@@ -78,7 +78,6 @@ int main(int argc, char *argv[])
 
   // -- (1) OneStepIntegrators --
   SP::OneStepIntegrator  aEulerMoreauOSI(new EulerMoreauOSI(0.5));
-  aEulerMoreauOSI->insertDynamicalSystem(aDS);
 
   // -- (2) Time discretisation --
   SP::TimeDiscretisation  aTD(new TimeDiscretisation(0,sStep));

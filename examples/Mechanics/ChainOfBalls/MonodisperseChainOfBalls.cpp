@@ -172,7 +172,6 @@ int main(int argc, char* argv[]){
 	      //
 	      VecOfallDS.push_back(ball);
         BallChain->nonSmoothDynamicalSystem()->insertDynamicalSystem(ball);
-        OSI->insertDynamicalSystem(ball);
       }
     // --------------------
     // --- Interactions ---

@@ -115,7 +115,6 @@ int main(int argc, char* argv[])
 #ifdef HEM5
     SP::OneStepIntegrator OSI(new Hem5OSI());
 #endif
-    OSI->insertDynamicalSystem(ball);
       // -- (2) Time discretisation --
     SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
 

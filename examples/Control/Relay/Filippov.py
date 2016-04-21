@@ -68,7 +68,6 @@ td = TimeDiscretisation(t0, h)
 s = TimeStepping(td)
 
 myIntegrator = EulerMoreauOSI(theta)
-myIntegrator.insertDynamicalSystem(process)
 s.insertIntegrator(myIntegrator)
 
 

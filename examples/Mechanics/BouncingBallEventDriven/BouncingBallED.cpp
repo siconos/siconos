@@ -108,7 +108,6 @@ int main(int argc, char* argv[])
 
     // -- (1) OneStepIntegrators --
     SP::OneStepIntegrator OSI(new LsodarOSI());
-    OSI->insertDynamicalSystem(ball);
 
     // -- (2) Time discretisation --
     SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));

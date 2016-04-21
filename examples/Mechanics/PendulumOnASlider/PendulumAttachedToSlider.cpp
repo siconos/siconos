@@ -96,9 +96,6 @@ int main(int argc, char* argv[])
     // ----------------
     SP::MoreauJeanOSI OSI(new MoreauJeanOSI(0.5, 1.));
 
-    // -- set the integrator for the pendulum --
-    pendulumWithSlider->nonSmoothDynamicalSystem()->setOSI(pendulum, OSI);
-
     SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
     SP::OneStepNSProblem impact(new FrictionContact(2, SICONOS_FRICTION_2D_ENUM));
     //SP::OneStepNSProblem impact(new LCP(SICONOS_LCP_ENUM));

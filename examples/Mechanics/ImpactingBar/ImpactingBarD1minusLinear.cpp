@@ -152,7 +152,6 @@ int main(int argc, char* argv[])
 #else
     SP::D1MinusLinearOSI OSI(new D1MinusLinearOSI());
 #endif
-    OSI->insertDynamicalSystem(bar);
 
     // -- (2) Time discretisation --
     SP::TimeDiscretisation t(new TimeDiscretisation(t0,h));

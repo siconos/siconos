@@ -123,7 +123,6 @@ DiodeBridge.nonSmoothDynamicalSystem().link(InterDiodeBridge, LSDiodeBridge)
 # (1) OneStepIntegrators
 theta = 0.5
 aOSI = EulerMoreauOSI(theta)
-aOSI.insertDynamicalSystem(LSDiodeBridge)
 # (2) Time discretisation
 aTiDisc = TimeDiscretisation(t0, h_step)
 

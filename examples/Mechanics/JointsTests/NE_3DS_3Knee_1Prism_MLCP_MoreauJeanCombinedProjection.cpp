@@ -307,9 +307,6 @@ int main(int argc, char* argv[])
 
     // -- (1) OneStepIntegrators --
     SP::MoreauJeanCombinedProjectionOSI OSI(new MoreauJeanCombinedProjectionOSI(theta));
-    OSI->insertDynamicalSystem(beam1);
-    OSI->insertDynamicalSystem(beam2);
-    OSI->insertDynamicalSystem(beam3);
 
 
     // -- (2) Time discretisation --

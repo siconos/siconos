@@ -139,7 +139,6 @@ int main()
     SP::BulletDS body( makeBox(g, position_init, shapes) );
 
     // -- Add the dynamical system in the non smooth dynamical system
-    osi->insertDynamicalSystem(body);
     model->nonSmoothDynamicalSystem()->insertDynamicalSystem(body);
 
     SP::btCollisionObject ground(new btCollisionObject());

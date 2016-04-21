@@ -27,18 +27,18 @@ set size winratio,winheight
 set origin 0.0,winheight*2.0+heightoff
 set ylabel 'm'
 
-resultfile="result.dat"
 
-
-plot\
-"result.dat" u 1:2 t "Ball position" w l,\
-"result.dat" u 1:8 t "Plane position " w l
+resultfile="BallNewtonEuler.dat"
+resulfile ="BallNewtonEulerOnMovingPlane.dat"
+plot \
+resultfile u 1:2 t "Ball position" w l,\
+resultfile u 1:8 t "Plane position " w l
 
 set origin 0.0,winheight*1.0+heightoff
 set ylabel "m/s" 
-plot\
-"result.dat" u 1:3 t "Ball Velocity" w l,\
-"result.dat" u 1:9 t "Plane Velocity" w l
+plot \
+resultfile u 1:3 t "Ball Velocity" w l,\
+resultfile u 1:9 t "Plane Velocity" w l
 
 set bmargin 0
 set format
@@ -48,9 +48,9 @@ set origin 0.0,0.0+heightoff
 set ylabel "A" 
 
 set ylabel "N s " 
-plot\
-"result.dat" u 1:4 t "contact impulse" w l,\
-"result.dat" u 1:12 t "reaction impulse on plane" w l
+plot \
+resultfile u 1:4 t "contact impulse" w l,\
+resultfile u 1:12 t "reaction impulse on plane" w l
 
 
 set nomultiplot

@@ -142,8 +142,6 @@ int main(int argc, char* argv[])
     // -- (1) OneStepIntegrators --
     double theta = 1.0;
     SP::EulerMoreauOSI aOSI(new EulerMoreauOSI(theta));
-    aOSI->insertDynamicalSystem(LS1DiodeBridgeCapFilter);
-    aOSI->insertDynamicalSystem(LS2DiodeBridgeCapFilter);
     // -- (2) Time discretisation --
     SP::TimeDiscretisation aTiDisc(new TimeDiscretisation(t0, h_step));
     // -- (3) Non smooth problem

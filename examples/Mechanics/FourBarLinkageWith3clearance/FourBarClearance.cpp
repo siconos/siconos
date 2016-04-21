@@ -189,7 +189,6 @@ int main(int argc, char* argv[])
 
     SP::MoreauJeanCombinedProjectionOSI OSI(new MoreauJeanCombinedProjectionOSI(0.5));
     // -- set the integrator for the four bar linkage --
-    FourBarIdeal->nonSmoothDynamicalSystem()->setOSI(fourbar, OSI);
 
     SP::OneStepNSProblem impact(new FrictionContact(2,SICONOS_FRICTION_2D_PGS)); /*,SICONOS_FRICTION_2D_ENUM
                                                                                    SICONOS_FRICTION_2D_LEMKE notworking //

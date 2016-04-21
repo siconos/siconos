@@ -74,7 +74,6 @@ s = TimeStepping(td)
 
 
 myIntegrator = EulerMoreauOSI(theta)
-myIntegrator.insertDynamicalSystem(process)
 
 s.insertIntegrator(myIntegrator)
 

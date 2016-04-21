@@ -121,7 +121,6 @@ int main(int argc, char* argv[])
 
       // -- OneStepIntegrators --
       SP::MoreauJeanOSI OSI(new MoreauJeanOSI(theta));
-      OSI->insertDynamicalSystem(yoyo);
    
       // -- OneStepNsProblem --
       SP::OneStepNSProblem osnspb(new LCP());
@@ -202,7 +201,6 @@ int main(int argc, char* argv[])
   
         t.reset(new TimeDiscretisation(t0, h));
         OSI.reset(new MoreauJeanOSI(theta));
-        OSI->insertDynamicalSystem(yoyo);
         osnspb.reset(new LCP());
         s.reset(new TimeStepping(t, OSI, osnspb));
         jeu->initialize(s);

@@ -109,7 +109,6 @@ int main(int argc, char* argv[])
     SP::TimeDiscretisation TimeDiscret(new TimeDiscretisation(TimeInitial, StepSize));
     //2. Integration solver for one step
     SP::MoreauJeanDirectProjectionOSI OSI(new MoreauJeanDirectProjectionOSI(0.5001));
-    OSI->insertDynamicalSystem(RockingBlock);
     //3. Nonsmooth problem
     SP::OneStepNSProblem impact(new LCP());
     SP::OneStepNSProblem impact_pos(new MLCPProjectOnConstraints());

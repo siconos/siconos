@@ -122,7 +122,6 @@ DiodeBridge.nonSmoothDynamicalSystem().link(InterDiodeBridge, LSDiodeBridge)
 theta = 0.5
 gamma = 0.5
 aOSI = EulerMoreauOSI(theta, gamma)
-aOSI.insertDynamicalSystem(LSDiodeBridge)
 #aOSI.setUseGammaForRelation(True)
 
 # (2) Time discretisation

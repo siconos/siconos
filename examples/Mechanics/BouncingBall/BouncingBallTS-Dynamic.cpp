@@ -105,9 +105,6 @@ int main(int argc, char* argv[])
     // -- (1) OneStepIntegrators --
     SP::MoreauJeanOSI OSI(new MoreauJeanOSI(theta));
 
-    // -- set the integrator for the ball --
-    bouncingBall->nonSmoothDynamicalSystem()->setOSI(ball, OSI);
-
     // -- (2) Time discretisation --
     SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
 

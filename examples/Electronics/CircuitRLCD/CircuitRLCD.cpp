@@ -106,7 +106,7 @@ int main(int argc, char* argv[])
 
     // -- (1) OneStepIntegrators --
     SP::EulerMoreauOSI OSI_RLCD(new EulerMoreauOSI(theta));
-    OSI_RLCD->insertDynamicalSystem(LSCircuitRLCD);
+
     // -- (2) Time discretisation --
     SP::TimeDiscretisation TiDiscRLCD(new TimeDiscretisation(t0, h_step));
     // --- (3) one step non smooth problem

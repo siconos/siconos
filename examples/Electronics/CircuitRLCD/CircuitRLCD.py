@@ -111,7 +111,6 @@ CircuitRLCD.nonSmoothDynamicalSystem().link(InterCircuitRLCD, LSCircuitRLCD)
 # (1) OneStepIntegrators
 theta = 0.5
 aOSI = EulerMoreauOSI(theta)
-aOSI.insertDynamicalSystem(LSCircuitRLCD)
 
 # (2) Time discretisation
 aTiDisc = TimeDiscretisation(t0, h_step)

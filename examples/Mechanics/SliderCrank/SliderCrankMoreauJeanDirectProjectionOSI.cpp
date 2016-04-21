@@ -125,7 +125,6 @@ int main(int argc, char* argv[])
     // --- Simulation ---
     // ----------------
     SP::MoreauJeanDirectProjectionOSI OSI(new MoreauJeanDirectProjectionOSI(0.5, 0.0));
-    OSI->insertDynamicalSystem(slider);
     OSI->setDeactivateYPosThreshold(1e-07);
     OSI->setDeactivateYVelThreshold(0.0);
     OSI->setActivateYPosThreshold(1e-06);
