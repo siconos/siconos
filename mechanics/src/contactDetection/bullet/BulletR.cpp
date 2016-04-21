@@ -46,10 +46,11 @@
 
 #include <Interaction.hpp>
 
-BulletR::BulletR(SP::btManifoldPoint point, double y_correction) :
+BulletR::BulletR(SP::btManifoldPoint point, double y_correction, double scaling) :
   NewtonEulerFrom3DLocalFrameR(),
   _contactPoints(point),
-  _y_correction(y_correction)
+  _y_correction(y_correction),
+  _scaling(scaling)
 {
   btVector3 posa = _contactPoints->getPositionWorldOnA();
   btVector3 posb = _contactPoints->getPositionWorldOnB();
@@ -80,17 +81,17 @@ void BulletR::computeh(double time, BlockVector& q0, SiconosVector& y)
   btVector3 posa = _contactPoints->getPositionWorldOnA();
   btVector3 posb = _contactPoints->getPositionWorldOnB();
 
-  (*pc1())(0) = posa[0];
-  (*pc1())(1) = posa[1];
-  (*pc1())(2) = posa[2];
-  (*pc2())(0) = posb[0];
-  (*pc2())(1) = posb[1];
-  (*pc2())(2) = posb[2];
+  (*pc1())(0) = posa[0]*_scaling;
+  (*pc1())(1) = posa[1]*_scaling;
+  (*pc1())(2) = posa[2]*_scaling;
+  (*pc2())(0) = posb[0]*_scaling;
+  (*pc2())(1) = posb[1]*_scaling;
+  (*pc2())(2) = posb[2]*_scaling;
 
   {
     // Due to margins we add, objects are reported as closer than they really
     // are, so we correct by a factor.
-    y.setValue(0, _contactPoints->getDistance() + _y_correction);
+    y.setValue(0, (_contactPoints->getDistance() + _y_correction)*_scaling);
 
     (*nc())(0) = _contactPoints->m_normalWorldOnB[0];
     (*nc())(1) = _contactPoints->m_normalWorldOnB[1];
@@ -98,12 +99,12 @@ void BulletR::computeh(double time, BlockVector& q0, SiconosVector& y)
 
     // Adjust contact point positions correspondingly along normal.  TODO: This
     // assumes same distance in each direction, i.e. same margin per object.
-    (*pc1())(0) -= (*nc())(0) * _y_correction/2;
-    (*pc1())(1) -= (*nc())(1) * _y_correction/2;
-    (*pc1())(2) -= (*nc())(2) * _y_correction/2;
-    (*pc2())(0) += (*nc())(0) * _y_correction/2;
-    (*pc2())(1) += (*nc())(1) * _y_correction/2;
-    (*pc2())(2) += (*nc())(2) * _y_correction/2;
+    // (*pc1())(0) -= (*nc())(0) * _y_correction/2;
+    // (*pc1())(1) -= (*nc())(1) * _y_correction/2;
+    // (*pc1())(2) -= (*nc())(2) * _y_correction/2;
+    // (*pc2())(0) += (*nc())(0) * _y_correction/2;
+    // (*pc2())(1) += (*nc())(1) * _y_correction/2;
+    // (*pc2())(2) += (*nc())(2) * _y_correction/2;
   }
 
   DEBUG_PRINTF("distance : %g\n",  y.getValue(0));

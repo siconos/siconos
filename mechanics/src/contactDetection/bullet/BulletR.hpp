@@ -33,9 +33,10 @@ private:
   const SP::btManifoldPoint _contactPoints;
 
   const double _y_correction;
+  const double _scaling;
 
 public:
-  BulletR(SP::btManifoldPoint, double y_correction=0);
+  BulletR(SP::btManifoldPoint, double y_correction=0, double scaling=1);
 
   SP::btManifoldPoint contactPoint() const
   {

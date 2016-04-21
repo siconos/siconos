@@ -1,4 +1,5 @@
 // -*- compile-command: "make -C ~/projects/siconos/bld/mechanics && valgrind --leak-check=full --suppressions=$HOME/projects/siconos/cmake/valgrind.supp ~/projects/siconos/bld/mechanics/src/proposed/test/testContact ContactTest" -*-
+// make --no-print-directory -C ~/projects/siconos/bld/mechanics && ~/projects/siconos/bld/mechanics/src/proposed/test/testContact ContactTest::t2 | grep pos, | cut -d, -f2-8 | plot.py -s
 
 #include "ContactTest.hpp"
 
@@ -11,6 +12,20 @@
 #include "SiconosKernel.hpp"
 
 #include <string>
+#include <sys/time.h>
+
+// Experimental settings for BulletBroadphase
+extern double extra_margin;
+extern double breaking_threshold;
+extern double box_ch_added_dimension;
+extern double box_convex_hull_margin;
+extern double bullet_world_scaling;
+
+// Experimental statistics from BulletBroadphase
+extern int new_interaction_counter;
+extern int existing_interaction_counter;
+extern int interaction_warning_counter;
+
 
 // test suite registration
 CPPUNIT_TEST_SUITE_REGISTRATION(ContactTest);
@@ -83,21 +98,30 @@ struct BounceParams
   bool dynamic;
   double size;
   double mass;
-  double margin;
+  double position;
+  double timestep;
 
   void dump() {
     printf("  trace:    %s\n", trace?"on":"off");
     printf("  dynamic:  %s\n", trace?"on":"off");
     printf("  size:     %.1g\n", size);
     printf("  mass:     %.1g\n", mass);
-    printf("  margin:   %.1g\n", margin);
+    printf("  position: %.1g\n", position);
   }
 };
 
 struct BounceResult
 {
+  double bounce_error_sum;
+  double bounce_error[6];
+  int n_bounce_error;
   double final_position;
   double final_position_std;
+  int num_interactions;
+  int num_interaction_warnings;
+  int max_simultaneous_contacts;
+  double avg_simultaneous_contacts;
+  double displacement_on_first_contact;
 };
 
 BounceResult bounceTest(std::string moving,
@@ -107,12 +131,29 @@ BounceResult bounceTest(std::string moving,
     // User-defined main parameters
     double t0 = 0;                   // initial computation time
     double T = 20.0;                 // end of computation time
-    double h = 0.005;                // time step
-    double position_init = 3.0;      // initial position
+    double h = params.timestep;      // time step
+    double position_init = params.position;  // initial position
     double velocity_init = 0.0;      // initial velocity
 
     double g = 9.81;
     double theta = 0.5;              // theta for MoreauJeanOSI integrator
+
+    int steps = (T-t0)/h;
+
+    // Statistics of this run
+    int bounce_counter = 0;
+    const int n_desired_bounces = 6;
+    double desired_bounce_times[6]  = { 2.585, 4.645, 6.290, 7.610, 8.660, 9.505 };
+    double desired_bounce_ratios[6] = { 0.6358, 0.4048, 0.2577, 0.1630, 0.1033, 0.0647 };
+    double actual_bounce_times[6]   = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
+    double actual_bounce_ratios[6]  = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
+
+    int local_new_interaction_count=0;
+    int max_simultaneous_contacts=0;
+    double avg_simultaneous_contacts=0.0;
+
+    bool first_contact = true;
+    double displacement_on_first_contact=0.0;
 
     // -- OneStepIntegrators --
     SP::OneStepIntegrator osi;
@@ -165,20 +206,22 @@ BounceResult bounceTest(std::string moving,
     body->setContactor(contactor);
 
     // A contactor with no body (static contactor) consisting of a plane
+    // Positioned such that bouncing and resting position = 0.0
     SP::SiconosContactor static_contactor(new SiconosContactor());
     if (ground=="plane")
     {
-      SP::SiconosPlane plane(new SiconosPlane(0,0,0));
+      SP::SiconosPlane plane(new SiconosPlane(0,0,-params.size/2));
       static_contactor->addShape(plane);
     }
     else if (ground=="box")
     {
-      SP::SiconosBox floorbox(new SiconosBox(0,0,-50,10,10,100));
+      SP::SiconosBox floorbox(new SiconosBox(0,0,-50-params.size/2,100,100,100));
+      //new SiconosBox(0,0,-params.size/2,params.size,params.size,params.size));
       static_contactor->addShape(floorbox);
     }
     else if (ground=="sphere")
     {
-      SP::SiconosSphere floorsphere(new SiconosSphere(0,0,-1.0,1.0));
+      SP::SiconosSphere floorsphere(new SiconosSphere(0,0,-1.0-params.size/2,1.0));
       static_contactor->addShape(floorsphere);
     }
 
@@ -237,8 +280,16 @@ BounceResult bounceTest(std::string moving,
 
     ///////
 
+    int new_interaction_total = 0;
+    new_interaction_counter = 0;
+    existing_interaction_counter = 0;
+    interaction_warning_counter = 0;
+
+    ///////
+
     int k=0;
     double std=0, final_pos=0;
+    double last_pos=position_init, last_vel=0;
     while (simulation->hasNextEvent())
     {
       // Update a property at step 500
@@ -255,20 +306,52 @@ BounceResult bounceTest(std::string moving,
       // Update integrator and solve constraints
       simulation->computeOneStep();
 
-      if (params.trace && k<3999) {
-        printf("pos, %f, (%f, %f, %f, %f)\n", (*body->q())(2),
-               (*body->q())(3), (*body->q())(4),
-               (*body->q())(5), (*body->q())(6));
-      }
-
+      double vel = (*body->velocity())(2);
       double pos = (*body->q())(2);
 
+      if (params.trace && (k+1) < steps) {
+        printf("pos, %f, %f, %f", pos, last_pos - pos, vel);
+      }
+
+      // Peaks (velocity crosses zero towards positive)
+      if (vel <= 0 && last_vel > 0) {
+        if (bounce_counter < n_desired_bounces)
+        {
+          actual_bounce_times[bounce_counter] = k*h;
+          actual_bounce_ratios[bounce_counter] = pos / position_init;
+          bounce_counter ++;
+        }
+      }
+
+      // Interaction statistics
+      if (new_interaction_counter > 0 && first_contact) {
+        first_contact = false;
+        displacement_on_first_contact = last_pos - pos;
+      }
+
+      int interactions = new_interaction_counter + existing_interaction_counter;
+
+      local_new_interaction_count += new_interaction_counter;
+
+      if (interactions > max_simultaneous_contacts)
+        max_simultaneous_contacts = interactions;
+
+      avg_simultaneous_contacts += interactions;
+
+      // Reset interaction counters for next iteration
+      new_interaction_counter = 0;
+      existing_interaction_counter = 0;
+
       // Standard deviation (cheating by not calculating mean!)
-      if (k==(3999-100))
+      if (k==(steps-100))
         final_pos = pos;
-      if (k>(3999-100)) {
+      if (k>(steps-100)) {
         std += (pos-final_pos)*(pos-final_pos);
       }
+
+      // State
+      last_pos = pos;
+      last_vel = vel;
 
       // Advance simulation
       simulation->nextStep();
@@ -279,8 +362,24 @@ BounceResult bounceTest(std::string moving,
       printf("(done, iterations=%d)\n", k - 1);
 
     BounceResult r;
-    r.final_position =  (*body->q())(2);
+    r.bounce_error_sum = 0.0;
+    r.n_bounce_error = 6;
+    for (int i=0; i < r.n_bounce_error; i++) {
+      double er = actual_bounce_ratios[i] - desired_bounce_ratios[i];
+      r.bounce_error[i] = fabs(er);
+      r.bounce_error_sum += er*er;
+    }
+    r.bounce_error_sum = sqrt(r.bounce_error_sum/r.n_bounce_error);
+    r.final_position = (*body->q())(2);
     r.final_position_std = sqrt(std/100);
+
+    r.num_interactions = local_new_interaction_count;
+    r.num_interaction_warnings = interaction_warning_counter;
+    r.max_simultaneous_contacts = max_simultaneous_contacts;
+    r.avg_simultaneous_contacts = avg_simultaneous_contacts / (double)k;
+
+    r.displacement_on_first_contact = displacement_on_first_contact;
+
     return r;
 }
 
@@ -290,16 +389,25 @@ void ContactTest::t2()
   {
     printf("\n==== t2\n");
 
+    // Experimental settings
+    extra_margin = 1.0;
+    breaking_threshold = 0.04;
+    box_ch_added_dimension = -0.5;
+    box_convex_hull_margin = (-box_ch_added_dimension/2) + extra_margin;
+    bullet_world_scaling = 1.0;
+
     BounceParams p;
     p.trace = true;
     p.dynamic = false;
-    p.size = 0.1;
+    p.size = 10;
     p.mass = 1.0;
-    p.margin = 0.1; // TODO
+    p.position = 20.0;
+    p.timestep = 0.005;
 
-    BounceResult r = bounceTest("box", "plane", p);
+    BounceResult r = bounceTest("box", "box", p);
 
-    fprintf(stderr, "\nFinal position: %g  (std=%g)\n\n",
+    fprintf(stderr, "\nSize: %g\n", p.size);
+    fprintf(stderr, "Final position: %g  (std=%g)\n\n",
             r.final_position, r.final_position_std);
   }
   catch (SiconosException e)
@@ -320,9 +428,11 @@ void ContactTest::t3()
     BounceParams params;
     params.trace = false;
     params.dynamic = false;
-    params.size = 0.1;
+    params.size = 0.01;
     params.mass = 1.0;
-    params.margin = 0.1; // TODO
+    params.position = 3.0;
+    params.timestep = 0.005;
+    bullet_world_scaling = 10.0;
 
     BounceResult results[2][3];
     results[0][0] = bounceTest("sphere", "plane",  params);
@@ -363,6 +473,173 @@ void ContactTest::t3()
     std::cout << "SiconosException: " << e.report() << std::endl;
     CPPUNIT_ASSERT(0);
   }
+
+  CPPUNIT_ASSERT(1);
+}
+
+void ContactTest::t4()
+{
+  try
+  {
+    printf("\n==== t4\n");
+
+    BounceParams params[3];
+    params[0].trace = true;
+    params[0].dynamic = false;
+    params[0].size = 0.02;
+    params[0].mass = 0.02;
+    params[0].position = 10.0;
+    params[0].timestep = 0.005;
+
+    params[1] = params[0];
+    params[1].size = 0.1;
+    params[1].mass = 0.1;
+    params[1].position = 10.0;
+
+    params[2] = params[0];
+    params[2].size = 1.0;
+    params[2].mass = 1.0;
+    params[2].position = 10.0;
+
+    BounceResult results[3];
+    int i;
+    for (i=0; i<3; i++) {
+      results[i] = bounceTest("box", "box", params[i]);
+    }
+
+    // Report
+    fprintf(stderr, "\nFinal resting positions:\n\n");
+    for (i=0; i<3; i++) {
+      fprintf(stderr, "   pos %.2f: %f  (std=%f)\n",
+              params[i].position,
+              results[i].final_position,
+              results[i].final_position_std);
+    }
+  }
+  catch (SiconosException e)
+  {
+    std::cout << "SiconosException: " << e.report() << std::endl;
+    CPPUNIT_ASSERT(0);
+  }
+
+  CPPUNIT_ASSERT(1);
+}
+
+template<typename T>
+class Var
+{
+public:
+  T valmin, valmax;
+  double prob;
+
+  Var(T _valmin, T _valmax)
+    : valmin(_valmin), valmax(_valmax) {}
+  Var(double _prob) : prob(_prob) {}
+  T sample() {
+    return (T)(rand()*(double)(valmax-valmin)/(double)RAND_MAX) + valmin;
+  }
+};
+
+template<>
+bool Var<bool>::sample() { return (rand()/(double)RAND_MAX) > prob; }
+
+void ContactTest::t5()
+{
+  printf("\n==== t5\n");
+
+  FILE *fresults = fopen("results.json", "w");
+  if (!fresults) {
+    CPPUNIT_ASSERT(1);
+  }
+
+  fprintf(fresults, "[\n");
+
+  int n_tests = 300;
+
+  float t0 = clock();
+  int test_count=0;
+
+  Var<double> var_extra_margin(0, 0.3);
+  Var<double> var_breaking_threshold(0, 1.0);
+  Var<double> var_box_ch_added_dimension(-0.5, 0.0);
+  Var<double> var_params_size(log(0.01), log(10.0));
+  Var<double> var_params_mass(log(0.01), log(10.0));
+  Var<double> var_params_position(3.0, 15.0);
+  Var<int> var_params_timestep(0, 3);
+  double possible_timesteps[4] = { 0.0005, 0.001, 0.005, 0.01 };
+
+  while (test_count < n_tests)
+  {
+    long elapsed = (long)((clock() - t0) / (double)CLOCKS_PER_SEC);
+    long remaining = (long)(elapsed / (test_count+1) / 60.0 * (n_tests - test_count));
+
+    printf("Iteration %d (%0.2f%%, remaining %ld min): ",
+           test_count,
+           test_count*100/(double)n_tests,
+           remaining);
+
+    fprintf(fresults, "%s{\n", test_count==0 ? "" : ",\n");
+    test_count ++;
+
+    BounceParams params;
+    params.trace = false;
+    params.dynamic = false;
+    params.size = exp(var_params_size.sample());
+    params.mass = exp(var_params_mass.sample());
+    params.position = var_params_position.sample();
+    params.timestep = possible_timesteps[var_params_timestep.sample()];
+
+    // Experimental settings
+    extra_margin = var_extra_margin.sample();
+    breaking_threshold = var_breaking_threshold.sample();
+    box_ch_added_dimension = 10000;
+    while (box_ch_added_dimension > (params.size*0.9))
+      box_ch_added_dimension = var_box_ch_added_dimension.sample();
+    box_convex_hull_margin = (-box_ch_added_dimension/2) + extra_margin;
+
+    bool success = false;
+
+    fprintf(fresults, "  \"size\": %g,\n", params.size);
+    fprintf(fresults, "  \"mass\": %g,\n", params.mass);
+    fprintf(fresults, "  \"position\": %g,\n", params.position);
+    fprintf(fresults, "  \"timestep\": %g,\n", params.timestep);
+    fprintf(fresults, "  \"dimensional_padding\": %g,\n", extra_margin);
+    fprintf(fresults, "  \"breaking_threshold\": %g,\n", breaking_threshold);
+    fprintf(fresults, "  \"dimension_adjust\": %g,\n", box_ch_added_dimension);
+    fprintf(fresults, "  \"setmargin\": %g,\n", box_convex_hull_margin);
+
+    BounceResult results;
+    try
+    {
+      results = bounceTest("box", "plane", params);
+      success = true;
+    }
+    catch (SiconosException e)
+    {
+      std::cout << "SiconosException: " << e.report() << std::endl;
+    }
+
+    fprintf(fresults, "  \"success\": %s,\n", success ? "true" : "false");
+    fprintf(fresults, "  \"bounce_error_sum\": %g,\n", results.bounce_error_sum);
+    fprintf(fresults, "  \"bounce_error\": [");
+    for (int i=0; i < results.n_bounce_error; i++)
+      fprintf(fresults, "%s %g", i==0 ? "" : ",", results.bounce_error[i]);
+    fprintf(fresults, " ],\n");
+    fprintf(fresults, "  \"final_position\": %g,\n", results.final_position);
+    fprintf(fresults, "  \"final_position_std\": %g,\n", results.final_position_std);
+
+    fprintf(fresults, "  \"num_interactions\": %d,\n", results.num_interactions);
+    fprintf(fresults, "  \"num_interaction_warnings\": %d,\n", results.num_interaction_warnings);
+    fprintf(fresults, "  \"max_simultaneous_contacts\": %d,\n", results.max_simultaneous_contacts);
+    fprintf(fresults, "  \"avg_simultaneous_contacts\": %g,\n", results.avg_simultaneous_contacts);
+    fprintf(fresults, "  \"displacement_on_first_contact\": %g\n", results.displacement_on_first_contact);
+
+    fprintf(fresults, "}");
+    fflush(fresults);
+  }
+
+  fprintf(fresults, "\n]\n");
+  fclose(fresults);
 
   CPPUNIT_ASSERT(1);
 }
