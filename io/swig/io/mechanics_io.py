@@ -637,7 +637,7 @@ class Hdf5():
             # add the dynamical system to the non smooth
             # dynamical system
             nsds = self._broadphase.model().nonSmoothDynamicalSystem()
-            nsds.setOSI(body, self._osi)
+            nsds.topology().setOSI(body, self._osi)
             nsds.setName(body, str(name))
 
     def importObject(self, name, translation, orientation,
@@ -727,7 +727,7 @@ class Hdf5():
                 # dynamical system
                 nsds = self._broadphase.model().nonSmoothDynamicalSystem()
                 nsds.insertDynamicalSystem(body)
-                nsds.setOSI(body, self._osi)
+                nsds.topology().setOSI(body, self._osi)
                 nsds.setName(body, str(name))
 
     def importJoint(self, name):
