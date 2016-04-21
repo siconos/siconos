@@ -60,8 +60,6 @@ def test_diode_bridge():
     # (1) OneStepIntegrators
     theta = 0.5
     integrator = EulerMoreauOSI(theta)
-    integrator.insertDynamicalSystem(bridge_ds)
-
     # (2) Time discretisation
     time_discretisation = TimeDiscretisation(t0, time_step)
 
