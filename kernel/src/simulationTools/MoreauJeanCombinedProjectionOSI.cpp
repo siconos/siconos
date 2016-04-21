@@ -59,7 +59,7 @@ void MoreauJeanCombinedProjectionOSI::initialize()
 bool MoreauJeanCombinedProjectionOSI::addInteractionInIndexSet(SP::Interaction inter, unsigned int i)
 {
   assert(i == 1 || i == 2);
-  //double h = simulationLink->timeStep();
+  //double h = _simulation->timeStep();
   if (i == 1) // index set for resolution at the velocity
   {
     double y = (inter->y(0))->getValue(0); // y(0) is the position

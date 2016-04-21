@@ -285,9 +285,9 @@ void Hem5OSI::fprob(integer* IFCN,
   fillvWork(NV, v);
 
   double t = *time;
-  simulationLink->model()->setCurrentTime(t);
+  _simulation->model()->setCurrentTime(t);
 
-  SP::DynamicalSystemsGraph dsGraph = simulationLink->model()->nonSmoothDynamicalSystem()->dynamicalSystems();
+  SP::DynamicalSystemsGraph dsGraph = _simulation->model()->nonSmoothDynamicalSystem()->dynamicalSystems();
 
 
 
@@ -356,7 +356,7 @@ void Hem5OSI::fprob(integer* IFCN,
   {
     InteractionsGraph::VIterator ui, uiend;
     SP::InteractionsGraph indexSet2
-      = simulationLink->model()->nonSmoothDynamicalSystem()->topology()->indexSet(2);
+      = _simulation->model()->nonSmoothDynamicalSystem()->topology()->indexSet(2);
     assert(indexSet2);
     for (std11::tie(ui, uiend) = indexSet2->vertices(); ui != uiend; ++ui)
     {
@@ -370,7 +370,7 @@ void Hem5OSI::fprob(integer* IFCN,
   if ((ifcn == 6) || (ifcn >= 10))  // compute GP ( Jacobian of the constraints)
   {
     InteractionsGraph::VIterator ui, uiend;
-    SP::InteractionsGraph indexSet2 = simulationLink->model()->nonSmoothDynamicalSystem()->topology()->indexSet(2);
+    SP::InteractionsGraph indexSet2 = _simulation->model()->nonSmoothDynamicalSystem()->topology()->indexSet(2);
     for (std11::tie(ui, uiend) = indexSet2->vertices(); ui != uiend; ++ui)
     {
       SP::Interaction inter = indexSet2->bundle(*ui);
@@ -388,7 +388,7 @@ void Hem5OSI::fprob(integer* IFCN,
   if ((ifcn == 3) || (ifcn == 6) || (ifcn >= 10))  // compute GT (partial time derivative of the constraints)
   {
     InteractionsGraph::VIterator ui, uiend;
-    SP::InteractionsGraph indexSet2 = simulationLink->model()->nonSmoothDynamicalSystem()->topology()->indexSet(2);
+    SP::InteractionsGraph indexSet2 = _simulation->model()->nonSmoothDynamicalSystem()->topology()->indexSet(2);
     for (std11::tie(ui, uiend) = indexSet2->vertices(); ui != uiend; ++ui)
     {
       SP::Interaction inter = indexSet2->bundle(*ui);
@@ -444,12 +444,12 @@ void Hem5OSI::fprob(integer* IFCN,
 }
 // void Hem5OSI::g(integer* nEq, doublereal*  time, doublereal* x, integer* ng, doublereal* gOut)
 // {
-//   std11::static_pointer_cast<EventDriven>(simulationLink)->computeg(shared_from_this(), nEq, time, x, ng, gOut);
+//   std11::static_pointer_cast<EventDriven>(_simulation)->computeg(shared_from_this(), nEq, time, x, ng, gOut);
 // }
 
 // void Hem5OSI::jacobianfx(integer* sizeOfX, doublereal* time, doublereal* x, integer* ml, integer* mu,  doublereal* jacob, integer* nrowpd)
 // {
-//   std11::static_pointer_cast<EventDriven>(simulationLink)->computeJacobianfx(shared_from_this(), sizeOfX, time, x, jacob);
+//   std11::static_pointer_cast<EventDriven>(_simulation)->computeJacobianfx(shared_from_this(), sizeOfX, time, x, jacob);
 // }
 
 void Hem5OSI::initialize()
@@ -466,7 +466,7 @@ void Hem5OSI::initialize()
   _forcesWork.reset(new BlockVector());
 
   // initialize xxxWork with xxx values of the dynamical systems present in the set.
-  SP::DynamicalSystemsGraph dsGraph = simulationLink->model()->nonSmoothDynamicalSystem()->dynamicalSystems();
+  SP::DynamicalSystemsGraph dsGraph = _simulation->model()->nonSmoothDynamicalSystem()->dynamicalSystems();
 
   for (DynamicalSystemsGraph::VIterator vi = dsGraph->begin(); vi != dsGraph->end(); ++vi)
   {
@@ -493,7 +493,7 @@ void Hem5OSI::initialize()
 
   // InteractionsGraph::VIterator ui, uiend;
   // SP::InteractionsGraph indexSet0
-  //   = simulationLink->model()->nonSmoothDynamicalSystem()->topology()->indexSet(0);
+  //   = _simulation->model()->nonSmoothDynamicalSystem()->topology()->indexSet(0);
   // assert(indexSet0);
   // for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
   // {
@@ -524,7 +524,7 @@ unsigned int Hem5OSI::numberOfConstraints()
   DEBUG_PRINT("Hem5OSI::updateConstraints() \n");
   InteractionsGraph::VIterator ui, uiend;
   SP::InteractionsGraph indexSet2
-    = simulationLink->model()->nonSmoothDynamicalSystem()->topology()->indexSet(2);
+    = _simulation->model()->nonSmoothDynamicalSystem()->topology()->indexSet(2);
   assert(indexSet2);
   SP::SiconosVector y;
   unsigned int n = 0;
@@ -743,7 +743,7 @@ void Hem5OSI::integrate(double& tinit, double& tend, double& tout, int& idid)
 
   InteractionsGraph::VIterator ui, uiend;
   SP::InteractionsGraph indexSet2
-    = simulationLink->model()->nonSmoothDynamicalSystem()->topology()->indexSet(2);
+    = _simulation->model()->nonSmoothDynamicalSystem()->topology()->indexSet(2);
   assert(indexSet2);
   SP::SiconosVector y;
   unsigned int pos=0;
@@ -775,7 +775,7 @@ void Hem5OSI::updateState(const unsigned int level)
   }
   else if (level == 2)
   {
-    double time = simulationLink->model()->currentTime();
+    double time = _simulation->model()->currentTime();
     for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
       (*it)->update(time);
   }
@@ -814,7 +814,7 @@ struct Hem5OSI::_NSLEffectOnFreeOutput : public SiconosVisitor
 
 void Hem5OSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, OneStepNSProblem * osnsp)
 {
-  SP::OneStepNSProblems  allOSNS  = simulationLink->oneStepNSProblems();
+  SP::OneStepNSProblems  allOSNS  = _simulation->oneStepNSProblems();
   SP::InteractionsGraph indexSet = osnsp->simulation()->indexSet(osnsp->indexSetLevel());
   SP::Interaction inter = indexSet->bundle(vertex_inter);
 

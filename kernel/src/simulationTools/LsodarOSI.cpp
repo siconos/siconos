@@ -195,17 +195,17 @@ void LsodarOSI::computeJacobianRhs(double t, DynamicalSystemsGraph& DSG0)
 
 void LsodarOSI::f(integer* sizeOfX, doublereal* time, doublereal* x, doublereal* xdot)
 {
-  std11::static_pointer_cast<EventDriven>(simulationLink)->computef(*this, sizeOfX, time, x, xdot);
+  std11::static_pointer_cast<EventDriven>(_simulation)->computef(*this, sizeOfX, time, x, xdot);
 }
 
 void LsodarOSI::g(integer* nEq, doublereal*  time, doublereal* x, integer* ng, doublereal* gOut)
 {
-  std11::static_pointer_cast<EventDriven>(simulationLink)->computeg(shared_from_this(), nEq, time, x, ng, gOut);
+  std11::static_pointer_cast<EventDriven>(_simulation)->computeg(shared_from_this(), nEq, time, x, ng, gOut);
 }
 
 void LsodarOSI::jacobianfx(integer* sizeOfX, doublereal* time, doublereal* x, integer* ml, integer* mu,  doublereal* jacob, integer* nrowpd)
 {
-  std11::static_pointer_cast<EventDriven>(simulationLink)->computeJacobianfx(*this, sizeOfX, time, x, jacob);
+  std11::static_pointer_cast<EventDriven>(_simulation)->computeJacobianfx(*this, sizeOfX, time, x, jacob);
 }
 
 void LsodarOSI::initialize()
@@ -235,7 +235,7 @@ void LsodarOSI::initialize()
   _xtmp.reset(new SiconosVector(_xWork->size()));
 
   // 2 - Ng, number of constraints:
-  _intData[1] = std11::static_pointer_cast<EventDriven>(simulationLink)->computeSizeOfg();
+  _intData[1] = std11::static_pointer_cast<EventDriven>(_simulation)->computeSizeOfg();
   // 3 - Itol, itask, iopt
   _intData[2] = 1; // itol, 1 if ATOL is a scalar, else 2 (ATOL array)
   _intData[3] = 1; // itask, an index specifying the task to be performed. 1: normal computation.
@@ -409,7 +409,7 @@ void LsodarOSI::updateState(const unsigned int level)
   }
   else if (level == 2)
   {
-    double time = simulationLink->model()->currentTime();
+    double time = _simulation->model()->currentTime();
     for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
       (*it)->update(time);
   }
@@ -449,7 +449,7 @@ struct LsodarOSI::_NSLEffectOnFreeOutput : public SiconosVisitor
 
 void LsodarOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, OneStepNSProblem* osnsp)
 {
-  SP::OneStepNSProblems  allOSNS  = simulationLink->oneStepNSProblems();
+  SP::OneStepNSProblems  allOSNS  = _simulation->oneStepNSProblems();
   SP::InteractionsGraph indexSet = osnsp->simulation()->indexSet(osnsp->indexSetLevel());
   SP::Interaction inter = indexSet->bundle(vertex_inter);
 

@@ -120,7 +120,7 @@ void D1MinusLinearOSI::initialize()
 
   DEBUG_PRINTF("D1MinusLinearOSI::initialize(). Type of OSI  %i ", _typeOfD1MinusLinearOSI );
 
-  SP::OneStepNSProblems allOSNSP  = simulationLink->oneStepNSProblems(); // all OSNSP
+  SP::OneStepNSProblems allOSNSP  = _simulation->oneStepNSProblems(); // all OSNSP
 
   bool isOSNSPinitialized = false ;
   switch (_typeOfD1MinusLinearOSI)
@@ -129,11 +129,11 @@ void D1MinusLinearOSI::initialize()
     // set evaluation levels (first is of velocity, second of acceleration type)
     (*allOSNSP)[SICONOS_OSNSP_TS_VELOCITY]->setIndexSetLevel(1);
     (*allOSNSP)[SICONOS_OSNSP_TS_VELOCITY]->setInputOutputLevel(1);
-    (*allOSNSP)[SICONOS_OSNSP_TS_VELOCITY]->initialize(simulationLink);
+    (*allOSNSP)[SICONOS_OSNSP_TS_VELOCITY]->initialize(_simulation);
 
     (*allOSNSP)[SICONOS_OSNSP_TS_VELOCITY + 1]->setIndexSetLevel(2);
     (*allOSNSP)[SICONOS_OSNSP_TS_VELOCITY + 1]->setInputOutputLevel(2);
-    (*allOSNSP)[SICONOS_OSNSP_TS_VELOCITY + 1]->initialize(simulationLink);
+    (*allOSNSP)[SICONOS_OSNSP_TS_VELOCITY + 1]->initialize(_simulation);
     isOSNSPinitialized = true ;
     DEBUG_EXPR((*allOSNSP)[SICONOS_OSNSP_TS_VELOCITY + 1]->display());
     break;
@@ -141,22 +141,22 @@ void D1MinusLinearOSI::initialize()
     // set evaluation levels (first is of velocity, second of acceleration type)
     (*allOSNSP)[SICONOS_OSNSP_TS_VELOCITY]->setIndexSetLevel(1);
     (*allOSNSP)[SICONOS_OSNSP_TS_VELOCITY]->setInputOutputLevel(1);
-    (*allOSNSP)[SICONOS_OSNSP_TS_VELOCITY]->initialize(simulationLink);
+    (*allOSNSP)[SICONOS_OSNSP_TS_VELOCITY]->initialize(_simulation);
 
     (*allOSNSP)[SICONOS_OSNSP_TS_VELOCITY + 1]->setIndexSetLevel(2);
     (*allOSNSP)[SICONOS_OSNSP_TS_VELOCITY + 1]->setInputOutputLevel(2);
-    (*allOSNSP)[SICONOS_OSNSP_TS_VELOCITY + 1]->initialize(simulationLink);
+    (*allOSNSP)[SICONOS_OSNSP_TS_VELOCITY + 1]->initialize(_simulation);
     isOSNSPinitialized = true ;
     break;
   case halfexplicit_velocity_level:
     // set evaluation levels (first is of velocity, second of acceleration type)
     (*allOSNSP)[SICONOS_OSNSP_TS_VELOCITY]->setIndexSetLevel(1);
     (*allOSNSP)[SICONOS_OSNSP_TS_VELOCITY]->setInputOutputLevel(1);
-    (*allOSNSP)[SICONOS_OSNSP_TS_VELOCITY]->initialize(simulationLink);
+    (*allOSNSP)[SICONOS_OSNSP_TS_VELOCITY]->initialize(_simulation);
 
     (*allOSNSP)[SICONOS_OSNSP_TS_VELOCITY + 1]->setIndexSetLevel(1); /** !!! */
     (*allOSNSP)[SICONOS_OSNSP_TS_VELOCITY + 1]->setInputOutputLevel(2);
-    (*allOSNSP)[SICONOS_OSNSP_TS_VELOCITY + 1]->initialize(simulationLink);
+    (*allOSNSP)[SICONOS_OSNSP_TS_VELOCITY + 1]->initialize(_simulation);
     isOSNSPinitialized = true ;
     break;
   }
@@ -179,9 +179,9 @@ double D1MinusLinearOSI::computeResidu()
   DEBUG_PRINT("\n D1MinusLinearOSI::computeResidu(), start\n");
 
 
-  DEBUG_PRINTF("nextTime %f\n", simulationLink->nextTime());
-  DEBUG_PRINTF("startingTime %f\n", simulationLink->startingTime());
-  DEBUG_PRINTF("time step size %f\n", simulationLink->timeStep());
+  DEBUG_PRINTF("nextTime %f\n", _simulation->nextTime());
+  DEBUG_PRINTF("startingTime %f\n", _simulation->startingTime());
+  DEBUG_PRINTF("time step size %f\n", _simulation->timeStep());
 
   switch (_typeOfD1MinusLinearOSI)
   {

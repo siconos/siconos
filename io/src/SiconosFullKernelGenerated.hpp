@@ -383,10 +383,10 @@ SICONOS_IO_REGISTER_WITH_BASES(RelayNSL,(NonSmoothLaw),
 SICONOS_IO_REGISTER_WITH_BASES(EqualityConditionNSL,(NonSmoothLaw),
 )
 SICONOS_IO_REGISTER(OneStepIntegrator,
-  (integratorType)
+  (_integratorType)
   (OSIDynamicalSystems)
   (_sizeMem)
-  (simulationLink)
+  (_simulation)
   (_extraAdditionalTerms))
 SICONOS_IO_REGISTER(MatrixIntegrator,
   (_mat)
@@ -1044,10 +1044,10 @@ SICONOS_IO_REGISTER_WITH_BASES(RelayNSL,(NonSmoothLaw),
 SICONOS_IO_REGISTER_WITH_BASES(EqualityConditionNSL,(NonSmoothLaw),
 )
 SICONOS_IO_REGISTER(OneStepIntegrator,
-  (integratorType)
+  (_integratorType)
   (OSIDynamicalSystems)
   (_sizeMem)
-  (simulationLink)
+  (_simulation)
   (_extraAdditionalTerms))
 SICONOS_IO_REGISTER(MatrixIntegrator,
   (_mat)

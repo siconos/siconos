@@ -151,7 +151,7 @@ void EulerMoreauOSI::initialize()
 {
   OneStepIntegrator::initialize();
   // Get initial time
-  double t0 = simulationLink->model()->t0();
+  double t0 = _simulation->model()->t0();
   // Compute W(t0) for all ds
   ConstDSIterator itDS;
   for (itDS = OSIDynamicalSystems->begin(); itDS != OSIDynamicalSystems->end(); ++itDS)
@@ -182,7 +182,7 @@ void EulerMoreauOSI::initW(double t, SP::DynamicalSystem ds)
   //  WMap[ds].reset(new SimpleMatrix(sizeW,sizeW));
   //   SP::SiconosMatrix W = WMap[ds];
 
-  double h = simulationLink->timeStep();
+  double h = _simulation->timeStep();
   Type::Siconos dsType = Type::value(*ds);
 
   // 1 - First order non linear systems
@@ -279,7 +279,7 @@ void EulerMoreauOSI::computeW(double t, DynamicalSystem& ds, DynamicalSystemsGra
   assert((WMap.find(dsN) != WMap.end()) &&
          "EulerMoreauOSI::computeW(t,ds) - W(ds) does not exists. Maybe you forget to initialize the osi?");
 
-  double h = simulationLink->timeStep();
+  double h = _simulation->timeStep();
   Type::Siconos dsType = Type::value(ds);
 
   SiconosMatrix& W = *WMap[dsN];
@@ -318,7 +318,7 @@ void EulerMoreauOSI::computeW(double t, DynamicalSystem& ds, DynamicalSystemsGra
 
 //  if (_useGamma)
   {
-    Topology& topo = *simulationLink->model()->nonSmoothDynamicalSystem()->topology();
+    Topology& topo = *_simulation->model()->nonSmoothDynamicalSystem()->topology();
     DynamicalSystemsGraph& DSG0 = *topo.dSG(0);
     InteractionsGraph& indexSet = *topo.indexSet(0);
     DynamicalSystemsGraph::OEIterator oei, oeiend;
@@ -355,8 +355,8 @@ double EulerMoreauOSI::computeResidu()
   //  $\mathcal R(x,r) = x - x_{k} -h\theta f( x , t_{k+1}) - h(1-\theta)f(x_k,t_k) - h r$
   //  $\mathcal R_{free}(x,r) = x - x_{k} -h\theta f( x , t_{k+1}) - h(1-\theta)f(x_k,t_k) $
 
-  double t = simulationLink->nextTime(); // End of the time step
-  double told = simulationLink->startingTime(); // Beginning of the time step
+  double t = _simulation->nextTime(); // End of the time step
+  double told = _simulation->startingTime(); // Beginning of the time step
   double h = t - told; // time step length
 
   DEBUG_PRINTF("nextTime %f\n", t);
@@ -376,7 +376,7 @@ double EulerMoreauOSI::computeResidu()
   double normResidu = maxResidu;
 
   // XXX TMP hack -- xhub
-  Topology& topo = *simulationLink->model()->nonSmoothDynamicalSystem()->topology();
+  Topology& topo = *_simulation->model()->nonSmoothDynamicalSystem()->topology();
   DynamicalSystemsGraph& DSG0 = *topo.dSG(0);
 
   for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
@@ -515,8 +515,8 @@ void EulerMoreauOSI::computeFreeState()
   // "Free" means without taking non-smooth effects into account.
   DEBUG_PRINT("EulerMoreauOSI::computeFreeState() starts\n");
 
-  double t = simulationLink->nextTime(); // End of the time step
-  double told = simulationLink->startingTime(); // Beginning of the time step
+  double t = _simulation->nextTime(); // End of the time step
+  double told = _simulation->startingTime(); // Beginning of the time step
   double h = t - told; // time step length
 
   // Operators computed at told have index i, and (i+1) at t.
@@ -532,7 +532,7 @@ void EulerMoreauOSI::computeFreeState()
   Type::Siconos dsType ; // Type of the current DS.
 
   // XXX to be removed -- xhub
-  Topology& topo = *simulationLink->model()->nonSmoothDynamicalSystem()->topology();
+  Topology& topo = *_simulation->model()->nonSmoothDynamicalSystem()->topology();
   DynamicalSystemsGraph& DSG0 = *topo.dSG(0);
 
 
@@ -647,7 +647,7 @@ void EulerMoreauOSI::prepareNewtonIteration(double time)
   // XXX TMP hack -- xhub
   // we have to iterate over the edges of the DSG0 -> the following won't be necessary anymore
   // Maurice will do that with subgraph :)
-  DynamicalSystemsGraph& DSG0 = *simulationLink->model()->nonSmoothDynamicalSystem()->topology()->dSG(0);
+  DynamicalSystemsGraph& DSG0 = *_simulation->model()->nonSmoothDynamicalSystem()->topology()->dSG(0);
   ConstDSIterator itDS;
   for (itDS = OSIDynamicalSystems->begin(); itDS != OSIDynamicalSystems->end(); ++itDS)
   {
@@ -685,7 +685,7 @@ void EulerMoreauOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_in
   /** \warning: ensures that it can also work with two different osi for two different ds ?
    */
 
-  SP::OneStepNSProblems  allOSNS  = simulationLink->oneStepNSProblems();
+  SP::OneStepNSProblems  allOSNS  = _simulation->oneStepNSProblems();
   SP::InteractionsGraph indexSet = osnsp->simulation()->indexSet(osnsp->indexSetLevel());
   SP::Interaction inter = indexSet->bundle(vertex_inter);
 
@@ -882,16 +882,16 @@ void EulerMoreauOSI::updateState(const unsigned int level)
 
   DEBUG_PRINT("EulerMoreauOSI::updateState\n");
 
-  double h = simulationLink->timeStep();
+  double h = _simulation->timeStep();
 
-  double RelativeTol = simulationLink->relativeConvergenceTol();
-  bool useRCC = simulationLink->useRelativeConvergenceCriteron();
+  double RelativeTol = _simulation->relativeConvergenceTol();
+  bool useRCC = _simulation->useRelativeConvergenceCriteron();
   if (useRCC)
-    simulationLink->setRelativeConvergenceCriterionHeld(true);
+    _simulation->setRelativeConvergenceCriterionHeld(true);
 
   DSIterator it;
   // XXX TMP hack -- xhub
-  Topology& topo = *simulationLink->model()->nonSmoothDynamicalSystem()->topology();
+  Topology& topo = *_simulation->model()->nonSmoothDynamicalSystem()->topology();
   DynamicalSystemsGraph& DSG0 = *topo.dSG(0);
 
   for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
@@ -914,7 +914,7 @@ void EulerMoreauOSI::updateState(const unsigned int level)
       DEBUG_EXPR(d.r()->display());
 
       // TODO ???
-      bool baux = (useRCC && dsType == Type::FirstOrderNonLinearDS && simulationLink->relativeConvergenceCriterionHeld());
+      bool baux = (useRCC && dsType == Type::FirstOrderNonLinearDS && _simulation->relativeConvergenceCriterionHeld());
       if (level != LEVELMAX)
       {
 
@@ -951,7 +951,7 @@ void EulerMoreauOSI::updateState(const unsigned int level)
         *workVectors[FirstOrderDS::xBuffer] -= x;
         double aux = (workVectors[FirstOrderDS::xBuffer]->norm2()) / (ds->normRef());
         if (aux > RelativeTol)
-          simulationLink->setRelativeConvergenceCriterionHeld(false);
+          _simulation->setRelativeConvergenceCriterionHeld(false);
       }
       DEBUG_PRINT("EulerMoreauOSI::updateState New value of x\n");
       DEBUG_EXPR(x.display());

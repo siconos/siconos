@@ -44,12 +44,12 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
 {
   DEBUG_PRINT("\n D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel(), starts\n");
 
-  double t = simulationLink->nextTime(); // end of the time step
-  double told = simulationLink->startingTime(); // beginning of the time step
-  double h = simulationLink->timeStep(); // time step length
+  double t = _simulation->nextTime(); // end of the time step
+  double told = _simulation->startingTime(); // beginning of the time step
+  double h = _simulation->timeStep(); // time step length
 
-  SP::OneStepNSProblems allOSNS  = simulationLink->oneStepNSProblems(); // all OSNSP
-  SP::Topology topo =  simulationLink->model()->nonSmoothDynamicalSystem()->topology();
+  SP::OneStepNSProblems allOSNS  = _simulation->oneStepNSProblems(); // all OSNSP
+  SP::Topology topo =  _simulation->model()->nonSmoothDynamicalSystem()->topology();
   SP::InteractionsGraph indexSet2 = topo->indexSet(2);
 
   /**************************************************************************************************************
@@ -172,7 +172,7 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
         inter->relation()->computeJacg(told, *inter, indexSet2->properties(*ui));
       }
 
-      if (simulationLink->model()->nonSmoothDynamicalSystem()->topology()->hasChanged())
+      if (_simulation->model()->nonSmoothDynamicalSystem()->topology()->hasChanged())
       {
         for (OSNSIterator itOsns = allOSNS->begin(); itOsns != allOSNS->end(); ++itOsns)
         {
@@ -192,8 +192,8 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
       // Note Franck : at the time this results in a call to swapInMem of all Interactions of the NSDS
       // So let the simu do this.
       //(*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]->saveInMemory(); // we push y and lambda in Memories
-      simulationLink->model()->nonSmoothDynamicalSystem()->pushInteractionsInMemory();
-      simulationLink->model()->nonSmoothDynamicalSystem()->updateInput(t,2);
+      _simulation->model()->nonSmoothDynamicalSystem()->pushInteractionsInMemory();
+      _simulation->model()->nonSmoothDynamicalSystem()->updateInput(t,2);
 
       for (DSIterator it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
       {
@@ -360,14 +360,14 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
   if (!allOSNS->empty())
   {
 
-    for (unsigned int level = simulationLink->levelMinForOutput();
-         level < simulationLink->levelMaxForOutput(); level++)
+    for (unsigned int level = _simulation->levelMinForOutput();
+         level < _simulation->levelMaxForOutput(); level++)
     {
-      simulationLink->model()->nonSmoothDynamicalSystem()->updateOutput(t,level);
+      _simulation->model()->nonSmoothDynamicalSystem()->updateOutput(t,level);
     }
-    simulationLink->updateIndexSets();
+    _simulation->updateIndexSets();
 
-    SP::Topology topo =  simulationLink->model()->nonSmoothDynamicalSystem()->topology();
+    SP::Topology topo =  _simulation->model()->nonSmoothDynamicalSystem()->topology();
     SP::InteractionsGraph indexSet3 = topo->indexSet(3);
 
     if (indexSet3->size() > 0)
@@ -541,11 +541,11 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
     // solve a LCP at acceleration level only for contacts which have been active at the beginning of the time-step
     if (!allOSNS->empty())
     {
-      // for (unsigned int level = simulationLink->levelMinForOutput(); level < simulationLink->levelMaxForOutput(); level++)
+      // for (unsigned int level = _simulation->levelMinForOutput(); level < _simulation->levelMaxForOutput(); level++)
       // {
-      //   simulationLink->updateOutput(level);
+      //   _simulation->updateOutput(level);
       // }
-      // simulationLink->updateIndexSets();
+      // _simulation->updateIndexSets();
       DEBUG_PRINT("We compute lambda^-_{k+1} \n");
       InteractionsGraph::VIterator ui, uiend;
       SP::Interaction inter;
@@ -555,7 +555,7 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
         inter->relation()->computeJach(t, *inter, indexSet2->properties(*ui));
         inter->relation()->computeJacg(t, *inter, indexSet2->properties(*ui));
       }
-      if (simulationLink->model()->nonSmoothDynamicalSystem()->topology()->hasChanged())
+      if (_simulation->model()->nonSmoothDynamicalSystem()->topology()->hasChanged())
       {
         for (OSNSIterator itOsns = allOSNS->begin(); itOsns != allOSNS->end(); ++itOsns)
         {
@@ -567,7 +567,7 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
       {
         (*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]->compute(t);
         DEBUG_EXPR((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]->display(););
-        simulationLink->model()->nonSmoothDynamicalSystem()->updateInput(t,2);
+        _simulation->model()->nonSmoothDynamicalSystem()->updateInput(t,2);
       }
     }
 
@@ -657,7 +657,7 @@ void D1MinusLinearOSI::computeFreeOutputHalfExplicitAccelerationLevel(Interactio
 {
 
   DEBUG_PRINT("D1MinusLinearOSI::computeFreeOutputHalfExplicitAccelerationLevel starts\n");
-  SP::OneStepNSProblems allOSNS  = simulationLink->oneStepNSProblems(); // all OSNSP
+  SP::OneStepNSProblems allOSNS  = _simulation->oneStepNSProblems(); // all OSNSP
   SP::InteractionsGraph indexSet = osnsp->simulation()->indexSet(osnsp->indexSetLevel());
   SP::Interaction inter = indexSet->bundle(vertex_inter);
   VectorOfBlockVectors& DSlink = *indexSet->properties(vertex_inter).DSlink;

@@ -31,7 +31,7 @@ using namespace RELATION;
 // --- constructor from a minimum set of data ---
 MoreauJeanOSI2::MoreauJeanOSI2(double theta): MoreauJeanOSI(theta)
 {
-  integratorType = OSI::MOREAUJEANOSI2;
+  _integratorType = OSI::MOREAUJEANOSI2;
 }
 
 MoreauJeanOSI2::~MoreauJeanOSI2()
@@ -44,8 +44,8 @@ void MoreauJeanOSI2::computeFreeState()
   // This function computes "free" states of the DS belonging to this Integrator.
   // "Free" means without taking non-smooth effects into account.
 
-  double t = simulationLink->nextTime(); // End of the time step
-  double told = simulationLink->startingTime(); // Beginning of the time step
+  double t = _simulation->nextTime(); // End of the time step
+  double told = _simulation->startingTime(); // Beginning of the time step
   double h = t - told; // time step length
   //h=0.0100000;
   // Operators computed at told have index i, and (i+1) at t.

@@ -633,10 +633,10 @@ SICONOS_IO_REGISTER(SpaceFilter,
   (diskplan_relations)
   (circlecircle_relations))
 SICONOS_IO_REGISTER(OneStepIntegrator,
-  (integratorType)
+  (_integratorType)
   (OSIDynamicalSystems)
   (_sizeMem)
-  (simulationLink)
+  (_simulation)
   (_extraAdditionalTerms))
 SICONOS_IO_REGISTER_WITH_BASES(DiskPlanR,(LagrangianScleronomousR),
   (r)

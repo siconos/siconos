@@ -41,7 +41,7 @@
 
 MoreauJeanDirectProjectionOSI::MoreauJeanDirectProjectionOSI(double theta) : MoreauJeanOSI(theta)
 {
-  integratorType = OSI::MOREAUDIRECTPROJECTIONOSI;
+  _integratorType = OSI::MOREAUDIRECTPROJECTIONOSI;
   _deactivateYPosThreshold = SICONOS_MPC_DEFAULT_DEACTIVATION_POS_THRESHOLD;
   _deactivateYVelThreshold = SICONOS_MPC_DEFAULT_DEACTIVATION_VEL_THRESHOLD;
   _activateYPosThreshold =   SICONOS_MPC_DEFAULT_ACTIVATION_POS_THRESHOLD;
@@ -50,7 +50,7 @@ MoreauJeanDirectProjectionOSI::MoreauJeanDirectProjectionOSI(double theta) : Mor
 
 MoreauJeanDirectProjectionOSI::MoreauJeanDirectProjectionOSI(double theta, double gamma) : MoreauJeanOSI(theta, gamma)
 {
-  integratorType = OSI::MOREAUDIRECTPROJECTIONOSI;
+  _integratorType = OSI::MOREAUDIRECTPROJECTIONOSI;
   _deactivateYPosThreshold = SICONOS_MPC_DEFAULT_DEACTIVATION_POS_THRESHOLD;
   _deactivateYVelThreshold = SICONOS_MPC_DEFAULT_DEACTIVATION_VEL_THRESHOLD;
   _activateYPosThreshold =   SICONOS_MPC_DEFAULT_ACTIVATION_POS_THRESHOLD;
@@ -89,7 +89,7 @@ void MoreauJeanDirectProjectionOSI::computeFreeState()
 
 
   // Compute qfree
-  //   double h = simulationLink->timeStep();
+  //   double h = _simulation->timeStep();
 
   //   DSIterator it; // Iterator through the set of DS.
 
@@ -165,7 +165,7 @@ bool MoreauJeanDirectProjectionOSI::addInteractionInIndexSet(SP::Interaction int
 {
 
   assert(i == 1);
-  double h = simulationLink->timeStep();
+  double h = _simulation->timeStep();
   double y = (inter->y(i - 1))->getValue(0); // for i=1 y(i-1) is the position
   double yDot = (inter->y(i))->getValue(0); // for i=1 y(i) is the velocity
   double gamma = 1.0 / 2.0;
@@ -195,7 +195,7 @@ bool MoreauJeanDirectProjectionOSI::removeInteractionInIndexSet(SP::Interaction 
 
 {
   assert(i == 1);
-  double h = simulationLink->timeStep();
+  double h = _simulation->timeStep();
   double y = (inter->y(i - 1))->getValue(0); // for i=1 y(i-1) is the position
   double yDot = (inter->y(i))->getValue(0); // for i=1 y(i) is the velocity
   double gamma = 1.0 / 2.0;

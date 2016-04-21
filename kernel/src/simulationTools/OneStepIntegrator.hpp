@@ -66,7 +66,7 @@ protected:
 
 
 /** type/name of the Integrator */
-  OSI::TYPES integratorType;
+  OSI::TYPES _integratorType;
 
 /** a set of DynamicalSystem to integrate */
   SP::DynamicalSystemsSet OSIDynamicalSystems;
@@ -78,7 +78,7 @@ protected:
   unsigned int _sizeMem;
 
 /** A link to the simulation that owns this OSI */
-  SP::Simulation simulationLink;
+  SP::Simulation _simulation;
 
 /** basic constructor with Id
  *  \param type integrator type/name
@@ -117,7 +117,7 @@ public:
  */
   inline OSI::TYPES getType() const
   {
-    return integratorType;
+    return _integratorType;
   }
 
 /** set the type of the OneStepIntegrator
@@ -125,7 +125,7 @@ public:
  */
   inline void setType(const OSI::TYPES& newType)
   {
-    integratorType = newType;
+    _integratorType = newType;
   };
 
   inline bool checkOSI(DynamicalSystemsGraph::VIterator dsi)
@@ -203,7 +203,7 @@ public:
  */
   inline SP::Simulation simulation() const
   {
-    return simulationLink;
+    return _simulation;
   }
 
 /** set the Simulation of the OneStepIntegrator
@@ -211,7 +211,7 @@ public:
  */
   inline void setSimulationPtr(SP::Simulation newS)
   {
-    simulationLink = newS;
+    _simulation = newS;
   }
 
   // --- OTHERS ... ---

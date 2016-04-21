@@ -89,7 +89,7 @@ void NewMarkAlphaOSI::computeW(SP::DynamicalSystem ds)
 {
   double beta_prime = (1 - _alpha_m) / ((1 - _alpha_f) * _beta);
   double gamma_prime = _gamma / _beta;
-  double h = simulationLink->nextTime() - simulationLink->startingTime(); // step size
+  double h = _simulation->nextTime() - _simulation->startingTime(); // step size
   if (h < 100 * MACHINE_PREC)
     RuntimeException::selfThrow("In NewMarkAlphaOSI::initW(t,ds), time integration is too small");
   // make sure that W is initialized before computing
@@ -147,7 +147,7 @@ double NewMarkAlphaOSI::computeResidu()
   // R_free = M_{n,k} ddotq_{n,k} - F_{n,k};
   // Compute norm of R_{n,k} for each DS
   // Take maximum norm of R_{n,k} over all DS
-  double t = simulationLink->nextTime(); // End of the time step
+  double t = _simulation->nextTime(); // End of the time step
   // Iteration through the set of Dynamical Systems.
   //
   DSIterator it;
@@ -275,7 +275,7 @@ void NewMarkAlphaOSI::computeFreeState()
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 void NewMarkAlphaOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, OneStepNSProblem* osnsp)
 {
-  double t = simulationLink->nextTime();
+  double t = _simulation->nextTime();
   SP::InteractionsGraph indexSet = osnsp->simulation()->indexSet(osnsp->indexSetLevel());
   SP::Interaction inter = indexSet->bundle(vertex_inter);
 
@@ -285,7 +285,7 @@ void NewMarkAlphaOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_i
   RELATION::TYPES relationType = inter->relation()->getType();
   RELATION::SUBTYPES relationSubType = inter->relation()->getSubType();
   // Get the set of OSNSPs
-  SP::OneStepNSProblems  allOSNS  = simulationLink->oneStepNSProblems();
+  SP::OneStepNSProblems  allOSNS  = _simulation->oneStepNSProblems();
   // get the size of the interaction
   unsigned int sizeY = inter->nonSmoothLaw()->size();
   // get pointer to delta q_free of Dynamical Systems concerned with the interaction
@@ -352,7 +352,7 @@ void NewMarkAlphaOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_i
         }
         else                  // output at the velocity level y_{n,k} = (h/gamma_prime)*dotg_{n,k}
         {
-          double h = simulationLink->nextTime() - simulationLink->startingTime();
+          double h = _simulation->nextTime() - _simulation->startingTime();
           double gamma_prime = _gamma / _beta;
           inter->computeOutput(t, indexSet->properties(vertex_inter), 1); // Update output of level 1
           yForNSsolver = (h / gamma_prime) * (*(inter->y(1))); //(h/gamma_prime)*dotg_{n,k}
@@ -418,7 +418,7 @@ void NewMarkAlphaOSI::prepareNewtonIteration(double time)
 void NewMarkAlphaOSI::prediction()
 {
   // Step size
-  double h = simulationLink->nextTime() - simulationLink->startingTime();
+  double h = _simulation->nextTime() - _simulation->startingTime();
   if (h < 100 * MACHINE_PREC)
     RuntimeException::selfThrow("In NewMarkAlphaOSI::prediction, time integration is too small");
   // Loop over all DS
@@ -481,7 +481,7 @@ void NewMarkAlphaOSI::prediction()
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 void NewMarkAlphaOSI::correction()
 {
-  double h = simulationLink->nextTime() - simulationLink->startingTime();
+  double h = _simulation->nextTime() - _simulation->startingTime();
   double beta_prime = (1 - _alpha_m) / ((1 - _alpha_f) * _beta);
   double gamma_prime = _gamma / _beta;
   //Make sure that the input of the concerned Dynamical Systems is updated after solving LCP
@@ -551,7 +551,7 @@ void NewMarkAlphaOSI::updateState(const unsigned int level)
   }
   else if (level == 2)
   {
-    double time = simulationLink->model()->currentTime();
+    double time = _simulation->model()->currentTime();
     for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
       (*it)->update(time);
   }
@@ -561,7 +561,7 @@ void NewMarkAlphaOSI::updateState(const unsigned int level)
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 void NewMarkAlphaOSI::computeCoefsDenseOutput(SP::DynamicalSystem ds)
 {
-  double h = simulationLink->nextTime() - simulationLink->startingTime();
+  double h = _simulation->nextTime() - _simulation->startingTime();
   Type::Siconos dsType = Type::value(*ds);    // Type of the current DS
   SP::SiconosVector q_n, dotq_n, ddotq_n, q_np1, dotq_np1, ddotq_np1;
   SP::SiconosVector _vec(new SiconosVector(ds->getDim()));
@@ -648,8 +648,8 @@ void NewMarkAlphaOSI::prepareEventLocalization()
 void NewMarkAlphaOSI::DenseOutputallDSs(double t)
 {
   // Make sure that all coefficients of the dense output polynomial for all DSs has been computed before
-  double t_n = simulationLink->startingTime();
-  double t_np1 = simulationLink->nextTime();
+  double t_n = _simulation->startingTime();
+  double t_np1 = _simulation->nextTime();
   double h = t_np1 - t_n;
   double theta = (t - t_n) / h;
   SP::SiconosVector _vec1(new SiconosVector(_orderDenseOutput + 1));

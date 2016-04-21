@@ -36,7 +36,7 @@ using namespace std::placeholders;
 
 
 OneStepIntegrator::OneStepIntegrator(const OSI::TYPES& id):
-  integratorType(id), _sizeMem(1)
+  _integratorType(id), _sizeMem(1)
 {
   OSIDynamicalSystems.reset(new DynamicalSystemsSet());
 }
@@ -45,16 +45,16 @@ void OneStepIntegrator::initialize()
 {
   if (_extraAdditionalTerms)
   {
-    Model& m = *simulationLink->model();
+    Model& m = *_simulation->model();
     _extraAdditionalTerms->init(*m.nonSmoothDynamicalSystem()->topology()->dSG(0), m);
   }
 
   // a subgraph has to be implemented.
-  _dynamicalSystemsGraph = simulationLink->model()->nonSmoothDynamicalSystem()->topology()->dSG(0);
+  _dynamicalSystemsGraph = _simulation->model()->nonSmoothDynamicalSystem()->topology()->dSG(0);
   
   // Temporary build of the dynamicalystems set
   DynamicalSystemsGraph::VIterator dsi, dsend;
-  SP::DynamicalSystemsGraph DSG = simulationLink->model()->nonSmoothDynamicalSystem()->topology()->dSG(0);
+  SP::DynamicalSystemsGraph DSG = _simulation->model()->nonSmoothDynamicalSystem()->topology()->dSG(0);
   for (std11::tie(dsi, dsend) = DSG->vertices(); dsi != dsend; ++dsi)
   {
     SP::OneStepIntegrator osi = DSG->osi[*dsi];
@@ -82,18 +82,18 @@ void OneStepIntegrator::computeInitialNewtonState()
 
 double OneStepIntegrator::computeResidu()
 {
-  RuntimeException::selfThrow("OneStepIntegrator::computeResidu not implemented for integrator of type " + integratorType);
+  RuntimeException::selfThrow("OneStepIntegrator::computeResidu not implemented for integrator of type " + _integratorType);
   return 0.0;
 }
 
 void OneStepIntegrator::computeFreeState()
 {
-  RuntimeException::selfThrow("OneStepIntegrator::computeFreeState not implemented for integrator of type " + integratorType);
+  RuntimeException::selfThrow("OneStepIntegrator::computeFreeState not implemented for integrator of type " + _integratorType);
 }
 
 void OneStepIntegrator::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, OneStepNSProblem* osnsp)
 {
-  RuntimeException::selfThrow("OneStepIntegrator::computeFreeOutput not implemented for integrator of type " + integratorType);
+  RuntimeException::selfThrow("OneStepIntegrator::computeFreeOutput not implemented for integrator of type " + _integratorType);
 }
 
 void OneStepIntegrator::resetNonSmoothPart()
@@ -109,7 +109,7 @@ void OneStepIntegrator::resetNonSmoothPart(unsigned int level)
 void OneStepIntegrator::display()
 {
   std::cout << "==== OneStepIntegrator display =====" <<std::endl;
-  std::cout << "| integratorType : " << integratorType <<std::endl;
+  std::cout << "| _integratorType : " << _integratorType <<std::endl;
   std::cout << "| _sizeMem: " << _sizeMem <<std::endl;
   std::cout << "====================================" <<std::endl;
 }

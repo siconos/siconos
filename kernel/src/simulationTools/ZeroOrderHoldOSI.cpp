@@ -53,12 +53,12 @@ void ZeroOrderHoldOSI::initialize()
 {
   OneStepIntegrator::initialize();
   ConstDSIterator itDS;
-  DynamicalSystemsGraph& DSG0 = *simulationLink->model()->nonSmoothDynamicalSystem()->topology()->dSG(0);
-  InteractionsGraph& IG0 = *simulationLink->model()->nonSmoothDynamicalSystem()->topology()->indexSet0();
+  DynamicalSystemsGraph& DSG0 = *_simulation->model()->nonSmoothDynamicalSystem()->topology()->dSG(0);
+  InteractionsGraph& IG0 = *_simulation->model()->nonSmoothDynamicalSystem()->topology()->indexSet0();
   DynamicalSystemsGraph::OEIterator oei, oeiend;
   Type::Siconos dsType;
 
-  Model& model = *simulationLink->model();
+  Model& model = *_simulation->model();
   for (itDS = OSIDynamicalSystems->begin(); itDS != OSIDynamicalSystems->end(); ++itDS)
   {
     dsType = Type::value(**itDS);
@@ -178,13 +178,13 @@ void ZeroOrderHoldOSI::computeFreeState()
   // "Free" means without taking non-smooth effects into account.
 
   // Operators computed at told have index i, and (i+1) at t.
-  double t = simulationLink->nextTime(); // End of the time step
-  double told = simulationLink->startingTime(); // Beginning of the time step
+  double t = _simulation->nextTime(); // End of the time step
+  double told = _simulation->startingTime(); // Beginning of the time step
   double h = t - told; // time step length
 
   DSIterator it; // Iterator through the set of DS.
 
-  DynamicalSystemsGraph& DSG0 = *simulationLink->model()->nonSmoothDynamicalSystem()->topology()->dSG(0);
+  DynamicalSystemsGraph& DSG0 = *_simulation->model()->nonSmoothDynamicalSystem()->topology()->dSG(0);
   Type::Siconos dsType ; // Type of the current DS.
   for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
   {
@@ -416,12 +416,12 @@ void ZeroOrderHoldOSI::integrate(double& tinit, double& tend, double& tout, int&
 
 void ZeroOrderHoldOSI::updateState(const unsigned int level)
 {
-  bool useRCC = simulationLink->useRelativeConvergenceCriteron();
+  bool useRCC = _simulation->useRelativeConvergenceCriteron();
   if (useRCC)
-    simulationLink->setRelativeConvergenceCriterionHeld(true);
+    _simulation->setRelativeConvergenceCriterionHeld(true);
 
   DSIterator it;
-  DynamicalSystemsGraph& DSG0 = *simulationLink->model()->nonSmoothDynamicalSystem()->topology()->dSG(0);
+  DynamicalSystemsGraph& DSG0 = *_simulation->model()->nonSmoothDynamicalSystem()->topology()->dSG(0);
   DynamicalSystemsGraph::OEIterator oei, oeiend;
   for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
   {
@@ -469,7 +469,7 @@ void ZeroOrderHoldOSI::updateState(const unsigned int level)
 bool ZeroOrderHoldOSI::addInteractionInIndexSet(SP::Interaction inter, unsigned int i)
 {
   assert(i == 1);
-  double h = simulationLink->timeStep();
+  double h = _simulation->timeStep();
   double y = (inter->y(i - 1))->getValue(0); // for i=1 y(i-1) is the position
   double yDot = (inter->y(i))->getValue(0); // for i=1 y(i) is the velocity
   double gamma = .5;
@@ -487,7 +487,7 @@ bool ZeroOrderHoldOSI::addInteractionInIndexSet(SP::Interaction inter, unsigned 
 bool ZeroOrderHoldOSI::removeInteractionInIndexSet(SP::Interaction inter, unsigned int i)
 {
   assert(i == 1);
-  double h = simulationLink->timeStep();
+  double h = _simulation->timeStep();
   double y = (inter->y(i - 1))->getValue(0); // for i=1 y(i-1) is the position
   double yDot = (inter->y(i))->getValue(0); // for i=1 y(i) is the velocity
   double gamma = .5;
@@ -503,14 +503,14 @@ bool ZeroOrderHoldOSI::removeInteractionInIndexSet(SP::Interaction inter, unsign
 
 const SiconosMatrix& ZeroOrderHoldOSI::Ad(SP::DynamicalSystem ds)
 {
-  DynamicalSystemsGraph& DSG0 = *simulationLink->model()->nonSmoothDynamicalSystem()->topology()->dSG(0);
+  DynamicalSystemsGraph& DSG0 = *_simulation->model()->nonSmoothDynamicalSystem()->topology()->dSG(0);
   DynamicalSystemsGraph::VDescriptor dsgVD = DSG0.descriptor(ds);
   return DSG0.Ad.at(dsgVD)->mat();
 }
 
 const SiconosMatrix& ZeroOrderHoldOSI::Bd(SP::DynamicalSystem ds)
 {
-  DynamicalSystemsGraph& DSG0 = *simulationLink->model()->nonSmoothDynamicalSystem()->topology()->dSG(0);
+  DynamicalSystemsGraph& DSG0 = *_simulation->model()->nonSmoothDynamicalSystem()->topology()->dSG(0);
   DynamicalSystemsGraph::VDescriptor dsgVD = DSG0.descriptor(ds);
   return DSG0.Bd.at(dsgVD)->mat();
 }
@@ -537,7 +537,7 @@ void ZeroOrderHoldOSI::display()
 
 void ZeroOrderHoldOSI::updateMatrices(SP::DynamicalSystem ds)
 {
-//  DynamicalSystemsGraph& DSG0 = *simulationLink->model()->nonSmoothDynamicalSystem()->topology()->dSG(0);
+//  DynamicalSystemsGraph& DSG0 = *_simulation->model()->nonSmoothDynamicalSystem()->topology()->dSG(0);
 //  if (!DSG0.Ad[dsgVD]->isConst())
 //    computeAd(dsgVD);
 //  if (DSG0.Bd.hasKey(dsgVD) && !DSG->Bd[dsgVD]->isConst())

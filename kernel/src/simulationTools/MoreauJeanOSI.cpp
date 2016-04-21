@@ -160,7 +160,7 @@ void MoreauJeanOSI::initialize()
 {
   OneStepIntegrator::initialize();
   // Get initial time
-  double t0 = simulationLink->model()->t0();
+  double t0 = _simulation->model()->t0();
   // Compute W(t0) for all ds
 
 
@@ -181,10 +181,10 @@ void MoreauJeanOSI::initialize()
     }
   }
 
-  SP::OneStepNSProblems  allOSNS  = simulationLink->oneStepNSProblems();
+  SP::OneStepNSProblems  allOSNS  = _simulation->oneStepNSProblems();
   ((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY])->setIndexSetLevel(1);
   ((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY])->setInputOutputLevel(1);
-  //  ((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY])->initialize(simulationLink);
+  //  ((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY])->initialize(_simulation);
 }
 void MoreauJeanOSI::initW(double t, SP::DynamicalSystem ds)
 {
@@ -209,7 +209,7 @@ void MoreauJeanOSI::initW(double t, SP::DynamicalSystem ds)
   //  WMap[ds].reset(new SimpleMatrix(sizeW,sizeW));
   //   SP::SiconosMatrix W = WMap[ds];
 
-  double h = simulationLink->timeStep();
+  double h = _simulation->timeStep();
   Type::Siconos dsType = Type::value(*ds);
 
 
@@ -390,7 +390,7 @@ void MoreauJeanOSI::computeW(double t, SP::DynamicalSystem ds)
   assert(ds &&
          "MoreauJeanOSI::computeW(t,ds) - ds == NULL");
 
-  double h = simulationLink->timeStep();
+  double h = _simulation->timeStep();
   Type::Siconos dsType = Type::value(*ds);
 
   if (dsType == Type::LagrangianLinearTIDS)
@@ -502,8 +502,8 @@ double MoreauJeanOSI::computeResidu()
   //  $\mathcal R(x,r) = x - x_{k} -h\theta f( x , t_{k+1}) - h(1-\theta)f(x_k,t_k) - h r$
   //  $\mathcal R_{free}(x,r) = x - x_{k} -h\theta f( x , t_{k+1}) - h(1-\theta)f(x_k,t_k) $
 
-  double t = simulationLink->nextTime(); // End of the time step
-  double told = simulationLink->startingTime(); // Beginning of the time step
+  double t = _simulation->nextTime(); // End of the time step
+  double told = _simulation->startingTime(); // Beginning of the time step
   double h = t - told; // time step length
 
   DEBUG_PRINTF("nextTime %f\n", t);
@@ -923,7 +923,7 @@ void MoreauJeanOSI::computeFreeState()
   // This function computes "free" states of the DS belonging to this Integrator.
   // "Free" means without taking non-smooth effects into account.
 
-  double t = simulationLink->nextTime(); // End of the time step
+  double t = _simulation->nextTime(); // End of the time step
 
   // Operators computed at told have index i, and (i+1) at t.
 
@@ -1168,7 +1168,7 @@ void MoreauJeanOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_int
   /** \warning: ensures that it can also work with two different osi for two different ds ?
    */
 
-  SP::OneStepNSProblems  allOSNS  = simulationLink->oneStepNSProblems();
+  SP::OneStepNSProblems  allOSNS  = _simulation->oneStepNSProblems();
   SP::InteractionsGraph indexSet = osnsp->simulation()->indexSet(osnsp->indexSetLevel());
   SP::Interaction inter = indexSet->bundle(vertex_inter);
 
@@ -1383,7 +1383,7 @@ void MoreauJeanOSI::updatePosition(SP::DynamicalSystem ds)
 {
   DEBUG_BEGIN("MoreauJeanOSI::updatePosition(SP::DynamicalSystem ds)\n");
 
-  double h = simulationLink->timeStep();
+  double h = _simulation->timeStep();
 
   Type::Siconos dsType = Type::value(*ds);
 
@@ -1455,10 +1455,10 @@ void MoreauJeanOSI::updateState(const unsigned int level)
 
   DEBUG_BEGIN("MoreauJeanOSI::updateState(const unsigned int level)\n");
 
-  double RelativeTol = simulationLink->relativeConvergenceTol();
-  bool useRCC = simulationLink->useRelativeConvergenceCriteron();
+  double RelativeTol = _simulation->relativeConvergenceTol();
+  bool useRCC = _simulation->useRelativeConvergenceCriteron();
   if (useRCC)
-    simulationLink->setRelativeConvergenceCriterionHeld(true);
+    _simulation->setRelativeConvergenceCriterionHeld(true);
 
   SP::SiconosMatrix W;
   
@@ -1483,7 +1483,7 @@ void MoreauJeanOSI::updateState(const unsigned int level)
 
       //    SiconosVector *vfree = d->velocityFree();
       SP::SiconosVector v = d->velocity();
-      bool baux = dsType == Type::LagrangianDS && useRCC && simulationLink->relativeConvergenceCriterionHeld();
+      bool baux = dsType == Type::LagrangianDS && useRCC && _simulation->relativeConvergenceCriterionHeld();
 
       // level == LEVELMAX => p(level) does not even exists (segfault)
       // \warning VA 04/08/2015. Why must we check that  d->p(level)->size() > 0 ?
@@ -1547,7 +1547,7 @@ void MoreauJeanOSI::updateState(const unsigned int level)
         ds->subWorkVector(q, DynamicalSystem::local_buffer);
         double aux = ((ds->workspace(DynamicalSystem::local_buffer))->norm2()) / (ds->normRef());
         if (aux > RelativeTol)
-          simulationLink->setRelativeConvergenceCriterionHeld(false);
+          _simulation->setRelativeConvergenceCriterionHeld(false);
       }
 
     }
@@ -1634,7 +1634,7 @@ bool MoreauJeanOSI::addInteractionInIndexSet(SP::Interaction inter, unsigned int
   DEBUG_PRINT("addInteractionInIndexSet(SP::Interaction inter, unsigned int i)\n");
 
   assert(i == 1);
-  double h = simulationLink->timeStep();
+  double h = _simulation->timeStep();
   double y = (inter->y(i - 1))->getValue(0); // for i=1 y(i-1) is the position
   double yDot = (inter->y(i))->getValue(0); // for i=1 y(i) is the velocity
 
@@ -1657,7 +1657,7 @@ bool MoreauJeanOSI::addInteractionInIndexSet(SP::Interaction inter, unsigned int
 bool MoreauJeanOSI::removeInteractionInIndexSet(SP::Interaction inter, unsigned int i)
 {
   assert(i == 1);
-  double h = simulationLink->timeStep();
+  double h = _simulation->timeStep();
   double y = (inter->y(i - 1))->getValue(0); // for i=1 y(i-1) is the position
   double yDot = (inter->y(i))->getValue(0); // for i=1 y(i) is the velocity
   double gamma = 1.0 / 2.0;

@@ -148,7 +148,7 @@ void SchatzmanPaoliOSI::initialize()
 {
   OneStepIntegrator::initialize();
   // Get initial time
-  double t0 = simulationLink->model()->t0();
+  double t0 = _simulation->model()->t0();
   // Compute W(t0) for all ds
   ConstDSIterator itDS;
   for (itDS = OSIDynamicalSystems->begin(); itDS != OSIDynamicalSystems->end(); ++itDS)
@@ -174,7 +174,7 @@ void SchatzmanPaoliOSI::initialize()
       d->velocityMemory()->swap(*velocity);
 
       // we compute the new state values
-      double h = simulationLink->timeStep();
+      double h = _simulation->timeStep();
       *q = *q0 + h* * v0;
       //*velocity=*velocity; we do nothing for the velocity
 
@@ -226,7 +226,7 @@ void SchatzmanPaoliOSI::initW(double t, SP::DynamicalSystem ds)
   //  WMap[ds].reset(new SimpleMatrix(sizeW,sizeW));
   //   SP::SiconosMatrix W = WMap[ds];
 
-  double h = simulationLink->timeStep();
+  double h = _simulation->timeStep();
   Type::Siconos dsType = Type::value(*ds);
 
 
@@ -393,7 +393,7 @@ void SchatzmanPaoliOSI::computeW(double t, SP::DynamicalSystem ds)
   assert((WMap.find(dsN) != WMap.end()) &&
          "SchatzmanPaoliOSI::computeW(t,ds) - W(ds) does not exists. Maybe you forget to initialize the osi?");
 
-  //double h = simulationLink->timeStep();
+  //double h = _simulation->timeStep();
   Type::Siconos dsType = Type::value(*ds);
 
   SP::SiconosMatrix W = WMap[dsN];
@@ -464,8 +464,8 @@ double SchatzmanPaoliOSI::computeResidu()
   //  $\mathcal R(x,r) = x - x_{k} -h\theta f( x , t_{k+1}) - h(1-\theta)f(x_k,t_k) - h r$
   //  $\mathcal R_{free}(x,r) = x - x_{k} -h\theta f( x , t_{k+1}) - h(1-\theta)f(x_k,t_k) $
 
-  double t = simulationLink->nextTime(); // End of the time step
-  double told = simulationLink->startingTime(); // Beginning of the time step
+  double t = _simulation->nextTime(); // End of the time step
+  double told = _simulation->startingTime(); // Beginning of the time step
   double h = t - told; // time step length
 
   // Operators computed at told have index i, and (i+1) at t.
@@ -733,8 +733,8 @@ void SchatzmanPaoliOSI::computeFreeState()
   // This function computes "free" states of the DS belonging to this Integrator.
   // "Free" means without taking non-smooth effects into account.
 
-  //double t = simulationLink->nextTime(); // End of the time step
-  //double told = simulationLink->startingTime(); // Beginning of the time step
+  //double t = _simulation->nextTime(); // End of the time step
+  //double told = _simulation->startingTime(); // Beginning of the time step
   //double h = t-told; // time step length
 
   // Operators computed at told have index i, and (i+1) at t.
@@ -952,7 +952,7 @@ void SchatzmanPaoliOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex
 
   SP::InteractionsGraph indexSet = osnsp->simulation()->indexSet(osnsp->indexSetLevel());
   SP::Interaction inter = indexSet->bundle(vertex_inter);
-  SP::OneStepNSProblems  allOSNS  = simulationLink->oneStepNSProblems();
+  SP::OneStepNSProblems  allOSNS  = _simulation->oneStepNSProblems();
 
   VectorOfBlockVectors& DSlink = *indexSet->properties(vertex_inter).DSlink;
   // Get relation and non smooth law types
@@ -1061,12 +1061,12 @@ void SchatzmanPaoliOSI::integrate(double& tinit, double& tend, double& tout, int
 void SchatzmanPaoliOSI::updateState(const unsigned int level)
 {
 
-  double h = simulationLink->timeStep();
+  double h = _simulation->timeStep();
 
-  double RelativeTol = simulationLink->relativeConvergenceTol();
-  bool useRCC = simulationLink->useRelativeConvergenceCriteron();
+  double RelativeTol = _simulation->relativeConvergenceTol();
+  bool useRCC = _simulation->useRelativeConvergenceCriteron();
   if (useRCC)
-    simulationLink->setRelativeConvergenceCriterionHeld(true);
+    _simulation->setRelativeConvergenceCriterionHeld(true);
 
   DSIterator it;
   SP::SiconosMatrix W;
@@ -1086,7 +1086,7 @@ void SchatzmanPaoliOSI::updateState(const unsigned int level)
 
       //    SiconosVector *vfree = d->velocityFree();
       SP::SiconosVector q = d->q();
-      bool baux = dsType == Type::LagrangianDS && useRCC && simulationLink->relativeConvergenceCriterionHeld();
+      bool baux = dsType == Type::LagrangianDS && useRCC && _simulation->relativeConvergenceCriterionHeld();
       if (level != LEVELMAX)
       {
         // To compute q, we solve W(q - qfree) = p
@@ -1149,7 +1149,7 @@ void SchatzmanPaoliOSI::updateState(const unsigned int level)
         ds->subWorkVector(q, DynamicalSystem::local_buffer);
         double aux = ((ds->workspace(DynamicalSystem::local_buffer))->norm2()) / (ds->normRef());
         if (aux > RelativeTol)
-          simulationLink->setRelativeConvergenceCriterionHeld(false);
+          _simulation->setRelativeConvergenceCriterionHeld(false);
       }
 
     }
