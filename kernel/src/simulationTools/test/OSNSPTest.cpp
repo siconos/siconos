@@ -41,7 +41,7 @@ void OSNSPTest::init()
   _sim.reset(new TimeStepping(_TD, 0));
   _osi.reset(new EulerMoreauOSI(_theta));
   _model->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DS);
-  _model->nonSmoothDynamicalSystem()->setOSI(_DS, _osi);
+  _model->nonSmoothDynamicalSystem()->topology()->setOSI(_DS, _osi);
   _sim->insertIntegrator(_osi);
   _model->initialize(_sim);
 }
@@ -89,7 +89,7 @@ void OSNSPTest::testAVI()
   SP::Interaction inter(new Interaction(_n, nslaw, rel));
   _osi.reset(new EulerMoreauOSI(_theta));
   _model->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DS);
-  _model->nonSmoothDynamicalSystem()->setOSI(_DS, _osi);
+  _model->nonSmoothDynamicalSystem()->topology()->setOSI(_DS, _osi);
   _model->nonSmoothDynamicalSystem()->link(inter, _DS);
   _sim.reset(new TimeStepping(_TD));
   _sim->insertIntegrator(_osi);
