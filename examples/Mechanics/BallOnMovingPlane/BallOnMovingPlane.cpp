@@ -233,7 +233,7 @@ int main(int argc, char* argv[])
     SimpleMatrix dataPlotRef(dataPlot);
     dataPlotRef.zero();
     ioMatrix::read("BallOnMovingPlane.ref", "ascii", dataPlotRef);
-
+    std::cout << "Error " << ((dataPlot - dataPlotRef).normInf()) << std::endl;
     if ((dataPlot - dataPlotRef).normInf() > 1e-10)
     {
       std::cout << "Warning. The result is rather different from the reference file." << std::endl;

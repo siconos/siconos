@@ -28,7 +28,7 @@
 //#include "SphereNEDSPlanR.hpp"
 #include "SiconosKernel.hpp"
 
-//#define WITH_PROJ
+#define WITH_PROJ
 #define WITH_FC3D
 using namespace std;
 #ifdef WITH_FC3D
@@ -338,7 +338,7 @@ int main(int argc, char* argv[])
     SimpleMatrix dataPlotRef(dataPlot);
     dataPlotRef.zero();
 #ifdef WITH_PROJ
-    ioMatrix::read("resultNETS-WITHPROJ.ref", "ascii", dataPlotRef);
+    ioMatrix::read("BallNewtonEuler-WITHPROJ.ref", "ascii", dataPlotRef);
 #else
     ioMatrix::read("BallNewtonEuler.ref", "ascii", dataPlotRef);
 #endif
