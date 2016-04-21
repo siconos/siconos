@@ -272,7 +272,7 @@ void KernelTest::t5()
 
   // -- (1) OneStepIntegrators --
   SP::MoreauJeanOSI OSI(new MoreauJeanOSI(theta));
-  bouncingBall->nonSmoothDynamicalSystem()->setOSI(ball, OSI);
+  bouncingBall->nonSmoothDynamicalSystem()->topology()->setOSI(ball, OSI);
 
   // -- (2) Time discretisation --
   SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));

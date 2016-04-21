@@ -111,7 +111,7 @@ bool DiodeBridge()
 
     SP::MoreauJeanOSI OSI_RLCD(new MoreauJeanOSI());
     DiodeBridge->nonSmoothDynamicalSystem()->insertDynamicalSystem(LSDiodeBridge);
-    DiodeBridge->nonSmoothDynamicalSystem()->setOSI(LSDiodeBridge, OSI_RLCD);
+    DiodeBridge->nonSmoothDynamicalSystem()->topology()->setOSI(LSDiodeBridge, OSI_RLCD);
     DiodeBridge->nonSmoothDynamicalSystem()->link(InterDiodeBridge, LSDiodeBridge);
 
     // --- Simulation specification---
