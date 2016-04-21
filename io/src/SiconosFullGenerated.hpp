@@ -272,7 +272,7 @@ SICONOS_IO_REGISTER(Model,
   (_t)
   (_t0)
   (_T)
-  (_strat)
+  (_simulation)
   (_nsds)
   (_title)
   (_author)

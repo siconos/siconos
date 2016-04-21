@@ -76,9 +76,9 @@ private:
   double _T;
 
   /** The simulation to solve the NonSmoothDynamicalSystem */
-  SP::Simulation _strat;
+  SP::Simulation _simulation;
 
-  /** The NonSmoothDynamicalSystem of the simulation */
+  /** The NonSmoothDynamicalSystem of the model */
   SP::NonSmoothDynamicalSystem _nsds;
 
   /** information concerning the Model */
@@ -169,7 +169,7 @@ public:
    */
   inline SP::Simulation simulation() const
   {
-    return _strat;
+    return _simulation;
   }
 
   /** set the Simulation of the Model

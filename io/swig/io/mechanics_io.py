@@ -637,7 +637,6 @@ class Hdf5():
             # add the dynamical system to the non smooth
             # dynamical system
             nsds = self._broadphase.model().nonSmoothDynamicalSystem()
-            nsds.insertDynamicalSystem(body)
             nsds.setOSI(body, self._osi)
             nsds.setName(body, str(name))
 
@@ -1383,7 +1382,8 @@ class Hdf5():
 
         self.importScene(body_class, shape_class, face_class, edge_class)
 
-        model.initialize(simulation)
+        model.setSimulation(simulation)
+        model.initialize()
 
         self.outputStaticObjects()
         self.outputDynamicObjects()

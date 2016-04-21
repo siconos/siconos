@@ -57,8 +57,8 @@ Model::Model(double newT0, double newT, const std::string& newTitle,
 
 Model::~Model()
 {
-  if (_strat)
-    _strat->clear();
+  if (_simulation)
+    _simulation->clear();
 }
 
 void Model::setSimulation(SP::Simulation newPtr)
@@ -66,7 +66,7 @@ void Model::setSimulation(SP::Simulation newPtr)
   // Warning: this function may be used carefully because of the links
   // between Model and TimeDiscretisation The model of the simulation
   // input MUST be the current model.
-  _strat = newPtr;
+  _simulation = newPtr;
 }
 
 void Model::setNonSmoothDynamicalSystemPtr(SP::NonSmoothDynamicalSystem newPtr)
@@ -84,13 +84,13 @@ void Model::initialize(SP::Simulation sim)
 void Model::initialize()
 {
 
-  assert(_strat && "Model::initialize() error - The simulation object of this model is null.");
+  assert(_simulation && "Model::initialize() error - The simulation object of this model is null.");
 
   // === topology init (computes Interaction sets, relative degrees ...) ===
   _nsds->topology()->initialize();
 
   // === Simulation init ===
-  _strat->initialize(shared_from_this());
+  _simulation->initialize(shared_from_this());
 
   // symmetry in indexSets
   _nsds->topology()->setProperties();
@@ -110,7 +110,7 @@ void Model::display() const
   std::cout << " Current time is " << _t <<std::endl;
   std::cout <<std::endl;
   if (!_nsds) std::cout << "No NSDS linked to the Model" <<std::endl;
-  if (_strat) std::cout << "The simulation (name: " << _strat->name() << ") is a " << Type::name(*_strat) << "." <<std::endl;
+  if (_simulation) std::cout << "The simulation (name: " << _simulation->name() << ") is a " << Type::name(*_simulation) << "." <<std::endl;
   else std::cout << "No simulation attached to this model." <<std::endl;
   std::cout <<std::endl;
   std::cout << " ============================" <<std::endl;
@@ -119,5 +119,5 @@ void Model::display() const
 void Model::setT(double newValue)
 {
   _T = newValue;
-  _strat->updateT(newValue);
+  _simulation->updateT(newValue);
 }
