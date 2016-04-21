@@ -32,6 +32,22 @@
 
 #include <string>
 
+
+#ifndef __GCCXML__
+
+#ifdef __GNUC__
+#define DEPRECATED_MODEL_API(func) func __attribute__ ((deprecated ("This constructor of function is deprecrated and will be removed in the next major Siconos release! Use initialize() and setSimulation() !")))
+#elif defined(_MSC_VER)
+#define DEPRECATED_MODEL_API(func) __declspec(deprecated("This constructor will be removed in the next major Siconos release and does not work with MSVC 2013 !  Use initialize() and setSimulation() !")) func
+#else
+#define DEPRECATED_MODEL_API(func) func
+#endif
+
+#else
+#define DEPRECATED_MODEL_API(func) func
+#endif
+
+
 /** \class Model
  * \brief  Model: object that links the NonSmoothDynamicalSystem with a
  * Simulation.
@@ -243,6 +259,8 @@ public:
    */
   void initialize();
 
+  DEPRECATED_MODEL_API(void initialize(SP::Simulation sim);)
+  
    /** display the data of the Model
       \return void
    */
