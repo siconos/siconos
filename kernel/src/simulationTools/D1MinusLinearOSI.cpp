@@ -32,8 +32,9 @@
 #include "NonSmoothDynamicalSystem.hpp"
 #include "OneStepNSProblem.hpp"
 
-//#define DEBUG_STDOUT
-//#define DEBUG_MESSAGES
+//#define DEBUG_BEGIN_END_ONLY
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
 #include "debug.h"
 
 
@@ -101,7 +102,10 @@ unsigned int D1MinusLinearOSI::numberOfIndexSets() const
 }
 void D1MinusLinearOSI::initialize()
 {
-  DEBUG_PRINT("D1MinusLinearOSI::initialize() starts \n");
+  DEBUG_BEGIN("D1MinusLinearOSI::initialize() \n");
+
+  OneStepIntegrator::initialize();
+  
   for (DSIterator it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
   {
     Type::Siconos dsType = Type::value(**it);
@@ -164,7 +168,7 @@ void D1MinusLinearOSI::initialize()
   {
     RuntimeException::selfThrow("D1MinusLinearOSI::initialize() - not implemented for type of D1MinusLinearOSI: " + _typeOfD1MinusLinearOSI );
   }
-  DEBUG_PRINT("D1MinusLinearOSI::initialize() ends \n");
+  DEBUG_END("D1MinusLinearOSI::initialize() \n");
 }
 
 
@@ -176,7 +180,7 @@ double D1MinusLinearOSI::computeResidu()
   DEBUG_PRINT(" ******************************************************************\n");
   DEBUG_PRINT(" ******************************************************************\n");
 
-  DEBUG_PRINT("\n D1MinusLinearOSI::computeResidu(), start\n");
+  DEBUG_BEGIN("D1MinusLinearOSI::computeResidu()\n");
 
 
   DEBUG_PRINTF("nextTime %f\n", _simulation->nextTime());
@@ -193,7 +197,7 @@ double D1MinusLinearOSI::computeResidu()
     return computeResiduHalfExplicitVelocityLevel();
   }
   RuntimeException::selfThrow("D1MinusLinearOSI::computeResidu() - not implemented for type of D1MinusLinearOSI: " + _typeOfD1MinusLinearOSI );
-  DEBUG_PRINT("D1MinusLinearOSI::computeResidu() ends\n");
+  DEBUG_END("D1MinusLinearOSI::computeResidu()\n");
   return 1;
 }
 
@@ -201,7 +205,7 @@ double D1MinusLinearOSI::computeResidu()
 
 void D1MinusLinearOSI::computeFreeState()
 {
-  DEBUG_PRINT("\n D1MinusLinearOSI::computeFreeState(), start\n");
+  DEBUG_BEGIN("D1MinusLinearOSI::computeFreeState()\n");
 
 
   for (DSIterator it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
@@ -259,14 +263,15 @@ void D1MinusLinearOSI::computeFreeState()
   }
 
 
-  DEBUG_PRINT("D1MinusLinearOSI::computeFreeState(), end\n");
+  DEBUG_END("D1MinusLinearOSI::computeFreeState()\n");
 
 
 }
 
 void D1MinusLinearOSI::updateState(const unsigned int level)
 {
-  DEBUG_PRINTF("\n D1MinusLinearOSI::updateState(const unsigned int level) start for level = %i\n",level);
+  DEBUG_BEGIN("D1MinusLinearOSI::updateState(const unsigned int level)\n");
+  DEBUG_PRINTF("with level  = %i\n",level);
 
   for (DSIterator it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
   {
@@ -331,7 +336,7 @@ void D1MinusLinearOSI::updateState(const unsigned int level)
 
   }
 
-  DEBUG_PRINT("\n D1MinusLinearOSI::updateState(const unsigned int level) end\n");
+  DEBUG_END("\n D1MinusLinearOSI::updateState(const unsigned int level)\n");
 
 }
 
@@ -353,14 +358,15 @@ void D1MinusLinearOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_
     return;
   }
   RuntimeException::selfThrow("D1MinusLinearOSI::computeResidu() - not implemented for type of D1MinusLinearOSI: " + _typeOfD1MinusLinearOSI);
-  DEBUG_PRINT("D1MinusLinearOSI::computeFreeOutput() ends\n");
+  DEBUG_END("D1MinusLinearOSI::computeFreeOutput()\n");
 }
 
 
 
 bool D1MinusLinearOSI::addInteractionInIndexSet(SP::Interaction inter, unsigned int i)
 {
-  DEBUG_PRINT("D1MinusLinearOSI::addInteractionInIndexSet.\n");
+  DEBUG_BEGIN("D1MinusLinearOSI::addInteractionInIndexSet.\n");
+  DEBUG_END("D1MinusLinearOSI::addInteractionInIndexSet.\n");
   switch (_typeOfD1MinusLinearOSI)
   {
   case halfexplicit_acceleration_level:
@@ -369,12 +375,14 @@ bool D1MinusLinearOSI::addInteractionInIndexSet(SP::Interaction inter, unsigned 
     return addInteractionInIndexSetHalfExplicitVelocityLevel(inter,i);
   }
   RuntimeException::selfThrow("D1MinusLinearOSI::addInteractionInIndexSet() - not implemented for type of D1MinusLinearOSI: " + _typeOfD1MinusLinearOSI);
+
   return 0;
 }
 
 bool D1MinusLinearOSI::removeInteractionInIndexSet(SP::Interaction inter, unsigned int i)
 {
-  DEBUG_PRINT("D1MinusLinearOSI::removeInteractionInIndexSet.\n");
+  DEBUG_BEGIN("D1MinusLinearOSI::removeInteractionInIndexSet.\n");
+  DEBUG_END("D1MinusLinearOSI::removeInteractionInIndexSet.\n");
   switch (_typeOfD1MinusLinearOSI)
   {
   case halfexplicit_acceleration_level:

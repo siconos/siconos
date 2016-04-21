@@ -219,7 +219,7 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
   // So let the simu do this.
   //(*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]->saveInMemory(); // we push y and lambda in Memories
   _simulation->model()->nonSmoothDynamicalSystem()->pushInteractionsInMemory();
-  _simulation->model()->nonSmoothDynamicalSystem()->updateInput(t,2);
+  _simulation->model()->nonSmoothDynamicalSystem()->updateInput(_simulation->model()->currentTime(),2);
 
   /**************************************************************************************************************
    *  Step 2 -  compute v_{k,1}
@@ -382,7 +382,7 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
 
     for (unsigned int level = _simulation->levelMinForOutput(); level < _simulation->levelMaxForOutput(); level++)
     {
-      _simulation->model()->nonSmoothDynamicalSystem()->updateOutput(t,level);
+      _simulation->model()->nonSmoothDynamicalSystem()->updateOutput(_simulation->model()->currentTime(),level);
     }
     _simulation->updateIndexSets();
 
@@ -612,7 +612,7 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
       }
     }
 
-    _simulation->model()->nonSmoothDynamicalSystem()->updateInput(t,2);
+    _simulation->model()->nonSmoothDynamicalSystem()->updateInput(_simulation->model()->currentTime(),2);
 
     for (DSIterator it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
     {

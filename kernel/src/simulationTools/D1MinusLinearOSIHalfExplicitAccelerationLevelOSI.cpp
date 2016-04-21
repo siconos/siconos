@@ -33,8 +33,8 @@
 
 #include "OneStepNSProblem.hpp"
 
-//#define DEBUG_STDOUT
-//#define DEBUG_MESSAGES
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
 #include "debug.h"
 
 /// @cond
@@ -42,7 +42,7 @@ using namespace RELATION;
 
 double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
 {
-  DEBUG_PRINT("\n D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel(), starts\n");
+  DEBUG_BEGIN("\n D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()\n");
 
   double t = _simulation->nextTime(); // end of the time step
   double told = _simulation->startingTime(); // beginning of the time step
@@ -70,7 +70,7 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
     SP::SiconosVector accFree;
     SP::SiconosVector work_tdg;
     SP::SiconosMatrix Mold;
-
+    DEBUG_EXPR((*it)->display());
 
     if ((dsType == Type::LagrangianDS) || (dsType == Type::LagrangianLinearTIDS))
     {
@@ -193,7 +193,7 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
       // So let the simu do this.
       //(*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]->saveInMemory(); // we push y and lambda in Memories
       _simulation->model()->nonSmoothDynamicalSystem()->pushInteractionsInMemory();
-      _simulation->model()->nonSmoothDynamicalSystem()->updateInput(t,2);
+      _simulation->model()->nonSmoothDynamicalSystem()->updateInput(_simulation->model()->currentTime(),2);
 
       for (DSIterator it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
       {
@@ -363,7 +363,7 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
     for (unsigned int level = _simulation->levelMinForOutput();
          level < _simulation->levelMaxForOutput(); level++)
     {
-      _simulation->model()->nonSmoothDynamicalSystem()->updateOutput(t,level);
+      _simulation->model()->nonSmoothDynamicalSystem()->updateOutput(_simulation->model()->currentTime(),level);
     }
     _simulation->updateIndexSets();
 
@@ -567,7 +567,7 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
       {
         (*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]->compute(t);
         DEBUG_EXPR((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]->display(););
-        _simulation->model()->nonSmoothDynamicalSystem()->updateInput(t,2);
+        _simulation->model()->nonSmoothDynamicalSystem()->updateInput(_simulation->model()->currentTime(),2);
       }
     }
 
@@ -647,7 +647,7 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
   } // No impact
 
 
-  DEBUG_PRINT("\n D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel(), ends\n");
+  DEBUG_END("D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()\n");
 
   return 0.; // there is no Newton iteration and the residuum is assumed to vanish
 }
@@ -656,7 +656,7 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
 void D1MinusLinearOSI::computeFreeOutputHalfExplicitAccelerationLevel(InteractionsGraph::VDescriptor& vertex_inter, OneStepNSProblem* osnsp)
 {
 
-  DEBUG_PRINT("D1MinusLinearOSI::computeFreeOutputHalfExplicitAccelerationLevel starts\n");
+  DEBUG_BEGIN("D1MinusLinearOSI::computeFreeOutputHalfExplicitAccelerationLevel\n");
   SP::OneStepNSProblems allOSNS  = _simulation->oneStepNSProblems(); // all OSNSP
   SP::InteractionsGraph indexSet = osnsp->simulation()->indexSet(osnsp->indexSetLevel());
   SP::Interaction inter = indexSet->bundle(vertex_inter);
@@ -861,7 +861,7 @@ void D1MinusLinearOSI::computeFreeOutputHalfExplicitAccelerationLevel(Interactio
     RuntimeException::selfThrow("D1MinusLinearOSI::computeFreeOutput - not implemented for Relation of type " + relationType);
 
   DEBUG_EXPR(yForNSsolver.display(););
-  DEBUG_PRINT("D1MinusLinearOSI::computeFreeOutputHalfExplicitAccelerationLevel ends\n");
+  DEBUG_END("D1MinusLinearOSI::computeFreeOutputHalfExplicitAccelerationLevel ends\n");
 
 }
 
