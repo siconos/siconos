@@ -84,8 +84,8 @@ SP::SimpleMatrix MoreauJeanOSI::W(SP::DynamicalSystem ds)
 void MoreauJeanOSI::setW(const SiconosMatrix& newValue, SP::DynamicalSystem ds)
 {
   // Check if ds is in the OSI
-  if (!OSIDynamicalSystems->isIn(ds))
-    RuntimeException::selfThrow("MoreauJeanOSI::setW(newVal,ds) - ds does not belong to this Integrator ...");
+  if (!(checkOSI(_dynamicalSystemsGraph->descriptor(ds))))
+    RuntimeException::selfThrow("MoreauJeanOSI::initW(t,ds) - ds does not belong to the OSI.");
 
   // Check dimensions consistency
   unsigned int line = newValue.size(0);
