@@ -40,14 +40,6 @@ private:
   void t2();
   void t3();
 
-  double bounceTest(std::string moving,
-                    std::string ground,
-                    bool dynamic=false,
-                    bool trace=false,
-                    double size=1.0,
-                    double mass=1.0,
-                    double margin=0.1);
-
 public:
   void setUp();
   void tearDown();

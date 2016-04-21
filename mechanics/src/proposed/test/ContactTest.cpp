@@ -77,13 +77,32 @@ void ContactTest::t1()
   CPPUNIT_ASSERT(1);
 }
 
-double ContactTest::bounceTest(std::string moving,
-                               std::string ground,
-                               bool trace,
-                               bool dynamic,
-                               double size,
-                               double mass,
-                               double margin)
+struct BounceParams
+{
+  bool trace;
+  bool dynamic;
+  double size;
+  double mass;
+  double margin;
+
+  void dump() {
+    printf("  trace:    %s\n", trace?"on":"off");
+    printf("  dynamic:  %s\n", trace?"on":"off");
+    printf("  size:     %.1g\n", size);
+    printf("  mass:     %.1g\n", mass);
+    printf("  margin:   %.1g\n", margin);
+  }
+};
+
+struct BounceResult
+{
+  double final_position;
+  double final_position_std;
+};
+
+BounceResult bounceTest(std::string moving,
+                        std::string ground,
+                        const BounceParams &params)
 {
     // User-defined main parameters
     double t0 = 0;                   // initial computation time
@@ -122,23 +141,25 @@ double ContactTest::bounceTest(std::string moving,
 
     printf("== Testing: %s falling on %s .. ",
            moving.c_str(), ground.c_str());
+    if (params.trace) printf("==\n");
     fflush(stdout);
 
     // TODO: set the shape margin
 
     // Set up a Siconos Mechanics environment:
     // A BodyDS with a contactor consisting of a single sphere.
-    SP::BodyDS body(new BodyDS(q0, v0, mass));
+    SP::BodyDS body(new BodyDS(q0, v0, params.mass));
     SP::SiconosContactor contactor(new SiconosContactor());
     SP::SiconosSphere sphere;
     if (moving=="sphere")
     {
-      sphere.reset(new SiconosSphere(0,0,0, size/2));
+      sphere.reset(new SiconosSphere(0,0,0, params.size/2));
       contactor->addShape(sphere);
     }
     else if (moving=="box")
     {
-      SP::SiconosBox box(new SiconosBox(0,0,0,size,size,size));
+      SP::SiconosBox box(
+        new SiconosBox(0,0,0,params.size,params.size,params.size));
       contactor->addShape(box);
     }
     body->setContactor(contactor);
@@ -167,7 +188,7 @@ double ContactTest::bounceTest(std::string moving,
     SP::SiconosVector FExt;
     FExt.reset(new SiconosVector(3));
     FExt->zero();
-    FExt->setValue(2, - g * mass);
+    FExt->setValue(2, - g * params.mass);
     body->setFExtPtr(FExt);
 
     // -- Add the dynamical systems into the non smooth dynamical system
@@ -217,10 +238,11 @@ double ContactTest::bounceTest(std::string moving,
     ///////
 
     int k=0;
+    double std=0, final_pos=0;
     while (simulation->hasNextEvent())
     {
       // Update a property at step 500
-      if (dynamic && k==500 && moving=="sphere") {
+      if (params.dynamic && k==500 && moving=="sphere") {
         sphere->setRadius(0.3);
       }
 
@@ -233,19 +255,33 @@ double ContactTest::bounceTest(std::string moving,
       // Update integrator and solve constraints
       simulation->computeOneStep();
 
-      if (trace)
-      printf("pos, %f, (%f, %f, %f, %f)\n", (*body->q())(2),
-             (*body->q())(3), (*body->q())(4),
-             (*body->q())(5), (*body->q())(6));
+      if (params.trace && k<3999) {
+        printf("pos, %f, (%f, %f, %f, %f)\n", (*body->q())(2),
+               (*body->q())(3), (*body->q())(4),
+               (*body->q())(5), (*body->q())(6));
+      }
+
+      double pos = (*body->q())(2);
+
+      // Standard deviation (cheating by not calculating mean!)
+      if (k==(3999-100))
+        final_pos = pos;
+      if (k>(3999-100)) {
+        std += (pos-final_pos)*(pos-final_pos);
+      }
 
       // Advance simulation
       simulation->nextStep();
       k++;
     }
 
-    printf(" (done, iterations=%d)\n", k - 1);
+    if (!params.trace)
+      printf("(done, iterations=%d)\n", k - 1);
 
-    return (*body->q())(2);
+    BounceResult r;
+    r.final_position =  (*body->q())(2);
+    r.final_position_std = sqrt(std/100);
+    return r;
 }
 
 void ContactTest::t2()
@@ -254,7 +290,17 @@ void ContactTest::t2()
   {
     printf("\n==== t2\n");
 
-    bounceTest("box", "plane", true, false, 1.0 /*size*/);
+    BounceParams p;
+    p.trace = true;
+    p.dynamic = false;
+    p.size = 0.1;
+    p.mass = 1.0;
+    p.margin = 0.1; // TODO
+
+    BounceResult r = bounceTest("box", "plane", p);
+
+    fprintf(stderr, "\nFinal position: %g  (std=%g)\n\n",
+            r.final_position, r.final_position_std);
   }
   catch (SiconosException e)
   {
@@ -271,34 +317,46 @@ void ContactTest::t3()
   {
     printf("\n==== t3\n");
 
-    double size = 0.3;
-    double mass = 1.0;
-    double margin = 0.1;
+    BounceParams params;
+    params.trace = false;
+    params.dynamic = false;
+    params.size = 0.1;
+    params.mass = 1.0;
+    params.margin = 0.1; // TODO
 
-    double results[2][3];
+    BounceResult results[2][3];
+    results[0][0] = bounceTest("sphere", "plane",  params);
+    results[1][0] = bounceTest("box",    "plane",  params);
+    results[0][1] = bounceTest("sphere", "sphere", params);
+    results[1][1] = bounceTest("box",    "sphere", params);
+    results[0][2] = bounceTest("sphere", "box",    params);
+    results[1][2] = bounceTest("box",    "box",    params);
 
-    results[0][0] = bounceTest("sphere", "plane", false, false,
-                               size, mass, margin);
-    results[1][0] = bounceTest("box", "plane", false, false,
-                               size, mass, margin);
-    results[0][1] = bounceTest("sphere", "sphere", false, false,
-                               size, mass, margin);
-    results[1][1] = bounceTest("box", "sphere", false, false,
-                               size, mass, margin);
-    results[0][2] = bounceTest("sphere", "box", false, false,
-                               size, mass, margin);
-    results[1][2] = bounceTest("box", "box", false, false,
-                               size, mass, margin);
-
-    printf("\n");
-    printf("Final resting positions:\n");
-    printf("\n");
-    printf("       | sphere | box   | plane\n");
-    printf("-------+-------+--------+------\n");
-    printf("sphere |%7.3f |%6.3f |%6.3f\n",
-           results[0][0], results[0][1], results[0][2]);
-    printf("box    |%7.3f |%6.3f |%6.3f\n",
-           results[1][0], results[1][1], results[1][2]);
+    // Report
+    printf("\nParams:\n\n");
+    params.dump();
+    printf("\nFinal resting positions:\n\n");
+    printf("       | sphere | box    | plane\n");
+    printf("-------+--------+--------+-------\n");
+    printf("sphere | %#6.3f | %#6.3f | %#6.3f\n",
+           results[0][0].final_position,
+           results[0][1].final_position,
+           results[0][2].final_position);
+    printf("box    | %#6.3f | %#6.3f | %#6.3f\n",
+           results[1][0].final_position,
+           results[1][1].final_position,
+           results[1][2].final_position);
+    printf("\nFinal resting position standard deviation:\n\n");
+    printf("       | sphere   | box      | plane\n");
+    printf("-------+----------+----------+---------\n");
+    printf("sphere | %#.2e | %#.2e | %#.2e\n",
+           results[0][0].final_position_std,
+           results[0][1].final_position_std,
+           results[0][2].final_position_std);
+    printf("box    | %#.2e | %#.2e | %#.2e\n",
+           results[1][0].final_position_std,
+           results[1][1].final_position_std,
+           results[1][2].final_position_std);
   }
   catch (SiconosException e)
   {
