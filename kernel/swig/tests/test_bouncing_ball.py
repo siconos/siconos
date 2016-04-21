@@ -234,7 +234,6 @@ def test_bouncing_ball2():
     OSI = K.MoreauJeanOSI(theta)
 
     OSI_d = K.MoreauJeanOSI(theta)
-    OSI_d.insertDynamicalSystem(ball_d)
 
     # (2) Time discretisation --
     t = K.TimeDiscretisation(t0, h)
