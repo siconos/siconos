@@ -421,7 +421,8 @@ def buildModelXML(xmlFile):
             _additionalInputsOSI(osixml, osi, dataOSI[osiType])
             print(osixml.DS_Concerned)
             for dsN in osixml.DS_Concerned:
-                osi.insertDynamicalSystem(allDS[dsN])
+                for ds in allDS[dsN]:
+                    model.nonSmoothDynamicalSyste().topology().setOSI(ds, osi)
             sim.insertIntegrator(osi)
             allOSI.append(osi)
 
