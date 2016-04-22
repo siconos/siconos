@@ -297,15 +297,18 @@ void EventDriven::initOSIs()
     if ((*itosi)->getType() == OSI::NEWMARKALPHAOSI)
     {
       SP::NewMarkAlphaOSI osi_NewMark =  std11::static_pointer_cast<NewMarkAlphaOSI>(*itosi);
-      for (DSIterator itds = (*itosi)->dynamicalSystems()->begin();
-           itds != (*itosi)->dynamicalSystems()->end(); ++itds)
+      DynamicalSystemsGraph::VIterator dsi, dsend;
+      SP::DynamicalSystemsGraph osiDSGraph = (*itosi)->dynamicalSystemsGraph();
+      for (std11::tie(dsi, dsend) = osiDSGraph->vertices(); dsi != dsend; ++dsi)
       {
-        if ((Type::value(**itds) == Type::LagrangianDS) || (Type::value(**itds) == Type::LagrangianLinearTIDS))
+        if (!(*itosi)->checkOSI(dsi)) continue;
+        SP::DynamicalSystem ds = osiDSGraph->bundle(*dsi);
+        if ((Type::value(*ds) == Type::LagrangianDS) || (Type::value(*ds) == Type::LagrangianLinearTIDS))
         {
-          SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS>(*itds);
+          SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS>(ds);
           *(d->workspace(DynamicalSystem::acce_like)) = *(d->acceleration()); // set a0 = ddotq0
           // Allocate the memory to stock coefficients of the polynomial for the dense output
-          d->allocateWorkMatrix(LagrangianDS::coeffs_denseoutput, (*itds)->getDim(), (osi_NewMark->getOrderDenseOutput() + 1));
+          d->allocateWorkMatrix(LagrangianDS::coeffs_denseoutput, ds->getDim(), (osi_NewMark->getOrderDenseOutput() + 1));
         }
       }
     }
@@ -321,11 +324,17 @@ void EventDriven::initOSIRhs()
     //Check whether OSIs used are of the same type
     if ((*itosi)->getType() != osiType)
       RuntimeException::selfThrow("OSIs used must be of the same type");
-    for (DSIterator itds = (*itosi)->dynamicalSystems()->begin();
-         itds != (*itosi)->dynamicalSystems()->end(); ++itds)
+
+    // perform the initialization
+    DynamicalSystemsGraph::VIterator dsi, dsend;
+    SP::DynamicalSystemsGraph osiDSGraph = (*itosi)->dynamicalSystemsGraph();
+    for (std11::tie(dsi, dsend) = osiDSGraph->vertices(); dsi != dsend; ++dsi)
     {
+      if (!(*itosi)->checkOSI(dsi)) continue;
+
+      SP::DynamicalSystem ds = osiDSGraph->bundle(*dsi);
       // Initialize right-hand side
-      (*itds)->initRhs(model()->t0());
+      ds->initRhs(model()->t0());
     }
   }
 }
@@ -383,11 +392,15 @@ void EventDriven::computef(OneStepIntegrator& osi, integer * sizeOfX, doublereal
   // Update Index sets? No !!
 
   // Get the required value, ie xdot for output.
-  DSIterator it;
   unsigned pos = 0;
-  for (it = lsodar.dynamicalSystemsBegin(); it != lsodar.dynamicalSystemsEnd(); ++it)
+
+  DynamicalSystemsGraph::VIterator dsi, dsend;
+  SP::DynamicalSystemsGraph osiDSGraph = lsodar.dynamicalSystemsGraph();
+  for (std11::tie(dsi, dsend) = osiDSGraph->vertices(); dsi != dsend; ++dsi)
   {
-    DynamicalSystem& ds = **it;
+    if (!(lsodar.checkOSI(dsi))) continue;
+
+    DynamicalSystem& ds = *(osiDSGraph->bundle(*dsi));
     Type::Siconos dsType = Type::value(ds);
     if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
     {
@@ -436,9 +449,13 @@ void EventDriven::computeJacobianfx(OneStepIntegrator& osi,
 
   unsigned int i = 0;
   unsigned pos = 0;
-  for (DSIterator it = lsodar.dynamicalSystemsBegin(); it != lsodar.dynamicalSystemsEnd(); ++it)
+  DynamicalSystemsGraph::VIterator dsi, dsend;
+  SP::DynamicalSystemsGraph osiDSGraph = lsodar.dynamicalSystemsGraph();
+  for (std11::tie(dsi, dsend) = osiDSGraph->vertices(); dsi != dsend; ++dsi)
   {
-    DynamicalSystem& ds = **it;
+    if (!(lsodar.checkOSI(dsi))) continue;
+
+    DynamicalSystem& ds = *(osiDSGraph->bundle(*dsi));
     Type::Siconos dsType = Type::value(ds);
     if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
     {

@@ -167,9 +167,12 @@ void LsodarOSI::fillXWork(integer* sizeOfX, doublereal* x)
 
 void LsodarOSI::computeRhs(double t, DynamicalSystemsGraph& DSG0)
 {
-  for (DSIterator it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
+
+  DynamicalSystemsGraph::VIterator dsi, dsend;
+  for (std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
   {
-    SP::DynamicalSystem& ds = *it;
+    if (!checkOSI(dsi)) continue;
+    SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
     ds->computeRhs(t);
     if (_extraAdditionalTerms)
     {
@@ -181,9 +184,12 @@ void LsodarOSI::computeRhs(double t, DynamicalSystemsGraph& DSG0)
 
 void LsodarOSI::computeJacobianRhs(double t, DynamicalSystemsGraph& DSG0)
 {
-  for (DSIterator it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
+
+  DynamicalSystemsGraph::VIterator dsi, dsend;
+  for (std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
   {
-    SP::DynamicalSystem& ds = *it;
+    if (!checkOSI(dsi)) continue;
+    SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
     ds->computeJacobianRhsx(t);
     if (_extraAdditionalTerms)
     {
@@ -215,17 +221,21 @@ void LsodarOSI::initialize()
   DSIterator itDS;
   std::string type;
   // initialize xWork with x values of the dynamical systems present in the set.
-  for (itDS = OSIDynamicalSystems->begin(); itDS != OSIDynamicalSystems->end(); ++itDS)
+
+  DynamicalSystemsGraph::VIterator dsi, dsend;
+  for (std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
   {
-    if (Type::value(**itDS) == Type::LagrangianDS ||
-        Type::value(**itDS) == Type::LagrangianLinearTIDS)
+    if (!checkOSI(dsi)) continue;
+    SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
+    if (Type::value(*ds) == Type::LagrangianDS ||
+        Type::value(*ds) == Type::LagrangianLinearTIDS)
     {
-      LagrangianDS& LDS = *std11::static_pointer_cast<LagrangianDS>(*itDS);
+      LagrangianDS& LDS = *std11::static_pointer_cast<LagrangianDS>(ds);
       _xWork->insertPtr(LDS.q());
       _xWork->insertPtr(LDS.velocity());
     }
     else
-      _xWork->insertPtr((*itDS)->x());
+      _xWork->insertPtr(ds->x());
   }
   //   Integer parameters for LSODAROSI are saved in vector intParam.
   //   The link with variable names in opkdmain.f is indicated in comments
@@ -397,21 +407,28 @@ void LsodarOSI::integrate(double& tinit, double& tend, double& tout, int& istate
 void LsodarOSI::updateState(const unsigned int level)
 {
   // Compute all required (ie time-dependent) data for the DS of the OSI.
-  DSIterator it;
 
+  DynamicalSystemsGraph::VIterator dsi, dsend;
   if (level == 1) // ie impact case: compute velocity
   {
-    for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
+    for (std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
     {
-      SP::LagrangianDS lds = std11::static_pointer_cast<LagrangianDS>(*it);
+      if (!checkOSI(dsi)) continue;
+      SP::LagrangianDS lds = std11::static_pointer_cast<LagrangianDS>(_dynamicalSystemsGraph->bundle(*dsi));
       lds->computePostImpactVelocity();
     }
   }
   else if (level == 2)
   {
     double time = _simulation->model()->currentTime();
-    for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
-      (*it)->update(time);
+    for (std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
+    {
+      if (!checkOSI(dsi)) continue;
+      {
+        SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
+        ds->update(time);
+      }
+    }
   }
   else RuntimeException::selfThrow("LsodarOSI::updateState(index), index is out of range. Index = " + level);
 }
