@@ -1,8 +1,8 @@
-set  term X11
-set term post
-set output "result.ps"
-resultfile = "resultTwoConED.dat"
-#resultfile = "BouncingBallTwoConED.ref"
+set term X11
+set term pdf
+set output "BouncingBallTwoContactsED.pdf"
+resultfile = "BouncingBallTwoContactsED.dat"
+#resultfile = "BouncingBallTwoContactsED.ref"
 plot \
 resultfile u 1:2 every ::1 t "Ball position" w l,\
 resultfile u 1:3 every ::1 t "Ball Velocity" w l,\

@@ -236,12 +236,12 @@ int main(int argc, char* argv[])
     cout << "Number of nonsmooth events = " << ll << endl;
     cout << "====> Output file writing ..." << endl << endl;
     dataPlot.resize(k, outputSize);
-    ioMatrix::write("resultTwoConED.dat", "ascii", dataPlot, "noDim");
+    ioMatrix::write("BouncingBallTwoContactsED.dat", "ascii", dataPlot, "noDim");
 
     // Comparison with a reference file
     SimpleMatrix dataPlotRef(dataPlot);
     dataPlotRef.zero();
-    ioMatrix::read("BouncingBallTwoConED.ref", "ascii", dataPlotRef);
+    ioMatrix::read("BouncingBallTwoContactsED.cpp", "ascii", dataPlotRef);
 
     std:: cout << " Error ="<< (dataPlot - dataPlotRef).normInf() << std::endl;
 
