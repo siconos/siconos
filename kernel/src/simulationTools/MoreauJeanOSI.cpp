@@ -167,11 +167,12 @@ void MoreauJeanOSI::initialize()
   DynamicalSystemsGraph::VIterator dsi, dsend;
   for (std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
   {
+    if (!checkOSI(dsi)) continue;
     // Memory allocation for workX. workX[ds*] corresponds to xfree (or vfree in lagrangian case).
     // workX[*itDS].reset(new SiconosVector((*itDS)->getDim()));
 
     SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
-    if (!checkOSI(dsi)) continue;
+
     // W initialization
     initW(t0, ds);
     Type::Siconos dsType = Type::value(*ds);

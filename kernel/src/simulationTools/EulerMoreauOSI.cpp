@@ -76,7 +76,7 @@ void EulerMoreauOSI::setW(const SiconosMatrix& newValue, SP::DynamicalSystem ds)
 {
   // Check if ds is in the OSI
   if (!(checkOSI(_dynamicalSystemsGraph->descriptor(ds))))
-    RuntimeException::selfThrow("MoreauJeanOSI::initW(t,ds) - ds does not belong to the OSI.");
+    RuntimeException::selfThrow("EulerMoreauOSI::initW(t,ds) - ds does not belong to the OSI.");
 
 
   // Check dimensions consistency
@@ -173,7 +173,7 @@ void EulerMoreauOSI::initW(double t, SP::DynamicalSystem ds)
     RuntimeException::selfThrow("EulerMoreauOSI::initW(t,ds) - ds == NULL");
 
   if (!(checkOSI(_dynamicalSystemsGraph->descriptor(ds))))
-    RuntimeException::selfThrow("MoreauJeanOSI::initW(t,ds) - ds does not belong to the OSI.");
+    RuntimeException::selfThrow("EulerMoreauOSI::initW(t,ds) - ds does not belong to the OSI.");
 
   unsigned int dsN = ds->number();
   if (WMap.find(dsN) != WMap.end())
@@ -244,7 +244,7 @@ void EulerMoreauOSI::initWBoundaryConditions(SP::DynamicalSystem ds)
     RuntimeException::selfThrow("EulerMoreauOSI::initWBoundaryConditions(t,ds) - ds == NULL");
 
   if (!(checkOSI(_dynamicalSystemsGraph->descriptor(ds))))
-    RuntimeException::selfThrow("MoreauJeanOSI::initW(t,ds) - ds does not belong to the OSI.");
+    RuntimeException::selfThrow("EulerMoreauOSI::initW(t,ds) - ds does not belong to the OSI.");
 
   Type::Siconos dsType = Type::value(*ds);
 

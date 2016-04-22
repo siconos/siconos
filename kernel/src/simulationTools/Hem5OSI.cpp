@@ -249,16 +249,24 @@ void Hem5OSI::fillvWork(integer* NV, doublereal* v)
 
 void Hem5OSI::computeRhs(double t)
 {
-  DSIterator it;
-  for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
-    (*it)->computeRhs(t);
+  DynamicalSystemsGraph::VIterator dsi, dsend;
+  for (std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
+  {
+    if (!checkOSI(dsi)) continue;
+    SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
+    ds->computeRhs(t);
+  }
 }
 
 void Hem5OSI::computeJacobianRhs(double t)
 {
-  DSIterator it;
-  for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
-    (*it)->computeJacobianRhsx(t);
+  DynamicalSystemsGraph::VIterator dsi, dsend;
+  for (std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
+  {
+    if (!checkOSI(dsi)) continue;
+    SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
+    ds->computeJacobianRhsx(t);
+  }
 }
 
 void Hem5OSI::fprob(integer* IFCN,
@@ -287,7 +295,7 @@ void Hem5OSI::fprob(integer* IFCN,
   double t = *time;
   _simulation->model()->setCurrentTime(t);
 
-  SP::DynamicalSystemsGraph dsGraph = _simulation->model()->nonSmoothDynamicalSystem()->dynamicalSystems();
+  SP::DynamicalSystemsGraph dsGraph =  _dynamicalSystemsGraph;
 
 
 
@@ -466,7 +474,7 @@ void Hem5OSI::initialize()
   _forcesWork.reset(new BlockVector());
 
   // initialize xxxWork with xxx values of the dynamical systems present in the set.
-  SP::DynamicalSystemsGraph dsGraph = _simulation->model()->nonSmoothDynamicalSystem()->dynamicalSystems();
+  SP::DynamicalSystemsGraph dsGraph = _dynamicalSystemsGraph;
 
   for (DynamicalSystemsGraph::VIterator vi = dsGraph->begin(); vi != dsGraph->end(); ++vi)
   {
@@ -763,21 +771,27 @@ void Hem5OSI::integrate(double& tinit, double& tend, double& tout, int& idid)
 void Hem5OSI::updateState(const unsigned int level)
 {
   // Compute all required (ie time-dependent) data for the DS of the OSI.
-  DSIterator it;
-
+  DynamicalSystemsGraph::VIterator dsi, dsend;
   if (level == 1) // ie impact case: compute velocity
   {
-    for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
+    for (std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
     {
-      SP::LagrangianDS lds = std11::static_pointer_cast<LagrangianDS>(*it);
+      if (!checkOSI(dsi)) continue;
+      SP::LagrangianDS lds = std11::static_pointer_cast<LagrangianDS>(_dynamicalSystemsGraph->bundle(*dsi));
       lds->computePostImpactVelocity();
     }
   }
   else if (level == 2)
   {
     double time = _simulation->model()->currentTime();
-    for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
-      (*it)->update(time);
+    for (std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
+    {
+      if (!checkOSI(dsi)) continue;
+      {
+        SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
+        ds->update(time);
+      }
+    }
   }
   else RuntimeException::selfThrow("Hem5OSI::updateState(index), index is out of range. Index = " + level);
 }

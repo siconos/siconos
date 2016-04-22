@@ -72,9 +72,10 @@ SP::SimpleMatrix SchatzmanPaoliOSI::W(SP::DynamicalSystem ds)
 
 void SchatzmanPaoliOSI::setW(const SiconosMatrix& newValue, SP::DynamicalSystem ds)
 {
+ 
   // Check if ds is in the OSI
-  if (!OSIDynamicalSystems->isIn(ds))
-    RuntimeException::selfThrow("SchatzmanPaoliOSI::setW(newVal,ds) - ds does not belong to this Integrator ...");
+  if (!(checkOSI(_dynamicalSystemsGraph->descriptor(ds))))
+    RuntimeException::selfThrow("SchatzmanPaoliOSI::initW(t,ds) - ds does not belong to the OSI.");
 
   // Check dimensions consistency
   unsigned int line = newValue.size(0);
@@ -150,14 +151,16 @@ void SchatzmanPaoliOSI::initialize()
   // Get initial time
   double t0 = _simulation->model()->t0();
   // Compute W(t0) for all ds
-  ConstDSIterator itDS;
-  for (itDS = OSIDynamicalSystems->begin(); itDS != OSIDynamicalSystems->end(); ++itDS)
+  DynamicalSystemsGraph::VIterator dsi, dsend;
+  for (std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
   {
-    Type::Siconos dsType = Type::value(*(*itDS));
+    if (!checkOSI(dsi)) continue;
+    SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
+    Type::Siconos dsType = Type::value(*ds);
     if (dsType == Type::LagrangianLinearTIDS)
     {
       // Computation of the first step for starting
-      SP::LagrangianLinearTIDS d = std11::static_pointer_cast<LagrangianLinearTIDS> (*itDS);
+      SP::LagrangianLinearTIDS d = std11::static_pointer_cast<LagrangianLinearTIDS> (ds);
 
       SP::SiconosVector q0  = d->q0();
       SP::SiconosVector q  = d->q();
@@ -198,10 +201,10 @@ void SchatzmanPaoliOSI::initialize()
     // workX[*itDS].reset(new SiconosVector((*itDS)->getDim()));
 
     // W initialization
-    initW(t0, *itDS);
+    initW(t0, ds);
 
     //      if ((*itDS)->getType() == Type::LagrangianDS || (*itDS)->getType() == Type::FirstOrderNonLinearDS)
-    (*itDS)->allocateWorkVector(DynamicalSystem::local_buffer, WMap[(*itDS)->number()]->size(0));
+    ds->allocateWorkVector(DynamicalSystem::local_buffer, WMap[ds->number()]->size(0));
   }
 }
 void SchatzmanPaoliOSI::initW(double t, SP::DynamicalSystem ds)
@@ -213,7 +216,7 @@ void SchatzmanPaoliOSI::initW(double t, SP::DynamicalSystem ds)
   if (!ds)
     RuntimeException::selfThrow("SchatzmanPaoliOSI::initW(t,ds) - ds == NULL");
 
-  if (!OSIDynamicalSystems->isIn(ds))
+  if (!(checkOSI(_dynamicalSystemsGraph->descriptor(ds))))
     RuntimeException::selfThrow("SchatzmanPaoliOSI::initW(t,ds) - ds does not belong to the OSI.");
 
   unsigned int dsN = ds->number();
@@ -297,7 +300,7 @@ void SchatzmanPaoliOSI::initWBoundaryConditions(SP::DynamicalSystem ds)
   if (!ds)
     RuntimeException::selfThrow("SchatzmanPaoliOSI::initWBoundaryConditions(t,ds) - ds == NULL");
 
-  if (!OSIDynamicalSystems->isIn(ds))
+  if (!(checkOSI(_dynamicalSystemsGraph->descriptor(ds))))
     RuntimeException::selfThrow("SchatzmanPaoliOSI::initWBoundaryConditions(t,ds) - ds does not belong to the OSI.");
 
   Type::Siconos dsType = Type::value(*ds);
@@ -479,9 +482,11 @@ double SchatzmanPaoliOSI::computeResidu()
   double maxResidu = 0;
   double normResidu = maxResidu;
 
-  for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
+  DynamicalSystemsGraph::VIterator dsi, dsend;
+  for (std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
   {
-    ds = *it; // the considered dynamical system
+    if (!checkOSI(dsi)) continue;
+    SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
     dsType = Type::value(*ds); // Its type
     SP::SiconosVector residuFree = ds->workspace(DynamicalSystem::freeresidu);
 
@@ -749,9 +754,13 @@ void SchatzmanPaoliOSI::computeFreeState()
   SP::DynamicalSystem ds; // Current Dynamical System.
   SP::SiconosMatrix W; // W SchatzmanPaoliOSI matrix of the current DS.
   Type::Siconos dsType ; // Type of the current DS.
-  for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
+
+  DynamicalSystemsGraph::VIterator dsi, dsend;
+  for (std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
   {
-    ds = *it; // the considered dynamical system
+    if (!checkOSI(dsi)) continue;
+
+    ds = _dynamicalSystemsGraph->bundle(*dsi);
     dsType = Type::value(*ds); // Its type
     W = WMap[ds->number()]; // Its W SchatzmanPaoliOSI matrix of iteration.
 
@@ -888,10 +897,12 @@ void SchatzmanPaoliOSI::computeFreeState()
 
 void SchatzmanPaoliOSI::prepareNewtonIteration(double time)
 {
-  ConstDSIterator itDS;
-  for (itDS = OSIDynamicalSystems->begin(); itDS != OSIDynamicalSystems->end(); ++itDS)
+  DynamicalSystemsGraph::VIterator dsi, dsend;
+  for (std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
   {
-    computeW(time, *itDS);
+    if (!checkOSI(dsi)) continue;
+    SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
+    computeW(time, ds);
   }
 }
 
@@ -1068,11 +1079,14 @@ void SchatzmanPaoliOSI::updateState(const unsigned int level)
   if (useRCC)
     _simulation->setRelativeConvergenceCriterionHeld(true);
 
-  DSIterator it;
   SP::SiconosMatrix W;
-  for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
+  SP::DynamicalSystem ds;
+  DynamicalSystemsGraph::VIterator dsi, dsend;
+  for (std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
   {
-    SP::DynamicalSystem ds = *it;
+    if (!checkOSI(dsi)) continue;
+    ds = _dynamicalSystemsGraph->bundle(*dsi);
+
     W = WMap[ds->number()];
     // Get the DS type
 
@@ -1232,12 +1246,15 @@ void SchatzmanPaoliOSI::display()
   OneStepIntegrator::display();
 
   std::cout << "====== SchatzmanPaoliOSI OSI display ======" <<std::endl;
-  DSIterator it;
-  for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
+
+  DynamicalSystemsGraph::VIterator dsi, dsend;
+  for (std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
   {
+    if (!checkOSI(dsi)) continue;
+    SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
     std::cout << "--------------------------------" <<std::endl;
-    std::cout << "--> W of dynamical system number " << (*it)->number() << ": " <<std::endl;
-    if (WMap[(*it)->number()]) WMap[(*it)->number()]->display();
+    std::cout << "--> W of dynamical system number " << ds->number() << ": " <<std::endl;
+    if (WMap[ds->number()]) WMap[ds->number()]->display();
     else std::cout << "-> NULL" <<std::endl;
     std::cout << "--> and corresponding theta is: " << _theta <<std::endl;
   }
