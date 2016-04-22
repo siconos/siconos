@@ -138,6 +138,14 @@ public:
   };
 
 /** get the set of DynamicalSystem associated with the Integrator
+ *  \return a SP::DynamicalSystemsGraph
+ */
+  inline SP::DynamicalSystemsGraph dynamicalSystemsGraph() const
+  {
+    return _dynamicalSystemsGraph;
+  };
+
+/** get the set of DynamicalSystem associated with the Integrator
  *  \return a DynamicalSystemsSet
  */
   inline SP::DynamicalSystemsSet dynamicalSystems() const
