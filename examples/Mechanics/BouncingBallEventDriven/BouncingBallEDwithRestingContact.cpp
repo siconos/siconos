@@ -199,11 +199,11 @@ int main(int argc, char* argv[])
     SimpleMatrix dataPlotRef(dataPlot);
     dataPlotRef.zero();
     ioMatrix::read("BouncingBallEDwithRestingContact.ref", "ascii", dataPlotRef);
-
+    std::cout << "error = " << (dataPlot - dataPlotRef).normInf() << std::endl;
     if ((dataPlot - dataPlotRef).normInf() > 1e-3)
     {
       std::cout << "Warning. The results is rather different from the reference file." << std::endl;
-      std::cout << "error = " << (dataPlot - dataPlotRef).normInf() << std::endl;
+
       return 1;
     }
 
