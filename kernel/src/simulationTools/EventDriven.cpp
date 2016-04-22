@@ -518,9 +518,9 @@ void EventDriven::computeg(SP::OneStepIntegrator osi,
      free(xdottmp);
      */
   // Update the output from level 0 to level 1
-  model()->nonSmoothDynamicalSystem()->updateOutput(0);
-  model()->nonSmoothDynamicalSystem()->updateOutput(1);
-  model()->nonSmoothDynamicalSystem()->updateOutput(2);
+  model()->nonSmoothDynamicalSystem()->updateOutput(t,0);
+  model()->nonSmoothDynamicalSystem()->updateOutput(t,1);
+  model()->nonSmoothDynamicalSystem()->updateOutput(t,2);
   //
   for (std11::tie(ui, uiend) = _indexSet0->vertices(); ui != uiend; ++ui)
   {
