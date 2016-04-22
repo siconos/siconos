@@ -201,8 +201,6 @@ SICONOS_IO_REGISTER_WITH_BASES(LinearSensor,(ControlSensor),
   (_nSteps))
 SICONOS_IO_REGISTER_WITH_BASES(PrismaticJointR,(NewtonEulerR),
   (_axis0)
-  (_d1)
-  (_d2)
   (_V1)
   (_V2)
   (_V1x)
@@ -239,8 +237,6 @@ SICONOS_IO_REGISTER(Topology,
   (_symmetric))
 SICONOS_IO_REGISTER_WITH_BASES(KneeJointR,(NewtonEulerR),
   (_P0)
-  (_d1)
-  (_d2)
   (_G1P0x)
   (_G1P0y)
   (_G1P0z)
