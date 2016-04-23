@@ -1,6 +1,6 @@
 set autoscale
 #set term X11
-#set term pdf monochrome dashed
+set term pdf monochrome dashed
 
 l=1;
 L=1.5;
@@ -12,8 +12,8 @@ set xlabel 'time (s)'
 set grid 
 
 #scheme =  "Moreau"
-#scheme  = "Moreau-ProjectOnConstraints"
-scheme = "Moreau-CombinedProjection"
+scheme  = "Moreau-ProjectOnConstraints"
+#scheme = "Moreau-CombinedProjection"
 scheme = "D1MinusLinear"
 
 timestep= "1e-5"
