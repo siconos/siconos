@@ -79,6 +79,12 @@ class CiTask():
                                           'docker-make-install'],
                                     'examples': ['docker-build', 'docker-ctest']})
 
+            else:
+                if 'examples' in srcs:
+                    srcs.remove('examples')
+                if 'examples' in targets:
+                    targets.pop('examples')
+
             return CiTask(mode, build_configuration, distrib, ci_config, fast,
                           pkgs, srcs, targets, cmake_cmd)
         return init

@@ -77,6 +77,7 @@ siconos_clang_asan = siconos_clang.copy()(
 # <clang-3.7.1 does not support linux 4.2
 # This will likely hurt you
 siconos_clang_msan = siconos_default.copy()(
+    with_examples=False,
     distrib='debian:jessie',
     ci_config='with_msan',
     build_configuration='Debug',
