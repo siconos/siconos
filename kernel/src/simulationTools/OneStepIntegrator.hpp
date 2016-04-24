@@ -68,9 +68,6 @@ protected:
 /** type/name of the Integrator */
   OSI::TYPES _integratorType;
 
-/** a set of DynamicalSystem to integrate */
-  SP::DynamicalSystemsSet OSIDynamicalSystems;
-
 /** a graph of dynamical to integrate */
   SP::DynamicalSystemsGraph _dynamicalSystemsGraph; 
 
@@ -145,51 +142,6 @@ public:
     return _dynamicalSystemsGraph;
   };
 
-/** get the set of DynamicalSystem associated with the Integrator
- *  \return a DynamicalSystemsSet
- */
-  inline SP::DynamicalSystemsSet dynamicalSystems() const
-  {
-    std::cout << "call to dynamicalSystems()" << std::endl;
-    return OSIDynamicalSystems;
-  };
-
-/** gets an iterator to the first element of the OSIDynamicalSystems set.
- *  \return a DSIterator.
- */
-  inline DSIterator dynamicalSystemsBegin()
-  {
-    std::cout << "call to dynamicalSystemsBegin()" << std::endl;
-    return OSIDynamicalSystems->begin();
-  };
-
-/** gets an iterator equal to OSIDynamicalSystems->end().
- *  \return a DSIterator.
- */
-  inline DSIterator dynamicalSystemsEnd()
-  {
-    std::cout << "call to dynamicalSystemsEnd()" << std::endl;
-    return OSIDynamicalSystems->end();
-  };
-
-/** gets a const iterator to the first element of the OSIDynamicalSystems set.
- *  \return a ConstDSIterator.
- */
-  inline ConstDSIterator dynamicalSystemsBegin() const
-  {
-    std::cout << "call to dynamicalSystemsBegin()" << std::endl;
-    return OSIDynamicalSystems->begin();
-  };
-
-/** gets a const iterator equal to OSIDynamicalSystems->end().
- *  \return a ConstDSIterator.
- */
-  inline ConstDSIterator dynamicalSystemsEnd() const
-  {
-    std::cout << "call to dynamicalSystemsEnd()" << std::endl;
-    return OSIDynamicalSystems->end();
-  };
-
 /** get _sizeMem value
  *  \return an unsigned int
  */
@@ -228,9 +180,6 @@ public:
    */
   virtual void initialize() = 0;
 
-  /** Save Dynamical Systems data into memory.
-   */
-  void saveInMemory();
 
   /** compute the initial state of the Newton loop.
    */

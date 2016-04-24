@@ -105,18 +105,22 @@ void D1MinusLinearOSI::initialize()
   DEBUG_BEGIN("D1MinusLinearOSI::initialize() \n");
 
   OneStepIntegrator::initialize();
-  
-  for (DSIterator it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
+
+  DynamicalSystemsGraph::VIterator dsi, dsend;
+  for (std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
   {
-    Type::Siconos dsType = Type::value(**it);
+    if (!checkOSI(dsi)) continue;
+
+    SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
+    Type::Siconos dsType = Type::value(*ds);
     if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
     {
-      SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (*it);
+      SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
       d->computeMass();
     }
     else if (dsType == Type::NewtonEulerDS)
     {
-      //SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS> (*it);
+      //SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS> (ds);
     }
     else
       RuntimeException::selfThrow("D1MinusLinearOSI::initialize - not implemented for Dynamical system type: " + dsType);
@@ -206,17 +210,18 @@ double D1MinusLinearOSI::computeResidu()
 void D1MinusLinearOSI::computeFreeState()
 {
   DEBUG_BEGIN("D1MinusLinearOSI::computeFreeState()\n");
-
-
-  for (DSIterator it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
+  DynamicalSystemsGraph::VIterator dsi, dsend;
+  for (std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
   {
-    // type of the current DS
-    Type::Siconos dsType = Type::value(**it);
+    if (!checkOSI(dsi)) continue;
+    SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
+
+    Type::Siconos dsType = Type::value(*ds);
     /* \warning the following conditional statement should be removed with a MechanicalDS class */
     if ((dsType == Type::LagrangianDS) || (dsType == Type::LagrangianLinearTIDS))
     {
       // Lagrangian Systems
-      SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (*it);
+      SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
 
       // get left state from memory
       SP::SiconosVector vold = d->velocityMemory()->getSiconosVector(0); // right limit
@@ -239,7 +244,7 @@ void D1MinusLinearOSI::computeFreeState()
     else if (dsType == Type::NewtonEulerDS)
     {
       // NewtonEuler Systems
-      SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS> (*it);
+      SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS> (ds);
 
       // get left state from memory
       SP::SiconosVector vold = d->velocityMemory()->getSiconosVector(0); // right limit
@@ -273,16 +278,20 @@ void D1MinusLinearOSI::updateState(const unsigned int level)
   DEBUG_BEGIN("D1MinusLinearOSI::updateState(const unsigned int level)\n");
   DEBUG_PRINTF("with level  = %i\n",level);
 
-  for (DSIterator it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
+  DynamicalSystemsGraph::VIterator dsi, dsend;
+  for (std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
   {
-    // type of the current DS
-    Type::Siconos dsType = Type::value(**it);
+    if (!checkOSI(dsi)) continue;
+
+    SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
+
+    Type::Siconos dsType = Type::value(*ds);
 
     /* \warning the following conditional statement should be removed with a MechanicalDS class */
     /* Lagrangian DS*/
     if ((dsType == Type::LagrangianDS) || (dsType == Type::LagrangianLinearTIDS))
     {
-      SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (*it);
+      SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
       SP::SiconosMatrix M = d->mass();
       SP::SiconosVector v = d->velocity();
 
@@ -309,7 +318,7 @@ void D1MinusLinearOSI::updateState(const unsigned int level)
     /*  NewtonEuler Systems */
     else if (dsType == Type::NewtonEulerDS)
     {
-      SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS> (*it);
+      SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS> (ds);
       SP::SiconosMatrix M(new SimpleMatrix(*(d->mass()))); // we copy the mass matrix to avoid its factorization;
       SP::SiconosVector v = d->velocity(); // POINTER CONSTRUCTOR : contains new velocity
       if (d->p(1))

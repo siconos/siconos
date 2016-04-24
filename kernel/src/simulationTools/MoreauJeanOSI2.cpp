@@ -61,9 +61,13 @@ void MoreauJeanOSI2::computeFreeState()
   SP::SiconosMatrix  W; // W MoreauJeanOSI matrix of the current DS.
   SP::SiconosMatrix  M; // W MoreauJeanOSI matrix of the current DS.
   Type::Siconos dsType ; // Type of the current DS.
-  for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
+
+  DynamicalSystemsGraph::VIterator dsi, dsend;
+  for (std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
   {
-    ds = *it; // the considered dynamical system
+    if (!checkOSI(dsi)) continue;
+
+    SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
     dsType = Type::value(*ds); // Its type
     W = WMap[ds->number()]; // Its W MoreauJeanOSI matrix of iteration.
 

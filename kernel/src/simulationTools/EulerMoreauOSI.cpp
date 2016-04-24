@@ -871,11 +871,13 @@ void EulerMoreauOSI::integrate(double& tinit, double& tend, double& tout, int&)
   //double h = tend - tinit;
   tout = tend;
 
-  DSIterator it;
+
   SP::SiconosMatrix W;
-  for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
+  DynamicalSystemsGraph::VIterator dsi, dsend;
+  for (std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
   {
-    SP::DynamicalSystem ds = *it;
+    if (!checkOSI(dsi)) continue;
+    SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
     W = WMap[ds->number()];
     Type::Siconos dsType = Type::value(*ds);
     RuntimeException::selfThrow("EulerMoreauOSI::integrate - not yet implemented for Dynamical system type :" + dsType);

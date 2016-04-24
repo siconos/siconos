@@ -30,19 +30,21 @@ void MoreauJeanCombinedProjectionOSI::initialize()
 {
 
   MoreauJeanOSI::initialize();
-
-  ConstDSIterator itDS;
-  for (itDS = OSIDynamicalSystems->begin(); itDS != OSIDynamicalSystems->end(); ++itDS)
+  DynamicalSystemsGraph::VIterator dsi, dsend;
+  for (std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
   {
-    Type::Siconos dsType = Type::value(**itDS);
+    if (!checkOSI(dsi)) continue;
+    SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
+    Type::Siconos dsType = Type::value(*ds);
+
     if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
     {
-      SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (*itDS);
+      SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
       d->allocateWorkVector(DynamicalSystem::qtmp, d->getNdof());
     }
     else if (dsType == Type::NewtonEulerDS)
     {
-      SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS>(*itDS);
+      SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS>(ds);
       d->allocateWorkVector(DynamicalSystem::qtmp, d->q()->size());
     }
     else

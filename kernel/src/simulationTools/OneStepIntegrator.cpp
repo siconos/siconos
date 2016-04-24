@@ -38,7 +38,6 @@ using namespace std::placeholders;
 OneStepIntegrator::OneStepIntegrator(const OSI::TYPES& id):
   _integratorType(id), _sizeMem(1)
 {
-  OSIDynamicalSystems.reset(new DynamicalSystemsSet());
 }
 
 void OneStepIntegrator::initialize()
@@ -51,28 +50,6 @@ void OneStepIntegrator::initialize()
 
   // a subgraph has to be implemented.
   _dynamicalSystemsGraph = _simulation->model()->nonSmoothDynamicalSystem()->topology()->dSG(0);
-  
-  // Temporary build of the dynamicalystems set
-  DynamicalSystemsGraph::VIterator dsi, dsend;
-  SP::DynamicalSystemsGraph DSG = _simulation->model()->nonSmoothDynamicalSystem()->topology()->dSG(0);
-  for (std11::tie(dsi, dsend) = DSG->vertices(); dsi != dsend; ++dsi)
-  {
-    SP::OneStepIntegrator osi = DSG->osi[*dsi];
-    SP::DynamicalSystem ds = DSG->bundle(*dsi);
-      if (!osi)
-      {
-       RuntimeException::selfThrow("ds is linked with an osi");
-      }
-      else
-      {
-        OSIDynamicalSystems->insert(ds);
-      }
-    }
-}
-
-void OneStepIntegrator::saveInMemory()
-{
-  std::for_each(OSIDynamicalSystems->begin(), OSIDynamicalSystems->end(), std11::bind(&DynamicalSystem::swapInMemory, _1));
 }
 
 void OneStepIntegrator::computeInitialNewtonState()
@@ -98,12 +75,24 @@ void OneStepIntegrator::computeFreeOutput(InteractionsGraph::VDescriptor& vertex
 
 void OneStepIntegrator::resetNonSmoothPart()
 {
-  std::for_each(OSIDynamicalSystems->begin(), OSIDynamicalSystems->end(), std11::bind(&DynamicalSystem::resetAllNonSmoothPart, _1));
+ DynamicalSystemsGraph::VIterator dsi, dsend;
+  for (std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
+  {
+    if (!checkOSI(dsi)) continue;
+    SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
+    ds->resetNonSmoothPart(0);
+  }
 }
 
 void OneStepIntegrator::resetNonSmoothPart(unsigned int level)
 {
-  std::for_each(OSIDynamicalSystems->begin(), OSIDynamicalSystems->end(), std11::bind(&DynamicalSystem::resetNonSmoothPart, _1, level));
+ DynamicalSystemsGraph::VIterator dsi, dsend;
+  for (std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
+  {
+    if (!checkOSI(dsi)) continue;
+    SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
+    ds->resetNonSmoothPart(level);
+  }
 }
 
 void OneStepIntegrator::display()

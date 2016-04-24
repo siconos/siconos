@@ -52,35 +52,38 @@ ZeroOrderHoldOSI::ZeroOrderHoldOSI():
 void ZeroOrderHoldOSI::initialize()
 {
   OneStepIntegrator::initialize();
-  ConstDSIterator itDS;
-  DynamicalSystemsGraph& DSG0 = *_simulation->model()->nonSmoothDynamicalSystem()->topology()->dSG(0);
+  DynamicalSystemsGraph& DSG0 = *_dynamicalSystemsGraph;
   InteractionsGraph& IG0 = *_simulation->model()->nonSmoothDynamicalSystem()->topology()->indexSet0();
   DynamicalSystemsGraph::OEIterator oei, oeiend;
   Type::Siconos dsType;
 
   Model& model = *_simulation->model();
-  for (itDS = OSIDynamicalSystems->begin(); itDS != OSIDynamicalSystems->end(); ++itDS)
-  {
-    dsType = Type::value(**itDS);
+  DynamicalSystemsGraph::VIterator dsi, dsend;
+
+  for (std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
+   {
+    if (!checkOSI(dsi)) continue;
+    SP::DynamicalSystem  ds = _dynamicalSystemsGraph->bundle(*dsi);
+    dsType = Type::value(*ds);
     if ((dsType != Type::FirstOrderLinearDS) && (dsType != Type::FirstOrderLinearTIDS))
       RuntimeException::selfThrow("ZeroOrderHoldOSI::initialize - the DynamicalSystem does not have the right type");
     unsigned int indxIter = 0;
     DynamicalSystemsGraph::AVIterator avi, aviend;
-    DynamicalSystemsGraph::VDescriptor dsgVD = DSG0.descriptor(*itDS);
+    DynamicalSystemsGraph::VDescriptor dsgVD = DSG0.descriptor(ds);
     if (!DSG0.Ad.hasKey(dsgVD))
     {
-      DSG0.Ad[dsgVD].reset(new MatrixIntegrator(**itDS, model));
+      DSG0.Ad[dsgVD].reset(new MatrixIntegrator(*ds, model));
       if (DSG0.Ad.at(dsgVD)->isConst())
         DSG0.Ad.at(dsgVD)->integrate();
     }
     else
       RuntimeException::selfThrow("ZeroOrderHoldOSI::initialize - Ad MatrixIntegrator is already initialized for ds the DS");
 
-    if ((static_cast<const FirstOrderLinearDS&>(**itDS)).b())
+    if ((static_cast<const FirstOrderLinearDS&>(*ds)).b())
     {
-      SP::SiconosMatrix E(new SimpleMatrix((*itDS)->getN(), (*itDS)->getN(), 0));
+      SP::SiconosMatrix E(new SimpleMatrix(ds->getN(), ds->getN(), 0));
       E->eye();
-      DSG0.AdInt.insert(dsgVD, SP::MatrixIntegrator(new MatrixIntegrator(**itDS, model, E)));
+      DSG0.AdInt.insert(dsgVD, SP::MatrixIntegrator(new MatrixIntegrator(*ds, model, E)));
       if (DSG0.AdInt.at(dsgVD)->isConst())
         DSG0.AdInt.at(dsgVD)->integrate();
     }
@@ -109,13 +112,13 @@ void ZeroOrderHoldOSI::initialize()
           indxIter++;
           if (!relR.isJacLgPlugged())
           {
-            DSG0.Bd[dsgVD].reset(new MatrixIntegrator(**itDS, model, relR.B()));
+            DSG0.Bd[dsgVD].reset(new MatrixIntegrator(*ds, model, relR.B()));
             if (DSG0.Bd.at(dsgVD)->isConst())
               DSG0.Bd.at(dsgVD)->integrate();
           }
           else
           {
-            DSG0.Bd[dsgVD].reset(new MatrixIntegrator(**itDS, model, relR.getPluging(), inter.getSizeOfY()));
+            DSG0.Bd[dsgVD].reset(new MatrixIntegrator(*ds, model, relR.getPluging(), inter.getSizeOfY()));
           }
         }
         else
@@ -126,7 +129,7 @@ void ZeroOrderHoldOSI::initialize()
       }
     }
 
-    (*itDS)->allocateWorkVector(DynamicalSystem::local_buffer, (*itDS)->getDim());
+    ds->allocateWorkVector(DynamicalSystem::local_buffer, ds->getDim());
 
   }
 }
@@ -146,15 +149,17 @@ double ZeroOrderHoldOSI::computeResidu()
 
   // Iteration through the set of Dynamical Systems.
   //
-  DSIterator it;
   Type::Siconos dsType ; // Type of the current DS.
 
   double maxResidu = 0;
+  DynamicalSystemsGraph::VIterator dsi, dsend;
 
-  for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
-  {
-    DynamicalSystem& ds = **it; // the considered dynamical system
-    dsType = Type::value(ds); // Its type
+  for (std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
+   {
+    if (!checkOSI(dsi)) continue;
+    SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
+
+    dsType = Type::value(*ds); // Its type
     // 1 - First Order Linear Systems
     if (dsType == Type::FirstOrderLinearDS)
     {
@@ -182,21 +187,23 @@ void ZeroOrderHoldOSI::computeFreeState()
   double told = _simulation->startingTime(); // Beginning of the time step
   double h = t - told; // time step length
 
-  DSIterator it; // Iterator through the set of DS.
-
-  DynamicalSystemsGraph& DSG0 = *_simulation->model()->nonSmoothDynamicalSystem()->topology()->dSG(0);
+  DynamicalSystemsGraph& DSG0 = *_dynamicalSystemsGraph;
   Type::Siconos dsType ; // Type of the current DS.
-  for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
-  {
-    DynamicalSystem& ds = **it; // the considered dynamical system
-    dsType = Type::value(ds); // Its type
 
-    DynamicalSystemsGraph::VDescriptor dsgVD = DSG0.descriptor(*it);
+  DynamicalSystemsGraph::VIterator dsi, dsend;
+
+  for (std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
+   {
+    if (!checkOSI(dsi)) continue;
+    SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
+    dsType = Type::value(*ds); // Its type
+
+    DynamicalSystemsGraph::VDescriptor dsgVD = DSG0.descriptor(ds);
     VectorOfVectors& workVectors = *DSG0.properties(dsgVD).workVectors;
 //    updateMatrices(dsDescr);
     if (dsType == Type::FirstOrderLinearTIDS || dsType == Type::FirstOrderLinearDS)
     {
-      FirstOrderLinearDS& d = static_cast<FirstOrderLinearDS&>(ds);
+      FirstOrderLinearDS& d = static_cast<FirstOrderLinearDS&>(*ds);
       // Check whether we have to recompute things
       if (!DSG0.Ad.at(dsgVD)->isConst())
         DSG0.Ad.at(dsgVD)->integrate();
@@ -223,11 +230,15 @@ void ZeroOrderHoldOSI::computeFreeState()
 
 void ZeroOrderHoldOSI::prepareNewtonIteration(double time)
 {
-  ConstDSIterator itDS;
-  for (itDS = OSIDynamicalSystems->begin(); itDS != OSIDynamicalSystems->end(); ++itDS)
-  {
-    //    computeMatrices(time, **itDS);
-  }
+
+  // DynamicalSystemsGraph::VIterator dsi, dsend;
+
+  // for (std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
+  // {
+  //   //if (!checkOSI(dsi)) continue;
+  //   //SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
+  //   //    computeMatrices(time, *ds);
+  // }
 }
 
 
@@ -420,19 +431,22 @@ void ZeroOrderHoldOSI::updateState(const unsigned int level)
   if (useRCC)
     _simulation->setRelativeConvergenceCriterionHeld(true);
 
-  DSIterator it;
-  DynamicalSystemsGraph& DSG0 = *_simulation->model()->nonSmoothDynamicalSystem()->topology()->dSG(0);
+  DynamicalSystemsGraph& DSG0 = *_dynamicalSystemsGraph;
   DynamicalSystemsGraph::OEIterator oei, oeiend;
-  for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
+  DynamicalSystemsGraph::VIterator dsi, dsend;
+  for (std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
   {
-    DynamicalSystem& ds = **it;
-    Type::Siconos dsType = Type::value(ds);
-    DynamicalSystemsGraph::VDescriptor dsgVD = DSG0.descriptor(*it);
+    if (!checkOSI(dsi)) continue;
+    SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
+ 
+    Type::Siconos dsType = Type::value(*ds);
+    
+    DynamicalSystemsGraph::VDescriptor dsgVD = DSG0.descriptor(ds);
     VectorOfVectors& workVectors = *DSG0.properties(dsgVD).workVectors;
     // 1 - First Order Linear Systems
     if (dsType == Type::FirstOrderLinearDS || dsType == Type::FirstOrderLinearTIDS)
     {
-      FirstOrderLinearDS& d = static_cast<FirstOrderLinearDS&>(ds);
+      FirstOrderLinearDS& d = static_cast<FirstOrderLinearDS&>(*ds);
       SiconosVector& x = *d.x();
       // 1 - First Order Linear Time Invariant Systems
       // \Phi is already computed
@@ -521,15 +535,17 @@ void ZeroOrderHoldOSI::display()
   OneStepIntegrator::display();
 
   std::cout << "====== ZOH OSI display ======" <<std::endl;
-  DSIterator it;
-  for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
+  std::cout << "--------------------------------" << std::endl;
+  DynamicalSystemsGraph::VIterator dsi, dsend;
+  for (std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
   {
-    std::cout << "--------------------------------" << std::endl;
+    if (!checkOSI(dsi)) continue;
+    SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
 //    cout << "--> Phi of dynamical system number " << itN << ": " << endl;
-//    if (Ad(*it)) Ad(*it)->display();
+//    if (Ad(ds)) Ad(ds)->display();
 //    else cout << "-> NULL" << endl;
 //    cout << "--> Psi of dynamical system number " << itN << ": " << endl;
-//    if (Bd(*it)) Bd(*it)->display();
+//    if (Bd(ds)) Bd(ds)->display();
 //    else cout << "-> NULL" << endl;
   }
   std::cout << "================================" <<std::endl;
