@@ -191,17 +191,17 @@ public:
   //  boost::property_map<graph_t, graph_properties_t >::type GraphPropertiesAccess;
 
 #if defined(SICONOS_STD_UNORDERED_MAP) && !defined(SICONOS_USE_MAP_FOR_HASH)
-  typedef std::unordered_map<V, VDescriptor> VMap;
-  typedef std::unordered_map<E, EDescriptor> EMap;
+  typedef typename std::unordered_map<V, VDescriptor> VMap;
+  typedef typename std::unordered_map<E, EDescriptor> EMap;
 #else
-  typedef std::map<V, VDescriptor> VMap;
-  typedef std::map<E, EDescriptor> EMap;
+  typedef typename std::map<V, VDescriptor> VMap;
+  typedef typename std::map<E, EDescriptor> EMap;
 #endif
 
 
   int _stamp;
   VMap vertex_descriptor;
-  EMap edge_descriptor;
+  EMap edge_map;
 
 protected:
   /** serialization hooks
@@ -696,6 +696,10 @@ public:
     assert(bundle(new_ed) == ag.bundle(new_ve));
     assert(ag.size() == edges_number());
 
+
+    typename AdjointG::EMap& ag_edge_map = ag.edge_map;
+
+
     // better to build a range [vd1,vd2] or [vd1]...
     bool endl = false;
     for (VDescriptor vdx = vd1; !endl; vdx = vd2)
@@ -703,6 +707,11 @@ public:
       assert(vdx == vd1 || vdx == vd2);
 
       if (vdx == vd2) endl = true;
+
+//      if (ag_edge_map.find(vdx) == ag_edge_map.end())
+//      {
+//        ag_edge_map[vdx] = vdx.;
+//      }
 
 #if defined(SICONOS_STD_UNORDERED_MAP) && !defined(SICONOS_USE_MAP_FOR_HASH)
       std::unordered_map<E, EDescriptor> Edone;

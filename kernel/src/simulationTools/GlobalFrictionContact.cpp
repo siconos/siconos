@@ -138,9 +138,6 @@ bool GlobalFrictionContact::preCompute(double time)
     _mu->clear();
 //    _mu.reserve(indexSet.size())
 
-    size_t nDS = indexSet.edges_number();
-    assert(nDS > 0 && "GlobalFrictionContact::preCompute the number of DS in the indexSet is 0, but we have an non-empty indexset");
-
 #if defined(SICONOS_STD_UNORDERED_MAP) && !defined(SICONOS_USE_MAP_FOR_HASH)
     typedef std::unordered_map<SP::DynamicalSystem, SiconosMatrix*> dsMatMap;
     typedef std::unordered_map<SP::DynamicalSystem, size_t> dsPosMap;
@@ -156,26 +153,9 @@ bool GlobalFrictionContact::preCompute(double time)
     size_t sizeM = 0;
     size_t nbDS = 0;
 
+
+
     // compute size and nnz of M and collect all matrices
-
-    InteractionsGraph::EIterator dsi, dsend;
-    for (std11::tie(dsi, dsend) = indexSet.edges(); dsi != dsend; ++dsi)
-    {
-      SP::DynamicalSystem ds = indexSet.bundle(*dsi);
-      SiconosMatrix* W = DSG0.properties(DSG0.descriptor(ds)).W.get();
-      bool inserted = dsMat.insert(std::make_pair(ds, W)).second;
-
-      if (inserted) // first time we see this DS
-      {
-        absPosDS.insert(std::make_pair(ds, sizeM));
-
-        // update sizes
-        sizeM += W->size(0);
-        nnzM += W->nnz();
-        ++nbDS;
-      }
-    }
-
     // compute nnz of H and collect H blocks
     // fill _b and mu
     if (_b->size() != _sizeOutput)
@@ -203,6 +183,36 @@ bool GlobalFrictionContact::preCompute(double time)
       setBlock(*inter.yForNSsolver(), _b, 3, 0, pos);
       nnzH += inter.getLeftInteractionBlock(workMInter).nnz();
       pos += 3;
+
+      SP::DynamicalSystem ds1 = indexSet.properties(*ui).source;
+      SP::DynamicalSystem ds2 = indexSet.properties(*ui).target;
+      SiconosMatrix* W = DSG0.properties(DSG0.descriptor(ds1)).W.get();
+      bool inserted = dsMat.insert(std::make_pair(ds1, W)).second;
+
+      if (inserted) // first time we see this DS
+      {
+        absPosDS.insert(std::make_pair(ds1, sizeM));
+
+        // update sizes
+        sizeM += W->size(0);
+        nnzM += W->nnz();
+        ++nbDS;
+      }
+      if (ds1 != ds2)
+      {
+      SiconosMatrix* W = DSG0.properties(DSG0.descriptor(ds2)).W.get();
+      bool inserted = dsMat.insert(std::make_pair(ds2, W)).second;
+
+      if (inserted) // first time we see this DS
+      {
+        absPosDS.insert(std::make_pair(ds2, sizeM));
+
+        // update sizes
+        sizeM += W->size(0);
+        nnzM += W->nnz();
+        ++nbDS;
+      }
+      }
     }
 
     // fill M and _q
