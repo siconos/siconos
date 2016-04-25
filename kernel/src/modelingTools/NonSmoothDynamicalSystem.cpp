@@ -152,7 +152,6 @@ void NonSmoothDynamicalSystem::updateInput(double time, unsigned int level)
 
   // To compute input(level) (ie with lambda[level]) for all Interactions.
   //  assert(level>=0);
-  //  double time = nextTime();
 
   // Set dynamical systems non-smooth part to zero.
   reset(level);
