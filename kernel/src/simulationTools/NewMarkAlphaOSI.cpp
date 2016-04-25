@@ -159,7 +159,7 @@ double NewMarkAlphaOSI::computeResidu()
   for (std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
   {
     if (!checkOSI(dsi)) continue;
-    SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
+    ds = _dynamicalSystemsGraph->bundle(*dsi);
 
     dsType = Type::value(*ds); // Its type
     SP::SiconosVector freeR = ds->workspace(DynamicalSystem::freeresidu);
@@ -248,7 +248,7 @@ void NewMarkAlphaOSI::computeFreeState()
   for (std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
   {
     if (!checkOSI(dsi)) continue;
-    SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
+    ds = _dynamicalSystemsGraph->bundle(*dsi);
 
     dsType = Type::value(*ds); // Its type
     // Get iteration matrix W, make sure that W was updated before
