@@ -79,8 +79,7 @@ void OneStepIntegrator::resetNonSmoothPart()
   for (std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
   {
     if (!checkOSI(dsi)) continue;
-    SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
-    ds->resetNonSmoothPart(0);
+    _dynamicalSystemsGraph->bundle(*dsi)->resetNonSmoothPart(1);
   }
 }
 
@@ -90,8 +89,7 @@ void OneStepIntegrator::resetNonSmoothPart(unsigned int level)
   for (std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
   {
     if (!checkOSI(dsi)) continue;
-    SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
-    ds->resetNonSmoothPart(level);
+    _dynamicalSystemsGraph->bundle(*dsi)->resetNonSmoothPart(level);
   }
 }
 

@@ -68,8 +68,13 @@ protected:
 /** type/name of the Integrator */
   OSI::TYPES _integratorType;
 
-/** a graph of dynamical to integrate */
-  SP::DynamicalSystemsGraph _dynamicalSystemsGraph; 
+/** a graph of dynamical systems to integrate
+ * For the moment, we point to the graph of dynamical systems in
+ * in the topology. We use the properties "osi" to check if the dynamical
+ * system is integrated by this osi. It has to be improved by using a subgraph
+ * to avoid the use of checkOSI
+ */
+  SP::DynamicalSystemsGraph _dynamicalSystemsGraph;
 
 /** size of the memory for the integrator */
   unsigned int _sizeMem;
