@@ -49,7 +49,7 @@ void OneStepIntegrator::initialize()
   }
 
   // a subgraph has to be implemented.
-  _dynamicalSystemsGraph = _simulation->model()->nonSmoothDynamicalSystem()->topology()->dSG(0);
+  _dynamicalSystemsGraph = _simulation->nonSmoothDynamicalSystem()->topology()->dSG(0);
 }
 
 void OneStepIntegrator::computeInitialNewtonState()

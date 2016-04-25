@@ -53,7 +53,7 @@ void ZeroOrderHoldOSI::initialize()
 {
   OneStepIntegrator::initialize();
   DynamicalSystemsGraph& DSG0 = *_dynamicalSystemsGraph;
-  InteractionsGraph& IG0 = *_simulation->model()->nonSmoothDynamicalSystem()->topology()->indexSet0();
+  InteractionsGraph& IG0 = *_simulation->nonSmoothDynamicalSystem()->topology()->indexSet0();
   DynamicalSystemsGraph::OEIterator oei, oeiend;
   Type::Siconos dsType;
 
@@ -517,14 +517,14 @@ bool ZeroOrderHoldOSI::removeInteractionInIndexSet(SP::Interaction inter, unsign
 
 const SiconosMatrix& ZeroOrderHoldOSI::Ad(SP::DynamicalSystem ds)
 {
-  DynamicalSystemsGraph& DSG0 = *_simulation->model()->nonSmoothDynamicalSystem()->topology()->dSG(0);
+  DynamicalSystemsGraph& DSG0 = *_simulation->nonSmoothDynamicalSystem()->topology()->dSG(0);
   DynamicalSystemsGraph::VDescriptor dsgVD = DSG0.descriptor(ds);
   return DSG0.Ad.at(dsgVD)->mat();
 }
 
 const SiconosMatrix& ZeroOrderHoldOSI::Bd(SP::DynamicalSystem ds)
 {
-  DynamicalSystemsGraph& DSG0 = *_simulation->model()->nonSmoothDynamicalSystem()->topology()->dSG(0);
+  DynamicalSystemsGraph& DSG0 = *_simulation->nonSmoothDynamicalSystem()->topology()->dSG(0);
   DynamicalSystemsGraph::VDescriptor dsgVD = DSG0.descriptor(ds);
   return DSG0.Bd.at(dsgVD)->mat();
 }
@@ -553,7 +553,7 @@ void ZeroOrderHoldOSI::display()
 
 void ZeroOrderHoldOSI::updateMatrices(SP::DynamicalSystem ds)
 {
-//  DynamicalSystemsGraph& DSG0 = *_simulation->model()->nonSmoothDynamicalSystem()->topology()->dSG(0);
+//  DynamicalSystemsGraph& DSG0 = *_simulation->nonSmoothDynamicalSystem()->topology()->dSG(0);
 //  if (!DSG0.Ad[dsgVD]->isConst())
 //    computeAd(dsgVD);
 //  if (DSG0.Bd.hasKey(dsgVD) && !DSG->Bd[dsgVD]->isConst())

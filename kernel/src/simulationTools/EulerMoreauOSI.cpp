@@ -321,7 +321,7 @@ void EulerMoreauOSI::computeW(double t, DynamicalSystem& ds, DynamicalSystemsGra
 
 //  if (_useGamma)
   {
-    Topology& topo = *_simulation->model()->nonSmoothDynamicalSystem()->topology();
+    Topology& topo = *_simulation->nonSmoothDynamicalSystem()->topology();
     DynamicalSystemsGraph& DSG0 = *topo.dSG(0);
     InteractionsGraph& indexSet = *topo.indexSet(0);
     DynamicalSystemsGraph::OEIterator oei, oeiend;
@@ -379,7 +379,7 @@ double EulerMoreauOSI::computeResidu()
   double normResidu = maxResidu;
 
   // XXX TMP hack -- xhub
-  Topology& topo = *_simulation->model()->nonSmoothDynamicalSystem()->topology();
+  Topology& topo = *_simulation->nonSmoothDynamicalSystem()->topology();
   DynamicalSystemsGraph& DSG0 = *topo.dSG(0);
 
 

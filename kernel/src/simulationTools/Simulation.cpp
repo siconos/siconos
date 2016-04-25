@@ -43,9 +43,9 @@
 #include "TypeName.hpp"
 // for Debug
 // #define DEBUG_BEGIN_END_ONLY
-// #define DEBUG_NOCOLOR
-// #define DEBUG_STDOUT
-// #define DEBUG_MESSAGES
+#define DEBUG_NOCOLOR
+#define DEBUG_STDOUT
+#define DEBUG_MESSAGES
 #include <debug.h>
 #include <fstream>
 #include "Model.hpp"
@@ -115,6 +115,10 @@ double Simulation::startingTime() const
 
 double Simulation::nextTime() const
 {
+  DEBUG_PRINT("Simulation::nextTime()\n");
+  DEBUG_PRINTF(" _eventsManager->nextTime()= %f\n", _eventsManager->nextTime() );
+  DEBUG_PRINTF(" _model->currentTime()= %f\n", _model.lock()->currentTime() );
+  
   return _eventsManager->nextTime();
 }
 
@@ -175,7 +179,7 @@ void Simulation::updateIndexSets()
 
   DEBUG_BEGIN("Simulation::updateIndexSets()\n");
   // update I0 indices
-  unsigned int nindexsets = model()->nonSmoothDynamicalSystem()->topology()->indexSetsSize();
+  unsigned int nindexsets = _nsds->topology()->indexSetsSize();
 
   DEBUG_PRINTF("  nindexsets = %d\n", nindexsets   );
   if (nindexsets > 1)
@@ -183,8 +187,8 @@ void Simulation::updateIndexSets()
     for (unsigned int i = 1; i < nindexsets ; ++i)
     {
       updateIndexSet(i);
-      model()->nonSmoothDynamicalSystem()->topology()->indexSet(i)->update_vertices_indices();
-      model()->nonSmoothDynamicalSystem()->topology()->indexSet(i)->update_edges_indices();
+      _nsds->topology()->indexSet(i)->update_vertices_indices();
+      _nsds->topology()->indexSet(i)->update_edges_indices();
     }
   }
   DEBUG_END("Simulation::updateIndexSets()\n");
@@ -207,6 +211,8 @@ void Simulation::initialize(SP::Model m, bool withOSI)
 
   _T = m->finalT();
 
+  _nsds =  m->nonSmoothDynamicalSystem();
+
   // === Events manager initialization ===
   _eventsManager->initialize(_T);
   _tinit = _eventsManager->startingTime();
@@ -222,7 +228,7 @@ void Simulation::initialize(SP::Model m, bool withOSI)
 
 
     DynamicalSystemsGraph::VIterator dsi, dsend;
-    SP::DynamicalSystemsGraph DSG = model()->nonSmoothDynamicalSystem()->topology()->dSG(0);
+    SP::DynamicalSystemsGraph DSG = _nsds->topology()->dSG(0);
     for (std11::tie(dsi, dsend) = DSG->vertices(); dsi != dsend; ++dsi)
     {
       SP::OneStepIntegrator osi = DSG->osi[*dsi];
@@ -230,7 +236,7 @@ void Simulation::initialize(SP::Model m, bool withOSI)
       if (!osi)
       {
         // By default, if the user has not set the OSI, we assign the first OSI to all DS
-        model()->nonSmoothDynamicalSystem()->topology()->setOSI(ds,*_allOSI->begin());
+        _nsds->topology()->setOSI(ds,*_allOSI->begin());
         //std::cout << "By default, if the user has not set the OSI, we assign the first OSI to all DS"<<std::endl;
       }
       else
@@ -275,7 +281,7 @@ void Simulation::initialize(SP::Model m, bool withOSI)
   // Note FP : this was formerly done in inter->initialize call with local levels values
   // but I think it's ok (better?) to do it with the simulation levels values.
   DynamicalSystemsGraph::VIterator dsi, dsend;
-  SP::DynamicalSystemsGraph DSG = model()->nonSmoothDynamicalSystem()->topology()->dSG(0);
+  SP::DynamicalSystemsGraph DSG = _nsds->topology()->dSG(0);
   for (std11::tie(dsi, dsend) = DSG->vertices(); dsi != dsend; ++dsi)
   {
     //assert(_levelMinForInput <= _levelMaxForInput);
@@ -286,7 +292,7 @@ void Simulation::initialize(SP::Model m, bool withOSI)
   }
 
   InteractionsGraph::VIterator ui, uiend;
-  SP::InteractionsGraph indexSet0 = model()->nonSmoothDynamicalSystem()->topology()->indexSet0();
+  SP::InteractionsGraph indexSet0 = _nsds->topology()->indexSet0();
   for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
   {
     Interaction& inter = *indexSet0->bundle(*ui);
@@ -345,7 +351,7 @@ void Simulation::initializeInteraction(double time, SP::Interaction inter)
   computeLevelsForInputAndOutput(inter);
 
   // Get the interaction properties from the topology for initialization.
-  SP::InteractionsGraph indexSet0 = model()->nonSmoothDynamicalSystem()->topology()->indexSet0();
+  SP::InteractionsGraph indexSet0 = _nsds->topology()->indexSet0();
   InteractionsGraph::VDescriptor ui = indexSet0->descriptor(inter);
 
   // This calls computeOutput() and initializes qMemory and q_k.
@@ -379,9 +385,9 @@ SP::SiconosVector Simulation::y(unsigned int level, unsigned int coor)
 
   InteractionsGraph::VIterator ui, uiend;
   SP::Interaction inter;
-  SP::InteractionsGraph indexSet0 = model()->nonSmoothDynamicalSystem()->topology()->indexSet0();
+  SP::InteractionsGraph indexSet0 = _nsds->topology()->indexSet0();
 
-  SP::SiconosVector y (new SiconosVector (model()->nonSmoothDynamicalSystem()->topology()->indexSet0()->size() ));
+  SP::SiconosVector y (new SiconosVector (_nsds->topology()->indexSet0()->size() ));
   int i=0;
   for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
   {
@@ -405,9 +411,9 @@ SP::SiconosVector Simulation::lambda(unsigned int level, unsigned int coor)
 
   InteractionsGraph::VIterator ui, uiend;
   SP::Interaction inter;
-  SP::InteractionsGraph indexSet0 = model()->nonSmoothDynamicalSystem()->topology()->indexSet0();
+  SP::InteractionsGraph indexSet0 = _nsds->topology()->indexSet0();
 
-  SP::SiconosVector lambda (new SiconosVector (model()->nonSmoothDynamicalSystem()->topology()->indexSet0()->size() ));
+  SP::SiconosVector lambda (new SiconosVector (_nsds->topology()->indexSet0()->size() ));
   int i=0;
   for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
   {
@@ -452,7 +458,7 @@ void Simulation::processEvents()
   }
 
   /* should be evaluated only if needed */
-  SP::DynamicalSystemsGraph dsGraph = model()->nonSmoothDynamicalSystem()->dynamicalSystems();
+  SP::DynamicalSystemsGraph dsGraph = _nsds->dynamicalSystems();
   for (DynamicalSystemsGraph::VIterator vi = dsGraph->begin(); vi != dsGraph->end(); ++vi)
   {
     dsGraph->bundle(*vi)->endStep();
@@ -983,7 +989,7 @@ void Simulation::computeLevelsForInputAndOutput(SP::Interaction inter, bool init
  /** \warning. We test only for the first Dynamical of the interaction.
    * we assume that the osi(s) are consistent for one interaction
    */
-  SP::InteractionsGraph indexSet0 = model()->nonSmoothDynamicalSystem()->topology()->indexSet(0);
+  SP::InteractionsGraph indexSet0 = _nsds->topology()->indexSet(0);
   SP::DynamicalSystem ds = indexSet0->properties(indexSet0->descriptor(inter)).source;
   // Note FP :  we should probably connect osi and graph before, in simulation->initialize?
   DSOSIConstIterator it = _osiMap.find(ds);
@@ -997,7 +1003,7 @@ void Simulation::computeLevelsForInputAndOutput(SP::Interaction inter, bool init
   osi->accept(*(setupLevels.get()));
   if (!init) // We are not computing the levels at the initialization
   {
-    SP::Topology topo = model()->nonSmoothDynamicalSystem()->topology();
+    SP::Topology topo = _nsds->topology();
     unsigned int indxSize = topo->indexSetsSize();
     assert (_numberOfIndexSets >0);
     if ((indxSize == LEVELMAX) || (indxSize < _numberOfIndexSets ))
@@ -1014,7 +1020,7 @@ void Simulation::computeLevelsForInputAndOutput()
 {
   DEBUG_PRINT("Simulation::computeLevelsForInputAndOutput()\n");
 
-  SP::Topology topo = model()->nonSmoothDynamicalSystem()->topology();
+  SP::Topology topo = _nsds->topology();
 
   InteractionsGraph::VIterator ui, uiend;
   SP::InteractionsGraph indexSet0 = topo->indexSet0();

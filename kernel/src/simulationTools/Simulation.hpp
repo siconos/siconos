@@ -92,6 +92,11 @@ protected:
   /** A link to the Model which contains the Simulation */
   std11::weak_ptr<Model> _model;
 
+  /** A pointer to the nonsmooth dynamical system that is
+   * simulated
+   */
+  SP::NonSmoothDynamicalSystem _nsds;
+
   /** _levelMinForOutput is the minimum level for the output
    * (Interaction::_lowerlevelForOutput) for all the interactions
    */
@@ -379,6 +384,14 @@ public:
   inline SP::Model model() const
   {
     return _model.lock();
+  }
+
+  /** get the NonSmoothDynamicalSystem
+   *  \return NonSmoothDynamicalSystem
+   */
+  inline SP::NonSmoothDynamicalSystem nonSmoothDynamicalSystem() const
+  {
+    return _nsds;
   }
 
   /** get tolerance

@@ -420,7 +420,7 @@ void LsodarOSI::updateState(const unsigned int level)
   }
   else if (level == 2)
   {
-    double time = _simulation->model()->currentTime();
+    double time = _simulation->nextTime();
     for (std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
     {
       if (!checkOSI(dsi)) continue;

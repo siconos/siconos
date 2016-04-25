@@ -90,9 +90,9 @@ void EventDriven::insertIntegrator(SP::OneStepIntegrator osi)
 void EventDriven::updateIndexSet(unsigned int i)
 {
   assert(!_model.expired());
-  assert(model()->nonSmoothDynamicalSystem());
-  assert(model()->nonSmoothDynamicalSystem()->topology());
-  SP::Topology topo = model()->nonSmoothDynamicalSystem()->topology();
+  assert(_nsds);
+  assert(_nsds->topology());
+  SP::Topology topo = _nsds->topology();
 
   assert(i < topo->indexSetsSize() &&
          "EventDriven::updateIndexSet(i), indexSets[i] does not exist.");
@@ -193,13 +193,13 @@ void EventDriven::updateIndexSetsWithDoubleCondition()
 {
 
   assert(!_model.expired());
-  assert(model()->nonSmoothDynamicalSystem());
-  assert(model()->nonSmoothDynamicalSystem()->topology());
+  assert(_nsds);
+  assert(_nsds->topology());
 
   // for all Interactions in indexSet[i-1], compute y[i-1] and
   // update the indexSet[i]
 
-  SP::Topology topo = model()->nonSmoothDynamicalSystem()->topology();
+  SP::Topology topo = _nsds->topology();
 
   SP::InteractionsGraph indexSet2 = topo->indexSet(2);
 
@@ -225,13 +225,13 @@ void EventDriven::updateIndexSetsWithDoubleCondition()
 void EventDriven::initOSNS()
 {
   assert(!_model.expired());
-  assert(model()->nonSmoothDynamicalSystem());
-  assert(model()->nonSmoothDynamicalSystem()->topology());
+  assert(_nsds);
+  assert(_nsds->topology());
   // for all Interactions in indexSet[i-1], compute y[i-1] and
   // update the indexSet[i]
   // Note that interactions set may be empty.
   InteractionsGraph::VIterator ui, uiend;
-  SP::Topology topo = model()->nonSmoothDynamicalSystem()->topology();
+  SP::Topology topo = _nsds->topology();
 
   // === update all index sets ===
   updateIndexSets();
@@ -280,7 +280,7 @@ void EventDriven::initOSNS()
     // Detect NonSmoothEvent at the beginning of the simulation
     if( topo->indexSetsSize() > 1)
     {
-      SP::InteractionsGraph indexSet1 = model()->nonSmoothDynamicalSystem()->topology()->indexSet(1);
+      SP::InteractionsGraph indexSet1 = _nsds->topology()->indexSet(1);
       if (indexSet1->size() != 0) // There is one non-smooth event to be added
       {
         _eventsManager->scheduleNonSmoothEvent(*this, _eventsManager->startingTime(), false);
@@ -380,7 +380,7 @@ void EventDriven::computef(OneStepIntegrator& osi, integer * sizeOfX, doublereal
     {
       // Update the state of the DS
       (*_allNSProblems)[SICONOS_OSNSP_ED_SMOOTH_ACC]->compute(t);
-      model()->nonSmoothDynamicalSystem()->updateInput(t,2); // Necessary to compute DS state below
+      _nsds->updateInput(t,2); // Necessary to compute DS state below
     }
     // Compute the right-hand side ( xdot = f + r in DS) for all the
     //ds, with the new value of input.  lsodar->computeRhs(t);
@@ -492,10 +492,10 @@ void EventDriven::computeg(SP::OneStepIntegrator osi,
                            doublereal * gOut)
 {
   assert(!_model.expired());
-  assert(model()->nonSmoothDynamicalSystem());
-  assert(model()->nonSmoothDynamicalSystem()->topology());
+  assert(_nsds);
+  assert(_nsds->topology());
   InteractionsGraph::VIterator ui, uiend;
-  SP::Topology topo = model()->nonSmoothDynamicalSystem()->topology();
+  SP::Topology topo = _nsds->topology();
   SP::InteractionsGraph indexSet2 = topo->indexSet(2);
   unsigned int nsLawSize, k = 0 ;
   SP::SiconosVector y, ydot, yddot, lambda;
@@ -518,9 +518,9 @@ void EventDriven::computeg(SP::OneStepIntegrator osi,
      free(xdottmp);
      */
   // Update the output from level 0 to level 1
-  model()->nonSmoothDynamicalSystem()->updateOutput(t,0);
-  model()->nonSmoothDynamicalSystem()->updateOutput(t,1);
-  model()->nonSmoothDynamicalSystem()->updateOutput(t,2);
+  _nsds->updateOutput(t,0);
+  _nsds->updateOutput(t,1);
+  _nsds->updateOutput(t,2);
   //
   for (std11::tie(ui, uiend) = _indexSet0->vertices(); ui != uiend; ++ui)
   {
@@ -581,7 +581,7 @@ void EventDriven::updateImpactState()
 {
   OSIIterator itOSI;
   // Compute input = R(lambda[1])
-  model()->nonSmoothDynamicalSystem()->updateInput(model()->currentTime(),1);
+  _nsds->updateInput(model()->currentTime(),1);
 
   // Compute post-impact velocity
   for (itOSI = _allOSI->begin(); itOSI != _allOSI->end() ; ++itOSI)
@@ -591,7 +591,7 @@ void EventDriven::updateImpactState()
 void EventDriven::updateSmoothState()
 {
   // Update input of level 2
-  model()->nonSmoothDynamicalSystem()->updateInput(model()->currentTime(),2);
+  _nsds->updateInput(model()->currentTime(),2);
   OSIIterator itOSI;
   // Compute acceleration
   for (itOSI = _allOSI->begin(); itOSI != _allOSI->end() ; ++itOSI)
@@ -611,7 +611,7 @@ void EventDriven::update(unsigned int levelInput)
     updateSmoothState();
   }
   // Update output (y)
-  model()->nonSmoothDynamicalSystem()->updateOutput(model()->currentTime(),levelInput);
+  _nsds->updateOutput(model()->currentTime(),levelInput);
   // Warning: index sets are not updated in this function !!
 }
 
@@ -640,9 +640,9 @@ void EventDriven::advanceToEvent()
     // Update input of level 2 >>> has already been done in newtonSolve
     // Update state of all Dynamicall Systems >>>  has already been done in newtonSolve
     // Update outputs of levels 0, 1, 2
-    model()->nonSmoothDynamicalSystem()->updateOutput(model()->currentTime(),0);
-    model()->nonSmoothDynamicalSystem()->updateOutput(model()->currentTime(),1);
-    model()->nonSmoothDynamicalSystem()->updateOutput(model()->currentTime(),2);
+    _nsds->updateOutput(model()->currentTime(),0);
+    _nsds->updateOutput(model()->currentTime(),1);
+    _nsds->updateOutput(model()->currentTime(),2);
     // Detect whether or not some events occur during the integration step
     _minConstraint = detectEvents();
     //
@@ -735,9 +735,9 @@ void EventDriven::advanceToEvent()
     // Set model time to _tout
     model()->setCurrentTime(_tout);
     //update output[0], output[1], output[2]
-    model()->nonSmoothDynamicalSystem()->updateOutput(model()->currentTime(),0);
-    model()->nonSmoothDynamicalSystem()->updateOutput(model()->currentTime(),1);
-    model()->nonSmoothDynamicalSystem()->updateOutput(model()->currentTime(),2);
+    _nsds->updateOutput(model()->currentTime(),0);
+    _nsds->updateOutput(model()->currentTime(),1);
+    _nsds->updateOutput(model()->currentTime(),2);
     //update lambda[2], input[2] and indexSet[2] with double consitions for the case there is no new event added during time integration, otherwise, this
     // update is done when the new event is processed
     if (!isNewEventOccur)
@@ -747,11 +747,11 @@ void EventDriven::advanceToEvent()
         // Solve LCP at acceleration level
         if (((*_allNSProblems)[SICONOS_OSNSP_ED_SMOOTH_ACC]->hasInteractions()))
         {
-          SP::InteractionsGraph indexSet2 = model()->nonSmoothDynamicalSystem()->topology()->indexSet(2);
+          SP::InteractionsGraph indexSet2 = _nsds->topology()->indexSet(2);
           if (indexSet2->size() != 0)
           {
             (*_allNSProblems)[SICONOS_OSNSP_ED_SMOOTH_ACC]->compute(_tout);
-            model()->nonSmoothDynamicalSystem()->updateInput(_tout,2);
+            _nsds->updateInput(_tout,2);
             // update indexSet[2] with double condition
             //updateIndexSetsWithDoubleCondition();
           }
@@ -771,7 +771,7 @@ double EventDriven::computeResiduConstraints()
 {
   // Make sure that the state of all Dynamical Systems was updated
   double t = nextTime(); // time at the end of the step
-  SP::InteractionsGraph indexSet2 = model()->nonSmoothDynamicalSystem()->topology()->indexSet(2);
+  SP::InteractionsGraph indexSet2 = _nsds->topology()->indexSet(2);
   double _y;
   // Loop over all interactions of indexSet2
   InteractionsGraph::VIterator ui, uiend;
@@ -833,7 +833,7 @@ void EventDriven::prepareNewtonIteration()
   _newtonResiduYMax = 0.0;
   double _maxResidu;
   // Update input of level 2
-  model()->nonSmoothDynamicalSystem()->updateInput(model()->currentTime(),2);
+  _nsds->updateInput(model()->currentTime(),2);
   // Loop over all OSIs
   OSI::TYPES  osiType;
   for (OSIIterator itosi = _allOSI->begin(); itosi != _allOSI->end(); ++itosi)
@@ -902,7 +902,7 @@ void EventDriven::predictionNewtonIteration()
 void EventDriven::correctionNewtonIteration()
 {
   //Update the input of level 2 for all Dynamical Systems after each iteration
-  model()->nonSmoothDynamicalSystem()->updateInput(model()->currentTime(),2);
+  _nsds->updateInput(model()->currentTime(),2);
   // Correction
   for (OSIIterator itosi = _allOSI->begin(); itosi != _allOSI->end(); ++itosi)
   {
@@ -949,7 +949,7 @@ void EventDriven::newtonSolve(double criterion, unsigned int maxStep)
       cout << "Warning!!!In EventDriven::newtonSolve: Number of iterations is greater than the maximum value " << maxStep <<endl;
     }
     // If no convergence, proceed iteration
-    SP::InteractionsGraph indexSet2 = model()->nonSmoothDynamicalSystem()->topology()->indexSet(2);
+    SP::InteractionsGraph indexSet2 = _nsds->topology()->indexSet(2);
     if (indexSet2->size() != 0) // if indexSet2 is not empty, solve LCP to determine contact forces
     {
       info = computeOneStepNSProblem(SICONOS_OSNSP_ED_SMOOTH_POS);
@@ -973,7 +973,7 @@ double EventDriven::detectEvents(bool updateIstate)
   bool _IsFirstTime = true;
   InteractionsGraph::VIterator ui, uiend;
   SP::SiconosVector y, ydot, lambda;
-  SP::Topology topo = model()->nonSmoothDynamicalSystem()->topology();
+  SP::Topology topo = _nsds->topology();
   SP::InteractionsGraph indexSet2 = topo->indexSet(2);
   //
 #ifdef DEBUG_MESSAGES
@@ -1107,7 +1107,7 @@ void EventDriven::LocalizeFirstEvent()
     // If _istate = 3 or 5, i.e. some contacts are closed, we need to compute y[0] for all interactions
     if ((_istate == 3) || (_istate == 5)) // some contacts are closed
     {
-      model()->nonSmoothDynamicalSystem()->updateOutput(model()->currentTime(),0);
+      _nsds->updateOutput(model()->currentTime(),0);
     }
     // If _istate = 4 or 5, i.e. some contacts are detached, we need to solve LCP at the acceleration level to compute contact forces
     if ((_istate == 4) || (_istate == 5)) // some contacts are opened

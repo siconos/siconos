@@ -571,7 +571,7 @@ void NewMarkAlphaOSI::updateState(const unsigned int level)
   }
   else if (level == 2)
   {
-    double time = _simulation->model()->currentTime();
+    double time = _simulation->nextTime();
     DynamicalSystemsGraph::VIterator dsi, dsend;
     for (std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
     {

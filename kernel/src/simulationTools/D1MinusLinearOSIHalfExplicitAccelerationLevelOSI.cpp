@@ -49,7 +49,7 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
   double h = _simulation->timeStep(); // time step length
 
   SP::OneStepNSProblems allOSNS  = _simulation->oneStepNSProblems(); // all OSNSP
-  SP::Topology topo =  _simulation->model()->nonSmoothDynamicalSystem()->topology();
+  SP::Topology topo =  _simulation->nonSmoothDynamicalSystem()->topology();
   SP::InteractionsGraph indexSet2 = topo->indexSet(2);
 
   /**************************************************************************************************************
@@ -175,7 +175,7 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
         inter->relation()->computeJacg(told, *inter, indexSet2->properties(*ui));
       }
 
-      if (_simulation->model()->nonSmoothDynamicalSystem()->topology()->hasChanged())
+      if (_simulation->nonSmoothDynamicalSystem()->topology()->hasChanged())
       {
         for (OSNSIterator itOsns = allOSNS->begin(); itOsns != allOSNS->end(); ++itOsns)
         {
@@ -195,8 +195,8 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
       // Note Franck : at the time this results in a call to swapInMem of all Interactions of the NSDS
       // So let the simu do this.
       //(*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]->saveInMemory(); // we push y and lambda in Memories
-      _simulation->model()->nonSmoothDynamicalSystem()->pushInteractionsInMemory();
-      _simulation->model()->nonSmoothDynamicalSystem()->updateInput(_simulation->model()->currentTime(),2);
+      _simulation->nonSmoothDynamicalSystem()->pushInteractionsInMemory();
+      _simulation->nonSmoothDynamicalSystem()->updateInput(_simulation->nextTime(),2);
 
       for (std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
       {
@@ -370,11 +370,11 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
     for (unsigned int level = _simulation->levelMinForOutput();
          level < _simulation->levelMaxForOutput(); level++)
     {
-      _simulation->model()->nonSmoothDynamicalSystem()->updateOutput(_simulation->model()->currentTime(),level);
+      _simulation->nonSmoothDynamicalSystem()->updateOutput(_simulation->nextTime(),level);
     }
     _simulation->updateIndexSets();
 
-    SP::Topology topo =  _simulation->model()->nonSmoothDynamicalSystem()->topology();
+    SP::Topology topo =  _simulation->nonSmoothDynamicalSystem()->topology();
     SP::InteractionsGraph indexSet3 = topo->indexSet(3);
 
     if (indexSet3->size() > 0)
@@ -569,7 +569,7 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
         inter->relation()->computeJach(t, *inter, indexSet2->properties(*ui));
         inter->relation()->computeJacg(t, *inter, indexSet2->properties(*ui));
       }
-      if (_simulation->model()->nonSmoothDynamicalSystem()->topology()->hasChanged())
+      if (_simulation->nonSmoothDynamicalSystem()->topology()->hasChanged())
       {
         for (OSNSIterator itOsns = allOSNS->begin(); itOsns != allOSNS->end(); ++itOsns)
         {
@@ -581,7 +581,7 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
       {
         (*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]->compute(t);
         DEBUG_EXPR((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]->display(););
-        _simulation->model()->nonSmoothDynamicalSystem()->updateInput(_simulation->model()->currentTime(),2);
+        _simulation->nonSmoothDynamicalSystem()->updateInput(_simulation->nextTime(),2);
       }
     }
     for (std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
