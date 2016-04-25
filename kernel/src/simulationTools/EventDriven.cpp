@@ -581,7 +581,7 @@ void EventDriven::updateImpactState()
 {
   OSIIterator itOSI;
   // Compute input = R(lambda[1])
-  _nsds->updateInput(model()->currentTime(),1);
+  _nsds->updateInput(nextTime(),1);
 
   // Compute post-impact velocity
   for (itOSI = _allOSI->begin(); itOSI != _allOSI->end() ; ++itOSI)
@@ -591,7 +591,7 @@ void EventDriven::updateImpactState()
 void EventDriven::updateSmoothState()
 {
   // Update input of level 2
-  _nsds->updateInput(model()->currentTime(),2);
+  _nsds->updateInput(nextTime(),2);
   OSIIterator itOSI;
   // Compute acceleration
   for (itOSI = _allOSI->begin(); itOSI != _allOSI->end() ; ++itOSI)
@@ -611,7 +611,7 @@ void EventDriven::update(unsigned int levelInput)
     updateSmoothState();
   }
   // Update output (y)
-  _nsds->updateOutput(model()->currentTime(),levelInput);
+  _nsds->updateOutput(nextTime(),levelInput);
   // Warning: index sets are not updated in this function !!
 }
 
@@ -640,9 +640,9 @@ void EventDriven::advanceToEvent()
     // Update input of level 2 >>> has already been done in newtonSolve
     // Update state of all Dynamicall Systems >>>  has already been done in newtonSolve
     // Update outputs of levels 0, 1, 2
-    _nsds->updateOutput(model()->currentTime(),0);
-    _nsds->updateOutput(model()->currentTime(),1);
-    _nsds->updateOutput(model()->currentTime(),2);
+    _nsds->updateOutput(nextTime(),0);
+    _nsds->updateOutput(nextTime(),1);
+    _nsds->updateOutput(nextTime(),2);
     // Detect whether or not some events occur during the integration step
     _minConstraint = detectEvents();
     //
@@ -735,9 +735,9 @@ void EventDriven::advanceToEvent()
     // Set model time to _tout
     model()->setCurrentTime(_tout);
     //update output[0], output[1], output[2]
-    _nsds->updateOutput(model()->currentTime(),0);
-    _nsds->updateOutput(model()->currentTime(),1);
-    _nsds->updateOutput(model()->currentTime(),2);
+    _nsds->updateOutput(nextTime(),0);
+    _nsds->updateOutput(nextTime(),1);
+    _nsds->updateOutput(nextTime(),2);
     //update lambda[2], input[2] and indexSet[2] with double consitions for the case there is no new event added during time integration, otherwise, this
     // update is done when the new event is processed
     if (!isNewEventOccur)
@@ -833,7 +833,7 @@ void EventDriven::prepareNewtonIteration()
   _newtonResiduYMax = 0.0;
   double _maxResidu;
   // Update input of level 2
-  _nsds->updateInput(model()->currentTime(),2);
+  _nsds->updateInput(nextTime(),2);
   // Loop over all OSIs
   OSI::TYPES  osiType;
   for (OSIIterator itosi = _allOSI->begin(); itosi != _allOSI->end(); ++itosi)
@@ -902,7 +902,7 @@ void EventDriven::predictionNewtonIteration()
 void EventDriven::correctionNewtonIteration()
 {
   //Update the input of level 2 for all Dynamical Systems after each iteration
-  _nsds->updateInput(model()->currentTime(),2);
+  _nsds->updateInput(nextTime(),2);
   // Correction
   for (OSIIterator itosi = _allOSI->begin(); itosi != _allOSI->end(); ++itosi)
   {
@@ -1107,7 +1107,7 @@ void EventDriven::LocalizeFirstEvent()
     // If _istate = 3 or 5, i.e. some contacts are closed, we need to compute y[0] for all interactions
     if ((_istate == 3) || (_istate == 5)) // some contacts are closed
     {
-      _nsds->updateOutput(model()->currentTime(),0);
+      _nsds->updateOutput(nextTime(),0);
     }
     // If _istate = 4 or 5, i.e. some contacts are detached, we need to solve LCP at the acceleration level to compute contact forces
     if ((_istate == 4) || (_istate == 5)) // some contacts are opened

@@ -164,7 +164,7 @@ void TimeSteppingDirectProjection::advanceToEvent()
     SP::Interaction inter = indexSet->bundle(*ui);
     inter->lambda(0)->zero();
   }
-  _nsds->updateInput(model()->currentTime(),0);
+  _nsds->updateInput(nextTime(),0);
 
   //Store the q vector of each DS.
 
@@ -198,7 +198,7 @@ void TimeSteppingDirectProjection::advanceToEvent()
       SP::Interaction inter = indexSet->bundle(*ui);
       inter->lambda(0)->zero();
     }
-    _nsds->updateInput(model()->currentTime(),0);
+    _nsds->updateInput(nextTime(),0);
     info = 0;
 
     DEBUG_PRINT("TimeSteppingProjectOnConstraint compute OSNSP.\n");
@@ -215,7 +215,7 @@ void TimeSteppingDirectProjection::advanceToEvent()
       std::cout << " TimeSteppingDirectProjection::advanceToEvent() project on constraints. solver failed." <<std::endl ;
       return;
     }
-    _nsds->updateInput(model()->currentTime(),0);
+    _nsds->updateInput(nextTime(),0);
 
     DEBUG_EXPR_WE(std ::cout << "After update input" << std::endl;
 	       SP::InteractionsGraph indexSet1 = _nsds->topology()->indexSet(1);

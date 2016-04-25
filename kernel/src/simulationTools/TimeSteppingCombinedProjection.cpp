@@ -372,7 +372,7 @@ void TimeSteppingCombinedProjection::advanceToEvent()
       SP::Interaction inter = indexSet->bundle(*ui);
       inter->lambda(0)->zero();
     }
-    _nsds->updateInput(model()->currentTime(),0);
+    _nsds->updateInput(nextTime(),0);
 
 #ifdef TSPROJ_WITHOUT_PROJECTION
 
@@ -421,7 +421,7 @@ void TimeSteppingCombinedProjection::advanceToEvent()
         SP::Interaction inter = indexSet->bundle(*ui);
         inter->lambda(0)->zero();
       }
-      _nsds->updateInput(model()->currentTime(),0);
+      _nsds->updateInput(nextTime(),0);
     }
 
     //Store the q vector of each DS.
@@ -484,7 +484,7 @@ void TimeSteppingCombinedProjection::advanceToEvent()
 
 
 
-      _nsds->updateInput(model()->currentTime(),0);
+      _nsds->updateInput(nextTime(),0);
 
 
 

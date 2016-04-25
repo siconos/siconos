@@ -349,7 +349,7 @@ void TimeStepping::update(unsigned int levelInput)
   DEBUG_BEGIN("TimeStepping::update(unsigned int levelInput)\n");
   // 1 - compute input (lambda -> r)
   if (!_allNSProblems->empty())
-    _nsds->updateInput(model()->currentTime(),levelInput);
+    _nsds->updateInput(nextTime(),levelInput);
 
 
   
@@ -367,7 +367,7 @@ void TimeStepping::update(unsigned int levelInput)
     for (unsigned int level = _levelMinForOutput;
          level < _levelMaxForOutput + 1;
          level++)
-      _nsds->updateOutput(model()->currentTime(),level);
+      _nsds->updateOutput(nextTime(),level);
   }
   DEBUG_END("TimeStepping::update(unsigned int levelInput)\n");
 
@@ -407,8 +407,8 @@ void TimeStepping::initializeNewtonLoop()
     assert(_levelMaxForOutput >= _levelMinForOutput);
     //    assert(_levelMinForInput >=0);
     assert(_levelMaxForInput >= _levelMinForInput);
-    _nsds->updateOutput(model()->currentTime(),_levelMinForOutput);
-    _nsds->updateInput(model()->currentTime(),_levelMaxForInput);
+    _nsds->updateOutput(nextTime(),_levelMinForOutput);
+    _nsds->updateInput(nextTime(),_levelMaxForInput);
   }
 
   SP::DynamicalSystemsGraph dsGraph = _nsds->dynamicalSystems();

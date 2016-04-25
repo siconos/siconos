@@ -115,10 +115,9 @@ double Simulation::startingTime() const
 
 double Simulation::nextTime() const
 {
-  DEBUG_PRINT("Simulation::nextTime()\n");
-  DEBUG_PRINTF(" _eventsManager->nextTime()= %f\n", _eventsManager->nextTime() );
-  DEBUG_PRINTF(" _model->currentTime()= %f\n", _model.lock()->currentTime() );
-  
+  // DEBUG_PRINT("Simulation::nextTime()\n");
+  // DEBUG_PRINTF(" _eventsManager->nextTime()= %f\n", _eventsManager->nextTime() );
+  // DEBUG_PRINTF(" _model->currentTime()= %f\n", _model.lock()->currentTime() );
   return _eventsManager->nextTime();
 }
 
@@ -369,7 +368,7 @@ int Simulation::computeOneStepNSProblem(int Id)
     RuntimeException::selfThrow("Simulation - computeOneStepNSProblem, OneStepNSProblem == NULL, Id: " + Id);
 
   DEBUG_END("Simulation::computeOneStepNSProblem(int Id)\n");
-  return (*_allNSProblems)[Id]->compute(model()->currentTime());
+  return (*_allNSProblems)[Id]->compute(nextTime());
 
 
 }
