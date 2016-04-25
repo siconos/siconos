@@ -150,7 +150,6 @@ double NewMarkAlphaOSI::computeResidu()
   double t = _simulation->nextTime(); // End of the time step
   // Iteration through the set of Dynamical Systems.
   //
-  DSIterator it;
   SP::DynamicalSystem ds; // Current Dynamical System.
   Type::Siconos dsType ; // Type of the current DS.
   double maxResidu = 0.0;
@@ -386,7 +385,6 @@ void NewMarkAlphaOSI::initialize()
   // Initialize OneStepIntegrator
   OneStepIntegrator::initialize();
   // Initialize W, acceleration-like for all ds
-  ConstDSIterator itDS;
   Type::Siconos dsType ;    // Type of the current DS.
   DynamicalSystemsGraph::VIterator dsi, dsend;
   for (std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
@@ -398,7 +396,7 @@ void NewMarkAlphaOSI::initialize()
     // allocate memory for work space for Newton iteration procedure
     ds->allocateWorkVector(DynamicalSystem::local_buffer, WMap[ds->number()]->size(0));
     //Allocate the memory to stock the acceleration-like variable
-    dsType = Type::value(**itDS); // Its type
+    dsType = Type::value(*ds); // Its type
     if ((dsType == Type::LagrangianDS) || (dsType == Type::LagrangianLinearTIDS))
     {
       ds->allocateWorkVector(DynamicalSystem::acce_like, ds->getDim()); // allocate memory for the acceleration-like of DS
@@ -556,8 +554,6 @@ void NewMarkAlphaOSI::integrate(double& t_ini, double& t_end, double& t_out, int
 void NewMarkAlphaOSI::updateState(const unsigned int level)
 {
   // Compute all required (ie time-dependent) data for the DS of the OSI.
-  DSIterator it;
-
   if (level == 1) // ie impact case: compute velocity
   {
     DynamicalSystemsGraph::VIterator dsi, dsend;
@@ -708,7 +704,6 @@ void NewMarkAlphaOSI::DenseOutputallDSs(double t)
   (*_vec3)(5) = (20.0 * std::pow(theta, 3)) / std::pow(h, 2);
   //
   SP::SimpleMatrix Matrix_coeffs;
-  ConstDSIterator itDS;
   Type::Siconos dsType;    // Type of the current DS
 
   DynamicalSystemsGraph::VIterator dsi, dsend;

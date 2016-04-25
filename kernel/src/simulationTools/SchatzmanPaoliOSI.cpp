@@ -475,7 +475,6 @@ double SchatzmanPaoliOSI::computeResidu()
 
   // Iteration through the set of Dynamical Systems.
   //
-  DSIterator it;
   SP::DynamicalSystem ds; // Current Dynamical System.
   Type::Siconos dsType ; // Type of the current DS.
 
@@ -749,8 +748,6 @@ void SchatzmanPaoliOSI::computeFreeState()
 
   // Iteration through the set of Dynamical Systems.
   //
-  DSIterator it; // Iterator through the set of DS.
-
   SP::DynamicalSystem ds; // Current Dynamical System.
   SP::SiconosMatrix W; // W SchatzmanPaoliOSI matrix of the current DS.
   Type::Siconos dsType ; // Type of the current DS.

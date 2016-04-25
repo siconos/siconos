@@ -218,7 +218,6 @@ void LsodarOSI::initialize()
 {
   OneStepIntegrator::initialize();
   _xWork.reset(new BlockVector());
-  DSIterator itDS;
   std::string type;
   // initialize xWork with x values of the dynamical systems present in the set.
 
