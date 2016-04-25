@@ -384,7 +384,7 @@ SICONOS_IO_REGISTER_WITH_BASES(EqualityConditionNSL,(NonSmoothLaw),
 )
 SICONOS_IO_REGISTER(OneStepIntegrator,
   (_integratorType)
-  (OSIDynamicalSystems)
+  (_dynamicalSystemsGraph)
   (_sizeMem)
   (_simulation)
   (_extraAdditionalTerms))
