@@ -241,9 +241,9 @@ void EventDriven::initOSNS()
   {
     OSI::TYPES  osiType = (*_allOSI->begin())->getType();
     if (osiType == OSI::LSODAROSI || osiType == OSI::HEM5OSI) //EventDriven associated with LsodarOSI OSI
-    {      
+    {
     }
-    else if (osiType == OSI::NEWMARKALPHAOSI) // EventDrivent asscociated with NewMarkAlpha
+    else if (osiType == OSI::NEWMARKALPHAOSI) // EventDriven associated with NewMarkAlpha
     {
       if (_allNSProblems->size() != 3)
         RuntimeException::selfThrow
@@ -259,12 +259,13 @@ void EventDriven::initOSNS()
       RuntimeException::selfThrow(" EventDriven::initialize, OSI not yet implemented.");
     }
 
-    if (!((*_allNSProblems)[SICONOS_OSNSP_ED_IMPACT])) // ie if the impact problem does not
-      // exist
+    if (!((*_allNSProblems)[SICONOS_OSNSP_ED_IMPACT])) /* ie if the impact problem does not
+                                                        *  exist */
       RuntimeException::selfThrow
       ("EventDriven::initialize, an EventDriven simulation must have an 'impact' non smooth problem.");
-    if (!((*_allNSProblems)[SICONOS_OSNSP_ED_SMOOTH_ACC])) // ie if the acceleration-level problem
-      // does not exist
+    
+    if (!((*_allNSProblems)[SICONOS_OSNSP_ED_SMOOTH_ACC])) /* ie if the acceleration-level problem
+                                                            * does not exist */
       RuntimeException::selfThrow
       ("EventDriven::initialize, an EventDriven simulation must have an 'acceleration' non smooth problem.");
     // Initialize OSNSP for impact problem and at the acceleration level
