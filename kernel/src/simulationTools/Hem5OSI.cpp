@@ -293,7 +293,6 @@ void Hem5OSI::fprob(integer* IFCN,
   fillvWork(NV, v);
 
   double t = *time;
-  _simulation->model()->setCurrentTime(t);
 
   SP::DynamicalSystemsGraph dsGraph =  _dynamicalSystemsGraph;
 
@@ -460,12 +459,12 @@ void Hem5OSI::fprob(integer* IFCN,
 //   std11::static_pointer_cast<EventDriven>(_simulation)->computeJacobianfx(shared_from_this(), sizeOfX, time, x, jacob);
 // }
 
-void Hem5OSI::initialize()
+void Hem5OSI::initialize(Model& m)
 {
 
-  DEBUG_PRINT("Hem5OSI::initialize()\n");
+  DEBUG_PRINT("Hem5OSI::initialize(Model& m)\n");
 
-  OneStepIntegrator::initialize();
+  OneStepIntegrator::initialize(m);
   _qWork.reset(new BlockVector());
   _vWork.reset(new BlockVector());
   _aWork.reset(new BlockVector());

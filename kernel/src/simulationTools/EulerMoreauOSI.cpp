@@ -148,9 +148,9 @@ SP::SiconosMatrix EulerMoreauOSI::WBoundaryConditions(SP::DynamicalSystem ds)
 }
 
 
-void EulerMoreauOSI::initialize()
+void EulerMoreauOSI::initialize(Model& m)
 {
-  OneStepIntegrator::initialize();
+  OneStepIntegrator::initialize(m);
   // Get initial time
   double t0 = _simulation->startingTime();
 

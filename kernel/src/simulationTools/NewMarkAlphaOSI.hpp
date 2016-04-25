@@ -225,7 +225,7 @@ public:
                                  OneStepNSProblem* osnsp);
   
   /** initialize */
-  void initialize();
+  void initialize(Model& m);
 
   /** prepare for Newton Iteration 
    * \param time

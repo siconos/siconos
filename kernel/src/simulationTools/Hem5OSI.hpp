@@ -251,7 +251,7 @@ public:
 
   /** initialization of the integrator
    */
-  void initialize();
+  void initialize(Model& m);
 
   /** integrate the system, between tinit and tend (->iout=true), with possible stop at tout (->iout=false)
    *  \param tinit initial time

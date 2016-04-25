@@ -301,7 +301,7 @@ public:
       invariant systems, we compute time invariant operator (example :
       W)
    */
-  virtual void initialize();
+  virtual void initialize(Model& m);
 
   /** init WMap[ds] EulerMoreauOSI matrix at time t
    *  \param time the time (double)

@@ -214,9 +214,9 @@ void LsodarOSI::jacobianfx(integer* sizeOfX, doublereal* time, doublereal* x, in
   std11::static_pointer_cast<EventDriven>(_simulation)->computeJacobianfx(*this, sizeOfX, time, x, jacob);
 }
 
-void LsodarOSI::initialize()
+void LsodarOSI::initialize(Model& m)
 {
-  OneStepIntegrator::initialize();
+  OneStepIntegrator::initialize(m);
   _xWork.reset(new BlockVector());
   std::string type;
   // initialize xWork with x values of the dynamical systems present in the set.

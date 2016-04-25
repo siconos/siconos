@@ -100,11 +100,11 @@ unsigned int D1MinusLinearOSI::numberOfIndexSets() const
   RuntimeException::selfThrow("D1MinusLinearOSI::numberOfIndexSet - not implemented for D1minusLinear of type: " + _typeOfD1MinusLinearOSI);
   return 0;
 }
-void D1MinusLinearOSI::initialize()
+void D1MinusLinearOSI::initialize(Model & m)
 {
   DEBUG_BEGIN("D1MinusLinearOSI::initialize() \n");
 
-  OneStepIntegrator::initialize();
+  OneStepIntegrator::initialize(m);
 
   DynamicalSystemsGraph::VIterator dsi, dsend;
   for (std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)

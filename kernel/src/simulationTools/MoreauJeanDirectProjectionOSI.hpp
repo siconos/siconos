@@ -134,7 +134,7 @@ public:
       invariant systems, we compute time invariant operator (example :
       W)
   */
-  void initialize();
+  void initialize(Model& m);
 
   /** Apply the rule to one Interaction to known if is it should be included
    * in the IndexSet of level i

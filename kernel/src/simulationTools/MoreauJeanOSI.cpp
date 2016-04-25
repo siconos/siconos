@@ -156,9 +156,9 @@ SP::SiconosMatrix MoreauJeanOSI::WBoundaryConditions(SP::DynamicalSystem ds)
 }
 
 
-void MoreauJeanOSI::initialize()
+void MoreauJeanOSI::initialize(Model& m)
 {
-  OneStepIntegrator::initialize();
+  OneStepIntegrator::initialize(m);
   // Get initial time
   double t0 = _simulation->startingTime();
   // Compute W(t0) for all ds

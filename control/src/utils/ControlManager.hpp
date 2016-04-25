@@ -172,9 +172,10 @@ public:
    * \param name the type (int) of the Sensor
    * \param td the SP::TimeDiscretisation of the Sensor
    * \param ds the DynamicalSystem used in the Sensor
+   * \param m the model
    * \return a SP::Sensor to the added Sensor
    */
-  SP::Sensor addAndRecordSensor(int name, SP::TimeDiscretisation td, SP::DynamicalSystem ds);
+  SP::Sensor addAndRecordSensor(int name, SP::TimeDiscretisation td, SP::DynamicalSystem ds, const Model& m);
 
   /** Add an existing Sensor to the Manager
    * \param s a SP::Sensor to the Sensor we want to add
@@ -189,7 +190,7 @@ public:
    * \param s a SP::Sensor to the Sensor we want to add
    * \param td the TimeDiscretisation used for the associated Event
    */
-  void addAndRecordSensorPtr(SP::Sensor s, SP::TimeDiscretisation td);
+  void addAndRecordSensorPtr(SP::Sensor s, SP::TimeDiscretisation td, const Model& m);
 
   /** To build and add a new Actuator in the Manager
    * \param name the type of the Actuator
@@ -206,9 +207,10 @@ public:
    * \param name the type of the Actuator
    * \param t the SP::TimeDiscretisation of the Actuator
    * \param sensor the ControlSensor used to feed the Actuator
+   * \param m the model
    * \return a SP::Actuator to the added Actuator
    */
-  SP::Actuator addAndRecordActuator(int name, SP::TimeDiscretisation t, SP::ControlSensor sensor);
+  SP::Actuator addAndRecordActuator(int name, SP::TimeDiscretisation t, SP::ControlSensor sensor, const Model& m);
 
   /** Add an existing Actuator to the manager
    * \param act a SP::Actuator to the Actuator we want to add
@@ -223,7 +225,7 @@ public:
    * \param act a SP::Actuator to the Actuator we want to add
    * \param td the TimeDiscretisation used for the associated Event
    */
-  void addAndRecordActuatorPtr(SP::Actuator act, SP::TimeDiscretisation td);
+  void addAndRecordActuatorPtr(SP::Actuator act, SP::TimeDiscretisation td, const Model& m);
 
   /** To build and add a new Observer in the Manager
    * \param name the type of the Observer
@@ -244,7 +246,7 @@ public:
    * \param xHat0 the initial guess for the state
    * \return a SP::Observer to the added Observer
    */
-  SP::Observer addAndRecordObserver(int name, SP::TimeDiscretisation td, SP::ControlSensor sensor, const SiconosVector& xHat0);
+  SP::Observer addAndRecordObserver(int name, SP::TimeDiscretisation td, SP::ControlSensor sensor, const SiconosVector& xHat0, const Model& m);
 
   /** Add an existing Observer to the manager
    * \param obs a SP::Observer to the Observer we want to add
@@ -259,7 +261,7 @@ public:
    * \param obs a SP::Observer to the Observer we want to add
    * \param td the TimeDiscretisation used for the associated Event
    */
-  void addAndRecordObserverPtr(SP::Observer obs, SP::TimeDiscretisation td);
+  void addAndRecordObserverPtr(SP::Observer obs, SP::TimeDiscretisation td, const Model& m);
 
 
   /** initialize all Sensors, Observers and Actuators.

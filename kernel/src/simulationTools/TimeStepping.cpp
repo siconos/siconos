@@ -129,7 +129,6 @@ void TimeStepping::updateIndexSet(unsigned int i)
   // - gray_color : discovered vertex (Interaction) but searching descendants
   // - black_color : discovered vertex (Interaction) together with the descendants
 
-  assert(!_model.expired());
   assert(_nsds);
   assert(_nsds->topology());
 

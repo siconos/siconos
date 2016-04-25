@@ -204,8 +204,9 @@ public:
   // --- OTHERS ... ---
 
   /** initialise the integrator
+   * \param m a Model
    */
-  virtual void initialize() = 0;
+  virtual void initialize(Model& m ) = 0;
 
 
   /** compute the initial state of the Newton loop.

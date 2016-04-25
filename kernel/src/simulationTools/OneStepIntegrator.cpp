@@ -40,11 +40,10 @@ OneStepIntegrator::OneStepIntegrator(const OSI::TYPES& id):
 {
 }
 
-void OneStepIntegrator::initialize()
+void OneStepIntegrator::initialize( Model& m )
 {
   if (_extraAdditionalTerms)
   {
-    Model& m = *_simulation->model();
     _extraAdditionalTerms->init(*m.nonSmoothDynamicalSystem()->topology()->dSG(0), m);
   }
 

@@ -145,9 +145,9 @@ SP::SiconosMatrix SchatzmanPaoliOSI::WBoundaryConditions(SP::DynamicalSystem ds)
 }
 
 
-void SchatzmanPaoliOSI::initialize()
+void SchatzmanPaoliOSI::initialize(Model& m)
 {
-  OneStepIntegrator::initialize();
+  OneStepIntegrator::initialize(m);
   // Get initial time
   double t0 = _simulation->startingTime();
   // Compute W(t0) for all ds

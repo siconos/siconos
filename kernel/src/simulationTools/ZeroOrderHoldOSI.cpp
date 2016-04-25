@@ -49,15 +49,15 @@ using namespace RELATION;
 ZeroOrderHoldOSI::ZeroOrderHoldOSI():
   OneStepIntegrator(OSI::ZOHOSI), _useGammaForRelation(false) {}
 
-void ZeroOrderHoldOSI::initialize()
+void ZeroOrderHoldOSI::initialize(Model& m)
 {
-  OneStepIntegrator::initialize();
+  OneStepIntegrator::initialize(m);
   DynamicalSystemsGraph& DSG0 = *_dynamicalSystemsGraph;
   InteractionsGraph& IG0 = *_simulation->nonSmoothDynamicalSystem()->topology()->indexSet0();
   DynamicalSystemsGraph::OEIterator oei, oeiend;
   Type::Siconos dsType;
 
-  Model& model = *_simulation->model();
+
   DynamicalSystemsGraph::VIterator dsi, dsend;
 
   for (std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
@@ -72,7 +72,7 @@ void ZeroOrderHoldOSI::initialize()
     DynamicalSystemsGraph::VDescriptor dsgVD = DSG0.descriptor(ds);
     if (!DSG0.Ad.hasKey(dsgVD))
     {
-      DSG0.Ad[dsgVD].reset(new MatrixIntegrator(*ds, model));
+      DSG0.Ad[dsgVD].reset(new MatrixIntegrator(*ds, m));
       if (DSG0.Ad.at(dsgVD)->isConst())
         DSG0.Ad.at(dsgVD)->integrate();
     }
@@ -83,14 +83,14 @@ void ZeroOrderHoldOSI::initialize()
     {
       SP::SiconosMatrix E(new SimpleMatrix(ds->getN(), ds->getN(), 0));
       E->eye();
-      DSG0.AdInt.insert(dsgVD, SP::MatrixIntegrator(new MatrixIntegrator(*ds, model, E)));
+      DSG0.AdInt.insert(dsgVD, SP::MatrixIntegrator(new MatrixIntegrator(*ds, m, E)));
       if (DSG0.AdInt.at(dsgVD)->isConst())
         DSG0.AdInt.at(dsgVD)->integrate();
     }
 
     // init extra term, usually to add control terms
     if (_extraAdditionalTerms)
-      _extraAdditionalTerms->init(DSG0, model);
+      _extraAdditionalTerms->init(DSG0, m);
 
     // Now we search for an Interaction dedicated to control
     for (std11::tie(avi, aviend) = DSG0.adjacent_vertices(dsgVD);
@@ -112,13 +112,13 @@ void ZeroOrderHoldOSI::initialize()
           indxIter++;
           if (!relR.isJacLgPlugged())
           {
-            DSG0.Bd[dsgVD].reset(new MatrixIntegrator(*ds, model, relR.B()));
+            DSG0.Bd[dsgVD].reset(new MatrixIntegrator(*ds, m, relR.B()));
             if (DSG0.Bd.at(dsgVD)->isConst())
               DSG0.Bd.at(dsgVD)->integrate();
           }
           else
           {
-            DSG0.Bd[dsgVD].reset(new MatrixIntegrator(*ds, model, relR.getPluging(), inter.getSizeOfY()));
+            DSG0.Bd[dsgVD].reset(new MatrixIntegrator(*ds, m, relR.getPluging(), inter.getSizeOfY()));
           }
         }
         else

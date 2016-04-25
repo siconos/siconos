@@ -87,7 +87,7 @@ public:
   // --- OTHER FUNCTIONS ---
 
   /** initialization of the ZeroOrderHoldOSI integrator */
-  void initialize();
+  void initialize(Model& m);
 
   /** return the maximum of all norms for the "ZeroOrderHoldOSI-discretized" residus of DS
     \return a double

@@ -380,10 +380,10 @@ void NewMarkAlphaOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_i
 }
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-void NewMarkAlphaOSI::initialize()
+void NewMarkAlphaOSI::initialize(Model& m)
 {
   // Initialize OneStepIntegrator
-  OneStepIntegrator::initialize();
+  OneStepIntegrator::initialize(m);
   // Initialize W, acceleration-like for all ds
   Type::Siconos dsType ;    // Type of the current DS.
   DynamicalSystemsGraph::VIterator dsi, dsend;

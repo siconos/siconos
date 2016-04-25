@@ -87,7 +87,6 @@ void TimeSteppingD1Minus::updateIndexSet(unsigned int i)
   // To update IndexSet i: add or remove Interactions from
   // this set, depending on y values.
 
-  assert(!_model.expired());
   assert(_nsds);
   assert(_nsds->topology());
 

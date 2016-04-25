@@ -89,7 +89,6 @@ void EventDriven::insertIntegrator(SP::OneStepIntegrator osi)
 
 void EventDriven::updateIndexSet(unsigned int i)
 {
-  assert(!_model.expired());
   assert(_nsds);
   assert(_nsds->topology());
   SP::Topology topo = _nsds->topology();
@@ -192,7 +191,6 @@ void EventDriven::updateIndexSet(unsigned int i)
 void EventDriven::updateIndexSetsWithDoubleCondition()
 {
 
-  assert(!_model.expired());
   assert(_nsds);
   assert(_nsds->topology());
 
@@ -224,7 +222,6 @@ void EventDriven::updateIndexSetsWithDoubleCondition()
 
 void EventDriven::initOSNS()
 {
-  assert(!_model.expired());
   assert(_nsds);
   assert(_nsds->topology());
   // for all Interactions in indexSet[i-1], compute y[i-1] and
@@ -365,7 +362,6 @@ void EventDriven::computef(OneStepIntegrator& osi, integer * sizeOfX, doublereal
   lsodar.fillXWork(sizeOfX, x);
 
   double t = *time;
-  model()->setCurrentTime(t);
   // Update Jacobian matrices at all interactions
   InteractionsGraph::VIterator ui, uiend;
   for (std11::tie(ui, uiend) = _indexSet0->vertices(); ui != uiend; ++ui)
@@ -442,7 +438,6 @@ void EventDriven::computeJacobianfx(OneStepIntegrator& osi,
   // Compute the jacobian of the vector field according to x for the
   // current ds
   double t = *time;
-  model()->setCurrentTime(t);
   lsodar.computeJacobianRhs(t, *_DSG0);
 
   // Save jacobianX values from dynamical system into current jacob
@@ -492,7 +487,6 @@ void EventDriven::computeg(SP::OneStepIntegrator osi,
                            doublereal* x, integer * ng,
                            doublereal * gOut)
 {
-  assert(!_model.expired());
   assert(_nsds);
   assert(_nsds->topology());
   InteractionsGraph::VIterator ui, uiend;
@@ -505,7 +499,6 @@ void EventDriven::computeg(SP::OneStepIntegrator osi,
   lsodar->fillXWork(sizeOfX, x);
   //
   double t = *time;
-  model()->setCurrentTime(t);
   if (!_allNSProblems->empty())
   {
     if (((*_allNSProblems)[SICONOS_OSNSP_ED_SMOOTH_ACC]->hasInteractions()))
@@ -669,7 +662,6 @@ void EventDriven::advanceToEvent()
       // add new event to the list to be handled
       cout << "A new event occurs at time: " << _tout <<endl;
       _eventsManager->scheduleNonSmoothEvent(*this, _tout);
-      model()->setCurrentTime(_tout);
     }
   }
   else if (osiType == OSI::LSODAROSI || osiType == OSI::HEM5OSI)
@@ -734,7 +726,6 @@ void EventDriven::advanceToEvent()
       //   }
     }
     // Set model time to _tout
-    model()->setCurrentTime(_tout);
     //update output[0], output[1], output[2]
     _nsds->updateOutput(nextTime(),0);
     _nsds->updateOutput(nextTime(),1);
@@ -1095,7 +1086,6 @@ void EventDriven::LocalizeFirstEvent()
     _numIter++;
     double t_i = (t_b + t_a) / 2.0; // mid-time of the current interval
     // set t_i as the current time
-    model()->setCurrentTime(t_i);
     // Generate dense output for all DSs at the time t_i
     for (OSIIterator itosi = _allOSI->begin(); itosi != _allOSI->end(); ++itosi)
     {
@@ -1108,7 +1098,7 @@ void EventDriven::LocalizeFirstEvent()
     // If _istate = 3 or 5, i.e. some contacts are closed, we need to compute y[0] for all interactions
     if ((_istate == 3) || (_istate == 5)) // some contacts are closed
     {
-      _nsds->updateOutput(nextTime(),0);
+      _nsds->updateOutput(t_i,0);
     }
     // If _istate = 4 or 5, i.e. some contacts are detached, we need to solve LCP at the acceleration level to compute contact forces
     if ((_istate == 4) || (_istate == 5)) // some contacts are opened

@@ -57,10 +57,10 @@ MoreauJeanDirectProjectionOSI::MoreauJeanDirectProjectionOSI(double theta, doubl
   _activateYVelThreshold =   SICONOS_MPC_DEFAULT_ACTIVATION_VEL_THRESHOLD;
 }
 
-void MoreauJeanDirectProjectionOSI::initialize()
+void MoreauJeanDirectProjectionOSI::initialize(Model& m)
 {
 
-  MoreauJeanOSI::initialize();
+  MoreauJeanOSI::initialize(m);
   DynamicalSystemsGraph::VIterator dsi, dsend;
   for (std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
   {

@@ -89,11 +89,7 @@ protected:
       its id) */
   SP::OneStepNSProblems _allNSProblems;
 
-  /** A link to the Model which contains the Simulation */
-  std11::weak_ptr<Model> _model;
-
-  /** A pointer to the nonsmooth dynamical system that is
-   * simulated
+  /** A pointer to the simulated nonsmooth dynamical system
    */
   SP::NonSmoothDynamicalSystem _nsds;
 
@@ -378,13 +374,6 @@ public:
    */
   virtual void insertNonSmoothProblem(SP::OneStepNSProblem osns, int Id = SICONOS_OSNSP_DEFAULT);
 
-  /** get the Model which contains the Simulation
-   *  \return the Model of this simulation
-   */
-  inline SP::Model model() const
-  {
-    return _model.lock();
-  }
 
   /** get the NonSmoothDynamicalSystem
    *  \return NonSmoothDynamicalSystem

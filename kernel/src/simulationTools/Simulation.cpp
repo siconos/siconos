@@ -48,9 +48,8 @@
 // #define DEBUG_MESSAGES
 #include <debug.h>
 #include <fstream>
+
 #include "Model.hpp"
-
-
 
 
 
@@ -115,9 +114,6 @@ double Simulation::startingTime() const
 
 double Simulation::nextTime() const
 {
-  // DEBUG_PRINT("Simulation::nextTime()\n");
-  // DEBUG_PRINTF(" _eventsManager->nextTime()= %f\n", _eventsManager->nextTime() );
-  // DEBUG_PRINTF(" _model->currentTime()= %f\n", _model.lock()->currentTime() );
   return _eventsManager->nextTime();
 }
 
@@ -206,7 +202,6 @@ void Simulation::initialize(SP::Model m, bool withOSI)
 {
   // === Connection with the model ===
   assert(m && "Simulation::initialize(model) - model = NULL.");
-  _model = std11::weak_ptr<Model>(m);
 
   _T = m->finalT();
 
@@ -259,7 +254,7 @@ void Simulation::initialize(SP::Model m, bool withOSI)
       // }
 
       (*itosi)->setSimulationPtr(shared_from_this());
-      (*itosi)->initialize();
+      (*itosi)->initialize(*m);
 
     }
   }
@@ -307,11 +302,6 @@ void Simulation::initialize(SP::Model m, bool withOSI)
 
   _tend =  _eventsManager->nextTime();
 
-  // Set Model current time (warning: current time of the model
-  // corresponds to the time of the next event to be treated).
-  model()->setCurrentTime(nextTime());
-
-
   // End of initialize:
 
   //  - all OSI and OSNS (ie DS and Interactions) states are computed
@@ -338,9 +328,6 @@ void Simulation::initialize(SP::Model m, bool withOSI)
 
 void Simulation::initializeInteraction(double time, SP::Interaction inter)
 {
-  assert(model() && "Simulation::initialize() must be called before "
-         "Simulation::initializeInteraction()");
-
   // determine which (lower and upper) levels are required for this Interaction
   // in this Simulation.
   computeLevelsForInputAndOutput(inter);
@@ -448,8 +435,6 @@ void Simulation::processEvents()
     {
       updateIndexSets();
     }
-    // Set Model current time
-    model()->setCurrentTime(_eventsManager->nextTime());
   }
 
   /* should be evaluated only if needed */

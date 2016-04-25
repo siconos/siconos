@@ -26,10 +26,10 @@
 //#define DEBUG_WHERE_MESSAGES
 #include <debug.h>
 
-void MoreauJeanCombinedProjectionOSI::initialize()
+void MoreauJeanCombinedProjectionOSI::initialize(Model& m)
 {
 
-  MoreauJeanOSI::initialize();
+  MoreauJeanOSI::initialize(m);
   DynamicalSystemsGraph::VIterator dsi, dsend;
   for (std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
   {
