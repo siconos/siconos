@@ -45,8 +45,7 @@
 #define DEPRECATED_OSI_API(func) func
 #endif
 
-
-/**  Generic object to manage DynamicalSystem(s) time-integration
+/**  Generic class to manage DynamicalSystem(s) time-integration
  *
  *  \author SICONOS Development Team - copyright INRIA
  *  \version 3.0.0.
@@ -54,7 +53,21 @@
  *
  * !!! This is a virtual class, interface for some specific integrators !!!
  *
- * At the time, available integrators are: MoreauJeanOSI, EulerMoreauOSI, LsodarOSI, Hem5OSI
+ * At the time, available integrators are:
+ * <ul>
+ * <li> EulerMoreauOSI </li>
+ * <li> MoreauJeanOSI </li>
+ * <li> MoreauJeanCombinedProjectionOSI </li>
+ * <li> MoreauJeanDirectProjectionOSI </li>
+ * <li> D1MinusLinearOSI </li>
+ * <li> D1MinusLinearOSIHalfExplicitAccelerationLevelOSI </li>
+ * <li> D1MinusLinearOSIHalfExplicitVelocityLevelOSI </li>
+ * <li> SchatzmanPaoliOSI </li>
+ * <li> LsodarOSI </li>
+ * <li> Hem5OSI </li>
+ * <li> NewMarkAlphaOSI </li>
+ * <li> ZeroOrderHoldOSI </li>
+ * </ul>
  *
  */
 class OneStepIntegrator :public std11::enable_shared_from_this<OneStepIntegrator>
@@ -114,66 +127,75 @@ public:
 
 // --- GETTERS/SETTERS ---
 
-/** get the type of the OneStepIntegrator
- *  \return std::string : the type of the OneStepIntegrator
- */
+  /** get the type of the OneStepIntegrator
+   *  \return std::string : the type of the OneStepIntegrator
+   */
   inline OSI::TYPES getType() const
   {
     return _integratorType;
   }
 
-/** set the type of the OneStepIntegrator
- *  \param newType std::string : the type of the OneStepIntegrator
- */
+  /** set the type of the OneStepIntegrator
+   *  \param newType std::string : the type of the OneStepIntegrator
+   */
   inline void setType(const OSI::TYPES& newType)
   {
     _integratorType = newType;
   };
 
+  /** Check if the dynamical system bundle in the node of the
+   * _dynamicalSystemGraph is interagted or not by this osi.
+   * \param dsi the iterator on the node of the graph
+   */
   inline bool checkOSI(DynamicalSystemsGraph::VIterator dsi)
   {
     return  (_dynamicalSystemsGraph->osi[*dsi].get()) == this;
   };
+
+  /** Check if the dynamical system bundle in the node of the
+   * _dynamicalSystemGraph is interagted or not by this osi.
+   * \param dsgv the descriptor on the node of the graph
+   */
   inline bool checkOSI(DynamicalSystemsGraph::VDescriptor dsgv)
   {
     return  (_dynamicalSystemsGraph->osi[dsgv].get()) == this;
   };
 
-/** get the set of DynamicalSystem associated with the Integrator
- *  \return a SP::DynamicalSystemsGraph
- */
+  /** get the set of DynamicalSystem associated with the Integrator
+   *  \return a SP::DynamicalSystemsGraph
+   */
   inline SP::DynamicalSystemsGraph dynamicalSystemsGraph() const
   {
     return _dynamicalSystemsGraph;
   };
 
-/** get _sizeMem value
- *  \return an unsigned int
- */
+  /** get _sizeMem value
+   *  \return an unsigned int
+   */
   inline unsigned int getSizeMem() const
   {
     return _sizeMem;
   };
 
-/** set _sizeMem
- *  \param newValue an unsigned int
- */
+  /** set _sizeMem
+   *  \param newValue an unsigned int
+   */
   inline void setSizeMem(unsigned int newValue)
   {
     _sizeMem = newValue;
   };
 
-/** get the Simulation that owns the OneStepIntegrator
- *  \return a pointer to Simulation
- */
+  /** get the Simulation that owns the OneStepIntegrator
+   *  \return a pointer to Simulation
+   */
   inline SP::Simulation simulation() const
   {
     return _simulation;
   }
 
-/** set the Simulation of the OneStepIntegrator
- *  \param newS a pointer to Simulation
- */
+  /** set the Simulation of the OneStepIntegrator
+   *  \param newS a pointer to Simulation
+   */
   inline void setSimulationPtr(SP::Simulation newS)
   {
     _simulation = newS;
@@ -191,8 +213,8 @@ public:
   virtual void computeInitialNewtonState();
 
   /** return the maximum of all norms for the discretized residus of DS
-      \return a double
-  */
+   *  \return a double
+   */
   virtual double computeResidu();
 
   /** integrates the Dynamical System linked to this integrator, without taking constraints
