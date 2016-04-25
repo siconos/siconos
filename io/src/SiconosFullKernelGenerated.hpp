@@ -215,8 +215,7 @@ SICONOS_IO_REGISTER_WITH_BASES(SchatzmanPaoliOSI,(OneStepIntegrator),
 SICONOS_IO_REGISTER_WITH_BASES(LagrangianCompliantR,(LagrangianR),
   (_pluginJachlambda))
 SICONOS_IO_REGISTER(NonSmoothLaw,
-  (_size)
-  (_sizeProjectOnConstraints))
+  (_size))
 SICONOS_IO_REGISTER(BoundaryCondition,
   (_velocityIndices)
   (_prescribedVelocity)
