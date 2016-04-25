@@ -407,8 +407,7 @@ void OneStepNSProblem::initialize(SP::Simulation sim)
   // constraints declared in the topology.
   if (_maxSize == 0) // if maxSize not set explicitely by user before
     // initialize
-    _maxSize = simulation()->model()->
-               nonSmoothDynamicalSystem()->topology()->numberOfConstraints();
+    _maxSize = simulation()->nonSmoothDynamicalSystem()->topology()->numberOfConstraints();
 }
 
 SP::SimpleMatrix OneStepNSProblem::getOSIMatrix(SP::OneStepIntegrator Osi, SP::DynamicalSystem ds)
