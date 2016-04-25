@@ -67,10 +67,6 @@ protected:
   /** "size" of the NonSmoothLaw */
   unsigned int _size;
 
-  /** size of the NonSmoothLaw to project on the constraints. It is not equal to _size in the case of friction.*/
-  unsigned int _sizeProjectOnConstraints;
-
-
   /** default constructor
    */
   NonSmoothLaw() {};
@@ -101,13 +97,6 @@ public:
   inline unsigned int size() const
   {
     return _size;
-  }
-  /** to get the significant size for the projection on constraints
-  *  \return the significant size for the projection on constraints
-  */
-  inline unsigned int sizeProjectOnConstraints() const
-  {
-    return _sizeProjectOnConstraints;
   }
 
   /** display the data of the NonSmoothLaw on the standard output
