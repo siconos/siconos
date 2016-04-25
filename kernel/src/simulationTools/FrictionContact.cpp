@@ -67,13 +67,13 @@ void FrictionContact::initialize(SP::Simulation sim)
 
   // get topology
   SP::Topology topology =
-    simulation()->model()->nonSmoothDynamicalSystem()->topology();
+    simulation()->nonSmoothDynamicalSystem()->topology();
 
   // Note that interactionBlocks is up to date since updateInteractionBlocks
   // has been called during OneStepNSProblem::initialize()
 
   // Fill vector of friction coefficients
-  int sizeMu = simulation()->model()->nonSmoothDynamicalSystem()
+  int sizeMu = simulation()->nonSmoothDynamicalSystem()
                ->topology()->indexSet(0)->size();
   _mu->reserve(sizeMu);
 

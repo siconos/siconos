@@ -550,7 +550,7 @@ void TimeSteppingDirectProjection::newtonSolve(double criterion, unsigned int ma
   _newtonNbIterations = 0; // number of Newton iterations
   int info = 0;
   //cout<<"||||||||||||||||||||||||||||||| ||||||||||||||||||||||||||||||| BEGIN NEWTON IT "<<endl;
-  bool isLinear  = (_model.lock())->nonSmoothDynamicalSystem()->isLinear();
+  bool isLinear  = _nsds->isLinear();
   SP::InteractionsGraph indexSet = _nsds->topology()->indexSet(0);
   initializeNewtonLoop();
 

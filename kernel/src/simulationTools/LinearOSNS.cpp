@@ -108,7 +108,7 @@ void LinearOSNS::initOSNSMatrix()
       _M.reset(new OSNSMatrix(maxSize(), _MStorageType));
     else // if(_MStorageType == 1) size = number of _interactionBlocks
       // = number of Interactionin the largest considered indexSet
-      if (indexSetLevel() != LEVELMAX && simulation()->model()->nonSmoothDynamicalSystem()->topology()->indexSetsSize() > indexSetLevel())
+      if (indexSetLevel() != LEVELMAX && simulation()->nonSmoothDynamicalSystem()->topology()->indexSetsSize() > indexSetLevel())
       {
         _M.reset(new OSNSMatrix(simulation()->indexSet(indexSetLevel())->size(), _MStorageType));
       }
@@ -589,8 +589,8 @@ bool LinearOSNS::preCompute(double time)
   // and are uptodate.
 
   // Get topology
-  SP::Topology topology = simulation()->model()->nonSmoothDynamicalSystem()->topology();
-  bool isLinear = simulation()->model()->nonSmoothDynamicalSystem()->isLinear();
+  SP::Topology topology = simulation()->nonSmoothDynamicalSystem()->topology();
+  bool isLinear = simulation()->nonSmoothDynamicalSystem()->isLinear();
 
   //   std::cout << "!b || !isLinear :"  << boolalpha <<  (!b || !isLinear) <<  std::endl;
 

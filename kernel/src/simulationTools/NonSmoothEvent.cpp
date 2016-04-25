@@ -68,8 +68,8 @@ void NonSmoothEvent::process(Simulation& simulation)
       // in) for post-event values and last interactionBlock (pos 1,
       // first in) for pre-event values.
 
-      simulation.model()->nonSmoothDynamicalSystem()->swapInMemory();  // To save pre-impact values
-      simulation.model()->nonSmoothDynamicalSystem()->pushInteractionsInMemory();  // To save pre-impact values
+      simulation.nonSmoothDynamicalSystem()->swapInMemory();  // To save pre-impact values
+      simulation.nonSmoothDynamicalSystem()->pushInteractionsInMemory();  // To save pre-impact values
 
       // solve the LCP-impact => y[1],lambda[1]
       eventDriven.computeOneStepNSProblem(SICONOS_OSNSP_ED_IMPACT); // solveLCPImpact();
@@ -91,8 +91,8 @@ void NonSmoothEvent::process(Simulation& simulation)
     }
 
     // Save results in memory
-    simulation.model()->nonSmoothDynamicalSystem()->swapInMemory();  // To save pre-impact values
-    simulation.model()->nonSmoothDynamicalSystem()->pushInteractionsInMemory();  // To save pre-impact values
+    simulation.nonSmoothDynamicalSystem()->swapInMemory();  // To save pre-impact values
+    simulation.nonSmoothDynamicalSystem()->pushInteractionsInMemory();  // To save pre-impact values
 
   }
 }

@@ -113,7 +113,7 @@ void MLCP::computeInteractionBlock(const InteractionsGraph::EDescriptor& ed)
   SP::Interaction inter2 = indexSet->bundle(indexSet->target(ed));
 
   assert(inter1 != inter2);
-  bool isLinear = simulation()->model()->nonSmoothDynamicalSystem()->isLinear();
+  bool isLinear = simulation()->nonSmoothDynamicalSystem()->isLinear();
 
   if (!_hasBeenUpdated || !isLinear)
     LinearOSNS::computeInteractionBlock(ed);

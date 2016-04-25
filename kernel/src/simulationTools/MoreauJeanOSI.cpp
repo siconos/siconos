@@ -160,7 +160,7 @@ void MoreauJeanOSI::initialize()
 {
   OneStepIntegrator::initialize();
   // Get initial time
-  double t0 = _simulation->model()->t0();
+  double t0 = _simulation->startingTime();
   // Compute W(t0) for all ds
 
 

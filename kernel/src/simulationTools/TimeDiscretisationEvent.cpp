@@ -40,8 +40,8 @@ void TimeDiscretisationEvent::process(Simulation& simulation)
   //simulation->updateOutput(0, 1);
   // Save state(s) in Memories (DS and Interactions, through OSI and OSNS).
 
-  simulation.model()->nonSmoothDynamicalSystem()->swapInMemory();  // To save pre-impact values
-  simulation.model()->nonSmoothDynamicalSystem()->pushInteractionsInMemory();  // To save pre-impact values
+  simulation.nonSmoothDynamicalSystem()->swapInMemory();  // To save pre-impact values
+  simulation.nonSmoothDynamicalSystem()->pushInteractionsInMemory();  // To save pre-impact values
 
 }
 

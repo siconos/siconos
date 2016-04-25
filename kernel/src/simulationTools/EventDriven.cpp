@@ -334,7 +334,7 @@ void EventDriven::initOSIRhs()
 
       SP::DynamicalSystem ds = osiDSGraph->bundle(*dsi);
       // Initialize right-hand side
-      ds->initRhs(model()->t0());
+      ds->initRhs(startingTime());
     }
   }
 }

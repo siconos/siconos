@@ -106,7 +106,7 @@ void OneStepNSProblem::updateInteractionBlocks()
   // Get index set from Simulation
   SP::InteractionsGraph indexSet = simulation()->indexSet(indexSetLevel());
 
-  bool isLinear = simulation()->model()->nonSmoothDynamicalSystem()->isLinear();
+  bool isLinear = simulation()->nonSmoothDynamicalSystem()->isLinear();
 
   // we put diagonal informations on vertices
   // self loops with bgl are a *nightmare* at the moment

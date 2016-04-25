@@ -152,7 +152,9 @@ void EulerMoreauOSI::initialize()
 {
   OneStepIntegrator::initialize();
   // Get initial time
-  double t0 = _simulation->model()->t0();
+  double t0 = _simulation->startingTime();
+
+  std::cout << std::endl;
   // Compute W(t0) for all ds
   DynamicalSystemsGraph::VIterator dsi, dsend;
   for (std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)

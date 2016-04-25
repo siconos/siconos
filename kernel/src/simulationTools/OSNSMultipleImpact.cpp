@@ -176,7 +176,7 @@ unsigned int OSNSMultipleImpact::EstimateNdataCols()
     _numberCols = _numberCols + (indexSet->bundle(*ui)->getSizeOfY());
   }
   // Number of columns for data at particles
-  SP::DynamicalSystemsGraph DSG = simulation()->model()->nonSmoothDynamicalSystem()->dynamicalSystems();
+  SP::DynamicalSystemsGraph DSG = simulation()->nonSmoothDynamicalSystem()->dynamicalSystems();
   DynamicalSystemsGraph::VIterator dsi, dsiend;
   for (std11::tie(dsi, dsiend) = DSG->vertices(); dsi != dsiend; ++dsi)
   {
@@ -336,8 +336,8 @@ void OSNSMultipleImpact::PreComputeImpact()
   SP::InteractionsGraph indexSet = simulation()->indexSet(indexSetLevel()); // get indexSet[1]
   Ncontact = indexSet->size();
   //2. Compute matrix _M
-  SP::Topology topology = simulation()->model()->nonSmoothDynamicalSystem()->topology();
-  bool isLinear = simulation()->model()->nonSmoothDynamicalSystem()->isLinear();
+  SP::Topology topology = simulation()->nonSmoothDynamicalSystem()->topology();
+  bool isLinear = simulation()->nonSmoothDynamicalSystem()->isLinear();
   if (!_hasBeenUpdated || !isLinear)
   {
     // Computes new _unitaryBlocks if required
@@ -472,7 +472,7 @@ void OSNSMultipleImpact::initialize(SP::Simulation sim)
   // Allocate the memory
   AllocateMemory();
   // get topology
-  SP::Topology topology = simulation()->model()->nonSmoothDynamicalSystem()->topology();
+  SP::Topology topology = simulation()->nonSmoothDynamicalSystem()->topology();
   // Note that _interactionBlocks is up to date since updateInteractionBlocks
   // has been called during OneStepNSProblem::initialize()
 
@@ -868,7 +868,7 @@ void OSNSMultipleImpact::SaveDataOneStep(unsigned int _ithPoint)
     //WriteVectorIntoMatrix(*E_inter, _ithPoint, col_pos);
     col_pos = col_pos + F_inter->size();
   } // Save the data related to DS
-  SP::DynamicalSystemsGraph DSG = simulation()->model()->nonSmoothDynamicalSystem()->dynamicalSystems();
+  SP::DynamicalSystemsGraph DSG = simulation()->nonSmoothDynamicalSystem()->dynamicalSystems();
   DynamicalSystemsGraph::VIterator dsi, dsiend;
   for (std11::tie(dsi, dsiend) = DSG->vertices(); dsi != dsiend; ++dsi)
   {
@@ -1051,7 +1051,7 @@ void OSNSMultipleImpact::display() const
   std::cout << "Primary impulse at the end of impact: " << Impulse_variable <<std::endl;
   std::cout << "Duration of the multiple impacs process: " << Time_variable <<std::endl;
   // Display post-impact velocities
-  SP::DynamicalSystemsGraph DSG0 = simulation()->model()->nonSmoothDynamicalSystem()->topology()->dSG(0);
+  SP::DynamicalSystemsGraph DSG0 = simulation()->nonSmoothDynamicalSystem()->topology()->dSG(0);
   DynamicalSystemsGraph::VIterator ui, uiend;
   for (std11::tie(ui, uiend) = DSG0->vertices(); ui != uiend; ++ui)
   {
@@ -1064,7 +1064,7 @@ void OSNSMultipleImpact::display() const
     (lag_ds->velocity())->display();
   }
   // Display impulses at contact points
-  SP::InteractionsGraph IndexSet0 = simulation()->model()->nonSmoothDynamicalSystem()->topology()->indexSet(0);
+  SP::InteractionsGraph IndexSet0 = simulation()->nonSmoothDynamicalSystem()->topology()->indexSet(0);
   InteractionsGraph::VIterator vi, viend;
   for (std11::tie(vi, viend) = IndexSet0->vertices(); vi != viend; ++vi)
   {

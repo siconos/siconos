@@ -162,7 +162,7 @@ void Simulation::addInOSIMap(SP::DynamicalSystem ds, SP::OneStepIntegrator  osi)
 
 SP::InteractionsGraph Simulation::indexSet(unsigned int i)
 {
-  return (_model.lock()->nonSmoothDynamicalSystem()->topology()->indexSet(i)) ;
+  return _nsds->topology()->indexSet(i) ;
 }
 
 SP::OneStepNSProblem Simulation::oneStepNSProblem(int Id)
@@ -238,13 +238,9 @@ void Simulation::initialize(SP::Model m, bool withOSI)
         _nsds->topology()->setOSI(ds,*_allOSI->begin());
         //std::cout << "By default, if the user has not set the OSI, we assign the first OSI to all DS"<<std::endl;
       }
-      else
-      {
-      }
 
       osi = DSG->osi[*dsi];
-      ds->initialize(model()->t0(),
-                     osi->getSizeMem());
+      ds->initialize(m->t0(), osi->getSizeMem());
       addInOSIMap(ds, osi);
     }
 
@@ -257,7 +253,7 @@ void Simulation::initialize(SP::Model m, bool withOSI)
       //      itds != (*itosi)->dynamicalSystems()->end();
       //      ++itds)
       // {
-      //   (*itds)->initialize(model()->t0(),
+      //   (*itds)->initialize(startingTime(),
       //                       (*itosi)->getSizeMem());
       //   addInOSIMap(*itds, *itosi);
       // }

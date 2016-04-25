@@ -526,7 +526,7 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
   _isNewtonConverge = false;
   _newtonNbIterations = 0; // number of Newton iterations
   int info = 0;
-  bool isLinear  = (_model.lock())->nonSmoothDynamicalSystem()->isLinear();
+  bool isLinear  = _nsds->isLinear();
   InteractionsGraph& indexSet0 = *_nsds->topology()->indexSet0();
   bool hasNSProblems = (!_allNSProblems->empty() &&   indexSet0.size() > 0) ? true : false;
 

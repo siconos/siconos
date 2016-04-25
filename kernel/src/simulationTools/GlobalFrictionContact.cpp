@@ -102,7 +102,7 @@ void GlobalFrictionContact::initialize(SP::Simulation sim)
   }
 
   // get topology
-  SP::Topology topology = simulation()->model()->nonSmoothDynamicalSystem()->topology();
+  SP::Topology topology = simulation()->nonSmoothDynamicalSystem()->topology();
 
   // Note that interactionBlocks is up to date since updateInteractionBlocks has been called during OneStepNSProblem::initialize()
 
@@ -111,7 +111,7 @@ void GlobalFrictionContact::initialize(SP::Simulation sim)
   _mu.reset(new MuStorage());
   _mu->reserve(I0->size());
 
-  SP::DynamicalSystemsSet allDS = simulation->model()->nonSmoothDynamicalSystem()->dynamicalSystems();;
+  SP::DynamicalSystemsSet allDS = simulation->nonSmoothDynamicalSystem()->dynamicalSystems();;
 
 
   // Default size for M = _maxSize
@@ -120,7 +120,7 @@ void GlobalFrictionContact::initialize(SP::Simulation sim)
     if (MStorageType == 0)
       M.reset(new OSNSMatrix(_maxSize, 0));
     else // if(MStorageType == 1) size = number of DSBlocks = number of DS in the largest considered DynamicalSystemsSet
-      M.reset(new OSNSMatrix(simulation->model()->nonSmoothDynamicalSystem()->dynamicalSystems()->size(), 1));
+      M.reset(new OSNSMatrix(simulation->nonSmoothDynamicalSystem()->dynamicalSystems()->size(), 1));
   }
   if (!H)
   {
@@ -129,7 +129,7 @@ void GlobalFrictionContact::initialize(SP::Simulation sim)
     else // if(MStorageType == 1) size = number of DSBlocks = number of DS in the largest considered DynamicalSystemsSet
 
 
-      H.reset(new OSNSMatrix(simulation->model()->nonSmoothDynamicalSystem()->dynamicalSystems()->size(), simulation->indexSet(levelMin)->size()   , 1));
+      H.reset(new OSNSMatrix(simulation->nonSmoothDynamicalSystem()->dynamicalSystems()->size(), simulation->indexSet(levelMin)->size()   , 1));
   }
 
 
@@ -192,7 +192,7 @@ void GlobalFrictionContact::computeq(double time)
     q->resize(_sizeOutput);
   q->zero();
 
-  SP::DynamicalSystemsSet allDS = simulation->model()->nonSmoothDynamicalSystem()->dynamicalSystems();;
+  SP::DynamicalSystemsSet allDS = simulation->nonSmoothDynamicalSystem()->dynamicalSystems();;
   DSIterator itDS;
 
   // type of the current one step integrator
@@ -337,8 +337,8 @@ bool GlobalFrictionContact::preCompute(double time)
   // M, _sizeOutput have been computed in initialize and are uptodate.
 
   // Get topology
-  SP::Topology topology = simulation->model()->nonSmoothDynamicalSystem()->topology();
-  SP::DynamicalSystemsSet allDS = simulation->model()->nonSmoothDynamicalSystem()->dynamicalSystems();;
+  SP::Topology topology = simulation->nonSmoothDynamicalSystem()->topology();
+  SP::DynamicalSystemsSet allDS = simulation->nonSmoothDynamicalSystem()->dynamicalSystems();;
   
   if (!_hasBeenUpdated)
   {
@@ -493,7 +493,7 @@ void GlobalFrictionContact::postCompute()
 
   //     }
 
-  SP::DynamicalSystemsSet allDS = simulation->model()->nonSmoothDynamicalSystem()->dynamicalSystems();;
+  SP::DynamicalSystemsSet allDS = simulation->nonSmoothDynamicalSystem()->dynamicalSystems();;
   DSIterator itDS;
   unsigned int sizeDS;
   SP::OneStepIntegrator  Osi;

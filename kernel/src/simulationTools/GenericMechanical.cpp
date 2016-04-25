@@ -51,7 +51,7 @@ void GenericMechanical::initialize(SP::Simulation sim)
 void GenericMechanical::computeDiagonalInteractionBlock(const InteractionsGraph::VDescriptor& vd)
 {
   SP::InteractionsGraph indexSet = simulation()->indexSet(indexSetLevel());
-  //bool isTimeInvariant = simulation()->model()->nonSmoothDynamicalSystem()->topology()->isTimeInvariant();
+  //bool isTimeInvariant = simulation()->nonSmoothDynamicalSystem()->topology()->isTimeInvariant();
 
   /*Build the corresponding numerics problems*/
 
