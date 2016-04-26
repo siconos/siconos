@@ -138,6 +138,10 @@ protected:
    */
   bool _useGammaForRelation;
 
+  /** a boolean to force the evaluation of T in an explicit way
+   */
+  bool _explicitNewtonEulerDSOperators;
+
   /** nslaw effects
    */
   struct _NSLEffectOnFreeOutput;
@@ -278,6 +282,21 @@ public:
     if (_useGammaForRelation) _useGamma = false;
   };
 
+  /** get boolean _explicitNewtonEulerDSOperators for the relation
+   *  \return a Boolean
+   */
+  inline bool explicitNewtonEulerDSOperators()
+  {
+    return _explicitNewtonEulerDSOperators;
+  };
+
+  /** set the boolean to indicate that we use gamma for the relation
+   *  \param newUseGammaForRelation a Boolean
+   */
+  inline void setExplicitNewtonEulerDSOperators(bool newExplicitNewtonEulerDSOperators)
+  {
+    _explicitNewtonEulerDSOperators = newExplicitNewtonEulerDSOperators;
+  };
 
   // --- OTHER FUNCTIONS ---
 
@@ -291,13 +310,14 @@ public:
    *  \param time
    *  \param ds a pointer to DynamicalSystem
    */
-  void initW(double time, SP::DynamicalSystem ds );
+  void initW(double time, SP::DynamicalSystem ds, DynamicalSystemsGraph::VDescriptor& dsv);
 
   /** compute WMap[ds] MoreauJeanGOSI matrix at time t
    *  \param time (double)
    *  \param ds a pointer to DynamicalSystem
+   *  \param W the matrix to compute
    */
-  void computeW(double time , SP::DynamicalSystem ds);
+  void computeW(double time, SP::DynamicalSystem ds,  SiconosMatrix& W);
 
   /** compute WBoundaryConditionsMap[ds] MoreauJeanGOSI matrix at time t
    *  \param ds a pointer to DynamicalSystem

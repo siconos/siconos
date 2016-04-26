@@ -207,7 +207,6 @@ int main(int argc, char* argv[])
 #else
     SP::MoreauJeanGOSI OSI(new MoreauJeanGOSI(theta));
 #endif
-    OSI->insertDynamicalSystem(ball);
     // -- (2) Time discretisation --
     SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
 

@@ -153,7 +153,7 @@ bool SiconosMatrix::fillCSC(CSparseMatrix* csc, size_t row_off, size_t col_off, 
   csi* Mi = csc->i; // row indx
   csi* Mp = csc->p; // column pointers
 
-  assert(csc->p[col_off] >= 0);
+  assert(Mp[col_off] >= 0);
   size_t nz = csc->p[col_off];
 
   size_t nrow = size(0);
@@ -168,9 +168,11 @@ bool SiconosMatrix::fillCSC(CSparseMatrix* csc, size_t row_off, size_t col_off, 
     {
       for (size_t i = 0; i < nrow; ++i)
       {
-        if (fabs(arr[i]) > tol)
+        // col-major
+        double elt_val = arr[i + j*nrow];
+        if (fabs(elt_val) > tol)
         {
-          Mx[pval] = arr[i];
+          Mx[pval] = elt_val;
           Mi[pval] = i + row_off;
           ++pval;
         }

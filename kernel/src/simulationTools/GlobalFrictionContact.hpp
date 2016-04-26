@@ -114,7 +114,7 @@ public:
 
   /** destructor
    */
-  virtual ~GlobalFrictionContact() {};
+  virtual ~GlobalFrictionContact();
 
   // GETTERS/SETTERS
 
@@ -197,12 +197,12 @@ public:
    *  \param double current time
    *  \return int information about the solver convergence (0: ok, >0 problem, see Numerics documentation)
    */
-  int compute(double time);
+  virtual int compute(double time);
 
   /** post-treatment of output from Numerics solver: \n
    *  set values of the unknowns of Interactions using (velocity,reaction)
    */
-  void postCompute();
+  virtual void postCompute();
 
   /** print the data to the screen */
   void display() const;

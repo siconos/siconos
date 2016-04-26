@@ -27,13 +27,13 @@
 
 /** Copy a subBlock of size sizeB of vIn (from index startIn) into a subBlock
  *  of vOut (from index startOut)
- * \param vIn, a SP::SiconosVector
- * \param vOut, a SP::SiconosVector
- * \param sizeB, an unsigned int
- * \param startIn, an unsigned int
- * \param startOut, an unsigned int
+ * \param vIn block to copy
+ * \param vOut vector to change (destination)
+ * \param sizeB size of the block to copy
+ * \param startIn starting position for the block (vIn)
+ * \param startOut starting position for the destination (vOut)
  */
-void setBlock(const SiconosVector&, SP::SiconosVector, unsigned int, unsigned int, unsigned int);
+void setBlock(const SiconosVector& vIn, SP::SiconosVector vOut, unsigned int sizeB, unsigned int startIn, unsigned int startOut);
 
 /** A==B when (A-B).normInf()<tolerance
  * \param 2 SiconosVector
