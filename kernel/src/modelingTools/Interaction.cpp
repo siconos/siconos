@@ -789,9 +789,9 @@ SiconosMatrix& Interaction::getLeftInteractionBlock(VectorOfSMatrices& workM) co
   else
   {
     RuntimeException::selfThrow("Interaction::getLeftInteractionBlockForDS, not yet implemented for relations of type " + relationType);
-    // stupid compiler check
-    return *workM[FirstOrderR::mat_C];
   }
+  // stupid compiler check
+  return *workM[FirstOrderR::mat_C];
 
 }
 void Interaction::getLeftInteractionBlockForDSProjectOnConstraints(unsigned int pos, SP::SiconosMatrix InteractionBlock) const
