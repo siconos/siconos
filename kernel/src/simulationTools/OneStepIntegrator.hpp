@@ -149,7 +149,7 @@ public:
    */
   inline bool checkOSI(DynamicalSystemsGraph::VIterator dsi)
   {
-    return  (_dynamicalSystemsGraph->osi[*dsi].get()) == this;
+    return  (_dynamicalSystemsGraph->properties(*dsi).osi.get()) == this;
   };
 
   /** Check if the dynamical system bundle in the node of the
@@ -158,7 +158,7 @@ public:
    */
   inline bool checkOSI(DynamicalSystemsGraph::VDescriptor dsgv)
   {
-    return  (_dynamicalSystemsGraph->osi[dsgv].get()) == this;
+    return  (_dynamicalSystemsGraph->properties(dsgv).osi.get()) == this;
   };
 
   /** get the set of DynamicalSystem associated with the Integrator
