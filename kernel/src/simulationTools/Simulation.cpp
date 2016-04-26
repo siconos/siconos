@@ -130,7 +130,6 @@ void Simulation::clear()
   {
     _allOSI->clear();
   }
-  _osiMap.clear();
   if (_allNSProblems)
   {
     _allNSProblems->clear();
@@ -142,18 +141,6 @@ void Simulation::clear()
 void Simulation::insertIntegrator(SP::OneStepIntegrator osi)
 {
   _allOSI->insert(osi);
-  // Note: each (ds,osi) pair will be registered into the _osiMap
-  // during initialize() call (in osi->initialize).  During this step,
-  // we will check that each ds belongs to one and only one osi.
-}
-
-void Simulation::addInOSIMap(SP::DynamicalSystem ds, SP::OneStepIntegrator  osi)
-{
-  if (_osiMap.find(ds) != _osiMap.end()) // ie if ds is already registered
-    // in the map with another
-    // integrator
-    RuntimeException::selfThrow("Simulation::addInOSIMap(ds,osi), ds is already associated with another one-step integrator");
-  _osiMap[ds] = osi;
 }
 
 SP::InteractionsGraph Simulation::indexSet(unsigned int i)
@@ -236,7 +223,6 @@ void Simulation::initialize(SP::Model m, bool withOSI)
 
       osi = DSG->properties(*dsi).osi;
       ds->initialize(m->t0(), osi->getSizeMem());
-      addInOSIMap(ds, osi);
     }
 
 
@@ -1019,9 +1005,9 @@ void Simulation::computeLevelsForInputAndOutput(SP::Interaction inter, bool init
    */
   SP::InteractionsGraph indexSet0 = _nsds->topology()->indexSet(0);
   SP::DynamicalSystem ds = indexSet0->properties(indexSet0->descriptor(inter)).source;
-  // Note FP :  we should probably connect osi and graph before, in simulation->initialize?
-  DSOSIConstIterator it = _osiMap.find(ds);
-  SP::OneStepIntegrator osi = it->second;
+
+  SP::DynamicalSystemsGraph DSG0 = _nsds->topology()->dSG(0);
+  SP::OneStepIntegrator osi = DSG0->properties(DSG0->descriptor(ds)).osi;
 
   if (!osi)
     RuntimeException::selfThrow("Simulation::computeLevelsForInputAndOutput osi does not exists");

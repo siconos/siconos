@@ -102,11 +102,6 @@ typedef std::set<SP::OneStepIntegrator> OSISet;
 
 /** Iterator through vector of OSI*/
 typedef OSISet::iterator OSIIterator;
-/** A map that links DynamicalSystems and their OneStepIntegrator. */
-typedef std::map<SP::DynamicalSystem, SP::OneStepIntegrator> DSOSIMap;
-
-/** Const Iterator through a DSOSIMap. */
-typedef DSOSIMap::const_iterator DSOSIConstIterator;
 
 // ================== Objects to handle OSNS ==================
 

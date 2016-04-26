@@ -82,9 +82,6 @@ protected:
   /** the dynamical systems integrators */
   SP::OSISet _allOSI;
 
-  /** Map to link all DynamicalSystems and their OneStepIntegrator*/
-  DSOSIMap _osiMap;
-
   /** the non smooth problems (each problem is identified thanks to
       its id) */
   SP::OneStepNSProblems _allNSProblems;
@@ -301,12 +298,6 @@ public:
    *  \param osi the OneStepIntegrator to add
    */
   virtual void insertIntegrator(SP::OneStepIntegrator osi);
-
-  /** register a DS and its OSI into the osiMap.
-      \param ds a pointer to a DynamicalSystem.
-   *  \param osi a pointer to a OneStepIntegrator.
-   */
-  void addInOSIMap(SP::DynamicalSystem ds, SP::OneStepIntegrator osi);
 
   /** get a pointer to indexSets[i]
       \param i number of the required index set
