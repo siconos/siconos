@@ -445,12 +445,12 @@ void ContactTest::t3()
     params.outsideMargin = 0.1;
 
     BounceResult results[2][3];
-    results[0][0] = bounceTest("sphere", "plane",  params);
-    results[1][0] = bounceTest("box",    "plane",  params);
-    results[0][1] = bounceTest("sphere", "sphere", params);
-    results[1][1] = bounceTest("box",    "sphere", params);
-    results[0][2] = bounceTest("sphere", "box",    params);
-    results[1][2] = bounceTest("box",    "box",    params);
+    results[0][0] = bounceTest("sphere", "sphere",  params);
+    results[1][0] = bounceTest("box",    "sphere",  params);
+    results[0][1] = bounceTest("sphere", "box", params);
+    results[1][1] = bounceTest("box",    "box", params);
+    results[0][2] = bounceTest("sphere", "plane",    params);
+    results[1][2] = bounceTest("box",    "plane",    params);
 
     // Report
     printf("\nParams:\n\n");
