@@ -84,7 +84,7 @@ void MoreauJeanGOSI::initialize(Model& m)
     Type::Siconos dsType = Type::value(*ds);
     if (dsType == Type::LagrangianLinearTIDS || dsType == Type::LagrangianDS)
     {
-      ds->allocateWorkVector(DynamicalSystem::local_buffer, WMap[ds->number()]->size(0));
+      ds->allocateWorkVector(DynamicalSystem::local_buffer, _dynamicalSystemsGraph->properties(*dsi).W->size(0));
     }
   }
 
@@ -147,7 +147,6 @@ void MoreauJeanGOSI::initW(double t, SP::DynamicalSystem ds, DynamicalSystemsGra
   // === ===
   else if (dsType == Type::NewtonEulerDS)
   {
-    //WMap[dsN].reset(new SimpleMatrix(3, 3));
     SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS> (ds);
     _dynamicalSystemsGraph->properties(dsv).W.reset(new SimpleMatrix(*d->luW()));
 
@@ -283,8 +282,6 @@ void MoreauJeanGOSI::computeW(double t, SP::DynamicalSystem ds, SiconosMatrix& W
 {
   // Compute W matrix of the Dynamical System ds, at time t and for the current ds state.
   DEBUG_PRINT("MoreauJeanGOSI::computeW starts\n");
-  // When this function is called, WMap[ds] is supposed to exist and not to be null
-  // Memory allocation has been done during initW.
 
   assert(ds &&
          "MoreauJeanGOSI::computeW(t,ds) - ds == NULL");
