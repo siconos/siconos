@@ -91,7 +91,7 @@ void BulletR::computeh(double time, BlockVector& q0, SiconosVector& y)
   {
     // Due to margins we add, objects are reported as closer than they really
     // are, so we correct by a factor.
-    y.setValue(0, (_contactPoints->getDistance() + _y_correction)*_scaling);
+    y.setValue(0, _contactPoints->getDistance()*_scaling + _y_correction);
 
     (*nc())(0) = _contactPoints->m_normalWorldOnB[0];
     (*nc())(1) = _contactPoints->m_normalWorldOnB[1];

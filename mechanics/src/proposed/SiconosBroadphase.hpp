@@ -36,11 +36,10 @@ protected:
   virtual void visit(SP::SiconosPlane plane) = 0;
   virtual void visit(SP::SiconosSphere sphere) = 0;
   virtual void visit(SP::SiconosBox box) = 0;
-  //  virtual void visit(SP::BodyDS body) = 0;
   virtual void visit(const BodyDS &body) = 0;
 
   SP::Model _model;
-  
+
   void link(SP::Interaction inter,
             SP::DynamicalSystem ds1,
             SP::DynamicalSystem ds2 = SP::DynamicalSystem());

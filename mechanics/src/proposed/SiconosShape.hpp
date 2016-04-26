@@ -52,6 +52,8 @@ protected:
   virtual void onChanged() = 0;
 
   SP::SiconosVector _position;
+  double _inside_margin;
+  double _outside_margin;
 
   SiconosShape(float x, float y, float z)
     : _position(new SiconosVector(7))
@@ -61,6 +63,15 @@ protected:
     (*_position)(1) = y;
     (*_position)(2) = z;
     (*_position)(3) = 1.0; // quaternion
+
+    _inside_margin = 0.1;
+    _outside_margin = 0.1;
+  }
+
+  SiconosShape(const SP::SiconosVector pos)
+    : _position(new SiconosVector(7))
+  {
+    _position = pos;
   }
 
 public:
@@ -79,6 +90,20 @@ public:
     (*_position)(2) = z;
     onChanged();
   }
+
+  void setInsideMargin (double margin)
+  {
+    _inside_margin = margin;
+  }
+
+  void setOutsideMargin(double margin)
+  {
+    _outside_margin = margin;
+  }
+
+  double insideMargin() { return _inside_margin; }
+
+  double outsideMargin() { return _outside_margin; }
 
   // TODO orientation
 

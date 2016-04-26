@@ -100,13 +100,20 @@ struct BounceParams
   double mass;
   double position;
   double timestep;
+  double insideMargin;
+  double outsideMargin;
+  BulletOptions options;
 
   void dump() {
-    printf("  trace:    %s\n", trace?"on":"off");
-    printf("  dynamic:  %s\n", trace?"on":"off");
-    printf("  size:     %.1g\n", size);
-    printf("  mass:     %.1g\n", mass);
-    printf("  position: %.1g\n", position);
+    printf("  trace:              %s\n", trace?"on":"off");
+    printf("  dynamic:            %s\n", trace?"on":"off");
+    printf("  size:               %.3g\n", size);
+    printf("  mass:               %.3g\n", mass);
+    printf("  position:           %.3g\n", position);
+    printf("  insideMargin:       %.3g\n", insideMargin);
+    printf("  outsideMargin:      %.3g\n", outsideMargin);
+    printf("  breakingThreshold:  %.3g\n", options.breakingThreshold);
+    printf("  worldScale:         %.3g\n", options.worldScale);
   }
 };
 
@@ -195,12 +202,16 @@ BounceResult bounceTest(std::string moving,
     if (moving=="sphere")
     {
       sphere.reset(new SiconosSphere(0,0,0, params.size/2));
+      sphere->setInsideMargin(params.insideMargin);
+      sphere->setOutsideMargin(params.outsideMargin);
       contactor->addShape(sphere);
     }
     else if (moving=="box")
     {
       SP::SiconosBox box(
         new SiconosBox(0,0,0,params.size,params.size,params.size));
+      box->setInsideMargin(params.insideMargin);
+      box->setOutsideMargin(params.outsideMargin);
       contactor->addShape(box);
     }
     body->setContactor(contactor);
@@ -211,17 +222,22 @@ BounceResult bounceTest(std::string moving,
     if (ground=="plane")
     {
       SP::SiconosPlane plane(new SiconosPlane(0,0,-params.size/2));
+      plane->setInsideMargin(params.insideMargin);
+      plane->setOutsideMargin(params.outsideMargin);
       static_contactor->addShape(plane);
     }
     else if (ground=="box")
     {
       SP::SiconosBox floorbox(new SiconosBox(0,0,-50-params.size/2,100,100,100));
-      //new SiconosBox(0,0,-params.size/2,params.size,params.size,params.size));
+      floorbox->setInsideMargin(params.insideMargin);
+      floorbox->setOutsideMargin(params.outsideMargin);
       static_contactor->addShape(floorbox);
     }
     else if (ground=="sphere")
     {
       SP::SiconosSphere floorsphere(new SiconosSphere(0,0,-1.0-params.size/2,1.0));
+      floorsphere->setInsideMargin(params.insideMargin);
+      floorsphere->setOutsideMargin(params.outsideMargin);
       static_contactor->addShape(floorsphere);
     }
 
@@ -272,7 +288,7 @@ BounceResult bounceTest(std::string moving,
     model->initialize(simulation);
 
     // Object to manage the Bullet implementation of broadphase
-    SP::SiconosBroadphase broadphase(new BulletBroadphase());
+    SP::BulletBroadphase broadphase(new BulletBroadphase(params.options));
 
     // Build broadphase-specific mirror of contactor graph
     broadphase->buildGraph(model);
@@ -281,9 +297,7 @@ BounceResult bounceTest(std::string moving,
     ///////
 
     int new_interaction_total = 0;
-    new_interaction_counter = 0;
-    existing_interaction_counter = 0;
-    interaction_warning_counter = 0;
+    broadphase->resetStatistics();
 
     ///////
 
@@ -310,7 +324,7 @@ BounceResult bounceTest(std::string moving,
       double pos = (*body->q())(2);
 
       if (params.trace && (k+1) < steps) {
-        printf("pos, %f, %f, %f", pos, last_pos - pos, vel);
+        printf("pos, %f, %f, %f\n", pos, last_pos - pos, vel);
       }
 
       // Peaks (velocity crosses zero towards positive)
@@ -324,14 +338,15 @@ BounceResult bounceTest(std::string moving,
       }
 
       // Interaction statistics
-      if (new_interaction_counter > 0 && first_contact) {
+      if (broadphase->statistics().new_interactions_created > 0 && first_contact) {
         first_contact = false;
         displacement_on_first_contact = last_pos - pos;
       }
 
-      int interactions = new_interaction_counter + existing_interaction_counter;
+      int interactions = broadphase->statistics().new_interactions_created
+        + broadphase->statistics().existing_interactions_processed;
 
-      local_new_interaction_count += new_interaction_counter;
+      local_new_interaction_count += broadphase->statistics().new_interactions_created;
 
       if (interactions > max_simultaneous_contacts)
         max_simultaneous_contacts = interactions;
@@ -339,8 +354,7 @@ BounceResult bounceTest(std::string moving,
       avg_simultaneous_contacts += interactions;
 
       // Reset interaction counters for next iteration
-      new_interaction_counter = 0;
-      existing_interaction_counter = 0;
+      broadphase->resetStatistics();
 
       // Standard deviation (cheating by not calculating mean!)
       if (k==(steps-100))
@@ -374,7 +388,7 @@ BounceResult bounceTest(std::string moving,
     r.final_position_std = sqrt(std/100);
 
     r.num_interactions = local_new_interaction_count;
-    r.num_interaction_warnings = interaction_warning_counter;
+    r.num_interaction_warnings = broadphase->statistics().interaction_warnings;
     r.max_simultaneous_contacts = max_simultaneous_contacts;
     r.avg_simultaneous_contacts = avg_simultaneous_contacts / (double)k;
 
@@ -389,24 +403,19 @@ void ContactTest::t2()
   {
     printf("\n==== t2\n");
 
-    // Experimental settings
-    extra_margin = 1.0;
-    breaking_threshold = 0.04;
-    box_ch_added_dimension = -0.5;
-    box_convex_hull_margin = (-box_ch_added_dimension/2) + extra_margin;
-    bullet_world_scaling = 1.0;
+    BounceParams params;
+    params.trace = true;
+    params.dynamic = false;
+    params.size = 1;
+    params.mass = 1.0;
+    params.position = 3.0;
+    params.timestep = 0.005;
+    params.insideMargin = 0.1;
+    params.outsideMargin = 0.1;
 
-    BounceParams p;
-    p.trace = true;
-    p.dynamic = false;
-    p.size = 10;
-    p.mass = 1.0;
-    p.position = 20.0;
-    p.timestep = 0.005;
+    BounceResult r = bounceTest("box", "box", params);
 
-    BounceResult r = bounceTest("box", "box", p);
-
-    fprintf(stderr, "\nSize: %g\n", p.size);
+    fprintf(stderr, "\nSize: %g\n", params.size);
     fprintf(stderr, "Final position: %g  (std=%g)\n\n",
             r.final_position, r.final_position_std);
   }
@@ -432,7 +441,8 @@ void ContactTest::t3()
     params.mass = 1.0;
     params.position = 3.0;
     params.timestep = 0.005;
-    bullet_world_scaling = 10.0;
+    params.insideMargin = 0.1;
+    params.outsideMargin = 0.1;
 
     BounceResult results[2][3];
     results[0][0] = bounceTest("sphere", "plane",  params);
@@ -490,6 +500,8 @@ void ContactTest::t4()
     params[0].mass = 0.02;
     params[0].position = 10.0;
     params[0].timestep = 0.005;
+    params[0].insideMargin = 0.1;
+    params[0].outsideMargin = 0.1;
 
     params[1] = params[0];
     params[1].size = 0.1;
@@ -559,12 +571,13 @@ void ContactTest::t5()
   float t0 = clock();
   int test_count=0;
 
-  Var<double> var_extra_margin(0, 0.3);
+  Var<double> var_inside_margin(0, 0.5);
+  Var<double> var_outside_margin(0, 0.5);
   Var<double> var_breaking_threshold(0, 1.0);
-  Var<double> var_box_ch_added_dimension(-0.5, 0.0);
   Var<double> var_params_size(log(0.01), log(10.0));
   Var<double> var_params_mass(log(0.01), log(10.0));
   Var<double> var_params_position(3.0, 15.0);
+  Var<int> var_world_scale(log(0.001), log(100.0));
   Var<int> var_params_timestep(0, 3);
   double possible_timesteps[4] = { 0.0005, 0.001, 0.005, 0.01 };
 
@@ -588,14 +601,14 @@ void ContactTest::t5()
     params.mass = exp(var_params_mass.sample());
     params.position = var_params_position.sample();
     params.timestep = possible_timesteps[var_params_timestep.sample()];
+    params.insideMargin = var_inside_margin.sample();
+    params.outsideMargin = var_outside_margin.sample();
 
     // Experimental settings
-    extra_margin = var_extra_margin.sample();
-    breaking_threshold = var_breaking_threshold.sample();
-    box_ch_added_dimension = 10000;
-    while (box_ch_added_dimension > (params.size*0.9))
-      box_ch_added_dimension = var_box_ch_added_dimension.sample();
-    box_convex_hull_margin = (-box_ch_added_dimension/2) + extra_margin;
+    BulletOptions options;
+    options.breakingThreshold = var_breaking_threshold.sample();
+    options.worldScale = exp(var_world_scale.sample());
+    params.options = options;
 
     bool success = false;
 
@@ -603,10 +616,10 @@ void ContactTest::t5()
     fprintf(fresults, "  \"mass\": %g,\n", params.mass);
     fprintf(fresults, "  \"position\": %g,\n", params.position);
     fprintf(fresults, "  \"timestep\": %g,\n", params.timestep);
-    fprintf(fresults, "  \"dimensional_padding\": %g,\n", extra_margin);
-    fprintf(fresults, "  \"breaking_threshold\": %g,\n", breaking_threshold);
-    fprintf(fresults, "  \"dimension_adjust\": %g,\n", box_ch_added_dimension);
-    fprintf(fresults, "  \"setmargin\": %g,\n", box_convex_hull_margin);
+    fprintf(fresults, "  \"inside_margin\": %g,\n", params.insideMargin);
+    fprintf(fresults, "  \"outside_margin\": %g,\n", params.outsideMargin);
+    fprintf(fresults, "  \"breaking_threshold\": %g,\n", options.breakingThreshold);
+    fprintf(fresults, "  \"world_scale\": %g,\n", options.worldScale);
 
     BounceResult results;
     try

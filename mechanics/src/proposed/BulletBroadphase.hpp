@@ -34,6 +34,30 @@
 
 DEFINE_SPTR(BulletBroadphase_impl);
 
+struct BulletOptions
+{
+  BulletOptions()
+    : breakingThreshold(0.5)
+    , worldScale(1.0)
+    , useAxisSweep3(false)
+    {}
+  double breakingThreshold;
+  double worldScale;
+  bool useAxisSweep3;
+};
+
+struct BulletStatistics
+{
+  BulletStatistics()
+    : new_interactions_created(0)
+    , existing_interactions_processed(0)
+    , interaction_warnings(0)
+    {}
+  int new_interactions_created;
+  int existing_interactions_processed;
+  int interaction_warnings;
+};
+
 class BulletBroadphase : public SiconosBroadphase, public std11::enable_shared_from_this<BulletBroadphase>
 {
 protected:
@@ -44,21 +68,12 @@ protected:
   static BulletBroadphase *gBulletBroadphase;
 
 public:
-  struct Options
-  {
-    Options()
-      : use_convexhull_for_primitives(true)
-      , use_axissweep3(false)
-      {}
-    bool use_convexhull_for_primitives;
-    bool use_axissweep3;
-  };
-
-  BulletBroadphase(const Options &options = Options());
+  BulletBroadphase(const BulletOptions &options = BulletOptions());
   ~BulletBroadphase();
 
 protected:
-  Options options;
+  BulletOptions options;
+  BulletStatistics stats;
 
   void visit(SP::SiconosPlane plane);
   void visit(SP::SiconosSphere sphere);
@@ -72,7 +87,7 @@ protected:
   template<typename ST, typename BT>
   void visit_helper(ST& shape, BT& btshape,
                     std::map<ST,BT>& shapemap);
-  
+
 public:
   // TODO: default implementations of buildGraph to SiconosBroadphase?
   //       encountered problems with shared_from_this() when doing so.
@@ -82,6 +97,9 @@ public:
 
   void updateGraph();
   void performBroadphase();
+
+  const BulletStatistics &statistics() const { return stats; }
+  void resetStatistics() { stats = BulletStatistics(); }
 };
 
 #endif /* BulletBroadphase.hpp */

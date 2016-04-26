@@ -37,7 +37,7 @@ protected:
   ACCEPT_SERIALIZATION(BodyDS);
 
   SP::SiconosContactor _contactor;
-  
+
 public:
 
   BodyDS(SP::SiconosVector position,
