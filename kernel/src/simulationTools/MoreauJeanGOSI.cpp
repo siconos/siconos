@@ -62,11 +62,11 @@ MoreauJeanGOSI::MoreauJeanGOSI(double theta, double gamma):
 }
 
 
-void MoreauJeanGOSI::initialize()
+void MoreauJeanGOSI::initialize(Model& m)
 {
-  OneStepIntegrator::initialize();
+  OneStepIntegrator::initialize(m);
   // Get initial time
-  double t0 = _simulation->model()->t0();
+  double t0 = m.t0();
   // Compute W(t0) for all ds
 
 

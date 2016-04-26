@@ -31,8 +31,8 @@
 
 #include "gfc3d_Solvers.h"
 
- #define DEBUG_STDOUT
- #define DEBUG_MESSAGES
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
 #include "debug.h"
 
 // Constructor from a set of data
@@ -105,17 +105,17 @@ void GlobalFrictionContact::initialize(SP::Simulation sim)
   // Default size for M = _maxSize
   if (!_M)
   {
-    if (MStorageType == 0)
-      M.reset(new OSNSMatrix(_maxSize, 0));
+    if (_MStorageType == 0)
+      _M.reset(new OSNSMatrix(_maxSize, 0));
     else // if(MStorageType == 1) size = number of DSBlocks = number of DS in the largest considered DynamicalSystemsSet
-      M.reset(new OSNSMatrix(simulation->nonSmoothDynamicalSystem()->dynamicalSystems()->size(), 1));
+      _M.reset(new OSNSMatrix(simulation()->nonSmoothDynamicalSystem()->dynamicalSystems()->size(), 1));
   }
   if (!_H)
   {
     if (_MStorageType == 0)
       _H.reset(new OSNSMatrix(_maxSize, 0));
     else // if(_MStorageType == 1) size = number of DSBlocks = number of DS in the largest considered DynamicalSystemsSet
-      _H.reset(new OSNSMatrix(simulation->nonSmoothDynamicalSystem()->dynamicalSystems()->size(), simulation->indexSet(_indexSetLevel)->size()   , 1));
+      _H.reset(new OSNSMatrix(simulation()->nonSmoothDynamicalSystem()->dynamicalSystems()->size(), simulation()->indexSet(_indexSetLevel)->size()   , 1));
   }
 
 
@@ -131,15 +131,15 @@ bool GlobalFrictionContact::preCompute(double time)
   // M, _sizeOutput have been computed in initialize and are uptodate.
 
   // Get topology
-  SP::Topology topology = simulation()->model()->nonSmoothDynamicalSystem()->topology();
+  SP::Topology topology = simulation()->nonSmoothDynamicalSystem()->topology();
 
   if (indexSetLevel() == LEVELMAX)
     return false;
 
   if (!_hasBeenUpdated)
   {
-    InteractionsGraph& indexSet = *simulation()->model()->nonSmoothDynamicalSystem()->topology()->indexSet(_indexSetLevel);
-    DynamicalSystemsGraph& DSG0 = *simulation()->model()->nonSmoothDynamicalSystem()->dynamicalSystems();
+    InteractionsGraph& indexSet = *simulation()->nonSmoothDynamicalSystem()->topology()->indexSet(_indexSetLevel);
+    DynamicalSystemsGraph& DSG0 = *simulation()->nonSmoothDynamicalSystem()->dynamicalSystems();
 
     _sizeOutput = 3*indexSet.size();
 
@@ -374,7 +374,7 @@ void GlobalFrictionContact::postCompute()
   // Only Interactions (ie Interactions) of indexSet(leveMin) are concerned.
 
   // === Get index set from Topology ===
-  InteractionsGraph& indexSet = *simulation()->model()->nonSmoothDynamicalSystem()->topology()->indexSet(_indexSetLevel);
+  InteractionsGraph& indexSet = *simulation()->nonSmoothDynamicalSystem()->topology()->indexSet(_indexSetLevel);
   // y and lambda vectors
   SP::SiconosVector  y, lambda;
 
