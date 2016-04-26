@@ -178,6 +178,7 @@ bool GlobalFrictionContact::preCompute(double time)
       Interaction& inter = *indexSet.bundle(*ui);
       VectorOfSMatrices& workMInter = *indexSet.properties(*ui).workMatrices;
 
+      assert(Type::value(*(inter.nonSmoothLaw())) == Type::NewtonImpactFrictionNSL);
       _mu->push_back(std11::static_pointer_cast<NewtonImpactFrictionNSL>(inter.nonSmoothLaw())->mu());
 
       OneStepIntegrator& Osi = *indexSet.properties(*ui).osi;
