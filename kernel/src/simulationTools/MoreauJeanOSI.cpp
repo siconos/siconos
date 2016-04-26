@@ -63,76 +63,18 @@ MoreauJeanOSI::MoreauJeanOSI(double theta, double gamma):
 
 const SimpleMatrix MoreauJeanOSI::getW(SP::DynamicalSystem ds)
 {
-  int dsN = ds->number();
   assert(ds &&
          "MoreauJeanOSI::getW(ds): ds == NULL.");
-  //    return *(WMap[0]);
-  assert(WMap[dsN] &&
+  assert(_dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).W &&
          "MoreauJeanOSI::getW(ds): W[ds] == NULL.");
-  return *(WMap[dsN]); // Copy !!
+  return *_dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).W; // Copy !!
 }
 
 SP::SimpleMatrix MoreauJeanOSI::W(SP::DynamicalSystem ds)
 {
   assert(ds && "MoreauJeanOSI::W(ds): ds == NULL.");
-  //  return WMap[0];
-  //  if(WMap[ds]==NULL)
-  //    RuntimeException::selfThrow("MoreauJeanOSI::W(ds): W[ds] == NULL.");
-  return WMap[ds->number()];
+  return _dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).W;
 }
-
-void MoreauJeanOSI::setW(const SiconosMatrix& newValue, SP::DynamicalSystem ds)
-{
-  // Check if ds is in the OSI
-  if (!(checkOSI(_dynamicalSystemsGraph->descriptor(ds))))
-    RuntimeException::selfThrow("MoreauJeanOSI::initW(t,ds) - ds does not belong to the OSI.");
-
-  // Check dimensions consistency
-  unsigned int line = newValue.size(0);
-  unsigned int col  = newValue.size(1);
-
-  if (line != col) // Check that newValue is square
-    RuntimeException::selfThrow("MoreauJeanOSI::setW(newVal,ds) - newVal is not square! ");
-
-  if (!ds)
-    RuntimeException::selfThrow("MoreauJeanOSI::setW(newVal,ds) - ds == NULL.");
-
-  unsigned int sizeW = ds->getDim(); // n for first order systems, ndof for lagrangian.
-  unsigned int dsN = ds->number();
-  if (line != sizeW) // check consistency between newValue and dynamical system size
-    RuntimeException::selfThrow("MoreauJeanOSI::setW(newVal,ds) - unconsistent dimension between newVal and dynamical system to be integrated ");
-
-  // Memory allocation for W, if required
-  if (!WMap[dsN]) // allocate a new W if required
-  {
-    WMap[dsN].reset(new SimpleMatrix(newValue));
-  }
-  else  // or fill-in an existing one if dimensions are consistent.
-  {
-    if (line == WMap[dsN]->size(0) && col == WMap[dsN]->size(1))
-      *(WMap[dsN]) = newValue;
-    else
-      RuntimeException::selfThrow("MoreauJeanOSI - setW: inconsistent dimensions with problem size for given input matrix W");
-  }
-}
-
-void MoreauJeanOSI::setWPtr(SP::SimpleMatrix newPtr, SP::DynamicalSystem ds)
-{
-  unsigned int line = newPtr->size(0);
-  unsigned int col  = newPtr->size(1);
-  if (line != col) // Check that newPtr is square
-    RuntimeException::selfThrow("MoreauJeanOSI::setWPtr(newVal) - newVal is not square! ");
-
-  if (!ds)
-    RuntimeException::selfThrow("MoreauJeanOSI::setWPtr(newVal,ds) - ds == NULL.");
-
-  unsigned int sizeW = ds->getDim(); // n for first order systems, ndof for lagrangian.
-  if (line != sizeW) // check consistency between newValue and dynamical system size
-    RuntimeException::selfThrow("MoreauJeanOSI::setW(newVal) - unconsistent dimension between newVal and dynamical system to be integrated ");
-
-  WMap[ds->number()] = newPtr;                  // link with new pointer
-}
-
 
 
 const SimpleMatrix MoreauJeanOSI::getWBoundaryConditions(SP::DynamicalSystem ds)
@@ -140,19 +82,15 @@ const SimpleMatrix MoreauJeanOSI::getWBoundaryConditions(SP::DynamicalSystem ds)
   assert(ds &&
          "MoreauJeanOSI::getWBoundaryConditions(ds): ds == NULL.");
   //    return *(WBoundaryConditionsMap[0]);
-  unsigned int dsN = ds->number();
-  assert(_WBoundaryConditionsMap[dsN] &&
+  assert(_dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).WBoundaryConditions &&
          "MoreauJeanOSI::getWBoundaryConditions(ds): WBoundaryConditions[ds] == NULL.");
-  return *(_WBoundaryConditionsMap[dsN]); // Copy !!
+  return *(_dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).WBoundaryConditions); // Copy !!
 }
 
 SP::SiconosMatrix MoreauJeanOSI::WBoundaryConditions(SP::DynamicalSystem ds)
 {
   assert(ds && "MoreauJeanOSI::WBoundaryConditions(ds): ds == NULL.");
-  //  return WBoundaryConditionsMap[0];
-  //  if(WBoundaryConditionsMap[ds]==NULL)
-  //    RuntimeException::selfThrow("MoreauJeanOSI::WBoundaryConditions(ds): W[ds] == NULL.");
-  return _WBoundaryConditionsMap[ds->number()];
+  return _dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).W ;
 }
 
 
@@ -174,11 +112,11 @@ void MoreauJeanOSI::initialize(Model& m)
     SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
 
     // W initialization
-    initW(t0, ds);
+    initW(t0, ds, *dsi);
     Type::Siconos dsType = Type::value(*ds);
     if (dsType == Type::LagrangianLinearTIDS || dsType == Type::LagrangianDS)
     {
-      ds->allocateWorkVector(DynamicalSystem::local_buffer, WMap[ds->number()]->size(0));
+      ds->allocateWorkVector(DynamicalSystem::local_buffer, _dynamicalSystemsGraph->properties(*dsi).W->size(0));
     }
   }
 
@@ -187,12 +125,11 @@ void MoreauJeanOSI::initialize(Model& m)
   ((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY])->setInputOutputLevel(1);
   //  ((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY])->initialize(_simulation);
 }
-void MoreauJeanOSI::initW(double t, SP::DynamicalSystem ds)
+void MoreauJeanOSI::initW(double t, SP::DynamicalSystem ds, DynamicalSystemsGraph::VDescriptor& dsv)
 {
   DEBUG_BEGIN("MoreauJeanOSI::initW\n");
   // This function:
   // - allocate memory for a matrix W
-  // - insert this matrix into WMap with ds as a key
 
   if (!ds)
     RuntimeException::selfThrow("MoreauJeanOSI::initW(t,ds) - ds == NULL");
@@ -201,15 +138,10 @@ void MoreauJeanOSI::initW(double t, SP::DynamicalSystem ds)
     RuntimeException::selfThrow("MoreauJeanOSI::initW(t,ds) - ds does not belong to the OSI.");
 
 
-   unsigned int dsN = ds->number();
-  if (WMap.find(dsN) != WMap.end())
+   if (_dynamicalSystemsGraph->properties(dsv).W)
     RuntimeException::selfThrow("MoreauJeanOSI::initW(t,ds) - W(ds) is already in the map and has been initialized.");
 
-
   // Memory allocation for W
-  //  WMap[ds].reset(new SimpleMatrix(sizeW,sizeW));
-  //   SP::SiconosMatrix W = WMap[ds];
-
   double h = _simulation->timeStep();
   Type::Siconos dsType = Type::value(*ds);
 
@@ -217,23 +149,22 @@ void MoreauJeanOSI::initW(double t, SP::DynamicalSystem ds)
   if (dsType == Type::LagrangianDS)
   {
     SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
-    WMap[dsN].reset(new SimpleMatrix(*d->mass())); //*W = *d->mass();
+    _dynamicalSystemsGraph->properties(dsv).W.reset((new SimpleMatrix(*d->mass()))); //*W = *d->mass();
     // Compute the W matrix
-    computeW(t,ds);
+    computeW(t,ds, *_dynamicalSystemsGraph->properties(dsv).W);
     // WBoundaryConditions initialization
     if (d->boundaryConditions())
-      initWBoundaryConditions(d);
+      initWBoundaryConditions(d,dsv);
   }
   // 2 - Lagrangian linear systems
   else if (dsType == Type::LagrangianLinearTIDS)
   {
     SP::LagrangianLinearTIDS d = std11::static_pointer_cast<LagrangianLinearTIDS> (ds);
-    WMap[dsN].reset(new SimpleMatrix(*d->mass())); //*W = *d->mass();
+    _dynamicalSystemsGraph->properties(dsv).W.reset(new SimpleMatrix(*d->mass())); //*W = *d->mass();
 
     SP::SiconosMatrix K = d->K();
     SP::SiconosMatrix C = d->C();
-    SP::SiconosMatrix W = WMap[dsN];
-
+    SP::SiconosMatrix W = _dynamicalSystemsGraph->properties(dsv).W;
     if (C)
       scal(h * _theta, *C, *W, false); // W += h*_theta *C
     if (K)
@@ -241,19 +172,20 @@ void MoreauJeanOSI::initW(double t, SP::DynamicalSystem ds)
 
     // WBoundaryConditions initialization
     if (d->boundaryConditions())
-      initWBoundaryConditions(d);
+      initWBoundaryConditions(d,dsv);
   }
 
   // === ===
   else if (dsType == Type::NewtonEulerDS)
   {
-    //WMap[dsN].reset(new SimpleMatrix(3, 3));
-
-    computeW(t,ds);
     SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS> (ds);
+    _dynamicalSystemsGraph->properties(dsv).W.reset(new SimpleMatrix(*d->mass()));
+
+    computeW(t,ds, *_dynamicalSystemsGraph->properties(dsv).W);
+
     // WBoundaryConditions initialization
     if (d->boundaryConditions())
-      initWBoundaryConditions(d);
+      initWBoundaryConditions(d,dsv);
 
   }
   else RuntimeException::selfThrow("MoreauJeanOSI::initW - not yet implemented for Dynamical system of type : " + Type::name(*ds));
@@ -266,7 +198,7 @@ void MoreauJeanOSI::initW(double t, SP::DynamicalSystem ds)
 }
 
 
-void MoreauJeanOSI::initWBoundaryConditions(SP::DynamicalSystem ds)
+void MoreauJeanOSI::initWBoundaryConditions(SP::DynamicalSystem ds, DynamicalSystemsGraph::VDescriptor& dsv)
 {
   // This function:
   // - allocate memory for a matrix WBoundaryConditions
@@ -280,14 +212,13 @@ void MoreauJeanOSI::initWBoundaryConditions(SP::DynamicalSystem ds)
   if (!(checkOSI(_dynamicalSystemsGraph->descriptor(ds))))
     RuntimeException::selfThrow("MoreauJeanOSI::initWBoundaryConditions(t,ds) - ds does not belong to the OSI.");
 
-  Type::Siconos dsType = Type::value(*ds);
-  unsigned int dsN = ds->number();
+  if (_dynamicalSystemsGraph->properties(dsv).WBoundaryConditions)
+    RuntimeException::selfThrow("MoreauJeanOSI::initWBoundaryConditions(t,ds) - WBoundaryConditions(ds) is already in the map and has been initialized.");
 
+  
+  Type::Siconos dsType = Type::value(*ds);
   if (dsType == Type::LagrangianLinearTIDS || dsType == Type::LagrangianDS || dsType == Type::NewtonEulerDS)
   {
-    if (_WBoundaryConditionsMap.find(dsN) != _WBoundaryConditionsMap.end())
-      RuntimeException::selfThrow("MoreauJeanOSI::initWBoundaryConditions(t,ds) - WBoundaryConditions(ds) is already in the map and has been initialized.");
-
     // Memory allocation for WBoundaryConditions
     unsigned int sizeWBoundaryConditions = ds->getDim(); // n for first order systems, ndof for lagrangian.
 
@@ -303,8 +234,8 @@ void MoreauJeanOSI::initWBoundaryConditions(SP::DynamicalSystem ds)
       bc = d->boundaryConditions();
     }
     unsigned int numberBoundaryConditions = bc->velocityIndices()->size();
-    _WBoundaryConditionsMap[dsN].reset(new SimpleMatrix(sizeWBoundaryConditions, numberBoundaryConditions));
-    computeWBoundaryConditions(ds);
+    _dynamicalSystemsGraph->properties(dsv).W.reset(new SimpleMatrix(sizeWBoundaryConditions, numberBoundaryConditions));
+    computeWBoundaryConditions(ds,*_dynamicalSystemsGraph->properties(dsv).W);
   }
   else
     RuntimeException::selfThrow("MoreauJeanOSI::initWBoundaryConditions - not yet implemented for Dynamical system of type :" +  Type::name(*ds));
@@ -312,7 +243,7 @@ void MoreauJeanOSI::initWBoundaryConditions(SP::DynamicalSystem ds)
 }
 
 
-void MoreauJeanOSI::computeWBoundaryConditions(SP::DynamicalSystem ds)
+void MoreauJeanOSI::computeWBoundaryConditions(SP::DynamicalSystem ds, SiconosMatrix& WBoundaryConditions)
 {
   // Compute WBoundaryConditions matrix of the Dynamical System ds, at
   // time t and for the current ds state.
@@ -325,14 +256,9 @@ void MoreauJeanOSI::computeWBoundaryConditions(SP::DynamicalSystem ds)
          "MoreauJeanOSI::computeWBoundaryConditions(t,ds) - ds == NULL");
 
   Type::Siconos dsType = Type::value(*ds);
-  unsigned int dsN = ds->number();
   if (dsType == Type::LagrangianLinearTIDS || dsType == Type::LagrangianDS ||  dsType == Type::NewtonEulerDS)
   {
-    assert((_WBoundaryConditionsMap.find(dsN) != _WBoundaryConditionsMap.end()) &&
-           "MoreauJeanOSI::computeW(t,ds) - W(ds) does not exists. Maybe you forget to initialize the osi?");
-
-    SP::SimpleMatrix WBoundaryConditions = _WBoundaryConditionsMap[dsN];
-
+ 
     SP::SiconosVector columntmp(new SiconosVector(ds->getDim()));
 
     int columnindex = 0;
@@ -340,17 +266,17 @@ void MoreauJeanOSI::computeWBoundaryConditions(SP::DynamicalSystem ds)
     std::vector<unsigned int>::iterator itindex;
 
     SP::BoundaryCondition bc;
-    SP::SimpleMatrix W;
+
+    SP::SiconosMatrix W = _dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).W;
+
     if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
     {
-      W = WMap[dsN];
       SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
       bc = d->boundaryConditions();
     }
     else if (dsType == Type::NewtonEulerDS)
     {
       SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS> (ds);
-      W= d->luW();
       bc = d->boundaryConditions();
     }
 
@@ -363,7 +289,7 @@ void MoreauJeanOSI::computeWBoundaryConditions(SP::DynamicalSystem ds)
       /*\warning we assume that W is symmetric in the Lagrangian case
         we store only the column and not the row */
 
-      WBoundaryConditions->setCol(columnindex, *columntmp);
+      WBoundaryConditions.setCol(columnindex, *columntmp);
       double diag = (*columntmp)(*itindex);
       columntmp->zero();
       (*columntmp)(*itindex) = diag;
@@ -381,12 +307,10 @@ void MoreauJeanOSI::computeWBoundaryConditions(SP::DynamicalSystem ds)
 }
 
 
-void MoreauJeanOSI::computeW(double t, SP::DynamicalSystem ds)
+void MoreauJeanOSI::computeW(double t, SP::DynamicalSystem ds, SiconosMatrix& W)
 {
   // Compute W matrix of the Dynamical System ds, at time t and for the current ds state.
   DEBUG_PRINT("MoreauJeanOSI::computeW starts\n");
-  // When this function is called, WMap[ds] is supposed to exist and not to be null
-  // Memory allocation has been done during initW.
 
   assert(ds &&
          "MoreauJeanOSI::computeW(t,ds) - ds == NULL");
@@ -401,35 +325,31 @@ void MoreauJeanOSI::computeW(double t, SP::DynamicalSystem ds)
   else if (dsType == Type::LagrangianDS)
   {
 
-    unsigned int dsN = ds->number();
-    assert((WMap.find(dsN) != WMap.end()) &&
-           "MoreauJeanOSI::computeW(t,ds) - W(ds) does not exists. Maybe you forget to initialize the osi?");
-    SP::SiconosMatrix W = WMap[dsN];
 
     SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
     SP::SiconosMatrix K = d->jacobianqForces(); // jacobian according to q
     SP::SiconosMatrix C = d->jacobianqDotForces(); // jacobian according to velocity
 
     d->computeMass();
-    *W = *d->mass();
+    W = *d->mass();
 
     if (C)
     {
       d->computeJacobianqDotForces(t);
-      scal(-h * _theta, *C, *W, false); // W -= h*_theta*C
+      scal(-h * _theta, *C, W, false); // W -= h*_theta*C
     }
 
     if (K)
     {
       d->computeJacobianqForces(t);
-      scal(-h * h * _theta * _theta, *K, *W, false); //*W -= h*h*_theta*_theta**K;
+      scal(-h * h * _theta * _theta, *K, W, false); //*W -= h*h*_theta*_theta**K;
     }
   }
   // === ===
   else if (dsType == Type::NewtonEulerDS)
   {
     SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS> (ds);
-    *(d->luW()) = *(d->mass());
+    W = *(d->mass());
 
     SP::SiconosMatrix K = d->jacobianqForces(); // jacobian according to q
     SP::SiconosMatrix C = d->jacobianvForces(); // jacobian according to velocity
@@ -437,7 +357,7 @@ void MoreauJeanOSI::computeW(double t, SP::DynamicalSystem ds)
     if (C)
     {
       d->computeJacobianvForces(t);
-      scal(-h * _theta, *C, *(d->luW()), false); // W -= h*_theta*C
+      scal(-h * _theta, *C, W, false); // W -= h*_theta*C
     }
     if (K)
     {
@@ -447,11 +367,11 @@ void MoreauJeanOSI::computeW(double t, SP::DynamicalSystem ds)
       DEBUG_EXPR(K->display(););
       SP::SimpleMatrix  buffer (new SimpleMatrix(*(d->mass())));
       prod(*K, *T, *buffer, true);
-      scal(-h * h * _theta * _theta, *buffer, *(d->luW()), false);
+      scal(-h * h * _theta * _theta, *buffer, W, false);
       //*W -= h*h*_theta*_theta**K;
     }
-    DEBUG_EXPR(d->luW()->display(););
-    DEBUG_EXPR_WE(std::cout <<  std::boolalpha << " d->luW()->isPLUFactorized() = "<< d->luW()->isPLUFactorized() << std::endl;);
+    DEBUG_EXPR(W->display(););
+    DEBUG_EXPR_WE(std::cout <<  std::boolalpha << "W->isPLUFactorized() = "<< W->isPLUFactorized() << std::endl;); 
 
   }
   else RuntimeException::selfThrow("MoreauJeanOSI::computeW - not yet implemented for Dynamical system of type : " +Type::name(*ds));
@@ -597,7 +517,7 @@ double MoreauJeanOSI::computeResidu()
         d->boundaryConditions()->computePrescribedVelocity(t);
 
         unsigned int columnindex = 0;
-        SP::SimpleMatrix WBoundaryConditions = _WBoundaryConditionsMap[ds->number()];
+        SP::SimpleMatrix WBoundaryConditions = _dynamicalSystemsGraph->properties(*dsi).WBoundaryConditions ;
         SP::SiconosVector columntmp(new SiconosVector(ds->getDim()));
 
         for (std::vector<unsigned int>::iterator  itindex = d->boundaryConditions()->velocityIndices()->begin() ;
@@ -629,7 +549,7 @@ double MoreauJeanOSI::computeResidu()
       if (d->boundaryConditions())
       {
         unsigned int columnindex = 0;
-        SP::SimpleMatrix WBoundaryConditions = _WBoundaryConditionsMap[ds->number()];
+        SP::SimpleMatrix WBoundaryConditions = _dynamicalSystemsGraph->properties(*dsi).W ;
         SP::SiconosVector columntmp(new SiconosVector(ds->getDim()));
 
         for (std::vector<unsigned int>::iterator  itindex = d->boundaryConditions()->velocityIndices()->begin() ;
@@ -751,7 +671,7 @@ double MoreauJeanOSI::computeResidu()
         d->boundaryConditions()->computePrescribedVelocity(t);
 
         unsigned int columnindex = 0;
-        SP::SimpleMatrix WBoundaryConditions = _WBoundaryConditionsMap[ds->number()];
+        SP::SimpleMatrix WBoundaryConditions =_dynamicalSystemsGraph->properties(*dsi).WBoundaryConditions;
         SP::SiconosVector columntmp(new SiconosVector(ds->getDim()));
 
         for (std::vector<unsigned int>::iterator  itindex = d->boundaryConditions()->velocityIndices()->begin() ;
@@ -845,7 +765,7 @@ double MoreauJeanOSI::computeResidu()
         d->boundaryConditions()->computePrescribedVelocity(t);
 
         unsigned int columnindex = 0;
-        SP::SimpleMatrix WBoundaryConditions = _WBoundaryConditionsMap[ds->number()];
+        SP::SimpleMatrix WBoundaryConditions = _dynamicalSystemsGraph->properties(*dsi).WBoundaryConditions;
         SP::SiconosVector columntmp(new SiconosVector(ds->getDim()));
 
         for (std::vector<unsigned int>::iterator  itindex = d->boundaryConditions()->velocityIndices()->begin() ;
@@ -879,7 +799,7 @@ double MoreauJeanOSI::computeResidu()
       if (d->boundaryConditions())
       {
         unsigned int columnindex = 0;
-        SP::SimpleMatrix WBoundaryConditions = _WBoundaryConditionsMap[ds->number()];
+        SP::SimpleMatrix WBoundaryConditions = _dynamicalSystemsGraph->properties(*dsi).WBoundaryConditions;
         SP::SiconosVector columntmp(new SiconosVector(ds->getDim()));
 
         for (std::vector<unsigned int>::iterator  itindex = d->boundaryConditions()->velocityIndices()->begin() ;
@@ -946,7 +866,7 @@ void MoreauJeanOSI::computeFreeState()
     if (!checkOSI(dsi)) continue;
     ds = _dynamicalSystemsGraph->bundle(*dsi);
     dsType = Type::value(*ds); // Its type
-    W = WMap[ds->number()]; // Its W MoreauJeanOSI matrix of iteration.
+    W = _dynamicalSystemsGraph->properties(*dsi).W; // Its W MoreauJeanOSI matrix of iteration.
     // 3 - Lagrangian Non Linear Systems
     if (dsType == Type::LagrangianDS)
     {
@@ -982,7 +902,7 @@ void MoreauJeanOSI::computeFreeState()
 
       // -- Update W --
       // Note: during computeW, mass and jacobians of forces will be computed/
-      computeW(t, d);
+      computeW(t, d, *W);
 
       // -- vfree =  v - W^{-1} ResiduFree --
       // At this point vfree = residuFree
@@ -1061,7 +981,8 @@ void MoreauJeanOSI::computeFreeState()
 
       // -- Update W --
       // Note: during computeW, mass and jacobians of forces will be computed/
-      computeW(t, d);
+      SP::SimpleMatrix W = _dynamicalSystemsGraph->properties(*dsi).W;
+      computeW(t, d, *W);
       SP::SiconosVector v = d->velocity(); // v = v_k,i+1
 
       // -- vfree =  v - W^{-1} ResiduFree --
@@ -1069,7 +990,8 @@ void MoreauJeanOSI::computeFreeState()
       // -> Solve WX = vfree and set vfree = X
       //    std::cout<<"MoreauJeanOSI::computeFreeState residu free"<<endl;
       //    vfree->display();
-      d->luW()->PLUForwardBackwardInPlace(*vfree);
+      
+      W->PLUForwardBackwardInPlace(*vfree);
       //    std::cout<<"MoreauJeanOSI::computeFreeState -WRfree"<<endl;
       //    vfree->display();
       //    scal(h,*vfree,*vfree);
@@ -1092,7 +1014,7 @@ void MoreauJeanOSI::prepareNewtonIteration(double time)
    {
     if (!checkOSI(dsi)) continue;
     SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
-    computeW(time, ds);
+    computeW(time, ds, *_dynamicalSystemsGraph->properties(*dsi).W);
   }
 
   if (!_explicitNewtonEulerDSOperators)
@@ -1324,7 +1246,7 @@ void MoreauJeanOSI::integrate(double& tinit, double& tend, double& tout, int& no
     if (!checkOSI(dsi)) continue;
     SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
     
-    W = WMap[ds->number()];
+    W =  _dynamicalSystemsGraph->properties(*dsi).W;
     Type::Siconos dsType = Type::value(*ds);
     
     if (dsType == Type::LagrangianLinearTIDS)
@@ -1470,7 +1392,7 @@ void MoreauJeanOSI::updateState(const unsigned int level)
     SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
 
 
-    W = WMap[ds->number()];
+    W = _dynamicalSystemsGraph->properties(*dsi).W;
     // Get the DS type
 
     Type::Siconos dsType = Type::value(*ds);
@@ -1521,7 +1443,7 @@ void MoreauJeanOSI::updateState(const unsigned int level)
              itindex != d->boundaryConditions()->velocityIndices()->end();
              ++itindex)
         {
-          _WBoundaryConditionsMap[ds->number()]->getCol(bc, *columntmp);
+           _dynamicalSystemsGraph->properties(*dsi).WBoundaryConditions->getCol(bc, *columntmp);
           /*\warning we assume that W is symmetric in the Lagrangian case*/
           double value = - inner_prod(*columntmp, *v);
           if (level != LEVELMAX && d->p(level)&& d->p(level)->size() > 0)
@@ -1581,7 +1503,7 @@ void MoreauJeanOSI::updateState(const unsigned int level)
                ++itindex)
             v->setValue(*itindex, 0.0);
 
-        d->luW()->PLUForwardBackwardInPlace(*v);
+        _dynamicalSystemsGraph->properties(*dsi).W->PLUForwardBackwardInPlace(*v);
 
         DEBUG_EXPR(d->p(level)->display());
         DEBUG_PRINT("MoreauJeanOSI::updatestate W CT lambda\n");
@@ -1605,7 +1527,7 @@ void MoreauJeanOSI::updateState(const unsigned int level)
              itindex != d->boundaryConditions()->velocityIndices()->end();
              ++itindex)
         {
-          _WBoundaryConditionsMap[ds->number()]->getCol(bc, *columntmp);
+          _dynamicalSystemsGraph->properties(*dsi).WBoundaryConditions->getCol(bc, *columntmp);
           /*\warning we assume that W is symmetric in the Lagrangian case*/
           double value = - inner_prod(*columntmp, *v);
           if (level != LEVELMAX && d->p(level) && d->p(level)->size() > 0)
@@ -1694,7 +1616,7 @@ void MoreauJeanOSI::display()
 
       std::cout << "--------------------------------" <<std::endl;
       std::cout << "--> W of dynamical system number " << ds->number() << ": " <<std::endl;
-      if (WMap[ds->number()]) WMap[ds->number()]->display();
+      if (_dynamicalSystemsGraph->properties(*dsi).W) _dynamicalSystemsGraph->properties(*dsi).W->display();
       else std::cout << "-> NULL" <<std::endl;
       std::cout << "--> and corresponding theta is: " << _theta <<std::endl;
     }

@@ -77,13 +77,14 @@ struct InteractionProperties
 /** \struct SystemProperties mandatory properties for a DynamicalSystems */
 struct SystemProperties
 {
-  SP::SiconosMatrix upper_block;        /**< i,j block i<j */
-  SP::SiconosMatrix lower_block;        /**< i,j block i>j */
-  SP::VectorOfVectors workVectors;      /**< Used for instance in Newton iteration */
-  SP::VectorOfMatrices workMatrices;    /**< Mostly for Lagrangian system */
-  SP::OneStepIntegrator osi;            /**< Integrator used for the given DynamicalSystem */
-  SP::SiconosMatrix W;                  /**< Matrix for integration */
-//  SP::SiconosMemory _xMemory          /**< old value of x, TBD */
+  SP::SiconosMatrix upper_block;          /**< i,j block i<j */
+  SP::SiconosMatrix lower_block;          /**< i,j block i>j */
+  SP::VectorOfVectors workVectors;        /**< Used for instance in Newton iteration */
+  SP::VectorOfMatrices workMatrices;      /**< Mostly for Lagrangian system */
+  SP::OneStepIntegrator osi;              /**< Integrator used for the given DynamicalSystem */
+  SP::SimpleMatrix W;                    /**< Matrix for integration */
+  SP::SimpleMatrix WBoundaryConditions;  /**< Matrix for integration of boundary conditions*/
+//  SP::SiconosMemory _xMemory            /**< old value of x, TBD */
 
   ACCEPT_SERIALIZATION(SystemProperties);
 };

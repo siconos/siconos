@@ -25,6 +25,7 @@
 #include "Model.hpp"
 #include "EulerMoreauOSI.hpp"
 #include "MoreauJeanOSI.hpp"
+#include "SchatzmanPaoliOSI.hpp"
 #include "NewMarkAlphaOSI.hpp"
 #include "LagrangianDS.hpp"
 #include "NewtonEulerDS.hpp"
@@ -420,11 +421,17 @@ SP::SimpleMatrix OneStepNSProblem::getOSIMatrix(SP::OneStepIntegrator Osi, SP::D
   dsType = Type::value(*ds);
 
   if (osiType == OSI::MOREAUJEANOSI
-      || osiType == OSI::MOREAUDIRECTPROJECTIONOSI
-      || osiType == OSI::SCHATZMANPAOLIOSI)
+      || osiType == OSI::MOREAUDIRECTPROJECTIONOSI)
+  {
+    // if (dsType != Type::NewtonEulerDS)
+      block = (std11::static_pointer_cast<MoreauJeanOSI> (Osi))->W(ds); // get its W matrix ( pointer link!)
+    // else
+    //   block = (std11::static_pointer_cast<NewtonEulerDS> (ds))->luW(); // get its W matrix ( pointer link!)
+  }
+  else if (osiType == OSI::SCHATZMANPAOLIOSI)
   {
     if (dsType != Type::NewtonEulerDS)
-      block = (std11::static_pointer_cast<MoreauJeanOSI> (Osi))->W(ds); // get its W matrix ( pointer link!)
+      block = (std11::static_pointer_cast<SchatzmanPaoliOSI> (Osi))->W(ds); // get its W matrix ( pointer link!)
     else
       block = (std11::static_pointer_cast<NewtonEulerDS> (ds))->luW(); // get its W matrix ( pointer link!)
   }

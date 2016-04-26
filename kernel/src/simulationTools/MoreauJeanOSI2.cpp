@@ -69,7 +69,7 @@ void MoreauJeanOSI2::computeFreeState()
 
     SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
     dsType = Type::value(*ds); // Its type
-    W = WMap[ds->number()]; // Its W MoreauJeanOSI matrix of iteration.
+    W = _dynamicalSystemsGraph->properties(*dsi).W; // Its W MoreauJeanOSI matrix of iteration.
 
     if (dsType == Type::FirstOrderLinearDS)
     {
@@ -113,7 +113,7 @@ void MoreauJeanOSI2::computeFreeState()
       }
 
       // -- Update W --
-      computeW(t, d);
+      computeW(t, d, *W);
     }
     // 2bis - First Order Linear Systems with Time Invariant coefficients
     else if (dsType == Type::FirstOrderLinearTIDS)
@@ -168,7 +168,7 @@ void MoreauJeanOSI2::computeFreeState()
 
       // -- Update W --
       // Note: during computeW, mass and jacobians of fL will be computed/
-      computeW(t, d);
+      computeW(t, d, *W);
 
       SP::SiconosMatrix M = d->mass();
       SP::SiconosVector v = d->velocity(); // v = v_k,i+1

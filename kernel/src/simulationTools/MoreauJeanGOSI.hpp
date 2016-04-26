@@ -114,10 +114,6 @@ protected:
   */
   ACCEPT_SERIALIZATION(MoreauJeanGOSI);
 
-
-  /** Stl map that associates a W MoreauJeanGOSI matrix to each DynamicalSystem of the OSI */
-  MapOfDSMatrices WMap;
-
   /** Stl map that associates the columns of  W MoreauJeanGOSI matrix to each DynamicalSystem of the OSI if it has some boundary conditions */
   MapOfDSMatrices _WBoundaryConditionsMap;
 

@@ -99,7 +99,6 @@ void MoreauJeanGOSI::initW(double t, SP::DynamicalSystem ds, DynamicalSystemsGra
   DEBUG_PRINT("MoreauJeanGOSI::initW starts\n");
   // This function:
   // - allocate memory for a matrix W
-  // - insert this matrix into WMap with ds as a key
 
   if (!ds || !dsv)
     RuntimeException::selfThrow("MoreauJeanGOSI::initW(t, ds, dsv) - ds == NULL or dsv == NULL");
@@ -1444,7 +1443,7 @@ void MoreauJeanGOSI::display()
 
       std::cout << "--------------------------------" <<std::endl;
       std::cout << "--> W of dynamical system number " << ds->number() << ": " <<std::endl;
-      if (WMap[ds->number()]) WMap[ds->number()]->display();
+      if (_dynamicalSystemsGraph->properties(*dsi).W) _dynamicalSystemsGraph->properties(*dsi).W->display();
       else std::cout << "-> NULL" <<std::endl;
       std::cout << "--> and corresponding theta is: " << _theta <<std::endl;
     }
