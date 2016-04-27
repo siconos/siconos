@@ -71,7 +71,21 @@ protected:
   SiconosShape(const SP::SiconosVector pos)
     : _position(new SiconosVector(7))
   {
-    _position = pos;
+    switch (pos->size()) {
+    case 3:
+      _position->zero();
+      _position->setValue(0, pos->getValue(0));
+      _position->setValue(1, pos->getValue(1));
+      _position->setValue(2, pos->getValue(2));
+      _position->setValue(3, 1);
+      break;
+    case 7:
+      _position = pos;
+      break;
+    default:
+      assert((pos->size()==3 || pos->size()==7)
+             && "Shape must be initialized with a 3- or 7-vector.");
+    }
   }
 
 public:
@@ -129,6 +143,9 @@ public:
   SiconosPlane(float x, float y, float z)
     : SiconosShape(x,y,z) {}
 
+  SiconosPlane(SP::SiconosVector pos)
+    : SiconosShape(pos) {}
+
   /** visitors hook
    */
   ACCEPT_BASE_VISITORS(SiconosShape);
@@ -146,6 +163,10 @@ protected:
 public:
   SiconosSphere(float x, float y, float z, float radius)
     : SiconosShape(x,y,z), _radius(radius) {}
+
+  SiconosSphere(SP::SiconosVector pos, float radius)
+    : SiconosShape(pos), _radius(radius) {}
+
   float radius() const { return _radius; }
   void setRadius(float r) { _radius = r; onChanged(); }
 
@@ -172,6 +193,10 @@ public:
     (*_dimensions)(1) = height;
     (*_dimensions)(2) = depth;
   }
+
+  SiconosBox(SP::SiconosVector pos,
+             SP::SiconosVector dimensions)
+    : SiconosShape(pos), _dimensions(dimensions) {}
 
   SP::SiconosVector dimensions() const { return _dimensions; }
 
