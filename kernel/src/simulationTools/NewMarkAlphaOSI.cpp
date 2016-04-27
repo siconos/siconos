@@ -53,22 +53,20 @@ NewMarkAlphaOSI::NewMarkAlphaOSI(double _rho_infty, bool flag = false):
 
 const SimpleMatrix NewMarkAlphaOSI::getW(SP::DynamicalSystem ds)
 {
-  int dsN = ds->number();
   assert(ds && "NewMarkAlphaOSI::getW(ds): ds == NULL.");
-  assert(WMap[dsN] && "NewMarkAlphaOSI::getW(ds): W[ds] == NULL.");
-  return *(WMap[dsN]); // Copy !!
+  assert(_dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).W && "NewMarkAlphaOSI::getW(ds): W[ds] == NULL.");
+  return *(_dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).W); // Copy !!
 }
 
 SP::SimpleMatrix NewMarkAlphaOSI::W(SP::DynamicalSystem ds)
 {
   assert(ds && "NewMarkAlphaOSI::W(ds): ds == NULL.");
-  assert(WMap[ds->number()] && "NewMarkAlphaOSI::W(ds): W[ds] == NULL.");
-  return WMap[ds->number()];
+  assert(_dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).W && "NewMarkAlphaOSI::W(ds): W[ds] == NULL.");
+  return _dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).W;
 }
 
 void NewMarkAlphaOSI::initW(SP::DynamicalSystem ds)
 {
-  // This function is to allocate memory for a matrix W and insert this matrix into WMap with ds as a key
 
   if (!ds)
     RuntimeException::selfThrow("NewMarkAlphaOSI::initW(t,ds) - ds == NULL");
@@ -76,16 +74,16 @@ void NewMarkAlphaOSI::initW(SP::DynamicalSystem ds)
   if (!(checkOSI(_dynamicalSystemsGraph->descriptor(ds))))
     RuntimeException::selfThrow("NewMarkAlphaOSI::initW(t,ds) - ds does not belong to the OSI.");
 
-  unsigned int dsN = ds->number();
-  if (WMap.find(dsN) != WMap.end())
+  if (_dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).W)
     RuntimeException::selfThrow("NewMarkAlphaOSI::initW(t,ds) - W(ds) is already in the map and has been initialized.");
 
-  WMap[dsN].reset(new SimpleMatrix(ds->getDim(), ds->getDim())); // allocate memory
-  computeW(ds);
+  SP::SimpleMatrix W = _dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).W;
+  W.reset(new SimpleMatrix(ds->getDim(), ds->getDim())); // allocate memory
+  computeW(ds,*W);
 }
 
 
-void NewMarkAlphaOSI::computeW(SP::DynamicalSystem ds)
+void NewMarkAlphaOSI::computeW(SP::DynamicalSystem ds, SiconosMatrix& W)
 {
   double beta_prime = (1 - _alpha_m) / ((1 - _alpha_f) * _beta);
   double gamma_prime = _gamma / _beta;
@@ -93,8 +91,6 @@ void NewMarkAlphaOSI::computeW(SP::DynamicalSystem ds)
   if (h < 100 * MACHINE_PREC)
     RuntimeException::selfThrow("In NewMarkAlphaOSI::initW(t,ds), time integration is too small");
   // make sure that W is initialized before computing
-  unsigned int dsN = ds->number();
-  SP::SiconosMatrix W = WMap[dsN];
   Type::Siconos dsType = Type::value(*ds);
   SP::SiconosMatrix M;
   SP::SiconosMatrix K;
@@ -121,11 +117,11 @@ void NewMarkAlphaOSI::computeW(SP::DynamicalSystem ds)
         *C *= -1.0;     // C = -C
     }
     // Compute W = (beta_prime/h^2)*M - (gamma_prime/h)*C - K
-    scal(beta_prime / (h * h), *M, *W, true);
+    scal(beta_prime / (h * h), *M, W, true);
     if (C)
-      scal(-gamma_prime / h, *C, *W, false);
+      scal(-gamma_prime / h, *C, W, false);
     if (K)
-      scal(-1.0, *K, *W, false);
+      scal(-1.0, *K, W, false);
     //
 #ifdef DEBUG_NEWMARK
     std::cout.precision(15);
@@ -252,7 +248,7 @@ void NewMarkAlphaOSI::computeFreeState()
 
     dsType = Type::value(*ds); // Its type
     // Get iteration matrix W, make sure that W was updated before
-    W = WMap[ds->number()]; // Its W matrix of iteration.
+    W = _dynamicalSystemsGraph->properties(*dsi).W; // Its W matrix of iteration.
     SP::SiconosVector _qfree = ds->workspace(DynamicalSystem::free); // q_free
     SP::SiconosVector freeR = ds->workspace(DynamicalSystem::freeresidu);
     // -- Convert the DS into a Lagrangian one.
@@ -394,7 +390,7 @@ void NewMarkAlphaOSI::initialize(Model& m)
     // W initialization
     initW(ds);
     // allocate memory for work space for Newton iteration procedure
-    ds->allocateWorkVector(DynamicalSystem::local_buffer, WMap[ds->number()]->size(0));
+    ds->allocateWorkVector(DynamicalSystem::local_buffer,   _dynamicalSystemsGraph->properties(*dsi).W->size(0));
     //Allocate the memory to stock the acceleration-like variable
     dsType = Type::value(*ds); // Its type
     if ((dsType == Type::LagrangianDS) || (dsType == Type::LagrangianLinearTIDS))
@@ -418,7 +414,8 @@ void NewMarkAlphaOSI::prepareNewtonIteration(double time)
   {
     if (!checkOSI(dsi)) continue;
     SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
-    computeW(ds);
+    SiconosMatrix& W = *_dynamicalSystemsGraph->properties(*dsi).W; 
+    computeW(ds, W );
   }
 }
 
@@ -506,7 +503,8 @@ void NewMarkAlphaOSI::correction()
     if (!checkOSI(dsi)) continue;
     SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
 
-    SP::SimpleMatrix W = WMap[ds->number()]; // Iteration matrix W_{n+1,k} computed at kth iteration
+    SP::SimpleMatrix W = _dynamicalSystemsGraph->properties(*dsi).W; // Its W matrix of iteration.
+; // Iteration matrix W_{n+1,k} computed at kth iteration
     SP::SiconosVector _r = ds->workspace(DynamicalSystem::freeresidu); // Free residu r_{n+1,k}
     dsType = Type::value(*ds); // Its type
     if ((dsType == Type::LagrangianDS) || (dsType == Type::LagrangianLinearTIDS))

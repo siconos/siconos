@@ -144,12 +144,12 @@ void MoreauJeanOSI::initW(double t, SP::DynamicalSystem ds, DynamicalSystemsGrap
   // Memory allocation for W
   double h = _simulation->timeStep();
   Type::Siconos dsType = Type::value(*ds);
-
+  SP::SimpleMatrix W =  _dynamicalSystemsGraph->properties(dsv).W;
 
   if (dsType == Type::LagrangianDS)
   {
     SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
-    _dynamicalSystemsGraph->properties(dsv).W.reset((new SimpleMatrix(*d->mass()))); //*W = *d->mass();
+    W.reset((new SimpleMatrix(*d->mass()))); //*W = *d->mass();
     // Compute the W matrix
     computeW(t,ds, *_dynamicalSystemsGraph->properties(dsv).W);
     // WBoundaryConditions initialization
@@ -160,7 +160,7 @@ void MoreauJeanOSI::initW(double t, SP::DynamicalSystem ds, DynamicalSystemsGrap
   else if (dsType == Type::LagrangianLinearTIDS)
   {
     SP::LagrangianLinearTIDS d = std11::static_pointer_cast<LagrangianLinearTIDS> (ds);
-    _dynamicalSystemsGraph->properties(dsv).W.reset(new SimpleMatrix(*d->mass())); //*W = *d->mass();
+    W.reset(new SimpleMatrix(*d->mass())); //*W = *d->mass();
 
     SP::SiconosMatrix K = d->K();
     SP::SiconosMatrix C = d->C();
@@ -179,7 +179,7 @@ void MoreauJeanOSI::initW(double t, SP::DynamicalSystem ds, DynamicalSystemsGrap
   else if (dsType == Type::NewtonEulerDS)
   {
     SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS> (ds);
-    _dynamicalSystemsGraph->properties(dsv).W.reset(new SimpleMatrix(*d->mass()));
+    W.reset(new SimpleMatrix(*d->mass()));
 
     computeW(t,ds, *_dynamicalSystemsGraph->properties(dsv).W);
 
@@ -215,7 +215,7 @@ void MoreauJeanOSI::initWBoundaryConditions(SP::DynamicalSystem ds, DynamicalSys
   if (_dynamicalSystemsGraph->properties(dsv).WBoundaryConditions)
     RuntimeException::selfThrow("MoreauJeanOSI::initWBoundaryConditions(t,ds) - WBoundaryConditions(ds) is already in the map and has been initialized.");
 
-  
+
   Type::Siconos dsType = Type::value(*ds);
   if (dsType == Type::LagrangianLinearTIDS || dsType == Type::LagrangianDS || dsType == Type::NewtonEulerDS)
   {
@@ -258,7 +258,7 @@ void MoreauJeanOSI::computeWBoundaryConditions(SP::DynamicalSystem ds, SiconosMa
   Type::Siconos dsType = Type::value(*ds);
   if (dsType == Type::LagrangianLinearTIDS || dsType == Type::LagrangianDS ||  dsType == Type::NewtonEulerDS)
   {
- 
+
     SP::SiconosVector columntmp(new SiconosVector(ds->getDim()));
 
     int columnindex = 0;
@@ -371,7 +371,7 @@ void MoreauJeanOSI::computeW(double t, SP::DynamicalSystem ds, SiconosMatrix& W)
       //*W -= h*h*_theta*_theta**K;
     }
     DEBUG_EXPR(W->display(););
-    DEBUG_EXPR_WE(std::cout <<  std::boolalpha << "W->isPLUFactorized() = "<< W->isPLUFactorized() << std::endl;); 
+    DEBUG_EXPR_WE(std::cout <<  std::boolalpha << "W->isPLUFactorized() = "<< W->isPLUFactorized() << std::endl;);
 
   }
   else RuntimeException::selfThrow("MoreauJeanOSI::computeW - not yet implemented for Dynamical system of type : " +Type::name(*ds));
@@ -990,7 +990,7 @@ void MoreauJeanOSI::computeFreeState()
       // -> Solve WX = vfree and set vfree = X
       //    std::cout<<"MoreauJeanOSI::computeFreeState residu free"<<endl;
       //    vfree->display();
-      
+
       W->PLUForwardBackwardInPlace(*vfree);
       //    std::cout<<"MoreauJeanOSI::computeFreeState -WRfree"<<endl;
       //    vfree->display();
@@ -1245,10 +1245,10 @@ void MoreauJeanOSI::integrate(double& tinit, double& tend, double& tout, int& no
   {
     if (!checkOSI(dsi)) continue;
     SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
-    
+
     W =  _dynamicalSystemsGraph->properties(*dsi).W;
     Type::Siconos dsType = Type::value(*ds);
-    
+
     if (dsType == Type::LagrangianLinearTIDS)
     {
       // get the ds
@@ -1384,7 +1384,7 @@ void MoreauJeanOSI::updateState(const unsigned int level)
     _simulation->setRelativeConvergenceCriterionHeld(true);
 
   SP::SiconosMatrix W;
-  
+
   DynamicalSystemsGraph::VIterator dsi, dsend;
   for (std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
   {

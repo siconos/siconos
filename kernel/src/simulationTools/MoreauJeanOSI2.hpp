@@ -40,7 +40,6 @@
  * MoreauJeanOSI class is used to define some time-integrators methods for a list of dynamical systems.
  * Each DynamicalSystem is associated to a SiconosMatrix, named "W", and a double, "theta", through two
  * STL maps:
- * - WMap, with WMap[ds] = a pointer to a SiconosMatrix
  * - thetaMap, thetaMap[ds] = a double
  * ds being a SP::DynamicalSystem
  *

@@ -71,7 +71,7 @@ const SimpleMatrix SchatzmanPaoliOSI::getWBoundaryConditions(SP::DynamicalSystem
   assert(ds &&
          "SchatzmanPaoliOSI::getWBoundaryConditions(ds): ds == NULL.");
   //    return *(WBoundaryConditionsMap[0]);
-  assert(_dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).W &&
+  assert(_dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).WBoundaryConditions &&
          "SchatzmanPaoliOSI::getWBoundaryConditions(ds): WBoundaryConditions[ds] == NULL.");
   return *(_dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).WBoundaryConditions); // Copy !!
 }

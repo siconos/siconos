@@ -249,7 +249,7 @@ public:
   /** compute W SchatzmanPaoliOSI matrix at time t
    *  \param time the time (double)
    *  \param ds a pointer to DynamicalSystem
-   *  \param W write the result in W
+   *  \param W the matrix to compute
    */
   void computeW(double time, SP::DynamicalSystem ds, SiconosMatrix& W);
 

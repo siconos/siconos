@@ -302,13 +302,13 @@ public:
    */
   virtual void initialize(Model& m);
 
-  /** init WMap[ds] MoreauJeanGOSI matrix at time t
+  /** init W MoreauJeanGOSI matrix at time t
    *  \param time
    *  \param ds a pointer to DynamicalSystem
    */
   void initW(double time, SP::DynamicalSystem ds, DynamicalSystemsGraph::VDescriptor& dsv);
 
-  /** compute WMap[ds] MoreauJeanGOSI matrix at time t
+  /** compute W MoreauJeanGOSI matrix at time t
    *  \param time (double)
    *  \param ds a pointer to DynamicalSystem
    *  \param W the matrix to compute

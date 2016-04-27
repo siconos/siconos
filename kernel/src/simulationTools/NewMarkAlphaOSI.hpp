@@ -46,9 +46,6 @@ protected:
   /** Parameters of the numerical scheme:  beta, gamma, alpha_m, alpha_f */
   double _beta, _gamma, _alpha_m, _alpha_f;
 
-  /** Stl map that associates a W matrix to each DynamicalSystem of the OSI */
-  MapOfDSMatrices WMap;
-
   /** Order of the polynomial for dense output*/
   unsigned int _orderDenseOutput;
 
@@ -199,15 +196,16 @@ public:
    */
   SP::SimpleMatrix W(SP::DynamicalSystem ds);
 
-  /** initialize WMap[ds] matrix
+  /** initialize W matrix
     *  \param ds a pointer to DynamicalSystem
     */
   void initW(SP::DynamicalSystem ds );
 
-  /** compute WMap[ds] matrix
+  /** compute W matrix
    *  \param ds a pointer to DynamicalSystem
+   *  \param W the result in W
    */
-  void computeW(SP::DynamicalSystem ds);
+  void computeW(SP::DynamicalSystem ds,  SiconosMatrix& W);
 
   /** compute the residual of dynamical equation
    *\return double: maximum residu over all DSs
@@ -223,11 +221,11 @@ public:
    */
   virtual void computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter,
                                  OneStepNSProblem* osnsp);
-  
+
   /** initialize */
   void initialize(Model& m);
 
-  /** prepare for Newton Iteration 
+  /** prepare for Newton Iteration
    * \param time
    */
   void prepareNewtonIteration(double time);
