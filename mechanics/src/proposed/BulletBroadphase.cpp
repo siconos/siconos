@@ -148,6 +148,10 @@ BulletBroadphase::BulletBroadphase(const BulletOptions &_options)
   impl.reset(new BulletBroadphase_impl());
   impl->_collisionConfiguration.reset(
     new btDefaultCollisionConfiguration());
+
+  impl->_collisionConfiguration->setConvexConvexMultipointIterations();
+  impl->_collisionConfiguration->setPlaneConvexMultipointIterations();
+
   impl->_dispatcher.reset(
     new btCollisionDispatcher(&*impl->_collisionConfiguration));
 
