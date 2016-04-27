@@ -142,7 +142,7 @@ void SchatzmanPaoliOSI::initialize(Model& m)
     initW(t0, ds, *dsi);
 
     //      if ((*itDS)->getType() == Type::LagrangianDS || (*itDS)->getType() == Type::FirstOrderNonLinearDS)
-    ds->allocateWorkVector(DynamicalSystem::local_buffer, WMap[ds->number()]->size(0));
+    ds->allocateWorkVector(DynamicalSystem::local_buffer,_dynamicalSystemsGraph->properties(*dsi).W->size(0));
   }
 }
 void SchatzmanPaoliOSI::initW(double t, SP::DynamicalSystem ds, DynamicalSystemsGraph::VDescriptor& dsv)
@@ -157,8 +157,7 @@ void SchatzmanPaoliOSI::initW(double t, SP::DynamicalSystem ds, DynamicalSystems
   if (!(checkOSI(_dynamicalSystemsGraph->descriptor(ds))))
     RuntimeException::selfThrow("SchatzmanPaoliOSI::initW(t,ds) - ds does not belong to the OSI.");
 
-  unsigned int dsN = ds->number();
-  if (WMap.find(dsN) != WMap.end())
+  if (_dynamicalSystemsGraph->properties(dsv).W)
     RuntimeException::selfThrow("SchatzmanPaoliOSI::initW(t,ds) - W(ds) is already in the map and has been initialized.");
 
 
@@ -200,7 +199,7 @@ void SchatzmanPaoliOSI::initW(double t, SP::DynamicalSystem ds, DynamicalSystems
     SP::SiconosMatrix K = d->K();
     SP::SiconosMatrix C = d->C();
     _dynamicalSystemsGraph->properties(dsv).W.reset(new SimpleMatrix(*d->mass())); //*W = *d->mass();
-    SP::SiconosMatrix W = WMap[dsN];
+    SP::SiconosMatrix W = _dynamicalSystemsGraph->properties(dsv).W;
 
     if (C)
       scal(1 / 2.0 * h * _theta, *C, *W, false); // W += 1/2.0*h*_theta *C
@@ -330,10 +329,7 @@ void SchatzmanPaoliOSI::computeW(double t, SP::DynamicalSystem ds, SiconosMatrix
 
   assert(ds &&
          "SchatzmanPaoliOSI::computeW(t,ds) - ds == NULL");
-  unsigned int dsN = ds->number();
-  assert((WMap.find(dsN) != WMap.end()) &&
-         "SchatzmanPaoliOSI::computeW(t,ds) - W(ds) does not exists. Maybe you forget to initialize the osi?");
-
+ 
   //double h = _simulation->timeStep();
   Type::Siconos dsType = Type::value(*ds);
 

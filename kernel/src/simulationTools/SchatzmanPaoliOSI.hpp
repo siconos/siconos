@@ -68,12 +68,6 @@ protected:
   ACCEPT_SERIALIZATION(SchatzmanPaoliOSI);
 
 
-  /** Stl map that associates a W SchatzmanPaoliOSI matrix to each DynamicalSystem of the OSI */
-  MapOfDSMatrices WMap;
-
-  /** Stl map that associates the columns of  W SchatzmanPaoliOSI matrix to each DynamicalSystem of the OSI if it has some boundary conditions */
-  MapOfDSMatrices _WBoundaryConditionsMap;
-
   /** Stl map that associates a theta parameter for the integration
   *  scheme to each DynamicalSystem of the OSI */
   double _theta;
@@ -148,14 +142,6 @@ public:
   void setWPtr(SP::SimpleMatrix newPtr, SP::DynamicalSystem ds);
 
   // -- WBoundaryConditions --
-
-  /** get WBoundaryConditions map
-   *  \return a MapOfDSMatrices
-   */
-  inline MapOfDSMatrices getWBoundaryConditionsMap() const
-  {
-    return _WBoundaryConditionsMap;
-  };
 
   /** get the value of WBoundaryConditions corresponding to DynamicalSystem ds
    * \param ds a pointer to DynamicalSystem, optional, default =
