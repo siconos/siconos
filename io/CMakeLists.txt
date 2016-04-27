@@ -55,7 +55,7 @@ if(WITH_SERIALIZATION)
     set(io_targets ${COMPONENTS})
 
     # REMOVE_item not on cmake 2.8 ...
-    list(REMOVE_item io_targets numerics io)
+    list(REMOVE_ITEM io_targets numerics io)
     print_var(io_targets)
     # header generation
     SET(GENERATED_TARGETS --targets=${io_targets})
