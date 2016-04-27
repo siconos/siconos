@@ -8,7 +8,8 @@ set(SWIG_MODULE_${COMPONENT}_EXTRA_DEPS)
 # List of modules to be built in the python bindings
 set(${COMPONENT}_PYTHON_MODULES "mechanics/bodies"
   "mechanics/joints"
-  "mechanics/contact_detection/base")
+  "mechanics/contact_detection/base"
+  "mechanics/proposed")
 
 if(WITH_OCC)
   list(APPEND ${COMPONENT}_PYTHON_MODULES "mechanics/occ")
