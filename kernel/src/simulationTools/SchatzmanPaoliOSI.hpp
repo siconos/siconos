@@ -130,13 +130,13 @@ public:
   SP::SimpleMatrix W(SP::DynamicalSystem ds);
 
   /** set the value of W[ds] to newValue
-   * \param newValue SiconosMatrix 
+   * \param newValue SiconosMatrix
    * \param ds  a pointer to DynamicalSystem,
    */
   void setW(const SiconosMatrix& newValue, SP::DynamicalSystem ds);
 
   /** set W[ds] to pointer newPtr
-   * \param newPtr SP::SiconosMatrix  
+   * \param newPtr SP::SiconosMatrix
    * \param ds a pointer to DynamicalSystem
    */
   void setWPtr(SP::SimpleMatrix newPtr, SP::DynamicalSystem ds);
@@ -239,14 +239,14 @@ public:
    */
   void initialize(Model& m );
 
-  /** init WMap[ds] SchatzmanPaoliOSI matrix at time t
+  /** init W SchatzmanPaoliOSI matrix at time t
    *  \param time (double)
    *  \param ds a pointer to DynamicalSystem
-   *  \param dsv a descriptor of the ds on the graph (redundant) 
+   *  \param dsv a descriptor of the ds on the graph (redundant)
    */
   void initW(double time, SP::DynamicalSystem ds, DynamicalSystemsGraph::VDescriptor& dsv);
 
-  /** compute WMap[ds] SchatzmanPaoliOSI matrix at time t
+  /** compute W SchatzmanPaoliOSI matrix at time t
    *  \param time the time (double)
    *  \param ds a pointer to DynamicalSystem
    *  \param W write the result in W
@@ -261,7 +261,7 @@ public:
 
   /** init WBoundaryConditionsMap[ds] SchatzmanPaoliOSI
    *  \param ds a pointer to DynamicalSystem
-   *  \param dsv a descriptor of the ds on the graph (redundant to avoid invocation) 
+   *  \param dsv a descriptor of the ds on the graph (redundant to avoid invocation)
    */
   void initWBoundaryConditions(SP::DynamicalSystem ds, DynamicalSystemsGraph::VDescriptor& dsv);
 
