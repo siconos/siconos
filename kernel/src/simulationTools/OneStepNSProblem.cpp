@@ -423,17 +423,11 @@ SP::SimpleMatrix OneStepNSProblem::getOSIMatrix(SP::OneStepIntegrator Osi, SP::D
   if (osiType == OSI::MOREAUJEANOSI
       || osiType == OSI::MOREAUDIRECTPROJECTIONOSI)
   {
-    // if (dsType != Type::NewtonEulerDS)
       block = (std11::static_pointer_cast<MoreauJeanOSI> (Osi))->W(ds); // get its W matrix ( pointer link!)
-    // else
-    //   block = (std11::static_pointer_cast<NewtonEulerDS> (ds))->luW(); // get its W matrix ( pointer link!)
   }
   else if (osiType == OSI::SCHATZMANPAOLIOSI)
   {
-    if (dsType != Type::NewtonEulerDS)
       block = (std11::static_pointer_cast<SchatzmanPaoliOSI> (Osi))->W(ds); // get its W matrix ( pointer link!)
-    else
-      block = (std11::static_pointer_cast<NewtonEulerDS> (ds))->luW(); // get its W matrix ( pointer link!)
   }
   else if (osiType == OSI::EULERMOREAUOSI)
   {

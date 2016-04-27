@@ -285,6 +285,7 @@ public:
   /** init WMap[ds] MoreauJeanOSI matrix at time t
    *  \param time
    *  \param ds a pointer to DynamicalSystem
+   *  \param dsv a descriptor of the ds on the graph (redundant to avoid invocation) 
    */
   void initW(double time, SP::DynamicalSystem ds, DynamicalSystemsGraph::VDescriptor& dsv);
 
@@ -303,6 +304,7 @@ public:
 
   /** init WBoundaryConditionsMap[ds] MoreauJeanOSI
    *  \param ds a pointer to DynamicalSystem
+   *  \param dsv a descriptor of the ds on the graph (redundant) 
    */
   void initWBoundaryConditions(SP::DynamicalSystem ds, DynamicalSystemsGraph::VDescriptor& dsv);
 

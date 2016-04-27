@@ -54,94 +54,32 @@ const SimpleMatrix SchatzmanPaoliOSI::getW(SP::DynamicalSystem ds)
 {
   assert(ds &&
          "SchatzmanPaoliOSI::getW(ds): ds == NULL.");
-  //    return *(WMap[0]);
-  unsigned int dsN = ds->number();
-  assert(WMap[dsN] &&
+  assert(_dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).W &&
          "SchatzmanPaoliOSI::getW(ds): W[ds] == NULL.");
-  return *(WMap[dsN]); // Copy !!
+  return *_dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).W; // Copy !!
 }
 
 SP::SimpleMatrix SchatzmanPaoliOSI::W(SP::DynamicalSystem ds)
 {
   assert(ds && "SchatzmanPaoliOSI::W(ds): ds == NULL.");
-  //  return WMap[0];
-  //  if(WMap[ds]==NULL)
-  //    RuntimeException::selfThrow("SchatzmanPaoliOSI::W(ds): W[ds] == NULL.");
-  return WMap[ds->number()];
+  return _dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).W;
+;
 }
-
-void SchatzmanPaoliOSI::setW(const SiconosMatrix& newValue, SP::DynamicalSystem ds)
-{
- 
-  // Check if ds is in the OSI
-  if (!(checkOSI(_dynamicalSystemsGraph->descriptor(ds))))
-    RuntimeException::selfThrow("SchatzmanPaoliOSI::initW(t,ds) - ds does not belong to the OSI.");
-
-  // Check dimensions consistency
-  unsigned int line = newValue.size(0);
-  unsigned int col  = newValue.size(1);
-
-  if (line != col) // Check that newValue is square
-    RuntimeException::selfThrow("SchatzmanPaoliOSI::setW(newVal,ds) - newVal is not square! ");
-
-  if (!ds)
-    RuntimeException::selfThrow("SchatzmanPaoliOSI::setW(newVal,ds) - ds == NULL.");
-
-  unsigned int sizeW = ds->getDim(); // n for first order systems, ndof for lagrangian.
-  unsigned int dsN = ds->number();
-  if (line != sizeW) // check consistency between newValue and dynamical system size
-    RuntimeException::selfThrow("SchatzmanPaoliOSI::setW(newVal,ds) - unconsistent dimension between newVal and dynamical system to be integrated ");
-
-  // Memory allocation for W, if required
-  if (!WMap[dsN]) // allocate a new W if required
-  {
-    WMap[dsN].reset(new SimpleMatrix(newValue));
-  }
-  else  // or fill-in an existing one if dimensions are consistent.
-  {
-    if (line == WMap[dsN]->size(0) && col == WMap[dsN]->size(1))
-      *(WMap[dsN]) = newValue;
-    else
-      RuntimeException::selfThrow("SchatzmanPaoliOSI - setW: inconsistent dimensions with problem size for given input matrix W");
-  }
-}
-
-void SchatzmanPaoliOSI::setWPtr(SP::SimpleMatrix newPtr, SP::DynamicalSystem ds)
-{
-  unsigned int line = newPtr->size(0);
-  unsigned int col  = newPtr->size(1);
-  if (line != col) // Check that newPtr is square
-    RuntimeException::selfThrow("SchatzmanPaoliOSI::setWPtr(newVal) - newVal is not square! ");
-
-  if (!ds)
-    RuntimeException::selfThrow("SchatzmanPaoliOSI::setWPtr(newVal,ds) - ds == NULL.");
-
-  unsigned int sizeW = ds->getDim(); // n for first order systems, ndof for lagrangian.
-  if (line != sizeW) // check consistency between newValue and dynamical system size
-    RuntimeException::selfThrow("SchatzmanPaoliOSI::setW(newVal) - unconsistent dimension between newVal and dynamical system to be integrated ");
-
-  WMap[ds->number()] = newPtr;                  // link with new pointer
-}
-
-
 
 const SimpleMatrix SchatzmanPaoliOSI::getWBoundaryConditions(SP::DynamicalSystem ds)
 {
   assert(ds &&
          "SchatzmanPaoliOSI::getWBoundaryConditions(ds): ds == NULL.");
   //    return *(WBoundaryConditionsMap[0]);
-  assert(_WBoundaryConditionsMap[ds->number()] &&
+  assert(_dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).W &&
          "SchatzmanPaoliOSI::getWBoundaryConditions(ds): WBoundaryConditions[ds] == NULL.");
-  return *(_WBoundaryConditionsMap[ds->number()]); // Copy !!
+  return *(_dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).WBoundaryConditions); // Copy !!
 }
 
 SP::SiconosMatrix SchatzmanPaoliOSI::WBoundaryConditions(SP::DynamicalSystem ds)
 {
   assert(ds && "SchatzmanPaoliOSI::WBoundaryConditions(ds): ds == NULL.");
-  //  return WBoundaryConditionsMap[0];
-  //  if(WBoundaryConditionsMap[ds]==NULL)
-  //    RuntimeException::selfThrow("SchatzmanPaoliOSI::WBoundaryConditions(ds): W[ds] == NULL.");
-  return _WBoundaryConditionsMap[ds->number()];
+  return _dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).WBoundaryConditions;
 }
 
 
@@ -201,13 +139,13 @@ void SchatzmanPaoliOSI::initialize(Model& m)
     // workX[*itDS].reset(new SiconosVector((*itDS)->getDim()));
 
     // W initialization
-    initW(t0, ds);
+    initW(t0, ds, *dsi);
 
     //      if ((*itDS)->getType() == Type::LagrangianDS || (*itDS)->getType() == Type::FirstOrderNonLinearDS)
     ds->allocateWorkVector(DynamicalSystem::local_buffer, WMap[ds->number()]->size(0));
   }
 }
-void SchatzmanPaoliOSI::initW(double t, SP::DynamicalSystem ds)
+void SchatzmanPaoliOSI::initW(double t, SP::DynamicalSystem ds, DynamicalSystemsGraph::VDescriptor& dsv)
 {
   // This function:
   // - allocate memory for a matrix W
@@ -261,7 +199,7 @@ void SchatzmanPaoliOSI::initW(double t, SP::DynamicalSystem ds)
     SP::LagrangianLinearTIDS d = std11::static_pointer_cast<LagrangianLinearTIDS> (ds);
     SP::SiconosMatrix K = d->K();
     SP::SiconosMatrix C = d->C();
-    WMap[dsN].reset(new SimpleMatrix(*d->mass())); //*W = *d->mass();
+    _dynamicalSystemsGraph->properties(dsv).W.reset(new SimpleMatrix(*d->mass())); //*W = *d->mass();
     SP::SiconosMatrix W = WMap[dsN];
 
     if (C)
@@ -272,7 +210,7 @@ void SchatzmanPaoliOSI::initW(double t, SP::DynamicalSystem ds)
 
     // WBoundaryConditions initialization
     if (d->boundaryConditions())
-      initWBoundaryConditions(d);
+      initWBoundaryConditions(d,dsv);
 
 
   }
@@ -291,7 +229,7 @@ void SchatzmanPaoliOSI::initW(double t, SP::DynamicalSystem ds)
 }
 
 
-void SchatzmanPaoliOSI::initWBoundaryConditions(SP::DynamicalSystem ds)
+void SchatzmanPaoliOSI::initWBoundaryConditions(SP::DynamicalSystem ds, DynamicalSystemsGraph::VDescriptor& dsv)
 {
   // This function:
   // - allocate memory for a matrix WBoundaryConditions
@@ -328,7 +266,7 @@ void SchatzmanPaoliOSI::initWBoundaryConditions(SP::DynamicalSystem ds)
 }
 
 
-void SchatzmanPaoliOSI::computeWBoundaryConditions(SP::DynamicalSystem ds)
+void SchatzmanPaoliOSI::computeWBoundaryConditions(SP::DynamicalSystem ds, SiconosMatrix& WBoundaryConditions)
 {
   // Compute WBoundaryConditions matrix of the Dynamical System ds, at
   // time t and for the current ds state.
@@ -383,7 +321,7 @@ void SchatzmanPaoliOSI::computeWBoundaryConditions(SP::DynamicalSystem ds)
 }
 
 
-void SchatzmanPaoliOSI::computeW(double t, SP::DynamicalSystem ds)
+void SchatzmanPaoliOSI::computeW(double t, SP::DynamicalSystem ds, SiconosMatrix& W)
 {
   // Compute W matrix of the Dynamical System ds, at time t and for the current ds state.
 
@@ -398,8 +336,6 @@ void SchatzmanPaoliOSI::computeW(double t, SP::DynamicalSystem ds)
 
   //double h = _simulation->timeStep();
   Type::Siconos dsType = Type::value(*ds);
-
-  SP::SiconosMatrix W = WMap[dsN];
 
   // 1 - Lagrangian non linear systems
   if (dsType == Type::LagrangianDS)
@@ -759,7 +695,7 @@ void SchatzmanPaoliOSI::computeFreeState()
 
     ds = _dynamicalSystemsGraph->bundle(*dsi);
     dsType = Type::value(*ds); // Its type
-    W = WMap[ds->number()]; // Its W SchatzmanPaoliOSI matrix of iteration.
+    W =  _dynamicalSystemsGraph->properties(*dsi).W; // Its W SchatzmanPaoliOSI matrix of iteration.
 
     //1 - Lagrangian Non Linear Systems
     if (dsType == Type::LagrangianDS)
@@ -899,7 +835,7 @@ void SchatzmanPaoliOSI::prepareNewtonIteration(double time)
   {
     if (!checkOSI(dsi)) continue;
     SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
-    computeW(time, ds);
+    computeW(time, ds, *_dynamicalSystemsGraph->properties(*dsi).W );
   }
 }
 
@@ -1084,7 +1020,7 @@ void SchatzmanPaoliOSI::updateState(const unsigned int level)
     if (!checkOSI(dsi)) continue;
     ds = _dynamicalSystemsGraph->bundle(*dsi);
 
-    W = WMap[ds->number()];
+    W = _dynamicalSystemsGraph->properties(*dsi).W;
     // Get the DS type
 
     Type::Siconos dsType = Type::value(*ds);
@@ -1251,7 +1187,7 @@ void SchatzmanPaoliOSI::display()
     SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
     std::cout << "--------------------------------" <<std::endl;
     std::cout << "--> W of dynamical system number " << ds->number() << ": " <<std::endl;
-    if (WMap[ds->number()]) WMap[ds->number()]->display();
+    if (_dynamicalSystemsGraph->properties(*dsi).W)  _dynamicalSystemsGraph->properties(*dsi).W->display();
     else std::cout << "-> NULL" <<std::endl;
     std::cout << "--> and corresponding theta is: " << _theta <<std::endl;
   }

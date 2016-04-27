@@ -256,24 +256,28 @@ public:
   /** init WMap[ds] SchatzmanPaoliOSI matrix at time t
    *  \param time (double)
    *  \param ds a pointer to DynamicalSystem
+   *  \param dsv a descriptor of the ds on the graph (redundant) 
    */
-  void initW(double time, SP::DynamicalSystem ds);
+  void initW(double time, SP::DynamicalSystem ds, DynamicalSystemsGraph::VDescriptor& dsv);
 
   /** compute WMap[ds] SchatzmanPaoliOSI matrix at time t
    *  \param time the time (double)
    *  \param ds a pointer to DynamicalSystem
+   *  \param W write the result in W
    */
-  void computeW(double time, SP::DynamicalSystem ds);
+  void computeW(double time, SP::DynamicalSystem ds, SiconosMatrix& W);
 
   /** compute WBoundaryConditionsMap[ds] SchatzmanPaoliOSI matrix at time t
    *  \param ds a pointer to DynamicalSystem
+   *  \param WBoundaryConditions write the result in WBoundaryConditions
    */
-  void computeWBoundaryConditions(SP::DynamicalSystem ds);
+  void computeWBoundaryConditions(SP::DynamicalSystem ds, SiconosMatrix& WBoundaryConditions);
 
   /** init WBoundaryConditionsMap[ds] SchatzmanPaoliOSI
    *  \param ds a pointer to DynamicalSystem
+   *  \param dsv a descriptor of the ds on the graph (redundant to avoid invocation) 
    */
-  void initWBoundaryConditions(SP::DynamicalSystem ds);
+  void initWBoundaryConditions(SP::DynamicalSystem ds, DynamicalSystemsGraph::VDescriptor& dsv);
 
   /** return the maximum of all norms for the "SchatzmanPaoliOSI-discretized" residus of DS
    *  \return a double
