@@ -116,6 +116,7 @@ void MoreauJeanOSI::initialize(Model& m)
     Type::Siconos dsType = Type::value(*ds);
     if (dsType == Type::LagrangianLinearTIDS || dsType == Type::LagrangianDS)
     {
+      assert(_dynamicalSystemsGraph->properties(*dsi).W && "W is NULL");
       ds->allocateWorkVector(DynamicalSystem::local_buffer, _dynamicalSystemsGraph->properties(*dsi).W->size(0));
     }
   }
@@ -144,12 +145,11 @@ void MoreauJeanOSI::initW(double t, SP::DynamicalSystem ds, DynamicalSystemsGrap
   // Memory allocation for W
   double h = _simulation->timeStep();
   Type::Siconos dsType = Type::value(*ds);
-  SP::SimpleMatrix W =  _dynamicalSystemsGraph->properties(dsv).W;
 
   if (dsType == Type::LagrangianDS)
   {
     SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
-    W.reset((new SimpleMatrix(*d->mass()))); //*W = *d->mass();
+    _dynamicalSystemsGraph->properties(dsv).W.reset((new SimpleMatrix(*d->mass()))); //*W = *d->mass();
     // Compute the W matrix
     computeW(t,ds, *_dynamicalSystemsGraph->properties(dsv).W);
     // WBoundaryConditions initialization
@@ -160,7 +160,7 @@ void MoreauJeanOSI::initW(double t, SP::DynamicalSystem ds, DynamicalSystemsGrap
   else if (dsType == Type::LagrangianLinearTIDS)
   {
     SP::LagrangianLinearTIDS d = std11::static_pointer_cast<LagrangianLinearTIDS> (ds);
-    W.reset(new SimpleMatrix(*d->mass())); //*W = *d->mass();
+    _dynamicalSystemsGraph->properties(dsv).W.reset(new SimpleMatrix(*d->mass())); //*W = *d->mass();
 
     SP::SiconosMatrix K = d->K();
     SP::SiconosMatrix C = d->C();
@@ -179,7 +179,7 @@ void MoreauJeanOSI::initW(double t, SP::DynamicalSystem ds, DynamicalSystemsGrap
   else if (dsType == Type::NewtonEulerDS)
   {
     SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS> (ds);
-    W.reset(new SimpleMatrix(*d->mass()));
+    _dynamicalSystemsGraph->properties(dsv).W.reset(new SimpleMatrix(*d->mass()));
 
     computeW(t,ds, *_dynamicalSystemsGraph->properties(dsv).W);
 

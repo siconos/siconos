@@ -123,7 +123,6 @@ void EulerMoreauOSI::initW(double t, SP::DynamicalSystem ds, DynamicalSystemsGra
 
   double h = _simulation->timeStep();
   Type::Siconos dsType = Type::value(*ds);
-  SP::SimpleMatrix W =  _dynamicalSystemsGraph->properties(dsv).W;
   // 1 - First order non linear systems
   if (dsType == Type::FirstOrderNonLinearDS || dsType == Type::FirstOrderLinearDS || dsType == Type::FirstOrderLinearTIDS)
   {
@@ -135,18 +134,18 @@ void EulerMoreauOSI::initW(double t, SP::DynamicalSystem ds, DynamicalSystemsGra
     // Copy M or I if M is Null into W
     if (d->M())
       //      *W = *d->M();
-      W.reset(new SimpleMatrix(*d->M()));
+      _dynamicalSystemsGraph->properties(dsv).W.reset(new SimpleMatrix(*d->M()));
 
     else
     {
       //W->eye();
-      W.reset(new SimpleMatrix(sizeW, sizeW)); // Warning if the Jacobian is a sparse matrix
-      W->eye();
+      _dynamicalSystemsGraph->properties(dsv).W.reset(new SimpleMatrix(sizeW, sizeW)); // Warning if the Jacobian is a sparse matrix
+      _dynamicalSystemsGraph->properties(dsv).W->eye();
     }
 
     // d->computeJacobianfx(t); // Computation of JacxF is not required here
     // since it must have been done in OSI->initialize, before a call to this function.
-
+    SP::SiconosMatrix W = _dynamicalSystemsGraph->properties(dsv).W;
     // Add -h*_theta*jacobian_XF to W
     scal(-h * _theta, *d->jacobianfx(), *W, false);
   }
