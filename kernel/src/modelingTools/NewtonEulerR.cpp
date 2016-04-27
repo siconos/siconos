@@ -26,7 +26,7 @@
 #include "NewtonEulerDS.hpp"
 
 #include "BlockVector.hpp"
-#include "SimulationTypeDef.hpp"
+#include "SimulationGraphs.hpp"
 
 // #define DEBUG_BEGIN_END_ONLY
 // #define DEBUG_STDOUT

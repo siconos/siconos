@@ -41,7 +41,7 @@
 #include "BlockVector.hpp"
 #include "FirstOrderNonLinearDS.hpp"
 
-#include "SimulationTypeDef.hpp"
+#include "SimulationGraphs.hpp"
 
 using namespace std;
 using namespace RELATION;

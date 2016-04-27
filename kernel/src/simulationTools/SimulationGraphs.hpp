@@ -34,14 +34,90 @@
  * InteractionsGraph = L(DynamicalSystemsGraph)
  *
  * where L is the line graph
- * transformation */
+ * transformation
+ *
+ *
+ * Properties on graph :
+ * --------------------
+ *
+ * The properties on the graph enable to store the data that are specicic to a simulation
+ * strategy. It avoids to burden the modeling classes that should be as independent as possible from
+ * the simulation choices.
+ *
+ * There are mainly two types of properties
+ * <ul>
+ * <li>  Mandatory properties DynamicalSystemProperties and InteractionProperties .
+ *       These properties are always  instanciated for any kind of simulation.
+ *       The accesors to the property are illustrated in the followinf example :
+ *       For a given SP::DynamicalSystem ds and a given graph SP::DynamicalSystemsGrap DSG
+ *
+ *       DynamicalSystemsGraph::VDescriptor dsv = DSG->descriptor(ds);
+ *       SP::OneStepintegrator osi = DSG->properties(dsv).osi;
+ * </li>
+ * <li> Optional Properties
+ *      They are installed thanks to the macro INSTALL_GRAPH_PROPERTIES.
+ *
+ *      The accesors to the property are illustrated in the following example :
+ *      For a given SP::DynamicalSystem ds and a given graph SP::DynamicalSystemsGrap DSG
+ *
+ *      DynamicalSystemsGraph::VDescriptor dsv = DSG->descriptor(ds);
+ *      DSG->name.insert(dsv, name); // insert the name in the property
+ *      const std::string& name =  DSG[*dsv]->name;
+ * 
+ *
+ * </li>
+ * </ul>
+ */
+
+/** \struct InteractionProperties mandatory properties for an Interaction  */
+struct InteractionProperties
+{
+  SP::SiconosMatrix block;             /**< diagonal block */
+  SP::DynamicalSystem source;
+  unsigned int source_pos;
+  SP::DynamicalSystem target;
+  unsigned int target_pos;
+  SP::OneStepIntegrator osi;
+  bool forControl;                     /**< true if the relation is used to add a control input to a DS */
+  SP::VectorOfBlockVectors DSlink;     /**< pointer links to DS variables needed for computation, mostly x (or q), z, r (or p) */
+  SP::VectorOfVectors workVectors;     /**< set of SiconosVector, mostly to have continuous memory vectors (not the case with BlockVector in DSlink) */
+  SP::VectorOfSMatrices workMatrices;  /**< To store jacobians */
+
+
+  ACCEPT_SERIALIZATION(InteractionProperties);
+};
+
+/** \struct DynamicalSystemProperties mandatory properties for a DynamicalSystems */
+struct DynamicalSystemProperties
+{
+  SP::SiconosMatrix upper_block;          /**< i,j block i<j */
+  SP::SiconosMatrix lower_block;          /**< i,j block i>j */
+  SP::VectorOfVectors workVectors;        /**< Used for instance in Newton iteration */
+  SP::VectorOfMatrices workMatrices;      /**< Mostly for Lagrangian system */
+  SP::OneStepIntegrator osi;              /**< Integrator used for the given DynamicalSystem */
+  SP::SimpleMatrix W;                    /**< Matrix for integration */
+  SP::SimpleMatrix WBoundaryConditions;  /**< Matrix for integration of boundary conditions*/
+//  SP::SiconosMemory _xMemory            /**< old value of x, TBD */
+
+  ACCEPT_SERIALIZATION(DynamicalSystemProperties);
+};
+
+struct GraphProperties
+{
+  bool symmetric;
+
+  ACCEPT_SERIALIZATION(GraphProperties);
+};
+
+
+
 typedef SiconosGraph < std11::shared_ptr<DynamicalSystem>, std11::shared_ptr<Interaction>,
-        SystemProperties, InteractionProperties,
+        DynamicalSystemProperties, InteractionProperties,
         GraphProperties > _DynamicalSystemsGraph;
 
 
 typedef SiconosGraph < std11::shared_ptr<Interaction>, std11::shared_ptr<DynamicalSystem>,
-        InteractionProperties, SystemProperties,
+        InteractionProperties, DynamicalSystemProperties,
         GraphProperties > _InteractionsGraph;
 
 struct DynamicalSystemsGraph : public _DynamicalSystemsGraph
@@ -66,7 +142,7 @@ struct DynamicalSystemsGraph : public _DynamicalSystemsGraph
                            ((Vertex, unsigned int, groupId))); // For group manipulations (example assign
                                                                // a material id for contact law
                                                                // determination
-  // always needed -> SystemProperties
+  // always needed -> DynamicalSystemProperties
 
   /** serialization hooks */
   ACCEPT_SERIALIZATION(DynamicalSystemsGraph);
@@ -119,5 +195,7 @@ struct InteractionsGraph : public _InteractionsGraph
   /** serialization hooks */
   ACCEPT_SERIALIZATION(InteractionsGraph);
 };
+
+
 
 #endif

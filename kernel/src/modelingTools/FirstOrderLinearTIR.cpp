@@ -19,7 +19,7 @@
 #include "FirstOrderLinearTIR.hpp"
 #include "Interaction.hpp"
 #include "BlockVector.hpp"
-#include "SimulationTypeDef.hpp"
+#include "SimulationGraphs.hpp"
 
 #include <iostream>
 

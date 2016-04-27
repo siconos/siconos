@@ -452,7 +452,7 @@ SICONOS_IO_REGISTER(SiconosMemory,
   (_nbVectorsInMemory)
   (_vectorMemory)
   (_indx))
-SICONOS_IO_REGISTER(SystemProperties,
+SICONOS_IO_REGISTER(DynamicalSystemProperties,
   (upper_block)
   (lower_block)
   (workVectors)
@@ -649,7 +649,7 @@ void siconos_io_register_generated(Archive& ar)
   ar.register_type(static_cast<TimeDiscretisationEvent*>(NULL));
   ar.register_type(static_cast<LagrangianDS*>(NULL));
   ar.register_type(static_cast<GraphProperties*>(NULL));
-  ar.register_type(static_cast<SystemProperties*>(NULL));
+  ar.register_type(static_cast<DynamicalSystemProperties*>(NULL));
   ar.register_type(static_cast<InteractionProperties*>(NULL));
   ar.register_type(static_cast<MatrixIntegrator*>(NULL));
   ar.register_type(static_cast<DynamicalSystemsGraph*>(NULL));
@@ -1113,7 +1113,7 @@ SICONOS_IO_REGISTER(SiconosMemory,
   (_nbVectorsInMemory)
   (_vectorMemory)
   (_indx))
-SICONOS_IO_REGISTER(SystemProperties,
+SICONOS_IO_REGISTER(DynamicalSystemProperties,
   (upper_block)
   (lower_block)
   (workVectors)
@@ -1310,7 +1310,7 @@ void siconos_io_register_generated(Archive& ar)
   ar.register_type(static_cast<TimeDiscretisationEvent*>(NULL));
   ar.register_type(static_cast<LagrangianDS*>(NULL));
   ar.register_type(static_cast<GraphProperties*>(NULL));
-  ar.register_type(static_cast<SystemProperties*>(NULL));
+  ar.register_type(static_cast<DynamicalSystemProperties*>(NULL));
   ar.register_type(static_cast<InteractionProperties*>(NULL));
   ar.register_type(static_cast<MatrixIntegrator*>(NULL));
   ar.register_type(static_cast<DynamicalSystemsGraph*>(NULL));
