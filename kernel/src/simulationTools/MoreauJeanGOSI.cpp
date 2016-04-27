@@ -147,7 +147,7 @@ void MoreauJeanGOSI::initW(double t, SP::DynamicalSystem ds, DynamicalSystemsGra
   else if (dsType == Type::NewtonEulerDS)
   {
     SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS> (ds);
-    _dynamicalSystemsGraph->properties(dsv).W.reset(new SimpleMatrix(*d->luW()));
+    _dynamicalSystemsGraph->properties(dsv).W.reset(new SimpleMatrix(*d->mass()));
 
     computeW(t,ds, *_dynamicalSystemsGraph->properties(dsv).W);
     // WBoundaryConditions initialization

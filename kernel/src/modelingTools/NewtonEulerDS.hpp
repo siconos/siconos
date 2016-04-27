@@ -898,10 +898,7 @@ public:
   {
     return _massMatrix;
   }
-  inline SP::SimpleMatrix luW()
-  {
-    return _luW;
-  }
+
   inline SP::SimpleMatrix T()
   {
     return _T; 
