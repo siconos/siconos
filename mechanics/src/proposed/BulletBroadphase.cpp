@@ -704,12 +704,13 @@ void BulletBroadphase::performBroadphase()
       SP::Interaction inter;
       if (impl->nslaw->size() == 3)
       {
-        // Remove the added outside margin
+        // Remove the added outside margin as a correction factor in Relation
         double combined_margin =
           pairA->shape->outsideMargin() + pairB->shape->outsideMargin();
 
         SP::BulletR rel(new BulletR(createSPtrbtManifoldPoint(*it->point),
-                                    combined_margin,
+                                    pairA->shape->outsideMargin(),
+                                    pairB->shape->outsideMargin(),
                                     1.0 / options.worldScale));
 
         // We wish to be sure that no Interactions are created without
