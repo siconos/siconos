@@ -403,7 +403,6 @@ class ShapeCollection():
                 else:
                     # a convex point set
                     convex = btConvexHullShape()
-                    print('set collision margin to ', self._collision_margin)
                     convex.setMargin(self._collision_margin)
                     for points in self.shape(shape_name):
                         convex.addPoint(btVector3(float(points[0]),
@@ -517,11 +516,11 @@ class Hdf5():
         self._output_frequency = 1
         self._keep = []
 
-        print('collision_margin in __init__', collision_margin)
-        print('self._collision_margin in __init__', self._collision_margin)
-        
+        #print('collision_margin in __init__', collision_margin)
+        #print('self._collision_margin in __init__', self._collision_margin)
 
-        
+
+
     def __enter__(self):
         if self._set_external_forces is None:
             self._set_external_forces = self.apply_gravity
@@ -544,7 +543,7 @@ class Hdf5():
         if self._shape_filename is None:
             if self._collision_margin:
                 self._shape = ShapeCollection(io=self, collision_margin=self._collision_margin)
-                
+
             else:
                 self._shape = ShapeCollection(io=self)
         else:
@@ -668,8 +667,7 @@ class Hdf5():
             # add the dynamical system to the non smooth
             # dynamical system
             nsds = self._broadphase.model().nonSmoothDynamicalSystem()
-            nsds.insertDynamicalSystem(body)
-            nsds.setOSI(body, self._osi)
+            nsds.topology().setOSI(body, self._osi)
             nsds.setName(body, str(name))
 
     def importObject(self, name, translation, orientation,
@@ -784,7 +782,7 @@ class Hdf5():
                 # dynamical system
                 nsds = self._model.nonSmoothDynamicalSystem()
                 nsds.insertDynamicalSystem(body)
-                nsds.setOSI(body, self._osi)
+                nsds.topology().setOSI(body, self._osi)
                 nsds.setName(body, str(name))
 
     def importJoint(self, name):
@@ -1290,7 +1288,7 @@ class Hdf5():
                 self._number_of_dynamic_objects += 1
 
     def addNewtonImpactFrictionNSL(self, name, mu, e=0, collision_group1=0,
-                                      collision_group2=0):
+                                   collision_group2=0):
         """
         Add a nonsmooth law for contact between 2 groups.
         Only NewtonImpactFrictionNSL are supported.
@@ -1368,6 +1366,8 @@ class Hdf5():
           solver : default Numerics.SICONOS_FRICTION_3D_NSGS
           itermax : maximum number of iteration for solver
           tolerance : friction contact solver tolerance
+          numerics_verbose : set verbose mode in numerics
+          output_frequency :
 
         """
 
@@ -1467,6 +1467,7 @@ class Hdf5():
 
         self.importScene(body_class, shape_class, face_class, edge_class)
 
+        self._model.setSimulation(simulation)
         self._model.initialize(simulation)
 
         self.outputStaticObjects()
@@ -1496,7 +1497,7 @@ class Hdf5():
                 log(self.outputContactForces, with_timer)()
 
                 log(self.outputSolverInfos, with_timer)()
-                    
+
                 log(self._out.flush)()
 
             if proposed_is_here and use_proposed:
@@ -1508,12 +1509,12 @@ class Hdf5():
 
             if violation_verbose:
                 print('violation info')
-                y = simulation.output(0,0)
+                y = simulation.y(0,0)
                 yplus=  np.zeros((2,len(y)))
                 yplus[0,:] = y
                 #print(yplus)
-                
-                if len(simulation.output(0,0)) >0 :
+
+                if len(simulation.y(0,0)) >0 :
                     y=np.min(yplus,axis=1)
                     violation_max=np.max(-y)
                     print('  violation max :',np.max(-y))
@@ -1528,7 +1529,7 @@ class Hdf5():
                 #     velocity_max=np.max(v)
                 #     print('  velocity max :',np.max(v))
                 #     #print(simulation.output(1,0))
-        
+
 
             log(simulation.nextStep, with_timer)()
 

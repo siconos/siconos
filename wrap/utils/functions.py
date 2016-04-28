@@ -29,7 +29,6 @@ def compute_dt_matrices(A, B, h, TV=False):
     process_simu.setName("plant simulation")
     # Declaration of the integrator
     process_integrator = SK.ZeroOrderHoldOSI()
-    process_integrator.insertDynamicalSystem(process_ds)
     process_simu.insertIntegrator(process_integrator)
 
     rel = SK.FirstOrderLinearTIR(Csurface, B)

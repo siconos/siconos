@@ -49,6 +49,7 @@ min_time = None
 max_time = None
 scale_factor = 1
 vtk_export_mode = False
+view_cycle = -1
 
 for o, a in opts:
 
@@ -944,6 +945,7 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
                 self._renderer_window = renderer_window
                 self._times = times
                 self._image_counter = 0
+                self._view_cycle = -1
 
                 self._recording = False
 
@@ -1070,6 +1072,34 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
                         print 'camera position:', self._renderer.GetActiveCamera().GetPosition()
                         print 'camera focal point', self._renderer.GetActiveCamera().GetFocalPoint()
                         print 'camera clipping plane', self._renderer.GetActiveCamera().GetClippingRange()
+
+                if key == 'o':
+                        self._renderer.GetActiveCamera().SetParallelProjection(
+                            1-self._renderer.GetActiveCamera().GetParallelProjection())
+
+                if key == 'v':
+                        # Cycle through some useful views
+                        dist = norm(self._renderer.GetActiveCamera().GetPosition())
+                        #dist2 = norm([numpy.sqrt(dist**2)/3]*2)
+                        d3 = norm([numpy.sqrt(dist**2)/3]*3)
+                        self._view_cycle += 1
+                        if self._view_cycle == 0:
+                                print('Left')
+                                self._renderer.GetActiveCamera().SetPosition(dist,0,0)
+                                self._renderer.GetActiveCamera().SetViewUp(0,0,1)
+                        elif self._view_cycle == 1:
+                                print('Right')
+                                self._renderer.GetActiveCamera().SetPosition(0,dist,0)
+                                self._renderer.GetActiveCamera().SetViewUp(0,0,1)
+                        elif self._view_cycle == 2:
+                                print('Top')
+                                self._renderer.GetActiveCamera().SetPosition(0,0,dist)
+                                self._renderer.GetActiveCamera().SetViewUp(1,0,0)
+                        else: # Corner
+                                print('Corner')
+                                self._renderer.GetActiveCamera().SetPosition(d3,d3,d3)
+                                self._renderer.GetActiveCamera().SetViewUp(-1,-1,1)
+                                self._view_cycle = -1
 
                 if key == 's':
                     if not self._recording:

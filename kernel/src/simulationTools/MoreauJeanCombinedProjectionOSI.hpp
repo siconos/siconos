@@ -79,7 +79,7 @@ public:
       invariant systems, we compute time invariant operator (example :
       W)
   */
-  void initialize();
+  void initialize(Model& m);
 
 
 

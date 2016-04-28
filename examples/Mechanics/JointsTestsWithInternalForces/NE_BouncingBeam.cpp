@@ -204,7 +204,6 @@ int main(int argc, char* argv[])
     // -- (1) OneStepIntegrators --
 
     SP::MoreauJeanOSI OSI3(new MoreauJeanOSI(theta));
-    OSI3->insertDynamicalSystem(bouncingbeam);
 
     // -- (2) Time discretisation --
     SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));

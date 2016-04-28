@@ -578,12 +578,12 @@ void  MBTB_initSimu(double hTS, int withProj)
   if (withProj==0)
   {
     pOSI0.reset(new MoreauJeanOSI(sDParams[0]));
-    pOSI0->insertDynamicalSystem(sDS[0]);
+    //pOSI0->insertDynamicalSystem(sDS[0]);
   }
   else if(withProj==1)
   {
     pOSI1.reset(new MoreauJeanDirectProjectionOSI(sDParams[0]));
-    pOSI1->insertDynamicalSystem(sDS[0]);
+    //pOSI1->insertDynamicalSystem(sDS[0]);
     pOSI1->setDeactivateYPosThreshold(sDParams[4]);
     pOSI1->setDeactivateYVelThreshold(sDParams[5]);
     pOSI1->setActivateYPosThreshold(sDParams[6]);
@@ -593,7 +593,7 @@ void  MBTB_initSimu(double hTS, int withProj)
   else if  (withProj==2)
   {
     pOSI2.reset(new MoreauJeanCombinedProjectionOSI(sDParams[0]));
-    pOSI2->insertDynamicalSystem(sDS[0]);
+    //pOSI2->insertDynamicalSystem(sDS[0]);
   }
 
 
@@ -631,7 +631,7 @@ void  MBTB_initSimu(double hTS, int withProj)
     if (withProj==0 or withProj==1)
      {
        //pOSI1.reset(new MBTB_MoreauJeanOSI(sDParams[0]));
-       pOSI1->insertDynamicalSystem(sDS[numDS]);
+       //pOSI1->insertDynamicalSystem(sDS[numDS]);
        // pOSI1->_deactivateYPosThreshold= sDParams[4];
        // pOSI1->_deactivateYVelThreshold= sDParams[5];
        // pOSI1->_activateYPosThreshold= sDParams[6];
@@ -642,13 +642,13 @@ void  MBTB_initSimu(double hTS, int withProj)
     if (withProj==0)
     {
       //pOSI0.reset(new MoreauJeanOSI(sDParams[0]));
-      pOSI0->insertDynamicalSystem(sDS[numDS]);
+      //pOSI0->insertDynamicalSystem(sDS[numDS]);
       // sSimu->insertIntegrator(pOSI0);
     }
     else if (withProj==1)
     {
       //pOSI1.reset(new MoreauJeanDirectProjectionOSI(sDParams[0]));
-      pOSI1->insertDynamicalSystem(sDS[numDS]);
+      //pOSI1->insertDynamicalSystem(sDS[numDS]);
       // pOSI1->setDeactivateYPosThreshold(sDParams[4]);
       // pOSI1->setDeactivateYVelThreshold(sDParams[5]);
       // pOSI1->setActivateYPosThreshold(sDParams[6];
@@ -659,14 +659,15 @@ void  MBTB_initSimu(double hTS, int withProj)
     else if  (withProj==2)
     {
       //pOSI2.reset(new MoreauJeanCombinedProjectionOSI(sDParams[0]));
-      pOSI2->insertDynamicalSystem(sDS[numDS]);
+      //pOSI2->insertDynamicalSystem(sDS[numDS]);
       // sSimu->insertIntegrator(pOSI2);
     }
   }
 
   // --- Simulation initialization ---
   cout <<"\n====> Initialisation ..." <<endl<<endl;
-  myModel->initialize(sSimu);
+  myModel->setSimulation(sSimu);
+  myModel->initialize();
 
   printf("====> COMPUTE H OF INTERATIONS: (just for display)\n");
   SP::InteractionsGraph indexSet0 = myModel->nonSmoothDynamicalSystem()->topology()->indexSet0();

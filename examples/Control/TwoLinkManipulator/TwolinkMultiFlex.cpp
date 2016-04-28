@@ -159,7 +159,6 @@ int main(int argc, char* argv[])
 
     // -- OneStepIntegrators --
     SP::OneStepIntegrator OSI(new MoreauJeanOSI(0.500001));
-    OSI->insertDynamicalSystem(arm);
     s->insertIntegrator(OSI);
 
     // -- OneStepNsProblem --

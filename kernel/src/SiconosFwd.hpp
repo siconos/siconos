@@ -92,7 +92,7 @@ DEFINE_SPTR(NewtonEulerFrom3DLocalFrameR)
 // OSI
 DEFINE_SPTR(EulerMoreauOSI)
 DEFINE_SPTR(MoreauJeanOSI)
-DEFINE_SPTR(MoreauJeanOSI2)
+DEFINE_SPTR(MoreauJeanGOSI)
 DEFINE_SPTR(MoreauJeanCombinedProjectionOSI)
 DEFINE_SPTR(MoreauJeanDirectProjectionOSI)
 DEFINE_SPTR(LsodarOSI)

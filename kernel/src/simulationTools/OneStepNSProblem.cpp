@@ -25,6 +25,7 @@
 #include "Model.hpp"
 #include "EulerMoreauOSI.hpp"
 #include "MoreauJeanOSI.hpp"
+#include "SchatzmanPaoliOSI.hpp"
 #include "NewMarkAlphaOSI.hpp"
 #include "LagrangianDS.hpp"
 #include "NewtonEulerDS.hpp"
@@ -73,8 +74,8 @@ OneStepNSProblem::OneStepNSProblem(int numericsSolverId):
 
 bool OneStepNSProblem::hasInteractions() const
 {
-  return _simulation->model()->nonSmoothDynamicalSystem()->topology()->indexSet(_indexSetLevel)->size() > 0 ;
-   //return _simulation->model()->nonSmoothDynamicalSystem()->topology()->indexSet(0)->size() > 0 ;
+  return _simulation->nonSmoothDynamicalSystem()->topology()->indexSet(_indexSetLevel)->size() > 0 ;
+   //return _simulation->nonSmoothDynamicalSystem()->topology()->indexSet(0)->size() > 0 ;
 }
 
 void OneStepNSProblem::updateInteractionBlocks()
@@ -89,7 +90,7 @@ void OneStepNSProblem::updateInteractionBlocks()
   //  1 - is the topology time invariant?
   //  2 - does interactionBlocks[interi][interj] already exists (ie has been
   //  computed in a previous time step)?
-  //  3 - do we need to compute this interactionBlock? A interactionBlock is
+  //  3 - do we need to compute this interactionBlock? An interactionBlock has
   //  to be computed if interi and interj are in IndexSet1 AND if interi and
   //  interj have common DynamicalSystems.
   //
@@ -97,16 +98,14 @@ void OneStepNSProblem::updateInteractionBlocks()
   //
   //  - If 1 and 2 are true then it does nothing. 3 is not checked.
   //  - If 1 == true, 2 == false, 3 == false, it does nothing.
-  //  - If 1 == true, 2 == false, 3 == true, it computes the
-  //    interactionBlock.
-  //  - If 1==false, 2 is not checked, and the interactionBlock is
-  //    computed if 3==true.
+  //  - If 1 == true, 2 == false, 3 == true, it computes the interactionBlock.
+  //  - If 1==false, 2 is not checked, and the interactionBlock is computed if 3==true.
   //
 
   // Get index set from Simulation
   SP::InteractionsGraph indexSet = simulation()->indexSet(indexSetLevel());
 
-  bool isLinear = simulation()->model()->nonSmoothDynamicalSystem()->isLinear();
+  bool isLinear = simulation()->nonSmoothDynamicalSystem()->isLinear();
 
   // we put diagonal informations on vertices
   // self loops with bgl are a *nightmare* at the moment
@@ -407,8 +406,7 @@ void OneStepNSProblem::initialize(SP::Simulation sim)
   // constraints declared in the topology.
   if (_maxSize == 0) // if maxSize not set explicitely by user before
     // initialize
-    _maxSize = simulation()->model()->
-               nonSmoothDynamicalSystem()->topology()->numberOfConstraints();
+    _maxSize = simulation()->nonSmoothDynamicalSystem()->topology()->numberOfConstraints();
 }
 
 SP::SimpleMatrix OneStepNSProblem::getOSIMatrix(SP::OneStepIntegrator Osi, SP::DynamicalSystem ds)
@@ -423,13 +421,13 @@ SP::SimpleMatrix OneStepNSProblem::getOSIMatrix(SP::OneStepIntegrator Osi, SP::D
   dsType = Type::value(*ds);
 
   if (osiType == OSI::MOREAUJEANOSI
-      || osiType == OSI::MOREAUDIRECTPROJECTIONOSI
-      || osiType == OSI::SCHATZMANPAOLIOSI)
+      || osiType == OSI::MOREAUDIRECTPROJECTIONOSI)
   {
-    if (dsType != Type::NewtonEulerDS)
       block = (std11::static_pointer_cast<MoreauJeanOSI> (Osi))->W(ds); // get its W matrix ( pointer link!)
-    else
-      block = (std11::static_pointer_cast<NewtonEulerDS> (ds))->luW(); // get its W matrix ( pointer link!)
+  }
+  else if (osiType == OSI::SCHATZMANPAOLIOSI)
+  {
+      block = (std11::static_pointer_cast<SchatzmanPaoliOSI> (Osi))->W(ds); // get its W matrix ( pointer link!)
   }
   else if (osiType == OSI::EULERMOREAUOSI)
   {

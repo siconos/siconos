@@ -200,7 +200,7 @@ public:
   /** initialization of the D1MinusLinearOSI integrator; for linear time
    *  invariant systems, we compute time invariant operator
    */
-  virtual void initialize();
+  virtual void initialize(Model& m);
 
   /** return the maximum of all norms for the residus of DS
    *  \post{ds->residuFree will be calculated, ds->q() contains new position, ds->velocity contains predicted velocity}

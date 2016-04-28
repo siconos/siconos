@@ -61,7 +61,6 @@ def test_bouncing_ball1():
 
     # (1) OneStepIntegrators
     OSI = MoreauJeanOSI(theta)
-    OSI.insertDynamicalSystem(ball)
 
     # (2) Time discretisation --
     t = TimeDiscretisation(t0, h)
@@ -233,10 +232,8 @@ def test_bouncing_ball2():
 
     # (1) OneStepIntegrators
     OSI = K.MoreauJeanOSI(theta)
-    OSI.insertDynamicalSystem(ball)
 
     OSI_d = K.MoreauJeanOSI(theta)
-    OSI_d.insertDynamicalSystem(ball_d)
 
     # (2) Time discretisation --
     t = K.TimeDiscretisation(t0, h)

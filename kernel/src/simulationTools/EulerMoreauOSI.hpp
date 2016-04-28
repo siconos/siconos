@@ -27,7 +27,7 @@
 
 const unsigned int EULERMOREAUSTEPSINMEMORY = 1;
 
-/** \class EulerMoreauOSI 
+/** \class EulerMoreauOSI
  * Time-Integrator for Dynamical Systems
  *  \brief One Step time Integrator for First Order Dynamical Systems.
  *  \author SICONOS Development Team - copyright INRIA
@@ -38,11 +38,11 @@ const unsigned int EULERMOREAUSTEPSINMEMORY = 1;
  * for first order systems.
  * It is mainly based on some extensions of the Backward Euler and \f$\theta-\gamma\f$
  * schemes proposed in the pionnering work of J.J. Moreau for the sweeping process
- * 
+ *
  * J.J. Moreau. Evolution problem associated with a moving convex set in a Hilbert space.
  * Journal of Differential Equations, 26, pp 347--374, 1977.
  *
- * Variants are now used to integrate LCS, Relay systems, Higher order sweeping process see 
+ * Variants are now used to integrate LCS, Relay systems, Higher order sweeping process see
  * for instance
  *
  *
@@ -74,7 +74,7 @@ const unsigned int EULERMOREAUSTEPSINMEMORY = 1;
  *    \mbox{nslaw} ( y_{k+1} , \lambda_{k+1})
  * \end{cases}
  * \f}
- * where \f$\theta = [0,1]\f$ and \f$\gamma \in [0,1]\f$. 
+ * where \f$\theta = [0,1]\f$ and \f$\gamma \in [0,1]\f$.
  * As in Acary & Brogliato 2008, we call the previous problem  the ``one--step nonsmooth problem''.
  *
  * Another variant can also be used (FullThetaGamma scheme)
@@ -86,12 +86,12 @@ const unsigned int EULERMOREAUSTEPSINMEMORY = 1;
  *     \mbox{nslaw} ( y_{k+\gamma} , \lambda_{k+\gamma})
  *   \end{cases}
  * \f}
- * 
+ *
  *
  * EulerMoreauOSI class is used to define some time-integrators methods for a
- * list of first order dynamical systems. A EulerMoreauOSI instance is defined by 
+ * list of first order dynamical systems. A EulerMoreauOSI instance is defined by
  * the value of theta  and possibly gamma and the list of
- * concerned dynamical systems.  
+ * concerned dynamical systems.
  *
  * Each DynamicalSystem is associated to a SiconosMatrix, named "W", which is the "iteration" matrix.
  * W matrices are initialized and computed in initW and computeW. Depending on the DS type, they may
@@ -120,12 +120,6 @@ protected:
   */
   ACCEPT_SERIALIZATION(EulerMoreauOSI);
 
-
-  /** Stl map that associates a W EulerMoreauOSI matrix to each DynamicalSystem of the OSI */
-  MapOfDSMatrices WMap;
-
-  /** Stl map that associates the columns of  W EulerMoreauOSI matrix to each DynamicalSystem of the OSI if it has some boundary conditions */
-  MapOfDSMatrices _WBoundaryConditionsMap;
 
   /** Stl map that associates a theta parameter for the integration
   *  scheme to each DynamicalSystem of the OSI */
@@ -185,27 +179,7 @@ public:
    */
   SP::SimpleMatrix W(SP::DynamicalSystem ds);
 
-  /** set the value of W[ds] to newValue
-   * \param newValue SiconosMatrix 
-   * \param ds a pointer to DynamicalSystem,
-   */
-  void setW(const SiconosMatrix& newValue, SP::DynamicalSystem ds);
-
-  /** set W[ds] to pointer newPtr
-   * \param newPtr
-   * \param ds a pointer to DynamicalSystem
-   */
-  void setWPtr(SP::SimpleMatrix newPtr, SP::DynamicalSystem ds);
-
   // -- WBoundaryConditions --
-
-  /** get WBoundaryConditions map
-   *  \return a MapOfDSMatrices
-   */
-  inline MapOfDSMatrices getWBoundaryConditionsMap() const
-  {
-    return _WBoundaryConditionsMap;
-  };
 
   /** get the value of WBoundaryConditions corresponding to DynamicalSystem ds
    * \param ds a pointer to DynamicalSystem, optional, default =
@@ -301,20 +275,22 @@ public:
       invariant systems, we compute time invariant operator (example :
       W)
    */
-  virtual void initialize();
+  virtual void initialize(Model& m);
 
-  /** init WMap[ds] EulerMoreauOSI matrix at time t
+  /** init W EulerMoreauOSI matrix at time t
    *  \param time the time (double)
    *  \param ds a pointer to DynamicalSystem
+   *  \param dsv a descriptor of the ds on the graph (redundant to avoid invocation)
    */
-  void initW(double time, SP::DynamicalSystem ds);
+  void initW(double time, SP::DynamicalSystem ds, DynamicalSystemsGraph::VDescriptor& dsv);
 
-  /** compute WMap[ds] EulerMoreauOSI matrix at time t
+  /** compute W EulerMoreauOSI matrix at time t
    *  \param time the current time
    *  \param ds the DynamicalSystem
-   *  \param dsgVD a DynamicalSystemsGraph::VDescriptor&
+   *  \param dsv a descriptor of the ds on the graph (redundant to avoid invocation)
+   *  \param W the matrix to compute
    */
-  void computeW(double time, DynamicalSystem& ds, DynamicalSystemsGraph::VDescriptor& dsgVD);
+  void computeW(double time, DynamicalSystem& ds, DynamicalSystemsGraph::VDescriptor& dsv, SiconosMatrix& W);
 
   /** compute WBoundaryConditionsMap[ds] EulerMoreauOSI matrix at time t
    *  \param ds a pointer to DynamicalSystem
@@ -330,12 +306,12 @@ public:
    *  \return the maximum of the 2-norm over all the residu
    */
   double computeResidu();
-  
+
   /** Perform the integration of the dynamical systems linked to this integrator
    *  without taking into account the nonsmooth input r
    */
   virtual void computeFreeState();
-  
+
   /** integrates the Interaction linked to this integrator, without taking non-smooth effects into account
    * \param vertex_inter of the interaction graph
    * \param osnsp pointer to OneStepNSProblem

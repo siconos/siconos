@@ -82,7 +82,6 @@ for i in range(nbInter):
 
 # (1) OneStepIntegrators
 OSI = kernel.Moreau(theta)
-OSI.insertDynamicalSystem(block)
 
 # (2) Time discretisation --
 t = kernel.TimeDiscretisation(t0,h)

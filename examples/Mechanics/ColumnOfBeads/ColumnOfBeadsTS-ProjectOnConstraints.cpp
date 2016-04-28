@@ -148,7 +148,6 @@ int withLevel(unsigned int mylevel)
     for (unsigned int i = 0; i < nBeads; i++)
     {
       columnOfBeads->nonSmoothDynamicalSystem()->insertDynamicalSystem(beads[i]);
-      OSI->insertDynamicalSystem(beads[i]);
     }
 
     // // link the interaction and the dynamical system

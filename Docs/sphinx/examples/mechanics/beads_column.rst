@@ -72,8 +72,6 @@ balls have the same mass, m = 1, and the same radius, R=0.1::
   // --- Dynamical systems --- 
   // -------------------------
   
-  unsigned int i;
-  
   // mass matrix, set to identity
   SP::SiconosMatrix Mass = new SimpleMatrix(nDof,nDof);
   Mass->eye();
@@ -86,7 +84,7 @@ balls have the same mass, m = 1, and the same radius, R=0.1::
   q0.resize(dsNumber,NULL);
   v0.resize(dsNumber,NULL);
   
-  for (i=0;i<dsNumber;i++)
+  for (unsigned i = 0; i < dsNumber; ++i)
   {
       // Memory allocation for q0[i] and v0[i]
       q0[i] = new SimpleVector(nDof);

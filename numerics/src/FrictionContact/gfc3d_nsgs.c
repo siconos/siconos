@@ -1,4 +1,4 @@
-/* Siconos-Numerics, Copyright INRIA 2005-2012.
+/* Siconos-Numerics, Copyright INRIA 2005-2016
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -143,6 +143,7 @@ void gfc3d_nsgs(GlobalFrictionContactProblem* restrict problem, double* restrict
       double normUT = sqrt(velocity[pos + 1] * velocity[pos + 1] + velocity[pos + 2] * velocity[pos + 2]);
       double an = 1.0;
       reaction[pos] -= an * (velocity[pos] + mu[contact] * normUT);
+//      reaction[pos] -= an * mu[contact] * normUT;
       reaction[pos + 1] -= an * velocity[pos + 1];
       reaction[pos + 2] -= an * velocity[pos + 2];
       projectionOnCone(&reaction[pos], mu[contact]);
@@ -156,13 +157,13 @@ void gfc3d_nsgs(GlobalFrictionContactProblem* restrict problem, double* restrict
 
 
     /* **** Criterium convergence **** */
-    /* this is very expensive to check, you better chek it only once in a while  */
+    /* this is very expensive to check, you better do it only once in a while  */
     if (!(iter % erritermax))
     {
       (*computeError)(problem, reaction , velocity, globalVelocity, tolerance, &error);
 
       if (verbose > 0)
-        printf("----------------------------------- FC3D - NSGS - Iteration %i Residual = %14.7e Tol = %g\n", iter, error, tolerance);
+        printf("----------------------------------- FC3D - NSGS - Iteration %i Residual = %14.7e; Tol = %g\n", iter, error, tolerance);
     }
 
     if (error < tolerance) hasNotConverged = 0;

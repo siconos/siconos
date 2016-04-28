@@ -71,6 +71,11 @@ ENDIF()
 # --- Boost ---
 compile_with(Boost 1.47 REQUIRED)
 
+#SET(WITH_BOOST_LOG TRUE)
+IF(WITH_BOOST_LOG)
+  compile_with(Boost 1.47 COMPONENTS log  REQUIRED)
+  APPEND_CXX_FLAGS("-DBOOST_LOG_DYN_LINK")
+ENDIF()
 # --- Bullet ---
 IF(WITH_BULLET)
   COMPILE_WITH(Bullet REQUIRED)
@@ -155,7 +160,7 @@ endif()
 
 
 # -- HDF5 --
-# For loggin in Numerics
+# For logging in Numerics
 IF(WITH_HDF5)
   COMPILE_WITH(HDF5 REQUIRED)
 ENDIF(WITH_HDF5)

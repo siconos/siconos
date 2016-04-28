@@ -54,76 +54,18 @@ EulerMoreauOSI::EulerMoreauOSI(double theta, double gamma):
 
 const SimpleMatrix EulerMoreauOSI::getW(SP::DynamicalSystem ds)
 {
-  int dsN = ds->number();
   assert(ds &&
          "EulerMoreauOSI::getW(ds): ds == NULL.");
-  //    return *(WMap[0]);
-  assert(WMap[dsN] &&
+  assert(_dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).W &&
          "EulerMoreauOSI::getW(ds): W[ds] == NULL.");
-  return *(WMap[dsN]); // Copy !!
+  return *(_dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).W); // Copy !!
 }
 
 SP::SimpleMatrix EulerMoreauOSI::W(SP::DynamicalSystem ds)
 {
   assert(ds && "EulerMoreauOSI::W(ds): ds == NULL.");
-  //  return WMap[0];
-  //  if(WMap[ds]==NULL)
-  //    RuntimeException::selfThrow("EulerMoreauOSI::W(ds): W[ds] == NULL.");
-  return WMap[ds->number()];
+  return _dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).W;
 }
-
-void EulerMoreauOSI::setW(const SiconosMatrix& newValue, SP::DynamicalSystem ds)
-{
-  // Check if ds is in the OSI
-  if (!OSIDynamicalSystems->isIn(ds))
-    RuntimeException::selfThrow("EulerMoreauOSI::setW(newVal,ds) - ds does not belong to this Integrator ...");
-
-  // Check dimensions consistency
-  unsigned int line = newValue.size(0);
-  unsigned int col  = newValue.size(1);
-
-  if (line != col) // Check that newValue is square
-    RuntimeException::selfThrow("EulerMoreauOSI::setW(newVal,ds) - newVal is not square! ");
-
-  if (!ds)
-    RuntimeException::selfThrow("EulerMoreauOSI::setW(newVal,ds) - ds == NULL.");
-
-  unsigned int sizeW = ds->getDim(); // n for first order systems, ndof for lagrangian.
-  unsigned int dsN = ds->number();
-  if (line != sizeW) // check consistency between newValue and dynamical system size
-    RuntimeException::selfThrow("EulerMoreauOSI::setW(newVal,ds) - unconsistent dimension between newVal and dynamical system to be integrated ");
-
-  // Memory allocation for W, if required
-  if (!WMap[dsN]) // allocate a new W if required
-  {
-    WMap[dsN].reset(new SimpleMatrix(newValue));
-  }
-  else  // or fill-in an existing one if dimensions are consistent.
-  {
-    if (line == WMap[dsN]->size(0) && col == WMap[dsN]->size(1))
-      *(WMap[dsN]) = newValue;
-    else
-      RuntimeException::selfThrow("EulerMoreauOSI - setW: inconsistent dimensions with problem size for given input matrix W");
-  }
-}
-
-void EulerMoreauOSI::setWPtr(SP::SimpleMatrix newPtr, SP::DynamicalSystem ds)
-{
-  unsigned int line = newPtr->size(0);
-  unsigned int col  = newPtr->size(1);
-  if (line != col) // Check that newPtr is square
-    RuntimeException::selfThrow("EulerMoreauOSI::setWPtr(newVal) - newVal is not square! ");
-
-  if (!ds)
-    RuntimeException::selfThrow("EulerMoreauOSI::setWPtr(newVal,ds) - ds == NULL.");
-
-  unsigned int sizeW = ds->getDim(); // n for first order systems, ndof for lagrangian.
-  if (line != sizeW) // check consistency between newValue and dynamical system size
-    RuntimeException::selfThrow("EulerMoreauOSI::setW(newVal) - unconsistent dimension between newVal and dynamical system to be integrated ");
-
-  WMap[ds->number()] = newPtr;                  // link with new pointer
-}
-
 
 
 const SimpleMatrix EulerMoreauOSI::getWBoundaryConditions(SP::DynamicalSystem ds)
@@ -131,92 +73,79 @@ const SimpleMatrix EulerMoreauOSI::getWBoundaryConditions(SP::DynamicalSystem ds
   assert(ds &&
          "EulerMoreauOSI::getWBoundaryConditions(ds): ds == NULL.");
   //    return *(WBoundaryConditionsMap[0]);
-  unsigned int dsN = ds->number();
-  assert(_WBoundaryConditionsMap[dsN] &&
-         "EulerMoreauOSI::getWBoundaryConditions(ds): WBoundaryConditions[ds] == NULL.");
-  return *(_WBoundaryConditionsMap[dsN]); // Copy !!
+  assert(_dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).WBoundaryConditions
+         && "EulerMoreauOSI::getWBoundaryConditions(ds): WBoundaryConditions[ds] == NULL.");
+  return *(_dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).WBoundaryConditions); // Copy !!
 }
 
 SP::SiconosMatrix EulerMoreauOSI::WBoundaryConditions(SP::DynamicalSystem ds)
 {
   assert(ds && "EulerMoreauOSI::WBoundaryConditions(ds): ds == NULL.");
-  //  return WBoundaryConditionsMap[0];
-  //  if(WBoundaryConditionsMap[ds]==NULL)
-  //    RuntimeException::selfThrow("EulerMoreauOSI::WBoundaryConditions(ds): W[ds] == NULL.");
-  return _WBoundaryConditionsMap[ds->number()];
+  return _dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).WBoundaryConditions;
 }
 
 
-void EulerMoreauOSI::initialize()
+void EulerMoreauOSI::initialize(Model& m)
 {
-  OneStepIntegrator::initialize();
+  OneStepIntegrator::initialize(m);
   // Get initial time
-  double t0 = simulationLink->model()->t0();
+  double t0 = _simulation->startingTime();
+
+  std::cout << std::endl;
   // Compute W(t0) for all ds
-  ConstDSIterator itDS;
-  for (itDS = OSIDynamicalSystems->begin(); itDS != OSIDynamicalSystems->end(); ++itDS)
+  DynamicalSystemsGraph::VIterator dsi, dsend;
+  for (std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
   {
+    SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
     // W initialization
-    initW(t0, *itDS);
-    (*itDS)->allocateWorkVector(DynamicalSystem::local_buffer, WMap[(*itDS)->number()]->size(0));
+    initW(t0, ds, *dsi);
+    ds->allocateWorkVector(DynamicalSystem::local_buffer, _dynamicalSystemsGraph->properties(*dsi).W->size(0));
   }
 }
-void EulerMoreauOSI::initW(double t, SP::DynamicalSystem ds)
+void EulerMoreauOSI::initW(double t, SP::DynamicalSystem ds, DynamicalSystemsGraph::VDescriptor& dsv)
 {
   // This function:
   // - allocate memory for a matrix W
-  // - insert this matrix into WMap with ds as a key
 
   if (!ds)
     RuntimeException::selfThrow("EulerMoreauOSI::initW(t,ds) - ds == NULL");
 
-  if (!OSIDynamicalSystems->isIn(ds))
+  if (!(checkOSI(_dynamicalSystemsGraph->descriptor(ds))))
     RuntimeException::selfThrow("EulerMoreauOSI::initW(t,ds) - ds does not belong to the OSI.");
-  unsigned int dsN = ds->number();
-  if (WMap.find(dsN) != WMap.end())
+
+  if (_dynamicalSystemsGraph->properties(dsv).W)
     RuntimeException::selfThrow("EulerMoreauOSI::initW(t,ds) - W(ds) is already in the map and has been initialized.");
 
 
   unsigned int sizeW = ds->getDim(); // n for first order systems, ndof for lagrangian.
   // Memory allocation for W
-  //  WMap[ds].reset(new SimpleMatrix(sizeW,sizeW));
-  //   SP::SiconosMatrix W = WMap[ds];
 
-  double h = simulationLink->timeStep();
+
+  double h = _simulation->timeStep();
   Type::Siconos dsType = Type::value(*ds);
-
   // 1 - First order non linear systems
   if (dsType == Type::FirstOrderNonLinearDS || dsType == Type::FirstOrderLinearDS || dsType == Type::FirstOrderLinearTIDS)
   {
     //    // Memory allocation for W
-    //     WMap[ds].reset(new SimpleMatrix(sizeW,sizeW));
-    //     SP::SiconosMatrix W = WMap[ds];
 
     // W =  M - h*_theta* [jacobian_x f(t,x,z)]
     SP::FirstOrderNonLinearDS d = std11::static_pointer_cast<FirstOrderNonLinearDS> (ds);
 
     // Copy M or I if M is Null into W
-
-
-    //    SP::SiconosMatrix W = WMap[ds];
-
     if (d->M())
       //      *W = *d->M();
-      WMap[dsN].reset(new SimpleMatrix(*d->M()));
+      _dynamicalSystemsGraph->properties(dsv).W.reset(new SimpleMatrix(*d->M()));
 
     else
     {
       //W->eye();
-      // WMap[ds].reset(new SimpleMatrix(sizeW,sizeW,Siconos::IDENTITY));
-      WMap[dsN].reset(new SimpleMatrix(sizeW, sizeW)); // Warning if the Jacobian is a sparse matrix
-      WMap[dsN]->eye();
+      _dynamicalSystemsGraph->properties(dsv).W.reset(new SimpleMatrix(sizeW, sizeW)); // Warning if the Jacobian is a sparse matrix
+      _dynamicalSystemsGraph->properties(dsv).W->eye();
     }
-    SP::SiconosMatrix W = WMap[dsN];
-
 
     // d->computeJacobianfx(t); // Computation of JacxF is not required here
     // since it must have been done in OSI->initialize, before a call to this function.
-
+    SP::SiconosMatrix W = _dynamicalSystemsGraph->properties(dsv).W;
     // Add -h*_theta*jacobian_XF to W
     scal(-h * _theta, *d->jacobianfx(), *W, false);
   }
@@ -240,8 +169,8 @@ void EulerMoreauOSI::initWBoundaryConditions(SP::DynamicalSystem ds)
   if (!ds)
     RuntimeException::selfThrow("EulerMoreauOSI::initWBoundaryConditions(t,ds) - ds == NULL");
 
-  if (!OSIDynamicalSystems->isIn(ds))
-    RuntimeException::selfThrow("EulerMoreauOSI::initWBoundaryConditions(t,ds) - ds does not belong to the OSI.");
+  if (!(checkOSI(_dynamicalSystemsGraph->descriptor(ds))))
+    RuntimeException::selfThrow("EulerMoreauOSI::initW(t,ds) - ds does not belong to the OSI.");
 
   Type::Siconos dsType = Type::value(*ds);
 
@@ -268,21 +197,16 @@ void EulerMoreauOSI::computeWBoundaryConditions(SP::DynamicalSystem ds)
 }
 
 
-void EulerMoreauOSI::computeW(double t, DynamicalSystem& ds, DynamicalSystemsGraph::VDescriptor& dsgVD)
+void EulerMoreauOSI::computeW(double t, DynamicalSystem& ds, DynamicalSystemsGraph::VDescriptor& dsv,
+                              SiconosMatrix& W) 
 {
   // Compute W matrix of the Dynamical System ds, at time t and for the current ds state.
 
-  // When this function is called, WMap[ds] is supposed to exist and not to be null
+  // When this function is called, W is supposed to exist and not to be null
   // Memory allocation has been done during initW.
 
-  unsigned int dsN = ds.number();
-  assert((WMap.find(dsN) != WMap.end()) &&
-         "EulerMoreauOSI::computeW(t,ds) - W(ds) does not exists. Maybe you forget to initialize the osi?");
-
-  double h = simulationLink->timeStep();
+  double h = _simulation->timeStep();
   Type::Siconos dsType = Type::value(ds);
-
-  SiconosMatrix& W = *WMap[dsN];
 
   // 1 - First order non linear systems
   if (dsType == Type::FirstOrderNonLinearDS)
@@ -318,16 +242,16 @@ void EulerMoreauOSI::computeW(double t, DynamicalSystem& ds, DynamicalSystemsGra
 
 //  if (_useGamma)
   {
-    Topology& topo = *simulationLink->model()->nonSmoothDynamicalSystem()->topology();
-    DynamicalSystemsGraph& DSG0 = *topo.dSG(0);
-    InteractionsGraph& indexSet = *topo.indexSet(0);
+
+    InteractionsGraph& indexSet = *_simulation->nonSmoothDynamicalSystem()->topology()->indexSet(0);
+
     DynamicalSystemsGraph::OEIterator oei, oeiend;
     InteractionsGraph::VDescriptor ivd;
     SP::SiconosMatrix K;
     SP::Interaction inter;
-    for (std11::tie(oei, oeiend) = DSG0.out_edges(dsgVD); oei != oeiend; ++oei)
+    for (std11::tie(oei, oeiend) = _dynamicalSystemsGraph->out_edges(dsv); oei != oeiend; ++oei)
     {
-      inter = DSG0.bundle(*oei);
+      inter = _dynamicalSystemsGraph->bundle(*oei);
       ivd = indexSet.descriptor(inter);
       FirstOrderR& rel = static_cast<FirstOrderR&>(*inter->relation());
       K = rel.K();
@@ -355,8 +279,8 @@ double EulerMoreauOSI::computeResidu()
   //  $\mathcal R(x,r) = x - x_{k} -h\theta f( x , t_{k+1}) - h(1-\theta)f(x_k,t_k) - h r$
   //  $\mathcal R_{free}(x,r) = x - x_{k} -h\theta f( x , t_{k+1}) - h(1-\theta)f(x_k,t_k) $
 
-  double t = simulationLink->nextTime(); // End of the time step
-  double told = simulationLink->startingTime(); // Beginning of the time step
+  double t = _simulation->nextTime(); // End of the time step
+  double told = _simulation->startingTime(); // Beginning of the time step
   double h = t - told; // time step length
 
   DEBUG_PRINTF("nextTime %f\n", t);
@@ -368,26 +292,21 @@ double EulerMoreauOSI::computeResidu()
 
   // Iteration through the set of Dynamical Systems.
   //
-  DSIterator it;
   SP::DynamicalSystem ds; // Current Dynamical System.
   Type::Siconos dsType ; // Type of the current DS.
 
   double maxResidu = 0;
   double normResidu = maxResidu;
 
-  // XXX TMP hack -- xhub
-  Topology& topo = *simulationLink->model()->nonSmoothDynamicalSystem()->topology();
-  DynamicalSystemsGraph& DSG0 = *topo.dSG(0);
-
-  for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
+  DynamicalSystemsGraph::VIterator dsi, dsend;
+  for (std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
   {
-    ds = *it; // the considered dynamical system
+    ds = _dynamicalSystemsGraph->bundle(*dsi);
     dsType = Type::value(*ds); // Its type
     // XXX TMP hack -- xhub
     // we have to iterate over the edges of the DSG0 -> the following won't be necessary anymore
     // Maurice will do that with subgraph :)
-    DynamicalSystemsGraph::VDescriptor dsgVD = topo.getDSG0Descriptor(ds);
-    VectorOfVectors& workVectors = *DSG0.properties(dsgVD).workVectors;
+    VectorOfVectors& workVectors = *_dynamicalSystemsGraph->properties(*dsi).workVectors;
     SiconosVector& residuFree = *workVectors[FirstOrderDS::residuFree];
     SiconosVector& residu = *workVectors[FirstOrderDS::residu];
     // 1 - First Order Non Linear Systems
@@ -515,8 +434,8 @@ void EulerMoreauOSI::computeFreeState()
   // "Free" means without taking non-smooth effects into account.
   DEBUG_PRINT("EulerMoreauOSI::computeFreeState() starts\n");
 
-  double t = simulationLink->nextTime(); // End of the time step
-  double told = simulationLink->startingTime(); // Beginning of the time step
+  double t = _simulation->nextTime(); // End of the time step
+  double told = _simulation->startingTime(); // Beginning of the time step
   double h = t - told; // time step length
 
   // Operators computed at told have index i, and (i+1) at t.
@@ -526,29 +445,26 @@ void EulerMoreauOSI::computeFreeState()
 
   // Iteration through the set of Dynamical Systems.
   //
-  DSIterator it; // Iterator through the set of DS.
 
   SP::DynamicalSystem ds; // Current Dynamical System.
   Type::Siconos dsType ; // Type of the current DS.
 
-  // XXX to be removed -- xhub
-  Topology& topo = *simulationLink->model()->nonSmoothDynamicalSystem()->topology();
-  DynamicalSystemsGraph& DSG0 = *topo.dSG(0);
 
 
-  for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
+  DynamicalSystemsGraph::VIterator dsi, dsend;
+  for (std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
   {
-    ds = *it; // the considered dynamical system
+    if (!checkOSI(dsi)) continue;
+    ds = _dynamicalSystemsGraph->bundle(*dsi);
 
     // XXX TMP hack -- xhub
     // we have to iterate over the edges of the DSG0 -> the following won't be necessary anymore
     // Maurice will do that with subgraph :)
-    DynamicalSystemsGraph::VDescriptor dsgVD = DSG0.descriptor(ds);
-    VectorOfVectors& workVectors = *DSG0.properties(dsgVD).workVectors;
 
+    VectorOfVectors& workVectors = *_dynamicalSystemsGraph->properties(*dsi).workVectors;
 
     dsType = Type::value(*ds); // Its type
-    SiconosMatrix& W = *WMap[ds->number()]; // Its W EulerMoreauOSI matrix of iteration.
+    SiconosMatrix& W = *_dynamicalSystemsGraph->properties(*dsi).W; // Its W EulerMoreauOSI matrix of iteration.
 
     // 1 - First Order Non Linear Systems
     if (dsType == Type::FirstOrderNonLinearDS || dsType == Type::FirstOrderLinearDS || dsType == Type::FirstOrderLinearTIDS)
@@ -647,12 +563,14 @@ void EulerMoreauOSI::prepareNewtonIteration(double time)
   // XXX TMP hack -- xhub
   // we have to iterate over the edges of the DSG0 -> the following won't be necessary anymore
   // Maurice will do that with subgraph :)
-  DynamicalSystemsGraph& DSG0 = *simulationLink->model()->nonSmoothDynamicalSystem()->topology()->dSG(0);
-  ConstDSIterator itDS;
-  for (itDS = OSIDynamicalSystems->begin(); itDS != OSIDynamicalSystems->end(); ++itDS)
+  DynamicalSystemsGraph::VIterator dsi, dsend;
+  for (std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
   {
-    DynamicalSystemsGraph::VDescriptor dsgVD = DSG0.descriptor(*itDS);
-    computeW(time, **itDS, dsgVD);
+    if (!checkOSI(dsi)) continue;
+    SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
+    DynamicalSystemsGraph::VDescriptor dsv = _dynamicalSystemsGraph->descriptor(ds);
+    SP::SiconosMatrix W = _dynamicalSystemsGraph->properties(*dsi).W;
+    computeW(time, *ds, dsv, *W);
   }
 }
 
@@ -685,7 +603,7 @@ void EulerMoreauOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_in
   /** \warning: ensures that it can also work with two different osi for two different ds ?
    */
 
-  SP::OneStepNSProblems  allOSNS  = simulationLink->oneStepNSProblems();
+  SP::OneStepNSProblems  allOSNS  = _simulation->oneStepNSProblems();
   SP::InteractionsGraph indexSet = osnsp->simulation()->indexSet(osnsp->indexSetLevel());
   SP::Interaction inter = indexSet->bundle(vertex_inter);
 
@@ -866,12 +784,13 @@ void EulerMoreauOSI::integrate(double& tinit, double& tend, double& tout, int&)
   //double h = tend - tinit;
   tout = tend;
 
-  DSIterator it;
+
   SP::SiconosMatrix W;
-  for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
+  DynamicalSystemsGraph::VIterator dsi, dsend;
+  for (std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
   {
-    SP::DynamicalSystem ds = *it;
-    W = WMap[ds->number()];
+    if (!checkOSI(dsi)) continue;
+    SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
     Type::Siconos dsType = Type::value(*ds);
     RuntimeException::selfThrow("EulerMoreauOSI::integrate - not yet implemented for Dynamical system type :" + dsType);
   }
@@ -882,27 +801,25 @@ void EulerMoreauOSI::updateState(const unsigned int level)
 
   DEBUG_PRINT("EulerMoreauOSI::updateState\n");
 
-  double h = simulationLink->timeStep();
+  double h = _simulation->timeStep();
 
-  double RelativeTol = simulationLink->relativeConvergenceTol();
-  bool useRCC = simulationLink->useRelativeConvergenceCriteron();
+  double RelativeTol = _simulation->relativeConvergenceTol();
+  bool useRCC = _simulation->useRelativeConvergenceCriteron();
   if (useRCC)
-    simulationLink->setRelativeConvergenceCriterionHeld(true);
+    _simulation->setRelativeConvergenceCriterionHeld(true);
 
-  DSIterator it;
-  // XXX TMP hack -- xhub
-  Topology& topo = *simulationLink->model()->nonSmoothDynamicalSystem()->topology();
-  DynamicalSystemsGraph& DSG0 = *topo.dSG(0);
+  DynamicalSystemsGraph::VIterator dsi, dsend;
 
-  for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
+  for (std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
   {
-    SP::DynamicalSystem ds = *it;
-    SiconosMatrix& W = *WMap[ds->number()];
+    if (!checkOSI(dsi)) continue;
+    SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
 
     // Get the DS type
     Type::Siconos dsType = Type::value(*ds);
-    DynamicalSystemsGraph::VDescriptor dsgVD = topo.getDSG0Descriptor(ds);
-    VectorOfVectors& workVectors = *DSG0.properties(dsgVD).workVectors;
+    VectorOfVectors& workVectors = *_dynamicalSystemsGraph->properties(*dsi).workVectors;
+
+    SimpleMatrix&  W = *_dynamicalSystemsGraph->properties(*dsi).W;
 
     if (dsType == Type::FirstOrderNonLinearDS || dsType == Type::FirstOrderLinearDS || dsType == Type::FirstOrderLinearTIDS)
     {
@@ -914,7 +831,7 @@ void EulerMoreauOSI::updateState(const unsigned int level)
       DEBUG_EXPR(d.r()->display());
 
       // TODO ???
-      bool baux = (useRCC && dsType == Type::FirstOrderNonLinearDS && simulationLink->relativeConvergenceCriterionHeld());
+      bool baux = (useRCC && dsType == Type::FirstOrderNonLinearDS && _simulation->relativeConvergenceCriterionHeld());
       if (level != LEVELMAX)
       {
 
@@ -951,7 +868,7 @@ void EulerMoreauOSI::updateState(const unsigned int level)
         *workVectors[FirstOrderDS::xBuffer] -= x;
         double aux = (workVectors[FirstOrderDS::xBuffer]->norm2()) / (ds->normRef());
         if (aux > RelativeTol)
-          simulationLink->setRelativeConvergenceCriterionHeld(false);
+          _simulation->setRelativeConvergenceCriterionHeld(false);
       }
       DEBUG_PRINT("EulerMoreauOSI::updateState New value of x\n");
       DEBUG_EXPR(x.display());
@@ -965,12 +882,15 @@ void EulerMoreauOSI::display()
   OneStepIntegrator::display();
 
   std::cout << "====== EulerMoreauOSI OSI display ======" <<std::endl;
-  DSIterator it;
-  for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
+
+  DynamicalSystemsGraph::VIterator dsi, dsend;
+  for (std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
   {
+    if (!checkOSI(dsi)) continue;
+    SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
     std::cout << "--------------------------------" <<std::endl;
-    std::cout << "--> W of dynamical system number " << (*it)->number() << ": " <<std::endl;
-    if (WMap[(*it)->number()]) WMap[(*it)->number()]->display();
+    std::cout << "--> W of dynamical system number " << ds->number() << ": " <<std::endl;
+    if (_dynamicalSystemsGraph->properties(*dsi).W) _dynamicalSystemsGraph->properties(*dsi).W->display();
     else std::cout << "-> NULL" <<std::endl;
     std::cout << "--> and corresponding theta is: " << _theta <<std::endl;
   }

@@ -64,7 +64,7 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction , doubl
   int info = -1 ;
 
   if (problem->dimension != 3)
-    numericsError("fc3d_driver", "Dimension of the problem : problem-> dimension is not compatible or is not set");
+    numericsError("gfc3d_driver", "Dimension of the problem : problem-> dimension is not compatible or is not set");
 
 
   /* Non Smooth Gauss Seidel (NSGS) */

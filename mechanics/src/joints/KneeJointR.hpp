@@ -41,11 +41,6 @@ protected:
    */
   SP::SiconosVector _P0;
 
-  /** Pointers on the first concerned dynamical system*/
-  SP::NewtonEulerDS _d1;
-  /** Pointers on the second concerned dynamical system*/
-  SP::NewtonEulerDS _d2;
-
   /**Absolute coodinates of the vector  G1P0 when d1 is located in q=(0,0,0,1,0,0,0)
    * i.e. P0 in the body frame of d1.
    * These values are computed when the constructor is called.
@@ -78,7 +73,7 @@ public:
   KneeJointR(SP::NewtonEulerDS d1, SP::SiconosVector P0, bool absolutRef = true);
   /** destructor
    */
-  void checkInitPos();
+  void checkInitPos(SP::SiconosVector q1, SP::SiconosVector q2);
   virtual ~KneeJointR() {};
 
   /** Get the number of constraints defined in the joint
@@ -86,11 +81,14 @@ public:
    */
   static unsigned int numberOfConstraints() { return 3; }
 
-  virtual void computeJachq(double time, Interaction& inter, VectorOfBlockVectors& DSlink);
+  virtual void computeJachq(double time, Interaction& inter, SP::BlockVector q0);
 
+  
   virtual void computeh(double time, BlockVector& q0, SiconosVector& y);
 
-  virtual void computeDotJachq(double time, SiconosVector& workQ, SiconosVector& workZ, SiconosVector& workQdot);
+  virtual void computeDotJachq(double time, BlockVector& workQ, BlockVector& workZ, BlockVector& workQdot);
+
+  virtual void computeDotJachq(double time, SP::SiconosVector qdot1, SP::SiconosVector qdot2=SP::SiconosVector());
 
 protected:
 

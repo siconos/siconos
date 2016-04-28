@@ -141,8 +141,6 @@ int main(int argc, char* argv[])
 
     // -- (1) OneStepIntegrators --
     SP::MoreauJeanOSI OSI(new MoreauJeanOSI(theta));
-    OSI->insertDynamicalSystem(ball);
-    OSI->insertDynamicalSystem(movingplane);
 
     // -- (2) Time discretisation --
     SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
@@ -234,7 +232,7 @@ int main(int argc, char* argv[])
     SimpleMatrix dataPlotRef(dataPlot);
     dataPlotRef.zero();
     ioMatrix::read("BallOnMovingPlane.ref", "ascii", dataPlotRef);
-
+    std::cout << "Error " << ((dataPlot - dataPlotRef).normInf()) << std::endl;
     if ((dataPlot - dataPlotRef).normInf() > 1e-10)
     {
       std::cout << "Warning. The result is rather different from the reference file." << std::endl;

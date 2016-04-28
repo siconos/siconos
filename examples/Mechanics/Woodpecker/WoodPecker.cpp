@@ -144,7 +144,6 @@ int main(int argc, char* argv[])
 
     // -- OneStepIntegrators --
     SP::OneStepIntegrator vOSI(new MoreauJeanOSI(theta));
-    vOSI->insertDynamicalSystem(dynamicalSystem);
     s->insertIntegrator(vOSI);
 
 

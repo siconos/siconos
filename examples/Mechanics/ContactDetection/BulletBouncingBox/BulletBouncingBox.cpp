@@ -130,7 +130,6 @@ int main()
     body->setFExtPtr(FExt);
 
     // -- Add the dynamical system in the non smooth dynamical system
-    osi->insertDynamicalSystem(body);
     model->nonSmoothDynamicalSystem()->insertDynamicalSystem(body);
 
     SP::btCollisionObject ground(new btCollisionObject());

@@ -167,9 +167,12 @@ void LsodarOSI::fillXWork(integer* sizeOfX, doublereal* x)
 
 void LsodarOSI::computeRhs(double t, DynamicalSystemsGraph& DSG0)
 {
-  for (DSIterator it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
+
+  DynamicalSystemsGraph::VIterator dsi, dsend;
+  for (std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
   {
-    SP::DynamicalSystem& ds = *it;
+    if (!checkOSI(dsi)) continue;
+    SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
     ds->computeRhs(t);
     if (_extraAdditionalTerms)
     {
@@ -181,9 +184,12 @@ void LsodarOSI::computeRhs(double t, DynamicalSystemsGraph& DSG0)
 
 void LsodarOSI::computeJacobianRhs(double t, DynamicalSystemsGraph& DSG0)
 {
-  for (DSIterator it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
+
+  DynamicalSystemsGraph::VIterator dsi, dsend;
+  for (std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
   {
-    SP::DynamicalSystem& ds = *it;
+    if (!checkOSI(dsi)) continue;
+    SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
     ds->computeJacobianRhsx(t);
     if (_extraAdditionalTerms)
     {
@@ -195,37 +201,40 @@ void LsodarOSI::computeJacobianRhs(double t, DynamicalSystemsGraph& DSG0)
 
 void LsodarOSI::f(integer* sizeOfX, doublereal* time, doublereal* x, doublereal* xdot)
 {
-  std11::static_pointer_cast<EventDriven>(simulationLink)->computef(*this, sizeOfX, time, x, xdot);
+  std11::static_pointer_cast<EventDriven>(_simulation)->computef(*this, sizeOfX, time, x, xdot);
 }
 
 void LsodarOSI::g(integer* nEq, doublereal*  time, doublereal* x, integer* ng, doublereal* gOut)
 {
-  std11::static_pointer_cast<EventDriven>(simulationLink)->computeg(shared_from_this(), nEq, time, x, ng, gOut);
+  std11::static_pointer_cast<EventDriven>(_simulation)->computeg(shared_from_this(), nEq, time, x, ng, gOut);
 }
 
 void LsodarOSI::jacobianfx(integer* sizeOfX, doublereal* time, doublereal* x, integer* ml, integer* mu,  doublereal* jacob, integer* nrowpd)
 {
-  std11::static_pointer_cast<EventDriven>(simulationLink)->computeJacobianfx(*this, sizeOfX, time, x, jacob);
+  std11::static_pointer_cast<EventDriven>(_simulation)->computeJacobianfx(*this, sizeOfX, time, x, jacob);
 }
 
-void LsodarOSI::initialize()
+void LsodarOSI::initialize(Model& m)
 {
-  OneStepIntegrator::initialize();
+  OneStepIntegrator::initialize(m);
   _xWork.reset(new BlockVector());
-  DSIterator itDS;
   std::string type;
   // initialize xWork with x values of the dynamical systems present in the set.
-  for (itDS = OSIDynamicalSystems->begin(); itDS != OSIDynamicalSystems->end(); ++itDS)
+
+  DynamicalSystemsGraph::VIterator dsi, dsend;
+  for (std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
   {
-    if (Type::value(**itDS) == Type::LagrangianDS ||
-        Type::value(**itDS) == Type::LagrangianLinearTIDS)
+    if (!checkOSI(dsi)) continue;
+    SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
+    if (Type::value(*ds) == Type::LagrangianDS ||
+        Type::value(*ds) == Type::LagrangianLinearTIDS)
     {
-      LagrangianDS& LDS = *std11::static_pointer_cast<LagrangianDS>(*itDS);
+      LagrangianDS& LDS = *std11::static_pointer_cast<LagrangianDS>(ds);
       _xWork->insertPtr(LDS.q());
       _xWork->insertPtr(LDS.velocity());
     }
     else
-      _xWork->insertPtr((*itDS)->x());
+      _xWork->insertPtr(ds->x());
   }
   //   Integer parameters for LSODAROSI are saved in vector intParam.
   //   The link with variable names in opkdmain.f is indicated in comments
@@ -235,7 +244,7 @@ void LsodarOSI::initialize()
   _xtmp.reset(new SiconosVector(_xWork->size()));
 
   // 2 - Ng, number of constraints:
-  _intData[1] = std11::static_pointer_cast<EventDriven>(simulationLink)->computeSizeOfg();
+  _intData[1] = std11::static_pointer_cast<EventDriven>(_simulation)->computeSizeOfg();
   // 3 - Itol, itask, iopt
   _intData[2] = 1; // itol, 1 if ATOL is a scalar, else 2 (ATOL array)
   _intData[3] = 1; // itask, an index specifying the task to be performed. 1: normal computation.
@@ -397,21 +406,28 @@ void LsodarOSI::integrate(double& tinit, double& tend, double& tout, int& istate
 void LsodarOSI::updateState(const unsigned int level)
 {
   // Compute all required (ie time-dependent) data for the DS of the OSI.
-  DSIterator it;
 
+  DynamicalSystemsGraph::VIterator dsi, dsend;
   if (level == 1) // ie impact case: compute velocity
   {
-    for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
+    for (std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
     {
-      SP::LagrangianDS lds = std11::static_pointer_cast<LagrangianDS>(*it);
+      if (!checkOSI(dsi)) continue;
+      SP::LagrangianDS lds = std11::static_pointer_cast<LagrangianDS>(_dynamicalSystemsGraph->bundle(*dsi));
       lds->computePostImpactVelocity();
     }
   }
   else if (level == 2)
   {
-    double time = simulationLink->model()->currentTime();
-    for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
-      (*it)->update(time);
+    double time = _simulation->nextTime();
+    for (std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
+    {
+      if (!checkOSI(dsi)) continue;
+      {
+        SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
+        ds->update(time);
+      }
+    }
   }
   else RuntimeException::selfThrow("LsodarOSI::updateState(index), index is out of range. Index = " + level);
 }
@@ -449,7 +465,7 @@ struct LsodarOSI::_NSLEffectOnFreeOutput : public SiconosVisitor
 
 void LsodarOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, OneStepNSProblem* osnsp)
 {
-  SP::OneStepNSProblems  allOSNS  = simulationLink->oneStepNSProblems();
+  SP::OneStepNSProblems  allOSNS  = _simulation->oneStepNSProblems();
   SP::InteractionsGraph indexSet = osnsp->simulation()->indexSet(osnsp->indexSetLevel());
   SP::Interaction inter = indexSet->bundle(vertex_inter);
 

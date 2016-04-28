@@ -41,9 +41,7 @@ void NewtonEulerFrom3DLocalFrameR::initComponents(Interaction& inter, VectorOfBl
   _jachq.reset(new SimpleMatrix(3, qSize));
 
 
-  /* VA 12/04/2016 All of what follows shoudl be put in WorkM*/
   _Mabs_C.reset(new SimpleMatrix(3, 3));
-  _MObjToAbs.reset(new SimpleMatrix(3, 3));
   _AUX2.reset(new SimpleMatrix(3, 3));
   //  _isContact=1;
 }
@@ -102,7 +100,7 @@ void NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts(SP::SiconosVect
 //  SimpleMatrix& Mobj1_abs = *d1->MObjToAbs();
 
   computeMObjToAbs(q1,_MObjToAbs);
- 
+
   DEBUG_PRINT("NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts, _MObjToAbs:");
   DEBUG_EXPR(_MObjToAbs->display(););
 
@@ -137,7 +135,7 @@ void NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts(SP::SiconosVect
       _jachqT->setValue(ii, jj, _AUX2->getValue(ii, jj - 3));
 
 
-  
+
   DEBUG_PRINT("NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts, _jahcqT:\n");
   DEBUG_EXPR(_jachqT->display(););
   // DEBUG_EXPR_WE(
@@ -186,7 +184,7 @@ void NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts(SP::SiconosVect
 
 
 
-  
+
   double t[6];
   double * pt = t;
   orthoBaseFromVector(&Nx, &Ny, &Nz, pt, pt + 1, pt + 2, pt + 3, pt + 4, pt + 5);
@@ -250,7 +248,7 @@ void NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts(SP::SiconosVect
 
 
   computeMObjToAbs(q2,_MObjToAbs);
-  
+
   prod(*_NPG2, *_MObjToAbs, *_AUX1, true);
   prod(*_Mabs_C, *_AUX1, *_AUX2, true);
 
@@ -264,39 +262,18 @@ void NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts(SP::SiconosVect
 
 }
 
-void NewtonEulerFrom3DLocalFrameR::computeJachqT(Interaction& inter, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2)
+void NewtonEulerFrom3DLocalFrameR::computeJachqT(Interaction& inter, SP::BlockVector q0)
 {
-
-  DEBUG_BEGIN("NewtonEulerFrom3DLocalFrameR::computeJachqT(Interaction& inter, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2)\n");
-  SP::NewtonEulerDS d1 =  std11::static_pointer_cast<NewtonEulerDS> (ds1);
-  SP::NewtonEulerDS d2 =  std11::static_pointer_cast<NewtonEulerDS> (ds2);
- 
-  
-  if(d1 != d2)
-    FC3DcomputeJachqTFromContacts(d1->q(), d2->q());
-
-  else
+  DEBUG_BEGIN("NewtonEulerFrom3DLocalFrameR::computeJachqT(Interaction& inter,  SP::BlockVector q0)\n");
+  if (q0->getNumberOfBlocks()>1)
   {
-    FC3DcomputeJachqTFromContacts(d1->q());
-  }
-  DEBUG_END("NewtonEulerFrom3DLocalFrameR::computeJachqT(Interaction& inter, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2)\n");
-
-}
-
-
-void NewtonEulerFrom3DLocalFrameR::computeJachqT(Interaction& inter, VectorOfBlockVectors& DSlink)
-{
-  DEBUG_BEGIN("NewtonEulerFrom3DLocalFrameR::computeJachqT(Interaction& inter, VectorOfBlockVectors& DSlink) \n")
-  SP::BlockVector BlockX = DSlink[NewtonEulerR::q0];
-  if (inter.has2Bodies())
-  {
-    FC3DcomputeJachqTFromContacts((BlockX->getAllVect())[0], (BlockX->getAllVect())[1]);
+    FC3DcomputeJachqTFromContacts((q0->getAllVect())[0], (q0->getAllVect())[1]);
   }
   else
   {
-    FC3DcomputeJachqTFromContacts((BlockX->getAllVect())[0]);
+    FC3DcomputeJachqTFromContacts((q0->getAllVect())[0]);
   }
+  DEBUG_END("NewtonEulerFrom3DLocalFrameR::computeJachqT(Interaction& inter,  SP::BlockVector q0)\n");
 
-  DEBUG_END("NewtonEulerFrom3DLocalFrameR::computeJachqT(Interaction& inter, VectorOfBlockVectors& DSlink) \n");
 
 }

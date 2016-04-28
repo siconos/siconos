@@ -139,7 +139,6 @@ int main(int argc, char* argv[])
     // -- (1) OneStepIntegrators --
 #ifdef TS_PROJ
     SP::MoreauJeanDirectProjectionOSI OSI(new MoreauJeanDirectProjectionOSI(theta));
-    OSI->insertDynamicalSystem(bar);
     OSI->setDeactivateYPosThreshold(1e-05);
     OSI->setDeactivateYVelThreshold(0.0);
     OSI->setActivateYPosThreshold(1e-09);
@@ -147,10 +146,8 @@ int main(int argc, char* argv[])
 #else
 #ifdef TS_COMBINED
     SP::OneStepIntegrator OSI(new MoreauJeanCombinedProjectionOSI(theta));
-    OSI->insertDynamicalSystem(bar);
 #else
     SP::MoreauJeanOSI OSI(new MoreauJeanOSI(theta,0.5));
-    OSI->insertDynamicalSystem(bar);
 #endif
 #endif
     // -- (2) Time discretisation --

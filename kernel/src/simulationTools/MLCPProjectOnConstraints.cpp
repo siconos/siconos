@@ -105,7 +105,7 @@ void MLCPProjectOnConstraints::updateInteractionBlocks()
     indexSet->update_edges_indices();
   }
 
-  bool isLinear = simulation()->model()->nonSmoothDynamicalSystem()->isLinear();
+  bool isLinear = simulation()->nonSmoothDynamicalSystem()->isLinear();
 
 
 
@@ -387,7 +387,7 @@ void MLCPProjectOnConstraints::updateInteractionBlocksOLD()
 
   SP::InteractionsGraph indexSet = simulation()->indexSet(indexSetLevel());
 
-  bool isLinear = simulation()->model()->nonSmoothDynamicalSystem()->isLinear();
+  bool isLinear = simulation()->nonSmoothDynamicalSystem()->isLinear();
   //  std::cout<<"isLinear: "<<isLinear<<" hasTopologyChanged: "<<hasTopologyChanged<<"hasBeenUpdated: "<<_hasBeenUpdated<<endl;
 
 

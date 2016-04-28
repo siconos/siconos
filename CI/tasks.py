@@ -14,6 +14,13 @@ siconos_test_deb = CiTask(
     srcs=['examples'],
     targets={'examples': ['docker-build', 'docker-ctest']})
 
+siconos_test_rpm = CiTask(
+    ci_config='examples',
+    distrib='fedora:latest',
+    pkgs=['siconos'],
+    srcs=['examples'],
+    targets={'examples': ['docker-build', 'docker-ctest']})
+
 siconos_debian_latest = siconos_default.copy()(
     ci_config='with_bullet',
     add_pkgs=['bullet', 'h5py'],  # for mechanics.io
@@ -31,6 +38,7 @@ siconos_ubuntu_15_10_with_mechanisms = siconos_default.copy()(
     ci_config='with_mechanisms',
     add_pkgs=['pythonocc-conda', 'wget', 'bash', 'bzip2', 'pythonocc-conda-dep'],
     cmake_cmd='Build/ci-scripts/conda.sh',
+    with_examples=True,
     distrib='debian:stretch')
 
 siconos_numerics_only = siconos_ubuntu_15_10.copy()(
@@ -56,7 +64,7 @@ siconos_openblas_lapacke = siconos_default.copy()(
 
 siconos_clang = siconos_ubuntu_15_10.copy()(
     ci_config=('with_bullet', 'with_py3'),
-    with_examples=True,
+    with_examples=False,
     remove_pkgs=['python-env'],
     add_pkgs=['clang', 'bullet', 'cppunit_clang', 'wget', 'xz', 'python3-env', 'path', 'h5py3'])  # h5py-3 for mechanics.io
 
@@ -69,6 +77,7 @@ siconos_clang_asan = siconos_clang.copy()(
 # <clang-3.7.1 does not support linux 4.2
 # This will likely hurt you
 siconos_clang_msan = siconos_default.copy()(
+    with_examples=False,
     distrib='debian:jessie',
     ci_config='with_msan',
     build_configuration='Debug',

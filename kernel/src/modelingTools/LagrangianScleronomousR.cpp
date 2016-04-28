@@ -24,7 +24,7 @@
 #include "LagrangianDS.hpp"
 
 #include "BlockVector.hpp"
-#include "SimulationTypeDef.hpp"
+#include "SimulationGraphs.hpp"
 //#define DEBUG_MESSAGES
 //#define DEBUG_STDOUT
 #include "debug.h"

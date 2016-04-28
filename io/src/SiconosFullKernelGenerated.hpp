@@ -162,7 +162,7 @@ SICONOS_IO_REGISTER(Model,
   (_t)
   (_t0)
   (_T)
-  (_strat)
+  (_simulation)
   (_nsds)
   (_title)
   (_author)
@@ -215,8 +215,7 @@ SICONOS_IO_REGISTER_WITH_BASES(SchatzmanPaoliOSI,(OneStepIntegrator),
 SICONOS_IO_REGISTER_WITH_BASES(LagrangianCompliantR,(LagrangianR),
   (_pluginJachlambda))
 SICONOS_IO_REGISTER(NonSmoothLaw,
-  (_size)
-  (_sizeProjectOnConstraints))
+  (_size))
 SICONOS_IO_REGISTER(BoundaryCondition,
   (_velocityIndices)
   (_prescribedVelocity)
@@ -383,10 +382,10 @@ SICONOS_IO_REGISTER_WITH_BASES(RelayNSL,(NonSmoothLaw),
 SICONOS_IO_REGISTER_WITH_BASES(EqualityConditionNSL,(NonSmoothLaw),
 )
 SICONOS_IO_REGISTER(OneStepIntegrator,
-  (integratorType)
-  (OSIDynamicalSystems)
+  (_integratorType)
+  (_dynamicalSystemsGraph)
   (_sizeMem)
-  (simulationLink)
+  (_simulation)
   (_extraAdditionalTerms))
 SICONOS_IO_REGISTER(MatrixIntegrator,
   (_mat)
@@ -453,7 +452,7 @@ SICONOS_IO_REGISTER(SiconosMemory,
   (_nbVectorsInMemory)
   (_vectorMemory)
   (_indx))
-SICONOS_IO_REGISTER(SystemProperties,
+SICONOS_IO_REGISTER(DynamicalSystemProperties,
   (upper_block)
   (lower_block)
   (workVectors)
@@ -650,7 +649,7 @@ void siconos_io_register_generated(Archive& ar)
   ar.register_type(static_cast<TimeDiscretisationEvent*>(NULL));
   ar.register_type(static_cast<LagrangianDS*>(NULL));
   ar.register_type(static_cast<GraphProperties*>(NULL));
-  ar.register_type(static_cast<SystemProperties*>(NULL));
+  ar.register_type(static_cast<DynamicalSystemProperties*>(NULL));
   ar.register_type(static_cast<InteractionProperties*>(NULL));
   ar.register_type(static_cast<MatrixIntegrator*>(NULL));
   ar.register_type(static_cast<DynamicalSystemsGraph*>(NULL));
@@ -823,7 +822,7 @@ SICONOS_IO_REGISTER(Model,
   (_t)
   (_t0)
   (_T)
-  (_strat)
+  (_simulation)
   (_nsds)
   (_title)
   (_author)
@@ -1044,10 +1043,10 @@ SICONOS_IO_REGISTER_WITH_BASES(RelayNSL,(NonSmoothLaw),
 SICONOS_IO_REGISTER_WITH_BASES(EqualityConditionNSL,(NonSmoothLaw),
 )
 SICONOS_IO_REGISTER(OneStepIntegrator,
-  (integratorType)
+  (_integratorType)
   (OSIDynamicalSystems)
   (_sizeMem)
-  (simulationLink)
+  (_simulation)
   (_extraAdditionalTerms))
 SICONOS_IO_REGISTER(MatrixIntegrator,
   (_mat)
@@ -1114,7 +1113,7 @@ SICONOS_IO_REGISTER(SiconosMemory,
   (_nbVectorsInMemory)
   (_vectorMemory)
   (_indx))
-SICONOS_IO_REGISTER(SystemProperties,
+SICONOS_IO_REGISTER(DynamicalSystemProperties,
   (upper_block)
   (lower_block)
   (workVectors)
@@ -1311,7 +1310,7 @@ void siconos_io_register_generated(Archive& ar)
   ar.register_type(static_cast<TimeDiscretisationEvent*>(NULL));
   ar.register_type(static_cast<LagrangianDS*>(NULL));
   ar.register_type(static_cast<GraphProperties*>(NULL));
-  ar.register_type(static_cast<SystemProperties*>(NULL));
+  ar.register_type(static_cast<DynamicalSystemProperties*>(NULL));
   ar.register_type(static_cast<InteractionProperties*>(NULL));
   ar.register_type(static_cast<MatrixIntegrator*>(NULL));
   ar.register_type(static_cast<DynamicalSystemsGraph*>(NULL));

@@ -1167,7 +1167,6 @@ NumericsSparseLinearSolverParams* NM_linearSolverParams(NumericsMatrix* A)
 }
 
 
-/* NumericsMatrix : initialize triplet storage from sparse block storage */
 CSparseMatrix* NM_triplet(NumericsMatrix* A)
 {
   if (!NM_sparse(A)->triplet)

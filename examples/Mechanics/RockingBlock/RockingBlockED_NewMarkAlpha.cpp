@@ -123,7 +123,6 @@ int main(int argc, char* argv[])
     SP::TimeDiscretisation TimeDiscret(new TimeDiscretisation(TimeInitial, StepSize));
     //2. Integration solver for one step
     SP::OneStepIntegrator OSI(new NewMarkAlphaOSI(_rho, IsHandleVelConstraint));
-    OSI->insertDynamicalSystem(RockingBlock);
     SP::NewMarkAlphaOSI _NewMarkAlpha = std11::static_pointer_cast<NewMarkAlphaOSI>(OSI);
     //3. Nonsmooth problem
     SP::OneStepNSProblem impact(new LCP());

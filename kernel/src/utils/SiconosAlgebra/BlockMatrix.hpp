@@ -438,6 +438,12 @@ public:
   friend void scal(double, const SiconosMatrix&, SiconosMatrix&, bool);
   friend SiconosMatrix& operator *=(SiconosMatrix& m, const double& s);
   friend SiconosMatrix& operator /=(SiconosMatrix& m, const double& s);
+
+  /** return the number of non-zero in the matrix
+   * \param tol the tolerance to consider a number zero (not used if the matrix is sparse)
+   * \return the number of non-zeros
+   */
+  virtual size_t nnz(double tol = 1e-14);
 };
 
 //DEFINE_SPTR(BlockMatrix)

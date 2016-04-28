@@ -21,8 +21,8 @@
   \brief LagrangianDS class - Second Order Non Linear Dynamical Systems.
 */
 
-#ifndef LAGRANGIAFGyrDS_H
-#define LAGRANGIAFGyrDS_H
+#ifndef LAGRANGIANDS_H
+#define LAGRANGIANDS_H
 
 #include "DynamicalSystem.hpp"
 #include "BoundaryCondition.hpp"
@@ -1075,4 +1075,4 @@ public:
 
 TYPEDEF_SPTR(LagrangianDS)
 
-#endif // LAGRANGIAfGyrDS_H
+#endif // LAGRANGIANDS_H

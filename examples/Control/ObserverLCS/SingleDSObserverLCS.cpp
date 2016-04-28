@@ -103,7 +103,6 @@ int main(int argc, char* argv[])
     double theta = 0.5;
     // One Step Integrator
     SP::EulerMoreauOSI myIntegrator(new EulerMoreauOSI(theta));
-    myIntegrator->insertDynamicalSystem(processObserver);
     s->insertIntegrator(myIntegrator);
     // OneStepNSProblem
 

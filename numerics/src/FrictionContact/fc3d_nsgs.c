@@ -331,9 +331,9 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction, double *veloci
 
   if (options->numberOfInternalSolvers < 1)
   {
-    numericsError("fc3d_nsgs", "The NSGS method needs options for the internal solvers, options[0].numberOfInternalSolvers should be >1");
+    numericsError("fc3d_nsgs", "The NSGS method needs options for the internal solvers, options[0].numberOfInternalSolvers should be >= 1");
   }
-  assert(&options[1]);
+  assert(options->internalSolvers);
 
   SolverOptions * localsolver_options = options->internalSolvers;
 

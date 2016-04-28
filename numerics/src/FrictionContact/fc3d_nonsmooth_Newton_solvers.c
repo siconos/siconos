@@ -586,8 +586,6 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers* equation
             NM_MPI_com((MPI_Comm) options->solverData);
           }
 
-#else
-          numericsError("frictionContact_nonsmooth_Newton_solversSolve", "MUMPS solver needs a MPI installation.\n");
 #endif
           break;
         }

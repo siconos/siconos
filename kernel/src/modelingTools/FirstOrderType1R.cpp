@@ -21,7 +21,7 @@
 #include "FirstOrderNonLinearDS.hpp"
 
 #include "BlockVector.hpp"
-#include "SimulationTypeDef.hpp"
+#include "SimulationGraphs.hpp"
 
 
 FirstOrderType1R::FirstOrderType1R(const std::string& pluginh, const std::string& pluging):

@@ -31,7 +31,7 @@ using namespace RELATION;
 GenericMechanical::GenericMechanical(int FC3D_Solver_Id):
   LinearOSNS()
 {
-  _MStorageType = SICONOS_SPARSE;
+  _MStorageType = NM_SPARSE_BLOCK;
   _pnumerics_GMP = buildEmptyGenericMechanicalProblem();
   genericMechanicalProblem_setDefaultSolverOptions(&*_numerics_solver_options, FC3D_Solver_Id);
 }
@@ -51,7 +51,7 @@ void GenericMechanical::initialize(SP::Simulation sim)
 void GenericMechanical::computeDiagonalInteractionBlock(const InteractionsGraph::VDescriptor& vd)
 {
   SP::InteractionsGraph indexSet = simulation()->indexSet(indexSetLevel());
-  //bool isTimeInvariant = simulation()->model()->nonSmoothDynamicalSystem()->topology()->isTimeInvariant();
+  //bool isTimeInvariant = simulation()->nonSmoothDynamicalSystem()->topology()->isTimeInvariant();
 
   /*Build the corresponding numerics problems*/
 

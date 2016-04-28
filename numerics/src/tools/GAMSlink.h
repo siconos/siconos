@@ -505,7 +505,7 @@ static inline int NM_to_GDX(idxHandle_t Xptr, const char* name, const char* desc
   if (idxDataWriteStart(Xptr, name, descr, 2, dims, msg, GMS_SSSIZE) == 0)
     idxerrorR(idxGetLastError(Xptr), "idxDataWriteStart");
 
-  if (M->storageType == 0)
+  if (M->storageType == NM_DENSE)
   {
     assert(M->matrix0);
     idxDataWriteDenseColMajor(Xptr, 2, M->matrix0);

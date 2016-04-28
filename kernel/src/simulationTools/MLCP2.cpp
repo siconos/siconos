@@ -38,19 +38,19 @@ MLCP2::MLCP2(const std::string& newNumericsSolverName, const std::string& newId)
 
 void MLCP2::initialize(SP::Simulation simulation)
 {
-  SP::DynamicalSystemsSet  DSSet = simulation->model()->nonSmoothDynamicalSystem()->dynamicalSystems();
+  SP::DynamicalSystemsSet  DSSet = simulation->nonSmoothDynamicalSystem()->dynamicalSystems();
   if (DSSet->begin() == DSSet->end())
     printf("DSSet is empty\n");
   else
     printf("DSSet is not empty\n");
   updateDSInteractionBlocks();
-  DSSet = simulation->model()->nonSmoothDynamicalSystem()->dynamicalSystems();
+  DSSet = simulation->nonSmoothDynamicalSystem()->dynamicalSystems();
   if (DSSet->begin() == DSSet->end())
     printf("DSSet is empty\n");
   else
     printf("DSSet is not empty\n");
   updateInteractionDSBlocks();
-  DSSet = simulation->model()->nonSmoothDynamicalSystem()->dynamicalSystems();
+  DSSet = simulation->nonSmoothDynamicalSystem()->dynamicalSystems();
   if (DSSet->begin() == DSSet->end())
     printf("DSSet is empty\n");
   else
@@ -61,8 +61,8 @@ void MLCP2::initialize(SP::Simulation simulation)
 }
 void MLCP2::updateM()
 {
-  SP::InteractionsGraph IG = simulation->indexSet(levelMin);
-  SP::DynamicalSystemsSet DSSet = simulation->model()->nonSmoothDynamicalSystem()->dynamicalSystems();
+  SP::InteractionsGraph IG = simulation->indexSet(_indexSetLevel);
+  SP::DynamicalSystemsSet DSSet = simulation->nonSmoothDynamicalSystem()->dynamicalSystems();
   if (!M)
   {
     // Creates and fills M using Interactionof indexSet
@@ -98,14 +98,14 @@ void MLCP2::updateM()
 
 //   // Get index set from Simulation
 
-//   indexSet = simulation->indexSet(levelMin);
-//   isTimeInvariant = simulation->model()->nonSmoothDynamicalSystem()->topology()->isTimeInvariant();
+//   indexSet = simulation->indexSet(_indexSetLevel);
+//   isTimeInvariant = simulation->nonSmoothDynamicalSystem()->topology()->isTimeInvariant();
 
 //   if (!isTimeInvariant || mFirstCall){
 //     for(itinter1 = indexSet->begin(); itinter1!=indexSet->end();++itinter1){
 //       computeblock(&(*itinter1));
 //     }
-//     DynamicalSystemsSet * allDS = simulation->model()->nonSmoothDynamicalSystem()->dynamicalSystems();
+//     DynamicalSystemsSet * allDS = simulation->nonSmoothDynamicalSystem()->dynamicalSystems();
 //     for(itDS=allDS->begin(); itDS!= allDS->end(); ++itDS){
 //       computeblock(&(*itDS));
 //       for(itinter1 = indexSet->begin(); itinter1!=indexSet->end();++itinter1){
@@ -180,7 +180,7 @@ void MLCP2::computeq(double time)
   q->zero();
 
   // === Get index set from Simulation ===
-  SP::InteractionsGraph indexSet = simulation->indexSet(levelMin);
+  SP::InteractionsGraph indexSet = simulation->indexSet(_indexSetLevel);
   // === Loop through "active" Interactions (ie present in indexSets[level]) ===
 
   unsigned int pos = 0;
@@ -204,7 +204,7 @@ void MLCP2::computeq(double time)
   //   SP::SiconosVector  e = std11::static_pointer_cast<FirstOrderLinearR>((*itCurrent)->relation())->e();
   //   q->addBlock(pos, *e);
   // }
-  SP::DynamicalSystemsSet  allDS = simulation->model()->nonSmoothDynamicalSystem()->dynamicalSystems();
+  SP::DynamicalSystemsSet  allDS = simulation->nonSmoothDynamicalSystem()->dynamicalSystems();
   for (DSIterator itDS = allDS->begin(); itDS != allDS->end(); ++itDS)
   {
     pos = M->getPositionOfDSBlock(*itDS);
@@ -234,17 +234,17 @@ bool MLCP2::preCompute(double time)
   // M, sizeOutput have been computed in initialize and are uptodate.
 
   // Get topology
-  SP::Topology topology = simulation->model()->nonSmoothDynamicalSystem()->topology();
+  SP::Topology topology = simulation->nonSmoothDynamicalSystem()->topology();
 
-  if (!topology->isTimeInvariant() || !simulation->model()->nonSmoothDynamicalSystem()->isLinear())
+  if (!topology->isTimeInvariant() || !simulation->nonSmoothDynamicalSystem()->isLinear())
   {
     // Computes new interactionBlocks if required
     updateInteractionBlocks();
 
     // Updates matrix M
-    SP::InteractionsGraph indexSet = model()->nonSmoothDynamicalSystem()->topology()->indexSet(levelMin);
+    SP::InteractionsGraph indexSet = model()->nonSmoothDynamicalSystem()->topology()->indexSet(_indexSetLevel);
 
-    SP::DynamicalSystemsSet DSSet = simulation->model()->nonSmoothDynamicalSystem()->dynamicalSystems();
+    SP::DynamicalSystemsSet DSSet = simulation->nonSmoothDynamicalSystem()->dynamicalSystems();
     //fill M block
     // Note FP : update this file with new fill function
     M->fill(indexSet, DSSet, interactionBlocks, DSBlocks, DSInteractionBlocks, interactionDSBlocks);
@@ -336,7 +336,7 @@ void MLCP2::postCompute()
   // Only Interactions (ie Interactions) of indexSet(leveMin) are concerned.
 
   // === Get index set from Topology ===
-  SP::InteractionsGraph indexSet = model()->nonSmoothDynamicalSystem()->topology()->indexSet(levelMin);
+  SP::InteractionsGraph indexSet = model()->nonSmoothDynamicalSystem()->topology()->indexSet(_indexSetLevel);
   // y and lambda vectors
   SP::SiconosVector lambda, y, x;
 
@@ -355,8 +355,8 @@ void MLCP2::postCompute()
     pos = M->getPositionOfInteractionBlock(inter;
 
     // Get Y and Lambda for the current Interaction
-    y = inter->y(levelMin);
-    lambda = inter->lambda(levelMin);
+    y = inter->y(_indexSetLevel);
+    lambda = inter->lambda(_indexSetLevel);
     // Copy w/z values, starting from index pos into y/lambda.
     setBlock(*(_w.get()), y, y->size(), pos, 0);// Warning: yEquivalent is saved in y !!
     setBlock(*(_z.get()), lambda, lambda->size(), pos, 0);
@@ -369,13 +369,13 @@ void MLCP2::postCompute()
   //   pos = M->getPositionOfInteractionBlock(*itCurrent);
 
   //   // Get Y and Lambda for the current Interaction
-  //   y = (*itCurrent)->y(levelMin);
-  //   lambda = (*itCurrent)->lambda(levelMin);
+  //   y = (*itCurrent)->y(_indexSetLevel);
+  //   lambda = (*itCurrent)->lambda(_indexSetLevel);
   //   // Copy w/z values, starting from index pos into y/lambda.
   //   setBlock(*(_w.get()), y, y->size(), pos, 0);// Warning: yEquivalent is saved in y !!
   //   setBlock(*(_z.get()), lambda, lambda->size(), pos, 0);
   // }
-  SP::DynamicalSystemsSet allDS = simulation->model()->nonSmoothDynamicalSystem()->dynamicalSystems();
+  SP::DynamicalSystemsSet allDS = simulation->nonSmoothDynamicalSystem()->dynamicalSystems();
   for (DSIterator itDS = allDS->begin(); itDS != allDS->end(); ++itDS)
   {
     pos = M->getPositionOfDSBlock(*itDS);

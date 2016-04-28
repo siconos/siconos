@@ -108,8 +108,6 @@ int main(int argc, char* argv[])
     // -- (1) OneStepIntegrators --
     SP::MoreauJeanOSI OSI(new MoreauJeanOSI(theta));
 
-    // -- set the integrator for the ball --
-    bouncingBall->nonSmoothDynamicalSystem()->setOSI(ball, OSI);
 
     // -- (2) Time discretisation --
     SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
@@ -120,6 +118,7 @@ int main(int argc, char* argv[])
     // -- (4) Simulation setup with (1) (2) (3)
     SP::TimeStepping s(new TimeStepping(t, OSI, osnspb));
 
+ 
     // =========================== End of model definition ===========================
 
     // ================================= Computation =================================
@@ -127,7 +126,15 @@ int main(int argc, char* argv[])
     // --- Simulation initialization ---
 
     cout << "====> Initialisation ..." << endl;
-    bouncingBall->initialize(s);
+    bouncingBall->setSimulation(s);
+    //bouncingBall->nonSmoothDynamicalSystem()->topology()->setOSI(ball, OSI);
+    bouncingBall->initialize();
+
+    // -- set the integrator for the ball --
+
+
+    
+    
     int N = ceil((T - t0) / h); // Number of time steps
 
     // --- Get the values to be plotted ---

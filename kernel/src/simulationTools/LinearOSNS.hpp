@@ -270,7 +270,7 @@ public:
 
   /** post-treatment for LinearOSNS
    */
-  void postCompute() ;
+  virtual void postCompute();
 
   /** print the data to the screen
    */

@@ -26,23 +26,25 @@
 //#define DEBUG_WHERE_MESSAGES
 #include <debug.h>
 
-void MoreauJeanCombinedProjectionOSI::initialize()
+void MoreauJeanCombinedProjectionOSI::initialize(Model& m)
 {
 
-  MoreauJeanOSI::initialize();
-
-  ConstDSIterator itDS;
-  for (itDS = OSIDynamicalSystems->begin(); itDS != OSIDynamicalSystems->end(); ++itDS)
+  MoreauJeanOSI::initialize(m);
+  DynamicalSystemsGraph::VIterator dsi, dsend;
+  for (std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
   {
-    Type::Siconos dsType = Type::value(**itDS);
+    if (!checkOSI(dsi)) continue;
+    SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
+    Type::Siconos dsType = Type::value(*ds);
+
     if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
     {
-      SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (*itDS);
+      SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
       d->allocateWorkVector(DynamicalSystem::qtmp, d->getNdof());
     }
     else if (dsType == Type::NewtonEulerDS)
     {
-      SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS>(*itDS);
+      SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS>(ds);
       d->allocateWorkVector(DynamicalSystem::qtmp, d->q()->size());
     }
     else
@@ -59,7 +61,7 @@ void MoreauJeanCombinedProjectionOSI::initialize()
 bool MoreauJeanCombinedProjectionOSI::addInteractionInIndexSet(SP::Interaction inter, unsigned int i)
 {
   assert(i == 1 || i == 2);
-  //double h = simulationLink->timeStep();
+  //double h = _simulation->timeStep();
   if (i == 1) // index set for resolution at the velocity
   {
     double y = (inter->y(0))->getValue(0); // y(0) is the position

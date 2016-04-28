@@ -30,6 +30,59 @@
 #include <iostream>
 #include <cassert>
 
+/*****************************************************
+ * START visitor for nslaw
+*/
+#if 0
+struct AVI::_BoundsNSLEffect : public SiconosVisitor
+{
+
+  using SiconosVisitor::visit;
+
+  AVI* _parent;
+  SP::Interaction _inter;
+  unsigned int _pos;
+
+
+  _BoundsNSLEffect(AVI *p, SP::Interaction inter, unsigned int pos) :
+    _parent(p), _inter(inter), _pos(pos) {};
+
+  void visit(const NormalConeNSL& nslaw)
+  {
+    if (_pos > 0)
+    {
+      S
+    }
+    // take the 
+    SiconosVector& K = nslaw.K();
+    SimpleMatrix& H = nslaw.H();
+    _numerics_problem->size = nslaw.size();
+    _numerics_problem->d = NULL;
+    _numerics_problem->poly->id = SICONOS_SET_POLYHEDRON;
+    _numerics_problem->poly->size_ineq = K.size();
+    _numerics_problem->poly->size_eq = 0;
+    _numerics_problem->poly->H = H.getArray();
+    _numerics_problem->poly->K = K.getArray();
+    _numerics_problem->poly->Heq = NULL;
+    _numerics_problem->poly->Keq = NULL;
+  }
+
+  void visit(const RelayNSL& nslaw)
+  {
+    Siconos
+
+  }
+
+  void visit(const ComplementarityConditionNSL& nslaw)
+  {
+  }
+
+};
+#endif
+/*****************************************************
+ * END visitor for nslaw
+*/
+
 AVI::AVI(int numericsSolverId): LinearOSNS(numericsSolverId)
 {
   _numerics_problem.reset(new AffineVariationalInequalities);

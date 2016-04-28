@@ -53,8 +53,8 @@ using namespace RELATION;
 void TimeSteppingD1Minus::initOSNS()
 {
   // initialize OSNS for InteractionsGraph from Topology
-  assert(model()->nonSmoothDynamicalSystem()->topology()->isUpToDate());
-  SP::Topology topo =  model()->nonSmoothDynamicalSystem()->topology();
+  assert(_nsds->topology()->isUpToDate());
+  SP::Topology topo =  _nsds->topology();
 
   // there is at least one OSNP
   if (!_allNSProblems->empty())
@@ -68,7 +68,7 @@ void TimeSteppingD1Minus::initOSNS()
 
     // update output
     for (unsigned int level = _levelMinForOutput; level < _levelMaxForOutput; level++)
-      updateOutput(level);
+      _nsds->updateOutput(nextTime(),level);
   }
 }
 
@@ -87,11 +87,10 @@ void TimeSteppingD1Minus::updateIndexSet(unsigned int i)
   // To update IndexSet i: add or remove Interactions from
   // this set, depending on y values.
 
-  assert(!_model.expired());
-  assert(model()->nonSmoothDynamicalSystem());
-  assert(model()->nonSmoothDynamicalSystem()->topology());
+  assert(_nsds);
+  assert(_nsds->topology());
 
-  SP::Topology topo = model()->nonSmoothDynamicalSystem()->topology();
+  SP::Topology topo = _nsds->topology();
 
   assert(i < topo->indexSetsSize() &&
          "TimeSteppingD1Minus::updateIndexSet(i), indexSets[i] does not exist.");
@@ -165,7 +164,7 @@ void TimeSteppingD1Minus::update(unsigned int levelInput)
 {
   // compute input (lambda -> r)
   if (!_allNSProblems->empty())
-    updateInput(levelInput);
+    _nsds->updateInput(nextTime(),levelInput);
 
   // compute state for each dynamical system
   for (OSIIterator itOSI = _allOSI->begin(); itOSI != _allOSI->end(); ++itOSI)
@@ -175,7 +174,7 @@ void TimeSteppingD1Minus::update(unsigned int levelInput)
   if (!_allNSProblems->empty())
   {
     for (unsigned int level = _levelMinForOutput; level < _levelMaxForOutput; level++)
-      updateOutput(level);
+      _nsds->updateOutput(nextTime(),level);
   }
 }
 
@@ -206,7 +205,7 @@ void TimeSteppingD1Minus::advanceToEvent()
   // * indexset (I_{k+1}^+)
 
   // Initialize lambdas of all interactions.
-  SP::InteractionsGraph indexSet0 = model()->nonSmoothDynamicalSystem()->
+  SP::InteractionsGraph indexSet0 = _nsds->
                                     topology()->indexSet(0);
   InteractionsGraph::VIterator ui, uiend, vnext;
   std11::tie(ui, uiend) = indexSet0->vertices();
@@ -238,10 +237,10 @@ void TimeSteppingD1Minus::advanceToEvent()
   // this should be done in updateIndexSet(i) for all integrators only
   // if a graph has changed
   //updateIndexSet(1);
-  //model()->nonSmoothDynamicalSystem()->topology()->indexSet(1)->update_vertices_indices();
-  //model()->nonSmoothDynamicalSystem()->topology()->indexSet(1)->update_edges_indices();
+  //_nsds->topology()->indexSet(1)->update_vertices_indices();
+  //_nsds->topology()->indexSet(1)->update_edges_indices();
 
-  //if(model()->nonSmoothDynamicalSystem()->topology()->hasChanged())
+  //if(_nsds->topology()->hasChanged())
   //{
   //  for(OSNSIterator itOsns = _allNSProblems->begin(); itOsns != _allNSProblems->end(); ++itOsns)
   //  {
@@ -253,7 +252,7 @@ void TimeSteppingD1Minus::advanceToEvent()
     computeOneStepNSProblem(SICONOS_OSNSP_TS_VELOCITY);
 
   DEBUG_EXPR(
-    if (model()->nonSmoothDynamicalSystem()->topology()->indexSet(1)->size() >0)
+    if (_nsds->topology()->indexSet(1)->size() >0)
       (*_allNSProblems)[SICONOS_OSNSP_TS_VELOCITY]->display();
     );
 
@@ -270,8 +269,8 @@ void TimeSteppingD1Minus::advanceToEvent()
 // {
 //   //  assert(level>=0);
 
-//   double time = model()->currentTime();
-//   SP::Topology topology = model()->nonSmoothDynamicalSystem()->topology();
+//   double time = nextTime();
+//   SP::Topology topology = _nsds->topology();
 //   InteractionsIterator it;
 
 //   // // set dynamical systems non-smooth part to zero.

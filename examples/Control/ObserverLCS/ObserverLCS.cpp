@@ -119,7 +119,7 @@ int main(int argc, char* argv[])
     ObserverLCS->nonSmoothDynamicalSystem()->insertDynamicalSystem(observer);
     ObserverLCS->nonSmoothDynamicalSystem()->link(myProcessInteraction, process);
     ObserverLCS->nonSmoothDynamicalSystem()->link(myObserverInteraction, observer);
-    
+
     // ------------------
     // --- Simulation ---
     // ------------------
@@ -130,9 +130,7 @@ int main(int argc, char* argv[])
     // -- OneStepIntegrators --
     double theta = 0.5;
     SP::EulerMoreauOSI myIntegrator(new EulerMoreauOSI(theta));
-    myIntegrator->insertDynamicalSystem(observer);
-    myIntegrator->insertDynamicalSystem(process);
-    
+
     s->insertIntegrator(myIntegrator);
 
     // -- OneStepNsProblem --

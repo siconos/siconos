@@ -1,6 +1,6 @@
 .. _related_projects::
 
-Related projects and Platforms
+Related Projects and Platforms
 ==============================
 
 Control Engineering Softwares
@@ -12,13 +12,12 @@ containing mechanical, electrical, electronic, hydraulic, thermal, control, elec
 The free Modelica language, free Modelica libraries and Modelica simulation tools are available, ready-to-use and have been utilized in demanding industrial
 applications, including hardware-in-the-loop simulations. The development and promotion of Modelica is organized by the non-profit Modelica Association.
 `More, see overview article ... <http://www.modelica.org/documents/ModelicaOverview14.pdf>`_.
-* `Orocos, <http://www.orocos.org>`_ which >is a European project, started on September 1<sup>st</sup>, 2001. he project aims at producing an open source software framework, by providing a functional basis for general robots control.
-  
-* `Motion Strategy Library <http://msl.cs.uiuc.edu/msl/index.html>`_ : "allows easy development and testing of motion planning algorithms
-for a wide variety of applications."
 
-* `NICONET <http://www.win.tue.nl/niconet/>`_ is a European thematic network project with
-the aim of formalising and extending current collaboration with respect to robust numerical software for control systems analysis and synthesis.
+* `Orocos, <http://www.orocos.org>`_ , a European project, started in 2001. It aims at producing an open source software framework, by providing a functional basis for general robots control.
+
+* `Motion Strategy Library <http://msl.cs.uiuc.edu/msl/index.html>`_ : "allows easy development and testing of motion planning algorithms for a wide variety of applications."
+
+* `NICONET <http://www.win.tue.nl/niconet/>`_ is a European thematic network project with the aim of formalising and extending current collaboration with respect to robust numerical software for control systems analysis and synthesis.
 
 Engineering Mechanics Softwares
 -------------------------------
@@ -32,14 +31,14 @@ Multibody systems
 
 Structures and Finite element applications
 """"""""""""""""""""""""""""""""""""""""""
-* `LMGC90 <https://git-xen.lmgc.univ-montp2.fr/lmgc90/lmgc90_user/wikis/home>`_ a free and open source software dedicated to multi-physics simulation of discrete material and structures
+* `LMGC90 <https://git-xen.lmgc.univ-montp2.fr/lmgc90/lmgc90_user/wikis/home>`_ a free and open source software dedicated to multi-physics simulation of discrete material and structures. Siconos/numerics can be used as a solver for those problems.
 * `IFER <http://www.engr.usask.ca/%7Emacphed/finite/fe_resources/fe_resources.html>`_ - Internet Finite Element Resources
 * `OpenFem <http://www.openfem.net>`_ is an open-source software freely distributed under the terms of the `GNU Lesser Public License <http://www.fsf.org/copyleft/lesser.html>`_ (LGPL). It is also a registered trademark of `INRIA <http://www.inria.fr>`_ and `SDTools <http://www.sdtools.com>`_.
 * `FreeFem++ <http://www.freefem.org/ff++/index.htm>`_, which is an implementation of a language dedicated to the finite element method. It enables you to solve Partial Differential Equations (PDE) easily.
 * `GETFEM++ <http://www.gmm.insa-tlse.fr/getfem/>`_
 * `Zebulon <http://www.nwnumerics.com>`_ is an advanced object oriented FEA program with many non-linear solution capabilities. The program is designed to be flexible for the user and provide solution options not found in other codes. We are aggressively developing cutting edge methods and multi-physics applications. The program is designed to be both easy to learn, and powerful to use.
 
-* `OOfelie <http://venus.arcride.edu.ar/oofelie.html>`_ Object Oriented Finite Elements Led by Interactive Execution. This project is the result of a collaboration between the Computational Mechanics Group of INTEC and the Laboratoire de Techniques Aeronautiques et Spatiales, University of Liege, Belgium. The objective of this work is to define the architecture of a new finite element program using the C++ programming language. The program is built around an interpreter, which allows the user to define interactively either data as well as algorithms. The program may thus be very easily configured to new computational strategies. See also the non offical site http://garfield.ltas.ulg.ac.be/oo_meta/fr_oometa.htm.
+* `OOfelie <http://venus.arcride.edu.ar/oofelie.html>`_ Object Oriented Finite Elements Led by Interactive Execution. This project is the result of a collaboration between the Computational Mechanics Group of INTEC and the Laboratoire de Techniques Aéronautiques et Spatiales, University of Liege, Belgium. The objective of this work is to define the architecture of a new finite element program using the C++ programming language. The program is built around an interpreter, which allows the user to define interactively either data as well as algorithms. The program may thus be very easily configured to new computational strategies. See also `the non official site <http://garfield.ltas.ulg.ac.be/oo_meta/fr_oometa.htm>`_.
 
 Hybrid Systems
 """"""""""""""
@@ -94,8 +93,7 @@ Scientific Computing in C++
 Scientific Computing in Python
 ------------------------------
 
-* `SciPy <http://www.scipy.org>`_ an open source library of scientific tools for Python. SciPy supplements the Numeric module, gathering a variety of high level science and engineering modules together as a single package. Within SciPy are modules for graphics and plotting, optimization, integration, special functions, signal and image processing, genetic algorithms, ODE solvers, and others. There is also an experimental "compiler" that takes a Numeric array expression in Python and compiles it to C++ code
-on the fly.
+* `SciPy <http://www.scipy.org>`_ an open source library of scientific tools for Python. SciPy supplements the Numeric module, gathering a variety of high level science and engineering modules together as a single package. Within SciPy are modules for graphics and plotting, optimization, integration, special functions, signal and image processing, genetic algorithms, ODE solvers, and others. There is also an experimental "compiler" that takes a Numeric array expression in Python and compiles it to C++ code on the fly.
 
 * `Swig: Simplified Wrapper and Interface Generator <http://www.swig.org/>`_, a software development tool that connects programs written in C and C++ with a variety of high-level programming languages. *...*
   
@@ -106,7 +104,7 @@ on the fly.
 Specific Developments for Non Smooth Systems
 --------------------------------------------
 
-None of the links of this page correponds to a member of the project.
+None of the links of this page corresponds to a member of the project.
 
 General theory for non smooth systems
 """""""""""""""""""""""""""""""""""""
@@ -124,10 +122,10 @@ Optimization & Mathematical programming
 """""""""""""""""""""""""""""""""""""""
 
 * `Steve Wright <http://www.cs.wisc.edu/%7Eswright/>`_
-* `NEOS Server for Optimization <http://www-neos.mcs.anl.gov/>`_ - The NEOS Server solvers represent the state-of-the-art in optimization software.
+* `NEOS Server for Optimization <http://www.neos-server.org>`_ - The NEOS Server solvers represent the state-of-the-art in optimization software.
 * `Optimization Software <http://www-fp.mcs.anl.gov/otc/Guide/softwareGuide/>`_: linear and nonlinear programming.
-* `AMPL Modeling Language for Mathematical Programming <http://www.ampl.com/>`_, modeling language and system for 
-formulating, solving and analyzing large-scale optimization (mathematical programming) problems.
+* `AMPL Modeling Language for Mathematical Programming <http://www.ampl.com/>`_, modeling language and system for formulating, solving and analyzing large-scale optimization (mathematical programming) problems.
+* `GAMS Modeling Language for Mathematical Programming <http://www.gams.com/>`_, modeling language and system for formulating, solving and analyzing large-scale optimization (mathematical programming) problems. Siconos can call GAMS to solve an optimization problem.
 
 Numerical time integration
 """"""""""""""""""""""""""

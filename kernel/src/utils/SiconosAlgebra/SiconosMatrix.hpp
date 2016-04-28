@@ -454,6 +454,19 @@ public:
   */
   friend bool isComparableTo(const SiconosMatrix& m1, const SiconosMatrix& m2);
 
+  /** return the number of non-zero in the matrix
+   * \param tol the tolerance to consider a number zero (not used if the matrix is sparse)
+   * \return the number of non-zeros
+   */
+  virtual size_t nnz(double tol = 1e-14);
+
+  /** return the number of non-zero in the matrix
+   * \param csm the compressed column sparse matrix
+   * \param tol the tolerance to consider a number zero (not used if the matrix is sparse)
+   * \return the number of non-zeros
+   */
+  bool fillCSC(CSparseMatrix* csc, size_t row_off, size_t col_off, double tol = 1e-14);
+
   /** Visitors hook
    */
   VIRTUAL_ACCEPT_VISITORS(SiconosMatrix);

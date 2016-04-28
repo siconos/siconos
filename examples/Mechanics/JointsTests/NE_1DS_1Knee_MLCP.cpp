@@ -127,7 +127,7 @@ int main(int argc, char* argv[])
     SP::SiconosVector v10(new SiconosVector(nDim));
     SP::SimpleMatrix I1(new SimpleMatrix(3, 3));
     v10->zero();
-    (*v10)(0)=1000;
+    (*v10)(0)=100;
     I1->eye();
     I1->setValue(0, 0, 0.1);
     I1->setValue(0, 1, 0.1);
@@ -186,7 +186,6 @@ int main(int argc, char* argv[])
 
     // -- (1) OneStepIntegrators --
     SP::MoreauJeanOSI OSI1(new MoreauJeanOSI(theta));
-    OSI1->insertDynamicalSystem(beam1);
 
     // -- (2) Time discretisation --
     SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
@@ -276,6 +275,8 @@ int main(int argc, char* argv[])
       fprintf(pFile, "\n");
       // s->nextStep();
       s->processEvents();
+      // std::cout <<"s->getNewtonNbIterations  for step k " << k<< "  = " << s->getNewtonNbIterations() <<std::endl;
+      // std::cout <<"s->getNewtonCumulativeNbIterations  for step k " << k<< "  = " << s->getNewtonCumulativeNbIterations() <<std::endl;
       ++show_progress;
     }
     fprintf(pFile, "};");
@@ -287,15 +288,16 @@ int main(int argc, char* argv[])
     ioMatrix::write("NE_1DS_1Knee_MLCP.dat", "ascii", dataPlot, "noDim");
     ioMatrix::write("NE_1DS_1Knee_MLCP_beam1.dat", "ascii", beam1Plot, "noDim");
 
-    // SimpleMatrix dataPlotRef(dataPlot);
-    // dataPlotRef.zero();
-    // ioMatrix::read("NE_1DS_1Knee_1Prism_MLCP.ref", "ascii", dataPlotRef);
-    // if ((dataPlot - dataPlotRef).normInf() > 1e-7)
-    // {
-    //   (dataPlot - dataPlotRef).display();
-    //   std::cout << "Warning. The results is rather different from the reference file." << std::endl;
-    //   return 1;
-    // }
+    SimpleMatrix dataPlotRef(dataPlot);
+    dataPlotRef.zero();
+    ioMatrix::read("NE_1DS_1Knee_MLCP.ref", "ascii", dataPlotRef);
+    std::cout << "Error w.r.t. reference file : " << (dataPlot - dataPlotRef).normInf() << std::endl;
+    if ((dataPlot - dataPlotRef).normInf() > 1e-7)
+    {
+      (dataPlot - dataPlotRef).display();
+      std::cout << "Warning. The results is rather different from the reference file." << std::endl;
+      return 1;
+    }
 
     fclose(pFile);
   }

@@ -116,7 +116,8 @@
 ** TODO MechanicalDS, MechanicalR ?
 ** TODO Rename qDot in velocity see with OB.
 ** TODO Other rotations implementations for Direct implementation (O. Bruls algorithms)
-** TODO Add an empty ComputeFreeOutput in Moreau2 to simplify computeqBlock in LinearOSNS
+** CANCELLED Add an empty ComputeFreeOutput in Moreau2 to simplify computeqBlock in LinearOSNS
+   CLOSED: [2016-04-19 Tue 12:56]
 ** TODO Detail computation of residual terms $\mathcal R_y, R_\lambda, R_q$ in DevNotes
 ** DONE Check why Simulation doesn't work with mutilple interaction and one relation (ColumnOfBeads)
    CLOSED: [2012-10-15 Mon 11:24]
@@ -132,10 +133,12 @@
 ** DONE Remove UnitaryRelation
    CLOSED: [2012-05-03 Thu 16:01]
 
-** TODO [50%] Insert the MBTB of Saladyn in Siconos (siconos GPL Licence)
+** DONE [100%] Insert the MBTB of Saladyn in Siconos (siconos GPL Licence)
+   CLOSED: [2016-04-19 Tue 12:57]
 *** DONE first import.
     CLOSED: [2013-03-03 Dim 09:36]
-*** TODO check header licence and so on
+*** DONE check header licence and so on
+    CLOSED: [2016-04-19 Tue 12:57]
 
 ** DONE ProjectOnConstraints Schemes					 :VA:
    DEADLINE: <2012-02-18 Sam> CLOSED: [2012-02-29 Mer 09:15]
@@ -177,6 +180,12 @@
 *** TODO add computation of lambda in SOLOUT and write a root-finding for SOLOUT
 
 ** TODO remove ds.number() and use dsg0->index(descriptor)
+** TODO Review calls to compute/update Jacobians for NewtonEulerR <2016-04-19 Tue>
+   + difference between Lagrangian NewtonEuler mainly due to 
+   the fact the computation for the normals can not be updated. This is not the same for the Hinge.
+   + How to differentiate it
+** TODO Implement a purely explicit scheme for NewtonEulerDS and NewtonEulerR <2016-04-19 Tue>   
+** TODO Continue to update signature for secondorder terms in NewtonEulerR*
 
 * Development list for Mechanics
 ** how to use plantuml with org

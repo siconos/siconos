@@ -27,7 +27,10 @@
 //#define NERI_DEBUG
 
 
+
+
 //#define NEFC3D_DEBUG
+// #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
 #include "debug.h"
@@ -169,6 +172,10 @@ void NewtonEulerFrom1DLocalFrameR::initComponents(Interaction& inter, VectorOfBl
   //proj_with_q  _jachqProj.reset(new SimpleMatrix(_jachq->size(0),_jachq->size(1)));
   unsigned int qSize = 7 * (inter.getSizeOfDS() / 6);
   _jachq.reset(new SimpleMatrix(1, qSize));
+
+
+
+  /* VA 12/04/2016 All of what follows should be put in WorkM*/
   _Mabs_C.reset(new SimpleMatrix(1, 3));
   _MObjToAbs.reset(new SimpleMatrix(3, 3));
   _AUX1.reset(new SimpleMatrix(3, 3));
@@ -178,10 +185,10 @@ void NewtonEulerFrom1DLocalFrameR::initComponents(Interaction& inter, VectorOfBl
   //  _isContact=1;
 }
 
-void NewtonEulerFrom1DLocalFrameR::computeJachq(double time, Interaction& inter, VectorOfBlockVectors& DSlink)
+void NewtonEulerFrom1DLocalFrameR::computeJachq(double time, Interaction& inter, SP::BlockVector q0)
 {
 
-  DEBUG_BEGIN("NewtonEulerFrom1DLocalFrameR::computeJachq(double time, Interaction& inter, ...) \n");
+  DEBUG_BEGIN("NewtonEulerFrom1DLocalFrameR::computeJachq(double time, Interaction& inter, SP::BlockVector q0 ) \n");
   DEBUG_PRINTF("with time =  %f\n",time);
   DEBUG_PRINTF("with inter =  %p\n",&inter);
 
@@ -196,16 +203,12 @@ void NewtonEulerFrom1DLocalFrameR::computeJachq(double time, Interaction& inter,
     _jachq->setValue(0, 9, -_Nc->getValue(2));
   }
 
-  SP::BlockVector BlockX = DSlink[NewtonEulerR::q0];
-  for (int iDS = 0; iDS < 2; iDS++)
+  for (unsigned int iDS =0 ; iDS < q0->getNumberOfBlocks()  ; iDS++)
   {
-    if (!inter.has2Bodies() && iDS == 1)
-      continue;
+    SP::SiconosVector q = (q0->getAllVect())[iDS];
     double sign = 1.0;
-    SP::SiconosVector q = (BlockX->getAllVect())[iDS];
     DEBUG_PRINTF("NewtonEulerFrom1DLocalFrameR::computeJachq : ds%d->q :", iDS);
     DEBUG_EXPR_WE(q->display(););
-
 
     ::boost::math::quaternion<double>    quatGP;
     if (iDS == 0)
@@ -251,37 +254,23 @@ void NewtonEulerFrom1DLocalFrameR::computeJachq(double time, Interaction& inter,
   }
 
   DEBUG_EXPR(_jachq->display(););
-
-  DEBUG_END("NewtonEulerFrom1DLocalFrameR::computeJachq(double time, Interaction& inter, ...) \n");
+  DEBUG_END("NewtonEulerFrom1DLocalFrameR::computeJachq(double time, Interaction& inter, SP::BlockVector q0 \n");
 
 }
-void NewtonEulerFrom1DLocalFrameR::computeJachqT(Interaction& inter, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2)
+
+void NewtonEulerFrom1DLocalFrameR::computeJachqT(Interaction& inter, SP::BlockVector q0 )
 {
-  SP::NewtonEulerDS d1 =  std11::static_pointer_cast<NewtonEulerDS> (ds1);
-  SP::NewtonEulerDS d2 =  std11::static_pointer_cast<NewtonEulerDS> (ds2);
-  if(d1 != d2)
+  DEBUG_BEGIN("NewtonEulerFrom1DLocalFrameR::computeJachqT(Interaction& inter, SP::BlockVector q0 \n")
+    
+  if (q0->getNumberOfBlocks()>1)
   {
-    NIcomputeJachqTFromContacts(d1->q(), d2->q());
+    NIcomputeJachqTFromContacts((q0->getAllVect())[0], (q0->getAllVect())[1]);
   }
   else
   {
-    NIcomputeJachqTFromContacts(d1->q());
-  }
-}
-
-void NewtonEulerFrom1DLocalFrameR::computeJachqT(Interaction& inter, VectorOfBlockVectors& DSlink)
-{
-  DEBUG_BEGIN("NewtonEulerFrom1DLocalFrameR::computeJachqT(Interaction& inter, VectorOfBlockVectors& DSlink) \n")
-  SP::BlockVector BlockX = DSlink[NewtonEulerR::q0];
-  if (inter.has2Bodies())
-  {
-    NIcomputeJachqTFromContacts((BlockX->getAllVect())[0], (BlockX->getAllVect())[1]);
-  }
-  else
-  {
-    NIcomputeJachqTFromContacts((BlockX->getAllVect())[0]);
+    NIcomputeJachqTFromContacts((q0->getAllVect())[0]);
   }
 
-  DEBUG_END("NewtonEulerFrom1DLocalFrameR::computeJachqT(Interaction& inter, VectorOfBlockVectors& DSlink) \n");
+  DEBUG_END("NewtonEulerFrom1DLocalFrameR::computeJachqT(Interaction& inter, SP::BlockVector q0) \n");
 
 }

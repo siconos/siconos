@@ -131,7 +131,6 @@ int main(int argc, char* argv[])
     // --- Simulation ---
     // ----------------
     SP::D1MinusLinearOSI OSI(new D1MinusLinearOSI());
-    OSI->insertDynamicalSystem(slider);
     SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
     SP::OneStepNSProblem impact(new LCP());
     SP::OneStepNSProblem force(new LCP());
@@ -236,7 +235,7 @@ int main(int argc, char* argv[])
       // std::cout <<"s->nextTime() = " <<s->nextTime()  <<std::endl;
       // std::cout <<"=====================================================" <<std::endl;
 
- std::cout << k << std::endl;
+      //std::cout << k << std::endl;
       s->advanceToEvent();
 
       // --- Get values to be plotted ---

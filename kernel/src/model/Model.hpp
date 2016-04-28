@@ -32,6 +32,22 @@
 
 #include <string>
 
+
+#ifndef __GCCXML__
+
+#ifdef __GNUC__
+#define DEPRECATED_MODEL_API(func) func __attribute__ ((deprecated ("This constructor of function is deprecrated and will be removed in the next major Siconos release! Use initialize() and setSimulation() !")))
+#elif defined(_MSC_VER)
+#define DEPRECATED_MODEL_API(func) __declspec(deprecated("This constructor will be removed in the next major Siconos release and does not work with MSVC 2013 !  Use initialize() and setSimulation() !")) func
+#else
+#define DEPRECATED_MODEL_API(func) func
+#endif
+
+#else
+#define DEPRECATED_MODEL_API(func) func
+#endif
+
+
 /** \class Model
  * \brief  Model: object that links the NonSmoothDynamicalSystem with a
  * Simulation.
@@ -60,9 +76,9 @@ private:
   double _T;
 
   /** The simulation to solve the NonSmoothDynamicalSystem */
-  SP::Simulation _strat;
+  SP::Simulation _simulation;
 
-  /** The NonSmoothDynamicalSystem of the simulation */
+  /** The NonSmoothDynamicalSystem of the model */
   SP::NonSmoothDynamicalSystem _nsds;
 
   /** information concerning the Model */
@@ -153,13 +169,13 @@ public:
    */
   inline SP::Simulation simulation() const
   {
-    return _strat;
+    return _simulation;
   }
 
   /** set the Simulation of the Model
    *  \return a pointer on Simulation
    */
-  void setSimulationPtr(SP::Simulation);
+  void setSimulation(SP::Simulation);
 
   /** get the NonSmoothDynamicalSystem of the Model
    *  \return a pointer on NonSmoothDynamicalSystem
@@ -240,10 +256,11 @@ public:
 
   /** Complete initialization of the model (NonSmoothDynamicalSystem,
       Simulation)
-      \param sim Simulation for this Model
    */
-  void initialize(SP::Simulation sim);
+  void initialize();
 
+  DEPRECATED_MODEL_API(void initialize(SP::Simulation sim);)
+  
    /** display the data of the Model
       \return void
    */

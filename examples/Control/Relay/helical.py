@@ -67,7 +67,6 @@ simu = sk.TimeStepping(td)
 # osi
 theta = 0.5
 myIntegrator = sk.EulerMoreauOSI(theta)
-myIntegrator.insertDynamicalSystem(particle)
 simu.insertIntegrator(myIntegrator)
 
 # osns

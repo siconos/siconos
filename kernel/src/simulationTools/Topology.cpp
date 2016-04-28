@@ -227,13 +227,9 @@ void Topology::setName(SP::Interaction inter, const std::string& name)
   _IG[0]->name.insert(igv, name);
 }
 
-// In those two functions, we should store in the graph the information
-// that the ds is integrated by the OSI, instead of storing this info
-// in the OSI -- xhub
 void Topology::setOSI(SP::DynamicalSystem ds, SP::OneStepIntegrator OSI)
 {
-  // to be move on the graph
-  OSI->insertDynamicalSystem(ds);
+  _DSG[0]->properties(_DSG[0]->descriptor(ds)).osi = OSI;
 }
 
 void Topology::setControlProperty(SP::Interaction inter,
@@ -374,9 +370,9 @@ SP::DynamicalSystem Topology::getDynamicalSystem(std::string name)
 
 unsigned int Topology::numberOfInvolvedDS(unsigned int inumber)
 {
-   if (inumber >= _IG.size())
+  if (inumber >= _IG.size())
   {
-    RuntimeException::selfThrow("index number must be inferior to the number of indexSets");
+    RuntimeException::selfThrow("Topology::numberOfInvolvedDS :: index number must be smaller than the number of indexSets");
   }
 
   /* on an adjoint graph a dynamical system may be on several edges */

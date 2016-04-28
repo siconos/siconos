@@ -84,7 +84,7 @@ void TimeSteppingCombinedProjection::computeLevelsForInputAndOutput(SP::Interact
   // Add the  specific indexSets
   if (!init) // We are not computing the levels at the initialization
   {
-    SP::Topology topo = model()->nonSmoothDynamicalSystem()->topology();
+    SP::Topology topo = _nsds->topology();
     unsigned int indxSize = topo->indexSetsSize();
     if (indxSize == _indexSetLevelForProjection)
     {
@@ -98,7 +98,7 @@ void TimeSteppingCombinedProjection::computeLevelsForInputAndOutput()
 {
   Simulation::computeLevelsForInputAndOutput();
   // Add the  specific indexSets
-  SP::Topology topo = model()->nonSmoothDynamicalSystem()->topology();
+  SP::Topology topo = _nsds->topology();
   unsigned int indxSize = topo->indexSetsSize();
   if (indxSize == _indexSetLevelForProjection)
   {
@@ -189,7 +189,7 @@ void TimeSteppingCombinedProjection::advanceToEvent()
   _maxViolationUnilateral = 0.0;
   _maxViolationEquality = 0.0;
 
-  SP::Topology topo = model()->nonSmoothDynamicalSystem()->topology();
+  SP::Topology topo = _nsds->topology();
   if (topo->numberOfIndexSet() > _indexSetLevelForProjection)
   {
     SP::InteractionsGraph indexSet1 = topo->indexSet(1);
@@ -366,13 +366,13 @@ void TimeSteppingCombinedProjection::advanceToEvent()
 
     // Zeroing Lambda Muliplier of indexSet()
 
-    SP::InteractionsGraph indexSet = model()->nonSmoothDynamicalSystem()->topology()->indexSet(0);
+    SP::InteractionsGraph indexSet = _nsds->topology()->indexSet(0);
     for (std11::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
     {
       SP::Interaction inter = indexSet->bundle(*ui);
       inter->lambda(0)->zero();
     }
-    updateInput(0);
+    _nsds->updateInput(nextTime(),0);
 
 #ifdef TSPROJ_WITHOUT_PROJECTION
 
@@ -380,13 +380,13 @@ void TimeSteppingCombinedProjection::advanceToEvent()
     /** Second step, Perform the projection on constraints.*/
     DEBUG_PRINT( "TimeSteppingCombinedProjection::newtonSolve begin projection:\n");
 
-    SP::DynamicalSystemsGraph dsGraph = model()->nonSmoothDynamicalSystem()->dynamicalSystems();
+    SP::DynamicalSystemsGraph dsGraph = _nsds->dynamicalSystems();
 
 
     bool runningProjection = false;
     _nbProjectionIteration = 0;
 
-    if (model()->nonSmoothDynamicalSystem()->topology()->numberOfIndexSet() > _indexSetLevelForProjection)
+    if (_nsds->topology()->numberOfIndexSet() > _indexSetLevelForProjection)
     {
       updateIndexSet(2);
       computeCriteria(&runningProjection);
@@ -414,14 +414,14 @@ void TimeSteppingCombinedProjection::advanceToEvent()
     {
       // Zeroing Lambda Muliplier of indexSet()
 
-      SP::InteractionsGraph indexSet = model()->nonSmoothDynamicalSystem()->topology()->indexSet(0);
+      SP::InteractionsGraph indexSet = _nsds->topology()->indexSet(0);
       InteractionsGraph::VIterator ui, uiend;
       for (std11::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
       {
         SP::Interaction inter = indexSet->bundle(*ui);
         inter->lambda(0)->zero();
       }
-      updateInput(0);
+      _nsds->updateInput(nextTime(),0);
     }
 
     //Store the q vector of each DS.
@@ -458,7 +458,7 @@ void TimeSteppingCombinedProjection::advanceToEvent()
 
       // Zeroing Lambda Muliplier of indexSet()
 
-      SP::InteractionsGraph indexSet = model()->nonSmoothDynamicalSystem()->topology()->indexSet(0);
+      SP::InteractionsGraph indexSet = _nsds->topology()->indexSet(0);
       InteractionsGraph::VIterator ui, uiend;
       for (std11::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
       {
@@ -484,7 +484,7 @@ void TimeSteppingCombinedProjection::advanceToEvent()
 
 
 
-      updateInput(0);
+      _nsds->updateInput(nextTime(),0);
 
 
 
@@ -546,14 +546,14 @@ void TimeSteppingCombinedProjection::advanceToEvent()
 
 #ifdef TSPROJ_DEBUG_LEVEL1
 
-      // SP::InteractionsGraph indexSet1 = model()->nonSmoothDynamicalSystem()->topology()->indexSet(1);
+      // SP::InteractionsGraph indexSet1 = _nsds->topology()->indexSet(1);
       // std ::cout << "lambda(1) in IndexSet1" << std::endl;
       // for (std11::tie(ui, uiend) = indexSet1->vertices(); ui != uiend; ++ui)
       // {
       //   SP::Interaction inter = indexSet1->bundle(*ui);
       //   inter->lambda(1)->display();
       // }
-      SP::InteractionsGraph indexSet2 = model()->nonSmoothDynamicalSystem()->topology()->indexSet(2);
+      SP::InteractionsGraph indexSet2 = _nsds->topology()->indexSet(2);
       std ::cout << "lambda(0) in indexSet2" << std::endl;
       for (std11::tie(ui, uiend) = indexSet2->vertices(); ui != uiend; ++ui)
       {
@@ -612,7 +612,7 @@ void TimeSteppingCombinedProjection::advanceToEvent()
       }
 
 
-    if (model()->nonSmoothDynamicalSystem()->topology()->numberOfIndexSet() > _indexSetLevelForProjection)
+    if (_nsds->topology()->numberOfIndexSet() > _indexSetLevelForProjection)
     {
       updateIndexSet(1);
     }
@@ -671,8 +671,8 @@ void TimeSteppingCombinedProjection::advanceToEvent()
 void TimeSteppingCombinedProjection::computeCriteria(bool * runningProjection)
 {
   DEBUG_PRINT("TimeSteppingCombinedProjection::computeCriteria(bool * runningProjection)\n");
-  // SP::InteractionsGraph indexSet = model()->nonSmoothDynamicalSystem()->topology()->indexSet(_indexSetLevelForProjection);
-  SP::InteractionsGraph indexSet = model()->nonSmoothDynamicalSystem()->topology()->indexSet(_indexSetLevelForProjection);
+  // SP::InteractionsGraph indexSet = _nsds->topology()->indexSet(_indexSetLevelForProjection);
+  SP::InteractionsGraph indexSet = _nsds->topology()->indexSet(_indexSetLevelForProjection);
 
   InteractionsGraph::VIterator aVi, viend;
 
@@ -688,13 +688,6 @@ void TimeSteppingCombinedProjection::computeCriteria(bool * runningProjection)
 
     interac->computeOutput(getTkp1(), indexSet->properties(*aVi), 0);
     interac->relation()->computeJach(getTkp1(), *interac, indexSet->properties(*aVi));
-    if (interac->relation()->getType() == RELATION::NewtonEuler)
-    {
-      SP::DynamicalSystem ds1 = indexSet->properties(*aVi).source;
-      SP::DynamicalSystem ds2 = indexSet->properties(*aVi).target;
-      SP::NewtonEulerR ner = (std11::static_pointer_cast<NewtonEulerR>(interac->relation()));
-      ner->computeJachqT(*interac, ds1, ds2);
-    }
 
     if (Type::value(*(interac->nonSmoothLaw())) ==  Type::NewtonImpactFrictionNSL ||
         Type::value(*(interac->nonSmoothLaw())) == Type::NewtonImpactNSL)
@@ -780,11 +773,10 @@ void TimeSteppingCombinedProjection::updateIndexSet(unsigned int i)
   // - gray_color : discovered vertex (Interactions) but searching descendants
   // - black_color : discovered vertex (Interaction) together with the descendants
 
-  assert(!_model.expired());
-  assert(model()->nonSmoothDynamicalSystem());
-  assert(model()->nonSmoothDynamicalSystem()->topology());
+  assert(_nsds);
+  assert(_nsds->topology());
 
-  SP::Topology topo = model()->nonSmoothDynamicalSystem()->topology();
+  SP::Topology topo = _nsds->topology();
 
   assert(i < topo->indexSetsSize() &&
          "TimeStepping::updateIndexSet(i), indexSets[i] does not exist.");

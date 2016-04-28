@@ -716,7 +716,12 @@ public:
     return _yForNSsolver;
   }
 
-  /** gets the matrix used in interactionBlock computation, (left * W * rigth), depends on the relation type (ex, LinearTIR, left = C, right = B).
+  /** gets the matrix used in interactionBlock computation, (left * W * right), depends on the relation type (ex, LinearTIR, left = C, right = B).
+   *  \param workM
+   */
+  SiconosMatrix& getLeftInteractionBlock(VectorOfSMatrices& workM) const;
+
+  /** gets the matrix used in interactionBlock computation, (left * W * right), depends on the relation type (ex, LinearTIR, left = C, right = B).
    *         We get only the part corresponding to one ds.
    *  \param pos int, relative position of the beginning of the required block in relation matrix.
    *  \param InteractionBlock a pointer to SiconosMatrix (in-out parameter): the resulting interactionBlock matrix

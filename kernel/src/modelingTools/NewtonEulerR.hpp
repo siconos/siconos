@@ -31,7 +31,7 @@
  *  \version 3.0.0.
  *  \date Apr 27, 2004
  *
- * \class NewtonEulerR 
+ * \class NewtonEulerR
  * Relations for NewtonEuler Dynamical Systems. This class is only an
  * interface for specific (Linear, Scleronomous ...)  NewtonEuler
  * Relations (see derived classes).
@@ -49,7 +49,7 @@ class NewtonEulerR : public Relation
 {
 public:
 // add deltaq ??? -- xhub 30/03/2014
-  enum NewtonEulerRDS  {xfree, z, q0, velocity, dotq, p0, p1, p2, MObjToAbs, DSlinkSize};
+  enum NewtonEulerRDS  {xfree, z, q0, velocity, dotq, p0, p1, p2, DSlinkSize};
   // enum NewtonEulerRVec {xfree, z, q0, dotq, p0, p1, p2, workVecSize};
   // enum NewtonEulerRMat {C, D, F, workMatSize};
 
@@ -94,6 +94,9 @@ protected:
   In the case of a local frame, _jachqT is built from the geometrical datas(local frame, point of contact).*/
   SP::SimpleMatrix _jachqT;
 
+  /** local storage of _T as working vector to compute JachqT from q */
+  SP::SimpleMatrix _T;
+
   /** basic constructor
   \param lagType the sub-type of the relation
   */
@@ -101,9 +104,9 @@ protected:
 
   /** initialize components specific to derived classes.
    * \param inter  Interaction associated with the Relation
-   * \param DSlink 
+   * \param DSlink
    * \param workV
-   * \param workM 
+   * \param workM
    */
   virtual void initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
 
@@ -207,16 +210,17 @@ public:
   {
     ;
   }
-  /** compute the jacobian of h w.r.t. q 
+  /** compute the jacobian of h w.r.t. q
    * \param time current time
    * \param inter the interaction using this relation
-   * \param DSlink the container of the link to DynamicalSystem attributes
+   * \param q0  the container of the block vector to the dynamical system
    */
-  virtual void computeJachq(double time, Interaction& inter, VectorOfBlockVectors& DSlink)
+  virtual void computeJachq(double time, Interaction& inter, SP::BlockVector q0)
   {
     ;
   }
-  /** compute the jacobian of h w.r.t. \f$\dot{q}\f$ 
+
+  /** compute the jacobian of h w.r.t. \f$\dot{q}\f$
    * \param time current time
    * \param inter the interaction using this relation
    */
@@ -227,10 +231,10 @@ public:
      */
     assert(0) ;
   }
-  virtual void computeDotJachq(double time, SiconosVector& workQ, SiconosVector& workZ, SiconosVector& workQdot);
+  virtual void computeDotJachq(double time, BlockVector& workQ, BlockVector& workZ, BlockVector& workQdot);
 
 
-  /** compute the jacobian of h w.r.t. \f$\dot{q}\f$ 
+  /** compute the jacobian of h w.r.t. \f$\dot{q}\f$
    * \param time current time
    * \param inter the interaction using this relation
    */
@@ -238,7 +242,7 @@ public:
   {
     ;
   }
-  /** compute the jacobian of h w.r.t. \f$\dot{q}\f$ 
+  /** compute the jacobian of h w.r.t. \f$\dot{q}\f$
    * \param time current time
    * \param inter the interaction using this relation
    */
@@ -246,7 +250,7 @@ public:
   {
     ;
   }
-  /** compute the jacobian of h w.r.t. \f$\dot{q}\f$ 
+  /** compute the jacobian of h w.r.t. \f$\dot{q}\f$
    * \param time current time
    * \param inter the interaction using this relation
    */
@@ -256,22 +260,24 @@ public:
   }
 
   /* default implementation consists in multiplying jachq and T
-     \param inter interaction that owns the relation
-     \param ds1 dynamical system linked to this interaction (source)
-     \param ds2 second ds linked to this interaction (target). If there is 
-     only one ds in the inter, call this function with ..., ds, ds)
+   * in this implementation we use _T which is consitent which directly
+   * computed with computeT(q) when q is given
+   * this one in more consistent with the notion of function of q
+   *
+   *  \param inter interaction that owns the relation
+   *  \param q0  the block vector to the dynamical system position
   */
-  virtual void computeJachqT(Interaction& inter, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2);
-  virtual void computeJachqT(Interaction& inter, VectorOfBlockVectors& DSlink );
+  virtual void computeJachqT(Interaction& inter, SP::BlockVector q0);
 
-  /** compute all the jacobian of h 
+
+  /** compute all the jacobian of h
    * \param time current time
    * \param inter the interaction using this relation
    * \param interProp Interaction properties
    */
   virtual void computeJach(double time, Interaction& inter, InteractionProperties& interProp);
 
-  /** compute all the jacobian of g 
+  /** compute all the jacobian of g
    * \param time current time
    * \param inter the interaction using this relation
    * \param interProp Interaction properties
@@ -289,7 +295,7 @@ public:
       \param inter interaction that owns the relation
       \param DSlink the container of the link to DynamicalSystem attributes
       \param ds1 dynamical system linked to this interaction (source)
-      \param ds2 second ds linked to this interaction (target). If there is 
+      \param ds2 second ds linked to this interaction (target). If there is
       only one ds in the inter, call this function with ..., ds, ds)
    */
   void computeSecondOrderTimeDerivativeTerms(double time, Interaction& inter, VectorOfBlockVectors& DSlink, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2);

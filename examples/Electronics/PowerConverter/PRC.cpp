@@ -113,7 +113,6 @@ int main(int argc, char* argv[])
     // -- (1) OneStepIntegrators --
     double theta = 0.5;
     SP::EulerMoreauOSI aOSI(new EulerMoreauOSI(theta));
-    aOSI->insertDynamicalSystem(LSPRC);
 
     // -- (2) Time discretisation --
     SP::TimeDiscretisation aTiDisc(new TimeDiscretisation(t0, h_step));

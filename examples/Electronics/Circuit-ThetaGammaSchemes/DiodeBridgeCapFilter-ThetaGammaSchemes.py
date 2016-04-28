@@ -139,8 +139,6 @@ DiodeBridgeCapFilter.nonSmoothDynamicalSystem().link(InterDiodeBridgeCapFilter, 
 theta = 0.5
 gamma = 1.0
 aOSI = EulerMoreauOSI(theta, gamma)
-aOSI.insertDynamicalSystem(LS1DiodeBridgeCapFilter)
-aOSI.insertDynamicalSystem(LS2DiodeBridgeCapFilter)
 aOSI.setUseGammaForRelation(True)
 
 # (2) Time discretisation

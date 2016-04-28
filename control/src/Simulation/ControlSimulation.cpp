@@ -46,7 +46,8 @@ void ControlSimulation::initialize()
   _dataLegend = "time";
 
   // Simulation part
-  _model->initialize(_processSimulation);
+  _model->setSimulation(_processSimulation);
+  _model->initialize();
   // Control part
   _CM->initialize(*_model);
 
@@ -94,7 +95,7 @@ void ControlSimulation::setTheta(unsigned int newTheta)
 void ControlSimulation::addDynamicalSystem(SP::DynamicalSystem ds, const std::string& name)
 {
   _model->nonSmoothDynamicalSystem()->insertDynamicalSystem(ds);
-  _model->nonSmoothDynamicalSystem()->setOSI(ds, _processIntegrator);
+  _model->nonSmoothDynamicalSystem()->topology()->setOSI(ds, _processIntegrator);
 
   if (!name.empty())
   {

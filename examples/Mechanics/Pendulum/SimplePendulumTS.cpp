@@ -140,7 +140,6 @@ int main(int argc, char* argv[])
     double theta = 0.500001;
 
     SP::OneStepIntegrator OSI(new MoreauJeanOSI(theta));
-    OSI->insertDynamicalSystem(simplependulum);
     s->insertIntegrator(OSI);
 
     SP::OneStepNSProblem osnspb(new LCP());

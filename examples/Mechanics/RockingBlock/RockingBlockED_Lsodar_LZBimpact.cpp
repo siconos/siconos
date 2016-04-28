@@ -124,7 +124,6 @@ int main(int argc, char* argv[])
     SP::TimeDiscretisation TimeDiscret(new TimeDiscretisation(TimeInitial, StepSize));
     //2. Integration solver for one step
     SP::OneStepIntegrator OSI(new LsodarOSI());
-    OSI->insertDynamicalSystem(RockingBlock);
     //3. Nonsmooth problem
     SP::OneStepNSProblem impact(new OSNSMultipleImpact(TypeContactLaw, DelP));
     SP::OSNSMultipleImpact multiple_impact = std11::dynamic_pointer_cast<OSNSMultipleImpact>(impact);

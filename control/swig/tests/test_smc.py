@@ -60,7 +60,7 @@ def test_smc1():
     processSimulation.setName("plant simulation")
     # Declaration of the integrator
     processIntegrator = ZeroOrderHoldOSI()
-    process.nonSmoothDynamicalSystem().setOSI(processDS, processIntegrator)
+    process.nonSmoothDynamicalSystem().topology().setOSI(processDS, processIntegrator)
     processSimulation.insertIntegrator(processIntegrator)
     # Actuator, Sensor & ControlManager
     control = ControlManager(processSimulation)

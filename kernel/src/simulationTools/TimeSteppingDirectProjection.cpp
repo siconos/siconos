@@ -87,7 +87,7 @@ void TimeSteppingDirectProjection::nextStep()
 
   // Zeroing Lambda Muliplier of indexSet()
 
-  SP::InteractionsGraph indexSet = model()->nonSmoothDynamicalSystem()->topology()->indexSet(0);
+  SP::InteractionsGraph indexSet = _nsds->topology()->indexSet(0);
   InteractionsGraph::VIterator ui, uiend;
   for (std11::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
   {
@@ -106,23 +106,23 @@ void TimeSteppingDirectProjection::advanceToEvent()
 
   if (!_doOnlyProj)
     TimeStepping::newtonSolve(_newtonTolerance, _newtonMaxIteration);
-  
+
 
   DEBUG_EXPR_WE(std::cout << "TimeStepping::newtonSolve end : Number of iterations=" << getNewtonNbIterations() << "\n";
 		std::cout << "                              : newtonResiduDSMax=" << newtonResiduDSMax() << "\n";
 		std::cout << "                              : newtonResiduYMax=" << newtonResiduYMax() << "\n";
 		std::cout << "                              : newtonResiduRMax=" << newtonResiduRMax() << "\n";
 		);
-  
+
   if (!_doProj)
     return;
   int info = 0;
-  
+
   /** Second step, Perform the projection on constraints.*/
 
   DEBUG_PRINT("TimeSteppingDirectProjection::newtonSolve begin projection:\n");
 
-  SP::DynamicalSystemsGraph dsGraph = model()->nonSmoothDynamicalSystem()->dynamicalSystems();
+  SP::DynamicalSystemsGraph dsGraph = _nsds->dynamicalSystems();
 
 
 #ifdef TSPROJ_CORRECTIONVELOCITIES
@@ -153,18 +153,18 @@ void TimeSteppingDirectProjection::advanceToEvent()
   //   if (criteria < -_constraintTol)
   //     runningNewton=true;
   // }
-  if (model()->nonSmoothDynamicalSystem()->topology()->numberOfIndexSet() > _indexSetLevelForProjection)
+  if (_nsds->topology()->numberOfIndexSet() > _indexSetLevelForProjection)
     computeCriteria(&runningProjection);
   // Zeroing Lambda Muliplier of indexSet()
 
-  SP::InteractionsGraph indexSet = model()->nonSmoothDynamicalSystem()->topology()->indexSet(0);
+  SP::InteractionsGraph indexSet = _nsds->topology()->indexSet(0);
   InteractionsGraph::VIterator ui, uiend;
   for (std11::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
   {
     SP::Interaction inter = indexSet->bundle(*ui);
     inter->lambda(0)->zero();
   }
-  updateInput(0);
+  _nsds->updateInput(nextTime(),0);
 
   //Store the q vector of each DS.
 
@@ -191,22 +191,22 @@ void TimeSteppingDirectProjection::advanceToEvent()
     _nbProjectionIteration++;
     DEBUG_PRINTF("TimeSteppingDirectProjection projection step = %d\n", _nbProjectionIteration);
 
-    SP::InteractionsGraph indexSet = model()->nonSmoothDynamicalSystem()->topology()->indexSet(0);
+    SP::InteractionsGraph indexSet = _nsds->topology()->indexSet(0);
     InteractionsGraph::VIterator ui, uiend;
     for (std11::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
     {
       SP::Interaction inter = indexSet->bundle(*ui);
       inter->lambda(0)->zero();
     }
-    updateInput(0);
+    _nsds->updateInput(nextTime(),0);
     info = 0;
 
     DEBUG_PRINT("TimeSteppingProjectOnConstraint compute OSNSP.\n");
-    
+
     info = computeOneStepNSProblem(SICONOS_OSNSP_TS_POS);
 
-    DEBUG_PRINTF("IndexSet0->size() = %i\n", (int)model()->nonSmoothDynamicalSystem()->topology()->indexSet(0)->size() );
-    DEBUG_PRINTF("IndexSet1->size() = %i\n", (int)model()->nonSmoothDynamicalSystem()->topology()->indexSet(1)->size() );
+    DEBUG_PRINTF("IndexSet0->size() = %i\n", (int)_nsds->topology()->indexSet(0)->size() );
+    DEBUG_PRINTF("IndexSet1->size() = %i\n", (int)_nsds->topology()->indexSet(1)->size() );
     DEBUG_EXPR(oneStepNSProblem(SICONOS_OSNSP_TS_POS)->display());
 
 
@@ -215,17 +215,17 @@ void TimeSteppingDirectProjection::advanceToEvent()
       std::cout << " TimeSteppingDirectProjection::advanceToEvent() project on constraints. solver failed." <<std::endl ;
       return;
     }
-    updateInput(0);
-    
+    _nsds->updateInput(nextTime(),0);
+
     DEBUG_EXPR_WE(std ::cout << "After update input" << std::endl;
-	       SP::InteractionsGraph indexSet1 = model()->nonSmoothDynamicalSystem()->topology()->indexSet(1);
+	       SP::InteractionsGraph indexSet1 = _nsds->topology()->indexSet(1);
 	       std ::cout << "lamda(1) in IndexSet1" << std::endl;
 	       for (std11::tie(ui, uiend) = indexSet1->vertices(); ui != uiend; ++ui)
 		 {
 		   SP::Interaction inter = indexSet1->bundle(*ui);
 		   inter->lambda(1)->display();
 		 }
-	       SP::InteractionsGraph indexSet0 = model()->nonSmoothDynamicalSystem()->topology()->indexSet(0);
+	       SP::InteractionsGraph indexSet0 = _nsds->topology()->indexSet(0);
 	       std ::cout << "lamda(0) in indexSet0" << std::endl;
 	       for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
 		 {
@@ -233,7 +233,7 @@ void TimeSteppingDirectProjection::advanceToEvent()
 		   inter->lambda(0)->display();
 		 }
 	       );
-    
+
     // This part should be in MoreauJeanOSIProjectOnConstraintsOS::updateState(level =0)
     for (DynamicalSystemsGraph::VIterator aVi2 = dsGraph->begin(); aVi2 != dsGraph->end(); ++aVi2)
     {
@@ -256,10 +256,10 @@ void TimeSteppingDirectProjection::advanceToEvent()
           //*q = * qtmp +  *neds->p(0);
           *q += *neds->p(0); // Why it works like that and not with the previous line ?
         }
-	
+
         DEBUG_EXPR_WE(std ::cout << "q after  update " << std::endl;
 		      q->display(););
-	
+
         neds->normalizeq();
         neds->computeT();
       }
@@ -291,9 +291,9 @@ void TimeSteppingDirectProjection::advanceToEvent()
     DEBUG_EXPR_WE(std::cout << "TimeSteppingDirectProjection::Projection end : Number of iterations=" << _nbProjectionIteration << "\n";
 	       std ::cout << "After update state in position" << std::endl;
 	       std ::cout << "lamda(1) in IndexSet1" << std::endl;
-	       SP::InteractionsGraph indexSet1 = model()->nonSmoothDynamicalSystem()->topology()->indexSet(1);
-	       SP::InteractionsGraph indexSet0 = model()->nonSmoothDynamicalSystem()->topology()->indexSet(0);
-	       
+	       SP::InteractionsGraph indexSet1 = _nsds->topology()->indexSet(1);
+	       SP::InteractionsGraph indexSet0 = _nsds->topology()->indexSet(0);
+
 	       for (std11::tie(ui, uiend) = indexSet1->vertices(); ui != uiend; ++ui)
 		 {
 		   SP::Interaction inter = indexSet1->bundle(*ui);
@@ -305,8 +305,7 @@ void TimeSteppingDirectProjection::advanceToEvent()
 		   SP::Interaction inter = indexSet0->bundle(*ui);
 		   inter->lambda(0)->display();
 		 }
-	       std ::cout << "y(1) in IndexSet1" << std::endl;
-	       for (std11::tie(ui, uiend) = indexSet1->vertices(); ui != uiend; ++ui)
+	       std ::cout << "y(1) in IndexSet1" << std::endl;	       for (std11::tie(ui, uiend) = indexSet1->vertices(); ui != uiend; ++ui)
 		 {
 		   SP::Interaction inter = indexSet1->bundle(*ui);
 		   inter->y(1)->display();
@@ -488,7 +487,7 @@ void TimeSteppingDirectProjection::advanceToEvent()
 void TimeSteppingDirectProjection::computeCriteria(bool * runningProjection)
 {
 
-  SP::InteractionsGraph indexSet = model()->nonSmoothDynamicalSystem()->topology()->indexSet(_indexSetLevelForProjection);
+  SP::InteractionsGraph indexSet = _nsds->topology()->indexSet(_indexSetLevelForProjection);
   InteractionsGraph::VIterator aVi, viend;
 
   double maxViolationEquality = -1e24;
@@ -504,13 +503,7 @@ void TimeSteppingDirectProjection::computeCriteria(bool * runningProjection)
     SP::Interaction inter = indexSet->bundle(*aVi);
     inter->computeOutput(getTkp1(), indexSet->properties(*aVi), 0);
     inter->relation()->computeJach(getTkp1(), *inter, indexSet->properties(*aVi));
-    if (inter->relation()->getType() == RELATION::NewtonEuler)
-    {
-      SP::DynamicalSystem ds1 = indexSet->properties(*aVi).source;
-      SP::DynamicalSystem ds2 = indexSet->properties(*aVi).target;
-      SP::NewtonEulerR ner = (std11::static_pointer_cast<NewtonEulerR>(inter->relation()));
-      ner->computeJachqT(*inter, ds1, ds2);
-    }
+
     if (Type::value(*(inter->nonSmoothLaw())) ==  Type::NewtonImpactFrictionNSL ||
         Type::value(*(inter->nonSmoothLaw())) == Type::NewtonImpactNSL)
     {
@@ -557,8 +550,8 @@ void TimeSteppingDirectProjection::newtonSolve(double criterion, unsigned int ma
   _newtonNbIterations = 0; // number of Newton iterations
   int info = 0;
   //cout<<"||||||||||||||||||||||||||||||| ||||||||||||||||||||||||||||||| BEGIN NEWTON IT "<<endl;
-  bool isLinear  = (_model.lock())->nonSmoothDynamicalSystem()->isLinear();
-  SP::InteractionsGraph indexSet = model()->nonSmoothDynamicalSystem()->topology()->indexSet(0);
+  bool isLinear  = _nsds->isLinear();
+  SP::InteractionsGraph indexSet = _nsds->topology()->indexSet(0);
   initializeNewtonLoop();
 
   if ((_newtonOptions == SICONOS_TS_LINEAR || _newtonOptions == SICONOS_TS_LINEAR_IMPLICIT)

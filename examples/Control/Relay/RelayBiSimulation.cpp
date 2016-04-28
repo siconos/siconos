@@ -122,8 +122,8 @@ int main(int argc, char* argv[])
     // -- OneStepIntegrators --
     double theta = 0.5;
     SP::EulerMoreauOSI processIntegrator(new EulerMoreauOSI(theta));
-    processIntegrator->insertDynamicalSystem(processDS);
     processSimulation->insertIntegrator(processIntegrator);
+    process->nonSmoothDynamicalSystem()->topology()->setOSI(processDS,processIntegrator);
 
     // -------------
     // --- Model controller ---
@@ -142,9 +142,8 @@ int main(int argc, char* argv[])
     // -- OneStepIntegrators --
     double controllertheta = 0.5;
     SP::EulerMoreauOSI controllerIntegrator(new EulerMoreauOSI(controllertheta));
-    controllerIntegrator->insertDynamicalSystem(controllerDS);
     controllerSimulation->insertIntegrator(controllerIntegrator);
-
+    controller->nonSmoothDynamicalSystem()->topology()->setOSI(controllerDS,controllerIntegrator);
     // -- OneStepNsProblem --
     SP::LCP controllerLCP(new LCP());
 

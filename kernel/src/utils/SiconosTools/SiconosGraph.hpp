@@ -191,9 +191,9 @@ public:
   //  boost::property_map<graph_t, graph_properties_t >::type GraphPropertiesAccess;
 
 #if defined(SICONOS_STD_UNORDERED_MAP) && !defined(SICONOS_USE_MAP_FOR_HASH)
-  typedef std::unordered_map<V, VDescriptor> VMap;
+  typedef typename std::unordered_map<V, VDescriptor> VMap;
 #else
-  typedef std::map<V, VDescriptor> VMap;
+  typedef typename std::map<V, VDescriptor> VMap;
 #endif
 
 
@@ -644,6 +644,9 @@ public:
     assert(!is_edge(vd1, vd2, e_bundle));
 
     std11::tie(new_edge, inserted) = boost::add_edge(vd1, vd2, g);
+
+    // During a gdb session, I saw that inserted is always going to be true ...
+    // This check is therefore unnecessary.
     assert(inserted);
 
     index(new_edge) = std::numeric_limits<size_t>::max();

@@ -37,7 +37,7 @@ struct CollisionUpdater : public SiconosVisitor
 
 void BodyTimeStepping::updateWorldFromDS()
 {
-  DynamicalSystemsGraph& dsg = *model()->nonSmoothDynamicalSystem()->dynamicalSystems();
+  DynamicalSystemsGraph& dsg = *_nsds->dynamicalSystems();
   DynamicalSystemsGraph::VIterator dsi, dsiend;
   std11::tie(dsi, dsiend) = dsg.vertices();
 

@@ -62,26 +62,23 @@ void tipTrajectories(SP::SiconosVector  q, double * traj, double length)
   positionInInertialFrame[0]=length/2;
   positionInInertialFrame[1]=0.0;
   positionInInertialFrame[2]=0.0;
-  
+
   fromInertialToSpatialFrame(positionInInertialFrame, positionInSpatialFrame, q  );
   traj[0] = positionInSpatialFrame[0];
   traj[1] = positionInSpatialFrame[1];
   traj[2] = positionInSpatialFrame[2];
-  
-  
+
+
   // std::cout <<  "positionInSpatialFrame[0]" <<  positionInSpatialFrame[0]<<std::endl;
   // std::cout <<  "positionInSpatialFrame[1]" <<  positionInSpatialFrame[1]<<std::endl;
   // std::cout <<  "positionInSpatialFrame[2]" <<  positionInSpatialFrame[2]<<std::endl;
-  
+
   positionInInertialFrame[0]=-length/2;
   fromInertialToSpatialFrame(positionInInertialFrame, positionInSpatialFrame, q  );
   traj[3]= positionInSpatialFrame[0];
   traj[4] = positionInSpatialFrame[1];
   traj[5] = positionInSpatialFrame[2];
 }
-
-
-
 
 
 int main(int argc, char* argv[])
@@ -148,7 +145,7 @@ int main(int argc, char* argv[])
     q10->setValue(4, V1.getValue(0)*sin(angle / 2));
     q10->setValue(5, V1.getValue(1)*sin(angle / 2));
     q10->setValue(6, V1.getValue(2)*sin(angle / 2));
-    
+
     // -- The dynamical system --
     SP::NewtonEulerDS beam1(new NewtonEulerDS(q10, v10, m, I1));
     // -- Set external forces (weight) --
@@ -225,8 +222,6 @@ int main(int argc, char* argv[])
     SP::NewtonEulerR relation0(new NewtonEulerR());
     relation0->setJachq(H);
     relation0->setE(eR);
-    cout << "main jacQH" << endl;
-    relation0->jachq()->display();
 
 
     // Interactions
@@ -248,23 +243,23 @@ int main(int argc, char* argv[])
     P->zero();
     // Building the first knee joint for beam1
     // input  - the concerned DS : beam1
-    //        - a point in the spatial frame (absolute frame) where the knee is defined P 
+    //        - a point in the spatial frame (absolute frame) where the knee is defined P
     SP::NewtonEulerR relation1(new KneeJointR(beam1, P));
 
-    
-    
+
+
     // Building the second knee joint for beam1 and beam2
     // input  - the first concerned DS : beam1
     // input  - the second concerned DS : beam2
-    //        - a point in the spatial frame (absolute frame) where the knee is defined P 
+    //        - a point in the spatial frame (absolute frame) where the knee is defined P
     P->zero();
     P->setValue(0, L1 / 2);
     SP::NewtonEulerR relation2(new KneeJointR(beam1, beam2, P));
-    
+
     // Building the third knee joint for beam2 and beam3
     // input  - the first concerned DS : beam2
     // input  - the second concerned DS : beam3
-    //        - a point in the spatial frame (absolute frame) where the knee is defined P 
+    //        - a point in the spatial frame (absolute frame) where the knee is defined P
     P->zero();
     P->setValue(0, -L1 / 2);
     SP::NewtonEulerR relation3(new KneeJointR(beam2, beam3, P));
@@ -283,7 +278,7 @@ int main(int argc, char* argv[])
     // relation2->setJachq(H2);
     // relation3->setJachq(H3);
     // relation4->setJachq(H4);
-    
+
     SP::Interaction inter1(new Interaction(KneeJointR::numberOfConstraints(), nslaw1, relation1));
     SP::Interaction inter2(new Interaction(KneeJointR::numberOfConstraints(), nslaw2, relation2));
     SP::Interaction inter3(new Interaction(KneeJointR::numberOfConstraints(), nslaw3, relation3));
@@ -309,11 +304,12 @@ int main(int argc, char* argv[])
 
     // -- (1) OneStepIntegrators --
     SP::MoreauJeanOSI OSI1(new MoreauJeanOSI(theta));
-    OSI1->insertDynamicalSystem(beam1);
+    myModel->nonSmoothDynamicalSystem()->topology()->setOSI(beam1,OSI1);
     SP::MoreauJeanOSI OSI2(new MoreauJeanOSI(theta));
-    OSI2->insertDynamicalSystem(beam2);
+    myModel->nonSmoothDynamicalSystem()->topology()->setOSI(beam2,OSI2);
+    //OSI2->insertDynamicalSystem(beam2);
     SP::MoreauJeanOSI OSI3(new MoreauJeanOSI(theta));
-    OSI3->insertDynamicalSystem(beam3);
+    myModel->nonSmoothDynamicalSystem()->topology()->setOSI(beam3,OSI3);
 
     // -- (2) Time discretisation --
     SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
@@ -366,7 +362,7 @@ int main(int argc, char* argv[])
     Index startIndex(4);
     fprintf(pFile, "double T[%d*%d]={", N + 1, outputSize);
     double beamTipTrajectories[6];
-    
+
     for (k = 0; k < N; k++)
     {
       // solve ...
@@ -376,7 +372,7 @@ int main(int argc, char* argv[])
 
       // --- Get values to be plotted ---
       dataPlot(k, 0) =  s->nextTime();
-      
+
       dataPlot(k, 1) = (*q1)(0);
       dataPlot(k, 2) = (*q1)(1);
       dataPlot(k, 3) = (*q1)(2);
@@ -392,7 +388,7 @@ int main(int argc, char* argv[])
       dataPlot(k, 12) = (*q2)(4);
       dataPlot(k, 13) = (*q2)(5);
       dataPlot(k, 14) = (*q2)(6);
-      
+
       dataPlot(k, 15) = (*q3)(0);
       dataPlot(k, 16) = (*q3)(1);
       dataPlot(k, 17) = (*q3)(2);
@@ -400,7 +396,7 @@ int main(int argc, char* argv[])
       dataPlot(k, 19) = (*q3)(4);
       dataPlot(k, 20) = (*q3)(5);
       dataPlot(k, 21) = (*q3)(6);
-    
+
       tipTrajectories(q1,beamTipTrajectories,L1);
       beam1Plot(0,3*k) = beamTipTrajectories[0];
       beam1Plot(0,3*k+1) = beamTipTrajectories[1];
@@ -424,7 +420,7 @@ int main(int argc, char* argv[])
       beam3Plot(1,3*k) = beamTipTrajectories[3];
       beam3Plot(1,3*k+1) = beamTipTrajectories[4];
       beam3Plot(1,3*k+2) = beamTipTrajectories[5];
-      
+
       //printf("reaction1:%lf \n", interFloor->lambda(1)->getValue(0));
 
       for (unsigned int jj = 0; jj < outputSize; jj++)
@@ -436,6 +432,7 @@ int main(int argc, char* argv[])
       fprintf(pFile, "\n");
       s->nextStep();
       ++show_progress;
+      //std::cout <<"s->getNewtonCumulativeNbIterations  for step k " << k<< "  = " << s->getNewtonCumulativeNbIterations() <<std::endl;
     }
     fprintf(pFile, "};");
     cout << endl << "End of computation - Number of iterations done: " << k - 1 << endl;
@@ -444,7 +441,7 @@ int main(int argc, char* argv[])
     // --- Output files ---
     cout << "====> Output file writing ..." << endl;
     dataPlot.resize(k, outputSize);
-    ioMatrix::write("NE_3DS_3Knee_1Prism_MLCP.dat", "ascii", dataPlot);
+    ioMatrix::write("NE_3DS_3Knee_1Prism_MLCP.dat", "ascii", dataPlot, "noDim");
     ioMatrix::write("NE_3DS_3Knee_1Prism_beam1.dat", "ascii", beam1Plot, "noDim");
     ioMatrix::write("NE_3DS_3Knee_1Prism_beam2.dat", "ascii", beam2Plot, "noDim");
     ioMatrix::write("NE_3DS_3Knee_1Prism_beam3.dat", "ascii", beam3Plot, "noDim");

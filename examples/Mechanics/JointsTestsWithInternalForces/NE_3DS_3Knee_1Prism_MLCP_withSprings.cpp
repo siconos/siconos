@@ -317,11 +317,14 @@ int main(int argc, char* argv[])
 
     // -- (1) OneStepIntegrators --
     SP::MoreauJeanOSI OSI1(new MoreauJeanOSI(theta));
-    OSI1->insertDynamicalSystem(beam1);
+    myModel->nonSmoothDynamicalSystem()->topology()->setOSI(beam1,OSI1);
     SP::MoreauJeanOSI OSI2(new MoreauJeanOSI(theta));
-    OSI2->insertDynamicalSystem(beam2);
+    myModel->nonSmoothDynamicalSystem()->topology()->setOSI(beam2,OSI2);
+    //OSI2->insertDynamicalSystem(beam2);
     SP::MoreauJeanOSI OSI3(new MoreauJeanOSI(theta));
-    OSI3->insertDynamicalSystem(beam3);
+    myModel->nonSmoothDynamicalSystem()->topology()->setOSI(beam3,OSI3);
+
+    //OSI3->insertDynamicalSystem(beam3);
 
     // -- (2) Time discretisation --
     SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
@@ -458,7 +461,7 @@ int main(int argc, char* argv[])
     ioMatrix::write("NE_3DS_3Knee_1Prism_MLCP_beam2.dat", "ascii", beam2Plot, "noDim");
     ioMatrix::write("NE_3DS_3Knee_1Prism_MLCP_beam3.dat", "ascii", beam3Plot, "noDim");
 
-    std::cout << "====> Comparison with reference file ..." << std::endl;
+    //std::cout << "====> Comparison with reference file ..." << std::endl;
 
     // SimpleMatrix dataPlotRef(dataPlot);
     // dataPlotRef.zero();

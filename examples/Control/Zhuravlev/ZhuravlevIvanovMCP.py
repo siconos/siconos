@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 
 h = 1e-3
 
-withPlot = False
+withPlot = True
 
 
 class ZI(object):
@@ -79,12 +79,12 @@ class ZI(object):
 if __name__ == '__main__':
     xk = np.array((1., 10.))
 
-    T = 1.0
+    T = 4.0
     t = 0.0
     z = np.zeros((4,))
     w = np.empty((4,))
 
-    kappa = 0.9
+    kappa = 0.41
     g = 9.81
     theta = 1.0
     gamma = 1.0
@@ -156,9 +156,16 @@ if __name__ == '__main__':
         #z[:] = 0.0
 
     print('f_eval', zi_syst.f_eval, 'nabla_eval', zi_syst.nabla_eval)
-#    np.savetxt("dataZIsol.txt", sol)
-#    np.savetxt("dataZIlambdaPM.txt", lambdaPM)
-#    np.savetxt("dataZIsign.txt", signs)
+
+    pos = np.abs(sol[:, 0])
+    velocity = (1 - kappa*np.sign(sol[:, 0]*sol[:, 1]))*sol[:, 1]*np.sign(sol[:, 0])
+
+    if True:
+        np.savetxt("dataZIsol.txt", sol)
+        np.savetxt("dataZIlambdaPM.txt", lambdaPM)
+        np.savetxt("dataZIsign.txt", signs)
+        np.savetxt("dataZIpos.txt", pos)
+        np.savetxt("dataZIvel.txt", velocity)
 
     if withPlot:
         plt.figure()
@@ -170,9 +177,6 @@ if __name__ == '__main__':
         plt.plot(signs[:, 0])
         plt.plot(signs[:, 1])
         plt.show()
-
-        pos = np.abs(sol[:, 0])
-        velocity = (1 - kappa*np.sign(sol[:, 0]*sol[:, 1]))*sol[:, 1]*np.sign(sol[:, 0])
 
         plt.subplot(311)
         plt.title('position')

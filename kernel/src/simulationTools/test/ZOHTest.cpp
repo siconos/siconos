@@ -41,7 +41,7 @@ void ZOHTest::init()
   _sim.reset(new TimeStepping(_TD, 0));
   _ZOH.reset(new ZeroOrderHoldOSI());
   _model->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DS);
-  _model->nonSmoothDynamicalSystem()->setOSI(_DS, _ZOH);
+  _model->nonSmoothDynamicalSystem()->topology()->setOSI(_DS, _ZOH);
   _sim->insertIntegrator(_ZOH);
   _model->initialize(_sim);
 }
@@ -159,7 +159,7 @@ void ZOHTest::testMatrixIntegration2()
   SP::Interaction inter(new Interaction(_n, nslaw, rel));
   _ZOH.reset(new ZeroOrderHoldOSI());
   _model->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DS);
-  _model->nonSmoothDynamicalSystem()->setOSI(_DS, _ZOH);
+  _model->nonSmoothDynamicalSystem()->topology()->setOSI(_DS, _ZOH);
   _model->nonSmoothDynamicalSystem()->link(inter, _DS);
   _model->nonSmoothDynamicalSystem()->setControlProperty(inter, true);
   _sim.reset(new TimeStepping(_TD, 1));
@@ -226,7 +226,7 @@ void ZOHTest::testMatrixIntegration3()
   SP::Interaction inter(new Interaction(_n, nslaw, rel));
   _ZOH.reset(new ZeroOrderHoldOSI());
   _model->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DS);
-  _model->nonSmoothDynamicalSystem()->setOSI(_DS, _ZOH);
+  _model->nonSmoothDynamicalSystem()->topology()->setOSI(_DS, _ZOH);
   _model->nonSmoothDynamicalSystem()->link(inter, _DS);
   _model->nonSmoothDynamicalSystem()->setControlProperty(inter, true);
   _sim.reset(new TimeStepping(_TD, 1));
@@ -299,7 +299,7 @@ void ZOHTest::testMatrixIntegration4()
   SP::Interaction inter(new Interaction(_n, nslaw, rel));
   _ZOH.reset(new ZeroOrderHoldOSI());
   _model->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DS);
-  _model->nonSmoothDynamicalSystem()->setOSI(_DS, _ZOH);
+  _model->nonSmoothDynamicalSystem()->topology()->setOSI(_DS, _ZOH);
   _model->nonSmoothDynamicalSystem()->link(inter, _DS);
   _model->nonSmoothDynamicalSystem()->setControlProperty(inter, true);
   _sim.reset(new TimeStepping(_TD, 1));

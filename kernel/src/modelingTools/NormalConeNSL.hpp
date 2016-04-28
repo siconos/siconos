@@ -52,10 +52,10 @@ private:
   */
   ACCEPT_SERIALIZATION(NormalConeNSL);
 
-  /** matrix in the (H-K)-represenation of the polytope */
+  /** matrix in the (H-K)-representation of the polytope */
   SP::SimpleMatrix _H;
 
-  /** vector in the (H-K)-represenation of polytope */
+  /** vector in the (H-K)-representation of polytope */
   SP::SiconosVector _K;
 
   /** default constructor
@@ -66,8 +66,8 @@ public:
 
   /** constructor with the value of the NormalConeNSL attributes
   *  \param size size of the NonSmoothLaw
-  *  \param H matrix in the (H-K)-represenation of the polytope P
-  *  \param K vector in the (H-K)-represenation of the polytope P
+  *  \param H matrix in the (H-K)-representation of the polytope P
+  *  \param K vector in the (H-K)-representation of the polytope P
   */
   NormalConeNSL(unsigned size, SP::SimpleMatrix H, SP::SiconosVector K);
 

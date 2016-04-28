@@ -41,7 +41,7 @@
 
 MoreauJeanDirectProjectionOSI::MoreauJeanDirectProjectionOSI(double theta) : MoreauJeanOSI(theta)
 {
-  integratorType = OSI::MOREAUDIRECTPROJECTIONOSI;
+  _integratorType = OSI::MOREAUDIRECTPROJECTIONOSI;
   _deactivateYPosThreshold = SICONOS_MPC_DEFAULT_DEACTIVATION_POS_THRESHOLD;
   _deactivateYVelThreshold = SICONOS_MPC_DEFAULT_DEACTIVATION_VEL_THRESHOLD;
   _activateYPosThreshold =   SICONOS_MPC_DEFAULT_ACTIVATION_POS_THRESHOLD;
@@ -50,30 +50,31 @@ MoreauJeanDirectProjectionOSI::MoreauJeanDirectProjectionOSI(double theta) : Mor
 
 MoreauJeanDirectProjectionOSI::MoreauJeanDirectProjectionOSI(double theta, double gamma) : MoreauJeanOSI(theta, gamma)
 {
-  integratorType = OSI::MOREAUDIRECTPROJECTIONOSI;
+  _integratorType = OSI::MOREAUDIRECTPROJECTIONOSI;
   _deactivateYPosThreshold = SICONOS_MPC_DEFAULT_DEACTIVATION_POS_THRESHOLD;
   _deactivateYVelThreshold = SICONOS_MPC_DEFAULT_DEACTIVATION_VEL_THRESHOLD;
   _activateYPosThreshold =   SICONOS_MPC_DEFAULT_ACTIVATION_POS_THRESHOLD;
   _activateYVelThreshold =   SICONOS_MPC_DEFAULT_ACTIVATION_VEL_THRESHOLD;
 }
 
-void MoreauJeanDirectProjectionOSI::initialize()
+void MoreauJeanDirectProjectionOSI::initialize(Model& m)
 {
 
-  MoreauJeanOSI::initialize();
-
-  ConstDSIterator itDS;
-  for (itDS = OSIDynamicalSystems->begin(); itDS != OSIDynamicalSystems->end(); ++itDS)
+  MoreauJeanOSI::initialize(m);
+  DynamicalSystemsGraph::VIterator dsi, dsend;
+  for (std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
   {
-    Type::Siconos dsType = Type::value(**itDS);
+    if (!checkOSI(dsi)) continue;
+    SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
+    Type::Siconos dsType = Type::value(*ds);
     if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
     {
-      SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (*itDS);
+      SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
       d->allocateWorkVector(DynamicalSystem::qtmp, d->getNdof());
     }
     else if (dsType == Type::NewtonEulerDS)
     {
-      SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS>(*itDS);
+      SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS>(ds);
       d->allocateWorkVector(DynamicalSystem::qtmp, d->q()->size());
     }
     else
@@ -86,65 +87,6 @@ void MoreauJeanDirectProjectionOSI::initialize()
 void MoreauJeanDirectProjectionOSI::computeFreeState()
 {
   MoreauJeanOSI::computeFreeState();
-
-
-  // Compute qfree
-  //   double h = simulationLink->timeStep();
-
-  //   DSIterator it; // Iterator through the set of DS.
-
-  //   SP::DynamicalSystem ds; // Current Dynamical System.
-  //   SP::SiconosMatrix W; // W MoreauJeanOSI matrix of the current DS.
-  //   Type::Siconos dsType ; // Type of the current DS.
-  //   for (it=OSIDynamicalSystems->begin(); it!= OSIDynamicalSystems->end(); ++it)
-  //   {
-  //     ds = *it; // the considered dynamical system
-  //     dsType = Type::value(*ds); // Its type
-  //     if (dsType == Type::LagrangianLinearTIDS ||
-  //         dsType == Type::LagrangianDS)
-  //     {
-
-  //       SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
-  //       SP::SiconosVector vfree = d->workspace(DynamicalSystem::free);
-  //       SP::SiconosVector vold = d->velocityMemory()->getSiconosVector(0);
-  //       SP::SiconosVector qold = d->qMemory()->getSiconosVector(0);
-  //       SP::SiconosVector q = d->q();
-  // #ifdef DEBUG_MESSAGES
-  //       DEBUG_PRINT("MoreauJeanDirectProjectionOSI::computeFreeState() q before.\n");
-  //       q->display();
-  // #endif
-  //       // *q = *qold + h*(theta * *v +(1.0 - theta)* *vold)
-  //       double coeff = h*_theta;
-  //       scal(coeff, *vfree, *q) ; // q = h*theta*v
-  //       coeff = h*(1-_theta);
-  //       scal(coeff,*vold,*q,false); // q += h(1-theta)*vold
-  //       *q += *qold;
-  // #ifdef DEBUG_MESSAGES
-  //       DEBUG_PRINT("MoreauJeanDirectProjectionOSI::computeFreeState() q after (qfree).\n");
-  //       q->display();
-  // #endif
-  //     }
-  //     else if (dsType == Type::NewtonEulerDS)
-  //     {
-  //       SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS> (ds);
-  //       SP::SiconosVector vfree = d->workspace(DynamicalSystem::free);
-  //       SP::SiconosMatrix T = d->T();
-  //       SP::SiconosVector dotq = d->dotq();
-  //       prod(*T,*vfree,*dotq,true);
-  //       SP::SiconosVector q = d->q();
-
-  //       //  -> get previous time step state
-  //       SP::SiconosVector dotqold = d->dotqMemory()->getSiconosVector(0);
-  //       SP::SiconosVector qold = d->qMemory()->getSiconosVector(0);
-  //       // *q = *qold + h*(theta * *v +(1.0 - theta)* *vold)
-  //       double coeff = h*_theta;
-  //       scal(coeff, *dotq, *q) ; // q = h*theta*v
-  //       coeff = h*(1-_theta);
-  //       scal(coeff,*dotqold,*q,false); // q += h(1-theta)*vold
-  //       *q += *qold;
-
-  //     }
-  //   }
 }
 
 #ifdef STANDARD_ACTIVATION
@@ -165,7 +107,7 @@ bool MoreauJeanDirectProjectionOSI::addInteractionInIndexSet(SP::Interaction int
 {
 
   assert(i == 1);
-  double h = simulationLink->timeStep();
+  double h = _simulation->timeStep();
   double y = (inter->y(i - 1))->getValue(0); // for i=1 y(i-1) is the position
   double yDot = (inter->y(i))->getValue(0); // for i=1 y(i) is the velocity
   double gamma = 1.0 / 2.0;
@@ -195,7 +137,7 @@ bool MoreauJeanDirectProjectionOSI::removeInteractionInIndexSet(SP::Interaction 
 
 {
   assert(i == 1);
-  double h = simulationLink->timeStep();
+  double h = _simulation->timeStep();
   double y = (inter->y(i - 1))->getValue(0); // for i=1 y(i-1) is the position
   double yDot = (inter->y(i))->getValue(0); // for i=1 y(i) is the velocity
   double gamma = 1.0 / 2.0;

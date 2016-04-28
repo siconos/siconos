@@ -157,7 +157,7 @@ def get_priority(type_, name):
                    (r'.*', 9))
 
     big_hack_prio = {'GraphProperties': 1e-3,
-                     'SystemProperties': 2e-3,
+                     'DynamicalSystemProperties': 2e-3,
                      'InteractionProperties': 3e-3,
                      'MatrixIntegrator': 4e-3,
                      'DynamicalSystemsGraph': 5e-3,

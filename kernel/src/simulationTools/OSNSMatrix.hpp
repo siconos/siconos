@@ -26,12 +26,6 @@
 #include "SiconosFwd.hpp"
 #include "SimulationTypeDef.hpp"
 
-enum SICONOS_STORAGE_TYPE
-{
-  SICONOS_DENSE = 0,
-  SICONOS_SPARSE = 1
-};
-
 /** Interface to some specific storage types for matrices used in
  * OneStepNSProblem
  *
@@ -91,6 +85,8 @@ enum SICONOS_STORAGE_TYPE
  *  interactionBlocks are saved in the matrix M and there is no copy of
  *  sub-interactionBlocks, only links thanks to pointers.
  *
+ * - Sparse matrix (_storageType = 2): at the time of writting, only csc (compressed-sparse column).
+ *   Could also be triplet (coo or coordinate) or csr (compressed-sparse row).
  */
 class OSNSMatrix
 {

@@ -25,7 +25,7 @@
 // warning -> this is an abstract class, so constructors are usefull only for
 // calls in derived classes constructors
 
-NonSmoothLaw::NonSmoothLaw(unsigned int size): _size(size), _sizeProjectOnConstraints(size)
+NonSmoothLaw::NonSmoothLaw(unsigned int size): _size(size)
 {}
 
 NonSmoothLaw::~NonSmoothLaw()

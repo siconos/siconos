@@ -82,15 +82,13 @@ protected:
   /** the dynamical systems integrators */
   SP::OSISet _allOSI;
 
-  /** Map to link all DynamicalSystems and their OneStepIntegrator*/
-  DSOSIMap _osiMap;
-
   /** the non smooth problems (each problem is identified thanks to
       its id) */
   SP::OneStepNSProblems _allNSProblems;
 
-  /** A link to the Model which contains the Simulation */
-  std11::weak_ptr<Model> _model;
+  /** A pointer to the simulated nonsmooth dynamical system
+   */
+  SP::NonSmoothDynamicalSystem _nsds;
 
   /** _levelMinForOutput is the minimum level for the output
    * (Interaction::_lowerlevelForOutput) for all the interactions
@@ -301,12 +299,6 @@ public:
    */
   virtual void insertIntegrator(SP::OneStepIntegrator osi);
 
-  /** register a DS and its OSI into the osiMap.
-      \param ds a pointer to a DynamicalSystem.
-   *  \param osi a pointer to a OneStepIntegrator.
-   */
-  void addInOSIMap(SP::DynamicalSystem ds, SP::OneStepIntegrator osi);
-
   /** get a pointer to indexSets[i]
       \param i number of the required index set
       \return a graph of interactions
@@ -373,12 +365,13 @@ public:
    */
   virtual void insertNonSmoothProblem(SP::OneStepNSProblem osns, int Id = SICONOS_OSNSP_DEFAULT);
 
-  /** get the Model which contains the Simulation
-   *  \return the Model of this simulation
+
+  /** get the NonSmoothDynamicalSystem
+   *  \return NonSmoothDynamicalSystem
    */
-  inline SP::Model model() const
+  inline SP::NonSmoothDynamicalSystem nonSmoothDynamicalSystem() const
   {
-    return _model.lock();
+    return _nsds;
   }
 
   /** get tolerance
@@ -435,24 +428,6 @@ public:
   /** Initialize a single Interaction for this Simulation, used for dynamic
    *  topology updates. */
   virtual void initializeInteraction(double time, SP::Interaction inter);
-
-  /** Set OSI (DS) non-smooth part to zero.
-   */
-  void reset();
-
-  /** Set OSI (DS) non-smooth part to zero for a given level.
-   * \param level the level to will be zeroed
-   */
-  void reset(unsigned int level);
-
-  /** save DynamicalSystems and Interactions states in Memories
-      (through OSI and OSNS).
-   */
-  void saveInMemory();
-
-  /** save interaction states in memories. Applied to all interactions
-   of the connected topology (via model->nsds). */
-  void pushInteractionsInMemory();
 
   /** computes a one step NS problem
    *  \param nb the id of the OneStepNSProblem to be computed
@@ -530,29 +505,19 @@ public:
     return _relativeConvergenceCriterionHeld;
   };
 
-  /** compute r thanks to lambda[level] for all Interactions
-      \param level lambda level
-   */
-  virtual void updateInput(unsigned int level);
-
-  /** compute output for all the interactions
-      \param level y min order to be computed
-   */
-  void updateOutput(unsigned int level = 0);
-
   /** return input lambda[level](coor) for all the interactions
       \param level lambda min order to be computed
       \param coor the coordinate of interest
       \return a SP::SiconosVector that contains the concatenated value
    */
-  SP::SiconosVector input(unsigned int level = 0, unsigned int coor=0 );
+  SP::SiconosVector lambda(unsigned int level = 0, unsigned int coor=0 );
 
   /** return output y[level](coor) for all the interactions
       \param level y min order to be computed
       \param coor the coordinate of interest
       \return a SP::SiconosVector that contains the concatenated value
    */
-  SP::SiconosVector output(unsigned int level = 0, unsigned int coor=0 );
+  SP::SiconosVector y(unsigned int level = 0, unsigned int coor=0 );
 
   /** call eventsManager processEvents.
    */

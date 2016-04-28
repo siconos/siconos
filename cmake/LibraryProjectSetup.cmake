@@ -101,8 +101,8 @@ macro(LIBRARY_PROJECT_SETUP)
   set(installed_targets ${installed_targets}
     CACHE INTERNAL "Include directories for external dependencies.")
   set_target_properties(${COMPONENT} PROPERTIES 
-    OUTPUT_NAME "${COMPONENT_LIBRARY_NAME}" 
-    VERSION "${SICONOS_VERSION}" 
+    OUTPUT_NAME "${COMPONENT_LIBRARY_NAME}"
+    VERSION "${SICONOS_VERSION}"
     CLEAN_DIRECT_OUTPUT 1 # no clobbering
     LINKER_LANGUAGE ${${COMPONENT}_LINKER_LANGUAGE})
 

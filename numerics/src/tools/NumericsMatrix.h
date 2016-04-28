@@ -158,11 +158,11 @@ typedef struct
 } NumericsMatrix;
 
 /*! Types of matrices for NumericsMatrix */
-enum NumericsMatrix_types {
+typedef enum NumericsMatrix_types {
   NM_DENSE,        /**< dense format */
   NM_SPARSE_BLOCK, /**< sparse block format */
   NM_SPARSE,          /**< compressed column format */
-};
+} NM_types;
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"

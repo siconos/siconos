@@ -48,7 +48,7 @@
  *    RTOL   = a relative error tolerance parameter, either a scalar or array of length NEQ. \n
  *    ATOL   = an absolute error tolerance parameter, either a scalar or an array of length NEQ.  Input only.
  */
-class LsodarOSI : public OneStepIntegrator, public std11::enable_shared_from_this<LsodarOSI>
+class LsodarOSI : public OneStepIntegrator
 {
 private:
   /** serialization hooks
@@ -244,7 +244,7 @@ public:
 
   /** initialization of the integrator
    */
-  void initialize();
+  void initialize(Model& m);
 
   /** integrate the system, between tinit and tend (->iout=true), with possible stop at tout (->iout=false)
    *  \param tinit initial time

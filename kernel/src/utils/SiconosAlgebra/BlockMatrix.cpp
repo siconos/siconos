@@ -1129,3 +1129,16 @@ SPC::SiconosMatrix BlockMatrix::block(unsigned int row, unsigned int col) const
   return std11::shared_ptr<SiconosMatrix>((*_mat)(row, col));
 }
 
+size_t BlockMatrix::nnz(double tol)
+{
+  size_t nnz = 0;
+  BlocksMat::iterator1 it;
+  BlocksMat::iterator2 it2;
+  for (it = _mat->begin1(); it != _mat->end1(); ++it)
+  {
+    for (it2 = it.begin(); it2 != it.end(); ++it2)
+      nnz += (**it2).nnz();
+  }
+  return nnz;
+}
+

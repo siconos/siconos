@@ -21,7 +21,7 @@
 #include "FirstOrderNonLinearDS.hpp"
 
 #include "BlockVector.hpp"
-#include "SimulationTypeDef.hpp"
+#include "SimulationGraphs.hpp"
 
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES 1

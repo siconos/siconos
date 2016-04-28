@@ -126,7 +126,6 @@ simu = sk.TimeStepping(td)
 # osi
 theta = 0.50000000000001
 osi = sk.EulerMoreauOSI(theta)
-osi.insertDynamicalSystem(RC)
 simu.insertIntegrator(osi)
 
 # osns

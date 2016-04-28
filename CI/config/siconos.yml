@@ -20,6 +20,7 @@ updater:
     debian-jessie: printf "deb http://llvm.org/apt/jessie/ llvm-toolchain-jessie-3.8 main\ndeb-src http://llvm.org/apt/jessie/ llvm-toolchain-jessie-3.8 main" >> /etc/apt/sources.list && apt-get update -y
     debian: apt-get update -y
     ubuntu-15.10: printf "deb http://ppa.launchpad.net/oli-huber/siconos/ubuntu wily main\ndeb-src http://ppa.launchpad.net/oli-huber/siconos/ubuntu wily main" >> /etc/apt/sources.list && apt-get update -y
+    fedora:  dnf --setopt=deltarpm=false install -y dnf-plugins-core && dnf -y copr enable xhub/siconos-git
 
 ##############################################################################
 env:
@@ -201,6 +202,7 @@ pkgs:
       - oce-draw
 
     fedora:
+      - OCE-devel
 
   mumps:
     debian-7.8:

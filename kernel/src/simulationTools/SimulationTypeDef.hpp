@@ -36,8 +36,6 @@
 /*  eq dlmach('e'),  DBL_EPSILON,  fabs(a-b) <  */
 #define MACHINE_PREC std::numeric_limits<double>::epsilon()
 
-
-
 // ================== Objects to handle DS ==================
 
 /** Map of SP::SimpleMatrix; key = the number of the related DS*/
@@ -56,43 +54,6 @@ TYPEDEF_SPTR(VectorOfVectors)
 TYPEDEF_SPTR(VectorOfMatrices)
 TYPEDEF_SPTR(VectorOfSMatrices)
 
-/** \struct InteractionProperties mandatory properties for an Interaction  */
-struct InteractionProperties
-{
-  SP::SiconosMatrix block;    // diagonal block
-  SP::DynamicalSystem source;
-  unsigned int source_pos;
-  SP::DynamicalSystem target;
-  unsigned int target_pos;
-  SP::OneStepIntegrator osi;
-  bool forControl;            /**< true if the relation is used to control the DS */
-  SP::VectorOfBlockVectors DSlink;     /**< pointer links to DS variables needed for computation, mostly x (or q), z, r (or p) */
-  SP::VectorOfVectors workVectors;     /**< set of SiconosVector, mostly to have continuous memory vectors (not the case with BlockVector in DSlink) */
-  SP::VectorOfSMatrices workMatrices;   /**< To store jacobians */
-
-
-  ACCEPT_SERIALIZATION(InteractionProperties);
-};
-
-/** \struct SystemProperties mandatory properties for a DynamicalSystems */
-struct SystemProperties
-{
-  SP::SiconosMatrix upper_block;   /**< i,j block i<j */
-  SP::SiconosMatrix lower_block;   /**< i,j block i>j */
-  SP::VectorOfVectors workVectors;     /**< Used for instance in Newton iteration */
-  SP::VectorOfMatrices workMatrices;   /**< Mostly for Lagrangian system */
-//  SP::SiconosMemory _xMemory       /**< old value of x, TBD */
-
-  ACCEPT_SERIALIZATION(SystemProperties);
-};
-
-struct GraphProperties
-{
-  bool symmetric;
-
-  ACCEPT_SERIALIZATION(GraphProperties);
-};
-
 // ================== Objects to handle OSI ==================
 
 /** Vector of OneStepIntegrator */
@@ -100,11 +61,6 @@ typedef std::set<SP::OneStepIntegrator> OSISet;
 
 /** Iterator through vector of OSI*/
 typedef OSISet::iterator OSIIterator;
-/** A map that links DynamicalSystems and their OneStepIntegrator. */
-typedef std::map<SP::DynamicalSystem, SP::OneStepIntegrator> DSOSIMap;
-
-/** Const Iterator through a DSOSIMap. */
-typedef DSOSIMap::const_iterator DSOSIConstIterator;
 
 // ================== Objects to handle OSNS ==================
 

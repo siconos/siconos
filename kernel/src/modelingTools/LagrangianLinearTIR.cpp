@@ -21,7 +21,7 @@
 //
 #include "LagrangianDS.hpp"
 #include "BlockVector.hpp"
-#include "SimulationTypeDef.hpp"
+#include "SimulationGraphs.hpp"
 
 #include <iostream>
 

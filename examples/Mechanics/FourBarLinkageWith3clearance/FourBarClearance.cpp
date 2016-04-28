@@ -25,6 +25,7 @@ double J2 = m2*l2*l2/12.0;
 double I3 = m3*l3*l3/3.0;
 //double PI = 22.0/7.0;
 
+
 int main(int argc, char* argv[])
 {
   try
@@ -35,7 +36,7 @@ int main(int argc, char* argv[])
     // User-defined main parameters
     unsigned int nDof = 7;           // degrees of freedom for robot arm
     double t0 = 0;                   // initial computation time
-    double T = 10.0;                   // final computation time
+    double T = 1.0;                   // final computation time
     double h = 1e-4;                // time step
     //double criterion = 1e-6;
     //unsigned int maxIter = 2000;
@@ -189,7 +190,6 @@ int main(int argc, char* argv[])
 
     SP::MoreauJeanCombinedProjectionOSI OSI(new MoreauJeanCombinedProjectionOSI(0.5));
     // -- set the integrator for the four bar linkage --
-    FourBarIdeal->nonSmoothDynamicalSystem()->setOSI(fourbar, OSI);
 
     SP::OneStepNSProblem impact(new FrictionContact(2,SICONOS_FRICTION_2D_PGS)); /*,SICONOS_FRICTION_2D_ENUM
                                                                                    SICONOS_FRICTION_2D_LEMKE notworking //
@@ -448,7 +448,7 @@ int main(int argc, char* argv[])
       k++;
     }
 
-    cout << "End of computation - Number of iterations done: " << k << endl;
+    cout << "\nEnd of computation - Number of iterations done: " << k << endl;
     cout << "Computation Time " << time.elapsed()  << endl;
 
     // --- Output files ---

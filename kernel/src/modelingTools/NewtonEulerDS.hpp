@@ -734,11 +734,23 @@ public:
    */
   virtual void computeFGyr(SP::SiconosVector velocity);
 
+  /** function to compute gyroscopic forces with some specific values for q and velocity (ie not those of the current state).
+   *  \param velocity SP::SiconosVector: pointers on  velocity vector
+   *  \param SP::SiconosVector fGyr
+   */
+  virtual void computeFGyr(SP::SiconosVector velocity, SP::SiconosVector fGyr);
+
 
   /** Default function to compute the jacobian following q of fGyr
    *  \param time the current time
    */
   virtual void computeJacobianFGyrv(double time);
+
+  /** Default function to compute the jacobian following q of fGyr
+   * by forward finite difference
+   *  \param time the current time
+   */
+  virtual void computeJacobianFGyrvByFD(double time, SP::SiconosVector q, SP::SiconosVector velocity);
 
   // /** Default function to compute the jacobian following v of fGyr
   //  *  \param time the current time
@@ -886,13 +898,10 @@ public:
   {
     return _massMatrix;
   }
-  inline SP::SimpleMatrix luW()
-  {
-    return _luW;
-  }
+
   inline SP::SimpleMatrix T()
   {
-    return _T;
+    return _T; 
   }
   inline SP::SimpleMatrix Tdot()
   {

@@ -97,7 +97,6 @@ int main(int argc, char* argv[])
     double theta = 0.5;
     SP::EulerMoreauOSI integrator(new EulerMoreauOSI(theta));
     s->insertIntegrator(integrator);
-    itw->nonSmoothDynamicalSystem()->setOSI(doubleIntegrator, integrator);
 
     // -- OneStepNsProblem --
 

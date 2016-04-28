@@ -262,6 +262,15 @@ void SiconosGraphTest::t6()
 
   CPPUNIT_ASSERT(ag.size() == g.edges_number());
   CPPUNIT_ASSERT(ag.size() == 10);
+//  CPPUNIT_ASSERT(ag.edges_number() == 1);
+
+  AG::EIterator dsi, dsend;
+  for (std11::tie(dsi, dsend) = ag.edges(); dsi != dsend; ++dsi)
+  {
+    std::string& str = ag.bundle(*dsi);
+    std::cout << "t6:found edge " << str << std::endl;
+
+  }
 
   g.remove_out_edge_if(vd1, num_inf<G, AG>(10, g, ag));
 

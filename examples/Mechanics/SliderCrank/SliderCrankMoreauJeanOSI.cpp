@@ -151,7 +151,6 @@ int main(int argc, char* argv[])
     // --- Simulation ---
     // ----------------
     SP::MoreauJeanOSI OSI(new MoreauJeanOSI(0.5, 0.0));
-    OSI->insertDynamicalSystem(slider);
     SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
 #ifdef WITH_FRICTION
     SP::OneStepNSProblem impact(new FrictionContact(2, SICONOS_FRICTION_2D_ENUM));

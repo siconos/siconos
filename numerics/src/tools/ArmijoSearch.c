@@ -45,7 +45,7 @@ double search_Armijo_standalone(int n, double* theta, double preRHS, search_data
   double* F_merit = ls_data->F_merit;
   double* desc_dir = ls_data->desc_dir;
   void* data = ls_data->data;
-  int arcsearch = ls_data->searchtype == ARCSEARCH;
+  bool arcsearch = ls_data->searchtype == ARCSEARCH;
   void* set = ls_data->set;
   double RHS;
 

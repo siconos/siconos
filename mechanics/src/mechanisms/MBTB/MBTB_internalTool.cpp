@@ -124,7 +124,7 @@ void _MBTB_DRAW_STEP()
   if(sDrawMode & MBTB_ARTEFACT_REACTION)
   {
     // printf("MBTB_DRAW_STEP REACTION\n");
-    SP::Topology topo = sSimu->model()->nonSmoothDynamicalSystem()->topology();
+    SP::Topology topo = sSimu->nonSmoothDynamicalSystem()->topology();
     double h = sSimu->timeStep();
     SP::InteractionsGraph indexSet1 = topo->indexSet(1);
 

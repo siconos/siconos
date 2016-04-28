@@ -82,7 +82,6 @@ int main()
   //*****BUILD THE STEP INTEGRATOR
   SP::OneStepIntegrator  aEulerMoreauOSI ;
   aEulerMoreauOSI.reset(new EulerMoreauOSI(0.5));
-  aEulerMoreauOSI->insertDynamicalSystem(aDS);
   aS->insertIntegrator(aEulerMoreauOSI);
 
   //**** BUILD THE STEP NS PROBLEM
