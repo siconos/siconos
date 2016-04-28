@@ -221,7 +221,7 @@ BounceResult bounceTest(std::string moving,
     SP::SiconosContactor static_contactor(new SiconosContactor());
     if (ground=="plane")
     {
-      SP::SiconosPlane plane(new SiconosPlane(0,0,-params.size/2));
+      SP::SiconosPlane plane(new SiconosPlane(0,0,0));
       plane->setInsideMargin(params.insideMargin);
       plane->setOutsideMargin(params.outsideMargin);
       static_contactor->addShape(plane);
