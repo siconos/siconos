@@ -406,12 +406,12 @@ void ContactTest::t2()
     BounceParams params;
     params.trace = true;
     params.dynamic = false;
-    params.size = 1;
+    params.size = 1.0;
     params.mass = 1.0;
     params.position = 3.0;
     params.timestep = 0.005;
-    params.insideMargin = 0.1;
-    params.outsideMargin = 0.1;
+    params.insideMargin = 0.3;
+    params.outsideMargin = 0.3;
 
     BounceResult r = bounceTest("box", "box", params);
 

@@ -63,17 +63,22 @@ class BulletBroadphase : public SiconosBroadphase, public std11::enable_shared_f
 protected:
   SP::BulletBroadphase_impl impl;
 
+  void initialize_impl();
+
   // callback for contact point removal, and a global for context
   static bool bulletContactClear(void* userPersistentData);
   static BulletBroadphase *gBulletBroadphase;
 
 public:
-  BulletBroadphase(const BulletOptions &options = BulletOptions());
+  BulletBroadphase();
+  BulletBroadphase(SP::Model model);
+  BulletBroadphase(const BulletOptions &options);
+  BulletBroadphase(SP::Model model, const BulletOptions &options);
   ~BulletBroadphase();
 
 protected:
-  BulletOptions options;
-  BulletStatistics stats;
+  BulletOptions _options;
+  BulletStatistics _stats;
 
   void visit(SP::SiconosPlane plane);
   void visit(SP::SiconosSphere sphere);
@@ -98,8 +103,9 @@ public:
   void updateGraph();
   void performBroadphase();
 
-  const BulletStatistics &statistics() const { return stats; }
-  void resetStatistics() { stats = BulletStatistics(); }
+  const BulletOptions &options() const { return _options; }
+  const BulletStatistics &statistics() const { return _stats; }
+  void resetStatistics() { _stats = BulletStatistics(); }
 };
 
 #endif /* BulletBroadphase.hpp */

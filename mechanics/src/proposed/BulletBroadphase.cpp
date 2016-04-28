@@ -142,8 +142,7 @@ void BulletBroadphase_impl::onChanged(SP::SiconosBox box)
   dirtyBoxes.push_back(box);
 }
 
-BulletBroadphase::BulletBroadphase(const BulletOptions &_options)
-  : options(_options)
+void BulletBroadphase::initialize_impl()
 {
   impl.reset(new BulletBroadphase_impl());
   impl->_collisionConfiguration.reset(
@@ -155,7 +154,7 @@ BulletBroadphase::BulletBroadphase(const BulletOptions &_options)
   impl->_dispatcher.reset(
     new btCollisionDispatcher(&*impl->_collisionConfiguration));
 
-  if (options.useAxisSweep3)
+  if (_options.useAxisSweep3)
     impl->_broadphase.reset(new btAxisSweep3(btVector3(), btVector3()));
   else
     impl->_broadphase.reset(new btDbvtBroadphase());
@@ -169,6 +168,35 @@ BulletBroadphase::BulletBroadphase(const BulletOptions &_options)
   impl->_collisionWorld->getDispatchInfo().m_convexConservativeDistanceThreshold = 0.1f;
 
   impl->nslaw.reset(new NewtonImpactFrictionNSL(0.8, 0., 0.0, 3));
+}
+
+BulletBroadphase::BulletBroadphase()
+{
+  initialize_impl();
+}
+
+BulletBroadphase::BulletBroadphase(SP::Model model)
+{
+  initialize_impl();
+
+  if (model)
+    buildGraph(model);
+}
+
+BulletBroadphase::BulletBroadphase(const BulletOptions &options)
+  : _options(options)
+{
+  initialize_impl();
+}
+
+BulletBroadphase::BulletBroadphase(SP::Model model,
+                                   const BulletOptions &options)
+  : _options(options)
+{
+  initialize_impl();
+
+  if (model)
+    buildGraph(model);
 }
 
 BulletBroadphase::~BulletBroadphase()
@@ -294,7 +322,7 @@ void BulletBroadphase::update(SP::SiconosSphere sphere)
          &*sphere,sphere.use_count(),
          (*pos)(0), (*pos)(1), (*pos)(2), sphere->radius());
 
-  double r = (sphere->radius() + sphere->outsideMargin()) * options.worldScale;
+  double r = (sphere->radius() + sphere->outsideMargin()) * _options.worldScale;
 
   // Update shape parameters
 #ifdef USE_CONVEXHULL_FOR_SPHERE
@@ -320,9 +348,9 @@ void BulletBroadphase::update(SP::SiconosSphere sphere)
 
   SiconosVector &q = *sphere->position();
   btTransform tr(btQuaternion(q(4), q(5), q(6), q(3)),
-                 btVector3(q(0)*options.worldScale,
-                           q(1)*options.worldScale,
-                           q(2)*options.worldScale));
+                 btVector3(q(0)*_options.worldScale,
+                           q(1)*_options.worldScale,
+                           q(2)*_options.worldScale));
   btobject->setWorldTransform(tr);
 }
 
@@ -335,12 +363,12 @@ void BulletBroadphase::visit(SP::SiconosPlane plane)
   // create the initial plane with default parameters
 #ifdef USE_BOX_FOR_PLANE
   SP::btBoxShape btplane(
-    new btBoxShape(btVector3(1000*options.worldScale,
-                             1000*options.worldScale,
-                             1000*options.worldScale)));
+    new btBoxShape(btVector3(1000*_options.worldScale,
+                             1000*_options.worldScale,
+                             1000*_options.worldScale)));
 #else
 #ifdef USE_CONVEXHULL_FOR_PLANE
-  btScalar h = 1000 * options.worldScale;
+  btScalar h = 1000 * _options.worldScale;
   const btScalar pts[] = {
     h, h, 0,
     h, -h, 0,
@@ -351,15 +379,15 @@ void BulletBroadphase::visit(SP::SiconosPlane plane)
     new btConvexHullShape(pts, 4, sizeof(pts[0])*3));
 
   // We ignore the desired internal margin for plane and just use a large one.
-  plane->setInsideMargin(1000 * options.worldScale);
+  plane->setInsideMargin(1000 * _options.worldScale);
 
   // External margin
   btplane->setMargin((plane->insideMargin() + plane->outsideMargin())
-                     * options.worldScale);
+                     * _options.worldScale);
 #else
   SP::btStaticPlaneShape btplane(
     new btStaticPlaneShape(btVector3(0, 0, 1), 0.0));
-  btplane->setMargin(plane->outsideMargin() * options.worldScale);
+  btplane->setMargin(plane->outsideMargin() * _options.worldScale);
 #endif
 #endif
 
@@ -380,20 +408,20 @@ void BulletBroadphase::update(SP::SiconosPlane plane)
   SiconosVector &q = *plane->position();
 #ifdef USE_BOX_FOR_PLANE
   btTransform tr(btQuaternion(q(4), q(5), q(6), q(3)),
-    btVector3(q(0)*options.worldScale,
-              q(1)*options.worldScale,
-              (q(2) + plane->outsideMargin() - 1000)*options.worldScale));
+    btVector3(q(0)*_options.worldScale,
+              q(1)*_options.worldScale,
+              (q(2) + plane->outsideMargin() - 1000)*_options.worldScale));
 #else
 #ifdef USE_CONVEXHULL_FOR_PLANE
   btTransform tr(btQuaternion(q(4), q(5), q(6), q(3)),
-    btVector3(q(0)*options.worldScale,
-              q(1)*options.worldScale,
-              (q(2) - plane->insideMargin())*options.worldScale));
+    btVector3(q(0)*_options.worldScale,
+              q(1)*_options.worldScale,
+              (q(2) - plane->insideMargin())*_options.worldScale));
 #else
   btTransform tr(btQuaternion(q(4), q(5), q(6), q(3)),
-                 btVector3(q(0)*options.worldScale,
-                           q(1)*options.worldScale,
-              (q(2) - plane->insideMargin())*options.worldScale));
+                 btVector3(q(0)*_options.worldScale,
+                           q(1)*_options.worldScale,
+              (q(2) - plane->insideMargin())*_options.worldScale));
 #endif
 #endif
   btobject->setWorldTransform(tr);
@@ -427,7 +455,7 @@ void BulletBroadphase::visit(SP::SiconosBox box)
   SP::btBoxShape btbox(new btBoxShape(btVector3(half, half, half)));
 
   // btBoxShape has an internal margin
-  btbox->setMargin(box->insideMargin() * options.worldScale);
+  btbox->setMargin(box->insideMargin() * _options.worldScale);
 #endif
 
   // initialization
@@ -456,12 +484,12 @@ void BulletBroadphase::update(SP::SiconosBox box)
   double m = box->outsideMargin();
 #endif
 
-  double sx = ((*box->dimensions())(0) + m*2) * options.worldScale;
-  double sy = ((*box->dimensions())(1) + m*2) * options.worldScale;
-  double sz = ((*box->dimensions())(2) + m*2) * options.worldScale;
+  double sx = ((*box->dimensions())(0) + m*2) * _options.worldScale;
+  double sy = ((*box->dimensions())(1) + m*2) * _options.worldScale;
+  double sz = ((*box->dimensions())(2) + m*2) * _options.worldScale;
 
   btbox->setLocalScaling(btVector3(sx, sy, sz));
-  btbox->setMargin((box->insideMargin() + box->outsideMargin()) * options.worldScale);
+  btbox->setMargin((box->insideMargin() + box->outsideMargin()) * _options.worldScale);
 
   // Update object parameters
   SP::btCollisionObject btobject(impl->objectMap[box]);
@@ -470,9 +498,9 @@ void BulletBroadphase::update(SP::SiconosBox box)
 
   SiconosVector &q = *box->position();
   btTransform tr(btQuaternion(q(4), q(5), q(6), q(3)),
-                 btVector3(q(0)*options.worldScale,
-                           q(1)*options.worldScale,
-                           q(2)*options.worldScale));
+                 btVector3(q(0)*_options.worldScale,
+                           q(1)*_options.worldScale,
+                           q(2)*_options.worldScale));
 
   btobject->setWorldTransform(tr);
 }
@@ -650,7 +678,7 @@ void BulletBroadphase::performBroadphase()
 
   // TODO: This must be either configured dynamically or made available to the
   // user.
-  gContactBreakingThreshold = options.breakingThreshold;
+  gContactBreakingThreshold = _options.breakingThreshold;
 
   // 1. perform bullet collision detection
   impl->orphanedInteractions.clear();
@@ -696,7 +724,7 @@ void BulletBroadphase::performBroadphase()
       SP::Interaction *p_inter =
         (SP::Interaction*)it->point->m_userPersistentData;
       // (note: nothing for now!)
-      stats.existing_interactions_processed ++;
+      _stats.existing_interactions_processed ++;
     }
     else
     {
@@ -711,19 +739,19 @@ void BulletBroadphase::performBroadphase()
         SP::BulletR rel(new BulletR(createSPtrbtManifoldPoint(*it->point),
                                     pairA->shape->outsideMargin(),
                                     pairB->shape->outsideMargin(),
-                                    1.0 / options.worldScale));
+                                    1.0 / _options.worldScale));
 
         // We wish to be sure that no Interactions are created without
         // sufficient warning before contact.  TODO: Replace with exception or
         // flag.
         if ((it->point->getDistance() + combined_margin) < 0.0) {
           fprintf(stderr, "Interactions must be created with positive distance (%f).\n",
-                  (it->point->getDistance() + combined_margin)/options.worldScale);
-          stats.interaction_warnings ++;
+                  (it->point->getDistance() + combined_margin)/_options.worldScale);
+          _stats.interaction_warnings ++;
         }
 
         inter.reset(new Interaction(3, impl->nslaw, rel, 0 /*4 * i + z*/));
-        stats.new_interactions_created ++;
+        _stats.new_interactions_created ++;
       }
       else
       {
