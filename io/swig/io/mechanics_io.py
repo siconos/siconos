@@ -24,7 +24,7 @@ from siconos.mechanics.contact_detection.tools import Contactor
 
 from siconos.mechanics import joints
 
-use_proposed = True
+use_proposed = False
 try:
     from siconos.mechanics.proposed import BodyDS, \
         BodyTimeStepping, SiconosSphere, SiconosBox,\

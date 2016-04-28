@@ -8,6 +8,9 @@
 from siconos.mechanics.contact_detection.tools import Contactor
 from siconos.io.mechanics_io import Hdf5
 import siconos.numerics as Numerics
+import siconos.io.mechanics_io
+
+siconos.io.mechanics_io.use_proposed = True
 
 import pydoc
 # Creation of the hdf5 file for input/output
