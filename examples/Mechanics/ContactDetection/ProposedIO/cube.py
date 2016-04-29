@@ -12,6 +12,10 @@ import siconos.io.mechanics_io
 
 siconos.io.mechanics_io.use_proposed = True
 
+options = siconos.io.mechanics_io.BulletOptions()
+options.worldScale = 1.0
+options.breakingThreshold = 0.4
+
 import pydoc
 # Creation of the hdf5 file for input/output
 with Hdf5() as io:
@@ -60,7 +64,7 @@ with Hdf5(mode='r+') as io:
 
     io.run(with_timer=False,
             time_stepping=BodyTimeStepping,
-            space_filter=BulletBroadphase,
+            space_filter=lambda x: BulletBroadphase(x, options),
             body_class=BodyDS,
             shape_class=SiconosContactor,
             face_class=None,
