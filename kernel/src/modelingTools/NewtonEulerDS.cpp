@@ -836,6 +836,10 @@ void NewtonEulerDS::display() const
   std::cout << "- p[2] " <<std::endl;
   if (_p[2]) _p[2]->display();
   else std::cout << "-> NULL" <<std::endl;
+  std::cout << "mass :" <<  _mass <<std::endl;
+  std::cout << "Inertia :" <<std::endl;
+  if (_I) _I->display();
+  else std::cout << "-> NULL" <<std::endl;
   std::cout << "===================================== " <<std::endl;
 }
 
