@@ -61,7 +61,7 @@ for opt, arg in opts:
 
 if generated_file is None:
     usage()
-    print('{0} --ouput option is mandatory.'.format(myname))
+    print('{0} --output option is mandatory.'.format(myname))
     sys.exit(1)
 
 if source_dir is None:

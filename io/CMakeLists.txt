@@ -55,19 +55,21 @@ if(WITH_SERIALIZATION)
     set(io_targets ${COMPONENTS})
 
     # REMOVE_item not on cmake 2.8 ...
-    list(REMOVE_ITEM io_targets numerics io)
+    list(REMOVE_ITEM io_targets numerics io externals)
     print_var(io_targets)
-    # header generation
-    SET(GENERATED_TARGETS --targets=${io_targets})
+
+    string(REPLACE ";" "," io_targets_list "${io_targets}")
+    SET(GENERATED_TARGETS --targets=${io_targets_list})
 
     if(HAVE_SICONOS_KERNEL)
-      set(GENERATED_DEPENDENCIES SiconosKernel.hpp)
+      set(GENERATED_DEPENDENCIES ../kernel/src/SiconosKernel.hpp)
     endif()
     if(HAVE_SICONOS_MECHANICS)
-      set(GENERATED_DEPENDENCIES ${GENERATED_DEPENDENCIES} SpaceFilter.hpp)
+      set(GENERATED_DEPENDENCIES ${GENERATED_DEPENDENCIES}
+        ../mechanics/src/contactDetection/basicBroadphase/SpaceFilter.hpp)
     endif()
     if(HAVE_SICONOS_CONTROL)
-      set(GENERATED_DEPENDENCIES ${GENERATED_DEPENDENCIES} SiconosControl.hpp)
+      set(GENERATED_DEPENDENCIES ${GENERATED_DEPENDENCIES} ../control/src/SiconosControl.hpp)
     endif()
     
     # append local headers directories to GENERATED_INCLUDES)
@@ -81,7 +83,7 @@ if(WITH_SERIALIZATION)
       ENDFOREACH()
     ENDIF()
 
-    SET(GENERATED_COMMAND COMMAND ${CMAKE_SOURCE_DIR}/tools/builder.py
+    SET(GENERATED_COMMAND COMMAND ${CMAKE_SOURCE_DIR}/io/tools/builder.py
       ${GENERATED_TARGETS} ${GENERATED_INCLUDES} --output=${GENERATED_HEADER}
       --source="${CMAKE_CURRENT_SOURCE_DIR}/../")
 
