@@ -26,7 +26,8 @@ set(${COMPONENT}_DIRS
   hairer
   netlib/dftemplates
   netlib/odepack
-  ql0001
+  optim_misc
+  optim_misc/ql0001
   SOL/lumod-c
   SuiteSparse/CSparse
   SuiteSparse/CSparse_extensions
@@ -34,7 +35,7 @@ set(${COMPONENT}_DIRS
 )
 
 if(WITH_CXX)
-  list(APPEND ${COMPONENT}_DIRS numeric_bindings)
+  list(APPEND ${COMPONENT}_DIRS numeric_bindings boost_contribs)
 endif()
 
 
