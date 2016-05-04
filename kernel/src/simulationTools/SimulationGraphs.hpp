@@ -40,7 +40,7 @@
  * Properties on graph :
  * --------------------
  *
- * The properties on the graph enable to store the data that are specicic to a simulation
+ * The properties on the graph enable to store the data that are specific to a simulation
  * strategy. It avoids to burden the modeling classes that should be as independent as possible from
  * the simulation choices.
  *
@@ -48,8 +48,8 @@
  * <ul>
  * <li>  Mandatory properties DynamicalSystemProperties and InteractionProperties .
  *       These properties are always  instanciated for any kind of simulation.
- *       The accesors to the property are illustrated in the followinf example :
- *       For a given SP::DynamicalSystem ds and a given graph SP::DynamicalSystemsGrap DSG
+ *       The accessors to the property are illustrated in the following example :
+ *       For a given SP::DynamicalSystem ds and a given graph SP::DynamicalSystemsGraph DSG
  *
  *       DynamicalSystemsGraph::VDescriptor dsv = DSG->descriptor(ds);
  *       SP::OneStepintegrator osi = DSG->properties(dsv).osi;
@@ -57,8 +57,8 @@
  * <li> Optional Properties
  *      They are installed thanks to the macro INSTALL_GRAPH_PROPERTIES.
  *
- *      The accesors to the property are illustrated in the following example :
- *      For a given SP::DynamicalSystem ds and a given graph SP::DynamicalSystemsGrap DSG
+ *      The accessors to the property are illustrated in the following example :
+ *      For a given SP::DynamicalSystem ds and a given graph SP::DynamicalSystemsGraph DSG
  *
  *      DynamicalSystemsGraph::VDescriptor dsv = DSG->descriptor(ds);
  *      DSG->name.insert(dsv, name); // insert the name in the property
