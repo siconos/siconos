@@ -10,6 +10,10 @@
 #include <float.h>
 #include <assert.h>
 
+#ifndef epsilon
+#define epsilon 0x1.0000000000000p-52
+#endif
+
 /*@
   axiomatic Max {
   logic real fmax(real x, real y);
@@ -50,7 +54,7 @@
     ensures 0. <= \result <= 1. + x;
     ensures x <= \result <= 1. || 1. <= \result <= x;
     ensures \result * \result == x;
-    ensures \result > 2.22044604925e-16 ==> x > 4.930380657631323783823303533017413935457540219431394e-32;
+    ensures \result > epsilon ==> x > epsilon*epsilon;
 */
 extern double sqrt(double x);
 
@@ -64,9 +68,7 @@ extern double sqrt(double x);
  */
 extern double fmax(double x, double y);
 
-#ifndef epsilon
-#define epsilon 0x1.0000000000000p-52
-#endif
+
 
 #ifdef __FRAMAC__
 #include <__fc_builtin.h>

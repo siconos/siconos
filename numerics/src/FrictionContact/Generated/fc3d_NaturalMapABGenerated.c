@@ -74,9 +74,9 @@ void fc3d_NaturalMapABGenerated(
     double x123 = 0.;
 
     x1 = rt1*rt1 + rt2*rt2;
-    /*@ assert (x1) >= 0; */
+    /*@ assert x1 >= 0; */
     x2 = ut1*ut1 + ut2*ut2;
-    /*@ assert (x2) >= 0; */
+    /*@ assert x2 >= 0; */
     x29 = x1 <= epsilon;
     /*@ assert x29 <==> (x1 <= epsilon); */
     x30 = x2 <= epsilon;
@@ -141,17 +141,17 @@ void fc3d_NaturalMapABGenerated(
     x10 = mu*ut1;
     x11 = rt1 - x10;
     x12 = x11*x11;
-    /*@ assert (x12) >= 0; */
+    /*@ assert x12 >= 0; */
     x13 = mu*ut2;
     x14 = rt2 - x13;
     x15 = x14*x14;
-    /*@ assert (x15) >= 0; */
+    /*@ assert x15 >= 0; */
     x16 = x12 + x15;
     x44 = x2 >= epsilon;
     /*@ assert x44 <==> (x2 >= epsilon); */
     x45 = epsilon*(mu + 1);
-    /*@ assert (x45) >= 0; */
-    /*@ assert (x45) != 0; */
+    /*@ assert x45 >= 0; */
+    /*@ assert x45 != 0; */
     x46 = x16 <= x45;
     /*@ assert x46 <==> (x16 <= x45); */
     x47 = x29 && x44 && x46;
@@ -239,43 +239,39 @@ void fc3d_NaturalMapABGenerated(
     {
         x4 = 2*mu*mu - 2*mu + 1;
         x7 = mu*rn;
-        /*@ assert (x7) >= 0; */
-        /*@ assert (2 >= 0); */
+        /*@ assert x7 >= 0; */
+        /*@ assert 2 >= 0; */
         x24 = sqrt(2);
-        /*@ assert (x24) >= 0; */
-        /*@ assert (x24) != 0; */
+        /*@ assert x24 >= 0; */
+        /*@ assert x24 != 0; */
         x25 = -1.0*un + x7;
         x26 = Heaviside(x25);
         x27 = mu*x26;
         x28 = (1.0/2.0)*x24*x27;
-        /*@ assert (x4 < -epsilon*epsilon*epsilon || x4 > epsilon*epsilon*epsilon); */
+        /*@ assert x4 < -epsilon*epsilon*epsilon || x4 > epsilon*epsilon*epsilon; */
         x74 = 1.0/x4;
         x75 = mu - 1;
         x76 = x75*x75;
-        /*@ assert (x76) >= 0; */
+        /*@ assert x76 >= 0; */
         x100 = mu*mu;
-        /*@ assert (x100) >= 0; */
+        /*@ assert x100 >= 0; */
         x101 = x26*x74;
         x121 = -2.0*mu + 2*x100 + 1.0;
-        /*@ assert (x121 < -epsilon*epsilon*epsilon || x121 > epsilon*epsilon*epsilon); */
+        /*@ assert x121 < -epsilon*epsilon*epsilon || x121 > epsilon*epsilon*epsilon; */
         x122 = 1.0/x121;
         x123 = mu*mu*mu;
-        /*@ assert (x123) >= 0; */
+        /*@ assert x123 >= 0; */
 
     }
     if (x43)
     {
         x6 = -un;
         x7 = mu*rn;
-        /*@ assert (x7) >= 0; */
-        /*@ assert (2 >= 0); */
+        /*@ assert 2 >= 0; */
         x24 = sqrt(2);
-        /*@ assert (x24) >= 0; */
-        /*@ assert (x24) != 0; */
         x25 = -1.0*un + x7;
-        /*@ assert (x1 >= 0); */
         x32 = sqrt(x1);
-        /*@ assert (x32 < -epsilon*epsilon*epsilon || x32 > epsilon*epsilon*epsilon); */
+        /*@ assert x32 < -epsilon*epsilon*epsilon || x32 > epsilon*epsilon*epsilon; */
         x33 = 1.0/x32;
         x34 = 0.25*mu*x33;
         x35 = Heaviside(x25 + x32);
@@ -286,21 +282,20 @@ void fc3d_NaturalMapABGenerated(
         x40 = x24*x32;
         x41 = x35*x40 + x38*x40;
         x60 = rt2*x36;
-        /*@ assert (x1 >= 0); */
-        /*@ assert (x1 < -epsilon*epsilon*epsilon || x1 > epsilon*epsilon*epsilon); */
+        /*@ assert x1 < -epsilon*epsilon*epsilon || x1 > epsilon*epsilon*epsilon; */
         x77 = 1.0/((sqrt(x1))*(sqrt(x1))*(sqrt(x1)));
         x78 = 0.25*mu*x77;
         x79 = rt2*rt2;
-        /*@ assert (x79) >= 0; */
+        /*@ assert x79 >= 0; */
         x80 = x6 + x7;
         x81 = Max(0, x32 + x80);
-        /*@ assert (x81) >= 0; */
+        /*@ assert x81 >= 0; */
         x82 = 2*x81;
         x83 = Max(0, -x32 + x80);
-        /*@ assert (x83) >= 0; */
+        /*@ assert x83 >= 0; */
         x84 = 2.0*x83;
         x85 = rt1*rt1;
-        /*@ assert (x85) >= 0; */
+        /*@ assert x85 >= 0; */
         x86 = 2*x32*x35;
         x87 = 2*x32;
         x88 = x38*x85;
@@ -318,11 +313,8 @@ void fc3d_NaturalMapABGenerated(
     if (x47)
     {
         x7 = mu*rn;
-        /*@ assert (x7) >= 0; */
-        /*@ assert (2 >= 0); */
+        /*@ assert 2 >= 0; */
         x24 = sqrt(2);
-        /*@ assert (x24) >= 0; */
-        /*@ assert (x24) != 0; */
         x25 = -1.0*un + x7;
         x26 = Heaviside(x25);
         x27 = mu*x26;
@@ -332,11 +324,9 @@ void fc3d_NaturalMapABGenerated(
     if (x49)
     {
         x7 = mu*rn;
-        /*@ assert (x7) >= 0; */
         x25 = -1.0*un + x7;
-        /*@ assert (x1 >= 0); */
         x32 = sqrt(x1);
-        /*@ assert (x32 < -epsilon*epsilon*epsilon || x32 > epsilon*epsilon*epsilon); */
+        /*@ assert x32 < -epsilon*epsilon*epsilon || x32 > epsilon*epsilon*epsilon; */
         x33 = 1.0/x32;
         x38 = Heaviside(x25 - 1.0*x32);
         x48 = mu*x33*x38;
@@ -346,11 +336,9 @@ void fc3d_NaturalMapABGenerated(
     {
         x6 = -un;
         x7 = mu*rn;
-        /*@ assert (x7) >= 0; */
-        /*@ assert (x2 >= 0); */
         x8 = sqrt(x2);
         x9 = -mu*x8 + x6 + x7;
-        /*@ assert (x16 >= 0); */
+        /*@ assert x16 >= 0; */
         x17 = sqrt(x16);
         x18 = x17 + x9;
         x19 = Heaviside(x18);
@@ -358,10 +346,10 @@ void fc3d_NaturalMapABGenerated(
         x21 = -x17 + x9;
         x22 = Heaviside(x21);
         x23 = 0.5*x22;
-        /*@ assert (x8 < -epsilon*epsilon*epsilon || x8 > epsilon*epsilon*epsilon); */
+        /*@ assert x8 < -epsilon*epsilon*epsilon || x8 > epsilon*epsilon*epsilon; */
         x50 = 1.0/x8;
         x51 = -x10*x50;
-        /*@ assert (x17 < -epsilon*epsilon*epsilon || x17 > epsilon*epsilon*epsilon); */
+        /*@ assert x17 < -epsilon*epsilon*epsilon || x17 > epsilon*epsilon*epsilon; */
         x52 = 1.0/x17;
         x53 = mu*x52;
         x54 = x11*x53;
@@ -378,15 +366,14 @@ void fc3d_NaturalMapABGenerated(
         x72 = -rt1 + x10;
         x73 = x69*x72;
         x92 = Max(0, x18);
-        /*@ assert (x92) >= 0; */
+        /*@ assert x92 >= 0; */
         x93 = 0.5*x92;
         x94 = -x53;
-        /*@ assert (x16 >= 0); */
-        /*@ assert (x16 < -epsilon*epsilon*epsilon || x16 > epsilon*epsilon*epsilon); */
+        /*@ assert x16 < -epsilon*epsilon*epsilon || x16 > epsilon*epsilon*epsilon; */
         x95 = 1.0/((sqrt(x16))*(sqrt(x16))*(sqrt(x16)));
         x96 = mu*x95;
         x97 = Max(0, x21);
-        /*@ assert (x97) >= 0; */
+        /*@ assert x97 >= 0; */
         x98 = 0.5*x97;
         x99 = x11*x72;
         x107 = -0.5*mu*x11*x14*x92*x95;
@@ -402,11 +389,9 @@ void fc3d_NaturalMapABGenerated(
     {
         x6 = -un;
         x7 = mu*rn;
-        /*@ assert (x7) >= 0; */
-        /*@ assert (x2 >= 0); */
         x8 = sqrt(x2);
         x9 = -mu*x8 + x6 + x7;
-        /*@ assert (x16 >= 0); */
+        /*@ assert x16 >= 0; */
         x17 = sqrt(x16);
         x18 = x17 + x9;
         x19 = Heaviside(x18);
@@ -415,7 +400,6 @@ void fc3d_NaturalMapABGenerated(
         x22 = Heaviside(x21);
         x23 = 0.5*x22;
         x25 = -1.0*un + x7;
-        /*@ assert (x1 >= 0); */
         x32 = sqrt(x1);
         x38 = Heaviside(x25 - 1.0*x32);
         x65 = -mu*x20;
@@ -426,18 +410,16 @@ void fc3d_NaturalMapABGenerated(
     {
         x6 = -un;
         x7 = mu*rn;
-        /*@ assert (x7) >= 0; */
-        /*@ assert (x2 >= 0); */
         x8 = sqrt(x2);
         x9 = -mu*x8 + x6 + x7;
-        /*@ assert (x16 >= 0); */
+        /*@ assert x16 >= 0; */
         x17 = sqrt(x16);
         x18 = x17 + x9;
         x19 = Heaviside(x18);
         x20 = 0.5*x19;
         x21 = -x17 + x9;
         x22 = Heaviside(x21);
-        /*@ assert (x17 < -epsilon*epsilon*epsilon || x17 > epsilon*epsilon*epsilon); */
+        /*@ assert x17 < -epsilon*epsilon*epsilon || x17 > epsilon*epsilon*epsilon; */
         x52 = 1.0/x17;
         x53 = mu*x52;
         x54 = x11*x53;
@@ -449,24 +431,20 @@ void fc3d_NaturalMapABGenerated(
         x72 = -rt1 + x10;
         x73 = x69*x72;
         x92 = Max(0, x18);
-        /*@ assert (x92) >= 0; */
         x93 = 0.5*x92;
-        /*@ assert (x16 >= 0); */
-        /*@ assert (x16 < -epsilon*epsilon*epsilon || x16 > epsilon*epsilon*epsilon); */
+        /*@ assert x16 < -epsilon*epsilon*epsilon || x16 > epsilon*epsilon*epsilon; */
         x95 = 1.0/((sqrt(x16))*(sqrt(x16))*(sqrt(x16)));
         x97 = Max(0, x21);
-        /*@ assert (x97) >= 0; */
         x98 = 0.5*x97;
         x99 = x11*x72;
         x108 = x14*x72;
         x110 = 0.5*mu*x22*x52;
-        /*@ assert (x16 < -epsilon*epsilon*epsilon || x16 > epsilon*epsilon*epsilon); */
         x111 = 1.0/x16;
         x112 = 0.5*x111*x19;
         x113 = 0.5*x111*x22;
         x114 = -x52;
         x115 = x72*x72;
-        /*@ assert (x115) >= 0; */
+        /*@ assert x115 >= 0; */
         x116 = -rt2 + x13;
         x117 = -x11*x112*x14 - x116*x72*x95*x98;
         x118 = x11*x116;
@@ -474,25 +452,21 @@ void fc3d_NaturalMapABGenerated(
         x120 = x116*x69;
         x125 = x116*x14;
         x126 = x116*x116;
-        /*@ assert (x126) >= 0; */
+        /*@ assert x126 >= 0; */
 
     }
     if (x57)
     {
         x7 = mu*rn;
-        /*@ assert (x7) >= 0; */
         x25 = -1.0*un + x7;
-        /*@ assert (x1 >= 0); */
         x32 = sqrt(x1);
         x38 = Heaviside(x25 - 1.0*x32);
 
     }x6 = -un;
     x7 = mu*rn;
-    /*@ assert (x7) >= 0; */
-    /*@ assert (x2 >= 0); */
     x8 = sqrt(x2);
     x9 = -mu*x8 + x6 + x7;
-    /*@ assert (x16 >= 0); */
+    /*@ assert x16 >= 0; */
     x17 = sqrt(x16);
     x18 = x17 + x9;
     x19 = Heaviside(x18);
@@ -515,11 +489,10 @@ void fc3d_NaturalMapABGenerated(
     {
         /*@ assigns result[1]; */
         result[1] = 0;
-        /*@ assert (result[1]) >= 0; */
+        /*@ assert result[1] >= 0; */
     }
 
 
-    /*@ assert x70 || x46; */
     if (x70)
     {
         /*@ assigns result[2]; */
@@ -584,7 +557,7 @@ void fc3d_NaturalMapABGenerated(
     {
         /*@ assigns result[4]; */
         result[4] = 0.0;
-        /*@ assert (result[4]) >= 0; */
+        /*@ assert result[4] >= 0; */
     }
     else if (x59)
     {
@@ -594,7 +567,6 @@ void fc3d_NaturalMapABGenerated(
     }
 
 
-    /*@ assert x31 || x43 || x57 || x59; */
     if (x31)
     {
         /*@ assigns result[5]; */
@@ -611,7 +583,7 @@ void fc3d_NaturalMapABGenerated(
     {
         /*@ assigns result[5]; */
         result[5] = 0.0;
-        /*@ assert (result[5]) >= 0; */
+        /*@ assert result[5] >= 0; */
     }
     else if (x59)
     {
@@ -621,7 +593,6 @@ void fc3d_NaturalMapABGenerated(
     }
 
 
-    /*@ assert x31 || x43 || x47 || x49 || x59; */
     if (x31)
     {
         /*@ assigns result[6]; */
@@ -654,7 +625,6 @@ void fc3d_NaturalMapABGenerated(
     }
 
 
-    /*@ assert x31 || x43 || x57 || x59; */
     if (x31)
     {
         /*@ assigns result[7]; */
@@ -671,7 +641,7 @@ void fc3d_NaturalMapABGenerated(
     {
         /*@ assigns result[7]; */
         result[7] = 0.0;
-        /*@ assert (result[7]) >= 0; */
+        /*@ assert result[7] >= 0; */
     }
     else if (x59)
     {
@@ -681,7 +651,6 @@ void fc3d_NaturalMapABGenerated(
     }
 
 
-    /*@ assert x31 || x43 || x57 || x59; */
     if (x31)
     {
         /*@ assigns result[8]; */
@@ -714,7 +683,6 @@ void fc3d_NaturalMapABGenerated(
     result[9] = x65 - x66 + x75 + 1;
 
 
-    /*@ assert x70 || x46; */
     if (x70)
     {
         /*@ assigns result[10]; */
@@ -725,11 +693,10 @@ void fc3d_NaturalMapABGenerated(
     {
         /*@ assigns result[10]; */
         result[10] = 0;
-        /*@ assert (result[10]) >= 0; */
+        /*@ assert result[10] >= 0; */
     }
 
 
-    /*@ assert x70 || x46; */
     if (x70)
     {
         /*@ assigns result[11]; */
@@ -749,7 +716,7 @@ void fc3d_NaturalMapABGenerated(
     {
         /*@ assigns result[12]; */
         result[12] = 0.0;
-        /*@ assert (result[12]) >= 0; */
+        /*@ assert result[12] >= 0; */
     }
     else if (x70)
     {
@@ -759,7 +726,6 @@ void fc3d_NaturalMapABGenerated(
     }
 
 
-    /*@ assert x70 || x46; */
     if (x70)
     {
         /*@ assigns result[13]; */
@@ -770,17 +736,16 @@ void fc3d_NaturalMapABGenerated(
     {
         /*@ assigns result[13]; */
         result[13] = 1;
-        /*@ assert (result[13]) >= 0; */
-        /*@ assert (result[13]) != 0; */
+        /*@ assert result[13] >= 0; */
+        /*@ assert result[13] != 0; */
     }
 
 
-    /*@ assert x46 || x70; */
     if (x46)
     {
         /*@ assigns result[14]; */
         result[14] = 0.0;
-        /*@ assert (result[14]) >= 0; */
+        /*@ assert result[14] >= 0; */
     }
     else if (x70)
     {
@@ -790,12 +755,11 @@ void fc3d_NaturalMapABGenerated(
     }
 
 
-    /*@ assert x46 || x70; */
     if (x46)
     {
         /*@ assigns result[15]; */
         result[15] = 0.0;
-        /*@ assert (result[15]) >= 0; */
+        /*@ assert result[15] >= 0; */
     }
     else if (x70)
     {
@@ -805,7 +769,6 @@ void fc3d_NaturalMapABGenerated(
     }
 
 
-    /*@ assert x70 || x46; */
     if (x70)
     {
         /*@ assigns result[16]; */
@@ -816,11 +779,10 @@ void fc3d_NaturalMapABGenerated(
     {
         /*@ assigns result[16]; */
         result[16] = 0;
-        /*@ assert (result[16]) >= 0; */
+        /*@ assert result[16] >= 0; */
     }
 
 
-    /*@ assert x46 || x70; */
     if (x46)
     {
         /*@ assigns result[17]; */
