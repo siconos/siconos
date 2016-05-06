@@ -1,4 +1,7 @@
 # Siconos
+|  **`ubuntu-14-04-gcc-atlas-lapack`**   |
+|----------------------------------------|
+|[![Build Status](https://travis-ci.org/siconos/siconos.svg?branch=master)](https://travis-ci.org/siconos/siconos)|
 
 A software package for the modeling and simulation of nonsmooth dynamical systems in C++ and in Python.
 
@@ -58,6 +61,7 @@ This component can be used to
 Siconos is currently distributed under GPL license (v2).
 
 ### The archetypal example: "The bouncing ball"
+```python
     from siconos.kernel import LagrangianLinearTIDS, NewtonImpactNSL,\
         LagrangianLinearTIR, Interaction, Model, MoreauJeanOSI,\
         TimeDiscretisation, LCP, TimeStepping
