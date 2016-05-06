@@ -112,5 +112,5 @@ bouncingBall.initialize(s) # simulation initialization
 N = (T - t0) / h # the number of time steps
 # time loop
 while s.hasNextEvent():
-s.computeOneStep()
-s.nextStep()
+    s.computeOneStep()
+    s.nextStep()
