@@ -98,7 +98,6 @@ bouncingBall.nonSmoothDynamicalSystem().link(inter, ball)
 # Simulation
 # (1) OneStepIntegrators
 OSI = MoreauJeanOSI(theta)
-OSI.insertDynamicalSystem(ball)
 # (2) Time discretisation 
 t = TimeDiscretisation(t0, h)
 # (3) one step non smooth problem
