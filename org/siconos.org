@@ -1049,6 +1049,55 @@ examples:
 **** TODO Prevent using LCP formulation with RelayNSL.		    :VINCENT:
      - if you use LCP formulation as osnspb in Siconos/Kernel with RelayNSL, the simulation runs perfectly well but the results are hazardous
 
+* Interesting software libraries
+** Collision / Physics
+
+This list is restricted to open source 3D collision detection
+libraries, or physics libraries that include a collision detection
+component that can be used on its own.
+
+| Name      | URL                                                                         | Language        | Last update | Notes                 | License            |
+|-----------+-----------------------------------------------------------------------------+-----------------+-------------+-----------------------+--------------------|
+| Bullet    | http://bulletphysics.org/                                                   | C++             |             | Used in Siconos       | zlib               |
+| OZCollide | http://www.tsarevitch.org/ozcollide                                         | C++             |             |                       | LGPL               |
+| ODE       | http://opende.sf.net                                                        | C++/C interface |             |                       | LGPL v2.1+         |
+| ncollide  | http://ncollide.org/                                                        | Rust            |             |                       | BSD3               |
+| V-Collide | http://www3.cs.stonybrook.edu/~algorith/implement/V_COLLIDE/implement.shtml | C/C++           |        1998 | uses RAPID            | Unspecified        |
+| RAPID     | http://www3.cs.stonybrook.edu/~algorith/implement/RAPID/implement.shtml     | C/C++           |       1995? |                       | Unspecified        |
+| SOLID     | http://solid.sourceforge.net/                                               | C++             |        1999 |                       | LGPL v2            |
+| OPCODE    | http://www.codercorner.com/Opcode.htm                                       | C++             |        2003 |                       | Unspecified        |
+| ColDet    | https://sourceforge.net/projects/coldet/                                    | C++             |             |                       | LGPL v2            |
+| PQP       | http://gamma.cs.unc.edu/SSV/                                                | C++             |        1999 | works, mesh-mesh only | Permissive         |
+| V-Clip    | http://www3.cs.stonybrook.edu/~algorith/implement/V-CLIP/implement.shtml    | C++             |    Not sure | Unspecified           |                    |
+| CollDet   | http://cgvr.cs.uni-bremen.de/research/colldet/                              | C++             |        2007 | For OpenSG            | Permissive (educ.) |
+| FCL       | https://github.com/flexible-collision-library/fcl                           | C++             |        2015 | Uses libCCD           | BSD                |
+| libCCD    | https://github.com/danfis/libccd                                            | C++             |        2016 | Convex-convex GJK     | BSD                |
+
+Other resources:
+
+| https://otik.zcu.cz/bitstream/handle/11025/5966/E59.pdf  | Paper includes a survey of collision libraries            |
+| http://gamma.cs.unc.edu/research/collision/packages.html | Rest of the UNC algorithms, most require filing a request |
+
+** CAD modeling
+
+CAD libraries / tools generally support constructive geometry
+modeling, implicit curved surfaces, etc., instead of just mesh
+representations.  Generally don't include any physics support.
+
+| FreeCAD      | http://www.freecadweb.org/ | C++/Python | Based on Open CASCADE (OCCT), used in Siconos           | LGPL v2+               |
+| Open CASCADE | http://www.opencascade.com | C++        | http://git.dev.opencascade.org/gitweb/                  | LGPL v2.1              |
+| OpenSCAD     | http://www.openscad.org/   | Qt/C++     | Constructive geometry front-end, not a library          | GPL v2                 |
+| OpenCSG      | http://www.opencsg.org/    | C++        | Constructive geometry rendering engine used by OpenSCAD | GPL v2                 |
+| CGAL         | http://www.cgal.org/       | C++        | Geometric algorithms used by OpenSCAD                   | GPL v3+, or commercial |
+
+** Scene graph
+
+Scene graph libraries maintain a graph of objects that can be rendered
+visually, but generally physics is left to an external solution.
+
+| OpenSG         | http://www.opensg.org/         | C++ | LGPL v2         |
+| OpenSceneGraph | http://www.openscenegraph.org/ | C++ | LGPL (modified) |
+
 * Footnotes
 
  
