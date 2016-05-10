@@ -109,20 +109,24 @@ def resolve_path(source_dir, header_path):
 
 def usage():
     myname = sys.argv[0]
-    print('{0} [--namespace=<namespace>] -I<path> [-I<path> ...] \
-               [--targets=<Mod1>[,Mod2[,...]]] \
-               [--output=<filename>] \
-               [--source=<siconos source dir>] \
-               header'.format(myname))
+    print(' '.join("""{0} [--namespace=<namespace>] -I<path> [-I<path> ...]
+    [--targets=<Mod1>[,Mod2[,...]]]
+    [--output=<filename>]
+    [--source=<siconos source dir>]
+    [--build=<siconos build dir>]
+    header""".format(myname).split()))
 
-def parse_args():
+def parse_args(need_build_path=False):
     """Parse command-line arguments for generated header builder utility."""
     include_paths = []
     siconos_namespace = '::'
+    myname = sys.argv[0]
 
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'I:', ['help', 'namespace=',
-                                                        'targets=', 'output=', 'source='])
+        longopts = ['help', 'namespace=', 'targets=', 'output=', 'source=']
+        if need_build_path:
+            longopts.append('build=')
+        opts, args = getopt.getopt(sys.argv[1:], 'I:', longopts)
     except getopt.GetoptError as err:
         print(str(err))
         usage()
@@ -131,6 +135,7 @@ def parse_args():
     targets = []
     generated_file = None
     source_dir = None
+    build_path = None
 
     for opt, arg in opts:
         if opt == '--targets':
@@ -146,6 +151,8 @@ def parse_args():
             generated_file = arg
         if opt == '--source':
             source_dir = arg
+        if opt == '--build':
+            build_path = arg
 
     if generated_file is None:
         usage()
@@ -155,6 +162,11 @@ def parse_args():
     if source_dir is None:
         usage()
         print('{0} --source  option is mandatory.'.format(myname))
+        sys.exit(1)
+
+    if need_build_path and build_path is None:
+        usage()
+        print('{0} --build  option is mandatory.'.format(myname))
         sys.exit(1)
 
     generated_header = os.path.splitext(os.path.basename(generated_file))[0]
@@ -168,7 +180,8 @@ def parse_args():
             targets,
             generated_file,
             source_dir,
-            generated_header)
+            generated_header,
+            build_path)
 
 def get_headers(targets):
     all_headers = [h for h in itertools.chain(*(input_headers[target]

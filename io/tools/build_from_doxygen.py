@@ -33,6 +33,9 @@ def classes_from_build_path(build_path):
     """Get classes and members from all Doxygen XML files found on the
        provided build path."""
     doxy_xml_path = os.path.join(build_path,'Docs/build/html/doxygen/xml')
+    if not os.path.exists(doxy_xml_path):
+        print('%s: Error, path "%s" does not exist.'%(sys.argv[0], doxy_xml_path))
+        sys.exit(1)
     doxy_xml_files = (
         glob(os.path.join(doxy_xml_path, 'class*.xml'))
         + glob(os.path.join(doxy_xml_path, 'struct*.xml')))
@@ -84,7 +87,7 @@ def classes_from_headers(all_headers, include_paths):
         for i in include_paths:
             cmd += ['-I', i]
         cmd.append(hpp)
-        print(' '.join(cmd))
+        # print(' '.join(cmd))
         os.system(' '.join(cmd))
         with open(compiled, 'r') as out:
             for line in out:
@@ -96,15 +99,13 @@ def classes_from_headers(all_headers, include_paths):
         shutil.rmtree(d)
 
 if __name__=='__main__':
-    src_path = '../..'
-    build_path = '../../bld'
-
     (include_paths,
      siconos_namespace,
      targets,
      generated_file,
      source_dir,
-     generated_header) = parse_args()
+     generated_header,
+     build_path) = parse_args(need_build_path=True)
 
     all_headers = get_headers(targets)
 
@@ -116,7 +117,13 @@ if __name__=='__main__':
     classes = {k: v for k,v in doxygen_classes.items()
                if k in header_classes and not unwanted(k)}
 
-    assign_priorities(classes, src_path)
+    print('%d classes found.'%len(classes))
+
+    if len(classes) < 10:
+        print('%s: Error, not enough classes found.'%sys.argv[0])
+        sys.exit(1)
+
+    assign_priorities(classes, source_dir)
 
     resolve_base_classes(classes)
 

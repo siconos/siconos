@@ -28,7 +28,8 @@ from builder_common import *
  targets,
  generated_file,
  source_dir,
- generated_header) = parse_args()
+ generated_header,
+ build_path) = parse_args()
 
 all_headers = get_headers(targets)
 
