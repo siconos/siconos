@@ -216,8 +216,9 @@ def write_classes(dest_file, classes):
                 'SICONOS_IO_REGISTER_WITH_BASES({0},{1},\n'
                 .format(clname, '('+')('.join(bases)+')'))
         else:
-            dest_file.write('SICONOS_IO_REGISTER({0},\n'.format(clname))
+            dest_file.write('SICONOS_IO_REGISTER({0},\n'
+                            .format(clname))
 
         # Write (wanted) member variables
-        dest_file.write('\n'.join('  ({0})'.format(m) for m in members
-                                  if not unwanted(m)) + ')\n')
+        dest_file.write('\n'.join(sorted('  ({0})'.format(m) for m in members
+                                         if not unwanted(m))) + ')\n')
