@@ -205,7 +205,7 @@ def write_includes(dest_file, all_headers):
         dest_file.write('#include "{0}"\n'.format(header))
 
 def write_register_with_bases(dest_file, with_base):
-    with_base_s = [c for c,p in sorted(with_base, key=lambda k: k[1])]
+    with_base_s = [c for c,p in sorted(with_base, key=lambda k: (k[1],k[0]))]
     dest_file.write('\n')
     dest_file.write('template <class Archive>\n')
     dest_file.write('void siconos_io_register_generated(Archive& ar)\n')

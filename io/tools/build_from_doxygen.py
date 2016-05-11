@@ -144,7 +144,12 @@ if __name__=='__main__':
         with_base = [(cl['name'],
                       cl['priority'])
                      for cl in classes.values()
-                     if len(cl['bases'])>0 and not cl['abstract']]
+                     if not cl['abstract']]
+
+        # Note: This was the condition before, but noticed that
+        # builder.py did not check the number of bases before adding
+        # to with_base!
+        # if len(cl['bases'])>0 and not cl['abstract']]
 
         # filtering is not correct at this point
         # some unwanted classes are necessary
