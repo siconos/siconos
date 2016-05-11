@@ -89,5 +89,11 @@ public:
   {
     return _storedY;
   }
+
+  /** capture data when the SensorEvent is processed => set data[SensorEvent]=...
+   */
+  // Note: This is redundant to abstract definition in Sensor.hpp,
+  // just to help Doxygen's imperfect detection of abstract classes.
+  virtual void capture() = 0;
 };
 #endif
