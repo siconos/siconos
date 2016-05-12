@@ -4,19 +4,24 @@
 Siconos/C++ Reminder
 ====================
 
-C++ is the basic language of siconos input files, thus you need at least a basic knowledge of c++.
+C++ is the basic language of Siconos input files, thus you need at least a basic knowledge of C++.
 This topic is covered by many books or tutorials, try for example :cite:`eckel_cpp`.
-However, you can find in this first section the main C++ commands you need to know to write a first input file. \n
+However, you can find in this first section the main C++ commands you need to know to write a first input file.
 
+This page presents some basic commands and things you need to know to write a first C++ driver for your simulation.
 
-However, this page presents some basic commands and things you need to know to write a first cpp driver for yout simulation.
+   Note: In recent versions it is possible to design complete Siconos
+   simulations using the Python programming language.  If you are
+   using the Python interface, most of this document can be ignored.
+   However, the Python interface uses the same class names.  See the
+   :ref:`siconos_python_reference`.
 
 Building/destroying and using objects
 -------------------------------------
 
 .. highlight:: c++
-	       
-To describe your problem, you will mainly need to build pointers to objects. 
+
+To describe your problem, you will mainly need to build pointers to objects.
 Siconos use smart pointers so you do not have to bother with deletion.
 The namespace SP enclose typedefs of all Siconos classes as smart pointers.
 
@@ -59,6 +64,7 @@ Then in most cases, to build such an object, you just need to insert some existi
 The usual ways of construction are described below.
 
 ::
+
    # build a dense vector of 4 elements
    SP::SiconosVector v1(new SimpleVector(4));
 
@@ -107,6 +113,7 @@ Note that a BlockVector can also contain some other BlockVector::
 V1 has now two blocks: the first one is a block of two blocks and the second is equal to v1.
 
 ::
+
    // m1 ... m4 some SP::SiconosMatrix
    SP::SiconosMatrix M(new BlockMatrix(m1,m2,m3,m4));
    // M is a 2X2 blocks matrix 
@@ -122,7 +129,7 @@ Check the complete list of available constructors in reference documentation of 
 Read/write vectors and matrices from/to file
 """"""""""""""""""""""""""""""""""""""""""""
 
-This is done thanks to :doxysiconos:`ioVector` and :doxysiconos:`ioMatrix` classes.
+This is done using :doxysiconos:`ioVector` and :doxysiconos:`ioMatrix` classes.
 
 ::
 
@@ -137,10 +144,13 @@ Input/Ouput Files format:
 
 On the first line, the dimensions, with space as separator. Then the data. 
 
-Example, for a 2-rows, 3-columns matrix:\n
-2 3\n
-1 2 3\n
-4 5 6\n
+Example, for a 2-rows, 3-columns matrix:
+
+::
+
+   2 3
+   1 2 3
+   4 5 6
 
 However, if you give as a second argument to write function "noDim", the first line with dimensions will not be written.
 
@@ -318,7 +328,7 @@ To handle a specific block, use "[ ]" or getVector and getVectorPtr functions::
 About efficiency
 """"""""""""""""
 
-As you can notice above, for most of the functionnalities, two solutions are available: either an overloaded operator or a function without any return value.
+As you can see above, for most functionality, two solutions are available: either an overloaded operator or a function without any return value.
 For example in the case of matrix addition::
 
   C = A + B;
@@ -326,8 +336,6 @@ For example in the case of matrix addition::
   add(A,B,C);
 
 In a general way, if you need efficiency, always prefer functions to overloaded operators. 
-The first solution is just there to give a more pleasant, and readable, way of writing operations.
+The first solution is just there to give a more pleasant and readable, way of writing operations.
 
 Try also to use pointers to objects to avoid temporary and time-consuming copies.
-
-...
