@@ -16,23 +16,23 @@
    related_projects
    z_siconos_bibtex
 
-.. container:: indeximgs
+.. container:: index-gallery
 
     .. image:: /figures/buck.*
        :height: 190 px
-       :class: indeximg
+       :class: gallery
        :alt: Analog circuit simulation with non-smooth components
     .. image:: /figures/C60.*
        :height: 190 px
-       :class: indeximg
+       :class: gallery
        :alt: Simulation of a mechanical circuit breaker
     .. image:: /figures/Exomars.24.10.small.*
        :height: 190 px
-       :class: indeximg
+       :class: gallery
        :alt: Simulation of the ExoMars rover
     .. image:: /figures/snapshot-silo.*
        :height: 190 px
-       :class: indeximg
+       :class: gallery
        :alt: Simulation of granular materials
 
 
