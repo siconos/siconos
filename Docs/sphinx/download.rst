@@ -13,29 +13,29 @@ Sources
 
 Siconos project is hosted on github : https://github.com/siconos/siconos
 
-and the whole sources can be freely downloaded. Try for example::
+and the source code can be freely downloaded. Try for example::
 
   git clone git@github.com:siconos/siconos.git
 
-As user, you will probably only need to clone the repository (as shown above) once for all and then just update your local copy to
+As user, you will probably only need to clone the repository (as shown above) once and then just update your local copy to
 include the last revision::
 
   cd path-to-siconos
   git pull
 
-As developper, you will need to learn more about git. Check for example https://git-scm.com/book/en/v1/Getting-Started-About-Version-Control.
+As developer, you will need to learn more about git. Check for example https://git-scm.com/book/en/v1/Getting-Started-About-Version-Control.
 
-Just below, you can find a short git reminder::
-  
-* bring your working copy "up-to-date" with the Gforge repository::
-    
+Below, you can find a short git refresher:
+
+* bring your working copy "up-to-date" with the github repository::
+
     git pull --rebase
 
 * commit the new version of your file(s) to your local repository::
-    
+
     git commit -a -m "some comments"
-    
-* control the state of your local repository::
+
+* check the status of your local repository::
 
     git status
 
@@ -54,7 +54,7 @@ Just below, you can find a short git reminder::
 * see the list of files which differ::
 
     git diff origin master --stat
-    
+
 * propagate your changes to the main repository::
 
     git push
