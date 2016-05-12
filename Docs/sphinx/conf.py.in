@@ -159,6 +159,20 @@ html_theme = 'siconos'
 # Add any paths that contain custom themes here, relative to this directory.
 html_theme_path = ['@CMAKE_CURRENT_SOURCE_DIR@/sphinx/sphinx_themes']
 
+# Activate the bootstrap theme if it's available
+try:
+    import sphinx_bootstrap_theme
+    html_theme = 'bootstrap'
+    html_theme_path += sphinx_bootstrap_theme.get_html_theme_path()
+    html_theme_options = {
+        'bootswatch_theme': "superhero",
+    }
+except:
+    print("""Warning: Module sphinx_bootstrap_theme not found, continuing
+anyway using old theme.  To get the new theme, use,
+
+    pip install sphinx_bootstrap_theme""")
+
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
 #html_title = None

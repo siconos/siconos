@@ -1,0 +1,25 @@
+
+@media (max-width:1000px) {
+    #sidebar { display: none; }
+}
+
+#sidebar {
+    padding: 10px;
+}
+
+#sidebar h3 {
+    color: #df691a; /* "superhero" bootstrap theme */
+}
+
+.indeximg {
+    margin: 5px 5px 5px 5px;
+    display: inline-block;
+}
+
+.indeximgs {
+    overflow-x: scroll;
+    overflow-y: hidden;
+    white-space: nowrap;
+    width: 100%;
+    margin-bottom: 1cm;
+}
