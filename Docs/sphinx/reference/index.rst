@@ -1,8 +1,10 @@
 .. _siconos_devel_guide:
 
 
-Siconos developpers' guide
-==========================
+Developer guide
+===============
+
+To do.
 
 .. toctree::
    :maxdepth: 2

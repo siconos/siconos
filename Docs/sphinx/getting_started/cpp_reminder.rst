@@ -1,8 +1,8 @@
 .. _cpp_reminder::
 
 
-Siconos/C++ Reminder
-====================
+C++ Refresher
+=============
 
 C++ is the basic language of Siconos input files, thus you need at least a basic knowledge of C++.
 This topic is covered by many books or tutorials, try for example :cite:`eckel_cpp`.

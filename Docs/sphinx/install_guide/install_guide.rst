@@ -1,7 +1,7 @@
 .. _siconos_install_guide:
 
-Siconos Software installation guide
-===================================
+Installation guide
+==================
 
 Whatever your system is, you will need first to :
 
@@ -164,7 +164,7 @@ if *siconos_install_path* is not a standard path of your system, you may need to
 
 .. _siconos_cmake_options:
 
-CMake options for Siconos installation
+CMake options
 --------------------------------------
 
 Most options are like '-DWITH_XXX=ON or OFF to enable or disable some behavior or some interface to other libraries.

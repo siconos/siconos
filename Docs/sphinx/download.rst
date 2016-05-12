@@ -1,6 +1,6 @@
 .. _download:
 
-Download siconos
+Download Siconos
 ================
 
 Binaries

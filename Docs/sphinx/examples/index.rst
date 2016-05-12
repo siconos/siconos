@@ -1,7 +1,7 @@
 .. _siconos_examples:
 
-Examples' Manual
-================
+Examples Manual
+===============
 This document is a collection of some examples of modelisation and simulation of nonsmooth systems with Siconos.
 ALl of them are distributed with siconos package and are the results of several contributions (which means that depending on each author(s) the documentation
 may be more or less detailed ...)
