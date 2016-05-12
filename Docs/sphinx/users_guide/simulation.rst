@@ -1,8 +1,8 @@
 .. _simulation_nsds:
 
-**************************************
-Nonsmooth dynamical systems simulation
-**************************************
+******************************************
+Simulation of non-smooth dynamical systems
+******************************************
 
 Once the model (i.e. the nonsmooth dynamical system) has been properly defined and described as explained in :ref:`modeling_nsds`,
 the global simulation strategy to formalize and solve this system must be defined.
