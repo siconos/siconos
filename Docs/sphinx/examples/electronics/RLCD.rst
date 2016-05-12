@@ -3,4 +3,5 @@
 RLCD Circuit
 ------------
 
-blalakzlkaz
+To do.
+
