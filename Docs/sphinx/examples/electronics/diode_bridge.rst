@@ -252,8 +252,8 @@ and recalling that
 this is equivalent to the linear relation between :math:`(x, r)` and :math:`(y, \lambda)`:
 
 .. math::
-   
-   y &=& Cx + D\lambda, \ \ \ r = B\lambda
+
+   y = Cx + D\lambda, \ \ \ r = B\lambda
 
 To represent this kind of algebraic equations, siconos has a class :doxysiconos:`FirstOrderLinearTIR` (TIR stands for time-invariant coefficients relations)
 which inherits from :doxysiconos:`Relation`. Check :ref:`relations` to find a complete review of all the relations formalisms available in the software.
@@ -503,4 +503,4 @@ The results can now be postprocessed, with matplotlib for example::
 
 
 .. image:: /figures/electronics/DiodeBridge/diodeBridgeResult.*
-
+   :align: center
