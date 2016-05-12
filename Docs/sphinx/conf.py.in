@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# @PROJECT_NAME@ documentation build configuration file, created by
+# @PROJECT_NAME_CAP@ documentation build configuration file, created by
 # sphinx-quickstart on Thu Sep 24 16:40:52 2015.
 #
 # This file is execfile()d with the current directory set to its
@@ -84,8 +84,8 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'@PROJECT_NAME@'
-copyright = u'2015, Siconos development team'
+project = u'@PROJECT_NAME_CAP@'
+copyright = u'2016, Siconos development team'
 author = u'Siconos development team'
 
 # The version info for the project you're documenting, acts as replacement for

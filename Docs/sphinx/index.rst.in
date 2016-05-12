@@ -1,10 +1,10 @@
-.. @PROJECT_NAME@ documentation master file, created by
+.. @PROJECT_NAME_CAP@ documentation master file, created by
    sphinx-quickstart on Thu Sep 24 16:40:52 2015.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to @PROJECT_NAME@'s home page!
-==========================================
+@PROJECT_NAME_CAP@: Non-smooth numerical simulation
+===================================================
 .. toctree::
    :hidden:
    :maxdepth: 3
