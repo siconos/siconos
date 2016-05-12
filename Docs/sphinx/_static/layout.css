@@ -11,17 +11,23 @@
     color: #df691a; /* "superhero" bootstrap theme */
 }
 
-.indeximg {
+.gallery {
     margin: 5px 5px 5px 5px;
     display: inline-block;
+    text-align: center;
 }
 
-.indeximgs {
+.index-gallery {
     overflow-x: scroll;
     overflow-y: hidden;
     white-space: nowrap;
     width: 100%;
     margin-bottom: 1cm;
+}
+
+.examples-gallery {
+    width: 100%;
+    text-align: center;
 }
 
 blockquote {
