@@ -33,9 +33,9 @@ Gallery
    :scale: 50%
    :target: mechanics/beads_column.html
 
-.. image:: /figures/Control/Two-linkManipulator/two-linkManipulatorResults2.*
+.. image:: /figures/control/Two-linkManipulator/two-linkManipulatorResults2.*
    :scale: 50%
-   :target: :ref:`two_link_manipulator_example`_
+   :target: :ref:`two_link_manipulator`_
 	    
 .. image:: /figures/electronics/PowerConverter/PRC_fig2.*	   
    :scale: 50%
@@ -45,7 +45,7 @@ Gallery
    :scale: 50%
    :target: :ref:`billiard_example`_
 
-.. image:: /figures/Control/ObserverLCS/ObserverLCS.*	   
+.. image:: /figures/control/ObserverLCS/ObserverLCS.*
    :scale: 50%
    :target: :ref:`siconos_examples`_
 
