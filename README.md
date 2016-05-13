@@ -58,7 +58,7 @@ This component can be used to
 
 # License
 
-Siconos is currently distributed under GPL license (v2).
+Siconos is currently distributed under Apache Licenses (v2).
 
 ### The archetypal example: "The bouncing ball"
 ```python
