@@ -943,7 +943,25 @@ TODO
 *** Release with new License.
     + Changelog
     + 4.0
-    + 
+      +
+
+** <2016-05-17 Tue>
+*** Release
+   + License: GPL --> LGPL externals
+   + test : ok. comment mettre les labels
+   + move headers boost from io in externals M.B.
+   + Numero 4.0 M.B.
+   + Branch 4.0
+*** Doc
+   + github.io
+   + publish ? script ?
+
+*** TODO list following meeting of <2016-05-17 Tue>
+   + branch and release MB
+   + push new doc on website SS
+
+
+
 * Code reviews 						 :SICONOS:CODEREVIEW:
 ** Review Meeting with OB <2011-09-01 Mer> 			   :OB:MB:VA:
 *** Siconos/Kernel
