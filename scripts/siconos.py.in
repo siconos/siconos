@@ -91,7 +91,7 @@ def cartridge():
 |=============================================================================|
 |          Siconos-Kernel version {0}.{1}.{2}      Copyright INRIA 2005-2016      |
 |                                                                             |
-|                 Free software under GNU General Public License.             |
+|                    Free software under Apache License.                      |
 |=============================================================================|
 """.format(@MAJOR_VERSION@, @MINOR_VERSION@, '@PATCH_VERSION@'.ljust(3)))
 
