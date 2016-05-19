@@ -61,7 +61,7 @@ for opt, arg in opts:
 
 if generated_file is None:
     usage()
-    print('{0} --ouput option is mandatory.'.format(myname))
+    print('{0} --output option is mandatory.'.format(myname))
     sys.exit(1)
 
 if source_dir is None:
@@ -192,7 +192,11 @@ def get_priority(type_, name):
 
 
 # main loop
-config = parser.config_t(include_paths=include_paths, ignore_gccxml_output=True)
+if 'xml_generator_configuration_t' in dir(parser):
+    config = parser.xml_generator_configuration_t(include_paths=include_paths, ignore_gccxml_output=False,
+                                                  keep_xml=True, xml_generator='castxml')
+else:
+    config = parser.config_t(include_paths=include_paths, ignore_gccxml_output=True)
 
 decls = parser.parse(all_headers, config,  compilation_mode=COMPILATION_MODE.ALL_AT_ONCE)
 global_ns = declarations.get_global_namespace(decls)

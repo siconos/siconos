@@ -52,6 +52,10 @@ if(WITH_BULLET)
   set(${COMPONENT}_LINK_LIBRARIES ${${COMPONENT}_LINK_LIBRARIES} ${BULLET_LIBRARIES})
 endif()
 
+if(WITH_MECHANISMS)
+  set(${COMPONENT}_LINK_LIBRARIES ${${COMPONENT}_LINK_LIBRARIES} externals)
+endif()
+
 include(LibraryProjectSetup)
 library_project_setup()
 

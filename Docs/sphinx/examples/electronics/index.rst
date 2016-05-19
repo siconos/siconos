@@ -5,5 +5,5 @@ Electronics
 
 .. toctree::
 
-   RLCD
    diode_bridge
+   RLCD

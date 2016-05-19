@@ -1,8 +1,8 @@
 .. _siconos_python_reference:
 
 
-Python interface reference
-==========================
+Python API reference
+====================
 
 This is the documentation of `python <https://www.python.org/>`_ interface to Siconos.
 
@@ -15,7 +15,3 @@ This is the documentation of `python <https://www.python.org/>`_ interface to Si
    modules/mechanics
    modules/control
    modules/io
-
-
-
-	      

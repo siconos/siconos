@@ -95,6 +95,8 @@ while(eventsManager->hasNextEvent())
 }
 \endcode
 
+.. _event_driven_lagrange:
+
 Event Driven algorithm for Lagrangian systems
 ---------------------------------------------
 

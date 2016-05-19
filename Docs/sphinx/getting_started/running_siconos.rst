@@ -1,7 +1,7 @@
 .. _running_siconos:
 
-Running a simulation with Siconos
-=================================
+Running a simulation
+====================
 
 Basics
 ------

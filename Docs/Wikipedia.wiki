@@ -8,7 +8,7 @@
 | screenshot              = [[Image:siconos3_snapshot.png|center|250px]]
 | logo              = [[Image:siconos_logo.png|center|250px]]
 | genre = [[Software framework|Framework]]
-| license = [[GNU General Public License|GPL]]
+| license = [[Apache]]
 | website = [http://siconos.gforge.inria.fr siconos.gforge.inria.fr ]
 |status = Active
 }}

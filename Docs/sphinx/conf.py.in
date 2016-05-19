@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# @PROJECT_NAME@ documentation build configuration file, created by
+# @PROJECT_NAME_CAP@ documentation build configuration file, created by
 # sphinx-quickstart on Thu Sep 24 16:40:52 2015.
 #
 # This file is execfile()d with the current directory set to its
@@ -63,7 +63,7 @@ numpydoc_class_members_toctree = True
 
 doxylink = {
     'doxysiconos':
-    ('@CMAKE_CURRENT_BINARY_DIR@/build/html/Tags/@PROJECT_NAME@.tag',
+    ('@CMAKE_CURRENT_BINARY_DIR@/build/html/tags/@PROJECT_NAME@.tag',
      'doxygen/html'),
 #     '@CMAKE_CURRENT_BINARY_DIR@/build/html/doxygen/html'),
 }
@@ -84,8 +84,8 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'@PROJECT_NAME@'
-copyright = u'2015, Siconos development team'
+project = u'@PROJECT_NAME_CAP@'
+copyright = u'2016, Siconos development team'
 author = u'Siconos development team'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -158,6 +158,20 @@ html_theme = 'siconos'
 
 # Add any paths that contain custom themes here, relative to this directory.
 html_theme_path = ['@CMAKE_CURRENT_SOURCE_DIR@/sphinx/sphinx_themes']
+
+# Activate the bootstrap theme if it's available
+try:
+    import sphinx_bootstrap_theme
+    html_theme = 'bootstrap'
+    html_theme_path += sphinx_bootstrap_theme.get_html_theme_path()
+    html_theme_options = {
+        'bootswatch_theme': "superhero",
+    }
+except:
+    print("""Warning: Module sphinx_bootstrap_theme not found, continuing
+anyway using old theme.  To get the new theme, use,
+
+    pip install sphinx_bootstrap_theme""")
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".

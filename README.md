@@ -1,4 +1,7 @@
 # Siconos
+|  **`ubuntu-14-04-gcc-atlas-lapack`**   |
+|----------------------------------------|
+|[![Build Status](https://travis-ci.org/siconos/siconos.svg?branch=master)](https://travis-ci.org/siconos/siconos)|
 
 A software package for the modeling and simulation of nonsmooth dynamical systems in C++ and in Python.
 
@@ -55,58 +58,58 @@ This component can be used to
 
 # License
 
-Siconos is currently distributed under GPL license (v2).
+Siconos is currently distributed under Apache Licenses (v2).
 
 ### The archetypal example: "The bouncing ball"
-    from siconos.kernel import LagrangianLinearTIDS, NewtonImpactNSL,\
-        LagrangianLinearTIR, Interaction, Model, MoreauJeanOSI,\
-        TimeDiscretisation, LCP, TimeStepping
-    from numpy import eye, empty
-    
-    t0 = 0       # start time
-    T = 10       # end time
-    h = 0.005    # time step
-    r = 0.1      # ball radius
-    g = 9.81     # gravity
-    m = 1        # ball mass
-    e = 0.9      # restitution coeficient
-    theta = 0.5  # theta scheme
-    
-    # the dynamical system
-    x = [1, 0, 0]    # initial position
-    v = [0, 0, 0]    # initial velocity
-    mass = eye(3)  # mass matrix
-    mass[2, 2] = 2. / 5 * r * r
-    ball = LagrangianLinearTIDS(x, v, mass)
-    weight = [-m * g, 0, 0] 
-    ball.setFExtPtr(weight) #set external forces
-    # Interaction ball-floor
-    H = [[1, 0, 0]]
-    nslaw = NewtonImpactNSL(e)
-    relation = LagrangianLinearTIR(H)
-    inter = Interaction(nslaw, relation)
-    # Model
-    bouncingBall = Model(t0, T)
-    # add the dynamical system to the non smooth dynamical system
-    bouncingBall.nonSmoothDynamicalSystem().insertDynamicalSystem(ball)
-    # link the interaction and the dynamical system
-    bouncingBall.nonSmoothDynamicalSystem().link(inter, ball)
-    # Simulation
-    # (1) OneStepIntegrators
-    OSI = MoreauJeanOSI(theta)
-    OSI.insertDynamicalSystem(ball)
-    # (2) Time discretisation 
-    t = TimeDiscretisation(t0, h)
-    # (3) one step non smooth problem
-    osnspb = LCP()
-    # (4) Simulation setup with (1) (2) (3)
-    s = TimeStepping(t, OSI, osnspb)
-    # end of model definition
-    
-    # computation
-    bouncingBall.initialize(s) # simulation initialization
-    N = (T - t0) / h # the number of time steps
-    # time loop
-    while s.hasNextEvent():
-        s.computeOneStep()
-        s.nextStep()
+```python
+from siconos.kernel import LagrangianLinearTIDS, NewtonImpactNSL,\
+LagrangianLinearTIR, Interaction, Model, MoreauJeanOSI,\
+TimeDiscretisation, LCP, TimeStepping
+from numpy import eye, empty
+
+t0 = 0       # start time
+T = 10       # end time
+h = 0.005    # time step
+r = 0.1      # ball radius
+g = 9.81     # gravity
+m = 1        # ball mass
+e = 0.9      # restitution coeficient
+theta = 0.5  # theta scheme
+
+# the dynamical system
+x = [1, 0, 0]    # initial position
+v = [0, 0, 0]    # initial velocity
+mass = eye(3)  # mass matrix
+mass[2, 2] = 2. / 5 * r * r
+ball = LagrangianLinearTIDS(x, v, mass)
+weight = [-m * g, 0, 0] 
+ball.setFExtPtr(weight) #set external forces
+# Interaction ball-floor
+H = [[1, 0, 0]]
+nslaw = NewtonImpactNSL(e)
+relation = LagrangianLinearTIR(H)
+inter = Interaction(nslaw, relation)
+# Model
+bouncingBall = Model(t0, T)
+# add the dynamical system to the non smooth dynamical system
+bouncingBall.nonSmoothDynamicalSystem().insertDynamicalSystem(ball)
+# link the interaction and the dynamical system
+bouncingBall.nonSmoothDynamicalSystem().link(inter, ball)
+# Simulation
+# (1) OneStepIntegrators
+OSI = MoreauJeanOSI(theta)
+# (2) Time discretisation 
+t = TimeDiscretisation(t0, h)
+# (3) one step non smooth problem
+osnspb = LCP()
+# (4) Simulation setup with (1) (2) (3)
+s = TimeStepping(t, OSI, osnspb)
+# end of model definition
+
+# computation
+bouncingBall.initialize(s) # simulation initialization
+N = (T - t0) / h # the number of time steps
+# time loop
+while s.hasNextEvent():
+    s.computeOneStep()
+    s.nextStep()

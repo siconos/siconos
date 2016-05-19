@@ -871,6 +871,96 @@ TODO
 
 
 
+** <2016-04-29 Fri>
+*** License
+    + Code outside externals --> externals (e.g.  Cholesky.hpp) 
+    + Two choices   
+      + Externals en LGPL v3, the remaining Apache v2
+      + All in LGPL v3
+ --> vote for the mixed version LGPL/Apache
+
+   + TODO : move code in externals 
+     + numerics 
+         |-----------+--------+---+---+-----|
+         | file      | action |   |   | who |
+         |-----------+--------+---+---+-----|
+         | fftw*     |        |   |   | OB  |
+         | SimpleLCP |        |   |   |     |
+         |-----------+--------+---+---+-----|
+     + kernel
+       |--------------------+--------+-----|
+       | file               | action | who |
+       |--------------------+--------+-----|
+       | cholesky.hpp       | move   | VA  |
+       | determinant.hpp    | move   |     |
+       | expm.hpp           | move   |     |
+       | random.hpp         | delete |     |
+       | bindings_utils.hpp | move   |     |
+       |--------------------+--------+-----|
+     + control rien OB
+     + mechanics
+       |-------+----------------+-----|
+       | file  | action         | who |
+       |-------+----------------+-----|
+       | qnb.f | move (license) | VA  |
+       |-------+----------------+-----|
+
+     + io  	 
+      |-------------------------+--------+-----|
+      | file                    | action | who |
+      |-------------------------+--------+-----|
+      | src/boost/serialization | move   | MB  |
+      | renderer.py             | move   | VA  |
+      | SimpleGui.py            | move   | VA  |
+      |-------------------------+--------+-----|
+     + wrap 
+       |---------+-----------------------------------------+---|
+       | file    |                                         |   |
+       |---------+-----------------------------------------+---|
+       | numpy.I | leave as it is ot update with copyright |   |
+       |---------+-----------------------------------------+---|
+
+*** HEADER
+
+   Siconos is a program dedicated to modeling, simulation and control
+   of non smooth dynamical systems.
+
+   Copyright 2016 INRIA.
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+
+       
+*** Release with new License.
+    + Changelog
+    + 4.0
+      +
+
+** <2016-05-17 Tue>
+*** Release
+   + License: GPL --> LGPL externals
+   + test : ok. comment mettre les labels
+   + move headers boost from io in externals M.B.
+   + Numero 4.0 M.B.
+   + Branch 4.0
+*** Doc
+   + github.io
+   + publish ? script ?
+
+*** TODO list following meeting of <2016-05-17 Tue>
+   + branch and release MB
+   + push new doc on website SS
+
+
 
 * Code reviews 						 :SICONOS:CODEREVIEW:
 ** Review Meeting with OB <2011-09-01 Mer> 			   :OB:MB:VA:
@@ -976,3 +1066,57 @@ examples:
 
 **** TODO Prevent using LCP formulation with RelayNSL.		    :VINCENT:
      - if you use LCP formulation as osnspb in Siconos/Kernel with RelayNSL, the simulation runs perfectly well but the results are hazardous
+
+* Interesting software libraries
+** Collision / Physics
+
+This list is restricted to open source 3D collision detection
+libraries, or physics libraries that include a collision detection
+component that can be used on its own.
+
+| Name      | URL                                                                         | Language        | Last update | Notes                 | License            |
+|-----------+-----------------------------------------------------------------------------+-----------------+-------------+-----------------------+--------------------|
+| Bullet    | http://bulletphysics.org/                                                   | C++             |             | Used in Siconos       | zlib               |
+| OZCollide | http://www.tsarevitch.org/ozcollide                                         | C++             |             |                       | LGPL               |
+| ODE       | http://opende.sf.net                                                        | C++/C interface |             |                       | LGPL v2.1+         |
+| ncollide  | http://ncollide.org/                                                        | Rust            |             |                       | BSD3               |
+| V-Collide | http://www3.cs.stonybrook.edu/~algorith/implement/V_COLLIDE/implement.shtml | C/C++           |        1998 | uses RAPID            | Unspecified        |
+| RAPID     | http://www3.cs.stonybrook.edu/~algorith/implement/RAPID/implement.shtml     | C/C++           |       1995? |                       | Unspecified        |
+| SOLID     | http://solid.sourceforge.net/                                               | C++             |        1999 |                       | LGPL v2            |
+| OPCODE    | http://www.codercorner.com/Opcode.htm                                       | C++             |        2003 |                       | Unspecified        |
+| ColDet    | https://sourceforge.net/projects/coldet/                                    | C++             |             |                       | LGPL v2            |
+| PQP       | http://gamma.cs.unc.edu/SSV/                                                | C++             |        1999 | works, mesh-mesh only | Permissive         |
+| V-Clip    | http://www3.cs.stonybrook.edu/~algorith/implement/V-CLIP/implement.shtml    | C++             |    Not sure | Unspecified           |                    |
+| CollDet   | http://cgvr.cs.uni-bremen.de/research/colldet/                              | C++             |        2007 | For OpenSG            | Permissive (educ.) |
+| FCL       | https://github.com/flexible-collision-library/fcl                           | C++             |        2015 | Uses libCCD           | BSD                |
+| libCCD    | https://github.com/danfis/libccd                                            | C++             |        2016 | Convex-convex GJK     | BSD                |
+
+Other resources:
+
+| https://otik.zcu.cz/bitstream/handle/11025/5966/E59.pdf  | Paper includes a survey of collision libraries            |
+| http://gamma.cs.unc.edu/research/collision/packages.html | Rest of the UNC algorithms, most require filing a request |
+
+** CAD modeling
+
+CAD libraries / tools generally support constructive geometry
+modeling, implicit curved surfaces, etc., instead of just mesh
+representations.  Generally don't include any physics support.
+
+| FreeCAD      | http://www.freecadweb.org/ | C++/Python | Based on Open CASCADE (OCCT), used in Siconos           | LGPL v2+               |
+| Open CASCADE | http://www.opencascade.com | C++        | http://git.dev.opencascade.org/gitweb/                  | LGPL v2.1              |
+| OpenSCAD     | http://www.openscad.org/   | Qt/C++     | Constructive geometry front-end, not a library          | GPL v2                 |
+| OpenCSG      | http://www.opencsg.org/    | C++        | Constructive geometry rendering engine used by OpenSCAD | GPL v2                 |
+| CGAL         | http://www.cgal.org/       | C++        | Geometric algorithms used by OpenSCAD                   | GPL v3+, or commercial |
+
+** Scene graph
+
+Scene graph libraries maintain a graph of objects that can be rendered
+visually, but generally physics is left to an external solution.
+
+| OpenSG         | http://www.opensg.org/         | C++ | LGPL v2         |
+| OpenSceneGraph | http://www.openscenegraph.org/ | C++ | LGPL (modified) |
+
+* Footnotes
+
+ 
+

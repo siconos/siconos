@@ -12,13 +12,16 @@ Linear Relations and Newton impact law.
 Building the Non-Smooth Dynamical System
 ----------------------------------------
 
-As described in the figure below, we consider a ball of mass m and radius R, described by 3 generalized coordinates :math:`q=(z,x,\theta)`
-The ball is subjected to the gravity g. The system is also constituted by a rigid plane, defined by its position h with respect
+As described in the figure below, we consider a ball of mass :math:`m` and radius :math:`R`, described by 3 generalized coordinates :math:`q=(z,x,\theta)`
+The ball is subjected to the gravity :math:`g`. The system is also constituted by a rigid plane, defined by its position :math:`h` with respect
 to the axis Oz. We assume that the position of the plane is fixed.
 
-.. image:: /figures/mechanics/BouncingBall/BouncingBall.*
+.. figure:: /figures/mechanics/BouncingBall/BouncingBall.*
    :width: 8cm
- 
+   :align: center
+
+   fig 1: Coordinate system
+
 The equation of motion of the ball is given by
 
 .. math::
@@ -34,13 +37,14 @@ The equation of motion of the ball is given by
    \end{array}\right]
 
 with
-* M the inertia term, a nXn matrix.
-* p the force due to the non-smooth law, ie the reaction at impact. 
+
+* :math:`M` the inertia term, a :math:`n\times{}n` matrix.
+* :math:`p` the force due to the non-smooth law, ie the reaction at impact. 
 * :math:`F_{ext}(t):  \mathcal R \mapsto \mathcal R^{n}` the given external force.
 
 That fits with Lagrangian, Linear and Time-Invariant coefficient Dynamical System, represented by LagrangianLinearTIDS class (see \ref dsInSiconos).
 
-Next, we will suppose that we have a column of "dsNumber" balls like the one above (mass and radius may be different, and if necessary, variables will be indexed by i, i being the number of the ball). Each ball is governed by a linear system like the one written for a single ball and may be in contact with the balls above and below it.
+Next, we will suppose that we have a column of "dsNumber" balls like the one above (mass and radius may be different, and if necessary, variables will be indexed by :math:`i`, the number of the ball). Each ball is governed by a linear system like the one written for a single ball and may be in contact with the balls above and below it.
 
 Let us now start the writing of the input file. Like for the first tutorial, we create a new directory, multiBeads, and save the template given \ref tutGCtemplate "here" as multiBeads.cpp. 
 
@@ -66,7 +70,7 @@ All the systems are inserted in a container, a DynamicalSystemsSet,
 named allDS. 
 
 From now on, to simplify writing, we suppose that all
-balls have the same mass, m = 1, and the same radius, R=0.1::
+balls have the same mass, :math:`m = 1`, and the same radius, :math:`R=0.1`::
 
   // -------------------------
   // --- Dynamical systems --- 
@@ -101,7 +105,7 @@ balls have the same mass, m = 1, and the same radius, R=0.1::
       velocity_init+= increment_velocity;
   }
   
-Next, it is necessary to define the external forces, the gravity, applied on each ball. According to \ref doc_dsPlugin, a plug-in function is available for those forces. (For details on plug-in functions, see \ref doc_usingPlugin). Its signature (the type of its arguments) is given in DefaultPlugin.cpp. So we copy it in a new file, say BeadsPlugin.cpp, and we define an extern function, gravity.::
+Next, it is necessary to define the external forces, the gravity, applied on each ball. According to :ref:`dsPlugins`, a plug-in function is available for those forces. (For details on plug-in functions, see :ref:`siconos_plugins`). Its signature (the type of its arguments) is given in DefaultPlugin.cpp. So we copy it in a new file, say BeadsPlugin.cpp, and we define an extern function, gravity.::
   
   const double m = 1; // bead mass
   const double g = 9.81; // gravity
@@ -116,11 +120,11 @@ Next, it is necessary to define the external forces, the gravity, applied on eac
 
 Warning
 
-* gravity must be an " extern "C" " function, and code is C, not C++. 
+* gravity must be an *extern "C"* function, and code is C, not C++. 
 * the name of the plugin file, BeadsPlugin.cpp here, must be xxxPlugin.cpp, xxx being whatever you want. 
 
 
-Now we have to say "use gravity from BeadsPlugin.cpp to compute the external forces of my systems".
+Now we have to say "use gravity from BeadsPlugin.cpp to compute the external forces of my systems."
 This is done thanks to "setComputeFExtFunction" function, in multiBeads.cpp::
 
    // 	
@@ -149,7 +153,9 @@ This is done thanks to "setComputeFExtFunction" function, in multiBeads.cpp::
 
 From this point, any call to the external forces of a system in allDS will result in a call to the function gravity defined in BeadsPlugin.cpp.
 
-*Remark:* m and R are set inside the BeadsPlugin file but it would also be possible, and maybe better, to pass them as parameters in gravity function. 
+*Remark:* :math:`m` and :math:`R` are set inside the BeadsPlugin file
+but it would also be possible, and maybe better, to pass them as
+parameters in gravity function.
 See \ref doc_usingPlugin for details on that option.
 
 Ok, now DynamicalSystems are clearly defined and all saved in allDS. Let's turn our attention to Interactions. In the same way, they will be handled by a container, an InteractionsSet, named allInteractions. The potential interactions are the contacts between beads and the impact on the ground. Thus, for dsNumbers systems, there are dsNumbers-1 "bead-bead" Interactions plus one between the "bottom bead" and the floor.
@@ -157,30 +163,28 @@ Ok, now DynamicalSystems are clearly defined and all saved in allDS. Let's turn 
 We start with bead-floor Interaction: the ball at the bottom bounces on the rigid plane, introducing a constraint on the position of the ball, given by:
 :math:`z-R-h\geq 0`.
 To define an Interaction, it is first necessary to set some relations between local variables at contact and the global coordinates. 
-Thus, as a local variables of the Interaction, we introduce y as the distance between the ball and the floor and :math:`\lambda` as the multiplier that corresponds to 
-the reaction at contact. Then the relation writes
+Thus, as a local variables of the Interaction, we introduce :math:`y` as the distance between the ball and the floor and :math:`\lambda` as the multiplier that corresponds to 
+the reaction at contact. Then the relation is written,
 
 .. math::
 
-   \f{eqnarray*}
-   y = Hq + b = [1 \ 0 \ 0] q - R - h  \\
-   \f}
-   and 
-   \f{eqnarray*}
-   p = H^t \lambda 
-   \f}
+   y =& Hq + b = [1 \ 0 \ 0] q - R - h \\
+   p =& H^t \lambda
 
 (next, we set h=0).
 
-Finally we need to define a non-smooth law to define the behavior of the ball at impact. 
-The unilateral constraint is such that
+.. compound::
 
-:math:`0 \leq y \perp \lambda \geq 0`
+   Finally we need to define a non-smooth law to define the behavior of the ball at impact. 
+   The unilateral constraint is such that
 
-completed with a Newton Impact law, for which we set the restitutive coefficient e to 0.9: 
+   .. math:: 0 \leq y \perp \lambda \geq 0
 
-:math:`if \ y=0, \ \dot y(t^+) = -e \dot y(t^-)`
-:math:`t^+ \f$  and \f$ t^-` being post and pre-impact times.
+   completed with a Newton Impact law, for which we set the restitutive coefficient :math:`e` to 0.9: 
+
+   .. math:: \textrm{if} \ y=0, \ \dot y(t^+) = -e \dot y(t^-)
+
+   with :math:`t^+` and :math:`t^-` being post and pre-impact times.
 
 The first Interaction can then be constructed::
 
@@ -213,18 +217,15 @@ The first Interaction can then be constructed::
 
 In the same way, the potential contact between two balls introduces some new constraints:
 
-:math:`(z_i-R_i)-(z_j-R_j)-h \geq 0`, if ball i is on top of ball j.
+:math:`(z_i-R_i)-(z_j-R_j)-h \geq 0`, if ball :math:`i` is on top of ball :math:`j`.
 
-So if we consider the Interaction between ball i and j, y being the distance between two balls and \f$ \lambda \f$ the multiplier, we get:
+So if we consider the Interaction between ball :math:`i` and :math:`j`, :math:`y` being the distance between two balls and :math:`\lambda` the multiplier, we get:
 
 .. math::
 
-   \f{eqnarray*}
-   y = HQ + b = [-1 \ 0 \ 0 \ 1 \ 0 \ 0]Q + R_j-R_i-h \\
-   p = H^t \lambda \\
-   \f}
-
-   Q = \left[\begin{array}{c}
+   y =& HQ + b = [-1 \ 0 \ 0 \ 1 \ 0 \ 0]Q + R_j-R_i-h \\
+   p =& H^t \lambda \\
+   Q =& \left[\begin{array}{c}
    q_j \\
    q_i
    \end{array}\right]
@@ -298,7 +299,7 @@ As a first example, we will use a Moreau's time-stepping scheme, where the non-s
 Event-Driven algorithm
 """"""""""""""""""""""
 
-In that second part, an event-driven algorithm is used to solve the problem. Event-Driven Simulation principle is detailed in \ref docSimuED.
+In that second part, an event-driven algorithm is used to solve the problem. Event-Driven Simulation principle is detailed in :ref:`event_driven`.
 
 The dynamics is decomposed in "modes", time-intervalls where the dynamics is smooth and discrete events where the dynamics is non-smooth.
 
@@ -316,7 +317,7 @@ The integrator will handle all the DynamicalSystems of the Model. During integra
   OneStepIntegrator * OSI = new Lsodar(allDS,s); 
 
 Each time a root is found, a new NonSmoothEvent is created and it's then necessary to write and solve a non-smooth problem. We won't detail this here but just remember that this requires two LCP, one at "velocity" level, named impact, and another at "acceleration" level, named acceleration. 
-The whole event-driven algorithm for Lagrangian Systems is available here: docSimuED::
+The whole event-driven algorithm for Lagrangian Systems is available here: :ref:`event_driven_lagrange`::
 
   OneStepNSProblem * impact = new LCP(s, "impact",solverName,101, 0.0001,"max",0.6);
   OneStepNSProblem * acceleration = new LCP(s, "acceleration",solverName,101, 0.0001,"max",0.6);
@@ -350,7 +351,7 @@ Concerning the output, we save the position and velocity of all balls::
       i++;
   }
 
-Note that we use a "DSIterator", which is no more than a pointer on a set of DynamicalSystems; allDS.begin() is a pointer on the first object handled by allDS and allDS.end() a pointer "just after" the last object handled by allDS. The current pointed system is then *it ("content of the pointer"). Thus, in the loop above, we sweep through all the DynamicalSystems and get the corresponding q and v.
+Note that we use a "DSIterator", which is simply a pointer to a set of DynamicalSystems; allDS.begin() is a pointer to the first object handled by allDS and allDS.end() a pointer "just after" the last object handled by allDS. The current pointed system is then \*it ("content of the pointer"). Thus, in the loop above, we sweep through all the DynamicalSystems and get the corresponding :math:`q` and :math:`v`.
 A static_cast is also required since allDS contains DynamicalSystem whereas we need functions specific to LagrangianDS (getQ ...). 
 
 Next, we write::
@@ -397,7 +398,7 @@ Then the simulation process consists in:
 * deal with the system at event (for example, in case of a non-smooth event, formalize and solve one or more LCP)
 * next step
 
-Once again this is only a summary and we encourage you to read \ref docSimuED to get more details about the event-driven strategy. 
+Once again this is only a summary and we encourage you to read :ref:`event_driven` to get more details about the event-driven strategy. 
 
 The resulting code is::
 
@@ -487,8 +488,11 @@ and then plot with for example gnuplot::
 
 result.gp being a command file (see example in mechanics/MultiBeadsColumn)
 
-Results are given on the figure below:
+Results are given in fig 2, below:
 
-.. image:: /figures/mechanics/multiBeadsResults.*
+.. figure:: /figures/mechanics/MultiBeads/MultiBeads.*
+   :align: center
+
+   fig 2: Result of MultiBeads simulation
 
 .. highlight:: python

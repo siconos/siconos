@@ -1,10 +1,10 @@
 .. _siconos_api_reference:
 
 
-Siconos api C/C++ reference
-===========================
+Siconos API reference (C/C++)
+=============================
 
-Documentation is automatically generated from C/C++ source files of siconos, thanks to doxygen :
+Documentation is automatically generated from the Siconos C/C++ source files using Doxygen:
 
 `C/C++ API documentation`_.
 

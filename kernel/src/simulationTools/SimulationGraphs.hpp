@@ -1,20 +1,19 @@
-/* Siconos-Kernel, Copyright INRIA 2005-2015
- * Siconos is a program dedicated to modeling, simulation and control
+/* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
- * Siconos is a free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- * Siconos is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with Siconos; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ * Copyright 2016 INRIA.
  *
- * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
 */
 
 /*! \file SiconosGraphs.hpp
@@ -40,7 +39,7 @@
  * Properties on graph :
  * --------------------
  *
- * The properties on the graph enable to store the data that are specicic to a simulation
+ * The properties on the graph enable to store the data that are specific to a simulation
  * strategy. It avoids to burden the modeling classes that should be as independent as possible from
  * the simulation choices.
  *
@@ -48,8 +47,8 @@
  * <ul>
  * <li>  Mandatory properties DynamicalSystemProperties and InteractionProperties .
  *       These properties are always  instanciated for any kind of simulation.
- *       The accesors to the property are illustrated in the followinf example :
- *       For a given SP::DynamicalSystem ds and a given graph SP::DynamicalSystemsGrap DSG
+ *       The accessors to the property are illustrated in the following example :
+ *       For a given SP::DynamicalSystem ds and a given graph SP::DynamicalSystemsGraph DSG
  *
  *       DynamicalSystemsGraph::VDescriptor dsv = DSG->descriptor(ds);
  *       SP::OneStepintegrator osi = DSG->properties(dsv).osi;
@@ -57,8 +56,8 @@
  * <li> Optional Properties
  *      They are installed thanks to the macro INSTALL_GRAPH_PROPERTIES.
  *
- *      The accesors to the property are illustrated in the following example :
- *      For a given SP::DynamicalSystem ds and a given graph SP::DynamicalSystemsGrap DSG
+ *      The accessors to the property are illustrated in the following example :
+ *      For a given SP::DynamicalSystem ds and a given graph SP::DynamicalSystemsGraph DSG
  *
  *      DynamicalSystemsGraph::VDescriptor dsv = DSG->descriptor(ds);
  *      DSG->name.insert(dsv, name); // insert the name in the property

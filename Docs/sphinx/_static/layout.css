@@ -1,0 +1,35 @@
+
+@media (max-width:1000px) {
+    #sidebar { display: none; }
+}
+
+#sidebar {
+    padding-left: 20px;
+}
+
+#sidebar h3 {
+    color: #df691a; /* "superhero" bootstrap theme */
+}
+
+.gallery {
+    margin: 5px 5px 5px 5px;
+    display: inline-block;
+    text-align: center;
+}
+
+.index-gallery {
+    overflow-x: scroll;
+    overflow-y: hidden;
+    white-space: nowrap;
+    width: 100%;
+    margin-bottom: 1cm;
+}
+
+.examples-gallery {
+    width: 100%;
+    text-align: center;
+}
+
+blockquote {
+    font-size: inherit;
+}

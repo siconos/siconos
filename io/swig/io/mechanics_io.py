@@ -479,7 +479,7 @@ class Hdf5():
 
     def __init__(self, io_filename=None, mode='w',
                  broadphase=None, osi=None, shape_filename=None,
-                 set_external_forces=None, length_scale=None, collision_margin=None):
+                 set_external_forces=None, gravity_scale=None, collision_margin=None):
 
         if io_filename is None:
             self._io_filename = '{0}.hdf5'.format(
@@ -511,7 +511,7 @@ class Hdf5():
         self._number_of_shapes = 0
         self._number_of_dynamic_objects = 0
         self._number_of_static_objects = 0
-        self._length_scale = length_scale
+        self._gravity_scale = gravity_scale
         self._collision_margin = collision_margin
         self._output_frequency = 1
         self._keep = []
@@ -525,8 +525,8 @@ class Hdf5():
         if self._set_external_forces is None:
             self._set_external_forces = self.apply_gravity
 
-        if self._length_scale is None:
-            self._length_scale = 1  # 1 => m, 1/100. => cm
+        if self._gravity_scale is None:
+            self._gravity_scale = 1  # 1 => m, 1/100. => cm
 
         self._out = h5py.File(self._io_filename, self._mode)
         self._data = group(self._out, 'data')
@@ -557,7 +557,7 @@ class Hdf5():
         self._out.close()
 
     def apply_gravity(self, body):
-        g = constants.g / self._length_scale
+        g = constants.g / self._gravity_scale
         weight = [0, 0, - body.massValue() * g]
         body.setFExtPtr(weight)
 
@@ -752,12 +752,18 @@ class Hdf5():
 
             else:
                 # a Bullet moving object
-
                 bws = BulletWeightedShape(
                     self._shape.get(contactors[0].name), mass)
 
                 if inertia is not None:
-                    bws.setInertia(inertia[0], inertia[1], inertia[2])
+                    print('inertia',inertia, type(inertia))
+                    print(np.shape(inertia))                    
+                    if np.shape(inertia) == (3,):
+                        bws.setInertia(inertia[0], inertia[1], inertia[2])
+                    elif (np.shape(inertia)== (3,3)):
+                        bws.setInertia(inertia)
+                    else:
+                        print('Wrong shape of inertia')
 
                 body = body_class(bws,
                                   translation + orientation,
@@ -1329,7 +1335,7 @@ class Hdf5():
             shape_class=None,
             face_class=None,
             edge_class=None,
-            length_scale=1,
+            gravity_scale=1.0, 
             t0=0,
             T=10,
             h=0.0005,
@@ -1347,7 +1353,7 @@ class Hdf5():
         Run a simulation from inputs in hdf5 file.
         parameters are:
           with_timer : use a timer for log output (default False)
-          length_scale : gravity is multiplied by this factor.
+          gravity_scale : gravity is multiplied by this factor.
                          1.     for meters (default).
                          1./100 for centimeters.
                          This parameter may be needed for small
@@ -1370,9 +1376,8 @@ class Hdf5():
           output_frequency :
 
         """
-
         from siconos.kernel import \
-            Model, MoreauJeanOSI, TimeDiscretisation,\
+            Model, NonSmoothDynamicalSystem, OneStepNSProblem, MoreauJeanOSI, TimeDiscretisation,\
             GenericMechanical, FrictionContact, NewtonImpactFrictionNSL
 
         from siconos.numerics import SICONOS_FRICTION_3D_ONECONTACT_NSN_AC
@@ -1403,6 +1408,11 @@ class Hdf5():
         if output_frequency is not None:
             self._output_frequency = output_frequency
 
+
+        if gravity_scale is not None:
+            self._gravity_scale = gravity_scale
+
+            
         # cold restart
         times = set()
         if self.dynamic_data() is not None and len(self.dynamic_data()) > 0:
@@ -1431,8 +1441,9 @@ class Hdf5():
             osnspb = FrictionContact(3, solver)
 
         osnspb.numericsSolverOptions().iparam[0] = itermax
+        osnspb.numericsSolverOptions().internalSolvers.iparam[0] = 100 
         osnspb.numericsSolverOptions().dparam[0] = tolerance
-        osnspb.setMaxSize(16384)
+        osnspb.setMaxSize(30000)
         osnspb.setMStorageType(1)
         osnspb.setNumericsVerboseMode(numerics_verbose)
 
@@ -1473,10 +1484,20 @@ class Hdf5():
         self.outputStaticObjects()
         self.outputDynamicObjects()
 
+        # nsds = model.nonSmoothDynamicalSystem()
+        # nds= nsds.getNumberOfDS()
+        # for i in range(nds):
+        #     ds = nsds.dynamicalSystem(i)
+        #     ds.display()
+        # #raw_input()
+
+
         while simulation.hasNextEvent():
 
             print ('step', k, '<', k0 - 1 + int((T - t0) / h))
 
+            
+            
             if proposed_is_here and use_proposed:
                 self._broadphase.updateGraph()
                 self._broadphase.performBroadphase()
@@ -1484,7 +1505,10 @@ class Hdf5():
                 log(self._broadphase.buildInteractions, with_timer)\
                     (self._model.currentTime())
 
+            
             log(simulation.computeOneStep, with_timer)()
+            
+            #osnspb.display()
 
             # if (k%self._output_frequency == 0) :
             if (k % self._output_frequency == 0) or (k == 1):

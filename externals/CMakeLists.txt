@@ -1,5 +1,5 @@
 #================================================================
-# cmake utilities to build numerics component
+# cmake utilities to build external component
 #================================================================
 
 set(COMPONENT externals)
@@ -26,7 +26,8 @@ set(${COMPONENT}_DIRS
   hairer
   netlib/dftemplates
   netlib/odepack
-  ql0001
+  optim_misc
+  optim_misc/ql0001
   SOL/lumod-c
   SuiteSparse/CSparse
   SuiteSparse/CSparse_extensions
@@ -34,7 +35,7 @@ set(${COMPONENT}_DIRS
 )
 
 if(WITH_CXX)
-  list(APPEND ${COMPONENT}_DIRS numeric_bindings)
+  list(APPEND ${COMPONENT}_DIRS numeric_bindings boost_contribs)
 endif()
 
 
@@ -60,7 +61,6 @@ if(NOT HAS_ATLAS_LAPACK)
   set(${COMPONENT}_EXCLUDE_SRCS ${${COMPONENT}_EXCLUDE_SRCS} "blas_lapack/clapack_dtrtrs.c")
 endif()
 
-
 # ---- Final setup for the library ----
 # --- set linked libraries and linker language ---
 set(${COMPONENT}_LINKER_LANGUAGE C)
@@ -85,6 +85,46 @@ library_project_setup()
 
 # --- specific install ----
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/FCMangle.h DESTINATION include/${PROJECT_NAME})
+
+
+if(HAVE_SICONOS_MECHANICS)
+  # This files is not installed as a program, even though it is one.
+  # Remove the comment if you know how it should be installed --xhub
+  #  configure_file(io/SimpleGui.py ${SICONOS_SWIG_ROOT_DIR}/io/SimpleGui.py @ONLY) 
+
+
+  file(GLOB rendererFiles RELATIVE ${CMAKE_SOURCE_DIR}/externals/renderer  ${CMAKE_SOURCE_DIR}/externals/renderer/img/*.*)
+  foreach(rendererFile ${rendererFiles})
+    set(srcRendererPath ${CMAKE_SOURCE_DIR}/externals/renderer/${rendererFile})
+    if(NOT IS_DIRECTORY ${srcRendererPath})     
+      install(FILES  ${srcRendererPath} DESTINATION share/siconos/renderer/img)
+    endif(NOT IS_DIRECTORY ${srcRendererPath})
+  endforeach(rendererFile)
+
+  file(GLOB rendererFiles RELATIVE ${CMAKE_SOURCE_DIR}/externals/renderer/  ${CMAKE_SOURCE_DIR}/externals/renderer/threeJS_libraries/*.*)
+  foreach(rendererFile ${rendererFiles})
+    set(srcRendererPath ${CMAKE_SOURCE_DIR}/externals/renderer/${rendererFile})
+    if(NOT IS_DIRECTORY ${srcRendererPath})     
+      install(FILES  ${srcRendererPath} DESTINATION share/siconos/renderer/threeJS_libraries  )
+    endif(NOT IS_DIRECTORY ${srcRendererPath})
+  endforeach(rendererFile)
+
+  install(PROGRAMS renderer/renderer.py
+    DESTINATION bin RENAME siconos_renderer)
+  
+endif()
+
+if(WITH_SERIALIZATION)
+  install(FILES
+    ${CMAKE_CURRENT_SOURCE_DIR}/boost_contribs/boost/serialization/unordered_collections_load_imp.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/boost_contribs/boost/serialization/unordered_collections_save_imp.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/boost_contribs/boost/serialization/unordered_map.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/boost_contribs/boost/serialization/unordered_set.hpp
+    DESTINATION include/${PROJECT_NAME}/boost/serialization)
+endif()
+
+
+
 
 # --- tests ---
 include(${COMPONENT}_tests.cmake)

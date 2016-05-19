@@ -261,6 +261,8 @@ And we have:
    -Mass^{-1}K & -Mass^{-1}C
    \end{array}\right]
 
+.. _dsPlugins:
+
 Dynamical Systems plug-in functions
 -----------------------------------
 

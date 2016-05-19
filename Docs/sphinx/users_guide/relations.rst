@@ -107,7 +107,7 @@ Compliant
 
 Class: LagrangianCompliantR
 
-The constraints depends on state and :math:`\lambda`, whith a function of time for which :math:`\dot \lambda(t)\f$ has sense.
+The constraints depends on state and :math:`\lambda`, with a function of time for which :math:`\dot \lambda(t)\f` has sense.
 
 .. math::
    

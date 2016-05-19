@@ -3,7 +3,7 @@ Version:        3.9.0
 Release:        2%{?dist}
 Summary:        Simulation platform dedicated to non-smooth dynamical systems
 
-License:        GPLv3
+License:        Apache2.0
 URL:            http://siconos.gforge.inria.fr
 #Source0:        https://github.com/siconos/siconos/archive/master.tar.gz
 Source0:        master.tar.gz

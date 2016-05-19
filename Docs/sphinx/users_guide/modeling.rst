@@ -1,8 +1,8 @@
 .. _modeling_nsds:
 
-************************************
-Nonsmooth dynamical systems modeling
-************************************
+****************************************
+Modeling of non-smooth dynamical systems
+****************************************
 
 
 

@@ -32,6 +32,7 @@ get_uninitialized_vars(CMAKE_ARGS_FROM_CACHE)
 
 # cmake project name
 set(PROJECT_NAME siconos)
+set(PROJECT_NAME_CAP Siconos)
 
 if(USER_OPTIONS_FILE)
   get_filename_component(input_file ${USER_OPTIONS_FILE} NAME)

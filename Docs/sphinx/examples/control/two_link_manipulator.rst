@@ -70,7 +70,7 @@ can be rewritten as
    M(\theta)\ddot{\theta}+C(\theta,\dot{\theta})\dot{\theta}+G(\theta)=0 
 
 where :math:`M,C\in \cal{R}^{2\times 2},G\in R^{2}` 
-have the same meaning as in (general dynamics\}) and they are explicitly given by: 
+have the same meaning as in (general dynamics) and they are explicitly given by: 
 
 .. math::
 
@@ -80,7 +80,7 @@ have the same meaning as in (general dynamics\}) and they are explicitly given b
    \end{array}\right],\quad & 
    \left\{ \begin{array}{ccc}
    M_{11} & = & \displaystyle\frac{m_{1}l_{1}^{2}}{4}+m_{2}\left(l_{1}^{2}+\frac{l_{2}^{2}}{4}l_{1}l_{2}\cos\theta_{2}\right)+I_{1}+I_{2}\hspace{0.5cm}\\
-   M_{12} & = & M_{21} =\displaystyle\frac{m_{2}l_{2}^{2}}{4}+\frac{m_{2}l_{1}\l_{2}}{2}\cos{\theta_{2}}+I_{2}\hspace{2cm}\\
+   M_{12} & = & M_{21} =\displaystyle\frac{m_{2}l_{2}^{2}}{4}+\frac{m_{2}l_{1}l_{2}}{2}\cos{\theta_{2}}+I_{2}\hspace{2cm}\\
    M_{22} & = & \displaystyle\frac{m_{2}l_{2}^{2}}{4}+I_{2}\hspace{5.8cm}\\ \end{array}\right.,\\ &C=\left[\begin{array}{cc} C_{11} & C_{12}\\ C_{21} & C_{22}\\ \end{array}\right],\quad &\left\{\begin{array}{ccc} C_{11} & = & -m_{2}l_{1}l_{2}\dot{\theta}_{2}\sin\theta_{2}\\\
    C_{12} & = & -\displaystyle\frac{m_{2}l_{1}l_{2}}{2}\dot{\theta}_{2}\sin\theta_{2}\\
    C_{21} & = & \displaystyle\frac{m_{2}l_{1}l_{2}}{2}\dot{\theta}_{1}\sin\theta_{2}\\
