@@ -29,6 +29,9 @@ siconos_debian_latest = siconos_default.copy()(
 siconos_ubuntu_15_04 = siconos_default.copy()(
     distrib='ubuntu:15.04')
 
+siconos_ubuntu_16_04 = siconos_default.copy()(
+    distrib='ubuntu:16.04')
+
 siconos_ubuntu_15_10 = siconos_default.copy()(
     ci_config='with_umfpack',
     add_pkgs=['umfpack'],
@@ -135,6 +138,7 @@ known_tasks = {'siconos---vm0':
                'siconos---vm2':
                (siconos_ubuntu_15_10,
                 siconos_ubuntu_15_04,
+                siconos_ubuntu_16_04,
                 siconos_profiling),
 
                'siconos---vm3':
