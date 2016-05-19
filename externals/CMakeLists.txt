@@ -1,5 +1,5 @@
 #================================================================
-# cmake utilities to build numerics component
+# cmake utilities to build external component
 #================================================================
 
 set(COMPONENT externals)
@@ -114,7 +114,14 @@ if(HAVE_SICONOS_MECHANICS)
   
 endif()
 
-
+if(WITH_SERIALIZATION)
+  install(FILES
+    ${CMAKE_CURRENT_SOURCE_DIR}/boost_contribs/boost/serialization/unordered_collections_load_imp.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/boost_contribs/boost/serialization/unordered_collections_save_imp.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/boost_contribs/boost/serialization/unordered_map.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/boost_contribs/boost/serialization/unordered_set.hpp
+    DESTINATION include/${PROJECT_NAME}/boost/serialization)
+endif()
 
 
 

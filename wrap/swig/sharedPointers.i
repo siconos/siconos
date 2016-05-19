@@ -5,8 +5,6 @@
 #define SWIG_SHARED_PTR_NAMESPACE std11
 %include boost_shared_ptr.i
 
-%import SiconosConfig.h
-
 #if defined(SICONOS_STD_SHARED_PTR) && !defined(SICONOS_USE_BOOST_FOR_CXX11)
 #define STD11 std
 #undef __cplusplus

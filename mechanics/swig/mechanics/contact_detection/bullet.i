@@ -2,6 +2,10 @@
 // SWIG interface for Siconos Mechanics/ContactDetection/Bullet
 %module(package="contact_detection", directors="1", allprotected="1") bullet
 
+ // serialization not yet implemented for bullet
+#undef WITH_IO
+#undef WITH_SERIALIZATION
+
 %include base.i
 
 // due to undefined private copy constructors
@@ -216,7 +220,6 @@ PY_FULL_REGISTER(BulletFrom1DLocalFrameR);
 
   extern  btScalar gContactBreakingThreshold;
 
-  
   void set_gContactBreakingThreshold(double x)
   {
     gContactBreakingThreshold = btScalar(x);
@@ -226,8 +229,6 @@ PY_FULL_REGISTER(BulletFrom1DLocalFrameR);
     return gContactBreakingThreshold;
   };
 
-  
-  
 }
 
 
