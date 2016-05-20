@@ -45,7 +45,7 @@
 #define Sign(x) ((double)(x>0) - (double)(x<0))
 #define Max fmax
 #define Abs(x) (x < 0 ? -x : x)
-#define Heaviside(x) (x < 0 ? 0 : ((x > 0) ? 1 : .5))
+#define Heaviside(x) (x < 0 ? 0 : ((x > 0) ? 1 : 0.))
 
 /*@ requires \is_finite((double) x);
     requires x >= 0.;
