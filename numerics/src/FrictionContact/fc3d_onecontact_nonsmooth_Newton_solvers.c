@@ -238,8 +238,6 @@ static void AC_fillMLocal(FrictionContactProblem * problem, FrictionContactProbl
   NumericsMatrix * MGlobal = problem->M;
   int n = 3 * problem->numberOfContacts;
 
-
-
   // Dense storage
   int storageType = MGlobal->storageType;
   if (storageType == 0)
@@ -268,8 +266,43 @@ static void AC_fillMLocal(FrictionContactProblem * problem, FrictionContactProbl
     /*     cblas_dcopy(9, MGlobal->matrix1->block[diagPos], 1, localproblem->M->matrix0 , 1); */
 
   }
+  else if (storageType == 2)
+  {
+    /* ok, we maintain the sparseblock storage from the sparse one */
+    if (!problem->M->matrix1)
+    {
+      problem->M->matrix1 = (SparseBlockStructuredMatrix*) malloc(sizeof(SparseBlockStructuredMatrix));
+      problem->M->matrix1->block = NULL;
+      problem->M->matrix1->index1_data = NULL;
+      problem->M->matrix1->index2_data = NULL;
+    }
+    sparseToSBM(problem->dimension, NM_triplet(problem->M), problem->M->matrix1);
+    int diagPos = getDiagonalBlockPos(problem->M->matrix1, contact);
+    localproblem->M->matrix0 = problem->M->matrix1->block[diagPos];
+
+    /* Direct access is below, but there is a bug, find it! */
+
+    /* CSparseMatrix* MM = NM_triplet(MGlobal); */
+    /* int in = 3 * contact, it = in + 1, is = it + 1; */
+    /* int inc = n * in; */
+    /* double * MLocal =  localproblem->M->matrix0; */
+    /* /\* The part of MM which corresponds to the current block is copied into MLocal *\/ */
+    /* MLocal[0] = MM->x[inc + in]; */
+    /* MLocal[1] = MM->x[inc + it]; */
+    /* MLocal[2] = MM->x[inc + is]; */
+    /* inc += n; */
+    /* MLocal[3] = MM->x[inc + in]; */
+    /* MLocal[4] = MM->x[inc + it]; */
+    /* MLocal[5] = MM->x[inc + is]; */
+    /* inc += n; */
+    /* MLocal[6] = MM->x[inc + in]; */
+    /* MLocal[7] = MM->x[inc + it]; */
+    /* MLocal[8] = MM->x[inc + is]; */
+  }
   else
+  {
     numericsError("fc3d_AlartCurnier:AC_fillMLocal() -", "unknown storage type for matrix M");
+  }
 
 }
 
@@ -714,7 +747,7 @@ int fc3d_onecontact_nonsmooth_Newton_solvers_solve_damped(FrictionContactProblem
   // Compute values of Rho (should be here ?)
   double rho[3] = {1., 1., 1.};
 #ifdef OPTI_RHO
-  computerho(localproblem, rho);
+//  computerho(localproblem, rho);
   DEBUG_PRINTF("rho[0] = %4.2e, rho[1] = %4.2e, rho[2] = %4.2e \n", rho[0], rho[1], rho[2]);
 #endif
 
