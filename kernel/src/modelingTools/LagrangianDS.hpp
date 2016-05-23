@@ -372,7 +372,7 @@ public:
   /** to get the value of ndof
    *  \return the value of ndof
    */
-  inline unsigned int getNdof() const
+  inline unsigned int ndof() const
   {
     return _ndof;
   };

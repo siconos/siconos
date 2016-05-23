@@ -60,7 +60,7 @@ void LagrangianDSTest::testBuildLagrangianDS4()
   ds->initialize(time);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS4A : ", Type::value(*ds) == Type::LagrangianDS, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS4B : ", ds->number() == 0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS4D : ", ds->getNdof() == 3, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS4D : ", ds->ndof() == 3, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS4L : ", *(ds->mass()) == *(mass), true);
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNewtonEulerDS1D : ", ds->computeKineticEnergy() == 87.0, true);
@@ -77,7 +77,7 @@ void LagrangianDSTest::testBuildLagrangianDS5()
   ds->initialize(time);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS5A : ", Type::value(*ds) == Type::LagrangianDS, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS5B : ", ds->number() == 0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS5D : ", std11::static_pointer_cast<LagrangianDS>(ds)->getNdof() == 3, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS5D : ", std11::static_pointer_cast<LagrangianDS>(ds)->ndof() == 3, true);
 
   std11::static_pointer_cast<LagrangianDS>(ds)->computeMass();
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS5L : ", *(std11::static_pointer_cast<LagrangianDS>(ds)->mass()) == (*mass), true);
