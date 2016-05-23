@@ -456,7 +456,7 @@ void EventDriven::computeJacobianfx(OneStepIntegrator& osi,
     {
       LagrangianDS& lds = static_cast<LagrangianDS&>(ds);
       BlockMatrix& jacotmp = *lds.jacobianRhsx();
-      for (unsigned int j = 0; j < lds.getN(); ++j)
+      for (unsigned int j = 0; j < lds.n(); ++j)
       {
         for (unsigned int k = 0; k < lds.dimension(); ++k)
           jacob[i++] = jacotmp(k, j);

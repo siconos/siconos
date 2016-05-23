@@ -47,7 +47,7 @@ void FirstOrderNonLinearDSTest::testBuildFirstOrderNonLinearDS3()
   SP::FirstOrderNonLinearDS ds(new FirstOrderNonLinearDS(*x0, "TestPlugin:computeF", "TestPlugin:computeJacobianfx"));
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS3A : ", Type::value(*ds) == Type::FirstOrderNonLinearDS, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS3C : ", ds->getN() == 3, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS3C : ", ds->n() == 3, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS3D : ", ds->getX0() == *x0, true);
   double time = 1.5;
   ds->initialize("TimeStepping", time);

@@ -51,7 +51,7 @@ void LinearSensor::initialize(const Model& m)
   // What happen here if we have more than one DS ?
   // This may be unlikely to happen.
   //  _DS = _model->nonSmoothDynamicalSystem()->dynamicalSystemNumber(0);
-  if (colC != _DS->getN())
+  if (colC != _DS->n())
   {
     RuntimeException::selfThrow(" LinearSensor::initialize - The number of column of the C matrix must be equal to the length of x");
   }

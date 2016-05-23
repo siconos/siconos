@@ -281,7 +281,7 @@ public:
   /** allow to get n, the dimension, i.e. the size of the state x of the DynamicalSystem
    *  \return the value of n
    */
-  inline unsigned int getN() const
+  inline unsigned int n() const
   {
     return _n;
   }

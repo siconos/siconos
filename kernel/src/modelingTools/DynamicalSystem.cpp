@@ -53,7 +53,7 @@ DynamicalSystem::DynamicalSystem(const DynamicalSystem & ds):
   _number(count++)
 {
   // The following data should always be initialize
-  _n = ds.getN();
+  _n = ds.n();
   _normRef = ds.normRef();
   _x0.reset(new SiconosVector(*(ds.x0())));
   _workspace.resize(sizeWorkV);

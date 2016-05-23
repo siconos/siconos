@@ -333,13 +333,15 @@ public:
 
   // === GETTERS AND SETTERS ===
 
-  /** return the dim. of the system (n for first order). Usefull to avoid if(typeOfDS) when size is required.
-   *  \return an unsigned int.
+  /** return the dim. of the system (n for first order).
+   * Useful to avoid if(typeOfDS) when size is required.
+   * \return an unsigned int.
    */
   virtual inline unsigned int dimension() const
   {
     return _n;
   }
+
   virtual inline unsigned int getqDim() const
   {
     return _qDim;

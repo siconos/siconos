@@ -126,7 +126,7 @@ void SlidingReducedOrderObserver::process()
     prod(*_C, *_xHat, *_e);
     *_e -= y;
 
-    SiconosVector tmpV(_DS->getN());
+    SiconosVector tmpV(_DS->n());
     SimpleMatrix tmpC(*_C);
     for (unsigned int i = 0; i < _e->size(); ++i)
       tmpV(i) = (*_e)(i);
@@ -146,7 +146,7 @@ void SlidingReducedOrderObserver::process()
 ////    prod(*_C, _DS->getx(), *_e);
 //    *_e -= y;
 //
-//    SiconosVector tmpV(_DS->getN());
+//    SiconosVector tmpV(_DS->n());
 //    SimpleMatrix tmpC(*_C);
 //    for (unsigned int i = 0; i < _e->size(); ++i)
 //      tmpV(i) = (*_e)(i);

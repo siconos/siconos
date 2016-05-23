@@ -80,7 +80,7 @@ void ZeroOrderHoldOSI::initialize(Model& m)
 
     if ((static_cast<const FirstOrderLinearDS&>(*ds)).b())
     {
-      SP::SiconosMatrix E(new SimpleMatrix(ds->getN(), ds->getN(), 0));
+      SP::SiconosMatrix E(new SimpleMatrix(ds->n(), ds->n(), 0));
       E->eye();
       DSG0.AdInt.insert(dsgVD, SP::MatrixIntegrator(new MatrixIntegrator(*ds, m, E)));
       if (DSG0.AdInt.at(dsgVD)->isConst())
