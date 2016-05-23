@@ -317,7 +317,7 @@ void Hem5OSI::fprob(integer* IFCN,
             AM[ii + jj*(int)(*NV)] = lds.mass()->getValue(ii,jj) ;
           }
         }
-        pos += lds.getDim();
+        pos += lds.dimension();
       }
       else
       {
@@ -421,7 +421,7 @@ void Hem5OSI::fprob(integer* IFCN,
           Type::value(*ds) == Type::LagrangianLinearTIDS)
       {
         LagrangianDS& lds = *std11::static_pointer_cast<LagrangianDS>(ds);
-        unsigned int dim = lds.getDim();
+        unsigned int dim = lds.dimension();
         for (unsigned int i =0 ; i < dim ; i++)
         {
           QDOT[i+pos] = v[i+pos];

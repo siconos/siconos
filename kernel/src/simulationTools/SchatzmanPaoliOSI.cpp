@@ -135,7 +135,7 @@ void SchatzmanPaoliOSI::initialize(Model& m)
 
     }
     // Memory allocation for workX. workX[ds*] corresponds to xfree (or vfree in lagrangian case).
-    // workX[*itDS].reset(new SiconosVector((*itDS)->getDim()));
+    // workX[*itDS].reset(new SiconosVector((*itDS)->dimension()));
 
     // W initialization
     initW(t0, ds, *dsi);
@@ -159,7 +159,7 @@ void SchatzmanPaoliOSI::initW(double t, SP::DynamicalSystem ds, DynamicalSystems
     RuntimeException::selfThrow("SchatzmanPaoliOSI::initW(t,ds) - W(ds) is already in the map and has been initialized.");
 
 
-  //unsigned int sizeW = ds->getDim(); // n for first order systems, ndof for lagrangian.
+  //unsigned int sizeW = ds->dimension(); // n for first order systems, ndof for lagrangian.
   // Memory allocation for W
 
   double h = _simulation->timeStep();
@@ -740,7 +740,7 @@ void SchatzmanPaoliOSI::updateState(const unsigned int level)
       // v->display();
 
       // int bc=0;
-      // SP::SiconosVector columntmp(new SiconosVector(ds->getDim()));
+      // SP::SiconosVector columntmp(new SiconosVector(ds->dimension()));
 
       // if (d->boundaryConditions())
       // {

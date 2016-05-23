@@ -71,12 +71,12 @@ LagrangianDS::LagrangianDS(SP::SiconosVector newQ0, SP::SiconosVector newVelocit
   _q[0].reset(new SiconosVector(*_q0));
   _q[1].reset(new SiconosVector(*_velocity0));
   _q[2].reset(new SiconosVector(_ndof));
-  _workspace[freeresidu].reset(new SiconosVector(getDim()));
-  _workspace[free].reset(new SiconosVector(getDim()));
-  //   _xp.reset(new SiconosVector(getDim()));
-  //   _xq.reset(new SiconosVector(getDim()));
-  //   mXfree.reset(new SiconosVector(getDim()));
-  //   r.reset(new SiconosVector(getDim()));
+  _workspace[freeresidu].reset(new SiconosVector(dimension()));
+  _workspace[free].reset(new SiconosVector(dimension()));
+  //   _xp.reset(new SiconosVector(dimension()));
+  //   _xq.reset(new SiconosVector(dimension()));
+  //   mXfree.reset(new SiconosVector(dimension()));
+  //   r.reset(new SiconosVector(dimension()));
 
   /** \todo lazy Memory allocation */
   _p.resize(3);
@@ -127,8 +127,8 @@ LagrangianDS::LagrangianDS(SP::SiconosVector newQ0, SP::SiconosVector newVelocit
   _q[0].reset(new SiconosVector(*_q0));
   _q[1].reset(new SiconosVector(*_velocity0));
   _q[2].reset(new SiconosVector(_ndof));
-  _workspace[freeresidu].reset(new SiconosVector(getDim()));
-  _workspace[free].reset(new SiconosVector(getDim()));
+  _workspace[freeresidu].reset(new SiconosVector(dimension()));
+  _workspace[free].reset(new SiconosVector(dimension()));
 
 
   _p.resize(3);
@@ -158,8 +158,8 @@ LagrangianDS::LagrangianDS(SP::SiconosVector newQ0, SP::SiconosVector newVelocit
   _q[0].reset(new SiconosVector(*_q0));
   _q[1].reset(new SiconosVector(*_velocity0));
   _q[2].reset(new SiconosVector(_ndof));
-  _workspace[freeresidu].reset(new SiconosVector(getDim()));
-  _workspace[free].reset(new SiconosVector(getDim()));
+  _workspace[freeresidu].reset(new SiconosVector(dimension()));
+  _workspace[free].reset(new SiconosVector(dimension()));
 
   // Mass
   setComputeMassFunction(SSLH::getPluginName(massName), SSLH::getPluginFunctionName(massName));

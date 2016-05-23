@@ -374,7 +374,7 @@ void  NewtonEulerR::computeSecondOrderTimeDerivativeTerms(double time, Interacti
     setBlock(auxBloc2, jachqTdot, dimIndex, startIndex);
     DEBUG_EXPR(jachqTdot->display());
 
-    k += ds->getDim();
+    k += ds->dimension();
   }
 
   // compute the product of jachqTdot and v

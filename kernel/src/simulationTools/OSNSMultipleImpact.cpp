@@ -179,7 +179,7 @@ unsigned int OSNSMultipleImpact::EstimateNdataCols()
   DynamicalSystemsGraph::VIterator dsi, dsiend;
   for (std11::tie(dsi, dsiend) = DSG->vertices(); dsi != dsiend; ++dsi)
   {
-    _numberCols = _numberCols + (DSG->bundle(*dsi)->getDim());
+    _numberCols = _numberCols + (DSG->bundle(*dsi)->dimension());
   }
   return(_numberCols);
 }

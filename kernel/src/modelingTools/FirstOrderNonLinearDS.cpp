@@ -46,10 +46,10 @@ FirstOrderNonLinearDS::FirstOrderNonLinearDS(SP::SiconosVector newX0):
   _x[1].reset(new SiconosVector(_n));
 
   //mG
-  _workspace[free].reset(new SiconosVector(getDim()));
-  _fold.reset(new SiconosVector(getDim()));
+  _workspace[free].reset(new SiconosVector(dimension()));
+  _fold.reset(new SiconosVector(dimension()));
   _f.reset(new SiconosVector(_n));
-  _b.reset(new SiconosVector(getDim()));
+  _b.reset(new SiconosVector(dimension()));
   _jacobianfx.reset(new SimpleMatrix(_n, _n));
   // == r ==
 
@@ -73,11 +73,11 @@ FirstOrderNonLinearDS::FirstOrderNonLinearDS(SP::SiconosVector newX0, const std:
   _x[0].reset(new SiconosVector(*_x0));
   _x[1].reset(new SiconosVector(_n));
   _f.reset(new SiconosVector(_n));
-  _b.reset(new SiconosVector(getDim()));
+  _b.reset(new SiconosVector(dimension()));
   _jacobianfx.reset(new SimpleMatrix(_n, _n));
-  _workspace[free].reset(new SiconosVector(getDim()));
-  _r.reset(new SiconosVector(getDim()));
-  _fold.reset(new SiconosVector(getDim()));
+  _workspace[free].reset(new SiconosVector(dimension()));
+  _r.reset(new SiconosVector(dimension()));
+  _fold.reset(new SiconosVector(dimension()));
 
   // == r ==
 

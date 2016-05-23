@@ -128,7 +128,7 @@ void ZeroOrderHoldOSI::initialize(Model& m)
       }
     }
 
-    ds->allocateWorkVector(DynamicalSystem::local_buffer, ds->getDim());
+    ds->allocateWorkVector(DynamicalSystem::local_buffer, ds->dimension());
 
   }
 }

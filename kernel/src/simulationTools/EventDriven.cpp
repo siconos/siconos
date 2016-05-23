@@ -305,7 +305,7 @@ void EventDriven::initOSIs()
           SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS>(ds);
           *(d->workspace(DynamicalSystem::acce_like)) = *(d->acceleration()); // set a0 = ddotq0
           // Allocate the memory to stock coefficients of the polynomial for the dense output
-          d->allocateWorkMatrix(LagrangianDS::coeffs_denseoutput, ds->getDim(), (osi_NewMark->getOrderDenseOutput() + 1));
+          d->allocateWorkMatrix(LagrangianDS::coeffs_denseoutput, ds->dimension(), (osi_NewMark->getOrderDenseOutput() + 1));
         }
       }
     }
@@ -458,7 +458,7 @@ void EventDriven::computeJacobianfx(OneStepIntegrator& osi,
       BlockMatrix& jacotmp = *lds.jacobianRhsx();
       for (unsigned int j = 0; j < lds.getN(); ++j)
       {
-        for (unsigned int k = 0; k < lds.getDim(); ++k)
+        for (unsigned int k = 0; k < lds.dimension(); ++k)
           jacob[i++] = jacotmp(k, j);
       }
     }

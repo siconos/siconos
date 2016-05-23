@@ -116,7 +116,7 @@ void EulerMoreauOSI::initW(double t, SP::DynamicalSystem ds, DynamicalSystemsGra
     RuntimeException::selfThrow("EulerMoreauOSI::initW(t,ds) - W(ds) is already in the map and has been initialized.");
 
 
-  unsigned int sizeW = ds->getDim(); // n for first order systems, ndof for lagrangian.
+  unsigned int sizeW = ds->dimension(); // n for first order systems, ndof for lagrangian.
   // Memory allocation for W
 
 

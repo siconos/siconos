@@ -241,7 +241,7 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
   {
     assert(ds == DS1 || ds == DS2);
     endl = (ds == DS2);
-    unsigned int sizeDS = ds->getDim();
+    unsigned int sizeDS = ds->dimension();
     // get _interactionBlocks corresponding to the current DS
     // These _interactionBlocks depends on the relation type.
     leftInteractionBlock.reset(new SimpleMatrix(nslawSize, sizeDS));
@@ -434,7 +434,7 @@ void LinearOSNS::computeInteractionBlock(const InteractionsGraph::EDescriptor& e
 
 
   // loop over the common DS
-  unsigned int sizeDS = ds->getDim();
+  unsigned int sizeDS = ds->dimension();
 
   // get _interactionBlocks corresponding to the current DS
   // These _interactionBlocks depends on the relation type.

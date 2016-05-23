@@ -33,8 +33,8 @@ FirstOrderLinearDS::FirstOrderLinearDS(SP::SiconosVector newX0, const std::strin
   _pluginA->setComputeFunction(APlugin);
   _pluginb->setComputeFunction(bPlugin);
 
-  _f.reset(new SiconosVector(getDim()));
-  _A.reset(new SimpleMatrix(getDim(), getDim()));
+  _f.reset(new SiconosVector(dimension()));
+  _A.reset(new SimpleMatrix(dimension(), dimension()));
 
   checkDynamicalSystem();
 }
@@ -43,7 +43,7 @@ FirstOrderLinearDS::FirstOrderLinearDS(SP::SiconosVector newX0, const std::strin
 FirstOrderLinearDS::FirstOrderLinearDS(SP::SiconosVector newX0, SP::SiconosMatrix newA):
   FirstOrderNonLinearDS(newX0)
 {
-  _f.reset(new SiconosVector(getDim()));
+  _f.reset(new SiconosVector(dimension()));
   _pluginb.reset(new PluggedObject());
   _pluginA.reset(new PluggedObject());
   if ((newA->size(0) != _n) || (newA->size(1) != _n))
@@ -56,7 +56,7 @@ FirstOrderLinearDS::FirstOrderLinearDS(SP::SiconosVector newX0, SP::SiconosMatri
 FirstOrderLinearDS::FirstOrderLinearDS(SP::SiconosVector newX0):
   FirstOrderNonLinearDS(newX0)
 {
-  _f.reset(new SiconosVector(getDim()));
+  _f.reset(new SiconosVector(dimension()));
   _pluginb.reset(new PluggedObject());
   _pluginA.reset(new PluggedObject());
   checkDynamicalSystem();
@@ -75,7 +75,7 @@ FirstOrderLinearDS::FirstOrderLinearDS(SP::SiconosVector newX0, SP::SiconosMatri
 
   _A = newA;
   _b = newB;
-  _f.reset(new SiconosVector(getDim()));
+  _f.reset(new SiconosVector(dimension()));
 
   checkDynamicalSystem();
 }
@@ -137,7 +137,7 @@ void FirstOrderLinearDS::setComputebFunction(const std::string& pluginPath, cons
   //  Plugin::setFunction(&_bPtr, pluginPath, functionName);
   _pluginb->setComputeFunction(pluginPath, functionName);
   if (!_b)
-    _b.reset(new SiconosVector(getDim()));
+    _b.reset(new SiconosVector(dimension()));
   //  SSLH::buildPluginName(pluginNamebPtr,pluginPath,functionName);
 }
 

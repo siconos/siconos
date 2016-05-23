@@ -74,7 +74,7 @@ void MoreauJeanGOSI::initialize(Model& m)
   {
     if (!checkOSI(dsi)) continue;
     // Memory allocation for workX. workX[ds*] corresponds to xfree (or vfree in lagrangian case).
-    // workX[*itDS].reset(new SiconosVector((*itDS)->getDim()));
+    // workX[*itDS].reset(new SiconosVector((*itDS)->dimension()));
 
     SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
 
@@ -186,7 +186,7 @@ void MoreauJeanGOSI::initWBoundaryConditions(SP::DynamicalSystem ds)
       RuntimeException::selfThrow("MoreauJeanGOSI::initWBoundaryConditions(t,ds) - WBoundaryConditions(ds) is already in the map and has been initialized.");
 
     // Memory allocation for WBoundaryConditions
-    unsigned int sizeWBoundaryConditions = ds->getDim(); // n for first order systems, ndof for lagrangian.
+    unsigned int sizeWBoundaryConditions = ds->dimension(); // n for first order systems, ndof for lagrangian.
 
     SP::BoundaryCondition bc;
     if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
@@ -230,7 +230,7 @@ void MoreauJeanGOSI::computeWBoundaryConditions(SP::DynamicalSystem ds)
 
     SP::SimpleMatrix WBoundaryConditions = _WBoundaryConditionsMap[dsN];
 
-    SP::SiconosVector columntmp(new SiconosVector(ds->getDim()));
+    SP::SiconosVector columntmp(new SiconosVector(ds->dimension()));
 
     int columnindex = 0;
 
@@ -485,7 +485,7 @@ double MoreauJeanGOSI::computeResidu()
 
         unsigned int columnindex = 0;
         SP::SimpleMatrix WBoundaryConditions = _WBoundaryConditionsMap[ds->number()];
-        SP::SiconosVector columntmp(new SiconosVector(ds->getDim()));
+        SP::SiconosVector columntmp(new SiconosVector(ds->dimension()));
 
         for (std::vector<unsigned int>::iterator  itindex = d->boundaryConditions()->velocityIndices()->begin() ;
              itindex != d->boundaryConditions()->velocityIndices()->end();
@@ -517,7 +517,7 @@ double MoreauJeanGOSI::computeResidu()
       {
         unsigned int columnindex = 0;
         SP::SimpleMatrix WBoundaryConditions = _WBoundaryConditionsMap[ds->number()];
-        SP::SiconosVector columntmp(new SiconosVector(ds->getDim()));
+        SP::SiconosVector columntmp(new SiconosVector(ds->dimension()));
 
         for (std::vector<unsigned int>::iterator  itindex = d->boundaryConditions()->velocityIndices()->begin() ;
              itindex != d->boundaryConditions()->velocityIndices()->end();
@@ -639,7 +639,7 @@ double MoreauJeanGOSI::computeResidu()
 
         unsigned int columnindex = 0;
         SP::SimpleMatrix WBoundaryConditions = _WBoundaryConditionsMap[ds->number()];
-        SP::SiconosVector columntmp(new SiconosVector(ds->getDim()));
+        SP::SiconosVector columntmp(new SiconosVector(ds->dimension()));
 
         for (std::vector<unsigned int>::iterator  itindex = d->boundaryConditions()->velocityIndices()->begin() ;
              itindex != d->boundaryConditions()->velocityIndices()->end();
@@ -733,7 +733,7 @@ double MoreauJeanGOSI::computeResidu()
 
         unsigned int columnindex = 0;
         SP::SimpleMatrix WBoundaryConditions = _WBoundaryConditionsMap[ds->number()];
-        SP::SiconosVector columntmp(new SiconosVector(ds->getDim()));
+        SP::SiconosVector columntmp(new SiconosVector(ds->dimension()));
 
         for (std::vector<unsigned int>::iterator  itindex = d->boundaryConditions()->velocityIndices()->begin() ;
              itindex != d->boundaryConditions()->velocityIndices()->end();
@@ -767,7 +767,7 @@ double MoreauJeanGOSI::computeResidu()
       {
         unsigned int columnindex = 0;
         SP::SimpleMatrix WBoundaryConditions = _WBoundaryConditionsMap[ds->number()];
-        SP::SiconosVector columntmp(new SiconosVector(ds->getDim()));
+        SP::SiconosVector columntmp(new SiconosVector(ds->dimension()));
 
         for (std::vector<unsigned int>::iterator  itindex = d->boundaryConditions()->velocityIndices()->begin() ;
              itindex != d->boundaryConditions()->velocityIndices()->end();
@@ -1264,7 +1264,7 @@ void MoreauJeanGOSI::updateState(const unsigned int level)
       if (d->boundaryConditions())
       {
         int bc = 0;
-        SP::SiconosVector columntmp(new SiconosVector(ds->getDim()));
+        SP::SiconosVector columntmp(new SiconosVector(ds->dimension()));
 
         for (std::vector<unsigned int>::iterator  itindex = d->boundaryConditions()->velocityIndices()->begin() ;
              itindex != d->boundaryConditions()->velocityIndices()->end();
@@ -1348,7 +1348,7 @@ void MoreauJeanGOSI::updateState(const unsigned int level)
       if (d->boundaryConditions())
       {
         int bc = 0;
-        SP::SiconosVector columntmp(new SiconosVector(ds->getDim()));
+        SP::SiconosVector columntmp(new SiconosVector(ds->dimension()));
 
         for (std::vector<unsigned int>::iterator  itindex = d->boundaryConditions()->velocityIndices()->begin() ;
              itindex != d->boundaryConditions()->velocityIndices()->end();

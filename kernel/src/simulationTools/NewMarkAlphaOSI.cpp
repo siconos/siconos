@@ -77,7 +77,7 @@ void NewMarkAlphaOSI::initW(SP::DynamicalSystem ds)
     RuntimeException::selfThrow("NewMarkAlphaOSI::initW(t,ds) - W(ds) is already in the map and has been initialized.");
 
   SP::SimpleMatrix W = _dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).W;
-  W.reset(new SimpleMatrix(ds->getDim(), ds->getDim())); // allocate memory
+  W.reset(new SimpleMatrix(ds->dimension(), ds->dimension())); // allocate memory
   computeW(ds,*W);
 }
 
@@ -394,8 +394,8 @@ void NewMarkAlphaOSI::initialize(Model& m)
     dsType = Type::value(*ds); // Its type
     if ((dsType == Type::LagrangianDS) || (dsType == Type::LagrangianLinearTIDS))
     {
-      ds->allocateWorkVector(DynamicalSystem::acce_like, ds->getDim()); // allocate memory for the acceleration-like of DS
-      ds->allocateWorkVector(DynamicalSystem::acce_memory, ds->getDim()); // allocate memory to stock acceleration
+      ds->allocateWorkVector(DynamicalSystem::acce_like, ds->dimension()); // allocate memory for the acceleration-like of DS
+      ds->allocateWorkVector(DynamicalSystem::acce_memory, ds->dimension()); // allocate memory to stock acceleration
     }
     else
     {
@@ -582,7 +582,7 @@ void NewMarkAlphaOSI::computeCoefsDenseOutput(SP::DynamicalSystem ds)
   double h = _simulation->nextTime() - _simulation->startingTime();
   Type::Siconos dsType = Type::value(*ds);    // Type of the current DS
   SP::SiconosVector q_n, dotq_n, ddotq_n, q_np1, dotq_np1, ddotq_np1;
-  SP::SiconosVector _vec(new SiconosVector(ds->getDim()));
+  SP::SiconosVector _vec(new SiconosVector(ds->dimension()));
   if ((dsType == Type::LagrangianDS) || (dsType == Type::LagrangianLinearTIDS))
   {
     SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS>(ds);

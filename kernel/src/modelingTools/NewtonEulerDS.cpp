@@ -135,7 +135,7 @@ NewtonEulerDS::NewtonEulerDS(): DynamicalSystem(6),
 
   _dotq.reset(new SiconosVector(_qDim));
   _workspace[freeresidu].reset(new SiconosVector(_n));
-  _workspace[free].reset(new SiconosVector(getDim()));
+  _workspace[free].reset(new SiconosVector(dimension()));
   _massMatrix.reset(new SimpleMatrix(_n, _n));
   _luW.reset(new SimpleMatrix(_n, _n));
   _massMatrix->zero();
@@ -190,7 +190,7 @@ void NewtonEulerDS::internalInit(SP::SiconosVector Q0, SP::SiconosVector Velocit
   startIndex[3] = 3;
   setBlock(_I, _massMatrix, dimIndex, startIndex);
   _workspace[freeresidu].reset(new SiconosVector(_n));
-  _workspace[free].reset(new SiconosVector(getDim()));
+  _workspace[free].reset(new SiconosVector(dimension()));
 
   _T.reset(new SimpleMatrix(_qDim, _n));
   _T->zero();

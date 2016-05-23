@@ -248,7 +248,7 @@ bool GlobalFrictionContact::preCompute(double time)
       SP::DynamicalSystem ds = (*it).first;
       SiconosMatrix& mat = *(*it).second;
 
-      size_t dss = ds->getDim();
+      size_t dss = ds->dimension();
 
       // compute q (aka free velocity) = v^k + contribution from forces
       OneStepIntegrator& Osi = *DSG0.properties(DSG0.descriptor(ds)).osi;
@@ -298,7 +298,7 @@ bool GlobalFrictionContact::preCompute(double time)
       for (SP::DynamicalSystem ds = ds1; !endl; ds = ds2, posBlock = pos2)
       {
         endl = (ds == ds2);
-        size_t sizeDS = ds->getDim();
+        size_t sizeDS = ds->dimension();
         // this whole part is a hack. Just should just get the rightblock
         leftInteractionBlock.reset(new SimpleMatrix(3, sizeDS));
         inter.getLeftInteractionBlockForDS(posBlock, leftInteractionBlock, workMInter);
@@ -410,7 +410,7 @@ void GlobalFrictionContact::postCompute()
   //      RuntimeException::selfThrow("GlobalFrictionContact::postCompute not yet implemented for dynamical system of types "+dsType);
 
   //       pos = M->getPositionOfDSBlock(*itDS);
-  //       sizeDS = (*itDS)->getDim();
+  //       sizeDS = (*itDS)->dimension();
   //       setBlock((static_cast<LagrangianDS*>(*itDS))->velocity(),velocity,sizeDS, pos, 0 );
 
   //     }
