@@ -22,10 +22,9 @@
 
 #include <iostream>
 // #define DEBUG_NOCOLOR
-// #define DEBUG_BEGIN_END_ONLY
+//#define DEBUG_BEGIN_END_ONLY
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
-
 #include <debug.h>
 
 
@@ -142,11 +141,13 @@ NewtonEulerDS::NewtonEulerDS(): DynamicalSystem(6),
   _massMatrix->zero();
   _T.reset(new SimpleMatrix(_qDim, _n));
 
-  _mass = 0.;
+  _scalarMass = 0.;
 }
 
-void NewtonEulerDS::internalInit(SP::SiconosVector Q0, SP::SiconosVector Velocity0, double mass , SP::SiconosMatrix inertialMatrix)
+void NewtonEulerDS::internalInit(SP::SiconosVector Q0, SP::SiconosVector Velocity0,
+                                 double mass , SP::SiconosMatrix inertialMatrix)
 {
+  DEBUG_BEGIN("NewtonEulerDS::internalInit(SP::SiconosVector Q0, SP::SiconosVector Velocity0, double mass , SP::SiconosMatrix inertialMatrix)\n");
   _p.resize(3);
   _p[0].reset(new SiconosVector());
   _p[1].reset(new SiconosVector(_n)); // Needed in NewtonEulerR
@@ -155,7 +156,7 @@ void NewtonEulerDS::internalInit(SP::SiconosVector Q0, SP::SiconosVector Velocit
   // --- NEWTONEULER INHERITED CLASS MEMBERS ---
   // -- Memory allocation for vector and matrix members --
 
-  _mass = mass;
+  _scalarMass = mass;
   _qDim = 7;
   _n = 6;
 
@@ -175,9 +176,9 @@ void NewtonEulerDS::internalInit(SP::SiconosVector Q0, SP::SiconosVector Velocit
   _jacobianFGyrv.reset(new SimpleMatrix(_n, _n));
   _luW.reset(new SimpleMatrix(_n, _n));
   _massMatrix->zero();
-  _massMatrix->setValue(0, 0, _mass);
-  _massMatrix->setValue(1, 1, _mass);
-  _massMatrix->setValue(2, 2, _mass);
+  _massMatrix->setValue(0, 0, _scalarMass);
+  _massMatrix->setValue(1, 1, _scalarMass);
+  _massMatrix->setValue(2, 2, _scalarMass);
   _I = inertialMatrix;
   Index dimIndex(2);
   dimIndex[0] = 3;
@@ -199,6 +200,7 @@ void NewtonEulerDS::internalInit(SP::SiconosVector Q0, SP::SiconosVector Velocit
   computeT();
   computeMObjToAbs();
   initForces();
+  DEBUG_END("NewtonEulerDS::internalInit(SP::SiconosVector Q0, SP::SiconosVector Velocity0, double mass , SP::SiconosMatrix inertialMatrix)\n");
 }
 NewtonEulerDS::NewtonEulerDS(SP::SiconosVector Q0, SP::SiconosVector Velocity0,
                              double  mass, SP::SiconosMatrix inertialMatrix):
@@ -280,10 +282,12 @@ void NewtonEulerDS::initializeNonSmoothInput(unsigned int level)
 
 void NewtonEulerDS::initForces()
 {
+  DEBUG_BEGIN("NewtonEulerDS::initForces()\n")
   _forces.reset(new SiconosVector(_n));
   _fGyr.reset(new SiconosVector(3,0.0));
   _jacobianFGyrv.reset(new SimpleMatrix(_n, _n));
   _jacobianvForces.reset(new SimpleMatrix(_n, _n));
+  DEBUG_END("NewtonEulerDS::initForces()\n")
 }
 
 void NewtonEulerDS::initRhs(double time)
@@ -835,7 +839,7 @@ void NewtonEulerDS::display() const
   std::cout << "- p[2] " <<std::endl;
   if (_p[2]) _p[2]->display();
   else std::cout << "-> NULL" <<std::endl;
-  std::cout << "mass :" <<  _mass <<std::endl;
+  std::cout << "mass :" <<  _scalarMass <<std::endl;
   std::cout << "Inertia :" <<std::endl;
   if (_I) _I->display();
   else std::cout << "-> NULL" <<std::endl;
@@ -958,4 +962,22 @@ void NewtonEulerDS::setComputeJacobianMIntqFunction(FInt_NE fct)
 void NewtonEulerDS::setComputeJacobianMIntvFunction(FInt_NE fct)
 {
   _pluginJacvMInt->setComputeFunction((void *)fct);
+}
+
+
+double NewtonEulerDS::computeKineticEnergy()
+{
+  DEBUG_BEGIN("NewtonEulerDS::computeKineticEnergy()\n");
+  assert(_v);
+  assert(_massMatrix);
+  DEBUG_EXPR(_v->display());
+  DEBUG_EXPR(_massMatrix->display());
+
+  SiconosVector tmp(6);
+  prod(*_massMatrix, *_v, tmp, true);
+  double K =0.5*inner_prod(tmp,*_v);
+
+  DEBUG_PRINTF("Kinetic Energy = %e\n", K);
+  DEBUG_END("NewtonEulerDS::computeKineticEnergy()\n");
+  return K;
 }

@@ -122,9 +122,9 @@ protected:
 
   /** Scalar mass of the system
    */
-  double _mass;
+  double _scalarMass;
 
-  /** used for concatenate _I and _mass.I_3 */
+  /** used for concatenate _I and _scalarMass.I_3 */
   SP::SimpleMatrix _massMatrix;
 
   /** Contains the LU factorization of the Mass (or the iteration matrix.).
@@ -436,9 +436,9 @@ public:
   /** get mass value
    *  \return a double
    */
-  inline double massValue() const
+  inline double scalarMass() const
   {
-    return _mass;
+    return _scalarMass;
   };
 
 
@@ -856,7 +856,9 @@ public:
                                 SP::SiconosVector position,
                                 SP::SiconosVector velocity);
 
-
+  /** To compute the kinetic energy
+   */
+  double computeKineticEnergy();
 
   // --- miscellaneous ---
 
@@ -888,8 +890,6 @@ public:
   virtual void computeT();
 
   virtual void computeTdot();
-
-
 
   virtual void normalizeq();
 

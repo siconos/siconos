@@ -47,10 +47,17 @@ if(WITH_${COMPONENT}_TESTING)
   # modeling tools 
   BEGIN_TEST(src/modelingTools/test)
   
-  NEW_TEST(testModelingTools FirstOrderLinearDSTest.cpp FirstOrderLinearTIRTest.cpp FirstOrderLinearRTest.cpp 
+  NEW_TEST(testModelingTools
+    FirstOrderLinearDSTest.cpp
+    FirstOrderLinearTIRTest.cpp
+    FirstOrderLinearRTest.cpp
     FirstOrderType1RTest.cpp 
-    LagrangianLinearTIRTest.cpp LagrangianScleronomousRTest.cpp LagrangianRheonomousRTest.cpp 
-    LagrangianCompliantRTest.cpp)
+    LagrangianLinearTIRTest.cpp
+    LagrangianScleronomousRTest.cpp
+    LagrangianRheonomousRTest.cpp
+    LagrangianCompliantRTest.cpp
+    LagrangianDSTest.cpp
+    NewtonEulerDSTest.cpp)
   END_TEST()
   #FirstOrderNonLinearDSTest.cpp FirstOrderLinearDSTest.cpp 
   #LagrangianDSTest.cpp LagrangianLinearTIDSTest.cpp TestMain.cpp)

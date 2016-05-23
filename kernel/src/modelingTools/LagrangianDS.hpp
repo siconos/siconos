@@ -980,6 +980,11 @@ public:
    */
   virtual void computeJacobianqDotForces(double time);
 
+
+  /** To compute the kinetic energy
+   */
+  double computeKineticEnergy();
+
   // --- miscellaneous ---
 
   /** print the data to the screen

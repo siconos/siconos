@@ -18,8 +18,8 @@
 #include "LagrangianDS.hpp"
 #include "BlockVector.hpp"
 #include "BlockMatrix.hpp"
-//#define DEBUG_STDOUT
-//#define DEBUG_MESSAGES
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
 #include "debug.h"
 #include <iostream>
 
@@ -886,3 +886,21 @@ void LagrangianDS::setComputeJacobianFGyrqDotFunction(FPtr5 fct)
 {
   _pluginJacqDotFGyr->setComputeFunction((void *)fct);
 }//computeJacobianFGyrqDotPtr=fct;}
+
+double LagrangianDS::computeKineticEnergy()
+{
+  DEBUG_BEGIN("NewtonEulerDS::computeKineticEnergy()\n");
+  SP::SiconosVector velo = velocity();
+  assert(velo);
+  assert(_mass);
+  DEBUG_EXPR(velo->display());
+  DEBUG_EXPR(_mass->display());
+
+  SP::SiconosVector tmp(new SiconosVector(*velo));
+  prod(*_mass, *velo, *tmp, true);
+  double K =0.5*inner_prod(*tmp,*velo);
+
+  DEBUG_PRINTF("Kinetic Energy = %e\n", K);
+  DEBUG_END("LagrangianDS::computeKineticEnergy()\n");
+  return K;
+}
