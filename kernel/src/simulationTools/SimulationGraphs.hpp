@@ -62,7 +62,7 @@
  *      DynamicalSystemsGraph::VDescriptor dsv = DSG->descriptor(ds);
  *      DSG->name.insert(dsv, name); // insert the name in the property
  *      const std::string& name =  DSG[*dsv]->name;
- * 
+ *
  *
  * </li>
  * </ul>
@@ -110,14 +110,24 @@ struct GraphProperties
 
 
 
-typedef SiconosGraph < std11::shared_ptr<DynamicalSystem>, std11::shared_ptr<Interaction>,
-        DynamicalSystemProperties, InteractionProperties,
-        GraphProperties > _DynamicalSystemsGraph;
+class _DynamicalSystemsGraph :
+  public SiconosGraph < std11::shared_ptr<DynamicalSystem>,
+                        std11::shared_ptr<Interaction>,
+                        DynamicalSystemProperties, InteractionProperties,
+                        GraphProperties >
+{
+  ACCEPT_SERIALIZATION(_DynamicalSystemsGraph);
+};
 
 
-typedef SiconosGraph < std11::shared_ptr<Interaction>, std11::shared_ptr<DynamicalSystem>,
-        InteractionProperties, DynamicalSystemProperties,
-        GraphProperties > _InteractionsGraph;
+class _InteractionsGraph :
+  public SiconosGraph < std11::shared_ptr<Interaction>,
+                        std11::shared_ptr<DynamicalSystem>,
+                        InteractionProperties, DynamicalSystemProperties,
+                        GraphProperties >
+{
+  ACCEPT_SERIALIZATION(_InteractionsGraph);
+};
 
 struct DynamicalSystemsGraph : public _DynamicalSystemsGraph
 {
