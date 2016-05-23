@@ -508,6 +508,8 @@ void BulletBroadphase::update(SP::SiconosBox box)
 void BulletBroadphase::visit(const BodyDS &bds)
 {
   SP::SiconosContactor contactor = bds.contactor();
+  if (!contactor)
+    return;
 
   // (Stripping constness!  Only because SP::BodyDS visitor does not work.)
   SP::BodyDS spbds( ((BodyDS*)(&bds))->shared_from_this() );

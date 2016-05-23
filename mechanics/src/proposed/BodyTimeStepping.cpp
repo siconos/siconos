@@ -31,7 +31,8 @@ struct CollisionUpdater : public SiconosVisitor
 
   void visit(const BodyDS& bds)
   {
-    bds.contactor()->setPosition(bds.q());
+    if (bds.contactor())
+      bds.contactor()->setPosition(bds.q());
   }
 };
 
