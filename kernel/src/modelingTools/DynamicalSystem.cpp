@@ -82,7 +82,7 @@ DynamicalSystem::DynamicalSystem(const DynamicalSystem & ds):
 
   if (ds.xMemory())
     _xMemory.reset(new SiconosMemory(*(ds.xMemory())));
-  _stepsInMemory = ds.getStepsInMemory();
+  _stepsInMemory = ds.stepsInMemory();
 
   _workspace.resize(sizeWorkV);
 

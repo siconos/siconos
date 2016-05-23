@@ -497,7 +497,7 @@ public:
   /** get the value of stepsInMemory
    *  \return the value of stepsInMemory
    */
-  inline int getStepsInMemory() const
+  inline int stepsInMemory() const
   {
     return _stepsInMemory;
   }
