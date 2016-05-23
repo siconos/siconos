@@ -686,14 +686,6 @@ public:
 
   // -- forces --
 
-  /** get the value of forces
-   *  \return SiconosVector
-   */
-  inline const SiconosVector getForces() const
-  {
-    return *_forces;
-  }
-
   /** get forces
    *  \return pointer on a SiconosVector
    */
