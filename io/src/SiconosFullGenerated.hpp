@@ -78,10 +78,34 @@ SICONOS_IO_REGISTER(MatrixIntegrator,
   (_model)
   (_plugin)
   (_sim))
-SICONOS_IO_REGISTER(DynamicalSystemsGraph,
-)
-SICONOS_IO_REGISTER(InteractionsGraph,
-)
+SICONOS_IO_REGISTER_WITH_BASES(DynamicalSystemsGraph,(_DynamicalSystemsGraph),
+  (Ad)
+  (AdInt)
+  (Ld)
+  (Bd)
+  (B)
+  (L)
+  (pluginB)
+  (pluginL)
+  (e)
+  (u)
+  (pluginU)
+  (pluginJacgx)
+  (tmpXdot)
+  (jacgx)
+  (name)
+  (groupId)
+  (dummy))
+//SICONOS_IO_REGISTER(DynamicalSystemsGraph,
+//)
+//SICONOS_IO_REGISTER(InteractionsGraph,
+//)
+SICONOS_IO_REGISTER_WITH_BASES(InteractionsGraph,(_InteractionsGraph),
+  (blockProj)
+  (upper_blockProj)
+  (lower_blockProj)
+  (name)
+  (dummy))
 SICONOS_IO_REGISTER(Topology,
   (_DSG)
   (_IG)
