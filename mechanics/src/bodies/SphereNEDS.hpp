@@ -58,11 +58,6 @@ public:
     return (_v->getValue(pos));
   };
 
-  inline double getMassValue() const
-  {
-    return _mass;
-  };
-
   inline double getRadius() const
   {
     return radius;
