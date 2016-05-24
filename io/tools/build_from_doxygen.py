@@ -3,6 +3,7 @@
 import os, os.path, sys
 from glob import glob
 import lxml.etree
+import re
 
 from builder_common import *
 
@@ -18,11 +19,28 @@ def get_classes_conditional(doxy_xml_files, cond):
                 classname = cl.find('./compoundname')
                 baseclasses = cl.xpath('./basecompoundref')
                 membervars = cl.xpath('.//memberdef[@kind="variable"]/name')
+
+                # An exception: Members get attached to Graph classes
+                # through this macro, and is not understood by
+                # Doxygen, so we have to parse it outselves.
+                graphvars = cl.xpath('.//memberdef[@kind="function"]/name'
+                                     +'[text()="INSTALL_GRAPH_PROPERTIES"]')
+                graphmems = []
+
+                if len(graphvars)>0:
+                    r = re.compile('\(\(\w+,\s*[\w: ]+,\s*(\w+)\)\)')
+                    for g in graphvars:
+                        for a in g.xpath('../argsstring'):
+                            graphmems += r.findall(a.text)
+                    # The INSTALL_GRAPH_PROPERTIES macro also adds a
+                    # bool called "dummy"
+                    graphmems.append('dummy')
+
                 location = cl.find('./location')
                 found[classname.text] = (
                     {'name': classname.text,
                      'bases': [base.text for base in baseclasses],
-                     'members': [mem.text for mem in membervars],
+                     'members': [mem.text for mem in membervars] + graphmems,
                      'filepath': location.attrib['file'],
                      'line': int(location.attrib['line']),
                      'abstract': cl.xpath('@abstract="yes"'),
