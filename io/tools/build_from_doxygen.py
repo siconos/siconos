@@ -86,6 +86,16 @@ def resolve_base_classes(classes):
                 resolved.append(base)
         cl['resolved_bases'] = resolved
 
+def remove_unwanted_resolved(classes):
+    """This is a bit of an ugly hack: For some classes, they are not in
+       "unwanted" because we want them to resolve as base classes, but
+       they are covered in SiconosFull.hpp, so we don't want them to
+       appear in generated headers."""
+    unwanted_resolved = ['_DynamicalSystemsGraph', '_InteractionsGraph']
+    for u in unwanted_resolved:
+        if u in classes:
+            del classes[u]
+
 def classes_from_headers(all_headers, include_paths):
     """Use compiler preprocessor to find an approximate list of classes
        referenced by a set of headers.  May return some words which
@@ -144,6 +154,8 @@ if __name__=='__main__':
     assign_priorities(classes, source_dir)
 
     resolve_base_classes(classes)
+
+    remove_unwanted_resolved(classes)
 
     with open(generated_file, 'w') as dest_file:
         write_header(dest_file, ' '.join(sys.argv), generated_header)
