@@ -193,7 +193,7 @@ void LsodarOSI::computeJacobianRhs(double t, DynamicalSystemsGraph& DSG0)
     if (_extraAdditionalTerms)
     {
       DynamicalSystemsGraph::VDescriptor dsgVD = DSG0.descriptor(ds);
-      _extraAdditionalTerms->addJacobianRhsContribution(DSG0, dsgVD, t, ds->getJacobianRhsx());
+      _extraAdditionalTerms->addJacobianRhsContribution(DSG0, dsgVD, t, *(ds->jacobianRhsx()));
     }
   }
 }

@@ -465,7 +465,7 @@ void EventDriven::computeJacobianfx(OneStepIntegrator& osi,
     else if(dsType == Type::FirstOrderNonLinearDS || dsType == Type::FirstOrderLinearDS
         || dsType == Type::FirstOrderLinearTIDS)
     {
-      SimpleMatrix& jacotmp = static_cast<SimpleMatrix&>(ds.getJacobianRhsx()); // Pointer link !
+      SimpleMatrix& jacotmp = static_cast<SimpleMatrix&>(*(ds.jacobianRhsx())); // Pointer link !
       pos += jacotmp.copyData(&jacob[pos]);
     }
     else

@@ -428,14 +428,6 @@ public:
 
   // --- JacobianRhsx ---
 
-  /** get the value of the gradient according to \f$ x \f$ of the right-hand side
-   *  \return SimpleMatrix
-   */
-  inline SiconosMatrix& getJacobianRhsx() const
-  {
-    return *_jacxRhs;
-  }
-
   /** get gradient according to \f$ x \f$ of the right-hand side (pointer)
    *  \return pointer on a SiconosMatrix
    */

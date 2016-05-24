@@ -833,14 +833,6 @@ public:
    */
   void setComputeJacobianFGyrqDotFunction(FPtr5 fct);
 
-  /** get the value of the gradient according to \f$ x \f$ of the right-hand side
-   *  \return BlockMatrix&
-   */
-  inline const BlockMatrix& getJacobianRhsx() const
-  {
-    return *_jacxRhs;
-  }
-
   /** get gradient according to \f$ x \f$ of the right-hand side (pointer)
    *  \return pointer on a SiconosMatrix
    */
@@ -1061,7 +1053,7 @@ public:
    * \param id the id of the SimpleMatrix
    *  \return a SP::SimpleMatrix
    */
-  inline SP::SimpleMatrix getWorkMatrix(const WorkMatrixNames & id) const
+  inline SP::SimpleMatrix workMatrix(const WorkMatrixNames & id) const
   {
     return  _workMatrix[id];
   }
