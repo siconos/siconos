@@ -124,7 +124,7 @@ SICONOS_IO_REGISTER_WITH_BASES(NewtonImpactFrictionNSL,(NonSmoothLaw),
   (_et)
   (_mu))
 SICONOS_IO_REGISTER_WITH_BASES(MixedComplementarityConditionNSL,(NonSmoothLaw),
-  (EqualitySize))
+  (_equalitySize))
 SICONOS_IO_REGISTER(NonSmoothDynamicalSystem,
   (_BVP)
   (_mIsLinear)
