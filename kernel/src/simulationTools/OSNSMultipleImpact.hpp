@@ -49,7 +49,7 @@ private:
   //! Number of contacts (only the active contacts)
   unsigned int _nContact;
   //! Maximal number of steps for each computation
-  unsigned int NstepMax;
+  unsigned int _nStepMax;
   //! Tolerance to define zero
   double _tolImpact;
   //! Type of the compliance model
@@ -131,8 +131,8 @@ private:
   double _ZeroVel_EndIm;
   //! Epsilon to define a zero value for potential energy in termination condition
   double _ZeroEner_EndIm;
-  //! we start to save data from Step_min_save to Step_min_save
-  unsigned int Step_min_save, Step_max_save;
+  //! we start to save data from _stepMinSave to _stepMaxSave
+  unsigned int _stepMinSave, _stepMaxSave;
 public:
   //!Default constructor
   OSNSMultipleImpact();

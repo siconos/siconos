@@ -38,9 +38,9 @@ OSNSMultipleImpact::OSNSMultipleImpact(): LinearOSNS()
   _ZeroEner_EndIm = DEFAULT_TOL_ENER;
   _saveData = false;
   _sizeDataSave = 1000;
-  NstepMax = 100000;
-  Step_min_save = 1;
-  Step_max_save = NstepMax;
+  _nStepMax = 100000;
+  _stepMinSave = 1;
+  _stepMaxSave = _nStepMax;
   _namefile = "DataMultipleImpact.dat";
 }
 //------------------------------ -------------------------------------------------------------
@@ -57,9 +57,9 @@ OSNSMultipleImpact::OSNSMultipleImpact(std::string newTypeLaw, double newDelP = 
   _saveData = false;
   _namefile = "DataMultipleImpact.dat";
   _sizeDataSave = 1000;
-  NstepMax = 100000;
-  Step_min_save = 1;
-  Step_max_save = NstepMax;
+  _nStepMax = 100000;
+  _stepMinSave = 1;
+  _stepMaxSave = _nStepMax;
   if ((_typeCompLaw != "MonoStiffness") && (_typeCompLaw != "BiStiffness"))
     RuntimeException::selfThrow("OSNSMultipleImpact::_typeCompLaw type of the compliance model must be either MonoStiffness or BiStiffness!");
 }
@@ -109,13 +109,13 @@ void OSNSMultipleImpact::SetNstepSave(unsigned int var)
 
 void OSNSMultipleImpact::SetNstepMax(unsigned int var)
 {
-  NstepMax = var;
+  _nStepMax = var;
 };
 
 void OSNSMultipleImpact::SetStepMinMaxSave(unsigned int var1, unsigned int var2)
 {
-  Step_min_save = var1;
-  Step_max_save = var2;
+  _stepMinSave = var1;
+  _stepMaxSave = var2;
 }
 
 void OSNSMultipleImpact::set_typeCompLaw(std::string newTypeLaw)
@@ -890,7 +890,7 @@ void OSNSMultipleImpact::ComputeImpact()
   unsigned int _counterstepsave = 0;
   // Show computation progress
   //cout << "*********** Impact computation progress *************" <<std::endl;
-  //boost::progress_display show_progress(NstepMax);
+  //boost::progress_display show_progress(_nStepMax);
   /*
      std::cout << "----------Before multiple impacts computation---------------" <<std::endl;
      std::cout << "Velocity at contacts: ";
@@ -900,7 +900,7 @@ void OSNSMultipleImpact::ComputeImpact()
   */
   //cout << "-------------------Multiple impacts computation starts:-----------------------" <<std::endl;
   // First save at the beginning of impact computation
-  if ((_saveData) && (Step_min_save == 1))
+  if ((_saveData) && (_stepMinSave == 1))
   {
     SaveDataOneStep(point_save); // Save the data
     point_save++;
@@ -943,7 +943,7 @@ void OSNSMultipleImpact::ComputeImpact()
     // Step 8: update the state of DS and output during impact and write data into output file at the beginning of each step
     if ((_saveData) & (_counterstepsave >= _nStepSave))
     {
-      if ((number_step >= Step_min_save) && (number_step <= Step_max_save))
+      if ((number_step >= _stepMinSave) && (number_step <= _stepMaxSave))
       {
         UpdateDuringImpact(); // Update state of dynamical system
         SaveDataOneStep(point_save); // Save the data
@@ -952,7 +952,7 @@ void OSNSMultipleImpact::ComputeImpact()
       }
     }
     //
-    if (number_step > NstepMax)
+    if (number_step > _nStepMax)
     {
       RuntimeException::selfThrow("In OSNSMultipleImpact::ComputeImpact, number of integration steps perfomed exceeds the maximal number of steps allowed!!!");
       //cout << "Causion: so long computation, the computation is stopped even when the impact is not yet terminated!!! " <<std::endl;
