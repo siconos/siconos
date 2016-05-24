@@ -426,7 +426,7 @@ SICONOS_IO_REGISTER_WITH_BASES(OSNSMultipleImpact,(LinearOSNS),
   (_ZeroEner_EndIm)
   (_ZeroVel_EndIm))
 SICONOS_IO_REGISTER_WITH_BASES(EventDriven,(Simulation),
-  (TOL_ED)
+  (_TOL_ED)
   (_DSG0)
   (_indexSet0)
   (_isNewtonConverge)

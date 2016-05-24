@@ -61,7 +61,7 @@ private:
 protected:
   /** an epsilon to define the contraint g for Interaction in IndexSet[1]
    */
-  static double TOL_ED;
+  static double _TOL_ED;
 
   /** boolean variable to known whether Newton iterations converges or not */
   bool _isNewtonConverge;
@@ -137,19 +137,19 @@ public:
     return _istate;
   }
   
-  /** Set value to TOL_ED
+  /** Set value to _TOL_ED
    * \param var the new tolerance
    */
   inline void setToleranceED(double var)
   {
-    TOL_ED = var;
+    _TOL_ED = var;
   }
   /** Get value of _epsilon
    * \return double
    */
   inline double toleranceED()
   {
-    return TOL_ED;
+    return _TOL_ED;
   }
 
   /** To know if Newton Iteratio is convergent

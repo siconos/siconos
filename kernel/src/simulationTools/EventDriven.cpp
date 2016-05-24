@@ -66,7 +66,7 @@ EventDriven::EventDriven(SP::TimeDiscretisation td, int nb): Simulation(td), _is
   _localizeEventMaxIter = 100;
 }
 
-double EventDriven::TOL_ED = DEFAULT_TOL_ED;
+double EventDriven::_TOL_ED = DEFAULT_TOL_ED;
 
 
 
@@ -121,16 +121,16 @@ void EventDriven::updateIndexSet(unsigned int i)
       // if indexSet[1]=>getYRef(0): output y
       // if indexSet[2]=>getYRef(1): output ydot
       double y = inter->getYRef(0); // output to define the IndexSets at this Interaction
-      if (y < -TOL_ED) // y[0] < 0
+      if (y < -_TOL_ED) // y[0] < 0
       {
         inter->display();
-        cout << "y = " << y << " < -TOL_ED =  "   << -TOL_ED  <<endl;
+        cout << "y = " << y << " < -_TOL_ED =  "   << -_TOL_ED  <<endl;
         RuntimeException::selfThrow("EventDriven::updateIndexSet, output of level 0 must be positive!!! ");
       }
       // 1 - If the Interaction is not yet in the set
       if (!indexSet1->is_vertex(inter)) // Interaction is not yet in the indexSet[i]
       {
-        if (fabs(y) <= TOL_ED)
+        if (fabs(y) <= _TOL_ED)
         {
           // vertex and edges insertions
           indexSet1->copy_vertex(inter, *_indexSet0);
@@ -138,7 +138,7 @@ void EventDriven::updateIndexSet(unsigned int i)
       }
       else // if the Interaction was already in the set
       {
-        if (fabs(y) > TOL_ED)
+        if (fabs(y) > _TOL_ED)
         {
           indexSet1->remove_vertex(inter); // remove the Interaction from IndexSet[1]
           inter->lambda(1)->zero(); // reset the lambda[1] to zero
@@ -152,7 +152,7 @@ void EventDriven::updateIndexSet(unsigned int i)
         double y = inter->getYRef(1); // output of level 1 at this Interaction
         if (!indexSet2->is_vertex(inter)) // Interaction is not yet in the indexSet[2]
         {
-          if (fabs(y) <= TOL_ED)
+          if (fabs(y) <= _TOL_ED)
           {
             // vertex and edges insertions
             indexSet2->copy_vertex(inter, *_indexSet0);
@@ -160,7 +160,7 @@ void EventDriven::updateIndexSet(unsigned int i)
         }
         else // if the Interaction was already in the set
         {
-          if (fabs(y) > TOL_ED)
+          if (fabs(y) > _TOL_ED)
           {
             indexSet2->remove_vertex(inter); // remove the Interaction from IndexSet[1]
             inter->lambda(2)->zero(); // reset the lambda[i] to zero
@@ -210,11 +210,11 @@ void EventDriven::updateIndexSetsWithDoubleCondition()
     SP::Interaction inter = indexSet2->bundle(*ui);
     double gamma = inter->getYRef(2);
     double F     = inter->getLambdaRef(2);
-    if (fabs(F) < TOL_ED)
+    if (fabs(F) < _TOL_ED)
       indexSet2->remove_vertex(inter);
-    else if ((gamma < -TOL_ED) || (F < -TOL_ED))
+    else if ((gamma < -_TOL_ED) || (F < -_TOL_ED))
       RuntimeException::selfThrow("EventDriven::updateIndexSetsWithDoubleCondition(), output[2] and lambda[2] for Interactionof indexSet[2] must be higher or equal to zero.");
-    else if (((fabs(gamma) > TOL_ED) && (fabs(F) > TOL_ED)))
+    else if (((fabs(gamma) > _TOL_ED) && (fabs(F) > _TOL_ED)))
       RuntimeException::selfThrow("EventDriven::updateIndexSetsWithDoubleCondition(), something is wrong for the LCP resolution.");
   }
 }
@@ -527,15 +527,15 @@ void EventDriven::computeg(SP::OneStepIntegrator osi,
     {
       for (unsigned int i = 0; i < nsLawSize; ++i)
       {
-        if ((*y)(i) > TOL_ED)
+        if ((*y)(i) > _TOL_ED)
         {
           gOut[k] = (*y)(i);
         }
         else
         {
-          if ((*ydot)(i) > -TOL_ED)
+          if ((*ydot)(i) > -_TOL_ED)
           {
-            gOut[k] = 100 * TOL_ED;
+            gOut[k] = 100 * _TOL_ED;
           }
           else
           {
@@ -549,19 +549,19 @@ void EventDriven::computeg(SP::OneStepIntegrator osi,
     {
       for (unsigned int i = 0; i < nsLawSize; ++i)
       {
-        if ((*lambda)(i) > TOL_ED)
+        if ((*lambda)(i) > _TOL_ED)
         {
           gOut[k] = (*lambda)(i); // g = lambda[2]
         }
         else
         {
-          if ((*yddot)(i) > TOL_ED)
+          if ((*yddot)(i) > _TOL_ED)
           {
             gOut[k] = (*lambda)(i);
           }
           else
           {
-            gOut[k] = 100 * TOL_ED;
+            gOut[k] = 100 * _TOL_ED;
           }
         }
         k++;
@@ -649,7 +649,7 @@ void EventDriven::advanceToEvent()
     if (_istate != 2) //some events occur
     {
       cout << "In EventDriven::advanceToEvent, some events are detected!!!" <<endl;
-      if (std::abs(_minConstraint) < TOL_ED) // events occur at the end of the integration step
+      if (std::abs(_minConstraint) < _TOL_ED) // events occur at the end of the integration step
       {
         isNewEventOccur = true;
       }
@@ -983,7 +983,7 @@ double EventDriven::detectEvents(bool updateIstate)
     lambda = inter->lambda(2); // input of level 2 at this Interaction
     if (!(indexSet2->is_vertex(inter))) // if Interaction is not in the indexSet[2]
     {
-      if ((*y)(0) < TOL_ED) // gap at the current interaction <= 0
+      if ((*y)(0) < _TOL_ED) // gap at the current interaction <= 0
       {
         _IsContactClosed = true;
       }
@@ -1003,7 +1003,7 @@ double EventDriven::detectEvents(bool updateIstate)
     }
     else // If interaction is in the indexSet[2]
     {
-      if ((*lambda)(0) < TOL_ED) // normal force at the current interaction <= 0
+      if ((*lambda)(0) < _TOL_ED) // normal force at the current interaction <= 0
       {
         _IsContactOpened = true;
       }
@@ -1109,13 +1109,13 @@ void EventDriven::LocalizeFirstEvent()
     }
     // Check whether or not some events occur in the interval [t_a, t_i]
     _minConstraint = detectEvents(_IsupdateIstate);
-    if (std::abs(_minConstraint) < TOL_ED) // first event is found
+    if (std::abs(_minConstraint) < _TOL_ED) // first event is found
     {
       _tout = t_i;
       found = true;
     }
     // if some events are detected in the interval [t_a, t_i] (if _istate != 2), set t_b = t_i
-    if (_minConstraint < -TOL_ED)
+    if (_minConstraint < -_TOL_ED)
     {
       t_b = t_i;
     }
