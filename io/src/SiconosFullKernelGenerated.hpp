@@ -5,7 +5,7 @@
 #ifdef WITH_SERIALIZATION
 #include "SiconosKernel.hpp"
 SICONOS_IO_REGISTER(SiconosException,
-  (reportMsg))
+  (_reportMsg))
 SICONOS_IO_REGISTER(BlockVector,
   (_sizeV)
   (_tabIndex)

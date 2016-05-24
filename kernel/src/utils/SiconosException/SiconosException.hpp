@@ -57,7 +57,7 @@ public:
    */
   inline std::string report() const
   {
-    return reportMsg;
+    return _reportMsg;
   } ;
 
 protected:
@@ -66,7 +66,7 @@ protected:
   ACCEPT_SERIALIZATION(SiconosException);
 
   /** report message which describe the exception */
-  std::string reportMsg;
+  std::string _reportMsg;
 };
 
 #endif //__SiconosException__

@@ -18,10 +18,10 @@
 #include "SiconosException.hpp"
 
 
-SiconosException::SiconosException(): reportMsg("Siconos Exception")
+SiconosException::SiconosException(): _reportMsg("Siconos Exception")
 {}
 
-SiconosException::SiconosException(const std::string& report): reportMsg(report)
+SiconosException::SiconosException(const std::string& report): _reportMsg(report)
 {}
 
 SiconosException::~SiconosException() {}
