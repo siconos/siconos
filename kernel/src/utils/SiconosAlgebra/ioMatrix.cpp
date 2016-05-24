@@ -115,7 +115,7 @@ bool write(const std::string& fileName, const std::string& mode, const SiconosMa
   if (outputType != "noDim")
     outfile << m.size(0) << " " << m.size(1) << std::endl;
 
-  if (m.getNum() == 1)
+  if (m.num() == 1)
   {
     // DenseMat * p = m.dense();
     DenseMat::iterator1 row;
@@ -134,7 +134,7 @@ bool write(const std::string& fileName, const std::string& mode, const SiconosMa
 
     }
   }
-  else if (m.getNum() == 2)
+  else if (m.num() == 2)
   {
     TriangMat * p = m.triang();
     TriangMat::iterator1 row;
@@ -144,7 +144,7 @@ bool write(const std::string& fileName, const std::string& mode, const SiconosMa
       outfile << std::endl;
     }
   }
-  else if (m.getNum() == 3)
+  else if (m.num() == 3)
   {
     SymMat * p = m.sym();
     SymMat::iterator1 row;
@@ -154,7 +154,7 @@ bool write(const std::string& fileName, const std::string& mode, const SiconosMa
       outfile << std::endl;
     }
   }
-  else if (m.getNum() == 4)
+  else if (m.num() == 4)
   {
     SparseMat * p = m.sparse();
     SparseMat::iterator1 row;

@@ -104,12 +104,12 @@ namespace ioVector
       if (outputType != "noDim")
         outfile << m.size() << std::endl;
     
-      if (m.getNum() == 1)
+      if (m.num() == 1)
       {
         DenseVect*  p = m.dense();
         std::copy(p->begin(), p->end(), std::ostream_iterator<double>(outfile, " "));
       }
-      else if (m.getNum() == 4)
+      else if (m.num() == 4)
       {
         SparseVect* p = m.sparse();
         std::copy(p->begin(), p->end(), std::ostream_iterator<double>(outfile, " "));

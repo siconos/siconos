@@ -607,7 +607,7 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
 
 
       SP::LagrangianDS lds = (std11::static_pointer_cast<LagrangianDS>(ds));
-      unsigned int sizeDS = lds->getDim();
+      unsigned int sizeDS = lds->dimension();
       leftInteractionBlock.reset(new SimpleMatrix(sizeY, sizeDS));
       inter->getLeftInteractionBlockForDS(pos, leftInteractionBlock, workMInter);
 
@@ -659,7 +659,7 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
       }
       SP::NewtonEulerDS neds = (std11::static_pointer_cast<NewtonEulerDS>(ds));
 #ifdef MLCPPROJ_WITH_CT
-      unsigned int sizeDS = neds->getDim();
+      unsigned int sizeDS = neds->dimension();
       SP::SimpleMatrix T = neds->T();
       SP::SimpleMatrix workT(new SimpleMatrix(*T));
       workT->trans();
@@ -678,7 +678,7 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
 #else
       if (0) //(std11::static_pointer_cast<NewtonEulerR> inter->relation())->_isConstact){
       {
-//        unsigned int sizeDS = neds->getDim();
+//        unsigned int sizeDS = neds->dimension();
 //        SP::SimpleMatrix T = neds->T();
 //        SP::SimpleMatrix workT(new SimpleMatrix(*T));
 //        workT->trans();
@@ -861,7 +861,7 @@ void MLCPProjectOnConstraints::computeInteractionBlock(const InteractionsGraph::
     assert(inter1 != inter2);
     currentInteractionBlock->zero();
 #ifdef MLCPPROJ_WITH_CT
-    unsigned int sizeDS = (std11::static_pointer_cast<NewtonEulerDS>(ds))->getDim();
+    unsigned int sizeDS = (std11::static_pointer_cast<NewtonEulerDS>(ds))->dimension();
     leftInteractionBlock.reset(new SimpleMatrix(sizeY1, sizeDS));
     inter1->getLeftInteractionBlockForDS(pos1, leftInteractionBlock);
     SP::NewtonEulerDS neds = (std11::static_pointer_cast<NewtonEulerDS>(ds));
@@ -891,7 +891,7 @@ void MLCPProjectOnConstraints::computeInteractionBlock(const InteractionsGraph::
   else if (relationType1 == Lagrangian &&
            relationType2 == Lagrangian)
   {
-    unsigned int sizeDS =  ds->getDim();
+    unsigned int sizeDS =  ds->dimension();
     leftInteractionBlock.reset(new SimpleMatrix(sizeY1, sizeDS));
     inter1->getLeftInteractionBlockForDS(pos1, leftInteractionBlock, workMInter1);
 
@@ -1192,7 +1192,7 @@ void MLCPProjectOnConstraints::computeOptions(SP::Interaction inter1, SP::Intera
   else if (Type::value(*(inter1->nonSmoothLaw()))
            == Type::MixedComplementarityConditionNSL)
   {
-    equalitySize1 = std11::static_pointer_cast<MixedComplementarityConditionNSL>(inter1->nonSmoothLaw())->getEqualitySize();
+    equalitySize1 = std11::static_pointer_cast<MixedComplementarityConditionNSL>(inter1->nonSmoothLaw())->equalitySize();
   }
 
   // Compute the number of inequalities

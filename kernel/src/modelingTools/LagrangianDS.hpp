@@ -372,7 +372,7 @@ public:
   /** to get the value of ndof
    *  \return the value of ndof
    */
-  inline unsigned int getNdof() const
+  inline unsigned int ndof() const
   {
     return _ndof;
   };
@@ -385,10 +385,11 @@ public:
     _ndof = newNdof;
   };
 
-  /** return the dim. of the system (n for first order, ndof for Lagrangian). Usefull to avoid if(typeOfDS) when size is required.
+  /** return the dim. of the system (n for first order, ndof for Lagrangian).
+   * Useful to avoid if(typeOfDS) when size is required.
    *  \return an unsigned int.
    */
-  virtual inline unsigned int getDim() const
+  virtual inline unsigned int dimension() const
   {
     return _ndof;
   }
@@ -550,14 +551,6 @@ public:
     _mass = newPtr;
   }
 
-  /** get MassLU: a copy of the mass matrix which is LU-factorized. Temporary function?
-   *  \return a pointer on a SiconosMatrix
-   */
-  inline SP::SimpleMatrix massLU() const
-  {
-    return (_workMatrix[invMass]);
-  }
-
   // --- fInt ---
 
   /** get fInt
@@ -685,14 +678,6 @@ public:
   }
 
   // -- forces --
-
-  /** get the value of forces
-   *  \return SiconosVector
-   */
-  inline const SiconosVector getForces() const
-  {
-    return *_forces;
-  }
 
   /** get forces
    *  \return pointer on a SiconosVector
@@ -840,14 +825,6 @@ public:
    */
   void setComputeJacobianFGyrqDotFunction(FPtr5 fct);
 
-  /** get the value of the gradient according to \f$ x \f$ of the right-hand side
-   *  \return BlockMatrix&
-   */
-  inline const BlockMatrix& getJacobianRhsx() const
-  {
-    return *_jacxRhs;
-  }
-
   /** get gradient according to \f$ x \f$ of the right-hand side (pointer)
    *  \return pointer on a SiconosMatrix
    */
@@ -980,6 +957,11 @@ public:
    */
   virtual void computeJacobianqDotForces(double time);
 
+
+  /** To compute the kinetic energy
+   */
+  double computeKineticEnergy();
+
   // --- miscellaneous ---
 
   /** print the data to the screen
@@ -1063,7 +1045,7 @@ public:
    * \param id the id of the SimpleMatrix
    *  \return a SP::SimpleMatrix
    */
-  inline SP::SimpleMatrix getWorkMatrix(const WorkMatrixNames & id) const
+  inline SP::SimpleMatrix workMatrix(const WorkMatrixNames & id) const
   {
     return  _workMatrix[id];
   }

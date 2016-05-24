@@ -122,9 +122,9 @@ protected:
 
   /** Scalar mass of the system
    */
-  double _mass;
+  double _scalarMass;
 
-  /** used for concatenate _I and _mass.I_3 */
+  /** used for concatenate _I and _scalarMass.I_3 */
   SP::SimpleMatrix _massMatrix;
 
   /** Contains the LU factorization of the Mass (or the iteration matrix.).
@@ -333,13 +333,15 @@ public:
 
   // === GETTERS AND SETTERS ===
 
-  /** return the dim. of the system (n for first order). Usefull to avoid if(typeOfDS) when size is required.
-   *  \return an unsigned int.
+  /** return the dim. of the system (n for first order).
+   * Useful to avoid if(typeOfDS) when size is required.
+   * \return an unsigned int.
    */
-  virtual inline unsigned int getDim() const
+  virtual inline unsigned int dimension() const
   {
     return _n;
   }
+
   virtual inline unsigned int getqDim() const
   {
     return _qDim;
@@ -436,9 +438,9 @@ public:
   /** get mass value
    *  \return a double
    */
-  inline double massValue() const
+  inline double scalarMass() const
   {
-    return _mass;
+    return _scalarMass;
   };
 
 
@@ -470,15 +472,6 @@ public:
 
 
   // -- forces --
-
-  /** get the value of forces
-   *  \return SiconosVector
-   */
-  inline const SiconosVector getForces() const
-  {
-    return *_forces;
-  }
-
   /** get forces
    *  \return pointer on a SiconosVector
    */
@@ -856,7 +849,9 @@ public:
                                 SP::SiconosVector position,
                                 SP::SiconosVector velocity);
 
-
+  /** To compute the kinetic energy
+   */
+  double computeKineticEnergy();
 
   // --- miscellaneous ---
 
@@ -888,8 +883,6 @@ public:
   virtual void computeT();
 
   virtual void computeTdot();
-
-
 
   virtual void normalizeq();
 

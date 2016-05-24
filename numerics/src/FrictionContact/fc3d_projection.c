@@ -642,7 +642,11 @@ void fc3d_projectionOnCylinderWithLocalIteration_initialize(
 {
   int nc = problem->numberOfContacts;
   /* printf("fc3d_projectionOnConeWithLocalIteration_initialize. Allocation of dwork\n"); */
-  assert(!localproblem->mu);
+  if(localproblem->mu)
+  {
+    free(localproblem->mu);
+  }
+
   localproblem->mu = options->dWork;
 
   if (!localsolver_options->dWork)

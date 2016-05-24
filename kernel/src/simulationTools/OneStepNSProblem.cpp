@@ -438,7 +438,7 @@ SP::SimpleMatrix OneStepNSProblem::getOSIMatrix(SP::OneStepIntegrator Osi, SP::D
       RuntimeException::selfThrow("OneStepNSProblem::getOSIMatrix not yet implemented for LsodarOSI Integrator with dynamical system of type " + dsType);
 
     // get lu-factorized mass
-    block = (std11::static_pointer_cast<LagrangianDS>(ds))->massLU();
+    block = (std11::static_pointer_cast<LagrangianDS>(ds))->workMatrix(LagrangianDS::invMass);
   }
   else if (osiType == OSI::NEWMARKALPHAOSI)
   {
@@ -451,7 +451,7 @@ SP::SimpleMatrix OneStepNSProblem::getOSIMatrix(SP::OneStepIntegrator Osi, SP::D
     // If LCP at acceleration level
     if (((*allOSNS)[SICONOS_OSNSP_ED_SMOOTH_ACC]).get() == this)
     {
-      block = (std11::static_pointer_cast<LagrangianDS>(ds))->massLU();
+      block = (std11::static_pointer_cast<LagrangianDS>(ds))->workMatrix(LagrangianDS::invMass);
     }
     else // It LCP at position level
     {

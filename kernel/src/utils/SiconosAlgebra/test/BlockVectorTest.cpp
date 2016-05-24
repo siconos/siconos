@@ -75,7 +75,7 @@ void BlockVectorTest::testConstructor1()
   //  SP::SiconosVector  z = v->vector(0);
   //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", z->isBlock(), false);
   //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", z->size() == 3, true);
-  //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", z->getNum() == 1, true);
+  //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", z->num() == 1, true);
   //  std::cout << "--> Constructor 1 test ended with success." <<std::endl;
 }
 
@@ -107,11 +107,11 @@ void BlockVectorTest::testConstructor2()
   SP::SiconosVector  ww = v->vector(0);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", ww->isBlock(), false);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", ww->size() == 3, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", ww->getNum() == 1, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", ww->num() == 1, true);
   ww = v->vector(1);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", ww->isBlock(), false);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", ww->size() == 5, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", ww->getNum() == 1, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", ww->num() == 1, true);
 
   SP::BlockVector  x2(new BlockVector());
   x2->insertPtr(w);
@@ -131,11 +131,11 @@ void BlockVectorTest::testConstructor2()
   SP::SiconosVector  ww2 = v2->vector(0);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", ww2->isBlock(), false);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", ww2->size() == 3, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", ww2->getNum() == 1, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", ww2->num() == 1, true);
   ww2 = v2->vector(1);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", ww2->isBlock(), false);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", ww2->size() == 5, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", ww2->getNum() == 1, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", ww2->num() == 1, true);
   std::cout << "--> Constructor 2 test ended with success." <<std::endl;
 }
 

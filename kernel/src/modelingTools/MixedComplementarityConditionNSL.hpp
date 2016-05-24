@@ -44,7 +44,7 @@ private:
   /** default constructor
    */
   MixedComplementarityConditionNSL() {};
-  unsigned int EqualitySize;
+  unsigned int _equalitySize;
 
 public:
   /** basic constructor
@@ -64,9 +64,9 @@ public:
   /** get the number of equality present in the MLCP
    *  \return an unsigned int
    */
-  inline unsigned int getEqualitySize()
+  inline unsigned int equalitySize()
   {
-    return EqualitySize;
+    return _equalitySize;
   };
 
   /** Visitors hook

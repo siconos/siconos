@@ -15,51 +15,42 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#ifndef __LagrangianDSTest__
-#define __LagrangianDSTest__
+#ifndef __NewtonEulerDSTest__
+#define __NewtonEulerDSTest__
 
 #include <cppunit/extensions/HelperMacros.h>
-#include "LagrangianDS.hpp"
+#include "NewtonEulerDS.hpp"
 #include "RuntimeException.hpp"
 
-class LagrangianDSTest : public CppUnit::TestFixture
+class NewtonEulerDSTest : public CppUnit::TestFixture
 {
 
 private:
   /** serialization hooks
   */
-  ACCEPT_SERIALIZATION(LagrangianDSTest);
-
+  ACCEPT_SERIALIZATION(NewtonEulerDSTest);
 
   // Name of the tests suite
-  CPPUNIT_TEST_SUITE(LagrangianDSTest);
+  CPPUNIT_TEST_SUITE(NewtonEulerDSTest);
 
   // tests to be done ...
 
-  // CPPUNIT_TEST(testBuildLagrangianDS1);
-  // CPPUNIT_TEST(testBuildLagrangianDS2);
-  // CPPUNIT_TEST(testBuildLagrangianDS3);
-  CPPUNIT_TEST(testBuildLagrangianDS4);
-  CPPUNIT_TEST(testBuildLagrangianDS5);
-  CPPUNIT_TEST(testcomputeDS);
+  CPPUNIT_TEST(testBuildNewtonEulerDS1);
   CPPUNIT_TEST(End);
 
   CPPUNIT_TEST_SUITE_END();
 
   // \todo exception test
 
-  // void testBuildLagrangianDS1();
-  // void testBuildLagrangianDS2();
-  // void testBuildLagrangianDS3();
-  void testBuildLagrangianDS4();
-  void testBuildLagrangianDS5();
-  void testcomputeDS();
+  void testBuildNewtonEulerDS1();
+  // void testcomputeDS();
   void End();
 
   // Members
 
   SP::SiconosVector q0, velocity0, u0;
-  SP::SiconosMatrix mass;
+  double mass;
+  SP::SiconosMatrix inertia;
 
 public:
   void setUp();

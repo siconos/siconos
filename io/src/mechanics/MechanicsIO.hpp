@@ -41,15 +41,18 @@ public:
   /** get all positions: translation (x,y,z) + orientation quaternion
    * (qw, qx, qy, qz)
    * \param model the model
-   * \return a SP::SimpleMatrix where the columns are x, y, z, qw, qx, qy, qz 
+   * \return a SP::SimpleMatrix where the columns are
+             id, x, y, z, qw, qx, qy, qz
+     id is the DynamicalSystem number + 1
    */
   SP::SimpleMatrix positions(const Model& model) const;
 
   /** get all velocities: translation (xdot, ydot, zdot) + orientation velocities 
       ox, oy, oz
    * \param model the model
-      \return a matrix where the columns are xdot, ydot, zdot,
+      \return a matrix where the columns are id, xdot, ydot, zdot,
       ox, oy, oz
+      id is the DynamicalSystem number + 1
   */
   SP::SimpleMatrix velocities(const Model& model) const;
 

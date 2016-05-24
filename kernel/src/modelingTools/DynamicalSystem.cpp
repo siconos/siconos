@@ -43,8 +43,8 @@ DynamicalSystem::DynamicalSystem(unsigned int newN):
   _normRef = 1;
   _x.resize(2);
   _workspace.resize(sizeWorkV);
-  _workspace[freeresidu].reset(new SiconosVector(getDim()));
-  _r.reset(new SiconosVector(getDim()));
+  _workspace[freeresidu].reset(new SiconosVector(dimension()));
+  _r.reset(new SiconosVector(dimension()));
   _z.reset(new SiconosVector(1));
 }
 
@@ -53,7 +53,7 @@ DynamicalSystem::DynamicalSystem(const DynamicalSystem & ds):
   _number(count++)
 {
   // The following data should always be initialize
-  _n = ds.getN();
+  _n = ds.n();
   _normRef = ds.normRef();
   _x0.reset(new SiconosVector(*(ds.x0())));
   _workspace.resize(sizeWorkV);
@@ -82,7 +82,7 @@ DynamicalSystem::DynamicalSystem(const DynamicalSystem & ds):
 
   if (ds.xMemory())
     _xMemory.reset(new SiconosMemory(*(ds.xMemory())));
-  _stepsInMemory = ds.getStepsInMemory();
+  _stepsInMemory = ds.stepsInMemory();
 
   _workspace.resize(sizeWorkV);
 

@@ -132,7 +132,7 @@ void KernelTest::t3()
   fill_SolverOptions(so.get(), SICONOS_FRICTION_3D_NSN_AC, 10, 10, 0, 0.);
   so->numberOfInternalSolvers = 1;
   so->internalSolvers = (_SolverOptions *) malloc(sizeof(_SolverOptions) * so->numberOfInternalSolvers);
-  fill_SolverOptions(so->internalSolvers, SICONOS_FRICTION_3D_NSN_AC, 10, 10, 0, 0.);  
+  fill_SolverOptions(so->internalSolvers, SICONOS_FRICTION_3D_NSN_AC, 10, 10, 0, 0.);
 
   std::ofstream ofs("SolverOptions.xml");
   {
@@ -318,7 +318,7 @@ void KernelTest::t6()
     double h = bouncingBall->simulation()->timeStep();
     int N = (int)((T - t0) / h); // Number of time steps
 
-    SP::DynamicalSystemsGraph dsg = 
+    SP::DynamicalSystemsGraph dsg =
       bouncingBall->nonSmoothDynamicalSystem()->topology()->dSG(0);
 
     SP::LagrangianDS ball = std11::static_pointer_cast<LagrangianDS>
@@ -386,9 +386,9 @@ void KernelTest::t6()
 
     if ((dataPlot - dataPlotRef).normInf() > 1e-12)
     {
-      std::cout << 
-        "Warning. The results is rather different from the reference file :" 
-                << 
+      std::cout <<
+        "Warning. The results is rather different from the reference file :"
+                <<
         (dataPlot - dataPlotRef).normInf()
                 <<
         std::endl;
@@ -448,10 +448,10 @@ void KernelTest::t7()
 void KernelTest::t8()
 {
   SP::DynamicalSystem ds1, ds2;
-  
+
   SP::SiconosVector q(new SiconosVector(3));
   SP::SiconosVector v(new SiconosVector(3));
-  
+
   (*q)(0) = 0.;
   (*q)(1) = 1.;
   (*q)(2) = 1.;
@@ -461,7 +461,7 @@ void KernelTest::t8()
   (*v)(2) = 10.;
 
   SP::Model model(new Model(0,10));
-  
+
   ds1.reset(new Disk(1, 1, q, v));
   ds2.reset(new Disk(2, 2, q, v));
 
@@ -473,12 +473,19 @@ void KernelTest::t8()
   SP::SimpleMatrix positions = IO.positions(*model);
   SP::SimpleMatrix velocities = IO.velocities(*model);
 
-  CPPUNIT_ASSERT((*positions)(0,0) == 0.);
-  CPPUNIT_ASSERT((*velocities)(0,0) == 0.);
-  CPPUNIT_ASSERT((*positions)(0,1) == 1.);
-  CPPUNIT_ASSERT((*positions)(1,1) == 1.);
-  CPPUNIT_ASSERT((*velocities)(0,2) == 10.);
-  CPPUNIT_ASSERT((*velocities)(1,2) == 10.);
+  //ids
+  CPPUNIT_ASSERT((*positions)(0,0) == 1);
+  CPPUNIT_ASSERT((*velocities)(0,0) == 1);
+
+  CPPUNIT_ASSERT((*positions)(1,0) == 2);
+  CPPUNIT_ASSERT((*velocities)(1,0) == 2);
+
+  CPPUNIT_ASSERT((*positions)(0,1) == 0.);
+  CPPUNIT_ASSERT((*velocities)(0,1) == 0.);
+  CPPUNIT_ASSERT((*positions)(0,2) == 1.);
+  CPPUNIT_ASSERT((*positions)(1,2) == 1.);
+  CPPUNIT_ASSERT((*velocities)(0,3) == 10.);
+  CPPUNIT_ASSERT((*velocities)(1,3) == 10.);
 
 }
 #endif

@@ -66,8 +66,8 @@ const SiconosVector prod(const SiconosMatrix& A, const SiconosVector& x)
   if (A.size(1) != x.size())
     SiconosMatrixException::selfThrow("prod(matrix,vector) error: inconsistent sizes.");
 
-  unsigned int numA = A.getNum();
-  unsigned int numX = x.getNum();
+  unsigned int numA = A.num();
+  unsigned int numX = x.num();
 
   if (numA == 0) // if A is block ...
     SiconosMatrixException::selfThrow("prod(matrix,vector) error: not yet implemented for block matrix.");
@@ -122,9 +122,9 @@ void prod(double a, const SiconosMatrix& A, const SiconosVector& x, SiconosVecto
   if (A.size(0) != y.size())
     SiconosMatrixException::selfThrow("prod(A,x,y) error: inconsistent sizes between A and y.");
 
-  unsigned int numA = A.getNum();
-  unsigned int numX = x.getNum();
-  unsigned int numY = y.getNum();
+  unsigned int numA = A.num();
+  unsigned int numX = x.num();
+  unsigned int numY = y.num();
 
   if (numA == 0) // If A is Block
     SiconosMatrixException::selfThrow("prod(A,x,y) error: not yet implemented for block matrices.");
@@ -308,9 +308,9 @@ void prod(const SiconosVector& x, const SiconosMatrix& A, SiconosVector& y, bool
   if (A.size(1) != y.size())
     SiconosMatrixException::selfThrow("prod(x,A,y) error: inconsistent sizes between A and y.");
 
-  unsigned int numA = A.getNum();
-  unsigned int numX = x.getNum();
-  unsigned int numY = y.getNum();
+  unsigned int numA = A.num();
+  unsigned int numX = x.num();
+  unsigned int numY = y.num();
 
   if (numA == 0) // If A is Block
     SiconosMatrixException::selfThrow("prod(x,A,y) error: not yet implemented for block matrices.");
@@ -498,9 +498,9 @@ void prod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, bool
   if (A.size(0) != y.size())
     SiconosMatrixException::selfThrow("prod(A,x,y) error: inconsistent sizes between A and y.");
 
-  unsigned int numA = A.getNum();
-  unsigned int numX = x.getNum();
-  unsigned int numY = y.getNum();
+  unsigned int numA = A.num();
+  unsigned int numX = x.num();
+  unsigned int numY = y.num();
 
   if (numA == 0) // If A is Block
     SiconosMatrixException::selfThrow("prod(A,x,y) error: not yet implemented for block matrices.");
@@ -688,9 +688,9 @@ void axpy_prod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y,
   if (A.size(0) != y.size())
     SiconosMatrixException::selfThrow("prod(A,x,y) error: inconsistent sizes between A and y.");
 
-  unsigned int numA = A.getNum();
-  unsigned int numX = x.getNum();
-  unsigned int numY = y.getNum();
+  unsigned int numA = A.num();
+  unsigned int numX = x.num();
+  unsigned int numY = y.num();
 
   if (numA == 0) // If A is Block
     SiconosMatrixException::selfThrow("axpy_prod(A,x,y) error: not yet implemented for block matrices.");
@@ -795,9 +795,9 @@ void gemvtranspose(double a, const SiconosMatrix& A, const SiconosVector& x, dou
     SiconosMatrixException::selfThrow("gemv(...) not yet implemented for block vectors or matrices.");
   assert(!(A.isPLUFactorized()) && "A is PLUFactorized in prod !!");
 
-  unsigned int numA = A.getNum();
-  unsigned int numX = x.getNum();
-  unsigned int numY = y.getNum();
+  unsigned int numA = A.num();
+  unsigned int numX = x.num();
+  unsigned int numY = y.num();
   if (numA != 1 || numX != 1 || numY != 1)
     SiconosMatrixException::selfThrow("gemv(...) failed: reserved to dense matrices or vectors.");
 
@@ -810,9 +810,9 @@ void gemv(double a, const SiconosMatrix& A, const SiconosVector& x, double b, Si
     SiconosMatrixException::selfThrow("gemv(...) not yet implemented for block vectors or matrices.");
   assert(!(A.isPLUFactorized()) && "A is PLUFactorized in prod !!");
 
-  unsigned int numA = A.getNum();
-  unsigned int numX = x.getNum();
-  unsigned int numY = y.getNum();
+  unsigned int numA = A.num();
+  unsigned int numX = x.num();
+  unsigned int numY = y.num();
   if (numA != 1 || numX != 1 || numY != 1)
     SiconosMatrixException::selfThrow("gemv(...) failed: reserved to dense matrices or vectors.");
 

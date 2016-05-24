@@ -54,7 +54,7 @@ void SimpleMatrix::PLUFactorizationInPlace()
     std::cout << "SimpleMatrix::PLUFactorizationInPlace warning: this matrix is already PLUFactorized. " << std::endl;
     return;
   }
-  if (num == 1)
+  if (_num == 1)
   {
     if (!_ipiv)
       _ipiv.reset(new VInt(size(0)));
@@ -88,7 +88,7 @@ void SimpleMatrix::PLUInverseInPlace()
 {
   if (!_isPLUFactorized)
     PLUFactorizationInPlace();
-  if (num != 1)
+  if (_num != 1)
     SiconosMatrixException::selfThrow(" SimpleMatrix::PLUInverseInPlace: only implemented for dense matrices.");
 
 #if defined(HAVE_ATLAS) && defined(OUTSIDE_FRAMEWORK_BLAS)
@@ -109,7 +109,7 @@ void SimpleMatrix::PLUForwardBackwardInPlace(SiconosMatrix &B)
     SiconosMatrixException::selfThrow("SimpleMatrix PLUForwardBackwardInPlace(M) failed. Not yet implemented for M being a BlockMatrix.");
   int info = 0;
 
-  if (num == 1)
+  if (_num == 1)
   {
     if (!_isPLUFactorized) // call gesv => LU-factorize+solve
     {
@@ -132,7 +132,7 @@ void SimpleMatrix::PLUForwardBackwardInPlace(SiconosMatrix &B)
       // B now contains solution:
     }
     else // call getrs: only solve using previous lu-factorization
-      if (B.getNum() == 1)
+      if (B.num() == 1)
         info = lapack::getrs(*mat.Dense, *_ipiv, *(B.dense()));
       else
         SiconosMatrixException::selfThrow(" SimpleMatrix::PLUInverseInPlace: only implemented for dense matrices in RHS.");
@@ -144,12 +144,12 @@ void SimpleMatrix::PLUForwardBackwardInPlace(SiconosMatrix &B)
       PLUFactorizationInPlace();
     }
     // and then solve
-    if (B.getNum() == 1)
+    if (B.num() == 1)
     {
       inplace_solve(*sparse(), *(B.dense()), ublas::lower_tag());
       inplace_solve(ublas::trans(*sparse()), *(B.dense()), ublas::upper_tag());
     }
-    else if (B.getNum() == 4)
+    else if (B.num() == 4)
     {
       inplace_solve(*sparse(), *(B.sparse()), ublas::lower_tag());
       inplace_solve(ublas::trans(*sparse()), *(B.sparse()), ublas::upper_tag());
@@ -176,7 +176,7 @@ void SimpleMatrix::PLUForwardBackwardInPlace(SiconosVector &B)
   ublas::column(tmpB, 0) = *(B.dense()); // Conversion of vector to matrix. Temporary solution.
   int info;
 
-  if (num == 1)
+  if (_num == 1)
   {
     if (!_isPLUFactorized) // call gesv => LU-factorize+solve
     {

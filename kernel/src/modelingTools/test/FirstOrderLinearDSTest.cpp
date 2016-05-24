@@ -50,7 +50,7 @@ void FirstOrderLinearDSTest::testBuildFirstOrderLinearDS1()
   SP::FirstOrderLinearDS ds(new FirstOrderLinearDS(x0, "TestPlugin:computeA", "TestPlugin:computeb"));
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS1A : ", Type::value(*ds) == Type::FirstOrderLinearDS, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS1B : ", ds->getN() == 3, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS1B : ", ds->n() == 3, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS1C : ", ds->x0() == x0, true);
 
   double time = 1.5;

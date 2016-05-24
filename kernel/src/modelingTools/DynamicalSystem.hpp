@@ -281,7 +281,7 @@ public:
   /** allow to get n, the dimension, i.e. the size of the state x of the DynamicalSystem
    *  \return the value of n
    */
-  inline unsigned int getN() const
+  inline unsigned int n() const
   {
     return _n;
   }
@@ -294,10 +294,11 @@ public:
     _n = newN;
   }
 
-  /** return the dim. of the system (n for first order, ndof for Lagrangian). Usefull to avoid if(typeOfDS) when size is required.
+  /** return the dim. of the system (n for first order, ndof for Lagrangian).
+   * Useful to avoid if(typeOfDS) when size is required.
    *  \return an unsigned int.
    */
-  virtual inline unsigned int getDim() const
+  virtual inline unsigned int dimension() const
   {
     return _n;
   };
@@ -427,14 +428,6 @@ public:
 
   // --- JacobianRhsx ---
 
-  /** get the value of the gradient according to \f$ x \f$ of the right-hand side
-   *  \return SimpleMatrix
-   */
-  inline SiconosMatrix& getJacobianRhsx() const
-  {
-    return *_jacxRhs;
-  }
-
   /** get gradient according to \f$ x \f$ of the right-hand side (pointer)
    *  \return pointer on a SiconosMatrix
    */
@@ -496,7 +489,7 @@ public:
   /** get the value of stepsInMemory
    *  \return the value of stepsInMemory
    */
-  inline int getStepsInMemory() const
+  inline int stepsInMemory() const
   {
     return _stepsInMemory;
   }

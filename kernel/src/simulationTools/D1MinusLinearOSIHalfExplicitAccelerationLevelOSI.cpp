@@ -93,7 +93,7 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
 
       if (! d->workspace(DynamicalSystem::free_tdg))
       {
-        d->allocateWorkVector(DynamicalSystem::free_tdg, d->getDim()) ;
+        d->allocateWorkVector(DynamicalSystem::free_tdg, d->dimension()) ;
       }
       work_tdg = d->workspace(DynamicalSystem::free_tdg);
       work_tdg->zero();
@@ -128,7 +128,7 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
 
       if (! d->workspace(DynamicalSystem::free_tdg))
       {
-        d->allocateWorkVector(DynamicalSystem::free_tdg, d->getDim()) ;
+        d->allocateWorkVector(DynamicalSystem::free_tdg, d->dimension()) ;
       }
 
       work_tdg = d->workspace(DynamicalSystem::free_tdg);

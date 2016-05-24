@@ -109,7 +109,7 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
       /* Store the value of vFree in d->workspace(DynamicalSystem::free_tdg called workFree_tdg*/
       if (! d->workspace(DynamicalSystem::free_tdg))
       {
-        d->allocateWorkVector(DynamicalSystem::free_tdg, d->getDim()) ;
+        d->allocateWorkVector(DynamicalSystem::free_tdg, d->dimension()) ;
       }
       workFree_tdg = d->workspace(DynamicalSystem::free_tdg);
       workFree_tdg->zero();
@@ -158,7 +158,7 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
 
       if (! d->workspace(DynamicalSystem::free_tdg))
       {
-        d->allocateWorkVector(DynamicalSystem::free_tdg, d->getDim()) ;
+        d->allocateWorkVector(DynamicalSystem::free_tdg, d->dimension()) ;
       }
 
       workFree_tdg = d->workspace(DynamicalSystem::free_tdg);

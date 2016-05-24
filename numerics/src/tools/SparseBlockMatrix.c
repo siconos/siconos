@@ -1947,10 +1947,10 @@ int sparseToSBM(int blocksize, const CSparseMatrix* const sparseMat, SparseBlock
   }
 
   /* 5: allocate memory for contiguous blocks */
-  assert(A->block == NULL);
   assert(A->nbblocks>0);
 
-  A->block = (double **) malloc(A->nbblocks * sizeof(double *));
+  if (!A->block)
+    A->block = (double **) malloc(A->nbblocks * sizeof(double *));
   for (unsigned int i = 0; i < A->nbblocks; i++)
   {
     A->block[i] = (double *) malloc(blocksize * blocksize * sizeof(double));
@@ -1982,11 +1982,12 @@ int sparseToSBM(int blocksize, const CSparseMatrix* const sparseMat, SparseBlock
   DEBUG_PRINTF("A->filled1 =%i\n",A->filled1);
   DEBUG_PRINTF("A->filled2 =%i\n",A->filled2);
   /* 7: allocate memory for index data */
-  assert(A->index1_data == NULL);
-  assert(A->index2_data == NULL);
 
-  A->index1_data = (size_t*) malloc(A->filled1 * sizeof(size_t));
-  A->index2_data = (size_t*) malloc(A->filled2 * sizeof(size_t));
+  if (!A->index1_data)
+    A->index1_data = (size_t*) malloc(A->filled1 * sizeof(size_t));
+
+  if (!A->index2_data)
+    A->index2_data = (size_t*) malloc(A->filled2 * sizeof(size_t));
 
 
   for (size_t i = 0; i < A->filled1; i++)

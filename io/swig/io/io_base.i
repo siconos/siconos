@@ -21,7 +21,7 @@
 
 %include "SiconosRestart.hpp"
 
-#ifdef HAVE_SICONOS_MECHANICS
+#ifdef WITH_MECHANICS
 %include <MechanicsIO.hpp>
 %{
 #include <MechanicsIO.hpp>

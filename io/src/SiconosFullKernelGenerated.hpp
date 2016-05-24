@@ -1,23 +1,23 @@
-// generated with the command : ./build_from_doxygen.py --targets=kernel -I/home/sinclairs/.local/include/siconos -I/usr/include/openmpi --output=../src/SiconosFullKernelGenerated.hpp --source=../.. --build=../../bld
+// generated with the command : ./build_from_doxygen.py --targets=kernel -I/usr/local/include/siconos -I/usr/include/openmpi --output=../src/SiconosFullKernelGenerated.hpp --source=../.. --build=/home/build/maurice/Debug/Siconos/
 #ifndef SiconosFullKernelGenerated_hpp
 #define SiconosFullKernelGenerated_hpp
 #include <SiconosConfig.h>
 #ifdef WITH_SERIALIZATION
 #include "SiconosKernel.hpp"
 SICONOS_IO_REGISTER(SiconosException,
-  (reportMsg))
+  (_reportMsg))
 SICONOS_IO_REGISTER(BlockVector,
   (_sizeV)
   (_tabIndex)
-  (vect))
+  (_vect))
 SICONOS_IO_REGISTER_WITH_BASES(BlockMatrix,(SiconosMatrix),
   (_mat)
   (_tabCol)
   (_tabRow)
-  (dimCol)
-  (dimRow))
+  (_dimCol)
+  (_dimRow))
 SICONOS_IO_REGISTER(SiconosMatrix,
-  (num))
+  (_num))
 SICONOS_IO_REGISTER(SiconosMemory,
   (_indx)
   (_nbVectorsInMemory)
@@ -71,24 +71,24 @@ SICONOS_IO_REGISTER_WITH_BASES(MultipleImpactNSL,(NonSmoothLaw),
   (_Stiff))
 SICONOS_IO_REGISTER(PluggedObject,
   (_pluginName))
-SICONOS_IO_REGISTER_WITH_BASES(NewtonImpactFrictionNSL,(NonSmoothLaw),
-  (_en)
-  (_et)
-  (_mu))
-SICONOS_IO_REGISTER(NonSmoothDynamicalSystem,
-  (_BVP)
-  (_mIsLinear)
-  (_topology))
 SICONOS_IO_REGISTER_WITH_BASES(ComplementarityConditionNSL,(NonSmoothLaw),
 )
 SICONOS_IO_REGISTER_WITH_BASES(EqualityConditionNSL,(NonSmoothLaw),
 )
+SICONOS_IO_REGISTER_WITH_BASES(NewtonImpactFrictionNSL,(NonSmoothLaw),
+  (_en)
+  (_et)
+  (_mu))
+SICONOS_IO_REGISTER_WITH_BASES(MixedComplementarityConditionNSL,(NonSmoothLaw),
+  (EqualitySize))
+SICONOS_IO_REGISTER(NonSmoothDynamicalSystem,
+  (_BVP)
+  (_mIsLinear)
+  (_topology))
 SICONOS_IO_REGISTER_WITH_BASES(NewtonEulerFrom3DLocalFrameR,(NewtonEulerFrom1DLocalFrameR),
 )
 SICONOS_IO_REGISTER_WITH_BASES(FirstOrderLinearTIR,(FirstOrderR),
   (_e))
-SICONOS_IO_REGISTER_WITH_BASES(MixedComplementarityConditionNSL,(NonSmoothLaw),
-  (EqualitySize))
 SICONOS_IO_REGISTER(BoundaryCondition,
   (_pluginPrescribedVelocity)
   (_prescribedVelocity)
@@ -180,7 +180,7 @@ SICONOS_IO_REGISTER_WITH_BASES(NewtonEulerDS,(DynamicalSystem),
   (_luW)
   (_mExt)
   (_mInt)
-  (_mass)
+  (_scalarMass)
   (_massMatrix)
   (_p)
   (_pluginFExt)
@@ -196,6 +196,7 @@ SICONOS_IO_REGISTER_WITH_BASES(NewtonEulerDS,(DynamicalSystem),
   (_qDim)
   (_qMemory)
   (_reactionToBoundaryConditions)
+  (_scalarMass)
   (_v)
   (_v0)
   (_vMemory))
@@ -342,37 +343,37 @@ SICONOS_IO_REGISTER_WITH_BASES(MLCPProjectOnConstraints,(MLCP),
   (_doProjOnEquality)
   (_useMassNormalization))
 SICONOS_IO_REGISTER_WITH_BASES(OSNSMultipleImpact,(LinearOSNS),
-  (DelImpulseContact)
-  (DeltaP)
-  (DistriVector)
-  (ElasCoefContact)
-  (EnerAtPrimaCon)
-  (EnerContact)
-  (ForceContact)
-  (IdPrimaContact)
-  (ImpulseContact_update)
-  (Impulse_variable)
-  (IsPrimaConEnergy)
-  (Kcontact)
-  (NameFile)
-  (Ncontact)
-  (NstepMax)
-  (NstepSave)
-  (OldVelContact)
-  (ResContact)
-  (SelectPrimaConInVel)
-  (SizeDataSave)
-  (StateContact)
-  (Step_max_save)
-  (Step_min_save)
-  (TOL_IMPACT)
-  (Time_variable)
-  (TolImpulseContact)
-  (TypeCompLaw)
-  (VelAtPrimaCon)
-  (VelContact)
-  (WcContact)
-  (YesSaveData)
+  (_deltaImpulseContact)
+  (_deltaP)
+  (_distributionVector)
+  (_elasticyCoefficientcontact)
+  (_energyPrimaryContact)
+  (_energyContact)
+  (_forceContact)
+  (_primaryContactId)
+  (_impulseContactUpdate)
+  (_impulseVariable)
+  (_isPrimaryContactEnergy)
+  (_Kcontact)
+  (_namefile)
+  (_nContact)
+  (_nStepMax)
+  (_nStepSave)
+  (_oldVelocityContact)
+  (_restitutionContact)
+  (_selectPrimaConInVel)
+  (_sizeDataSave)
+  (_stateContact)
+  (_stepMaxSave)
+  (_stepMinSave)
+  (_tolImpact)
+  (_timeVariable)
+  (_tolImpulseContact)
+  (_typeCompLaw)
+  (_relativeVelocityPrimaryContact)
+  (_velocityContact)
+  (_WorkcContact)
+  (_saveData)
   (_DataMatrix)
   (_IsImpactEnd)
   (_Tol_Ener)
@@ -380,7 +381,7 @@ SICONOS_IO_REGISTER_WITH_BASES(OSNSMultipleImpact,(LinearOSNS),
   (_ZeroEner_EndIm)
   (_ZeroVel_EndIm))
 SICONOS_IO_REGISTER_WITH_BASES(EventDriven,(Simulation),
-  (TOL_ED)
+  (_TOL_ED)
   (_DSG0)
   (_indexSet0)
   (_isNewtonConverge)
@@ -583,13 +584,13 @@ void siconos_io_register_generated(Archive& ar)
   ar.register_type(static_cast<Topology*>(NULL));
   ar.register_type(static_cast<MultipleImpactNSL*>(NULL));
   ar.register_type(static_cast<PluggedObject*>(NULL));
-  ar.register_type(static_cast<NewtonImpactFrictionNSL*>(NULL));
-  ar.register_type(static_cast<NonSmoothDynamicalSystem*>(NULL));
   ar.register_type(static_cast<ComplementarityConditionNSL*>(NULL));
   ar.register_type(static_cast<EqualityConditionNSL*>(NULL));
+  ar.register_type(static_cast<NewtonImpactFrictionNSL*>(NULL));
+  ar.register_type(static_cast<MixedComplementarityConditionNSL*>(NULL));
+  ar.register_type(static_cast<NonSmoothDynamicalSystem*>(NULL));
   ar.register_type(static_cast<NewtonEulerFrom3DLocalFrameR*>(NULL));
   ar.register_type(static_cast<FirstOrderLinearTIR*>(NULL));
-  ar.register_type(static_cast<MixedComplementarityConditionNSL*>(NULL));
   ar.register_type(static_cast<BoundaryCondition*>(NULL));
   ar.register_type(static_cast<NewtonImpactNSL*>(NULL));
   ar.register_type(static_cast<NewtonEulerFrom1DLocalFrameR*>(NULL));

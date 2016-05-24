@@ -38,14 +38,15 @@ int main(void)
   NumericsMatrix* W = createNumericsMatrix(NM_SPARSE, 9, 9);
   NM_copy_to_sparse(tmpM, W);
 
-  int solvers_to_test[] = {SICONOS_FRICTION_3D_NSGS,
-                           SICONOS_FRICTION_3D_NSN_AC,
-                           SICONOS_FRICTION_3D_NSN_FB,
-                           SICONOS_FRICTION_3D_NSN_NM,
-                           SICONOS_FRICTION_3D_SOCLCP,
-                           SICONOS_FRICTION_3D_PROX};
+  int solvers_to_test[] = {SICONOS_FRICTION_3D_NSGS};
+  /* Note computeSparseAWpB only for sparse block storage at the moment */
+  /*                         SICONOS_FRICTION_3D_NSN_AC,
+                             SICONOS_FRICTION_3D_NSN_FB,
+                             SICONOS_FRICTION_3D_NSN_NM,
+                             SICONOS_FRICTION_3D_SOCLCP,
+                             SICONOS_FRICTION_3D_PROX};*/
 
-  for (size_t s = 0; s < sizeof(solvers_to_test); ++s)
+  for (size_t s = 0; s < 1; ++s)
   {
     int solver_id = solvers_to_test[s];
 
@@ -67,7 +68,6 @@ int main(void)
     FC->mu = NULL;
     deleteSolverOptions(&SO);
     freeFrictionContactProblem(FC);
-    free(FC);
   }
 
   freeNumericsMatrix(W);

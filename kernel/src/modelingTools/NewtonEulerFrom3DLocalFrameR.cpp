@@ -25,8 +25,8 @@
 
 #include "op3x3.h"
 
-// #define DEBUG_STDOUT
-// #define DEBUG_MESSAGES
+//#define DEBUG_STDOUT
+//#define DEBUG_MESSAGES
 #include "debug.h"
 
 /*
@@ -46,7 +46,7 @@ void NewtonEulerFrom3DLocalFrameR::initComponents(Interaction& inter, VectorOfBl
 }
 void NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts(SP::SiconosVector q1)
 {
-
+  DEBUG_BEGIN("NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts(SP::SiconosVector q1)\n");
   double Nx = _Nc->getValue(0);
   double Ny = _Nc->getValue(1);
   double Nz = _Nc->getValue(2);
@@ -59,12 +59,15 @@ void NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts(SP::SiconosVect
 
   DEBUG_PRINT("contact normal:\n");
   DEBUG_EXPR(_Nc->display(););
+  DEBUG_PRINTF("_Nc->norm2() -1.0 = %e\n",_Nc->norm2()-1.0);
   DEBUG_PRINT("contact point :\n");
   DEBUG_EXPR(_Pc1->display(););
   DEBUG_PRINT("center of mass :\n");
   DEBUG_EXPR(q1->display(););
 
-  assert(_Nc->norm2() >0.0 && "NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts. Normal vector not consistent ") ;
+  assert(_Nc->norm2() >0.0
+         && std::abs(_Nc->norm2()-1.0) < 1e-6
+         && "NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts. Normal vector not consistent ") ;
 
   double t[6];
   double * pt = t;
@@ -95,12 +98,13 @@ void NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts(SP::SiconosVect
   (*_NPG1)(2, 1) = (G1x - Px);
   (*_NPG1)(2, 2) = 0;
 
+  DEBUG_PRINT("lever arm skew matrix\n");
+  DEBUG_EXPR(_NPG1->display(););
+
 //  d1->computeMObjToAbs();
 //  SimpleMatrix& Mobj1_abs = *d1->MObjToAbs();
 
   computeMObjToAbs(q1,_MObjToAbs);
-
-  DEBUG_PRINT("NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts, _MObjToAbs:");
   DEBUG_EXPR(_MObjToAbs->display(););
 
 
@@ -155,6 +159,7 @@ void NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts(SP::SiconosVect
   //   prod(*jaux, *v, *vRes, true);
   //   vRes->display();
   //   );
+  DEBUG_END("NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts(SP::SiconosVector q1)\n");
 }
 
 void NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts(SP::SiconosVector q1, SP::SiconosVector q2)

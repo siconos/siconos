@@ -124,7 +124,7 @@ void LagrangianLinearTIDS::initialize(double time, unsigned int sizeOfMemory)
   }
 
   if (!_forces)
-    _forces.reset(new SiconosVector(getDim()));
+    _forces.reset(new SiconosVector(dimension()));
   // If z has not been set, we initialize it with a null vector of
   // size 1, since z is required in plug-in functions call.
   if (! _z)

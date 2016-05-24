@@ -350,12 +350,12 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction, double *veloci
   localproblem->mu = (double*)malloc(sizeof(double));
 
 
-  if (problem->M->storageType == NM_DENSE)
+  if (problem->M->storageType == NM_DENSE || problem->M->storageType == NM_SPARSE)
   {
     localproblem->M = createNumericsMatrixFromData(NM_DENSE, 3, 3,
                                            malloc(9 * sizeof(double)));
   }
-  else
+  else /* NM_SPARSE_BLOCK */
   {
     localproblem->M = createNumericsMatrixFromData(NM_DENSE, 3, 3, NULL);
   }

@@ -47,7 +47,7 @@ private:
   unsigned int _sizeV;
 
   /** A container of pointers on SiconosVector. */
-  VectorOfVectors vect;
+  VectorOfVectors _vect;
 
   /** tabindex[i] = tabindex[i-1] + ni, ni being the size of svref[i]. */
   SP::Index _tabIndex;
@@ -61,7 +61,7 @@ public:
   BlockVector();
 
   /** copy contructor
-   *  \param v BlockVector& 
+   *  \param v BlockVector&
    */
   BlockVector(const BlockVector& v);
 
@@ -87,12 +87,12 @@ public:
   };
 
 
-  /** iterator equal to vect.begin
+  /** iterator equal to _vect.begin
       \return a VectorOfVectors::iterator
   */
   inline VectorOfVectors::iterator begin()
   {
-    return vect.begin();
+    return _vect.begin();
   };
 
   /** iterator equal to vect.end
@@ -100,31 +100,31 @@ public:
   */
   inline VectorOfVectors::iterator end()
   {
-    return vect.end();
+    return _vect.end();
   };
 
-  /** const iterator equal to vect.begin
+  /** const iterator equal to _vect.begin
       \return a VectorOfVectors::iterator
   */
   inline VectorOfVectors::const_iterator begin() const
   {
-    return vect.begin();
+    return _vect.begin();
   };
 
-  /** const iterator equal to vect.end
+  /** const iterator equal to _vect.end
       \return a VectorOfVectors::iterator
   */
   inline VectorOfVectors::const_iterator end() const
   {
-    return vect.end();
+    return _vect.end();
   } ;
 
-  /** get vect, ie all the vectors of the object
+  /** get _vect, ie all the vectors of the object
    * \return a VectorOfVectors
    */
   inline VectorOfVectors getAllVect() const
   {
-    return vect;
+    return _vect;
   }
 
   /** get the number of Blocks
@@ -174,31 +174,31 @@ public:
    */
   double operator()(unsigned int i) const;
 
-  /** return i-eme SiconosVector of vect
+  /** return i-eme SiconosVector of _vect
    * \param pos block number
    * \return a pointer to a SiconosVector
    */
   inline SP::SiconosVector vector(unsigned int pos)
   {
-    return vect[pos];
+    return _vect[pos];
   };
 
-  /** return i-eme SiconosVector of vect
+  /** return i-eme SiconosVector of _vect
    * \param pos block number
    * \return a pointer to a SiconosVector
    */
   inline SPC::SiconosVector vector(unsigned int pos) const
   {
-    return vect[pos];
+    return _vect[pos];
   };
 
-  /** set i-eme SiconosVector of vect (copy)
+  /** set i-eme SiconosVector of _vect (copy)
    * \param pos block number
    * \param v a SiconosVector
    */
   void setVector(unsigned int pos, const SiconosVector& v);
 
-  /** set i-eme SiconosVector of vect (pointer link)
+  /** set i-eme SiconosVector of _vect (pointer link)
    * \param pos block number
    * \param v a SiconosVector
    */

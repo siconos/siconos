@@ -53,7 +53,7 @@ void DelayedSampledActuator::actuate()
 {
   DSIterator itDS;
   SensorsIterator itS;
-  int nDof = model()->nonSmoothDynamicalSystem()->dynamicalSystem(0)->getDim();
+  int nDof = model()->nonSmoothDynamicalSystem()->dynamicalSystem(0)->dimension();
   int ncont = 0;
   double t = model()->currentTime();
   SiconosVector * myZ(new SiconosVector(nDof));

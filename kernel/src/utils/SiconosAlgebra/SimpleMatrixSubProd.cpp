@@ -54,9 +54,9 @@ void subprod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, c
   if (dimX > x.size() || dimY > y.size() || rowA > A.size(0) || colA > A.size(1))
     SiconosMatrixException::selfThrow("subprod(A,x,y) error: input index too large.");
 
-  unsigned int numA = A.getNum();
-  unsigned int numX = x.getNum();
-  unsigned int numY = y.getNum();
+  unsigned int numA = A.num();
+  unsigned int numX = x.num();
+  unsigned int numY = y.num();
 
   if (numA == 0)  // If A,x or y is Block
     SiconosMatrixException::selfThrow("subprod(A,x,y) error: not yet implemented for A block matrices.");

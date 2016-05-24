@@ -143,7 +143,7 @@ Topology::addInteractionInIndexSet0(SP::Interaction inter, SP::DynamicalSystem d
   else
   {
     _IG[0]->properties(ig_new_ve).target = ds2;
-    _IG[0]->properties(ig_new_ve).target_pos = ds1->getDim();
+    _IG[0]->properties(ig_new_ve).target_pos = ds1->dimension();
   }
 
   assert(_IG[0]->bundle(ig_new_ve) == inter);
@@ -272,13 +272,13 @@ Topology::link(SP::Interaction inter, SP::DynamicalSystem ds, SP::DynamicalSyste
 
   unsigned int sumOfDSSizes = 0, sumOfZSizes = 0;
 
-  sumOfDSSizes += ds->getDim();
+  sumOfDSSizes += ds->dimension();
   if(ds->z())
     sumOfZSizes += ds->z()->size();
 
   if(ds2)
   {
-    sumOfDSSizes += ds2->getDim();
+    sumOfDSSizes += ds2->dimension();
     if(ds->z())
       sumOfZSizes += ds2->z()->size();
     inter->setHas2Bodies(true);

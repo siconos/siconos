@@ -77,7 +77,7 @@ void NewMarkAlphaOSI::initW(SP::DynamicalSystem ds)
     RuntimeException::selfThrow("NewMarkAlphaOSI::initW(t,ds) - W(ds) is already in the map and has been initialized.");
 
   SP::SimpleMatrix W = _dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).W;
-  W.reset(new SimpleMatrix(ds->getDim(), ds->getDim())); // allocate memory
+  W.reset(new SimpleMatrix(ds->dimension(), ds->dimension())); // allocate memory
   computeW(ds,*W);
 }
 
@@ -394,8 +394,8 @@ void NewMarkAlphaOSI::initialize(Model& m)
     dsType = Type::value(*ds); // Its type
     if ((dsType == Type::LagrangianDS) || (dsType == Type::LagrangianLinearTIDS))
     {
-      ds->allocateWorkVector(DynamicalSystem::acce_like, ds->getDim()); // allocate memory for the acceleration-like of DS
-      ds->allocateWorkVector(DynamicalSystem::acce_memory, ds->getDim()); // allocate memory to stock acceleration
+      ds->allocateWorkVector(DynamicalSystem::acce_like, ds->dimension()); // allocate memory for the acceleration-like of DS
+      ds->allocateWorkVector(DynamicalSystem::acce_memory, ds->dimension()); // allocate memory to stock acceleration
     }
     else
     {
@@ -582,7 +582,7 @@ void NewMarkAlphaOSI::computeCoefsDenseOutput(SP::DynamicalSystem ds)
   double h = _simulation->nextTime() - _simulation->startingTime();
   Type::Siconos dsType = Type::value(*ds);    // Type of the current DS
   SP::SiconosVector q_n, dotq_n, ddotq_n, q_np1, dotq_np1, ddotq_np1;
-  SP::SiconosVector _vec(new SiconosVector(ds->getDim()));
+  SP::SiconosVector _vec(new SiconosVector(ds->dimension()));
   if ((dsType == Type::LagrangianDS) || (dsType == Type::LagrangianLinearTIDS))
   {
     SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS>(ds);
@@ -592,7 +592,7 @@ void NewMarkAlphaOSI::computeCoefsDenseOutput(SP::DynamicalSystem ds)
     q_np1 = d->q(); // q_{n+1}
     dotq_np1 = d->velocity(); // dotq_{n+1}
     ddotq_np1 = d->acceleration(); // ddotq_{n+1}
-    SP::SimpleMatrix _CoeffsDense = d->getWorkMatrix(LagrangianDS::coeffs_denseoutput); // matrix of coefficients [a0 a1 a2 a3 a4 a5]
+    SP::SimpleMatrix _CoeffsDense = d->workMatrix(LagrangianDS::coeffs_denseoutput); // matrix of coefficients [a0 a1 a2 a3 a4 a5]
     if (_CoeffsDense->size(1) != 6)
     {
       RuntimeException::selfThrow("In NewMarkAlphaOSI::computeCoefsDenseOutput: the number of polynomial coeffcients considered here must equal to 6 (dense output polynomial of order 5)");
@@ -712,7 +712,7 @@ void NewMarkAlphaOSI::DenseOutputallDSs(double t)
     if ((dsType == Type::LagrangianDS) || (dsType == Type::LagrangianLinearTIDS))
     {
       SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS>(ds);
-      Matrix_coeffs = d->getWorkMatrix(LagrangianDS::coeffs_denseoutput);
+      Matrix_coeffs = d->workMatrix(LagrangianDS::coeffs_denseoutput);
       prod(*Matrix_coeffs, *_vec1, *(d->q()), true); // q = Matrix_coeffs*_vec1
       prod(*Matrix_coeffs, *_vec2, *(d->velocity()), true); // dotq = Matrix_coeffs*_vec2
       prod(*Matrix_coeffs, *_vec3, *(d->acceleration()), true); // ddotq = Matrix_coeffs*_vec3

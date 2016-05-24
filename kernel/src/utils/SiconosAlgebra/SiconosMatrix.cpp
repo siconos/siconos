@@ -22,7 +22,7 @@
 #include "BlockMatrix.hpp"
 
 // Constructor with the type-number
-SiconosMatrix::SiconosMatrix(unsigned int type): num(type)
+SiconosMatrix::SiconosMatrix(unsigned int type): _num(type)
 {}
 
 const SP::Index SiconosMatrix::tabRow() const
@@ -63,7 +63,7 @@ bool isComparableTo(const  SiconosMatrix& m1, const  SiconosMatrix& m2)
 
 SiconosMatrix& operator *=(SiconosMatrix& m, const double& s)
 {
-  if (m.num == 0) // BlockMatrix
+  if (m._num == 0) // BlockMatrix
   {
     BlockMatrix& mB = static_cast<BlockMatrix&>(m);
     BlocksMat::iterator1 it;
@@ -74,18 +74,18 @@ SiconosMatrix& operator *=(SiconosMatrix& m, const double& s)
         (**it2) *= s;
     }
   }
-  else if (m.num == 1)
+  else if (m._num == 1)
     *m.dense() *= s;
-  else if (m.num == 2)
+  else if (m._num == 2)
     *m.triang() *= s;
-  else if (m.num == 3)
+  else if (m._num == 3)
     *m.sym() *= s;
-  else if (m.num == 4)
+  else if (m._num == 4)
     *m.sparse() *= s;
-  else if (m.num == 5)
+  else if (m._num == 5)
     *m.banded() *= s;
-  else if (m.num == 6) {} // nothing!
-  else //if(num == 7)
+  else if (m._num == 6) {} // nothing!
+  else //if(_num == 7)
     SiconosMatrixException::selfThrow(" SP::SiconosMatrix = (double) : invalid type of matrix");
 
   return m;
@@ -93,7 +93,7 @@ SiconosMatrix& operator *=(SiconosMatrix& m, const double& s)
 
 SiconosMatrix& operator /=(SiconosMatrix& m, const double& s)
 {
-  if (m.num == 0) // BlockMatrix
+  if (m._num == 0) // BlockMatrix
   {
     BlockMatrix& mB = static_cast<BlockMatrix&>(m);
     BlocksMat::iterator1 it;
@@ -104,18 +104,18 @@ SiconosMatrix& operator /=(SiconosMatrix& m, const double& s)
         (**it2) /= s;
     }
   }
-  else if (m.num == 1)
+  else if (m._num == 1)
     *m.dense() /= s;
-  else if (m.num == 2)
+  else if (m._num == 2)
     *m.triang() /= s;
-  else if (m.num == 3)
+  else if (m._num == 3)
     *m.sym() /= s;
-  else if (m.num == 4)
+  else if (m._num == 4)
     *m.sparse() /= s;
-  else if (m.num == 5)
+  else if (m._num == 5)
     *m.banded() /= s;
-  else if (m.num == 6) {} // nothing!
-  else //if(num == 7)
+  else if (m._num == 6) {} // nothing!
+  else //if(_num == 7)
     SiconosMatrixException::selfThrow(" SiconosMatrix *= (double) : invalid type of matrix");
 
   return m;
@@ -124,7 +124,7 @@ SiconosMatrix& operator /=(SiconosMatrix& m, const double& s)
 size_t SiconosMatrix::nnz(double tol)
 {
   size_t nnz = 0;
-  if (num == 1) //dense
+  if (_num == 1) //dense
   {
     double* arr = getArray();
     for (size_t i = 0; i < size(0)*size(1); ++i)
@@ -132,7 +132,7 @@ size_t SiconosMatrix::nnz(double tol)
       if (fabs(arr[i]) > tol) { nnz++; }
     }
   }
-  else if (num == 4)
+  else if (_num == 4)
   {
     nnz = sparse()->nnz();
   }
@@ -160,7 +160,7 @@ bool SiconosMatrix::fillCSC(CSparseMatrix* csc, size_t row_off, size_t col_off, 
 
   csi pval = Mp[col_off];
 
-  if (num == 1) //dense
+  if (_num == 1) //dense
   {
     double* arr = getArray();
     for (size_t j = 0, joff = col_off; j < ncol; ++j)
@@ -179,7 +179,7 @@ bool SiconosMatrix::fillCSC(CSparseMatrix* csc, size_t row_off, size_t col_off, 
       Mp[++joff] = pval;
     }
   }
-  else if (num == 4)
+  else if (_num == 4)
   {
     const Index& ptr = sparse()->index1_data();
     const Index& indx = sparse()->index2_data();

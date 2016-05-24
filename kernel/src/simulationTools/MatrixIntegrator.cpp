@@ -38,7 +38,7 @@ MatrixIntegrator::MatrixIntegrator(const DynamicalSystem& ds, const Model& m, SP
   _plugin(plugin)
 {
   commonInit(ds, m);
-  unsigned int n = ds.getN();
+  unsigned int n = ds.n();
   _mat.reset(new SimpleMatrix(n, p, 0));
   _spo.reset(new SubPluggedObject(*_plugin, n, p));
   std11::static_pointer_cast<FirstOrderLinearDS>(_DS)->setPluginB(_spo);
@@ -47,7 +47,7 @@ MatrixIntegrator::MatrixIntegrator(const DynamicalSystem& ds, const Model& m, SP
 
 MatrixIntegrator::MatrixIntegrator(const DynamicalSystem& ds, const Model& m)
 {
-  unsigned int n = ds.getN();
+  unsigned int n = ds.n();
   _mat.reset(new SimpleMatrix(n, n, 0));
   commonInit(ds, m);
 }
@@ -94,7 +94,7 @@ void MatrixIntegrator::integrate()
   SP::SiconosVector Ecol = static_cast<FirstOrderLinearDS&>(*_DS).b();
   if (!Ecol && _E)
   {
-    Ecol.reset(new SiconosVector(_DS->getN(), 0));
+    Ecol.reset(new SiconosVector(_DS->n(), 0));
     static_cast<FirstOrderLinearDS&>(*_DS).setb(Ecol);
   }
   unsigned int p = _mat->size(1);

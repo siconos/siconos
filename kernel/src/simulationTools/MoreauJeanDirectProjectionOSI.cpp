@@ -69,7 +69,7 @@ void MoreauJeanDirectProjectionOSI::initialize(Model& m)
     if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
     {
       SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
-      d->allocateWorkVector(DynamicalSystem::qtmp, d->getNdof());
+      d->allocateWorkVector(DynamicalSystem::qtmp, d->ndof());
     }
     else if (dsType == Type::NewtonEulerDS)
     {

@@ -21,9 +21,29 @@ Entries are written backwards. That is, items at the bottom
 of the file were added first, and each subsequent addition is placed on a line
 before it.
 
+--------------------------------------------------------------------------------
+  v4.0.0 (in development branch siconos/master)
+--------------------------------------------------------------------------------
+Main changes:
+
+	* Software license change: GNU General Public License is replaced
+	everywhere by Apache license, version 2.0 except for the code in
+	directory named 'external' which is distributed under GNU Lesser
+	General Public License or equivalent.
+
+	* [...]
+
+	* [numerics] overflows & NaN avoided with static analysis in generated
+	functions and jacobians (AlartCurnier, JeanMoreau, NaturalMap)
+
+	* [mechanics] siconos_vview (python) : fix for the visualisation of static
+	objects + add -vtk-exports option for the visualization with paraview
+
+	* [io] mechanics_io (python) : implementation of restart from positions and
+	velocities  ("cold restart")
 
 --------------------------------------------------------------------------------
-  v3.8.0 (in development branch siconos/master)
+v3.8.0 (in development branch siconos/master)
 --------------------------------------------------------------------------------
 Main Changes:
 

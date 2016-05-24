@@ -123,8 +123,8 @@ void MLCP2::computeDSBlock(SP::DynamicalSystem DS)
 {
   if (!DSBlocks[DS])
   {
-    DSBlocks[DS].reset(new SimpleMatrix(DS->getDim(), DS->getDim()));
-    n += DS->getDim();
+    DSBlocks[DS].reset(new SimpleMatrix(DS->dimension(), DS->dimension()));
+    n += DS->dimension();
   }
   SP::OneStepIntegrator Osi = simulation->integratorOfDS(DS); // get OneStepIntegrator of current dynamical system
   const OSI::TYPES  osiType = Osi->getType();
@@ -153,7 +153,7 @@ void MLCP2::computeInteractionDSBlock(SP::Interaction inter, SP::DynamicalSystem
 {
   if (interactionDSBlocks[inter][DS] == 0)
   {
-    interactionDSBlocks[inter][DS].reset(new SimpleMatrix(inter->nonSmoothLaw()->size(), DS->getDim()));
+    interactionDSBlocks[inter][DS].reset(new SimpleMatrix(inter->nonSmoothLaw()->size(), DS->dimension()));
   }
   inter->getLeftInteractionBlockForDS(DS, interactionDSBlocks[inter][DS]);
 }
@@ -164,7 +164,7 @@ void MLCP2::computeDSInteractionBlock(SP::DynamicalSystem DS, SP::Interaction in
   double h = simulation->timeStep();
   if (!DSInteractionBlocks[DS][inter])
   {
-    DSInteractionBlocks[DS][inter].reset(new SimpleMatrix(DS->getDim(), inter->nonSmoothLaw()->size()));
+    DSInteractionBlocks[DS][inter].reset(new SimpleMatrix(DS->dimension(), inter->nonSmoothLaw()->size()));
   }
   inter->getRightInteractionBlockForDS(DS, DSInteractionBlocks[DS][inter]);
   *(DSInteractionBlocks[DS][inter]) *= h;

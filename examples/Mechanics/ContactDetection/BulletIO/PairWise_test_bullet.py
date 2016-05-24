@@ -104,7 +104,7 @@ with Hdf5(mode='r+',collision_margin=0.05) as io:
            shape_class=None,
            face_class=None,
            edge_class=None,
-           length_scale=0.1,
+           gravity_scale=0.1,
            t0=0,
            T=step*hstep,
            h=hstep,
