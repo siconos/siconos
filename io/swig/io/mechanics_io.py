@@ -140,7 +140,7 @@ def object_id(obj):
 
 def apply_gravity(body):
     g = constants.g
-    weight = [0, 0, - body.massValue() * g]
+    weight = [0, 0, - body.scalarMass() * g]
     body.setFExtPtr(weight)
 
 
@@ -531,7 +531,7 @@ class Hdf5():
 
     def apply_gravity(self, body):
         g = constants.g / self._gravity_scale
-        weight = [0, 0, - body.massValue() * g]
+        weight = [0, 0, - body.scalarMass() * g]
         body.setFExtPtr(weight)
 
 # hdf5 structure
