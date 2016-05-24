@@ -206,7 +206,7 @@ int main(int argc, char* argv[]){
     SP::OneStepNSProblem impact(new OSNSMultipleImpact(TypeContactLaw,DelPest));
     //SP::OneStepNSProblem impact(new OSNSMultipleImpact(TypeContactLaw,NestImpact));
     SP::OSNSMultipleImpact multiple_impact = std11::dynamic_pointer_cast<OSNSMultipleImpact>(impact);
-    multiple_impact->SetYesSaveData(_IsSaveDataImpact);
+    multiple_impact->SetSaveData(_IsSaveDataImpact);
     multiple_impact->SetNameOutput(impact_data_name.c_str());
     multiple_impact->SetNstepSave(Nstep_save_impact);
     multiple_impact->SetNstepMax(Nstep_max_impact);
