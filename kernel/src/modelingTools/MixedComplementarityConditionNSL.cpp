@@ -20,7 +20,7 @@
 
 MixedComplementarityConditionNSL::MixedComplementarityConditionNSL(unsigned int newSize, unsigned int equalitySize): NonSmoothLaw(newSize + equalitySize)
 {
-  EqualitySize = equalitySize;
+  _equalitySize = equalitySize;
 }
 
 MixedComplementarityConditionNSL::~MixedComplementarityConditionNSL()
