@@ -411,7 +411,7 @@ struct IsDense : public Question<bool>
 {
   PyObject* SiconosMatrix_to_numpy(SiconosMatrix& m)
   {
-    if (m.getNum() == 1)
+    if (m.num() == 1)
     {
       npy_intp this_matrix_dim[2];
       this_matrix_dim[0] = m.size(0);
@@ -430,7 +430,7 @@ struct IsDense : public Question<bool>
 
   PyObject* SiconosMatrix_to_numpy(SimpleMatrix& m)
   {
-    if (m.getNum() == 1)
+    if (m.num() == 1)
     {
       npy_intp this_matrix_dim[2];
       this_matrix_dim[0] = m.size(0);
@@ -451,7 +451,7 @@ struct IsDense : public Question<bool>
   {
     if (m && m->size(0) > 0 && m->size(1) > 0)
     {
-      if (m->getNum() == 1)
+      if (m->num() == 1)
       {
         npy_intp this_matrix_dim[2];
         this_matrix_dim[0] = m->size(0);
@@ -478,7 +478,7 @@ struct IsDense : public Question<bool>
   {
     if (m && m->size(0) > 0 && m->size(1) > 0)
     {
-      if (m->getNum() == 1)
+      if (m->num() == 1)
       {
         npy_intp this_matrix_dim[2];
         this_matrix_dim[0] = m->size(0);
