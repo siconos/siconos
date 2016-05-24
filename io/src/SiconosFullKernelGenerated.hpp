@@ -17,7 +17,7 @@ SICONOS_IO_REGISTER_WITH_BASES(BlockMatrix,(SiconosMatrix),
   (_dimCol)
   (_dimRow))
 SICONOS_IO_REGISTER(SiconosMatrix,
-  (num))
+  (_num))
 SICONOS_IO_REGISTER(SiconosMemory,
   (_indx)
   (_nbVectorsInMemory)

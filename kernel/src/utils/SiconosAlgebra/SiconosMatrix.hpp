@@ -68,7 +68,7 @@ protected:
   /** A number to specify the type of the matrix: (block or ublas-type)
    * 0-> BlockMatrix, 1 -> DenseMat, 2 -> TriangMat, 3 -> SymMat, 4->SparseMat, 5->BandedMat, 6->zeroMat, 7->IdentityMat
    */
-  unsigned int num;
+  unsigned int _num;
 
   /** default constructor */
   SiconosMatrix() {};
@@ -89,7 +89,7 @@ public:
    * \return a bool.*/
   inline bool isBlock(void) const
   {
-    if (num == 0) return true ;
+    if (_num == 0) return true ;
     else return false;
   }
 
@@ -135,7 +135,7 @@ public:
    */
   inline unsigned int getNum() const
   {
-    return num;
+    return _num;
   };
 
   /** get the number of block (i=0, row, i=1 col)

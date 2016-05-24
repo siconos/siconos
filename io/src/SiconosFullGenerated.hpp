@@ -29,7 +29,7 @@
 #include "FirstOrderLinearDS.hpp"
 #include "SiconosControl.hpp"
 SICONOS_IO_REGISTER(SiconosException,
-  (reportMsg))
+  (_reportMsg))
 SICONOS_IO_REGISTER(BlockVector,
   (_sizeV)
   (_tabIndex)
@@ -41,7 +41,7 @@ SICONOS_IO_REGISTER_WITH_BASES(BlockMatrix,(SiconosMatrix),
   (_dimCol)
   (_dimRow))
 SICONOS_IO_REGISTER(SiconosMatrix,
-  (num))
+  (_num))
 SICONOS_IO_REGISTER(SiconosMemory,
   (_indx)
   (_nbVectorsInMemory)

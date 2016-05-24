@@ -36,25 +36,25 @@ using namespace Siconos;
 
 double SimpleMatrix::normInf() const
 {
-  if (num == 1)
+  if (_num == 1)
     return norm_inf(*mat.Dense);
-  else if (num == 2)
+  else if (_num == 2)
     return norm_inf(*mat.Triang);
-  else if (num == 3)
+  else if (_num == 3)
     return norm_inf(*mat.Sym);
-  else if (num == 4)
+  else if (_num == 4)
     return norm_inf(*mat.Sparse);
-  else if (num == 5)
+  else if (_num == 5)
     return norm_inf(*mat.Banded);
-  else if (num == 6)
+  else if (_num == 6)
     return 0;
-  else // if(num==7)
+  else // if(_num==7)
     return 1;
 }
 
 void SimpleMatrix::normInfByColumn(SP::SiconosVector vIn) const
 {
-  if (num == 1)
+  if (_num == 1)
   {
     if (vIn->size() != size(1))
       RuntimeException::selfThrow("SimpleMatrix::normInfByColumn: the given vector does not have the right length");
@@ -74,26 +74,26 @@ void SimpleMatrix::normInfByColumn(SP::SiconosVector vIn) const
 
 double SimpleMatrix::det() const
 {
-  if (num == 1)
+  if (_num == 1)
     return determinant(*mat.Dense);
-  else if (num == 2)
+  else if (_num == 2)
     return determinant(*mat.Triang);
-  else if (num == 3)
+  else if (_num == 3)
     return determinant(*mat.Sym);
-  else if (num == 4)
+  else if (_num == 4)
     return determinant(*mat.Sparse);
-  else if (num == 5)
+  else if (_num == 5)
     return determinant(*mat.Banded);
-  else if (num == 6)
+  else if (_num == 6)
     return 0;
-  else // if(num==7)
+  else // if(_num==7)
     return 1;
 }
 
 
 void SimpleMatrix::trans()
 {
-  switch (num)
+  switch (_num)
   {
   case 1:
     *mat.Dense = ublas::trans(*mat.Dense);
@@ -131,12 +131,12 @@ void SimpleMatrix::trans(const SiconosMatrix &m)
     switch (numM)
     {
     case 1:
-      if (num != 1)
+      if (_num != 1)
         SiconosMatrixException::selfThrow("SimpleMatrix::trans(m) failed, try to transpose a dense matrix into another type.");
       noalias(*mat.Dense) = ublas::trans(*m.dense());
       break;
     case 2:
-      if (num != 1)
+      if (_num != 1)
         SiconosMatrixException::selfThrow("SimpleMatrix::trans(m) failed, try to transpose a triangular matrix into a non-dense one.");
       noalias(*mat.Dense) = ublas::trans(*m.triang());
       break;
@@ -144,17 +144,17 @@ void SimpleMatrix::trans(const SiconosMatrix &m)
       *this = m;
       break;
     case 4:
-      if (num == 1)
+      if (_num == 1)
         noalias(*mat.Dense) = ublas::trans(*m.sparse());
-      else if (num == 4)
+      else if (_num == 4)
         noalias(*mat.Sparse) = ublas::trans(*m.sparse());
       else
         SiconosMatrixException::selfThrow("SimpleMatrix::trans(m) failed, try to transpose a sparse matrix into a forbidden type (not dense nor sparse).");
       break;
     case 5:
-      if (num == 1)
+      if (_num == 1)
         noalias(*mat.Dense) = ublas::trans(*m.banded());
-      else if (num == 5)
+      else if (_num == 5)
         noalias(*mat.Banded) = ublas::trans(*m.banded());
       else
         SiconosMatrixException::selfThrow("SimpleMatrix::trans(m) failed, try to transpose a banded matrix into a forbidden type (not dense nor banded).");

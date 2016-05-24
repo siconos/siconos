@@ -29,7 +29,7 @@ void SimpleMatrix::addBlock(unsigned int row_min, unsigned int col_min, const Si
   // add m to current matrix elements, starting from row row_min and column col_min, to the values of the matrix m.
   // m may be a BlockMatrix.
 
-  if (num == 6 || num == 7)
+  if (_num == 6 || _num == 7)
     SiconosMatrixException::selfThrow("SimpleMatrix::addBlock(pos,..., m) forbidden for zero or identity matrix.");
 
   if (&m == this)
@@ -78,7 +78,7 @@ void SimpleMatrix::addBlock(unsigned int row_min, unsigned int col_min, const Si
   }
   else // if m is a SimpleMatrix
   {
-    if (num == 1)
+    if (_num == 1)
     {
       switch (numM)
       {
@@ -116,7 +116,7 @@ void SimpleMatrix::subBlock(unsigned int row_min, unsigned int col_min, const Si
   // sub m to current matrix elements, starting from row row_min and column col_min, to the values of the matrix m.
   // m may be a BlockMatrix.
 
-  if (num == 6 || num == 7)
+  if (_num == 6 || _num == 7)
     SiconosMatrixException::selfThrow("SimpleMatrix::subBlock(pos,..., m) forbidden for zero or identity matrix.");
 
   if (&m == this)
@@ -165,7 +165,7 @@ void SimpleMatrix::subBlock(unsigned int row_min, unsigned int col_min, const Si
   }
   else // if m is a SimpleMatrix
   {
-    if (num == 1)
+    if (_num == 1)
     {
       switch (numM)
       {

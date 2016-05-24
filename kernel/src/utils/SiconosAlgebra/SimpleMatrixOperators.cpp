@@ -38,13 +38,13 @@ double& SimpleMatrix::operator()(unsigned int row, unsigned int col)
 {
   assert((row < size(0) && col < size(1)) && "SimpleMatrix:operator(): Index out of range");
 
-  if (num == 1)
+  if (_num == 1)
     return (*mat.Dense)(row, col);
-  else if (num == 2)
+  else if (_num == 2)
     return (*mat.Triang)(row, col);
-  else if (num == 3)
+  else if (_num == 3)
     return (*mat.Sym)(row, col);
-  else if (num == 4)
+  else if (_num == 4)
   {
     double *d = (*mat.Sparse).find_element(row, col);
     if (d == NULL)
@@ -52,11 +52,11 @@ double& SimpleMatrix::operator()(unsigned int row, unsigned int col)
     double & ref = *d;
     return ref;
   }
-  else if (num == 5)
+  else if (_num == 5)
     return (*mat.Banded)(row, col);
-  else if (num == 6)
+  else if (_num == 6)
     return const_cast<double&>((*mat.Zero)(row, col));
-  else // i(num==7)
+  else // i(_num==7)
     return const_cast<double&>((*mat.Identity)(row, col));
 }
 
@@ -64,19 +64,19 @@ double SimpleMatrix::operator()(unsigned int row, unsigned int col) const
 {
   assert((row < size(0) && col < size(1)) && "SimpleMatrix:operator(): Index out of range");
 
-  if (num == 1)
+  if (_num == 1)
     return (*mat.Dense)(row, col);
-  else if (num == 2)
+  else if (_num == 2)
     return (*mat.Triang)(row, col);
-  else if (num == 3)
+  else if (_num == 3)
     return (*mat.Sym)(row, col);
-  else if (num == 4)
+  else if (_num == 4)
     return (*mat.Sparse)(row, col);
-  else if (num == 5)
+  else if (_num == 5)
     return (*mat.Banded)(row, col);
-  else if (num == 6)
+  else if (_num == 6)
     return 0.0;
-  else // if (num == 7)
+  else // if (_num == 7)
     return (row == col);
 }
 
@@ -130,7 +130,7 @@ SimpleMatrix& SimpleMatrix::operator = (const SiconosMatrix& m)
   }
   else
   {
-    switch (num)
+    switch (_num)
     {
     case 1:
       switch (numM)
@@ -235,7 +235,7 @@ SimpleMatrix& SimpleMatrix::operator = (const SimpleMatrix& m)
     return *this;
   }
 
-  switch (num)
+  switch (_num)
   {
   case 1:
     switch (numM)
@@ -318,7 +318,7 @@ SimpleMatrix& SimpleMatrix::operator = (const SimpleMatrix& m)
 
 SimpleMatrix& SimpleMatrix::operator = (const DenseMat& m)
 {
-  if (num != 1)
+  if (_num != 1)
     SiconosMatrixException::selfThrow("SimpleMatrix::operator = DenseMat : forbidden: the current matrix is not dense.");
 
   if (size(0) != m.size1() || size(1) != m.size2())
@@ -343,7 +343,7 @@ SimpleMatrix& SimpleMatrix::operator +=(const SiconosMatrix& m)
 
   if (&m == this) // auto-assignment
   {
-    switch (num)
+    switch (_num)
     {
     case 1:
       *mat.Dense += *mat.Dense;
@@ -393,7 +393,7 @@ SimpleMatrix& SimpleMatrix::operator +=(const SiconosMatrix& m)
   }
   else // if m is a SimpleMatrix
   {
-    switch (num)
+    switch (_num)
     {
     case 1:
       switch (numM)
@@ -498,7 +498,7 @@ SimpleMatrix& SimpleMatrix::operator -= (const SiconosMatrix& m)
 
   if (&m == this) // auto-assignment
   {
-    switch (num)
+    switch (_num)
     {
     case 1:
       *mat.Dense -= *mat.Dense;
@@ -545,7 +545,7 @@ SimpleMatrix& SimpleMatrix::operator -= (const SiconosMatrix& m)
   }
   else // if m is a SimpleMatrix
   {
-    switch (num)
+    switch (_num)
     {
     case 1:
       switch (numM)
