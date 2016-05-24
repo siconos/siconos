@@ -17,6 +17,7 @@ set(${COMPONENT}_SWIG_INCLUDE_DIRECTORIES
 
 
 if(HAVE_SICONOS_MECHANICS)
+  list(APPEND ${COMPONENT}_SWIG_DEFS "-DWITH_MECHANICS")
   configure_file(io/mechanics_io.py ${SICONOS_SWIG_ROOT_DIR}/io/mechanics_io.py @ONLY)
   configure_file(io/vview.py ${CMAKE_BINARY_DIR}/io/vview.py @ONLY)
   configure_file(io/pprocess.py ${CMAKE_BINARY_DIR}/io/pprocess.py @ONLY)
