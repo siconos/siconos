@@ -69,7 +69,6 @@ with Hdf5(mode='r+') as io:
             shape_class=SiconosContactor,
             face_class=None,
             edge_class=None,
-            length_scale=1,
             t0=0,
             T=20,
             h=0.005,
