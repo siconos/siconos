@@ -61,10 +61,10 @@ private:
   SP::Index _tabCol;
 
   /** Number of rows (Warning: total number of scalar elements, not number of blocks) */
-  unsigned int dimRow;
+  unsigned int _dimRow;
 
   /** Number of columns (Warning: total number of scalar elements, not number of blocks) */
-  unsigned int dimCol;
+  unsigned int _dimCol;
 
 
   /** default constructor

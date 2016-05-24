@@ -38,8 +38,8 @@ SICONOS_IO_REGISTER_WITH_BASES(BlockMatrix,(SiconosMatrix),
   (_mat)
   (_tabCol)
   (_tabRow)
-  (dimCol)
-  (dimRow))
+  (_dimCol)
+  (_dimRow))
 SICONOS_IO_REGISTER(SiconosMatrix,
   (num))
 SICONOS_IO_REGISTER(SiconosMemory,

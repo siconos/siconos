@@ -34,7 +34,7 @@ using std::endl;
 //                CONSTRUCTORS
 // =================================================
 
-BlockMatrix::BlockMatrix(const SiconosMatrix &m): SiconosMatrix(0), dimRow(0), dimCol(0)
+BlockMatrix::BlockMatrix(const SiconosMatrix &m): SiconosMatrix(0), _dimRow(0), _dimCol(0)
 {
   _tabRow.reset(new Index());
   _tabCol.reset(new Index());
@@ -56,8 +56,8 @@ BlockMatrix::BlockMatrix(const SiconosMatrix &m): SiconosMatrix(0), dimRow(0), d
     // We scan all the blocks of m ...
     for (it1 = mB._mat->begin1(); it1 != mB._mat->end1(); ++it1)
     {
-      dimRow += (*(it1.begin()))->size(0);
-      _tabRow->push_back(dimRow);
+      _dimRow += (*(it1.begin()))->size(0);
+      _tabRow->push_back(_dimRow);
       for (it2 = it1.begin(); it2 != it1.end(); ++it2)
       {
         i = it2.index1();
@@ -66,11 +66,11 @@ BlockMatrix::BlockMatrix(const SiconosMatrix &m): SiconosMatrix(0), dimRow(0), d
           _mat->insert_element(i, j, std11::shared_ptr<SiconosMatrix>(new BlockMatrix(**it2)));
         else
           _mat->insert_element(i, j, std11::shared_ptr<SiconosMatrix>(new SimpleMatrix(**it2)));
-        // dimCol must be incremented only at first "column-loop"
+        // _dimCol must be incremented only at first "column-loop"
         if (firstLoop)
         {
-          dimCol += (*it2)->size(1);
-          _tabCol->push_back(dimCol);
+          _dimCol += (*it2)->size(1);
+          _tabCol->push_back(_dimCol);
         }
       }
       firstLoop = false;
@@ -84,14 +84,14 @@ BlockMatrix::BlockMatrix(const SiconosMatrix &m): SiconosMatrix(0), dimRow(0), d
     _mat.reset(new BlocksMat(1, 1, 1));
     _mat->insert_element(0, 0, std11::shared_ptr<SiconosMatrix>(new SimpleMatrix(m)));
 
-    dimRow = m.size(0);
-    dimCol = m.size(1);
-    _tabRow->push_back(dimRow);
-    _tabCol->push_back(dimCol);
+    _dimRow = m.size(0);
+    _dimCol = m.size(1);
+    _tabRow->push_back(_dimRow);
+    _tabCol->push_back(_dimCol);
   }
 }
 
-BlockMatrix::BlockMatrix(const BlockMatrix &m): SiconosMatrix(0), dimRow(0), dimCol(0)
+BlockMatrix::BlockMatrix(const BlockMatrix &m): SiconosMatrix(0), _dimRow(0), _dimCol(0)
 {
   unsigned int nbRows = m.getNumberOfBlocks(0);
   unsigned int nbCols = m.getNumberOfBlocks(1);
@@ -111,8 +111,8 @@ BlockMatrix::BlockMatrix(const BlockMatrix &m): SiconosMatrix(0), dimRow(0), dim
   // We scan all the blocks of m ...
   for (it1 = m._mat->begin1(); it1 != m._mat->end1(); ++it1)
   {
-    dimRow += (*(it1.begin()))->size(0);
-    _tabRow->push_back(dimRow);
+    _dimRow += (*(it1.begin()))->size(0);
+    _tabRow->push_back(_dimRow);
     for (it2 = it1.begin(); it2 != it1.end(); ++it2)
     {
       i = it2.index1();
@@ -122,11 +122,11 @@ BlockMatrix::BlockMatrix(const BlockMatrix &m): SiconosMatrix(0), dimRow(0), dim
       else
         _mat->insert_element(i, j, std11::shared_ptr<SiconosMatrix>(new SimpleMatrix(**it2)));
 
-      // dimCol must be incremented only at first "column-loop"
+      // _dimCol must be incremented only at first "column-loop"
       if (firstLoop)
       {
-        dimCol += (*it2)->size(1);
-        _tabCol->push_back(dimCol);
+        _dimCol += (*it2)->size(1);
+        _tabCol->push_back(_dimCol);
       }
     }
     firstLoop = false;
@@ -134,7 +134,7 @@ BlockMatrix::BlockMatrix(const BlockMatrix &m): SiconosMatrix(0), dimRow(0), dim
 }
 
 BlockMatrix::BlockMatrix(const std::vector<SP::SiconosMatrix >& m, unsigned int row, unsigned int col):
-  SiconosMatrix(0), dimRow(0), dimCol(0)
+  SiconosMatrix(0), _dimRow(0), _dimCol(0)
 {
   if (m.size() != (row * col))
     SiconosMatrixException::selfThrow("BlockMatrix constructor from a vector<SiconosMatrix*>, number of blocks inconsistent with provided dimensions.");
@@ -157,16 +157,16 @@ BlockMatrix::BlockMatrix(const std::vector<SP::SiconosMatrix >& m, unsigned int 
     {
       (*_mat)(i, j) = m[k++];
 
-      // dimCol must be incremented only at first "column-loop"
+      // _dimCol must be incremented only at first "column-loop"
       if (firstColLoop)
       {
-        dimCol += m[k - 1]->size(1);
-        _tabCol->push_back(dimCol);
+        _dimCol += m[k - 1]->size(1);
+        _tabCol->push_back(_dimCol);
       }
       if (firstRowLoop)
       {
-        dimRow += m[k - 1]->size(0);
-        _tabRow->push_back(dimRow);
+        _dimRow += m[k - 1]->size(0);
+        _tabRow->push_back(_dimRow);
         firstRowLoop = false;
       }
     }
@@ -176,7 +176,7 @@ BlockMatrix::BlockMatrix(const std::vector<SP::SiconosMatrix >& m, unsigned int 
 }
 
 BlockMatrix::BlockMatrix(SP::SiconosMatrix A, SP::SiconosMatrix B, SP::SiconosMatrix C, SP::SiconosMatrix D):
-  SiconosMatrix(0), dimRow(0), dimCol(0)
+  SiconosMatrix(0), _dimRow(0), _dimCol(0)
 {
   if (A->size(0) != B->size(0) || C->size(0) != D->size(0) ||  A->size(1) != C->size(1) ||  B->size(1) != D->size(1))
     SiconosMatrixException::selfThrow("BlockMatrix constructor(A,B,C,D), inconsistent sizes between A, B, C or D SiconosMatrices.");
@@ -196,14 +196,14 @@ BlockMatrix::BlockMatrix(SP::SiconosMatrix A, SP::SiconosMatrix B, SP::SiconosMa
   (*_mat)(0, 1) = B;
   (*_mat)(1, 0) = C;
   (*_mat)(1, 1) = D;
-  dimRow = A->size(0);
-  _tabRow->push_back(dimRow);
-  dimRow += C->size(0);
-  _tabRow->push_back(dimRow);
-  dimCol = A->size(1);
-  _tabCol->push_back(dimCol);
-  dimCol += B->size(1);
-  _tabCol->push_back(dimCol);
+  _dimRow = A->size(0);
+  _tabRow->push_back(_dimRow);
+  _dimRow += C->size(0);
+  _tabRow->push_back(_dimRow);
+  _dimCol = A->size(1);
+  _tabCol->push_back(_dimCol);
+  _dimCol += B->size(1);
+  _tabCol->push_back(_dimCol);
 
 }
 
@@ -455,8 +455,8 @@ void BlockMatrix::eye()
 
 unsigned int BlockMatrix::size(unsigned int index) const
 {
-  if (index == 0) return dimRow;
-  else return dimCol;
+  if (index == 0) return _dimRow;
+  else return _dimCol;
 };
 
 
@@ -626,7 +626,7 @@ void BlockMatrix::setValue(unsigned int row, unsigned int col, double value)
 //   if(m->isBlock ())
 //     SiconosMatrixException::selfThrow("BlockMatrix::setBlock of a block into an other block is forbidden.");
 
-//   if(row > dimRow || col > dimCol )
+//   if(row > _dimRow || col > _dimCol )
 //     SiconosMatrixException::selfThrow("BlockMatrix::setBlock(i,j,m), i or j is out of range.");
 
 //   // Check dim
@@ -639,11 +639,11 @@ void BlockMatrix::getRow(unsigned int r, SiconosVector &v) const
 {
   unsigned int numRow = 0, posRow = r, start = 0, stop = 0;
 
-  if (r > dimRow)
+  if (r > _dimRow)
     SiconosMatrixException::selfThrow("BlockMatrix:getRow : row number is out of range");
 
   // Verification of the size of the result vector
-  if (v.size() != dimCol)
+  if (v.size() != _dimCol)
     SiconosMatrixException::selfThrow("BlockMatrix:getRow : inconsistent sizes");
 
   // Find the row-block number where "r" is
@@ -667,11 +667,11 @@ void BlockMatrix::getCol(unsigned int c, SiconosVector &v) const
 {
   unsigned int numCol = 0, posCol = c, start = 0, stop = 0;
 
-  if (c > dimCol)
+  if (c > _dimCol)
     SiconosMatrixException::selfThrow("BlockMatrix:getCol : column number is out of range");
 
   // Verification of the size of the result vector
-  if (v.size() != dimRow)
+  if (v.size() != _dimRow)
     SiconosMatrixException::selfThrow("BlockMatrix:getcol : inconsistent sizes");
 
   // Find the column-block number where "c" is
@@ -696,7 +696,7 @@ void BlockMatrix::setRow(unsigned int r, const SiconosVector &v)
 
   unsigned int numRow = 0, posRow = r, start = 0, stop = 0;
 
-  if (v.size() != dimCol)
+  if (v.size() != _dimCol)
     SiconosMatrixException::selfThrow("BlockMatrix:setRow : inconsistent sizes");
 
   while (r >= (*_tabRow)[numRow] && numRow < _tabRow->size())
@@ -719,7 +719,7 @@ void BlockMatrix::setCol(unsigned int col, const SiconosVector &v)
 
   unsigned int numCol = 0, posCol = col, start = 0, stop = 0;
 
-  if (v.size() != dimRow)
+  if (v.size() != _dimRow)
     SiconosMatrixException::selfThrow("BlockMatrix:setCol : inconsistent sizes");
 
   while (col >= (*_tabCol)[numCol] && numCol < _tabCol->size())
@@ -748,7 +748,7 @@ void BlockMatrix::addSimple(unsigned int& indRow, unsigned int& indCol, const Si
   unsigned int col = m.size(1) - indCol; // number of columns of the block to be added.
   unsigned int initCol = indCol;
 
-  if (row > dimRow || col > dimCol) SiconosMatrixException::selfThrow("BlockMatrix::addSimple : invalid ranges");
+  if (row > _dimRow || col > _dimCol) SiconosMatrixException::selfThrow("BlockMatrix::addSimple : invalid ranges");
 
   unsigned int numM = m.getNum();
 
@@ -801,7 +801,7 @@ void BlockMatrix::subSimple(unsigned int& indRow, unsigned int& indCol, const Si
   unsigned int row = m.size(0) - indRow; // number of rows of the block to be added.
   unsigned int col = m.size(1) - indCol; // number of columns of the block to be added.
   unsigned int initCol = indCol;
-  if (row > dimRow || col > dimCol) SiconosMatrixException::selfThrow("BlockMatrix::addSimple : invalid ranges");
+  if (row > _dimRow || col > _dimCol) SiconosMatrixException::selfThrow("BlockMatrix::addSimple : invalid ranges");
 
   unsigned int numM = m.getNum();
 
@@ -853,7 +853,7 @@ BlockMatrix& BlockMatrix::operator = (const SiconosMatrix &m)
 {
   if (&m == this) return *this; // auto-assignment.
 
-  if (m.size(0) != dimRow || m.size(1) != dimCol)
+  if (m.size(0) != _dimRow || m.size(1) != _dimCol)
     SiconosMatrixException::selfThrow("operator = (const SiconosMatrix&): Left and Right values have inconsistent sizes.");
 
   // Warning: we do not reallocate the blocks, but only copy the values. This means that
@@ -886,8 +886,8 @@ BlockMatrix& BlockMatrix::operator = (const SiconosMatrix &m)
     }
     else
     {
-      for (unsigned int i = 0; i < dimRow; ++i)
-        for (unsigned int j = 0; j < dimCol; ++j)
+      for (unsigned int i = 0; i < _dimRow; ++i)
+        for (unsigned int j = 0; j < _dimCol; ++j)
           (*this)(i, j) = m(i, j);
     }
   }
@@ -926,7 +926,7 @@ BlockMatrix& BlockMatrix::operator = (const BlockMatrix &m)
 {
   if (&m == this) return *this; // auto-assignment.
 
-  if (m.size(0) != dimRow || m.size(1) != dimCol)
+  if (m.size(0) != _dimRow || m.size(1) != _dimCol)
     SiconosMatrixException::selfThrow("operator = (const SiconosMatrix&): Left and Right values have inconsistent sizes.");
 
   // Warning: we do not reallocate the blocks, but only copy the values. This means that
@@ -957,8 +957,8 @@ BlockMatrix& BlockMatrix::operator = (const BlockMatrix &m)
   }
   else
   {
-    for (unsigned int i = 0; i < dimRow; ++i)
-      for (unsigned int j = 0; j < dimCol; ++j)
+    for (unsigned int i = 0; i < _dimRow; ++i)
+      for (unsigned int j = 0; j < _dimCol; ++j)
         (*this)(i, j) = m(i, j);
   }
   return *this;
@@ -990,7 +990,7 @@ BlockMatrix& BlockMatrix::operator += (const SiconosMatrix &m)
     return *this;
   }
 
-  if (m.size(0) != dimRow || m.size(1) != dimCol)
+  if (m.size(0) != _dimRow || m.size(1) != _dimCol)
     SiconosMatrixException::selfThrow("BlockMatrix::operator += Left and Right values have inconsistent sizes.");
 
   if (m.isBlock())
@@ -1018,8 +1018,8 @@ BlockMatrix& BlockMatrix::operator += (const SiconosMatrix &m)
     }
     else
     {
-      for (unsigned int i = 0; i < dimRow; ++i)
-        for (unsigned int j = 0; j < dimCol; ++j)
+      for (unsigned int i = 0; i < _dimRow; ++i)
+        for (unsigned int j = 0; j < _dimCol; ++j)
           (*this)(i, j) += m(i, j);
     }
   }
@@ -1047,7 +1047,7 @@ BlockMatrix& BlockMatrix::operator -= (const SiconosMatrix &m)
     return *this;
   }
 
-  if (m.size(0) != dimRow || m.size(1) != dimCol)
+  if (m.size(0) != _dimRow || m.size(1) != _dimCol)
     SiconosMatrixException::selfThrow("BlockMatrix::operator += Left and Right values have inconsistent sizes.");
 
   if (m.isBlock())
@@ -1075,8 +1075,8 @@ BlockMatrix& BlockMatrix::operator -= (const SiconosMatrix &m)
     }
     else
     {
-      for (unsigned int i = 0; i < dimRow; ++i)
-        for (unsigned int j = 0; j < dimCol; ++j)
+      for (unsigned int i = 0; i < _dimRow; ++i)
+        for (unsigned int j = 0; j < _dimCol; ++j)
           (*this)(i, j) -= m(i, j);
     }
   }
