@@ -9,7 +9,7 @@ SICONOS_IO_REGISTER(SiconosException,
 SICONOS_IO_REGISTER(BlockVector,
   (_sizeV)
   (_tabIndex)
-  (vect))
+  (_vect))
 SICONOS_IO_REGISTER_WITH_BASES(BlockMatrix,(SiconosMatrix),
   (_mat)
   (_tabCol)
@@ -180,6 +180,7 @@ SICONOS_IO_REGISTER_WITH_BASES(NewtonEulerDS,(DynamicalSystem),
   (_luW)
   (_mExt)
   (_mInt)
+  (_scalarMass)
   (_massMatrix)
   (_p)
   (_pluginFExt)
