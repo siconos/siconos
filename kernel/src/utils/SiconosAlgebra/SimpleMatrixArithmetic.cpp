@@ -34,9 +34,9 @@ void add(const SiconosMatrix & A, const SiconosMatrix& B, SiconosMatrix& C)
   if ((A.size(0) != C.size(0)) || (A.size(1) != C.size(1)))
     SiconosMatrixException::selfThrow("Matrix addition: inconsistent sizes");
 
-  unsigned int numA = A.getNum();
-  unsigned int numB = B.getNum();
-  unsigned int numC = C.getNum();
+  unsigned int numA = A.num();
+  unsigned int numB = B.num();
+  unsigned int numC = C.num();
 
   // === if C is zero or identity => read-only ===
   if (numC == 6 || numC == 7)
@@ -272,9 +272,9 @@ void sub(const SiconosMatrix & A, const SiconosMatrix& B, SiconosMatrix& C)
   if ((A.size(0) != C.size(0)) || (A.size(1) != C.size(1)))
     SiconosMatrixException::selfThrow("Matrix addition: inconsistent sizes");
 
-  unsigned int numA = A.getNum();
-  unsigned int numB = B.getNum();
-  unsigned int numC = C.getNum();
+  unsigned int numA = A.num();
+  unsigned int numB = B.num();
+  unsigned int numC = C.num();
 
   // === if C is zero or identity => read-only ===
   if (numC == 6 || numC == 7)

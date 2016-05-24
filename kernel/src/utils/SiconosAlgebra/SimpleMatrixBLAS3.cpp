@@ -67,8 +67,8 @@ const SimpleMatrix prod(const SiconosMatrix &A, const SiconosMatrix& B)
   if ((A.size(1) != B.size(0)))
     SiconosMatrixException::selfThrow("Matrix function C=prod(A,B): inconsistent sizes");
 
-  unsigned int numA = A.getNum();
-  unsigned int numB = B.getNum();
+  unsigned int numA = A.num();
+  unsigned int numB = B.num();
 
   // == TODO: implement block product ==
   if (numA == 0 || numB == 0)
@@ -165,9 +165,9 @@ dim : dim[0] number of raw, dim[1] number of col
 // void prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C, int indexACol, bool init){
 //   // To compute C[indexAcol::] = A * B
 
-//   unsigned int numA = A.getNum();
-//   unsigned int numB = B.getNum();
-//   unsigned int numC = C.getNum();
+//   unsigned int numA = A.num();
+//   unsigned int numB = B.num();
+//   unsigned int numC = C.num();
 //   if (numA == 0 || numB == 0 || numC == 0)
 //     SiconosMatrixException::selfThrow("Matrix function prod(A,B,C,index): inconsistent sizes");
 //   // === if C is zero or identity => read-only ===
@@ -196,9 +196,9 @@ void prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C, bool
   if (A.size(0) != C.size(0) || B.size(1) != C.size(1))
     SiconosMatrixException::selfThrow("Matrix function prod(A,B,C): inconsistent sizes");
 
-  unsigned int numA = A.getNum();
-  unsigned int numB = B.getNum();
-  unsigned int numC = C.getNum();
+  unsigned int numA = A.num();
+  unsigned int numB = B.num();
+  unsigned int numC = C.num();
 
   // == TODO: implement block product ==
   if (numA == 0 || numB == 0)
@@ -593,9 +593,9 @@ void axpy_prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C,
   assert(!(B.isPLUFactorized()) && "B is PLUFactorized in prod !!" );
   if(!C.isBlock())
     C.resetLU();
-  unsigned int numA = A.getNum();
-  unsigned int numB = B.getNum();
-  unsigned int numC = C.getNum();
+  unsigned int numA = A.num();
+  unsigned int numB = B.num();
+  unsigned int numC = C.num();
   // == TODO: implement block product ==
   if (numA == 0 || numB == 0)
     SiconosMatrixException::selfThrow("Matrix product ( prod(A,B,C) ): not yet implemented for BlockMatrix objects.");
@@ -807,9 +807,9 @@ void gemmtranspose(double a, const SiconosMatrix& A, const SiconosMatrix& B, dou
 {
   if (A.isBlock() || B.isBlock() || C.isBlock())
     SiconosMatrixException::selfThrow("gemm(...) not yet implemented for block matrices.");
-  unsigned int numA = A.getNum();
-  unsigned int numB = B.getNum();
-  unsigned int numC = C.getNum();
+  unsigned int numA = A.num();
+  unsigned int numB = B.num();
+  unsigned int numC = C.num();
   if (numA != 1 || numB != 1 || numC != 1)
     SiconosMatrixException::selfThrow("gemm(...) failed: reserved to dense matrices.");
 
@@ -826,9 +826,9 @@ void gemmtranspose(double a, const SiconosMatrix& A, const SiconosMatrix& B, dou
 
 void gemm(double a, const SiconosMatrix& A, const SiconosMatrix& B, double b, SiconosMatrix& C)
 {
-  unsigned int numA = A.getNum();
-  unsigned int numB = B.getNum();
-  unsigned int numC = C.getNum();
+  unsigned int numA = A.num();
+  unsigned int numB = B.num();
+  unsigned int numC = C.num();
   assert(!(B.isPLUFactorized()) && "B is PLUFactorized in prod !!");
   assert(!(A.isPLUFactorized()) && "A is PLUFactorized in prod !!");
   C.resetLU();
@@ -868,8 +868,8 @@ void scal(double a, const SiconosMatrix& A, SiconosMatrix& B, bool init)
   }
   else
   {
-    unsigned int numA = A.getNum();
-    unsigned int numB = B.getNum();
+    unsigned int numA = A.num();
+    unsigned int numB = B.num();
 
     if (numB == 6 || numB == 7) // B = 0 or identity.
       SiconosMatrixException::selfThrow("scal(a,A,B) : forbidden for B being a zero or identity matrix.");

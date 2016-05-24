@@ -158,7 +158,7 @@ SimpleMatrix::SimpleMatrix(unsigned int row, unsigned int col, double inputValue
 // }
 
 // Copy constructors
-SimpleMatrix::SimpleMatrix(const SimpleMatrix &smat): SiconosMatrix(smat.getNum()), _isPLUFactorized(false), _isQRFactorized(false), _isPLUInversed(false)
+SimpleMatrix::SimpleMatrix(const SimpleMatrix &smat): SiconosMatrix(smat.num()), _isPLUFactorized(false), _isQRFactorized(false), _isPLUInversed(false)
 {
   if (_num == 1)
   {
@@ -190,7 +190,7 @@ SimpleMatrix::SimpleMatrix(const SimpleMatrix &smat): SiconosMatrix(smat.getNum(
 /** copy constructor of a block given by the coord = [r0A r1A c0A c1A]
  *  \param A the matrix for extracting the block
  */
-SimpleMatrix::SimpleMatrix(const SimpleMatrix& A , const Index& coord ):  SiconosMatrix(A.getNum()), _isPLUFactorized(false), _isQRFactorized(false), _isPLUInversed(false)
+SimpleMatrix::SimpleMatrix(const SimpleMatrix& A , const Index& coord ):  SiconosMatrix(A.num()), _isPLUFactorized(false), _isQRFactorized(false), _isPLUInversed(false)
 {
   if (coord[0]>=coord[1])
     SiconosMatrixException::selfThrow("SimpleMatrix::SimpleMatrix(const SimpleMatrix& A , const Index& coord ). Empty row range coord[0]>= coord[1]");
@@ -237,10 +237,10 @@ SimpleMatrix::SimpleMatrix(const SimpleMatrix& A , const Index& coord ):  Sicono
 
 
 
-SimpleMatrix::SimpleMatrix(const SiconosMatrix &m): SiconosMatrix(m.getNum()), _isPLUFactorized(), _isQRFactorized(false), _isPLUInversed(false)
+SimpleMatrix::SimpleMatrix(const SiconosMatrix &m): SiconosMatrix(m.num()), _isPLUFactorized(), _isQRFactorized(false), _isPLUInversed(false)
 {
-  // _num is set in SiconosMatrix constructor with m.getNum() ... must be changed if m is Block
-  unsigned int numM = m.getNum();
+  // _num is set in SiconosMatrix constructor with m.num() ... must be changed if m is Block
+  unsigned int numM = m.num();
 
 
   _isPLUFactorized= m.isPLUFactorized();
@@ -754,7 +754,7 @@ void subprod(const SiconosMatrix& A, const BlockVector& x, SiconosVector& y, con
     subCoord[3] = coord[2] + subCoord[5] - subCoord[4];
     for (VectorOfVectors::const_iterator it = x.begin(); it != x.end(); ++it)
     {
-      if ((*it)->getNum() == 0)
+      if ((*it)->num() == 0)
         SiconosMatrixException::selfThrow("subprod(A,x,y) error: not yet implemented for x block of blocks ...");
       if (xPos >= firstBlockNum && xPos <= lastBlockNum)
       {
@@ -801,9 +801,9 @@ void private_addprod(const SiconosMatrix& A, unsigned startRow, unsigned int sta
 
   // we take a submatrix subA of A, starting from row startRow to row (startRow+sizeY) and between columns startCol and (startCol+sizeX).
   // Then computation of y = subA*x + y.
-  unsigned int numA = A.getNum();
-  unsigned int numY = y.getNum();
-  unsigned int numX = x.getNum();
+  unsigned int numA = A.num();
+  unsigned int numY = y.num();
+  unsigned int numX = x.num();
   unsigned int sizeX = x.size();
   unsigned int sizeY = y.size();
 
@@ -911,9 +911,9 @@ void private_addprod(SPC::SiconosVector x, SPC::SiconosMatrix A, unsigned int st
 
   // we take a submatrix subA of A, starting from row startRow to row (startRow+sizeY) and between columns startCol and (startCol+sizeX).
   // Then computation of y = subA*x + y.
-  unsigned int numA = A->getNum();
-  unsigned int numY = y->getNum();
-  unsigned int numX = x->getNum();
+  unsigned int numA = A->num();
+  unsigned int numY = y->num();
+  unsigned int numX = x->num();
   unsigned int sizeX = x->size();
   unsigned int sizeY = y->size();
 
@@ -1016,9 +1016,9 @@ void private_addprod(double a, SPC::SiconosMatrix A, unsigned int startRow, unsi
 
   // we take a submatrix subA of A, starting from row startRow to row (startRow+sizeY) and between columns startCol and (startCol+sizeX).
   // Then computation of y = subA*x + y.
-  unsigned int numA = A->getNum();
-  unsigned int numY = y->getNum();
-  unsigned int numX = x->getNum();
+  unsigned int numA = A->num();
+  unsigned int numY = y->num();
+  unsigned int numX = x->num();
   unsigned int sizeX = x->size();
   unsigned int sizeY = y->size();
 

@@ -132,7 +132,7 @@ void SimpleMatrix::PLUForwardBackwardInPlace(SiconosMatrix &B)
       // B now contains solution:
     }
     else // call getrs: only solve using previous lu-factorization
-      if (B.getNum() == 1)
+      if (B.num() == 1)
         info = lapack::getrs(*mat.Dense, *_ipiv, *(B.dense()));
       else
         SiconosMatrixException::selfThrow(" SimpleMatrix::PLUInverseInPlace: only implemented for dense matrices in RHS.");
@@ -144,12 +144,12 @@ void SimpleMatrix::PLUForwardBackwardInPlace(SiconosMatrix &B)
       PLUFactorizationInPlace();
     }
     // and then solve
-    if (B.getNum() == 1)
+    if (B.num() == 1)
     {
       inplace_solve(*sparse(), *(B.dense()), ublas::lower_tag());
       inplace_solve(ublas::trans(*sparse()), *(B.dense()), ublas::upper_tag());
     }
-    else if (B.getNum() == 4)
+    else if (B.num() == 4)
     {
       inplace_solve(*sparse(), *(B.sparse()), ublas::lower_tag());
       inplace_solve(ublas::trans(*sparse()), *(B.sparse()), ublas::upper_tag());

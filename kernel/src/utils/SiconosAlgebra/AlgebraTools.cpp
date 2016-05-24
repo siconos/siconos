@@ -33,7 +33,7 @@ namespace Siconos {
         // Do not work with sparse.
         A.resetLU();
         Exp.resetLU();
-        assert(Exp.getNum() == 1 || A.getNum() == 1); 
+        assert(Exp.num() == 1 || A.num() == 1);
         if(computeAndAdd)
           *Exp.dense() += expm_pad(*A.dense());
         else

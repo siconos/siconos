@@ -135,7 +135,7 @@ public:
   /** Get the type number of the current vector.
    * \return an unsigned int
    */
-  unsigned int getNum() const
+  unsigned int num() const
   {
     if (_dense) return 1;
     else return 4;

@@ -119,7 +119,7 @@ void SimpleMatrix::setBlock(unsigned int row_min, unsigned int col_min, const Si
   if (col_max > size(1))
     SiconosMatrixException::selfThrow("SimpleMatrix::setBlock(row,col,m): m.col + col is out of range.");
 
-  unsigned int numM = m.getNum();
+  unsigned int numM = m.num();
 
   if (numM == 0) // if m is a block matrix ...
   {
@@ -172,8 +172,8 @@ void setBlock(SPC::SiconosMatrix  MIn, SP::SiconosMatrix MOut, const Index& dim,
   {}// SiconosVectorException::selfThrow("");
   else
   {
-    unsigned int numIn = MIn->getNum();
-    unsigned int numOut = MOut->getNum();
+    unsigned int numIn = MIn->num();
+    unsigned int numOut = MOut->num();
 
     if (numOut == 6 || numOut == 7) // if MOut = 0 or Identity => read-only
       SiconosMatrixException::selfThrow("matrices, setBlock(MIn, MOut...): MOut is read-only (zero or identity matrix?).");
@@ -551,7 +551,7 @@ void SimpleMatrix::getRow(unsigned int r, SiconosVector &vOut) const
     vOut.zero();
   else
   {
-    unsigned int numV = vOut.getNum();
+    unsigned int numV = vOut.num();
     if (numV == 1)
     {
       if (_num == 1)
@@ -588,7 +588,7 @@ void SimpleMatrix::getRow(unsigned int r, SiconosVector &vOut) const
 void SimpleMatrix::setRow(unsigned int r, const SiconosVector& vIn)
 {
   // Set row number r of current matrix with vIn.
-  unsigned int numV = vIn.getNum();
+  unsigned int numV = vIn.num();
   if (r >= size(0))
     SiconosMatrixException::selfThrow("setRow(row): row is out of range");
 
@@ -637,7 +637,7 @@ void SimpleMatrix::getCol(unsigned int r, SiconosVector &vOut)const
     vOut.zero();
   else
   {
-    unsigned int numV = vOut.getNum();
+    unsigned int numV = vOut.num();
 
     if (numV == 1)
     {
@@ -676,7 +676,7 @@ void SimpleMatrix::getCol(unsigned int r, SiconosVector &vOut)const
 void SimpleMatrix::setCol(unsigned int r, const SiconosVector &vIn)
 {
   // Set column number r of current matrix with vIn.
-  unsigned int numV = vIn.getNum();
+  unsigned int numV = vIn.num();
   if (r >= size(1))
     SiconosMatrixException::selfThrow("setCol(col): col is out of range");
 
@@ -726,7 +726,7 @@ void SimpleMatrix::getSubRow(unsigned int r, unsigned int pos, SP::SiconosVector
     vOut->zero();
   else
   {
-    unsigned int numV = vOut->getNum();
+    unsigned int numV = vOut->num();
     unsigned int nbEl = vOut->size();
 
     if (numV == 1)
@@ -775,7 +775,7 @@ void SimpleMatrix::getSubRow(unsigned int r, unsigned int pos, SP::SiconosVector
 void SimpleMatrix::setSubRow(unsigned int r, unsigned int pos, SP::SiconosVector vIn)
 {
   // Set row number r, starting from element at position pos, of current matrix with vIn.
-  unsigned int numV = vIn->getNum();
+  unsigned int numV = vIn->num();
   if (r >= size(0))
     SiconosMatrixException::selfThrow("setSubRow(row): row is out of range");
 
@@ -830,7 +830,7 @@ void SimpleMatrix::getSubCol(unsigned int r, unsigned int pos, SP::SiconosVector
     vOut->zero();
   else
   {
-    unsigned int numV = vOut->getNum();
+    unsigned int numV = vOut->num();
     unsigned int nbEl = vOut->size();
 
     if (numV == 1)
@@ -879,7 +879,7 @@ void SimpleMatrix::getSubCol(unsigned int r, unsigned int pos, SP::SiconosVector
 void SimpleMatrix::setSubCol(unsigned int r, unsigned int pos, SP::SiconosVector vIn)
 {
   // Set column number r, starting from element at position pos, of current matrix with vIn.
-  unsigned int numV = vIn->getNum();
+  unsigned int numV = vIn->num();
   if (r >= size(1))
     SiconosMatrixException::selfThrow("setSubCol(col): col is out of range");
 

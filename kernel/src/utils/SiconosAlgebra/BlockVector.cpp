@@ -335,13 +335,13 @@ BlockVector& BlockVector::operator -= (const SiconosVector& vIn)
   if(dim > _sizeV) SiconosVectorException::selfThrow("BlockVector::addSimple : invalid ranges");
 
   VectorOfVectors::const_iterator it;
-  unsigned int numVIn = vIn.getNum();
+  unsigned int numVIn = vIn.num();
   unsigned int currentSize, currentNum;
   unsigned int index = 0;
   for(it = _vect.begin(); it != _vect.end(); ++it)
   {
     currentSize = (*it)->size();
-    currentNum = (*it)->getNum();
+    currentNum = (*it)->num();
     if(numVIn != currentNum) SiconosVectorException::selfThrow("BlockVector::addSimple : inconsistent types.");
     if(numVIn == 1)
       noalias(*(*it)->dense()) -=  ublas::subrange(*vIn.dense(), index, index + currentSize) ;
@@ -381,14 +381,14 @@ BlockVector& BlockVector::operator += (const SiconosVector& vIn)
   if(dim > _sizeV) SiconosVectorException::selfThrow("BlockVector::addSimple : invalid ranges");
 
   VectorOfVectors::const_iterator it;
-  unsigned int numVIn = vIn.getNum();
+  unsigned int numVIn = vIn.num();
   unsigned int currentSize, currentNum;
   unsigned int index = 0;
 
   for(it = _vect.begin(); it != _vect.end(); ++it)
   {
     currentSize = (*it)->size();
-    currentNum = (*it)->getNum();
+    currentNum = (*it)->num();
     if(numVIn != currentNum) SiconosVectorException::selfThrow("BlockVector::addSimple : inconsistent types.");
     if(numVIn == 1)
       noalias(*(*it)->dense()) += ublas::subrange(*vIn.dense(), index, index + currentSize) ;

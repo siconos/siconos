@@ -133,7 +133,7 @@ public:
   /** get the attribute num of current matrix
    * \return an unsigned int.
    */
-  inline unsigned int getNum() const
+  inline unsigned int num() const
   {
     return _num;
   };

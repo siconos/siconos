@@ -51,7 +51,7 @@ void SimpleMatrix::addBlock(unsigned int row_min, unsigned int col_min, const Si
   if (col_max > size(1))
     SiconosMatrixException::selfThrow("SimpleMatrix::addBlock(row,col,m): m.col + col is out of range.");
 
-  unsigned int numM = m.getNum();
+  unsigned int numM = m.num();
 
   if (numM == 0) // if m is a block matrix ...
   {
@@ -138,7 +138,7 @@ void SimpleMatrix::subBlock(unsigned int row_min, unsigned int col_min, const Si
   if (col_max > size(1))
     SiconosMatrixException::selfThrow("SimpleMatrix::subBlock(row,col,m): m.col + col is out of range.");
 
-  unsigned int numM = m.getNum();
+  unsigned int numM = m.num();
 
   if (numM == 0) // if m is a block matrix ...
   {

@@ -35,7 +35,7 @@ const SimpleMatrix operator * (const SiconosMatrix & A, double a)
 {
   // To compute B = a * A
 
-  unsigned int numA = A.getNum();
+  unsigned int numA = A.num();
 
   if (numA == 6) // if A = 0
   {
@@ -69,7 +69,7 @@ SimpleMatrix operator * (double a, const SiconosMatrix & A)
 {
   // To compute B = a * A
 
-  unsigned int numA = A.getNum();
+  unsigned int numA = A.num();
 
   if (numA == 6) // if A = 0
   {
@@ -106,7 +106,7 @@ const SimpleMatrix operator / (const SiconosMatrix & A, double a)
   if (a == 0.0)
     SiconosMatrixException::selfThrow(" Matrix, operator / , division by zero.");
 
-  unsigned int numA = A.getNum();
+  unsigned int numA = A.num();
 
   if (numA == 6) // if A = 0
   {
@@ -165,8 +165,8 @@ const SimpleMatrix operator + (const  SiconosMatrix& A, const  SiconosMatrix& B)
   if ((A.size(0) != B.size(0)) || (A.size(1) != B.size(1)))
     SiconosMatrixException::selfThrow("Matrix operator + : inconsistent sizes");
 
-  unsigned int numA = A.getNum();
-  unsigned int numB = B.getNum();
+  unsigned int numA = A.num();
+  unsigned int numB = B.num();
 
   // == A or B equal to null ==
   if (numA == 6) // A = 0
@@ -308,8 +308,8 @@ const SimpleMatrix operator - (const  SiconosMatrix& A, const  SiconosMatrix& B)
   if ((A.size(0) != B.size(0)) || (A.size(1) != B.size(1)))
     SiconosMatrixException::selfThrow("Matrix operator -  : inconsistent sizes");
 
-  unsigned int numA = A.getNum();
-  unsigned int numB = B.getNum();
+  unsigned int numA = A.num();
+  unsigned int numB = B.num();
 
 
   // == B equal to null ==

@@ -467,7 +467,7 @@ void SiconosVector::setBlock(unsigned int index, const SiconosVector& vIn)
   unsigned int end = vIn.size() + index;
   assert(end <= size() && "SiconosVector::setBlock : invalid ranges");
 
-  assert (vIn.getNum() == getNum() && "SiconosVector::setBlock: inconsistent types.");
+  assert (vIn.num() == num() && "SiconosVector::setBlock: inconsistent types.");
 
   if (_dense)
     noalias(ublas::subrange(*vect.Dense, index, end)) = *vIn.dense();
@@ -487,8 +487,8 @@ void SiconosVector::toBlock(SiconosVector& vOut, unsigned int sizeB, unsigned in
   assert(startOut + sizeB <= vOut.size() && "vector toBlock(v1,v2,...): end position in output vector is out of range.");
 
   unsigned int endOut = startOut + sizeB;
-  unsigned int numIn = getNum();
-  unsigned int numOut = vOut.getNum();
+  unsigned int numIn = num();
+  unsigned int numOut = vOut.num();
 
   if (numIn == numOut)
   {
@@ -519,9 +519,9 @@ void SiconosVector::addBlock(unsigned int index, const SiconosVector& vIn)
   unsigned int end = vIn.size();
   if ((index + end) > size()) SiconosVectorException::selfThrow("SiconosVector::addBlock : invalid ranges");
 
-  unsigned int numVin = vIn.getNum();
+  unsigned int numVin = vIn.num();
 
-  if (numVin != getNum()) SiconosVectorException::selfThrow("SiconosVector::addBlock : inconsistent types.");
+  if (numVin != num()) SiconosVectorException::selfThrow("SiconosVector::addBlock : inconsistent types.");
 
   if (_dense)
     noalias(ublas::subrange(*vect.Dense, index, index + end)) += *vIn.dense();
@@ -539,8 +539,8 @@ void SiconosVector::subBlock(unsigned int index, const SiconosVector& vIn)
   unsigned int end = vIn.size();
   if ((index + end) > size()) SiconosVectorException::selfThrow("SiconosVector::subBlock : invalid ranges");
 
-  unsigned int numVin = vIn.getNum();
-  if (numVin != getNum()) SiconosVectorException::selfThrow("SiconosVector::subBlock : inconsistent types.");
+  unsigned int numVin = vIn.num();
+  if (numVin != num()) SiconosVectorException::selfThrow("SiconosVector::subBlock : inconsistent types.");
 
   if (_dense)
     noalias(ublas::subrange(*vect.Dense, index, index + end)) -= *vIn.dense();
@@ -558,9 +558,9 @@ SiconosVector& SiconosVector::operator = (const SiconosVector& vIn)
 
   assert(size() == vIn.size() && "SiconosVector::operator = failed: inconsistent sizes.");
 
-  unsigned int vInNum = vIn.getNum();
+  unsigned int vInNum = vIn.num();
   {
-    switch (getNum())
+    switch (num())
     {
     case 1:
       switch (vInNum)
@@ -654,7 +654,7 @@ SiconosVector& SiconosVector::operator += (const SiconosVector& vIn)
   if (&vIn == this) // alias
   {
     // Note: using this *= 2.0 is much more time-consuming.
-    switch (getNum())
+    switch (num())
     {
     case 1:
       *vect.Dense += *vect.Dense;
@@ -669,9 +669,9 @@ SiconosVector& SiconosVector::operator += (const SiconosVector& vIn)
     return *this;
   }
 
-  unsigned int vInNum = vIn.getNum();
+  unsigned int vInNum = vIn.num();
   {
-    switch (getNum())
+    switch (num())
     {
     case 1:
       switch (vInNum)
@@ -719,9 +719,9 @@ SiconosVector& SiconosVector::operator -= (const SiconosVector& vIn)
     return *this;
   }
 
-  unsigned int vInNum = vIn.getNum();
+  unsigned int vInNum = vIn.num();
   {
-    switch (getNum())
+    switch (num())
     {
     case 1:
       switch (vInNum)
@@ -778,7 +778,7 @@ bool operator == (const SiconosVector &m, const SiconosVector &x)
 
 SiconosVector operator * (const  SiconosVector&m, double d)
 {
-  unsigned int numM = m.getNum();
+  unsigned int numM = m.num();
 
   if (numM == 1)
   {
@@ -795,7 +795,7 @@ SiconosVector operator * (const  SiconosVector&m, double d)
 
 SiconosVector operator * (double d, const  SiconosVector&m)
 {
-  unsigned int numM = m.getNum();
+  unsigned int numM = m.num();
 
   if (numM == 1)
   {
@@ -812,7 +812,7 @@ SiconosVector operator * (double d, const  SiconosVector&m)
 
 SiconosVector operator / (const SiconosVector &m, double d)
 {
-  unsigned int numM = m.getNum();
+  unsigned int numM = m.num();
 
   if (numM == 1)
   {
@@ -834,8 +834,8 @@ SiconosVector operator + (const  SiconosVector& x, const  SiconosVector& y)
   if (x.size() != y.size())
     SiconosVectorException::selfThrow("SiconosVector, x + y: inconsistent sizes");
 
-  unsigned int numX = x.getNum();
-  unsigned int numY = y.getNum();
+  unsigned int numX = x.num();
+  unsigned int numY = y.num();
 
   if (numX == numY) // x, y SiconosVector of the same type
   {
@@ -866,9 +866,9 @@ void add(const SiconosVector& x, const SiconosVector& y, SiconosVector& z)
   if (x.size() != y.size() || x.size() != z.size())
     SiconosVectorException::selfThrow("add(x,y,z): inconsistent sizes");
 
-  unsigned int numX = x.getNum();
-  unsigned int numY = y.getNum();
-  unsigned int numZ = z.getNum();
+  unsigned int numX = x.num();
+  unsigned int numY = y.num();
+  unsigned int numZ = z.num();
 
   if (&z == &x) // x, and z are the same object.
   {
@@ -921,8 +921,8 @@ SiconosVector operator - (const  SiconosVector& x, const  SiconosVector& y)
   if (x.size() != y.size())
     SiconosVectorException::selfThrow("SiconosVector, x - y: inconsistent sizes");
 
-  unsigned int numX = x.getNum();
-  unsigned int numY = y.getNum();
+  unsigned int numX = x.num();
+  unsigned int numY = y.num();
 
   if (numX == numY) // x, y SiconosVector of the same type
   {
@@ -951,9 +951,9 @@ void sub(const SiconosVector& x, const SiconosVector& y, SiconosVector& z)
   if (x.size() != y.size() || x.size() != z.size())
     SiconosVectorException::selfThrow("sub(x,y,z): inconsistent sizes");
 
-  unsigned int numX = x.getNum();
-  unsigned int numY = y.getNum();
-  unsigned int numZ = z.getNum();
+  unsigned int numX = x.num();
+  unsigned int numY = y.num();
+  unsigned int numZ = z.num();
 
   if (&z == &x) // x and z are the same object.
   {
@@ -1018,8 +1018,8 @@ void axpby(double a, const SiconosVector& x, double b, SiconosVector& y)
   if (x.size() != y.size())
     SiconosVectorException::selfThrow("axpby(x,y,z): inconsistent sizes");
 
-  unsigned int numX = x.getNum();
-  unsigned int numY = y.getNum();
+  unsigned int numX = x.num();
+  unsigned int numY = y.num();
 
   if (numX == numY) // x and y of the same type
   {
@@ -1057,8 +1057,8 @@ void axpy(double a, const SiconosVector& x, SiconosVector& y)
   if (x.size() != y.size())
     SiconosVectorException::selfThrow("axpy(x,y,z): inconsistent sizes");
 
-  unsigned int numX = x.getNum();
-  unsigned int numY = y.getNum();
+  unsigned int numX = x.num();
+  unsigned int numY = y.num();
 
   if (numX == numY) // x and y of the same type
   {
@@ -1090,8 +1090,8 @@ double inner_prod(const SiconosVector &x, const SiconosVector &m)
   if (x.size() != m.size())
     SiconosVectorException::selfThrow("inner_prod: inconsistent sizes");
 
-  unsigned int numM = m.getNum();
-  unsigned int numX = x.getNum();
+  unsigned int numM = m.num();
+  unsigned int numX = x.num();
 
   if (numX == numM)
   {
@@ -1109,8 +1109,8 @@ double inner_prod(const SiconosVector &x, const SiconosVector &m)
 // outer_prod(v,w) = trans(v)*w
 SimpleMatrix outer_prod(const SiconosVector &x, const SiconosVector& m)
 {
-  unsigned int numM = m.getNum();
-  unsigned int numX = x.getNum();
+  unsigned int numM = m.num();
+  unsigned int numX = x.num();
 
   if (numM == 1)
   {
@@ -1151,8 +1151,8 @@ void scal(double a, const SiconosVector & x, SiconosVector & y, bool init)
     if (sizeX != sizeY)
       SiconosVectorException::selfThrow("scal(a,SiconosVector,SiconosVector) failed, sizes are not consistent.");
 
-    unsigned int numY = y.getNum();
-    unsigned int numX = x.getNum();
+    unsigned int numY = y.num();
+    unsigned int numX = x.num();
     if (numX == numY)
     {
 
@@ -1221,8 +1221,8 @@ void subscal(double a, const SiconosVector & x, SiconosVector & y, const Index& 
   if (dimY > y.size() || dimX > x.size())
     SiconosVectorException::selfThrow("subscal(a,x,y,...) error: input index too large.");
 
-  unsigned int numY = y.getNum();
-  unsigned int numX = x.getNum();
+  unsigned int numY = y.num();
+  unsigned int numX = x.num();
 
   if (&x == &y) // if x and y are the same object
   {
@@ -1390,8 +1390,8 @@ void setBlock(const SiconosVector& vIn, SP::SiconosVector vOut, unsigned int siz
               unsigned int startIn, unsigned int startOut)
 {
   unsigned int endOut = startOut + sizeB;
-  unsigned int numIn = vIn.getNum();
-  unsigned int numOut = vOut->getNum();
+  unsigned int numIn = vIn.num();
+  unsigned int numOut = vOut->num();
   assert(vOut->size() >= endOut && "The output vector is too small");
   if (numIn == numOut)
   {

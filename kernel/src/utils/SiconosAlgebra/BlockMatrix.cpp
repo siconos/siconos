@@ -239,7 +239,7 @@ const DenseMat  BlockMatrix::getDense(unsigned int row, unsigned int col) const
   SP::SiconosMatrix tmp;
   tmp = (*_mat)(row, col);
 
-  if (tmp->getNum() != 1)
+  if (tmp->num() != 1)
     SiconosMatrixException::selfThrow("DenseMat BlockMatrix::getDense(unsigned int row, unsigned int col) : the matrix at (row, col) is not a Dense matrix");
 
   return (tmp->getDense());
@@ -249,7 +249,7 @@ const DenseMat  BlockMatrix::getDense(unsigned int row, unsigned int col) const
 const TriangMat BlockMatrix::getTriang(unsigned int row, unsigned int col) const
 {
   SP::SiconosMatrix tmp = (*_mat)(row, col);
-  if (tmp->getNum() != 2)
+  if (tmp->num() != 2)
   {
     SiconosMatrixException::selfThrow("TriangMat BlockMatrix::getTriang(unsigned int row, unsigned int col) : the matrix at (row, col) is not a Triangular matrix");
   }
@@ -261,7 +261,7 @@ const SymMat BlockMatrix::getSym(unsigned int row, unsigned int col) const
 {
 
   SP::SiconosMatrix tmp = (*_mat)(row, col);
-  if (tmp->getNum() != 3)
+  if (tmp->num() != 3)
   {
     SiconosMatrixException::selfThrow("SymMat BlockMatrix::getSym(unsigned int row, unsigned int col) : the matrix at (row, col) is not a Symmmetric matrix");
   }
@@ -273,7 +273,7 @@ const SparseMat  BlockMatrix::getSparse(unsigned int row, unsigned int col) cons
 {
 
   SP::SiconosMatrix tmp = (*_mat)(row, col);
-  if (tmp->getNum() != 4)
+  if (tmp->num() != 4)
   {
     SiconosMatrixException::selfThrow("SparseMat BlockMatrix::getSparse(unsigned int row, unsigned int col) : the matrix at (row, col) is not a Sparse matrix");
   }
@@ -285,7 +285,7 @@ const BandedMat  BlockMatrix::getBanded(unsigned int row, unsigned int col) cons
 {
 
   SP::SiconosMatrix tmp = (*_mat)(row, col);
-  if (tmp->getNum() != 5)
+  if (tmp->num() != 5)
   {
     SiconosMatrixException::selfThrow("BandedMat BlockMatrix::getBanded(unsigned int row, unsigned int col) : the matrix at (row, col) is not a Banded matrix");
   }
@@ -297,7 +297,7 @@ const ZeroMat  BlockMatrix::getZero(unsigned int row, unsigned int col) const
 {
 
   SP::SiconosMatrix tmp = (*_mat)(row, col);
-  if (tmp->getNum() != 5)
+  if (tmp->num() != 5)
   {
     SiconosMatrixException::selfThrow("ZeroMat BlockMatrix::getZero(unsigned int row, unsigned int col) : the matrix at (row, col) is not a Zero matrix");
   }
@@ -309,7 +309,7 @@ const IdentityMat  BlockMatrix::getIdentity(unsigned int row, unsigned int col) 
 {
 
   SP::SiconosMatrix tmp = (*_mat)(row, col);
-  if (tmp->getNum() != 5)
+  if (tmp->num() != 5)
   {
     SiconosMatrixException::selfThrow("IdentityMat BlockMatrix::getIdentity(unsigned int row, unsigned int col) : the matrix at (row, col) is not a Identity matrix");
   }
@@ -322,7 +322,7 @@ DenseMat*  BlockMatrix::dense(unsigned int row, unsigned int col) const
 
 
   SP::SiconosMatrix tmp = (*_mat)(row, col);
-  if (tmp->getNum() != 1)
+  if (tmp->num() != 1)
   {
     SiconosMatrixException::selfThrow("DenseMat* BlockMatrix::dense(unsigned int row, unsigned int col) : the matrix at (row, col) is not a Dense matrix");
   }
@@ -334,7 +334,7 @@ TriangMat* BlockMatrix::triang(unsigned int row, unsigned int col) const
 {
 
   SP::SiconosMatrix tmp = (*_mat)(row, col);
-  if (tmp->getNum() != 2)
+  if (tmp->num() != 2)
   {
     SiconosMatrixException::selfThrow("TriangMat* BlockMatrix::triang(unsigned int row, unsigned int col) : the matrix at (row, col) is not a Triangular matrix");
   }
@@ -344,7 +344,7 @@ SymMat* BlockMatrix::sym(unsigned int row, unsigned int col) const
 {
 
   SP::SiconosMatrix tmp = (*_mat)(row, col);
-  if (tmp->getNum() != 3)
+  if (tmp->num() != 3)
   {
     SiconosMatrixException::selfThrow("SymMat* BlockMatrix::sym(unsigned int row, unsigned int col) : the matrix at (row, col) is not a Symmmetric matrix");
   }
@@ -355,7 +355,7 @@ SparseMat*  BlockMatrix::sparse(unsigned int row, unsigned int col) const
 {
 
   SP::SiconosMatrix tmp = (*_mat)(row, col);
-  if (tmp->getNum() != 4)
+  if (tmp->num() != 4)
   {
     SiconosMatrixException::selfThrow("SparseMat* BlockMatrix::sparse(unsigned int row, unsigned int col) : the matrix at (row, col) is not a Sparse matrix");
   }
@@ -366,7 +366,7 @@ BandedMat*  BlockMatrix::banded(unsigned int row, unsigned int col) const
 {
 
   SP::SiconosMatrix tmp = (*_mat)(row, col);
-  if (tmp->getNum() != 5)
+  if (tmp->num() != 5)
   {
     SiconosMatrixException::selfThrow("BandedMat* BlockMatrix::banded(unsigned int row, unsigned int col) : the matrix at (row, col) is not a Banded matrix");
   }
@@ -377,7 +377,7 @@ ZeroMat*  BlockMatrix::zero_mat(unsigned int row, unsigned int col) const
 {
 
   SP::SiconosMatrix tmp = (*_mat)(row, col);
-  if (tmp->getNum() != 6)
+  if (tmp->num() != 6)
   {
     SiconosMatrixException::selfThrow("ZeroMat* BlockMatrix::zero(unsigned int row, unsigned int col) : the matrix at (row, col) is not a Zero matrix");
   }
@@ -388,7 +388,7 @@ IdentityMat*  BlockMatrix::identity(unsigned int row, unsigned int col) const
 {
 
   SP::SiconosMatrix tmp = (*_mat)(row, col);
-  if (tmp->getNum() != 5)
+  if (tmp->num() != 5)
   {
     SiconosMatrixException::selfThrow("IdentityMat* BlockMatrix::identity(unsigned int row, unsigned int col) : the matrix at (row, col) is not a Identity matrix");
   }
@@ -750,7 +750,7 @@ void BlockMatrix::addSimple(unsigned int& indRow, unsigned int& indCol, const Si
 
   if (row > _dimRow || col > _dimCol) SiconosMatrixException::selfThrow("BlockMatrix::addSimple : invalid ranges");
 
-  unsigned int numM = m.getNum();
+  unsigned int numM = m.num();
 
   // iterators through this
   BlocksMat::iterator1 it1;
@@ -767,7 +767,7 @@ void BlockMatrix::addSimple(unsigned int& indRow, unsigned int& indCol, const Si
       {
         currentCol = (*it2)->size(1);
         currentRow = (*it2)->size(0);
-        currentNum = (*it2)->getNum();
+        currentNum = (*it2)->num();
         if (numM != currentNum) SiconosMatrixException::selfThrow("BlockMatrix::addSimple : inconsistent types.");
 
         if (numM == 1)
@@ -803,7 +803,7 @@ void BlockMatrix::subSimple(unsigned int& indRow, unsigned int& indCol, const Si
   unsigned int initCol = indCol;
   if (row > _dimRow || col > _dimCol) SiconosMatrixException::selfThrow("BlockMatrix::addSimple : invalid ranges");
 
-  unsigned int numM = m.getNum();
+  unsigned int numM = m.num();
 
   // iterators through this
   BlocksMat::iterator1 it1;
@@ -820,7 +820,7 @@ void BlockMatrix::subSimple(unsigned int& indRow, unsigned int& indCol, const Si
       {
         currentCol = (*it2)->size(1);
         currentRow = (*it2)->size(0);
-        currentNum = (*it2)->getNum();
+        currentNum = (*it2)->num();
         if (numM != currentNum) SiconosMatrixException::selfThrow("BlockMatrix::addSimple : inconsistent types.");
 
         if (numM == 1)

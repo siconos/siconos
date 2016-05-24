@@ -127,7 +127,7 @@ void SimpleMatrix::trans(const SiconosMatrix &m)
     trans();//SiconosMatrixException::selfThrow("SimpleMatrix::trans(m) failed, m = this, use this->trans().");
   else
   {
-    unsigned int numM = m.getNum();
+    unsigned int numM = m.num();
     switch (numM)
     {
     case 1:
@@ -187,7 +187,7 @@ const SimpleMatrix matrix_pow(const SimpleMatrix& m, unsigned int power)
 
   if (power > 0)
   {
-    unsigned int num = m.getNum();
+    unsigned int num = m.num();
     if (num == 1)
     {
       DenseMat p = *m.dense();

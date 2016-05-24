@@ -89,7 +89,7 @@ SimpleMatrix& SimpleMatrix::operator = (const SiconosMatrix& m)
 
   if (&m == this) return *this; // auto-assignment.
 
-  unsigned int numM = m.getNum();
+  unsigned int numM = m.num();
 
   if (size(0) != m.size(0) || size(1) != m.size(1))
   {
@@ -217,7 +217,7 @@ SimpleMatrix& SimpleMatrix::operator = (const SimpleMatrix& m)
 
   if (&m == this) return *this; // auto-assignment.
 
-  unsigned int numM = m.getNum();
+  unsigned int numM = m.num();
 
   if (size(0) != m.size(0) || size(1) != m.size(1))
     resize(m.size(0), m.size(1));
@@ -337,7 +337,7 @@ SimpleMatrix& SimpleMatrix::operator = (const DenseMat& m)
 SimpleMatrix& SimpleMatrix::operator +=(const SiconosMatrix& m)
 {
 
-  unsigned int numM = m.getNum();
+  unsigned int numM = m.num();
   if (numM == 6) // m = 0
     return *this;
 
@@ -492,7 +492,7 @@ SimpleMatrix& SimpleMatrix::operator +=(const SiconosMatrix& m)
 SimpleMatrix& SimpleMatrix::operator -= (const SiconosMatrix& m)
 {
 
-  unsigned int numM = m.getNum();
+  unsigned int numM = m.num();
   if (numM == 6) // m = 0
     return *this;
 
