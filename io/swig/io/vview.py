@@ -810,9 +810,9 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
 
         id_t0 = numpy.where(dpos_data[:, 0] == min(dpos_data[:, 0]))
 
-    #    set_positionv(spos_data[:, 1], spos_data[:, 2], spos_data[:, 3],
-    #                  spos_data[:, 4], spos_data[:, 5], spos_data[:, 6],
-    #                  spos_data[:, 7], spos_data[:, 8])
+        set_positionv(spos_data[:, 1], spos_data[:, 2], spos_data[:, 3],
+                      spos_data[:, 4], spos_data[:, 5], spos_data[:, 6],
+                      spos_data[:, 7], spos_data[:, 8])
 
         set_positionv(
             pos_data[id_t0, 1], pos_data[id_t0, 2], pos_data[id_t0, 3],
@@ -1309,6 +1309,10 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
             cf_prov.method()
 
             id_t = numpy.where(pos_data[:, 0] == times[index])
+
+            set_positionv(spos_data[:, 1], spos_data[:, 2], spos_data[:, 3],
+                      spos_data[:, 4], spos_data[:, 5], spos_data[:, 6],
+                      spos_data[:, 7], spos_data[:, 8])
 
             set_positionv(
                 pos_data[id_t, 1], pos_data[id_t, 2], pos_data[id_t, 3],
