@@ -48,6 +48,7 @@ except getopt.GetoptError, err:
 min_time = None
 max_time = None
 scale_factor = 1
+time_scale_factor=1
 vtk_export_mode = False
 view_cycle = -1
 
@@ -1284,9 +1285,9 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
                                        make_time_scale_observer(
                                            slider_repres, input_observer),
                                        interactor_renderer,
-                                       scale_factor, scale_factor -
-                                       scale_factor / 2,
-                                       scale_factor + scale_factor / 2,
+                                       time_scale_factor, time_scale_factor -
+                                       time_scale_factor / 2,
+                                       time_scale_factor + time_scale_factor / 2,
                                        0.1, 0.9, 0.3, 0.9)
 
         renderer_window.Render()
