@@ -645,6 +645,7 @@ component that can be used on its own.
 | CollDet   | http://cgvr.cs.uni-bremen.de/research/colldet/                              | C++             |        2007 | For OpenSG            | Permissive (educ.) |
 | FCL       | https://github.com/flexible-collision-library/fcl                           | C++             |        2015 | Uses libCCD           | BSD                |
 | libCCD    | https://github.com/danfis/libccd                                            | C++             |        2016 | Convex-convex GJK     | BSD                |
+| klampt    | http://motion.pratt.duke.edu/klampt/index.html                              | C++             |        2016 | "robust contact"      | Permissive (Indiana) |
 
 Other resources:
 
