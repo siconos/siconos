@@ -516,6 +516,164 @@ using nm + sed, grep and friends. The proper way to do so is to use a DLLIMPORT 
 defined __declspec(dllimport) when needed. See VTK and many big FOSS project.
 
 
+
+* Code reviews 						 :SICONOS:CODEREVIEW:
+** Review Meeting with OB <2011-09-01 Mer> 			   :OB:MB:VA:
+*** Siconos/Kernel
+**** DONE VA review DeVNotes Chapter 9
+     DEADLINE: <2011-09-15 Thu> CLOSED: [2011-10-26 Wed 11:01]
+**** NewtonEulerDS.cpp
+- todo remove _luW in map or attached to node
+- todo rename _M in _massMatrix (same in LagragianDS.cpp)
+- todo remove _ndof
+- todo comment Jacobian fext mext --> to be added in Newton loop further
+- todo remove _NNL and add _v (or _qDot) in fext and mext
+- todo review Devnotes Chapter 9 (todo VA)
+- todo relate Devnotes (boxed formulaes with code)
+- todo neccessity _centerOfMass ?
+- schedule _fL simpleVector ?
+- schedule : rename W --> iterationMatrix
+- schedule : Newton sur \dot q = Tv ??
+- schedule : MechanicalDS.cpp ?
+- schedule : neccesssity of v0 ?
+- remark : hard dependence on quaternions
+**** NewtonEulerR.hpp, NewtonEulerRFC3D.hpp, NewtonEulerRImpact.hpp
+- done : Reference to DevNotes
+- done : rename NewtonEulerRFC3D   --> NewtonEulerFrom3DLocalFrameR
+- done : rename NewtonEulerRImpact --> NewtonEulerFrom1DLocalFrameR
+- contactForce It is the right place ? Force in Joint ?
+- what is the goal of _yProj ?
+- question of _jachq, jachqT and a generic G for MechanicalR.cpp
+- todo :  add updateLocalframe. checkvalidLocalframe
+- todo : rename _Nc, _Pc1, _Pc2 to _normal, _contactPoint1, _contactPoint2
+**** TimeSteppingProjectOnConstraints.hpp
+   - todo : Doxycomment the methods
+   - Comment : 2 independent Newton loops.
+     + the first one for the velocity
+     + the second one for the contraints for the position
+        $h(q) = 0 $ and $\| Q \|=1$
+       - Why there is a renornalization of q ?
+       - Where is the computation of the residual ?
+**** MLCPProjectOnconstraints.hpp
+   - todo : Comment method computeOptions
+   - todo : Comment the damping method  (*_z)*=0.2;
+   - todo :  store the result of osnspb_pos in lambda[0] and p[0]
+
+* Tricks
+astyle --style=ansi -U -v -s2
+** Howto to generate doc and Web site ?
+
+
+*** local generation
+In a build directory
+
+cd ---/Build/Numerics
+cmake -DWITH_DOCUMENTATION=ON -DDOXYGEN_OUTPUT=../GeneratedDocs  ~/siconos/trunk/Numerics
+make doc
+cd ---/Build/Kernel
+cmake -DWITH_DOCUMENTATION=ON -DDOXYGEN_OUTPUT=../GeneratedDocs  ~/siconos/trunk/Kernel
+make doc
+cd ---/Build/Examples
+cmake -DWITH_DOCUMENTATION=ON -DDOXYGEN_OUTPUT=../GeneratedDocs  ~/siconos/trunk/Examples
+make doc
+cd ---/Build/Homepage
+cmake  -DDOXYGEN_OUTPUT=../GeneratedDocs  ~/siconos/trunk/Docs
+make doc
+
+repeat the whole process at least one time for Tags
+
+rsync -avu --exclude '*~' --delete --rsh="ssh -l username" ../GeneratedDocs/* username@scm.gforge.inria.fr:/home/groups/siconos/htdocs/version_number
+
+
+
+
+
+
+
+*** publish documentation on website
+
+use trunk/Dev/Tools/publish (local generation is done on the fly by
+the script so previous tip is not needed)
+
+examples:
+ - devel version
+./publish -u <gforge user> -d
+
+ - version 3.4.0 (= rev 3194)
+./publish -r3194 -u <gforge user>
+
+* Obsolete stuff
+** Development list for FrontEnd		     :SICONOS:DEVEL:FrontEnd:
+*** DONE rename {dsg,indexset}.vertices() (mapping to std::vector)
+    CLOSED: [2014-10-01 mer. 11:15]
+    renamed in
+    {dsg, indexSet}.{dynamicalSystems(), Interactions()}
+    (still mappings to std::vector)
+    The need for iterator on graph.vertices and edges may remain.
+*** TODO doxygen latex -> sphinx
+*** TODO document python only features
+** Bugs - Tracker
+*** Numerics
+**** TODO Tests with MUMPS fails since it is quite verbose and outputs "ERROR ANALYSIS" :MAURICE:
+*** Kernel
+**** DONE Avoid namespace pollution in SiconosGraph.hpp (using namespace boost;)
+     CLOSED: [2012-10-01 Mon 17:37]
+
+**** TODO Prevent using LCP formulation with RelayNSL.		    :VINCENT:
+     - if you use LCP formulation as osnspb in Siconos/Kernel with RelayNSL, the simulation runs perfectly well but the results are hazardous
+
+* Interesting software libraries
+** Collision / Physics
+
+This list is restricted to open source 3D collision detection
+libraries, or physics libraries that include a collision detection
+component that can be used on its own.
+
+| Name      | URL                                                                         | Language        | Last update | Notes                 | License            |
+|-----------+-----------------------------------------------------------------------------+-----------------+-------------+-----------------------+--------------------|
+| Bullet    | http://bulletphysics.org/                                                   | C++             |             | Used in Siconos       | zlib               |
+| OZCollide | http://www.tsarevitch.org/ozcollide                                         | C++             |             |                       | LGPL               |
+| ODE       | http://opende.sf.net                                                        | C++/C interface |             |                       | LGPL v2.1+         |
+| ncollide  | http://ncollide.org/                                                        | Rust            |             |                       | BSD3               |
+| V-Collide | http://www3.cs.stonybrook.edu/~algorith/implement/V_COLLIDE/implement.shtml | C/C++           |        1998 | uses RAPID            | Unspecified        |
+| RAPID     | http://www3.cs.stonybrook.edu/~algorith/implement/RAPID/implement.shtml     | C/C++           |       1995? |                       | Unspecified        |
+| SOLID     | http://solid.sourceforge.net/                                               | C++             |        1999 |                       | LGPL v2            |
+| OPCODE    | http://www.codercorner.com/Opcode.htm                                       | C++             |        2003 |                       | Unspecified        |
+| ColDet    | https://sourceforge.net/projects/coldet/                                    | C++             |             |                       | LGPL v2            |
+| PQP       | http://gamma.cs.unc.edu/SSV/                                                | C++             |        1999 | works, mesh-mesh only | Permissive         |
+| V-Clip    | http://www3.cs.stonybrook.edu/~algorith/implement/V-CLIP/implement.shtml    | C++             |    Not sure | Unspecified           |                    |
+| CollDet   | http://cgvr.cs.uni-bremen.de/research/colldet/                              | C++             |        2007 | For OpenSG            | Permissive (educ.) |
+| FCL       | https://github.com/flexible-collision-library/fcl                           | C++             |        2015 | Uses libCCD           | BSD                |
+| libCCD    | https://github.com/danfis/libccd                                            | C++             |        2016 | Convex-convex GJK     | BSD                |
+
+Other resources:
+
+| https://otik.zcu.cz/bitstream/handle/11025/5966/E59.pdf  | Paper includes a survey of collision libraries            |
+| http://gamma.cs.unc.edu/research/collision/packages.html | Rest of the UNC algorithms, most require filing a request |
+
+** CAD modeling
+
+CAD libraries / tools generally support constructive geometry
+modeling, implicit curved surfaces, etc., instead of just mesh
+representations.  Generally don't include any physics support.
+
+| FreeCAD      | http://www.freecadweb.org/ | C++/Python | Based on Open CASCADE (OCCT), used in Siconos           | LGPL v2+               |
+| Open CASCADE | http://www.opencascade.com | C++        | http://git.dev.opencascade.org/gitweb/                  | LGPL v2.1              |
+| OpenSCAD     | http://www.openscad.org/   | Qt/C++     | Constructive geometry front-end, not a library          | GPL v2                 |
+| OpenCSG      | http://www.opencsg.org/    | C++        | Constructive geometry rendering engine used by OpenSCAD | GPL v2                 |
+| CGAL         | http://www.cgal.org/       | C++        | Geometric algorithms used by OpenSCAD                   | GPL v3+, or commercial |
+
+** Scene graph
+
+Scene graph libraries maintain a graph of objects that can be rendered
+visually, but generally physics is left to an external solution.
+
+| OpenSG         | http://www.opensg.org/         | C++ | LGPL v2         |
+| OpenSceneGraph | http://www.openscenegraph.org/ | C++ | LGPL (modified) |
+
+* Footnotes
+
+
 * Siconos Meeting  					    :SICONOS:Meeting:
 ** <2011-09-01>
    Presents : FP, OB, VA, MB.
@@ -960,163 +1118,72 @@ TODO
    + branch and release MB
    + push new doc on website SS
 
-
-
-* Code reviews 						 :SICONOS:CODEREVIEW:
-** Review Meeting with OB <2011-09-01 Mer> 			   :OB:MB:VA:
-*** Siconos/Kernel
-**** DONE VA review DeVNotes Chapter 9
-     DEADLINE: <2011-09-15 Thu> CLOSED: [2011-10-26 Wed 11:01]
-**** NewtonEulerDS.cpp
-- todo remove _luW in map or attached to node
-- todo rename _M in _massMatrix (same in LagragianDS.cpp)
-- todo remove _ndof
-- todo comment Jacobian fext mext --> to be added in Newton loop further
-- todo remove _NNL and add _v (or _qDot) in fext and mext
-- todo review Devnotes Chapter 9 (todo VA)
-- todo relate Devnotes (boxed formulaes with code)
-- todo neccessity _centerOfMass ?
-- schedule _fL simpleVector ?
-- schedule : rename W --> iterationMatrix
-- schedule : Newton sur \dot q = Tv ??
-- schedule : MechanicalDS.cpp ?
-- schedule : neccesssity of v0 ?
-- remark : hard dependence on quaternions
-**** NewtonEulerR.hpp, NewtonEulerRFC3D.hpp, NewtonEulerRImpact.hpp
-- done : Reference to DevNotes
-- done : rename NewtonEulerRFC3D   --> NewtonEulerFrom3DLocalFrameR
-- done : rename NewtonEulerRImpact --> NewtonEulerFrom1DLocalFrameR
-- contactForce It is the right place ? Force in Joint ?
-- what is the goal of _yProj ?
-- question of _jachq, jachqT and a generic G for MechanicalR.cpp
-- todo :  add updateLocalframe. checkvalidLocalframe
-- todo : rename _Nc, _Pc1, _Pc2 to _normal, _contactPoint1, _contactPoint2
-**** TimeSteppingProjectOnConstraints.hpp
-   - todo : Doxycomment the methods
-   - Comment : 2 independent Newton loops.
-     + the first one for the velocity
-     + the second one for the contraints for the position
-        $h(q) = 0 $ and $\| Q \|=1$
-       - Why there is a renornalization of q ?
-       - Where is the computation of the residual ?
-**** MLCPProjectOnconstraints.hpp
-   - todo : Comment method computeOptions
-   - todo : Comment the damping method  (*_z)*=0.2;
-   - todo :  store the result of osnspb_pos in lambda[0] and p[0]
-
-* Tricks
-astyle --style=ansi -U -v -s2
-** Howto to generate doc and Web site ?
-
-
-*** local generation
-In a build directory
-
-cd ---/Build/Numerics
-cmake -DWITH_DOCUMENTATION=ON -DDOXYGEN_OUTPUT=../GeneratedDocs  ~/siconos/trunk/Numerics
-make doc
-cd ---/Build/Kernel
-cmake -DWITH_DOCUMENTATION=ON -DDOXYGEN_OUTPUT=../GeneratedDocs  ~/siconos/trunk/Kernel
-make doc
-cd ---/Build/Examples
-cmake -DWITH_DOCUMENTATION=ON -DDOXYGEN_OUTPUT=../GeneratedDocs  ~/siconos/trunk/Examples
-make doc
-cd ---/Build/Homepage
-cmake  -DDOXYGEN_OUTPUT=../GeneratedDocs  ~/siconos/trunk/Docs
-make doc
-
-repeat the whole process at least one time for Tags
-
-rsync -avu --exclude '*~' --delete --rsh="ssh -l username" ../GeneratedDocs/* username@scm.gforge.inria.fr:/home/groups/siconos/htdocs/version_number
-
-
-
-
-
-
-
-*** publish documentation on website
-
-use trunk/Dev/Tools/publish (local generation is done on the fly by
-the script so previous tip is not needed)
-
-examples:
- - devel version
-./publish -u <gforge user> -d
-
- - version 3.4.0 (= rev 3194)
-./publish -r3194 -u <gforge user>
-
-* Obsolete stuff
-** Development list for FrontEnd		     :SICONOS:DEVEL:FrontEnd:
-*** DONE rename {dsg,indexset}.vertices() (mapping to std::vector)
-    CLOSED: [2014-10-01 mer. 11:15]
-    renamed in
-    {dsg, indexSet}.{dynamicalSystems(), Interactions()}
-    (still mappings to std::vector)
-    The need for iterator on graph.vertices and edges may remain.
-*** TODO doxygen latex -> sphinx
-*** TODO document python only features
-** Bugs - Tracker
-*** Numerics
-**** TODO Tests with MUMPS fails since it is quite verbose and outputs "ERROR ANALYSIS" :MAURICE:
-*** Kernel
-**** DONE Avoid namespace pollution in SiconosGraph.hpp (using namespace boost;)
-     CLOSED: [2012-10-01 Mon 17:37]
-
-**** TODO Prevent using LCP formulation with RelayNSL.		    :VINCENT:
-     - if you use LCP formulation as osnspb in Siconos/Kernel with RelayNSL, the simulation runs perfectly well but the results are hazardous
-
-* Interesting software libraries
-** Collision / Physics
-
-This list is restricted to open source 3D collision detection
-libraries, or physics libraries that include a collision detection
-component that can be used on its own.
-
-| Name      | URL                                                                         | Language        | Last update | Notes                 | License            |
-|-----------+-----------------------------------------------------------------------------+-----------------+-------------+-----------------------+--------------------|
-| Bullet    | http://bulletphysics.org/                                                   | C++             |             | Used in Siconos       | zlib               |
-| OZCollide | http://www.tsarevitch.org/ozcollide                                         | C++             |             |                       | LGPL               |
-| ODE       | http://opende.sf.net                                                        | C++/C interface |             |                       | LGPL v2.1+         |
-| ncollide  | http://ncollide.org/                                                        | Rust            |             |                       | BSD3               |
-| V-Collide | http://www3.cs.stonybrook.edu/~algorith/implement/V_COLLIDE/implement.shtml | C/C++           |        1998 | uses RAPID            | Unspecified        |
-| RAPID     | http://www3.cs.stonybrook.edu/~algorith/implement/RAPID/implement.shtml     | C/C++           |       1995? |                       | Unspecified        |
-| SOLID     | http://solid.sourceforge.net/                                               | C++             |        1999 |                       | LGPL v2            |
-| OPCODE    | http://www.codercorner.com/Opcode.htm                                       | C++             |        2003 |                       | Unspecified        |
-| ColDet    | https://sourceforge.net/projects/coldet/                                    | C++             |             |                       | LGPL v2            |
-| PQP       | http://gamma.cs.unc.edu/SSV/                                                | C++             |        1999 | works, mesh-mesh only | Permissive         |
-| V-Clip    | http://www3.cs.stonybrook.edu/~algorith/implement/V-CLIP/implement.shtml    | C++             |    Not sure | Unspecified           |                    |
-| CollDet   | http://cgvr.cs.uni-bremen.de/research/colldet/                              | C++             |        2007 | For OpenSG            | Permissive (educ.) |
-| FCL       | https://github.com/flexible-collision-library/fcl                           | C++             |        2015 | Uses libCCD           | BSD                |
-| libCCD    | https://github.com/danfis/libccd                                            | C++             |        2016 | Convex-convex GJK     | BSD                |
-
-Other resources:
-
-| https://otik.zcu.cz/bitstream/handle/11025/5966/E59.pdf  | Paper includes a survey of collision libraries            |
-| http://gamma.cs.unc.edu/research/collision/packages.html | Rest of the UNC algorithms, most require filing a request |
-
-** CAD modeling
-
-CAD libraries / tools generally support constructive geometry
-modeling, implicit curved surfaces, etc., instead of just mesh
-representations.  Generally don't include any physics support.
-
-| FreeCAD      | http://www.freecadweb.org/ | C++/Python | Based on Open CASCADE (OCCT), used in Siconos           | LGPL v2+               |
-| Open CASCADE | http://www.opencascade.com | C++        | http://git.dev.opencascade.org/gitweb/                  | LGPL v2.1              |
-| OpenSCAD     | http://www.openscad.org/   | Qt/C++     | Constructive geometry front-end, not a library          | GPL v2                 |
-| OpenCSG      | http://www.opencsg.org/    | C++        | Constructive geometry rendering engine used by OpenSCAD | GPL v2                 |
-| CGAL         | http://www.cgal.org/       | C++        | Geometric algorithms used by OpenSCAD                   | GPL v3+, or commercial |
-
-** Scene graph
-
-Scene graph libraries maintain a graph of objects that can be rendered
-visually, but generally physics is left to an external solution.
-
-| OpenSG         | http://www.opensg.org/         | C++ | LGPL v2         |
-| OpenSceneGraph | http://www.openscenegraph.org/ | C++ | LGPL (modified) |
-
-* Footnotes
-
  
 
+
+** <2016-05-26 Thu>
+   MB, SS, VA
+*** Release 4.0
+   + Generation XML and SiconosFullGenerated  
+      http://stackoverflow.com/questions/34042933/boost-vector-serialization-append-issue#34043591
+      Problem with loading of VectorofVectors. The load is made such that the vectors are append to the vector
+      --> know issues
+   + Renaming attributes(members of struct without underscore)
+   + Changelog 
+     
+*** Mechanics. Collision interface 
+   + Management of APIs.
+     + 2D/3D
+     + namespace siconos
+     + naming convention of include 
+       #include "SiconosVector.hpp" 
+       --> #include "siconos/SiconosVector.hpp" ?
+       --> #include "siconos/Vector.hpp" ?
+
+   + Organization
+     + /src 
+       + /mechanisms
+       + /joints
+       + /collision
+	 BodyDS.* BodyTimeStepping.* SiconosShape.* SiconosBroadPhase.*
+         + /bullet (implementation with bullet shapes and contactors)
+	   BulletBroadPhase.cpp
+	 + /native  (basic implementation of simple shapes) 
+	   Disk.*, Circle.*,  Sphere.* , ... + BasicBroadphase (SpaceFilter.*)
+
+   + Code in proposed
+     + split SiconosShape.* ?
+       + add convex hull
+       + add mesh
+       + store parameters (for the moment store as in Bullet to avoid copy)
+     + BodyDS
+       + Computation of mass and inertia
+	 + external service (in python, in bullet)
+	 
+     + naming of pose.
+       + transalation = [x,y,z],
+       + orientation = [q0, q1, q3, q4] a quaternion
+       + position = [translation, orientation] 
+         
+     + group contactors
+       
+     + Broaphase --> builder
+
+   + Contact detection Bullet
+     + local_scaling, collision_margin, breakingThreshold
+     + low level API of contact detection (raytracer, raytest, ...)
+     + Chrono::Engine and Bullet ?
+     + Bullet3 ? New 
+ 
+   + vview.py
+     + glyph disappear ?
+     + 
+
+
+   + CodeViz
+     + Side effect of method
+     + Why we need a shared pointer rather than a reference ?
+     + 
+	
+     
+   
