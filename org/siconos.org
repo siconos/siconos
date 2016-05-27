@@ -185,7 +185,27 @@
    the fact the computation for the normals can not be updated. This is not the same for the Hinge.
    + How to differentiate it
 ** TODO Implement a purely explicit scheme for NewtonEulerDS and NewtonEulerR <2016-04-19 Tue>   
-** TODO Continue to update signature for secondorder terms in NewtonEulerR*
+** TODO Continue to update signature for second order terms in NewtonEulerR*
+** TODO Implement a better time integration scheme for NewtonEulerDS
+   + The implementation of NewtonEulerDS is done using the angular velocity vector
+     with respect to the axis of the body-fixed frame. (\Omega). This approach allows to
+     use a constant matrix of moment of inertia. The price to pay is to compute the external
+     moment with respect to the body fixed frame. it the external moment mExt is given with respect
+     to the axis of the inertial frame we have to integrate
+     I \Omega + \Omega x I \Omega = R^T(q) Mext(t)
+   + If the ratio if moments of inertia is large (large aspect), the standard Moreau--Jean scheme become 
+     unstable mainly  due to the fact the renormalization of quaternion introduces some terms and drift
+     from pure rotational motion. Two solutions may be implemented :
+     + The presence of R(q) renders the equation nonlinear with respect to q and not only to \Omega
+     For the moment, the Jacobian is computed by finite difference but a analytic equation has to be 
+     implemented. The add-on does not bring any better solution.
+     + The implementation of time-integrator that is geometrically exact for the rotation.
+   + The example siconos/examples/Mechanics/ContactDetection/BulletIO/bar.py illustrates the phenomena.
+     For the moment, even without gyrospic forces, the integration of mixed rotations motions is not stable.
+   + The same instability has to be expected for contact forces over bars even if it difficult to demonstrate 
+     it on simple example
+
+
 
 * Development list for Mechanics
 ** how to use plantuml with org
