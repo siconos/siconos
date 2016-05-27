@@ -481,7 +481,7 @@ if(WITH_${COMPONENT}_TESTING)
 
   ## test from the Rover Example
   NEW_TEST(FC3Dtest501 fc3d_Rover2.c) ## test ok without LineSearch
-  NEW_TEST(FC3Dtest503 fc3d_Rover3.c) ## LineSearch is needed 
+  NEW_TEST(FC3Dtest503 fc3d_Rover3.c) ## JeanMoreau ok, AC:no
 
 
   ## test 2D dense on two differents files
