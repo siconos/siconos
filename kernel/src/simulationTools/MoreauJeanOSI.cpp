@@ -349,7 +349,6 @@ void MoreauJeanOSI::computeW(double t, SP::DynamicalSystem ds, SiconosMatrix& W)
   {
     SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS> (ds);
     W = *(d->mass());
-
     SP::SiconosMatrix K = d->jacobianqForces(); // jacobian according to q
     SP::SiconosMatrix C = d->jacobianvForces(); // jacobian according to velocity
 
@@ -369,8 +368,8 @@ void MoreauJeanOSI::computeW(double t, SP::DynamicalSystem ds, SiconosMatrix& W)
       scal(-h * h * _theta * _theta, *buffer, W, false);
       //*W -= h*h*_theta*_theta**K;
     }
-    DEBUG_EXPR(W->display(););
-    DEBUG_EXPR_WE(std::cout <<  std::boolalpha << "W->isPLUFactorized() = "<< W->isPLUFactorized() << std::endl;);
+    DEBUG_EXPR(W.display(););
+    DEBUG_EXPR_WE(std::cout <<  std::boolalpha << "W.isPLUFactorized() = "<< W.isPLUFactorized() << std::endl;);
 
   }
   else RuntimeException::selfThrow("MoreauJeanOSI::computeW - not yet implemented for Dynamical system of type : " +Type::name(*ds));
@@ -977,7 +976,6 @@ void MoreauJeanOSI::computeFreeState()
       SP::SiconosVector vfree = d->workspace(DynamicalSystem::free);//workX[d];
       (*vfree) = *(d->workspace(DynamicalSystem::freeresidu));
       //*(d->vPredictor())=*(d->workspace(DynamicalSystem::freeresidu));
-
       // -- Update W --
       // Note: during computeW, mass and jacobians of forces will be computed/
       SP::SimpleMatrix W = _dynamicalSystemsGraph->properties(*dsi).W;
@@ -989,6 +987,7 @@ void MoreauJeanOSI::computeFreeState()
       // -> Solve WX = vfree and set vfree = X
       //    std::cout<<"MoreauJeanOSI::computeFreeState residu free"<<endl;
       //    vfree->display();
+      DEBUG_EXPR(d->workspace(DynamicalSystem::freeresidu)->display(););
 
       W->PLUForwardBackwardInPlace(*vfree);
       //    std::cout<<"MoreauJeanOSI::computeFreeState -WRfree"<<endl;
@@ -996,7 +995,9 @@ void MoreauJeanOSI::computeFreeState()
       //    scal(h,*vfree,*vfree);
       // -> compute real vfree
       *vfree *= -1.0;
+      DEBUG_EXPR(vfree->display(););
       *vfree += *v;
+      DEBUG_EXPR(vfree->display(););
     }
     else
       RuntimeException::selfThrow("MoreauJeanOSI::computeFreeState - not yet implemented for Dynamical system of type: " +  Type::name(*ds));
@@ -1333,10 +1334,8 @@ void MoreauJeanOSI::updatePosition(SP::DynamicalSystem ds)
     // get dynamical system
     SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS> (ds);
     SP::SiconosVector v = d->velocity();
-    DEBUG_PRINT("MoreauJeanOSI::updateState()\n ")
-      DEBUG_EXPR(d->display());
-    DEBUG_PRINT("MoreauJeanOSI::updateState() prev v\n")
-      DEBUG_EXPR(v->display());
+    DEBUG_EXPR(d->display());
+    DEBUG_EXPR(v->display());
 
     //compute q
     //first step consists in computing  \dot q.
@@ -1345,9 +1344,6 @@ void MoreauJeanOSI::updatePosition(SP::DynamicalSystem ds)
     SP::SiconosMatrix T = d->T();
     SP::SiconosVector dotq = d->dotq();
     prod(*T, *v, *dotq, true);
-
-    DEBUG_PRINT("MoreauJeanOSI::updateState v\n");
-    DEBUG_EXPR(v->display());
     DEBUG_EXPR(dotq->display());
 
     SP::SiconosVector q = d->q();
@@ -1366,6 +1362,8 @@ void MoreauJeanOSI::updatePosition(SP::DynamicalSystem ds)
 
     //q[3:6] must be normalized
     d->normalizeq();
+    DEBUG_PRINT("new q after normalizing\n");
+    DEBUG_EXPR(q->display());
 
   }
   DEBUG_END("MoreauJeanOSI::updatePosition(SP::DynamicalSystem ds)\n");
