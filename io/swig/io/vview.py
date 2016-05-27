@@ -842,6 +842,8 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
         interactor_renderer.GetInteractorStyle(
         ).SetCurrentStyleToTrackballCamera()
 
+
+
         # http://www.itk.org/Wiki/VTK/Depth_Peeling ?
 
         # Use a render window with alpha bits (as initial value is 0 (false) ):
@@ -1203,6 +1205,7 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
 
         interactor_renderer.AddObserver('KeyPressEvent', input_observer.key)
 
+
         # Create a vtkLight, and set the light parameters.
         light = vtk.vtkLight()
         light.SetFocalPoint(0, 0, 0)
@@ -1306,8 +1309,25 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
                                        time_scale_factor + time_scale_factor / 2,
                                        0.1, 0.9, 0.3, 0.9)
 
+
+
+
         renderer_window.Render()
         interactor_renderer.Initialize()
+
+        # display coordinates axes
+        axes = vtk.vtkAxesActor()
+        axes.SetTotalLength(1.0,1.0,1.0)
+        widget = vtk.vtkOrientationMarkerWidget()
+        #widget.SetOutlineColor( 0.9300, 0.5700, 0.1300 )
+        widget.SetOrientationMarker( axes )
+        widget.SetInteractor(interactor_renderer)
+        #widget.SetViewport( 0.0, 0.0, 40.0, 40.0 );
+        widget.SetEnabled(True);
+        widget.InteractiveOn();
+
+
+
 
         timer_id = interactor_renderer.CreateRepeatingTimer(40)   # 25 fps
         interactor_renderer.AddObserver(
