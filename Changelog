@@ -31,8 +31,6 @@ Main changes:
 	directory named 'external' which is distributed under GNU Lesser
 	General Public License or equivalent.
 
-	* [...]
-
 	* [numerics] overflows & NaN avoided with static analysis in generated
 	functions and jacobians (AlartCurnier, JeanMoreau, NaturalMap)
 
@@ -47,11 +45,13 @@ Main changes:
 
 	* [kernel] move simulation attibutes into the graph (WMap, W boundaryMap, ... )
 
-	* [mechanics] siconos_vview (python) : fix for the visualisation of static
+	* [mechanics] siconos_vview (python) : fix for the visualization of static
 	objects + add -vtk-exports option for the visualization with paraview
 
 	* [io] mechanics_io (python) : implementation of restart from positions and
 	velocities  ("cold restart")
+
+	* issue: [io] serialization needs boost <= 1.57
 
 --------------------------------------------------------------------------------
 v3.8.0 (in development branch siconos/master)
