@@ -1184,7 +1184,4 @@ TODO
    + CodeViz
      + Side effect of method
      + Why we need a shared pointer rather than a reference ?
-     + 
-	
-     
-   
+       + new? make_shared? impact on memory allocation and organization
