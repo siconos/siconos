@@ -638,6 +638,17 @@ void BulletBroadphase::updateGraph()
     }
     impl->dirtyBoxes.clear();
   }
+
+  if (!impl->dirtyCHs.empty())
+  {
+    std::vector<SP::SiconosConvexHull>::iterator it;
+    for (it=impl->dirtyCHs.begin();
+         it!=impl->dirtyCHs.end(); it++)
+    {
+      update(*it);
+    }
+    impl->dirtyCHs.clear();
+  }
 }
 
 /** This class allows to iterate over all the contact points in a
