@@ -3,6 +3,7 @@
 import os, os.path, sys
 from glob import glob
 import lxml.etree
+import re
 
 from builder_common import *
 
@@ -18,11 +19,28 @@ def get_classes_conditional(doxy_xml_files, cond):
                 classname = cl.find('./compoundname')
                 baseclasses = cl.xpath('./basecompoundref')
                 membervars = cl.xpath('.//memberdef[@kind="variable"]/name')
+
+                # An exception: Members get attached to Graph classes
+                # through this macro, and is not understood by
+                # Doxygen, so we have to parse it outselves.
+                graphvars = cl.xpath('.//memberdef[@kind="function"]/name'
+                                     +'[text()="INSTALL_GRAPH_PROPERTIES"]')
+                graphmems = []
+
+                if len(graphvars)>0:
+                    r = re.compile('\(\(\w+,\s*[\w: ]+,\s*(\w+)\)\)')
+                    for g in graphvars:
+                        for a in g.xpath('../argsstring'):
+                            graphmems += r.findall(a.text)
+                    # The INSTALL_GRAPH_PROPERTIES macro also adds a
+                    # bool called "dummy"
+                    graphmems.append('dummy')
+
                 location = cl.find('./location')
                 found[classname.text] = (
                     {'name': classname.text,
                      'bases': [base.text for base in baseclasses],
-                     'members': [mem.text for mem in membervars],
+                     'members': [mem.text for mem in membervars] + graphmems,
                      'filepath': location.attrib['file'],
                      'line': int(location.attrib['line']),
                      'abstract': cl.xpath('@abstract="yes"'),
@@ -67,6 +85,16 @@ def resolve_base_classes(classes):
             if base in classes:
                 resolved.append(base)
         cl['resolved_bases'] = resolved
+
+def remove_unwanted_resolved(classes):
+    """This is a bit of an ugly hack: For some classes, they are not in
+       "unwanted" because we want them to resolve as base classes, but
+       they are covered in SiconosFull.hpp, so we don't want them to
+       appear in generated headers."""
+    unwanted_resolved = ['_DynamicalSystemsGraph', '_InteractionsGraph']
+    for u in unwanted_resolved:
+        if u in classes:
+            del classes[u]
 
 def classes_from_headers(all_headers, include_paths):
     """Use compiler preprocessor to find an approximate list of classes
@@ -126,6 +154,8 @@ if __name__=='__main__':
     assign_priorities(classes, source_dir)
 
     resolve_base_classes(classes)
+
+    remove_unwanted_resolved(classes)
 
     with open(generated_file, 'w') as dest_file:
         write_header(dest_file, ' '.join(sys.argv), generated_header)

@@ -39,15 +39,12 @@ static inline int test_rover(char  * filename)
   /* options->internalSolvers->iparam[0] = 20; */
   /* options->internalSolvers->iparam[1] = 20; */
   /* options->internalSolvers->dparam[0] = 1e-2; */
+
+  options->internalSolvers->iparam[10] = 1; // JeanMoreau ok, AlartCurnier fail
   info = frictionContact_test_function(finput, options);
-
-
 
   deleteSolverOptions(options);
   free(options);
-
-
-
 
   fclose(finput);
   printf("\nEnd of test on %s\n", filename);

@@ -21,16 +21,17 @@
 #include <boost/math/quaternion.hpp>
 
 #include <iostream>
-// #define DEBUG_NOCOLOR
+//#define DEBUG_NOCOLOR
 //#define DEBUG_BEGIN_END_ONLY
-// #define DEBUG_STDOUT
-// #define DEBUG_MESSAGES
+//#define DEBUG_STDOUT
+//#define DEBUG_MESSAGES
 #include <debug.h>
 
 
 void computeMObjToAbs(SP::SiconosVector q, SP::SimpleMatrix mObjToAbs)
 {
   DEBUG_BEGIN("computeMObjToAbs(SP::SiconosVector q, SP::SimpleMatrix mObjToAbs)\n");
+
   double q0 = q->getValue(3);
   double q1 = q->getValue(4);
   double q2 = q->getValue(5);
@@ -319,8 +320,9 @@ void NewtonEulerDS::initialize(double time, unsigned int sizeOfMemory)
     _fExt.reset(new SiconosVector(3, 0));
 
   if (_pluginMExt->fPtr && !_mExt)
+  {
     _mExt.reset(new SiconosVector(3, 0));
-
+  }
   if (_pluginFInt->fPtr && !_fInt)
     _fInt.reset(new SiconosVector(3, 0));
 
@@ -346,6 +348,13 @@ void NewtonEulerDS::initialize(double time, unsigned int sizeOfMemory)
   if ((_pluginJacvMInt->fPtr || _computeJacobianMIntvByFD) && !_jacobianMIntv)
     _jacobianMIntv.reset(new SimpleMatrix(3, _n));
 
+  if(_mExt)
+  {
+    _mExtObj.reset(new SiconosVector(3, 0));
+     if (!_jacobianqForces)
+       _jacobianqForces.reset(new SimpleMatrix(_n, _qDim));
+     _jacobianMExtObjq.reset(new SimpleMatrix(3, _qDim));
+  }
 
   // Set links to variables of top-class DynamicalSystem.
   // Warning: this results only in pointers links.
@@ -374,10 +383,80 @@ void NewtonEulerDS::computeFExt(double time)
 
 void NewtonEulerDS::computeMExt(double time)
 {
+  computeMExt(time,  _mExt);
+}
+void NewtonEulerDS::computeMExt(double time, SP::SiconosVector mExt)
+{
+  // Take the constant value of exists otherwise call the plugin
+  *mExt = *_mExt;
   if (_pluginMExt->fPtr)
-    ((FExt_NE)_pluginFExt->fPtr)(time, &(*_mExt)(0), _qDim, &(*_q0)(0) ); // parameter z are assumed to be equal to q0
+    ((FExt_NE)_pluginMExt->fPtr)(time, &(*mExt)(0), _qDim, &(*_q0)(0) ); // parameter z are assumed to be equal to q0
+}
+void NewtonEulerDS::computeMExtObj(double time)
+{
+  computeMExtObj(time, _q, _MObjToAbs, _mExtObj );
 }
 
+void NewtonEulerDS::computeMExtObj(double time, SP::SiconosVector q, SP::SiconosMatrix mObjToAbs, SP::SiconosVector mExtObj )
+{
+  DEBUG_BEGIN("NewtonEulerDS::computeMExtObj(...)\n");
+  // Call plugin if needed
+  SP::SiconosVector mExt(new SiconosVector(3));
+  computeMExt(time, mExt);
+  // Rotate Mext
+  SiconosVector aux(3);
+  /* The question of the application of the external moments is not very clear
+   *  and depends on the chosen external frame to express the moment.
+   */
+  prod( *mExt, *mObjToAbs, aux); // aux =  transpose(_MObjToAbs) * _mext
+  *mExtObj = aux;
+
+  // SiconosVector aux2(3);
+  // SP::SimpleMatrix RT (new SimpleMatrix(3,3));
+  // RT->trans(*mObjToAbs);
+  // prod(*RT, *mExt, aux2);
+  // std::cout<< "--------------------------- "<<(aux-aux2).normInf() << std::endl;
+  // assert((aux-aux2).normInf() < 1e-16);
+
+  DEBUG_EXPR(mExtObj->display());
+  DEBUG_END("NewtonEulerDS::computeMExtObj(...)\n");
+}
+
+
+
+
+
+void NewtonEulerDS::computeJacobianMExtObjqByFD(double time, SP::SiconosVector q)
+{
+  DEBUG_BEGIN("NewtonEulerDS::computeJacobianMExtvByFD(...)\n");
+  SP::SiconosVector mExtObj(new SiconosVector(3));
+  SP::SimpleMatrix mObjToAbs(new SimpleMatrix(3,3));
+
+  ::computeMObjToAbs(q,mObjToAbs);
+  computeMExtObj(time, q,  mObjToAbs, mExtObj);
+
+  double mExtObj0 = mExtObj->getValue(0);
+  double mExtObj1 = mExtObj->getValue(1);
+  double mExtObj2 = mExtObj->getValue(2);
+
+  SP::SiconosVector qeps(new SiconosVector(*q));
+  _jacobianMExtObjq->zero();
+  (*qeps)(0) += _epsilonFD;
+  for (int j =0; j < 7; j++)
+  {
+    ::computeMObjToAbs(qeps,mObjToAbs);
+    computeMExtObj(time, qeps,  mObjToAbs, mExtObj);
+    _jacobianMExtObjq->setValue(0,j,  (mExtObj->getValue(0) - mExtObj0)/_epsilonFD );
+    _jacobianMExtObjq->setValue(1,j,  (mExtObj->getValue(1) - mExtObj1)/_epsilonFD );
+    _jacobianMExtObjq->setValue(2,j,  (mExtObj->getValue(2) - mExtObj2)/_epsilonFD );
+    (*qeps)(j) -= _epsilonFD;
+    if (j<6) (*qeps)(j+1) += _epsilonFD;
+  }
+  DEBUG_EXPR(_jacobianMExtObjq->display(););
+  DEBUG_END("NewtonEulerDS::computeJacobianMExtvByFD(...)\n");
+
+
+}
 
 void NewtonEulerDS::computeFInt(double time)
 {
@@ -481,7 +560,7 @@ void NewtonEulerDS::computeJacobianFIntvByFD(double time, SP::SiconosVector q, S
 
   SP::SiconosVector veps(new SiconosVector(*velocity));
   _jacobianFIntv->zero();
-  
+
   (*veps)(0) += _epsilonFD;
   for (int j =0; j < 6; j++)
   {
@@ -492,7 +571,7 @@ void NewtonEulerDS::computeJacobianFIntvByFD(double time, SP::SiconosVector q, S
     (*veps)(j) -= _epsilonFD;
     if (j<5) (*veps)(j+1) += _epsilonFD;
   }
-  
+
   DEBUG_END("NewtonEulerDS::computeJacobianFIntvByFD(...)\n");
 
 
@@ -510,7 +589,7 @@ void NewtonEulerDS::computeJacobianFGyrvByFD(double time, SP::SiconosVector q, S
   SP::SiconosVector veps(new SiconosVector(*velocity));
   _jacobianFGyrv->zero();
 
-  
+
   (*veps)(0) += _epsilonFD;
   for (int j =0; j < 6; j++)
   {
@@ -606,7 +685,6 @@ void NewtonEulerDS::computeJacobianMIntvByFD(double time, SP::SiconosVector q, S
 }
 
 
-
 void NewtonEulerDS::computeRhs(double time, bool isDSup)
 {
   // if isDSup == true, this means that there is no need to re-compute mass ...
@@ -636,13 +714,13 @@ void NewtonEulerDS::computeFGyr(SP::SiconosVector v, SP::SiconosVector fGyr)
   {
     DEBUG_EXPR( _I->display());
     DEBUG_EXPR( v->display());
-    SiconosVector bufOmega(3);
-    SiconosVector bufIOmega(3);
-    bufOmega.setValue(0, v->getValue(3));
-    bufOmega.setValue(1, v->getValue(4));
-    bufOmega.setValue(2, v->getValue(5));
-    prod(*_I, bufOmega, bufIOmega, true);
-    cross_product(bufOmega, bufIOmega, *fGyr);
+    SiconosVector omega(3);
+    SiconosVector iomega(3);
+    omega.setValue(0, v->getValue(3));
+    omega.setValue(1, v->getValue(4));
+    omega.setValue(2, v->getValue(5));
+    prod(*_I, omega, iomega, true);
+    cross_product(omega, iomega, *fGyr);
   }
   DEBUG_EXPR(fGyr->display());
   DEBUG_END("NewtonEulerDS::computeFGyr(SP::SiconosVector v, SP::SiconosVector fGyr)\n");
@@ -662,6 +740,7 @@ void NewtonEulerDS::computeFGyr(SP::SiconosVector v)
 
 void NewtonEulerDS::computeForces(double time, SP::SiconosVector q, SP::SiconosVector v)
 {
+  DEBUG_BEGIN("NewtonEulerDS::computeForces(double time, SP::SiconosVector q, SP::SiconosVector v)\n")
   // Warning: an operator (fInt ...) may be set (ie allocated and not NULL) but not plugged, that's why two steps are required here.
   if (_forces)
   {
@@ -674,12 +753,10 @@ void NewtonEulerDS::computeForces(double time, SP::SiconosVector q, SP::SiconosV
     }
     if (_mExt)
     {
-      computeMExt(time);
-      SiconosVector aux(3);
-      //computeMObjToAbs();
-      prod( *_mExt, *_MObjToAbs, aux); // aux =  transpose(_MObjToAbs) * _mext
-      *_mExt = aux;
-      _forces->setBlock(3, *_mExt);
+      // computeMExt(time);
+      // _forces->setBlock(3, *_mExt);
+      computeMExtObj(time);
+      _forces->setBlock(3, *_mExtObj);
     }
     if (_fInt)
     {
@@ -706,13 +783,13 @@ void NewtonEulerDS::computeForces(double time, SP::SiconosVector q, SP::SiconosV
       _forces->setValue(4, _forces->getValue(4) - _mInt->getValue(1));
       _forces->setValue(5, _forces->getValue(5) - _mInt->getValue(2));
     }
-
     computeFGyr(v);
-    // std::cout << "_fGyr " <<std::endl;
-    // _fGyr->display();
     _forces->setValue(3, _forces->getValue(3) - _fGyr->getValue(0));
     _forces->setValue(4, _forces->getValue(4) - _fGyr->getValue(1));
     _forces->setValue(5, _forces->getValue(5) - _fGyr->getValue(2));
+
+    DEBUG_EXPR(_forces->display());
+    DEBUG_END("NewtonEulerDS::computeForces(double time, SP::SiconosVector q, SP::SiconosVector v)\n")
 
     // std::cout << "_forces : "<< std::endl;
     // _forces->display();
@@ -722,6 +799,7 @@ void NewtonEulerDS::computeForces(double time, SP::SiconosVector q, SP::SiconosV
 
 void NewtonEulerDS::computeJacobianqForces(double time)
 {
+  DEBUG_BEGIN("NewtonEulerDS::computeJacobianqForces(double time) \n");
   if (_jacobianqForces)
   {
     _jacobianqForces->zero();
@@ -741,14 +819,20 @@ void NewtonEulerDS::computeJacobianqForces(double time)
       _jacobianqForces->setBlock(3,0, -1.0* *aux);
       //_jacobianqForces->setBlock(3,0,-1.0* *_jacobianMIntq);
     }
-    // std::cout << "_jacobianqForces : "<< std::endl;
-    // _jacobianqForces->display();
+    if (_jacobianMExtObjq)
+    {
+      computeJacobianMExtObjqByFD(time, _q);
+      _jacobianqForces->setBlock(3,0,1.0* *_jacobianMExtObjq);
+    }
+    DEBUG_EXPR(_jacobianqForces->display(););
   }
   //else nothing.
+  DEBUG_END("NewtonEulerDS::computeJacobianqForces(double time) \n");
 }
 
 void NewtonEulerDS::computeJacobianvForces(double time)
 {
+  DEBUG_BEGIN("NewtonEulerDS::computeJacobianvForces(double time) \n");
   if (_jacobianvForces)
   {
     _jacobianvForces->zero();
@@ -772,6 +856,7 @@ void NewtonEulerDS::computeJacobianvForces(double time)
     // _jacobianvForces->display();
   }
   //else nothing.
+  DEBUG_END("NewtonEulerDS::computeJacobianvForces(double time) \n");
 }
 
 void NewtonEulerDS::computeJacobianFGyrv(double time)
@@ -808,6 +893,10 @@ void NewtonEulerDS::computeJacobianFGyrv(double time)
   }
   //else nothing.
   DEBUG_EXPR(_jacobianFGyrv->display());
+  // SP::SimpleMatrix jacobianFGyrtmp (new SimpleMatrix(*_jacobianFGyrv));
+  // computeJacobianFGyrvByFD(time, _q, _v);
+  // std::cout << "#################" << (*jacobianFGyrtmp - *_jacobianFGyrv).normInf() << std::endl;
+  // assert((*jacobianFGyrtmp - *_jacobianFGyrv).normInf()< 1e-10);
   DEBUG_END("NewtonEulerDS::computeJacobianFGyrv(double time) \n");
 }
 

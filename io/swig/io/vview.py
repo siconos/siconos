@@ -15,13 +15,28 @@ from siconos.io.mechanics_io import Hdf5
 
 
 def usage():
-    """
-    {0} <hdf5 file>
-    """.format(sys.argv[0])
     print '{0}: Usage'.format(sys.argv[0])
     print """
     {0} [--help] [tmin=<float value>] [tmax=<float value>]
         [--cf-scale=<float value>] [--vtk-export] <hdf5 file>
+    """
+    print """
+    Options : 
+      --help    
+        display this message
+     --tmin= value   
+       set the time lower bound for visualization 
+     --tmax= value    
+       set the time upper bound for visualization 
+     --cf-scale= value  (default : 1.0 )
+       rescale the arrow representing the contact forces by the value. 
+       the normal cone and the contact points are also rescaled
+     --normalcone-ratio = value  (default : 1.0 )  
+       introduce a ratio between the representation of the contact forces arrows
+       the normal cone and the contact points. useful when the contact forces are
+       small with respect to the characteristic dimesion
+     --vtk-export    
+       export visualization in vtk files (to use in paraview for instance)
     """
 
 
@@ -39,7 +54,7 @@ def add_compatiblity_methods(obj):
 try:
     opts, args = getopt.gnu_getopt(sys.argv[1:], '',
                                    ['help', 'dat', 'tmin=', 'tmax=',
-                                    'cf-scale=', 'vtk-export'])
+                                    'cf-scale=', 'normalcone-ratio=','vtk-export'])
 except getopt.GetoptError, err:
         sys.stderr.write('{0}\n'.format(str(err)))
         usage()
@@ -47,7 +62,9 @@ except getopt.GetoptError, err:
 
 min_time = None
 max_time = None
-scale_factor = 1
+cf_scale_factor = 1
+normalcone_ratio = 1
+time_scale_factor=1
 vtk_export_mode = False
 view_cycle = -1
 
@@ -64,7 +81,10 @@ for o, a in opts:
         max_time = float(a)
 
     elif o == '--cf-scale':
-        scale_factor = float(a)
+        cf_scale_factor = float(a)
+
+    elif o == '--normalcone-ratio':
+        normalcone_ratio = float(a)
 
     elif o == '--vtk-export':
         vtk_export_mode = True
@@ -223,9 +243,6 @@ def brep_reader(brep_string, indx):
         return reader
 
 
-def usage():
-    print """{0}
-    """.format(sys.argv[0])
 
 refs = []
 refs_attrs = []
@@ -388,7 +405,7 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
     times.sort()
 
     ndyna = len(numpy.where(dpos_data[:, 0] == times[0]))
-
+    
     cf_prov._time = min(times[:])
 
     cf_prov.method()
@@ -444,9 +461,9 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
         cone_glyph[mu].SetInputConnection(contact_pos_norm[mu].GetOutputPort())
         cone_glyph[mu].SetSourceConnection(cone[mu].GetOutputPort())
 
-        cone_glyph[mu]._scale_fact = 1
+        cone_glyph[mu]._scale_fact = normalcone_ratio
         cone_glyph[mu].SetScaleFactor(
-            cone_glyph[mu]._scale_fact * scale_factor)
+            cone_glyph[mu]._scale_fact *cf_scale_factor)
         cone_glyph[mu].SetVectorModeToUseVector()
 
         cone_glyph[mu].SetInputArrayToProcess(1, 0, 0, 0, 'contactNormals')
@@ -486,7 +503,7 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
         arrow_glyph[mu].ClampingOn()
         arrow_glyph[mu]._scale_fact = 5
         arrow_glyph[mu].SetScaleFactor(
-            arrow_glyph[mu]._scale_fact * scale_factor)
+            arrow_glyph[mu]._scale_fact * cf_scale_factor)
         arrow_glyph[mu].SetVectorModeToUseVector()
 
         arrow_glyph[mu].SetInputArrayToProcess(1, 0, 0, 0, 'contactForces')
@@ -517,9 +534,9 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
 
         cylinder_glyph[mu].SetInputArrayToProcess(1, 0, 0, 0, 'contactNormals')
         cylinder_glyph[mu].OrientOn()
-        cylinder_glyph[mu]._scale_fact = 1
+        cylinder_glyph[mu]._scale_fact = normalcone_ratio
         cylinder_glyph[mu].SetScaleFactor(
-            cylinder_glyph[mu]._scale_fact * scale_factor)
+            cylinder_glyph[mu]._scale_fact * cf_scale_factor)
 
         clmapper[mu] = vtk.vtkPolyDataMapper()
         clmapper[mu].SetInputConnection(cylinder_glyph[mu].GetOutputPort())
@@ -531,9 +548,9 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
         # sphere_glypha[mu].SetScaleModeToScaleByVector()
         # sphere_glypha[mu].SetRange(-0.5, 2)
         # sphere_glypha[mu].ClampingOn()
-        sphere_glypha[mu]._scale_fact = .1
+        sphere_glypha[mu]._scale_fact = .1 * normalcone_ratio
         sphere_glypha[mu].SetScaleFactor(
-            sphere_glypha[mu]._scale_fact * scale_factor)
+            sphere_glypha[mu]._scale_fact *cf_scale_factor)
         # sphere_glypha[mu].SetVectorModeToUseVector()
 
         sphere_glyphb[mu] = vtk.vtkGlyph3D()
@@ -543,9 +560,9 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
         # sphere_glyphb[mu].SetScaleModeToScaleByVector()
         # sphere_glyphb[mu].SetRange(-0.5, 2)
         # sphere_glyphb[mu].ClampingOn()
-        sphere_glyphb[mu]._scale_fact = .1
+        sphere_glyphb[mu]._scale_fact = .1 * normalcone_ratio
         sphere_glyphb[mu].SetScaleFactor(
-            sphere_glyphb[mu]._scale_fact * scale_factor)
+            sphere_glyphb[mu]._scale_fact *cf_scale_factor)
         # sphere_glyphb[mu].SetVectorModeToUseVector()
 
         # sphere_glyphb[mu].SetInputArrayToProcess(1, 0, 0, 0, 'contactNormals')
@@ -810,20 +827,22 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
 
         id_t0 = numpy.where(dpos_data[:, 0] == min(dpos_data[:, 0]))
 
-    #    set_positionv(spos_data[:, 1], spos_data[:, 2], spos_data[:, 3],
-    #                  spos_data[:, 4], spos_data[:, 5], spos_data[:, 6],
-    #                  spos_data[:, 7], spos_data[:, 8])
+        if numpy.shape(spos_data)[0] >0 :
+            set_positionv(spos_data[:, 1], spos_data[:, 2], spos_data[:, 3],
+                          spos_data[:, 4], spos_data[:, 5], spos_data[:, 6],
+                          spos_data[:, 7], spos_data[:, 8])
 
         set_positionv(
             pos_data[id_t0, 1], pos_data[id_t0, 2], pos_data[id_t0, 3],
-            pos_data[id_t0, 4], pos_data[
-                id_t0, 5], pos_data[id_t0, 6],
+            pos_data[id_t0, 4], pos_data[id_t0, 5], pos_data[id_t0, 6],
             pos_data[id_t0, 7], pos_data[id_t0, 8])
 
         renderer_window.AddRenderer(renderer)
         interactor_renderer.SetRenderWindow(renderer_window)
         interactor_renderer.GetInteractorStyle(
         ).SetCurrentStyleToTrackballCamera()
+
+
 
         # http://www.itk.org/Wiki/VTK/Depth_Peeling ?
 
@@ -1186,6 +1205,7 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
 
         interactor_renderer.AddObserver('KeyPressEvent', input_observer.key)
 
+
         # Create a vtkLight, and set the light parameters.
         light = vtk.vtkLight()
         light.SetFocalPoint(0, 0, 0)
@@ -1275,22 +1295,39 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
                                      make_scale_observer([cone_glyph, cylinder_glyph, sphere_glypha, sphere_glyphb, arrow_glyph]
                                                          ),
                                      interactor_renderer,
-                                     scale_factor, scale_factor -
-                                     scale_factor / 2,
-                                     scale_factor + scale_factor / 2,
+                                     cf_scale_factor, cf_scale_factor -
+                                     cf_scale_factor / 2,
+                                     cf_scale_factor + cf_scale_factor / 2,
                                      0.01, 0.01, 0.01, 0.7)
 
         xslwsc, xslrepsc = make_slider('Time scale',
                                        make_time_scale_observer(
                                            slider_repres, input_observer),
                                        interactor_renderer,
-                                       scale_factor, scale_factor -
-                                       scale_factor / 2,
-                                       scale_factor + scale_factor / 2,
+                                       time_scale_factor, time_scale_factor -
+                                       time_scale_factor / 2,
+                                       time_scale_factor + time_scale_factor / 2,
                                        0.1, 0.9, 0.3, 0.9)
+
+
+
 
         renderer_window.Render()
         interactor_renderer.Initialize()
+
+        # display coordinates axes
+        axes = vtk.vtkAxesActor()
+        axes.SetTotalLength(1.0,1.0,1.0)
+        widget = vtk.vtkOrientationMarkerWidget()
+        #widget.SetOutlineColor( 0.9300, 0.5700, 0.1300 )
+        widget.SetOrientationMarker( axes )
+        widget.SetInteractor(interactor_renderer)
+        #widget.SetViewport( 0.0, 0.0, 40.0, 40.0 );
+        widget.SetEnabled(True);
+        widget.InteractiveOn();
+
+
+
 
         timer_id = interactor_renderer.CreateRepeatingTimer(40)   # 25 fps
         interactor_renderer.AddObserver(
@@ -1309,13 +1346,15 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
             cf_prov.method()
 
             id_t = numpy.where(pos_data[:, 0] == times[index])
+            if numpy.shape(spos_data)[0] >0 :
+                set_positionv(spos_data[:, 1], spos_data[:, 2], spos_data[:, 3],
+                              spos_data[:, 4], spos_data[:, 5], spos_data[:, 6],
+                              spos_data[:, 7], spos_data[:, 8])
 
             set_positionv(
                 pos_data[id_t, 1], pos_data[id_t, 2], pos_data[id_t, 3],
-                pos_data[id_t, 4],
-                pos_data[id_t, 5], pos_data[
-                    id_t, 6], pos_data[id_t, 7],
-                pos_data[id_t, 8])
+                pos_data[id_t, 4], pos_data[id_t, 5], pos_data[id_t, 6],
+                pos_data[id_t, 7],pos_data[id_t, 8])
 
             big_data_writer.SetFileName('{0}-{1}.{2}'.format(os.path.splitext(
                                         os.path.basename(io_filename))[0],

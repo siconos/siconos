@@ -31,6 +31,10 @@ typedef void (*FExt_NE)(double t, double* f, unsigned int size_z, double *z);
 
 
 void computeMObjToAbs(SP::SiconosVector q, SP::SimpleMatrix mObjToAbs);
+
+
+
+
 void computeT(SP::SiconosVector q, SP::SimpleMatrix T);
 /** \class NewtonEulerDS
  *  \brief NewtonEuler non linear dynamical systems - Second Order Non Linear Dynamical Systems.
@@ -154,6 +158,9 @@ protected:
   /** external moment of the forces */
   SP::SiconosVector _mExt;
 
+  /** external moment of the forces */
+  SP::SiconosVector _mExtObj;
+
   /** internal moment of the forces */
   SP::SiconosVector _mInt;
 
@@ -168,6 +175,9 @@ protected:
 
   /** jacobian_{v} MInt*/
   SP::SimpleMatrix _jacobianMIntv;
+
+  /** jacobian_{v} MExtObj*/
+  SP::SimpleMatrix _jacobianMExtObjq;
 
   /** internal forces of the system */
   SP::SiconosVector _fGyr;
@@ -642,6 +652,12 @@ public:
    * \param time the current time
    */
   virtual void computeMExt(double time);
+  virtual void computeMExt(double time, SP::SiconosVector mExt);
+
+  virtual void computeMExtObj(double time);
+  virtual void computeMExtObj(double time, SP::SiconosVector q, SP::SiconosMatrix mObjToAbs, SP::SiconosVector mExtObj );
+
+  void computeJacobianMExtObjqByFD(double time, SP::SiconosVector q);
 
   /** default function to compute the internal forces
    *  \param time the current time

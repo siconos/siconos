@@ -31,16 +31,27 @@ Main changes:
 	directory named 'external' which is distributed under GNU Lesser
 	General Public License or equivalent.
 
-	* [...]
-
 	* [numerics] overflows & NaN avoided with static analysis in generated
 	functions and jacobians (AlartCurnier, JeanMoreau, NaturalMap)
 
-	* [mechanics] siconos_vview (python) : fix for the visualisation of static
+	* [kernel] cleaning and rewriting of methods in NewtonEulerDS and NewtonEulerR
+	to be more explicit(avoid the use of DSlink in particular)
+
+	* [kernel] move some methods in Simulation to NonSmoothDynamicalSystem
+	(reset, swapInMemory,  updateOutput, updateInput) and change the initialization
+	process. Remoce the weak_ptr to model.
+
+	* [kernel] remove DynamicalSystemsSet from OSI.
+
+	* [kernel] move simulation attibutes into the graph (WMap, W boundaryMap, ... )
+
+	* [mechanics] siconos_vview (python) : fix for the visualization of static
 	objects + add -vtk-exports option for the visualization with paraview
 
 	* [io] mechanics_io (python) : implementation of restart from positions and
 	velocities  ("cold restart")
+
+	* issue: [io] serialization needs boost <= 1.57
 
 --------------------------------------------------------------------------------
 v3.8.0 (in development branch siconos/master)
@@ -55,7 +66,7 @@ Main Changes:
 	usesd in Siconos, but written by other people. This includes CSparse,
 	HEM5, LSODAR, LUMOD, ...
 
-	* [kernel] Add Boundary conditions for the NewtonEulerDS and fix a bug in the 
+	* [kernel] Add Boundary conditions for the NewtonEulerDS and fix a bug in the
 	LagrangianDS boundary condition
 	* [kernel] Development of D1MinusLinear for NEwtonEulerDS and LagrangianDS
 	with Half explicit scheme at the velocity level. See paper with T. Schindler
@@ -68,7 +79,7 @@ Main Changes:
 	* [numerics] Add relaxation in NSGS solvers for FC3D
 	* [numerics] Add SOCLCP solvers
 	* [numerics] Improve updating rule for FP and EG solvers for VI
-	* [numerics] Update LMGC drivers for GFC3D 
+	* [numerics] Update LMGC drivers for GFC3D
 	* [numerics] add GAMS interface + new solvers for FC3D based on AVI
 	reformulation
 	* [numerics] update PATH (from M. Ferris & co) glue code
@@ -445,7 +456,7 @@ Main Changes:
 	Add MoreauProjectOnConstraintsOSI to use a temporary vector for
 	storing q before projection.
 	* FirstOrderType2Radd computation of computeInput
-	* TimeStepping add _isNewtonConverge 
+	* TimeStepping add _isNewtonConverge
 
 --------------------------------------------------------------------------------
   v3.4.0 March 2012
@@ -464,7 +475,7 @@ Main Changes:
 	Correct a bug in the construction of the Jacobian Matrix in the projection
 	operator.
 	* LagrangianR, NewtonEulerR remove useless attributes (_yProj)
-	* SchatzmanPaoli Add a draft (for linear systems) of the Schatzman-Paoli 
+	* SchatzmanPaoli Add a draft (for linear systems) of the Schatzman-Paoli
 	scheme
 
 --------------------------------------------------------------------------------
@@ -1245,7 +1256,7 @@ Main Changes:
 	Add MoreauProjectOnConstraintsOSI to use a temporary vector for
 	storing q before projection.
 	* FirstOrderType2Radd computation of computeInput
-	* TimeStepping add _isNewtonConverge 
+	* TimeStepping add _isNewtonConverge
 
 --------------------------------------------------------------------------------
   v3.4.0 March 2012
@@ -1264,7 +1275,7 @@ Main Changes:
 	Correct a bug in the construction of the Jacobian Matrix in the projection
 	operator.
 	* LagrangianR, NewtonEulerR remove useless attributes (_yProj)
-	* SchatzmanPaoli Add a draft (for linear systems) of the Schatzman-Paoli 
+	* SchatzmanPaoli Add a draft (for linear systems) of the Schatzman-Paoli
 	scheme
 
 --------------------------------------------------------------------------------
@@ -1765,5 +1776,3 @@ Do not hesitate to use the emacs mode Change Log for editing this file
 	* boost serialization of a Siconos Model with two functions :
 	save(SP::Model&,std::string filename)
 	load(std::string filename)
-
-
