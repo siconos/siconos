@@ -56,6 +56,7 @@
 #include <BulletCollision/CollisionShapes/btSphereShape.h>
 #include <BulletCollision/CollisionShapes/btBoxShape.h>
 #include <BulletCollision/CollisionShapes/btConvexHullShape.h>
+#include <LinearMath/btConvexHullComputer.h>
 
 //#define DEBUG_MESSAGES 1
 #include <debug.h>
@@ -530,6 +531,7 @@ void BulletBroadphase::visit(SP::SiconosConvexHull ch)
   if (ch->vertices()->size(1) != 3)
     throw SiconosException("Convex hull vertices matrix must have 3 columns.");
 
+  // TODO: We can probably avoid this copy
   int rows = ch->vertices()->size(0);
   btScalar *pts = new btScalar[rows*3];
   for (int r=0; r < rows; r++) {
@@ -538,13 +540,20 @@ void BulletBroadphase::visit(SP::SiconosConvexHull ch)
     pts[r*3+2] = (*ch->vertices())(r, 2);
   }
 
-  SP::btConvexHullShape btch(new btConvexHullShape(pts, rows));
+  // Internal margin implemented by shrinking the hull
+  // TODO: Do we need the shrink clamp? (last parameter)
+  btConvexHullComputer shrinkCH;
+  shrinkCH.compute(pts, sizeof(btScalar)*3, rows,
+                   ch->insideMargin(), 0);
 
-  // External margin
-  btch->setMargin(ch->outsideMargin());
+  SP::btConvexHullShape btch(new btConvexHullShape);
+  for (int v=0; v < shrinkCH.vertices.size(); v++)
+    btch->addPoint(shrinkCH.vertices[v], false);
+  btch->recalcLocalAabb();
+  delete pts;
 
-  // TODO: Internal margin
-  //btbox->setMargin(ch->insideMargin() * _options.worldScale);
+  // Add external margin
+  btch->setMargin(ch->insideMargin() + ch->outsideMargin());
 
   // initialization
   visit_helper(ch, btch, impl->chMap);
