@@ -168,8 +168,10 @@ ENDIF(WITH_HDF5)
 #
 # -- Serialization --
 #
+include(serialization_vector_test)
 if(WITH_SERIALIZATION)
   COMPILE_WITH(Boost 1.47 COMPONENTS serialization filesystem REQUIRED)
+  TEST_SERIALIZATION_VECTOR_BUG()
 endif()
 
 # -- Python bindings --
