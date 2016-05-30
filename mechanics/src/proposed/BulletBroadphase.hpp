@@ -83,11 +83,13 @@ protected:
   void visit(SP::SiconosPlane plane);
   void visit(SP::SiconosSphere sphere);
   void visit(SP::SiconosBox box);
+  void visit(SP::SiconosConvexHull ch);
   void visit(const BodyDS &body);
 
   void update(SP::SiconosPlane plane);
   void update(SP::SiconosSphere sphere);
   void update(SP::SiconosBox box);
+  void update(SP::SiconosConvexHull ch);
 
   template<typename ST, typename BT>
   void visit_helper(ST& shape, BT& btshape,

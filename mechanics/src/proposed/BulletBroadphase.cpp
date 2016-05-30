@@ -41,6 +41,8 @@
 #include <OneStepIntegrator.hpp>
 #include <NewtonImpactFrictionNSL.hpp>
 #include <FrictionContact.hpp>
+#include <SiconosMatrix.hpp>
+#include <boost/numeric/ublas/matrix.hpp>
 
 #include <Question.hpp>
 
@@ -81,6 +83,7 @@ protected:
   std::vector<SP::SiconosPlane> dirtyPlanes;
   std::vector<SP::SiconosSphere> dirtySpheres;
   std::vector<SP::SiconosBox> dirtyBoxes;
+  std::vector<SP::SiconosConvexHull> dirtyCHs;
 
   std::map<SP::SiconosShape, SP::btCollisionObject> objectMap;
 #ifdef USE_BOX_FOR_PLANE
@@ -105,6 +108,8 @@ protected:
   std::map<SP::SiconosBox, SP::btBoxShape> boxMap;
 #endif
 
+  std::map<SP::SiconosConvexHull, SP::btConvexHullShape> chMap;
+
   std::map<Interaction*, bool> orphanedInteractions;
 
   SP::NonSmoothLaw nslaw;
@@ -116,6 +121,7 @@ public:
   virtual void onChanged(SP::SiconosPlane plane);
   virtual void onChanged(SP::SiconosSphere sphere);
   virtual void onChanged(SP::SiconosBox box);
+  virtual void onChanged(SP::SiconosConvexHull ch);
 
   friend class BulletBroadphase;
 };
@@ -140,6 +146,11 @@ void BulletBroadphase_impl::onChanged(SP::SiconosSphere sphere)
 void BulletBroadphase_impl::onChanged(SP::SiconosBox box)
 {
   dirtyBoxes.push_back(box);
+}
+
+void BulletBroadphase_impl::onChanged(SP::SiconosConvexHull ch)
+{
+  dirtyCHs.push_back(ch);
 }
 
 void BulletBroadphase::initialize_impl()
@@ -497,6 +508,72 @@ void BulletBroadphase::update(SP::SiconosBox box)
          && "BulletBroadphase::update(), box not found in objectMap.");
 
   SiconosVector &q = *box->position();
+  btTransform tr(btQuaternion(q(4), q(5), q(6), q(3)),
+                 btVector3(q(0)*_options.worldScale,
+                           q(1)*_options.worldScale,
+                           q(2)*_options.worldScale));
+
+  btobject->setWorldTransform(tr);
+}
+
+void BulletBroadphase::visit(SP::SiconosConvexHull ch)
+{
+  DEBUG_PRINTF("contactor: %p, ", impl->currentContactor);
+  DEBUG_PRINTF("ch: %p(%ld)\n",
+         &*ch,ch.use_count());
+
+  const double half = 0.5;
+
+  if (!ch->vertices())
+    throw SiconosException("No vertices matrix specified for convex hull.");
+
+  if (ch->vertices()->size(1) != 3)
+    throw SiconosException("Convex hull vertices matrix must have 3 columns.");
+
+  int rows = ch->vertices()->size(0);
+  btScalar *pts = new btScalar[rows*3];
+  for (int r=0; r < rows; r++) {
+    pts[r*3+0] = (*ch->vertices())(r, 0);
+    pts[r*3+1] = (*ch->vertices())(r, 1);
+    pts[r*3+2] = (*ch->vertices())(r, 2);
+  }
+
+  SP::btConvexHullShape btch(new btConvexHullShape(pts, rows));
+
+  // External margin
+  btch->setMargin(ch->outsideMargin());
+
+  // TODO: Internal margin
+  //btbox->setMargin(ch->insideMargin() * _options.worldScale);
+
+  // initialization
+  visit_helper(ch, btch, impl->chMap);
+}
+
+void BulletBroadphase::update(SP::SiconosConvexHull ch)
+{
+  const SP::SiconosVector pos = ch->position();
+  DEBUG_PRINTF("updating ch: %p(%ld) - %f, %f, %f\n",
+         &*ch,ch.use_count(),
+         (*pos)(0), (*pos)(1), (*pos)(2));
+
+  // Update shape parameters
+  SP::btConvexHullShape btch(impl->chMap[ch]);
+  assert(btch
+         && "BulletBroadphase::update(), ch not found in chMap.");
+
+  double m = ch->outsideMargin();
+
+  // TODO
+  //btbox->setLocalScaling(btVector3(sx, sy, sz));
+  //btbox->setMargin((box->insideMargin() + box->outsideMargin()) * _options.worldScale);
+
+  // Update object parameters
+  SP::btCollisionObject btobject(impl->objectMap[ch]);
+  assert(btobject
+         && "BulletBroadphase::update(), ch not found in objectMap.");
+
+  SiconosVector &q = *ch->position();
   btTransform tr(btQuaternion(q(4), q(5), q(6), q(3)),
                  btVector3(q(0)*_options.worldScale,
                            q(1)*_options.worldScale,

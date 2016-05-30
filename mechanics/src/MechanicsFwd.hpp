@@ -51,6 +51,7 @@
   REGISTER(SiconosShape)                        \
   REGISTER(SiconosSphere)                       \
   REGISTER(SiconosBox)                          \
+  REGISTER(SiconosConvexHull)                   \
   REGISTER(SiconosPlane)                        \
   REGISTER(SiconosBroadphase)                   \
   REGISTER(SiconosShapeHandler)                 \

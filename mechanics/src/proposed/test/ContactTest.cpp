@@ -214,6 +214,19 @@ BounceResult bounceTest(std::string moving,
       box->setOutsideMargin(params.outsideMargin);
       contactor->addShape(box);
     }
+    else if (moving=="ch")
+    {
+      SP::SiconosMatrix pts(new SimpleMatrix(4,3));
+      (*pts)(0,0) = 0.0; (*pts)(0,1) = 0.0; (*pts)(0,2) = 0.0;
+      (*pts)(1,1) = 1.0; (*pts)(1,1) = 0.0; (*pts)(1,2) = 0.0;
+      (*pts)(2,0) = 0.0; (*pts)(2,1) = 1.0; (*pts)(2,2) = 0.0;
+      (*pts)(3,0) = 0.0; (*pts)(3,1) = 0.0; (*pts)(3,2) = 1.0;
+      SP::SiconosConvexHull ch(
+        new SiconosConvexHull(0,0,0,pts));
+      ch->setInsideMargin(params.insideMargin);
+      ch->setOutsideMargin(params.outsideMargin);
+      contactor->addShape(ch);
+    }
     body->setContactor(contactor);
 
     // A contactor with no body (static contactor) consisting of a plane
@@ -654,4 +667,38 @@ void ContactTest::t5()
   fclose(fresults);
 
   CPPUNIT_ASSERT(1);
+}
+
+void ContactTest::t6()
+{
+  printf("\n==== t6\n");
+
+  BounceParams params;
+  params.trace = false;
+  params.dynamic = false;
+  params.size = 1.0;
+  params.mass = 1.0;
+  params.position = 3.0;
+  params.timestep = 0.005;
+  params.insideMargin = 0.1;
+  params.outsideMargin = 0.1;
+
+  BulletOptions options;
+  options.breakingThreshold = 0.4;
+  options.worldScale = 1.0;
+  params.options = options;
+
+  bool success = false;
+
+  BounceResult results;
+  try
+  {
+    results = bounceTest("ch", "plane", params);
+    success = true;
+  }
+  catch (SiconosException e)
+  {
+    std::cout << "SiconosException: " << e.report() << std::endl;
+    CPPUNIT_ASSERT(1);
+  }
 }

@@ -29,6 +29,7 @@
 #include <SiconosSerialization.hpp>
 #include <SiconosVisitor.hpp>
 #include <SiconosVector.hpp>
+#include <SiconosMatrix.hpp>
 
 class SiconosShapeHandler
 {
@@ -36,6 +37,7 @@ public:
   virtual void onChanged(SP::SiconosSphere) = 0;
   virtual void onChanged(SP::SiconosBox) = 0;
   virtual void onChanged(SP::SiconosPlane) = 0;
+  virtual void onChanged(SP::SiconosConvexHull) = 0;
 };
 
 class SiconosShape
@@ -205,6 +207,45 @@ public:
     (*_dimensions)(0) = (*dim)(0);
     (*_dimensions)(1) = (*dim)(1);
     (*_dimensions)(2) = (*dim)(2);
+    onChanged();
+  }
+
+  /** visitors hook
+   */
+  ACCEPT_BASE_VISITORS(SiconosShape);
+};
+
+struct SiconosConvexHull : public SiconosShape, public std11::enable_shared_from_this<SiconosConvexHull>
+{
+protected:
+  SP::SiconosMatrix _vertices;
+
+  virtual void onChanged()
+    { SP::SiconosShapeHandler h(_handler.lock());
+      if (h) h->onChanged(shared_from_this()); }
+
+public:
+  SiconosConvexHull(float x, float y, float z,
+                    SP::SiconosMatrix vertices)
+    : SiconosShape(x,y,z), _vertices(vertices)
+  {
+    if (_vertices && _vertices->size(1) != 3)
+      throw SiconosException("Convex hull vertices matrix must have 3 columns.");
+  }
+
+  SiconosConvexHull(SP::SiconosVector pos,
+                    SP::SiconosMatrix vertices)
+    : SiconosShape(pos), _vertices(vertices)
+  {
+    if (_vertices && _vertices->size(1) != 3)
+      throw SiconosException("Convex hull vertices matrix must have 3 columns.");
+  }
+
+  SP::SiconosMatrix vertices() const { return _vertices; }
+
+  void setVertices(SP::SiconosMatrix vertices)
+  {
+    _vertices = vertices;
     onChanged();
   }
 
