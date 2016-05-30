@@ -29,7 +29,7 @@ try:
     from siconos.mechanics.proposed import BodyDS, \
         BodyTimeStepping, SiconosSphere, SiconosBox,\
         SiconosPlane, SiconosContactor, BulletBroadphase, \
-        BulletOptions
+        BulletOptions, SiconosConvexHull
     proposed_is_here = True
 except:
     proposed_is_here = False
@@ -402,12 +402,25 @@ class ShapeCollection():
                         self._io._keep.append(self._shapes[shape_name])
                 else:
                     # a convex point set
-                    convex = btConvexHullShape()
-                    convex.setMargin(self._collision_margin)
-                    for points in self.shape(shape_name):
-                        convex.addPoint(btVector3(float(points[0]),
-                                                  float(points[1]),
-                                                  float(points[2])))
+                    if use_proposed:
+                        points = self.shape(shape_name)
+                        convex = SiconosConvexHull(0,0,0,points)
+                        dims = [points[:,0].max() - points[:,0].min(),
+                                points[:,1].max() - points[:,1].min(),
+                                points[:,2].max() - points[:,2].min()]
+                        convex.setInsideMargin(
+                            self.shape(shape_name).attrs.get('insideMargin',
+                                                             min(dims)*0.1))
+                        convex.setOutsideMargin(
+                            self.shape(shape_name).attrs.get('outsideMargin',
+                                                             min(dims)*0.1))
+                    else:
+                        convex = btConvexHullShape()
+                        convex.setMargin(self._collision_margin)
+                        for points in self.shape(shape_name):
+                            convex.addPoint(btVector3(float(points[0]),
+                                                      float(points[1]),
+                                                      float(points[2])))
                     self._shapes[shape_name] = convex
 
             elif isinstance(self.url(shape_name), str) and \
