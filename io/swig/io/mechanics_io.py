@@ -695,9 +695,20 @@ class Hdf5():
                 # a static object
                 for c in contactors:
                     shp = self._shape.get(c.name)
-                    shp.setPosition(c.translation + c.orientation)
-                    print('Adding shape to static contactor',c.translation)
+                    # TODO contactor position
+                    # shp.setPosition(c.translation + c.orientation)
+                    pos = (translation + orientation)
+                    shp.setPosition(pos)
+                    print('Adding shape %s to static contactor'%c.name, pos)
                     self._static_contactor.addShape(shp)
+
+                    self._static_origins.append(translation)
+
+                    self._static_orientations.append(orientation)
+
+                    self._static_transforms.append(
+                        btTransform(orientation[1:3]+orientation[:1],
+                                    translation)
 
             elif mass == 0.:
                 # a static object
