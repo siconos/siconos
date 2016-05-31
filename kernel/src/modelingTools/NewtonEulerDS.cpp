@@ -23,45 +23,248 @@
 #include <iostream>
 //#define DEBUG_NOCOLOR
 //#define DEBUG_BEGIN_END_ONLY
-//#define DEBUG_STDOUT
-//#define DEBUG_MESSAGES
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
 #include <debug.h>
+
+
+void computeRotationMatrix(double q0, double q1, double q2, double q3,
+                           SP::SimpleMatrix rotationMatrix)
+{
+
+  /* Brute force version by multiplication of quaternion
+   */
+  // ::boost::math::quaternion<double>    quatQ(q0, q1, q2, q3);
+  // ::boost::math::quaternion<double>    quatcQ(q0, -q1, -q2, -q3);
+  // ::boost::math::quaternion<double>    quatx(0, 1, 0, 0);
+  // ::boost::math::quaternion<double>    quaty(0, 0, 1, 0);
+  // ::boost::math::quaternion<double>    quatz(0, 0, 0, 1);
+  // ::boost::math::quaternion<double>    quatBuff;
+  // /*See equation with label eq:newton_Mobjtoabs from the DevNote.pdf
+  //  * Chapter gradient computation, case of NewtonEuler formulation
+  //  * with quaternion
+  //  */
+  // quatBuff = quatQ * quatx * quatcQ;
+  // rotationMatrix->setValue(0, 0, quatBuff.R_component_2());
+  // rotationMatrix->setValue(1, 0, quatBuff.R_component_3());
+  // rotationMatrix->setValue(2, 0, quatBuff.R_component_4());
+  // quatBuff = quatQ * quaty * quatcQ;
+  // rotationMatrix->setValue(0, 1, quatBuff.R_component_2());
+  // rotationMatrix->setValue(1, 1, quatBuff.R_component_3());
+  // rotationMatrix->setValue(2, 1, quatBuff.R_component_4());
+  // quatBuff = quatQ * quatz * quatcQ;
+  // rotationMatrix->setValue(0, 2, quatBuff.R_component_2());
+  // rotationMatrix->setValue(1, 2, quatBuff.R_component_3());
+  // rotationMatrix->setValue(2, 2, quatBuff.R_component_4());
+
+  /* direct computation https://en.wikipedia.org/wiki/Quaternions_and_spatial_rotation */
+  rotationMatrix->setValue(0, 0,     q0*q0 +q1*q1 -q2*q2 -q3*q3 );
+  rotationMatrix->setValue(0, 1, 2.0*(q1*q2        - q0*q3));
+  rotationMatrix->setValue(0, 2, 2.0*(q1*q3        + q0*q2));
+
+  rotationMatrix->setValue(1, 0, 2.0*(q1*q2        + q0*q3) );
+  rotationMatrix->setValue(1, 1,     q0*q0 -q1*q1 +q2*q2 -q3*q3 );
+  rotationMatrix->setValue(1, 2, 2.0*(q2*q3        - q0*q1) );
+
+  rotationMatrix->setValue(2, 0, 2.0*(q1*q3        - q0*q2) );
+  rotationMatrix->setValue(2, 1, 2.0*(q2*q3         + q0*q1) );
+  rotationMatrix->setValue(2, 2,     q0*q0 -q1*q1 -q2*q2 +q3*q3 );
+}
+
+void computeRotationMatrixTransposed(double q0, double q1, double q2, double q3,
+                                     SP::SimpleMatrix rotationMatrix)
+{
+
+  /* brute force version by multiplication of quaternion
+   */
+  // ::boost::math::quaternion<double>    quatQ(q0, q1, q2, q3);
+  // ::boost::math::quaternion<double>    quatcQ(q0, -q1, -q2, -q3);
+  // ::boost::math::quaternion<double>    quatx(0, 1, 0, 0);
+  // ::boost::math::quaternion<double>    quaty(0, 0, 1, 0);
+  // ::boost::math::quaternion<double>    quatz(0, 0, 0, 1);
+  // ::boost::math::quaternion<double>    quatBuff;
+  // /*See equation with label eq:newton_Mobjtoabs from the DevNote.pdf
+  //  * Chapter gradient computation, case of NewtonEuler formulation
+  //  * with quaternion
+  //  */
+  // quatBuff = quatcQ * quatx * quatQ;
+  // rotationMatrix->setValue(0, 0, quatBuff.R_component_2());
+  // rotationMatrix->setValue(1, 0, quatBuff.R_component_3());
+  // rotationMatrix->setValue(2, 0, quatBuff.R_component_4());
+  // quatBuff = quatcQ * quaty * quatQ;
+  // rotationMatrix->setValue(0, 1, quatBuff.R_component_2());
+  // rotationMatrix->setValue(1, 1, quatBuff.R_component_3());
+  // rotationMatrix->setValue(2, 1, quatBuff.R_component_4());
+  // quatBuff = quatcQ * quatz * quatQ;
+  // rotationMatrix->setValue(0, 2, quatBuff.R_component_2());
+  // rotationMatrix->setValue(1, 2, quatBuff.R_component_3());
+  // rotationMatrix->setValue(2, 2, quatBuff.R_component_4());
+
+
+  /* direct computation https://en.wikipedia.org/wiki/Quaternions_and_spatial_rotation */
+  rotationMatrix->setValue(0, 0,     q0*q0 +q1*q1 -q2*q2 -q3*q3 );
+  rotationMatrix->setValue(1, 0, 2.0*(q1*q2        - q0*q3));
+  rotationMatrix->setValue(2, 0, 2.0*(q1*q3        + q0*q2));
+
+  rotationMatrix->setValue(0, 1, 2.0*(q1*q2        + q0*q3) );
+  rotationMatrix->setValue(1, 1,     q0*q0 -q1*q1 +q2*q2 -q3*q3 );
+  rotationMatrix->setValue(2, 1, 2.0*(q2*q3        - q0*q1) );
+
+  rotationMatrix->setValue(0, 2, 2.0*(q1*q3        - q0*q2) );
+  rotationMatrix->setValue(1, 2, 2.0*(q2*q3         + q0*q1) );
+  rotationMatrix->setValue(2, 2,     q0*q0 -q1*q1 -q2*q2 +q3*q3 );
+}
+
+void rotate(double q0, double q1, double q2, double q3, SP::SiconosVector v )
+{
+  DEBUG_BEGIN("::rotate(double q0, double q1, double q2, double q3, SP::SiconosVector v )\n");
+  DEBUG_EXPR(v->display(););
+  DEBUG_PRINTF("( q0 = %e \t,  q1 = %e \t,  q2= %e \t ,  q3= %e \t, SP::SiconosVector v )\n", q0,q1,q2,q3);
+
+  // First way. Using the rotation matrix
+  // SP::SimpleMatrix rotationMatrix(new SimpleMatrix(3,3));
+  // SiconosVector tmp(3);
+  // ::computeRotationMatrix(q0,q1,q2,q3, rotationMatrix);
+  // prod(*rotationMatrix, *v,  tmp);
+  // *v =tmp;
+
+  //Second way. Using the transpose of the rotation matrix
+  // SP::SimpleMatrix rotationMatrix(new SimpleMatrix(3,3));
+  // SiconosVector tmp(3);
+  // ::computeRotationMatrixTransposed(q0,q1,q2,q3, rotationMatrix);
+  // prod(*v, *rotationMatrix,  tmp);
+  // *v =tmp;
+
+  // cross product and axis angle
+  // see http://www.geometrictools.com/Documentation/RotationIssues.pdf
+  // SP::SiconosVector axis(new SiconosVector(3));
+  // double angle = ::getAxisAngle(q0,q1,q2,q3, axis);
+  // SiconosVector t(3), tmp(3);
+  // cross_product(*axis,*v,t);
+  // cross_product(*axis,t,tmp);
+  // *v += sin(angle)*t + (1.0-cos(angle))*tmp;
+
+  // Direct computation with cross product
+  SiconosVector t(3), tmp(3);
+  SiconosVector qvect(3);
+  qvect(0)=q1;
+  qvect(1)=q2;
+  qvect(2)=q3;
+  cross_product(qvect,*v,t);
+  t *= 2.0;
+  DEBUG_EXPR(t.display(););
+  cross_product(qvect,t,tmp);
+  DEBUG_EXPR(tmp.display(););
+  *v += tmp;
+  *v += q0*t;
+
+  DEBUG_EXPR(v->display(););
+  DEBUG_END("::rotate(double q0, double q1, double q2, double q3, SP::SiconosVector v )\n");
+}
+
+
 
 
 void computeMObjToAbs(SP::SiconosVector q, SP::SimpleMatrix mObjToAbs)
 {
   DEBUG_BEGIN("computeMObjToAbs(SP::SiconosVector q, SP::SimpleMatrix mObjToAbs)\n");
-
-  double q0 = q->getValue(3);
-  double q1 = q->getValue(4);
-  double q2 = q->getValue(5);
-  double q3 = q->getValue(6);
-
-  ::boost::math::quaternion<double>    quatQ(q0, q1, q2, q3);
-  ::boost::math::quaternion<double>    quatcQ(q0, -q1, -q2, -q3);
-  ::boost::math::quaternion<double>    quatx(0, 1, 0, 0);
-  ::boost::math::quaternion<double>    quaty(0, 0, 1, 0);
-  ::boost::math::quaternion<double>    quatz(0, 0, 0, 1);
-  ::boost::math::quaternion<double>    quatBuff;
-  /*See equation with label eq:newton_Mobjtoabs from the DevNote.pdf
-   * Chapter gradient computation, case of NewtonEuler formulation
-   * with quaternion
+  /* Curiously, enough the previous version use the implementation in
+   *  computeRotationMatrix(q, mObjToAbs); but the filling of the rotaion matrix was wrong..
+   *  the filling is now corrected
    */
-  quatBuff = quatcQ * quatx * quatQ;
-  mObjToAbs->setValue(0, 0, quatBuff.R_component_2());
-  mObjToAbs->setValue(0, 1, quatBuff.R_component_3());
-  mObjToAbs->setValue(0, 2, quatBuff.R_component_4());
-  quatBuff = quatcQ * quaty * quatQ;
-  mObjToAbs->setValue(1, 0, quatBuff.R_component_2());
-  mObjToAbs->setValue(1, 1, quatBuff.R_component_3());
-  mObjToAbs->setValue(1, 2, quatBuff.R_component_4());
-  quatBuff = quatcQ * quatz * quatQ;
-  mObjToAbs->setValue(2, 0, quatBuff.R_component_2());
-  mObjToAbs->setValue(2, 1, quatBuff.R_component_3());
-  mObjToAbs->setValue(2, 2, quatBuff.R_component_4());
-  DEBUG_END("computeMObjToAbs(SP::SiconosVector q, SP::SimpleMatrix mObjToAbs)\n");
+  ::computeRotationMatrix(q, mObjToAbs);
 
+  DEBUG_END("computeMObjToAbs(SP::SiconosVector q, SP::SimpleMatrix mObjToAbs)\n");
 }
+
+void computeMAbsToObj(SP::SiconosVector q, SP::SimpleMatrix mObjToAbs)
+{
+  DEBUG_BEGIN("computeMAbsToObj(SP::SiconosVector q, SP::SimpleMatrix mObjToAbs)\n");
+  ::computeRotationMatrix(q, mObjToAbs);
+  DEBUG_END("computeMAbsToObs(SP::SiconosVector q, SP::SimpleMatrix mObjToAbs)\n");
+}
+
+
+void rotate(SP::SiconosVector q, SP::SiconosVector v )
+{
+  DEBUG_BEGIN("::rotate(SP::SiconosVector q, SP::SiconosVector v )\n");
+  ::rotate(q->getValue(3),q->getValue(4),q->getValue(5),q->getValue(6), v);
+  DEBUG_END("::rotate(SP::SiconosVector q, SP::SiconosVector v )\n");
+}
+
+void computeRotationMatrix(SP::SiconosVector q, SP::SimpleMatrix rotationMatrix  )
+{
+  ::computeRotationMatrix(q->getValue(3),q->getValue(4),q->getValue(5),q->getValue(6),
+                          rotationMatrix);
+}
+void computeRotationMatrixTransposed(SP::SiconosVector q, SP::SimpleMatrix rotationMatrix )
+{
+  ::computeRotationMatrixTransposed(q->getValue(3),q->getValue(4),q->getValue(5),q->getValue(6),
+                               rotationMatrix);
+}
+
+double getAxisAngle(double q0, double q1, double q2, double q3, SP::SiconosVector axis )
+{
+
+  double angle = acos(q0) *2.0;
+  //double f = sin( angle *0.5);
+  double f = sqrt(1-q0*q0); // cheaper than sin ?
+  if (f !=0.0)
+  {
+    axis->setValue(0, q1/f);
+    axis->setValue(1, q2/f);
+    axis->setValue(2, q3/f);
+  }
+  else
+  {
+    axis->zero();
+  }
+  return angle;
+}
+double getAxisAngle(SP::SiconosVector q, SP::SiconosVector axis )
+{
+  double angle = ::getAxisAngle(q->getValue(3),q->getValue(4),q->getValue(5),q->getValue(6),axis );
+  return angle;
+}
+
+
+void setAxisAngle(SP::SiconosVector q, SP::SiconosVector axis, double angle  )
+{
+
+  double normv = sqrt(axis->getValue(0)*axis->getValue(0)+
+                      axis->getValue(1)*axis->getValue(1)+
+                      axis->getValue(2)*axis->getValue(2));
+
+  if (normv != 0.0)
+  {
+    q->setValue(3, cos(angle/2.0));
+    double f = sin( angle *0.5);
+    q->setValue(4, axis->getValue(0)/normv * f);
+    q->setValue(5, axis->getValue(1)/normv * f);
+    q->setValue(6, axis->getValue(2)/normv * f);
+  }
+  else
+  {
+    // we assume that the axis has to be well defined.
+    // we return a non unit quaternion.
+    q->zero();
+  }
+}
+
+void normalizeq(SP::SiconosVector q)
+{
+  double normq = sqrt(q->getValue(3) * q->getValue(3) +
+                      q->getValue(4) * q->getValue(4) +
+                      q->getValue(5) * q->getValue(5) +
+                      q->getValue(6) * q->getValue(6));
+  assert(normq > 0);
+  normq = 1.0 / normq;
+  q->setValue(3, q->getValue(3) * normq);
+  q->setValue(4, q->getValue(4) * normq);
+  q->setValue(5, q->getValue(5) * normq);
+  q->setValue(6, q->getValue(6) * normq);
+}
+
 
 void computeT(SP::SiconosVector q, SP::SimpleMatrix T)
 {
@@ -86,9 +289,6 @@ void computeT(SP::SiconosVector q, SP::SimpleMatrix T)
   DEBUG_END("computeT(SP::SiconosVector q, SP::SimpleMatrix T)\n")
 
 }
-
-
-
 
 
 
@@ -203,6 +403,7 @@ void NewtonEulerDS::internalInit(SP::SiconosVector Q0, SP::SiconosVector Velocit
   initForces();
   DEBUG_END("NewtonEulerDS::internalInit(SP::SiconosVector Q0, SP::SiconosVector Velocity0, double mass , SP::SiconosMatrix inertialMatrix)\n");
 }
+
 NewtonEulerDS::NewtonEulerDS(SP::SiconosVector Q0, SP::SiconosVector Velocity0,
                              double  mass, SP::SiconosMatrix inertialMatrix):
   DynamicalSystem(6),
@@ -994,18 +1195,9 @@ void NewtonEulerDS::computeTdot()
 }
 
 
-
-
-
 void NewtonEulerDS::normalizeq()
 {
-  double normq = sqrt(_q->getValue(3) * _q->getValue(3) + _q->getValue(4) * _q->getValue(4) + _q->getValue(5) * _q->getValue(5) + _q->getValue(6) * _q->getValue(6));
-  assert(normq > 0);
-  normq = 1 / normq;
-  _q->setValue(3, _q->getValue(3) * normq);
-  _q->setValue(4, _q->getValue(4) * normq);
-  _q->setValue(5, _q->getValue(5) * normq);
-  _q->setValue(6, _q->getValue(6) * normq);
+  ::normalizeq(_q);
 }
 void NewtonEulerDS::computeMObjToAbs()
 {

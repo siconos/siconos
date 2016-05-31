@@ -30,12 +30,49 @@ typedef void (*FInt_NE)(double t, double* q, double* v, double *f, unsigned int 
 typedef void (*FExt_NE)(double t, double* f, unsigned int size_z, double *z);
 
 
+void computeRotationMatrix(double q0, double q1, double q2, double q3, SP::SimpleMatrix rotationMatrix);
+void computeRotationMatrix(SP::SiconosVector q,  SP::SimpleMatrix rotationMatrix);
+
+void computeRotationMatrixTransposed(double q0, double q1, double q2, double q3, SP::SimpleMatrix rotationMatrix);
+void computeRotationMatrixTransposed(SP::SiconosVector q, SP::SimpleMatrix rotationMatrix);
+
+
+/* For a given position vector q, compute the rotation matrix
+ * from the body-fixed frame to the inertial frame
+ * w.r.t the quaternion that parametrize the rotation in q.
+ * the result is return in v
+ * \param[in] q the position vector
+ * \param[out] mObjToAbs the computed rotation matrix
+ */
 void computeMObjToAbs(SP::SiconosVector q, SP::SimpleMatrix mObjToAbs);
 
+/* For a given position vector q, compute the rotation matrix
+ * from the body-fixed frame to the inertial frame
+ * w.r.t the quaternion that parametrize the rotation in q.
+ * the result is return in v
+ * \param[in] q the position vector
+ * \param[out] mObjToAbs the computed rotation matrix
+ */
+void computeMAbsToObj(SP::SiconosVector q, SP::SimpleMatrix mObjToAbs);
 
 
+
+/* For a given position vector q, performs the rotation of the vector v
+ * w.r.t the quaternion that parametrize the rotation in q.
+ * the result is return in v
+ * \param[in] q the position vector
+ * \param[in,out] v the vector to be rotated
+ */
+void rotate(SP::SiconosVector q, SP::SiconosVector v );
+void normalizeq(SP::SiconosVector q);
+double getAxisAngle(double q0, double q1, double q2, double q3, SP::SiconosVector axis );
+double getAxisAngle(SP::SiconosVector q, SP::SiconosVector axis );
+void setAxisAngle(SP::SiconosVector q, SP::SiconosVector axis, double angle);
 
 void computeT(SP::SiconosVector q, SP::SimpleMatrix T);
+
+
+
 /** \class NewtonEulerDS
  *  \brief NewtonEuler non linear dynamical systems - Second Order Non Linear Dynamical Systems.
  *   NewtonEuler non linear dynamical systems - Derived from DynamicalSystem -
