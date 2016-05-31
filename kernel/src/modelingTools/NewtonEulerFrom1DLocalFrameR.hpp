@@ -66,7 +66,7 @@ protected:
   SP::SimpleMatrix _RotationAbsToContactFrame;
 
   /* Matrix converting */
-  SP::SimpleMatrix _MObjToAbs;
+  SP::SimpleMatrix _rotationMatrixAbsToBody;
 
   /* Cross product matrices that correspond the lever arm from
    * contact point to center of mass*/

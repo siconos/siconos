@@ -74,10 +74,13 @@ void NewtonEulerFrom1DLocalFrameR::NIcomputeJachqTFromContacts(SP::SiconosVector
 
   //d1->computeMObjToAbs();
   //SimpleMatrix& Mobj1_abs = *d1->MObjToAbs();
-  computeMObjToAbs(q1,_MObjToAbs);
+  //computeMObjToAbs(q1,_rotationMatrixAbsToBody);
 
 
-  prod(*_NPG1, *_MObjToAbs, *_AUX1, true);
+  computeRotationMatrix(q1,_rotationMatrixAbsToBody);
+  prod(*_NPG1, *_rotationMatrixAbsToBody, *_AUX1, true);
+
+
   prod(*_RotationAbsToContactFrame, *_AUX1, *_AUX2, true);
 
 
@@ -124,9 +127,9 @@ void NewtonEulerFrom1DLocalFrameR::NIcomputeJachqTFromContacts(SP::SiconosVector
 //  d1->computeMObjToAbs();
 //  SimpleMatrix& Mobj1_abs = *d1->MObjToAbs();
 
-  computeMObjToAbs(q1,_MObjToAbs);
-
-  prod(*_NPG1, *_MObjToAbs, *_AUX1, true);
+  // computeMObjToAbs(q1,_rotationMatrixAbsToBody);
+  computeRotationMatrix(q1,_rotationMatrixAbsToBody);
+  prod(*_NPG1, *_rotationMatrixAbsToBody, *_AUX1, true);
   prod(*_RotationAbsToContactFrame, *_AUX1, *_AUX2, true);
 
   for (unsigned int jj = 0; jj < 3; jj++)
@@ -153,9 +156,11 @@ void NewtonEulerFrom1DLocalFrameR::NIcomputeJachqTFromContacts(SP::SiconosVector
 
 //  d2->computeMObjToAbs();
 //  SimpleMatrix& Mobj2_abs = *d2->MObjToAbs();
+//  computeMObjToAbs(q2,_rotationMatrixAbsToBody);
 
-  computeMObjToAbs(q2,_MObjToAbs);
-  prod(*_NPG2, *_MObjToAbs, *_AUX1, true);
+  computeRotationMatrix(q2,_rotationMatrixAbsToBody);
+  prod(*_NPG2, *_rotationMatrixAbsToBody, *_AUX1, true);
+
   prod(*_RotationAbsToContactFrame, *_AUX1, *_AUX2, true);
 
   for (unsigned int jj = 0; jj < 3; jj++)
@@ -176,7 +181,7 @@ void NewtonEulerFrom1DLocalFrameR::initComponents(Interaction& inter, VectorOfBl
 
   /* VA 12/04/2016 All of what follows should be put in WorkM*/
   _RotationAbsToContactFrame.reset(new SimpleMatrix(1, 3));
-  _MObjToAbs.reset(new SimpleMatrix(3, 3));
+  _rotationMatrixAbsToBody.reset(new SimpleMatrix(3, 3));
   _AUX1.reset(new SimpleMatrix(3, 3));
   _AUX2.reset(new SimpleMatrix(1, 3));
   _NPG1.reset(new SimpleMatrix(3, 3));

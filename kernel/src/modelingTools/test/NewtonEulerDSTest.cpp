@@ -304,22 +304,22 @@ void NewtonEulerDSTest::testNewtonEulerDSQuaternionMObjToAbs()
   std::cout << (*v-*vref).normInf()<<std::endl;
 
 
-  //Old version double transpose !!!
+  //Old version
   SiconosVector aux(3);
   SP::SimpleMatrix mObjToAbs(new SimpleMatrix(3,3));
-  ::computeMObjToAbs(q03,  mObjToAbs); // should compute R^T but compute R for the moment
+  ::computeRotationMatrix(q03,  mObjToAbs); // compute R
   prod( *mObjToAbs, *v, aux); // multiply by R^T
   *v=aux;
   std::cout << "v : "<<std::endl;
   v->display();
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testNewtonEulerDSQuaternion : ", ((*v-*vref).normInf() <= std::numeric_limits<double>::epsilon()*10.0), true);
 
-  // Possible alternative (but more expensive one than the new one below)
+  // double tranpose version
   (*v)(0)=1.0;
   (*v)(1)=1.0;
   (*v)(2)=1.0;
   SP::SimpleMatrix mAbsToObj(new SimpleMatrix(3,3));
-  ::computeMAbsToObj(q03,  mAbsToObj); // should compute R but compute R^T for the moment
+  ::computeRotationMatrixTransposed(q03,  mAbsToObj); // Compute R^T for the moment
   prod(*v, *mAbsToObj, aux); // multiply by R^T^T
   *v=aux;
   std::cout << "v : "<<std::endl;
@@ -336,6 +336,32 @@ void NewtonEulerDSTest::testNewtonEulerDSQuaternionMObjToAbs()
   v->display();
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testNewtonEulerDSQuaternion : ", ((*v-*vref).normInf() <= std::numeric_limits<double>::epsilon()*10.0), true);
+
+  SP::SimpleMatrix m(new SimpleMatrix(3,3));
+  m->zero();
+  (*m)(2,0)=1.0;
+  (*m)(0,1)=1.0;
+  (*m)(0,2)=1.0;
+  (*m)(1,2)=1.0;
+  (*m)(2,2)=1.0;
+  SP::SimpleMatrix mref(new SimpleMatrix(3,3));
+  mref->zero();
+  (*mref)(0,0) = sqrt(2.0)/2.0;
+  (*mref)(2,0) = sqrt(2.0)/2.0;
+  (*mref)(0,1) = sqrt(2.0)/2.0;
+  (*mref)(2,1) = -sqrt(2.0)/2.0;
+  (*mref)(0,2) = sqrt(2.0);
+  (*mref)(1,2) = 1.0;
+
+  ::rotateAbsToBody(q03, m);
+  std::cout << "m : "<<std::endl;
+  m->display();
+  std::cout << "mref : "<<std::endl;
+  mref->display();
+
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testNewtonEulerDSQuaternion : ", ((*m-*mref).normInf() <= std::numeric_limits<double>::epsilon()*10.0), true);
+
+
 
 
 }

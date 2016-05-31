@@ -31,39 +31,60 @@ typedef void (*FExt_NE)(double t, double* f, unsigned int size_z, double *z);
 
 
 void computeRotationMatrix(double q0, double q1, double q2, double q3, SP::SimpleMatrix rotationMatrix);
-void computeRotationMatrix(SP::SiconosVector q,  SP::SimpleMatrix rotationMatrix);
 
-void computeRotationMatrixTransposed(double q0, double q1, double q2, double q3, SP::SimpleMatrix rotationMatrix);
+void computeRotationMatrix(SP::SiconosVector q,  SP::SimpleMatrix rotationMatrix);
 void computeRotationMatrixTransposed(SP::SiconosVector q, SP::SimpleMatrix rotationMatrix);
 
 
-/* For a given position vector q, compute the rotation matrix
- * from the body-fixed frame to the inertial frame
- * w.r.t the quaternion that parametrize the rotation in q.
- * the result is return in v
- * \param[in] q the position vector
- * \param[out] mObjToAbs the computed rotation matrix
- */
-void computeMObjToAbs(SP::SiconosVector q, SP::SimpleMatrix mObjToAbs);
+// /* For a given position vector q, compute the rotation matrix
+//  * from the body-fixed frame to the inertial frame
+//  * w.r.t the quaternion that parametrize the rotation in q.
+//  * the result is return in v
+//  * \param[in] q the position vector
+//  * \param[out] mObjToAbs the computed rotation matrix
+//  */
+// void computeMObjToAbs(SP::SiconosVector q, SP::SimpleMatrix mObjToAbs);
 
-/* For a given position vector q, compute the rotation matrix
- * from the body-fixed frame to the inertial frame
- * w.r.t the quaternion that parametrize the rotation in q.
- * the result is return in v
- * \param[in] q the position vector
- * \param[out] mObjToAbs the computed rotation matrix
- */
-void computeMAbsToObj(SP::SiconosVector q, SP::SimpleMatrix mObjToAbs);
+// /* For a given position vector q, compute the rotation matrix
+//  * from the body-fixed frame to the inertial frame
+//  * w.r.t the quaternion that parametrize the rotation in q.
+//  * the result is return in v
+//  * \param[in] q the position vector
+//  * \param[out] mObjToAbs the computed rotation matrix
+//  */
+// void computeMAbsToObj(SP::SiconosVector q, SP::SimpleMatrix mObjToAbs);
 
 /* For a given position vector q, performs the rotation of the vector v
- * w.r.t the quaternion that parametrize the rotation in q.
- * the result is return in v
+ * w.r.t the quaternion that parametrize the rotation in q, that is the
+ * rotation of the body fixed frame with respect to the inertial frame.
  * \param[in] q the position vector
  * \param[in,out] v the vector to be rotated
  */
 void rotateAbsToBody(SP::SiconosVector q, SP::SiconosVector v );
-
+/* For a given position vector q, performs the rotation of the matrix m
+ * w.r.t the quaternion that parametrize the rotation in q, that is the
+ * rotation of the body fixed frame with respect to the inertial frame.
+ * \param[in] q the position vector
+ * \param[in,out] m the vector to be rotated
+ */
+void rotateAbsToBody(SP::SiconosVector q, SP::SimpleMatrix m );
 void rotateAbsToBody(double q0, double q1, double q2, double q3, SP::SiconosVector v );
+void rotateAbsToBody(double q0, double q1, double q2, double q3, SP::SimpleMatrix m );
+
+
+/* For a given position vector q, express the vector v given in
+ * the inertial frame into to the bdy frame
+ * w.r.t the quaternion that parametrize the rotation in q.
+ * The operation amounts to multiplying by the transposed rotation matrix.
+ * the result is return in v
+ * \param[in] q the position vector
+ * \param[in,out] v the vector to be reexpressed
+ */
+void changeFrameAbsToBody(SP::SiconosVector q, SP::SiconosVector v );
+void changeFrameAbsToBody(SP::SiconosVector q, SP::SimpleMatrix m );
+
+void changeFrameBodyToAbs(SP::SiconosVector q, SP::SiconosVector v );
+void changeFrameBodyToAbs(SP::SiconosVector q, SP::SimpleMatrix m );
 
 void normalizeq(SP::SiconosVector q);
 double getAxisAngle(double q0, double q1, double q2, double q3, SP::SiconosVector axis );
@@ -156,7 +177,7 @@ protected:
   /* the rotation matrix that converts a vector in body coordinates (in the body fixed frame)
    * in the absolute coordinates in the inertial frame of reference.
    */
-  SP::SimpleMatrix _MObjToAbs;
+  //SP::SimpleMatrix _MObjToAbs;
 
   /** Inertial matrix
    */
@@ -693,7 +714,7 @@ public:
   virtual void computeMExt(double time, SP::SiconosVector mExt);
 
   virtual void computeMExtObj(double time);
-  virtual void computeMExtObj(double time, SP::SiconosVector q, SP::SiconosMatrix mObjToAbs, SP::SiconosVector mExtObj );
+  virtual void computeMExtObj(double time, SP::SiconosVector q, SP::SiconosVector mExtObj );
 
   void computeJacobianMExtObjqByFD(double time, SP::SiconosVector q);
 
@@ -1000,15 +1021,15 @@ public:
   };
 
 
-  /** get the matrix converting the object coordinates in the absolute coordinates.
-      \return SP::SimpleMatrix
-   */
-  SP::SimpleMatrix MObjToAbs()
-  {
-    return _MObjToAbs;
-  }
+  // /** get the matrix converting the object coordinates in the absolute coordinates.
+  //     \return SP::SimpleMatrix
+  //  */
+  // SP::SimpleMatrix MObjToAbs()
+  // {
+  //   return _MObjToAbs;
+  // }
   /*update the _MObjToAbs from the current quaternion.*/
-  void computeMObjToAbs();
+  //void computeMObjToAbs();
 
   // /* update the _MObjToAbs from a given quaternion.
   //  * \param q

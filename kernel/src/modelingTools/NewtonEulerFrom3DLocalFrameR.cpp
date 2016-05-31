@@ -25,9 +25,9 @@
 
 #include "op3x3.h"
 
-#define DEBUG_NOCOLOR
-#define DEBUG_STDOUT
-#define DEBUG_MESSAGES
+// #define DEBUG_NOCOLOR
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
 #include "debug.h"
 
 /*
@@ -104,15 +104,16 @@ void NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts(SP::SiconosVect
 
 //  d1->computeMObjToAbs();
 //  SimpleMatrix& Mobj1_abs = *d1->MObjToAbs();
+//  computeMObjToAbs(q1,_rotationMatrixAbsToBody);
 
-  computeMObjToAbs(q1,_MObjToAbs);
-  DEBUG_EXPR(_MObjToAbs->display(););
+  computeRotationMatrix(q1,_rotationMatrixAbsToBody);
+  DEBUG_EXPR(_rotationMatrixAbsToBody->display(););
 
 
 
-  prod(*_NPG1, *_MObjToAbs, *_AUX1, true);
+  prod(*_NPG1, *_rotationMatrixAbsToBody, *_AUX1, true);
 
-  DEBUG_EXPR(_MObjToAbs->display(););
+  DEBUG_EXPR(_rotationMatrixAbsToBody->display(););
   DEBUG_EXPR(_AUX1->display(););
 
   prod(*_RotationAbsToContactFrame, *_AUX1, *_AUX2, true);
@@ -223,9 +224,9 @@ void NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts(SP::SiconosVect
 //  d1->computeMObjToAbs();
 //  SimpleMatrix& Mobj1_abs = *d1->MObjToAbs();
 
-  computeMObjToAbs(q1,_MObjToAbs);
-
-  prod(*_NPG1, *_MObjToAbs, *_AUX1, true);
+  //computeMObjToAbs(q1,_rotationMatrixAbsToBody);
+  computeRotationMatrix(q1,_rotationMatrixAbsToBody);
+  prod(*_NPG1, *_rotationMatrixAbsToBody, *_AUX1, true);
   prod(*_RotationAbsToContactFrame, *_AUX1, *_AUX2, true);
 
 
@@ -239,11 +240,10 @@ void NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts(SP::SiconosVect
 
 //  d2->computeMObjToAbs();
 //  SimpleMatrix& Mobj2_abs = *d2->MObjToAbs();
+//  computeMObjToAbs(q2,_rotationMatrixAbsToBody);
 
-
-  computeMObjToAbs(q2,_MObjToAbs);
-
-  prod(*_NPG2, *_MObjToAbs, *_AUX1, true);
+  computeRotationMatrix(q2,_rotationMatrixAbsToBody);
+  prod(*_NPG2, *_rotationMatrixAbsToBody, *_AUX1, true);
   prod(*_RotationAbsToContactFrame, *_AUX1, *_AUX2, true);
 
   for (unsigned int ii = 0; ii < 3; ii++)

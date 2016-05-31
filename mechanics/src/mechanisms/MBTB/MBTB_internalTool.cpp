@@ -310,21 +310,23 @@ void _MBTB_displayStep()
       }
       printf("\n");
       printf("Moments in Joint  %i\n", numJ);
-      SiconosVector vaux(3),res(3);
+
+      SP::SiconosVector vaux(new SiconosVector(3));
       for(int ii=3; ii<6; ii++)
       {
-        vaux.setValue(ii-3,sJointRelations[numJ]->_jointR->contactForce()->getValue(ii));
-        printf("%e",vaux.getValue(ii-3));
+        vaux->setValue(ii-3,sJointRelations[numJ]->_jointR->contactForce()->getValue(ii));
+        printf("%e",vaux->getValue(ii-3));
         printf("\t");
       }
       /*convert momentum in abs frame*/
       printf("\n");
-      printf("Moments in Joint %i in absolute frame \n", numJ);
 
-      prod(*(sJointRelations[numJ]->_ds1->MObjToAbs()),vaux,res);
+      printf("Moments in Joint %i in absolute frame \n", numJ);
+      //prod(*(sJointRelations[numJ]->_ds1->MObjToAbs()),vaux,res);
+      changeFrameBodyToAbs(sJointRelations[numJ]->_ds1->q(),vaux);
       for(int ii=0; ii<3; ii++)
       {
-        printf("%e",res.getValue(ii));
+        printf("%e",vaux->getValue(ii));
         printf("\t");
       }
       printf("\n");
@@ -361,19 +363,20 @@ void _MBTB_displayStep()
       }
 
 
-      SiconosVector vaux(3),res(3);
+      SP::SiconosVector vaux(new SiconosVector(3));
       for(int ii=3; ii<6; ii++)
       {
-        vaux.setValue(ii-3,sContacts[numC]->relation()->contactForce()->getValue(ii));
+        vaux->setValue(ii-3,sContacts[numC]->relation()->contactForce()->getValue(ii));
       }
       /*convert momentum in abs frame*/
       //sDS[sContacts[numC]->_indexBody1]->computeMObjToAbs();
-      prod(*(sDS[sContacts[numC]->_indexBody1]->MObjToAbs()),vaux,res);
+      //prod(*(sDS[sContacts[numC]->_indexBody1]->MObjToAbs()),vaux,res);
+      changeFrameBodyToAbs(sDS[sContacts[numC]->_indexBody1]->q(),vaux);
       printf("\n");
       printf("Moments of contact forces in contact  %i in absolute frame \n", numC);
       for(int ii=0; ii<3; ii++)
       {
-        printf("%e",res.getValue(ii));
+        printf("%e",vaux->getValue(ii));
         printf("\t");
       }
 
@@ -470,17 +473,17 @@ void _MBTB_printStep(FILE *fp)
       fprintf(fp,"%e",sJointRelations[numJ]->_jointR->contactForce()->getValue(ii));
       fprintf(fp,"\t");
     }
-    SiconosVector vaux(3),res(3);
+    SP::SiconosVector vaux(new SiconosVector(3));
     for(unsigned int ii=3; ii<6; ii++)
     {
-      vaux.setValue(ii-3,sJointRelations[numJ]->_jointR->contactForce()->getValue(ii));
+      vaux->setValue(ii-3,sJointRelations[numJ]->_jointR->contactForce()->getValue(ii));
     }
     /*convert momentum in abs frame*/
-
-    prod(*(sJointRelations[numJ]->_ds1->MObjToAbs()),vaux,res);
+    //prod(*(sJointRelations[numJ]->_ds1->MObjToAbs()),vaux,res);
+    changeFrameBodyToAbs(sJointRelations[numJ]->_ds1->q(),vaux);
     for(int ii=0; ii<3; ii++)
     {
-      fprintf(fp,"%e",res.getValue(ii));
+      fprintf(fp,"%e",vaux->getValue(ii));
       fprintf(fp,"\t");
     }
 
@@ -503,17 +506,18 @@ void _MBTB_printStep(FILE *fp)
       fprintf(fp,"%e",sContacts[numC]->relation()->contactForce()->getValue(ii));
       fprintf(fp,"\t");
     }
-    SiconosVector vaux(3),res(3);
+    SP::SiconosVector vaux(new SiconosVector(3));
     for(unsigned int ii=3; ii<6; ii++)
     {
-      vaux.setValue(ii-3,sContacts[numC]->relation()->contactForce()->getValue(ii));
+      vaux->setValue(ii-3,sContacts[numC]->relation()->contactForce()->getValue(ii));
     }
     /*convert momentum in abs frame*/
     //sDS[sContacts[numC]->_indexBody1]->computeMObjToAbs();
-    prod(*(sDS[sContacts[numC]->_indexBody1]->MObjToAbs()),vaux,res);
+    //prod(*(sDS[sContacts[numC]->_indexBody1]->MObjToAbs()),vaux,res);
+    changeFrameBodyToAbs(sDS[sContacts[numC]->_indexBody1]->q(),vaux);
     for(int ii=0; ii<3; ii++)
     {
-      fprintf(fp,"%e",res.getValue(ii));
+      fprintf(fp,"%e",vaux->getValue(ii));
       fprintf(fp,"\t");
     }
   }
