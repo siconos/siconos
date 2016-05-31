@@ -23,7 +23,8 @@
 #include "SiconosAlgebra.hpp"
 
 using namespace Siconos;
-
+// #define DEBUG_MESSAGES
+#include "debug.h"
 
 SP::SimpleMatrix operator * (const SP::SimpleMatrix A, const SP::SimpleMatrix B)
 {
@@ -457,7 +458,10 @@ bool operator == (const SiconosMatrix &m, const SiconosMatrix &x)
   //    return false;
   // Warning : two block matrices may be "equal" but have blocks of different sizes.
   double norm = (m - x).normInf();
-  return (norm < std::numeric_limits<double>::epsilon());
+  DEBUG_PRINTF("norm = %12.8e \n", norm );
+  DEBUG_PRINTF("std::numeric_limits<double>::epsilon() = %12.8e \n", std::numeric_limits<double>::epsilon() );
+  DEBUG_EXPR(std::cout << std::boolalpha << (norm <= std::numeric_limits<double>::epsilon()) <<std::endl;);
+  return (norm <= std::numeric_limits<double>::epsilon());
 }
 
 bool operator != (const SiconosMatrix &m, const SiconosMatrix &x)
