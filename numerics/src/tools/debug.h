@@ -32,6 +32,7 @@
 #define ANSI_COLOR_RESET   "\x1b[0m"
 
 #ifdef DEBUG_MESSAGES
+
 #ifdef DEBUG_WHERE_MESSAGES
 #define DEBUG_WHERESTR  "%s:%d:\n"
 #define DEBUG_WHEREARG  __FILE__, __LINE__
@@ -40,14 +41,17 @@
 #define DEBUG_WHEREARG  ""
 #endif
 
-#ifdef DEBUG_STDOUT
 extern unsigned int debug_counter;
+
+
+#ifdef DEBUG_STDOUT
 
 #ifdef DEBUG_NOCOLOR
 #define DEBUG_INTERNAL_PRINTF(...)   printf(__VA_ARGS__);
 #else
 #define DEBUG_INTERNAL_PRINTF(...)   printf(ANSI_COLOR_RED); printf(__VA_ARGS__); printf(ANSI_COLOR_RESET);
 #endif
+
 #else
 
 #ifdef DEBUG_NOCOLOR
@@ -55,17 +59,17 @@ extern unsigned int debug_counter;
 #else
 #define DEBUG_INTERNAL_PRINTF(...)    fprintf(stderr, ANSI_COLOR_RED); fprintf(stderr, __VA_ARGS__); fprintf(stderr, ANSI_COLOR_RESET);
 #endif
-#endif
+
+#endif //DEBUG_STDOUT
 
 
 //#define DEBUG_PREFIX   printf("%i",debug_counter); for (unsigned int i =0 ; i < debug_counter; i++) printf(".");
 #define DEBUG_PREFIX                                                   \
   if (debug_counter > 0)                                               \
-    for (unsigned int i = 0 ; i < debug_counter-1; i++) printf("|  "); \
-  printf("-");
+    for (unsigned int i = 0 ; i < debug_counter-1; i++) printf("|  ");
 
-#define DEBUG_BEGIN(M)  DEBUG_PREFIX; if (debug_counter  < 24 ) debug_counter++;   DEBUG_INTERNAL_PRINTF("= BEGIN ==== %s",M)
-#define DEBUG_END(M)    if (debug_counter >0)  debug_counter-- ; DEBUG_PREFIX;   DEBUG_INTERNAL_PRINTF("= END   ==== %s",M)
+#define DEBUG_BEGIN(M)  DEBUG_PREFIX; if (debug_counter  < 24 ) debug_counter++;   DEBUG_INTERNAL_PRINTF("-= BEGIN ==== %s",M)
+#define DEBUG_END(M)    if (debug_counter >0)  debug_counter-- ; DEBUG_PREFIX;   DEBUG_INTERNAL_PRINTF("-= END   ==== %s",M)
 
 #ifdef DEBUG_BEGIN_END_ONLY
 #define DEBUG_PRINTF(_fmt, ...)
@@ -74,7 +78,7 @@ extern unsigned int debug_counter;
 #define DEBUG_EXPR_WE(E)
 #define DEBUG_GLOBAL_VAR_DECL(D)
 #else
-#define DEBUG_PRINTF(_fmt, ...)  DEBUG_INTERNAL_PRINTF(DEBUG_WHERESTR _fmt, DEBUG_WHEREARG, __VA_ARGS__)
+#define DEBUG_PRINTF(_fmt, ...)  DEBUG_PREFIX; DEBUG_INTERNAL_PRINTF(DEBUG_WHERESTR _fmt, DEBUG_WHEREARG, __VA_ARGS__)
 #define DEBUG_PRINT(M)  DEBUG_PRINTF("%s",M)
 #define DEBUG_EXPR(E) DEBUG_PRINTF("%s: ", #E) do { E ; } while(0)
 #define DEBUG_EXPR_WE(E) do { E ; } while(0)
@@ -82,6 +86,7 @@ extern unsigned int debug_counter;
 #endif
 
 #else
+
 #define DEBUG_BEGIN(M)
 #define DEBUG_END(M)
 #define DEBUG_PRINTF(_fmt, ...)
@@ -89,6 +94,7 @@ extern unsigned int debug_counter;
 #define DEBUG_EXPR(E)
 #define DEBUG_EXPR_WE(E)
 #define DEBUG_GLOBAL_VAR_DECL(D)
+
 #endif
 
 #define DEBUG_PRINT_MAT_STR(NAME, M, nrows, ncols) \
