@@ -350,7 +350,7 @@ void TimeStepping::update(unsigned int levelInput)
     _nsds->updateInput(nextTime(),levelInput);
 
 
-  
+
   // 2 - compute state for each dynamical system
   OSIIterator itOSI;
   for (itOSI = _allOSI->begin(); itOSI != _allOSI->end() ; ++itOSI)
@@ -373,7 +373,9 @@ void TimeStepping::update(unsigned int levelInput)
 
 void TimeStepping::computeFreeState()
 {
+  DEBUG_BEGIN("TimeStepping::computeFreeState()\n");
   std::for_each(_allOSI->begin(), _allOSI->end(), std11::bind(&OneStepIntegrator::computeFreeState, _1));
+  DEBUG_END("TimeStepping::computeFreeState()\n");
 }
 
 // compute simulation between current and next event.  Initial
