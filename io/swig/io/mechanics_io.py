@@ -1223,9 +1223,9 @@ class Hdf5():
             shape = self._ref.create_dataset(name,
                                              (apoints.shape[0],
                                               apoints.shape[1]))
-            if insideMargin:
+            if insideMargin is not None:
                 shape.attrs['insideMargin'] = insideMargin
-            if outsideMargin:
+            if outsideMargin is not None:
                 shape.attrs['outsideMargin'] = outsideMargin
             shape[:] = points[:]
             shape.attrs['type'] = 'convex'
@@ -1243,9 +1243,9 @@ class Hdf5():
             shape.attrs['id'] = self._number_of_shapes
             shape.attrs['type'] = 'primitive'
             shape.attrs['primitive'] = primitive
-            if insideMargin:
+            if insideMargin is not None:
                 shape.attrs['insideMargin'] = insideMargin
-            if outsideMargin:
+            if outsideMargin is not None:
                 shape.attrs['outsideMargin'] = outsideMargin
             shape[:] = params
             self._shapeid[name] = shape.attrs['id']
