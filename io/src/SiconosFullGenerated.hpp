@@ -198,7 +198,6 @@ SICONOS_IO_REGISTER(Relation,
   (_subType))
 SICONOS_IO_REGISTER_WITH_BASES(NewtonEulerDS,(DynamicalSystem),
   (_I)
-  (_MObjToAbs)
   (_T)
   (_Tdot)
   (_boundaryConditions)

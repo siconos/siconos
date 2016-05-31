@@ -102,9 +102,6 @@ void NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts(SP::SiconosVect
   DEBUG_PRINT("lever arm skew matrix :\n");
   DEBUG_EXPR(_NPG1->display(););
 
-//  d1->computeMObjToAbs();
-//  SimpleMatrix& Mobj1_abs = *d1->MObjToAbs();
-//  computeMObjToAbs(q1,_rotationMatrixAbsToBody);
 
   computeRotationMatrix(q1,_rotationMatrixAbsToBody);
   DEBUG_EXPR(_rotationMatrixAbsToBody->display(););
@@ -221,10 +218,7 @@ void NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts(SP::SiconosVect
 
 
 
-//  d1->computeMObjToAbs();
-//  SimpleMatrix& Mobj1_abs = *d1->MObjToAbs();
 
-  //computeMObjToAbs(q1,_rotationMatrixAbsToBody);
   computeRotationMatrix(q1,_rotationMatrixAbsToBody);
   prod(*_NPG1, *_rotationMatrixAbsToBody, *_AUX1, true);
   prod(*_RotationAbsToContactFrame, *_AUX1, *_AUX2, true);
@@ -238,9 +232,6 @@ void NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts(SP::SiconosVect
     for (unsigned int jj = 3; jj < 6; jj++)
       _jachqT->setValue(ii, jj, _AUX2->getValue(ii, jj - 3));
 
-//  d2->computeMObjToAbs();
-//  SimpleMatrix& Mobj2_abs = *d2->MObjToAbs();
-//  computeMObjToAbs(q2,_rotationMatrixAbsToBody);
 
   computeRotationMatrix(q2,_rotationMatrixAbsToBody);
   prod(*_NPG2, *_rotationMatrixAbsToBody, *_AUX1, true);

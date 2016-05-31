@@ -72,14 +72,8 @@ void NewtonEulerFrom1DLocalFrameR::NIcomputeJachqTFromContacts(SP::SiconosVector
   (*_NPG1)(2, 2) = 0;
 
 
-  //d1->computeMObjToAbs();
-  //SimpleMatrix& Mobj1_abs = *d1->MObjToAbs();
-  //computeMObjToAbs(q1,_rotationMatrixAbsToBody);
-
-
   computeRotationMatrix(q1,_rotationMatrixAbsToBody);
   prod(*_NPG1, *_rotationMatrixAbsToBody, *_AUX1, true);
-
 
   prod(*_RotationAbsToContactFrame, *_AUX1, *_AUX2, true);
 
@@ -124,10 +118,6 @@ void NewtonEulerFrom1DLocalFrameR::NIcomputeJachqTFromContacts(SP::SiconosVector
   (*_NPG1)(2, 1) = (G1x - Px);
   (*_NPG1)(2, 2) = 0;
 
-//  d1->computeMObjToAbs();
-//  SimpleMatrix& Mobj1_abs = *d1->MObjToAbs();
-
-  // computeMObjToAbs(q1,_rotationMatrixAbsToBody);
   computeRotationMatrix(q1,_rotationMatrixAbsToBody);
   prod(*_NPG1, *_rotationMatrixAbsToBody, *_AUX1, true);
   prod(*_RotationAbsToContactFrame, *_AUX1, *_AUX2, true);
@@ -154,9 +144,7 @@ void NewtonEulerFrom1DLocalFrameR::NIcomputeJachqTFromContacts(SP::SiconosVector
   (*_NPG2)(2, 1) = (G2x - Px);
   (*_NPG2)(2, 2) = 0;
 
-//  d2->computeMObjToAbs();
-//  SimpleMatrix& Mobj2_abs = *d2->MObjToAbs();
-//  computeMObjToAbs(q2,_rotationMatrixAbsToBody);
+
 
   computeRotationMatrix(q2,_rotationMatrixAbsToBody);
   prod(*_NPG2, *_rotationMatrixAbsToBody, *_AUX1, true);

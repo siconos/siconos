@@ -271,7 +271,7 @@ void NewtonEulerDSTest::testNewtonEulerDSQuaternion()
   std::cout << "--> quaternion 2 test ended with success." <<std::endl;
 }
 
-void NewtonEulerDSTest::testNewtonEulerDSQuaternionMObjToAbs()
+void NewtonEulerDSTest::testNewtonEulerDSQuaternionMatrix()
 {
   std::cout << "--> Test: quaternion 2" <<std::endl;
   std::cout <<" ---------- test with q03 (rotation of pi/4 about the y-axis)" << std::endl;
@@ -306,21 +306,20 @@ void NewtonEulerDSTest::testNewtonEulerDSQuaternionMObjToAbs()
 
   //Old version
   SiconosVector aux(3);
-  SP::SimpleMatrix mObjToAbs(new SimpleMatrix(3,3));
-  ::computeRotationMatrix(q03,  mObjToAbs); // compute R
-  prod( *mObjToAbs, *v, aux); // multiply by R^T
+  SP::SimpleMatrix matrix(new SimpleMatrix(3,3));
+  ::computeRotationMatrix(q03,  matrix); // compute R
+  prod( *matrix, *v, aux); // multiply by R
   *v=aux;
   std::cout << "v : "<<std::endl;
   v->display();
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testNewtonEulerDSQuaternion : ", ((*v-*vref).normInf() <= std::numeric_limits<double>::epsilon()*10.0), true);
 
-  // double tranpose version
+  // double transpose version
   (*v)(0)=1.0;
   (*v)(1)=1.0;
   (*v)(2)=1.0;
-  SP::SimpleMatrix mAbsToObj(new SimpleMatrix(3,3));
-  ::computeRotationMatrixTransposed(q03,  mAbsToObj); // Compute R^T for the moment
-  prod(*v, *mAbsToObj, aux); // multiply by R^T^T
+  ::computeRotationMatrixTransposed(q03,  matrix); // Compute R^T for the moment
+  prod(*v, *matrix, aux); // multiply by R^T^T
   *v=aux;
   std::cout << "v : "<<std::endl;
   v->display();

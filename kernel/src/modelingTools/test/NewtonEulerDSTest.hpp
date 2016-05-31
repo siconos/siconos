@@ -37,7 +37,7 @@ private:
 
   CPPUNIT_TEST(testBuildNewtonEulerDS1);
   CPPUNIT_TEST(testNewtonEulerDSQuaternion);
-  CPPUNIT_TEST(testNewtonEulerDSQuaternionMObjToAbs);
+  CPPUNIT_TEST(testNewtonEulerDSQuaternionMatrix);
   CPPUNIT_TEST(End);
 
   CPPUNIT_TEST_SUITE_END();
@@ -46,7 +46,7 @@ private:
 
   void testBuildNewtonEulerDS1();
   void testNewtonEulerDSQuaternion();
-  void testNewtonEulerDSQuaternionMObjToAbs();
+  void testNewtonEulerDSQuaternionMatrix();
   // void testcomputeDS();
   void End();
 

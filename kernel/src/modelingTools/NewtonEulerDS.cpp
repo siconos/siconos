@@ -40,10 +40,6 @@ void computeRotationMatrix(double q0, double q1, double q2, double q3,
   // ::boost::math::quaternion<double>    quaty(0, 0, 1, 0);
   // ::boost::math::quaternion<double>    quatz(0, 0, 0, 1);
   // ::boost::math::quaternion<double>    quatBuff;
-  // /*See equation with label eq:newton_Mobjtoabs from the DevNote.pdf
-  //  * Chapter gradient computation, case of NewtonEuler formulation
-  //  * with quaternion
-  //  */
   // quatBuff = quatQ * quatx * quatcQ;
   // rotationMatrix->setValue(0, 0, quatBuff.R_component_2());
   // rotationMatrix->setValue(1, 0, quatBuff.R_component_3());
@@ -147,21 +143,6 @@ void rotateAbsToBody(double q0, double q1, double q2, double q3, SP::SimpleMatri
   DEBUG_END("::rotateAbsToBody(double q0, double q1, double q2, double q3, SP::SimpleMatrix m )\n");
 }
 
-
-// void computeMObjToAbs(SP::SiconosVector q, SP::SimpleMatrix mObjToAbs)
-// {
-//   DEBUG_BEGIN("computeMObjToAbs(SP::SiconosVector q, SP::SimpleMatrix mObjToAbs)\n");
-//   ::computeRotationMatrix(q, mObjToAbs);
-//   DEBUG_EXPR(mObjToAbs->display(););
-//   DEBUG_END("computeMObjToAbs(SP::SiconosVector q, SP::SimpleMatrix mObjToAbs)\n");
-// }
-
-// void computeMAbsToObj(SP::SiconosVector q, SP::SimpleMatrix mObjToAbs)
-// {
-//   DEBUG_BEGIN("computeMAbsToObj(SP::SiconosVector q, SP::SimpleMatrix mObjToAbs)\n");
-//   ::computeRotationMatrixTransposed(q, mObjToAbs);
-//   DEBUG_END("computeMAbsToObs(SP::SiconosVector q, SP::SimpleMatrix mObjToAbs)\n");
-// }
 
 void rotateAbsToBody(SP::SiconosVector q, SP::SiconosVector v )
 {
@@ -632,8 +613,6 @@ void NewtonEulerDS::computeJacobianMExtObjqByFD(double time, SP::SiconosVector q
 {
   DEBUG_BEGIN("NewtonEulerDS::computeJacobianMExtvByFD(...)\n");
   SP::SiconosVector mExtObj(new SiconosVector(3));
-  SP::SimpleMatrix mObjToAbs(new SimpleMatrix(3,3));
-
   computeMExtObj(time, q, mExtObj);
 
   double mExtObj0 = mExtObj->getValue(0);
@@ -968,13 +947,6 @@ void NewtonEulerDS::computeForces(double time, SP::SiconosVector q, SP::SiconosV
     {
       computeMInt(time, q , v);
       SiconosVector aux(3);
-      //computeMObjToAbs();
-      // prod(*_mInt, *_MObjToAbs, aux);// aux =  transpose(_MObjToAbs) * _mInt
-      // *_mInt = aux;
-      // std::cout << "_MObjToAbs " <<std::endl;
-      // _MObjToAbs->display();
-      //std::cout << "NewtonEulerDS::computeForces: _mint: " <<std::endl;
-      //_mInt->display();
       ::changeFrameAbsToBody(q,_mInt); // We have to be sure that MInt is expressed in inertial frame.
       _forces->setValue(3, _forces->getValue(3) - _mInt->getValue(0));
       _forces->setValue(4, _forces->getValue(4) - _mInt->getValue(1));
@@ -1008,13 +980,6 @@ void NewtonEulerDS::computeJacobianqForces(double time)
     if (_jacobianMIntq)
     {
       computeJacobianMIntq(time);
-      // SP::SimpleMatrix aux (new SimpleMatrix(3,_qDim));
-      // SP::SimpleMatrix RT (new SimpleMatrix(3,3));
-      // //computeMObjToAbs();
-      // RT->trans(*_MObjToAbs);
-      // prod(*RT, *_jacobianMIntq, *aux);
-      // _jacobianqForces->setBlock(3,0, -1.0* *aux);
-      // //_jacobianqForces->setBlock(3,0,-1.0* *_jacobianMIntq);
       ::changeFrameAbsToBody(_q,_jacobianqForces); // We have to ensure that the Jacobian is expressed in inertial frame
     }
     if (_jacobianMExtObjq)
@@ -1196,10 +1161,7 @@ void NewtonEulerDS::normalizeq()
 {
   ::normalizeq(_q);
 }
-// void NewtonEulerDS::computeMObjToAbs()
-// {
-//   ::computeMObjToAbs(_q, _MObjToAbs);
-// }
+
 
 
 
