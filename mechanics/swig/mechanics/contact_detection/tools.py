@@ -8,7 +8,7 @@ class Shape(object):
     def __init__(self,
                  shape_name,
                  relative_translation=[0, 0, 0],
-                 relative_orientation=[0, 1, 0, 0]):
+                 relative_orientation=[1, 0, 0, 0]):
 
         if len(relative_orientation) == 2:
             # axis + angle
@@ -39,7 +39,7 @@ class Avatar(Shape):
                  shape_name,
                  parameters=None,
                  relative_translation=[0, 0, 0],
-                 relative_orientation=[0, 1, 0, 0]):
+                 relative_orientation=[1, 0, 0, 0]):
 
         self.parameters = parameters
         super(Avatar, self).__init__(shape_name,
@@ -57,7 +57,7 @@ class Contactor(Shape):
                  shape_name,
                  collision_group=0,
                  relative_translation=[0, 0, 0],
-                 relative_orientation=[0, 1, 0, 0]):
+                 relative_orientation=[1, 0, 0, 0]):
 
         self.group = collision_group
 
