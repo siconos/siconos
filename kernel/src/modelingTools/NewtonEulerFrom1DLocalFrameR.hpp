@@ -34,7 +34,7 @@
  * This class is an interface for a relation with impact.  It
  * implements the computation of the jacoboian of h from the points of
  * contacts and the normal.  Use this class consists in overloading
- * the method computeh, by setting the menber pc1, pc2, nc and y.  The
+ * the method computeh, by setting the member pc1, pc2, nc and y.  The
  * matrix jachq is used both for the building of the OSNSP (with T)
  * and for the predictor of activation of deactivation of the Interaction.
  *
@@ -48,25 +48,32 @@ protected:
   */
   ACCEPT_SERIALIZATION(NewtonEulerFrom1DLocalFrameR);
 
-  /*Point of contact*/
+  /* Contact Points */
   SP::SiconosVector _Pc1;
   SP::SiconosVector _Pc2;
 
-  /*Inward Normal at the contact */
+  /* Inward Normal at the contact.
+   * \todo The meaning of "Inward" has to be explained carefully.
+   */
   SP::SiconosVector _Nc;
 
-  // /*because set is not sorted!*/
-  // SP::NewtonEulerDS _ds1;
-  // SP::NewtonEulerDS _ds2;
+
   virtual void initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
 
-  /*Matrix converting  the absolute coordinate to the contact coordinate.*/
-  SP::SimpleMatrix _Mabs_C;
+  /* Rotation matrix converting the absolute coordinate to the contact frame coordinate.
+   * This matrix contains the unit vector(s)of the contact frame in row.
+   */
+  SP::SimpleMatrix _RotationAbsToContactFrame;
+
   /* Matrix converting */
   SP::SimpleMatrix _MObjToAbs;
-  /*cross product matrices*/
+
+  /* Cross product matrices that correspond the lever arm from
+   * contact point to center of mass*/
   SP::SimpleMatrix _NPG1;
   SP::SimpleMatrix _NPG2;
+
+
   /*buffer matrices*/
   SP::SimpleMatrix _AUX1;
   SP::SimpleMatrix _AUX2;
@@ -95,7 +102,7 @@ public:
   virtual ~NewtonEulerFrom1DLocalFrameR() {};
 
   virtual void computeJachq(double time, Interaction& inter, SP::BlockVector q0);
-  
+
   /* Default implementation consists in multiplying jachq and T (see NewtonEulerR::computeJachqT)
    * but here we compute the operator from the the contact point locations
    * and the local frame at contact
@@ -103,7 +110,7 @@ public:
    *  \param q0  the block vector to the dynamical system position
    */
   virtual void computeJachqT(Interaction& inter, SP::BlockVector q0);
-  
+
   inline SP::SiconosVector pc1() const
   {
     return _Pc1;
