@@ -55,15 +55,16 @@ void computeMObjToAbs(SP::SiconosVector q, SP::SimpleMatrix mObjToAbs);
  */
 void computeMAbsToObj(SP::SiconosVector q, SP::SimpleMatrix mObjToAbs);
 
-
-
 /* For a given position vector q, performs the rotation of the vector v
  * w.r.t the quaternion that parametrize the rotation in q.
  * the result is return in v
  * \param[in] q the position vector
  * \param[in,out] v the vector to be rotated
  */
-void rotate(SP::SiconosVector q, SP::SiconosVector v );
+void rotateAbsToBody(SP::SiconosVector q, SP::SiconosVector v );
+
+void rotateAbsToBody(double q0, double q1, double q2, double q3, SP::SiconosVector v );
+
 void normalizeq(SP::SiconosVector q);
 double getAxisAngle(double q0, double q1, double q2, double q3, SP::SiconosVector axis );
 double getAxisAngle(SP::SiconosVector q, SP::SiconosVector axis );

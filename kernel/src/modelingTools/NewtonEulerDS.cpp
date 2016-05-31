@@ -21,10 +21,10 @@
 #include <boost/math/quaternion.hpp>
 
 #include <iostream>
-//#define DEBUG_NOCOLOR
+#define DEBUG_NOCOLOR
 //#define DEBUG_BEGIN_END_ONLY
-// #define DEBUG_STDOUT
-// #define DEBUG_MESSAGES
+#define DEBUG_STDOUT
+#define DEBUG_MESSAGES
 #include <debug.h>
 
 
@@ -115,9 +115,9 @@ void computeRotationMatrixTransposed(double q0, double q1, double q2, double q3,
   rotationMatrix->setValue(2, 2,     q0*q0 -q1*q1 -q2*q2 +q3*q3 );
 }
 
-void rotate(double q0, double q1, double q2, double q3, SP::SiconosVector v )
+void rotateAbsToBody(double q0, double q1, double q2, double q3, SP::SiconosVector v )
 {
-  DEBUG_BEGIN("::rotate(double q0, double q1, double q2, double q3, SP::SiconosVector v )\n");
+  DEBUG_BEGIN("::rotateAbsToBody(double q0, double q1, double q2, double q3, SP::SiconosVector v )\n");
   DEBUG_EXPR(v->display(););
   DEBUG_PRINTF("( q0 = %e \t,  q1 = %e \t,  q2= %e \t ,  q3= %e \t, SP::SiconosVector v )\n", q0,q1,q2,q3);
 
@@ -128,14 +128,14 @@ void rotate(double q0, double q1, double q2, double q3, SP::SiconosVector v )
   // prod(*rotationMatrix, *v,  tmp);
   // *v =tmp;
 
-  //Second way. Using the transpose of the rotation matrix
+  // Second way. Using the transpose of the rotation matrix
   // SP::SimpleMatrix rotationMatrix(new SimpleMatrix(3,3));
   // SiconosVector tmp(3);
   // ::computeRotationMatrixTransposed(q0,q1,q2,q3, rotationMatrix);
   // prod(*v, *rotationMatrix,  tmp);
   // *v =tmp;
 
-  // cross product and axis angle
+  // Third way. cross product and axis angle
   // see http://www.geometrictools.com/Documentation/RotationIssues.pdf
   // SP::SiconosVector axis(new SiconosVector(3));
   // double angle = ::getAxisAngle(q0,q1,q2,q3, axis);
@@ -159,7 +159,7 @@ void rotate(double q0, double q1, double q2, double q3, SP::SiconosVector v )
   *v += q0*t;
 
   DEBUG_EXPR(v->display(););
-  DEBUG_END("::rotate(double q0, double q1, double q2, double q3, SP::SiconosVector v )\n");
+  DEBUG_END("::rotateAbsToBody(double q0, double q1, double q2, double q3, SP::SiconosVector v )\n");
 }
 
 
@@ -169,27 +169,27 @@ void computeMObjToAbs(SP::SiconosVector q, SP::SimpleMatrix mObjToAbs)
 {
   DEBUG_BEGIN("computeMObjToAbs(SP::SiconosVector q, SP::SimpleMatrix mObjToAbs)\n");
   /* Curiously, enough the previous version use the implementation in
-   *  computeRotationMatrix(q, mObjToAbs); but the filling of the rotaion matrix was wrong..
+   *  computeRotationMatrix(q, mObjToAbs); but the filling of the rotation matrix was wrong..
    *  the filling is now corrected
    */
   ::computeRotationMatrix(q, mObjToAbs);
-
+  DEBUG_EXPR(mObjToAbs->display(););
   DEBUG_END("computeMObjToAbs(SP::SiconosVector q, SP::SimpleMatrix mObjToAbs)\n");
 }
 
 void computeMAbsToObj(SP::SiconosVector q, SP::SimpleMatrix mObjToAbs)
 {
   DEBUG_BEGIN("computeMAbsToObj(SP::SiconosVector q, SP::SimpleMatrix mObjToAbs)\n");
-  ::computeRotationMatrix(q, mObjToAbs);
+  ::computeRotationMatrixTransposed(q, mObjToAbs);
   DEBUG_END("computeMAbsToObs(SP::SiconosVector q, SP::SimpleMatrix mObjToAbs)\n");
 }
 
 
-void rotate(SP::SiconosVector q, SP::SiconosVector v )
+void rotateAbsToBody(SP::SiconosVector q, SP::SiconosVector v )
 {
-  DEBUG_BEGIN("::rotate(SP::SiconosVector q, SP::SiconosVector v )\n");
-  ::rotate(q->getValue(3),q->getValue(4),q->getValue(5),q->getValue(6), v);
-  DEBUG_END("::rotate(SP::SiconosVector q, SP::SiconosVector v )\n");
+  DEBUG_BEGIN("::rotateAbsToBody(SP::SiconosVector q, SP::SiconosVector v )\n");
+  ::rotateAbsToBody(q->getValue(3),q->getValue(4),q->getValue(5),q->getValue(6), v);
+  DEBUG_END("::rotateAbsToBody(SP::SiconosVector q, SP::SiconosVector v )\n");
 }
 
 void computeRotationMatrix(SP::SiconosVector q, SP::SimpleMatrix rotationMatrix  )
@@ -205,7 +205,7 @@ void computeRotationMatrixTransposed(SP::SiconosVector q, SP::SimpleMatrix rotat
 
 double getAxisAngle(double q0, double q1, double q2, double q3, SP::SiconosVector axis )
 {
-
+  DEBUG_BEGIN("getAxisAngle(double q0, double q1, double q2, double q3, SP::SiconosVector axis )\n");
   double angle = acos(q0) *2.0;
   //double f = sin( angle *0.5);
   double f = sqrt(1-q0*q0); // cheaper than sin ?
@@ -219,6 +219,9 @@ double getAxisAngle(double q0, double q1, double q2, double q3, SP::SiconosVecto
   {
     axis->zero();
   }
+  DEBUG_PRINTF("angle= %12.8e\n", angle);
+  DEBUG_EXPR(axis->display(););
+  DEBUG_END("getAxisAngle(double q0, double q1, double q2, double q3, SP::SiconosVector axis )\n");
   return angle;
 }
 double getAxisAngle(SP::SiconosVector q, SP::SiconosVector axis )

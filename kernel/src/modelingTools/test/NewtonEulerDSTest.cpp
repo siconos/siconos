@@ -138,7 +138,7 @@ void NewtonEulerDSTest::testNewtonEulerDSQuaternion()
   (*v)(2)=1.0;
 
 
-  ::rotate(q0, v );
+  ::rotateAbsToBody(q0, v );
   std::cout << "v : "<<std::endl;
   v->display();
   (*vref)(0)=1.0;
@@ -166,7 +166,7 @@ void NewtonEulerDSTest::testNewtonEulerDSQuaternion()
   R->display();
   Rref.display();
 
-  ::rotate(q01, v );
+  ::rotateAbsToBody(q01, v );
   std::cout << "v : "<<std::endl;
   v->display();
   (*vref)(0)=1.0;
@@ -206,7 +206,7 @@ void NewtonEulerDSTest::testNewtonEulerDSQuaternion()
   Rref(0,2)=1.0;
   Rref.display();
 
-  ::rotate(q02, v );
+  ::rotateAbsToBody(q02, v );
   std::cout << "v : "<<std::endl;
   v->display();
   (*vref)(0)=-1.0;
@@ -252,7 +252,7 @@ void NewtonEulerDSTest::testNewtonEulerDSQuaternion()
   Rref(2,2)=sqrt(2.0)/2.0;
   Rref.display();
 
-  ::rotate(q03, v);
+  ::rotateAbsToBody(q03, v);
   std::cout << "v : "<<std::endl;
   v->display();
   (*vref)(0)=-sqrt(2.0);
@@ -297,14 +297,21 @@ void NewtonEulerDSTest::testNewtonEulerDSQuaternionMObjToAbs()
   (*vref)(0)=sqrt(2.0);
   (*vref)(1)=1.0;
   (*vref)(2)=0.0;
+  std::cout << "v : "<<std::endl;
+  v->display();
+  std::cout << "vref : "<<std::endl;
+  vref->display();
+  std::cout << (*v-*vref).normInf()<<std::endl;
 
 
   //Old version double transpose !!!
   SiconosVector aux(3);
   SP::SimpleMatrix mObjToAbs(new SimpleMatrix(3,3));
-  ::computeMObjToAbs(q03,  mObjToAbs); // compute R^T
-  prod( *v, *mObjToAbs, aux); // multiply bu R^T^T
+  ::computeMObjToAbs(q03,  mObjToAbs); // should compute R^T but compute R for the moment
+  prod( *mObjToAbs, *v, aux); // multiply by R^T
   *v=aux;
+  std::cout << "v : "<<std::endl;
+  v->display();
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testNewtonEulerDSQuaternion : ", ((*v-*vref).normInf() <= std::numeric_limits<double>::epsilon()*10.0), true);
 
   // Possible alternative (but more expensive one than the new one below)
@@ -312,16 +319,22 @@ void NewtonEulerDSTest::testNewtonEulerDSQuaternionMObjToAbs()
   (*v)(1)=1.0;
   (*v)(2)=1.0;
   SP::SimpleMatrix mAbsToObj(new SimpleMatrix(3,3));
-  ::computeMAbsToObj(q03,  mAbsToObj); // Compute R
-  prod(*mAbsToObj, *v, aux); // multiply by R
+  ::computeMAbsToObj(q03,  mAbsToObj); // should compute R but compute R^T for the moment
+  prod(*v, *mAbsToObj, aux); // multiply by R^T^T
   *v=aux;
+  std::cout << "v : "<<std::endl;
+  v->display();
+
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testNewtonEulerDSQuaternion : ", ((*v-*vref).normInf() <= std::numeric_limits<double>::epsilon()*10.0), true);
 
   //New version
   (*v)(0)=1.0;
   (*v)(1)=1.0;
   (*v)(2)=1.0;
-  ::rotate(q03, v);
+  ::rotateAbsToBody(q03, v);
+  std::cout << "v : "<<std::endl;
+  v->display();
+
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testNewtonEulerDSQuaternion : ", ((*v-*vref).normInf() <= std::numeric_limits<double>::epsilon()*10.0), true);
 
 
