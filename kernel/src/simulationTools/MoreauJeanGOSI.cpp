@@ -359,13 +359,12 @@ void MoreauJeanGOSI::computeInitialNewtonState()
     if (_explicitNewtonEulerDSOperators)
     {
       if (Type::value(*ds) == Type::NewtonEulerDS){
-        // The goal is to update T() and MObjToAbs() one time at the beginning of the Newton Loop
+        // The goal is to update T() one time at the beginning of the Newton Loop
         // We want to be explicit on this function since we do not compute their Jacobians.
         SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS> (ds);
         SP::SiconosVector qold = d->qMemory()->getSiconosVector(0);
         //SP::SiconosVector q = d->q();
         computeT(qold,d->T());
-        computeMObjToAbs(qold,d->MObjToAbs());
       }
     }
     // The goal is to converge in one iteration of the system is almost linear
@@ -988,13 +987,12 @@ void MoreauJeanGOSI::prepareNewtonIteration(double time)
 
       SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
 
-      //  VA <2016-04-19 Tue> We compute T and MObjToAbs to be consitent with the Jacobian at the beginning of the Newton iteration and not at the end
+      //  VA <2016-04-19 Tue> We compute T to be consistent with the Jacobian at the beginning of the Newton iteration and not at the end
       Type::Siconos dsType = Type::value(*ds);
       if (dsType == Type::NewtonEulerDS)
       {
         SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS> (ds);
         computeT(d->q(),d->T());
-        computeMObjToAbs(d->q(),d->MObjToAbs());
       }
     }
 

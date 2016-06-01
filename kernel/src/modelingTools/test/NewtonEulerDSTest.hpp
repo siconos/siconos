@@ -36,6 +36,8 @@ private:
   // tests to be done ...
 
   CPPUNIT_TEST(testBuildNewtonEulerDS1);
+  CPPUNIT_TEST(testNewtonEulerDSQuaternion);
+  CPPUNIT_TEST(testNewtonEulerDSQuaternionMatrix);
   CPPUNIT_TEST(End);
 
   CPPUNIT_TEST_SUITE_END();
@@ -43,12 +45,14 @@ private:
   // \todo exception test
 
   void testBuildNewtonEulerDS1();
+  void testNewtonEulerDSQuaternion();
+  void testNewtonEulerDSQuaternionMatrix();
   // void testcomputeDS();
   void End();
 
   // Members
 
-  SP::SiconosVector q0, velocity0, u0;
+  SP::SiconosVector q0, q01,  velocity0, u0;
   double mass;
   SP::SiconosMatrix inertia;
 

@@ -30,12 +30,52 @@ typedef void (*FInt_NE)(double t, double* q, double* v, double *f, unsigned int 
 typedef void (*FExt_NE)(double t, double* f, unsigned int size_z, double *z);
 
 
-void computeMObjToAbs(SP::SiconosVector q, SP::SimpleMatrix mObjToAbs);
+void computeRotationMatrix(double q0, double q1, double q2, double q3, SP::SimpleMatrix rotationMatrix);
+
+void computeRotationMatrix(SP::SiconosVector q,  SP::SimpleMatrix rotationMatrix);
+void computeRotationMatrixTransposed(SP::SiconosVector q, SP::SimpleMatrix rotationMatrix);
+
+/* For a given position vector q, performs the rotation of the vector v
+ * w.r.t the quaternion that parametrize the rotation in q, that is the
+ * rotation of the body fixed frame with respect to the inertial frame.
+ * \param[in] q the position vector
+ * \param[in,out] v the vector to be rotated
+ */
+void rotateAbsToBody(SP::SiconosVector q, SP::SiconosVector v );
+/* For a given position vector q, performs the rotation of the matrix m
+ * w.r.t the quaternion that parametrize the rotation in q, that is the
+ * rotation of the body fixed frame with respect to the inertial frame.
+ * \param[in] q the position vector
+ * \param[in,out] m the vector to be rotated
+ */
+void rotateAbsToBody(SP::SiconosVector q, SP::SimpleMatrix m );
+void rotateAbsToBody(double q0, double q1, double q2, double q3, SP::SiconosVector v );
+void rotateAbsToBody(double q0, double q1, double q2, double q3, SP::SimpleMatrix m );
 
 
+/* For a given position vector q, express the vector v given in
+ * the inertial frame into to the bdy frame
+ * w.r.t the quaternion that parametrize the rotation in q.
+ * The operation amounts to multiplying by the transposed rotation matrix.
+ * the result is return in v
+ * \param[in] q the position vector
+ * \param[in,out] v the vector to be reexpressed
+ */
+void changeFrameAbsToBody(SP::SiconosVector q, SP::SiconosVector v );
+void changeFrameAbsToBody(SP::SiconosVector q, SP::SimpleMatrix m );
 
+void changeFrameBodyToAbs(SP::SiconosVector q, SP::SiconosVector v );
+void changeFrameBodyToAbs(SP::SiconosVector q, SP::SimpleMatrix m );
+
+void normalizeq(SP::SiconosVector q);
+double getAxisAngle(double q0, double q1, double q2, double q3, SP::SiconosVector axis );
+double getAxisAngle(SP::SiconosVector q, SP::SiconosVector axis );
+void setAxisAngle(SP::SiconosVector q, SP::SiconosVector axis, double angle);
 
 void computeT(SP::SiconosVector q, SP::SimpleMatrix T);
+
+
+
 /** \class NewtonEulerDS
  *  \brief NewtonEuler non linear dynamical systems - Second Order Non Linear Dynamical Systems.
  *   NewtonEuler non linear dynamical systems - Derived from DynamicalSystem -
@@ -114,11 +154,6 @@ protected:
 
   /** The time derivative of \f$q\f$, \f$\dot q\f$*/
   SP::SiconosVector _dotq;
-
-  /* the rotation matrix that converts a vector in body coordinates (in the body fixed frame)
-   * in the absolute coordinates in the inertial frame of reference.
-   */
-  SP::SimpleMatrix _MObjToAbs;
 
   /** Inertial matrix
    */
@@ -655,7 +690,7 @@ public:
   virtual void computeMExt(double time, SP::SiconosVector mExt);
 
   virtual void computeMExtObj(double time);
-  virtual void computeMExtObj(double time, SP::SiconosVector q, SP::SiconosMatrix mObjToAbs, SP::SiconosVector mExtObj );
+  virtual void computeMExtObj(double time, SP::SiconosVector q, SP::SiconosVector mExtObj );
 
   void computeJacobianMExtObjqByFD(double time, SP::SiconosVector q);
 
@@ -960,22 +995,6 @@ public:
   {
     return _reactionToBoundaryConditions;
   };
-
-
-  /** get the matrix converting the object coordinates in the absolute coordinates.
-      \return SP::SimpleMatrix
-   */
-  SP::SimpleMatrix MObjToAbs()
-  {
-    return _MObjToAbs;
-  }
-  /*update the _MObjToAbs from the current quaternion.*/
-  void computeMObjToAbs();
-
-  // /* update the _MObjToAbs from a given quaternion.
-  //  * \param q
-  //  */
-  // void computeMObjToAbs(SP::SiconosVector q);
 
   ACCEPT_STD_VISITORS();
 

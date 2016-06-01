@@ -79,6 +79,17 @@ from scipy import constants
 
 import time
 
+def arguments():
+    """Returns tuple containing dictionary of calling function's
+    named arguments and a list of calling function's unnamed
+    positional arguments.
+    """
+    from inspect import getargvalues, stack
+    posname, kwname, args = getargvalues(stack()[1][0])[-3:]
+    posargs = args.pop(posname, [])
+    args.update(args.pop(kwname, []))
+    return args, posargs
+
 
 @contextmanager
 def tmpfile(suffix='', prefix='siconos_io', contents=None):
@@ -1264,7 +1275,7 @@ class Hdf5():
 
     def addObject(self, name, shapes,
                   translation,
-                  orientation=[0, 1, 0, 0],
+                  orientation=[1, 0, 0, 0],
                   velocity=[0, 0, 0, 0, 0, 0],
                   mass=0, inertia=None):
         """
@@ -1273,7 +1284,7 @@ class Hdf5():
         The initial translation is mandatory : [x, y z].
         If the mass is zero this is a static object.
         """
-
+        #print(arguments())
         if len(orientation) == 2:
             # axis + angle
             axis = orientation[0]
@@ -1496,6 +1507,7 @@ class Hdf5():
         simulation.insertIntegrator(self._osi)
         simulation.insertNonSmoothProblem(osnspb)
         simulation.setNewtonMaxIteration(Newton_max_iter)
+        simulation.setNewtonTolerance(1e-10)
 
         k0 = 1 + len(times)
         k = k0

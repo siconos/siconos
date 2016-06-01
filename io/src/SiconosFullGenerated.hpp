@@ -143,8 +143,8 @@ SICONOS_IO_REGISTER_WITH_BASES(NewtonImpactNSL,(NonSmoothLaw),
 SICONOS_IO_REGISTER_WITH_BASES(NewtonEulerFrom1DLocalFrameR,(NewtonEulerR),
   (_AUX1)
   (_AUX2)
-  (_MObjToAbs)
-  (_Mabs_C)
+  (_rotationMatrixAbsToBody)
+  (_RotationAbsToContactFrame)
   (_NPG1)
   (_NPG2)
   (_Nc)
@@ -198,7 +198,6 @@ SICONOS_IO_REGISTER(Relation,
   (_subType))
 SICONOS_IO_REGISTER_WITH_BASES(NewtonEulerDS,(DynamicalSystem),
   (_I)
-  (_MObjToAbs)
   (_T)
   (_Tdot)
   (_boundaryConditions)

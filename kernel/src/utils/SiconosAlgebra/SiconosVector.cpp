@@ -37,6 +37,8 @@ namespace siconosBindings = boost::numeric::bindings::blas;
 #include "SiconosVector.hpp"
 #include "SiconosAlgebra.hpp"
 
+//#define DEBUG_MESSAGES
+#include "debug.h"
 
 // Do not document
 /// @cond
@@ -769,7 +771,10 @@ SiconosVector& SiconosVector::operator -= (const BlockVector& vIn)
 
 bool operator == (const SiconosVector &m, const SiconosVector &x)
 {
-  return ((m - x).norm2() < std::numeric_limits<double>::epsilon());
+  DEBUG_PRINTF("norm = %12.8e \n", (m - x).normInf() );
+  DEBUG_PRINTF("std::numeric_limits<double>::epsilon() = %12.8e \n", std::numeric_limits<double>::epsilon() );
+  DEBUG_EXPR(std::cout << std::boolalpha << ( (m - x).normInf() <= std::numeric_limits<double>::epsilon()) <<std::endl;);
+  return ((m - x).normInf() <= std::numeric_limits<double>::epsilon());
 }
 
 //==================

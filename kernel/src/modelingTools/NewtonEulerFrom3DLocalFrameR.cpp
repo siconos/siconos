@@ -25,8 +25,9 @@
 
 #include "op3x3.h"
 
-//#define DEBUG_STDOUT
-//#define DEBUG_MESSAGES
+// #define DEBUG_NOCOLOR
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
 #include "debug.h"
 
 /*
@@ -40,7 +41,7 @@ void NewtonEulerFrom3DLocalFrameR::initComponents(Interaction& inter, VectorOfBl
   _jachq.reset(new SimpleMatrix(3, qSize));
 
 
-  _Mabs_C.reset(new SimpleMatrix(3, 3));
+  _RotationAbsToContactFrame.reset(new SimpleMatrix(3, 3));
   _AUX2.reset(new SimpleMatrix(3, 3));
   //  _isContact=1;
 }
@@ -73,18 +74,18 @@ void NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts(SP::SiconosVect
   double * pt = t;
   orthoBaseFromVector(&Nx, &Ny, &Nz, pt, pt + 1, pt + 2, pt + 3, pt + 4, pt + 5);
   pt = t;
-  _Mabs_C->setValue(0, 0, Nx);
-  _Mabs_C->setValue(1, 0, *pt);
-  _Mabs_C->setValue(2, 0, *(pt + 3));
-  _Mabs_C->setValue(0, 1, Ny);
-  _Mabs_C->setValue(1, 1, *(pt + 1));
-  _Mabs_C->setValue(2, 1, *(pt + 4));
-  _Mabs_C->setValue(0, 2, Nz);
-  _Mabs_C->setValue(1, 2, *(pt + 2));
-  _Mabs_C->setValue(2, 2, *(pt + 5));
+  _RotationAbsToContactFrame->setValue(0, 0, Nx);
+  _RotationAbsToContactFrame->setValue(1, 0, *pt);
+  _RotationAbsToContactFrame->setValue(2, 0, *(pt + 3));
+  _RotationAbsToContactFrame->setValue(0, 1, Ny);
+  _RotationAbsToContactFrame->setValue(1, 1, *(pt + 1));
+  _RotationAbsToContactFrame->setValue(2, 1, *(pt + 4));
+  _RotationAbsToContactFrame->setValue(0, 2, Nz);
+  _RotationAbsToContactFrame->setValue(1, 2, *(pt + 2));
+  _RotationAbsToContactFrame->setValue(2, 2, *(pt + 5));
 
-  DEBUG_PRINT("_Mabs_C:\n");
-  DEBUG_EXPR(_Mabs_C->display(););
+  DEBUG_PRINT("_RotationAbsToContactFrame:\n");
+  DEBUG_EXPR(_RotationAbsToContactFrame->display(););
 
   _NPG1->zero();
 
@@ -98,48 +99,35 @@ void NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts(SP::SiconosVect
   (*_NPG1)(2, 1) = (G1x - Px);
   (*_NPG1)(2, 2) = 0;
 
-  DEBUG_PRINT("lever arm skew matrix\n");
+  DEBUG_PRINT("lever arm skew matrix :\n");
   DEBUG_EXPR(_NPG1->display(););
 
-//  d1->computeMObjToAbs();
-//  SimpleMatrix& Mobj1_abs = *d1->MObjToAbs();
 
-  computeMObjToAbs(q1,_MObjToAbs);
-  DEBUG_EXPR(_MObjToAbs->display(););
+  computeRotationMatrix(q1,_rotationMatrixAbsToBody);
+  DEBUG_EXPR(_rotationMatrixAbsToBody->display(););
 
 
 
-  prod(*_NPG1, *_MObjToAbs, *_AUX1, true);
+  prod(*_NPG1, *_rotationMatrixAbsToBody, *_AUX1, true);
 
-  DEBUG_PRINT("NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts, *_MObjToAbs:");
-  DEBUG_EXPR_WE(_MObjToAbs->display(););
-  DEBUG_PRINT("NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts, AUX1:");
-  DEBUG_EXPR_WE(_AUX1->display(););
-  DEBUG_PRINT("NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts, AUX2:");
+  DEBUG_EXPR(_rotationMatrixAbsToBody->display(););
+  DEBUG_EXPR(_AUX1->display(););
+
+  prod(*_RotationAbsToContactFrame, *_AUX1, *_AUX2, true);
+
+  DEBUG_EXPR(_RotationAbsToContactFrame->display(););
+  DEBUG_EXPR(_AUX1->display(););
   DEBUG_EXPR(_AUX2->display(););
-
-
-  prod(*_Mabs_C, *_AUX1, *_AUX2, true);
-
-  DEBUG_PRINT("NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts, Mabs_C:");
-  DEBUG_EXPR_WE(_Mabs_C->display(););
-  DEBUG_PRINT("NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts, AUX1:");
-  DEBUG_EXPR_WE(_AUX1->display(););
-  DEBUG_PRINT("NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts, AUX2:");
-  DEBUG_EXPR_WE(_AUX2->display(););
 
 
   for (unsigned int ii = 0; ii < 3; ii++)
     for (unsigned int jj = 0; jj < 3; jj++)
-      _jachqT->setValue(ii, jj, _Mabs_C->getValue(ii, jj));
+      _jachqT->setValue(ii, jj, _RotationAbsToContactFrame->getValue(ii, jj));
 
   for (unsigned int ii = 0; ii < 3; ii++)
     for (unsigned int jj = 3; jj < 6; jj++)
       _jachqT->setValue(ii, jj, _AUX2->getValue(ii, jj - 3));
 
-
-
-  DEBUG_PRINT("NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts, _jahcqT:\n");
   DEBUG_EXPR(_jachqT->display(););
   // DEBUG_EXPR_WE(
   //   SP::SimpleMatrix jaux(new SimpleMatrix(*_jachqT));
@@ -193,15 +181,15 @@ void NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts(SP::SiconosVect
   double * pt = t;
   orthoBaseFromVector(&Nx, &Ny, &Nz, pt, pt + 1, pt + 2, pt + 3, pt + 4, pt + 5);
   pt = t;
-  _Mabs_C->setValue(0, 0, Nx);
-  _Mabs_C->setValue(1, 0, *pt);
-  _Mabs_C->setValue(2, 0, *(pt + 3));
-  _Mabs_C->setValue(0, 1, Ny);
-  _Mabs_C->setValue(1, 1, *(pt + 1));
-  _Mabs_C->setValue(2, 1, *(pt + 4));
-  _Mabs_C->setValue(0, 2, Nz);
-  _Mabs_C->setValue(1, 2, *(pt + 2));
-  _Mabs_C->setValue(2, 2, *(pt + 5));
+  _RotationAbsToContactFrame->setValue(0, 0, Nx);
+  _RotationAbsToContactFrame->setValue(1, 0, *pt);
+  _RotationAbsToContactFrame->setValue(2, 0, *(pt + 3));
+  _RotationAbsToContactFrame->setValue(0, 1, Ny);
+  _RotationAbsToContactFrame->setValue(1, 1, *(pt + 1));
+  _RotationAbsToContactFrame->setValue(2, 1, *(pt + 4));
+  _RotationAbsToContactFrame->setValue(0, 2, Nz);
+  _RotationAbsToContactFrame->setValue(1, 2, *(pt + 2));
+  _RotationAbsToContactFrame->setValue(2, 2, *(pt + 5));
 
   _NPG1->zero();
 
@@ -230,35 +218,28 @@ void NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts(SP::SiconosVect
 
 
 
-//  d1->computeMObjToAbs();
-//  SimpleMatrix& Mobj1_abs = *d1->MObjToAbs();
 
-  computeMObjToAbs(q1,_MObjToAbs);
-
-  prod(*_NPG1, *_MObjToAbs, *_AUX1, true);
-  prod(*_Mabs_C, *_AUX1, *_AUX2, true);
+  computeRotationMatrix(q1,_rotationMatrixAbsToBody);
+  prod(*_NPG1, *_rotationMatrixAbsToBody, *_AUX1, true);
+  prod(*_RotationAbsToContactFrame, *_AUX1, *_AUX2, true);
 
 
   for (unsigned int ii = 0; ii < 3; ii++)
     for (unsigned int jj = 0; jj < 3; jj++)
-      _jachqT->setValue(ii, jj, _Mabs_C->getValue(ii, jj));
+      _jachqT->setValue(ii, jj, _RotationAbsToContactFrame->getValue(ii, jj));
 
   for (unsigned int ii = 0; ii < 3; ii++)
     for (unsigned int jj = 3; jj < 6; jj++)
       _jachqT->setValue(ii, jj, _AUX2->getValue(ii, jj - 3));
 
-//  d2->computeMObjToAbs();
-//  SimpleMatrix& Mobj2_abs = *d2->MObjToAbs();
 
-
-  computeMObjToAbs(q2,_MObjToAbs);
-
-  prod(*_NPG2, *_MObjToAbs, *_AUX1, true);
-  prod(*_Mabs_C, *_AUX1, *_AUX2, true);
+  computeRotationMatrix(q2,_rotationMatrixAbsToBody);
+  prod(*_NPG2, *_rotationMatrixAbsToBody, *_AUX1, true);
+  prod(*_RotationAbsToContactFrame, *_AUX1, *_AUX2, true);
 
   for (unsigned int ii = 0; ii < 3; ii++)
     for (unsigned int jj = 0; jj < 3; jj++)
-      _jachqT->setValue(ii, jj + 6, -_Mabs_C->getValue(ii, jj));
+      _jachqT->setValue(ii, jj + 6, -_RotationAbsToContactFrame->getValue(ii, jj));
 
   for (unsigned int ii = 0; ii < 3; ii++)
     for (unsigned int jj = 3; jj < 6; jj++)

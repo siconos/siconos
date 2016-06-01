@@ -36,6 +36,7 @@ set(${COMPONENT}_SWIG_INCLUDE_DIRECTORIES
   ${CMAKE_SOURCE_DIR}/kernel/swig)
 
 configure_file(mechanics/contact_detection/tools.py ${SICONOS_SWIG_ROOT_DIR}/mechanics/contact_detection/tools.py)
+configure_file(mechanics/contact_detection/convexhull.py  ${SICONOS_SWIG_ROOT_DIR}/mechanics/contact_detection/convexhull.py )
 include(swig_python_tools)
 swig_module_setup(${COMPONENT}_PYTHON_MODULES)
 build_python_tests()
