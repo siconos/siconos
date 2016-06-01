@@ -1400,6 +1400,7 @@ class Hdf5():
         simulation.insertIntegrator(self._osi)
         simulation.insertNonSmoothProblem(osnspb)
         simulation.setNewtonMaxIteration(Newton_max_iter)
+        simulation.setNewtonTolerance(1e-10)
 
         k0 = 1 + len(times)
         k = k0
