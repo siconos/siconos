@@ -18,7 +18,9 @@ def usage():
     print '{0}: Usage'.format(sys.argv[0])
     print """
     {0} [--help] [tmin=<float value>] [tmax=<float value>]
-        [--cf-scale=<float value>] [--vtk-export] <hdf5 file>
+        [--cf-scale=<float value>] [--vtk-export]
+        [--advance=<'fps' or float value>] [--fps=float value]
+        <hdf5 file>
     """
     print """
     Options : 
@@ -37,6 +39,10 @@ def usage():
        small with respect to the characteristic dimesion
      --vtk-export    
        export visualization in vtk files (to use in paraview for instance)
+     --advance= value or 'fps'
+       automatically advance time during recording (default : don't advance)
+     --fps= value
+       frames per second of generated video (default 25)
     """
 
 
@@ -54,7 +60,8 @@ def add_compatiblity_methods(obj):
 try:
     opts, args = getopt.gnu_getopt(sys.argv[1:], '',
                                    ['help', 'dat', 'tmin=', 'tmax=',
-                                    'cf-scale=', 'normalcone-ratio=','vtk-export'])
+                                    'cf-scale=', 'normalcone-ratio=','vtk-export',
+                                    'advance=','fps='])
 except getopt.GetoptError, err:
         sys.stderr.write('{0}\n'.format(str(err)))
         usage()
@@ -67,6 +74,8 @@ normalcone_ratio = 1
 time_scale_factor=1
 vtk_export_mode = False
 view_cycle = -1
+advance_by_time = None
+frames_per_second = 25
 
 for o, a in opts:
 
@@ -89,6 +98,17 @@ for o, a in opts:
     elif o == '--vtk-export':
         vtk_export_mode = True
 
+    elif o == '--advance':
+        if a=='fps':
+            advance_by_time = 1.0 / frames_per_second
+        else:
+            advance_by_time = float(a)
+
+    elif o == '--fps':
+        frames_per_second = int(a)
+
+if frames_per_second == 0:
+    frames_per_second = 25
 
 if len(args) > 0:
     io_filename = args[0]
@@ -943,7 +963,7 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
 
         recorder = vtk.vtkOggTheoraWriter()
         recorder.SetQuality(2)
-        recorder.SetRate(25)
+        recorder.SetRate(frames_per_second)
         recorder.SetFileName('xout.avi')
         recorder.SetInputConnection(image_maker.GetOutputPort())
 
@@ -1161,8 +1181,20 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
 
             def recorder_observer(self, obj, event):
                 if self._recording:
+                    if advance_by_time is not None:
+                        self._time += advance_by_time
+                        slwsc.SetEnabled(False) # Scale slider
+                        xslwsc.SetEnabled(False) # Time scale slider
+                        #slider_widget.SetEnabled(False) # Time slider
+                        #widget.SetEnabled(False) # Axis widget
+                    self.update()
                     image_maker.Modified()
                     recorder.Write()
+                    if advance_by_time is not None:
+                        slwsc.SetEnabled(True)
+                        xslwsc.SetEnabled(True)
+                        #slider_widget.SetEnabled(True)
+                        #widget.SetEnabled(True) # Axis widget
 
         slider_repres = vtk.vtkSliderRepresentation2D()
 
