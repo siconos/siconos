@@ -4,32 +4,42 @@
 \begin{tabular}{lll}
   \centering
   Author &  O. Bonnefon &2010\\
-  Revision& section 9.1 to 9.3 V. Acary&  05/09/2011
+  Revision& section \ref{Sec:NE_motion} to \ref{Sec:NE_TD} V. Acary&  05/09/2011\\
+  Revision& section \ref{Sec:NE_motion}  V. Acary&  01/06/2016\\
+
 \end{tabular}
 \section{The Equations of motion}
-
+\label{Sec:NE_motion}
 The equations of motion in the Newton-Euler(\cite{Wittenburg1977,Haug89} formalism can be stated as
 \begin{equation}
   \label{eq:NewtonEuler}
   \left\{\begin{array}{rcl}
-    M \dot V &=& F_{ext}(X, V, \Omega, R), \\
-    I \dot \Omega + \Omega \wedge I\Omega &=&  M_{ext}(X,V, \Omega, R), \\
+    M \dot V &=& F(X, V, \Omega, R), \\
+    I \dot \Omega + \Omega \wedge I\Omega &=&  M(X,V, \Omega, R), \\
     \dot X &=& V, \\
     \dot R &=& R \tilde \Omega,\quad R^{-1}=R^T,\quad  \det(R)=1 .
 \end{array}\right.
 \end{equation}
 with
 \begin{itemize}
-\item $x_G,v_G$ position and velocity of the center of mass expressed in a inertial frame of reference
-\item $\Omega$ angular velocity vector expressed in the body--fixed frame (frame attached to the object)
+\item $x_G,v_G$ (spatial or inertial) position and velocity of the center of mass expressed in a inertial frame of reference
+\item $\Omega$  the (convected) angular velocity vector expressed in the body--fixed frame (frame attached to the body), 
 \item $R$ rotation matrix from the inertial frame to the body--fixed frame \footnote{$R^{-1}=R^T, \det(R)=1$, \textit{i.e} $ R\in SO^+(3)$}
 \item $M=m\,I_{3\times 3}$ diagonal mass matrix
 \item $m \in \RR$ mass
-\item $I$ constant inertia matrix
-\item $F_{ext}$ and $ M_{ext}$ are the external applied forces and torques
+\item $I$ constant matrix of inertia moment 
+\item $F$ and $ M$ are the total applied (spatial) forces and  (convected) torques
 \end{itemize}
 
+\begin{ndrva}
+  Add a formulation in terms of spatial angular velocity ($\omega = R
+  \Omega$) and the spatial total applied moment ($m = R M$) and add
+  the equation
 
+$$ I \dot \Omega + \Omega \wedge I\Omega =  R^T m(X,V, \Omega, R), $$
+
+
+\end{ndrva}
 \section{The relation}
 
 Let us define by $q$ by  the position and the orientation, we don't focus on the  representation of the orientation.
@@ -50,6 +60,7 @@ Using  this operator, (\ref{Relation}) leads to :
 \[\dot Y = C T \left(\begin{array}{l} V\\ \Omega\end{array}\right) + \dot H\]
 
 \section{Time discretization $t_k \to t_{k+1}$, and implementation in Siconos}
+\label{Sec:NE_TD}
 The goal of this section is to describe the computation done in Siconos. The unknown are denoted according to the Siconos convention.
 \subsection{The unknowns}
 
@@ -146,7 +157,7 @@ This section describes the $T$ operator in this case. Computation using quaterni
 \[\dot q = \frac{1}{2} q (0,\Omega)\]
 So using the matrix formulation:
 \[\dot q = \frac{1}{2}  \left(\begin{array}{cccc} q_0&-q_1&-q_2&-q_3 \\ q_1&q_0&-q_3&q_2\\
-  q_2&q_3&q_0&-q_1\\ q_3&-q_2&-q_1&q_0\end{array}\right)  \left(\begin{array}{c} 0 \\ \Omega
+  q_2&q_3&q_0&-q_1\\ q_3&-q_2&q_1&q_0\end{array}\right)  \left(\begin{array}{c} 0 \\ \Omega
   \end{array}\right) =
   T_q   \Omega  \]
   That lead to :
