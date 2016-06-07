@@ -21,15 +21,17 @@ import pydoc
 with Hdf5() as io:
 
     # Definition of a tetrahedron as a convex shape
-    io.addConvexShape('Tetra', [
-        (-1.0, 1.0, -1.0),
-        (1.0, -1.0, -1.0),
-        (-1.0, -1.0, 1.0),
-        (-1.0, 1.0, 1.0)])
+    import numpy
+    pts = numpy.array([(-1.0, 1.0, 1.0),
+                       (1.0, -1.0, 1.0),
+                       (-1.0, -1.0, 1.0),
+                       (0.0, 0.0, -1.0)])
+    io.addConvexShape('Tetra', pts - pts.mean(0),
+                      insideMargin=0.05, outsideMargin=0.1)
 
     # Definition of the ground shape
-    io.addPrimitiveShape('Ground', 'Box', (10, 10, 0.1),
-                         insideMargin=0.05, outsideMargin=0.1)
+    io.addPrimitiveShape('Ground', 'Box', (10, 10, 1),
+                         insideMargin=0.2, outsideMargin=0.1)
 
     # Definition of a non smooth law. As no group ids are specified it
     # is between contactors of group id 0.

@@ -531,29 +531,50 @@ void BulletBroadphase::visit(SP::SiconosConvexHull ch)
   if (ch->vertices()->size(1) != 3)
     throw SiconosException("Convex hull vertices matrix must have 3 columns.");
 
-  // TODO: We can probably avoid this copy
+  // Copy and scale the points
   int rows = ch->vertices()->size(0);
-  btScalar *pts = new btScalar[rows*3];
+  std::vector<btScalar> pts;
+  pts.resize(rows*3);
   for (int r=0; r < rows; r++) {
-    pts[r*3+0] = (*ch->vertices())(r, 0);
-    pts[r*3+1] = (*ch->vertices())(r, 1);
-    pts[r*3+2] = (*ch->vertices())(r, 2);
+    pts[r*3+0] = (*ch->vertices())(r, 0) * _options.worldScale;
+    pts[r*3+1] = (*ch->vertices())(r, 1) * _options.worldScale;
+    pts[r*3+2] = (*ch->vertices())(r, 2) * _options.worldScale;
   }
 
-  // Internal margin implemented by shrinking the hull
-  // TODO: Do we need the shrink clamp? (last parameter)
-  btConvexHullComputer shrinkCH;
-  shrinkCH.compute(pts, sizeof(btScalar)*3, rows,
-                   ch->insideMargin(), 0);
+  SP::btConvexHullShape btch;
+  if (ch->insideMargin() == 0)
+  {
+    // Create a convex hull directly with no further processing.
+    // TODO: In case of worldScale=1, maybe we could avoid the copy to pts.
+    btch.reset(new btConvexHullShape(&pts[0], rows, sizeof(btScalar)*3));
+  }
+  else
+  {
+    // Internal margin implemented by shrinking the hull
+    // TODO: Do we need the shrink clamp? (last parameter)
+    btConvexHullComputer shrinkCH;
+    btScalar shrunkBy = shrinkCH.compute(&pts[0], sizeof(btScalar)*3, rows,
+                                         ch->insideMargin() * _options.worldScale,
+                                         0);
+    if (shrunkBy < 0) {
+      // TODO: Warning
+      "insideMargin is too large, convex hull would be too small.";
+      btch.reset(new btConvexHullShape(&pts[0], rows, sizeof(btScalar)*3));
+      ch->setInsideMargin(0);
+    }
+    else {
+      btch.reset(new btConvexHullShape);
+      for (int i=0; i < shrinkCH.vertices.size(); i++) {
+        const btVector3 &v(shrinkCH.vertices[i]);
+        btch->addPoint(v, false);
+      }
+      ch->setInsideMargin(shrunkBy / _options.worldScale);
+    }
+  }
 
-  SP::btConvexHullShape btch(new btConvexHullShape);
-  for (int v=0; v < shrinkCH.vertices.size(); v++)
-    btch->addPoint(shrinkCH.vertices[v], false);
+  // Add external margin and recalc bounding box
+  btch->setMargin((ch->insideMargin() + ch->outsideMargin()) * _options.worldScale);
   btch->recalcLocalAabb();
-  delete pts;
-
-  // Add external margin
-  btch->setMargin(ch->insideMargin() + ch->outsideMargin());
 
   // initialization
   visit_helper(ch, btch, impl->chMap);
@@ -575,7 +596,7 @@ void BulletBroadphase::update(SP::SiconosConvexHull ch)
 
   // TODO
   //btbox->setLocalScaling(btVector3(sx, sy, sz));
-  //btbox->setMargin((box->insideMargin() + box->outsideMargin()) * _options.worldScale);
+  btch->setMargin((ch->insideMargin() + ch->outsideMargin()) * _options.worldScale);
 
   // Update object parameters
   SP::btCollisionObject btobject(impl->objectMap[ch]);
