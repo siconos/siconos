@@ -14,7 +14,7 @@ siconos.io.mechanics_io.use_proposed = True
 
 options = siconos.io.mechanics_io.BulletOptions()
 options.worldScale = 1.0
-options.breakingThreshold = 0.4
+options.breakingThreshold = 0.04
 
 import pydoc
 # Creation of the hdf5 file for input/output
