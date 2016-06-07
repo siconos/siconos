@@ -21,14 +21,7 @@
 #
 #====================================================================================
 # Set minimum version for cmake
-cmake_minimum_required(VERSION 2.8.7)
-
-# Set policies (see http://www.cmake.org/cmake/help/v3.0/manual/cmake-policies.7.html)
-# MACOSX_RPATH required from cmake 3.0.
-# See http://www.kitware.com/blog/home/post/510
-if(POLICY CMP0042)
-  cmake_policy(SET CMP0042 OLD)
-endif()
+cmake_minimum_required(VERSION 3.0.2)
 
 # Check path to the current install of @PROJECT_NAME@.
 set(@PROJECT_NAME@_ROOT_DIR @CMAKE_INSTALL_PREFIX@)

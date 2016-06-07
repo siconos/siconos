@@ -9,14 +9,7 @@
 # ============= Global 'standard' cmake Settings =============
 
 # Set minimum version for cmake
-cmake_minimum_required(VERSION 2.8.9)
-
-# Set policies (see http://www.cmake.org/cmake/help/v3.0/manual/cmake-policies.7.html)
-# MACOSX_RPATH required from cmake 3.0.
-# See http://www.kitware.com/blog/home/post/510
-if(POLICY CMP0042)
-  cmake_policy(SET CMP0042 OLD)
-endif()
+cmake_minimum_required(VERSION 3.0.2)
 
 # Set cmake modules directory (i.e. the one which contains all user-defined FindXXX.cmake files among other things)
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
