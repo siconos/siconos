@@ -692,6 +692,20 @@ visually, but generally physics is left to an external solution.
 | OpenSG         | http://www.opensg.org/         | C++ | LGPL v2         |
 | OpenSceneGraph | http://www.openscenegraph.org/ | C++ | LGPL (modified) |
 
+** Simulators
+
+A simulator is a software environment that integrates a simulation engine for a
+particular purpose, such as robotics, circuit design, etc.  These could be good
+candidates for integrating Siconos as a back-end/engine.
+
+| Name          | URL                                       | Type        | Engine              | Language | Licence    |
+|---------------+-------------------------------------------+-------------+---------------------+----------+------------|
+| Gazebo        | http://gazebosim.org/                     | Robotics    | Multi               | C++      | Apache 2.0 |
+| MORSE         | http://www.openrobots.org/morse/          | Robotics    | Bullet              | Python   | BSD        |
+| Blender       | https://www.blender.org                   | Art/etc     | Bullet              | C++/Py   | GPL 2+     |
+| RoboCup       | https://sourceforge.net/projects/sserver/ | Robotics    | SimSpark            | C++      | LGPL 3     |
+| OpenSimulator | http://opensimulator.org/                 | "Cloud" sim | ODE / Bullet(expr.) | C#       | Permissive |
+
 * Footnotes
 
 
