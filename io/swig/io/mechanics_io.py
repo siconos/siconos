@@ -650,7 +650,9 @@ class Hdf5():
             nslaw = nslawClass(float(self._nslaws[name].attrs['e']), 0.,
                                float(self._nslaws[name].attrs['mu']), 3)
             if use_proposed:
-                pass # TODO
+                self._broadphase.insertNonSmoothLaw(nslaw,
+                                        int(self._nslaws[name].attrs['gid1']),
+                                        int(self._nslaws[name].attrs['gid2']));
             else:
                 self._broadphase.insert(nslaw,
                                         int(self._nslaws[name].attrs['gid1']),
@@ -710,6 +712,7 @@ class Hdf5():
                     # shp.setPosition(c.translation + c.orientation)
                     pos = (translation + orientation)
                     shp.setPosition(pos)
+                    shp.setGroup(c.group)
                     print('Adding shape %s to static contactor'%c.name, pos)
                     self._static_contactor.addShape(shp)
 
@@ -718,8 +721,13 @@ class Hdf5():
                     self._static_orientations.append(orientation)
 
                     self._static_transforms.append(
-                        btTransform(orientation[1:3]+orientation[:1],
-                                    translation)
+                        btTransform(btQuaternion(orientation[1],
+                                                 orientation[2],
+                                                 orientation[3],
+                                                 orientation[0]),
+                                    btVector3(translation[0],
+                                              translation[1],
+                                              translation[2])))
 
             elif mass == 0.:
                 # a static object
@@ -781,6 +789,7 @@ class Hdf5():
                 for c in contactors:
                     shp = self._shape.get(c.name)
                     shp.setPosition(c.translation + c.orientation)
+                    shp.setGroup(c.group)
                     contactor.addShape(shp)
 
                 body.setContactor(contactor)

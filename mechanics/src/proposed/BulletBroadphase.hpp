@@ -105,6 +105,9 @@ public:
   void updateGraph();
   void performBroadphase();
 
+  void insertNonSmoothLaw(SP::NonSmoothLaw, int group1, int group2);
+  SP::NonSmoothLaw nonSmoothLaw(int group1, int group2);
+
   const BulletOptions &options() const { return _options; }
   const BulletStatistics &statistics() const { return _stats; }
   void resetStatistics() { _stats = BulletStatistics(); }

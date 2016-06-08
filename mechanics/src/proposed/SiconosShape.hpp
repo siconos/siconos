@@ -56,22 +56,26 @@ protected:
   SP::SiconosVector _position;
   double _inside_margin;
   double _outside_margin;
+  int _group;
 
   SiconosShape(float x, float y, float z)
     : _position(new SiconosVector(7))
+    , _group(0)
+    , _inside_margin(0.1)
+    , _outside_margin(0.1)
   {
     _position->zero();
     (*_position)(0) = x; // position
     (*_position)(1) = y;
     (*_position)(2) = z;
     (*_position)(3) = 1.0; // quaternion
-
-    _inside_margin = 0.1;
-    _outside_margin = 0.1;
   }
 
   SiconosShape(const SP::SiconosVector pos)
     : _position(new SiconosVector(7))
+    , _group(0)
+    , _inside_margin(0.1)
+    , _outside_margin(0.1)
   {
     switch (pos->size()) {
     case 3:
@@ -120,6 +124,10 @@ public:
   double insideMargin() { return _inside_margin; }
 
   double outsideMargin() { return _outside_margin; }
+
+  void setGroup(int group) { _group = group; }
+
+  int group() { return _group; }
 
   // TODO orientation
 

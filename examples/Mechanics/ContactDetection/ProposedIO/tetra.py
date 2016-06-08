@@ -35,13 +35,15 @@ with Hdf5() as io:
 
     # Definition of a non smooth law. As no group ids are specified it
     # is between contactors of group id 0.
-    io.addNewtonImpactFrictionNSL('contact', mu=0.3)
+    io.addNewtonImpactFrictionNSL('contact', mu=0.3, e=0.9,
+                                  collision_group1=1,
+                                  collision_group2=2)
 
     # The cube object made with an unique Contactor : the tetrahedron shape.
     # As a mass is given, it is a dynamic system involved in contact
     # detection and in the simulation.  With no group id specified the
     # Contactor belongs to group 0
-    io.addObject('cube', [Contactor('Tetra')],
+    io.addObject('cube', [Contactor('Tetra', collision_group=1)],
                  translation=[0, 0, 4],
                  velocity=[0, 0, 0, 0, 0, 0],
                  mass=1)
@@ -49,7 +51,7 @@ with Hdf5() as io:
     # the ground object made with the ground shape. As the mass is
     # not given, it is a static object only involved in contact
     # detection.
-    io.addObject('ground', [Contactor('Ground')],
+    io.addObject('ground', [Contactor('Ground', collision_group=2)],
                  translation=[0, 0, -0.1])
 
 # Run the simulation from the inputs previously defined and add

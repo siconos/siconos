@@ -54,6 +54,9 @@ public:
   virtual void updateGraph() = 0;
   virtual void performBroadphase() = 0;
 
+  virtual void insertNonSmoothLaw(SP::NonSmoothLaw, int group1, int group2) = 0;
+  virtual SP::NonSmoothLaw nonSmoothLaw(int group1, int group2) = 0;
+
   SP::Model model() { return _model; }
 };
 

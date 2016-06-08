@@ -113,7 +113,8 @@ protected:
 
   std::map<Interaction*, bool> orphanedInteractions;
 
-  SP::NonSmoothLaw nslaw;
+  // Non-smooth laws
+  std::map<std::pair<int,int>, SP::NonSmoothLaw> nslaws;
 
 public:
   BulletBroadphase_impl() {}
@@ -178,8 +179,6 @@ void BulletBroadphase::initialize_impl()
   btGImpactCollisionAlgorithm::registerAlgorithm(&*impl->_dispatcher);
   impl->_collisionWorld->getDispatchInfo().m_useContinuous = false;
   impl->_collisionWorld->getDispatchInfo().m_convexConservativeDistanceThreshold = 0.1f;
-
-  impl->nslaw.reset(new NewtonImpactFrictionNSL(0.8, 0., 0.0, 3));
 }
 
 BulletBroadphase::BulletBroadphase()
@@ -850,7 +849,14 @@ void BulletBroadphase::performBroadphase()
     {
       /* new interaction */
       SP::Interaction inter;
-      if (impl->nslaw->size() == 3)
+
+      int g1 = pairA->shape->group();
+      int g2 = pairB->shape->group();
+      SP::NonSmoothLaw nslaw = nonSmoothLaw(g1,g2);
+      if (!nslaw) // TODO: Warning, error?
+        nslaw.reset(new NewtonImpactFrictionNSL(0.8, 0.3, 0.0, 3));
+
+      if (nslaw->size() == 3)
       {
         // Remove the added outside margin as a correction factor in Relation
         double combined_margin =
@@ -870,16 +876,16 @@ void BulletBroadphase::performBroadphase()
           _stats.interaction_warnings ++;
         }
 
-        inter.reset(new Interaction(3, impl->nslaw, rel, 0 /*4 * i + z*/));
+        inter.reset(new Interaction(3, nslaw, rel, 0 /*4 * i + z*/));
         _stats.new_interactions_created ++;
       }
       else
       {
-        if (impl->nslaw->size() == 1)
+        if (nslaw->size() == 1)
         {
           SP::BulletFrom1DLocalFrameR rel(
             new BulletFrom1DLocalFrameR(createSPtrbtManifoldPoint(*it->point)));
-          inter.reset(new Interaction(1, impl->nslaw, rel, 0 /*4 * i + z*/));
+          inter.reset(new Interaction(1, nslaw, rel, 0 /*4 * i + z*/));
         }
       }
 
@@ -905,4 +911,21 @@ void BulletBroadphase::performBroadphase()
 
   /* Update non smooth problem */
   model()->simulation()->initOSNS();
+}
+
+void BulletBroadphase::insertNonSmoothLaw(SP::NonSmoothLaw nslaw,
+                                          int group1, int group2)
+{
+  printf("inserting nonsmoothlaw %p for %d and %d\n", &*nslaw, group1, group2);
+  impl->nslaws[std::pair<int,int>(group1,group2)] = nslaw;
+}
+
+SP::NonSmoothLaw BulletBroadphase::nonSmoothLaw(int group1, int group2)
+{
+  try {
+    printf("returning nonsmoothlaw %p for %d and %d\n", &*impl->nslaws.at(std::pair<int,int>(group1,group2)), group1, group2);
+    return impl->nslaws.at(std::pair<int,int>(group1,group2));
+  } catch (const std::out_of_range &) {
+    return SP::NonSmoothLaw();
+  }
 }
