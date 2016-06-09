@@ -916,14 +916,12 @@ void BulletBroadphase::performBroadphase()
 void BulletBroadphase::insertNonSmoothLaw(SP::NonSmoothLaw nslaw,
                                           int group1, int group2)
 {
-  printf("inserting nonsmoothlaw %p for %d and %d\n", &*nslaw, group1, group2);
   impl->nslaws[std::pair<int,int>(group1,group2)] = nslaw;
 }
 
 SP::NonSmoothLaw BulletBroadphase::nonSmoothLaw(int group1, int group2)
 {
   try {
-    printf("returning nonsmoothlaw %p for %d and %d\n", &*impl->nslaws.at(std::pair<int,int>(group1,group2)), group1, group2);
     return impl->nslaws.at(std::pair<int,int>(group1,group2));
   } catch (const std::out_of_range &) {
     return SP::NonSmoothLaw();
