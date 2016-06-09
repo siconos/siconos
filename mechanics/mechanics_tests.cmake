@@ -9,13 +9,13 @@ if(WITH_${COMPONENT}_TESTING)
   set(TEST_INCLUDE_DIR ${TEST_INCLUDE_DIR} ${CPPUNIT_INCLUDE_DIR})
 
   # the main test driver
-  SET(TEST_MAIN src/contactDetection/basicBroadphase/test/TestMain.cpp)
+  SET(TEST_MAIN src/collision/native/test/TestMain.cpp)
 
-  BEGIN_TEST(src/contactDetection/basicBroadphase/test)
+  BEGIN_TEST(src/collision/native/test)
   NEW_TEST(testMultiBody MultiBodyTest.cpp)
   END_TEST()
 
-  BEGIN_TEST(src/proposed/test)
+  BEGIN_TEST(src/collision/bullet/test)
   NEW_TEST(testContact ContactTest.cpp)
   END_TEST()
 

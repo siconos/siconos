@@ -5,7 +5,7 @@
 # shape.
 #
 
-from siconos.mechanics.contact_detection.tools import Contactor
+from siconos.mechanics.collision.tools import Contactor
 from siconos.io.mechanics_io import Hdf5
 
 # Creation of the hdf5 file for input/output

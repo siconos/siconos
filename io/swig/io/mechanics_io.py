@@ -20,33 +20,34 @@ try:
 except:
     pass
 
-from siconos.mechanics.contact_detection.tools import Contactor
+from siconos.mechanics.collision.tools import Contactor
 
 from siconos.mechanics import joints
 
 use_proposed = False
 try:
-    from siconos.mechanics.proposed import BodyDS, \
+    from siconos.mechanics.collision import BodyDS, \
         BodyTimeStepping, SiconosSphere, SiconosBox,\
-        SiconosPlane, SiconosContactor, BulletBroadphase, \
-        BulletOptions, SiconosConvexHull
+        SiconosPlane, SiconosContactor, SiconosConvexHull
+    from siconos.mechanics.collision.bullet import \
+        BulletBroadphase, BulletOptions
     proposed_is_here = True
 except:
     proposed_is_here = False
     use_proposed = False
 
 try:
-    from siconos.mechanics.contact_detection.bullet import \
+    from siconos.mechanics.collision.bullet import \
         BulletDS, BulletWeightedShape, \
         btCollisionObject, btQuaternion, btTransform, btVector3, quatRotate
 
-    from siconos.mechanics.contact_detection.bullet import \
+    from siconos.mechanics.collision.bullet import \
         cast_BulletR
 
-    from siconos.mechanics.contact_detection.bullet import \
+    from siconos.mechanics.collision.bullet import \
         __mul__ as mul
 
-    from siconos.mechanics.contact_detection.bullet import btVector3, \
+    from siconos.mechanics.collision.bullet import btVector3, \
         btConvexHullShape, btCylinderShape, btBoxShape, btSphereShape, \
         btConeShape, btCapsuleShape, btCompoundShape, btTriangleIndexVertexArray, \
         btGImpactMeshShape
@@ -1426,7 +1427,7 @@ class Hdf5():
 
         from siconos.numerics import SICONOS_FRICTION_3D_ONECONTACT_NSN_AC
 
-        from siconos.mechanics.contact_detection.bullet import \
+        from siconos.mechanics.collision.bullet import \
             btConvexHullShape, btCollisionObject, \
             btBoxShape, btQuaternion, btTransform, btConeShape, \
             BulletSpaceFilter, cast_BulletR, \

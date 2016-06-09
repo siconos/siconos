@@ -2,7 +2,7 @@
 // SWIG interface for Siconos Mechanics/Occ
 %module(package="mechanics", directors="1", allprotected="1") occ
 
-%include contact_detection/base.i
+%include collision/native.i
 
 // do not wrap visitor visit : this leads to a huge amount of wrapper
 // code generation and this fails at compile time on shared_ptr freearg

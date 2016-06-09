@@ -5,14 +5,14 @@
 # using the Siconos proposed mechanics API
 #
 
-from siconos.mechanics.contact_detection.tools import Contactor
+from siconos.mechanics.collision.tools import Contactor
 from siconos.io.mechanics_io import Hdf5
 import siconos.numerics as Numerics
 import siconos.io.mechanics_io
 
 siconos.io.mechanics_io.use_proposed = True
 
-options = siconos.io.mechanics_io.BulletOptions()
+options = siconos.mechanics.collision.bullet.BulletOptions()
 options.worldScale = 1.0
 options.breakingThreshold = 0.4
 
@@ -59,8 +59,9 @@ with Hdf5(mode='r+') as io:
 
     # print(pydoc.render_doc(io.run, "Help on %s"))
 
-    from siconos.mechanics.proposed import BodyDS, \
-        BodyTimeStepping, BulletBroadphase, SiconosContactor
+    from siconos.mechanics.collision import BodyDS, \
+        BodyTimeStepping, SiconosContactor
+    from siconos.mechanics.collision.bullet import BulletBroadphase
 
     io.run(with_timer=False,
             time_stepping=BodyTimeStepping,
