@@ -1591,6 +1591,10 @@ class Hdf5():
                     if  (violation_max >= self._collision_margin):
                         #print(simulation.output(0,0))
                         print('  violation max is larger than the collision_margin')
+                    lam = simulation.lambda_(1,0)
+                    print(' lambda : ',lam)
+                    #raw_input()
+
                 # v = simulation.output(1,0)
                 # vplus=  np.zeros((2,len(v)))
                 # vplus[0,:] = v
