@@ -579,7 +579,7 @@ void ContactTest::t5()
 
   fprintf(fresults, "[\n");
 
-  int n_tests = 300;
+  int n_tests = 3; // Set this to a large number to gather proper statistics
 
   float t0 = clock();
   int test_count=0;
