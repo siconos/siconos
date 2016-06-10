@@ -26,6 +26,22 @@ class UnstructuredGridSource(vtk.vtkProgrammableSource):
         # 3: UnstructuredGridOutput for vtkProgrammableSource
         return vtk.vtkProgrammableSource.GetOutputPort(self, 3)
 
+
+class ConvexSource(UnstructuredGridSource):
+
+    def __init__(self, convex, points):
+        self._convex = convex
+        self._points = points
+        self.SetExecuteMethod(self.method)
+
+    def method(self):
+        output = self.GetUnstructuredGridOutput()
+        output.Allocate(1, 1)
+        output.InsertNextCell(
+            convex.GetCellType(), self._convex.GetPointIds())
+        output.SetPoints(self._points)
+
+
 def usage():
     pass
 
@@ -268,12 +284,12 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
 
             velo = self._velocity
             output.GetFieldData().GetArray('velocity').SetTuple(
-                            0, (velo[0],
-                                velo[1],
-                                velo[2],
-                                velo[3],
-                                velo[4],
-                                velo[5]))
+                0, (velo[0],
+                    velo[1],
+                    velo[2],
+                    velo[3],
+                    velo[4],
+                    velo[5]))
 
     # contact forces provider
     class ContactInfoSource():
@@ -355,7 +371,6 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
 
             output_b.SetPoints(cpb_points)
 
-
     #  Step 2
     #
     #
@@ -417,18 +432,7 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
                 points.InsertNextPoint(vertice[0], vertice[1], vertice[2])
                 convex.GetPointIds().SetId(id_, id_)
 
-            convex_source = UnstructuredGridSource()
-
-            def convex_source_method():
-                output = convex_source.GetUnstructuredGridOutput()
-                output.Allocate(1, 1)
-                output.InsertNextCell(
-                    convex.GetCellType(), convex.GetPointIds())
-                output.SetPoints(points)
-
-            convex_source.SetExecuteMethod(convex_source_method)
-
-            readers[shape_name] = convex_source
+            readers[shape_name] = ConvexSource(convex, points)
 
         else:
             assert shape_type == 'primitive'
@@ -516,7 +520,8 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
             transformers[contactor_name] = transformer
 
             data_connectors[instance] = DataConnector(instance)
-            data_connectors[instance]._connector.SetInputConnection(transformer.GetOutputPort())
+            data_connectors[instance]._connector.SetInputConnection(
+                transformer.GetOutputPort())
             data_connectors[instance]._connector.Update()
             big_data_source.AddInputConnection(
                 data_connectors[instance]._connector.GetOutputPort())
