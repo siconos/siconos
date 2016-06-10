@@ -31,13 +31,24 @@ private:
 
   const SP::btManifoldPoint _contactPoints;
 
+  const double _y_correction_A;
+  const double _y_correction_B;
+  const double _scaling;
+
 public:
-  BulletR(SP::btManifoldPoint);
+  BulletR(SP::btManifoldPoint,
+          double y_correction_A=0,
+          double y_correction_B=0,
+          double scaling=1);
 
   SP::btManifoldPoint contactPoint() const
   {
     return _contactPoints;
   };
+
+  double y_correction_A() { return _y_correction_A; }
+  double y_correction_B() { return _y_correction_A; }
+  double y_correction() { return _y_correction_A + _y_correction_B; }
 
   virtual void computeh(double time, BlockVector& q0, SiconosVector& y);
 

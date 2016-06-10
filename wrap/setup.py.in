@@ -132,7 +132,7 @@ for comp in with_component.keys():
         packages.append('siconos.' + comp)
 
 if with_component['mechanics']:
-    packages.append('siconos.mechanics.contact_detection')
+    packages.append('siconos.mechanics.collision')
 
 if with_mechanisms:
     packages.append('siconos.mechanics.mechanisms')
