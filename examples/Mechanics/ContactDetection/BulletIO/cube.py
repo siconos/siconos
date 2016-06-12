@@ -4,7 +4,7 @@
 # Example of one object under gravity with one contactor and a ground
 #
 
-from siconos.mechanics.collision.tools import Contactor
+from siconos.mechanics.contact_detection.tools import Contactor
 from siconos.io.mechanics_io import Hdf5
 import siconos.numerics as Numerics
 

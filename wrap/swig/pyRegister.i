@@ -7,7 +7,11 @@
 
 
 // without include
-%define PY_REGISTER_WITHOUT_HEADER(TYPE)
+%define PY_REGISTER(TYPE)
+%inline
+%{
+#include <TYPE.hpp>
+%}
 %rename  (__getitem__) TYPE ## ::operator[];
 %rename  (__add__) TYPE ## ::operator+;
 %rename  (__mul__) TYPE ## ::operator*;
@@ -46,14 +50,6 @@
 
 %shared_ptr(TYPE);
 %make_picklable(TYPE, Kernel);
-%enddef
-
-%define PY_REGISTER(TYPE)
-%inline
-%{
-#include <TYPE.hpp>
-%}
-PY_REGISTER_WITHOUT_HEADER(TYPE)
 %enddef
 
 %define PY_FULL_REGISTER(TYPE)
@@ -123,3 +119,4 @@ PY_REGISTER_WITHOUT_HEADER(TYPE)
 %shared_ptr(TYPE);
 %make_picklable(TYPE, Kernel);
 %enddef
+

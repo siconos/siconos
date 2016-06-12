@@ -5,15 +5,9 @@
 
 #define DUMMY(X, Y) class X : public Y {}
 
-#undef PROPOSED_CLASSES
 #undef BULLET_CLASSES
 #undef OCC_CLASSES
 #undef MECHANISMS_CLASSES
-
-#define PROPOSED_CLASSES() \
-  REGISTER(BodyDS)
-
-#include <BodyDS.hpp>
 
 #define XBULLET_CLASSES() \
   REGISTER(BulletDS)     \
@@ -71,7 +65,6 @@ DUMMY(MBTB_ContactRelation, NewtonEulerFrom1DLocalFrameR);
   REGISTER(PivotJointR)                         \
   REGISTER(KneeJointR)                          \
   REGISTER(PrismaticJointR)                     \
-  PROPOSED_CLASSES()                            \
   OCC_CLASSES()                                 \
   XBULLET_CLASSES()                             \
   MECHANISMS_CLASSES()                          \
