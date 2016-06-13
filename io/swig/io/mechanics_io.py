@@ -1542,9 +1542,8 @@ class Hdf5():
 
             print ('step', k, '<', k0 - 1 + int((T - t0) / h))
 
-            
-            
             if proposed_is_here and use_proposed:
+                self._broadphase.resetStatistics()
                 self._broadphase.updateGraph()
                 self._broadphase.performBroadphase()
             else:
