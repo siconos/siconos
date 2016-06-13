@@ -558,8 +558,13 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
         pvelob._connector.GetOutputPort())
 
     big_data_writer.SetInputConnection(big_data_source.GetOutputPort())
-
+    ntime = len(times)
+    k=0
+    packet= int(ntime/100)+1
     for time in times:
+        k=k+1
+        if (k%packet == 0):
+            sys.stdout.write('.')
         index = bisect.bisect_left(times, time)
         index = max(0, index)
         index = min(index, len(times) - 1)
@@ -602,3 +607,4 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
         if ascii_mode:
             big_data_writer.SetDataModeToAscii()
         big_data_writer.Write()
+    print(' ')
