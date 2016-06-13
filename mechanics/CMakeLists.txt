@@ -16,7 +16,6 @@ set(${COMPONENT}_DIRS
   src/collision
   src/collision/native
   src/collision/native/bodies
-  src/collision/bullet
   src/joints
   )
 
