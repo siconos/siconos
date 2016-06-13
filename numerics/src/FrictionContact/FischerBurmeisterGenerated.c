@@ -24,16 +24,21 @@
 
 #define ZERO_SQR  ZERO * ZERO
 
-#define POST_CHECK_POW(x) assert(isfinite(x))
-#define POST_CHECK_ADD(x) assert(isfinite(x))
-#define POST_CHECK_MUL(x) assert(isfinite(x))
-#define POST_CHECK(x) assert(isfinite(x))
+#ifdef FB_DEBUG_POST_CHECK
+#define POST_CHECK_POW(x) assert(isfinite((double)x))
+#define POST_CHECK_ADD(x) assert(isfinite((double)x))
+#define POST_CHECK_MUL(x) assert(isfinite((double)x))
+#define POST_CHECK(x) assert(isfinite((double)x))
+#else
+#define POST_CHECK_POW(x)
+#define POST_CHECK_ADD(x)
+#define POST_CHECK_MUL(x)
+#define POST_CHECK(x)
+#endif
 
 #define NOT_ZERO(x) fabs(x) > 0
 #define IS_NOT_ZERO(x) fabs(x) > 0
 #define IS_POSITIVE(x) 1
-
-
 
 #define random1 sqrt(2)/2
 #define random2 sqrt(2)/2
@@ -41,10 +46,8 @@
 #ifdef __cplusplus
 #include <cmath>
 #define CHECK(x)
-#define XCHECK(x) assert(isfinite(x))
 #else
 #define CHECK(x)
-#define XCHECK(x) assert(isfinite(x))
 #endif
 
 // temporary bug fix for overloaded pow. Sympy generates code with long double

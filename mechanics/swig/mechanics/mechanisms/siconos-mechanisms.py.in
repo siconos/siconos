@@ -31,11 +31,11 @@ from siconos.mechanics.mechanisms import cadmbtb
 # simple hdf5 output
 # a dummy SpaceFilter is needed for model encapsulation
 # a (pseudo) Contactor class is needed for the object-shape association.
-from siconos.mechanics.collision.native import SpaceFilter
+from siconos.mechanics.contact_detection.base import SpaceFilter
 with_io = "@HAVE_SICONOS_IO@" is "TRUE"
 if with_io:
     from siconos.io import mechanics_io as io
-from siconos.mechanics.collision.tools import Avatar, Contactor
+from siconos.mechanics.contact_detection.tools import Avatar, Contactor
 
 install_path = os.path.join('@CMAKE_INSTALL_PREFIX@', 'bin')
 default_options = os.path.join(mechanisms_path, 'mbtbDefaultOptions.py')
