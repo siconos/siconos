@@ -26,6 +26,7 @@
 #cmakedefine WITH_SERIALIZATION
 #cmakedefine HAVE_GENERATION
 #cmakedefine WITH_HDF5
+#cmakedefine WITH_OPENMP
 
 // Is cblas available? 
 #cmakedefine HAS_CBLAS
