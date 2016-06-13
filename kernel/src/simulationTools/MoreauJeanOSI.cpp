@@ -233,8 +233,8 @@ void MoreauJeanOSI::initWBoundaryConditions(SP::DynamicalSystem ds, DynamicalSys
       bc = d->boundaryConditions();
     }
     unsigned int numberBoundaryConditions = bc->velocityIndices()->size();
-    _dynamicalSystemsGraph->properties(dsv).W.reset(new SimpleMatrix(sizeWBoundaryConditions, numberBoundaryConditions));
-    computeWBoundaryConditions(ds,*_dynamicalSystemsGraph->properties(dsv).W);
+    _dynamicalSystemsGraph->properties(dsv).WBoundaryConditions.reset(new SimpleMatrix(sizeWBoundaryConditions, numberBoundaryConditions));
+    computeWBoundaryConditions(ds,*_dynamicalSystemsGraph->properties(dsv).WBoundaryConditions);
   }
   else
     RuntimeException::selfThrow("MoreauJeanOSI::initWBoundaryConditions - not yet implemented for Dynamical system of type :" +  Type::name(*ds));
@@ -548,7 +548,7 @@ double MoreauJeanOSI::computeResidu()
       if (d->boundaryConditions())
       {
         unsigned int columnindex = 0;
-        SP::SimpleMatrix WBoundaryConditions = _dynamicalSystemsGraph->properties(*dsi).W ;
+        SP::SimpleMatrix WBoundaryConditions = _dynamicalSystemsGraph->properties(*dsi).WBoundaryConditions ;
         SP::SiconosVector columntmp(new SiconosVector(ds->dimension()));
 
         for (std::vector<unsigned int>::iterator  itindex = d->boundaryConditions()->velocityIndices()->begin() ;
