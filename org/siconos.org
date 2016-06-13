@@ -712,12 +712,12 @@ candidates for integrating Siconos as a back-end/engine.
 
 Dear Siconos users,
 
-A brand new Siconos 4.0.0 is out !! Siconos is now ditributed under Apache 2.0 license.
+A brand new Siconos 4.0.0 is out !! Siconos is now distributed under Apache 2.0 license.
 
 The source code (zip and tar.gz) can be found on github : https://github.com/siconos/siconos/releases
-We are currenlty working on the release candidate 4.1.0 that can be forked from our github repo. 
+We are currently working on the release candidate 4.1.0 that can be forked from our github repo. 
 
-We have also try to work our documentation at  http://siconos.gforge.inria.fr even if it lacks of polishing. 
+We have also worked our documentation at  http://siconos.gforge.inria.fr even if it lacks of polishing. 
 
 As usual, your feedback comments are welcome.
 
