@@ -13,9 +13,11 @@ set(COMPONENT_LIBRARY_NAME ${PROJECT_NAME}_${COMPONENT})
 # source directories for numerics
 set(${COMPONENT}_DIRS
   src/.
-  src/bodies
+  src/collision
+  src/collision/native
+  src/collision/native/bodies
+  src/collision/bullet
   src/joints
-  src/contactDetection/basicBroadphase
   )
 
 if(WITH_OCC)
@@ -46,7 +48,7 @@ set(${COMPONENT}_LINK_LIBRARIES ${${COMPONENT}_LINK_LIBRARIES} ${SICONOS_LINK_LI
 set(${COMPONENT}_LINK_LIBRARIES ${${COMPONENT}_LINK_LIBRARIES} numerics kernel)
 
 if(WITH_BULLET)
-  list(APPEND ${COMPONENT}_DIRS src/contactDetection/bullet)
+  list(APPEND ${COMPONENT}_DIRS src/collision/bullet)
   include_directories(${BULLET_INCLUDE_DIRS})
   set(${COMPONENT}_LINK_LIBRARIES ${${COMPONENT}_LINK_LIBRARIES} ${BULLET_LIBRARIES})
 endif()
