@@ -763,8 +763,7 @@ void PrismaticJointR::Jd2(double X1, double Y1, double Z1, double q10, double q1
 
 void PrismaticJointR::computeDotJachq(double time, BlockVector& workQ, BlockVector& workZ, BlockVector& workQdot)
 {
-  std::cout << "Warning:  PrismaticJointR::computeDotJachq(...) not yet implemented"<< std::cout;
-
+  std::cout << "Warning:  PrismaticJointR::computeDotJachq(...) not yet implemented" << std::endl;
 }
 
 void PrismaticJointR::DotJd1d2(double Xdot1, double Ydot1, double Zdot1, double qdot10, double qdot11, double qdot12, double qdot13,
