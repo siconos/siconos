@@ -138,13 +138,13 @@ FOREACH(_EXE ${_EXE_LIST_${_CURRENT_TEST_DIRECTORY}})
     FILE(APPEND ${CMAKE_CURRENT_BINARY_DIR}/SiconosTestConfig.cmake "  ADD_TEST(\${ARGV})\n")
     FILE(APPEND ${CMAKE_CURRENT_BINARY_DIR}/SiconosTestConfig.cmake "  SET(_EXE \${ARGV0})\n")
 
-    IF(APPLE)
-      SET(ENV_PPTY "DYLD_LIBRARY_PATH=$ENV{DYLD_LIBRARY_PATH}:${LIBFORTests}")
-    ELSEIF(CMAKE_SYSTEM_NAME MATCHES Windows)
-      SET(ENV_PPTY "Path=${COMPONENT_PATH}")
-    ELSE() # unix
-      SET(ENV_PPTY "LD_LIBRARY_PATH=$ENV{LD_LIBRARY_PATH}:${LIBFORTests}")
-    ENDIF()
+    # IF(APPLE)
+    #   #SET(ENV_PPTY "DYLD_LIBRARY_PATH=$ENV{DYLD_LIBRARY_PATH}:${LIBFORTests}")
+    # ELSEIF(CMAKE_SYSTEM_NAME MATCHES Windows)
+    #   SET(ENV_PPTY "Path=${COMPONENT_PATH}")
+    # ELSE() # unix
+    #   SET(ENV_PPTY "LD_LIBRARY_PATH=$ENV{LD_LIBRARY_PATH}:${LIBFORTests}")
+    # ENDIF()
 
     IF(USE_SANITIZER MATCHES "asan")
       SET(ENV_PPTY "${ENV_PPTY};ASAN_OPTIONS=detect_stack_use_after_return=1:detect_leaks=1:$ENV{ASAN_OPTIONS}")
@@ -179,13 +179,13 @@ FOREACH(_EXE ${_EXE_LIST_${_CURRENT_TEST_DIRECTORY}})
 
     SET_TESTS_PROPERTIES(${_EXE} PROPERTIES FAIL_REGULAR_EXPRESSION "FAILURE;Exception;failed;ERROR;test unsucceeded")
 
-    if(APPLE)
-      set_tests_properties(${_EXE} PROPERTIES ENVIRONMENT "DYLD_LIBRARY_PATH=$ENV{DYLD_LIBRARY_PATH}:${LIBFORTests}")
-    elseif(CMAKE_SYSTEM_NAME MATCHES Windows)
-      set_tests_properties(${_EXE} PROPERTIES ENVIRONMENT "Path=${COMPONENT_PATH}")
-    else() #unix
-      set_tests_properties(${_EXE} PROPERTIES ENVIRONMENT "LD_LIBRARY_PATH=$ENV{LD_LIBRARY_PATH}:${LIBFORTests}")
-    endif()
+    # if(APPLE)
+    #   #set_tests_properties(${_EXE} PROPERTIES ENVIRONMENT "DYLD_LIBRARY_PATH=$ENV{DYLD_LIBRARY_PATH}:${LIBFORTests}")
+    # elseif(CMAKE_SYSTEM_NAME MATCHES Windows)
+    #   set_tests_properties(${_EXE} PROPERTIES ENVIRONMENT "Path=${COMPONENT_PATH}")
+    # else() #unix
+    #   set_tests_properties(${_EXE} PROPERTIES ENVIRONMENT "LD_LIBRARY_PATH=$ENV{LD_LIBRARY_PATH}:${LIBFORTests}")
+    # endif()
 
     IF(USE_SANITIZER MATCHES "asan")
       set_property(TEST ${_EXE} APPEND PROPERTY ENVIRONMENT ASAN_OPTIONS=detect_stack_use_after_return=1:detect_leaks=1:$ENV{ASAN_OPTIONS})

@@ -43,6 +43,10 @@ build_python_tests()
 
 # siconos mechanisms script
 if(WITH_MECHANISMS)
+  # we need siconos-mechanism for build and install tree with different 'PYTHONPATH' for each of them.
+  set(CURRENT_PYTHON_PATH ${CMAKE_BINARY_DIR}/wrap)
+  configure_file(mechanics/mechanisms/siconos-mechanisms.py.in ${CMAKE_BINARY_DIR}/scripts_for_build/siconos-mechanisms.py)
+  set(CURRENT_PYTHON_PATH ${SICONOS_PYTHON_INSTALL_DIR})
   configure_file(mechanics/mechanisms/siconos-mechanisms.py.in ${CMAKE_BINARY_DIR}/scripts/siconos-mechanisms.py)
   configure_file(mechanics/mechanisms/mbtbDefaultOptions.py ${SICONOS_SWIG_ROOT_DIR}/mechanics/mechanisms/mbtbDefaultOptions.py)
   install(PROGRAMS ${CMAKE_BINARY_DIR}/scripts/siconos-mechanisms.py DESTINATION bin RENAME siconos_mechanisms)

@@ -3,7 +3,6 @@
 
 import numpy as np
 
-# import siconos.numerics * fails with py.test!
 import siconos.numerics as SN
 
 def vi_function_1D(n, x, F):
