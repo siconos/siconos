@@ -1269,3 +1269,19 @@ TODO
      + Side effect of method
      + Why we need a shared pointer rather than a reference ?
        + new? make_shared? impact on memory allocation and organization
+** <2016-06-14 Tue>
+  + Update applications (SE, IMSRN)
+    + Open engineering [[http://open-engineering.com]]
+    + Logilab 
+    + Ingeliance  
+  + Lie integrator 
+  + Parralelization (Open MP, Cuda)
+    + block of codes on C
+    + generation in Python
+    + first // loop
+  + mechanics_io
+    + plugins
+    + remove/ add DS dynamically
+  + Mail announcement, 
+  + packaging launchpad
+    
