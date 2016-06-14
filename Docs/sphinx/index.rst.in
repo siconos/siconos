@@ -3,14 +3,15 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-@PROJECT_NAME_CAP@: Non-smooth numerical simulation
+@PROJECT_NAME_CAP@: nonsmooth numerical simulation
 ===================================================
 .. toctree::
    :hidden:
    :maxdepth: 3
 
    documentation_index
-   examples/index
+   documentation_index_dev
+
    download
    contacts
    related_projects
@@ -38,7 +39,7 @@
 
 Siconos is an open-source scientific software primarily targeted at modeling and simulating nonsmooth dynamical systems in C++ and in Python:
 
-* Mechanical systems (rigid or solid) with unilateral contact and Coulomb friction and impact (Nonsmooth mechanics, 
+* Mechanical systems (rigid or solid) with unilateral contact and Coulomb friction and impact (nonsmooth mechanics, 
   contact dynamics, multibody systems dynamics or granular materials). 
 
 * Switched Electrical Circuit such as electrical circuits with ideal and piecewise linear components: power converter, rectifier, Phase-Locked Loop (PLL) or Analog-to-Digital converter.
@@ -52,6 +53,14 @@ optimal control with state constraints), Optimization (Complementarity systems a
 Fluid Mechanics, and Computer Graphics.
 
 
+.. raw:: html
+
+	 <center>
+	 <iframe width="560" height="315" src="https://www.youtube.com/embed/3I_BkFTqH8I" frameborder="0" allowfullscreen></iframe>
+	 </center>
+	 
+
+	 
 ..
    Indices and tables
    ==================
