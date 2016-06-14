@@ -17,25 +17,6 @@
    related_projects
    z_siconos_bibtex
 
-.. container:: index-gallery
-
-    .. image:: /figures/buck.*
-       :height: 190 px
-       :class: gallery
-       :alt: Analog circuit simulation with non-smooth components
-    .. image:: /figures/C60.*
-       :height: 190 px
-       :class: gallery
-       :alt: Simulation of a mechanical circuit breaker
-    .. image:: /figures/Exomars.24.10.small.*
-       :height: 190 px
-       :class: gallery
-       :alt: Simulation of the ExoMars rover
-    .. image:: /figures/snapshot-silo.*
-       :height: 190 px
-       :class: gallery
-       :alt: Simulation of granular materials
-
 
 Siconos is an open-source scientific software primarily targeted at modeling and simulating nonsmooth dynamical systems in C++ and in Python:
 
@@ -59,6 +40,25 @@ Fluid Mechanics, and Computer Graphics.
 	 <iframe width="560" height="315" src="https://www.youtube.com/embed/3I_BkFTqH8I" frameborder="0" allowfullscreen></iframe>
 	 </center>
 	 
+.. container:: index-gallery
+
+    .. image:: /figures/buck.*
+       :height: 190 px
+       :class: gallery
+       :alt: Analog circuit simulation with non-smooth components
+    .. image:: /figures/C60.*
+       :height: 190 px
+       :class: gallery
+       :alt: Simulation of a mechanical circuit breaker
+    .. image:: /figures/Exomars.24.10.small.*
+       :height: 190 px
+       :class: gallery
+       :alt: Simulation of the ExoMars rover
+    .. image:: /figures/snapshot-silo.*
+       :height: 190 px
+       :class: gallery
+       :alt: Simulation of granular materials
+
 
 	 
 ..

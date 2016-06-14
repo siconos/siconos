@@ -1,7 +1,7 @@
 Developer doc
 =====================
 
-**Siconos API reference:**
+**Siconos API reference (Doxygen):**
 
 *There you can find details about all methods and classes implemented in Siconos.*
 
