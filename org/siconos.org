@@ -715,16 +715,17 @@ Dear Siconos users,
 A brand new Siconos 4.0.0 is out !! Siconos is now distributed under Apache 2.0 license.
 
 The source code (zip and tar.gz) can be found on github : https://github.com/siconos/siconos/releases
-We are currently working on the release candidate 4.1.0 that can be forked from our github repo. 
+We are now working on the release candidate 4.1.0 that can be forked from our github repo master branch.
 
-We have also worked our documentation at  http://siconos.gforge.inria.fr even if it lacks of polishing. 
+We have also improved our documentation at http://siconos.gforge.inria.fr even if it still lacks some polish.
 
 As usual, your feedback comments are welcome.
 
-We start also to feed our YouTube channel https://www.youtube.com/channel/UCgv2siTCJeSdWFPTDk71Iyw If you have nice applications with Siconos, do not hesitate to contribute.
+We have also started to feed our YouTube channel, https://www.youtube.com/channel/UCgv2siTCJeSdWFPTDk71Iyw
+So, if you have any nice applications made with Siconos, please do not hesitate to contribute.  We are interested in showcasing Siconos at work!
 
 All the best,
-Vincent A. for the siconos team
+Vincent A. for the Siconos team
 
 
 ---
