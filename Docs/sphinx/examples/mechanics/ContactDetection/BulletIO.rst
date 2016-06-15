@@ -8,7 +8,7 @@ Author: Maurice Bremond, Vincent Acary 2013--2016
 You may refer to the source code of this set of  examples, `found here <https://github.com/siconos/siconos/tree/master/examples/Mechanics/MechanicsIO/>`_.
 
 
-Description of the physical problems : rigid bodies collection with contact and coulomb friction
+Description of the physical problems : rigid bodies collection with contact and Coulomb friction
 ````````````````````````````````````````````````````````````````````````````````````````````````
 
 In this set of examples (cubes.py, n_cubes.py, ...), we model collections of rigid bodies

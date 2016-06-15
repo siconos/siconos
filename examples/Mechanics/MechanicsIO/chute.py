@@ -246,7 +246,7 @@ with Hdf5() as io:
   n_cube=5
   n_row=1
   n_col=1
-  cube_size =0.05
+  cube_size =0.25
   x_shift=3.0
   for i in range(n_row):
     for j in range(n_col):
