@@ -65,7 +65,7 @@ with Hdf5() as io:
                              ( bar_length,  bar_width, -bar_height),
                              ( bar_length, -bar_width, -bar_height),
                              ( bar_length ,-bar_width,  bar_height)])
-  
+
   angle= math.pi/4.0
   ori = [math.cos(angle/2.0),0.0,math.sin(angle/2.0),0]
   print('ori initial', ori)
@@ -83,7 +83,7 @@ with Hdf5() as io:
                translation=[0, 0, 0.0],
                orientation = origround)
 
-  
+
   # Definition of a non smooth law. As no group ids are specified it
   # is between contactors of group id 0.
   io.addNewtonImpactFrictionNSL('contact', mu=0.3)

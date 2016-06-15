@@ -5,7 +5,7 @@ Collections of rigid bodies with Bullet based contact detection (Siconos/Mechani
 
 Author: Maurice Bremond, Vincent Acary 2013--2016
 
-You may refer to the source code of this set of  examples, `found here <https://github.com/siconos/siconos/tree/master/examples/Mechanics/ContactDetection/BulletIO>`_.
+You may refer to the source code of this set of  examples, `found here <https://github.com/siconos/siconos/tree/master/examples/Mechanics/MechanicsIO/>`_.
 
 
 Description of the physical problems : rigid bodies collection with contact and coulomb friction
@@ -22,7 +22,7 @@ The results cab be viewed with the siconos_vview and the siconos_vexport python 
 
 A brief description of examples is as follows :
 
-* cube.py is a the simplest example with few cubes that fall down on a rigid ficex plane. The scene is built
+* cube.py is  the simplest example with few cubes that fall down on a rigid fixed plane. The scene is built
   using calls to mechanics_io methods such as
   
   * addPrimitiveShape for creating a primitive shape ::
@@ -74,11 +74,22 @@ A brief description of examples is as follows :
             numerics_verbose=False,
             output_frequency=None)
 	    
-* n_cubes.py is an extension of cubes.py where it is possible to build a reactangular pile of cubes
+* n_cubes.py . This is an extension of cubes.py where it is possible to build a reactangular pile of cubes
   
-* cube_from_HDFfile.py is an adaptation of cube.py but the scheme is direclty read from the cube_scene.hdf5 file.
-  In that case, if there a previous computation in the file, it is assumed the we do a warm retart from the current
-  state in the hdf5 file.
+* cube_scene.py, cube_simulation.py n_cubes_scene.py n_cubes_simulation.py . These examples are a different treatment of the same example
+  but the construction of the scene and the simulation are separated into differents. In that way, it is possible to produce a scene file
+  and then to perfoms several simulations. Furthermore, if the result of the simulation is stored in the hdf5 file, we restart from the last
+  state of the system to continue the simulation. it is alo possible to concatenate in time several simulations in that way.
 
-* bar.py, bar_contact.py
+* MultipleContactorsAndNSlaws.py . This  is an example where two shapes are fixed to the same mechanical system. It allows to build clusters and to get
+  some complex contact shapes.
+
+* bar.py, bar_contact.py  This simple example provides one with a simple simulation where the performance of Lie integrator are important for long term
+  simulation of rotating bodie in a stable way. It allows also to test large inertia ratio in the solver.
+
+* convexhull.py . This test shos how to build a collection of convexhull shapes
+
+* PairWise_test_bullet.py . This test file performs the test of contacting pairs of various nature (primitive, convex hull). Meshes have to be added.
+
+* chute.py. This example is a little more complex one where the a collection of polyhedra falls down into an hopper.
   

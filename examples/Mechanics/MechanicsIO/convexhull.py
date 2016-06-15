@@ -34,14 +34,14 @@ with Hdf5() as io:
   orientation = [math.cos(angle/2.0), 0.0, math.sin(angle/2.0), 0.0]
   orientation = [1.0, 0.0, 0.0, 0.0]
   #orientation = [0.0, 1.0, 0.0, 0.0] #--> cos(\theta/2.0) = 0, sin(\theta/2.0) =1 ==> \theta = pi
-  
+
   ######### left_up
   v1 = numpy.array([0, 0 , 1.0*box_height])
   v2 = numpy.array([box_width,box_width,0.0])
   v3 = numpy.array([box_width,-box_width,0.0])
   v4 = numpy.array([-box_width,-box_width,0.0])
   v5 = numpy.array([-box_width,box_width,0.0])
-  
+
   left_up_vertices=numpy.array([v1,v2,v3,v4, v5])
   print left_up_vertices
   io.addConvexShape('Left_up',left_up_vertices )
@@ -53,7 +53,7 @@ with Hdf5() as io:
   translation = [0.0, 2.0*box_width ,0.0]
   io.addObject('right_up', [Contactor('Right_up')],
                translation=translation)
-    
+
   n_polyhedron=1
   n_row=1
   n_col=1
@@ -64,8 +64,8 @@ with Hdf5() as io:
   orientation_polyhedron = [math.cos(angle/2.0), 0.0, math.sin(angle/2.0), 0.0]
   #orientation_polyhedron = [1.0, 0.0, 0.0, 0.0]
   #orientation_polyhedron = [0.0, 1.0, 0.0, 0.0] #--> cos(\theta/2.0) = 0, sin(\theta/2.0) =1 ==> \theta = pi
- 
-  
+
+
   for i in range(n_row):
     for j in range(n_col):
       for n in range(n_polyhedron):
@@ -79,7 +79,7 @@ with Hdf5() as io:
         ch = ConvexHull(polyhedron_vertices)
         cm = ch.centroid()
         print('cm', cm)
-        
+
         # correction of vertices such that o is the centroid
         polyhedron_vertices = numpy.array(polyhedron_vertices)[:]-cm[:]
         print('corrected polyhedron_vertices', polyhedron_vertices)
@@ -96,7 +96,7 @@ with Hdf5() as io:
 
         # Definition of a polyhedron as a convex shape
         io.addConvexShape('PolyhedronCS'+str(n)+'_'+str(i)+'_'+str(j), polyhedron_vertices)
-        
+
         trans=[box_width/5.0+i*x_shift*polyhedron_size, x_shift*(j+2)*polyhedron_size, box_height+polyhedron_size*x_shift*n]
         #trans= [0,0,0]
         io.addObject('polyhedron'+str(n)+'_'+str(i)+'_'+str(j), [Contactor('PolyhedronCS'+str(n)+'_'+str(i)+'_'+str(j))],

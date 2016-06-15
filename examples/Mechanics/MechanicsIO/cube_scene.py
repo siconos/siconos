@@ -46,4 +46,3 @@ with Hdf5() as io:
     # detection.
     io.addObject('ground', [Contactor('Ground')],
                  translation=[0, 0, 0])
-

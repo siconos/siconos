@@ -80,4 +80,3 @@ with Hdf5() as io:
     #              translation=[0, -50., 25.])
     # io.addObject('rear00', [Contactor('Rear0')],
     #              translation=[25., 0., 250.])
-
