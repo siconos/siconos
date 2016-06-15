@@ -479,6 +479,17 @@ class ShapeCollection():
                 #     orie2 = attrs[12:16]
                 #     bcols = btCompoundShape()
                 #     bcols.addChildShape(...
+                elif name in ['Sphere']:
+                    if use_proposed:
+                        self._shapes[shape_name] = primitive([0,0,0], attrs[0])
+                        self._shapes[shape_name].setInsideMargin(
+                            self.shape(shape_name).attrs.get('insideMargin',
+                                                             min(attrs)/2))
+                        self._shapes[shape_name].setOutsideMargin(
+                            self.shape(shape_name).attrs.get('outsideMargin',
+                                                             min(attrs)/2))
+                    else:
+                        self._shapes[shape_name] = primitive(*attrs)
                 else:
                     self._shapes[shape_name] = primitive(*attrs)
 
