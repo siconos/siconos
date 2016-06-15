@@ -1018,17 +1018,14 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
                     pos_data[id_t, 8])
 
                 self._slider_repres.SetValue(self._time)
-                renderer_window.Render()
 
                 self._current_id.SetNumberOfValues(1)
                 self._current_id.SetValue(0, index)
 
                 self._iter_plot.SetSelection(self._current_id)
                 self._prec_plot.SetSelection(self._current_id)
-                self._iter_plot_view.Update()
-                self._prec_plot_view.Update()
-                self._iter_plot_view.GetRenderer().GetRenderWindow().Render()
-                self._prec_plot_view.GetRenderer().GetRenderWindow().Render()
+
+                renderer_window.Render()
 
             def object_pos(self, id_):
                 index = bisect.bisect_left(self._times, self._time)
