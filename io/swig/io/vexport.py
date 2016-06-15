@@ -89,7 +89,9 @@ else:
 
 transforms = dict()
 transformers = dict()
-data_connectors = dict()
+data_connectors_v = dict()
+data_connectors_t = dict()
+data_connectors_d = dict()
 
 big_data_source = vtk.vtkMultiBlockDataGroupFilter()
 add_compatiblity_methods(big_data_source)
@@ -161,12 +163,33 @@ def build_set_velocity(dico):
     def set_velocity(instance, v0, v1, v2, v3, v4, v5):
 
         if instance in dico:
-            dico[instance]._velocity[:] = [v0, v1, v2, v3, v4, v5]
+            dico[instance]._data[:] = [v0, v1, v2, v3, v4, v5]
             dico[instance]._connector.Update()
 
     set_velocityv = numpy.vectorize(set_velocity)
     return set_velocityv
 
+def build_set_translation(dico):
+
+    def set_translation(instance, x0, x1, x2 ):
+
+        if instance in dico:
+            dico[instance]._data[:] = [x0, x1, x2]
+            dico[instance]._connector.Update()
+
+    set_translationv = numpy.vectorize(set_translation)
+    return set_translationv
+
+def build_set_displacement(dico):
+
+    def set_displacement(instance, x0, x1, x2 ):
+
+        if instance in dico:
+            dico[instance]._data[:] = [x0, x1, x2]
+            dico[instance]._connector.Update()
+
+    set_displacementv = numpy.vectorize(set_displacement)
+    return set_displacementv
 
 def step_reader(step_string):
 
@@ -262,34 +285,32 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
 
     class DataConnector():
 
-        def __init__(self, instance):
+        def __init__(self, instance, data_name='velocity', data_size=6):
 
             self._instance = instance
-
+            self._data_name = data_name
+            self._data_size = data_size
             self._connector = vtk.vtkProgrammableFilter()
             self._connector.SetExecuteMethod(self.method)
-            self._velocity = numpy.array([0, 0, 0, 0, 0, 0])
-            self._vtk_velocity = vtk.vtkFloatArray()
-            self._vtk_velocity.SetName('velocity')
-            self._vtk_velocity.SetNumberOfComponents(6)
-            self._vtk_velocity.SetNumberOfTuples(1)
+            self._data = numpy.zeros(data_size)
+            self._vtk_data = vtk.vtkFloatArray()
+            self._vtk_data.SetName(data_name)
+            self._vtk_data.SetNumberOfComponents(data_size)
+            self._vtk_data.SetNumberOfTuples(1)
 
         def method(self):
             input = self._connector.GetInput()
             output = self._connector.GetOutput()
             output.ShallowCopy(input)
 
-            if output.GetFieldData().GetArray('velocity') is None:
-                output.GetFieldData().AddArray(self._vtk_velocity)
+            if output.GetFieldData().GetArray(self._data_name) is None:
+                output.GetFieldData().AddArray(self._vtk_data)
 
-            velo = self._velocity
-            output.GetFieldData().GetArray('velocity').SetTuple(
-                0, (velo[0],
-                    velo[1],
-                    velo[2],
-                    velo[3],
-                    velo[4],
-                    velo[5]))
+            data = self._data
+
+            data_t = tuple(data[0:self._data_size])
+            output.GetFieldData().GetArray(self._data_name).SetTuple(
+                0, data_t)
 
     # contact forces provider
     class ContactInfoSource():
@@ -519,12 +540,26 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
             transformer.SetTransform(transform)
             transformers[contactor_name] = transformer
 
-            data_connectors[instance] = DataConnector(instance)
-            data_connectors[instance]._connector.SetInputConnection(
+            data_connectors_v[instance] = DataConnector(instance)
+            data_connectors_v[instance]._connector.SetInputConnection(
                 transformer.GetOutputPort())
-            data_connectors[instance]._connector.Update()
+            data_connectors_v[instance]._connector.Update()
             big_data_source.AddInputConnection(
-                data_connectors[instance]._connector.GetOutputPort())
+                data_connectors_v[instance]._connector.GetOutputPort())
+
+            data_connectors_t[instance] = DataConnector(instance, data_name='translation', data_size=3)
+            data_connectors_t[instance]._connector.SetInputConnection(
+                transformer.GetOutputPort())
+            data_connectors_t[instance]._connector.Update()
+            big_data_source.AddInputConnection(
+                data_connectors_t[instance]._connector.GetOutputPort())
+
+            data_connectors_d[instance] = DataConnector(instance, data_name='displacement', data_size=3)
+            data_connectors_d[instance]._connector.SetInputConnection(
+                transformer.GetOutputPort())
+            data_connectors_d[instance]._connector.Update()
+            big_data_source.AddInputConnection(
+                data_connectors_d[instance]._connector.GetOutputPort())
 
             transforms[instance].append(transform)
             offsets[instance].append(
@@ -537,7 +572,9 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
     spos_data = spos_data[:].copy()
     velo_data = velo_data[:].copy()
 
-    set_velocityv = build_set_velocity(data_connectors)
+    set_velocityv = build_set_velocity(data_connectors_v)
+    set_translationv = build_set_translation(data_connectors_t)
+    set_displacementv = build_set_displacement(data_connectors_d)
 
     times = list(set(dpos_data[:, 0]))
     times.sort()
@@ -589,6 +626,7 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
             pos_data[id_t, 7], pos_data[id_t, 8])
 
         id_tv = numpy.where(velo_data[:, 0] == times[index])
+        
         set_velocityv(
             velo_data[id_tv, 1],
             velo_data[id_tv, 2],
@@ -597,6 +635,20 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
             velo_data[id_tv, 5],
             velo_data[id_tv, 6],
             velo_data[id_tv, 7])
+
+        set_translationv(
+            pos_data[id_t, 1],
+            pos_data[id_t, 2],
+            pos_data[id_t, 3],
+            pos_data[id_t, 4],
+        )
+        
+        # set_displacementv(
+        #     pos_data[id_t, 1],
+        #     pos_data[id_t, 2]- pos_data[0, 2],
+        #     pos_data[id_t, 3]- pos_data[0, 3],
+        #     pos_data[id_t, 4]- pos_data[0, 4]
+        # ) # should be w.r.t initial position
 
         big_data_writer.SetFileName('{0}-{1}.{2}'.format(os.path.splitext(
                                     os.path.basename(io_filename))[0],

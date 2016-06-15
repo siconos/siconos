@@ -708,54 +708,6 @@ candidates for integrating Siconos as a back-end/engine.
 
 * Footnotes
 
-* Mail anouncement.
-
-Dear Siconos users,
-
-A brand new Siconos 4.0.0 is out !! Siconos is now distributed under Apache 2.0 license.
-
-The source code (zip and tar.gz) can be found on github : https://github.com/siconos/siconos/releases
-We are currently working on the release candidate 4.1.0 that can be forked from our github repo. 
-
-We have also worked our documentation at  http://siconos.gforge.inria.fr even if it lacks of polishing. 
-
-As usual, your feedback comments are welcome.
-
-We start also to feed our YouTube channel https://www.youtube.com/channel/UCgv2siTCJeSdWFPTDk71Iyw If you have nice applications with Siconos, do not hesitate to contribute.
-
-All the best,
-Vincent A. for the siconos team
-
-
----
-Main changes: (see https://github.com/siconos/siconos/blob/master/Changelog)
-
-	* Software license change: GNU General Public License is replaced
-	everywhere by Apache license, version 2.0 except for the code in
-	directory named 'external' which is distributed under GNU Lesser
-	General Public License or equivalent.
-
-	* [numerics] overflows & NaN avoided with static analysis in generated
-	functions and jacobians (AlartCurnier, JeanMoreau, NaturalMap)
-
-	* [kernel] cleaning and rewriting of methods in NewtonEulerDS and NewtonEulerR
-	to be more explicit(avoid the use of DSlink in particular)
-
-	* [kernel] move some methods in Simulation to NonSmoothDynamicalSystem
-	(reset, swapInMemory,  updateOutput, updateInput) and change the initialization
-	process. Remoce the weak_ptr to model.
-
-	* [kernel] remove DynamicalSystemsSet from OSI.
-
-	* [kernel] move simulation attibutes into the graph (WMap, W boundaryMap, ... )
-
-	* [mechanics] siconos_vview (python) : fix for the visualization of static
-	objects + add -vtk-exports option for the visualization with paraview
-
-	* [io] mechanics_io (python) : implementation of restart from positions and
-	velocities  ("cold restart")
-
-	* issue: [io] serialization needs boost <= 1.57
 
 
 * Siconos Meeting  					    :SICONOS:Meeting:
@@ -1268,3 +1220,19 @@ TODO
      + Side effect of method
      + Why we need a shared pointer rather than a reference ?
        + new? make_shared? impact on memory allocation and organization
+** <2016-06-14 Tue>
+  + Update applications (SE, IMSRN)
+    + Open engineering [[http://open-engineering.com]]
+    + Logilab 
+    + Ingeliance  
+  + Lie integrator 
+  + Parralelization (Open MP, Cuda)
+    + block of codes on C
+    + generation in Python
+    + first // loop
+  + mechanics_io
+    + plugins
+    + remove/ add DS dynamically
+  + Mail announcement, 
+  + packaging launchpad
+    

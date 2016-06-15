@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 #
-# Make software environment from a yml database.
+# Build shell commands from package specifications in a yml database.
 #
 
 import getopt
@@ -19,6 +19,17 @@ def usage():
 
 class OutputMode:
     Script, Docker, Vagrant = range(3)
+
+output_mode_spec = dict()
+output_mode_spec['script'] = OutputMode.Script
+output_mode_spec['docker'] = OutputMode.Docker
+output_mode_spec['vagrant'] = OutputMode.Vagrant
+
+def wildcard(spec):
+    if 'wildcard' in spec:
+        return spec['wildcard']
+    else:
+        return 'any'
 
 
 def is_list(a):
@@ -55,9 +66,8 @@ def get_entry(spec=None, distrib=None, distrib_version=None, pkg=None,
             if match_distrib in spec[section][pkg]:
                 return spec[section][pkg][match_distrib]
 
-
-        if wildcard in spec[section][pkg]:
-            return spec[section][pkg][wildcard]
+        if wildcard(spec) in spec[section][pkg]:
+            return spec[section][pkg][wildcard(spec)]
 
         else:
             return None
@@ -124,8 +134,8 @@ def env(definitions=None, output_mode=None):
         sys.stdout.write('{0}\n'.format(' \\ \n  '.join(items)))
 
 
-def run(installer=None, command=None, pkg=None, pkgs=None,
-        output_mode=OutputMode.Script):
+def install(installer=None, command=None, pkg=None, pkgs=None,
+            output_mode=OutputMode.Script):
     """
     Format an install command according to output mode.
     """
@@ -161,112 +171,146 @@ def run(installer=None, command=None, pkg=None, pkgs=None,
 
     sys.stdout.write('{0}\n'.format(' \\ \n  '.join(items)))
 
-try:
-    opts, args = getopt.gnu_getopt(sys.argv[1:], '',
-                                   ['pkg=',
-                                    'pkgs=',
-                                    'script',
-                                    'docker',
-                                    'vagrant',
-                                    'split=',
-                                    'distrib='])
 
-except getopt.GetoptError as err:
-        sys.stderr.write('{0}\n'.format(str(err)))
-        usage()
-        exit(2)
+class Options(object):
 
-distrib = None
-distrib_version = None
-pkgs = list()
+    def __init__(self, *args, **kwargs):
+        if len(args) > 0:
+            for arg in args:
+                self.set_options(arg)
 
-output_mode = OutputMode.Script
-split = False
+        for k in kwargs:
+            setattr(self, k, kwargs[k])
 
-for o, a in opts:
-    if o == '--distrib':
-        if ':' in a:
-            distrib, distrib_version = a.split(':')
-        else:
-            distrib = a
-    elif o == '--pkg':
-        pkgs.append(a)
-    elif o == '--pkgs':
-        pkgs += a.split(',')
-    elif o == '--script':
-        output_mode = OutputMode.Script
-    elif o == '--docker':
-        output_mode = OutputMode.Docker
-    elif o == '--vagrant':
-        output_mode = OutputMode.Vagrant
-    elif o == '--split':
-        split = a.lower() in ['true', 'yes', '1']
+    def set_options(self, values):
+        for k in values:
+            setattr(self, k, values[k])
+
+    def all(self):
+        options = (name for name in dir(self) if not name.startswith('_'))
+        values = (self.o for o in options)
+        return dict(zip(options, values))
 
 
-specfilename = args[0]
+def get_options():
 
-with open(specfilename) as specfile:
+    try:
+        opts, args = getopt.gnu_getopt(sys.argv[1:], '',
+                                       ['pkg=',
+                                        'pkgs=',
+                                        'script',
+                                        'docker',
+                                        'vagrant',
+                                        'split=',
+                                        'distrib='])
 
-    spec = yaml.load(specfile.read())
+    except getopt.GetoptError as err:
+            sys.stderr.write('{0}\n'.format(str(err)))
+            usage()
+            exit(2)
 
-    wildcard = None
-    if 'wildcard' in spec:
-        wildcard = spec['wildcard']
-    else:
-        wildcard = 'any'
+    options = Options()
 
-    by_installer = list()
-    by_command = list()
-    definitions = list()
+    options.distrib = None
+    options.distrib_version = None
+    options.pkgs = list()
 
-    for pkg in pkgs:
+    options.output_mode = OutputMode.Script
+    options.split = False
 
-        definition = get_entry(spec, distrib, distrib_version, pkg, 'env')
-
-        if definition is not None:
-            if is_list(definition):
-                for iter_def in definition:
-                    definitions.append(iter_def)
+    for o, a in opts:
+        if o == '--distrib':
+            if ':' in a:
+                options.distrib, options.distrib_version = a.split(':')
             else:
-                definitions.append(definition)
+                options.distrib = a
+        elif o == '--pkg':
+            options.pkgs.append(a)
+        elif o == '--pkgs':
+            options.pkgs += a.split(',')
+        elif o == '--script':
+            options.output_mode = OutputMode.Script
+        elif o == '--docker':
+            options.output_mode = OutputMode.Docker
+        elif o == '--vagrant':
+            options.output_mode = OutputMode.Vagrant
+        elif o == '--split':
+            options.split = a.lower() in ['true', 'yes', '1']
 
-        entries = pkg_entries(spec=spec, distrib=distrib,
-                              distrib_version=distrib_version, pkg=pkg)
+    options.specfilename = args[0]
 
-        for entry in entries:
-            if entry is not None:
-                if hasattr(entry, 'has_key'):
-                    if 'command' in entry:
-                        by_command.append(entry['command'])
-                elif hasattr(entry, 'sort'):
-                    by_installer += entry
+    return options
+
+
+def print_commands(*args, **kwargs):
+
+    if len(args) == 1:
+        options = args[0]
+    else:
+        options = Options(kwargs)
+
+    with open(options.specfilename) as specfile:
+
+        spec = yaml.load(specfile.read())
+
+        by_installer = list()
+        by_command = list()
+        definitions = list()
+
+        for pkg in options.pkgs:
+
+            definition = get_entry(spec, options.distrib,
+                                   options.distrib_version, pkg, 'env')
+
+            if definition is not None:
+                if is_list(definition):
+                    for iter_def in definition:
+                        definitions.append(iter_def)
                 else:
-                    by_installer.append(entry)
-            else:
-                by_installer.append(pkg)
+                    definitions.append(definition)
 
-    begin(distrib=distrib, distrib_version=distrib_version,
-          output_mode=output_mode)
+            entries = pkg_entries(spec=spec, distrib=options.distrib,
+                                  distrib_version=options.distrib_version,
+                                  pkg=pkg)
 
-    installer = get_entry(spec, distrib, distrib_version, wildcard,
-                          'installer')
+            for entry in entries:
+                if entry is not None:
+                    if hasattr(entry, 'has_key'):
+                        if 'command' in entry:
+                            by_command.append(entry['command'])
+                    elif hasattr(entry, 'sort'):
+                        by_installer += entry
+                    else:
+                        by_installer.append(entry)
+                else:
+                    by_installer.append(pkg)
 
-    assert installer is not None
+        begin(distrib=options.distrib, distrib_version=options.distrib_version,
+              output_mode=options.output_mode)
 
-    updater = get_entry(spec, distrib, distrib_version, wildcard, 'updater')
+        installer = get_entry(spec, options.distrib, options.distrib_version,
+                              wildcard(spec), 'installer')
 
-    if updater:
-        installer = '{0} && {1}'.format(updater, installer)
+        assert installer is not None
 
-    if split:
-        for pkg in by_installer:
-            run(installer=installer,
-                pkg=pkg, output_mode=output_mode)
-    else:
-        run(installer=installer,
-            pkgs=by_installer, output_mode=output_mode)
+        updater = get_entry(spec, options.distrib, options.distrib_version,
+                            wildcard(spec), 'updater')
 
-    for command in by_command:
-        run(command=command, output_mode=output_mode)
+        if updater:
+            installer = '{0} && {1}'.format(updater, installer)
 
-    env(definitions, output_mode)
+        if options.split:
+            for pkg in by_installer:
+                format(installer=installer,
+                       pkg=pkg, output_mode=options.output_mode)
+        else:
+            install(installer=installer,
+                    pkgs=by_installer, output_mode=options.output_mode)
+
+        for command in by_command:
+            install(command=command, output_mode=options.output_mode)
+
+        env(definitions, options.output_mode)
+
+if __name__ == '__main__':
+    print_commands(get_options())

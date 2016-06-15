@@ -18,7 +18,7 @@ def usage():
     print '{0}: Usage'.format(sys.argv[0])
     print """
     {0} [--help] [tmin=<float value>] [tmax=<float value>]
-        [--cf-scale=<float value>] [--vtk-export]
+        [--cf-scale=<float value>] [--no-cf] [--vtk-export]
         [--advance=<'fps' or float value>] [--fps=float value]
         <hdf5 file>
     """
@@ -33,6 +33,8 @@ def usage():
      --cf-scale= value  (default : 1.0 )
        rescale the arrow representing the contact forces by the value. 
        the normal cone and the contact points are also rescaled
+     --no-cf
+       do not display contact forces
      --normalcone-ratio = value  (default : 1.0 )  
        introduce a ratio between the representation of the contact forces arrows
        the normal cone and the contact points. useful when the contact forces are
@@ -59,7 +61,7 @@ def add_compatiblity_methods(obj):
 
 try:
     opts, args = getopt.gnu_getopt(sys.argv[1:], '',
-                                   ['help', 'dat', 'tmin=', 'tmax=',
+                                   ['help', 'dat', 'tmin=', 'tmax=', 'no-cf',
                                     'cf-scale=', 'normalcone-ratio=','vtk-export',
                                     'advance=','fps='])
 except getopt.GetoptError, err:
@@ -76,6 +78,7 @@ vtk_export_mode = False
 view_cycle = -1
 advance_by_time = None
 frames_per_second = 25
+cf_disable = False
 
 for o, a in opts:
 
@@ -91,6 +94,9 @@ for o, a in opts:
 
     elif o == '--cf-scale':
         cf_scale_factor = float(a)
+
+    elif o == '--no-cf':
+        cf_disable = True
 
     elif o == '--normalcone-ratio':
         normalcone_ratio = float(a)
@@ -377,14 +383,12 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
 
             # self._output.Update()
 
-    cf_prov = CFprov(cf_data)
-
     contact_posa = dict()
     contact_posb = dict()
     contact_pos_force = dict()
     contact_pos_norm = dict()
 
-    for mu in cf_prov._mu_coefs:
+    def init_contact_pos(mu):
 
         contact_posa[mu] = vtk.vtkDataObjectToDataSetFilter()
         contact_posb[mu] = vtk.vtkDataObjectToDataSetFilter()
@@ -421,14 +425,20 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
         contact_pos_norm[mu].SetVectorComponent(1, "contactNormals", 1)
         contact_pos_norm[mu].SetVectorComponent(2, "contactNormals", 2)
 
+    cf_prov = None
+    if not cf_disable:
+        cf_prov = CFprov(cf_data)
+        for mu in cf_prov._mu_coefs:
+            init_contact_pos(mu)
+
     times = list(set(dpos_data[:, 0]))
     times.sort()
 
     ndyna = len(numpy.where(dpos_data[:, 0] == times[0]))
-    
-    cf_prov._time = min(times[:])
 
-    cf_prov.method()
+    if cf_prov is not None:
+        cf_prov._time = min(times[:])
+        cf_prov.method()
 
     cone = dict()
     cone_glyph = dict()
@@ -454,7 +464,7 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
     transform = vtk.vtkTransform()
     transform.Translate(-0.5, 0., 0.)
 
-    for mu in cf_prov._mu_coefs:
+    def init_cf_sources(mu):
         contact_posa[mu].SetInputData(cf_prov._output[mu])
         contact_posa[mu].Update()
         contact_posb[mu].SetInputData(cf_prov._output[mu])
@@ -611,6 +621,9 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
         sactorb[mu] = vtk.vtkActor()
         sactorb[mu].GetProperty().SetColor(0, 1, 0)
         sactorb[mu].SetMapper(smapperb[mu])
+
+    if cf_prov is not None:
+        [init_cf_sources(mu) for mu in cf_prov._mu_coefs]
 
     renderer = vtk.vtkRenderer()
     renderer_window = vtk.vtkRenderWindow()
@@ -829,13 +842,14 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
     spos_data = spos_data[:].copy()
 
     if not vtk_export_mode:
-        for mu in cf_prov._mu_coefs:
-            renderer.AddActor(gactor[mu])
-            renderer.AddActor(cactor[mu])
+        if cf_prov is not None:
+            for mu in cf_prov._mu_coefs:
+                renderer.AddActor(gactor[mu])
+                renderer.AddActor(cactor[mu])
 
-            renderer.AddActor(clactor[mu])
-            renderer.AddActor(sactora[mu])
-            renderer.AddActor(sactorb[mu])
+                renderer.AddActor(clactor[mu])
+                renderer.AddActor(sactora[mu])
+                renderer.AddActor(sactorb[mu])
 
         import imp
         try:
@@ -992,8 +1006,9 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
                 index = bisect.bisect_left(self._times, self._time)
                 index = max(0, index)
                 index = min(index, len(self._times) - 1)
-                cf_prov._time = self._times[index]
-                cf_prov.method()
+                if cf_prov is not None:
+                    cf_prov._time = self._times[index]
+                    cf_prov.method()
 
         #        contact_posa.Update()
 
@@ -1018,17 +1033,14 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
                     pos_data[id_t, 8])
 
                 self._slider_repres.SetValue(self._time)
-                renderer_window.Render()
 
                 self._current_id.SetNumberOfValues(1)
                 self._current_id.SetValue(0, index)
 
                 self._iter_plot.SetSelection(self._current_id)
                 self._prec_plot.SetSelection(self._current_id)
-                self._iter_plot_view.Update()
-                self._prec_plot_view.Update()
-                self._iter_plot_view.GetRenderer().GetRenderWindow().Render()
-                self._prec_plot_view.GetRenderer().GetRenderWindow().Render()
+
+                renderer_window.Render()
 
             def object_pos(self, id_):
                 index = bisect.bisect_left(self._times, self._time)
@@ -1049,7 +1061,8 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
 
                 if key == 'r':
                     spos_data, dpos_data, cf_data, solv_data = load()
-                    cf_prov = CFprov(cf_data)
+                    if not cf_disabled:
+                        cf_prov = CFprov(cf_data)
                     times = list(set(dpos_data[:, 0]))
                     times.sort()
                     ndyna = len(numpy.where(dpos_data[:, 0] == times[0]))
@@ -1058,12 +1071,13 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
                             set(spos_data[:, 1]))
                     else:
                         instances = set(dpos_data[:, 1])
-                    cf_prov._time = min(times[:])
-                    cf_prov.method()
-                    contact_posa.SetInputData(cf_prov._output)
-                    contact_posa.Update()
-                    contact_posb.SetInputData(cf_prov._output)
-                    contact_posb.Update()
+                    if cf_prov is not None:
+                        cf_prov._time = min(times[:])
+                        cf_prov.method()
+                        contact_posa.SetInputData(cf_prov._output)
+                        contact_posa.Update()
+                        contact_posb.SetInputData(cf_prov._output)
+                        contact_posb.Update()
                     id_t0 = numpy.where(
                         dpos_data[:, 0] == min(dpos_data[:, 0]))
                     contact_pos_force.Update()
@@ -1374,8 +1388,9 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
             index = max(0, index)
             index = min(index, len(times) - 1)
 
-            cf_prov._time = times[index]
-            cf_prov.method()
+            if cf_prov is not None:
+                cf_prov._time = times[index]
+                cf_prov.method()
 
             id_t = numpy.where(pos_data[:, 0] == times[index])
             if numpy.shape(spos_data)[0] >0 :

@@ -1,6 +1,6 @@
 .. _documentation_index:
 
-Siconos documentation
+User doc
 =====================
 
 **Getting and installing siconos software:**
@@ -28,19 +28,3 @@ Siconos documentation
    users_guide/index
    examples/index
 
-**Siconos API reference:**
-
-*There you can find details about all methods and classes implemented in Siconos.*
-
-.. toctree::
-   :maxdepth: 1
-
-   reference/siconos_api_reference
-   reference/siconos_python_reference
-
-**For people who contribute to siconos:**
-
-.. toctree::
-   :maxdepth: 1
-
-   devel_guide/index

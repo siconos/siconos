@@ -11,4 +11,4 @@ before_script:
   - cd build
 
 script:
-  - ../CI/driver.py
+  - ../CI/driver.py --run

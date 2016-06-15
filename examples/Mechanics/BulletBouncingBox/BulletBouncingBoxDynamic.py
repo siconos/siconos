@@ -69,7 +69,7 @@ def makeBox(pos=position_init, vel=velocity_init):
     body = BulletDS(box1,
                     [0, 0, pos, 1., 0, 0, 0],
                     [0, 0, vel, 0., 0., 0.])
-    
+
     # set external forces
     weight = [0, 0, - box1.mass() * g]
     body.setFExtPtr(weight)

@@ -1,11 +1,31 @@
-from machinery.ci_task import CiTask
+#
+# Siconos specific
+#
 
-siconos_default = CiTask(
+from machinery.ci_task import CiTask
+import os
+
+#
+# 1. where the packages are defined
+#
+database = os.path.join('config', 'siconos.yml')
+
+#
+# 2. the default task
+#
+default = CiTask(
     ci_config='default',
     distrib='ubuntu:14.04',
-    pkgs=['build-base', 'gcc', 'gfortran', 'gnu-c++', 'atlas-lapack', 'lpsolve', 'python-env'],
+    pkgs=['build-base', 'gcc', 'gfortran', 'gnu-c++', 'atlas-lapack',
+          'lpsolve', 'python-env'],
     srcs=['.'],
     targets={'.': ['docker-build', 'docker-ctest']})
+
+#
+# 3. all the tasks
+#
+
+siconos_default = default
 
 siconos_test_deb = CiTask(
     ci_config='examples',
@@ -121,8 +141,9 @@ siconos_default_examples = siconos_default.copy()(
     with_examples=True)
 
 
-# dispatch based on hostname and distrib type (to min. disk requirement)
-
+#
+# 4. dispatch based on hostname and distrib type (to min. disk requirement)
+#
 known_tasks = {'siconos---vm0':
                (siconos_fedora_latest,
                 siconos_gcc_asan,

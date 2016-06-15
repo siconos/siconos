@@ -81,7 +81,7 @@ with Hdf5() as io:
   io.addObject('left_up', [Contactor('Left_up')],
                translation=[0, 0, 0])
 
-  
+
   ######### left_middle
   id_plan=id_plan+1
   body_collection['plan_id']["left_middle"]=id_plan
@@ -101,7 +101,7 @@ with Hdf5() as io:
   io.addConvexShape('Left_middle',left_middle_vertices )
   io.addObject('left_middle', [Contactor('Left_middle')],
                translation=[0, 0, 0])
-  
+
   ######### left_down
   id_plan=id_plan+1
   body_collection['plan_id']["left_down"]=id_plan
@@ -222,7 +222,7 @@ with Hdf5() as io:
   io.addConvexShape('Front_up',front_up_vertices )
   io.addObject('front_up', [Contactor('Front_up')],
                translation=[0, 0, 0])
-  
+
   ######### front_down
   id_plan=id_plan+1
   body_collection['plan_id']["front_down"]=id_plan
@@ -246,7 +246,7 @@ with Hdf5() as io:
   n_cube=5
   n_row=1
   n_col=1
-  cube_size =0.05
+  cube_size =0.25
   x_shift=3.0
   for i in range(n_row):
     for j in range(n_col):
@@ -261,7 +261,7 @@ with Hdf5() as io:
                                                                    (cube_size, -cube_size, -cube_size),
                                                                    (cube_size, -cube_size, cube_size)])
 
-  
+
         io.addObject('cube'+str(n)+'_'+str(i)+'_'+str(j), [Contactor('CubeCS'+str(n)+'_'+str(i)+'_'+str(j))],
                      translation=[2+i*x_shift*cube_size, 2+x_shift*j*cube_size, 3+cube_size*x_shift*n],
                      velocity=[0, 0, 0, 0, 0, 0],
@@ -280,7 +280,7 @@ with Hdf5() as io:
 
 step=1000
 hstep=0.005
-  
+
 # Run the simulation from the inputs previously defined and add
 # results to the hdf5 file. The visualisation of the output may be done
 # with the vview command.
@@ -310,4 +310,3 @@ with Hdf5(mode='r+') as io:
          tolerance=1e-4,
          numerics_verbose=False,
          output_frequency=10)
-

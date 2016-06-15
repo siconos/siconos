@@ -6,4 +6,3 @@ siconos -v -g -j 2 -DBT_USE_DOUBLE_PRECISION=1 -DWITH_BULLET `pkg-config bullet 
 
 # Mac Os X (Snow Leopard)
 #siconos -v -j 2  -DBT_USE_DOUBLE_PRECISION -opt=-I/usr/local/include/bullet -ldopt=-lBulletCollision -ldopt=-lLinearMath -ldopt=-lBulletDynamics -ldopt=-framework -ldopt=GLUT QGLBullet.cpp
-
