@@ -146,7 +146,7 @@ public:
   virtual void acceptSP(SP::SiconosVisitor tourist) = 0;
 };
 
-struct SiconosPlane : public SiconosShape, public std11::enable_shared_from_this<SiconosPlane>
+class SiconosPlane : public SiconosShape, public std11::enable_shared_from_this<SiconosPlane>
 {
 protected:
   virtual void onChanged()
@@ -160,12 +160,14 @@ public:
   SiconosPlane(SP::SiconosVector pos)
     : SiconosShape(pos) {}
 
+  virtual ~SiconosPlane() {}
+
   /** visitors hook
    */
   ACCEPT_BASE_VISITORS(SiconosShape);
 };
 
-struct SiconosSphere : public SiconosShape, public std11::enable_shared_from_this<SiconosSphere>
+class SiconosSphere : public SiconosShape, public std11::enable_shared_from_this<SiconosSphere>
 {
 protected:
   float _radius;
@@ -191,7 +193,7 @@ public:
   ACCEPT_BASE_VISITORS(SiconosShape);
 };
 
-struct SiconosBox : public SiconosShape, public std11::enable_shared_from_this<SiconosBox>
+class SiconosBox : public SiconosShape, public std11::enable_shared_from_this<SiconosBox>
 {
 protected:
   SP::SiconosVector _dimensions;
@@ -231,7 +233,7 @@ public:
   ACCEPT_BASE_VISITORS(SiconosShape);
 };
 
-struct SiconosConvexHull : public SiconosShape, public std11::enable_shared_from_this<SiconosConvexHull>
+class SiconosConvexHull : public SiconosShape, public std11::enable_shared_from_this<SiconosConvexHull>
 {
 protected:
   SP::SiconosMatrix _vertices;
