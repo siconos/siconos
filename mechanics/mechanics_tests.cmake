@@ -63,7 +63,7 @@ if(WITH_${COMPONENT}_TESTING)
       
       set(command_name "python ${CMAKE_BINARY_DIR}/scripts/siconos -P ${CMAKE_BINARY_DIR}/scripts-for-build/siconos-mechanisms.py .")
       MESSAGE("${command_name}")
-      add_test(mechanisms_${_dir} ${CMAKE_COMMAND} -E chdir ${bin_dir} python ${CMAKE_BINARY_DIR}/scripts/siconos -P ${CMAKE_BINARY_DIR}/scripts-for-build/siconos-mechanisms.py . )
+      add_test(mechanisms_${_dir} ${CMAKE_COMMAND} -E chdir ${bin_dir} python ${CMAKE_BINARY_DIR}/scripts_for_build/siconos-mechanisms.py . )
     endforeach(_dir)
  
   ENDIF()

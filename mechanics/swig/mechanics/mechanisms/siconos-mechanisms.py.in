@@ -18,10 +18,6 @@ print('############## Enrironment variable                ###############')
 print("sys.executable: ", sys.executable)
 print("sys.path: ", sys.path)
 
-print('DYLD_LIBRARY_PATH:', os.getenv('DYLD_LIBRARY_PATH'))
-print('LD_LIBRARY_PATH:', os.getenv('LD_LIBRARY_PATH'))
-
-
 print('############## Loading of definition files         ###############')
 
 

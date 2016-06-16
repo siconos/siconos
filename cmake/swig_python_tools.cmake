@@ -118,12 +118,12 @@ macro(add_siconos_swig_sub_module fullname)
   # Check dependencies and then link ...
   add_dependencies(${SWIG_MODULE_${_name}_REAL_NAME} ${COMPONENT})
 
-  IF(UNIX AND NOT APPLE)
+  if(UNIX AND NOT APPLE)
     # do not link against the Python library on unix, it is useless
     swig_link_libraries(${_name} ${${COMPONENT}_LINK_LIBRARIES} ${COMPONENT})
-  ELSE(UNIX AND NOT APPLE)
+  else()
     swig_link_libraries(${_name} ${PYTHON_LIBRARIES} ${${COMPONENT}_LINK_LIBRARIES} ${COMPONENT})
-  ENDIF(UNIX AND NOT APPLE)
+  endif()
 
   # set dep between docstrings and python bindings
   add_dependencies(${SWIG_MODULE_${_name}_REAL_NAME} ${COMPONENT}_docstrings)
@@ -146,9 +146,8 @@ macro(add_siconos_swig_sub_module fullname)
   # install path ...
   set(DEST "${SICONOS_PYTHON_INSTALL_DIR}/${SICONOS_PYTHON_PACKAGE}/${_path}")
 
-  # done by python setup.py ...
   #install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/${_name}.py DESTINATION ${DEST})
-  install(TARGETS ${SWIG_MODULE_${_name}_REAL_NAME} DESTINATION ${DEST})
+  install(TARGETS ${SWIG_MODULE_${_name}_REAL_NAME} LIBRARY DESTINATION ${DEST})
   
 endmacro()
 

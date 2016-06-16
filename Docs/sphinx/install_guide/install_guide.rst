@@ -159,7 +159,6 @@ Remark
 if *siconos_install_path* is not a standard path of your system, you may need to set some environment variables, mainly:
 
 * append *siconos_install_path*/bin to PATH
-* append *siconos_install_path*/lib to LD_LIBRARY_PATH and/or DYLD_LIBRARY_PATH (on MacOs)
 
 
 .. _siconos_cmake_options:
