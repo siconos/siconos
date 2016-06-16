@@ -61,9 +61,9 @@ protected:
 
   SiconosShape(float x, float y, float z)
     : _position(new SiconosVector(7))
-    , _group(0)
     , _inside_margin(0.1)
     , _outside_margin(0.1)
+    , _group(0)
   {
     _position->zero();
     (*_position)(0) = x; // position
@@ -74,9 +74,9 @@ protected:
 
   SiconosShape(const SP::SiconosVector pos)
     : _position(new SiconosVector(7))
-    , _group(0)
     , _inside_margin(0.1)
     , _outside_margin(0.1)
+    , _group(0)
   {
     switch (pos->size()) {
     case 3:
