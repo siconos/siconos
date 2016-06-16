@@ -34,6 +34,7 @@
 class SiconosShapeHandler
 {
 public:
+  virtual ~SiconosShapeHandler() {}
   virtual void onChanged(SP::SiconosSphere) = 0;
   virtual void onChanged(SP::SiconosBox) = 0;
   virtual void onChanged(SP::SiconosPlane) = 0;
@@ -95,6 +96,9 @@ protected:
   }
 
 public:
+
+  virtual ~SiconosShape() {}
+
   SP::SiconosVector position() const { return _position; }
 
   void setPosition(const SP::SiconosVector pos)
@@ -177,6 +181,8 @@ public:
   SiconosSphere(SP::SiconosVector pos, float radius)
     : SiconosShape(pos), _radius(radius) {}
 
+  virtual ~SiconosSphere() {}
+
   float radius() const { return _radius; }
   void setRadius(float r) { _radius = r; onChanged(); }
 
@@ -207,6 +213,8 @@ public:
   SiconosBox(SP::SiconosVector pos,
              SP::SiconosVector dimensions)
     : SiconosShape(pos), _dimensions(dimensions) {}
+
+  virtual ~SiconosBox() {}
 
   SP::SiconosVector dimensions() const { return _dimensions; }
 
@@ -248,6 +256,8 @@ public:
     if (_vertices && _vertices->size(1) != 3)
       throw SiconosException("Convex hull vertices matrix must have 3 columns.");
   }
+
+  virtual ~SiconosConvexHull() {}
 
   SP::SiconosMatrix vertices() const { return _vertices; }
 

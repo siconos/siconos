@@ -47,6 +47,8 @@ protected:
   void unlink(SP::Interaction inter);
 
 public:
+  virtual ~SiconosBroadphase() {}
+
   virtual void buildGraph(SP::Model model) = 0;
   virtual void buildGraph(std::vector<SP::BodyDS> bodies) = 0;
   virtual void buildGraph(SP::SiconosContactor contactors) = 0;

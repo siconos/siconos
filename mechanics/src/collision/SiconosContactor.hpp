@@ -54,6 +54,7 @@ protected:
   std::vector<SP::SiconosShape> _shapes;
 
 public:
+  virtual ~SiconosContactor() {}
 
   const std::vector<SP::SiconosShape> &shapes() const
     { return _shapes; }
