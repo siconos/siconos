@@ -33,12 +33,6 @@
 class SiconosBroadphase : public SiconosVisitor
 {
 protected:
-  virtual void visit(SP::SiconosPlane plane) = 0;
-  virtual void visit(SP::SiconosSphere sphere) = 0;
-  virtual void visit(SP::SiconosBox box) = 0;
-  virtual void visit(SP::SiconosConvexHull ch) = 0;
-  virtual void visit(const BodyDS &body) = 0;
-
   SP::Model _model;
 
   void link(SP::Interaction inter,
