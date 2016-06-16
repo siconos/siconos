@@ -783,6 +783,7 @@ bool BulletBroadphase::bulletContactClear(void* userPersistentData)
   DEBUG_PRINTF("unlinking interaction %p\n", &**p_inter);
   gBulletBroadphase->unlink(*p_inter);
   delete p_inter;
+  return false;
 }
 
 void BulletBroadphase::performBroadphase()
