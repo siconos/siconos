@@ -522,8 +522,6 @@ void BulletBroadphase::visit(SP::SiconosConvexHull ch)
   DEBUG_PRINTF("ch: %p(%ld)\n",
          &*ch,ch.use_count());
 
-  const double half = 0.5;
-
   if (!ch->vertices())
     throw SiconosException("No vertices matrix specified for convex hull.");
 
@@ -557,7 +555,7 @@ void BulletBroadphase::visit(SP::SiconosConvexHull ch)
                                          0);
     if (shrunkBy < 0) {
       // TODO: Warning
-      "insideMargin is too large, convex hull would be too small.";
+      // "insideMargin is too large, convex hull would be too small.";
       btch.reset(new btConvexHullShape(&pts[0], rows, sizeof(btScalar)*3));
       ch->setInsideMargin(0);
     }
@@ -590,8 +588,6 @@ void BulletBroadphase::update(SP::SiconosConvexHull ch)
   SP::btConvexHullShape btch(impl->chMap[ch]);
   assert(btch
          && "BulletBroadphase::update(), ch not found in chMap.");
-
-  double m = ch->outsideMargin();
 
   // TODO
   //btbox->setLocalScaling(btVector3(sx, sy, sz));
