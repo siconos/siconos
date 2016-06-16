@@ -684,7 +684,7 @@ void  MBTB_initSimu(double hTS, int withProj)
   printf("====> COMPUTE H OF INTERATION END)\n");
 
   FILE *fp;
-  fp = fopen("simu.txt", "w");
+  fp = fopen("simulation_results.dat", "w");
   _MBTB_printHeader(fp);
   fclose(fp) ;
   NumericsOptions global_options;
@@ -723,7 +723,7 @@ void MBTB_run(int NbSteps)
 {
 
   FILE *fp;
-  fp = fopen("simu.txt", "a");
+  fp = fopen("simulation_results.dat", "a");
   int currentTimerCmp = sTimerCmp;
   for(int ii=0; ii<NbSteps; ii++)
   {

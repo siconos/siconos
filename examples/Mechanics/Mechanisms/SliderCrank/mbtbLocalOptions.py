@@ -46,7 +46,7 @@ contactTrans2=array.array('d',[
 
 #3D parameters
 ## It must be set to 1 to run in a 3D view.
-with3D=1
+with3D=0
 ## 3D viewer update frequency and output frequency.
 freqOutput=10
 freqUpdate=10
