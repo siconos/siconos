@@ -23,7 +23,7 @@ m=array.array('d',[7.6e-2])
 inertialMatrix=numpy.array([((1.91e+1,0,0),(0,1.91e+1,0),(0,0,2.68e+1))])
 
 ## REQUIRED the CAD files.
-afile=numpy.array(['./CAD/tube.stp'])
+afile=['./CAD/tube.stp']
 
 ## REQUIRED the library for the pluged forces.
 if apple :
@@ -43,16 +43,16 @@ NBJOINTS=0 # number of joints
 ## REQUIRED the number of contacts
 NBCONTACTS=3
 ## REQUIRED the names of each contact.
-contactName=numpy.array([
-         'contact_boby0_1','contact_boby1_2','contact_boby2_3'])
+contactName=[
+         'contact_boby0_1','contact_boby1_2','contact_boby2_3']
 ## REQUIRED the CAD file attached to the first body involved in the contact.
-afileContact1=numpy.array([
+afileContact1=[
        './CAD/1.stp','./CAD/tube_bottom_surface.stp','./CAD/tube_top_side_surface.stp'
-       ])
+       ]
 ## REQUIRED the CAD file attached to the second body involved in the contact.
-afileContact2=numpy.array([
+afileContact2=[
        './CAD/shaft_surface.stp','./CAD/shaft_surface.stp','./CAD/shaft_top_surface.stp'
-        ])
+        ]
 ## REQUIRED the identifier of the first body involved in the contact.
 contactBody1=array.array('I',[
              PART1,PART1,PART1])

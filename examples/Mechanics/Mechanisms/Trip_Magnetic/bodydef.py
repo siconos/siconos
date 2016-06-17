@@ -76,7 +76,7 @@ inertialMatrix=numpy.array([((3.891182e+01, -6.015089e+00, -2.8917964e-01),(-6.0
 			    #((8.3896687e+00,  0.0000000e+00, -8.7749247e-6),(0.0000000e+00,  1.9192988e-01,  0.0000000e+00),(-8.7749247e-6,  0.0000000e+00,  8.3896744e+00))
 ])
 ###### STEP Files of bodies ################################################################
-afile=numpy.array(['./CAD/C60/manette.stp',
+afile=['./CAD/C60/manette.stp',
                    './CAD/C60/biellette.stp',
                    './CAD/C60/crochet.stp',
                    './CAD/C60/platine.stp',
@@ -86,7 +86,7 @@ afile=numpy.array(['./CAD/C60/manette.stp',
 		   './CAD/C60/J1/Aiguille.stp',
 		   #'./CAD/C60/J1/72569701.stp'
 #		   './CAD/C60/J1/couvercle.stp' # porte_contact.stp=> (0,0,0,0,0,1, -69*my_PI/180.0),
-])
+]
 ###### FORCES and MOMENTS acting on the bodies##################################################
 plugin='plugins.so'
 
@@ -284,7 +284,7 @@ contactName=numpy.array([
 
 ])
 ######CONTACT BODY1 STEP FILES DESCRIPTIONS#################################################################
-afileContact1=numpy.array([
+afileContact1=[
 	'./CAD/REVISED_CAD2/J1/Handle_Case_J1_bottom_bearing2.stp',
 	'./CAD/REVISED_CAD2/J1/Handle_Case_J1_top_bearing2.stp',
 	'./CAD/C60/C1/Handle_case_C1_ON_plane.stp',
@@ -346,9 +346,9 @@ afileContact1=numpy.array([
 	'./CAD/C60/C8/barre_magnetic_2.stp',
 	'./CAD/C60/newFC/Tbar_magnetic_FC_X.stp',
 	'./CAD/C60/Magnetic_plunger_outer_casing/magnetic_plunder_surface.stp',
-])
+]
 ######CONTACT BODY2 STEP FILES DESCRIPTIONS#################################################################
-afileContact2=numpy.array([
+afileContact2=[
 	'./CAD/C60/J1/Case_handle_J1_journal_surface.stp',
 	'./CAD/C60/J1/Case_as_cover_handle_journal_surface_J1.stp',
 	'./CAD/Case_C2_ring_3.stp',
@@ -415,7 +415,7 @@ afileContact2=numpy.array([
 	'./CAD/C60/newFC/Case_Magnetic_Mcontact_FC_X.stp',
 	'./CAD/C60/Magnetic_plunger_outer_casing/case_plunger_cover.stp',
 
-])
+]
 ######NAME OF CONTACT BODY1  DESCRIPTIONS#################################################################
 contactBody1=array.array('I',[
 	MANETTE, #J1
