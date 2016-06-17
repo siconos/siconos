@@ -246,6 +246,7 @@ class ShapeCollection():
     def __init__(self, io, collision_margin=0.04):
         self._io = io
         self._shapes = dict()
+        self._tri = dict()
         self._collision_margin=collision_margin
         #print('self._collision_margin',self._collision_margin)
         if bullet_is_here:
@@ -287,14 +288,15 @@ class ShapeCollection():
             if not isinstance(self.url(shape_name), str) and \
                not 'primitive' in self.attributes(shape_name):
                 # assume a vtp file (xml) stored in a string buffer
-                if self.attributes(shape_name)['type'] == 'vtk':
+                if self.attributes(shape_name)['type'] == 'vtp':
                     if self.shape(shape_name).dtype == h5py.new_vlen(str):
                         with tmpfile() as tmpf:
                             data = self.shape(shape_name)[:][0]
                             tmpf[0].write(data)
                             tmpf[0].flush()
-                            self._tri[index], self._shape[index] = loadMesh(
-                                tmpf[1],self._collision_margin)
+                            (self._tri[shape_name],
+                             self._shapes[shape_name]) = loadMesh(
+                                 tmpf[1], self._collision_margin)
                     else:
                         assert False
                 elif self.attributes(shape_name)['type'] in['step']:
@@ -1044,7 +1046,7 @@ class Hdf5():
                 assert os.path.splitext(filename)[-1][1:] == 'vtp'
                 shape_data = str_of_file(filename)
 
-            self.addMeshShapeFromString(name, shape_data)
+            self.addMeshFromString(name, shape_data)
 
     def addBRepFromString(self, name, shape_data):
         """
