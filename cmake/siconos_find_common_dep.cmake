@@ -192,6 +192,10 @@ if(WITH_PYTHON_WRAPPER)
       MESSAGE(STATUS "Old version of scipy detected. Support for 64 bits int was added in 0.14.0, forcing 32 bits int for python bindings")
     ENDIF(scipy_VERSION VERSION_LESS "0.14.0")
   ENDIF(NOT NO_RUNTIME_BUILD_DEP)
+  find_python_module(pyhull)
+  if(NOT pyhull_FOUND)
+    message(STATUS "Warning, python pyhull package not found. Some examples may not run properly. Try pip install pyhull.")
+  endif()
 endif()
 
 
