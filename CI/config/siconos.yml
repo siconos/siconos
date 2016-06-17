@@ -117,7 +117,7 @@ pkgs:
   cmake:
     ubuntu-12.04:
        - python-software-properties
-       - cmake-2.8.12
+       - cmake-3.0.2
        - python-matplotlib
 
 
@@ -130,6 +130,23 @@ pkgs:
         apt-get update -qq &&
         apt-get purge cmake -qq &&
         apt-get -y install cmake
+
+  cmake-3.0.2:
+    ubuntu-12.04:
+      command:
+	sudo apt-get install build-essential&&
+	wget http://www.cmake.org/files/v3.0/cmake-3.0.2.tar.gz&&
+	tar xf cmake-3.0.2.tar.gz&&
+	cd cmake-3.0.2./configure&&
+	make install
+
+    ubuntu-14.04:
+      command:
+	sudo apt-get install build-essential&&
+	wget http://www.cmake.org/files/v3.0/cmake-3.0.2.tar.gz&&
+	tar xf cmake-3.0.2.tar.gz&&
+	cd cmake-3.0.2./configure&&
+	make install
 
   gfortran:
     fedora: gcc-gfortran
