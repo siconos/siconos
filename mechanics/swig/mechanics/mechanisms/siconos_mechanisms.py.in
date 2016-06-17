@@ -2,12 +2,17 @@
 from __future__ import print_function
 import os
 import sys
+import atexit
 
 print('##################################################################')
 print('############## Siconos/Mechanics mechanisms module ###############')
 print('##################################################################')
 
 siconos_pythonpath = "@CURRENT_PYTHON_PATH@"
+
+# path to data (bodydef, CAD files ...).
+example_path = '@EXAMPLE_PATH@'
+
 sys.path.append(siconos_pythonpath)
 mechanisms_path = os.path.join(siconos_pythonpath,
                                'siconos/mechanics/mechanisms')
@@ -33,9 +38,8 @@ if with_io:
     from siconos.io import mechanics_io as io
 from siconos.mechanics.contact_detection.tools import Avatar, Contactor
 
-install_path = os.path.join('@CMAKE_INSTALL_PREFIX@', 'bin')
 default_options = os.path.join(mechanisms_path, 'mbtbDefaultOptions.py')
-local_options = os.path.join(os.getcwd(), 'mbtbLocalOptions.py')
+local_options = os.path.join(example_path, 'mbtbLocalOptions.py')
 
 exec(compile(open(default_options).read(), default_options, 'exec'))
 
@@ -43,9 +47,11 @@ if os.path.exists(local_options):
     exec(compile(open(local_options).read(), local_options, 'exec'))
     print("siconos-mechanisms.py, info: mbtbLocalOptions.py loaded")
 
-exec(compile(open("bodydef.py").read(), "bodydef.py", 'exec'))
-print("siconos-mechanisms.py, info: bodydef.py loaded")
+bodydef_file = os.path.join(example_path, 'bodydef.py')
+exec(compile(open(bodydef_file).read(), bodydef_file, 'exec'))
+print('siconos-mechanisms.py, info:', bodydef_file, ' loaded')
 
+with_run_id = False
 
 try:
     print(" run id: ", run_id)
@@ -86,7 +92,14 @@ for idContact in range(NBCONTACTS):
 
 
 #build contacts (must be done before the dynamical system building
+
 for idContact in range(NBCONTACTS):
+    afileContact1[idContact] = os.path.join(example_path,
+                                            afileContact1[idContact])
+    afileContact2[idContact] = os.path.join(example_path,
+                                            afileContact2[idContact])
+    print(afileContact2[idContact])
+
     mbtb.MBTB_ContactLoadCADFile(idContact, afileContact1[idContact],
                                  afileContact2[idContact],
                                  contactDraw1[idContact],
@@ -113,6 +126,7 @@ if with_run_id:
 print("User plugin : ", plugin)
 
 for idBody in range(NBBODIES):
+    afile[idBody] = os.path.join(example_path, afile[idBody])
     mbtb.MBTB_BodyLoadCADFile(idBody, afile[idBody], bodyDraw[idBody])
     mbtb.MBTB_BodyBuild(idBody, body[idBody], m[idBody],
                         initPos[idBody], initCenterMass[idBody],
@@ -142,6 +156,8 @@ except NameError:
     print("run.py, info: joint points not defined.")
 
 for idArtefact in range(NBARTEFACTS):
+    Artefactfile[idArtefact] = os.path.join(example_path,
+                                            Artefactfile[idArtefact])
     cadmbtb.CADMBTB_loadArtefactCADFile(
         Artefactfile[idArtefact], ArtefactTrans[idArtefact])
 
@@ -199,7 +215,6 @@ def remove_run_id_dir():
         os.removedirs(run_id)
 
 
-import atexit
 atexit.register(remove_run_id_dir)
 
 # Hdf5 IO setup
@@ -368,6 +383,7 @@ if with_io:
                     relative_translation=offset[contactBody2[idContact]])]
 
         for idArtefact in range(NBARTEFACTS):
+            
             shape_name = os.path.basename(
                 os.path.splitext(Artefactfile[idArtefact])[0])
 
