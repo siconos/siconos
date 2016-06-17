@@ -155,7 +155,8 @@ known_tasks = {'siconos---vm0':
                (siconos_fedora_latest,
                 siconos_gcc_asan,
                 siconos_gcc_asan_latest,
-                siconos_ubuntu_15_10_with_mechanisms),
+                siconos_ubuntu_15_10_with_mechanisms,
+                siconos_debian_mechanisms)
 
                'siconos---vm1':
                (siconos_numerics_only,

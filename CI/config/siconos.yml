@@ -57,6 +57,7 @@ pkgs:
 
   build-base:
     any:
+      - git-core
       - make
       - cmake
       - boost
@@ -315,27 +316,27 @@ pkgs:
 # deps required for oce/pythonocc install, when oce/occ sources = git repos, last version.
   oce-pythonocc-deps:
     debian:
-      - git-core
       - libgl1-mesa-glx
       - libglu1-mesa
-      - libsm6
-      - libice6
+      - libgl1-mesa-dev
+      - libglu1-mesa-dev
+      - libglapi-mesa
+      - libfreetype6-dev
 
 
   oce-pythonocc:
     any:
       command: git clone https://github.com/tpaviot/oce.git &&
-      	       git clone https://github.com/tpaviot/pythonocc-core.git &&
+               git clone https://github.com/tpaviot/pythonocc-core.git &&
                mkdir build &&
                cd build &&
-	       mkdir oce-last pythonocc &&
-	       cd oce-last &&
+               mkdir oce-last pythonocc &&
+               cd oce-last &&
                cmake ../../oce -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release &&
                make -j 2 &&
                make install &&
-	       cd ../pythonocc &&
-	       cmake ../../pythonocc-core -DCMAKE_BUILD_TYPE=Release &&
-	       make -j 2 &&
-	       make install &&
-	       cd &&
-	       python -c 'import OCC'
+               cd ../pythonocc &&
+               cmake ../../pythonocc-core -DCMAKE_BUILD_TYPE=Release &&
+               make install &&
+               cd &&
+               python -c 'import OCC'
