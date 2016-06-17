@@ -6,7 +6,7 @@ results = []
 results_ref = []
 
 with open ("simulation_results.dat", "r") as myfile:
-    data=myfile.readlines()    
+    data=myfile.readlines()
     #print data[1:]
     for i in data[1:]:
         data_l_i = i.split('\t')
@@ -22,9 +22,9 @@ with open ("simulation_results.dat", "r") as myfile:
         results =  numpy.array(data_l_i_f)
         #print i,float(i.split('\t'))
         #print ' '
-        
+
 with open ("simulation_results.ref", "r") as myfile:
-    data=myfile.readlines()    
+    data=myfile.readlines()
     #print data[1:]
     for i in data[1:]:
         data_l_i = i.split('\t')
@@ -43,5 +43,5 @@ with open ("simulation_results.ref", "r") as myfile:
 
 error_= numpy.linalg.norm(results-results_ref)
 print 'Error w.r.t reference file = ', error_
-        
+
 assert (error_< 1e-14)
