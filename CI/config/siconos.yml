@@ -120,6 +120,9 @@ pkgs:
        - cmake-3.0.2
        - python-matplotlib
 
+    ubuntu-14.04:
+       - cmake-3.0.2
+
 
   cmake-2.8.12:
     ubuntu-12.04:
