@@ -80,6 +80,7 @@ protected:
   BulletOptions _options;
   BulletStatistics _stats;
 
+  using SiconosVisitor::visit;
   void visit(SP::SiconosPlane plane);
   void visit(SP::SiconosSphere sphere);
   void visit(SP::SiconosBox box);
