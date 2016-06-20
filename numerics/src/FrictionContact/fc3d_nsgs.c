@@ -28,8 +28,15 @@
 #include <math.h>
 #include <assert.h>
 #include <time.h>
+#include <alloca.h>
 
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
+
+#include <SiconosConfig.h>
+#if defined(WITH_OPENMP) && defined(_OPENMP)
+#define USE_OPENMP 1
+#include <omp.h>
+#endif
 
 void fake_compute_error_nsgs(FrictionContactProblem* problem, double *reaction, double *velocity, double tolerance, SolverOptions  *options,  double* error)
 {
@@ -346,27 +353,43 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction, double *veloci
   ComputeErrorPtr computeError = NULL;
 
   /* Connect local solver and local problem*/
-  FrictionContactProblem* localproblem = (FrictionContactProblem*)malloc(sizeof(FrictionContactProblem));
-  localproblem->numberOfContacts = 1;
-  localproblem->dimension = 3;
-  localproblem->q = (double*)malloc(3 * sizeof(double));
-  localproblem->mu = (double*)malloc(sizeof(double));
+#if defined(USE_OPENMP) && defined(_OPENMP)
+  const unsigned int max_threads = omp_get_max_threads();
+  FrictionContactProblem **localproblems = alloca(max_threads*sizeof(void*));
+  SolverOptions **localsolvoptions = alloca(max_threads*sizeof(void*));
+#else
+  const unsigned int max_threads = 1;
+  FrictionContactProblem *localproblems[1];
+  SolverOptions *localsolvoptions[1];
+#endif
 
-  if (problem->M->storageType == NM_DENSE || problem->M->storageType == NM_SPARSE)
+  for (unsigned int i=0; i < max_threads; i++)
   {
-    localproblem->M = createNumericsMatrixFromData(NM_DENSE, 3, 3,
-                                           malloc(9 * sizeof(double)));
-  }
-  else /* NM_SPARSE_BLOCK */
-  {
-    localproblem->M = createNumericsMatrixFromData(NM_DENSE, 3, 3, NULL);
-  }
+    FrictionContactProblem *localproblem = malloc(sizeof(FrictionContactProblem));
+    localproblems[i] = localproblem;
+    localproblem->numberOfContacts = 1;
+    localproblem->dimension = 3;
+    localproblem->q = (double*)malloc(3 * sizeof(double));
+    localproblem->mu = (double*)malloc(sizeof(double));
 
+    if (problem->M->storageType == NM_DENSE || problem->M->storageType == NM_SPARSE)
+    {
+      localproblem->M = createNumericsMatrixFromData(NM_DENSE, 3, 3,
+                                                         malloc(9 * sizeof(double)));
+    }
+    else /* NM_SPARSE_BLOCK */
+    {
+      localproblem->M = createNumericsMatrixFromData(NM_DENSE, 3, 3, NULL);
+    }
 
-  initializeLocalSolver_nsgs(&local_solver, &update_localproblem,
-                             (FreeSolverNSGSPtr *)&freeSolver, &computeError,
-                             problem , localproblem,
-                             options, localsolver_options);
+    localsolvoptions[i] = malloc(sizeof(SolverOptions));
+    *localsolvoptions[i] = *localsolver_options;
+
+    initializeLocalSolver_nsgs(&local_solver, &update_localproblem,
+                               (FreeSolverNSGSPtr *)&freeSolver, &computeError,
+                               problem, localproblems[i],
+                               options, localsolvoptions[i]);
+  }
 
   /*****  NSGS Iterations *****/
   int iter = 0; /* Current iteration number */
@@ -397,7 +420,6 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction, double *veloci
   /*  dparam[0]= dparam[2]; // set the tolerance for the local solver */
   if (iparam[1] == 1 || iparam[1] == 2)
   {
-    double reactionold[3];
     while ((iter < itermax) && (hasNotConverged > 0))
     {
 
@@ -406,8 +428,12 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction, double *veloci
       //cblas_dcopy( n , q , incx , velocity , incy );
       error = 0.0;
 
+      #if defined(_OPENMP) && defined(USE_OPENMP)
+      #pragma omp parallel for private(contact) reduction(+:error)
+      #endif
       for (unsigned int i= 0 ; i < nc ; ++i)
       {
+        double reactionold[3];
         if (iparam[5])
         {
           contact = scontacts[i];
@@ -417,16 +443,22 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction, double *veloci
           contact = i;
         }
 
+        #if defined(_OPENMP) && defined(USE_OPENMP)
+        unsigned int tid = omp_get_thread_num();
+        #else
+        unsigned int tid = 0;
+        #endif
 
         reactionold[0] = reaction[3 * contact];
         reactionold[1] = reaction[3 * contact + 1];
         reactionold[2] = reaction[3 * contact + 2];
         if (verbose > 1) printf("----------------------------------- Contact Number %i\n", contact);
-        (*update_localproblem)(contact, problem, localproblem, reaction, localsolver_options);
+        (*update_localproblem)(contact, problem, localproblems[tid],
+                               reaction, localsolvoptions[tid]);
 
-
-        localsolver_options->iparam[4] = contact;
-        (*local_solver)(localproblem, &(reaction[3 * contact]) , localsolver_options);
+        localsolvoptions[tid]->iparam[4] = contact;
+        (*local_solver)(localproblems[tid], &(reaction[3 * contact]),
+                        localsolvoptions[tid]);
 
         error += pow(reaction[3 * contact] - reactionold[0], 2) +
                  pow(reaction[3 * contact + 1] - reactionold[1], 2) +
@@ -472,27 +504,37 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction, double *veloci
       int withRelaxation=iparam[4];
       if (withRelaxation)
       {
-        double reactionold[3];
-
         double omega = dparam[8];
         while ((iter < itermax) && (hasNotConverged > 0))
         {
           ++iter;
           /* Loop through the contact points */
           //cblas_dcopy( n , q , incx , velocity , incy );
+          #if defined(_OPENMP) && defined(USE_OPENMP)
+          #pragma omp parallel for private(contact)
+          #endif
           for (unsigned int i= 0 ; i < nc ; ++i)
           {
+            double reactionold[3];
 
             contact = scontacts[i];
+
+            #if defined(_OPENMP) && defined(USE_OPENMP)
+            unsigned int tid = omp_get_thread_num();
+            #else
+            unsigned int tid = 0;
+            #endif
 
             reactionold[0] = reaction[3 * contact];
             reactionold[1] = reaction[3 * contact + 1];
             reactionold[2] = reaction[3 * contact + 2];
 
             if (verbose > 1) printf("----------------------------------- Contact Number %i\n", contact);
-            (*update_localproblem)(contact, problem, localproblem, reaction, localsolver_options);
-            localsolver_options->iparam[4] = contact;
-            (*local_solver)(localproblem, &(reaction[3 * contact]), localsolver_options);
+            (*update_localproblem)(contact, problem, localproblems[tid],
+                                   reaction, localsolvoptions[tid]);
+            localsolvoptions[tid]->iparam[4] = contact;
+            (*local_solver)(localproblems[tid], &(reaction[3 * contact]),
+                            localsolvoptions[tid]);
 
             reaction[3 * contact] = omega*reaction[3 * contact]+(1.0-omega)*reactionold[0];
             reaction[3 * contact+1] = omega*reaction[3 * contact+1]+(1.0-omega)*reactionold[1];
@@ -533,15 +575,24 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction, double *veloci
           /* Loop through the contact points */
           //cblas_dcopy( n , q , incx , velocity , incy );
 
+          #if defined(_OPENMP) && defined(USE_OPENMP)
+          #pragma omp parallel for private(contact)
+          #endif
           for (unsigned int i= 0 ; i < nc ; ++i)
           {
             contact = scontacts[i];
+            #if defined(_OPENMP) && defined(USE_OPENMP)
+            unsigned int tid = omp_get_thread_num();
+            #else
+            unsigned int tid = 0;
+            #endif
 
             if (verbose > 1) printf("----------------------------------- Contact Number %i\n", contact);
-            (*update_localproblem)(contact, problem, localproblem, reaction, localsolver_options);
-            localsolver_options->iparam[4] = contact;
-            (*local_solver)(localproblem, &(reaction[3 * contact]), localsolver_options);
-
+            (*update_localproblem)(contact, problem, localproblems[tid],
+                                   reaction, localsolvoptions[tid]);
+            localsolvoptions[tid]->iparam[4] = contact;
+            (*local_solver)(localproblems[tid], &(reaction[3 * contact]),
+                            localsolvoptions[tid]);
           }
 
           /* **** Criterium convergence **** */
@@ -566,8 +617,6 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction, double *veloci
       int withRelaxation=iparam[4];
       if (withRelaxation)
       {
-        double reactionold[3];
-
         double omega = dparam[8];
         while ((iter < itermax) && (hasNotConverged > 0))
         {
@@ -577,21 +626,33 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction, double *veloci
           /* Loop through the contact points */
           //cblas_dcopy( n , q , incx , velocity , incy );
 
+          #if defined(_OPENMP) && defined(USE_OPENMP)
+          #pragma omp parallel for private(contact)
+          #endif
           for (unsigned int i= 0 ; i < nc ; ++i)
           {
+            double reactionold[3];
 
             contact = scontacts[i];
+
+            #if defined(_OPENMP) && defined(USE_OPENMP)
+            unsigned int tid = omp_get_thread_num();
+            #else
+            unsigned int tid = 0;
+            #endif
 
             reactionold[0] = reaction[3 * contact];
             reactionold[1] = reaction[3 * contact + 1];
             reactionold[2] = reaction[3 * contact + 2];
 
             if (verbose > 1) printf("----------------------------------- Contact Number %i\n", contact);
-            (*update_localproblem)(contact, problem, localproblem, reaction, localsolver_options);
+            (*update_localproblem)(contact, problem, localproblems[tid],
+                                   reaction, localsolvoptions[tid]);
 
-            localsolver_options->iparam[4] = contact; /* We write in dWork always with respect to the initial index i*/
+            localsolvoptions[tid]->iparam[4] = contact; /* We write in dWork always with respect to the initial index i*/
 
-            (*local_solver)(localproblem, &(reaction[3 * contact]), localsolver_options);
+            (*local_solver)(localproblems[tid], &(reaction[3 * contact]),
+                            localsolvoptions[tid]);
 
             reaction[3 * contact] = omega*reaction[3 * contact]+(1.0-omega)*reactionold[0];
             reaction[3 * contact+1] = omega*reaction[3 * contact+1]+(1.0-omega)*reactionold[1];
@@ -632,13 +693,23 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction, double *veloci
           uint_shuffle(scontacts, nc);
           /* Loop through the contact points */
           //cblas_dcopy( n , q , incx , velocity , incy );
+          #if defined(_OPENMP) && defined(USE_OPENMP)
+          #pragma omp parallel for private(contact)
+          #endif
           for (unsigned int i= 0 ; i < nc ; ++i)
           {
+            #if defined(_OPENMP) && defined(USE_OPENMP)
+            unsigned int tid = omp_get_thread_num();
+            #else
+            unsigned int tid = 0;
+            #endif
             contact = scontacts[i];
             if (verbose > 1) printf("----------------------------------- Contact Number %i\n", contact);
-            (*update_localproblem)(contact, problem, localproblem, reaction, localsolver_options);
-            localsolver_options->iparam[4] = contact; /* We write in dWork always with respect to the initial index i*/
-            (*local_solver)(localproblem, &(reaction[3 * contact]), localsolver_options);
+            (*update_localproblem)(contact, problem, localproblems[tid],
+                                   reaction, localsolvoptions[tid]);
+            localsolvoptions[tid]->iparam[4] = contact; /* We write in dWork always with respect to the initial index i*/
+            (*local_solver)(localproblems[tid], &(reaction[3 * contact]),
+                            localsolvoptions[tid]);
           }
           /* **** Criterium convergence **** */
           (*computeError)(problem, reaction , velocity, tolerance, options, &error);
@@ -672,15 +743,18 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction, double *veloci
       int withRelaxation=iparam[4];
       if(withRelaxation)
       {
-        double reactionold[3];
         double omega = dparam[8];
         while ((iter < itermax) && (hasNotConverged > 0))
         {
           ++iter;
           /* Loop through the contact points */
           //cblas_dcopy( n , q , incx , velocity , incy );
+          #if defined(_OPENMP) && defined(USE_OPENMP)
+          #pragma omp parallel for private(contact)
+          #endif
           for (contact= 0 ; contact < nc ; ++contact)
           {
+            double reactionold[3];
             if (withRelaxation)
             {
               reactionold[0] = reaction[3 * contact];
@@ -688,10 +762,18 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction, double *veloci
               reactionold[2] = reaction[3 * contact + 2];
             }
 
+            #if defined(_OPENMP) && defined(USE_OPENMP)
+            unsigned int tid = omp_get_thread_num();
+            #else
+            unsigned int tid = 0;
+            #endif
+
             if (verbose > 1) printf("----------------------------------- Contact Number %i\n", contact);
-            (*update_localproblem)(contact, problem, localproblem, reaction, localsolver_options);
-            localsolver_options->iparam[4] = contact;
-            (*local_solver)(localproblem, &(reaction[3 * contact]), localsolver_options);
+            (*update_localproblem)(contact, problem, localproblems[tid],
+                                   reaction, localsolvoptions[tid]);
+            localsolvoptions[tid]->iparam[4] = contact;
+            (*local_solver)(localproblems[tid], &(reaction[3 * contact]),
+                            localsolvoptions[tid]);
             if(withRelaxation)
             {
               reaction[3 * contact] = omega*reaction[3 * contact]+(1.0-omega)*reactionold[0];
@@ -735,15 +817,23 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction, double *veloci
           /* Loop through the contact points */
           //cblas_dcopy( n , q , incx , velocity , incy );
 
+          #if defined(_OPENMP) && defined(USE_OPENMP)
+          #pragma omp parallel for private(contact)
+          #endif
           for (contact= 0 ; contact < nc ; ++contact)
           {
-
+            #if defined(_OPENMP) && defined(USE_OPENMP)
+            unsigned int tid = omp_get_thread_num();
+            #else
+            unsigned int tid = 0;
+            #endif
 
             if (verbose > 1) printf("----------------------------------- Contact Number %i\n", contact);
-
-            (*update_localproblem)(contact, problem, localproblem, reaction, localsolver_options);
-            localsolver_options->iparam[4] = contact;
-            (*local_solver)(localproblem, &(reaction[3 * contact]), localsolver_options);
+            (*update_localproblem)(contact, problem, localproblems[tid],
+                                   reaction, localsolvoptions[tid]);
+            localsolvoptions[tid]->iparam[4] = contact;
+            (*local_solver)(localproblems[tid], &(reaction[3 * contact]),
+                            localsolvoptions[tid]);
           }
 
           /* **** Criterium convergence **** */
@@ -778,13 +868,17 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction, double *veloci
   iparam[7] = iter;
 
   /***** Free memory *****/
-  (*freeSolver)(problem,localproblem,localsolver_options);
-  if (problem->M->storageType == NM_DENSE && localproblem->M->matrix0)
+  for (unsigned int i=0; i < max_threads; i++)
   {
-    free(localproblem->M->matrix0);
+    (*freeSolver)(problem,localproblems[i],localsolvoptions[i]);
+    if (problem->M->storageType == NM_DENSE && localproblems[i]->M->matrix0)
+    {
+      free(localproblems[i]->M->matrix0);
+    }
+    localproblems[i]->M->matrix0 = NULL;
+    freeFrictionContactProblem(localproblems[i]);
+    free(localsolvoptions[i]);
   }
-  localproblem->M->matrix0 = NULL;
-  freeFrictionContactProblem(localproblem);
 
   if (scontacts) /* shuffle */
   {
