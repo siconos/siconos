@@ -72,7 +72,7 @@ s.insertIntegrator(OSI)
 s.insertNonSmoothProblem(osnspb)
 
 # simulation initialization
-blockModel.initialize(s)
+blockModel.initialize()
 
 # ok on ubuntu lucid
 inter.y(0).display()

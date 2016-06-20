@@ -70,7 +70,7 @@ act.setB(B)
 control.addActuatorPtr(act, tActuator)
 
 # Initialization
-process.initialize(s)
+process.initialize()
 control.initialize(process)
 act.setRef(xFinal)
 act.setK(K)

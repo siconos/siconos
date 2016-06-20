@@ -146,7 +146,7 @@ int main(int argc, char* argv[])
 
     // --- Simulation initialization ---
     cout << "====> Initialisation ..." << endl << endl;
-    sliderWithClearance->initialize(s);
+    sliderWithClearance->initialize();
     int N = ceil((T - t0) / h) + 1; // Number of time steps
 
     // --- Get the values to be plotted ---

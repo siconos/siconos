@@ -149,7 +149,7 @@ int main(int argc, char* argv[])
     // -------------------------------- Simulation initialization ------------------------------------------------------
     cout << "====> Simulation initialisation ..." << endl << endl;
     EDscheme->setPrintStat(true);
-    RoBlockModel->initialize(EDscheme); // initialize the model
+    RoBlockModel->initialize(); // initialize the model
 
 
     //SP::LsodarOSI lsodar = std11::static_pointer_cast<LsodarOSI>(OSI);

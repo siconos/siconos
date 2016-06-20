@@ -113,7 +113,7 @@ int main(int argc, char* argv[])
     SP::TimeStepping StratCircuitRLCD(new TimeStepping(TiDiscRLCD, OSI_RLCD, LCP_RLCD));
 
     cout << "====> Initialisation ..." << endl << endl;
-    CircuitRLCD->initialize(StratCircuitRLCD);
+    CircuitRLCD->initialize();
     cout << " -----> End of initialization." << endl;
 
     double h = StratCircuitRLCD->timeStep();

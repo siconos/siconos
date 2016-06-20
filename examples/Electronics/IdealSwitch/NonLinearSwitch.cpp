@@ -123,7 +123,7 @@ int main()
 
   // Initialization
   cout << "====> Initialisation ..." << endl << endl;
-  aM->initialize(aS);
+  aM->initialize();
 
   //To compute necessary information for memory allocator
   aMLCP->preCompute(0.0);

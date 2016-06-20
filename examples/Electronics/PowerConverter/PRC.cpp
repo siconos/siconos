@@ -128,7 +128,7 @@ int main(int argc, char* argv[])
     // ================================= Computation =================================
 
     cout << "====> Simulation initialisation ..." << endl << endl;
-    PRC->initialize(aTS);
+    PRC->initialize();
 
     double h = aTS->timeStep();
     int N = ceil((T - t0) / h); // Number of time steps

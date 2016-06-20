@@ -173,7 +173,7 @@ int main(int argc, char* argv[])
 
 
 
-    Manipulator->initialize(s);
+    Manipulator->initialize();
     cout << "End of model initialisation" << endl;
 
     int k = 0;

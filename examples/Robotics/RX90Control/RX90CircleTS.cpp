@@ -198,7 +198,7 @@ int main(int argc, char* argv[])
     // --- Simulation initialization ---
 
 
-    RX90->initialize(s);
+    RX90->initialize();
     cout << "End of simulation initialisation" << endl;
 
     int k = 0;

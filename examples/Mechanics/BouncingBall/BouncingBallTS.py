@@ -96,7 +96,7 @@ s = TimeStepping(t, OSI, osnspb)
 #
 
 # simulation initialization
-bouncingBall.initialize(s)
+bouncingBall.initialize()
 
 
 # the number of time steps

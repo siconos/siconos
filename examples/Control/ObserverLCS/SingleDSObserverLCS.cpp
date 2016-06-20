@@ -115,7 +115,7 @@ int main(int argc, char* argv[])
     // ================================= Computation =================================
 
     // --- Initialisation of the simulation ---
-    ObserverLCS->initialize(s);
+    ObserverLCS->initialize();
 
     int k = 0; // Current step
     unsigned int N = ceil((T - t0) / h) + 1; // Number of time steps

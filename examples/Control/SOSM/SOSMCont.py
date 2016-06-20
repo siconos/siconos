@@ -96,7 +96,7 @@ print('initialization')
 osnspb = Relay()
 s.insertNonSmoothProblem(osnspb)
 
-filippov.initialize(s);
+filippov.initialize();
 
 print('end of initialization')
 # matrix to save data

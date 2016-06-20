@@ -112,10 +112,10 @@ int main(int argc, char* argv[])
 
     cout << "====> Simulation initialisation ..." << endl << endl;
 
-    itw->initialize(s);
+    itw->initialize();
 
 
-    //  (s->oneStepNSProblems)[0]->initialize(s);
+    //  (s->oneStepNSProblems)[0]->initialize();
 
 
     // --- Get the values to be plotted ---

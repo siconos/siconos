@@ -131,7 +131,7 @@ int main(int argc, char* argv[])
     // ================================= Computation =================================
 
     // --- Simulation initialization ---
-    Follower->initialize(S);
+    Follower->initialize();
     cout << "End of model initialisation" << endl;
 
 

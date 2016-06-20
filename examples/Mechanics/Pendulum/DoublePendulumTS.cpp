@@ -152,7 +152,7 @@ int main(int argc, char* argv[])
     // ================================= Computation =================================
 
     // --- Simulation initialization ---
-    Pendulum->initialize(s);
+    Pendulum->initialize();
     cout << "End of simulation initialisation" << endl;
 
     int k = 0;

@@ -238,7 +238,7 @@ s.insertIntegrator(OSI)
 s.insertNonSmoothProblem(osnspb)
 
 # simulation initialization
-blockModel.initialize(s)
+blockModel.initialize()
 
 # the number of time steps
 N = (T-t0)/h

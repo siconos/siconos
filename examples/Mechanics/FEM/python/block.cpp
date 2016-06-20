@@ -106,7 +106,7 @@ int main(int argc, char* argv[])
     // --- Simulation initialization ---
 
     cout << "====> Initialisation ..." << endl << endl;
-    bouncingBall->initialize(s);
+    bouncingBall->initialize();
 
     inter->y(0)->display();
 

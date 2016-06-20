@@ -139,7 +139,7 @@ int main(int argc, char* argv[])
 
     // Initialization
     cout << "====> Initialisation ..." << endl << endl;
-    Collpitts->initialize(aTS);
+    Collpitts->initialize();
     cout << " ---> End of initialization." << endl;
 
     int k = 0;

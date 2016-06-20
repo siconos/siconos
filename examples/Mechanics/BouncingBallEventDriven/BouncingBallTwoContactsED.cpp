@@ -140,7 +140,7 @@ int main(int argc, char* argv[])
     // --- Simulation initialization ---
     cout << "====> Simulation initialisation ..." << endl << endl;
     s->setPrintStat(true);
-    bouncingBall->initialize(s);
+    bouncingBall->initialize();
     OSI->display();
     int N = 1850; // Number of saved points: depends on the number of events ...
     int ll = 0;

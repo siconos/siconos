@@ -176,7 +176,7 @@ int main(int argc, char* argv[])
     // --- Simulation initialization ---
 
     cout <<"====> Initialisation ..." <<endl<<endl;
-    impactingBar->initialize(s);
+    impactingBar->initialize();
     int N = floor((T-t0)/h) +1; // Number of time steps
 
     // --- Get the values to be plotted ---

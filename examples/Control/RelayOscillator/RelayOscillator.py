@@ -105,7 +105,7 @@ aTS = TimeStepping(aTiDisc,aOSI,aRelay)
 #
 
 # simulation initialization
-RelayOscillator.initialize(aTS)
+RelayOscillator.initialize()
 
 k = 0
 h = aTS.timeStep();

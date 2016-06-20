@@ -136,7 +136,7 @@ int main(int argc, char* argv[])
 
     // Initialization
     cout << "====> Initialisation ..." << endl << endl;
-    DiodeBridgePowSup->initialize(aTS);
+    DiodeBridgePowSup->initialize();
     cout << " ---> End of initialization." << endl;
 
 

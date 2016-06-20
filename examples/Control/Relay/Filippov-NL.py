@@ -86,7 +86,7 @@ s.insertNonSmoothProblem(osnspb)
 s.setComputeResiduY(True)
 s.setComputeResiduR(True)
 
-filippov.initialize(s);
+filippov.initialize();
 
 # matrix to save data
 dataPlot = empty((N+1,4))

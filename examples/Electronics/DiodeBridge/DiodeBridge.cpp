@@ -129,7 +129,7 @@ int main(int argc, char* argv[])
 
     // Initialization
     cout << "====> Initialisation ..." << endl << endl;
-    DiodeBridge->initialize(aTS);
+    DiodeBridge->initialize();
     cout << " ---> End of initialization." << endl;
 
     int k = 0;

@@ -157,7 +157,7 @@ int main(int argc, char* argv[])
     relayOscillatorWithChattering->initialize();
 
 
-    //  (s->oneStepNSProblems)[0]->initialize(s);
+    //  (s->oneStepNSProblems)[0]->initialize();
 
 
     // --- Get the values to be plotted ---

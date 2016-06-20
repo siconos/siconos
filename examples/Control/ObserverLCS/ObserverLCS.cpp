@@ -145,7 +145,7 @@ int main(int argc, char* argv[])
 
     cout << "====> Simulation initialisation ..." << endl << endl;
 
-    ObserverLCS->initialize(s);
+    ObserverLCS->initialize();
 
     // --- Get the values to be plotted ---
     unsigned int outputSize = 10; // number of required data

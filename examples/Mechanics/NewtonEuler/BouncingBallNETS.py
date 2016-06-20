@@ -127,7 +127,7 @@ s.insertNonSmoothProblem(osnspb)
 #
 
 # simulation initialization
-bouncingBall.initialize(s)
+bouncingBall.initialize()
 
 # the number of time steps
 N = (T - t0) / h

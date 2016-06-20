@@ -150,7 +150,7 @@ int main(int argc, char* argv[])
 
     // Initialization
     cout << "====> Initialisation ..." << endl << endl;
-    DiodeBridgeCapFilter->initialize(aTS);
+    DiodeBridgeCapFilter->initialize();
     cout << " ---> End of initialization." << endl;
 
 

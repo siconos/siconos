@@ -166,7 +166,7 @@ int main(int argc, char* argv[])
     // ================================= Computation =================================
 
     // --- Simulation initialization ---
-    Robot->initialize(s);
+    Robot->initialize();
     cout << "End of model initialisation" << endl;
 
     int k = 0;

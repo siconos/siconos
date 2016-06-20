@@ -77,7 +77,7 @@ s.insertIntegrator(myIntegrator)
 osnspb = Relay()
 s.insertNonSmoothProblem(osnspb)
 
-filippov.initialize(s);
+filippov.initialize();
 
 # matrix to save data
 dataPlot = empty((N+1,4))

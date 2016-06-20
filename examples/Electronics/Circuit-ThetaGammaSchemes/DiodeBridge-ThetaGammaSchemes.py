@@ -140,7 +140,7 @@ aTS = TimeStepping(aTiDisc, aOSI, aLCP)
 #
 
 # simulation initialization
-DiodeBridge.initialize(aTS)
+DiodeBridge.initialize()
 
 k = 0
 h = aTS.timeStep()
