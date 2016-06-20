@@ -140,6 +140,7 @@ int main(int argc, char* argv[])
     s->setProjectionMaxIteration(10);
     s->setConstraintTolUnilateral(1e-10);
     s->setConstraintTol(1e-10);
+    sliderWithClearance->setSimulation(s);
     // =========================== End of model definition ===========================
 
     // ================================= Computation =================================

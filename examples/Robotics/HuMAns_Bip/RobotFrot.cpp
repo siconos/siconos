@@ -172,7 +172,7 @@ int main(int argc, char* argv[])
     SP::FrictionContact osnspb(new FrictionContact(3, mySolver));
     s->insertNonSmoothProblem(osnspb);
     cout << "=== End of model loading === " << endl;
-
+    Robot->setSimulation(s);
     // =========================== End of model definition ===========================
 
 

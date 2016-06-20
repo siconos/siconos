@@ -170,6 +170,7 @@ int main(int argc, char* argv[])
     SP::NonSmoothSolver mySolver(new NonSmoothSolver(solverName, iparam, dparam));
     SP::LCP osnspb(new LCP(mySolver));
     s->insertNonSmoothProblem(osnspb);
+    Robot->setSimulation(s);
     cout << "=== End of model loading === " << endl;
 
     // =========================== End of model definition ===========================

@@ -116,7 +116,7 @@ int main(int argc, char* argv[])
 
     // -- (4) Simulation setup with (1) (2) (3)
     SP::TimeStepping s(new TimeStepping(t, OSI, osnspb));
-
+    bouncingBall->setSimulation(s);
  
     // =========================== End of model definition ===========================
 

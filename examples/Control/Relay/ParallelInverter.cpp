@@ -194,7 +194,7 @@ int main(int argc, char* argv[])
 
     //SP::Relay osnspb(new Relay("Lemke"));
     //s->insertNonSmoothProblem(osnspb);
-
+    simpleExampleRelay->setSimulation(s);
     // =========================== End of model definition ===========================
 
     // ================================= Computation =================================

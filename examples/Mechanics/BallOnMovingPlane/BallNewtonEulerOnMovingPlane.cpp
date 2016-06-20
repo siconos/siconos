@@ -244,7 +244,8 @@ int main(int argc, char* argv[])
 #endif
     s->setNewtonTolerance(1e-10);
     s->setNewtonMaxIteration(10);
-
+    bouncingBall->setSimulation(s);
+    
     // =========================== End of model definition ===========================
 
     // ================================= Computation =================================

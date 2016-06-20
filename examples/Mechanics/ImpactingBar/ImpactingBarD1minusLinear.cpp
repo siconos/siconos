@@ -167,7 +167,7 @@ int main(int argc, char* argv[])
     s->insertNonSmoothProblem(impact, SICONOS_OSNSP_TS_VELOCITY);
     s->insertNonSmoothProblem(force, SICONOS_OSNSP_TS_VELOCITY + 1);
 
-
+    impactingBar->setSimulation(s);
 
     // =========================== End of model definition ===========================
 

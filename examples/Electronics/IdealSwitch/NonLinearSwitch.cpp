@@ -119,7 +119,7 @@ int main()
   aS->setComputeResiduY(true);
   aS->setComputeResiduR(true);
   aS->setUseRelativeConvergenceCriteron(false);
-
+  aM->setSimulation(aS);
 
   // Initialization
   cout << "====> Initialisation ..." << endl << endl;

@@ -210,7 +210,7 @@ int main(int argc, char* argv[])
     SP::TimeStepping s(new TimeStepping(t, OSI3, osnspb));
     //    s->setComputeResiduY(true);
     //  s->setUseRelativeConvergenceCriteron(false);
-
+    myModel->setSimulation(s);
 
 
     // =========================== End of model definition ===========================

@@ -243,6 +243,7 @@ osnspb = kernel.FrictionContact(3)
 s = kernel.TimeStepping(t)
 s.insertIntegrator(OSI)
 s.insertNonSmoothProblem(osnspb)
+blockModel.setSimulation(s)
 
 # simulation initialization
 blockModel.initialize()

@@ -123,7 +123,7 @@ int main(int argc, char* argv[])
 
 
     s->insertNonSmoothProblem(osnspb);
-
+    filippov->setSimulation(s);
     // =========================== End of model definition ===========================
 
     // ================================= Computation =================================

@@ -116,7 +116,7 @@ int main(int argc, char* argv[])
     // -- OneStepIntegrators --
     double theta = 0.5;
     SP::EulerMoreauOSI myIntegrator(new EulerMoreauOSI(theta));
-    
+
     s->insertIntegrator(myIntegrator);
 
     // -- OneStepNsProblem --
@@ -130,6 +130,7 @@ int main(int argc, char* argv[])
 
     s->insertNonSmoothProblem(osnspb);
 
+    relayOscillator->setSimulation(s);
     // =========================== End of model definition ===========================
 
     // ================================= Computation =================================

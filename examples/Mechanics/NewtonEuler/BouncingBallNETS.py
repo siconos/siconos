@@ -119,7 +119,7 @@ osnspb = LCP()
 s = TimeStepping(t)
 s.insertIntegrator(OSI)
 s.insertNonSmoothProblem(osnspb)
-
+bouncingBall.setSimulation(s)
 # end of model definition
 
 #

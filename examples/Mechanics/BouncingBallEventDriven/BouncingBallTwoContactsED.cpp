@@ -133,6 +133,7 @@ int main(int argc, char* argv[])
     s->insertNonSmoothProblem(acceleration, SICONOS_OSNSP_ED_SMOOTH_ACC);
     cout << "SICONOS_OSNSP_ED_IMPACT: " << SICONOS_OSNSP_ED_IMPACT << endl;
     cout << "SICONOS_OSNSP_ED_ACCELERATION :" << SICONOS_OSNSP_ED_SMOOTH_ACC << endl;
+    bouncingBall->setSimulation(s);
     // =========================== End of model definition ===========================
 
     // ================================= Computation =================================

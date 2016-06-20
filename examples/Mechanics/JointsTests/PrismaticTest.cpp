@@ -139,7 +139,7 @@ int main(int argc, char* argv[])
     // -- OneStepNsProblem --
     SP::OneStepNSProblem osnspb(new Equality());
     s->insertNonSmoothProblem(osnspb);
-
+    bouncingBall->setSimulation(s);
     // =========================== End of model definition ===========================
 
     // ================================= Computation =================================

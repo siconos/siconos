@@ -160,7 +160,7 @@ int main(int argc, char* argv[])
 
 
     s->insertNonSmoothProblem(osnspb);
-
+    Robot->setSimulation(s);
     cout << "=== End of model loading === " << endl;
 
     // =========================== End of model definition ===========================  dataPlot(k,7) = (*inter->y(0))(0);

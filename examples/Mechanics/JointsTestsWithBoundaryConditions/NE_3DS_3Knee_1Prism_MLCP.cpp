@@ -355,7 +355,7 @@ int main(int argc, char* argv[])
     s->insertIntegrator(OSI3);
     //    s->setComputeResiduY(true);
     //  s->setUseRelativeConvergenceCriteron(false);
-
+    myModel->setSimulation(s);
 
 
     // =========================== End of model definition ===========================

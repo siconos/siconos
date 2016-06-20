@@ -236,6 +236,7 @@ osnspb = kernel.LCP()
 s = kernel.TimeStepping(t)
 s.insertIntegrator(OSI)
 s.insertNonSmoothProblem(osnspb)
+blockModel.setSimulation(s)
 
 # simulation initialization
 blockModel.initialize()

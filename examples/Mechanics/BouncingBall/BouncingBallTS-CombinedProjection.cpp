@@ -120,6 +120,7 @@ int main(int argc, char* argv[])
     s->setProjectionMaxIteration(4);
     s->setConstraintTolUnilateral(1e-10);
     s->setConstraintTol(1e-10);
+    bouncingBall->setSimulation(s);
     // =========================== End of model definition ===========================
 
     // ================================= Computation =================================

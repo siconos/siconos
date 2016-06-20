@@ -136,7 +136,8 @@ int main(int argc, char* argv[])
 
     // -- (4) Simulation setup with (1) (2) (3)
     SP::TimeStepping aTS(new TimeStepping(aTiDisc, aOSI, aLCP));
-
+    Collpitts->setSimulation(aTS);
+    
     // Initialization
     cout << "====> Initialisation ..." << endl << endl;
     Collpitts->initialize();

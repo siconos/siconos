@@ -92,6 +92,7 @@ int main()
 //  aLCP.reset(new LCP(SICONOS_LCP_NEWTONFB));
 
   aS->insertNonSmoothProblem(aLCP);
+  aM->setSimulation(aS);
   aM->initialize();
 
   setNumericsVerbose(0);

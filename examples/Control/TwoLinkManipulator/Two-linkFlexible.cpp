@@ -160,7 +160,7 @@ int main(int argc, char* argv[])
 
 
     s->insertNonSmoothProblem(osnspb);
-
+    Manipulator->setSimulation(s);
     cout << "=== End of model loading === " << endl;
 
     // =========================== End of model definition ===========================

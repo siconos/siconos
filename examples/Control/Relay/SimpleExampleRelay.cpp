@@ -111,7 +111,8 @@ int main(int argc, char* argv[])
 
     SP::Relay osnspb(new Relay(SICONOS_RELAY_PGS));
     s->insertNonSmoothProblem(osnspb);
-
+    simpleExampleRelay->setSimulation(s);
+    
     // =========================== End of model definition ===========================
 
     // ================================= Computation =================================

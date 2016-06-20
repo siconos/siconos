@@ -145,7 +145,7 @@ int main(int argc, char* argv[])
 
 
     s->insertNonSmoothProblem(osnspb);
-
+    relayOscillatorWithSliding->setSimulation(s);
     // =========================== End of model definition ===========================
 
     // ================================= Computation =================================

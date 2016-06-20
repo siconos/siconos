@@ -143,6 +143,7 @@ int main(int argc, char* argv[])
     // bool check2 = EDscheme->hasOneStepNSProblem(acceleration);
     // cout << "Impact law included in the simulation: " << check1 << endl;
     // cout << "LCP at acceleration level included in the simulation: " << check2 << endl;
+    RoBlockModel->setSimulation(EDscheme);
     //==================================================================================================================
     //                    V. Process the simulation
     //==================================================================================================================

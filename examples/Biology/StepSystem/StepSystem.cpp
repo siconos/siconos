@@ -98,6 +98,7 @@ int main(int argc, char *argv[])
 
 // Initialization
   printf("-> Initialisation \n");
+  aM->setSimulation(aS);
   aM->initialize();
   printf("-> End of initialization \n");
 

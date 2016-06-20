@@ -147,7 +147,8 @@ int main(int argc, char* argv[])
     SP::LCP aLCP(new LCP());
     // -- (4) Simulation setup with (1) (2) (3)
     SP::TimeStepping aTS(new TimeStepping(aTiDisc, aOSI, aLCP));
-
+    DiodeBridgeCapFilter->setSimulation(aTS);
+    
     // Initialization
     cout << "====> Initialisation ..." << endl << endl;
     DiodeBridgeCapFilter->initialize();

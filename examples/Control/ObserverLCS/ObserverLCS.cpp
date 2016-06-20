@@ -136,7 +136,8 @@ int main(int argc, char* argv[])
     // -- OneStepNsProblem --
     SP::LCP osnspb(new LCP());
     s->insertNonSmoothProblem(osnspb);
-
+    ObserverLCS->setSimulation(s);
+    
     // =========================== End of model definition ===========================
 
     // ================================= Computation =================================

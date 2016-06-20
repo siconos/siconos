@@ -195,7 +195,7 @@ int main(int argc, char* argv[])
     SP::OneStepNSProblem osnspb(new LCP());
     s->insertNonSmoothProblem(osnspb);
     // OneStepNSProblem  osnspb(new LCP(s,"name","Lemke",200001, 0.00001);
-
+    Manipulator->setSimulation(s);
     cout << "=== End of model loading === " << endl;
 
     // =========================== End of model definition ===========================
