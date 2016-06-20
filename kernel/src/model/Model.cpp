@@ -73,11 +73,6 @@ void Model::setNonSmoothDynamicalSystemPtr(SP::NonSmoothDynamicalSystem newPtr)
   _nsds = newPtr;
 }
 
-void Model::initialize(SP::Simulation sim)
-{
-  setSimulation(sim);
-  initialize();
-}
 
 
 void Model::initialize()
