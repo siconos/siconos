@@ -156,7 +156,7 @@ int withLevel(unsigned int mylevel)
     //   columnOfBeads->nonSmoothDynamicalSystem()->link(interOfBeads[i],beads[i+1]);
     // }
 
-    
+
     // -- (2) Time discretisation --
     SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
 
@@ -170,6 +170,9 @@ int withLevel(unsigned int mylevel)
     s->setProjectionMaxIteration(10);
     s->setConstraintTolUnilateral(1e-08);
     // s->setConstraintTol(1e-10);
+    columnOfBeads->setSimulation(s);
+
+
     // =========================== End of model definition ===========================
 
     // ================================= Computation =================================
@@ -177,7 +180,7 @@ int withLevel(unsigned int mylevel)
     // --- Simulation initialization ---
 
     cout << "====> Initialisation ..." << endl << endl;
-    columnOfBeads->initialize(s);
+    columnOfBeads->initialize();
 
     int N = ceil((T - t0) / h); // Number of time steps
 
@@ -269,7 +272,7 @@ int withLevel(unsigned int mylevel)
           }
         }
       }
-      
+
       s->computeOneStep();
 
       // --- Get values to be plotted ---
@@ -346,4 +349,3 @@ int main(int argc, char* argv[])
   info = withLevel(1);
   return info;
 }
-

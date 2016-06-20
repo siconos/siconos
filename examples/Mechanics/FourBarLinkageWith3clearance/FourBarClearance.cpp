@@ -227,6 +227,8 @@ int main(int argc, char* argv[])
     //s->insertNonSmoothProblem(osnspb);
 
     //cout << "=== End of model loading === " << endl;
+    FourBarIdeal->setSimulation(s);
+
 ////////////////////////////////////////////////////////////////////////
 
     // =========================== End of model definition ===========================  dataPlot(k,7) = (*inter->y(0))(0);
@@ -235,7 +237,7 @@ int main(int argc, char* argv[])
     // ================================= Computation =================================
 
     // --- Simulation initialization ---
-    FourBarIdeal->initialize(s);
+    FourBarIdeal->initialize();
     cout << "End of simulation initialisation" << endl;
 
     int k = 1;

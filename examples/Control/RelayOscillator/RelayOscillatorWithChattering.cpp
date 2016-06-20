@@ -144,6 +144,7 @@ int main(int argc, char* argv[])
 
 
     s->insertNonSmoothProblem(osnspb);
+    relayOscillatorWithChattering->setSimulation(s);
 
     // =========================== End of model definition ===========================
 
@@ -153,7 +154,7 @@ int main(int argc, char* argv[])
 
     cout << "====> Simulation initialisation ..." << endl << endl;
 
-    relayOscillatorWithChattering->initialize(s);
+    relayOscillatorWithChattering->initialize();
 
 
     //  (s->oneStepNSProblems)[0]->initialize(s);

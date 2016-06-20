@@ -139,6 +139,7 @@ int main(int argc, char* argv[])
     osnspb->numericsSolverOptions()->dparam[0] = 1e-6;
 
     S->insertNonSmoothProblem(osnspb);
+    Follower->setSimulation(S);
 
     cout << "=== End of model loading === " << endl;
     // =========================== End of model definition ===========================
@@ -146,7 +147,7 @@ int main(int argc, char* argv[])
     // ================================= Computation =================================
 
     // --- Simulation initialization ---
-    Follower->initialize(S);
+    Follower->initialize();
     cout << "End of model initialisation" << endl;
 
 
