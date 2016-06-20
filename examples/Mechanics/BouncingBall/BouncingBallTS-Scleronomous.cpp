@@ -115,6 +115,8 @@ int main(int argc, char* argv[])
     // -- (4) Simulation setup with (1) (2) (3)
     SP::TimeStepping s(new TimeStepping(t, OSI, osnspb));
 
+    bouncingBall->setSimulation(s);
+
     // =========================== End of model definition ===========================
 
     // ================================= Computation =================================
@@ -122,7 +124,7 @@ int main(int argc, char* argv[])
     // --- Simulation initialization ---
 
     cout << "====> Initialisation ..." << endl << endl;
-    bouncingBall->initialize(s);
+    bouncingBall->initialize();
     int N = ceil((T - t0) / h); // Number of time steps
 
     // --- Get the values to be plotted ---
