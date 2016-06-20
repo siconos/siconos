@@ -58,7 +58,7 @@ pkgs:
   build-base:
     any:
       - git-core
-	  - wget
+      - wget
       - make
       - cmake
       - boost
