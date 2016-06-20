@@ -149,13 +149,14 @@ int main(int argc, char* argv[])
     SP::OneStepNSProblem osnspb(new FrictionContact(2));
     s->insertNonSmoothProblem(osnspb);
 
+    model->setSimulation(s);
 
     cout << "=== End of model loading === " << endl;
 
     // ================= Computation =================
 
     // --- Simulation initialization ---
-    model->initialize(s);
+    model->initialize();
 
     cout << "End of model initialisation" << endl;
 

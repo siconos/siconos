@@ -121,6 +121,8 @@ int main(int argc, char* argv[])
     EDscheme->insertIntegrator(OSI);
     EDscheme->insertNonSmoothProblem(impact, SICONOS_OSNSP_ED_IMPACT);
     EDscheme->insertNonSmoothProblem(acceleration, SICONOS_OSNSP_ED_SMOOTH_ACC);
+    RoBlockModel->setSimulation(EDscheme); // initialize the model
+
     // bool check1 = EDscheme->hasOneStepNSProblem(impact);
     // bool check2 = EDscheme->hasOneStepNSProblem(acceleration);
     // cout << "Impact law included in the simulation: " << check1 << endl;
@@ -130,7 +132,7 @@ int main(int argc, char* argv[])
     //==================================================================================================================
     // -------------------------------- Simulation initialization ------------------------------------------------------
     cout << "====> Simulation initialisation ..." << endl << endl;
-    RoBlockModel->initialize(EDscheme); // initialize the model
+    RoBlockModel->initialize(); // initialize the model
     EDscheme->setPrintStat(true);
     SP::EventsManager eventsManager = EDscheme->eventsManager(); // ponters point to the "eventsManager" object
     SP::SiconosVector PosBlock = RockingBlock->q();              // pointer points to the position vector of the rocking block

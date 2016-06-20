@@ -114,12 +114,15 @@ int main(int argc, char* argv[])
     SP::TimeStepping TSscheme(new TimeStepping(TimeDiscret));
     TSscheme->insertIntegrator(OSI);
     TSscheme->insertNonSmoothProblem(impact);
+    RoBlockModel->setSimulation(TSscheme);
+
     //==================================================================================================================
     //                    V. Process the simulation
     //==================================================================================================================
     // -------------------------------- Simulation initialization ------------------------------------------------------
     cout << "====> Simulation initialisation ..." << endl << endl;
-    RoBlockModel->initialize(TSscheme); // initialize the model
+    RoBlockModel->initialize(); // initialize the model
+
     SP::SiconosVector PosBlock = RockingBlock->q();        // pointer points to the position vector of the rocking block
     SP::SiconosVector VelBlock = RockingBlock->velocity(); // pointer points to the velocity of the rocking block
     //-------------------- Save the output during simulation ---------------------------------------------------------

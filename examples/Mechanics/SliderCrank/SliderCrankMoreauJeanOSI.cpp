@@ -166,13 +166,15 @@ int main(int argc, char* argv[])
     s->setNewtonMaxIteration(200);
 
     SP::Topology topo = sliderWithClearance->nonSmoothDynamicalSystem()->topology();
+
+    sliderWithClearance->setSimulation(s);
     // =========================== End of model definition ===========================
 
     // ================================= Computation =================================
 
     // --- Simulation initialization ---
     cout << "====> Initialisation ..." << endl << endl;
-    sliderWithClearance->initialize(s);
+    sliderWithClearance->initialize();
     int N = ceil((T - t0) / h) + 1; // Number of time steps
 
     // --- Get the values to be plotted ---

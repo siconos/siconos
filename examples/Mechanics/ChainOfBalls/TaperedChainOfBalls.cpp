@@ -219,10 +219,12 @@ int main(int argc, char* argv[]){
     s->insertIntegrator(OSI);
     s->insertNonSmoothProblem(impact,SICONOS_OSNSP_ED_IMPACT);
     s->insertNonSmoothProblem(acceleration,SICONOS_OSNSP_ED_SMOOTH_ACC);
+    BallChain->setSimulation(s);
+
     // =========================== End of model definition ===========================
     //----------------------------------- Initialization-------------------------------
     s->setPrintStat(true);
-    BallChain->initialize(s);
+    BallChain->initialize();
     SP::DynamicalSystemsGraph DSG0 = BallChain->nonSmoothDynamicalSystem()->topology()->dSG(0);
     SP::InteractionsGraph IndexSet0 = BallChain->nonSmoothDynamicalSystem()->topology()->indexSet(0);
     SP::InteractionsGraph IndexSet1 = BallChain->nonSmoothDynamicalSystem()->topology()->indexSet(1);

@@ -198,6 +198,7 @@ int main(int argc, char* argv[])
     SP::TimeSteppingCombinedProjection s(new TimeSteppingCombinedProjection(t, OSI, osnspb, osnspb_pos));
     s->setProjectionMaxIteration(1000);
     s->setConstraintTolUnilateral(1e-08);
+    myModel->setSimulation(s);
 
 
     // =========================== End of model definition ===========================
@@ -207,7 +208,7 @@ int main(int argc, char* argv[])
     // --- Simulation initialization ---
 
     cout << "====> Initialisation ..." << endl << endl;
-    myModel->initialize(s);
+    myModel->initialize();
 
 
     // --- Get the values to be plotted ---

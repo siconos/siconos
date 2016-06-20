@@ -117,11 +117,12 @@ int main(int argc, char* argv[])
     EDscheme->insertNonSmoothProblem(impact, SICONOS_OSNSP_ED_IMPACT);
     EDscheme->insertNonSmoothProblem(acceleration, SICONOS_OSNSP_ED_SMOOTH_ACC);
     EDscheme->insertNonSmoothProblem(position, SICONOS_OSNSP_ED_SMOOTH_POS);
+    Pendulum->setSimulation(EDscheme); // initialize the model
     // =========================== End of model definition ===========================
     // --- Simulation Initialization ---
     cout << "====> Simulation initialisation ..." << endl << endl;
     EDscheme->setPrintStat(true);
-    Pendulum->initialize(EDscheme); // initialize the model
+    Pendulum->initialize(); // initialize the model
     cout << "End of simulation initialisation" << endl;
     // ================================= Computation =================================
 

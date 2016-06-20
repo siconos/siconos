@@ -143,6 +143,9 @@ int main(int argc, char* argv[])
 
     SP::OneStepNSProblem osnspb(new LCP());
     s->insertNonSmoothProblem(osnspb);
+
+    Pendulum->setSimulation(s);
+
     cout << "=== End of model loading === " << endl;
 
     // =========================== End of model definition ===========================  dataPlot(k,7) = (*inter->y(0))(0);
@@ -152,7 +155,7 @@ int main(int argc, char* argv[])
 
 
     // --- Simulation initialization ---
-    Pendulum->initialize(s);
+    Pendulum->initialize();
     cout << "End of simulation initialisation" << endl;
 
     int k = 0;

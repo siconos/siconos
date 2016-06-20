@@ -128,7 +128,7 @@ int main(int argc, char* argv[])
     v10->zero();
     (*v10)(0)=100;
     (*v10)(5)=100;
-    
+
     I1->eye();
     I1->setValue(0, 0, 0.1);
     I1->setValue(0, 1, 0.1);
@@ -180,10 +180,11 @@ int main(int argc, char* argv[])
 
     // -- (4) Simulation setup with (1) (2) (3)
     SP::TimeStepping s(new TimeStepping(t));
-    
+
     s->insertIntegrator(OSI1);
     s->insertNonSmoothProblem(impact, SICONOS_OSNSP_TS_VELOCITY);
     s->setNewtonMaxIteration(10);
+    myModel->setSimulation(s);
 
 
     // =========================== End of model definition ===========================
@@ -193,7 +194,7 @@ int main(int argc, char* argv[])
     // --- Simulation initialization ---
 
     cout << "====> Initialisation ..." << endl << endl;
-    myModel->initialize(s);
+    myModel->initialize();
 
 
     // --- Get the values to be plotted ---
