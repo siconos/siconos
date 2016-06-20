@@ -1581,7 +1581,9 @@ class Hdf5():
                 log(self._out.flush)()
 
             if proposed_is_here and use_proposed:
-                print('number of contacts',self._broadphase.statistics().new_interactions_created)
+                print('number of contacts',
+                      self._broadphase.statistics().new_interactions_created
+                      + self._broadphase.statistics().existing_interactions_processed)
             else:
                 print('number of contacts',self._broadphase.model().simulation().oneStepNSProblem(0).getSizeOutput()/3)
 
