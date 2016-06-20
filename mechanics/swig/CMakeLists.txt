@@ -38,6 +38,9 @@ configure_file(mechanics/contact_detection/tools.py ${SICONOS_SWIG_ROOT_DIR}/mec
 configure_file(mechanics/contact_detection/convexhull.py  ${SICONOS_SWIG_ROOT_DIR}/mechanics/contact_detection/convexhull.py )
 include(swig_python_tools)
 swig_module_setup(${COMPONENT}_PYTHON_MODULES)
+# exclude mechanisms tests. They will be activated later (below) if required.
+list(APPEND ${COMPONENT}_python_excluded_tests
+  ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_siconos_mechanisms.py)
 build_python_tests()
 
 
