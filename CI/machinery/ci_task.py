@@ -89,11 +89,13 @@ class CiTask():
                           pkgs, srcs, targets, cmake_cmd)
         return init
 
-    def run(self, targets_override=None):
+    def run(self, root_dir, targets_override=None):
 
         return_code = 0
 
         for src in self._srcs:
+
+            full_src = os.path.join(root_dir, src)
 
             if targets_override is not None:
                 self._targets[src] = targets_override
@@ -105,6 +107,10 @@ class CiTask():
 
             os.makedirs(bdir)
 
+
+            #
+            # not generic, to be moved somewhere else
+            #
             redundants = [
                 'build-base', 'gfortran', 'gnu-c++', 'lpsolve', 'wget', 'xz',
                 'asan', 'cppunit_clang', 'python-env', 'profiling',
@@ -113,6 +119,9 @@ class CiTask():
                           for p in self._pkgs if p not in redundants]
 
             # special case for examples
+            #
+            # not generic, to be moved somewhere else
+            #
             if src is 'examples':
                 ci_config_args = 'examples'
             else:
@@ -129,8 +138,13 @@ class CiTask():
                               self._build_configuration),
                           '-DDOCKER_DISTRIB={0}'.format(self._distrib),
                           '-DDOCKER_TEMPLATES={0}'.format(self.templates()),
-                          '-DDOCKER_TEMPLATE={0}'.format('-'.join(templ_list))]
+                          '-DDOCKER_TEMPLATE={0}'.format('-'.join(templ_list)),
+                          '-DDOCKER_PROJECT_SOURCE_DIR={0}'.format(full_src)]
 
+            #
+            # not generic, to be moved somewhere else
+            #
+            # probably broken
             if self._cmake_cmd:
                 src_absolute_dir = os.path.normpath(
                     os.path.abspath(__file__) + '../../../..')
@@ -139,7 +153,7 @@ class CiTask():
 
             try:
                 check_call(
-                    ['cmake'] + cmake_args + [os.path.join('..', '..', src)],
+                    ['cmake'] + cmake_args + [os.path.join(root_dir, 'CI')],
                     cwd=bdir)
 
                 for target in self._targets[src]:
