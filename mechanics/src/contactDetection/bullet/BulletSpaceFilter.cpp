@@ -411,8 +411,8 @@ void BulletSpaceFilter::addDynamicObject(SP::BulletDS ds,
   }
 
   /* Insert the new DS into the OSI, model, and simulation. */
-  //osi->insertDynamicalSystem(ds);
   this->model()->nonSmoothDynamicalSystem()->insertDynamicalSystem(ds);
+  this->model()->nonSmoothDynamicalSystem()->topology()->setOSI(ds, osi);
 
   /* Initialize the DS at the current time */
   ds->initialize(simulation->nextTime(), osi->getSizeMem());
@@ -421,6 +421,8 @@ void BulletSpaceFilter::addDynamicObject(SP::BulletDS ds,
   simulation->initialize(this->model(), false);
 
   /* Re-create the world from scratch */
+  _collisionWorld.reset();
+
   _dispatcher.reset(new btCollisionDispatcher(&*_collisionConfiguration));
   _collisionWorld.reset(new btCollisionWorld(&*_dispatcher, &*_broadphase,
                                              &*_collisionConfiguration));
