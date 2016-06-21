@@ -157,6 +157,7 @@ aTS = TimeStepping(aTiDisc, aOSI, aLCP)
 #
 
 # simulation initialization
+DiodeBridgeCapFilter.setSimulation(aTS)
 DiodeBridgeCapFilter.initialize()
 
 k = 0

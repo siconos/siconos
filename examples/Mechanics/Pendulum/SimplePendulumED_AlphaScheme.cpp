@@ -123,6 +123,7 @@ int main(int argc, char* argv[])
     // --- Simulation Initialization ---
     cout << "====> Simulation initialisation ..." << endl << endl;
     EDscheme->setPrintStat(true);
+    Pendulum->setSimulation(EDscheme);
     Pendulum->initialize(); // initialize the model
     cout << "End of simulation initialisation" << endl;
     // ================================= Computation =================================

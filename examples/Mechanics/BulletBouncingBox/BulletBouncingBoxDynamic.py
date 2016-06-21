@@ -93,7 +93,6 @@ bouncingBox.nonSmoothDynamicalSystem().insertDynamicalSystem(body)
 
 # (1) OneStepIntegrators
 osi = MoreauJeanOSI(theta)
-osi.insertDynamicalSystem(body)
 
 ground = btCollisionObject()
 ground.setCollisionFlags(btCollisionObject.CF_STATIC_OBJECT)

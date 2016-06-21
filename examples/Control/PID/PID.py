@@ -72,7 +72,6 @@ control.addActuatorPtr(act, tActuator)
 # Initialization
 process.setSimulation(s)
 process.initialize()
-control.setSimulation(s)
 control.initialize(process)
 act.setRef(xFinal)
 act.setK(K)
