@@ -125,16 +125,6 @@ pkgs:
        - cmake-3.0.2
 
 
-  cmake-2.8.12:
-    ubuntu-12.04:
-      command:
-        add-apt-repository ppa:smspillaz/cmake-2.8.12 -y &&
-        add-apt-repository ppa:teward/swig3.0 -y &&
-        add-apt-repository ppa:boost-latest/ppa -y &&
-        apt-get update -qq &&
-        apt-get purge cmake -qq &&
-        apt-get -y install cmake
-
   cmake-3.0.2:
     ubuntu-12.04:
       command:

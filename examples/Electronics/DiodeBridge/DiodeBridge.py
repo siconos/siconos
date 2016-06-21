@@ -139,6 +139,7 @@ aTS = TimeStepping(aTiDisc, aOSI, aLCP)
 #
 
 # simulation initialization
+DiodeBridge.setSimulation(aTS)
 DiodeBridge.initialize()
 
 k = 0
