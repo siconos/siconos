@@ -467,8 +467,8 @@ void BulletSpaceFilter::addDynamicObject(SP::BulletDS ds,
   /* Initialize the DS at the current time */
   ds->initialize(simulation->nextTime(), osi->getSizeMem());
 
-  /* Partially re-initialize the simulation. */
-  simulation->initialize(this->model(), false);
+  /* Partially re-initialize the simulation and integrators. */
+  simulation->initialize(this->model(), true);
 
   /* Re-create the world from scratch */
   _collisionWorld.reset();
