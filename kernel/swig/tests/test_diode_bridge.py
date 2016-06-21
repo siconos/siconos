@@ -71,7 +71,8 @@ def test_diode_bridge():
                                      integrator, non_smooth_problem)
 
     # simulation initialization
-    diode_bridge.initialize(bridge_simulation)
+    diode_bridge.setSimulation(bridge_simulation)
+    diode_bridge.initialize()
     k = 0
     h = bridge_simulation.timeStep()
     # Number of time steps

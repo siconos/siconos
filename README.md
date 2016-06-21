@@ -107,7 +107,8 @@ s = TimeStepping(t, OSI, osnspb)
 # end of model definition
 
 # computation
-bouncingBall.initialize(s) # simulation initialization
+bouncingBall.setSimulation(s)
+bouncingBall.initialize() # simulation initialization
 N = (T - t0) / h # the number of time steps
 # time loop
 while s.hasNextEvent():

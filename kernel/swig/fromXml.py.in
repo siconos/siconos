@@ -451,7 +451,8 @@ def buildModelXML(xmlFile):
                 sim.insertNonSmoothProblem(osnsp, numId)
                 allOSNSP.append(osnsp)
 
-    model.initialize(sim)
+    model.setSimulation(sim)
+    model.initialize()
     model.display()
     nsds.display()
 

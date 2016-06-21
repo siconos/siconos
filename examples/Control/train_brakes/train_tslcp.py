@@ -132,6 +132,7 @@ simu.insertIntegrator(osi)
 osnspb = sk.LCP()
 simu.insertNonSmoothProblem(osnspb)
 
+circuit.setSimulation()
 circuit.initialize(simu)
 
 # -- Get the values to be plotted --

@@ -306,7 +306,8 @@ void Disks::init(std::string disks_input)
 
     _playground->insert(nslaw, 0, 0);
 
-    _model->initialize(simulation_);
+    _model->setSimulation(simulation_);
+    _model->initialize();
   }
 
   catch (SiconosException e)

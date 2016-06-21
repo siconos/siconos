@@ -115,7 +115,8 @@ def test_serialization4():
     #
 
     # simulation initialization
-    first_bouncingBall.initialize(s)
+    first_bouncingBall.setSimulation(s)
+    first_bouncingBall.initialize()
 
     #
     # save and load data from xml and .dat

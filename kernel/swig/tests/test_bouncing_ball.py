@@ -80,7 +80,8 @@ def test_bouncing_ball1():
     #
 
     # simulation initialization
-    bouncingBall.initialize(s)
+    bouncingBall.setSimulation(s)
+    bouncingBall.initialize()
 
     #
     # save and load data from xml and .dat
@@ -260,9 +261,10 @@ def test_bouncing_ball2():
     #
 
     # simulation initialization
-    bouncingBall.initialize(s)
-
-    bouncingBall_d.initialize(s_d)
+    bouncingBall.setSimulation(s)
+    bouncingBall_d.setSimulation(s_d)
+    bouncingBall.initialize()
+    bouncingBall_d.initialize()
 
     # the number of time steps
     N = (T-t0)/h+1

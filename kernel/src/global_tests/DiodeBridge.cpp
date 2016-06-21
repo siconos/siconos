@@ -135,7 +135,8 @@ bool DiodeBridge()
     StratDiodeBridge->insertNonSmoothProblem(LCP_RLCD);
 
     // Initialization of the model
-    DiodeBridge->initialize(StratDiodeBridge);
+    DiodeBridge->setSimulation(StratDiodeBridge);
+    DiodeBridge->initialize();
 
     int k = 0;
     // dataPlot (ascii) output

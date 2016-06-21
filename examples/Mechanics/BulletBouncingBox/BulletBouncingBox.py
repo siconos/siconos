@@ -139,7 +139,9 @@ simulation.insertNonSmoothProblem(osnspb)
 
 
 # simulation initialization
-bouncingBox.initialize(simulation)
+
+bouncingBox.setSimulation(simulation)
+bouncingBox.initialize()
 
 # Get the values to be plotted
 # ->saved in a matrix dataPlot

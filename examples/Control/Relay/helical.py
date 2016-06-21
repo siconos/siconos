@@ -73,7 +73,8 @@ simu.insertIntegrator(myIntegrator)
 osnspb = sk.Relay(sn.SICONOS_RELAY_LEMKE)
 simu.insertNonSmoothProblem(osnspb)
 
-filippov.initialize(simu)
+filippov.setSimulation(simu)
+filippov.initialize()
 
 # -- Get the values to be plotted --
 output_size = 1 + ndof + 2 * ninter

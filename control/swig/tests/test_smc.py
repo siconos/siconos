@@ -73,7 +73,8 @@ def test_smc1():
     control.addActuatorPtr(act, tActuator)
 
     # Initialization.
-    process.initialize(processSimulation)
+    process.setSimulation(processSimulation)
+    process.initialize()
     control.initialize(process)
     # This is not working right now
     # eventsManager = s.eventsManager()
