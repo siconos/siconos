@@ -332,6 +332,8 @@ if __name__ == '__main__':
             exe_name = os.path.splitext(os.path.basename(args[0]))[0]
             exe_full_path = os.path.join(call_pwd, exe_name)
         env = os.environ
+        # LD_LIBRARY_PATH required to find local plugins.
+        # No need to set DYLD for macos, since plugins are .so files.
         env['LD_LIBRARY_PATH'] = '{0};{1}'.format(os.getenv('LD_LIBRARY_PATH'), os.getcwd())
         env['Path'] = '{0};{1}'.format(os.getenv('Path'),
                                        os.path.join(siconos_prefix, 'bin'))
