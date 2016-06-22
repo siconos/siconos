@@ -1,13 +1,18 @@
 #!/usr/bin/env python
-
+from __future__ import print_function
 import os
 import sys
+import atexit
 
 print('##################################################################')
 print('############## Siconos/Mechanics mechanisms module ###############')
 print('##################################################################')
 
-siconos_pythonpath = "@SICONOS_PYTHON_INSTALL_DIR@"
+siconos_pythonpath = "@CURRENT_PYTHON_PATH@"
+
+# path to data (bodydef, CAD files ...).
+example_path = '@EXAMPLE_PATH@'
+
 sys.path.append(siconos_pythonpath)
 mechanisms_path = os.path.join(siconos_pythonpath,
                                'siconos/mechanics/mechanisms')
@@ -15,12 +20,8 @@ mechanisms_path = os.path.join(siconos_pythonpath,
 print('############## Enrironment variable                ###############')
 
 
-print("sys.executable: ",sys.executable)
-print("sys.path: ",sys.path)
-
-print('DYLD_LIBRARY_PATH:',os.getenv('DYLD_LIBRARY_PATH'))
-print('LD_LIBRARY_PATH:',os.getenv('LD_LIBRARY_PATH'))
-
+print("sys.executable: ", sys.executable)
+print("sys.path: ", sys.path)
 
 print('############## Loading of definition files         ###############')
 
@@ -37,9 +38,8 @@ if with_io:
     from siconos.io import mechanics_io as io
 from siconos.mechanics.contact_detection.tools import Avatar, Contactor
 
-install_path = os.path.join('@CMAKE_INSTALL_PREFIX@', 'bin')
 default_options = os.path.join(mechanisms_path, 'mbtbDefaultOptions.py')
-local_options = os.path.join(os.getcwd(), 'mbtbLocalOptions.py')
+local_options = os.path.join(example_path, 'mbtbLocalOptions.py')
 
 exec(compile(open(default_options).read(), default_options, 'exec'))
 
@@ -47,12 +47,14 @@ if os.path.exists(local_options):
     exec(compile(open(local_options).read(), local_options, 'exec'))
     print("siconos-mechanisms.py, info: mbtbLocalOptions.py loaded")
 
-exec(compile(open("bodydef.py").read(), "bodydef.py", 'exec'))
-print("siconos-mechanisms.py, info: bodydef.py loaded")
+bodydef_file = os.path.join(example_path, 'bodydef.py')
+exec(compile(open(bodydef_file).read(), bodydef_file, 'exec'))
+print('siconos-mechanisms.py, info:', bodydef_file, ' loaded')
 
+with_run_id = False
 
 try:
-    print(" run id: ", run_id )
+    print(" run id: ", run_id)
     os.mkdir(run_id)
     os.chdir(run_id)
     os.symlink(os.path.join('..', 'CAD'), 'CAD')
@@ -75,28 +77,47 @@ if with3D:
     display.View_Iso()
 
 
-mbtb.MBTB_init(NBBODIES,NBJOINTS,NBCONTACTS)
+mbtb.MBTB_init(NBBODIES, NBJOINTS, NBCONTACTS)
 
-if NBCONTACTS>0:
-    mbtb.MBTB_ContactSetDParam(2,0,0,ContactArtefactLength)
-    mbtb.MBTB_ContactSetDParam(3,0,0,ArtefactThreshold)
-    mbtb.MBTB_ContactSetDParam(4,0,0,NominalForce)
+if NBCONTACTS > 0:
+    mbtb.MBTB_ContactSetDParam(2, 0, 0, ContactArtefactLength)
+    mbtb.MBTB_ContactSetDParam(3, 0, 0, ArtefactThreshold)
+    mbtb.MBTB_ContactSetDParam(4, 0, 0, NominalForce)
 
 for idContact in range(NBCONTACTS):
-    cadmbtb.CADMBTB_setContactDParam(0,idContact,0,contactTrans1[idContact]) # visu
-    cadmbtb.CADMBTB_setContactDParam(0,idContact,1,contactTrans2[idContact]) # visu
+    cadmbtb.CADMBTB_setContactDParam(
+        0, idContact, 0, contactTrans1[idContact])  # visu
+    cadmbtb.CADMBTB_setContactDParam(
+        0, idContact, 1, contactTrans2[idContact])  # visu
 
 
 #build contacts (must be done before the dynamical system building
+
 for idContact in range(NBCONTACTS):
-    mbtb.MBTB_ContactLoadCADFile(idContact,afileContact1[idContact],afileContact2[idContact],contactDraw1[idContact],contactDraw2[idContact])
-    mbtb.MBTB_ContactBuild(idContact,contactName[idContact],contactBody1[idContact],contactBody2[idContact],contactType3D[idContact],contactmu[idContact],contacten[idContact],et)
-    mbtb.MBTB_ContactSetDParam(1,idContact,0,contactOffset[idContact]) # offset
-    mbtb.MBTB_ContactSetIParam(0,idContact,0,contactOffsetP1[idContact]) # application point P1 or Trans P1.
-    mbtb.MBTB_ContactSetIParam(1,idContact,0,contactNormalFromFace1[idContact]) # normal computed from Face1.
+    afileContact1[idContact] = os.path.join(example_path,
+                                            afileContact1[idContact])
+    afileContact2[idContact] = os.path.join(example_path,
+                                            afileContact2[idContact])
+    print(afileContact2[idContact])
+
+    mbtb.MBTB_ContactLoadCADFile(idContact, afileContact1[idContact],
+                                 afileContact2[idContact],
+                                 contactDraw1[idContact],
+                                 contactDraw2[idContact])
+    mbtb.MBTB_ContactBuild(idContact, contactName[idContact],
+                           contactBody1[idContact], contactBody2[idContact],
+                           contactType3D[idContact], contactmu[idContact],
+                           contacten[idContact], et)
+    mbtb.MBTB_ContactSetDParam(
+        1, idContact, 0, contactOffset[idContact])  # offset
+    # application point P1 or Trans P1.
+    mbtb.MBTB_ContactSetIParam(0, idContact, 0, contactOffsetP1[idContact])
+    # normal computed from Face1.
+    mbtb.MBTB_ContactSetIParam(
+        1, idContact, 0, contactNormalFromFace1[idContact])
 
 for idBody in range(NBBODIES):
-    cadmbtb.CADMBTB_setShapeDParam(0,idBody,bodyTrans[idBody]) # visu
+    cadmbtb.CADMBTB_setShapeDParam(0, idBody, bodyTrans[idBody])  # visu
 
 #build dynamical systems
 if with_run_id:
@@ -105,84 +126,95 @@ if with_run_id:
 print("User plugin : ", plugin)
 
 for idBody in range(NBBODIES):
-    mbtb.MBTB_BodyLoadCADFile(idBody,afile[idBody],bodyDraw[idBody])
+    afile[idBody] = os.path.join(example_path, afile[idBody])
+    mbtb.MBTB_BodyLoadCADFile(idBody, afile[idBody], bodyDraw[idBody])
     mbtb.MBTB_BodyBuild(idBody, body[idBody], m[idBody],
                         initPos[idBody], initCenterMass[idBody],
                         inertialMatrix[idBody],
-                        plugin, fctfext[idBody],plugin,fctmext[idBody],
-                        plugin, fctfint[idBody],plugin,fctmint[idBody],
-                        plugin, fctfintjacq[idBody],plugin,fctmintjacq[idBody],
-                        plugin, fctfintjacv[idBody],plugin,fctmintjacv[idBody],
-                        plugin, boundaryCondition[idBody],boundaryConditionIndex[idBody])
+                        plugin, fctfext[idBody], plugin, fctmext[idBody],
+                        plugin, fctfint[idBody], plugin, fctmint[idBody],
+                        plugin, fctfintjacq[
+                            idBody], plugin, fctmintjacq[idBody],
+                        plugin, fctfintjacv[
+                            idBody], plugin, fctmintjacv[idBody],
+                        plugin, boundaryCondition[idBody],
+                        boundaryConditionIndex[idBody])
 
-    mbtb.MBTB_BodySetVelocity(idBody,initVel[idBody])
+    mbtb.MBTB_BodySetVelocity(idBody, initVel[idBody])
 
 #build joint
 for idJoint in range(NBJOINTS):
-    mbtb.MBTB_JointBuild(idJoint,jointName[idJoint],jointType[idJoint],jointBody1[idJoint],jointBody2[idJoint],jointPos[idJoint])
+    mbtb.MBTB_JointBuild(idJoint, jointName[idJoint],
+                         jointType[idJoint], jointBody1[idJoint],
+                         jointBody2[idJoint], jointPos[idJoint])
 
 try:
     for idJoint in range(NBJOINTS):
-        mbtb.MBTB_setJointPoints(idJoint,jointPoints[2*idJoint],jointPoints[2*idJoint+1])
+        mbtb.MBTB_setJointPoints(idJoint, jointPoints[
+                                 2 * idJoint], jointPoints[2 * idJoint + 1])
 except NameError:
     print("run.py, info: joint points not defined.")
 
 for idArtefact in range(NBARTEFACTS):
-    cadmbtb.CADMBTB_loadArtefactCADFile(Artefactfile[idArtefact],ArtefactTrans[idArtefact])
+    Artefactfile[idArtefact] = os.path.join(example_path,
+                                            Artefactfile[idArtefact])
+    cadmbtb.CADMBTB_loadArtefactCADFile(
+        Artefactfile[idArtefact], ArtefactTrans[idArtefact])
 
 
-mbtb.MBTB_SetDParam(0,TSTheta)
-mbtb.MBTB_SetDParam(1,TSGamma)
+mbtb.MBTB_SetDParam(0, TSTheta)
+mbtb.MBTB_SetDParam(1, TSGamma)
 
-mbtb.MBTB_SetDParam(2,TSNewtonTolerance)
-mbtb.MBTB_SetDParam(3,TSNewtonMaxIteration)
+mbtb.MBTB_SetDParam(2, TSNewtonTolerance)
+mbtb.MBTB_SetDParam(3, TSNewtonMaxIteration)
 
-mbtb.MBTB_SetDParam(4,TSdeactivateYPosThreshold)
-mbtb.MBTB_SetDParam(5,TSdeactivateYVelThreshold)
-mbtb.MBTB_SetDParam(6,TSactivateYPosThreshold)
-mbtb.MBTB_SetDParam(7,TSactivateYVelThreshold)
-mbtb.MBTB_SetDParam(8,TSProjectionMaxIteration)
-mbtb.MBTB_SetDParam(9,TSConstraintTol)
-mbtb.MBTB_SetDParam(10,TSConstraintTolUnilateral)
-mbtb.MBTB_SetDParam(11,TSLevelOfProjection)
+mbtb.MBTB_SetDParam(4, TSdeactivateYPosThreshold)
+mbtb.MBTB_SetDParam(5, TSdeactivateYVelThreshold)
+mbtb.MBTB_SetDParam(6, TSactivateYPosThreshold)
+mbtb.MBTB_SetDParam(7, TSactivateYVelThreshold)
+mbtb.MBTB_SetDParam(8, TSProjectionMaxIteration)
+mbtb.MBTB_SetDParam(9, TSConstraintTol)
+mbtb.MBTB_SetDParam(10, TSConstraintTolUnilateral)
+mbtb.MBTB_SetDParam(11, TSLevelOfProjection)
 
-mbtb.MBTB_initSimu(stepSize,withProj)
+mbtb.MBTB_initSimu(stepSize, withProj)
 mbtb.MBTB_setGraphicFreq(freqUpdate)
 mbtb.MBTB_setOutputFreq(freqOutput)
-mbtb.MBTB_setSolverIOption(2,withReduced);
-mbtb.MBTB_setSolverIOption(0,solverIt);
-mbtb.MBTB_setSolverDOption(0,solverTol);
+mbtb.MBTB_setSolverIOption(2, withReduced)
+mbtb.MBTB_setSolverIOption(0, solverIt)
+mbtb.MBTB_setSolverDOption(0, solverTol)
 if gotoPos:
-    mbtb.MBTB_moveBodyToPosWithSpeed(0,aPos0,aVel0)
-    mbtb.MBTB_moveBodyToPosWithSpeed(1,aPos1,aVel1)
-    mbtb.MBTB_moveBodyToPosWithSpeed(2,aPos2,aVel2)
+    mbtb.MBTB_moveBodyToPosWithSpeed(0, aPos0, aVel0)
+    mbtb.MBTB_moveBodyToPosWithSpeed(1, aPos1, aVel1)
+    mbtb.MBTB_moveBodyToPosWithSpeed(2, aPos2, aVel2)
 
 if with3D:
     display.View_Iso()
     display.FitAll()
 
+    # ord('W'): self._display.SetModeWireFrame,
+    # ord('S'): set_shade_mode,
+    # ord('A'): self._display.EnableAntiAliasing,
+    # ord('B'): self._display.DisableAntiAliasing,
+    # ord('Q'): self._display.SetModeQuickHLR,
+    # ord('E'): self._display.SetModeExactHLR,
+    # ord('F'): self._display.FitAll(
+ais_boxshp = None
 
-                         # ord('W'): self._display.SetModeWireFrame,
-                         # ord('S'): set_shade_mode,
-                         # ord('A'): self._display.EnableAntiAliasing,
-                         # ord('B'): self._display.DisableAntiAliasing,
-                         # ord('Q'): self._display.SetModeQuickHLR,
-                         # ord('E'): self._display.SetModeExactHLR,
-                         # ord('F'): self._display.FitAll(
-ais_boxshp=None
 
 def remove_run_id_dir():
 
     if with_run_id:
-        os.rename('simu.txt', os.path.join('..', 'simu-{0}.txt'.format(run_id)))
-        os.rename('siconos-mechanisms.hdf5', os.path.join('..', 'siconos-mechanisms-{0}.hdf5'.format(run_id)))
+        os.rename('simu.txt', os.path.join(
+            '..', 'simu-{0}.txt'.format(run_id)))
+        os.rename('siconos-mechanisms.hdf5', os.path.join('..',
+                                                          'siconos-mechanisms-{0}.hdf5'.format(run_id)))
         os.remove('CAD')
         os.remove('plugins')
         os.chdir('..')
         os.removedirs(run_id)
 
 
-import atexit
 atexit.register(remove_run_id_dir)
 
 # Hdf5 IO setup
@@ -193,7 +225,8 @@ if with_io:
             currentTimerCmp = mbtb.cvar.sTimerCmp
             for i in range(nsteps):
                 mbtb.cvar.sTimerCmp += 1
-                print('STEP Number =',mbtb.cvar.sTimerCmp, '<', nsteps+currentTimerCmp);
+                print('STEP Number =', mbtb.cvar.sTimerCmp,
+                      '<', nsteps + currentTimerCmp)
                 mbtb._MBTB_STEP()
                 mbtb._MBTB_displayStep()
                 io.outputDynamicObjects()
@@ -201,10 +234,9 @@ if with_io:
                 io.outputContactForces()
                 io.outputSolverInfos()
                 if mbtb.cvar.sTimerCmp % mbtb.cvar.sFreqOutput == 0:
-                    mbtb._MBTB_printStep(fp);
+                    mbtb._MBTB_printStep(fp)
             mbtb._MBTB_close(fp)
             mbtb.ACE_PRINT_TIME()
-
 
         def STEP(event=None):
             _run(1)
@@ -234,14 +266,12 @@ if with_io:
             _run(100000)
 
         def QUIT(event=None):
-            exit();
-
+            exit()
 
         def GRAPHIC_ON(event=None):
             cadmbtb.CADMBTB_setGraphicContext(display.Context)
             v = display.GetView().GetObject()
             cadmbtb.CADMBTB_setGraphicView(v)
-
 
         def GRAPHIC_OFF(event=None):
             cadmbtb.CADMBTB_disableGraphic()
@@ -289,18 +319,25 @@ if with_io:
 
         def VIEW_TOP(event=None):
             display.View_Top()
+
         def VIEW_BOTTOM(event=None):
             display.View_Bottom()
+
         def VIEW_LEFT(event=None):
             display.View_Left()
+
         def VIEW_RIGHT(event=None):
             display.View_Right()
+
         def VIEW_REAR(event=None):
             display.View_Rear()
+
         def VIEW_FRONT(event=None):
             display.View_Front()
+
         def VIEW_ISO(event=None):
             display.View_Iso()
+
         def VIEW_FITALL(event=None):
             display.FitAll()
 
@@ -316,35 +353,41 @@ if with_io:
 
             io.addShapeDataFromFile(shape_name, afile[idBody])
 
-            assoc_shapes[idBody] = [Avatar(shape_name,
-                                          relative_translation=offset[idBody])]
+            assoc_shapes[idBody] = [
+                Avatar(shape_name, relative_translation=offset[idBody])]
     #        io.addObject('obj-{0}'.format(shape_name),
     #                     [Avatar(shape_name, relative_translation=offset)],
     #                     mass=1,
     #                     translation=[0, 0, 0])
 
         for idContact in range(NBCONTACTS):
-            shape_name1 = os.path.basename(os.path.splitext(afileContact1[idContact])[0])
-            shape_name2 = os.path.basename(os.path.splitext(afileContact2[idContact])[0])
+            shape_name1 = os.path.basename(
+                os.path.splitext(afileContact1[idContact])[0])
+            shape_name2 = os.path.basename(
+                os.path.splitext(afileContact2[idContact])[0])
 
             io.addShapeDataFromFile(shape_name1, afileContact1[idContact])
             io.addShapeDataFromFile(shape_name2, afileContact2[idContact])
 
-            print contactBody1[idContact], contactBody2[idContact]
+            print(contactBody1[idContact], contactBody2[idContact])
 
-            assoc_shapes[contactBody1[idContact]] += [Contactor(shape_name1,
-                                                               relative_translation=offset[contactBody1[idContact]])]
+            assoc_shapes[contactBody1[idContact]] += [
+                Contactor(
+                    shape_name1,
+                    relative_translation=offset[contactBody1[idContact]])]
 
             if contactBody2[idContact] >= 0:
-                assoc_shapes[contactBody2[idContact]] += [Contactor(shape_name2,
-                                                                    relative_translation=offset[contactBody2[idContact]])]
-
+                assoc_shapes[contactBody2[idContact]] += [
+                Contactor(
+                    shape_name2,
+                    relative_translation=offset[contactBody2[idContact]])]
 
         for idArtefact in range(NBARTEFACTS):
-            shape_name = os.path.basename(os.path.splitext(Artefactfile[idArtefact])[0])
+            
+            shape_name = os.path.basename(
+                os.path.splitext(Artefactfile[idArtefact])[0])
 
             io.addShapeDataFromFile(shape_name, Artefactfile[idArtefact])
-
 
         for idBody in range(NBBODIES):
             shape_name = os.path.basename(os.path.splitext(afile[idBody])[0])
@@ -354,22 +397,21 @@ if with_io:
                          mass=1,
                          translation=[0, 0, 0])
 
-
         for idArtefact in range(NBARTEFACTS):
 
-            shape_name = os.path.basename(os.path.splitext(Artefactfile[idArtefact])[0])
+            shape_name = os.path.basename(
+                os.path.splitext(Artefactfile[idArtefact])[0])
 
             io.addObject('artefact-{0}'.format(shape_name),
-                         [Avatar(shape_name)], 
+                         [Avatar(shape_name)],
                          mass=0,
                          translation=[0, 0, 0])
-
 
         io.outputStaticObjects()
 
         if with3D and __name__ == '__main__':
-            cadmbtb.CADMBTB_setIParam(0,dumpGraphic)
-            mbtb.MBTB_ContactSetIParam(2,0,0,drawMode)
+            cadmbtb.CADMBTB_setIParam(0, dumpGraphic)
+            mbtb.MBTB_ContactSetIParam(2, 0, 0, drawMode)
             add_menu('Siconos Mechanisms')
             add_menu('Options')
             add_menu('Verbose')
@@ -388,31 +430,35 @@ if with_io:
             add_function_to_menu('Siconos Mechanisms', RUN)
             add_function_to_menu('Siconos Mechanisms', QUIT)
 
-            add_function_to_menu('Display',GRAPHIC_OFF)
-            add_function_to_menu('Display',GRAPHIC_ON)
-            add_function_to_menu('Display',GRAPHIC_DUMP)
-            add_function_to_menu('Verbose',ENABLE_VERBOSE_MBTB_PRINT_DIST)
-            add_function_to_menu('Verbose',DISABLE_VERBOSE_MBTB_PRINT_DIST)
-            add_function_to_menu('Verbose',ENABLE_VERBOSE_MBTB_DISPLAY_STEP_BODIES)
-            add_function_to_menu('Verbose',DISABLE_VERBOSE_MBTB_DISPLAY_STEP_BODIES)
-            add_function_to_menu('Verbose',ENABLE_VERBOSE_MBTB_DISPLAY_STEP_JOINTS)
-            add_function_to_menu('Verbose',DISABLE_VERBOSE_MBTB_DISPLAY_STEP_JOINTS)
-            add_function_to_menu('Verbose',ENABLE_VERBOSE_MBTB_DISPLAY_STEP_CONTACTS)
-            add_function_to_menu('Verbose',DISABLE_VERBOSE_MBTB_DISPLAY_STEP_CONTACTS)
-            add_function_to_menu('Options',DISABLE_PROJ)
-            add_function_to_menu('Options',ENABLE_PROJ)
-            add_function_to_menu('Options',DISABLE_ONLYPROJ)
-            add_function_to_menu('Options',ENABLE_ONLYPROJ)
-            add_function_to_menu('View',VIEW_TOP)
-            add_function_to_menu('View',VIEW_BOTTOM)
-            add_function_to_menu('View',VIEW_RIGHT)
-            add_function_to_menu('View',VIEW_LEFT)
-            add_function_to_menu('View',VIEW_FRONT)
-            add_function_to_menu('View',VIEW_REAR)
-            add_function_to_menu('View',VIEW_ISO)
-            add_function_to_menu('View',VIEW_FITALL)
+            add_function_to_menu('Display', GRAPHIC_OFF)
+            add_function_to_menu('Display', GRAPHIC_ON)
+            add_function_to_menu('Display', GRAPHIC_DUMP)
+            add_function_to_menu('Verbose', ENABLE_VERBOSE_MBTB_PRINT_DIST)
+            add_function_to_menu('Verbose', DISABLE_VERBOSE_MBTB_PRINT_DIST)
+            add_function_to_menu(
+                'Verbose', ENABLE_VERBOSE_MBTB_DISPLAY_STEP_BODIES)
+            add_function_to_menu(
+                'Verbose', DISABLE_VERBOSE_MBTB_DISPLAY_STEP_BODIES)
+            add_function_to_menu(
+                'Verbose', ENABLE_VERBOSE_MBTB_DISPLAY_STEP_JOINTS)
+            add_function_to_menu(
+                'Verbose', DISABLE_VERBOSE_MBTB_DISPLAY_STEP_JOINTS)
+            add_function_to_menu(
+                'Verbose', ENABLE_VERBOSE_MBTB_DISPLAY_STEP_CONTACTS)
+            add_function_to_menu(
+                'Verbose', DISABLE_VERBOSE_MBTB_DISPLAY_STEP_CONTACTS)
+            add_function_to_menu('Options', DISABLE_PROJ)
+            add_function_to_menu('Options', ENABLE_PROJ)
+            add_function_to_menu('Options', DISABLE_ONLYPROJ)
+            add_function_to_menu('Options', ENABLE_ONLYPROJ)
+            add_function_to_menu('View', VIEW_TOP)
+            add_function_to_menu('View', VIEW_BOTTOM)
+            add_function_to_menu('View', VIEW_RIGHT)
+            add_function_to_menu('View', VIEW_LEFT)
+            add_function_to_menu('View', VIEW_FRONT)
+            add_function_to_menu('View', VIEW_REAR)
+            add_function_to_menu('View', VIEW_ISO)
+            add_function_to_menu('View', VIEW_FITALL)
             start_display()
         else:
             _run(stepNumber)
-
-

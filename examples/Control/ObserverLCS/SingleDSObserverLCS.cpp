@@ -16,7 +16,7 @@ int main(int argc, char* argv[])
     double h = 1.0e-3;      // Time step
     double Vinit = 10.0;
     unsigned int noutput = 1;
-    
+
     // ================= Creation of the model =======================
 
     // == Creation of the NonSmoothDynamicalSystem ==
@@ -88,7 +88,7 @@ int main(int argc, char* argv[])
     SP::NonSmoothLaw myNslaw(new ComplementarityConditionNSL(nslawSize));
 
     SP::Interaction myProcessInteraction(new Interaction(ninter, myNslaw, myProcessRelation));
-    
+
     // Model
     SP::Model ObserverLCS(new Model(t0, T));
     ObserverLCS->nonSmoothDynamicalSystem()->insertDynamicalSystem(processObserver);
@@ -112,10 +112,12 @@ int main(int argc, char* argv[])
 
     SP::LCP osnspb(new LCP());
     s->insertNonSmoothProblem(osnspb);
+
+    ObserverLCS->setSimulation(s);
     // ================================= Computation =================================
 
     // --- Initialisation of the simulation ---
-    ObserverLCS->initialize(s);
+    ObserverLCS->initialize();
 
     int k = 0; // Current step
     unsigned int N = ceil((T - t0) / h) + 1; // Number of time steps

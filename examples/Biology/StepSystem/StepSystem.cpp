@@ -98,7 +98,8 @@ int main(int argc, char *argv[])
 
 // Initialization
   printf("-> Initialisation \n");
-  aM->initialize(aS);
+  aM->setSimulation(aS);
+  aM->initialize();
   printf("-> End of initialization \n");
 
 // BUILD THE STEP INTEGRATOR

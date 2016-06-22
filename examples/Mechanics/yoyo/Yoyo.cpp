@@ -121,14 +121,16 @@ int main(int argc, char* argv[])
 
       // -- OneStepIntegrators --
       SP::MoreauJeanOSI OSI(new MoreauJeanOSI(theta));
-   
+
       // -- OneStepNsProblem --
       SP::OneStepNSProblem osnspb(new LCP());
-   
+
       SP::TimeStepping s(new TimeStepping(t, OSI, osnspb));
 
+      jeu->setSimulation(s);
+
       // --- Model initialization ---
-      jeu->initialize(s);
+      jeu->initialize();
 
       q = yoyo->q();
       v = yoyo->velocity();
@@ -186,30 +188,30 @@ int main(int argc, char* argv[])
         (*v0)(0) = -(*v)(0);
         (*v0)(2) = (*v)(2);
         (*v0)(1) = -r * (*v0)(0) + (*v0)(2);
-  
+
         yoyo.reset(new LagrangianDS(q0, v0, M));
         yoyo->setComputeFExtFunction("YoyoPlugin", "force_extf");
         yoyo->setComputeFIntFunction("YoyoPlugin", "F_intf");
         yoyo->setComputeJacobianFIntqDotFunction("YoyoPlugin", "jacobianVFIntf");
         yoyo->setComputeJacobianFIntqFunction("YoyoPlugin", "jacobianFIntqf");
-        
+
         inter.reset(new Interaction(1, loi, relation));
-          
+
         jeu.reset(new Model(t0, T));
         jeu->nonSmoothDynamicalSystem()->insertDynamicalSystem(yoyo);
         jeu->nonSmoothDynamicalSystem()->link(inter, yoyo);
-  
+
         t.reset(new TimeDiscretisation(t0, h));
         OSI.reset(new MoreauJeanOSI(theta));
         osnspb.reset(new LCP());
         s.reset(new TimeStepping(t, OSI, osnspb));
-        jeu->initialize(s);
-  
+        jeu->initialize();
+
         q = yoyo->q();
         v = yoyo->velocity();
         p = yoyo->p(1);
         lambda = inter->lambda(1);
-  
+
         while (s->hasNextEvent())
         {
           s->computeOneStep();

@@ -37,7 +37,8 @@ To clarify things before getting into details, here are the standard minimal ste
 
   # associate this simulation with a previously defined model (ds and interactions)
   # and initialize
-  my_model.initialize(simu)
+  my_model.setSimulation(simu)
+  my_model.initialize()
 
 
 Depending on your problem, you may have to change the integrator (here a :doxysiconos:`MoreauJeanOSI`), the nonsmooth problem formulation (:doxysiconos:`LCP`) and the

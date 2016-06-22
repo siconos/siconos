@@ -208,8 +208,8 @@ int main()
 
     simulation->insertIntegrator(osi);
     simulation->insertNonSmoothProblem(osnspb);
-
-    model->initialize(simulation);
+    model->setSimulation(simulation);
+    model->initialize();
 
     std::cout << "====> End of initialisation ..." << std::endl << std::endl;
 

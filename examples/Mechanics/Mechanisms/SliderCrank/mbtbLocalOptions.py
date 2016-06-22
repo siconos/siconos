@@ -94,8 +94,8 @@ gotoPos=0
 ## The number of artefacts
 NBARTEFACTS=1
 ## CAD file of the artefacts
-Artefactfile=numpy.array([
-        './CAD/artefact2.step'])
+Artefactfile=[
+        './CAD/artefact2.step']
 ## transparency of the artefacts
 ArtefactTrans=array.array('d',[
         0.8])

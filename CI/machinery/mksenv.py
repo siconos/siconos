@@ -25,6 +25,7 @@ output_mode_spec['script'] = OutputMode.Script
 output_mode_spec['docker'] = OutputMode.Docker
 output_mode_spec['vagrant'] = OutputMode.Vagrant
 
+
 def wildcard(spec):
     if 'wildcard' in spec:
         return spec['wildcard']
@@ -53,7 +54,7 @@ def get_entry(spec=None, distrib=None, distrib_version=None, pkg=None,
 
     distrib_full = '{0}-{1}'.format(distrib, distrib_version)
 
-    if pkg in spec[section]:
+    if section in spec and pkg in spec[section]:
 
         if distrib_full in spec[section][pkg]:
             return spec[section][pkg][distrib_full]
@@ -71,6 +72,7 @@ def get_entry(spec=None, distrib=None, distrib_version=None, pkg=None,
 
         else:
             return None
+
 
 def pkg_entries(spec=None, distrib=None, distrib_version=None, pkg=None):
     """
@@ -115,6 +117,10 @@ def begin(distrib=None, distrib_version=None, output_mode=None):
     """
     if output_mode == OutputMode.Docker:
         sys.stdout.write('FROM {0}:{1}\n'.format(distrib, distrib_version))
+    elif output_mode == OutputMode.Script:
+        sys.stdout.write('#!/bin/sh\n')
+        sys.stdout.write('# {0} {1}\n'.format(distrib,
+                                              distrib_version))
 
 
 def env(definitions=None, output_mode=None):
@@ -131,7 +137,7 @@ def env(definitions=None, output_mode=None):
 
         items += definitions
 
-        sys.stdout.write('{0}\n'.format(' \\ \n  '.join(items)))
+        sys.stdout.write('{0}\n'.format(' \\\n  '.join(items)))
 
 
 def install(installer=None, command=None, pkg=None, pkgs=None,
@@ -152,7 +158,7 @@ def install(installer=None, command=None, pkg=None, pkgs=None,
                 output_mode))
             exit(1)
 
-    if installer is not None:
+    if installer is not None and pkgs is not None and len(pkgs) > 0:
         items.append(installer)
 
     if command is not None:
@@ -169,7 +175,7 @@ def install(installer=None, command=None, pkg=None, pkgs=None,
     if pkgs is not None:
         items += pkgs
 
-    sys.stdout.write('{0}\n'.format(' \\ \n  '.join(items)))
+    sys.stdout.write('{0}\n'.format(' \\\n  '.join(items)))
 
 
 class Options(object):

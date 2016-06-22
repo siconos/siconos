@@ -18,11 +18,9 @@ ELSE()
   SET(EXE_EXT)
 ENDIF()
 
-# For some environment variables (LD_LIBRARY_PATH, DYLD_LIBRARY_PATH, Path)
-set(LIBFORTests @CMAKE_CURRENT_BINARY_DIR@)
 if(CMAKE_SYSTEM_NAME MATCHES Windows)
   set(COMPONENT_BIN_DIR)
-  get_filename_component(BASE_BIN_DIR "@CMAKE_CURRENT_BINARY_DIR@" PATH)
+  get_filename_component(BASE_BIN_DIR "@CMAKE_CURRENT_BINARY_DIR@" DIRECTORY)
   foreach(_C "externals" "numerics" "kernel" "mechanics" "control" "io")
     set(COMPONENT_BIN_DIR "${COMPONENT_BIN_DIR}\;${BASE_BIN_DIR}/${_C}")
   endforeach()
@@ -138,12 +136,7 @@ FOREACH(_EXE ${_EXE_LIST_${_CURRENT_TEST_DIRECTORY}})
     FILE(APPEND ${CMAKE_CURRENT_BINARY_DIR}/SiconosTestConfig.cmake "  ADD_TEST(\${ARGV})\n")
     FILE(APPEND ${CMAKE_CURRENT_BINARY_DIR}/SiconosTestConfig.cmake "  SET(_EXE \${ARGV0})\n")
 
-    IF(APPLE)
-      SET(ENV_PPTY "DYLD_LIBRARY_PATH=$ENV{DYLD_LIBRARY_PATH}:${LIBFORTests}")
-    ELSEIF(CMAKE_SYSTEM_NAME MATCHES Windows)
-      SET(ENV_PPTY "Path=${COMPONENT_PATH}")
-    ELSE() # unix
-      SET(ENV_PPTY "LD_LIBRARY_PATH=$ENV{LD_LIBRARY_PATH}:${LIBFORTests}")
+    IF(CMAKE_SYSTEM_NAME MATCHES Windows)
     ENDIF()
 
     IF(USE_SANITIZER MATCHES "asan")
@@ -179,12 +172,8 @@ FOREACH(_EXE ${_EXE_LIST_${_CURRENT_TEST_DIRECTORY}})
 
     SET_TESTS_PROPERTIES(${_EXE} PROPERTIES FAIL_REGULAR_EXPRESSION "FAILURE;Exception;failed;ERROR;test unsucceeded")
 
-    if(APPLE)
-      set_tests_properties(${_EXE} PROPERTIES ENVIRONMENT "DYLD_LIBRARY_PATH=$ENV{DYLD_LIBRARY_PATH}:${LIBFORTests}")
-    elseif(CMAKE_SYSTEM_NAME MATCHES Windows)
+    if(CMAKE_SYSTEM_NAME MATCHES Windows)
       set_tests_properties(${_EXE} PROPERTIES ENVIRONMENT "Path=${COMPONENT_PATH}")
-    else() #unix
-      set_tests_properties(${_EXE} PROPERTIES ENVIRONMENT "LD_LIBRARY_PATH=$ENV{LD_LIBRARY_PATH}:${LIBFORTests}")
     endif()
 
     IF(USE_SANITIZER MATCHES "asan")

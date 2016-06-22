@@ -433,7 +433,8 @@ Then the last step consists in the simulation creation, with its time discretisa
 
 Finally, the simulation is used to initialize the model, which is now complete and ready to run::
 
-  DiodeBridge.initialize(simu)
+  DiodeBridge.setSimulation(simu)
+  DiodeBridge.initialize()
 
 
 Leading the Simulation Process

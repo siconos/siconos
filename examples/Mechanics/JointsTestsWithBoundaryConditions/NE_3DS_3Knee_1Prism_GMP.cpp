@@ -329,7 +329,7 @@ int main(int argc, char* argv[])
     s->insertIntegrator(OSI3);
     //    s->setComputeResiduY(true);
     //  s->setUseRelativeConvergenceCriteron(false);
-
+    myModel->setSimulation(s);
 
 
     // =========================== End of model definition ===========================
@@ -339,7 +339,7 @@ int main(int argc, char* argv[])
     // --- Simulation initialization ---
 
     cout << "====> Initialisation ..." << endl << endl;
-    myModel->initialize(s);
+    myModel->initialize();
 
 
     // --- Get the values to be plotted ---

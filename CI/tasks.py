@@ -58,11 +58,18 @@ siconos_ubuntu_15_10 = siconos_default.copy()(
     distrib='ubuntu:15.10')
 
 siconos_ubuntu_15_10_with_mechanisms = siconos_default.copy()(
-    ci_config='with_mechanisms',
+    ci_config='with_mechanisms_conda_version',
     add_pkgs=['pythonocc-conda', 'wget', 'bash', 'bzip2', 'pythonocc-conda-dep'],
     cmake_cmd='Build/ci-scripts/conda.sh',
     with_examples=True,
     distrib='debian:stretch')
+
+siconos_debian_mechanisms = siconos_default.copy()(
+    ci_config='with_mechanisms',
+    add_pkgs=['wget', 'bash', 'bullet', 'h5py', 'oce-pythonocc-deps'],
+    with_examples=True,
+    distrib='debian:latest')
+
 
 siconos_numerics_only = siconos_ubuntu_15_10.copy()(
     ci_config='no_cxx',
@@ -148,7 +155,8 @@ known_tasks = {'siconos---vm0':
                (siconos_fedora_latest,
                 siconos_gcc_asan,
                 siconos_gcc_asan_latest,
-                siconos_ubuntu_15_10_with_mechanisms),
+                siconos_ubuntu_15_10_with_mechanisms,
+                siconos_debian_mechanisms),
 
                'siconos---vm1':
                (siconos_numerics_only,

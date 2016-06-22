@@ -42,7 +42,8 @@ void OSNSPTest::init()
   _model->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DS);
   _model->nonSmoothDynamicalSystem()->topology()->setOSI(_DS, _osi);
   _sim->insertIntegrator(_osi);
-  _model->initialize(_sim);
+  _model->setSimulation(_sim);
+  _model->initialize();
 }
 
 void OSNSPTest::tearDown()
@@ -94,7 +95,8 @@ void OSNSPTest::testAVI()
   _sim->insertIntegrator(_osi);
   SP::AVI osnspb(new AVI());
   _sim->insertNonSmoothProblem(osnspb);
-  _model->initialize(_sim);
+  _model->setSimulation(_sim);
+  _model->initialize();
   SimpleMatrix dataPlot((unsigned)ceil((_T - _t0) / _h) + 10, 5);
   SiconosVector& xProc = *_DS->x();
   SiconosVector& lambda = *inter->lambda(0);

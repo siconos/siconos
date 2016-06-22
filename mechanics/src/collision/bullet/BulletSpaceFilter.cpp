@@ -43,6 +43,22 @@
 //#define DEBUG_MESSAGES 1
 #include <debug.h>
 
+
+#include "MoreauJeanOSI.hpp"
+#include "MoreauJeanGOSI.hpp"
+#include "EulerMoreauOSI.hpp"
+#include "SchatzmanPaoliOSI.hpp"
+
+#define VISITOR_CLASSES() \
+  REGISTER(MoreauJeanOSI) \
+  REGISTER(MoreauJeanGOSI) \
+  REGISTER(EulerMoreauOSI) \
+  REGISTER(SchatzmanPaoliOSI)
+
+#include <VisitorMaker.hpp>
+
+using namespace Experimental;
+
 extern btScalar gContactBreakingThreshold;
 typedef bool (*ContactProcessedCallback)(btManifoldPoint& cp, void* body0, void* body1);
 typedef bool (*ContactDestroyedCallback)(void* userPersistentData);
@@ -80,6 +96,32 @@ struct ForPosition : public Question<SP::SiconosVector>
 {
   ANSWER(BulletDS, q());
 };
+
+/* initW is not a member of OneStepIntegrator (should it be ?),
+   so we visit some integrators which provide this initialization.
+*/
+
+/* first, a generic visitor is defined. */
+struct CallInitW : public SiconosVisitor
+{
+  double time;
+  SP::DynamicalSystem ds;
+  DynamicalSystemsGraph::VDescriptor dsv;
+
+  template<typename T>
+  void operator()(const T& osi)
+  {
+    const_cast<T*>(&osi)->initW(this->time, this->ds, this->dsv);
+  }
+};
+
+/* the visit is made on classes which provide the function initW */
+typedef Visitor < Classes < MoreauJeanOSI,
+                            MoreauJeanGOSI,
+                            EulerMoreauOSI,
+                            SchatzmanPaoliOSI >,
+                  CallInitW >::Make InitW;
+
 
 BulletSpaceFilter::BulletSpaceFilter(SP::Model model) :
   SpaceFilter(),
@@ -143,7 +185,7 @@ void BulletSpaceFilter::setCollisionConfiguration(
 void BulletSpaceFilter::buildInteractions(double time)
 {
   DEBUG_PRINT("-----start build interaction\n");
-  
+
   DEBUG_PRINT("----- insert dynamic collision objects if needed\n");
 
 
@@ -185,7 +227,7 @@ void BulletSpaceFilter::buildInteractions(double time)
   _collisionWorld->performDiscreteCollisionDetection();
 
 
-  
+
   // 2. collect old contact points from Siconos graph
   DEBUG_PRINT("-----  2. collect old contact points from Siconos graph\n");
   std::map<btManifoldPoint*, bool> contactPoints;
@@ -228,7 +270,7 @@ void BulletSpaceFilter::buildInteractions(double time)
       _collisionWorld->getDispatcher()->getManifoldByIndexInternal(i);
 
     DEBUG_PRINTF("processing manifold %d : %p\n", i, contactManifold);
- 
+
     const btCollisionObject* obA = contactManifold->getBody0();
     const btCollisionObject* obB = contactManifold->getBody1();
 
@@ -411,16 +453,26 @@ void BulletSpaceFilter::addDynamicObject(SP::BulletDS ds,
   }
 
   /* Insert the new DS into the OSI, model, and simulation. */
-  //osi->insertDynamicalSystem(ds);
   this->model()->nonSmoothDynamicalSystem()->insertDynamicalSystem(ds);
+  this->model()->nonSmoothDynamicalSystem()->topology()->setOSI(ds, osi);
+
+  DynamicalSystemsGraph& dsg = *(this->model()->nonSmoothDynamicalSystem()->dynamicalSystems());
+  DynamicalSystemsGraph::VDescriptor dsv = dsg.descriptor(ds);
+  InitW initW;
+  initW.time = simulation->nextTime();
+  initW.ds = ds;
+  initW.dsv = dsv;
+  osi->accept(initW);
 
   /* Initialize the DS at the current time */
   ds->initialize(simulation->nextTime(), osi->getSizeMem());
 
-  /* Partially re-initialize the simulation. */
-  simulation->initialize(this->model(), false);
+  /* Partially re-initialize the simulation and integrators. */
+  simulation->initialize(this->model(), true);
 
   /* Re-create the world from scratch */
+  _collisionWorld.reset();
+
   _dispatcher.reset(new btCollisionDispatcher(&*_collisionConfiguration));
   _collisionWorld.reset(new btCollisionWorld(&*_dispatcher, &*_broadphase,
                                              &*_collisionConfiguration));

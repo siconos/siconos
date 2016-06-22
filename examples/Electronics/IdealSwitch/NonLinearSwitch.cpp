@@ -119,11 +119,11 @@ int main()
   aS->setComputeResiduY(true);
   aS->setComputeResiduR(true);
   aS->setUseRelativeConvergenceCriteron(false);
-
+  aM->setSimulation(aS);
 
   // Initialization
   cout << "====> Initialisation ..." << endl << endl;
-  aM->initialize(aS);
+  aM->initialize();
 
   //To compute necessary information for memory allocator
   aMLCP->preCompute(0.0);

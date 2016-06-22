@@ -143,13 +143,14 @@ int main(int argc, char* argv[])
     // bool check2 = EDscheme->hasOneStepNSProblem(acceleration);
     // cout << "Impact law included in the simulation: " << check1 << endl;
     // cout << "LCP at acceleration level included in the simulation: " << check2 << endl;
+    RoBlockModel->setSimulation(EDscheme);
     //==================================================================================================================
     //                    V. Process the simulation
     //==================================================================================================================
     // -------------------------------- Simulation initialization ------------------------------------------------------
     cout << "====> Simulation initialisation ..." << endl << endl;
     EDscheme->setPrintStat(true);
-    RoBlockModel->initialize(EDscheme); // initialize the model
+    RoBlockModel->initialize(); // initialize the model
 
 
     //SP::LsodarOSI lsodar = std11::static_pointer_cast<LsodarOSI>(OSI);

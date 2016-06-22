@@ -124,14 +124,14 @@ int main(int argc, char* argv[])
     SP::TimeStepping S(new TimeStepping(t));
     S->insertIntegrator(OSI);
     S->insertNonSmoothProblem(osnspb);
-
+    Follower->setSimulation(S);
     cout << "=== End of model loading === " << endl;
     // =========================== End of model definition ===========================
 
     // ================================= Computation =================================
 
     // --- Simulation initialization ---
-    Follower->initialize(S);
+    Follower->initialize();
     cout << "End of model initialisation" << endl;
 
 

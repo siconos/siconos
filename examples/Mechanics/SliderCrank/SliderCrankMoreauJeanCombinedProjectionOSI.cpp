@@ -133,13 +133,15 @@ int main(int argc, char* argv[])
     s->setProjectionMaxIteration(500);
     s->setConstraintTolUnilateral(1e-10);
     s->setConstraintTol(1e-10);
+    sliderWithClearance->setSimulation(s);
+
     // =========================== End of model definition ===========================
 
     // ================================= Computation =================================
 
     // --- Simulation initialization ---
     cout << "====> Initialisation ..." << endl << endl;
-    sliderWithClearance->initialize(s);
+    sliderWithClearance->initialize();
     int N = ceil((T - t0) / h) + 1; // Number of time steps
 
     // --- Get the values to be plotted ---

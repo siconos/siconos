@@ -115,14 +115,14 @@ int main(int argc, char* argv[])
     s->insertIntegrator(OSI);
     s->insertNonSmoothProblem(impact, SICONOS_OSNSP_TS_VELOCITY);
     s->insertNonSmoothProblem(force, SICONOS_OSNSP_TS_VELOCITY + 1);
-
+    bouncingBall->setSimulation(s);
     // =========================== End of model definition ===========================
 
     // ================================= Computation =================================
 
     // --- Simulation initialization ---
     cout << "====> Initialisation ..." << endl << endl;
-    bouncingBall->initialize(s);
+    bouncingBall->initialize();
     int N = ceil((T - t0) / h); // Number of time steps
     int Nplot = (int)((T - t0) / hplot); // Number of plot steps
 

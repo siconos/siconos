@@ -194,7 +194,7 @@ int main(int argc, char* argv[])
 
     //SP::Relay osnspb(new Relay("Lemke"));
     //s->insertNonSmoothProblem(osnspb);
-
+    simpleExampleRelay->setSimulation(s);
     // =========================== End of model definition ===========================
 
     // ================================= Computation =================================
@@ -203,10 +203,10 @@ int main(int argc, char* argv[])
 
     cout << "====> Simulation initialisation ..." << endl << endl;
 
-    simpleExampleRelay->initialize(s);
+    simpleExampleRelay->initialize();
 
 
-    //  (s->oneStepNSProblems)[0]->initialize(s);
+    //  (s->oneStepNSProblems)[0]->initialize();
 
 
     // --- Get the values to be plotted ---

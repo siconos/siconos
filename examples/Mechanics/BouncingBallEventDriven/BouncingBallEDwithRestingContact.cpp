@@ -120,7 +120,7 @@ int main(int argc, char* argv[])
     s->insertIntegrator(OSI);
     s->insertNonSmoothProblem(impact, SICONOS_OSNSP_ED_IMPACT);
     s->insertNonSmoothProblem(acceleration, SICONOS_OSNSP_ED_SMOOTH_ACC);
-
+    bouncingBall->setSimulation(s);
     // =========================== End of model definition ===========================
 
     // ================================= Computation =================================
@@ -128,7 +128,7 @@ int main(int argc, char* argv[])
     // --- Simulation initialization ---
     cout << "====> Simulation initialisation ..." << endl << endl;
     s->setPrintStat(true);
-    bouncingBall->initialize(s);
+    bouncingBall->initialize();
 
     int N = 1854; // Number of saved points: depends on the number of events ...
 

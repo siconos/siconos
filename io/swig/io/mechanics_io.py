@@ -10,6 +10,7 @@ from math import cos, sin
 import shlex
 import numpy as np
 import h5py
+import bisect
 
 import tempfile
 from contextlib import contextmanager
@@ -79,6 +80,11 @@ import siconos.numerics as Numerics
 from scipy import constants
 
 import time
+
+
+def floatv(v):
+    return [float(x) for x in v]
+
 
 def arguments():
     """Returns tuple containing dictionary of calling function's
@@ -258,8 +264,9 @@ class ShapeCollection():
     def __init__(self, io, collision_margin=0.04):
         self._io = io
         self._shapes = dict()
+        self._tri = dict()
         self._collision_margin=collision_margin
-        print('self._collision_margin',self._collision_margin)
+        # print('self._collision_margin',self._collision_margin)
         if proposed_is_here and use_proposed:
 
             self._primitive = {'Sphere': SiconosSphere,
@@ -297,7 +304,8 @@ class ShapeCollection():
 
         return shape_url
 
-    def get(self, shape_name, shape_class=None, face_class=None, edge_class=None):
+    def get(self, shape_name, shape_class=None, face_class=None,
+            edge_class=None):
 
         if not shape_name in self._shapes:
 
@@ -305,21 +313,23 @@ class ShapeCollection():
             if not isinstance(self.url(shape_name), str) and \
                not 'primitive' in self.attributes(shape_name):
                 # assume a vtp file (xml) stored in a string buffer
-                if self.attributes(shape_name)['type'] == 'vtk':
+                if self.attributes(shape_name)['type'] == 'vtp':
                     if self.shape(shape_name).dtype == h5py.new_vlen(str):
                         with tmpfile() as tmpf:
                             data = self.shape(shape_name)[:][0]
                             tmpf[0].write(data)
                             tmpf[0].flush()
-                            self._tri[index], self._shape[index] = loadMesh(
-                                tmpf[1],self._collision_margin)
+                            (self._tri[shape_name],
+                             self._shapes[shape_name]) = loadMesh(
+                                 tmpf[1], self._collision_margin)
                     else:
                         assert False
                 elif self.attributes(shape_name)['type'] in['step']:
                     from OCC.STEPControl import STEPControl_Reader
                     from OCC.BRep import BRep_Builder
                     from OCC.TopoDS import TopoDS_Compound
-                    from OCC.IFSelect import IFSelect_RetDone, IFSelect_ItemsByEntity
+                    from OCC.IFSelect import IFSelect_RetDone,\
+                        IFSelect_ItemsByEntity
 
                     builder = BRep_Builder()
                     comp = TopoDS_Compound()
@@ -399,8 +409,8 @@ class ShapeCollection():
                                 face_maker = face_class
 
                             self._shapes[shape_name] = \
-                                                       face_maker(ref_brep,
-                                                                  contact_index)
+                                face_maker(ref_brep,
+                                           contact_index)
 
                         elif self.attributes(shape_name)['contact'] == 'Edge':
                             if edge_class is None:
@@ -408,8 +418,8 @@ class ShapeCollection():
                             else:
                                 edge_maker = edge_class
                             self._shapes[shape_name] = \
-                                        edge_maker(ref_brep,
-                                                   contact_index)
+                                edge_maker(ref_brep,
+                                           contact_index)
 
                         self._io._keep.append(self._shapes[shape_name])
                 else:
@@ -438,7 +448,7 @@ class ShapeCollection():
             elif isinstance(self.url(shape_name), str) and \
                     os.path.exists(self.url(shape_name)):
                 self._tri[shape_name], self._shapes[shape_name] = loadMesh(
-                    self.url(shape_name),_collision_margin)
+                    self.url(shape_name), _collision_margin)
             else:
                 # it must be a primitive with attributes
                 if isinstance(self.url(shape_name), str):
@@ -462,9 +472,9 @@ class ShapeCollection():
                     else:
                         self._shapes[shape_name] = primitive(
                             btVector3(attrs[0] / 2,
-                                                                   attrs[
-                                                                       1] / 2,
-                                                                   attrs[2] / 2))
+                                      attrs[1] / 2,
+                                      attrs[2] / 2))
+
                 elif name in ['Cylinder']:
                     self._shapes[shape_name] = primitive(btVector3(attrs[0],
                                                                    attrs[
@@ -551,11 +561,8 @@ class Hdf5():
         self._collision_margin = collision_margin
         self._output_frequency = 1
         self._keep = []
-
-        #print('collision_margin in __init__', collision_margin)
-        #print('self._collision_margin in __init__', self._collision_margin)
-
-
+        self._scheduled_births = []
+        self._births = dict()
 
     def __enter__(self):
         if self._set_external_forces is None:
@@ -578,13 +585,16 @@ class Hdf5():
 
         if self._shape_filename is None:
             if self._collision_margin:
-                self._shape = ShapeCollection(io=self, collision_margin=self._collision_margin)
+                self._shape = ShapeCollection(
+                    io=self, collision_margin=self._collision_margin)
 
             else:
                 self._shape = ShapeCollection(io=self)
         else:
             if self._collision_margin:
-                self._shape = ShapeCollection(io=self._shape_filename, collision_margin=self._collision_margin)
+                self._shape = ShapeCollection(
+                    io=self._shape_filename,
+                    collision_margin=self._collision_margin)
             else:
                 self._shape = ShapeCollection(io=self._shape_filename)
         return self
@@ -708,8 +718,9 @@ class Hdf5():
             nsds.topology().setOSI(body, self._osi)
             nsds.setName(body, str(name))
 
-    def importObject(self, name, translation, orientation,
-                     velocity, contactors, mass, inertia, body_class, shape_class):
+    def importBulletObject(self, name, translation, orientation,
+                           velocity, contactors, mass, inertia,
+                           body_class, shape_class, birth=False):
 
         if body_class is None:
             body_class = BulletDS
@@ -812,11 +823,11 @@ class Hdf5():
                     self._shape.get(contactors[0].name), mass)
 
                 if inertia is not None:
-                    print('inertia',inertia, type(inertia))
-                    print(np.shape(inertia))                    
+                    print('inertia', inertia, type(inertia))
+                    print(np.shape(inertia))
                     if np.shape(inertia) == (3,):
                         bws.setInertia(inertia[0], inertia[1], inertia[2])
-                    elif (np.shape(inertia)== (3,3)):
+                    elif (np.shape(inertia) == (3, 3)):
                         bws.setInertia(inertia)
                     else:
                         print('Wrong shape of inertia')
@@ -842,10 +853,18 @@ class Hdf5():
 
                 # add the dynamical system to the non smooth
                 # dynamical system
-                nsds = self._model.nonSmoothDynamicalSystem()
-                nsds.insertDynamicalSystem(body)
-                nsds.topology().setOSI(body, self._osi)
-                nsds.setName(body, str(name))
+                if birth:
+                    self._broadphase.addDynamicObject(
+                        body,
+                        self._broadphase.model().simulation(),
+                        self._osi)
+                    nsds = self._broadphase.model().nonSmoothDynamicalSystem()
+                    nsds.setName(body, str(name))
+                else:
+                    nsds = self._broadphase.model().nonSmoothDynamicalSystem()
+                    nsds.insertDynamicalSystem(body)
+                    nsds.topology().setOSI(body, self._osi)
+                    nsds.setName(body, str(name))
 
     def importJoint(self, name):
         if self._broadphase is not None:
@@ -853,7 +872,7 @@ class Hdf5():
                 topology()
 
             joint_class = getattr(joints,
-                                 self.joints()[name].attrs['type'])
+                                  self.joints()[name].attrs['type'])
 
             joint_nslaw = EqualityConditionNSL(5)
 
@@ -880,56 +899,139 @@ class Hdf5():
                 self._broadphase.model().nonSmoothDynamicalSystem().\
                     link(joint_inter, ds1)
 
-    def importScene(self, body_class, shape_class, face_class, edge_class):
+    def importScene(self, time, body_class, shape_class, face_class,
+                    edge_class):
         """
-        Import into the broadphase object all the static and dynamic objects
-        from hdf5 file
+        From the specification given in the hdf5 file with the help of
+        add* functions, import into the broadphase object:
+          - the static objects
+          - the dynamic objects
+          - the joints
+          - the nonsmooth laws
+        that have a specified time of birth <= current time.
         """
 
         for shape_name in self._ref:
             self._shapeid[shape_name] = self._ref[shape_name].attrs['id']
             self._number_of_shapes += 1
 
-        def floatv(v):
-            return [float(x) for x in v]
-
         # import dynamical systems
         if self._broadphase is not None and 'input' in self._data:
 
             for (name, obj) in sorted(self._input.items(),
-                                      key = lambda x:x[0]):
+                                      key=lambda x: x[0]):
                 input_ctrs = [ctr for _n_, ctr in obj.items()]
                 mass = obj.attrs['mass']
+                time_of_birth = obj.attrs['time_of_birth']
 
-                # cold restart if output previously done
-                if mass > 0 and self.dynamic_data() is not None and \
-                        len(self.dynamic_data()) > 0:
-                    dpos_data = self.dynamic_data()
-                    max_time = max(dpos_data[:, 0])
-                    id_last = np.where(
-                        abs(dpos_data[:, 0] - max_time) < 1e-9)[0]
-                    id_last_inst = np.where(
-                        dpos_data[id_last, 1] ==
-                        self.instances()[name].attrs['id'])[0]
-                    xpos = dpos_data[id_last[id_last_inst[0]], :]
-                    translation = (xpos[2], xpos[3], xpos[4])
-                    orientation = (xpos[5], xpos[6], xpos[7], xpos[8])
-
-                    velocities = self.velocities_data()
-                    id_vlast = np.where(
-                        abs(velocities[:, 0] - max_time) < 1e-9)[0]
-
-                    id_vlast_inst = np.where(
-                        velocities[id_vlast, 1] ==
-                        self.instances()[name].attrs['id'])[0]
-                    xvel = velocities[id_vlast[id_vlast_inst[0]], :]
-                    velocity = (xvel[2], xvel[3], xvel[4])
-
-                # start from initial conditions
+                if time_of_birth > time:
+                    #
+                    # in the future
+                    #
+                    bisect.insort_left(self._scheduled_births, time_of_birth)
+                    if time_of_birth in self._births:
+                        self._births[time_of_birth].append((name, obj))
+                    else:
+                        self._births[time_of_birth] = [(name, obj)]
                 else:
-                    translation = obj.attrs['translation']
-                    orientation = obj.attrs['orientation']
-                    velocity = obj.attrs['velocity']
+                    #
+                    # this is for now
+                    #
+                    # cold restart if output previously done
+                    if mass > 0 and self.dynamic_data() is not None and \
+                            len(self.dynamic_data()) > 0:
+                        dpos_data = self.dynamic_data()
+                        max_time = max(dpos_data[:, 0])
+                        id_last = np.where(
+                            abs(dpos_data[:, 0] - max_time) < 1e-9)[0]
+                        id_last_inst = np.where(
+                            dpos_data[id_last, 1] ==
+                            self.instances()[name].attrs['id'])[0]
+                        xpos = dpos_data[id_last[id_last_inst[0]], :]
+                        translation = (xpos[2], xpos[3], xpos[4])
+                        orientation = (xpos[5], xpos[6], xpos[7], xpos[8])
+
+                        velocities = self.velocities_data()
+                        id_vlast = np.where(
+                            abs(velocities[:, 0] - max_time) < 1e-9)[0]
+
+                        id_vlast_inst = np.where(
+                            velocities[id_vlast, 1] ==
+                            self.instances()[name].attrs['id'])[0]
+                        xvel = velocities[id_vlast[id_vlast_inst[0]], :]
+                        velocity = (xvel[2], xvel[3], xvel[4])
+
+                    # start from initial conditions
+                    else:
+                        translation = obj.attrs['translation']
+                        orientation = obj.attrs['orientation']
+                        velocity = obj.attrs['velocity']
+
+                    contactors = [Contactor(ctr.attrs['name'],
+                                            int(ctr.attrs['group']),
+                                            floatv(ctr.attrs['translation']),
+                                            floatv(ctr.attrs['orientation']))
+                                  for ctr in input_ctrs]
+
+                    if 'inertia' in obj.attrs:
+                        inertia = obj.attrs['inertia']
+                    else:
+                        inertia = None
+
+                    if True in ('type' in self.shapes()[ctr.attrs['name']].attrs
+                                and self.shapes()[ctr.attrs['name']].attrs['type']
+                                in ['brep', 'step']
+                                for ctr in input_ctrs):
+                        # Occ object
+                        self.importBRepObject(
+                            name, floatv(translation), floatv(orientation),
+                            floatv(
+                                velocity), contactors, float(mass),
+                            inertia, body_class, shape_class, face_class,
+                            edge_class)
+                    else:
+                        # Bullet object
+                        self.importBulletObject(
+                            name, floatv(translation), floatv(orientation),
+                            floatv(velocity), contactors, float(mass),
+                            inertia, body_class, shape_class)
+
+            # import nslaws
+            # note: no time of birth for nslaws and joints
+            for name in self._nslaws:
+                self.importNonSmoothLaw(name)
+
+            for name in self.joints():
+                self.importJoint(name)
+
+            # build collision graph
+            if use_proposed:
+                print('Calling buildGraph')
+                self._broadphase.buildGraph(self._broadphase.model())
+                self._broadphase.buildGraph(self._static_contactor)
+
+    def importBirths(self, body_class=None, shape_class=None,
+                     face_class=None, edge_class=None,):
+        """
+        Import new objects in the broadphase.
+        """
+        time = self._broadphase.model().simulation().nextTime()
+
+        ind_time = bisect.bisect_left(self._scheduled_births, time)
+
+        current_times_of_births = self._scheduled_births[:ind_time]
+        self._scheduled_births = self._scheduled_births[ind_time:]
+
+        print (time, current_times_of_births)
+        for time_of_birth in current_times_of_births:
+
+            for (name, obj) in self._births[time_of_birth]:
+                translation = obj.attrs['translation']
+                orientation = obj.attrs['orientation']
+                velocity = obj.attrs['velocity']
+
+                input_ctrs = [ctr for _n_, ctr in obj.items()]
+                mass = obj.attrs['mass']
 
                 contactors = [Contactor(ctr.attrs['name'],
                                         int(ctr.attrs['group']),
@@ -943,34 +1045,27 @@ class Hdf5():
                     inertia = None
 
                 if True in ('type' in self.shapes()[ctr.attrs['name']].attrs
-                            and self.shapes()[ctr.attrs['name']].attrs['type'] in ['brep', 'step']
+                            and self.shapes()[ctr.attrs['name']].attrs['type']
+                            in ['brep', 'step']
                             for ctr in input_ctrs):
                     # Occ object
                     self.importBRepObject(
                         name, floatv(translation), floatv(orientation),
                         floatv(
-                            velocity), contactors, float(
-                        mass),
-                        inertia, body_class, shape_class, face_class, edge_class)
+                            velocity), contactors, float(mass),
+                        inertia, body_class, shape_class, face_class,
+                        edge_class)
                 else:
                     # Bullet object
-                    self.importObject(
+                    self.importBulletObject(
                         name, floatv(translation), floatv(orientation),
                         floatv(velocity), contactors, float(mass),
-                        inertia, body_class, shape_class)
-
-            # import nslaws
-            for name in self._nslaws:
-                self.importNonSmoothLaw(name)
-
-            for name in self.joints():
-                self.importJoint(name)
+                        inertia, body_class, shape_class, birth=True)
 
             # build collision graph
             if use_proposed:
-                print('Calling buildGraph')
-                self._broadphase.buildGraph(self._model)
-                self._broadphase.buildGraph(self._static_contactor)
+                print('Calling buildGraph: TODO incremental buildGraph()')
+                sys.exit(1)
 
     def outputStaticObjects(self):
         """
@@ -999,7 +1094,7 @@ class Hdf5():
 
     def outputDynamicObjects(self):
         """
-        Outputs translations and orientations of dynamic objects
+        Outputs translations and orientations of dynamic objects.
         """
 
         current_line = self._dynamic_data.shape[0]
@@ -1008,14 +1103,16 @@ class Hdf5():
 
         positions = self._io.positions(self._broadphase.model())
 
-        self._dynamic_data.resize(current_line + positions.shape[0], 0)
+        if positions is not None:
 
-        times = np.empty((positions.shape[0], 1))
-        times.fill(time)
+            self._dynamic_data.resize(current_line + positions.shape[0], 0)
 
-        self._dynamic_data[current_line:, :] = np.concatenate((times,
-                                                               positions),
-                                                               axis=1)
+            times = np.empty((positions.shape[0], 1))
+            times.fill(time)
+
+            self._dynamic_data[current_line:, :] = np.concatenate((times,
+                                                                   positions),
+                                                                  axis=1)
 
     def outputVelocities(self):
         """
@@ -1028,14 +1125,16 @@ class Hdf5():
 
         velocities = self._io.velocities(self._broadphase.model())
 
-        self._velocities_data.resize(current_line + velocities.shape[0], 0)
+        if velocities is not None:
 
-        times = np.empty((velocities.shape[0], 1))
-        times.fill(time)
+            self._velocities_data.resize(current_line + velocities.shape[0], 0)
 
-        self._velocities_data[current_line:, :] = np.concatenate((times,
-                                                                  velocities),
-                                                                  axis=1)
+            times = np.empty((velocities.shape[0], 1))
+            times.fill(time)
+
+            self._velocities_data[current_line:, :] = np.concatenate((times,
+                                                                      velocities),
+                                                                     axis=1)
 
     def outputContactForces(self):
         """
@@ -1085,31 +1184,20 @@ class Hdf5():
 
         self._solv_data[current_line, :] = [time, iterations, precision,
                                             local_precision]
+
     def printSolverInfos(self):
         """
         Outputs solver #iterations & precision reached
         """
+        if self._solv_data.shape[0] > 0:
+            current_line = self._solv_data.shape[0] - 1
+            time, iterations, precision, local_precision = \
+                self._solv_data[current_line, :]
 
-        time = self._broadphase.model().simulation().nextTime()
-        so = self._broadphase.model().simulation().oneStepNSProblem(0).\
-            numericsSolverOptions()
-
-        current_line = self._solv_data.shape[0]
-        self._solv_data.resize(current_line + 1, 0)
-        if so.solverId == Numerics.SICONOS_GENERIC_MECHANICAL_NSGS:
-            iterations = so.iparam[3]
-            precision = so.dparam[2]
-            local_precision = so.dparam[3]
-        elif so.solverId == Numerics.SICONOS_FRICTION_3D_NSGS:
-            iterations = so.iparam[7]
-            precision = so.dparam[1]
-            local_precision = 0.
-        # maybe wrong for others
-        else:
-            iterations = so.iparam[1]
-            precision = so.dparam[1]
-            local_precision = so.dparam[2]
-        print('SolverInfos at time :',time, 'iterations= ',iterations,' precision=',precision,'local_precision=',local_precision)
+            print('SolverInfos at time :', time,
+                  'iterations= ', iterations,
+                  'precision=', precision,
+                  'local_precision=', local_precision)
 
     def addMeshFromString(self, name, shape_data):
         """
@@ -1150,7 +1238,7 @@ class Hdf5():
                 assert os.path.splitext(filename)[-1][1:] == 'vtp'
                 shape_data = str_of_file(filename)
 
-            self.addMeshShapeFromString(name, shape_data)
+            self.addMeshFromString(name, shape_data)
 
     def addBRepFromString(self, name, shape_data):
         """
@@ -1298,14 +1386,18 @@ class Hdf5():
                   translation,
                   orientation=[1, 0, 0, 0],
                   velocity=[0, 0, 0, 0, 0, 0],
-                  mass=0, inertia=None):
+                  mass=0, inertia=None, time_of_birth=0.):
         """
-        Add an object with associated shapes.
-        Contact detection is defined by a list of contactors.
+        Add an object with associated contact shapes that are called
+        contactors.
+        Contact detection is defined by the list of contactors.
         The initial translation is mandatory : [x, y z].
         If the mass is zero this is a static object.
+        A default inertia is associated if it is not given.
+        A time of birth may be specified, so the object will not appear
+        in the scene until this time.
         """
-        #print(arguments())
+        # print(arguments())
         if len(orientation) == 2:
             # axis + angle
             axis = orientation[0]
@@ -1322,6 +1414,9 @@ class Hdf5():
         if name not in self._input:
 
             obj = group(self._input, name)
+
+            obj.attrs['time_of_birth'] = time_of_birth
+
             obj.attrs['mass'] = mass
             obj.attrs['translation'] = translation
             obj.attrs['orientation'] = ori
@@ -1391,7 +1486,7 @@ class Hdf5():
             shape_class=None,
             face_class=None,
             edge_class=None,
-            gravity_scale=1.0, 
+            gravity_scale=1.0,
             t0=0,
             T=10,
             h=0.0005,
@@ -1433,8 +1528,9 @@ class Hdf5():
 
         """
         from siconos.kernel import \
-            Model, NonSmoothDynamicalSystem, OneStepNSProblem, MoreauJeanOSI, TimeDiscretisation,\
-            GenericMechanical, FrictionContact, NewtonImpactFrictionNSL
+            Model, NonSmoothDynamicalSystem, OneStepNSProblem, MoreauJeanOSI,\
+            TimeDiscretisation, GenericMechanical, FrictionContact,\
+            NewtonImpactFrictionNSL
 
         from siconos.numerics import SICONOS_FRICTION_3D_ONECONTACT_NSN_AC
 
@@ -1464,11 +1560,9 @@ class Hdf5():
         if output_frequency is not None:
             self._output_frequency = output_frequency
 
-
         if gravity_scale is not None:
             self._gravity_scale = gravity_scale
 
-            
         # cold restart
         times = set()
         if self.dynamic_data() is not None and len(self.dynamic_data()) > 0:
@@ -1481,7 +1575,7 @@ class Hdf5():
 
         # Model
         #
-        self._model = Model(t0, T)
+        model = Model(t0, T)
 
         # (1) OneStepIntegrators
         joints = list(self.joints())
@@ -1497,7 +1591,7 @@ class Hdf5():
             osnspb = FrictionContact(3, solver)
 
         osnspb.numericsSolverOptions().iparam[0] = itermax
-        osnspb.numericsSolverOptions().internalSolvers.iparam[0] = 100 
+        osnspb.numericsSolverOptions().internalSolvers.iparam[0] = 100
         osnspb.numericsSolverOptions().dparam[0] = tolerance
         osnspb.setMaxSize(30000)
         osnspb.setMStorageType(1)
@@ -1509,9 +1603,9 @@ class Hdf5():
         # (5) broadphase contact detection
         if proposed_is_here and use_proposed:
             self._static_contactor = SiconosContactor()
-            self._broadphase = space_filter(self._model)
+            self._broadphase = space_filter(model)
         else:
-            self._broadphase = space_filter(self._model)
+            self._broadphase = space_filter(model)
             if not multipoints_iterations:
                 print("""
             ConvexConvexMultipointIterations and PlaneConvexMultipointIterations are unset
@@ -1533,10 +1627,10 @@ class Hdf5():
         k0 = 1 + len(times)
         k = k0
 
-        self.importScene(body_class, shape_class, face_class, edge_class)
+        self.importScene(t0, body_class, shape_class, face_class, edge_class)
 
-        self._model.setSimulation(simulation)
-        self._model.initialize(simulation)
+        model.setSimulation(simulation)
+        model.initialize()
 
         self.outputStaticObjects()
         self.outputDynamicObjects()
@@ -1546,12 +1640,16 @@ class Hdf5():
         # for i in range(nds):
         #     ds = nsds.dynamicalSystem(i)
         #     ds.display()
-        # #raw_input()
-
+        # raw_input()
 
         while simulation.hasNextEvent():
 
             print ('step', k, '<', k0 - 1 + int((T - t0) / h))
+
+            log(self.importBirths(body_class=body_class,
+                                  shape_class=shape_class,
+                                  face_class=face_class,
+                                  edge_class=edge_class))
 
             if proposed_is_here and use_proposed:
                 self._broadphase.resetStatistics()
@@ -1559,14 +1657,10 @@ class Hdf5():
                 self._broadphase.performBroadphase()
             else:
                 log(self._broadphase.buildInteractions, with_timer)\
-                    (self._model.currentTime())
+                    (model.currentTime())
 
-            
             log(simulation.computeOneStep, with_timer)()
-            
-            #osnspb.display()
 
-            # if (k%self._output_frequency == 0) :
             if (k % self._output_frequency == 0) or (k == 1):
                 print ('output in hdf5 file at step ', k)
 
@@ -1585,27 +1679,30 @@ class Hdf5():
                       self._broadphase.statistics().new_interactions_created
                       + self._broadphase.statistics().existing_interactions_processed)
             else:
-                print('number of contacts',self._broadphase.model().simulation().oneStepNSProblem(0).getSizeOutput()/3)
+                print('number of contacts',
+                      self._broadphase.model().simulation().oneStepNSProblem(0).
+                      getSizeOutput() / 3)
 
             self.printSolverInfos()
 
             if violation_verbose:
                 print('violation info')
-                y = simulation.y(0,0)
-                yplus=  np.zeros((2,len(y)))
-                yplus[0,:] = y
-                #print(yplus)
+                y = simulation.y(0, 0)
+                yplus = np.zeros((2, len(y)))
+                yplus[0, :] = y
+                # print(yplus)
 
-                if len(simulation.y(0,0)) >0 :
-                    y=np.min(yplus,axis=1)
-                    violation_max=np.max(-y)
-                    print('  violation max :',np.max(-y))
-                    if  (violation_max >= self._collision_margin):
-                        #print(simulation.output(0,0))
-                        print('  violation max is larger than the collision_margin')
-                    lam = simulation.lambda_(1,0)
-                    print(' lambda : ',lam)
-                    #raw_input()
+                if len(simulation.y(0, 0)) > 0:
+                    y = np.min(yplus, axis=1)
+                    violation_max = np.max(-y)
+                    print('  violation max :', np.max(-y))
+                    if (violation_max >= self._collision_margin):
+                        # print(simulation.output(0,0))
+                        print(
+                            '  violation max is larger than the collision_margin')
+                    lam = simulation.lambda_(1, 0)
+                    print(' lambda : ', lam)
+                    # raw_input()
 
                 # v = simulation.output(1,0)
                 # vplus=  np.zeros((2,len(v)))
@@ -1614,8 +1711,7 @@ class Hdf5():
                 #     v=np.max(vplus,axis=1)
                 #     velocity_max=np.max(v)
                 #     print('  velocity max :',np.max(v))
-                #     #print(simulation.output(1,0))
-
+                # print(simulation.output(1,0))
 
             log(simulation.nextStep, with_timer)()
 

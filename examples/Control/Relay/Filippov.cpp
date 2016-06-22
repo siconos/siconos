@@ -123,7 +123,7 @@ int main(int argc, char* argv[])
 
 
     s->insertNonSmoothProblem(osnspb);
-
+    filippov->setSimulation(s);
     // =========================== End of model definition ===========================
 
     // ================================= Computation =================================
@@ -132,10 +132,10 @@ int main(int argc, char* argv[])
 
     cout << "====> Simulation initialisation ..." << endl << endl;
 
-    filippov->initialize(s);
+    filippov->initialize();
 
 
-    //  (s->oneStepNSProblems)[0]->initialize(s);
+    //  (s->oneStepNSProblems)[0]->initialize();
 
 
     // --- Get the values to be plotted ---

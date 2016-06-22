@@ -132,7 +132,6 @@ void lcp_pgs(LinearComplementarityProblem* problem, double *z, double *w, int *i
 }
 int linearComplementarity_pgs_setDefaultSolverOptions(SolverOptions* options)
 {
-  int i;
   if (verbose > 0)
   {
     printf("Set the Default SolverOptions for the PGS Solver\n");

@@ -214,7 +214,7 @@ int main(int argc, char* argv[])
     SP::TimeStepping s(new TimeStepping(t, OSI3, osnspb));
     //    s->setComputeResiduY(true);
     //  s->setUseRelativeConvergenceCriteron(false);
-
+    myModel->setSimulation(s);
 
 
     // =========================== End of model definition ===========================
@@ -224,7 +224,7 @@ int main(int argc, char* argv[])
     // --- Simulation initialization ---
 
     cout << "====> Initialisation ..." << endl << endl;
-    myModel->initialize(s);
+    myModel->initialize();
 
 
     // --- Get the values to be plotted ---

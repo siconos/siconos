@@ -166,9 +166,10 @@ int main(int argc, char* argv[])
     // --- Simulation initialization ---
 
     cout << "====> Simulation initialisation ..." << endl << endl;
-
-    process->initialize(processSimulation);
-    controller->initialize(controllerSimulation);
+    process->setSimulation(processSimulation);
+    process->initialize();
+    controller->setSimulation(controllerSimulation);
+    controller->initialize();
 
     // --- Get the values to be plotted ---
     unsigned int outputSize = 10; // number of required data

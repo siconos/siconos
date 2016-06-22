@@ -132,7 +132,8 @@ simu.insertIntegrator(osi)
 osnspb = sk.LCP()
 simu.insertNonSmoothProblem(osnspb)
 
-circuit.initialize(simu)
+circuit.setSimulation(simu)
+circuit.initialize()
 
 # -- Get the values to be plotted --
 output_size = 2 * number_of_cars + 1

@@ -71,9 +71,9 @@ inertialMatrix = np.array([((1, 0, 0), (0, 7.4e-5, 0), (0, 0, 1)),
                            ((1, 0, 0), (0, 2.7e-6, 0), (0, 0, 1))])
 """inertia matrix"""
 
-afile = np.array(['./CAD/body1.step',
-                  './CAD/body2.step',
-                  './CAD/Slider.step'])
+afile = ['./CAD/body1.step',
+         './CAD/body2.step',
+         './CAD/Slider.step']
 """CAD files """
 
 plugin = "SliderCrankPlugin.so"
@@ -160,16 +160,16 @@ contactName = np.array([
     'contact_boby1_2'])
 """contacts' names"""
 
-afileContact1 = np.array([
+afileContact1 = [
     './CAD/contact_b_cyl.step',
     './CAD/contact_h_cyl.step',
-    './CAD/RingBody1.stp'])
+    './CAD/RingBody1.stp']
 """CAD files attached to the first body involved in the contact"""
 
-afileContact2 = np.array([
+afileContact2 = [
     './CAD/chamber.step',
     './CAD/chamber.step',
-    './CAD/AxisBody2.stp'])
+    './CAD/AxisBody2.stp']
 """CAD files attached to the second body involved in the contact"""
 
 contactBody1 = array.array('I', [

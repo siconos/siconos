@@ -1,3 +1,3 @@
 # from default, test solvers with mumps
-include(CI/config/default.cmake)
+include(config/default.cmake)
 set_option(WITH_MUMPS ON)

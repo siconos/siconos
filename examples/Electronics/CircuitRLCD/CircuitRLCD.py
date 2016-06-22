@@ -128,7 +128,8 @@ aTS = TimeStepping(aTiDisc, aOSI, aLCP)
 #
 
 # simulation initialization
-CircuitRLCD.initialize(aTS)
+CircuitRLCD.setSimulation(aTS)
+CircuitRLCD.initialize()
 
 k = 0
 h = aTS.timeStep()

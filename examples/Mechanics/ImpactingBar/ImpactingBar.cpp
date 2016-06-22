@@ -175,6 +175,8 @@ int main(int argc, char* argv[])
     SP::TimeStepping s(new TimeStepping(t,OSI,osnspb));
 #endif
 #endif
+    impactingBar->setSimulation(s);
+
     // =========================== End of model definition ===========================
 
     // ================================= Computation =================================
@@ -182,7 +184,7 @@ int main(int argc, char* argv[])
     // --- Simulation initialization ---
 
     cout <<"====> Initialisation ..." <<endl<<endl;
-    impactingBar->initialize(s);
+    impactingBar->initialize();
     int N = floor((T-t0)/h); // Number of time steps
 
     // --- Get the values to be plotted ---

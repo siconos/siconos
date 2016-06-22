@@ -121,14 +121,14 @@ int main(int argc, char* argv[])
 
     // -- (4) Simulation setup with (1) (2) (3)
     SP::TimeStepping aTS(new TimeStepping(aTiDisc, aOSI, aLCP));
-
+    PRC->setSimulation(aTS);
 
     // =========================== End of model definition ===========================
 
     // ================================= Computation =================================
 
     cout << "====> Simulation initialisation ..." << endl << endl;
-    PRC->initialize(aTS);
+    PRC->initialize();
 
     double h = aTS->timeStep();
     int N = ceil((T - t0) / h); // Number of time steps

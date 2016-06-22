@@ -264,7 +264,8 @@ void Disks::init()
 
     _playground->insert(nslaw, 0, 0);
 
-    _model->initialize(simulation_);
+    _model->setSimulation(simulation_);
+    _model->initialize();
 
   }
 

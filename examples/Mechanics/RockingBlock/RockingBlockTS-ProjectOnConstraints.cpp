@@ -114,12 +114,14 @@ int main(int argc, char* argv[])
     SP::OneStepNSProblem impact_pos(new MLCPProjectOnConstraints());
     //4. Simulation with (1), (2), (3)
     SP::TimeStepping TSscheme(new TimeSteppingDirectProjection(TimeDiscret, OSI, impact, impact_pos, 0));
+    RoBlockModel->setSimulation(TSscheme); // initialize the model
+
     //==================================================================================================================
     //                    V. Process the simulation
     //==================================================================================================================
     // -------------------------------- Simulation initialization ------------------------------------------------------
     cout << "====> Simulation initialisation ..." << endl << endl;
-    RoBlockModel->initialize(TSscheme); // initialize the model
+    RoBlockModel->initialize(); // initialize the model
     SP::SiconosVector PosBlock = RockingBlock->q();        // pointer points to the position vector of the rocking block
     SP::SiconosVector VelBlock = RockingBlock->velocity(); // pointer points to the velocity of the rocking block
     //-------------------- Save the output during simulation ---------------------------------------------------------

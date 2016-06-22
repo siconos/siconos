@@ -1,16 +1,22 @@
-Under config directory, configurations for continuous integration that
-works with:
+# -*- org -*-
 
-- cmake:
-cmake -DCI_CONFIG=<configuration> <siconos source directory>
+* Continuous Integration
 
-then cdash targets are visibles with
-make help
+under siconos source
+mkdir build
+../CI/driver.py --run --root-dir=.. [--tasks=<task>]
 
-For a continuous build:
-make Continuous
+list tasks:
+../CI/driver.py --list-tasks
 
-- ctest:
-ctest -DCI_CONFIG=<configuration> -S CTestDriver.cmake
+* What should be generic:
 
+ - driver.py
+ - cmake/
+ - machinery/
+
+* What is project specific
+
+ - tasks.py
+ - config/*.*
 

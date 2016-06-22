@@ -146,6 +146,7 @@ int main(int argc, char* argv[])
     SP::OneStepNSProblem acceleration(new LCP(mySolver));
     s->insertNonSmoothProblem(impact, SICONOS_OSNSP_ED_IMPACT);
     s->insertNonSmoothProblem(acceleration, SICONOS_OSNSP_ED_ACCELERATION);
+    RX90->setSimulation(s);
     cout << "=== End of model loading === " << endl;
 
     // =========================== End of model definition ===========================  dataPlot(k,7) = (*inter->y(0))(0);
@@ -155,7 +156,7 @@ int main(int argc, char* argv[])
     // --- Simulation initialization ---
 
 
-    RX90->initialize(s);
+    RX90->initialize();
     cout << "End of simulation initialisation" << endl;
 
     int k = 0;

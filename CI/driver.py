@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import sys
+import os
 from socket import gethostname
 
 from tasks import default, known_tasks, database
@@ -11,7 +12,11 @@ from getopt import gnu_getopt, GetoptError
 
 def usage():
     print("""
-{0} [-v] [--tasks=<task1>,<task2>,...] [--list-tasks] [--targets] [--run]\
+    {0} [-v] [--tasks=<task1>,<task2>,...] \
+        [--list-tasks] \
+        [--root-dir=...] \
+        [--targets=...] \
+        [--run]\
     [--brutal-docker-clean]
     """.format(sys.argv[0]))
 
@@ -19,13 +24,13 @@ def usage():
 try:
     opts, args = gnu_getopt(sys.argv[1:], 'v',
                             ['run', 'tasks=', 'list-tasks', 'targets=',
+                             'root-dir=',
                              'print=', 'brutal-docker-clean'])
 
 except GetoptError as err:
     sys.stderr.write(str(err))
     usage()
     exit(2)
-
 
 tasks = None
 brutal_clean = False
@@ -41,6 +46,9 @@ for o, a in opts:
 
     if o in ('-v',):
         verbose = True
+
+    if o in ('--root-dir',):
+        root_dir = os.path.abspath(a)
 
     if o in ('--tasks',):
         import tasks
@@ -90,8 +98,13 @@ if print_mode:
 if run:
 
     for task in tasks:
+        try:
 
-        return_code += task.run(targets_override=targets_override)
+            return_code += task.run(root_dir,
+                                    targets_override=targets_override)
+
+        except Exception as e:
+            sys.stderr.write(str(e))
 
     for task in tasks:
 

@@ -196,6 +196,7 @@ int main(int argc, char* argv[])
     SP::TimeStepping s(new TimeStepping(t));
     s->insertIntegrator(OSI1);
     s->insertNonSmoothProblem(impact, SICONOS_OSNSP_TS_VELOCITY);
+    myModel->setSimulation(s);
 
 
 
@@ -206,7 +207,7 @@ int main(int argc, char* argv[])
     // --- Simulation initialization ---
 
     cout << "====> Initialisation ..." << endl << endl;
-    myModel->initialize(s);
+    myModel->initialize();
 
 
     // --- Get the values to be plotted ---

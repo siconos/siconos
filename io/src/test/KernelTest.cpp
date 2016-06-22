@@ -290,7 +290,8 @@ void KernelTest::t5()
   // --- Simulation initialization ---
 
   cout << "====> Initialisation ..." << endl << endl;
-  bouncingBall->initialize(s);
+  bouncingBall->setSimulation(s);
+  bouncingBall->initialize();
 
 
   Siconos::save(bouncingBall, "BouncingBall1.xml");

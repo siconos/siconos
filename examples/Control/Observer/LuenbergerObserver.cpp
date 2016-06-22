@@ -102,7 +102,8 @@ int main(int argc, char* argv[])
   act->setB(B);
   sim->addActuator(act, hControl);
 
-    cout << "=== End of model loading === " << endl;
+  
+  cout << "=== End of model loading === " << endl;
   // =========================== End of model definition ===========================
 
   // ================================= Computation =================================

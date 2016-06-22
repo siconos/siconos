@@ -57,6 +57,8 @@ pkgs:
 
   build-base:
     any:
+      - git-core
+      - wget
       - make
       - cmake
       - boost
@@ -116,19 +118,29 @@ pkgs:
   cmake:
     ubuntu-12.04:
        - python-software-properties
-       - cmake-2.8.12
+       - cmake-3.0.2
        - python-matplotlib
 
+    ubuntu-14.04:
+       - cmake-3.0.2
 
-  cmake-2.8.12:
+
+  cmake-3.0.2:
     ubuntu-12.04:
       command:
-        add-apt-repository ppa:smspillaz/cmake-2.8.12 -y &&
-        add-apt-repository ppa:teward/swig3.0 -y &&
-        add-apt-repository ppa:boost-latest/ppa -y &&
-        apt-get update -qq &&
-        apt-get purge cmake -qq &&
-        apt-get -y install cmake
+        wget http://www.cmake.org/files/v3.0/cmake-3.0.2.tar.gz&&
+        tar xf cmake-3.0.2.tar.gz&&
+        cd cmake-3.0.2&&
+        ./configure&&
+        make install
+
+    ubuntu-14.04:
+      command:
+        wget http://www.cmake.org/files/v3.0/cmake-3.0.2.tar.gz&&
+        tar xf cmake-3.0.2.tar.gz&&
+        cd cmake-3.0.2&&
+        ./configure&&
+        make install
 
   gfortran:
     fedora: gcc-gfortran
@@ -310,3 +322,32 @@ pkgs:
       - libglu1-mesa
       - libsm6
       - libice6
+
+
+# deps required for oce/pythonocc install, when oce/occ sources = git repos, last version.
+  oce-pythonocc-deps:
+    debian:
+      - libgl1-mesa-glx
+      - libglu1-mesa
+      - libgl1-mesa-dev
+      - libglu1-mesa-dev
+      - libglapi-mesa
+      - libfreetype6-dev
+
+
+  oce-pythonocc:
+    any:
+      command: git clone https://github.com/tpaviot/oce.git &&
+               git clone https://github.com/tpaviot/pythonocc-core.git &&
+               mkdir build &&
+               cd build &&
+               mkdir oce-last pythonocc &&
+               cd oce-last &&
+               cmake ../../oce -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release &&
+               make -j 2 &&
+               make install &&
+               cd ../pythonocc &&
+               cmake ../../pythonocc-core -DCMAKE_BUILD_TYPE=Release &&
+               make install &&
+               cd &&
+               python -c 'import OCC'

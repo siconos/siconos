@@ -75,7 +75,8 @@ defined for the dynamical systems. An initialization phase remains to be done:
 
 .. testcode::
 
-   bouncingBall.initialize(simulation)
+   bouncingBall.setSimulation(simulation)
+   bouncingBall.initialize()
 
 The simulation is now ready for execution.
 
@@ -145,7 +146,8 @@ The simulation is initialized with the modelisation part:
 
 .. testcode::
 
-   DiodesBridgeModel.initialize(simulation)
+   DiodesBridgeModel.setSimulation(simulation)
+   DiodesBridgeModel.initialize()
 
 
 It is now ready for execution.

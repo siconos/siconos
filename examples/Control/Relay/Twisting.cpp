@@ -97,7 +97,7 @@ int main(int argc, char* argv[])
     double theta = 0.5;
     SP::EulerMoreauOSI integrator(new EulerMoreauOSI(theta));
     s->insertIntegrator(integrator);
-
+    itw->setSimulation(s);
     // -- OneStepNsProblem --
 
     SP::AVI osnspb(new AVI());
@@ -112,10 +112,10 @@ int main(int argc, char* argv[])
 
     cout << "====> Simulation initialisation ..." << endl << endl;
 
-    itw->initialize(s);
+    itw->initialize();
 
 
-    //  (s->oneStepNSProblems)[0]->initialize(s);
+    //  (s->oneStepNSProblems)[0]->initialize();
 
 
     // --- Get the values to be plotted ---

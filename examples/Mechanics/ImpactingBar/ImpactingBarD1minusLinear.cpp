@@ -167,7 +167,7 @@ int main(int argc, char* argv[])
     s->insertNonSmoothProblem(impact, SICONOS_OSNSP_TS_VELOCITY);
     s->insertNonSmoothProblem(force, SICONOS_OSNSP_TS_VELOCITY + 1);
 
-
+    impactingBar->setSimulation(s);
 
     // =========================== End of model definition ===========================
 
@@ -176,7 +176,7 @@ int main(int argc, char* argv[])
     // --- Simulation initialization ---
 
     cout <<"====> Initialisation ..." <<endl<<endl;
-    impactingBar->initialize(s);
+    impactingBar->initialize();
     int N = floor((T-t0)/h) +1; // Number of time steps
 
     // --- Get the values to be plotted ---

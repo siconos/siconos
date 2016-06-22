@@ -87,7 +87,7 @@ bouncingBox.nonSmoothDynamicalSystem().insertDynamicalSystem(body)
 
 # (1) OneStepIntegrators
 osi = MoreauJeanOSI(theta)
-osi.insertDynamicalSystem(body)
+
 
 ground = btCollisionObject()
 ground.setCollisionFlags(btCollisionObject.CF_STATIC_OBJECT)
@@ -132,14 +132,14 @@ broadphase.collisionConfiguration().setPlaneConvexMultipointIterations()
 broadphase.addStaticObject(ground, 0)
 
 # (6) Simulation setup with (1) (2) (3) (4) (5)
-simulation = BulletTimeStepping(timedisc)
+simulation = BulletTimeStepping(timedisc, osi, osnspb)
 #simulation.setNewtonOptions(1)
-simulation.insertIntegrator(osi)
-simulation.insertNonSmoothProblem(osnspb)
 
 
 # simulation initialization
-bouncingBox.initialize(simulation)
+
+bouncingBox.setSimulation(simulation)
+bouncingBox.initialize()
 
 # Get the values to be plotted
 # ->saved in a matrix dataPlot

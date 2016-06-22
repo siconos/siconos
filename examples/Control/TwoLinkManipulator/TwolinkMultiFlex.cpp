@@ -163,6 +163,7 @@ int main(int argc, char* argv[])
     // -- OneStepNsProblem --
     SP::OneStepNSProblem osnspb(new LCP());
     s->insertNonSmoothProblem(osnspb);
+    Manipulator->setSimulation(s);
     cout << "=== End of model loading === " << endl;
 
     // =========================== End of model definition ===========================
@@ -173,7 +174,7 @@ int main(int argc, char* argv[])
 
 
 
-    Manipulator->initialize(s);
+    Manipulator->initialize();
     cout << "End of model initialisation" << endl;
 
     int k = 0;

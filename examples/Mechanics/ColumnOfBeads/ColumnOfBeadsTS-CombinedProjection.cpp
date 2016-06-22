@@ -167,6 +167,7 @@ int main(int argc, char* argv[])
     SP::TimeSteppingCombinedProjection s(new TimeSteppingCombinedProjection(t, OSI, osnspb, osnspb_pos));
     s->setProjectionMaxIteration(10);
     s->setConstraintTolUnilateral(1e-08);
+    columnOfBeads->setSimulation(s);
 
 
     // =========================== End of model definition ===========================
@@ -176,7 +177,7 @@ int main(int argc, char* argv[])
     // --- Simulation initialization ---
 
     cout << "====> Initialisation ..." << endl << endl;
-    columnOfBeads->initialize(s);
+    columnOfBeads->initialize();
 
     int N = ceil((T - t0) / h); // Number of time steps
 
