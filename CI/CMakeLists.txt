@@ -5,15 +5,15 @@ set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 
 include(Tools)
 
+# Check/set uninitialized cache variables
+get_uninitialized_vars(CI_OPTIONS)
+
 if(CI_CONFIG)
   string(REPLACE "," ";" CI_CONFIG_LIST ${CI_CONFIG})
-  FOREACH(_CI ${CI_CONFIG_LIST})
+  foreach(_CI ${CI_CONFIG_LIST})
     include(config/${_CI}.cmake)
-  ENDFOREACH(_CI CI_CONFIG_LIST)
+  endforeach(_CI CI_CONFIG_LIST)
 endif()
-
-# Check/set uninitialized cache variables (--> for docker config)
-get_uninitialized_vars(CMAKE_ARGS_FROM_CACHE)
 
 
 # ---------- Docker or not docker ... ------------------------
@@ -23,7 +23,7 @@ if(WITH_DOCKER)
     set(DOCKER_MKSENV_COMMAND ${CMAKE_SOURCE_DIR}/machinery/mksenv.py)
     set(DOCKER_MKSENV_INPUT ${CMAKE_SOURCE_DIR}/config/siconos.yml)
     set(DOCKER_REPOSITORY ci_driver)
-    set(DOCKER_CMAKE_FLAGS ${CMAKE_ARGS_FROM_CACHE};-DWITH_DOCKER=0;-V)
+    set(DOCKER_CMAKE_FLAGS ${CI_OPTIONS};-DWITH_DOCKER=0;-V)
     set(DOCKER_CTEST_DRIVER ${CMAKE_SOURCE_DIR}/machinery/CTestDriver.cmake)
     set(DOCKER_CTEST_MODE ${MODE})
     set(DOCKER_BUILD_CONFIGURATION ${BUILD_CONFIGURATION})

@@ -12,10 +12,5 @@ endmacro()
 
 # set an option from script
 macro(set_option var value)
-  get_property(CACHE_VAR_TYPE CACHE ${var} PROPERTY TYPE)
-  if(CACHE_VAR_TYPE)
-    set_property(CACHE ${var} PROPERTY VALUE ${value})
-  else()
-    set(${var} ${value} CACHE BOOL "${var} is set from script")
-  endif()
+  list(APPEND CI_OPTIONS -D${var}=${value})
 endmacro()
