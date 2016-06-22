@@ -48,7 +48,7 @@ for o, a in opts:
         verbose = True
 
     if o in ('--root-dir',):
-        root_dir = a
+        root_dir = os.path.abspath(a)
 
     if o in ('--tasks',):
         import tasks
