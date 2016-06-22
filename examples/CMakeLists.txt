@@ -9,9 +9,6 @@ include(OutOfSourcesBuild)
 # Some usefull macros
 include(SiconosTools)
 
-# Check/set uninitialized cache variables (--> for docker config)
-get_uninitialized_vars(CMAKE_ARGS_FROM_CACHE)
-
 include(WindowsSiconosSetup)
 
 if(WITH_DOCKER)
