@@ -759,7 +759,6 @@ class Hdf5():
                         self._broadphase.model().simulation(),
                         self._osi)
                     nsds = self._broadphase.model().nonSmoothDynamicalSystem()
-                    nsds.topology().setOSI(body, self._osi)
                     nsds.setName(body, str(name))
                 else:
                     nsds = self._broadphase.model().nonSmoothDynamicalSystem()
