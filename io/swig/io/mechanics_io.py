@@ -816,9 +816,11 @@ class Hdf5():
 
         # import dynamical systems
         if self._broadphase is not None and 'input' in self._data:
-
+            counter =0
             for (name, obj) in sorted(self._input.items(),
                                       key=lambda x: x[0]):
+                counter +=1
+                print ('import  object ', counter)
                 input_ctrs = [ctr for _n_, ctr in obj.items()]
                 mass = obj.attrs['mass']
                 time_of_birth = obj.attrs['time_of_birth']
@@ -1054,7 +1056,7 @@ class Hdf5():
         so = self._broadphase.model().simulation().oneStepNSProblem(0).\
             numericsSolverOptions()
 
-        Current_line = self._solv_data.shape[0]
+        current_line = self._solv_data.shape[0]
         self._solv_data.resize(current_line + 1, 0)
         if so.solverId == Numerics.SICONOS_GENERIC_MECHANICAL_NSGS:
             iterations = so.iparam[3]
@@ -1070,7 +1072,7 @@ class Hdf5():
             precision = so.dparam[1]
             local_precision = so.dparam[2]
 
-        Self._solv_data[current_line, :] = [time, iterations, precision,
+        self._solv_data[current_line, :] = [time, iterations, precision,
                                             local_precision]
 
     def printSolverInfos(self):
@@ -1418,6 +1420,7 @@ class Hdf5():
           output_frequency :
 
         """
+        print ('load siconos module ...')
         from siconos.kernel import \
             Model, NonSmoothDynamicalSystem, OneStepNSProblem, MoreauJeanOSI,\
             TimeDiscretisation, GenericMechanical, FrictionContact,\
@@ -1430,7 +1433,8 @@ class Hdf5():
             btBoxShape, btQuaternion, btTransform, btConeShape, \
             BulletSpaceFilter, cast_BulletR, \
             BulletWeightedShape, BulletDS, BulletTimeStepping
-
+        
+        print ('setup model simulation ...')
         if set_external_forces is not None:
             self._set_external_forces = set_external_forces
 
@@ -1453,8 +1457,8 @@ class Hdf5():
             times = set(dpos_data[:, 0])
             t0 = float(max(times))
             T = float(t0 + T)
-            print ('Restart from previous simulation at t0={0}'.format(t0))
-            print ('Run until T={0}'.format(T))
+            print ('restart from previous simulation at t0={0}'.format(t0))
+            print ('run until T={0}'.format(T))
 
         # Model
         #
@@ -1505,12 +1509,12 @@ class Hdf5():
 
         k0 = 1 + len(times)
         k = k0
-
+        print ('import scene ...')
         self.importScene(t0, body_class, shape_class, face_class, edge_class)
 
         model.setSimulation(simulation)
         model.initialize()
-
+        print ('first output static and dynamic objects ...')
         self.outputStaticObjects()
         self.outputDynamicObjects()
 
@@ -1520,7 +1524,7 @@ class Hdf5():
         #     ds = nsds.dynamicalSystem(i)
         #     ds.display()
         # raw_input()
-
+        print ('start simulation ...')
         while simulation.hasNextEvent():
 
             print ('step', k, '<', k0 - 1 + int((T - t0) / h))
