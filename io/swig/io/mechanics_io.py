@@ -724,8 +724,7 @@ class Hdf5():
                     self._shape.get(contactors[0].name), mass)
 
                 if inertia is not None:
-                    print('inertia', inertia, type(inertia))
-                    print(np.shape(inertia))
+
                     if np.shape(inertia) == (3,):
                         bws.setInertia(inertia[0], inertia[1], inertia[2])
                     elif (np.shape(inertia) == (3, 3)):
@@ -1536,37 +1535,38 @@ class Hdf5():
 
                 log(self._out.flush)()
 
-            print('number of contacts',
-                  self._broadphase.model().simulation().oneStepNSProblem(0).
-                  getSizeOutput() / 3)
-            self.printSolverInfos()
-            if violation_verbose:
-                print('violation info')
-                y = simulation.y(0, 0)
-                yplus = np.zeros((2, len(y)))
-                yplus[0, :] = y
-                # print(yplus)
 
-                if len(simulation.y(0, 0)) > 0:
-                    y = np.min(yplus, axis=1)
-                    violation_max = np.max(-y)
-                    print('  violation max :', np.max(-y))
-                    if (violation_max >= self._collision_margin):
-                        # print(simulation.output(0,0))
-                        print(
-                            '  violation max is larger than the collision_margin')
-                    lam = simulation.lambda_(1, 0)
-                    print(' lambda : ', lam)
-                    # raw_input()
+            numberOfContact=self._broadphase.model().simulation().oneStepNSProblem(0).getSizeOutput()/3
+            if numberOfContact > 0 :
+                print('number of contact',self._broadphase.model().simulation().oneStepNSProblem(0).getSizeOutput()/3)
+                self.printSolverInfos()
+                
+            if violation_verbose and numberOfContact > 0 :
+                if len(simulation.y(0,0)) >0 :
+                    print('violation info')
+                    y = simulation.y(0,0)
+                    yplus=  np.zeros((2,len(y)))
+                    yplus[0,:] = y
+                    y=np.min(yplus,axis=1)
+                    violation_max=np.max(-y)
+                    print('  violation max :',violation_max)
+                    if  (violation_max >= self._collision_margin):
+                        print('  violation max is larger than the collision_margin')
+                    lam = simulation.lambda_(1,0)
+                    print('  lambda max :',np.max(lam))
+                    #print(' lambda : ',lam)
+                    #raw_input()
 
-                # v = simulation.output(1,0)
-                # vplus=  np.zeros((2,len(v)))
-                # vplus[0,:] = v
-                # if len(simulation.output(1,0)) >0 :
-                #     v=np.max(vplus,axis=1)
-                #     velocity_max=np.max(v)
-                #     print('  velocity max :',np.max(v))
-                # print(simulation.output(1,0))
+
+                if len(simulation.y(1,0)) >0 :
+                    v = simulation.y(1,0)
+                    vplus=  np.zeros((2,len(v)))
+                    vplus[0,:] = v
+                    v=np.max(vplus,axis=1)
+                    print('  velocity max :',np.max(v))
+                    print('  velocity min :',np.min(v))
+                #     #print(simulation.output(1,0))
+
 
             log(simulation.nextStep, with_timer)()
 
