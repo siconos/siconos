@@ -66,7 +66,7 @@
 // btStaticPlaneShape, so we replace it with a large box.
 
 #define USE_CONVEXHULL_FOR_BOX 1
-#define USE_CONVEXHULL_FOR_SPHERE 1
+// #define USE_CONVEXHULL_FOR_SPHERE 1
 // #define USE_BOX_FOR_PLANE 1
 #define USE_CONVEXHULL_FOR_PLANE 1
 
@@ -349,7 +349,7 @@ void BulletBroadphase::update(SP::SiconosSphere sphere)
   btsphere->setLocalScaling(btVector3(r, r, r));
 
   // btSphereShape has an internal margin
-  btsphere->setMargin(sphere->insideMargin() * options.worldScale);
+  btsphere->setMargin(sphere->insideMargin() * _options.worldScale);
 #endif
 
   // Update object parameters
