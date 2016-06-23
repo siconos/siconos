@@ -915,7 +915,7 @@ class Hdf5():
         current_times_of_births = self._scheduled_births[:ind_time]
         self._scheduled_births = self._scheduled_births[ind_time:]
 
-        print (time, current_times_of_births)
+        #print (time, current_times_of_births)
         for time_of_birth in current_times_of_births:
 
             for (name, obj) in self._births[time_of_birth]:
@@ -1054,7 +1054,7 @@ class Hdf5():
         so = self._broadphase.model().simulation().oneStepNSProblem(0).\
             numericsSolverOptions()
 
-        current_line = self._solv_data.shape[0]
+        Current_line = self._solv_data.shape[0]
         self._solv_data.resize(current_line + 1, 0)
         if so.solverId == Numerics.SICONOS_GENERIC_MECHANICAL_NSGS:
             iterations = so.iparam[3]
@@ -1070,22 +1070,35 @@ class Hdf5():
             precision = so.dparam[1]
             local_precision = so.dparam[2]
 
-        self._solv_data[current_line, :] = [time, iterations, precision,
+        Self._solv_data[current_line, :] = [time, iterations, precision,
                                             local_precision]
 
     def printSolverInfos(self):
         """
         Outputs solver #iterations & precision reached
         """
-        if self._solv_data.shape[0] > 0:
-            current_line = self._solv_data.shape[0] - 1
-            time, iterations, precision, local_precision = \
-                self._solv_data[current_line, :]
+        time = self._broadphase.model().simulation().nextTime()
+        so = self._broadphase.model().simulation().oneStepNSProblem(0).\
+            numericsSolverOptions()
+        if so.solverId == Numerics.SICONOS_GENERIC_MECHANICAL_NSGS:
+            iterations = so.iparam[3]
+            precision = so.dparam[2]
+            local_precision = so.dparam[3]
+        elif so.solverId == Numerics.SICONOS_FRICTION_3D_NSGS:
+            iterations = so.iparam[7]
+            precision = so.dparam[1]
+            local_precision = 0.
+        # maybe wrong for others
+        else:
+            iterations = so.iparam[1]
+            precision = so.dparam[1]
+            local_precision = so.dparam[2]
 
-            print('SolverInfos at time :', time,
-                  'iterations= ', iterations,
-                  'precision=', precision,
-                  'local_precision=', local_precision)
+        
+        print('SolverInfos at time :', time,
+              'iterations= ', iterations,
+              'precision=', precision,
+              'local_precision=', )
 
     def addMeshFromString(self, name, shape_data):
         """
