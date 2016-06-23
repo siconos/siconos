@@ -15,6 +15,7 @@ if(CI_CONFIG)
   endforeach(_CI CI_CONFIG_LIST)
 endif()
 
+message(STATUS "CI options are : ${CI_OPTIONS}")
 
 # ---------- Docker or not docker ... ------------------------
 if(WITH_DOCKER)
