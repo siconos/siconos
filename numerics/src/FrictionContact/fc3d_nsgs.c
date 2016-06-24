@@ -880,6 +880,7 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction, double *veloci
     }
     localproblems[i]->M->matrix0 = NULL;
     freeFrictionContactProblem(localproblems[i]);
+    deleteSolverOptions(localsolvoptions[i]);
     free(localsolvoptions[i]);
   }
 
