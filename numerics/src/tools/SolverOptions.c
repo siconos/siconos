@@ -313,7 +313,9 @@ void deleteSolverOptions(SolverOptions* op)
     for (int i = 0; i < op->numberOfInternalSolvers; i++)
       deleteSolverOptions(&(op->internalSolvers[i]));
     if (op->numberOfInternalSolvers && op->internalSolvers)
+    {
       free(op->internalSolvers);
+    }
     op->internalSolvers = NULL;
     if (op->iparam)
       free(op->iparam);
@@ -410,7 +412,8 @@ void copy_SolverOptions(SolverOptions* options_ori, SolverOptions* options)
   }
   
   options->numberOfInternalSolvers =  options_ori->numberOfInternalSolvers;
-  options->internalSolvers = (SolverOptions *)malloc(options->numberOfInternalSolvers*sizeof(SolverOptions));
+  if (options->numberOfInternalSolvers)
+    options->internalSolvers = (SolverOptions *)malloc(options->numberOfInternalSolvers*sizeof(SolverOptions));
   for (int i = 0  ; i < options->numberOfInternalSolvers; i++ )
   {
     SolverOptions * internal_options_ori = options_ori->internalSolvers + i;
