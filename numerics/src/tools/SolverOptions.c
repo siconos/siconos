@@ -365,6 +365,77 @@ void fill_SolverOptions(SolverOptions* options, int solverId, int iSize, int dSi
   options->dparam[0] = tol;
 
 }
+void copy_SolverOptions(SolverOptions* options_ori, SolverOptions* options)
+{
+  options->solverId =  options_ori->solverId;
+  options->isSet = options_ori->isSet ;
+  options->filterOn = options_ori->filterOn;
+  
+  options->iSize = options_ori->iSize;
+  options->dSize = options_ori->dSize;
+  assert(!options->iparam);
+  options->iparam = (int *)calloc(options->iSize, sizeof(int));
+  assert(!options->dparam);
+  options->dparam = (double *)calloc(options->dSize, sizeof(double));
+  for (int i = 0  ; i < options->iSize; i++ )
+  {
+    options->iparam[i] =  options_ori->iparam[i];
+  }
+  for (int i = 0  ; i < options->dSize; i++ )
+  {
+    options->dparam[i] =  options_ori->dparam[i];
+  }
+
+  
+  if (options_ori->iWork)
+  {
+    assert(options->iWorkSize > 0);
+    options->iWorkSize = options_ori->iWorkSize;
+    options->iWork = (int *)calloc(options->iWorkSize, sizeof(int));
+    for (int i = 0  ; i < options->iWorkSize; i++ )
+    {
+      options->iWork[i] =  options_ori->iWork[i];
+    }
+  }
+    
+  if (options_ori->dWork)
+  {
+    assert(options->dWorkSize > 0);
+    options->dWorkSize = options_ori->dWorkSize;
+    options->dWork = (double *)calloc(options->dWorkSize, sizeof(double));
+    for (int i = 0  ; i < options->dWorkSize; i++ )
+    {
+      options->dWork[i] =  options_ori->dWork[i];
+    }
+  }
+  
+  options->numberOfInternalSolvers =  options_ori->numberOfInternalSolvers;
+  options->internalSolvers = (SolverOptions *)malloc(options->numberOfInternalSolvers*sizeof(SolverOptions));
+  for (int i = 0  ; i < options->numberOfInternalSolvers; i++ )
+  {
+    SolverOptions * internal_options_ori = options_ori->internalSolvers + i;
+    SolverOptions * internal_options = options->internalSolvers + i;
+    
+    copy_SolverOptions(internal_options_ori,  internal_options);
+  }
+
+  // Warning pointer link
+  if (options_ori->callback)
+    options->callback =options_ori->callback;
+  if (options_ori->numericsOptions)
+    options->numericsOptions =options_ori->numericsOptions;
+  if (options_ori->solverParameters)
+    options->solverParameters =options_ori->solverParameters;
+   if (options_ori->solverData)
+    options->solverData =options_ori->solverData;
+ 
+
+
+  
+  
+}
+
+
 
 void set_SolverOptions(SolverOptions* options, int solverId)
 {
