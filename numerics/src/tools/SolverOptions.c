@@ -388,7 +388,6 @@ void copy_SolverOptions(SolverOptions* options_ori, SolverOptions* options)
     options->dparam[i] =  options_ori->dparam[i];
   }
 
-
   if (options_ori->iWork)
   {
     assert(options->iWorkSize > 0);
@@ -414,6 +413,7 @@ void copy_SolverOptions(SolverOptions* options_ori, SolverOptions* options)
   options->numberOfInternalSolvers =  options_ori->numberOfInternalSolvers;
   if (options->numberOfInternalSolvers)
     options->internalSolvers = (SolverOptions *)malloc(options->numberOfInternalSolvers*sizeof(SolverOptions));
+
   for (int i = 0  ; i < options->numberOfInternalSolvers; i++ )
   {
     SolverOptions * internal_options_ori = options_ori->internalSolvers + i;
@@ -431,11 +431,6 @@ void copy_SolverOptions(SolverOptions* options_ori, SolverOptions* options)
     options->solverParameters =options_ori->solverParameters;
    if (options_ori->solverData)
     options->solverData =options_ori->solverData;
-
-
-
-
-
 }
 
 

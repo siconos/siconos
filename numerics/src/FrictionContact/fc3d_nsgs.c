@@ -383,7 +383,10 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction, double *veloci
     }
 
     localsolvoptions[i] = malloc(sizeof(SolverOptions));
-    *localsolvoptions[i] = *localsolver_options;
+    null_SolverOptions(localsolvoptions[i]);
+    localsolvoptions[i]->dparam = NULL;
+    localsolvoptions[i]->iparam = NULL;
+    copy_SolverOptions(localsolver_options,localsolvoptions[i]);
 
     initializeLocalSolver_nsgs(&local_solver, &update_localproblem,
                                (FreeSolverNSGSPtr *)&freeSolver, &computeError,
