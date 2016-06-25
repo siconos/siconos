@@ -216,13 +216,7 @@ void fc3d_nsgs_computeqLocal(FrictionContactProblem * problem, FrictionContactPr
 
 
   int in = 3 * contact, it = in + 1, is = it + 1;
-  /* reaction current block set to zero, to exclude current contact block */
-  double rin = reaction[in] ;
-  double rit = reaction[it] ;
-  double ris = reaction[is] ;
-  reaction[in] = 0.0;
-  reaction[it] = 0.0;
-  reaction[is] = 0.0;
+
   /* qLocal computation*/
 
 
@@ -235,20 +229,29 @@ void fc3d_nsgs_computeqLocal(FrictionContactProblem * problem, FrictionContactPr
   {
     double * MM = problem->M->matrix0;
     int incx = n, incy = 1;
+    /* reaction current block set to zero, to exclude current contact block */
+    double rin = reaction[in] ;
+    double rit = reaction[it] ;
+    double ris = reaction[is] ;
+    reaction[in] = 0.0;
+    reaction[it] = 0.0;
+    reaction[is] = 0.0;
     qLocal[0] += cblas_ddot(n , &MM[in] , incx , reaction , incy);
     qLocal[1] += cblas_ddot(n , &MM[it] , incx , reaction , incy);
     qLocal[2] += cblas_ddot(n , &MM[is] , incx , reaction , incy);
+    reaction[in] = rin;
+    reaction[it] = rit;
+    reaction[is] = ris;
   }
   else if (problem->M->storageType == 1)
   {
     /* qLocal += rowMB * reaction
-    with rowMB the row of blocks of MGlobal which corresponds to the current contact
-    */
+     * with rowMB the row of blocks of MGlobal which corresponds 
+     * to the current contact
+     */
     rowProdNoDiagSBM(n, 3, contact, problem->M->matrix1, reaction, qLocal, 0);
   }
-  reaction[in] = rin;
-  reaction[it] = rit;
-  reaction[is] = ris;
+
 
 
 }
@@ -737,10 +740,10 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction, double *veloci
 
 
             if (verbose > 1) printf("----------------------------------- Contact Number %i\n", contact);
+
             (*update_localproblem)(contact, problem, localproblem, reaction, localsolver_options);
             localsolver_options->iparam[4] = contact;
             (*local_solver)(localproblem, &(reaction[3 * contact]), localsolver_options);
-
           }
 
           /* **** Criterium convergence **** */

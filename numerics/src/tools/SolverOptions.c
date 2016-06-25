@@ -372,7 +372,7 @@ void copy_SolverOptions(SolverOptions* options_ori, SolverOptions* options)
   options->solverId =  options_ori->solverId;
   options->isSet = options_ori->isSet ;
   options->filterOn = options_ori->filterOn;
-  
+
   options->iSize = options_ori->iSize;
   options->dSize = options_ori->dSize;
   assert(!options->iparam);
@@ -388,7 +388,7 @@ void copy_SolverOptions(SolverOptions* options_ori, SolverOptions* options)
     options->dparam[i] =  options_ori->dparam[i];
   }
 
-  
+
   if (options_ori->iWork)
   {
     assert(options->iWorkSize > 0);
@@ -399,7 +399,7 @@ void copy_SolverOptions(SolverOptions* options_ori, SolverOptions* options)
       options->iWork[i] =  options_ori->iWork[i];
     }
   }
-    
+
   if (options_ori->dWork)
   {
     assert(options->dWorkSize > 0);
@@ -410,7 +410,7 @@ void copy_SolverOptions(SolverOptions* options_ori, SolverOptions* options)
       options->dWork[i] =  options_ori->dWork[i];
     }
   }
-  
+
   options->numberOfInternalSolvers =  options_ori->numberOfInternalSolvers;
   if (options->numberOfInternalSolvers)
     options->internalSolvers = (SolverOptions *)malloc(options->numberOfInternalSolvers*sizeof(SolverOptions));
@@ -418,7 +418,7 @@ void copy_SolverOptions(SolverOptions* options_ori, SolverOptions* options)
   {
     SolverOptions * internal_options_ori = options_ori->internalSolvers + i;
     SolverOptions * internal_options = options->internalSolvers + i;
-    
+
     copy_SolverOptions(internal_options_ori,  internal_options);
   }
 
@@ -431,11 +431,11 @@ void copy_SolverOptions(SolverOptions* options_ori, SolverOptions* options)
     options->solverParameters =options_ori->solverParameters;
    if (options_ori->solverData)
     options->solverData =options_ori->solverData;
- 
 
 
-  
-  
+
+
+
 }
 
 
