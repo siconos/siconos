@@ -819,7 +819,6 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction, double *veloci
           ++iter;
           /* Loop through the contact points */
           //cblas_dcopy( n , q , incx , velocity , incy );
-
           #if defined(_OPENMP) && defined(USE_OPENMP)
           #pragma omp parallel for private(contact)
           #endif
