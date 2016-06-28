@@ -82,6 +82,9 @@ int frictionContact_test_function(FILE * f, SolverOptions * options)
   setDefaultNumericsOptions(&global_options);
   global_options.verboseMode = 1; // turn verbose mode to off by default
 
+
+
+  printSolverOptions(options);
   int NC = problem->numberOfContacts;
   int dim = problem->dimension;
   //int dim = problem->numberOfContacts;
