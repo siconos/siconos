@@ -29,7 +29,7 @@
 
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 
-void initializeLocalSolver_nsgs_velocity(SolverPtr* solve, FreeSolverPtr* freeSolver, ComputeErrorPtr* computeError, FrictionContactProblem* problem, FrictionContactProblem* localproblem, SolverOptions* localsolver_options)
+void fc3d_nsgs_initialize_local_solver_velocity(SolverPtr* solve, FreeSolverPtr* freeSolver, ComputeErrorPtr* computeError, FrictionContactProblem* problem, FrictionContactProblem* localproblem, SolverOptions* localsolver_options)
 {
 
 
@@ -116,7 +116,7 @@ void fc3d_nsgs_velocity(FrictionContactProblem* problem, double *reaction, doubl
 
 
   FrictionContactProblem* localproblem = 0;
-  initializeLocalSolver_nsgs_velocity(&local_solver, &freeSolver, &computeError, problem, localproblem, localsolver_options);
+  fc3d_nsgs_initialize_local_solver_velocity(&local_solver, &freeSolver, &computeError, problem, localproblem, localsolver_options);
 
   /*****  NSGS_VELOCITY Iterations *****/
   int iter = 0; /* Current iteration number */

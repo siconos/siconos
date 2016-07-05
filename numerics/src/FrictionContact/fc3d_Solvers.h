@@ -163,6 +163,9 @@ extern "C"
 
   void fc3d_nsgs_computeqLocal(FrictionContactProblem * problem, FrictionContactProblem * localproblem, double * reaction, int contact);
 
+  void fc3d_nsgs_initialize_local_solver(SolverPtr* solve, UpdatePtr* update, FreeSolverNSGSPtr* freeSolver, ComputeErrorPtr* computeError,
+                                FrictionContactProblem* problem, FrictionContactProblem* localproblem,
+                                         SolverOptions * options, SolverOptions * localsolver_options);
 
   /** set the default solver parameters and perform memory allocation for NSGS
       \param options the pointer to the array of options to set
