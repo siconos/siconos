@@ -55,7 +55,9 @@ typedef struct _SolverOptions
   double * dparam;                         /**< dparam a list of double parameters (depends on each solver, see solver doc)*/
   int filterOn;                            /**< filterOn 1 to check solution validity after the driver call, else 0. Default = 1. (For example if
                                             * filterOn = 1 for a LCP, lcp_compute_error() will be called at the end of the process) */
+  int dWorkSize;                           /**< dWorkSize size of vector iWork */
   double * dWork;                          /**< dWork is a pointer on a working memory zone (for doubles) reserved for the solver .*/
+  int iWorkSize;                           /**< iWorkSize size of vector iWork */
   int * iWork;                             /**< iWork is a pointer on a working memory zone (for integers) reserved for the solver .*/
   int numberOfInternalSolvers;             /**< numberOfInternalSolvers the number of internal or local 'sub-solvers' used by the solver*/
   struct _SolverOptions * internalSolvers; /**< internalSolvers pointer to sub-solvers*/
@@ -205,6 +207,12 @@ extern "C"
    * \param options the structure to free
    */
   void free_solver_specific_data(SolverOptions* options);
+
+  /** copy SolverOptions
+   * \param options_ori the structure to copy
+   * \param options the output structure 
+   */
+  void copy_SolverOptions(SolverOptions* options_ori, SolverOptions* options);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

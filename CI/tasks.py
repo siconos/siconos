@@ -66,7 +66,8 @@ siconos_ubuntu_15_10_with_mechanisms = siconos_default.copy()(
 
 siconos_debian_mechanisms = siconos_default.copy()(
     ci_config='with_mechanisms',
-    add_pkgs=['wget', 'bash', 'bullet', 'h5py', 'oce-pythonocc-deps'],
+    add_pkgs=['wget', 'bash', 'bullet', 'h5py', 'oce-pythonocc-deps',
+              'oce-pythonocc'],
     with_examples=True,
     distrib='debian:latest')
 

@@ -823,8 +823,7 @@ class Hdf5():
                     self._shape.get(contactors[0].name), mass)
 
                 if inertia is not None:
-                    print('inertia', inertia, type(inertia))
-                    print(np.shape(inertia))
+
                     if np.shape(inertia) == (3,):
                         bws.setInertia(inertia[0], inertia[1], inertia[2])
                     elif (np.shape(inertia) == (3, 3)):
@@ -917,9 +916,11 @@ class Hdf5():
 
         # import dynamical systems
         if self._broadphase is not None and 'input' in self._data:
-
+            counter =0
             for (name, obj) in sorted(self._input.items(),
                                       key=lambda x: x[0]):
+                counter +=1
+                print ('import  object ', counter)
                 input_ctrs = [ctr for _n_, ctr in obj.items()]
                 mass = obj.attrs['mass']
                 time_of_birth = obj.attrs['time_of_birth']
@@ -1022,7 +1023,7 @@ class Hdf5():
         current_times_of_births = self._scheduled_births[:ind_time]
         self._scheduled_births = self._scheduled_births[ind_time:]
 
-        print (time, current_times_of_births)
+        #print (time, current_times_of_births)
         for time_of_birth in current_times_of_births:
 
             for (name, obj) in self._births[time_of_birth]:
@@ -1189,15 +1190,28 @@ class Hdf5():
         """
         Outputs solver #iterations & precision reached
         """
-        if self._solv_data.shape[0] > 0:
-            current_line = self._solv_data.shape[0] - 1
-            time, iterations, precision, local_precision = \
-                self._solv_data[current_line, :]
+        time = self._broadphase.model().simulation().nextTime()
+        so = self._broadphase.model().simulation().oneStepNSProblem(0).\
+            numericsSolverOptions()
+        if so.solverId == Numerics.SICONOS_GENERIC_MECHANICAL_NSGS:
+            iterations = so.iparam[3]
+            precision = so.dparam[2]
+            local_precision = so.dparam[3]
+        elif so.solverId == Numerics.SICONOS_FRICTION_3D_NSGS:
+            iterations = so.iparam[7]
+            precision = so.dparam[1]
+            local_precision = 0.
+        # maybe wrong for others
+        else:
+            iterations = so.iparam[1]
+            precision = so.dparam[1]
+            local_precision = so.dparam[2]
 
-            print('SolverInfos at time :', time,
-                  'iterations= ', iterations,
-                  'precision=', precision,
-                  'local_precision=', local_precision)
+        
+        print('SolverInfos at time :', time,
+              'iterations= ', iterations,
+              'precision=', precision,
+              'local_precision=', )
 
     def addMeshFromString(self, name, shape_data):
         """
@@ -1527,6 +1541,7 @@ class Hdf5():
           output_frequency :
 
         """
+        print ('load siconos module ...')
         from siconos.kernel import \
             Model, NonSmoothDynamicalSystem, OneStepNSProblem, MoreauJeanOSI,\
             TimeDiscretisation, GenericMechanical, FrictionContact,\
@@ -1539,7 +1554,8 @@ class Hdf5():
             btBoxShape, btQuaternion, btTransform, btConeShape, \
             BulletSpaceFilter, cast_BulletR, \
             BulletWeightedShape, BulletDS, BulletTimeStepping
-
+        
+        print ('setup model simulation ...')
         if set_external_forces is not None:
             self._set_external_forces = set_external_forces
 
@@ -1570,8 +1586,8 @@ class Hdf5():
             times = set(dpos_data[:, 0])
             t0 = float(max(times))
             T = float(t0 + T)
-            print ('Restart from previous simulation at t0={0}'.format(t0))
-            print ('Run until T={0}'.format(T))
+            print ('restart from previous simulation at t0={0}'.format(t0))
+            print ('run until T={0}'.format(T))
 
         # Model
         #
@@ -1626,12 +1642,12 @@ class Hdf5():
 
         k0 = 1 + len(times)
         k = k0
-
+        print ('import scene ...')
         self.importScene(t0, body_class, shape_class, face_class, edge_class)
 
         model.setSimulation(simulation)
         model.initialize()
-
+        print ('first output static and dynamic objects ...')
         self.outputStaticObjects()
         self.outputDynamicObjects()
 
@@ -1641,7 +1657,7 @@ class Hdf5():
         #     ds = nsds.dynamicalSystem(i)
         #     ds.display()
         # raw_input()
-
+        print ('start simulation ...')
         while simulation.hasNextEvent():
 
             print ('step', k, '<', k0 - 1 + int((T - t0) / h))
@@ -1674,44 +1690,45 @@ class Hdf5():
 
                 log(self._out.flush)()
 
+
             if proposed_is_here and use_proposed:
-                print('number of contacts',
-                      self._broadphase.statistics().new_interactions_created
-                      + self._broadphase.statistics().existing_interactions_processed)
+                numberOfContact = (
+                    self._broadphase.statistics().new_interactions_created
+                    + self._broadphase.statistics().existing_interactions_processed)
             else:
-                print('number of contacts',
-                      self._broadphase.model().simulation().oneStepNSProblem(0).
-                      getSizeOutput() / 3)
+                numberOfContact = (self._broadphase.model().simulation()
+                                   .oneStepNSProblem(0).getSizeOutput()/3)
 
-            self.printSolverInfos()
+            if numberOfContact > 0 :
+                print('number of contact',self._broadphase.model().simulation().oneStepNSProblem(0).getSizeOutput()/3)
+                self.printSolverInfos()
 
-            if violation_verbose:
-                print('violation info')
-                y = simulation.y(0, 0)
-                yplus = np.zeros((2, len(y)))
-                yplus[0, :] = y
-                # print(yplus)
+            if violation_verbose and numberOfContact > 0 :
+                if len(simulation.y(0,0)) >0 :
+                    print('violation info')
+                    y = simulation.y(0,0)
+                    yplus=  np.zeros((2,len(y)))
+                    yplus[0,:] = y
+                    y=np.min(yplus,axis=1)
+                    violation_max=np.max(-y)
+                    print('  violation max :',violation_max)
+                    if  (violation_max >= self._collision_margin):
+                        print('  violation max is larger than the collision_margin')
+                    lam = simulation.lambda_(1,0)
+                    print('  lambda max :',np.max(lam))
+                    #print(' lambda : ',lam)
+                    #raw_input()
 
-                if len(simulation.y(0, 0)) > 0:
-                    y = np.min(yplus, axis=1)
-                    violation_max = np.max(-y)
-                    print('  violation max :', np.max(-y))
-                    if (violation_max >= self._collision_margin):
-                        # print(simulation.output(0,0))
-                        print(
-                            '  violation max is larger than the collision_margin')
-                    lam = simulation.lambda_(1, 0)
-                    print(' lambda : ', lam)
-                    # raw_input()
 
-                # v = simulation.output(1,0)
-                # vplus=  np.zeros((2,len(v)))
-                # vplus[0,:] = v
-                # if len(simulation.output(1,0)) >0 :
-                #     v=np.max(vplus,axis=1)
-                #     velocity_max=np.max(v)
-                #     print('  velocity max :',np.max(v))
-                # print(simulation.output(1,0))
+                if len(simulation.y(1,0)) >0 :
+                    v = simulation.y(1,0)
+                    vplus=  np.zeros((2,len(v)))
+                    vplus[0,:] = v
+                    v=np.max(vplus,axis=1)
+                    print('  velocity max :',np.max(v))
+                    print('  velocity min :',np.min(v))
+                #     #print(simulation.output(1,0))
+
 
             log(simulation.nextStep, with_timer)()
 

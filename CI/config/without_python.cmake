@@ -1,5 +1,5 @@
 # from default, test without python wrappers
-include(config/default.cmake)
+include(default)
 set_option(WITH_PYTHON_WRAPPER OFF)
 set_option(WITH_XML OFF)
 set_option(WITH_numerics_PYTHON_WRAPPER OFF)

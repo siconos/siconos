@@ -111,15 +111,12 @@ void MoreauJeanOSI::initialize(Model& m)
     SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
 
     // W initialization
-    if (!_dynamicalSystemsGraph->properties(*dsi).W)
+    initW(t0, ds, *dsi);
+    Type::Siconos dsType = Type::value(*ds);
+    if (dsType == Type::LagrangianLinearTIDS || dsType == Type::LagrangianDS)
     {
-      initW(t0, ds, *dsi);
-      Type::Siconos dsType = Type::value(*ds);
-      if (dsType == Type::LagrangianLinearTIDS || dsType == Type::LagrangianDS)
-      {
-        assert(_dynamicalSystemsGraph->properties(*dsi).W && "W is NULL");
-        ds->allocateWorkVector(DynamicalSystem::local_buffer, _dynamicalSystemsGraph->properties(*dsi).W->size(0));
-      }
+      assert(_dynamicalSystemsGraph->properties(*dsi).W && "W is NULL");
+      ds->allocateWorkVector(DynamicalSystem::local_buffer, _dynamicalSystemsGraph->properties(*dsi).W->size(0));
     }
   }
 

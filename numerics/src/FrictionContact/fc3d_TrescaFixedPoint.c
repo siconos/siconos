@@ -62,6 +62,7 @@ void fc3d_TrescaFixedPoint(FrictionContactProblem* problem, double *reaction, do
 
   internalSolverPtr internalsolver;
   options->dWork = (double *) malloc(nc * sizeof(double));
+  options->dWorkSize = nc;
   double * mu = options->dWork;
   internalsolver_options->dWork = options->dWork;
 

@@ -1,3 +1,3 @@
 # from default, test serialization
-include(config/default.cmake)
+include(default)
 set_option(WITH_SERIALIZATION ON)

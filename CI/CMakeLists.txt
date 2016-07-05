@@ -1,7 +1,7 @@
 # Configurations used for continuous integration
 cmake_minimum_required(VERSION 2.6)
 
-set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
+set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake;${CMAKE_SOURCE_DIR}/config)
 
 include(Tools)
 
@@ -15,6 +15,7 @@ if(CI_CONFIG)
   endforeach(_CI CI_CONFIG_LIST)
 endif()
 
+message(STATUS "CI options are : ${CI_OPTIONS}")
 
 # ---------- Docker or not docker ... ------------------------
 if(WITH_DOCKER)

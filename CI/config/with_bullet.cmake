@@ -1,3 +1,3 @@
 # from default + bullet
-include(config/default.cmake)
+include(default)
 set_option(WITH_BULLET ON)

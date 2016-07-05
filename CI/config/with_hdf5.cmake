@@ -1,4 +1,4 @@
 # from default, test solvers with sanitizer
-include(config/default.cmake)
+include(default)
 set_option(WITH_HDF5 ON)
 
