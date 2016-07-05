@@ -134,6 +134,31 @@ extern "C"
   */
   void fc3d_nsgs(FrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options);
 
+  /** Non-Smooth Gauss Seidel solver for friction-contact 3D problem using OpemMP pragma (experimental)
+      \param problem the friction-contact 3D problem to solve
+      \param velocity global vector (n), in-out parameter
+      \param reaction global vector (n), in-out parameters
+      \param info return 0 if the solution is found
+      \param options the solver options :
+      [in] iparam[0] : Maximum iteration number
+
+
+      [out]iparam[7] = iter number of performed iterations
+
+      [out] iparam[10] = number of threads
+
+      [out] iparam[11] = methods id. (experimental mode)
+
+
+      [in]  dparam[0]  user tolerance on the loop
+
+      [out] dparam[1]  reached error
+
+      The internal (local) solver must set by the SolverOptions options[1]
+
+  */
+  void fc3d_nsgs_openmp(FrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options);
+
   void fc3d_nsgs_fillMLocal(FrictionContactProblem * problem, FrictionContactProblem * localproblem, int contact);
 
   void fc3d_nsgs_computeqLocal(FrictionContactProblem * problem, FrictionContactProblem * localproblem, double * reaction, int contact);

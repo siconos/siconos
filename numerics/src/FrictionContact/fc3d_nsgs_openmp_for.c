@@ -41,7 +41,7 @@
 void initializeLocalSolver_nsgs(SolverPtr* solve, UpdatePtr* update, FreeSolverNSGSPtr* freeSolver, ComputeErrorPtr* computeError,
                                 FrictionContactProblem* problem, FrictionContactProblem* localproblem,
                                 SolverOptions * options, SolverOptions * localsolver_options);
-void fc3d_nsgs_openmp_redblack(FrictionContactProblem* problem, double *reaction,
+void fc3d_nsgs_openmp_for(FrictionContactProblem* problem, double *reaction,
                                double *velocity, int* info, SolverOptions* options)
 {
   /* int and double parameters */
@@ -125,13 +125,11 @@ void fc3d_nsgs_openmp_redblack(FrictionContactProblem* problem, double *reaction
     ++iter;
     /* Loop through the contact points */
     //cblas_dcopy( n , q , incx , velocity , incy );
-    for (int c=0; c<2; c++)
-    {
     #if defined(_OPENMP) && defined(USE_OPENMP)
     #pragma omp parallel for 
     #endif
-      for ( unsigned int contact = c ; contact < nc ; contact+=2)
-      {
+    for ( unsigned int contact = 0 ; contact < nc ; contact+=1)
+    {
       #if defined(_OPENMP) && defined(USE_OPENMP)
         unsigned int tid = omp_get_thread_num();
       #else
@@ -159,7 +157,6 @@ void fc3d_nsgs_openmp_redblack(FrictionContactProblem* problem, double *reaction
         }
         //printf("### tid = %i\n",tid);
       }
-    }
 
     /* **** Criterium convergence **** */
     (*computeError)(problem, reaction , velocity, tolerance, options, &error);
