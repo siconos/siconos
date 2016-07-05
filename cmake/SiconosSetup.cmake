@@ -205,7 +205,7 @@ if(WITH_DOCUMENTATION)
 endif()
 
 # =========== OpenMP ==========
-OPTION (WITH_OPENMP "Use OpenMP" ON)
+OPTION (WITH_OPENMP "Use OpenMP" OFF)
 IF(WITH_OPENMP)
   FIND_PACKAGE(OpenMP)
   IF(OPENMP_FOUND)
