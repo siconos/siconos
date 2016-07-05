@@ -38,9 +38,9 @@
 #include <omp.h>
 #endif
 
-void initializeLocalSolver_nsgs(SolverPtr* solve, UpdatePtr* update, FreeSolverNSGSPtr* freeSolver, ComputeErrorPtr* computeError,
-                                FrictionContactProblem* problem, FrictionContactProblem* localproblem,
-                                SolverOptions * options, SolverOptions * localsolver_options);
+
+void snPrintf(int level, SolverOptions* opts, const char *fmt, ...);
+
 void fc3d_nsgs_openmp_for(FrictionContactProblem* problem, double *reaction,
                                double *velocity, int* info, SolverOptions* options)
 {
@@ -65,7 +65,6 @@ void fc3d_nsgs_openmp_for(FrictionContactProblem* problem, double *reaction,
 
   SolverOptions * localsolver_options = options->internalSolvers;
 
-
   SolverPtr local_solver = NULL;
   UpdatePtr update_localproblem = NULL;
   FreeSolverNSGSPtr freeSolver = NULL;
@@ -73,14 +72,25 @@ void fc3d_nsgs_openmp_for(FrictionContactProblem* problem, double *reaction,
 
   /* Connect local solver and local problem*/
 #if defined(USE_OPENMP) && defined(_OPENMP)
-  const unsigned int max_threads = omp_get_max_threads();
+  unsigned int max_threads = omp_get_max_threads();
   FrictionContactProblem **localproblems = alloca(max_threads*sizeof(void*));
   SolverOptions **localsolvoptions = alloca(max_threads*sizeof(void*));
 #else
-  const unsigned int max_threads = 1;
+  unsigned int max_threads = 1;
   FrictionContactProblem *localproblems[1];
   SolverOptions *localsolvoptions[1];
 #endif
+
+  if (iparam[10] >0)
+  {
+    max_threads = iparam[10];
+    omp_set_num_threads(max_threads);
+  }
+  
+
+  if (verbose > 0) printf("----------------------------------- number of threads %i\n", omp_get_max_threads()  );
+  if (verbose > 0) printf("----------------------------------- number of contacts %i\n", nc );
+
 
   for (unsigned int i=0; i < max_threads; i++)
   {
@@ -107,7 +117,7 @@ void fc3d_nsgs_openmp_for(FrictionContactProblem* problem, double *reaction,
     localsolvoptions[i]->iparam = NULL;
     copy_SolverOptions(localsolver_options,localsolvoptions[i]);
 
-    initializeLocalSolver_nsgs(&local_solver, &update_localproblem,
+    fc3d_nsgs_initialize_local_solver(&local_solver, &update_localproblem,
                                (FreeSolverNSGSPtr *)&freeSolver, &computeError,
                                problem, localproblems[i],
                                options, localsolvoptions[i]);
@@ -117,7 +127,7 @@ void fc3d_nsgs_openmp_for(FrictionContactProblem* problem, double *reaction,
   int iter = 0; /* Current iteration number */
   double error = 1.; /* Current error */
   int hasNotConverged = 1;
-
+  
   unsigned int *scontacts = NULL;
 
   while ((iter < itermax) && (hasNotConverged > 0))
@@ -135,7 +145,8 @@ void fc3d_nsgs_openmp_for(FrictionContactProblem* problem, double *reaction,
       #else
         unsigned int tid = 0;
       #endif
-
+        /* if (verbose > 0) printf("----------------------------------- thread id %i\n",tid  ); */
+        /* if (verbose > 0) printf("----------------------------------- number of threads %i\n", omp_get_num_threads()  ); */
         if (verbose > 1) printf("----------------------------------- Contact Number %i\n", contact);
         (*update_localproblem)(contact, problem, localproblems[tid],
                                reaction, localsolvoptions[tid]);

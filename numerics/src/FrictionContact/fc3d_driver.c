@@ -119,6 +119,13 @@ int fc3d_driver(FrictionContactProblem* problem,
     fc3d_nsgs(problem, reaction , velocity , &info , options);
     break;
   }
+  case SICONOS_FRICTION_3D_NSGS_OPENMP:
+  {
+    snPrintf(1, options,
+             " ========================== Call NSGS_OPENMP solver for Friction-Contact 3D problem ==========================\n");
+    fc3d_nsgs_openmp(problem, reaction , velocity , &info , options);
+    break;
+  }
   case SICONOS_FRICTION_3D_NSGSV:
   {
     snPrintf(1, options,

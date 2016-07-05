@@ -66,3 +66,37 @@ void fc3d_nsgs_openmp(FrictionContactProblem* problem, double *reaction,
   }
 
 }
+
+
+
+int fc3d_nsgs_openmp_setDefaultSolverOptions(SolverOptions* options)
+{
+  int i;
+  if (verbose > 0)
+  {
+    printf("Set the Default SolverOptions for the NSGS OPENMP Solver\n");
+  }
+
+  /*  strcpy(options->solverName,"NSGS");*/
+  options->solverId = SICONOS_FRICTION_3D_NSGS_OPENMP;
+  options->numberOfInternalSolvers = 1;
+  options->isSet = 1;
+  options->filterOn = 1;
+  options->iSize = 15;
+  options->dSize = 15;
+  options->iparam = (int *)malloc(options->iSize * sizeof(int));
+  options->dparam = (double *)malloc(options->dSize * sizeof(double));
+  options->dWork = NULL;
+  null_SolverOptions(options);
+  for (i = 0; i < 15; i++)
+  {
+    options->iparam[i] = 0;
+    options->dparam[i] = 0.0;
+  }
+  options->iparam[0] = 1000;
+  options->dparam[0] = 1e-4;
+  options->internalSolvers = (SolverOptions *)malloc(sizeof(SolverOptions));
+  fc3d_onecontact_nonsmooth_Newtow_setDefaultSolverOptions(options->internalSolvers);
+
+  return 0;
+}

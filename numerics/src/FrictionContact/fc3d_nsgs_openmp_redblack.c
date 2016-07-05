@@ -38,9 +38,6 @@
 #include <omp.h>
 #endif
 
-void initializeLocalSolver_nsgs(SolverPtr* solve, UpdatePtr* update, FreeSolverNSGSPtr* freeSolver, ComputeErrorPtr* computeError,
-                                FrictionContactProblem* problem, FrictionContactProblem* localproblem,
-                                SolverOptions * options, SolverOptions * localsolver_options);
 void fc3d_nsgs_openmp_redblack(FrictionContactProblem* problem, double *reaction,
                                double *velocity, int* info, SolverOptions* options)
 {
@@ -107,7 +104,7 @@ void fc3d_nsgs_openmp_redblack(FrictionContactProblem* problem, double *reaction
     localsolvoptions[i]->iparam = NULL;
     copy_SolverOptions(localsolver_options,localsolvoptions[i]);
 
-    initializeLocalSolver_nsgs(&local_solver, &update_localproblem,
+    fc3d_nsgs_initialize_local_solver(&local_solver, &update_localproblem,
                                (FreeSolverNSGSPtr *)&freeSolver, &computeError,
                                problem, localproblems[i],
                                options, localsolvoptions[i]);

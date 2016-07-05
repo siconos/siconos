@@ -172,6 +172,8 @@ extern "C"
   */
   int fc3d_nsgs_setDefaultSolverOptions(SolverOptions* options);
 
+  int fc3d_nsgs_openmp_setDefaultSolverOptions(SolverOptions* options);
+
 
 
 
