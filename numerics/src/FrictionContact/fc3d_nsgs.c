@@ -822,13 +822,13 @@ int fc3d_nsgs_setDefaultSolverOptions(SolverOptions* options)
   options->numberOfInternalSolvers = 1;
   options->isSet = 1;
   options->filterOn = 1;
-  options->iSize = 10;
-  options->dSize = 10;
+  options->iSize = 15;
+  options->dSize = 15;
   options->iparam = (int *)malloc(options->iSize * sizeof(int));
   options->dparam = (double *)malloc(options->dSize * sizeof(double));
   options->dWork = NULL;
   null_SolverOptions(options);
-  for (i = 0; i < 10; i++)
+  for (i = 0; i < 15; i++)
   {
     options->iparam[i] = 0;
     options->dparam[i] = 0.0;
