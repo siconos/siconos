@@ -65,7 +65,7 @@ void fc3d_nsgs_update(int contact, FrictionContactProblem* problem, FrictionCont
 
 
 }
-void initializeLocalSolver_nsgs(SolverPtr* solve, UpdatePtr* update, FreeSolverNSGSPtr* freeSolver, ComputeErrorPtr* computeError,
+void fc3d_nsgs_initialize_local_solver(SolverPtr* solve, UpdatePtr* update, FreeSolverNSGSPtr* freeSolver, ComputeErrorPtr* computeError,
                                 FrictionContactProblem* problem, FrictionContactProblem* localproblem,
                                 SolverOptions * options, SolverOptions * localsolver_options)
 {
@@ -363,7 +363,7 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction, double *veloci
   }
 
 
-  initializeLocalSolver_nsgs(&local_solver, &update_localproblem,
+  fc3d_nsgs_initialize_local_solver(&local_solver, &update_localproblem,
                              (FreeSolverNSGSPtr *)&freeSolver, &computeError,
                              problem , localproblem,
                              options, localsolver_options);
