@@ -80,6 +80,26 @@ extern "C"
   */
   int fc3d_setDefaultSolverOptions(SolverOptions* options, int solverId);
 
+
+  
+  enum SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION
+  {
+    SICONOS_FRICTION_3D_NSGS_FULL_ERROR_EVALUATION,
+    SICONOS_FRICTION_3D_NSGS_LIGHT_ERROR_EVALUATION_WITH_FULL_FINAL,
+    SICONOS_FRICTION_3D_NSGS_LIGHT_ERROR_EVALUATION
+  };
+  enum SICONOS_FRICTION_3D_NSGS_SHUFFLE
+  {
+    SICONOS_FRICTION_3D_NSGS_SHUFFLE_FALSE,
+    SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE,
+    SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE_EACH_LOOP
+  };
+  enum SICONOS_FRICTION_3D_NSGS_RELAXATION
+  {
+    SICONOS_FRICTION_3D_NSGS_RELAXATION_FALSE,
+    SICONOS_FRICTION_3D_NSGS_RELAXATION_TRUE
+  };
+
   /** Non-Smooth Gauss Seidel solver for friction-contact 3D problem
       \param problem the friction-contact 3D problem to solve
       \param velocity global vector (n), in-out parameter
@@ -88,14 +108,19 @@ extern "C"
       \param options the solver options :
       [in] iparam[0] : Maximum iteration number
       [in] iparam[1] : error computation method :
-          0 : Complete error computation with velocity computation
-          1: Light error computation with incremental values on reaction verification of absolute error at the end
-          2: only light error computation (velocity not computed)
+          SICONOS_FRICTION_3D_NSGS_FULL_ERROR_EVALUATION (0) : Full error computation with velocity computation
+          SICONOS_FRICTION_3D_NSGS_LIGHT_ERROR_EVALUATION_WITH_FULL_FINAL (1) : Light error computation with incremental values on reaction verification of absolute error at the end
+          SICONOS_FRICTION_3D_NSGS_LIGHT_ERROR_EVALUATION (2) : only light error computation (velocity not computed)
       [in] iparam[4] : method uses overrelaxation
+          SICONOS_FRICTION_3D_NSGS_RELAXATION_FALSE (0) relaxation is not used,
+          SICONOS_FRICTION_3D_NSGS_RELAXATION_TRUE  (1) relaxation is used with parameter dparam[8],
+
       [in] iparam[5] : shuffle the contact indices in the loop
-           1 : only at the beginning
-           2: in each iteration
-      [in] iparam[6] : seed for the random genrator in shuffling  contacts
+           SICONOS_FRICTION_3D_NSGS_SHUFFLE_FALSE (0) : no shuffle
+           SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE (1) : shuffle only at the beginning
+           SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE_EACH_LOOP (2) : shuffle in each iteration
+      [in] iparam[6] : seed for the random generator in shuffling  contacts
+
       [out]iparam[7] = iter number of performed iterations
 
 
