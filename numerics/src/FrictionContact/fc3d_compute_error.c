@@ -32,18 +32,16 @@
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
 #include "debug.h"
-void fc3d_unitary_compute_and_add_error(double* restrict r , double* restrict u, double mu, double* restrict error)
+void fc3d_unitary_compute_and_add_error(double* restrict r , double* restrict u, double mu, double* restrict error, double * worktmp)
 {
 
-  double normUT;
-  double rho = 1.0;
-
-  double worktmp[3];
+  //double normUT;
+  //double worktmp[3];
   /* Compute the modified local velocity */
-  normUT = hypot(u[1], u[2]); // i.e sqrt(u[ic3p1]*u[ic3p1]+u[ic3p2]*u[ic3p2]);
-  worktmp[0] = r[0] - rho * (u[0] + mu * normUT);
-  worktmp[1] = r[1] - rho * u[1] ;
-  worktmp[2] = r[2] - rho * u[2] ;
+  //normUT = hypot(u[1], u[2]); // i.e sqrt(u[ic3p1]*u[ic3p1]+u[ic3p2]*u[ic3p2]);
+  worktmp[0] = r[0] - u[0] - mu *  hypot(u[1], u[2]);
+  worktmp[1] = r[1] -  u[1] ;
+  worktmp[2] = r[2] -  u[2] ;
   projectionOnCone(worktmp, mu);
   worktmp[0] = r[0] -  worktmp[0];
   worktmp[1] = r[1] -  worktmp[1];
@@ -69,18 +67,21 @@ int fc3d_compute_error(
 
   cblas_dcopy(n , problem->q , incx , w , incy); // w <-q
   // Compute the current velocity
-  prodNumericsMatrix(n, n, 1.0, problem->M, z, 1.0, w);
+  //prodNumericsMatrix(n, n, 1.0, problem->M, z, 1.0, w);
+  prodNumericsMatrix3x3(n, n, problem->M, z, w);
 
 
   *error = 0.;
 
 
-  int ic, ic3;
 
+  
+  int ic, ic3;
+  double worktmp[3];
   for (ic = 0, ic3 = 0 ; ic < nc ; ic++, ic3 += 3)
   {
 
-    fc3d_unitary_compute_and_add_error(z + ic3, w + ic3, mu[ic], error);
+    fc3d_unitary_compute_and_add_error(z + ic3, w + ic3, mu[ic], error, worktmp);
   }
   *error = sqrt(*error);
 
@@ -151,14 +152,12 @@ int fc3d_compute_error_velocity(FrictionContactProblem* problem, double *z , dou
     return 0;
 }
 
-void fc3d_Tresca_unitary_compute_and_add_error(double *z , double *w, double R, double * error)
+void fc3d_Tresca_unitary_compute_and_add_error(double *z , double *w, double R, double * error, double * worktmp)
 {
-  double rho = 1.0;
-  double worktmp[3];
   /* Compute the modified local velocity */
-  worktmp[0] = z[0] - rho * w[0];
-  worktmp[1] = z[1] - rho * w[1] ;
-  worktmp[2] = z[2] - rho * w[2] ;
+  worktmp[0] = z[0] -  w[0];
+  worktmp[1] = z[1] -  w[1] ;
+  worktmp[2] = z[2] -  w[2] ;
   projectionOnCylinder(worktmp, R);
   worktmp[0] = z[0] -  worktmp[0];
   worktmp[1] = z[1] -  worktmp[1];
@@ -184,15 +183,15 @@ int fc3d_Tresca_compute_error(FrictionContactProblem* problem,
   double R;
   cblas_dcopy(n , problem->q , incx , w , incy); // w <-q
   // Compute the current velocity
-  prodNumericsMatrix(n, n, 1.0, problem->M, z, 1.0, w);
-
+  /* prodNumericsMatrix(n, n, 1.0, problem->M, z, 1.0, w); */
+  prodNumericsMatrix3x3(n, n, problem->M, z, w);
   *error = 0.;
   int ic, ic3;
-
+  double worktmp[3];
   for (ic = 0, ic3 = 0 ; ic < nc ; ic++, ic3 += 3)
   {
     R = (options->dWork[ic]);
-    fc3d_Tresca_unitary_compute_and_add_error(z+ic3 , w+ic3, R, error);
+    fc3d_Tresca_unitary_compute_and_add_error(z+ic3 , w+ic3, R, error, worktmp);
   }
   *error = sqrt(*error);
 

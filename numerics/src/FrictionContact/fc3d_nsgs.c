@@ -249,7 +249,7 @@ void fc3d_nsgs_computeqLocal(FrictionContactProblem * problem, FrictionContactPr
      * with rowMB the row of blocks of MGlobal which corresponds
      * to the current contact
      */
-    rowProdNoDiagSBM(n, 3, contact, problem->M->matrix1, reaction, qLocal, 0);
+    rowProdNoDiagSBM3x3(n, 3, contact, problem->M->matrix1, reaction, qLocal);
   }
 
 

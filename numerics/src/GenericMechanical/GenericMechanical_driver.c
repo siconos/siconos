@@ -164,7 +164,8 @@ int GenericMechanical_compute_error(GenericMechanicalProblem* pGMP, double *reac
     {
       FrictionContactProblem * fcProblem = (FrictionContactProblem *)curProblem->problem;
       localError = 0.;
-      fc3d_unitary_compute_and_add_error(reaction + posInX, velocity + posInX, fcProblem->mu[0], &localError);
+      double worktmp[3];
+      fc3d_unitary_compute_and_add_error(reaction + posInX, velocity + posInX, fcProblem->mu[0], &localError, worktmp);
       localError = sqrt(localError) / (1 + cblas_dnrm2(curSize , curProblem->q , 1));
       if (localError > *err)
         *err = localError ;
