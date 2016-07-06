@@ -327,7 +327,8 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction, double *veloci
   int itermax = iparam[0];
   /* Tolerance */
   double tolerance = dparam[0];
-
+  double normq = cblas_dnrm2(nc*3 , problem->q , 1);
+ 
   if (*info == 0)
     return;
 
@@ -456,7 +457,7 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction, double *veloci
     if (iparam[1] == SICONOS_FRICTION_3D_NSGS_LIGHT_ERROR_EVALUATION_WITH_FULL_FINAL) /* Full criterium */
     {
       double absolute_error;
-      (*computeError)(problem, reaction , velocity, tolerance, options, &absolute_error);
+      (*computeError)(problem, reaction , velocity, tolerance, options, normq, &absolute_error);
       if (verbose > 0)
       {
         if (absolute_error > error)
@@ -500,7 +501,7 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction, double *veloci
           }
 
           /* **** Criterium convergence **** */
-          (*computeError)(problem, reaction , velocity, tolerance, options, &error);
+          (*computeError)(problem, reaction , velocity, tolerance, options, normq,  &error);
 
 
           if (error < tolerance)
@@ -545,7 +546,7 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction, double *veloci
           }
 
           /* **** Criterium convergence **** */
-          (*computeError)(problem, reaction , velocity, tolerance, options, &error);
+          (*computeError)(problem, reaction , velocity, tolerance, options, normq, &error);
 
           if (verbose > 0)
             printf("----------------------------------- FC3D - NSGS - Iteration %i Residual = %14.7e <= %7.3e\n", iter, error, options->dparam[0]);
@@ -602,7 +603,7 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction, double *veloci
           }
 
           /* **** Criterium convergence **** */
-          (*computeError)(problem, reaction , velocity, tolerance, options, &error);
+          (*computeError)(problem, reaction , velocity, tolerance, options, normq, &error);
 
           if (error < tolerance)
           {
@@ -644,7 +645,7 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction, double *veloci
             (*local_solver)(localproblem, &(reaction[3 * contact]), localsolver_options);
           }
           /* **** Criterium convergence **** */
-          (*computeError)(problem, reaction , velocity, tolerance, options, &error);
+          (*computeError)(problem, reaction , velocity, tolerance, options, normq,  &error);
 
 
           if (error < tolerance)
@@ -703,7 +704,7 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction, double *veloci
           }
 
           /* **** Criterium convergence **** */
-          (*computeError)(problem, reaction , velocity, tolerance, options, &error);
+          (*computeError)(problem, reaction , velocity, tolerance, options, normq,  &error);
 
 
           if (error < tolerance)
@@ -749,7 +750,7 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction, double *veloci
           }
 
           /* **** Criterium convergence **** */
-          (*computeError)(problem, reaction , velocity, tolerance, options, &error);
+          (*computeError)(problem, reaction , velocity, tolerance, options, normq,  &error);
 
           if (error < tolerance)
           {

@@ -103,9 +103,9 @@ void fc3d_VI_ExtraGradient(FrictionContactProblem* problem, double *reaction, do
   variationalInequality_ExtraGradient(vi, reaction, velocity , info , visolver_options);
 
 
-
   /* **** Criterium convergence **** */
-  fc3d_compute_error(problem, reaction , velocity, options->dparam[0], options, &error);
+  double normq = cblas_dnrm2(nc*3 , problem->q , 1);
+  fc3d_compute_error(problem, reaction , velocity, options->dparam[0], options, normq, &error);
 
   /* for (i =0; i< n ; i++) */
   /* { */

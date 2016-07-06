@@ -27,7 +27,7 @@
 #include <math.h>
 //#define VERBOSE_DEBUG
 #include "Friction_cst.h"
-
+#include "SiconosBlas.h"
 
 #define DEBUG_MESSAGES
 #define DEBUG_STDOUT
@@ -49,7 +49,8 @@ void fc3d_SOCLCP(FrictionContactProblem* problem, double *reaction, double *velo
 
   /* Tolerance */
   double tolerance = dparam[0];
-
+  double normq = cblas_dnrm2(nc*3 , problem->q , 1);
+ 
 
 
   if (options->numberOfInternalSolvers < 1)
@@ -110,7 +111,7 @@ void fc3d_SOCLCP(FrictionContactProblem* problem, double *reaction, double *velo
 
   double real_error=0.0;
 
-  fc3d_compute_error(problem, reaction , velocity, tolerance, options, &real_error);
+  fc3d_compute_error(problem, reaction , velocity, tolerance, options, normq, &real_error);
 
   if (options->callback)
   {
