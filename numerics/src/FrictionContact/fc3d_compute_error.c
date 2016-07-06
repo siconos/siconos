@@ -52,7 +52,7 @@ void fc3d_unitary_compute_and_add_error(double* restrict r , double* restrict u,
 int fc3d_compute_error(
   FrictionContactProblem* problem,
   double *z , double *w, double tolerance,
-  SolverOptions * options, double * error)
+  SolverOptions * options, double norm, double * error)
 {
   assert(problem);
   assert(z);
@@ -70,25 +70,18 @@ int fc3d_compute_error(
   //prodNumericsMatrix(n, n, 1.0, problem->M, z, 1.0, w);
   prodNumericsMatrix3x3(n, n, problem->M, z, w);
 
-
   *error = 0.;
-
-
-
-  
   int ic, ic3;
   double worktmp[3];
   for (ic = 0, ic3 = 0 ; ic < nc ; ic++, ic3 += 3)
   {
-
     fc3d_unitary_compute_and_add_error(z + ic3, w + ic3, mu[ic], error, worktmp);
   }
   *error = sqrt(*error);
 
   /* Computes error */
-  double normq = cblas_dnrm2(n , problem->q , incx);
-  DEBUG_PRINTF("normq = %12.8e\n", normq);
-  *error = *error / (normq + 1.0);
+  DEBUG_PRINTF("norm = %12.8e\n", norm);
+  *error = *error / (norm + 1.0);
   if (*error > tolerance)
   {
     if (verbose > 1)

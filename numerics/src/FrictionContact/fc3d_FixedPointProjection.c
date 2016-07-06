@@ -44,6 +44,7 @@ void fc3d_fixedPointProjection(FrictionContactProblem* problem, double *reaction
   int itermax = iparam[0];
   /* Tolerance */
   double tolerance = dparam[0];
+  double normq = cblas_dnrm2(nc*3 , problem->q , 1);
 
   /*****  Fixed point iterations *****/
   int iter = 0; /* Current iteration number */
@@ -202,7 +203,7 @@ void fc3d_fixedPointProjection(FrictionContactProblem* problem, double *reaction
 
 
       /* **** Criterium convergence **** */
-      fc3d_compute_error(problem, reaction , velocity, tolerance, options, &error);
+      fc3d_compute_error(problem, reaction , velocity, tolerance, options, normq, &error);
       DEBUG_EXPR_WE(
         if ((error < error_k))
         {

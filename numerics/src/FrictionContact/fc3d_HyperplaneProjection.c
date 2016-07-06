@@ -44,7 +44,8 @@ void fc3d_HyperplaneProjection(FrictionContactProblem* problem, double *reaction
   int lsitermax = iparam[1];
   /* Tolerance */
   double tolerance = dparam[0];
-
+  double normq = cblas_dnrm2(nc*3 , problem->q , 1);
+ 
 
 
 
@@ -177,7 +178,7 @@ void fc3d_HyperplaneProjection(FrictionContactProblem* problem, double *reaction
     }
 
     /* **** Criterium convergence **** */
-    fc3d_compute_error(problem, reaction , velocity, tolerance, options, &error);
+    fc3d_compute_error(problem, reaction , velocity, tolerance, options, normq, &error);
 
     if (options->callback)
     {

@@ -26,7 +26,7 @@
 #include <assert.h>
 #include "pinv.h"
 #include "Friction_cst.h"
-
+#include "SiconosBlas.h"
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 
 void fc3d_nsgs_initialize_local_solver_velocity(SolverPtr* solve, FreeSolverPtr* freeSolver, ComputeErrorPtr* computeError, FrictionContactProblem* problem, FrictionContactProblem* localproblem, SolverOptions* localsolver_options)
@@ -66,7 +66,7 @@ void fc3d_nsgs_velocity(FrictionContactProblem* problem, double *reaction, doubl
   int itermax = iparam[0];
   /* Tolerance */
   double tolerance = dparam[0];
-
+  double normq = cblas_dnrm2(nc*3 , problem->q , 1);
   /* Check for trivial case */
   /*   *info = checkTrivialCase(n, q,velocity, reaction, options); */
 
@@ -146,7 +146,7 @@ void fc3d_nsgs_velocity(FrictionContactProblem* problem, double *reaction, doubl
 
 
     /* **** Criterium convergence **** */
-    (*computeError)(problem, reaction , velocity, tolerance, options, &error);
+    (*computeError)(problem, reaction , velocity, tolerance, options, normq,  &error);
 
     if (verbose > 0)
       printf("----------------------------------- FC3D - NSGS_VELOCITY - Iteration %i Residual = %14.7e\n", iter, error);

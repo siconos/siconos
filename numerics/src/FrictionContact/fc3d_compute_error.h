@@ -37,10 +37,11 @@ extern "C"
       \param w vector
       \param tolerance value for error computation
       \param options
+      \param norm norm of a vector (problem->q) for relative error
       \param[in,out] error value
       \return 0 if ok
    */
-  int fc3d_compute_error(FrictionContactProblem* problem, double *z , double *w, double tolerance, SolverOptions * options, double * error);
+  int fc3d_compute_error(FrictionContactProblem* problem, double *z , double *w, double tolerance, SolverOptions * options, double norm, double * error);
 
   /** Error computation (using the normal map residual) for one friction-contact 3D problem
       \param r the reaction force
