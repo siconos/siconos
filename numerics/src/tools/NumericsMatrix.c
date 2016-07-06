@@ -63,8 +63,45 @@ void prodNumericsMatrix(int sizeX, int sizeY, double alpha, NumericsMatrix* A, c
     fprintf(stderr, "Numerics, NumericsMatrix, product matrix - vector prod(A,x,y) failed, unknown storage type for A.\n");
     exit(EXIT_FAILURE);
   }
-
 }
+
+void prodNumericsMatrix3x3(int sizeX, int sizeY, NumericsMatrix* A,
+                           double* const x, double* y)
+{
+
+  assert(A);
+  assert(x);
+  assert(y);
+  assert(A->size0 == sizeY);
+  assert(A->size1 == sizeX);
+  double alpha=1;
+  double beta=1;
+  
+  int storage = A->storageType;
+
+  /* double* storage */
+  switch (storage)
+  {
+    case NM_DENSE:
+      cblas_dgemv(CblasColMajor, CblasNoTrans, sizeY, sizeX, alpha, A->matrix0, sizeY, x, 1, beta, y, 1);
+    break;
+  /* SparseBlock storage */
+    case NM_SPARSE_BLOCK:
+      prodSBM3x3(sizeX, sizeY, A->matrix1, x, y);
+    break;
+  /* coordinate */
+    case NM_SPARSE:
+      cs_aaxpy(alpha, NM_csc(A), x, beta, y);
+    break;
+
+    default:
+    fprintf(stderr, "Numerics, NumericsMatrix, product matrix - vector prod(A,x,y) failed, unknown storage type for A.\n");
+    exit(EXIT_FAILURE);
+  }
+}
+
+
+
 
 void prodNumericsMatrixNumericsMatrix(double alpha, const NumericsMatrix* const A, const NumericsMatrix* const B, double beta,  NumericsMatrix* C)
 {
