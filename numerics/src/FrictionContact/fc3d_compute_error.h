@@ -46,9 +46,10 @@ extern "C"
       \param r the reaction force
       \param u the local velocity
       \param mu coeficient of friction
+      \param worktmp work vector
       \param[in,out] error value
    */
-  void fc3d_unitary_compute_and_add_error(double r[3] , double u[3], double mu, double * error);
+  void fc3d_unitary_compute_and_add_error(double r[3] , double u[3], double mu, double * error, double * worktmp);
 
   /** Error computation for a friction-contact 3D problem
       \param problem the structure which defines the friction-contact problem
@@ -65,9 +66,10 @@ extern "C"
       \param z vector
       \param w vector
       \param R radius of the cylinder
+      \param worktmp work vector
       \param[in,out] error value
    */
-  void fc3d_Tresca_unitary_compute_and_add_error(double z[3] , double w[3], double R, double * error);
+  void fc3d_Tresca_unitary_compute_and_add_error(double z[3] , double w[3], double R, double * error, double *worktmp);
 
 
   /** Error computation for friction-contact 3D problem with Tresca Friction

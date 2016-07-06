@@ -329,7 +329,7 @@ int fc3d_projectionOnConeWithLocalIteration_solve(FrictionContactProblem* localp
   int i ;
 
 
-  double velocity[3],velocity_k[3],reaction_k[3];
+  double velocity[3],velocity_k[3],reaction_k[3],worktmp[3];
   double normUT;
   double localerror = 1.0;
   //printf ("localerror = %14.7e\n",localerror );
@@ -430,7 +430,7 @@ int fc3d_projectionOnConeWithLocalIteration_solve(FrictionContactProblem* localp
 
     /* compute local error */
     localerror =0.0;
-    fc3d_unitary_compute_and_add_error(reaction , velocity, mu_i, &localerror);
+    fc3d_unitary_compute_and_add_error(reaction , velocity, mu_i, &localerror, worktmp);
 
 
     /*Update rho*/
@@ -710,7 +710,7 @@ int fc3d_projectionOnCylinderWithLocalIteration_solve(FrictionContactProblem* lo
 
   /* int incx = 1, incy = 1; */
   int i;
-  double velocity[3],velocity_k[3],reaction_k[3];
+  double velocity[3],velocity_k[3],reaction_k[3], worktmp[3];
 
   double localerror = 1.0;
   //printf ("localerror = %14.7e\n",localerror );
@@ -813,7 +813,7 @@ int fc3d_projectionOnCylinderWithLocalIteration_solve(FrictionContactProblem* lo
 
     /* compute local error */
     localerror =0.0;
-    fc3d_Tresca_unitary_compute_and_add_error(reaction , velocity, R, &localerror);
+    fc3d_Tresca_unitary_compute_and_add_error(reaction , velocity, R, &localerror,worktmp);
 
 
     /*Update rho*/
