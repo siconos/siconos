@@ -192,6 +192,19 @@ extern "C"
                double alpha, const SparseBlockStructuredMatrix* const A,
                const double* const x, double beta, double* y);
 
+  /** SparseMatrix - vector product y = A*x + y for block of size 3x3
+      \param[in] sizeX dim of the vectors x
+      \param[in] sizeY dim of the vectors y
+      \param[in] alpha coefficient
+      \param[in] A the matrix to be multiplied
+      \param[in] x the vector to be multiplied
+      \param[in] beta coefficient
+      \param[in,out] y the resulting vector
+  */
+  void prodSBM3x3(unsigned int sizeX, unsigned int sizeY,
+                  const SparseBlockStructuredMatrix* const A,
+                  double* const x, double* y);
+
   /** SparseMatrix - SparseMatrix product C = alpha*A*B + beta*C
 
      \param[in] alpha coefficient
@@ -231,6 +244,18 @@ extern "C"
       \param[in] init = 0 for y += Ax, =1 for y = Ax
   */
   void rowProdNoDiagSBM(unsigned int sizeX, unsigned int sizeY, unsigned int currentRowNumber, const SparseBlockStructuredMatrix* const A, const double* const x, double* y, int init);
+
+  /** Row of a SparseMatrix - vector product y = rowA*x or y += rowA*x, rowA being a row of blocks of A of size 3x3
+      \param[in] sizeX dim of the vector x
+      \param[in] sizeY dim of the vector y
+      \param[in] currentRowNumber number of the required row of blocks
+      \param[in] A the matrix to be multiplied
+      \param[in] x the vector to be multiplied
+      \param[in,out] y the resulting vector
+      \param[in] init = 0 for y += Ax
+  */
+  void rowProdNoDiagSBM3x3(unsigned int sizeX, unsigned int sizeY, unsigned int currentRowNumber, const SparseBlockStructuredMatrix* const A, double* const x, double* y);
+  
 
   /** Destructor for SparseBlockStructuredMatrix objects
       \param blmat SparseBlockStructuredMatrix the matrix to be destroyed.

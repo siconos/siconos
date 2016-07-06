@@ -178,6 +178,18 @@ extern "C"
   */
   void prodNumericsMatrix(int sizeX, int sizeY, double alpha, NumericsMatrix* A, const double* const x, double beta, double* y);
 
+  /** Matrix - vector product y = A*x + y
+      \param[in] sizeX dim of the vector x
+      \param[in] sizeY dim of the vector y
+      \param[in] alpha coefficient
+      \param[in] A the matrix to be multiplied
+      \param[in] x the vector to be multiplied
+      \param[in] beta coefficient
+      \param[in,out] y the resulting vector
+  */
+  void prodNumericsMatrix3x3(int sizeX, int sizeY,  NumericsMatrix* A,
+                             double* const x, double* y);
+
   /** Matrix - Matrix product C = alpha*A*B + beta*B
       \param[in] alpha coefficient
       \param[in] A the matrix to be multiplied
