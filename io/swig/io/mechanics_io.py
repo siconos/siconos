@@ -914,13 +914,14 @@ class Hdf5():
 
         ind_time = bisect.bisect_left(self._scheduled_births, time)
 
-        current_times_of_births = self._scheduled_births[:ind_time]
+        current_times_of_births = set(self._scheduled_births[:ind_time])
         self._scheduled_births = self._scheduled_births[ind_time:]
 
         #print (time, current_times_of_births)
         for time_of_birth in current_times_of_births:
-
+            #print( "time_of_birth", time_of_birth)
             for (name, obj) in self._births[time_of_birth]:
+                #print(name,obj)
                 translation = obj.attrs['translation']
                 orientation = obj.attrs['orientation']
                 velocity = obj.attrs['velocity']
@@ -956,7 +957,8 @@ class Hdf5():
                         name, floatv(translation), floatv(orientation),
                         floatv(velocity), contactors, float(mass),
                         inertia, body_class, shape_class, birth=True)
-
+            #raw_input()
+            
     def outputStaticObjects(self):
         """
         Outputs translations and orientations of static objects
