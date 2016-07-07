@@ -29,7 +29,7 @@
 #include <assert.h>
 #include <time.h>
 #include <alloca.h>
-
+#include "op3x3.h"
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 
 #include <SiconosConfig.h>
@@ -86,7 +86,7 @@ void fc3d_nsgs_openmp_for(FrictionContactProblem* problem, double *reaction,
     max_threads = iparam[10];
     omp_set_num_threads(max_threads);
   }
-  
+
 
   if (verbose > 0) printf("----------------------------------- number of threads %i\n", omp_get_max_threads()  );
   if (verbose > 0) printf("----------------------------------- number of contacts %i\n", nc );
@@ -127,19 +127,25 @@ void fc3d_nsgs_openmp_for(FrictionContactProblem* problem, double *reaction,
   int iter = 0; /* Current iteration number */
   double error = 1.; /* Current error */
   int hasNotConverged = 1;
-  
+  double error_delta_reaction=0.0;
+  double error_nat=0.0;
   unsigned int *scontacts = NULL;
 
   while ((iter < itermax) && (hasNotConverged > 0))
   {
     ++iter;
+    error_delta_reaction=0.0;
     /* Loop through the contact points */
     //cblas_dcopy( n , q , incx , velocity , incy );
+
+    /* for (unsigned int kk=0; kk < 3*nc; kk++ ) reaction_k[kk]=reaction[kk]; */
+
     #if defined(_OPENMP) && defined(USE_OPENMP)
-    #pragma omp parallel for 
+    #pragma omp parallel for reduction(+:error_delta_reaction)
     #endif
     for ( unsigned int contact = 0 ; contact < nc ; contact+=1)
     {
+
       #if defined(_OPENMP) && defined(USE_OPENMP)
         unsigned int tid = omp_get_thread_num();
       #else
@@ -150,38 +156,75 @@ void fc3d_nsgs_openmp_for(FrictionContactProblem* problem, double *reaction,
         if (verbose > 1) printf("----------------------------------- Contact Number %i\n", contact);
         (*update_localproblem)(contact, problem, localproblems[tid],
                                reaction, localsolvoptions[tid]);
+
         localsolvoptions[tid]->iparam[4] = contact;
+
+        /* version without localreaction */
         double localreaction[3];
-        #pragma omp critical(localreaction)
         {
           localreaction[0] = reaction[3 * contact+0];
           localreaction[1] = reaction[3 * contact+1];
           localreaction[2] = reaction[3 * contact+2];
         };
+
         (*local_solver)(localproblems[tid], localreaction,
                         localsolvoptions[tid]);
-        #pragma omp critical(localreaction)
         {
+          error_delta_reaction += pow(reaction[3 * contact] - localreaction[0], 2) +
+            pow(reaction[3 * contact + 1] - localreaction[1], 2) +
+            pow(reaction[3 * contact + 2] - localreaction[2], 2);
+
           reaction[3 * contact+0] = localreaction[0];
           reaction[3 * contact+1] = localreaction[1];
           reaction[3 * contact+2] = localreaction[2];
+
         }
+
+        /* version without localreaction */
+        /* (*local_solver)(localproblems[tid], &(reaction[3 * contact]),
+           localsolvoptions[tid]);*/
+
+
         //printf("### tid = %i\n",tid);
       }
 
-    /* **** Criterium convergence **** */
-    (*computeError)(problem, reaction , velocity, tolerance, options, &error);
+    //double normq = cblas_dnrm2(nc*3 , problem->q , 1);
+    error_delta_reaction = sqrt(error_delta_reaction);
+
+    /* printf("error_delta_reaction  = %e\t", error_delta_reaction); */
+    /* printf("rel error_delta_reaction  = %e\n", error_delta_reaction/cblas_dnrm2(nc*3 , reaction , 1)); */
+    double norm_r = cblas_dnrm2(nc*3 , reaction , 1);
+    if (fabs(norm_r) > DBL_EPSILON)
+      error_delta_reaction /= norm_r;
+    
+    error = error_delta_reaction;
 
     if (error < tolerance)
     {
       hasNotConverged = 0;
       if (verbose > 0)
+      {
         printf("----------------------------------- FC3D - NSGS - Iteration %i Residual = %14.7e < %7.3e\n", iter, error, options->dparam[0]);
+        double normq = cblas_dnrm2(nc*3 , problem->q , 1);
+        (*computeError)(problem, reaction , velocity, tolerance, options, normq,  &error_nat);
+        /* test of consistency */
+        double c  = 10.0;
+        if   ( (error_nat/c >=  error_delta_reaction) || (error_delta_reaction >= c *error_nat))
+        {
+          printf("%e %e %e   \n",error_nat/c, error_delta_reaction, c *error_nat     );
+          printf(" WARNING: rel error_delta_reaction is not consistent with natural map error  \n");
+        }
+
+      }
     }
     else
     {
       if (verbose > 0)
+      {
         printf("----------------------------------- FC3D - NSGS - Iteration %i Residual = %14.7e > %7.3e\n", iter, error, options->dparam[0]);
+      }
+
+
     }
 
     *info = hasNotConverged;

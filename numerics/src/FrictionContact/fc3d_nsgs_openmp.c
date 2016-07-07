@@ -44,6 +44,9 @@ void fc3d_nsgs_openmp_redblack(FrictionContactProblem* problem, double *reaction
 void fc3d_nsgs_openmp_for(FrictionContactProblem* problem, double *reaction,
                                double *velocity, int* info, SolverOptions* options);
 
+void fc3d_nsgs_error_comparison(FrictionContactProblem* problem, double *reaction,
+                               double *velocity, int* info, SolverOptions* options);
+
 
 void fc3d_nsgs_openmp(FrictionContactProblem* problem, double *reaction,
                                double *velocity, int* info, SolverOptions* options)
@@ -59,6 +62,10 @@ void fc3d_nsgs_openmp(FrictionContactProblem* problem, double *reaction,
   else if (iparam[11] == 1)
   {
     fc3d_nsgs_openmp_redblack(problem, reaction, velocity, info, options) ;
+  }
+  else if (iparam[11] == 10)
+  {
+    fc3d_nsgs_error_comparison(problem, reaction, velocity, info, options) ;
   }
   else
   {

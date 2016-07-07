@@ -50,7 +50,7 @@ void fc3d_nsgs_openmp_redblack(FrictionContactProblem* problem, double *reaction
   int itermax = iparam[0];
   /* Tolerance */
   double tolerance = dparam[0];
-
+  double normq = cblas_dnrm2(nc*3 , problem->q , 1);
   if (*info == 0)
     return;
 
@@ -159,7 +159,7 @@ void fc3d_nsgs_openmp_redblack(FrictionContactProblem* problem, double *reaction
     }
 
     /* **** Criterium convergence **** */
-    (*computeError)(problem, reaction , velocity, tolerance, options, &error);
+    (*computeError)(problem, reaction , velocity, tolerance, options, normq, &error);
 
     if (error < tolerance)
     {
