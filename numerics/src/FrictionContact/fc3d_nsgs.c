@@ -440,7 +440,10 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction, double *veloci
 
       /* **** Criterium convergence **** */
       error = sqrt(error);
-
+      double norm_r = cblas_dnrm2(nc*3 , reaction , 1);
+      if (fabs(norm_r) > DBL_EPSILON)
+        error /= norm_r;
+      
       if (error < tolerance)
       {
         hasNotConverged = 0;
