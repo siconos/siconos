@@ -44,6 +44,7 @@ void fc3d_DeSaxceFixedPoint(FrictionContactProblem* problem, double *reaction, d
   int itermax = iparam[0];
   /* Tolerance */
   double tolerance = dparam[0];
+  double normq = cblas_dnrm2(nc*3 , problem->q , 1);
 
   /*****  Fixed point iterations *****/
   int iter = 0; /* Current iteration number */
@@ -55,7 +56,6 @@ void fc3d_DeSaxceFixedPoint(FrictionContactProblem* problem, double *reaction, d
   double * velocitytmp = (double *)malloc(n * sizeof(double));
 
   double rho = 0.0;
-
 
   if (dparam[3] > 0.0)
   {
@@ -96,7 +96,7 @@ void fc3d_DeSaxceFixedPoint(FrictionContactProblem* problem, double *reaction, d
       }
 
       /* **** Criterium convergence **** */
-      fc3d_compute_error(problem, reaction , velocity, tolerance, options, &error);
+      fc3d_compute_error(problem, reaction , velocity, tolerance, options, normq, &error);
 
       if (options->callback)
       {

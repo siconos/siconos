@@ -514,11 +514,13 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers* equation
 
   double tolerance = options->dparam[0];
   assert(tolerance > 0);
+  
   if (verbose > 0)
     printf("------------------------ FC3D - _nonsmooth_Newton_solversSolve - Start with tolerance = %g\n", tolerance);
 
   unsigned int _3problemSize = 3 * problemSize;
-
+  double normq = cblas_dnrm2(_3problemSize , problem->q , 1);
+ 
   void *buffer;
 
   if (!options->dWork)
@@ -695,7 +697,7 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers* equation
 
       fc3d_compute_error(problem, reaction, velocity,
 //      fc3d_FischerBurmeister_compute_error(problem, reaction, velocity,
-                                      tolerance, options, &(options->dparam[1]));
+                         tolerance, options, normq, &(options->dparam[1]));
 
       DEBUG_EXPR_WE(equation->function(equation->data, problemSize,
                                        reaction, velocity, equation->problem->mu, rho,

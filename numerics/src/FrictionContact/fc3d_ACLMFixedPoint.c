@@ -52,6 +52,7 @@ void fc3d_ACLMFixedPoint(FrictionContactProblem* problem, double *reaction, doub
   int itermax = iparam[0];
   /* Tolerance */
   double tolerance = dparam[0];
+  double normq = cblas_dnrm2(nc*3 , problem->q , 1);
 
 
 
@@ -72,7 +73,6 @@ void fc3d_ACLMFixedPoint(FrictionContactProblem* problem, double *reaction, doub
   int iter = 0; /* Current iteration number */
   double error = 1.; /* Current error */
   int hasNotConverged = 1;
-
   soclcp_InternalSolverPtr internalsolver;
 
   SecondOrderConeLinearComplementarityProblem* soclcp = (SecondOrderConeLinearComplementarityProblem *)malloc(sizeof(SecondOrderConeLinearComplementarityProblem));
@@ -139,7 +139,7 @@ void fc3d_ACLMFixedPoint(FrictionContactProblem* problem, double *reaction, doub
     cumul_iter +=  internalsolver_options->iparam[7];
     /* **** Criterium convergence **** */
 
-    fc3d_compute_error(problem, reaction , velocity, tolerance, options, &error);
+    fc3d_compute_error(problem, reaction , velocity, tolerance, options, normq, &error);
 
     if (options->callback)
     {

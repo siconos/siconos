@@ -18,6 +18,7 @@
 
 #include "fc3d_Solvers.h"
 #include "fc3d_compute_error.h"
+#include "SiconosBlas.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -39,7 +40,8 @@ void fc3d_TrescaFixedPoint(FrictionContactProblem* problem, double *reaction, do
   int itermax = iparam[0];
   /* Tolerance */
   double tolerance = dparam[0];
-
+  double normq = cblas_dnrm2(nc*3 , problem->q , 1);
+ 
 
 
   if (options->numberOfInternalSolvers < 1)
@@ -117,7 +119,7 @@ void fc3d_TrescaFixedPoint(FrictionContactProblem* problem, double *reaction, do
 
     /* **** Criterium convergence **** */
 
-    fc3d_compute_error(problem, reaction , velocity, tolerance, options, &error);
+    fc3d_compute_error(problem, reaction , velocity, tolerance, options, normq,  &error);
 
     if (options->callback)
     {

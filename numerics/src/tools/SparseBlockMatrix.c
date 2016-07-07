@@ -5,6 +5,7 @@
 #include "SiconosLapack.h"
 #include <math.h>
 #include "misc.h"
+#include "op3x3.h"
 //#define DEBUG_MESSAGES 1
 //#define DEBUG_STDOUT 1
 //#define DEBUG_NOCOLOR 1
@@ -127,6 +128,83 @@ void prodSBM(unsigned int sizeX, unsigned int sizeY, double alpha, const SparseB
     }
   }
 }
+void prodSBM3x3(unsigned int sizeX, unsigned int sizeY, const SparseBlockStructuredMatrix* const A,  double* const x, double* y)
+{
+  /* Product SparseMat - vector, y = vector product y += alpha*A*x  for block of size 3x3 */
+
+  assert(A);
+  assert(x);
+  assert(y);
+  assert(A->blocksize0);
+  assert(A->blocksize1);
+  assert(A->index1_data);
+  assert(A->index2_data);
+
+  /* Checks sizes */
+  assert(sizeX == A->blocksize1[A->blocknumber1 - 1]);
+  assert(sizeY == A->blocksize0[A->blocknumber0 - 1]);
+
+  /* Column (block) position of the current block*/
+  size_t colNumber;
+  /* Number of rows/columns of the current block */
+  unsigned int nbRows, nbColumns;
+  /* Position of the sub-block of x multiplied by the sub-block of A */
+  unsigned int posInX = 0;
+  /* Position of the sub-block of y, result of the product */
+  unsigned int posInY = 0;
+
+  /* Loop over all non-null blocks
+     Works whatever the ordering order of the block is, in A->block
+  */
+
+  for (unsigned int currentRowNumber = 0 ; currentRowNumber < A->filled1 - 1; ++currentRowNumber)
+  {
+    for (size_t blockNum = A->index1_data[currentRowNumber];
+         blockNum < A->index1_data[currentRowNumber + 1]; ++blockNum)
+    {
+      assert(blockNum < A->filled2);
+
+      colNumber = A->index2_data[blockNum];
+
+      assert(colNumber < sizeX);
+
+      /* Get dim. of the current block */
+      nbRows = A->blocksize0[currentRowNumber];
+
+
+      if (currentRowNumber != 0)
+        nbRows -= A->blocksize0[currentRowNumber - 1];
+
+      assert((nbRows <= sizeY));
+
+      nbColumns = A->blocksize1[colNumber];
+      if (colNumber != 0)
+        nbColumns -= A->blocksize1[colNumber - 1];
+
+      assert((nbColumns <= sizeX));
+
+      /* Get position in x of the sub-block multiplied by A sub-block */
+      posInX = 0;
+      if (colNumber != 0)
+        posInX += A->blocksize1[colNumber - 1];
+      /* Get position in y for the ouput sub-block, result of the product */
+      posInY = 0;
+      if (currentRowNumber != 0)
+        posInY += A->blocksize0[currentRowNumber - 1];
+      /* Computes y[] += currentBlock*x[] */
+
+      /* cblas_dgemv(CblasColMajor, CblasNoTrans, nbRows, nbColumns, alpha, A->block[blockNum], */
+      /*             nbRows, &x[posInX], 1, 1.0, &y[posInY], 1); */
+      assert((nbColumns == 3));
+      assert((nbRows == 3));
+      mvp3x3(A->block[blockNum], &x[posInX], &y[posInY]);
+
+    }
+  }
+}
+
+
+
 
 void allocateMemoryForProdSBMSBM(const SparseBlockStructuredMatrix* const A, const SparseBlockStructuredMatrix* const B, SparseBlockStructuredMatrix*  C)
 {
@@ -311,7 +389,7 @@ void prodSBMSBM(double alpha, const SparseBlockStructuredMatrix* const A, const 
   assert(A->blocksize1);
   assert(B->blocksize0);
   assert(B->blocksize1);
-  
+
   assert(A->blocksize1[A->blocknumber1 - 1] == B->blocksize0[B->blocknumber0 - 1]);
 
   /*     Check the compatibility of the number and the sizes of blocks */
@@ -567,7 +645,6 @@ void subRowProdSBM(unsigned int sizeX, unsigned int sizeY, unsigned int currentR
 
   }
 }
-
 void rowProdNoDiagSBM(unsigned int sizeX, unsigned int sizeY, unsigned int currentRowNumber, const SparseBlockStructuredMatrix* const A, const double* const x, double* y, int init)
 {
   /*
@@ -644,6 +721,85 @@ void rowProdNoDiagSBM(unsigned int sizeX, unsigned int sizeY, unsigned int curre
         posInX += A->blocksize0[colNumber - 1];
       /* Computes y[] += currentBlock*x[] */
       cblas_dgemv(CblasColMajor,CblasNoTrans, nbRows, nbColumns, 1.0, A->block[blockNum], nbRows, &x[posInX], 1, 1.0, y, 1);
+    }
+  }
+}
+void rowProdNoDiagSBM3x3(unsigned int sizeX, unsigned int sizeY, unsigned int currentRowNumber, const SparseBlockStructuredMatrix* const A, double* const x, double* y)
+{
+  /*
+     If: A is a SparseBlockStructuredMatrix matrix, Aij a block at row
+     i and column j (Warning: i and j are indices of block position,
+     not scalar component positions)
+
+     Then rowProdNoDiagSBM computes y = sum for i not equal to j of
+     Aij.xj over a row of blocks (or += if init = false)
+
+     currentRowNumber represents the position (block number) of the
+     required line of blocks in the matrix A.
+
+  */
+
+
+  /* Column (block) position of the current block*/
+  size_t colNumber = 0;
+
+  /* Number of rows/columns of the current block */
+  unsigned int nbRows, nbColumns;
+
+  /* Position of the sub-block of x multiplied by the sub-block of
+   * A */
+  unsigned int posInX = 0;
+
+  /* Look for the first element of the wanted row */
+
+  /* Assertions */
+  assert(A);
+  assert(x);
+  assert(y);
+  assert(sizeX == A->blocksize1[A->blocknumber1 - 1]);
+  assert(currentRowNumber <= A->blocknumber0);
+
+  /* Get dim (rows) of the current block */
+  nbRows = sizeY;
+
+  /*  if this is important, move it into a function --xhub */
+  /*   assert(
+    {
+      nbRows = A->blocksize0[currentRowNumber];
+      if(currentRowNumber!=0)
+        nbRows -= A->blocksize0[currentRowNumber-1];
+      nbRows == sizeY ;
+    });*/
+
+
+  /* Loop over all non-null blocks. Works whatever the ordering order
+     of the block is, in A->block, but it requires a set to 0 of all y
+     components
+  */
+  for (size_t blockNum = A->index1_data[currentRowNumber];
+       blockNum < A->index1_data[currentRowNumber + 1];
+       ++blockNum)
+  {
+    /* Get row/column position of the current block */
+    colNumber = A->index2_data[blockNum];
+
+    /* Computes product only for extra diagonal blocks */
+    if (colNumber != currentRowNumber)
+    {
+      /* Get dim(columns) of the current block */
+      nbColumns = A->blocksize1[colNumber];
+      if (colNumber != 0)
+        nbColumns -= A->blocksize1[colNumber - 1];
+
+      /* Get position in x of the sub-block multiplied by A sub-block */
+      posInX = 0;
+      if (colNumber != 0)
+        posInX += A->blocksize0[colNumber - 1];
+      /* Computes y[] += currentBlock*x[] */
+      /* cblas_dgemv(CblasColMajor,CblasNoTrans, nbRows, nbColumns, 1.0, A->block[blockNum], nbRows, &x[posInX], 1, 1.0, y, 1); */
+      assert((nbColumns == 3));
+      assert((nbRows == 3));
+      mvp3x3(A->block[blockNum], &x[posInX], y);
     }
   }
 }
@@ -1765,7 +1921,7 @@ void freeSparseBlockCoordinateMatrix3x3fortran(SparseBlockCoordinateMatrix *MC)
 /* i.e coo.h file under scipy sparsetools */
 SparseBlockStructuredMatrix* SBCMToSBM(SparseBlockCoordinateMatrix* MC)
 {
-  SparseBlockStructuredMatrix* M = (SparseBlockStructuredMatrix *) 
+  SparseBlockStructuredMatrix* M = (SparseBlockStructuredMatrix *)
     malloc(sizeof(SparseBlockStructuredMatrix));
 
   M->nbblocks = MC->nbblocks;
