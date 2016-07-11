@@ -619,6 +619,7 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction, double *veloci
           }
 
           /* **** Criterium convergence **** */
+
           if (iparam[8] >0)
           {
             if (iter % iparam[8] ==0 )
@@ -733,6 +734,7 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction, double *veloci
           }
 
           /* **** Criterium convergence **** */
+
           if (iparam[8] >0)
           {
             if (iter % iparam[8] ==0 )
