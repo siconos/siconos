@@ -1069,6 +1069,10 @@ class Hdf5():
             iterations = so.iparam[3]
             precision = so.dparam[2]
             local_precision = so.dparam[3]
+        elif so.solverId == Numerics.SICONOS_FRICTION_3D_NSGS_OPENMP:
+            iterations = so.iparam[7]
+            precision = so.dparam[2]
+            local_precision = so.dparam[3]
         elif so.solverId == Numerics.SICONOS_FRICTION_3D_NSGS:
             iterations = so.iparam[7]
             precision = so.dparam[1]
@@ -1492,7 +1496,9 @@ class Hdf5():
 
             
         osnspb.numericsSolverOptions().iparam[0] = itermax
-        osnspb.numericsSolverOptions().internalSolvers.iparam[0] = 100
+        n_thread =6
+        osnspb.numericsSolverOptions().iparam[10] = n_thread
+        osnspb.numericsSolverOptions().internalSolvers.iparam[0] = 10
         osnspb.numericsSolverOptions().dparam[0] = tolerance
         osnspb.setMaxSize(30000)
         osnspb.setMStorageType(1)
