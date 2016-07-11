@@ -153,11 +153,6 @@ public:
    * \return the friction contact problem from Numerics
    */
   SP::FrictionContactProblem frictionContactProblem();
-  
-  /**
-   * \return the friction contact problem from Numerics
-   */
-  FrictionContactProblem * frictionContactProblemPtr();
 
   /** solve a friction contact problem
    * \param problem the friction contact problem
