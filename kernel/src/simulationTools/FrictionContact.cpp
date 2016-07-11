@@ -116,6 +116,17 @@ SP::FrictionContactProblem FrictionContact::frictionContactProblem()
   return numerics_problem;
 }
 
+FrictionContactProblem * FrictionContact::frictionContactProblemPtr()
+{
+  FrictionContactProblem * numerics_problem = new FrictionContactProblem();
+  numerics_problem->dimension = _contactProblemDim;
+  numerics_problem->numberOfContacts = _sizeOutput / _contactProblemDim;
+  numerics_problem->M = &*_M->getNumericsMatrix();
+  numerics_problem->q = &*_q->getArray();
+  numerics_problem->mu = &(_mu->at(0));
+  return numerics_problem;
+}
+
 int FrictionContact::solve(SP::FrictionContactProblem problem)
 {
   if (!problem)

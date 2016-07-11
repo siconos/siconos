@@ -69,6 +69,7 @@ from scipy import constants
 
 import time
 
+from siconos.io.FrictionContactTrace import  FrictionContactTrace
 
 def floatv(v):
     return [float(x) for x in v]
@@ -665,6 +666,7 @@ class Hdf5():
                            velocity, contactors, mass, inertia,
                            body_class, shape_class, birth=False):
 
+        
         if body_class is None:
             body_class = BulletDS
 
@@ -819,8 +821,7 @@ class Hdf5():
             counter =0
             for (name, obj) in sorted(self._input.items(),
                                       key=lambda x: x[0]):
-                counter +=1
-                print ('import  object ', counter)
+                
                 input_ctrs = [ctr for _n_, ctr in obj.items()]
                 mass = obj.attrs['mass']
                 time_of_birth = obj.attrs['time_of_birth']
@@ -839,8 +840,10 @@ class Hdf5():
                     # this is for now
                     #
                     # cold restart if output previously done
-                    if mass > 0 and self.dynamic_data() is not None and \
-                            len(self.dynamic_data()) > 0:
+                    if mass > 0 and self.dynamic_data() is not None and len(self.dynamic_data()) > 0:
+                        counter +=1
+                        print ('Import  dynamic object number ', counter, 'from current state')
+                        print ('                object name   ', name)
                         dpos_data = self.dynamic_data()
                         max_time = max(dpos_data[:, 0])
                         id_last = np.where(
@@ -860,10 +863,13 @@ class Hdf5():
                             velocities[id_vlast, 1] ==
                             self.instances()[name].attrs['id'])[0]
                         xvel = velocities[id_vlast[id_vlast_inst[0]], :]
-                        velocity = (xvel[2], xvel[3], xvel[4])
+                        velocity = (xvel[2], xvel[3], xvel[4], xvel[5], xvel[6], xvel[7])
 
                     # start from initial conditions
                     else:
+                        counter +=1
+                        print ('Import  dynamic or static object number ', counter, 'from initial state')
+                        print ('                object name   ', name)
                         translation = obj.attrs['translation']
                         orientation = obj.attrs['orientation']
                         velocity = obj.attrs['velocity']
@@ -886,8 +892,7 @@ class Hdf5():
                         # Occ object
                         self.importBRepObject(
                             name, floatv(translation), floatv(orientation),
-                            floatv(
-                                velocity), contactors, float(mass),
+                            floatv(velocity), contactors, float(mass),
                             inertia, body_class, shape_class, face_class,
                             edge_class)
                     else:
@@ -914,13 +919,14 @@ class Hdf5():
 
         ind_time = bisect.bisect_left(self._scheduled_births, time)
 
-        current_times_of_births = self._scheduled_births[:ind_time]
+        current_times_of_births = set(self._scheduled_births[:ind_time])
         self._scheduled_births = self._scheduled_births[ind_time:]
 
         #print (time, current_times_of_births)
         for time_of_birth in current_times_of_births:
-
+            #print( "time_of_birth", time_of_birth)
             for (name, obj) in self._births[time_of_birth]:
+                #print(name,obj)
                 translation = obj.attrs['translation']
                 orientation = obj.attrs['orientation']
                 velocity = obj.attrs['velocity']
@@ -956,7 +962,8 @@ class Hdf5():
                         name, floatv(translation), floatv(orientation),
                         floatv(velocity), contactors, float(mass),
                         inertia, body_class, shape_class, birth=True)
-
+            #raw_input()
+            
     def outputStaticObjects(self):
         """
         Outputs translations and orientations of static objects
@@ -1392,7 +1399,9 @@ class Hdf5():
             tolerance=1e-8,
             numerics_verbose=False,
             violation_verbose=False,
-            output_frequency=None):
+            output_frequency=None,
+            friction_contact_trace=False,
+            friction_contact_trace_params=None):
         """
         Run a simulation from inputs in hdf5 file.
         parameters are:
@@ -1472,11 +1481,16 @@ class Hdf5():
         # (2) Time discretisation --
         timedisc = TimeDiscretisation(t0, h)
 
-        if len(joints) > 0:
-            osnspb = GenericMechanical(SICONOS_FRICTION_3D_ONECONTACT_NSN_AC)
-        else:
-            osnspb = FrictionContact(3, solver)
 
+        if (friction_contact_trace == False) :
+            if len(joints) > 0:
+                osnspb = GenericMechanical(SICONOS_FRICTION_3D_ONECONTACT_NSN_AC)
+            else:
+                osnspb = FrictionContact(3, solver)
+        else:
+            osnspb = FrictionContactTrace(3, solver,friction_contact_trace_params,model)
+
+            
         osnspb.numericsSolverOptions().iparam[0] = itermax
         osnspb.numericsSolverOptions().internalSolvers.iparam[0] = 100
         osnspb.numericsSolverOptions().dparam[0] = tolerance
