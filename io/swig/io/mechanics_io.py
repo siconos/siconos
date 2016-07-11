@@ -860,7 +860,7 @@ class Hdf5():
                             velocities[id_vlast, 1] ==
                             self.instances()[name].attrs['id'])[0]
                         xvel = velocities[id_vlast[id_vlast_inst[0]], :]
-                        velocity = (xvel[2], xvel[3], xvel[4])
+                        velocity = (xvel[2], xvel[3], xvel[4], xvel[5], xvel[6], xvel[7])
 
                     # start from initial conditions
                     else:
