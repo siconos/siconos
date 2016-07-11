@@ -28,6 +28,7 @@
 #include <math.h>
 #include <assert.h>
 #include <time.h>
+#include <float.h>
 
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 
