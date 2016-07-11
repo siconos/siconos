@@ -117,7 +117,7 @@ class FrictionContactTrace(FrictionContact):
                 # problem = self.getNumericsProblemPtr()
                 # print(problem, type(problem))
                     
-                problem = self.frictionContactProblem()
+                problem = self.frictionContactProblemPtr()
                 print(problem, type(problem))
                 solver_maxiter=SO.iparam[0]
                 n_format_string=len(str(solver_maxiter))

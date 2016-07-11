@@ -87,7 +87,9 @@ namespace std11 = boost;
 %include boost_shared_ptr.i
 
 // put needed shared_ptrs here
-%shared_ptr(FrictionContactProblem)
+// commented-out for now, swig insists on calling freeFrictionContactProblem()
+// instead of respecting the shared_ptr!
+// %shared_ptr(FrictionContactProblem)
 
 
  // more convenient
