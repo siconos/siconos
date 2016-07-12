@@ -121,9 +121,11 @@ extern "C"
            SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE_EACH_LOOP (2) : shuffle in each iteration
       [in] iparam[6] : seed for the random generator in shuffling  contacts
 
-      [out]iparam[7] = iter number of performed iterations
+      
 
+      [out] iparam[7] = iter number of performed iterations
 
+      [in] iparam[8] = error computation frequency
 
       [in]  dparam[0]  user tolerance on the loop
       [in]  dparam[8]  the relaxation parameter omega

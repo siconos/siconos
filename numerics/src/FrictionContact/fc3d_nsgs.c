@@ -28,6 +28,7 @@
 #include <math.h>
 #include <assert.h>
 #include <time.h>
+#include <float.h>
 
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 
@@ -328,7 +329,7 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction, double *veloci
   /* Tolerance */
   double tolerance = dparam[0];
   double normq = cblas_dnrm2(nc*3 , problem->q , 1);
- 
+
   if (*info == 0)
     return;
 
@@ -440,6 +441,10 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction, double *veloci
 
       /* **** Criterium convergence **** */
       error = sqrt(error);
+      double norm_r = cblas_dnrm2(nc*3 , reaction , 1);
+      if (fabs(norm_r) > DBL_EPSILON)
+        error /= norm_r;
+
 
       if (error < tolerance)
       {
@@ -501,8 +506,13 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction, double *veloci
           }
 
           /* **** Criterium convergence **** */
-          (*computeError)(problem, reaction , velocity, tolerance, options, normq,  &error);
-
+          if (iparam[8] >0)
+          {
+            if (iter % iparam[8] ==0 )
+              (*computeError)(problem, reaction , velocity, tolerance, options, normq,  &error);
+          }
+          else
+            (*computeError)(problem, reaction , velocity, tolerance, options, normq,  &error);
 
           if (error < tolerance)
           {
@@ -546,7 +556,14 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction, double *veloci
           }
 
           /* **** Criterium convergence **** */
-          (*computeError)(problem, reaction , velocity, tolerance, options, normq, &error);
+          if (iparam[8] >0)
+          {
+            if (iter % iparam[8] ==0 )
+              (*computeError)(problem, reaction , velocity, tolerance, options, normq,  &error);
+          }
+          else
+            (*computeError)(problem, reaction , velocity, tolerance, options, normq,  &error);
+
 
           if (verbose > 0)
             printf("----------------------------------- FC3D - NSGS - Iteration %i Residual = %14.7e <= %7.3e\n", iter, error, options->dparam[0]);
@@ -603,7 +620,14 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction, double *veloci
           }
 
           /* **** Criterium convergence **** */
-          (*computeError)(problem, reaction , velocity, tolerance, options, normq, &error);
+
+          if (iparam[8] >0)
+          {
+            if (iter % iparam[8] ==0 )
+              (*computeError)(problem, reaction , velocity, tolerance, options, normq,  &error);
+          }
+          else
+            (*computeError)(problem, reaction , velocity, tolerance, options, normq,  &error);
 
           if (error < tolerance)
           {
@@ -645,7 +669,13 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction, double *veloci
             (*local_solver)(localproblem, &(reaction[3 * contact]), localsolver_options);
           }
           /* **** Criterium convergence **** */
-          (*computeError)(problem, reaction , velocity, tolerance, options, normq,  &error);
+          if (iparam[8] >0)
+          {
+            if (iter % iparam[8] ==0 )
+              (*computeError)(problem, reaction , velocity, tolerance, options, normq,  &error);
+          }
+          else
+            (*computeError)(problem, reaction , velocity, tolerance, options, normq,  &error);
 
 
           if (error < tolerance)
@@ -704,7 +734,14 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction, double *veloci
           }
 
           /* **** Criterium convergence **** */
-          (*computeError)(problem, reaction , velocity, tolerance, options, normq,  &error);
+
+          if (iparam[8] >0)
+          {
+            if (iter % iparam[8] ==0 )
+              (*computeError)(problem, reaction , velocity, tolerance, options, normq,  &error);
+          }
+          else
+            (*computeError)(problem, reaction , velocity, tolerance, options, normq,  &error);
 
 
           if (error < tolerance)
@@ -750,7 +787,13 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction, double *veloci
           }
 
           /* **** Criterium convergence **** */
-          (*computeError)(problem, reaction , velocity, tolerance, options, normq,  &error);
+          if (iparam[8] >0)
+          {
+            if (iter % iparam[8] ==0 )
+              (*computeError)(problem, reaction , velocity, tolerance, options, normq,  &error);
+          }
+          else
+            (*computeError)(problem, reaction , velocity, tolerance, options, normq,  &error);
 
           if (error < tolerance)
           {

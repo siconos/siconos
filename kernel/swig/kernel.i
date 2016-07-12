@@ -150,7 +150,6 @@ namespace std
 %shared_ptr(NumericsMatrix);
 %shared_ptr(CSparseMatrix);
 %shared_ptr(SparseBlockStructuredMatrix);
-%shared_ptr(FrictionContactProblem);
 %shared_ptr(GlobalFrictionContactProblem);
 
 %import NumericsOptions.h

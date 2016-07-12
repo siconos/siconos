@@ -79,7 +79,7 @@ protected:
   /** Pointer to the function used to call the Numerics driver to solve the problem */
   Driver _frictionContact_driver;
 
-  SP::FrictionContactProblem _numerics_problem;
+  FrictionContactProblem _numerics_problem;
 
 public:
 
@@ -153,6 +153,11 @@ public:
    * \return the friction contact problem from Numerics
    */
   SP::FrictionContactProblem frictionContactProblem();
+
+  /**
+   * \return the friction contact problem from Numerics (raw ptr, do not free)
+   */
+  FrictionContactProblem *frictionContactProblemPtr();
 
   /** solve a friction contact problem
    * \param problem the friction contact problem
