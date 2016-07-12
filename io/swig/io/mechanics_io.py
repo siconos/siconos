@@ -67,7 +67,7 @@ import siconos.numerics as Numerics
 
 
 try:
-    dir(Numeric).index('fc3d_nsgs_openmp')
+    dir(Numerics).index('fc3d_nsgs_openmp')
     numerics_has_openmp_solvers=True
 except ValueError:
     numerics_has_openmp_solvers=False
@@ -1523,7 +1523,7 @@ class Hdf5():
         osnspb.numericsSolverOptions().iparam[0] = itermax
 
         if numerics_has_openmp_solvers :
-            if so.solverId == Numerics.SICONOS_FRICTION_3D_NSGS_OPENMP:
+            if  osnspb.numericsSolverOptions().solverId == Numerics.SICONOS_FRICTION_3D_NSGS_OPENMP:
                 n_thread =6
                 osnspb.numericsSolverOptions().iparam[10] = n_thread
                 

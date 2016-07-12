@@ -25,8 +25,10 @@ from siconos.kernel import \
     FrictionContact
 from siconos.numerics import \
     FrictionContactProblem
-
-import siconos.fclib as F
+try:
+    import siconos.fclib as F
+except :
+    print("No module named siconos.fclib.")
 
 import imp
 import sys
