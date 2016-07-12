@@ -65,6 +65,14 @@ from siconos.io.io_base import MechanicsIO
 
 import siconos.numerics as Numerics
 
+
+try:
+    dir(Numeric).index('fc3d_nsgs_openmp')
+    numerics_has_openmp_solvers=True
+except ValueError:
+    numerics_has_openmp_solvers=False
+
+
 from scipy import constants
 
 import time
@@ -1069,10 +1077,6 @@ class Hdf5():
             iterations = so.iparam[3]
             precision = so.dparam[2]
             local_precision = so.dparam[3]
-        elif so.solverId == Numerics.SICONOS_FRICTION_3D_NSGS_OPENMP:
-            iterations = so.iparam[7]
-            precision = so.dparam[2]
-            local_precision = so.dparam[3]
         elif so.solverId == Numerics.SICONOS_FRICTION_3D_NSGS:
             iterations = so.iparam[7]
             precision = so.dparam[1]
@@ -1082,6 +1086,17 @@ class Hdf5():
             iterations = so.iparam[1]
             precision = so.dparam[1]
             local_precision = so.dparam[2]
+
+        if numerics_has_openmp_solvers :
+            if so.solverId == Numerics.SICONOS_FRICTION_3D_NSGS_OPENMP:
+                iterations = so.iparam[7]
+                precision = so.dparam[2]
+                local_precision = so.dparam[3]
+            # maybe wrong for others
+            else:
+                iterations = so.iparam[1]
+                precision = so.dparam[1]
+                local_precision = so.dparam[2]
 
         self._solv_data[current_line, :] = [time, iterations, precision,
                                             local_precision]
@@ -1106,7 +1121,17 @@ class Hdf5():
             iterations = so.iparam[1]
             precision = so.dparam[1]
             local_precision = so.dparam[2]
-
+            
+        if numerics_has_openmp_solvers :
+            if so.solverId == Numerics.SICONOS_FRICTION_3D_NSGS_OPENMP:
+                iterations = so.iparam[7]
+                precision = so.dparam[2]
+                local_precision = so.dparam[3]
+            # maybe wrong for others
+            else:
+                iterations = so.iparam[1]
+                precision = so.dparam[1]
+                local_precision = so.dparam[2]
         
         print('SolverInfos at time :', time,
               'iterations= ', iterations,
@@ -1496,8 +1521,13 @@ class Hdf5():
 
             
         osnspb.numericsSolverOptions().iparam[0] = itermax
-        n_thread =6
-        osnspb.numericsSolverOptions().iparam[10] = n_thread
+
+        if numerics_has_openmp_solvers :
+            if so.solverId == Numerics.SICONOS_FRICTION_3D_NSGS_OPENMP:
+                n_thread =6
+                osnspb.numericsSolverOptions().iparam[10] = n_thread
+                
+
         osnspb.numericsSolverOptions().internalSolvers.iparam[0] = 10
         osnspb.numericsSolverOptions().dparam[0] = tolerance
         osnspb.setMaxSize(30000)
