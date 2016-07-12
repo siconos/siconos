@@ -1069,7 +1069,7 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
 
                 if key == 'r':
                     spos_data, dpos_data, cf_data, solv_data = load()
-                    if not cf_disabled:
+                    if not cf_disable:
                         cf_prov = CFprov(cf_data)
                     times = list(set(dpos_data[:, 0]))
                     times.sort()
