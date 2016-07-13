@@ -362,27 +362,25 @@ void BulletSpaceFilter::buildInteractions(double time)
               }
             }
 
-            if (obB->getUserPointer())
+            if (dsa != dsb)
             {
-              SP::BulletDS dsb(static_cast<BulletDS*>(obB->getUserPointer())->shared_ptr());
+              DEBUG_PRINTF("LINK obA:%p obB:%p inter:%p\n", obA, obB, &*inter);
+            }
 
-              if (dsa != dsb)
-              {
-                DEBUG_PRINTF("LINK obA:%p obB:%p inter:%p\n", obA, obB, &*inter);
-                assert(inter);
-
+            if (dsa && !dsb)
+            {
+                cpoint->m_userPersistentData = &*inter;
+                link(inter, dsa);
+            }
+            else if (!dsa && dsb)
+            {
+                cpoint->m_userPersistentData = &*inter;
+                link(inter, dsb);
+            }
+            else if (dsa && dsb && (dsa != dsb))
+            {
                 cpoint->m_userPersistentData = &*inter;
                 link(inter, dsa, dsb);
-              }
-              /* else collision shapes belong to the same object do nothing */
-            }
-            else
-            {
-              DEBUG_PRINTF("LINK obA:%p inter :%p\n", obA, &*inter);
-              assert(inter);
-
-              cpoint->m_userPersistentData = &*inter;
-              link(inter, dsa);
             }
           }
 
