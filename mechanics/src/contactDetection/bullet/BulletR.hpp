@@ -31,8 +31,11 @@ private:
 
   const SP::btManifoldPoint _contactPoints;
 
+  bool _flip; /* if true, points A and B are swapped from the point
+               * view of the Relation. */
+
 public:
-  BulletR(SP::btManifoldPoint);
+  BulletR(SP::btManifoldPoint, bool flip=false);
 
   SP::btManifoldPoint contactPoint() const
   {

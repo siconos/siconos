@@ -350,7 +350,11 @@ void BulletSpaceFilter::buildInteractions(double time)
             SP::Interaction inter;
             if (nslaw->size() == 3)
             {
-              SP::BulletR rel(new BulletR(cpoint));
+              /* if objectB is the only DS, (A is static), then flip
+               * the contact points and normal otherwise the relation
+               * is to the wrong side */
+              bool flip = !dsa && dsb;
+              SP::BulletR rel(new BulletR(cpoint, flip));
               inter.reset(new Interaction(3, nslaw, rel, 4 * i + z));
             }
             else
