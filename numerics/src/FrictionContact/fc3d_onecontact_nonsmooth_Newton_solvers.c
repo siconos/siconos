@@ -719,7 +719,7 @@ int fc3d_onecontact_nonsmooth_Newton_solvers_solve_damped(FrictionContactProblem
 
 
   double Tol = dparam[0];
-  double itermax = iparam[0];
+  int itermax = iparam[0];
   int LSitermax = iparam[12];
 
 
