@@ -469,11 +469,27 @@ void BulletSpaceFilter::addDynamicObject(SP::BulletDS ds,
   simulation->initialize(this->model(), false);
 
   /* Re-create the world from scratch */
+#if 0
   _collisionWorld.reset();
 
   _dispatcher.reset(new btCollisionDispatcher(&*_collisionConfiguration));
   _collisionWorld.reset(new btCollisionWorld(&*_dispatcher, &*_broadphase,
                                              &*_collisionConfiguration));
+  // btGImpactCollisionAlgorithm::registerAlgorithm(&*_dispatcher);
+  // _collisionWorld->getDispatchInfo().m_useContinuous = false;
   _dynamicCollisionsObjectsInserted = false;
   _staticCollisionsObjectsInserted = false;
+#else
+  for (CollisionObjects::iterator ico = ds->collisionObjects()->begin();
+       ico != ds->collisionObjects()->end(); ++ico)
+  {
+    printf("Adding collision object\n");
+    btCollisionObject *ob = const_cast<btCollisionObject*>((*ico).first);
+    printf("user pointer: %p\n", ob->getUserPointer());
+    _collisionWorld->addCollisionObject(ob);
+    _collisionWorld->updateSingleAabb(ob);
+    _collisionWorld->getBroadphase()->getOverlappingPairCache()->
+        cleanProxyFromPairs(ob->getBroadphaseHandle(), &*_dispatcher);
+  }
+#endif
 }
