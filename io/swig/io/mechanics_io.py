@@ -169,13 +169,16 @@ def group(h, name):
         return h.create_group(name)
 
 
-def data(h, name, nbcolumns):
+def data(h, name, nbcolumns, use_compression=False):
     try:
         return h[name]
     except KeyError:
+        comp = use_compression and nbcolumns > 0
         return h.create_dataset(name, (0, nbcolumns),
-                                maxshape=(None, nbcolumns))
-
+                                maxshape=(None, nbcolumns),
+                                chunks=[None,(4000,nbcolumns)][comp],
+                                compression=[None,'gzip'][comp],
+                                compression_opts=[None,9][comp])
 
 def add_line(dataset, line):
     dataset.resize(dataset.shape[0] + 1, 0)
@@ -474,7 +477,8 @@ class Hdf5():
 
     def __init__(self, io_filename=None, mode='w',
                  broadphase=None, osi=None, shape_filename=None,
-                 set_external_forces=None, gravity_scale=None, collision_margin=None):
+                 set_external_forces=None, gravity_scale=None, collision_margin=None,
+                 use_compression=False):
 
         if io_filename is None:
             self._io_filename = '{0}.hdf5'.format(
@@ -513,6 +517,7 @@ class Hdf5():
         self._scheduled_births = []
         self._births = dict()
         self._initializing = True
+        self._use_compression = use_compression
 
     def __enter__(self):
         if self._set_external_forces is None:
@@ -525,11 +530,16 @@ class Hdf5():
         self._data = group(self._out, 'data')
         self._ref = group(self._data, 'ref')
         self._joints = group(self._data, 'joints')
-        self._static_data = data(self._data, 'static', 9)
-        self._velocities_data = data(self._data, 'velocities', 8)
-        self._dynamic_data = data(self._data, 'dynamic', 9)
-        self._cf_data = data(self._data, 'cf', 15)
-        self._solv_data = data(self._data, 'solv', 4)
+        self._static_data = data(self._data, 'static', 9,
+                                 use_compression = self._use_compression)
+        self._velocities_data = data(self._data, 'velocities', 8,
+                                     use_compression = self._use_compression)
+        self._dynamic_data = data(self._data, 'dynamic', 9,
+                                  use_compression = self._use_compression)
+        self._cf_data = data(self._data, 'cf', 15,
+                             use_compression = self._use_compression)
+        self._solv_data = data(self._data, 'solv', 4,
+                               use_compression = self._use_compression)
         self._input = group(self._data, 'input')
         self._nslaws = group(self._data, 'nslaws')
 
@@ -1333,7 +1343,8 @@ class Hdf5():
                 obj.attrs['inertia'] = inertia
 
             for num, shape in enumerate(shapes):
-                dat = data(obj, '{0}-{1}'.format(shape.name, num), 0)
+                dat = data(obj, '{0}-{1}'.format(shape.name, num), 0,
+                           use_compression = self._use_compression)
                 dat.attrs['name'] = shape.name
                 if hasattr(shape, 'group'):
                     dat.attrs['group'] = shape.group
