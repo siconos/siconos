@@ -512,6 +512,7 @@ class Hdf5():
         self._keep = []
         self._scheduled_births = []
         self._births = dict()
+        self._initializing = True
 
     def __enter__(self):
         if self._set_external_forces is None:
@@ -910,12 +911,18 @@ class Hdf5():
             for name in self.joints():
                 self.importJoint(name)
 
+    def currentTime(self):
+        if self._initializing:
+            return self._broadphase.model().simulation().startingTime()
+        else:
+            return self._broadphase.model().simulation().nextTime()
+
     def importBirths(self, body_class=None, shape_class=None,
                      face_class=None, edge_class=None,):
         """
         Import new objects in the broadphase.
         """
-        time = self._broadphase.model().simulation().nextTime()
+        time = self.currentTime()
 
         ind_time = bisect.bisect_left(self._scheduled_births, time)
 
@@ -963,12 +970,12 @@ class Hdf5():
                         floatv(velocity), contactors, float(mass),
                         inertia, body_class, shape_class, birth=True)
             #raw_input()
-            
+
     def outputStaticObjects(self):
         """
         Outputs translations and orientations of static objects
         """
-        time = self._broadphase.model().simulation().nextTime()
+        time = self.currentTime()
         idd = -1
         p = 0
         self._static_data.resize(len(self._static_transforms), 0)
@@ -989,14 +996,14 @@ class Hdf5():
             idd -= 1
             p += 1
 
-    def outputDynamicObjects(self):
+    def outputDynamicObjects(self, initial=False):
         """
         Outputs translations and orientations of dynamic objects.
         """
 
         current_line = self._dynamic_data.shape[0]
 
-        time = self._broadphase.model().simulation().nextTime()
+        time = self.currentTime()
 
         positions = self._io.positions(self._broadphase.model())
 
@@ -1018,7 +1025,7 @@ class Hdf5():
 
         current_line = self._dynamic_data.shape[0]
 
-        time = self._broadphase.model().simulation().nextTime()
+        time = self.currentTime()
 
         velocities = self._io.velocities(self._broadphase.model())
 
@@ -1039,7 +1046,7 @@ class Hdf5():
         """
         if self._broadphase.model().nonSmoothDynamicalSystem().\
                 topology().indexSetsSize() > 1:
-            time = self._broadphase.model().simulation().nextTime()
+            time = self.currentTime()
             contact_points = self._io.contactPoints(self._broadphase.model())
 
             if contact_points is not None:
@@ -1059,7 +1066,7 @@ class Hdf5():
         Outputs solver #iterations & precision reached
         """
 
-        time = self._broadphase.model().simulation().nextTime()
+        time = self.currentTime()
         so = self._broadphase.model().simulation().oneStepNSProblem(0).\
             numericsSolverOptions()
 
@@ -1086,7 +1093,7 @@ class Hdf5():
         """
         Outputs solver #iterations & precision reached
         """
-        time = self._broadphase.model().simulation().nextTime()
+        time = self.currentTime()
         so = self._broadphase.model().simulation().oneStepNSProblem(0).\
             numericsSolverOptions()
         if so.solverId == Numerics.SICONOS_GENERIC_MECHANICAL_NSGS:
@@ -1539,6 +1546,7 @@ class Hdf5():
         #     ds.display()
         # raw_input()
         print ('start simulation ...')
+        self._initializing = False
         while simulation.hasNextEvent():
 
             print ('step', k, '<', k0 - 1 + int((T - t0) / h))
