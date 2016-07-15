@@ -32,21 +32,7 @@
 
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 
-#include <SiconosConfig.h>
-#if defined(WITH_OPENMP) && defined(_OPENMP)
-#define USE_OPENMP 1
-#include <omp.h>
-#endif
-
-void fc3d_nsgs_openmp_redblack(FrictionContactProblem* problem, double *reaction,
-                               double *velocity, int* info, SolverOptions* options);
-
-void fc3d_nsgs_openmp_for(FrictionContactProblem* problem, double *reaction,
-                               double *velocity, int* info, SolverOptions* options);
-
-void fc3d_nsgs_error_comparison(FrictionContactProblem* problem, double *reaction,
-                               double *velocity, int* info, SolverOptions* options);
-
+#include "fc3d_nsgs_openmp.h"
 
 void fc3d_nsgs_openmp(FrictionContactProblem* problem, double *reaction,
                                double *velocity, int* info, SolverOptions* options)
@@ -62,6 +48,11 @@ void fc3d_nsgs_openmp(FrictionContactProblem* problem, double *reaction,
   else if (iparam[11] == 1)
   {
     fc3d_nsgs_openmp_redblack(problem, reaction, velocity, info, options) ;
+  }
+  else if (iparam[11] == 2)
+  {
+    
+    fc3d_nsgs_openmp_ddm_naive(problem, reaction, velocity, info, options) ;
   }
   else if (iparam[11] == 10)
   {
