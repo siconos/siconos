@@ -41,32 +41,15 @@ void fc3d_nsgs_index_computeqLocal(FrictionContactProblem * problem,
 {
   int n = 3 * problem->numberOfContacts;
   int in = 3 * contact, it = in + 1, is = it + 1;
-
   /* qLocal computation*/
-
-
-
   qLocal[0] = problem->q[in];
   qLocal[1] =  problem->q[it];
   qLocal[2] =  problem->q[is];
 
   if (problem->M->storageType == 0)
   {
-    double * MM = problem->M->matrix0;
-    int incx = n, incy = 1;
-    /* reaction current block set to zero, to exclude current contact block */
-    double rin = reaction[in] ;
-    double rit = reaction[it] ;
-    double ris = reaction[is] ;
-    reaction[in] = 0.0;
-    reaction[it] = 0.0;
-    reaction[is] = 0.0;
-    qLocal[0] += cblas_ddot(n , &MM[in] , incx , reaction , incy);
-    qLocal[1] += cblas_ddot(n , &MM[it] , incx , reaction , incy);
-    qLocal[2] += cblas_ddot(n , &MM[is] , incx , reaction , incy);
-    reaction[in] = rin;
-    reaction[it] = rit;
-    reaction[is] = ris;
+    fprintf(stderr, "Numerics, fc3d_nsgs failed.  : %s.\n");
+    exit(EXIT_FAILURE);
   }
   else if (problem->M->storageType == 1)
   {
@@ -75,7 +58,13 @@ void fc3d_nsgs_index_computeqLocal(FrictionContactProblem * problem,
      * to the current contact
      */
     rowProdNoDiagSBM3x3_index_block(n, 3, contact, problem->M->matrix1, reaction, qLocal, index, index_size);
+    /* rowProdNoDiagSBM3x3(n, 3, contact, problem->M->matrix1, reaction, qLocal); */
   }
+
+  /* for(unsigned int i =0; i < 3; i++) printf("qLocal[%i]= %e\t", i, qLocal[i]); */
+  /* printf("\n"); */
+
+  
 }
 
 
@@ -152,6 +141,7 @@ void fc3d_nsgs_index(FrictionContactProblem* problem,
                      int* info, SolverOptions* options,
                      unsigned int* index, unsigned int index_size)
 {
+  
   /* int and double parameters */
   int* iparam = options->iparam;
   double* dparam = options->dparam;
@@ -164,7 +154,8 @@ void fc3d_nsgs_index(FrictionContactProblem* problem,
   double normq = cblas_dnrm2(nc*3 , problem->q , 1);
 
 
-  printf("start fc3d_nsgs_index\n \n" );
+  
+  /* printf("start fc3d_nsgs_index\n \n" ); */
   /* for (int ii=0; ii < index_size; ii++) */
   /* { */
   /*   printf("index[%i] = %i\n", ii,index[ii] ); */
@@ -182,7 +173,7 @@ void fc3d_nsgs_index(FrictionContactProblem* problem,
   SolverOptions * localsolver_options = options->internalSolvers;
   
   SolverPtr local_solver = NULL;
-  Update_indexPtr update_thread_problem = NULL;
+  Update_indexPtr update_problem = NULL;
   FreeSolverNSGSPtr freeSolver = NULL;
   ComputeErrorPtr computeError = NULL;
 
@@ -192,7 +183,7 @@ void fc3d_nsgs_index(FrictionContactProblem* problem,
   localproblem->dimension = 3;
   localproblem->q = (double*)malloc(3 * sizeof(double));
   localproblem->mu = (double*)malloc(sizeof(double));
-  printf("start of initialization\n" );
+  /* printf("start of initialization\n" ); */
 
   //display(problem->M);
   if (problem->M->storageType == NM_DENSE || problem->M->storageType == NM_SPARSE)
@@ -205,11 +196,11 @@ void fc3d_nsgs_index(FrictionContactProblem* problem,
     localproblem->M = createNumericsMatrixFromData(NM_DENSE, 3, 3, NULL);
   }
 
-  fc3d_nsgs_index_initialize_local_solver(&local_solver, &update_thread_problem,
+  fc3d_nsgs_index_initialize_local_solver(&local_solver, &update_problem,
                              (FreeSolverNSGSPtr *)&freeSolver, &computeError,
                              problem , localproblem,
                              options, localsolver_options);
-  printf("end of initialization\n" );
+  /* printf("end of initialization\n" ); */
   /*****  NSGS Iterations *****/
   int iter = 0; /* Current iteration number */
   double error = 1.; /* Current error */
@@ -217,7 +208,6 @@ void fc3d_nsgs_index(FrictionContactProblem* problem,
   unsigned int contact; /* Number of the current row of blocks in M */
 
   unsigned int *scontacts = NULL;
-  verbose=1;
   /*  dparam[0]= dparam[2]; // set the tolerance for the local solver */
   if (iparam[1] == SICONOS_FRICTION_3D_NSGS_LIGHT_ERROR_EVALUATION_WITH_FULL_FINAL ||
       iparam[1] == SICONOS_FRICTION_3D_NSGS_LIGHT_ERROR_EVALUATION)
@@ -240,9 +230,9 @@ void fc3d_nsgs_index(FrictionContactProblem* problem,
         reactionold[2] = reaction[3 * contact + 2];
         if (verbose > 1) printf("----------------------------------- Contact Number %i\n", contact);
 
-        (*update_thread_problem)(contact, problem, localproblem,
-                                 reaction, localsolver_options,
-                                 index, index_size);
+        (*update_problem)(contact, problem, localproblem,
+                                   reaction, localsolver_options,
+                                   index, index_size);
         /* frictionContact_display(localproblem); */
         localsolver_options->iparam[4] = contact;
         (*local_solver)(localproblem, &(reaction[3 * contact]) , localsolver_options);
@@ -281,7 +271,7 @@ void fc3d_nsgs_index(FrictionContactProblem* problem,
       {
         if (absolute_error > error)
         {
-          printf("----------------------------------- FC3D - NSGS INDEX - Warning absolute Residual = %14.7e is larger than incremental error = %14.7e\n", absolute_error, error);
+          printf("----------------------------------- FC3D - NSGS INDEX - WARNING absolute Residual = %14.7e is larger than incremental error = %14.7e\n", absolute_error, error);
         }
       }
     }
@@ -312,3 +302,4 @@ void fc3d_nsgs_index(FrictionContactProblem* problem,
   }
 
 }
+
