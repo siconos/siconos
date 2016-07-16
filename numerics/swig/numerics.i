@@ -70,6 +70,26 @@
 // needed macros
 %include "SiconosConfig.h"
 
+// declare C++ shared_ptrs to C structs
+// need to do this here for other modules to reference numerics structs by shared_ptr.
+// swig requires same namespace 'std11' is used.
+%{
+#if defined(SICONOS_STD_SHARED_PTR) && !defined(SICONOS_USE_BOOST_FOR_CXX11)
+namespace std11 = std;
+#include <memory>
+#else
+#include <boost/shared_ptr.hpp>
+#include <boost/enable_shared_from_this.hpp>
+namespace std11 = boost;
+#endif
+%}
+#define SWIG_SHARED_PTR_NAMESPACE std11
+%include boost_shared_ptr.i
+
+// put needed shared_ptrs here
+// commented-out for now, swig insists on calling freeFrictionContactProblem()
+// instead of respecting the shared_ptr!
+// %shared_ptr(FrictionContactProblem)
 
 
  // more convenient

@@ -8,7 +8,7 @@ if(WITH_TESTING)
   ENDIF()
 endif()
 
-IF(CMAKE_SYSTEM_NAME MATCHES Windows)
+IF(MSVC)
   SET(VAR_SEPARATOR ";")
   APPEND_CXX_FLAGS("/bigobj")
 ELSE()

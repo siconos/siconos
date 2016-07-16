@@ -350,7 +350,11 @@ void BulletSpaceFilter::buildInteractions(double time)
             SP::Interaction inter;
             if (nslaw->size() == 3)
             {
-              SP::BulletR rel(new BulletR(cpoint));
+              /* if objectB is the only DS, (A is static), then flip
+               * the contact points and normal otherwise the relation
+               * is to the wrong side */
+              bool flip = !dsa && dsb;
+              SP::BulletR rel(new BulletR(cpoint, flip));
               inter.reset(new Interaction(3, nslaw, rel, 4 * i + z));
             }
             else
@@ -362,27 +366,25 @@ void BulletSpaceFilter::buildInteractions(double time)
               }
             }
 
-            if (obB->getUserPointer())
+            if (dsa != dsb)
             {
-              SP::BulletDS dsb(static_cast<BulletDS*>(obB->getUserPointer())->shared_ptr());
+              DEBUG_PRINTF("LINK obA:%p obB:%p inter:%p\n", obA, obB, &*inter);
+            }
 
-              if (dsa != dsb)
-              {
-                DEBUG_PRINTF("LINK obA:%p obB:%p inter:%p\n", obA, obB, &*inter);
-                assert(inter);
-
+            if (dsa && !dsb)
+            {
+                cpoint->m_userPersistentData = &*inter;
+                link(inter, dsa);
+            }
+            else if (!dsa && dsb)
+            {
+                cpoint->m_userPersistentData = &*inter;
+                link(inter, dsb);
+            }
+            else if (dsa && dsb && (dsa != dsb))
+            {
                 cpoint->m_userPersistentData = &*inter;
                 link(inter, dsa, dsb);
-              }
-              /* else collision shapes belong to the same object do nothing */
-            }
-            else
-            {
-              DEBUG_PRINTF("LINK obA:%p inter :%p\n", obA, &*inter);
-              assert(inter);
-
-              cpoint->m_userPersistentData = &*inter;
-              link(inter, dsa);
             }
           }
 
@@ -471,11 +473,27 @@ void BulletSpaceFilter::addDynamicObject(SP::BulletDS ds,
   simulation->initialize(this->model(), false);
 
   /* Re-create the world from scratch */
+#if 0
   _collisionWorld.reset();
 
   _dispatcher.reset(new btCollisionDispatcher(&*_collisionConfiguration));
   _collisionWorld.reset(new btCollisionWorld(&*_dispatcher, &*_broadphase,
                                              &*_collisionConfiguration));
+  // btGImpactCollisionAlgorithm::registerAlgorithm(&*_dispatcher);
+  // _collisionWorld->getDispatchInfo().m_useContinuous = false;
   _dynamicCollisionsObjectsInserted = false;
   _staticCollisionsObjectsInserted = false;
+#else
+  for (CollisionObjects::iterator ico = ds->collisionObjects()->begin();
+       ico != ds->collisionObjects()->end(); ++ico)
+  {
+    printf("Adding collision object\n");
+    btCollisionObject *ob = const_cast<btCollisionObject*>((*ico).first);
+    printf("user pointer: %p\n", ob->getUserPointer());
+    _collisionWorld->addCollisionObject(ob);
+    _collisionWorld->updateSingleAabb(ob);
+    _collisionWorld->getBroadphase()->getOverlappingPairCache()->
+        cleanProxyFromPairs(ob->getBroadphaseHandle(), &*_dispatcher);
+  }
+#endif
 }

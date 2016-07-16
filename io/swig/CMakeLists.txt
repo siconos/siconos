@@ -24,6 +24,8 @@ if(HAVE_SICONOS_MECHANICS)
   configure_file(io/vview.py ${CMAKE_BINARY_DIR}/io/vview.py @ONLY)
   configure_file(io/vexport.py ${CMAKE_BINARY_DIR}/io/vexport.py @ONLY)
   configure_file(io/pprocess.py ${CMAKE_BINARY_DIR}/io/pprocess.py @ONLY)
+  configure_file(io/info.py ${CMAKE_BINARY_DIR}/io/info.py @ONLY)
+  configure_file(io/filter.py ${CMAKE_BINARY_DIR}/io/filter.py @ONLY)
 
 
   install(PROGRAMS ${CMAKE_BINARY_DIR}/io/vview.py
@@ -32,6 +34,10 @@ if(HAVE_SICONOS_MECHANICS)
     DESTINATION bin RENAME siconos_vexport)
   install(PROGRAMS ${CMAKE_BINARY_DIR}/io/pprocess.py
     DESTINATION bin RENAME siconos_pprocess)
+  install(PROGRAMS ${CMAKE_BINARY_DIR}/io/info.py
+    DESTINATION bin RENAME siconos_info)
+  install(PROGRAMS ${CMAKE_BINARY_DIR}/io/filter.py
+    DESTINATION bin RENAME siconos_filter)
 
   
 endif()

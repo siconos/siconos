@@ -177,13 +177,16 @@ def group(h, name):
         return h.create_group(name)
 
 
-def data(h, name, nbcolumns):
+def data(h, name, nbcolumns, use_compression=False):
     try:
         return h[name]
     except KeyError:
+        comp = use_compression and nbcolumns > 0
         return h.create_dataset(name, (0, nbcolumns),
-                                maxshape=(None, nbcolumns))
-
+                                maxshape=(None, nbcolumns),
+                                chunks=[None,(4000,nbcolumns)][comp],
+                                compression=[None,'gzip'][comp],
+                                compression_opts=[None,9][comp])
 
 def add_line(dataset, line):
     dataset.resize(dataset.shape[0] + 1, 0)
@@ -482,7 +485,8 @@ class Hdf5():
 
     def __init__(self, io_filename=None, mode='w',
                  broadphase=None, osi=None, shape_filename=None,
-                 set_external_forces=None, gravity_scale=None, collision_margin=None):
+                 set_external_forces=None, gravity_scale=None, collision_margin=None,
+                 use_compression=False):
 
         if io_filename is None:
             self._io_filename = '{0}.hdf5'.format(
@@ -520,6 +524,8 @@ class Hdf5():
         self._keep = []
         self._scheduled_births = []
         self._births = dict()
+        self._initializing = True
+        self._use_compression = use_compression
 
     def __enter__(self):
         if self._set_external_forces is None:
@@ -532,11 +538,16 @@ class Hdf5():
         self._data = group(self._out, 'data')
         self._ref = group(self._data, 'ref')
         self._joints = group(self._data, 'joints')
-        self._static_data = data(self._data, 'static', 9)
-        self._velocities_data = data(self._data, 'velocities', 8)
-        self._dynamic_data = data(self._data, 'dynamic', 9)
-        self._cf_data = data(self._data, 'cf', 15)
-        self._solv_data = data(self._data, 'solv', 4)
+        self._static_data = data(self._data, 'static', 9,
+                                 use_compression = self._use_compression)
+        self._velocities_data = data(self._data, 'velocities', 8,
+                                     use_compression = self._use_compression)
+        self._dynamic_data = data(self._data, 'dynamic', 9,
+                                  use_compression = self._use_compression)
+        self._cf_data = data(self._data, 'cf', 15,
+                             use_compression = self._use_compression)
+        self._solv_data = data(self._data, 'solv', 4,
+                               use_compression = self._use_compression)
         self._input = group(self._data, 'input')
         self._nslaws = group(self._data, 'nslaws')
 
@@ -918,12 +929,18 @@ class Hdf5():
             for name in self.joints():
                 self.importJoint(name)
 
+    def currentTime(self):
+        if self._initializing:
+            return self._broadphase.model().simulation().startingTime()
+        else:
+            return self._broadphase.model().simulation().nextTime()
+
     def importBirths(self, body_class=None, shape_class=None,
                      face_class=None, edge_class=None,):
         """
         Import new objects in the broadphase.
         """
-        time = self._broadphase.model().simulation().nextTime()
+        time = self.currentTime()
 
         ind_time = bisect.bisect_left(self._scheduled_births, time)
 
@@ -971,12 +988,12 @@ class Hdf5():
                         floatv(velocity), contactors, float(mass),
                         inertia, body_class, shape_class, birth=True)
             #raw_input()
-            
+
     def outputStaticObjects(self):
         """
         Outputs translations and orientations of static objects
         """
-        time = self._broadphase.model().simulation().nextTime()
+        time = self.currentTime()
         idd = -1
         p = 0
         self._static_data.resize(len(self._static_transforms), 0)
@@ -997,14 +1014,14 @@ class Hdf5():
             idd -= 1
             p += 1
 
-    def outputDynamicObjects(self):
+    def outputDynamicObjects(self, initial=False):
         """
         Outputs translations and orientations of dynamic objects.
         """
 
         current_line = self._dynamic_data.shape[0]
 
-        time = self._broadphase.model().simulation().nextTime()
+        time = self.currentTime()
 
         positions = self._io.positions(self._broadphase.model())
 
@@ -1026,7 +1043,7 @@ class Hdf5():
 
         current_line = self._dynamic_data.shape[0]
 
-        time = self._broadphase.model().simulation().nextTime()
+        time = self.currentTime()
 
         velocities = self._io.velocities(self._broadphase.model())
 
@@ -1047,7 +1064,7 @@ class Hdf5():
         """
         if self._broadphase.model().nonSmoothDynamicalSystem().\
                 topology().indexSetsSize() > 1:
-            time = self._broadphase.model().simulation().nextTime()
+            time = self.currentTime()
             contact_points = self._io.contactPoints(self._broadphase.model())
 
             if contact_points is not None:
@@ -1067,7 +1084,7 @@ class Hdf5():
         Outputs solver #iterations & precision reached
         """
 
-        time = self._broadphase.model().simulation().nextTime()
+        time = self.currentTime()
         so = self._broadphase.model().simulation().oneStepNSProblem(0).\
             numericsSolverOptions()
 
@@ -1105,7 +1122,7 @@ class Hdf5():
         """
         Outputs solver #iterations & precision reached
         """
-        time = self._broadphase.model().simulation().nextTime()
+        time = self.currentTime()
         so = self._broadphase.model().simulation().oneStepNSProblem(0).\
             numericsSolverOptions()
         if so.solverId == Numerics.SICONOS_GENERIC_MECHANICAL_NSGS:
@@ -1355,7 +1372,8 @@ class Hdf5():
                 obj.attrs['inertia'] = inertia
 
             for num, shape in enumerate(shapes):
-                dat = data(obj, '{0}-{1}'.format(shape.name, num), 0)
+                dat = data(obj, '{0}-{1}'.format(shape.name, num), 0,
+                           use_compression = self._use_compression)
                 dat.attrs['name'] = shape.name
                 if hasattr(shape, 'group'):
                     dat.attrs['group'] = shape.group
@@ -1575,6 +1593,7 @@ class Hdf5():
         #     ds.display()
         # raw_input()
         print ('start simulation ...')
+        self._initializing = False
         while simulation.hasNextEvent():
 
             print ('step', k, '<', k0 - 1 + int((T - t0) / h))

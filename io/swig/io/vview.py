@@ -632,7 +632,7 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
     readers = dict()
     datasets = dict()
     mappers = dict()
-    actors = []
+    actors = dict()
     vtk_reader = {'vtp': vtk.vtkXMLPolyDataReader,
                   'stl': vtk.vtkSTLReader}
 
@@ -813,7 +813,7 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
 
             actor.GetProperty().SetColor(random_color())
             actor.SetMapper(fixed_mappers[contactor_name])
-            actors.append(actor)
+            actors[instance] = actor
             renderer.AddActor(actor)
 
             transform = vtk.vtkTransform()
@@ -1025,6 +1025,14 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
 
                 id_t = numpy.where(pos_data[:, 0] == self._times[index])
 
+                for instance, actor in actors.items():
+                    if instance < 0 or instance in pos_data[id_t,1]:
+                        #actor.GetProperty().SetColor(0,0,1)
+                        actor.VisibilityOn()
+                    else:
+                        #actor.GetProperty().SetColor(0,1,0)
+                        actor.VisibilityOff()
+
                 set_positionv(
                     pos_data[id_t, 1], pos_data[id_t, 2], pos_data[id_t, 3],
                     pos_data[id_t, 4],
@@ -1051,7 +1059,7 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
                 return (pos_data[id_t[0][id_], 2], pos_data[id_t[0][id_], 3], pos_data[id_t[0][id_], 4])
 
             def set_opacity(self):
-                for instance, actor in zip(instances, actors):
+                for instance, actor in actors.items():
                     if instance >= 0:
                         actor.GetProperty().SetOpacity(self._opacity)
 
@@ -1061,7 +1069,7 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
 
                 if key == 'r':
                     spos_data, dpos_data, cf_data, solv_data = load()
-                    if not cf_disabled:
+                    if not cf_disable:
                         cf_prov = CFprov(cf_data)
                     times = list(set(dpos_data[:, 0]))
                     times.sort()

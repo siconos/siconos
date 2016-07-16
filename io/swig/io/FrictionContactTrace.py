@@ -25,6 +25,7 @@ from siconos.kernel import \
     FrictionContact
 from siconos.numerics import \
     FrictionContactProblem
+
 try:
     import siconos.fclib as F
 except :

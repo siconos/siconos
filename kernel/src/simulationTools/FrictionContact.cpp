@@ -34,7 +34,6 @@ FrictionContact::FrictionContact(int dimPb, int numericsSolverId):
 {
   if (dimPb == 2 && numericsSolverId == SICONOS_FRICTION_3D_NSGS)
     _numerics_solver_id = SICONOS_FRICTION_2D_NSGS;
-  _numerics_problem.reset(new FrictionContactProblem);
 
   if (dimPb == 2)
   {
@@ -116,9 +115,9 @@ SP::FrictionContactProblem FrictionContact::frictionContactProblem()
   return numerics_problem;
 }
 
-FrictionContactProblem * FrictionContact::frictionContactProblemPtr()
+FrictionContactProblem *FrictionContact::frictionContactProblemPtr()
 {
-  FrictionContactProblem * numerics_problem = new FrictionContactProblem();
+  FrictionContactProblem *numerics_problem = &_numerics_problem;
   numerics_problem->dimension = _contactProblemDim;
   numerics_problem->numberOfContacts = _sizeOutput / _contactProblemDim;
   numerics_problem->M = &*_M->getNumericsMatrix();
