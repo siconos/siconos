@@ -375,10 +375,14 @@ void copy_SolverOptions(SolverOptions* options_ori, SolverOptions* options)
 
   options->iSize = options_ori->iSize;
   options->dSize = options_ori->dSize;
-  assert(!options->iparam);
+  
+
   options->iparam = (int *)calloc(options->iSize, sizeof(int));
-  assert(!options->dparam);
+
   options->dparam = (double *)calloc(options->dSize, sizeof(double));
+  
+  assert(options_ori->iparam);
+  assert(options_ori->dparam);
   for (int i = 0  ; i < options->iSize; i++ )
   {
     options->iparam[i] =  options_ori->iparam[i];
