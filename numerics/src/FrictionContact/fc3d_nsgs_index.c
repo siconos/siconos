@@ -129,7 +129,7 @@ void fc3d_nsgs_index_initialize_local_solver(SolverPtr* solve, Update_indexPtr* 
  
   default:
   {
-    fprintf(stderr, "Numerics, fc3d_nsgs failed. Unknown internal solver : %s.\n", idToName(localsolver_options->solverId));
+    fprintf(stderr, "Numerics, fc3d_nsgs failed. Unknown internal solver : %s.\n", solver_options_id_to_name(localsolver_options->solverId));
     exit(EXIT_FAILURE);
   }
   }

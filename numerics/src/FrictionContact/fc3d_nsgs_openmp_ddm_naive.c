@@ -200,10 +200,10 @@ void fc3d_nsgs_openmp_ddm_naive(FrictionContactProblem* problem, double *reactio
     }
 
     interface_local_solver_options[i] = malloc(sizeof(SolverOptions));
-    null_SolverOptions(interface_local_solver_options[i]);
+    solver_options_nullify(interface_local_solver_options[i]);
     interface_local_solver_options[i]->dparam = NULL;
     interface_local_solver_options[i]->iparam = NULL;
-    copy_SolverOptions(localsolver_options,interface_local_solver_options[i]);
+    solver_options_copy(localsolver_options,interface_local_solver_options[i]);
 
     fc3d_nsgs_index_initialize_local_solver(&local_solver, &update_thread_problem,
                                             (FreeSolverNSGSPtr *)&freeSolver, &computeError,
@@ -224,8 +224,8 @@ void fc3d_nsgs_openmp_ddm_naive(FrictionContactProblem* problem, double *reactio
     /* getchar(); */
 
     thread_solver_options[i] = malloc(sizeof(SolverOptions));
-    null_SolverOptions(thread_solver_options[i]);
-    copy_SolverOptions(options, thread_solver_options[i]);
+    solver_options_nullify(thread_solver_options[i]);
+    solver_options_copy(options, thread_solver_options[i]);
     thread_solver_options[i]->dparam[0] /= 10.0;
 
     thread_solver_options[i]->iparam[0]=thread_itermax;
@@ -535,7 +535,7 @@ void fc3d_nsgs_openmp_ddm_naive(FrictionContactProblem* problem, double *reactio
     }
     interface_local_problems[i]->M->matrix0 = NULL;
     freeFrictionContactProblem(interface_local_problems[i]);
-    deleteSolverOptions(interface_local_solver_options[i]);
+    solver_options_delete(interface_local_solver_options[i]);
     free(interface_local_solver_options[i]);
   }
 

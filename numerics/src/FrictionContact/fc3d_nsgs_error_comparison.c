@@ -282,7 +282,7 @@ void fc3d_nsgs_error_comparison(FrictionContactProblem* problem, double *reactio
   }
   localproblem->M->matrix0 = NULL;
   freeFrictionContactProblem(localproblem);
-  deleteSolverOptions(localsolver_options);
+  solver_options_delete(localsolver_options);
   free(localsolver_options);
 
 

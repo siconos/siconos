@@ -99,10 +99,10 @@ void fc3d_nsgs_openmp_redblack(FrictionContactProblem* problem, double *reaction
     }
 
     localsolvoptions[i] = malloc(sizeof(SolverOptions));
-    null_SolverOptions(localsolvoptions[i]);
+    solver_options_nullify(localsolvoptions[i]);
     localsolvoptions[i]->dparam = NULL;
     localsolvoptions[i]->iparam = NULL;
-    copy_SolverOptions(localsolver_options,localsolvoptions[i]);
+    solver_options_copy(localsolver_options,localsolvoptions[i]);
 
     fc3d_nsgs_initialize_local_solver(&local_solver, &update_localproblem,
                                (FreeSolverNSGSPtr *)&freeSolver, &computeError,
@@ -197,7 +197,7 @@ void fc3d_nsgs_openmp_redblack(FrictionContactProblem* problem, double *reaction
     }
     localproblems[i]->M->matrix0 = NULL;
     freeFrictionContactProblem(localproblems[i]);
-    deleteSolverOptions(localsolvoptions[i]);
+    solver_options_delete(localsolvoptions[i]);
     free(localsolvoptions[i]);
   }
 
