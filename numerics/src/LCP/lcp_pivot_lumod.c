@@ -616,7 +616,7 @@ int linearComplementarity_pivot_lumod_setDefaultSolverOptions(SolverOptions* opt
     printf("Set the Default SolverOptions for the generic pivot Solver\n");
   }
 
-  set_SolverOptions(options, SICONOS_LCP_PIVOT_LUMOD);
+  solver_options_set(options, SICONOS_LCP_PIVOT_LUMOD);
   return 0;
 }
 */

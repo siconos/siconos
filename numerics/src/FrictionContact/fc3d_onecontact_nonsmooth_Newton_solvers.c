@@ -346,7 +346,7 @@ int fc3d_onecontact_nonsmooth_Newtow_setDefaultSolverOptions(SolverOptions* opti
   options->dSize = 14;
   options->iparam = (int *)malloc(options->iSize * sizeof(int));
   options->dparam = (double *)malloc(options->dSize * sizeof(double));
-  null_SolverOptions(options);
+  solver_options_nullify(options);
   for (i = 0; i < 14; i++)
   {
     options->iparam[i] = 0;

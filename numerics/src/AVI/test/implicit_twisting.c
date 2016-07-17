@@ -71,7 +71,7 @@ int main(void)
   };
 
   SolverOptions options;
-  set_SolverOptions(&options, SICONOS_AVI_CAOFERRIS);
+  solver_options_set(&options, SICONOS_AVI_CAOFERRIS);
 
   _Bool c1, c2, c3, c4;
   unsigned N = 0;
@@ -137,7 +137,7 @@ int main(void)
 
   printf("final x: %2.6e %2.6e\n", sigma[0], sigma[1]);
 
-  deleteSolverOptions(&options);
+  solver_options_delete(&options);
   return info;
 
 expose_failure:

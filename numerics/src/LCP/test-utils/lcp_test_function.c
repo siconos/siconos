@@ -37,7 +37,7 @@ int lcp_test_function(FILE * f, int solverId, char* filename)
   setDefaultNumericsOptions(&global_options);
   global_options.verboseMode = 1;
   SolverOptions options;
-  set_SolverOptions(&options, solverId);
+  solver_options_set(&options, solverId);
 
 #ifdef HAVE_GAMS_C_API
   if (solverId == SICONOS_LCP_GAMS)
@@ -71,7 +71,7 @@ int lcp_test_function(FILE * f, int solverId, char* filename)
   free(z);
   free(w);
 
-  deleteSolverOptions(&options);
+  solver_options_delete(&options);
 
   if (solverId == SICONOS_LCP_GAMS)
   {
@@ -108,13 +108,13 @@ int lcp_test_function_SBM(FILE * f, int solverId)
 
   info = linearComplementarity_setDefaultSolverOptions(problem, options, SICONOS_LCP_NSGS_SBM);
 
-  set_SolverOptions(options->internalSolvers, solverId);
+  solver_options_set(options->internalSolvers, solverId);
 
 #ifdef HAVE_GAMS_C_API
   if (solverId == SICONOS_LCP_GAMS)
   {
     // no testing for now
-    deleteSolverOptions(options);
+    solver_options_delete(options);
     free(options);
     freeLinearComplementarityProblem(problem);
     fclose(foutput);
@@ -149,7 +149,7 @@ int lcp_test_function_SBM(FILE * f, int solverId)
   free(w);
   // info = linearComplementarity_deleteDefaultSolverOptions(&options,solvername);
 
-  deleteSolverOptions(options);
+  solver_options_delete(options);
   free(options);
 
   freeLinearComplementarityProblem(problem);

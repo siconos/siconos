@@ -60,13 +60,13 @@ int main(void)
 
     if (info)
     {
-      fprintf(stderr, "Solver %s failed with error %d\n", idToName(solver_id), info);
+      fprintf(stderr, "Solver %s failed with error %d\n", solver_options_id_to_name(solver_id), info);
       total_info = 1;
     }
     FC->M = NULL;
     FC->q = NULL;
     FC->mu = NULL;
-    deleteSolverOptions(&SO);
+    solver_options_delete(&SO);
     freeFrictionContactProblem(FC);
   }
 

@@ -96,14 +96,14 @@ int lcp_driver_SparseBlockMatrix(LinearComplementarityProblem* problem, double *
   /* Solver name */
   //  char * name = options->solverName;
   if (verbose == 1)
-    printf(" ========================== Call %s SparseBlockMatrix solver for Linear Complementarity problem ==========================\n", idToName(options->solverId));
+    printf(" ========================== Call %s SparseBlockMatrix solver for Linear Complementarity problem ==========================\n", solver_options_id_to_name(options->solverId));
 
   /****** Gauss Seidel block solver ******/
   if ((options->solverId) == SICONOS_LCP_NSGS_SBM)
     lcp_nsgs_SBM(problem, z , w , &info , options);
   else
   {
-    fprintf(stderr, "LCP_driver_SparseBlockMatrix error: unknown solver named: %s\n", idToName(options->solverId));
+    fprintf(stderr, "LCP_driver_SparseBlockMatrix error: unknown solver named: %s\n", solver_options_id_to_name(options->solverId));
     exit(EXIT_FAILURE);
   }
 
@@ -130,12 +130,12 @@ int lcp_driver_DenseMatrix(LinearComplementarityProblem* problem, double *z , do
 
   if (NoDefaultOptions == 0)
   {
-    readSolverOptions(0, options);
+    solver_options_read(0, options);
     options->filterOn = 1;
   }
 
   if (verbose > 0)
-    printSolverOptions(options);
+    solver_options_print(options);
 
   /* Output info. : 0: ok -  >0: problem (depends on solver) */
   int info = -1;
@@ -174,7 +174,7 @@ int lcp_driver_DenseMatrix(LinearComplementarityProblem* problem, double *z , do
 
 
   if (verbose == 1)
-    printf(" ========================== Call %s solver for Linear Complementarity problem ==========================\n", idToName(options->solverId));
+    printf(" ========================== Call %s solver for Linear Complementarity problem ==========================\n", solver_options_id_to_name(options->solverId));
 
   /****** Lemke algorithm ******/
   /* IN: itermax
@@ -303,7 +303,7 @@ int lcp_driver_DenseMatrix(LinearComplementarityProblem* problem, double *z , do
     break;
   default:
   {
-    fprintf(stderr, "lcp_driver_DenseMatrix error: unknown solver name: %s\n", idToName(options->solverId));
+    fprintf(stderr, "lcp_driver_DenseMatrix error: unknown solver name: %s\n", solver_options_id_to_name(options->solverId));
     exit(EXIT_FAILURE);
   }
   }

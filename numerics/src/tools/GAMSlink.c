@@ -128,7 +128,7 @@ static void setDashedOptions(const char* optName, const char* optValue, const ch
 void filename_datafiles(const int iter, const int solverId, const char* base_name, unsigned len, char* template_name, char* log_filename)
 {
   char iterStr[40];
-  snprintf(iterStr, sizeof(iterStr), "-i%d-%s", iter, idToName(solverId));
+  snprintf(iterStr, sizeof(iterStr), "-i%d-%s", iter, solver_options_id_to_name(solverId));
   if (base_name)
   {
     strncpy(template_name, base_name, len);

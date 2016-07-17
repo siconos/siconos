@@ -39,7 +39,7 @@ void  mixedLinearComplementarity_default_setDefaultSolverOptions(MixedLinearComp
   pOptions->iparam = (int*)malloc(10 * sizeof(int));
   pOptions->dparam = (double*)malloc(10 * sizeof(double));
   pOptions->numberOfInternalSolvers = 0;
-  null_SolverOptions(pOptions);
+  solver_options_nullify(pOptions);
 
 
   pOptions->dparam[0] = 10 - 7;
@@ -78,13 +78,13 @@ void  mixedLinearComplementarity_deleteDefaultSolverOptions(MixedLinearComplemen
   // Todo : fix this ...
   //if (pOptions->callback)
   //  free(pOptions->callback);
-  null_SolverOptions(pOptions);
+  solver_options_nullify(pOptions);
 
 }
 
 int mixedLinearComplementarity_setDefaultSolverOptions(MixedLinearComplementarityProblem* problem, SolverOptions* pOptions)
 {
-  null_SolverOptions(pOptions);
+  solver_options_nullify(pOptions);
   int info = -1;
 
   switch (pOptions->solverId)

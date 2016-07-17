@@ -393,7 +393,7 @@ int gfc3d_nonsmooth_Newton_AlartCurnier_setDefaultSolverOptions(
   options->iparam = (int *) calloc(options->iSize, sizeof(int));
   options->dparam = (double *) calloc(options->dSize,  sizeof(double));
   options->dWork = NULL;
-  null_SolverOptions(options);
+  solver_options_nullify(options);
   options->iparam[0] = 200;    /* input :  itermax */
   options->iparam[1] = 1;      /* output : #iter */
   options->iparam[2] = 0;      /* unused */

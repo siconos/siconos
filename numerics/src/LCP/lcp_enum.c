@@ -172,7 +172,7 @@ void lcp_enum_reset(LinearComplementarityProblem* problem, SolverOptions* option
     free(options->iWork);
   }
   options->dWork = NULL;
-  null_SolverOptions(options);
+  solver_options_nullify(options);
 }
 
 
@@ -320,7 +320,7 @@ int linearComplementarity_enum_setDefaultSolverOptions(LinearComplementarityProb
   }
 
 
-  null_SolverOptions(options);
+  solver_options_nullify(options);
   options->solverId = SICONOS_LCP_ENUM;
   options->numberOfInternalSolvers = 0;
   options->isSet = 1;

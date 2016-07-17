@@ -40,7 +40,7 @@ int main(void)
 
   info = frictionContact_test_function(finput, options);
 
-  deleteSolverOptions(options);
+  solver_options_delete(options);
   free(options);
   fclose(finput);
   printf("\nEnd of test on ./data/Capsules-i122-1617.dat\n");

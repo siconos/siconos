@@ -183,7 +183,7 @@ void soclcp_initializeLocalSolver_nsgs(Solver_soclcp_Ptr* solve, Update_soclcp_P
   /* } */
   default:
   {
-    fprintf(stderr, "Numerics, soclcp_nsgs failed. Unknown internal solver : %s.\n", idToName(localsolver_options->solverId));
+    fprintf(stderr, "Numerics, soclcp_nsgs failed. Unknown internal solver : %s.\n", solver_options_id_to_name(localsolver_options->solverId));
     exit(EXIT_FAILURE);
   }
   }
@@ -649,7 +649,7 @@ int soclcp_nsgs_setDefaultSolverOptions(SolverOptions* options)
   }
 
   /*  strcpy(options->solverName,"NSGS");*/
-  null_SolverOptions(options);
+  solver_options_nullify(options);
   options->solverId = SICONOS_SOCLCP_NSGS;
   options->numberOfInternalSolvers = 1;
   options->isSet = 1;

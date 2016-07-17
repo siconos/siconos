@@ -282,7 +282,7 @@ int fc3d_ProjectedGradientOnCylinder_setDefaultSolverOptions(SolverOptions* opti
     free(options->dparam);
   options->dparam = (double *)malloc(options->dSize * sizeof(double));
   options->dWork = NULL;
-  null_SolverOptions(options);
+  solver_options_nullify(options);
   for (i = 0; i < 10; i++)
   {
     options->iparam[i] = 0;
@@ -294,7 +294,7 @@ int fc3d_ProjectedGradientOnCylinder_setDefaultSolverOptions(SolverOptions* opti
 
   if (options->internalSolvers != NULL)
   {
-    deleteSolverOptions(options->internalSolvers);
+    solver_options_delete(options->internalSolvers);
     free(options->internalSolvers);
   }
 

@@ -108,7 +108,7 @@ void relay_avi_caoferris(RelayProblem* problem, double *z, double *w, int *info,
 
 int relay_avi_caoferris_setDefaultSolverOptions(SolverOptions* options)
 {
-  set_SolverOptions(options, SICONOS_RELAY_AVI_CAOFERRIS);
+  solver_options_set(options, SICONOS_RELAY_AVI_CAOFERRIS);
   return 0;
 }
 

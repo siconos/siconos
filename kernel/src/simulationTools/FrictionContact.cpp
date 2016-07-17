@@ -183,5 +183,5 @@ void FrictionContact::display() const
 
 FrictionContact::~FrictionContact()
 {
-  deleteSolverOptions(&*_numerics_solver_options);
+  solver_options_delete(&*_numerics_solver_options);
 }

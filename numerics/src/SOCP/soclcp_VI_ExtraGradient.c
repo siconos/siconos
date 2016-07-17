@@ -115,7 +115,7 @@ void soclcp_VI_ExtraGradient(SecondOrderConeLinearComplementarityProblem* proble
   }
   free(vi);
 
-  deleteSolverOptions(visolver_options);
+  solver_options_delete(visolver_options);
   free(visolver_options);
   visolver_options=NULL;
   free(soclcp_as_vi);
@@ -143,7 +143,7 @@ int soclcp_VI_ExtraGradient_setDefaultSolverOptions(SolverOptions* options)
   options->iparam = (int *)malloc(options->iSize * sizeof(int));
   options->dparam = (double *)malloc(options->dSize * sizeof(double));
   options->dWork = NULL;
-  null_SolverOptions(options);
+  solver_options_nullify(options);
   for (i = 0; i < 8; i++)
   {
     options->iparam[i] = 0;

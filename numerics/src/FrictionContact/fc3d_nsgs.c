@@ -204,7 +204,7 @@ void fc3d_nsgs_initialize_local_solver(SolverPtr* solve, UpdatePtr* update, Free
   }
   default:
   {
-    fprintf(stderr, "Numerics, fc3d_nsgs failed. Unknown internal solver : %s.\n", idToName(localsolver_options->solverId));
+    fprintf(stderr, "Numerics, fc3d_nsgs failed. Unknown internal solver : %s.\n", solver_options_id_to_name(localsolver_options->solverId));
     exit(EXIT_FAILURE);
   }
   }
@@ -872,8 +872,9 @@ int fc3d_nsgs_setDefaultSolverOptions(SolverOptions* options)
   options->iparam = (int *)malloc(options->iSize * sizeof(int));
   options->dparam = (double *)malloc(options->dSize * sizeof(double));
   options->dWork = NULL;
-  null_SolverOptions(options);
+
   for (i = 0; i < 15; i++)
+  solver_options_nullify(options);
   {
     options->iparam[i] = 0;
     options->dparam[i] = 0.0;

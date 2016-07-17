@@ -121,7 +121,7 @@ int main(int argc, char* argv[])
                            numerics_solver_options, &numerics_options);
 
 
-  deleteSolverOptions(numerics_solver_options);
+  solver_options_delete(numerics_solver_options);
 
   // Solver output
   printf("\n");

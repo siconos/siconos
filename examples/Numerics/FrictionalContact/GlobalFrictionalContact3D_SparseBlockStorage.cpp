@@ -228,7 +228,7 @@ int main(int argc, char* argv[])
                                         reaction , velocity, globalVelocity,
                                         numerics_solver_options, &numerics_options);
 
-  deleteSolverOptions(numerics_solver_options);
+  solver_options_delete(numerics_solver_options);
 
   free(numerics_solver_options);
   // Solver output

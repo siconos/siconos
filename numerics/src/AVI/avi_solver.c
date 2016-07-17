@@ -43,20 +43,20 @@ int avi_driver(AffineVariationalInequalities* problem, double *z , double *w, So
   /* If the options for solver have not been set, read default values in .opt file */
   if (options->isSet == 0)
   {
-    readSolverOptions(0, options);
+    solver_options_read(0, options);
     options->filterOn = 1;
   }
 
   if (verbose > 0)
   {
-    printSolverOptions(options);
+    solver_options_print(options);
   }
 
   /* Output info. : 0: ok -  >0: problem (depends on solver) */
   int info = -1;
 
   if (verbose == 1)
-    printf(" ========================== Call %s solver for AVI ==========================\n", idToName(options->solverId));
+    printf(" ========================== Call %s solver for AVI ==========================\n", solver_options_id_to_name(options->solverId));
 
   int id = options->solverId;
   switch (id)
@@ -67,7 +67,7 @@ int avi_driver(AffineVariationalInequalities* problem, double *z , double *w, So
   /*error */
   default:
   {
-    fprintf(stderr, "avi_driver error: unknown solver name: %s\n", idToName(options->solverId));
+    fprintf(stderr, "avi_driver error: unknown solver name: %s\n", solver_options_id_to_name(options->solverId));
     exit(EXIT_FAILURE);
   }
   }

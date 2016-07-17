@@ -175,7 +175,7 @@ int Relay::compute(double time)
 void Relay::setSolverId(int solverId)
 {
   // clear previous Solveroptions
-  deleteSolverOptions(_numerics_solver_options.get());
+  solver_options_delete(_numerics_solver_options.get());
   relay_setDefaultSolverOptions(NULL, _numerics_solver_options.get(), solverId);
 }
 
@@ -187,6 +187,6 @@ void Relay::display() const
 
 Relay::~Relay()
 {
-  deleteSolverOptions(&*_numerics_solver_options);
+  solver_options_delete(&*_numerics_solver_options);
 }
 

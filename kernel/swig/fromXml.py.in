@@ -229,7 +229,7 @@ def _additionalInputsOSNSP(osnspxml, osnsp, osnspOpt):
     solverxml = osnspxml.NonSmoothSolver
     if solverxml is not None:
         solverOptions = osnsp.numericsSolverOptions()
-        solverId = SN.nameToId(solverxml.Name)
+        solverId = SN.solver_options_name_to_id(solverxml.Name)
         if solverId == 0:
             print('Error: the solver named {:} has no corresponding id in siconos.numerics'.format(solverxml.Name))
             exit(1)

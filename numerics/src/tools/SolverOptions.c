@@ -54,9 +54,9 @@ char * SICONOS_NUMERICS_PROBLEM_FC3D_STR = "FC3D";
 char * SICONOS_NUMERICS_PROBLEM_VI_STR = "VI";
 char * SICONOS_NUMERICS_PROBLEM_AVI_STR = "AVI";
 
-static void recursive_printSolverOptions(SolverOptions* options, int level);
+static void recursive_solver_options_print(SolverOptions* options, int level);
 
-char * idProblemToChar(int id)
+char * solver_options_id_to_char(int id)
 {
   switch (id)
   {
@@ -97,13 +97,13 @@ char * idProblemToChar(int id)
     return SICONOS_NUMERICS_PROBLEM_AVI_STR;
   }
   default:
-    printf("Numerics:idProblemToChar, id unknown : %d \n", id);
+    printf("Numerics:solver_options_id_to_char, id unknown : %d \n", id);
     return NULL;
   }
 
 }
 
-void readSolverOptions(int driverType, SolverOptions* options)
+void solver_options_read(int driverType, SolverOptions* options)
 {
   /* To each problem, corresponds a XXX_parameters.opt file where default parameters can be read, XXX being the problem name (LCP, FrictionContact3D ...) */
 
@@ -113,7 +113,7 @@ void readSolverOptions(int driverType, SolverOptions* options)
   // Checks if NUMERICSSPATH is set.
   if (getenv("SICONOSPATH") == NULL)
   {
-    fprintf(stderr, "Numerics, readSolverOptions error, SICONOSPATH environment variable not set. Can not find default solver options file.\n");
+    fprintf(stderr, "Numerics, solver_options_read error, SICONOSPATH environment variable not set. Can not find default solver options file.\n");
     return;
     //exit(EXIT_FAILURE);
   }
@@ -156,7 +156,7 @@ void readSolverOptions(int driverType, SolverOptions* options)
       printf("The default-parameters file is: %s\n", name);
     if (!ficin)
     {
-      printf("Numerics, readSolverOptions error. Can not open file %60s", name);
+      printf("Numerics, solver_options_read error. Can not open file %60s", name);
       exit(-1);
     }
     //nval = fscanf(ficin, "%c", &(options->solverName));
@@ -165,13 +165,13 @@ void readSolverOptions(int driverType, SolverOptions* options)
     CHECK_IO(fgets(buffer, 64, ficin));
     /* Solver name */
     CHECK_IO(fgets(bufferName , 64, ficin));
-    options->solverId = nameToId(bufferName);
+    options->solverId = solver_options_name_to_id(bufferName);
     CHECK_IO(fgets(buffer, 64, ficin));
     /* iparam */
     nval = fscanf(ficin, "%d%d", &(options->iparam[0]), &(options->iparam[1]));
     if (nval != 4)
     {
-      fprintf(stderr, "Numerics, readSolverOptions error, wrong number of parameters for iparam.\n");
+      fprintf(stderr, "Numerics, solver_options_read error, wrong number of parameters for iparam.\n");
       exit(EXIT_FAILURE);
 
     }
@@ -179,19 +179,19 @@ void readSolverOptions(int driverType, SolverOptions* options)
     nval = fscanf(ficin, "%lf%lf%lf", &(options->dparam[0]), &(options->dparam[1]), &(options->dparam[2]));
     if (nval != 3)
     {
-      fprintf(stderr, "Numerics, readSolverOptions error, wrong number of parameters for dparam.\n");
+      fprintf(stderr, "Numerics, solver_options_read error, wrong number of parameters for dparam.\n");
       exit(EXIT_FAILURE);
 
     }
     fclose(ficin);
     break;
   default:
-    fprintf(stderr, "Numerics, readSolverOptions error, unknown problem type.\n");
+    fprintf(stderr, "Numerics, solver_options_read error, unknown problem type.\n");
     exit(EXIT_FAILURE);
   }
 }
 
-void recursive_printSolverOptions(SolverOptions* options, int level)
+void recursive_solver_options_print(SolverOptions* options, int level)
 {
   char* marge;
   int i;
@@ -207,7 +207,7 @@ void recursive_printSolverOptions(SolverOptions* options, int level)
   {
     printf("%sThe solver parameters below have  been set \t options->isSet = %i\n", marge, options->isSet);
     printf("%sId of the solver\t\t\t\t options->solverId = %d \n", marge, options->solverId);
-    printf("%sName of the solver\t\t\t\t  %s \n", marge, idToName(options->solverId));
+    printf("%sName of the solver\t\t\t\t  %s \n", marge, solver_options_id_to_name(options->solverId));
     if (options->iparam != NULL)
     {
       printf("%sint parameters \t\t\t\t\t options->iparam\n", marge);
@@ -245,24 +245,24 @@ void recursive_printSolverOptions(SolverOptions* options, int level)
 
 
 
-  printf("%sSee %s documentation for parameters definition)\n", marge, idToName(options->solverId));
+  printf("%sSee %s documentation for parameters definition)\n", marge, solver_options_id_to_name(options->solverId));
 
   printf("\n");
 
   printf("%snumber of internal (or local) solvers \t\t options->numberOfInternalSolvers = %i\n", marge, options->numberOfInternalSolvers);
   for (i = 0; i < options->numberOfInternalSolvers; i++)
   {
-    recursive_printSolverOptions(options->internalSolvers + i, level + 1);
+    recursive_solver_options_print(options->internalSolvers + i, level + 1);
   }
   free(marge);
 
 }
-void printSolverOptions(SolverOptions* options)
+void solver_options_print(SolverOptions* options)
 {
-  recursive_printSolverOptions(options, 0);
+  recursive_solver_options_print(options, 0);
 }
 
-void free_solver_specific_data(SolverOptions* options)
+void solver_options_free_solver_specific_data(SolverOptions* options)
 {
   int id = options->solverId;
   switch (id)
@@ -305,13 +305,13 @@ void free_solver_specific_data(SolverOptions* options)
   }
 }
 
-void deleteSolverOptions(SolverOptions* op)
+void solver_options_delete(SolverOptions* op)
 {
   if(op)
   {
     assert(op->numberOfInternalSolvers >= 0);
     for (int i = 0; i < op->numberOfInternalSolvers; i++)
-      deleteSolverOptions(&(op->internalSolvers[i]));
+      solver_options_delete(&(op->internalSolvers[i]));
     if (op->numberOfInternalSolvers && op->internalSolvers)
     {
       free(op->internalSolvers);
@@ -335,11 +335,11 @@ void deleteSolverOptions(SolverOptions* op)
       free(op->callback);
       op->callback = NULL;
     }
-    free_solver_specific_data(op);
+    solver_options_free_solver_specific_data(op);
   }
 }
 
-void null_SolverOptions(SolverOptions* options)
+void solver_options_nullify(SolverOptions* options)
 {
   options->dWork = NULL;
   options->iWork = NULL;
@@ -350,7 +350,7 @@ void null_SolverOptions(SolverOptions* options)
   options->solverParameters = NULL;
 }
 
-void fill_SolverOptions(SolverOptions* options, int solverId, int iSize, int dSize, int iter_max, double tol)
+void solver_options_fill(SolverOptions* options, int solverId, int iSize, int dSize, int iter_max, double tol)
 {
   options->solverId = solverId;
   options->numberOfInternalSolvers = 0;
@@ -360,14 +360,14 @@ void fill_SolverOptions(SolverOptions* options, int solverId, int iSize, int dSi
   options->dSize = dSize;
   options->iparam = (int *)calloc(iSize, sizeof(int));
   options->dparam = (double *)calloc(dSize, sizeof(double));
-  null_SolverOptions(options);
+  solver_options_nullify(options);
   /* we set those value, even if they don't make sense. If this is the case,
    * they should be +inf */
   options->iparam[0] = iter_max;
   options->dparam[0] = tol;
 
 }
-void copy_SolverOptions(SolverOptions* options_ori, SolverOptions* options)
+void solver_options_copy(SolverOptions* options_ori, SolverOptions* options)
 {
   options->solverId =  options_ori->solverId;
   options->isSet = options_ori->isSet ;
@@ -423,7 +423,7 @@ void copy_SolverOptions(SolverOptions* options_ori, SolverOptions* options)
     SolverOptions * internal_options_ori = options_ori->internalSolvers + i;
     SolverOptions * internal_options = options->internalSolvers + i;
 
-    copy_SolverOptions(internal_options_ori,  internal_options);
+    solver_options_copy(internal_options_ori,  internal_options);
   }
 
   // Warning pointer link
@@ -439,7 +439,7 @@ void copy_SolverOptions(SolverOptions* options_ori, SolverOptions* options)
 
 
 
-void set_SolverOptions(SolverOptions* options, int solverId)
+void solver_options_set(SolverOptions* options, int solverId)
 {
  int iSize = 0;
  int dSize = 0;
@@ -462,7 +462,7 @@ void set_SolverOptions(SolverOptions* options, int solverId)
     dSize = 2;
     iter_max = 1000;
     tol = tol == 0. ? 1e-8 : tol;
-    fill_SolverOptions(options, solverId, iSize, dSize, iter_max, tol);
+    solver_options_fill(options, solverId, iSize, dSize, iter_max, tol);
     break;
   }
   case SICONOS_LCP_RPGS:
@@ -471,7 +471,7 @@ void set_SolverOptions(SolverOptions* options, int solverId)
     dSize = 3;
     iter_max = 1000;
     tol = 1e-8;
-    fill_SolverOptions(options, solverId, iSize, dSize, iter_max, tol);
+    solver_options_fill(options, solverId, iSize, dSize, iter_max, tol);
     options->dparam[2] = 1.0;
     break;
   }
@@ -481,7 +481,7 @@ void set_SolverOptions(SolverOptions* options, int solverId)
     dSize = 3;
     iter_max = 1000;
     tol = 1e-8;
-    fill_SolverOptions(options, solverId, iSize, dSize, iter_max, tol);
+    solver_options_fill(options, solverId, iSize, dSize, iter_max, tol);
     options->dparam[2] = 0.3;
     break;
   }
@@ -491,7 +491,7 @@ void set_SolverOptions(SolverOptions* options, int solverId)
     dSize = 4;
     iter_max = 1000;
     tol = 1e-8;
-    fill_SolverOptions(options, solverId, iSize, dSize, iter_max, tol);
+    solver_options_fill(options, solverId, iSize, dSize, iter_max, tol);
     options->dparam[2] = 0.3;
     options->dparam[3] = 1.0;
     break;
@@ -502,7 +502,7 @@ void set_SolverOptions(SolverOptions* options, int solverId)
     dSize = 2;
     iter_max = 0; /* this indicates the number of solutions ...  */
     tol = 1e-8;
-    fill_SolverOptions(options, solverId, iSize, dSize, iter_max, tol);
+    solver_options_fill(options, solverId, iSize, dSize, iter_max, tol);
     /*use dgels:*/
     options->iparam[4] = 0;
     break;
@@ -519,7 +519,7 @@ void set_SolverOptions(SolverOptions* options, int solverId)
     dSize = 3;
     iter_max = 1000;
     tol = 1e-12;
-    fill_SolverOptions(options, solverId, iSize, dSize, iter_max, tol);
+    solver_options_fill(options, solverId, iSize, dSize, iter_max, tol);
     newton_lsa_default_SolverOption(options);
     break;
 
@@ -528,7 +528,7 @@ void set_SolverOptions(SolverOptions* options, int solverId)
     dSize = 8;
     iter_max = 100;
     tol = 1e-12;
-    fill_SolverOptions(options, solverId, iSize, dSize, iter_max, tol);
+    solver_options_fill(options, solverId, iSize, dSize, iter_max, tol);
     pathsearch_default_SolverOption(options);
     break;
 
@@ -537,7 +537,7 @@ void set_SolverOptions(SolverOptions* options, int solverId)
     dSize = 3;
     iter_max = 100;
     tol = 1e-12;
-    fill_SolverOptions(options, solverId, iSize, dSize, iter_max, tol);
+    solver_options_fill(options, solverId, iSize, dSize, iter_max, tol);
     vi_box_AVI_extra_SolverOptions(options);
     break;
 
@@ -549,7 +549,7 @@ void set_SolverOptions(SolverOptions* options, int solverId)
     dSize = 3;
     iter_max = 10000;
     tol = 1e-12;
-    fill_SolverOptions(options, solverId, iSize, dSize, iter_max, tol);
+    solver_options_fill(options, solverId, iSize, dSize, iter_max, tol);
     break;
 
   case SICONOS_LCP_LEMKE:
@@ -562,7 +562,7 @@ void set_SolverOptions(SolverOptions* options, int solverId)
     dSize = 3;
     iter_max = 10000;
     tol = 100*DBL_EPSILON;
-    fill_SolverOptions(options, solverId, iSize, dSize, iter_max, tol);
+    solver_options_fill(options, solverId, iSize, dSize, iter_max, tol);
     options->iparam[SICONOS_IPARAM_PIVOT_RULE] = SICONOS_LCP_PIVOT_LEMKE;
     break;
 
@@ -582,14 +582,14 @@ void set_SolverOptions(SolverOptions* options, int solverId)
     dSize = 4; // stupid thing in checkTrivialCase in fc3d_driver.c
     iter_max = 10000;
     tol = tol == 0. ? 1e-9 : tol;
-    fill_SolverOptions(options, solverId, iSize, dSize, iter_max, tol);
+    solver_options_fill(options, solverId, iSize, dSize, iter_max, tol);
     if (!options->solverParameters)
     {
       options->solverParameters = createGAMSparams(GAMS_MODELS_SHARE_DIR, GAMS_DIR);
     }
     break;
 #else
-    printf("set_SolverOptions :: GAMS was not enabled, exiting!\n");
+    printf("solver_options_set :: GAMS was not enabled, exiting!\n");
     exit(EXIT_FAILURE);
 #endif
   }
@@ -600,16 +600,16 @@ void set_SolverOptions(SolverOptions* options, int solverId)
     dSize = 3;
     iter_max = 10000;
     tol = 1e-12;
-    fill_SolverOptions(options, solverId, iSize, dSize, iter_max, tol);
+    solver_options_fill(options, solverId, iSize, dSize, iter_max, tol);
     break;
   default:
-   printf("set_SolverOptions not supported for solver id %d named %s\n", solverId, idToName(solverId));
+   printf("solver_options_set not supported for solver id %d named %s\n", solverId, solver_options_id_to_name(solverId));
    exit(EXIT_FAILURE);
  }
 
 }
 
-char * idToName(int Id)
+char * solver_options_id_to_name(int Id)
 {
   switch (Id)
   {
@@ -621,7 +621,7 @@ SICONOS_REGISTER_SOLVERS()
     return SICONOS_NONAME_STR;
   }
 }
-int nameToId(char * pName)
+int solver_options_name_to_id(char * pName)
 {
 #undef SICONOS_SOLVER_MACRO
 #define SICONOS_SOLVER_MACRO(X) if (strcmp(X ## _STR, pName) == 0) return X;

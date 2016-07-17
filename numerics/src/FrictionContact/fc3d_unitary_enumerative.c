@@ -616,7 +616,7 @@ int fc3d_unitary_enumerative_setDefaultSolverOptions(
   options->iparam = (int *) malloc(options->iSize * sizeof(int));
   options->dparam = (double *) malloc(options->dSize * sizeof(double));
   options->dWork = NULL;
-  null_SolverOptions(options);
+  solver_options_nullify(options);
   for (unsigned int i = 0; i < 5; i++)
   {
     options->iparam[i] = 0;

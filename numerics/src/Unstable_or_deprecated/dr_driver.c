@@ -59,7 +59,7 @@ int dr_driver(RelayProblem* problem, double *z , double *w, SolverOptions* optio
   char * name = options->solverName;*/
 
   if (verbose == 1)
-    printf(" ========================== Call %s solver for Relayproblem ==========================\n", idToName(options->solverId));
+    printf(" ========================== Call %s solver for Relayproblem ==========================\n", solver_options_id_to_name(options->solverId));
 
   /****** NLGS algorithm ******/
   if (options->solverId == SICONOS_RELAY_NLGS)
@@ -72,7 +72,7 @@ int dr_driver(RelayProblem* problem, double *z , double *w, SolverOptions* optio
   /*error */
   else
   {
-    fprintf(stderr, "dr_driver error: unknown solver named: %s\n", idToName(options->solverId));
+    fprintf(stderr, "dr_driver error: unknown solver named: %s\n", solver_options_id_to_name(options->solverId));
     exit(EXIT_FAILURE);
   }
 
