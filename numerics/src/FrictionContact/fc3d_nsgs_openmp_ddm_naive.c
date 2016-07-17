@@ -381,10 +381,7 @@ void fc3d_nsgs_openmp_ddm_naive(FrictionContactProblem* problem, double *reactio
     /* ----------------- interface loop ---------------------- */
     /* ------------------------------------------------------- */
     {
-      verbose=0;
       double error_delta_reaction_interface=0.0;
-
-
       for (unsigned int i = 0; i < interface_index_size; i++ )
       {
         int  contact = interface_index[i];
