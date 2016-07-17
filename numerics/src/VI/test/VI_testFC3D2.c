@@ -114,7 +114,7 @@ int main(void)
     printf("x[%i]=%f\t",i,x[i]);    printf("w[%i]=F[%i]=%f\n",i,i,w[i]);
   }
  
-  deleteSolverOptions(options);
+  solver_options_delete(options);
   free(options);
   free(problem);
   free(x);

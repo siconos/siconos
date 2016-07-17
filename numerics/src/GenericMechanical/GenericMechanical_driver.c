@@ -507,7 +507,7 @@ void genericMechanicalProblem_setDefaultSolverOptions(SolverOptions* options, in
   options->dSize = 15;
   options->numberOfInternalSolvers = 2;
   options->dWork = NULL;
-  null_SolverOptions(options);
+  solver_options_nullify(options);
   options->iparam = (int *)calloc(options->iSize, sizeof(int));
   options->dparam = (double *)malloc(options->dSize * sizeof(double));
   options->iparam[0] = 10000;
@@ -548,7 +548,7 @@ void genericMechanicalProblem_setDefaultSolverOptions(SolverOptions* options, in
     (&options->internalSolvers[1])->dSize = 5;
     (&options->internalSolvers[1])->iparam = (int *)malloc(options->iSize * sizeof(int));
     (&options->internalSolvers[1])->dparam = (double *)malloc(options->dSize * sizeof(double));
-    null_SolverOptions((&options->internalSolvers[1]));
+    solver_options_nullify((&options->internalSolvers[1]));
     for (int i = 0; i < 5; i++)
     {
       (&options->internalSolvers[1])->iparam[i] = 0;

@@ -38,7 +38,7 @@ int main(void)
 
   info = frictionContact_test_function(finput, options);
 
-  deleteSolverOptions(options);
+  solver_options_delete(options);
   free(options);
   fclose(finput);
   printf("\nEnd of test on ./data/Example1_Fc3D_SBM.dat\n");

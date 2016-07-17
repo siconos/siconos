@@ -28,7 +28,7 @@ int main(void)
   FILE * finput  =  fopen("./data/relay1.dat", "r");
 
   char solvername[20] = "RELAY_PATH";
-  info = relay_test_function(finput, nameToId(solvername));
+  info = relay_test_function(finput, solver_options_name_to_id(solvername));
 
   fclose(finput);
 

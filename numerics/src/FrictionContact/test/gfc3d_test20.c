@@ -90,7 +90,7 @@ int main(void)
 
   freeGlobalFrictionContactProblem(problem);
 
-  deleteSolverOptions(options);
+  solver_options_delete(options);
   free(options);
 
   printf("End of test on %s\n", filename);

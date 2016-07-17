@@ -148,22 +148,22 @@ extern "C"
       3: FrictionContact3D\n
       \param[out] options structure used to save the parameters
   */
-  void readSolverOptions(int driverType, SolverOptions* options);
+  void solver_options_read(int driverType, SolverOptions* options);
 
   /** screen display of solver parameters
       \param options the structure to be displayed
   */
-  void printSolverOptions(SolverOptions* options);
+  void solver_options_print(SolverOptions* options);
 
   /** free some SolverOptions fields;
    *   \param options the structure to clean
    */
-  void deleteSolverOptions(SolverOptions * options);
+  void solver_options_delete(SolverOptions * options);
 
   /* Set all pointer fields to NULL, except iparam and dparam
    * \param options the struct to initialize
    */
-  void null_SolverOptions(SolverOptions* options);
+  void solver_options_nullify(SolverOptions* options);
 
   /** fill a SolverOptions struct: set fields, allocate memory and set common
    * values
@@ -176,43 +176,43 @@ extern "C"
    * \param tol tolerance for the solution.
    * if this does not make sense or is unwanted, give inf as value
    */
-  void fill_SolverOptions(SolverOptions* options, int solverId, int iSize, int dSize, int iter_max, double tol);
+  void solver_options_fill(SolverOptions* options, int solverId, int iSize, int dSize, int iter_max, double tol);
 
   /** set parameters in SolverOption. This function should be used instead of
    * rewrittent each time a new function for setting the parameters
    * \param options the struct to set
    * \param solverId the id of the solver
    */
-  void set_SolverOptions(SolverOptions* options, int solverId);
+  void solver_options_set(SolverOptions* options, int solverId);
 
   /** return the id of a solver based on its name
    * \param pName the name of the solver
    * \return the id of the solver or 0 if it failed
    */
-  int nameToId(char * pName);
+  int solver_options_name_to_id(char * pName);
 
   /** return the name of a solver given its id
    * \param Id the id of the solver
    * \return the name of the solver
    */
-  char * idToName(int Id);
+  char * solver_options_id_to_name(int Id);
 
   /** return the name of a problem type (LCP, NCP, VI, ...) based on its id
    * \param id the id of the problem
    * \return the name of the problem
    */
-  char * idProblemToChar(int id);
+  char * solver_options_id_to_char(int id);
 
   /** free the solverData structure
    * \param options the structure to free
    */
-  void free_solver_specific_data(SolverOptions* options);
+  void solver_options_free_solver_specific_data(SolverOptions* options);
 
   /** copy SolverOptions
    * \param options_ori the structure to copy
    * \param options the output structure 
    */
-  void copy_SolverOptions(SolverOptions* options_ori, SolverOptions* options);
+  void solver_options_copy(SolverOptions* options_ori, SolverOptions* options);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

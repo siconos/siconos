@@ -39,7 +39,7 @@ int main(void)
 
 
 
-  deleteSolverOptions(options);
+  solver_options_delete(options);
   free(options);
 
 

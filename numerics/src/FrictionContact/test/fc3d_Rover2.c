@@ -43,7 +43,7 @@ static inline int test_rover(char  * filename)
 
 
 
-  deleteSolverOptions(options);
+  solver_options_delete(options);
   free(options);
 
 

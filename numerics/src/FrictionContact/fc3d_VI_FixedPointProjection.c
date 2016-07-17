@@ -119,7 +119,7 @@ void fc3d_VI_FixedPointProjection(FrictionContactProblem* problem, double *react
   }
   free(vi);
 
-  deleteSolverOptions(visolver_options);
+  solver_options_delete(visolver_options);
   free(visolver_options);
   free(fc3d_as_vi);
 
@@ -146,7 +146,7 @@ int fc3d_VI_FixedPointProjection_setDefaultSolverOptions(SolverOptions* options)
   options->iparam = (int *)malloc(options->iSize * sizeof(int));
   options->dparam = (double *)malloc(options->dSize * sizeof(double));
   options->dWork = NULL;
-  null_SolverOptions(options);
+  solver_options_nullify(options);
   for (i = 0; i < 8; i++)
   {
     options->iparam[i] = 0;

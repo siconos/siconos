@@ -43,7 +43,7 @@ static inline int test_rover(char  * filename)
   options->internalSolvers->iparam[10] = 1; // JeanMoreau ok, AlartCurnier fail
   info = frictionContact_test_function(finput, options);
 
-  deleteSolverOptions(options);
+  solver_options_delete(options);
   free(options);
 
   fclose(finput);

@@ -42,7 +42,7 @@ int main(void)
   
   info = genericMechanical_test_function(finput,options);
   printf("GMP TEST: Nb GS it=%i\n",options->iparam[3]);
-  deleteSolverOptions(options);
+  solver_options_delete(options);
   free(options);
 
   fclose(finput);

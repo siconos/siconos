@@ -62,10 +62,10 @@ int variationalInequality_driver(VariationalInequality* problem,
   int NoDefaultOptions = options->isSet; /* true(1) if the SolverOptions structure has been filled in else false(0) */
 
   if (!NoDefaultOptions)
-    readSolverOptions(3, options);
+    solver_options_read(3, options);
 
   if (verbose > 0)
-    printSolverOptions(options);
+    solver_options_print(options);
 
   /* Solver name */
   /*char * name = options->solverName;*/

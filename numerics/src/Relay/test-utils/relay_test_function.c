@@ -70,7 +70,7 @@ int relay_test_function(FILE * f, int  solverId)
   free(z);
   free(w);
 
-  deleteSolverOptions(options);
+  solver_options_delete(options);
 
   free(options);
 

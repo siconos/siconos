@@ -39,7 +39,7 @@ void  mixedComplementarity_default_setDefaultSolverOptions(MixedComplementarityP
   pOptions->iparam = (int*)calloc(10, sizeof(int));
   pOptions->dparam = (double*)calloc(10, sizeof(double));
   pOptions->numberOfInternalSolvers = 0;
-  null_SolverOptions(pOptions);
+  solver_options_nullify(pOptions);
 
 
   /*default tolerance of it*/

@@ -431,7 +431,7 @@ int gfc3d_nsgs_wr_setDefaultSolverOptions(SolverOptions* options)
   options->iparam = NULL;
   options->dparam = NULL;
   options->dWork = NULL;
-  null_SolverOptions(options);
+  solver_options_nullify(options);
   options->internalSolvers = (SolverOptions *)malloc(sizeof(SolverOptions));
   fc3d_nsgs_setDefaultSolverOptions(options->internalSolvers);
   return 0;
@@ -494,7 +494,7 @@ int gfc3d_globalAlartCurnier_wr_setDefaultSolverOptions(SolverOptions* options)
   options->iparam = NULL;
   options->dparam = NULL;
   options->dWork = NULL;
-  null_SolverOptions(options);
+  solver_options_nullify(options);
   options->internalSolvers = (SolverOptions *)malloc(sizeof(SolverOptions));
   gfc3d_nonsmooth_Newton_AlartCurnier_setDefaultSolverOptions(options->internalSolvers);
   return 0;
@@ -552,7 +552,7 @@ int gfc3d_nsgs_velocity_wr_setDefaultSolverOptions(SolverOptions* options)
   options->iparam = NULL;
   options->dparam = NULL;
   options->dWork = NULL;
-  null_SolverOptions(options);
+  solver_options_nullify(options);
   options->internalSolvers = (SolverOptions *)malloc(sizeof(SolverOptions));
   fc3d_nsgs_velocity_setDefaultSolverOptions(options->internalSolvers);
   return 0;
@@ -593,7 +593,7 @@ int gfc3d_proximal_wr_setDefaultSolverOptions(SolverOptions* options)
   options->iparam = NULL;
   options->dparam = NULL;
   options->dWork = NULL;
-  null_SolverOptions(options);
+  solver_options_nullify(options);
   options->internalSolvers = (SolverOptions *)malloc(sizeof(SolverOptions));
   fc3d_proximal_setDefaultSolverOptions(options->internalSolvers);
   return 0;
@@ -632,7 +632,7 @@ int gfc3d_DeSaxceFixedPoint_setDefaultSolverOptions(SolverOptions* options)
   options->iparam = NULL;
   options->dparam = NULL;
   options->dWork = NULL;
-  null_SolverOptions(options);
+  solver_options_nullify(options);
   options->internalSolvers = (SolverOptions *)malloc(sizeof(SolverOptions));
   fc3d_DeSaxceFixedPoint_setDefaultSolverOptions(options->internalSolvers);
   return 0;
@@ -672,7 +672,7 @@ int gfc3d_TrescaFixedPoint_setDefaultSolverOptions(SolverOptions* options)
   options->iparam = NULL;
   options->dparam = NULL;
   options->dWork = NULL;
-  null_SolverOptions(options);
+  solver_options_nullify(options);
   options->internalSolvers = (SolverOptions *)malloc(sizeof(SolverOptions));
   fc3d_TrescaFixedPoint_setDefaultSolverOptions(options->internalSolvers);
   return 0;

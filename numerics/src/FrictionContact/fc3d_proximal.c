@@ -47,7 +47,7 @@ void fc3d_proximal(FrictionContactProblem* problem, double *reaction, double *ve
   double tolerance = dparam[0];
   double normq = cblas_dnrm2(nc*3 , problem->q , 1);
   if (verbose > 0){
-    printSolverOptions(options);
+    solver_options_print(options);
   }
 
   if (options->numberOfInternalSolvers < 1)
@@ -366,7 +366,7 @@ int fc3d_proximal_setDefaultSolverOptions(SolverOptions* options)
   options->iparam = (int *)malloc(options->iSize * sizeof(int));
   options->dparam = (double *)malloc(options->dSize * sizeof(double));
   options->dWork = NULL;
-  null_SolverOptions(options);
+  solver_options_nullify(options);
   for (i = 0; i < 10; i++)
   {
     options->iparam[i] = 0;

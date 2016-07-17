@@ -63,7 +63,7 @@ void fc3d_SOCLCP(FrictionContactProblem* problem, double *reaction, double *velo
   if (verbose > 0)
   {
     printf("Local solver data :");
-    printSolverOptions(internalsolver_options);
+    solver_options_print(internalsolver_options);
   }
 
 
@@ -160,7 +160,7 @@ int fc3d_SOCLCP_setDefaultSolverOptions(SolverOptions* options)
   options->iparam = (int *)malloc(options->iSize * sizeof(int));
   options->dparam = (double *)malloc(options->dSize * sizeof(double));
   options->dWork = NULL;
-  null_SolverOptions(options);
+  solver_options_nullify(options);
   for (i = 0; i < 8; i++)
   {
     options->iparam[i] = 0;

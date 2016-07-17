@@ -38,7 +38,7 @@ int main(void)
   options->internalSolvers->dparam[0]=1e-5; /* no convergence for tighter tolerances */
 
   info = globalFrictionContact_test_function(finput, options);
-  deleteSolverOptions(options);
+  solver_options_delete(options);
   free(options);
   fclose(finput);
   printf("End of test on %s\n", filename);

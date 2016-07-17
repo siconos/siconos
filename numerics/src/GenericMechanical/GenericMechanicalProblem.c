@@ -171,7 +171,7 @@ void displayGMP(GenericMechanicalProblem * pGMP)
 
   while (pElem)
   {
-    printf("-->An sub-problem %s.\n", idProblemToChar(pElem->type));
+    printf("-->An sub-problem %s.\n", solver_options_id_to_char(pElem->type));
     pElem = pElem->nextProblem;
   }
   printf("The sparce block matrice is :\n");

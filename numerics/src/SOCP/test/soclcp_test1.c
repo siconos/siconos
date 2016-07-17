@@ -35,7 +35,7 @@ int main(void)
 
   info = soclcp_test_function(finput, options);
 
-  deleteSolverOptions(options);
+  solver_options_delete(options);
   free(options);
   fclose(finput);
   printf("\nEnd of test on ./data/Example1_SOCLCP_SBM.dat\n");

@@ -65,7 +65,7 @@ void fc3d_ACLMFixedPoint(FrictionContactProblem* problem, double *reaction, doub
 
   if (verbose > 0)
   {
-    printSolverOptions(options);
+    solver_options_print(options);
   }
 
 
@@ -190,7 +190,7 @@ int fc3d_ACLMFixedPoint_setDefaultSolverOptions(SolverOptions* options)
   options->iparam = (int *)malloc(options->iSize * sizeof(int));
   options->dparam = (double *)malloc(options->dSize * sizeof(double));
   options->dWork = NULL;
-  null_SolverOptions(options);
+  solver_options_nullify(options);
   for (i = 0; i < 8; i++)
   {
     options->iparam[i] = 0;

@@ -402,7 +402,7 @@ int variationalInequality_ExtraGradient_setDefaultSolverOptions(SolverOptions* o
   options->iparam = (int *)malloc(options->iSize * sizeof(int));
   options->dparam = (double *)malloc(options->dSize * sizeof(double));
   options->dWork = NULL;
-  null_SolverOptions(options);
+  solver_options_nullify(options);
   for (i = 0; i < 8; i++)
   {
     options->iparam[i] = 0;
