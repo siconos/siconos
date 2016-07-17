@@ -22,11 +22,15 @@
    m is the number of elements in arr1[]
    n is the number of elements in arr2[] */
 void printIntersection(int arr1[], int arr2[], int m, int n);
-void compute_intersection(int * arr1, int * arr2, int m, int n, int * intersection_set, int * intersection_set_size );
-
+void array_intersection(int * arr1, int * arr2, int m, int n, int * intersection_set, int * intersection_set_size );
+void array_of_array_intersection_with_array(int * arr1, int ** arr2, int m, int n, int array_size, int pos,  int ** intersection_set, int * intersection_set_size );
 /* Function prints union of arr1[] and arr2[]
    m is the number of elements in arr1[]
    n is the number of elements in arr2[] */
 
 void printUnion(int arr1[], int arr2[], int m, int n);
-void compute_union(int arr1[], int arr2[], int m, int n, int * union_set, int * union_set_size);
+void array_union(int arr1[], int arr2[], int m, int n, int * union_set, int * union_set_size);
+
+void array_print(int * idx, int idx_size);
+
+void array_of_array_print(int ** idx, int idx_size, int array_size);
