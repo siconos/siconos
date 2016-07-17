@@ -805,16 +805,6 @@ void rowProdNoDiagSBM3x3(unsigned int sizeX, unsigned int sizeY, unsigned int cu
   }
 }
 
-void printidx(int * idx, int idx_size);
-
-void printidx(int * idx, int idx_size)
-{
-  printf("[");
-  for (int i = 0; i <  idx_size; i++  ) printf("%i ", idx[i]);
-  printf("]\n");
-}
-
-
 void rowProdNoDiagSBM3x3_index_block(unsigned int sizeX, unsigned int sizeY, unsigned int currentRowNumber,
                                      const SparseBlockStructuredMatrix* const A, double* const x, double* y,
                                      unsigned int * index_block, int index_block_size)
@@ -859,29 +849,29 @@ void rowProdNoDiagSBM3x3_index_block(unsigned int sizeX, unsigned int sizeY, uns
      of the block is, in A->block, but it requires a set to 0 of all y
      components
   */
-  int  nb_block_in_row = 0;
+  int  index_in_row_size = 0;
   int max_colNumber=0;
   for (size_t blockNum = A->index1_data[currentRowNumber];
        blockNum < A->index1_data[currentRowNumber + 1];
        ++blockNum)
   {
-    nb_block_in_row ++;
+    index_in_row_size ++;
     colNumber = A->index2_data[blockNum];
     if (max_colNumber < colNumber) max_colNumber=colNumber;
   }
-  /* printf("nb_block_in_row = %i\n",nb_block_in_row ); */
+  /* printf("index_in_row_size = %i\n",index_in_row_size );  */
   /* printf("max_colNumber = %i\n",max_colNumber); */
-  int * index_column_in_row = (int * )malloc(nb_block_in_row * sizeof(int));
-  int * index_blockNum_in_row = (int * )malloc((max_colNumber+1) * sizeof(int));
   
+  int ** index_in_row = (int ** )malloc(index_in_row_size * sizeof(int*));
   int i_k=0;
   for (size_t blockNum = A->index1_data[currentRowNumber];
        blockNum < A->index1_data[currentRowNumber + 1];
        ++blockNum)
   {
+    index_in_row[i_k] = (int*) malloc(2* sizeof(int));
     colNumber = A->index2_data[blockNum];
-    index_column_in_row[i_k] = colNumber;
-    index_blockNum_in_row[colNumber] = blockNum;
+    index_in_row[i_k][0] =  colNumber;
+    index_in_row[i_k][1] = blockNum;
     /* printf("index_block[%i]=%i \t", i_k, index_block_in_row[i_k]); */
     i_k++;
   }
@@ -889,18 +879,20 @@ void rowProdNoDiagSBM3x3_index_block(unsigned int sizeX, unsigned int sizeY, uns
   
   /* printf("index_column_in_row= "); */
   /* printidx(index_column_in_row, i_k); */
-  /* printf("index_blockNum_in_row = "); */
-  /* printidx(index_blockNum_in_row, max_colNumber); */
-
+  /* printf("index_in_row = ");    */
+  /* array_of_array_print(index_in_row,index_in_row_size, 2); */
   /* printf("index_block= "); */
-  /* printidx(index_block, index_block_size); */
+  /* array_print(index_block, index_block_size); */
 
 
-  int * intersection_index = (int * )malloc(nb_block_in_row * sizeof(int)); // could be improved.
-  int intersection_index_size;
-  compute_intersection(index_column_in_row, index_block, nb_block_in_row, index_block_size, intersection_index, &intersection_index_size  );
+  int ** intersection_index = (int **)malloc(index_in_row_size * sizeof(int *)); // could be improved.
+  for (int k =0; k < index_in_row_size; k++ )
+    intersection_index[k] = (int*) malloc(2* sizeof(int));
+  int intersection_index_size=0;
+  array_of_array_intersection_with_array(index_block, index_in_row, index_block_size, index_in_row_size, 2, 0, intersection_index, &intersection_index_size  );
   /* printf("intersection= "); */
-  /* printidx(intersection_index, intersection_index_size); */
+  /* array_of_array_print(intersection_index, intersection_index_size, 2); */
+
   /* for (size_t blockNum = A->index1_data[currentRowNumber]; */
   /*      blockNum < A->index1_data[currentRowNumber + 1]; */
   /*      ++blockNum) */
@@ -909,8 +901,8 @@ void rowProdNoDiagSBM3x3_index_block(unsigned int sizeX, unsigned int sizeY, uns
   for (int i = 0 ; i < intersection_index_size; i++)
   {
     /* Get row/column position of the current block */
-    colNumber = intersection_index[i];
-    blockNum= index_blockNum_in_row[colNumber];
+    colNumber = intersection_index[i][0];
+    blockNum  = intersection_index[i][1];
     /* Computes product only for extra diagonal blocks */
     if (colNumber != currentRowNumber)
     {
@@ -930,6 +922,7 @@ void rowProdNoDiagSBM3x3_index_block(unsigned int sizeX, unsigned int sizeY, uns
       mvp3x3(A->block[blockNum], &x[posInX], y);
     }
   }
+  
 }
 void freeSBM(SparseBlockStructuredMatrix *blmat)
 {
