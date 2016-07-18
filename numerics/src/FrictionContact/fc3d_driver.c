@@ -62,7 +62,7 @@ char * SICONOS_FRICTION_3D_ONECONTACT_QUARTIC_STR = "FC3D_QUARTIC";
 char * SICONOS_FRICTION_3D_ONECONTACT_QUARTIC_NU_STR = "FC3D_QUARTIC_NU";
 char *  SICONOS_FRICTION_3D_ACLMFP_STR = "FC3D_ACLMFP";
 char *  SICONOS_FRICTION_3D_SOCLCP_STR = "FC3D_SOCLCP";
-
+char *  SICONOS_FRICTION_3D_NSGS_OPENMP_STR = "FC3D_NSGS_OPENMP";
 
 void snPrintf(int level, SolverOptions* opts, const char *fmt, ...);
 
@@ -117,6 +117,13 @@ int fc3d_driver(FrictionContactProblem* problem,
     snPrintf(1, options,
              " ========================== Call NSGS solver for Friction-Contact 3D problem ==========================\n");
     fc3d_nsgs(problem, reaction , velocity , &info , options);
+    break;
+  }
+  case SICONOS_FRICTION_3D_NSGS_OPENMP:
+  {
+    snPrintf(1, options,
+             " ========================== Call NSGS_OPENMP solver for Friction-Contact 3D problem ==========================\n");
+    fc3d_nsgs_openmp(problem, reaction , velocity , &info , options);
     break;
   }
   case SICONOS_FRICTION_3D_NSGSV:

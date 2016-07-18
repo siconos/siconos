@@ -6,6 +6,7 @@
 #include <math.h>
 #include "misc.h"
 #include "op3x3.h"
+#include "intersection_union.h"
 //#define DEBUG_MESSAGES 1
 //#define DEBUG_STDOUT 1
 //#define DEBUG_NOCOLOR 1
@@ -804,6 +805,125 @@ void rowProdNoDiagSBM3x3(unsigned int sizeX, unsigned int sizeY, unsigned int cu
   }
 }
 
+void rowProdNoDiagSBM3x3_index_block(unsigned int sizeX, unsigned int sizeY, unsigned int currentRowNumber,
+                                     const SparseBlockStructuredMatrix* const A, double* const x, double* y,
+                                     unsigned int * index_block, int index_block_size)
+{
+  /*
+     If: A is a SparseBlockStructuredMatrix matrix, Aij a block at row
+     i and column j (Warning: i and j are indices of block position,
+     not scalar component positions)
+
+     Then rowProdNoDiagSBM computes y = sum for i not equal to j of
+     Aij.xj over a row of blocks (or += if init = false)
+
+     currentRowNumber represents the position (block number) of the
+     required line of blocks in the matrix A.
+
+  */
+
+
+  /* Column (block) position of the current block*/
+  size_t colNumber = 0;
+
+  /* Number of rows/columns of the current block */
+  unsigned int nbRows, nbColumns;
+
+  /* Position of the sub-block of x multiplied by the sub-block of
+   * A */
+  unsigned int posInX = 0;
+
+  /* Look for the first element of the wanted row */
+
+  /* Assertions */
+  assert(A);
+  assert(x);
+  assert(y);
+  assert(sizeX == A->blocksize1[A->blocknumber1 - 1]);
+  assert(currentRowNumber <= A->blocknumber0);
+
+  /* Get dim (rows) of the current block */
+  nbRows = sizeY;
+
+  /* Loop over all non-null blocks. Works whatever the ordering order
+     of the block is, in A->block, but it requires a set to 0 of all y
+     components
+  */
+  int  index_in_row_size = 0;
+  int max_colNumber=0;
+  for (size_t blockNum = A->index1_data[currentRowNumber];
+       blockNum < A->index1_data[currentRowNumber + 1];
+       ++blockNum)
+  {
+    index_in_row_size ++;
+    colNumber = A->index2_data[blockNum];
+    if (max_colNumber < colNumber) max_colNumber=colNumber;
+  }
+  /* printf("index_in_row_size = %i\n",index_in_row_size );  */
+  /* printf("max_colNumber = %i\n",max_colNumber); */
+  
+  int ** index_in_row = (int ** )malloc(index_in_row_size * sizeof(int*));
+  int i_k=0;
+  for (size_t blockNum = A->index1_data[currentRowNumber];
+       blockNum < A->index1_data[currentRowNumber + 1];
+       ++blockNum)
+  {
+    index_in_row[i_k] = (int*) malloc(2* sizeof(int));
+    colNumber = A->index2_data[blockNum];
+    index_in_row[i_k][0] =  colNumber;
+    index_in_row[i_k][1] = blockNum;
+    /* printf("index_block[%i]=%i \t", i_k, index_block_in_row[i_k]); */
+    i_k++;
+  }
+
+  
+  /* printf("index_column_in_row= "); */
+  /* printidx(index_column_in_row, i_k); */
+  /* printf("index_in_row = ");    */
+  /* array_of_array_print(index_in_row,index_in_row_size, 2); */
+  /* printf("index_block= "); */
+  /* array_print(index_block, index_block_size); */
+
+
+  int ** intersection_index = (int **)malloc(index_in_row_size * sizeof(int *)); // could be improved.
+  for (int k =0; k < index_in_row_size; k++ )
+    intersection_index[k] = (int*) malloc(2* sizeof(int));
+  int intersection_index_size=0;
+  array_of_array_intersection_with_array(index_block, index_in_row, index_block_size, index_in_row_size, 2, 0, intersection_index, &intersection_index_size  );
+  /* printf("intersection= "); */
+  /* array_of_array_print(intersection_index, intersection_index_size, 2); */
+
+  /* for (size_t blockNum = A->index1_data[currentRowNumber]; */
+  /*      blockNum < A->index1_data[currentRowNumber + 1]; */
+  /*      ++blockNum) */
+
+  size_t blockNum;
+  for (int i = 0 ; i < intersection_index_size; i++)
+  {
+    /* Get row/column position of the current block */
+    colNumber = intersection_index[i][0];
+    blockNum  = intersection_index[i][1];
+    /* Computes product only for extra diagonal blocks */
+    if (colNumber != currentRowNumber)
+    {
+      /* Get dim(columns) of the current block */
+      nbColumns = A->blocksize1[colNumber];
+      if (colNumber != 0)
+        nbColumns -= A->blocksize1[colNumber - 1];
+
+      /* Get position in x of the sub-block multiplied by A sub-block */
+      posInX = 0;
+      if (colNumber != 0)
+        posInX += A->blocksize0[colNumber - 1];
+      /* Computes y[] += currentBlock*x[] */
+      /* cblas_dgemv(CblasColMajor,CblasNoTrans, nbRows, nbColumns, 1.0, A->block[blockNum], nbRows, &x[posInX], 1, 1.0, y, 1); */
+      assert((nbColumns == 3));
+      assert((nbRows == 3));
+      mvp3x3(A->block[blockNum], &x[posInX], y);
+    }
+  }
+  
+}
 void freeSBM(SparseBlockStructuredMatrix *blmat)
 {
   /* Free memory for SparseBlockStructuredMatrix */

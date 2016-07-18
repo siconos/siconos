@@ -445,7 +445,6 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction, double *veloci
       if (fabs(norm_r) > DBL_EPSILON)
         error /= norm_r;
 
-
       if (error < tolerance)
       {
         hasNotConverged = 0;
@@ -669,6 +668,7 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction, double *veloci
             (*local_solver)(localproblem, &(reaction[3 * contact]), localsolver_options);
           }
           /* **** Criterium convergence **** */
+
           if (iparam[8] >0)
           {
             if (iter % iparam[8] ==0 )
@@ -795,6 +795,7 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction, double *veloci
           else
             (*computeError)(problem, reaction , velocity, tolerance, options, normq,  &error);
 
+
           if (error < tolerance)
           {
             hasNotConverged = 0;
@@ -866,13 +867,14 @@ int fc3d_nsgs_setDefaultSolverOptions(SolverOptions* options)
   options->numberOfInternalSolvers = 1;
   options->isSet = 1;
   options->filterOn = 1;
-  options->iSize = 10;
-  options->dSize = 10;
+  options->iSize = 15;
+  options->dSize = 15;
   options->iparam = (int *)malloc(options->iSize * sizeof(int));
   options->dparam = (double *)malloc(options->dSize * sizeof(double));
   options->dWork = NULL;
+
+  for (i = 0; i < 15; i++)
   solver_options_nullify(options);
-  for (i = 0; i < 10; i++)
   {
     options->iparam[i] = 0;
     options->dparam[i] = 0.0;

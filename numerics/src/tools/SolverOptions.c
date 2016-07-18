@@ -375,10 +375,14 @@ void solver_options_copy(SolverOptions* options_ori, SolverOptions* options)
 
   options->iSize = options_ori->iSize;
   options->dSize = options_ori->dSize;
-  assert(!options->iparam);
+  
+
   options->iparam = (int *)calloc(options->iSize, sizeof(int));
-  assert(!options->dparam);
+
   options->dparam = (double *)calloc(options->dSize, sizeof(double));
+  
+  assert(options_ori->iparam);
+  assert(options_ori->dparam);
   for (int i = 0  ; i < options->iSize; i++ )
   {
     options->iparam[i] =  options_ori->iparam[i];
@@ -387,7 +391,6 @@ void solver_options_copy(SolverOptions* options_ori, SolverOptions* options)
   {
     options->dparam[i] =  options_ori->dparam[i];
   }
-
 
   if (options_ori->iWork)
   {
@@ -414,6 +417,7 @@ void solver_options_copy(SolverOptions* options_ori, SolverOptions* options)
   options->numberOfInternalSolvers =  options_ori->numberOfInternalSolvers;
   if (options->numberOfInternalSolvers)
     options->internalSolvers = (SolverOptions *)malloc(options->numberOfInternalSolvers*sizeof(SolverOptions));
+
   for (int i = 0  ; i < options->numberOfInternalSolvers; i++ )
   {
     SolverOptions * internal_options_ori = options_ori->internalSolvers + i;
@@ -431,11 +435,6 @@ void solver_options_copy(SolverOptions* options_ori, SolverOptions* options)
     options->solverParameters =options_ori->solverParameters;
    if (options_ori->solverData)
     options->solverData =options_ori->solverData;
-
-
-
-
-
 }
 
 

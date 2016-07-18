@@ -558,11 +558,17 @@ if(WITH_${COMPONENT}_TESTING)
     ENDFOREACH(_DAT ${FC3D_DATA_SET})
   ENDIF(HAVE_GAMS_C_API)
 
+
+  IF(WITH_OPENMP)
+    NEW_TEST(FC3D_openmp_test1 fc3d_openmp_test1.c) # 
+  ENDIF(WITH_OPENMP)
+
+  
   END_TEST()
 
 
 
-
+  
 
   
   BEGIN_TEST(src/GenericMechanical/test)
