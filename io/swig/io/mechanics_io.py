@@ -1483,9 +1483,21 @@ class Hdf5():
             dpos_data = self.dynamic_data()
             times = set(dpos_data[:, 0])
             t0 = float(max(times))
-            T = float(t0 + T)
-            print ('restart from previous simulation at t0={0}'.format(t0))
-            print ('run until T={0}'.format(T))
+
+        # Time-related parameters for this simulation run
+        k0 = 1+int(t0/h)
+        k = k0
+        kT = k0+int((T-t0)/h)
+        if T > t0:
+            print('')
+            print('Simulation will run from {0:.4f} to {1:.4f}s, step {2} to step {3} (h={4}, times=[{5},{6}])'
+                  .format(t0, T, k0, kT, h,
+                          min(times) if len(times)>0 else '?',
+                          max(times) if len(times)>0 else '?'))
+            print('')
+        else:
+            print('Simulation time {0} >= T={1}, exiting.'.format(t0,T))
+            exit()
 
         # Model
         #
@@ -1539,8 +1551,6 @@ class Hdf5():
         simulation.setNewtonMaxIteration(Newton_max_iter)
         simulation.setNewtonTolerance(1e-10)
 
-        k0 = 1 + len(times)
-        k = k0
         print ('import scene ...')
         self.importScene(t0, body_class, shape_class, face_class, edge_class)
 
