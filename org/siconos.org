@@ -517,6 +517,21 @@ file:GazeboClassDiagram.png
 
    + cf --> contact_friction
 
+** <2016-07-15 vie>
+*** Tooling and features
+**** Desired features for filtering tool
+
+   - remove objects
+   - decimate time
+   - cut off time (beginning and end)
+   - put together two hdf5 simulations
+
+**** Desired features for vview
+
+   - output current camera position
+   - specific starting camera position
+   - render video from command line
+   - skip to end of file, updating automatically when file changes
 
 * Port and support
 ** CrossCompilation - Windows
