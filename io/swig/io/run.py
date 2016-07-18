@@ -39,4 +39,4 @@ with Hdf5(mode='r+',io_filename=args.file[0]) as io:
     # of the International System of Units.
     # Because of fixed collision margins used in the collision detection,
     # sizes of small objects may need to be expressed in cm or mm.
-    io.run(output_frequency=args.every, T=args.T, h=args.p)
+    io.run(output_frequency=args.every, T=args.T, h=args.period)
