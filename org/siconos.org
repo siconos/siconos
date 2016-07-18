@@ -522,8 +522,8 @@ file:GazeboClassDiagram.png
 **** Desired features for filtering tool
 
    - remove objects
-   - decimate time
-   - cut off time (beginning and end)
+   - decimate time (done)
+   - cut off time (beginning and end) (done)
    - put together two hdf5 simulations
 
 **** Desired features for vview
