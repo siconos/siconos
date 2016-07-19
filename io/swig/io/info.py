@@ -4,7 +4,16 @@ from siconos.io.mechanics_io import Hdf5
 import sys, argparse
 import numpy as np
 
-fn = sys.argv[1]
+parser = argparse.ArgumentParser(
+    description = 'Show information about a Siconos HDF5 file.')
+parser.add_argument('file', metavar='input', type=str, nargs='+',
+                    help = 'input file(s) (HDF5)')
+parser.add_argument('-O','--list-objects', action = 'store_true',
+                    help = 'List object names in the file')
+parser.add_argument('-C','--list-contactors', action = 'store_true',
+                    help = 'List contactor names in the file')
+
+args = parser.parse_args()
 
 def summarize(io):
     spos_data = io.static_data()
@@ -40,15 +49,45 @@ def summarize(io):
            .format(solv_data[:,3].min(), solv_data[:,3].mean(),
                    solv_data[:,3].max()))
 
-from timeit import Timer
-try:
-    with Hdf5(mode='r',io_filename=fn) as io:
-        if io.dynamic_data() is None or len(io.dynamic_data()) == 0:
-            print 'Empty simulation found.'
-        else:
-            print ('')
-            print ('Filename: "{0}"'.format(fn))
-            summarize(io)
-except IOError, e:
-    print ('Error reading "{0}"'.format(fn))
-    print (e)
+def list_objects(io):
+    print ('')
+    print ('Objects:')
+    print ('')
+    print ('{0:>5} {1:>15} {2:>6} {3:>6}'.format(
+        'Id','Name','Mass','ToB'))
+    print ('{0:->5} {0:->15} {0:->6} {0:->6}'.format(''))
+    for name, obj in io.instances().items():
+        print ('{0:>5} {1:>15} {2:>6.4g} {3:>6.4g}'.format(
+            obj.attrs['id'], name,
+            obj.attrs['mass'],
+            obj.attrs['time_of_birth']))
+
+def list_contactors(io):
+    print ('')
+    print ('Contactors:')
+    print ('')
+    print ('{0:>5} {1:>15} {2:>9} {3:>9}'.format(
+        'Id','Name','Type','Primitive'))
+    print ('{0:->5} {0:->15} {0:->9} {0:->9}'.format(''))
+    for name, obj in io.shapes().items():
+        print ('{0:>5} {1:>15} {2:>9} {3:>9}'.format(
+            obj.attrs['id'], name,
+            obj.attrs['type'],
+            obj.attrs['primitive'] if 'primitive' in obj.attrs else ''))
+
+if __name__=='__main__':
+    try:
+        with Hdf5(mode='r', io_filename=args.file[0]) as io:
+            if io.dynamic_data() is None or len(io.dynamic_data()) == 0:
+                print 'Empty simulation found.'
+            else:
+                print ('')
+                print ('Filename: "{0}"'.format(args.file[0]))
+                summarize(io)
+                if args.list_objects:
+                    list_objects(io)
+                if args.list_contactors:
+                    list_contactors(io)
+    except IOError, e:
+        print ('Error reading "{0}"'.format(fn))
+        print (e)
