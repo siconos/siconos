@@ -86,9 +86,10 @@ class CopyVisitor(object):
             if path in ['data/cf', 'data/dynamic', 'data/velocities', 'data/static']:
                 if self.time_idx is not None:
                     # Get indexes of corresponding times in current dataset
-                    if path is 'data/dynamic':
+                    if path == 'data/dynamic':
                         time_idx = self.time_idx
-                    else:
+                    # Time-filter all but static objects
+                    elif path != 'data/static':
                         time_idx = np.in1d(obj[:,0], self.times).nonzero()[0]
 
                 # Additionally remove any lines referencing excluded objects
@@ -123,7 +124,9 @@ class CopyVisitor(object):
 
             # Copy the filtered or unfiltered dataset
             if time_idx is not None:
-                if len(time_idx)==1:
+                if len(time_idx)==0:
+                    pass
+                elif len(time_idx)==1:
                     ds[0,:] = obj[time_idx[0],:]
                 else:
                     ds[xrange(len(time_idx)),:] = obj[time_idx,:]
@@ -146,7 +149,7 @@ if __name__ == '__main__':
         print('Output file "{0}" already exists!'.format(args.fn_out[0]))
         sys.exit(1)
 
-    re_exclude = lambda: True
+    re_exclude = lambda _: False
     if args.exclude is not None:
         #re_exclude = re.compile(args.exclude).match
         ex = args.exclude.split(',')
