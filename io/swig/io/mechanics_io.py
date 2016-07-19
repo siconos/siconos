@@ -848,7 +848,7 @@ class Hdf5():
                 mass = obj.attrs['mass']
                 time_of_birth = obj.attrs['time_of_birth']
 
-                if time_of_birth > time:
+                if time_of_birth >= time:
                     #
                     # in the future
                     #
