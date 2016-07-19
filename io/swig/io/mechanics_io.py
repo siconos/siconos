@@ -58,7 +58,7 @@ except:
     pass
 
 from siconos.kernel import \
-    cast_NewtonImpactFrictionNSL, EqualityConditionNSL, Interaction
+    cast_NewtonImpactFrictionNSL, EqualityConditionNSL, Interaction, DynamicalSystem
 
 import siconos.kernel as Kernel
 from siconos.io.io_base import MechanicsIO
@@ -637,7 +637,7 @@ class Hdf5():
 
     def importBRepObject(self, name, translation, orientation,
                          velocity, contactors, mass, given_inertia, body_class,
-                         shape_class, face_class, edge_class):
+                         shape_class, face_class, edge_class, number = None):
 
         if body_class is None:
             body_class = OccBody
@@ -654,6 +654,10 @@ class Hdf5():
         else:
             body = body_class(
                 translation + orientation, velocity, mass, inertia)
+
+            if number is not None:
+                body.setNumber(number)
+
             for contactor in contactors:
 
                 # /!\ shared pointer <-> python ref ...
@@ -675,7 +679,8 @@ class Hdf5():
 
     def importBulletObject(self, name, translation, orientation,
                            velocity, contactors, mass, inertia,
-                           body_class, shape_class, birth=False):
+                           body_class, shape_class, birth=False,
+                           number = None):
 
         
         if body_class is None:
@@ -752,6 +757,9 @@ class Hdf5():
                                   contactors[0].orientation,
                                   contactors[0].group)
 
+                if number is not None:
+                    body.setNumber(number)
+
                 for contactor in contactors[1:]:
                     shape_id = self._shapeid[contactor.name]
 
@@ -822,6 +830,9 @@ class Hdf5():
           - the nonsmooth laws
         that have a specified time of birth <= current time.
         """
+
+        # Ensure we count up from zero for implicit DS numbering
+        DynamicalSystem.resetCount(0)
 
         for shape_name in self._ref:
             self._shapeid[shape_name] = self._ref[shape_name].attrs['id']
@@ -905,14 +916,15 @@ class Hdf5():
                             name, floatv(translation), floatv(orientation),
                             floatv(velocity), contactors, float(mass),
                             inertia, body_class, shape_class, face_class,
-                            edge_class)
+                            edge_class,
+                            number = self.instances()[name].attrs['id'])
                     else:
                         # Bullet object
                         self.importBulletObject(
                             name, floatv(translation), floatv(orientation),
                             floatv(velocity), contactors, float(mass),
-                            inertia, body_class, shape_class)
-
+                            inertia, body_class, shape_class,
+                            number = self.instances()[name].attrs['id'])
             # import nslaws
             # note: no time of birth for nslaws and joints
             for name in self._nslaws:
@@ -972,13 +984,15 @@ class Hdf5():
                         floatv(
                             velocity), contactors, float(mass),
                         inertia, body_class, shape_class, face_class,
-                        edge_class)
+                        edge_class, number = self.instances()[name].attrs['id'])
                 else:
                     # Bullet object
                     self.importBulletObject(
                         name, floatv(translation), floatv(orientation),
                         floatv(velocity), contactors, float(mass),
-                        inertia, body_class, shape_class, birth=True)
+                        inertia, body_class, shape_class, birth=True,
+                        number = self.instances()[name].attrs['id'])
+
             #raw_input()
 
     def outputStaticObjects(self):

@@ -119,7 +119,7 @@ struct GetPosition : public SiconosVisitor
   void operator()(const T& ds)
   {
     result.reset(new SiconosVector(1+ds.q()->size()));
-    result->setValue(0, ds.number() + 1);
+    result->setValue(0, ds.number());
     result->setBlock(1, *ds.q());
   }
 };
@@ -133,7 +133,7 @@ struct GetVelocity : public SiconosVisitor
   void operator()(const T& ds)
   {
     result.reset(new SiconosVector(1+ds.velocity()->size()));
-    result->setValue(0, ds.number() + 1);
+    result->setValue(0, ds.number());
     result->setBlock(1, *ds.velocity());
   }
 };
