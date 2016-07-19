@@ -1584,7 +1584,7 @@ class Hdf5():
         self._initializing = False
         while simulation.hasNextEvent():
 
-            print ('step', k, '<', k0 - 1 + int((T - t0) / h))
+            print ('step', k, '<', k0 + int((T - t0) / h))
 
             log(self.importBirths(body_class=body_class,
                                   shape_class=shape_class,
