@@ -640,6 +640,9 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
     for shape_name in io.shapes():
 
         shape_type = io.shapes()[shape_name].attrs['type']
+        scale = None
+        if 'scale' in io.shapes()[shape_name].attrs:
+            scale = io.shapes()[shape_name].attrs['scale']
 
         if shape_type in ['vtp', 'stl']:
             with io_tmpfile() as tmpf:
@@ -826,12 +829,21 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
             else:
                 transformer.SetInputData(datasets[contactor_name])
 
-            transformer.SetTransform(transform)
+            if 'scale' in io.shapes()[contactor_name].attrs:
+                scale = io.shapes()[contactor_name].attrs['scale']
+                scale_transform = vtk.vtkTransform()
+                scale_transform.Scale(scale, scale, scale)
+                scale_transform.SetInput(transform)
+                transformer.SetTransform(scale_transform)
+                actor.SetUserTransform(scale_transform)
+            else:
+                transformer.SetTransform(transform)
+                actor.SetUserTransform(transform)
+
             transformers[contactor_name] = transformer
 
             big_data_source.AddInputConnection(transformer.GetOutputPort())
 
-            actor.SetUserTransform(transform)
             transforms[instance].append(transform)
             offsets[instance].append(
                 (io.instances()[

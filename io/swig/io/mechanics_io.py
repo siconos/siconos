@@ -193,7 +193,7 @@ def str_of_file(filename):
 #
 # load .vtp file
 #
-def loadMesh(shape_filename, collision_margin):
+def loadMesh(shape_filename, collision_margin, scale=None):
     """
     loads a vtk .vtp file and returns a Bullet concave shape
     WARNING triangles cells assumed!
@@ -218,6 +218,9 @@ def loadMesh(shape_filename, collision_margin):
             apoints[i, 0] = p[0]
             apoints[i, 1] = p[1]
             apoints[i, 2] = p[2]
+
+        if scale is not None:
+            apoints *= scale
 
         aindices = np.empty((num_triangles, 3), dtype=np.int32)
 
@@ -305,9 +308,12 @@ class ShapeCollection():
                             data = self.shape(shape_name)[:][0]
                             tmpf[0].write(data)
                             tmpf[0].flush()
+                            scale = None
+                            if 'scale' in self.attributes(shape_name):
+                                scale = self.attributes(shape_name)['scale']
                             (self._tri[shape_name],
                              self._shapes[shape_name]) = loadMesh(
-                                 tmpf[1], self._collision_margin)
+                                 tmpf[1], self._collision_margin, scale=scale)
                     else:
                         assert False
                 elif self.attributes(shape_name)['type'] in['step']:
@@ -1140,7 +1146,7 @@ class Hdf5():
               'precision=', precision,
               'local_precision=', )
 
-    def addMeshFromString(self, name, shape_data):
+    def addMeshFromString(self, name, shape_data, scale=None):
         """
         Add a mesh shape from a string.
         Accepted format : mesh encoded in VTK .vtp format
@@ -1152,10 +1158,12 @@ class Hdf5():
             shape[:] = shape_data
             shape.attrs['id'] = self._number_of_shapes
             shape.attrs['type'] = 'vtp'
+            if scale is not None:
+                shape.attrs['scale'] = scale
             self._shapeid[name] = shape.attrs['id']
             self._number_of_shapes += 1
 
-    def addMeshFromFile(self, name, filename):
+    def addMeshFromFile(self, name, filename, scale=None):
         """
         Add a mesh shape from a file.
         Accepted format : .stl or mesh encoded in VTK .vtp format
@@ -1186,7 +1194,7 @@ class Hdf5():
                 assert os.path.splitext(filename)[-1][1:] == 'vtp'
                 shape_data = str_of_file(filename)
 
-            self.addMeshFromString(name, shape_data)
+            self.addMeshFromString(name, shape_data, scale=scale)
 
     def addBRepFromString(self, name, shape_data):
         """
