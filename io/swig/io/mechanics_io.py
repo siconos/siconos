@@ -1324,7 +1324,7 @@ class Hdf5():
                   translation,
                   orientation=[1, 0, 0, 0],
                   velocity=[0, 0, 0, 0, 0, 0],
-                  mass=0, inertia=None, time_of_birth=0.):
+                  mass=0, inertia=None, time_of_birth=-1):
         """
         Add an object with associated contact shapes that are called
         contactors.
