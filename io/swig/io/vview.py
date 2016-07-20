@@ -12,6 +12,7 @@ import random
 import getopt
 
 from siconos.io.mechanics_io import Hdf5
+from siconos.io.mechanics_io import tmpfile as io_tmpfile
 
 
 def usage():
@@ -215,7 +216,7 @@ def step_reader(step_string):
     stl_writer = StlAPI_Writer()
     stl_writer.SetASCIIMode(True)
 
-    with io.tmpfile(contents=io.shapes()[shape_name][:][0]) as tmpfile:
+    with io_tmpfile(contents=io.shapes()[shape_name][:][0]) as tmpfile:
         step_reader = STEPControl_Reader()
 
         status = step_reader.ReadFile(tmpfile[1])
@@ -234,7 +235,7 @@ def step_reader(step_string):
 
                 builder.Add(comp, shape)
 
-            with io.tmpfile(suffix='.stl') as tmpf:
+            with io_tmpfile(suffix='.stl') as tmpf:
                     stl_writer.Write(comp, tmpf[1])
                     tmpf[0].flush()
 
@@ -258,7 +259,7 @@ def brep_reader(brep_string, indx):
 
     stl_writer = StlAPI_Writer()
 
-    with io.tmpfile(suffix='.stl') as tmpf:
+    with io_tmpfile(suffix='.stl') as tmpf:
         stl_writer.Write(shape, tmpf[1])
         tmpf[0].flush()
 
@@ -641,7 +642,7 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
         shape_type = io.shapes()[shape_name].attrs['type']
 
         if shape_type in ['vtp', 'stl']:
-            with io.tmpfile() as tmpf:
+            with io_tmpfile() as tmpf:
                 tmpf[0].write(str(io.shapes()[shape_name][:][0]))
                 tmpf[0].flush()
                 reader = vtk_reader[shape_type]()
