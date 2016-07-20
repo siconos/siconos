@@ -26,9 +26,16 @@ BulletWeightedShape::BulletWeightedShape(SP::btCollisionShape shape, const doubl
   _mass(mass),
   _shape(shape)
 {
-
   btVector3 localinertia;
   _shape->calculateLocalInertia(_mass, localinertia);
+
+  assert( ! ((localinertia.x() == 0.0
+              && localinertia.y() == 0.0
+              && localinertia.z() == 0.0)
+             || isinf(localinertia.x())
+             || isinf(localinertia.y())
+             || isinf(localinertia.z()))
+          && "calculateLocalInertia() returned garbage" );
 
   _inertia.reset(new SimpleMatrix(3, 3));
 
