@@ -65,6 +65,10 @@ typedef bool (*ContactDestroyedCallback)(void* userPersistentData);
 extern ContactDestroyedCallback gContactDestroyedCallback;
 extern ContactProcessedCallback gContactProcessedCallback;
 
+int btScalarSize()
+{
+  return sizeof(btScalar);
+}
 
 std::map<Interaction*, bool> gOrphanedInteractions;
 

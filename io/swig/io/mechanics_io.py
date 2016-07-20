@@ -27,7 +27,7 @@ from siconos.mechanics import joints
 
 try:
     from siconos.mechanics.contact_detection.bullet import \
-        BulletDS, BulletWeightedShape, \
+        BulletDS, BulletWeightedShape, btScalarSize, \
         btCollisionObject, btQuaternion, btTransform, btVector3, quatRotate
 
     from siconos.mechanics.contact_detection.bullet import \
@@ -212,7 +212,7 @@ def loadMesh(shape_filename, collision_margin):
     shape = None
 
     if polydata.GetCellType(0) == 5:
-        apoints = np.empty((num_points, 3))
+        apoints = np.empty((num_points, 3), dtype={4:'f4',8:'f8'}[btScalarSize()])
         for i in range(0, points.GetNumberOfTuples()):
             p = points.GetTuple(i)
             apoints[i, 0] = p[0]

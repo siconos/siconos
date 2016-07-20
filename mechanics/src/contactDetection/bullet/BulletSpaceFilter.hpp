@@ -143,4 +143,6 @@ struct ForContactPoint : public Question<SP::btManifoldPoint>
   }
 };
 
+int btScalarSize();
+
 #endif
