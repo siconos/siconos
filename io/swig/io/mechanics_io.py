@@ -1160,12 +1160,19 @@ class Hdf5():
         Add a mesh shape from a file.
         Accepted format : .stl or mesh encoded in VTK .vtp format
         """
+        if filename[0] != os.path.sep:
+            filename = os.path.join(os.path.split(os.path.abspath(sys.argv[0]))[0],
+                                    filename)
         if name not in self._ref:
 
             if os.path.splitext(filename)[-1][1:] == 'stl':
                 reader = vtk.vtkSTLReader()
                 reader.SetFileName(filename)
                 reader.Update()
+
+                if reader.GetErrorCode() != 0:
+                    print('vtkSTLReader error', reader.GetErrorCode())
+                    sys.exit(1)
 
                 with tmpfile() as tmpf:
                     writer = vtk.vtkXMLPolyDataWriter()
