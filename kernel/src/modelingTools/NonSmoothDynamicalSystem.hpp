@@ -16,7 +16,7 @@
  * limitations under the License.
 */
 /*! \file NonSmoothDynamicalSystem.hpp
- * \brief container for DynamicalDystem and Interaction
+ * \brief container for DynamicalSystem and Interaction
  */
 #ifndef NSDS_H
 #define NSDS_H
@@ -25,9 +25,9 @@
 #include "DynamicalSystemsSet.hpp"
 #include "Topology.hpp"
 
-/** the Non Smooth Dynamical System consists of DynamicalDystem
+/** the Non Smooth Dynamical System consists of DynamicalSystem
  *  and Interaction regrouped together in a Topology object,
- *  in the form of a graph of DynamicalDystem as nodes and Interaction as edges
+ *  in the form of a graph of DynamicalSystem as nodes and Interaction as edges
  *  and its dual.
  *
  *  \author SICONOS Development Team - copyright INRIA
