@@ -1433,6 +1433,7 @@ class Hdf5():
             shape_class=None,
             face_class=None,
             edge_class=None,
+            controller=None,
             gravity_scale=1.0,
             t0=0,
             T=10,
@@ -1585,6 +1586,9 @@ class Hdf5():
         print ('import scene ...')
         self.importScene(t0, body_class, shape_class, face_class, edge_class)
 
+        if controller is not None:
+            controller.initialize(self)
+
         model.setSimulation(simulation)
         model.initialize()
         print ('first output static and dynamic objects ...')
@@ -1607,6 +1611,9 @@ class Hdf5():
                                   shape_class=shape_class,
                                   face_class=face_class,
                                   edge_class=edge_class))
+
+            if controller is not None:
+                controller.step()
 
             log(self._broadphase.buildInteractions, with_timer)\
                 (model.currentTime())
