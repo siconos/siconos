@@ -789,8 +789,11 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction, double *veloci
           /* **** Criterium convergence **** */
           if (iparam[8] >0)
           {
-            if (iter % iparam[8] ==0 )
+            if (iter % iparam[8] == 0) {
               (*computeError)(problem, reaction , velocity, tolerance, options, normq,  &error);
+              if (error > tolerance && iparam[9] == 1)
+                iparam[8] *= 2;
+            }
           }
           else
             (*computeError)(problem, reaction , velocity, tolerance, options, normq,  &error);
@@ -816,6 +819,8 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction, double *veloci
                                                      error, NULL);
           }
         }
+        if (iparam[9] == 1 && (iter == iparam[8] || iparam[9] > itermax))
+          iparam[8] = iparam[8]==1 ? 1 : iparam[8]/2;
       }
       else
       {

@@ -1551,6 +1551,8 @@ class Hdf5():
 
             
         osnspb.numericsSolverOptions().iparam[0] = itermax
+        osnspb.numericsSolverOptions().iparam[8] = 1
+        osnspb.numericsSolverOptions().iparam[9] = 1
         osnspb.numericsSolverOptions().internalSolvers.iparam[0] = 100
         osnspb.numericsSolverOptions().dparam[0] = tolerance
         osnspb.setMaxSize(30000)
