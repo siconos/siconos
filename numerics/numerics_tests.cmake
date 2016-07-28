@@ -235,31 +235,31 @@ if(WITH_${COMPONENT}_TESTING)
   NEW_TEST(FC3D_sparse_test fc3d_sparse_test.c)
 
   # (see FrictionContact/test/README for short details)
-  NEW_TEST(FC3Dtest1 fc3d_test1.c)
-  NEW_TEST(FC3Dtest2 fc3d_test2.c)
-  NEW_TEST(FC3Dtest3 fc3d_test3.c)
-  NEW_TEST(FC3Dtest4 fc3d_test4.c)
-  SET(FC3Dtest5_PROPERTIES WILL_FAIL TRUE)
-  NEW_TEST(FC3Dtest5 fc3d_test5.c)
+  NEW_TEST(test_fc3d_1 fc3d_test1.c)
+  NEW_TEST(test_fc3d_2 fc3d_test2.c)
+  NEW_TEST(test_fc3d_3 fc3d_test3.c)
+  NEW_TEST(test_fc3d_4 fc3d_test4.c)
+  SET(test_fc3d_5_PROPERTIES WILL_FAIL TRUE)
+  NEW_TEST(test_fc3d_5 fc3d_test5.c)
   
   IF(HAVE_PATHFERRIS)
-    NEW_TEST(FC3Dtest6 fc3d_test6.c)
-    SET(FC3Dtest6_PROPERTIES WILL_FAIL TRUE)
+    NEW_TEST(test_fc3d_6 fc3d_test6.c)
+    SET(test_fc3d_6_PROPERTIES WILL_FAIL TRUE)
   ENDIF(HAVE_PATHFERRIS)
   
-  SET(FC3Dtest7_PROPERTIES WILL_FAIL TRUE)
-  NEW_TEST(FC3Dtest7 fc3d_test7.c)
+  SET(test_fc3d_7_PROPERTIES WILL_FAIL TRUE)
+  NEW_TEST(test_fc3d_7 fc3d_test7.c)
   
   
-  NEW_TEST(FC3Dtest9 fc3d_test9.c)
+  NEW_TEST(test_fc3d_9 fc3d_test9.c)
 
 
 
-  NEW_TEST(FC3Dtest10 fc3d_test10.c)
-  NEW_TEST(FC3Dtest11 fc3d_test11.c)
-  NEW_TEST(FC3Dtest12 fc3d_test12.c)
-  NEW_TEST(FC3Dtest13 fc3d_test13.c)
-  NEW_TEST(FC3Dtest14 fc3d_test14.c)
+  NEW_TEST(test_fc3d_10 fc3d_test10.c)
+  NEW_TEST(test_fc3d_11 fc3d_test11.c)
+  NEW_TEST(test_fc3d_12 fc3d_test12.c)
+  NEW_TEST(test_fc3d_13 fc3d_test13.c)
+  NEW_TEST(test_fc3d_14 fc3d_test14.c)
 
   SET(NSGS_TOL 1e-6)
   SET(NSGS_NB_IT 10000)
@@ -294,44 +294,44 @@ if(WITH_${COMPONENT}_TESTING)
   NEW_FC_TEST(SICONOS_FRICTION_3D_NSGS Rover11211.dat ${NSGS_TOL} ${NSGS_NB_IT} 
     SICONOS_FRICTION_3D_ONECONTACT_QUARTIC 1e-6 10)
 
-  SET(FC3Dtest20_PROPERTIES WILL_FAIL TRUE)
+  SET(test_fc3d_20_PROPERTIES WILL_FAIL TRUE)
 
-  NEW_TEST(FC3Dtest20 fc3d_test20.c) 
-  NEW_TEST(FC3Dtest21 fc3d_test21.c)
-  NEW_TEST(FC3Dtest22 fc3d_test22.c)
-  NEW_TEST(FC3Dtest23 fc3d_test23.c)
+  NEW_TEST(test_fc3d_20 fc3d_test20.c) 
+  NEW_TEST(test_fc3d_21 fc3d_test21.c)
+  NEW_TEST(test_fc3d_22 fc3d_test22.c)
+  NEW_TEST(test_fc3d_23 fc3d_test23.c)
   
-  NEW_TEST(FC3Dtest30 fc3d_test30.c)
-  NEW_TEST(FC3Dtest31 fc3d_test31.c)
-  NEW_TEST(FC3Dtest32 fc3d_test32.c)
+  NEW_TEST(test_fc3d_30 fc3d_test30.c)
+  NEW_TEST(test_fc3d_31 fc3d_test31.c)
+  NEW_TEST(test_fc3d_32 fc3d_test32.c)
   
-  NEW_TEST(FC3Dtest33 fc3d_test33.c) # DSFP converges with specific rho
+  NEW_TEST(test_fc3d_33 fc3d_test33.c) # DSFP converges with specific rho
 
-  NEW_TEST(FC3Dtest3400 fc3d_test3400.c) # EG 
-  NEW_TEST(FC3Dtest35 fc3d_test35.c)     # EG
+  NEW_TEST(test_fc3d_3400 fc3d_test3400.c) # EG 
+  NEW_TEST(test_fc3d_35 fc3d_test35.c)     # EG
 
-  NEW_TEST(FC3Dtest36 fc3d_test36.c) #TFP with NSGS and projection on cylinder
+  NEW_TEST(test_fc3d_36 fc3d_test36.c) #TFP with NSGS and projection on cylinder
 
-  #SET(FC3Dtest37_PROPERTIES WILL_FAIL TRUE)
-  #NEW_TEST(FC3Dtest37 fc3d_test37.c) #TFP with ProjectedGradientOnCylinder is not working ...
+  #SET(test_fc3d_37_PROPERTIES WILL_FAIL TRUE)
+  #NEW_TEST(test_fc3d_37 fc3d_test37.c) #TFP with ProjectedGradientOnCylinder is not working ...
 
-  #NEW_TEST(FC3Dtest38 fc3d_test38.c) # HP is not converging
+  #NEW_TEST(test_fc3d_38 fc3d_test38.c) # HP is not converging
 
-  NEW_TEST(FC3Dtest40 fc3d_test40.c) # VI_EG 
-  NEW_TEST(FC3Dtest41 fc3d_test41.c) # VI_FPP
-  NEW_TEST(FC3Dtest42 fc3d_test42.c) # VI_FPP
-  NEW_TEST(FC3Dtest43 fc3d_test43.c) # DSFP converges with specific rho
-  NEW_TEST(FC3Dtest44 fc3d_test44.c) # VI_EG
-  NEW_TEST(FC3Dtest45 fc3d_test45.c) # VI_EG
+  NEW_TEST(test_fc3d_40 fc3d_test40.c) # VI_EG 
+  NEW_TEST(test_fc3d_41 fc3d_test41.c) # VI_FPP
+  NEW_TEST(test_fc3d_42 fc3d_test42.c) # VI_FPP
+  NEW_TEST(test_fc3d_43 fc3d_test43.c) # DSFP converges with specific rho
+  NEW_TEST(test_fc3d_44 fc3d_test44.c) # VI_EG
+  NEW_TEST(test_fc3d_45 fc3d_test45.c) # VI_EG
   
-  NEW_TEST(FC3Dtest46 fc3d_test46.c) # FPP
-  NEW_TEST(FC3Dtest47 fc3d_test47.c) # EG
+  NEW_TEST(test_fc3d_46 fc3d_test46.c) # FPP
+  NEW_TEST(test_fc3d_47 fc3d_test47.c) # EG
 
-  SET(FC3Dtest50_PROPERTIES WILL_FAIL TRUE)
-  NEW_TEST(FC3Dtest50 fc3d_test50.c)
+  SET(test_fc3d_50_PROPERTIES WILL_FAIL TRUE)
+  NEW_TEST(test_fc3d_50 fc3d_test50.c)
   
 
-  NEW_TEST(FC3Dtest60 fc3d_test60.c)
+  NEW_TEST(test_fc3d_60 fc3d_test60.c)
 
   NEW_FC_TEST(SICONOS_FRICTION_3D_NSN_AC Example1_Fc3D_SBM.dat)
   NEW_FC_TEST(SICONOS_FRICTION_3D_NSN_FB Example1_Fc3D_SBM.dat)
@@ -361,19 +361,19 @@ if(WITH_${COMPONENT}_TESTING)
   NEW_FC_TEST(SICONOS_FRICTION_3D_NSN_FB Capsules-i100-889.dat)
   NEW_FC_TEST(SICONOS_FRICTION_3D_NSN_NM Capsules-i100-889.dat)
   
-  NEW_TEST(FC3Dtest70 fc3d_test70.c) # DSFP
-  NEW_TEST(FC3Dtest71 fc3d_test71.c) # DSFP
-  NEW_TEST(FC3Dtest72 fc3d_test72.c)	
-  NEW_TEST(FC3Dtest73 fc3d_test73.c)
-  NEW_TEST(FC3Dtest74 fc3d_test74.c)
+  NEW_TEST(test_fc3d_70 fc3d_test70.c) # DSFP
+  NEW_TEST(test_fc3d_71 fc3d_test71.c) # DSFP
+  NEW_TEST(test_fc3d_72 fc3d_test72.c)	
+  NEW_TEST(test_fc3d_73 fc3d_test73.c)
+  NEW_TEST(test_fc3d_74 fc3d_test74.c)
   
-  NEW_TEST(FC3Dtest80 fc3d_test80.c) # Proximal
-  NEW_TEST(FC3Dtest81 fc3d_test81.c) # Proximal
-  NEW_TEST(FC3Dtest83 fc3d_test83.c) # Proximal
+  NEW_TEST(test_fc3d_80 fc3d_test80.c) # Proximal
+  NEW_TEST(test_fc3d_81 fc3d_test81.c) # Proximal
+  NEW_TEST(test_fc3d_83 fc3d_test83.c) # Proximal
 
-  NEW_TEST(FC3Dtest82 fc3d_test82.c) # Proximal
-  SET(FC3Dtest90_PROPERTIES WILL_FAIL TRUE)
-  NEW_TEST(FC3Dtest90 fc3d_test90.c) # TFP with cycling
+  NEW_TEST(test_fc3d_82 fc3d_test82.c) # Proximal
+  SET(test_fc3d_90_PROPERTIES WILL_FAIL TRUE)
+  NEW_TEST(test_fc3d_90 fc3d_test90.c) # TFP with cycling
 
   NEW_TEST(FC3DNewFromFortranData fc3d_newFromFortranData.c)
   NEW_TEST(FC3DLmgcDriver1 fc3d_LmgcDriver_test1.c)
@@ -384,26 +384,26 @@ if(WITH_${COMPONENT}_TESTING)
 
   NEW_TEST(FC3DLmgcDriver5 fc3d_LmgcDriver_test5.c)
 
-  NEW_TEST(FC3Dtest100 fc3d_test100.c)# TFP
-  NEW_TEST(FC3Dtest110 fc3d_test110.c)# TFP
+  NEW_TEST(test_fc3d_100 fc3d_test100.c)# TFP
+  NEW_TEST(test_fc3d_110 fc3d_test110.c)# TFP
 
-  NEW_TEST(FC3Dtest120 fc3d_test120.c) # TFP
-  NEW_TEST(FC3Dtest121 fc3d_test121.c) # DSFP
+  NEW_TEST(test_fc3d_120 fc3d_test120.c) # TFP
+  NEW_TEST(test_fc3d_121 fc3d_test121.c) # DSFP
 
-  NEW_TEST(FC3Dtest122 fc3d_test122.c) # ACLMFP
-  NEW_TEST(FC3Dtest123 fc3d_test123.c) # SOCLCP
-  NEW_TEST(FC3Dtest124 fc3d_test124.c) # NSGS
+  NEW_TEST(test_fc3d_122 fc3d_test122.c) # ACLMFP
+  NEW_TEST(test_fc3d_123 fc3d_test123.c) # SOCLCP
+  NEW_TEST(test_fc3d_124 fc3d_test124.c) # NSGS
 
-  NEW_TEST(FC3Dtest125 fc3d_test125.c) # TFP with other strategy for internal solver
-  NEW_TEST(FC3Dtest126 fc3d_test126.c) # ACLMFPwith other strategy for internal solver
+  NEW_TEST(test_fc3d_125 fc3d_test125.c) # TFP with other strategy for internal solver
+  NEW_TEST(test_fc3d_126 fc3d_test126.c) # ACLMFPwith other strategy for internal solver
  
 
-  NEW_TEST(FC3Dtest130 fc3d_test130.c)
+  NEW_TEST(test_fc3d_130 fc3d_test130.c)
 
-  NEW_TEST(FC3Dtest200 fc3d_test200.c)
-  NEW_TEST(FC3Dtest210 fc3d_test210.c)
+  NEW_TEST(test_fc3d_200 fc3d_test200.c)
+  NEW_TEST(test_fc3d_210 fc3d_test210.c)
 
-  NEW_TEST(FC3Dtest300 fc3d_test300.c)
+  NEW_TEST(test_fc3d_300 fc3d_test300.c)
 
 
   # Global Alart Curnier + Rover ok.
@@ -480,39 +480,39 @@ if(WITH_${COMPONENT}_TESTING)
   NEW_FC_TEST(SICONOS_FRICTION_3D_NSN_NM NESpheres_30_1.dat)
 
   ## test from the Rover Example
-  NEW_TEST(FC3Dtest501 fc3d_Rover2.c) ## test ok without LineSearch
-  NEW_TEST(FC3Dtest503 fc3d_Rover3.c) ## JeanMoreau ok, AC:no
+  NEW_TEST(test_fc3d_501 fc3d_Rover2.c) ## test ok without LineSearch
+  NEW_TEST(test_fc3d_503 fc3d_Rover3.c) ## JeanMoreau ok, AC:no
 
 
   ## test 2D dense on two differents files
-  NEW_TEST(fc2d_Problemtest1 fc2d_test1.c)
-  NEW_TEST(fc2d_Problemtest2 fc2d_test2.c)
-  NEW_TEST(fc2d_Problemtest3 fc2d_test3.c)
+  NEW_TEST(test_fc2d_1 fc2d_test1.c)
+  NEW_TEST(test_fc2d_2 fc2d_test2.c)
+  NEW_TEST(test_fc2d_3 fc2d_test3.c)
   
   
-  NEW_TEST(fc2d_Problemtest10 fc2d_test10.c)
-  NEW_TEST(fc2d_Problemtest11 fc2d_test11.c)
-  NEW_TEST(fc2d_Problemtest12 fc2d_test12.c)
+  NEW_TEST(test_fc2d_10 fc2d_test10.c)
+  NEW_TEST(test_fc2d_11 fc2d_test11.c)
+  NEW_TEST(test_fc2d_12 fc2d_test12.c)
   
 
   ## test 2D sparse on 4 differents files
-  NEW_TEST(fc2d_Problemtest20 fc2d_test20.c)
-  NEW_TEST(fc2d_Problemtest21 fc2d_test21.c)
-  NEW_TEST(fc2d_Problemtest22 fc2d_test22.c)
-  NEW_TEST(fc2d_Problemtest23 fc2d_test23.c)
+  NEW_TEST(test_fc2d_20 fc2d_test20.c)
+  NEW_TEST(test_fc2d_21 fc2d_test21.c)
+  NEW_TEST(test_fc2d_22 fc2d_test22.c)
+  NEW_TEST(test_fc2d_23 fc2d_test23.c)
 
   ## test 2D dense with Lemke NSGS failed on it
-  NEW_TEST(fc2d_Problemtest30 fc2d_test30.c)
-  NEW_TEST(fc2d_Problemtest31 fc2d_test31.c)
-  #SET(fc2d_Problemtest32 WILL_FAIL TRUE)
-  #NEW_TEST(fc2d_Problemtest32 fc2d_test32.c)
+  NEW_TEST(test_fc2d_30 fc2d_test30.c)
+  NEW_TEST(test_fc2d_31 fc2d_test31.c)
+  #SET(test_fc2d_32 WILL_FAIL TRUE)
+  #NEW_TEST(test_fc2d_32 fc2d_test32.c)
 
 
 
 
   ## test 2D dense with Enum Lemke failed on 41 !!
-  NEW_TEST(fc2d_Problemtest40 fc2d_test40.c)
-  NEW_TEST(fc2d_Problemtest41 fc2d_test41.c)
+  NEW_TEST(test_fc2d_40 fc2d_test40.c)
+  NEW_TEST(test_fc2d_41 fc2d_test41.c)
 
 
   NEW_TEST(GFC3D_test1 gfc3d_test1.c)
