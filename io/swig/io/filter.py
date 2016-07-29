@@ -21,7 +21,7 @@ parser.add_argument('--gzip', action = 'store_true',
 parser.add_argument('--single', action = 'store_true',
                     help = 'use single-precision floats in copy')
 parser.add_argument('--exclude', type=str,
-                    help = 'specify objects to exclude from copy (regexp)')
+                    help = 'specify objects to exclude from copy (comma-separated)')
 
 class CopyVisitor(object):
     """The CopyVisitor is called for each group and dataset in the HDF5
