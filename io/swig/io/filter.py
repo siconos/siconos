@@ -22,18 +22,29 @@ parser.add_argument('--single', action = 'store_true',
                     help = 'use single-precision floats in copy')
 parser.add_argument('--exclude', type=str,
                     help = 'specify objects to exclude from copy (comma-separated)')
+parser.add_argument('--attr', type=str, action='append',
+                    help = 'specify attributes to change during copy (obj.name=value)')
 
 class CopyVisitor(object):
     """The CopyVisitor is called for each group and dataset in the HDF5
        file, and is responsible for copying the structure to the new
        HDF5 file."""
-    def __init__(self, time_filter = None, object_filter = None):
+    def __init__(self, time_filter = None, object_filter = None, attr_filter = None):
         self.time_filter = None
         if time_filter is not None:
             self.time_filter = np.vectorize(time_filter)
         self.object_filter = object_filter
         self.time_idx = None
         self.excluded_objects = None
+        def copy_attrs(obj_to, obj_from):
+            for a in obj_from.attrs:
+                value = None
+                if attr_filter:
+                    value = attr_filter(obj_to, obj_from, a)
+                if value is None:
+                    value = obj_from.attrs[a]
+                obj_to.attrs[a] = value
+        self.copy_attrs = copy_attrs
 
     def visitor(self, path, obj):
         gr = io_out
@@ -70,8 +81,7 @@ class CopyVisitor(object):
                 else:
                     gr = gr.create_group(name)
                     gr_in = io_in['/'.join(names[:i+1])]
-                    for a in gr_in.attrs:
-                        gr.attrs[a] = gr_in.attrs[a]
+                    self.copy_attrs(gr, gr_in)
 
         # Determine chunks argument
         if obj.__class__ == h5py.Dataset:
@@ -119,8 +129,7 @@ class CopyVisitor(object):
                                    compression_opts = [obj.compression_opts,9][comp],
                                    shuffle = comp,
                                    fletcher32 = obj.fletcher32)
-            for a in obj.attrs:
-                ds.attrs[a] = obj.attrs[a]
+            self.copy_attrs(ds, obj)
 
             # Copy the filtered or unfiltered dataset
             if time_idx is not None:
@@ -182,9 +191,34 @@ if __name__ == '__main__':
                         self.last = None
             return res
 
+    class AttrFilter(object):
+        """Return a value to assign to a given attribute,
+           or None to copy the original value"""
+        def __init__(self, attr_values):
+            def pair(av):
+                a,v = av.split('=')
+                try:
+                    v = int(v)
+                except ValueError:
+                    try:
+                        v = float(v)
+                    except ValueError:
+                        pass
+                return a.split('.'), v
+            self.attrs = [pair(v) for v in attr_values]
+
+        def __call__(self, obj_to, obj_from, attr):
+            if 'nslaw' not in obj_from.name:
+                return None
+            for a,v in self.attrs:
+                if (obj_from.name == '/data/' + '/'.join(a[:-1])
+                    and attr == a[-1]):
+                    return v
+
     with h5py.File(args.fns_in[0], mode='r') as io_in:
         with h5py.File(args.fn_out[0], mode='w') as io_out:
             io_in.visititems(CopyVisitor(
                 time_filter = TimeFilter(),
-                object_filter = lambda name,obj: not re_exclude(name)
+                object_filter = lambda name,obj: not re_exclude(name),
+                attr_filter = args.attr and AttrFilter(args.attr),
             ).visitor)
