@@ -49,6 +49,51 @@ int main(void)
     options->internalSolvers->iparam[0]=@TEST_INTERNAL_SOLVER_MAXITER@;
   }
 
+  int iparam_idx_size = @IPARAM_IDX_SIZE@;
+  if (iparam_idx_size)
+  {
+    int iparam_idx[@IPARAM_IDX_SIZE@] = {@IPARAM_IDX_STR@};
+    int iparam_val[@IPARAM_IDX_SIZE@] = {@IPARAM_VAL_STR@};
+
+    for (int kk = 0 ; kk <iparam_idx_size; kk++)
+    {
+      options->iparam[iparam_idx[kk]] = iparam_val[kk];
+    }
+  }
+  int dparam_idx_size = @DPARAM_IDX_SIZE@;
+  if (dparam_idx_size)
+  {
+    int dparam_idx[@DPARAM_IDX_SIZE@] = {@DPARAM_IDX_STR@};
+    int dparam_val[@DPARAM_IDX_SIZE@] = {@DPARAM_VAL_STR@};
+
+    for (int kk = 0 ; kk <dparam_idx_size; kk++)
+    {
+      options->dparam[dparam_idx[kk]] = dparam_val[kk];
+    }
+  }
+  
+ int internal_iparam_idx_size = @INTERNAL_IPARAM_IDX_SIZE@;
+  if (internal_iparam_idx_size)
+  {
+    int internal_iparam_idx[@INTERNAL_IPARAM_IDX_SIZE@] = {@INTERNAL_IPARAM_IDX_STR@};
+    int internal_iparam_val[@INTERNAL_IPARAM_IDX_SIZE@] = {@INTERNAL_IPARAM_VAL_STR@};
+
+    for (int kk = 0 ; kk <internal_iparam_idx_size; kk++)
+    {
+      options->internalSolvers->iparam[internal_iparam_idx[kk]] = internal_iparam_val[kk];
+    }
+  }
+  int internal_dparam_idx_size = @INTERNAL_DPARAM_IDX_SIZE@;
+  if (internal_dparam_idx_size)
+  {
+    int internal_dparam_idx[@INTERNAL_DPARAM_IDX_SIZE@] = {@INTERNAL_DPARAM_IDX_STR@};
+    int internal_dparam_val[@INTERNAL_DPARAM_IDX_SIZE@] = {@INTERNAL_DPARAM_VAL_STR@};
+
+    for (int kk = 0 ; kk <internal_dparam_idx_size; kk++)
+    {
+      options->internalSolvers->dparam[internal_dparam_idx[kk]] = internal_dparam_val[kk];
+    }
+  }
 #ifdef HAVE_GAMS_C_API
 #ifdef __clang__
 #pragma clang diagnostic push
@@ -68,6 +113,7 @@ int main(void)
 #pragma clang diagnostic pop
 #endif /* __clang__  */
 #endif
+
 
   info = frictionContact_test_function(finput,options);
   solver_options_delete(options);
