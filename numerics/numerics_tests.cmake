@@ -236,65 +236,47 @@ if(WITH_${COMPONENT}_TESTING)
   NEW_TEST(FC3D_sparse_test fc3d_sparse_test.c)
 
   # (see FrictionContact/test/README for short details)
-  NEW_TEST(test_fc3d_1 fc3d_test1.c)
-
   NEW_FC_TEST(Example1_Fc3D_SBM.dat
     SICONOS_FRICTION_3D_NSGS 1e-16 ${NSGS_NB_IT} 
     SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone)
   
-  NEW_TEST(test_fc3d_2 fc3d_test2.c)
   NEW_FC_TEST(Example1_Fc3D_SBM.dat
     SICONOS_FRICTION_3D_NSGS  1e-16 ${NSGS_NB_IT} 
     SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithDiagonalization)
  
-  NEW_TEST(test_fc3d_3 fc3d_test3.c)
   NEW_FC_TEST(Example1_Fc3D_SBM.dat
     SICONOS_FRICTION_3D_NSGS 1e-16 ${NSGS_NB_IT} 
     SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration  1e-3 10)
 
-  NEW_TEST(test_fc3d_4 fc3d_test4.c)
   NEW_FC_TEST(Example1_Fc3D_SBM.dat
     SICONOS_FRICTION_3D_NSGS  1e-16 ${NSGS_NB_IT} 
     SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithRegularization 0 0
     DPARAM 3 0.1)
     
-  SET(test_fc3d_5_PROPERTIES WILL_FAIL TRUE)
-  NEW_TEST(test_fc3d_5 fc3d_test5.c)
-  
   NEW_FC_TEST(Example1_Fc3D_SBM.dat
     SICONOS_FRICTION_3D_NSGS  1e-16 1000
     SICONOS_FRICTION_3D_NCPGlockerFBNewton 0 0)
   SET(${TEST_NAME}_PROPERTIES WILL_FAIL TRUE)
 
-   
-  SET(test_fc3d_7_PROPERTIES WILL_FAIL TRUE)
-  NEW_TEST(test_fc3d_7 fc3d_test7.c)  
   NEW_FC_TEST(Example1_Fc3D_SBM.dat
     SICONOS_FRICTION_3D_NSGS  1e-16 1000
     SICONOS_FRICTION_3D_NCPGlockerFBFixedPoint 0.0 10 )
   SET(${TEST_NAME}_PROPERTIES WILL_FAIL TRUE)
 
 
-  
-  NEW_TEST(test_fc3d_9 fc3d_test9.c)
   NEW_FC_TEST(Capsules-i122-1617.dat
     SICONOS_FRICTION_3D_NSGS  1e-07 1000000
     SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration 1e-16 20
     DPARAM 8 1.0
     IPARAM 8 1)
 
-
-
-
-  NEW_TEST(test_fc3d_10 fc3d_test10.c)
   NEW_FC_TEST(Confeti-ex13-4contact-Fc3D-SBM.dat
     SICONOS_FRICTION_3D_NSGS  1e-05 10000
     SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone 0.0 0
     DPARAM 8 1.0
     IPARAM 8 1)
 
-  
-  NEW_TEST(test_fc3d_11 fc3d_test11.c)
+
   NEW_FC_TEST(Confeti-ex13-4contact-Fc3D-SBM.dat
     SICONOS_FRICTION_3D_NSGS  1e-12 10000
     SICONOS_FRICTION_3D_ONECONTACT_NSN_AC 1e-18 10
@@ -304,18 +286,15 @@ if(WITH_${COMPONENT}_TESTING)
     SICONOS_FRICTION_3D_NSGS  1e-12 10000
     SICONOS_FRICTION_3D_ONECONTACT_NSN_AC 1e-18 10
     INTERNAL_IPARAM 1 1)
-  
-  NEW_TEST(test_fc3d_12 fc3d_test12.c)
+
   NEW_FC_TEST(Confeti-ex13-4contact-Fc3D-SBM.dat
     SICONOS_FRICTION_3D_NSGS  1e-12 10000
     SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration 1e-6 100)
-  
-  NEW_TEST(test_fc3d_13 fc3d_test13.c)
+
   NEW_FC_TEST(Confeti-ex13-4contact-Fc3D-SBM.dat
     SICONOS_FRICTION_3D_NSGS  1e-12 10000
     SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithRegularization 0.0 0)
-  
-  NEW_TEST(test_fc3d_14 fc3d_test14.c)
+
   NEW_FC_TEST(problem-checkTwoRods1-condensed.dat
     SICONOS_FRICTION_3D_NSGS  1e-05 10000
     SICONOS_FRICTION_3D_ONECONTACT_NSN_AC 0.0 0
