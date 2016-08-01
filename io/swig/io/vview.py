@@ -877,6 +877,15 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
     pos_data = dpos_data[:].copy()
     spos_data = spos_data[:].copy()
 
+    def set_actors_visibility(id_t):
+        for instance, actor in actors.items():
+            if instance < 0 or instance in pos_data[id_t,1]:
+                #actor.GetProperty().SetColor(0,0,1)
+                actor.VisibilityOn()
+            else:
+                #actor.GetProperty().SetColor(0,1,0)
+                actor.VisibilityOff()
+
     if not vtk_export_mode:
         if cf_prov is not None:
             for mu in cf_prov._mu_coefs:
@@ -906,6 +915,8 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
             pos_data[id_t0, 1], pos_data[id_t0, 2], pos_data[id_t0, 3],
             pos_data[id_t0, 4], pos_data[id_t0, 5], pos_data[id_t0, 6],
             pos_data[id_t0, 7], pos_data[id_t0, 8])
+
+        set_actors_visibility(id_t0)
 
         renderer_window.AddRenderer(renderer)
         interactor_renderer.SetRenderWindow(renderer_window)
@@ -1072,13 +1083,7 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
 
                 id_t = numpy.where(pos_data[:, 0] == self._times[index])
 
-                for instance, actor in actors.items():
-                    if instance < 0 or instance in pos_data[id_t,1]:
-                        #actor.GetProperty().SetColor(0,0,1)
-                        actor.VisibilityOn()
-                    else:
-                        #actor.GetProperty().SetColor(0,1,0)
-                        actor.VisibilityOff()
+                set_actors_visibility(id_t)
 
                 set_positionv(
                     pos_data[id_t, 1], pos_data[id_t, 2], pos_data[id_t, 3],
