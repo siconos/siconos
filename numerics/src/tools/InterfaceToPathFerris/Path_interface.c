@@ -70,7 +70,7 @@ void SN_path_interface(MCP_Interface* restrict mcp_interface, double* restrict z
   double *tempZ;
   double *tempF;
   double dnnz;
-  int i;
+  unsigned int i;
 
 #if defined(USE_OUTPUT_INTERFACE)
   Output_Interface outputInterface =

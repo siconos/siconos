@@ -27,6 +27,7 @@
  *  - the solution to Hx = col should be saved only when col correspond to a
  *  driving variable not in the factorized basis*/ 
 
+#ifdef DEBUG_MESSAGES
 inline static void lumod_full_check(SN_lumod_dense_data* lumod_data)
 {
 #ifdef DEEP_DEBUG_Ck
@@ -65,7 +66,7 @@ inline static void lumod_full_check(SN_lumod_dense_data* lumod_data)
   free(Ctmp);
 #endif
 }
-
+#endif
 /* Wrapper on dense matrix */
 SN_lumod_dense_data* SN_lumod_dense_allocate(unsigned n, unsigned maxmod)
 {

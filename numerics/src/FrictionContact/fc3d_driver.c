@@ -342,7 +342,9 @@ int checkTrivialCase(FrictionContactProblem* problem, double* velocity,
 }
 
 #include <stdarg.h>
-void snPrintf(int level, SolverOptions* opts, const char *fmt, ...)
+/* the warning on vprintf is reported as a bug of clang ... --vacary */
+#pragma clang diagnostic ignored "-Wformat-nonliteral"
+void snPrintf(int level, SolverOptions* opts, const char * fmt, ...)
 {
   assert(opts);
   assert(opts->numericsOptions);

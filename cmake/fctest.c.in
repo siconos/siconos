@@ -64,7 +64,7 @@ int main(void)
   if (dparam_idx_size)
   {
     int dparam_idx[@DPARAM_IDX_SIZE@] = {@DPARAM_IDX_STR@};
-    int dparam_val[@DPARAM_IDX_SIZE@] = {@DPARAM_VAL_STR@};
+    double dparam_val[@DPARAM_IDX_SIZE@] = {@DPARAM_VAL_STR@};
 
     for (int kk = 0 ; kk <dparam_idx_size; kk++)
     {
@@ -87,7 +87,7 @@ int main(void)
   if (internal_dparam_idx_size)
   {
     int internal_dparam_idx[@INTERNAL_DPARAM_IDX_SIZE@] = {@INTERNAL_DPARAM_IDX_STR@};
-    int internal_dparam_val[@INTERNAL_DPARAM_IDX_SIZE@] = {@INTERNAL_DPARAM_VAL_STR@};
+    double internal_dparam_val[@INTERNAL_DPARAM_IDX_SIZE@] = {@INTERNAL_DPARAM_VAL_STR@};
 
     for (int kk = 0 ; kk <internal_dparam_idx_size; kk++)
     {

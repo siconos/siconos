@@ -60,7 +60,7 @@ static CB_FUNC(void) ncp_PATH_bounds(void* restrict id, int n, double* restrict 
 {
   SN_generic_path_env* env = (SN_generic_path_env*) id;
 
-  for (unsigned i = 0; i < n; ++i) {
+  for (unsigned i = 0; i < (unsigned )n; ++i) {
     z[i] = env->z[i];
     lb[i] = 0.;
     ub[i] = 1e20; /* Magic value, see PATH documentation */

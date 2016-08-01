@@ -40,7 +40,7 @@ static CB_FUNC(void) vi_box_PATH_bounds(void* restrict id, int n, double* restri
 {
   SN_generic_path_env* env = (SN_generic_path_env*) id;
 
-  for (unsigned i = 0; i < n; ++i) {
+  for (unsigned i = 0; i < (unsigned)n; ++i) {
     z[i] = env->z[i];
     lb[i] = env->lb[i];
     ub[i] = env->ub[i];

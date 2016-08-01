@@ -33,7 +33,7 @@ void lcp_path(LinearComplementarityProblem* problem, double *z, double *w, int *
   double * M = problem->M->matrix0;
 
   double * q = problem->q;
-  int nnz, i, j, dim;
+  int nnz, i, j;
 
   /* size of the LCP */
   int n = problem->size;
