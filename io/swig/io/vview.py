@@ -1145,6 +1145,7 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
 
                     pos_data = dpos_data[:].copy()
                     min_time = times[0]
+                    set_actors_visibility(id_t0)
 
                     max_time = times[len(times) - 1]
 
