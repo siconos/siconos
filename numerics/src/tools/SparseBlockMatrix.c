@@ -575,7 +575,7 @@ void prodSBMSBM(double alpha, const SparseBlockStructuredMatrix* const A, const 
   /*   exit(EXIT_FAILURE); */
 
 }
-void subRowProdSBM(unsigned int sizeX, unsigned int sizeY, unsigned int currentRowNumber,
+void SBM_row_prod(unsigned int sizeX, unsigned int sizeY, unsigned int currentRowNumber,
                    const SparseBlockStructuredMatrix* const A,
                    const double* const x, double* y, int init)
 {
@@ -645,14 +645,14 @@ void subRowProdSBM(unsigned int sizeX, unsigned int sizeY, unsigned int currentR
 
   }
 }
-void rowProdNoDiagSBM(unsigned int sizeX, unsigned int sizeY, unsigned int currentRowNumber, const SparseBlockStructuredMatrix* const A, const double* const x, double* y, int init)
+void SBM_row_prod_no_diag(unsigned int sizeX, unsigned int sizeY, unsigned int currentRowNumber, const SparseBlockStructuredMatrix* const A, const double* const x, double* y, int init)
 {
   /*
      If: A is a SparseBlockStructuredMatrix matrix, Aij a block at row
      i and column j (Warning: i and j are indices of block position,
      not scalar component positions)
 
-     Then rowProdNoDiagSBM computes y = sum for i not equal to j of
+     Then SBM_row_prod_no_diag computes y = sum for i not equal to j of
      Aij.xj over a row of blocks (or += if init = false)
 
      currentRowNumber represents the position (block number) of the
@@ -724,14 +724,14 @@ void rowProdNoDiagSBM(unsigned int sizeX, unsigned int sizeY, unsigned int curre
     }
   }
 }
-void rowProdNoDiagSBM3x3(unsigned int sizeX, unsigned int sizeY, unsigned int currentRowNumber, const SparseBlockStructuredMatrix* const A, double* const x, double* y)
+void SBM_row_prod_no_diag_3x3(unsigned int sizeX, unsigned int sizeY, unsigned int currentRowNumber, const SparseBlockStructuredMatrix* const A, double* const x, double* y)
 {
   /*
      If: A is a SparseBlockStructuredMatrix matrix, Aij a block at row
      i and column j (Warning: i and j are indices of block position,
      not scalar component positions)
 
-     Then rowProdNoDiagSBM computes y = sum for i not equal to j of
+     Then SBM_row_prod_no_diag computes y = sum for i not equal to j of
      Aij.xj over a row of blocks (or += if init = false)
 
      currentRowNumber represents the position (block number) of the

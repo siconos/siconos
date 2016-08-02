@@ -56,7 +56,7 @@ void mlcp_pgs_sbm_buildLocalProblem(int rowNumber, const SparseBlockStructuredMa
      row of blocks of M
   */
   cblas_dcopy(local_problem->size, &q[pos], 1, local_problem->q, 1);
-  rowProdNoDiagSBM(blmat->blocksize0[blmat->blocknumber0 - 1], local_problem->size, rowNumber, blmat, z, local_problem->q, 0);
+  SBM_row_prod_no_diag(blmat->blocksize0[blmat->blocknumber0 - 1], local_problem->size, rowNumber, blmat, z, local_problem->q, 0);
 
 }
 

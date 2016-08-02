@@ -76,10 +76,10 @@ int GenericMechanical_compute_error(GenericMechanicalProblem* pGMP, double *reac
     /*computation of the localproblem->q*/
     if (storageType == 0)
     {
-      rowProdNoDiag(pGMP->size, curSize, posInX, numMat, reaction, curProblem->q, 0);
+      NM_row_prod_no_diag(pGMP->size, curSize, posInX, numMat, reaction, curProblem->q, 0);
     }
     else
-      rowProdNoDiagSBM(pGMP->size, curSize, currentRowNumber, m, reaction, curProblem->q, 0);
+      SBM_row_prod_no_diag(pGMP->size, curSize, currentRowNumber, m, reaction, curProblem->q, 0);
 #ifdef GENERICMECHANICAL_DEBUG_COMPUTE_ERROR
     printDenseMatrice("qnodiag", 0, curProblem->q, curSize, 1);
 #endif
@@ -300,10 +300,10 @@ void genericMechanicalProblem_GS(GenericMechanicalProblem* pGMP, double * reacti
         memcpy(linearProblem->q, &(pGMP->q[posInX]), curSize * sizeof(double));
         if (storageType == 0)
         {
-          rowProdNoDiag(pGMP->size, curSize, posInX, numMat, reaction, linearProblem->q, 0);
+          NM_row_prod_no_diag(pGMP->size, curSize, posInX, numMat, reaction, linearProblem->q, 0);
         }
         else
-          rowProdNoDiagSBM(pGMP->size, curSize, currentRowNumber, m, reaction, linearProblem->q, 0);
+          SBM_row_prod_no_diag(pGMP->size, curSize, currentRowNumber, m, reaction, linearProblem->q, 0);
 
         resLocalSolver = LinearSystem_driver(linearProblem, sol, w, 0);
 
@@ -318,10 +318,10 @@ void genericMechanicalProblem_GS(GenericMechanicalProblem* pGMP, double * reacti
         memcpy(curProblem->q, &(pGMP->q[posInX]), curSize * sizeof(double));
         if (storageType == 0)
         {
-          rowProdNoDiag(pGMP->size, curSize, posInX, numMat, reaction, lcpProblem->q, 0);
+          NM_row_prod_no_diag(pGMP->size, curSize, posInX, numMat, reaction, lcpProblem->q, 0);
         }
         else
-          rowProdNoDiagSBM(pGMP->size, curSize, currentRowNumber, m, reaction, lcpProblem->q, 0);
+          SBM_row_prod_no_diag(pGMP->size, curSize, currentRowNumber, m, reaction, lcpProblem->q, 0);
         resLocalSolver = linearComplementarity_driver(lcpProblem, sol, w, options->internalSolvers, 0);
 
         break;
@@ -339,10 +339,10 @@ void genericMechanicalProblem_GS(GenericMechanicalProblem* pGMP, double * reacti
 
         if (storageType == 0)
         {
-          rowProdNoDiag(pGMP->size, curSize, posInX, numMat, reaction, fcProblem->q, 0);
+          NM_row_prod_no_diag(pGMP->size, curSize, posInX, numMat, reaction, fcProblem->q, 0);
         }
         else
-          rowProdNoDiagSBM(pGMP->size, curSize, currentRowNumber, m, reaction, fcProblem->q, 0);
+          SBM_row_prod_no_diag(pGMP->size, curSize, currentRowNumber, m, reaction, fcProblem->q, 0);
 
         DEBUG_EXPR_WE(for (int i =0 ; i < 3; i++)  printf("reaction[%i]= %12.8e,\t fcProblem->q[%i]= %12.8e,\n",i,reaction[i],i,fcProblem->q[i]););
 

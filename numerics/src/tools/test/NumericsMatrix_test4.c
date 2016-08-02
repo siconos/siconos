@@ -49,7 +49,7 @@ int main(void)
     return info;
   }
   printf("Construction ok ...\n");
-  info = test_subRowprodNonSquare(NMM[2], NMM[3]);
+  info = test_NM_row_prod_non_square(NMM[2], NMM[3]);
   printf("End of Sub-Prod Non Square...\n");
   if (info != 0) return info;
 

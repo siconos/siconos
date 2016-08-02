@@ -53,7 +53,7 @@ void lcp_nsgs_SBM_buildLocalProblem(int rowNumber, const SparseBlockStructuredMa
      row of blocks of M
   */
   cblas_dcopy_msan(local_problem->size, &q[pos], 1, local_problem->q, 1);
-  rowProdNoDiagSBM(blmat->blocksize0[blmat->blocknumber0 - 1], local_problem->size, rowNumber, blmat, z, local_problem->q, 0);
+  SBM_row_prod_no_diag(blmat->blocksize0[blmat->blocknumber0 - 1], local_problem->size, rowNumber, blmat, z, local_problem->q, 0);
 
 }
 

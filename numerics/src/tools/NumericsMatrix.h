@@ -91,7 +91,7 @@ The following linear algebra operation are supported:
 
   - product matrix - vector: prodNumericsMatrix()
   - product matrix - matrix: prodNumericsMatrixNumericsMatrix()
-  - partial product matrix - vector: subRowProd()
+  - partial product matrix - vector: NM_row_prod()
 
 \subsection NM_IO Input / Output
 
@@ -210,7 +210,7 @@ extern "C"
       \param[in,out] y the resulting vector
       \param[in] init = 0 for y += Ax, =1 for y = Ax
   */
-  void subRowProd(int sizeX, int sizeY, int currentRowNumber, const NumericsMatrix* const A, const double* const x, double* y, int init);
+  void NM_row_prod(int sizeX, int sizeY, int currentRowNumber, const NumericsMatrix* const A, const double* const x, double* y, int init);
 
   /** Row of a Matrix - vector product y = rowA*x or y += rowA*x, rowA being a submatrix of A (sizeY rows and sizeX columns)
       \param[in] sizeX dim of the vector x
@@ -221,7 +221,7 @@ extern "C"
       \param[in,out] y the resulting vector
       \param[in] init = 0 for y += Ax, =1 for y = Ax
   */
-  void rowProdNoDiag(int sizeX, int sizeY, int currentRowNumber, const NumericsMatrix* const A, const double* const x, double* y, int init);
+  void NM_row_prod_no_diag(int sizeX, int sizeY, int currentRowNumber, const NumericsMatrix* const A, const double* const x, double* y, int init);
 
   /** Free memory for a NumericsMatrix. Warning: call this function only if you are sure that
       memory has been allocated for the structure in Numerics. This function is assumed that the memory is "owned" by this structure.

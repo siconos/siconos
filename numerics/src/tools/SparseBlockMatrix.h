@@ -69,7 +69,7 @@
     index2_data[blockNumber] -> columnNumber.
 
 
-    Related functions: prodSBM(), subRowProdSBM(), freeSBM(),
+    Related functions: prodSBM(), SBM_row_prod(), freeSBM(),
     printSBM, getDiagonalBlockPos()
  * If we consider the matrix M and the right-hand-side q defined as
  *
@@ -232,7 +232,7 @@ extern "C"
       \param[in,out] y the resulting vector
       \param[in] init = 0 for y += Ax, =1 for y = Ax
   */
-  void subRowProdSBM(unsigned int sizeX, unsigned int sizeY, unsigned int currentRowNumber, const SparseBlockStructuredMatrix* const A, const double* const x, double* y, int init);
+  void SBM_row_prod(unsigned int sizeX, unsigned int sizeY, unsigned int currentRowNumber, const SparseBlockStructuredMatrix* const A, const double* const x, double* y, int init);
 
   /** Row of a SparseMatrix - vector product y = rowA*x or y += rowA*x, rowA being a row of blocks of A
       \param[in] sizeX dim of the vector x
@@ -243,7 +243,7 @@ extern "C"
       \param[in,out] y the resulting vector
       \param[in] init = 0 for y += Ax, =1 for y = Ax
   */
-  void rowProdNoDiagSBM(unsigned int sizeX, unsigned int sizeY, unsigned int currentRowNumber, const SparseBlockStructuredMatrix* const A, const double* const x, double* y, int init);
+  void SBM_row_prod_no_diag(unsigned int sizeX, unsigned int sizeY, unsigned int currentRowNumber, const SparseBlockStructuredMatrix* const A, const double* const x, double* y, int init);
 
   /** Row of a SparseMatrix - vector product y = rowA*x or y += rowA*x, rowA being a row of blocks of A of size 3x3
       \param[in] sizeX dim of the vector x
@@ -254,7 +254,7 @@ extern "C"
       \param[in,out] y the resulting vector
       \param[in] init = 0 for y += Ax
   */
-  void rowProdNoDiagSBM3x3(unsigned int sizeX, unsigned int sizeY, unsigned int currentRowNumber, const SparseBlockStructuredMatrix* const A, double* const x, double* y);
+  void SBM_row_prod_no_diag_3x3(unsigned int sizeX, unsigned int sizeY, unsigned int currentRowNumber, const SparseBlockStructuredMatrix* const A, double* const x, double* y);
   
 
   /** Destructor for SparseBlockStructuredMatrix objects

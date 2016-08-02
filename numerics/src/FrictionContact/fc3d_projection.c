@@ -128,7 +128,7 @@ void fc3d_projectionWithDiagonalization_update(int contact, FrictionContactProbl
     /* qLocal += rowMB * reaction
        with rowMB the row of blocks of MGlobal which corresponds to the current contact
     */
-    subRowProdSBM(n, 3, contact, MGlobal->matrix1, reaction, qLocal, 0);
+    SBM_row_prod(n, 3, contact, MGlobal->matrix1, reaction, qLocal, 0);
     // Substract diagonal term
     qLocal[0] -= MLocal[0] * reaction[in];
     qLocal[1] -= MLocal[4] * reaction[it];

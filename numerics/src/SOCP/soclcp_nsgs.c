@@ -228,7 +228,7 @@ void soclcp_nsgs_computeqLocal(SecondOrderConeLinearComplementarityProblem * pro
     with rowMB the row of blocks of MGlobal which corresponds to the current cone
     */
     DEBUG_PRINTF("dim= %i\n", dim);
-    rowProdNoDiagSBM(n, dim, cone, problem->M->matrix1, r, qLocal, 0);
+    SBM_row_prod_no_diag(n, dim, cone, problem->M->matrix1, r, qLocal, 0);
   }
   for(int i = 0; i < dim; i++)
   {

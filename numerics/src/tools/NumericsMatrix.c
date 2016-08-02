@@ -135,7 +135,7 @@ void prodNumericsMatrixNumericsMatrix(double alpha, const NumericsMatrix* const 
   }
 }
 
-void subRowProd(int sizeX, int sizeY, int currentRowNumber, const NumericsMatrix* A, const double* const x, double* y, int init)
+void NM_row_prod(int sizeX, int sizeY, int currentRowNumber, const NumericsMatrix* A, const double* const x, double* y, int init)
 {
 
   assert(A);
@@ -165,16 +165,16 @@ void subRowProd(int sizeX, int sizeY, int currentRowNumber, const NumericsMatrix
   }
   /* SparseBlock storage */
   else if (storage == 1)
-    subRowProdSBM(sizeX, sizeY, currentRowNumber, A->matrix1, x, y, init);
+    SBM_row_prod(sizeX, sizeY, currentRowNumber, A->matrix1, x, y, init);
   else
   {
-    fprintf(stderr, "Numerics, NumericsMatrix, product matrix - vector subRowProd(A,x,y) failed, unknown storage type for A.\n");
+    fprintf(stderr, "Numerics, NumericsMatrix, product matrix - vector NM_row_prod(A,x,y) failed, unknown storage type for A.\n");
     exit(EXIT_FAILURE);
   }
 
 }
 
-void rowProdNoDiag(int sizeX, int sizeY, int currentRowNumber, const NumericsMatrix* A, const double* const x, double* y, int init)
+void NM_row_prod_no_diag(int sizeX, int sizeY, int currentRowNumber, const NumericsMatrix* A, const double* const x, double* y, int init)
 {
 
   assert(A);
@@ -217,10 +217,10 @@ void rowProdNoDiag(int sizeX, int sizeY, int currentRowNumber, const NumericsMat
 
   }
   else if (storage == 1)
-    rowProdNoDiagSBM(sizeX, sizeY, currentRowNumber, A->matrix1, x, y, init);
+    SBM_row_prod_no_diag(sizeX, sizeY, currentRowNumber, A->matrix1, x, y, init);
   else
   {
-    fprintf(stderr, "Numerics, NumericsMatrix, product matrix - vector rowProdNoDiag(A,x,y) failed, unknown storage type for A.\n");
+    fprintf(stderr, "Numerics, NumericsMatrix, product matrix - vector NM_row_prod_no_diag(A,x,y) failed, unknown storage type for A.\n");
     exit(EXIT_FAILURE);
   }
 }

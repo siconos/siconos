@@ -28,10 +28,10 @@ extern "C"
   int test_BuildNumericsMatrix(NumericsMatrix** MM);
   int test_prodNumericsMatrix(NumericsMatrix** MM);
   int test_prodNumericsMatrixNumericsMatrix(NumericsMatrix** MM);
-  int test_subRowprod(NumericsMatrix* M1, NumericsMatrix* M2);
-  int test_rowProdNoDiag(NumericsMatrix* M1, NumericsMatrix* M2);
-  int test_subRowprodNonSquare(NumericsMatrix* M3, NumericsMatrix* M4);
-  int test_rowProdNoDiagNonSquare(NumericsMatrix* M3, NumericsMatrix* M4);
+  int test_NM_row_prod(NumericsMatrix* M1, NumericsMatrix* M2);
+  int test_NM_row_prod_no_diag(NumericsMatrix* M1, NumericsMatrix* M2);
+  int test_NM_row_prod_non_square(NumericsMatrix* M3, NumericsMatrix* M4);
+  int test_NM_row_prod_no_diag_non_square(NumericsMatrix* M3, NumericsMatrix* M4);
   int test_SBMRowToDense(SparseBlockStructuredMatrix *M);
   int test_RowPermutationSBM(SparseBlockStructuredMatrix *M);
   int test_ColPermutationSBM(SparseBlockStructuredMatrix *M);
