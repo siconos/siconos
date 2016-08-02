@@ -1061,6 +1061,7 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
                 self._recording = False
 
             def update(self):
+                global cf_prov
                 index = bisect.bisect_left(self._times, self._time)
                 index = max(0, index)
                 index = min(index, len(self._times) - 1)
@@ -1116,6 +1117,7 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
                         actor.GetProperty().SetOpacity(self._opacity)
 
             def key(self, obj, event):
+                global cf_prov
                 key = obj.GetKeySym()
                 print 'key', key
 
@@ -1138,10 +1140,12 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
                         contact_posa.Update()
                         contact_posb.SetInputData(cf_prov._output)
                         contact_posb.Update()
+                        [(contact_pos_force[mu].Update(),
+                          contact_pos_norm[mu].Update())
+                         for mu in cf_prov._mu_coefs]
+
                     id_t0 = numpy.where(
                         dpos_data[:, 0] == min(dpos_data[:, 0]))
-                    contact_pos_force.Update()
-                    contact_pos_norm.Update()
 
                     pos_data = dpos_data[:].copy()
                     min_time = times[0]
