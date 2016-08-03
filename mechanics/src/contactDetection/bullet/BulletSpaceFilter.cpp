@@ -192,6 +192,18 @@ void BulletSpaceFilter::buildInteractions(double time)
 
   DEBUG_PRINT("----- insert dynamic collision objects if needed\n");
 
+  if (! _dynamicCollisionsObjectsInserted ||  ! _staticCollisionsObjectsInserted)
+  {
+    _collisionWorld.reset();
+
+    _dispatcher.reset(new btCollisionDispatcher(&*_collisionConfiguration));
+    _collisionWorld.reset(new btCollisionWorld(&*_dispatcher, &*_broadphase,
+                                               &*_collisionConfiguration));
+    // btGImpactCollisionAlgorithm::registerAlgorithm(&*_dispatcher);
+    // _collisionWorld->getDispatchInfo().m_useContinuous = false;
+    _dynamicCollisionsObjectsInserted = false;
+    _staticCollisionsObjectsInserted = false;
+  }
 
   if (! _dynamicCollisionsObjectsInserted)
   {
