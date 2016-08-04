@@ -26,6 +26,9 @@
 #include "SiconosBlas.h"
 
 #include "sanitizer.h"
+/* #define DEBUG_STDOUT */
+/* #define DEBUG_MESSAGES 1 */
+#include "debug.h"
 
 void lcp_nsgs_SBM_buildLocalProblem(int rowNumber, const SparseBlockStructuredMatrix* const blmat, LinearComplementarityProblem* local_problem, double* q, double* z)
 {
@@ -59,6 +62,7 @@ void lcp_nsgs_SBM_buildLocalProblem(int rowNumber, const SparseBlockStructuredMa
 
 void lcp_nsgs_SBM(LinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options)
 {
+  DEBUG_BEGIN("lcp_nsgs_SBM(...)\n");
   /* Notes:
 
      - we suppose that the trivial solution case has been checked
@@ -199,6 +203,7 @@ void lcp_nsgs_SBM(LinearComplementarityProblem* problem, double *z, double *w, i
   free(local_problem->M);
   free(local_problem);
   /*   free(wBackup); */
+  DEBUG_END("lcp_nsgs_SBM(...)\n");
 }
 
 
@@ -229,6 +234,6 @@ int linearComplementarity_nsgs_SBM_setDefaultSolverOptions(SolverOptions* option
   options->iparam[0] = 1000;
   options->dparam[0] = 1e-6;
   options->internalSolvers = (SolverOptions*)malloc(options->numberOfInternalSolvers * sizeof(SolverOptions));
-
+  linearComplementarity_psor_setDefaultSolverOptions(options->internalSolvers);
   return 0;
 }
