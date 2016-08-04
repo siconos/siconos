@@ -472,7 +472,8 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction, double *veloci
       }
     }
   }
-  else if (iparam[1] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_FULL)
+  else if (iparam[1] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_FULL
+           || iparam[1] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_ADAPTIVE)
   {
     if (iparam[5] == SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE) /* shuffle */
     {
@@ -843,7 +844,7 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction, double *veloci
   }
   else
   {
-    numericsError("fc3d_nsgs", "iparam[1] must be equal to SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_FULL (0), SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL (1) or SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT  (2)");
+    numericsError("fc3d_nsgs", "iparam[1] must be equal to SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_FULL (0), SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL (1), SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT (2) or SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_ADAPTIVE (3)");
   }
 
   /** return parameter values */
