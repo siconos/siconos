@@ -84,9 +84,10 @@ extern "C"
   
   enum SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION
   {
-    SICONOS_FRICTION_3D_NSGS_FULL_ERROR_EVALUATION,
-    SICONOS_FRICTION_3D_NSGS_LIGHT_ERROR_EVALUATION_WITH_FULL_FINAL,
-    SICONOS_FRICTION_3D_NSGS_LIGHT_ERROR_EVALUATION
+    SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_FULL,
+    SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL,
+    SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT,
+    SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_ADAPTIVE
   };
   enum SICONOS_FRICTION_3D_NSGS_SHUFFLE
   {
@@ -108,9 +109,10 @@ extern "C"
       \param options the solver options :
       [in] iparam[0] : Maximum iteration number
       [in] iparam[1] : error computation method :
-          SICONOS_FRICTION_3D_NSGS_FULL_ERROR_EVALUATION (0) : Full error computation with velocity computation
-          SICONOS_FRICTION_3D_NSGS_LIGHT_ERROR_EVALUATION_WITH_FULL_FINAL (1) : Light error computation with incremental values on reaction verification of absolute error at the end
-          SICONOS_FRICTION_3D_NSGS_LIGHT_ERROR_EVALUATION (2) : only light error computation (velocity not computed)
+          SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_FULL (0) : Full error computation with velocity computation
+          SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL (1) : Light error computation with incremental values on reaction verification of absolute error at the end
+          SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT (2) : only light error computation (velocity not computed)
+          SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_ADAPTIVE (3) :  we adapt the frequency of the full erro evaluation.
       [in] iparam[4] : method uses overrelaxation
           SICONOS_FRICTION_3D_NSGS_RELAXATION_FALSE (0) relaxation is not used,
           SICONOS_FRICTION_3D_NSGS_RELAXATION_TRUE  (1) relaxation is used with parameter dparam[8],
@@ -121,11 +123,9 @@ extern "C"
            SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE_EACH_LOOP (2) : shuffle in each iteration
       [in] iparam[6] : seed for the random generator in shuffling  contacts
 
-      
-
       [out] iparam[7] = iter number of performed iterations
 
-      [in] iparam[8] = error computation frequency
+      [in]  iparam[8] = error computation frequency
 
       [in]  dparam[0]  user tolerance on the loop
       [in]  dparam[8]  the relaxation parameter omega

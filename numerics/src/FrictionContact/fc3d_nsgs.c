@@ -398,8 +398,8 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction, double *veloci
   }
 
   /*  dparam[0]= dparam[2]; // set the tolerance for the local solver */
-  if (iparam[1] == SICONOS_FRICTION_3D_NSGS_LIGHT_ERROR_EVALUATION_WITH_FULL_FINAL ||
-      iparam[1] == SICONOS_FRICTION_3D_NSGS_LIGHT_ERROR_EVALUATION)
+  if (iparam[1] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL ||
+      iparam[1] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT)
   {
     double reactionold[3];
     while ((iter < itermax) && (hasNotConverged > 0))
@@ -459,7 +459,7 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction, double *veloci
       }
       *info = hasNotConverged;
     }
-    if (iparam[1] == SICONOS_FRICTION_3D_NSGS_LIGHT_ERROR_EVALUATION_WITH_FULL_FINAL) /* Full criterium */
+    if (iparam[1] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL) /* Full criterium */
     {
       double absolute_error;
       (*computeError)(problem, reaction , velocity, tolerance, options, normq, &absolute_error);
@@ -472,7 +472,7 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction, double *veloci
       }
     }
   }
-  else if (iparam[1] == SICONOS_FRICTION_3D_NSGS_FULL_ERROR_EVALUATION)
+  else if (iparam[1] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_FULL)
   {
     if (iparam[5] == SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE) /* shuffle */
     {
@@ -791,9 +791,11 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction, double *veloci
           {
             if (iter % iparam[8] == 0) {
               (*computeError)(problem, reaction , velocity, tolerance, options, normq,  &error);
-              if (error > tolerance && iparam[9] == 1)
+              if (error > tolerance && iparam[1] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_ADAPTIVE)
                 iparam[8] *= 2;
             }
+            if (verbose > 0)
+              printf("----------------------------------- FC3D - NSGS - Iteration %i iparam[8] = %i, iparam[1] = % i \n", iter, iparam[8], iparam[1]); 
           }
           else
             (*computeError)(problem, reaction , velocity, tolerance, options, normq,  &error);
@@ -819,8 +821,11 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction, double *veloci
                                                      error, NULL);
           }
         }
-        if (iparam[9] == 1 && (iter == iparam[8] || iparam[9] > itermax))
+        if (iparam[1] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_ADAPTIVE && (iter == iparam[8] || iparam[1] > itermax))
           iparam[8] = iparam[8]==1 ? 1 : iparam[8]/2;
+         if (verbose > 0)
+              printf("----------------------------------- FC3D - NSGS - Iteration %i iparam[8] = %i, iparam[1] = % i \n", iter, iparam[8], iparam[1]); 
+
       }
       else
       {
@@ -829,12 +834,12 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction, double *veloci
     }
     else
     {
-      numericsError("fc3d_nsgs", "iparam[5] must be equal to SICONOS_FRICTION_3D_NSGS_SHUFLLE_FALSE (0), SICONOS_FRICTION_3D_NSGS_SHUFLLE_TRUE (1) or  SICONOS_FRICTION_3D_NSGS_SHUFLLE_TRUE_EACH_LOOP (2)");
+      numericsError("fc3d_nsgs", "iparam[5] must be equal to SICONOS_FRICTION_3D_NSGS_SHUFFLE_FALSE (0), SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE (1) or  SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE_EACH_LOOP (2)");
     }
   }
   else
   {
-    numericsError("fc3d_nsgs", "iparam[1] must be equal to SICONOS_FRICTION_3D_NSGS_FULL_ERROR_EVALUATION (0), SICONOS_FRICTION_3D_NSGS_LIGHT_ERROR_EVALUATION_WITH_FULL_FINAL (1) or SICONOS_FRICTION_3D_NSGS_LIGHT_ERROR_EVALUATION  (2)");
+    numericsError("fc3d_nsgs", "iparam[1] must be equal to SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_FULL (0), SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL (1) or SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT  (2)");
   }
 
   /** return parameter values */
