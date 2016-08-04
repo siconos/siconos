@@ -688,7 +688,7 @@ class Hdf5():
                            body_class, shape_class, birth=False,
                            number = None):
 
-        
+
         if body_class is None:
             body_class = BulletDS
 
@@ -849,7 +849,7 @@ class Hdf5():
             counter =0
             for (name, obj) in sorted(self._input.items(),
                                       key=lambda x: x[0]):
-                
+
                 input_ctrs = [ctr for _n_, ctr in obj.items()]
                 mass = obj.attrs['mass']
                 time_of_birth = obj.attrs['time_of_birth']
@@ -870,8 +870,8 @@ class Hdf5():
                     # cold restart if output previously done
                     if mass > 0 and self.dynamic_data() is not None and len(self.dynamic_data()) > 0:
                         counter +=1
-                        print ('Import  dynamic object number ', counter, 'from current state')
-                        print ('                object name   ', name)
+                        print ('Import  dynamic object name ', name, 'from current state')
+                        print ('  number of imported object ', counter)
                         dpos_data = self.dynamic_data()
                         max_time = max(dpos_data[:, 0])
                         id_last = np.where(
@@ -1140,7 +1140,7 @@ class Hdf5():
             precision = so.dparam[1]
             local_precision = so.dparam[2]
 
-        
+
         print('SolverInfos at time :', time,
               'iterations= ', iterations,
               'precision=', precision,
@@ -1490,7 +1490,7 @@ class Hdf5():
             btBoxShape, btQuaternion, btTransform, btConeShape, \
             BulletSpaceFilter, cast_BulletR, \
             BulletWeightedShape, BulletDS, BulletTimeStepping
-        
+
         print ('setup model simulation ...')
         if set_external_forces is not None:
             self._set_external_forces = set_external_forces
@@ -1550,10 +1550,16 @@ class Hdf5():
         else:
             osnspb = FrictionContactTrace(3, solver,friction_contact_trace_params,model)
 
-            
+
         osnspb.numericsSolverOptions().iparam[0] = itermax
-        osnspb.numericsSolverOptions().iparam[8] = 1
-        osnspb.numericsSolverOptions().iparam[9] = 1
+        # -- full error evaluation
+        #osnspb.numericsSolverOptions().iparam[1] = Numerics.SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_FULL
+        # --  Adaptive error evaluation
+        #osnspb.numericsSolverOptions().iparam[1] = Numerics.SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_ADAPTIVE
+        #osnspb.numericsSolverOptions().iparam[8] = 1
+        # -- light error evaluation with full final
+        osnspb.numericsSolverOptions().iparam[1] = Numerics.SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL
+
         osnspb.numericsSolverOptions().internalSolvers.iparam[0] = 100
         osnspb.numericsSolverOptions().dparam[0] = tolerance
         osnspb.setMaxSize(30000)
@@ -1638,7 +1644,7 @@ class Hdf5():
             if numberOfContact > 0 :
                 print('number of contact',self._broadphase.model().simulation().oneStepNSProblem(0).getSizeOutput()/3)
                 self.printSolverInfos()
-                
+
             if violation_verbose and numberOfContact > 0 :
                 if len(simulation.y(0,0)) >0 :
                     print('violation info')
