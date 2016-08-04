@@ -821,7 +821,7 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction, double *veloci
                                                      error, NULL);
           }
         }
-        if (iparam[1] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_ADAPTIVE && (iter == iparam[8] || iparam[1] > itermax))
+        if (iparam[1] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_ADAPTIVE && (iter == iparam[8] || iparam[8] > itermax))
           iparam[8] = iparam[8]==1 ? 1 : iparam[8]/2;
          if (verbose > 0)
               printf("----------------------------------- FC3D - NSGS - Iteration %i iparam[8] = %i, iparam[1] = % i \n", iter, iparam[8], iparam[1]); 
