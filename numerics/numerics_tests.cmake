@@ -531,6 +531,15 @@ if(WITH_${COMPONENT}_TESTING)
   NEW_FC_TEST(NESpheres_30_1.dat SICONOS_FRICTION_3D_NSN_FB)
   NEW_FC_TEST(NESpheres_30_1.dat SICONOS_FRICTION_3D_NSN_NM)
 
+  # Test from rock pile simulations using "time of birth" feature :
+  # failure in local solver with line search
+  NEW_FC_TEST(RockPile_tob1.dat SICONOS_FRICTION_3D_NSGS 1e-3 100000
+    SICONOS_FRICTION_3D_ONECONTACT_NSN_AC_GP 1e-16 100)
+  NEW_FC_TEST(RockPile_tob1.dat SICONOS_FRICTION_3D_NSGS 1e-3 100000
+    SICONOS_FRICTION_3D_ONECONTACT_NSN_AC_GP 1e-16 1000)
+  NEW_FC_TEST(RockPile_tob1.dat SICONOS_FRICTION_3D_NSGS 1e-3 100000
+    SICONOS_FRICTION_3D_ONECONTACT_NSN_AC 1e-16 100)
+
   ## test from the Rover Example
   NEW_TEST(test_fc3d_501 fc3d_Rover2.c) ## test ok without LineSearch
   NEW_TEST(test_fc3d_503 fc3d_Rover3.c) ## JeanMoreau ok, AC:no
