@@ -100,10 +100,10 @@ private:
   */
   ACCEPT_SERIALIZATION(BlockCSRMatrix);
 
-  /** Number of blocks in  row*/
+  /** Number of blocks rows (first dimension of the block matrix)*/
   unsigned int _nr;
 
-  /** Number of blocks in  col*/
+  /** Number of blocks columns (second dimension of the block matrix)*/
   unsigned int _nc;
 
   /** Sparse-Block Boost Matrix. Each block is a SiconosMatrix**/
