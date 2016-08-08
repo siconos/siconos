@@ -49,7 +49,7 @@ DEFINE_SPTR(BulletWeightedShape);
 //DEFINE_SPTR(BulletSpaceFilter);
 //DEFINE_SPTR(BulletTimeStepping);
 DEFINE_SPTR(CollisionObjects);
-DEFINE_SPTR(StaticObjects);
+DEFINE_SPTR_STRUCT(StaticObjects);
 
 #include "MechanicsFwd.hpp"
 
