@@ -298,17 +298,17 @@ void BlockCSRMatrix::convert()
   _sparseBlockStructuredMatrix->blocknumber1 = _nr;  // nc not always set
   _sparseBlockStructuredMatrix->nbblocks = (*_blockCSR).nnz();
   // Next copies: pointer links!!
-  _sparseBlockStructuredMatrix->blocksize0 =  &((*_diagsize0)[0]);
-  _sparseBlockStructuredMatrix->blocksize1 =  &((*_diagsize1)[0]);  // nr = nc
+  _sparseBlockStructuredMatrix->blocksize0 =  _diagsize0->data();
+  _sparseBlockStructuredMatrix->blocksize1 =  _diagsize1->data(); // nr = nc
 
   // boost
   _sparseBlockStructuredMatrix->filled1 = (*_blockCSR).filled1();
   _sparseBlockStructuredMatrix->filled2 = (*_blockCSR).filled2();
-  _sparseBlockStructuredMatrix->index1_data = &((*_blockCSR).index1_data()[0]);
+  _sparseBlockStructuredMatrix->index1_data = _blockCSR->index1_data().begin();
   if (_nr > 0)
   {
-    _sparseBlockStructuredMatrix->index2_data = &((*_blockCSR).index2_data()[0]);
-    _sparseBlockStructuredMatrix->block =  &((*_blockCSR).value_data()[0]);
+    _sparseBlockStructuredMatrix->index2_data = _blockCSR->index2_data().begin();
+    _sparseBlockStructuredMatrix->block =  _blockCSR->value_data().begin();
   };
 
   //   // Loop through the non-null blocks
