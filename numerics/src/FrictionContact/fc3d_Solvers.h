@@ -100,7 +100,11 @@ extern "C"
     SICONOS_FRICTION_3D_NSGS_RELAXATION_FALSE,
     SICONOS_FRICTION_3D_NSGS_RELAXATION_TRUE
   };
-
+  enum SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION
+  {
+    SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION_FALSE,
+    SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION_TRUE
+  };
   /** Non-Smooth Gauss Seidel solver for friction-contact 3D problem
       \param problem the friction-contact 3D problem to solve
       \param velocity global vector (n), in-out parameter
@@ -113,6 +117,9 @@ extern "C"
           SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL (1) : Light error computation with incremental values on reaction verification of absolute error at the end
           SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT (2) : only light error computation (velocity not computed)
           SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_ADAPTIVE (3) :  we adapt the frequency of the full erro evaluation.
+      [in] iparam[2] : filter local solution if the local error is greater than 1.0
+          SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION_FALSE (0) the filter is not applied
+          SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION_TRUE  (1) the filter is applied
       [in] iparam[4] : method uses overrelaxation
           SICONOS_FRICTION_3D_NSGS_RELAXATION_FALSE (0) relaxation is not used,
           SICONOS_FRICTION_3D_NSGS_RELAXATION_TRUE  (1) relaxation is used with parameter dparam[8],

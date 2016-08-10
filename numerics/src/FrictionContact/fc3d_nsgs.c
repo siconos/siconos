@@ -30,6 +30,9 @@
 #include <time.h>
 #include <float.h>
 
+/* #define DEBUG_MESSAGES */
+#include "debug.h"
+
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 
 void fake_compute_error_nsgs(FrictionContactProblem* problem, double *reaction, double *velocity, double tolerance, SolverOptions  *options,  double* error)
@@ -401,7 +404,7 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction, double *veloci
   if (iparam[1] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL ||
       iparam[1] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT)
   {
-    double reactionold[3];
+    double local_reaction[3];
     while ((iter < itermax) && (hasNotConverged > 0))
     {
 
@@ -420,21 +423,32 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction, double *veloci
         {
           contact = i;
         }
-
-
-        reactionold[0] = reaction[3 * contact];
-        reactionold[1] = reaction[3 * contact + 1];
-        reactionold[2] = reaction[3 * contact + 2];
+        local_reaction[0] = reaction[3 * contact];
+        local_reaction[1] = reaction[3 * contact + 1];
+        local_reaction[2] = reaction[3 * contact + 2];
         if (verbose > 1) printf("----------------------------------- Contact Number %i\n", contact);
         (*update_localproblem)(contact, problem, localproblem, reaction, localsolver_options);
 
-
         localsolver_options->iparam[4] = contact;
-        (*local_solver)(localproblem, &(reaction[3 * contact]) , localsolver_options);
+        (*local_solver)(localproblem, local_reaction , localsolver_options);
 
-        error += pow(reaction[3 * contact] - reactionold[0], 2) +
-                 pow(reaction[3 * contact + 1] - reactionold[1], 2) +
-                 pow(reaction[3 * contact + 2] - reactionold[2], 2);
+        error += pow(reaction[3 * contact] - local_reaction[0], 2) +
+                 pow(reaction[3 * contact + 1] - local_reaction[1], 2) +
+                 pow(reaction[3 * contact + 2] - local_reaction[2], 2);
+
+
+
+        if ((localsolver_options->dparam[1] > 1.0) && iparam[2] == SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION_TRUE)
+        {
+          DEBUG_PRINTF("Discard local reaction for contact %i at iteration %i with local_error = %e\n", contact, iter, localsolver_options->dparam[1]);
+        }
+        else
+        {
+          reaction[3 * contact]     = local_reaction[0];
+          reaction[3 * contact + 1] = local_reaction[1];
+          reaction[3 * contact + 2] = local_reaction[2];
+        }
+
 
       }
 
@@ -459,6 +473,7 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction, double *veloci
       }
       *info = hasNotConverged;
     }
+
     if (iparam[1] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL) /* Full criterium */
     {
       double absolute_error;
@@ -467,7 +482,7 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction, double *veloci
       {
         if (absolute_error > error)
         {
-          printf("----------------------------------- FC3D - NSGS - Warning absolute Residual = %14.7e is larger than incremental error = %14.7e\n", absolute_error, error);
+          printf("--------------------------- FC3D - NSGS - Warning absolute Residual = %14.7e is larger than incremental error = %14.7e\n", absolute_error, error);
         }
       }
     }
@@ -796,7 +811,7 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction, double *veloci
                 iparam[8] *= 2;
             }
             if (verbose > 0)
-              printf("----------------------------------- FC3D - NSGS - Iteration %i iparam[8] = %i, iparam[1] = % i \n", iter, iparam[8], iparam[1]); 
+              printf("----------------------------------- FC3D - NSGS - Iteration %i iparam[8] = %i, iparam[1] = % i \n", iter, iparam[8], iparam[1]);
           }
           else
             (*computeError)(problem, reaction , velocity, tolerance, options, normq,  &error);
@@ -829,7 +844,7 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction, double *veloci
             (*computeError)(problem, reaction , velocity, tolerance, options, normq,  &error);
         }
         if (verbose > 0)
-              printf("----------------------------------- FC3D - NSGS - Iteration %i iparam[8] = %i, iparam[1] = % i \n", iter, iparam[8], iparam[1]); 
+              printf("----------------------------------- FC3D - NSGS - Iteration %i iparam[8] = %i, iparam[1] = % i \n", iter, iparam[8], iparam[1]);
 
       }
       else
