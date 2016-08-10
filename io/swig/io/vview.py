@@ -225,8 +225,9 @@ def set_position(instance, q0, q1, q2, q3, q4, q5, q6):
                              axis[1],
                              axis[2])
 
-set_positionv = numpy.vectorize(set_position)
-
+def set_positionv(x):
+    for y in x.reshape(-1,8):
+        set_position(*(y.reshape(8)))
 
 def step_reader(step_string):
 
@@ -911,14 +912,9 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
         id_t0 = numpy.where(dpos_data[:, 0] == min(dpos_data[:, 0]))
 
         if numpy.shape(spos_data)[0] >0 :
-            set_positionv(spos_data[:, 1], spos_data[:, 2], spos_data[:, 3],
-                          spos_data[:, 4], spos_data[:, 5], spos_data[:, 6],
-                          spos_data[:, 7], spos_data[:, 8])
+            set_positionv(spos_data[:, 1:9])
 
-        set_positionv(
-            pos_data[id_t0, 1], pos_data[id_t0, 2], pos_data[id_t0, 3],
-            pos_data[id_t0, 4], pos_data[id_t0, 5], pos_data[id_t0, 6],
-            pos_data[id_t0, 7], pos_data[id_t0, 8])
+        set_positionv(pos_data[id_t0, 1:9])
 
         set_actors_visibility(id_t0)
 
@@ -1081,21 +1077,13 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
                 # arrow_glyph.Update()
                 # gmapper.Update()
 
-    #            set_positionv(spos_data[:, 1], spos_data[:, 2], spos_data[:, 3],
-    #                          spos_data[:, 4],
-    #                          spos_data[:, 5], spos_data[:, 6], spos_data[:, 7],
-    #                          spos_data[:, 8])
+                # set_positionv(spos_data[:, 1:9])
 
                 id_t = numpy.where(pos_data[:, 0] == self._times[index])
 
                 set_actors_visibility(id_t)
 
-                set_positionv(
-                    pos_data[id_t, 1], pos_data[id_t, 2], pos_data[id_t, 3],
-                    pos_data[id_t, 4],
-                    pos_data[id_t, 5], pos_data[
-                        id_t, 6], pos_data[id_t, 7],
-                    pos_data[id_t, 8])
+                set_positionv(pos_data[id_t, 1:9])
 
                 self._slider_repres.SetValue(self._time)
 
@@ -1466,14 +1454,9 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
 
             id_t = numpy.where(pos_data[:, 0] == times[index])
             if numpy.shape(spos_data)[0] >0 :
-                set_positionv(spos_data[:, 1], spos_data[:, 2], spos_data[:, 3],
-                              spos_data[:, 4], spos_data[:, 5], spos_data[:, 6],
-                              spos_data[:, 7], spos_data[:, 8])
+                set_positionv(spos_data[:, 1:9])
 
-            set_positionv(
-                pos_data[id_t, 1], pos_data[id_t, 2], pos_data[id_t, 3],
-                pos_data[id_t, 4], pos_data[id_t, 5], pos_data[id_t, 6],
-                pos_data[id_t, 7],pos_data[id_t, 8])
+            set_positionv(pos_data[id_t, 1:9])
 
             big_data_writer.SetFileName('{0}-{1}.{2}'.format(os.path.splitext(
                                         os.path.basename(io_filename))[0],
