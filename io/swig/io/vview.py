@@ -202,6 +202,10 @@ class Quaternion():
 
 
 def set_position(instance, q0, q1, q2, q3, q4, q5, q6):
+    if (numpy.any(numpy.isnan([q0, q1, q2, q3, q4, q5, q6]))
+        or numpy.any(numpy.isinf([q0, q1, q2, q3, q4, q5, q6]))):
+        print('Bad position for', instance, q0, q1, q2, q3, q4, q5, q6)
+        return
 
     q = Quaternion((q3, q4, q5, q6))
 
