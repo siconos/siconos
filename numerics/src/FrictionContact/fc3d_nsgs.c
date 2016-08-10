@@ -436,9 +436,7 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction, double *veloci
                  pow(reaction[3 * contact + 1] - local_reaction[1], 2) +
                  pow(reaction[3 * contact + 2] - local_reaction[2], 2);
 
-
-
-        if ((localsolver_options->dparam[1] > 1.0) && iparam[2] == SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION_TRUE)
+        if ((localsolver_options->dparam[1] > 1.0) && iparam[14] == SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION_TRUE)
         {
           DEBUG_PRINTF("Discard local reaction for contact %i at iteration %i with local_error = %e\n", contact, iter, localsolver_options->dparam[1]);
         }
@@ -896,8 +894,8 @@ int fc3d_nsgs_setDefaultSolverOptions(SolverOptions* options)
   options->numberOfInternalSolvers = 1;
   options->isSet = 1;
   options->filterOn = 1;
-  options->iSize = 10;
-  options->dSize = 10;
+  options->iSize = 20;
+  options->dSize = 20;
   options->iparam = (int *)malloc(options->iSize * sizeof(int));
   options->dparam = (double *)malloc(options->dSize * sizeof(double));
   options->dWork = NULL;
