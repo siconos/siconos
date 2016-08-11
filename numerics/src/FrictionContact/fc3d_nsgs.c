@@ -424,30 +424,32 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction, double *veloci
         {
           contact = i;
         }
-        local_reaction[0] = reaction[3 * contact];
-        local_reaction[1] = reaction[3 * contact + 1];
-        local_reaction[2] = reaction[3 * contact + 2];
+
         if (verbose > 1) printf("----------------------------------- Contact Number %i\n", contact);
         (*update_localproblem)(contact, problem, localproblem, reaction, localsolver_options);
 
         localsolver_options->iparam[4] = contact;
-        (*local_solver)(localproblem, local_reaction , localsolver_options);
 
-        error += pow(reaction[3 * contact] - local_reaction[0], 2) +
-                 pow(reaction[3 * contact + 1] - local_reaction[1], 2) +
-                 pow(reaction[3 * contact + 2] - local_reaction[2], 2);
+        double localreaction[3] = { reaction[contact*3 + 0],
+                                    reaction[contact*3 + 1],
+                                    reaction[contact*3 + 2] };
 
-        if ((localsolver_options->dparam[1] > 1.0) && iparam[14] == SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION_TRUE)
+        (*local_solver)(localproblem, localreaction, localsolver_options);
+
+        error += pow(reaction[3 * contact + 0] - localreaction[0], 2) +
+                 pow(reaction[3 * contact + 1] - localreaction[1], 2) +
+                 pow(reaction[3 * contact + 2] - localreaction[2], 2);
+
+        if ((localsolver_options->dparam[1] > 1.0)
+            && iparam[14] == SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION_TRUE)
         {
           DEBUG_EXPR(frictionContact_display(localproblem));
-          DEBUG_PRINTF("Discard local reaction for contact %i at iteration %i with local_error = %e\n", contact, iter, localsolver_options->dparam[1]);
+          DEBUG_PRINTF("Discard local reaction for contact %i at iteration %i "
+                       "with local_error = %e\n",
+                       contact, iter, localsolver_options->dparam[1]);
         }
         else
-        {
-          reaction[3 * contact]     = local_reaction[0];
-          reaction[3 * contact + 1] = local_reaction[1];
-          reaction[3 * contact + 2] = local_reaction[2];
-        }
+          memcpy(&reaction[contact*3], localreaction, sizeof(double)*3);
       }
 
 
@@ -492,8 +494,6 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction, double *veloci
     {
       if (iparam[4] == SICONOS_FRICTION_3D_NSGS_RELAXATION_TRUE) /* relaxation */
       {
-        double reactionold[3];
-
         double omega = dparam[8];
         while ((iter < itermax) && (hasNotConverged > 0))
         {
@@ -505,18 +505,31 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction, double *veloci
 
             contact = scontacts[i];
 
-            reactionold[0] = reaction[3 * contact];
-            reactionold[1] = reaction[3 * contact + 1];
-            reactionold[2] = reaction[3 * contact + 2];
-
             if (verbose > 1) printf("----------------------------------- Contact Number %i\n", contact);
             (*update_localproblem)(contact, problem, localproblem, reaction, localsolver_options);
             localsolver_options->iparam[4] = contact;
-            (*local_solver)(localproblem, &(reaction[3 * contact]), localsolver_options);
 
-            reaction[3 * contact] = omega*reaction[3 * contact]+(1.0-omega)*reactionold[0];
-            reaction[3 * contact+1] = omega*reaction[3 * contact+1]+(1.0-omega)*reactionold[1];
-            reaction[3 * contact+2] = omega*reaction[3 * contact+2]+(1.0-omega)*reactionold[2];
+            double localreaction[3] = { reaction[contact*3 + 0],
+                                        reaction[contact*3 + 1],
+                                        reaction[contact*3 + 2] };
+
+            (*local_solver)(localproblem, localreaction, localsolver_options);
+
+            /* perform relaxation */
+            localreaction[0] = omega*localreaction[0]+(1.0-omega)*reaction[contact*3+0];
+            localreaction[1] = omega*localreaction[1]+(1.0-omega)*reaction[contact*3+1];
+            localreaction[2] = omega*localreaction[2]+(1.0-omega)*reaction[contact*3+2];
+
+            if ((localsolver_options->dparam[1] > 1.0)
+                && iparam[14] == SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION_TRUE)
+            {
+              DEBUG_EXPR(frictionContact_display(localproblem));
+              DEBUG_PRINTF("Discard local reaction for contact %i at iteration %i "
+                           "with local_error = %e\n",
+                           contact, iter, localsolver_options->dparam[1]);
+            }
+            else
+              memcpy(&reaction[contact*3], localreaction, sizeof(double)*3);
           }
 
           /* **** Criterium convergence **** */
@@ -565,8 +578,23 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction, double *veloci
             if (verbose > 1) printf("----------------------------------- Contact Number %i\n", contact);
             (*update_localproblem)(contact, problem, localproblem, reaction, localsolver_options);
             localsolver_options->iparam[4] = contact;
-            (*local_solver)(localproblem, &(reaction[3 * contact]), localsolver_options);
 
+            double localreaction[3] = { reaction[contact*3 + 0],
+                                        reaction[contact*3 + 1],
+                                        reaction[contact*3 + 2] };
+
+            (*local_solver)(localproblem, localreaction, localsolver_options);
+
+            if ((localsolver_options->dparam[1] > 1.0)
+                && iparam[14] == SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION_TRUE)
+            {
+              DEBUG_EXPR(frictionContact_display(localproblem));
+              DEBUG_PRINTF("Discard local reaction for contact %i at iteration %i "
+                           "with local_error = %e\n",
+                           contact, iter, localsolver_options->dparam[1]);
+            }
+            else
+              memcpy(&reaction[contact*3], localreaction, sizeof(double)*3);
           }
 
           /* **** Criterium convergence **** */
@@ -617,20 +645,32 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction, double *veloci
 
             contact = scontacts[i];
 
-            reactionold[0] = reaction[3 * contact];
-            reactionold[1] = reaction[3 * contact + 1];
-            reactionold[2] = reaction[3 * contact + 2];
-
             if (verbose > 1) printf("----------------------------------- Contact Number %i\n", contact);
             (*update_localproblem)(contact, problem, localproblem, reaction, localsolver_options);
 
             localsolver_options->iparam[4] = contact; /* We write in dWork always with respect to the initial index i*/
 
-            (*local_solver)(localproblem, &(reaction[3 * contact]), localsolver_options);
+            double localreaction[3] = { reaction[contact*3 + 0],
+                                        reaction[contact*3 + 1],
+                                        reaction[contact*3 + 2] };
 
-            reaction[3 * contact] = omega*reaction[3 * contact]+(1.0-omega)*reactionold[0];
-            reaction[3 * contact+1] = omega*reaction[3 * contact+1]+(1.0-omega)*reactionold[1];
-            reaction[3 * contact+2] = omega*reaction[3 * contact+2]+(1.0-omega)*reactionold[2];
+            (*local_solver)(localproblem, localreaction, localsolver_options);
+
+            /* perform relaxation */
+            localreaction[0] = omega*localreaction[0]+(1.0-omega)*reaction[contact*3+0];
+            localreaction[1] = omega*localreaction[1]+(1.0-omega)*reaction[contact*3+1];
+            localreaction[2] = omega*localreaction[2]+(1.0-omega)*reaction[contact*3+2];
+
+            if ((localsolver_options->dparam[1] > 1.0)
+                && iparam[14] == SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION_TRUE)
+            {
+              DEBUG_EXPR(frictionContact_display(localproblem));
+              DEBUG_PRINTF("Discard local reaction for contact %i at iteration %i "
+                           "with local_error = %e\n",
+                           contact, iter, localsolver_options->dparam[1]);
+            }
+            else
+              memcpy(&reaction[contact*3], localreaction, sizeof(double)*3);
           }
 
           /* **** Criterium convergence **** */
@@ -680,7 +720,23 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction, double *veloci
             if (verbose > 1) printf("----------------------------------- Contact Number %i\n", contact);
             (*update_localproblem)(contact, problem, localproblem, reaction, localsolver_options);
             localsolver_options->iparam[4] = contact; /* We write in dWork always with respect to the initial index i*/
-            (*local_solver)(localproblem, &(reaction[3 * contact]), localsolver_options);
+
+            double localreaction[3] = { reaction[contact*3 + 0],
+                                        reaction[contact*3 + 1],
+                                        reaction[contact*3 + 2] };
+
+            (*local_solver)(localproblem, localreaction, localsolver_options);
+
+            if ((localsolver_options->dparam[1] > 1.0)
+                && iparam[14] == SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION_TRUE)
+            {
+              DEBUG_EXPR(frictionContact_display(localproblem));
+              DEBUG_PRINTF("Discard local reaction for contact %i at iteration %i "
+                           "with local_error = %e\n",
+                           contact, iter, localsolver_options->dparam[1]);
+            }
+            else
+              memcpy(&reaction[contact*3], localreaction, sizeof(double)*3);
           }
           /* **** Criterium convergence **** */
           if (iparam[8] >0)
@@ -737,14 +793,31 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction, double *veloci
             reactionold[1] = reaction[3 * contact + 1];
             reactionold[2] = reaction[3 * contact + 2];
 
-
             if (verbose > 1) printf("----------------------------------- Contact Number %i\n", contact);
             (*update_localproblem)(contact, problem, localproblem, reaction, localsolver_options);
             localsolver_options->iparam[4] = contact;
-            (*local_solver)(localproblem, &(reaction[3 * contact]), localsolver_options);
-            reaction[3 * contact] = omega*reaction[3 * contact]+(1.0-omega)*reactionold[0];
-            reaction[3 * contact+1] = omega*reaction[3 * contact+1]+(1.0-omega)*reactionold[1];
-            reaction[3 * contact+2] = omega*reaction[3 * contact+2]+(1.0-omega)*reactionold[2];
+
+            double localreaction[3] = { reaction[contact*3 + 0],
+                                        reaction[contact*3 + 1],
+                                        reaction[contact*3 + 2] };
+
+            (*local_solver)(localproblem, localreaction, localsolver_options);
+
+            /* perform relaxation */
+            localreaction[0] = omega*localreaction[0]+(1.0-omega)*reaction[contact*3+0];
+            localreaction[1] = omega*localreaction[1]+(1.0-omega)*reaction[contact*3+1];
+            localreaction[2] = omega*localreaction[2]+(1.0-omega)*reaction[contact*3+2];
+
+            if ((localsolver_options->dparam[1] > 1.0)
+                && iparam[14] == SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION_TRUE)
+            {
+              DEBUG_EXPR(frictionContact_display(localproblem));
+              DEBUG_PRINTF("Discard local reaction for contact %i at iteration %i "
+                           "with local_error = %e\n",
+                           contact, iter, localsolver_options->dparam[1]);
+            }
+            else
+              memcpy(&reaction[contact*3], localreaction, sizeof(double)*3);
           }
 
           /* **** Criterium convergence **** */
@@ -797,7 +870,23 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction, double *veloci
 
             (*update_localproblem)(contact, problem, localproblem, reaction, localsolver_options);
             localsolver_options->iparam[4] = contact;
-            (*local_solver)(localproblem, &(reaction[3 * contact]), localsolver_options);
+
+            double localreaction[3] = { reaction[contact*3 + 0],
+                                        reaction[contact*3 + 1],
+                                        reaction[contact*3 + 2] };
+
+            (*local_solver)(localproblem, localreaction, localsolver_options);
+
+            if ((localsolver_options->dparam[1] > 1.0)
+                && iparam[14] == SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION_TRUE)
+            {
+              DEBUG_EXPR(frictionContact_display(localproblem));
+              DEBUG_PRINTF("Discard local reaction for contact %i at iteration %i "
+                           "with local_error = %e\n",
+                           contact, iter, localsolver_options->dparam[1]);
+            }
+            else
+              memcpy(&reaction[contact*3], localreaction, sizeof(double)*3);
           }
 
           /* **** Criterium convergence **** */
