@@ -103,10 +103,17 @@ int fc3d_driver(FrictionContactProblem* problem,
 
   /* Check for trivial case */
   info = checkTrivialCase(problem, velocity, reaction, options);
-
-
   if (info == 0)
+  {
+    /* If a trivial solution is found, we set the number of iterations to 0
+       and the reached acuracy to 0.0 .
+       Since the indexing of parameters is non uniform, this may have side 
+       effects for some solvers. The two main return parameters iparam[7] and 
+       dparam[1] have to be defined and protected by means of enum*/ 
+    options->iparam[7] = 0;
+    options->dparam[1] = 0.0;
     goto exit;
+  }
 
 
   switch (options->solverId)
@@ -332,10 +339,7 @@ int checkTrivialCase(FrictionContactProblem* problem, double* velocity,
     velocity[i] = q[i];
     reaction[i] = 0.;
   }
-  options->iparam[2] = 0;
-  options->iparam[4] = 0;
-  options->dparam[1] = 0.0;
-  options->dparam[3] = 0.0;
+
   if (verbose == 1)
     printf("fc3d driver, take off, trivial solution reaction = 0, velocity = q.\n");
   return 0;
