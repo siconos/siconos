@@ -246,6 +246,12 @@ extern "C"
    */
   void NM_dense_display(double * m, int nRow, int nCol, int lDim);
 
+  /** Screen display of the vector content stored as a double * array 
+      \param m the vector to be displayed
+      \param nRow the number of rows
+   */
+  void NM_vector_display(double * m, int nRow);
+
 
   /** Screen display of the matrix content
       \param M the matrix to be displayed

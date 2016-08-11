@@ -44,7 +44,7 @@ void frictionContact_display(FrictionContactProblem* problem)
   if (problem->q)
   {
     printf("q vector:\n");
-    for (i = 0; i < n; i++) printf("q[ %i ] = %12.8e\n", i, problem->q[i]);
+    NM_vector_display(problem->q,n);
   }
   else
     printf("No q vector:\n");
@@ -52,7 +52,7 @@ void frictionContact_display(FrictionContactProblem* problem)
   if (problem->mu)
   {
     printf("mu vector:\n");
-    for (i = 0; i < problem->numberOfContacts; i++) printf("mu[ %i ] = %12.8e\n", i, problem->mu[i]);
+    NM_vector_display(problem->mu,problem->numberOfContacts);
   }
   else
     printf("No mu vector:\n");

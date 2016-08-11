@@ -306,7 +306,7 @@ void NM_dense_display(double * m, int nRow, int nCol, int lDim)
 
   for (lin = 0; lin < nRow; lin++)
   {
-    printf("[\t");
+    printf("[");
     for (col = 0; col < nCol; col++)
     {
       printf(" %.15e", m[lin + col * lDim]);
@@ -314,9 +314,27 @@ void NM_dense_display(double * m, int nRow, int nCol, int lDim)
         printf(",");
     }
     if (lin != nRow - 1)
-      printf("],\t");
+      printf("],\n");
     else
       printf("]\t ]\n");
+  }
+
+}
+void NM_vector_display(double * m, int nRow)
+{
+  int lin;
+  printf("vector of size\t%d\t =\n[", nRow);
+  if (nRow == 0)
+  {
+    printf("]\n");
+  }
+  for (lin = 0; lin < nRow; lin++)
+  {
+    printf(" %.15e", m[lin]);
+    if (lin != nRow - 1)
+      printf(", ");
+    else
+      printf("]\n");
   }
 
 }
