@@ -700,7 +700,7 @@ int nonSmoothNewtonNeigh(int n, double* z, NewtonFunctionPtr* phi, NewtonFunctio
     criterion = -rho * pow(criterion, p);
     /*      printf("ddddddd %d\n",scmp);
     if (scmp>100){
-    displayMat(sjacobianPhi_z,n,n,n);
+    NM_dense_display(sjacobianPhi_z,n,n,n);
     exit(1);
     }*/
 
@@ -737,7 +737,7 @@ int nonSmoothNewtonNeigh(int n, double* z, NewtonFunctionPtr* phi, NewtonFunctio
     if (!resls && niter > 1)
     {
 
-      /* displayMat(sjacobianPhi_z,n,n,n);
+      /* NM_dense_display(sjacobianPhi_z,n,n,n);
       printf("begin plot new descent dir\n");
       plotMerit(oldz,psi_z, descentCondition);
       printf("end\n");

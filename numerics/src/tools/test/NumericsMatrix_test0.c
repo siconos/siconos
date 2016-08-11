@@ -60,7 +60,7 @@ int main(void)
 
     printf("test on NMM[%i]\n", i);
 
-    display(NMM[i]);
+    NM_display(NMM[i]);
     displayRowbyRow(NMM[i]);
     FILE * foutput = fopen("testprintInfile.dat", "w");
     printInFile(NMM[i], foutput);

@@ -95,7 +95,7 @@ The following linear algebra operation are supported:
 
 \subsection NM_IO Input / Output
 
-  - display(): display a NumericsMatrix
+  - NM_display(): display a NumericsMatrix
   - displayRowbyRow(): display a NumericsMatrix row by row
   - printInFileName(), printInFile(): save to filesystem
   - readInFileName(), readInFile(): fill a NumericsMatrix from a file
@@ -236,13 +236,21 @@ extern "C"
       \param nCol the number of columns
       \param lDim the leading dimension of M
    */
-  void displayMat(double * m, int nRow, int nCol, int lDim);
+  void NM_dense_display_matlab(double * m, int nRow, int nCol, int lDim);
+
+  /** Screen display of the matrix content stored as a double * array in Fortran style
+      \param m the matrix to be displayed
+      \param nRow the number of rows
+      \param nCol the number of columns
+      \param lDim the leading dimension of M
+   */
+  void NM_dense_display(double * m, int nRow, int nCol, int lDim);
 
 
   /** Screen display of the matrix content
       \param M the matrix to be displayed
    */
-  void display(const NumericsMatrix* const M);
+  void NM_display(const NumericsMatrix* const M);
 
   /** PrintInFile  of the matrix content
      \param M the matrix to be printed

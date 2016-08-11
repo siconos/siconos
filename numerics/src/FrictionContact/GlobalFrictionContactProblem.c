@@ -149,14 +149,14 @@ void globalFrictionContact_display(GlobalFrictionContactProblem* problem)
   if (problem->M)
   {
     printf("M matrix:\n");
-    display(problem->M);
+    NM_display(problem->M);
   }
   else
     printf("No M matrix:\n");
   if (problem->H)
   {
     printf("H matrix:\n");
-    display(problem->H);
+    NM_display(problem->H);
   }
   else
     printf("No H matrix:\n");

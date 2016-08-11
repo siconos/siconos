@@ -130,17 +130,17 @@ void printCurrentSystem()
 {
   int npm = sNn + sMm;
   printf("printCurrentSystemM:\n");
-  displayMat(sM, sMl, npm, 0);
+  NM_dense_display(sM, sMl, npm, 0);
   printf("printCurrentSystemQ (ie -Q from mlcp beause of linear system MZ=Q):\n");
-  displayMat(sQ, sMl, 1, 0);
+  NM_dense_display(sQ, sMl, 1, 0);
 }
 void printRefSystem()
 {
   int npm = sNn + sMm;
   printf("ref M NbLines %d n %d  m %d :\n", sMl, sNn, sMm);
-  displayMat(sMref, sMl, npm, 0);
+  NM_dense_display(sMref, sMl, npm, 0);
   printf("ref Q (ie -Q from mlcp beause of linear system MZ=Q):\n");
-  displayMat(sQref, sMl, 1, 0);
+  NM_dense_display(sQref, sMl, 1, 0);
 }
 int mlcp_enum_getNbIWork(MixedLinearComplementarityProblem* problem, SolverOptions* options)
 {
@@ -226,7 +226,7 @@ void mlcp_enum(MixedLinearComplementarityProblem* problem, double *z, double *w,
   for (lin = 0; lin < sMl; lin++)
     sColNul[lin] = 0;
   /*  printf("sColNul\n");
-      displayMat(sColNul,npm,1);*/
+      NM_dense_display(sColNul,npm,1);*/
   if (verbose)
     printRefSystem();
   sW2V = workingInt;
@@ -245,7 +245,7 @@ void mlcp_enum(MixedLinearComplementarityProblem* problem, double *z, double *w,
       if (verbose)
       {
         printf("Solution of dgels\n");
-        displayMat(sQ, sMl, 1, 0);
+        NM_dense_display(sQ, sMl, 1, 0);
       }
     }
     else
@@ -254,7 +254,7 @@ void mlcp_enum(MixedLinearComplementarityProblem* problem, double *z, double *w,
       if (verbose)
       {
         printf("Solution of dgesv\n");
-        displayMat(sQ, sMl, 1, 0);
+        NM_dense_display(sQ, sMl, 1, 0);
       }
     }
     if (!LAinfo)
@@ -294,7 +294,7 @@ void mlcp_enum(MixedLinearComplementarityProblem* problem, double *z, double *w,
       if (verbose)
       {
         printf("Solving linear system success, solution in cone?\n");
-        displayMat(sQ, sMl, 1, 0);
+        NM_dense_display(sQ, sMl, 1, 0);
       }
 
       check = 1;
@@ -397,7 +397,7 @@ void mlcp_enum_Block(MixedLinearComplementarityProblem* problem, double *z, doub
     sColNul[lin] = 0;
 
   /*  printf("sColNul\n");
-      displayMat(sColNul,npm,1);*/
+      NM_dense_display(sColNul,npm,1);*/
   if (verbose)
     printRefSystem();
   sW2V = workingInt;
@@ -420,7 +420,7 @@ void mlcp_enum_Block(MixedLinearComplementarityProblem* problem, double *z, doub
       if (verbose)
       {
         printf("Solution of dgels\n");
-        displayMat(sQ, sMl, 1, 0);
+        NM_dense_display(sQ, sMl, 1, 0);
       }
     }
     else
@@ -429,7 +429,7 @@ void mlcp_enum_Block(MixedLinearComplementarityProblem* problem, double *z, doub
       if (verbose)
       {
         printf("Solution of dgesv\n");
-        displayMat(sQ, sMl, 1, 0);
+        NM_dense_display(sQ, sMl, 1, 0);
       }
     }
     if (!LAinfo)
@@ -469,7 +469,7 @@ void mlcp_enum_Block(MixedLinearComplementarityProblem* problem, double *z, doub
       if (verbose)
       {
         printf("Solving linear system success, solution in cone?\n");
-        displayMat(sQ, sMl, 1, 0);
+        NM_dense_display(sQ, sMl, 1, 0);
       }
 
       check = 1;

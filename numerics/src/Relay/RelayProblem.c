@@ -36,7 +36,7 @@ void Relay_display(RelayProblem* p)
   if (p->M)
   {
     printf("M matrix:\n");
-    display(p->M);
+    NM_display(p->M);
   }
   else
     printf("No M matrix:\n");

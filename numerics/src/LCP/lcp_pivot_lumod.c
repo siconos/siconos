@@ -89,7 +89,7 @@ void lcp_pivot_lumod_covering_vector(LinearComplementarityProblem* problem, doub
   assert(dim>0);
   unsigned int dim2;
   /* size of the LCP */
-  DEBUG_EXPR_WE( DEBUG_PRINT("matrix M: ") display(problem->M); DEBUG_PRINT("vector q: ")
+  DEBUG_EXPR_WE( DEBUG_PRINT("matrix M: ") NM_display(problem->M); DEBUG_PRINT("vector q: ")
       for(unsigned i = 0; i < dim; ++i) {printf("%e ", problem->q[i]);} printf("\n");
       if (cov_vec) { DEBUG_PRINT("covering vector: ") for(unsigned i = 0; i < dim; ++i) {printf("%e ", cov_vec[i]);}printf("\n");});
 

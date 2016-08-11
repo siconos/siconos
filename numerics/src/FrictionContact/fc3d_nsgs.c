@@ -30,7 +30,8 @@
 #include <time.h>
 #include <float.h>
 
-/* #define DEBUG_MESSAGES */
+#define DEBUG_STDOUT
+#define DEBUG_MESSAGES
 #include "debug.h"
 
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
@@ -438,6 +439,7 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction, double *veloci
 
         if ((localsolver_options->dparam[1] > 1.0) && iparam[14] == SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION_TRUE)
         {
+          DEBUG_EXPR(frictionContact_display(localproblem));
           DEBUG_PRINTF("Discard local reaction for contact %i at iteration %i with local_error = %e\n", contact, iter, localsolver_options->dparam[1]);
         }
         else
@@ -446,8 +448,6 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction, double *veloci
           reaction[3 * contact + 1] = local_reaction[1];
           reaction[3 * contact + 2] = local_reaction[2];
         }
-
-
       }
 
 

@@ -469,7 +469,7 @@ int genericMechanical_driver(GenericMechanicalProblem* problem, double *reaction
 
   int info = 0;
   DEBUG_EXPR(
-    display(problem->M);
+    NM_display(problem->M);
     displayGMP(problem);
     );
   if (!options->iparam[2])

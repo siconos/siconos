@@ -238,16 +238,16 @@ void lcp_enum(LinearComplementarityProblem* problem, double *z, double *w, int *
       /*   { */
       /*     printf("call dgels on ||AX-B||\n"); */
       /*     printf("A\n"); */
-      /*     displayMat(sM,sSize,sSize,0); */
+      /*     NM_dense_display(sM,sSize,sSize,0); */
       /*     printf("B\n"); */
-      /*     displayMat(sQ,sSize,1,0); */
+      /*     NM_dense_display(sQ,sSize,1,0); */
       /*   } */
 
       DGELS(LA_NOTRANS,sSize, sSize, NRHS, sM, sSize, sQ, sSize,&LAinfo);
       if (verbose)
       {
         printf("Solution of dgels (info=%i)\n", LAinfo);
-        displayMat(sQ, sSize, 1, 0);
+        NM_dense_display(sQ, sSize, 1, 0);
       }
     }
     else

@@ -258,8 +258,7 @@ void freeNumericsMatrix(NumericsMatrix* m)
   NM_internalData_free(m);
 }
 
-
-void displayMat(double * m, int nRow, int nCol, int lDim)
+void NM_dense_display_matlab(double * m, int nRow, int nCol, int lDim)
 {
   int lin, col;
   if (lDim == 0)
@@ -290,7 +289,39 @@ void displayMat(double * m, int nRow, int nCol, int lDim)
 
 }
 
-void display(const NumericsMatrix* const m)
+void NM_dense_display(double * m, int nRow, int nCol, int lDim)
+{
+  int lin, col;
+  if (lDim == 0)
+    lDim = nRow;
+  printf("Matrix of size\t%d\t x \t%d =\n[", nRow, nCol);
+  if (nRow == 0)
+  {
+    printf("]\n");
+  }
+  if (nCol == 0)
+  {
+    printf("]\n");
+  }
+
+  for (lin = 0; lin < nRow; lin++)
+  {
+    printf("[\t");
+    for (col = 0; col < nCol; col++)
+    {
+      printf(" %.15e", m[lin + col * lDim]);
+      if (col != nCol - 1)
+        printf(",");
+    }
+    if (lin != nRow - 1)
+      printf("],\t");
+    else
+      printf("]\t ]\n");
+  }
+
+}
+
+void NM_display(const NumericsMatrix* const m)
 {
   if (! m)
   {
@@ -305,7 +336,7 @@ void display(const NumericsMatrix* const m)
   case NM_DENSE:
   {
 
-    displayMat(m->matrix0, m->size0, m->size1, m->size0);
+    NM_dense_display(m->matrix0, m->size0, m->size1, m->size0);
     break;
   }
   case NM_SPARSE_BLOCK:

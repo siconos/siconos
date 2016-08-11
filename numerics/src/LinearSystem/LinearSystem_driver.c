@@ -245,14 +245,14 @@ void displayLS(LinearSystemProblem* p)
   if (p->M)
   {
     printf("M matrix:\n");
-    displayMat(p->M->matrix0, size, size, size);
+    NM_dense_display(p->M->matrix0, size, size, size);
   }
   else
     printf("No M matrix:\n");
   if (p->q)
   {
     printf("q matrix:\n");
-    displayMat(p->q, size, 1, 0);
+    NM_dense_display(p->q, size, 1, 0);
   }
   else
     printf("No q:\n");
