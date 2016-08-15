@@ -292,6 +292,7 @@ void fc3d_projectionOnConeWithLocalIteration_free(FrictionContactProblem * probl
 
 int fc3d_projectionOnConeWithLocalIteration_solve(FrictionContactProblem* localproblem, double* reaction, SolverOptions* options)
 {
+  
   /* int and double parameters */
   int* iparam = options->iparam;
   double* dparam = options->dparam;
@@ -440,7 +441,6 @@ int fc3d_projectionOnConeWithLocalIteration_solve(FrictionContactProblem* localp
       }
       else
         rho =rho_k;
-
     if (verbose > 1)
     {
       printf("----------------------  localiter = %i\t, rho= %.10e\t, error = %.10e \n", localiter, rho, localerror);
@@ -450,6 +450,7 @@ int fc3d_projectionOnConeWithLocalIteration_solve(FrictionContactProblem* localp
 
   }
   options->dWork[options->iparam[4]] =rho;
+  options->dparam[1] = localerror ;
 
   if (localerror > localtolerance)
     return 1;

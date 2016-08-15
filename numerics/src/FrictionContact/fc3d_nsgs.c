@@ -30,8 +30,8 @@
 #include <time.h>
 #include <float.h>
 
-/* #define DEBUG_STDOUT */
-/* #define DEBUG_MESSAGES */
+#define DEBUG_STDOUT
+#define DEBUG_MESSAGES
 #include "debug.h"
 
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
@@ -134,7 +134,15 @@ void fc3d_nsgs_initialize_local_solver(SolverPtr* solve, UpdatePtr* update, Free
     fc3d_onecontact_nonsmooth_Newton_solvers_initialize(problem, localproblem, localsolver_options);
     break;
   }
-  /* Newton solver (Glocker-Fischer-Burmeister)*/
+  case SICONOS_FRICTION_3D_ONECONTACT_NSN_AC_GP_P:
+  {
+    *solve = &fc3d_onecontact_nonsmooth_Newton_solvers_solve;
+    *update = &fc3d_onecontact_nonsmooth_Newton_AC_update;
+    *freeSolver = (FreeSolverNSGSPtr)&fc3d_onecontact_nonsmooth_Newton_solvers_free;
+    *computeError = (ComputeErrorPtr)&fc3d_compute_error;
+    fc3d_onecontact_nonsmooth_Newton_solvers_initialize(problem, localproblem, localsolver_options);
+    break;
+  }  /* Newton solver (Glocker-Fischer-Burmeister)*/
   case SICONOS_FRICTION_3D_NCPGlockerFBNewton:
   {
     *solve = &fc3d_onecontact_nonsmooth_Newton_solvers_solve;
@@ -400,7 +408,6 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction, double *veloci
     /* for (unsigned int i = 0; i<nc ; ++i) printf("%i\t", scontacts[i]); */
     /* printf("\n"); */
   }
-
   /*  dparam[0]= dparam[2]; // set the tolerance for the local solver */
   if (iparam[1] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL ||
       iparam[1] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT)
@@ -439,8 +446,27 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction, double *veloci
 
         if ((localsolver_options->dparam[1] > 1.0) && iparam[14] == SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION_TRUE)
         {
-          DEBUG_EXPR(frictionContact_display(localproblem));
-          DEBUG_PRINTF("Discard local reaction for contact %i at iteration %i with local_error = %e\n", contact, iter, localsolver_options->dparam[1]);
+          DEBUG_EXPR(
+            frictionContact_display(localproblem);
+            printf("Discard local reaction for contact %i at iteration %i with local_error = %e\n", contact, iter, localsolver_options->dparam[1]);
+            local_reaction[0] = reaction[3 * contact];
+            local_reaction[1] = reaction[3 * contact + 1];
+            local_reaction[2] = reaction[3 * contact + 2];
+            fc3d_projectionOnConeWithLocalIteration_initialize(problem, localproblem, localsolver_options );
+            fc3d_projectionOnConeWithLocalIteration_solve (localproblem, local_reaction , localsolver_options);
+            printf("Try local fc3d_projectionOnConeWithLocalIteration_solve with local_error = %e\n", localsolver_options->dparam[1]);
+            (*local_solver)(localproblem, local_reaction , localsolver_options);
+            printf("Try local another newton solve with local_error = %e\n", localsolver_options->dparam[1]);
+            if (localsolver_options->dparam[1] <= localsolver_options->dparam[0])
+            {
+              DEBUG_PRINTF("Finally keep the local solution = %e\n", localsolver_options->dparam[1]);
+              reaction[3 * contact]     = local_reaction[0];
+              reaction[3 * contact + 1] = local_reaction[1];
+              reaction[3 * contact + 2] = local_reaction[2];
+              getchar();
+            }
+            );
+
         }
         else
         {

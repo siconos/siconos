@@ -55,7 +55,7 @@ typedef void (*computeNonsmoothFunction)(double *, double * , double , double * 
   /** free memory for friction contact 3D Newton solver
    * \param localproblem for freeing matrix0
    */
-  void fc3d_onecontact_nonsmooth_Newton_solvers_free(FrictionContactProblem* localproblem);
+  void fc3d_onecontact_nonsmooth_Newton_solvers_free(FrictionContactProblem * problem, FrictionContactProblem * localproblem, SolverOptions* localsolver_options);
 
   /** compute error for friction-contact 3D problem with Newton
    *  \param dimension of the global problem

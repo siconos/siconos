@@ -41,7 +41,7 @@ static NewtonFunctionPtr F = NULL;
 static NewtonFunctionPtr jacobianF = NULL;
 static UpdateSolverPtr updateSolver = NULL;
 static PostSolverPtr postSolver = NULL;
-static FreeSolverPtr freeSolver = NULL;
+static FreeSolverNSGSPtr freeSolver = NULL;
 
 /* size of a block */
 static int Fsize;
@@ -99,10 +99,16 @@ void fc3d_AC_initialize(FrictionContactProblem* problem, FrictionContactProblem*
 
 }
 
-void fc3d_AC_free(void);
+void fc3d_AC_free(FrictionContactProblem * problem, FrictionContactProblem * localproblem, SolverOptions* localsolver_options);
 
-void fc3d_AC_free()
+void fc3d_AC_free(FrictionContactProblem * problem, FrictionContactProblem * localproblem, SolverOptions* localsolver_options)
 {
+}
+void fc3d_AC_free_P(FrictionContactProblem * problem, FrictionContactProblem * localproblem, SolverOptions* localsolver_options);
+void fc3d_AC_free_P(FrictionContactProblem * problem, FrictionContactProblem * localproblem, SolverOptions* localsolver_options)
+{
+  free(localsolver_options->dWork);
+  localsolver_options->dWork=NULL;
 }
 void fc3d_AC_post(int contact, double* reaction);
 void fc3d_AC_post(int contact, double* reaction)
@@ -126,8 +132,7 @@ void fc3d_onecontact_nonsmooth_Newton_solvers_initialize(FrictionContactProblem*
     /* jacobianF = &jacobianF_AC; */
     /*     updateSolver = &fc3d_AC_update; */
     postSolver = &fc3d_AC_post;
-    freeSolver = (FreeSolverPtr)&fc3d_AC_free;
-
+    freeSolver = &fc3d_AC_free;
   }
   else if (localsolver_options->solverId == SICONOS_FRICTION_3D_ONECONTACT_NSN_AC_GP)
   {
@@ -137,7 +142,19 @@ void fc3d_onecontact_nonsmooth_Newton_solvers_initialize(FrictionContactProblem*
     /* jacobianF = &jacobianF_AC; */
     /*     updateSolver = &fc3d_AC_update; */
     postSolver = &fc3d_AC_post;
-    freeSolver = (FreeSolverPtr)&fc3d_AC_free;
+    freeSolver = &fc3d_AC_free;
+
+  }
+  else if (localsolver_options->solverId == SICONOS_FRICTION_3D_ONECONTACT_NSN_AC_GP_P)
+  {
+    fc3d_AC_initialize(problem, localproblem,localsolver_options);
+    fc3d_projectionOnConeWithLocalIteration_initialize(problem, localproblem, localsolver_options );
+    /* Fsize = 3; */
+    /* F = &F_AC; */
+    /* jacobianF = &jacobianF_AC; */
+    /*     updateSolver = &fc3d_AC_update; */
+    postSolver = &fc3d_AC_post;
+    freeSolver = &fc3d_AC_free_P;
 
   }
 
@@ -153,7 +170,7 @@ void fc3d_onecontact_nonsmooth_Newton_solvers_initialize(FrictionContactProblem*
     jacobianF = &jacobianF_GlockerFischerBurmeister;
     /*     updateSolver = &NCPGlocker_update; */
     postSolver = &NCPGlocker_post;
-    freeSolver = (FreeSolverPtr)&NCPGlocker_free;
+    freeSolver = (FreeSolverNSGSPtr)&NCPGlocker_free;
   }
   else
   {
@@ -180,6 +197,11 @@ int fc3d_onecontact_nonsmooth_Newton_solvers_solve(FrictionContactProblem* local
   {
     info = fc3d_onecontact_nonsmooth_Newton_solvers_solve_damped(localproblem, reactionBlock, iparam, dparam);
   }
+  else if (options->solverId == SICONOS_FRICTION_3D_ONECONTACT_NSN_AC_GP_P)
+  {
+    info = fc3d_projectionOnConeWithLocalIteration_solve (localproblem, reactionBlock , options);
+    info = fc3d_onecontact_nonsmooth_Newton_solvers_solve_damped(localproblem, reactionBlock, iparam, dparam);
+  }
   else
   {
     info = nonSmoothDirectNewton(Fsize, reactionBlock, &F, &jacobianF, iparam, dparam);
@@ -196,13 +218,13 @@ int fc3d_onecontact_nonsmooth_Newton_solvers_solve(FrictionContactProblem* local
   /*  (*postSolver)(contact,reaction); */
 }
 
-void fc3d_onecontact_nonsmooth_Newton_solvers_free(FrictionContactProblem* localproblem)
+void fc3d_onecontact_nonsmooth_Newton_solvers_free(FrictionContactProblem * problem, FrictionContactProblem * localproblem, SolverOptions* localsolver_options)
 {
   F = NULL;
   jacobianF = NULL;
   updateSolver = NULL;
   postSolver = NULL;
-  (*freeSolver)();
+  (*freeSolver)(problem, localproblem, localsolver_options);
 }
 
 void fc3d_onecontact_nonsmooth_Newton_solvers_computeError(int n, double* velocity, double*reaction, double * error)
