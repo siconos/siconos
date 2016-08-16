@@ -30,8 +30,8 @@
 #include <time.h>
 #include <float.h>
 
-#define DEBUG_STDOUT
-#define DEBUG_MESSAGES
+/* #define DEBUG_STDOUT */
+/* #define DEBUG_MESSAGES */
 #include "debug.h"
 
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
@@ -412,7 +412,6 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction, double *veloci
   if (iparam[1] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL ||
       iparam[1] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT)
   {
-    double local_reaction[3];
     while ((iter < itermax) && (hasNotConverged > 0))
     {
 
@@ -453,20 +452,20 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction, double *veloci
           DEBUG_EXPR(
             frictionContact_display(localproblem);
             printf("Discard local reaction for contact %i at iteration %i with local_error = %e\n", contact, iter, localsolver_options->dparam[1]);
-            local_reaction[0] = reaction[3 * contact];
-            local_reaction[1] = reaction[3 * contact + 1];
-            local_reaction[2] = reaction[3 * contact + 2];
+            localreaction[0] = reaction[3 * contact];
+            localreaction[1] = reaction[3 * contact + 1];
+            localreaction[2] = reaction[3 * contact + 2];
             fc3d_projectionOnConeWithLocalIteration_initialize(problem, localproblem, localsolver_options );
-            fc3d_projectionOnConeWithLocalIteration_solve (localproblem, local_reaction , localsolver_options);
+            fc3d_projectionOnConeWithLocalIteration_solve (localproblem, localreaction , localsolver_options);
             printf("Try local fc3d_projectionOnConeWithLocalIteration_solve with local_error = %e\n", localsolver_options->dparam[1]);
-            (*local_solver)(localproblem, local_reaction , localsolver_options);
+            (*local_solver)(localproblem, localreaction , localsolver_options);
             printf("Try local another newton solve with local_error = %e\n", localsolver_options->dparam[1]);
             if (localsolver_options->dparam[1] <= localsolver_options->dparam[0])
             {
               DEBUG_PRINTF("Finally keep the local solution = %e\n", localsolver_options->dparam[1]);
-              reaction[3 * contact]     = local_reaction[0];
-              reaction[3 * contact + 1] = local_reaction[1];
-              reaction[3 * contact + 2] = local_reaction[2];
+              reaction[3 * contact]     = localreaction[0];
+              reaction[3 * contact + 1] = localreaction[1];
+              reaction[3 * contact + 2] = localreaction[2];
               getchar();
             }
             );
@@ -652,7 +651,6 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction, double *veloci
     {
       if (iparam[4] == SICONOS_FRICTION_3D_NSGS_RELAXATION_TRUE)
       {
-        double reactionold[3];
 
         double omega = dparam[8];
         while ((iter < itermax) && (hasNotConverged > 0))
