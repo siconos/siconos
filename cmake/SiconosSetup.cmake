@@ -216,7 +216,7 @@ IF(WITH_OPENMP)
 ENDIF()
 
 # =========== use ccache if available ===========
-OPTION (WITH_CCACHE "Use ccache" ON)
+OPTION (WITH_CCACHE "Use ccache" OFF)
 IF(WITH_CCACHE)
   find_program(CCACHE_FOUND ccache)
   if(CCACHE_FOUND)
