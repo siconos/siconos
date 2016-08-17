@@ -6,6 +6,12 @@
 #undef WITH_IO
 #undef WITH_SERIALIZATION
 
+#ifdef BT_USE_DOUBLE_PRECISION
+%{
+#define BT_USE_DOUBLE_PRECISION 1
+%}
+#endif
+
 %include base.i
 
 // due to undefined private copy constructors
