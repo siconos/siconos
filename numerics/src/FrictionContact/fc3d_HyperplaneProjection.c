@@ -221,15 +221,10 @@ int fc3d_HyperplaneProjection_setDefaultSolverOptions(SolverOptions* options)
   options->filterOn = 1;
   options->iSize = 8;
   options->dSize = 8;
-  options->iparam = (int *)malloc(options->iSize * sizeof(int));
-  options->dparam = (double *)malloc(options->dSize * sizeof(double));
+  options->iparam = (int *)calloc(options->iSize, sizeof(int));
+  options->dparam = (double *)calloc(options->dSize, sizeof(double));
   options->dWork = NULL;
   solver_options_nullify(options);
-  for (i = 0; i < 8; i++)
-  {
-    options->iparam[i] = 0;
-    options->dparam[i] = 0.0;
-  }
   options->iparam[0] = 2000000;
   options->iparam[1] = 50;
   options->dparam[0] = 1e-3;

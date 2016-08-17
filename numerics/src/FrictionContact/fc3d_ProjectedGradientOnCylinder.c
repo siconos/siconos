@@ -275,19 +275,12 @@ int fc3d_ProjectedGradientOnCylinder_setDefaultSolverOptions(SolverOptions* opti
   options->filterOn = 1;
   options->iSize = 10;
   options->dSize = 10;
-  if (options->iparam != NULL)
-    free(options->iparam);
-  options->iparam = (int *)malloc(options->iSize * sizeof(int));
-  if (options->dparam != NULL)
-    free(options->dparam);
-  options->dparam = (double *)malloc(options->dSize * sizeof(double));
+  options->iparam = (int *)realloc(options->iparam, options->iSize*sizeof(int));
+  options->dparam = (double *)realloc(options->dparam, options->dSize*sizeof(double));
   options->dWork = NULL;
   solver_options_nullify(options);
-  for (i = 0; i < 10; i++)
-  {
-    options->iparam[i] = 0;
-    options->dparam[i] = 0.0;
-  }
+  memset(options->iparam, 0, options->iSize*sizeof(int));
+  memset(options->dparam, 0, options->dSize*sizeof(int));
   options->iparam[0] = 20000;
   options->dparam[0] = 1e-6;
   options->dparam[3] = 1e-3;
