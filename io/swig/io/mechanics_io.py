@@ -494,10 +494,7 @@ class Hdf5():
         self._mode = mode
         self._broadphase = broadphase
         self._osi = osi
-        self._static_origins = []
-        self._static_orientations = []
-        self._static_transforms = []
-        self._static_cobjs = []
+        self._static = {}
         self._shape = None
         self._shapeid = dict()
         self._static_data = None
@@ -726,21 +723,18 @@ class Hdf5():
                     static_cobj.setCollisionFlags(
                         btCollisionObject.CF_STATIC_OBJECT)
 
-                    self._static_origins.append(
-                        static_cobj.getWorldTransform().getOrigin())
-
-                    self._static_orientations.append(
-                        static_cobj.getWorldTransform().getRotation())
-
-                    self._static_transforms.append(
-                        static_cobj.getWorldTransform())
-
                     static_cobj.setCollisionShape(
                         self._shape.get(c.name))
-                    self._static_cobjs.append(static_cobj)
 
-                    self._broadphase.addStaticObject(static_cobj,
-                                                     int(c.group))
+                    self._static[name] = {
+                        'number': number,
+                        'origin': static_cobj.getWorldTransform().getOrigin(),
+                        'orientation': static_cobj.getWorldTransform().getRotation(),
+                        'transform': static_cobj.getWorldTransform(),
+                        'cobj': static_cobj,
+                        }
+
+                    self._broadphase.addStaticObject(static_cobj, int(c.group))
 
             else:
                 # a moving object
@@ -846,7 +840,6 @@ class Hdf5():
 
         # import dynamical systems
         if self._broadphase is not None and 'input' in self._data:
-            counter =0
             for (name, obj) in sorted(self._input.items(),
                                       key=lambda x: x[0]):
 
@@ -869,9 +862,8 @@ class Hdf5():
                     #
                     # cold restart if output previously done
                     if mass > 0 and self.dynamic_data() is not None and len(self.dynamic_data()) > 0:
-                        counter +=1
                         print ('Import  dynamic object name ', name, 'from current state')
-                        print ('  number of imported object ', counter)
+                        print ('  number of imported object ', obj.attrs['id'])
                         dpos_data = self.dynamic_data()
                         max_time = max(dpos_data[:, 0])
                         id_last = np.where(
@@ -895,8 +887,7 @@ class Hdf5():
 
                     # start from initial conditions
                     else:
-                        counter +=1
-                        print ('Import  dynamic or static object number ', counter, 'from initial state')
+                        print ('Import  dynamic or static object number ', obj.attrs['id'], 'from initial state')
                         print ('                object name   ', name)
                         translation = obj.attrs['translation']
                         orientation = obj.attrs['orientation']
@@ -1006,16 +997,16 @@ class Hdf5():
         Outputs translations and orientations of static objects
         """
         time = self.currentTime()
-        idd = -1
         p = 0
-        self._static_data.resize(len(self._static_transforms), 0)
+        self._static_data.resize(len(self._static), 0)
 
-        for transform in self._static_transforms:
-            translation = transform.getOrigin()
-            rotation = transform.getRotation()
+        for static in self._static.values():
+            print('output static object', static['number'])
+            translation = static['transform'].getOrigin()
+            rotation = static['transform'].getRotation()
             self._static_data[p, :] = \
                 [time,
-                 idd,
+                 static['number'],
                  translation.x(),
                  translation.y(),
                  translation.z(),
@@ -1023,7 +1014,6 @@ class Hdf5():
                  rotation.x(),
                  rotation.y(),
                  rotation.z()]
-            idd -= 1
             p += 1
 
     def outputDynamicObjects(self, initial=False):
