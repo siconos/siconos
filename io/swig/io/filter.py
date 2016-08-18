@@ -56,6 +56,7 @@ class CopyVisitor(object):
                 inp = obj.file['data/input']
                 self.excluded_objects = [x.attrs['id'] for name,x in inp.items()
                                          if not self.object_filter(name, inp[name])]
+                print('Excluding object IDs {}'.format(self.excluded_objects))
 
         # If we are copying an excluded object, return early
         if self.excluded_objects is not None and 'data/input/' in path:
