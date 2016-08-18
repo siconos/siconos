@@ -341,7 +341,12 @@ void BulletSpaceFilter::buildInteractions(double time)
 
         DEBUG_PRINTF("collision between group %ld and %ld\n", gid1, gid2);
 
-        nslaw = (*_nslaws)(gid1, gid2);
+        try {
+          nslaw = (*_nslaws)(gid1, gid2);
+        } catch (ublas::bad_index &e) {
+          printf("Warning: NonSmoothLaw for groups %d and %d not found!\n",
+                 gid1, gid2);
+        }
 
         if (nslaw)
         {
