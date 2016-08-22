@@ -117,8 +117,8 @@ for o, a in opts:
         vtk_export_mode = True
 
     elif o == '--advance':
-        if a=='fps':
-            advance_by_time = 1.0 / frames_per_second
+        if 'fps' in a:
+            advance_by_time = eval(a, {'fps':1.0/frames_per_second})
         else:
             advance_by_time = float(a)
 
