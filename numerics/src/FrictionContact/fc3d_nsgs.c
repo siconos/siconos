@@ -475,6 +475,7 @@ void acceptLocalReactionProjected(FrictionContactProblem *problem,
 
       // Save the result in case next step fails
       double localreaction_proj[3];
+      double error_proj = localsolver_options->dparam[1];
       memcpy(localreaction_proj, localreaction, sizeof(double)*3);
 
       // Complete it further with the original solver
@@ -487,7 +488,7 @@ void acceptLocalReactionProjected(FrictionContactProblem *problem,
       // (Note: this has been observed, particularly when mu=1.0)
       if (nan3)
       {
-        DEBUG_PRINTF("Keep the projectionOnCone local solution = %e\n", localsolver_options->dparam[1]);
+        DEBUG_PRINTF("Keep the projectionOnCone local solution = %e\n", error_proj);
         memcpy(&reaction[contact*3], localreaction_proj, sizeof(double)*3);
       }
       else
