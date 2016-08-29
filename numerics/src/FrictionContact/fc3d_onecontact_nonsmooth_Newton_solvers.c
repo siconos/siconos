@@ -501,7 +501,16 @@ int fc3d_onecontact_nonsmooth_Newton_solvers_solve_direct(FrictionContactProblem
 /* #endif */
 
     // Solve the linear system
-    solv3x3(AWplusB, dR, F);
+    if ( solv3x3(AWplusB, dR, F) )
+    {
+      // if determinant is zero, replace dR=NaN with zero (i.e. don't
+      // modify R) and return early
+      dR[0] = 0; dR[1] = 0; dR[2] = 0;
+      inew = itermax;
+      DEBUG_EXPR(
+        assert(0 && "solv3x3 returned error, bad determinant found."));
+    }
+
     // upate iterates
     R[0] += dR[0];
     R[1] += dR[1];
@@ -802,22 +811,37 @@ int fc3d_onecontact_nonsmooth_Newton_solvers_solve_damped(FrictionContactProblem
       }
     }
 
-    solv3x3(AWplusB, dR, F);
-
-    // Perform Line Search
-
-    t_opt = t_init;
-    int infoLS = LineSearchGP(localproblem, Function, &t_opt, R, dR, rho, LSitermax, F, A, B, velocity);
-
-    if (infoLS == 0) t = t_opt;
+    if ( solv3x3(AWplusB, dR, F) )
+    {
+      // if determinant is zero, replace dR=NaN with zero (i.e. don't
+      // modify R) and return early
+      dR[0] = 0; dR[1] = 0; dR[2] = 0;
+      inew = itermax;
+      DEBUG_EXPR(
+        assert(0 && "solv3x3 returned error, bad determinant found."));
+    }
     else
     {
-      NumberofLSfailed++;
-      if (NumberofLSfailed > 5)
+      // Perform Line Search
+
+      t_opt = t_init;
+      int infoLS = LineSearchGP(localproblem, Function, &t_opt, R, dR,
+                                rho, LSitermax, F, A, B, velocity);
+
+      if (infoLS == 0)
+        t = t_opt;
+      else
       {
-        t = 100.0;
-        if (verbose > 1) printf("-----------------------------------------  Max Number of LineSearchGP failed =%i Tilt point\n ", NumberofLSfailed);
-        NumberofLSfailed = 0;
+        NumberofLSfailed++;
+        if (NumberofLSfailed > 5)
+        {
+          t = 100.0;
+          if (verbose > 1)
+            printf("-----------------------------------------  "
+                   "Max Number of LineSearchGP failed =%i Tilt point\n ",
+                   NumberofLSfailed);
+          NumberofLSfailed = 0;
+        }
       }
     }
 
