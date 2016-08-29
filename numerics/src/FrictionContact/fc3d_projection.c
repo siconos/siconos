@@ -276,8 +276,13 @@ void fc3d_projectionOnConeWithLocalIteration_initialize(FrictionContactProblem *
 {
   int nc = problem->numberOfContacts;
   /* printf("fc3d_projectionOnConeWithLocalIteration_initialize. Allocation of dwork\n"); */
-  localsolver_options->dWork = (double *)malloc(nc * sizeof(double));
-  localsolver_options->dWorkSize = nc ;
+  if (!localsolver_options->dWork
+      || localsolver_options->dWorkSize < nc)
+  {
+    localsolver_options->dWork = (double *)realloc(localsolver_options->dWork,
+                                                   nc * sizeof(double));
+    localsolver_options->dWorkSize = nc ;
+  }
   for (int i = 0; i < nc; i++)
   {
     localsolver_options->dWork[i]=1.0;
