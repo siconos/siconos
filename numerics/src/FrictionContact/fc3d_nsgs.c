@@ -392,10 +392,10 @@ unsigned int* allocShuffledContacts(FrictionContactProblem *problem,
 }
 
 static
-void solveLocalReaction(UpdatePtr update_localproblem, SolverPtr local_solver,
-                        unsigned int contact, FrictionContactProblem *problem,
-                        FrictionContactProblem *localproblem, double *reaction,
-                        SolverOptions *localsolver_options, double localreaction[3])
+int solveLocalReaction(UpdatePtr update_localproblem, SolverPtr local_solver,
+                       unsigned int contact, FrictionContactProblem *problem,
+                       FrictionContactProblem *localproblem, double *reaction,
+                       SolverOptions *localsolver_options, double localreaction[3])
 {
   (*update_localproblem)(contact, problem, localproblem,
                          reaction, localsolver_options);
@@ -406,7 +406,7 @@ void solveLocalReaction(UpdatePtr update_localproblem, SolverPtr local_solver,
   localreaction[1] = reaction[contact*3 + 1];
   localreaction[2] = reaction[contact*3 + 2];
 
-  (*local_solver)(localproblem, localreaction, localsolver_options);
+  return (*local_solver)(localproblem, localreaction, localsolver_options);
 }
 
 static
@@ -432,7 +432,9 @@ void acceptLocalReactionFiltered(FrictionContactProblem *localproblem,
                                  unsigned int contact, unsigned int iter,
                                  double *reaction, double localreaction[3])
 {
-  if (localsolver_options->dparam[1] > 1.0)
+  if (isnan(localsolver_options->dparam[1])
+      || isinf(localsolver_options->dparam[1])
+      || localsolver_options->dparam[1] > 1.0)
   {
     DEBUG_EXPR(frictionContact_display(localproblem));
     DEBUG_PRINTF("Discard local reaction for contact %i at iteration %i "
@@ -444,31 +446,62 @@ void acceptLocalReactionFiltered(FrictionContactProblem *localproblem,
 }
 
 static
-void acceptLocalReactionProjected(FrictionContactProblem *localproblem,
+void acceptLocalReactionProjected(FrictionContactProblem *problem,
+                                  FrictionContactProblem *localproblem,
+                                  SolverPtr local_solver,
                                   SolverOptions *localsolver_options,
                                   unsigned int contact, unsigned int iter,
                                   double *reaction, double localreaction[3])
 {
-  if (localsolver_options->dparam[1] > 1.0)
+  int nan1 = isnan(localsolver_options->dparam[1]) || isinf(localsolver_options->dparam[1]);
+  if (nan1 || localsolver_options->dparam[1] > 1.0)
   {
     DEBUG_EXPR(
       frictionContact_display(localproblem);
-      printf("Discard local reaction for contact %i at iteration %i with local_error = %e\n", contact, iter, localsolver_options->dparam[1]);
-      localreaction[0] = reaction[3 * contact];
-      localreaction[1] = reaction[3 * contact + 1];
-      localreaction[2] = reaction[3 * contact + 2];
+
+      // In case of bad solution, re-solve with a projection-on-cone solver
+      DEBUG_PRINTF("Discard local reaction for contact %i at iteration %i with local_error = %e\n", contact, iter, localsolver_options->dparam[1]);
+      memcpy(localreaction, &reaction[contact*3], sizeof(double)*3);
       fc3d_projectionOnConeWithLocalIteration_initialize(problem, localproblem, localsolver_options );
-      fc3d_projectionOnConeWithLocalIteration_solve (localproblem, localreaction , localsolver_options);
-      printf("Try local fc3d_projectionOnConeWithLocalIteration_solve with local_error = %e\n", localsolver_options->dparam[1]);
+      fc3d_projectionOnConeWithLocalIteration_solve(localproblem, localreaction, localsolver_options);
+      int nan2 = isnan(localsolver_options->dparam[1]) || isinf(localsolver_options->dparam[1]);
+      if (nan2) {
+        DEBUG_PRINTF("No hope for contact %d, setting to zero.\n", contact);
+        reaction[3*contact+0] = 0;
+        reaction[3*contact+1] = 0;
+        reaction[3*contact+2] = 0;
+        return;
+      }
+
+      // Save the result in case next step fails
+      double localreaction_proj[3];
+      memcpy(localreaction_proj, localreaction, sizeof(double)*3);
+
+      // Complete it further with the original solver
+      DEBUG_PRINTF("Try local fc3d_projectionOnConeWithLocalIteration_solve with local_error = %e\n", localsolver_options->dparam[1]);
       (*local_solver)(localproblem, localreaction , localsolver_options);
-      printf("Try local another newton solve with local_error = %e\n", localsolver_options->dparam[1]);
-      if (localsolver_options->dparam[1] <= localsolver_options->dparam[0])
+      int nan3 = isnan(localsolver_options->dparam[1]) || isinf(localsolver_options->dparam[1]);
+      DEBUG_PRINTF("Try local another newton solve with local_error = %e\n", localsolver_options->dparam[1]);
+
+      // If we produced a bad value doing this, keep the projectionOnCone solution
+      // (Note: this has been observed, particularly when mu=1.0)
+      if (nan3)
       {
-        DEBUG_PRINTF("Finally keep the local solution = %e\n", localsolver_options->dparam[1]);
-        reaction[3 * contact]     = localreaction[0];
-        reaction[3 * contact + 1] = localreaction[1];
-        reaction[3 * contact + 2] = localreaction[2];
-        getchar();
+        DEBUG_PRINTF("Keep the projectionOnCone local solution = %e\n", localsolver_options->dparam[1]);
+        memcpy(&reaction[contact*3], localreaction_proj, sizeof(double)*3);
+      }
+      else
+      {
+        if (nan1 || localsolver_options->dparam[1] <= localsolver_options->dparam[0])
+        {
+          DEBUG_PRINTF("Keep the new local solution = %e\n", localsolver_options->dparam[1]);
+          memcpy(&reaction[contact*3], localreaction, sizeof(double)*3);
+          //getchar();
+        }
+        else
+        {
+          DEBUG_PRINTF("Keep the previous local solution = %e\n", localsolver_options->dparam[1]);
+        }
       }
     );
   }
@@ -682,7 +715,7 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction,
                                     contact, iter, reaction, localreaction);
         #else
         // Experimental
-        acceptLocalReactionProjected(localproblem, localsolver_options,
+        acceptLocalReactionProjected(problem, localproblem, local_solver, localsolver_options,
                                      contact, iter, reaction, localreaction);
         #endif
       }
