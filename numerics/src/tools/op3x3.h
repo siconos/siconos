@@ -31,13 +31,6 @@
 #define restrict __restrict
 #endif
 
-/* Functions that insert NaN have error codes that should not be ignored! */
-#ifdef __GNUC__
-#define WARN_RESULT_IGNORED __attribute__ ((warn_unused_result))
-#else
-#define WARN_RESULT_IGNORED
-#endif
-
 /** OP3X3(EXPR) do EXPR 9 times
  * \param EXPR a C expression that should contains self incrementing
  *        pointers on arrays[9] */
