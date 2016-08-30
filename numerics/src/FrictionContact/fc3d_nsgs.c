@@ -453,6 +453,7 @@ void acceptLocalReactionProjected(FrictionContactProblem *problem,
                                   unsigned int contact, unsigned int iter,
                                   double *reaction, double localreaction[3])
 {
+  double error_prev = localsolver_options->dparam[1];
   int nan1 = isnan(localsolver_options->dparam[1]) || isinf(localsolver_options->dparam[1]);
   if (nan1 || localsolver_options->dparam[1] > 1.0)
   {
@@ -501,7 +502,7 @@ void acceptLocalReactionProjected(FrictionContactProblem *problem,
         }
         else
         {
-          DEBUG_PRINTF("Keep the previous local solution = %e\n", localsolver_options->dparam[1]);
+          DEBUG_PRINTF("Keep the previous local solution = %e\n", error_prev);
         }
       }
     );
