@@ -494,7 +494,8 @@ void acceptLocalReactionProjected(FrictionContactProblem *problem,
       }
       else
       {
-        if (nan1 || localsolver_options->dparam[1] <= localsolver_options->dparam[0])
+        if (nan1 || localsolver_options->dparam[1] <= localsolver_options->dparam[0]
+                 || localsolver_options->dparam[1] <= error_prev)
         {
           DEBUG_PRINTF("Keep the new local solution = %e\n", localsolver_options->dparam[1]);
           memcpy(&reaction[contact*3], localreaction, sizeof(double)*3);
