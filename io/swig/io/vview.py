@@ -1270,6 +1270,10 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
                         #slider_widget.SetEnabled(True)
                         #widget.SetEnabled(True) # Axis widget
 
+                    if self._time >= max(self._times):
+                        self._recording = False
+                        recorder.End()
+
         slider_repres = vtk.vtkSliderRepresentation2D()
 
         if min_time is None:
