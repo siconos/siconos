@@ -23,7 +23,9 @@ if(USE_DOXYGEN)
   if(NOT DOXYGEN_OUTPUT)
     set(DOXYGEN_OUTPUT ${DOC_ROOT_DIR}/doxygen CACHE INTERNAL "Path to doxygen outputs.")
   endif()
-  file(MAKE_DIRECTORY ${DOC_ROOT_DIR}/tags)
+  file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/build/tags)
+  file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/build/html)
+  
   file(MAKE_DIRECTORY ${DOXYGEN_OUTPUT}/man)
   
   # --- Config file and its options. --
@@ -51,7 +53,7 @@ if(USE_DOXYGEN)
   # Doc will be built when 'make doxygen' is called.
   if(WITH_DOCUMENTATION)
     # config file name
-    set(DOXY_CONFIG "${CMAKE_BINARY_DIR}/Docs/config/doxy.config" CACHE INTERNAL "Doxygen configuration file for doc from sources.")
+    set(DOXY_CONFIG "${CMAKE_CURRENT_BINARY_DIR}/config/doxy.config" CACHE INTERNAL "Doxygen configuration file for doc from sources.")
 
     # The generation of the config and the creation of the target will be done later,
     # after the update of inputs by each component, with macro 'finalize_doxygen'
@@ -112,7 +114,6 @@ if(USE_SPHINX)
     COMMAND ${SPHINX_EXECUTABLE} ${SPHINX_PARAMETERS}
     ${CMAKE_CURRENT_BINARY_DIR}/build/html
     )
-  #add_dependencies(html doxygen)
   
   # latex doc
   set(SPHINX_LATEX_PARAMETERS
@@ -127,15 +128,19 @@ if(USE_SPHINX)
     )
 
   # python api auto doc
-  set(SPHINX_APIDOC sphinx-apidoc)
-  set(GENERATED_DOC ${CMAKE_CURRENT_BINARY_DIR}/sphinx/reference)
-  set(APIDOC_PARAMETERS -e -P -o ${GENERATED_DOC})
+  if(WITH_PYTHON_WRAPPER)
 
-  add_custom_target(apidoc
-    COMMAND ${SPHINX_APIDOC} ${APIDOC_PARAMETERS}
-    ${CMAKE_BINARY_DIR}/wrap/${SICONOS_PYTHON_PACKAGE}
-    )
+    set(SPHINX_APIDOC sphinx-apidoc)
+    set(GENERATED_DOC ${CMAKE_CURRENT_BINARY_DIR}/sphinx/reference)
+    set(APIDOC_PARAMETERS -e -P -o ${GENERATED_DOC})
+    list(GET COMPONENTS -1 _last_comp)
+    add_custom_target(apidoc
+      COMMAND ${SPHINX_APIDOC} ${APIDOC_PARAMETERS}
+      ${CMAKE_BINARY_DIR}/wrap/${SICONOS_PYTHON_PACKAGE}
+      DEPENDS ${_last_comp}
+      )
+  endif()
 
-  add_custom_target(doc
-    DEPENDS doxygen html)
+  add_custom_target(doc DEPENDS html)
+
 endif()

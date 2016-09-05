@@ -146,13 +146,13 @@ extern "C"
    * \param order control if ordering is used
    * \param A the sparse matrix
    * \param tol the tolerance
-   * \param p the parameter structure that eventually holds the factors
+   * \param cs_lu_A the parameter structure that eventually holds the factors
    * \return 1 if the factorization was successful, 1 otherwise
    */
   int cs_lu_factorization(csi order, const cs *A, double tol, cs_lu_factors * cs_lu_A);
 
   /** Free a workspace related to a LU factorization
-   * \param p the structure to free
+   * \param cs_lu_A the structure to free
    */
   void cs_sparse_free(cs_lu_factors* cs_lu_A);
 

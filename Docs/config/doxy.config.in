@@ -2051,7 +2051,7 @@ TAGFILES               =
 # tag file that is based on the input files it reads. See section "Linking to
 # external documentation" for more information about the usage of tag files.
 
-GENERATE_TAGFILE       = @CMAKE_BINARY_DIR@/Docs/build/html/tags/@PROJECT_NAME@.tag
+GENERATE_TAGFILE       = @CMAKE_BINARY_DIR@/Docs/build/tags/@PROJECT_NAME@.tag
 
 # If the ALLEXTERNALS tag is set to YES, all external class will be listed in
 # the class index. If set to NO, only the inherited external classes will be

@@ -70,19 +70,13 @@ macro(finalize_doxygen)
   if(WITH_DOCUMENTATION)
     # verbose mode.
     #  Always off, since warnings may be obtained with 'doxygen_warnings' target.
-    #if(DEV_MODE)
     set(DOXY_QUIET "YES")
     set(DOXY_WARNINGS "NO")
-    #else()
-    #  set(DOXY_QUIET "YES")
-    #  set(DOXY_WARNINGS "NO")
-    #endif()
     set(GENERATE_HTML YES)
     foreach(_dir ${DOXY_INPUTS})
       set(DOXYGEN_INPUTS "${DOXYGEN_INPUTS} ${_dir}")
     endforeach()
     configure_file(${CMAKE_SOURCE_DIR}/Docs/config/doxy.config.in ${DOXY_CONFIG} @ONLY)
-
     add_custom_target(doxygen ${DOXYGEN_EXECUTABLE} ${DOXY_CONFIG})
     add_dependencies(html doxygen)
 
