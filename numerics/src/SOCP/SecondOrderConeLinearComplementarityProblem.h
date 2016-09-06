@@ -18,7 +18,7 @@
 #ifndef SOCLCP_H
 #define SOCLCP_H
 
-/*! \page soclcpProblem
+/*! \page soclcpProblem Second Order Cone Linear Complementarity Problem
  *
  * \section soclcpIntro Problem statement
  *  Given
@@ -44,21 +44,28 @@
  * \f}
  * with
  * \f{eqnarray}{
- *    C^\alpha_{\mu} = \{ r \mid \|[r_1,\ldot,r_{n^\alpha}]\| \leq \mu^\alpha * r_0   \} \subset {\mathrm{I\!R}}}^{n^\alpha}
+ *    C^\alpha_{\mu} = \{ r \mid \|[r_1, \ldots, r_{n^\alpha}]\| \leq \mu^\alpha * r_0   \} \subset {\mathrm{I\!R}}^{n^\alpha}
  * \f}
  *
+ * The problem is stored and given to the solver in numerics thanks to
+ *  the C structure  SecondOrderConeLinearComplementarityProblem.
+
  *  \section SOCLCPSolversList Available solvers for SOCCLP
- * Use the generic function SecondOrderConeLinearComplementarityProblem_driver() to call one the the specific solvers listed below:
+
+see SOCLCP_cst.h for solver ids.
+ 
+ * Use the generic function soclcp_driver() to call one the the specific solvers listed below:
  *
  * <ul>
  *
- * <li> SecondOrderConeLinearComplementarityProblem_psor(): PSOR (Gauss-Seidel with overrelaxation) solver.
- *       SolverId : SICONOS_SOCLCP_NSGS = , </li>
- *
- *
- * </ul>
- * (see the functions/solvers list in SecondOrderConeLinearComplementarityProblem_Solvers.h)
- *
+ * <li> soclcp_nsgs() : PSOR (Gauss-Seidel with overrelaxation) solver.
+ *       SolverId : SICONOS_SOCLCP_NSGS , </li>
+ * <li> soclcp_VI_FixedPointProjection() : VI formulation and fixed point projection.
+ *       SolverId : SICONOS_SOCLCP_VI_FPP , </li>
+ * <li> soclcp_VI_ExtraGradient() : VI formulation and extra-gradient solver.
+ *       SolverId : SICONOS_SOCLCP_VI_EG , </li>
+  * </ul>
+ * See the related functions/solvers list in SOCLCP_Solvers.h.
  *
  */
 
@@ -70,41 +77,24 @@
 #include "NumericsMatrix.h"
 
 /** \struct  SecondOrderConeLinearComplementarityProblem SecondOrderConeLinearComplementarityProblem.h
- *  The structure that defines a Second Order Cone Linear Complementarity Problem
- *  \f$\mathrm{SOCLCP}(M,q,\mu)\f$  such that
- * \f{eqnarray*}{
- * \begin{cases}
- *   u = M r + q \\
- *   C_{\mu} = \{ r \} =  \prod_{\alpha =1}^{n_c} C^\alpha_{\mu} \\
- *   C^\alpha_{\mu} = \{ r \mid \|[r_1,\ldot,r_{n^\alpha}]\| \leq \mu^\alpha * r_0   \} \subset {\mathrm{I\!R}}}^{n^\alpha}
- *   C^\star_{\mu} \ni  {u} \perp r \in C_{\mu}
- * \end{cases}
- * \f}
- *   \param nc the number of contacts \f$ n_c \f$
- *   \param M \f${M} \in {{\mathrm{I\!R}}}^{n \times n} \f$,
- *    a matrix with \f$ n = d  n_c\f$ stored in NumericsMatrix structure
- *   \param q  \f${q} \in {{\mathrm{I\!R}}}^{n} \f$,
- *   coneDimensions \f${\mu} \in {{\mathrm{I\!R}}}^{n_c} \f$, vector of dimension of the cones
- *     (\f$ n_c =\f$ numberOfContacts)
- *   \param mu \f${\mu} \in {{\mathrm{I\!R}}}^{n_c} \f$, vector of  coefficients
- *      (\f$ n_c =\f$ numberOfContacts)
+ *  The structure that defines a Second Order Cone Linear Complementarity Problem, , see details in \ref soclcpProblem.
  */
 typedef struct
 {
-  /** the problem dimenction. must equal to\f$ \sum_{i}^{n_c} d_i \f$   */
+  /** the problem dimension. must be equal to\f$ \sum_{i}^{n_c} d_i \f$   */
   int n;
 
   /** the number of cones \f$ n_c \f$ in the Cartesian product */
   int nc;
-  /** M \f${M} \in {{\mathrm{I\!R}}}^{n \times n} \f$,
+  /** \f${M} \in {{\mathrm{I\!R}}}^{n \times n} \f$,
      a matrix with \f$ n = d  n_c\f$ stored in NumericsMatrix structure */
   NumericsMatrix* M;
   /** \f${q} \in {{\mathrm{I\!R}}}^{n} \f$ */
   double* q;
-  /** coneIndex \f${\mu} \in {{\mathrm{I\!R}}}^{n_c} \f$, vector of indices of the cones
+  /** \f${\mu} \in {{\mathrm{I\!R}}}^{n_c} \f$, vector of indices of the cones
       (\f$ n_c =\f$ nc) */
   unsigned int* coneIndex;
-  /** mu \f${\mu} \in {{\mathrm{I\!R}}}^{n_c} \f$, vector of coefficients
+  /** \f${\mu} \in {{\mathrm{I\!R}}}^{n_c} \f$, vector of coefficients
       (\f$ n_c =\f$ nc) */
   double* mu;
 } SecondOrderConeLinearComplementarityProblem;

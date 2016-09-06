@@ -195,10 +195,8 @@ extern "C"
   /** SparseMatrix - vector product y = A*x + y for block of size 3x3
       \param[in] sizeX dim of the vectors x
       \param[in] sizeY dim of the vectors y
-      \param[in] alpha coefficient
       \param[in] A the matrix to be multiplied
       \param[in] x the vector to be multiplied
-      \param[in] beta coefficient
       \param[in,out] y the resulting vector
   */
   void prodSBM3x3(unsigned int sizeX, unsigned int sizeY,
@@ -252,7 +250,6 @@ extern "C"
       \param[in] A the matrix to be multiplied
       \param[in] x the vector to be multiplied
       \param[in,out] y the resulting vector
-      \param[in] init = 0 for y += Ax
   */
   void SBM_row_prod_no_diag_3x3(unsigned int sizeX, unsigned int sizeY, unsigned int currentRowNumber, const SparseBlockStructuredMatrix* const A, double* const x, double* y);
   

@@ -1,8 +1,7 @@
 #ifndef SOCLCP_CST_H
 #define SOCLCP_CST_H
-/** \file SeconfOrderConeLinearComplementarityProblem_cst.h */
-/** \enum SOCLCP_SOLVER SeconfOrderConeLinearComplementarityProblem_cst.h
- * Enum that allows one to encode the list of solvers in a proper to avoid mispelling
+/** \file SOCLCP_cst.h */
+/** \enum SOCLCP_SOLVER encode the list of solvers as integers to avoid mispelling
  * with char * variables
  */
 enum SOCLCP_SOLVER

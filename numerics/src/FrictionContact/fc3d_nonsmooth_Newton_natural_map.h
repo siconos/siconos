@@ -18,7 +18,7 @@
 #ifndef FRICTIONCONTACT3D_nonsmooth_Newton_NaturalMap_H
 #define FRICTIONCONTACT3D_nonsmooth_Newton_NaturalMap_H
 
-/*!\file fc3d_nonsmooth_Newton_NaturalMap.h
+/*!\file fc3d_nonsmooth_Newton_natural_map.h
 
   \brief Typedef and functions declarations related to natural map
   formulation for 3 dimension frictional contact problems in Local Coordinates.

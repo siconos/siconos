@@ -41,10 +41,12 @@
  *
  * R.W. Cottle, J.S. Pang, and R.E. Stone. <i>The Linear Complementarity Problem.</i> Academic Press, Inc., Boston, MA, 1992.
  *
+* The problem is stored and given to the solver in numerics thanks to
+   the C structure LinearComplementarityProblem.
+ 
  *  \section lcpSolversList Available solvers
 
-  The solvers and their parameters are described in \ref LCPSolvers . \n
-  Use the generic function lcp_driver() to call one the the specific solvers listed below:
+  Use the generic functions lcp_driver_DenseMatrix() to call one the the specific solvers listed below:
 
   \subsection lcpDirectSolvers Direct solvers
   - lcp_lexicolemke(), direct solver for LCP based on pivoting method principle for degenerate problem:
@@ -78,19 +80,8 @@
 #include "NumericsMatrix.h"
 
 /** \struct LinearComplementarityProblem LinearComplementarityProblem.h
- *  \brief Structure that contains and defines  \ref LCProblem
- *
- *   Find \f$(z,w)\f$ such that:\n
- *   \f{equation*}{
- *   \begin{cases}
- *   M \ z + q = w \\
- *   0 \le w \perp z \ge 0 \\
- *   \end{cases}
- *   \f}
- *
- * where \f$ w, z, q\f$ are vectors of size \f$n\f$ and \f$ M \f$ is a \f$n\times n\f$ matrix.
- * See \ref LCProblem for more details.
- */
+ *  \brief Structure that contains and defines \ref LCProblem
+  */
 typedef struct
 {
 

@@ -43,9 +43,13 @@
  *    C^\star_{\mu} \ni {\hat u} \perp r \in C_{\mu}
  * \end{cases}
  * \f}
- * and the set \f$C^{\alpha,\star}_{\mu^\alpha}\f$ is its dual.
+
+where the Coulomb friction cone is defined by
+\f$C_{\mu} = \prod\limits_{\alpha=1\ldots n_c}  C^{\alpha}_{\mu^\alpha}\f$
+
+with \f$C^{\alpha}_{\mu^\alpha} =\{ r^\alpha, \|r_{t}\| \leq \mu_{\alpha} |r^\alpha_{n}|\}\f$, and the set \f$C^{\alpha,\star}_{\mu^\alpha}\f$ its dual.
  *
- * The modified local velocity \f$\widehat u \f$ is not considered as an unknown since it can obtained uniquely
+ * The modified local velocity \f$\widehat u \f$ is not considered as an unknown since it can be obtained uniquely
  * from the local velocity \f$u\f$.
  * Coulomb's friction law with Signorini's condition for the unilateral contact written in terms
  * of second order complementarity condition
@@ -72,7 +76,9 @@
  * The problem is stored and given to the solver in Siconos/Numerics thanks to
  *  a C structure FrictionContactProblem .
  *
- *  \section fc3DSolversList Available solvers for Friction Contact 3D (see Friction_cst.h)
+ *  \section fc3DSolversList Available solvers for Friction Contact 3D
+
+ see Friction_cst.h for solver ids.
  * Use the generic function fc3d_driver() to call one the the specific solvers listed below:
  *
  * <ul>
@@ -135,41 +141,20 @@
 #include "NumericsMatrix.h"
 
 /** \struct FrictionContactProblem FrictionContactProblem.h
- *  The structure that defines a (reduced or dual) Friction-Contact (3D or 2D) problem
- *  \f$\mathrm{FC}(M,q,\mu)\f$  such that
- * \f{eqnarray*}{
- * \begin{cases}
- *   u = M r + q \\
- *    \hat u = u +\left[
- *      \left[\begin{array}{c}
- *          \mu^\alpha \|u^\alpha_{T}\|\\
- *         0 \\
- *         0
- *        \end{array}\right]^T, \alpha = 1 \ldots n_c
- *    \right]^T \\ \                                \
- *    C^\star_{\mu} \ni {\hat u} \perp r \in C_{\mu}
- * \end{cases}
- * \f}
- *   \param dimension dimension \f$d=2\f$ or \f$d=3\f$ of the contact space (3D or 2D )
- *   \param numberOfContacts the number of contacts \f$ n_c \f$
- *   \param M \f${M} \in {{\mathrm{I\!R}}}^{n \times n} \f$,
- *    a matrix with \f$ n = d  n_c\f$ stored in NumericsMatrix structure
- *   \param q  \f${q} \in {{\mathrm{I\!R}}}^{n} \f$,
- *   \param mu \f${\mu} \in {{\mathrm{I\!R}}}^{n_c} \f$, vector of friction coefficients
- *      (\f$ n_c =\f$ numberOfContacts)
+ *  The structure that defines a (reduced or dual) Friction-Contact (3D or 2D) problem, see details in \ref fcProblem.
 */
 typedef struct
 {
-  /** dimension \f$d=2\f$ or \f$d=3\f$ of the contact space (3D or 2D ) */
+  /** dimension of the contact space (3D or 2D ) */
   int dimension;
   /** the number of contacts \f$ n_c \f$ */
   int numberOfContacts;
-  /** M \f${M} \in {{\mathrm{I\!R}}}^{n \times n} \f$,
+  /** \f${M} \in {{\mathrm{I\!R}}}^{n \times n} \f$,
      a matrix with \f$ n = d  n_c\f$ stored in NumericsMatrix structure */
   NumericsMatrix* M;
   /** \f${q} \in {{\mathrm{I\!R}}}^{n} \f$ */
   double* q;
-  /** mu \f${\mu} \in {{\mathrm{I\!R}}}^{n_c} \f$, vector of friction coefficients
+  /** \f${\mu} \in {{\mathrm{I\!R}}}^{n_c} \f$, vector of friction coefficients
       (\f$ n_c =\f$ numberOfContacts) */
   double* mu;
 } FrictionContactProblem;

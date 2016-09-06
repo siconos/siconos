@@ -46,7 +46,12 @@
  *    C^\star_{\mu} \ni {\hat u} \perp r \in C_{\mu}
  * \end{cases}
  * \f}
- * and the set \f$C^{\alpha,\star}_{\mu^\alpha}\f$ is its dual.
+
+where the Coulomb friction cone is defined by
+\f$C_{\mu} = \prod\limits_{\alpha=1\ldots n_c}  C^{\alpha}_{\mu^\alpha}\f$
+
+with \f$C^{\alpha}_{\mu^\alpha} =\{ r^\alpha, \|r_{t}\| \leq \mu_{\alpha} |r^\alpha_{n}|\}\f$, and the set \f$C^{\alpha,\star}_{\mu^\alpha}\f$ its dual.
+
  * The modified local velocity \f$\widehat u \f$ is not considered as an unknown since it can obtained uniquely
  * from the local velocity \f$u\f$.
  * Coulomb's friction law with Signorini's condition for the unilateral contact written in terms

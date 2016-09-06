@@ -14,7 +14,8 @@
 
 #endif /* WITH_HDF5 */
 
-/** \struct SN_logh5 HDF5 logger (for full debug purposes) */
+/** \struct SN_logh5
+ HDF5 logger (for full debug purposes) */
 typedef struct {
   char* itername; /**< name of the group for the current iteration */
   unsigned itername_len; /**< maximum length of itername */
