@@ -14,32 +14,6 @@
 #define epsilon 0x1.0000000000000p-52
 #endif
 
-/*@
-  axiomatic Max {
-  logic real fmax(real x, real y);
-  axiom fmax_1: \forall real x, real y; fmax(x, y) >= x && fmax(y, y) >= y;
-  axiom fmax_2: \forall real x, real y; fmax(x, y) == x || fmax(y, y) == y;
-  }
-  axiomatic sqrt {
-  logic real sqrt(real x);
-  axiom sqrt_1: \forall real x; x >= 0 <==> x == sqrt(x) * sqrt(x);
-  axiom sqrt_2: \forall real x; x > 0 <==> sqrt(x) > 0;
-  }
-  axiomatic Heaviside {
-  logic real Heaviside(real x);
-  axiom Heaviside_1: \forall real x; (x < 0 ==> Heaviside(x) == 0);
-  axiom Heaviside_2: \forall real x; (x > 0 ==> Heaviside(x) == 1);
-  axiom Heaviside_3: \forall real x; (x == 0 ==> 0 < Heaviside(x) < 1);
-  }
-  axiomatic pow {
-  logic real pow(real x, real y);
-  axiom pow_1: \forall real x, real y; x >=0 ==> pow(x, y) >= 0;
-  }
-  axiomatic general {
-  axiom sq: \forall real x; x*x >= 0.;
-  }
-*/
-
 /*@ lemma one: \forall real mu; 2*mu*mu - 2*mu + 1 >= 0.5; */
 
 #define Sign(x) ((double)(x>0) - (double)(x<0))
@@ -55,6 +29,7 @@
     ensures x <= \result <= 1. || 1. <= \result <= x;
     ensures \result * \result == x;
     ensures \result > epsilon ==> x > epsilon*epsilon;
+    ensures x > epsilon ==> \result > epsilon;
 */
 extern double sqrt(double x);
 

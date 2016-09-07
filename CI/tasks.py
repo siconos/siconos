@@ -148,6 +148,10 @@ siconos_default_examples = siconos_default.copy()(
     ci_config='examples',
     with_examples=True)
 
+siconos_frama_c = siconos_ubuntu_16_04.copy()(
+    ci_config='with_frama_c',
+    add_pkgs=['opam', 'frama-c', 'libgtksourceview2.0-dev', 'libgnomecanvas2-dev', 'aspcud', 'm4',
+              'unzip', 'coq', 'ocaml', 'z3'])
 
 #
 # 4. dispatch based on hostname and distrib type (to min. disk requirement)

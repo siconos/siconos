@@ -32,6 +32,16 @@ set(${COMPONENT}_DIRS
   src/VI
 )
 
+# Static verifications (ACSL)
+if(WITH_FRAMA_C)
+  include(FramaC)
+  file(GLOB frama_c_files src/FrictionContact/Generated/*.c)
+  foreach(f ${frama_c_files})
+    add_frama_c_test(${f} ENTRY main)
+  endforeach()
+  add_frama_c_test(${CMAKE_CURRENT_SOURCE_DIR}/src/tools/test/test_static_op3x3.c ENTRY main INCLUDES ${CMAKE_SOURCE_DIR}/externals/tools)
+endif()
+
 # Unstable sources. Will be included only
 # if WITH_${COMPONENT}_UNSTABLE is true.
 set(${COMPONENT}_Unstable_SRCS)
