@@ -22,7 +22,7 @@
 #include <math.h>
 #include "LCP_Solvers.h"
 #include "QP_Solvers.h"
-
+#include "misc.h"
 void lcp_nsqp(LinearComplementarityProblem* problem, double *z, double *w, int *info , SolverOptions* options)
 {
   /* matrix M/vector q of the lcp */

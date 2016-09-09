@@ -26,6 +26,8 @@
 #include <math.h>
 #define VERBOSE_DEBUG
 #include "Friction_cst.h"
+#include "misc.h"
+
 void fc3d_TrescaFixedPoint(FrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options)
 {
   /* int and double parameters */

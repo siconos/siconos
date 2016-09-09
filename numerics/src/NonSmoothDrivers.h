@@ -65,14 +65,13 @@ extern "C"
       \param[in,out] z a m+n-vector of doubles which contains the solution of the problem.
       \param[in,out] w a m+n-vector of doubles which contains the solution of the problem.
       \param[in,out] options structure used to define the solver(s) and their parameters
-      \param[in] global_options  general options for Numerics (verbose mode ...)
       \return info termination value
       - 0 : successful\n
       - >0 : otherwise see each solver for more information about the log info
       \todo Sizing the regularization parameter and apply it only on null diagnal term
       \author Vincent Acary
   */
-  int mlcp_driver(MixedLinearComplementarityProblem* problem, double *z, double *w, SolverOptions* options, NumericsOptions* global_options);
+  int mlcp_driver(MixedLinearComplementarityProblem* problem, double *z, double *w, SolverOptions* options);
 
   /** General interface to solver for linear system
       \param[in] problem the LinearSystemProblem structure which handles the problem (M,q)
@@ -91,10 +90,9 @@ extern "C"
    *  \param[in,out] reaction global vector (n)
    *  \param[in,out] velocity global vector (n)
    *  \param[in,out] options structure used to define the solver(s) and their parameters
-   *  \param[in] global_options for Numerics (verbose mode ...)
    *  \return result (0 if successful otherwise 1).
    */
-  int fc2d_driver(FrictionContactProblem* problem, double *reaction , double *velocity, SolverOptions* options, NumericsOptions* global_options);
+  int fc2d_driver(FrictionContactProblem* problem, double *reaction , double *velocity, SolverOptions* options);
 
 
   /** General interface to solvers for friction-contact 3D problem
@@ -102,63 +100,57 @@ extern "C"
    *  \param[in,out] reaction global vector (n)
    *  \param[in,out] velocity global vector (n)
    *  \param[in,out] options structure used to define the solver(s) and their parameters
-   *  \param[in] global_options for Numerics (verbose mode ...)
    *  \return result (0 if successful otherwise 1).
    */
-  int fc3d_driver(FrictionContactProblem* problem, double *reaction , double *velocity, SolverOptions* options, NumericsOptions* global_options);
+  int fc3d_driver(FrictionContactProblem* problem, double *reaction , double *velocity, SolverOptions* options);
 
  /** General interface to solvers for friction-contact 3D problem
    *  \param[in] problem the structure which handles the Friction-Contact problem
    *  \param[in,out] x global vector (n)
    *  \param[in,out] w global vector (n)
    *  \param[in,out] options structure used to define the solver(s) and their parameters
-   *  \param[in] global_options for Numerics (verbose mode ...)
    *  \return result (0 if successful otherwise 1).
    */
-  int variationalInequality_driver(VariationalInequality* problem, double *x , double *w, SolverOptions* options, NumericsOptions* global_options);
+  int variationalInequality_driver(VariationalInequality* problem, double *x , double *w, SolverOptions* options);
 
   /** General interface to solvers for Affine Variational Inequalities (AVI)
     \param[in] problem the AffineVariationalInequalities structure which handles the problem (M,q)
     \param[in,out] sol a n-vector of doubles which contains the solution of the problem.
     \param[in,out] value a n-vector of doubles which contains the solution of the problem.
     \param[in,out] options structure used to define the solver(s) and their parameters
-    \param[in]  global_options the global options of Numerics
     \return info termination value
     - 0 : successful\n
     - >0 : otherwise see each solver for more information about the log info
     \author Olivier Huber
   */
-  int avi_driver(AffineVariationalInequalities* problem, double *sol, double *value, SolverOptions* options,  NumericsOptions* global_options);
+  int avi_driver(AffineVariationalInequalities* problem, double *sol, double *value, SolverOptions* options);
 
   /** General interface to solver for MCP problems
       \param[in] problem the MixedComplementarityProblem structure which handles the problem
       \param[in,out] z a m+n-vector of doubles which contains the solution of the problem.
       \param[in,out] w a m+n-vector of doubles which contains the solution of the problem.
       \param[in,out] options structure used to define the solver(s) and its(their) parameters
-      \param[in] global_options  general options for Numerics (verbose mode ...)
       \return info termination value  0 : successful, else error.\n
   */
-  int mcp_driver(MixedComplementarityProblem* problem, double *z, double *w, SolverOptions* options, NumericsOptions* global_options);
+  int mcp_driver(MixedComplementarityProblem* problem, double *z, double *w, SolverOptions* options);
 
   /** General interface to solver for MCP problems -- new version
       \param[in] problem the MixedComplementarityProblem2 structure which handles the problem
       \param[in,out] z a m+n-vector of doubles which contains the solution of the problem.
       \param[in,out] w a m+n-vector of doubles which contains the solution of the problem.
       \param[in,out] options structure used to define the solver(s) and its(their) parameters
-      \param[in] global_options  general options for Numerics (verbose mode ...)
       \return info termination value  0 : successful, else error.\n
   */
-  int mcp_driver2(MixedComplementarityProblem2* problem, double *z, double *w, SolverOptions* options, NumericsOptions* global_options);
+  int mcp_driver2(MixedComplementarityProblem2* problem, double *z, double *w, SolverOptions* options);
 
   /** General interface to solver for NCP problems
       \param[in] problem the NonlinearComplementarityProblem structure which handles the problem
       \param[in,out] z a n-vector of doubles which contains the solution of the problem.
       \param[in,out] F a n-vector of doubles which contains value of the function evaluated at the solution of the problem.
       \param[in,out] options structure used to define the solver(s) and its(their) parameters
-      \param[in] global_options  general options for Numerics (verbose mode ...)
       \return info termination value  0 : successful, else error
   */
-  int ncp_driver(NCP_struct* problem, double *z , double *F, SolverOptions* options,  NumericsOptions* global_options);
+  int ncp_driver(NCP_struct* problem, double *z , double *F, SolverOptions* options);
 
   /** LMGC interface to solvers for friction-contact 3D problem
    *  \param[in,out] reaction global vector (nc*3)

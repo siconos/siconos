@@ -25,6 +25,8 @@
 #include "LCP_Solvers.h"
 #include "SiconosLapack.h"
 #include "lcp_enum.h"
+#include "misc.h"
+
 static unsigned long  int sCurrentEnum = 0;
 static unsigned long  int sCmpEnum = 0;
 static unsigned long  int sNbCase = 0;

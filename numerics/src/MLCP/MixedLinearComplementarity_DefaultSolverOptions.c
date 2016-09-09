@@ -20,10 +20,9 @@
 #include <string.h>
 #include <time.h>
 #include <float.h>
-#include "NumericsOptions.h"
 #include "MLCP_Solvers.h"
 #include "NonSmoothDrivers.h"
-
+#include "misc.h"
 
 
 void  mixedLinearComplementarity_default_setDefaultSolverOptions(MixedLinearComplementarityProblem* problem, SolverOptions* pOptions)

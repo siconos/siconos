@@ -20,9 +20,11 @@
 #include <string.h>
 #include <time.h>
 
-#include "NumericsOptions.h"
 #include "fc2d_Solvers.h"
 #include "NonSmoothDrivers.h"
+#include "misc.h"
+
+
 char *  SICONOS_FRICTION_2D_NSGS_STR  = "F2D_NSGS";
 char *  SICONOS_FRICTION_2D_PGS_STR  = "F2D_PGS";
 char *  SICONOS_FRICTION_2D_CPG_STR  = "F2D_CPG";
@@ -39,7 +41,7 @@ static int fccounter = 0;
 #endif
 
 
-int fc2d_driver(FrictionContactProblem* problem, double *reaction , double *velocity, SolverOptions* options, NumericsOptions* global_options)
+int fc2d_driver(FrictionContactProblem* problem, double *reaction , double *velocity, SolverOptions* options)
 {
 
 #ifdef DUMP_PROBLEM
@@ -52,11 +54,8 @@ int fc2d_driver(FrictionContactProblem* problem, double *reaction , double *velo
   fclose(foutput);
 #endif
 
-  if (options == NULL || global_options == NULL)
-    numericsError("fc2d_driver", "null input for solver and/or global options");
-
-  /* Set global options */
-  setNumericsOptions(global_options);
+  if (options == NULL)
+    numericsError("fc2d_driver", "null input for solver options");
 
   /* Checks inputs */
   if (problem == NULL || reaction == NULL || velocity == NULL)
@@ -137,7 +136,7 @@ int fc2d_driver(FrictionContactProblem* problem, double *reaction , double *velo
     {
       if (verbose)
         printf(" ========================== Call Lemke solver for Friction-Contact 2D problem ==========================\n");
-      fc2d_lexicolemke(problem, reaction, velocity, &info, options, global_options);
+      fc2d_lexicolemke(problem, reaction, velocity, &info, options);
       break;
     }
     /****** Enum algorithm ******/
@@ -145,7 +144,7 @@ int fc2d_driver(FrictionContactProblem* problem, double *reaction , double *velo
     {
       if (verbose)
         printf(" ========================== Call Enumerative solver for Friction-Contact 2D problem ==========================\n");
-      fc2d_enum(problem, reaction, velocity, &info, options, global_options);
+      fc2d_enum(problem, reaction, velocity, &info, options);
       break;
     }
     /*error */

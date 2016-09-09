@@ -20,12 +20,11 @@
 #include <string.h>
 #include <time.h>
 #include <float.h>
-
-#include "NumericsOptions.h"
 #include "gfc3d_Solvers.h"
 #include "fc3d_Solvers.h"
 #include "NonSmoothDrivers.h"
 
+#include "misc.h"
 
 int gfc3d_setDefaultSolverOptions(SolverOptions* options, int solverId)
 {

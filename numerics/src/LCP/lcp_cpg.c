@@ -22,6 +22,7 @@
 #include <float.h>
 #include "SiconosBlas.h"
 #include "LCP_Solvers.h"
+#include "misc.h"
 
 void lcp_cpg(LinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options)
 {

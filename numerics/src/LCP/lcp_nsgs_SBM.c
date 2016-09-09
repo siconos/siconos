@@ -29,7 +29,7 @@
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES 1 */
 #include "debug.h"
-
+#include "misc.h"
 void lcp_nsgs_SBM_buildLocalProblem(int rowNumber, const SparseBlockStructuredMatrix* const blmat, LinearComplementarityProblem* local_problem, double* q, double* z)
 {
 

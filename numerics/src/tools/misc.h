@@ -23,14 +23,16 @@
 #include <stdint.h>
 #include <stddef.h>
 
+
+
+/* Verbose mode */
+extern int verbose;
+
+
 #if defined(__cplusplus) && !defined (BUILD_AS_CPP)
 extern "C"
 {
 #endif
-
-/** print a dense matrix or vector
- */
-void printm(unsigned int nl, unsigned int nc, double *m);
 
 /** Check return code of an expression. */
 #define CHECK_RETURN(EXPR)                                              \
@@ -112,6 +114,31 @@ void printm(unsigned int nl, unsigned int nc, double *m);
 #define WARN_RESULT_IGNORED
 #endif
 
+
+  /* Set verbose mode in numerics
+     \param newVerboseMode 0 no verbose, 1 verbose.
+  */
+  void setNumericsVerbose(int newVerboseMode);
+  
+  /* message output and exit with error
+     \param functionName name of the function where error occurs
+     \param message output message
+  */
+  void numericsError(char* functionName, char* message) NO_RETURN;
+
+  /* message output without exit
+     \param functionName name of the function where warning occurs
+     \param message output message
+  */
+  void numericsWarning(char* functionName, char* message);
+
+  /** print a dense matrix or vector
+   */
+  void printm(unsigned int nl, unsigned int nc, double *m);
+
+
+
+  
 #if defined(__cplusplus) && !defined (BUILD_AS_CPP)
 }
 #endif

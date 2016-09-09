@@ -43,7 +43,6 @@ For each solver, the input argument are:
 
 */
 #include "GlobalFrictionContactProblem.h"
-#include "NumericsOptions.h"
 #include "SolverOptions.h"
 #include "Friction_cst.h"
 #include "gfc3d_nonsmooth_Newton_AlartCurnier.h"
@@ -66,12 +65,11 @@ extern "C"
     \param[in,out] velocity global vector (n)
     \param[in,out] globalVelocity global vector
     \param[in,out] options structure used to define the solver(s) and their parameters
-    \param[in] global_options general options for Numerics (verbose mode ...)
     \return result (0 if successful otherwise 1).
   */
   int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction ,
                                      double *velocity, double* globalVelocity,
-                                     SolverOptions* options, NumericsOptions* global_options);
+                                     SolverOptions* options);
 
   /** set the default solver parameters and perform memory allocation for gfc3d
       \param options the pointer to the array of options to set

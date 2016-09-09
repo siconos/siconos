@@ -27,7 +27,7 @@
 #endif
 
 #include "fc2d_compute_error.h"
-
+#include "misc.h"
 
 #define SGN(x) ((x) < 0 ? -1 : (x) > 0 ? 1 : 0)
 

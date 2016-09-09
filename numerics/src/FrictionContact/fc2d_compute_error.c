@@ -16,14 +16,12 @@
  * limitations under the License.
 */
 
-
-#include "NumericsOptions.h" // for global options
-
 #include "fc2d_compute_error.h"
 
 #include "FrictionContactProblem.h"
 #include "SiconosBlas.h"
 #include <math.h>
+#include "misc.h"
 
 #define SGN(x) ((x) < 0 ? -1 : (x) > 0 ? 1 : 0)
 

@@ -22,7 +22,7 @@
 #include <math.h>
 #include "LCP_Solvers.h"
 #include "QP_Solvers.h"
-
+#include "misc.h"
 #include "sanitizer.h"
 
 void lcp_qp(LinearComplementarityProblem* problem, double *z, double *w, int *info , SolverOptions* options)

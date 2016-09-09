@@ -27,6 +27,8 @@
 #include "pinv.h"
 #include "Friction_cst.h"
 #include "SiconosBlas.h"
+#include "misc.h"
+
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 
 void fc3d_nsgs_initialize_local_solver_velocity(SolverPtr* solve, FreeSolverPtr* freeSolver, ComputeErrorPtr* computeError, FrictionContactProblem* problem, FrictionContactProblem* localproblem, SolverOptions* localsolver_options)

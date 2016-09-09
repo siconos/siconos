@@ -19,7 +19,6 @@
 
 #include "NumericsMatrix_private.h"
 #include "NumericsMatrix.h"
-#include "NumericsOptions.h"
 
 #include "debug.h"
 #include "misc.h"

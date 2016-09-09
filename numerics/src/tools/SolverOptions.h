@@ -26,7 +26,6 @@
   \author Franck Perignon
 */
 #include "SiconosConfig.h"
-#include "NumericsOptions.h"
 
 /** \struct Callback SolverOptions.h
 Structure used to store user callbacks inside solvers
@@ -61,7 +60,6 @@ typedef struct _SolverOptions
   int * iWork;                             /**< iWork is a pointer on a working memory zone (for integers) reserved for the solver .*/
   int numberOfInternalSolvers;             /**< numberOfInternalSolvers the number of internal or local 'sub-solvers' used by the solver*/
   struct _SolverOptions * internalSolvers; /**< internalSolvers pointer to sub-solvers*/
-  NumericsOptions * numericsOptions;       /**< numericsOptions global options for numerics (verbose mode ...)*/
   Callback * callback;                     /**< callback a pointer to user Callback*/
 
   void * solverParameters;                 /**< additional parameters specific to the solver */
@@ -211,7 +209,7 @@ extern "C"
    * \param id the id of the problem
    * \return the name of the problem
    */
-  char * solver_options_id_to_char(int id);
+  char * ns_problem_id_to_name(int id);
 
   /** free the solverData structure
    * \param options the structure to free

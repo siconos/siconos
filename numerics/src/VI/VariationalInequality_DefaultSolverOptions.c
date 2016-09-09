@@ -20,10 +20,9 @@
 #include <string.h>
 #include <time.h>
 #include <float.h>
-
-#include "NumericsOptions.h"
 #include "VariationalInequality_Solvers.h"
 #include "NonSmoothDrivers.h"
+#include "misc.h"
 
 int variationalInequality_setDefaultSolverOptions(SolverOptions* options, int solverId)
 {

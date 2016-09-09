@@ -20,7 +20,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
-
 #include "mlcp_cst.h"
 #include "MCP_cst.h"
 #include "NCP_cst.h"
@@ -56,7 +55,7 @@ char * SICONOS_NUMERICS_PROBLEM_AVI_STR = "AVI";
 
 static void recursive_solver_options_print(SolverOptions* options, int level);
 
-char * solver_options_id_to_char(int id)
+char * ns_problem_id_to_name(int id)
 {
   switch (id)
   {
@@ -97,7 +96,7 @@ char * solver_options_id_to_char(int id)
     return SICONOS_NUMERICS_PROBLEM_AVI_STR;
   }
   default:
-    printf("Numerics:solver_options_id_to_char, id unknown : %d \n", id);
+    printf("Numerics:ns_problem_id_to_name, id unknown : %d \n", id);
     return NULL;
   }
 
@@ -344,7 +343,6 @@ void solver_options_nullify(SolverOptions* options)
   options->dWork = NULL;
   options->iWork = NULL;
   options->callback = NULL;
-  options->numericsOptions = NULL;
   options->internalSolvers = NULL;
   options->solverData = NULL;
   options->solverParameters = NULL;
@@ -425,8 +423,6 @@ void solver_options_copy(SolverOptions* options_ori, SolverOptions* options)
   // Warning pointer link
   if (options_ori->callback)
     options->callback =options_ori->callback;
-  if (options_ori->numericsOptions)
-    options->numericsOptions =options_ori->numericsOptions;
   if (options_ori->solverParameters)
     options->solverParameters =options_ori->solverParameters;
    if (options_ori->solverData)
@@ -622,11 +618,11 @@ SICONOS_REGISTER_SOLVERS()
     return SICONOS_NONAME_STR;
   }
 }
+
 int solver_options_name_to_id(char * pName)
 {
 #undef SICONOS_SOLVER_MACRO
 #define SICONOS_SOLVER_MACRO(X) if (strcmp(X ## _STR, pName) == 0) return X;
 SICONOS_REGISTER_SOLVERS()
   return 0;
-
 }

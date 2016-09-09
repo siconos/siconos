@@ -52,10 +52,9 @@ extern "C"
      option->iparam[2]:0 GS block after block, 1 eliminate the equalities, 2 only one equality block, 3 solve the GMP as a MLCP.
      option->iparam[3]: output, number of GS it.
      options->dparam[0]: tolerance
-  \param [in] numerics_options options for display
   \return result (0 if successful otherwise 1).
   */
-  int genericMechanical_driver(GenericMechanicalProblem* problem, double *reaction , double *velocity, SolverOptions* options, NumericsOptions* numerics_options);
+  int genericMechanical_driver(GenericMechanicalProblem* problem, double *reaction , double *velocity, SolverOptions* options);
   /* Build an empty GenericMechanicalProblem
      \return a pointer on the built GenericMechanicalProblem.
    */
@@ -111,7 +110,7 @@ extern "C"
   /*
    *Containing the Gauss-Seidel algorithm.
    */
-  void genericMechanicalProblem_GS(GenericMechanicalProblem* pGMP, double * reaction, double * velocity, int * info, SolverOptions* options, NumericsOptions* numerics_options);
+  void genericMechanicalProblem_GS(GenericMechanicalProblem* pGMP, double * reaction, double * velocity, int * info, SolverOptions* options);
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif

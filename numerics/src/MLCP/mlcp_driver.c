@@ -27,6 +27,7 @@
 #include "NonSmoothDrivers.h"
 #endif
 #include "mlcp_cst.h"
+#include "misc.h"
 
 char*  SICONOS_NONAME_STR = "NONAME";
 char*  SICONOS_MLCP_PGS_STR = "MLCP_PGS";
@@ -53,6 +54,7 @@ int mlcp_alloc_working_memory(MixedLinearComplementarityProblem* problem, Solver
   case SICONOS_MLCP_ENUM :
     return mlcp_enum_alloc_working_memory(problem, options);
   default:
+
     return 0;/*Nothing to do*/
   }
 }
@@ -209,16 +211,12 @@ int mlcp_driver_get_dwork(MixedLinearComplementarityProblem* problem, SolverOpti
   /* return 0; */
 }
 
-int mlcp_driver(MixedLinearComplementarityProblem* problem, double *z, double *w, SolverOptions* options, NumericsOptions* global_options)
+int mlcp_driver(MixedLinearComplementarityProblem* problem, double *z, double *w, SolverOptions* options)
 {
 
 
   if (options == NULL)
     numericsError("mlcp_driver ", "null input for solver options.\n");
-
-  /* Set global options */
-  if (global_options)
-    setNumericsOptions(global_options);
 
   /* Checks inputs */
   if (problem == NULL || z == NULL || w == NULL)

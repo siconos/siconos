@@ -21,6 +21,7 @@
 //#define DEBUG_MESSAGES
 #include "debug.h"
 #include "float.h"
+#include "misc.h"
 #include <assert.h>
 
 #include "SiconosBlas.h"

@@ -32,8 +32,6 @@
 #include "NonSmoothLaw.hpp"
 #include "Simulation.hpp"
 
-#include <NumericsOptions.h>
-
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
 #include "debug.h"
@@ -46,10 +44,6 @@ OneStepNSProblem::OneStepNSProblem():
   _numerics_solver_options.reset(new SolverOptions);
   _numerics_solver_options->iWork = NULL;   _numerics_solver_options->callback = NULL;
   _numerics_solver_options->dWork = NULL;
-  // Numerics general options
-  _numerics_options.reset(new NumericsOptions());
-  setDefaultNumericsOptions(&*_numerics_options);
-  _numerics_options->verboseMode = 0; // turn verbose mode to off by default
 }
 // --- CONSTRUCTORS/DESTRUCTOR ---
 
@@ -59,11 +53,6 @@ OneStepNSProblem::OneStepNSProblem(int numericsSolverId):
   _numerics_solver_id(numericsSolverId), _sizeOutput(0),
   _indexSetLevel(0), _inputOutputLevel(0), _maxSize(0), _nbIter(0), _hasBeenUpdated(false)
 {
-
-  // Numerics general options
-  _numerics_options.reset(new NumericsOptions());
-  setDefaultNumericsOptions(&*_numerics_options);
-  _numerics_options->verboseMode = 0; // turn verbose mode to off by default
 
   _numerics_solver_options.reset(new SolverOptions);
   _numerics_solver_options->iWork = NULL;   _numerics_solver_options->callback = NULL;

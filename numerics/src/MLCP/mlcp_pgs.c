@@ -23,6 +23,7 @@
 #include <math.h>
 #include <float.h>
 #include "SiconosBlas.h"
+#include "misc.h"
 /*
  *
  * double *z : size n+m

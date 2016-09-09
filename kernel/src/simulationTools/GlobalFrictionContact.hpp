@@ -28,7 +28,7 @@
 #include "Friction_cst.h"
 
 /** Pointer to function of the type used for drivers for GlobalFrictionContact problems in Numerics */
-typedef int (*GFC3D_Driver)(GlobalFrictionContactProblem*, double*, double*, double*, SolverOptions*, NumericsOptions*);
+typedef int (*GFC3D_Driver)(GlobalFrictionContactProblem*, double*, double*, double*, SolverOptions*);
 TYPEDEF_SPTR(GlobalFrictionContactProblem)
 
 /** Formalization and Resolution of a Friction-Contact Problem

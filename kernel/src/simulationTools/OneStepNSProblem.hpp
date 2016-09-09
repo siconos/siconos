@@ -65,10 +65,8 @@
 
    \section osns_options Options for Numerics and the driver for solvers
 
-   When the Numerics driver is called, two input arguments are
-   required to set specific options:
-   - the global Numerics options (verbose mode ...) --> NumericsOptions
-   - the solver options (name, tolerance, max. number of iterations ...) --> _SolverOptions, \ref NumericsSolver.
+   When the Numerics driver is called a set of solver options (name, tolerance, max. number of iterations ...)
+   is required --> _SolverOptions, \ref NumericsSolver.
 
    Default values are always set in solver options the OneStepNSProblem is built
    but if you need to set them yourself, please see \ref NumericsSolver. 
@@ -113,10 +111,6 @@ protected:
   /** Number of calls to the solver */
   unsigned int _nbIter;
 
-  /** Numerics (C) structure used to define global options for
-      Numerics functions calls */
-  SP::NumericsOptions _numerics_options;
-
   /*During Newton it, this flag allows to update the numerics matrices only once if necessary.*/
   bool _hasBeenUpdated;
 
@@ -156,14 +150,6 @@ public:
   inline SP::SolverOptions numericsSolverOptions() const
   {
     return _numerics_solver_options;
-  };
-
-  /** To get the NumericsOptions structure
-   *  \return , the numerics structure used to save solver parameters
-   */
-  inline SP::NumericsOptions numericsOptions() const
-  {
-    return _numerics_options;
   };
 
   /** get dimension of the problem

@@ -23,7 +23,6 @@
 #include <assert.h>
 
 #include "SiconosLapack.h"
-#include "NumericsOptions.h"
 #include "gfc3d_Solvers.h"
 #include "NonSmoothDrivers.h"
 #include "fc3d_Solvers.h"
@@ -32,7 +31,7 @@
 #include <string.h>
 
 #include "sanitizer.h"
-
+#include "misc.h"
 //#define TEST_COND
 //#define OUTPUT_DEBUG
 extern int *Global_ipiv;

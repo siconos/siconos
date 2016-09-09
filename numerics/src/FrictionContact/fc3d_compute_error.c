@@ -17,7 +17,6 @@
 */
 
 
-#include "NumericsOptions.h" // for global options
 #include "FrictionContactProblem.h"
 #include "SolverOptions.h"
 #include "fc3d_compute_error.h"
@@ -32,6 +31,7 @@
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
 #include "debug.h"
+#include "misc.h"
 void fc3d_unitary_compute_and_add_error(double* restrict r , double* restrict u, double mu, double* restrict error, double * worktmp)
 {
 

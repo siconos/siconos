@@ -29,6 +29,7 @@
 #include <float.h>
 
 #include "sanitizer.h"
+#include "misc.h"
 
 /* Static variables */
 

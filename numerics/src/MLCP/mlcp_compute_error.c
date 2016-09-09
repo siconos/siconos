@@ -22,6 +22,7 @@
 #include <string.h>
 #include <math.h>
 #include "SiconosBlas.h"
+#include "misc.h"
 
 /*
  * (input) double *z : size n+m

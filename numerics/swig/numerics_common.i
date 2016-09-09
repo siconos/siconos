@@ -1,24 +1,5 @@
 
 %include "SolverOptions.h"
-%include "NumericsOptions.h"
-
-
-
-%extend NumericsOptions
-{
-  NumericsOptions()
-  {
-    NumericsOptions *numerics_options;
-    numerics_options = (NumericsOptions *) malloc(sizeof(NumericsOptions));
-    setDefaultNumericsOptions(numerics_options);
-    return numerics_options;
-  }
-
-  ~NumericsOptions()
-  {
-    free($self);
-  }
-}
 
 %extend _SolverOptions
 {

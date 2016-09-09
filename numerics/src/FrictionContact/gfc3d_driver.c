@@ -21,10 +21,10 @@
 #include <time.h>
 #include <float.h>
 #include <assert.h>
-
-#include "NumericsOptions.h"
 #include "SiconosConfig.h"
 #include "gfc3d_Solvers.h"
+#include "misc.h"
+
 int * Global_ipiv = NULL;
 int  Global_MisInverse = 0;
 int  Global_MisLU = 0;
@@ -41,12 +41,8 @@ char * SICONOS_GLOBAL_FRICTION_3D_GAMS_PATH_STR = "GFC3D_GAMS_PATH";
 char * SICONOS_GLOBAL_FRICTION_3D_GAMS_PATHVI_STR = "GFC3D_GAMS_PATHVI";
 
 
-int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity,  SolverOptions* options, NumericsOptions* global_options)
+int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity,  SolverOptions* options)
 {
-
-  /* Set global options */
-  setNumericsOptions(global_options);
-
   /* If the options for solver have not been set, read default values in .opt file */
   int NoDefaultOptions = options->isSet; /* true(1) if the SolverOptions structure has been filled in else false(0) */
 

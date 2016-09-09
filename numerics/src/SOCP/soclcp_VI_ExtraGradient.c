@@ -28,6 +28,7 @@
 #include "soclcp_compute_error.h"
 
 #include "SolverOptions.h"
+#include "misc.h"
 
 
 

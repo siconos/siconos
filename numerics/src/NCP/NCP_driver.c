@@ -28,13 +28,9 @@ char SICONOS_NCP_NEWTON_MINFBLSA_STR[] = "NCP Newton minFBLSA";
 char SICONOS_NCP_PATHSEARCH_STR[] = "NCP Path search";
 char SICONOS_NCP_PATH_STR[] = "NCP PATH";
 
-int ncp_driver(NCP_struct* problem, double *z , double *F, SolverOptions* options,  NumericsOptions* global_options)
+int ncp_driver(NCP_struct* problem, double *z , double *F, SolverOptions* options)
 {
   assert(options && "ncp_driver null input for solver options.\n");
-
-  /* Set global options */
-  if (global_options)
-    setNumericsOptions(global_options);
 
   /* Checks inputs */
   assert(problem && z && F && "ncp_driver null input for MixedComplementarityProblem and/or unknowns (z,w)");

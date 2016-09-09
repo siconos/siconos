@@ -20,9 +20,9 @@
 #include <string.h>
 #include <time.h>
 #include <float.h>
-#include "NumericsOptions.h"
 #include "LCP_Solvers.h"
 #include "NonSmoothDrivers.h"
+#include "misc.h"
 
 int linearComplementarity_setDefaultSolverOptions(LinearComplementarityProblem* problem, SolverOptions* options, int solverId)
 {

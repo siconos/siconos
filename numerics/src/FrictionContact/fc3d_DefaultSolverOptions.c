@@ -21,7 +21,6 @@
 #include <time.h>
 #include <float.h>
 
-#include "NumericsOptions.h"
 #include "fc3d_Solvers.h"
 #include "NonSmoothDrivers.h"
 

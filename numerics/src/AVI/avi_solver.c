@@ -16,23 +16,16 @@
  * limitations under the License.
 */
 
-#include "NumericsOptions.h"
 #include "NonSmoothDrivers.h"
 
 #include "AVI_Solvers.h"
+#include "misc.h"
 
 char *  SICONOS_AVI_CAOFERRIS_STR = "AVI from Cao & Ferris";
 
-int avi_driver(AffineVariationalInequalities* problem, double *z , double *w, SolverOptions* options,  NumericsOptions* global_options)
+int avi_driver(AffineVariationalInequalities* problem, double *z , double *w, SolverOptions* options)
 {
   assert(options && "avi_driver : null input for solver options");
-
-  /* Set global options */
-  if (global_options)
-  {
-    setNumericsOptions(global_options);
-  }
-
   /* Checks inputs */
   assert(problem && z && w &&
       "avi_driver : input for LinearComplementarityProblem and/or unknowns (z,w)");

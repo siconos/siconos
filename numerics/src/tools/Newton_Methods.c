@@ -23,7 +23,7 @@
 #include <string.h>
 #include <math.h>
 #include <float.h>
-
+#include "misc.h"
 #include "SiconosLapack.h"
 #include "ArmijoSearch.h"
 

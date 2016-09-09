@@ -22,7 +22,6 @@
 #include <float.h>
 #include <math.h>
 
-#include "NumericsOptions.h"
 #include "GenericMechanical_Solvers.h"
 #include "GenericMechanical_cst.h"
 #include "NonSmoothDrivers.h"
@@ -30,6 +29,7 @@
 #include "fc3d_unitary_enumerative.h"
 #include "GMPReduced.h"
 #include "SiconosBlas.h"
+#include "misc.h"
 
 /* #define GENERICMECHANICAL_DEBUG  */
 /* #define GENERICMECHANICAL_DEBUG2  */
@@ -203,7 +203,7 @@ static int SScmpTotal = 0;
 //#define GMP_WRITE_PRB
 //static double sCoefLS=1.0;
 void genericMechanicalProblem_GS(GenericMechanicalProblem* pGMP, double * reaction, double * velocity, int * info,
-    SolverOptions* options, NumericsOptions* numerics_options)
+				 SolverOptions* options)
 {
 #ifdef GMP_WRITE_PRB
   FILE * toto1  = fopen("GMP_CURRENT.txt", "w");
@@ -322,7 +322,7 @@ void genericMechanicalProblem_GS(GenericMechanicalProblem* pGMP, double * reacti
         }
         else
           SBM_row_prod_no_diag(pGMP->size, curSize, currentRowNumber, m, reaction, lcpProblem->q, 0);
-        resLocalSolver = linearComplementarity_driver(lcpProblem, sol, w, options->internalSolvers, 0);
+        resLocalSolver = linearComplementarity_driver(lcpProblem, sol, w, options->internalSolvers);
 
         break;
       }
@@ -347,7 +347,7 @@ void genericMechanicalProblem_GS(GenericMechanicalProblem* pGMP, double * reacti
         DEBUG_EXPR_WE(for (int i =0 ; i < 3; i++)  printf("reaction[%i]= %12.8e,\t fcProblem->q[%i]= %12.8e,\n",i,reaction[i],i,fcProblem->q[i]););
 
         /* We call the generic driver (rather than the specific) since we may choose between various local solvers */
-        resLocalSolver = fc3d_driver(fcProblem, sol, w, &options->internalSolvers[1], numerics_options);
+        resLocalSolver = fc3d_driver(fcProblem, sol, w, &options->internalSolvers[1]);
         //resLocalSolver=fc3d_unitary_enumerative_solve(fcProblem,sol,&options->internalSolvers[1]);
         break;
       }
@@ -460,7 +460,7 @@ void genericMechanicalProblem_GS(GenericMechanicalProblem* pGMP, double * reacti
  * options->iparam[2] == 3 Try to solve like a MLCP (==> No FC3d)
  */
 int genericMechanical_driver(GenericMechanicalProblem* problem, double *reaction , double *velocity,
-                             SolverOptions* options, NumericsOptions* numerics_options)
+                             SolverOptions* options)
 {
   // if (options == NULL )
   //  numericsError("fc3d_driver", "null input for solver options");
@@ -474,15 +474,15 @@ int genericMechanical_driver(GenericMechanicalProblem* problem, double *reaction
     );
   if (!options->iparam[2])
   {
-    genericMechanicalProblem_GS(problem, reaction, velocity, &info, options, numerics_options);
+    genericMechanicalProblem_GS(problem, reaction, velocity, &info, options);
   }
   else if (options->iparam[2] == 1)
   {
-    GMPReducedSolve(problem, reaction, velocity, &info, options, numerics_options);
+    GMPReducedSolve(problem, reaction, velocity, &info, options);
   }
   else if (options->iparam[2] == 2)
   {
-    GMPReducedEqualitySolve(problem, reaction, velocity, &info, options, numerics_options);
+    GMPReducedEqualitySolve(problem, reaction, velocity, &info, options);
   }
   else if (options->iparam[2] == 3)
   {

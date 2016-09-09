@@ -27,11 +27,11 @@
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 
 #include "fc3d_Solvers.h"
-#include "NumericsOptions.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
 #include "SiconosBlas.h"
+#include "misc.h"
 
 /*Static variables */
 

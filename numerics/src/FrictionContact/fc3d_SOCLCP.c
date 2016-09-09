@@ -32,7 +32,7 @@
 #define DEBUG_MESSAGES
 #define DEBUG_STDOUT
 #include "debug.h"
-
+#include "misc.h"
 
 
 /** pointer to function used to call internal solver for proximal point solver */

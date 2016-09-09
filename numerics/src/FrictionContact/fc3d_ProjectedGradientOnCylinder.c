@@ -24,6 +24,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include "Friction_cst.h"
+#include "misc.h"
 
 //#define VERBOSE_DEBUG
 

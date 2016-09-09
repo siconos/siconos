@@ -17,14 +17,13 @@
 */
 #include "NonSmoothNewton.h"
 #include "fc3d_NCPGlockerFixedPoint.h"
-#include "NumericsOptions.h"
 #include "SiconosBlas.h"
 #include "fc3d_2NCP_Glocker.h"
 #include "math.h"
 #include "stdio.h"
 #include "stdlib.h"
 #include "NCP_FixedP.h"
-
+#include "misc.h"
 
 
 /*============================ Fixed point Solver ==================================*/

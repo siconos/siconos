@@ -22,6 +22,7 @@
 #include <math.h>
 #include <float.h>
 #include "LCP_Solvers.h"
+#include "misc.h"
 
 void lcp_latin(LinearComplementarityProblem* problem, double *z, double *w, int *info , SolverOptions* options)
 {

@@ -34,11 +34,6 @@ int globalFrictionContact_test_function(FILE * f, SolverOptions * options)
   FILE * foutput  =  fopen("checkinput.dat", "w");
   info = globalFrictionContact_printInFile(problem, foutput);
 
-
-  NumericsOptions global_options;
-  setDefaultNumericsOptions(&global_options);
-  global_options.verboseMode = 1; // turn verbose mode to off by default
-
   int NC = problem->numberOfContacts;
   int dim = problem->dimension;
   int n = problem->M->size1;
@@ -64,8 +59,8 @@ int globalFrictionContact_test_function(FILE * f, SolverOptions * options)
   else if (dim == 3)
   {
     info = gfc3d_driver(problem,
-                                          reaction , velocity, globalvelocity,
-                                          options, &global_options);
+			reaction , velocity, globalvelocity,
+			options);
   }
   printf("\n");
   for (k = 0 ; k < dim * NC; k++)

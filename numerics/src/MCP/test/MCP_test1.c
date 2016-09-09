@@ -76,14 +76,6 @@ int main(void)
 
   /* FB solver */
   options.solverId = SICONOS_MCP_FB;
-
-
-
-  NumericsOptions global_options;
-  setDefaultNumericsOptions(&global_options);
-  global_options.verboseMode = 1;
-
-
   /* Create a MixedComplementarityProblem */
   MixedComplementarityProblem* problem = (MixedComplementarityProblem *)malloc(sizeof(MixedComplementarityProblem));
 
@@ -114,7 +106,7 @@ int main(void)
 
   /* Initialize the solver */
   mcp_driver_init(problem, &options) ;
-  info = mcp_driver(problem, z , w,  &options, &global_options);
+  info = mcp_driver(problem, z , w,  &options);
   mcp_driver_reset(problem, &options) ;
   /// TODO : write a real test ... ////
 

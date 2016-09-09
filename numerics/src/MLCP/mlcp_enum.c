@@ -35,6 +35,8 @@ dim(v)=nn
 #include "mlcp_enum.h"
 #include "mlcp_enum_tool.h"
 #include "SiconosLapack.h"
+#include "misc.h"
+
 //#ifdef HAVE_DGELS
 //#define ENUM_USE_DGELS
 //#endif

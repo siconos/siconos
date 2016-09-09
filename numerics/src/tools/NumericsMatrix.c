@@ -27,7 +27,6 @@
 #include "NumericsMatrix_private.h"
 #include "NM_conversions.h"
 #include "SiconosLapack.h"
-#include "NumericsOptions.h"
 #include "misc.h"
 #include "sanitizer.h"
 //#define DEBUG_MESSAGES

@@ -17,7 +17,6 @@
 */
 
 
-#include "NumericsOptions.h" // for global options
 #include "SecondOrderConeLinearComplementarityProblem.h"
 #include "SolverOptions.h"
 #include "soclcp_compute_error.h"
@@ -25,7 +24,7 @@
 #include "projectionOnCone.h"
 #include "projectionOnCylinder.h"
 #include "SiconosLapack.h"
-
+#include "misc.h"
 #include <math.h>
 #include <assert.h>
 

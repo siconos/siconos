@@ -25,8 +25,8 @@
 #include "LCP_Solvers.h"
 #include <assert.h>
 #include "relay_cst.h"
-
-void relay_enum(RelayProblem* problem, double *z, double *w, int *info, SolverOptions* options, NumericsOptions* global_options)
+#include "misc.h"
+void relay_enum(RelayProblem* problem, double *z, double *w, int *info, SolverOptions* options)
 {
   int i;
   // conversion into LCP
@@ -50,7 +50,7 @@ void relay_enum(RelayProblem* problem, double *z, double *w, int *info, SolverOp
   options->solverId = SICONOS_LCP_ENUM;
   lcp_enum_init(lcp_problem, options, 1);
 
-  * info = linearComplementarity_driver(lcp_problem, zlcp , wlcp, options, global_options);
+  * info = linearComplementarity_driver(lcp_problem, zlcp , wlcp, options);
   if (options->filterOn > 0)
     lcp_compute_error(lcp_problem, zlcp, wlcp, options->dparam[0], &(options->dparam[1]));
 

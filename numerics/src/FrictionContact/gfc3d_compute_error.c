@@ -18,7 +18,6 @@
 
 #include "gfc3d_compute_error.h"
 
-#include "NumericsOptions.h" // for global options
 #include "GlobalFrictionContactProblem.h"
 #include "gfc3d_Solvers.h"
 #include "projectionOnCone.h"
@@ -27,6 +26,7 @@
 #include <assert.h>
 #include <float.h>
 #include "sanitizer.h"
+#include "misc.h"
 
 int gfc3d_compute_error(GlobalFrictionContactProblem* problem, double* restrict reaction , double* restrict velocity, double* restrict globalVelocity, double tolerance, double* restrict error)
 {

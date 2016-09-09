@@ -25,6 +25,7 @@
 #endif
 #include "relay_cst.h"
 #include <time.h>
+#include "misc.h"
 
 char*  SICONOS_RELAY_PGS_STR = "RELAY_PGS";
 char*  SICONOS_RELAY_PATH_STR = "RELAY_PATH";
@@ -36,17 +37,14 @@ char*  SICONOS_RELAY_AVI_CAOFERRIS_STR = "RELAY_AVI_CAOFERRIS";
 char*  SICONOS_RELAY_AVI_CAOFERRIS_TEST_STR = "test version of the solver by Cao & Ferris; DO NOT USE!";
 
 int relay_driver(RelayProblem* problem, double *z , double *w,
-                 SolverOptions* options, NumericsOptions* global_options)
+                 SolverOptions* options)
 {
 
 
   //Relay_display(problem);
 
-  if (options == NULL || global_options == NULL)
+  if (options == NULL)
     numericsError("Relay_driver", "null input for solver and/or global options");
-
-  /* Set global options */
-  setNumericsOptions(global_options);
 
   /* Checks inputs */
   if (problem == NULL || z == NULL || w == NULL)
@@ -100,12 +98,12 @@ int relay_driver(RelayProblem* problem, double *z , double *w,
     relay_printInFile(problem, FP);
     fclose(FP);
 #endif
-    relay_lexicolemke(problem, z , w , &info , options, global_options);
+    relay_lexicolemke(problem, z , w , &info , options);
     break;
   }
   case SICONOS_RELAY_ENUM:
   {
-    relay_enum(problem, z , w , &info , options, global_options);
+    relay_enum(problem, z , w , &info , options);
     break;
   }
   case SICONOS_RELAY_PATH:

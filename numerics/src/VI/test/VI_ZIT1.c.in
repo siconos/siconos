@@ -149,7 +149,7 @@ int main(void)
   while ((t <= T) && info == 0)
   {
     k++;
-    info = variationalInequality_driver(problem, z, F, &options, NULL);
+    info = variationalInequality_driver(problem, z, F, &options);
     //printf("step %d, iter = %d, error = %le\n", k, options.iparam[1], options.dparam[1]);
     if (info > 0)
     {
@@ -158,7 +158,7 @@ int main(void)
       z[0] = copysign(1.0, -xk[0]);
       z[1] = copysign(1.0, -xk[1]);
 
-      info = variationalInequality_driver(problem, z, F, &options, NULL);
+      info = variationalInequality_driver(problem, z, F, &options);
 
       if (info > 0)
       {

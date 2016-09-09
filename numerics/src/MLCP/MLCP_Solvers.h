@@ -185,7 +185,6 @@ The direct and simplex solver must be initialize: \n
 
 */
 
-#include "NumericsOptions.h"
 #include "SolverOptions.h"
 #include "MixedLinearComplementarityProblem.h"
 #include "SiconosCompat.h"
@@ -534,7 +533,7 @@ extern "C"
   int mixedLinearComplementarity_psor_setDefaultSolverOptions(MixedLinearComplementarityProblem* problem, SolverOptions* pSolver);
 
 
-  int mlcp_driver(MixedLinearComplementarityProblem* problem, double *z, double *w, SolverOptions* options, NumericsOptions* global_options);
+  int mlcp_driver(MixedLinearComplementarityProblem* problem, double *z, double *w, SolverOptions* options);
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif

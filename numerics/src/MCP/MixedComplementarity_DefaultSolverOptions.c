@@ -20,11 +20,10 @@
 #include <string.h>
 #include <time.h>
 #include <float.h>
-
-#include "NumericsOptions.h"
 #include "MCP_Solvers.h"
 #include "MCP_cst.h"
 #include "NonSmoothDrivers.h"
+#include "misc.h"
 
 void  mixedComplementarity_default_setDefaultSolverOptions(MixedComplementarityProblem* problem, SolverOptions* pOptions)
 {

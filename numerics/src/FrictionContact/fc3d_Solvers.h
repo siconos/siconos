@@ -24,7 +24,6 @@
 */
 
 #include "FrictionContactProblem.h"
-#include "NumericsOptions.h"
 #include "SolverOptions.h"
 #include "fc3d_AlartCurnier_functions.h"
 #include "fc3d_projection.h"
@@ -69,10 +68,9 @@ extern "C"
   \param[in,out] reaction global vector (n)
   \param[in,out] velocity global vector (n)
   \param[in,out] options structure used to define the solver(s) and their parameters
-  \param[in] global_options for Numerics (verbose mode ...)
   \return result (0 if successful otherwise 1).
   */
-  int fc3d_driver(FrictionContactProblem* problem, double *reaction , double *velocity, SolverOptions* options, NumericsOptions* global_options);
+  int fc3d_driver(FrictionContactProblem* problem, double *reaction , double *velocity, SolverOptions* options);
 
   /** set the default solver parameters and perform memory allocation for fc3d
       \param options the pointer to the options to set

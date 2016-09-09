@@ -27,6 +27,7 @@
 //#define DEBUG_MESSAGES */
 #include "debug.h"
 #include <math.h>
+#include "misc.h"
 
 void fc3d_proximal(FrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options)
 {

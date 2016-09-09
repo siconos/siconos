@@ -34,7 +34,6 @@ For each solver, the input argument are:
 */
 
 #include "VariationalInequality.h"
-#include "NumericsOptions.h"
 #include "SolverOptions.h"
 #include "VI_cst.h"
 #include "SiconosCompat.h"
@@ -49,10 +48,9 @@ extern "C"
   \param[in,out] x global vector (n)
   \param[in,out] w global vector (n)
   \param[in,out] options structure used to define the solver(s) and their parameters
-  \param[in] global_options for Numerics (verbose mode ...)
   \return result (0 if successful otherwise 1).
   */
-  int variationalInequality_driver(VariationalInequality* problem, double *x , double *w, SolverOptions* options, NumericsOptions* global_options);
+  int variationalInequality_driver(VariationalInequality* problem, double *x , double *w, SolverOptions* options);
 
   /** set the default solver parameters and perform memory allocation for VariationalInequality
       \param options the pointer to the options to set

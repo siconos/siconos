@@ -23,7 +23,7 @@
 #include <math.h>
 #include <float.h>
 #include "LCP_Solvers.h"
-
+#include "misc.h"
 #define EPSDIAG DBL_EPSILON
 void lcp_rpgs(LinearComplementarityProblem* problem, double *z, double *w, int *info , SolverOptions* options)
 {

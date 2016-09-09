@@ -28,7 +28,7 @@
 #include "fc3d_compute_error.h"
 
 #include "SolverOptions.h"
-
+#include "misc.h"
 
 
 

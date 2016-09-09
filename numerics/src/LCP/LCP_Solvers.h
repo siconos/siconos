@@ -24,7 +24,6 @@
   \author siconos-team@lists.gforge.inria.fr
 */
 
-#include "NumericsOptions.h"
 #include "LinearComplementarityProblem.h"
 #include "SolverOptions.h"
 #include "lcp_cst.h"
@@ -37,20 +36,17 @@ extern "C"
 {
 #endif
 
-  /** \fn   int linearComplementarity_driver(LinearComplementarityProblem* problem, double *z , double *w, SolverOptions* options,  NumericsOptions* global_options)
-   *
-   General interface to solvers for Linear Complementarity Problems
+  /** General interface to solvers for Linear Complementarity Problems
     \param[in] problem the LinearComplementarityProblem structure which handles the problem (M,q)
     \param[in,out] z a n-vector of doubles which contains the solution of the problem.
     \param[in,out] w a n-vector of doubles which contains the solution of the problem.
     \param[in,out] options structure used to define the solver(s) and their parameters
-    \param[in]  global_options the global options of Numerics
     \return info termination value
     - 0 : successful\n
     - >0 : otherwise see each solver for more information about the log info
     \author Franck Perignon
   */
-  int linearComplementarity_driver(LinearComplementarityProblem* problem, double *z , double *w, SolverOptions* options,  NumericsOptions* global_options);
+  int linearComplementarity_driver(LinearComplementarityProblem* problem, double *z , double *w, SolverOptions* options);
 
   /** set the default solver parameters and perform memory allocation for LinearComplementarity
       \param[in] problem the LinearComplementarityProblem structure which handles the problem (M,q)

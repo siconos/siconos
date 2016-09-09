@@ -21,6 +21,7 @@
 #include "NonSmoothDrivers.h"
 #include "relay_test_function.h"
 #include "relay_cst.h"
+#include <string.h>
 
 int main(int argc, char ** argv)
 {

@@ -24,7 +24,7 @@
 #include <stdlib.h>
 #include "LCP_Solvers.h"
 #include "pivot-utils.h"
-
+#include "misc.h"
 #include "SiconosLapack.h"
 
 //#define DEBUG_STDOUT

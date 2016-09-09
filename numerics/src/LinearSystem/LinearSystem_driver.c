@@ -20,9 +20,10 @@
 #include <string.h>
 #include <time.h>
 #include <math.h>
-#include "NumericsOptions.h"
 #include "NonSmoothDrivers.h"
 #include "SiconosLapack.h"
+#include "misc.h"
+
 static int LWORK = 0;
 int SICONOS_LS_0 = 0;
 

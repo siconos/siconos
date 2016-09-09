@@ -25,6 +25,9 @@
 
 #include "fc2d_Solvers.h"
 #include "SiconosLapack.h"
+#include "misc.h"
+
+
 void fc2d_latin(FrictionContactProblem* problem , double *reaction , double *velocity , int *info, SolverOptions* options)
 {
   int nc = problem->numberOfContacts;

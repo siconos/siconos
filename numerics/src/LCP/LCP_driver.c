@@ -20,9 +20,8 @@
 #include <string.h>
 #include <time.h>
 #include <math.h>
-#include "NumericsOptions.h"
 #include "NonSmoothDrivers.h"
-
+#include "misc.h"
 #include "lcp_cst.h"
 
 /* #define DEBUG_STDOUT */
@@ -329,14 +328,10 @@ int lcp_driver_DenseMatrix(LinearComplementarityProblem* problem, double *z , do
 
 }
 
-int linearComplementarity_driver(LinearComplementarityProblem* problem, double *z , double *w, SolverOptions* options,  NumericsOptions* global_options)
+int linearComplementarity_driver(LinearComplementarityProblem* problem, double *z , double *w, SolverOptions* options)
 {
   assert(options && "lcp_driver : null input for solver options");
   DEBUG_BEGIN("linearComplementarity_driver(...)\n");
-  /* Set global options */
-  if (global_options)
-    setNumericsOptions(global_options);
-
   /* Checks inputs */
   assert(problem && z && w &&
       "lcp_driver : input for LinearComplementarityProblem and/or unknowns (z,w)");

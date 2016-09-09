@@ -72,11 +72,6 @@ int main(void)
   vi.istheNormVIset = 0;
   vi.set = NULL;
   vi.nabla_F = NULL;
-
-  NumericsOptions global_options;
-  setDefaultNumericsOptions(&global_options);
-  global_options.verboseMode = 1; // turn verbose mode to off by default
-
   SolverOptions * options = (SolverOptions *) malloc(sizeof(SolverOptions));
   int info = variationalInequality_setDefaultSolverOptions(options, SICONOS_VI_EG);
   options->dparam[0]=1e-8;
@@ -106,8 +101,7 @@ int main(void)
   info = variationalInequality_driver(&vi, 
                                       x, 
                                       w, 
-                                      options, 
-                                      &global_options);
+                                      options);
   int i =0;
   for (i =0; i< n ; i++)
   {

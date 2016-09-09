@@ -12,7 +12,7 @@
  *Vi=(Mi_2-Mi_1 Me_1^{-1} Me_2)Ri+Qi-Mi1 Me_1^{-1} Qe
  *
  */
-void GMPReducedSolve(GenericMechanicalProblem* pInProblem, double *reaction , double *velocity, int* info, SolverOptions* options, NumericsOptions* numerics_options);
+void GMPReducedSolve(GenericMechanicalProblem* pInProblem, double *reaction , double *velocity, int* info, SolverOptions* options);
 /*
  * The equalities are assamblate in an unique block.
  *
@@ -21,7 +21,7 @@ void GMPReducedSolve(GenericMechanicalProblem* pInProblem, double *reaction , do
  *
  *and GS.
  */
-void GMPReducedEqualitySolve(GenericMechanicalProblem* pInProblem, double *reaction , double *velocity, int* info, SolverOptions* options, NumericsOptions* numerics_options);
+void GMPReducedEqualitySolve(GenericMechanicalProblem* pInProblem, double *reaction , double *velocity, int* info, SolverOptions* options);
 /*
  * It converts the solution of the reduced problem to the initial problem.
  */

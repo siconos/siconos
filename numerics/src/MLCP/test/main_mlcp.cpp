@@ -165,8 +165,6 @@ void test_mlcp_series(MixedLinearComplementarityProblem* problem, double *z, dou
 {
   int info = -1;
   SolverOptions mlcpOptions;
-  NumericsOptions global_options;
-  setDefaultNumericsOptions(&global_options);
   double tol1 = 1e-15;
   double tol2 = 1e-6;
   double error = 0;
@@ -179,8 +177,6 @@ void test_mlcp_series(MixedLinearComplementarityProblem* problem, double *z, dou
   int aux = 0;
   long laux;
   int NbLines = problem->M->size0;
-  global_options.verboseMode = 0;
-
 
   //   mlcpOptions.isSet=0;
   //   mlcpOptions.iSize=0;
@@ -192,9 +188,6 @@ void test_mlcp_series(MixedLinearComplementarityProblem* problem, double *z, dou
   //   mlcpOptions.iWork=0;
   //   mlcpOptions.iparam=(int*)malloc(10*sizeof(int));
   //   mlcpOptions.dparam=(double*)malloc(10*sizeof(double));
-
-  //  global_options.verboseMode=1;
-  //  setNumericsOptions(&global_options);
 
   //   mlcpOptions.iparam[5]=3;/*Number of registered configurations*/
   //   mlcpOptions.iparam[8]=0;/*Prb nedd a update*/
@@ -248,7 +241,7 @@ void test_mlcp_series(MixedLinearComplementarityProblem* problem, double *z, dou
     startTimer();
     info = 1;
     if (n + m < MAX_DIM_ENUM)
-      info = mlcp_driver(problem, z, w, &mlcpOptions, &global_options);
+      info = mlcp_driver(problem, z, w, &mlcpOptions);
     stopTimer();
     summary[itest].times[ENUM_ID][sIdWithSol] = sDt.mCumul;
     strcpy(summary[itest].cv[ENUM_ID][sIdWithSol], "CV");
@@ -278,7 +271,7 @@ void test_mlcp_series(MixedLinearComplementarityProblem* problem, double *z, dou
     mlcp_driver_init(problem, &mlcpOptions);
 
     startTimer();
-    info = mlcp_driver(problem, z, w, &mlcpOptions, &global_options);
+    info = mlcp_driver(problem, z, w, &mlcpOptions);
     stopTimer();
     summary[itest].times[PGS_IM_ID][sIdWithSol] = sDt.mCumul;
     strcpy(summary[itest].cv[PGS_IM_ID][sIdWithSol], "CV");
@@ -308,7 +301,7 @@ void test_mlcp_series(MixedLinearComplementarityProblem* problem, double *z, dou
     mlcpOptions.dparam[0] = tol2;
 
     startTimer();
-    info = mlcp_driver(problem, z, w, &mlcpOptions, &global_options);
+    info = mlcp_driver(problem, z, w, &mlcpOptions);
     stopTimer();
     summary[itest].times[PGS_EX_ID][sIdWithSol] = sDt.mCumul;
     strcpy(summary[itest].cv[PGS_EX_ID][sIdWithSol], "CV");
@@ -337,7 +330,7 @@ void test_mlcp_series(MixedLinearComplementarityProblem* problem, double *z, dou
     mlcp_driver_init(problem, &mlcpOptions);
 
     startTimer();
-    info = mlcp_driver(problem, z, w, &mlcpOptions, &global_options);
+    info = mlcp_driver(problem, z, w, &mlcpOptions);
     stopTimer();
     summary[itest].times[RPGS_ID][sIdWithSol] = sDt.mCumul;
     strcpy(summary[itest].cv[RPGS_ID][sIdWithSol], "CV");
@@ -373,7 +366,7 @@ void test_mlcp_series(MixedLinearComplementarityProblem* problem, double *z, dou
       mlcp_driver_init(problem, &mlcpOptions);
 
       startTimer();
-      info = mlcp_driver(problem, z, w, &mlcpOptions, &global_options);
+      info = mlcp_driver(problem, z, w, &mlcpOptions);
       stopTimer();
       summary[itest].times[_ID][sIdWithSol] = sDt.mCumul;
       strcpy(summary[itest].cv[_ID][sIdWithSol], "CV");
@@ -404,7 +397,7 @@ void test_mlcp_series(MixedLinearComplementarityProblem* problem, double *z, dou
     mlcp_driver_init(problem, &mlcpOptions);
 
     startTimer();
-    info = mlcp_driver(problem, z, w, &mlcpOptions, &global_options);
+    info = mlcp_driver(problem, z, w, &mlcpOptions);
     stopTimer();
     summary[itest].times[RPSOR_ID][sIdWithSol] = sDt.mCumul;
     strcpy(summary[itest].cv[RPSOR_ID][sIdWithSol], "CV");
@@ -431,7 +424,7 @@ void test_mlcp_series(MixedLinearComplementarityProblem* problem, double *z, dou
     mlcp_driver_init(problem, &mlcpOptions);
 
     startTimer();
-    info = mlcp_driver(problem, z, w, &mlcpOptions, &global_options);
+    info = mlcp_driver(problem, z, w, &mlcpOptions);
     stopTimer();
     summary[itest].times[PATH_ID][sIdWithSol] = sDt.mCumul;
     strcpy(summary[itest].cv[PATH_ID][sIdWithSol], "CV");
@@ -470,7 +463,7 @@ void test_mlcp_series(MixedLinearComplementarityProblem* problem, double *z, dou
     mlcp_driver_init(problem, &mlcpOptions);
 
     startTimer();
-    info = mlcp_driver(problem, z, w, &mlcpOptions, &global_options);
+    info = mlcp_driver(problem, z, w, &mlcpOptions);
     stopTimer();
     summary[itest].times[SIMPLEX_ID][sIdWithSol] = sDt.mCumul;
     strcpy(summary[itest].cv[SIMPLEX_ID][sIdWithSol], "CV");
@@ -503,12 +496,12 @@ void test_mlcp_series(MixedLinearComplementarityProblem* problem, double *z, dou
     mlcp_driver_init(problem, &mlcpOptions);
 
     if (n + m < MAX_DIM_ENUM)
-      info = mlcp_driver(problem, z, w, &mlcpOptions, &global_options);
+      info = mlcp_driver(problem, z, w, &mlcpOptions);
     if (info == 0)
     {
       startTimer();
       if (n + m < MAX_DIM_ENUM)
-        info = mlcp_driver(problem, z, w, &mlcpOptions, &global_options);
+        info = mlcp_driver(problem, z, w, &mlcpOptions);
       stopTimer();
       summary[itest].times[DIRECT_ENUM_ID][sIdWithSol] = sDt.mCumul;
       strcpy(summary[itest].cv[DIRECT_ENUM_ID][sIdWithSol], "CV");
@@ -545,7 +538,7 @@ void test_mlcp_series(MixedLinearComplementarityProblem* problem, double *z, dou
 
     mlcp_driver_init(problem, &mlcpOptions);
     startTimer();
-    info = mlcp_driver(problem, z, w, &mlcpOptions, &global_options);
+    info = mlcp_driver(problem, z, w, &mlcpOptions);
     stopTimer();
     summary[itest].times[FB_ID][sIdWithSol] = sDt.mCumul;
     strcpy(summary[itest].cv[FB_ID][sIdWithSol], "CV");
@@ -583,9 +576,9 @@ void test_mlcp_series(MixedLinearComplementarityProblem* problem, double *z, dou
     info = 1;
 
     mlcp_driver_init(problem, &mlcpOptions);
-    info = mlcp_driver(problem, z, w, &mlcpOptions, &global_options);
+    info = mlcp_driver(problem, z, w, &mlcpOptions);
     startTimer();
-    info = mlcp_driver(problem, z, w, &mlcpOptions, &global_options);
+    info = mlcp_driver(problem, z, w, &mlcpOptions);
     stopTimer();
     laux = sDt.mCumul;
     summary[itest].times[DIRECT_FB_ID][sIdWithSol] = sDt.mCumul;

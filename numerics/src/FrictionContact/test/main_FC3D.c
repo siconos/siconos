@@ -35,12 +35,6 @@ int test_Series_nsgs(FrictionContactProblem* problem,
 {
   int info = -1, i;
 
-  // Numerics and Solver Options
-
-  NumericsOptions numerics_options;
-  setDefaultNumericsOptions(&numerics_options);
-  numerics_options.verboseMode = 1; // turn verbose mode to off by default
-
 
   SolverOptions numerics_solver_options;
   numerics_solver_options.filterOn = 0;
@@ -82,8 +76,8 @@ int test_Series_nsgs(FrictionContactProblem* problem,
     numerics_solver_options.dparam[4] = 0.0 ;
 
     info = fc3d_driver(problem,
-                                    reaction , velocity,
-                                    &numerics_solver_options, &numerics_options);
+		       reaction , velocity,
+		       &numerics_solver_options);
 
     printf("\n");
     for (int k = 0 ; k < 3 * NC; k++)

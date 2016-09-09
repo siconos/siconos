@@ -4,7 +4,6 @@
 #include <time.h>
 #include <float.h>
 #include "SiconosBlas.h"
-#include "NumericsOptions.h"
 #include "fc3d_Solvers.h"
 #include "NonSmoothDrivers.h"
 #include "fclib_interface.h"
@@ -39,13 +38,6 @@ int fc3d_LmgcDriver(double *reaction,
 
   /* frictionContact_display(FC); */
 
-  NumericsOptions numerics_options;
-  setDefaultNumericsOptions(&numerics_options);
-
-  numerics_options.verboseMode = verbose; // turn verbose mode to off by default
-
-
-
   SolverOptions numerics_solver_options;
 
   fc3d_setDefaultSolverOptions(&numerics_solver_options, solver_id);
@@ -53,9 +45,7 @@ int fc3d_LmgcDriver(double *reaction,
   numerics_solver_options.dparam[0] = tolerance;
   numerics_solver_options.iparam[0] = itermax;
 
-  int info = fc3d_driver(FC,
-                                      reaction , velocity,
-                                      &numerics_solver_options, &numerics_options);
+  int info = fc3d_driver(FC, reaction , velocity, &numerics_solver_options);
 
 
 //  uncomment to save FrictionContactProblem

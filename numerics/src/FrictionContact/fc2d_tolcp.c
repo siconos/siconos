@@ -24,6 +24,7 @@
 #include "fc2d_Solvers.h"
 #include "LCP_Solvers.h"
 #include <assert.h>
+#include "misc.h"
 
 int fc2d_tolcp(FrictionContactProblem* problem, LinearComplementarityProblem * lcp_problem)
 {

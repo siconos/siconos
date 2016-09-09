@@ -21,9 +21,10 @@
 #include <time.h>
 #include <float.h>
 
-#include "NumericsOptions.h"
 #include "SOCLCP_Solvers.h"
 #include "NonSmoothDrivers.h"
+#include "misc.h"
+
 
 int soclcp_setDefaultSolverOptions(SolverOptions* options, int solverId)
 {

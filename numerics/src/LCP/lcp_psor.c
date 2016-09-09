@@ -23,6 +23,7 @@
 #include <float.h>
 #include "LCP_Solvers.h"
 #include "SiconosBlas.h"
+#include "misc.h"
 
 /*\warning omega is not explicitely used. must be completed    */
 void lcp_psor(LinearComplementarityProblem* problem, double *z, double *w, int *info , SolverOptions* options)

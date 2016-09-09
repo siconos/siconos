@@ -33,6 +33,7 @@
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
 #include "debug.h"
+#include "misc.h"
 
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 

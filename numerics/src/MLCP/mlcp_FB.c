@@ -25,6 +25,7 @@
 #include "SiconosBlas.h"
 #include "NonSmoothNewtonNeighbour.h"
 #include "FischerBurmeister.h"
+#include "misc.h"
 
 static int sN = 0;
 static int sM = 0;

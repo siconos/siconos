@@ -21,9 +21,9 @@
 #include <time.h>
 #include <float.h>
 
-#include "NumericsOptions.h"
 #include "SOCLCP_Solvers.h"
 #include "NonSmoothDrivers.h"
+#include "misc.h"
 
 char *  SICONOS_SOCLCP_NSGS_STR = "SOCLCP_NSGS";
 char *  SICONOS_SOCLCP_NSGSV_STR = "SOCLCP_NSGSV";
@@ -53,26 +53,14 @@ char * SICONOS_SOCLCP_PROX_STR = "SOCLCP_PROX";
 char * SICONOS_SOCLCP_QUARTIC_STR = "SOCLCP_QUARTIC";
 char * SICONOS_SOCLCP_QUARTIC_NU_STR = "SOCLCP_QUARTIC_NU";
 
-void snPrintf(int level, SolverOptions* opts, const char *fmt, ...);
+void snPrintf(const char *fmt, ...);
 
 int soclcp_driver(SecondOrderConeLinearComplementarityProblem* problem,
                   double *r, double *v,
-                  SolverOptions* options,
-                  NumericsOptions* global_options)
+                  SolverOptions* options)
 {
   if(options == NULL)
     numericsError("soclcp_driver", "null input for solver and/or global options");
-
-  int setnumericsoptions=0;
-
-  /* Set global options */
-  if(global_options)
-  {
-    setNumericsOptions(global_options);
-    options->numericsOptions = (NumericsOptions*) malloc(sizeof(NumericsOptions));
-    options->numericsOptions->verboseMode = global_options->verboseMode;
-    setnumericsoptions=1;
-  }
 
   int NoDefaultOptions = options->isSet; /* true(1) if the SolverOptions structure has been filled in else false(0) */
 
@@ -100,62 +88,54 @@ int soclcp_driver(SecondOrderConeLinearComplementarityProblem* problem,
   /* Non Smooth Gauss Seidel (NSGS) */
   case SICONOS_SOCLCP_NSGS:
   {
-    snPrintf(1, options,
-             " ========================== Call NSGS solver for Second Order Cone LCP problem ==========================\n");
+    snPrintf(" ========================== Call NSGS solver for Second Order Cone LCP problem ==========================\n");
     soclcp_nsgs(problem, r , v , &info , options);
     break;
   }
   /* case SICONOS_SOCLCP_NSGSV: */
   /* { */
-  /*   snPrintf(1, options, */
-  /*            " ========================== Call NSGSV solver for Second Order Cone LCP problem ==========================\n"); */
+  /*   snPrintf(snPrintf(" ========================== Call NSGSV solver for Second Order Cone LCP problem ==========================\n"); */
   /*   soclcp_nsgs_v(problem, r , v , &info , options); */
   /*   break; */
   /* } */
   /* /\* Proximal point algorithm *\/ */
   /* case SICONOS_SOCLCP_PROX: */
   /* { */
-  /*   snPrintf(1, options, */
-  /*            " ========================== Call PROX (Proximal Point) solver for Second Order Cone LCP problem ==========================\n"); */
+  /*   snPrintf(snPrintf(" ========================== Call PROX (Proximal Point) solver for Second Order Cone LCP problem ==========================\n"); */
   /*   soclcp_proximal(problem, r , v , &info , options); */
   /*   break; */
   /* } */
   /* /\* Tresca Fixed point algorithm *\/ */
   /* case SICONOS_SOCLCP_TFP: */
   /* { */
-  /*   snPrintf(1, options,  */
-  /*            " ========================== Call TFP (Tresca Fixed Point) solver for Second Order Cone LCP problem ==========================\n"); */
+  /*   snPrintf(" ========================== Call TFP (Tresca Fixed Point) solver for Second Order Cone LCP problem ==========================\n"); */
   /*   soclcp_TrescaFixedPoint(problem, r , v , &info , options); */
   /*   break; */
   /* } */
   case SICONOS_SOCLCP_VI_FPP:
   {
-    snPrintf(1, options,
-             " ========================== Call VI_FixedPointProjection (VI_FPP) solver for Second Order Cone LCP problem ==========================\n");
+    snPrintf(" ========================== Call VI_FixedPointProjection (VI_FPP) solver for Second Order Cone LCP problem ==========================\n");
     soclcp_VI_FixedPointProjection(problem, r , v , &info , options);
     break;
   }
   /* VI Extra Gradient algorithm */
   case SICONOS_SOCLCP_VI_EG:
   {
-    snPrintf(1, options,
-             " ========================== Call VI_ExtraGradient (VI_EG) solver for Second Order Cone LCP problem ==========================\n");
+    snPrintf(" ========================== Call VI_ExtraGradient (VI_EG) solver for Second Order Cone LCP problem ==========================\n");
     soclcp_VI_ExtraGradient(problem, r , v , &info , options);
     break;
   }
   /* /\* Hyperplane Projection algorithm *\/ */
   /* case SICONOS_SOCLCP_HP: */
   /* { */
-  /*   snPrintf(1, options,  */
-  /*            " ========================== Call Hyperplane Projection (HP) solver for Second Order Cone LCP problem ==========================\n"); */
+  /*   snPrintf(" ========================== Call Hyperplane Projection (HP) solver for Second Order Cone LCP problem ==========================\n"); */
   /*   soclcp_HyperplaneProjection(problem, r , v , &info , options); */
   /*   break; */
   /* } */
   /* /\* Alart Curnier in local coordinates *\/ */
   /* case SICONOS_SOCLCP_NSN_AC: */
   /* { */
-  /*   snPrintf(1, options,  */
-  /*            " ========================== Call Alart Curnier solver for Second Order Cone LCP problem ==========================\n"); */
+  /*   snPrintf(" ========================== Call Alart Curnier solver for Second Order Cone LCP problem ==========================\n"); */
   /*   if (problem->M->matrix0) */
   /*   { */
   /*     soclcp_nonsmooth_Newton_AlartCurnier(problem, r , v , &info , options); */
@@ -169,24 +149,21 @@ int soclcp_driver(SecondOrderConeLinearComplementarityProblem* problem,
   /* /\* Fischer Burmeister in local coordinates *\/ */
   /* case SICONOS_SOCLCP_NSN_FB: */
   /* { */
-  /*   snPrintf(1, options,  */
-  /*            " ========================== Call Fischer Burmeister solver for Second Order Cone LCP problem ==========================\n"); */
+  /*   snPrintf(" ========================== Call Fischer Burmeister solver for Second Order Cone LCP problem ==========================\n"); */
   /*   soclcp_nonsmooth_Newton_FischerBurmeister(problem, r , v , &info , options); */
   /*   break; */
   /* } */
   /* case SICONOS_SOCLCP_QUARTIC_NU: */
   /* case SICONOS_SOCLCP_QUARTIC: */
   /* { */
-  /*   snPrintf(1, options,  */
-  /*            " ========================== Call Quartic solver for Second Order Cone LCP problem ==========================\n"); */
+  /*   snPrintf(" ========================== Call Quartic solver for Second Order Cone LCP problem ==========================\n"); */
   /*   soclcp_unitary_enumerative(problem, r , v , &info , options); */
   /*   break; */
   /* } */
   /* case SICONOS_SOCLCP_AlartCurnierNewton: */
   /* case SICONOS_SOCLCP_DampedAlartCurnierNewton: */
   /* { */
-  /*   snPrintf(1, options,  */
-  /*            " ========================== Call Quartic solver for Second Order Cone LCP problem ==========================\n"); */
+  /*   snPrintf(" ========================== Call Quartic solver for Second Order Cone LCP problem ==========================\n"); */
   /*   info =soclcp_Newton_solve(problem, r , options); */
   /*   break; */
   /* } */
@@ -196,12 +173,6 @@ int soclcp_driver(SecondOrderConeLinearComplementarityProblem* problem,
     exit(EXIT_FAILURE);
 
   }
-  }
-
-  if(setnumericsoptions)
-  {
-    free(options->numericsOptions);
-    options->numericsOptions = NULL;
   }
 
   return info;

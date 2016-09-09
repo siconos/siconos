@@ -20,18 +20,14 @@
 #include <string.h>
 #include <time.h>
 #ifndef MEXFLAG
-#include "NumericsOptions.h"
 #include "NonSmoothDrivers.h"
 #endif
 #include "relay_cst.h"
 
-int dr_driver(RelayProblem* problem, double *z , double *w, SolverOptions* options, NumericsOptions* global_options)
+int dr_driver(RelayProblem* problem, double *z , double *w, SolverOptions* options)
 {
-  if (options == NULL || global_options == NULL)
-    numericsError("dr_driver", "null input for solver and/or global options");
-
-  /* Set global options */
-  setNumericsOptions(global_options);
+  if (options == NULL)
+    numericsError("dr_driver", "null input for solver options");
 
   /* Checks inputs */
   if (problem == NULL || z == NULL || w == NULL)

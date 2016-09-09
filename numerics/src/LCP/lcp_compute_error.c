@@ -16,9 +16,9 @@
  * limitations under the License.
 */
 #include "SiconosBlas.h"
-#include "NumericsOptions.h" // for global options
 #include "LinearComplementarityProblem.h"
 #include "LCP_Solvers.h"
+#include "misc.h"
 
 void lcp_compute_error_only(unsigned int n, double *z , double *w, double * error)
 {

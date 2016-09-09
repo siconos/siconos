@@ -1,6 +1,6 @@
 #include "PathAlgebra.h"
-#include "NumericsOptions.h"
 #include "math.h"
+#include "misc.h"
 
 /** tolerance value for zero */
 static double zeroTol = 1e-15;
