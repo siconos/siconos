@@ -419,11 +419,25 @@ if(WITH_${COMPONENT}_TESTING)
   NEW_TEST(test_fc3d_73 fc3d_test73.c)
   NEW_TEST(test_fc3d_74 fc3d_test74.c)
   
-  NEW_TEST(test_fc3d_80 fc3d_test80.c) # Proximal
-  NEW_TEST(test_fc3d_81 fc3d_test81.c) # Proximal
-  NEW_TEST(test_fc3d_83 fc3d_test83.c) # Proximal
+  NEW_FC_TEST(OneObject-i100000-499.hdf5.dat
+    SICONOS_FRICTION_3D_PROX  1e-8 100000
+    0 0 0
+    DPARAM 3 1e4
+    IPARAM 1 1)
+  
+  NEW_FC_TEST(OneObject-i1028-138.hdf5.dat
+    SICONOS_FRICTION_3D_PROX  1e-8 100000
+    0 0 0
+    DPARAM 3 1e4
+    IPARAM 1 1)
+  
+  NEW_FC_TEST(KaplasTower-i1061-4.hdf5.dat
+    SICONOS_FRICTION_3D_PROX  1e-6 100000
+    0 0 0
+    DPARAM 3 1e4
+    IPARAM 1 1)
 
-  NEW_TEST(test_fc3d_82 fc3d_test82.c) # Proximal
+  
   SET(test_fc3d_90_PROPERTIES WILL_FAIL TRUE)
   NEW_TEST(test_fc3d_90 fc3d_test90.c) # TFP with cycling
 
