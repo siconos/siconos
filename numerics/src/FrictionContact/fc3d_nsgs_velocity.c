@@ -164,7 +164,6 @@ void fc3d_nsgs_velocity(FrictionContactProblem* problem, double *reaction, doubl
 }
 int fc3d_nsgs_velocity_setDefaultSolverOptions(SolverOptions* options)
 {
-  int i;
   if (verbose > 0)
   {
     printf("Set the Default SolverOptions for the NSGSV Solver\n");

@@ -126,7 +126,6 @@ void fc3d_DeSaxceFixedPoint(FrictionContactProblem* problem, double *reaction, d
 
 int fc3d_DeSaxceFixedPoint_setDefaultSolverOptions(SolverOptions* options)
 {
-  int i;
   if (verbose > 0)
   {
     printf("Set the Default SolverOptions for the DSFP Solver\n");

@@ -130,7 +130,6 @@ void fc3d_VI_FixedPointProjection(FrictionContactProblem* problem, double *react
 
 int fc3d_VI_FixedPointProjection_setDefaultSolverOptions(SolverOptions* options)
 {
-  int i;
   if (verbose > 0)
   {
     printf("Set the Default SolverOptions for the FixedPointProjection Solver\n");

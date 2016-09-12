@@ -349,7 +349,6 @@ void fc3d_proximal(FrictionContactProblem* problem, double *reaction, double *ve
 
 int fc3d_proximal_setDefaultSolverOptions(SolverOptions* options)
 {
-  int i;
   if (verbose > 0)
   {
     printf("Set the Default SolverOptions for the PROX Solver\n");

@@ -145,7 +145,6 @@ void fc3d_SOCLCP(FrictionContactProblem* problem, double *reaction, double *velo
 
 int fc3d_SOCLCP_setDefaultSolverOptions(SolverOptions* options)
 {
-  int i;
   if (verbose > 0)
   {
     printf("Set the Default SolverOptions for the SOCLCP Solver\n");

@@ -102,7 +102,6 @@ void fc2d_enum(FrictionContactProblem* problem, double *reaction, double *veloci
 
 int fc2d_enum_setDefaultSolverOptions(SolverOptions* options)
 {
-  int i;
   if (verbose > 0)
   {
     printf("Set the Default SolverOptions for the Enumerative Solver for fc2d\n");

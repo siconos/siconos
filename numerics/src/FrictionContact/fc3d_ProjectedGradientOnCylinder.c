@@ -262,7 +262,6 @@ void fc3d_ProjectedGradientOnCylinder(FrictionContactProblem* problem, double *r
 
 int fc3d_ProjectedGradientOnCylinder_setDefaultSolverOptions(SolverOptions* options)
 {
-  int i;
   if (verbose > 0)
   {
     printf("Set the Default SolverOptions for the PGoC Solver\n");

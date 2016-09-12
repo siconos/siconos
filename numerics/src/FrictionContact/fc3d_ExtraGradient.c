@@ -326,7 +326,6 @@ void fc3d_ExtraGradient(FrictionContactProblem* problem, double *reaction, doubl
 
 int fc3d_ExtraGradient_setDefaultSolverOptions(SolverOptions* options)
 {
-  int i;
   if (verbose > 0)
   {
     printf("Set the Default SolverOptions for the ExtraGradient Solver\n");

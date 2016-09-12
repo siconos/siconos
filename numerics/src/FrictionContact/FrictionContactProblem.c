@@ -28,7 +28,7 @@ void frictionContact_display(FrictionContactProblem* problem)
 {
 
   assert(problem);
-  int i, n = problem->dimension * problem->numberOfContacts;
+  int n = problem->dimension * problem->numberOfContacts;
   printf("FrictionContact Display :\n-------------\n");
   printf("dimension :%d \n", problem->dimension);
   printf("numberOfContacts:%d \n", problem->numberOfContacts);

@@ -303,7 +303,6 @@ void fc2d_cpg(FrictionContactProblem* problem , double *reaction , double *veloc
 }
 int fc2d_cpg_setDefaultSolverOptions(SolverOptions *options)
 {
-  int i;
   if (verbose > 0)
   {
     printf("Set the Default SolverOptions for the CPG Solver\n");

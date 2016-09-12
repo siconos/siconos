@@ -246,7 +246,6 @@ void fc3d_fixedPointProjection(FrictionContactProblem* problem, double *reaction
 
 int fc3d_fixedPointProjection_setDefaultSolverOptions(SolverOptions* options)
 {
-  int i;
   if (verbose > 0)
   {
     printf("Set the Default SolverOptions for the FPP Solver\n");

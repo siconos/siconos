@@ -329,7 +329,6 @@ void fc2d_nsgs(FrictionContactProblem* problem , double *reaction , double *velo
 }
 int fc2d_nsgs_setDefaultSolverOptions(SolverOptions *options)
 {
-  int i;
   if (verbose > 0)
   {
     printf("Set the Default SolverOptions for the 2D NSGS Solver\n");

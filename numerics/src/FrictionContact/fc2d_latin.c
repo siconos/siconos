@@ -552,7 +552,7 @@ void fc2d_latin(FrictionContactProblem* problem , double *reaction , double *vel
 }
 int fc2d_latin_setDefaultSolverOptions(SolverOptions *options)
 {
-  int i;
+
   if (verbose > 0)
   {
     printf("Set the Default SolverOptions for the Latin Solver\n");

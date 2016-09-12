@@ -228,7 +228,6 @@ void fc2d_sparse_nsgs(FrictionContactProblem* problem, double *z, double *w,
 
 int fc2d_sparse_nsgs_setDefaultSolverOptions(SolverOptions *options)
 {
-  int i;
   if (verbose > 0)
   {
     printf("Set the Default SolverOptions for the NSGS Solver\n");

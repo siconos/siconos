@@ -208,7 +208,6 @@ void fc3d_HyperplaneProjection(FrictionContactProblem* problem, double *reaction
 
 int fc3d_HyperplaneProjection_setDefaultSolverOptions(SolverOptions* options)
 {
-  int i;
   if (verbose > 0)
   {
     printf("Set the Default SolverOptions for the HyperplaneProjection Solver\n");

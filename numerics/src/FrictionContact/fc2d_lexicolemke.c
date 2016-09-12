@@ -101,7 +101,6 @@ void fc2d_lexicolemke(FrictionContactProblem* problem, double *reaction, double 
 
 int fc2d_lexicolemke_setDefaultSolverOptions(SolverOptions* options)
 {
-  int i;
   if (verbose > 0)
   {
     printf("Set the Default SolverOptions for the Lemke Solver for fc2d\n");

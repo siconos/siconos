@@ -175,7 +175,6 @@ void fc3d_ACLMFixedPoint(FrictionContactProblem* problem, double *reaction, doub
 
 int fc3d_ACLMFixedPoint_setDefaultSolverOptions(SolverOptions* options)
 {
-  int i;
   if (verbose > 0)
   {
     printf("Set the Default SolverOptions for the ACLMFP Solver\n");
