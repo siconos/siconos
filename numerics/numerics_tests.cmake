@@ -412,12 +412,32 @@ if(WITH_${COMPONENT}_TESTING)
   NEW_FC_TEST(Capsules-i100-889.dat SICONOS_FRICTION_3D_NSN_AC)
   NEW_FC_TEST(Capsules-i100-889.dat SICONOS_FRICTION_3D_NSN_FB)
   NEW_FC_TEST(Capsules-i100-889.dat SICONOS_FRICTION_3D_NSN_NM)
+
+
+  #DSFP test
+  NEW_FC_TEST(Example1_Fc3D_SBM.dat
+    SICONOS_FRICTION_3D_DSFP  1e-8 100000
+    0 0 0
+    DPARAM 3 2.0)
   
-  NEW_TEST(test_fc3d_70 fc3d_test70.c) # DSFP
-  NEW_TEST(test_fc3d_71 fc3d_test71.c) # DSFP
-  NEW_TEST(test_fc3d_72 fc3d_test72.c)	
-  NEW_TEST(test_fc3d_73 fc3d_test73.c)
-  NEW_TEST(test_fc3d_74 fc3d_test74.c)
+  NEW_FC_TEST(Example1_Fc3D_SBM.dat
+    SICONOS_FRICTION_3D_DSFP  1e-8 100000
+    0 0 0
+    DPARAM 3 -2.0)
+
+  #EG
+  NEW_FC_TEST(Example1_Fc3D_SBM.dat
+    SICONOS_FRICTION_3D_EG  1e-8 100000
+    0 0 0
+    DPARAM 3 1.0)
+  
+  NEW_FC_TEST(Example1_Fc3D_SBM.dat
+    SICONOS_FRICTION_3D_EG  1e-8 100000
+    0 0 0
+    DPARAM 3 -1.0)
+
+  NEW_FC_TEST(Example1_Fc3D_SBM.dat
+    SICONOS_FRICTION_3D_HP)
   
   NEW_FC_TEST(OneObject-i100000-499.hdf5.dat
     SICONOS_FRICTION_3D_PROX  1e-8 100000
@@ -437,7 +457,6 @@ if(WITH_${COMPONENT}_TESTING)
     DPARAM 3 1e4
     IPARAM 1 1)
 
-  
   SET(test_fc3d_90_PROPERTIES WILL_FAIL TRUE)
   NEW_TEST(test_fc3d_90 fc3d_test90.c) # TFP with cycling
 
