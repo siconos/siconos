@@ -24,8 +24,6 @@
 #include "Register.hpp"
 
 
-SICONOS_IO_REGISTER(NumericsOptions, (verboseMode));
-
 
 template <class Archive>
 void siconos_io(Archive& ar, Callback&v, unsigned int version)
@@ -44,10 +42,9 @@ void siconos_io(Archive& ar, _SolverOptions&v, unsigned int version)
     v.iparam = (int *) malloc(v.iSize * sizeof(int));
     v.dparam = (double *) malloc(v.dSize * sizeof(double));
     v.internalSolvers = (SolverOptions *) malloc(v.numberOfInternalSolvers * sizeof(SolverOptions));
-    v.numericsOptions = (NumericsOptions *) malloc(sizeof(NumericsOptions));
     v.callback = (Callback *) malloc(sizeof(Callback));
   }
-  SERIALIZE(v, (numericsOptions)(callback), ar);
+  SERIALIZE(v, (callback), ar);
 
   SERIALIZE_C_ARRAY(v.iSize, v, iparam, ar);
   SERIALIZE_C_ARRAY(v.dSize, v, dparam, ar);

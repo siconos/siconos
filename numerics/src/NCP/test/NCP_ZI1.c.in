@@ -22,8 +22,9 @@
 #include <float.h>
 
 #include "NonSmoothDrivers.h"
-#include "MCP_cst.h"
-
+#include "NCP_cst.h"
+#include "NonlinearComplementarityProblem.h"
+#include "NumericsMatrix.h"
 #include "SolverOptions.h"
 
 #define N 4

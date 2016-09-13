@@ -21,7 +21,12 @@
 #include "GenericMechanicalProblem.h"
 #include "NonSmoothDrivers.h"
 #include "misc.h"
-
+#include "LinearSystemProblem.h"
+#include "FrictionContactProblem.h"
+#include "LinearComplementarityProblem.h"
+#include "GenericMechanical_Solvers.h"
+#include "NumericsMatrix.h"
+#include "SparseBlockMatrix.h"
 //#define GMP_DEBUG
 
 /* void * solverFC3D; */

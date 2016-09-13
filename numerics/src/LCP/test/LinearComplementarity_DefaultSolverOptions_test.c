@@ -17,7 +17,12 @@
 */
 #include <stdio.h>
 #include <stdlib.h>
-#include "NonSmoothDrivers.h"
+#include "SolverOptions.h"
+#include "NumericsFwd.h"
+#include "LCP_Solvers.h"
+#include "lcp_cst.h"
+#include "LinearComplementarityProblem.h"
+#include "assert.h"
 
 int main(void)
 {

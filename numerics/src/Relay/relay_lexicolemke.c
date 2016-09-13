@@ -22,6 +22,7 @@
 #include <math.h>
 #include <float.h>
 #include "Relay_Solvers.h"
+#include "NonSmoothDrivers.h"
 #include "LCP_Solvers.h"
 #include "relay_cst.h"
 

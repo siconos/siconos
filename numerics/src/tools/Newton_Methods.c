@@ -26,7 +26,7 @@
 #include "misc.h"
 #include "SiconosLapack.h"
 #include "ArmijoSearch.h"
-
+#include "SolverOptions.h"
 #include "lcp_cst.h"
 #include "NCP_cst.h"
 #include "MCP_cst.h"

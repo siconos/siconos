@@ -18,7 +18,7 @@
 #ifndef NCP_PROBLEM_H
 #define NCP_PROBLEM_H
 
-#include "NumericsMatrix.h"
+#include "NumericsFwd.h"
 
 /*!\file NonlinearComplementarityProblem.h
  * \brief data structure to formalize a Nonlinear Complementarity Problem (NCP)
@@ -52,7 +52,7 @@ typedef void (*ptrFunctionJacNCP)(void* env, int n, double* z, NumericsMatrix* j
   0 &\le w \perp z \ge 0
   \f}
  */
-typedef struct
+struct NonlinearComplementarityProblem_
 {
   unsigned int n; /**< size of the problem */
   ptrFunctionNCP compute_F; /**< pointer to the function used to compute \f$F(z)\f$ */
@@ -61,8 +61,6 @@ typedef struct
   void* env; /**< environment for the compute_Fmcp and compute_nabla_F function.
                When called from Python, it contains an object with compute_F and compute_nabla_F as methods.
                When called from C, it can reference a data struct containing variables needed for the computations.*/
-} NonlinearComplementarityProblem;
-
-typedef NonlinearComplementarityProblem NCP_struct;
+};
 
 #endif

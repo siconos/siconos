@@ -42,16 +42,6 @@ For each solver, the input argument are:
 extern "C"
 {
 #endif
-
-  /** General interface to solvers for variational inequality problem
-  \param[in] problem the structure which handles the variational inequality problem
-  \param[in,out] x global vector (n)
-  \param[in,out] w global vector (n)
-  \param[in,out] options structure used to define the solver(s) and their parameters
-  \return result (0 if successful otherwise 1).
-  */
-  int variationalInequality_driver(VariationalInequality* problem, double *x , double *w, SolverOptions* options);
-
   /** set the default solver parameters and perform memory allocation for VariationalInequality
       \param options the pointer to the options to set
       \param solverId the identifier of the solver

@@ -19,7 +19,9 @@
 #include <stdlib.h>
 #include "NonSmoothDrivers.h"
 #include "relay_test_function.h"
-
+#include "RelayProblem.h"
+#include "SolverOptions.h"
+#include "Relay_Solvers.h"
 
 int relay_test_function(FILE * f, int  solverId)
 {

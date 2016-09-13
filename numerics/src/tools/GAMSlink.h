@@ -4,7 +4,11 @@
 #define GAMSLINK_H
 
 #include <stdbool.h>
-#include "SolverOptions.h"
+#include "NumericsMatrix.h"
+#include <assert.h>
+
+
+//#include "SolverOptions.h"
 
 /** Simply linked list of bool option for GAMS
  */
@@ -326,10 +330,7 @@ static inline void SN_GAMS_add_NV_from_gdx(SN_GAMS_gdx* gdx_data, double* vec, c
 
 #include <stdio.h>
 #include <string.h>
-#include <assert.h>
 #include <stdlib.h>
-
-#include "NumericsMatrix.h"
 
 #define idxerror(i, s) { idxErrorStr(Xptr, i, msg, GMS_SSSIZE); \
   printf("%s failed: %s\n",s,msg); return; }

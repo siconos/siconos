@@ -18,7 +18,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <errno.h>
-
+#include "NumericsMatrix.h"
 #include "GlobalFrictionContactProblem.h"
 #include "misc.h"
 

@@ -236,6 +236,8 @@ if(WITH_${COMPONENT}_TESTING)
   NEW_TEST(FC3D_sparse_test fc3d_sparse_test.c)
 
   # (see FrictionContact/test/README for short details)
+
+  # --- NSGS with different local solvers and parameters ---
   NEW_FC_TEST(Example1_Fc3D_SBM.dat
     SICONOS_FRICTION_3D_NSGS 1e-16 ${NSGS_NB_IT} 
     SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone)
@@ -396,10 +398,10 @@ if(WITH_${COMPONENT}_TESTING)
     0 0 0
     DPARAM 3 -1.0)
 
-
+  # --- TFP ---
   NEW_FC_TEST(Confeti-ex13-Fc3D-SBM.dat
     SICONOS_FRICTION_3D_TFP)
-
+ 
   #TFP with ProjectedGradientOnCylinder is not working ...
   SET(test_fc3d_TFP_PGoC_Tol_1e-4_Max_1000_inTol_1e-6_inMax_20000___Confeti-ex13-Fc3D-SBM_PROPERTIES WILL_FAIL TRUE)
   NEW_FC_TEST(Confeti-ex13-Fc3D-SBM.dat

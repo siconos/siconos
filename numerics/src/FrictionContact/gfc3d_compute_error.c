@@ -27,7 +27,7 @@
 #include <float.h>
 #include "sanitizer.h"
 #include "misc.h"
-
+#include "NumericsMatrix.h"
 int gfc3d_compute_error(GlobalFrictionContactProblem* problem, double* restrict reaction , double* restrict velocity, double* restrict globalVelocity, double tolerance, double* restrict error)
 {
 

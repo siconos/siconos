@@ -30,6 +30,7 @@
 #include "SiconosBlas.h"
 #include "NumericsMatrix.h"
 #include "NonlinearComplementarityProblem.h"
+#include "LinearComplementarityProblem.h"
 
 #if defined(__cplusplus)
 #undef restrict
@@ -70,7 +71,7 @@ extern "C"
    * \param x current newton iterate
    * \param r value of the normal map
    */
-  static inline void ncp_pathsearch_update_lcp_data(NCP_struct* problem, LinearComplementarityProblem* lcp_subproblem, unsigned n, double* restrict x_plus, double* restrict x, double* restrict r)
+  static inline void ncp_pathsearch_update_lcp_data(NonlinearComplementarityProblem* problem, LinearComplementarityProblem* lcp_subproblem, unsigned n, double* restrict x_plus, double* restrict x, double* restrict r)
   {
     /* compute M = nabla F(x_plus) */
     problem->compute_nabla_F(problem->env, n, x_plus, problem->nabla_F);

@@ -3,7 +3,18 @@
 #include "SiconosBlas.h"
 #include "GMPReduced.h"
 #include "misc.h"
-
+#include "GenericMechanicalProblem.h"
+#include "GenericMechanical_Solvers.h"
+#include "FrictionContactProblem.h"
+#include "LinearComplementarityProblem.h"
+#include "LCP_Solvers.h"
+#include "LinearSystemProblem.h"
+#include "MixedLinearComplementarityProblem.h"
+#include "mlcp_cst.h"
+#include "lcp_cst.h"
+#include "mlcp_Solvers.h"
+#include "SparseBlockMatrix.h"
+#include "NumericsMatrix.h"
 //#define GMP_DEBUG_REDUCED
 //#define GMP_DEBUG_GMPREDUCED_SOLVE
 

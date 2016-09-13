@@ -83,18 +83,6 @@ extern "C"
 {
 #endif
 
-  /** General interface to solver for relay problems
-      \param[in] problem the RelayProblem structure which handles the problem (M,q)
-      \param[in,out] z a n-vector of doubles which contains the solution of the problem.
-      \param[in,out] w a n-vector of doubles which contains the solution of the problem.
-      \param[in,out] options structure used to define the solver(s) and its (their) parameters
-      \return info termination value
-      - 0 : successful\n
-      - >0 : otherwise see each solver for more information about the log info
-   * \author Nineb Sheherazade.
-   */
-  int relay_driver(RelayProblem* problem, double *z , double *w, SolverOptions* options);
-
   /** set the default solver parameters and perform memory allocation for Relay
       \param[in] problem the RelayProblem structure which handles the problem (M,q)
       \param options the pointer to options to set

@@ -38,12 +38,12 @@
 #include "ncp_newton_FBLSA.h"
 
 #include "SiconosCompat.h"
-
+#include "lcp_cst.h"
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
 #include "debug.h"
 
-void ncp_pathsearch(NCP_struct* problem, double* z, double* F, int *info , SolverOptions* options)
+void ncp_pathsearch(NonlinearComplementarityProblem* problem, double* z, double* F, int *info , SolverOptions* options)
 {
 /* Main step of the algorithm:
  * - compute jacobians

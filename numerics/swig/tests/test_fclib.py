@@ -56,7 +56,7 @@ def solve_global(fcp, solver):
     reaction = np.zeros((size_reaction,))
     velocities = np.zeros((size_reaction,))
     global_velocities = np.zeros((n,))
-    return sn.gfc3d_driver(fcp, reaction, velocities, global_velocities, SO, no)
+    return sn.gfc3d_driver(fcp, reaction, velocities, global_velocities, SO)
 
 
 def test_gfc3d():

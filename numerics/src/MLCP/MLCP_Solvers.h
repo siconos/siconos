@@ -532,8 +532,6 @@ extern "C"
   int mixedLinearComplementarity_rpsor_setDefaultSolverOptions(MixedLinearComplementarityProblem* problem, SolverOptions* pSolver);
   int mixedLinearComplementarity_psor_setDefaultSolverOptions(MixedLinearComplementarityProblem* problem, SolverOptions* pSolver);
 
-
-  int mlcp_driver(MixedLinearComplementarityProblem* problem, double *z, double *w, SolverOptions* options);
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif

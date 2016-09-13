@@ -19,7 +19,9 @@
 #include <stdlib.h>
 #include "NonSmoothDrivers.h"
 #include "frictionContact_test_function.h"
-
+#include "SolverOptions.h"
+#include "Friction_cst.h"
+#include "fc3d_Solvers.h"
 
 static inline int test_rover(char  * filename)
 {

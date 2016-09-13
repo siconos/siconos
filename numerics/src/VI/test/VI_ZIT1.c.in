@@ -26,6 +26,9 @@
 #include "SiconosSets.h"
 
 #include "SolverOptions.h"
+#include "NumericsMatrix.h"
+#include "VariationalInequality.h"
+#include "VariationalInequality_Solvers.h"
 
 #define N 2
 

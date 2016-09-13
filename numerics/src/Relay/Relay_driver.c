@@ -23,7 +23,11 @@
 #ifndef MEXFLAG
 #include "NonSmoothDrivers.h"
 #endif
+#include "RelayProblem.h"
+#include "SolverOptions.h"
+#include "Relay_Solvers.h"
 #include "relay_cst.h"
+#include "NumericsMatrix.h"
 #include <time.h>
 #include "misc.h"
 

@@ -1,9 +1,9 @@
 
-%include "SolverOptions.h"
+%Include "SolverOptions.h"
 
-%extend _SolverOptions
+%extend SolverOptions_
 {
-  _SolverOptions(enum FRICTION_SOLVER id)
+  SolverOptions_(enum FRICTION_SOLVER id)
   {
     SolverOptions *SO;
     SO = (SolverOptions *) malloc(sizeof(SolverOptions));
@@ -32,14 +32,14 @@
     return SO;
   }
 
-  _SolverOptions()
+  SolverOptions_()
   {
     SolverOptions *SO;
     SO = (SolverOptions *) malloc(sizeof(SolverOptions));
     return SO;
   }
 
-  _SolverOptions(LinearComplementarityProblem* lcp, enum LCP_SOLVER id)
+  SolverOptions_(LinearComplementarityProblem* lcp, enum LCP_SOLVER id)
   {
     SolverOptions *SO;
     SO = (SolverOptions *) malloc(sizeof(SolverOptions));
@@ -47,7 +47,7 @@
     return SO;
   }
 
-  _SolverOptions(MixedLinearComplementarityProblem* mlcp, enum MLCP_SOLVER id)
+  SolverOptions_(MixedLinearComplementarityProblem* mlcp, enum MLCP_SOLVER id)
   {
     SolverOptions *SO;
     SO = (SolverOptions *) malloc(sizeof(SolverOptions));
@@ -56,7 +56,7 @@
     return SO;
   }
 
-  _SolverOptions(MixedComplementarityProblem* mlcp, enum MCP_SOLVER id)
+  SolverOptions_(MixedComplementarityProblem* mlcp, enum MCP_SOLVER id)
   {
     SolverOptions *SO;
     SO = (SolverOptions *) malloc(sizeof(SolverOptions));
@@ -65,7 +65,7 @@
     return SO;
   }
 
-  _SolverOptions(MixedComplementarityProblem2* mcp, enum MCP_SOLVER id)
+  SolverOptions_(MixedComplementarityProblem2* mcp, enum MCP_SOLVER id)
   {
     SolverOptions *SO;
     SO = (SolverOptions *) malloc(sizeof(SolverOptions));
@@ -73,7 +73,7 @@
     return SO;
   }
 
-  _SolverOptions(VariationalInequality* vi, enum VI_SOLVER id)
+  SolverOptions_(VariationalInequality* vi, enum VI_SOLVER id)
   {
     SolverOptions *SO;
     SO = (SolverOptions *) malloc(sizeof(SolverOptions));
@@ -81,7 +81,7 @@
     return SO;
   }
 
-  _SolverOptions(AffineVariationalInequalities* vi, enum AVI_SOLVER id)
+  SolverOptions_(AffineVariationalInequalities* vi, enum AVI_SOLVER id)
   {
     SolverOptions *SO;
     SO = (SolverOptions *) malloc(sizeof(SolverOptions));
@@ -90,7 +90,7 @@
     return SO;
   }
 
-  ~_SolverOptions()
+  ~SolverOptions_()
   {
     solver_options_delete($self);
     free($self);

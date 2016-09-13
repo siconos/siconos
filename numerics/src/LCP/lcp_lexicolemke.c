@@ -22,8 +22,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <float.h>
-#include "LCP_Solvers.h"
 #include "pivot-utils.h"
+#include "misc.h"
+#include "lcp_headers.h"
 #include "misc.h"
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES

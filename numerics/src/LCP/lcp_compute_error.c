@@ -18,6 +18,7 @@
 #include "SiconosBlas.h"
 #include "LinearComplementarityProblem.h"
 #include "LCP_Solvers.h"
+#include "NumericsMatrix.h"
 #include "misc.h"
 
 void lcp_compute_error_only(unsigned int n, double *z , double *w, double * error)

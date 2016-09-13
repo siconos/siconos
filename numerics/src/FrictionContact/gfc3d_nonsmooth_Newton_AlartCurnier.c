@@ -43,8 +43,8 @@
 
 #include "gfc3d_compute_error.h"
 #include "SiconosBlas.h"
-
-
+#include "NumericsMatrix.h"
+#include "NumericsSparseMatrix.h"
 /* #define DEBUG_MESSAGES 1 */
 /* #define DEBUG_STDOUT */
 #include <debug.h>

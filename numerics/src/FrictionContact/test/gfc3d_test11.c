@@ -19,6 +19,7 @@
 #include <stdlib.h>
 #include "NonSmoothDrivers.h"
 #include "globalFrictionContact_test_function.h"
+#include "Friction_cst.h"
 
 
 

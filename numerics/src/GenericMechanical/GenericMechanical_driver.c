@@ -30,7 +30,11 @@
 #include "GMPReduced.h"
 #include "SiconosBlas.h"
 #include "misc.h"
-
+#include "lcp_Solvers.h"
+#include "FrictionContactProblem.h"
+#include "LinearSystemProblem.h"
+#include "Friction_cst.h"
+#include "fc3d_onecontact_nonsmooth_Newton_solvers.h"
 /* #define GENERICMECHANICAL_DEBUG  */
 /* #define GENERICMECHANICAL_DEBUG2  */
 /* #define GENERICMECHANICAL_DEBUG_CMP */
@@ -43,6 +47,8 @@
 //#define DEBUG_MESSAGES
 //#define DEBUG_STDOUT
 #include "debug.h"
+#include "LinearComplementarityProblem.h"
+#include "lcp_cst.h"
 
 int GenericMechanical_compute_error(GenericMechanicalProblem* pGMP, double *reaction , double *velocity, double tol, SolverOptions* options, double * err)
 {

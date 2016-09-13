@@ -27,11 +27,11 @@ Ferris solves the subsequent AVI.
 #include "avi_caoferris.h"
 #include "relay_cst.h"
 #include "AffineVariationalInequalities.h"
-
+#include "SiconosSets.h"
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
 #include "debug.h"
-
+#include <stdlib.h>
 
 void relay_avi_caoferris_test(RelayProblem* problem, double *z, double *w, int *info, SolverOptions* options)
 {

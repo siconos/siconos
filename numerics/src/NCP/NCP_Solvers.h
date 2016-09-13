@@ -92,7 +92,7 @@ extern "C"
    * \param info 0 if everything worked
    * \param options struct used to specify the solver parameters
    */
-   void ncp_pathsearch(NCP_struct* problem, double* z, double* F, int *info , SolverOptions* options);
+   void ncp_pathsearch(NonlinearComplementarityProblem* problem, double* z, double* F, int *info , SolverOptions* options);
 
   /** NCP Solver using the PATH solver
    * \param problem the formalization of the NCP problem
@@ -101,7 +101,7 @@ extern "C"
    * \param info 0 if everything worked
    * \param options struct used to specify the solver parameters
    */
-   void ncp_path(NCP_struct* problem, double* z, double* F, int *info , SolverOptions* options);
+   void ncp_path(NonlinearComplementarityProblem* problem, double* z, double* F, int *info , SolverOptions* options);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

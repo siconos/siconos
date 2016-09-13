@@ -28,6 +28,8 @@
  * \author Olivier Huber
 */
 
+#include "NumericsFwd.h"
+
 /** \struct generic_set SiconosSets.h
  * Generic set (can be seen as a kind of ``base class''). Mainly used to infer
  * the type of set (box, polytope, ...) to properly operate on it
@@ -52,7 +54,7 @@ typedef struct
 /** \struct Polyhedron SiconosSets.h
  * Definition of a polytope in terms of (H,K) representation
  */
-typedef struct
+struct polyhedron_
 {
   int id; /**< id of the structure, usually solver specific */
   unsigned size_ineq; /**< number of inequalities */
@@ -61,7 +63,7 @@ typedef struct
   double* K; /**< K vector in an (H,K) representation of a polytope H x <= K */
   double* Heq; /**< Heq matrix for the equality constraints Heq x = Keq */
   double* Keq; /**< Keq vector for the equality constraints Heq x = Keq */
-} polyhedron;
+};
 
 enum SICONOS_SET_ID { SICONOS_SET_POSITIVE_ORTHANT, SICONOS_SET_BOX, SICONOS_SET_POLYHEDRON };
 

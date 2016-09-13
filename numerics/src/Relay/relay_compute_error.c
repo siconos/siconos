@@ -23,7 +23,7 @@
 
 #include "sanitizer.h"
 #include "misc.h"
-
+#include "NumericsMatrix.h"
 
 void project_on_box(int n, double* restrict z, double* restrict lb, double* restrict ub)
 {

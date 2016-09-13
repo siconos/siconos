@@ -406,7 +406,7 @@ namespace std11 = boost;
 
 #ifdef WITH_SERIALIZATION
 %make_picklable(Callback, Numerics);
-%make_picklable(_SolverOptions, Numerics);
+%make_picklable(SolverOptions_, Numerics);
 %make_picklable(FrictionContactProblem, Numerics);
 %make_picklable(NumericsMatrix, Numerics);
 %make_picklable(SparseBlockStructuredMatrix, Numerics);

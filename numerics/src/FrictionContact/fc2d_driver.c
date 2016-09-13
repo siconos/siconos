@@ -19,7 +19,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-
+#include "NumericsMatrix.h"
 #include "fc2d_Solvers.h"
 #include "NonSmoothDrivers.h"
 #include "misc.h"

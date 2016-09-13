@@ -20,7 +20,10 @@
 #include <string.h>
 #include <time.h>
 #include <math.h>
+#include "LinearSystemProblem.h"
+#include "SolverOptions.h"
 #include "NonSmoothDrivers.h"
+#include "NumericsMatrix.h"
 #include "SiconosLapack.h"
 #include "misc.h"
 

@@ -20,7 +20,9 @@
 #include <stdlib.h>
 #include "NonSmoothDrivers.h"
 #include "MCP_cst.h"
-
+#include "MixedComplementarityProblem.h"
+#include "SolverOptions.h"
+#include "MCP_Solvers.h"
 static double M[4] = {2.0, 1.0, 1.0, 2.0};
 static double q[4] = { -5.0, -6.0};
 

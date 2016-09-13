@@ -19,7 +19,9 @@
 #include <stdlib.h>
 #include "NonSmoothDrivers.h"
 #include "globalFrictionContact_test_function.h"
-
+#include "gfc3d_Solvers.h"
+#include "GlobalFrictionContactProblem.h"
+#include "NumericsMatrix.h"
 
 int globalFrictionContact_test_function(FILE * f, SolverOptions * options)
 {

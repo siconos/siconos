@@ -7,7 +7,9 @@
 #include "fc3d_Solvers.h"
 #include "NonSmoothDrivers.h"
 #include "fclib_interface.h"
-
+#include "GlobalFrictionContactProblem.h"
+#include "gfc3d_Solvers.h"
+#include "NumericsSparseMatrix.h"
 /* #define DEBUG_MESSAGES 1 */
 /* #define DEBUG_STDOUT */
 #include "debug.h"

@@ -28,6 +28,7 @@
 #endif
 #include "mlcp_cst.h"
 #include "misc.h"
+#include "NumericsMatrix.h"
 
 char*  SICONOS_NONAME_STR = "NONAME";
 char*  SICONOS_MLCP_PGS_STR = "MLCP_PGS";

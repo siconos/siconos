@@ -22,8 +22,8 @@
 #include <stdio.h>
 #include <math.h>
 #include <stdlib.h>
-
 #include "MixedLinearComplementarityProblem.h"
+#include "NumericsMatrix.h"
 #include "misc.h"
 
 void mixedLinearComplementarity_display(MixedLinearComplementarityProblem* p)

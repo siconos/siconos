@@ -114,6 +114,29 @@ MACRO(RM_TEST2)
   LIST(REMOVE_ITEM ${TEST_EXE}_NAME_LIST_${_CURRENT_TEST_DIRECTORY} ${TEST_NAME})
 ENDMACRO(RM_TEST2)
 
+# ====- Generate test file for 3D Fricton Contact Problem =====
+# Source file used to generate tests is fctest.c.in
+# Output file name (in build dir) is test_fc3d_SOLVERNAME_INTERNAL_SOLVERNAME_PARAM_VALUES ... .c
+#
+# Usage:
+#
+# NEW_FC_TEST(arg[0], arg[1] ...)
+# required args:
+#  0 : input data file name
+#  1 : solver name/id
+# optional args: 
+#  2 : tolerance
+#  3 : max iterations number
+#  4 : internal solver name/id
+#  5 : internal solver tolerance
+#  6 : internal solver, max iterations number
+#  others:
+#  IPARAM idx value ...
+# to set iparam[idx] = value
+# and/or :
+#  DPARAM idx value ...
+#  INTERNAL_IPARAM idx value ...
+#  INTERNAL_DPARAM idx value ...
 MACRO(NEW_FC_TEST)
   
   SET(TEST_DATA ${ARGV0})
@@ -185,12 +208,6 @@ MACRO(NEW_FC_TEST)
   UNSET(INTERNAL_DPARAM_VAL)
   UNSET(INTERNAL_DPARAM_VAL_STR)
   UNSET(INTERNAL_DPARAM_VAL_STR_UNDER)
-
- 
-  
-
-
-
   
   IF(${ARGC} GREATER 7)
     #MESSAGE("ARGN : " "${ARGN}")

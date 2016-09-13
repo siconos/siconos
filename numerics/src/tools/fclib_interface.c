@@ -17,7 +17,7 @@
 */
 #include <stdio.h>
 #include <stdlib.h>
-#include "NonSmoothDrivers.h"
+//#include "NonSmoothDrivers.h"
 #include "SiconosConfig.h"
 
 #define DEBUG_MESSAGES
@@ -25,7 +25,7 @@
 #include "debug.h"
 #ifdef WITH_FCLIB
 #include "fclib_interface.h"
-
+#include "FrictionContactProblem.h"
 
 
 void int_to_csi(int* o, csi* d, unsigned int n);

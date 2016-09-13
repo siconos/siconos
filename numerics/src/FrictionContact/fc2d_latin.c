@@ -22,7 +22,7 @@
 #include <math.h>
 #include <float.h>
 #include <assert.h>
-
+#include "NumericsMatrix.h"
 #include "fc2d_Solvers.h"
 #include "SiconosLapack.h"
 #include "misc.h"

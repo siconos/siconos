@@ -75,11 +75,12 @@ see SOCLCP_cst.h for solver ids.
 */
 
 #include "NumericsMatrix.h"
+#include "NumericsFwd.h"
 
 /** \struct  SecondOrderConeLinearComplementarityProblem SecondOrderConeLinearComplementarityProblem.h
  *  The structure that defines a Second Order Cone Linear Complementarity Problem, , see details in \ref soclcpProblem.
  */
-typedef struct
+struct SecondOrderConeLinearComplementarityProblem_
 {
   /** the problem dimension. must be equal to\f$ \sum_{i}^{n_c} d_i \f$   */
   int n;
@@ -97,7 +98,7 @@ typedef struct
   /** \f${\mu} \in {{\mathrm{I\!R}}}^{n_c} \f$, vector of coefficients
       (\f$ n_c =\f$ nc) */
   double* mu;
-} SecondOrderConeLinearComplementarityProblem;
+};
 
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)

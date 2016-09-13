@@ -21,7 +21,7 @@
 #include <string.h>
 #include <math.h>
 #include <float.h>
-
+#include "NonSmoothDrivers.h"
 #include "fc2d_Solvers.h"
 #include "fc2d_compute_error.h"
 #include "LCP_Solvers.h"

@@ -18,7 +18,7 @@
 #include <assert.h>
 #include "Friction_cst.h"
 #include "SiconosLapack.h"
-
+#include "NumericsSparseMatrix.h"
 #include "sanitizer.h"
 
 void computeDenseAWpB(

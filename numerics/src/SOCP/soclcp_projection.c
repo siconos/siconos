@@ -22,6 +22,7 @@
 #include "projectionOnCylinder.h"
 #include "soclcp_compute_error.h"
 #include "soclcp_projection.h"
+#include "SparseBlockMatrix.h"
 #include "SiconosBlas.h"
 #include <stdlib.h>
 #include <stdio.h>

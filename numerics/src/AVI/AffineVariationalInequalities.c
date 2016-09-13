@@ -23,6 +23,8 @@
 #include <math.h>
 #include <stdlib.h>
 #include <assert.h>
+#include "NumericsMatrix.h"
+#include "SiconosSets.h"
 #include "AffineVariationalInequalities.h"
 #include "misc.h"
 

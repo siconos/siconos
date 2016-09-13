@@ -1,3 +1,4 @@
+
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
@@ -19,10 +20,12 @@
 #include <assert.h>
 #include <math.h>
 #include "FrictionContactProblem_as_VI.h"
-
+#include "FrictionContactProblem.h"
+#include "VariationalInequality.h"
 #include "projectionOnCone.h"
 #include "misc.h"
 #include "SiconosBlas.h"
+#include "NumericsMatrix.h"
 
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */

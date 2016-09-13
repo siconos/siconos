@@ -34,15 +34,6 @@
 extern "C"
 {
 #endif
-  /** General interface to solvers for friction-contact 2D problem
-   *  \param[in] problem the structure which handles the Friction-Contact problem
-   *  \param[in,out] reaction global vector (n)
-   *  \param[in,out] velocity global vector (n)
-   *  \param[in,out] options structure used to define the solver(s) and their parameters
-   *  \return result (0 if successful otherwise 1).
-   */
-  int fc2d_driver(FrictionContactProblem* problem, double *reaction , double *velocity, SolverOptions* options);
-
 
   /** set the default solver parameters and perform memory allocation for fc3d
       \param options   the pointer to the options to set

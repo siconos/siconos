@@ -21,7 +21,7 @@
 
 #include <assert.h>
 
-#include "SolverOptions.h"
+#include "lcp_headers.h"
 #include "SiconosBlas.h"
 #include "NSSTools.h"
 

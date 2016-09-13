@@ -23,7 +23,7 @@
 #include "SiconosBlas.h"
 #include "fc2d_Solvers.h"
 #include "misc.h"
-
+#include "NumericsMatrix.h"
 
 void shuffle(int size, int * randnum);
 void shuffle(int size, int * randnum) //size is the given range

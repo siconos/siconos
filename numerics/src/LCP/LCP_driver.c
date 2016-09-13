@@ -23,7 +23,10 @@
 #include "NonSmoothDrivers.h"
 #include "misc.h"
 #include "lcp_cst.h"
-
+#include "SolverOptions.h"
+#include "LCP_Solvers.h"
+#include "NumericsMatrix.h"
+#include "LinearComplementarityProblem.h"
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
 #include "debug.h"

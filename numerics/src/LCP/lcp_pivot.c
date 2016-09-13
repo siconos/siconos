@@ -22,7 +22,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "LCP_Solvers.h"
+#include "lcp_headers.h"
 #include "pivot-utils.h"
 #include "misc.h"
 #include "SiconosLapack.h"

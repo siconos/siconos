@@ -26,6 +26,7 @@
   \author Franck Perignon
 */
 #include "SiconosConfig.h"
+#include "NumericsFwd.h"
 
 /** \struct Callback SolverOptions.h
 Structure used to store user callbacks inside solvers
@@ -41,10 +42,10 @@ typedef struct
 } Callback;
 
 
-/** \struct _SolverOptions SolverOptions.h
+/** \struct SolverOptions_ SolverOptions.h
     Structure used to send options (name, parameters and so on) to a specific solver (mainly from Kernel to Numerics).
 */
-typedef struct _SolverOptions
+struct SolverOptions_
 {
   int solverId;                            /**< solverId Id of the solver (see ) */
   int isSet;                               /**< isSet int equal to false(0) if the parameters below have not been set (ie need to read default values) else true(1)*/
@@ -59,14 +60,14 @@ typedef struct _SolverOptions
   int iWorkSize;                           /**< iWorkSize size of vector iWork */
   int * iWork;                             /**< iWork is a pointer on a working memory zone (for integers) reserved for the solver .*/
   int numberOfInternalSolvers;             /**< numberOfInternalSolvers the number of internal or local 'sub-solvers' used by the solver*/
-  struct _SolverOptions * internalSolvers; /**< internalSolvers pointer to sub-solvers*/
+  struct SolverOptions_ * internalSolvers; /**< internalSolvers pointer to sub-solvers*/
   Callback * callback;                     /**< callback a pointer to user Callback*/
 
   void * solverParameters;                 /**< additional parameters specific to the solver */
 
   void * solverData;                       /**< additional data specific to the solver */
 
-} SolverOptions;
+};
 
 enum SICONOS_NUMERICS_PROBLEM_TYPE
 {

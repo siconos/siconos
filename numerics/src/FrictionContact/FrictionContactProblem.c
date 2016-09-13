@@ -18,6 +18,8 @@
 #include <stdlib.h>
 #include <assert.h>
 #include "FrictionContactProblem.h"
+#include "NumericsMatrix.h"
+#include <stdio.h>
 #include "misc.h"
 
 //#define DEBUG_STDOUT

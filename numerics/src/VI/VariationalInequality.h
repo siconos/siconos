@@ -67,7 +67,8 @@
 #ifndef VARIATIONALINEQUALITY_H
 #define VARIATIONALINEQUALITY_H
 
-#include "NumericsMatrix.h"
+#include "NumericsFwd.h"
+#include <stdio.h>
 
 typedef void * (FVIPtr)(void*, double *, double *);
 typedef void (*ptrFunctionVI)(void *self, int n, double* x, double* fx);
@@ -77,7 +78,7 @@ typedef void (*ptrFunctionVI_nabla)(void *self, int n, double* x, NumericsMatrix
 /** \struct VariationalInequality VariationalInequality.h
  * 
  */
-typedef struct VariationalInequality_
+struct VariationalInequality_
 {
   int size; /**< size of the VI \f$ n \f$ */
   void *env; /**< pointer onto env object (which is self is the simplest case)*/
@@ -90,7 +91,7 @@ typedef struct VariationalInequality_
    * By default, set istheNormVIset =0 */
   void* set; /**< opaque struct that represent the set K (possibly empty) */
   NumericsMatrix* nabla_F; /**< storage for \f$\nabla_x F\f$*/
-} VariationalInequality;
+};
 
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)

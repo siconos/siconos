@@ -21,11 +21,13 @@
 #include <string.h>
 #include <math.h>
 #include <float.h>
+#include "NonSmoothDrivers.h"
 #include "Relay_Solvers.h"
 #include "LCP_Solvers.h"
 #include <assert.h>
 #include "relay_cst.h"
 #include "misc.h"
+#include "lcp_cst.h"
 void relay_enum(RelayProblem* problem, double *z, double *w, int *info, SolverOptions* options)
 {
   int i;

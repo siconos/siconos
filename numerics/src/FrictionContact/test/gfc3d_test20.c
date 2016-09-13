@@ -20,6 +20,8 @@
 #include "NonSmoothDrivers.h"
 #include "globalFrictionContact_test_function.h"
 #include "fclib_interface.h"
+#include "Friction_cst.h"
+#include "gfc3d_Solvers.h"
 
 
 

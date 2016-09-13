@@ -23,7 +23,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include <assert.h>
-
+#include "NumericsMatrix.h"
 #include "LinearComplementarityProblem.h"
 #include "misc.h"
 

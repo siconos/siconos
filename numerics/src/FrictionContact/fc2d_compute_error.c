@@ -17,7 +17,7 @@
 */
 
 #include "fc2d_compute_error.h"
-
+#include "NumericsMatrix.h"
 #include "FrictionContactProblem.h"
 #include "SiconosBlas.h"
 #include <math.h>

@@ -24,6 +24,9 @@
 #include <string.h>
 
 #include "NumericsMatrix.h"
+#include "NumericsSparseMatrix.h"
+#include "SiconosCompat.h"
+#include "SparseBlockMatrix.h"
 #include "NumericsMatrix_private.h"
 #include "NM_conversions.h"
 #include "SiconosLapack.h"

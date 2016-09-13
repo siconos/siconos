@@ -3,10 +3,10 @@
 %include "VariationalInequality_Solvers.h"
 %include "VI_cst.h"
 
-%extend VariationalInequality_
+%extend VariationalInequality
 {
 
-  VariationalInequality_(PyObject* n)
+  VariationalInequality(PyObject* n)
   {
      VariationalInequality* vi = variationalInequality_new((int) PyInt_AsLong(n));
      vi->F = &call_py_compute_F;
@@ -24,7 +24,7 @@
   }
 
 
-  VariationalInequality_(PyObject* n, PyObject* py_compute)
+  VariationalInequality(PyObject* n, PyObject* py_compute)
   {
 
      VariationalInequality* vi = variationalInequality_new((int) PyInt_AsLong(n));
@@ -138,7 +138,7 @@
       return PyInt_FromLong((uintptr_t)&$self->env);
     }
 
-  ~VariationalInequality_()
+  ~VariationalInequality()
   {
     if ($self->nabla_F)
     {

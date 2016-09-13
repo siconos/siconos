@@ -25,6 +25,7 @@
 #include "Relay_Solvers.h"
 #include "LCP_Solvers.h"
 #include <assert.h>
+#include "NumericsMatrix.h"
 
 void relay_to_lcp(RelayProblem* problem, LinearComplementarityProblem * lcp_problem)
 {

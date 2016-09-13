@@ -24,7 +24,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <limits.h>
-#include "LCP_Solvers.h"
+#include "lcp_headers.h"
 #include "pivot-utils.h"
 #include "lumod_wrapper.h"
 #include "misc.h"

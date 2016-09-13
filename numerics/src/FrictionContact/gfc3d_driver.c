@@ -23,6 +23,7 @@
 #include <assert.h>
 #include "SiconosConfig.h"
 #include "gfc3d_Solvers.h"
+#include "NonSmoothDrivers.h"
 #include "misc.h"
 
 int * Global_ipiv = NULL;

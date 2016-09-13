@@ -21,7 +21,7 @@
 #include <math.h>
 #include <float.h>
 
-#include "LCP_Solvers.h"
+#include "lcp_headers.h"
 #include "SiconosLapack.h"
 #include "Newton_Methods.h"
 #include "FischerBurmeister.h"

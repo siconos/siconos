@@ -96,8 +96,8 @@ with \f$C^{\alpha}_{\mu^\alpha} =\{ r^\alpha, \|r_{t}\| \leq \mu_{\alpha} |r^\al
   \author Vincent Acary.
 */
 
-#include "NumericsMatrix.h"
-
+#include "NumericsFwd.h"
+#include <stdio.h>
 /** \struct GFC3D_workspace GlobalFrictionContactProblem.h
  * Workspace for GFC3D computations: factorized M (since we compute multiples
  * time the global velocity*/
@@ -127,7 +127,7 @@ typedef struct
  * and the set \f$C^{\alpha,\star}_{\mu^\alpha}\f$ is its dual.
 
 */
-typedef struct
+struct GlobalFrictionContactProblem_
 {
   /** dimension \f$d=2\f$ or \f$d=3\f$ of the contact space (3D or 2D ) */
   int dimension;
@@ -150,7 +150,7 @@ typedef struct
   void* env; 
   /** workspace */
   GFC3D_workspace* workspace;
-} GlobalFrictionContactProblem;
+};
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"

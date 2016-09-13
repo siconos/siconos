@@ -41,6 +41,7 @@ dim(v)=nn
 #include "mlcp_direct.h"
 #include "mlcp_tool.h"
 #include "SiconosLapack.h"
+#include "NumericsMatrix.h"
 #include "misc.h"
 
 #define DIRECT_SOLVER_USE_DGETRI

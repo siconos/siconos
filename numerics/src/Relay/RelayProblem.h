@@ -59,19 +59,19 @@
   \author Franck Perignon
 */
 
-#include "NumericsMatrix.h"
+#include "NumericsFwd.h"
 
 /** \struct RelayProblem RelayProblem.h
  * \brief Struct defining a Relay problem
  */
-typedef struct
+struct RelayProblem_
 {
   int size;          /**< size dim of the problem */
   NumericsMatrix* M; /**< M matrix of the Relay */
   double* q;        /**< q vector */
   double* lb;       /**< lb upper bound */
   double* ub;       /**< ub lower bound */
-} RelayProblem;
+};
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"

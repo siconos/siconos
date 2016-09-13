@@ -21,7 +21,7 @@
 #include <string.h>
 #include <math.h>
 #include <float.h>
-#include "LCP_Solvers.h"
+#include "lcp_headers.h"
 #include <assert.h>
 #include "SiconosBlas.h"
 #include "misc.h"

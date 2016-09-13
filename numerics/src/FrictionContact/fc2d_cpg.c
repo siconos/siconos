@@ -17,7 +17,7 @@
 */
 
 #include "fc2d_Solvers.h"
-
+#include "NumericsMatrix.h"
 #include <assert.h>
 #include <math.h>
 #include "SiconosBlas.h"

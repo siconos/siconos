@@ -19,10 +19,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#ifndef MEXFLAG
-#include "NonSmoothDrivers.h"
-#endif
+/* #ifndef MEXFLAG */
+/* #include "NonSmoothDrivers.h" */
+/* #endif */
 #include <assert.h>
+#include "lcp_headers.h"
+#include "SparseBlockMatrix.h"
 #include "SiconosBlas.h"
 
 #include "sanitizer.h"

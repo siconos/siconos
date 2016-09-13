@@ -3,8 +3,12 @@
 #include <math.h>
 #include "NonSmoothDrivers.h"
 #include "projectionOnCone.h"
-
+#include "VariationalInequality.h"
+#include "FrictionContactProblem.h"
+#include "SolverOptions.h"
+#include "VariationalInequality_Solvers.h"
 #include "SiconosBlas.h"
+#include "NumericsMatrix.h"
 
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 

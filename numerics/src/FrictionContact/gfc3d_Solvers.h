@@ -59,17 +59,6 @@ typedef void (*FreeSolverGlobalPtr)(GlobalFrictionContactProblem*);
 extern "C"
 {
 #endif
-  /** General interface to solvers for global friction-contact 3D problem
-    \param[in] problem the structure which handles the Friction-Contact problem
-    \param[in,out] reaction global vector (n)
-    \param[in,out] velocity global vector (n)
-    \param[in,out] globalVelocity global vector
-    \param[in,out] options structure used to define the solver(s) and their parameters
-    \return result (0 if successful otherwise 1).
-  */
-  int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction ,
-                                     double *velocity, double* globalVelocity,
-                                     SolverOptions* options);
 
   /** set the default solver parameters and perform memory allocation for gfc3d
       \param options the pointer to the array of options to set

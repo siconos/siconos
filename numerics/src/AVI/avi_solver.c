@@ -17,9 +17,11 @@
 */
 
 #include "NonSmoothDrivers.h"
-
 #include "AVI_Solvers.h"
+#include "AVI_cst.h"
 #include "misc.h"
+#include "assert.h"
+#include "NumericsMatrix.h"
 
 char *  SICONOS_AVI_CAOFERRIS_STR = "AVI from Cao & Ferris";
 

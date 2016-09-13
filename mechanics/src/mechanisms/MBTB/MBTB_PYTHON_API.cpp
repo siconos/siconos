@@ -687,9 +687,6 @@ void  MBTB_initSimu(double hTS, int withProj)
   fp = fopen("simulation_results.dat", "w");
   _MBTB_printHeader(fp);
   fclose(fp) ;
-  NumericsOptions global_options;
-  global_options.verboseMode=0;
-  setNumericsOptions(&global_options);
   cout <<"====> end of initialisation" <<endl<<endl;
 }
 SP::Model MBTB_model()

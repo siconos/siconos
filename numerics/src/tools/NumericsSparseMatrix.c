@@ -4,7 +4,6 @@
 #include "SparseMatrix.h"
 #include <math.h>
 #include <float.h>
-
 #include "SiconosCompat.h"
 #include "NumericsSparseMatrix.h"
 

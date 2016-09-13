@@ -19,8 +19,8 @@
 #ifndef NUMERICSGENERICMECHANICALPROBLEM_H
 #define NUMERICSGENERICMECHANICALPROBLEM_H
 
-#include "NumericsMatrix.h"
-#include "SolverOptions.h"
+#include "NumericsFwd.h"
+
 /* void * solverFC3D; */
 /* void * solverEquality; */
 /* void * solverLCP; */
@@ -37,15 +37,15 @@
  *   The M and q contains the matrices of the GMP problem. The sub problems (problems) has also a M and q member usfull for the computation of the local error.
  *
  */
-typedef struct _listNumericsProblem
+struct listNumericsProblem_
 {
   int type;
   void * problem;
   double *q;/*a pointer on the q of the problem*/
   int size;/*size of the local problem.(needed because of dense case)*/
-  struct _listNumericsProblem * nextProblem;
-  struct _listNumericsProblem * prevProblem;
-} listNumericsProblem;
+  struct listNumericsProblem_ * nextProblem;
+  struct listNumericsProblem_ * prevProblem;
+};
 
 
 /** \struct GenericMechanicalProblem GenericMechanicalProblem.h
@@ -67,7 +67,7 @@ typedef struct _listNumericsProblem
  * - addProblem() ,
  * - and freeGenericMechanicalProblem() FUNCTIONS.
  */
-typedef struct
+struct GenericMechanicalProblem_
 {
   /*Number of line of blocks.*/
   /*PRIVATE: manage by addProblem.*/
@@ -84,7 +84,7 @@ typedef struct
   /*PRIVATE: manage by addProblem.*/
   listNumericsProblem *lastListElem;
   //  void * * problems;
-} GenericMechanicalProblem;
+};
 
 
 

@@ -20,7 +20,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include "LCP_Solvers.h"
+#include "lcp_headers.h"
 #include "SiconosLapack.h"
 #include <assert.h>
 #include "misc.h"

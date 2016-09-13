@@ -21,10 +21,17 @@
 #include <time.h>
 #include <math.h>
 #include <float.h>
-#ifndef MEXFLAG
-#include "NonSmoothDrivers.h"
-#endif
+/* #ifndef MEXFLAG */
+/* #include "NonSmoothDrivers.h" */
+/* #endif */
+#include "SparseBlockMatrix.h"
+#include "LinearComplementarityProblem.h"
+#include "MixedLinearComplementarityProblem.h"
+#include "NumericsMatrix.h"
+#include "SolverOptions.h"
 #include "SiconosBlas.h"
+#include "LCP_Solvers.h"
+#include "MLCP_Solvers.h"
 #include <assert.h>
 #include "misc.h"
 

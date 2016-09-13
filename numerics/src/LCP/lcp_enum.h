@@ -19,8 +19,7 @@
 #define LCP_ENUM_H
 
 #include "SiconosConfig.h"
-#include "LinearComplementarityProblem.h"
-#include "SolverOptions.h"
+#include "NumericsFwd.h"
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
