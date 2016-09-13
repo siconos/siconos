@@ -346,35 +346,110 @@ if(WITH_${COMPONENT}_TESTING)
     SICONOS_FRICTION_3D_NSGS ${NSGS_TOL} ${NSGS_NB_IT} 
     SICONOS_FRICTION_3D_ONECONTACT_QUARTIC 1e-6 10)
 
-  SET(test_fc3d_20_PROPERTIES WILL_FAIL TRUE)
+  SET(test_fc3d_NSGS_ONECONTACT_ProjectionOnCone_Tol_1e-5_Max_10000_inTol_0.0_inMax_0___Confeti-ex03-Fc3D-SBM_PROPERTIES WILL_FAIL TRUE)
+  NEW_FC_TEST(Confeti-ex03-Fc3D-SBM.dat
+    SICONOS_FRICTION_3D_NSGS 1e-5 10000
+    SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone 0.0 0)
 
-  NEW_TEST(test_fc3d_20 fc3d_test20.c) 
-  NEW_TEST(test_fc3d_21 fc3d_test21.c)
-  NEW_TEST(test_fc3d_22 fc3d_test22.c)
-  NEW_TEST(test_fc3d_23 fc3d_test23.c)
+  NEW_FC_TEST(Confeti-ex03-Fc3D-SBM.dat
+    SICONOS_FRICTION_3D_NSGS 1e-12 1000
+    SICONOS_FRICTION_3D_ONECONTACT_NSN_AC 1e-16  10)
+
   
-  NEW_TEST(test_fc3d_30 fc3d_test30.c)
-  NEW_TEST(test_fc3d_31 fc3d_test31.c)
-  NEW_TEST(test_fc3d_32 fc3d_test32.c)
-  
-  NEW_TEST(test_fc3d_33 fc3d_test33.c) # DSFP converges with specific rho
+  NEW_FC_TEST(Confeti-ex03-Fc3D-SBM.dat
+    SICONOS_FRICTION_3D_NSGS 1e-12 10000
+    SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration 1e-12  10)
 
-  NEW_TEST(test_fc3d_3400 fc3d_test3400.c) # EG 
-  NEW_TEST(test_fc3d_35 fc3d_test35.c)     # EG
+  NEW_FC_TEST(Confeti-ex13-4contact-Fc3D-SBM.dat
+    SICONOS_FRICTION_3D_NSGS 1e-12 10000
+    SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithRegularization 1e-8  10)
 
-  NEW_TEST(test_fc3d_36 fc3d_test36.c) #TFP with NSGS and projection on cylinder
 
-  #SET(test_fc3d_37_PROPERTIES WILL_FAIL TRUE)
-  #NEW_TEST(test_fc3d_37 fc3d_test37.c) #TFP with ProjectedGradientOnCylinder is not working ...
+  NEW_FC_TEST(Confeti-ex13-Fc3D-SBM.dat
+    SICONOS_FRICTION_3D_NSGS 1e-2 10000
+    SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone 0.0 0)
 
-  #NEW_TEST(test_fc3d_38 fc3d_test38.c) # HP is not converging
 
-  NEW_TEST(test_fc3d_40 fc3d_test40.c) # VI_EG 
+  NEW_FC_TEST(Confeti-ex13-Fc3D-SBM.dat
+    SICONOS_FRICTION_3D_NSGS 1e-5 1000
+    SICONOS_FRICTION_3D_ONECONTACT_NSN_AC 1e-16 10)
+
+  NEW_FC_TEST(Confeti-ex13-Fc3D-SBM.dat
+    SICONOS_FRICTION_3D_NSGS 1e-12 10000
+    SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration 1e-06  100)
+
+
+  NEW_FC_TEST(Confeti-ex13-Fc3D-SBM.dat
+    SICONOS_FRICTION_3D_DSFP  1e-08 10000
+    0 0 0
+    DPARAM 3 5e3)
+
+
+
+  NEW_FC_TEST(Confeti-ex13-Fc3D-SBM.dat
+    SICONOS_FRICTION_3D_EG  1e-08 10000
+    0 0 0
+    DPARAM 3 -3e3)
+
+  NEW_FC_TEST(Confeti-ex13-Fc3D-SBM.dat
+    SICONOS_FRICTION_3D_EG  1e-10 10000
+    0 0 0
+    DPARAM 3 -1.0)
+
+
+  NEW_FC_TEST(Confeti-ex13-Fc3D-SBM.dat
+    SICONOS_FRICTION_3D_TFP)
+
+  #TFP with ProjectedGradientOnCylinder is not working ...
+  SET(test_fc3d_TFP_PGoC_Tol_1e-4_Max_1000_inTol_1e-6_inMax_20000___Confeti-ex13-Fc3D-SBM_PROPERTIES WILL_FAIL TRUE)
+  NEW_FC_TEST(Confeti-ex13-Fc3D-SBM.dat
+    SICONOS_FRICTION_3D_TFP 1e-4 100
+    SICONOS_FRICTION_3D_PGoC 1e-6 200)
+
+  # HP is not converging
+  SET(test_fc3d_HP_Tol_1e-3_Max_10000_inTol_0_inMax_0___Confeti-ex13-Fc3D-SBM_PROPERTIES WILL_FAIL TRUE)
+  NEW_FC_TEST(Confeti-ex13-Fc3D-SBM.dat
+    SICONOS_FRICTION_3D_HP 1e-3 10000)
+
+
+  NEW_TEST(test_fc3d_40 fc3d_test40.c) # VI_EG
+  NEW_FC_TEST(Confeti-ex13-Fc3D-SBM.dat
+    SICONOS_FRICTION_3D_VI_EG 1e-8 10000
+    0 0 0
+    DPARAM 3 -3e3)
+
   NEW_TEST(test_fc3d_41 fc3d_test41.c) # VI_FPP
+  NEW_FC_TEST(Confeti-ex13-Fc3D-SBM.dat
+    SICONOS_FRICTION_3D_VI_FPP 1e-8 100000
+    0 0 0
+    IPARAM 1 2
+    IPARAM 2 0
+    IPARAM 3 0
+    DPARAM 3 -1e1)
+
   NEW_TEST(test_fc3d_42 fc3d_test42.c) # VI_FPP
-  NEW_TEST(test_fc3d_43 fc3d_test43.c) # DSFP converges with specific rho
+  NEW_FC_TEST(BoxesStack1-i100000-32.hdf5.dat
+    SICONOS_FRICTION_3D_VI_FPP 1e-8 100000
+    0 0 0
+    IPARAM 2 1)
+
+  NEW_TEST(test_fc3d_43 fc3d_test43.c) # DSFP converges with specific rho guessed with the nose
+  NEW_FC_TEST(BoxesStack1-i100000-32.hdf5.dat
+    SICONOS_FRICTION_3D_VI_DSFP 1e-3 100000
+    0 0 0
+    DPARAM 3 8e-4)
+
   NEW_TEST(test_fc3d_44 fc3d_test44.c) # VI_EG
+  NEW_FC_TEST(BoxesStack1-i100000-32.hdf5.dat
+    SICONOS_FRICTION_3D_VI_EG 1e-8 100000
+    0 0 0
+    IPARAM 2 1)
+
   NEW_TEST(test_fc3d_45 fc3d_test45.c) # VI_EG
+  NEW_FC_TEST(BoxesStack1-i100000-32.hdf5.dat
+    SICONOS_FRICTION_3D_VI_EG 1e-8 100000
+    0 0 0
+    IPARAM 2 1)
   
   NEW_TEST(test_fc3d_46 fc3d_test46.c) # FPP
   NEW_TEST(test_fc3d_47 fc3d_test47.c) # EG
