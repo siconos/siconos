@@ -1,11 +1,32 @@
 // LCP
+
+%ignore lcp_compute_error_only;
+
+%{
+  #include "LinearComplementarityProblem.h"
+  #include "LCP_Solvers.h"
+  #include "lcp_cst.h"
+  %}
+
 %include "LinearComplementarityProblem.h"
 %include "LCP_Solvers.h"
 %include "lcp_cst.h"
 
-%extend LinearComplementarityProblem_
+%extend SolverOptions
 {
-  LinearComplementarityProblem_(PyObject *o1, PyObject *o2)
+  SolverOptions(LinearComplementarityProblem* lcp, enum LCP_SOLVER id)
+  {
+    SolverOptions *SO;
+    SO = (SolverOptions *) malloc(sizeof(SolverOptions));
+    solver_options_set(SO, id);
+    return SO;
+  }
+
+};
+
+%extend LinearComplementarityProblem
+{
+  LinearComplementarityProblem(PyObject *o1, PyObject *o2)
     {
 
       int is_new_object1=0;
@@ -42,7 +63,7 @@
     }
 
 
-  ~LinearComplementarityProblem_()
+  ~LinearComplementarityProblem()
   {
     freeLinearComplementarityProblem($self);
   }

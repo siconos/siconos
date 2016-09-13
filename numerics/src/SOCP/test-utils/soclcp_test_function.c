@@ -19,7 +19,7 @@
 #include <stdlib.h>
 #include "NonSmoothDrivers.h"
 #include "SecondOrderConeLinearComplementarityProblem.h"
-#include "soclcp_Solvers.h"
+#include "SOCLCP_Solvers.h"
 #include "soclcp_test_function.h"
 
 

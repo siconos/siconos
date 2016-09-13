@@ -1,0 +1,39 @@
+#ifndef NumericsFwd_h
+#define NumericsFwd_h
+
+#define TYPEDEF_STRUCT(X) \
+  typedef struct X X; \
+
+// Matrices storage
+TYPEDEF_STRUCT(NumericsMatrix)
+TYPEDEF_STRUCT(polyhedron)
+TYPEDEF_STRUCT(NumericsSparseMatrix)
+TYPEDEF_STRUCT(NumericsSparseLinearSolverParams)
+TYPEDEF_STRUCT(SparseBlockStructuredMatrix)
+TYPEDEF_STRUCT(SparseBlockStructuredMatrixPred)
+TYPEDEF_STRUCT(SparseBlockCoordinateMatrix)
+
+// Nonsmooth solvers
+TYPEDEF_STRUCT(SolverOptions)
+
+// Nonsmooth problems 
+TYPEDEF_STRUCT(SecondOrderConeLinearComplementarityProblem)
+TYPEDEF_STRUCT(SecondOrderConeLinearComplementarityProblem_as_VI)
+TYPEDEF_STRUCT(RelayProblem)
+TYPEDEF_STRUCT(NonlinearComplementarityProblem)
+TYPEDEF_STRUCT(MixedLinearComplementarityProblem)
+TYPEDEF_STRUCT(MixedComplementarityProblem)
+TYPEDEF_STRUCT(MixedComplementarityProblem2)
+TYPEDEF_STRUCT(LinearSystemProblem)
+TYPEDEF_STRUCT(LinearComplementarityProblem)
+TYPEDEF_STRUCT(GlobalFrictionContactProblem)
+TYPEDEF_STRUCT(GenericMechanicalProblem)
+TYPEDEF_STRUCT(listNumericsProblem)
+TYPEDEF_STRUCT(FrictionContactProblem_as_VI)
+TYPEDEF_STRUCT(FrictionContactProblem)
+TYPEDEF_STRUCT(VariationalInequality)
+TYPEDEF_STRUCT(AffineVariationalInequalities)
+
+
+
+#endif

@@ -1,16 +1,32 @@
-
 // MCP
+%{
+#include "MixedComplementarityProblem.h"
+#include "MCP_Solvers.h"
+#include "MCP_cst.h"
+  %}
+
 %include "MixedComplementarityProblem.h"
 %include "MCP_Solvers.h"
 %include "MCP_cst.h"
 
+%extend SolverOptions
+{
+  SolverOptions(MixedComplementarityProblem* mlcp, enum MCP_SOLVER id)
+  {
+    SolverOptions *SO;
+    SO = (SolverOptions *) malloc(sizeof(SolverOptions));
+    SO->solverId=id;
+    mixedComplementarity_setDefaultSolverOptions(mlcp, SO);
+    return SO;
+  }
+};
 
-%extend MixedComplementarityProblem_
+%extend MixedComplementarityProblem
 {
 
 
 
-  MixedComplementarityProblem_()
+  MixedComplementarityProblem()
    {
      MixedComplementarityProblem* MCP;
      MCP =  (MixedComplementarityProblem *) malloc(sizeof(MixedComplementarityProblem));
@@ -70,7 +86,7 @@
 
 
 
-  MixedComplementarityProblem_(PyObject *sizeEq, PyObject *sizeIneq, PyObject *o1, PyObject *o2)
+  MixedComplementarityProblem(PyObject *sizeEq, PyObject *sizeIneq, PyObject *o1, PyObject *o2)
   {
      MixedComplementarityProblem* MCP;
      MCP =  (MixedComplementarityProblem *) malloc(sizeof(MixedComplementarityProblem));
@@ -129,7 +145,7 @@
      return MCP;
    }
 
-  ~MixedComplementarityProblem_()
+  ~MixedComplementarityProblem()
   {
     free($self->Fmcp);
     free($self->nablaFmcp);

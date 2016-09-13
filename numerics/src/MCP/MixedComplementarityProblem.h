@@ -64,7 +64,7 @@ typedef void (*ptrFunctionMCP_nabla)(void* env, int n1, int n2, double* z, Numer
   \f$z_i,w_i\f$ are vectors of size <pre>sizeEqualities</pre>, \f$z_e,w_e\f$ vectors of size <pre>sizeInequalities</pre>
   and \f$F\f$ is a non linear function that must be user-defined.
  */
-struct MixedComplementarityProblem_
+struct MixedComplementarityProblem
 {
   int sizeEqualities; /**< size of equalities $z_e, w_e$ size */
   int sizeInequalities; /**< size of inequalities $z_i,w_i$ size */
@@ -77,10 +77,10 @@ struct MixedComplementarityProblem_
 
 };
 
-/** \struct MixedComplementarityProblem2_ MixedComplementarityProblem.h
+/** \struct MixedComplementarityProblem2 MixedComplementarityProblem.h
  * Structure that contains and defines a MixedComplementarityProblem
  */
-struct MixedComplementarityProblem2_
+struct MixedComplementarityProblem2
 {
   int n1; /**< number of equalities constraints */
   int n2; /**< size of complementary variables */

@@ -82,7 +82,7 @@
 /** \struct LinearComplementarityProblem LinearComplementarityProblem.h
  *  \brief Structure that contains and defines \ref LCProblem
   */
-struct LinearComplementarityProblem_
+struct LinearComplementarityProblem
 {
 
   int size; /**<  size of the problem */

@@ -30,7 +30,7 @@
 #include "GMPReduced.h"
 #include "SiconosBlas.h"
 #include "misc.h"
-#include "lcp_Solvers.h"
+#include "LCP_Solvers.h"
 #include "FrictionContactProblem.h"
 #include "LinearSystemProblem.h"
 #include "Friction_cst.h"

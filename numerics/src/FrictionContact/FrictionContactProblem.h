@@ -144,7 +144,7 @@ with \f$C^{\alpha}_{\mu^\alpha} =\{ r^\alpha, \|r_{t}\| \leq \mu_{\alpha} |r^\al
 /** \struct FrictionContactProblem FrictionContactProblem.h
  *  The structure that defines a (reduced or dual) Friction-Contact (3D or 2D) problem, see details in \ref fcProblem.
 */
-struct FrictionContactProblem_
+struct FrictionContactProblem
 {
   /** dimension of the contact space (3D or 2D ) */
   int dimension;

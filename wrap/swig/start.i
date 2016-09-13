@@ -63,7 +63,7 @@ SWIG_init(void);
 // numpy macros
 %include numpy.i 	
 
-%include <misc.h>
+%include misc.h
 
 %init %{
   import_array();

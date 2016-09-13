@@ -35,7 +35,7 @@
 /** \struct SecondOrderConeLinearComplementarityProblem_as_VI SecondOrderConeLinearComplementarityProblem_as_VI.h
  *
  */
-struct SecondOrderConeLinearComplementarityProblem_as_VI_
+struct SecondOrderConeLinearComplementarityProblem_as_VI
 {
   /* the VI associated with the FC3D probelem */
   VariationalInequality * vi;

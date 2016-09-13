@@ -1,6 +1,6 @@
 #ifndef NUMERICS_GMPREDUCED
 #define NUMERICS_GMPREDUCED
-
+#include <stdio.h>
 /*
  * The equalities are eliminated.
  *

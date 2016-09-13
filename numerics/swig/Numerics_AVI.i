@@ -1,14 +1,33 @@
+%{
+#include "AffineVariationalInequalities.h"
+#include "AVI_Solvers.h"
+#include "AVI_cst.h"
+#include "VariationalInequality_Solvers.h"
+  %}
+
 
 %include "AffineVariationalInequalities.h"
 %include "AVI_Solvers.h"
 %include "AVI_cst.h"
 
-%extend AffineVariationalInequalities_
+%extend SolverOptions
 {
-  AffineVariationalInequalities_()
+  SolverOptions(AffineVariationalInequalities* vi, enum AVI_SOLVER id)
+  {
+    SolverOptions *SO;
+    SO = (SolverOptions *) malloc(sizeof(SolverOptions));
+    SO->solverId=id;
+    solver_options_set(SO, id);
+    return SO;
+  }
+};
+
+%extend AffineVariationalInequalities
+{
+  AffineVariationalInequalities()
    {
-     AffineVariationalInequalities_* avi;
-     avi = (AffineVariationalInequalities_ *) malloc(sizeof(AffineVariationalInequalities_));
+     AffineVariationalInequalities* avi;
+     avi = (AffineVariationalInequalities *) malloc(sizeof(AffineVariationalInequalities));
      avi->size = 0;
      avi->M = NULL;
      avi->q = NULL;
@@ -19,12 +38,12 @@
    }
 
 
-  AffineVariationalInequalities_(PyObject* mat, PyObject* vec)
+  AffineVariationalInequalities(PyObject* mat, PyObject* vec)
   {
 
 
-     AffineVariationalInequalities_* avi;
-     avi = (AffineVariationalInequalities_ *) malloc(sizeof(AffineVariationalInequalities_));
+     AffineVariationalInequalities* avi;
+     avi = (AffineVariationalInequalities *) malloc(sizeof(AffineVariationalInequalities));
      avi->d = NULL;
      avi->poly = NULL;
 
@@ -79,7 +98,7 @@
      }
    }
 
-  ~AffineVariationalInequalities_()
+  ~AffineVariationalInequalities()
   {
     if ($self->poly)
     {

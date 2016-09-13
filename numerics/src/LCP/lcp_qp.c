@@ -20,7 +20,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include "lcp_headers.h"
+#include "LinearComplementarityProblem.h"
+#include "LCP_Solvers.h"
+#include "lcp_cst.h"
+#include "SolverOptions.h"
+#include "NumericsMatrix.h"
+
 #include "QP_Solvers.h"
 #include "misc.h"
 #include "sanitizer.h"

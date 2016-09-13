@@ -132,7 +132,7 @@
  * \f$ v, w_{2}\f$ are vectors of size m.
  * See \ref MLCProblem for more details.
  */
-struct MixedLinearComplementarityProblem_
+struct MixedLinearComplementarityProblem
 {
   int isStorageType1; /**< boolean for storageType1 1 if the problem
                          is saved using (M,q),  0 otherwise */

@@ -127,7 +127,7 @@ typedef struct
  * and the set \f$C^{\alpha,\star}_{\mu^\alpha}\f$ is its dual.
 
 */
-struct GlobalFrictionContactProblem_
+struct GlobalFrictionContactProblem
 {
   /** dimension \f$d=2\f$ or \f$d=3\f$ of the contact space (3D or 2D ) */
   int dimension;

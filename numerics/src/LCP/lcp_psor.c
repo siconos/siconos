@@ -21,7 +21,12 @@
 #include <string.h>
 #include <math.h>
 #include <float.h>
-#include "LCP_headers.h"
+#include "LinearComplementarityProblem.h"
+#include "LCP_Solvers.h"
+#include "lcp_cst.h"
+#include "SolverOptions.h"
+#include "NumericsMatrix.h"
+
 #include "SiconosBlas.h"
 #include "misc.h"
 

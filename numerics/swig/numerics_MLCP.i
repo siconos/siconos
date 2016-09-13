@@ -1,5 +1,4 @@
 // MLCP
-
 %apply (double *q) { (double *qbck) };
 
 // redefine typemap on q for MLCP
@@ -18,29 +17,46 @@
     SWIG_fail;
  }
 
+%{
+  
+  #include "mlcp_cst.h"
+  #include "MixedLinearComplementarityProblem.h"
+  #include "MLCP_Solvers.h"
+  
+  %}
 
-
+%include "mlcp_cst.h"
 %include "MixedLinearComplementarityProblem.h"
 %include "MLCP_Solvers.h"
-%include "mlcp_cst.h"
+
+%extend SolverOptions
+{ 
+  SolverOptions(MixedLinearComplementarityProblem* mlcp, enum MLCP_SOLVER id)
+  {
+    SolverOptions *SO;
+    SO = (SolverOptions *) malloc(sizeof(SolverOptions));
+    SO->solverId=id;
+    mixedLinearComplementarity_setDefaultSolverOptions(mlcp, SO);
+    return SO;
+  }
+};
 
 
-
-%exception MixedLinearComplementarityProblem_ {
+%exception MixedLinearComplementarityProblem {
     $action
     if (PyErr_Occurred()) SWIG_fail;
 }
 
-%extend MixedLinearComplementarityProblem_
+%extend MixedLinearComplementarityProblem
 {
-  MixedLinearComplementarityProblem_()
+  MixedLinearComplementarityProblem()
    {
      MixedLinearComplementarityProblem* MLCP;
      MLCP =  (MixedLinearComplementarityProblem *) malloc(sizeof(MixedLinearComplementarityProblem));
      return MLCP;
    }
 
-  MixedLinearComplementarityProblem_(PyObject *dim, PyObject *o1, PyObject *o2)
+  MixedLinearComplementarityProblem(PyObject *dim, PyObject *o1, PyObject *o2)
     {
 
       int is_new_object1=0;
@@ -116,7 +132,7 @@
 
 
 
-  ~MixedLinearComplementarityProblem_()
+  ~MixedLinearComplementarityProblem()
   {
     freeMixedLinearComplementarityProblem($self);
   }

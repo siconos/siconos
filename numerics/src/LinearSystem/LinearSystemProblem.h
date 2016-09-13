@@ -49,7 +49,7 @@
 extern int SICONOS_LS_0;
 /** Linear Complementarity Problem elements
  */
-struct LinearSystemProblem_
+struct LinearSystemProblem
 {
   int size; /**< dim of the problem */
   NumericsMatrix* M; /**< matrix of the linear system */

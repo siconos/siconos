@@ -18,7 +18,7 @@
 
 #include <assert.h>
 #include <stdio.h>
-
+#include <string.h>
 #include "avi_caoferris.h"
 
 #include "AVI_Solvers.h"

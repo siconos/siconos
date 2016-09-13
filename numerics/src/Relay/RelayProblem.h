@@ -20,6 +20,7 @@
 
 
 #include <assert.h>
+#include <stdio.h>
 /*! \page RelayProblem Relay or box-constrained AVI problems
   \section relayIntro The problem
   Find \f$(z,w)\f$ such that:
@@ -64,7 +65,7 @@
 /** \struct RelayProblem RelayProblem.h
  * \brief Struct defining a Relay problem
  */
-struct RelayProblem_
+struct RelayProblem
 {
   int size;          /**< size dim of the problem */
   NumericsMatrix* M; /**< M matrix of the Relay */

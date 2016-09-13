@@ -187,36 +187,36 @@ def test_vi_C_interface():
         k = 0
         #SN.setNumericsVerbose(3)
 
-    #     while t <= T:
-    #         k += 1
-    #         info = SN.variationalInequality_box_newton_QiLSA(vi, lambda_, xkp1, SO)
-    #         #print('iter {:} ; solver iter = {:} ; prec = {:}'.format(k, SO.iparam[1], SO.dparam[1]))
-    #         if info > 0:
-    #             print(lambda_)
-    # #            vi_function(2, signs[k-1, :], xkp1)
-    #             lambda_[0] = -np.sign(xkp1[0])
-    #             lambda_[1] = -np.sign(xkp1[1])
-    #             if np.abs(xk[0]) < 1e-10:
-    #                 lambda_[0] = 0.01
-    #             if np.abs(xk[1]) < 1e-10:
-    #                 lambda_[1] = 0.01
-    #                 print('ok lambda')
-    #                 print(lambda_)
-    #             info = SN.variationalInequality_box_newton_QiLSA(vi, lambda_, xkp1, SO)
-    #             print('iter {:} ; solver iter = {:} ; prec = {:}'.format(k, SO.iparam[1], SO.dparam[1]))
-    #             if info >0:
-    #                 print('VI solver failed ! info = {:}'.format(info))
-    #                 print(xk)
-    #                 print(lambda_)
-    #                 print(xkp1)
-    #                 kaboom()
-    # #        else:
-    # #            print('iter {:} ; solver iter = {:} ; prec = {:}'.format(k, SO.iparam[1], SO.dparam[1]))
+        while t <= T:
+            k += 1
+            info = SN.variationalInequality_box_newton_QiLSA(vi, lambda_, xkp1, SO)
+            #print('iter {:} ; solver iter = {:} ; prec = {:}'.format(k, SO.iparam[1], SO.dparam[1]))
+            if info > 0:
+                print(lambda_)
+    #            vi_function(2, signs[k-1, :], xkp1)
+                lambda_[0] = -np.sign(xkp1[0])
+                lambda_[1] = -np.sign(xkp1[1])
+                if np.abs(xk[0]) < 1e-10:
+                    lambda_[0] = 0.01
+                if np.abs(xk[1]) < 1e-10:
+                    lambda_[1] = 0.01
+                    print('ok lambda')
+                    print(lambda_)
+                info = SN.variationalInequality_box_newton_QiLSA(vi, lambda_, xkp1, SO)
+                print('iter {:} ; solver iter = {:} ; prec = {:}'.format(k, SO.iparam[1], SO.dparam[1]))
+                if info >0:
+                    print('VI solver failed ! info = {:}'.format(info))
+                    print(xk)
+                    print(lambda_)
+                    print(xkp1)
+                    kaboom()
+    #        else:
+    #            print('iter {:} ; solver iter = {:} ; prec = {:}'.format(k, SO.iparam[1], SO.dparam[1]))
 
-    #  #       vi_function(2, lambda_, xkp1)
-    #         sol[k, 0:2] = xkp1
-    #         np.copyto(xk, xkp1, casting='no')
-    #         signs[k, 0:2] = lambda_
+     #       vi_function(2, lambda_, xkp1)
+            sol[k, 0:2] = xkp1
+            np.copyto(xk, xkp1, casting='no')
+            signs[k, 0:2] = lambda_
             t = k*h
             #z[:] = 0.0
 

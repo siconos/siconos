@@ -119,9 +119,7 @@ The following linear algebra operation are supported:
 #include "NumericsFwd.h"
 #include "SiconosConfig.h"
 #include "csparse.h" // For csi
-/* #include "SparseMatrix.h" */
-/* #include "NumericsSparseMatrix.h" */
-/* #include "SparseBlockMatrix.h" */
+#include "SparseMatrix.h"
 
 /** \struct NumericsMatrixInternalData NumericsMatrix.h 
  * Structure for simple workspaces
@@ -140,7 +138,7 @@ typedef struct
 
     See NM_* functions for linear algebra operations on dense, sparse block and sparse storage.
 */
-struct NumericsMatrix_
+struct NumericsMatrix
 {
   int storageType; /**< the type of storage:
                       0: dense (double*),

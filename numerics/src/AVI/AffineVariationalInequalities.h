@@ -67,7 +67,7 @@
  *   \langle x - z, q + Mz \rangle \geq 0\quad \text{for all }x\in K.
  *   \f}
  */
-struct AffineVariationalInequalities_
+struct AffineVariationalInequalities
 {
   unsigned int size; /**<  size of the problem */
   NumericsMatrix* M; /**< M matrix of the AVI (see the mathematical description)*/

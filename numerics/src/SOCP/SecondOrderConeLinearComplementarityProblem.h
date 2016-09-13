@@ -80,7 +80,7 @@ see SOCLCP_cst.h for solver ids.
 /** \struct  SecondOrderConeLinearComplementarityProblem SecondOrderConeLinearComplementarityProblem.h
  *  The structure that defines a Second Order Cone Linear Complementarity Problem, , see details in \ref soclcpProblem.
  */
-struct SecondOrderConeLinearComplementarityProblem_
+struct SecondOrderConeLinearComplementarityProblem
 {
   /** the problem dimension. must be equal to\f$ \sum_{i}^{n_c} d_i \f$   */
   int n;

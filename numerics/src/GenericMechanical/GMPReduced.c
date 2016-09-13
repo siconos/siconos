@@ -12,9 +12,10 @@
 #include "MixedLinearComplementarityProblem.h"
 #include "mlcp_cst.h"
 #include "lcp_cst.h"
-#include "mlcp_Solvers.h"
+#include "MLCP_Solvers.h"
 #include "SparseBlockMatrix.h"
 #include "NumericsMatrix.h"
+#include <string.h>
 //#define GMP_DEBUG_REDUCED
 //#define GMP_DEBUG_GMPREDUCED_SOLVE
 

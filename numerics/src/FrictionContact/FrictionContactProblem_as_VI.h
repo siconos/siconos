@@ -33,7 +33,7 @@
 /** \struct FrictionContactProblem_as_VI FrictionContactProblem_as_VI.h
  *
  */
-struct FrictionContactProblem_as_VI_
+struct FrictionContactProblem_as_VI
 {
   /* the VI associated with the FC3D probelem */
   VariationalInequality * vi;

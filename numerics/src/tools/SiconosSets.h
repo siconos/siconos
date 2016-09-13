@@ -54,7 +54,7 @@ typedef struct
 /** \struct Polyhedron SiconosSets.h
  * Definition of a polytope in terms of (H,K) representation
  */
-struct polyhedron_
+struct polyhedron
 {
   int id; /**< id of the structure, usually solver specific */
   unsigned size_ineq; /**< number of inequalities */

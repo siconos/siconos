@@ -5,11 +5,11 @@
 %include "NumericsSparseMatrix.h"
 
 // some extensions but numpy arrays should be used instead
-%extend NumericsMatrix_
+%extend NumericsMatrix
 {
 %fragment("NumericsMatrix");
 
-  NumericsMatrix_(PyObject* o)
+  NumericsMatrix(PyObject* o)
   {
     PyArrayObject* array_ = NULL;
     int array_ctrl_ = 0;
@@ -61,7 +61,7 @@
       PyErr_SetString(PyExc_RuntimeError, "The given matrix is not dense (matrix0 == NULL). For now only items on dense matrices can be set.");
       return NULL;
     }
-    if (!PyArg_ParseTuple(index, "ii:NumericsMatrix___setitem__",&i,&j)) return NULL;
+    if (!PyArg_ParseTuple(index, "ii:NumericsMatrix__setitem__",&i,&j)) return NULL;
     NumericsMatrix_set_matrix0(self,i,j,v);
     return Py_BuildValue("");
   }
@@ -74,7 +74,7 @@
       PyErr_SetString(PyExc_RuntimeError, "The given matrix is not dense (matrix0 == NULL). For now only items on dense matrices can be requested.");
       return NULL;
     }
-    if (!PyArg_ParseTuple(index, "ii:NumericsMatrix___getitem__",&i,&j)) return NULL;
+    if (!PyArg_ParseTuple(index, "ii:NumericsMatrix__getitem__",&i,&j)) return NULL;
     return SWIG_From_double(NumericsMatrix_get_matrix0(self,i,j));
   }
 
@@ -114,7 +114,7 @@
 //  }
 //
 
-  ~NumericsMatrix_()
+  ~NumericsMatrix()
   {
     freeNumericsMatrix($self);
     free($self);
@@ -187,9 +187,9 @@ fail:
  }
 }
 
-%extend SparseBlockStructuredMatrix_
+%extend SparseBlockStructuredMatrix
 {
- ~SparseBlockStructuredMatrix_()
+ ~SparseBlockStructuredMatrix()
  {
    freeSBM($self);
    free($self);

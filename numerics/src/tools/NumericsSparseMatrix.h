@@ -19,7 +19,7 @@ extern "C"
 
   /** \struct NumericsSparseLinearSolverParams NumericsSparseMatrix.h
    * solver-specific parameters*/
-  struct NumericsSparseLinearSolverParams_
+  struct NumericsSparseLinearSolverParams
   {
     NumericsSparseLinearSolver solver;
 
@@ -42,7 +42,7 @@ extern "C"
   /** \struct NumericsSparseMatrix NumericsSparseMatrix.h
    * Sparse matrix representation in Numerics. The supported format are:
    * triplet (aka coordinate, COO), CSC (via CSparse) and CSR if MKL is used */
-  struct NumericsSparseMatrix_
+  struct NumericsSparseMatrix
   {
     NumericsSparseLinearSolverParams* linearSolverParams;
                                /**< solver-specific parameters */

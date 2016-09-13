@@ -26,7 +26,7 @@
 #include <stdio.h>
 /* #include "SiconosCompat.h" */
 
-/* #include "SparseMatrix.h" */
+#include "SparseMatrix.h"
 
 /*!\file SparseBlockMatrix.h
   \brief Structure definition and functions related to
@@ -108,7 +108,7 @@
 */
 
 
-struct SparseBlockStructuredMatrix_
+struct SparseBlockStructuredMatrix
 {
   unsigned int nbblocks;
   double **block;
@@ -123,7 +123,7 @@ struct SparseBlockStructuredMatrix_
 
 };
 
-struct SparseBlockCoordinateMatrix_
+struct SparseBlockCoordinateMatrix
 {
   /** number of blocks */
   unsigned int nbblocks;
@@ -151,7 +151,7 @@ struct SparseBlockCoordinateMatrix_
   unsigned int *column;
 };
 
-struct SparseBlockStructuredMatrixPred_
+struct SparseBlockStructuredMatrixPred
 {
   int nbbldiag;
   int **indic;

@@ -18,11 +18,11 @@
 //
 //
 
-// Siconos.i - SWIG interface for Siconos
+// numerics.i - SWIG interface for siconos numerics component.
 %module(package="siconos") numerics
 
+// basics, mostly numpy.i stuff. 
 %include start.i
-
 
 // generated docstrings from doxygen xml output
 %include numerics-docstrings.i
@@ -46,19 +46,14 @@
 #include "SiconosConfig.h"
 #include "SolverOptions.h"
 #include "SparseMatrix.h"
+#include "NumericsMatrix.h"
 #include "SparseBlockMatrix.h"
-#include "fc3d_AlartCurnier_functions.h"
-#include "fc3d_nonsmooth_Newton_AlartCurnier.h"
-#include "fc3d_nonsmooth_Newton_FischerBurmeister.h"
-#include "fc3d_nonsmooth_Newton_natural_map.h"
-#include "AlartCurnierGenerated.h"
-#include "FischerBurmeisterGenerated.h"
-#include "NaturalMapGenerated.h"
-#include "gfc3d_compute_error.h"
+#include "NumericsSparseMatrix.h"
 #include "Numerics_functions.h"
 #include "SiconosSets.h"
 #include "GAMSlink.h"
-%}
+#include "NumericsFwd.h"
+  %}
 
 #ifdef WITH_SERIALIZATION
 %{
@@ -91,16 +86,18 @@ namespace std11 = boost;
 // instead of respecting the shared_ptr!
 // %shared_ptr(FrictionContactProblem)
 
+%rename (LCP) LinearComplementarityProblem;
+%rename (MLCP) MixedLinearComplementarityProblem;
+%rename (MCP) MixedComplementarityProblem;
+%rename (VI) VariationalInequality;
+%rename (AVI) AffineVariationalInequalities;
 
- // more convenient
- %rename (LCP) LinearComplementarityProblem;
- %rename (MLCP) MixedLinearComplementarityProblem;
- %rename (MCP) MixedComplementarityProblem;
- %rename (VI) VariationalInequality_;
- %rename (AVI) AffineVariationalInequalities;
+%inline %{
+  #include "NumericsFwd.h"
+ %}
 
- %ignore lcp_compute_error_only;
-
+ // -- Numpy typemaps --
+ // See http://docs.scipy.org/doc/numpy/reference/swig.interface-file.html.
  %apply (int DIM1 , int DIM2 , double* IN_FARRAY2)
  {(int nrows, int ncols, double* data          )};
 
@@ -139,7 +136,6 @@ namespace std11 = boost;
 
  %apply (double ARGOUT_ARRAY1[ANY])
  {(double B[9])}
-
 
 %include solverOptions.i
 
@@ -199,8 +195,8 @@ namespace std11 = boost;
 
 %fragment("NumPy_Fragments");
 
-//Relay
-%include "relay_cst.h"
+// // //Relay
+// // %include "relay_cst.h"
 
 %include numerics_MLCP.i
 
@@ -327,51 +323,49 @@ namespace std11 = boost;
 
 %include Numerics_for_python_callback.i
 
-%include numerics_common.i
-
 %include numerics_MCP.i
 %include Numerics_MCP2.i
 %include Numerics_VI.i
 
 
 
-// FrictionContact
-%ignore LocalNonsmoothNewtonSolver; //signature problem (should be SolverOption
-                          //instead of *iparam, *dparam).
-%ignore DampedLocalNonsmoothNewtonSolver; // signature problem idem.
+// // // FrictionContact
+// // %ignore LocalNonsmoothNewtonSolver; //signature problem (should be SolverOption
+// //                           //instead of *iparam, *dparam).
+// // %ignore DampedLocalNonsmoothNewtonSolver; // signature problem idem.
 
-%ignore frictionContactProblem_new; // signature issue with mu param
+// // %ignore frictionContactProblem_new; // signature issue with mu param
 
-%include "typemaps.i"
+// %include "typemaps.i"
 
-%apply double *OUTPUT { double *error };
-%apply double *OUTPUT { double *result };
+// // %apply double *OUTPUT { double *error };
+// // %apply double *OUTPUT { double *result };
 
-// Callback (see SolverOptions.i) needed here
-%typemap(in, numinputs=0) (FischerBurmeisterFun3x3Ptr computeACFun3x3) () {
-  // Callback (see SolverOptions.i) needed here
-  $1 = &fc3d_FischerBurmeisterFunctionGenerated;
- }
+// // // Callback (see SolverOptions.i) needed here
+// // %typemap(in, numinputs=0) (FischerBurmeisterFun3x3Ptr computeACFun3x3) () {
+// //   // Callback (see SolverOptions.i) needed here
+// //   $1 = &fc3d_FischerBurmeisterFunctionGenerated;
+// //  }
 
-%typemap(in, numinputs=0) (AlartCurnierFun3x3Ptr computeACFun3x3) () {
-  // Callback (see SolverOptions.i) needed here
-  $1 = &fc3d_AlartCurnierFunctionGenerated;
- }
+// // %typemap(in, numinputs=0) (AlartCurnierFun3x3Ptr computeACFun3x3) () {
+// //   // Callback (see SolverOptions.i) needed here
+// //   $1 = &fc3d_AlartCurnierFunctionGenerated;
+// //  }
 
-%typemap(in, numinputs=0) (NaturalMapFun3x3Ptr computeACFun3x3) () {
-  // Callback (see SolverOptions.i) needed here
-  $1 = &fc3d_NaturalMapFunctionGenerated;
- }
+// // %typemap(in, numinputs=0) (NaturalMapFun3x3Ptr computeACFun3x3) () {
+// //   // Callback (see SolverOptions.i) needed here
+// //   $1 = &fc3d_NaturalMapFunctionGenerated;
+// //  }
 
-%include "fc3d_AlartCurnier_functions.h"
-%include "fc3d_nonsmooth_Newton_AlartCurnier.h"
-%include "fc3d_nonsmooth_Newton_FischerBurmeister.h"
-%include "fc3d_nonsmooth_Newton_natural_map.h"
-%include "AlartCurnierGenerated.h"
-%include "FischerBurmeisterGenerated.h"
-%include "NaturalMapGenerated.h"
-%include "fclib_interface.h"
-%include "GAMSlink.h"
+// // %include "fc3d_AlartCurnier_functions.h"
+// // %include "fc3d_nonsmooth_Newton_AlartCurnier.h"
+// // %include "fc3d_nonsmooth_Newton_FischerBurmeister.h"
+// // %include "fc3d_nonsmooth_Newton_natural_map.h"
+// // %include "AlartCurnierGenerated.h"
+// // %include "FischerBurmeisterGenerated.h"
+// // %include "NaturalMapGenerated.h"
+// // %include "fclib_interface.h"
+// // %include "GAMSlink.h"
 
 // the order matters
 %include numerics_FC.i
@@ -401,6 +395,8 @@ namespace std11 = boost;
 #include <GenericMechanical_cst.h>
 %}
 %include GenericMechanical_cst.h
+
+%include numerics_common.i
 
 %include numerics_NM.i
 

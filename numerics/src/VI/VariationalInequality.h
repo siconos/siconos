@@ -78,7 +78,7 @@ typedef void (*ptrFunctionVI_nabla)(void *self, int n, double* x, NumericsMatrix
 /** \struct VariationalInequality VariationalInequality.h
  * 
  */
-struct VariationalInequality_
+struct VariationalInequality
 {
   int size; /**< size of the VI \f$ n \f$ */
   void *env; /**< pointer onto env object (which is self is the simplest case)*/

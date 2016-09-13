@@ -15,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
+
 #include "projectionOnCylinder.h"
 #include "fc3d_Solvers.h"
 #include "fc3d_compute_error.h"
@@ -23,6 +24,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <string.h>
 #include "Friction_cst.h"
 #include "misc.h"
 

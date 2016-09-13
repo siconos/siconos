@@ -29,7 +29,7 @@
 #include <assert.h>
 #include <time.h>
 #include <float.h>
-
+#include <string.h>
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
 #include "debug.h"

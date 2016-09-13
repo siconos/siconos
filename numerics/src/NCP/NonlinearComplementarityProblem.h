@@ -52,7 +52,7 @@ typedef void (*ptrFunctionJacNCP)(void* env, int n, double* z, NumericsMatrix* j
   0 &\le w \perp z \ge 0
   \f}
  */
-struct NonlinearComplementarityProblem_
+struct NonlinearComplementarityProblem
 {
   unsigned int n; /**< size of the problem */
   ptrFunctionNCP compute_F; /**< pointer to the function used to compute \f$F(z)\f$ */

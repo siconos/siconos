@@ -1,14 +1,33 @@
+%inline %{
+#include "VariationalInequality.h"
+#include "VariationalInequality_Solvers.h"
+#include "VI_cst.h"
+#include "VariationalInequality_Solvers.h"
+  %}
 
 %include "VariationalInequality.h"
 %include "VariationalInequality_Solvers.h"
 %include "VI_cst.h"
 
-%extend VariationalInequality_
+
+%extend SolverOptions
+{
+  SolverOptions(VariationalInequality* vi, enum VI_SOLVER id)
+  {
+    SolverOptions *SO;
+    SO = (SolverOptions *) malloc(sizeof(SolverOptions));
+    solver_options_set(SO, id);
+    return SO;
+  }
+};
+
+
+%extend VariationalInequality
 {
 
-  VariationalInequality_(PyObject* n)
+  VariationalInequality(PyObject* n)
   {
-     VariationalInequality_* vi = variationalInequality_new((int) PyInt_AsLong(n));
+     VariationalInequality* vi = variationalInequality_new((int) PyInt_AsLong(n));
      vi->F = &call_py_compute_F;
      vi->compute_nabla_F = &call_py_compute_nabla_F;
 
@@ -24,10 +43,10 @@
   }
 
 
-  VariationalInequality_(PyObject* n, PyObject* py_compute)
+  VariationalInequality(PyObject* n, PyObject* py_compute)
   {
 
-     VariationalInequality_* vi = variationalInequality_new((int) PyInt_AsLong(n));
+     VariationalInequality* vi = variationalInequality_new((int) PyInt_AsLong(n));
 
      PyObject* method_compute_F = PyObject_GetAttrString(py_compute, "compute_F");
      PyObject* method_compute_nabla_F = PyObject_GetAttrString(py_compute, "compute_nabla_F");
@@ -138,7 +157,7 @@
       return PyInt_FromLong((uintptr_t)&$self->env);
     }
 
-  ~VariationalInequality_()
+  ~VariationalInequality()
   {
     if ($self->nabla_F)
     {

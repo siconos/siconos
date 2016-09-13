@@ -21,7 +21,12 @@
 #include <math.h>
 #include <float.h>
 #include "SiconosBlas.h"
-#include "lcp_headers.h"
+#include "LinearComplementarityProblem.h"
+#include "LCP_Solvers.h"
+#include "lcp_cst.h"
+#include "SolverOptions.h"
+#include "NumericsMatrix.h"
+
 #include "misc.h"
 
 void lcp_cpg(LinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options)

@@ -32,8 +32,6 @@ Documentation to be done
 */
 
 #include "SiconosConfig.h"
-#include "ExternalsFwd.h"
-
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {
@@ -66,7 +64,7 @@ int nz ;      : # of entries in triplet matrix;
 } */
 
 
-#include "ExternalsFwd.h"
+#define CSparseMatrix struct cs_sparse
 
 #define NS_UNKNOWN_ERR(func, orig) \
 fprintf(stderr, #func ": unknown origin %d for sparse matrix\n", orig);

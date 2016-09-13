@@ -22,7 +22,12 @@
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "lcp_headers.h"
+#include "LinearComplementarityProblem.h"
+#include "LCP_Solvers.h"
+#include "lcp_cst.h"
+#include "SolverOptions.h"
+#include "NumericsMatrix.h"
+
 #include "pivot-utils.h"
 #include "misc.h"
 #include "SiconosLapack.h"
