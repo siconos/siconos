@@ -1,9 +1,8 @@
 #!/usr/bin/env python
 import sys
-import os
 import vtk
 from vtk.util import numpy_support
-from math import atan2, pi
+from math import pi
 import bisect
 from numpy.linalg import norm
 import numpy
@@ -19,30 +18,28 @@ def usage():
     print '{0}: Usage'.format(sys.argv[0])
     print """
     {0} [--help] [tmin=<float value>] [tmax=<float value>]
-        [--cf-scale=<float value>] [--no-cf] [--vtk-export]
+        [--cf-scale=<float value>] [--no-cf]
         [--advance=<'fps' or float value>] [--fps=float value]
         [--camera=x,y,z] [--lookat=x,y,z] [--up=x,y,z] [--ortho=scale]
         <hdf5 file>
     """
     print """
-    Options : 
-      --help    
+    Options :
+      --help
         display this message
-     --tmin= value   
-       set the time lower bound for visualization 
-     --tmax= value    
-       set the time upper bound for visualization 
+     --tmin= value
+       set the time lower bound for visualization
+     --tmax= value
+       set the time upper bound for visualization
      --cf-scale= value  (default : 1.0 )
-       rescale the arrow representing the contact forces by the value. 
+       rescale the arrow representing the contact forces by the value.
        the normal cone and the contact points are also rescaled
      --no-cf
        do not display contact forces
-     --normalcone-ratio = value  (default : 1.0 )  
+     --normalcone-ratio = value  (default : 1.0 )
        introduce a ratio between the representation of the contact forces arrows
        the normal cone and the contact points. useful when the contact forces are
        small with respect to the characteristic dimesion
-     --vtk-export    
-       export visualization in vtk files (to use in paraview for instance)
      --advance= value or 'fps'
        automatically advance time during recording (default : don't advance)
      --fps= value
@@ -72,9 +69,9 @@ def add_compatiblity_methods(obj):
 try:
     opts, args = getopt.gnu_getopt(sys.argv[1:], '',
                                    ['help', 'dat', 'tmin=', 'tmax=', 'no-cf',
-                                    'cf-scale=', 'normalcone-ratio=','vtk-export',
-                                    'advance=','fps=','camera=','lookat=','up=',
-                                    'ortho='])
+                                    'cf-scale=', 'normalcone-ratio=',
+                                    'advance=', 'fps=', 'camera=', 'lookat=',
+                                    'up=', 'ortho='])
 except getopt.GetoptError, err:
         sys.stderr.write('{0}\n'.format(str(err)))
         usage()
@@ -84,13 +81,12 @@ min_time = None
 max_time = None
 cf_scale_factor = 1
 normalcone_ratio = 1
-time_scale_factor=1
-vtk_export_mode = False
+time_scale_factor = 1
 view_cycle = -1
 advance_by_time = None
 frames_per_second = 25
 cf_disable = False
-initial_camera = [None]*4
+initial_camera = [None] * 4
 
 for o, a in opts:
 
@@ -113,12 +109,9 @@ for o, a in opts:
     elif o == '--normalcone-ratio':
         normalcone_ratio = float(a)
 
-    elif o == '--vtk-export':
-        vtk_export_mode = True
-
     elif o == '--advance':
         if 'fps' in a:
-            advance_by_time = eval(a, {'fps':1.0/frames_per_second})
+            advance_by_time = eval(a, {'fps': 1.0 / frames_per_second})
         else:
             advance_by_time = float(a)
 
@@ -126,13 +119,13 @@ for o, a in opts:
         frames_per_second = int(a)
 
     elif o == '--camera':
-        initial_camera[0] = map(float,a.split(','))
+        initial_camera[0] = map(float, a.split(','))
 
     elif o == '--lookat':
-        initial_camera[1] = map(float,a.split(','))
+        initial_camera[1] = map(float, a.split(','))
 
     elif o == '--up':
-        initial_camera[2] = map(float,a.split(','))
+        initial_camera[2] = map(float, a.split(','))
 
     elif o == '--ortho':
         initial_camera[3] = float(a)
@@ -153,7 +146,6 @@ def random_color():
     g = random.uniform(0.1, 0.9)
     b = random.uniform(0.1, 0.9)
     return r, g, b
-
 
 transforms = dict()
 transformers = dict()
@@ -203,7 +195,7 @@ class Quaternion():
 
 def set_position(instance, q0, q1, q2, q3, q4, q5, q6):
     if (numpy.any(numpy.isnan([q0, q1, q2, q3, q4, q5, q6]))
-        or numpy.any(numpy.isinf([q0, q1, q2, q3, q4, q5, q6]))):
+            or numpy.any(numpy.isinf([q0, q1, q2, q3, q4, q5, q6]))):
         print('Bad position for', instance, q0, q1, q2, q3, q4, q5, q6)
         return
 
@@ -225,9 +217,11 @@ def set_position(instance, q0, q1, q2, q3, q4, q5, q6):
                              axis[1],
                              axis[2])
 
+
 def set_positionv(x):
-    for y in x.reshape(-1,8):
+    for y in x.reshape(-1, 8):
         set_position(*(y.reshape(8)))
+
 
 def step_reader(step_string):
 
@@ -253,11 +247,9 @@ def step_reader(step_string):
             failsonly = False
             step_reader.PrintCheckLoad(failsonly, IFSelect_ItemsByEntity)
             step_reader.PrintCheckTransfer(failsonly, IFSelect_ItemsByEntity)
-
             ok = step_reader.TransferRoot(1)
             nbs = step_reader.NbShapes()
 
-            l = []
             for i in range(1, nbs + 1):
                 shape = step_reader.Shape(i)
 
@@ -296,7 +288,6 @@ def brep_reader(brep_string, indx):
         reader.Update()
 
         return reader
-
 
 
 refs = []
@@ -522,7 +513,7 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
 
         cone_glyph[mu]._scale_fact = normalcone_ratio
         cone_glyph[mu].SetScaleFactor(
-            cone_glyph[mu]._scale_fact *cf_scale_factor)
+            cone_glyph[mu]._scale_fact * cf_scale_factor)
         cone_glyph[mu].SetVectorModeToUseVector()
 
         cone_glyph[mu].SetInputArrayToProcess(1, 0, 0, 0, 'contactNormals')
@@ -609,7 +600,7 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
         # sphere_glypha[mu].ClampingOn()
         sphere_glypha[mu]._scale_fact = .1 * normalcone_ratio
         sphere_glypha[mu].SetScaleFactor(
-            sphere_glypha[mu]._scale_fact *cf_scale_factor)
+            sphere_glypha[mu]._scale_fact * cf_scale_factor)
         # sphere_glypha[mu].SetVectorModeToUseVector()
 
         sphere_glyphb[mu] = vtk.vtkGlyph3D()
@@ -621,7 +612,7 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
         # sphere_glyphb[mu].ClampingOn()
         sphere_glyphb[mu]._scale_fact = .1 * normalcone_ratio
         sphere_glyphb[mu].SetScaleFactor(
-            sphere_glyphb[mu]._scale_fact *cf_scale_factor)
+            sphere_glyphb[mu]._scale_fact * cf_scale_factor)
         # sphere_glyphb[mu].SetVectorModeToUseVector()
 
         # sphere_glyphb[mu].SetInputArrayToProcess(1, 0, 0, 0, 'contactNormals')
@@ -884,587 +875,558 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
 
     def set_actors_visibility(id_t):
         for instance, actor in actors.items():
-            if instance < 0 or instance in pos_data[id_t,1]:
-                #actor.GetProperty().SetColor(0,0,1)
+            if instance < 0 or instance in pos_data[id_t, 1]:
+                # actor.GetProperty().SetColor(0,0,1)
                 actor.VisibilityOn()
             else:
-                #actor.GetProperty().SetColor(0,1,0)
+                # actor.GetProperty().SetColor(0,1,0)
                 actor.VisibilityOff()
 
-    if not vtk_export_mode:
-        if cf_prov is not None:
-            for mu in cf_prov._mu_coefs:
-                renderer.AddActor(gactor[mu])
-                renderer.AddActor(cactor[mu])
+    if cf_prov is not None:
+        for mu in cf_prov._mu_coefs:
+            renderer.AddActor(gactor[mu])
+            renderer.AddActor(cactor[mu])
 
-                renderer.AddActor(clactor[mu])
-                renderer.AddActor(sactora[mu])
-                renderer.AddActor(sactorb[mu])
+            renderer.AddActor(clactor[mu])
+            renderer.AddActor(sactora[mu])
+            renderer.AddActor(sactorb[mu])
 
-        import imp
-        try:
-            imp.load_source('myview', 'myview.py')
-            import myview
-            this_view = myview.MyView(renderer)
-        except IOError as e:
-            pass
+    import imp
+    try:
+        imp.load_source('myview', 'myview.py')
+        import myview
+        this_view = myview.MyView(renderer)
+    except IOError as e:
+        pass
 
-        id_t0 = numpy.where(dpos_data[:, 0] == min(dpos_data[:, 0]))
+    id_t0 = numpy.where(dpos_data[:, 0] == min(dpos_data[:, 0]))
 
-        if numpy.shape(spos_data)[0] >0 :
-            set_positionv(spos_data[:, 1:9])
+    if numpy.shape(spos_data)[0] > 0:
+        set_positionv(spos_data[:, 1:9])
 
-        set_positionv(pos_data[id_t0, 1:9])
+    set_positionv(pos_data[id_t0, 1:9])
 
-        set_actors_visibility(id_t0)
-
-        renderer_window.AddRenderer(renderer)
-        interactor_renderer.SetRenderWindow(renderer_window)
-        interactor_renderer.GetInteractorStyle(
-        ).SetCurrentStyleToTrackballCamera()
-
-
-
-        # http://www.itk.org/Wiki/VTK/Depth_Peeling ?
-
-        # Use a render window with alpha bits (as initial value is 0 (false) ):
-        renderer_window.SetAlphaBitPlanes(1)
-
-        # Force to not pick a framebuffer with a multisample buffer ( as initial
-        # value is 8):
-        renderer_window.SetMultiSamples(0)
-
-        # Choose to use depth peeling (if supported) (initial value is 0
-        # (false) )
-        renderer.SetUseDepthPeeling(1)
-
-        # Set depth peeling parameters.
-        renderer.SetMaximumNumberOfPeels(100)
-
-        # Set the occlusion ratio (initial value is 0.0, exact image)
-        renderer.SetOcclusionRatio(0.1)
-
-        # Set the initial camera position and orientation if specified
-        if initial_camera[0] is not None:
-            renderer.GetActiveCamera().SetPosition(*initial_camera[0])
-        if initial_camera[1] is not None:
-            renderer.GetActiveCamera().SetFocalPoint(*initial_camera[1])
-        if initial_camera[2] is not None:
-            renderer.GetActiveCamera().SetViewUp(*initial_camera[2])
-        if initial_camera[3] is not None:
-            renderer.GetActiveCamera().ParallelProjectionOn()
-            renderer.GetActiveCamera().SetParallelScale(initial_camera[3])
-
-        # callback maker for scale manipulation
-        def make_scale_observer(glyphs):
-
-            def scale_observer(obj, event):
-                slider_repres = obj.GetRepresentation()
-                scale_at_pos = slider_repres.GetValue()
-                for glyph in glyphs:
-                    for k in glyph:
-                        glyph[k].SetScaleFactor(
-                            scale_at_pos * glyph[k]._scale_fact)
-
-            return scale_observer
-
-        # callback maker for time scale manipulation
-        def make_time_scale_observer(time_slider_repres, time_observer):
-
-            delta_time = max_time - min_time
-
-            def time_scale_observer(obj, event):
-                slider_repres = obj.GetRepresentation()
-                time_scale_at_pos = 1. - slider_repres.GetValue()
-
-                current_time = time_observer._time
-
-                shift = (current_time - min_time) / delta_time
-
-                xmin_time = min_time + time_scale_at_pos / 2. * delta_time
-                xmax_time = max_time - time_scale_at_pos / 2. * delta_time
-
-                xdelta_time = xmax_time - xmin_time
-
-                new_mintime = max(min_time, current_time - xdelta_time)
-                new_maxtime = min(max_time, current_time + xdelta_time)
-
-                time_slider_repres.SetMinimumValue(new_mintime)
-                time_slider_repres.SetMaximumValue(new_maxtime)
+    set_actors_visibility(id_t0)
 
-            return time_scale_observer
-
-        # make a slider widget and its representation
-        def make_slider(title, observer, interactor,
-                        startvalue, minvalue, maxvalue, cx1, cy1, cx2, cy2):
-            slider_repres = vtk.vtkSliderRepresentation2D()
-            slider_repres.SetMinimumValue(
-                minvalue - (maxvalue - minvalue) / 100)
-            slider_repres.SetMaximumValue(
-                maxvalue + (maxvalue - minvalue) / 100)
-            slider_repres.SetValue(startvalue)
-            slider_repres.SetTitleText(title)
-            slider_repres.GetPoint1Coordinate().\
-                SetCoordinateSystemToNormalizedDisplay()
-            slider_repres.GetPoint1Coordinate().SetValue(cx1, cy1)
-            slider_repres.GetPoint2Coordinate().\
-                SetCoordinateSystemToNormalizedDisplay()
-            slider_repres.GetPoint2Coordinate().SetValue(cx2, cy2)
-
-            slider_repres.SetSliderLength(0.02)
-            slider_repres.SetSliderWidth(0.03)
-            slider_repres.SetEndCapLength(0.01)
-            slider_repres.SetEndCapWidth(0.03)
-            slider_repres.SetTubeWidth(0.005)
-            slider_repres.SetLabelFormat('%f')
-            slider_repres.SetTitleHeight(0.02)
-            slider_repres.SetLabelHeight(0.02)
-
-            slider_widget = vtk.vtkSliderWidget()
-            slider_widget.SetInteractor(interactor)
-            slider_widget.SetRepresentation(slider_repres)
-            slider_widget.KeyPressActivationOff()
-            slider_widget.SetAnimationModeToAnimate()
-            slider_widget.SetEnabled(True)
-            slider_widget.AddObserver('InteractionEvent', observer)
-
-            return slider_widget, slider_repres
-
-        image_maker = vtk.vtkWindowToImageFilter()
-        image_maker.SetInput(renderer_window)
-
-        recorder = vtk.vtkOggTheoraWriter()
-        recorder.SetQuality(2)
-        recorder.SetRate(frames_per_second)
-        recorder.SetFileName('xout.avi')
-        recorder.SetInputConnection(image_maker.GetOutputPort())
-
-        writer = vtk.vtkPNGWriter()
-        writer.SetInputConnection(image_maker.GetOutputPort())
-
-        class InputObserver():
-
-            def __init__(self, times, slider_repres):
-                self._stimes = set(times)
-                self._opacity = 1.0
-                self._time_step = (max(self._stimes) - min(self._stimes)) \
-                    / len(self._stimes)
-                self._time = min(times)
-                self._slider_repres = slider_repres
-                self._current_id = vtk.vtkIdTypeArray()
-                self._renderer = renderer
-                self._renderer_window = renderer_window
-                self._times = times
-                self._image_counter = 0
-                self._view_cycle = -1
-
-                self._recording = False
-
-            def update(self):
-                global cf_prov
-                index = bisect.bisect_left(self._times, self._time)
-                index = max(0, index)
-                index = min(index, len(self._times) - 1)
-                if cf_prov is not None:
-                    cf_prov._time = self._times[index]
-                    cf_prov.method()
-
-        #        contact_posa.Update()
-
-        #        contact_posb.Update()
-
-                # contact_pos_force.Update()
-                # arrow_glyph.Update()
-                # gmapper.Update()
-
-                # set_positionv(spos_data[:, 1:9])
-
-                id_t = numpy.where(pos_data[:, 0] == self._times[index])
-
-                set_actors_visibility(id_t)
-
-                set_positionv(pos_data[id_t, 1:9])
-
-                self._slider_repres.SetValue(self._time)
-
-                self._current_id.SetNumberOfValues(1)
-                self._current_id.SetValue(0, index)
-
-                self._iter_plot.SetSelection(self._current_id)
-                self._prec_plot.SetSelection(self._current_id)
-
-                renderer_window.Render()
-
-            def object_pos(self, id_):
-                index = bisect.bisect_left(self._times, self._time)
-                index = max(0, index)
-                index = min(index, len(self._times) - 1)
-
-                id_t = numpy.where(pos_data[:, 0] == self._times[index])
-                return (pos_data[id_t[0][id_], 2], pos_data[id_t[0][id_], 3], pos_data[id_t[0][id_], 4])
-
-            def set_opacity(self):
-                for instance, actor in actors.items():
-                    if instance >= 0:
-                        actor.GetProperty().SetOpacity(self._opacity)
-
-            def key(self, obj, event):
-                global cf_prov
-                key = obj.GetKeySym()
-                print 'key', key
-
-                if key == 'r':
-                    spos_data, dpos_data, cf_data, solv_data = load()
-                    if not cf_disable:
-                        cf_prov = CFprov(cf_data)
-                    times = list(set(dpos_data[:, 0]))
-                    times.sort()
-                    ndyna = len(numpy.where(dpos_data[:, 0] == times[0]))
-                    if len(spos_data) > 0:
-                        instances = set(dpos_data[:, 1]).union(
-                            set(spos_data[:, 1]))
-                    else:
-                        instances = set(dpos_data[:, 1])
-                    if cf_prov is not None:
-                        cf_prov._time = min(times[:])
-                        cf_prov.method()
-                        contact_posa.SetInputData(cf_prov._output)
-                        contact_posa.Update()
-                        contact_posb.SetInputData(cf_prov._output)
-                        contact_posb.Update()
-                        [(contact_pos_force[mu].Update(),
-                          contact_pos_norm[mu].Update())
-                         for mu in cf_prov._mu_coefs]
-
-                    id_t0 = numpy.where(
-                        dpos_data[:, 0] == min(dpos_data[:, 0]))
-
-                    pos_data = dpos_data[:].copy()
-                    min_time = times[0]
-                    set_actors_visibility(id_t0)
-
-                    max_time = times[len(times) - 1]
-
-                    self._slider_repres.SetMinimumValue(min_time)
-                    self._slider_repres.SetMaximumValue(max_time)
-                    self.update()
-
-                if key == 'p':
-                    self._image_counter += 1
-                    image_maker.Update()
-                    writer.SetFileName(
-                        'vview-{0}.png'.format(self._image_counter))
-                    writer.Write()
-
-                if key == 'Up':
-                        self._time_step = self._time_step * 2.
-                        self._time += self._time_step
-
-                if key == 'Down':
-                        self._time_step = self._time_step / 2.
-                        self._time -= self._time_step
-
-                if key == 'Left':
-                        self._time -= self._time_step
-
-                if key == 'Right':
-                        self._time += self._time_step
-
-                if key == 't':
-                        self._opacity -= .1
-                        self.set_opacity()
-
-                if key == 'T':
-                        self._opacity += .1
-                        self.set_opacity()
-
-                if key == 'c':
-                        print 'camera position:', self._renderer.GetActiveCamera().GetPosition()
-                        print 'camera focal point', self._renderer.GetActiveCamera().GetFocalPoint()
-                        print 'camera clipping plane', self._renderer.GetActiveCamera().GetClippingRange()
-                        print 'camera up vector', self._renderer.GetActiveCamera().GetViewUp()
-                        if self._renderer.GetActiveCamera().GetParallelProjection()!=0:
-                            print 'camera parallel scale', self._renderer.GetActiveCamera().GetParallelScale()
-
-                if key == 'o':
-                        self._renderer.GetActiveCamera().SetParallelProjection(
-                            1-self._renderer.GetActiveCamera().GetParallelProjection())
-
-                if key == 'v':
-                        # Cycle through some useful views
-                        dist = norm(self._renderer.GetActiveCamera().GetPosition())
-                        #dist2 = norm([numpy.sqrt(dist**2)/3]*2)
-                        d3 = norm([numpy.sqrt(dist**2)/3]*3)
-                        self._view_cycle += 1
-                        if self._view_cycle == 0:
-                                print('Left')
-                                self._renderer.GetActiveCamera().SetPosition(dist,0,0)
-                                self._renderer.GetActiveCamera().SetViewUp(0,0,1)
-                        elif self._view_cycle == 1:
-                                print('Right')
-                                self._renderer.GetActiveCamera().SetPosition(0,dist,0)
-                                self._renderer.GetActiveCamera().SetViewUp(0,0,1)
-                        elif self._view_cycle == 2:
-                                print('Top')
-                                self._renderer.GetActiveCamera().SetPosition(0,0,dist)
-                                self._renderer.GetActiveCamera().SetViewUp(1,0,0)
-                        else: # Corner
-                                print('Corner')
-                                self._renderer.GetActiveCamera().SetPosition(d3,d3,d3)
-                                self._renderer.GetActiveCamera().SetViewUp(-1,-1,1)
-                                self._view_cycle = -1
-
-                if key == 's':
-                    if not self._recording:
-                        recorder.Start()
-                        self._recording = True
-
-                if key == 'e':
-                    if self._recording:
-                        self._recording = False
-                        recorder.End()
-
-                if key == 'C':
-                        this_view.action(self)
-                self.update()
-
-            def time(self, obj, event):
-                slider_repres = obj.GetRepresentation()
-                self._time = slider_repres.GetValue()
-                self.update()
-
-                # observer on 2D chart
-            def iter_plot_observer(self, obj, event):
-
-                if self._iter_plot.GetSelection() is not None:
-                    # just one selection at the moment!
-                    if self._iter_plot.GetSelection().GetMaxId() >= 0:
-                        self._time = self._times[
-                            self._iter_plot.GetSelection().GetValue(0)]
-                        # -> recompute index ...
-                        self.update()
-
-            def prec_plot_observer(self, obj, event):
-                if self._prec_plot.GetSelection() is not None:
-                    # just one selection at the moment!
-                    if self._prec_plot.GetSelection().GetMaxId() >= 0:
-                        self._time = self._times[
-                            self._prec_plot.GetSelection().GetValue(0)]
-                        # -> recompute index ...
-                        self.update()
-
-            def recorder_observer(self, obj, event):
-                if self._recording:
-                    if advance_by_time is not None:
-                        self._time += advance_by_time
-                        slwsc.SetEnabled(False) # Scale slider
-                        xslwsc.SetEnabled(False) # Time scale slider
-                        #slider_widget.SetEnabled(False) # Time slider
-                        #widget.SetEnabled(False) # Axis widget
-                    self.update()
-                    image_maker.Modified()
-                    recorder.Write()
-                    if advance_by_time is not None:
-                        slwsc.SetEnabled(True)
-                        xslwsc.SetEnabled(True)
-                        #slider_widget.SetEnabled(True)
-                        #widget.SetEnabled(True) # Axis widget
-
-                    if self._time >= max(self._times):
-                        self._recording = False
-                        recorder.End()
+    renderer_window.AddRenderer(renderer)
+    interactor_renderer.SetRenderWindow(renderer_window)
+    interactor_renderer.GetInteractorStyle(
+    ).SetCurrentStyleToTrackballCamera()
 
+    # http://www.itk.org/Wiki/VTK/Depth_Peeling ?
+
+    # Use a render window with alpha bits (as initial value is 0 (false) ):
+    renderer_window.SetAlphaBitPlanes(1)
+
+    # Force to not pick a framebuffer with a multisample buffer ( as initial
+    # value is 8):
+    renderer_window.SetMultiSamples(0)
+
+    # Choose to use depth peeling (if supported) (initial value is 0
+    # (false) )
+    renderer.SetUseDepthPeeling(1)
+
+    # Set depth peeling parameters.
+    renderer.SetMaximumNumberOfPeels(100)
+
+    # Set the occlusion ratio (initial value is 0.0, exact image)
+    renderer.SetOcclusionRatio(0.1)
+
+    # Set the initial camera position and orientation if specified
+    if initial_camera[0] is not None:
+        renderer.GetActiveCamera().SetPosition(*initial_camera[0])
+    if initial_camera[1] is not None:
+        renderer.GetActiveCamera().SetFocalPoint(*initial_camera[1])
+    if initial_camera[2] is not None:
+        renderer.GetActiveCamera().SetViewUp(*initial_camera[2])
+    if initial_camera[3] is not None:
+        renderer.GetActiveCamera().ParallelProjectionOn()
+        renderer.GetActiveCamera().SetParallelScale(initial_camera[3])
+
+    # callback maker for scale manipulation
+    def make_scale_observer(glyphs):
+
+        def scale_observer(obj, event):
+            slider_repres = obj.GetRepresentation()
+            scale_at_pos = slider_repres.GetValue()
+            for glyph in glyphs:
+                for k in glyph:
+                    glyph[k].SetScaleFactor(
+                        scale_at_pos * glyph[k]._scale_fact)
+
+        return scale_observer
+
+    # callback maker for time scale manipulation
+    def make_time_scale_observer(time_slider_repres, time_observer):
+
+        delta_time = max_time - min_time
+
+        def time_scale_observer(obj, event):
+            slider_repres = obj.GetRepresentation()
+            time_scale_at_pos = 1. - slider_repres.GetValue()
+
+            current_time = time_observer._time
+
+            shift = (current_time - min_time) / delta_time
+
+            xmin_time = min_time + time_scale_at_pos / 2. * delta_time
+            xmax_time = max_time - time_scale_at_pos / 2. * delta_time
+
+            xdelta_time = xmax_time - xmin_time
+
+            new_mintime = max(min_time, current_time - xdelta_time)
+            new_maxtime = min(max_time, current_time + xdelta_time)
+
+            time_slider_repres.SetMinimumValue(new_mintime)
+            time_slider_repres.SetMaximumValue(new_maxtime)
+
+        return time_scale_observer
+
+    # make a slider widget and its representation
+    def make_slider(title, observer, interactor,
+                    startvalue, minvalue, maxvalue, cx1, cy1, cx2, cy2):
         slider_repres = vtk.vtkSliderRepresentation2D()
-
-        if min_time is None:
-            min_time = times[0]
-
-        if max_time is None:
-            max_time = times[len(times) - 1]
-
-        slider_repres.SetMinimumValue(min_time)
-        slider_repres.SetMaximumValue(max_time)
-        slider_repres.SetValue(min_time)
-        slider_repres.SetTitleText("time")
-        slider_repres.GetPoint1Coordinate(
-        ).SetCoordinateSystemToNormalizedDisplay()
-        slider_repres.GetPoint1Coordinate().SetValue(0.4, 0.9)
-        slider_repres.GetPoint2Coordinate(
-        ).SetCoordinateSystemToNormalizedDisplay()
-        slider_repres.GetPoint2Coordinate().SetValue(0.9, 0.9)
+        slider_repres.SetMinimumValue(
+            minvalue - (maxvalue - minvalue) / 100)
+        slider_repres.SetMaximumValue(
+            maxvalue + (maxvalue - minvalue) / 100)
+        slider_repres.SetValue(startvalue)
+        slider_repres.SetTitleText(title)
+        slider_repres.GetPoint1Coordinate().\
+            SetCoordinateSystemToNormalizedDisplay()
+        slider_repres.GetPoint1Coordinate().SetValue(cx1, cy1)
+        slider_repres.GetPoint2Coordinate().\
+            SetCoordinateSystemToNormalizedDisplay()
+        slider_repres.GetPoint2Coordinate().SetValue(cx2, cy2)
 
         slider_repres.SetSliderLength(0.02)
         slider_repres.SetSliderWidth(0.03)
         slider_repres.SetEndCapLength(0.01)
         slider_repres.SetEndCapWidth(0.03)
         slider_repres.SetTubeWidth(0.005)
-        slider_repres.SetLabelFormat("%3.4lf")
+        slider_repres.SetLabelFormat('%f')
         slider_repres.SetTitleHeight(0.02)
         slider_repres.SetLabelHeight(0.02)
 
         slider_widget = vtk.vtkSliderWidget()
-        slider_widget.SetInteractor(interactor_renderer)
+        slider_widget.SetInteractor(interactor)
         slider_widget.SetRepresentation(slider_repres)
         slider_widget.KeyPressActivationOff()
         slider_widget.SetAnimationModeToAnimate()
         slider_widget.SetEnabled(True)
+        slider_widget.AddObserver('InteractionEvent', observer)
 
-        input_observer = InputObserver(times, slider_repres)
+        return slider_widget, slider_repres
 
-        slider_widget.AddObserver("InteractionEvent", input_observer.time)
+    image_maker = vtk.vtkWindowToImageFilter()
+    image_maker.SetInput(renderer_window)
 
-        interactor_renderer.AddObserver('KeyPressEvent', input_observer.key)
+    recorder = vtk.vtkOggTheoraWriter()
+    recorder.SetQuality(2)
+    recorder.SetRate(frames_per_second)
+    recorder.SetFileName('xout.avi')
+    recorder.SetInputConnection(image_maker.GetOutputPort())
 
+    writer = vtk.vtkPNGWriter()
+    writer.SetInputConnection(image_maker.GetOutputPort())
 
-        # Create a vtkLight, and set the light parameters.
-        light = vtk.vtkLight()
-        light.SetFocalPoint(0, 0, 0)
-        light.SetPosition(0, 0, 500)
-        # light.SetLightTypeToHeadlight()
-        renderer.AddLight(light)
+    class InputObserver():
 
-        hlight = vtk.vtkLight()
-        hlight.SetFocalPoint(0, 0, 0)
-        # hlight.SetPosition(0, 0, 500)
-        hlight.SetLightTypeToHeadlight()
-        renderer.AddLight(hlight)
+        def __init__(self, times, slider_repres):
+            self._stimes = set(times)
+            self._opacity = 1.0
+            self._time_step = (max(self._stimes) - min(self._stimes)) \
+                / len(self._stimes)
+            self._time = min(times)
+            self._slider_repres = slider_repres
+            self._current_id = vtk.vtkIdTypeArray()
+            self._renderer = renderer
+            self._renderer_window = renderer_window
+            self._times = times
+            self._image_counter = 0
+            self._view_cycle = -1
 
-        # Warning! numpy support offer a view on numpy array
-        # the numpy array must not be garbage collected!
-        nxtime = solv_data[:, 0].copy()
-        nxiters = solv_data[:, 1].copy()
-        nprecs = solv_data[:, 2].copy()
-        xtime = numpy_support.numpy_to_vtk(nxtime)
-        xiters = numpy_support.numpy_to_vtk(nxiters)
-        xprecs = numpy_support.numpy_to_vtk(nprecs)
+            self._recording = False
 
-        xtime.SetName('time')
-        xiters.SetName('iterations')
-        xprecs.SetName('precisions')
-
-        table = vtk.vtkTable()
-        table.AddColumn(xtime)
-        table.AddColumn(xiters)
-        table.AddColumn(xprecs)
-        # table.Dump()
-
-        tview_iter = vtk.vtkContextView()
-        tview_prec = vtk.vtkContextView()
-
-        chart_iter = vtk.vtkChartXY()
-        chart_prec = vtk.vtkChartXY()
-        tview_iter.GetScene().AddItem(chart_iter)
-        tview_prec.GetScene().AddItem(chart_prec)
-        iter_plot = chart_iter.AddPlot(vtk.vtkChart.LINE)
-        iter_plot.SetLabel('Solver iterations')
-        iter_plot.GetXAxis().SetTitle('time')
-        iter_plot.GetYAxis().SetTitle('iterations')
-
-        prec_plot = chart_prec.AddPlot(vtk.vtkChart.LINE)
-        prec_plot.SetLabel('Solver precisions')
-        prec_plot.GetXAxis().SetTitle('time')
-        prec_plot.GetYAxis().SetTitle('precisions')
-
-        add_compatiblity_methods(iter_plot)
-        add_compatiblity_methods(prec_plot)
-
-        iter_plot.SetInputData(table, 'time', 'iterations')
-        prec_plot.SetInputData(table, 'time', 'precisions')
-        iter_plot.SetWidth(5.0)
-        prec_plot.SetWidth(5.0)
-        iter_plot.SetColor(0, 255, 0, 255)
-        prec_plot.SetColor(0, 255, 0, 255)
-
-        input_observer._iter_plot = iter_plot
-        input_observer._prec_plot = prec_plot
-        input_observer._iter_plot_view = tview_iter
-        input_observer._prec_plot_view = tview_prec
-
-        tview_iter.GetInteractor().AddObserver('RightButtonReleaseEvent',
-                                               input_observer.iter_plot_observer)
-
-        tview_prec.GetInteractor().AddObserver('RightButtonReleaseEvent',
-                                               input_observer.prec_plot_observer)
-
-        # screen_size = renderer_window.GetScreenSize()
-        renderer_window.SetSize(600, 600)
-        tview_iter.GetRenderer().GetRenderWindow().SetSize(600, 200)
-        tview_prec.GetRenderer().GetRenderWindow().SetSize(600, 200)
-
-        tview_iter.GetInteractor().Initialize()
-        # tview_iter.GetInteractor().Start()
-        tview_iter.GetRenderer().SetBackground(.9, .9, .9)
-        tview_iter.GetRenderer().Render()
-
-        tview_prec.GetInteractor().Initialize()
-        # tview_prec.GetInteractor().Start()
-        tview_prec.GetRenderer().SetBackground(.9, .9, .9)
-        tview_prec.GetRenderer().Render()
-
-        slwsc, slrepsc = make_slider('Scale',
-                                     make_scale_observer([cone_glyph, cylinder_glyph, sphere_glypha, sphere_glyphb, arrow_glyph]
-                                                         ),
-                                     interactor_renderer,
-                                     cf_scale_factor, cf_scale_factor -
-                                     cf_scale_factor / 2,
-                                     cf_scale_factor + cf_scale_factor / 2,
-                                     0.01, 0.01, 0.01, 0.7)
-
-        xslwsc, xslrepsc = make_slider('Time scale',
-                                       make_time_scale_observer(
-                                           slider_repres, input_observer),
-                                       interactor_renderer,
-                                       time_scale_factor, time_scale_factor -
-                                       time_scale_factor / 2,
-                                       time_scale_factor + time_scale_factor / 2,
-                                       0.1, 0.9, 0.3, 0.9)
-
-
-
-
-        renderer_window.Render()
-        interactor_renderer.Initialize()
-
-        # display coordinates axes
-        axes = vtk.vtkAxesActor()
-        axes.SetTotalLength(1.0,1.0,1.0)
-        widget = vtk.vtkOrientationMarkerWidget()
-        #widget.SetOutlineColor( 0.9300, 0.5700, 0.1300 )
-        widget.SetOrientationMarker( axes )
-        widget.SetInteractor(interactor_renderer)
-        #widget.SetViewport( 0.0, 0.0, 40.0, 40.0 );
-        widget.SetEnabled(True);
-        widget.InteractiveOn();
-
-
-
-
-        timer_id = interactor_renderer.CreateRepeatingTimer(40)   # 25 fps
-        interactor_renderer.AddObserver(
-            'TimerEvent', input_observer.recorder_observer)
-
-        interactor_renderer.Start()
-
-    else:
-        # vtk export
-        for time in times:
-            index = bisect.bisect_left(times, time)
+        def update(self):
+            global cf_prov
+            index = bisect.bisect_left(self._times, self._time)
             index = max(0, index)
-            index = min(index, len(times) - 1)
-
+            index = min(index, len(self._times) - 1)
             if cf_prov is not None:
-                cf_prov._time = times[index]
+                cf_prov._time = self._times[index]
                 cf_prov.method()
 
-            id_t = numpy.where(pos_data[:, 0] == times[index])
-            if numpy.shape(spos_data)[0] >0 :
-                set_positionv(spos_data[:, 1:9])
+    #        contact_posa.Update()
+
+    #        contact_posb.Update()
+
+            # contact_pos_force.Update()
+            # arrow_glyph.Update()
+            # gmapper.Update()
+
+            # set_positionv(spos_data[:, 1:9])
+
+            id_t = numpy.where(pos_data[:, 0] == self._times[index])
+
+            set_actors_visibility(id_t)
 
             set_positionv(pos_data[id_t, 1:9])
 
-            big_data_writer.SetFileName('{0}-{1}.{2}'.format(os.path.splitext(
-                                        os.path.basename(io_filename))[0],
-                index, big_data_writer.GetDefaultFileExtension()))
-            big_data_writer.SetTimeStep(times[index])
-            big_data_source.Update()
-            big_data_writer.Write()
+            self._slider_repres.SetValue(self._time)
+
+            self._current_id.SetNumberOfValues(1)
+            self._current_id.SetValue(0, index)
+
+            self._iter_plot.SetSelection(self._current_id)
+            self._prec_plot.SetSelection(self._current_id)
+
+            renderer_window.Render()
+
+        def object_pos(self, id_):
+            index = bisect.bisect_left(self._times, self._time)
+            index = max(0, index)
+            index = min(index, len(self._times) - 1)
+
+            id_t = numpy.where(pos_data[:, 0] == self._times[index])
+            return (pos_data[id_t[0][id_], 2], pos_data[id_t[0][id_], 3], pos_data[id_t[0][id_], 4])
+
+        def set_opacity(self):
+            for instance, actor in actors.items():
+                if instance >= 0:
+                    actor.GetProperty().SetOpacity(self._opacity)
+
+        def key(self, obj, event):
+            global cf_prov
+            key = obj.GetKeySym()
+            print 'key', key
+
+            if key == 'r':
+                spos_data, dpos_data, cf_data, solv_data = load()
+                if not cf_disable:
+                    cf_prov = CFprov(cf_data)
+                times = list(set(dpos_data[:, 0]))
+                times.sort()
+                ndyna = len(numpy.where(dpos_data[:, 0] == times[0]))
+                if len(spos_data) > 0:
+                    instances = set(dpos_data[:, 1]).union(
+                        set(spos_data[:, 1]))
+                else:
+                    instances = set(dpos_data[:, 1])
+                if cf_prov is not None:
+                    cf_prov._time = min(times[:])
+                    cf_prov.method()
+                    contact_posa.SetInputData(cf_prov._output)
+                    contact_posa.Update()
+                    contact_posb.SetInputData(cf_prov._output)
+                    contact_posb.Update()
+                    [(contact_pos_force[mu].Update(),
+                      contact_pos_norm[mu].Update())
+                     for mu in cf_prov._mu_coefs]
+
+                id_t0 = numpy.where(
+                    dpos_data[:, 0] == min(dpos_data[:, 0]))
+
+                pos_data = dpos_data[:].copy()
+                min_time = times[0]
+                set_actors_visibility(id_t0)
+
+                max_time = times[len(times) - 1]
+
+                self._slider_repres.SetMinimumValue(min_time)
+                self._slider_repres.SetMaximumValue(max_time)
+                self.update()
+
+            if key == 'p':
+                self._image_counter += 1
+                image_maker.Update()
+                writer.SetFileName(
+                    'vview-{0}.png'.format(self._image_counter))
+                writer.Write()
+
+            if key == 'Up':
+                    self._time_step = self._time_step * 2.
+                    self._time += self._time_step
+
+            if key == 'Down':
+                    self._time_step = self._time_step / 2.
+                    self._time -= self._time_step
+
+            if key == 'Left':
+                    self._time -= self._time_step
+
+            if key == 'Right':
+                    self._time += self._time_step
+
+            if key == 't':
+                    self._opacity -= .1
+                    self.set_opacity()
+
+            if key == 'T':
+                    self._opacity += .1
+                    self.set_opacity()
+
+            if key == 'c':
+                    print 'camera position:', self._renderer.GetActiveCamera().GetPosition()
+                    print 'camera focal point', self._renderer.GetActiveCamera().GetFocalPoint()
+                    print 'camera clipping plane', self._renderer.GetActiveCamera().GetClippingRange()
+                    print 'camera up vector', self._renderer.GetActiveCamera().GetViewUp()
+                    if self._renderer.GetActiveCamera().GetParallelProjection() != 0:
+                        print 'camera parallel scale', self._renderer.GetActiveCamera().GetParallelScale()
+
+            if key == 'o':
+                    self._renderer.GetActiveCamera().SetParallelProjection(
+                        1 - self._renderer.GetActiveCamera().GetParallelProjection())
+
+            if key == 'v':
+                    # Cycle through some useful views
+                    dist = norm(self._renderer.GetActiveCamera().GetPosition())
+                    # dist2 = norm([numpy.sqrt(dist**2)/3]*2)
+                    d3 = norm([numpy.sqrt(dist**2) / 3] * 3)
+                    self._view_cycle += 1
+                    if self._view_cycle == 0:
+                            print('Left')
+                            self._renderer.GetActiveCamera().SetPosition(
+                                dist, 0, 0)
+                            self._renderer.GetActiveCamera().SetViewUp(0, 0, 1)
+                    elif self._view_cycle == 1:
+                            print('Right')
+                            self._renderer.GetActiveCamera().SetPosition(
+                                0, dist, 0)
+                            self._renderer.GetActiveCamera().SetViewUp(0, 0, 1)
+                    elif self._view_cycle == 2:
+                            print('Top')
+                            self._renderer.GetActiveCamera().SetPosition(
+                                0, 0, dist)
+                            self._renderer.GetActiveCamera().SetViewUp(1, 0, 0)
+                    else:  # Corner
+                            print('Corner')
+                            self._renderer.GetActiveCamera().SetPosition(
+                                d3, d3, d3)
+                            self._renderer.GetActiveCamera().SetViewUp(
+                                -1, -1, 1)
+                            self._view_cycle = -1
+
+            if key == 's':
+                if not self._recording:
+                    recorder.Start()
+                    self._recording = True
+
+            if key == 'e':
+                if self._recording:
+                    self._recording = False
+                    recorder.End()
+
+            if key == 'C':
+                    this_view.action(self)
+            self.update()
+
+        def time(self, obj, event):
+            slider_repres = obj.GetRepresentation()
+            self._time = slider_repres.GetValue()
+            self.update()
+
+            # observer on 2D chart
+        def iter_plot_observer(self, obj, event):
+
+            if self._iter_plot.GetSelection() is not None:
+                # just one selection at the moment!
+                if self._iter_plot.GetSelection().GetMaxId() >= 0:
+                    self._time = self._times[
+                        self._iter_plot.GetSelection().GetValue(0)]
+                    # -> recompute index ...
+                    self.update()
+
+        def prec_plot_observer(self, obj, event):
+            if self._prec_plot.GetSelection() is not None:
+                # just one selection at the moment!
+                if self._prec_plot.GetSelection().GetMaxId() >= 0:
+                    self._time = self._times[
+                        self._prec_plot.GetSelection().GetValue(0)]
+                    # -> recompute index ...
+                    self.update()
+
+        def recorder_observer(self, obj, event):
+            if self._recording:
+                if advance_by_time is not None:
+                    self._time += advance_by_time
+                    slwsc.SetEnabled(False)  # Scale slider
+                    xslwsc.SetEnabled(False)  # Time scale slider
+                    # slider_widget.SetEnabled(False) # Time slider
+                    # widget.SetEnabled(False) # Axis widget
+                self.update()
+                image_maker.Modified()
+                recorder.Write()
+                if advance_by_time is not None:
+                    slwsc.SetEnabled(True)
+                    xslwsc.SetEnabled(True)
+                    # slider_widget.SetEnabled(True)
+                    # widget.SetEnabled(True) # Axis widget
+
+                if self._time >= max(self._times):
+                    self._recording = False
+                    recorder.End()
+
+    slider_repres = vtk.vtkSliderRepresentation2D()
+
+    if min_time is None:
+        min_time = times[0]
+
+    if max_time is None:
+        max_time = times[len(times) - 1]
+
+    slider_repres.SetMinimumValue(min_time)
+    slider_repres.SetMaximumValue(max_time)
+    slider_repres.SetValue(min_time)
+    slider_repres.SetTitleText("time")
+    slider_repres.GetPoint1Coordinate(
+    ).SetCoordinateSystemToNormalizedDisplay()
+    slider_repres.GetPoint1Coordinate().SetValue(0.4, 0.9)
+    slider_repres.GetPoint2Coordinate(
+    ).SetCoordinateSystemToNormalizedDisplay()
+    slider_repres.GetPoint2Coordinate().SetValue(0.9, 0.9)
+
+    slider_repres.SetSliderLength(0.02)
+    slider_repres.SetSliderWidth(0.03)
+    slider_repres.SetEndCapLength(0.01)
+    slider_repres.SetEndCapWidth(0.03)
+    slider_repres.SetTubeWidth(0.005)
+    slider_repres.SetLabelFormat("%3.4lf")
+    slider_repres.SetTitleHeight(0.02)
+    slider_repres.SetLabelHeight(0.02)
+
+    slider_widget = vtk.vtkSliderWidget()
+    slider_widget.SetInteractor(interactor_renderer)
+    slider_widget.SetRepresentation(slider_repres)
+    slider_widget.KeyPressActivationOff()
+    slider_widget.SetAnimationModeToAnimate()
+    slider_widget.SetEnabled(True)
+
+    input_observer = InputObserver(times, slider_repres)
+
+    slider_widget.AddObserver("InteractionEvent", input_observer.time)
+
+    interactor_renderer.AddObserver('KeyPressEvent', input_observer.key)
+
+    # Create a vtkLight, and set the light parameters.
+    light = vtk.vtkLight()
+    light.SetFocalPoint(0, 0, 0)
+    light.SetPosition(0, 0, 500)
+    # light.SetLightTypeToHeadlight()
+    renderer.AddLight(light)
+
+    hlight = vtk.vtkLight()
+    hlight.SetFocalPoint(0, 0, 0)
+    # hlight.SetPosition(0, 0, 500)
+    hlight.SetLightTypeToHeadlight()
+    renderer.AddLight(hlight)
+
+    # Warning! numpy support offer a view on numpy array
+    # the numpy array must not be garbage collected!
+    nxtime = solv_data[:, 0].copy()
+    nxiters = solv_data[:, 1].copy()
+    nprecs = solv_data[:, 2].copy()
+    xtime = numpy_support.numpy_to_vtk(nxtime)
+    xiters = numpy_support.numpy_to_vtk(nxiters)
+    xprecs = numpy_support.numpy_to_vtk(nprecs)
+
+    xtime.SetName('time')
+    xiters.SetName('iterations')
+    xprecs.SetName('precisions')
+
+    table = vtk.vtkTable()
+    table.AddColumn(xtime)
+    table.AddColumn(xiters)
+    table.AddColumn(xprecs)
+    # table.Dump()
+
+    tview_iter = vtk.vtkContextView()
+    tview_prec = vtk.vtkContextView()
+
+    chart_iter = vtk.vtkChartXY()
+    chart_prec = vtk.vtkChartXY()
+    tview_iter.GetScene().AddItem(chart_iter)
+    tview_prec.GetScene().AddItem(chart_prec)
+    iter_plot = chart_iter.AddPlot(vtk.vtkChart.LINE)
+    iter_plot.SetLabel('Solver iterations')
+    iter_plot.GetXAxis().SetTitle('time')
+    iter_plot.GetYAxis().SetTitle('iterations')
+
+    prec_plot = chart_prec.AddPlot(vtk.vtkChart.LINE)
+    prec_plot.SetLabel('Solver precisions')
+    prec_plot.GetXAxis().SetTitle('time')
+    prec_plot.GetYAxis().SetTitle('precisions')
+
+    add_compatiblity_methods(iter_plot)
+    add_compatiblity_methods(prec_plot)
+
+    iter_plot.SetInputData(table, 'time', 'iterations')
+    prec_plot.SetInputData(table, 'time', 'precisions')
+    iter_plot.SetWidth(5.0)
+    prec_plot.SetWidth(5.0)
+    iter_plot.SetColor(0, 255, 0, 255)
+    prec_plot.SetColor(0, 255, 0, 255)
+
+    input_observer._iter_plot = iter_plot
+    input_observer._prec_plot = prec_plot
+    input_observer._iter_plot_view = tview_iter
+    input_observer._prec_plot_view = tview_prec
+
+    tview_iter.GetInteractor().AddObserver('RightButtonReleaseEvent',
+                                           input_observer.iter_plot_observer)
+
+    tview_prec.GetInteractor().AddObserver('RightButtonReleaseEvent',
+                                           input_observer.prec_plot_observer)
+
+    # screen_size = renderer_window.GetScreenSize()
+    renderer_window.SetSize(600, 600)
+    tview_iter.GetRenderer().GetRenderWindow().SetSize(600, 200)
+    tview_prec.GetRenderer().GetRenderWindow().SetSize(600, 200)
+
+    tview_iter.GetInteractor().Initialize()
+    # tview_iter.GetInteractor().Start()
+    tview_iter.GetRenderer().SetBackground(.9, .9, .9)
+    tview_iter.GetRenderer().Render()
+
+    tview_prec.GetInteractor().Initialize()
+    # tview_prec.GetInteractor().Start()
+    tview_prec.GetRenderer().SetBackground(.9, .9, .9)
+    tview_prec.GetRenderer().Render()
+
+    slwsc, slrepsc = make_slider('Scale',
+                                 make_scale_observer([cone_glyph, cylinder_glyph, sphere_glypha, sphere_glyphb, arrow_glyph]
+                                                     ),
+                                 interactor_renderer,
+                                 cf_scale_factor, cf_scale_factor -
+                                 cf_scale_factor / 2,
+                                 cf_scale_factor + cf_scale_factor / 2,
+                                 0.01, 0.01, 0.01, 0.7)
+
+    xslwsc, xslrepsc = make_slider('Time scale',
+                                   make_time_scale_observer(
+                                       slider_repres, input_observer),
+                                   interactor_renderer,
+                                   time_scale_factor, time_scale_factor -
+                                   time_scale_factor / 2,
+                                   time_scale_factor + time_scale_factor / 2,
+                                   0.1, 0.9, 0.3, 0.9)
+
+    renderer_window.Render()
+    interactor_renderer.Initialize()
+
+    # display coordinates axes
+    axes = vtk.vtkAxesActor()
+    axes.SetTotalLength(1.0, 1.0, 1.0)
+    widget = vtk.vtkOrientationMarkerWidget()
+    # widget.SetOutlineColor( 0.9300, 0.5700, 0.1300 )
+    widget.SetOrientationMarker(axes)
+    widget.SetInteractor(interactor_renderer)
+    # widget.SetViewport( 0.0, 0.0, 40.0, 40.0 );
+    widget.SetEnabled(True)
+    widget.InteractiveOn()
+
+    timer_id = interactor_renderer.CreateRepeatingTimer(40)   # 25 fps
+    interactor_renderer.AddObserver(
+        'TimerEvent', input_observer.recorder_observer)
+
+    interactor_renderer.Start()
