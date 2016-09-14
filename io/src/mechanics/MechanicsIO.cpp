@@ -217,6 +217,32 @@ struct ContactPointVisitor : public SiconosVisitor
 
 };
 
+struct ContactPointDomainVisitor : public SiconosVisitor
+{
+  SP::Interaction inter;
+  SiconosVector answer;
+
+  template<typename T>
+  void operator()(const T& rel)
+  {
+  }
+
+};
+
+template<>
+void ContactPointDomainVisitor::operator()(const BulletR& rel)
+{
+  answer.resize(2);
+
+  /*
+   * TODO: contact point domain coloring (e.g. based on broadphase).
+   * currently, domain = (x>0):1?0
+   */
+  answer.setValue(0, rel.pc1()->getValue(0) > 0);
+
+  answer.setValue(1, inter->number());
+}
+
 template<typename T, typename G>
 SP::SimpleMatrix MechanicsIO::visitAllVerticesForVector(const G& graph) const
 {
@@ -301,6 +327,38 @@ SP::SimpleMatrix MechanicsIO::contactPoints(const Model& model) const
       graph.bundle(*vi)->relation()->accept(inspector);
       const SiconosVector& data = inspector.answer;
       if (data.size() == 14) result->setRow(current_row, data);
+    }
+  }
+  return result;
+}
+
+SP::SimpleMatrix MechanicsIO::domains(const Model& model) const
+{
+  SP::SimpleMatrix result(new SimpleMatrix());
+  InteractionsGraph::VIterator vi, viend;
+  if (model.nonSmoothDynamicalSystem()->topology()->numberOfIndexSet() > 0)
+  {
+    InteractionsGraph& graph =
+      *model.nonSmoothDynamicalSystem()->topology()->indexSet(1);
+    unsigned int current_row;
+    result->resize(graph.vertices_number(), 2);
+    for(current_row=0, std11::tie(vi,viend) = graph.vertices();
+        vi!=viend; ++vi, ++current_row)
+    {
+      DEBUG_PRINTF("process interaction : %p\n", &*graph.bundle(*vi));
+
+      typedef Visitor < Classes <
+                          NewtonEulerFrom1DLocalFrameR,
+                          NewtonEulerFrom3DLocalFrameR,
+                          PrismaticJointR,
+                          KneeJointR,
+                          PivotJointR>,
+                        ContactPointDomainVisitor>::Make DomainInspector;
+      DomainInspector inspector;
+      inspector.inter = graph.bundle(*vi);
+      graph.bundle(*vi)->relation()->accept(inspector);
+      const SiconosVector& data = inspector.answer;
+      if (data.size() == 2) result->setRow(current_row, data);
     }
   }
   return result;

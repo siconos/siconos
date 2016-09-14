@@ -481,7 +481,7 @@ class Hdf5():
     def __init__(self, io_filename=None, mode='w',
                  broadphase=None, osi=None, shape_filename=None,
                  set_external_forces=None, gravity_scale=None, collision_margin=None,
-                 use_compression=False):
+                 use_compression=False, output_domains=False):
 
         if io_filename is None:
             self._io_filename = '{0}.hdf5'.format(
@@ -498,6 +498,7 @@ class Hdf5():
         self._velocities_data = None
         self._dynamic_data = None
         self._cf_data = None
+        self._domain_data = None
         self._solv_data = None
         self._input = None
         self._nslaws = None
@@ -518,6 +519,7 @@ class Hdf5():
         self._births = dict()
         self._initializing = True
         self._use_compression = use_compression
+        self._should_output_domains = output_domains
 
     def __enter__(self):
         if self._set_external_forces is None:
@@ -538,6 +540,9 @@ class Hdf5():
                                   use_compression = self._use_compression)
         self._cf_data = data(self._data, 'cf', 15,
                              use_compression = self._use_compression)
+        if self._should_output_domains:
+            self._domain_data = data(self._data, 'domain', 3,
+                                     use_compression = self._use_compression)
         self._solv_data = data(self._data, 'solv', 4,
                                use_compression = self._use_compression)
         self._input = group(self._data, 'input')
@@ -599,6 +604,12 @@ class Hdf5():
         Contact points informations.
         """
         return self._cf_data
+
+    def domains_data(self):
+        """
+        Contact point domain information.
+        """
+        return self._domain_data
 
     def solver_data(self):
         """
@@ -1077,6 +1088,25 @@ class Hdf5():
                     np.concatenate((times,
                                     contact_points),
                                    axis=1)
+
+    def outputDomains(self):
+        """
+        Outputs domains of contact points
+        """
+        if self._broadphase.model().nonSmoothDynamicalSystem().\
+                topology().indexSetsSize() > 1:
+            time = self.currentTime()
+            domains = self._io.domains(self._broadphase.model())
+
+            if domains is not None:
+
+                current_line = self._domain_data.shape[0]
+                self._domain_data.resize(current_line + domains.shape[0], 0)
+                times = np.empty((domains.shape[0], 1))
+                times.fill(time)
+
+                self._domain_data[current_line:, :] = \
+                    np.concatenate((times, domains), axis=1)
 
     def outputSolverInfos(self):
         """
@@ -1632,6 +1662,9 @@ class Hdf5():
                 log(self.outputVelocities, with_timer)()
 
                 log(self.outputContactForces, with_timer)()
+
+                if self._should_output_domains:
+                    log(self.outputDomains, with_timer)()
 
                 log(self.outputSolverInfos, with_timer)()
 

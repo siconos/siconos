@@ -61,6 +61,12 @@ public:
       \return a matrix where the columns are mu x y z, nx, ny, nz, rx, ry, rz, vx, vy, vz, ox, oy, oz, id
   */
   SP::SimpleMatrix contactPoints(const Model& model) const;
+
+  /** get the domain of each contact point
+   * \param model the model
+      \return a matrix where the columns are domain, id
+  */
+  SP::SimpleMatrix domains(const Model& model) const;
 };
 
 
