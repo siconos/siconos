@@ -81,7 +81,7 @@ extern "C"
   int fc3d_setDefaultSolverOptions(SolverOptions* options, int solverId);
 
   
-  enum SICONOS_FRICTION_3D_NSGS
+  enum SICONOS_FRICTION_3D_NSGS_LOCALSOLVER
   {
     SICONOS_FRICTION_3D_NSGS_LOCALSOLVER_CONTACTNUMBER = 4
   };
