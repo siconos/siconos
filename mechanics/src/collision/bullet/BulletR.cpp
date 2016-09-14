@@ -46,17 +46,23 @@
 #include <Interaction.hpp>
 
 BulletR::BulletR(SP::btManifoldPoint point,
+                 bool flip,
                  double y_correction_A,
                  double y_correction_B,
                  double scaling) :
   NewtonEulerFrom3DLocalFrameR(),
   _contactPoints(point),
+  _flip(flip),
   _y_correction_A(y_correction_A),
   _y_correction_B(y_correction_B),
   _scaling(scaling)
 {
   btVector3 posa = _contactPoints->getPositionWorldOnA();
   btVector3 posb = _contactPoints->getPositionWorldOnB();
+  if (flip) {
+      posa = _contactPoints->getPositionWorldOnB();
+      posb = _contactPoints->getPositionWorldOnA();
+  }
 
   (*pc1())(0) = posa[0];
   (*pc1())(1) = posa[1];
@@ -65,9 +71,9 @@ BulletR::BulletR(SP::btManifoldPoint point,
   (*pc2())(1) = posb[1];
   (*pc2())(2) = posb[2];
 
-  (*nc())(0) = _contactPoints->m_normalWorldOnB[0];
-  (*nc())(1) = _contactPoints->m_normalWorldOnB[1];
-  (*nc())(2) = _contactPoints->m_normalWorldOnB[2];
+  (*nc())(0) = _contactPoints->m_normalWorldOnB[0] * (flip ? -1 : 1);
+  (*nc())(1) = _contactPoints->m_normalWorldOnB[1] * (flip ? -1 : 1);
+  (*nc())(2) = _contactPoints->m_normalWorldOnB[2] * (flip ? -1 : 1);
 
   assert(!((*nc())(0)==0 && (*nc())(1)==0 && (*nc())(2)==0)
          && "nc = 0, problems..\n");
@@ -85,6 +91,10 @@ void BulletR::computeh(double time, BlockVector& q0, SiconosVector& y)
 
   btVector3 posa = _contactPoints->getPositionWorldOnA();
   btVector3 posb = _contactPoints->getPositionWorldOnB();
+  if (_flip) {
+      posa = _contactPoints->getPositionWorldOnB();
+      posb = _contactPoints->getPositionWorldOnA();
+  }
 
   (*pc1())(0) = posa[0]*_scaling;
   (*pc1())(1) = posa[1]*_scaling;
@@ -98,9 +108,9 @@ void BulletR::computeh(double time, BlockVector& q0, SiconosVector& y)
     // are, so we correct by a factor.
     y.setValue(0, _contactPoints->getDistance()*_scaling + correction);
 
-    (*nc())(0) = _contactPoints->m_normalWorldOnB[0];
-    (*nc())(1) = _contactPoints->m_normalWorldOnB[1];
-    (*nc())(2) = _contactPoints->m_normalWorldOnB[2];
+    (*nc())(0) = _contactPoints->m_normalWorldOnB[0] * (_flip ? -1 : 1);
+    (*nc())(1) = _contactPoints->m_normalWorldOnB[1] * (_flip ? -1 : 1);
+    (*nc())(2) = _contactPoints->m_normalWorldOnB[2] * (_flip ? -1 : 1);
 
     // Adjust contact point positions correspondingly along normal.  TODO: This
     // assumes same distance in each direction, i.e. same margin per object.

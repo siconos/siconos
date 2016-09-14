@@ -552,7 +552,7 @@ void fc2d_latin(FrictionContactProblem* problem , double *reaction , double *vel
 }
 int fc2d_latin_setDefaultSolverOptions(SolverOptions *options)
 {
-  int i;
+
   if (verbose > 0)
   {
     printf("Set the Default SolverOptions for the Latin Solver\n");
@@ -565,15 +565,10 @@ int fc2d_latin_setDefaultSolverOptions(SolverOptions *options)
   options->filterOn = 1;
   options->iSize = 5;
   options->dSize = 5;
-  options->iparam = (int *)malloc(options->iSize * sizeof(int));
-  options->dparam = (double *)malloc(options->dSize * sizeof(double));
+  options->iparam = (int *)calloc(options->iSize, sizeof(int));
+  options->dparam = (double *)calloc(options->dSize, sizeof(double));
   options->dWork = NULL;
-  null_SolverOptions(options);
-  for (i = 0; i < 5; i++)
-  {
-    options->iparam[i] = 0;
-    options->dparam[i] = 0.0;
-  }
+  solver_options_nullify(options);
   options->iparam[0] = 1000;
   options->dparam[0] = 1e-4;
   options->dparam[3] = 0.3;

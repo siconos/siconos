@@ -66,10 +66,10 @@ int fc2d_driver(FrictionContactProblem* problem, double *reaction , double *velo
   int NoDefaultOptions = options->isSet; /* true(1) if the SolverOptions structure has been filled in else false(0) */
 
   if (!NoDefaultOptions)
-    readSolverOptions(3, options);
+    solver_options_read(3, options);
 
   if (verbose > 0)
-    printSolverOptions(options);
+    solver_options_print(options);
 
 
 
@@ -98,7 +98,7 @@ int fc2d_driver(FrictionContactProblem* problem, double *reaction , double *velo
     }
     else
     {
-      fprintf(stderr, "fc2d_driver error: unknown solver named: %s\n", idToName(options->solverId));
+      fprintf(stderr, "fc2d_driver error: unknown solver named: %s\n", solver_options_id_to_name(options->solverId));
       exit(EXIT_FAILURE);
     }
   }
@@ -151,7 +151,7 @@ int fc2d_driver(FrictionContactProblem* problem, double *reaction , double *velo
     /*error */
     default:
     {
-      fprintf(stderr, "fc2d_driver error: unknown solver named: %s\n", idToName(options->solverId));
+      fprintf(stderr, "fc2d_driver error: unknown solver named: %s\n", solver_options_id_to_name(options->solverId));
       exit(EXIT_FAILURE);
     }
     }

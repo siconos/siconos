@@ -563,10 +563,10 @@ exit_1:
   return info;
 }
 
-int test_subRowprod(NumericsMatrix* M1, NumericsMatrix* M2)
+int test_NM_row_prod(NumericsMatrix* M1, NumericsMatrix* M2)
 {
 
-  printf("== Numerics tests: subRowProd(NumericsMatrix,vector) == \n");
+  printf("== Numerics tests: NM_row_prod(NumericsMatrix,vector) == \n");
   int i , n = M1->size1;
   double * x = (double *)malloc(n * sizeof(double));
 
@@ -585,7 +585,7 @@ int test_subRowprod(NumericsMatrix* M1, NumericsMatrix* M2)
   for (i = 0; i < sizeY; i++)
     yref[i] = cblas_ddot(n, &(M1->matrix0[min + i]), incx, x, incy);
 
-  subRowProd(n, sizeY, min, M1, x, y, 1);
+  NM_row_prod(n, sizeY, min, M1, x, y, 1);
   double tol = 1e-12;
   int info = 0;
   for (i = 0; i < sizeY; i++)
@@ -601,7 +601,7 @@ int test_subRowprod(NumericsMatrix* M1, NumericsMatrix* M2)
     printf("Step 0 ( y = subA*x, double* storage) failed ...\n");
 
   /* += */
-  subRowProd(n, sizeY, min, M1, x, y, 0);
+  NM_row_prod(n, sizeY, min, M1, x, y, 0);
   for (i = 0; i < sizeY; i++)
   {
     if (fabs(y[i] - 2 * yref[i]) > tol) info = 1;
@@ -629,7 +629,7 @@ int test_subRowprod(NumericsMatrix* M1, NumericsMatrix* M2)
     yref[i] = cblas_ddot(n, &(M1->matrix0[4 + i]), incx, x, incy);
   }
   /* Sparse ... */
-  subRowProd(n, sizeY, pos, M2, x, y, 1);
+  NM_row_prod(n, sizeY, pos, M2, x, y, 1);
   for (i = 0; i < sizeY; i++)
   {
     if (fabs(y[i] - yref[i]) > tol) info = 1;
@@ -637,7 +637,7 @@ int test_subRowprod(NumericsMatrix* M1, NumericsMatrix* M2)
   }
   for (i = 0; i < sizeY; i++)
     yref[i] = cblas_ddot(n, &(M1->matrix0[6 + i]), incx, x, incy);
-  subRowProd(n, sizeY, pos + 1, M2, x, y, 1);
+  NM_row_prod(n, sizeY, pos + 1, M2, x, y, 1);
   for (i = 0; i < sizeY; i++)
   {
     if (fabs(y[i] - yref[i]) > tol) info = 1;
@@ -651,7 +651,7 @@ int test_subRowprod(NumericsMatrix* M1, NumericsMatrix* M2)
     printf("Step 2 ( y = subA*x,  sparse storage) failed ...\n");
 
   /* Sparse, += ... */
-  subRowProd(n, sizeY, pos + 1, M2, x, y, 0);
+  NM_row_prod(n, sizeY, pos + 1, M2, x, y, 0);
   for (i = 0; i < sizeY; i++)
   {
     if (fabs(y[i] - 2 * yref[i]) > tol) info = 1;
@@ -665,14 +665,14 @@ int test_subRowprod(NumericsMatrix* M1, NumericsMatrix* M2)
 
   free(x);
   free(y);
-  printf("== End of test subRowProd(NumericsMatrix,vector), result = %d\n", info);
+  printf("== End of test NM_row_prod(NumericsMatrix,vector), result = %d\n", info);
 
   return info;
 }
-int test_subRowprodNonSquare(NumericsMatrix* M3, NumericsMatrix* M4)
+int test_NM_row_prod_non_square(NumericsMatrix* M3, NumericsMatrix* M4)
 {
 
-  printf("== Numerics tests: subRowProdNonSquare(NumericsMatrix,vector) == \n");
+  printf("== Numerics tests: subRowProd_non_square(NumericsMatrix,vector) == \n");
   int i , n = M3->size0, m = M3->size1;
   double * x = (double *)malloc(m * sizeof(double));
 
@@ -692,7 +692,7 @@ int test_subRowprodNonSquare(NumericsMatrix* M3, NumericsMatrix* M4)
   for (i = 0; i < sizeY; i++)
     yref[i] = cblas_ddot(m, &(M3->matrix0[min + i]), incx, x, incy);
 
-  subRowProd(sizeX, sizeY, min, M3, x, y, 1);
+  NM_row_prod(sizeX, sizeY, min, M3, x, y, 1);
   double tol = 1e-12;
   int info = 0;
   for (i = 0; i < sizeY; i++)
@@ -703,12 +703,12 @@ int test_subRowprodNonSquare(NumericsMatrix* M3, NumericsMatrix* M4)
     /*           printf("%lf\n", yref[i]); */
   }
   if (info == 0)
-    printf("Step 0 ( y = subA*x, double* storage NonSquare) ok ...\n");
+    printf("Step 0 ( y = subA*x, double* storage _non_square) ok ...\n");
   else
-    printf("Step 0 ( y = subA*x, double* storage NonSquare) failed ...\n");
+    printf("Step 0 ( y = subA*x, double* storage _non_square) failed ...\n");
 
   /* += */
-  subRowProd(sizeX, sizeY, min, M3, x, y, 0);
+  NM_row_prod(sizeX, sizeY, min, M3, x, y, 0);
   for (i = 0; i < sizeY; i++)
   {
     if (fabs(y[i] - 2 * yref[i]) > tol) info = 1;
@@ -717,9 +717,9 @@ int test_subRowprodNonSquare(NumericsMatrix* M3, NumericsMatrix* M4)
     /*           printf("%lf\n", 2*yref[i]); */
   }
   if (info == 0)
-    printf("Step 1 ( y += subA*x, double* storage NonSquare) ok ...\n");
+    printf("Step 1 ( y += subA*x, double* storage _non_square) ok ...\n");
   else
-    printf("Step 1 ( y += subA*x, double* storage NonSquare) failed ...\n");
+    printf("Step 1 ( y += subA*x, double* storage _non_square) failed ...\n");
 
 
   free(y);
@@ -735,7 +735,7 @@ int test_subRowprodNonSquare(NumericsMatrix* M3, NumericsMatrix* M4)
     yref[i] = cblas_ddot(m, &(M3->matrix0[4 + i]), incx, x, incy);
   }
   /* Sparse ... */
-  subRowProd(sizeX, sizeY, pos, M4, x, y, 1);
+  NM_row_prod(sizeX, sizeY, pos, M4, x, y, 1);
   for (i = 0; i < sizeY; i++)
   {
     if (fabs(y[i] - yref[i]) > tol) info = 1;
@@ -743,7 +743,7 @@ int test_subRowprodNonSquare(NumericsMatrix* M3, NumericsMatrix* M4)
   }
   for (i = 0; i < sizeY; i++)
     yref[i] = cblas_ddot(m, &(M3->matrix0[6 + i]), incx, x, incy);
-  subRowProd(sizeX, sizeY, pos + 1, M4, x, y, 1);
+  NM_row_prod(sizeX, sizeY, pos + 1, M4, x, y, 1);
   for (i = 0; i < sizeY; i++)
   {
     if (fabs(y[i] - yref[i]) > tol) info = 1;
@@ -752,12 +752,12 @@ int test_subRowprodNonSquare(NumericsMatrix* M3, NumericsMatrix* M4)
 
 
   if (info == 0)
-    printf("Step 2 ( y = subA*x, sparse storage NonSquare) ok ...\n");
+    printf("Step 2 ( y = subA*x, sparse storage _non_square) ok ...\n");
   else
-    printf("Step 2 ( y = subA*x,  sparse storage NonSquare) failed ...\n");
+    printf("Step 2 ( y = subA*x,  sparse storage _non_square) failed ...\n");
 
   /* Sparse, += ... */
-  subRowProd(sizeX, sizeY, pos + 1, M4, x, y, 0);
+  NM_row_prod(sizeX, sizeY, pos + 1, M4, x, y, 0);
   for (i = 0; i < sizeY; i++)
   {
     if (fabs(y[i] - 2 * yref[i]) > tol) info = 1;
@@ -771,15 +771,15 @@ int test_subRowprodNonSquare(NumericsMatrix* M3, NumericsMatrix* M4)
 
   free(x);
   free(y);
-  printf("== End of test subRowProd(NumericsMatrix,vector), result = %d\n", info);
+  printf("== End of test NM_row_prod(NumericsMatrix,vector), result = %d\n", info);
 
   return info;
 }
 
-int test_rowProdNoDiag(NumericsMatrix* M1, NumericsMatrix* M2)
+int test_NM_row_prod_no_diag(NumericsMatrix* M1, NumericsMatrix* M2)
 {
 
-  printf("== Numerics tests: rowProdNoDiag(NumericsMatrix,vector) == \n");
+  printf("== Numerics tests: NM_row_prod_no_diag(NumericsMatrix,vector) == \n");
   int i , n = M1->size1;
   double * x = (double *)malloc(n * sizeof(double));
 
@@ -802,7 +802,7 @@ int test_rowProdNoDiag(NumericsMatrix* M1, NumericsMatrix* M2)
   /*   for(i=0;i<sizeY;i++) */
   /*     yref[i]=cblas_ddot(n, &(M1->matrix0[min+i]), incx, x, incy); */
 
-  /*   rowProdNoDiag(n,sizeY,min,M1,x,y,1); */
+  /*   NM_row_prod_no_diag(n,sizeY,min,M1,x,y,1); */
 
   /*   for(i = 0; i< sizeY; i++) */
   /*     { */
@@ -815,7 +815,7 @@ int test_rowProdNoDiag(NumericsMatrix* M1, NumericsMatrix* M2)
   /*     printf("Step 0 ( y = subA*x, double* storage) failed ...\n"); */
 
   /*   /\* += *\/ */
-  /*   rowProdNoDiag(n,sizeY,min,M1,x,y,0); */
+  /*   NM_row_prod_no_diag(n,sizeY,min,M1,x,y,0); */
   /*   for(i = 0; i< sizeY; i++) */
   /*     { */
   /*       if( fabs(y[i]-2*yref[i])>tol) info = 1; */
@@ -837,13 +837,13 @@ int test_rowProdNoDiag(NumericsMatrix* M1, NumericsMatrix* M2)
   yref[1] = 16;
 
   /* Sparse ... */
-  rowProdNoDiag(n, sizeY, pos, M2, x, y, 1);
+  NM_row_prod_no_diag(n, sizeY, pos, M2, x, y, 1);
   for (i = 0; i < sizeY; i++)
   {
     if (fabs(y[i] - yref[i]) > tol) info = 1;
     //  printf("%lf\n", fabs(y[i]-yref[i]));
   }
-  rowProdNoDiag(n, sizeY, pos + 1, M2, x, y, 1);
+  NM_row_prod_no_diag(n, sizeY, pos + 1, M2, x, y, 1);
   yref[0] = 10;
   yref[1] = 14;
   for (i = 0; i < sizeY; i++)
@@ -857,7 +857,7 @@ int test_rowProdNoDiag(NumericsMatrix* M1, NumericsMatrix* M2)
     printf("Step 2 ( y = subA*x,  sparse storage) failed ...\n");
 
   /* Sparse, += ... */
-  rowProdNoDiag(n, sizeY, pos + 1, M2, x, y, 0);
+  NM_row_prod_no_diag(n, sizeY, pos + 1, M2, x, y, 0);
   for (i = 0; i < sizeY; i++)
   {
     if (fabs(y[i] - 2 * yref[i]) > tol) info = 1;
@@ -871,14 +871,14 @@ int test_rowProdNoDiag(NumericsMatrix* M1, NumericsMatrix* M2)
 
   free(x);
   free(y);
-  printf("== End of test rowProdNoDiag(NumericsMatrix,vector), result = %d\n", info);
+  printf("== End of test NM_row_prod_no_diag(NumericsMatrix,vector), result = %d\n", info);
 
   return info;
 }
-int test_rowProdNoDiagNonSquare(NumericsMatrix* M3, NumericsMatrix* M4)
+int test_NM_row_prod_no_diag_non_square(NumericsMatrix* M3, NumericsMatrix* M4)
 {
 
-  printf("== Numerics tests: rowProdNoDiagNonSquare(NumericsMatrix,vector) == \n");
+  printf("== Numerics tests: NM_row_prod_no_diag_non_square(NumericsMatrix,vector) == \n");
   int i ,  m = M3->size1;
   double * x = (double *)malloc(m * sizeof(double));
 
@@ -900,7 +900,7 @@ int test_rowProdNoDiagNonSquare(NumericsMatrix* M3, NumericsMatrix* M4)
   /*   for(i=0;i<sizeY;i++) */
   /*     yref[i]=cblas_ddot(n, &(M3->matrix0[min+i]), incx, x, incy); */
 
-  /*   rowProdNoDiag(n,sizeY,min,M3,x,y,1); */
+  /*   NM_row_prod_no_diag(n,sizeY,min,M3,x,y,1); */
   /*   for(i = 0; i< sizeY; i++) */
   /*     { */
   /*       if( fabs(y[i]-yref[i])>tol) info = 1;  */
@@ -912,7 +912,7 @@ int test_rowProdNoDiagNonSquare(NumericsMatrix* M3, NumericsMatrix* M4)
   /*     printf("Step 0 ( y = subA*x, double* storage) failed ...\n"); */
 
   /*   /\* += *\/ */
-  /*   rowProdNoDiag(n,sizeY,min,M3,x,y,0); */
+  /*   NM_row_prod_no_diag(n,sizeY,min,M3,x,y,0); */
   /*   for(i = 0; i< sizeY; i++) */
   /*     { */
   /*       if( fabs(y[i]-2*yref[i])>tol) info = 1;  */
@@ -933,7 +933,7 @@ int test_rowProdNoDiagNonSquare(NumericsMatrix* M3, NumericsMatrix* M4)
   yref[1] = 0;
 
   /* Sparse ... */
-  rowProdNoDiag(sizeX, sizeY, pos, M4, x, y, 1);
+  NM_row_prod_no_diag(sizeX, sizeY, pos, M4, x, y, 1);
   for (i = 0; i < sizeY; i++)
   {
     if (fabs(y[i] - yref[i]) > tol) info = 1;
@@ -946,7 +946,7 @@ int test_rowProdNoDiagNonSquare(NumericsMatrix* M3, NumericsMatrix* M4)
   yref[0] = 10;
   yref[1] = 14;
 
-  rowProdNoDiag(sizeX, sizeY, pos + 1, M4, x, y, 1);
+  NM_row_prod_no_diag(sizeX, sizeY, pos + 1, M4, x, y, 1);
 
   for (i = 0; i < sizeY; i++)
   {
@@ -962,7 +962,7 @@ int test_rowProdNoDiagNonSquare(NumericsMatrix* M3, NumericsMatrix* M4)
     printf("Step 2 ( y = subA*x,  sparse storage) failed ...\n");
 
   /* Sparse, += ... */
-  rowProdNoDiag(sizeX, sizeY, pos + 1, M4, x, y, 0);
+  NM_row_prod_no_diag(sizeX, sizeY, pos + 1, M4, x, y, 0);
   for (i = 0; i < sizeY; i++)
   {
     if (fabs(y[i] - 2 * yref[i]) > tol) info = 1;
@@ -978,7 +978,7 @@ int test_rowProdNoDiagNonSquare(NumericsMatrix* M3, NumericsMatrix* M4)
 
   free(x);
   free(y);
-  printf("== End of test rowProdNoDiagNonSquare(NumericsMatrix,vector), result = %d\n", info);
+  printf("== End of test NM_row_prod_no_diag_non_square(NumericsMatrix,vector), result = %d\n", info);
 
   return info;
 }

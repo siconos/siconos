@@ -74,19 +74,19 @@ def test_gfc3d():
             for s in solvers:
                 res = solve_global(fcp, s)
                 if res:
-                    print('Solver {:} on problem {:} failed with info = {:}'.format(sn.idToName(s), d, res))
+                    print('Solver {:} on problem {:} failed with info = {:}'.format(sn.solver_options_id_to_name(s), d, res))
                     mark_as_failed = True
                 else:
-                    print('Solver {:} on problem {:} is ok'.format(sn.idToName(s), d))
+                    print('Solver {:} on problem {:} is ok'.format(sn.solver_options_id_to_name(s), d))
 
             fcp_reduced = condensed_from_global(fcp)
             for s in solvers_reduced1:
                 res = solve_reduced(fcp_reduced, s)
                 if res:
-                    print('Solver {:} on problem {:} in reduced form failed with info = {:}'.format(sn.idToName(s), d, res))
+                    print('Solver {:} on problem {:} in reduced form failed with info = {:}'.format(sn.solver_options_id_to_name(s), d, res))
                     mark_as_failed = True
                 else:
-                    print('Solver {:} on problem {:} is ok'.format(sn.idToName(s), d))
+                    print('Solver {:} on problem {:} is ok'.format(sn.solver_options_id_to_name(s), d))
 
     assert mark_as_failed is False
 
@@ -103,9 +103,9 @@ def test_fc3d():
             for s in solvers_reduced2:
                 res = solve_reduced(fcp, s)
                 if res:
-                    print('Solver {:} on problem {:} failed with info = {:}'.format(sn.idToName(s), d, res))
+                    print('Solver {:} on problem {:} failed with info = {:}'.format(sn.solver_options_id_to_name(s), d, res))
                     mark_as_failed = True
                 else:
-                    print('Solver {:} on problem {:} is ok'.format(sn.idToName(s), d))
+                    print('Solver {:} on problem {:} is ok'.format(sn.solver_options_id_to_name(s), d))
 
     assert mark_as_failed is False

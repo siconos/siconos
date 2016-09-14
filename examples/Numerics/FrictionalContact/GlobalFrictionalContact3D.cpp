@@ -172,7 +172,7 @@ int main(int argc, char* argv[])
                                         reaction , velocity, globalVelocity,
                                         numerics_solver_options, &numerics_options);
 
-  deleteSolverOptions(numerics_solver_options);
+  solver_options_delete(numerics_solver_options);
   // Solver output
   printf("\n");
   for (k = 0 ; k < m; k++) printf("velocity[%i] = %12.8e \t \t reaction[%i] = %12.8e \n ", k, velocity[k], k , reaction[k]);

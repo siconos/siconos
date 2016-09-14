@@ -72,7 +72,7 @@ void ncp_pathsearch(NCP_struct* problem, double* z, double* F, int *info , Solve
   if (!preAlloc || (preAlloc && !options->internalSolvers))
   {
     options->internalSolvers = (SolverOptions *) malloc(sizeof(SolverOptions));
-    set_SolverOptions(options->internalSolvers, SICONOS_LCP_PIVOT);
+    solver_options_set(options->internalSolvers, SICONOS_LCP_PIVOT);
     options->numberOfInternalSolvers = 1;
 
     SolverOptions * lcp_options = options->internalSolvers;
@@ -216,7 +216,7 @@ void ncp_pathsearch(NCP_struct* problem, double* z, double* F, int *info , Solve
           if (err_lcp > local_tol)
           {
             printf("ncp_pathsearch :: lcp solved with very bad precision\n");
-            display(lcp_subproblem.M);
+            NM_display(lcp_subproblem.M);
             printf("z r q x_plus\n");
             for (unsigned i = 0; i < n; ++i) printf("%e %e %e %e\n", z[i], r[i], lcp_subproblem.q[i], x_plus[i]);
             options->internalSolvers->iparam[SICONOS_IPARAM_PIVOT_RULE] = 0;
@@ -292,7 +292,7 @@ void ncp_pathsearch(NCP_struct* problem, double* z, double* F, int *info , Solve
         }
         else
         {
-          display(lcp_subproblem.M);
+          NM_display(lcp_subproblem.M);
           printf("z r q x_plus\n");
           for (unsigned i = 0; i < n; ++i) printf("%e %e %e %e\n", z[i], r[i], lcp_subproblem.q[i], x_plus[i]);
           DEBUG_PRINT("ncp_pathsearch :: Lemke start did not succeeded !\n");
@@ -383,7 +383,7 @@ void ncp_pathsearch(NCP_struct* problem, double* z, double* F, int *info , Solve
     problem->nabla_F = NULL;
     free(options->dWork);
     options->dWork = NULL;
-    deleteSolverOptions(options->internalSolvers);
+    solver_options_delete(options->internalSolvers);
     free(options->internalSolvers);
     options->internalSolvers = NULL;
     free_NMS_data(data_NMS);

@@ -262,7 +262,6 @@ void fc3d_ProjectedGradientOnCylinder(FrictionContactProblem* problem, double *r
 
 int fc3d_ProjectedGradientOnCylinder_setDefaultSolverOptions(SolverOptions* options)
 {
-  int i;
   if (verbose > 0)
   {
     printf("Set the Default SolverOptions for the PGoC Solver\n");
@@ -275,26 +274,19 @@ int fc3d_ProjectedGradientOnCylinder_setDefaultSolverOptions(SolverOptions* opti
   options->filterOn = 1;
   options->iSize = 10;
   options->dSize = 10;
-  if (options->iparam != NULL)
-    free(options->iparam);
-  options->iparam = (int *)malloc(options->iSize * sizeof(int));
-  if (options->dparam != NULL)
-    free(options->dparam);
-  options->dparam = (double *)malloc(options->dSize * sizeof(double));
+  options->iparam = (int *)realloc(options->iparam, options->iSize*sizeof(int));
+  options->dparam = (double *)realloc(options->dparam, options->dSize*sizeof(double));
   options->dWork = NULL;
-  null_SolverOptions(options);
-  for (i = 0; i < 10; i++)
-  {
-    options->iparam[i] = 0;
-    options->dparam[i] = 0.0;
-  }
+  solver_options_nullify(options);
+  memset(options->iparam, 0, options->iSize*sizeof(int));
+  memset(options->dparam, 0, options->dSize*sizeof(int));
   options->iparam[0] = 20000;
   options->dparam[0] = 1e-6;
   options->dparam[3] = 1e-3;
 
   if (options->internalSolvers != NULL)
   {
-    deleteSolverOptions(options->internalSolvers);
+    solver_options_delete(options->internalSolvers);
     free(options->internalSolvers);
   }
 

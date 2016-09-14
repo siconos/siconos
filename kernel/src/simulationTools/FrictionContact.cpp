@@ -111,7 +111,7 @@ SP::FrictionContactProblem FrictionContact::frictionContactProblem()
   numerics_problem->numberOfContacts = _sizeOutput / _contactProblemDim;
   numerics_problem->M = &*_M->getNumericsMatrix();
   numerics_problem->q = &*_q->getArray();
-  numerics_problem->mu = &(_mu->at(0));
+  numerics_problem->mu = _mu->data();
   return numerics_problem;
 }
 
@@ -122,7 +122,7 @@ FrictionContactProblem *FrictionContact::frictionContactProblemPtr()
   numerics_problem->numberOfContacts = _sizeOutput / _contactProblemDim;
   numerics_problem->M = &*_M->getNumericsMatrix();
   numerics_problem->q = &*_q->getArray();
-  numerics_problem->mu = &(_mu->at(0));
+  numerics_problem->mu = _mu->data();
   return numerics_problem;
 }
 
@@ -183,5 +183,5 @@ void FrictionContact::display() const
 
 FrictionContact::~FrictionContact()
 {
-  deleteSolverOptions(&*_numerics_solver_options);
+  solver_options_delete(&*_numerics_solver_options);
 }

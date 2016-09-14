@@ -575,7 +575,7 @@ void prodSBMSBM(double alpha, const SparseBlockStructuredMatrix* const A, const 
   /*   exit(EXIT_FAILURE); */
 
 }
-void subRowProdSBM(unsigned int sizeX, unsigned int sizeY, unsigned int currentRowNumber,
+void SBM_row_prod(unsigned int sizeX, unsigned int sizeY, unsigned int currentRowNumber,
                    const SparseBlockStructuredMatrix* const A,
                    const double* const x, double* y, int init)
 {
@@ -645,14 +645,14 @@ void subRowProdSBM(unsigned int sizeX, unsigned int sizeY, unsigned int currentR
 
   }
 }
-void rowProdNoDiagSBM(unsigned int sizeX, unsigned int sizeY, unsigned int currentRowNumber, const SparseBlockStructuredMatrix* const A, const double* const x, double* y, int init)
+void SBM_row_prod_no_diag(unsigned int sizeX, unsigned int sizeY, unsigned int currentRowNumber, const SparseBlockStructuredMatrix* const A, const double* const x, double* y, int init)
 {
   /*
      If: A is a SparseBlockStructuredMatrix matrix, Aij a block at row
      i and column j (Warning: i and j are indices of block position,
      not scalar component positions)
 
-     Then rowProdNoDiagSBM computes y = sum for i not equal to j of
+     Then SBM_row_prod_no_diag computes y = sum for i not equal to j of
      Aij.xj over a row of blocks (or += if init = false)
 
      currentRowNumber represents the position (block number) of the
@@ -724,14 +724,14 @@ void rowProdNoDiagSBM(unsigned int sizeX, unsigned int sizeY, unsigned int curre
     }
   }
 }
-void rowProdNoDiagSBM3x3(unsigned int sizeX, unsigned int sizeY, unsigned int currentRowNumber, const SparseBlockStructuredMatrix* const A, double* const x, double* y)
+void SBM_row_prod_no_diag_3x3(unsigned int sizeX, unsigned int sizeY, unsigned int currentRowNumber, const SparseBlockStructuredMatrix* const A, double* const x, double* y)
 {
   /*
      If: A is a SparseBlockStructuredMatrix matrix, Aij a block at row
      i and column j (Warning: i and j are indices of block position,
      not scalar component positions)
 
-     Then rowProdNoDiagSBM computes y = sum for i not equal to j of
+     Then SBM_row_prod_no_diag computes y = sum for i not equal to j of
      Aij.xj over a row of blocks (or += if init = false)
 
      currentRowNumber represents the position (block number) of the
@@ -2188,7 +2188,7 @@ int sparseToSBM(int blocksize, const CSparseMatrix* const sparseMat, SparseBlock
 
       /* index1_data[rowNumber]<= blockNumber */
 
-      assert(brow < A->filled1);
+      assert(brow < (csi)A->filled1);
       if (A->index1_data[brow] > (size_t)blocknum[blockindex])
       {
         A->index1_data[brow] = blocknum[blockindex];
@@ -2199,8 +2199,8 @@ int sparseToSBM(int blocksize, const CSparseMatrix* const sparseMat, SparseBlock
       assert(birow + bicol * blocksize <= blocksize * blocksize);
 
       assert(blockindex < blockindexmax);
-      assert(blocknum[blockindex] < A->nbblocks);
-      assert(blocknum[blockindex] < A->filled2);
+      assert(blocknum[blockindex] < (csi)A->nbblocks);
+      assert(blocknum[blockindex] < (csi)A->filled2);
 
       DEBUG_PRINTF("A->block[blocknum[blockindex=%d]=%d][birow=%d + bicol=%d * blocksize=%d] = it.third=%g\n", blockindex, blocknum[blockindex], birow, bicol, blocksize, it.third);
       A->block[blocknum[blockindex]][birow + bicol * blocksize] = it.third;

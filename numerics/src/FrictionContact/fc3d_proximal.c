@@ -47,7 +47,7 @@ void fc3d_proximal(FrictionContactProblem* problem, double *reaction, double *ve
   double tolerance = dparam[0];
   double normq = cblas_dnrm2(nc*3 , problem->q , 1);
   if (verbose > 0){
-    printSolverOptions(options);
+    solver_options_print(options);
   }
 
   if (options->numberOfInternalSolvers < 1)
@@ -146,8 +146,7 @@ void fc3d_proximal(FrictionContactProblem* problem, double *reaction, double *ve
     {
       internalsolver = &fc3d_ExtraGradient;
     }
-    else if (internalsolver_options->solverId == SICONOS_FRICTION_3D_LOCALAC ||
-             internalsolver_options->solverId == SICONOS_FRICTION_3D_NSN_AC)
+    else if (internalsolver_options->solverId == SICONOS_FRICTION_3D_NSN_AC)
     {
       internalsolver = &fc3d_nonsmooth_Newton_AlartCurnier;
       iter_iparam =1;
@@ -350,7 +349,6 @@ void fc3d_proximal(FrictionContactProblem* problem, double *reaction, double *ve
 
 int fc3d_proximal_setDefaultSolverOptions(SolverOptions* options)
 {
-  int i;
   if (verbose > 0)
   {
     printf("Set the Default SolverOptions for the PROX Solver\n");
@@ -363,15 +361,10 @@ int fc3d_proximal_setDefaultSolverOptions(SolverOptions* options)
   options->filterOn = 1;
   options->iSize = 10;
   options->dSize = 10;
-  options->iparam = (int *)malloc(options->iSize * sizeof(int));
-  options->dparam = (double *)malloc(options->dSize * sizeof(double));
+  options->iparam = (int *)calloc(options->iSize, sizeof(int));
+  options->dparam = (double *)calloc(options->dSize, sizeof(double));
   options->dWork = NULL;
-  null_SolverOptions(options);
-  for (i = 0; i < 10; i++)
-  {
-    options->iparam[i] = 0;
-    options->dparam[i] = 0.0;
-  }
+  solver_options_nullify(options);
   options->iparam[0] = 1000;
 
   options->iparam[2] = 5;    /* Default mimimun iteration of the internal

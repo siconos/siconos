@@ -29,7 +29,7 @@ int soclcp_setDefaultSolverOptions(SolverOptions* options, int solverId)
 {
   options->iparam = NULL;
   options->dparam = NULL;
-  null_SolverOptions(options);
+  solver_options_nullify(options);
 
   int info = -1;
   switch(solverId)

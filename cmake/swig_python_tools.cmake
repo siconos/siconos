@@ -110,7 +110,7 @@ macro(add_siconos_swig_sub_module fullname)
   set_property(TARGET ${SWIG_MODULE_${_name}_REAL_NAME} PROPERTY LIBRARY_OUTPUT_DIRECTORY ${SICONOS_SWIG_ROOT_DIR}/${_path})
   message(" -- ${_name} generated (swig) file will be ${${_name}_generated_file_fullname}")
   
-  IF(CMAKE_SYSTEM_NAME MATCHES Windows AND ${COMPONENT} MATCHES "kernel")
+  IF(MSVC AND ${COMPONENT} MATCHES "kernel")
     set_source_files_properties(${${_name}_generated_file_fullname} PROPERTIES COMPILE_FLAGS "/bigobj")
   ENDIF()
  

@@ -43,7 +43,7 @@ void lcp_psor(LinearComplementarityProblem* problem, double *z, double *w, int *
   int itermax = options->iparam[0];
   double tol = options->dparam[0];
   double omega = options->dparam[2]; // Not yet used
-  printf("omega %f\n is not used !!!!!", omega);
+  printf("Warning : omega %f is not used !!!!!\n", omega);
 
   incxn = n;
 
@@ -197,7 +197,7 @@ int linearComplementarity_psor_setDefaultSolverOptions(SolverOptions* options)
   options->iparam = (int *)malloc(options->iSize * sizeof(int));
   options->dparam = (double *)malloc(options->dSize * sizeof(double));
   options->dWork = NULL;
-  null_SolverOptions(options);
+  solver_options_nullify(options);
   for (i = 0; i < 5; i++)
   {
     options->iparam[i] = 0;

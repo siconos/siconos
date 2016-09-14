@@ -74,7 +74,7 @@ int main(void)
   printf("End of MCP solvers test. \n");
   mcp_driver_reset(problem, &options);
   freeMixedComplementarityProblem(problem);
-  deleteSolverOptions(&options);
+  solver_options_delete(&options);
 
   return info;
 }

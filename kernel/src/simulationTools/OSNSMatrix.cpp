@@ -21,8 +21,10 @@
 #include "Tools.hpp"
 #include "BlockCSRMatrix.hpp"
 #include "SimulationGraphs.hpp"
-//#define OSNSM_DEBUG
 
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES 1
+#include "debug.h"
 
 // Default constructor: empty matrix, default storage
 // No allocation for _M1 or _M2
@@ -41,7 +43,7 @@ OSNSMatrix::OSNSMatrix(unsigned int n, int stor):
   // for _storageType = NM_DENSE (dense) n represents the real _dimRowension of
   // the matrix and for sparse storage (_storageType == 1) the number
   // of interactionBlocks in a row or column.
-
+  DEBUG_BEGIN("OSNSMatrix::OSNSMatrix(unsigned int n, int stor) \n");
   switch(_storageType)
   {
   case NM_DENSE:
@@ -54,6 +56,7 @@ OSNSMatrix::OSNSMatrix(unsigned int n, int stor):
   }
   case NM_SPARSE_BLOCK:
   {
+    DEBUG_PRINTF(" _M2 is reset with a matrix of size = %i\n", n);
     _M2.reset(new BlockCSRMatrix(n));
     break;
   }
@@ -61,6 +64,7 @@ OSNSMatrix::OSNSMatrix(unsigned int n, int stor):
   }
   _numericsMat.reset(new NumericsMatrix);
   NM_null(_numericsMat.get());
+  DEBUG_END("OSNSMatrix::OSNSMatrix(unsigned int n, int stor) \n");
 }
 
 OSNSMatrix::OSNSMatrix(unsigned int n, unsigned int m, int stor):
@@ -71,7 +75,7 @@ OSNSMatrix::OSNSMatrix(unsigned int n, unsigned int m, int stor):
   // for _storageType = NM_DENSE (dense) n represents the real dimension of
   // the matrix and for sparse storage (_storageType == 1) the number
   // of interactionBlocks in a row or column.
-
+  DEBUG_BEGIN("OSNSMatrix::OSNSMatrix(unsigned int n, unsigned int m, int stor)\n");
   switch(_storageType)
   {
   case NM_DENSE:
@@ -92,6 +96,8 @@ OSNSMatrix::OSNSMatrix(unsigned int n, unsigned int m, int stor):
 
   _numericsMat.reset(new NumericsMatrix);
   NM_null(_numericsMat.get());
+  DEBUG_END("OSNSMatrix::OSNSMatrix(unsigned int n, unsigned int m, int stor)\n");
+
 }
 
 // Basic constructor
@@ -155,17 +161,17 @@ unsigned int OSNSMatrix::getPositionOfInteractionBlock(Interaction& inter) const
 {
   // Note FP: I think the return value below is not the right one :
   // this position does not depend on the interaction but on
-  // the OSNS and the corresponding indexSet. 
+  // the OSNS and the corresponding indexSet.
   // One Interaction may have different absolute positions if it is present
   // in several OSNS. ==> add this pos as a property on vertex in Interactions Graph
-  // 
+  //
   return inter.absolutePosition();
 }
 
 // Fill the matrix
 void OSNSMatrix::fill(SP::InteractionsGraph indexSet, bool update)
 {
-
+  DEBUG_BEGIN("void OSNSMatrix::fill(SP::InteractionsGraph indexSet, bool update)\n");
   assert(indexSet);
 
   if (update)
@@ -210,10 +216,8 @@ void OSNSMatrix::fill(SP::InteractionsGraph indexSet, bool update)
 
       std11::static_pointer_cast<SimpleMatrix>(_M1)
       ->setBlock(pos, pos, *indexSet->properties(*vi).block);
-#ifdef OSNSMPROJ_DEBUG
-      printf("OSNSMatrix _M1: %i %i\n", _M1->size(0), _M1->size(1));
-      printf("OSNSMatrix block: %i %i\n", indexSet->properties(*vi).block->size(0), indexSet->properties(*vi).block->size(1));
-#endif
+      DEBUG_PRINTF("OSNSMatrix _M1: %i %i\n", _M1->size(0), _M1->size(1));
+      DEBUG_PRINTF("OSNSMatrix block: %i %i\n", indexSet->properties(*vi).block->size(0), indexSet->properties(*vi).block->size(1));
     }
 
     InteractionsGraph::EIterator ei, eiend;
@@ -236,11 +240,9 @@ void OSNSMatrix::fill(SP::InteractionsGraph indexSet, bool update)
       assert(pos < _dimRow);
       assert(col < _dimColumn);
 
-#ifdef OSNSM_DEBUG
-      printf("OSNSMatrix _M1: %i %i\n", _M1->size(0), _M1->size(1));
-      printf("OSNSMatrix upper: %i %i\n", indexSet->properties(*ei).upper_block->size(0), indexSet->properties(*ei).upper_block->size(1));
-      printf("OSNSMatrix lower: %i %i\n", indexSet->properties(*ei).lower_block->size(0), indexSet->properties(*ei).lower_block->size(1));
-#endif
+      DEBUG_PRINTF("OSNSMatrix _M1: %i %i\n", _M1->size(0), _M1->size(1));
+      DEBUG_PRINTF("OSNSMatrix upper: %i %i\n", indexSet->properties(*ei).upper_block->size(0), indexSet->properties(*ei).upper_block->size(1));
+      DEBUG_PRINTF("OSNSMatrix lower: %i %i\n", indexSet->properties(*ei).lower_block->size(0), indexSet->properties(*ei).lower_block->size(1));
 
       assert(indexSet->properties(*ei).lower_block);
       assert(indexSet->properties(*ei).upper_block);
@@ -257,19 +259,28 @@ void OSNSMatrix::fill(SP::InteractionsGraph indexSet, bool update)
   else if (_storageType == NM_SPARSE_BLOCK)
   {
     if (! _M2)
+    {
+      DEBUG_PRINT("Reset _M2 shared pointer using new BlockCSRMatrix(indexSet) \n ");
       _M2.reset(new BlockCSRMatrix(indexSet));
+
+    }
     else
+    {
+      DEBUG_PRINT("fill existing _M2\n");
       _M2->fill(indexSet);
+    }
   }
 
   if (update)
     convert();
-
+  DEBUG_END("void OSNSMatrix::fill(SP::InteractionsGraph indexSet, bool update)\n");
 }
 
 // convert current matrix to NumericsMatrix structure
 void OSNSMatrix::convert()
 {
+  DEBUG_BEGIN("OSNSMatrix::convert()\n");
+  DEBUG_PRINTF("_storageType = %i\n", _storageType);
   _numericsMat->storageType = _storageType;
   _numericsMat->size0 = _dimRow;
   _numericsMat->size1 = _dimColumn;
@@ -299,6 +310,7 @@ void OSNSMatrix::convert()
      RuntimeException::selfThrow("OSNSMatrix::convert unknown _storageType");
   }
   }
+  DEBUG_END("OSNSMatrix::convert()\n");
 }
 
 // Display data

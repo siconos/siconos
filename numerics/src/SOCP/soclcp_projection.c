@@ -390,7 +390,7 @@ int soclcp_projection_setDefaultSolverOptions(SolverOptions* options)
     printf("Set the Default SolverOptions for the local SOCLCP Solver\n");
   }
 
-  null_SolverOptions(options);
+  solver_options_nullify(options);
   options->solverId = SICONOS_SOCLCP_ProjectionOnConeWithLocalIteration;
   options->numberOfInternalSolvers = 0;
   options->isSet = 1;

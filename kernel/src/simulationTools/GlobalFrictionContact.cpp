@@ -44,7 +44,7 @@ GlobalFrictionContact::GlobalFrictionContact(int dimPb, const int numericsSolver
 
 GlobalFrictionContact::~GlobalFrictionContact()
 {
-  deleteSolverOptions(&*_numerics_solver_options);
+  solver_options_delete(&*_numerics_solver_options);
 }
 
 void GlobalFrictionContact::initialize(SP::Simulation sim)

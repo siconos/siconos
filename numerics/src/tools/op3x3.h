@@ -31,7 +31,6 @@
 #define restrict __restrict
 #endif
 
-
 /** OP3X3(EXPR) do EXPR 9 times
  * \param EXPR a C expression that should contains self incrementing
  *        pointers on arrays[9] */
@@ -456,7 +455,8 @@ static inline double det3x3(double* a)
  * \param[out] x double x[3]
  * \param[in] b double b[3]
  */
-static inline void solv3x3(double* restrict a, double* restrict x, double* restrict b)
+WARN_RESULT_IGNORED
+static inline int solv3x3(double* restrict a, double* restrict x, double* restrict b)
 {
 
   SET3X3(a);
@@ -486,7 +486,9 @@ static inline void solv3x3(double* restrict a, double* restrict x, double* restr
     *x++ = NAN;
     *x++ = NAN;
     *x   = NAN;
+    return 1;
   }
+  return 0;
 }
 
 /** check equality : a[9] == b[9]
@@ -674,9 +676,10 @@ void print3(double* v);
  * \param[out] A2y second component of the vector A
  * \param[out] A2z third component of the vector A
 */
-static inline void orthoBaseFromVector(double *Ax, double *Ay, double *Az,
-                                       double *A1x, double *A1y, double *A1z,
-                                       double *A2x, double *A2y, double *A2z)
+WARN_RESULT_IGNORED
+static inline int orthoBaseFromVector(double *Ax, double *Ay, double *Az,
+                                      double *A1x, double *A1y, double *A1z,
+                                      double *A2x, double *A2y, double *A2z)
 {
 
   double normA = sqrt((*Ax) * (*Ax) + (*Ay) * (*Ay) + (*Az) * (*Az));
@@ -691,7 +694,7 @@ static inline void orthoBaseFromVector(double *Ax, double *Ay, double *Az,
     (*A2x) = NAN;
     (*A2y) = NAN;
     (*A2z) = NAN;
-    return;
+    return 1;
   }
   (*Ax) /= normA;
   (*Ay) /= normA;
@@ -732,6 +735,7 @@ static inline void orthoBaseFromVector(double *Ax, double *Ay, double *Az,
   (*A2x) = *Ay * *A1z - *Az * *A1y;
   (*A2y) = *Az * *A1x - *Ax * *A1z;
   (*A2z) = *Ax * *A1y - *Ay * *A1x;
+  return 0;
 }
 
 
@@ -741,6 +745,7 @@ static inline void orthoBaseFromVector(double *Ax, double *Ay, double *Az,
  * \param[in,out] b on input, the right-hand side; on output the solution x
  * \return 0 if ok, otherwise the column where no pivot could be selected
  */
+WARN_RESULT_IGNORED
 static inline int solve_3x3_gepp(const double* restrict a, double* restrict b)
 {
   double lp0, lp1, lp2, lm1, lm2, ln1, ln2;

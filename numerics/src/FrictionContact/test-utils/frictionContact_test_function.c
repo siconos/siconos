@@ -59,7 +59,7 @@ void frictionContact_test_gams_opts(SN_GAMSparams* GP, int solverId)
   }
   else
   {
-    fprintf(stderr, "frictionContact_test_gams_opts :: ERROR unkown solverId = %d e.g. solver named %s", solverId, idToName(solverId));
+    fprintf(stderr, "frictionContact_test_gams_opts :: ERROR unkown solverId = %d e.g. solver named %s", solverId, solver_options_id_to_name(solverId));
   }
   add_GAMS_opt_int(GP, "minor_iteration_limit", 100000, GAMS_OPT_SOLVER);
   add_GAMS_opt_int(GP, "major_iteration_limit", 20, GAMS_OPT_SOLVER);
@@ -84,7 +84,7 @@ int frictionContact_test_function(FILE * f, SolverOptions * options)
 
 
 
-  printSolverOptions(options);
+  solver_options_print(options);
   int NC = problem->numberOfContacts;
   int dim = problem->dimension;
   //int dim = problem->numberOfContacts;

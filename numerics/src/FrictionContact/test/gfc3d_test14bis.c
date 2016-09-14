@@ -37,7 +37,7 @@ int main(void)
   gfc3d_setDefaultSolverOptions(options, SICONOS_GLOBAL_FRICTION_3D_NSGS);
 
   info = globalFrictionContact_test_function(finput, options);
-  deleteSolverOptions(options);
+  solver_options_delete(options);
   free(options);
   fclose(finput);
   printf("End of test on %s\n", filename);

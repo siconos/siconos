@@ -135,7 +135,7 @@ void prodNumericsMatrixNumericsMatrix(double alpha, const NumericsMatrix* const 
   }
 }
 
-void subRowProd(int sizeX, int sizeY, int currentRowNumber, const NumericsMatrix* A, const double* const x, double* y, int init)
+void NM_row_prod(int sizeX, int sizeY, int currentRowNumber, const NumericsMatrix* A, const double* const x, double* y, int init)
 {
 
   assert(A);
@@ -165,16 +165,16 @@ void subRowProd(int sizeX, int sizeY, int currentRowNumber, const NumericsMatrix
   }
   /* SparseBlock storage */
   else if (storage == 1)
-    subRowProdSBM(sizeX, sizeY, currentRowNumber, A->matrix1, x, y, init);
+    SBM_row_prod(sizeX, sizeY, currentRowNumber, A->matrix1, x, y, init);
   else
   {
-    fprintf(stderr, "Numerics, NumericsMatrix, product matrix - vector subRowProd(A,x,y) failed, unknown storage type for A.\n");
+    fprintf(stderr, "Numerics, NumericsMatrix, product matrix - vector NM_row_prod(A,x,y) failed, unknown storage type for A.\n");
     exit(EXIT_FAILURE);
   }
 
 }
 
-void rowProdNoDiag(int sizeX, int sizeY, int currentRowNumber, const NumericsMatrix* A, const double* const x, double* y, int init)
+void NM_row_prod_no_diag(int sizeX, int sizeY, int currentRowNumber, const NumericsMatrix* A, const double* const x, double* y, int init)
 {
 
   assert(A);
@@ -217,10 +217,10 @@ void rowProdNoDiag(int sizeX, int sizeY, int currentRowNumber, const NumericsMat
 
   }
   else if (storage == 1)
-    rowProdNoDiagSBM(sizeX, sizeY, currentRowNumber, A->matrix1, x, y, init);
+    SBM_row_prod_no_diag(sizeX, sizeY, currentRowNumber, A->matrix1, x, y, init);
   else
   {
-    fprintf(stderr, "Numerics, NumericsMatrix, product matrix - vector rowProdNoDiag(A,x,y) failed, unknown storage type for A.\n");
+    fprintf(stderr, "Numerics, NumericsMatrix, product matrix - vector NM_row_prod_no_diag(A,x,y) failed, unknown storage type for A.\n");
     exit(EXIT_FAILURE);
   }
 }
@@ -258,8 +258,7 @@ void freeNumericsMatrix(NumericsMatrix* m)
   NM_internalData_free(m);
 }
 
-
-void displayMat(double * m, int nRow, int nCol, int lDim)
+void NM_dense_display_matlab(double * m, int nRow, int nCol, int lDim)
 {
   int lin, col;
   if (lDim == 0)
@@ -290,7 +289,57 @@ void displayMat(double * m, int nRow, int nCol, int lDim)
 
 }
 
-void display(const NumericsMatrix* const m)
+void NM_dense_display(double * m, int nRow, int nCol, int lDim)
+{
+  int lin, col;
+  if (lDim == 0)
+    lDim = nRow;
+  printf("Matrix of size\t%d\t x \t%d =\n[", nRow, nCol);
+  if (nRow == 0)
+  {
+    printf("]\n");
+  }
+  if (nCol == 0)
+  {
+    printf("]\n");
+  }
+
+  for (lin = 0; lin < nRow; lin++)
+  {
+    printf("[");
+    for (col = 0; col < nCol; col++)
+    {
+      printf(" %.15e", m[lin + col * lDim]);
+      if (col != nCol - 1)
+        printf(",");
+    }
+    if (lin != nRow - 1)
+      printf("],\n");
+    else
+      printf("]\t ]\n");
+  }
+
+}
+void NM_vector_display(double * m, int nRow)
+{
+  int lin;
+  printf("vector of size\t%d\t =\n[", nRow);
+  if (nRow == 0)
+  {
+    printf("]\n");
+  }
+  for (lin = 0; lin < nRow; lin++)
+  {
+    printf(" %.15e", m[lin]);
+    if (lin != nRow - 1)
+      printf(", ");
+    else
+      printf("]\n");
+  }
+
+}
+
+void NM_display(const NumericsMatrix* const m)
 {
   if (! m)
   {
@@ -305,7 +354,7 @@ void display(const NumericsMatrix* const m)
   case NM_DENSE:
   {
 
-    displayMat(m->matrix0, m->size0, m->size1, m->size0);
+    NM_dense_display(m->matrix0, m->size0, m->size1, m->size0);
     break;
   }
   case NM_SPARSE_BLOCK:
@@ -383,14 +432,14 @@ static int cs_printInFile(const cs *A, int brief, FILE* file)
          CS_SUBSUB, CS_DATE, CS_COPYRIGHT) ;
   if(nz < 0)
   {
-    fprintf(file,"%ld-by-%ld, nzmax: %ld nnz: %ld, 1-norm: %g\n", m, n, nzmax,
+    fprintf(file,"%lld-by-%lld, nzmax: %lld nnz: %lld, 1-norm: %g\n", m, n, nzmax,
            Ap [n], cs_norm(A)) ;
     for(j = 0 ; j < n ; j++)
     {
-      fprintf(file,"    col %ld : locations %ld to %ld\n", j, Ap [j], Ap [j+1]-1);
+      fprintf(file,"    col %lld : locations %lld to %lld\n", j, Ap [j], Ap [j+1]-1);
       for(p = Ap [j] ; p < Ap [j+1] ; p++)
       {
-        fprintf(file,"      %ld : %g\n", Ai [p], Ax ? Ax [p] : 1) ;
+        fprintf(file,"      %lld : %g\n", Ai [p], Ax ? Ax [p] : 1) ;
         if(brief && p > 20)
         {
           fprintf(file,"  ...\n") ;
@@ -401,10 +450,10 @@ static int cs_printInFile(const cs *A, int brief, FILE* file)
   }
   else
   {
-    fprintf(file,"triplet: %ld-by-%ld, nzmax: %ld nnz: %ld\n", m, n, nzmax, nz) ;
+    fprintf(file,"triplet: %lld-by-%lld, nzmax: %lld nnz: %lld\n", m, n, nzmax, nz) ;
     for(p = 0 ; p < nz ; p++)
     {
-      fprintf(file,"    %ld %ld : %g\n", Ai [p], Ap [p], Ax ? Ax [p] : 1) ;
+      fprintf(file,"    %lld %lld : %g\n", Ai [p], Ap [p], Ax ? Ax [p] : 1) ;
       if(brief && p > 20)
       {
         fprintf(file,"  ...\n") ;
@@ -1883,7 +1932,7 @@ CSparseMatrix* NM_csparse_alloc_for_copy(const CSparseMatrix* const m)
   }
   else
   {
-    fprintf(stderr, "NM_copy :: error unknown type %d for CSparse matrix\n", m->nz);
+    fprintf(stderr, "NM_copy :: error unknown type %lld for CSparse matrix\n", m->nz);
     exit(EXIT_FAILURE);
   }
 

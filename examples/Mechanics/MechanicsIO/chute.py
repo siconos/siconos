@@ -49,7 +49,7 @@ def normal_plane(p1,p2,p3):
 #create some bodies
 
 # Creation of the hdf5 file for input/output
-with Hdf5() as io:
+with Hdf5(use_compression=True) as io:
 
   ######### left_up
   id_plan=id_plan+1

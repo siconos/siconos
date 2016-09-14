@@ -89,11 +89,12 @@ endif()
 
 # ---- Python ---
 # (interp and lib)
+# Warning FP : python is always required, at least
+# for siconos script.
+find_package(PythonFull REQUIRED)
+get_filename_component(PYTHON_EXE_NAME ${PYTHON_EXECUTABLE} NAME)
 if(WITH_PYTHON_WRAPPER OR WITH_DOCUMENTATION)
-  find_package(PythonFull REQUIRED)
   include(FindPythonModule)
-  get_filename_component(PYTHON_EXE_NAME ${PYTHON_EXECUTABLE} NAME)
-
   # --- xml schema. Used in tests. ---
   if(WITH_XML)
     set(SICONOS_XML_SCHEMA "${CMAKE_SOURCE_DIR}/config/xmlschema/SiconosModelSchema-V3.7.xsd")
@@ -148,11 +149,17 @@ configure_file(
   "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
   IMMEDIATE @ONLY)
 
-add_custom_target(uninstall
-  echo >> ${CMAKE_CURRENT_BINARY_DIR}/install_manifest.txt
-  COMMAND cat ${CMAKE_CURRENT_BINARY_DIR}/python_install_manifest.txt >> ${CMAKE_CURRENT_BINARY_DIR}/install_manifest.txt
-  COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
 
+if(WITH_PYTHON_WRAPPER)
+  add_custom_target(uninstall
+    echo >> ${CMAKE_CURRENT_BINARY_DIR}/install_manifest.txt
+    COMMAND cat ${CMAKE_CURRENT_BINARY_DIR}/python_install_manifest.txt >> ${CMAKE_CURRENT_BINARY_DIR}/install_manifest.txt
+    COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
+else()
+  add_custom_target(uninstall
+    echo >> ${CMAKE_CURRENT_BINARY_DIR}/install_manifest.txt
+    COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
+endif()
 # # =========== RPATH stuff ===========
 # # we follow recommendation of https://cmake.org/Wiki/CMake_RPATH_handling
 
@@ -160,9 +167,9 @@ add_custom_target(uninstall
 # do not skip the full RPATH for the build tree
 if(FORCE_SKIP_RPATH)
   set(CMAKE_SKIP_BUILD_RPATH TRUE)
-else(FORCE_SKIP_RPATH)
+else()
   set(CMAKE_SKIP_BUILD_RPATH FALSE)
-endif(FORCE_SKIP_RPATH)
+endif()
 
 # when building, don't use the install RPATH already
 # (but later on when installing)
@@ -213,4 +220,14 @@ IF(WITH_OPENMP)
     # Only applies to numerics code, which is in C (for now)
     #SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
   ENDIF()
+ENDIF()
+
+# =========== use ccache if available ===========
+OPTION (WITH_CCACHE "Use ccache" OFF)
+IF(WITH_CCACHE)
+  find_program(CCACHE_FOUND ccache)
+  if(CCACHE_FOUND)
+    set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ccache)
+    set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK ccache)
+  endif(CCACHE_FOUND)
 ENDIF()

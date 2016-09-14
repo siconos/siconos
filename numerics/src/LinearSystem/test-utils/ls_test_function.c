@@ -67,7 +67,7 @@ int ls_test_function(FILE * f, int solverId)
   options = (SolverOptions *)malloc(sizeof(*options));
 
   options->solverId = solverId;
-  printf("solverName ==> %s\n", idToName(solverId));
+  printf("solverName ==> %s\n", solver_options_id_to_name(solverId));
 
   _LSfillParamWithRespectToSolver(options, solverId, problem);
 

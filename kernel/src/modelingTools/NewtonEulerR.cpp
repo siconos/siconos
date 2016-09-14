@@ -122,7 +122,7 @@ void NewtonEulerR::computeOutput(double time, Interaction& inter, InteractionPro
 
   VectorOfBlockVectors& DSlink = *interProp.DSlink;
   SiconosVector& y = *inter.y(derivativeNumber);
-  BlockVector q = *DSlink[NewtonEulerR::q0];
+  BlockVector& q = *DSlink[NewtonEulerR::q0];
 
 
   if (derivativeNumber == 0)

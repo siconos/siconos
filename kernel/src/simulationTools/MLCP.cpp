@@ -61,7 +61,7 @@ void  MLCP::reset()
     free(_numerics_problem.blocksIsComp);
   _numerics_problem.blocksIsComp = 0;
   mlcp_driver_reset(&_numerics_problem, &*_numerics_solver_options);
-  deleteSolverOptions(&*_numerics_solver_options);
+  solver_options_delete(&*_numerics_solver_options);
   _numerics_solver_options.reset();
 }
 

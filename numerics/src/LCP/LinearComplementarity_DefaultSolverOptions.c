@@ -101,7 +101,7 @@ int linearComplementarity_setDefaultSolverOptions(LinearComplementarityProblem* 
   case SICONOS_LCP_PIVOT:
   case SICONOS_LCP_PIVOT_LUMOD:
   {
-    set_SolverOptions(options, solverId);
+    solver_options_set(options, solverId);
     info = 0;
     break;
   }

@@ -517,6 +517,21 @@ file:GazeboClassDiagram.png
 
    + cf --> contact_friction
 
+** <2016-07-15 vie>
+*** Tooling and features
+**** Desired features for filtering tool
+
+   - remove objects
+   - decimate time (done)
+   - cut off time (beginning and end) (done)
+   - put together two hdf5 simulations
+
+**** Desired features for vview
+
+   - output current camera position
+   - specific starting camera position
+   - render video from command line
+   - skip to end of file, updating automatically when file changes
 
 * Port and support
 ** CrossCompilation - Windows
@@ -1236,3 +1251,60 @@ TODO
   + Mail announcement, 
   + packaging launchpad
     
+** <2016-09-06 Tue>
+
+MB, FP, SS, OH, VA
+
+*** Previous Meeting
+**** Launchpad --> MB, OH
+    + Migrate debian directory on github siconos/siconos or siconos/debian
+    + Check that launchpad work
+    + openbuild suse --> packages debian
+    + Fedora
+
+**** Lie integration --> VA
+    + no news
+
+**** test fc3d --> failed nan VA
+
+*** CI et passage des examples
+    + pb de nettoyage --> MB
+
+*** Siconos Mechanisms Industrialization
+    + Siconos Mechanics / Mechanisms : towards a single library
+    + FreeCAD
+    + OpenEngineering   / support et maintenance.
+
+*** Siconos Mechanics / Gazebo
+    + hook in io.run()
+    + WIP
+    + Team competition NASA INRIA Chile
+
+*** FC3D
+    + Parallelization OpenMP
+      + rapport Cluster de Catolica
+	+ box stack : gain 16 et 32 cpus for the OPENMP raw parallel algorithm
+          Catolica cluster report :
+	  https://docs.google.com/document/d/1HSI2QoOFUoF67tKago41_Ir02x-UbbcwOoXYWhGjSsM/edit#heading=h.ybhxnfjiupu8
+      + Raw parallel
+	+ rename FOR solver
+	+ speedup max de 6 with
+      + DDM Naive
+	+ Interface  domain decomposition
+	+ partionning algorithm
+	  + spatial domain decomposition (Bullet info, simple space filter, hash table, .. )
+	  + graph partitioniong system SCOTCH/METIS
+	  + create an example on which the naive decomposition
+	+ visualization
+	  + visualize domain and graph decomposition (coloring)
+    + Explosion local solver
+      + output problems. --> hdf5
+      + cancel gyrospic forces.
+      + filter
+      + Accuracy of solving contacts
+    + packaging launchpad
+      + creation d'un compte siconos-team --> VA
+      + import siconos HRP
+      + ubuntu
+      + debian
+      + import siconos

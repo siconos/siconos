@@ -11,7 +11,7 @@ CSparseMatrix* NM_csc_to_triplet(CSparseMatrix* csc)
   csi* Ap = csc->p;
   csi* Ai = csc->i;
   double* val = csc->x;
-  for (size_t j = 0; j < csc->n; ++j)
+  for (csi j = 0; j < csc->n; ++j)
   {
     for (csi i = Ap[j]; i < Ap[j+1]; ++i)
     {

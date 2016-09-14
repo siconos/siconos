@@ -99,7 +99,7 @@ int main(void)
   /* Set solver options */
   SolverOptions options;
 
-  set_SolverOptions(&options, @SOLVER_ID@);
+  solver_options_set(&options, @SOLVER_ID@);
 
   /* Create a VariationalInequality */
 
@@ -173,7 +173,7 @@ int main(void)
     t = k*sim_data.h;
   }
   printf("VI_ZIT2 final values xk[0] =  %.*e; xk[1] =  %.*e\n", DECIMAL_DIG, xk[0], DECIMAL_DIG, xk[1]);
-  deleteSolverOptions(&options);
+  solver_options_delete(&options);
 
   free(problem->nabla_F);
   problem->nabla_F = NULL;

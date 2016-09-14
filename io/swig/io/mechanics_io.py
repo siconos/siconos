@@ -16,11 +16,6 @@ import tempfile
 from contextlib import contextmanager
 from operator import itemgetter
 
-try:
-    import vtk
-except:
-    pass
-
 from siconos.mechanics.collision.tools import Contactor
 
 from siconos.mechanics import joints
@@ -38,8 +33,8 @@ except:
     use_proposed = False
 
 try:
-    from siconos.mechanics.collision.bullet import \
-        BulletDS, BulletWeightedShape, \
+    from siconos.mechanics.contact_detection.bullet import \
+        BulletDS, BulletWeightedShape, btScalarSize, \
         btCollisionObject, btQuaternion, btTransform, btVector3, quatRotate
 
     from siconos.mechanics.collision.bullet import \
@@ -70,7 +65,7 @@ except:
     pass
 
 from siconos.kernel import \
-    cast_NewtonImpactFrictionNSL, EqualityConditionNSL, Interaction
+    cast_NewtonImpactFrictionNSL, EqualityConditionNSL, Interaction, DynamicalSystem
 
 import siconos.kernel as Kernel
 from siconos.io.io_base import MechanicsIO
@@ -181,13 +176,16 @@ def group(h, name):
         return h.create_group(name)
 
 
-def data(h, name, nbcolumns):
+def data(h, name, nbcolumns, use_compression=False):
     try:
         return h[name]
     except KeyError:
+        comp = use_compression and nbcolumns > 0
         return h.create_dataset(name, (0, nbcolumns),
-                                maxshape=(None, nbcolumns))
-
+                                maxshape=(None, nbcolumns),
+                                chunks=[None,(4000,nbcolumns)][comp],
+                                compression=[None,'gzip'][comp],
+                                compression_opts=[None,9][comp])
 
 def add_line(dataset, line):
     dataset.resize(dataset.shape[0] + 1, 0)
@@ -202,12 +200,14 @@ def str_of_file(filename):
 #
 # load .vtp file
 #
-def loadMesh(shape_filename, collision_margin):
+def loadMesh(shape_filename, collision_margin, scale=None):
     """
     loads a vtk .vtp file and returns a Bullet concave shape
     WARNING triangles cells assumed!
     """
 
+    import vtk
+    
     reader = vtk.vtkXMLPolyDataReader()
     reader.SetFileName(shape_filename)
     reader.Update()
@@ -221,12 +221,15 @@ def loadMesh(shape_filename, collision_margin):
     shape = None
 
     if polydata.GetCellType(0) == 5:
-        apoints = np.empty((num_points, 3))
+        apoints = np.empty((num_points, 3), dtype={4:'f4',8:'f8'}[btScalarSize()])
         for i in range(0, points.GetNumberOfTuples()):
             p = points.GetTuple(i)
             apoints[i, 0] = p[0]
             apoints[i, 1] = p[1]
             apoints[i, 2] = p[2]
+
+        if scale is not None:
+            apoints *= scale
 
         aindices = np.empty((num_triangles, 3), dtype=np.int32)
 
@@ -320,9 +323,12 @@ class ShapeCollection():
                             data = self.shape(shape_name)[:][0]
                             tmpf[0].write(data)
                             tmpf[0].flush()
+                            scale = None
+                            if 'scale' in self.attributes(shape_name):
+                                scale = self.attributes(shape_name)['scale']
                             (self._tri[shape_name],
                              self._shapes[shape_name]) = loadMesh(
-                                 tmpf[1], self._collision_margin)
+                                 tmpf[1], self._collision_margin, scale=scale)
                     else:
                         assert False
                 elif self.attributes(shape_name)['type'] in['step']:
@@ -526,7 +532,8 @@ class Hdf5():
 
     def __init__(self, io_filename=None, mode='w',
                  broadphase=None, osi=None, shape_filename=None,
-                 set_external_forces=None, gravity_scale=None, collision_margin=None):
+                 set_external_forces=None, gravity_scale=None, collision_margin=None,
+                 use_compression=False, output_domains=False):
 
         if io_filename is None:
             self._io_filename = '{0}.hdf5'.format(
@@ -536,16 +543,14 @@ class Hdf5():
         self._mode = mode
         self._broadphase = broadphase
         self._osi = osi
-        self._static_origins = []
-        self._static_orientations = []
-        self._static_transforms = []
-        self._static_cobjs = []
+        self._static = {}
         self._shape = None
         self._shapeid = dict()
         self._static_data = None
         self._velocities_data = None
         self._dynamic_data = None
         self._cf_data = None
+        self._domain_data = None
         self._solv_data = None
         self._input = None
         self._nslaws = None
@@ -564,6 +569,9 @@ class Hdf5():
         self._keep = []
         self._scheduled_births = []
         self._births = dict()
+        self._initializing = True
+        self._use_compression = use_compression
+        self._should_output_domains = output_domains
 
     def __enter__(self):
         if self._set_external_forces is None:
@@ -576,11 +584,19 @@ class Hdf5():
         self._data = group(self._out, 'data')
         self._ref = group(self._data, 'ref')
         self._joints = group(self._data, 'joints')
-        self._static_data = data(self._data, 'static', 9)
-        self._velocities_data = data(self._data, 'velocities', 8)
-        self._dynamic_data = data(self._data, 'dynamic', 9)
-        self._cf_data = data(self._data, 'cf', 15)
-        self._solv_data = data(self._data, 'solv', 4)
+        self._static_data = data(self._data, 'static', 9,
+                                 use_compression = self._use_compression)
+        self._velocities_data = data(self._data, 'velocities', 8,
+                                     use_compression = self._use_compression)
+        self._dynamic_data = data(self._data, 'dynamic', 9,
+                                  use_compression = self._use_compression)
+        self._cf_data = data(self._data, 'cf', 15,
+                             use_compression = self._use_compression)
+        if self._should_output_domains:
+            self._domain_data = data(self._data, 'domain', 3,
+                                     use_compression = self._use_compression)
+        self._solv_data = data(self._data, 'solv', 4,
+                               use_compression = self._use_compression)
         self._input = group(self._data, 'input')
         self._nslaws = group(self._data, 'nslaws')
 
@@ -641,6 +657,12 @@ class Hdf5():
         """
         return self._cf_data
 
+    def domains_data(self):
+        """
+        Contact point domain information.
+        """
+        return self._domain_data
+
     def solver_data(self):
         """
         Solver output
@@ -683,7 +705,7 @@ class Hdf5():
 
     def importBRepObject(self, name, translation, orientation,
                          velocity, contactors, mass, given_inertia, body_class,
-                         shape_class, face_class, edge_class):
+                         shape_class, face_class, edge_class, number = None):
 
         if body_class is None:
             body_class = OccBody
@@ -700,6 +722,10 @@ class Hdf5():
         else:
             body = body_class(
                 translation + orientation, velocity, mass, inertia)
+
+            if number is not None:
+                body.setNumber(number)
+
             for contactor in contactors:
 
                 # /!\ shared pointer <-> python ref ...
@@ -721,9 +747,10 @@ class Hdf5():
 
     def importBulletObject(self, name, translation, orientation,
                            velocity, contactors, mass, inertia,
-                           body_class, shape_class, birth=False):
+                           body_class, shape_class, birth=False,
+                           number = None):
 
-        
+
         if body_class is None:
             body_class = BulletDS
 
@@ -787,21 +814,18 @@ class Hdf5():
                     static_cobj.setCollisionFlags(
                         btCollisionObject.CF_STATIC_OBJECT)
 
-                    self._static_origins.append(
-                        static_cobj.getWorldTransform().getOrigin())
-
-                    self._static_orientations.append(
-                        static_cobj.getWorldTransform().getRotation())
-
-                    self._static_transforms.append(
-                        static_cobj.getWorldTransform())
-
                     static_cobj.setCollisionShape(
                         self._shape.get(c.name))
-                    self._static_cobjs.append(static_cobj)
 
-                    self._broadphase.addStaticObject(static_cobj,
-                                                     int(c.group))
+                    self._static[name] = {
+                        'number': number,
+                        'origin': static_cobj.getWorldTransform().getOrigin(),
+                        'orientation': static_cobj.getWorldTransform().getRotation(),
+                        'transform': static_cobj.getWorldTransform(),
+                        'cobj': static_cobj,
+                        }
+
+                    self._broadphase.addStaticObject(static_cobj, int(c.group))
 
             elif use_proposed:
                 # a proposed-API moving object
@@ -839,6 +863,9 @@ class Hdf5():
                                   contactors[0].translation,
                                   contactors[0].orientation,
                                   contactors[0].group)
+
+                if number is not None:
+                    body.setNumber(number)
 
                 for contactor in contactors[1:]:
                     shape_id = self._shapeid[contactor.name]
@@ -912,21 +939,23 @@ class Hdf5():
         that have a specified time of birth <= current time.
         """
 
+        # Ensure we count up from zero for implicit DS numbering
+        DynamicalSystem.resetCount(0)
+
         for shape_name in self._ref:
             self._shapeid[shape_name] = self._ref[shape_name].attrs['id']
             self._number_of_shapes += 1
 
         # import dynamical systems
         if self._broadphase is not None and 'input' in self._data:
-            counter =0
             for (name, obj) in sorted(self._input.items(),
                                       key=lambda x: x[0]):
-                
+
                 input_ctrs = [ctr for _n_, ctr in obj.items()]
                 mass = obj.attrs['mass']
                 time_of_birth = obj.attrs['time_of_birth']
 
-                if time_of_birth > time:
+                if time_of_birth >= time:
                     #
                     # in the future
                     #
@@ -941,9 +970,8 @@ class Hdf5():
                     #
                     # cold restart if output previously done
                     if mass > 0 and self.dynamic_data() is not None and len(self.dynamic_data()) > 0:
-                        counter +=1
-                        print ('Import  dynamic object number ', counter, 'from current state')
-                        print ('                object name   ', name)
+                        print ('Import  dynamic object name ', name, 'from current state')
+                        print ('  number of imported object ', obj.attrs['id'])
                         dpos_data = self.dynamic_data()
                         max_time = max(dpos_data[:, 0])
                         id_last = np.where(
@@ -967,8 +995,7 @@ class Hdf5():
 
                     # start from initial conditions
                     else:
-                        counter +=1
-                        print ('Import  dynamic or static object number ', counter, 'from initial state')
+                        print ('Import  dynamic or static object number ', obj.attrs['id'], 'from initial state')
                         print ('                object name   ', name)
                         translation = obj.attrs['translation']
                         orientation = obj.attrs['orientation']
@@ -994,14 +1021,15 @@ class Hdf5():
                             name, floatv(translation), floatv(orientation),
                             floatv(velocity), contactors, float(mass),
                             inertia, body_class, shape_class, face_class,
-                            edge_class)
+                            edge_class,
+                            number = self.instances()[name].attrs['id'])
                     else:
                         # Bullet object
                         self.importBulletObject(
                             name, floatv(translation), floatv(orientation),
                             floatv(velocity), contactors, float(mass),
-                            inertia, body_class, shape_class)
-
+                            inertia, body_class, shape_class,
+                            number = self.instances()[name].attrs['id'])
             # import nslaws
             # note: no time of birth for nslaws and joints
             for name in self._nslaws:
@@ -1016,12 +1044,18 @@ class Hdf5():
                 self._broadphase.buildGraph(self._broadphase.model())
                 self._broadphase.buildGraph(self._static_contactor)
 
+    def currentTime(self):
+        if self._initializing:
+            return self._broadphase.model().simulation().startingTime()
+        else:
+            return self._broadphase.model().simulation().nextTime()
+
     def importBirths(self, body_class=None, shape_class=None,
                      face_class=None, edge_class=None,):
         """
         Import new objects in the broadphase.
         """
-        time = self._broadphase.model().simulation().nextTime()
+        time = self.currentTime()
 
         ind_time = bisect.bisect_left(self._scheduled_births, time)
 
@@ -1061,13 +1095,14 @@ class Hdf5():
                         floatv(
                             velocity), contactors, float(mass),
                         inertia, body_class, shape_class, face_class,
-                        edge_class)
+                        edge_class, number = self.instances()[name].attrs['id'])
                 else:
                     # Bullet object
                     self.importBulletObject(
                         name, floatv(translation), floatv(orientation),
                         floatv(velocity), contactors, float(mass),
-                        inertia, body_class, shape_class, birth=True)
+                        inertia, body_class, shape_class, birth=True,
+                        number = self.instances()[name].attrs['id'])
 
             # build collision graph
             if use_proposed:
@@ -1078,17 +1113,17 @@ class Hdf5():
         """
         Outputs translations and orientations of static objects
         """
-        time = self._broadphase.model().simulation().nextTime()
-        idd = -1
+        time = self.currentTime()
         p = 0
-        self._static_data.resize(len(self._static_transforms), 0)
+        self._static_data.resize(len(self._static), 0)
 
-        for transform in self._static_transforms:
-            translation = transform.getOrigin()
-            rotation = transform.getRotation()
+        for static in self._static.values():
+            print('output static object', static['number'])
+            translation = static['transform'].getOrigin()
+            rotation = static['transform'].getRotation()
             self._static_data[p, :] = \
                 [time,
-                 idd,
+                 static['number'],
                  translation.x(),
                  translation.y(),
                  translation.z(),
@@ -1096,17 +1131,16 @@ class Hdf5():
                  rotation.x(),
                  rotation.y(),
                  rotation.z()]
-            idd -= 1
             p += 1
 
-    def outputDynamicObjects(self):
+    def outputDynamicObjects(self, initial=False):
         """
         Outputs translations and orientations of dynamic objects.
         """
 
         current_line = self._dynamic_data.shape[0]
 
-        time = self._broadphase.model().simulation().nextTime()
+        time = self.currentTime()
 
         positions = self._io.positions(self._broadphase.model())
 
@@ -1128,7 +1162,7 @@ class Hdf5():
 
         current_line = self._dynamic_data.shape[0]
 
-        time = self._broadphase.model().simulation().nextTime()
+        time = self.currentTime()
 
         velocities = self._io.velocities(self._broadphase.model())
 
@@ -1149,7 +1183,7 @@ class Hdf5():
         """
         if self._broadphase.model().nonSmoothDynamicalSystem().\
                 topology().indexSetsSize() > 1:
-            time = self._broadphase.model().simulation().nextTime()
+            time = self.currentTime()
             contact_points = self._io.contactPoints(self._broadphase.model())
 
             if contact_points is not None:
@@ -1164,12 +1198,31 @@ class Hdf5():
                                     contact_points),
                                    axis=1)
 
+    def outputDomains(self):
+        """
+        Outputs domains of contact points
+        """
+        if self._broadphase.model().nonSmoothDynamicalSystem().\
+                topology().indexSetsSize() > 1:
+            time = self.currentTime()
+            domains = self._io.domains(self._broadphase.model())
+
+            if domains is not None:
+
+                current_line = self._domain_data.shape[0]
+                self._domain_data.resize(current_line + domains.shape[0], 0)
+                times = np.empty((domains.shape[0], 1))
+                times.fill(time)
+
+                self._domain_data[current_line:, :] = \
+                    np.concatenate((times, domains), axis=1)
+
     def outputSolverInfos(self):
         """
         Outputs solver #iterations & precision reached
         """
 
-        time = self._broadphase.model().simulation().nextTime()
+        time = self.currentTime()
         so = self._broadphase.model().simulation().oneStepNSProblem(0).\
             numericsSolverOptions()
 
@@ -1196,7 +1249,7 @@ class Hdf5():
         """
         Outputs solver #iterations & precision reached
         """
-        time = self._broadphase.model().simulation().nextTime()
+        time = self.currentTime()
         so = self._broadphase.model().simulation().oneStepNSProblem(0).\
             numericsSolverOptions()
         if so.solverId == Numerics.SICONOS_GENERIC_MECHANICAL_NSGS:
@@ -1213,17 +1266,20 @@ class Hdf5():
             precision = so.dparam[1]
             local_precision = so.dparam[2]
 
-        
+
         print('SolverInfos at time :', time,
               'iterations= ', iterations,
               'precision=', precision,
               'local_precision=', )
 
-    def addMeshFromString(self, name, shape_data):
+    def addMeshFromString(self, name, shape_data, scale=None):
         """
         Add a mesh shape from a string.
         Accepted format : mesh encoded in VTK .vtp format
         """
+
+        import vtk
+        
         if name not in self._ref:
 
             shape = self._ref.create_dataset(name, (1,),
@@ -1231,20 +1287,32 @@ class Hdf5():
             shape[:] = shape_data
             shape.attrs['id'] = self._number_of_shapes
             shape.attrs['type'] = 'vtp'
+            if scale is not None:
+                shape.attrs['scale'] = scale
             self._shapeid[name] = shape.attrs['id']
             self._number_of_shapes += 1
 
-    def addMeshFromFile(self, name, filename):
+    def addMeshFromFile(self, name, filename, scale=None):
         """
         Add a mesh shape from a file.
         Accepted format : .stl or mesh encoded in VTK .vtp format
         """
+
+        import vtk
+        
+        if filename[0] != os.path.sep:
+            filename = os.path.join(os.path.split(os.path.abspath(sys.argv[0]))[0],
+                                    filename)
         if name not in self._ref:
 
             if os.path.splitext(filename)[-1][1:] == 'stl':
                 reader = vtk.vtkSTLReader()
                 reader.SetFileName(filename)
                 reader.Update()
+
+                if reader.GetErrorCode() != 0:
+                    print('vtkSTLReader error', reader.GetErrorCode())
+                    sys.exit(1)
 
                 with tmpfile() as tmpf:
                     writer = vtk.vtkXMLPolyDataWriter()
@@ -1258,7 +1326,7 @@ class Hdf5():
                 assert os.path.splitext(filename)[-1][1:] == 'vtp'
                 shape_data = str_of_file(filename)
 
-            self.addMeshFromString(name, shape_data)
+            self.addMeshFromString(name, shape_data, scale=scale)
 
     def addBRepFromString(self, name, shape_data):
         """
@@ -1406,7 +1474,7 @@ class Hdf5():
                   translation,
                   orientation=[1, 0, 0, 0],
                   velocity=[0, 0, 0, 0, 0, 0],
-                  mass=0, inertia=None, time_of_birth=0.):
+                  mass=0, inertia=None, time_of_birth=-1):
         """
         Add an object with associated contact shapes that are called
         contactors.
@@ -1446,7 +1514,8 @@ class Hdf5():
                 obj.attrs['inertia'] = inertia
 
             for num, shape in enumerate(shapes):
-                dat = data(obj, '{0}-{1}'.format(shape.name, num), 0)
+                dat = data(obj, '{0}-{1}'.format(shape.name, num), 0,
+                           use_compression = self._use_compression)
                 dat.attrs['name'] = shape.name
                 if hasattr(shape, 'group'):
                     dat.attrs['group'] = shape.group
@@ -1506,6 +1575,7 @@ class Hdf5():
             shape_class=None,
             face_class=None,
             edge_class=None,
+            controller=None,
             gravity_scale=1.0,
             t0=0,
             T=10,
@@ -1562,7 +1632,7 @@ class Hdf5():
             btBoxShape, btQuaternion, btTransform, btConeShape, \
             BulletSpaceFilter, cast_BulletR, \
             BulletWeightedShape, BulletDS, BulletTimeStepping
-        
+
         print ('setup model simulation ...')
         if set_external_forces is not None:
             self._set_external_forces = set_external_forces
@@ -1593,9 +1663,21 @@ class Hdf5():
             dpos_data = self.dynamic_data()
             times = set(dpos_data[:, 0])
             t0 = float(max(times))
-            T = float(t0 + T)
-            print ('restart from previous simulation at t0={0}'.format(t0))
-            print ('run until T={0}'.format(T))
+
+        # Time-related parameters for this simulation run
+        k0 = 1+int(t0/h)
+        k = k0
+        kT = k0+int((T-t0)/h)
+        if T > t0:
+            print('')
+            print('Simulation will run from {0:.4f} to {1:.4f}s, step {2} to step {3} (h={4}, times=[{5},{6}])'
+                  .format(t0, T, k0, kT, h,
+                          min(times) if len(times)>0 else '?',
+                          max(times) if len(times)>0 else '?'))
+            print('')
+        else:
+            print('Simulation time {0} >= T={1}, exiting.'.format(t0,T))
+            exit()
 
         # Model
         #
@@ -1618,8 +1700,21 @@ class Hdf5():
         else:
             osnspb = FrictionContactTrace(3, solver,friction_contact_trace_params,model)
 
-            
+
         osnspb.numericsSolverOptions().iparam[0] = itermax
+        # -- full error evaluation
+        #osnspb.numericsSolverOptions().iparam[1] = Numerics.SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_FULL
+        # --  Adaptive error evaluation
+        #osnspb.numericsSolverOptions().iparam[1] = Numerics.SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_ADAPTIVE
+        #osnspb.numericsSolverOptions().iparam[8] = 1
+        # -- light error evaluation with full final
+        osnspb.numericsSolverOptions().iparam[1] = Numerics.SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL
+        osnspb.numericsSolverOptions().iparam[14] = Numerics.SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION_TRUE
+
+
+
+        osnspb.numericsSolverOptions().internalSolvers.solverId = Numerics.SICONOS_FRICTION_3D_ONECONTACT_NSN_AC_GP_P
+        
         osnspb.numericsSolverOptions().internalSolvers.iparam[0] = 100
         osnspb.numericsSolverOptions().dparam[0] = tolerance
         osnspb.setMaxSize(30000)
@@ -1653,10 +1748,11 @@ class Hdf5():
         simulation.setNewtonMaxIteration(Newton_max_iter)
         simulation.setNewtonTolerance(1e-10)
 
-        k0 = 1 + len(times)
-        k = k0
         print ('import scene ...')
         self.importScene(t0, body_class, shape_class, face_class, edge_class)
+
+        if controller is not None:
+            controller.initialize(self)
 
         model.setSimulation(simulation)
         model.initialize()
@@ -1671,9 +1767,10 @@ class Hdf5():
         #     ds.display()
         # raw_input()
         print ('start simulation ...')
+        self._initializing = False
         while simulation.hasNextEvent():
 
-            print ('step', k, '<', k0 - 1 + int((T - t0) / h))
+            print ('step', k, '<', k0 + int((T - t0) / h))
 
             log(self.importBirths(body_class=body_class,
                                   shape_class=shape_class,
@@ -1688,6 +1785,9 @@ class Hdf5():
                 log(self._broadphase.buildInteractions, with_timer)\
                     (model.currentTime())
 
+            if controller is not None:
+                controller.step()
+
             log(simulation.computeOneStep, with_timer)()
 
             if (k % self._output_frequency == 0) or (k == 1):
@@ -1698,6 +1798,9 @@ class Hdf5():
                 log(self.outputVelocities, with_timer)()
 
                 log(self.outputContactForces, with_timer)()
+
+                if self._should_output_domains:
+                    log(self.outputDomains, with_timer)()
 
                 log(self.outputSolverInfos, with_timer)()
 

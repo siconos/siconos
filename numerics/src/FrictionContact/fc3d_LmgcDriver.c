@@ -174,7 +174,7 @@ int fc3d_LmgcDriver(double *reaction,
   free(M->block);
   free(M);
   free(FC);
-  deleteSolverOptions(&numerics_solver_options);
+  solver_options_delete(&numerics_solver_options);
   free(NM);
   free(MC);
 

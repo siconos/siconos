@@ -95,7 +95,7 @@ int fc3d_FixedP_solve(FrictionContactProblem * localproblem , double* reaction, 
   /*   (*postSolver)(contact,reaction); */
 }
 
-void fc3d_FixedP_free()
+void fc3d_FixedP_free(FrictionContactProblem * problem, FrictionContactProblem * localproblem, SolverOptions * localsolver_option)
 {
   updateSolver = NULL;
   postSolver = NULL;

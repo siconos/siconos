@@ -157,7 +157,7 @@ int internalPrecompute(MixedLinearComplementarityProblem* problem)
   if (verbose)
   {
     printf("mlcp_direct, precomputed M :\n");
-    displayMat(spFirstCC->M, sNpM, sNpM, 0);
+    NM_dense_display(spFirstCC->M, sNpM, sNpM, 0);
   }
   if (!(spFirstCC->Usable))
     return 0;

@@ -50,7 +50,7 @@ int main(void)
   }
   printf("Construction ok ...\n");
 
-  info = test_rowProdNoDiagNonSquare(NMM[2], NMM[3]);
+  info = test_NM_row_prod_no_diag_non_square(NMM[2], NMM[3]);
   printf("End of Sub-Prod no diag Non Square...\n");
   if (info != 0) return info;
 

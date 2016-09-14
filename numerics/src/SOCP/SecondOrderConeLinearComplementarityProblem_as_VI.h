@@ -18,7 +18,7 @@
 #ifndef SOCLCP_AS_VI_H
 #define SOCLCP_AS_VI_H
 
-/*! \page fcProblem SOCLCP as VI
+/*! \page soclp_vi_Problem SOCLCP as VI
  *
  *
  */

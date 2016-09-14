@@ -105,7 +105,7 @@ int main(int argc, char* argv[])
   // Numerics and Solver Options
 
   NumericsOptions numerics_options;
-  numerics_options.verboseMode = 1; // turn verbose mode to off by default
+  numerics_options.verboseMode = 2; // turn verbose mode to off by default
 
 
   SolverOptions *numerics_solver_options = (SolverOptions *)malloc(sizeof(SolverOptions));
@@ -121,7 +121,7 @@ int main(int argc, char* argv[])
                            numerics_solver_options, &numerics_options);
 
 
-  deleteSolverOptions(numerics_solver_options);
+  solver_options_delete(numerics_solver_options);
 
   // Solver output
   printf("\n");

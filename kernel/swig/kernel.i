@@ -144,7 +144,7 @@ namespace std
 
 // common declarations with Numerics
 
-// note : deleteSolverOptions is call by ~LCP(), ~FrictionContact(), etc.
+// note : solver_options_delete is call by ~LCP(), ~FrictionContact(), etc.
 %shared_ptr(_SolverOptions);
 %shared_ptr(NumericsOptions);
 %shared_ptr(NumericsMatrix);

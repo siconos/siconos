@@ -19,24 +19,20 @@
 #ifndef NumericsMatrix_H
 #define NumericsMatrix_H
 
-/*! \page NumericsMatrixPage Matrix Storage in Numerics
+/*! \page NumericsMatrixPage Matrix Storage in numerics component
 
-\section NumericsMatrixDef What is a NumericsMatrix?
+Numerics component proposes different ways to store 'matrix-like' objects, 
+all handled through a C structure, NumericsMatrix.
 
-To store matrix objects, Numerics functions use a structure named NumericsMatrix.\n
-This objects handles:
- - a number that identify the type of storage (0: double*
- 1: sparse block, 2: sparse compressed columns)
- - the dimensions of the matrix (rows: size0, columns: size1)
- - a list of pointers among which only one is non NULL and represents
-   the matrix itself.
 
-At the time, the following storage are available: \n
-- "classical" column-major storage in a double* (field named matrix0)
+A number (NumericsMatrix.storageType) identify the type of storage while only one pointer
+among NumericsMatrix.matrixX, X = storageType = 0, 1 or 2, is not NULL and hold the values of the matrix.
+
+At the time, the following storages are available: \n
+- "classical" (i.e. dense) column-major storage in a double*, NumericsMatrix.matrix0
 - sparse block storage, in a structure of type
-  SparseBlockStructuredMatrix (warning: only for square matrices!!)
-  (field named matrix1)
-- compressed columns storage, to be used with cs_sparse  (field named matrix2)
+  SparseBlockStructuredMatrix (warning: only for square matrices!!), NumericsMatrix.matrix1
+- sparse storage (csc, csr or triplet), based on CSparse (from T.Davis), NumericsMatrix.matrix2
 
 
 As an example, consider the following matrix A of size 8X8:\n
@@ -77,13 +73,20 @@ For the second way of storage, SparseBlockStructuredMatrix we have:
     ...\n
     matrix1->block[5] = [2,-1,2,2]
 
+
+\todo write proper doc for CSparse storage and complete the example above.
+
 \section NumericsMatrixTools Functions on NumericsMatrix
 
-\subsection NMAlloc Create and delete NumericsMatrix
+\subsection NMAlloc Create, fill and delete NumericsMatrix functions
 
-NumericsMatrix of any kind can be created using either createNumericsMatrix(), which allocates memory or createNumericsMatrixFromData() or fillNumericsMatrix(), which just fills a structure.
+- createNumericsMatrix() : allocation without initial values
+- createNumericsMatrixFromData() : allocation and set default values from external data
+- fillNumericsMatrix() : needs a pre-defined NumericsMatrix, set default values from external data
+- freeNumericsMatrix()
+
 These last two functions accept a <i>data</i> parameter, which if non-NULL contains the matrix data.
-The function freeNumericsMatrix() is used to clean the fields properly.
+
 
 \subsection NM_LA Linear Algebra
 
@@ -91,11 +94,11 @@ The following linear algebra operation are supported:
 
   - product matrix - vector: prodNumericsMatrix()
   - product matrix - matrix: prodNumericsMatrixNumericsMatrix()
-  - partial product matrix - vector: subRowProd()
+  - partial product matrix - vector: NM_row_prod()
 
 \subsection NM_IO Input / Output
 
-  - display(): display a NumericsMatrix
+  - NM_display(): display a NumericsMatrix
   - displayRowbyRow(): display a NumericsMatrix row by row
   - printInFileName(), printInFile(): save to filesystem
   - readInFileName(), readInFile(): fill a NumericsMatrix from a file
@@ -132,13 +135,9 @@ typedef struct
 } NumericsMatrixInternalData;
 
 /** \struct NumericsMatrix NumericsMatrix.h
- * Structure used to handle with matrix in Numerics (interface to
- * double*, SparseBlockStructuredMatrix and so on).\n
+    Interface to different type of matrices in numerics component, see \ref NumericsMatrixPage.
 
- * The structure may carry different representations of the same
- * matrix. The storageType indicates the default storage in order to
- * choose between different operations. NM_* functions allows for some
- * linear algebra operations on dense SparseBlock and sparse storage.
+    See NM_* functions for linear algebra operations on dense, sparse block and sparse storage.
 */
 typedef struct
 {
@@ -152,11 +151,11 @@ typedef struct
   SparseBlockStructuredMatrix* matrix1; /**< sparse block storage */
   NumericsSparseMatrix* matrix2; /**< csc, csr or triplet storage */
 
-  NumericsMatrixInternalData* internalData; /**< internal storage used for workspace amoung other */
+  NumericsMatrixInternalData* internalData; /**< internal storage, used for workspace amoung other things */
 
 } NumericsMatrix;
 
-/*! Types of matrices for NumericsMatrix */
+/*! Available types of storage for NumericsMatrix */
 typedef enum NumericsMatrix_types {
   NM_DENSE,        /**< dense format */
   NM_SPARSE_BLOCK, /**< sparse block format */
@@ -181,10 +180,8 @@ extern "C"
   /** Matrix - vector product y = A*x + y
       \param[in] sizeX dim of the vector x
       \param[in] sizeY dim of the vector y
-      \param[in] alpha coefficient
       \param[in] A the matrix to be multiplied
       \param[in] x the vector to be multiplied
-      \param[in] beta coefficient
       \param[in,out] y the resulting vector
   */
   void prodNumericsMatrix3x3(int sizeX, int sizeY,  NumericsMatrix* A,
@@ -199,7 +196,16 @@ extern "C"
   */
   void prodNumericsMatrixNumericsMatrix(double alpha, const NumericsMatrix* const A, const NumericsMatrix* const B, double beta, NumericsMatrix* C);
 
-
+  /** Row of a Matrix - vector product y = rowA*x or y += rowA*x, rowA being a submatrix of A (sizeY rows and sizeX columns)
+      \param[in] sizeX dim of the vector x
+      \param[in] sizeY dim of the vector y
+      \param[in] currentRowNumber position of the first row of rowA in A (warning: real row if A is a double*, block-row if A is a SparseBlockStructuredMatrix)
+      \param[in] A the matrix to be multiplied
+      \param[in] x the vector to be multiplied
+      \param[in,out] y the resulting vector
+      \param[in] init = 0 for y += Ax, =1 for y = Ax
+  */
+  void NM_row_prod(int sizeX, int sizeY, int currentRowNumber, const NumericsMatrix* const A, const double* const x, double* y, int init);
 
   /** Row of a Matrix - vector product y = rowA*x or y += rowA*x, rowA being a submatrix of A (sizeY rows and sizeX columns)
       \param[in] sizeX dim of the vector x
@@ -210,18 +216,7 @@ extern "C"
       \param[in,out] y the resulting vector
       \param[in] init = 0 for y += Ax, =1 for y = Ax
   */
-  void subRowProd(int sizeX, int sizeY, int currentRowNumber, const NumericsMatrix* const A, const double* const x, double* y, int init);
-
-  /** Row of a Matrix - vector product y = rowA*x or y += rowA*x, rowA being a submatrix of A (sizeY rows and sizeX columns)
-      \param[in] sizeX dim of the vector x
-      \param[in] sizeY dim of the vector y
-      \param[in] currentRowNumber position of the first row of rowA in A (warning: real row if A is a double*, block-row if A is a SparseBlockStructuredMatrix)
-      \param[in] A the matrix to be multiplied
-      \param[in] x the vector to be multiplied
-      \param[in,out] y the resulting vector
-      \param[in] init = 0 for y += Ax, =1 for y = Ax
-  */
-  void rowProdNoDiag(int sizeX, int sizeY, int currentRowNumber, const NumericsMatrix* const A, const double* const x, double* y, int init);
+  void NM_row_prod_no_diag(int sizeX, int sizeY, int currentRowNumber, const NumericsMatrix* const A, const double* const x, double* y, int init);
 
   /** Free memory for a NumericsMatrix. Warning: call this function only if you are sure that
       memory has been allocated for the structure in Numerics. This function is assumed that the memory is "owned" by this structure.
@@ -236,13 +231,27 @@ extern "C"
       \param nCol the number of columns
       \param lDim the leading dimension of M
    */
-  void displayMat(double * m, int nRow, int nCol, int lDim);
+  void NM_dense_display_matlab(double * m, int nRow, int nCol, int lDim);
+
+  /** Screen display of the matrix content stored as a double * array in Fortran style
+      \param m the matrix to be displayed
+      \param nRow the number of rows
+      \param nCol the number of columns
+      \param lDim the leading dimension of M
+   */
+  void NM_dense_display(double * m, int nRow, int nCol, int lDim);
+
+  /** Screen display of the vector content stored as a double * array 
+      \param m the vector to be displayed
+      \param nRow the number of rows
+   */
+  void NM_vector_display(double * m, int nRow);
 
 
   /** Screen display of the matrix content
       \param M the matrix to be displayed
    */
-  void display(const NumericsMatrix* const M);
+  void NM_display(const NumericsMatrix* const M);
 
   /** PrintInFile  of the matrix content
      \param M the matrix to be printed

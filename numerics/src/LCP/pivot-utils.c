@@ -336,7 +336,7 @@ int pivot_selection_lemke(double* mat, unsigned dim, unsigned drive, unsigned au
       }
       else
       {
-        if (block == aux_indx || i == aux_indx)
+        if (block == (int)aux_indx || i == aux_indx)
         {
           /* We want the auxilliary variable to exit before any othe.
            * see CPS p. 279 and example 4.4.16 */
@@ -390,7 +390,7 @@ int pivot_selection_lemke2(unsigned n, double* restrict col_drive, double* restr
       }
       else
       {
-        if (block == aux_indx || i == aux_indx)
+        if (block == (int)aux_indx || i == aux_indx)
         {
           /* We want the auxilliary variable to exit before any other.
            * see CPS p. 279 and example 4.4.16 */
@@ -410,7 +410,7 @@ int pivot_selection_lemke2(unsigned n, double* restrict col_drive, double* restr
               unsigned var = candidate_indx[k];
               double test_pivot = col_drive[var];
               block = lexicosort_rowmajor(var, block, n, lexico_mat, test_pivot, current_pivot, lexico_tol);
-              if (block == var)
+              if (block == (int)var)
               {
                 current_pivot = test_pivot;
               }
@@ -429,7 +429,7 @@ int pivot_selection_lemke2(unsigned n, double* restrict col_drive, double* restr
       unsigned var = candidate_indx[k];
       double test_pivot = col_drive[var];
       block = lexicosort_rowmajor(var, block, n, lexico_mat, test_pivot, current_pivot, lexico_tol);
-      if (block == var)
+      if (block == (int)var)
       {
         current_pivot = test_pivot;
       }
@@ -462,7 +462,7 @@ int pivot_selection_lemke3(unsigned n, double* restrict col_drive, double* restr
       }
       else
       {
-        if (block == aux_indx || i == aux_indx)
+        if (block == (int)aux_indx || i == aux_indx)
         {
           /* We want the auxilliary variable to exit before any other.
            * see CPS p. 279 and example 4.4.16 */

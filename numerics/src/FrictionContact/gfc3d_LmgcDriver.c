@@ -162,7 +162,7 @@ int gfc3d_LmgcDriver(double *reaction,
   for (int i=0; i < dSize_min; ++i)
     numerics_solver_options.dparam[i] = dparam[i];
 
-  /* printSolverOptions(&numerics_solver_options); */
+  /* solver_options_print(&numerics_solver_options); */
   /* FILE * file  =  fopen("toto.dat", "w"); */
   /* globalFrictionContact_printInFile(problem, file); */
   /* fclose(file); */

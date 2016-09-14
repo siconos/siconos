@@ -104,5 +104,5 @@ void LCP::initialize(SP::Simulation sim)
 
 LCP::~LCP()
 {
-  deleteSolverOptions(&*_numerics_solver_options);
+  solver_options_delete(&*_numerics_solver_options);
 }

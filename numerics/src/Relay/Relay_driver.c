@@ -70,13 +70,13 @@ int relay_driver(RelayProblem* problem, double *z , double *w,
    *  2 - Call specific solver (if no trivial sol.)
    *************************************************/
   if (verbose > 0)
-    printSolverOptions(options);
+    solver_options_print(options);
 
   /* Solver name */
   //char * name = options->solverName;
 
   if (verbose == 1)
-    printf(" ========================== Call %s solver for Relayproblem ==========================\n", idToName(options->solverId));
+    printf(" ========================== Call %s solver for Relayproblem ==========================\n", solver_options_id_to_name(options->solverId));
 
   switch (options->solverId)
   {
@@ -126,7 +126,7 @@ int relay_driver(RelayProblem* problem, double *z , double *w,
   /*error */
   default:
   {
-    fprintf(stderr, "Relay_driver error: unknown solver name: %s\n", idToName(options->solverId));
+    fprintf(stderr, "Relay_driver error: unknown solver name: %s\n", solver_options_id_to_name(options->solverId));
     exit(EXIT_FAILURE);
   }
   }

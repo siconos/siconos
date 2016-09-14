@@ -102,7 +102,6 @@ void fc2d_enum(FrictionContactProblem* problem, double *reaction, double *veloci
 
 int fc2d_enum_setDefaultSolverOptions(SolverOptions* options)
 {
-  int i;
   if (verbose > 0)
   {
     printf("Set the Default SolverOptions for the Enumerative Solver for fc2d\n");
@@ -114,15 +113,10 @@ int fc2d_enum_setDefaultSolverOptions(SolverOptions* options)
   options->filterOn = 1;
   options->iSize = 5;
   options->dSize = 5;
-  options->iparam = (int *)malloc(options->iSize * sizeof(int));
-  options->dparam = (double *)malloc(options->dSize * sizeof(double));
+  options->iparam = (int *)calloc(options->iSize, sizeof(int));
+  options->dparam = (double *)calloc(options->dSize, sizeof(double));
   options->dWork = NULL;
-  null_SolverOptions(options);
-  for (i = 0; i < 5; i++)
-  {
-    options->iparam[i] = 0;
-    options->dparam[i] = 0.0;
-  }
+  solver_options_nullify(options);
   options->dparam[0] = 1e-6;
   options->internalSolvers = (SolverOptions *)malloc(sizeof(SolverOptions));
   LinearComplementarityProblem* problem = NULL;

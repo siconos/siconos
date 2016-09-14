@@ -80,13 +80,17 @@ extern "C"
   */
   int fc3d_setDefaultSolverOptions(SolverOptions* options, int solverId);
 
-
   
+  enum SICONOS_FRICTION_3D_NSGS_LOCALSOLVER
+  {
+    SICONOS_FRICTION_3D_NSGS_LOCALSOLVER_CONTACTNUMBER = 4
+  };
   enum SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION
   {
-    SICONOS_FRICTION_3D_NSGS_FULL_ERROR_EVALUATION,
-    SICONOS_FRICTION_3D_NSGS_LIGHT_ERROR_EVALUATION_WITH_FULL_FINAL,
-    SICONOS_FRICTION_3D_NSGS_LIGHT_ERROR_EVALUATION
+    SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_FULL,
+    SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL,
+    SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT,
+    SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_ADAPTIVE
   };
   enum SICONOS_FRICTION_3D_NSGS_SHUFFLE
   {
@@ -99,6 +103,11 @@ extern "C"
     SICONOS_FRICTION_3D_NSGS_RELAXATION_FALSE,
     SICONOS_FRICTION_3D_NSGS_RELAXATION_TRUE
   };
+  enum SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION
+  {
+    SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION_FALSE,
+    SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION_TRUE
+  };
 
   /** Non-Smooth Gauss Seidel solver for friction-contact 3D problem
       \param problem the friction-contact 3D problem to solve
@@ -108,9 +117,13 @@ extern "C"
       \param options the solver options :
       [in] iparam[0] : Maximum iteration number
       [in] iparam[1] : error computation method :
-          SICONOS_FRICTION_3D_NSGS_FULL_ERROR_EVALUATION (0) : Full error computation with velocity computation
-          SICONOS_FRICTION_3D_NSGS_LIGHT_ERROR_EVALUATION_WITH_FULL_FINAL (1) : Light error computation with incremental values on reaction verification of absolute error at the end
-          SICONOS_FRICTION_3D_NSGS_LIGHT_ERROR_EVALUATION (2) : only light error computation (velocity not computed)
+          SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_FULL (0) : Full error computation with velocity computation
+          SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL (1) : Light error computation with incremental values on reaction verification of absolute error at the end
+          SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT (2) : only light error computation (velocity not computed)
+          SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_ADAPTIVE (3) :  we adapt the frequency of the full erro evaluation.
+      [in] iparam[2] : filter local solution if the local error is greater than 1.0
+          SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION_FALSE (0) the filter is not applied
+          SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION_TRUE  (1) the filter is applied
       [in] iparam[4] : method uses overrelaxation
           SICONOS_FRICTION_3D_NSGS_RELAXATION_FALSE (0) relaxation is not used,
           SICONOS_FRICTION_3D_NSGS_RELAXATION_TRUE  (1) relaxation is used with parameter dparam[8],
@@ -121,11 +134,9 @@ extern "C"
            SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE_EACH_LOOP (2) : shuffle in each iteration
       [in] iparam[6] : seed for the random generator in shuffling  contacts
 
-      
-
       [out] iparam[7] = iter number of performed iterations
 
-      [in] iparam[8] = error computation frequency
+      [in]  iparam[8] = error computation frequency
 
       [in]  dparam[0]  user tolerance on the loop
       [in]  dparam[8]  the relaxation parameter omega
@@ -203,18 +214,7 @@ extern "C"
    */
   int fc3d_TrescaFixedPoint_setDefaultSolverOptions(SolverOptions* options);
 
-  /** Fixed point solver for friction-contact 3D problem based on the SOCLCP approach. 
-      Warning: it solves the fake or associated friction problem.
-    \param problem the friction-contact 3D problem to solve
-    \param velocity global vector (n), in-out parameter
-    \param reaction global vector (n), in-out parameters
-    \param info return 0 if the solution is found
-    \param options the solver options :
-    iparam[0] : Maximum iteration number
-    The internal (local) solver must set by the SolverOptions options[1] : possible internal solvers is NSGS.
-  */
-  
-  /** set the default solver parameters and perform memory allocation for ACLM
+  /** set the default solver parameters and perform memory allocation for SOCLCP
    *  \param options the pointer to the array of options to set
    */
   int fc3d_SOCLCP_setDefaultSolverOptions(SolverOptions* options);

@@ -128,7 +128,7 @@ void fc3d_projectionWithDiagonalization_update(int contact, FrictionContactProbl
     /* qLocal += rowMB * reaction
        with rowMB the row of blocks of MGlobal which corresponds to the current contact
     */
-    subRowProdSBM(n, 3, contact, MGlobal->matrix1, reaction, qLocal, 0);
+    SBM_row_prod(n, 3, contact, MGlobal->matrix1, reaction, qLocal, 0);
     // Substract diagonal term
     qLocal[0] -= MLocal[0] * reaction[in];
     qLocal[1] -= MLocal[4] * reaction[it];
@@ -276,8 +276,13 @@ void fc3d_projectionOnConeWithLocalIteration_initialize(FrictionContactProblem *
 {
   int nc = problem->numberOfContacts;
   /* printf("fc3d_projectionOnConeWithLocalIteration_initialize. Allocation of dwork\n"); */
-  localsolver_options->dWork = (double *)malloc(nc * sizeof(double));
-  localsolver_options->dWorkSize = nc ;
+  if (!localsolver_options->dWork
+      || localsolver_options->dWorkSize < nc)
+  {
+    localsolver_options->dWork = (double *)realloc(localsolver_options->dWork,
+                                                   nc * sizeof(double));
+    localsolver_options->dWorkSize = nc ;
+  }
   for (int i = 0; i < nc; i++)
   {
     localsolver_options->dWork[i]=1.0;
@@ -292,6 +297,7 @@ void fc3d_projectionOnConeWithLocalIteration_free(FrictionContactProblem * probl
 
 int fc3d_projectionOnConeWithLocalIteration_solve(FrictionContactProblem* localproblem, double* reaction, SolverOptions* options)
 {
+  
   /* int and double parameters */
   int* iparam = options->iparam;
   double* dparam = options->dparam;
@@ -440,7 +446,6 @@ int fc3d_projectionOnConeWithLocalIteration_solve(FrictionContactProblem* localp
       }
       else
         rho =rho_k;
-
     if (verbose > 1)
     {
       printf("----------------------  localiter = %i\t, rho= %.10e\t, error = %.10e \n", localiter, rho, localerror);
@@ -450,6 +455,7 @@ int fc3d_projectionOnConeWithLocalIteration_solve(FrictionContactProblem* localp
 
   }
   options->dWork[options->iparam[4]] =rho;
+  options->dparam[1] = localerror ;
 
   if (localerror > localtolerance)
     return 1;

@@ -25,6 +25,10 @@
 
 #include "lcp_cst.h"
 
+/* #define DEBUG_STDOUT */
+/* #define DEBUG_MESSAGES */
+#include "debug.h"
+
 char *  SICONOS_LCP_LEMKE_STR = "Lemke";
 char *  SICONOS_LCP_NSGS_SBM_STR = "NSGS_SBM";
 char *  SICONOS_LCP_PGS_STR = "PGS";
@@ -52,6 +56,7 @@ static int lcp_driver_SparseBlockMatrix(LinearComplementarityProblem* problem, d
 
 int lcp_driver_SparseBlockMatrix(LinearComplementarityProblem* problem, double *z , double *w, SolverOptions* options)
 {
+  DEBUG_BEGIN("lcp_driver_SparseBlockMatrix(...)\n");
   /* Checks storage type for the matrix M of the LCP */
   if (problem->M->storageType == 0)
     numericsError("lcp_driver_SparseBlockMatrix", "forbidden type of storage for the matrix M of the LCP");
@@ -86,6 +91,7 @@ int lcp_driver_SparseBlockMatrix(LinearComplementarityProblem* problem, double *
     options->dparam[1] = 0.0; /* Error */
     if (verbose > 0)
       printf("LCP_driver_SparseBlockMatrix: found trivial solution for the LCP (positive vector q => z = 0 and w = q). \n");
+    DEBUG_END("lcp_driver_SparseBlockMatrix(...)\n");
     return info;
   }
 
@@ -96,14 +102,14 @@ int lcp_driver_SparseBlockMatrix(LinearComplementarityProblem* problem, double *
   /* Solver name */
   //  char * name = options->solverName;
   if (verbose == 1)
-    printf(" ========================== Call %s SparseBlockMatrix solver for Linear Complementarity problem ==========================\n", idToName(options->solverId));
+    printf(" ========================== Call %s SparseBlockMatrix solver for Linear Complementarity problem ==========================\n", solver_options_id_to_name(options->solverId));
 
   /****** Gauss Seidel block solver ******/
   if ((options->solverId) == SICONOS_LCP_NSGS_SBM)
     lcp_nsgs_SBM(problem, z , w , &info , options);
   else
   {
-    fprintf(stderr, "LCP_driver_SparseBlockMatrix error: unknown solver named: %s\n", idToName(options->solverId));
+    fprintf(stderr, "LCP_driver_SparseBlockMatrix error: unknown solver named: %s\n", solver_options_id_to_name(options->solverId));
     exit(EXIT_FAILURE);
   }
 
@@ -112,13 +118,14 @@ int lcp_driver_SparseBlockMatrix(LinearComplementarityProblem* problem, double *
    *************************************************/
   if (options->filterOn > 0)
     info = lcp_compute_error(problem, z, w, options->dparam[0], &(options->dparam[1]));
-
+  DEBUG_END("lcp_driver_SparseBlockMatrix(...)\n");
   return info;
 
 }
 
 int lcp_driver_DenseMatrix(LinearComplementarityProblem* problem, double *z , double *w, SolverOptions* options)
 {
+  DEBUG_BEGIN("lcp_driver_DenseMatrix(...)\n")
   /* Note: inputs are not checked since it is supposed to be done in lcp_driver() function which calls the present one. */
 
   /* Checks storage type for the matrix M of the LCP */
@@ -130,12 +137,12 @@ int lcp_driver_DenseMatrix(LinearComplementarityProblem* problem, double *z , do
 
   if (NoDefaultOptions == 0)
   {
-    readSolverOptions(0, options);
+    solver_options_read(0, options);
     options->filterOn = 1;
   }
 
   if (verbose > 0)
-    printSolverOptions(options);
+    solver_options_print(options);
 
   /* Output info. : 0: ok -  >0: problem (depends on solver) */
   int info = -1;
@@ -147,7 +154,7 @@ int lcp_driver_DenseMatrix(LinearComplementarityProblem* problem, double *z , do
   int n = problem->size;
   double *q = problem->q;
 /*  if (!((options->solverId == SICONOS_LCP_ENUM) && (options->iparam[0] == 1 )))*/
-    {      
+    {
       while ((i < (n - 1)) && (q[i] >= 0.)) i++;
       if ((i == (n - 1)) && (q[n - 1] >= 0.))
       {
@@ -163,6 +170,7 @@ int lcp_driver_DenseMatrix(LinearComplementarityProblem* problem, double *z , do
         options->dparam[1] = 0.0; /* Error */
         if (verbose > 0)
           printf("LCP_driver_DenseMatrix: found trivial solution for the LCP (positive vector q => z = 0 and w = q). \n");
+        DEBUG_END("lcp_driver_DenseMatrix(...)\n")
         return info;
       }
     }
@@ -174,7 +182,7 @@ int lcp_driver_DenseMatrix(LinearComplementarityProblem* problem, double *z , do
 
 
   if (verbose == 1)
-    printf(" ========================== Call %s solver for Linear Complementarity problem ==========================\n", idToName(options->solverId));
+    printf(" ========================== Call %s solver for Linear Complementarity problem ==========================\n", solver_options_id_to_name(options->solverId));
 
   /****** Lemke algorithm ******/
   /* IN: itermax
@@ -303,7 +311,7 @@ int lcp_driver_DenseMatrix(LinearComplementarityProblem* problem, double *z , do
     break;
   default:
   {
-    fprintf(stderr, "lcp_driver_DenseMatrix error: unknown solver name: %s\n", idToName(options->solverId));
+    fprintf(stderr, "lcp_driver_DenseMatrix error: unknown solver name: %s\n", solver_options_id_to_name(options->solverId));
     exit(EXIT_FAILURE);
   }
   }
@@ -316,7 +324,7 @@ int lcp_driver_DenseMatrix(LinearComplementarityProblem* problem, double *z , do
     if (info <= 0) /* info was not set or the solver was happy */
       info = info_;
   }
-
+  DEBUG_END("lcp_driver_DenseMatrix(...)\n")
   return info;
 
 }
@@ -324,7 +332,7 @@ int lcp_driver_DenseMatrix(LinearComplementarityProblem* problem, double *z , do
 int linearComplementarity_driver(LinearComplementarityProblem* problem, double *z , double *w, SolverOptions* options,  NumericsOptions* global_options)
 {
   assert(options && "lcp_driver : null input for solver options");
-
+  DEBUG_BEGIN("linearComplementarity_driver(...)\n");
   /* Set global options */
   if (global_options)
     setNumericsOptions(global_options);
@@ -340,7 +348,7 @@ int linearComplementarity_driver(LinearComplementarityProblem* problem, double *
   /* Storage type for the matrix M of the LCP */
 
   int storageType = problem->M->storageType;
-
+  DEBUG_PRINTF("storageType = %i\n", storageType);
   /* Sparse Block Storage */
   if (storageType == 1)
   {
@@ -350,5 +358,6 @@ int linearComplementarity_driver(LinearComplementarityProblem* problem, double *
   {
     info = lcp_driver_DenseMatrix(problem, z , w, options);
   }
+  DEBUG_END("linearComplementarity_driver(...)\n");
   return info;
 }

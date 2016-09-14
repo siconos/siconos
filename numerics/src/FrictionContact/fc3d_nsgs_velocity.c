@@ -46,7 +46,7 @@ void fc3d_nsgs_initialize_local_solver_velocity(SolverPtr* solve, FreeSolverPtr*
   }
   else
   {
-    fprintf(stderr, "Numerics, fc3d_nsgs_velocity failed. Unknown internal solver : %s.\n", idToName(localsolver_options->solverId));
+    fprintf(stderr, "Numerics, fc3d_nsgs_velocity failed. Unknown internal solver : %s.\n", solver_options_id_to_name(localsolver_options->solverId));
     exit(EXIT_FAILURE);
   }
 }
@@ -164,7 +164,6 @@ void fc3d_nsgs_velocity(FrictionContactProblem* problem, double *reaction, doubl
 }
 int fc3d_nsgs_velocity_setDefaultSolverOptions(SolverOptions* options)
 {
-  int i;
   if (verbose > 0)
   {
     printf("Set the Default SolverOptions for the NSGSV Solver\n");
@@ -177,15 +176,10 @@ int fc3d_nsgs_velocity_setDefaultSolverOptions(SolverOptions* options)
   options->filterOn = 1;
   options->iSize = 8;
   options->dSize = 8;
-  options->iparam = (int *)malloc(options->iSize * sizeof(int));
-  options->dparam = (double *)malloc(options->dSize * sizeof(double));
+  options->iparam = (int *)calloc(options->iSize, sizeof(int));
+  options->dparam = (double *)calloc(options->dSize, sizeof(double));
   options->dWork = NULL;
-  null_SolverOptions(options);
-  for (i = 0; i < 8; i++)
-  {
-    options->iparam[i] = 0;
-    options->dparam[i] = 0.0;
-  }
+  solver_options_nullify(options);
   options->iparam[0] = 1000;
   options->dparam[0] = 1e-4;
   options->internalSolvers = (SolverOptions *)malloc(sizeof(SolverOptions));

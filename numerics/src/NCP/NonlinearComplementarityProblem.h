@@ -27,7 +27,7 @@
 */
 
 /*! \page NCProblem Nonlinear Complementarity problems (NCP)
-  \section ncpIntro  Problem Statement
+  \section ncpProblemIntro  Problem Statement
   Given a sufficiently smooth function \f${F}\colon {{\mathrm{I\!R}}}^{n}  \to {{\mathrm{I\!R}}}^{n}\f$
   The Nonlinear Complementarity Problem (NCP) is to find two vectors \f$(z,w \in {{\mathrm{I\!R}}}^{n})\f$ such that:
   \f{align*}{

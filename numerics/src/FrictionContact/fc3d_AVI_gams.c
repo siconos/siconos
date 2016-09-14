@@ -893,7 +893,7 @@ static int fc3d_AVI_gams_base(FrictionContactProblem* problem, double *reaction,
         cs_gaxpy(NM_csc(&Akmat), pts, xtmp2);
         DEBUG_PRINT_VEC(xtmp2, Akmat.size0);
         NM_clearCSC(&Akmat);
-        display(&Akmat);
+        NM_display(&Akmat);
         DEBUG_PRINTF("contact %d, checking feasibility\n", i);
         free(xtmp2);
         free(pts);*/

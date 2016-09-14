@@ -28,10 +28,14 @@
 
 #include "Tools.hpp"
 
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES 1
+#include "debug.h"
+
 // Default constructor: empty matrix
 BlockCSRMatrix::BlockCSRMatrix():
-  _nr(0), 
-  _blockCSR(new CompressedRowMat()), 
+  _nr(0),
+  _blockCSR(new CompressedRowMat()),
   _sparseBlockStructuredMatrix(new SparseBlockStructuredMatrix()),
   _diagsize0(new IndexInt()),
   _diagsize1(new IndexInt()),
@@ -43,13 +47,13 @@ BlockCSRMatrix::BlockCSRMatrix():
 BlockCSRMatrix::BlockCSRMatrix(unsigned int nRow):
   _nr(nRow),
   // Only square-blocks matrices for the moment (ie nRow = nr = nrol)
-  
+
   // Allocate memory and fill in the matrix rowPos, rowCol ... are
   // initialized with nr to reserve at first step the maximum possible
   // (according to given nr) space in memory.  Thus a future resize
   // will not require memory allocation or copy.
   _blockCSR(new CompressedRowMat(_nr, _nr)),
-  _sparseBlockStructuredMatrix(new SparseBlockStructuredMatrix),
+  _sparseBlockStructuredMatrix(new SparseBlockStructuredMatrix()),
   _diagsize0(new IndexInt(_nr)),
   _diagsize1(new IndexInt(_nr)),
   rowPos(new IndexInt(_nr)),
@@ -66,7 +70,9 @@ BlockCSRMatrix::BlockCSRMatrix(SP::InteractionsGraph indexSet):
   rowPos(new IndexInt(_nr)),
   colPos(new IndexInt(_nr))
 {
+  DEBUG_BEGIN("BlockCSRMatrix::BlockCSRMatrix(SP::InteractionsGraph indexSet)\n");
   fill(indexSet);
+  DEBUG_END("BlockCSRMatrix::BlockCSRMatrix(SP::InteractionsGraph indexSet)\n");
 }
 
 BlockCSRMatrix::~BlockCSRMatrix()
@@ -143,6 +149,7 @@ void BlockCSRMatrix::fill(SP::InteractionsGraph indexSet)
     (*_blockCSR)(std::max(pos, col), std::min(pos, col)) =
       indexSet->properties(*ei).lower_block->getArray();
   }
+  DEBUG_EXPR(display(););
 }
 
 void BlockCSRMatrix::fillM(SP::InteractionsGraph indexSet)
@@ -291,17 +298,17 @@ void BlockCSRMatrix::convert()
   _sparseBlockStructuredMatrix->blocknumber1 = _nr;  // nc not always set
   _sparseBlockStructuredMatrix->nbblocks = (*_blockCSR).nnz();
   // Next copies: pointer links!!
-  _sparseBlockStructuredMatrix->blocksize0 =  &((*_diagsize0)[0]);
-  _sparseBlockStructuredMatrix->blocksize1 =  &((*_diagsize1)[0]);  // nr = nc
+  _sparseBlockStructuredMatrix->blocksize0 =  _diagsize0->data();
+  _sparseBlockStructuredMatrix->blocksize1 =  _diagsize1->data(); // nr = nc
 
   // boost
   _sparseBlockStructuredMatrix->filled1 = (*_blockCSR).filled1();
   _sparseBlockStructuredMatrix->filled2 = (*_blockCSR).filled2();
-  _sparseBlockStructuredMatrix->index1_data = &((*_blockCSR).index1_data()[0]);
+  _sparseBlockStructuredMatrix->index1_data = _blockCSR->index1_data().begin();
   if (_nr > 0)
   {
-    _sparseBlockStructuredMatrix->index2_data = &((*_blockCSR).index2_data()[0]);
-    _sparseBlockStructuredMatrix->block =  &((*_blockCSR).value_data()[0]);
+    _sparseBlockStructuredMatrix->index2_data = _blockCSR->index2_data().begin();
+    _sparseBlockStructuredMatrix->block =  _blockCSR->value_data().begin();
   };
 
   //   // Loop through the non-null blocks
@@ -321,22 +328,22 @@ void BlockCSRMatrix::display() const
             << _nr << " blocks in a row/col and "
             << _blockCSR->nnz()
             << " non-null blocks" <<std::endl;
-  std::cout << "filled1:" << _blockCSR->filled1() <<std::endl;
-  std::cout << "filled2:" << _blockCSR->filled2() <<std::endl;
-  std::cout << "index1_data:\n";
-  print(_blockCSR->index1_data().begin(), _blockCSR->index1_data().end());
-  std::cout <<std::endl;
-  std::cout << "index2_data:\n";
-  print(_blockCSR->index2_data().begin(), _blockCSR->index2_data().end());
-  std::cout <<std::endl;
-  std::cout << "Sum of sizes of the diagonal blocks:"
-            <<std::endl;
-  print(_diagsize0->begin(), _diagsize0->end());
-  print(_diagsize1->begin(), _diagsize1->end());
+  std::cout << "filled1 (index of the last non empty line + 1):" << _blockCSR->filled1() <<std::endl;
+  std::cout << "filled2 (number of non null blocks):" << _blockCSR->filled2() <<std::endl;
+  std::cout << "_blockCSR->index1_data().size()" << _blockCSR->index1_data().size() << std::endl;
+  print(_blockCSR->index1_data().begin(), _blockCSR->index1_data().end(),"index1_data", "\t");
+
+  assert(_blockCSR->index2_data().size() >= _blockCSR->filled2() );
+
+  std::cout << "_blockCSR->index2_data().size()" << _blockCSR->index2_data().size() << std::endl;
+  print(_blockCSR->index2_data().begin(), _blockCSR->index2_data().end(), "index2_data (column number for each block)", "\t");
+
+  std::cout << "last column number  "<<   _blockCSR->index2_data()[_blockCSR->filled2()-1] <<  " for block   " << _blockCSR->filled2() << std::endl;
+  print(_diagsize0->begin(), _diagsize0->end(),"_diagsize0 , sum of row sizes of the diagonal blocks", "\t" );
+  print(_diagsize1->begin(), _diagsize1->end(),"_diagsize1 , sum of col sizes of the diagonal blocks", "\t"  );
 }
 
 unsigned int BlockCSRMatrix::getNbNonNullBlocks() const
 {
   return _blockCSR->nnz();
 };
-

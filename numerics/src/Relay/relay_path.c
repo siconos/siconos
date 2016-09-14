@@ -134,7 +134,7 @@ int relay_path_setDefaultSolverOptions(SolverOptions* options)
   options->iparam = (int *)malloc(options->iSize * sizeof(int));
   options->dparam = (double *)malloc(options->dSize * sizeof(double));
   options->dWork = NULL;
-  null_SolverOptions(options);
+  solver_options_nullify(options);
   options->dparam[0] = 1e-8;
   options->dparam[1] = 1.0;
 #endif /*HAVE_PATHFERRIS*/

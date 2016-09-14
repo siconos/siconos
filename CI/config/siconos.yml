@@ -47,7 +47,16 @@ env:
       - FC=mpif90
       - CXX=mpicxx
 
-# see http://pages.cs.wisc.edu/~ferris/path/LICENSE
+  frama-c:
+    any:
+      - CAML_LD_LIBRARY_PATH="/root/.opam/system/lib/stublibs:/usr/lib/ocaml/stublibs"
+      - MANPATH="/root/.opam/system/man:"
+      - PERL5LIB="/root/.opam/system/lib/perl5"
+      - OCAML_TOPLEVEL_PATH="/root/.opam/system/lib/toplevel"
+      - PATH="/root/.opam/system/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+
+
+  # see http://pages.cs.wisc.edu/~ferris/path/LICENSE
   path:
     any:
       - PATH_LICENSE_STRING="3413119131&Courtesy&&&USR&54784&12_1_2016&1000&PATH&GEN&31_12_2017&0_0_0&5000&0_0"
@@ -170,7 +179,7 @@ pkgs:
     debian:
       - libcppunit-dev
 
-    fedora: 
+    fedora:
       - cppunit
       - cppunit-devel
 
@@ -232,8 +241,8 @@ pkgs:
       - libmumps-dev
 
     fedora:
-      - ptscotch-openmpi 
-      - ptscotch-openmpi-devel 
+      - ptscotch-openmpi
+      - ptscotch-openmpi-devel
       - blacs-openmpi-devel
       - openmpi-devel
       - scalapack-openmpi
@@ -270,20 +279,20 @@ pkgs:
   clang:
     debian-jessie:
       - clang-3.8
-# Don't worry, this is a hack to get cppunit to work with clang on ubuntu 15.10, because the system cppunit
-# has been compiled with a different string impl ...
+  # Don't worry, this is a hack to get cppunit to work with clang on ubuntu 15.10, because the system cppunit
+  # has been compiled with a different string impl ...
   cppunit_clang:
     ubuntu-15.10:
       command:  wget http://siconos.gforge.inria.fr/build-42/cppunit-clang-ubuntu-15.10.tar.xz &&
                 tar xJf cppunit-clang-ubuntu-15.10.tar.xz --strip-components=1 -C /usr/lib/x86_64-linux-gnu/
 
-# this is for msan. It also contains the so files for cppunit compiled with msan
+  # this is for msan. It also contains the so files for cppunit compiled with msan
   libcxx_msan:
     any:
       command: wget http://siconos.gforge.inria.fr/build-42/libcxx_msan-clang-3.6.tar.xz &&
                tar xJf libcxx_msan-clang-3.6.tar.xz -C /
 
-# dummy target
+  # dummy target
   cfi:
     any:
       command: mkdir /tmp/clang && ln -s /usr/bin/ld.gold /tmp/clang/ld
@@ -324,7 +333,7 @@ pkgs:
       - libice6
 
 
-# deps required for oce/pythonocc install, when oce/occ sources = git repos, last version.
+  # deps required for oce/pythonocc install, when oce/occ sources = git repos, last version.
   oce-pythonocc-deps:
     debian:
       - libgl1-mesa-glx
@@ -351,3 +360,17 @@ pkgs:
                make install &&
                cd &&
                python -c 'import OCC'
+
+  # ocaml package manager
+
+frama-c:
+    any:
+      command:
+        opam init &&
+        eval `opam config env` &&
+        opam install -y frama-c &&
+        git clone https://github.com/sylvainnahas/framac-werror &&
+        cd framac-werror &&
+        touch Werror.mli &&
+        make &&
+        make install

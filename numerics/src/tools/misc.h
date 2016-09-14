@@ -105,6 +105,13 @@ void printm(unsigned int nl, unsigned int nc, double *m);
 #define MAYBE_UNUSED
 #endif
 
+/* Functions that insert NaN have error codes that should not be ignored! */
+#ifdef __GNUC__
+#define WARN_RESULT_IGNORED __attribute__ ((warn_unused_result))
+#else
+#define WARN_RESULT_IGNORED
+#endif
+
 #if defined(__cplusplus) && !defined (BUILD_AS_CPP)
 }
 #endif

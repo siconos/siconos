@@ -49,7 +49,7 @@ int main(void)
     return info;
   }
   printf("Construction ok ...\n");
-  info = test_rowProdNoDiag(NMM[0], NMM[1]);
+  info = test_NM_row_prod_no_diag(NMM[0], NMM[1]);
   printf("End of Sub-Prod no diag ...\n");
   if (info != 0) return info;
 

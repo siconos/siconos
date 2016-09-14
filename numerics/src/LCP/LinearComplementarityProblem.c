@@ -37,7 +37,7 @@ void linearComplementarity_display(LinearComplementarityProblem* problem)
   if (problem->M)
   {
     printf("M matrix:\n");
-    display(problem->M);
+    NM_display(problem->M);
   }
   else
     printf("No M matrix:\n");

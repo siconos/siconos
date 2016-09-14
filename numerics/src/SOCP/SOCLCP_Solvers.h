@@ -18,7 +18,7 @@
 #ifndef SOCLCPSOLVERS_H
 #define SOCLCPSOLVERS_H
 
-/*!\file SecondOrderConeLinearComplementarityProblem_Solvers.h
+/*!\file SOCLCP_Solvers.h
   \brief Subroutines for the resolution of Second Order Cone Linear Complementarity Problem (SOCLCP).\n
 
 */

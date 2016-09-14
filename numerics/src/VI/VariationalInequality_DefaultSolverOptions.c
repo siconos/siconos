@@ -27,7 +27,7 @@
 
 int variationalInequality_setDefaultSolverOptions(SolverOptions* options, int solverId)
 {
-  null_SolverOptions(options);
+  solver_options_nullify(options);
 
   int info = -1;
   switch (solverId)
@@ -78,7 +78,7 @@ int variationalInequality_common_setDefaultSolverOptions(SolverOptions* options,
   options->dSize = 8;
   options->iparam = (int *)malloc(options->iSize * sizeof(int));
   options->dparam = (double *)malloc(options->dSize * sizeof(double));
-  null_SolverOptions(options);
+  solver_options_nullify(options);
   for (i = 0; i < 8; i++)
   {
     options->iparam[i] = 0;

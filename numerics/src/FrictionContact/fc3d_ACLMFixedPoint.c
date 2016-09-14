@@ -65,7 +65,7 @@ void fc3d_ACLMFixedPoint(FrictionContactProblem* problem, double *reaction, doub
 
   if (verbose > 0)
   {
-    printSolverOptions(options);
+    solver_options_print(options);
   }
 
 
@@ -175,7 +175,6 @@ void fc3d_ACLMFixedPoint(FrictionContactProblem* problem, double *reaction, doub
 
 int fc3d_ACLMFixedPoint_setDefaultSolverOptions(SolverOptions* options)
 {
-  int i;
   if (verbose > 0)
   {
     printf("Set the Default SolverOptions for the ACLMFP Solver\n");
@@ -187,15 +186,10 @@ int fc3d_ACLMFixedPoint_setDefaultSolverOptions(SolverOptions* options)
   options->filterOn = 1;
   options->iSize = 8;
   options->dSize = 8;
-  options->iparam = (int *)malloc(options->iSize * sizeof(int));
-  options->dparam = (double *)malloc(options->dSize * sizeof(double));
+  options->iparam = (int *)calloc(options->iSize, sizeof(int));
+  options->dparam = (double *)calloc(options->dSize, sizeof(double));
   options->dWork = NULL;
-  null_SolverOptions(options);
-  for (i = 0; i < 8; i++)
-  {
-    options->iparam[i] = 0;
-    options->dparam[i] = 0.0;
-  }
+  solver_options_nullify(options);
   options->iparam[0] = 1000;
   options->iparam[1] = 0;
   options->dparam[0] = 1e-4;

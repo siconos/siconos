@@ -62,7 +62,7 @@
   {
     SolverOptions *SO;
     SO = (SolverOptions *) malloc(sizeof(SolverOptions));
-    set_SolverOptions(SO, id);
+    solver_options_set(SO, id);
     return SO;
   }
 
@@ -88,7 +88,7 @@
   {
     SolverOptions *SO;
     SO = (SolverOptions *) malloc(sizeof(SolverOptions));
-    set_SolverOptions(SO, id);
+    solver_options_set(SO, id);
     return SO;
   }
 
@@ -96,7 +96,7 @@
   {
     SolverOptions *SO;
     SO = (SolverOptions *) malloc(sizeof(SolverOptions));
-    set_SolverOptions(SO, id);
+    solver_options_set(SO, id);
     return SO;
   }
 
@@ -105,13 +105,13 @@
     SolverOptions *SO;
     SO = (SolverOptions *) malloc(sizeof(SolverOptions));
     SO->solverId=id;
-    set_SolverOptions(SO, id);
+    solver_options_set(SO, id);
     return SO;
   }
 
   ~_SolverOptions()
   {
-    deleteSolverOptions($self);
+    solver_options_delete($self);
     free($self);
   }
 

@@ -37,9 +37,13 @@ private:
 
 public:
   BulletR(SP::btManifoldPoint,
+          bool flip=false,
           double y_correction_A=0,
           double y_correction_B=0,
           double scaling=1);
+
+  bool _flip; /* if true, points A and B are swapped from the point
+               * view of the Relation. */
 
   SP::btManifoldPoint contactPoint() const
   {

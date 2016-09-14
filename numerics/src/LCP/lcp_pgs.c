@@ -149,7 +149,7 @@ int linearComplementarity_pgs_setDefaultSolverOptions(SolverOptions* options)
   options->iparam = (int *)calloc(options->iSize, sizeof(int));
   options->dparam = (double *)calloc(options->dSize, sizeof(double));
   options->dWork = NULL;
-  null_SolverOptions(options);
+  solver_options_nullify(options);
   options->iparam[0] = 1000;
   options->dparam[0] = 1e-6;
   options->dparam[1] = 1.0;

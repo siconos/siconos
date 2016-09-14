@@ -268,6 +268,26 @@ public:
     return _number;
   }
 
+  /** to set the number of the DynamicalSystem
+   *  \return the previous value of number
+   */
+  inline int setNumber(int new_number)
+  {
+    int old_n = _number;
+    _number = new_number;
+    return old_n;
+  }
+
+  /** reset the global DynamicSystem counter
+   *  \return the previous value of count
+   */
+  static inline int resetCount(int new_count=0)
+  {
+    int old_count = count;
+    count = new_count;
+    return old_count;
+  }
+
   /** function used to sort DynamicalSystem in SiconosSet<SP::DynamicalSystem>
    *  \return an int (warning: must be const, despite intel compilers warning, because of SiconosSet Cmp function arguments)
    */

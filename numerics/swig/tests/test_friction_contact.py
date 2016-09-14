@@ -1,50 +1,51 @@
+"""Tests for python interface of friction contact solvers in numerics.
+"""
 #!/usr/bin/env python
 
 import numpy as np
-
-# import Siconos.Numerics * fails with py.test!
-import siconos.numerics as N
+import siconos.numerics as sn
 
 
 NC = 1
 
-M = np.eye(3*NC)
+M = np.eye(3 * NC)
 
 q = np.array([-1., 1., 3.])
 
 mu = np.array([0.1])
 
-z = np.array([0.,0.,0.])
+reactions = np.array([0., 0., 0.])
+velocities = np.array([0., 0., 0.])
+sn.setNumericsVerbose(2)
+FCP = sn.FrictionContactProblem(3, M, q, mu)
 
-reactions = np.array([0.,0.,0.])
 
-velocities = np.array([0.,0.,0.])
+def solve(problem, solver, options):
+    """Solve problem for a given solver
+    """
+    reactions[...] = 0.0
+    velocities[...] = 0.0
+    r = solver(problem, reactions, velocities, options)
+    assert options.dparam[1] < 1e-10
+    assert not r
 
 
 def test_fc3dnsgs():
-    N.setNumericsVerbose(2)
-    FCP = N.FrictionContactProblem(3,M,q,mu)
-    SO=N.SolverOptions(N.SICONOS_FRICTION_3D_NSGS)
-    r=N.fc3d_nsgs(FCP, reactions, velocities, SO)
-    assert SO.dparam[1] < 1e-10
-    assert not r
+    """Non-smooth Gauss Seidel, default
+    """
+    SO = sn.SolverOptions(sn.SICONOS_FRICTION_3D_NSGS)
+    solve(FCP, sn.fc3d_nsgs, SO)
 
 
 def test_fc3dlocalac():
-    N.setNumericsVerbose(2)
-    FCP = N.FrictionContactProblem(3,M,q,mu)
-    SO=N.SolverOptions(N.SICONOS_FRICTION_3D_NSN_AC)
-
-    r = N.fc3d_nonsmooth_Newton_AlartCurnier(FCP, reactions, velocities, SO)
-    assert SO.dparam[1] < 1e-10
-    assert not r
+    """Non-smooth Gauss Seidel, Alart-Curnier as local solver.
+    """
+    SO = sn.SolverOptions(sn.SICONOS_FRICTION_3D_NSN_AC)
+    solve(FCP, sn.fc3d_nonsmooth_Newton_AlartCurnier, SO)
 
 
 def test_fc3dfischer():
-    N.setNumericsVerbose(2)
-    FCP = N.FrictionContactProblem(3,M,q,mu)
-    SO=N.SolverOptions(N.SICONOS_FRICTION_3D_NSN_FB)
-
-    r = N.fc3d_nonsmooth_Newton_FischerBurmeister(FCP, reactions, velocities, SO)
-    assert SO.dparam[1] < 1e-10
-    assert not r
+    """Non-smooth Newton, Fischer-Burmeister.
+    """
+    SO = sn.SolverOptions(sn.SICONOS_FRICTION_3D_NSN_FB)
+    solve(FCP, sn.fc3d_nonsmooth_Newton_FischerBurmeister, SO)

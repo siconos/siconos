@@ -28,8 +28,6 @@
 char *  SICONOS_FRICTION_3D_NSGS_STR = "FC3D_NSGS";
 char *  SICONOS_FRICTION_3D_NSGSV_STR = "FC3D_NSGSV";
 char *  SICONOS_FRICTION_3D_TFP_STR = "FC3D_TFP";
-char *  SICONOS_FRICTION_3D_LOCALAC_STR = "FC3D_LOCALAC";
-char *  SICONOS_FRICTION_3D_LOCALFB_STR = "FC3D_LOCALFB";
 char *  SICONOS_FRICTION_3D_NSN_AC_STR = "FC3D_NSN_AC";
 char *  SICONOS_FRICTION_3D_NSN_FB_STR = "FC3D_NSN_FB";
 char *  SICONOS_FRICTION_3D_NSN_NM_STR = "FC3D_NSN_NM";
@@ -88,10 +86,10 @@ int fc3d_driver(FrictionContactProblem* problem,
   int NoDefaultOptions = options->isSet; /* true(1) if the SolverOptions structure has been filled in else false(0) */
 
   if (!NoDefaultOptions)
-    readSolverOptions(3, options);
+    solver_options_read(3, options);
 
   if (verbose > 1)
-    printSolverOptions(options);
+    solver_options_print(options);
 
   /* Solver name */
   /*char * name = options->solverName;*/
@@ -103,10 +101,17 @@ int fc3d_driver(FrictionContactProblem* problem,
 
   /* Check for trivial case */
   info = checkTrivialCase(problem, velocity, reaction, options);
-
-
   if (info == 0)
+  {
+    /* If a trivial solution is found, we set the number of iterations to 0
+       and the reached acuracy to 0.0 .
+       Since the indexing of parameters is non uniform, this may have side 
+       effects for some solvers. The two main return parameters iparam[7] and 
+       dparam[1] have to be defined and protected by means of enum*/ 
+    options->iparam[7] = 0;
+    options->dparam[1] = 0.0;
     goto exit;
+  }
 
 
   switch (options->solverId)
@@ -332,17 +337,16 @@ int checkTrivialCase(FrictionContactProblem* problem, double* velocity,
     velocity[i] = q[i];
     reaction[i] = 0.;
   }
-  options->iparam[2] = 0;
-  options->iparam[4] = 0;
-  options->dparam[1] = 0.0;
-  options->dparam[3] = 0.0;
+
   if (verbose == 1)
     printf("fc3d driver, take off, trivial solution reaction = 0, velocity = q.\n");
   return 0;
 }
 
 #include <stdarg.h>
-void snPrintf(int level, SolverOptions* opts, const char *fmt, ...)
+/* the warning on vprintf is reported as a bug of clang ... --vacary */
+#pragma clang diagnostic ignored "-Wformat-nonliteral"
+void snPrintf(int level, SolverOptions* opts, const char * fmt, ...)
 {
   assert(opts);
   assert(opts->numericsOptions);

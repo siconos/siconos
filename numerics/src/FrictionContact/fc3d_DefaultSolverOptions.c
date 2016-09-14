@@ -27,7 +27,7 @@
 
 int fc3d_setDefaultSolverOptions(SolverOptions* options, int solverId)
 {
-  null_SolverOptions(options);
+  solver_options_nullify(options);
 
   int info = -1;
   switch (solverId)
@@ -120,7 +120,7 @@ int fc3d_setDefaultSolverOptions(SolverOptions* options, int solverId)
   }
   default:
   {
-    set_SolverOptions(options, solverId);
+    solver_options_set(options, solverId);
 
   }
   }

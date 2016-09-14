@@ -304,7 +304,7 @@ static int convert_darray(PyObject *input, double *ptr) {
   {
     free(arg1->callback);
   }
-  pycallback = (Callback*) malloc(sizeof(Callback)); // free in deleteSolverOptions
+  pycallback = (Callback*) malloc(sizeof(Callback)); // free in solver_options_delete
   pycallback->env = $input;
   pycallback->collectStatsIteration = &collectStatsIterationCallback;
 

@@ -30,6 +30,10 @@
 #include <time.h>
 #include <float.h>
 
+/* #define DEBUG_STDOUT */
+/* #define DEBUG_MESSAGES */
+#include "debug.h"
+
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 
 void fake_compute_error_nsgs(FrictionContactProblem* problem, double *reaction, double *velocity, double tolerance, SolverOptions  *options,  double* error)
@@ -66,9 +70,14 @@ void fc3d_nsgs_update(int contact, FrictionContactProblem* problem, FrictionCont
 
 
 }
-void fc3d_nsgs_initialize_local_solver(SolverPtr* solve, UpdatePtr* update, FreeSolverNSGSPtr* freeSolver, ComputeErrorPtr* computeError,
-                                FrictionContactProblem* problem, FrictionContactProblem* localproblem,
-                                SolverOptions * options, SolverOptions * localsolver_options)
+
+void fc3d_nsgs_initialize_local_solver(SolverPtr* solve, UpdatePtr* update,
+                                       FreeSolverNSGSPtr* freeSolver,
+                                       ComputeErrorPtr* computeError,
+                                       FrictionContactProblem* problem,
+                                       FrictionContactProblem* localproblem,
+                                       SolverOptions * options,
+                                       SolverOptions * localsolver_options)
 {
 
   /** Connect to local solver */
@@ -130,7 +139,15 @@ void fc3d_nsgs_initialize_local_solver(SolverPtr* solve, UpdatePtr* update, Free
     fc3d_onecontact_nonsmooth_Newton_solvers_initialize(problem, localproblem, localsolver_options);
     break;
   }
-  /* Newton solver (Glocker-Fischer-Burmeister)*/
+  case SICONOS_FRICTION_3D_ONECONTACT_NSN_AC_GP_P:
+  {
+    *solve = &fc3d_onecontact_nonsmooth_Newton_solvers_solve;
+    *update = &fc3d_onecontact_nonsmooth_Newton_AC_update;
+    *freeSolver = (FreeSolverNSGSPtr)&fc3d_onecontact_nonsmooth_Newton_solvers_free;
+    *computeError = (ComputeErrorPtr)&fc3d_compute_error;
+    fc3d_onecontact_nonsmooth_Newton_solvers_initialize(problem, localproblem, localsolver_options);
+    break;
+  }  /* Newton solver (Glocker-Fischer-Burmeister)*/
   case SICONOS_FRICTION_3D_NCPGlockerFBNewton:
   {
     *solve = &fc3d_onecontact_nonsmooth_Newton_solvers_solve;
@@ -204,7 +221,7 @@ void fc3d_nsgs_initialize_local_solver(SolverPtr* solve, UpdatePtr* update, Free
   }
   default:
   {
-    fprintf(stderr, "Numerics, fc3d_nsgs failed. Unknown internal solver : %s.\n", idToName(localsolver_options->solverId));
+    fprintf(stderr, "Numerics, fc3d_nsgs failed. Unknown internal solver : %s.\n", solver_options_id_to_name(localsolver_options->solverId));
     exit(EXIT_FAILURE);
   }
   }
@@ -250,7 +267,7 @@ void fc3d_nsgs_computeqLocal(FrictionContactProblem * problem, FrictionContactPr
      * with rowMB the row of blocks of MGlobal which corresponds
      * to the current contact
      */
-    rowProdNoDiagSBM3x3(n, 3, contact, problem->M->matrix1, reaction, qLocal);
+    SBM_row_prod_no_diag_3x3(n, 3, contact, problem->M->matrix1, reaction, qLocal);
   }
 
 
@@ -315,40 +332,11 @@ void uint_shuffle (unsigned int *a, unsigned int n) {
   }
 }
 
-
-
-void fc3d_nsgs(FrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options)
+FrictionContactProblem* allocLocalProblem(FrictionContactProblem* problem)
 {
-  /* int and double parameters */
-  int* iparam = options->iparam;
-  double* dparam = options->dparam;
-  /* Number of contacts */
-  unsigned int nc = problem->numberOfContacts;
-  /* Maximum number of iterations */
-  int itermax = iparam[0];
-  /* Tolerance */
-  double tolerance = dparam[0];
-  double normq = cblas_dnrm2(nc*3 , problem->q , 1);
-
-  if (*info == 0)
-    return;
-
-  if (options->numberOfInternalSolvers < 1)
-  {
-    numericsError("fc3d_nsgs", "The NSGS method needs options for the internal solvers, options[0].numberOfInternalSolvers should be >= 1");
-  }
-  assert(options->internalSolvers);
-
-  SolverOptions * localsolver_options = options->internalSolvers;
-
-
-  SolverPtr local_solver = NULL;
-  UpdatePtr update_localproblem = NULL;
-  FreeSolverNSGSPtr freeSolver = NULL;
-  ComputeErrorPtr computeError = NULL;
-
   /* Connect local solver and local problem*/
-  FrictionContactProblem* localproblem = (FrictionContactProblem*)malloc(sizeof(FrictionContactProblem));
+  FrictionContactProblem* localproblem =
+    (FrictionContactProblem*)malloc(sizeof(FrictionContactProblem));
   localproblem->numberOfContacts = 1;
   localproblem->dimension = 3;
   localproblem->q = (double*)malloc(3 * sizeof(double));
@@ -363,474 +351,441 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction, double *veloci
   {
     localproblem->M = createNumericsMatrixFromData(NM_DENSE, 3, 3, NULL);
   }
+  return localproblem;
+}
 
+static
+void freeLocalProblem(FrictionContactProblem* localproblem,
+                      FrictionContactProblem* problem)
+{
+  if (problem->M->storageType == NM_DENSE && localproblem->M->matrix0)
+  {
+    free(localproblem->M->matrix0);
+  }
+  localproblem->M->matrix0 = NULL;
+  freeFrictionContactProblem(localproblem);
+}
 
-  fc3d_nsgs_initialize_local_solver(&local_solver, &update_localproblem,
-                             (FreeSolverNSGSPtr *)&freeSolver, &computeError,
-                             problem , localproblem,
-                             options, localsolver_options);
+static
+unsigned int* allocShuffledContacts(FrictionContactProblem *problem,
+                                    SolverOptions *options)
+{
+  unsigned int *scontacts = 0;
+  unsigned int nc = problem->numberOfContacts;
+  if (options->iparam[5] == SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE||
+      options->iparam[5] == SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE_EACH_LOOP)
+  {
+    if (options->iparam[6] >0)
+    {
+      srand((unsigned int)options->iparam[6]);
+    }
+    else
+      srand(1);
+    scontacts = (unsigned int *) malloc(nc * sizeof(unsigned int));
+    for (unsigned int i = 0; i < nc ; ++i)
+    {
+      scontacts[i] = i;
+    }
+    uint_shuffle(scontacts, nc);
+  }
+  return scontacts;
+}
+
+static
+int solveLocalReaction(UpdatePtr update_localproblem, SolverPtr local_solver,
+                       unsigned int contact, FrictionContactProblem *problem,
+                       FrictionContactProblem *localproblem, double *reaction,
+                       SolverOptions *localsolver_options, double localreaction[3])
+{
+  (*update_localproblem)(contact, problem, localproblem,
+                         reaction, localsolver_options);
+
+  localsolver_options->iparam[SICONOS_FRICTION_3D_NSGS_LOCALSOLVER_CONTACTNUMBER] = contact;
+
+  localreaction[0] = reaction[contact*3 + 0];
+  localreaction[1] = reaction[contact*3 + 1];
+  localreaction[2] = reaction[contact*3 + 2];
+
+  return (*local_solver)(localproblem, localreaction, localsolver_options);
+}
+
+static
+void performRelaxation(double localreaction[3], double *oldreaction, double omega)
+{
+  localreaction[0] = omega*localreaction[0]+(1.0-omega)*oldreaction[0];
+  localreaction[1] = omega*localreaction[1]+(1.0-omega)*oldreaction[1];
+  localreaction[2] = omega*localreaction[2]+(1.0-omega)*oldreaction[2];
+}
+
+static
+void accumulateLightErrorSum(double *light_error_sum, double localreaction[3],
+                             double *oldreaction)
+{
+  *light_error_sum += ( pow(oldreaction[0] - localreaction[0], 2) +
+                        pow(oldreaction[1] - localreaction[1], 2) +
+                        pow(oldreaction[2] - localreaction[2], 2) );
+}
+
+static
+void acceptLocalReactionFiltered(FrictionContactProblem *localproblem,
+                                 SolverOptions *localsolver_options,
+                                 unsigned int contact, unsigned int iter,
+                                 double *reaction, double localreaction[3])
+{
+  if (isnan(localsolver_options->dparam[1])
+      || isinf(localsolver_options->dparam[1])
+      || localsolver_options->dparam[1] > 1.0)
+  {
+    DEBUG_EXPR(frictionContact_display(localproblem));
+    DEBUG_PRINTF("Discard local reaction for contact %i at iteration %i "
+                 "with local_error = %e\n",
+                 contact, iter, localsolver_options->dparam[1]);
+  }
+  else
+    memcpy(&reaction[contact*3], localreaction, sizeof(double)*3);
+}
+
+static
+void acceptLocalReactionProjected(FrictionContactProblem *problem,
+                                  FrictionContactProblem *localproblem,
+                                  SolverPtr local_solver,
+                                  SolverOptions *localsolver_options,
+                                  unsigned int contact, unsigned int iter,
+                                  double *reaction, double localreaction[3])
+{
+  int nan1 = isnan(localsolver_options->dparam[1]) || isinf(localsolver_options->dparam[1]);
+  if (nan1 || localsolver_options->dparam[1] > 1.0)
+  {
+    DEBUG_EXPR(
+      frictionContact_display(localproblem);
+
+      // In case of bad solution, re-solve with a projection-on-cone solver
+      DEBUG_PRINTF("Discard local reaction for contact %i at iteration %i with local_error = %e\n", contact, iter, localsolver_options->dparam[1]);
+      memcpy(localreaction, &reaction[contact*3], sizeof(double)*3);
+      fc3d_projectionOnConeWithLocalIteration_initialize(problem, localproblem, localsolver_options );
+      fc3d_projectionOnConeWithLocalIteration_solve(localproblem, localreaction, localsolver_options);
+      int nan2 = isnan(localsolver_options->dparam[1]) || isinf(localsolver_options->dparam[1]);
+      if (nan2) {
+        DEBUG_PRINTF("No hope for contact %d, setting to zero.\n", contact);
+        reaction[3*contact+0] = 0;
+        reaction[3*contact+1] = 0;
+        reaction[3*contact+2] = 0;
+        return;
+      }
+
+      // Save the result in case next step fails
+      double localreaction_proj[3];
+      double error_proj = localsolver_options->dparam[1];
+      memcpy(localreaction_proj, localreaction, sizeof(double)*3);
+
+      // Complete it further with the original solver
+      DEBUG_PRINTF("Try local fc3d_projectionOnConeWithLocalIteration_solve with local_error = %e\n", localsolver_options->dparam[1]);
+      (*local_solver)(localproblem, localreaction , localsolver_options);
+      int nan3 = isnan(localsolver_options->dparam[1]) || isinf(localsolver_options->dparam[1]);
+      DEBUG_PRINTF("Try local another newton solve with local_error = %e\n", localsolver_options->dparam[1]);
+
+      // If we produced a bad value doing this, keep the projectionOnCone solution
+      // (Note: this has been observed, particularly when mu=1.0)
+      if (nan3)
+      {
+        DEBUG_PRINTF("Keep the projectionOnCone local solution = %e\n", error_proj);
+        memcpy(&reaction[contact*3], localreaction_proj, sizeof(double)*3);
+      }
+      else
+      {
+        if (nan1 || localsolver_options->dparam[1] <= localsolver_options->dparam[0]
+                 || localsolver_options->dparam[1] <= error_prev)
+        {
+          DEBUG_PRINTF("Keep the new local solution = %e\n", localsolver_options->dparam[1]);
+          memcpy(&reaction[contact*3], localreaction, sizeof(double)*3);
+          //getchar();
+        }
+        else
+        {
+          DEBUG_PRINTF("Keep the previous local solution = %e\n", error_prev);
+        }
+      }
+    );
+  }
+  else
+    memcpy(&reaction[contact*3], localreaction, sizeof(double)*3);
+}
+
+static
+void acceptLocalReactionUnconditionally(unsigned int contact,
+                                        double *reaction, double localreaction[3])
+{
+  memcpy(&reaction[contact*3], localreaction, sizeof(double)*3);
+}
+
+static
+double calculateLightError(double light_error_sum, unsigned int nc, double *reaction)
+{
+  double error = sqrt(light_error_sum);
+  double norm_r = cblas_dnrm2(nc*3 , reaction , 1);
+  if (fabs(norm_r) > DBL_EPSILON)
+    error /= norm_r;
+  return error;
+}
+
+static
+double calculateFullErrorAdaptiveInterval(FrictionContactProblem *problem,
+                                          ComputeErrorPtr computeError,
+                                          SolverOptions *options, int iter,
+                                          double *reaction, double *velocity,
+                                          double tolerance, double normq)
+{
+  double error=1e+24;
+  if (options->iparam[8] >0)
+  {
+    if (iter % options->iparam[8] == 0) {
+      (*computeError)(problem, reaction , velocity, tolerance, options, normq,  &error);
+      if (error > tolerance
+          && options->iparam[1] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_ADAPTIVE)
+        options->iparam[8] *= 2;
+    }
+    if (verbose > 0)
+      printf("----------------------------------- FC3D - NSGS - Iteration %i "
+             "options->iparam[8] = %i, options->iparam[1] = % i \n",
+             iter, options->iparam[8], options->iparam[1]);
+  }
+  else
+    (*computeError)(problem, reaction , velocity, tolerance, options, normq,  &error);
+
+  return error;
+}
+
+static
+int determineConvergence(double error, double tolerance, int iter,
+                         SolverOptions *options)
+{
+  int hasNotConverged = 1;
+  if (error < tolerance)
+  {
+    hasNotConverged = 0;
+    if (verbose > 0)
+      printf("----------------------------------- FC3D - NSGS - Iteration %i "
+             "Residual = %14.7e < %7.3e\n", iter, error, options->dparam[0]);
+  }
+  else
+  {
+    if (verbose > 0)
+      printf("----------------------------------- FC3D - NSGS - Iteration %i "
+             "Residual = %14.7e > %7.3e\n", iter, error, options->dparam[0]);
+  }
+  return hasNotConverged;
+}
+
+static
+double calculateFullErrorFinal(FrictionContactProblem *problem, SolverOptions *options,
+                               ComputeErrorPtr computeError,
+                               double *reaction, double *velocity, double tolerance,
+                               double normq, double light_error)
+{
+  double absolute_error;
+  (*computeError)(problem, reaction , velocity, tolerance,
+                  options, normq, &absolute_error);
+
+  if (verbose > 0 && absolute_error > light_error)
+  {
+    printf("--------------------------- FC3D - NSGS - Warning absolute "
+           "Residual = %14.7e is larger than incremental error = %14.7e\n",
+           absolute_error, light_error);
+  }
+  return absolute_error;
+}
+
+static
+void statsIterationCallback(FrictionContactProblem *problem,
+                            SolverOptions *options,
+                            double *reaction, double *velocity, double error)
+{
+  if (options->callback)
+  {
+    options->callback->collectStatsIteration(options->callback->env,
+                                             problem->numberOfContacts * 3,
+                                             reaction, velocity,
+                                             error, NULL);
+  }
+}
+
+void fc3d_nsgs(FrictionContactProblem* problem, double *reaction,
+               double *velocity, int* info, SolverOptions* options)
+{
+  /* int and double parameters */
+  int* iparam = options->iparam;
+  double* dparam = options->dparam;
+
+  /* Number of contacts */
+  unsigned int nc = problem->numberOfContacts;
+
+  /* Maximum number of iterations */
+  int itermax = iparam[SICONOS_IPARAM_MAX_ITER];
+
+  /* Tolerance */
+  double tolerance = dparam[0];
+  double normq = cblas_dnrm2(nc*3 , problem->q , 1);
+  double omega = dparam[8];
+
+  SolverOptions * localsolver_options = options->internalSolvers;
+  SolverPtr local_solver = NULL;
+  UpdatePtr update_localproblem = NULL;
+  FreeSolverNSGSPtr freeSolver = NULL;
+  ComputeErrorPtr computeError = NULL;
+
+  FrictionContactProblem* localproblem;
+  double localreaction[3];
 
   /*****  NSGS Iterations *****/
   int iter = 0; /* Current iteration number */
   double error = 1.; /* Current error */
   int hasNotConverged = 1;
   unsigned int contact; /* Number of the current row of blocks in M */
-
   unsigned int *scontacts = NULL;
-  if (iparam[5] == SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE||
-      iparam[5] == SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE_EACH_LOOP) /* shuffle */
+
+  if (*info == 0)
+    return;
+
+  if (options->numberOfInternalSolvers < 1)
   {
-    if (iparam[6] >0)
-    {
-      srand((unsigned int)iparam[6]);
-    }
-    else
-      srand(1);
-    scontacts = (unsigned int *) malloc(nc * sizeof(unsigned int));
-    for (unsigned int i = 0; i<nc ; ++i)
-    {
-      scontacts[i] = i;
-    }
-    uint_shuffle(scontacts, nc);
-    /* printf("scontacts :\t"); */
-    /* for (unsigned int i = 0; i<nc ; ++i) printf("%i\t", scontacts[i]); */
-    /* printf("\n"); */
+    numericsError("fc3d_nsgs",
+                  "The NSGS method needs options for the internal solvers, "
+                  "options[0].numberOfInternalSolvers should be >= 1");
+  }
+  assert(options->internalSolvers);
+
+  /*****  Initialize various solver options *****/
+  localproblem = allocLocalProblem(problem);
+
+  fc3d_nsgs_initialize_local_solver(&local_solver, &update_localproblem,
+                             (FreeSolverNSGSPtr *)&freeSolver, &computeError,
+                             problem, localproblem, options, localsolver_options);
+
+  scontacts = allocShuffledContacts(problem, options);
+
+  /*****  Check solver options *****/
+  if (! (iparam[5] == SICONOS_FRICTION_3D_NSGS_SHUFFLE_FALSE
+         || iparam[5] == SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE
+         || iparam[5] == SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE_EACH_LOOP))
+  {
+    numericsError(
+      "fc3d_nsgs", "iparam[5] must be equal to "
+      "SICONOS_FRICTION_3D_NSGS_SHUFFLE_FALSE (0), "
+      "SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE (1) or "
+      "SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE_EACH_LOOP (2)");
+    return;
   }
 
-  /*  dparam[0]= dparam[2]; // set the tolerance for the local solver */
-  if (iparam[1] == SICONOS_FRICTION_3D_NSGS_LIGHT_ERROR_EVALUATION_WITH_FULL_FINAL ||
-      iparam[1] == SICONOS_FRICTION_3D_NSGS_LIGHT_ERROR_EVALUATION)
+  if (! (iparam[1] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_FULL
+         || iparam[1] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL
+         || iparam[1] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT
+         || iparam[1] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_ADAPTIVE))
   {
-    double reactionold[3];
+    numericsError(
+      "fc3d_nsgs", "iparam[1] must be equal to "
+      "SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_FULL (0), "
+      "SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL (1), "
+      "SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT (2) or "
+      "SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_ADAPTIVE (3)");
+    return;
+  }
+
+  /*****  NSGS Iterations *****/
+
+  /* A special case for the most common options (should correspond
+   * with mechanics_io.py **/
+  if (iparam[5] == SICONOS_FRICTION_3D_NSGS_SHUFFLE_FALSE
+      && iparam[4] == SICONOS_FRICTION_3D_NSGS_RELAXATION_FALSE
+      && iparam[14] == SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION_TRUE
+      && iparam[1] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL)
+  {
     while ((iter < itermax) && (hasNotConverged > 0))
     {
-
       ++iter;
-      /* Loop through the contact points */
-      //cblas_dcopy( n , q , incx , velocity , incy );
-      error = 0.0;
-
-      for (unsigned int i= 0 ; i < nc ; ++i)
+      double light_error_sum = 0.0;
+      for (unsigned int i = 0 ; i < nc ; ++i)
       {
-        if (iparam[5])
+        contact = i;
+        solveLocalReaction(update_localproblem, local_solver, contact,
+                           problem, localproblem, reaction, localsolver_options,
+                           localreaction);
+
+        accumulateLightErrorSum(&light_error_sum, localreaction, &reaction[contact*3]);
+
+        /* #if 0 */
+        acceptLocalReactionFiltered(localproblem, localsolver_options,
+                                    contact, iter, reaction, localreaction);
+        /* #else */
+        /* // Experimental */
+        /* acceptLocalReactionProjected(problem, localproblem, local_solver, localsolver_options, */
+        /*                              contact, iter, reaction, localreaction); */
+        /* #endif */
+      }
+
+      error = calculateLightError(light_error_sum, nc, reaction);
+
+      hasNotConverged = determineConvergence(error, tolerance, iter, options);
+
+      statsIterationCallback(problem, options, reaction, velocity, error);
+    }
+  }
+
+  /* All other cases, we put all the ifs inline.. otherwise, too many
+   * variations to have dedicated loops, but add more if there are
+   * common cases to avoid checking booleans on every iteration. **/
+  else
+  {
+    while ((iter < itermax) && (hasNotConverged > 0))
+    {
+      ++iter;
+      double light_error_sum = 0.0;
+      for (unsigned int i = 0 ; i < nc ; ++i)
+      {
+        if (iparam[5] == SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE
+            || iparam[5] == SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE_EACH_LOOP)
         {
+          if (iparam[5] == SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE_EACH_LOOP)
+            uint_shuffle(scontacts, nc);
           contact = scontacts[i];
         }
         else
-        {
           contact = i;
-        }
 
+        solveLocalReaction(update_localproblem, local_solver, contact,
+                           problem, localproblem, reaction, localsolver_options,
+                           localreaction);
 
-        reactionold[0] = reaction[3 * contact];
-        reactionold[1] = reaction[3 * contact + 1];
-        reactionold[2] = reaction[3 * contact + 2];
-        if (verbose > 1) printf("----------------------------------- Contact Number %i\n", contact);
-        (*update_localproblem)(contact, problem, localproblem, reaction, localsolver_options);
+        if (iparam[4] == SICONOS_FRICTION_3D_NSGS_RELAXATION_TRUE)
+          performRelaxation(localreaction, &reaction[contact*3], omega);
 
+        accumulateLightErrorSum(&light_error_sum, localreaction, &reaction[contact*3]);
 
-        localsolver_options->iparam[4] = contact;
-        (*local_solver)(localproblem, &(reaction[3 * contact]) , localsolver_options);
-
-        error += pow(reaction[3 * contact] - reactionold[0], 2) +
-                 pow(reaction[3 * contact + 1] - reactionold[1], 2) +
-                 pow(reaction[3 * contact + 2] - reactionold[2], 2);
-
+        if (iparam[14] == SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION_TRUE)
+          acceptLocalReactionFiltered(localproblem, localsolver_options,
+                                      contact, iter, reaction, localreaction);
+        else
+          acceptLocalReactionUnconditionally(contact, reaction, localreaction);
       }
+      if (iparam[1] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT ||
+          iparam[1] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL)
+        error = calculateLightError(light_error_sum, nc, reaction);
+      else if (iparam[1] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_FULL)
+        error = calculateFullErrorAdaptiveInterval(problem, computeError, options,
+                                                   iter, reaction, velocity,
+                                                   tolerance, normq);
 
+      hasNotConverged = determineConvergence(error, tolerance, iter, options);
 
-      /* **** Criterium convergence **** */
-      error = sqrt(error);
-      double norm_r = cblas_dnrm2(nc*3 , reaction , 1);
-      if (fabs(norm_r) > DBL_EPSILON)
-        error /= norm_r;
-
-
-      if (error < tolerance)
-      {
-        hasNotConverged = 0;
-        if (verbose > 0)
-          printf("----------------------------------- FC3D - NSGS - Iteration %i Residual = %14.7e < %7.3e\n", iter, error, options->dparam[0]);
-      }
-      else
-      {
-        if (verbose > 0)
-          printf("----------------------------------- FC3D - NSGS - Iteration %i Residual = %14.7e > %7.3e\n", iter, error, options->dparam[0]);
-      }
-      *info = hasNotConverged;
-    }
-    if (iparam[1] == SICONOS_FRICTION_3D_NSGS_LIGHT_ERROR_EVALUATION_WITH_FULL_FINAL) /* Full criterium */
-    {
-      double absolute_error;
-      (*computeError)(problem, reaction , velocity, tolerance, options, normq, &absolute_error);
-      if (verbose > 0)
-      {
-        if (absolute_error > error)
-        {
-          printf("----------------------------------- FC3D - NSGS - Warning absolute Residual = %14.7e is larger than incremental error = %14.7e\n", absolute_error, error);
-        }
-      }
+      statsIterationCallback(problem, options, reaction, velocity, error);
     }
   }
-  else if (iparam[1] == SICONOS_FRICTION_3D_NSGS_FULL_ERROR_EVALUATION)
-  {
-    if (iparam[5] == SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE) /* shuffle */
-    {
-      if (iparam[4] == SICONOS_FRICTION_3D_NSGS_RELAXATION_TRUE) /* relaxation */
-      {
-        double reactionold[3];
 
-        double omega = dparam[8];
-        while ((iter < itermax) && (hasNotConverged > 0))
-        {
-          ++iter;
-          /* Loop through the contact points */
-          //cblas_dcopy( n , q , incx , velocity , incy );
-          for (unsigned int i= 0 ; i < nc ; ++i)
-          {
+  *info = hasNotConverged;
 
-            contact = scontacts[i];
-
-            reactionold[0] = reaction[3 * contact];
-            reactionold[1] = reaction[3 * contact + 1];
-            reactionold[2] = reaction[3 * contact + 2];
-
-            if (verbose > 1) printf("----------------------------------- Contact Number %i\n", contact);
-            (*update_localproblem)(contact, problem, localproblem, reaction, localsolver_options);
-            localsolver_options->iparam[4] = contact;
-            (*local_solver)(localproblem, &(reaction[3 * contact]), localsolver_options);
-
-            reaction[3 * contact] = omega*reaction[3 * contact]+(1.0-omega)*reactionold[0];
-            reaction[3 * contact+1] = omega*reaction[3 * contact+1]+(1.0-omega)*reactionold[1];
-            reaction[3 * contact+2] = omega*reaction[3 * contact+2]+(1.0-omega)*reactionold[2];
-          }
-
-          /* **** Criterium convergence **** */
-          if (iparam[8] >0)
-          {
-            if (iter % iparam[8] ==0 )
-              (*computeError)(problem, reaction , velocity, tolerance, options, normq,  &error);
-          }
-          else
-            (*computeError)(problem, reaction , velocity, tolerance, options, normq,  &error);
-
-          if (error < tolerance)
-          {
-            hasNotConverged = 0;
-            if (verbose > 0)
-              printf("----------------------------------- FC3D - NSGS - Iteration %i Residual = %14.7e < %7.3e\n", iter, error, options->dparam[0]);
-          }
-          else
-          {
-            if (verbose > 0)
-              printf("----------------------------------- FC3D - NSGS - Iteration %i Residual = %14.7e > %7.3e\n", iter, error, options->dparam[0]);
-          }
-
-          *info = hasNotConverged;
-
-          if (options->callback)
-          {
-            options->callback->collectStatsIteration(options->callback->env, 3 * nc,
-                                                     reaction, velocity,
-                                                     error, NULL);
-          }
-        } /* end while loop */
-      }
-      else if (iparam[4] == SICONOS_FRICTION_3D_NSGS_RELAXATION_FALSE)
-      {
-        while ((iter < itermax) && (hasNotConverged > 0))
-        {
-          ++iter;
-          /* Loop through the contact points */
-          //cblas_dcopy( n , q , incx , velocity , incy );
-
-          for (unsigned int i= 0 ; i < nc ; ++i)
-          {
-            contact = scontacts[i];
-
-            if (verbose > 1) printf("----------------------------------- Contact Number %i\n", contact);
-            (*update_localproblem)(contact, problem, localproblem, reaction, localsolver_options);
-            localsolver_options->iparam[4] = contact;
-            (*local_solver)(localproblem, &(reaction[3 * contact]), localsolver_options);
-
-          }
-
-          /* **** Criterium convergence **** */
-          if (iparam[8] >0)
-          {
-            if (iter % iparam[8] ==0 )
-              (*computeError)(problem, reaction , velocity, tolerance, options, normq,  &error);
-          }
-          else
-            (*computeError)(problem, reaction , velocity, tolerance, options, normq,  &error);
-
-
-          if (verbose > 0)
-            printf("----------------------------------- FC3D - NSGS - Iteration %i Residual = %14.7e <= %7.3e\n", iter, error, options->dparam[0]);
-          if (error < tolerance) hasNotConverged = 0;
-          *info = hasNotConverged;
-
-          if (options->callback)
-          {
-            options->callback->collectStatsIteration(options->callback->env, 3 * nc,
-                                                     reaction, velocity,
-                                                     error, NULL);
-          }
-        }
-      }
-      else
-      {
-        numericsError("fc3d_nsgs", "iparam[4] must be equal to SICONOS_FRICTION_3D_NSGS_RELAXATION_TRUE (0) or SICONOS_FRICTION_3D_NSGS_RELAXATION_FALSE (1)");
-      }
-    }
-    else if (iparam[5] == SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE_EACH_LOOP) /* shuffle in each loop */
-    {
-      if (iparam[4] == SICONOS_FRICTION_3D_NSGS_RELAXATION_TRUE)
-      {
-        double reactionold[3];
-
-        double omega = dparam[8];
-        while ((iter < itermax) && (hasNotConverged > 0))
-        {
-          ++iter;
-          uint_shuffle(scontacts, nc);
-
-          /* Loop through the contact points */
-          //cblas_dcopy( n , q , incx , velocity , incy );
-
-          for (unsigned int i= 0 ; i < nc ; ++i)
-          {
-
-            contact = scontacts[i];
-
-            reactionold[0] = reaction[3 * contact];
-            reactionold[1] = reaction[3 * contact + 1];
-            reactionold[2] = reaction[3 * contact + 2];
-
-            if (verbose > 1) printf("----------------------------------- Contact Number %i\n", contact);
-            (*update_localproblem)(contact, problem, localproblem, reaction, localsolver_options);
-
-            localsolver_options->iparam[4] = contact; /* We write in dWork always with respect to the initial index i*/
-
-            (*local_solver)(localproblem, &(reaction[3 * contact]), localsolver_options);
-
-            reaction[3 * contact] = omega*reaction[3 * contact]+(1.0-omega)*reactionold[0];
-            reaction[3 * contact+1] = omega*reaction[3 * contact+1]+(1.0-omega)*reactionold[1];
-            reaction[3 * contact+2] = omega*reaction[3 * contact+2]+(1.0-omega)*reactionold[2];
-          }
-
-          /* **** Criterium convergence **** */
-
-          if (iparam[8] >0)
-          {
-            if (iter % iparam[8] ==0 )
-              (*computeError)(problem, reaction , velocity, tolerance, options, normq,  &error);
-          }
-          else
-            (*computeError)(problem, reaction , velocity, tolerance, options, normq,  &error);
-
-          if (error < tolerance)
-          {
-            hasNotConverged = 0;
-            if (verbose > 0)
-              printf("----------------------------------- FC3D - NSGS - Iteration %i Residual = %14.7e < %7.3e\n", iter, error, options->dparam[0]);
-          }
-          else
-          {
-            if (verbose > 0)
-              printf("----------------------------------- FC3D - NSGS - Iteration %i Residual = %14.7e > %7.3e\n", iter, error, options->dparam[0]);
-          }
-
-          *info = hasNotConverged;
-
-          if (options->callback)
-          {
-            options->callback->collectStatsIteration(options->callback->env, 3 * nc,
-                                                     reaction, velocity,
-                                                     error, NULL);
-          }
-        }
-
-      }
-      else if (iparam[4] == SICONOS_FRICTION_3D_NSGS_RELAXATION_FALSE)
-      {
-        while ((iter < itermax) && (hasNotConverged > 0))
-        {
-          ++iter;
-          uint_shuffle(scontacts, nc);
-          /* Loop through the contact points */
-          //cblas_dcopy( n , q , incx , velocity , incy );
-          for (unsigned int i= 0 ; i < nc ; ++i)
-          {
-            contact = scontacts[i];
-            if (verbose > 1) printf("----------------------------------- Contact Number %i\n", contact);
-            (*update_localproblem)(contact, problem, localproblem, reaction, localsolver_options);
-            localsolver_options->iparam[4] = contact; /* We write in dWork always with respect to the initial index i*/
-            (*local_solver)(localproblem, &(reaction[3 * contact]), localsolver_options);
-          }
-          /* **** Criterium convergence **** */
-          if (iparam[8] >0)
-          {
-            if (iter % iparam[8] ==0 )
-              (*computeError)(problem, reaction , velocity, tolerance, options, normq,  &error);
-          }
-          else
-            (*computeError)(problem, reaction , velocity, tolerance, options, normq,  &error);
-
-
-          if (error < tolerance)
-          {
-            hasNotConverged = 0;
-            if (verbose > 0)
-              printf("----------------------------------- FC3D - NSGS - Iteration %i Residual = %14.7e < %7.3e\n", iter, error, options->dparam[0]);
-          }
-          else
-          {
-            if (verbose > 0)
-              printf("----------------------------------- FC3D - NSGS - Iteration %i Residual = %14.7e > %7.3e\n", iter, error, options->dparam[0]);
-          }
-
-          *info = hasNotConverged;
-
-          if (options->callback)
-          {
-            options->callback->collectStatsIteration(options->callback->env, 3 * nc,
-                                                     reaction, velocity,
-                                                     error, NULL);
-          }
-        }
-      }
-      else
-      {
-        numericsError("fc3d_nsgs", "iparam[4] must be equal to SICONOS_FRICTION_3D_NSGS_RELAXATION_TRUE (0) or SICONOS_FRICTION_3D_NSGS_RELAXATION_FALSE (1)");
-      }
-    }
-    else if (iparam[5] == SICONOS_FRICTION_3D_NSGS_SHUFFLE_FALSE) /* no shufle */
-    {
-
-      if(iparam[4] == SICONOS_FRICTION_3D_NSGS_RELAXATION_TRUE)
-      {
-        double reactionold[3];
-        double omega = dparam[8];
-        while ((iter < itermax) && (hasNotConverged > 0))
-        {
-          ++iter;
-          /* Loop through the contact points */
-          //cblas_dcopy( n , q , incx , velocity , incy );
-          for (contact= 0 ; contact < nc ; ++contact)
-          {
-            reactionold[0] = reaction[3 * contact];
-            reactionold[1] = reaction[3 * contact + 1];
-            reactionold[2] = reaction[3 * contact + 2];
-
-
-            if (verbose > 1) printf("----------------------------------- Contact Number %i\n", contact);
-            (*update_localproblem)(contact, problem, localproblem, reaction, localsolver_options);
-            localsolver_options->iparam[4] = contact;
-            (*local_solver)(localproblem, &(reaction[3 * contact]), localsolver_options);
-            reaction[3 * contact] = omega*reaction[3 * contact]+(1.0-omega)*reactionold[0];
-            reaction[3 * contact+1] = omega*reaction[3 * contact+1]+(1.0-omega)*reactionold[1];
-            reaction[3 * contact+2] = omega*reaction[3 * contact+2]+(1.0-omega)*reactionold[2];
-          }
-
-          /* **** Criterium convergence **** */
-
-          if (iparam[8] >0)
-          {
-            if (iter % iparam[8] ==0 )
-              (*computeError)(problem, reaction , velocity, tolerance, options, normq,  &error);
-          }
-          else
-            (*computeError)(problem, reaction , velocity, tolerance, options, normq,  &error);
-
-
-          if (error < tolerance)
-          {
-            hasNotConverged = 0;
-            if (verbose > 0)
-              printf("----------------------------------- FC3D - NSGS - Iteration %i Residual = %14.7e < %7.3e\n", iter, error, options->dparam[0]);
-          }
-          else
-          {
-            if (verbose > 0)
-              printf("----------------------------------- FC3D - NSGS - Iteration %i Residual = %14.7e > %7.3e\n", iter, error, options->dparam[0]);
-          }
-
-          *info = hasNotConverged;
-
-          if (options->callback)
-          {
-            options->callback->collectStatsIteration(options->callback->env, 3 * nc,
-                                                     reaction, velocity,
-                                                     error, NULL);
-          }
-        }
-
-      }
-      else if (iparam[4] == SICONOS_FRICTION_3D_NSGS_RELAXATION_FALSE)
-      {
-        while ((iter < itermax) && (hasNotConverged > 0))
-        {
-          ++iter;
-          /* Loop through the contact points */
-          //cblas_dcopy( n , q , incx , velocity , incy );
-
-          for (contact= 0 ; contact < nc ; ++contact)
-          {
-
-
-            if (verbose > 1) printf("----------------------------------- Contact Number %i\n", contact);
-
-            (*update_localproblem)(contact, problem, localproblem, reaction, localsolver_options);
-            localsolver_options->iparam[4] = contact;
-            (*local_solver)(localproblem, &(reaction[3 * contact]), localsolver_options);
-          }
-
-          /* **** Criterium convergence **** */
-          if (iparam[8] >0)
-          {
-            if (iter % iparam[8] ==0 )
-              (*computeError)(problem, reaction , velocity, tolerance, options, normq,  &error);
-          }
-          else
-            (*computeError)(problem, reaction , velocity, tolerance, options, normq,  &error);
-
-          if (error < tolerance)
-          {
-            hasNotConverged = 0;
-            if (verbose > 0)
-              printf("----------------------------------- FC3D - NSGS - Iteration %i Residual = %14.7e < %7.3e\n", iter, error, options->dparam[0]);
-          }
-          else
-          {
-            if (verbose > 0)
-              printf("----------------------------------- FC3D - NSGS - Iteration %i Residual = %14.7e > %7.3e\n", iter, error, options->dparam[0]);
-          }
-
-          *info = hasNotConverged;
-
-          if (options->callback)
-          {
-            options->callback->collectStatsIteration(options->callback->env, 3 * nc,
-                                                     reaction, velocity,
-                                                     error, NULL);
-          }
-        }
-      }
-      else
-      {
-        numericsError("fc3d_nsgs", "iparam[4] must be equal to SICONOS_FRICTION_3D_NSGS_RELAXATION_TRUE (0) or SICONOS_FRICTION_3D_NSGS_RELAXATION_FALSE (1)");
-      }
-    }
-    else
-    {
-      numericsError("fc3d_nsgs", "iparam[5] must be equal to SICONOS_FRICTION_3D_NSGS_SHUFLLE_FALSE (0), SICONOS_FRICTION_3D_NSGS_SHUFLLE_TRUE (1) or  SICONOS_FRICTION_3D_NSGS_SHUFLLE_TRUE_EACH_LOOP (2)");
-    }
-  }
-  else
-  {
-    numericsError("fc3d_nsgs", "iparam[1] must be equal to SICONOS_FRICTION_3D_NSGS_FULL_ERROR_EVALUATION (0), SICONOS_FRICTION_3D_NSGS_LIGHT_ERROR_EVALUATION_WITH_FULL_FINAL (1) or SICONOS_FRICTION_3D_NSGS_LIGHT_ERROR_EVALUATION  (2)");
-  }
+  /* Full criterium */
+  if (iparam[1] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL)
+    error = calculateFullErrorFinal(problem, options, computeError, reaction, velocity,
+                                    tolerance, normq, error /* = light error*/);
 
   /** return parameter values */
   dparam[0] = tolerance;
@@ -839,23 +794,12 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction, double *veloci
 
   /** Free memory **/
   (*freeSolver)(problem,localproblem,localsolver_options);
-  if (problem->M->storageType == NM_DENSE && localproblem->M->matrix0)
-  {
-    free(localproblem->M->matrix0);
-  }
-  localproblem->M->matrix0 = NULL;
-  freeFrictionContactProblem(localproblem);
-
-  if (scontacts) /* shuffle */
-  {
-    free(scontacts);
-  }
-
+  freeLocalProblem(localproblem, problem);
+  if (scontacts) free(scontacts);
 }
 
 int fc3d_nsgs_setDefaultSolverOptions(SolverOptions* options)
 {
-  int i;
   if (verbose > 0)
   {
     printf("Set the Default SolverOptions for the NSGS Solver\n");
@@ -866,18 +810,13 @@ int fc3d_nsgs_setDefaultSolverOptions(SolverOptions* options)
   options->numberOfInternalSolvers = 1;
   options->isSet = 1;
   options->filterOn = 1;
-  options->iSize = 10;
-  options->dSize = 10;
-  options->iparam = (int *)malloc(options->iSize * sizeof(int));
-  options->dparam = (double *)malloc(options->dSize * sizeof(double));
+  options->iSize = 20;
+  options->dSize = 20;
+  options->iparam = (int *)calloc(options->iSize, sizeof(int));
+  options->dparam = (double *)calloc(options->dSize, sizeof(double));
   options->dWork = NULL;
-  null_SolverOptions(options);
-  for (i = 0; i < 10; i++)
-  {
-    options->iparam[i] = 0;
-    options->dparam[i] = 0.0;
-  }
-  options->iparam[0] = 1000;
+  solver_options_nullify(options);
+  options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
   options->dparam[0] = 1e-4;
   options->internalSolvers = (SolverOptions *)malloc(sizeof(SolverOptions));
   fc3d_onecontact_nonsmooth_Newtow_setDefaultSolverOptions(options->internalSolvers);

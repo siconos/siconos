@@ -57,7 +57,7 @@ void mixedLinearComplementarity_display(MixedLinearComplementarityProblem* p)
   if (p->M)
   {
     printf("M matrix:\n");
-    display(p->M);
+    NM_display(p->M);
   }
   else
     printf("No M matrix:\n");
@@ -65,7 +65,7 @@ void mixedLinearComplementarity_display(MixedLinearComplementarityProblem* p)
   if (p->q)
   {
     printf("q matrix:\n");
-    displayMat(p->q, n + m, 1, 0);
+    NM_dense_display(p->q, n + m, 1, 0);
   }
   else
     printf("No q matrix:\n");
@@ -73,7 +73,7 @@ void mixedLinearComplementarity_display(MixedLinearComplementarityProblem* p)
   if (p->A)
   {
     printf("A matrix:\n");
-    displayMat(p->A, n, n, 0);
+    NM_dense_display(p->A, n, n, 0);
   }
   else
   {
@@ -81,13 +81,13 @@ void mixedLinearComplementarity_display(MixedLinearComplementarityProblem* p)
     if (p->M && !p->M->storageType)
     {
       printf("A matrix from M:\n");
-      displayMat(p->M->matrix0, n, n, n + m);
+      NM_dense_display(p->M->matrix0, n, n, n + m);
     }
   }
   if (p->B)
   {
     printf("B matrix:\n");
-    displayMat(p->B, m, m, 0);
+    NM_dense_display(p->B, m, m, 0);
   }
   else
   {
@@ -95,14 +95,14 @@ void mixedLinearComplementarity_display(MixedLinearComplementarityProblem* p)
     if (p->M && !p->M->storageType)
     {
       printf("B matrix from M:\n");
-      displayMat(p->M->matrix0 + n * (n + m) + n, m, m, n + m);
+      NM_dense_display(p->M->matrix0 + n * (n + m) + n, m, m, n + m);
     }
   }
 
   if (p->C)
   {
     printf("C matrix:\n");
-    displayMat(p->C, n, m, 0);
+    NM_dense_display(p->C, n, m, 0);
   }
   else
   {
@@ -110,14 +110,14 @@ void mixedLinearComplementarity_display(MixedLinearComplementarityProblem* p)
     if (p->M && !p->M->storageType)
     {
       printf("C matrix from M:\n");
-      displayMat(p->M->matrix0 + n * (n + m), n, m, n + m);
+      NM_dense_display(p->M->matrix0 + n * (n + m), n, m, n + m);
     }
   }
 
   if (p->D)
   {
     printf("D matrix:\n");
-    displayMat(p->D, m, n, 0);
+    NM_dense_display(p->D, m, n, 0);
   }
   else
   {
@@ -125,20 +125,20 @@ void mixedLinearComplementarity_display(MixedLinearComplementarityProblem* p)
     if (p->M && !p->M->storageType)
     {
       printf("D matrix from M:\n");
-      displayMat(p->M->matrix0 + n, m, n, n + m);
+      NM_dense_display(p->M->matrix0 + n, m, n, n + m);
     }
   }
   if (p->a)
   {
     printf("a matrix:\n");
-    displayMat(p->a, n, 1, 0);
+    NM_dense_display(p->a, n, 1, 0);
   }
   else
     printf("No a matrix:\n");
   if (p->b)
   {
     printf("b matrix:\n");
-    displayMat(p->b, m, 1, 0);
+    NM_dense_display(p->b, m, 1, 0);
   }
   else
     printf("No b matrix:\n");

@@ -171,11 +171,11 @@ void displayGMP(GenericMechanicalProblem * pGMP)
 
   while (pElem)
   {
-    printf("-->An sub-problem %s.\n", idProblemToChar(pElem->type));
+    printf("-->An sub-problem %s.\n", solver_options_id_to_char(pElem->type));
     pElem = pElem->nextProblem;
   }
   printf("The sparce block matrice is :\n");
-  display(pGMP->M);
+  NM_display(pGMP->M);
   printf("The q vector is :\n");
   for (ii = 0; ii < pGMP->size; ii++)
     printf("%e ", pGMP->q[ii]);

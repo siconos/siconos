@@ -34,7 +34,7 @@ int main(void)
 
   info = gfc3d_test_function_hdf5(filename, options);
 
-  deleteSolverOptions(options);
+  solver_options_delete(options);
   free(options);
   printf("\nEnd of test on %s\n",filename);
   return info;

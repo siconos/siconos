@@ -49,7 +49,7 @@ int main(void)
     return info;
   }
   printf("Construction ok ...\n");
-  info = test_subRowprod(NMM[0], NMM[1]);
+  info = test_NM_row_prod(NMM[0], NMM[1]);
   printf("End of Sub-Prod ...\n");
   if (info != 0) return info;
 

@@ -152,15 +152,10 @@ int fc3d_nonsmooth_Newton_FischerBurmeister_setDefaultSolverOptions(
   options->filterOn = 1;
   options->iSize = 14;
   options->dSize = 14;
-  options->iparam = (int *) malloc(options->iSize * sizeof(int));
-  options->dparam = (double *) malloc(options->dSize * sizeof(double));
+  options->iparam = (int *)calloc(options->iSize, sizeof(int));
+  options->dparam = (double *)calloc(options->dSize, sizeof(double));
   options->dWork = NULL;
-  null_SolverOptions(options);
-  for (unsigned int i = 0; i < 14; i++)
-  {
-    options->iparam[i] = 0;
-    options->dparam[i] = 0.0;
-  }
+  solver_options_nullify(options);
   options->iparam[0] = 200;
   options->iparam[1] = 1;
   options->iparam[3] = 100000; /* nzmax*/

@@ -18,7 +18,7 @@
 #ifndef FRICTIONCONTACTPROBLEM_AS_VI_H
 #define FRICTIONCONTACTPROBLEM_AS_VI_H
 
-/*! \page fcProblem Friction-contact problems (2D or 3D) as VI
+/*! \page fcProblemVI Friction-contact problems (2D or 3D) as VI
  *
  *
  */
