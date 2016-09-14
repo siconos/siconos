@@ -114,9 +114,11 @@ enum SICONOS_IPARAM
 #define SICONOS_IPARAM_NMS_N_MAX 8
 
 /** Some values for dparam index */
-#define SICONOS_DPARAM_TOL 0
-#define SICONOS_DPARAM_RESIDU 1
-
+enum SICONOS_DPARAM
+{
+  SICONOS_DPARAM_TOL = 0,
+  SICONOS_DPARAM_RESIDU = 1
+};
 /** line-search */
 #define SICONOS_DPARAM_LSA_ALPHA_MIN 2
 

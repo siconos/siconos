@@ -80,8 +80,11 @@ extern "C"
   */
   int fc3d_setDefaultSolverOptions(SolverOptions* options, int solverId);
 
-
   
+  enum SICONOS_FRICTION_3D_NSGS
+  {
+    SICONOS_FRICTION_3D_NSGS_LOCALSOLVER_CONTACTNUMBER = 4
+  };
   enum SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION
   {
     SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_FULL,
@@ -105,6 +108,7 @@ extern "C"
     SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION_FALSE,
     SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION_TRUE
   };
+
   /** Non-Smooth Gauss Seidel solver for friction-contact 3D problem
       \param problem the friction-contact 3D problem to solve
       \param velocity global vector (n), in-out parameter

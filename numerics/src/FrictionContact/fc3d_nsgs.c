@@ -400,7 +400,7 @@ int solveLocalReaction(UpdatePtr update_localproblem, SolverPtr local_solver,
   (*update_localproblem)(contact, problem, localproblem,
                          reaction, localsolver_options);
 
-  localsolver_options->iparam[4] = contact;
+  localsolver_options->iparam[SICONOS_FRICTION_3D_NSGS_LOCALSOLVER_CONTACTNUMBER] = contact;
 
   localreaction[0] = reaction[contact*3 + 0];
   localreaction[1] = reaction[contact*3 + 1];
@@ -453,7 +453,6 @@ void acceptLocalReactionProjected(FrictionContactProblem *problem,
                                   unsigned int contact, unsigned int iter,
                                   double *reaction, double localreaction[3])
 {
-  double error_prev = localsolver_options->dparam[1];
   int nan1 = isnan(localsolver_options->dparam[1]) || isinf(localsolver_options->dparam[1]);
   if (nan1 || localsolver_options->dparam[1] > 1.0)
   {
@@ -536,7 +535,7 @@ double calculateFullErrorAdaptiveInterval(FrictionContactProblem *problem,
                                           double *reaction, double *velocity,
                                           double tolerance, double normq)
 {
-  double error;
+  double error=1e+24;
   if (options->iparam[8] >0)
   {
     if (iter % options->iparam[8] == 0) {
@@ -621,7 +620,7 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction,
   unsigned int nc = problem->numberOfContacts;
 
   /* Maximum number of iterations */
-  int itermax = iparam[0];
+  int itermax = iparam[SICONOS_IPARAM_MAX_ITER];
 
   /* Tolerance */
   double tolerance = dparam[0];
@@ -713,14 +712,14 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction,
 
         accumulateLightErrorSum(&light_error_sum, localreaction, &reaction[contact*3]);
 
-        #if 0
+        /* #if 0 */
         acceptLocalReactionFiltered(localproblem, localsolver_options,
                                     contact, iter, reaction, localreaction);
-        #else
-        // Experimental
-        acceptLocalReactionProjected(problem, localproblem, local_solver, localsolver_options,
-                                     contact, iter, reaction, localreaction);
-        #endif
+        /* #else */
+        /* // Experimental */
+        /* acceptLocalReactionProjected(problem, localproblem, local_solver, localsolver_options, */
+        /*                              contact, iter, reaction, localreaction); */
+        /* #endif */
       }
 
       error = calculateLightError(light_error_sum, nc, reaction);
@@ -817,7 +816,7 @@ int fc3d_nsgs_setDefaultSolverOptions(SolverOptions* options)
   options->dparam = (double *)calloc(options->dSize, sizeof(double));
   options->dWork = NULL;
   solver_options_nullify(options);
-  options->iparam[0] = 1000;
+  options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
   options->dparam[0] = 1e-4;
   options->internalSolvers = (SolverOptions *)malloc(sizeof(SolverOptions));
   fc3d_onecontact_nonsmooth_Newtow_setDefaultSolverOptions(options->internalSolvers);
