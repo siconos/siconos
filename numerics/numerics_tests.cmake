@@ -435,7 +435,7 @@ if(WITH_${COMPONENT}_TESTING)
 
   NEW_TEST(test_fc3d_43 fc3d_test43.c) # DSFP converges with specific rho guessed with the nose
   NEW_FC_TEST(BoxesStack1-i100000-32.hdf5.dat
-    SICONOS_FRICTION_3D_VI_DSFP 1e-3 100000
+    SICONOS_FRICTION_3D_VI_FPP 1e-3 100000
     0 0 0
     DPARAM 3 8e-4)
 
@@ -445,11 +445,6 @@ if(WITH_${COMPONENT}_TESTING)
     0 0 0
     IPARAM 2 1)
 
-  NEW_TEST(test_fc3d_45 fc3d_test45.c) # VI_EG
-  NEW_FC_TEST(BoxesStack1-i100000-32.hdf5.dat
-    SICONOS_FRICTION_3D_VI_EG 1e-8 100000
-    0 0 0
-    IPARAM 2 1)
   
   NEW_TEST(test_fc3d_46 fc3d_test46.c) # FPP
   NEW_TEST(test_fc3d_47 fc3d_test47.c) # EG
