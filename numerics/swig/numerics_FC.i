@@ -19,9 +19,9 @@
 %include "Friction_cst.h"
 %include "fc3d_compute_error.h"
 
-%extend FrictionContactProblem
+%extend FrictionContactProblem_
 {
-  FrictionContactProblem()
+  FrictionContactProblem_()
   {
     FrictionContactProblem * FCP = (FrictionContactProblem *) malloc(sizeof(FrictionContactProblem));
     FCP->M = NULL;
@@ -33,7 +33,7 @@
 
 
   /* copy constructor */
-  FrictionContactProblem(PyObject *o)
+  FrictionContactProblem_(PyObject *o)
   {
     FrictionContactProblem* fcp;
     FrictionContactProblem* FCP;
@@ -53,7 +53,7 @@
   }
 
   /* */
-  FrictionContactProblem(PyObject *dim, PyObject *numberOfContacts, PyObject *M, PyObject *q, PyObject *mu)
+  FrictionContactProblem_(PyObject *dim, PyObject *numberOfContacts, PyObject *M, PyObject *q, PyObject *mu)
   {
     FrictionContactProblem * FC = (FrictionContactProblem *) malloc(sizeof(FrictionContactProblem));
     FC->dimension = PyInt_AsLong(dim);
@@ -72,7 +72,7 @@
     return $self->M;
   }
 
-  FrictionContactProblem(PyObject *dim, PyObject *o1, PyObject *o2, PyObject *o3)
+  FrictionContactProblem_(PyObject *dim, PyObject *o1, PyObject *o2, PyObject *o3)
     {
 
       int is_new_object1=0;
@@ -118,7 +118,7 @@
       return FC;
     }
 
-  ~FrictionContactProblem()
+  ~FrictionContactProblem_()
   {
     freeFrictionContactProblem($self);
   }

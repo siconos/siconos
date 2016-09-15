@@ -1,5 +1,6 @@
 
-%Include "SolverOptions.h"
+%include "SolverOptions.h"
+%include "MLCP_Solvers.h"
 
 %extend SolverOptions_
 {

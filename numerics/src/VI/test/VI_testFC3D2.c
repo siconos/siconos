@@ -5,11 +5,13 @@
 #include "projectionOnCone.h"
 #include "VariationalInequality.h"
 #include "FrictionContactProblem.h"
+#include "VariationalInequality.h"
 #include "SolverOptions.h"
+#include "VI_cst.h"
 #include "VariationalInequality_Solvers.h"
 #include "NumericsMatrix.h"
 #include "SiconosBlas.h"
-#include "NumericsMatrix.h"
+
 
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 

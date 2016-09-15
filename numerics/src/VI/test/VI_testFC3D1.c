@@ -7,6 +7,9 @@
 #include "FrictionContactProblem.h"
 #include "SolverOptions.h"
 #include "SiconosBlas.h"
+#include "VariationalInequality.h"
+#include "SolverOptions.h"
+#include "VI_cst.h"
 #include "VariationalInequality_Solvers.h"
 #include "NumericsMatrix.h"
 

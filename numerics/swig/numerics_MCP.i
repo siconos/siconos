@@ -5,12 +5,12 @@
 %include "MCP_cst.h"
 
 
-%extend MixedComplementarityProblem
+%extend MixedComplementarityProblem_
 {
 
 
 
-  MixedComplementarityProblem()
+  MixedComplementarityProblem_()
    {
      MixedComplementarityProblem* MCP;
      MCP =  (MixedComplementarityProblem *) malloc(sizeof(MixedComplementarityProblem));
@@ -70,7 +70,7 @@
 
 
 
-  MixedComplementarityProblem(PyObject *sizeEq, PyObject *sizeIneq, PyObject *o1, PyObject *o2)
+  MixedComplementarityProblem_(PyObject *sizeEq, PyObject *sizeIneq, PyObject *o1, PyObject *o2)
   {
      MixedComplementarityProblem* MCP;
      MCP =  (MixedComplementarityProblem *) malloc(sizeof(MixedComplementarityProblem));
@@ -129,7 +129,7 @@
      return MCP;
    }
 
-  ~MixedComplementarityProblem()
+  ~MixedComplementarityProblem_()
   {
     free($self->Fmcp);
     free($self->nablaFmcp);

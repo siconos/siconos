@@ -351,7 +351,7 @@ int gfc3d_LmgcDriver(double *reaction,
 /*                                              reaction, */
 /*                                              velocity, */
 /*                                              globalVelocity, */
-/*                                              &numerics_solver_options);
+/*                                              &numerics_solver_options); */
 
 /*   if(outputFile == 1) */
 /*   { */

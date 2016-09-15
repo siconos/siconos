@@ -2,6 +2,10 @@
 #include <stdlib.h>
 #include "NonSmoothDrivers.h"
 #include "stdlib.h"
+#include "VariationalInequality.h"
+#include "SolverOptions.h"
+#include "VI_cst.h"
+#include "VariationalInequality_Solvers.h"
 
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 
@@ -11,6 +15,7 @@ void Ftest(void * viIn, int n, double *x, double *F)
   VariationalInequality * vi = (VariationalInequality* ) viIn;
   for (i =0; i< vi->size ; i++)
   {
+
     F[i] = x[i]-i+4;
   }
 }

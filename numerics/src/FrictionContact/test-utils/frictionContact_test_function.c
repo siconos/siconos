@@ -25,7 +25,7 @@
 #include <fclib.h>
 #include <fclib_interface.h>
 #endif
-
+#include "misc.h"
 
 void frictionContact_test_gams_opts(SN_GAMSparams* GP, int solverId)
 {
@@ -73,7 +73,7 @@ int frictionContact_test_function(FILE * f, SolverOptions * options)
 
   int k, info = -1 ;
   FrictionContactProblem* problem = (FrictionContactProblem *)malloc(sizeof(FrictionContactProblem));
-
+  setNumericsVerbose(1);
   info = frictionContact_newFromFile(problem, f);
 
   FILE * foutput  =  fopen("checkinput.dat", "w");

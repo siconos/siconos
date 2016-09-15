@@ -244,7 +244,9 @@ int fc3d_unitary_enumerative_test_non_sliding(FrictionContactProblem* problem, d
   }
 
   /*sticking ? 0=MR+q*/
-  solv3x3(M, reaction, Q);
+  int info = solv3x3(M, reaction, Q);
+  if(info)
+    numericsWarning("fc3d_unitary_enumerative_test_non_sliding", "NaN output in solv3x3");
   M = M00;
   reaction = reaction0;
   Q = Q0;

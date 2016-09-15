@@ -21,6 +21,7 @@
 #include "globalFrictionContact_test_function.h"
 #include "Friction_cst.h"
 #include "gfc3d_Solvers.h"
+#include "SolverOptions.h"
 
 
 

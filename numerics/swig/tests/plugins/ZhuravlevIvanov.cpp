@@ -1,5 +1,6 @@
 #include "SiconosNumerics.h"
 #include "Variationalinequality_Solvers.h"
+#include "NumericsMatrix.h"
 #ifdef __cplusplus
 
 #ifdef _WIN32 

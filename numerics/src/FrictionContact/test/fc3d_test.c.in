@@ -37,19 +37,27 @@ int main(void)
   FILE * finput  =  fopen(filename,"r");
   SolverOptions * options = (SolverOptions *) malloc(sizeof(SolverOptions));
   double testTolerance = @TEST_TOLERANCE@;
+  int test_maxiter = @TEST_MAXITER@;
   int testInternalSolver = @TEST_INTERNAL_SOLVER@;
+  double test_internal_tol = @TEST_INTERNAL_SOLVER_TOLERANCE@;
+  int test_internal_maxit = @TEST_INTERNAL_SOLVER_MAXITER@;
+ 
   info=fc3d_setDefaultSolverOptions(options,@TEST_SOLVER@);
   if (testTolerance > 0.)
   {
     options->dparam[0]=@TEST_TOLERANCE@;
-    options->iparam[0]=@TEST_MAXITER@;
   }
+  if (test_maxiter > 0)
+    options->iparam[0]=@TEST_MAXITER@;
+
 
   if (testInternalSolver)
   {
     options->internalSolvers->solverId=@TEST_INTERNAL_SOLVER@;
-    options->internalSolvers->dparam[0]=@TEST_INTERNAL_SOLVER_TOLERANCE@;
-    options->internalSolvers->iparam[0]=@TEST_INTERNAL_SOLVER_MAXITER@;
+    if(test_internal_tol > 0.)
+      options->internalSolvers->dparam[0]=@TEST_INTERNAL_SOLVER_TOLERANCE@;
+    if(test_internal_maxit > 0)
+      options->internalSolvers->iparam[0]=@TEST_INTERNAL_SOLVER_MAXITER@;
   }
 
   int iparam_idx_size = @IPARAM_IDX_SIZE@;

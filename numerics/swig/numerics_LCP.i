@@ -3,9 +3,9 @@
 %include "LCP_Solvers.h"
 %include "lcp_cst.h"
 
-%extend LinearComplementarityProblem
+%extend LinearComplementarityProblem_
 {
-  LinearComplementarityProblem(PyObject *o1, PyObject *o2)
+  LinearComplementarityProblem_(PyObject *o1, PyObject *o2)
     {
 
       int is_new_object1=0;
@@ -42,7 +42,7 @@
     }
 
 
-  ~LinearComplementarityProblem()
+  ~LinearComplementarityProblem_()
   {
     freeLinearComplementarityProblem($self);
   }

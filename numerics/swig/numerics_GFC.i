@@ -51,10 +51,10 @@
 %include "gfc3d_Solvers.h"
 %include "gfc3d_compute_error.h"
 
-%extend GlobalFrictionContactProblem
+%extend GlobalFrictionContactProblem_
 {
 
-  GlobalFrictionContactProblem()
+  GlobalFrictionContactProblem_()
     {
 
       GlobalFrictionContactProblem *FC;
@@ -66,7 +66,7 @@
       return FC;
     }
 
-  GlobalFrictionContactProblem(PyObject *dim)
+  GlobalFrictionContactProblem_(PyObject *dim)
     {
 
       GlobalFrictionContactProblem *FC;
@@ -79,7 +79,7 @@
       return FC;
     }
 
-  GlobalFrictionContactProblem(PyObject *dim, PyObject *o1, PyObject *o2, PyObject *o3)
+  GlobalFrictionContactProblem_(PyObject *dim, PyObject *o1, PyObject *o2, PyObject *o3)
     {
 
       int is_new_object1=0;
@@ -123,7 +123,7 @@
       return FC;
     }
 
-  ~GlobalFrictionContactProblem()
+  ~GlobalFrictionContactProblem_()
   {
     freeGlobalFrictionContactProblem($self);
   }

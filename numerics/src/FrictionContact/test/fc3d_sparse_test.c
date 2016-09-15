@@ -19,7 +19,10 @@
 #include <stdlib.h>
 #include "NonSmoothDrivers.h"
 #include "frictionContact_test_function.h"
-
+#include "SolverOptions.h"
+#include "FrictionContactProblem.h"
+#include "Friction_cst.h"
+#include "fc3d_Solvers.h"
 
 int main(void)
 {

@@ -2,6 +2,11 @@
 #include <stdlib.h>
 #include "NonSmoothDrivers.h"
 #include "stdlib.h"
+#include "VariationalInequality.h"
+#include "SolverOptions.h"
+#include "VI_cst.h"
+#include "VariationalInequality_Solvers.h"
+
 
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 

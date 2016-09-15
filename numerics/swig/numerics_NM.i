@@ -2,13 +2,14 @@
 %include "SparseMatrix.h"
 %include "SparseBlockMatrix.h"
 %include "NumericsMatrix.h"
+%include "NumericsSparseMatrix.h"
 
 // some extensions but numpy arrays should be used instead
-%extend NumericsMatrix
+%extend NumericsMatrix_
 {
 %fragment("NumericsMatrix");
 
-  NumericsMatrix(PyObject* o)
+  NumericsMatrix_(PyObject* o)
   {
     PyArrayObject* array_ = NULL;
     int array_ctrl_ = 0;
@@ -113,7 +114,7 @@
 //  }
 //
 
-  ~NumericsMatrix()
+  ~NumericsMatrix_()
   {
     freeNumericsMatrix($self);
     free($self);
@@ -186,9 +187,9 @@ fail:
  }
 }
 
-%extend SparseBlockStructuredMatrix
+%extend SparseBlockStructuredMatrix_
 {
- ~SparseBlockStructuredMatrix()
+ ~SparseBlockStructuredMatrix_()
  {
    freeSBM($self);
    free($self);

@@ -26,21 +26,21 @@
 
 
 
-%exception MixedLinearComplementarityProblem {
+%exception MixedLinearComplementarityProblem_ {
     $action
     if (PyErr_Occurred()) SWIG_fail;
 }
 
-%extend MixedLinearComplementarityProblem
+%extend MixedLinearComplementarityProblem_
 {
-  MixedLinearComplementarityProblem()
+  MixedLinearComplementarityProblem_()
    {
      MixedLinearComplementarityProblem* MLCP;
      MLCP =  (MixedLinearComplementarityProblem *) malloc(sizeof(MixedLinearComplementarityProblem));
      return MLCP;
    }
 
-  MixedLinearComplementarityProblem(PyObject *dim, PyObject *o1, PyObject *o2)
+  MixedLinearComplementarityProblem_(PyObject *dim, PyObject *o1, PyObject *o2)
     {
 
       int is_new_object1=0;
@@ -116,7 +116,7 @@
 
 
 
-  ~MixedLinearComplementarityProblem()
+  ~MixedLinearComplementarityProblem_()
   {
     freeMixedLinearComplementarityProblem($self);
   }

@@ -3,12 +3,12 @@
 %include "AVI_Solvers.h"
 %include "AVI_cst.h"
 
-%extend AffineVariationalInequalities
+%extend AffineVariationalInequalities_
 {
-  AffineVariationalInequalities()
+  AffineVariationalInequalities_()
    {
-     AffineVariationalInequalities* avi;
-     avi = (AffineVariationalInequalities *) malloc(sizeof(AffineVariationalInequalities));
+     AffineVariationalInequalities_* avi;
+     avi = (AffineVariationalInequalities_ *) malloc(sizeof(AffineVariationalInequalities_));
      avi->size = 0;
      avi->M = NULL;
      avi->q = NULL;
@@ -19,12 +19,12 @@
    }
 
 
-  AffineVariationalInequalities(PyObject* mat, PyObject* vec)
+  AffineVariationalInequalities_(PyObject* mat, PyObject* vec)
   {
 
 
-     AffineVariationalInequalities* avi;
-     avi = (AffineVariationalInequalities *) malloc(sizeof(AffineVariationalInequalities));
+     AffineVariationalInequalities_* avi;
+     avi = (AffineVariationalInequalities_ *) malloc(sizeof(AffineVariationalInequalities_));
      avi->d = NULL;
      avi->poly = NULL;
 
@@ -79,7 +79,7 @@
      }
    }
 
-  ~AffineVariationalInequalities()
+  ~AffineVariationalInequalities_()
   {
     if ($self->poly)
     {
