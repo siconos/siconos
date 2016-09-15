@@ -303,19 +303,23 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
 
         ispos_data = io.static_data()
         idpos_data = io.dynamic_data()
+        try:
+            idom_data = io.domains_data()
+        except ValueError:
+            idom_data = None
 
         icf_data = io.contact_forces_data()[:]
 
         isolv_data = io.solver_data()
 
-        return ispos_data, idpos_data, icf_data, isolv_data
+        return ispos_data, idpos_data, idom_data, icf_data, isolv_data
 
-    spos_data, dpos_data, cf_data, solv_data = load()
+    spos_data, dpos_data, dom_data, cf_data, solv_data = load()
 
     # contact forces provider
     class CFprov():
 
-        def __init__(self, data):
+        def __init__(self, data, dom_data):
             self._data = None
             self._datap = numpy.array(
                 [[1., 2., 3., 4., 5., 6., 7., 8., 9., 10., 11., 12., 13., 14., 15.]])
@@ -327,6 +331,8 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
             else:
                 self._data = None
                 self._mu_coefs = []
+
+            self._dom_data = dom_data
 
             if self._data is not None:
                 self._time = min(self._data[:, 0])
@@ -345,6 +351,9 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
             self.cn_at_time = dict()
             self.cn = dict()
 
+            self.dom_at_time = dict()
+            self.dom = dict()
+
             self._contact_field = dict()
             self._output = dict()
 
@@ -360,11 +369,22 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
                 id_f = numpy.where(
                     abs(self._data[:, 0] - self._time) < 1e-15)[0]
 
+                dom_id_f = None
+                if self._dom_data is not None:
+                    dom_id_f = numpy.where(
+                        abs(self._dom_data[:, 0] - self._time) < 1e-15)[0]
+
                 for mu in self._mu_coefs:
 
                     try:
                         imu = numpy.where(
                             abs(self._data[id_f, 1] - mu) < 1e-15)[0]
+
+                        dom_imu = None
+                        if dom_id_f is not None:
+                            dom_imu = numpy.where(
+                                self._dom_data[dom_id_f,-1] == self._data[id_f[imu],-1]
+                            )[0]
 
                         self.cpa_at_time[mu] = self._data[
                             id_f[imu], 2:5].copy()
@@ -374,6 +394,11 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
                             id_f[imu], 8:11].copy()
                         self.cf_at_time[mu] = self._data[
                             id_f[imu], 11:14].copy()
+
+                        self.dom_at_time[mu] = None
+                        if dom_imu is not None:
+                            self.dom_at_time[mu] = self._dom_data[
+                                dom_id_f[imu], 1].copy()
 
                         self.cpa[mu] = numpy_support.numpy_to_vtk(
                             self.cpa_at_time[mu])
@@ -391,10 +416,17 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
                             self.cf_at_time[mu])
                         self.cf[mu].SetName('contactForces')
 
+                        if self.dom_at_time[mu] is not None:
+                            self.dom[mu] = numpy_support.numpy_to_vtk(
+                                self.dom_at_time[mu])
+                            self.dom[mu].SetName('domains')
+
                         self._contact_field[mu].AddArray(self.cpa[mu])
                         self._contact_field[mu].AddArray(self.cpb[mu])
                         self._contact_field[mu].AddArray(self.cn[mu])
                         self._contact_field[mu].AddArray(self.cf[mu])
+                        if self.dom[mu] is not None:
+                            self._contact_field[mu].AddArray(self.dom[mu])
                     except:
                         pass
 
@@ -445,9 +477,12 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
         contact_pos_norm[mu].SetVectorComponent(1, "contactNormals", 1)
         contact_pos_norm[mu].SetVectorComponent(2, "contactNormals", 2)
 
+        if cf_prov.dom_at_time is not None:
+            contact_pos_norm[mu].SetScalarComponent(0, "domains", 0)
+
     cf_prov = None
     if not cf_disable:
-        cf_prov = CFprov(cf_data)
+        cf_prov = CFprov(cf_data, dom_data)
         for mu in cf_prov._mu_coefs:
             init_contact_pos(mu)
 
@@ -463,6 +498,7 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
     cone = dict()
     cone_glyph = dict()
     cmapper = dict()
+    cLUT = dict()
     cactor = dict()
     arrow = dict()
     cylinder = dict()
@@ -513,14 +549,40 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
 
         cone_glyph[mu]._scale_fact = normalcone_ratio
         cone_glyph[mu].SetScaleFactor(
-            cone_glyph[mu]._scale_fact * cf_scale_factor)
+            cone_glyph[mu]._scale_fact *cf_scale_factor)
         cone_glyph[mu].SetVectorModeToUseVector()
 
         cone_glyph[mu].SetInputArrayToProcess(1, 0, 0, 0, 'contactNormals')
         cone_glyph[mu].OrientOn()
 
+        # Don't allow scalar to affect size of glyph
+        cone_glyph[mu].SetScaleModeToDataScalingOff()
+
+        # Allow scalar to affect color of glyph
+        cone_glyph[mu].SetColorModeToColorByScalar()
+
         cmapper[mu] = vtk.vtkPolyDataMapper()
         cmapper[mu].SetInputConnection(cone_glyph[mu].GetOutputPort())
+
+        # Random color map, up to 256 domains
+        cLUT[mu] = vtk.vtkLookupTable()
+        cLUT[mu].SetNumberOfColors(256)
+        cLUT[mu].Build()
+        for i in range(256):
+            cLUT[mu].SetTableValue(i, *random_color())
+        cLUT[mu].SetTableRange(0, 255)
+
+        # By default don't allow scalars to have an effect
+        cmapper[mu].ScalarVisibilityOff()
+
+        # If domain information is available, we turn on the color
+        # table and turn on scalars
+        if cf_prov.dom_at_time is not None:
+            cmapper[mu].SetLookupTable(cLUT[mu])
+            cmapper[mu].SetColorModeToMapScalars()
+            cmapper[mu].SetScalarModeToUsePointData()
+            cmapper[mu].SetScalarRange(0,255)
+            cmapper[mu].ScalarVisibilityOn()
 
         cactor[mu] = vtk.vtkActor()
         cactor[mu].GetProperty().SetOpacity(0.4)
@@ -1102,9 +1164,9 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
             print 'key', key
 
             if key == 'r':
-                spos_data, dpos_data, cf_data, solv_data = load()
+                spos_data, dpos_data, dom_data, cf_data, solv_data = load()
                 if not cf_disable:
-                    cf_prov = CFprov(cf_data)
+                    cf_prov = CFprov(cf_data, dom_data)
                 times = list(set(dpos_data[:, 0]))
                 times.sort()
                 ndyna = len(numpy.where(dpos_data[:, 0] == times[0]))
@@ -1113,16 +1175,17 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
                         set(spos_data[:, 1]))
                 else:
                     instances = set(dpos_data[:, 1])
+
                 if cf_prov is not None:
                     cf_prov._time = min(times[:])
                     cf_prov.method()
-                    contact_posa.SetInputData(cf_prov._output)
-                    contact_posa.Update()
-                    contact_posb.SetInputData(cf_prov._output)
-                    contact_posb.Update()
-                    [(contact_pos_force[mu].Update(),
-                      contact_pos_norm[mu].Update())
-                     for mu in cf_prov._mu_coefs]
+                    for mu in cf_prov._mu_coefs:
+                        contact_posa[mu].SetInputData(cf_prov._output)
+                        contact_posa[mu].Update()
+                        contact_posb[mu].SetInputData(cf_prov._output)
+                        contact_posb[mu].Update()
+                        contact_pos_force[mu].Update()
+                        contact_pos_norm[mu].Update()
 
                 id_t0 = numpy.where(
                     dpos_data[:, 0] == min(dpos_data[:, 0]))

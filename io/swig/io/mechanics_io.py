@@ -540,7 +540,7 @@ class Hdf5():
                                   use_compression = self._use_compression)
         self._cf_data = data(self._data, 'cf', 15,
                              use_compression = self._use_compression)
-        if self._should_output_domains:
+        if self._should_output_domains or 'domain' in self._data:
             self._domain_data = data(self._data, 'domain', 3,
                                      use_compression = self._use_compression)
         self._solv_data = data(self._data, 'solv', 4,
