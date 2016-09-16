@@ -1629,6 +1629,9 @@ class Hdf5():
         self.outputStaticObjects()
         self.outputDynamicObjects()
 
+        if self._should_output_domains:
+            log(self.outputDomains, with_timer)()
+
         # nsds = model.nonSmoothDynamicalSystem()
         # nds= nsds.getNumberOfDS()
         # for i in range(nds):
