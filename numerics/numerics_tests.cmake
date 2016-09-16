@@ -243,12 +243,12 @@ if(WITH_${COMPONENT}_TESTING)
   SET(FC3D_DATA_SET
     "Capsules-i100-1090.dat;Capsules-i100-889.dat;Capsules-i101-404.dat;Capsules-i103-990.dat;Capsules-i122-1617.dat;Example1_Fc3D.dat;Example1_Fc3D_SBM.dat;FrictionContact3D_1c.dat;FrictionContact3D_RR_1c.dat;NESpheres_10_1.dat;NESpheres_30_1.dat;OneObject-i100000-499.hdf5.dat;Rover1039.dat;Rover1040.dat;Rover1041.dat;Rover11035.dat;Rover11211.dat;Rover3865.dat;Rover4144.dat;Rover4396.dat;Rover4493.dat;Rover4516.dat;Rover4609.dat;Rover4613.dat;Rover4622.dat;Rover9770.dat;KaplasTower-i1061-4.hdf5.dat;Confeti-ex13-Fc3D-SBM.dat;BoxesStack1-i100000-32.hdf5.dat;FrictionContactProblem00237.dat;FrictionContactProblem00727.dat")
 
-  FOREACH(_DAT ${FC3D_DATA_SET})
+  foreach(_DAT ${FC3D_DATA_SET})
     # --- GAMS Solvers ---
-    IF(HAVE_GAMS_C_API)
+    if(HAVE_GAMS_C_API)
       NEW_FC_3D_TEST(${_DAT} SICONOS_FRICTION_3D_GAMS_PATH)
       NEW_FC_3D_TEST(${_DAT} SICONOS_FRICTION_3D_GAMS_LCP_PATH)
-      IF(HAVE_GAMS_PATHVI)
+      if(HAVE_GAMS_PATHVI)
 	NEW_FC_3D_TEST(${_DAT} SICONOS_FRICTION_3D_GAMS_PATHVI)
 	NEW_FC_3D_TEST(${_DAT} SICONOS_FRICTION_3D_GAMS_LCP_PATHVI)
       endif()
@@ -257,13 +257,16 @@ if(WITH_${COMPONENT}_TESTING)
     # --- NSGS on FC3D_DATA_SET ---
     NEW_FC_3D_TEST(${_DAT} SICONOS_FRICTION_3D_NSGS 1e-5 10000)
     NEW_FC_3D_TEST(${_DAT} SICONOS_FRICTION_3D_NSGS 1e-5 10000
-      0 0 0
+      SICONOS_FRICTION_3D_ONECONTACT_NSN_AC_GP 0 0
       INTERNAL_IPARAM 10 1)
 
     # --- Nonsmooth Newton on FC3D_DATA_SET ---
     NEW_FC_3D_TEST(${_DAT} SICONOS_FRICTION_3D_NSN_AC 1e-5 100
       0 0 0
       IPARAM 1 1)   
+    NEW_FC_3D_TEST(${_DAT} SICONOS_FRICTION_3D_NSN_AC)
+    NEW_FC_3D_TEST(${_DAT} SICONOS_FRICTION_3D_NSN_FB)
+    NEW_FC_3D_TEST(${_DAT} SICONOS_FRICTION_3D_NSN_NM)
   endforeach()
   set(fc3d_NSGS_Tol_1e-5_Max_10000_inTol_0_inMax_0___Rover4396_PROPERTIES WILL_FAIL TRUE)
   
@@ -285,7 +288,13 @@ if(WITH_${COMPONENT}_TESTING)
     SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithRegularization 0 0
     DPARAM 3 0.1)
     
-  NEW_FC_TEST(Example1_Fc3D_SBM.dat
+  NEW_FC_3D_TEST(Example1_Fc3D_SBM.dat
+    SICONOS_FRICTION_3D_NSGS  1e-16 ${NSGS_NB_IT}
+    SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration 1e-3 10
+    DPARAM 8 1.7
+    IPARAM 8 1)
+
+  NEW_FC_3D_TEST(Example1_Fc3D_SBM.dat
     SICONOS_FRICTION_3D_NSGS  1e-16 1000
     SICONOS_FRICTION_3D_NCPGlockerFBNewton 0 0
     WILL_FAIL)
@@ -402,15 +411,20 @@ if(WITH_${COMPONENT}_TESTING)
     SICONOS_FRICTION_3D_NSGS 1e-12 10000
     SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration 1e-06  100)
 
+  NEW_FC_3D_TEST(Confeti-ex03-Fc3D-SBM.dat
+    SICONOS_FRICTION_3D_NSGS 1e-8 20000
+    SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration 1e-16 100)
+  
+  NEW_FC_3D_TEST(Example1_Fc3D_SBM.dat
+    SICONOS_FRICTION_3D_NSGSV 1e-5 10000
+    SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone_velocity 0 0
+    INTERNAL_IPARAM 0 0
+    INTERNAL_DPARAM 0 0.
+    WILL_FAIL)
+  
+  # --- Extra-gradient ---
 
-  NEW_FC_TEST(Confeti-ex13-Fc3D-SBM.dat
-    SICONOS_FRICTION_3D_DSFP  1e-08 10000
-    0 0 0
-    DPARAM 3 5e3)
-
-
-
-  NEW_FC_TEST(Confeti-ex13-Fc3D-SBM.dat
+  NEW_FC_3D_TEST(Confeti-ex13-Fc3D-SBM.dat
     SICONOS_FRICTION_3D_EG  1e-08 10000
     0 0 0
     DPARAM 3 -3e3)
@@ -420,22 +434,64 @@ if(WITH_${COMPONENT}_TESTING)
     0 0 0
     DPARAM 3 -1.0)
 
-  # --- TFP ---
-  NEW_FC_TEST(Confeti-ex13-Fc3D-SBM.dat
+  NEW_FC_3D_TEST(Example1_Fc3D_SBM.dat
+    SICONOS_FRICTION_3D_EG  1e-8 100000
+    0 0 0
+    DPARAM 3 -1.0)
+
+  NEW_FC_3D_TEST(Example1_Fc3D_SBM.dat
+    SICONOS_FRICTION_3D_EG  1e-8 100000
+    0 0 0
+    DPARAM 3 1.0)
+
+  # --- Tresca Fixed Point ---
+  NEW_FC_3D_TEST(Confeti-ex13-Fc3D-SBM.dat
     SICONOS_FRICTION_3D_TFP)
  
   #TFP with ProjectedGradientOnCylinder is not working ...
-  SET(test_fc3d_TFP_PGoC_Tol_1e-4_Max_1000_inTol_1e-6_inMax_20000___Confeti-ex13-Fc3D-SBM_PROPERTIES WILL_FAIL TRUE)
-  NEW_FC_TEST(Confeti-ex13-Fc3D-SBM.dat
+  NEW_FC_3D_TEST(Confeti-ex13-Fc3D-SBM.dat
     SICONOS_FRICTION_3D_TFP 1e-4 100
-    SICONOS_FRICTION_3D_PGoC 1e-6 200)
+    SICONOS_FRICTION_3D_PGoC 1e-6 200
+    WILL_FAIL)
 
+  NEW_FC_3D_TEST(Example1_Fc3D_SBM.dat
+    SICONOS_FRICTION_3D_TFP 1e-16 100)
+
+  NEW_FC_3D_TEST(OneObject-i100000-499.hdf5.dat
+    SICONOS_FRICTION_3D_TFP 1e-8 100
+    0 0 0
+    DPARAM 3 1e4
+    WILL_FAIL)
+  
+  NEW_FC_3D_TEST(Confeti-ex03-Fc3D-SBM.dat
+    SICONOS_FRICTION_3D_TFP 10e-8 2000)
+
+  NEW_FC_3D_TEST(Confeti-ex03-Fc3D-SBM.dat
+    SICONOS_FRICTION_3D_TFP 10e-8 2000
+    0 0 0
+    IPARAM 1 1)
+
+  NEW_FC_3D_TEST(Example1_Fc3D_SBM.dat
+    SICONOS_FRICTION_3D_TFP 0 0
+    SICONOS_FRICTION_3D_PGoC 0 0
+    WILL_FAIL)
+  
+  NEW_FC_3D_TEST(Example1_Fc3D_SBM.dat
+    SICONOS_FRICTION_3D_TFP 0 0
+    SICONOS_FRICTION_3D_PGoC 0 0
+    INTERNAL_IPARAM 2 20
+    INTERNAL_DPARAM 3 -1.
+    INTERNAL_DPARAM 4 -1.e-6)
+
+  # ---- Hyperplane Projection ----
   # HP is not converging
   NEW_FC_3D_TEST(Confeti-ex13-Fc3D-SBM.dat
     SICONOS_FRICTION_3D_HP 1e-3 10000
     0 0 0
     WILL_FAIL)
 
+  NEW_FC_3D_TEST(Example1_Fc3D_SBM.dat
+    SICONOS_FRICTION_3D_HP)
 
   # ---- Varitionnal Inequalities formulation ----
   NEW_FC_3D_TEST(Confeti-ex13-Fc3D-SBM.dat
@@ -451,87 +507,32 @@ if(WITH_${COMPONENT}_TESTING)
     IPARAM 3 0
     DPARAM 3 -1e1)
 
-  NEW_TEST(test_fc3d_42 fc3d_test42.c) # VI_FPP
-  NEW_FC_TEST(BoxesStack1-i100000-32.hdf5.dat
+  NEW_FC_3D_TEST(BoxesStack1-i100000-32.hdf5.dat
     SICONOS_FRICTION_3D_VI_FPP 1e-8 100000
     0 0 0
     IPARAM 2 1)
 
-  NEW_TEST(test_fc3d_43 fc3d_test43.c) # DSFP converges with specific rho guessed with the nose
-  NEW_FC_TEST(BoxesStack1-i100000-32.hdf5.dat
-    SICONOS_FRICTION_3D_VI_FPP 1e-3 100000
-    0 0 0
-    DPARAM 3 8e-4)
+  NEW_FC_3D_TEST(BoxesStack1-i100000-32.hdf5.dat
+    SICONOS_FRICTION_3D_FPP 1e-8 100000)
 
-  NEW_TEST(test_fc3d_44 fc3d_test44.c) # VI_EG
-  NEW_FC_TEST(BoxesStack1-i100000-32.hdf5.dat
+  NEW_FC_3D_TEST(BoxesStack1-i100000-32.hdf5.dat
     SICONOS_FRICTION_3D_VI_EG 1e-8 100000
     0 0 0
     IPARAM 2 1)
 
+  # --- Test from rock pile simulations using "time of birth" feature --- 
+  # failure in local solver with line search
+  NEW_FC_3D_TEST(RockPile_tob1.dat SICONOS_FRICTION_3D_NSGS 1e-3 100000
+    SICONOS_FRICTION_3D_ONECONTACT_NSN_AC_GP 1e-16 100)
+  NEW_FC_3D_TEST(RockPile_tob1.dat SICONOS_FRICTION_3D_NSGS 1e-3 100000
+    SICONOS_FRICTION_3D_ONECONTACT_NSN_AC_GP 1e-16 1000)
+  NEW_FC_3D_TEST(RockPile_tob1.dat SICONOS_FRICTION_3D_NSGS 1e-3 100000
+    SICONOS_FRICTION_3D_ONECONTACT_NSN_AC 1e-16 100)
+
+  # ---- PROX ---
   
-  NEW_TEST(test_fc3d_46 fc3d_test46.c) # FPP
-  NEW_TEST(test_fc3d_47 fc3d_test47.c) # EG
-
-  SET(test_fc3d_50_PROPERTIES WILL_FAIL TRUE)
-  NEW_TEST(test_fc3d_50 fc3d_test50.c)
-  
-
-  NEW_TEST(test_fc3d_60 fc3d_test60.c)
-
-  NEW_FC_TEST(Example1_Fc3D_SBM.dat SICONOS_FRICTION_3D_NSN_AC )
-  NEW_FC_TEST(Example1_Fc3D_SBM.dat SICONOS_FRICTION_3D_NSN_FB)
-  NEW_FC_TEST(Example1_Fc3D_SBM.dat SICONOS_FRICTION_3D_NSN_NM)
-
-  NEW_FC_TEST(OneObject-i100000-499.hdf5.dat SICONOS_FRICTION_3D_NSN_AC)
-  NEW_FC_TEST(OneObject-i100000-499.hdf5.dat SICONOS_FRICTION_3D_NSN_FB)
-  NEW_FC_TEST(OneObject-i100000-499.hdf5.dat SICONOS_FRICTION_3D_NSN_NM)
-  
-  NEW_FC_TEST(Capsules-i100-1090.dat SICONOS_FRICTION_3D_NSN_AC)
-  NEW_FC_TEST(Capsules-i100-1090.dat SICONOS_FRICTION_3D_NSN_FB)
-  NEW_FC_TEST(Capsules-i100-1090.dat SICONOS_FRICTION_3D_NSN_NM)
-  
-  NEW_FC_TEST(Capsules-i101-404.dat SICONOS_FRICTION_3D_NSN_AC)
-  NEW_FC_TEST(Capsules-i101-404.dat SICONOS_FRICTION_3D_NSN_FB)
-  NEW_FC_TEST(Capsules-i101-404.dat SICONOS_FRICTION_3D_NSN_NM)
-
-  NEW_FC_TEST(Capsules-i103-990.dat SICONOS_FRICTION_3D_NSN_AC)
-  NEW_FC_TEST(Capsules-i103-990.dat SICONOS_FRICTION_3D_NSN_FB)
-  NEW_FC_TEST(Capsules-i103-990.dat SICONOS_FRICTION_3D_NSN_NM)
-  
-  NEW_FC_TEST(Capsules-i122-1617.dat SICONOS_FRICTION_3D_NSN_AC)
-  NEW_FC_TEST(Capsules-i122-1617.dat SICONOS_FRICTION_3D_NSN_FB)
-  NEW_FC_TEST(Capsules-i122-1617.dat SICONOS_FRICTION_3D_NSN_NM)
-  
-  NEW_FC_TEST(Capsules-i100-889.dat SICONOS_FRICTION_3D_NSN_AC)
-  NEW_FC_TEST(Capsules-i100-889.dat SICONOS_FRICTION_3D_NSN_FB)
-  NEW_FC_TEST(Capsules-i100-889.dat SICONOS_FRICTION_3D_NSN_NM)
-
-
-  #DSFP test
-  NEW_FC_TEST(Example1_Fc3D_SBM.dat
-    SICONOS_FRICTION_3D_DSFP  1e-8 100000
-    0 0 0
-    DPARAM 3 2.0)
-  
-  NEW_FC_TEST(Example1_Fc3D_SBM.dat
-    SICONOS_FRICTION_3D_DSFP  1e-8 100000
-    0 0 0
-    DPARAM 3 -2.0)
-
-  #EG
-  NEW_FC_TEST(Example1_Fc3D_SBM.dat
-    SICONOS_FRICTION_3D_EG  1e-8 100000
-    0 0 0
-    DPARAM 3 1.0)
-  
-  NEW_FC_TEST(Example1_Fc3D_SBM.dat
-    SICONOS_FRICTION_3D_EG  1e-8 100000
-    0 0 0
-    DPARAM 3 -1.0)
-
-  NEW_FC_TEST(Example1_Fc3D_SBM.dat
-    SICONOS_FRICTION_3D_HP)
+  NEW_FC_3D_TEST(Example1_Fc3D_SBM.dat
+    SICONOS_FRICTION_3D_PROX 1e-8 100)
   
   NEW_FC_3D_TEST(OneObject-i100000-499.hdf5.dat
     SICONOS_FRICTION_3D_PROX  1e-8 100000
@@ -551,9 +552,8 @@ if(WITH_${COMPONENT}_TESTING)
     DPARAM 3 1e4
     IPARAM 1 1)
 
-  SET(test_fc3d_90_PROPERTIES WILL_FAIL TRUE)
-  NEW_TEST(test_fc3d_90 fc3d_test90.c) # TFP with cycling
-
+  # --- LMGC driver ---
+  
   NEW_TEST(FC3DNewFromFortranData fc3d_newFromFortranData.c)
   NEW_TEST(FC3DLmgcDriver1 fc3d_LmgcDriver_test1.c)
   NEW_TEST(FC3DLmgcDriver2 fc3d_LmgcDriver_test2.c)
@@ -563,27 +563,21 @@ if(WITH_${COMPONENT}_TESTING)
 
   NEW_TEST(FC3DLmgcDriver5 fc3d_LmgcDriver_test5.c)
 
-  NEW_TEST(test_fc3d_100 fc3d_test100.c)# TFP
-  NEW_TEST(test_fc3d_110 fc3d_test110.c)# TFP
+  # --- DeSaxce Fixed Point ---
+  NEW_FC_3D_TEST(BoxesStack1-i100000-32.hdf5.dat
+    SICONOS_FRICTION_3D_DSFP 1e-3 100000
+    0 0 0
+    DPARAM 3 8e-4)
 
-  NEW_TEST(test_fc3d_120 fc3d_test120.c) # TFP
-  NEW_TEST(test_fc3d_121 fc3d_test121.c) # DSFP
+  NEW_FC_3D_TEST(Confeti-ex03-Fc3D-SBM.dat
+    SICONOS_FRICTION_3D_DSFP 0 0
+    0 0 0
+    DPARAM 3 1e2)
 
-  NEW_TEST(test_fc3d_122 fc3d_test122.c) # ACLMFP
-  NEW_TEST(test_fc3d_123 fc3d_test123.c) # SOCLCP
-  NEW_TEST(test_fc3d_124 fc3d_test124.c) # NSGS
-
-  NEW_TEST(test_fc3d_125 fc3d_test125.c) # TFP with other strategy for internal solver
-  NEW_TEST(test_fc3d_126 fc3d_test126.c) # ACLMFPwith other strategy for internal solver
- 
-
-  NEW_TEST(test_fc3d_130 fc3d_test130.c)
-
-  NEW_TEST(test_fc3d_200 fc3d_test200.c)
-  NEW_TEST(test_fc3d_210 fc3d_test210.c)
-
-  NEW_TEST(test_fc3d_300 fc3d_test300.c)
-
+  NEW_FC_3D_TEST(Confeti-ex13-Fc3D-SBM.dat
+    SICONOS_FRICTION_3D_DSFP  1e-08 10000
+    0 0 0
+    DPARAM 3 5e3)
 
   NEW_FC_3D_TEST(Example1_Fc3D_SBM.dat
     SICONOS_FRICTION_3D_DSFP  1e-8 100000
@@ -598,32 +592,55 @@ if(WITH_${COMPONENT}_TESTING)
     0 0 0
     IPARAM 1 1)
 
-  NEW_FC_TEST(FrictionContact3D_1c.dat SICONOS_FRICTION_3D_ONECONTACT_QUARTIC)
-  NEW_FC_TEST(FrictionContact3D_RR_1c.dat SICONOS_FRICTION_3D_ONECONTACT_QUARTIC)
+  # --- Second Order Cone formulation ---
+  NEW_FC_3D_TEST(Confeti-ex03-Fc3D-SBM.dat
+    SICONOS_FRICTION_3D_SOCLCP 0 0
+    0 1e-8 20000)
 
-  # Newton Euler 3D Spheres : some failures with  Alart Curnier
-  NEW_FC_TEST(NESpheres_10_1.dat SICONOS_FRICTION_3D_NSN_AC)
-  NEW_FC_TEST(NESpheres_10_1.dat SICONOS_FRICTION_3D_NSN_FB)
-  NEW_FC_TEST(NESpheres_10_1.dat SICONOS_FRICTION_3D_NSN_NM)
+  # --- Quartic ---
+  NEW_FC_3D_TEST(FrictionContact3D_1c.dat SICONOS_FRICTION_3D_ONECONTACT_QUARTIC)
+  NEW_FC_3D_TEST(FrictionContact3D_RR_1c.dat SICONOS_FRICTION_3D_ONECONTACT_QUARTIC)
 
-  NEW_FC_TEST(NESpheres_30_1.dat SICONOS_FRICTION_3D_NSN_AC)
-  NEW_FC_TEST(NESpheres_30_1.dat SICONOS_FRICTION_3D_NSN_FB)
-  NEW_FC_TEST(NESpheres_30_1.dat SICONOS_FRICTION_3D_NSN_NM)
+  # --- Global friction contact problem formulation ---
+  NEW_GFC_3D_TEST(Example_GlobalFrictionContact.dat SICONOS_GLOBAL_FRICTION_3D_NSGS)
+  NEW_GFC_3D_TEST(Example_GlobalFrictionContact.dat SICONOS_GLOBAL_FRICTION_3D_NSGS 0 0
+    SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone 0 0
+    INTERNAL_IPARAM 0 0
+    INTERNAL_DPARAM 0 0.)
+  NEW_GFC_3D_TEST(Example_GlobalFrictionContact.dat SICONOS_GLOBAL_FRICTION_3D_NSGS_WR)
+  NEW_GFC_3D_TEST(Example_GlobalFrictionContact.dat SICONOS_GLOBAL_FRICTION_3D_PROX_WR)
+  NEW_GFC_3D_TEST(Example_GlobalFrictionContact.dat SICONOS_GLOBAL_FRICTION_3D_DSFP_WR)
+  NEW_GFC_3D_TEST(Example_GlobalFrictionContact.dat SICONOS_GLOBAL_FRICTION_3D_NSGSV_WR 0 0
+    0 0 0
+    WILL_FAIL)
+  NEW_GFC_3D_TEST(Example_GlobalFrictionContact.dat SICONOS_GLOBAL_FRICTION_3D_TFP_WR)
+  NEW_GFC_3D_TEST(problem-check.dat SICONOS_GLOBAL_FRICTION_3D_NSGS_WR 0 0
+    0 0 0
+    INTERNAL_IPARAM 0 2000)
+  NEW_GFC_3D_TEST(check-NewtonAC-1contact.dat SICONOS_GLOBAL_FRICTION_3D_NSGS_WR)
+  NEW_GFC_3D_TEST(problem-check2.dat SICONOS_GLOBAL_FRICTION_3D_NSGS_WR)
+  NEW_TEST(gfc3d_NSGS_WR_ONECONTACT_NSN_AC_GP_problem-check2 gfc3d_test13.c)
+  NEW_GFC_3D_TEST(problem-checkTwoRods1.dat SICONOS_GLOBAL_FRICTION_3D_NSN_AC_WR 0 0
+    0 0 0
+    INTERNAL_IPARAM 0 1000
+    INTERNAL_DPARAM 0 1e-5)
+  NEW_GFC_3D_TEST(problem-checkTwoRods1.dat SICONOS_GLOBAL_FRICTION_3D_NSGS)
+  NEW_TEST(gfc3d_NSGS_WR_ONECONTACT_NSN_AC_GP_problem-checkTwoRods1 gfc3d_test15.c)
+  NEW_GFC_3D_TEST(problem-check.dat SICONOS_GLOBAL_FRICTION_3D_NSN_AC)
+  
+  # Alart Curnier functions
+  NEW_TEST(AlartCurnierFunctions_test fc3d_AlartCurnierFunctions_test.c)
 
-  # Test from rock pile simulations using "time of birth" feature :
-  # failure in local solver with line search
-  NEW_FC_TEST(RockPile_tob1.dat SICONOS_FRICTION_3D_NSGS 1e-3 100000
-    SICONOS_FRICTION_3D_ONECONTACT_NSN_AC_GP 1e-16 100)
-  NEW_FC_TEST(RockPile_tob1.dat SICONOS_FRICTION_3D_NSGS 1e-3 100000
-    SICONOS_FRICTION_3D_ONECONTACT_NSN_AC_GP 1e-16 1000)
-  NEW_FC_TEST(RockPile_tob1.dat SICONOS_FRICTION_3D_NSGS 1e-3 100000
-    SICONOS_FRICTION_3D_ONECONTACT_NSN_AC 1e-16 100)
-
-  ## test from the Rover Example
-  NEW_TEST(test_fc3d_501 fc3d_Rover2.c) ## test ok without LineSearch
-  NEW_TEST(test_fc3d_503 fc3d_Rover3.c) ## JeanMoreau ok, AC:no
-
-
+  # 
+  if(WITH_FCLIB)
+    NEW_TEST(FCLIB_test1 fc3d_writefclib_local_test.c)
+    NEW_TEST(FCLIB_GFC3D_test1 gfc3d_fclib_cubeH8.c)
+    NEW_TEST(FCLIB_GFC3D_test2 gfc3d_test20.c)
+  endif()
+  
+  #===========================================
+  # 2D Friction Contact tests
+  #===========================================
   ## test 2D dense on two differents files
   NEW_TEST(test_fc2d_1 fc2d_test1.c)
   NEW_TEST(test_fc2d_2 fc2d_test2.c)
@@ -653,52 +670,8 @@ if(WITH_${COMPONENT}_TESTING)
   NEW_TEST(test_fc2d_40 fc2d_test40.c)
   NEW_TEST(test_fc2d_41 fc2d_test41.c)
 
-
-  NEW_TEST(GFC3D_test1 gfc3d_test1.c)
-  NEW_TEST(GFC3D_test2 gfc3d_test2.c)
-  NEW_TEST(GFC3D_test3 gfc3d_test3.c)
-  NEW_TEST(GFC3D_test4 gfc3d_test4.c)
-  NEW_TEST(GFC3D_test5 gfc3d_test5.c)
-
-
-  SET(GFC3D_test6_PROPERTIES WILL_FAIL TRUE)
-  NEW_TEST(GFC3D_test6 gfc3d_test6.c)
-  
-  NEW_TEST(GFC3D_test7 gfc3d_test7.c)
-  
-  NEW_TEST(GFC3D_test10 gfc3d_test10.c)
-  NEW_TEST(GFC3D_test11 gfc3d_test11.c)
-  NEW_TEST(GFC3D_test12 gfc3d_test12.c)
-  NEW_TEST(GFC3D_test13 gfc3d_test13.c)
-  NEW_TEST(GFC3D_test14 gfc3d_test14.c)
-  NEW_TEST(GFC3D_test14bis gfc3d_test14bis.c)
-  NEW_TEST(GFC3D_test15 gfc3d_test15.c)
-  NEW_TEST(GFC3D_test16 gfc3d_test16.c)
-
-  
-  ## Alart Curnier functions
-  NEW_TEST(AlartCurnierFunctions_test fc3d_AlartCurnierFunctions_test.c)
-  IF(WITH_FCLIB)
-  NEW_TEST(FCLIB_test1 fc3d_writefclib_local_test.c)
-  NEW_TEST(FCLIB_GFC3D_test1 gfc3d_fclib_cubeH8.c)
-  NEW_TEST(FCLIB_GFC3D_test2 gfc3d_test20.c)
-  ENDIF(WITH_FCLIB)
-  SET(FC3D_DATA_SET
-   "Capsules-i100-1090.dat;Capsules-i100-889.dat;Capsules-i101-404.dat;Capsules-i103-990.dat;Capsules-i122-1617.dat;Example1_Fc3D.dat;Example1_Fc3D_SBM.dat;FrictionContact3D_1c.dat;FrictionContact3D_RR_1c.dat;NESpheres_10_1.dat;NESpheres_30_1.dat;OneObject-i100000-499.hdf5.dat;Rover1039.dat;Rover1040.dat;Rover1041.dat;Rover11035.dat;Rover11211.dat;Rover3865.dat;Rover4144.dat;Rover4396.dat;Rover4493.dat;Rover4516.dat;Rover4609.dat;Rover4613.dat;Rover4622.dat;Rover9770.dat;KaplasTower-i1061-4.hdf5.dat;Confeti-ex13-Fc3D-SBM.dat;BoxesStack1-i100000-32.hdf5.dat;FrictionContactProblem00237.dat;FrictionContactProblem00727.dat")
-
-  IF(HAVE_GAMS_C_API)
-    FOREACH(_DAT ${FC3D_DATA_SET})
-     NEW_FC_TEST(${_DAT} SICONOS_FRICTION_3D_GAMS_PATH)
-     NEW_FC_TEST(${_DAT} SICONOS_FRICTION_3D_GAMS_LCP_PATH)
-     IF(HAVE_GAMS_PATHVI)
-       NEW_FC_TEST(${_DAT} SICONOS_FRICTION_3D_GAMS_PATHVI)
-       NEW_FC_TEST(${_DAT} SICONOS_FRICTION_3D_GAMS_LCP_PATHVI)
-      ENDIF(HAVE_GAMS_PATHVI)
-    ENDFOREACH(_DAT ${FC3D_DATA_SET})
-  ENDIF(HAVE_GAMS_C_API)
-
-  
-  END_TEST()
+ 
+ END_TEST()
 
 
 

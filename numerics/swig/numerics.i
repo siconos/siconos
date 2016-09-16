@@ -370,7 +370,7 @@ namespace std11 = boost;
 // the order matters
 %include numerics_FC.i
 %include numerics_GFC.i
-
+%include GAMSlink.h
 %extend SN_GAMSparams
 {
 

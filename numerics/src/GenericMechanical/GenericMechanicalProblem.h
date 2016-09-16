@@ -16,7 +16,7 @@
  * limitations under the License.
 */
 
-#ifndef NUMERICSGENERICMECHANICALPROBLEM_$H
+#ifndef NUMERICSGENERICMECHANICALPROBLEM_H
 #define NUMERICSGENERICMECHANICALPROBLEM_H
 
 #include "NumericsFwd.h"

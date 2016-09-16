@@ -189,12 +189,11 @@ int main()
 
   cpy3x3(ia, a);
   cpy3(iv, v);
-
   START_TIMER(t7);
   for (i = 0; i < 1; ++i)
   {
     cpy3(v, x);
-    solv3x3(a, x, v);
+    info = solv3x3(a, x, v);
     v[0] += 0.0001;
   }
   STOP_TIMER(t7);
@@ -318,7 +317,7 @@ int main()
     cpy3x3(A + 9 * i, a);
 
     cpy3(B + 3 * i, x);
-    solv3x3(a, x, B + 3 * i);
+    info = solv3x3(a, x, B + 3 * i);
 
     /*
     printf("x:\n");

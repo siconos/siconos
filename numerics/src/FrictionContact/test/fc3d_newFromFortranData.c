@@ -19,7 +19,8 @@
 #include <stdlib.h>
 #include "NonSmoothDrivers.h"
 #include "frictionContact_test_function.h"
-
+#include "SparseBlockMatrix.h"
+#include "FrictionContactProblem.h"
 
 int main(void)
 {
