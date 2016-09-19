@@ -1,6 +1,7 @@
 
 #include <stdio.h>
 #include "hdf5_logger.h"
+#include "NumericsSparseMatrix.h"
 
 #ifdef WITH_HDF5
 
