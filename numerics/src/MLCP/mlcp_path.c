@@ -21,7 +21,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-
+#include "NumericsMatrix.h"
+#include "misc.h"
 #ifdef HAVE_PATHFERRIS
 #include "tools/InterfaceToPathFerris/SimpleLCP.h"
 #endif

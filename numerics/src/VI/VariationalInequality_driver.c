@@ -21,6 +21,7 @@
 #include <time.h>
 #include <float.h>
 #include <math.h>
+#include <assert.h>
 #include "VariationalInequality_Solvers.h"
 #include "VariationalInequality_computeError.h"
 

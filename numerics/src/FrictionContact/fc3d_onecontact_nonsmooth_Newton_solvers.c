@@ -35,7 +35,7 @@
 /* #define DEBUG_MESSAGES *\/ */
 /* #define DEBUG_STDOUT *\/ */
 #include "debug.h"
-
+#include <string.h>
 static computeNonsmoothFunction  Function = NULL;
 static NewtonFunctionPtr F = NULL;
 static NewtonFunctionPtr jacobianF = NULL;
