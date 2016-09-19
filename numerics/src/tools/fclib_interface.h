@@ -30,6 +30,7 @@ extern "C"
 #endif
 
 #if defined(WITH_FCLIB)
+  #include <FrictionContactProblem.h>
   FrictionContactProblem* from_fclib_local(const struct fclib_local *fclib_problem);
 
 

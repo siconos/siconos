@@ -26,7 +26,11 @@
 #ifdef WITH_FCLIB
 #include "fclib_interface.h"
 #include "FrictionContactProblem.h"
-
+#include "NumericsMatrix.h"
+#include "NumericsSparseMatrix.h"
+#include "SparseBlockMatrix.h"
+#include "timers_interf.h"
+#include "GlobalFrictionContactProblem.h"
 
 void int_to_csi(int* o, csi* d, unsigned int n);
 void int_to_csi(int* o, csi* d, unsigned int n)

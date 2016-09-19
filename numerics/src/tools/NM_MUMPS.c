@@ -19,6 +19,7 @@
 
 #include "NumericsMatrix_private.h"
 #include "NumericsMatrix.h"
+#include "NumericsSparseMatrix.h"
 
 #include "debug.h"
 #include "misc.h"
