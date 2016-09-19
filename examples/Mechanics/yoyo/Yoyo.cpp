@@ -205,6 +205,7 @@ int main(int argc, char* argv[])
         OSI.reset(new MoreauJeanOSI(theta));
         osnspb.reset(new LCP());
         s.reset(new TimeStepping(t, OSI, osnspb));
+	jeu->setSimulation(s);
         jeu->initialize();
 
         q = yoyo->q();
