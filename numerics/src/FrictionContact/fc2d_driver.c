@@ -61,17 +61,10 @@ int fc2d_driver(FrictionContactProblem* problem, double *reaction , double *velo
   if (problem == NULL || reaction == NULL || velocity == NULL)
     numericsError("fc2d_driver", "null input for FrictionContactProblem and/or unknowns (reaction,velocity)");
 
-  /* If the options for solver have not been set, read default values in .opt file */
-  int NoDefaultOptions = options->isSet; /* true(1) if the SolverOptions structure has been filled in else false(0) */
-
-  if (!NoDefaultOptions)
-    solver_options_read(3, options);
+  assert(options->isSet);
 
   if (verbose > 0)
     solver_options_print(options);
-
-
-
 
 
   /* Solver name */

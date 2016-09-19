@@ -50,12 +50,7 @@ int variationalInequality_driver(VariationalInequality* problem,
   if (options == NULL)
     numericsError("variationalInequality_driver", "null input for solver and/or global options");
 
-  /* If the options for solver have not been set, read default values in .opt file */
-  int NoDefaultOptions = options->isSet; /* true(1) if the SolverOptions structure has been filled in else false(0) */
-
-  if (!NoDefaultOptions)
-    solver_options_read(3, options);
-
+  assert(options->isSet);
   if (verbose > 0)
     solver_options_print(options);
 

@@ -35,12 +35,7 @@ int avi_driver(AffineVariationalInequalities* problem, double *z , double *w, So
   assert(problem->M->storageType == 0 &&
       "avi_driver_DenseMatrix : forbidden type of storage for the matrix M of the AVI");
 
-  /* If the options for solver have not been set, read default values in .opt file */
-  if (options->isSet == 0)
-  {
-    solver_options_read(0, options);
-    options->filterOn = 1;
-  }
+  assert(options->isSet);
 
   if (verbose > 0)
   {

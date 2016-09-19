@@ -62,10 +62,7 @@ int soclcp_driver(SecondOrderConeLinearComplementarityProblem* problem,
   if(options == NULL)
     numericsError("soclcp_driver", "null input for solver and/or global options");
 
-  int NoDefaultOptions = options->isSet; /* true(1) if the SolverOptions structure has been filled in else false(0) */
-
-  if(!NoDefaultOptions)
-    solver_options_read(3, options);
+  assert(options->isSet);
 
   if(verbose > 0)
     solver_options_print(options);

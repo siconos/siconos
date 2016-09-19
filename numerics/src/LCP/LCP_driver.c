@@ -134,14 +134,7 @@ int lcp_driver_DenseMatrix(LinearComplementarityProblem* problem, double *z , do
   if (problem->M->storageType == 1)
     numericsError("lcp_driver_DenseMatrix", "forbidden type of storage for the matrix M of the LCP");
 
-  /* If the options for solver have not been set, read default values in .opt file */
-  int NoDefaultOptions = options->isSet; /* true(1) if the SolverOptions structure has been filled in else false(0) */
-
-  if (NoDefaultOptions == 0)
-  {
-    solver_options_read(0, options);
-    options->filterOn = 1;
-  }
+  assert(options->isSet);
 
   if (verbose > 0)
     solver_options_print(options);

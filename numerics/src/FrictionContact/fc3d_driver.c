@@ -71,10 +71,7 @@ int fc3d_driver(FrictionContactProblem* problem,
   if (options == NULL)
     numericsError("fc3d_driver", "null input for solver options");
 
-  int NoDefaultOptions = options->isSet; /* true(1) if the SolverOptions structure has been filled in else false(0) */
-
-  if (!NoDefaultOptions)
-    solver_options_read(3, options);
+  assert(options->isSet); /* true(1) if the SolverOptions structure has been filled in else false(0) */
 
   if (verbose > 1)
     solver_options_print(options);

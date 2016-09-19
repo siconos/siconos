@@ -148,17 +148,6 @@ extern "C"
 {
 #endif
 
-  /** Read default parameters values for a solver and save them in a SolverOptions structure
-      \param[in] driverType  type of the considered problem.
-      Only the following solvers ids are allowed :\n
-      0: LCP\n
-      1: MLCP\n
-      2: FrictionContact2D\n
-      3: FrictionContact3D\n
-      \param[out] options structure used to save the parameters
-  */
-  void solver_options_read(int driverType, SolverOptions* options);
-
   /** screen display of solver parameters
       \param options the structure to be displayed
   */
