@@ -20,7 +20,7 @@
 #include "Simulation.hpp"
 #include "NormalConeNSL.hpp"
 #include "OSNSMatrix.hpp"
-
+#include "SiconosSets.h" // from numerics, for polyhedron
 //#include <AVI_Solvers.h>
 #include <NonSmoothDrivers.h>
 
@@ -152,7 +152,7 @@ int AVI::compute(double time)
     _numerics_problem->q = _q->getArray();
 
     info = avi_driver(_numerics_problem.get(), _z->getArray() , _w->getArray() ,
-                      _numerics_solver_options.get(), _numerics_options.get());
+                      _numerics_solver_options.get());
 
     if (info != 0)
     {

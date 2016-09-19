@@ -35,7 +35,7 @@
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
 #include "debug.h"
-
+#include "misc.h" // numerics to set verbose mode ...
 
 
 OneStepNSProblem::OneStepNSProblem():
@@ -499,8 +499,7 @@ void OneStepNSProblem::printStat()
 {
   std::cout << " Number of iterations done: " << _nbIter <<std::endl;
 }
-
 void OneStepNSProblem::setNumericsVerboseMode(bool vMode)
 {
-  _numerics_options->verboseMode = vMode;
+  setNumericsVerbose(vMode);
 }

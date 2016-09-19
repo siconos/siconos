@@ -9,19 +9,6 @@
 %include "VariationalInequality_Solvers.h"
 %include "VI_cst.h"
 
-
-%extend SolverOptions
-{
-  SolverOptions(VariationalInequality* vi, enum VI_SOLVER id)
-  {
-    SolverOptions *SO;
-    SO = (SolverOptions *) malloc(sizeof(SolverOptions));
-    solver_options_set(SO, id);
-    return SO;
-  }
-};
-
-
 %extend VariationalInequality
 {
 

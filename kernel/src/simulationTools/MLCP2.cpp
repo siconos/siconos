@@ -319,7 +319,7 @@ int MLCP2::compute(double time)
     //      exit(1);
     //mlcpDefaultSolver *pSolver = new mlcpDefaultSolver(m,n);
     //      displayMLCP2(&numerics_problem);
-    info = mlcp_driver(&numerics_problem, _z->getArray(), _w->getArray(), (solver->numericsSolverOptions()).get(), numerics_options.get());
+    info = mlcp_driver(&numerics_problem, _z->getArray(), _w->getArray(), (solver->numericsSolverOptions()).get());
 
     // --- Recovering of the desired variables from MLCP2 output ---
     postCompute();

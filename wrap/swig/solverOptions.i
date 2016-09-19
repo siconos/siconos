@@ -311,3 +311,9 @@ static int convert_darray(PyObject *input, double *ptr) {
   $1 = pycallback;
 
  }
+
+%{
+#include "SolverOptions.h"
+%}
+
+%include "SolverOptions.h"

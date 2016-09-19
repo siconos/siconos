@@ -53,6 +53,12 @@
 */
 
 #include "SiconosNumerics.h"
+#include "FrictionContactProblem.h"
+#include "NumericsMatrix.h"
+#include "SolverOptions.h"
+#include "Friction_cst.h"
+#include "fc3d_Solvers.h"
+
 
 int main(int argc, char* argv[])
 {

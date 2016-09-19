@@ -9,18 +9,6 @@
 %include "MCP_Solvers.h"
 %include "MCP_cst.h"
 
-%extend SolverOptions
-{
-  SolverOptions(MixedComplementarityProblem* mlcp, enum MCP_SOLVER id)
-  {
-    SolverOptions *SO;
-    SO = (SolverOptions *) malloc(sizeof(SolverOptions));
-    SO->solverId=id;
-    mixedComplementarity_setDefaultSolverOptions(mlcp, SO);
-    return SO;
-  }
-};
-
 %extend MixedComplementarityProblem
 {
 

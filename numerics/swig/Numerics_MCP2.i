@@ -1,15 +1,3 @@
-
-%extend SolverOptions
-{
-  SolverOptions(MixedComplementarityProblem2* mcp, enum MCP_SOLVER id)
-  {
-    SolverOptions *SO;
-    SO = (SolverOptions *) malloc(sizeof(SolverOptions));
-    solver_options_set(SO, id);
-    return SO;
-  }
-};
-
 %extend MixedComplementarityProblem2
 {
   MixedComplementarityProblem2()

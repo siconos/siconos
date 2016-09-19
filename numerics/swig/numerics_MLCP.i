@@ -29,19 +29,6 @@
 %include "MixedLinearComplementarityProblem.h"
 %include "MLCP_Solvers.h"
 
-%extend SolverOptions
-{ 
-  SolverOptions(MixedLinearComplementarityProblem* mlcp, enum MLCP_SOLVER id)
-  {
-    SolverOptions *SO;
-    SO = (SolverOptions *) malloc(sizeof(SolverOptions));
-    SO->solverId=id;
-    mixedLinearComplementarity_setDefaultSolverOptions(mlcp, SO);
-    return SO;
-  }
-};
-
-
 %exception MixedLinearComplementarityProblem {
     $action
     if (PyErr_Occurred()) SWIG_fail;

@@ -12,18 +12,6 @@
 %include "LCP_Solvers.h"
 %include "lcp_cst.h"
 
-%extend SolverOptions
-{
-  SolverOptions(LinearComplementarityProblem* lcp, enum LCP_SOLVER id)
-  {
-    SolverOptions *SO;
-    SO = (SolverOptions *) malloc(sizeof(SolverOptions));
-    solver_options_set(SO, id);
-    return SO;
-  }
-
-};
-
 %extend LinearComplementarityProblem
 {
   LinearComplementarityProblem(PyObject *o1, PyObject *o2)

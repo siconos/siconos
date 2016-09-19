@@ -86,15 +86,15 @@ namespace std11 = boost;
 // instead of respecting the shared_ptr!
 // %shared_ptr(FrictionContactProblem)
 
-%rename (LCP) LinearComplementarityProblem;
-%rename (MLCP) MixedLinearComplementarityProblem;
-%rename (MCP) MixedComplementarityProblem;
-%rename (VI) VariationalInequality;
-%rename (AVI) AffineVariationalInequalities;
 
-%inline %{
-  #include "NumericsFwd.h"
- %}
+ // more convenient
+ %rename (LCP) LinearComplementarityProblem;
+ %rename (MLCP) MixedLinearComplementarityProblem;
+ %rename (MCP) MixedComplementarityProblem;
+ %rename (VI) VariationalInequality;
+ %rename (AVI) AffineVariationalInequalities;
+
+ %ignore lcp_compute_error_only;
 
  // -- Numpy typemaps --
  // See http://docs.scipy.org/doc/numpy/reference/swig.interface-file.html.
@@ -195,8 +195,30 @@ namespace std11 = boost;
 
 %fragment("NumPy_Fragments");
 
-// // //Relay
-// // %include "relay_cst.h"
+// includes in 'begin' mandatory to avoid mess with
+// solverOptions.i, numerics_common and fwd decl
+// all this because of SolverOptions extend.
+%begin %{
+#include "relay_cst.h"
+#include "AVI_cst.h"
+#include "SOCLCP_cst.h"
+#include "Friction_cst.h"
+#include "lcp_cst.h"
+#include "MCP_cst.h"
+#include "mlcp_cst.h"
+#include "NCP_cst.h"
+#include "VI_cst.h"
+#include "GenericMechanical_cst.h"
+#include "fc2d_Solvers.h"
+#include "fc3d_Solvers.h"
+#include "gfc3d_Solvers.h"
+#include "MCP_Solvers.h"
+#include "MLCP_Solvers.h"
+  
+  %}
+
+//Relay
+%include "relay_cst.h"
 
 %include numerics_MLCP.i
 
@@ -323,54 +345,46 @@ namespace std11 = boost;
 
 %include Numerics_for_python_callback.i
 
+%include numerics_common.i
+
 %include numerics_MCP.i
 %include Numerics_MCP2.i
 %include Numerics_VI.i
 
 
 
-// // // FrictionContact
-// // %ignore LocalNonsmoothNewtonSolver; //signature problem (should be SolverOption
-// //                           //instead of *iparam, *dparam).
-// // %ignore DampedLocalNonsmoothNewtonSolver; // signature problem idem.
+// FrictionContact
+%ignore LocalNonsmoothNewtonSolver; //signature problem (should be SolverOption
+                          //instead of *iparam, *dparam).
+%ignore DampedLocalNonsmoothNewtonSolver; // signature problem idem.
 
-// // %ignore frictionContactProblem_new; // signature issue with mu param
+%ignore frictionContactProblem_new; // signature issue with mu param
 
-// %include "typemaps.i"
+%include "typemaps.i"
 
-// // %apply double *OUTPUT { double *error };
-// // %apply double *OUTPUT { double *result };
+%apply double *OUTPUT { double *error };
+%apply double *OUTPUT { double *result };
 
-// // // Callback (see SolverOptions.i) needed here
-// // %typemap(in, numinputs=0) (FischerBurmeisterFun3x3Ptr computeACFun3x3) () {
-// //   // Callback (see SolverOptions.i) needed here
-// //   $1 = &fc3d_FischerBurmeisterFunctionGenerated;
-// //  }
+// Callback (see SolverOptions.i) needed here
+%typemap(in, numinputs=0) (FischerBurmeisterFun3x3Ptr computeACFun3x3) () {
+  // Callback (see SolverOptions.i) needed here
+  $1 = &fc3d_FischerBurmeisterFunctionGenerated;
+ }
 
-// // %typemap(in, numinputs=0) (AlartCurnierFun3x3Ptr computeACFun3x3) () {
-// //   // Callback (see SolverOptions.i) needed here
-// //   $1 = &fc3d_AlartCurnierFunctionGenerated;
-// //  }
+%typemap(in, numinputs=0) (AlartCurnierFun3x3Ptr computeACFun3x3) () {
+  // Callback (see SolverOptions.i) needed here
+  $1 = &fc3d_AlartCurnierFunctionGenerated;
+ }
 
-// // %typemap(in, numinputs=0) (NaturalMapFun3x3Ptr computeACFun3x3) () {
-// //   // Callback (see SolverOptions.i) needed here
-// //   $1 = &fc3d_NaturalMapFunctionGenerated;
-// //  }
-
-// // %include "fc3d_AlartCurnier_functions.h"
-// // %include "fc3d_nonsmooth_Newton_AlartCurnier.h"
-// // %include "fc3d_nonsmooth_Newton_FischerBurmeister.h"
-// // %include "fc3d_nonsmooth_Newton_natural_map.h"
-// // %include "AlartCurnierGenerated.h"
-// // %include "FischerBurmeisterGenerated.h"
-// // %include "NaturalMapGenerated.h"
-// // %include "fclib_interface.h"
-// // %include "GAMSlink.h"
+%typemap(in, numinputs=0) (NaturalMapFun3x3Ptr computeACFun3x3) () {
+  // Callback (see SolverOptions.i) needed here
+  $1 = &fc3d_NaturalMapFunctionGenerated;
+ }
 
 // the order matters
 %include numerics_FC.i
 %include numerics_GFC.i
-%include GAMSlink.h
+
 %extend SN_GAMSparams
 {
 
@@ -394,17 +408,14 @@ namespace std11 = boost;
 %{
 #include <GenericMechanical_cst.h>
 %}
-%include GenericMechanical_cst.h
-
-%include numerics_common.i
+//%include GenericMechanical_cst.h
 
 %include numerics_NM.i
 
 #ifdef WITH_SERIALIZATION
 %make_picklable(Callback, Numerics);
-%make_picklable(SolverOptions_, Numerics);
+%make_picklable(SolverOptions, Numerics);
 %make_picklable(FrictionContactProblem, Numerics);
 %make_picklable(NumericsMatrix, Numerics);
 %make_picklable(SparseBlockStructuredMatrix, Numerics);
 #endif
-

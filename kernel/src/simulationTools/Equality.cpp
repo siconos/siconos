@@ -18,6 +18,7 @@
 #include "Equality.hpp"
 #include "Simulation.hpp"
 #include "OSNSMatrix.hpp"
+#include "NonSmoothDrivers.h" // from numerics, for LinearSystem_driver
 
 using namespace RELATION;
 

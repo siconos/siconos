@@ -10,18 +10,6 @@
 %include "AVI_Solvers.h"
 %include "AVI_cst.h"
 
-%extend SolverOptions
-{
-  SolverOptions(AffineVariationalInequalities* vi, enum AVI_SOLVER id)
-  {
-    SolverOptions *SO;
-    SO = (SolverOptions *) malloc(sizeof(SolverOptions));
-    SO->solverId=id;
-    solver_options_set(SO, id);
-    return SO;
-  }
-};
-
 %extend AffineVariationalInequalities
 {
   AffineVariationalInequalities()

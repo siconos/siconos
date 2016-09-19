@@ -138,8 +138,12 @@ ENDMACRO(RM_TEST2)
 #  INTERNAL_IPARAM idx value ...
 #  INTERNAL_DPARAM idx value ...
 MACRO(NEW_FC_TEST)
+
+  # check input file name
   assert(SOURCE_FILE_NAME)
+  # check prefix for test (fc3d, gfc3d ...)
   assert(TEST_NAME_PREFIX)
+  
   SET(TEST_DATA ${ARGV0})
 
   SET(TEST_SOLVER ${ARGV1})
@@ -286,7 +290,7 @@ MACRO(NEW_FC_TEST)
   ENDIF(${ARGC} GREATER 7)
     
 
-  STRING(REGEX REPLACE "SICONOS_FRICTION_3D" "3d" TEST_SOLVER_NAME1 ${TEST_SOLVER})
+  STRING(REGEX REPLACE "SICONOS_FRICTION_3D" "" TEST_SOLVER_NAME1 ${TEST_SOLVER})
   STRING(REGEX REPLACE "SICONOS_FRICTION_3D" "" TEST_INTERNAL_SOLVER_NAME1 ${TEST_INTERNAL_SOLVER})
   STRING(REGEX REPLACE "SICONOS_FRICTION_2D" "2d" TEST_SOLVER_NAME ${TEST_SOLVER_NAME1})
   STRING(REGEX REPLACE "SICONOS_FRICTION_2D" "" TEST_INTERNAL_SOLVER_NAME ${TEST_INTERNAL_SOLVER_NAME1})
@@ -329,8 +333,17 @@ ENDMACRO(NEW_FC_TEST)
 
 macro(NEW_FC_3D_TEST)
   # Set name of the file used to generate tests (c)source files.
-  set(SOURCE_FILE_NAME fc3d_test.c.in )
+  set(SOURCE_FILE_NAME fc_test.c.in )
   set(TEST_NAME_PREFIX fc3d)
+  NEW_FC_TEST(${ARGV})
+  unset(SOURCE_FILE_NAME)
+  unset(TEST_NAME_PREFIX)
+endmacro()
+
+macro(NEW_FC_2D_TEST)
+  # Set name of the file used to generate tests (c)source files.
+  set(SOURCE_FILE_NAME fc_test.c.in )
+  set(TEST_NAME_PREFIX fc2d)
   NEW_FC_TEST(${ARGV})
   unset(SOURCE_FILE_NAME)
   unset(TEST_NAME_PREFIX)

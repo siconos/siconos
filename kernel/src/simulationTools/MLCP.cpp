@@ -23,7 +23,9 @@
 #include "Model.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
 
-#include <MLCP_Solvers.h>
+// --- Numerics headers ---
+#include "NonSmoothDrivers.h"
+#include "MLCP_Solvers.h"
 
 using namespace RELATION;
 // #define DEBUG_STDOUT
@@ -178,7 +180,7 @@ int MLCP::compute(double time)
     try
     {
       info = mlcp_driver(&_numerics_problem, _z->getArray(), _w->getArray(),
-                         &*_numerics_solver_options, &*_numerics_options);
+                         &*_numerics_solver_options);
     }
     catch (...)
     {

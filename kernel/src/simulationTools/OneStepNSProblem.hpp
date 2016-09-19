@@ -66,7 +66,7 @@
    \section osns_options Options for Numerics and the driver for solvers
 
    When the Numerics driver is called a set of solver options (name, tolerance, max. number of iterations ...)
-   is required --> _SolverOptions, \ref NumericsSolver.
+   is required --> SolverOptions, \ref NumericsSolver.
 
    Default values are always set in solver options the OneStepNSProblem is built
    but if you need to set them yourself, please see \ref NumericsSolver. 
@@ -242,9 +242,6 @@ public:
     return _nbIter;
   };
 
-  /** set Numerics verbose mode
-      \param vMode 1 for on, 0 for off
-   */
   void setNumericsVerboseMode(bool vMode);
 
   /** reset stat (nbIter and CPUtime)

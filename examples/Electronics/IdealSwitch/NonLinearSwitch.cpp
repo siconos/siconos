@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "circuit.h"
+#include "MLCP_Solvers.h"
 
 using namespace std;
 

@@ -21,7 +21,9 @@
 // #define DEBUG_MESSAGES 1
 #include "debug.h"
 
-#include <LCP_Solvers.h>
+// --- numerics headers ---
+#include "NonSmoothDrivers.h"
+#include "LCP_Solvers.h"
 
 using namespace RELATION;
 
@@ -70,7 +72,7 @@ int LCP::compute(double time)
 
     }
     info = linearComplementarity_driver(&*_numerics_problem, _z->getArray() , _w->getArray() ,
-                                        &*_numerics_solver_options, &*_numerics_options);
+                                        &*_numerics_solver_options);
 
     if (_numerics_solver_options->solverId == SICONOS_LCP_ENUM)
     {

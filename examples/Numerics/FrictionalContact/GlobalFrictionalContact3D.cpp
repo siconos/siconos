@@ -54,6 +54,15 @@
   \brief
 */
 
+#include "GlobalFrictionContactProblem.h"
+#include "FrictionContactProblem.h"
+#include "NumericsMatrix.h"
+#include "SiconosNumerics.h"
+#include "SparseBlockMatrix.h"
+#include "NumericsSparseMatrix.h"
+#include "SolverOptions.h"
+#include "Friction_cst.h"
+#include "gfc3d_Solvers.h"
 #include "SiconosNumerics.h"
 
 int main(int argc, char* argv[])

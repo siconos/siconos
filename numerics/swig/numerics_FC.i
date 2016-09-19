@@ -19,78 +19,19 @@
 %include fclib_interface.h
 #endif
 
+%include "fc3d_AlartCurnier_functions.h"
+%include "fc3d_nonsmooth_Newton_AlartCurnier.h"
+%include "fc3d_nonsmooth_Newton_FischerBurmeister.h"
+%include "fc3d_nonsmooth_Newton_natural_map.h"
+%include "AlartCurnierGenerated.h"
+%include "FischerBurmeisterGenerated.h"
+%include "NaturalMapGenerated.h"
+%include "fclib_interface.h"
 %include "fc3d_Solvers.h"
 %include "fc3d_unitary_enumerative.h"
 %include "fc2d_Solvers.h"
 %include "Friction_cst.h"
 %include "fc3d_compute_error.h"
-%include "fc3d_nonsmooth_Newton_natural_map.h"
-%include "fc3d_nonsmooth_Newton_AlartCurnier.h"
-%include "fc3d_nonsmooth_Newton_FischerBurmeister.h"
-%include "fc3d_AlartCurnier_functions.h"
-%include "AlartCurnierGenerated.h"
-%include "FischerBurmeisterGenerated.h"
-%include "NaturalMapGenerated.h"
-
-%ignore LocalNonsmoothNewtonSolver; //signature problem (should be SolverOption
-                          //instead of *iparam, *dparam).
-%ignore DampedLocalNonsmoothNewtonSolver; // signature problem idem.
-
-%ignore frictionContactProblem_new; // signature issue with mu param
-
-%include "typemaps.i"
-
-%apply double *OUTPUT { double *error };
-%apply double *OUTPUT { double *result };
-
-// Callback (see SolverOptions.i) needed here
-%typemap(in, numinputs=0) (FischerBurmeisterFun3x3Ptr computeACFun3x3) () {
-  // Callback (see SolverOptions.i) needed here
-  $1 = &fc3d_FischerBurmeisterFunctionGenerated;
- }
-
-%typemap(in, numinputs=0) (AlartCurnierFun3x3Ptr computeACFun3x3) () {
-  // Callback (see SolverOptions.i) needed here
-  $1 = &fc3d_AlartCurnierFunctionGenerated;
- }
-
-%typemap(in, numinputs=0) (NaturalMapFun3x3Ptr computeACFun3x3) () {
-  // Callback (see SolverOptions.i) needed here
-  $1 = &fc3d_NaturalMapFunctionGenerated;
- }
-
-
-%extend SolverOptions
-{
-  SolverOptions(enum FRICTION_SOLVER id)
-  {
-    SolverOptions *SO;
-    SO = (SolverOptions *) malloc(sizeof(SolverOptions));
-
-    /* cf Friction_cst.h */
-    if(id >= 400 && id < 500)
-    {
-      fc2d_setDefaultSolverOptions(SO, id);
-    }
-    else if (id >= 500 && id < 600)
-    {
-      fc3d_setDefaultSolverOptions(SO, id);
-    }
-    else if (id >= 600 && id < 700)
-    {
-      gfc3d_setDefaultSolverOptions(SO, id);
-    }
-    else
-    {
-      PyErr_SetString(PyExc_RuntimeError, "Unknown friction contact problem solver");
-      free(SO);
-      return NULL;
-    }
-
-
-    return SO;
-  }
-};
 
 %extend FrictionContactProblem
 {
