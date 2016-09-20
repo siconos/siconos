@@ -20,6 +20,7 @@
 #include "NonSmoothDrivers.h"
 #include "frictionContact_test_function.h"
 #include "fc3d_Solvers.h"
+#include "gfc3d_Solvers.h"
 #include "Friction_cst.h"
 #if defined(WITH_FCLIB)
 #include <fclib.h>
