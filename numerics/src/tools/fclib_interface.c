@@ -171,9 +171,10 @@ int frictionContact_fclib_write(FrictionContactProblem* problem, char * title, c
       for (int j = 0; j <  problem ->M->size1 ; j++)
       {
         fclib_problem->W->x[i * problem ->M->size1 + j ] = problem ->M->matrix0[j * problem ->M->size0 + i  ];
+        fclib_problem->W->i[i * problem ->M->size1 + j ] = j;
       }
     }
-    fclib_problem->W->p[fclib_problem->W->m] = (fclib_problem->W->m + 1) * problem ->M->size1;
+    fclib_problem->W->p[fclib_problem->W->m] = (fclib_problem->W->m) * problem ->M->size1;
 
   }
   else if (problem ->M->storageType == 1) /* Sparse block storage */
