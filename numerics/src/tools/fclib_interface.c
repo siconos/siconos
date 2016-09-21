@@ -156,12 +156,15 @@ int frictionContact_fclib_write(FrictionContactProblem* problem, char * title, c
 
 
   CSparseMatrix * spmat = NULL;
+  
   if (problem ->M->storageType == 0) /* Dense Matrix */
   {
     fclib_problem->W->nzmax = problem->M->size0 * problem->M->size1;
     fclib_problem->W->p = (int*)malloc((fclib_problem->W->m + 1) * sizeof(int));
     fclib_problem->W->i = (int*)malloc((fclib_problem->W->nzmax) * sizeof(int));
     fclib_problem->W->x = (double*)malloc((fclib_problem->W->nzmax) * sizeof(double));
+    fclib_problem->W->nz = -2;
+    fclib_problem->W->info = NULL;
     for (int i = 0; i <  problem ->M->size0 ; i++)
     {
       fclib_problem->W->p[i] = i * problem ->M->size1;
@@ -170,7 +173,7 @@ int frictionContact_fclib_write(FrictionContactProblem* problem, char * title, c
         fclib_problem->W->x[i * problem ->M->size1 + j ] = problem ->M->matrix0[j * problem ->M->size0 + i  ];
       }
     }
-    fclib_problem->W->p[fclib_problem->W->m + 1] = (fclib_problem->W->m + 1) * problem ->M->size1;
+    fclib_problem->W->p[fclib_problem->W->m] = (fclib_problem->W->m + 1) * problem ->M->size1;
 
   }
   else if (problem ->M->storageType == 1) /* Sparse block storage */
@@ -222,8 +225,6 @@ int frictionContact_fclib_write(FrictionContactProblem* problem, char * title, c
 
   if (problem ->M->storageType == 0) /* Dense Matrix */
   {
-    free(fclib_problem->W->p);
-    free(fclib_problem->W->i);
     free(fclib_problem->W->x);
   }
   else if (problem ->M->storageType == 1)
