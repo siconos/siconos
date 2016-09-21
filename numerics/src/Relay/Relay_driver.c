@@ -29,7 +29,7 @@
 #include "relay_cst.h"
 #include "NumericsMatrix.h"
 #include <time.h>
-#include "misc.h"
+#include "numerics_verbose.h"
 
 char*  SICONOS_RELAY_PGS_STR = "RELAY_PGS";
 char*  SICONOS_RELAY_PATH_STR = "RELAY_PATH";
@@ -48,11 +48,11 @@ int relay_driver(RelayProblem* problem, double *z , double *w,
   //Relay_display(problem);
 
   if (options == NULL)
-    numericsError("Relay_driver", "null input for solver and/or global options");
+    numerics_error("Relay_driver", "null input for solver and/or global options");
 
   /* Checks inputs */
   if (problem == NULL || z == NULL || w == NULL)
-    numericsError("Relay_driver", "null input for RelayProblem and/or unknowns (z,w)");
+    numerics_error("Relay_driver", "null input for RelayProblem and/or unknowns (z,w)");
 
   /* Output info. : 0: ok -  >0: problem (depends on solver) */
   int info = -1;
@@ -64,7 +64,7 @@ int relay_driver(RelayProblem* problem, double *z , double *w,
   /* Sparse Block Storage */
   if (storageType == 1)
   {
-    numericsError("Relay_driver", "not yet implemented for sparse storage.");
+    numerics_error("Relay_driver", "not yet implemented for sparse storage.");
   }
   // else
 

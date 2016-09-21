@@ -28,7 +28,7 @@
 
 #include "SiconosLapack.h"
 #include <assert.h>
-#include "misc.h"
+#include "numerics_verbose.h"
 void lcp_newton_min(LinearComplementarityProblem* problem, double *z, double *w, int *info , SolverOptions* options)
 {
   /* matrix M/vector q of the lcp */

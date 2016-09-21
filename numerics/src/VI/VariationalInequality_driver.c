@@ -28,7 +28,7 @@
 #include "NonSmoothDrivers.h"
 #include "SiconosBlas.h"
 #include "SiconosSets.h"
-#include "misc.h"
+#include "numerics_verbose.h"
 
 char *  SICONOS_VI_EG_STR = "VI_EG";
 char *  SICONOS_VI_FPP_STR = "VI_FPP";
@@ -49,7 +49,7 @@ int variationalInequality_driver(VariationalInequality* problem,
                                  SolverOptions* options)
 {
   if (options == NULL)
-    numericsError("variationalInequality_driver", "null input for solver and/or global options");
+    numerics_error("variationalInequality_driver", "null input for solver and/or global options");
 
   assert(options->isSet);
   if (verbose > 0)

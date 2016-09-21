@@ -30,7 +30,7 @@
 
 #include "SiconosLapack.h"
 #include "lcp_enum.h"
-#include "misc.h"
+#include "numerics_verbose.h"
 
 static unsigned long  int sCurrentEnum = 0;
 static unsigned long  int sCmpEnum = 0;

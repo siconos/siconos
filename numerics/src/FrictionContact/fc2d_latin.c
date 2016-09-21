@@ -25,7 +25,7 @@
 #include "NumericsMatrix.h"
 #include "fc2d_Solvers.h"
 #include "SiconosLapack.h"
-#include "misc.h"
+#include "numerics_verbose.h"
 
 
 void fc2d_latin(FrictionContactProblem* problem , double *reaction , double *velocity , int *info, SolverOptions* options)

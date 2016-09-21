@@ -27,7 +27,7 @@
 #include "NumericsMatrix.h"
 
 
-#include "misc.h"
+#include "numerics_verbose.h"
 
 int linearComplementarity_setDefaultSolverOptions(LinearComplementarityProblem* problem, SolverOptions* options, int solverId)
 {
@@ -112,7 +112,7 @@ int linearComplementarity_setDefaultSolverOptions(LinearComplementarityProblem* 
   }
   default:
   {
-    numericsError("linearComplementarity_setDefaultSolverOptions", "Unknown Solver");
+    numerics_error("linearComplementarity_setDefaultSolverOptions", "Unknown Solver");
 
   }
   }

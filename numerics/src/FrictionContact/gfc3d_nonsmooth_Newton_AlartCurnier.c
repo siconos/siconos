@@ -30,7 +30,7 @@
 #include "fc3d_AlartCurnier_functions.h"
 #include "op3x3.h"
 #include "SparseBlockMatrix.h"
-#include "misc.h"
+#include "numerics_verbose.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>

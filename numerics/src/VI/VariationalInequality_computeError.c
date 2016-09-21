@@ -29,7 +29,7 @@
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
 #include "debug.h"
-#include "misc.h"
+#include "numerics_verbose.h"
 
 int variationalInequality_computeError(
   VariationalInequality* problem,

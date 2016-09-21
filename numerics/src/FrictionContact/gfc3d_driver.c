@@ -24,7 +24,7 @@
 #include "SiconosConfig.h"
 #include "gfc3d_Solvers.h"
 #include "NonSmoothDrivers.h"
-#include "misc.h"
+#include "numerics_verbose.h"
 
 int * Global_ipiv = NULL;
 int  Global_MisInverse = 0;
@@ -56,7 +56,7 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction , doubl
   int info = -1 ;
 
   if (problem->dimension != 3)
-    numericsError("gfc3d_driver", "Dimension of the problem : problem-> dimension is not compatible or is not set");
+    numerics_error("gfc3d_driver", "Dimension of the problem : problem-> dimension is not compatible or is not set");
 
 
   /* Non Smooth Gauss Seidel (NSGS) */

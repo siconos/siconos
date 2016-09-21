@@ -28,7 +28,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <float.h>
-#include "misc.h"
+#include "numerics_verbose.h"
 
 #include "sanitizer.h"
 #define VERBOSE_DEBUG
@@ -138,7 +138,7 @@ void soclcp_projection_update_with_regularization(int cone, SecondOrderConeLinea
 
   }
   else
-    numericsError("soclcp_projection -", "unknown storage type for matrix M");
+    numerics_error("soclcp_projection -", "unknown storage type for matrix M");
 
   /****  Computation of qLocal = qBlock + sum over a row of blocks in MGlobal of the products MLocal.reactionBlock,
      excluding the block corresponding to the current cone. ****/

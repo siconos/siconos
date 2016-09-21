@@ -29,7 +29,7 @@
 #include "fc3d_unitary_enumerative.h"
 #include "GMPReduced.h"
 #include "SiconosBlas.h"
-#include "misc.h"
+#include "numerics_verbose.h"
 #include "LCP_Solvers.h"
 #include "FrictionContactProblem.h"
 #include "LinearSystemProblem.h"
@@ -469,7 +469,7 @@ int genericMechanical_driver(GenericMechanicalProblem* problem, double *reaction
                              SolverOptions* options)
 {
   // if (options == NULL )
-  //  numericsError("fc3d_driver", "null input for solver options");
+  //  numerics_error("fc3d_driver", "null input for solver options");
 
   /* If the options for solver have not been set, read default values in .opt file */
 

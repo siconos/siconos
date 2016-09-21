@@ -26,7 +26,7 @@
 #include "fc2d_compute_error.h"
 #include "LCP_Solvers.h"
 #include <assert.h>
-#include "misc.h"
+#include "numerics_verbose.h"
 
 
 void fc2d_lexicolemke(FrictionContactProblem* problem, double *reaction, double *velocity, int *info, SolverOptions* options)

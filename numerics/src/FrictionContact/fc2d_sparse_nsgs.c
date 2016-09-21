@@ -28,7 +28,7 @@
 #include "SolverOptions.h"
 #include "LinearComplementarityProblem.h"
 #include "fc2d_compute_error.h"
-#include "misc.h"
+#include "numerics_verbose.h"
 #include "fc2d_Solvers.h"
 #include "LCP_Solvers.h"
 #include "SparseBlockMatrix.h"

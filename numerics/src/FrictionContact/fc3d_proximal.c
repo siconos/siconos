@@ -27,7 +27,7 @@
 //#define DEBUG_MESSAGES */
 #include "debug.h"
 #include <math.h>
-#include "misc.h"
+#include "numerics_verbose.h"
 
 void fc3d_proximal(FrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options)
 {
@@ -53,7 +53,7 @@ void fc3d_proximal(FrictionContactProblem* problem, double *reaction, double *ve
 
   if (options->numberOfInternalSolvers < 1)
   {
-    numericsError("fc3d_proximal", "The PROX method needs options for the internal solvers, options[0].numberOfInternalSolvers should be >1");
+    numerics_error("fc3d_proximal", "The PROX method needs options for the internal solvers, options[0].numberOfInternalSolvers should be >1");
   }
   SolverOptions *internalsolver_options = options->internalSolvers;
 
@@ -161,7 +161,7 @@ void fc3d_proximal(FrictionContactProblem* problem, double *reaction, double *ve
   }
   else
   {
-    numericsError("fc3d_proximal", "The PROX method needs options for the internal solvers, soptions->internalSolvers should be diffrent from NULL");
+    numerics_error("fc3d_proximal", "The PROX method needs options for the internal solvers, soptions->internalSolvers should be diffrent from NULL");
   }
 
 

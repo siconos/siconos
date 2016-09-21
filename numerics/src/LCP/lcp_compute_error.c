@@ -19,7 +19,7 @@
 #include "LinearComplementarityProblem.h"
 #include "LCP_Solvers.h"
 #include "NumericsMatrix.h"
-#include "misc.h"
+#include "numerics_verbose.h"
 
 void lcp_compute_error_only(unsigned int n, double *z , double *w, double * error)
 {
@@ -45,7 +45,7 @@ int lcp_compute_error(LinearComplementarityProblem* problem, double *z , double 
 {
   /* Checks inputs */
   if (problem == NULL || z == NULL || w == NULL)
-    numericsError("lcp_compute_error", "null input for problem and/or z and/or w");
+    numerics_error("lcp_compute_error", "null input for problem and/or z and/or w");
 
   /* Computes w = Mz + q */
   int incx = 1, incy = 1;

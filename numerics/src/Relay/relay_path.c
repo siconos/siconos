@@ -22,7 +22,7 @@
 #include "Relay_Solvers.h"
 #include "relay_cst.h"
 #include "NumericsMatrix.h"
-#include "misc.h"
+#include "numerics_verbose.h"
 #ifdef HAVE_PATHFERRIS
 #include "tools/InterfaceToPathFerris/SimpleLCP.h"
 #endif /*HAVE_PATHFERRIS*/

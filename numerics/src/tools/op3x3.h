@@ -23,7 +23,7 @@
 #include <float.h>
 #include <stdlib.h>
 
-#include "misc.h"
+#include "numerics_verbose.h"
 #include "SiconosCompat.h"
 
 #ifdef __cplusplus

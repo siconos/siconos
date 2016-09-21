@@ -1,0 +1,12 @@
+{
+  "test_bouncing_ball.py::test_bouncing_ball1": true, 
+  "test_diode_bridge.py::test_diode_bridge": true, 
+  "test_matrix_exp.py::test_SISO": true, 
+  "test_matrix_exp.py::test_TI": true, 
+  "test_matrix_exp.py::test_TV": true, 
+  "test_xml.py::test_xml1": true, 
+  "test_xml.py::test_xml2": true, 
+  "test_xml.py::test_xml3": true, 
+  "test_xml.py::test_xml5": true, 
+  "test_xml.py::test_xml6": true
+}

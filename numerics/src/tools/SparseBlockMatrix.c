@@ -4,7 +4,7 @@
 #include "SparseBlockMatrix.h"
 #include "SiconosLapack.h"
 #include <math.h>
-#include "misc.h"
+#include "numerics_verbose.h"
 #include "op3x3.h"
 //#define DEBUG_MESSAGES 1
 //#define DEBUG_STDOUT 1

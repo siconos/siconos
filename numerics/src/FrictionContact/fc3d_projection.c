@@ -29,7 +29,7 @@
 #include <float.h>
 
 #include "sanitizer.h"
-#include "misc.h"
+#include "numerics_verbose.h"
 
 /* Static variables */
 
@@ -199,7 +199,7 @@ void fc3d_projection_update_with_regularization(int contact, FrictionContactProb
 
   }
   else
-    numericsError("fc3d_projection -", "unknown storage type for matrix M");
+    numerics_error("fc3d_projection -", "unknown storage type for matrix M");
 
   /****  Computation of qLocal = qBlock + sum over a row of blocks in MGlobal of the products MLocal.reactionBlock,
      excluding the block corresponding to the current contact. ****/

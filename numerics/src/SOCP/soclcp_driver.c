@@ -23,7 +23,7 @@
 
 #include "SOCLCP_Solvers.h"
 #include "NonSmoothDrivers.h"
-#include "misc.h"
+#include "numerics_verbose.h"
 
 char *  SICONOS_SOCLCP_NSGS_STR = "SOCLCP_NSGS";
 char *  SICONOS_SOCLCP_NSGSV_STR = "SOCLCP_NSGSV";
@@ -60,7 +60,7 @@ int soclcp_driver(SecondOrderConeLinearComplementarityProblem* problem,
                   SolverOptions* options)
 {
   if(options == NULL)
-    numericsError("soclcp_driver", "null input for solver and/or global options");
+    numerics_error("soclcp_driver", "null input for solver and/or global options");
 
   assert(options->isSet);
 

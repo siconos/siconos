@@ -35,7 +35,7 @@
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
 #include "debug.h"
-#include "misc.h" // numerics to set verbose mode ...
+#include "numerics_verbose.h" // numerics to set verbose mode ...
 
 
 OneStepNSProblem::OneStepNSProblem():

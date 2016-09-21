@@ -27,7 +27,7 @@
 #include "NonSmoothDrivers.h"
 #endif
 #include "mlcp_cst.h"
-#include "misc.h"
+#include "numerics_verbose.h"
 #include "NumericsMatrix.h"
 
 char*  SICONOS_NONAME_STR = "NONAME";
@@ -217,11 +217,11 @@ int mlcp_driver(MixedLinearComplementarityProblem* problem, double *z, double *w
 
 
   if (options == NULL)
-    numericsError("mlcp_driver ", "null input for solver options.\n");
+    numerics_error("mlcp_driver ", "null input for solver options.\n");
 
   /* Checks inputs */
   if (problem == NULL || z == NULL || w == NULL)
-    numericsError("mlcp_driver", "null input for MixedLinearComplementarityProblem and/or unknowns (z,w)");
+    numerics_error("mlcp_driver", "null input for MixedLinearComplementarityProblem and/or unknowns (z,w)");
   /* Output info. : 0: ok -  >0: problem (depends on solver) */
   int info = -1;
   if (verbose)
@@ -233,7 +233,7 @@ int mlcp_driver(MixedLinearComplementarityProblem* problem, double *z, double *w
   /* Sparse Block Storage */
   if (storageType == 1)
   {
-    numericsError("mlcp_driver", "not yet implemented for sparse storage.");
+    numerics_error("mlcp_driver", "not yet implemented for sparse storage.");
   }
   // else
 

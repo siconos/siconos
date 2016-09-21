@@ -21,14 +21,14 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include "misc.h"
+#include "numerics_verbose.h"
 #include "LinearComplementarityProblem.h"
 #include "LCP_Solvers.h"
 #include "lcp_cst.h"
 #include "SolverOptions.h"
 #include "NumericsMatrix.h"
 
-#include "misc.h"
+#include "numerics_verbose.h"
 
 void lcp_latin_w(LinearComplementarityProblem* problem, double *z, double *w, int *info , SolverOptions* options)
 {

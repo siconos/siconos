@@ -33,7 +33,7 @@
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
 #include "debug.h"
-#include "misc.h"
+#include "numerics_verbose.h"
 
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 
@@ -312,7 +312,7 @@ void fc3d_nsgs_fillMLocal(FrictionContactProblem * problem, FrictionContactProbl
 
   }
   else
-    numericsError("fc3d_projection -", "unknown storage type for matrix M");
+    numerics_error("fc3d_projection -", "unknown storage type for matrix M");
 }
 
 
@@ -649,7 +649,7 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction,
 
   if (options->numberOfInternalSolvers < 1)
   {
-    numericsError("fc3d_nsgs",
+    numerics_error("fc3d_nsgs",
                   "The NSGS method needs options for the internal solvers, "
                   "options[0].numberOfInternalSolvers should be >= 1");
   }
@@ -669,7 +669,7 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction,
          || iparam[5] == SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE
          || iparam[5] == SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE_EACH_LOOP))
   {
-    numericsError(
+    numerics_error(
       "fc3d_nsgs", "iparam[5] must be equal to "
       "SICONOS_FRICTION_3D_NSGS_SHUFFLE_FALSE (0), "
       "SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE (1) or "
@@ -682,7 +682,7 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction,
          || iparam[1] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT
          || iparam[1] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_ADAPTIVE))
   {
-    numericsError(
+    numerics_error(
       "fc3d_nsgs", "iparam[1] must be equal to "
       "SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_FULL (0), "
       "SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL (1), "

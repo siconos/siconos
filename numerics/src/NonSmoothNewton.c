@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include "misc.h"
+#include "numerics_verbose.h"
 #include "NonSmoothNewton.h"
 #include "SiconosLapack.h"
 #include "math.h"

@@ -26,14 +26,14 @@
 #include <assert.h>
 #include <float.h>
 #include "sanitizer.h"
-#include "misc.h"
+#include "numerics_verbose.h"
 #include "NumericsMatrix.h"
 int gfc3d_compute_error(GlobalFrictionContactProblem* problem, double* restrict reaction , double* restrict velocity, double* restrict globalVelocity, double tolerance, double* restrict error)
 {
 
   /* Checks inputs */
   if (problem == NULL || reaction == NULL || velocity == NULL || globalVelocity == NULL)
-    numericsError("gfc3d_compute_error", "null input");
+    numerics_error("gfc3d_compute_error", "null input");
 
   gfc3d_init_workspace(problem);
   NumericsMatrix* factorized_M = problem->workspace->factorized_M;

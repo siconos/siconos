@@ -27,7 +27,7 @@
 #include <assert.h>
 #include <math.h>
 #include "sanitizer.h"
-#include "misc.h"
+#include "numerics_verbose.h"
 
 static void Globalfc3d_projection_free(GlobalFrictionContactProblem* problem)
 {

@@ -21,7 +21,7 @@
 #include "SecondOrderConeLinearComplementarityProblem_as_VI.h"
 
 #include "projectionOnCone.h"
-#include "misc.h"
+#include "numerics_verbose.h"
 #include "SiconosBlas.h"
 
 /* #define DEBUG_STDOUT */

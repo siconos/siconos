@@ -31,7 +31,7 @@
 #include "NumericsMatrix.h"
 #include "NM_conversions.h"
 #include "SiconosLapack.h"
-#include "misc.h"
+#include "numerics_verbose.h"
 #include "sanitizer.h"
 //#define DEBUG_MESSAGES
 #include "debug.h"

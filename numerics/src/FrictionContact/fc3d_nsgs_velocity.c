@@ -27,7 +27,7 @@
 #include "pinv.h"
 #include "Friction_cst.h"
 #include "SiconosBlas.h"
-#include "misc.h"
+#include "numerics_verbose.h"
 
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 
@@ -108,7 +108,7 @@ void fc3d_nsgs_velocity(FrictionContactProblem* problem, double *reaction, doubl
   }
   if (options->numberOfInternalSolvers < 1)
   {
-    numericsError("fc3d_nsgs_velocity", "The NSGS method needs options for the internal solvers, options[0].numberOfInternalSolvers should be >1");
+    numerics_error("fc3d_nsgs_velocity", "The NSGS method needs options for the internal solvers, options[0].numberOfInternalSolvers should be >1");
   }
 
 

@@ -36,7 +36,7 @@
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES 1 */
 #include "debug.h"
-#include "misc.h"
+#include "numerics_verbose.h"
 void lcp_nsgs_SBM_buildLocalProblem(int rowNumber, const SparseBlockStructuredMatrix* const blmat, LinearComplementarityProblem* local_problem, double* q, double* z)
 {
 
@@ -140,7 +140,7 @@ void lcp_nsgs_SBM(LinearComplementarityProblem* problem, double *z, double *w, i
 
   if (options->numberOfInternalSolvers < 1)
   {
-    numericsError("lcp_nsgs_SBM", "The NSGS_SBM method needs options for the internal solvers, options[0].numberOfInternalSolvers should be >1");
+    numerics_error("lcp_nsgs_SBM", "The NSGS_SBM method needs options for the internal solvers, options[0].numberOfInternalSolvers should be >1");
   }
 
 

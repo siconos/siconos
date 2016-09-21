@@ -32,7 +32,7 @@
 #define DEBUG_MESSAGES
 #define DEBUG_STDOUT
 #include "debug.h"
-#include "misc.h"
+#include "numerics_verbose.h"
 
 
 /** pointer to function used to call internal solver for proximal point solver */
@@ -55,7 +55,7 @@ void fc3d_SOCLCP(FrictionContactProblem* problem, double *reaction, double *velo
 
   if (options->numberOfInternalSolvers < 1)
   {
-    numericsError("fc3d_SOCLCP", "The SOCLCP for FrictionContactProblem needs options for the internal solvers, options[0].numberOfInternalSolvers should be >1");
+    numerics_error("fc3d_SOCLCP", "The SOCLCP for FrictionContactProblem needs options for the internal solvers, options[0].numberOfInternalSolvers should be >1");
   }
 
   SolverOptions * internalsolver_options = options->internalSolvers;

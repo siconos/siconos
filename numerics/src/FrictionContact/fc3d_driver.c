@@ -23,7 +23,7 @@
 
 #include "fc3d_Solvers.h"
 #include "NonSmoothDrivers.h"
-#include "misc.h"
+#include "numerics_verbose.h"
 
 char *  SICONOS_FRICTION_3D_NSGS_STR = "FC3D_NSGS";
 char *  SICONOS_FRICTION_3D_NSGSV_STR = "FC3D_NSGSV";
@@ -69,7 +69,7 @@ int fc3d_driver(FrictionContactProblem* problem,
 		SolverOptions* options)
 {
   if (options == NULL)
-    numericsError("fc3d_driver", "null input for solver options");
+    numerics_error("fc3d_driver", "null input for solver options");
 
   assert(options->isSet); /* true(1) if the SolverOptions structure has been filled in else false(0) */
 
@@ -79,7 +79,7 @@ int fc3d_driver(FrictionContactProblem* problem,
   int info = -1 ;
 
   if (problem->dimension != 3)
-    numericsError("fc3d_driver", "Dimension of the problem : problem-> dimension is not compatible or is not set");
+    numerics_error("fc3d_driver", "Dimension of the problem : problem-> dimension is not compatible or is not set");
 
   /* Check for trivial case */
   info = checkTrivialCase(problem, velocity, reaction, options);

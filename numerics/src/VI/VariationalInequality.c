@@ -18,7 +18,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include "VariationalInequality.h"
-#include "misc.h"
+#include "numerics_verbose.h"
 
 
 void variationalInequality_display(VariationalInequality* problem)

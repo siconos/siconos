@@ -22,7 +22,7 @@
 #define __RuntimeException__
 
 #include "SiconosException.hpp"
-#include <misc.h>
+#include <numerics_verbose.h>
 
 /** Runtime exceptions
  *

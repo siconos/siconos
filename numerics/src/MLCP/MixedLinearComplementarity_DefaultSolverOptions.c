@@ -22,7 +22,7 @@
 #include <float.h>
 #include "MLCP_Solvers.h"
 #include "NonSmoothDrivers.h"
-#include "misc.h"
+#include "numerics_verbose.h"
 
 
 void  mixedLinearComplementarity_default_setDefaultSolverOptions(MixedLinearComplementarityProblem* problem, SolverOptions* pOptions)
@@ -165,7 +165,7 @@ int mixedLinearComplementarity_setDefaultSolverOptions(MixedLinearComplementarit
   }
   default:
   {
-    numericsError("mixedLinearComplementarity_setDefaultSolverOptions", "Unknown Solver");
+    numerics_error("mixedLinearComplementarity_setDefaultSolverOptions", "Unknown Solver");
 
   }
   }

@@ -2,7 +2,7 @@
 #include "pinv.h"
 #include "SiconosBlas.h"
 #include "GMPReduced.h"
-#include "misc.h"
+#include "numerics_verbose.h"
 #include "GenericMechanicalProblem.h"
 #include "GenericMechanical_Solvers.h"
 #include "FrictionContactProblem.h"

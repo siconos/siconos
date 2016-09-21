@@ -23,7 +23,7 @@
 
 #include "SOCLCP_Solvers.h"
 #include "NonSmoothDrivers.h"
-#include "misc.h"
+#include "numerics_verbose.h"
 
 
 int soclcp_setDefaultSolverOptions(SolverOptions* options, int solverId)
@@ -108,7 +108,7 @@ int soclcp_setDefaultSolverOptions(SolverOptions* options, int solverId)
   /* } */
   default:
   {
-    numericsError("soclcp_setDefaultSolverOptions", "Unknown Solver");
+    numerics_error("soclcp_setDefaultSolverOptions", "Unknown Solver");
 
   }
   }

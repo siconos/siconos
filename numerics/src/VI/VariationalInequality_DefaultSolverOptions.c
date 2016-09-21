@@ -22,7 +22,7 @@
 #include <float.h>
 #include "VariationalInequality_Solvers.h"
 #include "NonSmoothDrivers.h"
-#include "misc.h"
+#include "numerics_verbose.h"
 
 int variationalInequality_setDefaultSolverOptions(SolverOptions* options, int solverId)
 {
@@ -53,7 +53,7 @@ int variationalInequality_setDefaultSolverOptions(SolverOptions* options, int so
   }
   default:
   {
-    numericsError("variationalInequality_setDefaultSolverOptions", "Unknown Solver");
+    numerics_error("variationalInequality_setDefaultSolverOptions", "Unknown Solver");
 
   }
   }

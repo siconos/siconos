@@ -28,7 +28,7 @@
 #include "SolverOptions.h"
 #include "NumericsMatrix.h"
 
-#include "misc.h"
+#include "numerics_verbose.h"
 #define EPSDIAG DBL_EPSILON
 void lcp_rpgs(LinearComplementarityProblem* problem, double *z, double *w, int *info , SolverOptions* options)
 {

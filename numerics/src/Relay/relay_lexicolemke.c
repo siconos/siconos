@@ -27,7 +27,7 @@
 #include "relay_cst.h"
 
 #include <assert.h>
-#include "misc.h"
+#include "numerics_verbose.h"
 
 void relay_lexicolemke(RelayProblem* problem, double *z, double *w, int *info, SolverOptions* options)
 {

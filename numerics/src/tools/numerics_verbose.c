@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include "misc.h"
+#include "numerics_verbose.h"
 
 /* Default value for verbose mode: turned to off
 Warning: global variable
@@ -13,17 +13,24 @@ void setNumericsVerbose(int newVerboseMode)
   verbose = newVerboseMode;
 }
 
-void numericsError(char * functionName, char* message)
+void numerics_set_verbose(int newVerboseMode)
 {
-  char output[200] = "Numerics error - ";
+  verbose = newVerboseMode;
+}
+
+
+void numerics_error(char * functionName, char* message)
+{
+  char output[300] = "Numerics error - ";
   strcat(output, functionName);
+  strcat(output, " :\t");
   strcat(output, message);
   strcat(output, ".\n");
   fprintf(stderr, "%s", output);
   exit(EXIT_FAILURE);
 }
 
-void numericsWarning(char * functionName, char* message)
+void numerics_warning(char * functionName, char* message)
 {
   char output[200] = "Numerics warning - ";
   strcat(output, functionName);
@@ -31,16 +38,4 @@ void numericsWarning(char * functionName, char* message)
   strcat(output, ".\n");
   fprintf(stderr, "%s", output);
   exit(EXIT_FAILURE);
-}
-
-void printm(unsigned int nl, unsigned int nc, double *m)
-{
-  for (unsigned int i = 0; i < nl; ++i)
-  {
-    for (unsigned int j = 0; j < nc; ++j)
-    {
-      printf("%32.24e ", *(m + j + nc * i));
-    }
-    printf("\n");
-  }
 }

@@ -25,7 +25,7 @@
 #include "MCP_FischerBurmeister.h"
 
 #include "NonSmoothDrivers.h"
-#include "misc.h"
+#include "numerics_verbose.h"
 
 char *SICONOS_MCP_FB_STR = "NewtonFB";
 char *SICONOS_MCP_NEWTON_FBLSA_STR = "Newton FBLSA";
@@ -62,11 +62,11 @@ int mcp_driver2(MixedComplementarityProblem2* problem, double *z , double *Fmcp,
 int mcp_driver(MixedComplementarityProblem* problem, double *z , double *w, SolverOptions* options)
 {
   if (options == NULL)
-    numericsError("mcp_driver ", "null input for solver options.\n");
+    numerics_error("mcp_driver ", "null input for solver options.\n");
 
   /* Checks inputs */
   if (problem == NULL || z == NULL || w == NULL)
-    numericsError("mcp_driver", "null input for MixedComplementarityProblem and/or unknowns (z,w)");
+    numerics_error("mcp_driver", "null input for MixedComplementarityProblem and/or unknowns (z,w)");
   /* Output info. : 0: ok -  >0: error (which depends on the chosen solver) */
   int info = -1;
 

@@ -27,7 +27,7 @@
 #include "NumericsMatrix.h"
 
 #include "QP_Solvers.h"
-#include "misc.h"
+#include "numerics_verbose.h"
 #include "sanitizer.h"
 
 void lcp_qp(LinearComplementarityProblem* problem, double *z, double *w, int *info , SolverOptions* options)

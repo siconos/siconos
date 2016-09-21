@@ -21,7 +21,7 @@
 #include <time.h>
 #include <math.h>
 #include "NonSmoothDrivers.h"
-#include "misc.h"
+#include "numerics_verbose.h"
 #include "lcp_cst.h"
 #include "SolverOptions.h"
 #include "LCP_Solvers.h"
@@ -61,7 +61,7 @@ int lcp_driver_SparseBlockMatrix(LinearComplementarityProblem* problem, double *
   DEBUG_BEGIN("lcp_driver_SparseBlockMatrix(...)\n");
   /* Checks storage type for the matrix M of the LCP */
   if (problem->M->storageType == 0)
-    numericsError("lcp_driver_SparseBlockMatrix", "forbidden type of storage for the matrix M of the LCP");
+    numerics_error("lcp_driver_SparseBlockMatrix", "forbidden type of storage for the matrix M of the LCP");
 
   /*
     The options for the global "block" solver are defined in options->\n
@@ -132,7 +132,7 @@ int lcp_driver_DenseMatrix(LinearComplementarityProblem* problem, double *z , do
 
   /* Checks storage type for the matrix M of the LCP */
   if (problem->M->storageType == 1)
-    numericsError("lcp_driver_DenseMatrix", "forbidden type of storage for the matrix M of the LCP");
+    numerics_error("lcp_driver_DenseMatrix", "forbidden type of storage for the matrix M of the LCP");
 
   assert(options->isSet);
 

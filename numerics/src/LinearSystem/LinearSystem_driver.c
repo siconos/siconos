@@ -25,7 +25,7 @@
 #include "NonSmoothDrivers.h"
 #include "NumericsMatrix.h"
 #include "SiconosLapack.h"
-#include "misc.h"
+#include "numerics_verbose.h"
 
 static int LWORK = 0;
 int SICONOS_LS_0 = 0;
@@ -65,7 +65,7 @@ int solveLeastSquareProblem(LinearSystemProblem* problem, double *z ,  SolverOpt
 
   /* Checks inputs */
   if (problem == NULL || z == NULL)
-    numericsError("EqualityProblem", "null input for EqualityProblem and/or unknowns (z)");
+    numerics_error("EqualityProblem", "null input for EqualityProblem and/or unknowns (z)");
 
   /* Output info. : 0: ok -  >0: problem (depends on solver) */
   int info = -1;
@@ -149,7 +149,7 @@ int myLu(LinearSystemProblem* problem, double *z ,  SolverOptions* options)
 {
   /* Checks inputs */
   if (problem == NULL || z == NULL)
-    numericsError("EqualityProblem", "null input for EqualityProblem and/or unknowns (z)");
+    numerics_error("EqualityProblem", "null input for EqualityProblem and/or unknowns (z)");
   /* Output info. : 0: ok -  >0: problem (depends on solver) */
   int info = -1;
   int n = problem->size;
@@ -207,7 +207,7 @@ int LinearSystem_driver(LinearSystemProblem* problem, double *z , double *w, Sol
   int i;
   assert(problem->M);
   if (problem->M->storageType == 1)
-    numericsError("LinearSystem_driver", "forbidden type of storage for the matrix M of the LCP");
+    numerics_error("LinearSystem_driver", "forbidden type of storage for the matrix M of the LCP");
 #ifdef LINEARSYSTEM_DEBUG
   displayLS(problem);
 #endif

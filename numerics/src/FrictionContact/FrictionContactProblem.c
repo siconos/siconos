@@ -20,7 +20,7 @@
 #include "FrictionContactProblem.h"
 #include "NumericsMatrix.h"
 #include <stdio.h>
-#include "misc.h"
+#include "numerics_verbose.h"
 
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES

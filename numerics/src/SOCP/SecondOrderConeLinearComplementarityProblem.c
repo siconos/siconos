@@ -18,7 +18,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include "SecondOrderConeLinearComplementarityProblem.h"
-#include "misc.h"
+#include "numerics_verbose.h"
 
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES

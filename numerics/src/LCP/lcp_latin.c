@@ -27,7 +27,7 @@
 #include "SolverOptions.h"
 #include "NumericsMatrix.h"
 
-#include "misc.h"
+#include "numerics_verbose.h"
 
 void lcp_latin(LinearComplementarityProblem* problem, double *z, double *w, int *info , SolverOptions* options)
 {

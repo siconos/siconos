@@ -29,7 +29,7 @@
 
 #include <assert.h>
 #include "SiconosBlas.h"
-#include "misc.h"
+#include "numerics_verbose.h"
 void lcp_pgs(LinearComplementarityProblem* problem, double *z, double *w, int *info , SolverOptions* options)
 {
   /* matrix M/vector q of the lcp */

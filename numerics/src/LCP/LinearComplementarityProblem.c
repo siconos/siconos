@@ -25,7 +25,7 @@
 #include <assert.h>
 #include "NumericsMatrix.h"
 #include "LinearComplementarityProblem.h"
-#include "misc.h"
+#include "numerics_verbose.h"
 
 void linearComplementarity_display(LinearComplementarityProblem* problem)
 {

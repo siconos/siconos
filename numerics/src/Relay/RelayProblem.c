@@ -25,7 +25,7 @@
 
 #include "RelayProblem.h"
 #include "NumericsMatrix.h"
-#include "misc.h"
+#include "numerics_verbose.h"
 
 void Relay_display(RelayProblem* p)
 {

@@ -23,7 +23,7 @@
 #include "SiconosBlas.h"
 #include <stdlib.h>
 #include <stdio.h>
-#include "misc.h"
+#include "numerics_verbose.h"
 /* Pointer to function used to update the solver, to formalize the local problem for example. */
 typedef void (*UpdateSolverPtr)(int, double*);
 

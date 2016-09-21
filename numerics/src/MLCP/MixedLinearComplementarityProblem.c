@@ -24,7 +24,7 @@
 #include <stdlib.h>
 #include "MixedLinearComplementarityProblem.h"
 #include "NumericsMatrix.h"
-#include "misc.h"
+#include "numerics_verbose.h"
 
 void mixedLinearComplementarity_display(MixedLinearComplementarityProblem* p)
 {

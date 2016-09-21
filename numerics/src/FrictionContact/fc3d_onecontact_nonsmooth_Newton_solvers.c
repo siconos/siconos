@@ -327,7 +327,7 @@ static void AC_fillMLocal(FrictionContactProblem * problem, FrictionContactProbl
   }
   else
   {
-    numericsError("fc3d_AlartCurnier:AC_fillMLocal() -", "unknown storage type for matrix M");
+    numerics_error("fc3d_AlartCurnier:AC_fillMLocal() -", "unknown storage type for matrix M");
   }
 
 }
@@ -385,7 +385,7 @@ int fc3d_onecontact_nonsmooth_Newtow_setDefaultSolverOptions(SolverOptions* opti
   options->iparam[SICONOS_FRICTION_3D_ONECONTACT_NSN_LINESEARCH_MAXITER] = 10;
 
   /* parameters for hybrid solvers */
-  options->iparam[SICONOS_FRICTION_3D_ONECONTACT_NSN_HYBRID_MAX_LOOP] = 4;
+  options->iparam[SICONOS_FRICTION_3D_ONECONTACT_NSN_HYBRID_MAX_LOOP] = 1;
   options->iparam[SICONOS_FRICTION_3D_ONECONTACT_NSN_HYBRID_MAX_ITER] = 10;
   return 0;
 }
@@ -761,6 +761,12 @@ int fc3d_onecontact_nonsmooth_Newton_solvers_solve_damped(FrictionContactProblem
   int LSitermax = iparam[SICONOS_FRICTION_3D_ONECONTACT_NSN_LINESEARCH_MAXITER];
 
 
+  if (iparam[SICONOS_FRICTION_3D_ONECONTACT_NSN_LINESEARCH] > SICONOS_FRICTION_3D_ONECONTACT_NSN_LINESEARCH_GOLDSTEINPRICE)
+  {
+    numerics_error("fc3d_onecontact_nonsmooth_Newton_solvers_solve_damped", "type of line search not found");
+  }
+
+  
   int i, j, k, inew;
 
   // store the value fo the function

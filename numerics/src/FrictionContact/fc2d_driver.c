@@ -22,7 +22,7 @@
 #include "NumericsMatrix.h"
 #include "fc2d_Solvers.h"
 #include "NonSmoothDrivers.h"
-#include "misc.h"
+#include "numerics_verbose.h"
 
 
 char *  SICONOS_FRICTION_2D_NSGS_STR  = "F2D_NSGS";
@@ -55,11 +55,11 @@ int fc2d_driver(FrictionContactProblem* problem, double *reaction , double *velo
 #endif
 
   if (options == NULL)
-    numericsError("fc2d_driver", "null input for solver options");
+    numerics_error("fc2d_driver", "null input for solver options");
 
   /* Checks inputs */
   if (problem == NULL || reaction == NULL || velocity == NULL)
-    numericsError("fc2d_driver", "null input for FrictionContactProblem and/or unknowns (reaction,velocity)");
+    numerics_error("fc2d_driver", "null input for FrictionContactProblem and/or unknowns (reaction,velocity)");
 
   assert(options->isSet);
 
@@ -74,7 +74,7 @@ int fc2d_driver(FrictionContactProblem* problem, double *reaction , double *velo
   int info = -1 ;
 
   if (problem->dimension != 2)
-    numericsError("fc2d_driver", "Dimension of the problem : problem-> dimension is not compatible or is not set");
+    numerics_error("fc2d_driver", "Dimension of the problem : problem-> dimension is not compatible or is not set");
 
 
   /* Non Smooth Gauss Seidel (NSGS) */
@@ -162,7 +162,7 @@ int fc2d_driver(FrictionContactProblem* problem, double *reaction , double *velo
   }
   else
   {
-    numericsError("fc2d_driver", 
+    numerics_error("fc2d_driver", 
                   " error: unknown storagetype named");
     exit(EXIT_FAILURE);
   }

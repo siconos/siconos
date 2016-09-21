@@ -40,7 +40,7 @@ SWIG_init(void);
 #include <assert.h>
 //#define DEBUG_MESSAGES 1
 #include <debug.h>
-#include <misc.h>
+#include <numerics_verbose.h>
 
 #if PY_VERSION_HEX < 0x02070000
 #ifndef PyBytes_Check
@@ -63,7 +63,7 @@ SWIG_init(void);
 // numpy macros
 %include numpy.i 	
 
-%include misc.h
+%include numerics_verbose.h
 
 %init %{
   import_array();

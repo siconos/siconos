@@ -22,7 +22,7 @@
 #include <math.h>
 #include "SiconosBlas.h"
 #include "fc2d_Solvers.h"
-#include "misc.h"
+#include "numerics_verbose.h"
 #include "NumericsMatrix.h"
 
 void shuffle(int size, int * randnum);

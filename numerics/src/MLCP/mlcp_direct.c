@@ -42,7 +42,7 @@ dim(v)=nn
 #include "mlcp_tool.h"
 #include "SiconosLapack.h"
 #include "NumericsMatrix.h"
-#include "misc.h"
+#include "numerics_verbose.h"
 
 #define DIRECT_SOLVER_USE_DGETRI
 double * sVBuf;

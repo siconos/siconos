@@ -20,7 +20,7 @@
 #include "NonSmoothDrivers.h"
 #include "frictionContact_test_function.h"
 #include "Friction_cst.h"
-#include "misc.h"
+#include "numerics_verbose.h"
 
 int main(void)
 {

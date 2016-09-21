@@ -23,7 +23,7 @@
 #include "FrictionContactProblem.h"
 #include "VariationalInequality.h"
 #include "projectionOnCone.h"
-#include "misc.h"
+#include "numerics_verbose.h"
 #include "SiconosBlas.h"
 #include "NumericsMatrix.h"
 

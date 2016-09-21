@@ -27,11 +27,11 @@
 int dr_driver(RelayProblem* problem, double *z , double *w, SolverOptions* options)
 {
   if (options == NULL)
-    numericsError("dr_driver", "null input for solver options");
+    numerics_error("dr_driver", "null input for solver options");
 
   /* Checks inputs */
   if (problem == NULL || z == NULL || w == NULL)
-    numericsError("dr_driver", "null input for LinearComplementarityProblem and/or unknowns (z,w)");
+    numerics_error("dr_driver", "null input for LinearComplementarityProblem and/or unknowns (z,w)");
 
   /* Output info. : 0: ok -  >0: problem (depends on solver) */
   int info = -1;
@@ -43,7 +43,7 @@ int dr_driver(RelayProblem* problem, double *z , double *w, SolverOptions* optio
   /* Sparse Block Storage */
   if (storageType == 1)
   {
-    numericsError("dr_driver", "not yet implemented for sparse storage.");
+    numerics_error("dr_driver", "not yet implemented for sparse storage.");
   }
   // else
 

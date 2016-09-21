@@ -26,7 +26,7 @@
 #include "LCP_Solvers.h"
 #include <assert.h>
 #include "relay_cst.h"
-#include "misc.h"
+#include "numerics_verbose.h"
 #include "lcp_cst.h"
 void relay_enum(RelayProblem* problem, double *z, double *w, int *info, SolverOptions* options)
 {

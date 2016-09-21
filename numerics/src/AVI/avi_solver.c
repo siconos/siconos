@@ -19,7 +19,7 @@
 #include "NonSmoothDrivers.h"
 #include "AVI_Solvers.h"
 #include "AVI_cst.h"
-#include "misc.h"
+#include "numerics_verbose.h"
 #include "assert.h"
 #include "NumericsMatrix.h"
 

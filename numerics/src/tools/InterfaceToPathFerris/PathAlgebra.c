@@ -1,6 +1,6 @@
 #include "PathAlgebra.h"
 #include "math.h"
-#include "misc.h"
+#include "numerics_verbose.h"
 
 /** tolerance value for zero */
 static double zeroTol = 1e-15;
@@ -16,7 +16,7 @@ void convertToPathSparse(int size0, int size1, double* matIn, int* col_start, in
     {
       col_start[j] = col_start[j - 1] + col_len[j - 1];
       if (col_start[j] == col_start[j - 1])
-        numericsError("PathAlgebra::convertToPathSparse()", "Null column in input matrix");
+        numerics_error("PathAlgebra::convertToPathSparse()", "Null column in input matrix");
     }
     col_len[j] = 0;
     for (int i = 0; i < size0 ; ++i)

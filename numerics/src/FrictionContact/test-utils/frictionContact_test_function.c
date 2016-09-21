@@ -26,7 +26,7 @@
 #include <fclib.h>
 #include <fclib_interface.h>
 #endif
-#include "misc.h"
+#include "numerics_verbose.h"
 
 void frictionContact_test_gams_opts(SN_GAMSparams* GP, int solverId)
 {

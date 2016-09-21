@@ -23,7 +23,7 @@
 #include "stdio.h"
 #include "stdlib.h"
 #include "NCP_FixedP.h"
-#include "misc.h"
+#include "numerics_verbose.h"
 
 
 /*============================ Fixed point Solver ==================================*/

@@ -20,7 +20,7 @@
 #include "NumericsMatrix.h"
 #include "NumericsSparseMatrix.h"
 #include "debug.h"
-#include "misc.h"
+#include "numerics_verbose.h"
 
 #ifdef WITH_UMFPACK
 

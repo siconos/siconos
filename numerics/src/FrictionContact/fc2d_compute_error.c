@@ -21,7 +21,7 @@
 #include "FrictionContactProblem.h"
 #include "SiconosBlas.h"
 #include <math.h>
-#include "misc.h"
+#include "numerics_verbose.h"
 
 #define SGN(x) ((x) < 0 ? -1 : (x) > 0 ? 1 : 0)
 
@@ -30,7 +30,7 @@ int fc2d_compute_error(FrictionContactProblem* problem, double *z , double *w, d
 
   /* Checks inputs */
   if (! problem || ! z || ! w)
-    numericsError("fc2d_compute_error", "null input for problem and/or z and/or w");
+    numerics_error("fc2d_compute_error", "null input for problem and/or z and/or w");
 
   int nc = problem->numberOfContacts;
 

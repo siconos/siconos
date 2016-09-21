@@ -23,7 +23,7 @@
 #define __SiconosMatrixException__
 
 #include "SiconosException.hpp"
-#include <misc.h>
+#include <numerics_verbose.h>
 
 /** Exception caused by a SiconosMatrix
  *

@@ -29,7 +29,7 @@
 #include "NumericsMatrix.h"
 
 #include "pivot-utils.h"
-#include "misc.h"
+#include "numerics_verbose.h"
 #include "SiconosLapack.h"
 
 //#define DEBUG_STDOUT

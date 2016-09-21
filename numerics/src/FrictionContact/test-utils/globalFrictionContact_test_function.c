@@ -22,7 +22,7 @@
 #include "gfc3d_Solvers.h"
 #include "GlobalFrictionContactProblem.h"
 #include "NumericsMatrix.h"
-#include "misc.h"
+#include "numerics_verbose.h"
 
 int globalFrictionContact_test_function(FILE * f, SolverOptions * options)
 {

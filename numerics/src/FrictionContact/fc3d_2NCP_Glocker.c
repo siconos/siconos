@@ -31,7 +31,7 @@
 #include <stdio.h>
 #include <math.h>
 #include "SiconosBlas.h"
-#include "misc.h"
+#include "numerics_verbose.h"
 
 /*Static variables */
 
@@ -185,7 +185,7 @@ void NCPGlocker_fillMLocal(FrictionContactProblem * problem, FrictionContactProb
     /*     cblas_dcopy(9, MGlobal->matrix1->block[diagPos], 1,localproblem->M->matrix0 , 1); */
   }
   else
-    numericsError("fc3d2NCP_Glocker::NCPGlocker_fillMLocal() -", "unknown storage type for matrix M");
+    numerics_error("fc3d2NCP_Glocker::NCPGlocker_fillMLocal() -", "unknown storage type for matrix M");
 
 }
 
