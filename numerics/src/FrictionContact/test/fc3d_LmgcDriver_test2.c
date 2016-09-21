@@ -90,11 +90,6 @@ int main(void)
                                       tolerance,
                                       itermax,
                                       0, 0, 0, 0);
-  printf("reaction:");
-  printm(1, 3 * nc, reaction);
-
-  printf("velocity:");
-  printm(1, 3 * nc, velocity);
 
   free(reaction);
   free(velocity);

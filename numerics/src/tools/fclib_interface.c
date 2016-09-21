@@ -24,6 +24,7 @@
 
 #include "debug.h"
 #ifdef WITH_FCLIB
+#include "csparse.h"
 #include "fclib_interface.h"
 #include "FrictionContactProblem.h"
 #include "NumericsMatrix.h"

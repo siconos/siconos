@@ -137,11 +137,12 @@ namespace std11 = boost;
  %apply (double ARGOUT_ARRAY1[ANY])
  {(double B[9])}
 
-%include solverOptions.i
 
 %include Numerics_typemaps_problems.i
 %include Numerics_typemaps_basic_linalg.i
 %include Numerics_typemaps_numericsmatrices.i
+%include NonSmoothDrivers.h
+%include solverOptions.i
 
 // this has to die --xhub
 // info param
@@ -214,7 +215,7 @@ namespace std11 = boost;
 #include "gfc3d_Solvers.h"
 #include "MCP_Solvers.h"
 #include "MLCP_Solvers.h"
-  
+#include "NonSmoothDrivers.h"  
   %}
 
 //Relay
@@ -383,6 +384,7 @@ namespace std11 = boost;
 
 // the order matters
 %include numerics_FC.i
+%include GAMSlink.h
 %include numerics_GFC.i
 
 %extend SN_GAMSparams

@@ -11,3 +11,7 @@ set(CTEST_DROP_METHOD "http")
 set(CTEST_DROP_SITE "cdash-bipop.inrialpes.fr")
 set(CTEST_DROP_LOCATION "/submit.php?project=Siconos")
 set(CTEST_DROP_SITE_CDASH TRUE)
+if(BUILD_NAME)
+  set(CTEST_BUILD_NAME Siconos-${BUILD_NAME})
+endif()
+  

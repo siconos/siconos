@@ -635,7 +635,7 @@ if(WITH_${COMPONENT}_TESTING)
   if(WITH_FCLIB)
     NEW_TEST(FCLIB_test1 fc3d_writefclib_local_test.c)
     NEW_TEST(FCLIB_GFC3D_test1 gfc3d_fclib_cubeH8.c)
-    NEW_TEST(FCLIB_GFC3D_test2 gfc3d_test20.c)
+    NEW_GFC_3D_TEST(LMGC_GlobalFrictionContactProblem00046.hdf5 SICONOS_GLOBAL_FRICTION_3D_NSN_AC)
   endif()
   
   #===========================================
@@ -643,50 +643,25 @@ if(WITH_${COMPONENT}_TESTING)
   #===========================================
   ## test 2D dense on two differents files
 
-  # NEW_TEST(test_fc2d_1 fc2d_test1.c)
   NEW_FC_2D_TEST(FrictionContactProblem00374.dat SICONOS_FRICTION_2D_NSGS)
-  
-  # NEW_TEST(test_fc2d_2 fc2d_test2.c)
   NEW_FC_2D_TEST(FrictionContactProblem00374.dat SICONOS_FRICTION_2D_CPG)
-  #NEW_TEST(test_fc2d_3 fc2d_test3.c)
   NEW_FC_2D_TEST(FrictionContactProblem00374.dat SICONOS_FRICTION_2D_LATIN)
-  
-  #NEW_TEST(test_fc2d_10 fc2d_test10.c)
   NEW_FC_2D_TEST(FrictionContactProblem00394.dat SICONOS_FRICTION_2D_NSGS)
-  #NEW_TEST(test_fc2d_11 fc2d_test11.c)
   NEW_FC_2D_TEST(FrictionContactProblem00394.dat SICONOS_FRICTION_2D_CPG)
-
-  #NEW_TEST(test_fc2d_12 fc2d_test12.c)
   NEW_FC_2D_TEST(FrictionContactProblem00394.dat SICONOS_FRICTION_2D_LATIN)
-  
 
   ## test 2D sparse on 4 differents files
-  #NEW_TEST(test_fc2d_20 fc2d_test20.c)
   NEW_FC_2D_TEST(FrictionContactProblem00727.dat SICONOS_FRICTION_2D_NSGS 1e-12 5000)
-  #NEW_TEST(test_fc2d_21 fc2d_test21.c)
   NEW_FC_2D_TEST(FrictionContactProblem00031.dat SICONOS_FRICTION_2D_NSGS 1e-12 5000)
-  #NEW_TEST(test_fc2d_22 fc2d_test22.c)
   NEW_FC_2D_TEST(FrictionContactProblem00071.dat SICONOS_FRICTION_2D_NSGS 1e-12 5000)
-  #NEW_TEST(test_fc2d_23 fc2d_test23.c)
   NEW_FC_2D_TEST(FrictionContactProblem00237.dat SICONOS_FRICTION_2D_NSGS 1e-12 5000)
 
-  ## test 2D dense with Lemke NSGS failed on it
-  #NEW_TEST(test_fc2d_30 fc2d_test30.c)
   NEW_FC_2D_TEST(FC2D_SliderCrankLagrangian00000.dat SICONOS_FRICTION_2D_LEMKE)
-  #NEW_TEST(test_fc2d_31 fc2d_test31.c)
   NEW_FC_2D_TEST(FrictionContactProblem00374.dat SICONOS_FRICTION_2D_LEMKE)
-  #SET(test_fc2d_32 WILL_FAIL TRUE)
-  #NEW_TEST(test_fc2d_32 fc2d_test32.c)
   NEW_FC_2D_TEST(FC2D_SliderCrankLagrangian00001.dat SICONOS_FRICTION_2D_LEMKE 0 0
     0 0 0 WILL_FAIL)
 
-
-
-
-  ## test 2D dense with Enum Lemke failed on 41 !!
-  #NEW_TEST(test_fc2d_40 fc2d_test40.c)
   NEW_FC_2D_TEST(FC2D_SliderCrankLagrangian00000.dat SICONOS_FRICTION_2D_ENUM)
-  #NEW_TEST(test_fc2d_41 fc2d_test41.c)
   NEW_FC_2D_TEST(FC2D_SliderCrankLagrangian00001.dat SICONOS_FRICTION_2D_ENUM)
 
  

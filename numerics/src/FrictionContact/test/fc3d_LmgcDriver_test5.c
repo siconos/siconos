@@ -93,12 +93,6 @@ int main(void)
                                       itermax,
                                       2,
                                       2, 0, 0);
-  printf("reaction:");
-  printm(1, 3 * nc, reaction);
-
-  printf("velocity:");
-  printm(1, 3 * nc, velocity);
-
   free(reaction);
   free(velocity);
 
