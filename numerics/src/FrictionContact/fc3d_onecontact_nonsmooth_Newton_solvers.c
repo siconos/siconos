@@ -976,7 +976,7 @@ int fc3d_onecontact_nonsmooth_Newton_solvers_solve_hybrid(FrictionContactProblem
 
   if (loop == max_loop)
   {
-    printf("Maximum number of loop (%i) in SICONOS_FRICTION_3D_ONECONTACT_NSN_AC_GP_P has been reached for contact %i with error = %e \n",max_loop,options->iparam[SICONOS_FRICTION_3D_NSGS_LOCALSOLVER_CONTACTNUMBER],local_error);
+    DEBUG_PRINTF("Maximum number of loop (%i) in SICONOS_FRICTION_3D_ONECONTACT_NSN_AC_GP_P has been reached for contact %i with error = %e \n",max_loop,options->iparam[SICONOS_FRICTION_3D_NSGS_LOCALSOLVER_CONTACTNUMBER],local_error);
   }
 
 
