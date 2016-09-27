@@ -25,8 +25,8 @@
 
 #include "MechanicsFwd.hpp"
 
-#include <SiconosFwd.hpp>
-#include <NewtonEulerDS.hpp>
+#include "SiconosFwd.hpp"
+#include "NewtonEulerDS.hpp"
 
 class OccBody : public NewtonEulerDS
 {

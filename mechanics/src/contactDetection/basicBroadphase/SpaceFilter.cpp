@@ -1386,3 +1386,8 @@ void SpaceFilter::insert(SP::NonSmoothLaw nslaw,
 
   nslaws(id1, id2) = nslaw;
 }
+
+SP::NonSmoothLaw SpaceFilter::nslaw(long unsigned int class1, long unsigned class2)
+{
+  return (*_nslaws)(class1, class2);
+}

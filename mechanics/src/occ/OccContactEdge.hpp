@@ -8,7 +8,7 @@ struct OccContactEdge : public OccContactShape
 {
   OccContactEdge() : OccContactShape() {};
 
-  OccContactEdge(const OccContactShape& reference_shape, unsigned int index);
+  OccContactEdge(const OccContactShape& shape, unsigned int index);
 
   virtual const SPC::TopoDS_Edge contact() const;
 

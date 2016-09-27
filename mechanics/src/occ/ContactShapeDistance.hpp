@@ -17,6 +17,7 @@ struct ContactShapeDistance
   double nx;
   double ny;
   double nz;
+
 };
 
 #endif

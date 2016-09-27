@@ -12,11 +12,11 @@
 
 #include <limits>
 
-OccContactEdge::OccContactEdge(const OccContactShape& reference_shape,
+OccContactEdge::OccContactEdge(const OccContactShape& shape,
                                unsigned int index) :
-  OccContactShape(reference_shape),
+  OccContactShape(shape),
   _index(index),
-  _edge(reference_shape.edge(index))
+  _edge(shape.edge(index))
 {
 };
 

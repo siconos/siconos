@@ -206,6 +206,13 @@ public:
     return _nslaws;
   };
 
+  /** Get a non smooth law.
+   * \param class1 collision group id of first contactor
+   * \param class2 collision group id of second contactor
+   * \return a pointer on a NonSmoothLaw object
+   */
+  SP::NonSmoothLaw nslaw(long unsigned int class1, long unsigned class2);
+
   /** Get an interaction id.
       \return an unsigned int
    * */
