@@ -1675,7 +1675,7 @@ class Hdf5():
         osnspb.numericsSolverOptions().dparam[0]=tolerance
         osnspb.setMaxSize(30000)
         osnspb.setMStorageType(1)
-        osnspb.setNumericsVerboseMode(numerics_verbose)
+        osnspb.setNumericsVerboseMode(False)
 
         # keep previous solution
         osnspb.setKeepLambdaAndYState(True)
@@ -1737,6 +1737,9 @@ class Hdf5():
 
             log(self._broadphase.buildInteractions, with_timer)\
                 (model.currentTime())
+
+            if (friction_contact_trace == True) :
+                 osnspb._stepcounter = k
 
             log(simulation.computeOneStep, with_timer)()
 
