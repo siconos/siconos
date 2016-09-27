@@ -449,7 +449,7 @@ int fc3d_projectionOnConeWithLocalIteration_solve(FrictionContactProblem* localp
         rho =rho_k;
     if (verbose > 1)
     {
-      printf("----------------------  localiter = %i\t, rho= %.10e\t, error = %.10e \n", localiter, rho, localerror);
+      printf("----------------------  fc3d_projectionOnConeWithLocalIteration_solve localiter = %i\t, rho= %.10e\t, error = %.10e \n", localiter, rho, localerror);
 
     }
 

@@ -367,8 +367,8 @@ int fc3d_onecontact_nonsmooth_Newtow_setDefaultSolverOptions(SolverOptions* opti
   options->numberOfInternalSolvers = 0;
   options->isSet = 1;
   options->filterOn = 1;
-  options->iSize = 16;
-  options->dSize = 16;
+  options->iSize = 20;
+  options->dSize = 20;
   options->iparam = (int *)calloc(options->iSize, sizeof(int));
   options->dparam = (double *)calloc(options->dSize, sizeof(double));
   solver_options_nullify(options);
@@ -974,7 +974,7 @@ int fc3d_onecontact_nonsmooth_Newton_solvers_solve_hybrid(FrictionContactProblem
   }
 
 
-  if (loop == max_loop)
+  if (loop == max_loop && max_loop != 1)
   {
     DEBUG_PRINTF("Maximum number of loop (%i) in SICONOS_FRICTION_3D_ONECONTACT_NSN_AC_GP_P has been reached for contact %i with error = %e \n",max_loop,options->iparam[SICONOS_FRICTION_3D_NSGS_LOCALSOLVER_CONTACTNUMBER],local_error);
   }
