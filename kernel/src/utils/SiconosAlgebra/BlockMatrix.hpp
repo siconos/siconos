@@ -102,6 +102,12 @@ public:
    */
   ~BlockMatrix(void);
 
+
+  inline bool isSymmetric(double tol) const
+  {
+    return false;
+  };
+
   /** get the number of block (i=0, row, i=1 col)
    *  \param i unsigned int(i=0, row, i=1 col)
    *  \return an unsigned int

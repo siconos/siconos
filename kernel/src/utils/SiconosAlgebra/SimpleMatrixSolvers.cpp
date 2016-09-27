@@ -106,7 +106,7 @@ void SimpleMatrix::PLUInverseInPlace()
 void SimpleMatrix::PLUForwardBackwardInPlace(SiconosMatrix &B)
 {
   if (B.isBlock())
-    SiconosMatrixException::selfThrow("SimpleMatrix PLUForwardBackwardInPlace(M) failed. Not yet implemented for M being a BlockMatrix.");
+    SiconosMatrixException::selfThrow("SimpleMatrix PLUForwardBackwardInPlace(B) failed at solving Ax = B. Not yet implemented for a BlockMatrix B.");
   int info = 0;
 
   if (_num == 1)

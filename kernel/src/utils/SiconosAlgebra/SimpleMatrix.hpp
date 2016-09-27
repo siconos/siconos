@@ -278,6 +278,9 @@ public:
     return _ipiv;
   }
 
+
+  bool isSymmetric(double tol) const;
+
   /** get DenseMat matrix
    *  \param row an unsigned int, position of the block - Useless for SimpleMatrix
    *  \param col an unsigned int, position of the block - Useless for SimpleMatrix
