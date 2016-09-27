@@ -35,6 +35,7 @@
 #include "LinearSystemProblem.h"
 #include "Friction_cst.h"
 #include "fc3d_onecontact_nonsmooth_Newton_solvers.h"
+#include "NumericsMatrix.h"
 /* #define GENERICMECHANICAL_DEBUG  */
 /* #define GENERICMECHANICAL_DEBUG2  */
 /* #define GENERICMECHANICAL_DEBUG_CMP */
