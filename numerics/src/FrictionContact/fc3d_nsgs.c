@@ -150,7 +150,7 @@ void fc3d_nsgs_initialize_local_solver(SolverPtr* solve, UpdatePtr* update,
     fc3d_onecontact_nonsmooth_Newton_solvers_initialize(problem, localproblem, localsolver_options);
     break;
   }
-  case SICONOS_FRICTION_3D_ONECONTACT_NSN_AC_GP_P:
+  case SICONOS_FRICTION_3D_ONECONTACT_NSN_AC_GP_HYBRID:
   {
     *solve = &fc3d_onecontact_nonsmooth_Newton_solvers_solve;
     *update = &fc3d_onecontact_nonsmooth_Newton_AC_update;

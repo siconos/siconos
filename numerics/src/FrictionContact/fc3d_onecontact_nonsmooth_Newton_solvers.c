@@ -152,7 +152,7 @@ void fc3d_onecontact_nonsmooth_Newton_solvers_initialize(FrictionContactProblem*
     freeSolver = &fc3d_AC_free;
 
   }
-  else if (localsolver_options->solverId == SICONOS_FRICTION_3D_ONECONTACT_NSN_AC_GP_P)
+  else if (localsolver_options->solverId == SICONOS_FRICTION_3D_ONECONTACT_NSN_AC_GP_HYBRID)
   {
     fc3d_AC_initialize(problem, localproblem,localsolver_options);
     fc3d_projectionOnConeWithLocalIteration_initialize(problem, localproblem, localsolver_options );
@@ -202,7 +202,7 @@ int fc3d_onecontact_nonsmooth_Newton_solvers_solve(FrictionContactProblem* local
   {
     info = fc3d_onecontact_nonsmooth_Newton_solvers_solve_damped(localproblem, local_reaction, options->iparam, options->dparam);
   }
-  else if (options->solverId == SICONOS_FRICTION_3D_ONECONTACT_NSN_AC_GP_P)
+  else if (options->solverId == SICONOS_FRICTION_3D_ONECONTACT_NSN_AC_GP_HYBRID)
   {
     info = fc3d_onecontact_nonsmooth_Newton_solvers_solve_hybrid(localproblem, local_reaction, options);
   }
@@ -903,7 +903,7 @@ int fc3d_onecontact_nonsmooth_Newton_solvers_solve_hybrid(FrictionContactProblem
   while (loop <  max_loop && local_error >= options->dparam[SICONOS_DPARAM_TOL] )
   {
     loop++;
-    DEBUG_PRINTF("SICONOS_FRICTION_3D_ONECONTACT_NSN_AC_GP_P:  loop = %i\n", loop);
+    DEBUG_PRINTF("SICONOS_FRICTION_3D_ONECONTACT_NSN_AC_GP_HYBRID:  loop = %i\n", loop);
     /* step 1 : fixed point projection solver */
     options->iparam[SICONOS_IPARAM_MAX_ITER]= pli_iteration_number;
     info = fc3d_projectionOnConeWithLocalIteration_solve (localproblem, local_reaction, options);
@@ -976,7 +976,7 @@ int fc3d_onecontact_nonsmooth_Newton_solvers_solve_hybrid(FrictionContactProblem
 
   if (loop == max_loop && max_loop != 1)
   {
-    DEBUG_PRINTF("Maximum number of loop (%i) in SICONOS_FRICTION_3D_ONECONTACT_NSN_AC_GP_P has been reached for contact %i with error = %e \n",max_loop,options->iparam[SICONOS_FRICTION_3D_NSGS_LOCALSOLVER_CONTACTNUMBER],local_error);
+    printf("Maximum number of loop (%i) in SICONOS_FRICTION_3D_ONECONTACT_NSN_AC_GP_HYBRID has been reached for contact %i with error = %e \n",max_loop,options->iparam[SICONOS_FRICTION_3D_NSGS_LOCALSOLVER_CONTACTNUMBER],local_error);
   }
 
 

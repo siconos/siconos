@@ -81,7 +81,7 @@ enum FRICTION_SOLVER
   SICONOS_FRICTION_3D_ONECONTACT_QUARTIC_NU = 563,
   SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCylinder = 557,
   SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCylinderWithLocalIteration = 564,
-  SICONOS_FRICTION_3D_ONECONTACT_NSN_AC_GP_P = 565,
+  SICONOS_FRICTION_3D_ONECONTACT_NSN_AC_GP_HYBRID = 565,
   
   /** 3D Frictional contact local solvers on global formulation */
   SICONOS_GLOBAL_FRICTION_3D_NSGS_WR = 600,
@@ -121,7 +121,7 @@ extern char *  SICONOS_FRICTION_3D_HP_STR ;
 extern char *  SICONOS_FRICTION_3D_NCPGlockerFBFixedPoint_STR;
 extern char *  SICONOS_FRICTION_3D_ONECONTACT_NSN_AC_STR;
 extern char *  SICONOS_FRICTION_3D_ONECONTACT_NSN_AC_GP_STR;
-extern char *  SICONOS_FRICTION_3D_ONECONTACT_NSN_AC_GP_P_STR;
+extern char *  SICONOS_FRICTION_3D_ONECONTACT_NSN_AC_GP_HYBRID_STR;
 extern char *  SICONOS_FRICTION_3D_NCPGlockerFBNewton_STR;
 extern char *  SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithDiagonalization_STR;
 extern char *  SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone_STR;
@@ -199,12 +199,20 @@ enum SICONOS_FRICTION_3D_ONECONTACT_NSN_LINESEARCH_ENUM
   SICONOS_FRICTION_3D_ONECONTACT_NSN_LINESEARCH_MAXITER = 12
 };
 
-enum SICONOS_FRICTION_3D_ONECONTACT_NSN_HYBRID
+enum SICONOS_FRICTION_3D_ONECONTACT_NSN_HYBRID_ENUM
 {
-  /** Maximum number of loop for the hybrid solver */
-  SICONOS_FRICTION_3D_ONECONTACT_NSN_HYBRID_MAX_LOOP = 14,
-  /** Maximum number of iterations for the projection solver */
-  SICONOS_FRICTION_3D_ONECONTACT_NSN_HYBRID_MAX_ITER = 15
+  /** index in iparam to store the strategy for the hybrid solver */
+  SICONOS_FRICTION_3D_ONECONTACT_NSN_HYBRID_STRATEGY = 14,
+  /** Loop NSN-PLI strategy for the hybrid solver */
+  SICONOS_FRICTION_3D_ONECONTACT_NSN_HYBRID_STRATEGY_PLI_NSN_LOOP = 0,
+  /** Loop PLI-NSN-PLI strategy for the hybrid solver */
+  SICONOS_FRICTION_3D_ONECONTACT_NSN_HYBRID_STRATEGY_NSN_PLI_LOOP = 1,
+  /** NSN and after Loop NSN-PLI strategy for the hybrid solver */
+  SICONOS_FRICTION_3D_ONECONTACT_NSN_HYBRID_STRATEGY_NSN_AND_NSN_PLI_LOOP = 2,
+  /** index in iparam to store the maximum number of loop for the hybrid solver */
+  SICONOS_FRICTION_3D_ONECONTACT_NSN_HYBRID_MAX_LOOP = 16,
+  /** index in iparam to store the maximum number of iterations for the projection solver */
+  SICONOS_FRICTION_3D_ONECONTACT_NSN_HYBRID_MAX_ITER = 17
 };
 
 
