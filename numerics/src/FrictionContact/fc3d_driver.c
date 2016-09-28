@@ -33,9 +33,9 @@ char *  SICONOS_FRICTION_3D_NSN_FB_STR = "FC3D_NSN_FB";
 char *  SICONOS_FRICTION_3D_NSN_NM_STR = "FC3D_NSN_NM";
 char *  SICONOS_FRICTION_3D_DSFP_STR = "FC3D_DeSaxceFixedPoint";
 char *  SICONOS_FRICTION_3D_NCPGlockerFBFixedPoint_STR = "FC3D_NCPGlockerFBFixedPoint";
-char *  SICONOS_FRICTION_3D_ONECONTACT_NSN_AC_STR = "FC3D_ONECONTACT_NSN_AC";
-char *  SICONOS_FRICTION_3D_ONECONTACT_NSN_AC_GP_STR = "FC3D_ONECONTACT_NSN_AC_GP";
-char *  SICONOS_FRICTION_3D_ONECONTACT_NSN_AC_GP_HYBRID_STR = "FC3D_ONECONTACT_NSN_AC_GP_HYBRID";
+char *  SICONOS_FRICTION_3D_ONECONTACT_NSN_STR = "FC3D_ONECONTACT_NSN";
+char *  SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_STR = "FC3D_ONECONTACT_NSN_GP";
+char *  SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID_STR = "FC3D_ONECONTACT_NSN_GP_HYBRID";
 char *  SICONOS_FRICTION_3D_NCPGlockerFBNewton_STR = "FC3D_NCPGlockerFBNewton";
 char * SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithDiagonalization_STR = "FC3D_ProjectionOnConeWithDiagonalization";
 char * SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone_STR = "FC3D_ProjectionOnCone";
@@ -217,8 +217,8 @@ int fc3d_driver(FrictionContactProblem* problem,
     fc3d_unitary_enumerative(problem, reaction , velocity , &info , options);
     break;
   }
-  case SICONOS_FRICTION_3D_ONECONTACT_NSN_AC:
-  case SICONOS_FRICTION_3D_ONECONTACT_NSN_AC_GP:
+  case SICONOS_FRICTION_3D_ONECONTACT_NSN:
+  case SICONOS_FRICTION_3D_ONECONTACT_NSN_GP:
   {
     snPrintf(" ========================== Call Newton-based solver for one contact Friction-Contact 3D problem ==========================\n");
     fc3d_onecontact_nonsmooth_Newton_solvers_initialize(problem, problem, options);

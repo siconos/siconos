@@ -1590,7 +1590,7 @@ class Hdf5():
             TimeDiscretisation, GenericMechanical, FrictionContact,\
             NewtonImpactFrictionNSL
 
-        from siconos.numerics import SICONOS_FRICTION_3D_ONECONTACT_NSN_AC
+        from siconos.numerics import SICONOS_FRICTION_3D_ONECONTACT_NSN
 
         from siconos.mechanics.contact_detection.bullet import \
             btConvexHullShape, btCollisionObject, \
@@ -1651,7 +1651,7 @@ class Hdf5():
 
         if (friction_contact_trace == False) :
             if len(joints) > 0:
-                osnspb=GenericMechanical(SICONOS_FRICTION_3D_ONECONTACT_NSN_AC)
+                osnspb=GenericMechanical(SICONOS_FRICTION_3D_ONECONTACT_NSN)
             else:
                 osnspb=FrictionContact(3, solver)
         else:
@@ -1668,7 +1668,7 @@ class Hdf5():
         osnspb.numericsSolverOptions().iparam[1]=Numerics.SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL
         osnspb.numericsSolverOptions().iparam[14]=Numerics.SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION_TRUE
 
-        osnspb.numericsSolverOptions().internalSolvers.solverId = Numerics.SICONOS_FRICTION_3D_ONECONTACT_NSN_AC_GP_HYBRID
+        osnspb.numericsSolverOptions().internalSolvers.solverId = Numerics.SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID
         
         osnspb.numericsSolverOptions().internalSolvers.iparam[0]=100
         osnspb.numericsSolverOptions().dparam[0]=tolerance

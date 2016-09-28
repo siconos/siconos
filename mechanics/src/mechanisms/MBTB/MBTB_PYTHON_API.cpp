@@ -538,7 +538,7 @@ void  MBTB_initSimu(double hTS, int withProj)
   // -- (3) one step non smooth problem
   //osnspb.reset(new Equality());
   //osnspb.reset(new MLCP(SICONOS_MLCP_PATH));
-  SP::LinearOSNS osnspb(new GenericMechanical(SICONOS_FRICTION_3D_ONECONTACT_NSN_AC_GP));
+  SP::LinearOSNS osnspb(new GenericMechanical(SICONOS_FRICTION_3D_ONECONTACT_NSN_GP));
   //SP::LinearOSNS osnspb(new GenericMechanical());
   osnspb->setKeepLambdaAndYState(true);
   //osnspb->numericsSolverOptions()->iparam[1]=0;

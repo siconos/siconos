@@ -60,9 +60,9 @@ enum FRICTION_SOLVER
   /* 3D Frictional Contact solvers for one contact (used mainly inside NSGS solvers) */
   
   /** Non-smooth Newton Alart-Curnier, 'direct', one contact solver */
-  SICONOS_FRICTION_3D_ONECONTACT_NSN_AC= 550,
+  SICONOS_FRICTION_3D_ONECONTACT_NSN= 550,
   /** Non-smooth Newton Alart-Curnier, 'damped', one contact solver */
-  SICONOS_FRICTION_3D_ONECONTACT_NSN_AC_GP = 551,
+  SICONOS_FRICTION_3D_ONECONTACT_NSN_GP = 551,
   /** Projection on cone, one contact solver */
   SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone = 552,
   /** Projection on cone, one contact solver */
@@ -81,7 +81,7 @@ enum FRICTION_SOLVER
   SICONOS_FRICTION_3D_ONECONTACT_QUARTIC_NU = 563,
   SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCylinder = 557,
   SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCylinderWithLocalIteration = 564,
-  SICONOS_FRICTION_3D_ONECONTACT_NSN_AC_GP_HYBRID = 565,
+  SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID = 565,
   
   /** 3D Frictional contact local solvers on global formulation */
   SICONOS_GLOBAL_FRICTION_3D_NSGS_WR = 600,
@@ -119,9 +119,9 @@ extern char *  SICONOS_FRICTION_3D_EG_STR ;
 extern char *  SICONOS_FRICTION_3D_FPP_STR ;
 extern char *  SICONOS_FRICTION_3D_HP_STR ;
 extern char *  SICONOS_FRICTION_3D_NCPGlockerFBFixedPoint_STR;
-extern char *  SICONOS_FRICTION_3D_ONECONTACT_NSN_AC_STR;
-extern char *  SICONOS_FRICTION_3D_ONECONTACT_NSN_AC_GP_STR;
-extern char *  SICONOS_FRICTION_3D_ONECONTACT_NSN_AC_GP_HYBRID_STR;
+extern char *  SICONOS_FRICTION_3D_ONECONTACT_NSN_STR;
+extern char *  SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_STR;
+extern char *  SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID_STR;
 extern char *  SICONOS_FRICTION_3D_NCPGlockerFBNewton_STR;
 extern char *  SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithDiagonalization_STR;
 extern char *  SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone_STR;
