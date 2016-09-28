@@ -220,6 +220,9 @@ protected:
   /** jacobian_v FGyr*/
   SP::SimpleMatrix _jacobianFGyrv;
 
+  /** if true, we set the gyroscopic forces equal to 0 (default false) **/
+  bool nullifyFGyr;
+
   /** If true, we compute the missing Jacobian by forward finite difference */
   bool _computeJacobianFIntqByFD;
 
@@ -546,7 +549,10 @@ public:
   }
   //  inline SP::SiconosMatrix jacobianZFL() const { return jacobianZFL; }
 
-
+  inline void setNullifyFGyr(bool value)
+  {
+    nullifyFGyr = value;
+  }
   inline void setComputeJacobianFIntqByFD(bool value)
   {
     _computeJacobianFIntqByFD=value;
