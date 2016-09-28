@@ -999,15 +999,15 @@ class Hdf5():
                             collision_group=ctr.attrs['group'].astype(int),
                             contact_type=ctr.attrs['type'].astype(int),
                             contact_index=ctr.attrs['contact_index'].astype(int),
-                            relative_translation=ctr.attrs['translation'].astype(float)
-                            relative_orientation=ctr.attrs['orientation'].astype(float)
+                            relative_translation=ctr.attrs['translation'].astype(float),
+                            relative_orientation=ctr.attrs['orientation'].astype(float))
                                       for ctr in input_ctrs]
                     except KeyError:
                         contactors = [Contactor(
                             shape_name=ctr.attrs['name'],
                             collision_group=ctr.attrs['group'].astype(int),
-                            relative_translation=ctr.attrs['translation'].astype(float)
-                            relative_orientation=ctr.attrs['orientation'].astype(float)
+                            relative_translation=ctr.attrs['translation'].astype(float),
+                            relative_orientation=ctr.attrs['orientation'].astype(float))
                                       for ctr in input_ctrs]
 
                     if 'inertia' in obj.attrs:
