@@ -204,7 +204,8 @@ int fc3d_onecontact_nonsmooth_Newton_solvers_solve(FrictionContactProblem* local
   }
   else if (options->solverId == SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID)
   {
-    if (options->iparam[SICONOS_FRICTION_3D_ONECONTACT_NSN_HYBRID_STRATEGY ] ==  SICONOS_FRICTION_3D_ONECONTACT_NSN_HYBRID_STRATEGY_PLI_NSN_LOOP)
+    if (options->iparam[SICONOS_FRICTION_3D_ONECONTACT_NSN_HYBRID_STRATEGY] ==  SICONOS_FRICTION_3D_ONECONTACT_NSN_HYBRID_STRATEGY_PLI_NSN_LOOP ||
+        options->iparam[SICONOS_FRICTION_3D_ONECONTACT_NSN_HYBRID_STRATEGY] ==  SICONOS_FRICTION_3D_ONECONTACT_NSN_HYBRID_STRATEGY_NSN_AND_NSN_PLI_LOOP)
     {
       info = fc3d_onecontact_nonsmooth_Newton_solvers_solve_hybrid_pli_nsn_loop(localproblem, local_reaction, options);
     }
@@ -908,6 +909,38 @@ int fc3d_onecontact_nonsmooth_Newton_solvers_solve_hybrid_pli_nsn_loop(FrictionC
 
   double current_error = 1e+24;
 
+
+  /* Perform a first call to NSN solver to see if is succeeds quickly */
+  
+  if (options->iparam[SICONOS_FRICTION_3D_ONECONTACT_NSN_HYBRID_STRATEGY ] ==  SICONOS_FRICTION_3D_ONECONTACT_NSN_HYBRID_STRATEGY_NSN_AND_NSN_PLI_LOOP)
+  {
+    options->iparam[SICONOS_IPARAM_MAX_ITER]= newton_iteration_number;
+    info = fc3d_onecontact_nonsmooth_Newton_solvers_solve_damped(localproblem,  local_reaction, options->iparam, options->dparam);
+    DEBUG_PRINTF("fc3d_onecontact_nonsmooth_Newton_solvers_solve_damped  ended with error = %e\n", options->dparam[SICONOS_DPARAM_RESIDU]);
+    int nan3 = isnan(options->dparam[SICONOS_DPARAM_RESIDU]) || isinf(options->dparam[SICONOS_DPARAM_RESIDU]);
+    if (nan3)
+    {
+      DEBUG_PRINTF("No Improvement after first call to nsn solver. get back to the local backup solution = %e\n", current_error);
+      memcpy(local_reaction, local_reaction_backup, sizeof(double)*3);
+    }
+    else
+    {
+      if (options->dparam[SICONOS_DPARAM_RESIDU] <= options->dparam[SICONOS_DPARAM_TOL]
+          || options->dparam[SICONOS_DPARAM_RESIDU] <= current_error)
+      {
+        DEBUG_PRINTF("Improvement after first call to nsn solve. Keep the new local solution of loop %i with error = %e\n", loop, options->dparam[SICONOS_DPARAM_RESIDU]);
+        current_error = options->dparam[SICONOS_DPARAM_RESIDU];
+        memcpy(local_reaction_backup, local_reaction, sizeof(double)*3);
+        /* getchar(); */
+      }
+      else
+      {
+        DEBUG_PRINTF("No Improvement after first call to nsn. Get back to the local backup solution = %e\n", loop, current_error);
+        memcpy(local_reaction, local_reaction_backup, sizeof(double)*3);
+      }
+    }
+  }
+  
   int loop = 0 ;
   while (loop <  max_loop && current_error >= options->dparam[SICONOS_DPARAM_TOL] )
   {

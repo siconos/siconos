@@ -210,9 +210,9 @@ enum SICONOS_FRICTION_3D_ONECONTACT_NSN_HYBRID_ENUM
   /** NSN and after Loop NSN-PLI strategy for the hybrid solver */
   SICONOS_FRICTION_3D_ONECONTACT_NSN_HYBRID_STRATEGY_NSN_AND_NSN_PLI_LOOP = 2,
   /** index in iparam to store the maximum number of loop for the hybrid solver */
-  SICONOS_FRICTION_3D_ONECONTACT_NSN_HYBRID_MAX_LOOP = 16,
+  SICONOS_FRICTION_3D_ONECONTACT_NSN_HYBRID_MAX_LOOP = 15,
   /** index in iparam to store the maximum number of iterations for the projection solver */
-  SICONOS_FRICTION_3D_ONECONTACT_NSN_HYBRID_MAX_ITER = 17
+  SICONOS_FRICTION_3D_ONECONTACT_NSN_HYBRID_MAX_ITER = 16
 };
 
 
