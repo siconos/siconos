@@ -27,6 +27,8 @@ try:
         SiconosPlane, SiconosContactor, SiconosConvexHull
     from siconos.mechanics.collision.bullet import \
         BulletBroadphase, BulletOptions
+    from siconos.mechanics.collision.bullet import \
+        btScalarSize, btQuaternion, btTransform, btVector3
     proposed_is_here = True
 except:
     proposed_is_here = False
@@ -797,18 +799,19 @@ class Hdf5():
                     print('Adding shape %s to static contactor'%c.name, pos)
                     self._static_contactor.addShape(shp)
 
-                    self._static_origins.append(translation)
-
-                    self._static_orientations.append(orientation)
-
-                    self._static_transforms.append(
-                        btTransform(btQuaternion(orientation[1],
-                                                 orientation[2],
-                                                 orientation[3],
-                                                 orientation[0]),
-                                    btVector3(translation[0],
-                                              translation[1],
-                                              translation[2])))
+                    self._static[name] = {
+                        'number': number,
+                        'origin': translation,
+                        'orientation': orientation,
+                        'transform': btTransform(btQuaternion(orientation[1],
+                                                              orientation[2],
+                                                              orientation[3],
+                                                              orientation[0]),
+                                                 btVector3(translation[0],
+                                                           translation[1],
+                                                           translation[2])),
+                        'shape': shp,
+                        }
 
             elif mass == 0.:
                 # a static object
@@ -866,7 +869,7 @@ class Hdf5():
                 contactor = SiconosContactor()
                 for c in contactors:
                     shp = self._shape.get(c.name)
-                    shp.setPosition(c.translation + c.orientation)
+                    shp.setPosition(list(c.translation) + list(c.orientation))
                     shp.setGroup(c.group)
                     contactor.addShape(shp)
 
