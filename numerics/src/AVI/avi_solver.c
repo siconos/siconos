@@ -16,23 +16,18 @@
  * limitations under the License.
 */
 
-#include "NumericsOptions.h"
 #include "NonSmoothDrivers.h"
-
 #include "AVI_Solvers.h"
+#include "AVI_cst.h"
+#include "numerics_verbose.h"
+#include "assert.h"
+#include "NumericsMatrix.h"
 
 char *  SICONOS_AVI_CAOFERRIS_STR = "AVI from Cao & Ferris";
 
-int avi_driver(AffineVariationalInequalities* problem, double *z , double *w, SolverOptions* options,  NumericsOptions* global_options)
+int avi_driver(AffineVariationalInequalities* problem, double *z , double *w, SolverOptions* options)
 {
   assert(options && "avi_driver : null input for solver options");
-
-  /* Set global options */
-  if (global_options)
-  {
-    setNumericsOptions(global_options);
-  }
-
   /* Checks inputs */
   assert(problem && z && w &&
       "avi_driver : input for LinearComplementarityProblem and/or unknowns (z,w)");
@@ -40,12 +35,7 @@ int avi_driver(AffineVariationalInequalities* problem, double *z , double *w, So
   assert(problem->M->storageType == 0 &&
       "avi_driver_DenseMatrix : forbidden type of storage for the matrix M of the AVI");
 
-  /* If the options for solver have not been set, read default values in .opt file */
-  if (options->isSet == 0)
-  {
-    solver_options_read(0, options);
-    options->filterOn = 1;
-  }
+  assert(options->isSet);
 
   if (verbose > 0)
   {

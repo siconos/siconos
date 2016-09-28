@@ -19,14 +19,13 @@
 #include <stdlib.h>
 #include "NonSmoothDrivers.h"
 #include "frictionContact_test_function.h"
-
+#include "SolverOptions.h"
+#include "FrictionContactProblem.h"
+#include "Friction_cst.h"
+#include "fc3d_Solvers.h"
 
 int main(void)
 {
-  NumericsOptions NO;
-  setDefaultNumericsOptions(&NO);
-  NO.verboseMode = 1; // turn verbose mode to off by default
-
   int total_info = 0;
 
   double q[] = { -1, 1, 3, -1, 1, 3, -1, 1, 3};
@@ -56,7 +55,7 @@ int main(void)
 
     SolverOptions SO;;
     fc3d_setDefaultSolverOptions(&SO, solver_id);
-    int info = fc3d_driver(FC, r, u, &SO, &NO);
+    int info = fc3d_driver(FC, r, u, &SO);
 
     if (info)
     {

@@ -31,7 +31,7 @@
 #include "SiconosLapack.h"
 #include "numericsMatrixTestFunction.h"
 #include "sanitizer.h"
-
+#include "SparseBlockMatrix.h"
 int test_BuildNumericsMatrix(NumericsMatrix** MM)
 {
 

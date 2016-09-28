@@ -26,6 +26,8 @@
 #include <math.h>
 #define VERBOSE_DEBUG
 #include "Friction_cst.h"
+#include "numerics_verbose.h"
+
 void fc3d_TrescaFixedPoint(FrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options)
 {
   /* int and double parameters */
@@ -46,7 +48,7 @@ void fc3d_TrescaFixedPoint(FrictionContactProblem* problem, double *reaction, do
 
   if (options->numberOfInternalSolvers < 1)
   {
-    numericsError("fc3d_TrescaFixedpoint", "The Tresca Fixed Point method needs options for the internal solvers, options[0].numberOfInternalSolvers should be >1");
+    numerics_error("fc3d_TrescaFixedpoint", "The Tresca Fixed Point method needs options for the internal solvers, options[0].numberOfInternalSolvers should be >1");
   }
 
   SolverOptions * internalsolver_options = options->internalSolvers;

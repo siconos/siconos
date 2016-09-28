@@ -20,9 +20,14 @@
 #include <string.h>
 #include <time.h>
 #include <float.h>
-#include "NumericsOptions.h"
+#include "LinearComplementarityProblem.h"
 #include "LCP_Solvers.h"
-#include "NonSmoothDrivers.h"
+#include "lcp_cst.h"
+#include "SolverOptions.h"
+#include "NumericsMatrix.h"
+
+
+#include "numerics_verbose.h"
 
 int linearComplementarity_setDefaultSolverOptions(LinearComplementarityProblem* problem, SolverOptions* options, int solverId)
 {
@@ -107,7 +112,7 @@ int linearComplementarity_setDefaultSolverOptions(LinearComplementarityProblem* 
   }
   default:
   {
-    numericsError("linearComplementarity_setDefaultSolverOptions", "Unknown Solver");
+    numerics_error("linearComplementarity_setDefaultSolverOptions", "Unknown Solver");
 
   }
   }

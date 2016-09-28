@@ -17,12 +17,13 @@
 */
 
 #include "SiconosBlas.h"
-#include "NumericsOptions.h" // for global options
 #include "RelayProblem.h"
 
 #include "Relay_Solvers.h"
 
 #include "sanitizer.h"
+#include "numerics_verbose.h"
+#include "NumericsMatrix.h"
 
 void project_on_box(int n, double* restrict z, double* restrict lb, double* restrict ub)
 {

@@ -24,7 +24,6 @@
 */
 
 #include "FrictionContactProblem.h"
-#include "NumericsOptions.h"
 #include "SolverOptions.h"
 #include "fc3d_AlartCurnier_functions.h"
 #include "fc3d_projection.h"
@@ -64,50 +63,14 @@ extern "C"
 {
 #endif
 
-  /** General interface to solvers for friction-contact 3D problem
-  \param[in] problem the structure which handles the Friction-Contact problem
-  \param[in,out] reaction global vector (n)
-  \param[in,out] velocity global vector (n)
-  \param[in,out] options structure used to define the solver(s) and their parameters
-  \param[in] global_options for Numerics (verbose mode ...)
-  \return result (0 if successful otherwise 1).
-  */
-  int fc3d_driver(FrictionContactProblem* problem, double *reaction , double *velocity, SolverOptions* options, NumericsOptions* global_options);
-
   /** set the default solver parameters and perform memory allocation for fc3d
       \param options the pointer to the options to set
       \param solverId the identifier of the solver
   */
   int fc3d_setDefaultSolverOptions(SolverOptions* options, int solverId);
 
-  
-  enum SICONOS_FRICTION_3D_NSGS_LOCALSOLVER
-  {
-    SICONOS_FRICTION_3D_NSGS_LOCALSOLVER_CONTACTNUMBER = 4
-  };
-  enum SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION
-  {
-    SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_FULL,
-    SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL,
-    SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT,
-    SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_ADAPTIVE
-  };
-  enum SICONOS_FRICTION_3D_NSGS_SHUFFLE
-  {
-    SICONOS_FRICTION_3D_NSGS_SHUFFLE_FALSE,
-    SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE,
-    SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE_EACH_LOOP
-  };
-  enum SICONOS_FRICTION_3D_NSGS_RELAXATION
-  {
-    SICONOS_FRICTION_3D_NSGS_RELAXATION_FALSE,
-    SICONOS_FRICTION_3D_NSGS_RELAXATION_TRUE
-  };
-  enum SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION
-  {
-    SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION_FALSE,
-    SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION_TRUE
-  };
+
+
 
   /** Non-Smooth Gauss Seidel solver for friction-contact 3D problem
       \param problem the friction-contact 3D problem to solve

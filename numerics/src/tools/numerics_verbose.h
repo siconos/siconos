@@ -15,22 +15,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#ifndef _NUMERICS_MISC_H_
-#define _NUMERICS_MISC_H_
+#ifndef _NUMERICS_VERBOSE_H_
+#define _NUMERICS_VERBOSE_H_
 
 #include "SiconosConfig.h"
 #include <errno.h>
 #include <stdint.h>
 #include <stddef.h>
 
+
+
+/* Verbose mode */
+extern int verbose;
+
+
 #if defined(__cplusplus) && !defined (BUILD_AS_CPP)
 extern "C"
 {
 #endif
-
-/** print a dense matrix or vector
- */
-void printm(unsigned int nl, unsigned int nc, double *m);
 
 /** Check return code of an expression. */
 #define CHECK_RETURN(EXPR)                                              \
@@ -112,6 +114,26 @@ void printm(unsigned int nl, unsigned int nc, double *m);
 #define WARN_RESULT_IGNORED
 #endif
 
+
+  /* Set verbose mode in numerics
+     \param newVerboseMode 0 no verbose, 1 verbose.
+  */
+  void numerics_set_verbose(int newVerboseMode);
+
+  void setNumericsVerbose(int newVerboseMode);
+  
+  /* message output and exit with error
+     \param functionName name of the function where error occurs
+     \param message output message
+  */
+  void numerics_error(char* functionName, char* message) NO_RETURN;
+
+  /* message output without exit
+     \param functionName name of the function where warning occurs
+     \param message output message
+  */
+  void numerics_warning(char* functionName, char* message);
+  
 #if defined(__cplusplus) && !defined (BUILD_AS_CPP)
 }
 #endif

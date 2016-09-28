@@ -17,7 +17,6 @@
 */
 
 
-#include "NumericsOptions.h" // for global options
 #include "VariationalInequality.h"
 #include "SolverOptions.h"
 #include "VariationalInequality_computeError.h"
@@ -30,6 +29,7 @@
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
 #include "debug.h"
+#include "numerics_verbose.h"
 
 int variationalInequality_computeError(
   VariationalInequality* problem,

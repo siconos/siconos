@@ -25,7 +25,7 @@
 #include "NewtonEulerDS.hpp"
 #include "NewtonEulerR.hpp"
 #include "SimulationGraphs.hpp"
-
+#include "SparseBlockMatrix.h" // From numerics, for SparseBlockStructuredMatrix
 #include "Tools.hpp"
 
 // #define DEBUG_STDOUT

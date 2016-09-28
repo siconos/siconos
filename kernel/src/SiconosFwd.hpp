@@ -9,12 +9,10 @@
 // --- Numerics ---
 
 #include <MixedLinearComplementarityProblem.h>
-#include <NumericsOptions.h>
 #include <SolverOptions.h>
 #include <NumericsMatrix.h>
 
 TYPEDEF_SPTR(MixedLinearComplementarityProblem)
-TYPEDEF_SPTR(NumericsOptions)
 TYPEDEF_SPTR(SolverOptions)
 TYPEDEF_SPTR(NumericsMatrix)
 // ----------------

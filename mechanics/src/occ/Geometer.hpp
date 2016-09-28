@@ -2,6 +2,7 @@
 #define Geometer_hpp
 
 #include <SiconosVisitor.hpp>
+#include <iostream>
 
 struct Geometer : public SiconosVisitor
 {
@@ -23,7 +24,6 @@ struct Geometer : public SiconosVisitor
   {
     answer = base->distance(edge);
   }
-
 
   virtual SP::ContactShapeDistance distance(const OccContactShape& psh1,
                                             const OccContactShape& psh2)

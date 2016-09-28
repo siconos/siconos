@@ -1,9 +1,11 @@
 from math import cos, sin
 from numpy.linalg import norm
 
+
 class Shape(object):
     """
-    A shape is associated to some body with relatives translation and orientation.
+    A shape with translation and orientation. The given position is meant to be
+    relative to some body reference frame.
     """
     def __init__(self,
                  shape_name,
@@ -31,8 +33,8 @@ class Shape(object):
 
 class Avatar(Shape):
     """
-    An Avatar shape is a shape associated to a body for visualisation
-    purpose only.
+    An Avatar shape is a shape that may be associated to some  body
+    for visualisation purpose only.
     """
 
     def __init__(self,
@@ -49,17 +51,25 @@ class Avatar(Shape):
 
 class Contactor(Shape):
     """
-    A Contactor shape belongs to a group and is associated to a body.
-    Contact laws must then be defined between groups.
+    A Contactor is associated to a shape. It belongs to a
+    collision group. Depending on the geometrical engine used,
+    some informations may be added to the contactor, such as
+    the kind of contact and the concerned part of the shape.
+    Note that contact laws must then be defined between collision
+    groups.
     """
 
     def __init__(self,
                  shape_name,
                  collision_group=0,
+                 contact_type=None,
+                 contact_index=None,
                  relative_translation=[0, 0, 0],
                  relative_orientation=[1, 0, 0, 0]):
 
         self.group = collision_group
+        self.contact_type = contact_type
+        self.contact_index = contact_index
 
         super(Contactor, self).__init__(shape_name,
                                         relative_translation,

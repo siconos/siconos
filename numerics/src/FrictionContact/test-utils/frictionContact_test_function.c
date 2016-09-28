@@ -19,12 +19,14 @@
 #include <stdlib.h>
 #include "NonSmoothDrivers.h"
 #include "frictionContact_test_function.h"
-
+#include "fc3d_Solvers.h"
+#include "gfc3d_Solvers.h"
+#include "Friction_cst.h"
 #if defined(WITH_FCLIB)
 #include <fclib.h>
 #include <fclib_interface.h>
 #endif
-
+#include "numerics_verbose.h"
 
 void frictionContact_test_gams_opts(SN_GAMSparams* GP, int solverId)
 {
@@ -72,17 +74,11 @@ int frictionContact_test_function(FILE * f, SolverOptions * options)
 
   int k, info = -1 ;
   FrictionContactProblem* problem = (FrictionContactProblem *)malloc(sizeof(FrictionContactProblem));
-
+  setNumericsVerbose(1);
   info = frictionContact_newFromFile(problem, f);
 
   FILE * foutput  =  fopen("checkinput.dat", "w");
   info = frictionContact_printInFile(problem, foutput);
-
-  NumericsOptions global_options;
-  setDefaultNumericsOptions(&global_options);
-  global_options.verboseMode = 1; // turn verbose mode to off by default
-
-
 
   solver_options_print(options);
   int NC = problem->numberOfContacts;
@@ -95,14 +91,14 @@ int frictionContact_test_function(FILE * f, SolverOptions * options)
   if (dim == 2)
   {
     info = fc2d_driver(problem,
-                                    reaction , velocity,
-                                    options, &global_options);
+		       reaction , velocity,
+		       options);
   }
   else if (dim == 3)
   {
     info = fc3d_driver(problem,
-                                    reaction , velocity,
-                                    options, &global_options);
+		       reaction , velocity,
+		       options);
   }
   else
   {
@@ -167,11 +163,6 @@ int frictionContact_test_function_hdf5(const char * path, SolverOptions * option
   FILE * foutput  =  fopen("checkinput.dat", "w");
   info = frictionContact_printInFile(problem, foutput);
 
-  
-  NumericsOptions global_options;
-  setDefaultNumericsOptions(&global_options);
-  global_options.verboseMode = 1; // turn verbose mode to off by default
-
   int NC = problem->numberOfContacts;
   int dim = problem->dimension;
   //int dim = problem->numberOfContacts;
@@ -182,14 +173,14 @@ int frictionContact_test_function_hdf5(const char * path, SolverOptions * option
   if (dim == 2)
   {
     info = fc2d_driver(problem,
-                                    reaction , velocity,
-                                    options, &global_options);
+		       reaction , velocity,
+		       options);
   }
   else if (dim == 3)
   {
     info = fc3d_driver(problem,
-                                    reaction , velocity,
-                                    options, &global_options);
+		       reaction , velocity,
+		       options);
   }
   else
   {
@@ -250,10 +241,6 @@ int gfc3d_test_function_hdf5(const char* path, SolverOptions* options)
   FILE * foutput  =  fopen("checkinput.dat", "w");
   info = globalFrictionContact_printInFile(problem, foutput);
 
-  NumericsOptions global_options;
-  setDefaultNumericsOptions(&global_options);
-  global_options.verboseMode = 1; // turn verbose mode to off by default
-
   int NC = problem->numberOfContacts;
   int dim = problem->dimension;
   int n = problem->M->size0;
@@ -264,7 +251,7 @@ int gfc3d_test_function_hdf5(const char* path, SolverOptions* options)
 
   if (dim == 3)
   {
-    info = gfc3d_driver(problem, reaction, velocity, global_velocity, options, &global_options);
+    info = gfc3d_driver(problem, reaction, velocity, global_velocity, options);
   }
   else
   {

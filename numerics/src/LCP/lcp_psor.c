@@ -21,8 +21,14 @@
 #include <string.h>
 #include <math.h>
 #include <float.h>
+#include "LinearComplementarityProblem.h"
 #include "LCP_Solvers.h"
+#include "lcp_cst.h"
+#include "SolverOptions.h"
+#include "NumericsMatrix.h"
+
 #include "SiconosBlas.h"
+#include "numerics_verbose.h"
 
 /*\warning omega is not explicitely used. must be completed    */
 void lcp_psor(LinearComplementarityProblem* problem, double *z, double *w, int *info , SolverOptions* options)

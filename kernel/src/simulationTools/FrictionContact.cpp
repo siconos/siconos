@@ -22,7 +22,7 @@
 #include "NonSmoothDynamicalSystem.hpp"
 #include "NewtonImpactFrictionNSL.hpp"
 #include "OSNSMatrix.hpp"
-
+#include "NonSmoothDrivers.h" // from numerics, for fcX_driver
 #include <fc2d_Solvers.h>
 #include <fc3d_Solvers.h>
 
@@ -136,8 +136,7 @@ int FrictionContact::solve(SP::FrictionContactProblem problem)
   return (*_frictionContact_driver)(&*problem,
                                     &*_z->getArray(),
                                     &*_w->getArray(),
-                                    &*_numerics_solver_options,
-                                    &*_numerics_options);
+                                    &*_numerics_solver_options);
 }
 
 

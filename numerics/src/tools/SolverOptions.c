@@ -20,7 +20,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
-
 #include "mlcp_cst.h"
 #include "MCP_cst.h"
 #include "NCP_cst.h"
@@ -29,7 +28,7 @@
 #include "Friction_cst.h"
 #include "AVI_cst.h"
 #include "VI_cst.h"
-#include "misc.h"
+#include "numerics_verbose.h"
 
 #include "Newton_Methods.h"
 #include "PathSearch.h"
@@ -56,7 +55,7 @@ char * SICONOS_NUMERICS_PROBLEM_AVI_STR = "AVI";
 
 static void recursive_solver_options_print(SolverOptions* options, int level);
 
-char * solver_options_id_to_char(int id)
+char * ns_problem_id_to_name(int id)
 {
   switch (id)
   {
@@ -97,98 +96,10 @@ char * solver_options_id_to_char(int id)
     return SICONOS_NUMERICS_PROBLEM_AVI_STR;
   }
   default:
-    printf("Numerics:solver_options_id_to_char, id unknown : %d \n", id);
+    printf("Numerics:ns_problem_id_to_name, id unknown : %d \n", id);
     return NULL;
   }
 
-}
-
-void solver_options_read(int driverType, SolverOptions* options)
-{
-  /* To each problem, corresponds a XXX_parameters.opt file where default parameters can be read, XXX being the problem name (LCP, FrictionContact3D ...) */
-
-  if (verbose > 0)
-    printf("\n ========== Numerics Non Smooth Solver - Read default parameters for the solver.\n ==========");
-
-  // Checks if NUMERICSSPATH is set.
-  if (getenv("SICONOSPATH") == NULL)
-  {
-    fprintf(stderr, "Numerics, solver_options_read error, SICONOSPATH environment variable not set. Can not find default solver options file.\n");
-    return;
-    //exit(EXIT_FAILURE);
-  }
-
-  FILE * ficin;
-  /* Name of the default parameters file */
-  char name[MAX_ENV_SIZE];
-  char nameSuffix[] = "/include/siconos";
-
-  strncpy(name, getenv("SICONOSPATH"), MAX_ENV_SIZE - sizeof(nameSuffix));
-  strcat(name, nameSuffix);
-
-  char buffer[64];
-  char bufferName[64];
-  /* Return value for reading */
-  int nval;
-
-  // set default size to 4 ...
-  if (options->iparam == NULL)
-    options->iparam = (int*)malloc(4 * sizeof(*options->iparam));
-  if (options->dparam == NULL)
-    options->dparam = (double*)malloc(4 * sizeof(*options->dparam));
-
-  switch (driverType)
-  {
-
-  case 0:
-    strcat(name, "LCP_parameters.opt");
-    break;
-  case 1:
-    strcat(name, "dfc2D_parameters.opt");
-    break;
-  case 2:
-    strcat(name, "FrictionContact2D_parameters.opt");
-    break;
-  case 3:
-    strcat(name, "FrictionContact3D_parameters.opt");
-    ficin = fopen(name, "r");
-    if (verbose > 0)
-      printf("The default-parameters file is: %s\n", name);
-    if (!ficin)
-    {
-      printf("Numerics, solver_options_read error. Can not open file %60s", name);
-      exit(-1);
-    }
-    //nval = fscanf(ficin, "%c", &(options->solverName));
-    CHECK_IO(fgets(buffer, 64, ficin));
-    CHECK_IO(fgets(buffer, 64, ficin));
-    CHECK_IO(fgets(buffer, 64, ficin));
-    /* Solver name */
-    CHECK_IO(fgets(bufferName , 64, ficin));
-    options->solverId = solver_options_name_to_id(bufferName);
-    CHECK_IO(fgets(buffer, 64, ficin));
-    /* iparam */
-    nval = fscanf(ficin, "%d%d", &(options->iparam[0]), &(options->iparam[1]));
-    if (nval != 4)
-    {
-      fprintf(stderr, "Numerics, solver_options_read error, wrong number of parameters for iparam.\n");
-      exit(EXIT_FAILURE);
-
-    }
-    /* dparam */
-    nval = fscanf(ficin, "%lf%lf%lf", &(options->dparam[0]), &(options->dparam[1]), &(options->dparam[2]));
-    if (nval != 3)
-    {
-      fprintf(stderr, "Numerics, solver_options_read error, wrong number of parameters for dparam.\n");
-      exit(EXIT_FAILURE);
-
-    }
-    fclose(ficin);
-    break;
-  default:
-    fprintf(stderr, "Numerics, solver_options_read error, unknown problem type.\n");
-    exit(EXIT_FAILURE);
-  }
 }
 
 void recursive_solver_options_print(SolverOptions* options, int level)
@@ -344,7 +255,6 @@ void solver_options_nullify(SolverOptions* options)
   options->dWork = NULL;
   options->iWork = NULL;
   options->callback = NULL;
-  options->numericsOptions = NULL;
   options->internalSolvers = NULL;
   options->solverData = NULL;
   options->solverParameters = NULL;
@@ -425,8 +335,6 @@ void solver_options_copy(SolverOptions* options_ori, SolverOptions* options)
   // Warning pointer link
   if (options_ori->callback)
     options->callback =options_ori->callback;
-  if (options_ori->numericsOptions)
-    options->numericsOptions =options_ori->numericsOptions;
   if (options_ori->solverParameters)
     options->solverParameters =options_ori->solverParameters;
    if (options_ori->solverData)
@@ -622,11 +530,11 @@ SICONOS_REGISTER_SOLVERS()
     return SICONOS_NONAME_STR;
   }
 }
+
 int solver_options_name_to_id(char * pName)
 {
 #undef SICONOS_SOLVER_MACRO
 #define SICONOS_SOLVER_MACRO(X) if (strcmp(X ## _STR, pName) == 0) return X;
 SICONOS_REGISTER_SOLVERS()
   return 0;
-
 }

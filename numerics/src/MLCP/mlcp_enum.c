@@ -31,10 +31,13 @@ dim(v)=nn
 #include <string.h>
 #include "MLCP_Solvers.h"
 #include "mlcp_tool.h"
+#include "NumericsMatrix.h"
 #include <math.h>
 #include "mlcp_enum.h"
 #include "mlcp_enum_tool.h"
 #include "SiconosLapack.h"
+#include "numerics_verbose.h"
+
 //#ifdef HAVE_DGELS
 //#define ENUM_USE_DGELS
 //#endif

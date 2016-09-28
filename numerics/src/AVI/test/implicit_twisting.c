@@ -29,7 +29,7 @@
 #include "AVI_Solvers.h"
 #include "AVI_cst.h"
 #include "SiconosSets.h"
-
+#include "NumericsMatrix.h"
 #define TS 10e-3
 #define NB_ITER 10000
 #define TOL_NC 1e-12

@@ -18,10 +18,11 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "NonSmoothDrivers.h"
-#include "GAMSlink.h"
-
-#include "frictionContact_test_function.h"
+#include "globalFrictionContact_test_function.h"
+#include "Friction_cst.h"
+#include "SolverOptions.h"
+#include "Friction_cst.h"
+#include "gfc3d_Solvers.h"
 
 
 int main(void)
@@ -29,24 +30,32 @@ int main(void)
   int info =0 ;
 
   char filename[] = "./data/@TEST_DATA@";
-  printf("Test on %s\n",filename);
+  printf("GFC 3D test on %s\n",filename);
 
   FILE * finput  =  fopen(filename,"r");
   SolverOptions * options = (SolverOptions *) malloc(sizeof(SolverOptions));
   double testTolerance = @TEST_TOLERANCE@;
+  int test_maxiter = @TEST_MAXITER@;
   int testInternalSolver = @TEST_INTERNAL_SOLVER@;
-  info=fc3d_setDefaultSolverOptions(options,@TEST_SOLVER@);
+  double test_internal_tol = @TEST_INTERNAL_SOLVER_TOLERANCE@;
+  int test_internal_maxit = @TEST_INTERNAL_SOLVER_MAXITER@;
+ 
+  info=gfc3d_setDefaultSolverOptions(options,@TEST_SOLVER@);
   if (testTolerance > 0.)
   {
     options->dparam[0]=@TEST_TOLERANCE@;
-    options->iparam[0]=@TEST_MAXITER@;
   }
+  if (test_maxiter > 0)
+    options->iparam[0]=@TEST_MAXITER@;
+
 
   if (testInternalSolver)
   {
     options->internalSolvers->solverId=@TEST_INTERNAL_SOLVER@;
-    options->internalSolvers->dparam[0]=@TEST_INTERNAL_SOLVER_TOLERANCE@;
-    options->internalSolvers->iparam[0]=@TEST_INTERNAL_SOLVER_MAXITER@;
+    if(test_internal_tol > 0.)
+      options->internalSolvers->dparam[0]=@TEST_INTERNAL_SOLVER_TOLERANCE@;
+    if(test_internal_maxit > 0)
+      options->internalSolvers->iparam[0]=@TEST_INTERNAL_SOLVER_MAXITER@;
   }
 
   int iparam_idx_size = @IPARAM_IDX_SIZE@;
@@ -94,32 +103,11 @@ int main(void)
       options->internalSolvers->dparam[internal_dparam_idx[kk]] = internal_dparam_val[kk];
     }
   }
-#ifdef HAVE_GAMS_C_API
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunreachable-code"
-#pragma clang diagnostic ignored  "-Wtautological-compare"
-#endif /*  __clang__  */
-  if ((@TEST_SOLVER@ == SICONOS_FRICTION_3D_GAMS_PATH) || (@TEST_SOLVER@ == SICONOS_FRICTION_3D_GAMS_PATHVI)
-      || (@TEST_SOLVER@ == SICONOS_FRICTION_3D_GAMS_LCP_PATH) || (@TEST_SOLVER@ == SICONOS_FRICTION_3D_GAMS_LCP_PATHVI))
-  {
-    assert(options->solverParameters);
-    SN_GAMSparams* GP = (SN_GAMSparams*)options->solverParameters;
-    GP->model_dir = GAMS_MODELS_SOURCE_DIR;
-    GP->filename = "@TEST_DATA@";
-    frictionContact_test_gams_opts(GP, @TEST_SOLVER@);
-  }
-#ifdef __clang__
-#pragma clang diagnostic pop
-#endif /* __clang__  */
-#endif
 
-
-  info = frictionContact_test_function(finput,options);
+  info = globalFrictionContact_test_function(finput,options);
   solver_options_delete(options);
   free(options);
-
   fclose(finput);
-  printf("\nEnd of test on %s\n", filename);
+  printf("\nEnd of GFC3D test on %s\n", filename);
   return info;
 }

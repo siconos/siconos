@@ -1,9 +1,13 @@
-
 // MCP
+%{
+#include "MixedComplementarityProblem.h"
+#include "MCP_Solvers.h"
+#include "MCP_cst.h"
+  %}
+
 %include "MixedComplementarityProblem.h"
 %include "MCP_Solvers.h"
 %include "MCP_cst.h"
-
 
 %extend MixedComplementarityProblem
 {

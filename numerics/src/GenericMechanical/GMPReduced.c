@@ -2,7 +2,20 @@
 #include "pinv.h"
 #include "SiconosBlas.h"
 #include "GMPReduced.h"
-
+#include "numerics_verbose.h"
+#include "GenericMechanicalProblem.h"
+#include "GenericMechanical_Solvers.h"
+#include "FrictionContactProblem.h"
+#include "LinearComplementarityProblem.h"
+#include "LCP_Solvers.h"
+#include "LinearSystemProblem.h"
+#include "MixedLinearComplementarityProblem.h"
+#include "mlcp_cst.h"
+#include "lcp_cst.h"
+#include "MLCP_Solvers.h"
+#include "SparseBlockMatrix.h"
+#include "NumericsMatrix.h"
+#include <string.h>
 //#define GMP_DEBUG_REDUCED
 //#define GMP_DEBUG_GMPREDUCED_SOLVE
 
@@ -304,7 +317,7 @@ void buildReducedGMP(GenericMechanicalProblem* pInProblem, double * Me, double *
  *
  *and GS.
  */
-void GMPReducedEqualitySolve(GenericMechanicalProblem* pInProblem, double *reaction , double *velocity, int * info, SolverOptions* options, NumericsOptions* numerics_options)
+void GMPReducedEqualitySolve(GenericMechanicalProblem* pInProblem, double *reaction , double *velocity, int * info, SolverOptions* options)
 {
 
   SparseBlockStructuredMatrix* m = pInProblem->M->matrix1;
@@ -322,7 +335,7 @@ void GMPReducedEqualitySolve(GenericMechanicalProblem* pInProblem, double *react
 
   if (Me_size == 0)
   {
-    genericMechanicalProblem_GS(pInProblem, reaction, velocity, info, options, numerics_options);
+    genericMechanicalProblem_GS(pInProblem, reaction, velocity, info, options);
     free(reducedProb);
     free(Qreduced);
     free(Rreduced);
@@ -387,7 +400,7 @@ void GMPReducedEqualitySolve(GenericMechanicalProblem* pInProblem, double *react
   numM.size1 = nbCol;
   _pnumerics_GMP->M = &numM;
   _pnumerics_GMP->q = Qreduced;
-  genericMechanicalProblem_GS(_pnumerics_GMP, Rreduced, Vreduced, info, options, numerics_options);
+  genericMechanicalProblem_GS(_pnumerics_GMP, Rreduced, Vreduced, info, options);
 #ifdef GMP_DEBUG_GMPREDUCED_SOLVE
   if (*info)
   {
@@ -437,7 +450,7 @@ void GMPReducedEqualitySolve(GenericMechanicalProblem* pInProblem, double *react
  *Vi=(Mi_2-Mi_1 Me_1^{-1} Me_2)Ri+Qi-Mi1 Me_1^{-1} Qe
  *
  */
-void GMPReducedSolve(GenericMechanicalProblem* pInProblem, double *reaction , double *velocity, int * info, SolverOptions* options, NumericsOptions* numerics_options)
+void GMPReducedSolve(GenericMechanicalProblem* pInProblem, double *reaction , double *velocity, int * info, SolverOptions* options)
 {
 
   SparseBlockStructuredMatrix* m = pInProblem->M->matrix1;
@@ -453,7 +466,7 @@ void GMPReducedSolve(GenericMechanicalProblem* pInProblem, double *reaction , do
 
   if ((Me_size == 0 || Mi_size == 0))
   {
-    genericMechanicalProblem_GS(pInProblem, reaction, velocity, info, options, numerics_options);
+    genericMechanicalProblem_GS(pInProblem, reaction, velocity, info, options);
     free(Me);
     free(Qe);
     free(Mi);
@@ -538,7 +551,7 @@ void GMPReducedSolve(GenericMechanicalProblem* pInProblem, double *reaction , do
   _pnumerics_GMP->q = Qi;
   double *Rreduced = (double *) malloc(Mi_size * sizeof(double));
   double *Vreduced = (double *) malloc(Mi_size * sizeof(double));
-  genericMechanicalProblem_GS(_pnumerics_GMP, Rreduced, Vreduced, info, options, numerics_options);
+  genericMechanicalProblem_GS(_pnumerics_GMP, Rreduced, Vreduced, info, options);
 #ifdef GMP_DEBUG_GMPREDUCED_SOLVE
   if (*info)
   {
@@ -692,7 +705,7 @@ void GMPasMLCP(GenericMechanicalProblem* pInProblem, double *reaction , double *
     aLCP.M = &M;
     linearComplementarity_setDefaultSolverOptions(&aLCP, &aLcpOptions, SICONOS_LCP_ENUM);
     lcp_enum_init(&aLCP, &aLcpOptions, 1);
-    *info = linearComplementarity_driver(&aLCP, reaction, velocity, &aLcpOptions, 0);
+    *info = linearComplementarity_driver(&aLCP, reaction, velocity, &aLcpOptions);
     lcp_enum_reset(&aLCP, &aLcpOptions, 1);
     goto END_GMP3;
   }
@@ -740,7 +753,7 @@ void GMPasMLCP(GenericMechanicalProblem* pInProblem, double *reaction , double *
   mixedLinearComplementarity_setDefaultSolverOptions(&aMLCP, &aMlcpOptions);
   mlcp_driver_init(&aMLCP, &aMlcpOptions);
   aMlcpOptions.dparam[0] = options->dparam[0];
-  *info = mlcp_driver(&aMLCP, reaction, velocity, &aMlcpOptions, 0);
+  *info = mlcp_driver(&aMLCP, reaction, velocity, &aMlcpOptions);
 
   mlcp_driver_reset(&aMLCP, &aMlcpOptions);
   mixedLinearComplementarity_deleteDefaultSolverOptions(&aMLCP, &aMlcpOptions);

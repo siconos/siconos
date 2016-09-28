@@ -29,6 +29,7 @@
 #include <float.h>
 
 #include "sanitizer.h"
+#include "numerics_verbose.h"
 
 /* Static variables */
 
@@ -198,7 +199,7 @@ void fc3d_projection_update_with_regularization(int contact, FrictionContactProb
 
   }
   else
-    numericsError("fc3d_projection -", "unknown storage type for matrix M");
+    numerics_error("fc3d_projection -", "unknown storage type for matrix M");
 
   /****  Computation of qLocal = qBlock + sum over a row of blocks in MGlobal of the products MLocal.reactionBlock,
      excluding the block corresponding to the current contact. ****/
@@ -448,7 +449,7 @@ int fc3d_projectionOnConeWithLocalIteration_solve(FrictionContactProblem* localp
         rho =rho_k;
     if (verbose > 1)
     {
-      printf("----------------------  localiter = %i\t, rho= %.10e\t, error = %.10e \n", localiter, rho, localerror);
+      printf("----------------------  fc3d_projectionOnConeWithLocalIteration_solve localiter = %i\t, rho= %.10e\t, error = %.10e \n", localiter, rho, localerror);
 
     }
 

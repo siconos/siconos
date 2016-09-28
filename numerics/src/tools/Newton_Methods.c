@@ -23,10 +23,10 @@
 #include <string.h>
 #include <math.h>
 #include <float.h>
-
+#include "numerics_verbose.h"
 #include "SiconosLapack.h"
 #include "ArmijoSearch.h"
-
+#include "SolverOptions.h"
 #include "lcp_cst.h"
 #include "NCP_cst.h"
 #include "MCP_cst.h"

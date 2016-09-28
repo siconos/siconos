@@ -19,7 +19,9 @@
 #include <stdlib.h>
 #include "NonSmoothDrivers.h"
 #include "relay_test_function.h"
-
+#include "RelayProblem.h"
+#include "SolverOptions.h"
+#include "Relay_Solvers.h"
 
 int relay_test_function(FILE * f, int  solverId)
 {
@@ -31,14 +33,6 @@ int relay_test_function(FILE * f, int  solverId)
 
   FILE * foutput  =  fopen("./relay.verif", "w");
   info = relay_printInFile(problem, foutput);
-
-
-  NumericsOptions global_options;
-  setDefaultNumericsOptions(&global_options);
-  global_options.verboseMode = 1;
-
-
-
   SolverOptions * options = (SolverOptions *)malloc(sizeof(SolverOptions));
 
   relay_setDefaultSolverOptions(problem, options, solverId);
@@ -52,7 +46,7 @@ int relay_test_function(FILE * f, int  solverId)
   double * z = (double *)calloc(problem->size, sizeof(double));
   double * w = (double *)calloc(problem->size, sizeof(double));
 
-  info = relay_driver(problem, z , w, options, &global_options);
+  info = relay_driver(problem, z , w, options);
 
   for (i = 0 ; i < problem->size ; i++)
   {

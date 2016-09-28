@@ -1,28 +1,18 @@
-
 %include "SolverOptions.h"
-%include "NumericsOptions.h"
+%include "relay_cst.h"
+%include "AVI_cst.h"
+ //%include "SOCLCP_cst.h"
+%include "Friction_cst.h"
+%include "lcp_cst.h"
+%include "MCP_cst.h"
+%include "mlcp_cst.h"
+%include "NCP_cst.h"
+%include "VI_cst.h"
+%include "GenericMechanical_cst.h"
 
-
-
-%extend NumericsOptions
+%extend SolverOptions
 {
-  NumericsOptions()
-  {
-    NumericsOptions *numerics_options;
-    numerics_options = (NumericsOptions *) malloc(sizeof(NumericsOptions));
-    setDefaultNumericsOptions(numerics_options);
-    return numerics_options;
-  }
-
-  ~NumericsOptions()
-  {
-    free($self);
-  }
-}
-
-%extend _SolverOptions
-{
-  _SolverOptions(enum FRICTION_SOLVER id)
+  SolverOptions(enum FRICTION_SOLVER id)
   {
     SolverOptions *SO;
     SO = (SolverOptions *) malloc(sizeof(SolverOptions));
@@ -51,14 +41,14 @@
     return SO;
   }
 
-  _SolverOptions()
+  SolverOptions()
   {
     SolverOptions *SO;
     SO = (SolverOptions *) malloc(sizeof(SolverOptions));
     return SO;
   }
 
-  _SolverOptions(LinearComplementarityProblem* lcp, enum LCP_SOLVER id)
+  SolverOptions(LinearComplementarityProblem* lcp, enum LCP_SOLVER id)
   {
     SolverOptions *SO;
     SO = (SolverOptions *) malloc(sizeof(SolverOptions));
@@ -66,7 +56,7 @@
     return SO;
   }
 
-  _SolverOptions(MixedLinearComplementarityProblem* mlcp, enum MLCP_SOLVER id)
+  SolverOptions(MixedLinearComplementarityProblem* mlcp, enum MLCP_SOLVER id)
   {
     SolverOptions *SO;
     SO = (SolverOptions *) malloc(sizeof(SolverOptions));
@@ -75,7 +65,7 @@
     return SO;
   }
 
-  _SolverOptions(MixedComplementarityProblem* mlcp, enum MCP_SOLVER id)
+  SolverOptions(MixedComplementarityProblem* mlcp, enum MCP_SOLVER id)
   {
     SolverOptions *SO;
     SO = (SolverOptions *) malloc(sizeof(SolverOptions));
@@ -84,7 +74,7 @@
     return SO;
   }
 
-  _SolverOptions(MixedComplementarityProblem2* mcp, enum MCP_SOLVER id)
+  SolverOptions(MixedComplementarityProblem2* mcp, enum MCP_SOLVER id)
   {
     SolverOptions *SO;
     SO = (SolverOptions *) malloc(sizeof(SolverOptions));
@@ -92,7 +82,7 @@
     return SO;
   }
 
-  _SolverOptions(VariationalInequality* vi, enum VI_SOLVER id)
+  SolverOptions(VariationalInequality* vi, enum VI_SOLVER id)
   {
     SolverOptions *SO;
     SO = (SolverOptions *) malloc(sizeof(SolverOptions));
@@ -100,7 +90,7 @@
     return SO;
   }
 
-  _SolverOptions(AffineVariationalInequalities* vi, enum AVI_SOLVER id)
+  SolverOptions(AffineVariationalInequalities* vi, enum AVI_SOLVER id)
   {
     SolverOptions *SO;
     SO = (SolverOptions *) malloc(sizeof(SolverOptions));
@@ -109,12 +99,10 @@
     return SO;
   }
 
-  ~_SolverOptions()
+  ~SolverOptions()
   {
     solver_options_delete($self);
     free($self);
   }
 
 };
-
-

@@ -1,7 +1,7 @@
-
-
 #include "SiconosNumerics.h"
-
+#include "VariationalInequality_Solvers.h"
+#include "SparseMatrix.h"
+#include "NumericsMatrix.h"
 #ifdef __cplusplus
 
 #ifdef _WIN32 

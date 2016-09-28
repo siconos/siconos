@@ -19,10 +19,10 @@
 
 #include "NumericsMatrix_private.h"
 #include "NumericsMatrix.h"
-#include "NumericsOptions.h"
+#include "NumericsSparseMatrix.h"
 
 #include "debug.h"
-#include "misc.h"
+#include "numerics_verbose.h"
 
 #ifdef WITH_MUMPS
 

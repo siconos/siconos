@@ -17,11 +17,13 @@
  * limitations under the License.
 */
 #include "MLCP_Solvers.h"
+#include "NumericsMatrix.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
 #include "SiconosBlas.h"
+#include "numerics_verbose.h"
 
 /*
  * (input) double *z : size n+m
@@ -33,7 +35,7 @@ int mlcp_compute_error(MixedLinearComplementarityProblem* problem, double *z, do
 {
   /* Checks inputs */
   if (problem == NULL || z == NULL || w == NULL)
-    numericsError("mlcp_compute_error", "null input for problem and/or z and/or w");
+    numerics_error("mlcp_compute_error", "null input for problem and/or z and/or w");
 
   int param = 1;
   int NbLines = problem->M->size0; /* Equalities */
@@ -47,7 +49,7 @@ int mlcp_compute_error(MixedLinearComplementarityProblem* problem, double *z, do
   if (problem->isStorageType1)
   {
     if (problem->M == NULL)
-      numericsError("mlcp_compute_error", "null input for M");
+      numerics_error("mlcp_compute_error", "null input for M");
 
     /* Computes w = Mz + q */
     cblas_dcopy(NbLines , problem->q , incx , w , incy);
@@ -63,7 +65,7 @@ int mlcp_compute_error(MixedLinearComplementarityProblem* problem, double *z, do
     /* Checks inputs */
     if (problem->A == NULL || problem->B == NULL || problem->C == NULL  || problem->D == NULL)
     {
-      numericsError("mlcp_compute_error: ", "null input for A, B, C or D");
+      numerics_error("mlcp_compute_error: ", "null input for A, B, C or D");
     }
 
     /* Links to problem data */

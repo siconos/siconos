@@ -43,16 +43,18 @@
 
 */
 
-#include "NumericsMatrix.h"
+#include "NumericsFwd.h"
+#include <stdio.h>
+
 extern int SICONOS_LS_0;
 /** Linear Complementarity Problem elements
  */
-typedef struct
+struct LinearSystemProblem
 {
   int size; /**< dim of the problem */
   NumericsMatrix* M; /**< matrix of the linear system */
   double * q; /**< vector */
-} LinearSystemProblem;
+};
 
 
 
@@ -68,7 +70,6 @@ extern "C"
   void LinearSystem_freeProblem(LinearSystemProblem *problem);
   int LinearSystem_newFromFile(LinearSystemProblem* problem, FILE* file);
   void LinearSystem_display(LinearSystemProblem* p);
-  int LinearSystem_driver(LinearSystemProblem* problem, double *z , double *w, SolverOptions* options);
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif

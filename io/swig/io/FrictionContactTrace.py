@@ -73,11 +73,12 @@ class FrictionContactTrace(FrictionContact):
             else:
                 self.condition = self.random_and_maxiter_condition
         self._counter = 0
+        self._stepcounter = 0
         self._model=model
         super(FrictionContactTrace, self).__init__(dim, solver)
 
     def maxiter_condition(self, SO):
-        return SO.iparam[7] > self._maxiter
+        return SO.iparam[7] >= self._maxiter
 
     def random_condition(self, SO):
         return random.random() > self._proba
@@ -112,16 +113,18 @@ class FrictionContactTrace(FrictionContact):
 
             w_backup = self.w().copy()
             z_backup = self.z().copy()
+            SO = self.numericsSolverOptions()
+            SO.internalSolvers.iparam[19] = self._stepcounter
+
 
             info = self.solve()
-            SO = self.numericsSolverOptions()
-                                                            
+
             if self.condition(SO):
                 # problem = self.getNumericsProblemPtr()
                 # print(problem, type(problem))
                     
                 problem = self.frictionContactProblemPtr()
-                print(problem, type(problem))
+                #print(problem, type(problem))
                 solver_maxiter=SO.iparam[0]
                 n_format_string=len(str(solver_maxiter))
                 format_string = "{0}-i{1:0"+str(n_format_string)+"d}-{2}-{3}.hdf5"

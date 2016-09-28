@@ -101,6 +101,11 @@ public:
     return false;
   };
 
+  /** determines if the matrix is symmetric up to a given tolerance
+   *  \return true if the matrix is inversed
+   */
+  virtual bool isSymmetric(double tol) const =0;
+
   /** determines if the matrix has been PLU factorized in place
    *  \return true if the matrix is factorized
    */

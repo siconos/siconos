@@ -362,6 +362,18 @@ SimpleMatrix::~SimpleMatrix()
     delete(mat.Identity);
 }
 
+bool SimpleMatrix::isSymmetric(double tol) const
+{
+  SP::SimpleMatrix  m_trans (new SimpleMatrix(*this));
+  m_trans->trans();
+  double err = (*this-*m_trans).normInf();
+  if ((*m_trans).normInf() > 0.0 )
+  {
+    err /= (*m_trans).normInf();
+  }
+  // std::cout << "err_rel  ="<< err <<std::endl;
+  return (err < tol);
+}
 //======================================
 // get Ublas component (dense, sym ...)
 //======================================

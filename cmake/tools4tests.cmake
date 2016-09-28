@@ -114,7 +114,35 @@ MACRO(RM_TEST2)
   LIST(REMOVE_ITEM ${TEST_EXE}_NAME_LIST_${_CURRENT_TEST_DIRECTORY} ${TEST_NAME})
 ENDMACRO(RM_TEST2)
 
+# ====- Generate test file for 3D Fricton Contact Problem =====
+# Source file used to generate tests is fctest.c.in
+# Output file name (in build dir) is test_fc3d_SOLVERNAME_INTERNAL_SOLVERNAME_PARAM_VALUES ... .c
+#
+# Usage:
+#
+# NEW_FC_TEST(arg[0], arg[1] ...)
+# required args:
+#  0 : input data file name
+#  1 : solver name/id
+# optional args: 
+#  2 : tolerance
+#  3 : max iterations number
+#  4 : internal solver name/id
+#  5 : internal solver tolerance
+#  6 : internal solver, max iterations number
+#  others:
+#  IPARAM idx value ...
+# to set iparam[idx] = value
+# and/or :
+#  DPARAM idx value ...
+#  INTERNAL_IPARAM idx value ...
+#  INTERNAL_DPARAM idx value ...
 MACRO(NEW_FC_TEST)
+
+  # check input file name
+  assert(SOURCE_FILE_NAME)
+  # check prefix for test (fc3d, gfc3d ...)
+  assert(TEST_NAME_PREFIX)
   
   SET(TEST_DATA ${ARGV0})
 
@@ -185,13 +213,7 @@ MACRO(NEW_FC_TEST)
   UNSET(INTERNAL_DPARAM_VAL)
   UNSET(INTERNAL_DPARAM_VAL_STR)
   UNSET(INTERNAL_DPARAM_VAL_STR_UNDER)
-
- 
-  
-
-
-
-  
+  unset(TEST_NAME_SUFFIX)
   IF(${ARGC} GREATER 7)
     #MESSAGE("ARGN : " "${ARGN}")
     SET(ARGN_COPY ${ARGN})
@@ -204,15 +226,16 @@ MACRO(NEW_FC_TEST)
       LIST(GET ARGN_COPY 0 PARAM_TYPE)
       LIST(REMOVE_AT ARGN_COPY 0)
       #MESSAGE("PARAM TYPE : " ${PARAM_TYPE})
-      
-      LIST(GET ARGN_COPY 0 PARAM_INDEX)
-      LIST(REMOVE_AT ARGN_COPY 0)
-      #MESSAGE("PARAM INDEX : " ${PARAM_INDEX})
-      
-      LIST(GET ARGN_COPY 0 PARAM_VAL)
-      LIST(REMOVE_AT ARGN_COPY 0)
-      #MESSAGE("PARAM VAL : " ${PARAM_VAL})
 
+      if(NOT ${PARAM_TYPE} STREQUAL "WILL_FAIL")
+	LIST(GET ARGN_COPY 0 PARAM_INDEX)
+	LIST(REMOVE_AT ARGN_COPY 0)
+	#MESSAGE("PARAM INDEX : " ${PARAM_INDEX})
+	
+	LIST(GET ARGN_COPY 0 PARAM_VAL)
+	LIST(REMOVE_AT ARGN_COPY 0)
+	#MESSAGE("PARAM VAL : " ${PARAM_VAL})
+      endif()
 
       IF ("${PARAM_TYPE}" STREQUAL "IPARAM")
 	MATH(EXPR IPARAM_IDX_SIZE "${IPARAM_IDX_SIZE}+1")
@@ -231,6 +254,8 @@ MACRO(NEW_FC_TEST)
 	MATH(EXPR INTERNAL_DPARAM_IDX_SIZE "${INTERNAL_DPARAM_IDX_SIZE}+1")
 	LIST(APPEND INTERNAL_DPARAM_IDX  ${PARAM_INDEX})	
  	LIST(APPEND INTERNAL_DPARAM_VAL  ${PARAM_VAL})
+      ELSEIF (${PARAM_TYPE} STREQUAL "WILL_FAIL")
+	set(TEST_NAME_SUFFIX "_EXPECTED_TO_FAIL")
       ELSE()
 	MESSAGE(SEND_ERROR "Problem in parameters in NEW_FC_TEST")
       ENDIF()
@@ -265,14 +290,14 @@ MACRO(NEW_FC_TEST)
   ENDIF(${ARGC} GREATER 7)
     
 
-  STRING(REGEX REPLACE "SICONOS_FRICTION_3D" "3d" TEST_SOLVER_NAME1 ${TEST_SOLVER})
+  STRING(REGEX REPLACE "SICONOS_FRICTION_3D" "" TEST_SOLVER_NAME1 ${TEST_SOLVER})
   STRING(REGEX REPLACE "SICONOS_FRICTION_3D" "" TEST_INTERNAL_SOLVER_NAME1 ${TEST_INTERNAL_SOLVER})
   STRING(REGEX REPLACE "SICONOS_FRICTION_2D" "2d" TEST_SOLVER_NAME ${TEST_SOLVER_NAME1})
   STRING(REGEX REPLACE "SICONOS_FRICTION_2D" "" TEST_INTERNAL_SOLVER_NAME ${TEST_INTERNAL_SOLVER_NAME1})
   STRING(REGEX REPLACE "0" "" TEST_INTERNAL_SOLVER_NAME ${TEST_INTERNAL_SOLVER_NAME})
   STRING(REGEX REPLACE "\\.dat" "" TEST_DATA_NAME ${TEST_DATA})
 
-  SET(TEST_NAME "test_fc${TEST_SOLVER_NAME}${TEST_INTERNAL_SOLVER_NAME}_Tol_${TEST_TOLERANCE}_Max_${TEST_MAXITER}_inTol_${TEST_INTERNAL_SOLVER_TOLERANCE}_inMax_${TEST_INTERNAL_SOLVER_MAXITER}")
+  SET(TEST_NAME "${TEST_NAME_PREFIX}_${TEST_SOLVER_NAME}${TEST_INTERNAL_SOLVER_NAME}_Tol_${TEST_TOLERANCE}_Max_${TEST_MAXITER}_inTol_${TEST_INTERNAL_SOLVER_TOLERANCE}_inMax_${TEST_INTERNAL_SOLVER_MAXITER}")
   
 
   IF(${IPARAM_IDX_SIZE} GREATER 0)
@@ -289,12 +314,14 @@ MACRO(NEW_FC_TEST)
   ENDIF()
  
 
-  STRING(CONCAT TEST_NAME ${TEST_NAME} "___${TEST_DATA_NAME}")
+  STRING(CONCAT TEST_NAME ${TEST_NAME} "_${TEST_DATA_NAME}")
+  if(TEST_NAME_SUFFIX)
+    string(CONCAT TEST_NAME ${TEST_NAME} "_${TEST_NAME_SUFFIX}")
+    set(${TEST_NAME}_PROPERTIES WILL_FAIL TRUE)
+    #MESSAGE( "test name   --> " ${TEST_NAME})
+  endif()
 
-  
-  #MESSAGE( "test name   --> " ${TEST_NAME})
-
-  CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/cmake/fctest.c.in 
+  CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/numerics/src/FrictionContact/test/${SOURCE_FILE_NAME} 
     ${CMAKE_CURRENT_BINARY_DIR}/${_CURRENT_TEST_DIRECTORY}/${TEST_NAME}.c)
 
   SET(${TEST_NAME}_FSOURCES)
@@ -303,6 +330,34 @@ MACRO(NEW_FC_TEST)
   LIST(APPEND ${TEST_NAME}_FSOURCES ${CMAKE_CURRENT_BINARY_DIR}/${_CURRENT_TEST_DIRECTORY}/${TEST_NAME}.c)
 
 ENDMACRO(NEW_FC_TEST)
+
+macro(NEW_FC_3D_TEST)
+  # Set name of the file used to generate tests (c)source files.
+  set(SOURCE_FILE_NAME fc_test.c.in )
+  set(TEST_NAME_PREFIX fc3d)
+  NEW_FC_TEST(${ARGV})
+  unset(SOURCE_FILE_NAME)
+  unset(TEST_NAME_PREFIX)
+endmacro()
+
+macro(NEW_FC_2D_TEST)
+  # Set name of the file used to generate tests (c)source files.
+  set(SOURCE_FILE_NAME fc_test.c.in )
+  set(TEST_NAME_PREFIX fc2d)
+  NEW_FC_TEST(${ARGV})
+  unset(SOURCE_FILE_NAME)
+  unset(TEST_NAME_PREFIX)
+endmacro()
+
+macro(NEW_GFC_3D_TEST)
+  # Set name of the file used to generate tests (c)source files.
+  set(SOURCE_FILE_NAME gfc3d_test.c.in )
+  set(TEST_NAME_PREFIX gfc3d)
+  NEW_FC_TEST(${ARGV})
+  unset(SOURCE_FILE_NAME)
+  unset(TEST_NAME_PREFIX)
+endmacro()
+
 
 MACRO(NEW_PB_TEST)
   SET(FILE_TO_CONF ${ARGV0})

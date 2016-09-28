@@ -1,3 +1,10 @@
+%{
+#include "AffineVariationalInequalities.h"
+#include "AVI_Solvers.h"
+#include "AVI_cst.h"
+#include "VariationalInequality_Solvers.h"
+  %}
+
 
 %include "AffineVariationalInequalities.h"
 %include "AVI_Solvers.h"

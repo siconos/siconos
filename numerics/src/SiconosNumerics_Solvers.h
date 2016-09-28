@@ -1,3 +1,25 @@
+/* Siconos is a program dedicated to modeling, simulation and control
+ * of non smooth dynamical systems.
+ *
+ * Copyright 2016 INRIA.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+*/
+
+/** \file SiconosNumerics_Solvers.h
+Define Macros used for solver name <---> id conversion.
+See functions in SolverOptions.h
+ */
 
 // List of solvers generated with
 //   git grep '^ *SICONOS_[A-Z_]* = [0-9]' | sed 's/.*\(SICONOS_[A-Z_]*\).*/SICONOS_SOLVER_MACRO(\1); \\/' |
@@ -79,12 +101,12 @@ SICONOS_SOLVER_MACRO(SICONOS_FRICTION_3D_DSFP);\
 SICONOS_SOLVER_MACRO(SICONOS_FRICTION_3D_VI_FPP);\
 SICONOS_SOLVER_MACRO(SICONOS_FRICTION_3D_VI_EG);\
 SICONOS_SOLVER_MACRO(SICONOS_FRICTION_3D_HP);\
-SICONOS_SOLVER_MACRO(SICONOS_FRICTION_3D_NCPGlockerFBFixedPoint);\
+ SICONOS_SOLVER_MACRO(SICONOS_FRICTION_3D_NCPGlockerFBFixedPoint);	\
 SICONOS_SOLVER_MACRO(SICONOS_FRICTION_3D_FPP);\
 SICONOS_SOLVER_MACRO(SICONOS_FRICTION_3D_EG);\
 SICONOS_SOLVER_MACRO(SICONOS_FRICTION_3D_NSN_FB);\
-SICONOS_SOLVER_MACRO(SICONOS_FRICTION_3D_ONECONTACT_NSN_AC);\
-SICONOS_SOLVER_MACRO(SICONOS_FRICTION_3D_ONECONTACT_NSN_AC_GP);              \
+SICONOS_SOLVER_MACRO(SICONOS_FRICTION_3D_ONECONTACT_NSN);\
+SICONOS_SOLVER_MACRO(SICONOS_FRICTION_3D_ONECONTACT_NSN_GP);              \
 SICONOS_SOLVER_MACRO(SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithDiagonalization);\
 SICONOS_SOLVER_MACRO(SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone);\
 SICONOS_SOLVER_MACRO(SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration);\

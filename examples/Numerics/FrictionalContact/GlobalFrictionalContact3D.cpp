@@ -54,6 +54,15 @@
   \brief
 */
 
+#include "GlobalFrictionContactProblem.h"
+#include "FrictionContactProblem.h"
+#include "NumericsMatrix.h"
+#include "SiconosNumerics.h"
+#include "SparseBlockMatrix.h"
+#include "NumericsSparseMatrix.h"
+#include "SolverOptions.h"
+#include "Friction_cst.h"
+#include "gfc3d_Solvers.h"
 #include "SiconosNumerics.h"
 
 int main(int argc, char* argv[])
@@ -154,11 +163,7 @@ int main(int argc, char* argv[])
   double *velocity = (double*)calloc(m, sizeof(double));
   double *globalVelocity = (double*)calloc(n, sizeof(double));
 
-  // Numerics and Solver Options
-
-  NumericsOptions numerics_options;
-  numerics_options.verboseMode = 1; // turn verbose mode to off by default
-
+  // Solver Options
 
   SolverOptions * numerics_solver_options = (SolverOptions *)malloc(sizeof(SolverOptions)) ;
   //char solvername[10]= "NSGS";
@@ -169,8 +174,8 @@ int main(int argc, char* argv[])
   //Driver call
   i = 0;
   info = gfc3d_driver(&numericsProblem,
-                                        reaction , velocity, globalVelocity,
-                                        numerics_solver_options, &numerics_options);
+		      reaction , velocity, globalVelocity,
+		      numerics_solver_options);
 
   solver_options_delete(numerics_solver_options);
   // Solver output

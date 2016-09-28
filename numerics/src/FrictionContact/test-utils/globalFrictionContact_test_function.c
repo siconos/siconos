@@ -19,13 +19,17 @@
 #include <stdlib.h>
 #include "NonSmoothDrivers.h"
 #include "globalFrictionContact_test_function.h"
-
+#include "gfc3d_Solvers.h"
+#include "GlobalFrictionContactProblem.h"
+#include "NumericsMatrix.h"
+#include "numerics_verbose.h"
 
 int globalFrictionContact_test_function(FILE * f, SolverOptions * options)
 {
 
   int k, info = -1 ;
   GlobalFrictionContactProblem* problem = (GlobalFrictionContactProblem *)malloc(sizeof(GlobalFrictionContactProblem));
+  setNumericsVerbose(1);
 
   info = globalFrictionContact_newFromFile(problem, f);
   globalFrictionContact_display(problem);
@@ -33,11 +37,6 @@ int globalFrictionContact_test_function(FILE * f, SolverOptions * options)
 
   FILE * foutput  =  fopen("checkinput.dat", "w");
   info = globalFrictionContact_printInFile(problem, foutput);
-
-
-  NumericsOptions global_options;
-  setDefaultNumericsOptions(&global_options);
-  global_options.verboseMode = 1; // turn verbose mode to off by default
 
   int NC = problem->numberOfContacts;
   int dim = problem->dimension;
@@ -64,8 +63,8 @@ int globalFrictionContact_test_function(FILE * f, SolverOptions * options)
   else if (dim == 3)
   {
     info = gfc3d_driver(problem,
-                                          reaction , velocity, globalvelocity,
-                                          options, &global_options);
+			reaction , velocity, globalvelocity,
+			options);
   }
   printf("\n");
   for (k = 0 ; k < dim * NC; k++)

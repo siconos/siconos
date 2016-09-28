@@ -26,6 +26,8 @@
 /* #define DEBUG_STDOUT   */
 /* #define DEBUG_MESSAGES   */
 #include "debug.h"
+#include "numerics_verbose.h"
+
 /* #define min(a,b) (a<=b?a:b) */
 
 void variationalInequality_FixedPointProjection(VariationalInequality* problem, double *x, double *w, int* info, SolverOptions* options)

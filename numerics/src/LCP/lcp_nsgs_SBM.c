@@ -19,17 +19,24 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#ifndef MEXFLAG
-#include "NonSmoothDrivers.h"
-#endif
+/* #ifndef MEXFLAG */
+/* #include "NonSmoothDrivers.h" */
+/* #endif */
 #include <assert.h>
+#include "LinearComplementarityProblem.h"
+#include "LCP_Solvers.h"
+#include "lcp_cst.h"
+#include "SolverOptions.h"
+#include "NumericsMatrix.h"
+
+#include "SparseBlockMatrix.h"
 #include "SiconosBlas.h"
 
 #include "sanitizer.h"
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES 1 */
 #include "debug.h"
-
+#include "numerics_verbose.h"
 void lcp_nsgs_SBM_buildLocalProblem(int rowNumber, const SparseBlockStructuredMatrix* const blmat, LinearComplementarityProblem* local_problem, double* q, double* z)
 {
 
@@ -133,7 +140,7 @@ void lcp_nsgs_SBM(LinearComplementarityProblem* problem, double *z, double *w, i
 
   if (options->numberOfInternalSolvers < 1)
   {
-    numericsError("lcp_nsgs_SBM", "The NSGS_SBM method needs options for the internal solvers, options[0].numberOfInternalSolvers should be >1");
+    numerics_error("lcp_nsgs_SBM", "The NSGS_SBM method needs options for the internal solvers, options[0].numberOfInternalSolvers should be >1");
   }
 
 

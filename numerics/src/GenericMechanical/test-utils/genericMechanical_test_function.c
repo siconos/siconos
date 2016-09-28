@@ -19,25 +19,19 @@
 #include <stdlib.h>
 #include "NonSmoothDrivers.h"
 #include "genericMechanical_test_function.h"
-
+#include "GenericMechanicalProblem.h"
+#include "SolverOptions.h"
+#include "GenericMechanical_Solvers.h"
 int genericMechanical_test_function(FILE * f, SolverOptions * options)
 {
 
   int k, info = -1 ;
   GenericMechanicalProblem* problem = genericMechanical_newFromFile(f);
-
-  NumericsOptions global_options;
-  setDefaultNumericsOptions(&global_options);
-  //global_options.verboseMode = 2; // turn verbose mode to off by default
-
-
-
   double *reaction = (double*)calloc(problem->size, sizeof(double));
   double *velocity = (double*)calloc(problem->size, sizeof(double));
-  //setNumericsOptions(&global_options);
   info = genericMechanical_driver(problem,
                                   reaction , velocity,
-                                  options, &global_options);
+                                  options);
   double err = 0;
   GenericMechanical_compute_error(problem, reaction , velocity, options->dparam[0], options, &err);
   printf("\n");

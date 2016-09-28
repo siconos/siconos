@@ -20,6 +20,7 @@
 #include <string.h>
 #include <assert.h>
 #include "MixedLinearComplementarityProblem.h"
+#include "SiconosCompat.h"
 
 int write_newformat(char *filename);
 int write_newformat(char *filename)

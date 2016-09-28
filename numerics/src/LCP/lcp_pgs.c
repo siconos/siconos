@@ -21,10 +21,15 @@
 #include <string.h>
 #include <math.h>
 #include <float.h>
+#include "LinearComplementarityProblem.h"
 #include "LCP_Solvers.h"
+#include "lcp_cst.h"
+#include "SolverOptions.h"
+#include "NumericsMatrix.h"
+
 #include <assert.h>
 #include "SiconosBlas.h"
-
+#include "numerics_verbose.h"
 void lcp_pgs(LinearComplementarityProblem* problem, double *z, double *w, int *info , SolverOptions* options)
 {
   /* matrix M/vector q of the lcp */

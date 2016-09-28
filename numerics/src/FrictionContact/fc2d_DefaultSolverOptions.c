@@ -21,9 +21,10 @@
 #include <time.h>
 #include <float.h>
 
-#include "NumericsOptions.h"
 #include "fc2d_Solvers.h"
 #include "NonSmoothDrivers.h"
+#include "numerics_verbose.h"
+
 
 int fc2d_setDefaultSolverOptions(SolverOptions* options, int solverId)
 {
@@ -64,7 +65,7 @@ int fc2d_setDefaultSolverOptions(SolverOptions* options, int solverId)
 
   default:
   {
-    numericsError("fc2d_setDefaultSolverOptions", "Unknown Solver");
+    numerics_error("fc2d_setDefaultSolverOptions", "Unknown Solver");
 
   }
   }

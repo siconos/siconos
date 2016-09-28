@@ -20,11 +20,13 @@
 #include <string.h>
 #include <time.h>
 #include <math.h>
-#include "NumericsOptions.h"
 #include "NonSmoothDrivers.h"
-
+#include "numerics_verbose.h"
 #include "lcp_cst.h"
-
+#include "SolverOptions.h"
+#include "LCP_Solvers.h"
+#include "NumericsMatrix.h"
+#include "LinearComplementarityProblem.h"
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
 #include "debug.h"
@@ -59,7 +61,7 @@ int lcp_driver_SparseBlockMatrix(LinearComplementarityProblem* problem, double *
   DEBUG_BEGIN("lcp_driver_SparseBlockMatrix(...)\n");
   /* Checks storage type for the matrix M of the LCP */
   if (problem->M->storageType == 0)
-    numericsError("lcp_driver_SparseBlockMatrix", "forbidden type of storage for the matrix M of the LCP");
+    numerics_error("lcp_driver_SparseBlockMatrix", "forbidden type of storage for the matrix M of the LCP");
 
   /*
     The options for the global "block" solver are defined in options->\n
@@ -130,16 +132,9 @@ int lcp_driver_DenseMatrix(LinearComplementarityProblem* problem, double *z , do
 
   /* Checks storage type for the matrix M of the LCP */
   if (problem->M->storageType == 1)
-    numericsError("lcp_driver_DenseMatrix", "forbidden type of storage for the matrix M of the LCP");
+    numerics_error("lcp_driver_DenseMatrix", "forbidden type of storage for the matrix M of the LCP");
 
-  /* If the options for solver have not been set, read default values in .opt file */
-  int NoDefaultOptions = options->isSet; /* true(1) if the SolverOptions structure has been filled in else false(0) */
-
-  if (NoDefaultOptions == 0)
-  {
-    solver_options_read(0, options);
-    options->filterOn = 1;
-  }
+  assert(options->isSet);
 
   if (verbose > 0)
     solver_options_print(options);
@@ -329,14 +324,10 @@ int lcp_driver_DenseMatrix(LinearComplementarityProblem* problem, double *z , do
 
 }
 
-int linearComplementarity_driver(LinearComplementarityProblem* problem, double *z , double *w, SolverOptions* options,  NumericsOptions* global_options)
+int linearComplementarity_driver(LinearComplementarityProblem* problem, double *z , double *w, SolverOptions* options)
 {
   assert(options && "lcp_driver : null input for solver options");
   DEBUG_BEGIN("linearComplementarity_driver(...)\n");
-  /* Set global options */
-  if (global_options)
-    setNumericsOptions(global_options);
-
   /* Checks inputs */
   assert(problem && z && w &&
       "lcp_driver : input for LinearComplementarityProblem and/or unknowns (z,w)");

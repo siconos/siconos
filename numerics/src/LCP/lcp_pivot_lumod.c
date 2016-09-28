@@ -24,10 +24,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <limits.h>
+#include "LinearComplementarityProblem.h"
 #include "LCP_Solvers.h"
+#include "lcp_cst.h"
+#include "SolverOptions.h"
+#include "NumericsMatrix.h"
+
 #include "pivot-utils.h"
 #include "lumod_wrapper.h"
-
+#include "numerics_verbose.h"
 #include "SiconosLapack.h"
 
 //#define DEBUG_STDOUT

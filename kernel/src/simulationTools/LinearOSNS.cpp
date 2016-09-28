@@ -152,7 +152,7 @@ void LinearOSNS::initialize(SP::Simulation sim)
 
 void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescriptor& vd)
 {
-  DEBUG_PRINT("LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescriptor& vd)\n");
+  DEBUG_BEGIN("LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescriptor& vd)\n");
 
   // Computes matrix _interactionBlocks[inter1][inter1] (and allocates memory if
   // necessary) one or two DS are concerned by inter1 .  How
@@ -316,10 +316,7 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
       }
       DEBUG_PRINT("leftInteractionBlock after application of boundary conditions\n");
       DEBUG_EXPR(leftInteractionBlock->display(););
-
-
       // (inter1 == inter2)
-      DEBUG_EXPR(leftInteractionBlock->display(););
       SP::SiconosMatrix work(new SimpleMatrix(*leftInteractionBlock));
       work->trans();
       SP::SiconosMatrix centralInteractionBlock = getOSIMatrix(Osi, ds);
@@ -327,15 +324,20 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
       DEBUG_EXPR_WE(std::cout <<  std::boolalpha << " centralInteractionBlock->isPLUFactorized() = "<< centralInteractionBlock->isPLUFactorized() << std::endl;);
       centralInteractionBlock->PLUForwardBackwardInPlace(*work);
       //*currentInteractionBlock +=  *leftInteractionBlock ** work;
+      DEBUG_EXPR(work->display(););
       prod(*leftInteractionBlock, *work, *currentInteractionBlock, false);
       //      gemm(CblasNoTrans,CblasNoTrans,1.0,*leftInteractionBlock,*work,1.0,*currentInteractionBlock);
       //*currentInteractionBlock *=h;
+      DEBUG_EXPR(currentInteractionBlock->display(););
+      assert(currentInteractionBlock->isSymmetric(1e-10));
+
+
     }
     else RuntimeException::selfThrow("LinearOSNS::computeInteractionBlock not yet implemented for relation of type " + relationType);
     // Set pos for next loop.
     pos = pos2;
   }
-  DEBUG_PRINT("LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescriptor& vd) ends \n");
+  DEBUG_END("LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescriptor& vd) ends \n");
 }
 
 void LinearOSNS::computeInteractionBlock(const InteractionsGraph::EDescriptor& ed)

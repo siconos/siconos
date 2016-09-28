@@ -19,7 +19,9 @@
 #include <stdlib.h>
 #include "NonSmoothDrivers.h"
 #include "soclcp_test_function.h"
-
+#include "SOCLCP_cst.h"
+#include "SolverOptions.h"
+#include "SOCLCP_Solvers.h"
 
 
 int main(void)

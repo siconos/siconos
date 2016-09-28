@@ -1,7 +1,6 @@
-
-%extend MixedComplementarityProblem2_
+%extend MixedComplementarityProblem2
 {
-  MixedComplementarityProblem2_()
+  MixedComplementarityProblem2()
    {
      MixedComplementarityProblem2* MCP;
      MCP = (MixedComplementarityProblem2 *) malloc(sizeof(MixedComplementarityProblem2));
@@ -13,7 +12,7 @@
      return MCP;
    }
 
-  MixedComplementarityProblem2_(PyObject* n1, PyObject* n2)
+  MixedComplementarityProblem2(PyObject* n1, PyObject* n2)
   {
      MixedComplementarityProblem2* MCP;
      MCP =  (MixedComplementarityProblem2 *) malloc(sizeof(MixedComplementarityProblem2));
@@ -39,7 +38,7 @@
   }
 
 
-  MixedComplementarityProblem2_(PyObject* n1, PyObject* n2, PyObject* py_compute_class)
+  MixedComplementarityProblem2(PyObject* n1, PyObject* n2, PyObject* py_compute_class)
   {
      MixedComplementarityProblem2* MCP;
      MCP =  (MixedComplementarityProblem2 *) malloc(sizeof(MixedComplementarityProblem2));
@@ -87,7 +86,7 @@
      return MCP;
    }
 
-  MixedComplementarityProblem2_(PyObject* n1, PyObject* n2, PyObject* py_compute_Fmcp, PyObject* py_compute_nabla_Fmcp)
+  MixedComplementarityProblem2(PyObject* n1, PyObject* n2, PyObject* py_compute_Fmcp, PyObject* py_compute_nabla_Fmcp)
   {
      MixedComplementarityProblem2* MCP;
      MCP =  (MixedComplementarityProblem2 *) malloc(sizeof(MixedComplementarityProblem2));
@@ -176,7 +175,7 @@
       return PyInt_FromLong((uintptr_t)&$self->env);
     }
 
-  ~MixedComplementarityProblem2_()
+  ~MixedComplementarityProblem2()
   {
     if ($self->nabla_Fmcp)
     {

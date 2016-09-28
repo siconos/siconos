@@ -20,8 +20,13 @@
 
 #include "GenericMechanicalProblem.h"
 #include "NonSmoothDrivers.h"
-#include "misc.h"
-
+#include "numerics_verbose.h"
+#include "LinearSystemProblem.h"
+#include "FrictionContactProblem.h"
+#include "LinearComplementarityProblem.h"
+#include "GenericMechanical_Solvers.h"
+#include "NumericsMatrix.h"
+#include "SparseBlockMatrix.h"
 //#define GMP_DEBUG
 
 /* void * solverFC3D; */
@@ -171,7 +176,7 @@ void displayGMP(GenericMechanicalProblem * pGMP)
 
   while (pElem)
   {
-    printf("-->An sub-problem %s.\n", solver_options_id_to_char(pElem->type));
+    printf("-->An sub-problem %s.\n", ns_problem_id_to_name(pElem->type));
     pElem = pElem->nextProblem;
   }
   printf("The sparce block matrice is :\n");

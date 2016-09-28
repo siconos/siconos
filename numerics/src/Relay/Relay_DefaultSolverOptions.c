@@ -20,10 +20,10 @@
 #include <string.h>
 #include <time.h>
 #include <float.h>
-#include "NumericsOptions.h"
 #include "Relay_Solvers.h"
 #include "NonSmoothDrivers.h"
 #include "relay_cst.h"
+#include "numerics_verbose.h"
 
 int relay_setDefaultSolverOptions(RelayProblem* problem, SolverOptions* options, int solverId)
 {
@@ -75,7 +75,7 @@ int relay_setDefaultSolverOptions(RelayProblem* problem, SolverOptions* options,
   */
   default:
   {
-    numericsError("Relay_setDefaultSolverOptions", " Unknown Solver");
+    numerics_error("Relay_setDefaultSolverOptions", " Unknown Solver");
   }
   }
 

@@ -22,6 +22,8 @@
 #include <math.h>
 #include "SiconosBlas.h"
 #include "fc2d_Solvers.h"
+#include "numerics_verbose.h"
+#include "NumericsMatrix.h"
 
 void shuffle(int size, int * randnum);
 void shuffle(int size, int * randnum) //size is the given range

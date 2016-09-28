@@ -21,13 +21,15 @@
 #include <string.h>
 #include <math.h>
 #include <float.h>
-
+#include "NonSmoothDrivers.h"
 #include "fc2d_Solvers.h"
 #include "fc2d_compute_error.h"
 #include "LCP_Solvers.h"
 #include <assert.h>
+#include "numerics_verbose.h"
 
-void fc2d_lexicolemke(FrictionContactProblem* problem, double *reaction, double *velocity, int *info, SolverOptions* options,  NumericsOptions* global_options)
+
+void fc2d_lexicolemke(FrictionContactProblem* problem, double *reaction, double *velocity, int *info, SolverOptions* options)
 {
   int i;
   // conversion into LCP
@@ -58,7 +60,7 @@ void fc2d_lexicolemke(FrictionContactProblem* problem, double *reaction, double 
 
 
 
-  *info = linearComplementarity_driver(lcp_problem, zlcp , wlcp, lcp_options, global_options);
+  *info = linearComplementarity_driver(lcp_problem, zlcp , wlcp, lcp_options);
   if (options->filterOn > 0)
     lcp_compute_error(lcp_problem, zlcp, wlcp, lcp_options->dparam[0], &(lcp_options->dparam[1]));
 

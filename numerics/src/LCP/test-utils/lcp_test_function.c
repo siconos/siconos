@@ -20,7 +20,10 @@
 #include "NonSmoothDrivers.h"
 #include "lcp_test_function.h"
 #include "GAMSlink.h"
-
+#include "lcp_cst.h"
+#include "LCP_Solvers.h"
+#include "LinearComplementarityProblem.h"
+#include "SolverOptions.h"
 int lcp_test_function(FILE * f, int solverId, char* filename)
 {
 
@@ -32,10 +35,6 @@ int lcp_test_function(FILE * f, int solverId, char* filename)
   FILE * foutput  =  fopen("./lcp_mmc.verif", "w");
   info = linearComplementarity_printInFile(problem, foutput);
   fclose(foutput);
-
-  NumericsOptions global_options;
-  setDefaultNumericsOptions(&global_options);
-  global_options.verboseMode = 1;
   SolverOptions options;
   solver_options_set(&options, solverId);
 
@@ -53,7 +52,7 @@ int lcp_test_function(FILE * f, int solverId, char* filename)
   double * z = (double *)calloc(problem->size, sizeof(double));
   double * w = (double *)calloc(problem->size, sizeof(double));
 
-  info = linearComplementarity_driver(problem, z , w, &options, &global_options);
+  info = linearComplementarity_driver(problem, z , w, &options);
 
   for (i = 0 ; i < problem->size ; i++)
   {
@@ -96,12 +95,6 @@ int lcp_test_function_SBM(FILE * f, int solverId)
 
   FILE * foutput  =  fopen("./lcp_mmc.verif", "w");
   info = linearComplementarity_printInFile(problem, foutput);
-
-
-  NumericsOptions global_options;
-  setDefaultNumericsOptions(&global_options);
-  global_options.verboseMode = 1;
-
   SolverOptions * options = (SolverOptions *)malloc(sizeof(SolverOptions));
 
 
@@ -130,7 +123,7 @@ int lcp_test_function_SBM(FILE * f, int solverId)
   double * z = (double *)calloc(problem->size, sizeof(double));
   double * w = (double *)calloc(problem->size, sizeof(double));
 
-  info = linearComplementarity_driver(problem, z , w, options, &global_options);
+  info = linearComplementarity_driver(problem, z , w, options);
 
   for (i = 0 ; i < problem->size ; i++)
   {

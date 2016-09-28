@@ -18,7 +18,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "NonSmoothDrivers.h"
-
+#include "SecondOrderConeLinearComplementarityProblem.h"
+#include "SOCLCP_Solvers.h"
 #include "soclcp_test_function.h"
 
 
@@ -39,12 +40,6 @@ int soclcp_test_function(FILE * f, SolverOptions * options)
   info = secondOrderConeLinearComplementarityProblem_printInFile(problem, foutput);
 
   /* secondOrderConeLinearComplementarityProblem_display(problem); */
-
-  NumericsOptions global_options;
-  setDefaultNumericsOptions(&global_options);
-  global_options.verboseMode = 1; // turn verbose mode to off by default
-
-
   int n = problem->n;
 
   double *r = (double*)malloc(n * sizeof(double));
@@ -54,9 +49,7 @@ int soclcp_test_function(FILE * f, SolverOptions * options)
     v[k] = 0.0;
     r[k] = 0.0;
   }
-  info = soclcp_driver(problem,
-                       r , v,
-                       options, &global_options);
+  info = soclcp_driver(problem, r , v, options);
 
   printf("\n");
   for(k = 0 ; k < n; k++)

@@ -22,9 +22,16 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include "LinearComplementarityProblem.h"
 #include "LCP_Solvers.h"
+#include "lcp_cst.h"
+#include "SolverOptions.h"
+#include "NumericsMatrix.h"
+
 #include "SiconosLapack.h"
 #include "lcp_enum.h"
+#include "numerics_verbose.h"
+
 static unsigned long  int sCurrentEnum = 0;
 static unsigned long  int sCmpEnum = 0;
 static unsigned long  int sNbCase = 0;

@@ -22,8 +22,13 @@
 #include "SiconosBlas.h"
 #include <math.h>
 #include <float.h>
+#include "LinearComplementarityProblem.h"
 #include "LCP_Solvers.h"
+#include "lcp_cst.h"
+#include "SolverOptions.h"
+#include "NumericsMatrix.h"
 
+#include "numerics_verbose.h"
 #define EPSDIAG DBL_EPSILON
 void lcp_rpgs(LinearComplementarityProblem* problem, double *z, double *w, int *info , SolverOptions* options)
 {

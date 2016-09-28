@@ -28,41 +28,11 @@
   - free
 
 */
-#include "NumericsMatrix.h"
-#include "SolverOptions.h"
-#include "FrictionContactProblem.h"
+#include "NumericsFwd.h"
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {
 #endif
-
-enum SICONOS_FRICTION_3D_ONECONTACT_NSN_FORMULATION_ENUM
-{
-  SICONOS_FRICTION_3D_ONECONTACT_NSN_FORMULATION_ALARTCURNIER_STD =0,
-  SICONOS_FRICTION_3D_ONECONTACT_NSN_FORMULATION_JEANMOREAU_STD =1,
-  SICONOS_FRICTION_3D_ONECONTACT_NSN_FORMULATION_ALARTCURNIER_GENERATED =2,
-  SICONOS_FRICTION_3D_ONECONTACT_NSN_FORMULATION_JEANMOREAU_GENERATED =3,
-  SICONOS_FRICTION_3D_ONECONTACT_NSN_FORMULATION_NULL = 4 ,
-  /** index in iparam to store the formulation */
-  SICONOS_FRICTION_3D_ONECONTACT_NSN_FORMULATION = 10,
-};
-enum SICONOS_FRICTION_3D_ONECONTACT_NSN_LINESEARCH_ENUM
-{
-  SICONOS_FRICTION_3D_ONECONTACT_NSN_LINESEARCH_GOLDSTEINPRICE = 0 ,
-  SICONOS_FRICTION_3D_ONECONTACT_NSN_LINESEARCH_ARMIJO = 1,
-  /** index in iparam to store the line-search */
-  SICONOS_FRICTION_3D_ONECONTACT_NSN_LINESEARCH = 11,
-  /** index in iparam to store the maximum number of iterations */
-  SICONOS_FRICTION_3D_ONECONTACT_NSN_LINESEARCH_MAXITER = 12
-};
-
-enum SICONOS_FRICTION_3D_ONECONTACT_NSN_HYBRID
-{
-  /** Maximum number of loop for the hybrid solver */
-  SICONOS_FRICTION_3D_ONECONTACT_NSN_HYBRID_MAX_LOOP = 14,
-  /** Maximum number of iterations for the projection solver */
-  SICONOS_FRICTION_3D_ONECONTACT_NSN_HYBRID_MAX_ITER = 15
-};
 
 
 typedef void (*computeNonsmoothFunction)(double *, double * , double , double * , double *, double *, double *);
@@ -115,8 +85,10 @@ typedef void (*computeNonsmoothFunction)(double *, double * , double , double * 
   int fc3d_onecontact_nonsmooth_Newton_solvers_solve_damped(FrictionContactProblem* localproblem,
                                        double * R, int *iparam, double *dparam);
 
+  int fc3d_onecontact_nonsmooth_Newton_solvers_solve_hybrid_pli_nsn_loop(FrictionContactProblem* localproblem,
+                                                            double * local_reaction, SolverOptions* options);
 
-  /* Set the default solver options for the ONECONTACT_NSN_AC Solver
+  /* Set the default solver options for the ONECONTACT_NSN Solver
    * Some default values:
    * options.iparam[0] = 200 is the maximum number of iterations.
    * options.iparam[3] = 100000 is the nzmax parameter for sparse matrices.

@@ -18,11 +18,11 @@
 //
 //
 
-// Siconos.i - SWIG interface for Siconos
+// numerics.i - SWIG interface for siconos numerics component.
 %module(package="siconos") numerics
 
+// basics, mostly numpy.i stuff. 
 %include start.i
-
 
 // generated docstrings from doxygen xml output
 %include numerics-docstrings.i
@@ -46,19 +46,14 @@
 #include "SiconosConfig.h"
 #include "SolverOptions.h"
 #include "SparseMatrix.h"
+#include "NumericsMatrix.h"
 #include "SparseBlockMatrix.h"
-#include "fc3d_AlartCurnier_functions.h"
-#include "fc3d_nonsmooth_Newton_AlartCurnier.h"
-#include "fc3d_nonsmooth_Newton_FischerBurmeister.h"
-#include "fc3d_nonsmooth_Newton_natural_map.h"
-#include "AlartCurnierGenerated.h"
-#include "FischerBurmeisterGenerated.h"
-#include "NaturalMapGenerated.h"
-#include "gfc3d_compute_error.h"
+#include "NumericsSparseMatrix.h"
 #include "Numerics_functions.h"
 #include "SiconosSets.h"
 #include "GAMSlink.h"
-%}
+#include "NumericsFwd.h"
+  %}
 
 #ifdef WITH_SERIALIZATION
 %{
@@ -96,11 +91,13 @@ namespace std11 = boost;
  %rename (LCP) LinearComplementarityProblem;
  %rename (MLCP) MixedLinearComplementarityProblem;
  %rename (MCP) MixedComplementarityProblem;
- %rename (VI) VariationalInequality_;
+ %rename (VI) VariationalInequality;
  %rename (AVI) AffineVariationalInequalities;
 
  %ignore lcp_compute_error_only;
 
+ // -- Numpy typemaps --
+ // See http://docs.scipy.org/doc/numpy/reference/swig.interface-file.html.
  %apply (int DIM1 , int DIM2 , double* IN_FARRAY2)
  {(int nrows, int ncols, double* data          )};
 
@@ -141,11 +138,11 @@ namespace std11 = boost;
  {(double B[9])}
 
 
-%include solverOptions.i
-
 %include Numerics_typemaps_problems.i
 %include Numerics_typemaps_basic_linalg.i
 %include Numerics_typemaps_numericsmatrices.i
+%include NonSmoothDrivers.h
+%include solverOptions.i
 
 // this has to die --xhub
 // info param
@@ -198,6 +195,28 @@ namespace std11 = boost;
 %}
 
 %fragment("NumPy_Fragments");
+
+// includes in 'begin' mandatory to avoid mess with
+// solverOptions.i, numerics_common and fwd decl
+// all this because of SolverOptions extend.
+%begin %{
+#include "relay_cst.h"
+#include "AVI_cst.h"
+#include "SOCLCP_cst.h"
+#include "Friction_cst.h"
+#include "lcp_cst.h"
+#include "MCP_cst.h"
+#include "mlcp_cst.h"
+#include "NCP_cst.h"
+#include "VI_cst.h"
+#include "GenericMechanical_cst.h"
+#include "fc2d_Solvers.h"
+#include "fc3d_Solvers.h"
+#include "gfc3d_Solvers.h"
+#include "MCP_Solvers.h"
+#include "MLCP_Solvers.h"
+#include "NonSmoothDrivers.h"  
+  %}
 
 //Relay
 %include "relay_cst.h"
@@ -363,18 +382,9 @@ namespace std11 = boost;
   $1 = &fc3d_NaturalMapFunctionGenerated;
  }
 
-%include "fc3d_AlartCurnier_functions.h"
-%include "fc3d_nonsmooth_Newton_AlartCurnier.h"
-%include "fc3d_nonsmooth_Newton_FischerBurmeister.h"
-%include "fc3d_nonsmooth_Newton_natural_map.h"
-%include "AlartCurnierGenerated.h"
-%include "FischerBurmeisterGenerated.h"
-%include "NaturalMapGenerated.h"
-%include "fclib_interface.h"
-%include "GAMSlink.h"
-
 // the order matters
 %include numerics_FC.i
+%include GAMSlink.h
 %include numerics_GFC.i
 
 %extend SN_GAMSparams
@@ -400,15 +410,14 @@ namespace std11 = boost;
 %{
 #include <GenericMechanical_cst.h>
 %}
-%include GenericMechanical_cst.h
+//%include GenericMechanical_cst.h
 
 %include numerics_NM.i
 
 #ifdef WITH_SERIALIZATION
 %make_picklable(Callback, Numerics);
-%make_picklable(_SolverOptions, Numerics);
+%make_picklable(SolverOptions, Numerics);
 %make_picklable(FrictionContactProblem, Numerics);
 %make_picklable(NumericsMatrix, Numerics);
 %make_picklable(SparseBlockStructuredMatrix, Numerics);
 #endif
-

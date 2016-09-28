@@ -22,12 +22,14 @@
 #include <math.h>
 #include <float.h>
 #include "Relay_Solvers.h"
+#include "NonSmoothDrivers.h"
 #include "LCP_Solvers.h"
 #include "relay_cst.h"
 
 #include <assert.h>
+#include "numerics_verbose.h"
 
-void relay_lexicolemke(RelayProblem* problem, double *z, double *w, int *info, SolverOptions* options,  NumericsOptions* global_options)
+void relay_lexicolemke(RelayProblem* problem, double *z, double *w, int *info, SolverOptions* options)
 {
   int i;
   // conversion into LCP
@@ -54,7 +56,7 @@ void relay_lexicolemke(RelayProblem* problem, double *z, double *w, int *info, S
 
   SolverOptions * lcp_options = options->internalSolvers;
 
-  *info = linearComplementarity_driver(lcp_problem, zlcp , wlcp, lcp_options, global_options);
+  *info = linearComplementarity_driver(lcp_problem, zlcp , wlcp, lcp_options);
   if (options->filterOn > 0)
     lcp_compute_error(lcp_problem, zlcp, wlcp, lcp_options->dparam[0], &(lcp_options->dparam[1]));
 

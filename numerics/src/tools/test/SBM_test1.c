@@ -27,6 +27,8 @@
 #include "NumericsMatrix.h"
 #include <math.h>
 #include "numericsMatrixTestFunction.h"
+#include "SparseBlockMatrix.h"
+
 int main(void)
 {
 

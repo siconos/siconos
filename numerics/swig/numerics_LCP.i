@@ -1,4 +1,13 @@
 // LCP
+
+%ignore lcp_compute_error_only;
+
+%{
+  #include "LinearComplementarityProblem.h"
+  #include "LCP_Solvers.h"
+  #include "lcp_cst.h"
+  %}
+
 %include "LinearComplementarityProblem.h"
 %include "LCP_Solvers.h"
 %include "lcp_cst.h"

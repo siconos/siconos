@@ -1,11 +1,17 @@
 %{
-#include "FrictionContactProblem.h"
 #include "fc3d_Solvers.h"
-#include "fc3d_compute_error.h"
 #include "Friction_cst.h"
+#include "FrictionContactProblem.h"
+#include "fc3d_compute_error.h"
 #ifdef WITH_FCLIB
 #include "fclib_interface.h"
 #endif
+#include "fc2d_Solvers.h"
+#include "gfc3d_Solvers.h"
+#include "fc3d_AlartCurnier_functions.h"
+#include "AlartCurnierGenerated.h"
+#include "FischerBurmeisterGenerated.h"
+#include "NaturalMapGenerated.h"
 %}
 
 %include "FrictionContactProblem.h"
@@ -13,6 +19,14 @@
 %include fclib_interface.h
 #endif
 
+%include "fc3d_AlartCurnier_functions.h"
+%include "fc3d_nonsmooth_Newton_AlartCurnier.h"
+%include "fc3d_nonsmooth_Newton_FischerBurmeister.h"
+%include "fc3d_nonsmooth_Newton_natural_map.h"
+%include "AlartCurnierGenerated.h"
+%include "FischerBurmeisterGenerated.h"
+%include "NaturalMapGenerated.h"
+%include "fclib_interface.h"
 %include "fc3d_Solvers.h"
 %include "fc3d_unitary_enumerative.h"
 %include "fc2d_Solvers.h"

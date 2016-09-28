@@ -22,9 +22,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <float.h>
-#include "LCP_Solvers.h"
 #include "pivot-utils.h"
+#include "numerics_verbose.h"
+#include "LinearComplementarityProblem.h"
+#include "LCP_Solvers.h"
+#include "lcp_cst.h"
+#include "SolverOptions.h"
+#include "NumericsMatrix.h"
 
+#include "numerics_verbose.h"
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
 

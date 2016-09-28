@@ -19,10 +19,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-
-#include "NumericsOptions.h"
+#include "NumericsMatrix.h"
 #include "fc2d_Solvers.h"
 #include "NonSmoothDrivers.h"
+#include "numerics_verbose.h"
+
+
 char *  SICONOS_FRICTION_2D_NSGS_STR  = "F2D_NSGS";
 char *  SICONOS_FRICTION_2D_PGS_STR  = "F2D_PGS";
 char *  SICONOS_FRICTION_2D_CPG_STR  = "F2D_CPG";
@@ -39,7 +41,7 @@ static int fccounter = 0;
 #endif
 
 
-int fc2d_driver(FrictionContactProblem* problem, double *reaction , double *velocity, SolverOptions* options, NumericsOptions* global_options)
+int fc2d_driver(FrictionContactProblem* problem, double *reaction , double *velocity, SolverOptions* options)
 {
 
 #ifdef DUMP_PROBLEM
@@ -52,27 +54,17 @@ int fc2d_driver(FrictionContactProblem* problem, double *reaction , double *velo
   fclose(foutput);
 #endif
 
-  if (options == NULL || global_options == NULL)
-    numericsError("fc2d_driver", "null input for solver and/or global options");
-
-  /* Set global options */
-  setNumericsOptions(global_options);
+  if (options == NULL)
+    numerics_error("fc2d_driver", "null input for solver options");
 
   /* Checks inputs */
   if (problem == NULL || reaction == NULL || velocity == NULL)
-    numericsError("fc2d_driver", "null input for FrictionContactProblem and/or unknowns (reaction,velocity)");
+    numerics_error("fc2d_driver", "null input for FrictionContactProblem and/or unknowns (reaction,velocity)");
 
-  /* If the options for solver have not been set, read default values in .opt file */
-  int NoDefaultOptions = options->isSet; /* true(1) if the SolverOptions structure has been filled in else false(0) */
-
-  if (!NoDefaultOptions)
-    solver_options_read(3, options);
+  assert(options->isSet);
 
   if (verbose > 0)
     solver_options_print(options);
-
-
-
 
 
   /* Solver name */
@@ -82,7 +74,7 @@ int fc2d_driver(FrictionContactProblem* problem, double *reaction , double *velo
   int info = -1 ;
 
   if (problem->dimension != 2)
-    numericsError("fc2d_driver", "Dimension of the problem : problem-> dimension is not compatible or is not set");
+    numerics_error("fc2d_driver", "Dimension of the problem : problem-> dimension is not compatible or is not set");
 
 
   /* Non Smooth Gauss Seidel (NSGS) */
@@ -137,7 +129,7 @@ int fc2d_driver(FrictionContactProblem* problem, double *reaction , double *velo
     {
       if (verbose)
         printf(" ========================== Call Lemke solver for Friction-Contact 2D problem ==========================\n");
-      fc2d_lexicolemke(problem, reaction, velocity, &info, options, global_options);
+      fc2d_lexicolemke(problem, reaction, velocity, &info, options);
       break;
     }
     /****** Enum algorithm ******/
@@ -145,7 +137,7 @@ int fc2d_driver(FrictionContactProblem* problem, double *reaction , double *velo
     {
       if (verbose)
         printf(" ========================== Call Enumerative solver for Friction-Contact 2D problem ==========================\n");
-      fc2d_enum(problem, reaction, velocity, &info, options, global_options);
+      fc2d_enum(problem, reaction, velocity, &info, options);
       break;
     }
     /*error */
@@ -170,7 +162,7 @@ int fc2d_driver(FrictionContactProblem* problem, double *reaction , double *velo
   }
   else
   {
-    numericsError("fc2d_driver", 
+    numerics_error("fc2d_driver", 
                   " error: unknown storagetype named");
     exit(EXIT_FAILURE);
   }

@@ -28,20 +28,18 @@
   \brief Definition of a structure to handle with friction-contact (2D or 3D) problems.
 */
 
-#include "NumericsMatrix.h"
-#include "FrictionContactProblem.h"
-#include "VariationalInequality.h"
+#include "NumericsFwd.h"
 
 /** \struct FrictionContactProblem_as_VI FrictionContactProblem_as_VI.h
  *
  */
-typedef struct
+struct FrictionContactProblem_as_VI
 {
   /* the VI associated with the FC3D probelem */
   VariationalInequality * vi;
   /* the FC3D associated with the VI  */
   FrictionContactProblem * fc3d;
-} FrictionContactProblem_as_VI;
+};
 
 
 

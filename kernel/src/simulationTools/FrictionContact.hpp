@@ -26,7 +26,7 @@
 #include <FrictionContactProblem.h>
 #include <Friction_cst.h>
 /** Pointer to function of the type used for drivers for FrictionContact problems in Numerics */
-typedef int (*Driver)(FrictionContactProblem*, double*, double*, SolverOptions*, NumericsOptions*);
+typedef int (*Driver)(FrictionContactProblem*, double*, double*, SolverOptions*);
 TYPEDEF_SPTR(FrictionContactProblem)
 
 /** Formalization and Resolution of a Friction-Contact Problem

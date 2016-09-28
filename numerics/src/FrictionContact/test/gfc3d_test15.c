@@ -19,6 +19,9 @@
 #include <stdlib.h>
 #include "NonSmoothDrivers.h"
 #include "globalFrictionContact_test_function.h"
+#include "Friction_cst.h"
+#include "gfc3d_Solvers.h"
+#include "SolverOptions.h"
 
 
 
@@ -35,7 +38,7 @@ int main(void)
   SolverOptions * options = (SolverOptions *)malloc(sizeof(SolverOptions));
 
   gfc3d_setDefaultSolverOptions(options, SICONOS_GLOBAL_FRICTION_3D_NSGS_WR);
-  options->internalSolvers->internalSolvers->solverId = SICONOS_FRICTION_3D_ONECONTACT_NSN_AC_GP;
+  options->internalSolvers->internalSolvers->solverId = SICONOS_FRICTION_3D_ONECONTACT_NSN_GP;
   options->internalSolvers->internalSolvers->iparam[0] = 100;
   options->internalSolvers->internalSolvers->iparam[1] = 15;
 

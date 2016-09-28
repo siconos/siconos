@@ -23,8 +23,10 @@
 #include <math.h>
 #include <stdlib.h>
 #include <assert.h>
+#include "NumericsMatrix.h"
+#include "SiconosSets.h"
 #include "AffineVariationalInequalities.h"
-#include "misc.h"
+#include "numerics_verbose.h"
 
 
 void AVI_display(AffineVariationalInequalities* problem)

@@ -43,6 +43,8 @@
 #include "PathAlgebra.h"
 
 #include "Path_interface.h"
+#include "NumericsMatrix.h"
+#include "numerics_verbose.h"
 
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES

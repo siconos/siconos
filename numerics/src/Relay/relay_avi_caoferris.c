@@ -27,7 +27,7 @@ Ferris solves the subsequent AVI.
 #include "avi_caoferris.h"
 #include "relay_cst.h"
 #include "LinearComplementarityProblem.h"
-
+#include "NumericsMatrix.h"
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
 #include "debug.h"

@@ -23,6 +23,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include "numerics_verbose.h"
 
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */

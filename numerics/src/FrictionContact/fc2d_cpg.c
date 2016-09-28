@@ -17,11 +17,11 @@
 */
 
 #include "fc2d_Solvers.h"
-
+#include "NumericsMatrix.h"
 #include <assert.h>
 #include <math.h>
 #include "SiconosBlas.h"
-
+#include "numerics_verbose.h"
 void fc2d_cpg(FrictionContactProblem* problem , double *reaction , double *velocity , int *info, SolverOptions* options)
 {
   int nc = problem->numberOfContacts;

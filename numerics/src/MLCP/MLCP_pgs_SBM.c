@@ -21,11 +21,19 @@
 #include <time.h>
 #include <math.h>
 #include <float.h>
-#ifndef MEXFLAG
-#include "NonSmoothDrivers.h"
-#endif
+/* #ifndef MEXFLAG */
+/* #include "NonSmoothDrivers.h" */
+/* #endif */
+#include "SparseBlockMatrix.h"
+#include "LinearComplementarityProblem.h"
+#include "MixedLinearComplementarityProblem.h"
+#include "NumericsMatrix.h"
+#include "SolverOptions.h"
 #include "SiconosBlas.h"
+#include "LCP_Solvers.h"
+#include "MLCP_Solvers.h"
 #include <assert.h>
+#include "numerics_verbose.h"
 
 static void mlcp_pgs_sbm_buildLocalProblem(int rowNumber, const SparseBlockStructuredMatrix* const blmat, LinearComplementarityProblem* local_problem, double* q, double* z);
 
@@ -133,7 +141,7 @@ void mlcp_pgs_SBM(MixedLinearComplementarityProblem* problem, double *z, double 
 
   if (options->numberOfInternalSolvers < 1)
   {
-    numericsError("mlcp_nsgs_SBM", "The MLCP_PGS_SBM method needs options for the internal solvers, options[0].numberOfInternalSolvers should be >1");
+    numerics_error("mlcp_nsgs_SBM", "The MLCP_PGS_SBM method needs options for the internal solvers, options[0].numberOfInternalSolvers should be >1");
   }
 
 

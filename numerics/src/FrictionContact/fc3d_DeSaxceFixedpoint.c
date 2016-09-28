@@ -26,6 +26,7 @@
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
 #include "debug.h"
+#include "numerics_verbose.h"
 
 
 void fc3d_DeSaxceFixedPoint(FrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options)
@@ -68,7 +69,7 @@ void fc3d_DeSaxceFixedPoint(FrictionContactProblem* problem, double *reaction, d
   }
   else
   {
-    numericsError("fc3d_DeSaxceFixedPoint", "The De Saxce fixed point is implemented with a fixed time--step. Use FixedPointProjection (VI_FPP) method for a variable time--step");
+    numerics_error("fc3d_DeSaxceFixedPoint", "The De Saxce fixed point is implemented with a fixed time--step. Use FixedPointProjection (VI_FPP) method for a variable time--step");
   }
 
   double alpha = 1.0;

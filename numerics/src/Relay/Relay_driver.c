@@ -23,8 +23,13 @@
 #ifndef MEXFLAG
 #include "NonSmoothDrivers.h"
 #endif
+#include "RelayProblem.h"
+#include "SolverOptions.h"
+#include "Relay_Solvers.h"
 #include "relay_cst.h"
+#include "NumericsMatrix.h"
 #include <time.h>
+#include "numerics_verbose.h"
 
 char*  SICONOS_RELAY_PGS_STR = "RELAY_PGS";
 char*  SICONOS_RELAY_PATH_STR = "RELAY_PATH";
@@ -36,21 +41,18 @@ char*  SICONOS_RELAY_AVI_CAOFERRIS_STR = "RELAY_AVI_CAOFERRIS";
 char*  SICONOS_RELAY_AVI_CAOFERRIS_TEST_STR = "test version of the solver by Cao & Ferris; DO NOT USE!";
 
 int relay_driver(RelayProblem* problem, double *z , double *w,
-                 SolverOptions* options, NumericsOptions* global_options)
+                 SolverOptions* options)
 {
 
 
   //Relay_display(problem);
 
-  if (options == NULL || global_options == NULL)
-    numericsError("Relay_driver", "null input for solver and/or global options");
-
-  /* Set global options */
-  setNumericsOptions(global_options);
+  if (options == NULL)
+    numerics_error("Relay_driver", "null input for solver and/or global options");
 
   /* Checks inputs */
   if (problem == NULL || z == NULL || w == NULL)
-    numericsError("Relay_driver", "null input for RelayProblem and/or unknowns (z,w)");
+    numerics_error("Relay_driver", "null input for RelayProblem and/or unknowns (z,w)");
 
   /* Output info. : 0: ok -  >0: problem (depends on solver) */
   int info = -1;
@@ -62,7 +64,7 @@ int relay_driver(RelayProblem* problem, double *z , double *w,
   /* Sparse Block Storage */
   if (storageType == 1)
   {
-    numericsError("Relay_driver", "not yet implemented for sparse storage.");
+    numerics_error("Relay_driver", "not yet implemented for sparse storage.");
   }
   // else
 
@@ -100,12 +102,12 @@ int relay_driver(RelayProblem* problem, double *z , double *w,
     relay_printInFile(problem, FP);
     fclose(FP);
 #endif
-    relay_lexicolemke(problem, z , w , &info , options, global_options);
+    relay_lexicolemke(problem, z , w , &info , options);
     break;
   }
   case SICONOS_RELAY_ENUM:
   {
-    relay_enum(problem, z , w , &info , options, global_options);
+    relay_enum(problem, z , w , &info , options);
     break;
   }
   case SICONOS_RELAY_PATH:

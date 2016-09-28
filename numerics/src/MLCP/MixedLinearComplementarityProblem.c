@@ -22,9 +22,9 @@
 #include <stdio.h>
 #include <math.h>
 #include <stdlib.h>
-
 #include "MixedLinearComplementarityProblem.h"
-#include "misc.h"
+#include "NumericsMatrix.h"
+#include "numerics_verbose.h"
 
 void mixedLinearComplementarity_display(MixedLinearComplementarityProblem* p)
 {

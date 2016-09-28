@@ -216,10 +216,6 @@ int main(int argc, char* argv[])
   for (k = 0 ; k < n; k++) globalVelocity[k] = 0.0;
   // Numerics and Solver Options
 
-  NumericsOptions numerics_options;
-  numerics_options.verboseMode = 1; // turn verbose mode to off by default
-
-
   SolverOzptions numerics_solver_options;
   numerics_solver_options.filterOn = 0;
   numerics_solver_options.isSet = 1;
@@ -254,7 +250,7 @@ int main(int argc, char* argv[])
   //Driver call
   info = primalFrictionContact3D_driver(&NumericsProblem,
                                         reaction , velocity, globalVelocity,
-                                        &numerics_solver_options, &numerics_options);
+                                        &numerics_solver_options);
 
 
 

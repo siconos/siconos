@@ -1308,3 +1308,26 @@ MB, FP, SS, OH, VA
       + ubuntu
       + debian
       + import siconos
+** <2016-09-13 Tue>
+
+SS, MB, VA
+
++ Discussion Cluster report
+  + one the example of n_cubes : not os good results
+  + one-wall 100 particles. speed up of 5 for 32 cores
+  + visulaization tools for ditrubuted application totalview, vampire ?
+  + large number of particles is necessary > 10000   to show an effect of parallelization
++ Newton Euler DS: 3DOF implementation
++ Discussion about instability of local solver
+  + new hybrid local solver VA
+  + solver LCP 4 faces ?
+  + output problems that shows the problem --> hdf5 files (SS, VA)
+  + implement a local proximal solver VA
++ DMM solver
+  + visualization of domain (SS)
+  + graph partitioning techniques (VA, MB)
+  + improve paraview visualization stuff (MB)
++ interface mechanics / mechanics proposed
+  + try to merge the mechanics proposed into the master branch and update all the examples : We will not maintain both API
+  + work with OpenEng --> merge MBTB into the new interface
+  

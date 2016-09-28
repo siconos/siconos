@@ -18,9 +18,9 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <errno.h>
-
+#include "NumericsMatrix.h"
 #include "GlobalFrictionContactProblem.h"
-#include "misc.h"
+#include "numerics_verbose.h"
 
 int globalFrictionContact_printInFile(GlobalFrictionContactProblem*  problem, FILE* file)
 {

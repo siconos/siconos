@@ -13,9 +13,6 @@ solvers = (sn.SICONOS_GLOBAL_FRICTION_3D_NSGS,)
 solvers_reduced1 = (sn.SICONOS_FRICTION_3D_NSGS, sn.SICONOS_FRICTION_3D_NSN_AC)
 solvers_reduced2 = (sn.SICONOS_FRICTION_3D_NSN_AC,)  # sn.SICONOS_FRICTION_3D_NSN_FB)
 
-no = sn.NumericsOptions()
-no.verboseMode = 0
-
 
 def condensed_from_global(fcp):
     # spsolve expect the indices to be cint aka 32 bits int
@@ -47,7 +44,7 @@ def solve_reduced(fcp, solver_reduced):
     reaction_reduced = np.zeros((size_reaction,))
     velocities_reduced = np.zeros((size_reaction,))
 
-    return sn.fc3d_driver(fcp, reaction_reduced, velocities_reduced, SO_reduced, no)
+    return sn.fc3d_driver(fcp, reaction_reduced, velocities_reduced, SO_reduced)
 
 
 def solve_global(fcp, solver):
@@ -59,7 +56,7 @@ def solve_global(fcp, solver):
     reaction = np.zeros((size_reaction,))
     velocities = np.zeros((size_reaction,))
     global_velocities = np.zeros((n,))
-    return sn.gfc3d_driver(fcp, reaction, velocities, global_velocities, SO, no)
+    return sn.gfc3d_driver(fcp, reaction, velocities, global_velocities, SO)
 
 
 def test_gfc3d():

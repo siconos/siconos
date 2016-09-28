@@ -45,6 +45,10 @@
 
 %{
 #include "GlobalFrictionContactProblem.h"
+#include "GlobalFrictionContactProblem.h"
+#include "gfc3d_Solvers.h"
+#include "gfc3d_compute_error.h"
+  
 %}
 
 %include "GlobalFrictionContactProblem.h"

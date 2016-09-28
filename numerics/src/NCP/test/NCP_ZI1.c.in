@@ -22,8 +22,9 @@
 #include <float.h>
 
 #include "NonSmoothDrivers.h"
-#include "MCP_cst.h"
-
+#include "NCP_cst.h"
+#include "NonlinearComplementarityProblem.h"
+#include "NumericsMatrix.h"
 #include "SolverOptions.h"
 
 #define N 4
@@ -145,7 +146,7 @@ int main(void)
   while ((t <= T) && info == 0)
   {
     k++;
-    info = ncp_driver(problem, z, F, &options, NULL);
+    info = ncp_driver(problem, z, F, &options);
     printf("step %d, iter = %d, error = %le\n", k, options.iparam[1], options.dparam[1]);
     if (info > 0)
     {
@@ -156,7 +157,7 @@ int main(void)
        while (options.dparam[0] < 1e-12)
        {
         options.dparam[0] *= 1.1;
-       info = ncp_driver(problem, z, F, &options, NULL);
+       info = ncp_driver(problem, z, F, &options);
        if (!info)
         goto almostgood;
        }
@@ -198,14 +199,14 @@ int main(void)
        while (options.dparam[0] < 1e-12)
        {
         options.dparam[0] *= 1.1;
-       info = ncp_driver(problem, z, F, &options, NULL);
+       info = ncp_driver(problem, z, F, &options);
        if (!info)
         goto almostgood;
        }
       }
 #else
       {
-       info = ncp_driver(problem, z, F, &options, NULL);
+       info = ncp_driver(problem, z, F, &options);
       }
 #endif
       if (info > 0)

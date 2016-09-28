@@ -35,13 +35,13 @@
 /** \struct SecondOrderConeLinearComplementarityProblem_as_VI SecondOrderConeLinearComplementarityProblem_as_VI.h
  *
  */
-typedef struct
+struct SecondOrderConeLinearComplementarityProblem_as_VI
 {
   /* the VI associated with the FC3D probelem */
   VariationalInequality * vi;
   /* the SOCLCP associated with the VI  */
   SecondOrderConeLinearComplementarityProblem * soclcp;
-} SecondOrderConeLinearComplementarityProblem_as_VI;
+};
 
 
 

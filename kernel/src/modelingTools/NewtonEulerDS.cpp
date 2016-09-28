@@ -307,6 +307,7 @@ Q0 : contains the center of mass coordinate, and the quaternion initial. (dim(Q0
 Velocity0 : contains the initial velocity of center of mass and the omega initial. (dim(Velocity0)=6)
 */
 NewtonEulerDS::NewtonEulerDS(): DynamicalSystem(6),
+                                nullifyFGyr(false),
                                 _computeJacobianFIntqByFD(false),
                                 _computeJacobianFIntvByFD(false),
                                 _computeJacobianMIntqByFD(false),
@@ -952,11 +953,13 @@ void NewtonEulerDS::computeForces(double time, SP::SiconosVector q, SP::SiconosV
       _forces->setValue(4, _forces->getValue(4) - _mInt->getValue(1));
       _forces->setValue(5, _forces->getValue(5) - _mInt->getValue(2));
     }
-    computeFGyr(v);
-    _forces->setValue(3, _forces->getValue(3) - _fGyr->getValue(0));
-    _forces->setValue(4, _forces->getValue(4) - _fGyr->getValue(1));
-    _forces->setValue(5, _forces->getValue(5) - _fGyr->getValue(2));
-
+    if (!nullifyFGyr)
+    {
+      computeFGyr(v);
+      _forces->setValue(3, _forces->getValue(3) - _fGyr->getValue(0));
+      _forces->setValue(4, _forces->getValue(4) - _fGyr->getValue(1));
+      _forces->setValue(5, _forces->getValue(5) - _fGyr->getValue(2));
+    }
     DEBUG_EXPR(_forces->display());
     DEBUG_END("NewtonEulerDS::computeForces(double time, SP::SiconosVector q, SP::SiconosVector v)\n")
 
@@ -1009,11 +1012,14 @@ void NewtonEulerDS::computeJacobianvForces(double time)
       computeJacobianMIntv(time);
       _jacobianvForces->setBlock(3,0,-1.0 * *_jacobianMIntv);
     }
-    if (_jacobianFGyrv)
+    if (!nullifyFGyr)
     {
-      //computeJacobianFGyrvByFD(time,_q,_v);
-      computeJacobianFGyrv(time);
-      *_jacobianvForces -= *_jacobianFGyrv;
+      if (_jacobianFGyrv)
+      {
+        //computeJacobianFGyrvByFD(time,_q,_v);
+        computeJacobianFGyrv(time);
+        *_jacobianvForces -= *_jacobianFGyrv;
+      }
     }
     // std::cout << "_jacobianvForces : "<< std::endl;
     // _jacobianvForces->display();

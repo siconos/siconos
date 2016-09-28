@@ -116,11 +116,10 @@ The following linear algebra operation are supported:
 #include <stdlib.h>
 #include <assert.h>
 #include <stdbool.h>
-
+#include "NumericsFwd.h"
 #include "SiconosConfig.h"
+#include "csparse.h" // For csi
 #include "SparseMatrix.h"
-#include "NumericsSparseMatrix.h"
-#include "SparseBlockMatrix.h"
 
 /** \struct NumericsMatrixInternalData NumericsMatrix.h 
  * Structure for simple workspaces
@@ -139,7 +138,7 @@ typedef struct
 
     See NM_* functions for linear algebra operations on dense, sparse block and sparse storage.
 */
-typedef struct
+struct NumericsMatrix
 {
   int storageType; /**< the type of storage:
                       0: dense (double*),
@@ -153,7 +152,7 @@ typedef struct
 
   NumericsMatrixInternalData* internalData; /**< internal storage, used for workspace amoung other things */
 
-} NumericsMatrix;
+};
 
 /*! Available types of storage for NumericsMatrix */
 typedef enum NumericsMatrix_types {

@@ -228,18 +228,18 @@ int extractLCP(NumericsMatrix* MGlobal, double *z , int *indic, int *indicop, do
                int *ipiv , int *sizesublcp , int *sizesublcpop)
 {
   if (MGlobal == NULL || z == NULL)
-    numericsError("extractLCP", "Null input for one arg (problem, z, ...)");
+    numerics_error("extractLCP", "Null input for one arg (problem, z, ...)");
 
   int info;
   /*  double epsdiag = DBL_EPSILON;*/
 
   /* Extract data from problem */
   if (MGlobal->storageType == 1)
-    numericsError("extractLCP", "Not yet implemented for sparse storage");
+    numerics_error("extractLCP", "Not yet implemented for sparse storage");
   double * M = MGlobal->matrix0;
   int sizelcp = MGlobal->size0;
   if (M == NULL)
-    numericsError("extractLCP", "Null input matrix M");
+    numerics_error("extractLCP", "Null input matrix M");
 
   /*  workspace = (double*)malloc(sizelcp * sizeof(double)); */
   /*    printf("recalcul_submat\n");*/
@@ -282,14 +282,14 @@ int extractLCP(NumericsMatrix* MGlobal, double *z , int *indic, int *indicop, do
     DGETRF(*sizesublcp, *sizesublcp, submatlcp, *sizesublcp, ipiv, info);
     if (info != 0)
     {
-      numericsWarning("extractLCP", "LU factorization failed") ;
+      numerics_warning("extractLCP", "LU factorization failed") ;
       return 1;
     }
 
     DGETRI(*sizesublcp, submatlcp, *sizesublcp, ipiv , info);
     if (info != 0)
     {
-      numericsWarning("extractLCP", "LU inversion failed");
+      numerics_warning("extractLCP", "LU inversion failed");
       return 1;
     }
 
@@ -312,7 +312,7 @@ int predictLCP(int sizeLCP, double* q, double *z , double *w , double tol,
                int *ipiv , int *sizesublcp , int *sizesublcpop , double *subq , double *bufz , double *newz)
 {
   if (q == NULL ||  z == NULL || w == NULL)
-    numericsError("predictLCP", "Null input for one arg (problem, q,w ...)");
+    numerics_error("predictLCP", "Null input for one arg (problem, q,w ...)");
 
   int i, sizelcp, info, incx;
   double error, normq;

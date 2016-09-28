@@ -12,11 +12,15 @@
 #include <TopoDS_Edge.hxx>
 #include <TopoDS_Face.hxx>
 #include <gp_Quaternion.hxx>
-
+#include <gp_Vec.hxx>
+#include <gp_Lin.hxx>
+#include <gp_Ax3.hxx>
 #include <limits>
 
 //#define DEBUG_MESSAGES 1
 #include <debug.h>
+
+#include <boost/math/quaternion.hpp>
 
 OccContactShape::OccContactShape() : _shape(new TopoDS_Shape())
 {
@@ -139,16 +143,29 @@ SPC::TopoDS_Edge OccContactShape::edge(unsigned int index) const
 void OccContactShape::move(const SiconosVector& q)
 {
 
+  // ::boost::math::quaternion<double>    quattrf(q(3),q(4),q(5),q(6));
+  // ::boost::math::quaternion<double> quatZ(0,0,0,1);
+  // ::boost::math::quaternion<double> quatX(0,1,0,0);
+  // ::boost::math::quaternion<double> quatBuff(0,0,0,0);
+
+  // quatBuff=quattrf*quatZ/quattrf;
+  // gp_Dir axeZ(quatBuff.R_component_2() ,quatBuff.R_component_3() ,quatBuff.R_component_4());
+  // quatBuff=quattrf*quatX/quattrf;
+  // gp_Dir axeX(quatBuff.R_component_2() ,quatBuff.R_component_3() ,quatBuff.R_component_4());
+
+  // gp_Ax3 aDestAx3(gp_Pnt(q(0), q(1), q(2)),axeZ,axeX);
+   
   const gp_Vec translat = gp_Vec(q(0), q(1), q(2));
 
   const gp_Quaternion rota = gp_Quaternion(q(4), q(5), q(6), q(3));
 
   gp_Trsf transfo;
 
+//  transfo.SetDisplacement(this->data().Location().Transformation(), aDestAx3);
   transfo.SetRotation(rota);
   transfo.SetTranslationPart(translat);
 
-  // this->data().Move(transfo);
+  this->data().Move(transfo);
   this->data().Location(TopLoc_Location(transfo));
 
   // cf code from Olivier

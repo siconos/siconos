@@ -1,6 +1,5 @@
-
 %{
-
+#include "VariationalInequality.h"
 #include <open_lib.h>
 
 static PyObject *my_callback_NablaFmcp = NULL;

@@ -7,7 +7,8 @@
  */
 
 #include "SiconosConfig.h"
-
+#include "NumericsFwd.h"
+#include "SparseMatrix.h" // for freeNSLSP
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {
@@ -16,9 +17,9 @@ extern "C"
 
   typedef enum { NS_CS_LUSOL, NS_MUMPS, NS_UMFPACK, NS_PARDISO } NumericsSparseLinearSolver;
 
-  /** \struct NumericsSparseLinearSolverParams SparseMatrix.h
+  /** \struct NumericsSparseLinearSolverParams NumericsSparseMatrix.h
    * solver-specific parameters*/
-  typedef struct
+  struct NumericsSparseLinearSolverParams
   {
     NumericsSparseLinearSolver solver;
 
@@ -34,14 +35,14 @@ extern "C"
     int iWorkSize; /**< size of integer work vector array */
     double* dWork;
     int dWorkSize;
-  } NumericsSparseLinearSolverParams;
+  };
 
   typedef enum { NS_UNKNOWN, NS_TRIPLET, NS_CSC, NS_CSR } NumericsSparseOrigin;
 
-  /** \struct NumericsSparseMatrix SparseMatrix.h
+  /** \struct NumericsSparseMatrix NumericsSparseMatrix.h
    * Sparse matrix representation in Numerics. The supported format are:
    * triplet (aka coordinate, COO), CSC (via CSparse) and CSR if MKL is used */
-  typedef struct
+  struct NumericsSparseMatrix
   {
     NumericsSparseLinearSolverParams* linearSolverParams;
                                /**< solver-specific parameters */
@@ -50,7 +51,7 @@ extern "C"
     CSparseMatrix* trans_csc;  /**< transpose of a csc matrix (used by CSparse) */
     CSparseMatrix* csr;        /**< csr matrix, only supported with mkl */
     unsigned       origin;     /**< original format of the matrix */
-  } NumericsSparseMatrix;
+  };
 
 
   /** Initialize the fields of a NumericsSparseMatrix

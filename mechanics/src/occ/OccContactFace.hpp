@@ -8,7 +8,7 @@ struct OccContactFace : public OccContactShape
 {
   OccContactFace() : OccContactShape() {};
 
-  OccContactFace(const OccContactShape& reference_shape, unsigned int index);
+  OccContactFace(const OccContactShape& shape, unsigned int index);
 
   virtual SPC::TopoDS_Face contact() const;
 

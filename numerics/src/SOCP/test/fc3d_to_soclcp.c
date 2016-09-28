@@ -19,7 +19,8 @@
 #include <stdlib.h>
 #include "NonSmoothDrivers.h"
 #include "soclcp_test_function.h"
-
+#include "FrictionContactProblem.h"
+#include "SecondOrderConeLinearComplementarityProblem.h"
 
 #include "../FrictionContact/test-utils/frictionContact_test_function.h"
 

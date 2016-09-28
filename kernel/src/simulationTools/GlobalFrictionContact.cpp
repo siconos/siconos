@@ -28,8 +28,10 @@
 #include "NewtonImpactNSL.hpp"
 #include "OSNSMatrix.hpp"
 
+// --- Numerics headers ---
+#include "NonSmoothDrivers.h"
 #include "gfc3d_Solvers.h"
-
+#include "NumericsSparseMatrix.h"
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
 #include "debug.h"
@@ -359,8 +361,7 @@ int GlobalFrictionContact::compute(double time)
                            _z->getArray(),
                            _w->getArray(),
                            _globalVelocities->getArray(),
-                           &*_numerics_solver_options,
-                           &*_numerics_options);
+			  &*_numerics_solver_options);
     postCompute();
 
   }

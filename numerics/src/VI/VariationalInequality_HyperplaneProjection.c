@@ -27,6 +27,8 @@
 /* #define DEBUG_MESSAGES */
 /* #define DEBUG_STDOUT */
 #include "debug.h"
+#include "numerics_verbose.h"
+#include <assert.h>
 
 void variationalInequality_HyperplaneProjection(VariationalInequality* problem, double *x, double *w, int* info, SolverOptions* options)
 {

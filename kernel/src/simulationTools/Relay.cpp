@@ -22,6 +22,9 @@
 #include "Simulation.hpp"
 #include "RelayNSL.hpp"
 #include "OSNSMatrix.hpp"
+
+// --- Numerics headers ---
+#include "NonSmoothDrivers.h"
 #include <Relay_Solvers.h>
 
 #include <limits>
@@ -158,7 +161,7 @@ int Relay::compute(double time)
     //      Relay_display(&numerics_problem);
 
     info = relay_driver(&numerics_problem, _z->getArray() , _w->getArray() ,
-                        &*_numerics_solver_options, &*_numerics_options);
+                        &*_numerics_solver_options);
 
     if (info != 0)
     {

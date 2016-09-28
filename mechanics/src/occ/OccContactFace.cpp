@@ -10,6 +10,8 @@
 
 #include <limits>
 
+#undef DEBUG_MESSAGES
+#include <debug.h>
 OccContactFace::OccContactFace(const OccContactShape& reference_shape,
                                unsigned int index) :
   OccContactShape(reference_shape),
@@ -47,13 +49,18 @@ SP::ContactShapeDistance OccContactFace::distance(
 
   dist.value = std::numeric_limits<double>::infinity();
 
-  cadmbtb_distanceFaceFace(*this, sh2,
-                           dist.x1, dist.y1, dist.z1,
-                           dist.x2, dist.y2, dist.z2,
-                           dist.nx, dist.ny, dist.nz,
-                           normalFromFace1,
-                           dist.value);
-
+  // cadmbtb_distanceFaceFace failure on bouncing ball
+  // cadmbtb_odistanceFaceFace => internal occ distance
+  cadmbtb_odistanceFaceFace(*this, sh2,
+                            dist.x1, dist.y1, dist.z1,
+                            dist.x2, dist.y2, dist.z2,
+                            dist.nx, dist.ny, dist.nz,
+                            normalFromFace1,
+                            dist.value);
+  DEBUG_EXPR(std::cout << dist.x1 << "," << dist.y1 << "," << dist.z1 << std::endl);
+  DEBUG_EXPR(std::cout << dist.x2 << "," << dist.y2 << "," << dist.z2 << std::endl);
+  DEBUG_EXPR(std::cout << dist.nx << "," << dist.ny << "," << dist.nz << std::endl);
+  DEBUG_EXPR(std::cout << "distance " << dist.value << std::endl);
   return pdist;
 }
 
@@ -66,6 +73,7 @@ SP::ContactShapeDistance OccContactFace::distance(
 
   dist.value = std::numeric_limits<double>::infinity();
 
+  // not tested
   cadmbtb_distanceFaceEdge(*this, sh2,
                            dist.x1, dist.y1, dist.z1,
                            dist.x2, dist.y2, dist.z2,

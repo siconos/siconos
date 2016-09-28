@@ -15,7 +15,7 @@
 %{
 #include <TopoDS_Shape.hxx>
 %}
-%typecheck(SWIG_TYPECHECK_INTEGER) (TopoDS_Shape& data) ()
+%typecheck(SWIG_TYPECHECK_INTEGER) (const TopoDS_Shape& shape) ()
 %{
   int res;
   res = SWIG_ConvertPtr($input, 0, SWIGTYPE_p_std11__shared_ptrT_TopoDS_Shape_t, 0);
@@ -24,18 +24,26 @@
   {
     /* this might be the case if the pointer comes directly from pythonocc */
     res = SWIG_ConvertPtr($input, 0, SWIGTYPE_p_TopoDS_Shape, 0);
+    _v = SWIG_CheckState(res);
+    if(!_v)
+    {
+      res = SWIG_ConvertPtr($input, 0, SWIGTYPE_p_TopoDS_Compound, 0);
+    }
   }
   _v = SWIG_CheckState(res);
 %}
 
-%typemap(in) (TopoDS_Shape & data) (void * argp, int res)
+%typemap(in) (const TopoDS_Shape& shape) (void * argp, int res)
 %{
   {
     /* fix sptr case missing */
     int newmem = 0;
     res = SWIG_ConvertPtrAndOwn($input, &argp, SWIGTYPE_p_TopoDS_Shape,  0 , &newmem);
     if (!SWIG_IsOK(res)) {
-      SWIG_exception_fail(SWIG_ArgError(res), "in method '" "new_OccContactShape" "', argument " "1"" of type '" "TopoDS_Shape const &""'"); 
+      res = SWIG_ConvertPtrAndOwn($input, &argp, SWIGTYPE_p_TopoDS_Compound,  0 , &newmem);
+      if (!SWIG_IsOK(res)) {
+        SWIG_exception_fail(SWIG_ArgError(res), "in method '" "new_OccContactShape" "', argument " "1"" of type '" "TopoDS_[Shape|Compound] const &""'"); 
+      }
     }
   }
   $1 = reinterpret_cast<TopoDS_Shape*>(argp);
@@ -55,6 +63,12 @@
 %}
 %shared_ptr(TopoDS_Edge)
 %include <TopoDS_Edge.hxx>
+
+%{
+#include <TopoDS_Compound.hxx>
+%}
+%shared_ptr(TopoDS_Compound)
+%include <TopoDS_Compound.hxx>
 
 
 // force the definition of SWIGTYPE_p_Interaction...

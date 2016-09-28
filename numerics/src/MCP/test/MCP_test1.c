@@ -20,7 +20,9 @@
 #include <stdlib.h>
 #include "NonSmoothDrivers.h"
 #include "MCP_cst.h"
-
+#include "MixedComplementarityProblem.h"
+#include "SolverOptions.h"
+#include "MCP_Solvers.h"
 static double M[4] = {2.0, 1.0, 1.0, 2.0};
 static double q[4] = { -5.0, -6.0};
 
@@ -76,14 +78,6 @@ int main(void)
 
   /* FB solver */
   options.solverId = SICONOS_MCP_FB;
-
-
-
-  NumericsOptions global_options;
-  setDefaultNumericsOptions(&global_options);
-  global_options.verboseMode = 1;
-
-
   /* Create a MixedComplementarityProblem */
   MixedComplementarityProblem* problem = (MixedComplementarityProblem *)malloc(sizeof(MixedComplementarityProblem));
 
@@ -114,7 +108,7 @@ int main(void)
 
   /* Initialize the solver */
   mcp_driver_init(problem, &options) ;
-  info = mcp_driver(problem, z , w,  &options, &global_options);
+  info = mcp_driver(problem, z , w,  &options);
   mcp_driver_reset(problem, &options) ;
   /// TODO : write a real test ... ////
 

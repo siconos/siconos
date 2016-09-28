@@ -83,19 +83,6 @@ extern "C"
 {
 #endif
 
-  /** General interface to solver for relay problems
-      \param[in] problem the RelayProblem structure which handles the problem (M,q)
-      \param[in,out] z a n-vector of doubles which contains the solution of the problem.
-      \param[in,out] w a n-vector of doubles which contains the solution of the problem.
-      \param[in,out] options structure used to define the solver(s) and its (their) parameters
-      \param[in,out] global_options non solver-specific options
-      \return info termination value
-      - 0 : successful\n
-      - >0 : otherwise see each solver for more information about the log info
-   * \author Nineb Sheherazade.
-   */
-  int relay_driver(RelayProblem* problem, double *z , double *w, SolverOptions* options,  NumericsOptions* global_options);
-
   /** set the default solver parameters and perform memory allocation for Relay
       \param[in] problem the RelayProblem structure which handles the problem (M,q)
       \param options the pointer to options to set
@@ -127,13 +114,12 @@ extern "C"
      * \param[in,out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
      * \param[in,out] w a n-vector of doubles which returns the solution of the problem.
      * \param options struct used to define the solver(s) and its (their) parameters
-     * \param global_options non solver-specific options
      * \param[out] info an integer which returns the termination value:\n
      0 = convergence,\n
      1 = no convergence,\n
      \author V. Acary
     */
-  void relay_lexicolemke(RelayProblem* problem, double *z, double *w, int *info, SolverOptions* options, NumericsOptions* global_options);
+  void relay_lexicolemke(RelayProblem* problem, double *z, double *w, int *info, SolverOptions* options);
 
   /** set the default solver parameters and perform memory allocation for Lemke
       \param options the pointer to options to set
@@ -145,14 +131,13 @@ extern "C"
      * \param[in,out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
      * \param[in,out] w a n-vector of doubles which returns the solution of the problem.
      * \param options struct used to define the solver(s) and its (their) parameters
-     * \param global_options non solver-specific options
      * \param[out] info an integer which returns the termination value:\n
      0 = convergence,\n
      1 = no convergence,\n
      2 = Null diagonal term\n
      \author V. Acary
     */
-  void relay_enum(RelayProblem* problem, double *z, double *w, int *info, SolverOptions* options, NumericsOptions* global_options);
+  void relay_enum(RelayProblem* problem, double *z, double *w, int *info, SolverOptions* options);
 
   /** set the default solver parameters and perform memory allocation for ENUM
    * \param[in] problem structure that represents the Relay (M, q...)

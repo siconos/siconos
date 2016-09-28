@@ -938,6 +938,7 @@ void computerho(FrictionContactProblem* localproblem, double * rho)
 
   double * MLocal = localproblem->M->matrix0;
 
+
   assert(MLocal[0 + 0 * 3] > 0);
 
   double sw = MLocal[1 + 1 * 3] + MLocal[2 + 2 * 3];

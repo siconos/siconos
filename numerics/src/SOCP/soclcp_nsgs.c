@@ -34,6 +34,7 @@
 //#define DEBUG_MESSAGES
 
 #include "debug.h"
+#include "numerics_verbose.h"
 
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 
@@ -266,7 +267,7 @@ void soclcp_nsgs_fillMLocal(SecondOrderConeLinearComplementarityProblem * proble
     localproblem->M->matrix0 = MGlobal->matrix1->block[diagPos];
   }
   else
-    numericsError("soclcp_projection -", "unknown storage type for matrix M");
+    numerics_error("soclcp_projection -", "unknown storage type for matrix M");
 }
 
 /* swap two indices */
@@ -295,7 +296,7 @@ void soclcp_nsgs(SecondOrderConeLinearComplementarityProblem* problem, double *r
 
   if(options->numberOfInternalSolvers < 1)
   {
-    numericsError("soclcp_nsgs", "The NSGS method needs options for the internal solvers, options[0].numberOfInternalSolvers should be >1");
+    numerics_error("soclcp_nsgs", "The NSGS method needs options for the internal solvers, options[0].numberOfInternalSolvers should be >1");
   }
   assert(&options[1]);
 

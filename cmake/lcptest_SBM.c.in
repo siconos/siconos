@@ -20,7 +20,8 @@
 #include <stdlib.h>
 #include "NonSmoothDrivers.h"
 #include "lcp_test_function.h"
-
+#include <string.h>
+#include "lcp_cst.h"
 int main(int argc, char ** argv)
 {
   int info =0 ;

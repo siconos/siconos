@@ -17,7 +17,6 @@
 */
 
 
-#include "NumericsOptions.h" // for global options
 #include "FrictionContactProblem.h"
 #include "SolverOptions.h"
 #include "fc3d_compute_error.h"
@@ -32,6 +31,7 @@
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
 #include "debug.h"
+#include "numerics_verbose.h"
 void fc3d_unitary_compute_and_add_error(double* restrict r , double* restrict u, double mu, double* restrict error, double * worktmp)
 {
 
@@ -99,7 +99,7 @@ int fc3d_compute_error_velocity(FrictionContactProblem* problem, double *z , dou
 {
   /* Checks inputs */
   if (problem == NULL || z == NULL || w == NULL)
-    numericsError("fc3d_compute_error", "null input for problem and/or z and/or w");
+    numerics_error("fc3d_compute_error", "null input for problem and/or z and/or w");
 
   /* Computes w = Mz + q */
   int incx = 1, incy = 1;
@@ -167,7 +167,7 @@ int fc3d_Tresca_compute_error(FrictionContactProblem* problem,
 {
   /* Checks inputs */
   if (problem == NULL || z == NULL || w == NULL)
-    numericsError("fc3d_Tresca_compute_error", "null input for problem and/or z and/or w");
+    numerics_error("fc3d_Tresca_compute_error", "null input for problem and/or z and/or w");
 
   /* Computes w = Mz + q */
   int incx = 1, incy = 1;

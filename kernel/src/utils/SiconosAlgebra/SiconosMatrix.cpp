@@ -40,6 +40,7 @@ const SP::Index SiconosMatrix::tabCol() const
 }
 
 
+
 //=====================
 // matrices comparison
 //=====================

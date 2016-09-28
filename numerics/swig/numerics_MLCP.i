@@ -1,5 +1,4 @@
 // MLCP
-
 %apply (double *q) { (double *qbck) };
 
 // redefine typemap on q for MLCP
@@ -18,13 +17,17 @@
     SWIG_fail;
  }
 
+%{
+  
+  #include "mlcp_cst.h"
+  #include "MixedLinearComplementarityProblem.h"
+  #include "MLCP_Solvers.h"
+  
+  %}
 
-
+%include "mlcp_cst.h"
 %include "MixedLinearComplementarityProblem.h"
 %include "MLCP_Solvers.h"
-%include "mlcp_cst.h"
-
-
 
 %exception MixedLinearComplementarityProblem {
     $action

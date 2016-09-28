@@ -317,6 +317,7 @@ class ShapeCollection():
             if not isinstance(self.url(shape_name), str) and \
                not 'primitive' in self.attributes(shape_name):
                 # assume a vtp file (xml) stored in a string buffer
+
                 if self.attributes(shape_name)['type'] == 'vtp':
                     if self.shape(shape_name).dtype == h5py.new_vlen(str):
                         with tmpfile() as tmpf:
@@ -342,9 +343,9 @@ class ShapeCollection():
                     comp = TopoDS_Compound()
                     builder.MakeCompound(comp)
 
-                    step_name = self.attributes(shape_name)['step']
+                    assert self.shape(shape_name).dtype == h5py.new_vlen(str)
 
-                    with tmpfile(contents=self.shape(step_name)[:][0]) as tmpf:
+                    with tmpfile(contents=self.shape(shape_name)[:][0]) as tmpf:
                         step_reader = STEPControl_Reader()
 
                         status = step_reader.ReadFile(tmpf[1])
@@ -358,8 +359,6 @@ class ShapeCollection():
 
                             ok = step_reader.TransferRoot(1)
                             nbs = step_reader.NbShapes()
-
-                            l = []
 
                             for i in range(1, nbs + 1):
                                 shape = step_reader.Shape(i)
@@ -402,10 +401,15 @@ class ShapeCollection():
                     else:
                         # a contact on a brep
                         assert 'contact' in self.attributes(shape_name)
-                        assert 'index' in self.attributes(shape_name)
+                        assert 'contact_index' in self.attributes(shape_name)
                         assert 'brep' in self.attributes(shape_name)
-                        contact_index = self.attributes(shape_name)['index']
+                        contact_index = self.attributes(shape_name)['contact_index']
 
+                        if shape_class is None:
+                            brep_class = OccContactShape
+                        else:
+                            brep_class = shape_class
+                        
                         ref_brep = self.get(
                             self.attributes(shape_name)['brep'], shape_class)
 
@@ -416,7 +420,7 @@ class ShapeCollection():
                                 face_maker = face_class
 
                             self._shapes[shape_name] = \
-                                face_maker(ref_brep,
+                                face_maker(brep_class(ref_brep),
                                            contact_index)
 
                         elif self.attributes(shape_name)['contact'] == 'Edge':
@@ -546,6 +550,7 @@ class Hdf5():
         self._static = {}
         self._shape = None
         self._shapeid = dict()
+        self._pinterid = dict()
         self._static_data = None
         self._velocities_data = None
         self._dynamic_data = None
@@ -556,11 +561,14 @@ class Hdf5():
         self._nslaws = None
         self._out = None
         self._data = None
+        self._ref = None
+        self._permanent_interactions = None
         self._joints = None
         self._io = MechanicsIO()
         self._set_external_forces = set_external_forces
         self._shape_filename = shape_filename
         self._number_of_shapes = 0
+        self._number_of_permanent_interactions = 0
         self._number_of_dynamic_objects = 0
         self._number_of_static_objects = 0
         self._gravity_scale = gravity_scale
@@ -583,6 +591,7 @@ class Hdf5():
         self._out = h5py.File(self._io_filename, self._mode)
         self._data = group(self._out, 'data')
         self._ref = group(self._data, 'ref')
+        self._permanent_interactions = group(self._data, 'permanent_interactions')
         self._joints = group(self._data, 'joints')
         self._static_data = data(self._data, 'static', 9,
                                  use_compression = self._use_compression)
@@ -592,7 +601,7 @@ class Hdf5():
                                   use_compression = self._use_compression)
         self._cf_data = data(self._data, 'cf', 15,
                              use_compression = self._use_compression)
-        if self._should_output_domains:
+        if self._should_output_domains or 'domain' in self._data:
             self._domain_data = data(self._data, 'domain', 3,
                                      use_compression = self._use_compression)
         self._solv_data = data(self._data, 'solv', 4,
@@ -633,6 +642,12 @@ class Hdf5():
         """
         return self._ref
 
+    def permanent_interactions(self):
+        """
+        Permanent interactions.
+        """
+        return self._permanent_interactions
+        
     def static_data(self):
         """
         Coordinates and orientations of static objects.
@@ -703,9 +718,11 @@ class Hdf5():
                                         int(self._nslaws[name].attrs['gid1']),
                                         int(self._nslaws[name].attrs['gid2']))
 
-    def importBRepObject(self, name, translation, orientation,
-                         velocity, contactors, mass, given_inertia, body_class,
-                         shape_class, face_class, edge_class, number = None):
+    def importOccObject(self, name, translation, orientation,
+                        velocity, contactors, mass, given_inertia, body_class,
+                        shape_class, face_class, edge_class, number=None):
+
+        from siconos.mechanics import occ
 
         if body_class is None:
             body_class = OccBody
@@ -728,12 +745,22 @@ class Hdf5():
 
             for contactor in contactors:
 
-                # /!\ shared pointer <-> python ref ...
-                shape_instantiated = self._shape.get(contactor.name,
-                                                     shape_class, face_class, edge_class)
-                self._keep.append(shape_instantiated)
+                reference_shape = occ.OccContactShape(
+                    self._shape.get(contactor.name,
+                                    shape_class, face_class,
+                                    edge_class))
 
-                body.addContactShape(shape_instantiated,
+                if contactor.contact_type == 'Face':
+                    contact_shape = occ.OccContactFace(reference_shape,
+                                                       contactor.contact_index)
+
+                elif contactor.contact_type == 'Edge':
+                    contact_shape = occ.OccContactEdge(reference_shape,
+                                                       contactor.contact_index)
+                    
+                self._keep.append(reference_shape)
+
+                body.addContactShape(contact_shape,
                                      contactor.translation,
                                      contactor.orientation,
                                      contactor.group)
@@ -742,9 +769,11 @@ class Hdf5():
             # add the dynamical system to the non smooth
             # dynamical system
             nsds = self._broadphase.model().nonSmoothDynamicalSystem()
+            nsds.insertDynamicalSystem(body)
             nsds.topology().setOSI(body, self._osi)
             nsds.setName(body, str(name))
 
+            
     def importBulletObject(self, name, translation, orientation,
                            velocity, contactors, mass, inertia,
                            body_class, shape_class, birth=False,
@@ -867,6 +896,7 @@ class Hdf5():
                 if number is not None:
                     body.setNumber(number)
 
+                body.setNullifyFGyr(True)
                 for contactor in contactors[1:]:
                     shape_id = self._shapeid[contactor.name]
 
@@ -927,6 +957,67 @@ class Hdf5():
                 self._broadphase.model().nonSmoothDynamicalSystem().\
                     link(joint_inter, ds1)
 
+    def importPermanentInteraction(self, name):
+        """
+        """
+        from siconos.mechanics import occ
+        if self._broadphase is not None and 'input' in self._data:
+            topo = self._broadphase.model().nonSmoothDynamicalSystem().\
+                topology()
+            pinter = self.permanent_interactions()[name]
+            body1_name=pinter.attrs['body1_name']
+            body2_name=pinter.attrs['body2_name']
+            contactor1_name = pinter.attrs['contactor1_name']
+            contactor2_name = pinter.attrs['contactor2_name']
+
+            body1 = self._input[body1_name]
+            body2 = self._input[body2_name]
+
+           
+                  
+            
+            ctr1 = body1[contactor1_name]
+            ctr2 = body2[contactor2_name]
+
+            cg1 = int(ctr1.attrs['group'])
+            cg2 = int(ctr2.attrs['group'])
+            nslaw = self._broadphase.nslaw(cg1, cg2)
+
+            topods1 = self._shape.get(ctr1.attrs['name'])
+            topods2 = self._shape.get(ctr2.attrs['name'])
+
+            ocs1 = occ.OccContactShape(topods1)
+            ocs2 = occ.OccContactShape(topods2)
+            
+            index1 = int(ctr1.attrs['contact_index'])
+            index2 = int(ctr2.attrs['contact_index'])
+
+            ctact_t1 = ctr1.attrs['type']
+            ctact_t2 = ctr2.attrs['type']
+
+            ctactbuild = {'Face': occ.OccContactFace,
+                          'Edge': occ.OccContactEdge}
+            
+            cocs1 = ctactbuild[ctact_t1](ocs1, index1)
+            cocs2 = ctactbuild[ctact_t2](ocs2, index2)
+
+            cp1 = occ.ContactPoint(cocs1)
+            cp2 = occ.ContactPoint(cocs2)
+            
+            relation = occ.OccR(cp1, cp2)
+            inter = Interaction(3, nslaw, relation)
+
+            ds1 = topo.getDynamicalSystem(body1_name)
+
+            try:
+                ds2 = topo.getDynamicalSystem(body2_name)
+                self._broadphase.model().nonSmoothDynamicalSystem().link(inter, ds1, ds2)
+            except:
+                self._broadphase.model().nonSmoothDynamicalSystem().link(inter, ds1)
+
+            self._keep.append([topods1, topods2, ocs1, ocs2, cp1, cp2, relation, inter])
+                        
+
     def importScene(self, time, body_class, shape_class, face_class,
                     edge_class):
         """
@@ -951,7 +1042,6 @@ class Hdf5():
             for (name, obj) in sorted(self._input.items(),
                                       key=lambda x: x[0]):
 
-                input_ctrs = [ctr for _n_, ctr in obj.items()]
                 mass = obj.attrs['mass']
                 time_of_birth = obj.attrs['time_of_birth']
 
@@ -1001,23 +1091,37 @@ class Hdf5():
                         orientation = obj.attrs['orientation']
                         velocity = obj.attrs['velocity']
 
-                    contactors = [Contactor(ctr.attrs['name'],
-                                            int(ctr.attrs['group']),
-                                            floatv(ctr.attrs['translation']),
-                                            floatv(ctr.attrs['orientation']))
-                                  for ctr in input_ctrs]
+                    input_ctrs = [ctr for _n_, ctr in obj.items()]
+
+                    try:
+                        contactors = [Contactor(
+                            shape_name=ctr.attrs['name'],
+                            collision_group=ctr.attrs['group'].astype(int),
+                            contact_type=ctr.attrs['type'].astype(int),
+                            contact_index=ctr.attrs['contact_index'].astype(int),
+                            relative_translation=ctr.attrs['translation'].astype(float),
+                            relative_orientation=ctr.attrs['orientation'].astype(float))
+                                      for ctr in input_ctrs]
+                    except KeyError:
+                        contactors = [Contactor(
+                            shape_name=ctr.attrs['name'],
+                            collision_group=ctr.attrs['group'].astype(int),
+                            relative_translation=ctr.attrs['translation'].astype(float),
+                            relative_orientation=ctr.attrs['orientation'].astype(float))
+                                      for ctr in input_ctrs]
 
                     if 'inertia' in obj.attrs:
                         inertia = obj.attrs['inertia']
                     else:
                         inertia = None
 
+
                     if True in ('type' in self.shapes()[ctr.attrs['name']].attrs
                                 and self.shapes()[ctr.attrs['name']].attrs['type']
                                 in ['brep', 'step']
                                 for ctr in input_ctrs):
                         # Occ object
-                        self.importBRepObject(
+                        self.importOccObject(
                             name, floatv(translation), floatv(orientation),
                             floatv(velocity), contactors, float(mass),
                             inertia, body_class, shape_class, face_class,
@@ -1043,6 +1147,9 @@ class Hdf5():
                 print('Calling buildGraph')
                 self._broadphase.buildGraph(self._broadphase.model())
                 self._broadphase.buildGraph(self._static_contactor)
+
+            for name in self.permanent_interactions():
+                self.importPermanentInteraction(name)
 
     def currentTime(self):
         if self._initializing:
@@ -1090,7 +1197,7 @@ class Hdf5():
                             in ['brep', 'step']
                             for ctr in input_ctrs):
                     # Occ object
-                    self.importBRepObject(
+                    self.importOccObject(
                         name, floatv(translation), floatv(orientation),
                         floatv(
                             velocity), contactors, float(mass),
@@ -1351,7 +1458,7 @@ class Hdf5():
 
     def addOccShape(self, name, occ_shape):
         """
-        Add an OpenCascade TopoDS_Shape
+        Add an OpenCascade TopoDS_Shape.
         """
 
         if name not in self._ref:
@@ -1360,6 +1467,7 @@ class Hdf5():
 
             # step format is used for the storage.
             step_writer = STEPControl_Writer()
+
             step_writer.Transfer(occ_shape, STEPControl_AsIs)
 
             shape_data = None
@@ -1396,41 +1504,24 @@ class Hdf5():
             self._shapeid[name] = shape.attrs['id']
             self._number_of_shapes += 1
 
-    def addContactFromBRep(self, name, brepname, contact_type,
-                           index, collision_group=0, associated_shape=None):
+    def addPermanentInteraction(self, name, body1_name, contactor1_name,
+                                body2_name, contactor2_name):
         """
-        Add contact reference from a previously added brep.
+        Add permanent interactions between two objects contactors.
         """
-        if name not in self._ref:
-            shape = self._ref.create_dataset(name, (1,),
-                                             dtype=h5py.new_vlen(str))
-            shape.attrs['id'] = self._number_of_shapes
-            shape.attrs['type'] = 'brep'
-            shape.attrs['contact'] = contact_type
-            shape.attrs['brep'] = brepname
-            shape.attrs['index'] = index
-            if associated_shape is not None:
-                shape.attrs['associated_shape'] = associated_shape
-            self._shapeid[name] = shape.attrs['id']
-            self._number_of_shapes += 1
+        if name not in self.permanent_interactions():
+            pinter = self.permanent_interactions().\
+                      create_dataset(name, (1,),
+                                     dtype=h5py.new_vlen(str))
+            pinter.attrs['id']=self._number_of_permanent_interactions
+            pinter.attrs['type']='permanent_interaction'
+            pinter.attrs['body1_name']=body1_name
+            pinter.attrs['body2_name']=body2_name
+            pinter.attrs['contactor1_name']=contactor1_name
+            pinter.attrs['contactor2_name']=contactor2_name
 
-    def addContactFromOccShape(self, name, occ_shape_name, contact_type,
-                               index, collision_group=0, associated_shape=None):
-        """
-        Add contact reference from a previously added brep.
-        """
-        if name not in self._ref:
-            shape = self._ref.create_dataset(name, (1,),
-                                             dtype=h5py.new_vlen(str))
-            shape.attrs['id'] = self._number_of_shapes
-            shape.attrs['type'] = 'step'
-            shape.attrs['contact'] = contact_type
-            shape.attrs['step'] = occ_shape_name
-            shape.attrs['index'] = index
-            if associated_shape is not None:
-                shape.attrs['associated_shape'] = associated_shape
-            self._shapeid[name] = shape.attrs['id']
-            self._number_of_shapes += 1
+            self._pinterid[name]=pinter.attrs['id']
+            self._number_of_permanent_interactions += 1
 
     def addConvexShape(self, name, points,
                        insideMargin=None, outsideMargin=None):
@@ -1438,18 +1529,18 @@ class Hdf5():
         Add a convex shape defined by a list of points.
         """
         if name not in self._ref:
-            apoints = np.array(points)
-            shape = self._ref.create_dataset(name,
+            apoints=np.array(points)
+            shape=self._ref.create_dataset(name,
                                              (apoints.shape[0],
                                               apoints.shape[1]))
             if insideMargin is not None:
                 shape.attrs['insideMargin'] = insideMargin
             if outsideMargin is not None:
                 shape.attrs['outsideMargin'] = outsideMargin
-            shape[:] = points[:]
-            shape.attrs['type'] = 'convex'
-            shape.attrs['id'] = self._number_of_shapes
-            self._shapeid[name] = shape.attrs['id']
+            shape[:]=points[:]
+            shape.attrs['type']='convex'
+            shape.attrs['id']=self._number_of_shapes
+            self._shapeid[name]=shape.attrs['id']
             self._number_of_shapes += 1
 
     def addPrimitiveShape(self, name, primitive, params,
@@ -1458,26 +1549,25 @@ class Hdf5():
         Add a primitive shape.
         """
         if name not in self._ref:
-            shape = self._ref.create_dataset(name, (1, len(params)))
-            shape.attrs['id'] = self._number_of_shapes
-            shape.attrs['type'] = 'primitive'
-            shape.attrs['primitive'] = primitive
+            shape=self._ref.create_dataset(name, (1, len(params)))
+            shape.attrs['id']=self._number_of_shapes
+            shape.attrs['type']='primitive'
+            shape.attrs['primitive']=primitive
             if insideMargin is not None:
                 shape.attrs['insideMargin'] = insideMargin
             if outsideMargin is not None:
                 shape.attrs['outsideMargin'] = outsideMargin
-            shape[:] = params
-            self._shapeid[name] = shape.attrs['id']
+            shape[:]=params
+            self._shapeid[name]=shape.attrs['id']
             self._number_of_shapes += 1
 
-    def addObject(self, name, shapes,
+    def addObject(self, name, contactors,
                   translation,
                   orientation=[1, 0, 0, 0],
                   velocity=[0, 0, 0, 0, 0, 0],
                   mass=0, inertia=None, time_of_birth=-1):
         """
-        Add an object with associated contact shapes that are called
-        contactors.
+        Add an object with associated contactors.
         Contact detection is defined by the list of contactors.
         The initial translation is mandatory : [x, y z].
         If the mass is zero this is a static object.
@@ -1488,49 +1578,53 @@ class Hdf5():
         # print(arguments())
         if len(orientation) == 2:
             # axis + angle
-            axis = orientation[0]
+            axis=orientation[0]
             assert len(axis) == 3
-            angle = orientation[1]
+            angle=orientation[1]
             assert type(angle) is float
-            n = sin(angle / 2.) / np.linalg.norm(axis)
+            n=sin(angle / 2.) / np.linalg.norm(axis)
 
-            ori = [cos(angle / 2.), axis[0] * n, axis[1] * n, axis[2] * n]
+            ori=[cos(angle / 2.), axis[0] * n, axis[1] * n, axis[2] * n]
         else:
             # a given quaternion
-            ori = orientation
+            ori=orientation
 
         if name not in self._input:
 
-            obj = group(self._input, name)
+            obj=group(self._input, name)
 
-            obj.attrs['time_of_birth'] = time_of_birth
+            obj.attrs['time_of_birth']=time_of_birth
 
-            obj.attrs['mass'] = mass
-            obj.attrs['translation'] = translation
-            obj.attrs['orientation'] = ori
-            obj.attrs['velocity'] = velocity
+            obj.attrs['mass']=mass
+            obj.attrs['translation']=translation
+            obj.attrs['orientation']=ori
+            obj.attrs['velocity']=velocity
 
             if inertia is not None:
-                obj.attrs['inertia'] = inertia
+                obj.attrs['inertia']=inertia
 
-            for num, shape in enumerate(shapes):
-                dat = data(obj, '{0}-{1}'.format(shape.name, num), 0,
-                           use_compression = self._use_compression)
-                dat.attrs['name'] = shape.name
-                if hasattr(shape, 'group'):
-                    dat.attrs['group'] = shape.group
-                if hasattr(shape, 'parameters') and \
-                        shape.parameters is not None:
-                    dat.attrs['parameters'] = shape.parameters
-                dat.attrs['translation'] = shape.translation
-                dat.attrs['orientation'] = shape.orientation
+            for num, ctor in enumerate(contactors):
+                dat=data(obj, '{0}-{1}'.format(ctor.name, num), 0,
+                           use_compression=self._use_compression)
+                dat.attrs['name']=ctor.name
+                if hasattr(ctor, 'group'):
+                    dat.attrs['group']=ctor.group
+                if hasattr(ctor, 'parameters') and \
+                        ctor.parameters is not None:
+                    dat.attrs['parameters']=ctor.parameters
+                if ctor.contact_type is not None:
+                    dat.attrs['type']=ctor.contact_type
+                if ctor.contact_index is not None:
+                    dat.attrs['contact_index']=ctor.contact_index
+                dat.attrs['translation']=ctor.translation
+                dat.attrs['orientation']=ctor.orientation
 
             if mass == 0:
-                obj.attrs['id'] = - (self._number_of_static_objects + 1)
+                obj.attrs['id']=- (self._number_of_static_objects + 1)
                 self._number_of_static_objects += 1
 
             else:
-                obj.attrs['id'] = (self._number_of_dynamic_objects + 1)
+                obj.attrs['id']=(self._number_of_dynamic_objects + 1)
                 self._number_of_dynamic_objects += 1
 
     def addNewtonImpactFrictionNSL(self, name, mu, e=0, collision_group1=0,
@@ -1538,19 +1632,19 @@ class Hdf5():
         """
         Add a nonsmooth law for contact between 2 groups.
         Only NewtonImpactFrictionNSL are supported.
-        name is a user identifiant and must be unique,
+        name is an user identifiant and must be unique,
         mu is the coefficient of friction,
         e is the coefficient of restitution on the contact normal,
         gid1 and gid2 define the group identifiants.
 
         """
         if name not in self._nslaws:
-            nslaw = self._nslaws.create_dataset(name, (0,))
-            nslaw.attrs['type'] = 'NewtonImpactFrictionNSL'
-            nslaw.attrs['mu'] = mu
-            nslaw.attrs['e'] = e
-            nslaw.attrs['gid1'] = collision_group1
-            nslaw.attrs['gid2'] = collision_group2
+            nslaw=self._nslaws.create_dataset(name, (0,))
+            nslaw.attrs['type']='NewtonImpactFrictionNSL'
+            nslaw.attrs['mu']=mu
+            nslaw.attrs['e']=e
+            nslaw.attrs['gid1']=collision_group1
+            nslaw.attrs['gid2']=collision_group2
 
     def addJoint(self, name, object1, object2=None, pivot_point=[0, 0, 0],
                  axis=[0, 1, 0],
@@ -1559,13 +1653,13 @@ class Hdf5():
         add a pivot joint between two objects
         """
         if name not in self.joints():
-            joint = self.joints().create_dataset(name, (0,))
-            joint.attrs['object1'] = object1
+            joint=self.joints().create_dataset(name, (0,))
+            joint.attrs['object1']=object1
             if object2 is not None:
-                joint.attrs['object2'] = object2
-            joint.attrs['type'] = joint_class
-            joint.attrs['pivot_point'] = pivot_point
-            joint.attrs['axis'] = axis
+                joint.attrs['object2']=object2
+            joint.attrs['type']=joint_class
+            joint.attrs['pivot_point']=pivot_point
+            joint.attrs['axis']=axis
 
     def run(self,
             with_timer=False,
@@ -1625,7 +1719,7 @@ class Hdf5():
             TimeDiscretisation, GenericMechanical, FrictionContact,\
             NewtonImpactFrictionNSL
 
-        from siconos.numerics import SICONOS_FRICTION_3D_ONECONTACT_NSN_AC
+        from siconos.numerics import SICONOS_FRICTION_3D_ONECONTACT_NSN
 
         from siconos.mechanics.collision.bullet import \
             btConvexHullShape, btCollisionObject, \
@@ -1635,7 +1729,7 @@ class Hdf5():
 
         print ('setup model simulation ...')
         if set_external_forces is not None:
-            self._set_external_forces = set_external_forces
+            self._set_external_forces=set_external_forces
 
         if proposed_is_here and use_proposed:
             if time_stepping is None:
@@ -1646,28 +1740,28 @@ class Hdf5():
 
         else:
             if time_stepping is None:
-                time_stepping = BulletTimeStepping
+                time_stepping=BulletTimeStepping
 
             if space_filter is None:
-                space_filter = BulletSpaceFilter
+                space_filter=BulletSpaceFilter
 
         if output_frequency is not None:
-            self._output_frequency = output_frequency
+            self._output_frequency=output_frequency
 
         if gravity_scale is not None:
-            self._gravity_scale = gravity_scale
+            self._gravity_scale=gravity_scale
 
         # cold restart
-        times = set()
+        times=set()
         if self.dynamic_data() is not None and len(self.dynamic_data()) > 0:
-            dpos_data = self.dynamic_data()
-            times = set(dpos_data[:, 0])
-            t0 = float(max(times))
+            dpos_data=self.dynamic_data()
+            times=set(dpos_data[:, 0])
+            t0=float(max(times))
 
         # Time-related parameters for this simulation run
-        k0 = 1+int(t0/h)
-        k = k0
-        kT = k0+int((T-t0)/h)
+        k0=1+int(t0/h)
+        k=k0
+        kT=k0+int((T-t0)/h)
         if T > t0:
             print('')
             print('Simulation will run from {0:.4f} to {1:.4f}s, step {2} to step {3} (h={4}, times=[{5},{6}])'
@@ -1681,45 +1775,43 @@ class Hdf5():
 
         # Model
         #
-        model = Model(t0, T)
+        model=Model(t0, T)
 
         # (1) OneStepIntegrators
-        joints = list(self.joints())
+        joints=list(self.joints())
 
-        self._osi = MoreauJeanOSI(theta)
+        self._osi=MoreauJeanOSI(theta)
 
         # (2) Time discretisation --
-        timedisc = TimeDiscretisation(t0, h)
+        timedisc=TimeDiscretisation(t0, h)
 
 
         if (friction_contact_trace == False) :
             if len(joints) > 0:
-                osnspb = GenericMechanical(SICONOS_FRICTION_3D_ONECONTACT_NSN_AC)
+                osnspb=GenericMechanical(SICONOS_FRICTION_3D_ONECONTACT_NSN)
             else:
-                osnspb = FrictionContact(3, solver)
+                osnspb=FrictionContact(3, solver)
         else:
-            osnspb = FrictionContactTrace(3, solver,friction_contact_trace_params,model)
+            osnspb=FrictionContactTrace(3, solver,friction_contact_trace_params,model)
 
 
-        osnspb.numericsSolverOptions().iparam[0] = itermax
+        osnspb.numericsSolverOptions().iparam[0]=itermax
         # -- full error evaluation
-        #osnspb.numericsSolverOptions().iparam[1] = Numerics.SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_FULL
+        #osnspb.numericsSolverOptions().iparam[1]=Numerics.SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_FULL
         # --  Adaptive error evaluation
-        #osnspb.numericsSolverOptions().iparam[1] = Numerics.SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_ADAPTIVE
-        #osnspb.numericsSolverOptions().iparam[8] = 1
+        #osnspb.numericsSolverOptions().iparam[1]=Numerics.SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_ADAPTIVE
+        #osnspb.numericsSolverOptions().iparam[8]=1
         # -- light error evaluation with full final
-        osnspb.numericsSolverOptions().iparam[1] = Numerics.SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL
-        osnspb.numericsSolverOptions().iparam[14] = Numerics.SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION_TRUE
+        osnspb.numericsSolverOptions().iparam[1]=Numerics.SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL
+        osnspb.numericsSolverOptions().iparam[14]=Numerics.SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION_TRUE
 
-
-
-        osnspb.numericsSolverOptions().internalSolvers.solverId = Numerics.SICONOS_FRICTION_3D_ONECONTACT_NSN_AC_GP_P
+        osnspb.numericsSolverOptions().internalSolvers.solverId = Numerics.SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID
         
-        osnspb.numericsSolverOptions().internalSolvers.iparam[0] = 100
-        osnspb.numericsSolverOptions().dparam[0] = tolerance
+        osnspb.numericsSolverOptions().internalSolvers.iparam[0]=100
+        osnspb.numericsSolverOptions().dparam[0]=tolerance
         osnspb.setMaxSize(30000)
         osnspb.setMStorageType(1)
-        osnspb.setNumericsVerboseMode(numerics_verbose)
+        osnspb.setNumericsVerboseMode(False)
 
         # keep previous solution
         osnspb.setKeepLambdaAndYState(True)
@@ -1729,7 +1821,7 @@ class Hdf5():
             self._static_contactor = SiconosContactor()
             self._broadphase = space_filter(model)
         else:
-            self._broadphase = space_filter(model)
+            self._broadphase=space_filter(model)
             if not multipoints_iterations:
                 print("""
             ConvexConvexMultipointIterations and PlaneConvexMultipointIterations are unset
@@ -1742,7 +1834,7 @@ class Hdf5():
                         setPlaneConvexMultipointIterations()
 
         # (6) Simulation setup with (1) (2) (3) (4) (5)
-        simulation = time_stepping(timedisc)
+        simulation=time_stepping(timedisc)
         simulation.insertIntegrator(self._osi)
         simulation.insertNonSmoothProblem(osnspb)
         simulation.setNewtonMaxIteration(Newton_max_iter)
@@ -1760,14 +1852,17 @@ class Hdf5():
         self.outputStaticObjects()
         self.outputDynamicObjects()
 
-        # nsds = model.nonSmoothDynamicalSystem()
+        if self._should_output_domains:
+            log(self.outputDomains, with_timer)()
+
+        # nsds=model.nonSmoothDynamicalSystem()
         # nds= nsds.getNumberOfDS()
         # for i in range(nds):
-        #     ds = nsds.dynamicalSystem(i)
+        #     ds=nsds.dynamicalSystem(i)
         #     ds.display()
         # raw_input()
         print ('start simulation ...')
-        self._initializing = False
+        self._initializing=False
         while simulation.hasNextEvent():
 
             print ('step', k, '<', k0 + int((T - t0) / h))
@@ -1777,6 +1872,9 @@ class Hdf5():
                                   face_class=face_class,
                                   edge_class=edge_class))
 
+            if controller is not None:
+                controller.step()
+
             if proposed_is_here and use_proposed:
                 self._broadphase.resetStatistics()
                 self._broadphase.updateGraph()
@@ -1785,8 +1883,8 @@ class Hdf5():
                 log(self._broadphase.buildInteractions, with_timer)\
                     (model.currentTime())
 
-            if controller is not None:
-                controller.step()
+            if (friction_contact_trace == True) :
+                 osnspb._stepcounter = k
 
             log(simulation.computeOneStep, with_timer)()
 
@@ -1822,24 +1920,24 @@ class Hdf5():
             if violation_verbose and numberOfContact > 0 :
                 if len(simulation.y(0,0)) >0 :
                     print('violation info')
-                    y = simulation.y(0,0)
+                    y=simulation.y(0,0)
                     yplus=  np.zeros((2,len(y)))
-                    yplus[0,:] = y
+                    yplus[0,:]=y
                     y=np.min(yplus,axis=1)
                     violation_max=np.max(-y)
                     print('  violation max :',violation_max)
                     if  (violation_max >= self._collision_margin):
                         print('  violation max is larger than the collision_margin')
-                    lam = simulation.lambda_(1,0)
+                    lam=simulation.lambda_(1,0)
                     print('  lambda max :',np.max(lam))
                     #print(' lambda : ',lam)
                     #raw_input()
 
 
                 if len(simulation.y(1,0)) >0 :
-                    v = simulation.y(1,0)
+                    v=simulation.y(1,0)
                     vplus=  np.zeros((2,len(v)))
-                    vplus[0,:] = v
+                    vplus[0,:]=v
                     v=np.max(vplus,axis=1)
                     print('  velocity max :',np.max(v))
                     print('  velocity min :',np.min(v))

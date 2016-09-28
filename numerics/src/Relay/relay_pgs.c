@@ -25,7 +25,8 @@
 #include "relay_cst.h"
 #include <assert.h>
 #include "SiconosBlas.h"
-
+#include "numerics_verbose.h"
+#include "NumericsMatrix.h"
 void relay_pgs(RelayProblem* problem, double *z, double *w, int *info, SolverOptions* options)
 {
 

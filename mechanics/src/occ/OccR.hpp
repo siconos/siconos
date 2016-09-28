@@ -49,6 +49,11 @@ public:
    */
   void setOffset(double val) { _offset = val; };
 
+  /** Set normalFromFace1.
+   * \param val : the new value.
+   */
+  void setNormalFromFace1(bool val) { _normalFromFace1 = val; };
+
   /** Get geometer.
    * \return a SP::Geometer object.
    */

@@ -25,7 +25,6 @@
 */
 
 #include "FrictionContactProblem.h"
-#include "NumericsOptions.h"
 #include "SolverOptions.h"
 #include "Friction_cst.h"
 #include "LinearComplementarityProblem.h"
@@ -35,16 +34,6 @@
 extern "C"
 {
 #endif
-  /** General interface to solvers for friction-contact 2D problem
-   *  \param[in] problem the structure which handles the Friction-Contact problem
-   *  \param[in,out] reaction global vector (n)
-   *  \param[in,out] velocity global vector (n)
-   *  \param[in,out] options structure used to define the solver(s) and their parameters
-   *  \param[in] global_options for Numerics (verbose mode ...)
-   *  \return result (0 if successful otherwise 1).
-   */
-  int fc2d_driver(FrictionContactProblem* problem, double *reaction , double *velocity, SolverOptions* options, NumericsOptions* global_options);
-
 
   /** set the default solver parameters and perform memory allocation for fc3d
       \param options   the pointer to the options to set
@@ -136,14 +125,13 @@ extern "C"
      * \param[in,out] reaction a n-vector of doubles which contains the initial solution and returns the solution of the problem.
      * \param[in,out] velocity a n-vector of doubles which returns the solution of the problem.
      * \param options
-     * \param global_options
      * \param[out] info an integer which returns the termination value:\n
      0 = convergence,\n
      1 = no convergence,\n
      2 = Null diagonal term\n
      \author V. Acary
     */
-  void fc2d_lexicolemke(FrictionContactProblem* problem, double *reaction, double *velocity, int *info, SolverOptions* options,  NumericsOptions* global_options);
+  void fc2d_lexicolemke(FrictionContactProblem* problem, double *reaction, double *velocity, int *info, SolverOptions* options);
 
 
   /** set the default solver parameters and perform memory allocation for Lemke
@@ -170,14 +158,13 @@ extern "C"
      * \param[in,out] reaction a n-vector of doubles which contains the initial solution and returns the solution of the problem.
      * \param[in,out] velocity a n-vector of doubles which returns the solution of the problem.
      * \param options
-     * \param global_options
      * \param[out] info an integer which returns the termination value:\n
      0 = convergence,\n
      1 = no convergence,\n
      2 = Null diagonal term\n
      \author V. Acary
     */
-  void fc2d_enum(FrictionContactProblem* problem, double *reaction, double *velocity, int *info, SolverOptions* options,  NumericsOptions* global_options);
+  void fc2d_enum(FrictionContactProblem* problem, double *reaction, double *velocity, int *info, SolverOptions* options);
 
 
 

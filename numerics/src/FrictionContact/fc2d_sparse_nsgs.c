@@ -25,10 +25,14 @@
 #ifndef MEXFLAG
 #include "NonSmoothDrivers.h"
 #endif
-
+#include "SolverOptions.h"
+#include "LinearComplementarityProblem.h"
 #include "fc2d_compute_error.h"
-
-
+#include "numerics_verbose.h"
+#include "fc2d_Solvers.h"
+#include "LCP_Solvers.h"
+#include "SparseBlockMatrix.h"
+#include "NumericsMatrix.h"
 #define SGN(x) ((x) < 0 ? -1 : (x) > 0 ? 1 : 0)
 
 static int fc2dLocalSolve(double *W, double *q, double mu, double *P, double *U);

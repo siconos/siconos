@@ -20,11 +20,10 @@
 #include <string.h>
 #include <time.h>
 #include <float.h>
-
-#include "NumericsOptions.h"
 #include "MCP_Solvers.h"
 #include "MCP_cst.h"
 #include "NonSmoothDrivers.h"
+#include "numerics_verbose.h"
 
 void  mixedComplementarity_default_setDefaultSolverOptions(MixedComplementarityProblem* problem, SolverOptions* pOptions)
 {
@@ -73,7 +72,7 @@ int mixedComplementarity_setDefaultSolverOptions(MixedComplementarityProblem* pr
   }
   default:
   {
-    numericsError("mixedLinearComplementarity_setDefaultSolverOptions", "Unknown Solver");
+    numerics_error("mixedLinearComplementarity_setDefaultSolverOptions", "Unknown Solver");
   }
   }
   return info;

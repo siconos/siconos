@@ -11,9 +11,9 @@ OccR::OccR(const ContactPoint& contact1,
            const ContactPoint& contact2) :
   NewtonEulerFrom3DLocalFrameR(),
   _contact1(contact1), _contact2(contact2), _geometer(new Geometer()),
-  _normalFromFace1(true),
+  _normalFromFace1(false),
   _offsetp1(false),
-  _offset(0.002)
+  _offset(0.0)
 {
 }
 
@@ -65,10 +65,5 @@ void OccR::computeh(double time, BlockVector& q0, SiconosVector& y)
   dist.value -= _offset;
 
   y.setValue(0, dist.value);
-
-/*  std::cout << "dist.value:" << dist.value << std::endl;
-  std::cout << "dist.n:" << dist.nx << "," << dist.ny << "," << dist.nz << std::endl;
-  std::cout << "dist.p1:" << dist.x1 << "," << dist.y1 << "," << dist.z1 << std::endl;
-  std::cout << "dist.p2:" << dist.x2 << "," << dist.y2 << "," << dist.z2 << std::endl;*/
 
 }

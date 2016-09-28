@@ -29,10 +29,21 @@
 #include <assert.h>
 #include <time.h>
 #include <float.h>
-
+#include <string.h>
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
 #include "debug.h"
+#include "numerics_verbose.h"
+
+
+//#define FCLIB_OUTPUT
+
+#ifdef FCLIB_OUTPUT
+static int fccounter = -1;
+#include "fclib_interface.h"
+#endif
+
+
 
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 
@@ -121,7 +132,7 @@ void fc3d_nsgs_initialize_local_solver(SolverPtr* solve, UpdatePtr* update,
     break;
   }
   /* Newton solver (Alart-Curnier) */
-  case SICONOS_FRICTION_3D_ONECONTACT_NSN_AC:
+  case SICONOS_FRICTION_3D_ONECONTACT_NSN:
   {
     *solve = &fc3d_onecontact_nonsmooth_Newton_solvers_solve;
     *update = &fc3d_onecontact_nonsmooth_Newton_AC_update;
@@ -130,7 +141,7 @@ void fc3d_nsgs_initialize_local_solver(SolverPtr* solve, UpdatePtr* update,
     fc3d_onecontact_nonsmooth_Newton_solvers_initialize(problem, localproblem, localsolver_options);
     break;
   }
-  case SICONOS_FRICTION_3D_ONECONTACT_NSN_AC_GP:
+  case SICONOS_FRICTION_3D_ONECONTACT_NSN_GP:
   {
     *solve = &fc3d_onecontact_nonsmooth_Newton_solvers_solve;
     *update = &fc3d_onecontact_nonsmooth_Newton_AC_update;
@@ -139,7 +150,7 @@ void fc3d_nsgs_initialize_local_solver(SolverPtr* solve, UpdatePtr* update,
     fc3d_onecontact_nonsmooth_Newton_solvers_initialize(problem, localproblem, localsolver_options);
     break;
   }
-  case SICONOS_FRICTION_3D_ONECONTACT_NSN_AC_GP_P:
+  case SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID:
   {
     *solve = &fc3d_onecontact_nonsmooth_Newton_solvers_solve;
     *update = &fc3d_onecontact_nonsmooth_Newton_AC_update;
@@ -311,7 +322,8 @@ void fc3d_nsgs_fillMLocal(FrictionContactProblem * problem, FrictionContactProbl
 
   }
   else
-    numericsError("fc3d_projection -", "unknown storage type for matrix M");
+    numerics_error("fc3d_projection -", "unknown storage type for matrix M");
+
 }
 
 
@@ -425,7 +437,16 @@ void accumulateLightErrorSum(double *light_error_sum, double localreaction[3],
                         pow(oldreaction[1] - localreaction[1], 2) +
                         pow(oldreaction[2] - localreaction[2], 2) );
 }
-
+int file_exists(const char *fname)
+{
+    FILE *file;
+    if ((file = fopen(fname, "r")))
+    {
+        fclose(file);
+        return 1;
+    }
+    return 0;
+}
 static
 void acceptLocalReactionFiltered(FrictionContactProblem *localproblem,
                                  SolverOptions *localsolver_options,
@@ -440,6 +461,49 @@ void acceptLocalReactionFiltered(FrictionContactProblem *localproblem,
     DEBUG_PRINTF("Discard local reaction for contact %i at iteration %i "
                  "with local_error = %e\n",
                  contact, iter, localsolver_options->dparam[1]);
+
+#ifdef FCLIB_OUTPUT
+
+    /* printf("step counter value = %i\n", localsolver_options->iparam[19]); */
+    char fname[256];
+    fccounter ++;
+    sprintf(fname, "./local_problem/localproblem_%i_%i.hdf5", contact, localsolver_options->iparam[19]);
+
+    if (file_exists(fname))
+    {
+       /* printf(" %s already dumped\n", fname); */
+    }
+    else
+    {
+      printf("Dump %s\n", fname);
+      int n = 100;
+      char * title = (char *)malloc(n * sizeof(char));
+      strcpy(title, "Bad local problem dump in hdf5");
+      char * description = (char *)malloc(n * sizeof(char));
+      strcpy(description, "Rewriting in hdf5 from siconos ");
+      strcat(description, fname);
+      strcat(description, " in FCLIB format");
+      char * mathInfo = (char *)malloc(n * sizeof(char));
+      strcpy(mathInfo,  "unknown");
+
+      frictionContact_fclib_write(localproblem,
+                                  title,
+                                  description,
+                                  mathInfo,
+                                  fname,3);
+
+      printf("end of dump %s\n", fname);
+      free(title);
+      free(description);
+      free(mathInfo);
+    }
+
+#endif
+
+    if (verbose > 1)
+      printf("Discard local reaction for contact %i at iteration %i "
+             "with local_error = %e\n",
+             contact, iter, localsolver_options->dparam[1]);
   }
   else
     memcpy(&reaction[contact*3], localreaction, sizeof(double)*3);
@@ -648,7 +712,7 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction,
 
   if (options->numberOfInternalSolvers < 1)
   {
-    numericsError("fc3d_nsgs",
+    numerics_error("fc3d_nsgs",
                   "The NSGS method needs options for the internal solvers, "
                   "options[0].numberOfInternalSolvers should be >= 1");
   }
@@ -668,7 +732,7 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction,
          || iparam[5] == SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE
          || iparam[5] == SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE_EACH_LOOP))
   {
-    numericsError(
+    numerics_error(
       "fc3d_nsgs", "iparam[5] must be equal to "
       "SICONOS_FRICTION_3D_NSGS_SHUFFLE_FALSE (0), "
       "SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE (1) or "
@@ -681,7 +745,7 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction,
          || iparam[1] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT
          || iparam[1] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_ADAPTIVE))
   {
-    numericsError(
+    numerics_error(
       "fc3d_nsgs", "iparam[1] must be equal to "
       "SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_FULL (0), "
       "SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL (1), "

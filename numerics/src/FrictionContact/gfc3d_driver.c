@@ -21,10 +21,11 @@
 #include <time.h>
 #include <float.h>
 #include <assert.h>
-
-#include "NumericsOptions.h"
 #include "SiconosConfig.h"
 #include "gfc3d_Solvers.h"
+#include "NonSmoothDrivers.h"
+#include "numerics_verbose.h"
+
 int * Global_ipiv = NULL;
 int  Global_MisInverse = 0;
 int  Global_MisLU = 0;
@@ -41,17 +42,9 @@ char * SICONOS_GLOBAL_FRICTION_3D_GAMS_PATH_STR = "GFC3D_GAMS_PATH";
 char * SICONOS_GLOBAL_FRICTION_3D_GAMS_PATHVI_STR = "GFC3D_GAMS_PATHVI";
 
 
-int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity,  SolverOptions* options, NumericsOptions* global_options)
+int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity,  SolverOptions* options)
 {
-
-  /* Set global options */
-  setNumericsOptions(global_options);
-
-  /* If the options for solver have not been set, read default values in .opt file */
-  int NoDefaultOptions = options->isSet; /* true(1) if the SolverOptions structure has been filled in else false(0) */
-
-  if (!NoDefaultOptions)
-    solver_options_read(3, options);
+  assert(options->isSet);
 
   if (verbose > 0)
     solver_options_print(options);
@@ -63,7 +56,7 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction , doubl
   int info = -1 ;
 
   if (problem->dimension != 3)
-    numericsError("gfc3d_driver", "Dimension of the problem : problem-> dimension is not compatible or is not set");
+    numerics_error("gfc3d_driver", "Dimension of the problem : problem-> dimension is not compatible or is not set");
 
 
   /* Non Smooth Gauss Seidel (NSGS) */

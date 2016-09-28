@@ -19,7 +19,8 @@
 #include <stdlib.h>
 #include "NonSmoothDrivers.h"
 #include "frictionContact_test_function.h"
-#include "misc.h"
+#include "Friction_cst.h"
+#include "numerics_verbose.h"
 
 int main(void)
 {
@@ -89,11 +90,6 @@ int main(void)
                                       tolerance,
                                       itermax,
                                       0, 0, 0, 0);
-  printf("reaction:");
-  printm(1, 3 * nc, reaction);
-
-  printf("velocity:");
-  printm(1, 3 * nc, velocity);
 
   free(reaction);
   free(velocity);

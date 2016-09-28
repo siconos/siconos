@@ -23,6 +23,7 @@
 
 #include "LinearOSNS.hpp"
 #include "SiconosNumerics.h"
+#include "Friction_cst.h" // from numerics, for solver id
 /** Pointer to function of the type used for drivers for GenericMechanical problems in Numerics */
 
 TYPEDEF_SPTR(GenericMechanicalProblem)

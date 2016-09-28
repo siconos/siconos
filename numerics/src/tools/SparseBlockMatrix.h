@@ -19,11 +19,12 @@
 #ifndef SparseBlockMatrix_H
 #define SparseBlockMatrix_H
 
-#include <stddef.h>
-#include <stdio.h>
-
+/* #include <stddef.h> */
+/* #include <stdio.h> */
+#include "NumericsFwd.h"
 #include "SiconosConfig.h"
-#include "SiconosCompat.h"
+#include <stdio.h>
+/* #include "SiconosCompat.h" */
 
 #include "SparseMatrix.h"
 
@@ -107,7 +108,7 @@
 */
 
 
-typedef struct
+struct SparseBlockStructuredMatrix
 {
   unsigned int nbblocks;
   double **block;
@@ -120,9 +121,9 @@ typedef struct
   size_t *index1_data;
   size_t *index2_data;
 
-} SparseBlockStructuredMatrix;
+};
 
-typedef struct
+struct SparseBlockCoordinateMatrix
 {
   /** number of blocks */
   unsigned int nbblocks;
@@ -148,9 +149,9 @@ typedef struct
 
   /** column indices */
   unsigned int *column;
-} SparseBlockCoordinateMatrix;
+};
 
-typedef struct
+struct SparseBlockStructuredMatrixPred
 {
   int nbbldiag;
   int **indic;
@@ -164,7 +165,7 @@ typedef struct
   double **bufz;
   double **newz;
   double **workspace;
-} SparseBlockStructuredMatrixPred;
+};
 
 #define NUMERICS_SBM_FREE_BLOCK 4
 #define NUMERICS_SBM_FREE_SBM 8

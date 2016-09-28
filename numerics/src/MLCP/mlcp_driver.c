@@ -27,6 +27,8 @@
 #include "NonSmoothDrivers.h"
 #endif
 #include "mlcp_cst.h"
+#include "numerics_verbose.h"
+#include "NumericsMatrix.h"
 
 char*  SICONOS_NONAME_STR = "NONAME";
 char*  SICONOS_MLCP_PGS_STR = "MLCP_PGS";
@@ -53,6 +55,7 @@ int mlcp_alloc_working_memory(MixedLinearComplementarityProblem* problem, Solver
   case SICONOS_MLCP_ENUM :
     return mlcp_enum_alloc_working_memory(problem, options);
   default:
+
     return 0;/*Nothing to do*/
   }
 }
@@ -209,20 +212,16 @@ int mlcp_driver_get_dwork(MixedLinearComplementarityProblem* problem, SolverOpti
   /* return 0; */
 }
 
-int mlcp_driver(MixedLinearComplementarityProblem* problem, double *z, double *w, SolverOptions* options, NumericsOptions* global_options)
+int mlcp_driver(MixedLinearComplementarityProblem* problem, double *z, double *w, SolverOptions* options)
 {
 
 
   if (options == NULL)
-    numericsError("mlcp_driver ", "null input for solver options.\n");
-
-  /* Set global options */
-  if (global_options)
-    setNumericsOptions(global_options);
+    numerics_error("mlcp_driver ", "null input for solver options.\n");
 
   /* Checks inputs */
   if (problem == NULL || z == NULL || w == NULL)
-    numericsError("mlcp_driver", "null input for MixedLinearComplementarityProblem and/or unknowns (z,w)");
+    numerics_error("mlcp_driver", "null input for MixedLinearComplementarityProblem and/or unknowns (z,w)");
   /* Output info. : 0: ok -  >0: problem (depends on solver) */
   int info = -1;
   if (verbose)
@@ -234,7 +233,7 @@ int mlcp_driver(MixedLinearComplementarityProblem* problem, double *z, double *w
   /* Sparse Block Storage */
   if (storageType == 1)
   {
-    numericsError("mlcp_driver", "not yet implemented for sparse storage.");
+    numerics_error("mlcp_driver", "not yet implemented for sparse storage.");
   }
   // else
 

@@ -312,10 +312,8 @@ static int convert_darray(PyObject *input, double *ptr) {
 
  }
 
-
 %{
 #include "SolverOptions.h"
 %}
 
 %include "SolverOptions.h"
-

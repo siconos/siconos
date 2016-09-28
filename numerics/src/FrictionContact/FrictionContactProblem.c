@@ -18,7 +18,9 @@
 #include <stdlib.h>
 #include <assert.h>
 #include "FrictionContactProblem.h"
-#include "misc.h"
+#include "NumericsMatrix.h"
+#include <stdio.h>
+#include "numerics_verbose.h"
 
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
