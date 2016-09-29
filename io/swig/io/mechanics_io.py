@@ -157,12 +157,19 @@ def apply_gravity(body):
     body.setFExtPtr(weight)
 
 
-def group(h, name):
+def group(h, name, must_exist=True):
     try:
         return h[name]
     except KeyError:
-        return h.create_group(name)
-
+        if must_exist:
+            return h.create_group(name)
+        else:
+            try:
+                return h.create_group(name)
+            except ValueError:
+                # could not create group, return None
+                # (file is probably in read-only mode)
+                return None
 
 def data(h, name, nbcolumns, use_compression=False):
     try:
@@ -539,7 +546,8 @@ class Hdf5():
         self._out = h5py.File(self._io_filename, self._mode)
         self._data = group(self._out, 'data')
         self._ref = group(self._data, 'ref')
-        self._permanent_interactions = group(self._data, 'permanent_interactions')
+        self._permanent_interactions = group(self._data, 'permanent_interactions',
+                                             must_exist=False)
         self._joints = group(self._data, 'joints')
         self._static_data = data(self._data, 'static', 9,
                                  use_compression = self._use_compression)
@@ -861,7 +869,8 @@ class Hdf5():
         """
         """
         from siconos.mechanics import occ
-        if self._broadphase is not None and 'input' in self._data:
+        if (self._broadphase is not None and 'input' in self._data
+              and self.permanent_interactions() is not None):
             topo = self._broadphase.model().nonSmoothDynamicalSystem().\
                 topology()
             pinter = self.permanent_interactions()[name]
@@ -873,9 +882,6 @@ class Hdf5():
             body1 = self._input[body1_name]
             body2 = self._input[body2_name]
 
-           
-                  
-            
             ctr1 = body1[contactor1_name]
             ctr2 = body2[contactor2_name]
 
