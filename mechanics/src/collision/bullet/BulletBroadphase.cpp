@@ -824,10 +824,12 @@ void BulletBroadphase::performBroadphase()
     assert(pairA && pairB && "btCollisionObject had a null user pointer!");
 
     // The first pair will always be the non-static object
+    bool flip = false;
     if (pairB->ds && !pairA->ds) {
       const BodyShapePair *tmp = pairA;
       pairA = pairB;
       pairB = tmp;
+      flip = true;
     }
 
     // If both bodies are static, no interaction is created.
@@ -860,6 +862,7 @@ void BulletBroadphase::performBroadphase()
           pairA->shape->outsideMargin() + pairB->shape->outsideMargin();
 
         SP::BulletR rel(new BulletR(createSPtrbtManifoldPoint(*it->point),
+                                    flip,
                                     pairA->shape->outsideMargin(),
                                     pairB->shape->outsideMargin(),
                                     1.0 / _options.worldScale));
