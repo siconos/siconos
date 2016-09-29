@@ -930,7 +930,9 @@ class Hdf5():
                         self._broadphase.buildGraph(body)
                         nsds.insertDynamicalSystem(body)
                         nsds.topology().setOSI(body, self._osi)
-                        self._broadphase.model().initialize()
+                        nsds.topology().initW(
+                            self._broadphase.model().simulation().nextTime(),
+                            body, self._osi)
                         body.initialize(self._broadphase.model().simulation().nextTime())
                         self._broadphase.model().simulation().initialize(
                             self._broadphase.model(), False)
