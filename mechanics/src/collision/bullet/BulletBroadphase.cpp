@@ -249,6 +249,11 @@ void BulletBroadphase::buildGraph(SP::Model model)
   }
 }
 
+void BulletBroadphase::buildGraph(SP::BodyDS body)
+{
+  body->accept(*this);
+}
+
 void BulletBroadphase::buildGraph(std::vector<SP::BodyDS> bodies)
 {
   std::vector<SP::BodyDS>::iterator it;

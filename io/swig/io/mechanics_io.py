@@ -924,11 +924,21 @@ class Hdf5():
                 # add the dynamical system to the non smooth
                 # dynamical system
                 if birth:
-                    self._broadphase.addDynamicObject(
-                        body,
-                        self._broadphase.model().simulation(),
-                        self._osi)
                     nsds = self._broadphase.model().nonSmoothDynamicalSystem()
+                    if use_proposed:
+                        print('Calling buildGraph for %s contactor'%str(name))
+                        self._broadphase.buildGraph(body)
+                        nsds.insertDynamicalSystem(body)
+                        nsds.topology().setOSI(body, self._osi)
+                        self._broadphase.model().initialize()
+                        body.initialize(self._broadphase.model().simulation().nextTime())
+                        self._broadphase.model().simulation().initialize(
+                            self._broadphase.model(), False)
+                    else:
+                        self._broadphase.addDynamicObject(
+                            body,
+                            self._broadphase.model().simulation(),
+                            self._osi)
                     nsds.setName(body, str(name))
                 else:
                     nsds = self._broadphase.model().nonSmoothDynamicalSystem()
@@ -1220,11 +1230,6 @@ class Hdf5():
                         floatv(velocity), contactors, float(mass),
                         inertia, body_class, shape_class, birth=True,
                         number = self.instances()[name].attrs['id'])
-
-            # build collision graph
-            if use_proposed:
-                print('Calling buildGraph: TODO incremental buildGraph()')
-                sys.exit(1)
 
     def outputStaticObjects(self):
         """
