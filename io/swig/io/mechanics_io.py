@@ -35,7 +35,7 @@ except:
     use_proposed = False
 
 try:
-    from siconos.mechanics.contact_detection.bullet import \
+    from siconos.mechanics.collision.bullet import \
         BulletDS, BulletWeightedShape, btScalarSize, \
         btCollisionObject, btQuaternion, btTransform, btVector3, quatRotate
 
@@ -904,9 +904,6 @@ class Hdf5():
                                   contactors[0].orientation,
                                   contactors[0].group)
 
-                if number is not None:
-                    body.setNumber(number)
-
                 body.setNullifyFGyr(True)
                 for contactor in contactors[1:]:
                     shape_id = self._shapeid[contactor.name]
@@ -917,6 +914,10 @@ class Hdf5():
                                            contactor.group)
 
             if body:
+                # set id number
+                if number is not None:
+                    body.setNumber(number)
+
                 # set external forces
                 self._set_external_forces(body)
 
