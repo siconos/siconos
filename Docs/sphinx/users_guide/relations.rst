@@ -11,7 +11,7 @@ Usually, "type+subtype" corresponds more or less to the name of the derived clas
 Then, depending on the sub-class, each relation holds some plug-in functions or operators used to define the constraints. They are listed below for each available type of relation. 
 
 
-Available classes: :doxysiconos:`FirstOrderR`, :doxysiconos:`FirstOrderLinearR`, :doxysiconos:`FirstOrderLinearTIR`, :doxysiconos:`LagrangianR, :doxysiconos:`LagrangianRheonomousR`, :doxysiconos:`LagrangianScleronomousR, :doxysiconos:`LagrangianCompliantR`, :doxysiconos:`LagrangianLinearR`.
+Available classes: :doxysiconos:`FirstOrderR`, :doxysiconos:`FirstOrderLinearR`, :doxysiconos:`FirstOrderLinearTIR`, :doxysiconos:`LagrangianR`, :doxysiconos:`LagrangianRheonomousR`, :doxysiconos:`LagrangianScleronomousR`, :doxysiconos:`LagrangianCompliantR`, :doxysiconos:`LagrangianLinearR`.
 
 .. image:: classRelation.*
 
@@ -20,6 +20,8 @@ First Order Relations
 
 Non Linear
 """"""""""
+
+Class :doxysiconos:`FirstOrderR`
 
 .. math::
    
@@ -35,14 +37,14 @@ We denote:
    G_0(X,t,\lambda,Z)=\nabla_X g(X,t,\lambda,Z)&, &  G_1(X,t,\lambda,Z)=\nabla_{\lambda} g(X,t,\lambda,Z) 
 
 h, g (and their jacobian according to X and lambda) are defined with some plug-in functions. \n
-See the doxygen documentation of the class to have a list of the set/get/compute functions.
+See the doxygen documentation of the class :doxysiconos:`FirstOrderR` to have a list of the set/get/compute functions.
 
-Note: for the signification of X, Z, R see :ref:_`interactions`
+Note: for the signification of X, Z, R see :ref:`interactions`
 
 Linear
 """"""
 
-FirstOrderLinearR 
+Class: :doxysiconos:`FirstOrderLinearR`
 
 .. math::
    
@@ -54,7 +56,7 @@ Plug-in functions are available for all operators.
 Linear with Time Invariant Coefficients
 """""""""""""""""""""""""""""""""""""""
 
-Class FirstOrderLinearTIR 
+Class :doxysiconos:`FirstOrderLinearTIR`
 
 .. math::
   
@@ -67,7 +69,7 @@ Lagrangian (second order) Relations
 Scleronomous
 """"""""""""
 
-Class: LagrangianScleronomousR
+Class :doxysiconos:`LagrangianScleronomousR`
 
 The constraints depend only on the state,
 
@@ -86,7 +88,7 @@ with
 Rheonomous
 """"""""""
 
-Class: LagrangianRheonomousR
+Class :doxysiconos:`LagrangianRheonomousR`
 
 The constraints depend on time and state, 
 
@@ -105,7 +107,7 @@ with
 Compliant
 """""""""
 
-Class: LagrangianCompliantR
+Class: :doxysiconos:`LagrangianCompliantR`
 
 The constraints depends on state and :math:`\lambda`, with a function of time for which :math:`\dot \lambda(t)\f` has sense.
 
@@ -125,7 +127,7 @@ with
 Linear and Time Invariant Coefficients
 """"""""""""""""""""""""""""""""""""""
 
-Class:  LagrangianLinearR
+Class: :doxysiconos:`LagrangianLinearR`
 
 Lagrangian linear relations with time-invariant coefficients. 
 
