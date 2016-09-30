@@ -79,7 +79,8 @@ extern "C"
       \param info return 0 if the solution is found
       \param options the solver options :
       [in] iparam[0] : Maximum iteration number
-      [in] iparam[1] : error computation method :
+
+      [in] iparam[SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION (7)] : error computation method :
           SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_FULL (0) : Full error computation with velocity computation
           SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL (1) : Light error computation with incremental values on reaction verification of absolute error at the end
           SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT (2) : only light error computation (velocity not computed)
@@ -97,7 +98,9 @@ extern "C"
            SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE_EACH_LOOP (2) : shuffle in each iteration
       [in] iparam[6] : seed for the random generator in shuffling  contacts
 
-      [out] iparam[7] = iter number of performed iterations
+
+
+      [out] iparam[SICONOS_IPARAM_ITER_DONE(1)] = iter number of performed iterations
 
       [in]  iparam[8] = error computation frequency
 

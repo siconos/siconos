@@ -753,7 +753,7 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers* equation
     }
   }
 
-  options->iparam[1] = iter;
+  options->iparam[SICONOS_IPARAM_ITER_DONE] = iter;
 
   if (!options->dWork)
   {

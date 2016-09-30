@@ -57,30 +57,30 @@ void fc3d_AC_initialize(FrictionContactProblem* problem, FrictionContactProblem*
   /* localFC3D = localproblem; */
   /* globalFC3D = problem; */
   DEBUG_PRINTF("fc3d_AC_initialize starts with options->iparam[10] = %i\n",
-               options->iparam[SICONOS_FRICTION_3D_ONECONTACT_NSN_FORMULATION]);
+               options->iparam[SICONOS_FRICTION_3D_NSN_FORMULATION]);
 
-  if (options->iparam[SICONOS_FRICTION_3D_ONECONTACT_NSN_FORMULATION] ==
-      SICONOS_FRICTION_3D_ONECONTACT_NSN_FORMULATION_ALARTCURNIER_STD )
+  if (options->iparam[SICONOS_FRICTION_3D_NSN_FORMULATION] ==
+      SICONOS_FRICTION_3D_NSN_FORMULATION_ALARTCURNIER_STD )
   {
     Function = &(computeAlartCurnierSTD);
   }
-  else if (options->iparam[SICONOS_FRICTION_3D_ONECONTACT_NSN_FORMULATION] ==
-           SICONOS_FRICTION_3D_ONECONTACT_NSN_FORMULATION_JEANMOREAU_STD )
+  else if (options->iparam[SICONOS_FRICTION_3D_NSN_FORMULATION] ==
+           SICONOS_FRICTION_3D_NSN_FORMULATION_JEANMOREAU_STD )
   {
     Function = &(computeAlartCurnierJeanMoreau);
   }
-  else if (options->iparam[SICONOS_FRICTION_3D_ONECONTACT_NSN_FORMULATION] ==
-           SICONOS_FRICTION_3D_ONECONTACT_NSN_FORMULATION_ALARTCURNIER_GENERATED )
+  else if (options->iparam[SICONOS_FRICTION_3D_NSN_FORMULATION] ==
+           SICONOS_FRICTION_3D_NSN_FORMULATION_ALARTCURNIER_GENERATED )
   {
     Function = &(fc3d_AlartCurnierFunctionGenerated);
   }
-  else if (options->iparam[SICONOS_FRICTION_3D_ONECONTACT_NSN_FORMULATION] ==
-           SICONOS_FRICTION_3D_ONECONTACT_NSN_FORMULATION_JEANMOREAU_GENERATED )
+  else if (options->iparam[SICONOS_FRICTION_3D_NSN_FORMULATION] ==
+           SICONOS_FRICTION_3D_NSN_FORMULATION_JEANMOREAU_GENERATED )
   {
     Function = &fc3d_AlartCurnierJeanMoreauFunctionGenerated;;
   }
-  else if (options->iparam[SICONOS_FRICTION_3D_ONECONTACT_NSN_FORMULATION] ==
-           SICONOS_FRICTION_3D_ONECONTACT_NSN_FORMULATION_NULL)
+  else if (options->iparam[SICONOS_FRICTION_3D_NSN_FORMULATION] ==
+           SICONOS_FRICTION_3D_NSN_FORMULATION_NULL)
   {
     Function = NULL;
   }
@@ -392,12 +392,12 @@ int fc3d_onecontact_nonsmooth_Newtow_setDefaultSolverOptions(SolverOptions* opti
   options->dparam[SICONOS_DPARAM_TOL] = 1e-14;
 
   /* Choice of formulation */
-  options->iparam[SICONOS_FRICTION_3D_ONECONTACT_NSN_FORMULATION] =
-    SICONOS_FRICTION_3D_ONECONTACT_NSN_FORMULATION_ALARTCURNIER_STD ;
+  options->iparam[SICONOS_FRICTION_3D_NSN_FORMULATION] =
+    SICONOS_FRICTION_3D_NSN_FORMULATION_ALARTCURNIER_STD ;
   /* Choice of line -search method */
-  options->iparam[SICONOS_FRICTION_3D_ONECONTACT_NSN_LINESEARCH] =
-    SICONOS_FRICTION_3D_ONECONTACT_NSN_LINESEARCH_GOLDSTEINPRICE;
-  options->iparam[SICONOS_FRICTION_3D_ONECONTACT_NSN_LINESEARCH_MAXITER] = 10;
+  options->iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH] =
+    SICONOS_FRICTION_3D_NSN_LINESEARCH_GOLDSTEINPRICE;
+  options->iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH_MAXITER] = 10;
 
   /* parameters for hybrid solvers */
   options->iparam[SICONOS_FRICTION_3D_ONECONTACT_NSN_HYBRID_STRATEGY] =
@@ -456,10 +456,10 @@ int fc3d_onecontact_nonsmooth_Newton_solvers_solve_direct(FrictionContactProblem
 /* #ifndef AC_Generated */
 #ifndef DEBUG_CHECK
     double AWpB[9];
-    if (iparam[SICONOS_FRICTION_3D_ONECONTACT_NSN_FORMULATION] !=
-        SICONOS_FRICTION_3D_ONECONTACT_NSN_FORMULATION_JEANMOREAU_GENERATED
-        && iparam[SICONOS_FRICTION_3D_ONECONTACT_NSN_FORMULATION] !=
-        SICONOS_FRICTION_3D_ONECONTACT_NSN_FORMULATION_NULL)
+    if (iparam[SICONOS_FRICTION_3D_NSN_FORMULATION] !=
+        SICONOS_FRICTION_3D_NSN_FORMULATION_JEANMOREAU_GENERATED
+        && iparam[SICONOS_FRICTION_3D_NSN_FORMULATION] !=
+        SICONOS_FRICTION_3D_NSN_FORMULATION_NULL)
     {
       double Fg[3] = {0., 0., 0.};
       double Ag[9] = {0., 0., 0., 0., 0., 0., 0., 0., 0.};
@@ -470,8 +470,8 @@ int fc3d_onecontact_nonsmooth_Newton_solvers_solve_direct(FrictionContactProblem
       assert(*rho > 0. && *(rho + 1) > 0. && *(rho + 2) > 0.);
 
 /* #ifdef AC_STD */
-      if  (iparam[SICONOS_FRICTION_3D_ONECONTACT_NSN_FORMULATION] ==
-           SICONOS_FRICTION_3D_ONECONTACT_NSN_FORMULATION_ALARTCURNIER_STD )
+      if  (iparam[SICONOS_FRICTION_3D_NSN_FORMULATION] ==
+           SICONOS_FRICTION_3D_NSN_FORMULATION_ALARTCURNIER_STD )
       {
         fc3d_AlartCurnierFunctionGenerated(R, velocity, mu, rho, Fg, Ag, Bg);
       }
@@ -479,8 +479,8 @@ int fc3d_onecontact_nonsmooth_Newton_solvers_solve_direct(FrictionContactProblem
 /* #endif */
 
 /* #ifdef AC_JeanMoreau */
-      if  (iparam[SICONOS_FRICTION_3D_ONECONTACT_NSN_FORMULATION] ==
-           SICONOS_FRICTION_3D_ONECONTACT_NSN_FORMULATION_JEANMOREAU_STD)
+      if  (iparam[SICONOS_FRICTION_3D_NSN_FORMULATION] ==
+           SICONOS_FRICTION_3D_NSN_FORMULATION_JEANMOREAU_STD)
       {
         fc3d_AlartCurnierJeanMoreauFunctionGenerated(R, velocity, mu, rho, Fg, Ag, Bg);
       }
@@ -781,10 +781,10 @@ int fc3d_onecontact_nonsmooth_Newton_solvers_solve_damped(FrictionContactProblem
 
   double Tol = dparam[SICONOS_DPARAM_TOL];
   int itermax = iparam[SICONOS_IPARAM_MAX_ITER];
-  int LSitermax = iparam[SICONOS_FRICTION_3D_ONECONTACT_NSN_LINESEARCH_MAXITER];
+  int LSitermax = iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH_MAXITER];
 
 
-  if (iparam[SICONOS_FRICTION_3D_ONECONTACT_NSN_LINESEARCH] > SICONOS_FRICTION_3D_ONECONTACT_NSN_LINESEARCH_GOLDSTEINPRICE)
+  if (iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH] > SICONOS_FRICTION_3D_NSN_LINESEARCH_GOLDSTEINPRICE)
   {
     numerics_error("fc3d_onecontact_nonsmooth_Newton_solvers_solve_damped", "type of line search not found");
   }

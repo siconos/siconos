@@ -35,6 +35,9 @@
 #include <mpi.h>
 #endif
 
+#define DEBUG_MESSAGES
+#include "debug.h"
+
 void fc3d_AlartCurnierFunction(
   unsigned int problemSize,
   AlartCurnierFun3x3Ptr computeACFun3x3,
@@ -95,7 +98,7 @@ int fc3d_nonsmooth_Newton_AlartCurnier_setDefaultSolverOptions(
   options->dparam = (double *)calloc(options->dSize, sizeof(double));
   options->dWork = NULL;
   solver_options_nullify(options);
-  options->iparam[0] = 200;
+  options->iparam[SICONOS_IPARAM_MAX_ITER] = 200;
   options->iparam[3] = 100000; /* nzmax*/
   options->iparam[5] = 1;
   options->iparam[7] = 1;      /* erritermax */
@@ -103,9 +106,10 @@ int fc3d_nonsmooth_Newton_AlartCurnier_setDefaultSolverOptions(
   options->dparam[3] = 1;      /* default rho */
 
   options->iparam[8] = -1;     /* mpi com fortran */
-  options->iparam[10] = 2;     /* 0 STD AlartCurnier, 1 JeanMoreau, 2 STD generated, 3 JeanMoreau generated */
-  options->iparam[11] = 0;     /* 0 GoldsteinPrice line search, 1 FBLSA */
-  options->iparam[12] = 100;   /* max iter line search */
+  options->iparam[SICONOS_FRICTION_3D_NSN_FORMULATION] = SICONOS_FRICTION_3D_NSN_FORMULATION_ALARTCURNIER_GENERATED;
+  /* 0 STD AlartCurnier, 1 JeanMoreau, 2 STD generated, 3 JeanMoreau generated */
+  options->iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH] = SICONOS_FRICTION_3D_NSN_LINESEARCH_GOLDSTEINPRICE;     /* 0 GoldsteinPrice line search, 1 FBLSA */
+  options->iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH_MAXITER] = 100;   /* max iter line search */
 
 #ifdef WITH_MUMPS
   options->iparam[13] = 1;
@@ -218,7 +222,6 @@ void fc3d_nonsmooth_Newton_AlartCurnier(
   equation.problem = problem;
   equation.data = (void *) &acparams;
   equation.function = &nonsmoothEqnAlartCurnierFun;
-
   fc3d_nonsmooth_Newton_solvers_solve(&equation, reaction, velocity, info,
                                    options);
 

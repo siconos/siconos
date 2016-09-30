@@ -384,12 +384,12 @@ unsigned int* allocShuffledContacts(FrictionContactProblem *problem,
 {
   unsigned int *scontacts = 0;
   unsigned int nc = problem->numberOfContacts;
-  if (options->iparam[5] == SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE||
-      options->iparam[5] == SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE_EACH_LOOP)
+  if (options->iparam[SICONOS_FRICTION_3D_NSGS_SHUFFLE] == SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE||
+      options->iparam[SICONOS_FRICTION_3D_NSGS_SHUFFLE] == SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE_EACH_LOOP)
   {
-    if (options->iparam[6] >0)
+    if (options->iparam[SICONOS_FRICTION_3D_NSGS_SHUFFLE_SEED] >0)
     {
-      srand((unsigned int)options->iparam[6]);
+      srand((unsigned int)options->iparam[SICONOS_FRICTION_3D_NSGS_SHUFFLE_SEED]);
     }
     else
       srand(1);
@@ -600,18 +600,18 @@ double calculateFullErrorAdaptiveInterval(FrictionContactProblem *problem,
                                           double tolerance, double normq)
 {
   double error=1e+24;
-  if (options->iparam[8] >0)
+  if (options->iparam[SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_FREQUENCY] >0)
   {
-    if (iter % options->iparam[8] == 0) {
+    if (iter % options->iparam[SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_FREQUENCY] == 0) {
       (*computeError)(problem, reaction , velocity, tolerance, options, normq,  &error);
       if (error > tolerance
-          && options->iparam[1] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_ADAPTIVE)
-        options->iparam[8] *= 2;
+          && options->iparam[SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_ADAPTIVE)
+        options->iparam[SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_FREQUENCY] *= 2;
     }
     if (verbose > 0)
       printf("----------------------------------- FC3D - NSGS - Iteration %i "
-             "options->iparam[8] = %i, options->iparam[1] = % i \n",
-             iter, options->iparam[8], options->iparam[1]);
+             "options->iparam[SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_FREQUENCY] = %i, options->iparam[SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION] = % i \n",
+             iter, options->iparam[SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_FREQUENCY], options->iparam[SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION]);
   }
   else
     (*computeError)(problem, reaction , velocity, tolerance, options, normq,  &error);
@@ -728,25 +728,25 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction,
   scontacts = allocShuffledContacts(problem, options);
 
   /*****  Check solver options *****/
-  if (! (iparam[5] == SICONOS_FRICTION_3D_NSGS_SHUFFLE_FALSE
-         || iparam[5] == SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE
-         || iparam[5] == SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE_EACH_LOOP))
+  if (! (iparam[SICONOS_FRICTION_3D_NSGS_SHUFFLE] == SICONOS_FRICTION_3D_NSGS_SHUFFLE_FALSE
+         || iparam[SICONOS_FRICTION_3D_NSGS_SHUFFLE] == SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE
+         || iparam[SICONOS_FRICTION_3D_NSGS_SHUFFLE] == SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE_EACH_LOOP))
   {
     numerics_error(
-      "fc3d_nsgs", "iparam[5] must be equal to "
+      "fc3d_nsgs", "iparam[SICONOS_FRICTION_3D_NSGS_SHUFFLE] must be equal to "
       "SICONOS_FRICTION_3D_NSGS_SHUFFLE_FALSE (0), "
       "SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE (1) or "
       "SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE_EACH_LOOP (2)");
     return;
   }
 
-  if (! (iparam[1] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_FULL
-         || iparam[1] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL
-         || iparam[1] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT
-         || iparam[1] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_ADAPTIVE))
+  if (! (iparam[SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_FULL
+         || iparam[SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL
+         || iparam[SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT
+         || iparam[SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_ADAPTIVE))
   {
     numerics_error(
-      "fc3d_nsgs", "iparam[1] must be equal to "
+      "fc3d_nsgs", "iparam[SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION] must be equal to "
       "SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_FULL (0), "
       "SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL (1), "
       "SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT (2) or "
@@ -758,10 +758,10 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction,
 
   /* A special case for the most common options (should correspond
    * with mechanics_io.py **/
-  if (iparam[5] == SICONOS_FRICTION_3D_NSGS_SHUFFLE_FALSE
-      && iparam[4] == SICONOS_FRICTION_3D_NSGS_RELAXATION_FALSE
-      && iparam[14] == SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION_TRUE
-      && iparam[1] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL)
+  if (iparam[SICONOS_FRICTION_3D_NSGS_SHUFFLE] == SICONOS_FRICTION_3D_NSGS_SHUFFLE_FALSE
+      && iparam[SICONOS_FRICTION_3D_NSGS_SHUFFLE] == SICONOS_FRICTION_3D_NSGS_RELAXATION_FALSE
+      && iparam[SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION] == SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION_TRUE
+      && iparam[SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL)
   {
     while ((iter < itermax) && (hasNotConverged > 0))
     {
@@ -805,10 +805,10 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction,
       double light_error_sum = 0.0;
       for (unsigned int i = 0 ; i < nc ; ++i)
       {
-        if (iparam[5] == SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE
-            || iparam[5] == SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE_EACH_LOOP)
+        if (iparam[SICONOS_FRICTION_3D_NSGS_SHUFFLE] == SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE
+            || iparam[SICONOS_FRICTION_3D_NSGS_SHUFFLE] == SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE_EACH_LOOP)
         {
-          if (iparam[5] == SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE_EACH_LOOP)
+          if (iparam[SICONOS_FRICTION_3D_NSGS_SHUFFLE] == SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE_EACH_LOOP)
             uint_shuffle(scontacts, nc);
           contact = scontacts[i];
         }
@@ -830,10 +830,10 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction,
         else
           acceptLocalReactionUnconditionally(contact, reaction, localreaction);
       }
-      if (iparam[1] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT ||
-          iparam[1] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL)
+      if (iparam[SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT ||
+          iparam[SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL)
         error = calculateLightError(light_error_sum, nc, reaction);
-      else if (iparam[1] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_FULL)
+      else if (iparam[SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_FULL)
         error = calculateFullErrorAdaptiveInterval(problem, computeError, options,
                                                    iter, reaction, velocity,
                                                    tolerance, normq);
@@ -847,14 +847,14 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction,
   *info = hasNotConverged;
 
   /* Full criterium */
-  if (iparam[1] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL)
+  if (iparam[SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL)
     error = calculateFullErrorFinal(problem, options, computeError, reaction, velocity,
                                     tolerance, normq, error /* = light error*/);
 
   /** return parameter values */
   dparam[0] = tolerance;
   dparam[1] = error;
-  iparam[7] = iter;
+  iparam[SICONOS_IPARAM_ITER_DONE] = iter;
 
   /** Free memory **/
   (*freeSolver)(problem,localproblem,localsolver_options);
