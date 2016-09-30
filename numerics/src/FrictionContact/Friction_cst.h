@@ -206,6 +206,7 @@ enum SICONOS_FRICTION_3D_NSN_LINESEARCH_ENUM
 {
   SICONOS_FRICTION_3D_NSN_LINESEARCH_GOLDSTEINPRICE = 0 ,
   SICONOS_FRICTION_3D_NSN_LINESEARCH_ARMIJO = 1,
+  SICONOS_FRICTION_3D_NSN_LINESEARCH_NO=-1,
   /** index in iparam to store the line-search */
   SICONOS_FRICTION_3D_NSN_LINESEARCH = 11,
   /** index in iparam to store the maximum number of iterations */
