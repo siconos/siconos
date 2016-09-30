@@ -28,6 +28,8 @@ int fc3d_LmgcDriver(double *reaction,
                                  int ndof)
 {
 
+  numerics_set_verbose(verbose);
+
   SparseBlockCoordinateMatrix* MC = newSparseBlockCoordinateMatrix3x3fortran(nc, nc, nb, row, column, W);
 
   SparseBlockStructuredMatrix* M = SBCMToSBM(MC);
