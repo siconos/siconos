@@ -932,19 +932,14 @@ void computeAlartCurnierJeanMoreau(double R[3], double velocity[3], double mu, d
 
 void computerho(FrictionContactProblem* localproblem, double * rho)
 {
-
-
-
-
   double * MLocal = localproblem->M->matrix0;
-
-
   assert(MLocal[0 + 0 * 3] > 0);
 
+  DEBUG_EXPR(NM_dense_display(MLocal,3,3,3););
   double sw = MLocal[1 + 1 * 3] + MLocal[2 + 2 * 3];
 
   double dw = sw * sw - 4.0 * (MLocal[1 + 1 * 3] + MLocal[2 + 2 * 3] -  MLocal[2 + 1 * 3] + MLocal[1 + 2 * 3]);
-
+  DEBUG_PRINTF("dw = %e\n",dw);
   if (dw > 0.0) dw = sqrt(dw);
   else dw = 0.0;
 
@@ -956,16 +951,12 @@ void computerho(FrictionContactProblem* localproblem, double * rho)
   assert(rho[1] > 0);
   assert(rho[2] > 0);
 
+  DEBUG_PRINTF("sw=%le\t  ", sw);
+  DEBUG_PRINTF("dw=%le\n ", dw);
+  DEBUG_PRINTF("rho[0]=%le\t", rho[0]);
+  DEBUG_PRINTF("rho[1]=%le\t", rho[1]);
+  DEBUG_PRINTF("rho[2]=%le\n", rho[2]);
 
 
-
-#ifdef VERBOSE_DEBUG
-  printf("sw=%le = ", sw);
-  printf("dw=%le = ", dw);
-  printf("rho[0]=%le = ", rho[0]);
-  printf("rho[1]=%le\n", rho[1]);
-  printf("rho[2]=%le\n", rho[2]);
-  printf("\n");
-#endif
 }
 
