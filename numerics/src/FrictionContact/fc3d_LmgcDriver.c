@@ -7,7 +7,7 @@
 #include "fc3d_Solvers.h"
 #include "NonSmoothDrivers.h"
 #include "fclib_interface.h"
-
+#include "numerics_verbose.h"
 static int fccounter = -1;
 
 int fc3d_LmgcDriver(double *reaction,
