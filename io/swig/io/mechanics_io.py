@@ -1603,8 +1603,11 @@ class Hdf5():
 
             ori=[cos(angle / 2.), axis[0] * n, axis[1] * n, axis[2] * n]
         else:
+            assert(len(orientation)==4)
             # a given quaternion
             ori=orientation
+
+        assert(len(translation)==3)
 
         if name not in self._input:
 
