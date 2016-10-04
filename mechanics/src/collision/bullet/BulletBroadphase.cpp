@@ -858,10 +858,8 @@ void BulletBroadphase::performBroadphase()
       int g1 = pairA->shape->group();
       int g2 = pairB->shape->group();
       SP::NonSmoothLaw nslaw = nonSmoothLaw(g1,g2);
-      if (!nslaw) // TODO: Warning, error?
-        nslaw.reset(new NewtonImpactFrictionNSL(0.8, 0.3, 0.0, 3));
 
-      if (nslaw->size() == 3)
+      if (nslaw && nslaw->size() == 3)
       {
         // Remove the added outside margin as a correction factor in Relation
         double combined_margin =
@@ -887,7 +885,7 @@ void BulletBroadphase::performBroadphase()
       }
       else
       {
-        if (nslaw->size() == 1)
+        if (nslaw && nslaw->size() == 1)
         {
           SP::BulletFrom1DLocalFrameR rel(
             new BulletFrom1DLocalFrameR(createSPtrbtManifoldPoint(*it->point)));
