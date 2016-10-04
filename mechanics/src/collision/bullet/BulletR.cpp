@@ -64,16 +64,23 @@ BulletR::BulletR(SP::btManifoldPoint point,
       posb = _contactPoints->getPositionWorldOnA();
   }
 
-  (*pc1())(0) = posa[0];
-  (*pc1())(1) = posa[1];
-  (*pc1())(2) = posa[2];
-  (*pc2())(0) = posb[0];
-  (*pc2())(1) = posb[1];
-  (*pc2())(2) = posb[2];
+  (*pc1())(0) = posa[0]*_scaling;
+  (*pc1())(1) = posa[1]*_scaling;
+  (*pc1())(2) = posa[2]*_scaling;
+  (*pc2())(0) = posb[0]*_scaling;
+  (*pc2())(1) = posb[1]*_scaling;
+  (*pc2())(2) = posb[2]*_scaling;
 
   (*nc())(0) = _contactPoints->m_normalWorldOnB[0] * (flip ? -1 : 1);
   (*nc())(1) = _contactPoints->m_normalWorldOnB[1] * (flip ? -1 : 1);
   (*nc())(2) = _contactPoints->m_normalWorldOnB[2] * (flip ? -1 : 1);
+
+  (*pc1())(0) += (*nc())(0) * _y_correction_A / _scaling;
+  (*pc1())(1) += (*nc())(1) * _y_correction_A / _scaling;
+  (*pc1())(2) += (*nc())(2) * _y_correction_A / _scaling;
+  (*pc2())(0) -= (*nc())(0) * _y_correction_B / _scaling;
+  (*pc2())(1) -= (*nc())(1) * _y_correction_B / _scaling;
+  (*pc2())(2) -= (*nc())(2) * _y_correction_B / _scaling;
 
   assert(!((*nc())(0)==0 && (*nc())(1)==0 && (*nc())(2)==0)
          && "nc = 0, problems..\n");
@@ -91,9 +98,11 @@ void BulletR::computeh(double time, BlockVector& q0, SiconosVector& y)
 
   btVector3 posa = _contactPoints->getPositionWorldOnA();
   btVector3 posb = _contactPoints->getPositionWorldOnB();
+  int flip = 1;
   if (_flip) {
       posa = _contactPoints->getPositionWorldOnB();
       posb = _contactPoints->getPositionWorldOnA();
+      flip = -1;
   }
 
   (*pc1())(0) = posa[0]*_scaling;
@@ -108,18 +117,18 @@ void BulletR::computeh(double time, BlockVector& q0, SiconosVector& y)
     // are, so we correct by a factor.
     y.setValue(0, _contactPoints->getDistance()*_scaling + correction);
 
-    (*nc())(0) = _contactPoints->m_normalWorldOnB[0] * (_flip ? -1 : 1);
-    (*nc())(1) = _contactPoints->m_normalWorldOnB[1] * (_flip ? -1 : 1);
-    (*nc())(2) = _contactPoints->m_normalWorldOnB[2] * (_flip ? -1 : 1);
+    (*nc())(0) = _contactPoints->m_normalWorldOnB[0] * flip;
+    (*nc())(1) = _contactPoints->m_normalWorldOnB[1] * flip;
+    (*nc())(2) = _contactPoints->m_normalWorldOnB[2] * flip;
 
     // Adjust contact point positions correspondingly along normal.  TODO: This
     // assumes same distance in each direction, i.e. same margin per object.
-    (*pc1())(0) += (*nc())(0) * _y_correction_A;
-    (*pc1())(1) += (*nc())(1) * _y_correction_A;
-    (*pc1())(2) += (*nc())(2) * _y_correction_A;
-    (*pc2())(0) -= (*nc())(0) * _y_correction_B;
-    (*pc2())(1) -= (*nc())(1) * _y_correction_B;
-    (*pc2())(2) -= (*nc())(2) * _y_correction_B;
+    (*pc1())(0) += (*nc())(0) * _y_correction_A / _scaling;
+    (*pc1())(1) += (*nc())(1) * _y_correction_A / _scaling;
+    (*pc1())(2) += (*nc())(2) * _y_correction_A / _scaling;
+    (*pc2())(0) -= (*nc())(0) * _y_correction_B / _scaling;
+    (*pc2())(1) -= (*nc())(1) * _y_correction_B / _scaling;
+    (*pc2())(2) -= (*nc())(2) * _y_correction_B / _scaling;
   }
 
   DEBUG_PRINTF("distance : %g\n",  y.getValue(0));
