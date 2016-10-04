@@ -132,8 +132,11 @@ extern "C"
      \param functionName name of the function where warning occurs
      \param message output message
   */
-  void numerics_warning(char* functionName, char* message);
+  void numerics_warning(char * functionName, char* fmt, ...);
+
+  void numerics_printf(const char * fmt, ...);
   
+  void numerics_printf_verbose(int verbose, const char * fmt, ...);
 #if defined(__cplusplus) && !defined (BUILD_AS_CPP)
 }
 #endif

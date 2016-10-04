@@ -53,7 +53,6 @@ char * SICONOS_SOCLCP_PROX_STR = "SOCLCP_PROX";
 char * SICONOS_SOCLCP_QUARTIC_STR = "SOCLCP_QUARTIC";
 char * SICONOS_SOCLCP_QUARTIC_NU_STR = "SOCLCP_QUARTIC_NU";
 
-void snPrintf(const char *fmt, ...);
 
 int soclcp_driver(SecondOrderConeLinearComplementarityProblem* problem,
                   double *r, double *v,
@@ -85,54 +84,54 @@ int soclcp_driver(SecondOrderConeLinearComplementarityProblem* problem,
   /* Non Smooth Gauss Seidel (NSGS) */
   case SICONOS_SOCLCP_NSGS:
   {
-    snPrintf(" ========================== Call NSGS solver for Second Order Cone LCP problem ==========================\n");
+    numerics_printf(" ========================== Call NSGS solver for Second Order Cone LCP problem ==========================\n");
     soclcp_nsgs(problem, r , v , &info , options);
     break;
   }
   /* case SICONOS_SOCLCP_NSGSV: */
   /* { */
-  /*   snPrintf(snPrintf(" ========================== Call NSGSV solver for Second Order Cone LCP problem ==========================\n"); */
+  /*   numerics_printf(numerics_printf(" ========================== Call NSGSV solver for Second Order Cone LCP problem ==========================\n"); */
   /*   soclcp_nsgs_v(problem, r , v , &info , options); */
   /*   break; */
   /* } */
   /* /\* Proximal point algorithm *\/ */
   /* case SICONOS_SOCLCP_PROX: */
   /* { */
-  /*   snPrintf(snPrintf(" ========================== Call PROX (Proximal Point) solver for Second Order Cone LCP problem ==========================\n"); */
+  /*   numerics_printf(numerics_printf(" ========================== Call PROX (Proximal Point) solver for Second Order Cone LCP problem ==========================\n"); */
   /*   soclcp_proximal(problem, r , v , &info , options); */
   /*   break; */
   /* } */
   /* /\* Tresca Fixed point algorithm *\/ */
   /* case SICONOS_SOCLCP_TFP: */
   /* { */
-  /*   snPrintf(" ========================== Call TFP (Tresca Fixed Point) solver for Second Order Cone LCP problem ==========================\n"); */
+  /*   numerics_printf(" ========================== Call TFP (Tresca Fixed Point) solver for Second Order Cone LCP problem ==========================\n"); */
   /*   soclcp_TrescaFixedPoint(problem, r , v , &info , options); */
   /*   break; */
   /* } */
   case SICONOS_SOCLCP_VI_FPP:
   {
-    snPrintf(" ========================== Call VI_FixedPointProjection (VI_FPP) solver for Second Order Cone LCP problem ==========================\n");
+    numerics_printf(" ========================== Call VI_FixedPointProjection (VI_FPP) solver for Second Order Cone LCP problem ==========================\n");
     soclcp_VI_FixedPointProjection(problem, r , v , &info , options);
     break;
   }
   /* VI Extra Gradient algorithm */
   case SICONOS_SOCLCP_VI_EG:
   {
-    snPrintf(" ========================== Call VI_ExtraGradient (VI_EG) solver for Second Order Cone LCP problem ==========================\n");
+    numerics_printf(" ========================== Call VI_ExtraGradient (VI_EG) solver for Second Order Cone LCP problem ==========================\n");
     soclcp_VI_ExtraGradient(problem, r , v , &info , options);
     break;
   }
   /* /\* Hyperplane Projection algorithm *\/ */
   /* case SICONOS_SOCLCP_HP: */
   /* { */
-  /*   snPrintf(" ========================== Call Hyperplane Projection (HP) solver for Second Order Cone LCP problem ==========================\n"); */
+  /*   numerics_printf(" ========================== Call Hyperplane Projection (HP) solver for Second Order Cone LCP problem ==========================\n"); */
   /*   soclcp_HyperplaneProjection(problem, r , v , &info , options); */
   /*   break; */
   /* } */
   /* /\* Alart Curnier in local coordinates *\/ */
   /* case SICONOS_SOCLCP_NSN_AC: */
   /* { */
-  /*   snPrintf(" ========================== Call Alart Curnier solver for Second Order Cone LCP problem ==========================\n"); */
+  /*   numerics_printf(" ========================== Call Alart Curnier solver for Second Order Cone LCP problem ==========================\n"); */
   /*   if (problem->M->matrix0) */
   /*   { */
   /*     soclcp_nonsmooth_Newton_AlartCurnier(problem, r , v , &info , options); */
@@ -146,21 +145,21 @@ int soclcp_driver(SecondOrderConeLinearComplementarityProblem* problem,
   /* /\* Fischer Burmeister in local coordinates *\/ */
   /* case SICONOS_SOCLCP_NSN_FB: */
   /* { */
-  /*   snPrintf(" ========================== Call Fischer Burmeister solver for Second Order Cone LCP problem ==========================\n"); */
+  /*   numerics_printf(" ========================== Call Fischer Burmeister solver for Second Order Cone LCP problem ==========================\n"); */
   /*   soclcp_nonsmooth_Newton_FischerBurmeister(problem, r , v , &info , options); */
   /*   break; */
   /* } */
   /* case SICONOS_SOCLCP_QUARTIC_NU: */
   /* case SICONOS_SOCLCP_QUARTIC: */
   /* { */
-  /*   snPrintf(" ========================== Call Quartic solver for Second Order Cone LCP problem ==========================\n"); */
+  /*   numerics_printf(" ========================== Call Quartic solver for Second Order Cone LCP problem ==========================\n"); */
   /*   soclcp_unitary_enumerative(problem, r , v , &info , options); */
   /*   break; */
   /* } */
   /* case SICONOS_SOCLCP_AlartCurnierNewton: */
   /* case SICONOS_SOCLCP_DampedAlartCurnierNewton: */
   /* { */
-  /*   snPrintf(" ========================== Call Quartic solver for Second Order Cone LCP problem ==========================\n"); */
+  /*   numerics_printf(" ========================== Call Quartic solver for Second Order Cone LCP problem ==========================\n"); */
   /*   info =soclcp_Newton_solve(problem, r , options); */
   /*   break; */
   /* } */

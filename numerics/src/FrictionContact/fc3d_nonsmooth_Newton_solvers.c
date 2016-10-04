@@ -593,8 +593,7 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers* equation
         }
       default:
         {
-          fprintf(stderr, "fc3d esolve: unknown linear solver.\n");
-          return;
+          numerics_error("fc3d_nonsmooth_Newton_solvers_solve", "Unknown linear solver.\n");
         }
     }
   }
@@ -634,7 +633,8 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers* equation
     {
       if (verbose > 0)
       {
-        fprintf(stderr, "fc3d esolve: warning! linear solver exit with code = %d\n", lsi);
+        numerics_warning("fc3d_nonsmooth_Newton_solvers_solve",
+                         "warning! linear solver exit with code = %d\n", lsi);
       }
     }
 
@@ -672,10 +672,9 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers* equation
       break;
     default:
       {
-        fprintf(stderr, "fc3d esolve: unknown line search option.\n");
-        return;
+        numerics_error("fc3d_nonsmooth_Newton_solvers_solve",
+                       "Unknown line search option.\n");
       }
-
     }
 
     if (!info_ls)
