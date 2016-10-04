@@ -1,7 +1,4 @@
 #include "OccContactShape.hpp"
-#include "ContactShapeDistance.hpp"
-#include "cadmbtb.hpp"
-#include "Geometer.hpp"
 
 #include <RuntimeException.hpp>
 
@@ -45,37 +42,6 @@ void OccContactShape::computeUVBounds()
     "OccContactShape::computeUVBounds() : cannot compute UV bounds for this contact shape"
     );
 }
-
-
-SP::ContactShapeDistance OccContactShape::distance(
-  const OccContactShape& sh2, bool normalFromFace1) const
-{
-  Geometer geometer(*this);
-  sh2.accept(geometer);
-
-  return geometer.answer;
-
-}
-
-SP::ContactShapeDistance OccContactShape::distance(
-  const OccContactFace& sh2, bool normalFromFace1) const
-{
-  RuntimeException::selfThrow(
-    "OccContactShape::distance() : cannot compute distance to this contact face"
-    );
-  return SP::ContactShapeDistance();
-}
-
-SP::ContactShapeDistance OccContactShape::distance(
-  const OccContactEdge& sh2, bool normalFromFace1) const
-{
-  RuntimeException::selfThrow(
-    "OccContactShape::distance() : cannot compute distance to this contact edge"
-    );
-
-  return SP::ContactShapeDistance();
-}
-
 
 std::string OccContactShape::exportBRepToString() const
 {

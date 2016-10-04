@@ -24,6 +24,7 @@
 #define OccR_hpp
 
 #include "MechanicsFwd.hpp"
+#include "Geometer.hpp"
 
 #include <SiconosFwd.hpp>
 #include <NewtonEulerFrom3DLocalFrameR.hpp>
@@ -35,7 +36,9 @@ public:
    *  \param contact1 : the first contact.
    *  \param contact2 : the second contact.
    */
-  OccR(const ContactPoint& contact1, const ContactPoint& contact2);
+  OccR(const ContactPoint& contact1,
+       const ContactPoint& contact2,
+       const DistanceCalculatorType& distance_calculator = CadmbtbType());
 
   /** Compute h.
    *  \param time : the time.

@@ -2,29 +2,30 @@
 #include "ContactPoint.hpp"
 #include "OccContactShape.hpp"
 #include "ContactShapeDistance.hpp"
-#include "Geometer.hpp"
-
+#include "WhichGeometer.hpp"
 #include <limits>
 #include <iostream>
+#include <boost/typeof/typeof.hpp>
 
 OccR::OccR(const ContactPoint& contact1,
-           const ContactPoint& contact2) :
+           const ContactPoint& contact2,
+           const DistanceCalculatorType& distance_calculator) :
   NewtonEulerFrom3DLocalFrameR(),
-  _contact1(contact1), _contact2(contact2), _geometer(new Geometer()),
+  _contact1(contact1),
+  _contact2(contact2),
+  _geometer(ask<WhichGeometer<BOOST_TYPEOF(distance_calculator)> >(contact1.contactShape())),
   _normalFromFace1(false),
   _offsetp1(false),
-  _offset(0.0)
+  _offset(0.002)
 {
 }
 
 
 void OccR::computeh(double time, BlockVector& q0, SiconosVector& y)
 {
-  const OccContactShape& pcsh1 = *this->_contact1.contactShape();
-  const OccContactShape& pcsh2 = *this->_contact2.contactShape();
+  this->_contact2.contactShape().accept(*this->_geometer);
 
-  SP::ContactShapeDistance pdist = _geometer->distance(pcsh1, pcsh2);
-  ContactShapeDistance& dist = *pdist;
+  ContactShapeDistance& dist = this->_geometer->answer;
 
   double& X1 = dist.x1;
   double& Y1 = dist.y1;

@@ -5,6 +5,9 @@
 #include "OccContactFace.hpp"
 #include "OccContactEdge.hpp"
 #include "ContactShapeDistance.hpp"
+#include "ContactPoint.hpp"
+#include "WhichGeometer.hpp"
+#include "WhichGeometer.hpp"
 
 #include <TopoDS_Shape.hxx>
 #include <BRepPrimAPI_MakeSphere.hxx>
@@ -196,10 +199,11 @@ void OccTest::distance()
   std::cout << translat2.X() << "," << translat2.Y() << "," << translat2.Z()
             << std::endl;
 
-  SP::ContactShapeDistance pdist =
-    body1->contactShape(0).distance(body2->contactShape(0));
+  SP::Geometer geometer = ask<WhichGeometer<CadmbtbType> >(body1->contactShape(0));
 
-  ContactShapeDistance& dist = *pdist;
+  body2->contactShape(0).accept(*geometer);
+
+  ContactShapeDistance& dist = geometer->answer;
 
   std::cout << dist.value << std::endl;
 

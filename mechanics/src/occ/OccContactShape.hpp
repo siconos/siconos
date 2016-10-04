@@ -23,8 +23,8 @@
 
 #include "MechanicsFwd.hpp"
 
-#include <SiconosFwd.hpp>
-#include <SiconosVisitor.hpp>
+#include "SiconosFwd.hpp"
+#include "SiconosVisitor.hpp"
 #include <string>
 
 DEFINE_SPTR(TopoDS_Shape);
@@ -131,31 +131,6 @@ struct OccContactShape
       \param q : NewtonEulerDS state
   */
   virtual void move(const SiconosVector& q);
-
-
-  /** Distance to a general contact shape.
-      \param sh2 : the contact shape.
-      \param normalFromFace1 : normal on first contact shape, default on second.
-      \return the distance, contact points and normal in ContactShapeDistance
-   */
-  virtual SP::ContactShapeDistance distance(
-    const OccContactShape& sh2, bool normalFromFace1=false) const;
-
-  /** Distance to a contact face.
-      \param sh2 : the contact face.
-      \param normalFromFace1 : normal on first contact shape, default on second.
-      \return the distance, contact points and normal in ContactShapeDistance
-   */
-  virtual SP::ContactShapeDistance distance(
-    const OccContactFace& sh2, bool normalFromFace1=false) const;
-
-  /** Distance to a contact edge.
-      \param sh2 : the contact edge.
-      \param normalFromFace1 : normal on first contact shape, default on second.
-      \return the distance, contact points and normal in ContactShapeDistance
-   */
-  virtual SP::ContactShapeDistance distance(
-    const OccContactEdge& sh2, bool normalFromFace1=false) const;
 
   /** Computed UV bounds.
    * @{
