@@ -51,21 +51,30 @@ protected:
   */
   ACCEPT_SERIALIZATION(SiconosContactor);
 
-  std::vector<SP::SiconosShape> _shapes;
-
 public:
   virtual ~SiconosContactor() {}
 
-  const std::vector<SP::SiconosShape> &shapes() const
+  struct ShapeOffset {
+    ShapeOffset(SP::SiconosShape _shape, SP::SiconosVector _offset)
+      : shape(_shape), offset(_offset) {}
+    SP::SiconosShape shape;
+    SP::SiconosVector offset;
+  };
+
+  const std::vector<ShapeOffset> &shapes() const
     { return _shapes; }
 
-  virtual void addShape(SP::SiconosShape shape);
+  virtual void addShape(SP::SiconosShape shape,
+                        SP::SiconosVector position);
 
   void setPosition(const SP::SiconosVector position);
 
   /** visitors hook
    */
   ACCEPT_VISITORS();
+
+protected:
+  std::vector<ShapeOffset> _shapes;
 };
 
 #endif /* SiconosContactor_h */

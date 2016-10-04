@@ -802,10 +802,9 @@ class Hdf5():
                     # TODO contactor position
                     # shp.setPosition(c.translation + c.orientation)
                     pos = (translation + orientation)
-                    shp.setPosition(pos)
                     shp.setGroup(c.group)
                     print('Adding shape %s to static contactor'%c.name, pos)
-                    self._static_contactor.addShape(shp)
+                    self._static_contactor.addShape(shp, pos)
 
                     self._static[name] = {
                         'number': number,
@@ -877,9 +876,9 @@ class Hdf5():
                 contactor = SiconosContactor()
                 for c in contactors:
                     shp = self._shape.get(c.name)
-                    shp.setPosition(list(c.translation) + list(c.orientation))
+                    pos = list(c.translation) + list(c.orientation)
                     shp.setGroup(c.group)
-                    contactor.addShape(shp)
+                    contactor.addShape(shp, pos)
 
                 body.setContactor(contactor)
 

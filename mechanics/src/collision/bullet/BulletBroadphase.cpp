@@ -266,12 +266,12 @@ void BulletBroadphase::buildGraph(SP::SiconosContactor contactor)
   impl->currentBodyDS.reset();
   impl->currentContactor = contactor;
 
-  std::vector<SP::SiconosShape>::const_iterator it;
+  std::vector<SiconosContactor::ShapeOffset>::const_iterator it;
   for (it=contactor->shapes().begin();
        it!=contactor->shapes().end();
        it++)
   {
-    (*it)->acceptSP(shared_from_this());
+    it->shape->acceptSP(shared_from_this());
   }
 }
 
@@ -624,14 +624,14 @@ void BulletBroadphase::visit(const BodyDS &bds)
   impl->currentBodyDS = spbds;
   impl->currentContactor = contactor;
 
-  std::vector<SP::SiconosShape>::const_iterator it;
+  std::vector<SiconosContactor::ShapeOffset>::const_iterator it;
   for (it=contactor->shapes().begin();
        it!=contactor->shapes().end();
        it++)
   {
-    (*it)->acceptSP(shared_from_this());
-    (*it)->setPosition(bds.q());
+    it->shape->acceptSP(shared_from_this());
   }
+  contactor->setPosition(bds.q());
 }
 
 void BulletBroadphase::updateGraph()
