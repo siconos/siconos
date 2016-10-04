@@ -75,6 +75,13 @@ siconos_debian_mechanisms = siconos_default.copy()(
     distrib='debian:latest')
 
 
+siconos_ubuntu_latest_mechanisms = siconos_default.copy()(
+    ci_config='with_mechanisms',
+    add_pkgs=['wget', 'bash', 'bullet', 'h5py', 'oce-pythonocc-deps',
+              'oce-pythonocc'],
+    with_examples=True,
+    distrib='ubuntu:latest')
+
 siconos_numerics_only = siconos_ubuntu_16_10.copy()(
     ci_config='no_cxx',
     remove_pkgs=['gnu-c++'])
