@@ -837,8 +837,9 @@ void BulletBroadphase::performBroadphase()
       flip = true;
     }
 
-    // If both bodies are static, no interaction is created.
-    if (!(pairA->ds || pairB->ds))
+    // If both collision objects belong to the same body (or no body),
+    // no interaction is created.
+    if (pairA->ds == pairB->ds)
       continue;
 
     if (it->point->m_userPersistentData)
