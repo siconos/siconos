@@ -28,6 +28,8 @@
 #include "Model.hpp"
 #include "DynamicalSystem.hpp"
 
+#include "SiconosVisitor.hpp"
+
 class InteractionManager : public SiconosVisitor
 {
 protected:

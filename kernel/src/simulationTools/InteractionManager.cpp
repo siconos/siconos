@@ -1,5 +1,10 @@
 
 #include "InteractionManager.hpp"
+#include "NonSmoothDynamicalSystem.hpp"
+#include "Simulation.hpp"
+#include "Model.hpp"
+
+#include "debug.h"
 
 void InteractionManager::link(SP::Model model,
                               SP::Interaction inter,
@@ -11,7 +16,7 @@ void InteractionManager::link(SP::Model model,
   model->nonSmoothDynamicalSystem()->link(inter, ds1, ds2);
 
   model->simulation()->initializeInteraction(
-    model()->simulation()->nextTime(),
+    model->simulation()->nextTime(),
     inter);
 
   // Note FP : ds init should probably be done once and only once for

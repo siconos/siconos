@@ -75,7 +75,7 @@ public:
   BulletBroadphase(SP::Model model);
   BulletBroadphase(const BulletOptions &options);
   BulletBroadphase(SP::Model model, const BulletOptions &options);
-  ~BulletBroadphase();
+  virtual ~BulletBroadphase();
 
 protected:
   BulletOptions _options;
