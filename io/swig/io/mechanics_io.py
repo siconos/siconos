@@ -903,7 +903,7 @@ class Hdf5():
                                   contactors[0].orientation,
                                   contactors[0].group)
 
-                body.setNullifyFGyr(True)
+                #body.setNullifyFGyr(True)
                 for contactor in contactors[1:]:
                     shape_id = self._shapeid[contactor.name]
 
