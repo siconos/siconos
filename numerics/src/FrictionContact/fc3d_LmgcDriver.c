@@ -50,7 +50,8 @@ int fc3d_LmgcDriver(double *reaction,
   }
   else if  (solver_id == SICONOS_FRICTION_3D_NSN_AC)
   {
-    numerics_solver_options.iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH] = SICONOS_FRICTION_3D_NSN_LINESEARCH_NO; 
+    numerics_solver_options.iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH] = SICONOS_FRICTION_3D_NSN_LINESEARCH_NO;
+    numerics_solver_options.iparam[SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY]=SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_VI_EG_NSN;
   }
 
   

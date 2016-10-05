@@ -29,6 +29,7 @@
 #include <math.h>
 #include <assert.h>
 #include "Friction_cst.h"
+#include "VI_cst.h"
 #include "SiconosLapack.h"
 
 #ifdef HAVE_MPI
@@ -222,7 +223,27 @@ void fc3d_nonsmooth_Newton_AlartCurnier(
   equation.problem = problem;
   equation.data = (void *) &acparams;
   equation.function = &nonsmoothEqnAlartCurnierFun;
-  fc3d_nonsmooth_Newton_solvers_solve(&equation, reaction, velocity, info,
-                                   options);
+
+  if
+    (options->iparam[SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY] ==  SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_VI_EG_NSN)
+  {
+    SolverOptions * options_vi_eg =(SolverOptions *)malloc(sizeof(SolverOptions));
+    fc3d_VI_ExtraGradient_setDefaultSolverOptions(options_vi_eg);
+    options_vi_eg->iparam[0] = 50;
+    options_vi_eg->dparam[0] = sqrt(options->dparam[0]);
+    options_vi_eg->iparam[SICONOS_VI_ERROR_EVALUATION] = SICONOS_VI_ERROR_EVALUATION_LIGHT;
+    fc3d_VI_ExtraGradient(problem, reaction , velocity , info , options_vi_eg);
+    
+    fc3d_nonsmooth_Newton_solvers_solve(&equation, reaction, velocity, info, options);
+  }
+  else if (options->iparam[SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY] ==  SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_NO)
+  {
+    fc3d_nonsmooth_Newton_solvers_solve(&equation, reaction, velocity, info, options);
+  }
+  else
+  {
+    numerics_error("fc3d_nonsmooth_Newton_AlartCurnier","Unknown nsn hybrid solver");
+  }
+  
 
 }
