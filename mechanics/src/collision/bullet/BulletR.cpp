@@ -75,12 +75,12 @@ BulletR::BulletR(SP::btManifoldPoint point,
   (*nc())(1) = _contactPoints->m_normalWorldOnB[1] * (flip ? -1 : 1);
   (*nc())(2) = _contactPoints->m_normalWorldOnB[2] * (flip ? -1 : 1);
 
-  (*pc1())(0) += (*nc())(0) * _y_correction_A / _scaling;
-  (*pc1())(1) += (*nc())(1) * _y_correction_A / _scaling;
-  (*pc1())(2) += (*nc())(2) * _y_correction_A / _scaling;
-  (*pc2())(0) -= (*nc())(0) * _y_correction_B / _scaling;
-  (*pc2())(1) -= (*nc())(1) * _y_correction_B / _scaling;
-  (*pc2())(2) -= (*nc())(2) * _y_correction_B / _scaling;
+  (*pc1())(0) += (*nc())(0) * _y_correction_A;
+  (*pc1())(1) += (*nc())(1) * _y_correction_A;
+  (*pc1())(2) += (*nc())(2) * _y_correction_A;
+  (*pc2())(0) -= (*nc())(0) * _y_correction_B;
+  (*pc2())(1) -= (*nc())(1) * _y_correction_B;
+  (*pc2())(2) -= (*nc())(2) * _y_correction_B;
 
   assert(!((*nc())(0)==0 && (*nc())(1)==0 && (*nc())(2)==0)
          && "nc = 0, problems..\n");
@@ -123,12 +123,12 @@ void BulletR::computeh(double time, BlockVector& q0, SiconosVector& y)
 
     // Adjust contact point positions correspondingly along normal.  TODO: This
     // assumes same distance in each direction, i.e. same margin per object.
-    (*pc1())(0) += (*nc())(0) * _y_correction_A / _scaling;
-    (*pc1())(1) += (*nc())(1) * _y_correction_A / _scaling;
-    (*pc1())(2) += (*nc())(2) * _y_correction_A / _scaling;
-    (*pc2())(0) -= (*nc())(0) * _y_correction_B / _scaling;
-    (*pc2())(1) -= (*nc())(1) * _y_correction_B / _scaling;
-    (*pc2())(2) -= (*nc())(2) * _y_correction_B / _scaling;
+    (*pc1())(0) += (*nc())(0) * _y_correction_A;
+    (*pc1())(1) += (*nc())(1) * _y_correction_A;
+    (*pc1())(2) += (*nc())(2) * _y_correction_A;
+    (*pc2())(0) -= (*nc())(0) * _y_correction_B;
+    (*pc2())(1) -= (*nc())(1) * _y_correction_B;
+    (*pc2())(2) -= (*nc())(2) * _y_correction_B;
   }
 
   DEBUG_PRINTF("distance : %g\n",  y.getValue(0));
