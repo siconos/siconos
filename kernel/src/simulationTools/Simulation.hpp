@@ -32,6 +32,7 @@
 // #include "Model.hpp"
 // #include "NonSmoothDynamicalSystem.hpp"
 // #include "Topology.hpp"
+#include "InteractionManager.hpp"
 
 
 /** Description of the simulation process (integrators, time
@@ -88,6 +89,10 @@ protected:
   /** A pointer to the simulated nonsmooth dynamical system
    */
   SP::NonSmoothDynamicalSystem _nsds;
+
+  /** An interaction manager
+   */
+  SP::InteractionManager _interman;
 
   /** _levelMinForOutput is the minimum level for the output
    * (Interaction::_lowerlevelForOutput) for all the interactions
@@ -159,7 +164,6 @@ protected:
   /** default constructor.
    */
   Simulation() {};
-
 
 
 private:
@@ -428,6 +432,10 @@ public:
    *  topology updates. */
   virtual void initializeInteraction(double time, SP::Interaction inter);
 
+  /** Set an object to automatically manage interactions during the simulation */
+  void setInteractionManager(SP::InteractionManager manager)
+    { _interman = manager; }
+
   /** computes a one step NS problem
    *  \param nb the id of the OneStepNSProblem to be computed
    *  \return information about the solver convergence.
@@ -556,7 +564,6 @@ public:
   /** visitors hook
    */
   VIRTUAL_ACCEPT_VISITORS(Simulation);
-
 };
 
 #endif // SIMULATION_H

@@ -190,6 +190,7 @@ BulletBroadphase::BulletBroadphase(SP::Model model)
 {
   initialize_impl();
 
+  _model = model;
   if (model)
     buildGraph(model);
 }
@@ -234,8 +235,8 @@ BulletBroadphase::~BulletBroadphase()
 
 void BulletBroadphase::buildGraph(SP::Model model)
 {
-  // required later in performBroadphase().
-  _model = model;
+  // // required later in performBroadphase().
+  // _model = model;
 
   DynamicalSystemsGraph& dsg =
     *(model->nonSmoothDynamicalSystem()->dynamicalSystems());
@@ -786,12 +787,12 @@ bool BulletBroadphase::bulletContactClear(void* userPersistentData)
   SP::Interaction *p_inter = (SP::Interaction*)userPersistentData;
   assert(p_inter!=NULL && "Contact point's stored (SP::Interaction*) is null!");
   DEBUG_PRINTF("unlinking interaction %p\n", &**p_inter);
-  gBulletBroadphase->unlink(*p_inter);
+  gBulletBroadphase->unlink(gBulletBroadphase->_model, *p_inter);
   delete p_inter;
   return false;
 }
 
-void BulletBroadphase::performBroadphase()
+void BulletBroadphase::updateInteractions(SP::Model model)
 {
   // 0. set up bullet callbacks
   gBulletBroadphase = this;
@@ -806,7 +807,7 @@ void BulletBroadphase::performBroadphase()
   impl->_collisionWorld->performDiscreteCollisionDetection();
   gBulletBroadphase = 0;
 
-  if (!model())
+  if (!model)
     return;
 
   // 2. deleted contact points have been removed from the graph during the
@@ -901,7 +902,7 @@ void BulletBroadphase::performBroadphase()
         it->point->m_userPersistentData = (void*)(new SP::Interaction(inter));
 
         /* link bodies by the new interaction */
-        link(inter, pairA->ds, pairB->ds);
+        link(model, inter, pairA->ds, pairB->ds);
       }
     }
     // if (n_points++ < 4) {
@@ -914,7 +915,7 @@ void BulletBroadphase::performBroadphase()
   // printf(", %d\n", late_interaction);
 
   /* Update non smooth problem */
-  model()->simulation()->initOSNS();
+  model->simulation()->initOSNS();
 }
 
 void BulletBroadphase::insertNonSmoothLaw(SP::NonSmoothLaw nslaw,

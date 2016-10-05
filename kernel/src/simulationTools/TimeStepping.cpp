@@ -451,6 +451,10 @@ void TimeStepping::advanceToEvent()
 {
   DEBUG_PRINTF("TimeStepping::advanceToEvent(). Time =%f\n",getTkp1());
 
+  // Update interactions if necessary
+  if (_interman)
+    _interman->updateGraph();
+
   // Initialize lambdas of all interactions.
   SP::InteractionsGraph indexSet0 = _nsds->
                                     topology()->indexSet(0);
