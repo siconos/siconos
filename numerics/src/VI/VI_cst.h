@@ -34,6 +34,20 @@ enum VI_SOLVER
   SICONOS_VI_BOX_PATH = 1022
 };
 
+enum SICONOS_VI_ERROR_EVALUATION_ENUM
+{
+  /** index in iparam to store the error evaluation method */
+  SICONOS_VI_ERROR_EVALUATION = 7,
+  SICONOS_VI_ERROR_EVALUATION_FULL = 0,
+  SICONOS_VI_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL = 1,
+  SICONOS_VI_ERROR_EVALUATION_LIGHT = 2,
+  SICONOS_VI_ERROR_EVALUATION_ADAPTIVE =3,
+  /** index in iparam to store the frequency of error evaluation method */
+  SICONOS_VI_ERROR_EVALUATION_FREQUENCY = 8 
+};
+
+
+
 extern char *  SICONOS_VI_EG_STR ;
 extern char *  SICONOS_VI_FPP_STR ;
 extern char *  SICONOS_VI_HP_STR ;

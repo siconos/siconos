@@ -77,7 +77,7 @@ void variationalInequality_ExtraGradient(VariationalInequality* problem, double 
 
   /* Variable for Line_search */
   int success =0;
-  double error_k;
+  double error_k, light_error_sum =0.0;
   int ls_iter = 0;
   int ls_itermax = 10;
   double tau=dparam[4], tauinv=dparam[5], L= dparam[6], Lmin = dparam[7];
@@ -126,7 +126,20 @@ void variationalInequality_ExtraGradient(VariationalInequality* problem, double 
       /* problem->ProjectionOnX(problem,xtmp,x); */
 
       /* **** Criterium convergence **** */
-      variationalInequality_computeError(problem, x , w, tolerance, options, &error);
+      if (options->iparam[SICONOS_VI_ERROR_EVALUATION] == SICONOS_VI_ERROR_EVALUATION_FULL )
+      {
+        variationalInequality_computeError(problem, x , w, tolerance, options, &error);
+      }
+      else if (options->iparam[SICONOS_VI_ERROR_EVALUATION] == SICONOS_VI_ERROR_EVALUATION_LIGHT )
+      {
+        cblas_dcopy(n, xtmp, 1,x , 1) ;
+        cblas_daxpy(n, -1.0, x_k , 1, xtmp , 1) ;
+        light_error_sum = cblas_dnrm2(n,xtmp,1);
+        double norm_x= cblas_dnrm2(n,x,1);
+        if (fabs(norm_x) > DBL_EPSILON)
+          light_error_sum /= norm_x;
+        error=light_error_sum;
+      }
 
       if (options->callback)
       {
@@ -235,7 +248,21 @@ void variationalInequality_ExtraGradient(VariationalInequality* problem, double 
 
 
         /* **** Criterium convergence **** */
-        variationalInequality_computeError(problem, x , w, tolerance, options, &error);
+        if (options->iparam[SICONOS_VI_ERROR_EVALUATION] == SICONOS_VI_ERROR_EVALUATION_FULL )
+        {
+          variationalInequality_computeError(problem, x , w, tolerance, options, &error);
+        }
+        else if (options->iparam[SICONOS_VI_ERROR_EVALUATION] == SICONOS_VI_ERROR_EVALUATION_LIGHT )
+        {
+          cblas_dcopy(n, xtmp, 1,x , 1) ;
+          cblas_daxpy(n, -1.0, x_k , 1, xtmp , 1) ;
+          light_error_sum = cblas_dnrm2(n,xtmp,1);
+          double norm_x= cblas_dnrm2(n,x,1);
+          if (fabs(norm_x) > DBL_EPSILON)
+            light_error_sum /= norm_x;
+          error=light_error_sum;
+        }
+
         DEBUG_PRINTF("error = %12.8e\t error_k = %12.8e\n",error,error_k);
         /*Update rho*/
         if ((rho_k*a1 < Lmin * a2) && (error < error_k))
@@ -345,7 +372,20 @@ void variationalInequality_ExtraGradient(VariationalInequality* problem, double 
 
 
         /* **** Criterium convergence **** */
-        variationalInequality_computeError(problem, x , w, tolerance, options, &error);
+        if (options->iparam[SICONOS_VI_ERROR_EVALUATION] == SICONOS_VI_ERROR_EVALUATION_FULL )
+        {
+          variationalInequality_computeError(problem, x , w, tolerance, options, &error);
+        }
+        else if (options->iparam[SICONOS_VI_ERROR_EVALUATION] == SICONOS_VI_ERROR_EVALUATION_LIGHT )
+        {
+          cblas_dcopy(n, xtmp, 1,x , 1) ;
+          cblas_daxpy(n, -1.0, x_k , 1, xtmp , 1) ;
+          light_error_sum = cblas_dnrm2(n,xtmp,1);
+          double norm_x= cblas_dnrm2(n,x,1);
+          if (fabs(norm_x) > DBL_EPSILON)
+            light_error_sum /= norm_x;
+          error=light_error_sum;
+        }
         DEBUG_PRINTF("error = %12.8e\t error_k = %12.8e\n",error,error_k);
         /*Update rho*/
         if ((rho_k*a1 < Lmin * a2*a2) && (error < error_k))
