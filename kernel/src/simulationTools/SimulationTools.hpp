@@ -30,6 +30,7 @@ Note that not all files from the current location are listed below, since some o
 #include "TimeSteppingD1Minus.hpp"
 #include "TimeSteppingDirectProjection.hpp"
 #include "TimeSteppingCombinedProjection.hpp"
+#include "InteractionManager.hpp"
 
 #include "Equality.hpp"
 #include "LCP.hpp"

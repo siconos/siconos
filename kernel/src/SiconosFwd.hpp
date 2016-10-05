@@ -52,6 +52,7 @@ DEFINE_SPTR(Simulation)
 DEFINE_SPTR(EventDriven)
 DEFINE_SPTR(TimeStepping)
 DEFINE_SPTR(EventsManager)
+DEFINE_SPTR(InteractionManager)
 
 DEFINE_SPTR(RelayNSL)
 DEFINE_SPTR(MixedComplementarityConditionNSL)

@@ -26,7 +26,7 @@
 
 #include <MechanicsFwd.hpp>
 
-#include <SiconosBroadphase.hpp>
+#include <InteractionManager.hpp>
 #include <SiconosShape.hpp>
 #include <SiconosContactor.hpp>
 
@@ -58,7 +58,7 @@ struct BulletStatistics
   int interaction_warnings;
 };
 
-class BulletBroadphase : public SiconosBroadphase, public std11::enable_shared_from_this<BulletBroadphase>
+class BulletBroadphase : public InteractionManager, public SiconosVisitor, public std11::enable_shared_from_this<BulletBroadphase>
 {
 protected:
   SP::BulletBroadphase_impl impl;
@@ -68,13 +68,14 @@ protected:
   // callback for contact point removal, and a global for context
   static bool bulletContactClear(void* userPersistentData);
   static BulletBroadphase *gBulletBroadphase;
+  SP::Model _model;
 
 public:
   BulletBroadphase();
   BulletBroadphase(SP::Model model);
   BulletBroadphase(const BulletOptions &options);
   BulletBroadphase(SP::Model model, const BulletOptions &options);
-  ~BulletBroadphase();
+  virtual ~BulletBroadphase();
 
 protected:
   BulletOptions _options;
@@ -105,7 +106,8 @@ public:
   void buildGraph(SP::SiconosContactor contactor);
 
   void updateGraph();
-  void performBroadphase();
+  void updateInteractions(SP::Simulation simulation);
+  SP::SiconosVisitor getDynamicalSystemsVisitor(SP::Simulation simulation);
 
   void insertNonSmoothLaw(SP::NonSmoothLaw, int group1, int group2);
   SP::NonSmoothLaw nonSmoothLaw(int group1, int group2);

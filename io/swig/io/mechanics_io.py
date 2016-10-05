@@ -778,7 +778,7 @@ class Hdf5():
 
             # add the dynamical system to the non smooth
             # dynamical system
-            nsds = self._broadphase.model().nonSmoothDynamicalSystem()
+            nsds = self._model.nonSmoothDynamicalSystem()
             nsds.insertDynamicalSystem(body)
             nsds.topology().setOSI(body, self._osi)
             nsds.setName(body, str(name))
@@ -923,33 +923,33 @@ class Hdf5():
                 # add the dynamical system to the non smooth
                 # dynamical system
                 if birth:
-                    nsds = self._broadphase.model().nonSmoothDynamicalSystem()
+                    nsds = self._model.nonSmoothDynamicalSystem()
                     if use_proposed:
                         print('Calling buildGraph for %s contactor'%str(name))
                         self._broadphase.buildGraph(body)
                         nsds.insertDynamicalSystem(body)
                         nsds.topology().setOSI(body, self._osi)
                         nsds.topology().initW(
-                            self._broadphase.model().simulation().nextTime(),
+                            self._model.simulation().nextTime(),
                             body, self._osi)
-                        body.initialize(self._broadphase.model().simulation().nextTime())
-                        self._broadphase.model().simulation().initialize(
-                            self._broadphase.model(), False)
+                        body.initialize(self._model.simulation().nextTime())
+                        self._model.simulation().initialize(
+                            self._model, False)
                     else:
                         self._broadphase.addDynamicObject(
                             body,
-                            self._broadphase.model().simulation(),
+                            self._model.simulation(),
                             self._osi)
                     nsds.setName(body, str(name))
                 else:
-                    nsds = self._broadphase.model().nonSmoothDynamicalSystem()
+                    nsds = self._model.nonSmoothDynamicalSystem()
                     nsds.insertDynamicalSystem(body)
                     nsds.topology().setOSI(body, self._osi)
                     nsds.setName(body, str(name))
 
     def importJoint(self, name):
         if self._broadphase is not None:
-            topo = self._broadphase.model().nonSmoothDynamicalSystem().\
+            topo = self._model.nonSmoothDynamicalSystem().\
                 topology()
 
             joint_class = getattr(joints,
@@ -968,7 +968,7 @@ class Hdf5():
                                     self.joints()[name].attrs['pivot_point'],
                                     self.joints()[name].attrs['axis'])
                 joint_inter = Interaction(5, joint_nslaw, joint)
-                self._broadphase.model().nonSmoothDynamicalSystem().\
+                self._model.nonSmoothDynamicalSystem().\
                     link(joint_inter, ds1, ds2)
 
             else:
@@ -977,7 +977,7 @@ class Hdf5():
                                     self.joints()[name].attrs['axis'])
 
                 joint_inter = Interaction(5, joint_nslaw, joint)
-                self._broadphase.model().nonSmoothDynamicalSystem().\
+                self._model.nonSmoothDynamicalSystem().\
                     link(joint_inter, ds1)
 
     def importPermanentInteraction(self, name):
@@ -986,7 +986,7 @@ class Hdf5():
         from siconos.mechanics import occ
         if (self._broadphase is not None and 'input' in self._data
               and self.permanent_interactions() is not None):
-            topo = self._broadphase.model().nonSmoothDynamicalSystem().\
+            topo = self._model.nonSmoothDynamicalSystem().\
                 topology()
             pinter = self.permanent_interactions()[name]
             body1_name=pinter.attrs['body1_name']
@@ -1032,9 +1032,9 @@ class Hdf5():
 
             try:
                 ds2 = topo.getDynamicalSystem(body2_name)
-                self._broadphase.model().nonSmoothDynamicalSystem().link(inter, ds1, ds2)
+                self._model.nonSmoothDynamicalSystem().link(inter, ds1, ds2)
             except:
-                self._broadphase.model().nonSmoothDynamicalSystem().link(inter, ds1)
+                self._model.nonSmoothDynamicalSystem().link(inter, ds1)
 
             self._keep.append([topods1, topods2, ocs1, ocs2, cp1, cp2, relation, inter])
                         
@@ -1166,7 +1166,7 @@ class Hdf5():
             # build collision graph
             if use_proposed:
                 print('Calling buildGraph')
-                self._broadphase.buildGraph(self._broadphase.model())
+                self._broadphase.buildGraph(self._model)
                 self._broadphase.buildGraph(self._static_contactor)
 
             for name in self.permanent_interactions():
@@ -1174,9 +1174,9 @@ class Hdf5():
 
     def currentTime(self):
         if self._initializing:
-            return self._broadphase.model().simulation().startingTime()
+            return self._model.simulation().startingTime()
         else:
-            return self._broadphase.model().simulation().nextTime()
+            return self._model.simulation().nextTime()
 
     def importBirths(self, body_class=None, shape_class=None,
                      face_class=None, edge_class=None,):
@@ -1265,7 +1265,7 @@ class Hdf5():
 
         time = self.currentTime()
 
-        positions = self._io.positions(self._broadphase.model())
+        positions = self._io.positions(self._model)
 
         if positions is not None:
 
@@ -1287,7 +1287,7 @@ class Hdf5():
 
         time = self.currentTime()
 
-        velocities = self._io.velocities(self._broadphase.model())
+        velocities = self._io.velocities(self._model)
 
         if velocities is not None:
 
@@ -1304,10 +1304,10 @@ class Hdf5():
         """
         Outputs contact forces
         """
-        if self._broadphase.model().nonSmoothDynamicalSystem().\
+        if self._model.nonSmoothDynamicalSystem().\
                 topology().indexSetsSize() > 1:
             time = self.currentTime()
-            contact_points = self._io.contactPoints(self._broadphase.model())
+            contact_points = self._io.contactPoints(self._model)
 
             if contact_points is not None:
 
@@ -1325,10 +1325,10 @@ class Hdf5():
         """
         Outputs domains of contact points
         """
-        if self._broadphase.model().nonSmoothDynamicalSystem().\
+        if self._model.nonSmoothDynamicalSystem().\
                 topology().indexSetsSize() > 1:
             time = self.currentTime()
-            domains = self._io.domains(self._broadphase.model())
+            domains = self._io.domains(self._model)
 
             if domains is not None:
 
@@ -1346,7 +1346,7 @@ class Hdf5():
         """
 
         time = self.currentTime()
-        so = self._broadphase.model().simulation().oneStepNSProblem(0).\
+        so = self._model.simulation().oneStepNSProblem(0).\
             numericsSolverOptions()
 
         current_line = self._solv_data.shape[0]
@@ -1373,7 +1373,7 @@ class Hdf5():
         Outputs solver #iterations & precision reached
         """
         time = self.currentTime()
-        so = self._broadphase.model().simulation().oneStepNSProblem(0).\
+        so = self._model.simulation().oneStepNSProblem(0).\
             numericsSolverOptions()
         if so.solverId == Numerics.SICONOS_GENERIC_MECHANICAL_NSGS:
             iterations = so.iparam[3]
@@ -1794,7 +1794,8 @@ class Hdf5():
 
         # Model
         #
-        model=Model(t0, T)
+        self._model=Model(t0, T)
+        model=self._model
 
         # (1) OneStepIntegrators
         joints=list(self.joints())
@@ -1856,6 +1857,7 @@ class Hdf5():
         simulation=time_stepping(timedisc)
         simulation.insertIntegrator(self._osi)
         simulation.insertNonSmoothProblem(osnspb)
+        simulation.insertInteractionManager(self._broadphase)
         simulation.setNewtonMaxIteration(Newton_max_iter)
         simulation.setNewtonTolerance(1e-10)
 
@@ -1895,9 +1897,10 @@ class Hdf5():
                 controller.step()
 
             if proposed_is_here and use_proposed:
-                self._broadphase.resetStatistics()
-                self._broadphase.updateGraph()
-                self._broadphase.performBroadphase()
+                pass
+                #self._broadphase.resetStatistics()
+                #self._broadphase.updateGraph()
+                #self._broadphase.performBroadphase()
             else:
                 log(self._broadphase.buildInteractions, with_timer)\
                     (model.currentTime())
@@ -1929,11 +1932,11 @@ class Hdf5():
                     self._broadphase.statistics().new_interactions_created
                     + self._broadphase.statistics().existing_interactions_processed)
             else:
-                numberOfContact = (self._broadphase.model().simulation()
+                numberOfContact = (self._model.simulation()
                                    .oneStepNSProblem(0).getSizeOutput()/3)
 
             if numberOfContact > 0 :
-                print('number of contact',self._broadphase.model().simulation().oneStepNSProblem(0).getSizeOutput()/3)
+                print('number of contact',self._model.simulation().oneStepNSProblem(0).getSizeOutput()/3)
                 self.printSolverInfos()
 
             if violation_verbose and numberOfContact > 0 :

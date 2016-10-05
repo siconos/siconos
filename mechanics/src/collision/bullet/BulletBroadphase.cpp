@@ -190,6 +190,7 @@ BulletBroadphase::BulletBroadphase(SP::Model model)
 {
   initialize_impl();
 
+  _model = model;
   if (model)
     buildGraph(model);
 }
@@ -786,13 +787,20 @@ bool BulletBroadphase::bulletContactClear(void* userPersistentData)
   SP::Interaction *p_inter = (SP::Interaction*)userPersistentData;
   assert(p_inter!=NULL && "Contact point's stored (SP::Interaction*) is null!");
   DEBUG_PRINTF("unlinking interaction %p\n", &**p_inter);
-  gBulletBroadphase->unlink(*p_inter);
+  gBulletBroadphase->unlink(
+    gBulletBroadphase->_model->simulation()->nonSmoothDynamicalSystem(),
+    *p_inter);
   delete p_inter;
   return false;
 }
 
-void BulletBroadphase::performBroadphase()
+void BulletBroadphase::updateInteractions(SP::Simulation simulation)
 {
+  printf("updateInteractions\n");
+
+  resetStatistics();
+  updateGraph();
+
   // 0. set up bullet callbacks
   gBulletBroadphase = this;
   gContactDestroyedCallback = this->bulletContactClear;
@@ -806,7 +814,7 @@ void BulletBroadphase::performBroadphase()
   impl->_collisionWorld->performDiscreteCollisionDetection();
   gBulletBroadphase = 0;
 
-  if (!model())
+  if (!simulation)
     return;
 
   // 2. deleted contact points have been removed from the graph during the
@@ -901,20 +909,27 @@ void BulletBroadphase::performBroadphase()
         it->point->m_userPersistentData = (void*)(new SP::Interaction(inter));
 
         /* link bodies by the new interaction */
-        link(inter, pairA->ds, pairB->ds);
+        link(simulation->nonSmoothDynamicalSystem(), simulation,
+             inter, pairA->ds, pairB->ds);
       }
     }
-    // if (n_points++ < 4) {
-    //   printf(", %f", it->point->getDistance());
-    // }
   }
+}
 
-  // while (n_points++ < 4)
-  //   printf(", 0");
-  // printf(", %d\n", late_interaction);
+struct CollisionUpdater : public SiconosVisitor
+{
+  using SiconosVisitor::visit;
 
-  /* Update non smooth problem */
-  model()->simulation()->initOSNS();
+  void visit(const BodyDS& bds)
+  {
+    if (bds.contactor())
+      bds.contactor()->setPosition(bds.q());
+  }
+};
+
+SP::SiconosVisitor BulletBroadphase::getDynamicalSystemsVisitor(SP::Simulation simulation)
+{
+  return SP::SiconosVisitor(new CollisionUpdater);
 }
 
 void BulletBroadphase::insertNonSmoothLaw(SP::NonSmoothLaw nslaw,

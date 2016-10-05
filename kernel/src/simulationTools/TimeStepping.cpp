@@ -345,18 +345,19 @@ void TimeStepping::nextStep()
 void TimeStepping::update(unsigned int levelInput)
 {
   DEBUG_BEGIN("TimeStepping::update(unsigned int levelInput)\n");
+
   // 1 - compute input (lambda -> r)
   if (!_allNSProblems->empty())
     _nsds->updateInput(nextTime(),levelInput);
-
-
 
   // 2 - compute state for each dynamical system
   OSIIterator itOSI;
   for (itOSI = _allOSI->begin(); itOSI != _allOSI->end() ; ++itOSI)
     (*itOSI)->updateState(levelInput);
+
   /*Because the dof of DS have been updated,
     the world (CAO for example) must be updated.*/
+  printf("updateWorldFromDS\n");
   updateWorldFromDS();
 
   // 3 - compute output ( x ... -> y)
@@ -451,6 +452,30 @@ void TimeStepping::advanceToEvent()
 {
   DEBUG_PRINTF("TimeStepping::advanceToEvent(). Time =%f\n",getTkp1());
 
+  // Update interactions if a manager was provided
+  if (_interman) {
+    // Visit relevant DSs before performing interactions update.
+    // e.g., update the collision engine to new DS positions.
+    // (replaces updateWorldFromDS)
+    SP::SiconosVisitor visitor(
+      _interman->getDynamicalSystemsVisitor(shared_from_this()));
+    if (visitor)
+    {
+      DynamicalSystemsGraph& dsg = *_nsds->dynamicalSystems();
+      DynamicalSystemsGraph::VIterator dsi, dsiend;
+      std11::tie(dsi, dsiend) = dsg.vertices();
+      for (; dsi != dsiend; ++dsi)
+      {
+        dsg.bundle(*dsi)->accept(*visitor);
+      }
+    }
+
+    _interman->updateInteractions(shared_from_this());
+
+    // TODO: This is only needed if the topology was actually touched
+    initOSNS();
+  }
+
   // Initialize lambdas of all interactions.
   SP::InteractionsGraph indexSet0 = _nsds->
                                     topology()->indexSet(0);
@@ -463,6 +488,7 @@ void TimeStepping::advanceToEvent()
   }
   newtonSolve(_newtonTolerance, _newtonMaxIteration);
 
+  printf("end of advanceToEvent\n");
 }
 
 /*update of the nabla */
@@ -562,6 +588,7 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
       DEBUG_BEGIN("          \n");
       DEBUG_END("          \n");
       _newtonNbIterations++;
+
       prepareNewtonIteration();
       computeFreeState();
       if (info)
