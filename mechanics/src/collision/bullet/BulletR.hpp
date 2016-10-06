@@ -31,16 +31,28 @@ private:
 
   const SP::btManifoldPoint _contactPoints;
 
-  bool _flip; /* if true, points A and B are swapped from the point
-               * view of the Relation. */
+  const double _y_correction_A;
+  const double _y_correction_B;
+  const double _scaling;
 
 public:
-  BulletR(SP::btManifoldPoint, bool flip=false);
+  BulletR(SP::btManifoldPoint,
+          bool flip=false,
+          double y_correction_A=0,
+          double y_correction_B=0,
+          double scaling=1);
+
+  bool _flip; /* if true, points A and B are swapped from the point
+               * view of the Relation. */
 
   SP::btManifoldPoint contactPoint() const
   {
     return _contactPoints;
   };
+
+  double y_correction_A() { return _y_correction_A; }
+  double y_correction_B() { return _y_correction_A; }
+  double y_correction() { return _y_correction_A + _y_correction_B; }
 
   virtual void computeh(double time, BlockVector& q0, SiconosVector& y);
 

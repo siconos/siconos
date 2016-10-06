@@ -1,6 +1,6 @@
 // -*- c++ -*-
 // SWIG interface for Siconos Mechanics/ContactDetection/Bullet
-%module(package="contact_detection", directors="1", allprotected="1") bullet
+%module(package="collision", directors="1", allprotected="1") bullet
 
  // serialization not yet implemented for bullet
 #undef WITH_IO
@@ -12,6 +12,7 @@
 %}
 #endif
 
+%include native.i
 %include base.i
 
 // due to undefined private copy constructors
@@ -283,3 +284,11 @@ PY_FULL_REGISTER(BulletFrom1DLocalFrameR);
     return index;
   }
 }
+
+// New Bullet stuff
+
+%include base.i
+
+PY_REGISTER_WITHOUT_HEADER(BulletOptions);
+PY_REGISTER_WITHOUT_HEADER(BulletStatistics);
+PY_FULL_REGISTER(BulletBroadphase);

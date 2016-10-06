@@ -25,7 +25,7 @@ from siconos.kernel import \
 
 import siconos.kernel as sk
 
-from siconos.mechanics.contact_detection.bullet import \
+from siconos.mechanics.collision.bullet import \
      btConvexHullShape, btVector3, btCollisionObject, \
      btBoxShape, btMatrix3x3, \
      BulletSpaceFilter, \
