@@ -355,11 +355,6 @@ void TimeStepping::update(unsigned int levelInput)
   for (itOSI = _allOSI->begin(); itOSI != _allOSI->end() ; ++itOSI)
     (*itOSI)->updateState(levelInput);
 
-  /*Because the dof of DS have been updated,
-    the world (CAO for example) must be updated.*/
-  printf("updateWorldFromDS\n");
-  updateWorldFromDS();
-
   // 3 - compute output ( x ... -> y)
   if (!_allNSProblems->empty())
   {
@@ -461,6 +456,7 @@ void TimeStepping::advanceToEvent()
       _interman->getDynamicalSystemsVisitor(shared_from_this()));
     if (visitor)
     {
+      printf("Visiting DSs...\n");
       DynamicalSystemsGraph& dsg = *_nsds->dynamicalSystems();
       DynamicalSystemsGraph::VIterator dsi, dsiend;
       std11::tie(dsi, dsiend) = dsg.vertices();
@@ -468,6 +464,7 @@ void TimeStepping::advanceToEvent()
       {
         dsg.bundle(*dsi)->accept(*visitor);
       }
+      printf("done visiting DSs.\n");
     }
 
     _interman->updateInteractions(shared_from_this());

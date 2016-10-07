@@ -22,9 +22,10 @@ from siconos.mechanics import joints
 
 use_proposed = False
 try:
+    from siconos.kernel import TimeStepping
     from siconos.mechanics.collision import BodyDS, \
-        BodyTimeStepping, SiconosSphere, SiconosBox,\
-        SiconosPlane, SiconosContactor, SiconosConvexHull
+        SiconosSphere, SiconosBox, SiconosPlane, \
+        SiconosContactor, SiconosConvexHull
     from siconos.mechanics.collision.bullet import \
         BulletBroadphase, BulletOptions
     from siconos.mechanics.collision.bullet import \
@@ -925,8 +926,9 @@ class Hdf5():
                 if birth:
                     nsds = self._model.nonSmoothDynamicalSystem()
                     if use_proposed:
-                        print('Calling buildGraph for %s contactor'%str(name))
-                        self._broadphase.buildGraph(body)
+                        # print('Calling buildGraph for %s contactor'%str(name))
+                        # print ('calling buildGraph for body')
+                        # self._broadphase.buildGraph(body)
                         nsds.insertDynamicalSystem(body)
                         nsds.topology().setOSI(body, self._osi)
                         nsds.topology().initW(
@@ -942,6 +944,8 @@ class Hdf5():
                             self._osi)
                     nsds.setName(body, str(name))
                 else:
+                    # print ('calling buildGraph for body')
+                    # self._broadphase.buildGraph(body)
                     nsds = self._model.nonSmoothDynamicalSystem()
                     nsds.insertDynamicalSystem(body)
                     nsds.topology().setOSI(body, self._osi)
@@ -1165,9 +1169,15 @@ class Hdf5():
 
             # build collision graph
             if use_proposed:
-                print('Calling buildGraph')
+                print('Calling buildGraph for model')
                 self._broadphase.buildGraph(self._model)
-                self._broadphase.buildGraph(self._static_contactor)
+                # for b in self.new_bodies:
+                #     print ('calling buildGraph for body')
+                #     self._broadphase.buildGraph(b)
+                # self.new_bodies = []
+                # print('Calling buildGraph for static')
+                # self._broadphase.buildGraph(self._static_contactor)
+                self._broadphase.insertStaticContactor(self._static_contactor)
 
             for name in self.permanent_interactions():
                 self.importPermanentInteraction(name)
@@ -1752,7 +1762,7 @@ class Hdf5():
 
         if proposed_is_here and use_proposed:
             if time_stepping is None:
-                time_stepping = BodyTimeStepping
+                time_stepping = TimeStepping
 
             if space_filter is None:
                 space_filter = BulletBroadphase
