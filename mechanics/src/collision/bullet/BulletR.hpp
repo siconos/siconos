@@ -56,6 +56,8 @@ public:
 
   virtual void computeh(double time, BlockVector& q0, SiconosVector& y);
 
+  void updateVectors();
+
   ACCEPT_STD_VISITORS();
 };
 
