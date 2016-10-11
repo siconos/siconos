@@ -66,13 +66,12 @@ with Hdf5(mode='r+') as io:
 
     # print(pydoc.render_doc(io.run, "Help on %s"))
 
-    from siconos.mechanics.collision import BodyDS, \
-        BodyTimeStepping, SiconosContactor
+    from siconos.mechanics.collision import BodyDS, SiconosContactor
     from siconos.mechanics.collision.bullet import BulletBroadphase
 
     io.run(with_timer=False,
-            time_stepping=BodyTimeStepping,
-            space_filter=lambda x: BulletBroadphase(x, options),
+            time_stepping=None,
+            space_filter=lambda model: BulletBroadphase(options),
             body_class=BodyDS,
             shape_class=SiconosContactor,
             face_class=None,
