@@ -138,6 +138,19 @@ protected:
   std::map<const BodyDS*, std::vector<SP::btBoxShape>> bodyBoxMap;
 #endif
 
+  std::map<const BodyDS*, std::vector<SP::btConvexHullShape>> bodyCHMap;
+  std::map<const BodyDS*, std::vector<SP::btSphereShape>> bodySphereMap;
+
+#ifdef USE_BOX_FOR_PLANE
+  std::map<const BodyDS*, std::vector<SP::btBoxShape>> bodyPlaneMap;
+#else
+#ifdef USE_CONVEXHULL_FOR_PLANE
+  std::map<const BodyDS*, std::vector<SP::btConvexHullShape>> bodyPlaneMap;
+#else
+  std::map<const BodyDS*, std::vector<SP::btStaticPlaneShape>> bodyPlaneMap;
+#endif
+#endif
+
   SP::Simulation _simulation;
 
 public:
@@ -345,6 +358,10 @@ void BulletBroadphase::visit(SP::SiconosSphere sphere)
 
   // initialization
   visit_helper(sphere, btsphere, impl->sphereMap);
+
+  if (impl->currentBodyDS) {
+    impl->bodySphereMap[&*impl->currentBodyDS].push_back(btsphere);
+  }
 }
 
 void BulletBroadphase::update(SP::SiconosSphere sphere)
@@ -425,6 +442,10 @@ void BulletBroadphase::visit(SP::SiconosPlane plane)
 
   // initialization
   visit_helper(plane, btplane, impl->planeMap);
+
+  if (impl->currentBodyDS) {
+    impl->bodyPlaneMap[&*impl->currentBodyDS].push_back(btplane);
+  }
 }
 
 void BulletBroadphase::update(SP::SiconosPlane plane)
@@ -600,6 +621,10 @@ void BulletBroadphase::visit(SP::SiconosConvexHull ch)
 
   // initialization
   visit_helper(ch, btch, impl->chMap);
+
+  if (impl->currentBodyDS) {
+    impl->bodyCHMap[&*impl->currentBodyDS].push_back(btch);
+  }
 }
 
 void BulletBroadphase::update(SP::SiconosConvexHull ch)
@@ -949,7 +974,10 @@ struct CollisionUpdater : public SiconosVisitor
   void visit(const BodyDS& bds)
   {
     if (bds.contactor()) {
-      if (impl.bodyBoxMap.find(&bds) == impl.bodyBoxMap.end())
+      if (impl.bodyBoxMap.find(&bds) == impl.bodyBoxMap.end()
+          && impl.bodyCHMap.find(&bds) == impl.bodyCHMap.end()
+          && impl.bodySphereMap.find(&bds) == impl.bodySphereMap.end()
+          && impl.bodyPlaneMap.find(&bds) == impl.bodyPlaneMap.end())
       {
         broad.buildGraph(&bds);
       }
