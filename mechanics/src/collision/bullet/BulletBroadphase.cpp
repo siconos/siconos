@@ -138,6 +138,8 @@ protected:
   std::map<const BodyDS*, std::vector<SP::btBoxShape>> bodyBoxMap;
 #endif
 
+  SP::Simulation _simulation;
+
 public:
   BulletBroadphase_impl() {}
   ~BulletBroadphase_impl() {}
@@ -222,29 +224,10 @@ BulletBroadphase::BulletBroadphase()
   initialize_impl();
 }
 
-BulletBroadphase::BulletBroadphase(SP::Model model)
-{
-  initialize_impl();
-
-  _model = model;
-  if (model)
-    buildGraph(model);
-}
-
 BulletBroadphase::BulletBroadphase(const BulletOptions &options)
   : _options(options)
 {
   initialize_impl();
-}
-
-BulletBroadphase::BulletBroadphase(SP::Model model,
-                                   const BulletOptions &options)
-  : _options(options)
-{
-  initialize_impl();
-
-  if (model)
-    buildGraph(model);
 }
 
 BulletBroadphase::~BulletBroadphase()
@@ -266,24 +249,6 @@ BulletBroadphase::~BulletBroadphase()
       delete pair;
       it->second->setUserPointer(0);
     }
-  }
-}
-
-void BulletBroadphase::buildGraph(SP::Model model)
-{
-  // required later in performBroadphase().
-  _model = model;
-  return;
-
-  DynamicalSystemsGraph& dsg =
-    *(model->nonSmoothDynamicalSystem()->dynamicalSystems());
-  DynamicalSystemsGraph::VIterator dsi, dsiend;
-  std11::tie(dsi, dsiend) = dsg.vertices();
-
-  for (; dsi != dsiend; ++dsi)
-  {
-    SP::DynamicalSystem ds(dsg.bundle(*dsi));
-    ds->accept(*this);
   }
 }
 
@@ -845,9 +810,7 @@ bool BulletBroadphase::bulletContactClear(void* userPersistentData)
   SP::Interaction *p_inter = (SP::Interaction*)userPersistentData;
   assert(p_inter!=NULL && "Contact point's stored (SP::Interaction*) is null!");
   DEBUG_PRINTF("unlinking interaction %p\n", &**p_inter);
-  gBulletBroadphase->unlink(
-    gBulletBroadphase->_model->simulation()->nonSmoothDynamicalSystem(),
-    *p_inter);
+  gBulletBroadphase->unlink(*p_inter);
   delete p_inter;
   return false;
 }
@@ -973,8 +936,7 @@ void BulletBroadphase::updateInteractions(SP::Simulation simulation)
         it->point->m_userPersistentData = (void*)(new SP::Interaction(inter));
 
         /* link bodies by the new interaction */
-        link(simulation->nonSmoothDynamicalSystem(), simulation,
-             inter, pairA->ds, pairB->ds);
+        link(inter, pairA->ds, pairB->ds);
       }
     }
   }

@@ -35,14 +35,6 @@ class InteractionManager
 public:
   virtual ~InteractionManager() {}
 
-  // virtual void buildGraph(SP::Model model) = 0;
-  // virtual void buildGraph(SP::DynamicalSystem body) = 0;
-  // virtual void buildGraph(std::vector<SP::DynamicalSystem> bodies) = 0;
-  // virtual void buildGraph(SP::SiconosContactor contactors) = 0;
-  // void buildGraph(std::vector<SP::SiconosContactor> contactors);
-
-  virtual void updateGraph() = 0;
-
   virtual void updateInteractions(SP::Simulation simulation) {}
 
   virtual SP::SiconosVisitor getDynamicalSystemsVisitor(SP::Simulation simulation)
@@ -51,14 +43,24 @@ public:
   virtual void insertNonSmoothLaw(SP::NonSmoothLaw, int group1, int group2) = 0;
   virtual SP::NonSmoothLaw nonSmoothLaw(int group1, int group2) = 0;
 
-  void link(SP::NonSmoothDynamicalSystem nsds,
-            SP::Simulation simulation,
-            SP::Interaction inter,
+protected:
+  // May only be called from updateInteractions()
+  void link(SP::Interaction inter,
             SP::DynamicalSystem ds1,
             SP::DynamicalSystem ds2 = SP::DynamicalSystem());
 
-  void unlink(SP::NonSmoothDynamicalSystem nsds,
-              SP::Interaction inter);
+  // May only be called from updateInteractions()
+  void unlink(SP::Interaction inter);
+
+  SP::Simulation _simulation;
+
+  // Will be called by simulation before updateInteractions() for
+  // link() and unlink() to work.
+  void setSimulation(SP::Simulation sim) { _simulation = sim; }
+
+  friend class Simulation;
+  friend class TimeStepping;
+  friend class EventDriven;
 };
 
 #endif /* InteractionManager_h */

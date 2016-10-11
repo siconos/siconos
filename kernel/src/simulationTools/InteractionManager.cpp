@@ -6,17 +6,15 @@
 
 #include "debug.h"
 
-void InteractionManager::link(SP::NonSmoothDynamicalSystem nsds,
-                              SP::Simulation simulation,
-                              SP::Interaction inter,
+void InteractionManager::link(SP::Interaction inter,
                               SP::DynamicalSystem ds1,
                               SP::DynamicalSystem ds2)
 {
   DEBUG_PRINTF("link interaction : %d\n", inter->number());
 
-  nsds->link(inter, ds1, ds2);
+  _simulation->nonSmoothDynamicalSystem()->link(inter, ds1, ds2);
 
-  simulation->initializeInteraction(simulation->nextTime(), inter);
+  _simulation->initializeInteraction(_simulation->nextTime(), inter);
 
   // Note FP : ds init should probably be done once and only once for
   // all ds (like in simulation->initialize()) but where/when?
@@ -32,8 +30,7 @@ void InteractionManager::link(SP::NonSmoothDynamicalSystem nsds,
   }
 }
 
-void InteractionManager::unlink(SP::NonSmoothDynamicalSystem nsds,
-                                SP::Interaction inter)
+void InteractionManager::unlink(SP::Interaction inter)
 {
-  nsds->removeInteraction(inter);
+  _simulation->nonSmoothDynamicalSystem()->removeInteraction(inter);
 }

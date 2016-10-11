@@ -926,9 +926,6 @@ class Hdf5():
                 if birth:
                     nsds = self._model.nonSmoothDynamicalSystem()
                     if use_proposed:
-                        # print('Calling buildGraph for %s contactor'%str(name))
-                        # print ('calling buildGraph for body')
-                        # self._broadphase.buildGraph(body)
                         nsds.insertDynamicalSystem(body)
                         nsds.topology().setOSI(body, self._osi)
                         nsds.topology().initW(
@@ -944,8 +941,6 @@ class Hdf5():
                             self._osi)
                     nsds.setName(body, str(name))
                 else:
-                    # print ('calling buildGraph for body')
-                    # self._broadphase.buildGraph(body)
                     nsds = self._model.nonSmoothDynamicalSystem()
                     nsds.insertDynamicalSystem(body)
                     nsds.topology().setOSI(body, self._osi)
@@ -1167,16 +1162,7 @@ class Hdf5():
             for name in self.joints():
                 self.importJoint(name)
 
-            # build collision graph
             if use_proposed:
-                print('Calling buildGraph for model')
-                self._broadphase.buildGraph(self._model)
-                # for b in self.new_bodies:
-                #     print ('calling buildGraph for body')
-                #     self._broadphase.buildGraph(b)
-                # self.new_bodies = []
-                # print('Calling buildGraph for static')
-                # self._broadphase.buildGraph(self._static_contactor)
                 self._broadphase.insertStaticContactor(self._static_contactor)
 
             for name in self.permanent_interactions():

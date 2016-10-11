@@ -467,6 +467,7 @@ void TimeStepping::advanceToEvent()
       printf("done visiting DSs.\n");
     }
 
+    _interman->setSimulation(shared_from_this());
     _interman->updateInteractions(shared_from_this());
 
     // TODO: This is only needed if the topology was actually touched

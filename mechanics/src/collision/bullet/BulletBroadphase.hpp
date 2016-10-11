@@ -68,13 +68,10 @@ protected:
   // callback for contact point removal, and a global for context
   static bool bulletContactClear(void* userPersistentData);
   static BulletBroadphase *gBulletBroadphase;
-  SP::Model _model;
 
 public:
   BulletBroadphase();
-  BulletBroadphase(SP::Model model);
   BulletBroadphase(const BulletOptions &options);
-  BulletBroadphase(SP::Model model, const BulletOptions &options);
   virtual ~BulletBroadphase();
 
 protected:
@@ -100,7 +97,6 @@ protected:
 public:
   // TODO: default implementations of buildGraph to SiconosBroadphase?
   //       encountered problems with shared_from_this() when doing so.
-  void buildGraph(SP::Model model);
   void buildGraph(const BodyDS *body);
   void buildGraph(SP::BodyDS body);
   void buildGraph(std::vector<SP::BodyDS> bodies);
