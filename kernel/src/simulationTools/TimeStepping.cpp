@@ -456,7 +456,6 @@ void TimeStepping::advanceToEvent()
       _interman->getDynamicalSystemsVisitor(shared_from_this()));
     if (visitor)
     {
-      printf("Visiting DSs...\n");
       DynamicalSystemsGraph& dsg = *_nsds->dynamicalSystems();
       DynamicalSystemsGraph::VIterator dsi, dsiend;
       std11::tie(dsi, dsiend) = dsg.vertices();
@@ -464,7 +463,6 @@ void TimeStepping::advanceToEvent()
       {
         dsg.bundle(*dsi)->accept(*visitor);
       }
-      printf("done visiting DSs.\n");
     }
 
     _interman->setSimulation(shared_from_this());
@@ -485,8 +483,6 @@ void TimeStepping::advanceToEvent()
     indexSet0->bundle(*ui)->resetAllLambda();
   }
   newtonSolve(_newtonTolerance, _newtonMaxIteration);
-
-  printf("end of advanceToEvent\n");
 }
 
 /*update of the nabla */

@@ -254,13 +254,11 @@ BulletBroadphase::~BulletBroadphase()
 
 void BulletBroadphase::buildGraph(SP::BodyDS body)
 {
-  printf("BulletBroadphase::buildGraph(SP::BodyDS %p)\n", &*body);
   body->accept(*this);
 }
 
 void BulletBroadphase::buildGraph(const BodyDS *body)
 {
-  printf("BulletBroadphase::buildGraph(const BodyDS %p)\n", &*body);
   body->accept(*this);
 }
 
@@ -496,8 +494,6 @@ void BulletBroadphase::visit(SP::SiconosBox box)
   visit_helper(box, btbox, impl->boxMap);
 
   if (impl->currentBodyDS) {
-    printf("inserting into bodyBoxMap for body %p, box %p\n",
-           &*impl->currentBodyDS, &*box);
     impl->bodyBoxMap[&*impl->currentBodyDS].push_back(btbox);
   }
 }
@@ -810,6 +806,7 @@ bool BulletBroadphase::bulletContactClear(void* userPersistentData)
   SP::Interaction *p_inter = (SP::Interaction*)userPersistentData;
   assert(p_inter!=NULL && "Contact point's stored (SP::Interaction*) is null!");
   DEBUG_PRINTF("unlinking interaction %p\n", &**p_inter);
+  printf("unlinking interaction %p\n", &**p_inter);
   gBulletBroadphase->unlink(*p_inter);
   delete p_inter;
   return false;
@@ -817,8 +814,6 @@ bool BulletBroadphase::bulletContactClear(void* userPersistentData)
 
 void BulletBroadphase::updateInteractions(SP::Simulation simulation)
 {
-  printf("updateInteractions\n");
-
   resetStatistics();
 
   // Update static contactors, initial bodies have already been
@@ -953,11 +948,9 @@ struct CollisionUpdater : public SiconosVisitor
 
   void visit(const BodyDS& bds)
   {
-    printf("CollisionUpdater: visit(%p)\n", &bds);
     if (bds.contactor()) {
       if (impl.bodyBoxMap.find(&bds) == impl.bodyBoxMap.end())
       {
-        printf("calling buildGraph for body %p\n", &bds);
         broad.buildGraph(&bds);
       }
       bds.contactor()->setPosition(bds.q());
