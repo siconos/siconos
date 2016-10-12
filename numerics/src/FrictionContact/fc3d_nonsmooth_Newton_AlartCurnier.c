@@ -93,8 +93,8 @@ int fc3d_nonsmooth_Newton_AlartCurnier_setDefaultSolverOptions(
   options->numberOfInternalSolvers = 0;
   options->isSet = 1;
   options->filterOn = 1;
-  options->iSize = 14;
-  options->dSize = 14;
+  options->iSize = 20;
+  options->dSize = 20;
   options->iparam = (int *)calloc(options->iSize, sizeof(int));
   options->dparam = (double *)calloc(options->dSize, sizeof(double));
   options->dWork = NULL;
