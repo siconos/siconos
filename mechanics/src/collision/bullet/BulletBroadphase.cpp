@@ -31,6 +31,7 @@
 
 #include <map>
 #include <boost/format.hpp>
+#include <boost/make_shared.hpp>
 
 #include <Model.hpp>
 #include <Relation.hpp>
@@ -58,6 +59,9 @@
 #include <BulletCollision/CollisionShapes/btConvexHullShape.h>
 #include <LinearMath/btConvexHullComputer.h>
 
+#include <LinearMath/btQuaternion.h>
+#include <LinearMath/btVector3.h>
+
 //#define DEBUG_MESSAGES 1
 #include <debug.h>
 
@@ -70,18 +74,82 @@
 // #define USE_BOX_FOR_PLANE 1
 #define USE_CONVEXHULL_FOR_PLANE 1
 
+// Bullet types (from USE flags above)
+#ifdef USE_CONVEXHULL_FOR_BOX
+#define BTBOXSHAPE btConvexHullShape
+#else
+#define BTBOXSHAPE btBoxShape
+#endif
+
+#define BTCHSHAPE btConvexHullShape
+
+#ifdef USE_CONVEXHULL_FOR_SPHERE
+#define BTSPHERESHAPE btConvexHullShape
+#else
+#define BTSPHERESHAPE btSphereShape
+#endif
+
+#ifdef USE_BOX_FOR_PLANE
+#define BTPLANESHAPE btBoxShape
+#else
+#ifdef USE_CONVEXHULL_FOR_PLANE
+#define BTPLANESHAPE btConvexHullShape
+#else
+#define BTPLANESHAPE btStaticPlaneShape
+#endif
+#endif
+
+// We need to maintain a 3-way record associating each body shape pair
+// for each shape type, and maintaining other memory we need too.  We
+// also need to access generic shape stuff (group, margin) by a
+// pointer, so we need a base class.
+struct BodyShapeRecord
+{
+  BodyShapeRecord(SP::BodyDS d, SP::SiconosShape sh,
+                  SP::btCollisionObject btobj, SP::SiconosVector off)
+    : ds(d), sshape(sh), btobject(btobj), offset(off) {}
+  SP::BodyDS ds;
+  SP::SiconosShape sshape;
+  SP::btCollisionObject btobject;
+  SP::SiconosVector offset;
+};
+
+template <typename SICONOSSHAPE, typename BULLETSHAPE>
+struct BodyShapeRecordT : BodyShapeRecord
+{
+  BodyShapeRecordT(SP::BodyDS d, SICONOSSHAPE sh, BULLETSHAPE btsh,
+                   SP::btCollisionObject btobj, SP::SiconosVector off)
+    : BodyShapeRecord(d, sh, btobj, off), shape(sh), btshape(btsh) {}
+  SICONOSSHAPE shape;
+  BULLETSHAPE btshape;
+};
+
+// Body-Shape map types
+typedef BodyShapeRecordT<SP::SiconosBox, SP::BTBOXSHAPE> BodyBoxRecord;
+typedef std::map<const BodyDS*, std::vector<std11::shared_ptr<BodyBoxRecord> > >
+  BodyBoxMap;
+
+typedef BodyShapeRecordT<SP::SiconosSphere, SP::BTSPHERESHAPE> BodySphereRecord;
+typedef std::map<const BodyDS*, std::vector<std11::shared_ptr<BodySphereRecord> > >
+  BodySphereMap;
+
+typedef BodyShapeRecordT<SP::SiconosConvexHull, SP::BTCHSHAPE> BodyCHRecord;
+typedef std::map<const BodyDS*, std::vector<std11::shared_ptr<BodyCHRecord> > >
+  BodyCHMap;
+
+typedef BodyShapeRecordT<SP::SiconosPlane, SP::BTPLANESHAPE> BodyPlaneRecord;
+typedef std::map<const BodyDS*, std::vector<std11::shared_ptr<BodyPlaneRecord> > >
+  BodyPlaneMap;
+
 class CollisionUpdater;
 
-class BulletBroadphase_impl : public SiconosShapeHandler
+class BulletBroadphase_impl
 {
 protected:
   SP::btCollisionWorld _collisionWorld;
   SP::btDefaultCollisionConfiguration _collisionConfiguration;
   SP::btCollisionDispatcher _dispatcher;
   SP::btBroadphaseInterface _broadphase;
-
-  SP::SiconosContactor currentContactor;
-  SP::BodyDS currentBodyDS;
 
   std::vector<SP::SiconosContactor> staticContactors;
 
@@ -94,104 +162,65 @@ protected:
   std::vector<SP::SiconosContactor> queuedStaticContactors;
   void insertQueuedContactors(BulletBroadphase &broad);
 
-  std::vector<SP::SiconosPlane> dirtyPlanes;
-  std::vector<SP::SiconosSphere> dirtySpheres;
-  std::vector<SP::SiconosBox> dirtyBoxes;
-  std::vector<SP::SiconosConvexHull> dirtyCHs;
-
-  std::map<SP::SiconosShape, SP::btCollisionObject> objectMap;
-#ifdef USE_BOX_FOR_PLANE
-  std::map<SP::SiconosPlane, SP::btBoxShape> planeMap;
-#else
-#ifdef USE_CONVEXHULL_FOR_PLANE
-  std::map<SP::SiconosPlane, SP::btConvexHullShape> planeMap;
-#else
-  std::map<SP::SiconosPlane, SP::btStaticPlaneShape> planeMap;
-#endif
-#endif
-
-#ifdef USE_CONVEXHULL_FOR_SPHERE
-  std::map<SP::SiconosSphere, SP::btConvexHullShape> sphereMap;
-#else
-  std::map<SP::SiconosSphere, SP::btSphereShape> sphereMap;
-#endif
-
-#ifdef USE_CONVEXHULL_FOR_BOX
-  std::map<SP::SiconosBox, SP::btConvexHullShape> boxMap;
-#else
-  std::map<SP::SiconosBox, SP::btBoxShape> boxMap;
-#endif
-
-  std::map<SP::SiconosConvexHull, SP::btConvexHullShape> chMap;
-
-  std::map<Interaction*, bool> orphanedInteractions;
-
   // Non-smooth laws
   std::map<std::pair<int,int>, SP::NonSmoothLaw> nslaws;
 
   /* During iteration over DSs for position updates we need to access
    * btCollisionObject, so need a map DS->btXShape. We don't use an
    * SP::BodyDS because we need to use it from a const visitor. */
-#ifdef USE_CONVEXHULL_FOR_BOX
-  std::map<const BodyDS*, std::vector<SP::btConvexHullShape>> bodyBoxMap;
-#else
-  std::map<const BodyDS*, std::vector<SP::btBoxShape>> bodyBoxMap;
-#endif
-
-  std::map<const BodyDS*, std::vector<SP::btConvexHullShape>> bodyCHMap;
-  std::map<const BodyDS*, std::vector<SP::btSphereShape>> bodySphereMap;
-
-#ifdef USE_BOX_FOR_PLANE
-  std::map<const BodyDS*, std::vector<SP::btBoxShape>> bodyPlaneMap;
-#else
-#ifdef USE_CONVEXHULL_FOR_PLANE
-  std::map<const BodyDS*, std::vector<SP::btConvexHullShape>> bodyPlaneMap;
-#else
-  std::map<const BodyDS*, std::vector<SP::btStaticPlaneShape>> bodyPlaneMap;
-#endif
-#endif
+  BodyBoxMap bodyBoxMap;
+  BodyCHMap bodyCHMap;
+  BodySphereMap bodySphereMap;
+  BodyPlaneMap bodyPlaneMap;
 
   SP::Simulation _simulation;
 
-public:
-  BulletBroadphase_impl() {}
-  ~BulletBroadphase_impl() {}
+  /* Create collision objects for each shape type */
+  void createCollisionObject(const SP::BodyDS ds,
+                             const SP::SiconosPlane plane,
+                             const SP::SiconosVector offset);
+  void createCollisionObject(const SP::BodyDS ds,
+                             const SP::SiconosSphere sphere,
+                             const SP::SiconosVector offset);
+  void createCollisionObject(const SP::BodyDS ds,
+                             const SP::SiconosBox box,
+                             const SP::SiconosVector offset);
+  void createCollisionObject(const SP::BodyDS ds,
+                             const SP::SiconosConvexHull ch,
+                             const SP::SiconosVector offset);
 
-  virtual void onChanged(SP::SiconosPlane plane);
-  virtual void onChanged(SP::SiconosSphere sphere);
-  virtual void onChanged(SP::SiconosBox box);
-  virtual void onChanged(SP::SiconosConvexHull ch);
+  /* Call the above functions for each shape associated with a body or contactor. */
+  void createCollisionObjectsForBodyContactor(
+    const SP::BodyDS ds, const SP::SiconosContactor contactor = SP::SiconosContactor());
+
+  /* A helper function used to initialise new shapes, generic to the
+   * shape type */
+  template<typename ST, typename BT, typename BR, typename BSM>
+  void createCollisionObjectHelper(SP::BodyDS ds, ST& shape, BT& btshape,
+                                   BSM& bodyShapeMap, SP::SiconosVector offset);
+
+  void updateShape(const BodyBoxRecord &record);
+  void updateShape(const BodySphereRecord &record);
+  void updateShape(const BodyCHRecord &record);
+  void updateShape(const BodyPlaneRecord &record);
+
+  void updateAllShapesForDS(const BodyDS &bds);
+  void updateShapePosition(const BodyShapeRecord &record);
+
+  /* Helper to apply an offset transform to a position and return as a
+   * btTransform */
+  btTransform offsetTransform(const SiconosVector& position,
+                              const SiconosVector& offset);
+
+  BulletOptions &_options;
+
+public:
+  BulletBroadphase_impl(BulletOptions &op) : _options(op) {}
+  ~BulletBroadphase_impl() {}
 
   friend class BulletBroadphase;
   friend class CollisionUpdater;
 };
-
-struct BodyShapePair
-{
-  BodyShapePair(SP::BodyDS d, SP::SiconosShape sh) : ds(d), shape(sh) {}
-  SP::BodyDS ds;
-  SP::SiconosShape shape;
-};
-
-void BulletBroadphase_impl::onChanged(SP::SiconosPlane plane)
-{
-  dirtyPlanes.push_back(plane);
-}
-
-void BulletBroadphase_impl::onChanged(SP::SiconosSphere sphere)
-{
-  dirtySpheres.push_back(sphere);
-}
-
-void BulletBroadphase_impl::onChanged(SP::SiconosBox box)
-{
-  dirtyBoxes.push_back(box);
-}
-
-void BulletBroadphase_impl::onChanged(SP::SiconosConvexHull ch)
-{
-  dirtyCHs.push_back(ch);
-}
 
 void BulletBroadphase_impl::insertQueuedContactors(BulletBroadphase &broad)
 {
@@ -200,7 +229,7 @@ void BulletBroadphase_impl::insertQueuedContactors(BulletBroadphase &broad)
        con != queuedStaticContactors.end();
        con ++)
   {
-    broad.buildGraph(*con);
+    createCollisionObjectsForBodyContactor(NULL, *con);
     staticContactors.push_back(*con);
   }
   queuedStaticContactors.clear();
@@ -208,7 +237,7 @@ void BulletBroadphase_impl::insertQueuedContactors(BulletBroadphase &broad)
 
 void BulletBroadphase::initialize_impl()
 {
-  impl.reset(new BulletBroadphase_impl());
+  impl.reset(new BulletBroadphase_impl(_options));
   impl->_collisionConfiguration.reset(
     new btDefaultCollisionConfiguration());
 
@@ -251,49 +280,6 @@ BulletBroadphase::~BulletBroadphase()
 
   // must be the first de-allocated, otherwise segfault
   impl->_collisionWorld.reset();
-
-  // free memory used to point back to DS
-  std::map<SP::SiconosShape, SP::btCollisionObject>::iterator it;
-  for (it = impl->objectMap.begin(); it != impl->objectMap.end(); ++it)
-  {
-    BodyShapePair *pair =
-      static_cast<BodyShapePair*>(it->second->getUserPointer());
-    if (pair) {
-      delete pair;
-      it->second->setUserPointer(0);
-    }
-  }
-}
-
-void BulletBroadphase::buildGraph(SP::BodyDS body)
-{
-  body->accept(*this);
-}
-
-void BulletBroadphase::buildGraph(const BodyDS *body)
-{
-  body->accept(*this);
-}
-
-void BulletBroadphase::buildGraph(std::vector<SP::BodyDS> bodies)
-{
-  std::vector<SP::BodyDS>::iterator it;
-  for (it=bodies.begin(); it!=bodies.end(); ++it)
-    (*it)->accept(*this);
-}
-
-void BulletBroadphase::buildGraph(SP::SiconosContactor contactor)
-{
-  impl->currentBodyDS.reset();
-  impl->currentContactor = contactor;
-
-  std::vector<SiconosContactor::ShapeOffset>::const_iterator it;
-  for (it=contactor->shapes().begin();
-       it!=contactor->shapes().end();
-       it++)
-  {
-    it->shape->acceptSP(shared_from_this());
-  }
 }
 
 void BulletBroadphase::insertStaticContactor(SP::SiconosContactor contactor)
@@ -304,42 +290,101 @@ void BulletBroadphase::insertStaticContactor(SP::SiconosContactor contactor)
   impl->queuedStaticContactors.push_back(contactor);
 }
 
-template<typename ST, typename BT>
-void BulletBroadphase::visit_helper(ST& shape, BT& btshape,
-                                    std::map<ST,BT>& shapemap)
+void BulletBroadphase_impl::updateAllShapesForDS(const BodyDS &bds)
+{
+  std::vector<std11::shared_ptr<BodyPlaneRecord> >::iterator itp;
+  for (itp = bodyPlaneMap[&bds].begin(); itp != bodyPlaneMap[&bds].end(); itp++)
+    updateShape(**itp);
+
+  std::vector<std11::shared_ptr<BodySphereRecord> >::iterator its;
+  for (its = bodySphereMap[&bds].begin(); its != bodySphereMap[&bds].end(); its++)
+    updateShape(**its);
+
+  std::vector<std11::shared_ptr<BodyBoxRecord> >::iterator itb;
+  for (itb = bodyBoxMap[&bds].begin(); itb != bodyBoxMap[&bds].end(); itb++)
+    updateShape(**itb);
+
+  std::vector<std11::shared_ptr<BodyCHRecord> >::iterator itc;
+  for (itc = bodyCHMap[&bds].begin(); itc != bodyCHMap[&bds].end(); itc++)
+    updateShape(**itc);
+}
+
+template<typename ST, typename BT, typename BR, typename BSM>
+void BulletBroadphase_impl::createCollisionObjectHelper(
+  SP::BodyDS ds, ST& shape, BT& btshape, BSM& bodyShapeMap, SP::SiconosVector offset)
 {
   // create corresponding Bullet object and shape
   SP::btCollisionObject btobject(new btCollisionObject());
 
-  // track association (and to keep a reference)
-  impl->objectMap[shape] = SP::btCollisionObject(btobject);
-
   // associate the shape with the object
   btobject->setCollisionShape(&*btshape);
 
-  // allow Bullet to report colliding DSs
-  btobject->setUserPointer(
-    static_cast<void*>(new BodyShapePair(impl->currentBodyDS, shape)));
-
-  // track association (and to keep a reference)
-  shapemap[shape] = btshape;
-
   // put it in the world
-  impl->_collisionWorld->addCollisionObject(&*btobject);
+  _collisionWorld->addCollisionObject(&*btobject);
 
-  // install handler for updates
-  shape->setHandler(impl);
+  // create a record to keep track of things
+  // (for static contactor, ds=nil)
+  std11::shared_ptr<BR> record(
+    std11::make_shared<BR>(ds, shape, btshape, btobject, offset));
 
-  // initial update of the shape properties
-  update(shape);
+  bodyShapeMap[ds ? &*ds : 0].push_back(record);
+
+  assert(record->btobject);
+  assert(record->sshape);
+  assert(record->shape);
+  assert(record->btshape);
+  assert(record->offset);
+  assert(record->offset->size() == 7);
+
+  // Allow Bullet to report colliding DSs.  We need to access it from
+  // the collision callback as the record base class so down-cast it.
+  btobject->setUserPointer(
+    reinterpret_cast<void*>(
+      static_cast<BodyShapeRecord*>(&*record)));
+
+  // initial parameter update
+  updateShape(*record);
 }
 
-void BulletBroadphase::visit(SP::SiconosSphere sphere)
+btTransform BulletBroadphase_impl::offsetTransform(const SiconosVector& position,
+                                                   const SiconosVector& offset)
 {
-  DEBUG_PRINTF("contactor: %p, ", impl->currentContactor);
-  DEBUG_PRINTF("sphere: %p(%ld)\n",
-         &*sphere,sphere.use_count());
+  /* Adjust offset position according to current rotation */
+  btQuaternion rbase(position(4), position(5),
+                     position(6), position(3));
+  btVector3 rboffset = quatRotate(rbase, btVector3(offset(0),
+                                                   offset(1),
+                                                   offset(2)));
 
+  /* Calculate total orientation */
+  btQuaternion roffset(offset(4), offset(5), offset(6), offset(3));
+  btQuaternion r(rbase * roffset);
+
+  /* Set the absolute shape position */
+  return btTransform( rbase * roffset,
+                      btVector3(position(0), position(1), position(2)) + rboffset );
+}
+
+void BulletBroadphase_impl::updateShapePosition(const BodyShapeRecord &record)
+{
+  SiconosVector q(7);
+  if (record.ds)
+    q = *record.ds->q();
+  else {
+    q.zero();
+    q(3) = 1;
+  }
+
+  DEBUG_PRINTF("updating shape position: %p(%ld) - %f, %f, %f\n",
+               &*box,box.use_count(), q(0), q(1), q(2));
+
+  record.btobject->setWorldTransform( offsetTransform(q, *record.offset) );
+}
+
+void BulletBroadphase_impl::createCollisionObject(const SP::BodyDS ds,
+                                                  SP::SiconosSphere sphere,
+                                                  SP::SiconosVector offset)
+{
   // set radius to 1.0 and use scaling instead of setting radius
   // directly, makes it easier to change during update
 
@@ -357,58 +402,35 @@ void BulletBroadphase::visit(SP::SiconosSphere sphere)
 #endif
 
   // initialization
-  visit_helper(sphere, btsphere, impl->sphereMap);
-
-  if (impl->currentBodyDS) {
-    impl->bodySphereMap[&*impl->currentBodyDS].push_back(btsphere);
-  }
+  createCollisionObjectHelper<SP::SiconosSphere, SP::BTSPHERESHAPE,
+                              BodySphereRecord, BodySphereMap>
+    (ds, sphere, btsphere, bodySphereMap, offset);
 }
 
-void BulletBroadphase::update(SP::SiconosSphere sphere)
+void BulletBroadphase_impl::updateShape(const BodySphereRecord &record)
 {
-  const SP::SiconosVector pos = sphere->position();
-  DEBUG_PRINTF("updating sphere: %p(%ld) - %f, %f, %f (r=%0.2f)\n",
-         &*sphere,sphere.use_count(),
-         (*pos)(0), (*pos)(1), (*pos)(2), sphere->radius());
+  SP::SiconosSphere sphere(record.shape);
+  SP::BTSPHERESHAPE btsphere(record.btshape);
 
   double r = (sphere->radius() + sphere->outsideMargin()) * _options.worldScale;
 
   // Update shape parameters
 #ifdef USE_CONVEXHULL_FOR_SPHERE
-  SP::btConvexHullShape btsphere(impl->sphereMap[sphere]);
-  assert(btsphere
-         && "BulletBroadphase::update(), sphere not found in sphereMap.");
   btsphere->setMargin(r);
 #else
-  SP::btSphereShape btsphere(impl->sphereMap[sphere]);
-  assert(btsphere
-         && "BulletBroadphase::update(), sphere not found in sphereMap.");
-
   btsphere->setLocalScaling(btVector3(r, r, r));
 
   // btSphereShape has an internal margin
   btsphere->setMargin(sphere->insideMargin() * _options.worldScale);
 #endif
 
-  // Update object parameters
-  SP::btCollisionObject btobject(impl->objectMap[sphere]);
-  assert(btobject
-         && "BulletBroadphase::update(), sphere not found in objectMap.");
-
-  SiconosVector &q = *sphere->position();
-  btTransform tr(btQuaternion(q(4), q(5), q(6), q(3)),
-                 btVector3(q(0)*_options.worldScale,
-                           q(1)*_options.worldScale,
-                           q(2)*_options.worldScale));
-  btobject->setWorldTransform(tr);
+  updateShapePosition(record);
 }
 
-void BulletBroadphase::visit(SP::SiconosPlane plane)
+void BulletBroadphase_impl::createCollisionObject(const SP::BodyDS ds,
+                                                  SP::SiconosPlane plane,
+                                                  SP::SiconosVector offset)
 {
-  DEBUG_PRINTF("contactor: %p, ", impl->currentContactor);
-  DEBUG_PRINTF("plane: %p(%ld)\n",
-         &*plane,plane.use_count());
-
   // create the initial plane with default parameters
 #ifdef USE_BOX_FOR_PLANE
   SP::btBoxShape btplane(
@@ -441,24 +463,18 @@ void BulletBroadphase::visit(SP::SiconosPlane plane)
 #endif
 
   // initialization
-  visit_helper(plane, btplane, impl->planeMap);
-
-  if (impl->currentBodyDS) {
-    impl->bodyPlaneMap[&*impl->currentBodyDS].push_back(btplane);
-  }
+  createCollisionObjectHelper<SP::SiconosPlane, SP::BTPLANESHAPE,
+                              BodyPlaneRecord, BodyPlaneMap>
+    (ds, plane, btplane, bodyPlaneMap, offset);
 }
 
-void BulletBroadphase::update(SP::SiconosPlane plane)
+void BulletBroadphase_impl::updateShape(const BodyPlaneRecord& record)
 {
-  DEBUG_PRINTF("updating plane: %p(%ld)\n",
-         &*plane,plane.use_count());
+  SP::SiconosPlane plane(record.shape);
+  SP::BTPLANESHAPE btplane(record.btshape);
 
   // Update object parameters
-  SP::btCollisionObject btobject(impl->objectMap[plane]);
-  assert(btobject
-         && "BulletBroadphase::update(), plane not found in objectMap.");
-
-  SiconosVector &q = *plane->position();
+  SiconosVector &q = *record.ds->q();
 #ifdef USE_BOX_FOR_PLANE
   btTransform tr(btQuaternion(q(4), q(5), q(6), q(3)),
     btVector3(q(0)*_options.worldScale,
@@ -472,20 +488,19 @@ void BulletBroadphase::update(SP::SiconosPlane plane)
               (q(2) - plane->insideMargin())*_options.worldScale));
 #else
   btTransform tr(btQuaternion(q(4), q(5), q(6), q(3)),
-                 btVector3(q(0)*_options.worldScale,
-                           q(1)*_options.worldScale,
+    btVector3(q(0)*_options.worldScale,
+              q(1)*_options.worldScale,
               (q(2) - plane->insideMargin())*_options.worldScale));
 #endif
 #endif
-  btobject->setWorldTransform(tr);
+
+  // Note, we do not use generic updateShapePosition for plane
 }
 
-void BulletBroadphase::visit(SP::SiconosBox box)
+void BulletBroadphase_impl::createCollisionObject(const SP::BodyDS ds,
+                                                  SP::SiconosBox box,
+                                                  SP::SiconosVector offset)
 {
-  DEBUG_PRINTF("contactor: %p, ", impl->currentContactor);
-  DEBUG_PRINTF("box: %p(%ld)\n",
-         &*box,box.use_count());
-
   const double half = 0.5;
 
 #ifdef USE_CONVEXHULL_FOR_BOX
@@ -512,29 +527,17 @@ void BulletBroadphase::visit(SP::SiconosBox box)
 #endif
 
   // initialization
-  visit_helper(box, btbox, impl->boxMap);
-
-  if (impl->currentBodyDS) {
-    impl->bodyBoxMap[&*impl->currentBodyDS].push_back(btbox);
-  }
+  createCollisionObjectHelper<SP::SiconosBox, SP::BTBOXSHAPE,
+                              BodyBoxRecord, BodyBoxMap>
+    (ds, box, btbox, bodyBoxMap, offset);
 }
 
-void BulletBroadphase::update(SP::SiconosBox box)
+void BulletBroadphase_impl::updateShape(const BodyBoxRecord &record)
 {
-  const SP::SiconosVector pos = box->position();
-  DEBUG_PRINTF("updating box: %p(%ld) - %f, %f, %f\n",
-         &*box,box.use_count(),
-         (*pos)(0), (*pos)(1), (*pos)(2));
+  SP::SiconosBox box(record.shape);
+  SP::BTBOXSHAPE btbox(record.btshape);
 
   // Update shape parameters
-#ifdef USE_CONVEXHULL_FOR_BOX
-  SP::btConvexHullShape btbox(impl->boxMap[box]);
-#else
-  SP::btBoxShape btbox(impl->boxMap[box]);
-#endif
-  assert(btbox
-         && "BulletBroadphase::update(), box not found in boxMap.");
-
 #ifdef USE_CONVEXHULL_FOR_BOX
   double m = -box->insideMargin();
 #else
@@ -548,26 +551,13 @@ void BulletBroadphase::update(SP::SiconosBox box)
   btbox->setLocalScaling(btVector3(sx, sy, sz));
   btbox->setMargin((box->insideMargin() + box->outsideMargin()) * _options.worldScale);
 
-  // Update object parameters
-  SP::btCollisionObject btobject(impl->objectMap[box]);
-  assert(btobject
-         && "BulletBroadphase::update(), box not found in objectMap.");
-
-  SiconosVector &q = *box->position();
-  btTransform tr(btQuaternion(q(4), q(5), q(6), q(3)),
-                 btVector3(q(0)*_options.worldScale,
-                           q(1)*_options.worldScale,
-                           q(2)*_options.worldScale));
-
-  btobject->setWorldTransform(tr);
+  updateShapePosition(record);
 }
 
-void BulletBroadphase::visit(SP::SiconosConvexHull ch)
+void BulletBroadphase_impl::createCollisionObject(const SP::BodyDS ds,
+                                                  SP::SiconosConvexHull ch,
+                                                  SP::SiconosVector offset)
 {
-  DEBUG_PRINTF("contactor: %p, ", impl->currentContactor);
-  DEBUG_PRINTF("ch: %p(%ld)\n",
-         &*ch,ch.use_count());
-
   if (!ch->vertices())
     throw SiconosException("No vertices matrix specified for convex hull.");
 
@@ -620,110 +610,47 @@ void BulletBroadphase::visit(SP::SiconosConvexHull ch)
   btch->recalcLocalAabb();
 
   // initialization
-  visit_helper(ch, btch, impl->chMap);
-
-  if (impl->currentBodyDS) {
-    impl->bodyCHMap[&*impl->currentBodyDS].push_back(btch);
-  }
+  createCollisionObjectHelper<SP::SiconosConvexHull, SP::BTCHSHAPE,
+                              BodyCHRecord, BodyCHMap>
+    (ds, ch, btch, bodyCHMap, offset);
 }
 
-void BulletBroadphase::update(SP::SiconosConvexHull ch)
+void BulletBroadphase_impl::updateShape(const BodyCHRecord &record)
 {
-  const SP::SiconosVector pos = ch->position();
-  DEBUG_PRINTF("updating ch: %p(%ld) - %f, %f, %f\n",
-         &*ch,ch.use_count(),
-         (*pos)(0), (*pos)(1), (*pos)(2));
+  SP::SiconosConvexHull ch(record.shape);
+  SP::BTCHSHAPE btch(record.btshape);
 
   // Update shape parameters
-  SP::btConvexHullShape btch(impl->chMap[ch]);
-  assert(btch
-         && "BulletBroadphase::update(), ch not found in chMap.");
 
   // TODO
   //btbox->setLocalScaling(btVector3(sx, sy, sz));
   btch->setMargin((ch->insideMargin() + ch->outsideMargin()) * _options.worldScale);
 
-  // Update object parameters
-  SP::btCollisionObject btobject(impl->objectMap[ch]);
-  assert(btobject
-         && "BulletBroadphase::update(), ch not found in objectMap.");
-
-  SiconosVector &q = *ch->position();
-  btTransform tr(btQuaternion(q(4), q(5), q(6), q(3)),
-                 btVector3(q(0)*_options.worldScale,
-                           q(1)*_options.worldScale,
-                           q(2)*_options.worldScale));
-
-  btobject->setWorldTransform(tr);
+  updateShapePosition(record);
 }
 
-void BulletBroadphase::visit(const BodyDS &bds)
+void BulletBroadphase_impl::createCollisionObjectsForBodyContactor(
+  const SP::BodyDS ds, SP::SiconosContactor contactor)
 {
-  SP::SiconosContactor contactor = bds.contactor();
-  if (!contactor)
-    return;
+  SP::SiconosContactor con(contactor);
+  if (ds) con = ds->contactor();
+  if (!con) return;
 
-  // (Stripping constness!  Only because SP::BodyDS visitor does not work.)
-  SP::BodyDS spbds( ((BodyDS*)(&bds))->shared_from_this() );
+  std::vector<std::pair<SP::SiconosPlane, SP::SiconosVector> >::const_iterator itp;
+  for (itp=con->planes().begin(); itp!=con->planes().end(); itp++)
+    createCollisionObject(ds, itp->first, itp->second);
 
-  impl->currentBodyDS = spbds;
-  impl->currentContactor = contactor;
+  std::vector<std::pair<SP::SiconosSphere, SP::SiconosVector> >::const_iterator its;
+  for (its=con->spheres().begin(); its!=con->spheres().end(); its++)
+    createCollisionObject(ds, its->first, its->second);
 
-  std::vector<SiconosContactor::ShapeOffset>::const_iterator it;
-  for (it=contactor->shapes().begin();
-       it!=contactor->shapes().end();
-       it++)
-  {
-    it->shape->acceptSP(shared_from_this());
-  }
-  contactor->setPosition(bds.q());
-}
+  std::vector<std::pair<SP::SiconosBox, SP::SiconosVector> >::const_iterator itb;
+  for (itb=con->boxes().begin(); itb!=con->boxes().end(); itb++)
+    createCollisionObject(ds, itb->first, itb->second);
 
-void BulletBroadphase::updateGraph()
-{
-  if (!impl->dirtyPlanes.empty())
-  {
-    std::vector<SP::SiconosPlane>::iterator it;
-    for (it=impl->dirtyPlanes.begin();
-         it!=impl->dirtyPlanes.end(); it++)
-    {
-      update(*it);
-    }
-    impl->dirtyPlanes.clear();
-  }
-
-  if (!impl->dirtySpheres.empty())
-  {
-    std::vector<SP::SiconosSphere>::iterator it;
-    for (it=impl->dirtySpheres.begin();
-         it!=impl->dirtySpheres.end(); it++)
-    {
-      update(*it);
-    }
-    impl->dirtySpheres.clear();
-  }
-
-  if (!impl->dirtyBoxes.empty())
-  {
-    std::vector<SP::SiconosBox>::iterator it;
-    for (it=impl->dirtyBoxes.begin();
-         it!=impl->dirtyBoxes.end(); it++)
-    {
-      update(*it);
-    }
-    impl->dirtyBoxes.clear();
-  }
-
-  if (!impl->dirtyCHs.empty())
-  {
-    std::vector<SP::SiconosConvexHull>::iterator it;
-    for (it=impl->dirtyCHs.begin();
-         it!=impl->dirtyCHs.end(); it++)
-    {
-      update(*it);
-    }
-    impl->dirtyCHs.clear();
-  }
+  std::vector<std::pair<SP::SiconosConvexHull, SP::SiconosVector> >::const_iterator itc;
+  for (itc=con->convexhulls().begin(); itc!=con->convexhulls().end(); itc++)
+    createCollisionObject(ds, itc->first, itc->second);
 }
 
 /** This class allows to iterate over all the contact points in a
@@ -831,7 +758,6 @@ bool BulletBroadphase::bulletContactClear(void* userPersistentData)
   SP::Interaction *p_inter = (SP::Interaction*)userPersistentData;
   assert(p_inter!=NULL && "Contact point's stored (SP::Interaction*) is null!");
   DEBUG_PRINTF("unlinking interaction %p\n", &**p_inter);
-  printf("unlinking interaction %p\n", &**p_inter);
   gBulletBroadphase->unlink(*p_inter);
   delete p_inter;
   return false;
@@ -845,9 +771,6 @@ void BulletBroadphase::updateInteractions(SP::Simulation simulation)
   // added via the visitor.
   impl->insertQueuedContactors(*this);
 
-  // Update contactor positions
-  updateGraph();
-
   // 0. set up bullet callbacks
   gBulletBroadphase = this;
   gContactDestroyedCallback = this->bulletContactClear;
@@ -857,7 +780,6 @@ void BulletBroadphase::updateInteractions(SP::Simulation simulation)
   gContactBreakingThreshold = _options.breakingThreshold;
 
   // 1. perform bullet collision detection
-  impl->orphanedInteractions.clear();
   impl->_collisionWorld->performDiscreteCollisionDetection();
   gBulletBroadphase = 0;
 
@@ -878,17 +800,17 @@ void BulletBroadphase::updateInteractions(SP::Simulation simulation)
     DEBUG_PRINTF("  -- %p, %p, %p\n", it->objectA, it->objectB, it->point);
 
     // Get the BodyDS and SiconosShape pointers
-    const BodyShapePair *pairA, *pairB;
-    pairA = static_cast<BodyShapePair*>(it->objectA->getUserPointer());
-    pairB = static_cast<BodyShapePair*>(it->objectB->getUserPointer());
+
+    const BodyShapeRecord *pairA, *pairB;
+    pairA = reinterpret_cast<const BodyShapeRecord*>(it->objectA->getUserPointer());
+    pairB = reinterpret_cast<const BodyShapeRecord*>(it->objectB->getUserPointer());
     assert(pairA && pairB && "btCollisionObject had a null user pointer!");
 
     // The first pair will always be the non-static object
     bool flip = false;
     if (pairB->ds && !pairA->ds) {
-      const BodyShapePair *tmp = pairA;
-      pairA = pairB;
-      pairB = tmp;
+      pairA = reinterpret_cast<const BodyShapeRecord*>(it->objectB->getUserPointer());
+      pairB = reinterpret_cast<const BodyShapeRecord*>(it->objectA->getUserPointer());
       flip = true;
     }
 
@@ -910,28 +832,28 @@ void BulletBroadphase::updateInteractions(SP::Simulation simulation)
       /* new interaction */
       SP::Interaction inter;
 
-      int g1 = pairA->shape->group();
-      int g2 = pairB->shape->group();
+      int g1 = pairA->sshape->group();
+      int g2 = pairB->sshape->group();
       SP::NonSmoothLaw nslaw = nonSmoothLaw(g1,g2);
 
       if (nslaw && nslaw->size() == 3)
       {
         // Remove the added outside margin as a correction factor in Relation
         double combined_margin =
-          pairA->shape->outsideMargin() + pairB->shape->outsideMargin();
+          pairA->sshape->outsideMargin() + pairB->sshape->outsideMargin();
 
         SP::BulletR rel(new BulletR(createSPtrbtManifoldPoint(*it->point),
                                     flip,
-                                    pairA->shape->outsideMargin(),
-                                    pairB->shape->outsideMargin(),
+                                    pairA->sshape->outsideMargin(),
+                                    pairB->sshape->outsideMargin(),
                                     1.0 / _options.worldScale));
 
         // We wish to be sure that no Interactions are created without
         // sufficient warning before contact.  TODO: Replace with exception or
         // flag.
         if ((it->point->getDistance() + combined_margin) < 0.0) {
-          fprintf(stderr, "Interactions must be created with positive distance (%f).\n",
-                  (it->point->getDistance() + combined_margin)/_options.worldScale);
+          DEBUG_PRINTF(stderr, "Interactions must be created with positive distance (%f).\n",
+                       (it->point->getDistance() + combined_margin)/_options.worldScale);
           _stats.interaction_warnings ++;
         }
 
@@ -971,17 +893,18 @@ struct CollisionUpdater : public SiconosVisitor
   CollisionUpdater(BulletBroadphase &_broad, BulletBroadphase_impl &_impl)
     : broad(_broad), impl(_impl) {}
 
-  void visit(const BodyDS& bds)
+  void visit(SP::BodyDS bds)
   {
-    if (bds.contactor()) {
-      if (impl.bodyBoxMap.find(&bds) == impl.bodyBoxMap.end()
-          && impl.bodyCHMap.find(&bds) == impl.bodyCHMap.end()
-          && impl.bodySphereMap.find(&bds) == impl.bodySphereMap.end()
-          && impl.bodyPlaneMap.find(&bds) == impl.bodyPlaneMap.end())
+    if (bds->contactor()) {
+      BodyBoxMap::iterator it = impl.bodyBoxMap.find(&*bds);
+      if (impl.bodyBoxMap.find(&*bds) == impl.bodyBoxMap.end()
+          && impl.bodyCHMap.find(&*bds) == impl.bodyCHMap.end()
+          && impl.bodySphereMap.find(&*bds) == impl.bodySphereMap.end()
+          && impl.bodyPlaneMap.find(&*bds) == impl.bodyPlaneMap.end())
       {
-        broad.buildGraph(&bds);
+        impl.createCollisionObjectsForBodyContactor(bds);
       }
-      bds.contactor()->setPosition(bds.q());
+      impl.updateAllShapesForDS(*bds);
     }
   }
 };

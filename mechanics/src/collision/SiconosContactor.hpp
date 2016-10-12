@@ -26,6 +26,7 @@
 #define SiconosContactor_h
 
 #include <vector>
+#include <utility>
 
 #include "MechanicsFwd.hpp"
 
@@ -54,27 +55,36 @@ protected:
 public:
   virtual ~SiconosContactor() {}
 
-  struct ShapeOffset {
-    ShapeOffset(SP::SiconosShape _shape, SP::SiconosVector _offset)
-      : shape(_shape), offset(_offset) {}
-    SP::SiconosShape shape;
-    SP::SiconosVector offset;
-  };
+  void addShape(SP::SiconosPlane shape, SP::SiconosVector offset);
+  void addShape(SP::SiconosSphere shape, SP::SiconosVector offset);
+  void addShape(SP::SiconosBox shape, SP::SiconosVector offset);
+  void addShape(SP::SiconosConvexHull shape, SP::SiconosVector offset);
 
-  const std::vector<ShapeOffset> &shapes() const
-    { return _shapes; }
+  const std::vector< std::pair<SP::SiconosPlane,
+                               SP::SiconosVector> >& planes() const
+    { return _planes; }
 
-  virtual void addShape(SP::SiconosShape shape,
-                        SP::SiconosVector position);
+  const std::vector< std::pair<SP::SiconosSphere,
+                               SP::SiconosVector> >& spheres() const
+    { return _spheres; }
 
-  void setPosition(const SP::SiconosVector position);
+  const std::vector< std::pair<SP::SiconosBox,
+                               SP::SiconosVector> >& boxes() const
+    { return _boxes; }
+
+  const std::vector< std::pair<SP::SiconosConvexHull,
+                               SP::SiconosVector> >& convexhulls() const
+    { return _chs; }
 
   /** visitors hook
    */
   ACCEPT_VISITORS();
 
 protected:
-  std::vector<ShapeOffset> _shapes;
+  std::vector< std::pair<SP::SiconosPlane,  SP::SiconosVector> > _planes;
+  std::vector< std::pair<SP::SiconosSphere, SP::SiconosVector> > _spheres;
+  std::vector< std::pair<SP::SiconosBox, SP::SiconosVector> > _boxes;
+  std::vector< std::pair<SP::SiconosConvexHull, SP::SiconosVector> > _chs;
 };
 
 #endif /* SiconosContactor_h */

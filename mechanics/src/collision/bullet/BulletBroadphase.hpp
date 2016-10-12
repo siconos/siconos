@@ -58,7 +58,7 @@ struct BulletStatistics
   int interaction_warnings;
 };
 
-class BulletBroadphase : public InteractionManager, public SiconosVisitor, public std11::enable_shared_from_this<BulletBroadphase>
+class BulletBroadphase : public InteractionManager, public std11::enable_shared_from_this<BulletBroadphase>
 {
 protected:
   SP::BulletBroadphase_impl impl;
@@ -78,33 +78,9 @@ protected:
   BulletOptions _options;
   BulletStatistics _stats;
 
-  using SiconosVisitor::visit;
-  void visit(SP::SiconosPlane plane);
-  void visit(SP::SiconosSphere sphere);
-  void visit(SP::SiconosBox box);
-  void visit(SP::SiconosConvexHull ch);
-  void visit(const BodyDS &body);
-
-  void update(SP::SiconosPlane plane);
-  void update(SP::SiconosSphere sphere);
-  void update(SP::SiconosBox box);
-  void update(SP::SiconosConvexHull ch);
-
-  template<typename ST, typename BT>
-  void visit_helper(ST& shape, BT& btshape,
-                    std::map<ST,BT>& shapemap);
-
 public:
-  // TODO: default implementations of buildGraph to SiconosBroadphase?
-  //       encountered problems with shared_from_this() when doing so.
-  void buildGraph(const BodyDS *body);
-  void buildGraph(SP::BodyDS body);
-  void buildGraph(std::vector<SP::BodyDS> bodies);
-  void buildGraph(SP::SiconosContactor contactor);
-
   void insertStaticContactor(SP::SiconosContactor contactor);
 
-  void updateGraph();
   void updateInteractions(SP::Simulation simulation);
   SP::SiconosVisitor getDynamicalSystemsVisitor(SP::Simulation simulation);
 

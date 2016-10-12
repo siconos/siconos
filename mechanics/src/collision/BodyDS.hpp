@@ -53,7 +53,7 @@ public:
 
   /** visitors hook
    */
-  ACCEPT_BASE_STD_VISITORS(NewtonEulerDS);
+  ACCEPT_BASE_VISITORS(NewtonEulerDS);
 };
 
 #endif /* BodyDS_h */

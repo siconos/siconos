@@ -461,7 +461,7 @@ void TimeStepping::advanceToEvent()
       std11::tie(dsi, dsiend) = dsg.vertices();
       for (; dsi != dsiend; ++dsi)
       {
-        dsg.bundle(*dsi)->accept(*visitor);
+        dsg.bundle(*dsi)->acceptSP(visitor);
       }
     }
 
