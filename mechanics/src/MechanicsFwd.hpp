@@ -46,16 +46,14 @@
                                                 \
   /* Proposed new Mechanics API */              \
   REGISTER(BodyDS)                              \
-  REGISTER(BodyTimeStepping)                    \
   REGISTER(SiconosContactor)                    \
   REGISTER(SiconosShape)                        \
   REGISTER(SiconosSphere)                       \
   REGISTER(SiconosBox)                          \
   REGISTER(SiconosConvexHull)                   \
   REGISTER(SiconosPlane)                        \
-  REGISTER(SiconosBroadphase)                   \
-  REGISTER(SiconosShapeHandler)                 \
-  REGISTER(BulletBroadphase)
+  REGISTER(SiconosMechanicsWorld)               \
+  REGISTER(SiconosBulletWorld)
 
 #include <SiconosVisitables.hpp>
 

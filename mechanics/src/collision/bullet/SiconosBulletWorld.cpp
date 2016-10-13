@@ -17,14 +17,15 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 
-/*! \file BulletBroadphase.cpp
-  \brief Implementation of a Bullet-based broadphase algorithm.
+/*! \file SiconosBulletWorld.cpp
+  \brief Definition of a Bullet-based interaction handler for contact
+  detection.
 */
 
 #include <MechanicsFwd.hpp>
 
 #include "BulletSiconosFwd.hpp"
-#include "BulletBroadphase.hpp"
+#include "SiconosBulletWorld.hpp"
 #include "BodyDS.hpp"
 #include "BulletR.hpp"
 #include "BulletFrom1DLocalFrameR.hpp"
@@ -143,7 +144,7 @@ typedef std::map<const BodyDS*, std::vector<std11::shared_ptr<BodyPlaneRecord> >
 
 class CollisionUpdater;
 
-class BulletBroadphase_impl
+class SiconosBulletWorld_impl
 {
 protected:
   SP::btCollisionWorld _collisionWorld;
@@ -160,7 +161,7 @@ protected:
    * but seems to be the only way to maintain same order of calls to
    * addCollisionObject(). */
   std::vector<SP::SiconosContactor> queuedStaticContactors;
-  void insertQueuedContactors(BulletBroadphase &broad);
+  void insertQueuedContactors(SiconosBulletWorld &broad);
 
   // Non-smooth laws
   std::map<std::pair<int,int>, SP::NonSmoothLaw> nslaws;
@@ -212,17 +213,17 @@ protected:
   btTransform offsetTransform(const SiconosVector& position,
                               const SiconosVector& offset);
 
-  BulletOptions &_options;
+  SiconosBulletOptions &_options;
 
 public:
-  BulletBroadphase_impl(BulletOptions &op) : _options(op) {}
-  ~BulletBroadphase_impl() {}
+  SiconosBulletWorld_impl(SiconosBulletOptions &op) : _options(op) {}
+  ~SiconosBulletWorld_impl() {}
 
-  friend class BulletBroadphase;
+  friend class SiconosBulletWorld;
   friend class CollisionUpdater;
 };
 
-void BulletBroadphase_impl::insertQueuedContactors(BulletBroadphase &broad)
+void SiconosBulletWorld_impl::insertQueuedContactors(SiconosBulletWorld &broad)
 {
   std::vector<SP::SiconosContactor>::iterator con;
   for (con = queuedStaticContactors.begin();
@@ -235,9 +236,9 @@ void BulletBroadphase_impl::insertQueuedContactors(BulletBroadphase &broad)
   queuedStaticContactors.clear();
 }
 
-void BulletBroadphase::initialize_impl()
+void SiconosBulletWorld::initialize_impl()
 {
-  impl.reset(new BulletBroadphase_impl(_options));
+  impl.reset(new SiconosBulletWorld_impl(_options));
   impl->_collisionConfiguration.reset(
     new btDefaultCollisionConfiguration());
 
@@ -261,28 +262,28 @@ void BulletBroadphase::initialize_impl()
   impl->_collisionWorld->getDispatchInfo().m_convexConservativeDistanceThreshold = 0.1f;
 }
 
-BulletBroadphase::BulletBroadphase()
+SiconosBulletWorld::SiconosBulletWorld()
 {
   initialize_impl();
 }
 
-BulletBroadphase::BulletBroadphase(const BulletOptions &options)
+SiconosBulletWorld::SiconosBulletWorld(const SiconosBulletOptions &options)
   : _options(options)
 {
   initialize_impl();
 }
 
-BulletBroadphase::~BulletBroadphase()
+SiconosBulletWorld::~SiconosBulletWorld()
 {
   // unlink() will be called on all remaining
   // contact points when world is destroyed
-  gBulletBroadphase = this;
+  gBulletWorld = this;
 
   // must be the first de-allocated, otherwise segfault
   impl->_collisionWorld.reset();
 }
 
-void BulletBroadphase::insertStaticContactor(SP::SiconosContactor contactor)
+void SiconosBulletWorld::insertStaticContactor(SP::SiconosContactor contactor)
 {
   /* Work-around: Instead of adding them directly, we have to queue
    * them to be added after the initial bodies, otherwise Bullet
@@ -290,7 +291,7 @@ void BulletBroadphase::insertStaticContactor(SP::SiconosContactor contactor)
   impl->queuedStaticContactors.push_back(contactor);
 }
 
-void BulletBroadphase_impl::updateAllShapesForDS(const BodyDS &bds)
+void SiconosBulletWorld_impl::updateAllShapesForDS(const BodyDS &bds)
 {
   std::vector<std11::shared_ptr<BodyPlaneRecord> >::iterator itp;
   for (itp = bodyPlaneMap[&bds].begin(); itp != bodyPlaneMap[&bds].end(); itp++)
@@ -310,7 +311,7 @@ void BulletBroadphase_impl::updateAllShapesForDS(const BodyDS &bds)
 }
 
 template<typename ST, typename BT, typename BR, typename BSM>
-void BulletBroadphase_impl::createCollisionObjectHelper(
+void SiconosBulletWorld_impl::createCollisionObjectHelper(
   SP::BodyDS ds, ST& shape, BT& btshape, BSM& bodyShapeMap, SP::SiconosVector offset)
 {
   // create corresponding Bullet object and shape
@@ -346,7 +347,7 @@ void BulletBroadphase_impl::createCollisionObjectHelper(
   updateShape(*record);
 }
 
-btTransform BulletBroadphase_impl::offsetTransform(const SiconosVector& position,
+btTransform SiconosBulletWorld_impl::offsetTransform(const SiconosVector& position,
                                                    const SiconosVector& offset)
 {
   /* Adjust offset position according to current rotation */
@@ -365,7 +366,7 @@ btTransform BulletBroadphase_impl::offsetTransform(const SiconosVector& position
                       btVector3(position(0), position(1), position(2)) + rboffset );
 }
 
-void BulletBroadphase_impl::updateShapePosition(const BodyShapeRecord &record)
+void SiconosBulletWorld_impl::updateShapePosition(const BodyShapeRecord &record)
 {
   SiconosVector q(7);
   if (record.ds)
@@ -381,7 +382,7 @@ void BulletBroadphase_impl::updateShapePosition(const BodyShapeRecord &record)
   record.btobject->setWorldTransform( offsetTransform(q, *record.offset) );
 }
 
-void BulletBroadphase_impl::createCollisionObject(const SP::BodyDS ds,
+void SiconosBulletWorld_impl::createCollisionObject(const SP::BodyDS ds,
                                                   SP::SiconosSphere sphere,
                                                   SP::SiconosVector offset)
 {
@@ -407,7 +408,7 @@ void BulletBroadphase_impl::createCollisionObject(const SP::BodyDS ds,
     (ds, sphere, btsphere, bodySphereMap, offset);
 }
 
-void BulletBroadphase_impl::updateShape(const BodySphereRecord &record)
+void SiconosBulletWorld_impl::updateShape(const BodySphereRecord &record)
 {
   SP::SiconosSphere sphere(record.shape);
   SP::BTSPHERESHAPE btsphere(record.btshape);
@@ -427,7 +428,7 @@ void BulletBroadphase_impl::updateShape(const BodySphereRecord &record)
   updateShapePosition(record);
 }
 
-void BulletBroadphase_impl::createCollisionObject(const SP::BodyDS ds,
+void SiconosBulletWorld_impl::createCollisionObject(const SP::BodyDS ds,
                                                   SP::SiconosPlane plane,
                                                   SP::SiconosVector offset)
 {
@@ -468,7 +469,7 @@ void BulletBroadphase_impl::createCollisionObject(const SP::BodyDS ds,
     (ds, plane, btplane, bodyPlaneMap, offset);
 }
 
-void BulletBroadphase_impl::updateShape(const BodyPlaneRecord& record)
+void SiconosBulletWorld_impl::updateShape(const BodyPlaneRecord& record)
 {
   SP::SiconosPlane plane(record.shape);
   SP::BTPLANESHAPE btplane(record.btshape);
@@ -497,7 +498,7 @@ void BulletBroadphase_impl::updateShape(const BodyPlaneRecord& record)
   // Note, we do not use generic updateShapePosition for plane
 }
 
-void BulletBroadphase_impl::createCollisionObject(const SP::BodyDS ds,
+void SiconosBulletWorld_impl::createCollisionObject(const SP::BodyDS ds,
                                                   SP::SiconosBox box,
                                                   SP::SiconosVector offset)
 {
@@ -532,7 +533,7 @@ void BulletBroadphase_impl::createCollisionObject(const SP::BodyDS ds,
     (ds, box, btbox, bodyBoxMap, offset);
 }
 
-void BulletBroadphase_impl::updateShape(const BodyBoxRecord &record)
+void SiconosBulletWorld_impl::updateShape(const BodyBoxRecord &record)
 {
   SP::SiconosBox box(record.shape);
   SP::BTBOXSHAPE btbox(record.btshape);
@@ -554,7 +555,7 @@ void BulletBroadphase_impl::updateShape(const BodyBoxRecord &record)
   updateShapePosition(record);
 }
 
-void BulletBroadphase_impl::createCollisionObject(const SP::BodyDS ds,
+void SiconosBulletWorld_impl::createCollisionObject(const SP::BodyDS ds,
                                                   SP::SiconosConvexHull ch,
                                                   SP::SiconosVector offset)
 {
@@ -615,7 +616,7 @@ void BulletBroadphase_impl::createCollisionObject(const SP::BodyDS ds,
     (ds, ch, btch, bodyCHMap, offset);
 }
 
-void BulletBroadphase_impl::updateShape(const BodyCHRecord &record)
+void SiconosBulletWorld_impl::updateShape(const BodyCHRecord &record)
 {
   SP::SiconosConvexHull ch(record.shape);
   SP::BTCHSHAPE btch(record.btshape);
@@ -629,7 +630,7 @@ void BulletBroadphase_impl::updateShape(const BodyCHRecord &record)
   updateShapePosition(record);
 }
 
-void BulletBroadphase_impl::createCollisionObjectsForBodyContactor(
+void SiconosBulletWorld_impl::createCollisionObjectsForBodyContactor(
   const SP::BodyDS ds, SP::SiconosContactor contactor)
 {
   SP::SiconosContactor con(contactor);
@@ -751,19 +752,19 @@ public:
 };
 
 // called once for each contact point as it is destroyed
-BulletBroadphase* BulletBroadphase::gBulletBroadphase = NULL;
-bool BulletBroadphase::bulletContactClear(void* userPersistentData)
+SiconosBulletWorld* SiconosBulletWorld::gBulletWorld = NULL;
+bool SiconosBulletWorld::bulletContactClear(void* userPersistentData)
 {
   /* note: stored pointer to shared_ptr! */
   SP::Interaction *p_inter = (SP::Interaction*)userPersistentData;
   assert(p_inter!=NULL && "Contact point's stored (SP::Interaction*) is null!");
   DEBUG_PRINTF("unlinking interaction %p\n", &**p_inter);
-  gBulletBroadphase->unlink(*p_inter);
+  gBulletWorld->unlink(*p_inter);
   delete p_inter;
   return false;
 }
 
-void BulletBroadphase::updateInteractions(SP::Simulation simulation)
+void SiconosBulletWorld::updateInteractions(SP::Simulation simulation)
 {
   resetStatistics();
 
@@ -772,7 +773,7 @@ void BulletBroadphase::updateInteractions(SP::Simulation simulation)
   impl->insertQueuedContactors(*this);
 
   // 0. set up bullet callbacks
-  gBulletBroadphase = this;
+  gBulletWorld = this;
   gContactDestroyedCallback = this->bulletContactClear;
 
   // TODO: This must be either configured dynamically or made available to the
@@ -781,7 +782,7 @@ void BulletBroadphase::updateInteractions(SP::Simulation simulation)
 
   // 1. perform bullet collision detection
   impl->_collisionWorld->performDiscreteCollisionDetection();
-  gBulletBroadphase = 0;
+  gBulletWorld = 0;
 
   if (!simulation)
     return;
@@ -887,10 +888,10 @@ void BulletBroadphase::updateInteractions(SP::Simulation simulation)
 struct CollisionUpdater : public SiconosVisitor
 {
   using SiconosVisitor::visit;
-  BulletBroadphase_impl &impl;
-  BulletBroadphase &broad;
+  SiconosBulletWorld_impl &impl;
+  SiconosBulletWorld &broad;
 
-  CollisionUpdater(BulletBroadphase &_broad, BulletBroadphase_impl &_impl)
+  CollisionUpdater(SiconosBulletWorld &_broad, SiconosBulletWorld_impl &_impl)
     : broad(_broad), impl(_impl) {}
 
   void visit(SP::BodyDS bds)
@@ -909,18 +910,18 @@ struct CollisionUpdater : public SiconosVisitor
   }
 };
 
-SP::SiconosVisitor BulletBroadphase::getDynamicalSystemsVisitor(SP::Simulation simulation)
+SP::SiconosVisitor SiconosBulletWorld::getDynamicalSystemsVisitor(SP::Simulation simulation)
 {
   return SP::SiconosVisitor(new CollisionUpdater(*this, *impl));
 }
 
-void BulletBroadphase::insertNonSmoothLaw(SP::NonSmoothLaw nslaw,
+void SiconosBulletWorld::insertNonSmoothLaw(SP::NonSmoothLaw nslaw,
                                           int group1, int group2)
 {
   impl->nslaws[std::pair<int,int>(group1,group2)] = nslaw;
 }
 
-SP::NonSmoothLaw BulletBroadphase::nonSmoothLaw(int group1, int group2)
+SP::NonSmoothLaw SiconosBulletWorld::nonSmoothLaw(int group1, int group2)
 {
   try {
     return impl->nslaws.at(std::pair<int,int>(group1,group2));

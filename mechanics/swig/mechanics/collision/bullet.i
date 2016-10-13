@@ -289,6 +289,6 @@ PY_FULL_REGISTER(BulletFrom1DLocalFrameR);
 
 %include base.i
 
-PY_REGISTER_WITHOUT_HEADER(BulletOptions);
-PY_REGISTER_WITHOUT_HEADER(BulletStatistics);
-PY_FULL_REGISTER(BulletBroadphase);
+PY_REGISTER_WITHOUT_HEADER(SiconosBulletOptions);
+PY_REGISTER_WITHOUT_HEADER(SiconosBulletStatistics);
+PY_FULL_REGISTER(SiconosBulletWorld);

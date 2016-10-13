@@ -17,26 +17,27 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 
-/*! \file BulletBroadphase.hpp
-  \brief Definition of a Bullet-based broadphase algorithm.
+/*! \file SiconosBulletWorld.hpp
+  \brief Definition of a Bullet-based interaction handler for contact
+  detection.
 */
 
-#ifndef BulletBroadphase_h
-#define BulletBroadphase_h
+#ifndef SiconosBulletWorld_h
+#define SiconosBulletWorld_h
 
 #include <MechanicsFwd.hpp>
 
-#include <InteractionManager.hpp>
+#include <SiconosMechanicsWorld.hpp>
 #include <SiconosShape.hpp>
 #include <SiconosContactor.hpp>
 
 #include <map>
 
-DEFINE_SPTR(BulletBroadphase_impl);
+DEFINE_SPTR(SiconosBulletWorld_impl);
 
-struct BulletOptions
+struct SiconosBulletOptions
 {
-  BulletOptions()
+  SiconosBulletOptions()
     : breakingThreshold(0.5)
     , worldScale(1.0)
     , useAxisSweep3(false)
@@ -46,9 +47,9 @@ struct BulletOptions
   bool useAxisSweep3;
 };
 
-struct BulletStatistics
+struct SiconosBulletStatistics
 {
-  BulletStatistics()
+  SiconosBulletStatistics()
     : new_interactions_created(0)
     , existing_interactions_processed(0)
     , interaction_warnings(0)
@@ -58,25 +59,25 @@ struct BulletStatistics
   int interaction_warnings;
 };
 
-class BulletBroadphase : public InteractionManager, public std11::enable_shared_from_this<BulletBroadphase>
+class SiconosBulletWorld : public SiconosMechanicsWorld
 {
 protected:
-  SP::BulletBroadphase_impl impl;
+  SP::SiconosBulletWorld_impl impl;
 
   void initialize_impl();
 
   // callback for contact point removal, and a global for context
   static bool bulletContactClear(void* userPersistentData);
-  static BulletBroadphase *gBulletBroadphase;
+  static SiconosBulletWorld *gBulletWorld;
 
 public:
-  BulletBroadphase();
-  BulletBroadphase(const BulletOptions &options);
-  virtual ~BulletBroadphase();
+  SiconosBulletWorld();
+  SiconosBulletWorld(const SiconosBulletOptions &options);
+  virtual ~SiconosBulletWorld();
 
 protected:
-  BulletOptions _options;
-  BulletStatistics _stats;
+  SiconosBulletOptions _options;
+  SiconosBulletStatistics _stats;
 
 public:
   void insertStaticContactor(SP::SiconosContactor contactor);
@@ -87,9 +88,9 @@ public:
   void insertNonSmoothLaw(SP::NonSmoothLaw, int group1, int group2);
   SP::NonSmoothLaw nonSmoothLaw(int group1, int group2);
 
-  const BulletOptions &options() const { return _options; }
-  const BulletStatistics &statistics() const { return _stats; }
-  void resetStatistics() { _stats = BulletStatistics(); }
+  const SiconosBulletOptions &options() const { return _options; }
+  const SiconosBulletStatistics &statistics() const { return _stats; }
+  void resetStatistics() { _stats = SiconosBulletStatistics(); }
 };
 
-#endif /* BulletBroadphase.hpp */
+#endif /* SiconosBulletWorld.hpp */

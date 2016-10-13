@@ -27,7 +27,7 @@ try:
         SiconosSphere, SiconosBox, SiconosPlane, \
         SiconosContactor, SiconosConvexHull
     from siconos.mechanics.collision.bullet import \
-        BulletBroadphase, BulletOptions
+        SiconosBulletWorld, SiconosBulletOptions
     from siconos.mechanics.collision.bullet import \
         btScalarSize, btQuaternion, btTransform, btVector3
     proposed_is_here = True
@@ -482,8 +482,7 @@ class ShapeCollection():
 
                 if name in ['Box']:
                     if use_proposed:
-                        self._shapes[shape_name] = primitive([0,0,0],
-                                                             attrs)
+                        self._shapes[shape_name] = primitive(attrs)
                         self._shapes[shape_name].setInsideMargin(
                             self.shape(shape_name).attrs.get('insideMargin',
                                                              min(attrs)/2))
@@ -512,7 +511,7 @@ class ShapeCollection():
                 #     bcols.addChildShape(...
                 elif name in ['Sphere']:
                     if use_proposed:
-                        self._shapes[shape_name] = primitive([0,0,0], attrs[0])
+                        self._shapes[shape_name] = primitive(attrs[0])
                         self._shapes[shape_name].setInsideMargin(
                             self.shape(shape_name).attrs.get('insideMargin',
                                                              min(attrs)/2))
@@ -1751,7 +1750,7 @@ class Hdf5():
                 time_stepping = TimeStepping
 
             if space_filter is None:
-                space_filter = BulletBroadphase
+                space_filter = SiconosBulletWorld
 
         else:
             if time_stepping is None:

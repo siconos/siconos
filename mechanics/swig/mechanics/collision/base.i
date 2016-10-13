@@ -11,3 +11,4 @@ PY_REGISTER_WITHOUT_HEADER(SiconosConvexHull);
 PY_FULL_REGISTER(SiconosShape);
 PY_FULL_REGISTER(SiconosContactor);
 PY_FULL_REGISTER(BodyDS);
+PY_FULL_REGISTER(SiconosMechanicsWorld);

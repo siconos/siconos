@@ -12,7 +12,7 @@ import siconos.io.mechanics_io
 
 siconos.io.mechanics_io.use_proposed = True
 
-options = siconos.mechanics.collision.bullet.BulletOptions()
+options = siconos.mechanics.collision.bullet.SiconosBulletOptions()
 options.worldScale = 1.0
 options.breakingThreshold = 0.01
 
@@ -65,13 +65,12 @@ with Hdf5(mode='r+') as io:
 
     # print(pydoc.render_doc(io.run, "Help on %s"))
 
-    from siconos.kernel import TimeStepping
     from siconos.mechanics.collision import BodyDS, SiconosContactor
-    from siconos.mechanics.collision.bullet import BulletBroadphase
+    from siconos.mechanics.collision.bullet import SiconosBulletWorld
 
     io.run(with_timer=False,
-            time_stepping=TimeStepping,
-            space_filter=lambda model: BulletBroadphase(options),
+            time_stepping=None,
+            space_filter=lambda model: SiconosBulletWorld(options),
             body_class=BodyDS,
             shape_class=SiconosContactor,
             face_class=None,
