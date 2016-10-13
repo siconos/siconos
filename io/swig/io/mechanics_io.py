@@ -447,7 +447,7 @@ class ShapeCollection():
                     # a convex point set
                     if use_proposed:
                         points = self.shape(shape_name)
-                        convex = SiconosConvexHull(0,0,0,points)
+                        convex = SiconosConvexHull(points)
                         dims = [points[:,0].max() - points[:,0].min(),
                                 points[:,1].max() - points[:,1].min(),
                                 points[:,2].max() - points[:,2].min()]
