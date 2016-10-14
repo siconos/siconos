@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 
-/*! \file SiconosBulletWorld.cpp
+/*! \file SiconosBulletCollisionManager.cpp
   \brief Definition of a Bullet-based interaction handler for contact
   detection.
 */
@@ -25,7 +25,7 @@
 #include <MechanicsFwd.hpp>
 
 #include "BulletSiconosFwd.hpp"
-#include "SiconosBulletWorld.hpp"
+#include "SiconosBulletCollisionManager.hpp"
 #include "BodyDS.hpp"
 #include "BulletR.hpp"
 #include "BulletFrom1DLocalFrameR.hpp"
@@ -144,7 +144,7 @@ typedef std::map<const BodyDS*, std::vector<std11::shared_ptr<BodyPlaneRecord> >
 
 class CollisionUpdater;
 
-class SiconosBulletWorld_impl
+class SiconosBulletCollisionManager_impl
 {
 protected:
   SP::btCollisionWorld _collisionWorld;
@@ -161,7 +161,7 @@ protected:
    * but seems to be the only way to maintain same order of calls to
    * addCollisionObject(). */
   std::vector<SP::SiconosContactor> queuedStaticContactors;
-  void insertQueuedContactors(SiconosBulletWorld &broad);
+  void insertQueuedContactors(SiconosBulletCollisionManager &broad);
 
   // Non-smooth laws
   std::map<std::pair<int,int>, SP::NonSmoothLaw> nslaws;
@@ -216,14 +216,14 @@ protected:
   SiconosBulletOptions &_options;
 
 public:
-  SiconosBulletWorld_impl(SiconosBulletOptions &op) : _options(op) {}
-  ~SiconosBulletWorld_impl() {}
+  SiconosBulletCollisionManager_impl(SiconosBulletOptions &op) : _options(op) {}
+  ~SiconosBulletCollisionManager_impl() {}
 
-  friend class SiconosBulletWorld;
+  friend class SiconosBulletCollisionManager;
   friend class CollisionUpdater;
 };
 
-void SiconosBulletWorld_impl::insertQueuedContactors(SiconosBulletWorld &broad)
+void SiconosBulletCollisionManager_impl::insertQueuedContactors(SiconosBulletCollisionManager &broad)
 {
   std::vector<SP::SiconosContactor>::iterator con;
   for (con = queuedStaticContactors.begin();
@@ -236,9 +236,9 @@ void SiconosBulletWorld_impl::insertQueuedContactors(SiconosBulletWorld &broad)
   queuedStaticContactors.clear();
 }
 
-void SiconosBulletWorld::initialize_impl()
+void SiconosBulletCollisionManager::initialize_impl()
 {
-  impl.reset(new SiconosBulletWorld_impl(_options));
+  impl.reset(new SiconosBulletCollisionManager_impl(_options));
   impl->_collisionConfiguration.reset(
     new btDefaultCollisionConfiguration());
 
@@ -262,18 +262,18 @@ void SiconosBulletWorld::initialize_impl()
   impl->_collisionWorld->getDispatchInfo().m_convexConservativeDistanceThreshold = 0.1f;
 }
 
-SiconosBulletWorld::SiconosBulletWorld()
+SiconosBulletCollisionManager::SiconosBulletCollisionManager()
 {
   initialize_impl();
 }
 
-SiconosBulletWorld::SiconosBulletWorld(const SiconosBulletOptions &options)
+SiconosBulletCollisionManager::SiconosBulletCollisionManager(const SiconosBulletOptions &options)
   : _options(options)
 {
   initialize_impl();
 }
 
-SiconosBulletWorld::~SiconosBulletWorld()
+SiconosBulletCollisionManager::~SiconosBulletCollisionManager()
 {
   // unlink() will be called on all remaining
   // contact points when world is destroyed
@@ -283,7 +283,7 @@ SiconosBulletWorld::~SiconosBulletWorld()
   impl->_collisionWorld.reset();
 }
 
-void SiconosBulletWorld::insertStaticContactor(SP::SiconosContactor contactor)
+void SiconosBulletCollisionManager::insertStaticContactor(SP::SiconosContactor contactor)
 {
   /* Work-around: Instead of adding them directly, we have to queue
    * them to be added after the initial bodies, otherwise Bullet
@@ -291,7 +291,7 @@ void SiconosBulletWorld::insertStaticContactor(SP::SiconosContactor contactor)
   impl->queuedStaticContactors.push_back(contactor);
 }
 
-void SiconosBulletWorld_impl::updateAllShapesForDS(const BodyDS &bds)
+void SiconosBulletCollisionManager_impl::updateAllShapesForDS(const BodyDS &bds)
 {
   std::vector<std11::shared_ptr<BodyPlaneRecord> >::iterator itp;
   for (itp = bodyPlaneMap[&bds].begin(); itp != bodyPlaneMap[&bds].end(); itp++)
@@ -311,7 +311,7 @@ void SiconosBulletWorld_impl::updateAllShapesForDS(const BodyDS &bds)
 }
 
 template<typename ST, typename BT, typename BR, typename BSM>
-void SiconosBulletWorld_impl::createCollisionObjectHelper(
+void SiconosBulletCollisionManager_impl::createCollisionObjectHelper(
   SP::BodyDS ds, ST& shape, BT& btshape, BSM& bodyShapeMap, SP::SiconosVector offset)
 {
   // create corresponding Bullet object and shape
@@ -347,7 +347,7 @@ void SiconosBulletWorld_impl::createCollisionObjectHelper(
   updateShape(*record);
 }
 
-btTransform SiconosBulletWorld_impl::offsetTransform(const SiconosVector& position,
+btTransform SiconosBulletCollisionManager_impl::offsetTransform(const SiconosVector& position,
                                                    const SiconosVector& offset)
 {
   /* Adjust offset position according to current rotation */
@@ -366,7 +366,7 @@ btTransform SiconosBulletWorld_impl::offsetTransform(const SiconosVector& positi
                       btVector3(position(0), position(1), position(2)) + rboffset );
 }
 
-void SiconosBulletWorld_impl::updateShapePosition(const BodyShapeRecord &record)
+void SiconosBulletCollisionManager_impl::updateShapePosition(const BodyShapeRecord &record)
 {
   SiconosVector q(7);
   if (record.ds)
@@ -382,7 +382,7 @@ void SiconosBulletWorld_impl::updateShapePosition(const BodyShapeRecord &record)
   record.btobject->setWorldTransform( offsetTransform(q, *record.offset) );
 }
 
-void SiconosBulletWorld_impl::createCollisionObject(const SP::BodyDS ds,
+void SiconosBulletCollisionManager_impl::createCollisionObject(const SP::BodyDS ds,
                                                   SP::SiconosSphere sphere,
                                                   SP::SiconosVector offset)
 {
@@ -408,7 +408,7 @@ void SiconosBulletWorld_impl::createCollisionObject(const SP::BodyDS ds,
     (ds, sphere, btsphere, bodySphereMap, offset);
 }
 
-void SiconosBulletWorld_impl::updateShape(const BodySphereRecord &record)
+void SiconosBulletCollisionManager_impl::updateShape(const BodySphereRecord &record)
 {
   SP::SiconosSphere sphere(record.shape);
   SP::BTSPHERESHAPE btsphere(record.btshape);
@@ -428,7 +428,7 @@ void SiconosBulletWorld_impl::updateShape(const BodySphereRecord &record)
   updateShapePosition(record);
 }
 
-void SiconosBulletWorld_impl::createCollisionObject(const SP::BodyDS ds,
+void SiconosBulletCollisionManager_impl::createCollisionObject(const SP::BodyDS ds,
                                                   SP::SiconosPlane plane,
                                                   SP::SiconosVector offset)
 {
@@ -469,7 +469,7 @@ void SiconosBulletWorld_impl::createCollisionObject(const SP::BodyDS ds,
     (ds, plane, btplane, bodyPlaneMap, offset);
 }
 
-void SiconosBulletWorld_impl::updateShape(const BodyPlaneRecord& record)
+void SiconosBulletCollisionManager_impl::updateShape(const BodyPlaneRecord& record)
 {
   SP::SiconosPlane plane(record.shape);
   SP::BTPLANESHAPE btplane(record.btshape);
@@ -498,7 +498,7 @@ void SiconosBulletWorld_impl::updateShape(const BodyPlaneRecord& record)
   // Note, we do not use generic updateShapePosition for plane
 }
 
-void SiconosBulletWorld_impl::createCollisionObject(const SP::BodyDS ds,
+void SiconosBulletCollisionManager_impl::createCollisionObject(const SP::BodyDS ds,
                                                   SP::SiconosBox box,
                                                   SP::SiconosVector offset)
 {
@@ -533,7 +533,7 @@ void SiconosBulletWorld_impl::createCollisionObject(const SP::BodyDS ds,
     (ds, box, btbox, bodyBoxMap, offset);
 }
 
-void SiconosBulletWorld_impl::updateShape(const BodyBoxRecord &record)
+void SiconosBulletCollisionManager_impl::updateShape(const BodyBoxRecord &record)
 {
   SP::SiconosBox box(record.shape);
   SP::BTBOXSHAPE btbox(record.btshape);
@@ -555,7 +555,7 @@ void SiconosBulletWorld_impl::updateShape(const BodyBoxRecord &record)
   updateShapePosition(record);
 }
 
-void SiconosBulletWorld_impl::createCollisionObject(const SP::BodyDS ds,
+void SiconosBulletCollisionManager_impl::createCollisionObject(const SP::BodyDS ds,
                                                   SP::SiconosConvexHull ch,
                                                   SP::SiconosVector offset)
 {
@@ -616,7 +616,7 @@ void SiconosBulletWorld_impl::createCollisionObject(const SP::BodyDS ds,
     (ds, ch, btch, bodyCHMap, offset);
 }
 
-void SiconosBulletWorld_impl::updateShape(const BodyCHRecord &record)
+void SiconosBulletCollisionManager_impl::updateShape(const BodyCHRecord &record)
 {
   SP::SiconosConvexHull ch(record.shape);
   SP::BTCHSHAPE btch(record.btshape);
@@ -630,7 +630,7 @@ void SiconosBulletWorld_impl::updateShape(const BodyCHRecord &record)
   updateShapePosition(record);
 }
 
-void SiconosBulletWorld_impl::createCollisionObjectsForBodyContactor(
+void SiconosBulletCollisionManager_impl::createCollisionObjectsForBodyContactor(
   const SP::BodyDS ds, SP::SiconosContactor contactor)
 {
   SP::SiconosContactor con(contactor);
@@ -752,8 +752,8 @@ public:
 };
 
 // called once for each contact point as it is destroyed
-SiconosBulletWorld* SiconosBulletWorld::gBulletWorld = NULL;
-bool SiconosBulletWorld::bulletContactClear(void* userPersistentData)
+SiconosBulletCollisionManager* SiconosBulletCollisionManager::gBulletWorld = NULL;
+bool SiconosBulletCollisionManager::bulletContactClear(void* userPersistentData)
 {
   /* note: stored pointer to shared_ptr! */
   SP::Interaction *p_inter = (SP::Interaction*)userPersistentData;
@@ -764,7 +764,7 @@ bool SiconosBulletWorld::bulletContactClear(void* userPersistentData)
   return false;
 }
 
-void SiconosBulletWorld::updateInteractions(SP::Simulation simulation)
+void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation)
 {
   resetStatistics();
 
@@ -888,10 +888,10 @@ void SiconosBulletWorld::updateInteractions(SP::Simulation simulation)
 struct CollisionUpdater : public SiconosVisitor
 {
   using SiconosVisitor::visit;
-  SiconosBulletWorld_impl &impl;
-  SiconosBulletWorld &broad;
+  SiconosBulletCollisionManager_impl &impl;
+  SiconosBulletCollisionManager &broad;
 
-  CollisionUpdater(SiconosBulletWorld &_broad, SiconosBulletWorld_impl &_impl)
+  CollisionUpdater(SiconosBulletCollisionManager &_broad, SiconosBulletCollisionManager_impl &_impl)
     : broad(_broad), impl(_impl) {}
 
   void visit(SP::BodyDS bds)
@@ -910,18 +910,18 @@ struct CollisionUpdater : public SiconosVisitor
   }
 };
 
-SP::SiconosVisitor SiconosBulletWorld::getDynamicalSystemsVisitor(SP::Simulation simulation)
+SP::SiconosVisitor SiconosBulletCollisionManager::getDynamicalSystemsVisitor(SP::Simulation simulation)
 {
   return SP::SiconosVisitor(new CollisionUpdater(*this, *impl));
 }
 
-void SiconosBulletWorld::insertNonSmoothLaw(SP::NonSmoothLaw nslaw,
+void SiconosBulletCollisionManager::insertNonSmoothLaw(SP::NonSmoothLaw nslaw,
                                           int group1, int group2)
 {
   impl->nslaws[std::pair<int,int>(group1,group2)] = nslaw;
 }
 
-SP::NonSmoothLaw SiconosBulletWorld::nonSmoothLaw(int group1, int group2)
+SP::NonSmoothLaw SiconosBulletCollisionManager::nonSmoothLaw(int group1, int group2)
 {
   try {
     return impl->nslaws.at(std::pair<int,int>(group1,group2));

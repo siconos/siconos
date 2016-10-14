@@ -17,23 +17,23 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 
-/*! \file SiconosMechanicsWorld.hpp
+/*! \file SiconosCollisionManager.hpp
 \brief A mechanics world is a Siconos InteractionManager that supports
   static contactors and dynamic contactors attached to special
   Dynamical Systems (BodyDS, derived from NewtonEulerDS) found in the
   NonSmoothDynamicalSystem.
 */
 
-#ifndef SiconosMechanicsWorld_h
-#define SiconosMechanicsWorld_h
+#ifndef SiconosCollisionManager_h
+#define SiconosCollisionManager_h
 
 #include <InteractionManager.hpp>
 
-class SiconosMechanicsWorld : public InteractionManager
+class SiconosCollisionManager : public InteractionManager
 {
 public:
-  SiconosMechanicsWorld() {}
-  virtual ~SiconosMechanicsWorld() {}
+  SiconosCollisionManager() {}
+  virtual ~SiconosCollisionManager() {}
 
 public:
   virtual void insertStaticContactor(SP::SiconosContactor contactor) = 0;
@@ -42,4 +42,4 @@ public:
   virtual SP::NonSmoothLaw nonSmoothLaw(int group1, int group2) = 0;
 };
 
-#endif /* SiconosMechanicsWorld.hpp */
+#endif /* SiconosCollisionManager.hpp */

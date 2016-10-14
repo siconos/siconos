@@ -291,4 +291,4 @@ PY_FULL_REGISTER(BulletFrom1DLocalFrameR);
 
 PY_REGISTER_WITHOUT_HEADER(SiconosBulletOptions);
 PY_REGISTER_WITHOUT_HEADER(SiconosBulletStatistics);
-PY_FULL_REGISTER(SiconosBulletWorld);
+PY_FULL_REGISTER(SiconosBulletCollisionManager);

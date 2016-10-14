@@ -17,23 +17,23 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 
-/*! \file SiconosBulletWorld.hpp
+/*! \file SiconosBulletCollisionManager.hpp
   \brief Definition of a Bullet-based interaction handler for contact
   detection.
 */
 
-#ifndef SiconosBulletWorld_h
-#define SiconosBulletWorld_h
+#ifndef SiconosBulletCollisionManager_h
+#define SiconosBulletCollisionManager_h
 
 #include <MechanicsFwd.hpp>
 
-#include <SiconosMechanicsWorld.hpp>
+#include <SiconosCollisionManager.hpp>
 #include <SiconosShape.hpp>
 #include <SiconosContactor.hpp>
 
 #include <map>
 
-DEFINE_SPTR(SiconosBulletWorld_impl);
+DEFINE_SPTR(SiconosBulletCollisionManager_impl);
 
 struct SiconosBulletOptions
 {
@@ -59,21 +59,21 @@ struct SiconosBulletStatistics
   int interaction_warnings;
 };
 
-class SiconosBulletWorld : public SiconosMechanicsWorld
+class SiconosBulletCollisionManager : public SiconosCollisionManager
 {
 protected:
-  SP::SiconosBulletWorld_impl impl;
+  SP::SiconosBulletCollisionManager_impl impl;
 
   void initialize_impl();
 
   // callback for contact point removal, and a global for context
   static bool bulletContactClear(void* userPersistentData);
-  static SiconosBulletWorld *gBulletWorld;
+  static SiconosBulletCollisionManager *gBulletWorld;
 
 public:
-  SiconosBulletWorld();
-  SiconosBulletWorld(const SiconosBulletOptions &options);
-  virtual ~SiconosBulletWorld();
+  SiconosBulletCollisionManager();
+  SiconosBulletCollisionManager(const SiconosBulletOptions &options);
+  virtual ~SiconosBulletCollisionManager();
 
 protected:
   SiconosBulletOptions _options;
@@ -93,4 +93,4 @@ public:
   void resetStatistics() { _stats = SiconosBulletStatistics(); }
 };
 
-#endif /* SiconosBulletWorld.hpp */
+#endif /* SiconosBulletCollisionManager.hpp */

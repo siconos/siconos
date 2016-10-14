@@ -27,7 +27,7 @@ try:
         SiconosSphere, SiconosBox, SiconosPlane, \
         SiconosContactor, SiconosConvexHull
     from siconos.mechanics.collision.bullet import \
-        SiconosBulletWorld, SiconosBulletOptions
+        SiconosBulletCollisionManager, SiconosBulletOptions
     from siconos.mechanics.collision.bullet import \
         btScalarSize, btQuaternion, btTransform, btVector3
     proposed_is_here = True
@@ -1750,7 +1750,7 @@ class Hdf5():
                 time_stepping = TimeStepping
 
             if space_filter is None:
-                space_filter = SiconosBulletWorld
+                space_filter = SiconosBulletCollisionManager
 
         else:
             if time_stepping is None:

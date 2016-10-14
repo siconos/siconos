@@ -66,11 +66,11 @@ with Hdf5(mode='r+') as io:
     # print(pydoc.render_doc(io.run, "Help on %s"))
 
     from siconos.mechanics.collision import BodyDS, SiconosContactor
-    from siconos.mechanics.collision.bullet import SiconosBulletWorld
+    from siconos.mechanics.collision.bullet import SiconosBulletCollisionManager
 
     io.run(with_timer=False,
             time_stepping=None,
-            space_filter=lambda model: SiconosBulletWorld(options),
+            space_filter=lambda model: SiconosBulletCollisionManager(options),
             body_class=BodyDS,
             shape_class=SiconosContactor,
             face_class=None,
