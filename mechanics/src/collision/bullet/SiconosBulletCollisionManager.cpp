@@ -230,7 +230,7 @@ void SiconosBulletCollisionManager_impl::insertQueuedContactors(SiconosBulletCol
        con != queuedStaticContactors.end();
        con ++)
   {
-    createCollisionObjectsForBodyContactor(NULL, *con);
+    createCollisionObjectsForBodyContactor(SP::BodyDS(), *con);
     staticContactors.push_back(*con);
   }
   queuedStaticContactors.clear();
