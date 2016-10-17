@@ -409,7 +409,7 @@ int fc3d_onecontact_nonsmooth_Newton_solvers_solve_direct(FrictionContactProblem
   double * MLocal = localproblem->M->matrix0;
 
   double Tol = dparam[SICONOS_DPARAM_TOL];
-  double itermax = iparam[SICONOS_IPARAM_MAX_ITER];
+  int itermax = iparam[SICONOS_IPARAM_MAX_ITER];
 
 
   int i, j, k, inew;
