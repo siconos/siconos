@@ -31,21 +31,13 @@
 #include "MechanicsFwd.hpp"
 
 #include <SiconosSerialization.hpp>
-#include <SiconosVisitor.hpp>
 
 #include "SiconosShape.hpp"
 
-// NEW APPROACH: No inheritance on SiconosContactor/Sphere, etc.  Just create SiconosContactor
-// and Shape descriptors, then in buildInteractions, "compile" this down to a
-// Bullet-specific graph.
+/* \brief Class to hold the collection of shapes assigned to a body,
+ * and to associate each shape with an offset and collision group. */
 
-// Can we share SiconosContactors between BodyDS instances?  It would be best if the
-// SiconosContactor did *not* have pointers back to the BodyDS.  And yet, a
-// btCollisionShape must be associated with each shape...
-
-// Support groups, NSLs per surface, ..
-
-class SiconosContactor : public std11::enable_shared_from_this<SiconosContactor>
+class SiconosContactor
 {
 protected:
   /** serialization hooks
@@ -55,40 +47,15 @@ protected:
 public:
   virtual ~SiconosContactor() {}
 
-  void addShape(SP::SiconosPlane shape,
-                SP::SiconosVector offset = SP::SiconosVector());
-  void addShape(SP::SiconosSphere shape,
-                SP::SiconosVector offset = SP::SiconosVector());
-  void addShape(SP::SiconosBox shape,
-                SP::SiconosVector offset = SP::SiconosVector());
-  void addShape(SP::SiconosConvexHull shape,
+  void addShape(SP::SiconosShape shape,
                 SP::SiconosVector offset = SP::SiconosVector());
 
-  const std::vector< std::pair<SP::SiconosPlane,
-                               SP::SiconosVector> >& planes() const
-    { return _planes; }
-
-  const std::vector< std::pair<SP::SiconosSphere,
-                               SP::SiconosVector> >& spheres() const
-    { return _spheres; }
-
-  const std::vector< std::pair<SP::SiconosBox,
-                               SP::SiconosVector> >& boxes() const
-    { return _boxes; }
-
-  const std::vector< std::pair<SP::SiconosConvexHull,
-                               SP::SiconosVector> >& convexhulls() const
-    { return _chs; }
-
-  /** visitors hook
-   */
-  ACCEPT_VISITORS();
+  const std::vector< std::pair<SP::SiconosShape,
+                               SP::SiconosVector> >& shapes() const
+    { return _shapes; }
 
 protected:
-  std::vector< std::pair<SP::SiconosPlane,  SP::SiconosVector> > _planes;
-  std::vector< std::pair<SP::SiconosSphere, SP::SiconosVector> > _spheres;
-  std::vector< std::pair<SP::SiconosBox, SP::SiconosVector> > _boxes;
-  std::vector< std::pair<SP::SiconosConvexHull, SP::SiconosVector> > _chs;
+  std::vector< std::pair<SP::SiconosShape, SP::SiconosVector> > _shapes;
 };
 
 #endif /* SiconosContactor_h */

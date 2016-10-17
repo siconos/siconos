@@ -221,6 +221,7 @@ public:
 
   friend class SiconosBulletCollisionManager;
   friend class CollisionUpdater;
+  friend class CreateCollisionObjectShapeVisitor;
 };
 
 void SiconosBulletCollisionManager_impl::insertQueuedContactors(SiconosBulletCollisionManager &broad)
@@ -630,6 +631,27 @@ void SiconosBulletCollisionManager_impl::updateShape(const BodyCHRecord &record)
   updateShapePosition(record);
 }
 
+struct CreateCollisionObjectShapeVisitor : public SiconosVisitor
+{
+  using SiconosVisitor::visit;
+  SiconosBulletCollisionManager_impl &impl;
+  const SP::BodyDS ds;
+  SP::SiconosVector offset;
+
+  CreateCollisionObjectShapeVisitor(SiconosBulletCollisionManager_impl &_impl,
+                                    const SP::BodyDS _ds)
+    : impl(_impl), ds(_ds) {}
+
+  void visit(SP::SiconosPlane shape)
+    { impl.createCollisionObject(ds, shape, offset); }
+  void visit(SP::SiconosSphere shape)
+    { impl.createCollisionObject(ds, shape, offset); }
+  void visit(SP::SiconosBox shape)
+    { impl.createCollisionObject(ds, shape, offset); }
+  void visit(SP::SiconosConvexHull shape)
+    { impl.createCollisionObject(ds, shape, offset); }
+};
+
 void SiconosBulletCollisionManager_impl::createCollisionObjectsForBodyContactor(
   const SP::BodyDS ds, SP::SiconosContactor contactor)
 {
@@ -637,21 +659,17 @@ void SiconosBulletCollisionManager_impl::createCollisionObjectsForBodyContactor(
   if (ds) con = ds->contactor();
   if (!con) return;
 
-  std::vector<std::pair<SP::SiconosPlane, SP::SiconosVector> >::const_iterator itp;
-  for (itp=con->planes().begin(); itp!=con->planes().end(); itp++)
-    createCollisionObject(ds, itp->first, itp->second);
+  std11::shared_ptr<CreateCollisionObjectShapeVisitor>
+    ccosv(new CreateCollisionObjectShapeVisitor(*this, ds));
 
-  std::vector<std::pair<SP::SiconosSphere, SP::SiconosVector> >::const_iterator its;
-  for (its=con->spheres().begin(); its!=con->spheres().end(); its++)
-    createCollisionObject(ds, its->first, its->second);
-
-  std::vector<std::pair<SP::SiconosBox, SP::SiconosVector> >::const_iterator itb;
-  for (itb=con->boxes().begin(); itb!=con->boxes().end(); itb++)
-    createCollisionObject(ds, itb->first, itb->second);
-
-  std::vector<std::pair<SP::SiconosConvexHull, SP::SiconosVector> >::const_iterator itc;
-  for (itc=con->convexhulls().begin(); itc!=con->convexhulls().end(); itc++)
-    createCollisionObject(ds, itc->first, itc->second);
+  /* Call createCollisionObject for each shape type using the visitor
+   * defined above */
+  std::vector< std::pair<SP::SiconosShape, SP::SiconosVector> >::const_iterator it;
+  for (it=con->shapes().begin(); it!=con->shapes().end(); it++)
+  {
+    ccosv->offset = it->second;
+    it->first->acceptSP(ccosv);
+  }
 }
 
 /** This class allows to iterate over all the contact points in a

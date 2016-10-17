@@ -26,6 +26,7 @@
 #define SiconosShape_h
 
 #include "MechanicsFwd.hpp"
+#include <SiconosVisitor.hpp>
 #include <SiconosSerialization.hpp>
 #include <SiconosVector.hpp>
 #include <SiconosMatrix.hpp>
@@ -74,17 +75,27 @@ public:
   unsigned int group() { return _group; }
 
   unsigned int version() const { return _version; }
+
+  /** visitors hook
+   */
+  VIRTUAL_ACCEPT_VISITORS();
 };
 
-class SiconosPlane : public SiconosShape
+class SiconosPlane : public SiconosShape,
+                     public std11::enable_shared_from_this<SiconosPlane>
 {
 public:
   SiconosPlane() : SiconosShape() {}
 
   virtual ~SiconosPlane() {}
+
+  /** visitors hook
+   */
+  ACCEPT_VISITORS();
 };
 
-class SiconosSphere : public SiconosShape
+class SiconosSphere : public SiconosShape,
+                      public std11::enable_shared_from_this<SiconosSphere>
 {
 protected:
   float _radius;
@@ -97,9 +108,14 @@ public:
 
   float radius() const { return _radius; }
   void setRadius(float r) { _radius = r; _version ++; }
+
+  /** visitors hook
+   */
+  ACCEPT_VISITORS();
 };
 
-class SiconosBox : public SiconosShape
+class SiconosBox : public SiconosShape,
+                   public std11::enable_shared_from_this<SiconosBox>
 {
 protected:
   SP::SiconosVector _dimensions;
@@ -127,9 +143,14 @@ public:
     (*_dimensions)(2) = (*dim)(2);
     _version ++;
   }
+
+  /** visitors hook
+   */
+  ACCEPT_VISITORS();
 };
 
-class SiconosConvexHull : public SiconosShape
+class SiconosConvexHull : public SiconosShape,
+                          public std11::enable_shared_from_this<SiconosConvexHull>
 {
 protected:
   SP::SiconosMatrix _vertices;
@@ -151,6 +172,10 @@ public:
     _vertices = vertices;
     _version ++;
   }
+
+  /** visitors hook
+   */
+  ACCEPT_VISITORS();
 };
 
 #endif /* SiconosShape_h */
