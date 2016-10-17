@@ -55,10 +55,14 @@ protected:
 public:
   virtual ~SiconosContactor() {}
 
-  void addShape(SP::SiconosPlane shape, SP::SiconosVector offset);
-  void addShape(SP::SiconosSphere shape, SP::SiconosVector offset);
-  void addShape(SP::SiconosBox shape, SP::SiconosVector offset);
-  void addShape(SP::SiconosConvexHull shape, SP::SiconosVector offset);
+  void addShape(SP::SiconosPlane shape,
+                SP::SiconosVector offset = SP::SiconosVector());
+  void addShape(SP::SiconosSphere shape,
+                SP::SiconosVector offset = SP::SiconosVector());
+  void addShape(SP::SiconosBox shape,
+                SP::SiconosVector offset = SP::SiconosVector());
+  void addShape(SP::SiconosConvexHull shape,
+                SP::SiconosVector offset = SP::SiconosVector());
 
   const std::vector< std::pair<SP::SiconosPlane,
                                SP::SiconosVector> >& planes() const

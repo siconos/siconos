@@ -1,96 +1,36 @@
-// -*- compile-command: "make -C ~/projects/siconos/bld/mechanics && valgrind --leak-check=full --suppressions=$HOME/projects/siconos/cmake/valgrind.supp ~/projects/siconos/bld/mechanics/src/proposed/test/testContact ContactTest" -*-
-// make --no-print-directory -C ~/projects/siconos/bld/mechanics && ~/projects/siconos/bld/mechanics/src/proposed/test/testContact ContactTest::t2 | grep pos, | cut -d, -f2-8 | plot.py -s
+// -*- compile-command: "make -C ~/projects/siconos/bld/mechanics && valgrind --leak-check=full --suppressions=$HOME/projects/siconos/cmake/valgrind.supp ~/projects/siconos/bld/mechanics/src/collision/bullet/test/testContact ContactTest" -*-
+// make --no-print-directory -C ~/projects/siconos/bld/mechanics && ~/projects/siconos/bld/mechanics/src/collision/bullet/test/testContact ContactTest::t2 | grep pos, | cut -d, -f2-8 | plot.py -s
 
 #include "ContactTest.hpp"
 
 #include "SiconosContactor.hpp"
 #include "SiconosShape.hpp"
-#include "BulletBroadphase.hpp"
+#include "SiconosCollisionManager.hpp"
+#include "SiconosBulletCollisionManager.hpp"
 #include "BodyDS.hpp"
-#include "BodyTimeStepping.hpp"
 
 #include "SiconosKernel.hpp"
 
 #include <string>
 #include <sys/time.h>
 
-// Experimental settings for BulletBroadphase
+// Experimental settings for SiconosBulletCollisionManager
 extern double extra_margin;
 extern double breaking_threshold;
 extern double box_ch_added_dimension;
 extern double box_convex_hull_margin;
 extern double bullet_world_scaling;
 
-// Experimental statistics from BulletBroadphase
+// Experimental statistics from SiconosBulletCollisionManager
 extern int new_interaction_counter;
 extern int existing_interaction_counter;
 extern int interaction_warning_counter;
-
 
 // test suite registration
 CPPUNIT_TEST_SUITE_REGISTRATION(ContactTest);
 
 void ContactTest::setUp() {}
 void ContactTest::tearDown() {}
-
-void ContactTest::t1()
-{
-  try
-  {
-    printf("\n==== t1\n");
-
-    // Initial state
-    SP::SiconosVector pos(new SiconosVector(7));
-    SP::SiconosVector vel(new SiconosVector(6));
-    pos->zero();
-    vel->zero();
-
-    // Set up a Siconos Mechanics environment:
-    // A BodyDS with a contactor consisting of a single sphere.
-    (*pos)(2) = 10.0;
-    SP::BodyDS body(new BodyDS(pos, vel, 1.0));
-    SP::SiconosContactor contactor(new SiconosContactor());
-    SP::SiconosSphere sphere(new SiconosSphere(0,0,0,1.0));
-    contactor->addShape(sphere);
-    body->setContactor(contactor);
-
-    // A BodyDS with a contactor consisting of a plane
-    (*pos)(2) = 0.0;
-    SP::BodyDS body2(new BodyDS(pos, vel, 1.0));
-    SP::SiconosContactor contactor2(new SiconosContactor());
-    SP::SiconosPlane plane(new SiconosPlane(0,0,0));
-    contactor2->addShape(plane);
-    body2->setContactor(contactor2);
-
-    // Object to manage the Bullet implementation of broadphase
-    SP::SiconosBroadphase broadphase(new BulletBroadphase());
-
-    // Build broadphase-specific mirror of contactor graph
-    std::vector<SP::BodyDS> bodies;
-    bodies.push_back(body);
-    bodies.push_back(body2);
-    broadphase->buildGraph(bodies);
-
-    // Perform broadphase, generates IndexSet0
-    broadphase->performBroadphase();
-
-    // Update a property
-    sphere->setRadius(0.5);
-
-    // Check for dirty objects and update the graph
-    broadphase->updateGraph();
-
-    // Perform broadphase, generates IndexSet0
-    broadphase->performBroadphase();
-  }
-  catch (SiconosException e)
-  {
-    std::cout << "SiconosException: " << e.report() << std::endl;
-    CPPUNIT_ASSERT(0);
-  }
-
-  CPPUNIT_ASSERT(1);
-}
 
 struct BounceParams
 {
@@ -102,7 +42,7 @@ struct BounceParams
   double timestep;
   double insideMargin;
   double outsideMargin;
-  BulletOptions options;
+  SiconosBulletOptions options;
 
   void dump() {
     printf("  trace:              %s\n", trace?"on":"off");
@@ -201,15 +141,14 @@ BounceResult bounceTest(std::string moving,
     SP::SiconosSphere sphere;
     if (moving=="sphere")
     {
-      sphere.reset(new SiconosSphere(0,0,0, params.size/2));
+      sphere.reset(new SiconosSphere(params.size/2));
       sphere->setInsideMargin(params.insideMargin);
       sphere->setOutsideMargin(params.outsideMargin);
       contactor->addShape(sphere);
     }
     else if (moving=="box")
     {
-      SP::SiconosBox box(
-        new SiconosBox(0,0,0,params.size,params.size,params.size));
+      SP::SiconosBox box(new SiconosBox(params.size,params.size,params.size));
       box->setInsideMargin(params.insideMargin);
       box->setOutsideMargin(params.outsideMargin);
       contactor->addShape(box);
@@ -222,8 +161,7 @@ BounceResult bounceTest(std::string moving,
       (*pts)(1,1) = siz; (*pts)(1,1) = 0.0; (*pts)(1,2) = 0.0;
       (*pts)(2,0) = 0.0; (*pts)(2,1) = siz; (*pts)(2,2) = 0.0;
       (*pts)(3,0) = 0.0; (*pts)(3,1) = 0.0; (*pts)(3,2) = siz;
-      SP::SiconosConvexHull ch(
-        new SiconosConvexHull(0,0,0,pts));
+      SP::SiconosConvexHull ch(new SiconosConvexHull(pts));
       ch->setInsideMargin(params.insideMargin);
       ch->setOutsideMargin(params.outsideMargin);
       contactor->addShape(ch);
@@ -235,24 +173,30 @@ BounceResult bounceTest(std::string moving,
     SP::SiconosContactor static_contactor(new SiconosContactor());
     if (ground=="plane")
     {
-      SP::SiconosPlane plane(new SiconosPlane(0,0,0));
+      SP::SiconosPlane plane(new SiconosPlane());
       plane->setInsideMargin(params.insideMargin);
       plane->setOutsideMargin(params.outsideMargin);
       static_contactor->addShape(plane);
     }
     else if (ground=="box")
     {
-      SP::SiconosBox floorbox(new SiconosBox(0,0,-50-params.size/2,100,100,100));
+      SP::SiconosBox floorbox(new SiconosBox(100,100,100));
       floorbox->setInsideMargin(params.insideMargin);
       floorbox->setOutsideMargin(params.outsideMargin);
-      static_contactor->addShape(floorbox);
+      SP::SiconosVector pos(new SiconosVector(7));
+      (*pos)(2) = -50-params.size/2;
+      (*pos)(3) = 1.0;
+      static_contactor->addShape(floorbox, pos);
     }
     else if (ground=="sphere")
     {
-      SP::SiconosSphere floorsphere(new SiconosSphere(0,0,-1.0-params.size/2,1.0));
+      SP::SiconosSphere floorsphere(new SiconosSphere(1.0));
       floorsphere->setInsideMargin(params.insideMargin);
       floorsphere->setOutsideMargin(params.outsideMargin);
-      static_contactor->addShape(floorsphere);
+      SP::SiconosVector pos(new SiconosVector(7));
+      (*pos)(2) = -1-params.size/2;
+      (*pos)(3) = 1.0;
+      static_contactor->addShape(floorsphere, pos);
     }
 
     /////////
@@ -290,27 +234,30 @@ BounceResult bounceTest(std::string moving,
 
     SP::NonSmoothLaw nslaw(new NewtonImpactFrictionNSL(0.8, 0., 0.0, 3));
 
-    // TODO pass nslaw to broadphase
+    // TODO pass nslaw to collisionMan
 
-    // -- MoreauJeanOSI Time Stepping with Body-based Dynamical Systems
-    SP::BodyTimeStepping simulation(new BodyTimeStepping(timedisc));
+    // -- MoreauJeanOSI Time Stepping
+    SP::TimeStepping simulation(new TimeStepping(timedisc));
 
     simulation->insertIntegrator(osi);
     simulation->insertNonSmoothProblem(osnspb);
 
-    model->initialize(simulation);
+    model->setSimulation(simulation);
+    model->initialize();
 
-    // Object to manage the Bullet implementation of broadphase
-    SP::BulletBroadphase broadphase(new BulletBroadphase(params.options));
+    // Object to manage the Bullet implementation of collisionMan
+    SP::SiconosBulletCollisionManager collisionMan(
+      new SiconosBulletCollisionManager(params.options));
 
-    // Build broadphase-specific mirror of contactor graph
-    broadphase->buildGraph(model);
-    broadphase->buildGraph(static_contactor);
+    simulation->insertInteractionManager(collisionMan);
+
+    // Add static shapes
+    collisionMan->insertStaticContactor(static_contactor);
 
     ///////
 
     int new_interaction_total = 0;
-    broadphase->resetStatistics();
+    collisionMan->resetStatistics();
 
     ///////
 
@@ -323,12 +270,6 @@ BounceResult bounceTest(std::string moving,
       if (params.dynamic && k==500 && moving=="sphere") {
         sphere->setRadius(0.3);
       }
-
-      // Check for dirty objects and update the broadphase graph
-      broadphase->updateGraph();
-
-      // Perform broadphase, generates IndexSet0
-      broadphase->performBroadphase();
 
       // Update integrator and solve constraints
       simulation->computeOneStep();
@@ -351,15 +292,15 @@ BounceResult bounceTest(std::string moving,
       }
 
       // Interaction statistics
-      if (broadphase->statistics().new_interactions_created > 0 && first_contact) {
+      if (collisionMan->statistics().new_interactions_created > 0 && first_contact) {
         first_contact = false;
         displacement_on_first_contact = last_pos - pos;
       }
 
-      int interactions = broadphase->statistics().new_interactions_created
-        + broadphase->statistics().existing_interactions_processed;
+      int interactions = collisionMan->statistics().new_interactions_created
+        + collisionMan->statistics().existing_interactions_processed;
 
-      local_new_interaction_count += broadphase->statistics().new_interactions_created;
+      local_new_interaction_count += collisionMan->statistics().new_interactions_created;
 
       if (interactions > max_simultaneous_contacts)
         max_simultaneous_contacts = interactions;
@@ -367,7 +308,7 @@ BounceResult bounceTest(std::string moving,
       avg_simultaneous_contacts += interactions;
 
       // Reset interaction counters for next iteration
-      broadphase->resetStatistics();
+      collisionMan->resetStatistics();
 
       // Standard deviation (cheating by not calculating mean!)
       if (k==(steps-100))
@@ -401,7 +342,7 @@ BounceResult bounceTest(std::string moving,
     r.final_position_std = sqrt(std/100);
 
     r.num_interactions = local_new_interaction_count;
-    r.num_interaction_warnings = broadphase->statistics().interaction_warnings;
+    r.num_interaction_warnings = collisionMan->statistics().interaction_warnings;
     r.max_simultaneous_contacts = max_simultaneous_contacts;
     r.avg_simultaneous_contacts = avg_simultaneous_contacts / (double)k;
 
@@ -410,11 +351,11 @@ BounceResult bounceTest(std::string moving,
     return r;
 }
 
-void ContactTest::t2()
+void ContactTest::t1()
 {
   try
   {
-    printf("\n==== t2\n");
+    printf("\n==== t1\n");
 
     BounceParams params;
     params.trace = true;
@@ -441,11 +382,11 @@ void ContactTest::t2()
   CPPUNIT_ASSERT(1);
 }
 
-void ContactTest::t3()
+void ContactTest::t2()
 {
   try
   {
-    printf("\n==== t3\n");
+    printf("\n==== t2\n");
 
     BounceParams params;
     params.trace = false;
@@ -500,11 +441,11 @@ void ContactTest::t3()
   CPPUNIT_ASSERT(1);
 }
 
-void ContactTest::t4()
+void ContactTest::t3()
 {
   try
   {
-    printf("\n==== t4\n");
+    printf("\n==== t3\n");
 
     BounceParams params[3];
     params[0].trace = true;
@@ -568,9 +509,9 @@ public:
 template<>
 bool Var<bool>::sample() { return (rand()/(double)RAND_MAX) > prob; }
 
-void ContactTest::t5()
+void ContactTest::t4()
 {
-  printf("\n==== t5\n");
+  printf("\n==== t4\n");
 
   FILE *fresults = fopen("results.json", "w");
   if (!fresults) {
@@ -618,7 +559,7 @@ void ContactTest::t5()
     params.outsideMargin = var_outside_margin.sample();
 
     // Experimental settings
-    BulletOptions options;
+    SiconosBulletOptions options;
     options.breakingThreshold = var_breaking_threshold.sample();
     options.worldScale = exp(var_world_scale.sample());
     params.options = options;
@@ -670,9 +611,9 @@ void ContactTest::t5()
   CPPUNIT_ASSERT(1);
 }
 
-void ContactTest::t6()
+void ContactTest::t5()
 {
-  printf("\n==== t6\n");
+  printf("\n==== t5\n");
 
   BounceParams params;
   params.trace = false;
@@ -684,7 +625,7 @@ void ContactTest::t6()
   params.insideMargin = 0.1;
   params.outsideMargin = 0.1;
 
-  BulletOptions options;
+  SiconosBulletOptions options;
   options.breakingThreshold = 0.4;
   options.worldScale = 1.0;
   params.options = options;

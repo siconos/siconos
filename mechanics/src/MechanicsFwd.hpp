@@ -52,8 +52,8 @@
   REGISTER(SiconosBox)                          \
   REGISTER(SiconosConvexHull)                   \
   REGISTER(SiconosPlane)                        \
-  REGISTER(SiconosMechanicsWorld)               \
-  REGISTER(SiconosBulletWorld)
+  REGISTER(SiconosCollisionManager)             \
+  REGISTER(SiconosBulletCollisionManager)
 
 #include <SiconosVisitables.hpp>
 
