@@ -373,20 +373,16 @@ void NewtonEulerDS::internalInit(SP::SiconosVector Q0, SP::SiconosVector Velocit
   _massMatrix.reset(new SimpleMatrix(_n, _n));
   _jacobianFGyrv.reset(new SimpleMatrix(_n, _n));
   _luW.reset(new SimpleMatrix(_n, _n));
-  _massMatrix->zero();
-  _massMatrix->setValue(0, 0, _scalarMass);
-  _massMatrix->setValue(1, 1, _scalarMass);
-  _massMatrix->setValue(2, 2, _scalarMass);
-  _I = inertialMatrix;
-  Index dimIndex(2);
-  dimIndex[0] = 3;
-  dimIndex[1] = 3;
-  Index startIndex(4);
-  startIndex[0] = 0;
-  startIndex[1] = 0;
-  startIndex[2] = 3;
-  startIndex[3] = 3;
-  setBlock(_I, _massMatrix, dimIndex, startIndex);
+  if (inertialMatrix)
+    _I = inertialMatrix;
+  else {
+    _I.reset(new SimpleMatrix(3, 3));
+    _I->zero();
+    _I->setValue(0,0, 1.0);
+    _I->setValue(1,1, 1.0);
+    _I->setValue(2,2, 1.0);
+  }
+  updateMassMatrix();
   _workspace[freeresidu].reset(new SiconosVector(_n));
   _workspace[free].reset(new SiconosVector(dimension()));
 
@@ -398,6 +394,23 @@ void NewtonEulerDS::internalInit(SP::SiconosVector Q0, SP::SiconosVector Velocit
   computeT();
   initForces();
   DEBUG_END("NewtonEulerDS::internalInit(SP::SiconosVector Q0, SP::SiconosVector Velocity0, double mass , SP::SiconosMatrix inertialMatrix)\n");
+}
+
+void NewtonEulerDS::updateMassMatrix()
+{
+  _massMatrix->zero();
+  _massMatrix->setValue(0, 0, _scalarMass);
+  _massMatrix->setValue(1, 1, _scalarMass);
+  _massMatrix->setValue(2, 2, _scalarMass);
+  Index dimIndex(2);
+  dimIndex[0] = 3;
+  dimIndex[1] = 3;
+  Index startIndex(4);
+  startIndex[0] = 0;
+  startIndex[1] = 0;
+  startIndex[2] = 3;
+  startIndex[3] = 3;
+  setBlock(_I, _massMatrix, dimIndex, startIndex);
 }
 
 NewtonEulerDS::NewtonEulerDS(SP::SiconosVector Q0, SP::SiconosVector Velocity0,
@@ -427,6 +440,17 @@ void NewtonEulerDS::zeroPlugin()
 // Destructor
 NewtonEulerDS::~NewtonEulerDS()
 {
+}
+
+void NewtonEulerDS::setInertia(double ix, double iy, double iz)
+{
+  _I->zero();
+
+  (*_I)(0, 0) = ix;
+  (*_I)(1, 1) = iy;
+  (*_I)(2, 2) = iz;
+
+  updateMassMatrix();
 }
 
 bool NewtonEulerDS::checkDynamicalSystem()

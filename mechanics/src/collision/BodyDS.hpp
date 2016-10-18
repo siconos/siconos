@@ -46,7 +46,8 @@ public:
 
   BodyDS(SP::SiconosVector position,
          SP::SiconosVector velocity,
-         double mass);
+         double mass,
+         SP::SimpleMatrix inertia = SP::SimpleMatrix());
 
   virtual ~BodyDS();
 
