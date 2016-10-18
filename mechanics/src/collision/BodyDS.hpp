@@ -50,10 +50,16 @@ public:
 
   virtual ~BodyDS();
 
+  /** Access the contactor set associated with this body.
+   * \return A SP::SiconosContactorSet */
   SP::SiconosContactorSet contactors() const { return _contactors; }
 
+  /** Provide a set of contactors to the body.
+   * \param c A SP::SiconosContactorSet */
   void setContactors(SP::SiconosContactorSet c) { _contactors = c; }
 
+  /** Make the base position of the contactors equal to the DS q vector.
+   * \return a SP::SiconosVector */
   virtual SP::SiconosVector base_position() { return q(); }
 
   /** visitors hook
