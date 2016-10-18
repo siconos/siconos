@@ -877,7 +877,6 @@ class Hdf5():
                 for c in contactors:
                     shp = self._shape.get(c.name)
                     pos = list(c.translation) + list(c.orientation)
-                    print ('here2')
                     cset.append(SiconosContactor(shp, pos, c.group))
 
                 body.setContactors(cset)
