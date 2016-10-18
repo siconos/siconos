@@ -27,35 +27,67 @@
 #include "Interaction.hpp"
 #include "Model.hpp"
 #include "DynamicalSystem.hpp"
-
 #include "SiconosVisitor.hpp"
+
+#include <boost/numeric/ublas/symmetric.hpp>
 
 class InteractionManager
 {
 public:
+  InteractionManager() : _nslaws(1) {}
   virtual ~InteractionManager() {}
 
+  /** Called by Simulation prior to advancing to the next Event */
   virtual void updateInteractions(SP::Simulation simulation) {}
 
+  /** If non-null, Simulation will visit each dynamical system using
+   * this visitor prior to calling updateInteractions() */
   virtual SP::SiconosVisitor getDynamicalSystemsVisitor(SP::Simulation simulation)
     { return SP::SiconosVisitor(); }
 
-  virtual void insertNonSmoothLaw(SP::NonSmoothLaw, int group1, int group2) = 0;
-  virtual SP::NonSmoothLaw nonSmoothLaw(int group1, int group2) = 0;
+  class NSLawMatrix : public ublas::symmetric_matrix < SP::NonSmoothLaw >
+  {
+    ACCEPT_SERIALIZATION(NSLawMatrix);
+  public:
+    NSLawMatrix(NSLawMatrix::size_type i)
+      : ublas::symmetric_matrix < SP::NonSmoothLaw >(i) {}
+  };
+
+  /** Specify a non-smooth law to use for a given combination of
+   *  interaction groups.
+   * \param nsl a SP::NonSmoothLaw
+   * \param group1 first group
+   * \param group2 second group */
+  virtual void insertNonSmoothLaw(SP::NonSmoothLaw nslaw,
+                                  long unsigned int group1,
+                                  long unsigned int group2);
+
+  /** Retrieve a non-smooth law to use for a given combination of
+   *  interaction groups.
+   * \return nsl a SP::NonSmoothLaw
+   * \param group1 first group
+   * \param group2 second group */
+  virtual SP::NonSmoothLaw nonSmoothLaw(long unsigned int group1,
+                                        long unsigned int group2)
+    { return _nslaws(group1, group2); }
 
 protected:
-  // May only be called from updateInteractions()
+  /** May only be called from updateInteractions() */
   void link(SP::Interaction inter,
             SP::DynamicalSystem ds1,
             SP::DynamicalSystem ds2 = SP::DynamicalSystem());
 
-  // May only be called from updateInteractions()
+  /** May only be called from updateInteractions() */
   void unlink(SP::Interaction inter);
 
+  /** nslaws */
+  NSLawMatrix _nslaws;
+
+  /** The simulation, only accessible during updateInteraction()! */
   SP::Simulation _simulation;
 
-  // Will be called by simulation before updateInteractions() for
-  // link() and unlink() to work.
+  /** Will be called by simulation before updateInteractions() for
+   *  link() and unlink() to work. */
   void setSimulation(SP::Simulation sim) { _simulation = sim; }
 
   friend class Simulation;

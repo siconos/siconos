@@ -33,7 +33,7 @@
 class SiconosCollisionManager : public InteractionManager
 {
 public:
-  SiconosCollisionManager() {}
+  SiconosCollisionManager() : InteractionManager() {}
   virtual ~SiconosCollisionManager() {}
 
   /** An opaque handle can be used to refer to a specific static
@@ -45,9 +45,6 @@ public:
     SP::SiconosContactorSet cs, SP::SiconosVector position = SP::SiconosVector()) = 0;
 
   virtual bool removeStaticContactorSet(StaticContactorSetID id) = 0;
-
-  virtual void insertNonSmoothLaw(SP::NonSmoothLaw, int group1, int group2) = 0;
-  virtual SP::NonSmoothLaw nonSmoothLaw(int group1, int group2) = 0;
 };
 
 #endif /* SiconosCollisionManager.hpp */

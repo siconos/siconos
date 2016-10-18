@@ -172,9 +172,6 @@ protected:
   std::map< StaticContactorSetRecord*, SP::StaticContactorSetRecord >
     _staticContactorSetRecords;
 
-  // Non-smooth laws
-  std::map<std::pair<int,int>, SP::NonSmoothLaw> nslaws;
-
   /* During iteration over DSs for position updates we need to access
    * btCollisionObject, so need a map DS->btXShape. We don't use an
    * SP::BodyDS because we need to use it from a const visitor. */
@@ -299,6 +296,7 @@ void SiconosBulletCollisionManager::initialize_impl()
 }
 
 SiconosBulletCollisionManager::SiconosBulletCollisionManager()
+  : SiconosCollisionManager()
 {
   initialize_impl();
 }
@@ -980,19 +978,4 @@ struct CollisionUpdater : public SiconosVisitor
 SP::SiconosVisitor SiconosBulletCollisionManager::getDynamicalSystemsVisitor(SP::Simulation simulation)
 {
   return SP::SiconosVisitor(new CollisionUpdater(*this, *impl));
-}
-
-void SiconosBulletCollisionManager::insertNonSmoothLaw(SP::NonSmoothLaw nslaw,
-                                          int group1, int group2)
-{
-  impl->nslaws[std::pair<int,int>(group1,group2)] = nslaw;
-}
-
-SP::NonSmoothLaw SiconosBulletCollisionManager::nonSmoothLaw(int group1, int group2)
-{
-  try {
-    return impl->nslaws.at(std::pair<int,int>(group1,group2));
-  } catch (const std::out_of_range &) {
-    return SP::NonSmoothLaw();
-  }
 }

@@ -6,6 +6,8 @@
 
 #include "debug.h"
 
+#include <algorithm>
+
 void InteractionManager::link(SP::Interaction inter,
                               SP::DynamicalSystem ds1,
                               SP::DynamicalSystem ds2)
@@ -33,4 +35,15 @@ void InteractionManager::link(SP::Interaction inter,
 void InteractionManager::unlink(SP::Interaction inter)
 {
   _simulation->nonSmoothDynamicalSystem()->removeInteraction(inter);
+}
+
+void InteractionManager::insertNonSmoothLaw(SP::NonSmoothLaw nslaw,
+                                            long unsigned int group1,
+                                            long unsigned int group2)
+{
+  // ublas::matrix size type is not the same on 32 bits and 64 bits
+  NSLawMatrix::size_type maxgroup = std::max((NSLawMatrix::size_type) group1,
+                                             (NSLawMatrix::size_type) group2);
+  _nslaws.resize( std::max(_nslaws.size1(), maxgroup+1) );
+  _nslaws(group1, group2) = nslaw;
 }

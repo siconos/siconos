@@ -88,9 +88,6 @@ public:
   void updateInteractions(SP::Simulation simulation);
   SP::SiconosVisitor getDynamicalSystemsVisitor(SP::Simulation simulation);
 
-  void insertNonSmoothLaw(SP::NonSmoothLaw, int group1, int group2);
-  SP::NonSmoothLaw nonSmoothLaw(int group1, int group2);
-
   const SiconosBulletOptions &options() const { return _options; }
   const SiconosBulletStatistics &statistics() const { return _stats; }
   void resetStatistics() { _stats = SiconosBulletStatistics(); }
