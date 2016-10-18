@@ -13,6 +13,7 @@
 
 #include <string>
 #include <sys/time.h>
+#include <boost/make_shared.hpp>
 
 // Experimental settings for SiconosBulletCollisionManager
 extern double extra_margin;
@@ -137,21 +138,21 @@ BounceResult bounceTest(std::string moving,
     // Set up a Siconos Mechanics environment:
     // A BodyDS with a contactor consisting of a single sphere.
     SP::BodyDS body(new BodyDS(q0, v0, params.mass));
-    SP::SiconosContactor contactor(new SiconosContactor());
+    SP::SiconosContactorSet contactors(new SiconosContactorSet());
     SP::SiconosSphere sphere;
     if (moving=="sphere")
     {
       sphere.reset(new SiconosSphere(params.size/2));
       sphere->setInsideMargin(params.insideMargin);
       sphere->setOutsideMargin(params.outsideMargin);
-      contactor->addShape(sphere);
+      contactors->push_back(std11::make_shared<SiconosContactor>(sphere));
     }
     else if (moving=="box")
     {
       SP::SiconosBox box(new SiconosBox(params.size,params.size,params.size));
       box->setInsideMargin(params.insideMargin);
       box->setOutsideMargin(params.outsideMargin);
-      contactor->addShape(box);
+      contactors->push_back(std11::make_shared<SiconosContactor>(box));
     }
     else if (moving=="ch")
     {
@@ -164,19 +165,19 @@ BounceResult bounceTest(std::string moving,
       SP::SiconosConvexHull ch(new SiconosConvexHull(pts));
       ch->setInsideMargin(params.insideMargin);
       ch->setOutsideMargin(params.outsideMargin);
-      contactor->addShape(ch);
+      contactors->push_back(std11::make_shared<SiconosContactor>(ch));
     }
-    body->setContactor(contactor);
+    body->contactors() = contactors;
 
     // A contactor with no body (static contactor) consisting of a plane
     // Positioned such that bouncing and resting position = 0.0
-    SP::SiconosContactor static_contactor(new SiconosContactor());
+    SP::SiconosContactorSet static_contactors;
     if (ground=="plane")
     {
       SP::SiconosPlane plane(new SiconosPlane());
       plane->setInsideMargin(params.insideMargin);
       plane->setOutsideMargin(params.outsideMargin);
-      static_contactor->addShape(plane);
+      static_contactors->push_back(std11::make_shared<SiconosContactor>(plane));
     }
     else if (ground=="box")
     {
@@ -186,7 +187,7 @@ BounceResult bounceTest(std::string moving,
       SP::SiconosVector pos(new SiconosVector(7));
       (*pos)(2) = -50-params.size/2;
       (*pos)(3) = 1.0;
-      static_contactor->addShape(floorbox, pos);
+      static_contactors->push_back(std11::make_shared<SiconosContactor>(floorbox, pos));
     }
     else if (ground=="sphere")
     {
@@ -196,7 +197,7 @@ BounceResult bounceTest(std::string moving,
       SP::SiconosVector pos(new SiconosVector(7));
       (*pos)(2) = -1-params.size/2;
       (*pos)(3) = 1.0;
-      static_contactor->addShape(floorsphere, pos);
+      static_contactors->push_back(std11::make_shared<SiconosContactor>(floorsphere, pos));
     }
 
     /////////
@@ -251,8 +252,8 @@ BounceResult bounceTest(std::string moving,
 
     simulation->insertInteractionManager(collisionMan);
 
-    // Add static shapes
-    collisionMan->insertStaticContactor(static_contactor);
+    // Add static shapes (centered at zero by default)
+    collisionMan->insertStaticContactorSet(static_contactors);
 
     ///////
 

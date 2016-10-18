@@ -34,10 +34,10 @@
 
 #include "SiconosShape.hpp"
 
-/* \brief Class to hold the collection of shapes assigned to a body,
- * and to associate each shape with an offset and collision group. */
+/** Class to hold the shape assigned to a body, and to associate each
+ *  shape with an offset and collision group. */
 
-class SiconosContactor
+struct SiconosContactor
 {
 protected:
   /** serialization hooks
@@ -45,17 +45,24 @@ protected:
   ACCEPT_SERIALIZATION(SiconosContactor);
 
 public:
-  virtual ~SiconosContactor() {}
+  SiconosContactor(SP::SiconosShape _shape,
+                   SP::SiconosVector _offset = SP::SiconosVector(),
+                   int _collision_group = 0);
 
-  void addShape(SP::SiconosShape shape,
-                SP::SiconosVector offset = SP::SiconosVector());
+  SP::SiconosShape shape;
+  SP::SiconosVector offset;
+  int collision_group;
+};
 
-  const std::vector< std::pair<SP::SiconosShape,
-                               SP::SiconosVector> >& shapes() const
-    { return _shapes; }
+class SiconosContactorSet : public std::vector< SP::SiconosContactor >
+{
+public:
+  typedef std::vector< SP::SiconosContactor >::iterator iterator;
 
-protected:
-  std::vector< std::pair<SP::SiconosShape, SP::SiconosVector> > _shapes;
+  void append(SP::SiconosContactor b) { push_back(b); }
+  void append(std::vector<SP::SiconosContactor> b) { insert(end(), b.begin(), b.end()); }
+  void append(const SiconosContactorSet& b) { insert(end(), b.begin(), b.end()); }
+  void append(const SP::SiconosContactorSet& b) { insert(end(), b->begin(), b->end()); }
 };
 
 #endif /* SiconosContactor_h */

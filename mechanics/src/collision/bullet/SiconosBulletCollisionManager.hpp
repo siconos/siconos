@@ -80,7 +80,10 @@ protected:
   SiconosBulletStatistics _stats;
 
 public:
-  void insertStaticContactor(SP::SiconosContactor contactor);
+  StaticContactorSetID insertStaticContactorSet(
+    SP::SiconosContactorSet cs, SP::SiconosVector position = SP::SiconosVector());
+
+  bool removeStaticContactorSet(StaticContactorSetID id);
 
   void updateInteractions(SP::Simulation simulation);
   SP::SiconosVisitor getDynamicalSystemsVisitor(SP::Simulation simulation);

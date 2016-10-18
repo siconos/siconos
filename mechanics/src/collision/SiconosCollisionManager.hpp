@@ -28,6 +28,7 @@
 #define SiconosCollisionManager_h
 
 #include <InteractionManager.hpp>
+#include <SiconosContactor.hpp>
 
 class SiconosCollisionManager : public InteractionManager
 {
@@ -35,8 +36,15 @@ public:
   SiconosCollisionManager() {}
   virtual ~SiconosCollisionManager() {}
 
+  /** An opaque handle can be used to refer to a specific static
+   * contactor set previously added to the collision manager. */
+  typedef void* StaticContactorSetID;
+
 public:
-  virtual void insertStaticContactor(SP::SiconosContactor contactor) = 0;
+  virtual StaticContactorSetID insertStaticContactorSet(
+    SP::SiconosContactorSet cs, SP::SiconosVector position = SP::SiconosVector()) = 0;
+
+  virtual bool removeStaticContactorSet(StaticContactorSetID id) = 0;
 
   virtual void insertNonSmoothLaw(SP::NonSmoothLaw, int group1, int group2) = 0;
   virtual SP::NonSmoothLaw nonSmoothLaw(int group1, int group2) = 0;

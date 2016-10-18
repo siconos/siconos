@@ -24,8 +24,8 @@ use_proposed = False
 try:
     from siconos.kernel import TimeStepping
     from siconos.mechanics.collision import BodyDS, \
-        SiconosSphere, SiconosBox, SiconosPlane, \
-        SiconosContactor, SiconosConvexHull
+        SiconosSphere, SiconosBox, SiconosPlane, SiconosConvexHull, \
+        SiconosContactor, SiconosContactorSet
     from siconos.mechanics.collision.bullet import \
         SiconosBulletCollisionManager, SiconosBulletOptions
     from siconos.mechanics.collision.bullet import \
@@ -798,13 +798,13 @@ class Hdf5():
             if use_proposed and mass == 0:
                 # a static object
                 for c in contactors:
-                    shp = self._shape.get(c.name)
-                    # TODO contactor position
-                    # shp.setPosition(c.translation + c.orientation)
                     pos = (translation + orientation)
-                    shp.setGroup(c.group)
+                    shp = self._shape.get(c.name)
+                    conset = SiconosContactorSet()
+                    # TODO: segfault if we pass None for SiconosVector!
+                    conset.append(SiconosContactor(shp, [0,0,0,1,0,0,0], c.group))
                     print('Adding shape %s to static contactor'%c.name, pos)
-                    self._static_contactor.addShape(shp, pos)
+                    self._broadphase.insertStaticContactorSet(conset)
 
                     self._static[name] = {
                         'number': number,
@@ -873,14 +873,14 @@ class Hdf5():
                                   velocity,
                                   mass)
 
-                contactor = SiconosContactor()
+                cset = SiconosContactorSet()
                 for c in contactors:
                     shp = self._shape.get(c.name)
                     pos = list(c.translation) + list(c.orientation)
-                    shp.setGroup(c.group)
-                    contactor.addShape(shp, pos)
+                    print ('here2')
+                    cset.append(SiconosContactor(shp, pos, c.group))
 
-                body.setContactor(contactor)
+                body.setContactors(cset)
 
             else:
                 # a Bullet moving object
@@ -1160,9 +1160,6 @@ class Hdf5():
 
             for name in self.joints():
                 self.importJoint(name)
-
-            if use_proposed:
-                self._broadphase.insertStaticContactor(self._static_contactor)
 
             for name in self.permanent_interactions():
                 self.importPermanentInteraction(name)
@@ -1833,7 +1830,6 @@ class Hdf5():
 
         # (5) broadphase contact detection
         if proposed_is_here and use_proposed:
-            self._static_contactor = SiconosContactor()
             self._broadphase = space_filter(model)
         else:
             self._broadphase=space_filter(model)

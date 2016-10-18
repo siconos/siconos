@@ -47,6 +47,8 @@
   /* Proposed new Mechanics API */              \
   REGISTER(BodyDS)                              \
   REGISTER(SiconosContactor)                    \
+  REGISTER(SiconosContactorSet)                 \
+  REGISTER(SiconosContactorBase)                \
   REGISTER(SiconosShape)                        \
   REGISTER(SiconosSphere)                       \
   REGISTER(SiconosBox)                          \

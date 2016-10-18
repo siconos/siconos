@@ -17,48 +17,21 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 
-/*! \file BodyDS.hpp
-  \brief Definition of an abstract body
+/*! \file SiconosContactor.hpp
+  \brief Definition of an abstract contactor
 */
 
 
-#ifndef BodyDS_h
-#define BodyDS_h
+#ifndef SiconosContactorBase_h
+#define SiconosContactorBase_h
 
-#include <MechanicsFwd.hpp>
-#include <NewtonEulerDS.hpp>
-#include <SiconosVisitor.hpp>
-#include <SiconosContactor.hpp>
-#include <SiconosContactorBase.hpp>
-
-class BodyDS : public NewtonEulerDS,
-               public SiconosContactorBase,
-               public std11::enable_shared_from_this<BodyDS>
+struct SiconosContactorBase
 {
-protected:
-  /** serialization hooks
-  */
-  ACCEPT_SERIALIZATION(BodyDS);
-
-  SP::SiconosContactorSet _contactors;
-
-public:
-
-  BodyDS(SP::SiconosVector position,
-         SP::SiconosVector velocity,
-         double mass);
-
-  virtual ~BodyDS();
-
-  SP::SiconosContactorSet contactors() const { return _contactors; }
-
-  void setContactors(SP::SiconosContactorSet c) { _contactors = c; }
-
-  virtual SP::SiconosVector base_position() { return q(); }
-
-  /** visitors hook
-   */
-  ACCEPT_BASE_VISITORS(NewtonEulerDS);
+  SiconosContactorBase(SP::SiconosVector position) : _base_position(position)
+    { assert((position && position->size()==7)
+             || "Every ContactorSet must have a base position."); }
+  virtual SP::SiconosVector base_position() { return _base_position; }
+  SP::SiconosVector _base_position;
 };
 
-#endif /* BodyDS_h */
+#endif // SiconosContactorBase_h

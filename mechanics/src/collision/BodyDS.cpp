@@ -3,6 +3,9 @@
 #include "NewtonEulerDS.hpp"
 #include "BodyDS.hpp"
 #include "SiconosContactor.hpp"
+#include "SiconosContactorBase.hpp"
+
+#include <boost/make_shared.hpp>
 
 // TODO
 SP::SiconosMatrix identity_inertia()
@@ -19,6 +22,8 @@ BodyDS::BodyDS(SP::SiconosVector position,
                SP::SiconosVector velocity,
                double mass)
   : NewtonEulerDS(position, velocity, mass, identity_inertia())
+  , SiconosContactorBase(SP::SiconosVector())
+  , _contactors(std11::make_shared<SiconosContactorSet>())
 {
 }
 
