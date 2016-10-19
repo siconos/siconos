@@ -100,21 +100,21 @@
 #endif
 #endif
 
-// We need to maintain a 3-way record associating each body shape pair
-// for each shape type, and maintaining other memory we need too.  We
-// also need to access generic shape stuff (group, margin) by a
-// pointer, so we need a base class.
+// We need to maintain a record associating each body with a shape,
+// contactor, and collision object for each shape type.  We also need
+// to access generic shape stuff (group, margin) by a pointer from the
+// collision callback, so we need a record base class.
 struct BodyShapeRecord
 {
   BodyShapeRecord(SP::SiconosContactorBase b, SP::BodyDS d, SP::SiconosShape sh,
-                  SP::btCollisionObject btobj, SP::SiconosVector off)
-    : base(b), ds(d), sshape(sh), btobject(btobj), offset(off),
+                  SP::btCollisionObject btobj, SP::SiconosContactor con)
+    : base(b), ds(d), sshape(sh), btobject(btobj), contactor(con),
       shape_version(sh->version()) {}
   SP::SiconosContactorBase base;
   SP::BodyDS ds;
   SP::SiconosShape sshape;
   SP::btCollisionObject btobject;
-  SP::SiconosVector offset;
+  SP::SiconosContactor contactor;
   unsigned int shape_version;
 };
 
@@ -123,8 +123,8 @@ struct BodyShapeRecordT : BodyShapeRecord
 {
   BodyShapeRecordT(SP::SiconosContactorBase base, SP::BodyDS ds,
                    SICONOSSHAPE sh, BULLETSHAPE btsh,
-                   SP::btCollisionObject btobj, SP::SiconosVector off)
-    : BodyShapeRecord(base, ds, sh, btobj, off), shape(sh), btshape(btsh) {}
+                   SP::btCollisionObject btobj, SP::SiconosContactor con)
+    : BodyShapeRecord(base, ds, sh, btobj, con), shape(sh), btshape(btsh) {}
   SICONOSSHAPE shape;
   BULLETSHAPE btshape;
 };
@@ -188,19 +188,19 @@ protected:
   void createCollisionObject(const SP::SiconosContactorBase base,
                              const SP::BodyDS ds,
                              const SP::SiconosPlane plane,
-                             const SP::SiconosVector offset);
+                             const SP::SiconosContactor contactor);
   void createCollisionObject(const SP::SiconosContactorBase base,
                              const SP::BodyDS ds,
                              const SP::SiconosSphere sphere,
-                             const SP::SiconosVector offset);
+                             const SP::SiconosContactor contactor);
   void createCollisionObject(const SP::SiconosContactorBase base,
                              const SP::BodyDS ds,
                              const SP::SiconosBox box,
-                             const SP::SiconosVector offset);
+                             const SP::SiconosContactor contactor);
   void createCollisionObject(const SP::SiconosContactorBase base,
                              const SP::BodyDS ds,
                              const SP::SiconosConvexHull ch,
-                             const SP::SiconosVector offset);
+                             const SP::SiconosContactor contactor);
 
   /* Call the above functions for each shape associated with a body or contactor. */
   void createCollisionObjectsForBodyContactorSet(
@@ -212,8 +212,8 @@ protected:
    * shape type */
   template<typename ST, typename BT, typename BR, typename BSM>
   void createCollisionObjectHelper(SP::SiconosContactorBase base, SP::BodyDS ds,
-                                   ST& shape, BT& btshape,
-                                   BSM& bodyShapeMap, SP::SiconosVector offset);
+                                   ST& shape, BT& btshape, BSM& bodyShapeMap,
+                                   SP::SiconosContactor contactor);
 
   void updateShape(BodyBoxRecord &record);
   void updateShape(BodySphereRecord &record);
@@ -340,7 +340,7 @@ void SiconosBulletCollisionManager_impl::updateAllShapesForDS(const BodyDS &bds)
 template<typename ST, typename BT, typename BR, typename BSM>
 void SiconosBulletCollisionManager_impl::createCollisionObjectHelper(
   SP::SiconosContactorBase base, SP::BodyDS ds, ST& shape, BT& btshape,
-  BSM& bodyShapeMap, SP::SiconosVector offset)
+  BSM& bodyShapeMap, SP::SiconosContactor contactor)
 {
   assert(base && "Collision objects must have a base position.");
 
@@ -356,7 +356,7 @@ void SiconosBulletCollisionManager_impl::createCollisionObjectHelper(
   // create a record to keep track of things
   // (for static contactor, ds=nil)
   std11::shared_ptr<BR> record(
-    std11::make_shared<BR>(base, ds, shape, btshape, btobject, offset));
+    std11::make_shared<BR>(base, ds, shape, btshape, btobject, contactor));
 
   bodyShapeMap[ds ? &*ds : 0].push_back(record);
 
@@ -364,8 +364,9 @@ void SiconosBulletCollisionManager_impl::createCollisionObjectHelper(
   assert(record->sshape);
   assert(record->shape);
   assert(record->btshape);
-  assert(record->offset);
-  assert(record->offset->size() == 7);
+  assert(record->contactor);
+  assert(record->contactor->offset);
+  assert(record->contactor->offset->size() == 7);
 
   // Allow Bullet to report colliding DSs.  We need to access it from
   // the collision callback as the record base class so down-cast it.
@@ -410,14 +411,14 @@ void SiconosBulletCollisionManager_impl::updateShapePosition(const BodyShapeReco
   DEBUG_PRINTF("updating shape position: %p(%ld) - %f, %f, %f\n",
                &*box,box.use_count(), q(0), q(1), q(2));
 
-  record.btobject->setWorldTransform( offsetTransform(q, *record.offset) );
+  record.btobject->setWorldTransform( offsetTransform(q, *record.contactor->offset) );
 }
 
 void SiconosBulletCollisionManager_impl::createCollisionObject(
   const SP::SiconosContactorBase base,
   const SP::BodyDS ds,
   SP::SiconosSphere sphere,
-  SP::SiconosVector offset)
+  const SP::SiconosContactor contactor)
 {
   // set radius to 1.0 and use scaling instead of setting radius
   // directly, makes it easier to change during update
@@ -438,7 +439,7 @@ void SiconosBulletCollisionManager_impl::createCollisionObject(
   // initialization
   createCollisionObjectHelper<SP::SiconosSphere, SP::BTSPHERESHAPE,
                               BodySphereRecord, BodySphereMap>
-    (base, ds, sphere, btsphere, bodySphereMap, offset);
+    (base, ds, sphere, btsphere, bodySphereMap, contactor);
 }
 
 void SiconosBulletCollisionManager_impl::updateShape(BodySphereRecord &record)
@@ -470,7 +471,7 @@ void SiconosBulletCollisionManager_impl::createCollisionObject(
   const SP::SiconosContactorBase base,
   const SP::BodyDS ds,
   SP::SiconosPlane plane,
-  SP::SiconosVector offset)
+  SP::SiconosContactor contactor)
 {
   // create the initial plane with default parameters
 #ifdef USE_BOX_FOR_PLANE
@@ -506,7 +507,7 @@ void SiconosBulletCollisionManager_impl::createCollisionObject(
   // initialization
   createCollisionObjectHelper<SP::SiconosPlane, SP::BTPLANESHAPE,
                               BodyPlaneRecord, BodyPlaneMap>
-    (base, ds, plane, btplane, bodyPlaneMap, offset);
+    (base, ds, plane, btplane, bodyPlaneMap, contactor);
 }
 
 void SiconosBulletCollisionManager_impl::updateShape(BodyPlaneRecord& record)
@@ -542,7 +543,7 @@ void SiconosBulletCollisionManager_impl::createCollisionObject(
   const SP::SiconosContactorBase base,
   const SP::BodyDS ds,
   SP::SiconosBox box,
-  SP::SiconosVector offset)
+  SP::SiconosContactor contactor)
 {
   const double half = 0.5;
 
@@ -572,7 +573,7 @@ void SiconosBulletCollisionManager_impl::createCollisionObject(
   // initialization
   createCollisionObjectHelper<SP::SiconosBox, SP::BTBOXSHAPE,
                               BodyBoxRecord, BodyBoxMap>
-    (base, ds, box, btbox, bodyBoxMap, offset);
+    (base, ds, box, btbox, bodyBoxMap, contactor);
 }
 
 void SiconosBulletCollisionManager_impl::updateShape(BodyBoxRecord &record)
@@ -606,7 +607,7 @@ void SiconosBulletCollisionManager_impl::createCollisionObject(
   const SP::SiconosContactorBase base,
   const SP::BodyDS ds,
   SP::SiconosConvexHull ch,
-  SP::SiconosVector offset)
+  SP::SiconosContactor contactor)
 {
   if (!ch->vertices())
     throw SiconosException("No vertices matrix specified for convex hull.");
@@ -662,7 +663,7 @@ void SiconosBulletCollisionManager_impl::createCollisionObject(
   // initialization
   createCollisionObjectHelper<SP::SiconosConvexHull, SP::BTCHSHAPE,
                               BodyCHRecord, BodyCHMap>
-    (base, ds, ch, btch, bodyCHMap, offset);
+    (base, ds, ch, btch, bodyCHMap, contactor);
 }
 
 void SiconosBulletCollisionManager_impl::updateShape(BodyCHRecord &record)
@@ -697,13 +698,13 @@ struct CreateCollisionObjectShapeVisitor : public SiconosVisitor
     : impl(_impl), ds(_ds), base(_base) {}
 
   void visit(SP::SiconosPlane shape)
-    { impl.createCollisionObject(base, ds, shape, contactor->offset); }
+    { impl.createCollisionObject(base, ds, shape, contactor); }
   void visit(SP::SiconosSphere shape)
-    { impl.createCollisionObject(base, ds, shape, contactor->offset); }
+    { impl.createCollisionObject(base, ds, shape, contactor); }
   void visit(SP::SiconosBox shape)
-    { impl.createCollisionObject(base, ds, shape, contactor->offset); }
+    { impl.createCollisionObject(base, ds, shape, contactor); }
   void visit(SP::SiconosConvexHull shape)
-    { impl.createCollisionObject(base, ds, shape, contactor->offset); }
+    { impl.createCollisionObject(base, ds, shape, contactor); }
 };
 
 void SiconosBulletCollisionManager_impl::createCollisionObjectsForBodyContactorSet(
@@ -939,8 +940,8 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
       /* new interaction */
       SP::Interaction inter;
 
-      int g1 = pairA->sshape->group();
-      int g2 = pairB->sshape->group();
+      int g1 = pairA->contactor->collision_group;
+      int g2 = pairB->contactor->collision_group;
       SP::NonSmoothLaw nslaw = nonSmoothLaw(g1,g2);
 
       if (nslaw && nslaw->size() == 3)

@@ -40,13 +40,11 @@ protected:
 
   double _inside_margin;
   double _outside_margin;
-  unsigned int _group;   // the collision group to identify non-smooth law
   unsigned int _version; // version number tracks changes to shape properties
 
   SiconosShape()
     : _inside_margin(0.1)
     , _outside_margin(0.1)
-    , _group(0)
     , _version(0)
     {}
 
@@ -69,10 +67,6 @@ public:
   double insideMargin() { return _inside_margin; }
 
   double outsideMargin() { return _outside_margin; }
-
-  void setGroup(int group) { _group = group; }
-
-  unsigned int group() { return _group; }
 
   unsigned int version() const { return _version; }
 
