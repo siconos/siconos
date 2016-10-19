@@ -66,6 +66,9 @@
 //#define DEBUG_MESSAGES 1
 #include <debug.h>
 
+// Uncomment this to try un-queued static contactor behaviour
+#define QUEUE_STATIC_CONTACTORS 1
+
 // We can replace the primitives by alternative implementations.  To date,
 // everything works (under test conditions, very tentative) except
 // btStaticPlaneShape, so we replace it with a large box.
@@ -230,6 +233,8 @@ protected:
 
   SiconosBulletOptions &_options;
 
+  std::vector<SP::StaticContactorSetRecord> _queuedContactorSets;
+
 public:
   SiconosBulletCollisionManager_impl(SiconosBulletOptions &op) : _options(op) {}
   ~SiconosBulletCollisionManager_impl() {}
@@ -253,7 +258,11 @@ SiconosBulletCollisionManager::insertStaticContactorSet(
     (*position)(3) = 1.0;
   }
   rec->base = position;
+  #ifdef QUEUE_STATIC_CONTACTORS
+  impl->_queuedContactorSets.push_back(rec);
+  #else
   impl->createCollisionObjectsForBodyContactorSet(SP::BodyDS(), rec->base, cs);
+  #endif
   impl->_staticContactorSetRecords[&*rec] = rec;
   return static_cast<SiconosBulletCollisionManager::StaticContactorSetID>(&*rec);
 }
@@ -349,6 +358,11 @@ void SiconosBulletCollisionManager_impl::createCollisionObjectHelper(
 
   // associate the shape with the object
   btobject->setCollisionShape(&*btshape);
+
+  if (!ds)
+    btobject->setCollisionFlags(btCollisionObject::CF_STATIC_OBJECT);
+  else
+    btobject->setCollisionFlags(btCollisionObject::CF_KINEMATIC_OBJECT);
 
   // put it in the world
   _collisionWorld->addCollisionObject(&*btobject);
@@ -879,6 +893,19 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
   // -2. update collision objects from all BodyDS dynamical systems
   SP::SiconosVisitor updateVisitor(new CollisionUpdateVisitor(*impl));
   simulation->nonSmoothDynamicalSystem()->visitDynamicalSystems(updateVisitor);
+
+  if (! impl->_queuedContactorSets.empty())
+  {
+    std::vector<SP::StaticContactorSetRecord>::iterator it;
+    for (it = impl->_queuedContactorSets.begin();
+         it != impl->_queuedContactorSets.end();
+         ++ it)
+    {
+      impl->createCollisionObjectsForBodyContactorSet(
+        SP::BodyDS(), (*it)->base, (*it)->contactorSet);
+    }
+    impl->_queuedContactorSets.clear();
+  }
 
   // -1. reset statistical counters
   resetStatistics();
