@@ -66,7 +66,7 @@
 //#define DEBUG_MESSAGES 1
 #include <debug.h>
 
-// Uncomment this to try un-queued static contactor behaviour
+// Comment this to try un-queued static contactor behaviour
 #define QUEUE_STATIC_CONTACTORS 1
 
 // We can replace the primitives by alternative implementations.  To date,
@@ -233,7 +233,7 @@ protected:
 
   SiconosBulletOptions &_options;
 
-  std::vector<SP::StaticContactorSetRecord> _queuedContactorSets;
+  std::vector<SP::btCollisionObject> _queuedCollisionObjects;
 
 public:
   SiconosBulletCollisionManager_impl(SiconosBulletOptions &op) : _options(op) {}
@@ -258,11 +258,7 @@ SiconosBulletCollisionManager::insertStaticContactorSet(
     (*position)(3) = 1.0;
   }
   rec->base = position;
-  #ifdef QUEUE_STATIC_CONTACTORS
-  impl->_queuedContactorSets.push_back(rec);
-  #else
   impl->createCollisionObjectsForBodyContactorSet(SP::BodyDS(), rec->base, cs);
-  #endif
   impl->_staticContactorSetRecords[&*rec] = rec;
   return static_cast<SiconosBulletCollisionManager::StaticContactorSetID>(&*rec);
 }
@@ -365,7 +361,14 @@ void SiconosBulletCollisionManager_impl::createCollisionObjectHelper(
     btobject->setCollisionFlags(btCollisionObject::CF_KINEMATIC_OBJECT);
 
   // put it in the world
+  #ifdef QUEUE_STATIC_CONTACTORS
+  if (!ds)
+    _queuedCollisionObjects.push_back(btobject);
+  else
+    _collisionWorld->addCollisionObject(&*btobject);
+  #else
   _collisionWorld->addCollisionObject(&*btobject);
+  #endif
 
   // create a record to keep track of things
   // (for static contactor, ds=nil)
@@ -894,17 +897,17 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
   SP::SiconosVisitor updateVisitor(new CollisionUpdateVisitor(*impl));
   simulation->nonSmoothDynamicalSystem()->visitDynamicalSystems(updateVisitor);
 
-  if (! impl->_queuedContactorSets.empty())
+  if (! impl->_queuedCollisionObjects.empty())
   {
-    std::vector<SP::StaticContactorSetRecord>::iterator it;
-    for (it = impl->_queuedContactorSets.begin();
-         it != impl->_queuedContactorSets.end();
+
+    std::vector<SP::btCollisionObject>::iterator it;
+    for (it = impl->_queuedCollisionObjects.begin();
+         it != impl->_queuedCollisionObjects.end();
          ++ it)
     {
-      impl->createCollisionObjectsForBodyContactorSet(
-        SP::BodyDS(), (*it)->base, (*it)->contactorSet);
+      impl->_collisionWorld->addCollisionObject(&**it);
     }
-    impl->_queuedContactorSets.clear();
+    impl->_queuedCollisionObjects.clear();
   }
 
   // -1. reset statistical counters
