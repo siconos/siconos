@@ -264,6 +264,10 @@ public:
   void updateOutput(double time, unsigned int level = 0);
 
 
+  /** visit all dynamical systems in this system.
+   * \param visitor an SP::SiconosVisitor that can visit classes derived from DS
+   */
+  void visitDynamicalSystems(SP::SiconosVisitor visitor);
 };
 
 

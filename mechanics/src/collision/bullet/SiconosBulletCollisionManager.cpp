@@ -233,7 +233,7 @@ public:
   ~SiconosBulletCollisionManager_impl() {}
 
   friend class SiconosBulletCollisionManager;
-  friend class CollisionUpdater;
+  friend class CollisionUpdateVisitor;
   friend class CreateCollisionObjectShapeVisitor;
 };
 
@@ -833,8 +833,37 @@ bool SiconosBulletCollisionManager::bulletContactClear(void* userPersistentData)
   return false;
 }
 
+struct CollisionUpdateVisitor : public SiconosVisitor
+{
+  using SiconosVisitor::visit;
+  SiconosBulletCollisionManager_impl &impl;
+
+  CollisionUpdateVisitor(SiconosBulletCollisionManager_impl& _impl)
+    : impl(_impl) {}
+
+  void visit(SP::BodyDS bds)
+  {
+    if (bds->contactors()) {
+      BodyBoxMap::iterator it = impl.bodyBoxMap.find(&*bds);
+      if (impl.bodyBoxMap.find(&*bds) == impl.bodyBoxMap.end()
+          && impl.bodyCHMap.find(&*bds) == impl.bodyCHMap.end()
+          && impl.bodySphereMap.find(&*bds) == impl.bodySphereMap.end()
+          && impl.bodyPlaneMap.find(&*bds) == impl.bodyPlaneMap.end())
+      {
+        impl.createCollisionObjectsForBodyContactorSet(bds);
+      }
+      impl.updateAllShapesForDS(*bds);
+    }
+  }
+};
+
 void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation)
 {
+  // -2. update collision objects from all BodyDS dynamical systems
+  SP::SiconosVisitor updateVisitor(new CollisionUpdateVisitor(*impl));
+  simulation->nonSmoothDynamicalSystem()->visitDynamicalSystems(updateVisitor);
+
+  // -1. reset statistical counters
   resetStatistics();
 
   // 0. set up bullet callbacks
@@ -948,34 +977,4 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
       }
     }
   }
-}
-
-struct CollisionUpdater : public SiconosVisitor
-{
-  using SiconosVisitor::visit;
-  SiconosBulletCollisionManager_impl &impl;
-  SiconosBulletCollisionManager &broad;
-
-  CollisionUpdater(SiconosBulletCollisionManager &_broad, SiconosBulletCollisionManager_impl &_impl)
-    : broad(_broad), impl(_impl) {}
-
-  void visit(SP::BodyDS bds)
-  {
-    if (bds->contactors()) {
-      BodyBoxMap::iterator it = impl.bodyBoxMap.find(&*bds);
-      if (impl.bodyBoxMap.find(&*bds) == impl.bodyBoxMap.end()
-          && impl.bodyCHMap.find(&*bds) == impl.bodyCHMap.end()
-          && impl.bodySphereMap.find(&*bds) == impl.bodySphereMap.end()
-          && impl.bodyPlaneMap.find(&*bds) == impl.bodyPlaneMap.end())
-      {
-        impl.createCollisionObjectsForBodyContactorSet(bds);
-      }
-      impl.updateAllShapesForDS(*bds);
-    }
-  }
-};
-
-SP::SiconosVisitor SiconosBulletCollisionManager::getDynamicalSystemsVisitor(SP::Simulation simulation)
-{
-  return SP::SiconosVisitor(new CollisionUpdater(*this, *impl));
 }

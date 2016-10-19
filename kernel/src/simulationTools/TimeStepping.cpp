@@ -449,22 +449,6 @@ void TimeStepping::advanceToEvent()
 
   // Update interactions if a manager was provided
   if (_interman) {
-    // Visit relevant DSs before performing interactions update.
-    // e.g., update the collision engine to new DS positions.
-    // (replaces updateWorldFromDS)
-    SP::SiconosVisitor visitor(
-      _interman->getDynamicalSystemsVisitor(shared_from_this()));
-    if (visitor)
-    {
-      DynamicalSystemsGraph& dsg = *_nsds->dynamicalSystems();
-      DynamicalSystemsGraph::VIterator dsi, dsiend;
-      std11::tie(dsi, dsiend) = dsg.vertices();
-      for (; dsi != dsiend; ++dsi)
-      {
-        dsg.bundle(*dsi)->acceptSP(visitor);
-      }
-    }
-
     _interman->setSimulation(shared_from_this());
     _interman->updateInteractions(shared_from_this());
 

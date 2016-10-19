@@ -40,11 +40,6 @@ public:
   /** Called by Simulation prior to advancing to the next Event */
   virtual void updateInteractions(SP::Simulation simulation) {}
 
-  /** If non-null, Simulation will visit each dynamical system using
-   * this visitor prior to calling updateInteractions() */
-  virtual SP::SiconosVisitor getDynamicalSystemsVisitor(SP::Simulation simulation)
-    { return SP::SiconosVisitor(); }
-
   class NSLawMatrix : public ublas::symmetric_matrix < SP::NonSmoothLaw >
   {
     ACCEPT_SERIALIZATION(NSLawMatrix);

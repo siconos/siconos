@@ -86,7 +86,6 @@ public:
   bool removeStaticContactorSet(StaticContactorSetID id);
 
   void updateInteractions(SP::Simulation simulation);
-  SP::SiconosVisitor getDynamicalSystemsVisitor(SP::Simulation simulation);
 
   const SiconosBulletOptions &options() const { return _options; }
   const SiconosBulletStatistics &statistics() const { return _stats; }

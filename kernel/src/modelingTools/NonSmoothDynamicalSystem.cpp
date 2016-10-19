@@ -195,3 +195,13 @@ void NonSmoothDynamicalSystem::updateOutput(double time, unsigned int level)
 }
 
 
+void NonSmoothDynamicalSystem::visitDynamicalSystems(SP::SiconosVisitor visitor)
+{
+  DynamicalSystemsGraph &dsg = *dynamicalSystems();
+  DynamicalSystemsGraph::VIterator dsi, dsiend;
+  std11::tie(dsi, dsiend) = dsg.vertices();
+  for (; dsi != dsiend; ++dsi)
+  {
+    dsg.bundle(*dsi)->acceptSP(visitor);
+  }
+}
