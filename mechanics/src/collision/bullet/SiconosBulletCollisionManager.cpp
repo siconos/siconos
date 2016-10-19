@@ -267,7 +267,7 @@ bool SiconosBulletCollisionManager::removeStaticContactorSet(StaticContactorSetI
 
   SP::StaticContactorSetRecord rec(impl->_staticContactorSetRecords[recptr]);
   // TODO
-  assert(0 || "removeStaticContactorSet not implemented.");
+  assert(0 && "removeStaticContactorSet not implemented.");
   return false;
 }
 
