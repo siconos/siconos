@@ -29,10 +29,8 @@
 #include <NewtonEulerDS.hpp>
 #include <SiconosVisitor.hpp>
 #include <SiconosContactor.hpp>
-#include <SiconosContactorBase.hpp>
 
 class BodyDS : public NewtonEulerDS,
-               public SiconosContactorBase,
                public std11::enable_shared_from_this<BodyDS>
 {
 protected:
