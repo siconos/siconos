@@ -108,12 +108,14 @@ struct BodyShapeRecord
 {
   BodyShapeRecord(SP::SiconosContactorBase b, SP::BodyDS d, SP::SiconosShape sh,
                   SP::btCollisionObject btobj, SP::SiconosVector off)
-    : base(b), ds(d), sshape(sh), btobject(btobj), offset(off) {}
+    : base(b), ds(d), sshape(sh), btobject(btobj), offset(off),
+      shape_version(sh->version()) {}
   SP::SiconosContactorBase base;
   SP::BodyDS ds;
   SP::SiconosShape sshape;
   SP::btCollisionObject btobject;
   SP::SiconosVector offset;
+  unsigned int shape_version;
 };
 
 template <typename SICONOSSHAPE, typename BULLETSHAPE>
@@ -213,10 +215,10 @@ protected:
                                    ST& shape, BT& btshape,
                                    BSM& bodyShapeMap, SP::SiconosVector offset);
 
-  void updateShape(const BodyBoxRecord &record);
-  void updateShape(const BodySphereRecord &record);
-  void updateShape(const BodyCHRecord &record);
-  void updateShape(const BodyPlaneRecord &record);
+  void updateShape(BodyBoxRecord &record);
+  void updateShape(BodySphereRecord &record);
+  void updateShape(BodyCHRecord &record);
+  void updateShape(BodyPlaneRecord &record);
 
   void updateAllShapesForDS(const BodyDS &bds);
   void updateShapePosition(const BodyShapeRecord &record);
@@ -371,7 +373,8 @@ void SiconosBulletCollisionManager_impl::createCollisionObjectHelper(
     reinterpret_cast<void*>(
       static_cast<BodyShapeRecord*>(&*record)));
 
-  // initial parameter update
+  // initial parameter update (change version to make something happen)
+  record->shape_version -= 1;
   updateShape(*record);
 }
 
@@ -438,22 +441,27 @@ void SiconosBulletCollisionManager_impl::createCollisionObject(
     (base, ds, sphere, btsphere, bodySphereMap, offset);
 }
 
-void SiconosBulletCollisionManager_impl::updateShape(const BodySphereRecord &record)
+void SiconosBulletCollisionManager_impl::updateShape(BodySphereRecord &record)
 {
   SP::SiconosSphere sphere(record.shape);
   SP::BTSPHERESHAPE btsphere(record.btshape);
 
-  double r = (sphere->radius() + sphere->outsideMargin()) * _options.worldScale;
+  if (sphere->version() != record.shape_version)
+  {
+    double r = (sphere->radius() + sphere->outsideMargin()) * _options.worldScale;
 
-  // Update shape parameters
+    // Update shape parameters
 #ifdef USE_CONVEXHULL_FOR_SPHERE
-  btsphere->setMargin(r);
+    btsphere->setMargin(r);
 #else
-  btsphere->setLocalScaling(btVector3(r, r, r));
+    btsphere->setLocalScaling(btVector3(r, r, r));
 
-  // btSphereShape has an internal margin
-  btsphere->setMargin(sphere->insideMargin() * _options.worldScale);
+    // btSphereShape has an internal margin
+    btsphere->setMargin(sphere->insideMargin() * _options.worldScale);
 #endif
+
+    record.shape_version = sphere->version();
+  }
 
   updateShapePosition(record);
 }
@@ -501,7 +509,7 @@ void SiconosBulletCollisionManager_impl::createCollisionObject(
     (base, ds, plane, btplane, bodyPlaneMap, offset);
 }
 
-void SiconosBulletCollisionManager_impl::updateShape(const BodyPlaneRecord& record)
+void SiconosBulletCollisionManager_impl::updateShape(BodyPlaneRecord& record)
 {
   SP::SiconosPlane plane(record.shape);
   SP::BTPLANESHAPE btplane(record.btshape);
@@ -567,24 +575,29 @@ void SiconosBulletCollisionManager_impl::createCollisionObject(
     (base, ds, box, btbox, bodyBoxMap, offset);
 }
 
-void SiconosBulletCollisionManager_impl::updateShape(const BodyBoxRecord &record)
+void SiconosBulletCollisionManager_impl::updateShape(BodyBoxRecord &record)
 {
   SP::SiconosBox box(record.shape);
   SP::BTBOXSHAPE btbox(record.btshape);
 
   // Update shape parameters
+  if (box->version() != record.shape_version)
+  {
 #ifdef USE_CONVEXHULL_FOR_BOX
-  double m = -box->insideMargin();
+    double m = -box->insideMargin();
 #else
-  double m = box->outsideMargin();
+    double m = box->outsideMargin();
 #endif
 
-  double sx = ((*box->dimensions())(0) + m*2) * _options.worldScale;
-  double sy = ((*box->dimensions())(1) + m*2) * _options.worldScale;
-  double sz = ((*box->dimensions())(2) + m*2) * _options.worldScale;
+    double sx = ((*box->dimensions())(0) + m*2) * _options.worldScale;
+    double sy = ((*box->dimensions())(1) + m*2) * _options.worldScale;
+    double sz = ((*box->dimensions())(2) + m*2) * _options.worldScale;
 
-  btbox->setLocalScaling(btVector3(sx, sy, sz));
-  btbox->setMargin((box->insideMargin() + box->outsideMargin()) * _options.worldScale);
+    btbox->setLocalScaling(btVector3(sx, sy, sz));
+    btbox->setMargin((box->insideMargin() + box->outsideMargin()) * _options.worldScale);
+
+    record.shape_version = box->version();
+  }
 
   updateShapePosition(record);
 }
@@ -652,16 +665,20 @@ void SiconosBulletCollisionManager_impl::createCollisionObject(
     (base, ds, ch, btch, bodyCHMap, offset);
 }
 
-void SiconosBulletCollisionManager_impl::updateShape(const BodyCHRecord &record)
+void SiconosBulletCollisionManager_impl::updateShape(BodyCHRecord &record)
 {
   SP::SiconosConvexHull ch(record.shape);
   SP::BTCHSHAPE btch(record.btshape);
 
   // Update shape parameters
+  if (ch->version() != record.shape_version)
+  {
+    // TODO
+    //btbox->setLocalScaling(btVector3(sx, sy, sz));
+    btch->setMargin((ch->insideMargin() + ch->outsideMargin()) * _options.worldScale);
 
-  // TODO
-  //btbox->setLocalScaling(btVector3(sx, sy, sz));
-  btch->setMargin((ch->insideMargin() + ch->outsideMargin()) * _options.worldScale);
+    record.shape_version = ch->version();
+  }
 
   updateShapePosition(record);
 }
