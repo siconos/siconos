@@ -67,23 +67,9 @@ public:
     { return _nslaws(group1, group2); }
 
 protected:
-  /** May only be called from updateInteractions() */
-  void link(SP::Interaction inter,
-            SP::DynamicalSystem ds1,
-            SP::DynamicalSystem ds2 = SP::DynamicalSystem());
-
-  /** May only be called from updateInteractions() */
-  void unlink(SP::Interaction inter);
 
   /** nslaws */
   NSLawMatrix _nslaws;
-
-  /** The simulation, only accessible during updateInteraction()! */
-  SP::Simulation _simulation;
-
-  /** Will be called by simulation before updateInteractions() for
-   *  link() and unlink() to work. */
-  void setSimulation(SP::Simulation sim) { _simulation = sim; }
 
   friend class Simulation;
   friend class TimeStepping;

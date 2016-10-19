@@ -68,7 +68,7 @@ protected:
 
   // callback for contact point removal, and a global for context
   static bool bulletContactClear(void* userPersistentData);
-  static SiconosBulletCollisionManager *gBulletWorld;
+  static Simulation *gSimulation;
 
 public:
   SiconosBulletCollisionManager();

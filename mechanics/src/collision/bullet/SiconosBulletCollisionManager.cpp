@@ -311,7 +311,6 @@ SiconosBulletCollisionManager::~SiconosBulletCollisionManager()
 {
   // unlink() will be called on all remaining
   // contact points when world is destroyed
-  gBulletWorld = this;
 
   // must be the first de-allocated, otherwise segfault
   impl->_collisionWorld.reset();
@@ -821,14 +820,14 @@ public:
 };
 
 // called once for each contact point as it is destroyed
-SiconosBulletCollisionManager* SiconosBulletCollisionManager::gBulletWorld = NULL;
+Simulation* SiconosBulletCollisionManager::gSimulation;
 bool SiconosBulletCollisionManager::bulletContactClear(void* userPersistentData)
 {
   /* note: stored pointer to shared_ptr! */
   SP::Interaction *p_inter = (SP::Interaction*)userPersistentData;
   assert(p_inter!=NULL && "Contact point's stored (SP::Interaction*) is null!");
   DEBUG_PRINTF("unlinking interaction %p\n", &**p_inter);
-  gBulletWorld->unlink(*p_inter);
+  gSimulation->unlink(*p_inter);
   delete p_inter;
   return false;
 }
@@ -867,7 +866,7 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
   resetStatistics();
 
   // 0. set up bullet callbacks
-  gBulletWorld = this;
+  gSimulation = &*simulation;
   gContactDestroyedCallback = this->bulletContactClear;
 
   // TODO: This must be either configured dynamically or made available to the
@@ -876,10 +875,6 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
 
   // 1. perform bullet collision detection
   impl->_collisionWorld->performDiscreteCollisionDetection();
-  gBulletWorld = 0;
-
-  if (!simulation)
-    return;
 
   // 2. deleted contact points have been removed from the graph during the
   //    bullet collision detection callbacks
@@ -973,7 +968,7 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
         it->point->m_userPersistentData = (void*)(new SP::Interaction(inter));
 
         /* link bodies by the new interaction */
-        link(inter, pairA->ds, pairB->ds);
+        simulation->link(inter, pairA->ds, pairB->ds);
       }
     }
   }

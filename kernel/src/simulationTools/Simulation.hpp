@@ -561,6 +561,20 @@ public:
 
   virtual bool computeResiduR() { return false; };
 
+  /** Add a new Interaction between one or a pair of DSs.
+   * \param inter the SP::Interaction to add
+   * \param ds1 the first SP::DynamicalSystem in the Interaction
+   * \param ds2 the second SP::DynamicalSystem in the Interaction, if any
+   */
+  void link(SP::Interaction inter,
+            SP::DynamicalSystem ds1,
+            SP::DynamicalSystem ds2 = SP::DynamicalSystem());
+
+  /** Remove an Interaction from the simulation.
+   * \param inter the SP::Interaction to remove
+   */
+  void unlink(SP::Interaction inter);
+
   /** visitors hook
    */
   VIRTUAL_ACCEPT_VISITORS(Simulation);
