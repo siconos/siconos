@@ -170,6 +170,8 @@ protected:
    */
   Simulation() {};
 
+  /** Call the interaction manager one if is registered, otherwise do nothing. */
+  void updateInteractions();
 
 private:
 

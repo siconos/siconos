@@ -189,13 +189,7 @@ void TimeSteppingCombinedProjection::advanceToEvent()
   _maxViolationEquality = 0.0;
 
   // Update interactions if a manager was provided
-  if (_interman) {
-    _linkOrUnlink = false;
-    _interman->updateInteractions(shared_from_this());
-
-    if (_linkOrUnlink)
-      initOSNS();
-  }
+  updateInteractions();
 
   SP::Topology topo = _nsds->topology();
   if (topo->numberOfIndexSet() > _indexSetLevelForProjection)

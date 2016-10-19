@@ -611,13 +611,7 @@ void EventDriven::update(unsigned int levelInput)
 void EventDriven::advanceToEvent()
 {
   // Update interactions if a manager was provided
-  if (_interman) {
-    _linkOrUnlink = false;
-    _interman->updateInteractions(shared_from_this());
-
-    if (_linkOrUnlink)
-      initOSNS();
-  }
+  updateInteractions();
 
   _tinit = _eventsManager->startingTime();
   _tend =  _eventsManager->nextTime();
