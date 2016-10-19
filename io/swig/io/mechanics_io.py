@@ -1847,7 +1847,8 @@ class Hdf5():
         simulation=time_stepping(timedisc)
         simulation.insertIntegrator(self._osi)
         simulation.insertNonSmoothProblem(osnspb)
-        simulation.insertInteractionManager(self._broadphase)
+        if use_proposed:
+            simulation.insertInteractionManager(self._broadphase)
         simulation.setNewtonMaxIteration(Newton_max_iter)
         simulation.setNewtonTolerance(1e-10)
 

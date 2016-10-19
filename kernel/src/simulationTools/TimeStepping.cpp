@@ -355,6 +355,9 @@ void TimeStepping::update(unsigned int levelInput)
   for (itOSI = _allOSI->begin(); itOSI != _allOSI->end() ; ++itOSI)
     (*itOSI)->updateState(levelInput);
 
+  // need this until mechanics' BulletTimeStepping class is removed
+  updateWorldFromDS();
+
   // 3 - compute output ( x ... -> y)
   if (!_allNSProblems->empty())
   {
