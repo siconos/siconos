@@ -27,15 +27,15 @@ with Hdf5() as io:
                        (-1.0, -1.0, 1.0),
                        (0.0, 0.0, -1.0)])
     io.addConvexShape('Tetra', pts - pts.mean(0),
-                      insideMargin=0.05, outsideMargin=0.1)
+                      insideMargin=0.01, outsideMargin=0.0)
 
     # Definition of the ground shape
     io.addPrimitiveShape('Ground', 'Box', (10, 10, 1),
-                         insideMargin=0.2, outsideMargin=0.1)
+                         insideMargin=0.01, outsideMargin=0.0)
 
     # Definition of a non smooth law. As no group ids are specified it
     # is between contactors of group id 0.
-    io.addNewtonImpactFrictionNSL('contact', mu=0.3, e=0.9,
+    io.addNewtonImpactFrictionNSL('contact', mu=0.01, e=0.7,
                                   collision_group1=1,
                                   collision_group2=2)
 
