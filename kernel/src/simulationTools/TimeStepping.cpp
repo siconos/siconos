@@ -449,10 +449,11 @@ void TimeStepping::advanceToEvent()
 
   // Update interactions if a manager was provided
   if (_interman) {
+    _linkOrUnlink = false;
     _interman->updateInteractions(shared_from_this());
 
-    // TODO: This is only needed if the topology was actually touched
-    initOSNS();
+    if (_linkOrUnlink)
+      initOSNS();
   }
 
   // Initialize lambdas of all interactions.

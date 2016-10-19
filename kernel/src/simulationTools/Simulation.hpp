@@ -154,6 +154,11 @@ protected:
    */
   double _relativeConvergenceTol;
 
+  /**
+   * track whether link() or unlink() has been called
+   */
+  bool _linkOrUnlink;
+
   /** initializations of levels
    *
    */

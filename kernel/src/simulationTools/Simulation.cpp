@@ -1086,9 +1086,12 @@ void Simulation::link(SP::Interaction inter,
     if(has2DS)
       ds2->initializeNonSmoothInput(k);
   }
+
+  _linkOrUnlink = true;
 }
 
 void Simulation::unlink(SP::Interaction inter)
 {
   nonSmoothDynamicalSystem()->removeInteraction(inter);
+  _linkOrUnlink = true;
 }
