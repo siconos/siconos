@@ -887,8 +887,7 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
   gSimulation = &*simulation;
   gContactDestroyedCallback = this->bulletContactClear;
 
-  // TODO: This must be either configured dynamically or made available to the
-  // user.
+  // Important parameter controlling contact point making and breaking
   gContactBreakingThreshold = _options.breakingThreshold;
 
   // 1. perform bullet collision detection
