@@ -193,6 +193,15 @@ void TimeSteppingD1Minus::run()
 
 void TimeSteppingD1Minus::advanceToEvent()
 {
+  // Update interactions if a manager was provided
+  if (_interman) {
+    _linkOrUnlink = false;
+    _interman->updateInteractions(shared_from_this());
+
+    if (_linkOrUnlink)
+      initOSNS();
+  }
+
   // we start after initialization (initOSNS) with
   // * initial state (q_0, v_0^+)
   // * updated indexset (I_0^+)
