@@ -455,8 +455,7 @@ class ShapeCollection():
                             self.shape(shape_name).attrs.get('insideMargin',
                                                              min(dims)*0.1))
                         convex.setOutsideMargin(
-                            self.shape(shape_name).attrs.get('outsideMargin',
-                                                             min(dims)*0.1))
+                            self.shape(shape_name).attrs.get('outsideMargin', 0))
                     else:
                         convex = btConvexHullShape()
                         convex.setMargin(self._collision_margin)
@@ -482,13 +481,13 @@ class ShapeCollection():
 
                 if name in ['Box']:
                     if use_proposed:
-                        self._shapes[shape_name] = primitive(attrs)
-                        self._shapes[shape_name].setInsideMargin(
+                        box = primitive(attrs)
+                        self._shapes[shape_name] = box
+                        box.setInsideMargin(
                             self.shape(shape_name).attrs.get('insideMargin',
-                                                             min(attrs)/2))
-                        self._shapes[shape_name].setOutsideMargin(
-                            self.shape(shape_name).attrs.get('outsideMargin',
-                                                             min(attrs)/2))
+                                                             min(attrs)*0.1))
+                        box.setOutsideMargin(
+                            self.shape(shape_name).attrs.get('outsideMargin', 0))
                     else:
                         self._shapes[shape_name] = primitive(
                             btVector3(attrs[0] / 2,
@@ -511,13 +510,13 @@ class ShapeCollection():
                 #     bcols.addChildShape(...
                 elif name in ['Sphere']:
                     if use_proposed:
-                        self._shapes[shape_name] = primitive(attrs[0])
-                        self._shapes[shape_name].setInsideMargin(
+                        sphere = primitive(attrs[0])
+                        self._shapes[shape_name] = sphere
+                        sphere.setInsideMargin(
                             self.shape(shape_name).attrs.get('insideMargin',
-                                                             min(attrs)/2))
-                        self._shapes[shape_name].setOutsideMargin(
-                            self.shape(shape_name).attrs.get('outsideMargin',
-                                                             min(attrs)/2))
+                                                             min(attrs)*0.1))
+                        sphere.setOutsideMargin(
+                            self.shape(shape_name).attrs.get('outsideMargin', 0))
                     else:
                         self._shapes[shape_name] = primitive(*attrs)
                 else:
