@@ -478,6 +478,13 @@ void SiconosBulletCollisionManager_impl::updateShape(BodySphereRecord &record)
     btsphere->setMargin(sphere->insideMargin() * _options.worldScale);
 #endif
 
+    if (record.btobject->getBroadphaseHandle())
+    {
+      _collisionWorld->updateSingleAabb(&*record.btobject);
+      _collisionWorld->getBroadphase()->getOverlappingPairCache()->
+        cleanProxyFromPairs(record.btobject->getBroadphaseHandle(), &*_dispatcher);
+    }
+
     record.shape_version = sphere->version();
   }
 
@@ -611,8 +618,17 @@ void SiconosBulletCollisionManager_impl::updateShape(BodyBoxRecord &record)
     double sy = ((*box->dimensions())(1) + m*2) * _options.worldScale;
     double sz = ((*box->dimensions())(2) + m*2) * _options.worldScale;
 
+    assert(sx > 0 && sy > 0 && sz > 0);
+
     btbox->setLocalScaling(btVector3(sx, sy, sz));
     btbox->setMargin((box->insideMargin() + box->outsideMargin()) * _options.worldScale);
+
+    if (record.btobject->getBroadphaseHandle())
+    {
+      _collisionWorld->updateSingleAabb(&*record.btobject);
+      _collisionWorld->getBroadphase()->getOverlappingPairCache()->
+        cleanProxyFromPairs(record.btobject->getBroadphaseHandle(), &*_dispatcher);
+    }
 
     record.shape_version = box->version();
   }
@@ -694,6 +710,13 @@ void SiconosBulletCollisionManager_impl::updateShape(BodyCHRecord &record)
     // TODO
     //btbox->setLocalScaling(btVector3(sx, sy, sz));
     btch->setMargin((ch->insideMargin() + ch->outsideMargin()) * _options.worldScale);
+
+    if (record.btobject->getBroadphaseHandle())
+    {
+      _collisionWorld->updateSingleAabb(&*record.btobject);
+      _collisionWorld->getBroadphase()->getOverlappingPairCache()->
+        cleanProxyFromPairs(record.btobject->getBroadphaseHandle(), &*_dispatcher);
+    }
 
     record.shape_version = ch->version();
   }
