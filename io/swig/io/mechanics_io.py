@@ -868,9 +868,18 @@ class Hdf5():
             elif use_proposed:
                 # a proposed-API moving object
 
+                if inertia is not None:
+                    if np.shape(inertia) == (3,):
+                        inertia = np.diag(inertia)
+                    elif np.shape(inertia) != (3,3):
+                        print('Wrong shape of inertia')
+                else:
+                    # necessary because SWIG crashes on None
+                    inertia = []
+
                 body = body_class(translation + orientation,
                                   velocity,
-                                  mass)
+                                  mass, inertia)
 
                 cset = SiconosContactorSet()
                 for c in contactors:
