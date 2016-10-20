@@ -803,7 +803,7 @@ class Hdf5():
                     # TODO: segfault if we pass None for SiconosVector!
                     conset.append(SiconosContactor(shp, [0,0,0,1,0,0,0], c.group))
                     print('Adding shape %s to static contactor'%c.name, pos)
-                    self._broadphase.insertStaticContactorSet(conset)
+                    self._broadphase.insertStaticContactorSet(conset, pos)
 
                     self._static[name] = {
                         'number': number,
