@@ -41,10 +41,12 @@ struct SiconosBulletOptions
     : breakingThreshold(0.5)
     , worldScale(1.0)
     , useAxisSweep3(false)
+    , useMultipointIterations(true)
     {}
   double breakingThreshold;
   double worldScale;
   bool useAxisSweep3;
+  bool useMultipointIterations;
 };
 
 struct SiconosBulletStatistics

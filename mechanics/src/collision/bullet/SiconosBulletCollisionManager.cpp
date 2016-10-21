@@ -282,8 +282,11 @@ void SiconosBulletCollisionManager::initialize_impl()
   impl->_collisionConfiguration.reset(
     new btDefaultCollisionConfiguration());
 
-  impl->_collisionConfiguration->setConvexConvexMultipointIterations();
-  impl->_collisionConfiguration->setPlaneConvexMultipointIterations();
+  if (_options.useMultipointIterations)
+  {
+    impl->_collisionConfiguration->setConvexConvexMultipointIterations();
+    impl->_collisionConfiguration->setPlaneConvexMultipointIterations();
+  }
 
   impl->_dispatcher.reset(
     new btCollisionDispatcher(&*impl->_collisionConfiguration));
