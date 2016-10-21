@@ -1331,4 +1331,33 @@ SS, MB, VA
 + interface mechanics / mechanics proposed
   + try to merge the mechanics proposed into the master branch and update all the examples : We will not maintain both API
   + work with OpenEng --> merge MBTB into the new interface
-  
+
+** <2016-10-17 Mon>
+
+SS, MB, VA
+
+Meeting @bremond @radarsat1 and myself
+
+still to do,
+
+- InteractionManager
+  - factorize group management info and insertNonSmoothLaw
+  - naming convention : remove get, rename collisionUpdater -->   collisionUpdaterVisitor
+- SiconosContactor
+  - rename siconosContactorS or SiconosContactorSet
+  - why not visitor rather than a list of shapes ?  Why not a mixed solution :
+      - a list of standard shapes (sphere, planes, cubes, convex hulls,) and
+      - a generic shape with a visitor.
+  - study of memory management
+  - offset:
+      - name ?
+      - boost array of size 7 (3 translation, 1 quaternion) for saving space
+-  BodyDS
+    - mass matrix set to eye by default --> possibility to set Inertia Mass matrix
+    - old API --> first shape gives the mass matrix.
+    - computation of mass matrix and inertia with Huygens theorem
+
+- tests that bench memory and efficiency
+   - separate shape, mixed of shapes, contactors with multiple shapes, (mandatory)
+   - time_of_birth and restart  (mandatory)
+   - native ?  2D ? (optional)
