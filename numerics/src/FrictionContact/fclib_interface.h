@@ -41,6 +41,9 @@ extern "C"
                                   char * mathInfo,
                                   const char *path, int ndof);
 
+  int frictionContact_fclib_write_guess( double * reaction, double * velocity,
+                                         const char *path);
+
   GlobalFrictionContactProblem* from_fclib_global(const struct fclib_global *fclib_problem);
 
 
@@ -59,5 +62,3 @@ extern "C"
 #endif
 
 #endif
-
-

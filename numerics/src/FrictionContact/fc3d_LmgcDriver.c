@@ -11,21 +11,21 @@
 static int fccounter = -1;
 
 int fc3d_LmgcDriver(double *reaction,
-                                 double *velocity,
-                                 double *q,
-                                 double *mu,
-                                 double* W,
-                                 unsigned int *row,
-                                 unsigned int *column,
-                                 unsigned int nc,
-                                 unsigned int nb,
-                                 int solver_id,
-                                 double tolerance,
-                                 int itermax,
-                                 int verbose,
-                                 int outputFile,
-                                 int freq_output,
-                                 int ndof)
+                    double *velocity,
+                    double *q,
+                    double *mu,
+                    double* W,
+                    unsigned int *row,
+                    unsigned int *column,
+                    unsigned int nc,
+                    unsigned int nb,
+                    int solver_id,
+                    double tolerance,
+                    int itermax,
+                    int verbose,
+                    int outputFile,
+                    int freq_output,
+                    int ndof)
 {
 
   numerics_set_verbose(verbose);
@@ -160,6 +160,11 @@ int fc3d_LmgcDriver(double *reaction,
                                   description,
                                   mathInfo,
                                   fname,ndof);
+
+      frictionContact_fclib_write_guess(
+        reaction,
+        velocity,
+        fname);
 
       fclose(foutput);
     }
