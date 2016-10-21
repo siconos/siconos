@@ -9,19 +9,19 @@ from siconos.mechanics.collision.tools import Contactor
 from siconos.io.mechanics_io import Hdf5
 import siconos.numerics as Numerics
 import siconos.io.mechanics_io
+from siconos.mechanics.collision.bullet import SiconosBulletOptions
 
 siconos.io.mechanics_io.use_proposed = True
 
-options = siconos.mechanics.collision.bullet.BulletOptions()
+options = SiconosBulletOptions()
 options.worldScale = 1.0
-options.breakingThreshold = 0.4
+options.breakingThreshold = 0.04
 
-import pydoc
 # Creation of the hdf5 file for input/output
 with Hdf5() as io:
 
-    # Definition of a cube
-    io.addPrimitiveShape('Sphere', 'Sphere', (2, 2, 2),
+    # Definition of a sphere
+    io.addPrimitiveShape('Sphere', 'Sphere', (2,),
                          insideMargin=0.2, outsideMargin=0.3)
 
     # Definition of the ground shape
@@ -54,31 +54,19 @@ with Hdf5(mode='r+') as io:
 
     # By default earth gravity is applied and the units are those
     # of the International System of Units.
-    # Because of fixed collision margins used in the collision detection,
-    # sizes of small objects may need to be expressed in cm or mm.
-
-    # print(pydoc.render_doc(io.run, "Help on %s"))
-
-    from siconos.mechanics.collision import BodyDS, \
-        BodyTimeStepping, SiconosContactor
-    from siconos.mechanics.collision.bullet import BulletBroadphase
-
     io.run(with_timer=False,
-            time_stepping=BodyTimeStepping,
-            space_filter=lambda x: BulletBroadphase(x, options),
-            body_class=BodyDS,
-            shape_class=SiconosContactor,
-            face_class=None,
-            edge_class=None,
-            t0=0,
-            T=20,
-            h=0.005,
-            multipoints_iterations=True,
-            theta=0.50001,
-            Newton_max_iter=20,
-            set_external_forces=None,
-            solver=Numerics.SICONOS_FRICTION_3D_NSGS,
-            itermax=100000,
-            tolerance=1e-8,
-            numerics_verbose=False,
-            output_frequency=None)
+           options=options,
+           face_class=None,
+           edge_class=None,
+           t0=0,
+           T=20,
+           h=0.005,
+           multipoints_iterations=True,
+           theta=0.50001,
+           Newton_max_iter=20,
+           set_external_forces=None,
+           solver=Numerics.SICONOS_FRICTION_3D_NSGS,
+           itermax=100000,
+           tolerance=1e-8,
+           numerics_verbose=False,
+           output_frequency=None)
