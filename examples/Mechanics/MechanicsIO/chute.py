@@ -19,6 +19,7 @@ body_collection={}
 body_collection['plan_id']= {}
 id_plan=0
 
+
 def normal_plane(p1,p2,p3):
 
   x1=p1[0]

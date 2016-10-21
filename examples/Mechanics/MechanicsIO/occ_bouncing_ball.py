@@ -3,11 +3,18 @@
 #
 # Example of a bouncing ball with OpenCascade contactors
 #
+import siconos.io.mechanics_io
+siconos.io.mechanics_io.set_implementation('original')
+siconos.io.mechanics_io.set_backend('occ')
 
 from siconos.mechanics.contact_detection.tools import Contactor
 from siconos.mechanics import occ
 from siconos.io.mechanics_io import Hdf5
 import siconos.numerics as Numerics
+
+import siconos.io.mechanics_io
+siconos.io.mechanics_io.set_implementation('original')
+siconos.io.mechanics_io.set_backend('occ')
 
 from OCC.BRepPrimAPI import BRepPrimAPI_MakeBox, BRepPrimAPI_MakeSphere
 

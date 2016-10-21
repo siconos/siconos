@@ -10,8 +10,6 @@ from siconos.io.mechanics_io import Hdf5
 import siconos.numerics as Numerics
 import siconos.io.mechanics_io
 
-siconos.io.mechanics_io.use_proposed = True
-
 options = siconos.mechanics.collision.bullet.SiconosBulletOptions()
 options.worldScale = 1.0
 options.breakingThreshold = 0.04
@@ -66,25 +64,17 @@ with Hdf5(mode='r+') as io:
 
     # print(pydoc.render_doc(io.run, "Help on %s"))
 
-    from siconos.mechanics.collision import BodyDS, SiconosContactor
-    from siconos.mechanics.collision.bullet import SiconosBulletCollisionManager
-
     io.run(with_timer=False,
-            time_stepping=None,
-            space_filter=lambda model: SiconosBulletCollisionManager(options),
-            body_class=BodyDS,
-            shape_class=SiconosContactor,
-            face_class=None,
-            edge_class=None,
-            t0=0,
-            T=20,
-            h=0.005,
-            multipoints_iterations=True,
-            theta=0.50001,
-            Newton_max_iter=20,
-            set_external_forces=None,
-            solver=Numerics.SICONOS_FRICTION_3D_NSGS,
-            itermax=100000,
-            tolerance=1e-8,
-            numerics_verbose=False,
-            output_frequency=None)
+           options=options,
+           multipoints_iterations=True,
+           t0=0,
+           T=20,
+           h=0.005,
+           theta=0.50001,
+           Newton_max_iter=1,
+           set_external_forces=None,
+           solver=Numerics.SICONOS_FRICTION_3D_NSGS,
+           itermax=100000,
+           tolerance=1e-8,
+           numerics_verbose=False,
+           output_frequency=None)

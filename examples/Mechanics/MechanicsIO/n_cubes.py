@@ -9,6 +9,10 @@ from siconos.mechanics.collision.tools import Contactor
 from siconos.io.mechanics_io import Hdf5
 import siconos.numerics as Numerics
 
+import siconos.io.mechanics_io
+siconos.io.mechanics_io.set_implementation('original')
+siconos.io.mechanics_io.set_backend('bullet')
+
 import random
 
 n_cube=3

@@ -4,9 +4,12 @@
 # Multiples contactors with multiples non smooth laws
 #
 
-
 from siconos.mechanics.collision.tools import Contactor
 from siconos.io.mechanics_io import Hdf5
+import siconos.io.mechanics_io
+
+siconos.io.mechanics_io.set_implementation('original')
+siconos.io.mechanics_io.set_backend('bullet')
 
 # Creation of the hdf5 file for input/output
 with Hdf5(mode='w') as io:

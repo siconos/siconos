@@ -8,6 +8,7 @@ import random
 
 from siconos.mechanics.collision.tools import Contactor
 from siconos.io.mechanics_io import Hdf5
+import siconos.io.mechanics_io
 #sys.path.append('../..')
 #from mechanics_io import Hdf5
 import siconos.numerics as Numerics

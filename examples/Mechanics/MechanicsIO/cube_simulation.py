@@ -1,5 +1,10 @@
 
 from siconos.io.mechanics_io import Hdf5
+
+import siconos.io.mechanics_io
+siconos.io.mechanics_io.set_implementation('original')
+siconos.io.mechanics_io.set_backend('bullet')
+
 # Run the simulation from the inputs previously defined and add
 # results to the hdf5 file. The visualisation of the output may be done
 # with the vview command.

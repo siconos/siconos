@@ -6,80 +6,140 @@ import os
 import sys
 
 from math import cos, sin
+from scipy import constants
 
 import shlex
 import numpy as np
 import h5py
 import bisect
+import time
 
 import tempfile
 from contextlib import contextmanager
 from operator import itemgetter
 
+## Siconos imports
+import siconos.numerics as Numerics
+from siconos.kernel import \
+    cast_NewtonImpactFrictionNSL, EqualityConditionNSL, \
+    Interaction, DynamicalSystem, TimeStepping
+import siconos.kernel as Kernel
+
+# Siconos Mechanics imports
 from siconos.mechanics.collision.tools import Contactor
-
 from siconos.mechanics import joints
+from siconos.io.io_base import MechanicsIO
+from siconos.io.FrictionContactTrace import  FrictionContactTrace
 
-use_proposed = False
+# Currently we must choose between two implementations
+use_original = False
+use_proposed = True
+
+def set_implementation(i):
+    global use_original, use_proposed
+    if i=='original':
+        use_original = have_original
+        use_proposed = not have_original
+        setup_default_classes()
+        return use_original
+    elif i=='proposed':
+        use_proposed = have_proposed
+        use_original = not have_original
+        setup_default_classes()
+        return use_proposed
+    return False
+
+# For 'proposed' implementation, it is necessary to select a back-end,
+# although currently only Bullet is supported for general objects.
+backend = 'bullet'
+
+def set_backend(b):
+    global backend
+    backend = b
+    setup_default_classes()
+
+have_proposed = False
+have_original = False
+have_bullet = False
+have_occ = False
+
+# Imports for 'proposed' implementation
 try:
-    from siconos.kernel import TimeStepping
     from siconos.mechanics.collision import BodyDS, \
         SiconosSphere, SiconosBox, SiconosPlane, SiconosConvexHull, \
         SiconosContactor, SiconosContactorSet
-    from siconos.mechanics.collision.bullet import \
-        SiconosBulletCollisionManager, SiconosBulletOptions
-    from siconos.mechanics.collision.bullet import \
-        btScalarSize, btQuaternion, btTransform, btVector3
-    proposed_is_here = True
+
+    try:
+        from siconos.mechanics.collision.bullet import \
+            SiconosBulletCollisionManager, SiconosBulletOptions
+        have_bullet = True
+    except:
+        have_bullet = False
+
+    have_proposed = True
 except:
-    proposed_is_here = False
+    have_proposed = False
     use_proposed = False
 
+# Imports for 'original' implementation
 try:
     from siconos.mechanics.collision.bullet import \
         BulletDS, BulletWeightedShape, btScalarSize, \
-        btCollisionObject, btQuaternion, btTransform, btVector3, quatRotate
+        btCollisionObject
 
     from siconos.mechanics.collision.bullet import \
         cast_BulletR
-
-    from siconos.mechanics.collision.bullet import \
-        __mul__ as mul
 
     from siconos.mechanics.collision.bullet import btVector3, \
         btConvexHullShape, btCylinderShape, btBoxShape, btSphereShape, \
         btConeShape, btCapsuleShape, btCompoundShape, btTriangleIndexVertexArray, \
         btGImpactMeshShape
-
-    bullet_is_here = True
+    have_bullet = True
+    have_original = True
 
 except:
+    have_original = False
+    use_original = False
 
-    bullet_is_here = False
+# Shared Bullet imports
+try:
+    from siconos.mechanics.collision.bullet import \
+        btScalarSize, btQuaternion, btTransform, \
+        btVector3, quatRotate
+    from siconos.mechanics.collision.bullet import \
+        __mul__ as mul
+except:
+    have_bullet = False
 
-    pass
-
-
+# OCC imports
 try:
     from siconos.mechanics.occ import \
         OccContactShape, OccBody, OccContactFace, OccContactEdge, \
         OccTimeStepping, OccSpaceFilter, OccWrap
+    have_occ = True
 except:
-    pass
+    have_occ = False
 
-from siconos.kernel import \
-    cast_NewtonImpactFrictionNSL, EqualityConditionNSL, Interaction, DynamicalSystem
+### Configuration
 
-import siconos.kernel as Kernel
-from siconos.io.io_base import MechanicsIO
+use_bullet = False
 
-import siconos.numerics as Numerics
+def setup_default_classes():
+    global default_manager_class
+    global default_simulation_class
+    global use_bullet
+    if use_proposed:
+        if backend == 'bullet':
+            default_manager_class = lambda model,options: SiconosBulletCollisionManager(options)
+            use_bullet = have_bullet
+        default_simulation_class = TimeStepping
+    elif use_original:
+        if backend == 'bullet':
+            default_manager_class = lambda model,options: BulletSpaceFilter(model)
+            default_simulation_class = BulletTimeStepping
+            use_bullet = have_bullet
 
-from scipy import constants
-
-import time
-
-from siconos.io.FrictionContactTrace import  FrictionContactTrace
+### Utility functions
 
 def floatv(v):
     return [float(x) for x in v]
@@ -281,13 +341,13 @@ class ShapeCollection():
         self._tri = dict()
         self._collision_margin=collision_margin
         # print('self._collision_margin',self._collision_margin)
-        if proposed_is_here and use_proposed:
+        if use_proposed:
 
             self._primitive = {'Sphere': SiconosSphere,
                                'Box': SiconosBox,
                                'Plane': SiconosPlane}
 
-        elif bullet_is_here:
+        elif use_original and use_bullet:
 
             self._primitive = {'Cylinder': btCylinderShape,
                                'Sphere': btSphereShape,
@@ -456,13 +516,15 @@ class ShapeCollection():
                                                              min(dims)*0.1))
                         convex.setOutsideMargin(
                             self.shape(shape_name).attrs.get('outsideMargin', 0))
-                    else:
+                    elif use_original and use_bullet:
                         convex = btConvexHullShape()
                         convex.setMargin(self._collision_margin)
                         for points in self.shape(shape_name):
                             convex.addPoint(btVector3(float(points[0]),
                                                       float(points[1]),
                                                       float(points[2])))
+                    else:
+                        throw
                     self._shapes[shape_name] = convex
 
             elif isinstance(self.url(shape_name), str) and \
@@ -488,7 +550,7 @@ class ShapeCollection():
                                                              min(attrs)*0.1))
                         box.setOutsideMargin(
                             self.shape(shape_name).attrs.get('outsideMargin', 0))
-                    else:
+                    elif use_original and use_bullet:
                         self._shapes[shape_name] = primitive(
                             btVector3(attrs[0] / 2,
                                       attrs[1] / 2,
@@ -508,19 +570,13 @@ class ShapeCollection():
                 #     orie2 = attrs[12:16]
                 #     bcols = btCompoundShape()
                 #     bcols.addChildShape(...
-                elif name in ['Sphere']:
+                else: # e.g. name in ['Sphere']:
+                    prim = self._shapes[shape_name] = primitive(*attrs)
+                    shp = self.shape(shape_name)
                     if use_proposed:
-                        sphere = primitive(attrs[0])
-                        self._shapes[shape_name] = sphere
-                        sphere.setInsideMargin(
-                            self.shape(shape_name).attrs.get('insideMargin',
-                                                             min(attrs)*0.1))
-                        sphere.setOutsideMargin(
-                            self.shape(shape_name).attrs.get('outsideMargin', 0))
-                    else:
-                        self._shapes[shape_name] = primitive(*attrs)
-                else:
-                    self._shapes[shape_name] = primitive(*attrs)
+                        prim.setInsideMargin(
+                            shp.attrs.get('insideMargin', min(attrs)*0.1))
+                        prim.setOutsideMargin(shp.attrs.get('outsideMargin', 0))
 
         return self._shapes[shape_name]
 
@@ -722,7 +778,7 @@ class Hdf5():
                 self._broadphase.insertNonSmoothLaw(nslaw,
                                         int(self._nslaws[name].attrs['gid1']),
                                         int(self._nslaws[name].attrs['gid2']));
-            else:
+            elif use_original:
                 self._broadphase.insert(nslaw,
                                         int(self._nslaws[name].attrs['gid1']),
                                         int(self._nslaws[name].attrs['gid2']))
@@ -819,7 +875,7 @@ class Hdf5():
                         'shape': shp,
                         }
 
-            elif mass == 0.:
+            elif use_original and mass == 0. and use_bullet:
                 # a static object
                 rbase = btQuaternion(orientation[1],
                                      orientation[2],
@@ -889,7 +945,7 @@ class Hdf5():
 
                 body.setContactors(cset)
 
-            else:
+            elif use_original and use_bullet:
                 # a Bullet moving object
                 bws = BulletWeightedShape(
                     self._shape.get(contactors[0].name), mass)
@@ -940,7 +996,7 @@ class Hdf5():
                         body.initialize(self._model.simulation().nextTime())
                         self._model.simulation().initialize(
                             self._model, False)
-                    else:
+                    elif use_original:
                         self._broadphase.addDynamicObject(
                             body,
                             self._model.simulation(),
@@ -1683,6 +1739,7 @@ class Hdf5():
             with_timer=False,
             time_stepping=None,
             space_filter=None,
+            options=None,
             body_class=None,
             shape_class=None,
             face_class=None,
@@ -1749,19 +1806,8 @@ class Hdf5():
         if set_external_forces is not None:
             self._set_external_forces=set_external_forces
 
-        if proposed_is_here and use_proposed:
-            if time_stepping is None:
-                time_stepping = TimeStepping
-
-            if space_filter is None:
-                space_filter = SiconosBulletCollisionManager
-
-        else:
-            if time_stepping is None:
-                time_stepping=BulletTimeStepping
-
-            if space_filter is None:
-                space_filter=BulletSpaceFilter
+        if space_filter is None:  space_filter = default_manager_class
+        if time_stepping is None: time_stepping = default_simulation_class
 
         if output_frequency is not None:
             self._output_frequency=output_frequency
@@ -1836,20 +1882,19 @@ class Hdf5():
         osnspb.setKeepLambdaAndYState(True)
 
         # (5) broadphase contact detection
-        if proposed_is_here and use_proposed:
-            self._broadphase = space_filter(model)
-        else:
-            self._broadphase=space_filter(model)
-            if not multipoints_iterations:
-                print("""
-            ConvexConvexMultipointIterations and PlaneConvexMultipointIterations are unset
-            """)
-            else:
+        self._broadphase = space_filter(model, manager_options)
+
+        if use_original:
+            if multipoints_interaction:
                 if hasattr(self._broadphase, 'collisionConfiguration'):
                     self._broadphase.collisionConfiguration().\
                         setConvexConvexMultipointIterations()
                     self._broadphase.collisionConfiguration().\
                         setPlaneConvexMultipointIterations()
+            else:
+                print("""
+            ConvexConvexMultipointIterations and PlaneConvexMultipointIterations are unset
+            """)
 
         # (6) Simulation setup with (1) (2) (3) (4) (5)
         simulation=time_stepping(timedisc)
@@ -1895,12 +1940,7 @@ class Hdf5():
             if controller is not None:
                 controller.step()
 
-            if proposed_is_here and use_proposed:
-                pass
-                #self._broadphase.resetStatistics()
-                #self._broadphase.updateGraph()
-                #self._broadphase.performBroadphase()
-            else:
+            if use_original:
                 log(self._broadphase.buildInteractions, with_timer)\
                     (model.currentTime())
 
@@ -1926,11 +1966,11 @@ class Hdf5():
                 log(self._out.flush)()
 
 
-            if proposed_is_here and use_proposed:
+            if use_proposed:
                 numberOfContact = (
                     self._broadphase.statistics().new_interactions_created
                     + self._broadphase.statistics().existing_interactions_processed)
-            else:
+            elif use_original:
                 numberOfContact = (self._model.simulation()
                                    .oneStepNSProblem(0).getSizeOutput()/3)
 
