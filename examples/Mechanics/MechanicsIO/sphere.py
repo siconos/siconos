@@ -11,8 +11,6 @@ import siconos.numerics as Numerics
 import siconos.io.mechanics_io
 from siconos.mechanics.collision.bullet import SiconosBulletOptions
 
-siconos.io.mechanics_io.use_proposed = True
-
 options = SiconosBulletOptions()
 options.worldScale = 1.0
 options.breakingThreshold = 0.04
