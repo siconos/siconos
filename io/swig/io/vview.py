@@ -1251,21 +1251,25 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
                             print('Left')
                             self._renderer.GetActiveCamera().SetPosition(
                                 dist, 0, 0)
+                            self._renderer.GetActiveCamera().SetFocalPoint(0, 0, 0)
                             self._renderer.GetActiveCamera().SetViewUp(0, 0, 1)
                     elif self._view_cycle == 1:
                             print('Right')
                             self._renderer.GetActiveCamera().SetPosition(
                                 0, dist, 0)
+                            self._renderer.GetActiveCamera().SetFocalPoint(0, 0, 0)
                             self._renderer.GetActiveCamera().SetViewUp(0, 0, 1)
                     elif self._view_cycle == 2:
                             print('Top')
                             self._renderer.GetActiveCamera().SetPosition(
                                 0, 0, dist)
+                            self._renderer.GetActiveCamera().SetFocalPoint(0, 0, 0)
                             self._renderer.GetActiveCamera().SetViewUp(1, 0, 0)
                     else:  # Corner
                             print('Corner')
                             self._renderer.GetActiveCamera().SetPosition(
                                 d3, d3, d3)
+                            self._renderer.GetActiveCamera().SetFocalPoint(0, 0, 0)
                             self._renderer.GetActiveCamera().SetViewUp(
                                 -1, -1, 1)
                             self._view_cycle = -1
