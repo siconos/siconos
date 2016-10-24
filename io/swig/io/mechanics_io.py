@@ -938,13 +938,17 @@ class Hdf5():
                         inertia = np.diag(inertia)
                     elif np.shape(inertia) != (3,3):
                         print('Wrong shape of inertia')
+                    have_inertia = True
                 else:
                     # necessary because SWIG crashes on None
                     inertia = []
+                    have_inertia = False
 
                 body = body_class(translation + orientation,
                                   velocity,
                                   mass, inertia)
+                if have_inertia:
+                    body.setUseContactorInertia(False)
 
                 cset = SiconosContactorSet()
                 for c in contactors:

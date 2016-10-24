@@ -252,6 +252,10 @@ protected:
   btTransform offsetTransform(const SiconosVector& position,
                               const SiconosVector& offset);
 
+  /** Helper to set the inertia of a NewtonEulerDS based on a
+   * btCollisionShape */
+  void updateContactorInertia(SP::NewtonEulerDS ds, SP::btCollisionShape btshape);
+
   SiconosBulletOptions &_options;
 
   std::vector<SP::btCollisionObject> _queuedCollisionObjects;
@@ -486,6 +490,21 @@ void SiconosBulletCollisionManager_impl::createCollisionObject(
     (base, ds, sphere, btsphere, bodySphereMap, contactor);
 }
 
+void SiconosBulletCollisionManager_impl::updateContactorInertia(
+  SP::NewtonEulerDS ds, SP::btCollisionShape btshape)
+{
+  btVector3 localinertia;
+  btshape->calculateLocalInertia(ds->scalarMass(), localinertia);
+  assert( ! ((localinertia.x() == 0.0
+              && localinertia.y() == 0.0
+              && localinertia.z() == 0.0)
+             || isinf(localinertia.x())
+             || isinf(localinertia.y())
+             || isinf(localinertia.z()))
+          && "calculateLocalInertia() returned garbage" );
+  ds->setInertia(localinertia[0], localinertia[1], localinertia[2]);
+}
+
 void SiconosBulletCollisionManager_impl::updateShape(BodySphereRecord &record)
 {
   SP::SiconosSphere sphere(record.shape);
@@ -504,6 +523,9 @@ void SiconosBulletCollisionManager_impl::updateShape(BodySphereRecord &record)
     // btSphereShape has an internal margin
     btsphere->setMargin(sphere->insideMargin() * _options.worldScale);
 #endif
+
+    if (record.ds && record.ds->useContactorInertia())
+      updateContactorInertia(record.ds, btsphere);
 
     if (record.btobject->getBroadphaseHandle())
     {
@@ -650,6 +672,9 @@ void SiconosBulletCollisionManager_impl::updateShape(BodyBoxRecord &record)
     btbox->setLocalScaling(btVector3(sx, sy, sz));
     btbox->setMargin((box->insideMargin() + box->outsideMargin()) * _options.worldScale);
 
+    if (record.ds && record.ds->useContactorInertia())
+      updateContactorInertia(record.ds, btbox);
+
     if (record.btobject->getBroadphaseHandle())
     {
       _collisionWorld->updateSingleAabb(&*record.btobject);
@@ -694,6 +719,9 @@ void SiconosBulletCollisionManager_impl::updateShape(BodyCylinderRecord &record)
 
     btcyl->setLocalScaling(btVector3(radius, length/2, radius));
     btcyl->setMargin((cyl->insideMargin() + cyl->outsideMargin()) * _options.worldScale);
+
+    if (record.ds && record.ds->useContactorInertia())
+      updateContactorInertia(record.ds, btcyl);
 
     if (record.btobject->getBroadphaseHandle())
     {
@@ -782,6 +810,9 @@ void SiconosBulletCollisionManager_impl::updateShape(BodyCHRecord &record)
     // TODO
     //btbox->setLocalScaling(btVector3(sx, sy, sz));
     btch->setMargin((ch->insideMargin() + ch->outsideMargin()) * _options.worldScale);
+
+    if (record.ds && record.ds->useContactorInertia())
+      updateContactorInertia(record.ds, btch);
 
     if (record.btobject->getBroadphaseHandle())
     {

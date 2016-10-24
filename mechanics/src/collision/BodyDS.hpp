@@ -39,6 +39,7 @@ protected:
   ACCEPT_SERIALIZATION(BodyDS);
 
   SP::SiconosContactorSet _contactors;
+  bool _useContactorInertia;
 
 public:
 
@@ -48,6 +49,10 @@ public:
          SP::SimpleMatrix inertia = SP::SimpleMatrix());
 
   virtual ~BodyDS();
+
+  bool setUseContactorInertia(bool use) { _useContactorInertia = use; }
+
+  bool useContactorInertia() { return _useContactorInertia; }
 
   /** Access the contactor set associated with this body.
    * \return A SP::SiconosContactorSet */
