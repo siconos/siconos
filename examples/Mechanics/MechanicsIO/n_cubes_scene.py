@@ -35,7 +35,7 @@ with Hdf5() as io:
     #io.addPrimitiveShape('CubePrim', 'Box', (2, 2, 2))
 
     # Definition of the ground shape
-    io.addPrimitiveShape('Ground', 'Box', (200, 200, .5))
+    io.addPrimitiveShape('Ground', 'Box', (200, 200, .5), insideMargin=0.04)
 
     # Definition of the left shape
     # io.addPrimitiveShape('Left', 'Box', (100, 0.5, 50.))

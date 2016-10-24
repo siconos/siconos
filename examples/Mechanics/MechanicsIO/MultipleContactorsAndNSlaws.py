@@ -8,9 +8,6 @@ from siconos.mechanics.collision.tools import Contactor
 from siconos.io.mechanics_io import Hdf5
 import siconos.io.mechanics_io
 
-siconos.io.mechanics_io.set_implementation('original')
-siconos.io.mechanics_io.set_backend('bullet')
-
 # Creation of the hdf5 file for input/output
 with Hdf5(mode='w') as io:
 
@@ -20,7 +17,7 @@ with Hdf5(mode='w') as io:
     io.addPrimitiveShape('LongBox', 'Box', (1, 1, 5))
 
     # Definition of the ground shape
-    io.addPrimitiveShape('Ground', 'Box', (100, 100, .5))
+    io.addPrimitiveShape('Ground', 'Box', (100, 100, .5), insideMargin=0.04)
 
     # Definition of a non smooth law between groups 0 and 1
     io.addNewtonImpactFrictionNSL('contact1', mu=0.1,

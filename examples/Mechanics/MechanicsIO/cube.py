@@ -8,10 +8,6 @@ from siconos.mechanics.collision.tools import Contactor
 from siconos.io.mechanics_io import Hdf5
 import siconos.numerics as Numerics
 
-import siconos.io.mechanics_io
-siconos.io.mechanics_io.set_implementation('original')
-siconos.io.mechanics_io.set_backend('bullet')
-
 import pydoc
 # Creation of the hdf5 file for input/output
 with Hdf5() as io:
