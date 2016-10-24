@@ -50,7 +50,7 @@ public:
 
   virtual ~BodyDS();
 
-  bool setUseContactorInertia(bool use) { _useContactorInertia = use; }
+  void setUseContactorInertia(bool use) { _useContactorInertia = use; }
 
   bool useContactorInertia() { return _useContactorInertia; }
 
