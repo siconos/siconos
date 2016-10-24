@@ -103,6 +103,15 @@
 #endif
 #endif
 
+// Default Bullet options
+SiconosBulletOptions::SiconosBulletOptions()
+  : breakingThreshold(0.02)
+  , worldScale(1.0)
+  , useAxisSweep3(false)
+  , useMultipointIterations(true)
+{
+}
+
 // We need to maintain a record associating each body with a shape,
 // contactor, and collision object for each shape type.  We also need
 // to access generic shape stuff (group, margin) by a pointer from the
@@ -302,7 +311,6 @@ void SiconosBulletCollisionManager::initialize_impl()
 
   btGImpactCollisionAlgorithm::registerAlgorithm(&*impl->_dispatcher);
   impl->_collisionWorld->getDispatchInfo().m_useContinuous = false;
-  impl->_collisionWorld->getDispatchInfo().m_convexConservativeDistanceThreshold = 0.1f;
 }
 
 SiconosBulletCollisionManager::SiconosBulletCollisionManager()

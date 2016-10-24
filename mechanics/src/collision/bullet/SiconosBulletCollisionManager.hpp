@@ -37,12 +37,8 @@ DEFINE_SPTR(SiconosBulletCollisionManager_impl);
 
 struct SiconosBulletOptions
 {
-  SiconosBulletOptions()
-    : breakingThreshold(0.5)
-    , worldScale(1.0)
-    , useAxisSweep3(false)
-    , useMultipointIterations(true)
-    {}
+  SiconosBulletOptions();
+
   double breakingThreshold;
   double worldScale;
   bool useAxisSweep3;

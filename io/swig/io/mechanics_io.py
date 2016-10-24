@@ -522,7 +522,7 @@ class ShapeCollection():
                                 points[:,2].max() - points[:,2].min()]
                         convex.setInsideMargin(
                             self.shape(shape_name).attrs.get('insideMargin',
-                                                             min(dims)*0.1))
+                                                             min(dims)*0.02))
                         convex.setOutsideMargin(
                             self.shape(shape_name).attrs.get('outsideMargin', 0))
                     elif use_original and use_bullet:
@@ -556,7 +556,7 @@ class ShapeCollection():
                         self._shapes[shape_name] = box
                         box.setInsideMargin(
                             self.shape(shape_name).attrs.get('insideMargin',
-                                                             min(attrs)*0.1))
+                                                             min(attrs)*0.02))
                         box.setOutsideMargin(
                             self.shape(shape_name).attrs.get('outsideMargin', 0))
                     elif use_original and use_bullet:
@@ -584,7 +584,7 @@ class ShapeCollection():
                     shp = self.shape(shape_name)
                     if use_proposed:
                         prim.setInsideMargin(
-                            shp.attrs.get('insideMargin', min(attrs)*0.1))
+                            shp.attrs.get('insideMargin', min(attrs)*0.02))
                         prim.setOutsideMargin(shp.attrs.get('outsideMargin', 0))
 
         return self._shapes[shape_name]
