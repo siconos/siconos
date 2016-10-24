@@ -85,10 +85,7 @@ except:
 try:
     from siconos.mechanics.collision.bullet import \
         BulletDS, BulletWeightedShape, btScalarSize, \
-        btCollisionObject
-
-    from siconos.mechanics.collision.bullet import \
-        cast_BulletR
+        btCollisionObject, BulletTimeStepping, BulletSpaceFilter
 
     from siconos.mechanics.collision.bullet import btVector3, \
         btConvexHullShape, btCylinderShape, btBoxShape, btSphereShape, \
@@ -122,22 +119,34 @@ except:
 
 ### Configuration
 
+default_manager_class = None
+default_simulation_class = None
+default_body_class = None
 use_bullet = False
 
 def setup_default_classes():
     global default_manager_class
     global default_simulation_class
+    global default_body_class
     global use_bullet
     if use_proposed:
         if backend == 'bullet':
-            default_manager_class = lambda model,options: SiconosBulletCollisionManager(options)
+            def m(model, options):
+                if options is None:
+                    options = SiconosBulletOptions()
+                return SiconosBulletCollisionManager(options)
+            default_manager_class = m
             use_bullet = have_bullet
         default_simulation_class = TimeStepping
+        default_body_class = BodyDS
     elif use_original:
         if backend == 'bullet':
             default_manager_class = lambda model,options: BulletSpaceFilter(model)
             default_simulation_class = BulletTimeStepping
+            default_body_class = BulletDS
             use_bullet = have_bullet
+
+setup_default_classes()
 
 ### Utility functions
 
@@ -846,7 +855,7 @@ class Hdf5():
 
 
         if body_class is None:
-            body_class = BulletDS
+            body_class = default_body_class
 
         if self._broadphase is not None and 'input' in self._data:
             body = None
@@ -1796,12 +1805,6 @@ class Hdf5():
 
         from siconos.numerics import SICONOS_FRICTION_3D_ONECONTACT_NSN
 
-        from siconos.mechanics.collision.bullet import \
-            btConvexHullShape, btCollisionObject, \
-            btBoxShape, btQuaternion, btTransform, btConeShape, \
-            BulletSpaceFilter, cast_BulletR, \
-            BulletWeightedShape, BulletDS, BulletTimeStepping
-
         print ('setup model simulation ...')
         if set_external_forces is not None:
             self._set_external_forces=set_external_forces
@@ -1882,10 +1885,10 @@ class Hdf5():
         osnspb.setKeepLambdaAndYState(True)
 
         # (5) broadphase contact detection
-        self._broadphase = space_filter(model, manager_options)
+        self._broadphase = space_filter(model, options)
 
         if use_original:
-            if multipoints_interaction:
+            if multipoints_iterations:
                 if hasattr(self._broadphase, 'collisionConfiguration'):
                     self._broadphase.collisionConfiguration().\
                         setConvexConvexMultipointIterations()
