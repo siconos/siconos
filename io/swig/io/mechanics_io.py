@@ -66,8 +66,8 @@ have_occ = False
 # Imports for 'proposed' implementation
 try:
     from siconos.mechanics.collision import BodyDS, \
-        SiconosSphere, SiconosBox, SiconosPlane, SiconosConvexHull, \
-        SiconosContactor, SiconosContactorSet
+        SiconosSphere, SiconosBox, SiconosCylinder, SiconosPlane, \
+        SiconosConvexHull, SiconosContactor, SiconosContactorSet
 
     try:
         from siconos.mechanics.collision.bullet import \
@@ -354,6 +354,7 @@ class ShapeCollection():
 
             self._primitive = {'Sphere': SiconosSphere,
                                'Box': SiconosBox,
+                               'Cylinder': SiconosCylinder,
                                'Plane': SiconosPlane}
 
         elif use_original and use_bullet:
@@ -565,10 +566,9 @@ class ShapeCollection():
                                       attrs[1] / 2,
                                       attrs[2] / 2))
 
-                elif name in ['Cylinder']:
+                elif name in ['Cylinder'] and not use_proposed:
                     self._shapes[shape_name] = primitive(btVector3(attrs[0],
-                                                                   attrs[
-                                                                       1] / 2,
+                                                                   attrs[1]/2,
                                                                    attrs[0]))
                 # elif name in ['Compound']:
                 #     obj1 = attrs[0]

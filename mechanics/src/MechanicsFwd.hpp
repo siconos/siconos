@@ -52,6 +52,7 @@
   REGISTER(SiconosShape)                        \
   REGISTER(SiconosSphere)                       \
   REGISTER(SiconosBox)                          \
+  REGISTER(SiconosCylinder)                     \
   REGISTER(SiconosConvexHull)                   \
   REGISTER(SiconosPlane)                        \
   REGISTER(SiconosCollisionManager)             \

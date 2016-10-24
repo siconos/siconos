@@ -143,6 +143,42 @@ public:
   ACCEPT_VISITORS();
 };
 
+class SiconosCylinder : public SiconosShape,
+                        public std11::enable_shared_from_this<SiconosCylinder>
+{
+protected:
+  double _radius;
+  double _length;
+
+public:
+  SiconosCylinder(float radius, float length)
+    : SiconosShape(), _radius(radius), _length(length)
+  {
+  }
+
+  virtual ~SiconosCylinder() {}
+
+  void setRadius(double radius)
+  {
+    _radius = radius;
+    _version ++;
+  }
+
+  double radius() { return _radius; }
+
+  void setLength(double length)
+  {
+    _length = length;
+    _version ++;
+  }
+
+  double length() { return _length; }
+
+  /** visitors hook
+   */
+  ACCEPT_VISITORS();
+};
+
 class SiconosConvexHull : public SiconosShape,
                           public std11::enable_shared_from_this<SiconosConvexHull>
 {

@@ -9,10 +9,6 @@ from siconos.mechanics.collision.tools import Contactor
 from siconos.io.mechanics_io import Hdf5
 from math import pi, sin, cos
 
-import siconos.io.mechanics_io
-siconos.io.mechanics_io.set_implementation('original')
-siconos.io.mechanics_io.set_backend('bullet')
-
 # length of first branch
 l1 = 60
 
