@@ -208,4 +208,35 @@ public:
   ACCEPT_VISITORS();
 };
 
+typedef std::vector<unsigned int> VUInt;
+TYPEDEF_SPTR(VUInt)
+
+class SiconosMesh : public SiconosShape,
+                    public std11::enable_shared_from_this<SiconosMesh>
+{
+protected:
+  SP::VUInt _indexes;
+  SP::SiconosMatrix _vertices;
+
+public:
+  SiconosMesh(SP::VUInt indexes,
+              SP::SiconosMatrix vertices)
+    : SiconosShape(), _indexes(indexes), _vertices(vertices)
+  {
+    if (!_indexes || (_indexes->size() % 3) != 0)
+      throw SiconosException("Mesh indexes size must be divisible by 3.");
+    if (!_vertices || _vertices->size(1) != 3)
+      throw SiconosException("Mesh vertices matrix must have 3 columns.");
+  }
+
+  SP::VUInt indexes() { return _indexes; }
+  SP::SiconosMatrix vertices() { return _vertices; }
+
+  virtual ~SiconosMesh() {}
+
+  /** visitors hook
+   */
+  ACCEPT_VISITORS();
+};
+
 #endif /* SiconosShape_h */

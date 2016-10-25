@@ -59,6 +59,8 @@
 #include <BulletCollision/CollisionShapes/btBoxShape.h>
 #include <BulletCollision/CollisionShapes/btCylinderShape.h>
 #include <BulletCollision/CollisionShapes/btConvexHullShape.h>
+#include <BulletCollision/CollisionShapes/btBvhTriangleMeshShape.h>
+#include <BulletCollision/CollisionShapes/btTriangleIndexVertexArray.h>
 #include <LinearMath/btConvexHullComputer.h>
 
 #include <LinearMath/btQuaternion.h>
@@ -104,6 +106,16 @@
 #define BTPLANESHAPE btStaticPlaneShape
 #endif
 #endif
+
+// We need a bit more space to hold mesh data
+struct btSiconosMeshData : public btBvhTriangleMeshShape {
+  btSiconosMeshData(btStridingMeshInterface*i, bool b)
+    : btBvhTriangleMeshShape(i,b), btScalarVertices(0) {}
+  ~btSiconosMeshData() { if (btScalarVertices) delete[] btScalarVertices; }
+  btScalar* btScalarVertices;
+  SP::btTriangleIndexVertexArray btTriData;
+};
+#define BTMESHSHAPE btSiconosMeshData
 
 // Default Bullet options
 SiconosBulletOptions::SiconosBulletOptions()
@@ -164,6 +176,11 @@ typedef BodyShapeRecordT<SP::SiconosCylinder, SP::BTCYLSHAPE> BodyCylinderRecord
 typedef std::map<const BodyDS*, std::vector<std11::shared_ptr<BodyCylinderRecord> > >
   BodyCylinderMap;
 
+typedef BodyShapeRecordT<SP::SiconosMesh, std11::shared_ptr<btSiconosMeshData> >
+  BodyMeshRecord;
+typedef std::map<const BodyDS*, std::vector<std11::shared_ptr<BodyMeshRecord> > >
+  BodyMeshMap;
+
 /** For associating static contactor sets and their offsets.
  * Pointer to this is what is returned as the opaque and unique
  * StaticContactorSetID so that they can be removed. */
@@ -200,6 +217,7 @@ protected:
   BodyBoxMap bodyBoxMap;
   BodyCylinderMap bodyCylinderMap;
   BodyCHMap bodyCHMap;
+  BodyMeshMap bodyMeshMap;
 
   SP::Simulation _simulation;
 
@@ -224,6 +242,10 @@ protected:
                              const SP::BodyDS ds,
                              const SP::SiconosConvexHull ch,
                              const SP::SiconosContactor contactor);
+  void createCollisionObject(const SP::SiconosVector base,
+                             const SP::BodyDS ds,
+                             const SP::SiconosMesh mesh,
+                             const SP::SiconosContactor contactor);
 
   /* Call the above functions for each shape associated with a body or contactor. */
   void createCollisionObjectsForBodyContactorSet(
@@ -243,6 +265,7 @@ protected:
   void updateShape(BodyBoxRecord &record);
   void updateShape(BodyCylinderRecord &record);
   void updateShape(BodyCHRecord &record);
+  void updateShape(BodyMeshRecord &record);
 
   void updateAllShapesForDS(const BodyDS &bds);
   void updateShapePosition(const BodyShapeRecord &record);
@@ -371,6 +394,10 @@ void SiconosBulletCollisionManager_impl::updateAllShapesForDS(const BodyDS &bds)
   std::vector<std11::shared_ptr<BodyCHRecord> >::iterator itc;
   for (itc = bodyCHMap[&bds].begin(); itc != bodyCHMap[&bds].end(); itc++)
     updateShape(**itc);
+
+  std::vector<std11::shared_ptr<BodyMeshRecord> >::iterator itm;
+  for (itm = bodyMeshMap[&bds].begin(); itm != bodyMeshMap[&bds].end(); itm++)
+    updateShape(**itm);
 }
 
 template<typename ST, typename BT, typename BR, typename BSM>
@@ -827,6 +854,118 @@ void SiconosBulletCollisionManager_impl::updateShape(BodyCHRecord &record)
   updateShapePosition(record);
 }
 
+// If type of SiconosMatrix is the same as btScalar, we can avoid a copy
+template<typename SCALAR>
+std::pair<SP::btTriangleIndexVertexArray, btScalar*>
+make_bt_vertex_array(SP::SiconosMesh mesh,
+                     SCALAR _s1, SCALAR _s2)
+{
+  printf("make_bt_vertex_array: non-copy version\n");
+  SP::btTriangleIndexVertexArray bttris(
+    std11::make_shared<btTriangleIndexVertexArray>(
+      mesh->indexes()->size()/3,
+      mesh->indexes()->data(),
+      sizeof(int)*3,
+      mesh->vertices()->size(0),
+      mesh->vertices()->getArray(),
+      sizeof(btScalar)*3));
+  return std::make_pair(bttris, NULL);
+}
+
+// If type of SiconosMatrix is not the same as btScalar, we must copy
+template<typename SCALAR1, typename SCALAR2>
+std::pair<SP::btTriangleIndexVertexArray, btScalar*>
+make_bt_vertex_array(SP::SiconosMesh mesh, SCALAR1 _s1, SCALAR2 _s2)
+{
+  assert(mesh->vertices()->size(1) == 3);
+  unsigned int num = mesh->vertices()->size(0);
+  btScalar *vertices = new btScalar[num*3];
+  for (int i=0; i < num; i++)
+  {
+    vertices[i*3+0] = (*mesh->vertices())(i,0);
+    vertices[i*3+1] = (*mesh->vertices())(i,1);
+    vertices[i*3+2] = (*mesh->vertices())(i,2);
+  }
+  SP::btTriangleIndexVertexArray bttris(
+    std11::make_shared<btTriangleIndexVertexArray>(
+      num,
+      (int*)mesh->indexes()->data(),
+      sizeof(int)*3,
+      mesh->vertices()->size(0),
+      vertices,
+      sizeof(btScalar)*3));
+  return std::make_pair(bttris, vertices);
+}
+
+void SiconosBulletCollisionManager_impl::createCollisionObject(
+  const SP::SiconosVector base,
+  const SP::BodyDS ds,
+  SP::SiconosMesh mesh,
+  SP::SiconosContactor contactor)
+{
+  if (!mesh->indexes())
+    throw SiconosException("No indexes matrix specified for mesh.");
+
+  if ((mesh->indexes()->size() % 3) != 0)
+    throw SiconosException("Mesh indexes size must be divisible by 3.");
+
+  if (!mesh->vertices())
+    throw SiconosException("No vertices matrix specified for mesh.");
+
+  if (mesh->vertices()->size(1) != 3)
+    throw SiconosException("Convex hull vertices matrix must have 3 columns.");
+
+  // Create Bullet triangle list, either by copying on non-copying method
+  // TODO: worldScale on vertices
+  std::pair<SP::btTriangleIndexVertexArray, btScalar*> datapair(
+    make_bt_vertex_array(mesh, (btScalar)0, (*mesh->vertices())(0,0)));
+  SP::btTriangleIndexVertexArray bttris(datapair.first);
+
+  // Create Bullet mesh object
+  SP::BTMESHSHAPE btmesh(std11::make_shared<BTMESHSHAPE>(&*bttris, true));
+
+  // Hold on to the data since Bullet does not make a copy
+  btmesh->btTriData = bttris;
+  btmesh->btScalarVertices = datapair.second;
+
+  // initialization
+  createCollisionObjectHelper<SP::SiconosMesh, SP::BTMESHSHAPE,
+                              BodyMeshRecord, BodyMeshMap>
+    (base, ds, mesh, btmesh, bodyMeshMap, contactor);
+}
+
+void SiconosBulletCollisionManager_impl::updateShape(BodyMeshRecord &record)
+{
+  SP::SiconosMesh mesh(record.shape);
+  SP::BTMESHSHAPE btmesh(record.btshape);
+
+  // Update shape parameters
+  if (mesh->version() != record.shape_version)
+  {
+    // btBvhTriangleMeshShape supports only outsideMargin.
+    // TODO: support insideMargin, scale the points by their normals.
+    btmesh->setMargin(mesh->outsideMargin() * _options.worldScale);
+    btmesh->recalcLocalAabb();
+
+    // TODO: Calculate inertia from a mesh.  For now we leave it at
+    // identity, the user can provide an inertia if desired.
+
+    // if (record.ds && record.ds->useContactorInertia())
+    //   updateContactorInertia(record.ds, btmesh);
+
+    if (record.btobject->getBroadphaseHandle())
+    {
+      _collisionWorld->updateSingleAabb(&*record.btobject);
+      _collisionWorld->getBroadphase()->getOverlappingPairCache()->
+        cleanProxyFromPairs(record.btobject->getBroadphaseHandle(), &*_dispatcher);
+    }
+
+    record.shape_version = mesh->version();
+  }
+
+  updateShapePosition(record);
+}
+
 struct CreateCollisionObjectShapeVisitor : public SiconosVisitor
 {
   using SiconosVisitor::visit;
@@ -849,6 +988,8 @@ struct CreateCollisionObjectShapeVisitor : public SiconosVisitor
   void visit(SP::SiconosCylinder shape)
     { impl.createCollisionObject(base, ds, shape, contactor); }
   void visit(SP::SiconosConvexHull shape)
+    { impl.createCollisionObject(base, ds, shape, contactor); }
+  void visit(SP::SiconosMesh shape)
     { impl.createCollisionObject(base, ds, shape, contactor); }
 };
 

@@ -67,7 +67,8 @@ have_occ = False
 try:
     from siconos.mechanics.collision import BodyDS, \
         SiconosSphere, SiconosBox, SiconosCylinder, SiconosPlane, \
-        SiconosConvexHull, SiconosContactor, SiconosContactorSet
+        SiconosConvexHull, SiconosContactor, SiconosContactorSet, \
+        SiconosMesh
 
     try:
         from siconos.mechanics.collision.bullet import \
@@ -342,6 +343,56 @@ def loadMesh(shape_filename, collision_margin, scale=None):
 
     return keep, shape
 
+def loadSiconosMesh(shape_filename, scale=None):
+    """
+    loads a vtk .vtp file and returns a SiconosMesh shape
+    WARNING triangles cells assumed!
+    """
+    import vtk
+
+    reader = vtk.vtkXMLPolyDataReader()
+    reader.SetFileName(shape_filename)
+    reader.Update()
+
+    polydata = reader.GetOutput()
+    points = polydata.GetPoints().GetData()
+    num_points = points.GetNumberOfTuples()
+    num_triangles = polydata.GetNumberOfCells()
+
+    keep = None
+    shape = None
+
+    if polydata.GetCellType(0) == 5:
+        apoints = np.empty((num_points, 3), dtype={4:'f4',8:'f8'}[btScalarSize()])
+        for i in range(0, points.GetNumberOfTuples()):
+            p = points.GetTuple(i)
+            apoints[i, 0] = p[0]
+            apoints[i, 1] = p[1]
+            apoints[i, 2] = p[2]
+
+        if scale is not None:
+            apoints *= scale
+
+        aindices = np.empty(num_triangles*3, dtype=np.int)
+
+        for i in range(0, num_triangles):
+            c = polydata.GetCell(i)
+            aindices[i*3 + 0] = c.GetPointIds().GetId(0)
+            aindices[i*3 + 1] = c.GetPointIds().GetId(1)
+            aindices[i*3 + 2] = c.GetPointIds().GetId(2)
+
+        shape = SiconosMesh(list(aindices), apoints)
+        dims = apoints.max(axis=0) - apoints.min(axis=0)
+
+    else:  # assume convex shape
+        coors = dict()
+        for i in range(0, points.GetNumberOfTuples()):
+            coors[points.GetTuple(i)] = 1
+        coors = np.array(coors.keys())
+        dims = coors.max(axis=0) - coors.min(axis=0)
+        shape = SiconosConvexHull(coors.keys())
+
+    return shape, dims
 
 class ShapeCollection():
 
@@ -412,9 +463,18 @@ class ShapeCollection():
                             scale = None
                             if 'scale' in self.attributes(shape_name):
                                 scale = self.attributes(shape_name)['scale']
-                            (self._tri[shape_name],
-                             self._shapes[shape_name]) = loadMesh(
-                                 tmpf[1], self._collision_margin, scale=scale)
+                            if use_proposed:
+                                mesh, dims = loadSiconosMesh(tmpf[1], scale=scale)
+                                self._shapes[shape_name] = mesh
+                                mesh.setInsideMargin(
+                                    self.shape(shape_name).attrs.get('insideMargin',
+                                                                     min(dims)*0.02))
+                                mesh.setOutsideMargin(
+                                    self.shape(shape_name).attrs.get('outsideMargin',0))
+                            elif use_original:
+                                (self._tri[shape_name],
+                                 self._shapes[shape_name]) = loadMesh(
+                                     tmpf[1], self._collision_margin, scale=scale)
                     else:
                         assert False
                 elif self.attributes(shape_name)['type'] in['step']:
@@ -1468,7 +1528,8 @@ class Hdf5():
               'precision=', precision,
               'local_precision=', )
 
-    def addMeshFromString(self, name, shape_data, scale=None):
+    def addMeshFromString(self, name, shape_data, scale=None,
+                          insideMargin=None, outsideMargin=None):
         """
         Add a mesh shape from a string.
         Accepted format : mesh encoded in VTK .vtp format
@@ -1485,10 +1546,15 @@ class Hdf5():
             shape.attrs['type'] = 'vtp'
             if scale is not None:
                 shape.attrs['scale'] = scale
+            if insideMargin is not None:
+                shape.attrs['insideMargin'] = insideMargin
+            if outsideMargin is not None:
+                shape.attrs['outsideMargin'] = outsideMargin
             self._shapeid[name] = shape.attrs['id']
             self._number_of_shapes += 1
 
-    def addMeshFromFile(self, name, filename, scale=None):
+    def addMeshFromFile(self, name, filename, scale=None,
+                        insideMargin=None, outsideMargin=None):
         """
         Add a mesh shape from a file.
         Accepted format : .stl or mesh encoded in VTK .vtp format
@@ -1522,7 +1588,9 @@ class Hdf5():
                 assert os.path.splitext(filename)[-1][1:] == 'vtp'
                 shape_data = str_of_file(filename)
 
-            self.addMeshFromString(name, shape_data, scale=scale)
+            self.addMeshFromString(name, shape_data, scale=scale,
+                                   insideMargin=insideMargin,
+                                   outsideMargin=outsideMargin)
 
     def addBRepFromString(self, name, shape_data):
         """
