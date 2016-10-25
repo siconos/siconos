@@ -7,7 +7,7 @@
 #include "fc3d_Solvers.h"
 #include "NonSmoothDrivers.h"
 #include "fclib_interface.h"
-
+#include "numerics_verbose.h"
 static int fccounter = -1;
 
 int fc3d_LmgcDriver(double *reaction,
@@ -28,6 +28,8 @@ int fc3d_LmgcDriver(double *reaction,
                                  int ndof)
 {
 
+  numerics_set_verbose(verbose);
+
   SparseBlockCoordinateMatrix* MC = newSparseBlockCoordinateMatrix3x3fortran(nc, nc, nb, row, column, W);
 
   SparseBlockStructuredMatrix* M = SBCMToSBM(MC);
@@ -42,9 +44,25 @@ int fc3d_LmgcDriver(double *reaction,
 
   fc3d_setDefaultSolverOptions(&numerics_solver_options, solver_id);
 
+  if (solver_id == SICONOS_FRICTION_3D_NSGS)
+  {
+    numerics_solver_options.iparam[SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION] = SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL;
+  }
+  else if  (solver_id == SICONOS_FRICTION_3D_NSN_AC)
+  {
+    numerics_solver_options.iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH] = SICONOS_FRICTION_3D_NSN_LINESEARCH_NO;
+    numerics_solver_options.iparam[SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY]=SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_VI_EG_NSN;
+  }
+
+  
   numerics_solver_options.dparam[0] = tolerance;
   numerics_solver_options.iparam[0] = itermax;
 
+
+
+
+
+  
   int info = fc3d_driver(FC, reaction , velocity, &numerics_solver_options);
 
 
@@ -101,7 +119,7 @@ int fc3d_LmgcDriver(double *reaction,
   else if (outputFile == 2)
   {
     char fname[256];
-    sprintf(fname, "LMGC_FC3D-i%.5d-%i-%.5d.dat", numerics_solver_options.iparam[7], nc, fccounter++);
+    sprintf(fname, "LMGC_FC3D-i%.5d-%i-%.5d.dat", numerics_solver_options.iparam[SICONOS_IPARAM_ITER_DONE], nc, fccounter++);
     printf("LMGC_FC3D-i%.5d-%i-%.5d.dat", numerics_solver_options.iparam[7], nc, fccounter++);
     FILE * foutput  =  fopen(fname, "w");
     frictionContact_printInFile(FC, foutput);
@@ -114,8 +132,8 @@ int fc3d_LmgcDriver(double *reaction,
     if (fccounter % freq_output == 0)
     {
       char fname[256];
-      sprintf(fname, "LMGC_FC3D-i%.5d-%i-%.5d.hdf5", numerics_solver_options.iparam[7], nc, fccounter);
-      printf("Dump LMGC_FC3D-i%.5d-%i-%.5d.hdf5.\n", numerics_solver_options.iparam[7], nc, fccounter);
+      sprintf(fname, "LMGC_FC3D-i%.5d-%i-%.5d.hdf5", numerics_solver_options.iparam[SICONOS_IPARAM_ITER_DONE], nc, fccounter);
+      printf("Dump LMGC_FC3D-i%.5d-%i-%.5d.hdf5.\n", numerics_solver_options.iparam[SICONOS_IPARAM_ITER_DONE], nc, fccounter);
       /* printf("ndof = %i.\n", ndof); */
 
       FILE * foutput  =  fopen(fname, "w");

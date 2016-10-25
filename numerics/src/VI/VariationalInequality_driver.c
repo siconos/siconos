@@ -42,7 +42,7 @@ char *  SICONOS_VI_BOX_PATH_STR = "Box VI solver based on PATH solver";
 #include "debug.h"
 
 
-void snPrintf(int level, SolverOptions* opts, const char *fmt, ...);
+
 
 int variationalInequality_driver(VariationalInequality* problem, 
                                  double *x, double *w, 
@@ -75,21 +75,21 @@ int variationalInequality_driver(VariationalInequality* problem,
   /* Extra Gradient algorithm */
   case SICONOS_VI_EG:
   {
-    snPrintf(1, options, 
+    numerics_printf_verbose(1,
              " ========================== Call ExtraGradient (EG) solver for VI problem ==========================\n");
     variationalInequality_ExtraGradient(problem, x , w , &info , options);
     break;
   }
   case SICONOS_VI_FPP:
   {
-    snPrintf(1, options, 
+    numerics_printf_verbose(1,
              " ========================== Call Fixed Point Projection (FPP) solver for VI problem ==========================\n");
     variationalInequality_FixedPointProjection(problem, x , w , &info , options);
     break;
   }
   case SICONOS_VI_HP:
   {
-    snPrintf(1, options, 
+    numerics_printf_verbose(1,
              " ========================== Call Hyperplane Projection (HP) solver for VI problem ==========================\n");
     variationalInequality_HyperplaneProjection(problem, x , w , &info , options);
     break;

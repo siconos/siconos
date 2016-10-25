@@ -698,6 +698,7 @@ representations.  Generally don't include any physics support.
 | OpenSCAD     | http://www.openscad.org/   | Qt/C++     | Constructive geometry front-end, not a library          | GPL v2                 |
 | OpenCSG      | http://www.opencsg.org/    | C++        | Constructive geometry rendering engine used by OpenSCAD | GPL v2                 |
 | CGAL         | http://www.cgal.org/       | C++        | Geometric algorithms used by OpenSCAD                   | GPL v3+, or commercial |
+| SolveSpace   | http://solvespace.com/     | C++        | Constructive geometry 2D/3D                             | GPL 3                  |
 
 ** Scene graph
 
