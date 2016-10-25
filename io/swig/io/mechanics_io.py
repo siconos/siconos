@@ -145,6 +145,11 @@ def setup_default_classes():
             default_simulation_class = BulletTimeStepping
             default_body_class = BulletDS
             use_bullet = have_bullet
+        elif backend == 'occ':
+            default_manager_class = lambda model,options: OccSpaceFilter(model)
+            default_simulation_class = OccTimeStepping
+            default_body_class = OccBody
+            use_bullet = have_bullet
 
 setup_default_classes()
 
@@ -1192,12 +1197,12 @@ class Hdf5():
                         contactors = [Contactor(
                             shape_name=ctr.attrs['name'],
                             collision_group=ctr.attrs['group'].astype(int),
-                            contact_type=ctr.attrs['type'].astype(int),
+                            contact_type=ctr.attrs['type'],
                             contact_index=ctr.attrs['contact_index'].astype(int),
                             relative_translation=ctr.attrs['translation'].astype(float),
                             relative_orientation=ctr.attrs['orientation'].astype(float))
                                       for ctr in input_ctrs]
-                    except KeyError:
+                    except (KeyError,AttributeError):
                         contactors = [Contactor(
                             shape_name=ctr.attrs['name'],
                             collision_group=ctr.attrs['group'].astype(int),

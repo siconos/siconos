@@ -49,8 +49,8 @@ with Hdf5(mode='r+') as io:
     # sizes of small objects may need to be expressed in cm or mm.
 
     io.run(with_timer=False,
-           time_stepping=occ.OccTimeStepping,
-           space_filter=occ.OccSpaceFilter,
+           time_stepping=None,
+           space_filter=None,
            body_class=None,
            shape_class=None,
            face_class=None,
