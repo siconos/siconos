@@ -880,7 +880,10 @@ int fc3d_nsgs_setDefaultSolverOptions(SolverOptions* options)
   options->dparam = (double *)calloc(options->dSize, sizeof(double));
   options->dWork = NULL;
   solver_options_nullify(options);
+
   options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
+  options->iparam[SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION] = SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL;
+
   options->dparam[0] = 1e-4;
   options->internalSolvers = (SolverOptions *)malloc(sizeof(SolverOptions));
   fc3d_onecontact_nonsmooth_Newtow_setDefaultSolverOptions(options->internalSolvers);
