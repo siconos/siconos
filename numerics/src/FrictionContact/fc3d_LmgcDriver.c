@@ -54,15 +54,24 @@ int fc3d_LmgcDriver(double *reaction,
     numerics_solver_options.iparam[SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY]=SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_VI_EG_NSN;
   }
 
-  
+
   numerics_solver_options.dparam[0] = tolerance;
   numerics_solver_options.iparam[0] = itermax;
 
+  double * reaction_guess;
+  double * velocity_guess;
+  if (outputFile == 3)
+  {
+    // Save guesses.
+
+    reaction_guess = (double *)malloc(nc*3*sizeof(double));
+    velocity_guess = (double *)malloc(nc*3*sizeof(double));
+    for (int k =0; k < 3*nc; k++) reaction_guess[k]=reaction[k];
+    for (int k =0; k < 3*nc; k++) velocity_guess[k]=velocity[k];
+
+  }
 
 
-
-
-  
   int info = fc3d_driver(FC, reaction , velocity, &numerics_solver_options);
 
 
@@ -162,8 +171,8 @@ int fc3d_LmgcDriver(double *reaction,
                                   fname,ndof);
 
       frictionContact_fclib_write_guess(
-        reaction,
-        velocity,
+        reaction_guess,
+        velocity_guess,
         fname);
 
       fclose(foutput);
@@ -171,7 +180,8 @@ int fc3d_LmgcDriver(double *reaction,
 #else
     printf("Fclib is not available ...\n");
 #endif
-
+    free(reaction_guess);
+    free(velocity_guess);
   }
 
 
