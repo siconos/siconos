@@ -89,5 +89,5 @@ if __name__=='__main__':
                 if args.list_contactors:
                     list_contactors(io)
     except IOError, e:
-        print ('Error reading "{0}"'.format(fn))
+        print ('Error reading "{0}"'.format(args.file[0]))
         print (e)
