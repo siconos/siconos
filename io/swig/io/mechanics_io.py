@@ -1682,8 +1682,8 @@ class Hdf5():
         #osnspb.numericsSolverOptions().iparam[1]=Numerics.SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_ADAPTIVE
         #osnspb.numericsSolverOptions().iparam[8]=1
         # -- light error evaluation with full final
-        osnspb.numericsSolverOptions().iparam[1]=Numerics.SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL
-        osnspb.numericsSolverOptions().iparam[14]=Numerics.SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION_TRUE
+        osnspb.numericsSolverOptions().iparam[1]= Numerics.SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT
+        osnspb.numericsSolverOptions().iparam[14]= Numerics.SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION_TRUE
 
         osnspb.numericsSolverOptions().internalSolvers.solverId = Numerics.SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID
         
