@@ -158,9 +158,15 @@ enum SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_ENUM
 {
   /** index in iparam to store the error evaluation method */
   SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION = 7,
+  /** Evaluation of the error with the expensive function fc3d_compute_error **/
   SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_FULL = 0,
-  SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL = 1,
-  SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT = 2,
+  /** Evaluation of the error with the cheap incremental variation **/
+  SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT = 1,
+  /** Evaluation of the error with the cheap incremental variation but we modify
+      the incremental toleranve to reach the requred accuracy **/
+  SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL = 2,
+  /** Evaluation of the error with the expensive function fc3d_compute_error and
+      an adaptive frequncy for calling the error function  **/
   SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_ADAPTIVE =3,
   /** index in iparam to store the frequency of error evaluation method */
   SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_FREQUENCY = 8 
