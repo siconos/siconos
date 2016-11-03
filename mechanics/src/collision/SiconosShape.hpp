@@ -115,7 +115,7 @@ protected:
   SP::SiconosVector _dimensions;
 
 public:
-  SiconosBox(float width, float height, float depth)
+  SiconosBox(double width, double height, double depth)
     : SiconosShape(), _dimensions(new SiconosVector(3))
   {
     (*_dimensions)(0) = width;
@@ -130,11 +130,25 @@ public:
 
   SP::SiconosVector dimensions() const { return _dimensions; }
 
+  void setDimensions(double width, double height, double depth)
+  {
+    (*_dimensions)(0) = width;
+    (*_dimensions)(1) = height;
+    (*_dimensions)(2) = depth;
+    _version ++;
+  }
+
   void setDimensions(SP::SiconosVector dim)
   {
-    (*_dimensions)(0) = (*dim)(0);
-    (*_dimensions)(1) = (*dim)(1);
-    (*_dimensions)(2) = (*dim)(2);
+    _dimensions = dim;
+    _version ++;
+  }
+
+  void setDimensions(const SiconosVector& dim)
+  {
+    (*_dimensions)(0) = dim(0);
+    (*_dimensions)(1) = dim(1);
+    (*_dimensions)(2) = dim(2);
     _version ++;
   }
 
