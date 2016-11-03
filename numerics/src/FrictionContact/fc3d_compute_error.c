@@ -27,7 +27,7 @@
 
 #include <math.h>
 #include <assert.h>
-
+#include <float.h>
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
 #include "debug.h"
@@ -67,7 +67,6 @@ int fc3d_compute_error(
 
   cblas_dcopy(n , problem->q , incx , w , incy); // w <-q
   // Compute the current velocity
-  //prodNumericsMatrix(n, n, 1.0, problem->M, z, 1.0, w);
   prodNumericsMatrix3x3(n, n, problem->M, z, w);
 
   *error = 0.;
@@ -79,18 +78,16 @@ int fc3d_compute_error(
   }
   *error = sqrt(*error);
 
-  /* Computes error */
+  /* Compute relative error with respect to norm */
   DEBUG_PRINTF("norm = %12.8e\n", norm);
-  *error = *error / (norm + 1.0);
+  if (fabs(norm) > DBL_EPSILON)
+    *error /= norm;
+  /* *error = *error / (norm + 1.0); old version */
+
   if (*error > tolerance)
-  {
-    if (verbose > 1)
-      printf(" Numerics - fc3d_compute_error: error = %g > tolerance = %g.\n",
-             *error, tolerance);
     return 1;
-  }
-  else
-    return 0;
+
+  return 0;
 }
 
 
