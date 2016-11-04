@@ -486,7 +486,9 @@ void SiconosBulletCollisionManager_impl::updateShapePosition(const BodyShapeReco
   DEBUG_PRINTF("updating shape position: %p(%ld) - %f, %f, %f\n",
                &*box,box.use_count(), q(0), q(1), q(2));
 
-  record.btobject->setWorldTransform( offsetTransform(q, *record.contactor->offset) );
+  btTransform t = offsetTransform(q, *record.contactor->offset);
+  t.setOrigin(t.getOrigin() * _options.worldScale);
+  record.btobject->setWorldTransform( t );
 }
 
 void SiconosBulletCollisionManager_impl::createCollisionObject(
