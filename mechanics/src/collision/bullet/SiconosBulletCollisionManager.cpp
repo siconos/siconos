@@ -577,10 +577,11 @@ void SiconosBulletCollisionManager_impl::createCollisionObject(
 {
   // create the initial plane with default parameters
 #ifdef USE_BOX_FOR_PLANE
-  SP::btBoxShape btplane(
-    new btBoxShape(btVector3(1000*_options.worldScale,
-                             1000*_options.worldScale,
-                             1000*_options.worldScale)));
+  btScalar h = (1000 + plane->outsideMargin()) * _options.worldScale;
+  SP::btBoxShape btplane(new btBoxShape(btVector3(h, h, h)));
+  // Internal margin
+  btplane->setMargin((plane->insideMargin() + plane->outsideMargin())
+                     * _options.worldScale);
 #else
 #ifdef USE_CONVEXHULL_FOR_PLANE
   btScalar h = 1000 * _options.worldScale;
@@ -617,28 +618,24 @@ void SiconosBulletCollisionManager_impl::updateShape(BodyPlaneRecord& record)
   SP::SiconosPlane plane(record.shape);
   SP::BTPLANESHAPE btplane(record.btshape);
 
-  // Update object parameters
-  SiconosVector &q = *record.base;
+  SiconosVector o(7);
+  o = *record.contactor->offset;
+
+  // Adjust the offset according to plane implementation
 #ifdef USE_BOX_FOR_PLANE
-  btTransform tr(btQuaternion(q(4), q(5), q(6), q(3)),
-    btVector3(q(0)*_options.worldScale,
-              q(1)*_options.worldScale,
-              (q(2) + plane->outsideMargin() - 1000)*_options.worldScale));
+  o(2) -= -plane->outsideMargin() + 1000;
 #else
 #ifdef USE_CONVEXHULL_FOR_PLANE
-  btTransform tr(btQuaternion(q(4), q(5), q(6), q(3)),
-    btVector3(q(0)*_options.worldScale,
-              q(1)*_options.worldScale,
-              (q(2) - plane->insideMargin())*_options.worldScale));
-#else
-  btTransform tr(btQuaternion(q(4), q(5), q(6), q(3)),
-    btVector3(q(0)*_options.worldScale,
-              q(1)*_options.worldScale,
-              (q(2) - plane->insideMargin())*_options.worldScale));
+  o(2) -= plane->insideMargin();
+#else // USE_PLANE_FOR_PLANE
+  o(2) -= plane->insideMargin();
 #endif
 #endif
 
   // Note, we do not use generic updateShapePosition for plane
+  btTransform t = offsetTransform(*record.base, o);
+  t.setOrigin(t.getOrigin() * _options.worldScale);
+  record.btobject->setWorldTransform( t );
 }
 
 void SiconosBulletCollisionManager_impl::createCollisionObject(
