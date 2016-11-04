@@ -112,9 +112,9 @@ int soclcp_compute_error(
   *error = sqrt(*error);
 
   /* Computes error */
-  double normq = cblas_dnrm2(n , problem->q , incx);
-  DEBUG_PRINTF("normq = %12.8e\n", normq);
-  *error = *error / (normq + 1.0);
+  double norm_q = cblas_dnrm2(n , problem->q , incx);
+  DEBUG_PRINTF("norm_q = %12.8e\n", norm_q);
+  *error = *error / (norm_q + 1.0);
   
   if(*error > tolerance)
   {
@@ -170,8 +170,8 @@ int soclcp_compute_error_v(SecondOrderConeLinearComplementarityProblem* problem,
   *error = sqrt(*error);
 
   /* Computes error */
-  double normq = cblas_dnrm2(n , problem->q , incx);
-  *error = *error / (normq + 1.0);
+  double norm_q = cblas_dnrm2(n , problem->q , incx);
+  *error = *error / (norm_q + 1.0);
   if(*error > tolerance)
   {
     /*      if (verbose > 0) printf(" Numerics - soclcp_compute_error_velocity failed: error = %g > tolerance = %g.\n",*error, tolerance); */

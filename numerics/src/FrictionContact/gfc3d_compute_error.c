@@ -83,8 +83,8 @@ int gfc3d_compute_error(GlobalFrictionContactProblem* problem, double* restrict 
   *error = sqrt(*error);
 
   /* Computes error */
-  double normq = cblas_dnrm2(n , problem->q , 1);
-  *error = *error / (normq + 1.0);
+  double norm_q = cblas_dnrm2(n , problem->q , 1);
+  *error = *error / (norm_q + 1.0);
 
   if (*error > tolerance)
   {

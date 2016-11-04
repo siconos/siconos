@@ -60,8 +60,8 @@ int relay_compute_error(RelayProblem* problem, double* restrict z , double* rest
 
 
   /* Computes error */
-  double normq = cblas_dnrm2(n , problem->q , 1);
-  *error = *error / (normq + 1.0);
+  double norm_q = cblas_dnrm2(n , problem->q , 1);
+  *error = *error / (norm_q + 1.0);
   free(ztmp);
   if (*error > tolerance)
   {

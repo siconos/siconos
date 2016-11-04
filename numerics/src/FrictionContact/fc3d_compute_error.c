@@ -131,8 +131,8 @@ int fc3d_compute_error_velocity(FrictionContactProblem* problem, double *z , dou
   *error = sqrt(*error);
 
   /* Computes error */
-  double normq = cblas_dnrm2(n , problem->q , incx);
-  *error = *error / (normq + 1.0);
+  double norm_q = cblas_dnrm2(n , problem->q , incx);
+  *error = *error / (norm_q + 1.0);
   if (*error > tolerance)
   {
     /*      if (verbose > 0) printf(" Numerics - fc3d_compute_error_velocity failed: error = %g > tolerance = %g.\n",*error, tolerance); */
@@ -186,8 +186,8 @@ int fc3d_Tresca_compute_error(FrictionContactProblem* problem,
   *error = sqrt(*error);
 
   /* Computes error */
-  double normq = cblas_dnrm2(n , problem->q , incx);
-  *error = *error / (normq + 1.0);
+  double norm_q = cblas_dnrm2(n , problem->q , incx);
+  *error = *error / (norm_q + 1.0);
   if (*error > tolerance)
   {
     /* if (verbose > 0) printf(" Numerics - fc3d_Tresca_compute_error failed: error = %g > tolerance = %g.\n",*error, tolerance);  */

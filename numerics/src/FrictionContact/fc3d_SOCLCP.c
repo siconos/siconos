@@ -49,7 +49,7 @@ void fc3d_SOCLCP(FrictionContactProblem* problem, double *reaction, double *velo
 
   /* Tolerance */
   double tolerance = dparam[0];
-  double normq = cblas_dnrm2(nc*3 , problem->q , 1);
+  double norm_q = cblas_dnrm2(nc*3 , problem->q , 1);
  
 
 
@@ -111,7 +111,7 @@ void fc3d_SOCLCP(FrictionContactProblem* problem, double *reaction, double *velo
 
   double real_error=0.0;
 
-  fc3d_compute_error(problem, reaction , velocity, tolerance, options, normq, &real_error);
+  fc3d_compute_error(problem, reaction , velocity, tolerance, options, norm_q, &real_error);
 
   if (options->callback)
   {

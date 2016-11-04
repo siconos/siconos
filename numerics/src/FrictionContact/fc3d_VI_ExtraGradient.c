@@ -104,8 +104,8 @@ void fc3d_VI_ExtraGradient(FrictionContactProblem* problem, double *reaction, do
 
 
   /* **** Criterium convergence **** */
-  double normq = cblas_dnrm2(nc*3 , problem->q , 1);
-  fc3d_compute_error(problem, reaction , velocity, options->dparam[0], options, normq, &error);
+  double norm_q = cblas_dnrm2(nc*3 , problem->q , 1);
+  fc3d_compute_error(problem, reaction , velocity, options->dparam[0], options, norm_q, &error);
 
   /* for (i =0; i< n ; i++) */
   /* { */

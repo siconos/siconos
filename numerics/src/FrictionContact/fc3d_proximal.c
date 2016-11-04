@@ -46,7 +46,7 @@ void fc3d_proximal(FrictionContactProblem* problem, double *reaction, double *ve
   int itermax = iparam[0];
   /* Tolerance */
   double tolerance = dparam[0];
-  double normq = cblas_dnrm2(nc*3 , problem->q , 1);
+  double norm_q = cblas_dnrm2(nc*3 , problem->q , 1);
   if (verbose > 0){
     solver_options_print(options);
   }
@@ -108,7 +108,7 @@ void fc3d_proximal(FrictionContactProblem* problem, double *reaction, double *ve
       /* parameters to set the value of alpha */
       sigma = options->dparam[4];
       nu = options->dparam[5];
-      fc3d_compute_error(problem, reaction , velocity, tolerance, options, normq,  &error);
+      fc3d_compute_error(problem, reaction , velocity, tolerance, options, norm_q,  &error);
       internalsolver_options->dparam[0] = options->dparam[0];
       internalsolver_options->dparam[0] = error;
       alpha = sigma*pow(error,nu);
@@ -211,7 +211,7 @@ void fc3d_proximal(FrictionContactProblem* problem, double *reaction, double *ve
       (*internalsolver)(problem, reaction , velocity , info , internalsolver_options);
 
       /* **** Criterium convergence **** */
-      fc3d_compute_error(problem, reaction , velocity, tolerance, options, normq, &error);
+      fc3d_compute_error(problem, reaction , velocity, tolerance, options, norm_q, &error);
 
       int iter_internalsolver = internalsolver_options->iparam[iter_iparam];
       options->iparam[6] +=iter_internalsolver;
@@ -293,7 +293,7 @@ void fc3d_proximal(FrictionContactProblem* problem, double *reaction, double *ve
         }
       }
 
-      fc3d_compute_error(problem, reaction , velocity, tolerance, options, normq, &error);
+      fc3d_compute_error(problem, reaction , velocity, tolerance, options, norm_q, &error);
       //update the alpha with respect to the number of internal iterations.
 
       int iter_internalsolver = internalsolver_options->iparam[iter_iparam];
