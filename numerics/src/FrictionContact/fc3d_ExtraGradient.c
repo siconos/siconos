@@ -45,7 +45,7 @@ void fc3d_ExtraGradient(FrictionContactProblem* problem, double *reaction, doubl
   int itermax = iparam[0];
   /* Tolerance */
   double tolerance = dparam[0];
-  double normq = cblas_dnrm2(nc*3 , problem->q , 1);
+  double norm_q = cblas_dnrm2(nc*3 , problem->q , 1);
 
 
 
@@ -143,7 +143,7 @@ void fc3d_ExtraGradient(FrictionContactProblem* problem, double *reaction, doubl
       }
 
       /* **** Criterium convergence **** */
-      fc3d_compute_error(problem, reaction , velocity, tolerance, options, normq, &error);
+      fc3d_compute_error(problem, reaction , velocity, tolerance, options, norm_q, &error);
 
       if (options->callback)
       {
@@ -284,7 +284,7 @@ void fc3d_ExtraGradient(FrictionContactProblem* problem, double *reaction, doubl
         );
 
       /* **** Criterium convergence **** */
-      fc3d_compute_error(problem, reaction , velocity, tolerance, options, normq, &error);
+      fc3d_compute_error(problem, reaction , velocity, tolerance, options, norm_q, &error);
       DEBUG_PRINTF("error = %12.8e\t error_k = %12.8e\n",error,error_k);
       /*Update rho*/
       if ((rho_k*a1 < Lmin * a2) && (error < error_k))

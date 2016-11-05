@@ -315,7 +315,7 @@ int predictLCP(int sizeLCP, double* q, double *z , double *w , double tol,
     numerics_error("predictLCP", "Null input for one arg (problem, q,w ...)");
 
   int i, sizelcp, info, incx;
-  double error, normq;
+  double error, norm_q;
   double zi, wi;
   int incx = 1;
 
@@ -378,8 +378,8 @@ int predictLCP(int sizeLCP, double* q, double *z , double *w , double tol,
     if ((zi > 0.0) && (wi > 0.0)) error += zi * wi;
   }
 
-  normq = cblas_dnrm2(sizeLCP, q, incx);
-  error = error / normq;
+  norm_q = cblas_dnrm2(sizeLCP, q, incx);
+  error = error / norm_q;
 
   if (error > tol)
   {

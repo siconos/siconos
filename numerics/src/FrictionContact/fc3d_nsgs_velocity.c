@@ -68,7 +68,7 @@ void fc3d_nsgs_velocity(FrictionContactProblem* problem, double *reaction, doubl
   int itermax = iparam[0];
   /* Tolerance */
   double tolerance = dparam[0];
-  double normq = cblas_dnrm2(nc*3 , problem->q , 1);
+  double norm_q = cblas_dnrm2(nc*3 , problem->q , 1);
   /* Check for trivial case */
   /*   *info = checkTrivialCase(n, q,velocity, reaction, options); */
 
@@ -148,7 +148,7 @@ void fc3d_nsgs_velocity(FrictionContactProblem* problem, double *reaction, doubl
 
 
     /* **** Criterium convergence **** */
-    (*computeError)(problem, reaction , velocity, tolerance, options, normq,  &error);
+    (*computeError)(problem, reaction , velocity, tolerance, options, norm_q,  &error);
 
     if (verbose > 0)
       printf("----------------------------------- FC3D - NSGS_VELOCITY - Iteration %i Residual = %14.7e\n", iter, error);

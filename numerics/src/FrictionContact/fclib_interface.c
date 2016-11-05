@@ -157,7 +157,7 @@ int frictionContact_fclib_write(FrictionContactProblem* problem, char * title, c
 
 
   CSparseMatrix * spmat = NULL;
-  
+
   if (problem ->M->storageType == 0) /* Dense Matrix */
   {
     fclib_problem->W->nzmax = problem->M->size0 * problem->M->size1;
@@ -187,7 +187,7 @@ int frictionContact_fclib_write(FrictionContactProblem* problem, char * title, c
     fclib_problem->W->m = (int) spmat->m;
     fclib_problem->W->n = (int) spmat->n;
     fclib_problem->W->x = spmat->x;
-    fclib_problem->W->nz = (int) spmat->nz; 
+    fclib_problem->W->nz = (int) spmat->nz;
 
     if (spmat->nz == -1)
     {
@@ -222,7 +222,7 @@ int frictionContact_fclib_write(FrictionContactProblem* problem, char * title, c
                                              ndof);
 
 
-  
+
   /*   fclib_delete_local (fclib_problem); */
 
   if (problem ->M->storageType == 0) /* Dense Matrix */
@@ -243,7 +243,21 @@ int frictionContact_fclib_write(FrictionContactProblem* problem, char * title, c
   return info;
 
 }
+int frictionContact_fclib_write_guess( double * reaction, double * velocity,
+                                       const char *path)
+{
+  int info = 0;
+  int number_of_guesses = 1;
+  struct fclib_solution *guesses = ( struct fclib_solution *) malloc(number_of_guesses*sizeof( struct fclib_solution));
+  guesses->v = NULL;
+  guesses->l = NULL;
+  guesses->u = velocity;
+  guesses->r = reaction;
 
+  info = fclib_write_guesses (number_of_guesses, guesses, path);
+  return info;
+
+}
 
 GlobalFrictionContactProblem* from_fclib_global(const struct fclib_global* fclib_problem)
 {
@@ -266,9 +280,9 @@ GlobalFrictionContactProblem* from_fclib_global(const struct fclib_global* fclib
   M->nzmax = (csi) fclib_problem->M->nzmax;
   M->m = (csi) fclib_problem->M->m;
   M->n = (csi) fclib_problem->M->n;
- 
+
   M->x =  fclib_problem->M->x;
-  
+
   if (fclib_problem->M->nz == -1)
   {
     /* compressed colums */
@@ -287,7 +301,7 @@ GlobalFrictionContactProblem* from_fclib_global(const struct fclib_global* fclib
     /* since  problem->M->matrix2->csr does not exist, we need
        to fill transform M into a triplet or csc before returning
      */
-    
+
     fprintf(stderr, "from_fclib_local not implemented for csr matrices.\n");
     exit(EXIT_FAILURE); ;
   }
@@ -402,7 +416,7 @@ int globalFrictionContact_fclib_write(
   assert(problem->M->matrix2);
   assert(problem->H->matrix2);
 
-  
+
   /* only coordinates (triplet) */
   if (problem->M->matrix2->triplet)
   {
@@ -426,7 +440,7 @@ int globalFrictionContact_fclib_write(
     fprintf(stderr, "globalFrictionContact_fclib_write only implemented for triplet storage.\n");
     exit(EXIT_FAILURE); ;
   }
-  
+
   if (problem->H->matrix2->triplet)
   {
     fclib_problem->H = malloc(sizeof(struct fclib_matrix));

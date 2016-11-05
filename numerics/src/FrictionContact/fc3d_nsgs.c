@@ -597,13 +597,13 @@ double calculateFullErrorAdaptiveInterval(FrictionContactProblem *problem,
                                           ComputeErrorPtr computeError,
                                           SolverOptions *options, int iter,
                                           double *reaction, double *velocity,
-                                          double tolerance, double normq)
+                                          double tolerance, double norm_q)
 {
   double error=1e+24;
   if (options->iparam[SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_FREQUENCY] >0)
   {
     if (iter % options->iparam[SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_FREQUENCY] == 0) {
-      (*computeError)(problem, reaction , velocity, tolerance, options, normq,  &error);
+      (*computeError)(problem, reaction , velocity, tolerance, options, norm_q,  &error);
       if (error > tolerance
           && options->iparam[SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_ADAPTIVE)
         options->iparam[SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_FREQUENCY] *= 2;
@@ -614,14 +614,36 @@ double calculateFullErrorAdaptiveInterval(FrictionContactProblem *problem,
              iter, options->iparam[SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_FREQUENCY], options->iparam[SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION]);
   }
   else
-    (*computeError)(problem, reaction , velocity, tolerance, options, normq,  &error);
+    (*computeError)(problem, reaction , velocity, tolerance, options, norm_q,  &error);
 
   return error;
 }
 
+
+
 static
-int determineConvergence(double error, double tolerance, int iter,
-                         SolverOptions *options)
+double calculateFullErrorFinal(FrictionContactProblem *problem, SolverOptions *options,
+                               ComputeErrorPtr computeError,
+                               double *reaction, double *velocity, double tolerance,
+                               double norm_q)
+{
+  double absolute_error;
+  (*computeError)(problem, reaction , velocity, tolerance,
+                  options, norm_q, &absolute_error);
+
+  if (verbose > 0 && absolute_error > options->dparam[0])
+  {
+    printf("--------------------------- FC3D - NSGS - Warning absolute "
+           "Residual = %14.7e is larger than required precision = %14.7e\n",
+           absolute_error, options->dparam[0]);
+  }
+  return absolute_error;
+}
+
+
+static
+int determine_convergence(double error, double tolerance, int iter,
+                          SolverOptions *options)
 {
   int hasNotConverged = 1;
   if (error < tolerance)
@@ -629,35 +651,57 @@ int determineConvergence(double error, double tolerance, int iter,
     hasNotConverged = 0;
     if (verbose > 0)
       printf("----------------------------------- FC3D - NSGS - Iteration %i "
-             "Residual = %14.7e < %7.3e\n", iter, error, options->dparam[0]);
+             "Residual = %14.7e < %7.3e\n", iter, error, tolerance);
   }
   else
   {
     if (verbose > 0)
       printf("----------------------------------- FC3D - NSGS - Iteration %i "
-             "Residual = %14.7e > %7.3e\n", iter, error, options->dparam[0]);
+             "Residual = %14.7e > %7.3e\n", iter, error, tolerance);
   }
   return hasNotConverged;
 }
 
 static
-double calculateFullErrorFinal(FrictionContactProblem *problem, SolverOptions *options,
-                               ComputeErrorPtr computeError,
-                               double *reaction, double *velocity, double tolerance,
-                               double normq, double light_error)
+int determine_convergence_with_full_final(FrictionContactProblem *problem, SolverOptions *options,
+                                          ComputeErrorPtr computeError,
+                                          double *reaction, double *velocity,
+                                          double *tolerance, double norm_q, double error,
+                                          int iter)
 {
-  double absolute_error;
-  (*computeError)(problem, reaction , velocity, tolerance,
-                  options, normq, &absolute_error);
-
-  if (verbose > 0 && absolute_error > light_error)
+  int hasNotConverged = 1;
+  if (error < *tolerance)
   {
-    printf("--------------------------- FC3D - NSGS - Warning absolute "
-           "Residual = %14.7e is larger than incremental error = %14.7e\n",
-           absolute_error, light_error);
+    hasNotConverged = 0;
+    if (verbose > 0)
+      printf("----------------------------------- FC3D - NSGS - Iteration %i "
+             "Residual = %14.7e < %7.3e\n", iter, error, *tolerance);
+
+    double absolute_error = calculateFullErrorFinal(problem, options,
+                                                    computeError,
+                                                    reaction, velocity, options->dparam[0],
+                                                    norm_q);
+    if (absolute_error > options->dparam[0])
+    {
+      *tolerance = error/absolute_error*options->dparam[0];
+      if (verbose > 0)
+        printf("--------------------------- FC3D - NSGS - We modify the required incremental precision to reach accuracy to %e\n", *tolerance);
+      hasNotConverged = 1;
+    }
+
+
+
+
   }
-  return absolute_error;
+  else
+  {
+    if (verbose > 0)
+      printf("----------------------------------- FC3D - NSGS - Iteration %i "
+             "Residual = %14.7e > %7.3e\n", iter, error, *tolerance);
+  }
+  return hasNotConverged;
 }
+
 
 static
 void statsIterationCallback(FrictionContactProblem *problem,
@@ -672,6 +716,9 @@ void statsIterationCallback(FrictionContactProblem *problem,
                                              error, NULL);
   }
 }
+
+
+
 
 void fc3d_nsgs(FrictionContactProblem* problem, double *reaction,
                double *velocity, int* info, SolverOptions* options)
@@ -688,7 +735,7 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction,
 
   /* Tolerance */
   double tolerance = dparam[0];
-  double normq = cblas_dnrm2(nc*3 , problem->q , 1);
+  double norm_q = cblas_dnrm2(nc*3 , problem->q , 1);
   double omega = dparam[8];
 
   SolverOptions * localsolver_options = options->internalSolvers;
@@ -761,7 +808,7 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction,
   if (iparam[SICONOS_FRICTION_3D_NSGS_SHUFFLE] == SICONOS_FRICTION_3D_NSGS_SHUFFLE_FALSE
       && iparam[SICONOS_FRICTION_3D_NSGS_SHUFFLE] == SICONOS_FRICTION_3D_NSGS_RELAXATION_FALSE
       && iparam[SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION] == SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION_TRUE
-      && iparam[SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL)
+      && iparam[SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT)
   {
     while ((iter < itermax) && (hasNotConverged > 0))
     {
@@ -788,7 +835,7 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction,
 
       error = calculateLightError(light_error_sum, nc, reaction);
 
-      hasNotConverged = determineConvergence(error, tolerance, iter, options);
+      hasNotConverged = determine_convergence(error, tolerance, iter, options);
 
       statsIterationCallback(problem, options, reaction, velocity, error);
     }
@@ -824,21 +871,45 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction,
 
         accumulateLightErrorSum(&light_error_sum, localreaction, &reaction[contact*3]);
 
+        /* int test =100; */
+        /* if (contact == test) */
+        /* { */
+        /*   printf("reaction[%i] = %16.8e\t",3*contact-1,reaction[3*contact]); */
+        /*   printf("localreaction[%i] = %16.8e\n",2,localreaction[0]); */
+        /* } */
+
+
         if (iparam[14] == SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION_TRUE)
           acceptLocalReactionFiltered(localproblem, localsolver_options,
                                       contact, iter, reaction, localreaction);
         else
           acceptLocalReactionUnconditionally(contact, reaction, localreaction);
+
+
+
       }
-      if (iparam[SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT ||
-          iparam[SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL)
+
+      if (iparam[SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT)
+      {
         error = calculateLightError(light_error_sum, nc, reaction);
+        hasNotConverged = determine_convergence(error, tolerance, iter, options);
+      }
+      else if (iparam[SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL)
+      {
+        error = calculateLightError(light_error_sum, nc, reaction);
+        hasNotConverged = determine_convergence_with_full_final(problem,  options, computeError,
+                                                                reaction, velocity,
+                                                                &tolerance, norm_q, error,
+                                                                iter);
+
+      }
       else if (iparam[SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_FULL)
+      {
         error = calculateFullErrorAdaptiveInterval(problem, computeError, options,
                                                    iter, reaction, velocity,
-                                                   tolerance, normq);
-
-      hasNotConverged = determineConvergence(error, tolerance, iter, options);
+                                                   tolerance, norm_q);
+        hasNotConverged = determine_convergence(error, tolerance, iter, options);
+      }
 
       statsIterationCallback(problem, options, reaction, velocity, error);
     }
@@ -848,9 +919,20 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction,
 
   /* Full criterium */
   if (iparam[SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL)
+  {
     error = calculateFullErrorFinal(problem, options, computeError, reaction, velocity,
-                                    tolerance, normq, error /* = light error*/);
+                                    tolerance, norm_q);
+    /* printf("error = %8.4e,\t with  norm_q = %8.4e \n", error,norm_q); */
 
+    /* double norm_r = cblas_dnrm2(nc*3 , reaction , 1); */
+
+    /* error = calculateFullErrorFinal(problem, options, computeError, reaction, velocity, */
+    /*                                 tolerance, norm_r); */
+    /* printf("error = %8.4e,\t  with norm_r = %8.4e \n", error,norm_r); */
+    /* error = calculateFullErrorFinal(problem, options, computeError, reaction, velocity, */
+    /*                                 tolerance, 1.0); */
+    /* printf("error = %8.4e,\t  with norm = %8.4e \n", error,1.0); */
+  }
   /** return parameter values */
   dparam[0] = tolerance;
   dparam[1] = error;
@@ -880,7 +962,10 @@ int fc3d_nsgs_setDefaultSolverOptions(SolverOptions* options)
   options->dparam = (double *)calloc(options->dSize, sizeof(double));
   options->dWork = NULL;
   solver_options_nullify(options);
+
   options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
+  options->iparam[SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION] = SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL;
+
   options->dparam[0] = 1e-4;
   options->internalSolvers = (SolverOptions *)malloc(sizeof(SolverOptions));
   fc3d_onecontact_nonsmooth_Newtow_setDefaultSolverOptions(options->internalSolvers);

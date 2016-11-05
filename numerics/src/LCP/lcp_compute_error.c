@@ -52,9 +52,9 @@ int lcp_compute_error(LinearComplementarityProblem* problem, double *z , double 
   unsigned int n = problem->size;
   cblas_dcopy(n , problem->q , incx , w , incy);  // w <-q
   prodNumericsMatrix(n, n, 1.0, problem->M, z, 1.0, w);
-  double normq = cblas_dnrm2(n , problem->q , incx);
+  double norm_q = cblas_dnrm2(n , problem->q , incx);
   lcp_compute_error_only(n, z, w, error);
-  *error = *error / (normq + 1.0); /* Need some comments on why this is needed */
+  *error = *error / (norm_q + 1.0); /* Need some comments on why this is needed */
   if (*error > tolerance)
   {
     if (verbose > 0) printf(" Numerics - lcp_compute_error : error = %g > tolerance = %g.\n", *error, tolerance);

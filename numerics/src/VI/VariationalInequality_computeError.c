@@ -66,8 +66,8 @@ int variationalInequality_computeError(
     problem->istheNormVIset=1;
   }
 
-  double normq =problem->normVI;
-  DEBUG_PRINTF("normq = %12.8e\n", normq);
+  double norm_q =problem->normVI;
+  DEBUG_PRINTF("norm_q = %12.8e\n", norm_q);
 
   problem->F(problem,n,z,w);
   
@@ -80,7 +80,7 @@ int variationalInequality_computeError(
   *error = cblas_dnrm2(n , wtmp , incx);
 
   /* Computes error */
-  *error = *error / (normq + 1.0);
+  *error = *error / (norm_q + 1.0);
   if (*error > tolerance)
   {
     if (verbose > 1)
@@ -158,7 +158,7 @@ int variationalInequality_computeError_wait(
   cblas_dcopy(n , z , 1 , ztmp, 1);
 
   problem->F(problem,ztmp,w);
-  double normq = cblas_dnrm2(n , w , incx);
+  double norm_q = cblas_dnrm2(n , w , incx);
   
   
   cblas_daxpy(n, -1.0, w , 1, ztmp , 1) ;
@@ -177,7 +177,7 @@ int variationalInequality_computeError_wait(
 
   
   // Computes error
-  *error = *error / (normq + 1.0);
+  *error = *error / (norm_q + 1.0);
   if (*error > tolerance)
   {
     if (verbose > 1)
