@@ -863,12 +863,13 @@ make_bt_vertex_array(SP::SiconosMesh mesh,
   SP::btTriangleIndexVertexArray bttris(
     std11::make_shared<btTriangleIndexVertexArray>(
       mesh->indexes()->size()/3,
-      mesh->indexes()->data(),
+      (int*)mesh->indexes()->data(),
       sizeof(int)*3,
       mesh->vertices()->size(0),
       mesh->vertices()->getArray(),
       sizeof(btScalar)*3));
-  return std::make_pair(bttris, NULL);
+
+  return std::make_pair(bttris, mesh->vertices()->getArray());
 }
 
 // If type of SiconosMatrix is not the same as btScalar, we must copy
