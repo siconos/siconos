@@ -1489,13 +1489,13 @@ class Hdf5():
             precision = so.dparam[2]
             local_precision = so.dparam[3]
         elif so.solverId == Numerics.SICONOS_FRICTION_3D_NSGS:
-            iterations = so.iparam[7]
-            precision = so.dparam[1]
+            iterations = so.iparam[Numerics.SICONOS_IPARAM_ITER_DONE]
+            precision = so.dparam[Numerics.SICONOS_DPARAM_RESIDU]
             local_precision = 0.
         # maybe wrong for others
         else:
-            iterations = so.iparam[1]
-            precision = so.dparam[1]
+            iterations = so.iparam[Numerics.SICONOS_IPARAM_ITER_DONE]
+            precision = so.dparam[Numerics.SICONOS_DPARAM_RESIDU]
             local_precision = so.dparam[2]
 
         self._solv_data[current_line, :] = [time, iterations, precision,

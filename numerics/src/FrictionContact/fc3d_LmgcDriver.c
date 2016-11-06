@@ -66,8 +66,8 @@ int fc3d_LmgcDriver(double *reaction,
 
     reaction_guess = (double *)malloc(nc*3*sizeof(double));
     velocity_guess = (double *)malloc(nc*3*sizeof(double));
-    for (int k =0; k < 3*nc; k++) reaction_guess[k]=reaction[k];
-    for (int k =0; k < 3*nc; k++) velocity_guess[k]=velocity[k];
+    for (unsigned int k =0; k < 3*nc; k++) reaction_guess[k]=reaction[k];
+    for (unsigned int k =0; k < 3*nc; k++) velocity_guess[k]=velocity[k];
 
   }
 
