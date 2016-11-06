@@ -62,9 +62,9 @@ void numerics_printf(const char * fmt, ...)
   }
 }
 
-void numerics_printf_verbose(int verbose, const char * fmt, ...)
+void numerics_printf_verbose(int verbose_mode, const char * fmt, ...)
 {
-  if (verbose)
+  if (verbose_mode)
   {
     va_list args;
     va_start(args,fmt);
