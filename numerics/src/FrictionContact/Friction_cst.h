@@ -149,15 +149,35 @@ extern char *  SICONOS_GLOBAL_FRICTION_3D_GAMS_PATHVI_STR;
 extern char *  SICONOS_FRICTION_3D_ONECONTACT_QUARTIC_STR ;
 extern char *  SICONOS_FRICTION_3D_ONECONTACT_QUARTIC_NU_STR ;
 
-
-enum SICONOS_FRICTION_3D_NSGS_LOCALSOLVER
+enum SICONOS_FRICTION_3D_NSGS_IPARAM
 {
-  SICONOS_FRICTION_3D_NSGS_LOCALSOLVER_CONTACTNUMBER = 4
-};
-enum SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_ENUM
-{
+  /** index in iparam to store the relaxation strategy */
+  SICONOS_FRICTION_3D_NSGS_RELAXATION=4,
+  /** index in iparam to store the shuffle strategy */
+  SICONOS_FRICTION_3D_NSGS_SHUFFLE=5,
+  /** index in iparam to store the shuffle seed */
+  SICONOS_FRICTION_3D_NSGS_SHUFFLE_SEED=6,
   /** index in iparam to store the error evaluation method */
   SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION = 7,
+  /** index in iparam to store the frequency of error evaluation method */
+  SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_FREQUENCY = 8,
+  /** index in iparam to store the  */
+  SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION =14,
+};
+enum SICONOS_FRICTION_3D_NSGS_DPARAM
+{
+  /** index in iparam to store the relaxation strategy */
+  SICONOS_FRICTION_3D_NSGS_RELAXATION_VALUE=8,
+};
+
+
+enum SICONOS_FRICTION_3D_NSGS_LOCALSOLVER_IPARAM
+{
+  SICONOS_FRICTION_3D_NSGS_LOCALSOLVER_CONTACTNUMBER = 4,
+};
+
+enum SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_ENUM
+{
   /** Evaluation of the error with the expensive function fc3d_compute_error **/
   SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_FULL = 0,
   /** Evaluation of the error with the cheap incremental variation **/
@@ -168,33 +188,41 @@ enum SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_ENUM
   /** Evaluation of the error with the expensive function fc3d_compute_error and
       an adaptive frequncy for calling the error function  **/
   SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_ADAPTIVE =3,
-  /** index in iparam to store the frequency of error evaluation method */
-  SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_FREQUENCY = 8 
 };
 enum SICONOS_FRICTION_3D_NSGS_SHUFFLE_ENUM
 {
-  /** index in iparam to store the shuffle strategy */
-  SICONOS_FRICTION_3D_NSGS_SHUFFLE=5,
-  /** index in iparam to store the shuffle seed */
-  SICONOS_FRICTION_3D_NSGS_SHUFFLE_SEED=6,
   SICONOS_FRICTION_3D_NSGS_SHUFFLE_FALSE=0,
   SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE=1,
   SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE_EACH_LOOP=2
 };
 enum SICONOS_FRICTION_3D_NSGS_RELAXATION_ENUM
 {
-  /** index in iparam to store the relaxation strategy */
-  SICONOS_FRICTION_3D_NSGS_RELAXATION=4,
   SICONOS_FRICTION_3D_NSGS_RELAXATION_FALSE,
   SICONOS_FRICTION_3D_NSGS_RELAXATION_TRUE
 };
 enum SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION_ENUM
 {
-  SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION =14,
+
   SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION_FALSE =0,
   SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION_TRUE =1
 };
 
+
+enum SICONOS_FRICTION_3D_NSN_IPRAM
+{
+  /** index in iparam to store the formulation */
+  SICONOS_FRICTION_3D_NSN_FORMULATION = 10,
+  /** index in iparam to store the line-search */
+  SICONOS_FRICTION_3D_NSN_LINESEARCH = 11,
+  /** index in iparam to store the maximum number of iterations */
+  SICONOS_FRICTION_3D_NSN_LINESEARCH_MAXITER = 12,
+  /** index in iparam to store the strategy for the hybrid solver */
+  SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY = 14,
+  /** index in iparam to store the maximum number of loop for the hybrid solver */
+  SICONOS_FRICTION_3D_NSN_HYBRID_MAX_LOOP = 15,
+  /** index in iparam to store the maximum number of iterations for the projection solver */
+  SICONOS_FRICTION_3D_NSN_HYBRID_MAX_ITER = 16
+};
 
 enum SICONOS_FRICTION_3D_NSN_FORMULATION_ENUM
 {
@@ -203,8 +231,6 @@ enum SICONOS_FRICTION_3D_NSN_FORMULATION_ENUM
   SICONOS_FRICTION_3D_NSN_FORMULATION_ALARTCURNIER_GENERATED =2,
   SICONOS_FRICTION_3D_NSN_FORMULATION_JEANMOREAU_GENERATED =3,
   SICONOS_FRICTION_3D_NSN_FORMULATION_NULL = 4 ,
-  /** index in iparam to store the formulation */
-  SICONOS_FRICTION_3D_NSN_FORMULATION = 10,
 };
 
 
@@ -213,16 +239,10 @@ enum SICONOS_FRICTION_3D_NSN_LINESEARCH_ENUM
   SICONOS_FRICTION_3D_NSN_LINESEARCH_GOLDSTEINPRICE = 0 ,
   SICONOS_FRICTION_3D_NSN_LINESEARCH_ARMIJO = 1,
   SICONOS_FRICTION_3D_NSN_LINESEARCH_NO=-1,
-  /** index in iparam to store the line-search */
-  SICONOS_FRICTION_3D_NSN_LINESEARCH = 11,
-  /** index in iparam to store the maximum number of iterations */
-  SICONOS_FRICTION_3D_NSN_LINESEARCH_MAXITER = 12
 };
 
 enum SICONOS_FRICTION_3D_NSN_HYBRID_ENUM
 {
-  /** index in iparam to store the strategy for the hybrid solver */
-  SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY = 14,
   /** Loop NSN-PLI strategy for the hybrid solver */
   SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_NO = 0,
   /** Loop NSN-PLI strategy for the hybrid solver */
@@ -232,10 +252,6 @@ enum SICONOS_FRICTION_3D_NSN_HYBRID_ENUM
   /** NSN and after Loop NSN-PLI strategy for the hybrid solver */
   SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_NSN_AND_NSN_PLI_LOOP = 3,
   SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_VI_EG_NSN =4,
-  /** index in iparam to store the maximum number of loop for the hybrid solver */
-  SICONOS_FRICTION_3D_NSN_HYBRID_MAX_LOOP = 15,
-  /** index in iparam to store the maximum number of iterations for the projection solver */
-  SICONOS_FRICTION_3D_NSN_HYBRID_MAX_ITER = 16
 };
 
 
