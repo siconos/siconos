@@ -29,7 +29,7 @@ set ylabel 'm'
 
 
 resultfile="BallNewtonEuler.dat"
-resulfile ="BallNewtonEulerOnMovingPlane.dat"
+#resultfile ="BallNewtonEulerOnMovingPlane.dat"
 plot \
 resultfile u 1:2 t "Ball position" w l,\
 resultfile u 1:8 t "Plane position " w l

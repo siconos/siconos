@@ -20,11 +20,11 @@
 #if defined(_MSC_VER)
 #define _USE_MATH_DEFINES
 #endif
-#ifdef _WIN32 
-#define SICONOS_EXPORT extern "C" __declspec(dllexport) 
-#else 
-#define SICONOS_EXPORT extern "C" 
-#endif  
+#ifdef _WIN32
+#define SICONOS_EXPORT extern "C" __declspec(dllexport)
+#else
+#define SICONOS_EXPORT extern "C"
+#endif
 #include <math.h>
 #include <stdio.h>
 
