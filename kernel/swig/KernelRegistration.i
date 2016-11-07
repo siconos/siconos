@@ -63,5 +63,6 @@
   PY_REGISTER(Event);                                                   \
   PY_REGISTER(Model);                                                   \
   PY_REGISTER(BoundaryCondition);                                       \
+  PY_REGISTER(HarmonicBC);                                              \
   PY_REGISTER(OSNSMatrix);                                              \
   PY_REGISTER(BlockCSRMatrix);
