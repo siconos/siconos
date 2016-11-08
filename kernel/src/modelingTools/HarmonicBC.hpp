@@ -25,10 +25,10 @@
  *  \brief This class models a simple harmonic boundary conditions for
  *   prescribing the velocities in a Dynamical System. A simple
  *   boundary condition is considered to fix a component \f$ j \f$ of
- * the velocity vector, i.e., \f$ v_j(t) = a +  b cos( \omega t+ \phi)\f$ where \f$
+ *   the velocity vector, i.e., \f$ v_j(t) = a +  b cos( \omega t+ \phi)\f$.
  *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.2.0.
- *  \date (Re-Creation) November 2016
+ *  \version 4.1.0.
+ *  \date (Creation) November 2016
  *
  */
 class HarmonicBC : public  BoundaryCondition
@@ -43,6 +43,10 @@ public:
   HarmonicBC(SP::UnsignedIntVector newVelocityIndices,
              double a, double b,
              double omega, double phi) ;
+
+  HarmonicBC(SP::UnsignedIntVector newVelocityIndices,
+             SP::SiconosVector a, SP::SiconosVector b,
+             SP::SiconosVector omega, SP::SiconosVector phi);
 
 
   /** destructor */
@@ -69,6 +73,15 @@ protected:
   double _omega;
   /** Constant phase  */
   double _phi;
+
+  /** Constant additive term of the prescribed velocity  */
+  SP::SiconosVector _aV;
+  /** Constant multiplicative term of the prescribed velocity  */
+  SP::SiconosVector _bV;
+  /** Constant frequency  */
+  SP::SiconosVector _omegaV;
+  /** Constant phase  */
+  SP::SiconosVector _phiV;
 
   
 
