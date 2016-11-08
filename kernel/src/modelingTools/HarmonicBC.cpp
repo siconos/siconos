@@ -19,29 +19,29 @@
 #include "HarmonicBC.hpp"
 #include "BoundaryCondition.hpp"
 
-// HarmonicBC::HarmonicBC(SP::UnsignedIntVector newVelocityIndices,
-//                        double a, double b,
-//                        double omega, double phi):
-//   BoundaryCondition(newVelocityIndices),_a(a),_b(b),_omega(omega),_phi(phi)
-// {
-//   ;
-// }
+
+// #define DEBUG_MESSAGES
+// #define DEBUG_STDOUT
+#include "debug.h"
+
 HarmonicBC::HarmonicBC(SP::UnsignedIntVector newVelocityIndices,
                        double a, double b,
                        double omega, double phi) :
   BoundaryCondition (newVelocityIndices) ,_a(a),_b(b),_omega(omega),_phi(phi)
-  {};
+{
+};
 
 HarmonicBC::~HarmonicBC()
 {
 }
-
-
 void HarmonicBC::computePrescribedVelocity(double time)
 {
+  DEBUG_BEGIN("HarmonicBC::computePrescribedVelocity(double time)\n");
   if (!_prescribedVelocity) _prescribedVelocity.reset(new SiconosVector((unsigned int)_velocityIndices->size()));
   for (unsigned int k = 0 ; k < _velocityIndices->size(); k++)
   {
     _prescribedVelocity->setValue(k,_a+_b*cos(_omega*time+_phi));
+    DEBUG_PRINTF("_prescribedVelocity[%i] at time  %e = %e \n",k, time,_prescribedVelocity->getValue(k));
   }
+  DEBUG_END("HarmonicBC::computePrescribedVelocity(double time)\n");
 }
