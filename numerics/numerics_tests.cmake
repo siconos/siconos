@@ -486,7 +486,7 @@ if(WITH_${COMPONENT}_TESTING)
   # ---- Hyperplane Projection ----
   # HP is not converging
   NEW_FC_3D_TEST(Confeti-ex13-Fc3D-SBM.dat
-    SICONOS_FRICTION_3D_HP 1e-3 10000
+    SICONOS_FRICTION_3D_HP 1e-3 1000
     0 0 0
     WILL_FAIL)
 
@@ -508,7 +508,7 @@ if(WITH_${COMPONENT}_TESTING)
     DPARAM 3 -1e1)
 
   NEW_FC_3D_TEST(BoxesStack1-i100000-32.hdf5.dat
-    SICONOS_FRICTION_3D_VI_FPP 1e-8 100000
+    SICONOS_FRICTION_3D_VI_FPP 1e-3 100000
     0 0 0
     IPARAM 2 1)
 
