@@ -702,6 +702,7 @@ class Hdf5():
         self._ref = None
         self._permanent_interactions = None
         self._joints = None
+        self._boundary_conditions = None
         self._io = MechanicsIO()
         self._set_external_forces = set_external_forces
         self._shape_filename = shape_filename
@@ -732,6 +733,8 @@ class Hdf5():
         self._permanent_interactions = group(self._data, 'permanent_interactions',
                                              must_exist=False)
         self._joints = group(self._data, 'joints')
+        self._boundary_conditions = group(self._data, 'boundary_conditions')
+        
         self._static_data = data(self._data, 'static', 9,
                                  use_compression = self._use_compression)
         self._velocities_data = data(self._data, 'velocities', 8,
@@ -840,6 +843,12 @@ class Hdf5():
         Joints between dynamic objects or between an object and the scenery.
         """
         return self._joints
+    
+    def boundary_conditions(self):
+        """
+        Boundary conditions applied to  dynamic objects
+        """
+        return self._boundary_conditions
 
     def importNonSmoothLaw(self, name):
         if self._broadphase is not None:
@@ -1821,6 +1830,26 @@ class Hdf5():
             joint.attrs['pivot_point']=pivot_point
             joint.attrs['axis']=axis
 
+    def addBoundaryCondition(self, name, object1, indices=None, bc_class='HarmonicBC',
+                             a=None, b=None, omega=None, phi=None):
+        """
+        add boundarycondition to the object object1
+
+        implementation only works for HarmonicBC for the moment
+        """
+        if name not in self.boundary_conditions():
+            boundary_condition=self.boundary_conditions().create_dataset(name, (0,))
+            boundary_condition.attrs['object1']=object1
+            boundary_condition.attrs['indices']=indices
+            boundary_condition.attrs['type']=bc_class
+            if bc_class == 'HarmonicBC' :
+                boundary_condition.attrs['a']= a
+                boundary_condition.attrs['b']= b
+                boundary_condition.attrs['omega']= omega
+                boundary_condition.attrs['phi']= phi
+            else:
+                raise NotImplementedError
+            
     def run(self,
             with_timer=False,
             time_stepping=None,
