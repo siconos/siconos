@@ -241,7 +241,7 @@ if(WITH_${COMPONENT}_TESTING)
   NEW_TEST(FC3D_sparse_test fc3d_sparse_test.c)
 
   SET(FC3D_DATA_SET
-    "Capsules-i100-1090.dat;Capsules-i100-889.dat;Capsules-i101-404.dat;Capsules-i103-990.dat;Capsules-i122-1617.dat;Example1_Fc3D.dat;Example1_Fc3D_SBM.dat;FrictionContact3D_1c.dat;FrictionContact3D_RR_1c.dat;NESpheres_10_1.dat;NESpheres_30_1.dat;OneObject-i100000-499.hdf5.dat;Rover1039.dat;Rover1040.dat;Rover1041.dat;Rover11035.dat;Rover11211.dat;Rover3865.dat;Rover4144.dat;Rover4396.dat;Rover4493.dat;Rover4516.dat;Rover4609.dat;Rover4613.dat;Rover4622.dat;Rover9770.dat;KaplasTower-i1061-4.hdf5.dat;Confeti-ex13-Fc3D-SBM.dat;BoxesStack1-i100000-32.hdf5.dat;FrictionContactProblem00237.dat;FrictionContactProblem00727.dat")
+    "Capsules-i100-1090.dat;Capsules-i100-889.dat;Capsules-i101-404.dat;Capsules-i103-990.dat;Capsules-i122-1617.dat;Example1_Fc3D.dat;Example1_Fc3D_SBM.dat;FrictionContact3D_1c.dat;FrictionContact3D_RR_1c.dat;NESpheres_10_1.dat;NESpheres_30_1.dat;OneObject-i100000-499.hdf5.dat;Rover1039.dat;Rover1040.dat;Rover1041.dat;Rover11035.dat;Rover11211.dat;Rover3865.dat;Rover4144.dat;Rover4396.dat;Rover4493.dat;Rover4516.dat;Rover4609.dat;Rover4613.dat;Rover4622.dat;Rover9770.dat;KaplasTower-i1061-4.hdf5.dat;Confeti-ex13-Fc3D-SBM.dat;BoxesStack1-i100000-32.hdf5.dat")
 
   foreach(_DAT ${FC3D_DATA_SET})
     # --- GAMS Solvers ---
@@ -259,6 +259,9 @@ if(WITH_${COMPONENT}_TESTING)
     NEW_FC_3D_TEST(${_DAT} SICONOS_FRICTION_3D_NSGS 1e-5 10000
       SICONOS_FRICTION_3D_ONECONTACT_NSN_GP 0 0
       INTERNAL_IPARAM 10 1)
+    NEW_FC_3D_TEST(${_DAT} SICONOS_FRICTION_3D_NSGS 1e-5 10000
+      SICONOS_FRICTION_3D_ONECONTACT_NSN_GP 0 0
+      INTERNAL_IPARAM SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_PLI_NSN_LOOP)
 
     # --- Nonsmooth Newton on FC3D_DATA_SET ---
     NEW_FC_3D_TEST(${_DAT} SICONOS_FRICTION_3D_NSN_AC 1e-5 100
