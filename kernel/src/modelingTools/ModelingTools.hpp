@@ -42,6 +42,11 @@ Note that not all files from the current location are listed below, since some o
 #include "NewtonEulerFrom1DLocalFrameR.hpp"
 #include "NewtonEulerFrom3DLocalFrameR.hpp"
 
+#include "BoundaryCondition.hpp"
+#include "HarmonicBC.hpp"
+#include "FixedBC.hpp"
+
+
+
 #include "NonSmoothDynamicalSystem.hpp"
 
-#include "HarmonicBC.hpp"
