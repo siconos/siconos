@@ -1006,10 +1006,7 @@ public:
   /** set Boundary Conditions
    *  \param newbd BoundaryConditions
    */
-  inline void setBoundaryConditions(SP::BoundaryCondition newbd)
-  {
-    _boundaryConditions = newbd;
-  };
+  void setBoundaryConditions(SP::BoundaryCondition newbd);
 
   /** get Boundary Conditions
    *  \return SP::BoundaryCondition pointer on a BoundaryConditions

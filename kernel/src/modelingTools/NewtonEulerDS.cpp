@@ -1251,3 +1251,10 @@ double NewtonEulerDS::computeKineticEnergy()
   DEBUG_END("NewtonEulerDS::computeKineticEnergy()\n");
   return K;
 }
+void NewtonEulerDS::setBoundaryConditions(SP::BoundaryCondition newbd)
+{
+  if(!_boundaryConditions){
+    std::cout << "Warning : NewtonEulerDS::setBoundaryConditions. old boundary conditions were pre-existing" <<std::endl;
+  }
+  _boundaryConditions = newbd;
+};
