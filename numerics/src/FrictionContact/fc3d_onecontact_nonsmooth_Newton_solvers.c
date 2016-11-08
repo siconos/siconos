@@ -181,7 +181,7 @@ void fc3d_onecontact_nonsmooth_Newton_solvers_initialize(FrictionContactProblem*
   }
   else
   {
-    fprintf(stderr, "Numerics, fc3d_nsgs failed. Unknown formulation type.\n");
+    fprintf(stderr, "Numerics, fc3d_onecontact_nonsmooth_Newton_solvers failed. Unknown formulation type.\n");
     exit(EXIT_FAILURE);
   }
 }
@@ -228,7 +228,7 @@ int fc3d_onecontact_nonsmooth_Newton_solvers_solve(FrictionContactProblem* local
       }
       else
       {
-        printf("Numerics, fc3d_onecontact_nonsmooth_Newton_solvers_solve, failed.\n");
+        printf("Numerics, fc3d_onecontact_nonsmooth_Newton_solvers_solve, no convergence.\n");
       }
       /* note : exit on failure should be done in DefaultCheckSolverOutput */
     }
@@ -757,7 +757,7 @@ static int LineSearchGP(FrictionContactProblem* localproblem,
   }
   if (verbose > 1)
   {
-    printf("-----------------------------------------    LineSearchGP failed max number of iteration reached  = %i  with alpha = %.10e \n", LSitermax, alpha);
+    printf("-----------------------------------------    LineSearchGP not succeed max number of iteration reached  = %i  with alpha = %.10e \n", LSitermax, alpha);
   }
   *t_opt = alpha;
   return -1;
