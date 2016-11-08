@@ -1127,7 +1127,38 @@ class Hdf5():
                 joint_inter = Interaction(5, joint_nslaw, joint)
                 self._model.nonSmoothDynamicalSystem().\
                     link(joint_inter, ds1)
+                
+    def importBoundaryConditions(self, name):
+        if self._broadphase is not None:
+            topo = self._model.nonSmoothDynamicalSystem().\
+                topology()
 
+            bc_type = self.boundary_conditions()[name].attrs['type']
+            bc_class = getattr(Kernel,bc_type)
+
+            print('name = ', name)
+            print('object1')
+            
+            ds1_name = self.boundary_conditions()[name].attrs['object1']
+            ds1 = topo.getDynamicalSystem(ds1_name)
+
+            
+            if ( bc_type == 'HarmonicBC') :
+                bc = bc_class(self.boundary_conditions()[name].attrs['indices'],
+                              self.boundary_conditions()[name].attrs['a'],
+                              self.boundary_conditions()[name].attrs['b'],
+                              self.boundary_conditions()[name].attrs['omega'],
+                              self.boundary_conditions()[name].attrs['phi'])
+
+            
+            # set bc to the ds1
+
+            ds1.setBoundaryConditions(bc);
+            
+            #joint_inter = Interaction(5, joint_nslaw, joint)
+            #    self._model.nonSmoothDynamicalSystem().\
+            #        link(joint_inter, ds1)
+                
     def importPermanentInteraction(self, name):
         """
         """
@@ -1310,6 +1341,9 @@ class Hdf5():
 
             for name in self.joints():
                 self.importJoint(name)
+
+            for name in self.boundary_conditions():
+                self.importBoundaryConditions(name)
 
             for name in self.permanent_interactions():
                 self.importPermanentInteraction(name)
