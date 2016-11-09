@@ -238,7 +238,8 @@ int fc3d_onecontact_nonsmooth_Newton_solvers_solve(FrictionContactProblem* local
       }
       else
       {
-        printf("Numerics, fc3d_onecontact_nonsmooth_Newton_solvers_solve, no convergence.\n");
+        printf("Numerics, fc3d_onecontact_nonsmooth_Newton_solvers_solve, no convergence for contact %i with error %e\n",options->iparam[SICONOS_FRICTION_3D_NSGS_LOCALSOLVER_CONTACTNUMBER], options->dparam[SICONOS_DPARAM_RESIDU]);
+        /* frictionContact_display(localproblem) */;
       }
       /* note : exit on failure should be done in DefaultCheckSolverOutput */
     }
