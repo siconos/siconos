@@ -40,7 +40,7 @@ def check_error(n, m, h, TV=False):
         print('Exception in check_error(I) :', e)
         pass
 
-    print 'err_inv:', err_inv
+    print('err_inv:', err_inv)
     if err_inv < 1.0e-12:
         try:
             (AexpS, PsiS) = compute_dt_matrices(A, B, h, TV)
