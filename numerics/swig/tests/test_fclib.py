@@ -12,7 +12,7 @@ data_dir = working_dir + '/data/'
 solvers = (sn.SICONOS_GLOBAL_FRICTION_3D_NSGS,)
 solvers_reduced1 = (sn.SICONOS_FRICTION_3D_NSGS, sn.SICONOS_FRICTION_3D_NSN_AC)
 solvers_reduced2 = (sn.SICONOS_FRICTION_3D_NSN_AC,)  # sn.SICONOS_FRICTION_3D_NSN_FB)
-
+solvers_reduced3 = (sn.SICONOS_FRICTION_3D_NSGS,)
 
 def condensed_from_global(fcp):
     # spsolve expect the indices to be cint aka 32 bits int
@@ -39,6 +39,7 @@ def condensed_from_global(fcp):
 
 def solve_reduced(fcp, solver_reduced):
     SO_reduced = sn.SolverOptions(solver_reduced)
+    SO_reduced.iparam[0] =100000
     SO_reduced.dparam[0] = np.sqrt(fcp.numberOfContacts)*1e-9
     size_reaction = fcp.numberOfContacts * 3
     reaction_reduced = np.zeros((size_reaction,))
@@ -95,9 +96,9 @@ def test_fc3d():
     for d in data_files:
         full_path = data_dir + d
         if os.path.isfile(full_path):
-
+            sn.setNumericsVerbose(1)
             fcp = sn.frictionContact_fclib_read(full_path)
-            for s in solvers_reduced2:
+            for s in solvers_reduced3:
                 res = solve_reduced(fcp, s)
                 if res:
                     print('Solver {:} on problem {:} failed with info = {:}'.format(sn.solver_options_id_to_name(s), d, res))
