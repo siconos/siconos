@@ -50,8 +50,8 @@ void variationalInequality_ExtraGradient(VariationalInequality* problem, double 
   dparam[0] = dparam[2]; // set the tolerance for the local solver
 
 
-  double * xtmp = (double *)malloc(n * sizeof(double));
-  double * wtmp = (double *)malloc(n * sizeof(double));
+  double * xtmp = (double *)calloc(n,sizeof(double));
+  double * wtmp = (double *)calloc(n,sizeof(double));
 
   double rho = 0.0, rho_k =0.0;
   int isVariable = 0;
