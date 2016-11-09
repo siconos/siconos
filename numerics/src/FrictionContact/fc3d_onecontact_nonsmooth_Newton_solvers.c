@@ -111,13 +111,7 @@ void fc3d_AC_free(FrictionContactProblem * problem, FrictionContactProblem * loc
 void fc3d_AC_free(FrictionContactProblem * problem, FrictionContactProblem * localproblem, SolverOptions* localsolver_options)
 {
   if(problem->M->storageType == 2)
-   {
-     if (problem->M->matrix1)
-     {
-       freeSBM(problem->M->matrix1);
-       free(problem->M->matrix1);
-     }
-   }
+     NM_clearSparseBlock(problem->M);
 }
 void fc3d_AC_free_P(FrictionContactProblem * problem, FrictionContactProblem * localproblem, SolverOptions* localsolver_options);
 void fc3d_AC_free_P(FrictionContactProblem * problem, FrictionContactProblem * localproblem, SolverOptions* localsolver_options)
