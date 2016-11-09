@@ -39,7 +39,8 @@ def compute_dt_matrices(A, B, h, TV=False):
     process.nonSmoothDynamicalSystem().link(inter, process_ds)
     process.nonSmoothDynamicalSystem().setControlProperty(inter, True)
     # Initialization
-    process.initialize(process_simu)
+    process.setSimulation(process_simu)
+    process.initialize()
 
     # Main loop
     process_simu.computeOneStep()

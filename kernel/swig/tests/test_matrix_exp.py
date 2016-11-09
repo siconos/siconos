@@ -36,19 +36,22 @@ def check_error(n, m, h, TV=False):
         Aexp = expm(A * h)
         Psi = Ainv.dot((Aexp - np.eye(n)).dot(B))
         err_inv = np.linalg.norm(A.dot(np.linalg.inv(A)) - np.eye(n))
-    except:
+    except Exception as e :
+        print 'Exception in check_error(I) :', e
         pass
+
+    print 'err_inv:', err_inv
     if err_inv < 1.0e-12:
-        try:
-            (AexpS, PsiS) = compute_dt_matrices(A, B, h, TV)
-            err_phi = np.linalg.norm((Aexp - AexpS))
-            err_psi = np.linalg.norm(Psi - PsiS)
-            if err_phi > 5.0e-12 or err_psi > 5.0e-12:
-                print(err_phi, err_psi)
-                failed = True
-        except:
-            print(A.shape)
+        (AexpS, PsiS) = compute_dt_matrices(A, B, h, TV)
+        err_phi = np.linalg.norm((Aexp - AexpS))
+        err_psi = np.linalg.norm(Psi - PsiS)
+        if err_phi > 5.0e-12 or err_psi > 5.0e-12:
+            print(err_phi, err_psi)
             failed = True
+        # except Exception as e :
+        #     print 'Exception in check_error(II) :', e
+        #     print(A.shape)
+        #     failed = True
     return failed
 
 
@@ -91,3 +94,7 @@ def test_TV():
         k += 1
 
     assert not err
+
+if __name__ == '__main__':
+    print 'test_TI'
+    test_TI()
