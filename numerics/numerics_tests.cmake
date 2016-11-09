@@ -241,7 +241,7 @@ if(WITH_${COMPONENT}_TESTING)
   NEW_TEST(FC3D_sparse_test fc3d_sparse_test.c)
 
   SET(FC3D_DATA_SET
-    "Capsules-i100-1090.dat;Capsules-i100-889.dat;Capsules-i101-404.dat;Capsules-i103-990.dat;Capsules-i122-1617.dat;Example1_Fc3D.dat;Example1_Fc3D_SBM.dat;FrictionContact3D_1c.dat;FrictionContact3D_RR_1c.dat;NESpheres_10_1.dat;NESpheres_30_1.dat;OneObject-i100000-499.hdf5.dat;Rover1039.dat;Rover1040.dat;Rover1041.dat;Rover11035.dat;Rover11211.dat;Rover3865.dat;Rover4144.dat;Rover4396.dat;Rover4493.dat;Rover4516.dat;Rover4609.dat;Rover4613.dat;Rover4622.dat;Rover9770.dat;KaplasTower-i1061-4.hdf5.dat;Confeti-ex13-Fc3D-SBM.dat;BoxesStack1-i100000-32.hdf5.dat")
+    "Capsules-i100-1090.dat;Capsules-i100-889.dat;Capsules-i101-404.dat;Capsules-i103-990.dat;Capsules-i122-1617.dat;Example1_Fc3D.dat;Example1_Fc3D_SBM.dat;FrictionContact3D_1c.dat;FrictionContact3D_RR_1c.dat;NESpheres_10_1.dat;NESpheres_30_1.dat;Rover1039.dat;Rover1040.dat;Rover1041.dat;Rover11035.dat;Rover11211.dat;Rover3865.dat;Rover4144.dat;Rover4396.dat;Rover4493.dat;Rover4516.dat;Rover4609.dat;Rover4613.dat;Rover4622.dat;Rover9770.dat;Confeti-ex13-Fc3D-SBM.dat;BoxesStack1-i100000-32.hdf5.dat")
 
   foreach(_DAT ${FC3D_DATA_SET})
     # --- GAMS Solvers ---
@@ -273,6 +273,8 @@ if(WITH_${COMPONENT}_TESTING)
   endforeach()
   set(fc3d_NSGS_Tol_1e-5_Max_10000_inTol_0_inMax_0___Rover4396_PROPERTIES WILL_FAIL TRUE)
 
+
+  
   # --- NSGS with different local solvers and parameters ---
   NEW_FC_3D_TEST(Example1_Fc3D_SBM.dat
     SICONOS_FRICTION_3D_NSGS 1e-16 ${NSGS_NB_IT} 
@@ -460,11 +462,7 @@ if(WITH_${COMPONENT}_TESTING)
   NEW_FC_3D_TEST(Example1_Fc3D_SBM.dat
     SICONOS_FRICTION_3D_TFP 1e-16 100)
 
-  NEW_FC_3D_TEST(OneObject-i100000-499.hdf5.dat
-    SICONOS_FRICTION_3D_TFP 1e-8 100
-    0 0 0
-    DPARAM 3 1e4
-    WILL_FAIL)
+
   
   NEW_FC_3D_TEST(Confeti-ex03-Fc3D-SBM.dat
     SICONOS_FRICTION_3D_TFP 10e-8 2000)
@@ -525,36 +523,88 @@ if(WITH_${COMPONENT}_TESTING)
 
   # --- Test from rock pile simulations using "time of birth" feature --- 
   # failure in local solver with line search
-  NEW_FC_3D_TEST(RockPile_tob1.dat SICONOS_FRICTION_3D_NSGS 1e-3 100000
+  NEW_FC_3D_TEST(RockPile_tob1.dat SICONOS_FRICTION_3D_NSGS 1e-3 10000
     SICONOS_FRICTION_3D_ONECONTACT_NSN_GP 1e-16 100)
-  NEW_FC_3D_TEST(RockPile_tob1.dat SICONOS_FRICTION_3D_NSGS 1e-3 100000
-    SICONOS_FRICTION_3D_ONECONTACT_NSN_GP 1e-16 1000)
-  NEW_FC_3D_TEST(RockPile_tob1.dat SICONOS_FRICTION_3D_NSGS 1e-3 100000
-    SICONOS_FRICTION_3D_ONECONTACT_NSN 1e-16 100)
+  #  an increasing number of newton iterations implies a failure
+  NEW_FC_3D_TEST(RockPile_tob1.dat SICONOS_FRICTION_3D_NSGS 1e-3 10000
+    SICONOS_FRICTION_3D_ONECONTACT_NSN_GP 1e-16 1000 WILL_FAIL )
+  # removinf the line --search is worth
+  NEW_FC_3D_TEST(RockPile_tob1.dat SICONOS_FRICTION_3D_NSGS 1e-3 2000
+    SICONOS_FRICTION_3D_ONECONTACT_NSN 1e-16 100 WILL_FAIL)
 
   # ---- PROX ---
   
   NEW_FC_3D_TEST(Example1_Fc3D_SBM.dat
     SICONOS_FRICTION_3D_PROX 1e-8 100)
   
+
+  NEW_FC_3D_TEST(OneObject-i1028-138.hdf5.dat
+    SICONOS_FRICTION_3D_PROX  1e-8 100000
+    0 0 0
+    DPARAM 3 1e4
+    IPARAM 1 1)
+
+  # --------------------------------------- #
+  ### problems known as difficult
+  # --------------------------------------- #
+  # KaplasTower-i1061-4.hdf5.dat 
+  
+  NEW_FC_3D_TEST(KaplasTower-i1061-4.hdf5.dat SICONOS_FRICTION_3D_NSGS 1e-5 2000
+    SICONOS_FRICTION_3D_ONECONTACT_NSN_GP 0 0 WILL_FAIL)
+  NEW_FC_3D_TEST(KaplasTower-i1061-4.hdf5.dat SICONOS_FRICTION_3D_NSGS 1e-5 1500
+    SICONOS_FRICTION_3D_ONECONTACT_NSN_GP 0 0
+    INTERNAL_IPARAM 10 1
+    WILL_FAIL)
+  NEW_FC_3D_TEST(KaplasTower-i1061-4.hdf5.dat SICONOS_FRICTION_3D_NSGS 1e-5 1500
+    SICONOS_FRICTION_3D_ONECONTACT_NSN_GP 0 0
+    INTERNAL_IPARAM SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_PLI_NSN_LOOP
+    WILL_FAIL)
+  
+  NEW_FC_3D_TEST(KaplasTower-i1061-4.hdf5.dat SICONOS_FRICTION_3D_NSN_AC 1e-2 1000)
+  NEW_FC_3D_TEST(KaplasTower-i1061-4.hdf5.dat SICONOS_FRICTION_3D_NSN_FB 1e-3 1000)
+  NEW_FC_3D_TEST(KaplasTower-i1061-4.hdf5.dat SICONOS_FRICTION_3D_NSN_NM 1e-3 1000)
+  
+  NEW_FC_3D_TEST(KaplasTower-i1061-4.hdf5.dat
+    SICONOS_FRICTION_3D_PROX  1e-3 10
+    0 0 0
+    DPARAM 3 1e4
+    IPARAM 1 1)
+
+  # OneObject-i100000-499.hdf5.dat
+  NEW_FC_3D_TEST(OneObject-i100000-499.hdf5.dat
+    SICONOS_FRICTION_3D_NSGS 1e-5 100000
+    SICONOS_FRICTION_3D_ONECONTACT_NSN_GP 0 0
+    WILL_FAIL)
+  NEW_FC_3D_TEST(OneObject-i100000-499.hdf5.dat SICONOS_FRICTION_3D_NSGS 1e-5 10000
+    SICONOS_FRICTION_3D_ONECONTACT_NSN_GP 0 0
+    INTERNAL_IPARAM 10 1
+    WILL_FAIL)
+  NEW_FC_3D_TEST(OneObject-i100000-499.hdf5.dat SICONOS_FRICTION_3D_NSGS 1e-5 10000
+    SICONOS_FRICTION_3D_ONECONTACT_NSN_GP 0 0
+    INTERNAL_IPARAM SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_PLI_NSN_LOOP
+    WILL_FAIL)
+  NEW_FC_3D_TEST(OneObject-i100000-499.hdf5.dat SICONOS_FRICTION_3D_NSN_AC 1e-5 100
+    0 0 0
+    IPARAM 1 1)   
+  NEW_FC_3D_TEST(OneObject-i100000-499.hdf5.dat SICONOS_FRICTION_3D_NSN_AC 1e-3 1000)
+  NEW_FC_3D_TEST(OneObject-i100000-499.hdf5.dat SICONOS_FRICTION_3D_NSN_FB 1e-3 1000)
+  NEW_FC_3D_TEST(OneObject-i100000-499.hdf5.dat SICONOS_FRICTION_3D_NSN_NM 1e-3 1000)
+
   NEW_FC_3D_TEST(OneObject-i100000-499.hdf5.dat
     SICONOS_FRICTION_3D_PROX  1e-8 100000
     0 0 0
     DPARAM 3 1e4
     IPARAM 1 1)
   
-  NEW_FC_3D_TEST(OneObject-i1028-138.hdf5.dat
-    SICONOS_FRICTION_3D_PROX  1e-8 100000
-    0 0 0
-    DPARAM 3 1e4
-    IPARAM 1 1)
   
-  NEW_FC_3D_TEST(KaplasTower-i1061-4.hdf5.dat
-    SICONOS_FRICTION_3D_PROX  1e-5 100000
+  NEW_FC_3D_TEST(OneObject-i100000-499.hdf5.dat
+    SICONOS_FRICTION_3D_TFP 1e-8 100
     0 0 0
     DPARAM 3 1e4
-    IPARAM 1 1)
+    WILL_FAIL)
 
+
+  
   # --- LMGC driver ---
   
   NEW_TEST(FC3DNewFromFortranData fc3d_newFromFortranData.c)
