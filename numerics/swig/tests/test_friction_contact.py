@@ -26,7 +26,7 @@ def solve(problem, solver, options):
     reactions[...] = 0.0
     velocities[...] = 0.0
     r = solver(problem, reactions, velocities, options)
-    assert options.dparam[1] < 1e-10
+    assert options.dparam[1] < options.dparam[0]
     assert not r
 
 
