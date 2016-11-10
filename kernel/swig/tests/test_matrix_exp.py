@@ -97,5 +97,5 @@ def test_TV():
     assert not err
 
 if __name__ == '__main__':
-    print 'test_TI'
+    print('test_TI')
     test_TI()
