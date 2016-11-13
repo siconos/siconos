@@ -93,9 +93,9 @@ void fc3d_fixedPointProjection(FrictionContactProblem* problem, double *reaction
   double * reactiontmp = 0;
   if (isVariable)
   {
-    reaction_k = (double *)malloc(n * sizeof(double));
-    velocity_k = (double *)malloc(n * sizeof(double));
-    reactiontmp = (double *)malloc(n * sizeof(double));
+    reaction_k = (double *)calloc(n,sizeof(double));
+    velocity_k = (double *)calloc(n,sizeof(double));
+    reactiontmp = (double *)calloc(n,sizeof(double));
   }
 
 
