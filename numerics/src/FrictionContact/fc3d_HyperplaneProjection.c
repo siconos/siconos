@@ -58,10 +58,10 @@ void fc3d_HyperplaneProjection(FrictionContactProblem* problem, double *reaction
   int contact; /* Number of the current row of blocks in M */
   int nLocal = 3;
   dparam[0] = dparam[2]; // set the tolerance for the local solver
-  double * velocitytmp = (double *)malloc(n * sizeof(double));
-  double * reactiontmp = (double *)malloc(n * sizeof(double));
-  double * reactiontmp2 = (double *)malloc(n * sizeof(double));
-  double * reactiontmp3 = (double *)malloc(n * sizeof(double));
+  double * velocitytmp = (double *)calloc(n, sizeof(double));
+  double * reactiontmp = (double *)calloc(n, sizeof(double));
+  double * reactiontmp2 = (double *)calloc(n, sizeof(double));
+  double * reactiontmp3 = (double *)calloc(n, sizeof(double));
 
   double tau = 1.0;
   double sigma = 0.99;

@@ -58,31 +58,31 @@ void fc3d_ExtraGradient(FrictionContactProblem* problem, double *reaction, doubl
   int nLocal = 3;
   dparam[0] = dparam[2]; // set the tolerance for the local solver
 
-  
-  double * velocitytmp = (double *)malloc(n * sizeof(double));
-  double * reactiontmp = (double *)malloc(n * sizeof(double));
+
+  double * velocitytmp = (double *)calloc(n,sizeof(double));
+  double * reactiontmp = (double *)calloc(n,sizeof(double));
 
   double rho = 0.0, rho_k =0.0;
   int isVariable = 0;
 
   if (dparam[3] > 0.0)
-  {    
+  {
     rho = dparam[3];
     if (verbose > 0)
     {
-      printf("----------------------------------- FC3D - Extra Gradient (EG) - Fixed stepsize with  rho = %14.7e \n", rho); 
+      printf("----------------------------------- FC3D - Extra Gradient (EG) - Fixed stepsize with  rho = %14.7e \n", rho);
     }
   }
   else
   {
     /* Variable step in iterations*/
-    isVariable = 1;  
+    isVariable = 1;
     rho = -dparam[3];
     if (verbose > 0)
     {
       printf("----------------------------------- FC3D - Extra Gradient (EG) - Variable stepsize with starting rho = %14.7e \n", rho);
     }
-     
+
   }
 
   double alpha = 1.0;
@@ -100,8 +100,8 @@ void fc3d_ExtraGradient(FrictionContactProblem* problem, double *reaction, doubl
 
   if (isVariable)
   {
-    reaction_k = (double *)malloc(n * sizeof(double));
-    velocity_k = (double *)malloc(n * sizeof(double));
+    reaction_k = (double *)calloc(n,sizeof(double));
+    velocity_k = (double *)calloc(n,sizeof(double));
   }
 
   if (!isVariable)
@@ -147,8 +147,8 @@ void fc3d_ExtraGradient(FrictionContactProblem* problem, double *reaction, doubl
 
       if (options->callback)
       {
-        options->callback->collectStatsIteration(options->callback->env, nc * 3, 
-                                        reaction, velocity, 
+        options->callback->collectStatsIteration(options->callback->env, nc * 3,
+                                        reaction, velocity,
                                         error, NULL);
       }
 

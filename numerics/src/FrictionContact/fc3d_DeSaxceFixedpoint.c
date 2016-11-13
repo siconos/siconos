@@ -54,7 +54,7 @@ void fc3d_DeSaxceFixedPoint(FrictionContactProblem* problem, double *reaction, d
   int contact; /* Number of the current row of blocks in M */
   int nLocal = 3;
   dparam[0] = dparam[2]; // set the tolerance for the local solver
-  double * velocitytmp = (double *)malloc(n * sizeof(double));
+  double * velocitytmp = (double *)calloc(n, sizeof(double));
 
   double rho = 0.0;
 
