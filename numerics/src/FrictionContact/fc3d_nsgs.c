@@ -395,8 +395,6 @@ void freeLocalProblem(FrictionContactProblem* localproblem,
     localproblem->M->matrix0 = NULL;
   }
 
-  frictionContact_display(problem);
-  getchar();
   freeFrictionContactProblem(localproblem);
 }
 
