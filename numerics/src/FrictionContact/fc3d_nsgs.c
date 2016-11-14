@@ -371,8 +371,13 @@ void freeLocalProblem(FrictionContactProblem* localproblem,
   if (problem->M->storageType == NM_DENSE && localproblem->M->matrix0)
   {
     free(localproblem->M->matrix0);
+    localproblem->M->matrix0 = NULL;
   }
-  localproblem->M->matrix0 = NULL;
+  else if (problem->M->storageType == NM_SPARSE && localproblem->M->matrix0)
+  {
+    free(localproblem->M->matrix0);
+    localproblem->M->matrix0 = NULL;
+  }
   freeFrictionContactProblem(localproblem);
 }
 

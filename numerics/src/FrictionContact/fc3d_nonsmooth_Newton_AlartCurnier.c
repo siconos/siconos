@@ -224,8 +224,7 @@ void fc3d_nonsmooth_Newton_AlartCurnier(
   equation.data = (void *) &acparams;
   equation.function = &nonsmoothEqnAlartCurnierFun;
 
-  if
-    (options->iparam[SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY] ==  SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_VI_EG_NSN)
+  if(options->iparam[SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY] ==  SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_VI_EG_NSN)
   {
     SolverOptions * options_vi_eg =(SolverOptions *)malloc(sizeof(SolverOptions));
     fc3d_VI_ExtraGradient_setDefaultSolverOptions(options_vi_eg);
@@ -233,8 +232,10 @@ void fc3d_nonsmooth_Newton_AlartCurnier(
     options_vi_eg->dparam[0] = sqrt(options->dparam[0]);
     options_vi_eg->iparam[SICONOS_VI_ERROR_EVALUATION] = SICONOS_VI_ERROR_EVALUATION_LIGHT;
     fc3d_VI_ExtraGradient(problem, reaction , velocity , info , options_vi_eg);
-    
+
     fc3d_nonsmooth_Newton_solvers_solve(&equation, reaction, velocity, info, options);
+    solver_options_delete(options_vi_eg);
+    free(options_vi_eg);
   }
   else if (options->iparam[SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY] ==  SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_NO)
   {
@@ -244,6 +245,11 @@ void fc3d_nonsmooth_Newton_AlartCurnier(
   {
     numerics_error("fc3d_nonsmooth_Newton_AlartCurnier","Unknown nsn hybrid solver");
   }
+
+
+
   
+
+
 
 }
