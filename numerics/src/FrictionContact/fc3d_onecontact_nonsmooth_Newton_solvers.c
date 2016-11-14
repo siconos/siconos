@@ -110,7 +110,7 @@ void fc3d_AC_free(FrictionContactProblem * problem, FrictionContactProblem * loc
 
 void fc3d_AC_free(FrictionContactProblem * problem, FrictionContactProblem * localproblem, SolverOptions* localsolver_options)
 {
-  if(problem->M->storageType == 2)
+  if(problem->M->storageType == NM_SPARSE)
      NM_clearSparseBlock(problem->M);
 }
 void fc3d_AC_free_P(FrictionContactProblem * problem, FrictionContactProblem * localproblem, SolverOptions* localsolver_options);
@@ -286,7 +286,7 @@ static void AC_fillMLocal(FrictionContactProblem * problem, FrictionContactProbl
 
   // Dense storage
   int storageType = MGlobal->storageType;
-  if (storageType == 0)
+  if (storageType == NM_DENSE)
   {
     int in = 3 * contact, it = in + 1, is = it + 1;
     int inc = n * in;
@@ -305,16 +305,16 @@ static void AC_fillMLocal(FrictionContactProblem * problem, FrictionContactProbl
     MLocal[7] = MM[inc + it];
     MLocal[8] = MM[inc + is];
   }
-  else if (storageType == 1)
+  else if (storageType == NM_SPARSE_BLOCK)
   {
     int diagPos = getDiagonalBlockPos(MGlobal->matrix1, contact);
     localproblem->M->matrix0 = MGlobal->matrix1->block[diagPos];
     /*     cblas_dcopy(9, MGlobal->matrix1->block[diagPos], 1, localproblem->M->matrix0 , 1); */
 
   }
-  else if (storageType == 2)
+  else if (storageType == NM_SPARSE)
   {
-    /* ok, we maintain the sparseblock storage from the sparse one */
+    /* ok, we build the sparseblock storage from the sparse one */
     if (!problem->M->matrix1)
     {
       problem->M->matrix1 = (SparseBlockStructuredMatrix*) malloc(sizeof(SparseBlockStructuredMatrix));

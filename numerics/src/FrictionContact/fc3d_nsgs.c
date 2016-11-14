@@ -292,8 +292,7 @@ void fc3d_nsgs_fillMLocal(FrictionContactProblem * problem, FrictionContactProbl
 
 
   int storageType = MGlobal->storageType;
-  if (storageType == 0)
-    // Dense storage
+  if (storageType == NM_DENSE)
   {
     int in = 3 * contact, it = in + 1, is = it + 1;
     int inc = n * in;
@@ -313,11 +312,24 @@ void fc3d_nsgs_fillMLocal(FrictionContactProblem * problem, FrictionContactProbl
     MLocal[7] = MM[inc + it];
     MLocal[8] = MM[inc + is];
   }
-  else if (storageType == 1)
+  else if (storageType == NM_SPARSE_BLOCK)
   {
     int diagPos = getDiagonalBlockPos(MGlobal->matrix1, contact);
     localproblem->M->matrix0 = MGlobal->matrix1->block[diagPos];
-
+  }
+  else if (storageType == NM_SPARSE)
+  {
+    /* ok, we build the sparseblock storage from the sparse one */
+    if (!problem->M->matrix1)
+    {
+      problem->M->matrix1 = (SparseBlockStructuredMatrix*) malloc(sizeof(SparseBlockStructuredMatrix));
+      problem->M->matrix1->block = NULL;
+      problem->M->matrix1->index1_data = NULL;
+      problem->M->matrix1->index2_data = NULL;
+      sparseToSBM(problem->dimension, NM_triplet(problem->M), problem->M->matrix1);
+    }
+    int diagPos = getDiagonalBlockPos(MGlobal->matrix1, contact);
+    localproblem->M->matrix0 = MGlobal->matrix1->block[diagPos];
   }
   else
     numerics_error("fc3d_projection -", "unknown storage type for matrix M");
@@ -352,14 +364,14 @@ FrictionContactProblem* allocLocalProblem(FrictionContactProblem* problem)
   localproblem->q = (double*)malloc(3 * sizeof(double));
   localproblem->mu = (double*)malloc(sizeof(double));
 
-  if (problem->M->storageType == NM_DENSE || problem->M->storageType == NM_SPARSE)
+  if (problem->M->storageType == NM_DENSE)
   {
     localproblem->M = createNumericsMatrixFromData(NM_DENSE, 3, 3,
                                            malloc(9 * sizeof(double)));
   }
-  else /* NM_SPARSE_BLOCK */
+  else /* NM_SPARSE_BLOCK, NM_SPARSE */
   {
-    localproblem->M = createNumericsMatrixFromData(NM_DENSE, 3, 3, NULL);
+    localproblem->M = createNumericsMatrixFromData(NM_DENSE, 3, 3, NULL); /* V.A. 14/11/2016 What is the interest of this line */
   }
   return localproblem;
 }
@@ -373,11 +385,18 @@ void freeLocalProblem(FrictionContactProblem* localproblem,
     free(localproblem->M->matrix0);
     localproblem->M->matrix0 = NULL;
   }
-  else if (problem->M->storageType == NM_SPARSE && localproblem->M->matrix0)
+  else if (problem->M->storageType == NM_SPARSE)
   {
-    free(localproblem->M->matrix0);
+      NM_clearSparseBlock(problem->M);
+  }
+  else if (problem->M->storageType == NM_SPARSE_BLOCK)
+  {
+    /* we release the pointer to avoid deallocation of the diagonal blocks of the original matrix of the problem*/
     localproblem->M->matrix0 = NULL;
   }
+
+  frictionContact_display(problem);
+  getchar();
   freeFrictionContactProblem(localproblem);
 }
 
