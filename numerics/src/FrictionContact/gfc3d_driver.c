@@ -90,7 +90,7 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction , doubl
     Global_ipiv = NULL;
     Global_MisInverse = 0;
     Global_MisLU = 0;
-    gfc3d_globalAlartCurnier_wr(problem, reaction , velocity, globalVelocity, &info, options);
+    gfc3d_nonsmooth_Newton_AlartCurnier_wr(problem, reaction , velocity, globalVelocity, &info, options);
     break;
 
   }

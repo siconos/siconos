@@ -40,7 +40,7 @@ int gfc3d_setDefaultSolverOptions(SolverOptions* options, int solverId)
   }
   case SICONOS_GLOBAL_FRICTION_3D_NSN_AC_WR:
   {
-    info =    gfc3d_globalAlartCurnier_wr_setDefaultSolverOptions(options);
+    info =    gfc3d_nonsmooth_Newton_AlartCurnier_wr_setDefaultSolverOptions(options);
     break;
   }
   case SICONOS_GLOBAL_FRICTION_3D_NSGS_WR:
