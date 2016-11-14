@@ -38,6 +38,11 @@ extern int *Global_ipiv;
 extern int  Global_MisInverse;
 extern int  Global_MisLU;
 
+
+/* #define DEBUG_MESSAGES */
+/* #define DEBUG_STDOUT */
+#include "debug.h"
+
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 
 /* Global Variable for the reformulation of the problem */
@@ -438,9 +443,9 @@ int gfc3d_nsgs_wr_setDefaultSolverOptions(SolverOptions* options)
 
 
 
-void  gfc3d_globalAlartCurnier_wr(GlobalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, int *info, SolverOptions* options)
+void  gfc3d_nonsmooth_Newton_AlartCurnier_wr(GlobalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, int *info, SolverOptions* options)
 {
-
+  DEBUG_BEGIN("gfc3d_nonsmooth_Newton_AlartCurnier_wr(...)\n")
   // Reformulation
   FrictionContactProblem* localproblem = (FrictionContactProblem *) malloc(sizeof(FrictionContactProblem));
 
@@ -448,7 +453,7 @@ void  gfc3d_globalAlartCurnier_wr(GlobalFrictionContactProblem* problem, double 
 
 
   // From StorageType==1 to Storage==0
-  if (localproblem->M->storageType == 1)
+  if (localproblem->M->storageType == NM_SPARSE_BLOCK)
   {
     printf("Warning: fc3d_globalAlartCurnier is only implemented for dense matrices.\n");
     printf("Warning: The problem is reformulated.\n");
@@ -456,6 +461,9 @@ void  gfc3d_globalAlartCurnier_wr(GlobalFrictionContactProblem* problem, double 
     localproblem->M->matrix0 = (double*)malloc(localproblem->M->size0 * localproblem->M->size1 * sizeof(double));
 
     SBMtoDense(localproblem->M->matrix1, localproblem->M->matrix0);
+
+    DEBUG_EXPR( NM_dense_display(localproblem->M->matrix0,localproblem->M->size0, localproblem->M->size1, 0 ););
+
 
     freeSBM(localproblem->M->matrix1);
     free(localproblem->M->matrix1);
@@ -471,10 +479,10 @@ void  gfc3d_globalAlartCurnier_wr(GlobalFrictionContactProblem* problem, double 
 
   computeGlobalVelocity(problem, reaction, globalVelocity);
   freeLocalProblem(localproblem);
-
+  DEBUG_END("gfc3d_nonsmooth_Newton_AlartCurnier_wr(...)\n")
 
 }
-int gfc3d_globalAlartCurnier_wr_setDefaultSolverOptions(SolverOptions* options)
+int gfc3d_nonsmooth_Newton_AlartCurnier_wr_setDefaultSolverOptions(SolverOptions* options)
 {
 
 

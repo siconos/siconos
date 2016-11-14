@@ -394,8 +394,8 @@ int gfc3d_nonsmooth_Newton_AlartCurnier_setDefaultSolverOptions(
   options->dparam = (double *) calloc(options->dSize,  sizeof(double));
   options->dWork = NULL;
   solver_options_nullify(options);
-  options->iparam[0] = 200;    /* input :  itermax */
-  options->iparam[1] = 1;      /* output : #iter */
+  options->iparam[SICONOS_IPARAM_MAX_ITER] = 200;    /* input :  itermax */
+  options->iparam[SICONOS_IPARAM_ITER_DONE] = 1;      /* output : #iter */
   options->iparam[2] = 0;      /* unused */
   options->iparam[3] = 100000; /* nzmax*/
   options->iparam[4] = 0;      /* unused */
@@ -407,7 +407,8 @@ int gfc3d_nonsmooth_Newton_AlartCurnier_setDefaultSolverOptions(
 
   options->iparam[10] = 1;     /* 0 STD AlartCurnier, 1 JeanMoreau, 2 STD generated, 3 JeanMoreau generated */
 
-  options->dparam[0] = 1e-10;
+  options->dparam[SICONOS_DPARAM_TOL] = 1e-10;
+  options->dparam[SICONOS_FRICTION_3D_NSN_RHO] = 1.0;      /* default rho */
 
 
   options->internalSolvers = NULL;
