@@ -733,8 +733,10 @@ class Hdf5():
         self._permanent_interactions = group(self._data, 'permanent_interactions',
                                              must_exist=False)
         self._joints = group(self._data, 'joints')
-        self._boundary_conditions = group(self._data, 'boundary_conditions')
-        
+        try:
+            self._boundary_conditions = group(self._data, 'boundary_conditions')
+        except Exception as e :
+            print('Warning -  group(self._data, boundary_conditions ) : ',  e)
         self._static_data = data(self._data, 'static', 9,
                                  use_compression = self._use_compression)
         self._velocities_data = data(self._data, 'velocities', 8,
