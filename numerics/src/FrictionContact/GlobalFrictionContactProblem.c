@@ -22,6 +22,9 @@
 #include "GlobalFrictionContactProblem.h"
 #include "numerics_verbose.h"
 
+
+
+#define DEBUG_MESSAGES
 int globalFrictionContact_printInFile(GlobalFrictionContactProblem*  problem, FILE* file)
 {
   if (! problem)
@@ -201,9 +204,9 @@ void gfc3d_init_workspace(GlobalFrictionContactProblem* problem)
 
   if (!problem->workspace->factorized_M)
   {
-    problem->workspace->factorized_M = createNumericsMatrix(problem->M->storageType,
-                                               problem->M->size0,
-                                               problem->M->size1);
+    problem->workspace->factorized_M = NM_create(problem->M->storageType,
+                                                            problem->M->size0,
+                                                            problem->M->size1);
     NM_copy(problem->M, problem->workspace->factorized_M);
   }
 

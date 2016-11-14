@@ -337,7 +337,7 @@ void soclcp_nsgs(SecondOrderConeLinearComplementarityProblem* problem, double *r
 
     if(problem->M->storageType == 0)
     {
-      localproblem->M = createNumericsMatrixFromData(NM_DENSE, dim_max, dim_max,
+      localproblem->M = NM_create_from_data(NM_DENSE, dim_max, dim_max,
                         malloc(dim_max*dim_max* sizeof(double)));
     }
     else

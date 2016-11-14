@@ -65,7 +65,7 @@ FrictionContactProblem* from_fclib_local(const struct fclib_local* fclib_problem
 
   problem->numberOfContacts = fclib_problem->W->m / fclib_problem->spacedim; /* cf fclib spec */
 
-  problem->M = createNumericsMatrix(NM_SPARSE_BLOCK, fclib_problem->W->m, fclib_problem->W->n);
+  problem->M = NM_create(NM_SPARSE_BLOCK, fclib_problem->W->m, fclib_problem->W->n);
 
   problem->M->matrix1->block = NULL;
   problem->M->matrix1->index1_data = NULL;
@@ -274,7 +274,7 @@ GlobalFrictionContactProblem* from_fclib_global(const struct fclib_global* fclib
 
   problem->numberOfContacts = fclib_problem->H->n / fclib_problem->spacedim; /* cf fclib spec */
 
-  problem->M = createNumericsMatrix(NM_SPARSE, fclib_problem->M->m, fclib_problem->M->n);
+  problem->M = NM_create(NM_SPARSE, fclib_problem->M->m, fclib_problem->M->n);
 
   CSparseMatrix * M = (CSparseMatrix*)malloc(sizeof(CSparseMatrix));
   M->nzmax = (csi) fclib_problem->M->nzmax;
@@ -318,7 +318,7 @@ GlobalFrictionContactProblem* from_fclib_global(const struct fclib_global* fclib
   int_to_csi(fclib_problem->M->i, M->i, (unsigned) M->nzmax);
 
 
-  problem->H = createNumericsMatrix(NM_SPARSE, fclib_problem->H->m, fclib_problem->H->n);
+  problem->H = NM_create(NM_SPARSE, fclib_problem->H->m, fclib_problem->H->n);
 
   CSparseMatrix * H = (CSparseMatrix*)malloc(sizeof(CSparseMatrix));
 

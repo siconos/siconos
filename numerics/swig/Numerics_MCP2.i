@@ -32,7 +32,7 @@
      else
      {
      //TODO implement different types of matrices
-       MCP->nabla_Fmcp = createNumericsMatrix(NM_DENSE, size, size);
+       MCP->nabla_Fmcp = NM_create(NM_DENSE, size, size);
      }
      return MCP;
   }
@@ -57,7 +57,7 @@
      }
      else
      {
-       MCP->nabla_Fmcp = createNumericsMatrix(NM_DENSE, size, size);
+       MCP->nabla_Fmcp = NM_create(NM_DENSE, size, size);
      }
 
      PyObject* method_compute_Fmcp = PyObject_GetAttrString(py_compute_class, "compute_Fmcp");
@@ -105,7 +105,7 @@
      }
      else
      {
-       MCP->nabla_Fmcp = createNumericsMatrix(NM_DENSE, size, size);
+       MCP->nabla_Fmcp = NM_create(NM_DENSE, size, size);
      }
 
      MCP->env = (void*) malloc(sizeof(functions_env_python));

@@ -142,7 +142,7 @@ int main(void)
 //  options.iparam[4] = 10;
 
   problem->env = &sim_data;
-  problem->nabla_F = createNumericsMatrixFromData(NM_DENSE, N, N, nablaF);
+  problem->nabla_F = NM_create_from_data(NM_DENSE, N, N, nablaF);
 
   unsigned k = 0;
 

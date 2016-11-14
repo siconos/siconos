@@ -24,7 +24,7 @@
 
     if (!Mtmp) { return NULL; }
 
-    NumericsMatrix *M = createNumericsMatrix(Mtmp->storageType, Mtmp->size0, Mtmp->size1);
+    NumericsMatrix *M = NM_create(Mtmp->storageType, Mtmp->size0, Mtmp->size1);
     NM_copy(Mtmp, M);
 
     if (array_ctrl_ && array_) { Py_DECREF(array_); }

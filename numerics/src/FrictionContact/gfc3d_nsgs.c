@@ -47,7 +47,7 @@ static void initializeGlobalLocalSolver(int n, SolverGlobalPtr* solve, FreeSolve
   }
   else
   {
-    fprintf(stderr, "Numerics, fc3d_nsgs failed. Unknown local solver set by iparam[4]\n");
+    fprintf(stderr, "Numerics, gfc3d_nsgs failed. Unknown local solver set by iparam[4]\n");
     exit(EXIT_FAILURE);
   }
 }

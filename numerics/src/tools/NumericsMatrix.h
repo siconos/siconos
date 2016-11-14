@@ -80,8 +80,8 @@ For the second way of storage, SparseBlockStructuredMatrix we have:
 
 \subsection NMAlloc Create, fill and delete NumericsMatrix functions
 
-- createNumericsMatrix() : allocation without initial values
-- createNumericsMatrixFromData() : allocation and set default values from external data
+- NM_create() : allocation without initial values
+- NM_create_from_data() : allocation and set default values from external data
 - fillNumericsMatrix() : needs a pre-defined NumericsMatrix, set default values from external data
 - freeNumericsMatrix()
 
@@ -335,7 +335,7 @@ extern "C"
    * \param size1 number of columns
    * \return a pointer to a NumericsMatrix
    */
-  NumericsMatrix* createNumericsMatrix(int storageType, int size0, int size1);
+  NumericsMatrix* NM_create(int storageType, int size0, int size1);
 
   /** create a NumericsMatrix and possibly set the data
    * \param storageType the type of storage
@@ -345,7 +345,7 @@ extern "C"
    * set to NULL
    * \return a pointer to a NumericsMatrix
    */
-  NumericsMatrix* createNumericsMatrixFromData(int storageType, int size0, int size1, void* data);
+  NumericsMatrix* NM_create_from_data(int storageType, int size0, int size1, void* data);
 
   /** fill an existing NumericsMatrix struct
    * \param[in,out] M the struct to fill

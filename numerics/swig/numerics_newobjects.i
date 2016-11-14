@@ -37,8 +37,8 @@
 %newobject newNumericsSparseMatrix;
 %newobject duplicateNumericsMatrix;
 %newobject newNumericsMatrix;
-%newobject createNumericsMatrix;
-%newobject createNumericsMatrixFromData;
+%newobject NM_create;
+%newobject NM_create_from_data;
 %newobject newSparseNumericsMatrix;
 %newobject newSBM;
 %newobject SBCMToSBM;
