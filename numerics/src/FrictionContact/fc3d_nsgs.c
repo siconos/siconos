@@ -387,13 +387,17 @@ void freeLocalProblem(FrictionContactProblem* localproblem,
   }
   else if (problem->M->storageType == NM_SPARSE)
   {
-      NM_clearSparseBlock(problem->M);
+    /* we release the pointer */
+    localproblem->M->matrix0 = NULL;
+    NM_clearSparseBlock(problem->M);
+
   }
   else if (problem->M->storageType == NM_SPARSE_BLOCK)
   {
     /* we release the pointer to avoid deallocation of the diagonal blocks of the original matrix of the problem*/
     localproblem->M->matrix0 = NULL;
   }
+
 
   freeFrictionContactProblem(localproblem);
 }
