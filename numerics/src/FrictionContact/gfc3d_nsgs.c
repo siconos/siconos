@@ -111,7 +111,7 @@ void gfc3d_nsgs(GlobalFrictionContactProblem* restrict problem, double* restrict
   }
 
   dparam[0] = dparam[2]; // set the tolerance for the local solver
-
+  /* verbose=1; */
   while ((iter < itermax) && (hasNotConverged > 0))
   {
     ++iter;
