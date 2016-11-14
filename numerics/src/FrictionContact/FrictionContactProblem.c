@@ -159,7 +159,6 @@ int frictionContact_newFromFilename(FrictionContactProblem* problem, char* filen
 void freeFrictionContactProblem(FrictionContactProblem* problem)
 {
   assert(problem);
-
   if (problem->M)
   {
     freeNumericsMatrix(problem->M);
