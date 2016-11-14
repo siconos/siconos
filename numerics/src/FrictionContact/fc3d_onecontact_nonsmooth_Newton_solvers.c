@@ -282,82 +282,6 @@ void fc3d_onecontact_nonsmooth_Newton_solvers_computeError(int n, double* veloci
 
 }
 
-
-static void AC_fillMLocal(FrictionContactProblem * problem, FrictionContactProblem * localproblem, int contact)
-{
-
-  NumericsMatrix * MGlobal = problem->M;
-  int n = 3 * problem->numberOfContacts;
-
-  // Dense storage
-  int storageType = MGlobal->storageType;
-  if (storageType == NM_DENSE)
-  {
-    int in = 3 * contact, it = in + 1, is = it + 1;
-    int inc = n * in;
-    double * MM = MGlobal->matrix0;
-    double * MLocal =  localproblem->M->matrix0;
-    /* The part of MM which corresponds to the current block is copied into MLocal */
-    MLocal[0] = MM[inc + in];
-    MLocal[1] = MM[inc + it];
-    MLocal[2] = MM[inc + is];
-    inc += n;
-    MLocal[3] = MM[inc + in];
-    MLocal[4] = MM[inc + it];
-    MLocal[5] = MM[inc + is];
-    inc += n;
-    MLocal[6] = MM[inc + in];
-    MLocal[7] = MM[inc + it];
-    MLocal[8] = MM[inc + is];
-  }
-  else if (storageType == NM_SPARSE_BLOCK)
-  {
-    int diagPos = getDiagonalBlockPos(MGlobal->matrix1, contact);
-    localproblem->M->matrix0 = MGlobal->matrix1->block[diagPos];
-    /*     cblas_dcopy(9, MGlobal->matrix1->block[diagPos], 1, localproblem->M->matrix0 , 1); */
-
-  }
-  else if (storageType == NM_SPARSE)
-  {
-    /* ok, we build the sparseblock storage from the sparse one */
-    if (!problem->M->matrix1)
-    {
-      problem->M->matrix1 = (SparseBlockStructuredMatrix*) malloc(sizeof(SparseBlockStructuredMatrix));
-      problem->M->matrix1->block = NULL;
-      problem->M->matrix1->index1_data = NULL;
-      problem->M->matrix1->index2_data = NULL;
-      sparseToSBM(problem->dimension, NM_triplet(problem->M), problem->M->matrix1);
-    }
-
-    int diagPos = getDiagonalBlockPos(problem->M->matrix1, contact);
-    localproblem->M->matrix0 = problem->M->matrix1->block[diagPos];
-
-    /* Direct access is below, but there is a bug, find it! */
-
-    /* CSparseMatrix* MM = NM_triplet(MGlobal); */
-    /* int in = 3 * contact, it = in + 1, is = it + 1; */
-    /* int inc = n * in; */
-    /* double * MLocal =  localproblem->M->matrix0; */
-    /* /\* The part of MM which corresponds to the current block is copied into MLocal *\/ */
-    /* MLocal[0] = MM->x[inc + in]; */
-    /* MLocal[1] = MM->x[inc + it]; */
-    /* MLocal[2] = MM->x[inc + is]; */
-    /* inc += n; */
-    /* MLocal[3] = MM->x[inc + in]; */
-    /* MLocal[4] = MM->x[inc + it]; */
-    /* MLocal[5] = MM->x[inc + is]; */
-    /* inc += n; */
-    /* MLocal[6] = MM->x[inc + in]; */
-    /* MLocal[7] = MM->x[inc + it]; */
-    /* MLocal[8] = MM->x[inc + is]; */
-  }
-  else
-  {
-    numerics_error("fc3d_AlartCurnier:AC_fillMLocal() -", "unknown storage type for matrix M");
-  }
-
-}
-
 void fc3d_onecontact_nonsmooth_Newton_AC_update(int contact, FrictionContactProblem* problem, FrictionContactProblem* localproblem, double * reaction, SolverOptions* options)
 {
   /* Build a local problem for a specific contact
@@ -369,7 +293,7 @@ void fc3d_onecontact_nonsmooth_Newton_AC_update(int contact, FrictionContactProb
   */
 
   /* The part of MGlobal which corresponds to the current block is copied into MLocal */
-  AC_fillMLocal(problem, localproblem, contact);
+  fc3d_nsgs_fillMLocal(problem, localproblem, contact);
 
   /****  Computation of qLocal = qBlock + sum over a row of blocks in MGlobal of the products MLocal.reactionBlock,
      excluding the block corresponding to the current contact. ****/
