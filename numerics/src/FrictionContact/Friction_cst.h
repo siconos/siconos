@@ -166,7 +166,7 @@ enum SICONOS_FRICTION_3D_NSGS_IPARAM
 };
 enum SICONOS_FRICTION_3D_NSGS_DPARAM
 {
-  /** index in iparam to store the relaxation strategy */
+  /** index in dparam to store the relaxation strategy */
   SICONOS_FRICTION_3D_NSGS_RELAXATION_VALUE=8,
 };
 
@@ -208,7 +208,7 @@ enum SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION_ENUM
 };
 
 
-enum SICONOS_FRICTION_3D_NSN_IPRAM
+enum SICONOS_FRICTION_3D_NSN_IPARAM
 {
   /** index in iparam to store the formulation */
   SICONOS_FRICTION_3D_NSN_FORMULATION = 10,
@@ -224,6 +224,12 @@ enum SICONOS_FRICTION_3D_NSN_IPRAM
   SICONOS_FRICTION_3D_NSN_HYBRID_MAX_ITER = 16
 };
 
+enum SICONOS_FRICTION_3D_NSN_DPARAM
+{
+  /** index in dparam to store the rho value for porjection formulation */
+  SICONOS_FRICTION_3D_NSN_RHO = 3,
+
+};
 enum SICONOS_FRICTION_3D_NSN_FORMULATION_ENUM
 {
   SICONOS_FRICTION_3D_NSN_FORMULATION_ALARTCURNIER_STD =0,

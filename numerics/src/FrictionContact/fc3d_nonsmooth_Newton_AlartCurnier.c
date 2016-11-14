@@ -103,8 +103,10 @@ int fc3d_nonsmooth_Newton_AlartCurnier_setDefaultSolverOptions(
   options->iparam[3] = 100000; /* nzmax*/
   options->iparam[5] = 1;
   options->iparam[7] = 1;      /* erritermax */
-  options->dparam[0] = 1e-3;
-  options->dparam[3] = 1;      /* default rho */
+
+  
+  options->dparam[SICONOS_DPARAM_TOL] = 1e-3;
+  options->dparam[SICONOS_FRICTION_3D_NSN_RHO] = 1;      /* default rho */
 
   options->iparam[8] = -1;     /* mpi com fortran */
   options->iparam[SICONOS_FRICTION_3D_NSN_FORMULATION] = SICONOS_FRICTION_3D_NSN_FORMULATION_ALARTCURNIER_GENERATED;
