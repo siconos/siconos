@@ -150,7 +150,7 @@ struct NumericsMatrix
   SparseBlockStructuredMatrix* matrix1; /**< sparse block storage */
   NumericsSparseMatrix* matrix2; /**< csc, csr or triplet storage */
 
-  NumericsMatrixInternalData* internalData; /**< internal storage, used for workspace amoung other things */
+  NumericsMatrixInternalData* internalData; /**< internal storage, used for workspace among other things */
 
 };
 

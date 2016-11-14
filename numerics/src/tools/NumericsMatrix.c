@@ -79,7 +79,7 @@ void prodNumericsMatrix3x3(int sizeX, int sizeY, NumericsMatrix* A,
   assert(A->size1 == sizeX);
   double alpha=1;
   double beta=1;
-  
+
   int storage = A->storageType;
 
   /* double* storage */
@@ -1593,6 +1593,7 @@ NumericsMatrixInternalData* NM_internalData(NumericsMatrix* A)
     A->internalData->iWorkSize = 0;
     A->internalData->dWork = NULL;
     A->internalData->dWorkSize = 0;
+    A->internalData->isLUfactorized = 0;
   }
   return A->internalData;
 }
@@ -1653,6 +1654,8 @@ double* NM_dWork(NumericsMatrix* A, int size)
 
 int NM_gesv_expert(NumericsMatrix* A, double *b, bool keep)
 {
+
+  DEBUG_BEGIN("NM_gesv_expert(NumericsMatrix* A, double *b, bool keep)\n");
   assert(A->size0 == A->size1);
 
   int info = 1;
@@ -1665,12 +1668,17 @@ int NM_gesv_expert(NumericsMatrix* A, double *b, bool keep)
 
     if (keep)
     {
+
       double* wkspace = NM_dWork(A, A->size0*A->size1);
       int* ipiv = NM_iWork(A, A->size0);
+      DEBUG_PRINTF("iwork and dwork are intialized with size %i and %i\n",A->size0*A->size1,A->size0 );
+
       if (!NM_internalData(A)->isLUfactorized)
       {
+        DEBUG_PRINT("Start to call DGETRF for NM_DENSE storage\n");
         cblas_dcopy_msan(A->size0*A->size1, A->matrix0, 1, wkspace, 1);
         DGETRF(A->size0, A->size1, wkspace, A->size0, ipiv, &info);
+        DEBUG_PRINT("end of call DGETRF for NM_DENSE storage\n");
         if (info > 0)
         {
           if (verbose >= 2)
@@ -1687,8 +1695,9 @@ int NM_gesv_expert(NumericsMatrix* A, double *b, bool keep)
 
         NM_internalData(A)->isLUfactorized = true;
       }
-
+      DEBUG_PRINT("Start to call DGETRS for NM_DENSE storage\n");
       DGETRS(LA_NOTRANS, A->size0, 1, wkspace, A->size0, ipiv, b, A->size0, &info);
+      DEBUG_PRINT("End of call DGETRS for NM_DENSE storage\n");
       if (info < 0)
       {
         if (verbose >= 2)
@@ -1849,6 +1858,7 @@ int NM_gesv_expert(NumericsMatrix* A, double *b, bool keep)
    * instance with the minFBLSA. Therefore, we should not check here for
    * problems, but the calling function has to check the return code.*/
 //  CHECK_RETURN(info);
+  DEBUG_END("NM_gesv_expert(NumericsMatrix* A, double *b, bool keep)\n");
   return info;
 }
 
@@ -1951,4 +1961,3 @@ CSparseMatrix* NM_csparse_alloc_for_copy(const CSparseMatrix* const m)
 
   return out;
 }
-
