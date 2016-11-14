@@ -4,7 +4,8 @@
 
 #include "NumericsMatrix_private.h"
 
-#define DEBUG_MESSAGES 1
+/* #define DEBUG_MESSAGES */
+/* #define DEBUG_STDOUT */
 #include "debug.h"
 #include "op3x3.h"
 #include "SparseBlockMatrix.h"
@@ -39,6 +40,7 @@ void computeDenseAWpB(
   double* Wx = W->matrix0;
 
   assert(problemSize >= 3);
+
 
   double Wij[9], Ai[9], Bi[9], tmp[9];
 
@@ -514,13 +516,13 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers* equation
 
   double tolerance = options->dparam[0];
   assert(tolerance > 0);
-  
+
   if (verbose > 0)
     printf("------------------------ FC3D - _nonsmooth_Newton_solversSolve - Start with tolerance = %g\n", tolerance);
 
   unsigned int _3problemSize = 3 * problemSize;
   double norm_q = cblas_dnrm2(problemSize , problem->q , 1);
- 
+
   void *buffer;
 
   if (!options->dWork)
@@ -599,14 +601,15 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers* equation
   }
 
   // compute rho here
-  for (unsigned int i = 0; i < problemSize; ++i) rho[i] = options->dparam[3];
+  assert(options->dparam[SICONOS_FRICTION_3D_NSN_RHO]>0.0);
+  for (unsigned int i = 0; i < problemSize; ++i) rho[i] = options->dparam[SICONOS_FRICTION_3D_NSN_RHO];
 
   // velocity <- M*reaction + qfree
   cblas_dcopy(problemSize, problem->q, 1, velocity, 1);
   NM_gemv(1., problem->M, reaction, 1., velocity);
-  
+
   double linear_solver_residual=0.0;
-  
+
   while (iter++ < itermax)
   {
 
@@ -615,7 +618,6 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers* equation
                        reaction, velocity, equation->problem->mu,
                        rho,
                        F, Ax, Bx);
-
     // AW + B
     computeAWpB(Ax, problem->M, Bx, AWpB);
 
@@ -633,7 +635,7 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers* equation
     {
       if (verbose > 0)
       {
-        numerics_warning("fc3d_nonsmooth_Newton_solvers_solve",
+        numerics_warning("fc3d_nonsmooth_Newton_solvers_solve -",
                          "warning! linear solver exit with code = %d\n", lsi);
       }
     }
