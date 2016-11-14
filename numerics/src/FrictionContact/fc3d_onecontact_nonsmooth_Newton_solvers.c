@@ -110,8 +110,13 @@ void fc3d_AC_free(FrictionContactProblem * problem, FrictionContactProblem * loc
 
 void fc3d_AC_free(FrictionContactProblem * problem, FrictionContactProblem * localproblem, SolverOptions* localsolver_options)
 {
+
   if(problem->M->storageType == NM_SPARSE)
-     NM_clearSparseBlock(problem->M);
+  {
+    /* we release the pointer to avoid double deallocation */
+    localproblem->M->matrix0 = NULL;
+    NM_clearSparseBlock(problem->M);
+  }
 }
 void fc3d_AC_free_P(FrictionContactProblem * problem, FrictionContactProblem * localproblem, SolverOptions* localsolver_options);
 void fc3d_AC_free_P(FrictionContactProblem * problem, FrictionContactProblem * localproblem, SolverOptions* localsolver_options)
