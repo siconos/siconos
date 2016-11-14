@@ -547,10 +547,10 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers* equation
   NumericsMatrix *AWpB, *AWpB_backup;
   if (!options->dWork)
   {
-    AWpB = createNumericsMatrix(problem->M->storageType,
+    AWpB = NM_create(problem->M->storageType,
         problem->M->size0, problem->M->size1);
 
-    AWpB_backup = createNumericsMatrix(problem->M->storageType,
+    AWpB_backup = NM_create(problem->M->storageType,
         problem->M->size0, problem->M->size1);
   }
   else

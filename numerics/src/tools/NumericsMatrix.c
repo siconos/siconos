@@ -704,7 +704,7 @@ void getDiagonalBlock(NumericsMatrix* m, int numBlockRow, int numRow, int size, 
   }
 }
 
-NumericsMatrix* createNumericsMatrixFromData(int storageType, int size0, int size1, void* data)
+NumericsMatrix* NM_create_from_data(int storageType, int size0, int size1, void* data)
 {
   NumericsMatrix* M = newNumericsMatrix();
 
@@ -754,7 +754,7 @@ NumericsMatrix* newNumericsMatrix(void)
   return M;
 }
 
-NumericsMatrix* createNumericsMatrix(int storageType, int size0, int size1)
+NumericsMatrix* NM_create(int storageType, int size0, int size1)
 {
   NumericsMatrix* M = newNumericsMatrix();
 
@@ -772,7 +772,7 @@ NumericsMatrix* createNumericsMatrix(int storageType, int size0, int size1)
       data = newNumericsSparseMatrix();
       break;
     default:
-      fprintf(stderr, "createNumericsMatrix :: storageType value %d not implemented yet !", storageType);
+      fprintf(stderr, "NM_create :: storageType value %d not implemented yet !", storageType);
       exit(EXIT_FAILURE);
   }
 
@@ -824,7 +824,7 @@ void fillNumericsMatrix(NumericsMatrix* M, int storageType, int size0, int size1
 
 NumericsMatrix* newSparseNumericsMatrix(int size0, int size1, SparseBlockStructuredMatrix* m1)
 {
-  return createNumericsMatrixFromData(NM_SPARSE_BLOCK, size0, size1, (void*)m1);
+  return NM_create_from_data(NM_SPARSE_BLOCK, size0, size1, (void*)m1);
 }
 
 

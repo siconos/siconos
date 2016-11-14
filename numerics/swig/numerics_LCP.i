@@ -28,7 +28,7 @@
       LC = (LinearComplementarityProblem *) malloc(sizeof(LinearComplementarityProblem));
       size_t size0 = array_size(array,0);
       size_t size1 = array_size(array,1);
-      LC->M = createNumericsMatrix(NM_DENSE, size0, size1);
+      LC->M = NM_create(NM_DENSE, size0, size1);
 
       memcpy(LC->M->matrix0,array_data(array),size0*size1*sizeof(double));
       LC->size = size0;

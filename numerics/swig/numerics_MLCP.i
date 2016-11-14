@@ -64,7 +64,7 @@
       // return pointer : free by std swig destructor
       MLCP = (MixedLinearComplementarityProblem *) malloc(sizeof(MixedLinearComplementarityProblem));
 
-      MLCP->M = createNumericsMatrix(NM_DENSE, array_size(array,0), array_size(array,1));
+      MLCP->M = NM_create(NM_DENSE, array_size(array,0), array_size(array,1));
 
       memcpy(MLCP->M->matrix0,array_data(array),MLCP->M->size0*MLCP->M->size1*sizeof(double));
 

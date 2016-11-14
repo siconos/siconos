@@ -844,7 +844,7 @@ static int fc3d_lcp_gams_base(FrictionContactProblem* problem, double *reaction,
   /* Fills Akmat and Ab.x  */
   FC3D_gams_generate_first_constraints(&Akmat, &Emat, problem->mu, problem->q, tilde_omega, tilde_omegat, NM_csc(&Ab)->x);
 
-  NumericsMatrix* tmpWmat = createNumericsMatrix(NM_SPARSE, 3*problem->numberOfContacts, 3*problem->numberOfContacts);
+  NumericsMatrix* tmpWmat = NM_create(NM_SPARSE, 3*problem->numberOfContacts, 3*problem->numberOfContacts);
 
   double* tmpq = (double*)malloc(size * sizeof(double));
   double* lambda_r = (double*)calloc(size_l, sizeof(double));
@@ -920,7 +920,7 @@ static int fc3d_lcp_gams_base(FrictionContactProblem* problem, double *reaction,
     NM_update_size(&tildeWt);
 
 #ifndef  NDEBUG
-    NumericsMatrix* NM_AbT = createNumericsMatrix(NM_SPARSE, AbT->m,  AbT->n);
+    NumericsMatrix* NM_AbT = NM_create(NM_SPARSE, AbT->m,  AbT->n);
     NM_sparse(NM_AbT)->csc = AbT;
     SN_logh5_NM(NM_AbT, "AbT", logger_s);
     freeNumericsMatrix(NM_AbT);

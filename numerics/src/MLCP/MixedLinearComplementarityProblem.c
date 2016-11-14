@@ -402,7 +402,7 @@ int mixedLinearComplementarity_newFromFileOld(MixedLinearComplementarityProblem*
 
 
 
-  problem->M = createNumericsMatrixFromData(NM_DENSE, NbLines, n + m, vecM);
+  problem->M = NM_create_from_data(NM_DENSE, NbLines, n + m, vecM);
 
   problem->isStorageType1 = 1; // Both problems seems to be stored
   problem->isStorageType2 = 1; // Both problems seems to be stored

@@ -619,11 +619,11 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(
   // need to use the functions from NumericsMatrix --xhub
 
 
-  NumericsMatrix *AA_work = createNumericsMatrix(NM_SPARSE,  (int)J->m, (int)J->n);
+  NumericsMatrix *AA_work = NM_create(NM_SPARSE,  (int)J->m, (int)J->n);
 
   NumericsSparseMatrix* SM = newNumericsSparseMatrix();
   SM->triplet = J;
-  NumericsMatrix *AA = createNumericsMatrixFromData(NM_SPARSE,  (int)J->m, (int)J->n, SM);
+  NumericsMatrix *AA = NM_create_from_data(NM_SPARSE,  (int)J->m, (int)J->n, SM);
 
   info[0] = 1;
 

@@ -33,8 +33,8 @@ int main(void)
 
   double Wdata[81] = {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1};
 
-  NumericsMatrix* tmpM = createNumericsMatrixFromData(NM_DENSE, 9, 9, Wdata);
-  NumericsMatrix* W = createNumericsMatrix(NM_SPARSE, 9, 9);
+  NumericsMatrix* tmpM = NM_create_from_data(NM_DENSE, 9, 9, Wdata);
+  NumericsMatrix* W = NM_create(NM_SPARSE, 9, 9);
   NM_copy_to_sparse(tmpM, W);
 
   int solvers_to_test[] = {SICONOS_FRICTION_3D_NSGS};

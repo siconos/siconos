@@ -805,7 +805,7 @@ static PyObject* cs_sparse_to_coo_matrix(CSparseMatrix *M, bool copy)
 %typemap(memberin) (NumericsMatrix*) {
  //  %typemap(memberin) (NumericsMatrix*)
  // perform a deep copy
- if (!$1) { $1 = createNumericsMatrix($input->storageType, $input->size0, $input->size1); }
+ if (!$1) { $1 = NM_create($input->storageType, $input->size0, $input->size1); }
  NM_copy($input, $1);
 }
 

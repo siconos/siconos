@@ -80,7 +80,7 @@
        functions_env_python* vi_env_python = (functions_env_python*) $self->env;
        vi_env_python->id = ENV_IS_PYTHON_FUNCTIONS;
        vi_env_python->env_compute_jacobian = py_compute_nabla_F;
-       $self->nabla_F = createNumericsMatrix(NM_DENSE, $self->size, $self->size);
+       $self->nabla_F = NM_create(NM_DENSE, $self->size, $self->size);
      }
      else
      {
@@ -130,7 +130,7 @@
     $self->F = (ptrFunctionVI)p_compute_F;
     $self->compute_nabla_F = (ptrFunctionVI_nabla)p_compute_nabla_F;
 
-    $self->nabla_F = createNumericsMatrix(NM_DENSE, $self->size, $self->size);
+    $self->nabla_F = NM_create(NM_DENSE, $self->size, $self->size);
     }
     else
     {

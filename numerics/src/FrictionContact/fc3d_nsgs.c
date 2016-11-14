@@ -366,12 +366,12 @@ FrictionContactProblem* allocLocalProblem(FrictionContactProblem* problem)
 
   if (problem->M->storageType == NM_DENSE)
   {
-    localproblem->M = createNumericsMatrixFromData(NM_DENSE, 3, 3,
+    localproblem->M = NM_create_from_data(NM_DENSE, 3, 3,
                                            malloc(9 * sizeof(double)));
   }
   else /* NM_SPARSE_BLOCK, NM_SPARSE */
   {
-    localproblem->M = createNumericsMatrixFromData(NM_DENSE, 3, 3, NULL); /* V.A. 14/11/2016 What is the interest of this line */
+    localproblem->M = NM_create_from_data(NM_DENSE, 3, 3, NULL); /* V.A. 14/11/2016 What is the interest of this line */
   }
   return localproblem;
 }

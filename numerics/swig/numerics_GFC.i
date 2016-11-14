@@ -98,7 +98,7 @@
 
       size_t size0 = array_size(array,0);
       size_t size1 = array_size(array,1);
-      FC->M = createNumericsMatrix(NM_DENSE, size0, size1);
+      FC->M = NM_create(NM_DENSE, size0, size1);
 
       memcpy(FC->M->matrix0,array_data(array),size0*size1*sizeof(double));
       FC->dimension = (int) PyInt_AsLong(dim);
