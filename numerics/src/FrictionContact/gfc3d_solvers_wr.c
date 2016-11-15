@@ -100,7 +100,7 @@ int reformulationIntoLocalProblem(GlobalFrictionContactProblem* problem, Frictio
     Wnum->storageType = 0;
     Wnum-> size0 = m;
     Wnum-> size1 = m;
-    Wnum->matrix0 = (double*)malloc(m * m * sizeof(double));
+    Wnum->matrix0 = (double*)calloc(m * m , sizeof(double));
     Wnum->matrix1 = NULL;
     Wnum->matrix2 = NULL;
     Wnum->internalData = NULL;

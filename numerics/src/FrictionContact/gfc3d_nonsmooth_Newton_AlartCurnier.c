@@ -525,7 +525,7 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(
     /* allocate memory */
     assert(options->dWork == NULL);
     assert(options->iWork == NULL);
-    options->dWork = (double *) malloc(
+    options->dWork = (double *) calloc(
                        (localProblemSize + /* F */
                         3 * localProblemSize + /* A */
                         3 * localProblemSize + /* B */
@@ -534,7 +534,8 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(
                         ACProblemSize + /* rhs */
                         ACProblemSize + /* tmp2 */
                         ACProblemSize + /* tmp3 */
-                        ACProblemSize   /* solution */) *  sizeof(double));
+                        ACProblemSize   /* solution */) ,
+                       sizeof(double));
 
     /* XXX big hack here */
     options->iWork = (int *) malloc(
