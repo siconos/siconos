@@ -370,7 +370,7 @@ int pivot_selection_lemke2(unsigned n, double* restrict col_drive, double* restr
   int block = -1;
   unsigned candidate_indx[SIZE_CANDIDATE_PIVOT];
   unsigned nb_candidate = 0;
-  double candidate_pivot, current_pivot, candidate_ratio;
+  double candidate_pivot, current_pivot =0.0, candidate_ratio;
   double ratio = INFINITY;
   DEBUG_EXPR_WE(max_pivot_helped = 0;);
   for (unsigned i = 0 ; i < n ; ++i)

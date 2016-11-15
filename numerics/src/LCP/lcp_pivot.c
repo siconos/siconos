@@ -271,10 +271,10 @@ void lcp_pivot_covering_vector(LinearComplementarityProblem* problem, double* re
   {
     /* Principal Pivoting Methods  */
     case SICONOS_LCP_PIVOT_BARD:
-      basis[block] = basis[block] <= (int)dim ? block + dim + 2 : block + 1;
+      basis[block] = basis[block] <= (int)dim ? block + (int)dim + 2 : block + 1;
       break;
     case SICONOS_LCP_PIVOT_LEAST_INDEX:
-      basis[block] = basis[block] <= (int)dim ? block + dim + 2 : block + 1;
+      basis[block] = basis[block] <= (int)dim ? block + (int)dim + 2 : block + 1;
       break;
     case SICONOS_LCP_PIVOT_PATHSEARCH:
       DEBUG_PRINTF("t value : %le\n", mat[t_indx]);
