@@ -89,7 +89,7 @@ int soclcp_compute_error(
 
   int ic;
   int dim;
-  unsigned int dim_max;
+  unsigned int dim_max=0;
   for (int i =0; i <nc; i++)
   {
     dim_max=max(dim_max,problem->coneIndex[i+1]-problem->coneIndex[i]);
