@@ -527,7 +527,7 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers* equation
 
   if (!options->dWork)
   {
-    buffer = malloc((11 * problemSize) * sizeof(double)); // F(1),
+    buffer = calloc((11 * problemSize) , sizeof(double)); // F(1),
                                                           // tmp1(1),
                                                           // tmp2(1),
                                                           // tmp3(1),
