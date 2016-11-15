@@ -445,14 +445,15 @@ static int cs_printInFile(const cs *A, int brief, FILE* file)
          CS_SUBSUB, CS_DATE, CS_COPYRIGHT) ;
   if(nz < 0)
   {
-    fprintf(file,"%lld-by-%lld, nzmax: %lld nnz: %lld, 1-norm: %g\n", m, n, nzmax,
-           Ap [n], cs_norm(A)) ;
+    fprintf(file,"%lld-by-%lld, nzmax: %lld nnz: %lld, 1-norm: %g\n",
+            (long long int)m,  (long long int)n,  (long long int)nzmax,
+            (long long int)Ap [n],  cs_norm(A)) ;
     for(j = 0 ; j < n ; j++)
     {
-      fprintf(file,"    col %lld : locations %lld to %lld\n", j, Ap [j], Ap [j+1]-1);
+      fprintf(file,"    col %lld : locations %lld to %lld\n",  (long long int)j,  (long long int)Ap [j],  (long long int)Ap [j+1]-1);
       for(p = Ap [j] ; p < Ap [j+1] ; p++)
       {
-        fprintf(file,"      %lld : %g\n", Ai [p], Ax ? Ax [p] : 1) ;
+        fprintf(file,"      %lld : %g\n",  (long long int)Ai [p], Ax ? Ax [p] : 1) ;
         if(brief && p > 20)
         {
           fprintf(file,"  ...\n") ;
@@ -463,10 +464,11 @@ static int cs_printInFile(const cs *A, int brief, FILE* file)
   }
   else
   {
-    fprintf(file,"triplet: %lld-by-%lld, nzmax: %lld nnz: %lld\n", m, n, nzmax, nz) ;
+    fprintf(file,"triplet: %lld-by-%lld, nzmax: %lld nnz: %lld\n",  (long long int)m,  (long long int)n,
+            (long long int)nzmax,  (long long int)nz) ;
     for(p = 0 ; p < nz ; p++)
     {
-      fprintf(file,"    %lld %lld : %g\n", Ai [p], Ap [p], Ax ? Ax [p] : 1) ;
+      fprintf(file,"    %lld %lld : %g\n",  (long long int)Ai [p],  (long long int)Ap [p], Ax ? Ax [p] : 1) ;
       if(brief && p > 20)
       {
         fprintf(file,"  ...\n") ;
@@ -1955,7 +1957,7 @@ CSparseMatrix* NM_csparse_alloc_for_copy(const CSparseMatrix* const m)
   }
   else
   {
-    fprintf(stderr, "NM_copy :: error unknown type %lld for CSparse matrix\n", m->nz);
+    fprintf(stderr, "NM_copy :: error unknown type %lld for CSparse matrix\n",  (long long int)m->nz);
     exit(EXIT_FAILURE);
   }
 
