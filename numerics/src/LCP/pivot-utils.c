@@ -443,7 +443,8 @@ int pivot_selection_lemke3(unsigned n, double* restrict col_drive, double* restr
 {
   int block = -1;
   unsigned nb_candidates = 0;
-  double candidate_pivot, current_pivot, candidate_ratio;
+  double candidate_pivot , candidate_ratio;
+  /* double current_pivot; */
   double ratio = INFINITY;
   for (unsigned i = 0 ; i < n ; ++i)
   {
@@ -456,7 +457,7 @@ int pivot_selection_lemke3(unsigned n, double* restrict col_drive, double* restr
       {
         ratio = candidate_ratio;
         block = i;
-        current_pivot = candidate_pivot;
+        /* current_pivot = candidate_pivot; */
         nb_candidates = 0;
         candidate_indx[0] = i;
       }
