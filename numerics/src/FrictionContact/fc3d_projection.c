@@ -146,7 +146,7 @@ void fc3d_projectionWithDiagonalization_update(int contact, FrictionContactProbl
 void fc3d_projection_initialize_with_regularization(FrictionContactProblem * problem, FrictionContactProblem * localproblem)
 {
   if (!localproblem->M->matrix0)
-    localproblem->M->matrix0 = (double*)malloc(9 * sizeof(double));
+    localproblem->M->matrix0 = (double*)calloc(9, sizeof(double));
 }
 
 void fc3d_projection_update_with_regularization(int contact, FrictionContactProblem * problem, FrictionContactProblem * localproblem, double* reaction, SolverOptions* options)
