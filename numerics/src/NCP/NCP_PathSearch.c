@@ -54,7 +54,7 @@ void ncp_pathsearch(NonlinearComplementarityProblem* problem, double* z, double*
   unsigned int preAlloc = options->iparam[SICONOS_IPARAM_PREALLOC];
   int itermax = options->iparam[SICONOS_IPARAM_MAX_ITER];
 
-  double merit_norm = 1.0;
+  DEBUG_EXPR(double merit_norm = 1.0;);
   double nn_tol = options->dparam[SICONOS_DPARAM_TOL];
   int nbiter = 0;
 
@@ -352,8 +352,7 @@ void ncp_pathsearch(NonlinearComplementarityProblem* problem, double* z, double*
     functions->compute_F_merit(problem, z, F, data_NMS->ls_data->F_merit);
 
     /* XXX is this correct ? */
-    merit_norm = .5 * cblas_ddot(n, data_NMS->ls_data->F_merit, 1, data_NMS->ls_data->F_merit, 1);
-
+    DEBUG_EXPR(merit_norm = .5 * cblas_ddot(n, data_NMS->ls_data->F_merit, 1, data_NMS->ls_data->F_merit, 1););
     ncp_compute_error(n, z, F, nn_tol, &err); /* XXX F should be up-to-date, we should check only CC*/
     DEBUG_PRINTF("ncp_pathsearch :: iter = %d, ncp_error = %e; merit_norm^2 = %e\n", nbiter, err, merit_norm);
 

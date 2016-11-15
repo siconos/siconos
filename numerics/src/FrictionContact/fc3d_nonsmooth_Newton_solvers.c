@@ -500,19 +500,19 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers* equation
   unsigned int itermax = options->iparam[0];
   unsigned int erritermax = options->iparam[7];
 
-  int nzmax;
+  /* int nzmax; */
 
-  if (problem->M->storageType == NM_DENSE)
-  {
-    nzmax = problemSize * problemSize;
-  }
-  else
-  {
-    nzmax = options->iparam[3];
-  }
-
+  /* if (problem->M->storageType == NM_DENSE) */
+  /* { */
+  /*   nzmax = problemSize * problemSize; */
+  /* } */
+  /* else */
+  /* { */
+  /*   nzmax = options->iparam[3]; */
+  /* } */
+  /* assert(nzmax > 0); */
   assert(itermax > 0);
-  assert(nzmax > 0);
+
 
   double tolerance = options->dparam[0];
   assert(tolerance > 0);

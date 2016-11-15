@@ -186,7 +186,7 @@ void fc3d_proximal(FrictionContactProblem* problem, double *reaction, double *ve
   }
 
   if (iparam[9]){
-    double alpha_old;
+    double alpha_old = alpha;
     while ((iter < itermax) && (hasNotConverged > 0))
     {
       ++iter;

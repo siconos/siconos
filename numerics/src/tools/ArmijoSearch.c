@@ -38,7 +38,7 @@ double search_Armijo_standalone(int n, double* theta, double preRHS, search_data
   assert(ls_data->alpha0 > 0.0);
   assert(ls_data->alpha0 > ls_data->alpha_min);
   double alpha = ls_data->alpha0;
-  double theta_iter, theta_ref = *theta;
+  double theta_iter = *theta, theta_ref = *theta;
   double* z = ls_data->z;
   double* zc = ls_data->zc;
   double* F = ls_data->F;

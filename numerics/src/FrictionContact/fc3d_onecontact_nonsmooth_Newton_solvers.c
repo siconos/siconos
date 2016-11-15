@@ -847,7 +847,7 @@ int fc3d_onecontact_nonsmooth_Newton_solvers_solve_damped(FrictionContactProblem
 int fc3d_onecontact_nonsmooth_Newton_solvers_solve_hybrid_pli_nsn_loop(FrictionContactProblem* localproblem, double * local_reaction, SolverOptions * options)
 {
 
-  int info;
+  int info = -1;
   double local_reaction_backup[3] = {local_reaction[0], local_reaction[1], local_reaction[2]};
 
   int max_loop = options->iparam[SICONOS_FRICTION_3D_NSN_HYBRID_MAX_LOOP];
