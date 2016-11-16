@@ -30,7 +30,11 @@ void numerics_error(char * functionName, char* message)
   fprintf(stderr, "%s", output);
   exit(EXIT_FAILURE);
 }
-
+/* the warning on vprintf is reported as a bug of clang ... --vacary */
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wformat-nonliteral"
+#endif
 void numerics_warning(char * functionName, char* fmt, ...)
 {
   char output[200] = "Numerics warning - ";
@@ -43,13 +47,9 @@ void numerics_warning(char * functionName, char* fmt, ...)
   fputs(output, stderr);
   vfprintf(stderr, fmt, args);
   va_end(args);
-
-
-
 }
 
-/* the warning on vprintf is reported as a bug of clang ... --vacary */
-#pragma clang diagnostic ignored "-Wformat-nonliteral"
+
 void numerics_printf(const char * fmt, ...)
 {
   if (verbose)
@@ -73,3 +73,7 @@ void numerics_printf_verbose(int verbose_mode, const char * fmt, ...)
     va_end(args);
   }
 }
+
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
