@@ -744,8 +744,8 @@ void SBM_row_prod_no_diag_3x3(unsigned int sizeX, unsigned int sizeY, unsigned i
   /* Column (block) position of the current block*/
   size_t colNumber = 0;
 
-  /* Number of rows/columns of the current block */
-  unsigned int nbRows, nbColumns;
+  /* Number of columns of the current block */
+  unsigned int nbColumns;
 
   /* Position of the sub-block of x multiplied by the sub-block of
    * A */
@@ -759,19 +759,6 @@ void SBM_row_prod_no_diag_3x3(unsigned int sizeX, unsigned int sizeY, unsigned i
   assert(y);
   assert(sizeX == A->blocksize1[A->blocknumber1 - 1]);
   assert(currentRowNumber <= A->blocknumber0);
-
-  /* Get dim (rows) of the current block */
-  nbRows = sizeY;
-
-  /*  if this is important, move it into a function --xhub */
-  /*   assert(
-    {
-      nbRows = A->blocksize0[currentRowNumber];
-      if(currentRowNumber!=0)
-        nbRows -= A->blocksize0[currentRowNumber-1];
-      nbRows == sizeY ;
-    });*/
-
 
   /* Loop over all non-null blocks. Works whatever the ordering order
      of the block is, in A->block, but it requires a set to 0 of all y
@@ -799,7 +786,6 @@ void SBM_row_prod_no_diag_3x3(unsigned int sizeX, unsigned int sizeY, unsigned i
       /* Computes y[] += currentBlock*x[] */
       /* cblas_dgemv(CblasColMajor,CblasNoTrans, nbRows, nbColumns, 1.0, A->block[blockNum], nbRows, &x[posInX], 1, 1.0, y, 1); */
       assert((nbColumns == 3));
-      assert((nbRows == 3));
       mvp3x3(A->block[blockNum], &x[posInX], y);
     }
   }
