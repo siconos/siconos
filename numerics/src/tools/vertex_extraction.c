@@ -42,7 +42,6 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-function"
 #include "lp_lib.h"
-#pragma  GCC diagnostic pop
 
 
 
@@ -101,5 +100,6 @@ void siconos_find_vertex(const polyhedron* P, unsigned size, int* basis)
   printf("You need to compile the lp_solve support");
   exit(EXIT_FAILURE);
 }
+#pragma  GCC diagnostic pop
 
 #endif
