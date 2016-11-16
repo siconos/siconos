@@ -1167,8 +1167,6 @@ void MLCPProjectOnConstraints::computeOptions(SP::Interaction inter1, SP::Intera
 {
   //  printf("MLCPProjectOnConstraints::computeOptions\n");
   // Get dimension of the NonSmoothLaw (ie dim of the interactionBlock)
-  RELATION::TYPES relationType1;
-  relationType1 = inter1->relation()->getType();
   // Retrieve size of Y (projected variable)
   unsigned int sizeY1;
   sizeY1 = std11::static_pointer_cast<OSNSMatrixProjectOnConstraints>

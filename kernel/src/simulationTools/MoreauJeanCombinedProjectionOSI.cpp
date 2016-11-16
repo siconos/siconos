@@ -65,21 +65,21 @@ bool MoreauJeanCombinedProjectionOSI::addInteractionInIndexSet(SP::Interaction i
   {
     double y = (inter->y(0))->getValue(0); // y(0) is the position
     DEBUG_PRINTF("MoreauJeanCombinedProjectionOSI::addInteractionInIndexSet yref=%e \n", y);
-#ifdef DEBUG_MESSAGES
+    DEBUG_EXPR(
     if (y <= 0)
-      DEBUG_PRINTF("MoreauJeanCombinedProjectionOSI::addInteractionInIndexSet ACTIVATE in indexSet level = %i.\n", i);
-#endif
+      printf("MoreauJeanCombinedProjectionOSI::addInteractionInIndexSet ACTIVATE in indexSet level = %i.\n", i);
+      )
     return (y <= 0);
   }
   else if (i == 2)  //  special index for the projection
   {
+    DEBUG_EXPR(
     double lambda = 0;
     lambda = (inter->lambda(1))->getValue(0); // lambda(1) is the contact impulse for MoreauJeanOSI scheme
-    DEBUG_PRINTF("MoreauJeanCombinedProjectionOSI::addInteractionInIndexSet lambdaref=%e \n", lambda);
-#ifdef DEBUG_MESSAGES
+    printf("MoreauJeanCombinedProjectionOSI::addInteractionInIndexSet lambdaref=%e \n", lambda);
     if (lambda > 0)
-      DEBUG_PRINTF("MoreauJeanCombinedProjectionOSI::addInteractionInIndexSet ACTIVATE in indexSet level = %i.\n", i);
-#endif
+      printf("MoreauJeanCombinedProjectionOSI::addInteractionInIndexSet ACTIVATE in indexSet level = %i.\n", i);
+      )
     //    return (lambda > 0);
     return true;
   }

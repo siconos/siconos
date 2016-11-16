@@ -117,8 +117,8 @@ void AVI::initialize(SP::Simulation sim)
     _numerics_problem->poly->Keq= NULL;
 
     // we do not support more than one interaction
-    assert(nbInter++ == 0 &&
-        "AVI::initialize :: more than one Interactions for this OneStepNSProblem is not support ATM!");
+    if (!(nbInter++ == 0))
+      RuntimeException::selfThrow("AVI::initialize :: more than one Interactions for this OneStepNSProblem is not support ATM!");
   }
 
 }
