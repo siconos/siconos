@@ -63,6 +63,7 @@ public:
     _pluginName = "Sub" + PO.getPluginName();
     _tmpMat.reset(new SimpleMatrix(n, p));
 #if (__GNUG__ && !( __clang__ || __INTEL_COMPILER || __APPLE__ ))
+#pragma GCC diagnostic ignored "-Wpmf-conversions"
     fPtr = (void *)&SubPluggedObject::computeAndExtract;
     _parentfPtr = PO.fPtr;
 #else

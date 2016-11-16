@@ -72,7 +72,9 @@ void NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts(SP::SiconosVect
 
   double t[6];
   double * pt = t;
-  orthoBaseFromVector(&Nx, &Ny, &Nz, pt, pt + 1, pt + 2, pt + 3, pt + 4, pt + 5);
+
+  if (orthoBaseFromVector(&Nx, &Ny, &Nz, pt, pt + 1, pt + 2, pt + 3, pt + 4, pt + 5))
+    RuntimeException::selfThrow("NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts. Problem in calling orthoBaseFromVector");
   pt = t;
   _RotationAbsToContactFrame->setValue(0, 0, Nx);
   _RotationAbsToContactFrame->setValue(1, 0, *pt);
@@ -179,7 +181,8 @@ void NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts(SP::SiconosVect
 
   double t[6];
   double * pt = t;
-  orthoBaseFromVector(&Nx, &Ny, &Nz, pt, pt + 1, pt + 2, pt + 3, pt + 4, pt + 5);
+  if(orthoBaseFromVector(&Nx, &Ny, &Nz, pt, pt + 1, pt + 2, pt + 3, pt + 4, pt + 5))
+    RuntimeException::selfThrow("NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts. Problem in calling orthoBaseFromVector");
   pt = t;
   _RotationAbsToContactFrame->setValue(0, 0, Nx);
   _RotationAbsToContactFrame->setValue(1, 0, *pt);
