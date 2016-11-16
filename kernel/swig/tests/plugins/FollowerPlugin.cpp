@@ -205,6 +205,11 @@ SICONOS_EXPORT void FollowerComputeG0(unsigned int sizeDS, const double* q, unsi
   G0[0] = 1;
 }
 
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
+#endif
+
 SICONOS_EXPORT void FollowerComputeH1(unsigned int sizeDS, const double* q, double time, unsigned int sizeY, double* y, unsigned int sizeZ, double* z)
 {
   double CamEqForce, CamPosition, CamVelocity, CamAcceleration, rpm = z[0];
@@ -231,4 +236,6 @@ SICONOS_EXPORT void FollowerComputeG11(unsigned int sizeDS, const double* q, dou
   G1[0] = 0;
 }
 
-
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
