@@ -57,6 +57,11 @@ set(${COMPONENT}_EXCLUDE_DOXY
 
 SET(${COMPONENT}_EXCLUDE_SRCS "SOL/lumod-c/sparselib.c" "SOL/lumod-c/lumod_sparse.c")
 
+set_source_files_properties(SOL/lumod-c/commonlib.h PROPERTIES COMPILE_FLAGS -Wno-unused-variable)
+set_source_files_properties(SuiteSparse/CSparse/csparse.c PROPERTIES COMPILE_FLAGS -Wno-unused)
+
+
+
 if(NOT HAS_ATLAS_LAPACK)
   set(${COMPONENT}_EXCLUDE_SRCS ${${COMPONENT}_EXCLUDE_SRCS} "blas_lapack/clapack_dtrtrs.c")
 endif()
