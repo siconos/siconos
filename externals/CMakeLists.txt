@@ -57,7 +57,8 @@ set(${COMPONENT}_EXCLUDE_DOXY
 
 SET(${COMPONENT}_EXCLUDE_SRCS "SOL/lumod-c/sparselib.c" "SOL/lumod-c/lumod_sparse.c")
 
-set_source_files_properties(SOL/lumod-c/commonlib.h PROPERTIES COMPILE_FLAGS -Wno-unused-variable)
+set_source_files_properties(SOL/lumod-c/lumod_dense.c PROPERTIES COMPILE_FLAGS -Wno-unused-variable)
+set_source_files_properties(SOL/lumod-c/commonlib.c PROPERTIES COMPILE_FLAGS -Wno-unused-variable)
 set_source_files_properties(SuiteSparse/CSparse/csparse.c PROPERTIES COMPILE_FLAGS -Wno-unused)
 
 
