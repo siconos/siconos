@@ -91,6 +91,9 @@
 %ignore getInvMSimple;
 %ignore getInvMBlock;
 
+%warnfilter(509) rotateAbsToBody;
+%warnfilter(509) changeFrameAbsToBody;
+%warnfilter(509) changeFrameBodyToAbs;
 
 
  // common declarations with upper modules : Mechanics, IO, ...
