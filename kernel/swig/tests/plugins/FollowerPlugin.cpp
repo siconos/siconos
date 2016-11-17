@@ -205,7 +205,7 @@ SICONOS_EXPORT void FollowerComputeG0(unsigned int sizeDS, const double* q, unsi
   G0[0] = 1;
 }
 
-#ifdef __GNUC__
+#if (__GNUC__ && !( __clang__ ))
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-but-set-variable"
 #endif
@@ -236,6 +236,6 @@ SICONOS_EXPORT void FollowerComputeG11(unsigned int sizeDS, const double* q, dou
   G1[0] = 0;
 }
 
-#ifdef __GNUC__
+#if (__GNUC__ && !( __clang__ ))
 #pragma GCC diagnostic pop
 #endif
