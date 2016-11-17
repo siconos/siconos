@@ -152,7 +152,7 @@ namespace std11 = boost;
   // checkTrivialCase => better if directly in solvers, not in driver.
   $1 = &temp_info;
 }
-
+%warnfilter(322) set_cstruct;
 %inline
 %{
  static unsigned int isqrt(unsigned int n)
@@ -179,6 +179,7 @@ namespace std11 = boost;
     return 1;
 #endif
   }
+
 
 #ifdef __cplusplus
   extern "C" {
