@@ -240,7 +240,6 @@ namespace Siconos {
  */
     template <typename M>
     void fill_sym(M& m) {
-      typedef typename M::size_type  size_type ;
       typedef typename M::value_type value_type ;
 
       int size = m.size2() ;
