@@ -94,7 +94,7 @@ static inline void _sn_check_shape(PyObject** mat, CSparseMatrix *M) {};
   { \
   int32_t* int32p = (int32_t*) malloc(dim[0] * sizeof(int32_t)); \
   if (!int32p) {  PyErr_SetString(PyExc_RuntimeError, "Could not allocate memory to convert " # intp "to 32 bits"); return NULL; }; \
-  for (size_t i = 0; i < dim[0]; ++i) { int32p[i] = intp[i]; } \
+  for (size_t i = 0; i < (size_t)dim[0]; ++i) { int32p[i] = intp[i]; }        \
   out  = PyArray_SimpleNewFromData(1, dim, NPY_INT_TYPE, int32p); \
   if(!out) {  PyErr_SetString(PyExc_RuntimeError, "Could not extract " # intp); return NULL; }; \
   PyArray_UpdateFlags((PyArrayObject*)out, NPY_ARRAY_OWNDATA); \
