@@ -92,7 +92,7 @@ macro(add_siconos_swig_sub_module fullname)
 
   # compile flags
   foreach(_dir ${${COMPONENT}_SWIG_INCLUDE_DIRECTORIES})
-    set(${COMPONENT}_SWIG_DEFS "-I${_dir};${${COMPONENT}_SWIG_DEFS};-Wno-sometimes-uninitialized")
+    set(${COMPONENT}_SWIG_DEFS "-I${_dir};${${COMPONENT}_SWIG_DEFS}")
   endforeach()
 
   IF(WITH_CXX OR NOT ${COMPONENT} MATCHES "numerics")
