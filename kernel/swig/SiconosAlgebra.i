@@ -6,6 +6,11 @@
 
 %include KernelTypes.i
 
+%warnfilter(509) SiconosMatrix::PLUForwardBackwardInPlace;
+%warnfilter(509) SimpleMatrix::PLUForwardBackwardInPlace;
+%warnfilter(509) SimpleMatrix::SolveByLeastSquares;
+%warnfilter(509) SiconosVector;
+
 %include SiconosMatrix.hpp
 %include SimpleMatrix.hpp
 %include SiconosVector.hpp
