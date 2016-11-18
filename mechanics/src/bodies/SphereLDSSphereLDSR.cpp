@@ -82,8 +82,9 @@ void SphereLDSSphereLDSR::computeJachq(SiconosVector& q, SiconosVector& z)
   n2 = B;
   n3 = C;
 
-  orthoBaseFromVector(&n1, &n2, &n3, &u1, &u2, &u3, &v1, &v2, &v3);
-
+  if (orthoBaseFromVector(&n1, &n2, &n3, &u1, &u2, &u3, &v1, &v2, &v3))
+        RuntimeException::selfThrow("SphereLDSSphereLDSR::computeJachq. Problem in calling orthoBaseFromVector");
+  
   double x0 = 2 * n1 * r1 * u2;
   double x1 = 2 * n2 * r1 * u1;
   double x2 = x0 - x1;

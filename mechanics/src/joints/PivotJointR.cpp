@@ -77,8 +77,8 @@ void PivotJointR::initComponents(Interaction& inter, VectorOfBlockVectors& DSlin
 }
 void PivotJointR::buildA1A2()
 {
-  orthoBaseFromVector(&_Ax, &_Ay, &_Az, &_A1x, &_A1y, &_A1z, &_A2x, &_A2y, &_A2z);
-
+  if (orthoBaseFromVector(&_Ax, &_Ay, &_Az, &_A1x, &_A1y, &_A1z, &_A2x, &_A2y, &_A2z))
+    RuntimeException::selfThrow("PivotJointR::initComponents. Problem in calling orthoBaseFromVector");
   assert(fabs(_A1x * _Ax + _A1y * _Ay + _A1z * _Az) < 1e-9 && "PivotJoint, _A1 wrong\n");
   assert(fabs(_A2x * _Ax + _A2y * _Ay + _A2z * _Az) < 1e-9 && "PivotJoint, _A2 wrong\n");
   assert(fabs(_A1x * _A2x + _A1y * _A2y + _A1z * _A2z) < 1e-9 && "PivotJoint, _A12 wrong\n");
