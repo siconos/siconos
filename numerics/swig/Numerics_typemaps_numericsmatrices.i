@@ -1043,13 +1043,13 @@ static PyObject* cs_sparse_to_coo_matrix(CSparseMatrix *M, bool copy)
   if(M$argnum) { NM_clean_cs(M$argnum, alloc_ctrl_$argnum); cs_spfree(M$argnum); }
 }
 
-%inline
-%{
-  static void getSBM(SparseBlockStructuredMatrix* M, SparseBlockStructuredMatrix* outSBM)
-  {
-    outSBM=M;
-  }
-%}
+/* %inline */
+/* %{ */
+/*   static void getSBM(SparseBlockStructuredMatrix* M, SparseBlockStructuredMatrix* outSBM) */
+/*   { */
+/*     outSBM=M; */
+/*   } */
+/* %} */
 
 #undef CSparseMatrix
 
