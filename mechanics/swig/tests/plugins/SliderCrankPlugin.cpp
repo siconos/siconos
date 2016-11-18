@@ -68,7 +68,7 @@ extern "C" void internalMomentsB1_Jacq(double t, double *q, double *v, double *j
   // printf("q[5] = %e\n", q[5]);
   // printf("q[6] = %e\n", q[6]);
 
-  double angle = 2*asin(q[5]);
+  // double angle = 2*asin(q[5]);
 
   // printf("angle = %e\n", angle);
   jac[1+5*3]=1e3 * 2.0 / sqrt(1 - q[5]*q[5]) ;
