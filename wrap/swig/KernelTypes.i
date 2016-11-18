@@ -17,7 +17,7 @@
 // limitations under the License.
 //
 
-//	
+//
 // SWIG interface for Siconos Kernel types
 
 //PyArray_UpdateFlags does not seem to have any effect
@@ -293,15 +293,15 @@ struct IsDense : public Question<bool>
 
     // try a conversion from std11::shared_ptr<SiconosVector>
     res1 = SWIG_ConvertPtrAndOwn(vec, &argp1, $descriptor(std11::shared_ptr<SiconosVector> *), 0 |  0 , &newmem);
-    if (SWIG_IsOK(res1)) 
+    if (SWIG_IsOK(res1))
     {
-      if (newmem & SWIG_CAST_NEW_MEMORY) 
+      if (newmem & SWIG_CAST_NEW_MEMORY)
       {
         // taken from generated code
         tempshared1 = *reinterpret_cast< std11::shared_ptr<SiconosVector> * >(argp1);
         delete reinterpret_cast< std11::shared_ptr<SiconosVector> * >(argp1);
         return tempshared1;
-      } 
+      }
       else {
         smartarg1 = reinterpret_cast< std11::shared_ptr<SiconosVector> * >(argp1);
         return  *smartarg1;
@@ -321,7 +321,7 @@ struct IsDense : public Question<bool>
 
     // try a conversion from SiconosVector
     res1 = SWIG_ConvertPtr(vec, &argp1, $descriptor(SiconosVector *), 0 |  0);
-    if (SWIG_IsOK(res1)) 
+    if (SWIG_IsOK(res1))
     {
     // no newmem & SWIG_CAST_NEW_MEMORY + tempshared for non SP
       smartarg1 = reinterpret_cast< SiconosVector * >(argp1);
@@ -346,7 +346,7 @@ struct IsDense : public Question<bool>
       else
       {
         // not a dense vector : no conversion
-        return SWIG_NewPointerObj(SWIG_as_voidptr(&v), $descriptor(SP::SiconosVector *),  0 );  
+        return SWIG_NewPointerObj(SWIG_as_voidptr(&v), $descriptor(SP::SiconosVector *),  0 );
       }
     }
     else
@@ -721,7 +721,7 @@ struct IsDense : public Question<bool>
   $result = SP_SiconosVector_out($1, l_upcall, obj0);
 }
 
-// director output : PyObject -> SP::SiconosVector 
+// director output : PyObject -> SP::SiconosVector
 %typemap(directorout, fragment="SiconosVector") std11::shared_ptr<SiconosVector> ()
 {
   // %typemap(directorout, fragment="SiconosVector") std11::shared_ptr<SiconosVector> ()
@@ -759,7 +759,7 @@ struct IsDense : public Question<bool>
 //    array = obj_to_array_fortran_allow_conversion($input, NPY_DOUBLE,&is_new_object);
 //    if (!require_dimensions(array,2) ||
 //        !require_native(array) || !require_fortran(array)) throw Swig::DirectorMethodException();
-//    
+//
 //
 //    SP::SimpleMatrix tmp;
 //    tmp.reset(new SimpleMatrix(array_size(array,0), array_size(array,1)));
@@ -769,7 +769,7 @@ struct IsDense : public Question<bool>
 //  }
 //
 //  if (!swig_argp)
-//  {  
+//  {
 //    return (SiconosMatrix) c_result;
 //  }
 //  else
@@ -796,7 +796,7 @@ struct IsDense : public Question<bool>
 //////////////////////////////////////////////////////////////////////////////
 %define TYPEMAP_MATRIX(TYPE)
 // numpy or TYPE on input -> TYPE
-%typemap(in, fragment="SiconosMatrix") (std11::shared_ptr<TYPE>) (PyArrayObject* array=NULL, int is_new_object) 
+%typemap(in, fragment="SiconosMatrix") (std11::shared_ptr<TYPE>) (PyArrayObject* array=NULL, int is_new_object)
 {
 
   void *argp1=0;
@@ -807,15 +807,15 @@ struct IsDense : public Question<bool>
 
    // try a conversion from a SiconosMatrix
   res1 = SWIG_ConvertPtrAndOwn($input, &argp1, $descriptor(SP::TYPE *), 0 |  0 , &newmem);
-  if (SWIG_IsOK(res1)) 
+  if (SWIG_IsOK(res1))
   {
-    if (newmem & SWIG_CAST_NEW_MEMORY) 
+    if (newmem & SWIG_CAST_NEW_MEMORY)
     {
       // taken from generated code
       tempshared1 = *reinterpret_cast< SP::TYPE * >(argp1);
       delete reinterpret_cast< SP::TYPE * >(argp1);
       $1 = tempshared1;
-    } 
+    }
     else {
       smartarg1 = reinterpret_cast< SP::TYPE * >(argp1);
       $1 = *smartarg1;
@@ -845,7 +845,7 @@ struct IsDense : public Question<bool>
    }
 }
 
-%typemap(in, fragment="SiconosMatrix") 
+%typemap(in, fragment="SiconosMatrix")
   TYPE&
   (PyArrayObject* array = NULL, int is_new_object, std::vector<SP::TYPE> keeper)
 {
@@ -943,7 +943,7 @@ struct IsDense : public Question<bool>
       return SWIG_DIRECTOR_CAST(p);
     }
   };
-  
+
   template<typename T>
     struct DirectorNoCast
   {
@@ -953,7 +953,7 @@ struct IsDense : public Question<bool>
       return 0;
     }
   };
-%}  
+%}
 
 
 %typemap(out) std11::shared_ptr<std::vector<unsigned int> >
@@ -969,9 +969,9 @@ struct IsDense : public Question<bool>
   typedef boost::mpl::eval_if<boost::is_polymorphic<self_type >,
     DirectorCast<self_type >,
     DirectorNoCast<self_type > >::type CastMaybe;
-  
+
   CastMaybe cast_maybe;
-  
+
   Swig::Director* l_director = cast_maybe.value(arg1);
   bool l_upcall = (l_director && (l_director->swig_get_self()==obj0));
 
@@ -1005,7 +1005,7 @@ struct IsDense : public Question<bool>
 
 // check on input : a python sequence
 %typecheck(SWIG_TYPECHECK_INTEGER)
-(std11::shared_ptr<std::vector<unsigned int> >) 
+(std11::shared_ptr<std::vector<unsigned int> >)
 {
   // %typecheck(std11::shared_ptr<std::vector<unsigned int> >, precedence=SWIG_TYPECHECK_INTEGER))
   PySequence_Check($input);
@@ -1013,18 +1013,18 @@ struct IsDense : public Question<bool>
 
 // python int sequence => std::vector<unsigned int>
 %{
-  static int sequenceToUnsignedIntVector(
-    PyObject *input, 
-    std11::shared_ptr<std::vector<unsigned int> > ptr) 
+  static inline int sequenceToUnsignedIntVector(
+    PyObject *input,
+    std11::shared_ptr<std::vector<unsigned int> > ptr)
   {
     if (!PySequence_Check(input)) {
       PyErr_SetString(PyExc_TypeError,"Expecting a sequence");
       return 0;
     }
-    
+
     assert(ptr);
-    
-    for (int i =0; i <  PyObject_Length(input); i++) 
+
+    for (int i =0; i <  PyObject_Length(input); i++)
     {
       PyObject *o = PySequence_GetItem(input,i);
       if (!PyInt_Check(o)) {
@@ -1032,12 +1032,12 @@ struct IsDense : public Question<bool>
         PyErr_SetString(PyExc_ValueError,"Expecting a sequence of ints");
         return 0;
       }
-      
+
       if (PyInt_AsLong(o) == -1 && PyErr_Occurred())
         return 0;
-      
+
       ptr->push_back(static_cast<unsigned int>(PyInt_AsLong(o)));
-      
+
       Py_DECREF(o);
     }
     return 1;
@@ -1046,7 +1046,7 @@ struct IsDense : public Question<bool>
 
 
 // int sequence => std::vector<unsigned int>
-%typemap(in,fragment="NumPy_Fragments") std11::shared_ptr<std::vector<unsigned int> > (std11::shared_ptr<std::vector<unsigned int> > temp) 
+%typemap(in,fragment="NumPy_Fragments") std11::shared_ptr<std::vector<unsigned int> > (std11::shared_ptr<std::vector<unsigned int> > temp)
 {
   temp.reset(new std::vector<unsigned int>());
   if (!sequenceToUnsignedIntVector($input, temp))
