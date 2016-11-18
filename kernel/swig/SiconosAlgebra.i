@@ -9,6 +9,7 @@
 %warnfilter(509) SiconosMatrix::PLUForwardBackwardInPlace;
 %warnfilter(509) SimpleMatrix::PLUForwardBackwardInPlace;
 %warnfilter(509) SimpleMatrix::SolveByLeastSquares;
+%warnfilter(504) SimpleMatrix::ACCEPT_STD_VISITORS();
 %warnfilter(509) SiconosVector;
 
 %include SiconosMatrix.hpp
