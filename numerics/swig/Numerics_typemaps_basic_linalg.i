@@ -81,9 +81,10 @@
 
     if (*p_problem_size1 / 3 == 0) SWIG_fail;
 
-    number_of_contacts1 = *p_problem_size1 / 3;
+    /* number_of_contacts1 = *p_problem_size1 / 3; */
 
   }
+
 
   assert (*p_problem_size1);
 
@@ -152,7 +153,7 @@
 
     if (*p_problem_size1 / 3 == 0) SWIG_fail;
 
-    number_of_contacts1 = *p_problem_size1 / 3;
+    /* number_of_contacts1 = *p_problem_size1 / 3; */
 
   }
 
@@ -219,7 +220,7 @@
     if (*p_problem_size1 / 3 == 0) SWIG_fail;
 
 
-    number_of_contacts1 = *p_problem_size1 / 3;
+    /* number_of_contacts1 = *p_problem_size1 / 3; */
 
   }
 
