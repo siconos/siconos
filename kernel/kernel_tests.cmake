@@ -62,18 +62,6 @@ if(WITH_${COMPONENT}_TESTING)
   #FirstOrderNonLinearDSTest.cpp FirstOrderLinearDSTest.cpp 
   #LagrangianDSTest.cpp LagrangianLinearTIDSTest.cpp TestMain.cpp)
 
-  # Global tests
-  BEGIN_TEST(src/global_tests)
-
-  ADD_LIBRARY(gTestPlugin MODULE src/global_tests/gTestPlugin.cpp)
-  SET_TARGET_PROPERTIES(gTestPlugin 
-    PROPERTIES PREFIX "" 
-    OUTPUT_NAME src/global_tests/gTestPlugin)
-  
-  NEW_TEST(testGlobal
-    DiodeBridge.cpp FunctionTest.cpp  GlobalTests.cpp)
-  
-  END_TEST()
   
   BEGIN_TEST(src/utils/SiconosTools/test)
 
