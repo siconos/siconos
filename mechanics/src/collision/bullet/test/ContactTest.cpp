@@ -133,8 +133,6 @@ BounceResult bounceTest(std::string moving,
     if (params.trace) printf("==\n");
     fflush(stdout);
 
-    // TODO: set the shape margin
-
     // Set up a Siconos Mechanics environment:
     // A BodyDS with a contactor consisting of a single sphere.
     SP::BodyDS body(new BodyDS(q0, v0, params.mass));
@@ -167,11 +165,11 @@ BounceResult bounceTest(std::string moving,
       ch->setOutsideMargin(params.outsideMargin);
       contactors->push_back(std11::make_shared<SiconosContactor>(ch));
     }
-    body->contactors() = contactors;
+    body->setContactors(contactors);
 
     // A contactor with no body (static contactor) consisting of a plane
-    // Positioned such that bouncing and resting position = 0.0
-    SP::SiconosContactorSet static_contactors;
+    // positioned such that bouncing and resting position = 0.0
+    SP::SiconosContactorSet static_contactors(std11::make_shared<SiconosContactorSet>());
     if (ground=="plane")
     {
       SP::SiconosPlane plane(new SiconosPlane());
@@ -233,10 +231,6 @@ BounceResult bounceTest(std::string moving,
 
     int N = ceil((T - t0) / h); // Number of time steps
 
-    SP::NonSmoothLaw nslaw(new NewtonImpactFrictionNSL(0.8, 0., 0.0, 3));
-
-    // TODO pass nslaw to collisionMan
-
     // -- MoreauJeanOSI Time Stepping
     SP::TimeStepping simulation(new TimeStepping(timedisc));
 
@@ -255,10 +249,13 @@ BounceResult bounceTest(std::string moving,
     // Add static shapes (centered at zero by default)
     collisionMan->insertStaticContactorSet(static_contactors);
 
+    // Add a non-smooth law
+    SP::NonSmoothLaw nslaw(new NewtonImpactFrictionNSL(0.8, 0., 0.0, 3));
+    collisionMan->insertNonSmoothLaw(nslaw, 0, 0);
+
     ///////
 
     int new_interaction_total = 0;
-    collisionMan->resetStatistics();
 
     ///////
 
@@ -307,9 +304,6 @@ BounceResult bounceTest(std::string moving,
         max_simultaneous_contacts = interactions;
 
       avg_simultaneous_contacts += interactions;
-
-      // Reset interaction counters for next iteration
-      collisionMan->resetStatistics();
 
       // Standard deviation (cheating by not calculating mean!)
       if (k==(steps-100))
