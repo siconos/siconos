@@ -4,7 +4,7 @@ import numpy
 import math
 import pickle
 
-from siconos.mechanics.contact_detection.tools import Contactor
+from siconos.mechanics.collision.tools import Contactor
 from siconos.io.mechanics_io import Hdf5
 import siconos.numerics as Numerics
 
@@ -18,6 +18,7 @@ body_collection={}
 
 body_collection['plan_id']= {}
 id_plan=0
+
 
 def normal_plane(p1,p2,p3):
 

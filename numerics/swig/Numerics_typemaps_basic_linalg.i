@@ -85,7 +85,6 @@
 
   }
 
-  
   assert (*p_problem_size1);
 
 

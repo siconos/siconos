@@ -6,8 +6,9 @@ import pickle
 
 import random
 
-from siconos.mechanics.contact_detection.tools import Contactor
+from siconos.mechanics.collision.tools import Contactor
 from siconos.io.mechanics_io import Hdf5
+import siconos.io.mechanics_io
 #sys.path.append('../..')
 #from mechanics_io import Hdf5
 import siconos.numerics as Numerics
@@ -142,3 +143,4 @@ with Hdf5(mode='r+', collision_margin=0.01) as io:
          numerics_verbose=False,
          violation_verbose=True,
          output_frequency=10)
+  

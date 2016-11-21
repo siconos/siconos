@@ -5,7 +5,7 @@
 # shape.
 #
 
-from siconos.mechanics.contact_detection.tools import Contactor
+from siconos.mechanics.collision.tools import Contactor
 
 from siconos.io.mechanics_io import Hdf5
 
@@ -86,7 +86,7 @@ with Hdf5() as io:
 # with the vview command.
 
 
-step=10
+step=1000
 hstep=0.005
 
 with Hdf5(mode='r+',collision_margin=0.05) as io:

@@ -57,11 +57,13 @@
   PY_REGISTER(Simulation);                                              \
   PY_REGISTER(TimeStepping);                                            \
   PY_REGISTER(TimeSteppingCombinedProjection);                          \
+  PY_REGISTER(InteractionManager);                                      \
   PY_REGISTER(EventDriven);                                             \
   PY_REGISTER(EventsManager);                                           \
   PY_REGISTER(Event);                                                   \
   PY_REGISTER(Model);                                                   \
   PY_REGISTER(BoundaryCondition);                                       \
   PY_REGISTER(HarmonicBC);                                              \
+  PY_REGISTER(FixedBC);                                                 \
   PY_REGISTER(OSNSMatrix);                                              \
   PY_REGISTER(BlockCSRMatrix);

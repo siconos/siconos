@@ -188,6 +188,9 @@ void TimeSteppingCombinedProjection::advanceToEvent()
   _maxViolationUnilateral = 0.0;
   _maxViolationEquality = 0.0;
 
+  // Update interactions if a manager was provided
+  updateInteractions();
+
   SP::Topology topo = _nsds->topology();
   if (topo->numberOfIndexSet() > _indexSetLevelForProjection)
   {

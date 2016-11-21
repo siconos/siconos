@@ -5,8 +5,8 @@ import math
 import pickle
 
 import random
-from siconos.mechanics.contact_detection.tools import Contactor
-from siconos.mechanics.contact_detection.convexhull import ConvexHull
+from siconos.mechanics.collision.tools import Contactor
+from siconos.mechanics.collision.convexhull import ConvexHull
 
 from siconos.io.mechanics_io import Hdf5
 #sys.path.append('../..')

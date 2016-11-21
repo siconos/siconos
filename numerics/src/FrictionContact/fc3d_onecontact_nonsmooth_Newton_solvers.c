@@ -124,7 +124,6 @@ void fc3d_AC_free_P(FrictionContactProblem * problem, FrictionContactProblem * l
   fc3d_AC_free(problem, localproblem, localsolver_options);
   free(localsolver_options->dWork);
   localsolver_options->dWork=NULL;
-  
 }
 void fc3d_AC_post(int contact, double* reaction);
 void fc3d_AC_post(int contact, double* reaction)
@@ -352,7 +351,7 @@ int fc3d_onecontact_nonsmooth_Newton_solvers_solve_direct(FrictionContactProblem
   double * MLocal = localproblem->M->matrix0;
 
   double Tol = dparam[SICONOS_DPARAM_TOL];
-  double itermax = iparam[SICONOS_IPARAM_MAX_ITER];
+  int itermax = iparam[SICONOS_IPARAM_MAX_ITER];
 
 
   int i, j, k, inew;

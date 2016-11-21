@@ -1,5 +1,5 @@
 // -*- c++ -*-
-%module(package="contact_detection", directors="1", allprotected="1") base
+%module(package="collision", directors="1", allprotected="1") native
 
 %include MechanicsBase.i
 

@@ -610,6 +610,9 @@ void EventDriven::update(unsigned int levelInput)
 
 void EventDriven::advanceToEvent()
 {
+  // Update interactions if a manager was provided
+  updateInteractions();
+
   _tinit = _eventsManager->startingTime();
   _tend =  _eventsManager->nextTime();
   _tout = _tend;

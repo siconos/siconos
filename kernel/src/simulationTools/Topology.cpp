@@ -21,6 +21,21 @@
 #include "Interaction.hpp"
 #include "EqualityConditionNSL.hpp"
 
+
+#include "MoreauJeanOSI.hpp"
+#include "MoreauJeanGOSI.hpp"
+#include "EulerMoreauOSI.hpp"
+#include "SchatzmanPaoliOSI.hpp"
+
+#define VISITOR_CLASSES() \
+  REGISTER(MoreauJeanOSI) \
+  REGISTER(MoreauJeanGOSI) \
+  REGISTER(EulerMoreauOSI) \
+  REGISTER(SchatzmanPaoliOSI)
+
+#include <VisitorMaker.hpp>
+using namespace Experimental;
+
 // to be removed, once the mess with allOSI and OSIDynamicalSystems has been cleaned -- xhub
 #include "OneStepIntegrator.hpp"
 
@@ -224,6 +239,40 @@ void Topology::setName(SP::Interaction inter, const std::string& name)
 {
   InteractionsGraph::VDescriptor igv = _IG[0]->descriptor(inter);
   _IG[0]->name.insert(igv, name);
+}
+
+/* initW is not a member of OneStepIntegrator (should it be ?),
+   so we visit some integrators which provide this initialization.
+*/
+
+/* first, a generic visitor is defined. */
+struct CallInitW : public SiconosVisitor
+{
+  double time;
+  SP::DynamicalSystem ds;
+  DynamicalSystemsGraph::VDescriptor dsv;
+
+  template<typename T>
+  void operator()(const T& osi)
+  {
+    const_cast<T*>(&osi)->initW(this->time, this->ds, this->dsv);
+  }
+};
+
+/* the visit is made on classes which provide the function initW */
+typedef Visitor < Classes < MoreauJeanOSI,
+                            MoreauJeanGOSI,
+                            EulerMoreauOSI,
+                            SchatzmanPaoliOSI >,
+                  CallInitW >::Make InitW;
+
+void Topology::initW(double time, SP::DynamicalSystem ds, SP::OneStepIntegrator OSI)
+{
+  InitW initW;
+  initW.time = 0;
+  initW.ds = ds;
+  initW.dsv = _DSG[0]->descriptor(ds);
+  OSI->accept(initW);
 }
 
 void Topology::setOSI(SP::DynamicalSystem ds, SP::OneStepIntegrator OSI)

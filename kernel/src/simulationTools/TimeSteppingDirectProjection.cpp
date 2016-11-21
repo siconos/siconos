@@ -102,6 +102,8 @@ void TimeSteppingDirectProjection::advanceToEvent()
 
   DEBUG_PRINT("TimeStepping::newtonSolve begin :\n");
 
+  // Update interactions if a manager was provided
+  updateInteractions();
 
   if (!_doOnlyProj)
     TimeStepping::newtonSolve(_newtonTolerance, _newtonMaxIteration);

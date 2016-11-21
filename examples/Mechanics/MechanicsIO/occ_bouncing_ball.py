@@ -9,6 +9,10 @@ from siconos.mechanics import occ
 from siconos.io.mechanics_io import Hdf5
 import siconos.numerics as Numerics
 
+import siconos.io.mechanics_io
+siconos.io.mechanics_io.set_implementation('original')
+siconos.io.mechanics_io.set_backend('occ')
+
 from OCC.BRepPrimAPI import BRepPrimAPI_MakeBox, BRepPrimAPI_MakeSphere
 
 sphere = BRepPrimAPI_MakeSphere(1.).Shape()
@@ -45,8 +49,8 @@ with Hdf5(mode='r+') as io:
     # sizes of small objects may need to be expressed in cm or mm.
 
     io.run(with_timer=False,
-           time_stepping=occ.OccTimeStepping,
-           space_filter=occ.OccSpaceFilter,
+           time_stepping=None,
+           space_filter=None,
            body_class=None,
            shape_class=None,
            face_class=None,

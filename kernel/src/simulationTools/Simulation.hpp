@@ -32,6 +32,7 @@
 // #include "Model.hpp"
 // #include "NonSmoothDynamicalSystem.hpp"
 // #include "Topology.hpp"
+#include "InteractionManager.hpp"
 
 
 /** Description of the simulation process (integrators, time
@@ -88,6 +89,10 @@ protected:
   /** A pointer to the simulated nonsmooth dynamical system
    */
   SP::NonSmoothDynamicalSystem _nsds;
+
+  /** An interaction manager
+   */
+  SP::InteractionManager _interman;
 
   /** _levelMinForOutput is the minimum level for the output
    * (Interaction::_lowerlevelForOutput) for all the interactions
@@ -149,6 +154,11 @@ protected:
    */
   double _relativeConvergenceTol;
 
+  /**
+   * track whether link() or unlink() has been called
+   */
+  bool _linkOrUnlink;
+
   /** initializations of levels
    *
    */
@@ -160,7 +170,8 @@ protected:
    */
   Simulation() {};
 
-
+  /** Call the interaction manager one if is registered, otherwise do nothing. */
+  void updateInteractions();
 
 private:
 
@@ -428,6 +439,10 @@ public:
    *  topology updates. */
   virtual void initializeInteraction(double time, SP::Interaction inter);
 
+  /** Set an object to automatically manage interactions during the simulation */
+  void insertInteractionManager(SP::InteractionManager manager)
+    { _interman = manager; }
+
   /** computes a one step NS problem
    *  \param nb the id of the OneStepNSProblem to be computed
    *  \return information about the solver convergence.
@@ -553,10 +568,23 @@ public:
 
   virtual bool computeResiduR() { return false; };
 
+  /** Add a new Interaction between one or a pair of DSs.
+   * \param inter the SP::Interaction to add
+   * \param ds1 the first SP::DynamicalSystem in the Interaction
+   * \param ds2 the second SP::DynamicalSystem in the Interaction, if any
+   */
+  void link(SP::Interaction inter,
+            SP::DynamicalSystem ds1,
+            SP::DynamicalSystem ds2 = SP::DynamicalSystem());
+
+  /** Remove an Interaction from the simulation.
+   * \param inter the SP::Interaction to remove
+   */
+  void unlink(SP::Interaction inter);
+
   /** visitors hook
    */
   VIRTUAL_ACCEPT_VISITORS(Simulation);
-
 };
 
 #endif // SIMULATION_H

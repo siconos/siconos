@@ -491,6 +491,39 @@ public:
     return _scalarMass;
   };
 
+  /** Modify the scalar mass */
+  void setScalarMass(double mass)
+  {
+    _scalarMass = mass;
+    updateMassMatrix();
+  };
+
+  /* Get the inertia matrix
+   * \return a SP::SimpleMatrix
+   */
+  SP::SiconosMatrix inertia()
+  {
+    return _I;
+  };
+
+  /* Modify the inertia matrix.
+     \param newInertia the new inertia matrix
+  */
+  void setInertia(SP::SiconosMatrix newInertia)
+  {
+    _I = newInertia;
+    updateMassMatrix();
+  }
+
+  /* Modify the inertia matrix.
+     \param ix x component
+     \param iy y component
+     \param iz z component
+  */
+  void setInertia(double ix, double iy, double iz);
+
+  /** to be called after scalar mass or inertia matrix have changed */
+  void updateMassMatrix();
 
   // -- Fext --
   /** get fExt
@@ -973,10 +1006,7 @@ public:
   /** set Boundary Conditions
    *  \param newbd BoundaryConditions
    */
-  inline void setBoundaryConditions(SP::BoundaryCondition newbd)
-  {
-    _boundaryConditions = newbd;
-  };
+  void setBoundaryConditions(SP::BoundaryCondition newbd);
 
   /** get Boundary Conditions
    *  \return SP::BoundaryCondition pointer on a BoundaryConditions

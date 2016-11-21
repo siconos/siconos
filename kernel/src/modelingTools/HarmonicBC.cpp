@@ -19,29 +19,66 @@
 #include "HarmonicBC.hpp"
 #include "BoundaryCondition.hpp"
 
-// HarmonicBC::HarmonicBC(SP::UnsignedIntVector newVelocityIndices,
-//                        double a, double b,
-//                        double omega, double phi):
-//   BoundaryCondition(newVelocityIndices),_a(a),_b(b),_omega(omega),_phi(phi)
-// {
-//   ;
-// }
+
+// #define DEBUG_MESSAGES
+// #define DEBUG_STDOUT
+#include "debug.h"
+
 HarmonicBC::HarmonicBC(SP::UnsignedIntVector newVelocityIndices,
                        double a, double b,
                        double omega, double phi) :
   BoundaryCondition (newVelocityIndices) ,_a(a),_b(b),_omega(omega),_phi(phi)
-  {};
+{
+};
+
+HarmonicBC::HarmonicBC(SP::UnsignedIntVector newVelocityIndices,
+           SP::SiconosVector a, SP::SiconosVector b,
+           SP::SiconosVector omega, SP::SiconosVector phi):
+  BoundaryCondition (newVelocityIndices) ,_aV(a),_bV(b),_omegaV(omega),_phiV(phi)
+{
+  DEBUG_BEGIN("HarmonicBC::Harmonic((SP::UnsignedIntVector newVelocityIndices,\
+               SP::SiconosVector a, SP::SiconosVector b,                \
+               SP::SiconosVector omega, SP::SiconosVector phi)\n");
+
+  if (newVelocityIndices->size() != a->size()     ||
+      newVelocityIndices->size() != b->size()     ||
+      newVelocityIndices->size() != omega->size() ||
+      newVelocityIndices->size() != phi->size())
+    RuntimeException::selfThrow("HarmonicBC::HarmonicBC indices and vectors of data \
+           (a,b,omega,phi) must be of the same size ");
+
+  
+  DEBUG_END("HarmonicBC::Harmonic((SP::UnsignedIntVector newVelocityIndices,\
+           SP::SiconosVector a, SP::SiconosVector b,\
+           SP::SiconosVector omega, SP::SiconosVector phi)\n");
+
+  
+};
+
 
 HarmonicBC::~HarmonicBC()
 {
 }
-
-
 void HarmonicBC::computePrescribedVelocity(double time)
 {
+  DEBUG_BEGIN("HarmonicBC::computePrescribedVelocity(double time)\n");
   if (!_prescribedVelocity) _prescribedVelocity.reset(new SiconosVector((unsigned int)_velocityIndices->size()));
-  for (unsigned int k = 0 ; k < _velocityIndices->size(); k++)
+  if (!_aV)
   {
-    _prescribedVelocity->setValue(k,_a+_b*cos(_omega*time+_phi));
+    for (unsigned int k = 0 ; k < _velocityIndices->size(); k++)
+    {
+      _prescribedVelocity->setValue(k,_a+_b*cos(_omega*time+_phi));
+      DEBUG_PRINTF("_prescribedVelocity[%i] at time  %e = %e \n",k, time,_prescribedVelocity->getValue(k));
+    }
   }
+  else
+  {
+    for (unsigned int k = 0 ; k < _velocityIndices->size(); k++)
+    {
+      _prescribedVelocity->setValue(k,(*_aV)(k)+(*_bV)(k)*cos((*_omegaV)(k)*time+(*_phiV)(k)));
+      DEBUG_PRINTF("_prescribedVelocity[%i] at time  %e = %e \n",k, time,_prescribedVelocity->getValue(k));
+    }
+  }
+
+  DEBUG_END("HarmonicBC::computePrescribedVelocity(double time)\n");
 }

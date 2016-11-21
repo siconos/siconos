@@ -193,6 +193,9 @@ void TimeSteppingD1Minus::run()
 
 void TimeSteppingD1Minus::advanceToEvent()
 {
+  // Update interactions if a manager was provided
+  updateInteractions();
+
   // we start after initialization (initOSNS) with
   // * initial state (q_0, v_0^+)
   // * updated indexset (I_0^+)

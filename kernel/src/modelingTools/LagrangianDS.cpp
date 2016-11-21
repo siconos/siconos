@@ -904,3 +904,11 @@ double LagrangianDS::computeKineticEnergy()
   DEBUG_END("LagrangianDS::computeKineticEnergy()\n");
   return K;
 }
+
+void LagrangianDS::setBoundaryConditions(SP::BoundaryCondition newbd)
+{
+  if(!_boundaryConditions){
+    std::cout << "Warning : LagrangianDS::setBoundaryConditions. old boundary conditions were pre-existing" <<std::endl;
+  }
+  _boundaryConditions = newbd;
+};

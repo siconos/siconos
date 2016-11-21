@@ -464,7 +464,6 @@ void  gfc3d_nonsmooth_Newton_AlartCurnier_wr(GlobalFrictionContactProblem* probl
 
     DEBUG_EXPR( NM_dense_display(localproblem->M->matrix0,localproblem->M->size0, localproblem->M->size1, 0 ););
 
-    
     freeSBM(localproblem->M->matrix1);
     free(localproblem->M->matrix1);
     localproblem->M->matrix1 = NULL;

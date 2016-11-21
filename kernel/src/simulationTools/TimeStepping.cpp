@@ -345,18 +345,17 @@ void TimeStepping::nextStep()
 void TimeStepping::update(unsigned int levelInput)
 {
   DEBUG_BEGIN("TimeStepping::update(unsigned int levelInput)\n");
+
   // 1 - compute input (lambda -> r)
   if (!_allNSProblems->empty())
     _nsds->updateInput(nextTime(),levelInput);
-
-
 
   // 2 - compute state for each dynamical system
   OSIIterator itOSI;
   for (itOSI = _allOSI->begin(); itOSI != _allOSI->end() ; ++itOSI)
     (*itOSI)->updateState(levelInput);
-  /*Because the dof of DS have been updated,
-    the world (CAO for example) must be updated.*/
+
+  // need this until mechanics' BulletTimeStepping class is removed
   updateWorldFromDS();
 
   // 3 - compute output ( x ... -> y)
@@ -451,6 +450,9 @@ void TimeStepping::advanceToEvent()
 {
   DEBUG_PRINTF("TimeStepping::advanceToEvent(). Time =%f\n",getTkp1());
 
+  // Update interactions if a manager was provided
+  updateInteractions();
+
   // Initialize lambdas of all interactions.
   SP::InteractionsGraph indexSet0 = _nsds->
                                     topology()->indexSet(0);
@@ -462,7 +464,6 @@ void TimeStepping::advanceToEvent()
     indexSet0->bundle(*ui)->resetAllLambda();
   }
   newtonSolve(_newtonTolerance, _newtonMaxIteration);
-
 }
 
 /*update of the nabla */
@@ -562,6 +563,7 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
       DEBUG_BEGIN("          \n");
       DEBUG_END("          \n");
       _newtonNbIterations++;
+
       prepareNewtonIteration();
       computeFreeState();
       if (info)

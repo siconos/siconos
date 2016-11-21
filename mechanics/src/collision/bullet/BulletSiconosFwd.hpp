@@ -26,8 +26,16 @@ DEFINE_SPTR(btCollisionShape);
 DEFINE_SPTR(btBoxShape);
 DEFINE_SPTR(btCylinderShape);
 DEFINE_SPTR(btManifoldPoint);
+DEFINE_SPTR(btStaticPlaneShape);
+DEFINE_SPTR(btSphereShape);
+DEFINE_SPTR(btConvexHullShape);
 
 DEFINE_SPTR(btTriangleIndexVertexMaterialArray);
+DEFINE_SPTR(btTriangleIndexVertexArray);
+DEFINE_SPTR(btBvhTriangleMeshShape);
+
+// extension of btBvhTriangleMeshShape used in Siconos to store mesh data
+DEFINE_SPTR(btSiconosMeshData);
 
 DEFINE_SPTR(btCollisionObject);
 DEFINE_SAPTR(btCollisionObject);

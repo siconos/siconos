@@ -275,7 +275,7 @@ if(NOT LAPACK_FOUND)
     
     ## Generic LAPACKE library ##
     if((NOT LAPACK_LIBRARIES)
-	AND ((NOT WITH_LAPACK) OR (WITH_LAPACK STREQUAL "lapacke")))
+	AND ((NOT WITH_LAPACK) OR (WITH_LAPACK STREQUAL "lapacke") OR (WITH_LAPACK STREQUAL "generic")))
       message(STATUS "Try to find a generic lapacke ...")
       if(LAPACKE_NAME)
 	message(STATUS "Using user-provided name ${LAPACKE_NAME}")
