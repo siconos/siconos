@@ -8,7 +8,10 @@
 
 #ifndef BOOST_NUMERIC_BINDINGS_BLAS_LEVEL1_HPP
 #define BOOST_NUMERIC_BINDINGS_BLAS_LEVEL1_HPP
-
+#ifdef __GNUC__
+// Avoid tons of warnings with root code
+#pragma GCC system_header
+#endif
 #include <boost/numeric/bindings/blas/level1/asum.hpp>
 #include <boost/numeric/bindings/blas/level1/axpy.hpp>
 #include <boost/numeric/bindings/blas/level1/copy.hpp>
