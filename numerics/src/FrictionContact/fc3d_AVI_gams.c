@@ -23,6 +23,8 @@
 #include <float.h>
 
 #include "NumericsMatrix.h"
+#include "NumericsSparseMatrix.h"
+#include "SolverOptions.h"
 #include "FrictionContactProblem.h"
 #include "fc3d_Solvers.h"
 #include "fc3d_compute_error.h"
@@ -690,6 +692,7 @@ static int fc3d_AVI_gams_base(FrictionContactProblem* problem, double *reaction,
      ************************************************/
     unsigned offset_row = 0;
     double* xtmp = (double*)calloc(size, sizeof(double));
+    double workTmp[3];
     for (unsigned i3 = 0, i = 0; i3 < size; ++i, i3 += 3)
     {
       double res = 0.;
@@ -701,7 +704,7 @@ static int fc3d_AVI_gams_base(FrictionContactProblem* problem, double *reaction,
       DEBUG_PRINTF("Contact %d, del r = [%.*e; %.*e; %.*e]\n", i, DECIMAL_DIG, reaction_old[i3+0]-ri[0], DECIMAL_DIG, reaction_old[i3+1]-ri[1], DECIMAL_DIG, reaction_old[i3+2]-ri[2]);
       assert(i < (unsigned)problem->numberOfContacts);
       double mu = problem->mu[i];
-      fc3d_unitary_compute_and_add_error(ri, ui, mu, &res);
+      fc3d_unitary_compute_and_add_error(ri, ui, mu, &res, workTmp);
       residual_contact[i] = sqrt(res);
       DEBUG_EXPR_WE(if (res > old_residual) { printf("Contact %d, res = %g > %g = old_residual\n", i, sqrt(res), old_residual); });
       total_residual += res;

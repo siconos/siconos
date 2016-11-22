@@ -16,6 +16,7 @@
 #include "NumericsMatrix.h"
 #include "LinearComplementarityProblem.h"
 #include "LCP_Solvers.h"
+#include "SolverOptions.h"
 
 #ifdef HAVE_GAMS_C_API
 

@@ -16,6 +16,7 @@
 #define _XOPEN_SOURCE 700
 
 #include "NumericsMatrix.h"
+#include "NumericsSparseMatrix.h"
 #include "GlobalFrictionContactProblem.h"
 #include "gfc3d_Solvers.h"
 
