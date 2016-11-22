@@ -30,6 +30,7 @@
 
 void frictionContact_test_gams_opts(SN_GAMSparams* GP, int solverId)
 {
+#ifdef HAVE_GAMS_C_API
   if (solverId == SICONOS_FRICTION_3D_GAMS_PATHVI ||
       solverId == SICONOS_FRICTION_3D_GAMS_LCP_PATHVI ||
       solverId == SICONOS_GLOBAL_FRICTION_3D_GAMS_PATHVI
@@ -66,7 +67,7 @@ void frictionContact_test_gams_opts(SN_GAMSparams* GP, int solverId)
   add_GAMS_opt_int(GP, "minor_iteration_limit", 100000, GAMS_OPT_SOLVER);
   add_GAMS_opt_int(GP, "major_iteration_limit", 20, GAMS_OPT_SOLVER);
   add_GAMS_opt_double(GP, "expand_delta", 1e-10, GAMS_OPT_SOLVER);
-
+#endif
 }
 
 int frictionContact_test_function(FILE * f, SolverOptions * options)

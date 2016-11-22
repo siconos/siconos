@@ -184,6 +184,7 @@ void solver_options_free_solver_specific_data(SolverOptions* options)
       free(options->solverData);
       options->solverData = NULL;
       break;
+#ifdef HAVE_GAMS_C_API
     case SICONOS_FRICTION_3D_GAMS_PATH:
     case SICONOS_FRICTION_3D_GAMS_PATHVI:
     case SICONOS_FRICTION_3D_GAMS_LCP_PATH:
@@ -195,6 +196,7 @@ void solver_options_free_solver_specific_data(SolverOptions* options)
       options->solverParameters = NULL;
       break;
     }
+#endif
     case SICONOS_VI_BOX_AVI_LSA:
     {
      vi_box_AVI_free_solverData(options);
