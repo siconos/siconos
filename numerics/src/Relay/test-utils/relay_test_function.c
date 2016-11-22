@@ -17,6 +17,7 @@
 */
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 #include "NonSmoothDrivers.h"
 #include "relay_test_function.h"
 #include "RelayProblem.h"
@@ -51,6 +52,7 @@ int relay_test_function(FILE * f, int  solverId)
   for (i = 0 ; i < problem->size ; i++)
   {
     printf("z[%i] = %12.8e\t,w[%i] = %12.8e\n", i, z[i], i, w[i]);
+    info = info == 0 ? !(isfinite(z[i]) && isfinite(w[i])): info;
   }
 
   if (!info)

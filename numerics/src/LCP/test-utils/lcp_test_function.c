@@ -57,7 +57,9 @@ int lcp_test_function(FILE * f, int solverId, char* filename)
   for (i = 0 ; i < problem->size ; i++)
   {
     printf("z[%i] = %12.8e\t,w[%i] = %12.8e\n", i, z[i], i, w[i]);
+    info = info == 0 ? !(isfinite(z[i]) && isfinite(w[i])): info;
   }
+
 
   if (!info)
   {

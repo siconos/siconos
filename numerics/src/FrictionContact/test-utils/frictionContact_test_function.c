@@ -208,6 +208,10 @@ int frictionContact_test_function_hdf5(const char * path, SolverOptions * option
     printf("\n");
   }
 
+  for (k = 0; k < dim * NC; ++k)
+  {
+    info = info == 0 ? !(isfinite(velocity[k]) && isfinite(reaction[k])) : info;
+  }
   /* for (k = 0 ; k < dim * NC; k++) */
   /* { */
   /*   printf("Velocity[%i] = %12.8e \t \t Reaction[%i] = %12.8e\n", k, velocity[k], k , reaction[k]); */

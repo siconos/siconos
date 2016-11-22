@@ -77,6 +77,16 @@ int globalFrictionContact_test_function(FILE * f, SolverOptions * options)
   }
   printf("\n");
 
+  for (k = 0; k < dim * NC; ++k)
+  {
+    info = info == 0 ? !(isfinite(velocity[k]) && isfinite(reaction[k])) : info;
+  }
+
+  for (k = 0; k < n; ++k)
+  {
+    info = info == 0 ? !(isfinite(globalvelocity[k])) : info;
+  }
+
   if (!info)
   {
     printf("test succeeded\n");
