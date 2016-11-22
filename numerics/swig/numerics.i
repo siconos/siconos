@@ -388,6 +388,46 @@ namespace std11 = boost;
 %include GAMSlink.h
 %include numerics_GFC.i
 
+%define STR_FIELD_COPY(field,strobj)
+{
+%#if PY_MAJOR_VERSION < 3
+    if(!PyString_Check(strobj))
+%#else
+    if(!PyUnicode_Check(strobj))
+%#endif
+    {
+      PyErr_SetString(PyExc_TypeError, "The argument should be string");
+      PyErr_PrintEx(0);
+      return;
+    }
+
+    char* name_str;
+%#if PY_MAJOR_VERSION < 3
+    name_str = PyString_AsString(strobj);
+%#else
+    PyObject* tmp_ascii;
+    tmp_ascii = PyUnicode_AsASCIIString(strobj);
+    name_str = PyBytes_AsString(tmp_ascii);
+%#endif
+    size_t len = strlen(name_str) + 1;
+
+    // Some weird logic here
+    if (field)
+    {
+      field = (char*)realloc(field, len*sizeof(char));
+    }
+    else
+    {
+      field = (char*)malloc(len*sizeof(char));
+    }
+    strncpy(field, name_str, len);
+
+%#if PY_MAJOR_VERSION >= 3
+    Py_XDECREF(tmp_ascii);
+%#endif
+}
+%enddef
+
 %extend SN_GAMSparams
 {
 
@@ -397,6 +437,15 @@ namespace std11 = boost;
     return (SN_GAMSparams*) SO->solverParameters;
   }
 
+  void gamsdir_set(PyObject* strobj)
+  {
+    STR_FIELD_COPY($self->gams_dir, strobj)
+  }
+
+  void modeldir_set(PyObject* strobj)
+  {
+    STR_FIELD_COPY($self->model_dir, strobj)
+  }
   ~SN_GAMSparams()
   {
     //do nothing

@@ -8,8 +8,6 @@
 #include <assert.h>
 
 
-//#include "SolverOptions.h"
-
 /** Simply linked list of bool option for GAMS
  */
 
@@ -61,150 +59,6 @@ typedef struct {
   GAMS_opt_double* opt_double_list; /**< list of double options */
 } SN_GAMSparams;
 
-static inline SN_GAMSparams* createGAMSparams(char* model_dir, char* gams_dir)
-{
-  SN_GAMSparams* GP = (SN_GAMSparams*) malloc(sizeof(SN_GAMSparams));
-
-  GP->model_dir = model_dir;
-  GP->gams_dir = gams_dir;
-  GP->filename = NULL;
-  GP->filename_suffix = NULL;
-  GP->opt_str_list = NULL;
-  GP->opt_bool_list = NULL;
-  GP->opt_int_list = NULL;
-  GP->opt_double_list = NULL;
-
-  return GP;
-}
-
-#define GAMS_ADD_OPT(GAMSP_OPT_L, GAMSP_OPT_T) \
-GAMSP_OPT_T* next_opt = GAMSP_OPT_L; \
-GAMSP_OPT_T* new_opt; \
-if (next_opt) \
-{ \
-  while (next_opt->next_opt) \
-  { \
-    next_opt = next_opt->next_opt; \
-  } \
-  next_opt->next_opt = (GAMSP_OPT_T*)malloc(sizeof(GAMSP_OPT_T)); \
-  new_opt = next_opt->next_opt; \
-} \
-else \
-{ \
-  GAMSP_OPT_L = (GAMSP_OPT_T*)malloc(sizeof(GAMSP_OPT_T)); \
-  new_opt = GAMSP_OPT_L; \
-} \
-new_opt->name = name; \
-new_opt->value = value; \
-new_opt->type = type; \
-new_opt->next_opt = NULL; \
-
-static inline void add_GAMS_opt_str(SN_GAMSparams* GP, char* name, char* value, unsigned type)
-{
-   GAMS_ADD_OPT(GP->opt_str_list, GAMS_opt_str);
-}
-
-static inline void add_GAMS_opt_bool(SN_GAMSparams* GP, char* name, bool value, unsigned type)
-{
-   GAMS_ADD_OPT(GP->opt_bool_list, GAMS_opt_bool);
-}
-
-static inline void add_GAMS_opt_int(SN_GAMSparams* GP, char* name, int value, unsigned type)
-{
-   GAMS_ADD_OPT(GP->opt_int_list, GAMS_opt_int);
-}
-
-static inline void add_GAMS_opt_double(SN_GAMSparams* GP, char* name, double value, unsigned type)
-{
-   GAMS_ADD_OPT(GP->opt_double_list, GAMS_opt_double);
-}
-
-static inline void deleteGAMSparams(SN_GAMSparams* GP)
-{
-  if (GP->opt_str_list)
-  {
-    GAMS_opt_str* next_opt = GP->opt_str_list;
-    do 
-    {
-      GAMS_opt_str* str_opt = next_opt;
-      next_opt = str_opt->next_opt;
-      str_opt->name = NULL;
-      str_opt->value = NULL;
-      str_opt->next_opt = NULL;
-      free(str_opt);
-    }
-    while (next_opt);
-    GP->opt_str_list = NULL;
-  }
-  if (GP->opt_bool_list)
-  {
-    GAMS_opt_bool* next_opt = GP->opt_bool_list;
-    do 
-    {
-      GAMS_opt_bool* bool_opt = next_opt;
-      next_opt = bool_opt->next_opt;
-      bool_opt->name = NULL;
-      bool_opt->value = false;
-      bool_opt->next_opt = NULL;
-      free(bool_opt);
-    }
-    while (next_opt);
-    GP->opt_bool_list = NULL;
-  }
-  if (GP->opt_int_list)
-  {
-    GAMS_opt_int* next_opt = GP->opt_int_list;
-    do 
-    {
-      GAMS_opt_int* int_opt = next_opt;
-      next_opt = int_opt->next_opt;
-      int_opt->name = NULL;
-      int_opt->value = 0;
-      int_opt->next_opt = NULL;
-      free(int_opt);
-    }
-    while (next_opt);
-    GP->opt_int_list = NULL;
-  }
-  if (GP->opt_double_list)
-  {
-    GAMS_opt_double* next_opt = GP->opt_double_list;
-    do 
-    {
-      GAMS_opt_double* double_opt = next_opt;
-      next_opt = double_opt->next_opt;
-      double_opt->name = NULL;
-      double_opt->value = 0.;
-      double_opt->next_opt = NULL;
-      free(double_opt);
-    }
-    while (next_opt);
-    GP->opt_double_list = NULL;
-  }
-  free(GP);
-}
-
-static inline const char* GAMSP_get_filename(const void* GP)
-{
-  return ((SN_GAMSparams*) GP)->filename;
-}
-
-static inline void GAMSP_set_filename(void* GP, char* filename)
-{
-  ((SN_GAMSparams*) GP)->filename = filename;
-}
-
-static inline const char* GAMSP_get_filename_suffix(const void* GP)
-{
-  return ((SN_GAMSparams*) GP)->filename_suffix;
-}
-
-static inline void GAMSP_set_filename_suffix(void* GP, char* filename_suffix)
-{
-  ((SN_GAMSparams*) GP)->filename_suffix = filename_suffix;
-}
-
-
 typedef struct SN_GAMS_NM_gdx_
 {
   NumericsMatrix* mat;
@@ -227,10 +81,30 @@ typedef struct
   SN_GAMS_NV_gdx* vec_from_gdx;
 } SN_GAMS_gdx;
 
+static inline const char* GAMSP_get_filename(const void* GP)
+{
+  return ((SN_GAMSparams*) GP)->filename;
+}
+
+static inline void GAMSP_set_filename(void* GP, char* filename)
+{
+  ((SN_GAMSparams*) GP)->filename = filename;
+}
+
+static inline const char* GAMSP_get_filename_suffix(const void* GP)
+{
+  return ((SN_GAMSparams*) GP)->filename_suffix;
+}
+
+static inline void GAMSP_set_filename_suffix(void* GP, char* filename_suffix)
+{
+  ((SN_GAMSparams*) GP)->filename_suffix = filename_suffix;
+}
+
 #define SN_FREE_TILL_NEXT(X, T, ELT) \
   while(X) { T* next = X->next; X->ELT = NULL; X->name = NULL; X->next = NULL;\
     free(X); X = next; }
-  
+
 
 static inline void SN_free_SN_GAMS_gdx(SN_GAMS_gdx* gdx_data)
 {
@@ -576,6 +450,50 @@ extern "C"
   int SN_gams_solve(unsigned iter, optHandle_t Optr, char* sysdir, char* model, const char* base_name, SolverOptions* options, SN_GAMS_gdx* gdx_data);
 
   void filename_datafiles(const int iter, const int solverId, const char* base_name, unsigned len, char* template_name, char* log_filename);
+
+  /** Create a GAMS parameters struct
+   * \param model_dir path to the gams model directory
+   * \param gams_dir path to the GAMS installation directory
+   * \return a GAMS parameters struct
+   */
+  SN_GAMSparams* createGAMSparams(char* model_dir, char* gams_dir);
+
+  /** Add a string option to the GAMS parameters
+   * \param GP the GAMS parameter struct
+   * \param name the name of the option
+   * \param value the option value
+   * \param type the type of the option
+   */
+  void add_GAMS_opt_str(SN_GAMSparams* GP, char* name, char* value_orig, unsigned type);
+
+  /** Add a bool option to the GAMS parameters
+   * \param GP the GAMS parameter struct
+   * \param name the name of the option
+   * \param value the option value
+   * \param type the type of the option
+   */
+  void add_GAMS_opt_bool(SN_GAMSparams* GP, char* name, bool value, unsigned type);
+
+  /** Add an integer option to the GAMS parameters
+   * \param GP the GAMS parameter struct
+   * \param name the name of the option
+   * \param value the option value
+   * \param type the type of the option
+   */
+  void add_GAMS_opt_int(SN_GAMSparams* GP, char* name, int value, unsigned type);
+
+  /** Add a double option to the GAMS parameters
+   * \param GP the GAMS parameter struct
+   * \param name the name of the option
+   * \param value the option value
+   * \param type the type of the option
+   */
+  void add_GAMS_opt_double(SN_GAMSparams* GP, char* name, double value, unsigned type);
+
+  /** Delete a GAMS parameter struct
+   * \param GP the GAMS parameter struct
+   */
+  void deleteGAMSparams(SN_GAMSparams* GP);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

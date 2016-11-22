@@ -14,6 +14,20 @@
 /* GAMS stuff */
 
 #define _XOPEN_SOURCE 700
+#include <string.h>
+
+#ifdef __linux
+#elif _MSC_VER
+#define strdup _strdup
+#else
+static inline char* strdup(char* src)
+{
+  size_t len = strlen(src) + 1;
+  char* dest = (char*)malloc(len * sizeof(char));
+  strcpy(dest, src, len);
+  return dest;
+}
+#endif
 
 #include <stdio.h>
 #include <string.h>
@@ -24,6 +38,7 @@
 
 #include "NumericsMatrix.h"
 #include "FrictionContactProblem.h"
+#include "SolverOptions.h"
 
 #ifdef HAVE_GAMS_C_API
 
@@ -299,6 +314,158 @@ fail:
   gamsxFree(&Gptr);
   gmoFree(&gmoPtr);
   return (int)infos[1];
+}
+
+#define GAMS_ADD_OPT(GAMSP_OPT_L, GAMSP_OPT_T) \
+GAMSP_OPT_T* next_opt = GAMSP_OPT_L; \
+GAMSP_OPT_T* new_opt; \
+if (next_opt) \
+{ \
+  while (next_opt->next_opt) \
+  { \
+    next_opt = next_opt->next_opt; \
+  } \
+  next_opt->next_opt = (GAMSP_OPT_T*)malloc(sizeof(GAMSP_OPT_T)); \
+  new_opt = next_opt->next_opt; \
+} \
+else \
+{ \
+  GAMSP_OPT_L = (GAMSP_OPT_T*)malloc(sizeof(GAMSP_OPT_T)); \
+  new_opt = GAMSP_OPT_L; \
+} \
+new_opt->name = lname; \
+new_opt->value = value; \
+new_opt->type = type; \
+new_opt->next_opt = NULL; \
+
+#define GAMS_ADD_PREP(GP, name) \
+assert(GP); \
+assert(name); \
+char* lname = strdup(name);
+
+void add_GAMS_opt_str(SN_GAMSparams* GP, char* name, char* value_orig, unsigned type)
+{
+  GAMS_ADD_PREP(GP, name);
+  assert(value_orig);
+  char* value = strdup(value_orig);
+  GAMS_ADD_OPT(GP->opt_str_list, GAMS_opt_str);
+}
+
+void add_GAMS_opt_bool(SN_GAMSparams* GP, char* name, bool value, unsigned type)
+{
+  GAMS_ADD_PREP(GP, name);
+  GAMS_ADD_OPT(GP->opt_bool_list, GAMS_opt_bool);
+}
+
+void add_GAMS_opt_int(SN_GAMSparams* GP, char* name, int value, unsigned type)
+{
+  GAMS_ADD_PREP(GP, name);
+  GAMS_ADD_OPT(GP->opt_int_list, GAMS_opt_int);
+}
+
+void add_GAMS_opt_double(SN_GAMSparams* GP, char* name, double value, unsigned type)
+{
+  GAMS_ADD_PREP(GP, name);
+  GAMS_ADD_OPT(GP->opt_double_list, GAMS_opt_double);
+}
+
+SN_GAMSparams* createGAMSparams(char* model_dir, char* gams_dir)
+{
+  SN_GAMSparams* GP = (SN_GAMSparams*) malloc(sizeof(SN_GAMSparams));
+
+  GP->model_dir = strdup(model_dir);
+  GP->gams_dir = strdup(gams_dir);
+  assert(GP->model_dir);
+  assert(GP->gams_dir);
+  GP->filename = NULL;
+  GP->filename_suffix = NULL;
+  GP->opt_str_list = NULL;
+  GP->opt_bool_list = NULL;
+  GP->opt_int_list = NULL;
+  GP->opt_double_list = NULL;
+
+  return GP;
+}
+
+void deleteGAMSparams(SN_GAMSparams* GP)
+{
+  if (GP->model_dir)
+  {
+    free(GP->model_dir);
+    GP->model_dir = NULL;
+  }
+
+  if (GP->gams_dir)
+  {
+    free(GP->gams_dir);
+    GP->gams_dir = NULL;
+  }
+
+  if (GP->opt_str_list)
+  {
+    GAMS_opt_str* next_opt = GP->opt_str_list;
+    do 
+    {
+      GAMS_opt_str* str_opt = next_opt;
+      next_opt = str_opt->next_opt;
+      assert(str_opt->name);
+      free(str_opt->name);
+      str_opt->name = NULL;
+      assert(str_opt->value);
+      free(str_opt->value);
+      str_opt->value = NULL;
+      str_opt->next_opt = NULL;
+      free(str_opt);
+    }
+    while (next_opt);
+    GP->opt_str_list = NULL;
+  }
+  if (GP->opt_bool_list)
+  {
+    GAMS_opt_bool* next_opt = GP->opt_bool_list;
+    do 
+    {
+      GAMS_opt_bool* bool_opt = next_opt;
+      next_opt = bool_opt->next_opt;
+      bool_opt->name = NULL;
+      bool_opt->value = false;
+      bool_opt->next_opt = NULL;
+      free(bool_opt);
+    }
+    while (next_opt);
+    GP->opt_bool_list = NULL;
+  }
+  if (GP->opt_int_list)
+  {
+    GAMS_opt_int* next_opt = GP->opt_int_list;
+    do 
+    {
+      GAMS_opt_int* int_opt = next_opt;
+      next_opt = int_opt->next_opt;
+      int_opt->name = NULL;
+      int_opt->value = 0;
+      int_opt->next_opt = NULL;
+      free(int_opt);
+    }
+    while (next_opt);
+    GP->opt_int_list = NULL;
+  }
+  if (GP->opt_double_list)
+  {
+    GAMS_opt_double* next_opt = GP->opt_double_list;
+    do 
+    {
+      GAMS_opt_double* double_opt = next_opt;
+      next_opt = double_opt->next_opt;
+      double_opt->name = NULL;
+      double_opt->value = 0.;
+      double_opt->next_opt = NULL;
+      free(double_opt);
+    }
+    while (next_opt);
+    GP->opt_double_list = NULL;
+  }
+  free(GP);
 }
 
 /*
