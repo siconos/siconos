@@ -1,7 +1,7 @@
 import math
 import numpy
 class Simplex(object):
-    def __init__(self,coordinates):  
+    def __init__(self,coordinates):
         if not len(coordinates) == 4:
             raise RuntimeError('You must provide only 4 coordinates!')
         self._coordinates = numpy.array(coordinates)
@@ -16,7 +16,7 @@ class Simplex(object):
         vB = numpy.array(self._coordinates[2]) - numpy.array(self._coordinates[0])
         vC = numpy.array(self._coordinates[3]) - numpy.array(self._coordinates[0])
 
-        return numpy.abs(numpy.dot(numpy.cross(vA,vB),vC)) / 6.0  
+        return numpy.abs(numpy.dot(numpy.cross(vA,vB),vC)) / 6.0
 
     def det(self):
         # import numpy
@@ -29,7 +29,7 @@ class Simplex(object):
         det=abs(numpy.linalg.det(J))
         #print('det', det, 'volume',det/6.0)
         return det
-    
+
     def centroid(self):
         import numpy
         # compute centroid
@@ -39,21 +39,21 @@ class Simplex(object):
         cm = cm /len(self._coordinates)
         #print('centroid',cm)
         return cm
-    
+
     def inertia(self, G):
         '''
         inertia : Return the inertia w.r.t the global axis and the point G
         '''
         #
         det=self.det()
-        
+
         # change of variable
         v1=  self._coordinates[0] - numpy.array(G)
         v2 = self._coordinates[1] - numpy.array(G)
         v3 = self._coordinates[2] - numpy.array(G)
         v4 = self._coordinates[3] - numpy.array(G)
-        
-        
+
+
         I = numpy.zeros((3,3))
         I[0,0] = det*(
             v1[1]*v1[1]  + v1[1]*v2[1]+ v2[1]*v2[1]+ v1[1]*v3[1]+ v2[1]*v3[1]
@@ -80,15 +80,15 @@ class Simplex(object):
         # b'
         I[0,2] = - det*(
               2.0*v1[0]*v1[2]+ v2[0]*v1[2] + v3[0]*v1[2] +  v4[0]*v1[2] + v1[0]*v2[2]
-            + 2.0*v2[0]*v2[2]+ v3[0]*v2[2] + v4[0]*v2[2] +  v1[0]*v3[2] + v2[0]*v3[2] 
-            + 2.0*v3[0]*v3[2]+ v4[0]*v3[2] + v1[0]*v4[2] +  v2[0]*v4[2] + v3[0]*v4[2] 
+            + 2.0*v2[0]*v2[2]+ v3[0]*v2[2] + v4[0]*v2[2] +  v1[0]*v3[2] + v2[0]*v3[2]
+            + 2.0*v3[0]*v3[2]+ v4[0]*v3[2] + v1[0]*v4[2] +  v2[0]*v4[2] + v3[0]*v4[2]
             + 2.0*v4[0]*v4[2]) /120.0
         I[2,0] = I[0,2]
         # c'
         I[0,1] = - det*(
               2.0*v1[0]*v1[1]+ v2[0]*v1[1] + v3[0]*v1[1] +  v4[0]*v1[1] + v1[0]*v2[1]
             + 2.0*v2[0]*v2[1]+ v3[0]*v2[1] + v4[0]*v2[1] +  v1[0]*v3[1] + v2[0]*v3[1]
-            + 2.0*v3[0]*v3[1]+ v4[0]*v3[1] + v1[0]*v4[1] +  v2[0]*v4[1] + v3[0]*v4[1] 
+            + 2.0*v3[0]*v3[1]+ v4[0]*v3[1] + v1[0]*v4[1] +  v2[0]*v4[1] + v3[0]*v4[1]
             + 2.0*v4[0]*v4[1]) /120.0
         I[1,0] = I[0,1]
         [p,v]=numpy.linalg.eig(I)
@@ -97,14 +97,14 @@ class Simplex(object):
         # print('Principal direction :')
         # print(v)
         return I
-        
+
 class ConvexHull(object):
 
     def __init__(self,coordinates):
         '''
         Constructor
         '''
-        
+
         if len(coordinates) < 4:
             raise RuntimeError('You must provide at least 4 coordinates!')
         self._coordinates = numpy.array(coordinates)
@@ -142,7 +142,7 @@ class ConvexHull(object):
         #print('cm ---------- ' ,cm)
         #print('barycenter ---------', self.barycenter())
         return cm
-    
+
     def barycenter(self):
         # compute barycenter
         b = numpy.zeros(3)
@@ -166,9 +166,9 @@ class ConvexHull(object):
             #n= n/numpy.linalg.norm(n)
             volume += 1/6.0 *numpy.dot(a,n)
         return volume
-    
+
     def volume(self):
-        
+
         volume = 0
         # compute centroid
         c = self.centroid()
@@ -250,7 +250,7 @@ if __name__ == '__main__':
 
     s = Simplex(coords)
     print('volume of simplex',s.volume())
-    print s.inertia(s.centroid())
+    print(s.inertia(s.centroid()))
     # t = Polyeder(coords)
     # #print t.volume()
 
