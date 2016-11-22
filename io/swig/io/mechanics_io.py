@@ -1242,6 +1242,19 @@ class Hdf5():
 
         # import dynamical systems
         if self._broadphase is not None and 'input' in self._data:
+
+            dpos_data = self.dynamic_data()
+            if dpos_data is not None and len(dpos_data) > 0:
+
+                max_time = max(dpos_data[:, 0])
+                id_last = np.where(
+                    abs(dpos_data[:, 0] - max_time) < 1e-9)[0]
+
+            else:
+                # should not be used
+                max_time = None
+                id_last = None
+                
             for (name, obj) in sorted(self._input.items(),
                                       key=lambda x: x[0]):
 
@@ -1262,13 +1275,10 @@ class Hdf5():
                     # this is for now
                     #
                     # cold restart if output previously done
-                    if mass > 0 and self.dynamic_data() is not None and len(self.dynamic_data()) > 0:
+                    if mass > 0 and dpos_data is not None and len(dpos_data) > 0:
                         print ('Import  dynamic object name ', name, 'from current state')
                         print ('  number of imported object ', obj.attrs['id'])
-                        dpos_data = self.dynamic_data()
-                        max_time = max(dpos_data[:, 0])
-                        id_last = np.where(
-                            abs(dpos_data[:, 0] - max_time) < 1e-9)[0]
+
                         id_last_inst = np.where(
                             dpos_data[id_last, 1] ==
                             self.instances()[name].attrs['id'])[0]

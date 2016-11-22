@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 
 from siconos.io.mechanics_io import Hdf5
 
