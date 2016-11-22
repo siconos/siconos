@@ -1361,3 +1361,25 @@ still to do,
    - separate shape, mixed of shapes, contactors with multiple shapes, (mandatory)
    - time_of_birth and restart  (mandatory)
    - native ?  2D ? (optional)
+** <2016-11-22 Tue> SIMPAR 2016 preparation
+
+*** Update Rover example C++ code
+    - ultimate goal is to do it in Gazebo/Siconos
+*** VRML output ?
+    - blender
+*** failing examples with other dynamic example
+    - Sebastien's example?
+    -
+*** Developnment of pivot jiont with friction
+    - Real Coulomb friction ?
+    - ideal joint / geometric contact
+    - Viscous friction . LagrangianDS ok   NewtonEulerDS difficult to set a interbal fromce between Two Newton EulerDS
+
+
+*** Control
+    - sliding mode control of mechanical systems
+    - coupling mechanics/electronics/contorl
+
+*** Development of applications
+    - AMTC.  Ensimag student. LHD
+    -
