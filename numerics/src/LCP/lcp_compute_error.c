@@ -21,7 +21,7 @@
 #include "NumericsMatrix.h"
 #include "numerics_verbose.h"
 
-void lcp_compute_error_only(unsigned int n, double *z , double *w, double * error)
+void lcp_compute_error_only(unsigned int n, double* restrict z , double* restrict w, double* restrict error)
 {
   /* Checks complementarity */
 
