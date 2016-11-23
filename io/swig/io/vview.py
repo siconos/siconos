@@ -1086,7 +1086,7 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
     recorder = vtk.vtkOggTheoraWriter()
     recorder.SetQuality(2)
     recorder.SetRate(frames_per_second)
-    recorder.SetFileName('xout.avi')
+    recorder.SetFileName(os.path.splitext(io_filename)[0]+'.avi')
     recorder.SetInputConnection(image_maker.GetOutputPort())
 
     writer = vtk.vtkPNGWriter()
