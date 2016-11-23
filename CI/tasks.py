@@ -15,7 +15,7 @@ database = os.path.join('config', 'siconos.yml')
 #
 default = CiTask(
     ci_config='default',
-    distrib='ubuntu:14.04',
+    distrib='ubuntu:16.04',
     pkgs=['build-base', 'gcc', 'gfortran', 'gnu-c++', 'atlas-lapack',
           'lpsolve', 'python-env'],
     srcs=['.'],
@@ -29,7 +29,7 @@ siconos_default = default
 
 siconos_test_deb = CiTask(
     ci_config='examples',
-    distrib='ubuntu:15.10',
+    distrib='ubuntu:16.04',
     pkgs=['siconos'],
     srcs=['examples'],
     targets={'examples': ['docker-build', 'docker-ctest']})
@@ -49,8 +49,11 @@ siconos_debian_latest = siconos_default.copy()(
 siconos_ubuntu_15_04 = siconos_default.copy()(
     distrib='ubuntu:15.04')
 
-siconos_ubuntu_16_04 = siconos_default.copy()(
-    distrib='ubuntu:16.04')
+siconos_ubuntu_14_04 = siconos_default.copy()(
+    distrib='ubuntu:14.04')
+
+siconos_ubuntu_16_10 = siconos_default.copy()(
+    distrib='ubuntu:16.10')
 
 siconos_ubuntu_15_10 = siconos_default.copy()(
     ci_config='with_umfpack',
@@ -72,11 +75,11 @@ siconos_debian_mechanisms = siconos_default.copy()(
     distrib='debian:latest')
 
 
-siconos_numerics_only = siconos_ubuntu_15_10.copy()(
+siconos_numerics_only = siconos_ubuntu_16_10.copy()(
     ci_config='no_cxx',
     remove_pkgs=['gnu-c++'])
 
-siconos_profiling = siconos_ubuntu_15_10.copy()(
+siconos_profiling = siconos_ubuntu_16_10.copy()(
     build_configuration='Profiling',
     add_pkgs=['profiling'])
 
@@ -93,7 +96,7 @@ siconos_openblas_lapacke = siconos_default.copy()(
     add_pkgs=['openblas-lapacke', 'umfpack', 'path', 'wget'],  # wget for path
     with_examples=True)
 
-siconos_clang = siconos_ubuntu_15_10.copy()(
+siconos_clang = siconos_ubuntu_16_10.copy()(
     ci_config=('with_bullet', 'with_py3'),
     with_examples=False,
     remove_pkgs=['python-env'],
@@ -118,7 +121,7 @@ siconos_clang_cfi = siconos_default.copy()(
     distrib='debian:jessie',
     ci_config='with_cfi',
     build_configuration='Debug',
-    add_pkgs=['clang-3.8', 'mumps', 'hdf5', 'cfi'])
+    add_pkgs=['mumps', 'hdf5', 'cfi'])
 
 siconos_gcc_asan = siconos_fedora_latest.copy()(
     ci_config=('with_asan', 'with_mumps', 'with_hdf5', 'with_serialization'),
@@ -148,7 +151,7 @@ siconos_default_examples = siconos_default.copy()(
     ci_config='examples',
     with_examples=True)
 
-siconos_frama_c = siconos_ubuntu_16_04.copy()(
+siconos_frama_c = siconos_default.copy()(
     ci_config='with_frama_c',
     add_pkgs=['opam', 'frama-c', 'libgtksourceview2.0-dev', 'libgnomecanvas2-dev', 'aspcud', 'm4',
               'unzip', 'coq', 'ocaml', 'z3'])
@@ -172,7 +175,7 @@ known_tasks = {'siconos---vm0':
                'siconos---vm2':
                (siconos_ubuntu_15_10,
                 siconos_ubuntu_15_04,
-                siconos_ubuntu_16_04,
+                siconos_ubuntu_14_04,
                 siconos_profiling),
 
                'siconos---vm3':
