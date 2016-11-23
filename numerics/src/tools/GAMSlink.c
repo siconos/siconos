@@ -16,7 +16,7 @@
 #define _XOPEN_SOURCE 700
 #include <string.h>
 
-#ifdef __linux
+#if (__linux ||  __APPLE__)
 #elif _MSC_VER
 #define strdup _strdup
 #else
