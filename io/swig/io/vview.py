@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import sys
+import sys, os, json
 import vtk
 from vtk.util import numpy_support
 from math import pi
@@ -13,6 +13,27 @@ import getopt
 from siconos.io.mechanics_io import Hdf5
 from siconos.io.mechanics_io import tmpfile as io_tmpfile
 
+## Persistent configuration
+config = {'window_size': [600,600]}
+config_fn = os.path.join(os.environ['HOME'], '.config', 'siconos_vview.json')
+
+def load_configuration():
+    if os.path.exists(config_fn):
+        try:
+            config.update(json.load(open(config_fn)))
+        except:
+            print("Warning: Error loading configuration `{}'".format(config_fn))
+
+def save_configuration():
+    try:
+        if not os.path.exists(os.path.join(os.environ['HOME'], '.config')):
+            os.mkdir(os.path.join(os.environ['HOME'], '.config'))
+        json.dump(config, open(config_fn,'w'))
+    except:
+        print("Error saving configuration `{}'".format(config_fn))
+
+# Load it immediately
+load_configuration()
 
 ## Print usage information
 def usage():
@@ -1453,7 +1474,7 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
                                            input_observer.prec_plot_observer)
 
     # screen_size = renderer_window.GetScreenSize()
-    renderer_window.SetSize(600, 600)
+    renderer_window.SetSize(*config['window_size'])
     renderer_window.SetWindowName('vview: ' + io_filename)
     tview_iter.GetRenderer().GetRenderWindow().SetSize(600, 200)
     tview_prec.GetRenderer().GetRenderWindow().SetSize(600, 200)
@@ -1505,3 +1526,9 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
         'TimerEvent', input_observer.recorder_observer)
 
     interactor_renderer.Start()
+
+## Finalize on quit
+
+# Update configuration and save it
+config['window_size'] = renderer_window.GetSize()
+save_configuration()
