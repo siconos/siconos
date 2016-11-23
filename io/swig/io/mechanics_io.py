@@ -734,7 +734,8 @@ class Hdf5():
                                              must_exist=False)
         self._joints = group(self._data, 'joints')
         try:
-            self._boundary_conditions = group(self._data, 'boundary_conditions')
+            self._boundary_conditions = group(self._data, 'boundary_conditions',
+                                              must_exist=(self._mode=='w'))
         except Exception as e :
             print('Warning -  group(self._data, boundary_conditions ) : ',  e)
         self._static_data = data(self._data, 'static', 9,
