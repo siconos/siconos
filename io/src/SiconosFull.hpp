@@ -24,6 +24,7 @@
 
 #define NVP(X) BOOST_SERIALIZATION_NVP(X)
 
+#include <SparseBlockMatrix.h>
 #ifdef KERNEL_ONLY
 #include "SiconosFullKernelGenerated.hpp"
 #else
@@ -219,27 +220,27 @@ void siconos_io(Archive& ar, LsodarOSI& osi, unsigned int version)
     osi.jroot.reset(new integer[osi._intData[1]]);
   }
   {
-    boost::serialization::array<doublereal>
+    boost_ser_array<doublereal>
       wrapper = boost::serialization::make_array(osi.rtol.get(),osi._intData[0]); 
     ar & boost::serialization::make_nvp("rtol",wrapper); 
   }
   {
-    boost::serialization::array<doublereal>
+    boost_ser_array<doublereal>
       wrapper = boost::serialization::make_array(osi.atol.get(),osi._intData[0]); 
     ar & boost::serialization::make_nvp("atol",wrapper); 
   }
   {
-    boost::serialization::array<integer>
+    boost_ser_array<integer>
       wrapper = boost::serialization::make_array(osi.iwork.get(),osi._intData[7]); 
     ar & boost::serialization::make_nvp("iwork",wrapper); 
   }
   {
-    boost::serialization::array<doublereal>
+    boost_ser_array<doublereal>
       wrapper = boost::serialization::make_array(osi.rwork.get(),osi._intData[6]); 
     ar & boost::serialization::make_nvp("rwork",wrapper); 
   }
   {
-    boost::serialization::array<integer>
+    boost_ser_array<integer>
       wrapper = boost::serialization::make_array(osi.jroot.get(),osi._intData[1]); 
     ar & boost::serialization::make_nvp("jroot",wrapper); 
   }

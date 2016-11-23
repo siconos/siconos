@@ -51,6 +51,12 @@
 
 #include <debug.h>
 
+// This should be cleaner --xhub
+#if (BOOST_VERSION >= 106100)
+#define boost_ser_array boost::serialization::array_wrapper
+#else
+#define boost_ser_array boost::serialization::array
+#endif
 
 /** register class serialization in boost namespace
     \param a class name
@@ -170,7 +176,7 @@
     STRUCT . ARRAY = (BOOST_TYPEOF(STRUCT . ARRAY)) malloc(DIM * sizeof(BOOST_TYPEOF(* (STRUCT . ARRAY)))); \
   };                                                                    \
   {                                                                     \
-    boost::serialization::array<BOOST_TYPEOF(*(STRUCT . ARRAY))>        \
+    boost_ser_array<BOOST_TYPEOF(*(STRUCT . ARRAY))>        \
       wrapper = boost::serialization::make_array(STRUCT . ARRAY,DIM);   \
     ARCHIVE & boost::serialization::make_nvp(BOOST_PP_STRINGIZE(ARRAY),wrapper); \
   }
