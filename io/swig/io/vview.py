@@ -14,6 +14,7 @@ from siconos.io.mechanics_io import Hdf5
 from siconos.io.mechanics_io import tmpfile as io_tmpfile
 
 
+## Print usage information
 def usage():
     print '{0}: Usage'.format(sys.argv[0])
     print """
@@ -66,6 +67,7 @@ def add_compatiblity_methods(obj):
     if hasattr(obj, 'AddInput'):
         obj.AddInputData = obj.AddInput
 
+## Parse command line
 try:
     opts, args = getopt.gnu_getopt(sys.argv[1:], '',
                                    ['help', 'dat', 'tmin=', 'tmax=', 'no-cf',
@@ -140,6 +142,7 @@ else:
     usage()
     exit(1)
 
+## Utilities
 
 def random_color():
     r = random.uniform(0.1, 0.9)
@@ -289,6 +292,10 @@ def brep_reader(brep_string, indx):
 
         return reader
 
+
+## Program starts
+
+# Read file and open VTK interaction window
 
 refs = []
 refs_attrs = []
