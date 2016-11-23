@@ -1447,6 +1447,7 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
 
     # screen_size = renderer_window.GetScreenSize()
     renderer_window.SetSize(600, 600)
+    renderer_window.SetWindowName('vview: ' + io_filename)
     tview_iter.GetRenderer().GetRenderWindow().SetSize(600, 200)
     tview_prec.GetRenderer().GetRenderWindow().SetSize(600, 200)
 
