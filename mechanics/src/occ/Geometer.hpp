@@ -10,16 +10,15 @@
 #include <limits>
 
 
-struct DistanceCalculatorType {};
-struct OccType : DistanceCalculatorType {};
-struct CadmbtbType : DistanceCalculatorType {};
+struct DistanceCalculatorType { VIRTUAL_ACCEPT_VISITORS(DistanceCalculatorType); };
+struct OccDistanceType : DistanceCalculatorType { ACCEPT_STD_VISITORS(); };
+struct CadmbtbDistanceType : DistanceCalculatorType { ACCEPT_STD_VISITORS(); };
 
 struct Geometer : public Question<ContactShapeDistance>
 {
   bool _normalFromFace1;
   Geometer() : _normalFromFace1(true) {};
 };
-
 
 template<typename DistType>
 void distanceFaceFace(const OccContactFace& csh1,
@@ -57,7 +56,7 @@ void distanceEdgeEdge(const OccContactEdge& csh1,
 
 
 template<>
-void distanceFaceFace<CadmbtbType>(const OccContactFace& csh1,
+void distanceFaceFace<CadmbtbDistanceType>(const OccContactFace& csh1,
                                    const OccContactFace& csh2,
                                    Standard_Real& X1, Standard_Real& Y1, Standard_Real& Z1,
                                    Standard_Real& X2, Standard_Real& Y2, Standard_Real& Z2,
@@ -66,7 +65,7 @@ void distanceFaceFace<CadmbtbType>(const OccContactFace& csh1,
                                    Standard_Real& MinDist);
 
 template<>
-void distanceFaceEdge<CadmbtbType>(const OccContactFace& csh1,
+void distanceFaceEdge<CadmbtbDistanceType>(const OccContactFace& csh1,
                                    const OccContactEdge& csh2,
                                    Standard_Real& X1, Standard_Real& Y1, Standard_Real& Z1,
                                    Standard_Real& X2, Standard_Real& Y2, Standard_Real& Z2,
@@ -76,7 +75,7 @@ void distanceFaceEdge<CadmbtbType>(const OccContactFace& csh1,
 
 
 template<>
-void distanceFaceFace<OccType>(const OccContactFace& csh1,
+void distanceFaceFace<OccDistanceType>(const OccContactFace& csh1,
                                const OccContactFace& csh2,
                                Standard_Real& X1, Standard_Real& Y1, Standard_Real& Z1,
                                Standard_Real& X2, Standard_Real& Y2, Standard_Real& Z2,
@@ -85,7 +84,7 @@ void distanceFaceFace<OccType>(const OccContactFace& csh1,
                                Standard_Real& MinDist);
 
 template<>
-void distanceFaceEdge<OccType>(const OccContactFace& csh1,
+void distanceFaceEdge<OccDistanceType>(const OccContactFace& csh1,
                                const OccContactEdge& csh2,
                                Standard_Real& X1, Standard_Real& Y1, Standard_Real& Z1,
                                Standard_Real& X2, Standard_Real& Y2, Standard_Real& Z2,

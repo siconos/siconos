@@ -111,9 +111,7 @@ except:
 
 # OCC imports
 try:
-    from siconos.mechanics.occ import \
-        OccContactShape, OccBody, OccContactFace, OccContactEdge, \
-        OccTimeStepping, OccSpaceFilter, OccWrap
+    from siconos.mechanics import occ
     have_occ = True
 except:
     have_occ = False
@@ -147,9 +145,9 @@ def setup_default_classes():
             default_body_class = BulletDS
             use_bullet = have_bullet
         elif backend == 'occ':
-            default_manager_class = lambda model,options: OccSpaceFilter(model)
-            default_simulation_class = OccTimeStepping
-            default_body_class = OccBody
+            default_manager_class = lambda model,options: occ.OccSpaceFilter(model)
+            default_simulation_class = occ.OccTimeStepping
+            default_body_class = occ.OccBody
             use_bullet = have_bullet
 
 setup_default_classes()
@@ -292,7 +290,7 @@ def loadMesh(shape_filename, collision_margin, scale=None):
     """
 
     import vtk
-    
+
     reader = vtk.vtkXMLPolyDataReader()
     reader.SetFileName(shape_filename)
     reader.Update()
@@ -517,7 +515,7 @@ class ShapeCollection():
 
                         # the reference brep
                         if shape_class is None:
-                            brep_class = OccContactShape
+                            brep_class = occ.OccContactShape
                         else:
                             brep_class = shape_class
 
@@ -551,16 +549,16 @@ class ShapeCollection():
                         contact_index = self.attributes(shape_name)['contact_index']
 
                         if shape_class is None:
-                            brep_class = OccContactShape
+                            brep_class = occ.OccContactShape
                         else:
                             brep_class = shape_class
-                        
+
                         ref_brep = self.get(
                             self.attributes(shape_name)['brep'], shape_class)
 
                         if self.attributes(shape_name)['contact'] == 'Face':
                             if face_class is None:
-                                face_maker = OccContactFace
+                                face_maker = occ.OccContactFace
                             else:
                                 face_maker = face_class
 
@@ -570,7 +568,7 @@ class ShapeCollection():
 
                         elif self.attributes(shape_name)['contact'] == 'Edge':
                             if edge_class is None:
-                                edge_maker = OccContactEdge
+                                edge_maker = occ.OccContactEdge
                             else:
                                 edge_maker = edge_class
                             self._shapes[shape_name] = \
@@ -792,7 +790,7 @@ class Hdf5():
         Permanent interactions.
         """
         return self._permanent_interactions
-        
+
     def static_data(self):
         """
         Coordinates and orientations of static objects.
@@ -846,7 +844,7 @@ class Hdf5():
         Joints between dynamic objects or between an object and the scenery.
         """
         return self._joints
-    
+
     def boundary_conditions(self):
         """
         Boundary conditions applied to  dynamic objects
@@ -873,10 +871,8 @@ class Hdf5():
                         velocity, contactors, mass, given_inertia, body_class,
                         shape_class, face_class, edge_class, number=None):
 
-        from siconos.mechanics import occ
-
         if body_class is None:
-            body_class = OccBody
+            body_class = occ.OccBody
 
         if given_inertia is not None:
             inertia = given_inertia
@@ -908,7 +904,7 @@ class Hdf5():
                 elif contactor.contact_type == 'Edge':
                     contact_shape = occ.OccContactEdge(reference_shape,
                                                        contactor.contact_index)
-                    
+
                 self._keep.append(reference_shape)
 
                 body.addContactShape(contact_shape,
@@ -924,7 +920,7 @@ class Hdf5():
             nsds.topology().setOSI(body, self._osi)
             nsds.setName(body, str(name))
 
-            
+
     def importBulletObject(self, name, translation, orientation,
                            velocity, contactors, mass, inertia,
                            body_class, shape_class, birth=False,
@@ -1130,7 +1126,7 @@ class Hdf5():
                 joint_inter = Interaction(5, joint_nslaw, joint)
                 self._model.nonSmoothDynamicalSystem().\
                     link(joint_inter, ds1)
-                
+
     def importBoundaryConditions(self, name):
         if self._broadphase is not None:
             topo = self._model.nonSmoothDynamicalSystem().\
@@ -1141,11 +1137,11 @@ class Hdf5():
 
             print('name = ', name)
             print('object1')
-            
+
             ds1_name = self.boundary_conditions()[name].attrs['object1']
             ds1 = topo.getDynamicalSystem(ds1_name)
 
-            
+
             if ( bc_type == 'HarmonicBC') :
                 bc = bc_class(self.boundary_conditions()[name].attrs['indices'],
                               self.boundary_conditions()[name].attrs['a'],
@@ -1153,19 +1149,18 @@ class Hdf5():
                               self.boundary_conditions()[name].attrs['omega'],
                               self.boundary_conditions()[name].attrs['phi'])
 
-            
+
             # set bc to the ds1
 
             ds1.setBoundaryConditions(bc);
-            
+
             #joint_inter = Interaction(5, joint_nslaw, joint)
             #    self._model.nonSmoothDynamicalSystem().\
             #        link(joint_inter, ds1)
-                
+
     def importPermanentInteraction(self, name):
         """
         """
-        from siconos.mechanics import occ
         if (self._broadphase is not None and 'input' in self._data
               and self.permanent_interactions() is not None):
             topo = self._model.nonSmoothDynamicalSystem().\
@@ -1175,6 +1170,7 @@ class Hdf5():
             body2_name=pinter.attrs['body2_name']
             contactor1_name = pinter.attrs['contactor1_name']
             contactor2_name = pinter.attrs['contactor2_name']
+            distance_calculator = pinter.attrs['distance_calculator']
 
             body1 = self._input[body1_name]
             body2 = self._input[body2_name]
@@ -1191,7 +1187,7 @@ class Hdf5():
 
             ocs1 = occ.OccContactShape(topods1)
             ocs2 = occ.OccContactShape(topods2)
-            
+
             index1 = int(ctr1.attrs['contact_index'])
             index2 = int(ctr2.attrs['contact_index'])
 
@@ -1200,14 +1196,19 @@ class Hdf5():
 
             ctactbuild = {'Face': occ.OccContactFace,
                           'Edge': occ.OccContactEdge}
-            
+
             cocs1 = ctactbuild[ctact_t1](ocs1, index1)
             cocs2 = ctactbuild[ctact_t2](ocs2, index2)
 
             cp1 = occ.ContactPoint(cocs1)
             cp2 = occ.ContactPoint(cocs2)
+
+            real_dist_calc = {'cadmbtb': occ.CadmbtbDistanceType,
+                              'occ': occ.OccDistanceType}
+
+            relation = occ.OccR(cp1, cp2,
+                                real_dist_calc[distance_calculator]())
             
-            relation = occ.OccR(cp1, cp2)
             inter = Interaction(3, nslaw, relation)
 
             ds1 = topo.getDynamicalSystem(body1_name)
@@ -1218,8 +1219,10 @@ class Hdf5():
             except:
                 self._model.nonSmoothDynamicalSystem().link(inter, ds1)
 
-            self._keep.append([topods1, topods2, ocs1, ocs2, cp1, cp2, relation, inter])
-                        
+            # keep pointers
+            self._keep.append([topods1, topods2, ocs1, ocs2, cocs1, cocs2, cp1,
+                               cp2, relation])
+
 
     def importScene(self, time, body_class, shape_class, face_class,
                     edge_class):
@@ -1254,7 +1257,7 @@ class Hdf5():
                 # should not be used
                 max_time = None
                 id_last = None
-                
+
             for (name, obj) in sorted(self._input.items(),
                                       key=lambda x: x[0]):
 
@@ -1592,7 +1595,7 @@ class Hdf5():
         """
 
         import vtk
-        
+
         if name not in self._ref:
 
             shape = self._ref.create_dataset(name, (1,),
@@ -1617,7 +1620,7 @@ class Hdf5():
         """
 
         import vtk
-        
+
         if filename[0] != os.path.sep:
             filename = os.path.join(os.path.split(os.path.abspath(sys.argv[0]))[0],
                                     filename)
@@ -1718,7 +1721,8 @@ class Hdf5():
             self._number_of_shapes += 1
 
     def addPermanentInteraction(self, name, body1_name, contactor1_name,
-                                body2_name, contactor2_name):
+                                body2_name, contactor2_name,
+                                distance_calculator='cadmbtb'):
         """
         Add permanent interactions between two objects contactors.
         """
@@ -1732,6 +1736,7 @@ class Hdf5():
             pinter.attrs['body2_name']=body2_name
             pinter.attrs['contactor1_name']=contactor1_name
             pinter.attrs['contactor2_name']=contactor2_name
+            pinter.attrs['distance_calculator']=distance_calculator
 
             self._pinterid[name]=pinter.attrs['id']
             self._number_of_permanent_interactions += 1
@@ -1896,7 +1901,7 @@ class Hdf5():
                 boundary_condition.attrs['phi']= phi
             else:
                 raise NotImplementedError
-            
+
     def run(self,
             with_timer=False,
             time_stepping=None,
@@ -2027,7 +2032,7 @@ class Hdf5():
         osnspb.numericsSolverOptions().iparam[14]= Numerics.SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION_TRUE
 
         osnspb.numericsSolverOptions().internalSolvers.solverId = Numerics.SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID
-        
+
         osnspb.numericsSolverOptions().internalSolvers.iparam[0]=100
         osnspb.numericsSolverOptions().dparam[0]=tolerance
         osnspb.setMaxSize(30000)

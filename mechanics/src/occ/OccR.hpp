@@ -38,7 +38,7 @@ public:
    */
   OccR(const ContactPoint& contact1,
        const ContactPoint& contact2,
-       const DistanceCalculatorType& distance_calculator = CadmbtbType());
+       const DistanceCalculatorType& distance_calculator = CadmbtbDistanceType());
 
   /** Compute h.
    *  \param time : the time.

@@ -31,6 +31,9 @@
   REGISTER(OccContactShape)                     \
   REGISTER(OccContactFace)                      \
   REGISTER(OccContactEdge)                      \
+  REGISTER(DistanceCalculatorType)              \
+  REGISTER(OccDistanceType)                     \
+  REGISTER(CadmbtbDistanceType)                 \
   REGISTER(ContactShapes)                       \
   REGISTER(ContactPoint)                        \
   REGISTER(ContactPoints)                       \
