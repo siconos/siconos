@@ -24,7 +24,7 @@
 #include <Interaction.hpp>
 #include <boost/math/quaternion.hpp>
 #include <BlockVector.hpp>
-
+#include <cfloat>
 #include <iostream>
 
 // #define DEBUG_BEGIN_END_ONLY
