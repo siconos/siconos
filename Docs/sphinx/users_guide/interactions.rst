@@ -15,7 +15,7 @@ NSDS is the non-smooth dynamical system and :math:`I_{\alpha}` a single interact
 
 An Interaction is applied to a set of Dynamical Systems, then the set :math:`\mathcal{DS}^{\alpha}=\{ d \ / \ ds_{d} \in I_{\alpha} \}`
 is the set of all dynamical systems involved in :math:`I_{\alpha}`.
-Finally, we denote :math:`\mathcal{DS}_{\alpha,\beta}` `the set of dynamical systems that are involved in interactions :math:`\alpha` and :math:`\beta`;
+Finally, we denote :math:`\mathcal{DS}_{\alpha,\beta}` the set of dynamical systems that are involved in interactions :math:`\alpha` and :math:`\beta`;
 
 .. math::
    
@@ -41,7 +41,7 @@ Then one get the following vectors of global coordinates, say X (or Q in the Lag
 
 :math:`x_i \ (or \ q_i)` being the vectors of global coordinates of the Dynamical Systems involved in the Interaction.
 
-Remember also that each DynamicalSystem as a variable called *r* (or *p* in the Lagrangian case), an input vector related to the non smooth behavior or law, with:
+Remember also that each DynamicalSystem as a variable called :math:`r` (or :math:`p` in the Lagrangian case), an input vector related to the non-smooth behavior or law, with:
 
 .. math::
 
@@ -49,10 +49,10 @@ Remember also that each DynamicalSystem as a variable called *r* (or *p* in the 
    \\
    \mathcal{I}^d = \{ \alpha \in \mathcal{I}_0 \ / \ d \in \mathcal{DS}_{\alpha} \}
 
-Thus we define R for the Interaction as:
+Thus we define :math:`R` for the Interaction as:
 
 .. math::
-   
+
    R^{\alpha}=\left[\begin{array}{c} 
    r^{\alpha}_0 \\
    r^{\alpha}_1 \\
@@ -63,12 +63,12 @@ Thus we define R for the Interaction as:
    p^{\alpha}_1 \\
    ...
    \end{array}\right]
- 
-Warning: it is forbidden to mix first and second order Dynamical Systems in a single Interaction.
 
-An Interaction is characterized by some "local" variables, y (also called output, R being the input) and :math:`\lambda`. Both of them are "vector of vectors":
+*Warning: it is forbidden to mix first and second order Dynamical Systems in a single Interaction.*
 
-y[i] is a vector that represents the derivative number i of variable y according to time. Each y[i] or :math:`\lambda[i]` is a vector of size *interactionSize*.
+An Interaction is characterized by some "local" variables, :math:`y` (also called output, :math:`R` being the input) and :math:`\lambda`. Both of them are "vector of vectors":
+
+:math:`y[i]` is a vector that represents the derivative number :math:`i` of variable :math:`y` according to time. Each :math:`y[i]` or :math:`\lambda[i]` is a vector of size *interactionSize*.
 
 Not that the number of saved derivatives depends on the problem type.
 

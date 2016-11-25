@@ -36,10 +36,10 @@ We denote:
    \\
    G_0(X,t,\lambda,Z)=\nabla_X g(X,t,\lambda,Z)&, &  G_1(X,t,\lambda,Z)=\nabla_{\lambda} g(X,t,\lambda,Z) 
 
-h, g (and their jacobian according to X and lambda) are defined with some plug-in functions. \n
+:math:`h`, :math:`g` (and their jacobian according to :math:`X` and :math:`\lambda`) are defined with some plug-in functions. \n
 See the doxygen documentation of the class :doxysiconos:`FirstOrderR` to have a list of the set/get/compute functions.
 
-Note: for the signification of X, Z, R see :ref:`interactions`
+Note: for the signification of :math:`X`, :math:`Z`, :math:`R` see :ref:`interactions`
 
 Linear
 """"""
@@ -69,7 +69,7 @@ Lagrangian (second order) Relations
 Scleronomous
 """"""""""""
 
-Class :doxysiconos:`LagrangianScleronomousR`
+xClass :doxysiconos:`LagrangianScleronomousR`
 
 The constraints depend only on the state,
 
@@ -109,7 +109,7 @@ Compliant
 
 Class: :doxysiconos:`LagrangianCompliantR`
 
-The constraints depends on state and :math:`\lambda`, with a function of time for which :math:`\dot \lambda(t)\f` has sense.
+The constraints depends on state and :math:`\lambda`, with a function of time for which :math:`\dot\lambda(t)` makes sense.
 
 .. math::
    
