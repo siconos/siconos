@@ -1099,8 +1099,8 @@ class Hdf5():
             topo = self._model.nonSmoothDynamicalSystem().\
                 topology()
 
-            joint_class = getattr(joints,
-                                  self.joints()[name].attrs['type'])
+            joint_type = self.joints()[name].attrs['type']
+            joint_class = getattr(joints, joint_type)
 
             joint_nslaw = EqualityConditionNSL(5)
 
@@ -1110,19 +1110,25 @@ class Hdf5():
             if 'object2' in self.joints()[name].attrs:
                 ds2_name = self.joints()[name].attrs['object2']
                 ds2 = topo.getDynamicalSystem(ds2_name)
-                joint = joint_class(ds1,
-                                    ds2,
-                                    self.joints()[name].attrs['pivot_point'],
-                                    self.joints()[name].attrs['axis'])
+                try:
+                    joint = joint_class(ds1,
+                                        ds2,
+                                        self.joints()[name].attrs['pivot_point'],
+                                        self.joints()[name].attrs['axis'])
+                except NotImplementedError:
+                    joint = joint_class(ds1, ds2,
+                                        self.joints()[name].attrs['pivot_point'])
                 joint_inter = Interaction(5, joint_nslaw, joint)
                 self._model.nonSmoothDynamicalSystem().\
                     link(joint_inter, ds1, ds2)
 
             else:
-                joint = joint_class(ds1,
-                                    self.joints()[name].attrs['pivot_point'],
-                                    self.joints()[name].attrs['axis'])
-
+                try:
+                    joint = joint_class(ds1,
+                                        self.joints()[name].attrs['pivot_point'],
+                                        self.joints()[name].attrs['axis'])
+                except NotImplementedError:
+                    joint = joint_class(ds1, self.joints()[name].attrs['pivot_point'])
                 joint_inter = Interaction(5, joint_nslaw, joint)
                 self._model.nonSmoothDynamicalSystem().\
                     link(joint_inter, ds1)
@@ -1871,7 +1877,7 @@ class Hdf5():
                  axis=[0, 1, 0],
                  joint_class='PivotJointR'):
         """
-        add a pivot joint between two objects
+        add a joint between two objects
         """
         if name not in self.joints():
             joint=self.joints().create_dataset(name, (0,))
