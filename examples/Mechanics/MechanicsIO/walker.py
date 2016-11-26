@@ -7,7 +7,7 @@
 from siconos.mechanics.collision.tools import Contactor
 from siconos.io.mechanics_io import Hdf5
 import siconos.numerics as Numerics
-import math
+import math, numpy
 
 pi = math.pi
 
@@ -30,6 +30,7 @@ with Hdf5() as io:
     # Define shape of a bar-shaped link
     io.addPrimitiveShape('Bar1', 'Box', (10, 1, 1))
 
+    bar1 = \
     io.addObject('bar1', [Contactor('Bar1'),
                           Contactor('Bar1',
                                     relative_translation=[5.5, 0, 0],
@@ -52,21 +53,30 @@ with Hdf5() as io:
     io.addObject('bar5', [Contactor('Bar1')], translation=[-5.5, -5.5, 6],
                  orientation=[(0,1,0), pi/2], mass=1)
 
-    io.addJoint('joint1', 'bar1', 'bar2', [5.5,  5.5, 11], [0, 1, 0], 'PivotJointR')
-    io.addJoint('joint2', 'bar1', 'bar3', [5.5, -5.5, 11], [0, 1, 0], 'PivotJointR')
-    io.addJoint('joint3', 'bar1', 'bar4', [5.5,  5.5, 11], [0, 1, 0], 'PivotJointR')
-    io.addJoint('joint4', 'bar1', 'bar5', [5.5, -5.5, 11], [0, 1, 0], 'PivotJointR')
+    io.addJoint('joint1', 'bar1', 'bar2', [0,  5.5, 0], [0, 1, 0], 'PivotJointR')
+    io.addJoint('joint2', 'bar1', 'bar3', [0, -5.5, 0], [0, 1, 0], 'PivotJointR')
+    io.addJoint('joint3', 'bar1', 'bar4', [0,  5.5, 0], [0, 1, 0], 'PivotJointR')
+    io.addJoint('joint4', 'bar1', 'bar5', [0, -5.5, 0], [0, 1, 0], 'PivotJointR')
 
-    # Harmonic oscillator on X-axis angular velocity = a+b*cos(omega*time+phi))
-    freq = 0.5
-    amp = 0.3
-    io.addBoundaryCondition('vibration', 'bar1',
-                            indices=[4], # X-angular axis (index into ds->v)
-                            bc_class='HarmonicBC',
-                            a =     [     0.0 ],
-                            b =     [     amp ],
-                            omega = [ pi*freq ],
-                            phi =   [     0.0 ])
+    # # Harmonic oscillator on X-axis angular velocity = a+b*cos(omega*time+phi))
+    # freq = 0.5
+    # amp = 0.3
+    # io.addBoundaryCondition('vibration', 'bar1',
+    #                         indices=[4], # X-angular axis (index into ds->v)
+    #                         bc_class='HarmonicBC',
+    #                         a =     [     0.0 ],
+    #                         b =     [     amp ],
+    #                         omega = [ pi*freq ],
+    #                         phi =   [     0.0 ])
+
+def my_forces(body):
+    g = 9.81
+    weight = numpy.array([0, 0, - body.scalarMass() * g, 0, 0, 0])
+    twist = numpy.array([0,0,0,0,1,0])
+    force = weight
+    if body.number() == bar1:
+        force = weight + twist
+    body.setFExtPtr(force)
 
 # Run the simulation from the inputs previously defined and add
 # results to the hdf5 file. The visualisation of the output may be done
@@ -82,11 +92,11 @@ with Hdf5(mode='r+') as io:
             edge_class=None,
             t0=0,
             T=10,
-            h=0.01,
+            h=0.001,
             multipoints_iterations=True,
             theta=0.50001,
             Newton_max_iter=1,
-            set_external_forces=None, #lambda b: None, # ignore gravity
+            set_external_forces=my_forces,
             solver=Numerics.SICONOS_FRICTION_3D_NSGS,
             itermax=1000,
             tolerance=1e-4,
