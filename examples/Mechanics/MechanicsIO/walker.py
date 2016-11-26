@@ -20,7 +20,7 @@ with Hdf5() as io:
     io.addNewtonImpactFrictionNSL('contact',
                                   collision_group1 = 0,
                                   collision_group2 = 1,
-                                  mu=0.3)
+                                  mu=0.3, e=0.0)
 
     # Definition of the ground shape
     io.addPrimitiveShape('Ground', 'Box', (100, 100, 2))
@@ -42,40 +42,41 @@ with Hdf5() as io:
                  mass=1)
 
     io.addObject('bar2', [Contactor('Bar1')], translation=[5.5, 5.5, 6],
-                 orientation=[(0,1,0), pi/2], mass=1)
+                 orientation=[(0,1,0), -pi/2], mass=1)
 
     io.addObject('bar3', [Contactor('Bar1')], translation=[5.5, -5.5, 6],
-                 orientation=[(0,1,0), pi/2], mass=1)
+                 orientation=[(0,1,0), -pi/2], mass=1)
 
     io.addObject('bar4', [Contactor('Bar1')], translation=[-5.5, 5.5, 6],
-                 orientation=[(0,1,0), pi/2], mass=1)
+                 orientation=[(0,1,0), -pi/2], mass=1)
 
     io.addObject('bar5', [Contactor('Bar1')], translation=[-5.5, -5.5, 6],
-                 orientation=[(0,1,0), pi/2], mass=1)
+                 orientation=[(0,1,0), -pi/2], mass=1)
 
-    io.addJoint('joint1', 'bar1', 'bar2', [0,  5.5, 0], [0, 1, 0], 'PivotJointR')
-    io.addJoint('joint2', 'bar1', 'bar3', [0, -5.5, 0], [0, 1, 0], 'PivotJointR')
-    io.addJoint('joint3', 'bar1', 'bar4', [0,  5.5, 0], [0, 1, 0], 'PivotJointR')
-    io.addJoint('joint4', 'bar1', 'bar5', [0, -5.5, 0], [0, 1, 0], 'PivotJointR')
+    io.addJoint('joint1', 'bar2', 'bar1', [4.5, 0, 0], [0, 1, 0], 'PivotJointR')
+    io.addJoint('joint2', 'bar3', 'bar1', [4.5, 0, 0], [0, 1, 0], 'PivotJointR')
+    io.addJoint('joint3', 'bar4', 'bar1', [4.5, 0, 0], [0, 1, 0], 'PivotJointR')
+    io.addJoint('joint4', 'bar5', 'bar1', [4.5, 0, 0], [0, 1, 0], 'PivotJointR')
 
-    # # Harmonic oscillator on X-axis angular velocity = a+b*cos(omega*time+phi))
-    # freq = 0.5
-    # amp = 0.3
-    # io.addBoundaryCondition('vibration', 'bar1',
-    #                         indices=[4], # X-angular axis (index into ds->v)
-    #                         bc_class='HarmonicBC',
-    #                         a =     [     0.0 ],
-    #                         b =     [     amp ],
-    #                         omega = [ pi*freq ],
-    #                         phi =   [     0.0 ])
+    # Harmonic oscillator on Y-axis angular velocity = a+b*cos(omega*time+phi))
+    freq = 0.1
+    amp = 0.2
+    io.addBoundaryCondition('vibration', 'bar1',
+                            indices=[4], # Y-angular axis is index 4 into ds->v
+                            bc_class='HarmonicBC',
+                            a =     [     0.0 ],
+                            b =     [     amp ],
+                            omega = [ pi*freq ],
+                            phi =   [     0.0 ])
 
 def my_forces(body):
     g = 9.81
     weight = numpy.array([0, 0, - body.scalarMass() * g, 0, 0, 0])
-    twist = numpy.array([0,0,0,0,1,0])
+    twist = numpy.array([0,0,0,0,300,0])
+    push = numpy.array([0.3,0,0,0,0,0])
     force = weight
     if body.number() == bar1:
-        force = weight + twist
+        force = weight + push # + twist
     body.setFExtPtr(force)
 
 # Run the simulation from the inputs previously defined and add
@@ -91,7 +92,7 @@ with Hdf5(mode='r+') as io:
             face_class=None,
             edge_class=None,
             t0=0,
-            T=10,
+            T=30,
             h=0.001,
             multipoints_iterations=True,
             theta=0.50001,
