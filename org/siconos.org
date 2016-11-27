@@ -169,7 +169,7 @@
 
    ---> This has to be completely reviewed.
 
-** TODO Move Storage of Jacobians in SiconosGraph/Properties      :M3.6:
+** TODO Move Storage of Jacobians in SiconosGraph/Properties        :M3.6:
 ** TODO Remove _y_k and Yold and lambdaOld from Interaction. use workspace or memories
 ** TODO [20%] HEM5 integration 						 :VA:
 *** DONE First integration for the Bouncing Ball example
@@ -186,7 +186,8 @@
    + How to differentiate it
 ** TODO Implement a purely explicit scheme for NewtonEulerDS and NewtonEulerR <2016-04-19 Tue>   
 ** TODO Continue to update signature for second order terms in NewtonEulerR*
-** TODO Implement a better time integration scheme for NewtonEulerDS
+** TODO Implement a better time integration scheme for NewtonEulerDS 	 :VA:
+   DEADLINE: <2016-12-25 Sun> for Xmas
    + The implementation of NewtonEulerDS is done using the angular velocity vector
      with respect to the axis of the body-fixed frame. (\Omega). This approach allows to
      use a constant matrix of moment of inertia. The price to pay is to compute the external
@@ -205,9 +206,8 @@
    + The same instability has to be expected for contact forces over bars even if it difficult to demonstrate 
      it on simple example
 
-
-
-* Development list for Mechanics
+** TODO a first implementation of constraints at the position 
+* Development list for Mechanics 		    :SICONOS:DEVEL:MECHANICS:
 ** how to use plantuml with org
 1. get plantuml.jar http://fr.plantuml.com/download.html
 2. in .emacs :
@@ -512,26 +512,42 @@ organize the Mechanics API.
 #+RESULTS:
 file:GazeboClassDiagram.png
 
+** TODO Rover Revival. (common rope and siconos objectives)
+   DEADLINE: <2016-12-25 Sun>
+   + compilation and execution of Simple standalone rover     :FP:SS:
+   + output trajectory in hdf5 (python version) :VA:MB:SS:
+   + update Jan's blender plugin to do some visualization  :VA:MB:
+   + Rover + granular ? standalone and Gazebo :SS:
+     
 * Development list for io
-** <2016-03-14 Mon> naming convention in hdf5 file
+** TODO Naming convention and structure of the hdf5 mechanics io file
+   DEADLINE: <2016-12-16 Fri>
+   first discussion: <2016-03-14 Mon> 
+   continue <2016-11-21 Mon>
+   + naming 
+     + cf --> contact_friction
+     + dynamic --> position
+     + velocity with the position
+   + structure
+     + split time frame
+     + split hdf5 file
 
-   + cf --> contact_friction
-
-** <2016-07-15 vie>
-*** Tooling and features
-**** Desired features for filtering tool
+** DONE Tooling and features for siconos_vview siconos_filter <2016-07-15 vie>
+   CLOSED: [2016-11-25 Fri 15:19]
+*** Desired features for filtering tool
 
    - remove objects
    - decimate time (done)
    - cut off time (beginning and end) (done)
    - put together two hdf5 simulations
 
-**** Desired features for vview
+*** Desired features for vview
 
    - output current camera position
    - specific starting camera position
    - render video from command line
    - skip to end of file, updating automatically when file changes
+
 
 * Port and support
 ** CrossCompilation - Windows
