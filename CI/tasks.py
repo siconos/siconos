@@ -138,7 +138,9 @@ siconos_gcc_asan_latest = siconos_fedora_latest.copy()(
     build_configuration='Debug',
     fast=False)
 
-siconos_serialization = siconos_default.copy()(
+# There is a bug in boost 1.58 distributed with Xenial (Ubuntu LTS 16.04).
+# As long as it is not patched, we have to build on a newer ubuntu
+siconos_serialization = siconos_ubuntu_16_10.copy()(
     ci_config='with_serialization',
     add_pkgs=['serialization'])
 
