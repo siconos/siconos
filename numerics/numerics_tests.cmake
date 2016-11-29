@@ -191,11 +191,9 @@ if(WITH_${COMPONENT}_TESTING)
 
 
   BEGIN_TEST(src/MLCP/test)
-  IF(HAVE_SYSTIMES_H)
-    if(WITH_CXX)
-      NEW_TEST(MLCPtest main_mlcp.cpp)
-    endif()
-  ENDIF(HAVE_SYSTIMES_H)
+  IF(HAVE_SYSTIMES_H AND WITH_CXX)
+    NEW_TEST(MLCPtest main_mlcp.cpp)
+  ENDIF(HAVE_SYSTIMES_H AND WITH_CXX)
   NEW_TEST(ReadWrite_MLCPtest MixedLinearComplementarity_ReadWrite_test.c)
   END_TEST()
 

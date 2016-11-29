@@ -514,6 +514,9 @@ macro(build_plugin plug)
   set_property(TARGET ${plug_name} PROPERTY LIBRARY_OUTPUT_DIRECTORY ${SICONOS_SWIG_ROOT_DIR}/tests)
   set_target_properties(${plug_name} PROPERTIES PREFIX "")
   add_dependencies(${COMPONENT} ${plug_name})
+  if(NOT WITH_CXX)
+    set_source_files_properties(${plug} PROPERTIES LANGUAGE C)
+  endif(NOT WITH_CXX)
 endmacro()
 
 # ----------------------------------------

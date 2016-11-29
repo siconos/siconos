@@ -74,8 +74,10 @@ IF(WITH_FCLIB)
   ENDIF()
 ENDIF()
 
-# --- Boost ---
-compile_with(Boost 1.47 REQUIRED)
+IF(WITH_CXX)
+  # --- Boost ---
+  compile_with(Boost 1.47 REQUIRED)
+ENDIF(WITH_CXX)
 
 #SET(WITH_BOOST_LOG TRUE)
 IF(WITH_BOOST_LOG)

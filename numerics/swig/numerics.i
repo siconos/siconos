@@ -69,6 +69,7 @@
 // need to do this here for other modules to reference numerics structs by shared_ptr.
 // swig requires same namespace 'std11' is used.
 %{
+#ifdef __cplusplus
 #if defined(SICONOS_STD_SHARED_PTR) && !defined(SICONOS_USE_BOOST_FOR_CXX11)
 namespace std11 = std;
 #include <memory>
@@ -77,9 +78,12 @@ namespace std11 = std;
 #include <boost/enable_shared_from_this.hpp>
 namespace std11 = boost;
 #endif
+#endif
 %}
+#ifdef __cplusplus
 #define SWIG_SHARED_PTR_NAMESPACE std11
 %include boost_shared_ptr.i
+#endif
 
 // put needed shared_ptrs here
 // commented-out for now, swig insists on calling freeFrictionContactProblem()

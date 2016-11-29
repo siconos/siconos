@@ -17,7 +17,7 @@ if(WITH_${COMPONENT}_TESTING)
     NEW_TEST(odepacktest9 DLSOIBT-test.f)
   if(WITH_CXX)
     NEW_TEST(odepacktest10 test-funcC-inC.cpp funC.cpp)
-  endif()
+  endif(WITH_CXX)
   END_TEST()
 
   BEGIN_TEST(hairer/test)
