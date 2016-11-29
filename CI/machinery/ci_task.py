@@ -141,6 +141,10 @@ class CiTask():
                           '-DDOCKER_TEMPLATE={0}'.format('-'.join(templ_list)),
                           '-DDOCKER_PROJECT_SOURCE_DIR={0}'.format(full_src)]
 
+            # for examples ...
+            if not os.path.samefile(root_dir, full_src):
+                cmake_args.append('-DDOCKER_SHARED_DIRECTORIES={:}'.format(root_dir))
+
             #
             # not generic, to be moved somewhere else
             #
@@ -152,9 +156,9 @@ class CiTask():
                     '-DDOCKER_CMAKE_WRAPPER={:}/{:}'.format(src_absolute_dir, self._cmake_cmd)]
 
             try:
-                check_call(
-                    ['cmake'] + cmake_args + [os.path.join(root_dir, 'CI')],
-                    cwd=bdir)
+                full_cmd = ['cmake'] + cmake_args + [os.path.join(full_src, 'CI')]
+                print("cmake command is: {:}".format(' '.join(full_cmd)))
+                check_call(full_cmd, cwd=bdir)
 
                 for target in self._targets[src]:
 

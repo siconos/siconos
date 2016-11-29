@@ -151,7 +151,8 @@ siconos_with_mumps = siconos_default.copy()(
 
 siconos_default_examples = siconos_default.copy()(
     ci_config='examples',
-    with_examples=True)
+    with_examples=True,
+    fast=False)
 
 siconos_frama_c = siconos_default.copy()(
     ci_config='with_frama_c',
@@ -184,4 +185,5 @@ known_tasks = {'siconos---vm0':
                (siconos_debian_latest,
                 siconos_openblas_lapacke,
                 siconos_serialization,
-                siconos_with_mumps)}
+                siconos_with_mumps,
+                siconos_default_examples)}
