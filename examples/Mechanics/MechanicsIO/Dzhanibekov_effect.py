@@ -13,12 +13,12 @@ options.worldScale = 0.01
 with Hdf5() as io:
 
     # Definition of a tetrahedron as a convex shape
-    io.addPrimitiveShape('Body1', 'Cylinder', (1, 10))
-    io.addPrimitiveShape('Body2', 'Box', (2, .3, 7))
+    io.addPrimitiveShape('Body1', 'Cylinder', (1, 6))
+    io.addPrimitiveShape('Body2', 'Box', (2, .4, 11))
     
     io.addObject('roo', [Contactor('Body1'),
                          Contactor('Body2',
-                                   relative_translation=[0, 5, 0])],
+                                   relative_translation=[0, 3, 0])],
                  translation=[0, 0, 4],
                  # a small perturbation on z axis
                  velocity=[0, 0, 0, 0, 2, 0.0001],
