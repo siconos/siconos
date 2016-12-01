@@ -113,13 +113,9 @@ int main(int argc, char* argv[])
 
   // Unknown Declaration
 
-  double *reaction = (double*)malloc(3 * NC * sizeof(double));
-  double *velocity = (double*)malloc(3 * NC * sizeof(double));
-  for (int i = 0; i < 3 * NC; i++)
-  {
-    reaction[i] = 0.0;
-    velocity[i] = 0.0;
-  }
+  double *reaction = (double*)calloc(3 * NC, sizeof(double));
+  double *velocity = (double*)calloc(3 * NC, sizeof(double));
+
   // Solver Options
 
 
