@@ -5,10 +5,9 @@ from __future__ import print_function
 import os
 import sys
 
-from math import cos, sin
+from math import cos, sin, asin, atan2
 from scipy import constants
 
-import shlex
 import numpy as np
 import h5py
 import bisect
@@ -16,12 +15,11 @@ import time
 
 import tempfile
 from contextlib import contextmanager
-from operator import itemgetter
 
-## Siconos imports
+# Siconos imports
 import siconos.numerics as Numerics
 from siconos.kernel import \
-    cast_NewtonImpactFrictionNSL, EqualityConditionNSL, \
+    EqualityConditionNSL, \
     Interaction, DynamicalSystem, TimeStepping
 import siconos.kernel as Kernel
 
@@ -29,20 +27,21 @@ import siconos.kernel as Kernel
 from siconos.mechanics.collision.tools import Contactor
 from siconos.mechanics import joints
 from siconos.io.io_base import MechanicsIO
-from siconos.io.FrictionContactTrace import  FrictionContactTrace
+from siconos.io.FrictionContactTrace import FrictionContactTrace
 
 # Currently we must choose between two implementations
 use_original = False
 use_proposed = True
 
+
 def set_implementation(i):
     global use_original, use_proposed
-    if i=='original':
+    if i == 'original':
         use_original = have_original
         use_proposed = not have_original
         setup_default_classes()
         return use_original
-    elif i=='proposed':
+    elif i == 'proposed':
         use_proposed = have_proposed
         use_original = not have_original
         setup_default_classes()
@@ -52,6 +51,7 @@ def set_implementation(i):
 # For 'proposed' implementation, it is necessary to select a back-end,
 # although currently only Bullet is supported for general objects.
 backend = 'bullet'
+
 
 def set_backend(b):
     global backend
@@ -270,6 +270,7 @@ def data(h, name, nbcolumns, use_compression=False):
                                 compression=[None,'gzip'][comp],
                                 compression_opts=[None,9][comp])
 
+
 def add_line(dataset, line):
     dataset.resize(dataset.shape[0] + 1, 0)
     dataset[dataset.shape[0] - 1, :] = line
@@ -278,6 +279,64 @@ def add_line(dataset, line):
 def str_of_file(filename):
     with open(filename, 'r') as f:
         return str(f.read())
+
+
+class Quaternion():
+
+    def __init__(self, *args):
+        import vtk
+        self._vtkmath = vtk.vtkMath()
+        self._data = vtk.vtkQuaternion[float](*args)
+
+    def __mul__(self, q):
+        r = Quaternion()
+        self._vtkmath.MultiplyQuaternion(self._data, q._data, r._data)
+        return r
+
+    def __getitem__(self, i):
+        return self._data[i]
+
+    def conjugate(self):
+        r = Quaternion((self[0], self[1], self[2], self[3]))
+        r._data.Conjugate()
+        return r
+
+    def rotate(self, v):
+        pv = Quaternion((0, v[0], v[1], v[2]))
+        rv = self * pv * self.conjugate()
+        # assert(rv[0] == 0)
+        return [rv[1], rv[2], rv[3]]
+
+    def axisAngle(self):
+        r = [0, 0, 0]
+        a = self._data.GetRotationAngleAndAxis(r)
+        return r, a
+
+
+def phi(q0, q1, q2, q3):
+    """
+    Euler angle phi from quaternion.
+    """
+    return atan2(2*(q0*q1+q2*q3), 1-2*(q1*q1+q2*q2))
+
+
+def theta(q0, q1, q2, q3):
+    """
+    Euler angle theta from quaternion.
+    """
+    return asin(2*(q0*q2-q3*q1))
+
+
+def psi(q0, q1, q2, q3):
+    """
+    Euler angle psi from quaternion.
+    """
+    return atan2(2*(q0*q3+q1*q2), 1-2*(q2*q2+q3*q3))
+
+# vectorized versions
+phiv = np.vectorize(phi)
+thetav = np.vectorize(theta)
+psiv = np.vectorize(psi)
 
 
 #
@@ -1214,7 +1273,7 @@ class Hdf5():
 
             relation = occ.OccR(cp1, cp2,
                                 real_dist_calc[distance_calculator]())
-            
+
             inter = Interaction(3, nslaw, relation)
 
             ds1 = topo.getDynamicalSystem(body1_name)
@@ -1926,6 +1985,7 @@ class Hdf5():
             h=0.0005,
             multipoints_iterations=True,
             theta=0.50001,
+            Newton_options = Kernel.SICONOS_TS_NONLINEAR,
             Newton_max_iter=20,
             set_external_forces=None,
             solver=Numerics.SICONOS_FRICTION_3D_NSGS,
@@ -2071,6 +2131,8 @@ class Hdf5():
         simulation.insertNonSmoothProblem(osnspb)
         if use_proposed:
             simulation.insertInteractionManager(self._broadphase)
+
+        simulation.setNewtonOptions(Newton_options)
         simulation.setNewtonMaxIteration(Newton_max_iter)
         simulation.setNewtonTolerance(1e-10)
 

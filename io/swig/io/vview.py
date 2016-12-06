@@ -10,7 +10,7 @@ import random
 
 import getopt
 
-from siconos.io.mechanics_io import Hdf5
+from siconos.io.mechanics_io import Quaternion, Hdf5
 from siconos.io.mechanics_io import tmpfile as io_tmpfile
 
 ## Persistent configuration
@@ -183,39 +183,6 @@ big_data_writer.SetInputConnection(big_data_source.GetOutputPort())
 
 contactors = dict()
 offsets = dict()
-
-vtkmath = vtk.vtkMath()
-
-
-class Quaternion():
-
-    def __init__(self, *args):
-        self._data = vtk.vtkQuaternion[float](*args)
-
-    def __mul__(self, q):
-        r = Quaternion()
-        vtkmath.MultiplyQuaternion(self._data, q._data, r._data)
-        return r
-
-    def __getitem__(self, i):
-        return self._data[i]
-
-    def conjugate(self):
-        r = Quaternion((self[0], self[1], self[2], self[3]))
-        r._data.Conjugate()
-        return r
-
-    def rotate(self, v):
-        pv = Quaternion((0, v[0], v[1], v[2]))
-        rv = self * pv * self.conjugate()
-        # assert(rv[0] == 0)
-        return [rv[1], rv[2], rv[3]]
-
-    def axisAngle(self):
-        r = [0, 0, 0]
-        a = self._data.GetRotationAngleAndAxis(r)
-        return r, a
-
 
 def set_position(instance, q0, q1, q2, q3, q4, q5, q6):
     if (numpy.any(numpy.isnan([q0, q1, q2, q3, q4, q5, q6]))
@@ -848,6 +815,8 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
             if primitive == 'Sphere':
                 source = vtk.vtkSphereSource()
                 source.SetRadius(attrs[0])
+                source.SetThetaResolution(15)
+                source.SetPhiResolution(15)
 
             elif primitive == 'Cone':
                 source = vtk.vtkConeSource()
