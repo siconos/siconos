@@ -15,8 +15,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
+#define _XOPEN_SOURCE 700
+#include <string.h>
+
+#if (__linux ||  __APPLE__)
+#elif _MSC_VER
+#define strdup _strdup
+#else
+static inline char* strdup(char* src)
+{
+  size_t len = strlen(src) + 1;
+  char* dest = (char*)malloc(len * sizeof(char));
+  strcpy(dest, src, len);
+  return dest;
+}
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
+
 #include "NonSmoothDrivers.h"
 #include "lcp_test_function.h"
 #include "GAMSlink.h"
@@ -24,6 +41,7 @@
 #include "LCP_Solvers.h"
 #include "LinearComplementarityProblem.h"
 #include "SolverOptions.h"
+
 int lcp_test_function(FILE * f, int solverId, char* filename)
 {
 
@@ -43,7 +61,7 @@ int lcp_test_function(FILE * f, int solverId, char* filename)
   {
     SN_GAMSparams* GP = (SN_GAMSparams*)options.solverParameters;
     assert(GP);
-    GP->model_dir = GAMS_MODELS_SOURCE_DIR;
+    GP->model_dir = strdup(GAMS_MODELS_SOURCE_DIR);
     assert(filename);
     GP->filename = filename;
   }
@@ -114,9 +132,6 @@ int lcp_test_function_SBM(FILE * f, int solverId)
     freeLinearComplementarityProblem(problem);
     fclose(foutput);
     return 0;
-/*    SN_GAMSparams* GP = (SN_GAMSparams*)options->internalSolvers->solverParameters;
-    assert(GP);
-    GP->model_dir = GAMS_MODELS_SOURCE_DIR;*/
   }
 #endif
 

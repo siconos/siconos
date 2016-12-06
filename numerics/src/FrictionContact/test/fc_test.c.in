@@ -16,6 +16,22 @@
  * limitations under the License.
  */
 
+#define _XOPEN_SOURCE 700
+#include <string.h>
+
+#if (__linux ||  __APPLE__)
+#elif _MSC_VER
+#define strdup _strdup
+#else
+static inline char* strdup(char* src)
+{
+  size_t len = strlen(src) + 1;
+  char* dest = (char*)malloc(len * sizeof(char));
+  strcpy(dest, src, len);
+  return dest;
+}
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include "NonSmoothDrivers.h"
@@ -116,7 +132,7 @@ int main(void)
   {
     assert(options->solverParameters);
     SN_GAMSparams* GP = (SN_GAMSparams*)options->solverParameters;
-    GP->model_dir = GAMS_MODELS_SOURCE_DIR;
+    GP->model_dir = strdup(GAMS_MODELS_SOURCE_DIR);
     GP->filename = "@TEST_DATA@";
     frictionContact_test_gams_opts(GP, @TEST_SOLVER@);
   }
