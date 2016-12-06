@@ -50,6 +50,7 @@ extern "C"
     CSparseMatrix* csc;        /**< csc matrix */
     CSparseMatrix* trans_csc;  /**< transpose of a csc matrix (used by CSparse) */
     CSparseMatrix* csr;        /**< csr matrix, only supported with mkl */
+    csi*           diag_indx;  /**< indices for the diagonal terms */
     unsigned       origin;     /**< original format of the matrix */
   };
 
@@ -82,6 +83,17 @@ extern "C"
    */
   void NM_sparse_free(void *p);
 
+  /** Get the data part of sparse matrix
+   * \param A the sparse matrix
+   * \return a pointer to the data array
+   */
+  double* NM_sparse_data(NumericsSparseMatrix* A);
+
+  /** Allocate a CSparse matrix for future copy (as in NM_sparse_copy)
+   * \param m the matrix used as model
+   * \return an newly allocated matrix
+   */
+  CSparseMatrix* NM_csparse_alloc_for_copy(const CSparseMatrix* const m);
 
   /** Get the LU factors for cs_lusol
    * \param p the structure holding the data for the solver
@@ -99,7 +111,6 @@ extern "C"
   {
     return p->dWork;
   }
-
 
   /** Free allocated space for NumericsSparseLinearSolverParams.
    * \param p a NumericsSparseLinearSolverParams

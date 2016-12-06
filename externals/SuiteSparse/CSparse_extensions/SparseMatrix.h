@@ -156,7 +156,11 @@ extern "C"
    */
   void cs_sparse_free(cs_lu_factors* cs_lu_A);
 
-
+  /** print a matrix to a text file
+   * \param A matrix to print
+   * \param brief if positive, print only a portion of the matrix
+   * \param file file descriptor*/
+  int cs_printInFile(const cs *A, int brief, FILE* file);
 
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)

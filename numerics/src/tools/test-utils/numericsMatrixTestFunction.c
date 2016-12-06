@@ -829,21 +829,20 @@ int test_NM_row_prod_no_diag(NumericsMatrix* M1, NumericsMatrix* M2)
   free(y);
   sizeY = 2;
   int pos = 1; // pos of the required row of blocks
-  y = (double *)malloc(sizeY * sizeof(double));
-  for (i = 0; i < sizeY; i++) y[i] = 0.0;
+  y = (double *)calloc(sizeY, sizeof(double));
 
 
   yref[0] = 40;
   yref[1] = 16;
 
   /* Sparse ... */
-  NM_row_prod_no_diag(n, sizeY, pos, M2, x, y, 1);
+  NM_row_prod_no_diag(n, sizeY, pos, SIZE_MAX, M2, x, y, NULL, 1);
   for (i = 0; i < sizeY; i++)
   {
     if (fabs(y[i] - yref[i]) > tol) info = 1;
     //  printf("%lf\n", fabs(y[i]-yref[i]));
   }
-  NM_row_prod_no_diag(n, sizeY, pos + 1, M2, x, y, 1);
+  NM_row_prod_no_diag(n, sizeY, pos + 1, SIZE_MAX, M2, x, y, NULL, 1);
   yref[0] = 10;
   yref[1] = 14;
   for (i = 0; i < sizeY; i++)
@@ -857,7 +856,7 @@ int test_NM_row_prod_no_diag(NumericsMatrix* M1, NumericsMatrix* M2)
     printf("Step 2 ( y = subA*x,  sparse storage) failed ...\n");
 
   /* Sparse, += ... */
-  NM_row_prod_no_diag(n, sizeY, pos + 1, M2, x, y, 0);
+  NM_row_prod_no_diag(n, sizeY, pos + 1, SIZE_MAX, M2, x, y, NULL, 0);
   for (i = 0; i < sizeY; i++)
   {
     if (fabs(y[i] - 2 * yref[i]) > tol) info = 1;
@@ -933,7 +932,7 @@ int test_NM_row_prod_no_diag_non_square(NumericsMatrix* M3, NumericsMatrix* M4)
   yref[1] = 0;
 
   /* Sparse ... */
-  NM_row_prod_no_diag(sizeX, sizeY, pos, M4, x, y, 1);
+  NM_row_prod_no_diag(sizeX, sizeY, pos, SIZE_MAX, M4, x, y, NULL, 1);
   for (i = 0; i < sizeY; i++)
   {
     if (fabs(y[i] - yref[i]) > tol) info = 1;
@@ -946,7 +945,7 @@ int test_NM_row_prod_no_diag_non_square(NumericsMatrix* M3, NumericsMatrix* M4)
   yref[0] = 10;
   yref[1] = 14;
 
-  NM_row_prod_no_diag(sizeX, sizeY, pos + 1, M4, x, y, 1);
+  NM_row_prod_no_diag(sizeX, sizeY, pos + 1, SIZE_MAX, M4, x, y, NULL, 1);
 
   for (i = 0; i < sizeY; i++)
   {
@@ -962,7 +961,7 @@ int test_NM_row_prod_no_diag_non_square(NumericsMatrix* M3, NumericsMatrix* M4)
     printf("Step 2 ( y = subA*x,  sparse storage) failed ...\n");
 
   /* Sparse, += ... */
-  NM_row_prod_no_diag(sizeX, sizeY, pos + 1, M4, x, y, 0);
+  NM_row_prod_no_diag(sizeX, sizeY, pos + 1, SIZE_MAX, M4, x, y, NULL, 0);
   for (i = 0; i < sizeY; i++)
   {
     if (fabs(y[i] - 2 * yref[i]) > tol) info = 1;

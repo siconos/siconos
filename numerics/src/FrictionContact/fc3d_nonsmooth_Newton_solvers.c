@@ -21,13 +21,33 @@
 #include "SiconosLapack.h"
 #include "NumericsSparseMatrix.h"
 #include "sanitizer.h"
+#include "numerics_verbose.h"
 
-void computeDenseAWpB(
-  double *A,
-  NumericsMatrix *W,
-  double *B,
-  NumericsMatrix *AWpB);
-void computeDenseAWpB(
+static void NM_dense_to_sparse_diag_t(double* A, NumericsMatrix* B, size_t block_row_size, size_t block_col_size)
+{
+  /* TODO  CSC, CSR version*/
+  assert(A);
+  if(!B->matrix2->triplet) NM_triplet_alloc(B, block_row_size*block_col_size);
+  CSparseMatrix* Btriplet = B->matrix2->triplet;
+  B->matrix2->origin = NS_TRIPLET;
+  double* Alocal = A;
+  for (size_t i = 0, j = 0; i < (size_t)B->size0; i += block_row_size, j+= block_col_size)
+  {
+    {
+      for (size_t col_indx = j; col_indx < block_col_size+j; ++col_indx)
+      {
+        for (size_t row_indx = i; row_indx < block_row_size+i; ++row_indx, ++Alocal)
+        {
+          CHECK_RETURN(cs_zentry(Btriplet, row_indx, col_indx, *Alocal));
+        }
+//        Alocal = ;
+      }
+//      Alocal = A + block_row_size*block_col_size;
+    }
+  }
+}
+
+static void computeDenseAWpB(
   double *A,
   NumericsMatrix *W,
   double *B,
@@ -36,8 +56,9 @@ void computeDenseAWpB(
   unsigned problemSize = W->size0;
 
   double* result = AWpB->matrix0;
-
   double* Wx = W->matrix0;
+  assert(result);
+  assert(Wx);
 
   assert(problemSize >= 3);
 
@@ -65,13 +86,7 @@ void computeDenseAWpB(
   }
 }
 
-void computeSparseAWpB(
-  double *A,
-  NumericsMatrix *W,
-  double *B,
-  NumericsMatrix *AWpB);
-
-void computeSparseAWpB(
+static void computeSparseBlockAWpB(
   double *A,
   NumericsMatrix *W,
   double *B,
@@ -81,6 +96,9 @@ void computeSparseAWpB(
   /* unsigned int problemSize = W->size0; */
 
   SparseBlockStructuredMatrix* Wb = W->matrix1;
+  SparseBlockStructuredMatrix* result = AWpB->matrix1;
+  assert(Wb);
+  assert(result);
 
   assert((unsigned)W->size0 >= 3);
   assert((unsigned)W->size0 / 3 >= Wb->filled1 - 1);
@@ -104,28 +122,43 @@ void computeSparseAWpB(
       mm3x3(Ai, Wb->block[blockn], tmp);
       if (col == row) add3x3(Bi, tmp);
 
-      cpy3x3(tmp, AWpB->matrix1->block[blockn]);
+      cpy3x3(tmp, result->block[blockn]);
     }
   }
   /* Invalidation of sparse storage, if any. */
-  if (AWpB->matrix2)
-  {
-    if (AWpB->matrix2->triplet)
-    {
-      cs_spfree(AWpB->matrix2->triplet);
-      AWpB->matrix2->triplet = NULL;
-    }
-    if (AWpB->matrix2->csc)
-    {
-      cs_spfree(AWpB->matrix2->csc);
-      AWpB->matrix2->csc = NULL;
-    }
-    if (AWpB->matrix2->trans_csc)
-    {
-      cs_spfree(AWpB->matrix2->trans_csc);
-      AWpB->matrix2->trans_csc = NULL;
-    }
-  }
+  NM_clearSparseStorage(AWpB);
+}
+
+static void computeSparseAWpB(
+  double *A,
+  NumericsMatrix *W,
+  double *B,
+  NumericsMatrix *AWpB)
+{
+  unsigned problemSize = W->size0;
+  assert(problemSize >= 3);
+
+  assert(AWpB->matrix2);
+  assert(W->matrix2);
+
+
+  NM_clearSparseStorage(AWpB);
+  NumericsMatrix* Amat = NM_create(NM_SPARSE, problemSize, problemSize);
+  NumericsMatrix* Bmat = NM_create(NM_SPARSE, problemSize, problemSize);
+
+  NM_dense_to_sparse_diag_t(A, Amat, 3, 3);
+  NM_dense_to_sparse_diag_t(B, Bmat, 3, 3);
+
+  /* AWpB = B */
+  NM_copy(Bmat, AWpB);
+
+  /*  AWpB += AW */
+  NM_gemm(1., Amat, W, 1., AWpB);
+
+  freeNumericsMatrix(Amat);
+  freeNumericsMatrix(Bmat);
+  free(Amat);
+  free(Bmat);
 }
 
 void computeAWpB(
@@ -139,14 +172,28 @@ void computeAWpB(
   double *B,
   NumericsMatrix *AWpB)
 {
-  if (W->storageType == NM_DENSE)
+  switch (W->storageType)
+  {
+  case NM_DENSE:
   {
     computeDenseAWpB(A, W, B, AWpB);
+    break;
   }
-  else
+  case NM_SPARSE_BLOCK:
   {
-    assert (W->storageType == NM_SPARSE_BLOCK);
+    computeSparseBlockAWpB(A, W, B, AWpB);
+    break;
+  }
+  case NM_SPARSE:
+  {
     computeSparseAWpB(A, W, B, AWpB);
+    break;
+  }
+  default:
+  {
+    printf("computeAWpB :: Unsupported storage type %d, exiting!\n", W->storageType);
+    exit(EXIT_FAILURE);
+  }
   }
 }
 
@@ -500,17 +547,6 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers* equation
   unsigned int itermax = options->iparam[0];
   unsigned int erritermax = options->iparam[7];
 
-  /* int nzmax; */
-
-  /* if (problem->M->storageType == NM_DENSE) */
-  /* { */
-  /*   nzmax = problemSize * problemSize; */
-  /* } */
-  /* else */
-  /* { */
-  /*   nzmax = options->iparam[3]; */
-  /* } */
-  /* assert(nzmax > 0); */
   assert(itermax > 0);
 
 
@@ -685,7 +721,6 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers* equation
       cblas_dcopy(problemSize, tmp2, 1, reaction, 1);
     else
       cblas_daxpy(problemSize, 1., tmp3, 1., reaction, 1);
-
 
     // velocity <- M*reaction + qfree
     cblas_dcopy(problemSize, problem->q, 1, velocity, 1);

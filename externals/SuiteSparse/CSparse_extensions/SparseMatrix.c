@@ -174,3 +174,59 @@ CSparseMatrix* cs_spfree_on_stack(CSparseMatrix* A)
   A->x = NULL;
   return NULL;
 }
+
+int cs_printInFile(const cs *A, int brief, FILE* file)
+{
+  csi m, n, nzmax, nz, p, j, *Ap, *Ai ;
+  double *Ax ;
+  if(!A)
+  {
+    fprintf(file,"(null)\n") ;
+    return (0) ;
+  }
+  m = A->m ;
+  n = A->n ;
+  Ap = A->p ;
+  Ai = A->i ;
+  Ax = A->x ;
+  nzmax = A->nzmax ;
+  nz = A->nz ;
+  fprintf(file,"CSparse Version %d.%d.%d, %s.  %s\n", CS_VER, CS_SUBVER,
+         CS_SUBSUB, CS_DATE, CS_COPYRIGHT) ;
+  if(nz < 0)
+  {
+    fprintf(file,"%lld-by-%lld, nzmax: %lld nnz: %lld, 1-norm: %g\n",
+            (long long int)m,  (long long int)n,  (long long int)nzmax,
+            (long long int)Ap [n],  cs_norm(A)) ;
+    for(j = 0 ; j < n ; j++)
+    {
+      fprintf(file,"    col %lld : locations %lld to %lld\n",  (long long int)j,  (long long int)Ap [j],  (long long int)Ap [j+1]-1);
+      for(p = Ap [j] ; p < Ap [j+1] ; p++)
+      {
+        fprintf(file,"      %lld : %g\n",  (long long int)Ai [p], Ax ? Ax [p] : 1) ;
+        if(brief && p > 20)
+        {
+          fprintf(file,"  ...\n") ;
+          return (1) ;
+        }
+      }
+    }
+  }
+  else
+  {
+    fprintf(file,"triplet: %lld-by-%lld, nzmax: %lld nnz: %lld\n",  (long long int)m,  (long long int)n,
+            (long long int)nzmax,  (long long int)nz) ;
+    for(p = 0 ; p < nz ; p++)
+    {
+      fprintf(file,"    %lld %lld : %g\n",  (long long int)Ai [p],  (long long int)Ap [p], Ax ? Ax [p] : 1) ;
+      if(brief && p > 20)
+      {
+        fprintf(file,"  ...\n") ;
+        return (1) ;
+      }
+    }
+  }
+  return (1) ;
+}
+
+

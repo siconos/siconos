@@ -209,13 +209,26 @@ extern "C"
   /** Row of a Matrix - vector product y = rowA*x or y += rowA*x, rowA being a submatrix of A (sizeY rows and sizeX columns)
       \param[in] sizeX dim of the vector x
       \param[in] sizeY dim of the vector y
-      \param[in] currentRowNumber position of the first row of rowA in A (warning: real row if A is a double*, block-row if A is a SparseBlockStructuredMatrix)
+      \param[in] block_start block number (only used for SBM)
+      \param[in] row_start position of the first row of A (unused if A is SBM)
       \param[in] A the matrix to be multiplied
       \param[in] x the vector to be multiplied
       \param[in,out] y the resulting vector
-      \param[in] init = 0 for y += Ax, =1 for y = Ax
+      \param[in] xsave storage for saving the part of x set to 0
+      \param[in] if True y = Ax, else y += Ax
   */
-  void NM_row_prod_no_diag(int sizeX, int sizeY, int currentRowNumber, const NumericsMatrix* const A, const double* const x, double* y, int init);
+  void NM_row_prod_no_diag(size_t sizeX, size_t sizeY, int block_start, size_t row_start, NumericsMatrix* A, double* x, double* y, double* xsave, bool init);
+
+  /** Row of a Matrix - vector product y = rowA*x or y += rowA*x, rowA being a submatrix of A (3 rows and sizeX columns)
+      \param[in] sizeX dim of the vector x
+      \param[in] block_start block number (only used for SBM)
+      \param[in] row_start position of the first row of A (unused if A is SBM)
+      \param[in] A the matrix to be multiplied
+      \param[in] x the vector to be multiplied
+      \param[in,out] y the resulting vector
+      \param[in] if True y = Ax, else y += Ax
+  */
+  void NM_row_prod_no_diag3(size_t sizeX, int block_start, size_t row_start, NumericsMatrix* A, double* x, double* y, bool init);
 
   /** Free memory for a NumericsMatrix. Warning: call this function only if you are sure that
       memory has been allocated for the structure in Numerics. This function is assumed that the memory is "owned" by this structure.
@@ -301,20 +314,24 @@ extern "C"
   */
   void displayRowbyRow(const NumericsMatrix* const m);
 
-  /** get the diagonal block of a NumericsMatrix. No allocation is done.
+  /** get the (square) diagonal block of a NumericsMatrix. No allocation is done.
    * \param[in] m a NumericsMatrix
-   * \param[in] numBlockRow the number of the block Row. Useful only in sparse case
-   * \param[in] numRow the starting row. Useful only in dense case.
+   * \param[in] block_row_nb the number of the block Row. Useful only in sparse case
+   * \param[in] start_row the starting row. Useful only in dense case.
    * \param[in] size of the diag block. Only useful in dense case.
-   * \param[out] Bout the target. In the dense case (*Bout) must be allocated by caller.
-   *   In case of sparse case **Bout contains the resulting block (from the SBM).
+   * \param[out] Block the target. In the dense and sparse case (*Block) must be allocated by caller.
+   *   In case of SBM case **Bout contains the resulting block (from the SBM).
    */
-  void getDiagonalBlock(NumericsMatrix* m,
-                        int numBlockRow,
-                        int numRow,
-                        int size,
-                        double **Bout);
+  void NM_extract_diag_block(NumericsMatrix* M, int block_row_nb, size_t start_row,
+                             int size, double **Block);
 
+  /** get a 3x3 diagonal block of a NumericsMatrix. No allocation is done.
+   * \param[in] m a NumericsMatrix
+   * \param[in] block_row_nb the number of the block row
+   * \param[out] Block the target. In the dense and sparse case (*Block) must be allocated by caller.
+   *   In case of SBM case **Bout contains the resulting block (from the SBM).
+   */
+  void NM_extract_diag_block3(NumericsMatrix* M, int block_row_nb, double **Block);
 
   /** create a NumericsMatrix similar to the another one. The structure is the same
    * \param mat the model matrix
@@ -407,6 +424,16 @@ extern "C"
     * \param[in,out] A a Numericsmatrix
     */
   void NM_clearSparseStorage(NumericsMatrix *A);
+
+  /** Extract a block from a sparse matrix
+   * \param M matrix
+   * \param blockM dense storage for the block
+   * \param pos_row starting row for the block
+   * \param pos_col starting column for the block
+   * \param block_row_size block width
+   * \param block_col_size block height
+   */
+  void NM_sparse_extract_block(const NumericsMatrix* const M, double* blockM, size_t pos_row, size_t pos_col, size_t block_row_size, size_t block_col_size);
 
   /** Copy a CSparseMatrix inside another CSparseMatrix.
    *  Reallocations are performed if B cannot hold a copy of A
@@ -549,6 +576,21 @@ extern "C"
    */
   double* NM_dWork(NumericsMatrix *A, int size);
 
+  /** Add a constant term to the diagonal elements, when the block of the SBM
+   * are 3x3
+   * \param M the matrix
+   * \param alpha the term to add
+   */
+  void NM_add_to_diag3(NumericsMatrix* M, double alpha);
+
+  /** return the set of indices corresponding to the diagonal elements of the
+   * matrix
+   * \warning should be better tested
+   * \param M the matrix
+   * \return the list of indices for the diagonal elements
+   */
+  csi* NM_sparse_diag_indices(NumericsMatrix* M);
+
   /** set NumericsMatrix fields to NULL
    * \param A a matrix
    */
@@ -563,6 +605,24 @@ extern "C"
   /** update the size of the matrix based on the matrix data
    * \param[in,out] A the matrix which size is updated*/
   void NM_update_size(NumericsMatrix* A);
+
+  /** Allocate a csc matrix in A
+   * \param A the matrix
+   * \param nzmax number of non-zero elements
+   */
+  void NM_csc_alloc(NumericsMatrix* A, csi nzmax);
+
+  /** Allocate a triplet matrix in A
+   * \param A the matrix
+   * \param nzmax maximum number of non-zero elements
+   */
+  void NM_triplet_alloc(NumericsMatrix* A, csi nzmax);
+
+  /** Allocate a csr matrix in A
+   * \param A the matrix
+   * \param nzmax number of non-zero elements
+   */
+  void NM_csr_alloc(NumericsMatrix* A, csi nzmax);
 
   /** assert that a NumericsMatrix has the right structure given its type
    * \param type expected type 
@@ -599,30 +659,6 @@ extern "C"
     M->internalData->iWorkSize = 0;
     M->internalData->iWork = NULL;
   }
-
-  /** Allocate a csc matrix in A
-   * \param A the matrix
-   * \param nzmax number of non-zero elements
-   */
-  void NM_csc_alloc(NumericsMatrix* A, csi nzmax);
-
-  /** Allocate a triplet matrix in A
-   * \param A the matrix
-   * \param nzmax maximum number of non-zero elements
-   */
-  void NM_triplet_alloc(NumericsMatrix* A, csi nzmax);
-
-  /** Allocate a csr matrix in A
-   * \param A the matrix
-   * \param nzmax number of non-zero elements
-   */
-  void NM_csr_alloc(NumericsMatrix* A, csi nzmax);
-
-  /** Allocate a CSparse matrix for future copy (as in NM_sparse_copy)
-   * \param m the matrix used as model
-   * \return an newly allocated matrix
-   */
-  CSparseMatrix* NM_csparse_alloc_for_copy(const CSparseMatrix* const m);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

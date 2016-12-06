@@ -25,6 +25,8 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <math.h>
+#include <string.h>
+
 //#define VERBOSE_DEBUG
 #include "Friction_cst.h"
 #include "SiconosBlas.h"
@@ -75,16 +77,14 @@ void fc3d_SOCLCP(FrictionContactProblem* problem, double *reaction, double *velo
   SecondOrderConeLinearComplementarityProblem* soclcp = (SecondOrderConeLinearComplementarityProblem *)malloc(sizeof(SecondOrderConeLinearComplementarityProblem));
   soclcp->n = problem->numberOfContacts * problem->dimension;
   soclcp->nc= problem->numberOfContacts;
-  soclcp->M = problem-> M;
+  soclcp->M = problem->M;
   soclcp->q = (double *) malloc(soclcp->n * sizeof(double));
   soclcp->mu = problem->mu;
   soclcp->coneIndex = (unsigned int *) malloc((soclcp->nc+1) * sizeof(unsigned int));
 
-  for (int i=0; i < soclcp->n; i++)
-  {
-    soclcp->q[i]=problem->q[i];
-  }
-  for (int i=0; i < soclcp->nc+1; i++)
+  memcpy(soclcp->q, problem->q, (soclcp->n) * sizeof(double));
+
+  for (int i=0; i <= soclcp->nc; ++i)
   {
     soclcp->coneIndex[i] = 3*i;
   }

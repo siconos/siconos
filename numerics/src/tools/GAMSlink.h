@@ -380,12 +380,15 @@ static inline int NM_to_GDX(idxHandle_t Xptr, const char* name, const char* desc
   if (idxDataWriteStart(Xptr, name, descr, 2, dims, msg, GMS_SSSIZE) == 0)
     idxerrorR(idxGetLastError(Xptr), "idxDataWriteStart");
 
-  if (M->storageType == NM_DENSE)
+  switch (M->storageType)
+  {
+  case NM_DENSE:
   {
     assert(M->matrix0);
     idxDataWriteDenseColMajor(Xptr, 2, M->matrix0);
+    break;
   }
-  else
+  case NM_SPARSE:
   {
     CSparseMatrix* cs = NM_csc(M);
     assert(cs->p);
@@ -409,6 +412,13 @@ static inline int NM_to_GDX(idxHandle_t Xptr, const char* name, const char* desc
 
     free(p_int);
     free(i_int);
+    break;
+  }
+  default:
+  {
+    printf("NM_to_GDX :: unsupported matrix storage");
+    exit(EXIT_FAILURE);
+  }
   }
 
 

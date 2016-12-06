@@ -64,7 +64,7 @@ int soclcp_projectionOnCone_solve(SecondOrderConeLinearComplementarityProblem* l
   double * worktmp = options->dWork;
 
   cblas_dcopy(nLocal , qLocal, incx , worktmp , incy);
-  
+
   cblas_dgemv(CblasColMajor,CblasNoTrans, nLocal, nLocal, 1.0, MLocal, nLocal, reaction, incx, 1.0, worktmp, incy);
 
   for (int i =0; i < nLocal ; i++)
@@ -107,38 +107,8 @@ void soclcp_projection_update_with_regularization(int cone, SecondOrderConeLinea
 
   int n = problem->n;
 
-
-  int storageType = MGlobal->storageType;
-  if(storageType == 0)
-    // Dense storage
-  {
-    int in = 3 * cone, it = in + 1, is = it + 1;
-    int inc = n * in;
-    double * MM = MGlobal->matrix0;
-    double * MLocal =  localproblem->M->matrix0;
-
-    /* The part of MM which corresponds to the current block is copied into MLocal */
-    MLocal[0] = MM[inc + in];
-    MLocal[1] = MM[inc + it];
-    MLocal[2] = MM[inc + is];
-    inc += n;
-    MLocal[3] = MM[inc + in];
-    MLocal[4] = MM[inc + it];
-    MLocal[5] = MM[inc + is];
-    inc += n;
-    MLocal[6] = MM[inc + in];
-    MLocal[7] = MM[inc + it];
-    MLocal[8] = MM[inc + is];
-  }
-  else if(storageType == 1)
-  {
-    int diagPos = getDiagonalBlockPos(MGlobal->matrix1, cone);
-    /*     for (int i =0 ; i< 3*3 ; i++) localproblem->M->matrix0[i] = MGlobal->matrix1->block[diagPos][i] ; */
-    cblas_dcopy(9, MGlobal->matrix1->block[diagPos], 1, localproblem->M->matrix0 , 1);
-
-  }
-  else
-    numerics_error("soclcp_projection -", "unknown storage type for matrix M");
+  int coneStart = problem->coneIndex[cone];
+  NM_extract_diag_block(problem->M, cone, coneStart, problem->coneIndex[cone+1] - coneStart, &localproblem->M->matrix0);
 
   /****  Computation of qLocal = qBlock + sum over a row of blocks in MGlobal of the products MLocal.reactionBlock,
      excluding the block corresponding to the current cone. ****/
@@ -342,8 +312,6 @@ int soclcp_projectionOnConeWithLocalIteration_solve(SecondOrderConeLinearComplem
 
 void soclcp_projection_with_regularization_free(SecondOrderConeLinearComplementarityProblem * problem, SecondOrderConeLinearComplementarityProblem * localproblem, SolverOptions* localsolver_options)
 {
-  free(localproblem->M->matrix0);
-  localproblem->M->matrix0 = NULL;
 }
 
 int soclcp_projectionOnCylinder_solve(SecondOrderConeLinearComplementarityProblem* localproblem, double* reaction, SolverOptions * options)

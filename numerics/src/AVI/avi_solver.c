@@ -32,7 +32,7 @@ int avi_driver(AffineVariationalInequalities* problem, double *z , double *w, So
   assert(problem && z && w &&
       "avi_driver : input for LinearComplementarityProblem and/or unknowns (z,w)");
 
-  assert(problem->M->storageType == 0 &&
+  assert(problem->M->storageType == NM_DENSE &&
       "avi_driver_DenseMatrix : forbidden type of storage for the matrix M of the AVI");
 
   assert(options->isSet);

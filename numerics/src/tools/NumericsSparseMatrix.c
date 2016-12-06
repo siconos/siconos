@@ -14,7 +14,36 @@ void NM_sparse_null(NumericsSparseMatrix* A)
   A->csc = NULL;
   A->trans_csc = NULL;
   A->csr = NULL;
+  A->diag_indx = NULL;
   A->origin = NS_UNKNOWN;
+}
+
+double* NM_sparse_data(NumericsSparseMatrix* A)
+{
+  switch (A->origin)
+  {
+  case NS_CSC:
+  {
+    assert(A->csc);
+    return A->csc->x;
+    break;
+  }
+  case NS_CSR:
+  {
+    assert(A->csr);
+    return A->csr->x;
+    break;
+  }
+  case NS_TRIPLET:
+  {
+    assert(A->triplet);
+    return A->triplet->x;
+    break;
+  }
+  default:
+    printf("NM_sparse_data :: unknown matrix origin %d", A->origin);
+    exit(EXIT_FAILURE);
+  }
 }
 
 NumericsSparseMatrix* newNumericsSparseMatrix(void)
@@ -54,6 +83,11 @@ NumericsSparseMatrix* freeNumericsSparseMatrix(NumericsSparseMatrix* A)
   {
     cs_spfree(A->csr);
     A->csr = NULL;
+  }
+  if (A->diag_indx)
+  {
+    free(A->diag_indx);
+    A->diag_indx = NULL;
   }
   return NULL;
 }
@@ -129,6 +163,34 @@ NumericsSparseLinearSolverParams* freeNumericsSparseLinearSolverParams(NumericsS
 
   free(p);
   return NULL;
+}
+
+CSparseMatrix* NM_csparse_alloc_for_copy(const CSparseMatrix* const m)
+{
+  assert(m);
+  CSparseMatrix* out = NULL;
+  if (m->nz >= 0) /* triplet  */
+  {
+    out = cs_spalloc(m->m, m->n, m->nzmax, 1, 1);
+  }
+  else if (m->nz == -1) /* csc */
+  {
+    out = cs_spalloc(m->m, m->n, m->nzmax, 1, 0);
+  }
+  else if (m->nz == -2) /* csr  */
+  {
+    out = cs_spalloc(m->n, m->m, m->nzmax, 1, 0);
+    out->nz = -2;
+    out->m = m->m;
+    out->n = m->n;
+  }
+  else
+  {
+    fprintf(stderr, "NM_copy :: error unknown type %lld for CSparse matrix\n",  (long long int)m->nz);
+    exit(EXIT_FAILURE);
+  }
+
+  return out;
 }
 
 void NM_sparse_free(void *p)

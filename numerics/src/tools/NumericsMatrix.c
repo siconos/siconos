@@ -177,54 +177,200 @@ void NM_row_prod(int sizeX, int sizeY, int currentRowNumber, const NumericsMatri
 
 }
 
-void NM_row_prod_no_diag(int sizeX, int sizeY, int currentRowNumber, const NumericsMatrix* A, const double* const x, double* y, int init)
+void NM_row_prod_no_diag(size_t sizeX, size_t sizeY, int block_start, size_t row_start, NumericsMatrix* A, double* restrict x, double* restrict y, double* restrict xsave, bool init)
 {
-
   assert(A);
   assert(x);
   assert(y);
   assert(A->size0 >= sizeY);
   assert(A->size1 == sizeX);
 
-  /* Checks storage type */
-  int storage = A->storageType;
-
-
-  /* double* storage */
-  if (storage == 0)
+  switch(A->storageType)
   {
-    double * xSave = (double*) malloc(sizeY * sizeof(double));
-    double * xx = (double *)x; /*because of const*/
-    for (int i = 0; i < sizeY; i++)
-    {
-      xSave[i] = x[currentRowNumber + i];
-      xx[currentRowNumber + i] = 0;
-    }
-    double * MM = A->matrix0 + currentRowNumber;
+  case NM_DENSE:
+  {
+    double * xSave;
+    if (xsave) xSave = xsave;
+    else xSave = (double*) malloc(sizeY * sizeof(double));
+
+    memcpy(xSave, &x[row_start], sizeY * sizeof(double));
+    memset(&x[row_start], 0, sizeY * sizeof(double));
+
+    double * M = A->matrix0 + row_start;
     int incx = A->size0;
     int incy = 1;
     if (init)
     {
-      for (int i = 0; i < sizeY; i++)
-        y[i] = 0;
+      memset(y, 0, sizeY*sizeof(double));
     }
-    for (int i = 0; i < sizeY; i++)
+    for (size_t i = 0; i < sizeY; ++i)
     {
-      y[i] += cblas_ddot(A->size0 , MM + i , incx , x , incy);
+      y[i] += cblas_ddot(A->size0, M, incx, x, incy);
+      ++M;
     }
-    for (int i = 0; i < sizeY; i++)
-    {
-      xx[currentRowNumber + i] = xSave[i];
-    }
-    free(xSave);
 
+    memcpy(&x[row_start], xSave, sizeY*sizeof(double));
+
+    if (!xsave)
+    {
+      free(xSave);
+    }
+
+    break;
   }
-  else if (storage == 1)
-    SBM_row_prod_no_diag(sizeX, sizeY, currentRowNumber, A->matrix1, x, y, init);
-  else
+  case NM_SPARSE_BLOCK:
+  {
+    SBM_row_prod_no_diag(sizeX, sizeY, block_start, A->matrix1, x, y, init);
+    break;
+  }
+  case NM_SPARSE:
+  {
+    double * xSave;
+    if (xsave) xSave = xsave;
+    else xSave = (double*) malloc(sizeY * sizeof(double));
+
+    memcpy(xSave, &x[row_start], sizeY * sizeof(double));
+    memset(&x[row_start], 0, sizeY * sizeof(double));
+
+    if (init)
+    {
+      memset(y, 0, sizeY*sizeof(double));
+    }
+
+    CSparseMatrix* M;
+    if (A->matrix2->origin == NS_CSR)
+    {
+      M = NM_csr(A);
+    }
+    else
+    {
+      M = NM_csc_trans(A);
+    }
+
+    csi* Mp = M->p;
+    csi* Mi = M->i;
+    double* Mx = M->x;
+
+    for (size_t i = 0, j = row_start; i < sizeY; ++i, ++j)
+    {
+      for (csi p = Mp[j]; p < Mp[j+1]; ++p)
+      {
+        y[i] += Mx[p] * x[Mi[p]];
+      }
+    }
+
+    memcpy(&x[row_start], xSave, sizeY*sizeof(double));
+
+    if (!xsave)
+    {
+      free(xSave);
+    }
+    break;
+  }
+  default:
   {
     fprintf(stderr, "Numerics, NumericsMatrix, product matrix - vector NM_row_prod_no_diag(A,x,y) failed, unknown storage type for A.\n");
     exit(EXIT_FAILURE);
+  }
+  }
+}
+
+
+void NM_row_prod_no_diag3(size_t sizeX, int block_start, size_t row_start, NumericsMatrix* A, double* x, double* y, bool init)
+{
+  assert(A);
+  assert(x);
+  assert(y);
+  assert(A->size0 >= 3);
+  assert(A->size1 == sizeX);
+
+  switch(A->storageType)
+  {
+  case NM_DENSE:
+  {
+    if (init)
+    {
+      y[0] = 0.;
+      y[1] = 0.;
+      y[2] = 0.;
+    }
+    double* M = A->matrix0;
+    assert(M);
+    int incx = sizeX, incy = 1;
+    size_t in = row_start, it = row_start + 1, is = row_start + 2;
+    double rin = x[in] ;
+    double rit = x[it] ;
+    double ris = x[is] ;
+    x[in] = 0.;
+    x[it] = 0.;
+    x[is] = 0.;
+    y[0] += cblas_ddot(sizeX, &M[in], incx, x, incy);
+    y[1] += cblas_ddot(sizeX, &M[it], incx, x, incy);
+    y[2] += cblas_ddot(sizeX, &M[is], incx, x, incy);
+    x[in] = rin;
+    x[it] = rit;
+    x[is] = ris;
+    break;
+  }
+  case NM_SPARSE_BLOCK:
+  {
+    /* qLocal += rowMB * x
+     * with rowMB the row of blocks of MGlobal which corresponds
+     * to the current contact
+     */
+    SBM_row_prod_no_diag_3x3(sizeX, 3, block_start, A->matrix1, x, y);
+    break;
+  }
+  case NM_SPARSE:
+  {
+    if (init)
+    {
+      y[0] = 0.;
+      y[1] = 0.;
+      y[2] = 0.;
+    }
+
+    size_t in = row_start, it = row_start + 1, is = row_start + 2;
+    double rin = x[in] ;
+    double rit = x[it] ;
+    double ris = x[is] ;
+    x[in] = 0.;
+    x[it] = 0.;
+    x[is] = 0.;
+
+    CSparseMatrix* M;
+    if (A->matrix2->origin == NS_CSR)
+    {
+      M = NM_csr(A);
+    }
+    else
+    {
+      M = NM_csc_trans(A);
+    }
+
+    csi* Mp = M->p;
+    csi* Mi = M->i;
+    double* Mx = M->x;
+
+    for (size_t i = 0, j = row_start; i < 3; ++i, ++j)
+    {
+      for (csi p = Mp[j]; p < Mp[j+1]; ++p)
+      {
+        y[i] += Mx[p] * x[Mi[p]];
+      }
+    }
+
+    x[in] = rin;
+    x[it] = rit;
+    x[is] = ris;
+
+    break;
+  }
+  default:
+  {
+    fprintf(stderr, "NM_row_prod_no_diag3 :: unknown matrix storage %d", A->storageType);
+    exit(EXIT_FAILURE);
+  }
   }
 }
 
@@ -411,7 +557,7 @@ void displayRowbyRow(const NumericsMatrix* const m)
     exit(EXIT_FAILURE);
   }
   int storageType = m->storageType;
-  if (storageType == 0)
+  if (storageType == NM_DENSE)
   {
     printf("\n ========== Numerics Matrix of dim %dX%d\n", m->size0, m->size1);
     for (int lin = 0; lin < m->size0; lin++)
@@ -421,64 +567,14 @@ void displayRowbyRow(const NumericsMatrix* const m)
       printf("\n");
     }
   }
-  else if (storageType == 1)
+  else if (storageType == NM_SPARSE_BLOCK)
     printSBM(m->matrix1);
-}
-
-static int cs_printInFile(const cs *A, int brief, FILE* file)
-{
-  csi m, n, nzmax, nz, p, j, *Ap, *Ai ;
-  double *Ax ;
-  if(!A)
-  {
-    fprintf(file,"(null)\n") ;
-    return (0) ;
-  }
-  m = A->m ;
-  n = A->n ;
-  Ap = A->p ;
-  Ai = A->i ;
-  Ax = A->x ;
-  nzmax = A->nzmax ;
-  nz = A->nz ;
-  fprintf(file,"CSparse Version %d.%d.%d, %s.  %s\n", CS_VER, CS_SUBVER,
-         CS_SUBSUB, CS_DATE, CS_COPYRIGHT) ;
-  if(nz < 0)
-  {
-    fprintf(file,"%lld-by-%lld, nzmax: %lld nnz: %lld, 1-norm: %g\n",
-            (long long int)m,  (long long int)n,  (long long int)nzmax,
-            (long long int)Ap [n],  cs_norm(A)) ;
-    for(j = 0 ; j < n ; j++)
-    {
-      fprintf(file,"    col %lld : locations %lld to %lld\n",  (long long int)j,  (long long int)Ap [j],  (long long int)Ap [j+1]-1);
-      for(p = Ap [j] ; p < Ap [j+1] ; p++)
-      {
-        fprintf(file,"      %lld : %g\n",  (long long int)Ai [p], Ax ? Ax [p] : 1) ;
-        if(brief && p > 20)
-        {
-          fprintf(file,"  ...\n") ;
-          return (1) ;
-        }
-      }
-    }
-  }
   else
   {
-    fprintf(file,"triplet: %lld-by-%lld, nzmax: %lld nnz: %lld\n",  (long long int)m,  (long long int)n,
-            (long long int)nzmax,  (long long int)nz) ;
-    for(p = 0 ; p < nz ; p++)
-    {
-      fprintf(file,"    %lld %lld : %g\n",  (long long int)Ai [p],  (long long int)Ap [p], Ax ? Ax [p] : 1) ;
-      if(brief && p > 20)
-      {
-        fprintf(file,"  ...\n") ;
-        return (1) ;
-      }
-    }
+    fprintf(stderr, "displayRowbyRow :: unknown matrix storage");
+    exit(EXIT_FAILURE);
   }
-  return (1) ;
 }
-
 
 void printInFile(const NumericsMatrix* const m, FILE* file)
 {
@@ -557,7 +653,7 @@ void printInFileForScilab(const NumericsMatrix* const m, FILE* file)
   fprintf(file, "size0 = %d; \n", m->size0);
   fprintf(file, "size1 = %d; \n", m->size1);
 
-  if (storageType == 0)
+  if (storageType == NM_DENSE)
   {
     fprintf(file, "data= [");
     for (int i = 0; i < m->size0; i++)
@@ -571,12 +667,17 @@ void printInFileForScilab(const NumericsMatrix* const m, FILE* file)
     }
     fprintf(file, "]");
   }
-  else if (storageType == 1)
+  else if (storageType == NM_SPARSE_BLOCK)
   {
     printInFileSBMForScilab(m->matrix1, file);
     /*       fprintf(stderr,"Numerics, NumericsMatrix printInFileForScilab. Not yet implemented fo storageType = %i.\n", storageType); */
     /*       exit(EXIT_FAILURE); */
 
+  }
+  else
+  {
+    fprintf(stderr, "printInFileForScilab. :: unknown matrix storage");
+    exit(EXIT_FAILURE);
   }
 }
 
@@ -599,7 +700,7 @@ void readInFile(NumericsMatrix* const m, FILE *file)
   CHECK_IO(fscanf(file, "%d", &(m->size1)));
   int storageType = m->storageType;
 
-  if (storageType == 0)
+  if (storageType == NM_DENSE)
   {
     CHECK_IO(fscanf(file, "%d\t%d\n", &(m->size0), &(m->size1)));
 
@@ -610,7 +711,7 @@ void readInFile(NumericsMatrix* const m, FILE *file)
 
 
   }
-  else if (storageType == 1)
+  else if (storageType == NM_SPARSE_BLOCK)
   {
     readInFileSBM(m->matrix1, file);
   }
@@ -680,29 +781,118 @@ void readInFileForScilab(NumericsMatrix* const M, FILE *file)
   exit(EXIT_FAILURE);
 }
 
-void getDiagonalBlock(NumericsMatrix* m, int numBlockRow, int numRow, int size, double ** Bout)
+void NM_extract_diag_block(NumericsMatrix* M, int block_row_nb, size_t start_row, int size, double ** Block)
 {
-  int storageType = m->storageType;
-  if (storageType == 0)
+  int storageType = M->storageType;
+  switch (storageType)
   {
-    double * MM = m->matrix0;
-    double * elem = 0;
+  case NM_DENSE:
+  {
+    double* Mptr = M->matrix0 + (M->size0 + 1)*start_row;
+    double* Bmat = *Block;
     /* The part of MM which corresponds to the current block is copied into MLocal */
-    for (int i = 0; i < size; i++)
+    for (size_t i = 0; i < size; ++i)
     {
-      elem = MM + numRow + (numRow + i) * (m->size0);
-      for (int j = 0; j < size; j++)
-      {
-        (*Bout)[j + i * size] = *elem;
-        elem++;
-      }
+      memcpy(Bmat, Mptr, size*sizeof(double));
+      Mptr += M->size0;
+      Bmat += size;
     }
+    break;
   }
-  else if (storageType == 1)
+  case NM_SPARSE_BLOCK:
   {
-    int diagPos = getDiagonalBlockPos(m->matrix1, numBlockRow);
-    (*Bout) = m->matrix1->block[diagPos];
+    int diagPos = getDiagonalBlockPos(M->matrix1, block_row_nb);
+    (*Block) = M->matrix1->block[diagPos];
+    break;
+  }
+  case NM_SPARSE:
+  {
+    NM_sparse_extract_block(M, *Block, start_row, start_row, size, size);
+    break;
+  }
+  default:
+  {
+    printf("NM_extract_diag_block :: unknown matrix storage");
+    exit(EXIT_FAILURE);
+  }
+  }
+}
 
+void NM_extract_diag_block3(NumericsMatrix* M, int block_row_nb, double ** Block)
+{
+  int storageType = M->storageType;
+  switch (storageType)
+  {
+  case NM_DENSE:
+  {
+    double* Mptr = M->matrix0 + (M->size0 + 1)*(block_row_nb + block_row_nb + block_row_nb);
+    double* Bmat = *Block;
+    /* The part of MM which corresponds to the current block is copied into MLocal */
+    Bmat[0] = Mptr[0];
+    Bmat[1] = Mptr[1];
+    Bmat[2] = Mptr[2];
+    Mptr += M->size0;
+    Bmat[3] = Mptr[0];
+    Bmat[4] = Mptr[1];
+    Bmat[5] = Mptr[2];
+    Mptr += M->size0;
+    Bmat[6] = Mptr[0];
+    Bmat[7] = Mptr[1];
+    Bmat[8] = Mptr[2];
+    break;
+  }
+  case NM_SPARSE_BLOCK:
+  {
+    int diagPos = getDiagonalBlockPos(M->matrix1, block_row_nb);
+    (*Block) = M->matrix1->block[diagPos];
+    break;
+  }
+  case NM_SPARSE:
+  {
+    size_t start_row = (size_t)block_row_nb + block_row_nb + block_row_nb;
+    NM_sparse_extract_block(M, *Block, start_row, start_row, 3, 3);
+    break;
+  }
+  default:
+  {
+    printf("NM_extract_diag_block :: unknown matrix storage");
+    exit(EXIT_FAILURE);
+  }
+  }
+}
+
+void NM_add_to_diag3(NumericsMatrix* M, double alpha)
+{
+  size_t n = M->size0;
+  switch (M->storageType)
+  {
+  case NM_DENSE:
+  {
+    for (size_t indx = 0; indx < n*n; indx += n+1) M->matrix0[indx] += alpha;
+    break;
+  }
+  case NM_SPARSE_BLOCK:
+  {
+    for (size_t ic = 0; ic < n/3; ++ic)
+    {
+      int diagPos = getDiagonalBlockPos(M->matrix1, ic);
+      M->matrix1->block[diagPos][0] += alpha;
+      M->matrix1->block[diagPos][4] += alpha;
+      M->matrix1->block[diagPos][8] += alpha;
+    }
+    break;
+  }
+  case NM_SPARSE:
+  {
+    csi* diag_indices = NM_sparse_diag_indices(M);
+    double* Mx = NM_sparse_data(M->matrix2);
+    for (size_t i = 0; i < n; ++i) Mx[diag_indices[i]] += alpha;
+
+    break;
+  }
+  default:
+    printf("NM_add_to_diag3 :: unsupported matrix storage %d", M->storageType);
+    exit(EXIT_FAILURE);
   }
 }
 
@@ -909,6 +1099,7 @@ void NM_clearCSR(NumericsMatrix* A)
 
 void NM_clearSparseStorage(NumericsMatrix *A)
 {
+  if (A->matrix2) A->matrix2->origin = NS_UNKNOWN;
   NM_clearTriplet(A);
   NM_clearCSC(A);
   NM_clearCSCTranspose(A);
@@ -974,6 +1165,57 @@ void NM_copy_sparse(const CSparseMatrix* const A, CSparseMatrix* B)
   else if (A->nz == -2) { size_cpy = A->m + 1; }
 
   memcpy(B->p, A->p, size_cpy * sizeof(csi));
+}
+
+void NM_sparse_extract_block(const NumericsMatrix* const M, double* blockM, size_t pos_row, size_t pos_col, size_t block_row_size, size_t block_col_size)
+{
+  assert(M);
+  assert(M->storageType == NM_SPARSE);
+  assert(blockM);
+  assert(pos_row < M->size0);
+  assert(pos_col < M->size1);
+  assert(block_row_size > 0 && block_row_size + pos_row <= M->size0);
+  assert(block_col_size > 0 && block_col_size + pos_col <= M->size1);
+
+  NumericsSparseMatrix* Msparse = M->matrix2;
+  assert(Msparse);
+
+  /* Clear memory */
+  memset(blockM, 0, block_row_size*block_col_size * sizeof(double));
+
+//  switch (Msparse->origin)
+  {
+//  case NS_CSC:
+  {
+    CSparseMatrix* Mcsc = NM_csc(M);
+    assert(Mcsc);
+    csi* Mp = Mcsc->p;
+    csi* Mi = Mcsc->i;
+    double* Mx = Mcsc->x;
+    for (size_t j = pos_col; j < pos_col + block_col_size; ++j)
+    {
+      for (csi p = Mp[j]; p < Mp[j+1]; ++p)
+      {
+        csi row_nb = Mi[p];
+        if (row_nb >= pos_row)
+        {
+          if (row_nb >= pos_row + block_row_size)
+          {
+            break;
+          }
+          else
+          {
+            blockM[(j-pos_col)*block_col_size + row_nb - pos_row] = Mx[p];
+          }
+        }
+      }
+    }
+//    break;
+  }
+//  default:
+//    printf("NM_sparse_extract_block :: unsupported matrix type %d\n", Msparse->origin);
+//    exit(EXIT_FAILURE);
+  }
 }
 
 void NM_copy_to_sparse(const NumericsMatrix* const A, NumericsMatrix* B)
@@ -1473,12 +1715,17 @@ void NM_gemv(const double alpha, NumericsMatrix* A, const double *x,
   }
 
   case NM_SPARSE:
-  default:
   {
     assert(A->storageType == NM_SPARSE);
     // if possible use the much simpler version provided by CSparse
     // Also at the time of writing, cs_aaxpy is bugged --xhub
-    if (fabs(alpha - 1.) < 100*DBL_EPSILON && fabs(beta - 1.) < 100*DBL_EPSILON)
+    bool beta_check = false;
+    if (fabs(beta) < 100*DBL_EPSILON)
+    {
+      memset(y, 0, A->size0*sizeof(double));
+      beta_check = true;
+    }
+    if (fabs(alpha - 1.) < 100*DBL_EPSILON && (fabs(beta - 1.) < 100*DBL_EPSILON || beta_check))
     {
       CHECK_RETURN(cs_gaxpy(NM_csc(A), x, y));
     }
@@ -1486,7 +1733,12 @@ void NM_gemv(const double alpha, NumericsMatrix* A, const double *x,
     {
       CHECK_RETURN(cs_aaxpy(alpha, NM_csc(A), x, beta, y));
     }
+    break;
   }
+  default:
+    {
+      assert(0 && "NM_gemv unknown storageType");
+    }
   }
 }
 
@@ -1496,31 +1748,37 @@ void NM_tgemv(const double alpha, NumericsMatrix* A, const double *x,
 {
   switch (A->storageType)
   {
-    case NM_DENSE:
+  case NM_DENSE:
+    {
+      cblas_dgemv(CblasColMajor, CblasTrans, A->size0, A->size1,
+          alpha, A->matrix0, A->size0, x, 1, beta, y, 1);
+      break;
+    }
+  case NM_SPARSE_BLOCK:
+  case NM_SPARSE:
+    {
+      /* if possible use the much simpler version provided by CSparse
+       Also at the time of writing, cs_aaxpy is bugged --xhub */
+      bool beta_check = false;
+      if (fabs(beta) < 100*DBL_EPSILON)
       {
-        cblas_dgemv(CblasColMajor, CblasTrans, A->size0, A->size1,
-            alpha, A->matrix0, A->size0, x, 1, beta, y, 1);
-        break;
+        memset(y, 0, A->size0*sizeof(double));
+        beta_check = true;
       }
-    case NM_SPARSE_BLOCK:
-    case NM_SPARSE:
+      if (fabs(alpha - 1.) < 100*DBL_EPSILON && (fabs(beta - 1.) < 100*DBL_EPSILON || beta_check))
       {
-        /* if possible use the much simpler version provided by CSparse
-         Also at the time of writing, cs_aaxpy is bugged --xhub */
-        if (fabs(alpha - 1.) < 100*DBL_EPSILON && fabs(beta - 1.) < 100*DBL_EPSILON)
-        {
-          CHECK_RETURN(cs_gaxpy(NM_csc_trans(A), x, y));
-        }
-        else
-        {
-          CHECK_RETURN(cs_aaxpy(alpha, NM_csc_trans(A), x, beta, y));
-        }
-        break;
+        CHECK_RETURN(cs_gaxpy(NM_csc_trans(A), x, y));
       }
-    default:
+      else
       {
-        assert(0 && "NM_tgemv unknown storageType");
+        CHECK_RETURN(cs_aaxpy(alpha, NM_csc_trans(A), x, beta, y));
       }
+      break;
+    }
+  default:
+    {
+      assert(0 && "NM_tgemv unknown storageType");
+    }
   }
 }
 
@@ -1581,6 +1839,7 @@ void NM_gemm(const double alpha, NumericsMatrix* A, NumericsMatrix* B,
     NM_sparse(C)->csc = result;
     C->size0 = (int)C->matrix2->csc->m;
     C->size1 = (int)C->matrix2->csc->n;
+    NM_sparse(C)->origin = NS_CSC;
     break;
   }
   }
@@ -1918,6 +2177,97 @@ void NM_update_size(NumericsMatrix* A)
   }
 }
 
+csi* NM_sparse_diag_indices(NumericsMatrix* M)
+{
+  NumericsSparseMatrix* A = M->matrix2;
+  assert(A);
+  if (A->diag_indx) return A->diag_indx;
+
+  csi* indices = (csi*) malloc(M->size0 * sizeof(csi));
+  A->diag_indx = indices;
+  /* XXX hack --xhub  */
+  if (A->origin == NS_TRIPLET) { NM_csc(M); A->origin = NS_CSC; }
+  switch (A->origin)
+  {
+  case NS_CSC:
+  {
+    assert(A->csc);
+    indices[0] = 0;
+    CSparseMatrix* newMat = cs_spalloc(M->size0, M->size1, A->csc->p[M->size0]+M->size0, 1, 0);
+    csi* Ai = A->csc->i;
+    csi* Ap = A->csc->p;
+    double* Ax = A->csc->x;
+    csi* Ni = newMat->i;
+    csi* Np = newMat->p;
+    double* Nx = newMat->x;
+    csi end = Ap[1];
+    csi inc = 0;
+    Np[0] = 0;
+    if (Ai[0] == 0)
+    {
+      memcpy(Ni, Ai, end*sizeof(csi));
+      Np[1] = Ap[1];
+      memcpy(Nx, Ax, end*sizeof(double));
+    }
+    else
+    {
+      Ni[0] = 0;
+      Np[1] = Ap[1] + 1;
+      Nx[0] = 0.;
+      memcpy(&Ni[1], Ai, end*sizeof(csi));
+      memcpy(&Nx[1], Ax, end*sizeof(double));
+      ++inc;
+    }
+
+    /* Could optimize further and copy everything using memcpy */
+    for (size_t j = 1; j < M->size0; ++j)
+    {
+      csi rem = 0;
+      for (csi p = Ap[j]; (rem == 0) && (p < Ap[j+1]); ++p)
+      {
+        if (Ai[p] < j)
+        {
+          Ni[p+inc] = Ai[p];
+          Nx[p+inc] = Ax[p];
+        }
+        else
+        {
+          if (Ai[p] > j)
+          {
+            Ni[p+inc] = j;
+            Nx[p+inc] = 0.;
+            indices[j] = p+inc;
+            ++inc;
+          }
+          else
+          {
+            indices[j] = p+inc;
+          }
+          rem = p;
+          Np[j] = Ap[j] + inc;
+        }
+        end = Ap[j+1] - rem;
+        memcpy(&Ni[rem+inc], &Ai[rem], end*sizeof(csi));
+        memcpy(&Nx[rem+inc], &Ax[rem], end*sizeof(double));
+        assert(inc <= M->size0);
+      }
+    }
+    Np[M->size0] = Ap[M->size0] + inc;
+    NM_clearSparseStorage(M);
+    A->origin = NS_CSC;
+    A->csc = newMat;
+    break;
+  }
+  case NS_TRIPLET:
+  case NS_CSR:
+  default:
+    printf("NM_sparse_diag_indices :: unknown matrix origin %d", A->origin);
+    exit(EXIT_FAILURE);
+  }
+
+  return indices;
+}
+
 void NM_csc_alloc(NumericsMatrix* A, csi nzmax)
 {
   NM_sparse(A)->csc = cs_spalloc(A->size0, A->size1, nzmax, 1, 0);
@@ -1934,32 +2284,4 @@ void NM_csr_alloc(NumericsMatrix* A, csi nzmax)
 void NM_triplet_alloc(NumericsMatrix* A, csi nzmax)
 {
   NM_sparse(A)->triplet = cs_spalloc(A->size0, A->size1, nzmax, 1, 1);
-}
-
-CSparseMatrix* NM_csparse_alloc_for_copy(const CSparseMatrix* const m)
-{
-  assert(m);
-  CSparseMatrix* out = NULL;
-  if (m->nz >= 0) /* triplet  */
-  {
-    out = cs_spalloc(m->m, m->n, m->nzmax, 1, 1);
-  }
-  else if (m->nz == -1) /* csc */
-  {
-    out = cs_spalloc(m->m, m->n, m->nzmax, 1, 0);
-  }
-  else if (m->nz == -2) /* csr  */
-  {
-    out = cs_spalloc(m->n, m->m, m->nzmax, 1, 0);
-    out->nz = -2;
-    out->m = m->m;
-    out->n = m->n;
-  }
-  else
-  {
-    fprintf(stderr, "NM_copy :: error unknown type %lld for CSparse matrix\n",  (long long int)m->nz);
-    exit(EXIT_FAILURE);
-  }
-
-  return out;
 }

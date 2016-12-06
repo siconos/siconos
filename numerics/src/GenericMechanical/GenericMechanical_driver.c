@@ -54,7 +54,6 @@
 int GenericMechanical_compute_error(GenericMechanicalProblem* pGMP, double *reaction , double *velocity, double tol, SolverOptions* options, double * err)
 {
   listNumericsProblem * curProblem = pGMP->firstListElem;
-  SparseBlockStructuredMatrix* m = pGMP->M->matrix1;
   int storageType = pGMP->M->storageType;
   NumericsMatrix* numMat = pGMP->M;
   int currentRowNumber = 0;
@@ -81,12 +80,7 @@ int GenericMechanical_compute_error(GenericMechanicalProblem* pGMP, double *reac
     printDenseMatrice("reaction", 0, reaction, pGMP->size, 1);
 #endif
     /*computation of the localproblem->q*/
-    if (storageType == 0)
-    {
-      NM_row_prod_no_diag(pGMP->size, curSize, posInX, numMat, reaction, curProblem->q, 0);
-    }
-    else
-      SBM_row_prod_no_diag(pGMP->size, curSize, currentRowNumber, m, reaction, curProblem->q, 0);
+    NM_row_prod_no_diag(pGMP->size, curSize, currentRowNumber, posInX, numMat, reaction, curProblem->q, NULL, 0);
 #ifdef GENERICMECHANICAL_DEBUG_COMPUTE_ERROR
     printDenseMatrice("qnodiag", 0, curProblem->q, curSize, 1);
 #endif
@@ -97,12 +91,12 @@ int GenericMechanical_compute_error(GenericMechanicalProblem* pGMP, double *reac
     double * diagBlock = 0;
     if (storageType == 0) /*dense*/
     {
-      getDiagonalBlock(numMat, currentRowNumber, posInX, curSize, &bufForLocalProblemDense);
+      NM_extract_diag_block(numMat, currentRowNumber, posInX, curSize, &bufForLocalProblemDense);
       diagBlock = bufForLocalProblemDense;
     }
     else
     {
-      getDiagonalBlock(numMat, currentRowNumber, posInX, curSize, &diagBlock);
+      NM_extract_diag_block(numMat, currentRowNumber, posInX, curSize, &diagBlock);
     }
 #ifdef GENERICMECHANICAL_DEBUG_COMPUTE_ERROR
     printDenseMatrice("diagBlock", 0, diagBlock, curSize, curSize);
@@ -223,7 +217,6 @@ void genericMechanicalProblem_GS(GenericMechanicalProblem* pGMP, double * reacti
 #endif
   listNumericsProblem * curProblem = 0;
   int storageType = pGMP->M->storageType;
-  SparseBlockStructuredMatrix* m = pGMP->M->matrix1;
   NumericsMatrix* numMat = pGMP->M;
   int iterMax = options->iparam[0];
   int it = 0;
@@ -279,17 +272,17 @@ void genericMechanicalProblem_GS(GenericMechanicalProblem* pGMP, double * reacti
       //curSize=m->blocksize0[currentRowNumber] - posInX;
       curSize = curProblem->size;
       /*about the diagonal block:*/
-      //diagBlockNumber = getDiagonalBlockPos(m,currentRowNumber);
-      //diagBlockNumber = getDiagonalBlockPos(numMat,currentRowNumber,posInX,size);
+      //diagBlockNumber = NM_extract_diag_blockPos(m,currentRowNumber);
+      //diagBlockNumber = NM_extract_diag_blockPos(numMat,currentRowNumber,posInX,size);
       double * diagBlock = 0;
       if (storageType == 0) /*dense*/
       {
-        getDiagonalBlock(numMat, currentRowNumber, posInX, curSize, &bufForLocalProblemDense);
+        NM_extract_diag_block(numMat, currentRowNumber, posInX, curSize, &bufForLocalProblemDense);
         diagBlock = bufForLocalProblemDense;
       }
       else
       {
-        getDiagonalBlock(numMat, currentRowNumber, posInX, curSize, &diagBlock);
+        NM_extract_diag_block(numMat, currentRowNumber, posInX, curSize, &diagBlock);
 
       }
 
@@ -305,12 +298,7 @@ void genericMechanicalProblem_GS(GenericMechanicalProblem* pGMP, double * reacti
         linearProblem->M->matrix0 = diagBlock;
         /*about q.*/
         memcpy(linearProblem->q, &(pGMP->q[posInX]), curSize * sizeof(double));
-        if (storageType == 0)
-        {
-          NM_row_prod_no_diag(pGMP->size, curSize, posInX, numMat, reaction, linearProblem->q, 0);
-        }
-        else
-          SBM_row_prod_no_diag(pGMP->size, curSize, currentRowNumber, m, reaction, linearProblem->q, 0);
+        NM_row_prod_no_diag(pGMP->size, curSize, currentRowNumber, posInX, numMat, reaction, linearProblem->q, NULL, 0);
 
         resLocalSolver = LinearSystem_driver(linearProblem, sol, w, 0);
 
@@ -323,12 +311,7 @@ void genericMechanicalProblem_GS(GenericMechanicalProblem* pGMP, double * reacti
         lcpProblem->M->matrix0 = diagBlock;
         /*about q.*/
         memcpy(curProblem->q, &(pGMP->q[posInX]), curSize * sizeof(double));
-        if (storageType == 0)
-        {
-          NM_row_prod_no_diag(pGMP->size, curSize, posInX, numMat, reaction, lcpProblem->q, 0);
-        }
-        else
-          SBM_row_prod_no_diag(pGMP->size, curSize, currentRowNumber, m, reaction, lcpProblem->q, 0);
+        NM_row_prod_no_diag(pGMP->size, curSize, currentRowNumber, posInX, numMat, reaction, lcpProblem->q, NULL, 0);
         resLocalSolver = linearComplementarity_driver(lcpProblem, sol, w, options->internalSolvers);
 
         break;
@@ -344,12 +327,7 @@ void genericMechanicalProblem_GS(GenericMechanicalProblem* pGMP, double * reacti
 
         DEBUG_EXPR_WE(for (int i =0 ; i < 3; i++) printf("curProblem->q[%i]= %12.8e,\t fcProblem->q[%i]= %12.8e,\n",i,curProblem->q[i],i,fcProblem->q[i]););
 
-        if (storageType == 0)
-        {
-          NM_row_prod_no_diag(pGMP->size, curSize, posInX, numMat, reaction, fcProblem->q, 0);
-        }
-        else
-          SBM_row_prod_no_diag(pGMP->size, curSize, currentRowNumber, m, reaction, fcProblem->q, 0);
+        NM_row_prod_no_diag(pGMP->size, curSize, currentRowNumber, posInX, numMat, reaction, fcProblem->q, NULL, 0);
 
         DEBUG_EXPR_WE(for (int i =0 ; i < 3; i++)  printf("reaction[%i]= %12.8e,\t fcProblem->q[%i]= %12.8e,\n",i,reaction[i],i,fcProblem->q[i]););
 

@@ -112,7 +112,7 @@ void fc3d_projectionWithDiagonalization_update(int contact, FrictionContactProbl
   qLocal[1] = qGlobal[it];
   qLocal[2] = qGlobal[is];
 
-  if (MGlobal->storageType == 0)
+  if (MGlobal->storageType == NM_DENSE)
   {
     double * MM = MGlobal->matrix0;
     int incx = n, incy = 1;
@@ -124,7 +124,7 @@ void fc3d_projectionWithDiagonalization_update(int contact, FrictionContactProbl
     qLocal[1] -= MM[it + n * it] * reaction[it];
     qLocal[2] -= MM[is + n * is] * reaction[is];
   }
-  else if (MGlobal->storageType == 1)
+  else if (MGlobal->storageType == NM_SPARSE_BLOCK)
   {
     /* qLocal += rowMB * reaction
        with rowMB the row of blocks of MGlobal which corresponds to the current contact
@@ -135,6 +135,11 @@ void fc3d_projectionWithDiagonalization_update(int contact, FrictionContactProbl
     qLocal[1] -= MLocal[4] * reaction[it];
     qLocal[2] -= MLocal[8] * reaction[is];
 
+  }
+  else
+  {
+    fprintf(stderr, "fc3d_projectionWithDiagonalization_update :: Unsupported matrix storage)");
+    exit(EXIT_FAILURE);
   }
   /*   reaction[in] = rin; reaction[it] = rit; reaction[is] = ris; */
 
@@ -168,38 +173,7 @@ void fc3d_projection_update_with_regularization(int contact, FrictionContactProb
 
   int n = 3 * problem->numberOfContacts;
 
-
-  int storageType = MGlobal->storageType;
-  if (storageType == 0)
-    // Dense storage
-  {
-    int in = 3 * contact, it = in + 1, is = it + 1;
-    int inc = n * in;
-    double * MM = MGlobal->matrix0;
-    double * MLocal =  localproblem->M->matrix0;
-
-    /* The part of MM which corresponds to the current block is copied into MLocal */
-    MLocal[0] = MM[inc + in];
-    MLocal[1] = MM[inc + it];
-    MLocal[2] = MM[inc + is];
-    inc += n;
-    MLocal[3] = MM[inc + in];
-    MLocal[4] = MM[inc + it];
-    MLocal[5] = MM[inc + is];
-    inc += n;
-    MLocal[6] = MM[inc + in];
-    MLocal[7] = MM[inc + it];
-    MLocal[8] = MM[inc + is];
-  }
-  else if (storageType == 1)
-  {
-    int diagPos = getDiagonalBlockPos(MGlobal->matrix1, contact);
-    /*     for (int i =0 ; i< 3*3 ; i++) localproblem->M->matrix0[i] = MGlobal->matrix1->block[diagPos][i] ; */
-    cblas_dcopy(9, MGlobal->matrix1->block[diagPos], 1, localproblem->M->matrix0 , 1);
-
-  }
-  else
-    numerics_error("fc3d_projection -", "unknown storage type for matrix M");
+  NM_extract_diag_block3(problem->M, contact, &localproblem->M->matrix0);
 
   /****  Computation of qLocal = qBlock + sum over a row of blocks in MGlobal of the products MLocal.reactionBlock,
      excluding the block corresponding to the current contact. ****/

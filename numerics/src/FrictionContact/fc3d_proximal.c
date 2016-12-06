@@ -185,26 +185,20 @@ void fc3d_proximal(FrictionContactProblem* problem, double *reaction, double *ve
       printf("------------------------ FC3D - PROXIMAL - Only regularization \n");
   }
 
-  if (iparam[9]){
+  if (iparam[9])
+  {
     double alpha_old = alpha;
     while ((iter < itermax) && (hasNotConverged > 0))
     {
       ++iter;
       //Add proximal regularization on M
-      if (M->storageType == 0)
+      //This code looked weird before. Do we add (alpha - alpha_old) ?
+      double pert = alpha;
+      if (iter > 0)
       {
-        for (int i = 0 ; i < n ; i++) M->matrix0[i + i * n] += alpha;
+        pert -= alpha_old;
       }
-      else if (M->storageType == 1)
-      {
-        for (int ic = 0 ; ic < nc ; ic++)
-        {
-          int diagPos = getDiagonalBlockPos(M->matrix1, ic);
-          if (iter >0 )
-            for (int i = 0 ; i < 3 ; i++) M->matrix1->block[diagPos][i + 3 * i] -= alpha_old ;
-          for (int i = 0 ; i < 3 ; i++) M->matrix1->block[diagPos][i + 3 * i] += alpha ;
-        }
-      }
+      NM_add_to_diag3(M, pert);
 
       DEBUG_PRINTF("internal solver tolerance = %21.8e \n",internalsolver_options->dparam[0]);
 
@@ -251,18 +245,8 @@ void fc3d_proximal(FrictionContactProblem* problem, double *reaction, double *ve
       cblas_daxpy(n, -alpha, reactionold, 1, problem->q , 1) ;
 
       //Add proximal regularization on M
-      if (M->storageType == 0)
-      {
-        for (int i = 0 ; i < n ; i++) M->matrix0[i + i * n] += alpha;
-      }
-      else if (M->storageType == 1)
-      {
-        for (int ic = 0 ; ic < nc ; ic++)
-        {
-          int diagPos = getDiagonalBlockPos(M->matrix1, ic);
-          for (int i = 0 ; i < 3 ; i++) M->matrix1->block[diagPos][i + 3 * i] += alpha ;
-        }
-      }
+      NM_add_to_diag3(M, alpha);
+
       // internal solver for the regularized problem
       /*       fc3d_nsgs(problem, reaction , velocity , info , internalsolver_options); */
 
@@ -280,18 +264,7 @@ void fc3d_proximal(FrictionContactProblem* problem, double *reaction, double *ve
       cblas_daxpy(n, alpha, reactionold, 1, problem->q, 1) ;
 
       //substract proximal regularization on M
-      if (M->storageType == 0)
-      {
-        for (int i = 0 ; i < n ; i++) M->matrix0[i + i * n] -= alpha;
-      }
-      else if (M->storageType == 1)
-      {
-        for (int ic = 0 ; ic < nc ; ic++)
-        {
-          int diagPos = getDiagonalBlockPos(M->matrix1, ic);
-          for (int i = 0 ; i < 3 ; i++) M->matrix1->block[diagPos][i + 3 * i] -= alpha ;
-        }
-      }
+      NM_add_to_diag3(M, -alpha);
 
       fc3d_compute_error(problem, reaction , velocity, tolerance, options, norm_q, &error);
       //update the alpha with respect to the number of internal iterations.

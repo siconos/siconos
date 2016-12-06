@@ -158,7 +158,7 @@ int frictionContact_fclib_write(FrictionContactProblem* problem, char * title, c
 
   CSparseMatrix * spmat = NULL;
 
-  if (problem ->M->storageType == 0) /* Dense Matrix */
+  if (problem ->M->storageType == NM_DENSE) /* Dense Matrix */
   {
     fclib_problem->W->nzmax = problem->M->size0 * problem->M->size1;
     fclib_problem->W->p = (int*)malloc((fclib_problem->W->m + 1) * sizeof(int));
@@ -178,7 +178,7 @@ int frictionContact_fclib_write(FrictionContactProblem* problem, char * title, c
     fclib_problem->W->p[fclib_problem->W->m] = (fclib_problem->W->m) * problem ->M->size1;
 
   }
-  else if (problem ->M->storageType == 1) /* Sparse block storage */
+  else if (problem ->M->storageType == NM_SPARSE_BLOCK) /* Sparse block storage */
   {
     spmat = malloc(sizeof(CSparseMatrix));
     int MAYBE_UNUSED res = SBMtoSparseInitMemory(problem ->M->matrix1, spmat);
@@ -225,11 +225,11 @@ int frictionContact_fclib_write(FrictionContactProblem* problem, char * title, c
 
   /*   fclib_delete_local (fclib_problem); */
 
-  if (problem ->M->storageType == 0) /* Dense Matrix */
+  if (problem ->M->storageType == NM_DENSE) /* Dense Matrix */
   {
     free(fclib_problem->W->x);
   }
-  else if (problem ->M->storageType == 1)
+  else if (problem ->M->storageType == NM_SPARSE_BLOCK)
   {
     cs_spfree(spmat);
   }

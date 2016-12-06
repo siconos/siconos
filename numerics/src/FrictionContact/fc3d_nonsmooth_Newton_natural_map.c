@@ -247,8 +247,6 @@ void fc3d_nonsmooth_Newton_NaturalMap(
   assert(problem->mu);
   assert(problem->M);
 
-  assert(problem->M->matrix0 || problem->M->matrix1);
-
   assert(!options->iparam[4]); // only host
 
   NaturalMapParams acparams;

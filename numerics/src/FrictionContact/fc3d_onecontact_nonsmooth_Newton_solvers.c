@@ -45,8 +45,7 @@ static FreeSolverNSGSPtr freeSolver = NULL;
 
 /* size of a block */
 static int Fsize;
-void fc3d_AC_initialize(FrictionContactProblem* problem, FrictionContactProblem* localproblem, SolverOptions * options);
-void fc3d_AC_initialize(FrictionContactProblem* problem, FrictionContactProblem* localproblem, SolverOptions * options)
+static void fc3d_AC_initialize(FrictionContactProblem* problem, FrictionContactProblem* localproblem, SolverOptions * options)
 {
   /*
     In initialize, these operators are "connected" to their corresponding static variables, that will be used to build local problem
@@ -106,27 +105,18 @@ void fc3d_AC_initialize(FrictionContactProblem* problem, FrictionContactProblem*
 
 }
 
-void fc3d_AC_free(FrictionContactProblem * problem, FrictionContactProblem * localproblem, SolverOptions* localsolver_options);
-
-void fc3d_AC_free(FrictionContactProblem * problem, FrictionContactProblem * localproblem, SolverOptions* localsolver_options)
+static void fc3d_AC_free(FrictionContactProblem * problem, FrictionContactProblem * localproblem, SolverOptions* localsolver_options)
 {
 
-  if(problem->M->storageType == NM_SPARSE)
-  {
-    /* we release the pointer to avoid double deallocation */
-    localproblem->M->matrix0 = NULL;
-    NM_clearSparseBlock(problem->M);
-  }
 }
-void fc3d_AC_free_P(FrictionContactProblem * problem, FrictionContactProblem * localproblem, SolverOptions* localsolver_options);
-void fc3d_AC_free_P(FrictionContactProblem * problem, FrictionContactProblem * localproblem, SolverOptions* localsolver_options)
+static void fc3d_AC_free_P(FrictionContactProblem * problem, FrictionContactProblem * localproblem, SolverOptions* localsolver_options)
 {
   fc3d_AC_free(problem, localproblem, localsolver_options);
   free(localsolver_options->dWork);
   localsolver_options->dWork=NULL;
 }
-void fc3d_AC_post(int contact, double* reaction);
-void fc3d_AC_post(int contact, double* reaction)
+
+static void fc3d_AC_post(int contact, double* reaction)
 {
   /* This function is required in the interface but useless in Alart-Curnier case */
 }
