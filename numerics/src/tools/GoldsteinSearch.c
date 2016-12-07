@@ -25,7 +25,7 @@
 #include <assert.h>
 
 #include "SiconosBlas.h"
-#include "ArmijoSearch.h"
+#include "GoldsteinSearch.h"
 #include "SiconosSets.h"
 
 #ifdef __cplusplus
@@ -33,11 +33,11 @@
 #define restrict __restrict
 #endif
 
-double search_Armijo_standalone(int n, double* theta, double preRHS, search_data* ls_data)
+double search_Goldstein_standalone(int n, double* theta, double preRHS, search_data* ls_data)
 {
   assert(ls_data->alpha0 > 0.0);
   assert(ls_data->alpha0 > ls_data->alpha_min);
-  double alpha = ls_data->alpha0;
+  double alpha = 1.;
   double theta_iter = *theta, theta_ref = *theta;
   double* z = ls_data->z;
   double* zc = ls_data->zc;
@@ -49,10 +49,18 @@ double search_Armijo_standalone(int n, double* theta, double preRHS, search_data
   void* set = ls_data->set;
   double RHS;
 
-  armijo_extra_params* aep = (armijo_extra_params*) ls_data->extra_params;
-  preRHS *= aep->gamma;
+  goldstein_extra_params* gep = (goldstein_extra_params*) ls_data->extra_params;
 
-  while (alpha >= ls_data->alpha_min)
+  double c1 = gep->c;
+  double c2 = 1. - c1;
+  double alpha_max = gep->alpha_max;
+  size_t iter_max = gep->iter_max;
+
+  double alphamin = ls_data->alpha_min;
+  double alphamax = alpha_max;
+
+  size_t iter = 0;
+  while (iter < iter_max)
   {
      // desc_dir contains the direction d
      cblas_dcopy(n, z, 1, zc, 1);
@@ -83,41 +91,53 @@ double search_Armijo_standalone(int n, double* theta, double preRHS, search_data
      DEBUG_EXPR_WE(for (unsigned int i = 0; i < n; ++i)
          { DEBUG_PRINTF("% 2.2e ", zc[i]) }
          DEBUG_PRINT("\n"));
- 
+
      DEBUG_PRINT("F ");
      DEBUG_EXPR_WE(for (unsigned int i = 0; i < n; ++i)
          { DEBUG_PRINTF("% 2.2e ", F[i]) }
          DEBUG_PRINT("\n"));
- 
+
      DEBUG_PRINT("F_merit ");
      DEBUG_EXPR_WE(for (unsigned int i = 0; i < n; ++i)
          { DEBUG_PRINTF("% 2.2e ", F_merit[i]) }
          DEBUG_PRINT("\n"));
- 
+
      theta_iter = 0.5 * cblas_ddot(n, F_merit, 1, F_merit, 1);
- 
-     DEBUG_PRINTF("search_Armijo :: alpha %g\n", alpha);
-     DEBUG_PRINTF("search_Armijo :: theta_iter %.*e ; theta_ref %.*e  \n", DECIMAL_DIG, theta_iter, DECIMAL_DIG, theta_ref);
- 
+
+     DEBUG_PRINTF("search_Goldstein :: alpha %g\n", alpha);
+     DEBUG_PRINTF("search_Goldstein :: theta_iter %.*e ; theta_ref %.*e  \n", DECIMAL_DIG, theta_iter, DECIMAL_DIG, theta_ref);
+
      // acceptance test
-     if (theta_iter <= theta_ref + RHS)
+     double delta_theta = (theta_iter - theta_ref) / alpha;
+     bool C1 = (delta_theta >= c2*preRHS);
+     bool C2 = (delta_theta <= c1*preRHS);
+     if (C1 && C2)
      {
        if (verbose > 1)
-         printf("search_Armijo :: alpha %g\n", alpha);
+         printf("search_Goldstein :: alpha %g\n", alpha);
        break;
      }
-     else
-     {
-       // alpha too large, decrease it
-       alpha /= 2.0;
-     }
+    else if (!C1) alphamin = alpha;
+    else alphamax = alpha; // not(C2)
+
+    if (alpha < alpha_max)
+    {
+      alpha = 0.5 * (alphamin + alphamax);
+    }
+    else
+    {
+      alpha = alphamin;
+    }
+
+    ++iter;
   }
   *theta = theta_iter;
+  if (alpha <= 1e-14) return NAN;
   return alpha;
 }
 
 
-double linesearch_Armijo2(int n, double theta, double preRHS, search_data* ls_data)
+double linesearch_Goldstein2(int n, double theta, double preRHS, search_data* ls_data)
 {
   double theta_ref = theta;
 
@@ -125,15 +145,16 @@ double linesearch_Armijo2(int n, double theta, double preRHS, search_data* ls_da
     get_non_monotone_ref(ls_data->nm_ref_data, &theta_ref);
 
   ls_data->searchtype = LINESEARCH;
-  double alpha = search_Armijo_standalone(n, &theta_ref, preRHS, ls_data);
+  double alpha = search_Goldstein_standalone(n, &theta_ref, preRHS, ls_data);
 
   if (ls_data->nm_ref_data)
-    update_non_monotone_ref(ls_data->nm_ref_data, theta_ref);
+    if (isfinite(alpha)) update_non_monotone_ref(ls_data->nm_ref_data, theta_ref);
+    else zero_nm_data(ls_data->nm_ref_data);
 
   return alpha;
 }
 
-double arcsearch_Armijo2(int n, double theta, double preRHS, search_data* ls_data)
+double arcsearch_Goldstein2(int n, double theta, double preRHS, search_data* ls_data)
 {
   double theta_ref = theta;
 
@@ -142,7 +163,7 @@ double arcsearch_Armijo2(int n, double theta, double preRHS, search_data* ls_dat
 
   ls_data->searchtype = ARCSEARCH;
   assert(ls_data->set);
-  double alpha = search_Armijo_standalone(n, &theta_ref, preRHS, ls_data);
+  double alpha = search_Goldstein_standalone(n, &theta_ref, preRHS, ls_data);
 
   if (ls_data->nm_ref_data)
     update_non_monotone_ref(ls_data->nm_ref_data, theta_ref);
@@ -150,7 +171,9 @@ double arcsearch_Armijo2(int n, double theta, double preRHS, search_data* ls_dat
   return alpha;
 }
 
-void search_Armijo_params_init(armijo_extra_params* p)
+void search_Goldstein_params_init(goldstein_extra_params* p)
 {
-  p->gamma = 1e-4;
+  p->iter_max = 100;
+  p->c = .01;
+  p->alpha_max = 1e10;
 }

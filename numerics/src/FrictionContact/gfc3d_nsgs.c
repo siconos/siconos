@@ -125,7 +125,7 @@ void gfc3d_nsgs(GlobalFrictionContactProblem* restrict problem, double* restrict
 
     cblas_dcopy(n, qtmp, 1, globalVelocity, 1);
 
-    CHECK_RETURN(!NM_gesv_expert(factorized_M, globalVelocity, true));
+    CHECK_RETURN(!NM_gesv_expert(factorized_M, globalVelocity, NM_KEEP_FACTORS));
 
     /* Compute current local velocity */
     /*      velocity <--b */

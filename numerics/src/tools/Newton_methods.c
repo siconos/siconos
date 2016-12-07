@@ -16,7 +16,7 @@
  * limitations under the License.
 */
 
-#include "Newton_Methods.h"
+#include "Newton_methods.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -26,6 +26,7 @@
 #include "numerics_verbose.h"
 #include "SiconosLapack.h"
 #include "ArmijoSearch.h"
+#include "GoldsteinSearch.h"
 #include "SolverOptions.h"
 #include "lcp_cst.h"
 #include "NCP_cst.h"
@@ -36,6 +37,7 @@
 //#define DEBUG_MESSAGES
 #include "debug.h"
 
+typedef double (*linesearch_fptr)(int n, double theta, double preRHS, search_data*);
 
 void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverOptions* options, functions_LSA* functions)
 {
@@ -121,12 +123,42 @@ void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverO
   ls_data.F_merit = F_merit;
   ls_data.desc_dir = workV1;
   /** \todo this value should be settable by the user with a default value*/
-  ls_data.alpha_min = 1e-12;
+  ls_data.alpha_min = options->dparam[SICONOS_DPARAM_LSA_ALPHA_MIN];
   ls_data.alpha0 = 2.0;
   ls_data.data = data;
   ls_data.set = NULL;
   ls_data.sigma = params->sigma;
   ls_data.searchtype = LINESEARCH;
+  ls_data.extra_params = NULL;
+
+  linesearch_fptr linesearch_algo;
+  if (options->iparam[SICONOS_IPARAM_LSA_SEARCH_CRITERION] == SICONOS_LSA_GOLDSTEIN)
+  {
+    goldstein_extra_params* pG = (goldstein_extra_params*)malloc(sizeof(goldstein_extra_params));
+    ls_data.extra_params = (void*) pG;
+    search_Goldstein_params_init(pG);
+
+/*    if (options->iparam[SICONOS_IPARAM_GOLDSTEIN_ITERMAX])
+    {
+      pG->iter_max = options->iparam[SICONOS_IPARAM_GOLDSTEIN_ITERMAX];
+    }
+    if (options->dparam[SICONOS_DPARAM_GOLDSTEIN_C])
+    {
+      pG->c = options->dparam[SICONOS_DPARAM_GOLDSTEIN_C];
+    }
+    if (options->dparam[SICONOS_DPARAM_GOLDSTEIN_ALPHAMAX])
+    {
+      pG->alpha_max = options->dparam[SICONOS_DPARAM_GOLDSTEIN_ALPHAMAX];
+    }*/
+    linesearch_algo = &linesearch_Goldstein2;
+  }
+  else if (options->iparam[SICONOS_IPARAM_LSA_SEARCH_CRITERION] == SICONOS_LSA_ARMIJO)
+  {
+    armijo_extra_params* pG = (armijo_extra_params*)malloc(sizeof(armijo_extra_params));
+    ls_data.extra_params = (void*) pG;
+    search_Armijo_params_init(pG);
+    linesearch_algo = &linesearch_Armijo2;
+  }
 
   if (options->iparam[SICONOS_IPARAM_LSA_FORCE_ARCSEARCH])
   {
@@ -217,7 +249,7 @@ void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverO
       // Find direction by solving H * d = -F_desc
       cblas_dcopy(n, F_merit, incx, workV1, incy);
       cblas_dscal(n, -1.0, workV1, incx);
-      info_dir_search = NM_gesv(H, workV1);
+      info_dir_search = NM_gesv(H, workV1, params->keep_H);
     }
     /**************************************************************************
      * END COMPUTATION DESCENTE DIRECTION
@@ -265,7 +297,7 @@ void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverO
         DEBUG_PRINT("functions->compute_RHS_desc : no min descent direction ! searching for FB descent direction\n");
         cblas_dcopy(n, F_merit, incx, workV1, incy);
         cblas_dscal(n, -1.0, workV1, incx);
-        info_dir_search = NM_gesv(H, workV1);
+        info_dir_search = NM_gesv(H, workV1, params->keep_H);
       }
       else
       {
@@ -315,7 +347,7 @@ void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverO
       // TODO we should not compute this if min descent search has failed
       threshold = -params->rho*pow(cblas_dnrm2(n, workV1, incx), params->p);
       //threshold = -rho*cblas_dnrm2(n, workV1, incx)*cblas_dnrm2(n, JacThetaF_merit, incx);
-      if (preRHS > threshold)
+      if (params->check_dir_quality && preRHS > threshold)
       {
         if (verbose > 1)
           printf("newton_LSA :: direction not acceptable %g > %g\n", preRHS, threshold);
@@ -328,13 +360,15 @@ void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverO
             DEBUG_PRINT("\n"));
 
       }
-      preRHS *= params->gamma;
 
       // Line search
-      tau = linesearch_Armijo2(n, theta, preRHS, &ls_data);
+      tau = (*linesearch_algo)(n, theta, preRHS, &ls_data);
     }
 
-    cblas_daxpy(n , tau, workV1 , incx , z , incy);     //  z + tau*d --> z
+    if (isfinite(tau))
+      cblas_daxpy(n , tau, workV1 , incx , z , incy);     //  z + tau*d --> z
+    else
+      cblas_daxpy(n, 1., workV1 , incx , z , incy);        // hack (restart)
 
     // Construction of the RHS for the next iterate
     functions->compute_F(data, z, F);
@@ -358,26 +392,26 @@ void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverO
   }
 
   options->iparam[1] = iter;
-  options->dparam[1] = theta;
+  options->dparam[1] = err;
 
   if (verbose > 0)
   {
-    if (theta > tol)
+    if (err > tol)
     {
-      printf(" No convergence of Newton FB  after %d iterations\n" , iter);
+      printf(" No convergence of the Newton algo after %d iterations\n" , iter);
       printf(" The residue is : %g \n", theta);
       *info = 1;
     }
     else
     {
-      printf(" Convergence of Newton FB after %d iterations\n" , iter);
+      printf(" Convergence of the Newton algo after %d iterations\n" , iter);
       printf(" The residue is : %g \n", theta);
       *info = 0;
     }
   }
   else
   {
-    if (theta > tol) *info = 1;
+    if (err > tol) *info = 1;
     else *info = 0;
   }
 
@@ -400,7 +434,7 @@ void newton_lsa_default_SolverOption(SolverOptions* options)
 {
   options->iparam[SICONOS_IPARAM_LSA_NONMONOTONE_LS] = 0;
   options->iparam[SICONOS_IPARAM_LSA_NONMONOTONE_LS_M] = 0;
-  options->dparam[SICONOS_DPARAM_LSA_ALPHA_MIN] = 1e-12;
+  options->dparam[SICONOS_DPARAM_LSA_ALPHA_MIN] = 0.;
 }
 
 void set_lsa_params_data(SolverOptions* options, NumericsMatrix* mat)
@@ -417,8 +451,10 @@ void set_lsa_params_data(SolverOptions* options, NumericsMatrix* mat)
     // The following values are taken from the latter.
     params->p = 2.1;
     params->sigma = .9;
-    params->gamma = 1e-4;
     params->rho = 1e-8;
+
+    params->keep_H = false;
+    params->check_dir_quality = true;
   }
 
   if (!options->solverData)

@@ -129,21 +129,6 @@ int fc3d_nonsmooth_Newton_AlartCurnier_setDefaultSolverOptions(
   return 0;
 }
 
-
-typedef struct
-{
-  AlartCurnierFun3x3Ptr computeACFun3x3;
-} AlartCurnierParams;
-
-void nonsmoothEqnAlartCurnierFun(void* arg,
-                                   unsigned int problemSize,
-                                   double* reaction,
-                                   double* velocity,
-                                   double* mu,
-                                   double* rho,
-                                   double* result,
-                                   double* A,
-                                   double* B);
 void nonsmoothEqnAlartCurnierFun(void* arg,
                                  unsigned int problemSize,
                                  double* reaction,

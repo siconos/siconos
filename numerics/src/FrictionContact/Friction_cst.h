@@ -56,6 +56,7 @@ enum FRICTION_SOLVER
   SICONOS_FRICTION_3D_GAMS_LCP_PATHVI = 519,
   /** Non-smooth Newton, natural map, local formulation */
   SICONOS_FRICTION_3D_NSN_NM = 520,
+  SICONOS_FRICTION_3D_NSN_AC_TEST = 521,
 
   /* 3D Frictional Contact solvers for one contact (used mainly inside NSGS solvers) */
   

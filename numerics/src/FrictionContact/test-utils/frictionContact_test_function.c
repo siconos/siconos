@@ -139,7 +139,7 @@ int frictionContact_test_function(FILE * f, SolverOptions * options)
   }
   else
   {
-    printf("test unsuccessful, residual = %g\n", options->dparam[1]);
+    printf("test unsuccessful, residual = %g, info = %d, nb iter = %d\n", options->dparam[1], info, options->iparam[1] ? options->iparam[1] : options->iparam[7]);
   }
   free(reaction);
   free(velocity);

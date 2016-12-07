@@ -161,6 +161,13 @@ typedef enum NumericsMatrix_types {
   NM_SPARSE,          /**< compressed column format */
 } NM_types;
 
+/*! option for gesv factorization */
+typedef enum {
+  NM_NONE,          /**< keep nothing */
+  NM_KEEP_FACTORS,  /**< keep all the factorization data (useful to reuse the factorization) */
+  NM_PRESERVE       /**< keep the matrix as-is (useful for the dense case) */
+} NM_gesv_opts;
+
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {
@@ -529,25 +536,28 @@ extern "C"
    * \param[in,out] A a NumericsMatrix. On a dense factorisation
    * A.iWork is initialized.
    * \param[in,out] b pointer on a dense vector of size A->size1
-   * \param keep if true, keep all the info related to the factorization to
+   * \param keep if set to NM_KEEP_FACTORS, keep all the info related to the factorization to
    * allow for future solves. If A is already factorized, just solve the linear
-   * system
+   * system. If set to NM_PRESERVE, preserve the original matrix (just used in
+   * the dense case). if NM_NONE, discard eveerything.
    * \return 0 if successful, else the error is specific to the backend solver
    * used
    */
-  int NM_gesv_expert(NumericsMatrix* A, double *b, bool keep);
+  int NM_gesv_expert(NumericsMatrix* A, double *b, unsigned keep);
 
   /** Direct computation of the solution of a real system of linear
    * equations: A x = b.
    * \param[in,out] A a NumericsMatrix. On a dense factorisation
    * A.iWork is initialized.
    * \param[in,out] b pointer on a dense vector of size A->size1
+   * \param preserve preserve the original matrix data. Only useful in the
+   * dense case, where the LU factorization is done in-place.
    * \return 0 if successful, else the error is specific to the backend solver
    * used
    */
-  static inline int NM_gesv(NumericsMatrix* A, double *b)
+  static inline int NM_gesv(NumericsMatrix* A, double *b, bool preserve)
   {
-    return NM_gesv_expert(A, b, false);
+    return NM_gesv_expert(A, b, preserve ? NM_PRESERVE : NM_NONE);
   }
 
   /** Get linear solver parameters with initialization if needed.

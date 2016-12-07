@@ -1,4 +1,4 @@
-/* Factorisation with Newton_Methods.c is needed */
+/* Factorisation with Newton_methods.c is needed */
 
 #include "fc3d_nonsmooth_Newton_solvers.h"
 
@@ -100,6 +100,12 @@ static void computeSparseBlockAWpB(
   assert(Wb);
   assert(result);
 
+  /* Check for not allocated matrix  */
+  if (result->nbblocks != Wb->nbblocks)
+  {
+    NM_copy(W, AWpB);
+  }
+
   assert((unsigned)W->size0 >= 3);
   assert((unsigned)W->size0 / 3 >= Wb->filled1 - 1);
 
@@ -161,11 +167,6 @@ static void computeSparseAWpB(
   free(Bmat);
 }
 
-void computeAWpB(
-  double *A,
-  NumericsMatrix *W,
-  double *B,
-  NumericsMatrix *AWpB);
 void computeAWpB(
   double *A,
   NumericsMatrix *W,
@@ -396,7 +397,7 @@ int frictionContactFBLSA(
   // - F contains FB or grad FB merit
   // - tmp contains direction, scal*direction, reaction+scal*direction
 
-  // cf Newton_Methods.c, L59
+  // cf Newton_methods.c, L59
   double p = 2.1;
   double fblsa_rho = 1e-8;
   double gamma = 1e-4;
@@ -582,19 +583,15 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers* equation
   double *Bx = Ax + _3problemSize;
   double *rho = Bx + _3problemSize;
 
-  NumericsMatrix *AWpB, *AWpB_backup;
+  NumericsMatrix *AWpB;
   if (!options->dWork)
   {
     AWpB = NM_create(problem->M->storageType,
-        problem->M->size0, problem->M->size1);
-
-    AWpB_backup = NM_create(problem->M->storageType,
         problem->M->size0, problem->M->size1);
   }
   else
   {
     AWpB = (NumericsMatrix*) (rho + problemSize);
-    AWpB_backup = (NumericsMatrix*) (AWpB + sizeof(NumericsMatrix*));
   }
 
   /* just for allocations */
@@ -661,11 +658,11 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers* equation
     cblas_dscal(problemSize, -1., tmp1, 1);
 
     /* Solve: AWpB X = -F */
-    NM_copy(AWpB, AWpB_backup);
-    int lsi = NM_gesv(AWpB, tmp1);
+//    NM_copy(AWpB, AWpB_backup);
+    int lsi = NM_gesv(AWpB, tmp1, true);
 
     /* NM_copy needed here */
-    NM_copy(AWpB_backup, AWpB);
+//    NM_copy(AWpB_backup, AWpB);
 
     if (lsi)
     {
@@ -805,10 +802,8 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers* equation
   if (!options->dWork)
   {
     freeNumericsMatrix(AWpB);
-    freeNumericsMatrix(AWpB_backup);
 
     free(AWpB);
-    free(AWpB_backup);
   }
   if (verbose > 0)
     printf("------------------------ FC3D - NSN - End\n");

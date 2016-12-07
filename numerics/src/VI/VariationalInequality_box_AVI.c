@@ -21,7 +21,7 @@
 #include "Relay_Solvers.h"
 #include "SiconosSets.h"
 #include "SiconosBlas.h"
-#include "Newton_Methods.h"
+#include "Newton_methods.h"
 #include "VI_Newton.h"
 
 typedef struct {

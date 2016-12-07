@@ -366,6 +366,7 @@ extern "C"
   int checkTrivialCase(FrictionContactProblem* problem , double* velocity, double* reaction, SolverOptions* options);
 
 
+  void fc3d_nonsmooth_Newton_AlartCurnier2(FrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options);
 
   
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)

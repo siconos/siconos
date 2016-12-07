@@ -23,7 +23,7 @@
 #define PATHSEARCH_H
 
 #include "NMS.h"
-#include "Newton_Methods.h"
+#include "Newton_methods.h"
 
 /** struct ncp_pathsearch_data NCP_PathSearch.h
  * solver specific data

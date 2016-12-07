@@ -88,4 +88,9 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers* equation
 
 
 
+void computeAWpB(
+  double *A,
+  NumericsMatrix *W,
+  double *B,
+  NumericsMatrix *AWpB);
 #endif

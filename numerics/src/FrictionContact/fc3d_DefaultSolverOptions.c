@@ -23,6 +23,7 @@
 
 #include "fc3d_Solvers.h"
 #include "NonSmoothDrivers.h"
+#include "Newton_methods.h"
 
 int fc3d_setDefaultSolverOptions(SolverOptions* options, int solverId)
 {
@@ -94,6 +95,21 @@ int fc3d_setDefaultSolverOptions(SolverOptions* options, int solverId)
   case SICONOS_FRICTION_3D_NSN_AC:
   {
     info =    fc3d_nonsmooth_Newton_AlartCurnier_setDefaultSolverOptions(options);
+    break;
+  }
+  case SICONOS_FRICTION_3D_NSN_AC_TEST:
+  {
+    size_t iSize = 20;
+    size_t dSize = 20;
+    size_t iter_max = 200;
+    double tol = 1e-12;
+    solver_options_fill(options, solverId, iSize, dSize, iter_max, tol);
+    newton_lsa_default_SolverOption(options);
+//    options->iparam[5] = 1;
+//    options->iparam[7] = 1;
+    options->iparam[SICONOS_FRICTION_3D_NSN_FORMULATION] = SICONOS_FRICTION_3D_NSN_FORMULATION_ALARTCURNIER_GENERATED;
+    /* 0 STD AlartCurnier, 1 JeanMoreau, 2 STD generated, 3 JeanMoreau generated */
+
     break;
   }
   case SICONOS_FRICTION_3D_NSN_FB:

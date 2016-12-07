@@ -20,7 +20,7 @@
 #include "VariationalInequality_computeError.h"
 #include "Qi_merit.h"
 #include "SiconosSets.h"
-#include "Newton_Methods.h"
+#include "Newton_methods.h"
 #include "VI_Newton.h"
 
 void VI_compute_F(void* data_opaque, double* x, double* F)

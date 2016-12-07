@@ -169,10 +169,6 @@ void fc3d_projection_update_with_regularization(int contact, FrictionContactProb
 
   /* The part of MGlobal which corresponds to the current block is copied into MLocal */
 
-  NumericsMatrix * MGlobal = problem->M;
-
-  int n = 3 * problem->numberOfContacts;
-
   NM_extract_diag_block3(problem->M, contact, &localproblem->M->matrix0);
 
   /****  Computation of qLocal = qBlock + sum over a row of blocks in MGlobal of the products MLocal.reactionBlock,

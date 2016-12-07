@@ -19,7 +19,7 @@
 #ifndef NEWTON_METHODS_H
 #define NEWTON_METHODS_H
 
-/*!\file Newton_Methods.h
+/*!\file Newton_methods.h
  * \brief Data structure and function for using Newton based solvers
  *
  * The reference used for the implementation is "Finite-Dimensional Variational
@@ -39,7 +39,7 @@
 typedef void (*compute_F_ptr) (void* data_opaque, double* z, double* F);
 typedef void (*compute_F_merit_ptr) (void* data_opaque, double* z, double* F, double* F_merit);
 
-/** \struct functions_LSA Newton_Methods.h
+/** \struct functions_LSA Newton_methods.h
  * Struct holding the necessary pointers to functions needed by the
  * newton_LSA() procedure.
  */
@@ -58,7 +58,7 @@ typedef struct {
 // id of the stat structure 
 #define NEWTON_STATS_ITERATION 1
 
-/** \struct newton_stats Newton_Methods.h */
+/** \struct newton_stats Newton_methods.h */
 typedef struct {
   int id; /**< id of this structure */
   double merit_value; /**< value of the merit function at the end of the iteration */
@@ -66,15 +66,16 @@ typedef struct {
   unsigned int status; /**< status of this newton iteration */
 } newton_stats;
 
-/** \struct newton_LSA_data Newton_Methods.h*/
+/** \struct newton_LSA_param Newton_methods.h*/
 typedef struct {
   double p; /**<  p value for the acceptance test of the direction solution of the linear system */
   double sigma; /**< ratio for the decrease in norm of the C-function (\f$gamma'\f$ in VFBLSA)*/
-  double gamma; /**< constant for the line search*/
   double rho; /**< coefficient for the direction check*/
+  bool keep_H; /**< keep the matrix H untouched. Only used in the dense case, where a copy of the matrix is factorized */
+  bool check_dir_quality; /**< Check the quality of the descent direction (Eqn 9.1.6 p. 805 in Facchinei & Pamg)*/
 } newton_LSA_param;
 
-/** \struct newton_LSA_data Newton_Methods.h*/
+/** \struct newton_LSA_data Newton_methods.h*/
 typedef struct {
   NumericsMatrix* H; /**< matrix */
 } newton_LSA_data;

@@ -30,7 +30,7 @@
 #include "VI_cst.h"
 #include "numerics_verbose.h"
 
-#include "Newton_Methods.h"
+#include "Newton_methods.h"
 #include "PathSearch.h"
 #include "VariationalInequality_Solvers.h"
 

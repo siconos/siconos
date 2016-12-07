@@ -186,14 +186,14 @@ int fc3d_driver(FrictionContactProblem* problem,
   case SICONOS_FRICTION_3D_NSN_AC:
   {
     numerics_printf(" ========================== Call Alart Curnier solver for Friction-Contact 3D problem ==========================\n");
-    if (problem->M->matrix0)
-    {
-      fc3d_nonsmooth_Newton_AlartCurnier(problem, reaction , velocity , &info , options);
-    }
-    else
-    {
-      fc3d_nonsmooth_Newton_AlartCurnier(problem, reaction , velocity , &info , options);
-    }
+    fc3d_nonsmooth_Newton_AlartCurnier(problem, reaction , velocity , &info , options);
+    break;
+  }
+  /*  XXX to delete */
+   case SICONOS_FRICTION_3D_NSN_AC_TEST:
+  {
+    numerics_printf(" ========================== Call Alart Curnier solver for Friction-Contact 3D problem ==========================\n");
+    fc3d_nonsmooth_Newton_AlartCurnier2(problem, reaction , velocity , &info , options);
     break;
   }
   /* Fischer Burmeister in local coordinates */

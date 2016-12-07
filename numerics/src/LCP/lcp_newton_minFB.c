@@ -28,7 +28,7 @@
 #include "NumericsMatrix.h"
 
 #include "SiconosLapack.h"
-#include "Newton_Methods.h"
+#include "Newton_methods.h"
 #include "FischerBurmeister.h"
 #include "min_merit.h"
 #include "lcp_newton_FB.h"

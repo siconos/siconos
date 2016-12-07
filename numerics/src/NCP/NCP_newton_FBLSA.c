@@ -16,7 +16,7 @@
  * limitations under the License.
 */
 
-#include "Newton_Methods.h"
+#include "Newton_methods.h"
 
 #include "NCP_cst.h"
 #include "NonlinearComplementarityProblem.h"

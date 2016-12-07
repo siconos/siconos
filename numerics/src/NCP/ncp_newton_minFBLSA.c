@@ -23,7 +23,7 @@
 
 #include "NCP_Solvers.h"
 #include "SiconosLapack.h"
-#include "Newton_Methods.h"
+#include "Newton_methods.h"
 #include "FischerBurmeister.h"
 #include "min_merit.h"
 #include "ncp_newton_FBLSA.h"

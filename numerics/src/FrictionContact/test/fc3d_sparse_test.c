@@ -160,6 +160,7 @@ int main(void)
 
   int solvers_to_test[] = {SICONOS_FRICTION_3D_NSGS,
                            SICONOS_FRICTION_3D_NSN_AC,
+                           SICONOS_FRICTION_3D_NSN_AC_TEST,
                            SICONOS_FRICTION_3D_NSN_FB,
                            SICONOS_FRICTION_3D_NSN_NM,
                            SICONOS_FRICTION_3D_SOCLCP,

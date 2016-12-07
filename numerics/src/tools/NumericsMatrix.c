@@ -920,10 +920,10 @@ NumericsMatrix* duplicateNumericsMatrix(NumericsMatrix* mat)
       data = malloc(size0*size1*sizeof(double));
       break;
     case NM_SPARSE_BLOCK:
-      data = malloc(sizeof(SparseBlockStructuredMatrix));
+      data = newSBM();
       break;
     case NM_SPARSE:
-      data = malloc(sizeof(CSparseMatrix));
+      data = newNumericsSparseMatrix();
       break;
     default:
       fprintf(stderr, "duplicateNumericsMatrix :: storageType value %d not implemented yet !", mat->storageType);
@@ -1913,10 +1913,10 @@ double* NM_dWork(NumericsMatrix* A, int size)
   return A->internalData->dWork;
 }
 
-int NM_gesv_expert(NumericsMatrix* A, double *b, bool keep)
+int NM_gesv_expert(NumericsMatrix* A, double *b, unsigned keep)
 {
 
-  DEBUG_BEGIN("NM_gesv_expert(NumericsMatrix* A, double *b, bool keep)\n");
+  DEBUG_BEGIN("NM_gesv_expert(NumericsMatrix* A, double *b, unsigned keep)\n");
   assert(A->size0 == A->size1);
 
   int info = 1;
@@ -1927,7 +1927,7 @@ int NM_gesv_expert(NumericsMatrix* A, double *b, bool keep)
   {
     assert(A->matrix0);
 
-    if (keep)
+    if (keep == NM_KEEP_FACTORS)
     {
 
       double* wkspace = NM_dWork(A, A->size0*A->size1);
@@ -1969,7 +1969,17 @@ int NM_gesv_expert(NumericsMatrix* A, double *b, bool keep)
     }
     else
     {
-      DGESV(A->size0, 1, A->matrix0, A->size0, NM_iWork(A, A->size0), b,
+      double* mat;
+      if (keep == NM_PRESERVE)
+      {
+        mat = NM_dWork(A, A->size0*A->size1);
+        cblas_dcopy_msan(A->size0*A->size1, A->matrix0, 1, mat, 1);
+      }
+      else
+      {
+        mat = A->matrix0;
+      }
+      DGESV(A->size0, 1, mat, A->size0, NM_iWork(A, A->size0), b,
           A->size0, &info);
     }
     break;
@@ -1986,7 +1996,7 @@ int NM_gesv_expert(NumericsMatrix* A, double *b, bool keep)
       {
         printf("NM_gesv: using CSparse\n" );
       }
-      if (keep)
+      if (keep == NM_KEEP_FACTORS)
       {
         if (!(p->dWork && p->solver_data))
         {
@@ -2022,7 +2032,7 @@ int NM_gesv_expert(NumericsMatrix* A, double *b, bool keep)
 
       mumps_id->rhs = b;
 
-      if (!keep || mumps_id->job == -1)
+      if (keep != NM_KEEP_FACTORS|| mumps_id->job == -1)
       {
         mumps_id->job = 6;
       }
@@ -2045,7 +2055,7 @@ int NM_gesv_expert(NumericsMatrix* A, double *b, bool keep)
           printf("NM_gesv: MUMPS fails : info(1)=%d, info(2)=%d\n", info, mumps_id->info[1]);
         }
       }
-      if (!keep)
+      if (keep != NM_KEEP_FACTORS)
       {
         NM_MUMPS_free(p);
       }
@@ -2089,7 +2099,7 @@ int NM_gesv_expert(NumericsMatrix* A, double *b, bool keep)
         cblas_dcopy(C->n, umfpack_ws->x, 1, b, 1);
       }
 
-      if (!keep)
+      if (keep != NM_KEEP_FACTORS)
       {
         NM_UMFPACK_free(p);
       }
@@ -2119,7 +2129,7 @@ int NM_gesv_expert(NumericsMatrix* A, double *b, bool keep)
    * instance with the minFBLSA. Therefore, we should not check here for
    * problems, but the calling function has to check the return code.*/
 //  CHECK_RETURN(info);
-  DEBUG_END("NM_gesv_expert(NumericsMatrix* A, double *b, bool keep)\n");
+  DEBUG_END("NM_gesv_expert(NumericsMatrix* A, double *b, unsigned keep)\n");
   return info;
 }
 

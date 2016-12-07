@@ -51,7 +51,7 @@ int gfc3d_compute_error(GlobalFrictionContactProblem* problem, double* restrict 
 
   NM_gemv(1.0, H, reaction, 1.0, globalVelocitytmp);
 
-  CHECK_RETURN(!NM_gesv_expert(factorized_M, globalVelocitytmp, true));
+  CHECK_RETURN(!NM_gesv_expert(factorized_M, globalVelocitytmp, NM_KEEP_FACTORS));
 
   cblas_daxpy(n , -1.0 , globalVelocity , 1 , globalVelocitytmp, 1);
 

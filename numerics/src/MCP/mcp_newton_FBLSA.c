@@ -22,7 +22,7 @@
 #include "MCP_Solvers.h"
 #include "MCP_cst.h"
 #include "SiconosBlas.h"
-#include "Newton_Methods.h"
+#include "Newton_methods.h"
 #include "FischerBurmeister.h"
 
 #include "mcp_newton_FBLSA.h"

@@ -21,7 +21,7 @@
 #include <math.h>
 #include "MLCP_Solvers.h"
 #include "SiconosLapack.h"
-#include "Newton_Methods.h"
+#include "Newton_methods.h"
 #include "FischerBurmeister.h"
 
 //#define DEBUG_STDOUT

@@ -621,8 +621,6 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(
   // need to use the functions from NumericsMatrix --xhub
 
 
-  NumericsMatrix *AA_work = NM_create(NM_SPARSE,  (int)J->m, (int)J->n);
-
   NumericsSparseMatrix* SM = newNumericsSparseMatrix();
   SM->triplet = J;
   NumericsMatrix *AA = NM_create_from_data(NM_SPARSE,  (int)J->m, (int)J->n, SM);
@@ -661,15 +659,13 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(
     /* Solve: J X = -psi */
 
     /* Solve: AWpB X = -F */
-    NM_copy(AA, AA_work);
-
-    int info_solver = NM_gesv(AA_work, rhs);
+    int info_solver = NM_gesv(AA, rhs, true);
     if (info_solver > 0)
     {
       fprintf(stderr, "------------------------ GFC3D - NSN_AC - solver failed info = %d\n", info_solver);
       break;
       info[0] = 2;
-      CHECK_RETURN(!cs_check_triplet(NM_triplet(AA_work)));
+      CHECK_RETURN(!cs_check_triplet(NM_triplet(AA)));
     }
 
     /* Check the quality of the solution */
@@ -798,6 +794,4 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(
 
   freeNumericsMatrix(AA);
   free(AA);
-  freeNumericsMatrix(AA_work);
-  free(AA_work);
 }
