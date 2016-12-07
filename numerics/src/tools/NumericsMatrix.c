@@ -1167,7 +1167,7 @@ void NM_copy_sparse(const CSparseMatrix* const A, CSparseMatrix* B)
   memcpy(B->p, A->p, size_cpy * sizeof(csi));
 }
 
-void NM_sparse_extract_block(const NumericsMatrix* const M, double* blockM, size_t pos_row, size_t pos_col, size_t block_row_size, size_t block_col_size)
+void NM_sparse_extract_block(NumericsMatrix* M, double* blockM, size_t pos_row, size_t pos_col, size_t block_row_size, size_t block_col_size)
 {
   assert(M);
   assert(M->storageType == NM_SPARSE);
