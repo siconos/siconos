@@ -433,7 +433,7 @@ extern "C"
    * \param block_row_size block width
    * \param block_col_size block height
    */
-  void NM_sparse_extract_block(const NumericsMatrix* const M, double* blockM, size_t pos_row, size_t pos_col, size_t block_row_size, size_t block_col_size);
+  void NM_sparse_extract_block(NumericsMatrix* M, double* blockM, size_t pos_row, size_t pos_col, size_t block_row_size, size_t block_col_size);
 
   /** Copy a CSparseMatrix inside another CSparseMatrix.
    *  Reallocations are performed if B cannot hold a copy of A
