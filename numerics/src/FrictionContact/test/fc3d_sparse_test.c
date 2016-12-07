@@ -17,6 +17,7 @@
 */
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "NonSmoothDrivers.h"
 #include "frictionContact_test_function.h"
 #include "SolverOptions.h"
