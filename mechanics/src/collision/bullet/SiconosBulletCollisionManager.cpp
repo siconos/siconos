@@ -48,6 +48,15 @@
 
 #include <Question.hpp>
 
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunreachable-code"
+#pragma clang diagnostic ignored "-Woverloaded-virtual"
+#elif !(__INTEL_COMPILER || __APPLE__ )
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Woverloaded-virtual"
+#endif
+
 #include <BulletCollision/CollisionDispatch/btCollisionWorld.h>
 #include <BulletCollision/Gimpact/btGImpactCollisionAlgorithm.h>
 #include <BulletCollision/CollisionDispatch/btDefaultCollisionConfiguration.h>
@@ -65,6 +74,12 @@
 
 #include <LinearMath/btQuaternion.h>
 #include <LinearMath/btVector3.h>
+
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#elif !(__INTEL_COMPILER || __APPLE__ )
+#pragma GCC diagnostic pop
+#endif
 
 //#define DEBUG_MESSAGES 1
 #include <debug.h>
