@@ -41,7 +41,8 @@ exec_ = True
 comp = True
 myname = sys.argv[0]
 call_pwd = os.getcwd()
-verbose =True
+verbose = False
+
 
 class WorkDir(object):
     ''' a context manager for a workdir that may be temporary '''
@@ -294,7 +295,7 @@ if __name__ == '__main__':
 
         if o == '-v':
             make_args.append('VERBOSE=1')
-            verbose=True
+            verbose = True
     if not silent:
         cartridge()
 
@@ -390,12 +391,12 @@ if __name__ == '__main__':
                         '-DLINKER_LIBRARIES={0}'.format(
                             ';'.join(linker_libraries)),
                         '-DALL_EXTRA_DEFINITIONS={0}'.format(
-                            ';'.join(all_extra_defs))] + extra_defs + extra_cmake_args
+                            ';'.join(all_extra_defs))] +\
+                        extra_defs + extra_cmake_args
                     if verbose:
                         print("\n"," ".join(configure_command))
                     subprocess.check_call(configure_command,
-                        stderr=subprocess.STDOUT,
-                        env=env)
+                                          stderr=subprocess.STDOUT, env=env)
                 except Exception as exception:
                     sys.stderr.write(
                         '{0}: {1} build configuration failed, {2}\n'.format(
@@ -433,7 +434,7 @@ if __name__ == '__main__':
             exec_command = exec_prefix + [exe_full_path] +  args[1:]
             if verbose:
                 print("\n"," ".join(exec_command))
-                print("en=",env)
+                #print("en=",env)
             subprocess.check_call(exec_prefix +
                                   [exe_full_path] +
                                   args[1:],

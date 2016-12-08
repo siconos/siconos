@@ -28,7 +28,7 @@
 #endif
 
 %{
-#include "Newton_Methods.h"
+#include "Newton_methods.h"
 %}
 
 #define FPyArray_SimpleNewFromData(nd, dims, typenum, data)             \

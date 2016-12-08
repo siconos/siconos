@@ -125,7 +125,6 @@ int main(int argc, char* argv[])
     // --- Simulation initialization ---
 
     cout << "====> Initialisation ..." << endl;
-    bouncingBall->setSimulation(s);
     //bouncingBall->nonSmoothDynamicalSystem()->topology()->setOSI(ball, OSI);
     bouncingBall->initialize();
 
