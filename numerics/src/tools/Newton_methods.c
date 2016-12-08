@@ -159,6 +159,11 @@ void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverO
     search_Armijo_params_init(pG);
     linesearch_algo = &linesearch_Armijo2;
   }
+  else
+  {
+    fprintf(stderr, "Newton_LSA :: unknown linesearch specified");
+    linesearch_algo = &linesearch_Armijo2;
+  }
 
   if (options->iparam[SICONOS_IPARAM_LSA_FORCE_ARCSEARCH])
   {
@@ -424,10 +429,7 @@ newton_LSA_free:
     free(workV1);
     free(workV2);
   }
-  if (ls_data.nm_ref_data)
-  {
-    free_nm_data((nm_ref_struct*)ls_data.nm_ref_data);
-  }
+  free_ls_data(&ls_data);
 }
 
 void newton_lsa_default_SolverOption(SolverOptions* options)

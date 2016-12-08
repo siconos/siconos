@@ -120,3 +120,15 @@ void free_nm_data(nm_ref_struct* nm_ref_data)
   }
 }
 
+void free_ls_data(search_data* ls_data)
+{
+  if (ls_data->nm_ref_data)
+  {
+    free_nm_data((nm_ref_struct*)ls_data->nm_ref_data);
+  }
+  if (ls_data->extra_params)
+  {
+    free(ls_data->extra_params);
+    ls_data->extra_params = NULL;
+  }
+}

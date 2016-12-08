@@ -426,7 +426,7 @@ void solver_options_set(SolverOptions* options, int solverId)
   case SICONOS_LCP_NEWTON_FBLSA:
   case SICONOS_LCP_NEWTON_MINFBLSA:
   case SICONOS_VI_BOX_QI:
-    iSize = 6;
+    iSize = 7;
     dSize = 3;
     iter_max = 1000;
     tol = 1e-12;
@@ -444,7 +444,7 @@ void solver_options_set(SolverOptions* options, int solverId)
     break;
 
   case SICONOS_VI_BOX_AVI_LSA:
-    iSize = 6;
+    iSize = 7;
     dSize = 3;
     iter_max = 100;
     tol = 1e-12;

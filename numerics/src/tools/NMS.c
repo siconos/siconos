@@ -155,11 +155,13 @@ watchdog_step:
       ref_merit = data_NMS->ref_merit;
       if (dotprod < 0.0) /* check condition on <JacThetaF_merit, z_c(0) - z_c(T_k)>*/
       {
-        preRHS = -data_NMS->sigma*dotprod; /* we expect a plus in the LS function */
+//        preRHS = -data_NMS->sigma*dotprod; /* we expect a plus in the LS function */
+        preRHS = -dotprod; /* we expect a plus in the LS function */
       }
       else
       {
-        preRHS = -data_NMS->sigma*ref_merit;
+//        preRHS = -data_NMS->sigma*ref_merit;
+        preRHS = -ref_merit;
       }
 
       data_NMS->ls_data->z = NMS_checkpoint_0(data_NMS, n);
@@ -216,11 +218,13 @@ watchdog_step:
       /* check is reversed because we compute the <JacThetaF_merit, d_B - z_b(0)> */
       if (dotprod > 0.0) /* check condition on <JacThetaF_merit, z_b(0) - z_b(T_k)>*/
       {
-        preRHS = data_NMS->sigma*dotprod; /* we expect a plus in the LS function */
+//        preRHS = data_NMS->sigma*dotprod; /* we expect a plus in the LS function */
+        preRHS = dotprod; /* we expect a plus in the LS function */
       }
       else
       {
-        preRHS = -data_NMS->sigma*data_NMS->merit_bestpoint; /* we expect a plus in the LS function */
+//        preRHS = -data_NMS->sigma*data_NMS->merit_bestpoint; /* we expect a plus in the LS function */
+        preRHS = -data_NMS->merit_bestpoint; /* we expect a plus in the LS function */
       }
 
       data_NMS->ls_data->z = NMS_bestpoint(data_NMS, n);
@@ -384,6 +388,7 @@ void free_NMS_data(NMS_data* data)
   free(data->H);
   free_siconos_set(data->set);
   free(data->set);
+  free_ls_data(data->ls_data);
   free(data->ls_data);
 
   if (data->path_data)

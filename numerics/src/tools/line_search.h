@@ -120,6 +120,11 @@ extern "C"
    */
   void free_nm_data(nm_ref_struct* nm_ref_data);
 
+  /** free the allocated memory for the linesearch method
+   * \param ls_data the struct
+   */
+  void free_ls_data(search_data* ls_data);
+
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif

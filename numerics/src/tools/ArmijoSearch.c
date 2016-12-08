@@ -50,6 +50,7 @@ double search_Armijo_standalone(int n, double* theta, double preRHS, search_data
   double RHS;
 
   armijo_extra_params* aep = (armijo_extra_params*) ls_data->extra_params;
+  assert(aep);
   preRHS *= aep->gamma;
 
   while (alpha >= ls_data->alpha_min)

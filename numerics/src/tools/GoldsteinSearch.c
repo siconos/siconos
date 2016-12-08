@@ -50,7 +50,7 @@ double search_Goldstein_standalone(int n, double* theta, double preRHS, search_d
   double RHS;
 
   goldstein_extra_params* gep = (goldstein_extra_params*) ls_data->extra_params;
-
+  assert(gep);
   double c1 = gep->c;
   double c2 = 1. - c1;
   double alpha_max = gep->alpha_max;

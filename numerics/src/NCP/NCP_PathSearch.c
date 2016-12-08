@@ -134,6 +134,10 @@ void ncp_pathsearch(NonlinearComplementarityProblem* problem, double* z, double*
     data_NMS->ls_data->data = (void*)problem;
     data_NMS->ls_data->set = data_NMS->set;
     data_NMS->ls_data->sigma = options->dparam[SICONOS_DPARAM_NMS_SIGMA];
+    armijo_extra_params* pG = (armijo_extra_params*)malloc(sizeof(armijo_extra_params));
+    data_NMS->ls_data->extra_params = (void*) pG;
+    search_Armijo_params_init(pG);
+    pG->gamma = 1.;
     /* data_NMS->ls_data->searchtype is set in the NMS code */
   }
   else
