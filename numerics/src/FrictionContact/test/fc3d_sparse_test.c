@@ -78,6 +78,7 @@ static int solve_sparse(int solver_id, FrictionContactProblem* FC, double* r, do
     NumericsMatrix* W = NM_create(NM_SPARSE, n, n);
     NM_copy_to_sparse(problem->M, W);
     freeNumericsMatrix(problem->M);
+    free(problem->M);
     problem->M = W;
 
     info = fc3d_driver(problem, reaction, velocity, &SO);

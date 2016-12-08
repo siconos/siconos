@@ -32,6 +32,7 @@
 #include "NCP_cst.h"
 #include "MCP_cst.h"
 #include "VI_cst.h"
+#include "Friction_cst.h"
 
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
@@ -479,6 +480,7 @@ bool newton_LSA_check_solverId(int solverId)
     case SICONOS_LCP_NEWTON_MINFBLSA:
     case SICONOS_VI_BOX_QI:
     case SICONOS_VI_BOX_AVI_LSA:
+    case SICONOS_FRICTION_3D_NSN_AC_TEST:
       return true;
     default:
       return false;
