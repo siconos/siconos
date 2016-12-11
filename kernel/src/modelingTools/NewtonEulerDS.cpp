@@ -912,7 +912,7 @@ void NewtonEulerDS::computeForces(double time)
 
 void NewtonEulerDS::computeFGyr(SP::SiconosVector v, SP::SiconosVector fGyr)
 {
-  /*computation of \Omega times I \Omega*/
+  // computation of \Omega times I \Omega (FGyr is in the l.h.s of the equation of motion)
   DEBUG_BEGIN("NewtonEulerDS::computeFGyr(SP::SiconosVector v, SP::SiconosVector fGyr)\n");
   if (_I)
   {
@@ -1086,9 +1086,11 @@ void NewtonEulerDS::computeJacobianFGyrv(double time)
   }
   //else nothing.
   DEBUG_EXPR(_jacobianFGyrv->display());
+  // _jacobianFGyrv->display();
   // SP::SimpleMatrix jacobianFGyrtmp (new SimpleMatrix(*_jacobianFGyrv));
   // computeJacobianFGyrvByFD(time, _q, _v);
-  // std::cout << "#################" << (*jacobianFGyrtmp - *_jacobianFGyrv).normInf() << std::endl;
+  // jacobianFGyrtmp->display();
+  // std::cout << "#################  " << (*jacobianFGyrtmp - *_jacobianFGyrv).normInf() << std::endl;
   // assert((*jacobianFGyrtmp - *_jacobianFGyrv).normInf()< 1e-10);
   DEBUG_END("NewtonEulerDS::computeJacobianFGyrv(double time) \n");
 }
