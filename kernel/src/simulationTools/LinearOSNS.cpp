@@ -41,8 +41,8 @@
 #include "Tools.hpp"
 
 using namespace RELATION;
-// #define DEBUG_STDOUT
-// #define DEBUG_MESSAGES
+//#define DEBUG_STDOUT
+//#define DEBUG_MESSAGES
 #include "debug.h"
 
 LinearOSNS::LinearOSNS(): OneStepNSProblem(), _MStorageType(0), _keepLambdaAndYState(true)
@@ -329,7 +329,7 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
       //      gemm(CblasNoTrans,CblasNoTrans,1.0,*leftInteractionBlock,*work,1.0,*currentInteractionBlock);
       //*currentInteractionBlock *=h;
       DEBUG_EXPR(currentInteractionBlock->display(););
-      assert(currentInteractionBlock->isSymmetric(1e-10));
+      //assert(currentInteractionBlock->isSymmetric(1e-10));
 
 
     }
