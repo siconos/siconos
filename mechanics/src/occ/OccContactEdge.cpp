@@ -18,6 +18,7 @@ OccContactEdge::OccContactEdge(const OccContactShape& shape,
   _index(index),
   _edge(shape.edge(index))
 {
+  this->computeUVBounds();
 };
 
 const SPC::TopoDS_Edge OccContactEdge::contact() const

@@ -143,7 +143,7 @@ struct EdgeGeometer : public Geometer
                                dist.x1, dist.y1, dist.z1,
                                dist.x2, dist.y2, dist.z2,
                                dist.nx, dist.ny, dist.nz,
-                               not this->_normalFromFace1,
+                               this->_normalFromFace1,
                                dist.value);
   }
   void visit(const OccContactEdge& edge2)

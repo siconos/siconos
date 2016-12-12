@@ -152,6 +152,9 @@ IF(WITH_MECHANISMS)
 
   endif(OCE_FOUND)
   SET(HAVE_MECHANISMS TRUE)
+  if(WITH_OCC)
+    SET(HAVE_OCC TRUE)
+  endif()
 endif()
 
 # -- VTK --

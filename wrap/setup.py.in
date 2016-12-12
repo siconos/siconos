@@ -103,6 +103,10 @@ class TestSiconos(Command):
         call("py.test" + " siconos/tests", shell=True, env={"PYTHONPATH": "${CMAKE_BINARY_DIR}/wrap/"})
 
 
+def get_cmake_option(option):
+    opt = option.upper()
+    return opt == "ON" or opt == "1" or opt == "TRUE"
+
 # Full package name
 name = '@SICONOS_PYTHON_PACKAGE@'
 # List of python modules (directories) to be included
@@ -116,14 +120,14 @@ components_list = "@SICONOS_PYTHON_MODULES@"
 # This will probably change if we split each python interface for those packages.
 #with_component['numerics'] = True
 #with_component['kernel'] = "@HAVE_SICONOS_KERNEL@" is "TRUE"
-with_component['control'] = "@HAVE_SICONOS_CONTROL@" is "TRUE"
-with_component['mechanics'] = "@HAVE_SICONOS_MECHANICS@" is "TRUE"
-with_component['io'] = "@HAVE_SICONOS_IO@" is "TRUE"
-with_mechanisms = "@WITH_MECHANISMS@" is "ON"
-with_bullet = "@WITH_BULLET@" is "ON"
-with_occ = "@WITH_OCC@" is "ON"
+with_component['control'] = get_cmake_option("@HAVE_SICONOS_CONTROL@")
+with_component['mechanics'] = get_cmake_option("@HAVE_SICONOS_MECHANICS@")
+with_component['io'] = get_cmake_option("@HAVE_SICONOS_IO@")
+with_mechanisms = get_cmake_option("@WITH_MECHANISMS@")
+with_bullet = get_cmake_option("@WITH_BULLET@")
+with_occ = get_cmake_option("@WITH_OCC@")
 packages_for_tests = []
-with_testing = '@WITH_TESTING@' is 'ON'
+with_testing = get_cmake_option("@WITH_TESTING@")
 if with_testing:
     packages_for_tests.append('siconos.tests')
 

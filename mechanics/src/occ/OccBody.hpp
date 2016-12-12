@@ -62,19 +62,39 @@ public:
                        SP::SiconosVector orientation = SP::SiconosVector(),
                        unsigned int group=0);
 
+
+  /** Association of a shape without contact.
+   * \param shape the shape
+   * \param position relative position (x, y, z).
+   * \param orientation relative orientation quaternion w, x, y, z
+   */
+  void addShape(SP::TopoDS_Shape shape,
+                SP::SiconosVector position = SP::SiconosVector(),
+                SP::SiconosVector orientation = SP::SiconosVector());
+
   /** Update positions and orientations of contact shapes.
    */
   void updateContactShapes();
+
+  /** Update positions and orientations of shapes.
+   */
+  void updateShapes();
 
   /** Get an associated contact shape by its rank of association.
    *  \param id the number of the shape.
    */
   const OccContactShape& contactShape(unsigned int id) const;
 
+  /** Get an associated shape by its rank of association.
+   *  \param id the number of the shape.
+   */
+  const TopoDS_Shape& shape(unsigned int id) const;
+
   ACCEPT_BASE_STD_VISITORS(NewtonEulerDS);
 
 protected:
   SP::ContactShapes _contactShapes;
+  SP::TopoDS_Shapes _shapes;
 
   ACCEPT_SERIALIZATION(OccBody);
 };

@@ -1,10 +1,14 @@
 #ifndef OCC_UTILS
 #define OCC_UTILS
 
+#include "MechanicsFwd.hpp"
+#include "SiconosFwd.hpp"
 #include <Standard_TypeDef.hxx>
+
 class OccContactFace;
 class OccContactEdge;
 
+void occ_move(TopoDS_Shape& shape, const SiconosVector& pos);
 
 void occ_distanceFaceFace(const OccContactFace& csh1,
                           const OccContactFace& csh2,

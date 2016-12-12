@@ -16,6 +16,7 @@ OccContactFace::OccContactFace(const OccContactShape& reference_shape,
   _index(index),
   _face(reference_shape.face(index))
 {
+  this->computeUVBounds();
 };
 
 

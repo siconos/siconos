@@ -7,14 +7,15 @@
 from siconos.mechanics.contact_detection.tools import Contactor
 from siconos.io.mechanics_io import Hdf5
 from siconos import numerics
-from OCC.BRepPrimAPI import BRepPrimAPI_MakeBox, BRepPrimAPI_MakeSphere
 import siconos.io.mechanics_io
+from OCC.BRepPrimAPI import BRepPrimAPI_MakeBox, BRepPrimAPI_MakeSphere
+from OCC.gp import gp_Pnt
 
 siconos.io.mechanics_io.set_implementation('original')
 siconos.io.mechanics_io.set_backend('occ')
 
 sphere = BRepPrimAPI_MakeSphere(1.).Shape()
-ground = BRepPrimAPI_MakeBox(100., 100., .5).Shape()
+ground = BRepPrimAPI_MakeBox(gp_Pnt(-50, -50, 0), 100., 100., .5).Shape()
 
 # Creation of the hdf5 file for input/output
 with Hdf5() as io:
@@ -24,7 +25,7 @@ with Hdf5() as io:
 
     io.addObject('sphere',
                  [Contactor('Sphere', contact_type='Face', contact_index=0)],
-                 mass=1, translation=[50, 50, 10], velocity=[0, 0, 0, 0, 0, 0])
+                 mass=1, translation=[0, 0, 10], velocity=[0, 0, 0, 0, 0, 0])
 
     io.addObject('ground',
                  [Contactor('Ground', contact_type='Face', contact_index=5)],
@@ -33,7 +34,8 @@ with Hdf5() as io:
     io.addPermanentInteraction('sphere-ground',
                                'sphere', 'Sphere-0',
                                'ground', 'Ground-0',
-                               distance_calculator='occ')
+                               distance_calculator='occ',
+                               offset=0.01)
 
     io.addNewtonImpactFrictionNSL('contact', mu=0.3, e=0.9)
 

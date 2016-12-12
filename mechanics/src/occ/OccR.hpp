@@ -67,6 +67,10 @@ public:
    */
   void setGeometer(SP::Geometer geometer) { _geometer = geometer; }
 
+  /** visitor hooks
+   */
+  ACCEPT_STD_VISITORS();
+
 protected:
   const ContactPoint& _contact1;
   const ContactPoint& _contact2;

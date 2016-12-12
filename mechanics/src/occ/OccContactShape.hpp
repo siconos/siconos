@@ -27,11 +27,6 @@
 #include "SiconosVisitor.hpp"
 #include <string>
 
-DEFINE_SPTR(TopoDS_Shape);
-DEFINE_SPTR(TopoDS_Edge);
-DEFINE_SPTR(TopoDS_Face);
-
-
 struct OccContactShape
 {
 
@@ -76,6 +71,7 @@ struct OccContactShape
   void setShape(SP::TopoDS_Shape shape)
   {
     this->_shape = shape;
+    this->computeUVBounds();
   }
 
   /** Set OpenCascade data.
@@ -83,6 +79,7 @@ struct OccContactShape
   void setData(TopoDS_Shape& data)
   {
     this->_shape = createSPtrTopoDS_Shape(data);
+    this->computeUVBounds();
   }
 
   /** Known contacts.
@@ -126,11 +123,6 @@ struct OccContactShape
    * \return an unsigned int
    */
   unsigned int id() { return this->_id; }
-
-  /** Set shape position and orientation.
-      \param q : NewtonEulerDS state
-  */
-  virtual void move(const SiconosVector& q);
 
   /** Computed UV bounds.
    * @{

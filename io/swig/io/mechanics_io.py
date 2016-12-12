@@ -24,7 +24,7 @@ from siconos.kernel import \
 import siconos.kernel as Kernel
 
 # Siconos Mechanics imports
-from siconos.mechanics.collision.tools import Contactor
+from siconos.mechanics.collision.tools import Avatar, Contactor
 from siconos.mechanics import joints
 from siconos.io.io_base import MechanicsIO
 from siconos.io.FrictionContactTrace import FrictionContactTrace
@@ -730,7 +730,7 @@ class Hdf5():
     """
 
     def __init__(self, io_filename=None, mode='w',
-                 broadphase=None, osi=None, shape_filename=None,
+                 broadphase=None, model=None, osi=None, shape_filename=None,
                  set_external_forces=None, gravity_scale=None, collision_margin=None,
                  use_compression=False, output_domains=False):
 
@@ -741,6 +741,7 @@ class Hdf5():
             self._io_filename = io_filename
         self._mode = mode
         self._broadphase = broadphase
+        self._model = model
         self._osi = osi
         self._static = {}
         self._shape = None
@@ -951,26 +952,38 @@ class Hdf5():
 
             for contactor in contactors:
 
+                contact_shape = None
                 reference_shape = occ.OccContactShape(
                     self._shape.get(contactor.name,
                                     shape_class, face_class,
                                     edge_class))
-
-                if contactor.contact_type == 'Face':
-                    contact_shape = occ.OccContactFace(reference_shape,
-                                                       contactor.contact_index)
-
-                elif contactor.contact_type == 'Edge':
-                    contact_shape = occ.OccContactEdge(reference_shape,
-                                                       contactor.contact_index)
-
                 self._keep.append(reference_shape)
 
-                body.addContactShape(contact_shape,
-                                     contactor.translation,
-                                     contactor.orientation,
-                                     contactor.group)
-            self._set_external_forces(body)
+                if hasattr(contactor, 'contact_type'):
+
+                    if contactor.contact_type == 'Face':
+                        contact_shape = \
+                                    occ.OccContactFace(reference_shape,
+                                                       contactor.contact_index)
+
+                    elif contactor.contact_type == 'Edge':
+                        contact_shape = \
+                                    occ.OccContactEdge(reference_shape,
+                                                       contactor.contact_index)
+
+                if contact_shape is not None:
+
+                    body.addContactShape(contact_shape,
+                                         contactor.translation,
+                                         contactor.orientation,
+                                         contactor.group)
+
+                else:
+                    body.addShape(reference_shape.shape(),
+                                  contactor.translation,
+                                  contactor.orientation)
+
+                self._set_external_forces(body)
 
             # add the dynamical system to the non smooth
             # dynamical system
@@ -1236,6 +1249,7 @@ class Hdf5():
             contactor1_name = pinter.attrs['contactor1_name']
             contactor2_name = pinter.attrs['contactor2_name']
             distance_calculator = pinter.attrs['distance_calculator']
+            offset = pinter.attrs['offset']
 
             body1 = self._input[body1_name]
             body2 = self._input[body2_name]
@@ -1273,6 +1287,8 @@ class Hdf5():
 
             relation = occ.OccR(cp1, cp2,
                                 real_dist_calc[distance_calculator]())
+
+            relation.setOffset(offset)
 
             inter = Interaction(3, nslaw, relation)
 
@@ -1374,33 +1390,44 @@ class Hdf5():
 
                     input_ctrs = [ctr for _n_, ctr in obj.items()]
 
-                    try:
-                        contactors = [Contactor(
-                            shape_name=ctr.attrs['name'],
-                            collision_group=ctr.attrs['group'].astype(int),
-                            contact_type=ctr.attrs['type'],
-                            contact_index=ctr.attrs['contact_index'].astype(int),
-                            relative_translation=ctr.attrs['translation'].astype(float),
-                            relative_orientation=ctr.attrs['orientation'].astype(float))
-                                      for ctr in input_ctrs]
-                    except (KeyError,AttributeError):
-                        contactors = [Contactor(
-                            shape_name=ctr.attrs['name'],
-                            collision_group=ctr.attrs['group'].astype(int),
-                            relative_translation=ctr.attrs['translation'].astype(float),
-                            relative_orientation=ctr.attrs['orientation'].astype(float))
-                                      for ctr in input_ctrs]
+                    contactors = []
+                    occ_type = False
+                    for ctr in input_ctrs:
+                        if 'type' in ctr.attrs:
+                            # occ contact
+                            occ_type = True
+                            contactors.append(
+                                Contactor(
+                                    shape_name = ctr.attrs['name'],
+                                    collision_group = ctr.attrs['group'].astype(int),
+                                    contact_type = ctr.attrs['type'],
+                                    contact_index = ctr.attrs['contact_index'].astype(int),
+                                    relative_translation = ctr.attrs['translation'].astype(float),
+                                    relative_orientation = ctr.attrs['orientation'].astype(float)))
+                        elif 'group' in ctr.attrs:
+                            # bullet contact
+                            assert not occ_type
+                            contactors.append(
+                                Contactor(
+                                    shape_name=ctr.attrs['name'],
+                                    collision_group=ctr.attrs['group'].astype(int),
+                                    relative_translation=ctr.attrs['translation'].astype(float),
+                                    relative_orientation=ctr.attrs['orientation'].astype(float)))
+                        else:
+                            # occ shape
+                            occ_type = True
+                            contactors.append(
+                                Avatar(
+                                    shape_name = ctr.attrs['name'],
+                                    relative_translation = ctr.attrs['translation'].astype(float),
+                                    relative_orientation = ctr.attrs['orientation'].astype(float)))
 
                     if 'inertia' in obj.attrs:
                         inertia = obj.attrs['inertia']
                     else:
                         inertia = None
 
-
-                    if True in ('type' in self.shapes()[ctr.attrs['name']].attrs
-                                and self.shapes()[ctr.attrs['name']].attrs['type']
-                                in ['brep', 'step']
-                                for ctr in input_ctrs):
+                    if occ_type:
                         # Occ object
                         self.importOccObject(
                             name, floatv(translation), floatv(orientation),
@@ -1787,7 +1814,8 @@ class Hdf5():
 
     def addPermanentInteraction(self, name, body1_name, contactor1_name,
                                 body2_name, contactor2_name,
-                                distance_calculator='cadmbtb'):
+                                distance_calculator='cadmbtb',
+                                offset=0.0001):
         """
         Add permanent interactions between two objects contactors.
         """
@@ -1795,15 +1823,16 @@ class Hdf5():
             pinter = self.permanent_interactions().\
                       create_dataset(name, (1,),
                                      dtype=h5py.new_vlen(str))
-            pinter.attrs['id']=self._number_of_permanent_interactions
-            pinter.attrs['type']='permanent_interaction'
-            pinter.attrs['body1_name']=body1_name
-            pinter.attrs['body2_name']=body2_name
-            pinter.attrs['contactor1_name']=contactor1_name
-            pinter.attrs['contactor2_name']=contactor2_name
-            pinter.attrs['distance_calculator']=distance_calculator
+            pinter.attrs['id'] = self._number_of_permanent_interactions
+            pinter.attrs['type'] = 'permanent_interaction'
+            pinter.attrs['body1_name'] = body1_name
+            pinter.attrs['body2_name'] = body2_name
+            pinter.attrs['contactor1_name'] = contactor1_name
+            pinter.attrs['contactor2_name'] = contactor2_name
+            pinter.attrs['distance_calculator'] = distance_calculator
+            pinter.attrs['offset'] = offset
 
-            self._pinterid[name]=pinter.attrs['id']
+            self._pinterid[name] = pinter.attrs['id']
             self._number_of_permanent_interactions += 1
 
     def addConvexShape(self, name, points,
@@ -1844,19 +1873,27 @@ class Hdf5():
             self._shapeid[name]=shape.attrs['id']
             self._number_of_shapes += 1
 
-    def addObject(self, name, contactors,
+    def addObject(self, name, shapes,
                   translation,
                   orientation=[1, 0, 0, 0],
                   velocity=[0, 0, 0, 0, 0, 0],
                   mass=0, inertia=None, time_of_birth=-1):
-        """
-        Add an object with associated contactors.
-        Contact detection is defined by the list of contactors.
-        The initial translation is mandatory : [x, y z].
-        If the mass is zero this is a static object.
-        A default inertia is associated if it is not given.
-        A time of birth may be specified, so the object will not appear
-        in the scene until this time.
+        """Add an object with associated shapes as a list of Avatar or
+        Contactor objects.  Contact detection and processing is
+        defined by the Contactor objects.
+
+        The Avatar objects specify the visualization and may be
+        related to the computation of the moments of inertia.
+
+        Each Avatar and Contactor object may have a relative
+        translation and a relative orientation.
+
+        The initial translation is mandatory : [x, y z].  If the mass
+        is zero this is a static object.  A default inertia is
+        associated if it is not given.  A time of birth may be
+        specified, so the object will not appear in the scene until
+        this time.
+
         """
         # print(arguments())
         if len(orientation) == 2:
@@ -1889,21 +1926,30 @@ class Hdf5():
             if inertia is not None:
                 obj.attrs['inertia']=inertia
 
+            contactors = shapes
+
             for num, ctor in enumerate(contactors):
-                dat=data(obj, '{0}-{1}'.format(ctor.name, num), 0,
+                dat = data(obj, '{0}-{1}'.format(ctor.name, num), 0,
                            use_compression=self._use_compression)
-                dat.attrs['name']=ctor.name
+
+                dat.attrs['name'] = ctor.name
                 if hasattr(ctor, 'group'):
-                    dat.attrs['group']=ctor.group
+                    dat.attrs['group'] = ctor.group
+
                 if hasattr(ctor, 'parameters') and \
                         ctor.parameters is not None:
-                    dat.attrs['parameters']=ctor.parameters
-                if ctor.contact_type is not None:
-                    dat.attrs['type']=ctor.contact_type
-                if ctor.contact_index is not None:
-                    dat.attrs['contact_index']=ctor.contact_index
-                dat.attrs['translation']=ctor.translation
-                dat.attrs['orientation']=ctor.orientation
+                    dat.attrs['parameters'] = ctor.parameters
+
+                if hasattr(ctor, 'contact_type') and \
+                   ctor.contact_type is not None:
+                    dat.attrs['type'] = ctor.contact_type
+
+                if hasattr(ctor, 'contact_index') and \
+                   ctor.contact_index is not None:
+                    dat.attrs['contact_index'] = ctor.contact_index
+
+                dat.attrs['translation'] = ctor.translation
+                dat.attrs['orientation'] = ctor.orientation
 
             if mass == 0:
                 obj.attrs['id']=- (self._number_of_static_objects + 1)
@@ -2198,18 +2244,18 @@ class Hdf5():
 
 
             if use_proposed:
-                numberOfContact = (
+                number_of_contacts = (
                     self._broadphase.statistics().new_interactions_created
                     + self._broadphase.statistics().existing_interactions_processed)
             elif use_original:
-                numberOfContact = (self._model.simulation()
+                number_of_contacts = (self._model.simulation()
                                    .oneStepNSProblem(0).getSizeOutput()/3)
 
-            if numberOfContact > 0 :
-                print('number of contact',self._model.simulation().oneStepNSProblem(0).getSizeOutput()/3)
+            if number_of_contacts > 0 :
+                print('number of contacts',self._model.simulation().oneStepNSProblem(0).getSizeOutput()/3)
                 self.printSolverInfos()
 
-            if violation_verbose and numberOfContact > 0 :
+            if violation_verbose and number_of_contacts > 0 :
                 if len(simulation.y(0,0)) >0 :
                     print('violation info')
                     y=simulation.y(0,0)

@@ -1,4 +1,4 @@
 # the simulation may be executed with this command:
 
-siconos -Psiconos-mechanisms.py .
+siconos -Psiconos_mechanisms .
 

@@ -32,11 +32,11 @@ from siconos.mechanics.mechanisms import cadmbtb
 # simple hdf5 output
 # a dummy SpaceFilter is needed for model encapsulation
 # a (pseudo) Contactor class is needed for the object-shape association.
-from siconos.mechanics.contact_detection.base import SpaceFilter
+from siconos.mechanics.collision.native import SpaceFilter
 with_io = "@HAVE_SICONOS_IO@" is "TRUE"
 if with_io:
     from siconos.io import mechanics_io as io
-from siconos.mechanics.contact_detection.tools import Avatar, Contactor
+from siconos.mechanics.collision.tools import Avatar, Contactor
 
 default_options = os.path.join(mechanisms_path, 'mbtbDefaultOptions.py')
 local_options = os.path.join(example_path, 'mbtbLocalOptions.py')
@@ -219,7 +219,8 @@ atexit.register(remove_run_id_dir)
 
 # Hdf5 IO setup
 if with_io:
-    with io.Hdf5(broadphase=SpaceFilter(mbtb.MBTB_model())) as io:
+    with io.Hdf5(broadphase=SpaceFilter(mbtb.MBTB_model()),
+                 model=mbtb.MBTB_model()) as io:
         def _run(nsteps):
             fp = mbtb._MBTB_open('simu.txt', 'a')
             currentTimerCmp = mbtb.cvar.sTimerCmp
@@ -383,7 +384,7 @@ if with_io:
                     relative_translation=offset[contactBody2[idContact]])]
 
         for idArtefact in range(NBARTEFACTS):
-            
+
             shape_name = os.path.basename(
                 os.path.splitext(Artefactfile[idArtefact])[0])
 

@@ -1,11 +1,26 @@
 #include "OccUtils.hpp"
 #include "OccContactFace.hpp"
 #include "OccContactEdge.hpp"
+#include "SiconosVector.hpp"
 #include <TopoDS.hxx>
 #include <gp_Dir.hxx>
+#include <gp_Quaternion.hxx>
 #include <BRepExtrema_DistShapeShape.hxx>
 
 #include <cadmbtb.hpp>
+
+void occ_move(TopoDS_Shape& shape, const SiconosVector& q)
+{
+  const gp_Vec translat = gp_Vec(q(0), q(1), q(2));
+  const gp_Quaternion rota = gp_Quaternion(q(4), q(5), q(6), q(3));
+
+  gp_Trsf transfo;
+  transfo.SetRotation(rota);
+  transfo.SetTranslationPart(translat);
+
+  shape.Move(transfo);
+  shape.Location(TopLoc_Location(transfo));
+}
 
 void occ_distanceFaceFace(const OccContactFace& csh1,
                           const OccContactFace& csh2,

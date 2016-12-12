@@ -30,4 +30,10 @@ struct ContactShapes : public std::vector<SP::OccContactShape>
   ACCEPT_SERIALIZATION(ContactShapes);
 };
 
+struct TopoDS_Shapes : public std::vector<SP::TopoDS_Shape>
+{
+  ACCEPT_SERIALIZATION(TopoDS_Shapes);
+};
+
+
 #endif

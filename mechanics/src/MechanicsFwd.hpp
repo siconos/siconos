@@ -28,6 +28,10 @@
   REGISTER(NSLawMatrix)                         \
   REGISTER(OccR)                                \
   REGISTER(OccBody)                             \
+  REGISTER(TopoDS_Shape)                        \
+  REGISTER(TopoDS_Face)                         \
+  REGISTER(TopoDS_Edge)                         \
+  REGISTER(TopoDS_Shapes)                       \
   REGISTER(OccContactShape)                     \
   REGISTER(OccContactFace)                      \
   REGISTER(OccContactEdge)                      \
