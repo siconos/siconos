@@ -145,7 +145,7 @@ if __name__=='__main__':
     classes = {k: v for k,v in doxygen_classes.items()
                if k in header_classes and not unwanted(k)}
 
-    print('%d classes found.'%len(classes))
+    print('{:} classes found.'.format(len(classes)))
 
     if len(classes) < 10:
         print('%s: Error, not enough classes found.'%sys.argv[0])

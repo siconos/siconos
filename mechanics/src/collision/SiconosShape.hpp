@@ -78,6 +78,11 @@ public:
 class SiconosPlane : public SiconosShape,
                      public std11::enable_shared_from_this<SiconosPlane>
 {
+protected:
+  /** serialization hooks
+   */
+  ACCEPT_SERIALIZATION(SiconosPlane);
+
 public:
   SiconosPlane() : SiconosShape() {}
 
@@ -91,7 +96,13 @@ public:
 class SiconosSphere : public SiconosShape,
                       public std11::enable_shared_from_this<SiconosSphere>
 {
+private:
+  SiconosSphere() : SiconosShape() {};
+
 protected:
+  /** serialization hooks
+   */
+  ACCEPT_SERIALIZATION(SiconosSphere);
   float _radius;
 
 public:
@@ -111,7 +122,13 @@ public:
 class SiconosBox : public SiconosShape,
                    public std11::enable_shared_from_this<SiconosBox>
 {
+private:
+  SiconosBox() : SiconosShape() {};
+
 protected:
+  /** serialization hooks
+   */
+  ACCEPT_SERIALIZATION(SiconosBox);
   SP::SiconosVector _dimensions;
 
 public:
@@ -160,7 +177,13 @@ public:
 class SiconosCylinder : public SiconosShape,
                         public std11::enable_shared_from_this<SiconosCylinder>
 {
+private:
+  SiconosCylinder() : SiconosShape() {};
+
 protected:
+  /** serialization hooks
+   */
+  ACCEPT_SERIALIZATION(SiconosCylinder);
   double _radius;
   double _length;
 
@@ -196,7 +219,13 @@ public:
 class SiconosConvexHull : public SiconosShape,
                           public std11::enable_shared_from_this<SiconosConvexHull>
 {
+private:
+  SiconosConvexHull() : SiconosShape() {};
+
 protected:
+  /** serialization hooks
+   */
+  ACCEPT_SERIALIZATION(SiconosConvexHull);
   SP::SiconosMatrix _vertices;
 
 public:
@@ -228,7 +257,13 @@ TYPEDEF_SPTR(VUInt)
 class SiconosMesh : public SiconosShape,
                     public std11::enable_shared_from_this<SiconosMesh>
 {
+private:
+  SiconosMesh() : SiconosShape() {};
+
 protected:
+  /** serialization hooks
+   */
+  ACCEPT_SERIALIZATION(SiconosMesh);
   SP::VUInt _indexes;
   SP::SiconosMatrix _vertices;
 

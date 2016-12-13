@@ -3,7 +3,10 @@ __all__ = ['unwanted', 'get_priority', 'parse_args', 'get_headers',
            'write_header', 'write_footer', 'write_includes',
            'write_register_with_bases', 'write_classes']
 
-import os, os.path, sys, re
+import os
+import os.path
+import sys
+import re
 import itertools
 import getopt
 
@@ -23,7 +26,8 @@ input_headers = {
                   "SiconosBodies.hpp",
                   "CircleCircleR.hpp", "CircularDS.hpp",
                   "KneeJointR.hpp", "PivotJointR.hpp",
-                  "PrismaticJointR.hpp"],
+                  "PrismaticJointR.hpp", "BodyDS.hpp", "SiconosShape.hpp",
+                  "SiconosCollisionManager.hpp"],
 
     # fix missing forwards for Control
     'control': ['FirstOrderNonLinearDS.hpp',
@@ -31,13 +35,13 @@ input_headers = {
                 'SiconosControl.hpp'],
     }
 
-# un processed classed or attributes : to be defined explicitely in
-# SiconosFull.hpp
+
 def unwanted(s):
+    """ un processed classed or attributes : to be defined explicitely in SiconosFull.hpp"""
     m = re.search('xml|XML|Xml|MBlockCSR|fPtr|SimpleMatrix|SiconosVector|SiconosSet|DynamicalSystemsSet|SiconosGraph|SiconosSharedLibrary|numerics|computeFIntPtr|computeJacobianFIntqPtr|computeJacobianFIntqDotPtr|PrimalFrictionContact|FrictionContact|Lsodar|MLCP2|_moving_plans|_err|Hem5|_bufferY|_spo|_measuredPert|_predictedPert|_blockCSR', s)
     # note _err,_bufferY, _spo, _measuredPert, _predictedPert -> boost::circular_buffer issue with serialization
     # _spo : subpluggedobject
-    #_blockCSR -> double * serialization needed by hand (but uneeded anyway for a full restart)
+    # _blockCSR -> double * serialization needed by hand (but uneeded anyway for a full restart)
     return m is not None
 
 # try to provide an ordering for registering a class
@@ -183,10 +187,12 @@ def parse_args(need_build_path=False):
             generated_header,
             build_path)
 
+
 def get_headers(targets):
     all_headers = [h for h in itertools.chain(*(input_headers[target]
                                                 for target in targets))]
     return all_headers
+
 
 def write_header(dest_file, cmd, generated_header):
     dest_file.write('// generated with the command : {0}\n'
@@ -196,16 +202,19 @@ def write_header(dest_file, cmd, generated_header):
     dest_file.write('#include <SiconosConfig.h>\n'.format(generated_header))
     dest_file.write('#ifdef WITH_SERIALIZATION\n'.format(generated_header))
 
+
 def write_footer(dest_file):
     dest_file.write('#endif\n')
     dest_file.write('#endif\n')
+
 
 def write_includes(dest_file, all_headers):
     for header in all_headers:
         dest_file.write('#include "{0}"\n'.format(header))
 
+
 def write_register_with_bases(dest_file, with_base):
-    with_base_s = [c for c,p in sorted(with_base, key=lambda k: (k[1],k[0]))]
+    with_base_s = [c for c, p in sorted(with_base, key=lambda k: (k[1], k[0]))]
     dest_file.write('\n')
     dest_file.write('template <class Archive>\n')
     dest_file.write('void siconos_io_register_generated(Archive& ar)\n')
@@ -214,6 +223,7 @@ def write_register_with_bases(dest_file, with_base):
                             .join(
                                 '  ar.register_type(static_cast<{0}*>(NULL));'
                                 .format(x) for x in with_base_s)))
+
 
 def write_classes(dest_file, classes):
     """Write registration macros for classes, according to whether or

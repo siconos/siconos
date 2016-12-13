@@ -28,7 +28,7 @@
 #include <AffineVariationalInequalities.h>
 TYPEDEF_SPTR(AffineVariationalInequalities)
 
-/** Formalization and Resolution of a Linear Complementarity Problem (AVI)
+/** Formalization and Resolution of an Affine Variational Inequality (AVI)
  
    \author SICONOS Development Team - copyright INRIA
    \version 3.0.0.

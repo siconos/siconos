@@ -42,7 +42,14 @@ public:
 
   class NSLawMatrix : public ublas::symmetric_matrix < SP::NonSmoothLaw >
   {
-    ACCEPT_SERIALIZATION(NSLawMatrix);
+  private:
+    NSLawMatrix() : ublas::symmetric_matrix < SP::NonSmoothLaw >() {};
+
+
+  protected:
+
+    ACCEPT_SERIALIZATION(InteractionManager::NSLawMatrix);
+
   public:
     NSLawMatrix(NSLawMatrix::size_type i)
       : ublas::symmetric_matrix < SP::NonSmoothLaw >(i) {}
@@ -74,6 +81,8 @@ protected:
   friend class Simulation;
   friend class TimeStepping;
   friend class EventDriven;
+
+  ACCEPT_SERIALIZATION(InteractionManager);
 };
 
 #endif /* InteractionManager_h */

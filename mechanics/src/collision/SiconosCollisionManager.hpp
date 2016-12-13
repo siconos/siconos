@@ -32,6 +32,11 @@
 
 class SiconosCollisionManager : public InteractionManager
 {
+protected:
+  /** serialization hooks
+   */
+  ACCEPT_SERIALIZATION(SiconosCollisionManager);
+
 public:
   SiconosCollisionManager() : InteractionManager() {}
   virtual ~SiconosCollisionManager() {}

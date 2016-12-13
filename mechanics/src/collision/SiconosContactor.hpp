@@ -39,6 +39,9 @@
 
 struct SiconosContactor
 {
+private:
+  SiconosContactor() {};
+
 protected:
   /** serialization hooks
   */
@@ -56,6 +59,11 @@ public:
 
 class SiconosContactorSet : public std::vector< SP::SiconosContactor >
 {
+protected:
+  /** serialization hooks
+   */
+  ACCEPT_SERIALIZATION(SiconosContactorSet);
+
 public:
   typedef std::vector< SP::SiconosContactor >::iterator iterator;
 

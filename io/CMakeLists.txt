@@ -66,7 +66,7 @@ if(WITH_SERIALIZATION)
     endif()
     if(HAVE_SICONOS_MECHANICS)
       set(GENERATED_DEPENDENCIES ${GENERATED_DEPENDENCIES}
-        ../mechanics/src/contactDetection/basicBroadphase/SpaceFilter.hpp)
+        ../mechanics/src/collision/native/SpaceFilter.hpp)
     endif()
     if(HAVE_SICONOS_CONTROL)
       set(GENERATED_DEPENDENCIES ${GENERATED_DEPENDENCIES} ../control/src/SiconosControl.hpp)
