@@ -1007,7 +1007,7 @@ void NewtonEulerDS::computeJacobianqForces(double time)
     if (_jacobianMIntq)
     {
       computeJacobianMIntq(time);
-      ::changeFrameAbsToBody(_q,_jacobianqForces); // We have to ensure that the Jacobian is expressed in inertial frame
+      ::changeFrameAbsToBody(_q,_jacobianMIntq); // We have to ensure that the Jacobian is expressed in inertial frame
     }
     if (_jacobianMExtObjq)
     {

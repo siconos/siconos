@@ -165,6 +165,12 @@ PY_FULL_REGISTER(OccSpaceFilter);
 
 %include <cadmbtb.hpp>
 
+%{
+#include <OccUtils.hpp>
+%}
+
+%include <OccUtils.hpp>
+
 %inline
 %{
   #include <BRepTools.hxx>

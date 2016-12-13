@@ -2,13 +2,17 @@ from math import cos, sin
 from numpy.linalg import norm
 
 
-class Shape(object):
-    """
-    A shape with translation and orientation. The given position is meant to be
-    relative to some body reference frame.
+class MovedShape(object):
+    """A shape with a reference to some shape data and that is moved by a
+    given relative translation and relative orientation. The
+    orientation may be given as a quaternion or in the form (axis,
+    angle) where len(axis) == 3 and angle is a scalar.
+
+    The default value for the translation is
+    [0, 0, 0] and [1, 0, 0, 0] for the orientation.
     """
     def __init__(self,
-                 shape_name,
+                 shape_data,
                  relative_translation=[0, 0, 0],
                  relative_orientation=[1, 0, 0, 0]):
 
@@ -26,41 +30,42 @@ class Shape(object):
             assert len(relative_orientation) == 4
             ori = relative_orientation
 
-        self.name = shape_name
+        self.data = shape_data
         self.translation = relative_translation
         self.orientation = ori
 
 
-class Avatar(Shape):
+class Shape(MovedShape):
     """
-    An Avatar shape is a shape that may be associated to some  body
-    for visualisation purpose only.
+    A MovedShape with optional instance name and parameters.
     """
 
     def __init__(self,
-                 shape_name,
+                 shape_data,
+                 instance_name=None,
                  parameters=None,
                  relative_translation=[0, 0, 0],
                  relative_orientation=[1, 0, 0, 0]):
 
+        self.instance_name = instance_name
         self.parameters = parameters
-        super(Avatar, self).__init__(shape_name,
-                                     relative_translation,
-                                     relative_orientation)
+        super(Shape, self).__init__(shape_data,
+                                    relative_translation,
+                                    relative_orientation)
 
 
 class Contactor(Shape):
-    """
-    A Contactor is associated to a shape. It belongs to a
-    collision group. Depending on the geometrical engine used,
-    some informations may be added to the contactor, such as
-    the kind of contact and the concerned part of the shape.
-    Note that contact laws must then be defined between collision
-    groups.
+    """A Contactor is a Shape that belongs to a collision
+    group. Depending on the geometrical engine used, some informations
+    may be added to the contactor, such as the kind of contact and the
+    concerned part of the shape.  Note that contact laws must then be
+    defined between collision groups.
     """
 
     def __init__(self,
-                 shape_name,
+                 shape_data,
+                 instance_name=None,
+                 parameters=None,
                  collision_group=0,
                  contact_type=None,
                  contact_index=None,
@@ -71,6 +76,8 @@ class Contactor(Shape):
         self.contact_type = contact_type
         self.contact_index = contact_index
 
-        super(Contactor, self).__init__(shape_name,
+        super(Contactor, self).__init__(shape_data,
+                                        instance_name,
+                                        parameters,
                                         relative_translation,
                                         relative_orientation)
