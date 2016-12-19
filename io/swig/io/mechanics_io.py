@@ -1511,7 +1511,7 @@ class Hdf5():
                 contactors = [Contactor(
                     instance_name=ctr.attrs['instance_name'],
                     shape_data=ctr.attrs['name'],
-                    group=int(ctr.attrs['group']),
+                    collision_group=int(ctr.attrs['group']),
                     relative_translation=floatv(ctr.attrs['translation']),
                     relative_orientation=floatv(ctr.attrs['orientation']))
                               for ctr in input_ctrs]
