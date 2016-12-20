@@ -25,6 +25,7 @@
 
 #include <map>
 
+#include <NSLawMatrix.hpp>
 #include <SpaceFilter.hpp>
 #include "DiskMovingPlanR.hpp"
 #include <boost/numeric/ublas/symmetric.hpp>
@@ -36,11 +37,6 @@ class FMatrix  : public ublas::matrix < FTime, ublas::column_major,
                                          std::vector<FTime> >
 {
   ACCEPT_SERIALIZATION(FMatrix);
-};
-
-class NSLawMatrix : public ublas::symmetric_matrix < SP::NonSmoothLaw >
-{
-  ACCEPT_SERIALIZATION(NSLawMatrix);
 };
 
 class Hashed : public std11::enable_shared_from_this<Hashed>

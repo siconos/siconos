@@ -750,7 +750,7 @@ SICONOS_IO_REGISTER_WITH_BASES(CircularDS,(LagrangianDS),
   (radius))
 SICONOS_IO_REGISTER_WITH_BASES(SiconosCollisionManager,(InteractionManager),
 )
-SICONOS_IO_REGISTER(InteractionManager::NSLawMatrix,)
+SICONOS_IO_REGISTER(NSLawMatrix,)
 SICONOS_IO_REGISTER_WITH_BASES(BodyDS,(NewtonEulerDS),
   (_contactors)
   (_useContactorInertia))
@@ -799,8 +799,6 @@ SICONOS_IO_REGISTER_WITH_BASES(DiskMovingPlanR,(LagrangianRheonomousR),
   (_r)
   (_sqrA2pB2)
   (_time))
-SICONOS_IO_REGISTER(NSLawMatrix,
-)
 SICONOS_IO_REGISTER(Hashed,
   (body)
   (i)
@@ -1022,7 +1020,7 @@ void siconos_io_register_generated(Archive& ar)
   ar.register_type(static_cast<LagrangianDS*>(NULL));
   ar.register_type(static_cast<TimeDiscretisationEvent*>(NULL));
   ar.register_type(static_cast<InteractionManager*>(NULL));
-//  ar.register_type(static_cast<InteractionManager::NSLawMatrix*>(NULL));
+  ar.register_type(static_cast<NSLawMatrix*>(NULL));
   ar.register_type(static_cast<TimeSteppingCombinedProjection*>(NULL));
   ar.register_type(static_cast<NonSmoothEvent*>(NULL));
   ar.register_type(static_cast<QP*>(NULL));
@@ -1074,7 +1072,6 @@ void siconos_io_register_generated(Archive& ar)
   ar.register_type(static_cast<PrismaticJointR*>(NULL));
   ar.register_type(static_cast<SiconosContactor*>(NULL));
   ar.register_type(static_cast<DiskMovingPlanR*>(NULL));
-  ar.register_type(static_cast<NSLawMatrix*>(NULL));
   ar.register_type(static_cast<Hashed*>(NULL));
   ar.register_type(static_cast<SpaceFilter*>(NULL));
   ar.register_type(static_cast<SiconosContactorSet*>(NULL));

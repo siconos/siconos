@@ -18,7 +18,7 @@ SICONOS_IO_REGISTER_WITH_BASES(BlockMatrix,(SiconosMatrix),
   (_tabRow))
 SICONOS_IO_REGISTER(SiconosMatrix,
   (_num))
-  SICONOS_IO_REGISTER(InteractionManager::NSLawMatrix,)
+  SICONOS_IO_REGISTER(NSLawMatrix,)
 SICONOS_IO_REGISTER(SiconosMemory,
   (_indx)
   (_nbVectorsInMemory)
@@ -653,7 +653,7 @@ void siconos_io_register_generated(Archive& ar)
   ar.register_type(static_cast<LagrangianDS*>(NULL));
   ar.register_type(static_cast<TimeDiscretisationEvent*>(NULL));
   ar.register_type(static_cast<InteractionManager*>(NULL));
-//  ar.register_type(static_cast<InteractionManager::NSLawMatrix*>(NULL));
+  ar.register_type(static_cast<NSLawMatrix*>(NULL));
   ar.register_type(static_cast<TimeSteppingCombinedProjection*>(NULL));
   ar.register_type(static_cast<NonSmoothEvent*>(NULL));
   ar.register_type(static_cast<QP*>(NULL));

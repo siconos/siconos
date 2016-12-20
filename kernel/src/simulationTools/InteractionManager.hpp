@@ -28,8 +28,7 @@
 #include "Model.hpp"
 #include "DynamicalSystem.hpp"
 #include "SiconosVisitor.hpp"
-
-#include <boost/numeric/ublas/symmetric.hpp>
+#include "NSLawMatrix.hpp"
 
 class InteractionManager
 {
@@ -39,21 +38,6 @@ public:
 
   /** Called by Simulation prior to advancing to the next Event */
   virtual void updateInteractions(SP::Simulation simulation) {}
-
-  class NSLawMatrix : public ublas::symmetric_matrix < SP::NonSmoothLaw >
-  {
-  private:
-    NSLawMatrix() : ublas::symmetric_matrix < SP::NonSmoothLaw >() {};
-
-
-  protected:
-
-    ACCEPT_SERIALIZATION(InteractionManager::NSLawMatrix);
-
-  public:
-    NSLawMatrix(NSLawMatrix::size_type i)
-      : ublas::symmetric_matrix < SP::NonSmoothLaw >(i) {}
-  };
 
   /** Specify a non-smooth law to use for a given combination of
    *  interaction groups.
