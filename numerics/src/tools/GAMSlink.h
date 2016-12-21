@@ -388,6 +388,7 @@ static inline int NM_to_GDX(idxHandle_t Xptr, const char* name, const char* desc
     idxDataWriteDenseColMajor(Xptr, 2, M->matrix0);
     break;
   }
+  case NM_SPARSE_BLOCK: /* Perform a conversion to sparse storage */
   case NM_SPARSE:
   {
     CSparseMatrix* cs = NM_csc(M);
@@ -416,7 +417,7 @@ static inline int NM_to_GDX(idxHandle_t Xptr, const char* name, const char* desc
   }
   default:
   {
-    printf("NM_to_GDX :: unsupported matrix storage");
+    printf("NM_to_GDX :: unsupported matrix storage\n");
     exit(EXIT_FAILURE);
   }
   }
