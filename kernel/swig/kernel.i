@@ -217,8 +217,6 @@ namespace std
 
 %include "SimulationTypeDef.hpp"
 
-%include "SiconosSet.hpp"
-
 %import "boost/config.hpp"
 %import "boost/graph/graph_utility.hpp"
 
