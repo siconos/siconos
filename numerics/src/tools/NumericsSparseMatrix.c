@@ -1,3 +1,21 @@
+/* Siconos is a program dedicated to modeling, simulation and control
+ * of non smooth dynamical systems.
+ *
+ * Copyright 2016 INRIA.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
@@ -104,6 +122,8 @@ NumericsSparseLinearSolverParams* newNumericsSparseLinearSolverParams(void)
   p->solver = NS_MUMPS;
 #elif defined(WITH_UMFPACK)
   p->solver = NS_UMFPACK;
+#elif defined(WITH_SUPERLU)
+  p->solver = NS_SUPERLU;
 #else
   p->solver = NS_CS_LUSOL;
 #endif
@@ -202,4 +222,26 @@ void NM_sparse_free(void *p)
   cs_sparse_free(cs_lu_A);
 
   ptr->solver_data = NULL;
+}
+
+size_t NM_sparse_nnz(const CSparseMatrix* const A)
+{
+  if (A->nz >= 0)
+  {
+    return (size_t)A->nz;
   }
+  else if (A->nz == NS_CS_CSC)
+  {
+    return (size_t)A->p[A->n];
+  }
+  else if (A->nz == NS_CS_CSR)
+  {
+    return (size_t)A->p[A->m];
+  }
+  else
+  {
+    fprintf(stderr, "NM_sparse_nnz :: unsupported nz number %d", A->nz);
+    exit(EXIT_FAILURE);
+  }
+}
+
