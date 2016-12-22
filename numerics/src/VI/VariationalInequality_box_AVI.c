@@ -29,7 +29,7 @@ typedef struct {
   RelayProblem* relay_pb;
 } vi_box_AVI_LSA_data;
 
-static void vi_compute_decent_dir_by_avi(void* problem, double* z, double* F, double* descent_dir, SolverOptions* options)
+static int vi_compute_decent_dir_by_avi(void* problem, double* z, double* F, double* descent_dir, SolverOptions* options)
 {
   VariationalInequality* vi_pb = (VariationalInequality*) problem;
   int n = vi_pb->size;
@@ -47,6 +47,8 @@ static void vi_compute_decent_dir_by_avi(void* problem, double* z, double* F, do
   relay_avi_caoferris(relay_pb, descent_dir, F, &local_info, options->internalSolvers);
 
   cblas_daxpy(n, -1.0, z, 1, descent_dir, 1);
+
+  return local_info;
 
 //  avi_caoferris_stage3(avi_options, x, s_vec, problem->size, A,
 //  options->internalSolver);

@@ -223,7 +223,7 @@ void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverO
      */
     if (functions->compute_descent_direction)
     {
-      functions->compute_descent_direction(data, z, F, workV1, options);
+      info_dir_search = functions->compute_descent_direction(data, z, F, workV1, options);
     }
     else
     {
