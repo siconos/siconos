@@ -76,9 +76,9 @@ void NewMarkAlphaOSI::initW(SP::DynamicalSystem ds)
   if (_dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).W)
     RuntimeException::selfThrow("NewMarkAlphaOSI::initW(t,ds) - W(ds) is already in the map and has been initialized.");
 
-  SP::SimpleMatrix W = _dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).W;
-  W.reset(new SimpleMatrix(ds->dimension(), ds->dimension())); // allocate memory
-  computeW(ds,*W);
+  _dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).W.reset(
+    new SimpleMatrix(ds->dimension(), ds->dimension())); // allocate memory
+  computeW(ds,*_dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).W);
 }
 
 
@@ -389,6 +389,7 @@ void NewMarkAlphaOSI::initialize(Model& m)
     // W initialization
     initW(ds);
     // allocate memory for work space for Newton iteration procedure
+    assert(_dynamicalSystemsGraph->properties(*dsi).W && "W is NULL");
     ds->allocateWorkVector(DynamicalSystem::local_buffer,   _dynamicalSystemsGraph->properties(*dsi).W->size(0));
     //Allocate the memory to stock the acceleration-like variable
     dsType = Type::value(*ds); // Its type
