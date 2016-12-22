@@ -36,5 +36,3 @@
 #include "SSLH.hpp"
 
 #include "Tools.hpp"
-#include "Cmp.hpp"
-#include "SiconosSet.hpp"
