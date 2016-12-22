@@ -659,14 +659,6 @@ public:
     return _nslaw;
   }
 
-  /** function used to sort Interaction in SiconosSet<SP::Interaction>
-   *  \return a double* (warning: must be const, despite intel compilers warning, because of SiconosSet Cmp function arguments)
-   */
-  inline double* getSort() const
-  {
-    return (double*)this;
-  }
-
   // --- OTHER FUNCTIONS ---
 
   /** set interaction 'ds-dimension', i.e. sum of all sizes of the dynamical systems linked

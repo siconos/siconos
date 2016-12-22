@@ -288,14 +288,6 @@ public:
     return old_count;
   }
 
-  /** function used to sort DynamicalSystem in SiconosSet<SP::DynamicalSystem>
-   *  \return an int (warning: must be const, despite intel compilers warning, because of SiconosSet Cmp function arguments)
-   */
-  inline int getSort() const
-  {
-    return _number;
-  }
-
   // --- n ---
 
   /** allow to get n, the dimension, i.e. the size of the state x of the DynamicalSystem
