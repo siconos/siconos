@@ -502,9 +502,9 @@ class ShapeCollection():
         return shape_url
 
     def get(self, shape_name, shape_class=None, face_class=None,
-            edge_class=None):
+            edge_class=None, new_instance=False):
 
-        if not shape_name in self._shapes:
+        if new_instance or not shape_name in self._shapes:
 
             # load shape if it is an existing file
             if not isinstance(self.url(shape_name), str) and \
@@ -534,7 +534,7 @@ class ShapeCollection():
                                      tmpf[1], self._collision_margin, scale=scale)
                     else:
                         assert False
-                elif self.attributes(shape_name)['type'] in['step']:
+                elif self.attributes(shape_name)['type'] in['step', 'stp']:
                     from OCC.STEPControl import STEPControl_Reader
                     from OCC.BRep import BRep_Builder
                     from OCC.TopoDS import TopoDS_Compound
@@ -778,6 +778,7 @@ class Hdf5():
         self._initializing = True
         self._use_compression = use_compression
         self._should_output_domains = output_domains
+        self._contact_index_set = 1
 
     def __enter__(self):
         if self._set_external_forces is None:
@@ -957,7 +958,7 @@ class Hdf5():
                 reference_shape = occ.OccContactShape(
                     self._shape.get(contactor.data,
                                     shape_class, face_class,
-                                    edge_class))
+                                    edge_class, new_instance=True))
                 self._keep.append(reference_shape)
 
                 if hasattr(contactor, 'contact_type'):
@@ -1611,11 +1612,13 @@ class Hdf5():
     def outputContactForces(self):
         """
         Outputs contact forces
+        _contact_index_set default value is 1.
         """
         if self._model.nonSmoothDynamicalSystem().\
                 topology().indexSetsSize() > 1:
             time = self.currentTime()
-            contact_points = self._io.contactPoints(self._model)
+            contact_points = self._io.contactPoints(self._model,
+                                                    self._contact_index_set)
 
             if contact_points is not None:
 
@@ -2068,7 +2071,7 @@ class Hdf5():
             h=0.0005,
             multipoints_iterations=True,
             theta=0.50001,
-            Newton_options = Kernel.SICONOS_TS_NONLINEAR,
+            Newton_options=Kernel.SICONOS_TS_NONLINEAR,
             Newton_max_iter=20,
             set_external_forces=None,
             solver=Numerics.SICONOS_FRICTION_3D_NSGS,
@@ -2078,7 +2081,9 @@ class Hdf5():
             violation_verbose=False,
             output_frequency=None,
             friction_contact_trace=False,
-            friction_contact_trace_params=None):
+            friction_contact_trace_params=None,
+            contact_index_set=1,
+            osi=Kernel.MoreauJeanOSI):
         """
         Run a simulation from inputs in hdf5 file.
         parameters are:
@@ -2104,11 +2109,11 @@ class Hdf5():
           tolerance : friction contact solver tolerance
           numerics_verbose : set verbose mode in numerics
           output_frequency :
-
+          contact_index_set : index set from which contact points informations are retrieved.
         """
         print ('load siconos module ...')
         from siconos.kernel import \
-            Model, NonSmoothDynamicalSystem, OneStepNSProblem, MoreauJeanOSI,\
+            Model, NonSmoothDynamicalSystem, OneStepNSProblem,\
             TimeDiscretisation, GenericMechanical, FrictionContact,\
             NewtonImpactFrictionNSL
 
@@ -2157,7 +2162,7 @@ class Hdf5():
         # (1) OneStepIntegrators
         joints=list(self.joints())
 
-        self._osi=MoreauJeanOSI(theta)
+        self._osi=osi(theta)
 
         # (2) Time discretisation --
         timedisc=TimeDiscretisation(t0, h)
@@ -2171,6 +2176,7 @@ class Hdf5():
         else:
             osnspb=FrictionContactTrace(3, solver,friction_contact_trace_params,model)
 
+        self._contact_index_set = contact_index_set
 
         osnspb.numericsSolverOptions().iparam[0]=itermax
         # -- full error evaluation
