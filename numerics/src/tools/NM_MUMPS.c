@@ -120,30 +120,37 @@ MPI_Comm NM_MPI_com(MPI_Comm m)
 
 #endif /* WITH_MPI */
 
-int* NM_MUMPS_irn(NumericsMatrix* A)
+MUMPS_INT* NM_MUMPS_irn(NumericsMatrix* A)
 {
 
   if (NM_sparse(A)->triplet)
   {
     CSparseMatrix* triplet = NM_sparse(A)->triplet;
     csi nz = triplet->nz;
+    assert(nz > 0);
 
-    int* iWork = NM_iWork(A, (int) (2*nz) + 1);
+    /* TODO: do not allocate when sizeof(MUMPS_INT) == sizeof(csi),
+     * just do triplet->p[k]++*/
+    MUMPS_INT* iWork = (MUMPS_INT*)NM_iWork(A, (size_t)(2*nz) + 1, sizeof(MUMPS_INT));
 
-    for (int k=0; k<nz; ++k)
+    for (size_t k=0 ; k < (size_t)nz; ++k)
     {
-      iWork [k + nz] = (int) (triplet->p [k]) + 1;
-      iWork [k]      = (int) (triplet->i [k]) + 1;
+      iWork [k + nz] = (MUMPS_INT) (triplet->p [k]) + 1;
+      iWork [k]      = (MUMPS_INT) (triplet->i [k]) + 1;
     }
 
-    iWork [2*nz] = (int) nz;
+    iWork [2*nz] = (MUMPS_INT) nz;
   }
   else
   {
+    fprintf(stderr, "NM_MUMPS_irn :: xhub doubt this code is correct");
+    exit(EXIT_FAILURE);
+
+#if 0
     CSparseMatrix* csc = NM_sparse(A)->csc;
     csi nzmax = csc->nzmax ;
 
-    int* iWork = NM_iWork(A, (int) (2*nzmax) + 1);
+    MUMPS_INT* iWork = NM_iWork(A, (int) (2*nzmax) + 1);
 
     csi n = csc->n ;
     csi nz = 0;
@@ -156,28 +163,33 @@ int* NM_MUMPS_irn(NumericsMatrix* A)
       {
         assert (csc->x [p] != 0.);
         nz++;
-        iWork [p + nzmax] = (int) j;
-        iWork [p]         = (int) csci [p];
+        iWork [p + nzmax] = (MUMPS_INT) j;
+        iWork [p]         = (MUMPS_INT) csci [p];
       }
     }
 
-    iWork [2*nzmax] = (int) nz;
+    iWork [2*nzmax] = (MUMPS_INT) nz;
+#endif
   }
 
-  return NM_iWork(A, 0);
+  return (MUMPS_INT*)NM_iWork(A, 0, 0);
 }
 
 
-int* NM_MUMPS_jcn(NumericsMatrix* A)
+MUMPS_INT* NM_MUMPS_jcn(NumericsMatrix* A)
 {
   if (NM_sparse(A)->triplet)
   {
-    return NM_iWork(A, 0) + NM_sparse(A)->triplet->nz;
+    return &((MUMPS_INT*)NM_iWork(A, 0, 0))[NM_sparse(A)->triplet->nz];
   }
   else
   {
+    fprintf(stderr, "NM_MUMPS_irn :: xhub doubt this code is correct");
+    exit(EXIT_FAILURE);
+#if 0
     csi nzmax = NM_csc(A)->nzmax;
-    return NM_iWork(A, 0) + nzmax;
+    return NM_iWork(A, 0, 0) + nzmax;
+#endif
   }
 }
 
@@ -259,22 +271,26 @@ DMUMPS_STRUC_C* NM_MUMPS_id(NumericsMatrix* A)
     //mumps_id->CNTL(5) = ...;
 
     mumps_id = (DMUMPS_STRUC_C*) params->solver_data;
-    mumps_id->n = (int) NM_triplet(A)->n;
+    mumps_id->n = (MUMPS_INT) NM_triplet(A)->n;
     mumps_id->irn = NM_MUMPS_irn(A);
     mumps_id->jcn = NM_MUMPS_jcn(A);
 
-    int nz;
+    MUMPS_INT nz;
     if (NM_sparse(A)->triplet)
     {
-      nz = (int) NM_sparse(A)->triplet->nz;
+      nz = (MUMPS_INT) NM_sparse(A)->triplet->nz;
       mumps_id->nz = nz;
       mumps_id->a = NM_sparse(A)->triplet->x;
     }
     else
     {
+      fprintf(stderr, "NM_MUMPS_irn :: xhub doubt this code is correct");
+      exit(EXIT_FAILURE);
+#if 0
       nz = NM_linearSolverParams(A)->iWork[2 * NM_csc(A)->nzmax];
       mumps_id->nz = nz;
       mumps_id->a = NM_sparse(A)->csc->x;
+#endif
     }
   }
   else

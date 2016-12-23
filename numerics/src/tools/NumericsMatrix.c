@@ -1859,29 +1859,30 @@ NumericsMatrixInternalData* NM_internalData(NumericsMatrix* A)
   return A->internalData;
 }
 
-int* NM_iWork(NumericsMatrix* A, int size)
+void* NM_iWork(NumericsMatrix* A, size_t size, size_t sizeof_elt)
 {
+  size_t bit_size = size * sizeof_elt;
   if (!NM_internalData(A)->iWork)
   {
     assert(A->internalData);
 
     assert(A->internalData->iWorkSize == 0);
-    A->internalData->iWork = (int *) malloc(size * sizeof(int));
-    A->internalData->iWorkSize = size;
+    A->internalData->iWork = malloc(bit_size);
+    A->internalData->iWorkSize = bit_size;
   }
   else
   {
     assert(A->internalData);
 
-    if (size > A->internalData->iWorkSize)
+    if (bit_size > A->internalData->iWorkSize)
     {
-      A->internalData->iWork = (int *) realloc(A->internalData->iWork, size * sizeof(int));
-      A->internalData->iWorkSize = size;
+      A->internalData->iWork = realloc(A->internalData->iWork, bit_size);
+      A->internalData->iWorkSize = bit_size;
     }
   }
 
   assert(A->internalData->iWork);
-  assert(A->internalData->iWorkSize >= size);
+  assert(A->internalData->iWorkSize >= bit_size);
 
   return A->internalData->iWork;
 }
@@ -1931,7 +1932,7 @@ int NM_gesv_expert(NumericsMatrix* A, double *b, unsigned keep)
     {
 
       double* wkspace = NM_dWork(A, A->size0*A->size1);
-      int* ipiv = NM_iWork(A, A->size0);
+      lapack_int* ipiv = (lapack_int*)NM_iWork(A, A->size0, sizeof(lapack_int));
       DEBUG_PRINTF("iwork and dwork are intialized with size %i and %i\n",A->size0*A->size1,A->size0 );
 
       if (!NM_internalData(A)->isLUfactorized)
@@ -1979,7 +1980,7 @@ int NM_gesv_expert(NumericsMatrix* A, double *b, unsigned keep)
       {
         mat = A->matrix0;
       }
-      DGESV(A->size0, 1, mat, A->size0, NM_iWork(A, A->size0), b,
+      DGESV(A->size0, 1, mat, A->size0, (lapack_int*)NM_iWork(A, A->size0, sizeof(lapack_int)), b,
           A->size0, &info);
     }
     break;

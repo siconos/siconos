@@ -44,6 +44,10 @@ extern "C"
 
 #include <dmumps_c.h>
 
+#ifndef MUMPS_INT
+#define MUMPS_INT int
+#endif
+
 #define JOB_INIT -1
 #define JOB_END -2
 #define USE_COMM_WORLD -987654
@@ -59,8 +63,8 @@ extern "C"
   MPI_Comm NM_MPI_com(MPI_Comm m);
 #endif /*  HAVE_MPI */
 
-  int* NM_MUMPS_irn(NumericsMatrix* A);
-  int* NM_MUMPS_jcn(NumericsMatrix* A);
+  MUMPS_INT* NM_MUMPS_irn(NumericsMatrix* A);
+  MUMPS_INT* NM_MUMPS_jcn(NumericsMatrix* A);
 
   /** Get (and create if necessary) the working data for MUMPS
    * \param A the matrix to be factorized

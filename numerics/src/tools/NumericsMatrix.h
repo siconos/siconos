@@ -126,9 +126,9 @@ The following linear algebra operation are supported:
  */
 typedef struct
 {
-  int iWorkSize; /**< size of iWork */
-  int *iWork; /**< integer workspace */
-  int dWorkSize; /**< size of dWork */
+  size_t iWorkSize; /**< size of iWork */
+  void *iWork; /**< integer workspace */
+  size_t dWorkSize; /**< size of dWork */
   double *dWork; /**< double workspace */
   bool isLUfactorized; /**<  true if the matrix has already been LU-factorized */
 } NumericsMatrixInternalData;
@@ -574,10 +574,11 @@ extern "C"
 
   /** Integer work vector initialization, if needed.
    * \param[in,out] A pointer on a NumericsMatrix.
-   * \param[in] size the size of needed space.
+   * \param[in] size number of element to allocate
+   * \param[in] sizeof_elt of an element in bytes (result of sizeof for instance)
    * \return pointer on A->iWork allocated space of with the right size
    */
-  int* NM_iWork(NumericsMatrix *A, int size);
+  void* NM_iWork(NumericsMatrix *A, size_t size, size_t sizeof_elt);
 
   /** Double workspace initialization, if needed.
    * \param[in,out] A pointer on a NumericsMatrix.
