@@ -64,6 +64,11 @@ if(WITH_UMFPACK)
   compile_with(Umfpack REQUIRED)
 endif()
 
+# --- SUPERLU ---
+if(WITH_SUPERLU)
+  compile_with(SuperLU REQUIRED)
+endif()
+
 # --- Fclib ---
 IF(WITH_FCLIB)
   COMPILE_WITH(FCLIB REQUIRED)   
@@ -84,6 +89,7 @@ IF(WITH_BOOST_LOG)
   compile_with(Boost 1.47 COMPONENTS log  REQUIRED)
   APPEND_CXX_FLAGS("-DBOOST_LOG_DYN_LINK")
 ENDIF()
+
 # --- Bullet ---
 IF(WITH_BULLET)
   COMPILE_WITH(Bullet REQUIRED)

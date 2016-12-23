@@ -566,6 +566,12 @@ extern "C"
    */
   NumericsSparseLinearSolverParams* NM_linearSolverParams(NumericsMatrix* A);
 
+  /** Set the linear solver
+   * \param A the matrix
+   * \param solver_id the solver
+   */
+  void NM_setSparseSolver(NumericsMatrix* A,unsigned solver_id);
+
   /** Get Matrix internal data with initialization if needed.
    * \param[in,out] A a NumericsMatrix.
    * \return a pointer on internal data.

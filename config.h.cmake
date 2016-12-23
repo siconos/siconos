@@ -13,6 +13,7 @@
 #cmakedefine HAVE_MPI
 #cmakedefine WITH_MUMPS
 #cmakedefine WITH_UMFPACK
+#cmakedefine WITH_SUPERLU
 #cmakedefine WITH_TIMERS
 #cmakedefine DUMP_PROBLEM
 #cmakedefine WITH_FCLIB

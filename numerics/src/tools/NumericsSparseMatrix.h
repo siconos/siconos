@@ -34,7 +34,13 @@ extern "C"
 #endif
 
 
-  typedef enum { NS_CS_LUSOL, NS_MUMPS, NS_UMFPACK, NS_PARDISO } NumericsSparseLinearSolver;
+  /** \enum NumericsSparseLinearSolver NumericsSparseMatrix.h
+   * id for linear algebra solvers */
+  typedef enum { NS_CS_LUSOL, NS_MUMPS, NS_UMFPACK, NS_PARDISO, NS_SUPERLU } NumericsSparseLinearSolver;
+
+  /** \enum NumericsSparseTypesNZ
+   * value of nz for some matrix storage type */
+  typedef enum { NS_CS_CSC = -1, NS_CS_CSR = -2 } NumericsSparseTypesNZ;
 
   /** \struct NumericsSparseLinearSolverParams NumericsSparseMatrix.h
    * solver-specific parameters*/
@@ -133,11 +139,18 @@ extern "C"
     return p->dWork;
   }
 
+  /** get the number of non-zero (nnz) in a sparse matrix
+   * \param A the matrix
+   * \return the number of non-zero elements in the matrix
+   */
+  size_t NM_sparse_nnz(const CSparseMatrix* const A);
+
   /** Free allocated space for NumericsSparseLinearSolverParams.
    * \param p a NumericsSparseLinearSolverParams
    * \return NULL on success
    */
   NumericsSparseLinearSolverParams* freeNumericsSparseLinearSolverParams(NumericsSparseLinearSolverParams* p);
+
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif

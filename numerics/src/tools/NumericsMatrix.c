@@ -2113,6 +2113,90 @@ int NM_gesv_expert(NumericsMatrix* A, double *b, unsigned keep)
     }
 
 #endif /* WITH_UMFPACK */
+
+#ifdef WITH_SUPERLU
+    case NS_SUPERLU:
+    {
+      if (verbose >= 2)
+      {
+        printf("NM_gesv: using SuperLU\n" );
+      }
+
+      NM_SuperLU_WS* superlu_ws = NM_SuperLU_factorize(A);
+
+      if (!superlu_ws)
+      {
+        if (verbose > 1)
+          fprintf(stderr, "NM_gesv: cannot factorize the matrix with SuperLU\n");
+
+        NM_SuperLU_free(p);
+        return -1;
+      }
+
+      info = NM_SuperLU_solve(A, b, superlu_ws);
+
+      if (info)
+      {
+        fprintf(stderr, "NM_gesv: cannot solve the system with SuperLU\n");
+//        SuperLU_FN(report_status) (superlu_ws->control, (csi)info);
+      }
+
+      if (keep != NM_KEEP_FACTORS)
+      {
+        NM_SuperLU_free(p);
+      }
+      else if (!p->solver_free_hook)
+      {
+        p->solver_free_hook = &NM_SuperLU_free;
+      }
+
+      break;
+    }
+
+#endif /* WITH_SUPERLU */
+#ifdef WITH_PARDISO
+    case NS_PARDISO:
+    {
+      if (verbose >= 2)
+      {
+        printf("NM_gesv: using PARDISO\n" );
+      }
+
+      NM_PARDISO_WS* pardiso_ws = NM_PARDISO_factorize(A);
+
+      if (!pardiso_ws)
+      {
+        if (verbose > 1)
+          fprintf(stderr, "NM_gesv: cannot factorize the matrix with PARDISO\n");
+
+        NM_PARDISO_free(p);
+        return -1;
+      }
+
+      info = NM_PARDISO_solve(A);
+
+      if (info)
+      {
+        PARDISO_FN(report_status) (pardiso_ws->control, (csi)info);
+      }
+      else
+      {
+        cblas_dcopy(C->n, pardiso_ws->x, 1, b, 1);
+      }
+
+      if (keep != NM_KEEP_FACTORS)
+      {
+        NM_PARDISO_free(p);
+      }
+      else if (!p->solver_free_hook)
+      {
+        p->solver_free_hook = &NM_PARDISO_free;
+      }
+
+      break;
+    }
+
+#endif /* WITH_PARDISO */
     default:
     {
       fprintf(stderr, "NM_gesv: unknown sparse linearsolver : %d\n", p->solver);
@@ -2295,4 +2379,9 @@ void NM_csr_alloc(NumericsMatrix* A, csi nzmax)
 void NM_triplet_alloc(NumericsMatrix* A, csi nzmax)
 {
   NM_sparse(A)->triplet = cs_spalloc(A->size0, A->size1, nzmax, 1, 1);
+}
+
+void NM_setSparseSolver(NumericsMatrix* A, unsigned solver_id)
+{
+  NM_linearSolverParams(A)->solver = solver_id;
 }

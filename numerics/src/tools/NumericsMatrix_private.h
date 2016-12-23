@@ -131,6 +131,55 @@ typedef struct {
 
 #endif
 
+#ifdef WITH_SUPERLU
+#include <slu_ddefs.h>
+
+/** \struct NM_SuperLU_WS NumericsMatrix_private.h
+ * Structure for holding the data SuperLU needs
+ */
+typedef struct {
+  SuperMatrix* L;
+  SuperMatrix* U;
+  int_t* perm_r;
+  int_t* perm_c;
+  superlu_options_t* options;
+#ifdef SUPERLU_MAJOR_VERSION
+  GlobalLU_t* Glu;
+#endif
+} NM_SuperLU_WS;
+
+  /** Get (and create if necessary) the working data for SuperLU
+   * \param A the matrix to be factorized
+   */
+  NM_SuperLU_WS* NM_SuperLU_ws(NumericsMatrix* A);
+
+  /** Free the working data for SuperLU
+   * \param p a NumericsSparseLinearSolverParams object holding the data
+   */
+  void NM_SuperLU_free(void* p);
+
+  /** Display extra information about the solve
+   * \param superlu_ws the working space of SuperLU
+   */
+  void NM_SuperLU_extra_display(NM_SuperLU_WS* superlu_ws);
+
+  /** Factorize a matrix using SuperLU
+   * \param A the matrix to factorize
+   * \return the workspace containing the factorized form and other infos
+   */
+  NM_SuperLU_WS* NM_SuperLU_factorize(NumericsMatrix* A);
+
+  /** Solve Ax = b using SuperLU
+   * \param A the matrix
+   * \param[in,out] b on input the rhs, on output the solution
+   * \param superlu_ws the workspace for SuperLU
+   * \return the information code
+   */
+  int NM_SuperLU_solve(NumericsMatrix* A, double* b, NM_SuperLU_WS* superlu_ws);
+
+
+#endif
+
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif
