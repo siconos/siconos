@@ -83,6 +83,9 @@ extern "C"
 #include "SiconosLapacke.h"
 #endif
 
+#ifndef lapack_int
+#define lapack_int int
+#endif
 
 /*
   DGESV - The routine solves the system of linear equations for X:
@@ -92,35 +95,35 @@ extern "C"
   The columns of matrix B are individual right-hand sides.
   The columns of X are the corresponding solutions.
 */
-  static inline void DGESV(int N, int NRHS, double* A, int LDA, int* IPIV, double* B, int LDB, int* INFO)
+  static inline void DGESV(lapack_int N, lapack_int NRHS, double* A, lapack_int LDA, lapack_int* IPIV, double* B, lapack_int LDB, lapack_int* INFO)
   {
-    int C_N = N;
-    int C_NRHS = NRHS;
-    int C_LDA = LDA;
-    int C_LDB = LDB;
-    int C_INFO = 0;
+    lapack_int C_N = N;
+    lapack_int C_NRHS = NRHS;
+    lapack_int C_LDA = LDA;
+    lapack_int C_LDB = LDB;
+    lapack_int C_INFO = 0;
     WRAP_DGESV(LAPACK_NAME(dgesv), INTEGER(C_N), INTEGER(C_NRHS), A, INTEGER(C_LDA), INTEGERP(IPIV), B, INTEGER(C_LDB), INTEGER(C_INFO));
     *INFO = C_INFO;
   }
 
 /* DGETRF - LU factorization */
-  static inline void DGETRF(int M, int N, double* A, int LDA, int* IPIV, int* INFO)
+  static inline void DGETRF(lapack_int M, lapack_int N, double* A, lapack_int LDA, lapack_int* IPIV, lapack_int* INFO)
   {
-    int C_M = M;
-    int C_N = N;
-    int C_LDA = LDA;
-    int C_INFO = 0;
+    lapack_int C_M = M;
+    lapack_int C_N = N;
+    lapack_int C_LDA = LDA;
+    lapack_int C_INFO = 0;
     WRAP_DGETRF(LAPACK_NAME(dgetrf), INTEGER(C_M), INTEGER(C_N), A, INTEGER(C_LDA), INTEGERP(IPIV), INTEGER(C_INFO));
     *INFO = C_INFO;
   }
 
 /* DGETRI - matrix inversion
  */
-  static inline void DGETRI(int N, double* A, int LDA, int* IPIV, int* INFO)
+  static inline void DGETRI(lapack_int N, double* A, lapack_int LDA, lapack_int* IPIV, lapack_int* INFO)
   {
-    int C_N = N;
-    int C_LDA = LDA;
-    int C_INFO = 0;
+    lapack_int C_N = N;
+    lapack_int C_LDA = LDA;
+    lapack_int C_INFO = 0;
     WRAP_DGETRI(LAPACK_NAME(dgetri), INTEGER(C_N), A, INTEGER(C_LDA), INTEGERP(IPIV), INTEGER(C_INFO));
     *INFO = C_INFO;
   }
@@ -128,7 +131,7 @@ extern "C"
 
 #if defined(HAS_ATLAS_LAPACK)
 
-  static inline void DGESVD(char JOBU, char JOBVT, int M, int N, double * A, int LDA, double * S, double * U, int LDU, double * VT, int LDVT, double * superb, int* INFO)
+  static inline void DGESVD(char JOBU, char JOBVT, lapack_int M, lapack_int N, double * A, lapack_int LDA, double * S, double * U, lapack_int LDU, double * VT, lapack_int LDVT, double * superb, lapack_int* INFO)
   {
     /* int C_M = M; */
     /* int C_N = N; */
@@ -145,13 +148,13 @@ extern "C"
  *  with a general N-by-N matrix A using the LU factorization computed
  *  by DGETRF.
  */
-  static inline void DGETRS(const enum CBLAS_TRANSPOSE TRANS, int N, int NRHS, double* A, int LDA, int* IPIV, double* B, int LDB, int* INFO)
+  static inline void DGETRS(const enum CBLAS_TRANSPOSE TRANS, lapack_int N, lapack_int NRHS, double* A, lapack_int LDA, lapack_int* IPIV, double* B, lapack_int LDB, lapack_int* INFO)
   {
-    int C_N = N;
-    int C_NRHS = NRHS;
-    int C_LDA = LDA;
-    int C_LDB = LDB;
-    int C_INFO = 0;
+    lapack_int C_N = N;
+    lapack_int C_NRHS = NRHS;
+    lapack_int C_LDA = LDA;
+    lapack_int C_LDB = LDB;
+    lapack_int C_INFO = 0;
     WRAP_DGETRS(LAPACK_NAME(dgetrs), TRANS, INTEGER(C_N), INTEGER(C_NRHS), A, INTEGER(C_LDA), INTEGERP(IPIV), B, INTEGER(C_LDB), INTEGER(C_INFO));
     *INFO = C_INFO;
   }
@@ -162,14 +165,14 @@ extern "C"
   using a QR or LQ factorization of A. 
   The routine assumes that A has full rank.
 */
-  static inline void DGELS(const enum CBLAS_TRANSPOSE trans, int M, int N, int NRHS, double* A, int LDA, double* B, int LDB, int* INFO)
+  static inline void DGELS(const enum CBLAS_TRANSPOSE trans, lapack_int M, lapack_int N, lapack_int NRHS, double* A, lapack_int LDA, double* B, lapack_int LDB, lapack_int* INFO)
   {
-    /* int C_M = M; */
-    /* int C_N = N; */
-    /* int C_NRHS = NRHS; */
-    /* int C_LDA = LDA; */
-    /* int C_LDB = LDB; */
-    /* int C_INFO = 0 =*INFO; */
+    /* lapack_int C_M = M; */
+    /* lapack_int C_N = N; */
+    /* lapack_int C_NRHS = NRHS; */
+    /* lapack_int C_LDA = LDA; */
+    /* lapack_int C_LDB = LDB; */
+    /* lapack_int C_INFO = 0 =*INFO; */
     WRAP_DGELS(LAPACK_NAME(dgels),trans, INTEGER(C_M), INTEGER(C_N), INTEGER(C_NRHS), A, INTEGER(C_LDA), B, INTEGER(C_LDB),INTEGER(C_INFO));
     /* *INFO = C_INFO; */
   }
@@ -177,18 +180,18 @@ extern "C"
   /* DPOTRF - compute the Cholesky factorization of a real symmetric
      positive definite matrix A
   */
-  static inline void DPOTRF(const enum ATLAS_UPLO UPLO, int N, double* A, int LDA, int* INFO)
+  static inline void DPOTRF(const enum ATLAS_UPLO UPLO, lapack_int N, double* A, lapack_int LDA, lapack_int* INFO)
   {
-    int C_N = N;
-    int C_LDA = LDA;
-    int C_INFO = 0;
+    lapack_int C_N = N;
+    lapack_int C_LDA = LDA;
+    lapack_int C_INFO = 0;
     WRAP_DPOTRF(LAPACK_NAME(dpotrf), UPLO, INTEGER(C_N), A , INTEGER(C_LDA), INTEGER(C_INFO));
     *INFO = C_INFO;
   }
 
   /* DTRTRS - solve a triangular system of the form  A * X = B or A**T * X = B,
    */
-  static inline void DTRTRS(const enum ATLAS_UPLO UPLO, const enum CBLAS_TRANSPOSE TRANS, const enum CBLAS_DIAG  DIAG, int N, int NRHS, double* A, int LDA, double* B, int LDB, int* INFO)
+  static inline void DTRTRS(const enum ATLAS_UPLO UPLO, const enum CBLAS_TRANSPOSE TRANS, const enum CBLAS_DIAG  DIAG, lapack_int N, lapack_int NRHS, double* A, lapack_int LDA, double* B, lapack_int LDB, lapack_int* INFO)
   {
     *INFO = clapack_dtrtrs(CblasColMajor, CblasLeft, UPLO, TRANS, DIAG, N, NRHS, A, LDA, B, LDB);
 //  WRAP_DTRTRS(LAPACK_NAME(dtrtrs), CHAR(UPLO), CHAR(TRANS), CHAR(DIAG), INTEGER(C_N), INTEGER(C_NRHS), A, INTEGER(C_LDA), B, INTEGER(C_LDB), INTEGER(C_INFO));
@@ -208,14 +211,14 @@ extern "C"
   - fortran like interface, that needs a properly allocated work.
   - lapacke high-level interface, with work == superb, memory allocation hide from used.
 */
-  static inline void DGESVD(char JOBU, char JOBVT, int M, int N, double * A, int LDA, double * S, double * U, int LDU, double * VT, int LDVT, double * superb, int* INFO)
+  static inline void DGESVD(char JOBU, char JOBVT, lapack_int M, lapack_int N, double * A, lapack_int LDA, double * S, double * U, lapack_int LDU, double * VT, lapack_int LDVT, double * superb, lapack_int* INFO)
   {
-    int C_M = M;
-    int C_N = N;
-    int C_LDA = LDA;
-    int C_LDU = LDU;
-    int C_LDVT = LDVT;
-    int C_INFO = 0;
+    lapack_int C_M = M;
+    lapack_int C_N = N;
+    lapack_int C_LDA = LDA;
+    lapack_int C_LDU = LDU;
+    lapack_int C_LDVT = LDVT;
+    lapack_int C_INFO = 0;
     WRAP_DGESVD(LAPACK_NAME(dgesvd), CHAR(JOBU), CHAR(JOBVT), INTEGER(C_M), INTEGER(C_N), A, INTEGER(C_LDA), S, U, INTEGER(C_LDU), VT, INTEGER(C_LDVT), superb, INTEGER(C_INFO));
     *INFO = C_INFO;
   }
@@ -225,13 +228,13 @@ extern "C"
  *  with a general N-by-N matrix A using the LU factorization computed
  *  by DGETRF.
  */
-  static inline void DGETRS(char TRANS, int N, int NRHS, double* A, int LDA, int* IPIV, double* B, int LDB, int* INFO)
+  static inline void DGETRS(char TRANS, lapack_int N, lapack_int NRHS, double* A, lapack_int LDA, lapack_int* IPIV, double* B, lapack_int LDB, lapack_int* INFO)
   {
-    int C_N = N;
-    int C_NRHS = NRHS;
-    int C_LDA = LDA;
-    int C_LDB = LDB;
-    int C_INFO = 0;
+    lapack_int C_N = N;
+    lapack_int C_NRHS = NRHS;
+    lapack_int C_LDA = LDA;
+    lapack_int C_LDB = LDB;
+    lapack_int C_INFO = 0;
     WRAP_DGETRS(LAPACK_NAME(dgetrs), CHAR(TRANS), INTEGER(C_N), INTEGER(C_NRHS), A, INTEGER(C_LDA), INTEGERP(IPIV), B, INTEGER(C_LDB), INTEGER(C_INFO));
     *INFO = C_INFO;
   }
@@ -243,14 +246,14 @@ extern "C"
   using a QR or LQ factorization of A. 
   The routine assumes that A has full rank.
 */
-  static inline void DGELS(char trans, int M, int N, int NRHS, double* A, int LDA, double* B, int LDB, int* INFO)
+  static inline void DGELS(char trans, lapack_int M, lapack_int N, lapack_int NRHS, double* A, lapack_int LDA, double* B, lapack_int LDB, lapack_int* INFO)
   {
-    int C_M = M;
-    int C_N = N;
-    int C_NRHS = NRHS;
-    int C_LDA = LDA;
-    int C_LDB = LDB;
-    int C_INFO = 0;
+    lapack_int C_M = M;
+    lapack_int C_N = N;
+    lapack_int C_NRHS = NRHS;
+    lapack_int C_LDA = LDA;
+    lapack_int C_LDB = LDB;
+    lapack_int C_INFO = 0;
     WRAP_DGELS(LAPACK_NAME(dgels),CHAR(trans), INTEGER(C_M), INTEGER(C_N), INTEGER(C_NRHS), A, INTEGER(C_LDA), B, INTEGER(C_LDB),INTEGER(C_INFO));
     *INFO = C_INFO;
   }
@@ -258,24 +261,24 @@ extern "C"
   /* DPOTRF - compute the Cholesky factorization of a real symmetric
      positive definite matrix A
   */
-  static inline void DPOTRF(char UPLO, int N, double* A, int LDA, int* INFO)
+  static inline void DPOTRF(char UPLO, lapack_int N, double* A, lapack_int LDA, lapack_int* INFO)
   {
-    int C_N = N;
-    int C_LDA = LDA;
-    int C_INFO = 0;
+    lapack_int C_N = N;
+    lapack_int C_LDA = LDA;
+    lapack_int C_INFO = 0;
     WRAP_DPOTRF(LAPACK_NAME(dpotrf), CHAR(UPLO), INTEGER(C_N), A , INTEGER(C_LDA), INTEGER(C_INFO));
     *INFO = C_INFO;
   }
 
   /* DTRTRS - solve a triangular system of the form  A * X = B or A**T * X = B,
    */
-  static inline void DTRTRS(char UPLO, char TRANS, char DIAG, int N, int NRHS, double* A, int LDA, double* B, int LDB, int* INFO)
+  static inline void DTRTRS(char UPLO, char TRANS, char DIAG, lapack_int N, lapack_int NRHS, double* A, lapack_int LDA, double* B, lapack_int LDB, lapack_int* INFO)
   {
-    int C_N = N;
-    int C_NRHS = NRHS;
-    int C_LDA = LDA;
-    int C_LDB = LDB;
-    int C_INFO = 0;
+    lapack_int C_N = N;
+    lapack_int C_NRHS = NRHS;
+    lapack_int C_LDA = LDA;
+    lapack_int C_LDB = LDB;
+    lapack_int C_INFO = 0;
     WRAP_DTRTRS(LAPACK_NAME(dtrtrs), CHAR(UPLO), CHAR(TRANS), CHAR(DIAG), INTEGER(C_N), INTEGER(C_NRHS), A, INTEGER(C_LDA), B, INTEGER(C_LDB), INTEGER(C_INFO));
     *INFO = C_INFO;
   }
