@@ -117,40 +117,6 @@ double search_Armijo_standalone(int n, double* theta, double preRHS, search_data
   return alpha;
 }
 
-
-double linesearch_Armijo2(int n, double theta, double preRHS, search_data* ls_data)
-{
-  double theta_ref = theta;
-
-  if (ls_data->nm_ref_data)
-    get_non_monotone_ref(ls_data->nm_ref_data, &theta_ref);
-
-  ls_data->searchtype = LINESEARCH;
-  double alpha = search_Armijo_standalone(n, &theta_ref, preRHS, ls_data);
-
-  if (ls_data->nm_ref_data)
-    update_non_monotone_ref(ls_data->nm_ref_data, theta_ref);
-
-  return alpha;
-}
-
-double arcsearch_Armijo2(int n, double theta, double preRHS, search_data* ls_data)
-{
-  double theta_ref = theta;
-
-  if (ls_data->nm_ref_data)
-    get_non_monotone_ref(ls_data->nm_ref_data, &theta_ref);
-
-  ls_data->searchtype = ARCSEARCH;
-  assert(ls_data->set);
-  double alpha = search_Armijo_standalone(n, &theta_ref, preRHS, ls_data);
-
-  if (ls_data->nm_ref_data)
-    update_non_monotone_ref(ls_data->nm_ref_data, theta_ref);
-
-  return alpha;
-}
-
 void search_Armijo_params_init(armijo_extra_params* p)
 {
   p->gamma = 1e-4;

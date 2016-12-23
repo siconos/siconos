@@ -46,6 +46,16 @@ extern "C"
 {
 #endif
 
+  /** Goldstein (non-monotone) search, standalone version: it does not compute
+   * the reference value, it is expected as argument (theta)
+   * \param n size of the problem
+   * \param theta reference value for the acceptance test
+   * \param preRHS pre-computed value for the acceptance test
+   * \param ls_data necessary data for the search algorithm
+   * \return the coefficient alpha
+   */
+  double search_Goldstein_standalone(int n, double* theta, double preRHS, search_data* ls_data);
+
   /** Goldstein linesearch; this version compute and update the reference value
    * and calls search_Goldstein_standalone()
    * \param n size of the problem
@@ -54,7 +64,10 @@ extern "C"
    * \param ls_data necessary data for the search algorithm
    * \return the coefficient alpha
    */
-  double linesearch_Goldstein2(int n, double theta, double preRHS, search_data* ls_data);
+  static inline double linesearch_Goldstein2(int n, double theta, double preRHS, search_data* ls_data)
+  {
+    return line_search_generic(n, theta, preRHS, ls_data, LINESEARCH, &search_Goldstein_standalone);
+  }
 
   /** Goldstein arcsearch; this version compute and update the reference value
    * and calls search_Goldstein_standalone().
@@ -66,17 +79,10 @@ extern "C"
    * \param ls_data necessary data for the search algorithm
    * \return the coefficient alpha
    */
-  double arcsearch_Goldstein2(int n, double theta, double preRHS, search_data* ls_data);
-
-  /** Goldstein (non-monotone) search, standalone version: it does not compute
-   * the reference value, it is expected as argument (theta)
-   * \param n size of the problem
-   * \param theta reference value for the acceptance test
-   * \param preRHS pre-computed value for the acceptance test
-   * \param ls_data necessary data for the search algorithm
-   * \return the coefficient alpha
-   */
-  double search_Goldstein_standalone(int n, double* theta, double preRHS, search_data* ls_data);
+  static inline double arcsearch_Goldstein2(int n, double theta, double preRHS, search_data* ls_data)
+  {
+    return line_search_generic(n, theta, preRHS, ls_data, ARCSEARCH, &search_Goldstein_standalone);
+  }
 
   /** Initialize parameters to a default value
    * \param p parameters to set

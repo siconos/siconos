@@ -24,6 +24,26 @@
 #define restrict __restrict
 #endif
 
+double line_search_generic(int n, double theta, double preRHS, search_data* ls_data, unsigned searchtype, sn_ls_fn ls_fn)
+{
+  double theta_ref = theta;
+
+  if (ls_data->nm_ref_data)
+    get_non_monotone_ref(ls_data->nm_ref_data, &theta_ref);
+
+  ls_data->searchtype = searchtype;
+  assert(searchtype != ARCSEARCH || ls_data->set);
+  double alpha = (*ls_fn)(n, &theta_ref, preRHS, ls_data);
+ 
+  if (ls_data->nm_ref_data)
+  {
+    if (isfinite(alpha)) update_non_monotone_ref(ls_data->nm_ref_data, theta_ref);
+    else zero_nm_data(ls_data->nm_ref_data);
+  }
+
+  return alpha;
+}
+
 void update_non_monotone_ref(void* nm_ref_data, double cur_merit)
 {
   assert(nm_ref_data);

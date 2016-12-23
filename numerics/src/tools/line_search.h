@@ -65,6 +65,8 @@ enum SEARCH_TYPE { LINESEARCH, ARCSEARCH, BACKWARD_PATHSEARCH };
 
 enum LSA_ALGO { SICONOS_LSA_ARMIJO, SICONOS_LSA_GOLDSTEIN };
 
+typedef double (*sn_ls_fn)(int n, double* theta, double preRHS, search_data* ls_data);
+
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {
@@ -89,6 +91,18 @@ extern "C"
   {
     return ((nm_ref_struct*) nm_ref_data)->type;
   }
+
+  /** Generic call for a linesearch (or arcsearch). Handles the update of the
+   * update of the non-monotone data
+   * \param n size of the variable
+   * \param theta current value of the merit function
+   * \param preRHS value used for the comparison
+   * \param ls_data line search data
+   * \param searchtype type of search: linesearch or arcsearch
+   * \param ls_fn function to call
+   * \return the value of tau, NAN if the search failed
+   */
+  double line_search_generic(int n, double theta, double preRHS, search_data* ls_data, unsigned searchtype, sn_ls_fn ls_fn);
 
   /** update the reference value for the non-monotone line search
    * \param nm_ref_data the struct containing the data for the update

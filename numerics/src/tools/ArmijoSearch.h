@@ -43,6 +43,16 @@ extern "C"
 {
 #endif
 
+  /** Armijo (non-monotone) search, standalone version: it does not compute
+   * the reference value, it is expected as argument (theta)
+   * \param n size of the problem
+   * \param theta reference value for the acceptance test
+   * \param preRHS pre-computed value for the acceptance test
+   * \param ls_data necessary data for the search algorithm
+   * \return the coefficient alpha
+   */
+  double search_Armijo_standalone(int n, double* theta, double preRHS, search_data* ls_data);
+
   /** Armijo linesearch; this version compute and update the reference value
    * and calls search_Armijo_standalone()
    * \param n size of the problem
@@ -51,7 +61,10 @@ extern "C"
    * \param ls_data necessary data for the search algorithm
    * \return the coefficient alpha
    */
-  double linesearch_Armijo2(int n, double theta, double preRHS, search_data* ls_data);
+  static inline double linesearch_Armijo2(int n, double theta, double preRHS, search_data* ls_data)
+  {
+    return line_search_generic(n, theta, preRHS, ls_data, LINESEARCH, &search_Armijo_standalone);
+  }
 
   /** Armijo arcsearch; this version compute and update the reference value
    * and calls search_Armijo_standalone().
@@ -63,17 +76,11 @@ extern "C"
    * \param ls_data necessary data for the search algorithm
    * \return the coefficient alpha
    */
-  double arcsearch_Armijo2(int n, double theta, double preRHS, search_data* ls_data);
 
-  /** Armijo (non-monotone) search, standalone version: it does not compute
-   * the reference value, it is expected as argument (theta)
-   * \param n size of the problem
-   * \param theta reference value for the acceptance test
-   * \param preRHS pre-computed value for the acceptance test
-   * \param ls_data necessary data for the search algorithm
-   * \return the coefficient alpha
-   */
-  double search_Armijo_standalone(int n, double* theta, double preRHS, search_data* ls_data);
+  static inline double arcsearch_Armijo2(int n, double theta, double preRHS, search_data* ls_data)
+  {
+    return line_search_generic(n, theta, preRHS, ls_data, ARCSEARCH, &search_Armijo_standalone);
+  }
 
   /** Initialize parameters to a default value
    * \param p parameters to set

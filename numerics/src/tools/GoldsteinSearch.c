@@ -137,40 +137,6 @@ double search_Goldstein_standalone(int n, double* theta, double preRHS, search_d
 }
 
 
-double linesearch_Goldstein2(int n, double theta, double preRHS, search_data* ls_data)
-{
-  double theta_ref = theta;
-
-  if (ls_data->nm_ref_data)
-    get_non_monotone_ref(ls_data->nm_ref_data, &theta_ref);
-
-  ls_data->searchtype = LINESEARCH;
-  double alpha = search_Goldstein_standalone(n, &theta_ref, preRHS, ls_data);
-
-  if (ls_data->nm_ref_data)
-    if (isfinite(alpha)) update_non_monotone_ref(ls_data->nm_ref_data, theta_ref);
-    else zero_nm_data(ls_data->nm_ref_data);
-
-  return alpha;
-}
-
-double arcsearch_Goldstein2(int n, double theta, double preRHS, search_data* ls_data)
-{
-  double theta_ref = theta;
-
-  if (ls_data->nm_ref_data)
-    get_non_monotone_ref(ls_data->nm_ref_data, &theta_ref);
-
-  ls_data->searchtype = ARCSEARCH;
-  assert(ls_data->set);
-  double alpha = search_Goldstein_standalone(n, &theta_ref, preRHS, ls_data);
-
-  if (ls_data->nm_ref_data)
-    update_non_monotone_ref(ls_data->nm_ref_data, theta_ref);
-
-  return alpha;
-}
-
 void search_Goldstein_params_init(goldstein_extra_params* p)
 {
   p->iter_max = 100;
