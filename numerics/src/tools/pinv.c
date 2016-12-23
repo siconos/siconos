@@ -25,7 +25,7 @@
 /**
  * n : row number
  * m : col number
- * Warnning n correspond to M in the LAPACK routine, and m to N.
+ * Warning n correspond to M in the LAPACK routine, and m to N.
 
  This routine computes the pseudo inverse of A and returns its conditionning.
  

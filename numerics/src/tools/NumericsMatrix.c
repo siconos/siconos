@@ -47,7 +47,7 @@ void prodNumericsMatrix(int sizeX, int sizeY, double alpha, NumericsMatrix* A, c
 
   int storage = A->storageType;
 
-  /* double* storage */
+  /* dense storage */
   switch (storage)
   {
     case NM_DENSE:
@@ -57,7 +57,7 @@ void prodNumericsMatrix(int sizeX, int sizeY, double alpha, NumericsMatrix* A, c
     case NM_SPARSE_BLOCK:
       prodSBM(sizeX, sizeY, alpha, A->matrix1, x, beta, y);
     break;
-  /* coordinate */
+  /* sparse storage*/
     case NM_SPARSE:
       cs_aaxpy(alpha, NM_csc(A), x, beta, y);
     break;

@@ -15,6 +15,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
+
+/*! \file lcp_enum.h
+ * \brief functions for solving LCP using enumeration */
+
 #ifndef LCP_ENUM_H
 #define LCP_ENUM_H
 

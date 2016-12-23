@@ -16,6 +16,9 @@
  * limitations under the License.
 */
 
+/*!\file lcp_pivot.h
+ * \brief pivot related values*/
+
 // info values
 #define LCP_PIVOT_SUCCESS 0
 #define LCP_PIVOT_NUL 2

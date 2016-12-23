@@ -16,6 +16,10 @@
  * limitations under the License.
 */
 
+/*!\file mcp_newton_FBLSA.h
+ * \brief nonsmooth-based solver for MCP
+ */
+
 #ifndef MCP_NEWTON_FB
 #define MCP_NEWTON_FB
 

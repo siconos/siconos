@@ -222,7 +222,7 @@ extern "C"
       \param[in] x the vector to be multiplied
       \param[in,out] y the resulting vector
       \param[in] xsave storage for saving the part of x set to 0
-      \param[in] if True y = Ax, else y += Ax
+      \param[in] init if True y = Ax, else y += Ax
   */
   void NM_row_prod_no_diag(size_t sizeX, size_t sizeY, int block_start, size_t row_start, NumericsMatrix* A, double* x, double* y, double* xsave, bool init);
 
@@ -233,7 +233,7 @@ extern "C"
       \param[in] A the matrix to be multiplied
       \param[in] x the vector to be multiplied
       \param[in,out] y the resulting vector
-      \param[in] if True y = Ax, else y += Ax
+      \param[in] init if True y = Ax, else y += Ax
   */
   void NM_row_prod_no_diag3(size_t sizeX, int block_start, size_t row_start, NumericsMatrix* A, double* x, double* y, bool init);
 
@@ -322,7 +322,7 @@ extern "C"
   void displayRowbyRow(const NumericsMatrix* const m);
 
   /** get the (square) diagonal block of a NumericsMatrix. No allocation is done.
-   * \param[in] m a NumericsMatrix
+   * \param[in] M a NumericsMatrix
    * \param[in] block_row_nb the number of the block Row. Useful only in sparse case
    * \param[in] start_row the starting row. Useful only in dense case.
    * \param[in] size of the diag block. Only useful in dense case.
@@ -333,7 +333,7 @@ extern "C"
                              int size, double **Block);
 
   /** get a 3x3 diagonal block of a NumericsMatrix. No allocation is done.
-   * \param[in] m a NumericsMatrix
+   * \param[in] M a NumericsMatrix
    * \param[in] block_row_nb the number of the block row
    * \param[out] Block the target. In the dense and sparse case (*Block) must be allocated by caller.
    *   In case of SBM case **Bout contains the resulting block (from the SBM).

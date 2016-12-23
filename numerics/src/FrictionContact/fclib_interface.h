@@ -15,6 +15,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
+
+/*!\file fclib_interface.h
+ * \brief interface to fclib
+ */
+
 #ifndef FCLIB_INTERFACE_H
 #define FCLIB_INTERFACE_H
 

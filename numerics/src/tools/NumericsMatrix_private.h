@@ -19,6 +19,10 @@
 #ifndef NumericsMatrix_private_H
 #define NumericsMatrix_private_H
 
+/*!\file NumericsMatrix_private.h
+ * \brief non-public functions and data structures
+ */
+
 #include "SiconosConfig.h"
 #include "NumericsMatrix.h"
 
@@ -96,7 +100,7 @@ typedef struct {
   double control[UMFPACK_CONTROL]; /**< control parameters */
   double info[UMFPACK_INFO]; /**< informations from UMFPACK */
   csi* wi; /**< integer workspace, size n */
-  double* wd; /**< double workspace, size: with iterative refinement: 5n, without n */
+  double* wd; /**< double workspace, size: with iterative refinement: 5n, without: n */
   double* x; /**< solution of the problem, size n */
 } NM_UMFPACK_WS;
 

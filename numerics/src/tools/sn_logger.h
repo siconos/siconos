@@ -16,30 +16,29 @@
  * limitations under the License.
 */
 
-/*!\file pinv.h
- * \brief peseudo-inverse computations*/
+/*!\file sn_logger.h
+ * \brief Common data structures used by loggers in Siconos/Numerics
+ *
+ * \author Olivier Huber
+ */
 
-#ifndef Pinv_H
-#define Pinv_H
+#ifndef SN_LOGGER_H
+#define SN_LOGGER_H
 
-#include "SiconosConfig.h"
+/**\enum SN_loglevels sn_logger.h
+ * loglevels for the loggers in numerics*/
+enum SN_loglevels {
+  SN_LOGLEVEL_NO,
+  SN_LOGLEVEL_BASIC,
+  SN_LOGLEVEL_LIGHT,
+  SN_LOGLEVEL_VEC,
+  SN_LOGLEVEL_MAT,
+  SN_LOGLEVEL_ALL
+};
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
-extern "C"
-{
-#endif
+#define SN_LOG_LIGHT(log_lvl, expr) if (log_lvl >= SN_LOGLEVEL_LIGHT) expr;
+#define SN_LOG_SCALAR(log_lvl, expr) SN_LOG_LIGHT(log_lvl, expr)
+#define SN_LOG_VEC(log_lvl, expr) if (log_lvl >= SN_LOGLEVEL_VEC) expr;
+#define SN_LOG_MAT(log_lvl, expr) if (log_lvl >= SN_LOGLEVEL_MAT) expr;
 
-  /** Compute the pseudo-inverse of dense matrix with column major storage
-  \param A the matrix to be inversed
-  \param n the number of rows of A
-  \param m the number of columns of A
-  \param tolerance threshold used to validate the computation: if the error is less than this value, the computation is considered valid
-  \return the conditioning
-  */
-  double pinv(double * A, int n, int m, double tolerance);
-
-
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
-}
-#endif
 #endif

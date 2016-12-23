@@ -19,6 +19,10 @@
 #ifndef ProjectionOnCone_H
 #define ProjectionOnCone_H
 
+/*!\file projectionOnCone.h
+ * \brief function to project on cones
+ */
+
 #include "SiconosConfig.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -29,9 +33,11 @@ enum {PROJCONE_DUAL, PROJCONE_INSIDE, PROJCONE_BOUNDARY};
 extern "C"
 {
 #endif
+
   /** projectionOnCone Projection on the second Order Cone in \f$R^3\f$, \f$K \{ r, r_1 \geq 0, 0 \sqrt(r_2^2+r_3^2) \geq mu r_1  \} \f$
   \param[in,out] r the vector to be projected
   \param[in] mu the angle of the cone
+  \return the type of projection
   */
   unsigned projectionOnCone(double* r, double  mu);
 
@@ -41,6 +47,7 @@ extern "C"
   \param[in] size dimension
   */
   void projectionOnSecondOrderCone(double* r, double  mu, int size);
+
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif

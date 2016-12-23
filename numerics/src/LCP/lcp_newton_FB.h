@@ -16,6 +16,10 @@
  * limitations under the License.
 */
 
+/*!\file lcp_newton_FB.h
+ * \brief functions to solve LCP using a Newton method on the nonsmooth
+ * equation reformulation*/
+
 #ifndef LCP_NEWTON_FB
 #define LCP_NEWTON_FB
 

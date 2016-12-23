@@ -20,6 +20,10 @@
 #ifndef SN_SANITIZER_H
 #define SN_SANITIZER_H
 
+/*!\file sanitizer.h
+ * \brief sanitizer helpers
+ */
+
 #include "SiconosBlas.h"
 
 #if defined(__has_feature) 

@@ -19,6 +19,10 @@
 #ifndef Cond_H
 #define Cond_H
 
+/*!\file cond.h
+ * \brief condition number computation
+ */
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -27,6 +31,7 @@ extern "C"
   \param A the matrix to be read
   \param n the number of rows of A
   \param m the number of columns of A
+  \return the condition number
   */
   double cond(double * A, int n, int m);
 

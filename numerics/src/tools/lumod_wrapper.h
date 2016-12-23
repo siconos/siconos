@@ -1,3 +1,23 @@
+/* Siconos is a program dedicated to modeling, simulation and control
+ * of non smooth dynamical systems.
+ *
+ * Copyright 2016 INRIA.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+*/
+
+/*!\file lumod_wrapper.h
+ * \brief Wrapper around lumod */
 
 #ifndef LUMOD_WRAPPER_H
 #define LUMOD_WRAPPER_H
@@ -7,6 +27,8 @@
 
 #define SN_LUMOD_NEED_REFACTORIZATION 1
 
+/**\struct SN_lumod_dense_data lumod_wrapper.h
+ * Data structure for the LUMOD (successive rank-one update of a matrix) */
 typedef struct {
   unsigned n; /**< size of the matrix H*/
   unsigned maxmod; /**< maximum number of changes */
@@ -23,6 +45,8 @@ typedef struct {
   double* z; /**< z vector for LUMOD */
   double* w; /**< work vector for LUMOD */
 } SN_lumod_dense_data;
+
+
 
 static inline unsigned SN_lumod_need_refactorization(int info) { return (info == SN_LUMOD_NEED_REFACTORIZATION ? 1 : 0); }
 

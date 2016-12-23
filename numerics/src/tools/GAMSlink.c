@@ -1,16 +1,3 @@
-/*
-   Use this command to compile the example:
-   cl xp_example2.c api/gdxcc.c api/optcc.c api/gamsxcc.c -Iapi
-   */
-
-/*
-   This program performs the following steps:
-   1. Generate a gdx file with demand data
-   2. Calls GAMS to solve a simple transportation model
-   (The GAMS model writes the solution to a gdx file)
-   3. The solution is read from the gdx file
-   */
-
 /* GAMS stuff */
 
 #define _XOPEN_SOURCE 700

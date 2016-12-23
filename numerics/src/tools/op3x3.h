@@ -16,6 +16,9 @@
  * limitations under the License.
 */
 
+/*!\file op3x3.h
+ * \brief linear algebra operations in 3D*/
+
 #ifndef _op3x3_h_
 #define _op3x3_h_
 
@@ -181,7 +184,7 @@ static inline void scal3x3(double scal, double m[9])
 }
 
 /** diagonal scaling of a vector
- * \param[in] scal diagonal part of a matrix
+ * \param[in] scal_coeffs diagonal part of a matrix
  * \param[in,out] v a 3D vector 
  */
 static inline void diag_scal3(double* restrict scal_coeffs, double* restrict v)
@@ -439,6 +442,7 @@ static inline void mmm3x3(double* restrict a, double* restrict b, double* restri
 
 /** determinant
  * \param[in] a double* a
+ * \return the value of the determinant
  */
 static inline double det3x3(double* a)
 {
@@ -454,6 +458,7 @@ static inline double det3x3(double* a)
  * \param[in] a double a[9]
  * \param[out] x double x[3]
  * \param[in] b double b[3]
+ * \return 0 if success, 1 if failed
  */
 WARN_RESULT_IGNORED
 static inline int solv3x3(double* restrict a, double* restrict x, double* restrict b)
@@ -494,6 +499,7 @@ static inline int solv3x3(double* restrict a, double* restrict x, double* restri
 /** check equality : a[9] == b[9]
  * \param[in] a double a[9]
  * \param[in] b double b[9]
+ * \return 1 if true, 0 if false
  */
 static inline int equal3x3(double* restrict a, double* restrict b)
 {
@@ -511,6 +517,7 @@ static inline int equal3x3(double* restrict a, double* restrict b)
 /** check equality : a[3] == b[3]
  * \param[in] a double a[3]
  * \param[in] b double b[3]
+ * \return 1 if true, 0 if false
  */
 static inline int equal3(double* restrict a, double* restrict b)
 {
@@ -556,6 +563,7 @@ static inline void cross3(double* restrict a, double* restrict b, double* restri
 /** norm : || a ||
  *  may underflow & overflow
  * \param[in] a a[3]
+ * \return the norm
  */
 static inline double hypot3(double* a)
 {
@@ -601,8 +609,7 @@ static inline double hypot9(double* a)
  * \param[in] j0 column of first element
  * \param[in] a a[n,n] matrix
  * \param[out] b b[9] a 3x3 matrix */
-static inline void extract3x3(int n, int i0, int j0,
-                              double* restrict a, double* restrict b)
+static inline void extract3x3(int n, int i0, int j0, double* restrict a, double* restrict b)
 {
 
   int k0 = i0 + n * j0;
@@ -630,8 +637,7 @@ static inline void extract3x3(int n, int i0, int j0,
  * \param[in] j0 column of first element
  * \param[in,out] a  a[n,n] matrix
  * \param[in] b b[9] a 3x3 matrix */
-static inline void insert3x3(int n, int i0, int j0,
-                             double* restrict a, double* restrict b)
+static inline void insert3x3(int n, int i0, int j0, double* restrict a, double* restrict b)
 {
 
   int k0 = i0 + n * j0;
@@ -675,6 +681,7 @@ void print3(double* v);
  * \param[out] A2x first component of the vector A
  * \param[out] A2y second component of the vector A
  * \param[out] A2z third component of the vector A
+ * \return 0 if success, 1 if there is a problem
 */
 WARN_RESULT_IGNORED
 static inline int orthoBaseFromVector(double *Ax, double *Ay, double *Az,

@@ -19,9 +19,10 @@
 #ifndef NumericsSparseMatrix_H
 #define NumericsSparseMatrix_H
 
-/*!
-
-
+/*!\file NumericsSparseMatrix.h
+ * \brief Data structures and functions for sparse matrices
+ *
+ * \author Olivier Huber
  */
 
 #include "SiconosConfig.h"
@@ -55,6 +56,8 @@ extern "C"
     int dWorkSize;
   };
 
+  /**\enum NumericsSparseOrigin NumericsSparseMatrix.h
+   * matrix storage types */
   typedef enum { NS_UNKNOWN, NS_TRIPLET, NS_CSC, NS_CSR } NumericsSparseOrigin;
 
   /** \struct NumericsSparseMatrix NumericsSparseMatrix.h
@@ -116,13 +119,13 @@ extern "C"
   /** Get the LU factors for cs_lusol
    * \param p the structure holding the data for the solver
    */
-
   static inline void* NM_sparse_solver_data(NumericsSparseLinearSolverParams* p)
   {
     return p->solver_data;
   }
   /** Get the workspace for the sparse solver
    * \param p the structure holding the data for the solver
+   * \return the (double) workspace
    */
   static inline double* NM_sparse_workspace(NumericsSparseLinearSolverParams* p)
 

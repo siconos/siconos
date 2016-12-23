@@ -19,6 +19,9 @@
 #ifndef QUARTIC_H
 #define QUARTIC_H
 
+/*!\file quartic.h
+ * \brief quartic algorithm to find roots of quartic polynomials*/
+
 /** CACM Algorithm 326
    Roots of low order polynomials
    Author: Terence R.F.Nonweiler
@@ -45,6 +48,7 @@ extern "C"
   /** Suite of procedures for finding the (complex) roots of the quadratic,
   \param p Coefficients of the polynomial
   \param r root of the polynomial r[1][k] real part of the kth root r[2][k] imaginary part.
+  \return always 0
   */
   int QUADROOTS(double  p[5], double r[3][5]);
   int CUBICROOTS(double p[5], double r[3][5]);

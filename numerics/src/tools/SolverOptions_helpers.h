@@ -21,6 +21,9 @@
 #ifndef SolverOptions_helpers_H
 #define SolverOptions_helpers_H
 
+/*!\file SolverOptions_helpers.h
+ * \brief Helper functions for setting common solver options*/
+
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {

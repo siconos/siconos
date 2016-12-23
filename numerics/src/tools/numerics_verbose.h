@@ -15,6 +15,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
+
+/*!\file numerics_verbose.h
+ * \brief verbosity related functions*/
+
 #ifndef _NUMERICS_VERBOSE_H_
 #define _NUMERICS_VERBOSE_H_
 

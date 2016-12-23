@@ -16,6 +16,10 @@
  * limitations under the License.
 */
 
+/*! \file GenericMechanicalProblem.h
+ * \brief struct for GenericMechanicalProblem
+ */
+
 #ifndef NUMERICSGENERICMECHANICALPROBLEM_H
 #define NUMERICSGENERICMECHANICALPROBLEM_H
 
