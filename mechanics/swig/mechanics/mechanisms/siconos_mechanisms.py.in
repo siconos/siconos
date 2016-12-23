@@ -36,7 +36,7 @@ from siconos.mechanics.collision.native import SpaceFilter
 with_io = "@HAVE_SICONOS_IO@" is "TRUE"
 if with_io:
     from siconos.io import mechanics_io as io
-from siconos.mechanics.collision.tools import Avatar, Contactor
+from siconos.mechanics.collision.tools import Shape, Contactor
 
 default_options = os.path.join(mechanisms_path, 'mbtbDefaultOptions.py')
 local_options = os.path.join(example_path, 'mbtbLocalOptions.py')
@@ -355,9 +355,9 @@ if with_io:
             io.addShapeDataFromFile(shape_name, afile[idBody])
 
             assoc_shapes[idBody] = [
-                Avatar(shape_name, relative_translation=offset[idBody])]
+                Shape(shape_name, relative_translation=offset[idBody])]
     #        io.addObject('obj-{0}'.format(shape_name),
-    #                     [Avatar(shape_name, relative_translation=offset)],
+    #                     [Shape(shape_name, relative_translation=offset)],
     #                     mass=1,
     #                     translation=[0, 0, 0])
 
@@ -404,7 +404,7 @@ if with_io:
                 os.path.splitext(Artefactfile[idArtefact])[0])
 
             io.addObject('artefact-{0}'.format(shape_name),
-                         [Avatar(shape_name)],
+                         [Shape(shape_name)],
                          mass=0,
                          translation=[0, 0, 0])
 
