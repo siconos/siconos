@@ -23,15 +23,23 @@
 #define OccBody_impl_hpp
 
 #include "OccContactShape.hpp"
-#include <vector>
 
-struct ContactShapes : public std::vector<SP::OccContactShape>
+#include <vector>
+#include <boost/tuple/tuple.hpp>
+
+/* same things in BulletDS_impl.hpp */
+/* long unsigned int with bullet stuff ? */
+typedef std11::array<double, 7> OffSet;
+
+struct ContactShapes : public std::vector<boost::tuple<SP::OccContactShape, OffSet, int > >
 {
+private:
   ACCEPT_SERIALIZATION(ContactShapes);
 };
 
-struct TopoDS_Shapes : public std::vector<SP::TopoDS_Shape>
+struct TopoDS_Shapes : public std::vector<boost::tuple<SP::TopoDS_Shape, OffSet > >
 {
+private:
   ACCEPT_SERIALIZATION(TopoDS_Shapes);
 };
 
