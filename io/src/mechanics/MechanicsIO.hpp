@@ -47,7 +47,7 @@ public:
    */
   SP::SimpleMatrix positions(const Model& model) const;
 
-  /** get all velocities: translation (xdot, ydot, zdot) + orientation velocities 
+  /** get all velocities: translation (xdot, ydot, zdot) + orientation velocities
       ox, oy, oz
    * \param model the model
       \return a matrix where the columns are id, xdot, ydot, zdot,
@@ -58,9 +58,10 @@ public:
 
   /** get the coordinates of all contact points, normals, reactions and velocities
    * \param model the model
+   * \param index_set the index set number.
       \return a matrix where the columns are mu x y z, nx, ny, nz, rx, ry, rz, vx, vy, vz, ox, oy, oz, id
   */
-  SP::SimpleMatrix contactPoints(const Model& model) const;
+  SP::SimpleMatrix contactPoints(const Model& model, unsigned int index_set=1) const;
 
   /** get the domain of each contact point
    * \param model the model
