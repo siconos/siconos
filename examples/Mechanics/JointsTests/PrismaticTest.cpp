@@ -135,7 +135,6 @@ int main(int argc, char* argv[])
     s->insertIntegrator(OSI1);
 
 
-    string solverName = "LinearSystem" ;
     // -- OneStepNsProblem --
     SP::OneStepNSProblem osnspb(new Equality());
     s->insertNonSmoothProblem(osnspb);

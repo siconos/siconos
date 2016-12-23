@@ -26,7 +26,6 @@
 #include "FrictionContactProblem.h"
 #include "LinearComplementarityProblem.h"
 #include "LCP_Solvers.h"
-#include "LinearSystemProblem.h"
 #include "MixedLinearComplementarityProblem.h"
 #include "mlcp_cst.h"
 #include "lcp_cst.h"
@@ -730,17 +729,12 @@ void GMPasMLCP(GenericMechanicalProblem* pInProblem, double *reaction , double *
   if (!Mi_size)
   {
     /*it is a linear system.*/
-    LinearSystemProblem aLS;
+    for (size_t i = 0; i < Mi_size; ++i) reaction[i] = -Qreduced[i];
     NumericsMatrix M;
-    M.storageType = 0;
-    M.size0 = Mi_size;
-    M.size1 = Mi_size;
-    M.matrix0 = reducedProb;
-    M.matrix1 = 0;
-    aLS.size = Me_size;
-    aLS.q = Qreduced;
-    aLS.M = &M;
-    *info = LinearSystem_driver(&aLS, reaction, velocity, 0);
+    fillNumericsMatrix(&M, NM_DENSE, Mi_size, Mi_size, reducedProb);
+    *info = NM_gesv(&M, reaction, true);
+    M.matrix0 = NULL;
+    freeNumericsMatrix(&M);
     goto END_GMP3;
   }
   /*it is a MLCP*/

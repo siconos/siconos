@@ -18,7 +18,7 @@
 #include "Equality.hpp"
 #include "Simulation.hpp"
 #include "OSNSMatrix.hpp"
-#include "NonSmoothDrivers.h" // from numerics, for LinearSystem_driver
+#include <NumericsMatrix.h>
 
 using namespace RELATION;
 
@@ -40,13 +40,10 @@ int Equality::compute(double time)
 
   if (_sizeOutput != 0)
   {
-    // The EQUALITY in Numerics format
-    // Call EQUALITY Driver
-    _numerics_problem.q = q()->getArray();
-    _numerics_problem.size = _sizeOutput;
-    //      displayLS(&_numerics_problem);
-    info = LinearSystem_driver(&_numerics_problem, _z->getArray() , _w->getArray() , NULL);
-
+    double* q_ = q()->getArray();
+    double* z_ =  _z->getArray();
+    for (size_t i = 0; i < _sizeOutput; ++i) z_[i] = -q_[i];
+    info = NM_gesv(&*_M->getNumericsMatrix(), z_, true);
     // --- Recovering of the desired variables from EQUALITY output ---
     postCompute();
 
@@ -61,7 +58,6 @@ void Equality::initialize(SP::Simulation sim)
   LinearOSNS::initialize(sim);
   //SP::InteractionsGraph indexSet = simulation()->indexSet(levelMin());
   //_M.reset(new OSNSMatrix(indexSet,_MStorageType));
-  _numerics_problem.M = &*_M->getNumericsMatrix();
 }
 
 void Equality::updateM()
@@ -74,7 +70,6 @@ void Equality::updateM()
   {
     // Creates and fills M using Interactionof indexSet
     _M.reset(new OSNSMatrix(indexSet, _MStorageType));
-    _numerics_problem.M = &*_M->getNumericsMatrix();
   }
   else
   {

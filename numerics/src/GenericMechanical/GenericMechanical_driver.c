@@ -32,7 +32,6 @@
 #include "numerics_verbose.h"
 #include "LCP_Solvers.h"
 #include "FrictionContactProblem.h"
-#include "LinearSystemProblem.h"
 #include "Friction_cst.h"
 #include "fc3d_onecontact_nonsmooth_Newton_solvers.h"
 #include "NumericsMatrix.h"
@@ -132,7 +131,6 @@ int GenericMechanical_compute_error(GenericMechanicalProblem* pGMP, double *reac
     {
     case SICONOS_NUMERICS_PROBLEM_EQUALITY:
     {
-      //  LinearSystemProblem* linearProblem = (LinearSystemProblem*) curProblem->problem;
       double * w = velocity + posInX;
       localError = 0.;
       for (ii = 0; ii < curSize; ii++)
@@ -293,15 +291,17 @@ void genericMechanicalProblem_GS(GenericMechanicalProblem* pGMP, double * reacti
       {
       case SICONOS_NUMERICS_PROBLEM_EQUALITY:
       {
-        /*Mz*/
-        LinearSystemProblem* linearProblem = (LinearSystemProblem*) curProblem->problem;
-        linearProblem->M->matrix0 = diagBlock;
-        /*about q.*/
-        memcpy(linearProblem->q, &(pGMP->q[posInX]), curSize * sizeof(double));
-        NM_row_prod_no_diag(pGMP->size, curSize, currentRowNumber, posInX, numMat, reaction, linearProblem->q, NULL, 0);
+        NumericsMatrix M;
+        fillNumericsMatrix(&M, NM_DENSE, curSize, curSize, diagBlock);
 
-        resLocalSolver = LinearSystem_driver(linearProblem, sol, w, 0);
+        memcpy(sol, &(pGMP->q[posInX]), curSize * sizeof(double));
+        NM_row_prod_no_diag(pGMP->size, curSize, currentRowNumber, posInX, numMat, reaction, sol, NULL, 0);
+        cblas_dscal(curSize, -1., sol, 1);
 
+        resLocalSolver = NM_gesv(&M, sol, true);
+
+        M.matrix0 = NULL;
+        freeNumericsMatrix(&M);
         break;
       }
       case SICONOS_NUMERICS_PROBLEM_LCP:

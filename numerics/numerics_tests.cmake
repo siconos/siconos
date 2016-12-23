@@ -143,13 +143,6 @@ if(WITH_${COMPONENT}_TESTING)
 
   END_TEST(LCP/test)
 
-  BEGIN_TEST(src/LinearSystem/test)
-
-  NEW_LS_TEST(SICONOS_LS_0 ls_trivial.dat)
-  SET(test-LS_0-ls_inf_sol_perturbed_PROPERTIES WILL_FAIL TRUE)
-  NEW_LS_TEST(SICONOS_LS_0 ls_inf_sol_perturbed.dat)
-  END_TEST()
-
   BEGIN_TEST2(src/Relay/test)
 
   SET(DATA_SET "relay1.dat;relay_2x2.dat;relay_4x4.dat;relay_simple2.dat;step_1x1.dat;step_2x2.dat;step_4x4.dat")

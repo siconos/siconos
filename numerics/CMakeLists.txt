@@ -21,7 +21,6 @@ set(${COMPONENT}_DIRS
   src/LCP
   src/MLCP
   src/SOCP
-  src/LinearSystem
   src/QP
   src/Relay
   src/FrictionContact

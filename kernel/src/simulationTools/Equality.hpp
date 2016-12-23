@@ -23,7 +23,6 @@
 #define Equality_H
 
 #include "LinearOSNS.hpp"
-#include <LinearSystemProblem.h>
 
 /** Formalization and Resolution of a Linear Complementarity Problem (Equality)
  
@@ -54,7 +53,6 @@ private:
   */
   ACCEPT_SERIALIZATION(Equality);
 
-  LinearSystemProblem _numerics_problem;
 public:
 
   /** constructor

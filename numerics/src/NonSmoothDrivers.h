@@ -46,7 +46,6 @@
 /* #include "MLCP_Solvers.h" */
 /* #include "NCP_Solvers.h" */
 /* #include "MCP_Solvers.h" */
-//#include "LinearSystemProblem.h"
 //#include "SolverOptions.h"
 #include "NumericsFwd.h"
 //#include "MixedComplementarityProblem.h"
@@ -86,18 +85,6 @@ extern "C"
       \author Vincent Acary
   */
   int mlcp_driver(MixedLinearComplementarityProblem* problem, double *z, double *w, SolverOptions* options);
-
-  /** General interface to solver for linear system
-      \param[in] problem the LinearSystemProblem structure which handles the problem (M,q)
-      \param[in,out] z a n-vector of doubles solution of the problem.
-      \param[out] w a n-vector of doubles which contains zeros.
-      \param[in,out] options structure used to define the solver(s) and their parameters
-      \return info termination value
-      - 0 : successful\n
-      - >0 : otherwise see each solver for more information about the log info
-      \author Vincent Acary
-  */
-  int LinearSystem_driver(LinearSystemProblem* problem, double *z , double *w, SolverOptions* options);
 
   /** General interface to solvers for friction-contact 2D problem
    *  \param[in] problem the structure which handles the Friction-Contact problem

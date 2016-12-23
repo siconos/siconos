@@ -21,7 +21,6 @@
 #include "GenericMechanicalProblem.h"
 #include "NonSmoothDrivers.h"
 #include "numerics_verbose.h"
-#include "LinearSystemProblem.h"
 #include "FrictionContactProblem.h"
 #include "LinearComplementarityProblem.h"
 #include "GenericMechanical_Solvers.h"
@@ -56,8 +55,6 @@ void freeGenericMechanicalProblem(GenericMechanicalProblem * pGMP, unsigned int 
     {
     case SICONOS_NUMERICS_PROBLEM_EQUALITY:
     {
-      free(((LinearSystemProblem *)(pElem->problem))->M);
-      //  free(((LinearSystemProblem *)(pElem->problem))->q);
       break;
     }
     case SICONOS_NUMERICS_PROBLEM_LCP:
@@ -134,15 +131,7 @@ void * addProblem(GenericMechanicalProblem * pGMP, int problemType, int size)
   }
   case (SICONOS_NUMERICS_PROBLEM_EQUALITY):
   {
-    newProblem->problem = (void *) malloc(sizeof(LinearSystemProblem));
-    LinearSystemProblem* pLS = (LinearSystemProblem*) newProblem->problem;
-    pLS->size = size;
-    pLS->M = newNumericsMatrix();
-    pLS->q = (double*) malloc(size * sizeof(double));
-    newProblem->q = pLS->q;
-    pLS->M->storageType = 0; /*local prb is dense*/
-    pLS->M->size0 = size;
-    pLS->M->size1 = size;
+    newProblem->problem = NULL;
     break;
   }
   case (SICONOS_NUMERICS_PROBLEM_FC3D):
