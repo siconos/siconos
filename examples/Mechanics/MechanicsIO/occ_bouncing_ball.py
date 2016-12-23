@@ -34,7 +34,7 @@ with Hdf5() as io:
     io.addInteraction('sphere-ground',
                       'sphere', 'Sphere-0',
                       'ground', 'Ground-0',
-                      distance_calculator='occ',
+                      distance_calculator='cadmbtb',
                       offset=0.01)
 
     io.addNewtonImpactFrictionNSL('contact', mu=0.3, e=0.9)
