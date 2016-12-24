@@ -132,6 +132,7 @@ void * addProblem(GenericMechanicalProblem * pGMP, int problemType, int size)
   case (SICONOS_NUMERICS_PROBLEM_EQUALITY):
   {
     newProblem->problem = NULL;
+    newProblem->q = (double*) malloc(size * sizeof(double));;
     break;
   }
   case (SICONOS_NUMERICS_PROBLEM_FC3D):

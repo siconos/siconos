@@ -44,8 +44,8 @@
 /* #define GMP_WRITE_PRB */
 
 
-//#define DEBUG_MESSAGES
-//#define DEBUG_STDOUT
+#define DEBUG_MESSAGES
+#define DEBUG_STDOUT
 #include "debug.h"
 #include "LinearComplementarityProblem.h"
 #include "lcp_cst.h"
@@ -294,9 +294,9 @@ void genericMechanicalProblem_GS(GenericMechanicalProblem* pGMP, double * reacti
         NumericsMatrix M;
         fillNumericsMatrix(&M, NM_DENSE, curSize, curSize, diagBlock);
 
-        memcpy(sol, &(pGMP->q[posInX]), curSize * sizeof(double));
-        NM_row_prod_no_diag(pGMP->size, curSize, currentRowNumber, posInX, numMat, reaction, sol, NULL, 0);
-        cblas_dscal(curSize, -1., sol, 1);
+        memcpy(curProblem->q, &(pGMP->q[posInX]), curSize * sizeof(double));
+        NM_row_prod_no_diag(pGMP->size, curSize, currentRowNumber, posInX, numMat, reaction, curProblem->q, NULL, 0);
+        for (size_t i = 0; i < curSize; ++i) sol[i] = -curProblem->q[i];
 
         resLocalSolver = NM_gesv(&M, sol, true);
 
