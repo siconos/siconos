@@ -189,8 +189,16 @@ def parse_args(need_build_path=False):
 
 
 def get_headers(targets):
+    # ensure a certain ordering between these three targets
+    order = ['mechanics','kernel','control']
+    ordered_targets = []
+    for o in order:
+        if o in targets:
+            ordered_targets.append(o)
+    # they must come after all other targets
+    ordered_targets = [t for t in targets if t not in order] + ordered_targets
     all_headers = [h for h in itertools.chain(*(input_headers[target]
-                                                for target in targets))]
+                                                for target in ordered_targets))]
     return all_headers
 
 
