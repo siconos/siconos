@@ -24,6 +24,22 @@
 
 #ifdef WITH_SUPERLU
 
+#include <slu_ddefs.h>
+
+/** \struct NM_SuperLU_WS NumericsMatrix_private.h
+ * Structure for holding the data SuperLU needs
+ */
+struct NM_SuperLU_WS {
+  SuperMatrix* L;
+  SuperMatrix* U;
+  int_t* perm_r;
+  int_t* perm_c;
+  superlu_options_t* options;
+#ifdef SUPERLU_MAJOR_VERSION
+  GlobalLU_t* Glu;
+#endif
+};
+
 NM_SuperLU_WS* NM_SuperLU_factorize(NumericsMatrix* A)
 {
   SuperMatrix SA, SAC;

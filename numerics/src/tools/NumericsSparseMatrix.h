@@ -36,7 +36,7 @@ extern "C"
 
   /** \enum NumericsSparseLinearSolver NumericsSparseMatrix.h
    * id for linear algebra solvers */
-  typedef enum { NS_CS_LUSOL, NS_MUMPS, NS_UMFPACK, NS_PARDISO, NS_SUPERLU } NumericsSparseLinearSolver;
+  typedef enum { NS_CS_LUSOL, NS_MUMPS, NS_UMFPACK, NS_PARDISO, NS_SUPERLU, NS_SUPERLU_MT } NumericsSparseLinearSolver;
 
   /** \enum NumericsSparseTypesNZ
    * value of nz for some matrix storage type */

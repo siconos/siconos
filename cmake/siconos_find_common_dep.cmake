@@ -65,9 +65,22 @@ if(WITH_UMFPACK)
 endif()
 
 # --- SUPERLU ---
+IF (WITH_SUPERLU AND WITH_SUPERLU_MT)
+  message(FATAL_ERROR "Both SuperLU and SuperLU_MT are enabled. Due to symbol collision, both cannot be enabled at the same time")
+ENDIF()
+
 if(WITH_SUPERLU)
   compile_with(SuperLU REQUIRED)
 endif()
+
+if(WITH_SUPERLU_MT)
+  compile_with(SuperLU_MT REQUIRED)
+endif()
+
+# not ready yet
+#if(WITH_SUPERLU_dist)
+#  compile_with(SuperLU_dist REQUIRED)
+#endif()
 
 # --- Fclib ---
 IF(WITH_FCLIB)

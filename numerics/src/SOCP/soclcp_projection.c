@@ -102,11 +102,6 @@ void soclcp_projection_update_with_regularization(int cone, SecondOrderConeLinea
   */
 
   /* The part of MGlobal which corresponds to the current block is copied into MLocal */
-
-  NumericsMatrix * MGlobal = problem->M;
-
-  int n = problem->n;
-
   int coneStart = problem->coneIndex[cone];
   NM_extract_diag_block(problem->M, cone, coneStart, problem->coneIndex[cone+1] - coneStart, &localproblem->M->matrix0);
 

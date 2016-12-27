@@ -124,6 +124,8 @@ NumericsSparseLinearSolverParams* newNumericsSparseLinearSolverParams(void)
   p->solver = NS_UMFPACK;
 #elif defined(WITH_SUPERLU)
   p->solver = NS_SUPERLU;
+#elif defined(WITH_SUPERLU_MT)
+  p->solver = NS_SUPERLU_MT;
 #else
   p->solver = NS_CS_LUSOL;
 #endif

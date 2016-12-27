@@ -948,6 +948,8 @@ NumericsMatrix* newNumericsMatrix(void)
 
 NumericsMatrix* NM_create(int storageType, int size0, int size1)
 {
+  assert(size0 > 0);
+  assert(size1 > 0);
   NumericsMatrix* M = newNumericsMatrix();
 
   void* data;
@@ -978,6 +980,8 @@ void fillNumericsMatrix(NumericsMatrix* M, int storageType, int size0, int size1
 {
 
   assert(M);
+  assert(size0 > 0);
+  assert(size1 > 0);
   M->storageType = storageType;
   M->size0 = size0;
   M->size1 = size1;
@@ -2154,6 +2158,48 @@ int NM_gesv_expert(NumericsMatrix* A, double *b, unsigned keep)
     }
 
 #endif /* WITH_SUPERLU */
+
+#ifdef WITH_SUPERLU_MT
+    case NS_SUPERLU_MT:
+    {
+      if (verbose >= 2)
+      {
+        printf("NM_gesv: using SuperLU_MT\n" );
+      }
+
+      NM_SuperLU_MT_WS* superlu_mt_ws = NM_SuperLU_MT_factorize(A);
+
+      if (!superlu_mt_ws)
+      {
+        if (verbose > 1)
+          fprintf(stderr, "NM_gesv: cannot factorize the matrix with SuperLU_MT\n");
+
+        NM_SuperLU_MT_free(p);
+        return -1;
+      }
+
+      info = NM_SuperLU_MT_solve(A, b, superlu_mt_ws);
+
+      if (info)
+      {
+        fprintf(stderr, "NM_gesv: cannot solve the system with SuperLU_MT\n");
+//        SuperLU_MT_FN(report_status) (superlu_ws->control, (csi)info);
+      }
+
+      if (keep != NM_KEEP_FACTORS)
+      {
+        NM_SuperLU_MT_free(p);
+      }
+      else if (!p->solver_free_hook)
+      {
+        p->solver_free_hook = &NM_SuperLU_MT_free;
+      }
+
+      break;
+    }
+
+#endif /* WITH_SUPERLU_MT */
+
 #ifdef WITH_PARDISO
     case NS_PARDISO:
     {

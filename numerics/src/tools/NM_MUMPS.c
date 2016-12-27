@@ -270,7 +270,6 @@ DMUMPS_STRUC_C* NM_MUMPS_id(NumericsMatrix* A)
     //mumps_id->CNTL(3) = ...;
     //mumps_id->CNTL(5) = ...;
 
-    mumps_id = (DMUMPS_STRUC_C*) params->solver_data;
     mumps_id->n = (MUMPS_INT) NM_triplet(A)->n;
     mumps_id->irn = NM_MUMPS_irn(A);
     mumps_id->jcn = NM_MUMPS_jcn(A);

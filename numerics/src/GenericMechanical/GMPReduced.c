@@ -729,7 +729,8 @@ void GMPasMLCP(GenericMechanicalProblem* pInProblem, double *reaction , double *
   if (!Mi_size)
   {
     /*it is a linear system.*/
-    for (size_t i = 0; i < Me_size; ++i) reaction[i] = -Qreduced[i];
+    assert(Me_size >= 0);
+    for (size_t i = 0; i < (size_t)Me_size; ++i) reaction[i] = -Qreduced[i];
     NumericsMatrix M;
     fillNumericsMatrix(&M, NM_DENSE, Me_size, Me_size, reducedProb);
     *info = NM_gesv(&M, reaction, true);

@@ -175,7 +175,7 @@ MACRO(COMPILE_WITH)
 	remember_include_directories("${${_N}_INCLUDE_DIR}")
       endif()
       if(DEFINED ${_N}_INCLUDE_PATH)
-	remember_include_directories("${${_N}_INCLUDE_DIR}")
+       remember_include_directories("${${_N}_INCLUDE_PATH}")
       endif()
       # Now we set list of libs that must be linked with.
       if(DEFINED ${_N}_LIBRARIES)

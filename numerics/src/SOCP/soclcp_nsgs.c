@@ -216,11 +216,6 @@ void soclcp_nsgs_computeqLocal(SecondOrderConeLinearComplementarityProblem * pro
 void soclcp_nsgs_fillMLocal(SecondOrderConeLinearComplementarityProblem * problem,
                             SecondOrderConeLinearComplementarityProblem * localproblem, int cone)
 {
-
-  NumericsMatrix * MGlobal = problem->M;
-
-  int n = problem->n;
-
   int coneStart = problem->coneIndex[cone];
   NM_extract_diag_block(problem->M, cone, coneStart, problem->coneIndex[cone+1] - coneStart, &localproblem->M->matrix0);
 }
