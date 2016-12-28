@@ -1,4 +1,4 @@
-// generated with the command : ./build_from_doxygen.py --targets=kernel -I/home/sinclairs/.local/include/siconos -I/usr/include/openmpi --output=../src/SiconosFullKernelGenerated.hpp --source=../.. --build=../../bld
+// generated with build_from_doxygen.py
 #ifndef SiconosFullKernelGenerated_hpp
 #define SiconosFullKernelGenerated_hpp
 #include <SiconosConfig.h>
@@ -18,7 +18,6 @@ SICONOS_IO_REGISTER_WITH_BASES(BlockMatrix,(SiconosMatrix),
   (_tabRow))
 SICONOS_IO_REGISTER(SiconosMatrix,
   (_num))
-  SICONOS_IO_REGISTER(NSLawMatrix,)
 SICONOS_IO_REGISTER(SiconosMemory,
   (_indx)
   (_nbVectorsInMemory)
@@ -105,6 +104,8 @@ SICONOS_IO_REGISTER_WITH_BASES(HarmonicBC,(BoundaryCondition),
   (_omegaV)
   (_phi)
   (_phiV))
+SICONOS_IO_REGISTER(NSLawMatrix,
+)
 SICONOS_IO_REGISTER_WITH_BASES(EqualityConditionNSL,(NonSmoothLaw),
 )
 SICONOS_IO_REGISTER_WITH_BASES(NewtonImpactFrictionNSL,(NonSmoothLaw),
@@ -347,10 +348,10 @@ SICONOS_IO_REGISTER(DynamicalSystem,
   (count))
 SICONOS_IO_REGISTER(ExtraAdditionalTerms,
 )
-SICONOS_IO_REGISTER_WITH_BASES(TimeDiscretisationEvent,(Event),
-)
 SICONOS_IO_REGISTER(InteractionManager,
   (_nslaws))
+SICONOS_IO_REGISTER_WITH_BASES(TimeDiscretisationEvent,(Event),
+)
 SICONOS_IO_REGISTER_WITH_BASES(TimeSteppingCombinedProjection,(TimeStepping),
   (_constraintTol)
   (_constraintTolUnilateral)
@@ -449,6 +450,8 @@ SICONOS_IO_REGISTER_WITH_BASES(TimeSteppingDirectProjection,(TimeStepping),
   (_projectionMaxIteration))
 SICONOS_IO_REGISTER_WITH_BASES(ZeroOrderHoldOSI,(OneStepIntegrator),
   (_useGammaForRelation))
+SICONOS_IO_REGISTER_WITH_BASES(Equality,(LinearOSNS),
+)
 SICONOS_IO_REGISTER_WITH_BASES(GenericMechanical,(LinearOSNS),
 )
 SICONOS_IO_REGISTER_WITH_BASES(LinearOSNS,(OneStepNSProblem),
@@ -458,8 +461,6 @@ SICONOS_IO_REGISTER_WITH_BASES(LinearOSNS,(OneStepNSProblem),
   (_q)
   (_w)
   (_z))
-SICONOS_IO_REGISTER_WITH_BASES(Equality,(LinearOSNS),
-)
 SICONOS_IO_REGISTER_WITH_BASES(MoreauJeanCombinedProjectionOSI,(MoreauJeanOSI),
 )
 SICONOS_IO_REGISTER_WITH_BASES(MoreauJeanDirectProjectionOSI,(MoreauJeanOSI),
@@ -624,6 +625,7 @@ void siconos_io_register_generated(Archive& ar)
   ar.register_type(static_cast<ComplementarityConditionNSL*>(NULL));
   ar.register_type(static_cast<FixedBC*>(NULL));
   ar.register_type(static_cast<HarmonicBC*>(NULL));
+  ar.register_type(static_cast<NSLawMatrix*>(NULL));
   ar.register_type(static_cast<EqualityConditionNSL*>(NULL));
   ar.register_type(static_cast<NewtonImpactFrictionNSL*>(NULL));
   ar.register_type(static_cast<MixedComplementarityConditionNSL*>(NULL));
@@ -651,9 +653,8 @@ void siconos_io_register_generated(Archive& ar)
   ar.register_type(static_cast<LagrangianRheonomousR*>(NULL));
   ar.register_type(static_cast<NewtonEulerDS*>(NULL));
   ar.register_type(static_cast<LagrangianDS*>(NULL));
-  ar.register_type(static_cast<TimeDiscretisationEvent*>(NULL));
   ar.register_type(static_cast<InteractionManager*>(NULL));
-  ar.register_type(static_cast<NSLawMatrix*>(NULL));
+  ar.register_type(static_cast<TimeDiscretisationEvent*>(NULL));
   ar.register_type(static_cast<TimeSteppingCombinedProjection*>(NULL));
   ar.register_type(static_cast<NonSmoothEvent*>(NULL));
   ar.register_type(static_cast<QP*>(NULL));
@@ -665,8 +666,8 @@ void siconos_io_register_generated(Archive& ar)
   ar.register_type(static_cast<AVI*>(NULL));
   ar.register_type(static_cast<TimeSteppingDirectProjection*>(NULL));
   ar.register_type(static_cast<ZeroOrderHoldOSI*>(NULL));
-  ar.register_type(static_cast<GenericMechanical*>(NULL));
   ar.register_type(static_cast<Equality*>(NULL));
+  ar.register_type(static_cast<GenericMechanical*>(NULL));
   ar.register_type(static_cast<MoreauJeanCombinedProjectionOSI*>(NULL));
   ar.register_type(static_cast<MoreauJeanDirectProjectionOSI*>(NULL));
   ar.register_type(static_cast<TimeStepping*>(NULL));
