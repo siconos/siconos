@@ -203,8 +203,7 @@ def get_headers(targets):
 
 
 def write_header(dest_file, cmd, generated_header):
-    dest_file.write('// generated with the command : {0}\n'
-                    .format(' '.join(sys.argv)))
+    dest_file.write('// generated with {0}\n'.format(os.path.split(sys.argv[0])[-1]))
     dest_file.write('#ifndef {0}_hpp\n'.format(generated_header))
     dest_file.write('#define {0}_hpp\n'.format(generated_header))
     dest_file.write('#include <SiconosConfig.h>\n'.format(generated_header))
