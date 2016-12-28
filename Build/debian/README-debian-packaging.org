@@ -87,9 +87,10 @@ it and use apt-get to resolve the dependencies:
 Now building the packages should succeed.  We use "gbp" tools,
 i.e. "git buildpackage" to manage this:
 
-  : root@c565375d37b8:~/siconos-deb# gbp buildpackage --git-pristine-tar \
-  :   --git-pristine-tar-commit --git-upstream-tag='%(version)s' \
-  :   --git-debian-branch=debian/sid
+  : root@c565375d37b8:~/siconos-deb# gbp buildpackage --git-export-dir=../build
+
+Note that gbp buildpackage has some options in debian/gbp.conf that
+avoid needing to give the options by the command line.
 
 Relevant instructions to using gbp for this project can be found at:
 
@@ -115,10 +116,11 @@ Check if anything needs to be changed in the debian/*.install files,
 e.g. if there are new tools, and debian/control if there are new
 dependencies.
 
-Finally, update the changelog using "gbp dch" and re-build the package
-with "gbp buildpackage" as instructed above.
+Build the package to create a new "pristine tar" for this version:
 
-  : root@c565375d37b8:~/siconos-deb# gbp dch --debian-branch=debian/sid --snapshot --auto debian/
+  : root@c565375d37b8:~/siconos-deb# gbp buildpackage \
+  :   --git-export-dir=../build \
+  :   --git-pristine-tar-commit
 
 You can add the argument,
 
@@ -126,9 +128,21 @@ You can add the argument,
 
 to gdb buildpackage if you are working on the package and haven't
 committed changes yet, otherwise it will complain about changes to the
-git repository.  When done, update the changelog to "release", commit,
-and build the final package:
+git repository.  However, it is good practice to make commits as you
+go instead of using this option.
 
-  : gbp dch --release --auto --git-debian-branch=debian/sid
+Finally, update the changelog using "gbp dch" and re-build the package
+with "gbp buildpackage" as instructed above.
+
+  : root@c565375d37b8:~/siconos-deb# gbp dch --snapshot --auto debian/
+
+When you are ready to release the package, update the changelog using
+"--release" instead of "--snapshot", commit, and build the final
+package:
+
+  : gbp dch --release --auto
   : git commit -m"Release 4.1.0" debian/changelog
-  : gbp buildpackage --git-upstream-tag='%(version)s' --git-debian-branch=debian/sid
+  : gbp buildpackage --git-export-dir=../build
+
+Make sure the name and email addresses are correct and correspond with
+your GPG key.
