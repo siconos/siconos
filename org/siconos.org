@@ -532,6 +532,111 @@ file:GazeboClassDiagram.png
      + split time frame
      + split hdf5 file
 
+*** Actual structure
+
+h5dump cylinder.hdf5  | grep -E 'DATASET|GROUP'
+GROUP "/" {
+   GROUP "data" {
+      GROUP "boundary_conditions" {
+      DATASET "cf" {
+      DATASET "dynamic" {
+      GROUP "input" {
+         GROUP "cyl" {
+            ATTRIBUTE "id" {
+            ATTRIBUTE "inertia" {
+            ATTRIBUTE "mass" {
+            ATTRIBUTE "orientation" {
+            ATTRIBUTE "time_of_birth" {
+            ATTRIBUTE "translation" {
+            ATTRIBUTE "velocity" {
+            DATASET "Cyl-0" {
+               ATTRIBUTE "group" {
+               ATTRIBUTE "name" {
+               ATTRIBUTE "orientation" {
+               ATTRIBUTE "translation" {
+         GROUP "ground" {
+            ATTRIBUTE "id" {
+            ATTRIBUTE "mass" {
+            ATTRIBUTE "orientation" {
+            ATTRIBUTE "time_of_birth" {
+            ATTRIBUTE "translation" {
+            ATTRIBUTE "velocity" {
+            DATASET "Ground-0" {
+               ATTRIBUTE "group" {
+               ATTRIBUTE "name" {
+               ATTRIBUTE "orientation" {
+               ATTRIBUTE "translation" {
+      GROUP "joints" {
+      GROUP "nslaws" {
+         DATASET "contact" {
+            ATTRIBUTE "e" {
+            ATTRIBUTE "gid1" {
+            ATTRIBUTE "gid2" {
+            ATTRIBUTE "mu" {
+            ATTRIBUTE "type" {
+      GROUP "permanent_interactions" {
+      GROUP "ref" {
+         DATASET "Cyl" {
+            ATTRIBUTE "id" {
+            ATTRIBUTE "primitive" {
+            ATTRIBUTE "type" {
+         DATASET "Ground" {
+            ATTRIBUTE "id" {
+            ATTRIBUTE "primitive" {
+            ATTRIBUTE "type" {
+      DATASET "solv" {
+      DATASET "static" {
+      DATASET "velocities" {
+
+*** Proposition <2016-12-31 Sat>
+    + file_info
+      + IO hdf5 version
+      + author
+      + computer
+      + siconos version
+      + commit number ?
+    + model
+      + shapes (ref new name ?)
+	DATASET (shape_name)
+	ATTRIBUTE : id,primitive,type
+      + GROUP bodies (ex . input, new name)
+	ATTRIBUTE: id, inertia, mass, translation, orientation, velocity, time_of_birth,
+	DATASET : (attached shape) group, name, translation, orientation
+      + boundary_conditions
+      + joints
+      + permanent_interactions
+      + nonsmooth_laws
+        ATTRIBUTE e,gid1,gid2,mu,type
+    + simulation
+      + time step length h
+      + integrator
+	+ name or id.
+	+ parameters (theta, # newton loop, tolerances...)
+      + one_step_non_smooth_problem
+	+ type
+	+ solver id.
+	+ solver parameters. (iparam, dparam, )
+    + simulation_data
+      + coordinates (q, position, orientation, ...)
+      + velocities  (v)
+      + forces      (total applied forces optional)
+      + acceleration (a)
+      + contact     (cf, should we split ?)
+	+ id.
+	+ n,t,s
+	+ p_a, p_b
+	+ lambda[0]
+	+ lambda[1]
+        + ...
+	+ y
+	+ u (contact velocity)
+	+ internal variable of the nslaw
+      + solver info.
+	+ time step
+	+ error, convergence,
+	+ failed steps,
+
+
 ** DONE Tooling and features for siconos_vview siconos_filter <2016-07-15 vie>
    CLOSED: [2016-11-25 Fri 15:19]
 *** Desired features for filtering tool
