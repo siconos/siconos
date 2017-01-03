@@ -1873,10 +1873,9 @@ class Hdf5():
         Add a convex shape defined by a list of points.
         """
         if name not in self._ref:
-
             shape=self._ref.create_dataset(name,
-                                             (apoints.shape[0],
-                                              apoints.shape[1]))
+                                             (np.shape(points)[0],
+                                              np.shape(points)[1]))
             if insideMargin is not None:
                 shape.attrs['insideMargin'] = insideMargin
             if outsideMargin is not None:
