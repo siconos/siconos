@@ -6,7 +6,7 @@
 #
 # specification of center of mass & moments of inertia
 
-# 
+#
 
 
 from siconos.mechanics.collision.tools import Contactor
@@ -88,33 +88,23 @@ with Hdf5() as io:
                  [Contactor('Contact',
                             contact_type='Face',
                             contact_index=0,
-                            relative_translation=[-bowl_com.Coord(1),
-                                                  -bowl_com.Coord(2),
-                                                  -bowl_com.Coord(3)]),
+                            ),
                   Contactor('Contact',
                             contact_type='Face',
                             contact_index=3,
-                            relative_translation=[-bowl_com.Coord(1),
-                                                  -bowl_com.Coord(2),
-                                                  -bowl_com.Coord(3)]),
+                            ),
                   Contactor('Contact',
                             contact_type='Edge',
                             contact_index=0,
-                            relative_translation=[-bowl_com.Coord(1),
-                                                  -bowl_com.Coord(2),
-                                                  -bowl_com.Coord(3)])],
+                            )],
                  mass=bowl_mass,
 
-                 # api evolution ==>
-                 # we can keep relative_translation for per shape displacement
-                 # and add a center_of_mass parameter for the whole body
-                 # center_of_mass = [bowl_com.Coord(1),
-                 #                   bowl_com.Coord(2),
-                 #                   bowl_com.Coord(3)]
-
-                 orientation=([1, 0, 0], -pi/2),
+                 orientation=([1, 0, 0], -pi / 2),
                  translation=[0, 0, 2],
                  velocity=[0, 0, 0, 0, 2, 0],
+                 center_of_mass=[bowl_com.Coord(1),
+                                 bowl_com.Coord(2),
+                                 bowl_com.Coord(3)],
                  inertia=[bowl_I1, bowl_I2, bowl_I3])
 
     #
@@ -157,7 +147,6 @@ with Hdf5() as io:
                             contact_index=5)],
                  mass=0,
                  translation=[0, 0, 0])
-
 
     #
     # interactions, order ball -> bowl is important

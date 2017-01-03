@@ -923,11 +923,20 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
             big_data_source.AddInputConnection(transformer.GetOutputPort())
 
             transforms[instance].append(transform)
+
+            if 'center_of_mass' in io.instances()[instance_name].attrs:
+                center_of_mass = io.instances()[instance_name].\
+                                 attrs['center_of_mass'].astype(float)
+            else:
+                center_of_mass = [0., 0., 0.]
+
             offsets[instance].append(
-                (io.instances()[
+                (numpy.subtract(io.instances()[
                     instance_name][
-                 contactor_instance_name].attrs['translation'],
-                    io.instances()[instance_name][contactor_instance_name].attrs['orientation']))
+                        contactor_instance_name].attrs['translation'].astype(float),
+                                center_of_mass),
+                    io.instances()[instance_name][contactor_instance_name].\
+                 attrs['orientation'].astype(float)))
 
     pos_data = dpos_data[:].copy()
     spos_data = spos_data[:].copy()

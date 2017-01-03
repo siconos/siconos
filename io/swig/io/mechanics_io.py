@@ -972,11 +972,7 @@ class Hdf5():
                         contact_shape = \
                                     occ.OccContactEdge(reference_shape,
                                                        contactor.contact_index)
-                print (name, contactor, contact_shape)
 
-
-
-                    # keep track of shape
                 if contact_shape is not None:
 
                     if name not in self._occ_contactors:
@@ -1323,7 +1319,6 @@ class Hdf5():
             self._keep.append([cocs1, cocs2, cp1,
                                cp2, relation])
 
-
     def importScene(self, time, body_class, shape_class, face_class,
                     edge_class):
         """
@@ -1407,6 +1402,16 @@ class Hdf5():
                         orientation = obj.attrs['orientation']
                         velocity = obj.attrs['velocity']
 
+                        center_of_mass = None
+
+                        # bodyframe center of mass
+                        # check for compatibility
+                        if 'center_of_mass' in obj.attrs:
+                            center_of_mass = \
+                                obj.attrs['center_of_mass'].astype(float)
+                        else:
+                            center_of_mass = [0, 0, 0]
+
                     input_ctrs = [ctr for _n_, ctr in obj.items()]
 
                     contactors = []
@@ -1417,13 +1422,13 @@ class Hdf5():
                             occ_type = True
                             contactors.append(
                                 Contactor(
-                                    instance_name = ctr.attrs['instance_name'],
-                                    shape_data = ctr.attrs['name'],
-                                    collision_group = ctr.attrs['group'].astype(int),
-                                    contact_type = ctr.attrs['type'],
-                                    contact_index = ctr.attrs['contact_index'].astype(int),
-                                    relative_translation = ctr.attrs['translation'].astype(float),
-                                    relative_orientation = ctr.attrs['orientation'].astype(float)))
+                                    instance_name=ctr.attrs['instance_name'],
+                                    shape_data=ctr.attrs['name'],
+                                    collision_group=ctr.attrs['group'].astype(int),
+                                    contact_type=ctr.attrs['type'],
+                                    contact_index=ctr.attrs['contact_index'].astype(int),
+                                    relative_translation=np.subtract(ctr.attrs['translation'].astype(float), center_of_mass),
+                                    relative_orientation=ctr.attrs['orientation'].astype(float)))
                         elif 'group' in ctr.attrs:
                             # bullet contact
                             assert not occ_type
@@ -1432,7 +1437,7 @@ class Hdf5():
                                     instance_name=ctr.attrs['instance_name'],
                                     shape_data=ctr.attrs['name'],
                                     collision_group=ctr.attrs['group'].astype(int),
-                                    relative_translation=ctr.attrs['translation'].astype(float),
+                                    relative_translation=np.subtract(ctr.attrs['translation'].astype(float), center_of_mass),
                                     relative_orientation=ctr.attrs['orientation'].astype(float)))
                         else:
                             # occ shape
@@ -1440,10 +1445,10 @@ class Hdf5():
                             # fix: not only contactors here
                             contactors.append(
                                 Shape(
-                                    instance_name = ctr.attrs['instance_name'],
-                                    shape_data = ctr.attrs['name'],
-                                    relative_translation = ctr.attrs['translation'].astype(float),
-                                    relative_orientation = ctr.attrs['orientation'].astype(float)))
+                                    instance_name=ctr.attrs['instance_name'],
+                                    shape_data=ctr.attrs['name'],
+                                    relative_translation=np.subtract(ctr.attrs['translation'].astype(float), center_of_mass),
+                                    relative_orientation=ctr.attrs['orientation'].astype(float)))
 
                     if 'inertia' in obj.attrs:
                         inertia = obj.attrs['inertia']
@@ -1868,7 +1873,7 @@ class Hdf5():
         Add a convex shape defined by a list of points.
         """
         if name not in self._ref:
-            apoints=np.array(points)
+
             shape=self._ref.create_dataset(name,
                                              (apoints.shape[0],
                                               apoints.shape[1]))
@@ -1904,27 +1909,52 @@ class Hdf5():
                   translation,
                   orientation=[1, 0, 0, 0],
                   velocity=[0, 0, 0, 0, 0, 0],
-                  mass=0, inertia=None, time_of_birth=-1):
-        """Add an object with associated shapes as a list of Shape, Avatar or
-        Contactor objects.  Contact detection and processing is
-        defined by the Contactor objects.
+                  mass=0, center_of_mass=[0, 0, 0],
+                  inertia=None, time_of_birth=-1):
+        """Add an object with associated shapes as a list of Shape or
+        Contactor objects. Contact detection and processing is
+        defined by the Contactor objects. The Shape objects may be used to
+        specify the visualization.
 
-        The Avatar objects specify the visualization and may be
-        related to the computation of the moments of inertia.
+        Each Shape and Contactor object may have a relative
+        translation and a relative orientation expressed in the body frame.
 
-        Each Avatar and Contactor object may have a relative
-        translation and a relative orientation.
+        Parameters
+        ----------
+        name:
+          string
+          The name of the object.
 
-        The initial translation is mandatory : [x, y z].  If the mass
-        is zero this is a static object.  A default inertia is
-        associated if it is not given.  A time of birth may be
-        specified, so the object will not appear in the scene until
-        this time.
+        shapes:
+          iterable
+          The list of associated Shape or Contactor objects.
 
-        Contactor may have specified instance_name but it is not
-        mandatory.  If the contactor name is not specified, the
-        default one is <shape name>-<index in the list of contactors>.
+        translation:
+          array_like of length 3
+          Initial translation of the object (mandatory)
 
+        velocity:
+          array_like of length 6
+          Initial velocity of the object.
+          The components are those of the translation velocity along x, y and z
+          axis and the rotation velocity around x, y and z axis.
+          The default velocity is [0, 0, 0, 0, 0, 0].
+
+        mass:
+          real value
+          The mass of the object, if it is zero the object is defined as
+          a static object involved only in contact detection.
+          The default value is zero.
+
+        center_of_mass:
+          array_like of length 3
+          The position of the center of mass expressed in the body frame
+          coordinates.
+
+        inertia:
+          array_like of length 3 or 3x3 matrix.
+          the principal moments of inertia (array of length 3) or
+          a full 3x3 inertia matrix
         """
         # print(arguments())
         if len(orientation) == 2:
@@ -1953,7 +1983,7 @@ class Hdf5():
             obj.attrs['translation']=translation
             obj.attrs['orientation']=ori
             obj.attrs['velocity']=velocity
-
+            obj.attrs['center_of_mass']=center_of_mass
             if inertia is not None:
                 obj.attrs['inertia']=inertia
 
