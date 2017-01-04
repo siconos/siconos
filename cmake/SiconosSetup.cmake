@@ -52,13 +52,8 @@ set(${PROJECT_NAME}_LOCAL_LIBRARIES
 set(installed_targets ${installed_targets}
   CACHE INTERNAL "List of installed libraries for the siconos project.")
 
-if(CMAKE_VERSION VERSION_LESS 3)
-  set(PRIVATE LINK_PRIVATE CACHE INTERNAL "")
-  set(PUBLIC LINK_PUBLIC CACHE INTERNAL "")
-else()
-  set(PRIVATE PRIVATE CACHE INTERNAL "")
-  set(PUBLIC PUBLIC CACHE INTERNAL "")
-endif()
+set(PRIVATE PRIVATE CACHE INTERNAL "")
+set(PUBLIC PUBLIC CACHE INTERNAL "")
 
 set(tests_timeout 15 CACHE INTERNAL "Limit time for tests (in seconds)")
 
@@ -110,11 +105,13 @@ IF(NOT SIZE_OF_CSI)
   CHECK_TYPE_SIZE("size_t" SIZE_OF_CSI)
 ENDIF(NOT SIZE_OF_CSI)
 
-IF ("${SIZE_OF_CSI}" EQUAL 8)
-  SET(SICONOS_INT64 TRUE)
-ELSE ("${SIZE_OF_CSI}" EQUAL 8)
-  SET(SICONOS_INT64 FALSE)
-ENDIF ("${SIZE_OF_CSI}" EQUAL 8)
+IF(NOT DEFINED SICONOS_INT64)
+  IF ("${SIZE_OF_CSI}" EQUAL 8)
+    SET(SICONOS_INT64 TRUE)
+  ELSE ("${SIZE_OF_CSI}" EQUAL 8)
+    SET(SICONOS_INT64 FALSE)
+  ENDIF ("${SIZE_OF_CSI}" EQUAL 8)
+ENDIF()
 
 # =========== install setup ===========
 
