@@ -49,7 +49,7 @@ tlsvar MPI_Comm NM_mpi_com = MPI_COMM_NULL;
   }
 #elif defined(__GNUC__) & !defined(__APPLE__)
 
-  void cleanup_MPI(void) __attribute__ ((destructor))
+  static void cleanup_MPI(void) __attribute__ ((destructor))
   {
     if (NM_mpi_com != MPI_COMM_NULL)
     {
