@@ -24,7 +24,7 @@ from siconos.kernel import \
 import siconos.kernel as Kernel
 
 # Siconos Mechanics imports
-from siconos.mechanics.collision.tools import Shape, Contactor
+from siconos.mechanics.collision.tools import Contactor, Volume
 from siconos.mechanics import joints
 from siconos.io.io_base import MechanicsIO
 from siconos.io.FrictionContactTrace import FrictionContactTrace
@@ -933,19 +933,69 @@ class Hdf5():
                         velocity, contactors, mass, given_inertia, body_class,
                         shape_class, face_class, edge_class, number=None):
 
-        if body_class is None:
-            body_class = occ.OccBody
-
-        if given_inertia is not None:
-            inertia = given_inertia
-        else:
-            inertia = np.eye(3)
-
         if mass == 0.:
             # a static object
             pass
 
         else:
+
+            if body_class is None:
+                body_class = occ.OccBody
+
+            if given_inertia is not None:
+                inertia = given_inertia
+            else:
+                from OCC.GProp import GProp_GProps
+                from OCC.BRepGProp import brepgprop_VolumeProperties
+                from OCC.gp import gp_Ax1, gp_Dir
+
+                # compute mass and inertia from associated instances of Volume
+                volumes = filter(lambda s: isinstance(s, Volume),
+                                 contactors)
+
+                props = GProp_GProps()
+
+                for volume in volumes:
+
+                    iprops = GProp_GProps()
+                    ishape = occ.OccContactShape(
+                        self._shape.get(volume.data,
+                                        shape_class, face_class,
+                                        edge_class, new_instance=True)).data()
+
+                    # the shape relative displacement
+                    occ.occ_move(ishape, volume.translation)
+
+                    brepgprop_VolumeProperties(ishape, iprops)
+
+                    if volume.parameters is not None and \
+                       hasattr(volume.parameters, 'density'):
+                        density = volume.parameters.density
+                    else:
+                        density = 1
+
+                    props.Add(iprops, density)
+
+                # in props density=1
+                global_density = mass / props.Mass()
+                computed_com = props.Center_Of_Mass()
+
+                # center of mass shift
+                translation = np.subtract(translation,
+                                          [computed_com.Coord(1),
+                                           computed_com.Coord(2),
+                                           computed_com.Coord(3)])
+
+                I1 = global_density * props.MomentOfInertia(
+                    gp_Ax1(computed_com, gp_Dir(1, 0, 0)))
+                I2 = global_density * props.MomentOfInertia(
+                    gp_Ax1(computed_com, gp_Dir(0, 1, 0)))
+                I3 = global_density * props.MomentOfInertia(
+                    gp_Ax1(computed_com, gp_Dir(0, 0, 1)))
+
+                # computed_inertia = density * props.MatrixOfInertia()
+                inertia = [I1, I2, I3]
+
             body = body_class(
                 translation + orientation, velocity, mass, inertia)
 
@@ -1910,50 +1960,45 @@ class Hdf5():
                   velocity=[0, 0, 0, 0, 0, 0],
                   mass=0, center_of_mass=[0, 0, 0],
                   inertia=None, time_of_birth=-1):
-        """Add an object with associated shapes as a list of Shape or
+        """Add an object with associated shapes as a list of Volume or
         Contactor objects. Contact detection and processing is
-        defined by the Contactor objects. The Shape objects may be used to
-        specify the visualization.
+        defined by the Contactor objects. The Volume objects are used for
+        the computation of inertia and center of mass if not provided.
 
-        Each Shape and Contactor object may have a relative
-        translation and a relative orientation expressed in the body frame.
+        Each Contactor and Volume object may have a relative
+        translation and a relative orientation expressed in the bodyframe
+        coordinates.
 
         Parameters
         ----------
-        name:
-          string
-          The name of the object.
+        name: string
+            The name of the object.
 
-        shapes:
-          iterable
-          The list of associated Shape or Contactor objects.
+        shapes: iterable
+            The list of associated Contactor or Volume objects.
 
-        translation:
-          array_like of length 3
-          Initial translation of the object (mandatory)
+        translation: array_like of length 3
+            Initial translation of the object (mandatory)
 
-        velocity:
-          array_like of length 6
-          Initial velocity of the object.
-          The components are those of the translation velocity along x, y and z
-          axis and the rotation velocity around x, y and z axis.
-          The default velocity is [0, 0, 0, 0, 0, 0].
+        velocity: array_like of length 6
+            Initial velocity of the object.
+            The components are those of the translation velocity along
+            x, y and z axis and the rotation velocity around x, y and
+            z axis.  The default velocity is [0, 0, 0, 0, 0, 0].
 
-        mass:
-          real value
-          The mass of the object, if it is zero the object is defined as
-          a static object involved only in contact detection.
-          The default value is zero.
+        mass: float
+            The mass of the object, if it is zero the object is defined as
+            a static object involved only in contact detection.
+            The default value is zero.
 
-        center_of_mass:
-          array_like of length 3
-          The position of the center of mass expressed in the body frame
-          coordinates.
+        center_of_mass: array_like of length 3
+            The position of the center of mass expressed in the body frame
+            coordinates.
 
-        inertia:
-          array_like of length 3 or 3x3 matrix.
-          the principal moments of inertia (array of length 3) or
-          a full 3x3 inertia matrix
+        inertia: array_like of length 3 or 3x3 matrix.
+            The principal moments of inertia (array of length 3) or
+            a full 3x3 inertia matrix
+
         """
         # print(arguments())
         if len(orientation) == 2:
