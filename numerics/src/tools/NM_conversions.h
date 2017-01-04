@@ -23,7 +23,6 @@
   \brief Conversion related functions for the various matrix storages in Numerics
 */
 
-#include "SiconosConfig.h"
 #include "SparseMatrix.h"
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)

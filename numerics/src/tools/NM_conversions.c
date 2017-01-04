@@ -21,14 +21,18 @@
 #include <stdio.h>
 
 #include "NM_conversions.h"
+#include "SiconosConfig.h"
+
+#ifdef WITH_MKL_SPBLAS
 #include "tlsdef.h"
 #include "MKL_common.h"
-
 typedef void (*mkl_dcsrcoo_t) (const __INT_T *job , const __INT_T *n , double *acsr , __INT_T *ja , __INT_T *ia , __INT_T *nnz , double *acoo , __INT_T *rowind , __INT_T *colind , __INT_T *info );
 typedef void (*mkl_dcsrcsc_t) (const __INT_T *job , const __INT_T *n , double *acsr , __INT_T *ja , __INT_T *ia , double *acsc , __INT_T *ja1 , __INT_T *ia1 , __INT_T *info );
 
 tlsvar mkl_dcsrcoo_t mkl_dcsrcoo_p = NULL;
 tlsvar mkl_dcsrcsc_t mkl_dcsrcsc_p = NULL;
+
+#endif
 
 CSparseMatrix* NM_csc_to_triplet(CSparseMatrix* csc)
 {
