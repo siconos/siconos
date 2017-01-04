@@ -33,8 +33,7 @@
 #include "timers_interf.h"
 #include "GlobalFrictionContactProblem.h"
 
-void int_to_csi(int* o, csi* d, unsigned int n);
-void int_to_csi(int* o, csi* d, unsigned int n)
+static void int_to_csi(int* o, csi* d, unsigned int n)
 {
   for(unsigned int i=0; i<n; ++i)
   {
@@ -42,8 +41,7 @@ void int_to_csi(int* o, csi* d, unsigned int n)
   }
 }
 
-void csi_to_int(csi* o, int* d, unsigned int n);
-void csi_to_int(csi* o, int* d, unsigned int n)
+static void csi_to_int(csi* o, int* d, unsigned int n)
 {
   for(unsigned int i=0; i<n; ++i)
   {

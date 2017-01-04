@@ -94,6 +94,7 @@ void closePlugin(const std::string& pluginFile)
     SiconosSharedLibraryException::selfThrow("SiconosSharedLibrary::closePlugin - could not find an opened plugin named " + pluginFile);
   }
   PluginHandle plugin = it->second;
+  assert(plugin);
 #ifdef _WIN32
   FreeLibrary(plugin);
 #endif

@@ -1,5 +1,10 @@
 # include "csparse.h"
 
+#if defined(__cplusplus)
+#undef restrict
+#define restrict __restrict
+#endif
+
 /* C = alpha*A + beta*B */
 cs *cs_add (const cs *A, const cs *B, double alpha, double beta)
 {
@@ -884,7 +889,7 @@ csi cs_fkeep (cs *A, csi (*fkeep) (csi, csi, double, void *), void *other)
     return (nz) ;
 }
 /* y = A*x+y */
-csi cs_gaxpy (const cs *A, const double *x, double *y)
+csi cs_gaxpy (const cs *A, const double * restrict x, double * restrict y)
 {
     csi p, j, n, *Ap, *Ai ;
     double *Ax ;
@@ -919,7 +924,7 @@ csi cs_happly (const cs *V, csi i, double beta, double *x)
 }
 /* create a Householder reflection [v,beta,s]=house(x), overwrite x with v,
  * where (I-beta*v*v')*x = s*e1.  See Algo 5.1.1, Golub & Van Loan, 3rd ed. */
-double cs_house (double *x, double *beta, csi n)
+double cs_house (double * restrict x, double * restrict beta, csi n)
 {
     double s, sigma = 0 ;
     csi i ;
@@ -940,7 +945,7 @@ double cs_house (double *x, double *beta, csi n)
     return (s) ;
 }
 /* x(p) = b, for dense vectors x and b; p=NULL denotes identity */
-csi cs_ipvec (const csi *p, const double *b, double *x, csi n)
+csi cs_ipvec (const csi * restrict p, const double * restrict b, double * restrict x, csi n)
 {
     csi k ;
     if (!x || !b) return (0) ;                              /* check inputs */
@@ -1395,7 +1400,7 @@ csi cs_print (const cs *A, csi brief)
     return (1) ;
 }
 /* x = b(p), for dense vectors x and b; p=NULL denotes identity */
-csi cs_pvec (const csi *p, const double *b, double *x, csi n)
+csi cs_pvec (const csi * restrict p, const double *b, double * restrict x, csi n)
 {
     csi k ;
     if (!x || !b) return (0) ;                              /* check inputs */
@@ -1566,7 +1571,7 @@ csi cs_reach (cs *G, const cs *B, csi k, csi *xi, const csi *pinv)
     return (top) ;
 }
 /* x = x + beta * A(:,j), where x is a dense vector and A(:,j) is sparse */
-csi cs_scatter (const cs *A, csi j, double beta, csi *w, double *x, csi mark,
+csi cs_scatter (const cs *A, csi j, double beta, csi * restrict w, double * restrict x, csi mark,
     cs *C, csi nz)
 {
     csi i, p, *Ap, *Ai, *Ci ;
@@ -1652,7 +1657,7 @@ css *cs_schol (csi order, const cs *A)
     return ((S->lnz >= 0) ? S : cs_sfree (S)) ;
 }
 /* solve Gx=b(:,k), where G is either upper (lo=0) or lower (lo=1) triangular */
-csi cs_spsolve (cs *G, const cs *B, csi k, csi *xi, double *x, const csi *pinv,
+csi cs_spsolve (cs *G, const cs *B, csi k, csi * restrict xi, double * restrict x, const csi * restrict pinv,
     csi lo)
 {
     csi j, J, p, q, px, top, n, *Gp, *Gi, *Bp, *Bi ;

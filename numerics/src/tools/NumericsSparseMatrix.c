@@ -143,9 +143,7 @@ NumericsSparseLinearSolverParams* newNumericsSparseLinearSolverParams(void)
   NumericsSparseLinearSolverParams* p = (NumericsSparseLinearSolverParams*)
     malloc(sizeof(NumericsSparseLinearSolverParams));
 
-#if defined(WITH_MKL) && 0
-  p->solver = NS_PARDISO;
-#elif defined(WITH_MUMPS)
+#if defined(WITH_MUMPS)
   p->solver = NS_MUMPS;
 #elif defined(WITH_UMFPACK)
   p->solver = NS_UMFPACK;
@@ -157,19 +155,14 @@ NumericsSparseLinearSolverParams* newNumericsSparseLinearSolverParams(void)
   p->solver = NS_CS_LUSOL;
 #endif
 
-  p->iparam = NULL;
-  p->dparam = NULL;
-  p->iWork = NULL;
-  p->dWork = NULL;
-
   p->solver_data = NULL;
   p->solver_free_hook = NULL;
 
-  p->iSize = 0;
-  p->dSize = 0;
   p->iWorkSize = 0;
   p->dWorkSize = 0;
 
+  p->iWork = NULL;
+  p->dWork = NULL;
   return p;
 }
 
@@ -177,33 +170,25 @@ NumericsSparseLinearSolverParams* freeNumericsSparseLinearSolverParams(NumericsS
 {
   /* First free solver_data if some additional information has been given  */
   if (p->solver_free_hook)
+  {
     (*p->solver_free_hook)(p);
-  p->solver_free_hook = NULL;
+    p->solver_free_hook = NULL;
+  }
 
-  if (p->iparam)
-  {
-    assert(p->iSize>0);
-    free(p->iparam);
-    p->iparam = NULL;
-  }
-  if (p->dparam)
-  {
-    assert(p->dSize>0);
-    free(p->dparam);
-    p->dparam = NULL;
-  }
   if (p->iWork)
   {
     assert(p->iWorkSize>0);
     free(p->iWork);
     p->iWork = NULL;
   }
+
   if (p->dWork)
   {
     assert(p->dWorkSize>0);
     free(p->dWork);
     p->dWork = NULL;
   }
+
   if (p->solver_data)
   {
     free(p->solver_data);

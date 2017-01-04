@@ -48,11 +48,6 @@ extern "C"
   {
     NumericsSparseLinearSolver solver;
 
-    int* iparam;
-    double iSize;
-    double* dparam;
-    double dSize;
-
     void* solver_data; /**< solver-specific data (or workspace) */
     freeNSLSP solver_free_hook; /**< solver-specific hook to free solver_data  */
 

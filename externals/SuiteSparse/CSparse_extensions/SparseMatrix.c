@@ -206,8 +206,8 @@ double* cs_dense(CSparseMatrix *A)
 }
 
 /* y = alpha*A*x+beta*y */
-int cs_aaxpy(const double alpha, const cs *A, const double *x,
-             const double beta, double *y)
+int cs_aaxpy(const double alpha, const cs *A, const double * restrict x,
+             const double beta, double * restrict y)
 {
   csi p, n, *Ap, *Ai ;
   int j;
