@@ -26,6 +26,7 @@
 #include <stddef.h>                     // for NULL
 #include <iostream>                     // for operator<<, basic_ostream, etc
 #include <utility>                      // for make_pair, pair
+#include <cassert>
 
 namespace SiconosSharedLibrary
 {
