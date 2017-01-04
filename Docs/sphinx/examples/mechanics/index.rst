@@ -7,6 +7,6 @@ Mechanics
 
    bouncing_ball
    beads_column
-   billiard
+   billiards
    ContactDetection/BulletIO
    mechanisms/slider_crank

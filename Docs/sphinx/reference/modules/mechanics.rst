@@ -7,5 +7,9 @@ Usage
 Siconos Mechanics API
 ^^^^^^^^^^^^^^^^^^^^^
 
-.. automodule:: siconos.mechanics
-  :members:
+.. toctree::
+   mechanics/bodies
+   mechanics/joints
+   mechanics/occ
+   mechanics/collision/tools
+
