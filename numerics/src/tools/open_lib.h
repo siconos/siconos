@@ -32,8 +32,9 @@ extern "C"
 
   /** open a library and return an handle (casted as void*)
    * \param lib_name name of the library
+   * \param flags additional flags (for dlopen)
    */
-  void* open_library(const char* lib_name);
+  void* open_library(const char* lib_name, const int flags);
 
   /** get the address of a function in an already opened lib
    * \param plugin handle to the library

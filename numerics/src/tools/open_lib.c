@@ -36,7 +36,7 @@ typedef void* PluginHandle;
 
 #include "open_lib.h"
 
-void* open_library(const char* lib_name)
+void* open_library(const char* lib_name, const int flags)
 {
   void* HandleRes;
 #ifdef _WIN32
@@ -48,7 +48,7 @@ void* open_library(const char* lib_name)
     exit(err);
   }
 #else
-  HandleRes = dlopen(lib_name, RTLD_LAZY);
+  HandleRes = dlopen(lib_name, RTLD_LAZY | flags);
   if (!HandleRes)
   {
     printf("dlopen error %s while trying to open %s\n", dlerror(), lib_name);

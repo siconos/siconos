@@ -284,7 +284,7 @@ static void  my_call_to_callback_Fmcp (int size, double *z, double *F)
     name_str = PyBytes_AsString(tmp_ascii);
 #endif
 
-    handle_lib = open_library(name_str);
+    handle_lib = open_library(name_str, 0);
 
 #if PY_MAJOR_VERSION < 3
     name_str = PyString_AsString(f1_name);
