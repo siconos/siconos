@@ -151,6 +151,11 @@ extern "C"
    */
   NumericsSparseLinearSolverParams* freeNumericsSparseLinearSolverParams(NumericsSparseLinearSolverParams* p);
 
+  /** Check and fix a matrix, if needed
+   * \param A the matrix to check, modified if necessary to have ordered indices
+   */
+  void NM_sparse_fix_csc(CSparseMatrix* A);
+
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif

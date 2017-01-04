@@ -1831,9 +1831,10 @@ void NM_gemm(const double alpha, NumericsMatrix* A, NumericsMatrix* B,
      * matrix pointer. Otherwise, we have a memleak */
     CSparseMatrix* tmp_matrix = cs_multiply(NM_csc(A), NM_csc(B));
     assert(tmp_matrix && "NM_gemm :: cs_multiply failed");
-    CSparseMatrix* result = cs_add(tmp_matrix,
-                                   NM_csc(C), alpha, beta);
+    NM_sparse_fix_csc(tmp_matrix);
+    CSparseMatrix* result = cs_add(tmp_matrix, NM_csc(C), alpha, beta);
     assert(result && "NM_gemm :: cs_add failed");
+    NM_sparse_fix_csc(result);
 
     cs_spfree(tmp_matrix);
     NM_clearDense(C);
@@ -1845,6 +1846,10 @@ void NM_gemm(const double alpha, NumericsMatrix* A, NumericsMatrix* B,
     C->size1 = (int)C->matrix2->csc->n;
     NM_sparse(C)->origin = NS_CSC;
     break;
+  }
+  default:
+  {
+    assert(0 && "NM_gemm unknown storageType");
   }
   }
 }
@@ -2245,7 +2250,7 @@ int NM_gesv_expert(NumericsMatrix* A, double *b, unsigned keep)
 #endif /* WITH_PARDISO */
     default:
     {
-      fprintf(stderr, "NM_gesv: unknown sparse linearsolver : %d\n", p->solver);
+      fprintf(stderr, "NM_gesv: unknown sparse linearsolver %d\n", p->solver);
       exit(EXIT_FAILURE);
     }
     }
@@ -2431,3 +2436,22 @@ void NM_setSparseSolver(NumericsMatrix* A, unsigned solver_id)
 {
   NM_linearSolverParams(A)->solver = solver_id;
 }
+
+unsigned NM_sparse_origin(NumericsMatrix* M)
+{
+  assert(M);
+  if (!M->matrix2) return -1;
+  return M->matrix2->origin;
+}
+
+int NM_check(const NumericsMatrix* const A)
+{
+  int info = 0;
+  if (!A->matrix2) return info;
+
+  if (A->matrix2->csc) info = cs_check_csc(A->matrix2->csc);
+  if (A->matrix2->csr) info = info ? info : cs_check_csc(A->matrix2->csr);
+  if (A->matrix2->triplet) info = info ? info : cs_check_triplet(A->matrix2->triplet);
+  return info;
+}
+

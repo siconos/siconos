@@ -54,17 +54,19 @@ extern "C"
 
    matrix in compressed row/column or triplet form :
 {
-int nzmax ;   : maximum number of entries
-int m  ;      : number of rows
-int n ;       : number of columns
-int *p ;      : compressed: row (size m+1) or column (size n+1) pointers; triplet: row indices (size nz)
-int *i ;      : compressed: column or row indices, size nzmax; triplet: column indices (size nz)
+csi nzmax ;   : maximum number of entries
+csi m  ;      : number of rows
+csi n ;       : number of columns
+csi *p ;      : compressed: row (size m+1) or column (size n+1) pointers; triplet: row indices (size nz)
+csi *i ;      : compressed: column or row indices, size nzmax; triplet: column indices (size nz)
 double *x ;   :  numerical values, size nzmax
-int nz ;      : # of entries in triplet matrix;
+csi nz ;      : # of entries in triplet matrix;
 -1 for compressed columns;
 -2 for compressed rows
 
-} */
+}
+
+csi is either int64_t or int32_t and this is controlled at compile time*/
 
 
 #define CSparseMatrix struct cs_sparse
@@ -73,6 +75,8 @@ int nz ;      : # of entries in triplet matrix;
 fprintf(stderr, #func ": unknown origin %d for sparse matrix\n", orig);
 
 
+#define NS_NROW_CSR(mat) mat->n
+#define NS_NCOL_CSR(mat) mat->m
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
@@ -106,6 +110,12 @@ extern "C"
    * \return 0 if the matrix is fine, 1 otherwise
    * */
   int cs_check_triplet(CSparseMatrix *T);
+
+  /** Check if the given triplet matrix is properly constructed (col and row indices are correct)
+   * \param T the sparse matrix to check
+   * \return 0 if the matrix is fine, 1 otherwise
+   * */
+  int cs_check_csc(CSparseMatrix *T);
 
   /** Create dense matrix from a CSparseMatrix.
    * \param A the sparse matrix

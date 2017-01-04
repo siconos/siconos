@@ -19,11 +19,38 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
-#include "SparseMatrix.h"
 #include <math.h>
 #include <float.h>
+#include <stdbool.h>
+#include "SparseMatrix.h"
 #include "SiconosCompat.h"
 #include "NumericsSparseMatrix.h"
+
+
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-function"
+#elif !(__INTEL_COMPILER || __APPLE__ )
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-function"
+#endif
+
+typedef struct
+{
+  csi i;
+  size_t indx;
+} sort_indices_struct;
+
+#define SORT_NAME sorter
+#define SORT_TYPE sort_indices_struct
+#define SORT_CMP(x, y) ((x).i - (y).i)
+#include "sort.h"
+
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#elif !(__INTEL_COMPILER || __APPLE__ )
+#pragma GCC diagnostic pop
+#endif
 
 void NM_sparse_null(NumericsSparseMatrix* A)
 {
@@ -247,3 +274,69 @@ size_t NM_sparse_nnz(const CSparseMatrix* const A)
   }
 }
 
+void NM_sparse_fix_csc(CSparseMatrix* A)
+{
+  csi* Ap = A->p;
+  csi* Ai = A->i;
+  double* xbck = NULL;
+  sort_indices_struct* s = NULL;
+  for (size_t j = 0; j < (size_t) A->n; ++j)
+  {
+    bool need_sorting = false;
+    csi max_indx = -1;
+    csi p = Ap[j];
+    for ( ; p < Ap[j+1]; ++p)
+    {
+      if (Ai[p] <= max_indx)
+      {
+        need_sorting = true;
+        break;
+      }
+      else
+      {
+        max_indx = Ai[p];
+      }
+    }
+    if (need_sorting)
+    {
+      double* Ax = A->x;
+      csi min_indx = Ai[p];
+      csi ps = p-1;
+      for ( ; ps > Ap[j]; --ps)
+      {
+        if (Ai[ps] < min_indx)
+        {
+          break;
+        }
+      }
+      size_t len = Ap[j+1] - ps;
+      s = (sort_indices_struct*)realloc(s, len * sizeof(sort_indices_struct));
+      xbck = (double*)realloc(xbck, len * sizeof(double));
+      memcpy(xbck, &Ax[ps], len * sizeof(double));
+      for (size_t i = 0, pp = ps; i < len; ++i, ++pp)
+      {
+        s[i].i = Ai[pp];
+        s[i].indx = i;
+      }
+
+      sorter_tim_sort(s, len);
+
+      for (size_t i = 0, pp = ps; i < len; ++i, ++pp)
+      {
+        Ai[pp] = s[i].i;
+        Ax[pp] = xbck[s[i].indx];
+      }
+    }
+  }
+
+  if (xbck)
+  {
+    free(xbck);
+    xbck = NULL;
+  }
+  if (s)
+  {
+    free(s);
+    s = NULL;
+  }
+}

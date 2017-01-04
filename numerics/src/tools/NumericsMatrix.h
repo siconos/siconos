@@ -667,6 +667,11 @@ extern "C"
 #endif
   }
 
+  /** Check the matrix (the sparse format for now)
+   * \param A the matrix to check
+   * \return 0 if the matrix storage is fine, 1 if not*/
+  int NM_check(const NumericsMatrix* const A);
+
   /** Allocate the internalData structure (but not its content!)
    * \param M the matrix to modify
    */
@@ -676,6 +681,12 @@ extern "C"
     M->internalData->iWorkSize = 0;
     M->internalData->iWork = NULL;
   }
+
+  /** return the origin of a sparse part of a matrix
+   * \param M the matrix
+   * \return -1 if the matrix has no sparse representation, the origin
+   * otherwise*/
+  unsigned NM_sparse_origin(NumericsMatrix* M);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

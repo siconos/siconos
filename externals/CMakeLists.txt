@@ -29,6 +29,7 @@ set(${COMPONENT}_DIRS
   optim_misc
   optim_misc/ql0001
   SOL/lumod-c
+  sort
   SuiteSparse/CSparse
   SuiteSparse/CSparse_extensions
   tools
