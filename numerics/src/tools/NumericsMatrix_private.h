@@ -203,6 +203,44 @@ typedef struct NM_SuperLU_MT_WS NM_SuperLU_MT_WS;
 
 
 #endif
+
+
+#ifdef WITH_MKL_PARDISO
+
+typedef struct NM_MKL_pardiso_WS NM_MKL_pardiso_WS;
+
+  /** Get (and create if necessary) the working data for MKL_pardiso
+   * \param A the matrix to be factorized
+   */
+  NM_MKL_pardiso_WS* NM_MKL_pardiso_ws(NumericsMatrix* A);
+
+  /** Free the working data for MKL_pardiso
+   * \param p a NumericsSparseLinearSolverParams object holding the data
+   */
+  void NM_MKL_pardiso_free(void* p);
+
+  /** Display extra information about the solve
+   * \param MKL_pardiso_ws the working space of MKL_pardiso
+   */
+  void NM_MKL_pardiso_extra_display(NM_MKL_pardiso_WS* MKL_pardiso_ws);
+
+  /** Factorize a matrix using MKL_pardiso
+   * \param A the matrix to factorize
+   * \return the workspace containing the factorized form and other infos
+   */
+  NM_MKL_pardiso_WS* NM_MKL_pardiso_factorize(NumericsMatrix* A);
+
+  /** Solve Ax = b using MKL_pardiso
+   * \param A the matrix
+   * \param[in,out] b on input the rhs, on output the solution
+   * \param superlu_ws the workspace for MKL_pardiso
+   * \return the information code
+   */
+  int NM_MKL_pardiso_solve(NumericsMatrix* A, double* b, NM_MKL_pardiso_WS* superlu_ws);
+
+
+#endif
+
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif

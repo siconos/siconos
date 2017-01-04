@@ -53,6 +53,7 @@ typedef struct {
   int (*compute_descent_direction)(void* data_opaque, double* z, double* w, double* descent_dir, SolverOptions* options); /**< function to get the descent direction, used for instance in the Newton-Josephy method */
   void (*compute_JacTheta_merit)(void* data_opaque, double* z, double* w, double* F_merit, double* workV, double* JacThetaF_merit, SolverOptions* options); /**< function to get the descent direction, used for instance in the Newton-Josephy method */
   void* (*get_set_from_problem_data)(void* problem); /**< Function returning the set description from the  */
+  int (*ls_failure_fn)(void* problem, double* z, double* w, double* descent_dir, double err, size_t status); /**< Function to call when the line search fails */
 } functions_LSA;
 
 // id of the stat structure 
@@ -72,7 +73,7 @@ typedef struct {
   double sigma; /**< ratio for the decrease in norm of the C-function (\f$gamma'\f$ in VFBLSA)*/
   double rho; /**< coefficient for the direction check*/
   bool keep_H; /**< keep the matrix H untouched. Only used in the dense case, where a copy of the matrix is factorized */
-  bool check_dir_quality; /**< Check the quality of the descent direction (Eqn 9.1.6 p. 805 in Facchinei & Pamg)*/
+  bool check_dir_quality; /**< Check the quality of the descent direction (Eqn 9.1.6 p. 805 in Facchinei & Pang)*/
 } newton_LSA_param;
 
 /** \struct newton_LSA_data Newton_methods.h*/
@@ -122,6 +123,7 @@ extern "C"
     functions->compute_descent_direction = NULL;
     functions->compute_JacTheta_merit = NULL;
     functions->get_set_from_problem_data = NULL;
+    functions->ls_failure_fn = NULL;
   }
 
   /** Set the parameters and data for newton_LSA

@@ -151,6 +151,8 @@ NumericsSparseLinearSolverParams* newNumericsSparseLinearSolverParams(void)
   p->solver = NS_SUPERLU;
 #elif defined(WITH_SUPERLU_MT)
   p->solver = NS_SUPERLU_MT;
+#elif defined(WITH_MKL_PARDISO)
+  p->solver = NS_MKL_PARDISO;
 #else
   p->solver = NS_CS_LUSOL;
 #endif
@@ -163,6 +165,8 @@ NumericsSparseLinearSolverParams* newNumericsSparseLinearSolverParams(void)
 
   p->iWork = NULL;
   p->dWork = NULL;
+  p->linalg_data = NULL;
+
   return p;
 }
 
@@ -193,6 +197,13 @@ NumericsSparseLinearSolverParams* freeNumericsSparseLinearSolverParams(NumericsS
   {
     free(p->solver_data);
     p->solver_data = NULL;
+  }
+
+  if (p->linalg_data)
+  {
+    p->linalg_data->free_fn(p->linalg_data);
+    free(p->linalg_data);
+    p->linalg_data = NULL;
   }
 
   free(p);

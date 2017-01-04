@@ -39,7 +39,7 @@ void Function_VI_SOCLCP(void * self, int n_notused, double *x, double *F)
   int n =   soclcp->n;
 
   cblas_dcopy(n , soclcp->q , 1 , F, 1);
-  prodNumericsMatrix(n, n, 1.0, soclcp->M, x, 1.0, F);
+  NM_gemv(1.0, soclcp->M, x, 1.0, F);
 }
 
 

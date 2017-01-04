@@ -19,7 +19,7 @@ updater:
     debian-sid: printf "deb http://llvm.org/apt/unstable/ llvm-toolchain-3.8 main\ndeb-src http://llvm.org/apt/unstable/ llvm-toolchain-3.8 main" >> /etc/apt/sources.list && apt-get update -y
     debian-jessie: printf "deb http://llvm.org/apt/jessie/ llvm-toolchain-jessie-3.8 main\ndeb-src http://llvm.org/apt/jessie/ llvm-toolchain-jessie-3.8 main" >> /etc/apt/sources.list && apt-get update -y
     debian: apt-get update -y
-    ubuntu-16.04: printf "deb http://ppa.launchpad.net/oli-huber/siconos/ubuntu xenial main\ndeb-src http://ppa.launchpad.net/oli-huber/siconos/ubuntu xenial main" >> /etc/apt/sources.list && apt-get update -y
+    ubuntu-16.04: printf "deb http://ppa.launchpad.net/siconos/siconos-daily/ubuntu xenial main\ndeb-src http://ppa.launchpad.net/siconos/siconos-daily/ubuntu xenial main\ndeb http://ppa.launchpad.net/siconos/fclib-daily/ubuntu xenial main\ndeb-src http://ppa.launchpad.net/siconos/fclib-daily/ubuntu xenial main " >> /etc/apt/sources.list && apt-get update -y
     fedora:  dnf --setopt=deltarpm=false install -y dnf-plugins-core && dnf -y copr enable xhub/siconos-git
 
 ##############################################################################
@@ -283,8 +283,9 @@ pkgs:
   # has been compiled with a different string impl ...
   cppunit_clang:
     ubuntu-16.10:
-      command:  wget http://siconos.gforge.inria.fr/build-42/cppunit-clang-ubuntu-15.10.tar.xz &&
-                tar xJf cppunit-clang-ubuntu-15.10.tar.xz --strip-components=1 -C /usr/lib/x86_64-linux-gnu/
+      command:  wget http://siconos.gforge.inria.fr/build-42/cppunit-clang-ubuntu-16.10.tar.xz &&
+                tar xJf cppunit-clang-ubuntu-16.10.tar.xz --strip-components=1 -C /usr/lib/x86_64-linux-gnu/ lib &&
+                tar xJf cppunit-clang-ubuntu-16.10.tar.xz --strip-components=1 -C /usr/include/cppunit/ include
 
   # this is for msan. It also contains the so files for cppunit compiled with msan
   libcxx_msan:

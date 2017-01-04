@@ -189,7 +189,7 @@ void ncp_pathsearch(NonlinearComplementarityProblem* problem, double* z, double*
       lcp_subproblem_check.M = problem->nabla_F;
       lcp_subproblem_check.q = lcp_subproblem.q;
       //cblas_dcopy(n, x, 1, lcp_subproblem_check.q , 1);
-      //prodNumericsMatrix(n, n, -1.0, problem->nabla_F, x_plus, 0.0, lcp_subproblem.q);
+      //NM_gemv(-1.0, problem->nabla_F, x_plus, 0.0, lcp_subproblem.q);
     }
 
     double norm_r2 = cblas_ddot(n, r, 1, r, 1);

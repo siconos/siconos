@@ -29,6 +29,17 @@
     #define SN_PTRDIFF_T_F "%zd"
 #endif
 
+
+#ifdef _WIN32
+  #define DLLPRE ""
+  #define DLLEXT ".dll"
+#else
+  #define DLLPRE "lib"
+  #define DLLEXT ".so"
+#endif
+
+#define DLL_FROM_NAME(X) DLLPRE X  DLLEXT
+
 #if defined(_MSC_VER)
 // for M_PI
 #define _USE_MATH_DEFINES

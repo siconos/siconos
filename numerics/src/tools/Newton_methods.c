@@ -34,6 +34,8 @@
 #include "VI_cst.h"
 #include "Friction_cst.h"
 
+#include "hdf5_logger.h"
+
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
 #include "debug.h"
@@ -115,7 +117,15 @@ void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverO
   assert(params);
   assert(H);
 
+  char* solver_opt = getenv("SICONOS_SPARSE_SOLVER");
+  if (solver_opt)
+  {
+    NM_setSparseSolver(H, atoi(solver_opt));
+  }
+
   search_data ls_data;
+  linesearch_fptr linesearch_algo;
+
   ls_data.compute_F = functions->compute_F;
   ls_data.compute_F_merit = functions->compute_F_merit;
   ls_data.z = z;
@@ -132,7 +142,6 @@ void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverO
   ls_data.searchtype = LINESEARCH;
   ls_data.extra_params = NULL;
 
-  linesearch_fptr linesearch_algo;
   if (options->iparam[SICONOS_IPARAM_LSA_SEARCH_CRITERION] == SICONOS_LSA_GOLDSTEIN)
   {
     goldstein_extra_params* pG = (goldstein_extra_params*)malloc(sizeof(goldstein_extra_params));
@@ -200,6 +209,17 @@ void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverO
 
   functions->compute_error(data, z, F, JacThetaF_merit, tol, &err);
 
+  unsigned log_hdf5 = SN_LOGLEVEL_ALL;
+
+  char* hdf5_filename = getenv("SICONOS_HDF5_NAME");
+  if (!hdf5_filename) hdf5_filename = "test.hdf5";
+  SN_logh5* logger_s = NULL;
+  if (log_hdf5)
+  {
+    logger_s = SN_logh5_init(hdf5_filename, itermax);
+    SN_logh5_scalar_uinteger(0, "version", logger_s->file);
+  }
+
   // Newton Iteration
   while ((iter < itermax) && (err > tol))
   {
@@ -208,15 +228,12 @@ void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverO
 
     functions->compute_F(data, z, F);
 
-    DEBUG_PRINT("z ");
-    DEBUG_EXPR_WE(for (unsigned int i = 0; i < n; ++i)
-        { DEBUG_PRINTF("% 2.2e ", z[i]) }
-        DEBUG_PRINT("\n"));
-
-    DEBUG_PRINT("F ");
-    DEBUG_EXPR_WE(for (unsigned int i = 0; i < n; ++i)
-        { DEBUG_PRINTF("% 2.2e ", F[i]) }
-        DEBUG_PRINT("\n"));
+    if (log_hdf5)
+    {
+      SN_logh5_new_iter(iter, logger_s);
+      SN_LOG_LIGHT(log_hdf5,SN_logh5_vec_double(n, z, "z", logger_s->group));
+      SN_LOG_VEC(log_hdf5,SN_logh5_vec_double(n, F, "F", logger_s->group));
+    }
 
     /**************************************************************************
      * START COMPUTATION DESCENTE DIRECTION
@@ -232,25 +249,25 @@ void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverO
       {
         functions->compute_H_desc(data, z, F, workV1, workV2, H);
         functions->compute_RHS_desc(data, z, F, F_merit);
+        if (log_hdf5)
+        {
+          SN_LOG_MAT(log_hdf5, SN_logh5_NM(H, "H_desc", logger_s));
+          SN_LOG_VEC(log_hdf5, SN_logh5_vec_double(n, F_merit, "F_merit_desc", logger_s->group));
+        }
+
       } /* No computation of JacThetaFF_merit, this will come later */
       else
       {
         functions->compute_H(data, z, F, workV1, workV2, H);
         functions->compute_F_merit(data, z, F, F_merit);
         NM_tgemv(1., H, F_merit, 0., JacThetaF_merit);
+        if (log_hdf5)
+        {
+          SN_LOG_MAT(log_hdf5,SN_logh5_NM(H, "H", logger_s));
+          SN_LOG_VEC(log_hdf5,SN_logh5_vec_double(n, F_merit, "F_merit", logger_s->group));
+        }
+
       }
-
-      DEBUG_PRINT("Directional derivative matrix H\n");
-      DEBUG_EXPR_WE(for (unsigned int i = 0; i < n; ++i)
-          { for(unsigned int j = 0 ; j < n; ++j)
-          { DEBUG_PRINTF("% 2.2e ", H[j * n + i]) }
-          DEBUG_PRINT("\n")});
-
-      DEBUG_PRINT("F_desc ");
-      DEBUG_EXPR_WE(for (unsigned int i = 0; i < n; ++i)
-          { DEBUG_PRINTF("% 2.2e ", F_merit[i]) }
-          DEBUG_PRINT("\n"));
-
 
       // Find direction by solving H * d = -F_desc
       cblas_dcopy(n, F_merit, incx, workV1, incy);
@@ -261,10 +278,7 @@ void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverO
      * END COMPUTATION DESCENTE DIRECTION
      */
 
-    DEBUG_PRINT("d_k ");
-    DEBUG_EXPR_WE(for (unsigned int i = 0; i < n; ++i)
-        { DEBUG_PRINTF("% 2.10e ", workV1[i]) }
-        DEBUG_PRINT("\n"));
+    if (!info_dir_search && log_hdf5)  SN_LOG_VEC(log_hdf5,SN_logh5_vec_double(n, workV1, "desc_direction", logger_s->group));
 
     /**************************************************************************
      * START COMPUTATION JacTheta F_merit
@@ -285,25 +299,35 @@ void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverO
         functions->compute_H(data, z, F, F_merit, workV2, H);
         functions->compute_F_merit(data, z, F, F_merit);
         NM_tgemv(1., H, F_merit, 0., JacThetaF_merit);
+        if (log_hdf5)
+        {
+          SN_LOG_MAT(log_hdf5,SN_logh5_NM(H, "H", logger_s));
+          SN_LOG_VEC(log_hdf5,SN_logh5_vec_double(n, F_merit, "F_merit", logger_s->group));
+        }
       }
     }
 
-
-    DEBUG_PRINT("JacThetaF_merit ");
-    DEBUG_EXPR_WE(for (unsigned int i = 0; i < n; ++i)
-        { DEBUG_PRINTF("% 2.2e ", JacThetaF_merit[i]) }
-        DEBUG_PRINT("\n"));
-
+    if (log_hdf5)
+    {
+      SN_LOG_VEC(log_hdf5,SN_logh5_vec_double(n, JacThetaF_merit, "JacThetaF_merit", logger_s->group));
+      SN_LOG_SCALAR(log_hdf5,SN_logh5_scalar_integer(info_dir_search, "info_dir_search_solve", logger_s->group));
+    }
 
     // xhub :: we should be able to continue even if DGESV fails!
     if (info_dir_search)
     {
       if (functions->compute_RHS_desc) // we are safe here
       {
-        DEBUG_PRINT("functions->compute_RHS_desc : no min descent direction ! searching for FB descent direction\n");
+        DEBUG_PRINT("functions->compute_RHS_desc : no  descent direction found! searching for merit descent direction\n");
         cblas_dcopy(n, F_merit, incx, workV1, incy);
         cblas_dscal(n, -1.0, workV1, incx);
         info_dir_search = NM_gesv(H, workV1, params->keep_H);
+
+        if (log_hdf5)
+        {
+          SN_LOG_SCALAR(log_hdf5,SN_logh5_scalar_integer(info_dir_search, "info_dir_search_solve_meritdesc", logger_s->group));
+          if (!info_dir_search) SN_LOG_VEC(log_hdf5,SN_logh5_vec_double(n, workV1, "desc_merit_direction", logger_s->group));
+        }
       }
       else
       {
@@ -337,11 +361,18 @@ void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverO
     {
       cblas_dcopy(n, JacThetaF_merit, incx, workV1, incy);
       cblas_dscal(n, -1.0, workV1, incx);
+      theta_iter = INFINITY;
     }
 
     tau = 1.0;
     if ((theta_iter > params->sigma * theta) || (info_dir_search > 0 && functions->compute_RHS_desc)) // Newton direction not good enough or min part failed
     {
+      if (log_hdf5)
+      {
+        SN_LOG_SCALAR(log_hdf5,SN_logh5_scalar_double(theta_iter, "theta_iter", logger_s->group));
+        SN_LOG_SCALAR(log_hdf5,SN_logh5_scalar_double(params->sigma * theta, "theta_iter_threshold", logger_s->group));
+      }
+
       if (verbose > 1)
         printf("newton_LSA :: pure Newton direction not acceptable theta_iter = %g > %g = theta\n", theta_iter, theta);
 
@@ -353,18 +384,26 @@ void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverO
       // TODO we should not compute this if min descent search has failed
       threshold = -params->rho*pow(cblas_dnrm2(n, workV1, incx), params->p);
       //threshold = -rho*cblas_dnrm2(n, workV1, incx)*cblas_dnrm2(n, JacThetaF_merit, incx);
+
+      if (log_hdf5)
+      {
+        SN_LOG_SCALAR(log_hdf5,SN_logh5_scalar_double(preRHS, "preRHS_newton", logger_s->group));
+        SN_LOG_SCALAR(log_hdf5,SN_logh5_scalar_double(threshold, "preRHS_threshold", logger_s->group));
+      }
+
       if (params->check_dir_quality && preRHS > threshold)
       {
         if (verbose > 1)
           printf("newton_LSA :: direction not acceptable %g > %g\n", preRHS, threshold);
+
         cblas_dcopy(n, JacThetaF_merit, incx, workV1, incy);
         cblas_dscal(n, -1.0, workV1, incx);
         preRHS = cblas_ddot(n, JacThetaF_merit, incx, workV1, incy);
-        DEBUG_PRINT("steepest descent ! d_k ");
-        DEBUG_EXPR_WE(for (unsigned int i = 0; i < n; ++i)
-            { DEBUG_PRINTF("% 2.2e ", workV1[i]) }
-            DEBUG_PRINT("\n"));
+      }
 
+      if (log_hdf5)
+      {
+        SN_LOG_SCALAR(log_hdf5,SN_logh5_scalar_double(preRHS, "preRHS", logger_s->group));
       }
 
       // Line search
@@ -387,6 +426,15 @@ void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverO
     // Error Evaluation
     functions->compute_error(data, z, F, JacThetaF_merit, tol, &err);
 
+    if (log_hdf5)
+    {
+      SN_logh5_scalar_double(err, "error", logger_s->group);
+      SN_logh5_scalar_double(tau, "tau", logger_s->group);
+      SN_logh5_scalar_double(theta, "theta", logger_s->group);
+      SN_logh5_end_iter(logger_s);
+    }
+
+
     if (options->callback)
     {
       stats_iteration.merit_value = theta;
@@ -399,6 +447,7 @@ void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverO
 
   options->iparam[1] = iter;
   options->dparam[1] = err;
+
 
   if (verbose > 0)
   {
@@ -431,6 +480,14 @@ newton_LSA_free:
     free(workV2);
   }
   free_ls_data(&ls_data);
+
+  if (log_hdf5)
+  {
+    SN_logh5_scalar_uinteger(iter, "nb_iter", logger_s->file);
+    SN_logh5_scalar_uinteger(err, "residual", logger_s->file);
+    if (logger_s->group) SN_logh5_end_iter(logger_s);
+    SN_logh5_end(logger_s);
+  }
 }
 
 void newton_lsa_default_SolverOption(SolverOptions* options)

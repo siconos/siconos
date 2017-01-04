@@ -28,6 +28,19 @@
 #include "SiconosConfig.h"
 #include "NumericsFwd.h"
 #include "SparseMatrix.h" // for freeNSLSP
+
+
+/**\struct linalg_data_t NumericsSparseMatrix.h
+ * generic data struct for linear algebra operations
+ */
+typedef struct linalg_data_t
+{
+  int id;
+  void  (*free_fn)(struct linalg_data_t*);
+} linalg_data_t;
+
+typedef enum { SN_LINALG_UNKNOWN, SN_LINALG_MKL } linalg_data_id;
+
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {
@@ -36,7 +49,7 @@ extern "C"
 
   /** \enum NumericsSparseLinearSolver NumericsSparseMatrix.h
    * id for linear algebra solvers */
-  typedef enum { NS_CS_LUSOL, NS_MUMPS, NS_UMFPACK, NS_PARDISO, NS_SUPERLU, NS_SUPERLU_MT } NumericsSparseLinearSolver;
+  typedef enum { NS_CS_LUSOL, NS_MUMPS, NS_UMFPACK, NS_MKL_PARDISO, NS_SUPERLU, NS_SUPERLU_MT } NumericsSparseLinearSolver;
 
   /** \enum NumericsSparseTypesNZ
    * value of nz for some matrix storage type */
@@ -55,6 +68,8 @@ extern "C"
     int iWorkSize; /**< size of integer work vector array */
     double* dWork;
     int dWorkSize;
+
+    linalg_data_t* linalg_data; /**< data for the linear algebra */
   };
 
   /**\enum NumericsSparseOrigin NumericsSparseMatrix.h

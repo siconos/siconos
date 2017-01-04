@@ -41,7 +41,7 @@ static int vi_compute_decent_dir_by_avi(void* problem, double* z, double* F, dou
   vi_pb->compute_nabla_F(vi_pb, n, z, relay_pb->M);
 
   cblas_dcopy(n, F, 1, relay_pb->q, 1);
-  prodNumericsMatrix(n, n, -1.0, relay_pb->M, z, 1.0, relay_pb->q);
+  NM_gemv(-1.0, relay_pb->M, z, 1.0, relay_pb->q);
 
   int local_info = 0;
   relay_avi_caoferris(relay_pb, descent_dir, F, &local_info, options->internalSolvers);

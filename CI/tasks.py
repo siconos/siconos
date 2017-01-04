@@ -19,7 +19,8 @@ default = CiTask(
     pkgs=['build-base', 'gcc', 'gfortran', 'gnu-c++', 'atlas-lapack',
           'lpsolve', 'python-env'],
     srcs=['.'],
-    targets={'.': ['docker-build', 'docker-ctest']})
+    targets={'.': ['docker-build', 'docker-ctest'],
+             'examples': ['docker-build', 'docker-ctest']})
 
 #
 # 3. all the tasks
@@ -31,15 +32,13 @@ siconos_test_deb = CiTask(
     ci_config='examples',
     distrib='ubuntu:16.04',
     pkgs=['siconos'],
-    srcs=['examples'],
-    targets={'examples': ['docker-build', 'docker-ctest']})
+    srcs=['examples'])
 
 siconos_test_rpm = CiTask(
     ci_config='examples',
     distrib='fedora:latest',
     pkgs=['siconos'],
-    srcs=['examples'],
-    targets={'examples': ['docker-build', 'docker-ctest']})
+    srcs=['examples'])
 
 siconos_debian_latest = siconos_default.copy()(
     ci_config='with_bullet',

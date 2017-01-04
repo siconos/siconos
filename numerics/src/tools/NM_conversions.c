@@ -17,9 +17,18 @@
 */
 
 
-#include "NM_conversions.h"
 #include <assert.h>
 #include <stdio.h>
+
+#include "NM_conversions.h"
+#include "tlsdef.h"
+#include "MKL_common.h"
+
+typedef void (*mkl_dcsrcoo_t) (const __INT_T *job , const __INT_T *n , double *acsr , __INT_T *ja , __INT_T *ia , __INT_T *nnz , double *acoo , __INT_T *rowind , __INT_T *colind , __INT_T *info );
+typedef void (*mkl_dcsrcsc_t) (const __INT_T *job , const __INT_T *n , double *acsr , __INT_T *ja , __INT_T *ia , double *acsc , __INT_T *ja1 , __INT_T *ia1 , __INT_T *info );
+
+tlsvar mkl_dcsrcoo_t mkl_dcsrcoo_p = NULL;
+tlsvar mkl_dcsrcsc_t mkl_dcsrcsc_p = NULL;
 
 CSparseMatrix* NM_csc_to_triplet(CSparseMatrix* csc)
 {
@@ -41,8 +50,9 @@ CSparseMatrix* NM_csc_to_triplet(CSparseMatrix* csc)
 
 CSparseMatrix* NM_triplet_to_csr(CSparseMatrix* triplet)
 {
-#ifdef WITH_MKL
+#ifdef WITH_MKL_SPBLAS
   assert(triplet);
+  CHECK_MKL(load_mkl_function("mkl_dcsrcoo", (void**)&mkl_dcsrcoo_p));
   if (triplet->m != triplet->n)
   {
     fprintf(stderr, "NM_triplet_to_csr :: the matrix has to be square\n");
@@ -56,7 +66,7 @@ CSparseMatrix* NM_triplet_to_csr(CSparseMatrix* triplet)
   csi job[6] = {0};
   csi info = 0;
   job[0] = 2;
-  mkl_dcsrcoo(job, &n, csr->x, csr->i, csr->p, &(triplet->nz), triplet->x, triplet->i, triplet->p, &info);
+  (*mkl_dcsrcoo_p)(job, &n, csr->x, csr->i, csr->p, &(triplet->nz), triplet->x, triplet->i, triplet->p, &info);
 
   return csr;
 #else
@@ -67,8 +77,9 @@ CSparseMatrix* NM_triplet_to_csr(CSparseMatrix* triplet)
 
 CSparseMatrix* NM_csr_to_triplet(CSparseMatrix* csr)
 {
-#ifdef WITH_MKL
+#ifdef WITH_MKL_SPBLAS
   assert(csr);
+  CHECK_MKL(load_mkl_function("mkl_dcsrcoo", (void**)&mkl_dcsrcoo_p));
   if (csr->m != csr->n)
   {
     fprintf(stderr, "NM_csr_to_triplet :: the matrix has to be square\n");
@@ -79,8 +90,11 @@ CSparseMatrix* NM_csr_to_triplet(CSparseMatrix* csr)
 
   csi n = csr->n;
   csi job[6] = {0};
+  job[4] = csr->p[csr->m];
+  job[5] = 3;
   csi info = 0;
-  mkl_dcsrcoo(job, &n, csr->x, csr->i, csr->p, &(csr->p[csr->m]), triplet->x, triplet->i, triplet->p, &info);
+  (*mkl_dcsrcoo_p)(job, &n, csr->x, csr->i, csr->p, &(csr->p[csr->m]), triplet->x, triplet->i, triplet->p, &info);
+  triplet->nz = csr->p[csr->m];
 
   return triplet;
 #else
@@ -91,8 +105,9 @@ CSparseMatrix* NM_csr_to_triplet(CSparseMatrix* csr)
 
 CSparseMatrix* NM_csc_to_csr(CSparseMatrix* csc)
 {
-#ifdef WITH_MKL
+#ifdef WITH_MKL_SPBLAS
   assert(csc);
+  CHECK_MKL(load_mkl_function("mkl_dcsrcsc", (void**)&mkl_dcsrcsc_p));
   if (csc->m != csc->n)
   {
     fprintf(stderr, "NM_csc_to_csr :: the matrix has to be square\n");
@@ -105,8 +120,9 @@ CSparseMatrix* NM_csc_to_csr(CSparseMatrix* csc)
   csi n = csr->n;
   csi job[6] = {0};
   csi info = 0;
-  job[0] = 2;
-  mkl_dcsrcsc(job, &n, csr->x, csr->i, csr->p, &(csc->p[csc->n]), csc->x, csc->i, csc->p, &info);
+  job[0] = 1;
+  job[5] = 1;
+  (*mkl_dcsrcsc_p)(job, &n, csr->x, csr->i, csr->p, csc->x, csc->i, csc->p, &info);
 
   return csr;
 #else
@@ -117,7 +133,9 @@ CSparseMatrix* NM_csc_to_csr(CSparseMatrix* csc)
 
 CSparseMatrix* NM_csr_to_csc(CSparseMatrix* csr)
 {
-#ifdef WITH_MKL
+#ifdef WITH_MKL_SPBLAS
+  assert(csr);
+  CHECK_MKL(load_mkl_function("mkl_dcsrcsc", (void**)&mkl_dcsrcsc_p));
   if (csr->m != csr->n)
   {
     fprintf(stderr, "NM_csr_to_csc :: the matrix has to be square\n");
@@ -129,8 +147,9 @@ CSparseMatrix* NM_csr_to_csc(CSparseMatrix* csr)
 
   csi n = csr->n;
   csi job[6] = {0};
+  job[5] = 1;
   csi info = 0;
-  mkl_dcsrcsc(job, &n, csr->x, csr->i, csr->p, &(csr->p[csr->m]), csc->x, csc->i, csc->p, &info);
+  (*mkl_dcsrcsc_p)(job, &n, csr->x, csr->i, csr->p, csc->x, csc->i, csc->p, &info);
 
   return csc;
 #else

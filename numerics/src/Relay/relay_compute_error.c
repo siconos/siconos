@@ -45,7 +45,7 @@ int relay_compute_error(RelayProblem* problem, double* restrict z , double* rest
   /* Computes w = Mz + q */
   int n = problem->size;
   cblas_dcopy(n , problem->q , 1 , w , 1);  // w <-q
-  prodNumericsMatrix(n, n, 1.0, problem->M, z, 1.0, w);
+  NM_gemv(1.0, problem->M, z, 1.0, w);
   double * ztmp = (double*)malloc(n * sizeof(double));
   cblas_dcopy_msan(n , z , 1 , ztmp, 1);  // ztmp <-z
 

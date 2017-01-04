@@ -36,37 +36,10 @@
 //#define DEBUG_MESSAGES
 #include "debug.h"
 
-void prodNumericsMatrix(int sizeX, int sizeY, double alpha, NumericsMatrix* A, const double* const x, double beta, double* y)
-{
-
-  assert(A);
-  assert(x);
-  assert(y);
-  assert(A->size0 == sizeY);
-  assert(A->size1 == sizeX);
-
-  int storage = A->storageType;
-
-  /* dense storage */
-  switch (storage)
-  {
-    case NM_DENSE:
-      cblas_dgemv(CblasColMajor, CblasNoTrans, sizeY, sizeX, alpha, A->matrix0, sizeY, x, 1, beta, y, 1);
-    break;
-  /* SparseBlock storage */
-    case NM_SPARSE_BLOCK:
-      prodSBM(sizeX, sizeY, alpha, A->matrix1, x, beta, y);
-    break;
-  /* sparse storage*/
-    case NM_SPARSE:
-      cs_aaxpy(alpha, NM_csc(A), x, beta, y);
-    break;
-
-    default:
-    fprintf(stderr, "Numerics, NumericsMatrix, product matrix - vector prod(A,x,y) failed, unknown storage type for A.\n");
-    exit(EXIT_FAILURE);
-  }
-}
+#ifdef WITH_MKL_SPBLAS
+#include "MKL_common.h"
+#include "NM_MKL_spblas.h"
+#endif
 
 void prodNumericsMatrix3x3(int sizeX, int sizeY, NumericsMatrix* A,
                            double* const x, double* y)
@@ -99,41 +72,6 @@ void prodNumericsMatrix3x3(int sizeX, int sizeY, NumericsMatrix* A,
 
     default:
     fprintf(stderr, "Numerics, NumericsMatrix, product matrix - vector prod(A,x,y) failed, unknown storage type for A.\n");
-    exit(EXIT_FAILURE);
-  }
-}
-
-
-
-
-void prodNumericsMatrixNumericsMatrix(double alpha, const NumericsMatrix* const A, const NumericsMatrix* const B, double beta,  NumericsMatrix* C)
-{
-
-  assert(A);
-  assert(B);
-  assert(C);
-  int astorage = A->storageType;
-  int bstorage = B->storageType;
-  int cstorage = C->storageType;
-  assert(A->size1 == B->size0);
-  assert(C->size0 == A->size0);
-  assert(C->size1 == B->size1);
-
-
-  /* double* storage */
-  if ((astorage == NM_DENSE) && (bstorage == NM_DENSE) && (cstorage == NM_DENSE))
-  {
-    /*      cblas_dgemv(CblasColMajor,CblasNoTrans, sizeY, sizeX, alpha, A->matrix0, sizeY, x, 1, beta, y, 1); */
-    cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans, A->size0, B->size1, A->size1, alpha, A->matrix0, A->size0, B->matrix0, B->size0, beta, C->matrix0, C->size0);
-  }
-  /* SparseBlock storage */
-  else if ((astorage == NM_SPARSE_BLOCK) && (bstorage == NM_SPARSE_BLOCK) && (cstorage == NM_SPARSE_BLOCK))
-  {
-    prodSBMSBM(alpha, A->matrix1, B->matrix1, beta, C->matrix1);
-  }
-  else
-  {
-    fprintf(stderr, "Numerics, NumericsMatrix, product matrix - matrix prod(A,B,C) not yet implemented.\n");
     exit(EXIT_FAILURE);
   }
 }
@@ -1701,6 +1639,10 @@ CSparseMatrix* NM_csr(NumericsMatrix *A)
 void NM_gemv(const double alpha, NumericsMatrix* A, const double *x,
              const double beta, double *y)
 {
+  assert(A);
+  assert(x);
+  assert(y);
+
   switch (A->storageType)
   {
   case NM_DENSE:
@@ -1819,7 +1761,7 @@ void NM_gemm(const double alpha, NumericsMatrix* A, NumericsMatrix* B,
     assert(A->matrix1);
     assert(B->matrix1);
     assert(C->matrix1);
-    prodNumericsMatrixNumericsMatrix(alpha, A, B, beta, C);
+    prodSBMSBM(alpha, A->matrix1, B->matrix1, beta, C->matrix1);
 
     NM_clearDense(C);
     NM_clearSparseStorage(C);
@@ -1829,6 +1771,23 @@ void NM_gemm(const double alpha, NumericsMatrix* A, NumericsMatrix* B,
   {
     /* We need to free the allocated data here, hence we have to save the
      * matrix pointer. Otherwise, we have a memleak */
+#ifdef WITH_MKL_SPBLAS
+    if (check_mkl_lib() && (fabs(beta -1.) < 100*DBL_EPSILON))
+    {
+      if (!B->matrix2) NM_triplet(B);
+      if (!C->matrix2) NM_triplet(C);
+      NumericsSparseMatrix* tmp_matrix = NM_MKL_spblas_gemm(0, A->matrix2, B->matrix2);
+      assert(tmp_matrix);
+      NumericsSparseMatrix* result = NM_MKL_spblas_add(0, alpha, tmp_matrix, C->matrix2);
+      int size0 = C->size0;
+      int size1 = C->size1;
+      freeNumericsMatrix(C);
+      NM_null(C);
+      fillNumericsMatrix(C, NM_SPARSE, size0, size1, result);
+      NM_MKL_to_sparse_matrix(C);
+      return;
+    }
+#endif
     CSparseMatrix* tmp_matrix = cs_multiply(NM_csc(A), NM_csc(B));
     assert(tmp_matrix && "NM_gemm :: cs_multiply failed");
     NM_sparse_fix_csc(tmp_matrix);
@@ -2205,49 +2164,40 @@ int NM_gesv_expert(NumericsMatrix* A, double *b, unsigned keep)
 
 #endif /* WITH_SUPERLU_MT */
 
-#ifdef WITH_PARDISO
-    case NS_PARDISO:
+#ifdef WITH_MKL_PARDISO
+    case NS_MKL_PARDISO:
     {
       if (verbose >= 2)
       {
-        printf("NM_gesv: using PARDISO\n" );
+        printf("NM_gesv: using MKL_PARDISO\n" );
       }
 
-      NM_PARDISO_WS* pardiso_ws = NM_PARDISO_factorize(A);
+      NM_MKL_pardiso_WS* pardiso_ws = NM_MKL_pardiso_factorize(A);
 
       if (!pardiso_ws)
       {
         if (verbose > 1)
-          fprintf(stderr, "NM_gesv: cannot factorize the matrix with PARDISO\n");
+          fprintf(stderr, "NM_gesv: cannot factorize the matrix with MKL_PARDISO\n");
 
-        NM_PARDISO_free(p);
+        NM_MKL_pardiso_free(p);
         return -1;
       }
 
-      info = NM_PARDISO_solve(A);
-
-      if (info)
-      {
-        PARDISO_FN(report_status) (pardiso_ws->control, (csi)info);
-      }
-      else
-      {
-        cblas_dcopy(C->n, pardiso_ws->x, 1, b, 1);
-      }
+      info = NM_MKL_pardiso_solve(A, b, pardiso_ws);
 
       if (keep != NM_KEEP_FACTORS)
       {
-        NM_PARDISO_free(p);
+        NM_MKL_pardiso_free(p);
       }
       else if (!p->solver_free_hook)
       {
-        p->solver_free_hook = &NM_PARDISO_free;
+        p->solver_free_hook = &NM_MKL_pardiso_free;
       }
 
       break;
     }
 
-#endif /* WITH_PARDISO */
+#endif /* WITH_MKL_pardiso */
     default:
     {
       fprintf(stderr, "NM_gesv: unknown sparse linearsolver %d\n", p->solver);

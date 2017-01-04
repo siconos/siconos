@@ -117,7 +117,7 @@ void fc3d_fixedPointProjection(FrictionContactProblem* problem, double *reaction
 
       /* velocity_k <- q + M * reaction_k  */
       beta = 1.0;
-      prodNumericsMatrix(n, n, alpha, M, reaction_k, beta, velocity_k);
+      NM_gemv(alpha, M, reaction_k, beta, velocity_k);
 
       ls_iter = 0 ;
       success =0;
@@ -149,7 +149,7 @@ void fc3d_fixedPointProjection(FrictionContactProblem* problem, double *reaction
         /* velocity <- q + M * reaction  */
         cblas_dcopy(n , q , 1 , velocity, 1);
         beta = 1.0;
-        prodNumericsMatrix(n, n, alpha, M, reaction, beta, velocity);
+        NM_gemv(alpha, M, reaction, beta, velocity);
 
         DEBUG_EXPR_WE( for (int i =0; i< 5 ; i++)
                        {

@@ -79,7 +79,7 @@ extern "C"
     /* r = F_+(x) = F(x_+) + x - x_+ */
     /* the real q = q - r = x_+ - x - M x_plus */
     /* q = -M x_plus */
-    prodNumericsMatrix(n, n, -1.0, problem->nabla_F, x_plus, 0.0, lcp_subproblem->q);
+    NM_gemv(-1.0, problem->nabla_F, x_plus, 0.0, lcp_subproblem->q);
 
     /* first compute r = x - x_+ */
     cblas_dcopy(n, x, 1, r, 1); /* r = x */

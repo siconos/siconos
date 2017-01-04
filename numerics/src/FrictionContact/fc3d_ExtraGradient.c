@@ -118,7 +118,7 @@ void fc3d_ExtraGradient(FrictionContactProblem* problem, double *reaction, doubl
       cblas_dcopy(n , q , 1 , velocitytmp, 1);
 
 
-      prodNumericsMatrix(n, n, alpha, M, reactiontmp, beta, velocitytmp);
+      NM_gemv(alpha, M, reactiontmp, beta, velocitytmp);
       // projection for each contact
       for (contact = 0 ; contact < nc ; ++contact)
       {
@@ -130,7 +130,7 @@ void fc3d_ExtraGradient(FrictionContactProblem* problem, double *reaction, doubl
         projectionOnCone(&reactiontmp[pos], mu[contact]);
       }
       cblas_dcopy(n , q , 1 , velocitytmp, 1);
-      prodNumericsMatrix(n, n, alpha, M, reactiontmp, beta, velocitytmp);
+      NM_gemv(alpha, M, reactiontmp, beta, velocitytmp);
       // projection for each contact
       for (contact = 0 ; contact < nc ; ++contact)
       {
@@ -178,7 +178,7 @@ void fc3d_ExtraGradient(FrictionContactProblem* problem, double *reaction, doubl
 
       /* velocity_k <- q + M * reaction_k  */
       beta = 1.0;
-      prodNumericsMatrix(n, n, alpha, M, reaction_k, beta, velocity_k);
+      NM_gemv(alpha, M, reaction_k, beta, velocity_k);
 
       ls_iter = 0 ;
       success =0;
@@ -207,7 +207,7 @@ void fc3d_ExtraGradient(FrictionContactProblem* problem, double *reaction, doubl
         /* velocity <- q + M * reaction  */
         beta = 1.0;
         cblas_dcopy(n , q , 1 , velocity, 1);
-        prodNumericsMatrix(n, n, alpha, M, reaction, beta, velocity);
+        NM_gemv(alpha, M, reaction, beta, velocity);
 
 
         /* velocitytmp <- velocity */
@@ -261,7 +261,7 @@ void fc3d_ExtraGradient(FrictionContactProblem* problem, double *reaction, doubl
       }
       /* velocitytmp <- M* reaction* q  */
       cblas_dcopy(n , q , 1 , velocitytmp, 1);
-      prodNumericsMatrix(n, n, alpha, M, reaction, beta, velocitytmp);
+      NM_gemv(alpha, M, reaction, beta, velocitytmp);
 
       // projection for each contact
       for (contact = 0 ; contact < nc ; ++contact)

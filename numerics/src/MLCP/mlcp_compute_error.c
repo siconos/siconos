@@ -53,7 +53,7 @@ int mlcp_compute_error(MixedLinearComplementarityProblem* problem, double *z, do
 
     /* Computes w = Mz + q */
     cblas_dcopy(NbLines , problem->q , incx , w , incy);
-    prodNumericsMatrix(problem->M->size1, problem->M->size0, 1.0, problem->M, z, 1.0, w);
+    NM_gemv(1.0, problem->M, z, 1.0, w);
 
   }
   /* Problem in the form ABCD */

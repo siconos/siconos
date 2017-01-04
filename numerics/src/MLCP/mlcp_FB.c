@@ -65,7 +65,7 @@ void computeFz(double* z)
   int size = sN + sM;
   //F(z)=Mz+q
   cblas_dcopy(size , sProblem->q , incx , sFz , incy);
-  prodNumericsMatrix(size, size, 1.0, sProblem->M, z, 1.0, sFz);
+  NM_gemv(1.0, sProblem->M, z, 1.0, sFz);
 }
 
 void F_MCPFischerBurmeister(int size, double* z, double* FBz, int a)

@@ -43,7 +43,7 @@ void Function_VI_FC3D(void * self, int n_notused, double *x, double *F)
   int n = fc3d->numberOfContacts *  fc3d->dimension;
 
   cblas_dcopy(n , fc3d->q , 1 , F, 1);
-  prodNumericsMatrix(n, n, 1.0, fc3d->M, x, 1.0, F);
+  NM_gemv(1.0, fc3d->M, x, 1.0, F);
 
   int contact =0;
 

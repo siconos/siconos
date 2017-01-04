@@ -80,21 +80,24 @@ For the second way of storage, SparseBlockStructuredMatrix we have:
 
 \subsection NMAlloc Create, fill and delete NumericsMatrix functions
 
-- NM_create() : allocation without initial values
-- NM_create_from_data() : allocation and set default values from external data
-- fillNumericsMatrix() : needs a pre-defined NumericsMatrix, set default values from external data
-- freeNumericsMatrix()
+- NM_create(): allocation without initial values
+- NM_create_from_data(): allocation and set default values from external data
+- fillNumericsMatrix(): needs a pre-defined NumericsMatrix, set default values from external data
+- freeNumericsMatrix(): free a NumericsMatrix
 
 These last two functions accept a <i>data</i> parameter, which if non-NULL contains the matrix data.
-
 
 \subsection NM_LA Linear Algebra
 
 The following linear algebra operation are supported:
 
-  - product matrix - vector: prodNumericsMatrix()
-  - product matrix - matrix: prodNumericsMatrixNumericsMatrix()
+- BLAS-like functions:
+  - product matrix - vector: NM_gemv() and NM_tgemv() (transpose)
+  - product matrix - matrix: NM_gemm()
   - partial product matrix - vector: NM_row_prod()
+
+-LAPACK-like functions
+  -NM_gesv(): solve a linear system Ax = b
 
 \subsection NM_IO Input / Output
 
@@ -172,17 +175,6 @@ typedef enum {
 extern "C"
 {
 #endif
-  /** Matrix - vector product y = alpha*A*x + beta*y
-      \param[in] sizeX dim of the vector x
-      \param[in] sizeY dim of the vector y
-      \param[in] alpha coefficient
-      \param[in] A the matrix to be multiplied
-      \param[in] x the vector to be multiplied
-      \param[in] beta coefficient
-      \param[in,out] y the resulting vector
-  */
-  void prodNumericsMatrix(int sizeX, int sizeY, double alpha, NumericsMatrix* A, const double* const x, double beta, double* y);
-
   /** Matrix - vector product y = A*x + y
       \param[in] sizeX dim of the vector x
       \param[in] sizeY dim of the vector y
@@ -192,15 +184,6 @@ extern "C"
   */
   void prodNumericsMatrix3x3(int sizeX, int sizeY,  NumericsMatrix* A,
                              double* const x, double* y);
-
-  /** Matrix - Matrix product C = alpha*A*B + beta*B
-      \param[in] alpha coefficient
-      \param[in] A the matrix to be multiplied
-      \param[in] B the matrix to be multiplied
-      \param[in] beta coefficient
-      \param[in,out] C the resulting matrix
-  */
-  void prodNumericsMatrixNumericsMatrix(double alpha, const NumericsMatrix* const A, const NumericsMatrix* const B, double beta, NumericsMatrix* C);
 
   /** Row of a Matrix - vector product y = rowA*x or y += rowA*x, rowA being a submatrix of A (sizeY rows and sizeX columns)
       \param[in] sizeX dim of the vector x

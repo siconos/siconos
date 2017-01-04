@@ -94,7 +94,7 @@ void fc3d_HyperplaneProjection(FrictionContactProblem* problem, double *reaction
     cblas_dcopy(n , q , 1 , velocitytmp, 1);
     cblas_dcopy(n , reaction , 1 , reactiontmp, 1);
 
-    prodNumericsMatrix(n, n, 1.0, M, reactiontmp, 1.0, velocitytmp);
+    NM_gemv(1.0, M, reactiontmp, 1.0, velocitytmp);
 
 
     // projection for each contact
@@ -138,7 +138,7 @@ void fc3d_HyperplaneProjection(FrictionContactProblem* problem, double *reaction
 
       cblas_dcopy(n , q , 1 , velocitytmp, 1);
 
-      prodNumericsMatrix(n, n, 1.0, M, reactiontmp2, 1.0, velocitytmp);
+      NM_gemv(1.0, M, reactiontmp2, 1.0, velocitytmp);
 
 
 

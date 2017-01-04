@@ -230,7 +230,7 @@ void variationalInequality_ExtraGradient(VariationalInequality* problem, double 
 
         /* velocitytmp <- q  */
         /* cblas_dcopy(n , q , 1 , velocitytmp, 1); */
-        /* prodNumericsMatrix(n, n, alpha, M, reaction, beta, velocitytmp); */
+        /* NM_gemv(alpha, M, reaction, beta, velocitytmp); */
 
         problem->F(problem, n, x,wtmp);
 
@@ -354,7 +354,7 @@ void variationalInequality_ExtraGradient(VariationalInequality* problem, double 
 
         /* velocitytmp <- q  */
         /* cblas_dcopy(n , q , 1 , velocitytmp, 1); */
-        /* prodNumericsMatrix(n, n, alpha, M, reaction, beta, velocitytmp); */
+        /* NM_gemv(alpha, M, reaction, beta, velocitytmp); */
 
         problem->F(problem, n, x,wtmp);
 

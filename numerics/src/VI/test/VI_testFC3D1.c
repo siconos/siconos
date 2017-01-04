@@ -33,7 +33,7 @@ void Ftest(void * self, int n_unused, double *x, double *F)
   int n = nc * nLocal; 
 
   cblas_dcopy(n , fc3d->q , 1 , F, 1);
-  prodNumericsMatrix(n, n, 1.0, fc3d->M, x, 1.0, F);
+  NM_gemv(1.0, fc3d->M, x, 1.0, F);
   int contact =0;
  
   for (contact = 0 ; contact < nc ; ++contact)

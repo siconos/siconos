@@ -51,7 +51,7 @@ int lcp_compute_error(LinearComplementarityProblem* problem, double *z , double 
   int incx = 1, incy = 1;
   unsigned int n = problem->size;
   cblas_dcopy(n , problem->q , incx , w , incy);  // w <-q
-  prodNumericsMatrix(n, n, 1.0, problem->M, z, 1.0, w);
+  NM_gemv(1.0, problem->M, z, 1.0, w);
   double norm_q = cblas_dnrm2(n , problem->q , incx);
   lcp_compute_error_only(n, z, w, error);
   *error = *error / (norm_q + 1.0); /* Need some comments on why this is needed */

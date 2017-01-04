@@ -92,7 +92,7 @@ void fc3d_ProjectedGradientOnCylinder(FrictionContactProblem* problem, double *r
     {
       ++iter;
       cblas_dcopy(n , q , 1 , velocitytmp, 1);
-      prodNumericsMatrix(n, n, alpha, M, reaction, beta, velocitytmp);
+      NM_gemv(alpha, M, reaction, beta, velocitytmp);
       // projection for each contact
       cblas_daxpy(n, -1.0, velocitytmp, 1, reaction , 1);
       for (contact = 0 ; contact < nc ; ++contact)
@@ -139,7 +139,7 @@ void fc3d_ProjectedGradientOnCylinder(FrictionContactProblem* problem, double *r
 
 
     cblas_dcopy(n , q , 1 , velocitytmp, 1);
-    prodNumericsMatrix(n, n, 1.0, M, reaction, 1.0, velocitytmp);
+    NM_gemv(1.0, M, reaction, 1.0, velocitytmp);
 
     cblas_daxpy(n, rho, velocitytmp, 1, reaction, 1);
 
@@ -147,7 +147,7 @@ void fc3d_ProjectedGradientOnCylinder(FrictionContactProblem* problem, double *r
       projectionOnCylinder(&reaction[contact * nLocal],
                            options->dWork[contact]);
     cblas_dcopy(n , q , 1 , velocitytmp, 1);
-    prodNumericsMatrix(n, n, 1.0, M, reaction, 1.0, velocitytmp);
+    NM_gemv(1.0, M, reaction, 1.0, velocitytmp);
 
     double oldcriterion = cblas_ddot(n, reaction, 1, velocitytmp, 1);
 #ifdef VERBOSE_DEBUG
@@ -162,7 +162,7 @@ void fc3d_ProjectedGradientOnCylinder(FrictionContactProblem* problem, double *r
       cblas_dcopy(n , reaction , 1 , reactionold , 1);
       // compute the direction
       cblas_dcopy(n , q , 1 , velocitytmp, 1);
-      prodNumericsMatrix(n, n, 1.0, M, reaction, 1.0, velocitytmp);
+      NM_gemv(1.0, M, reaction, 1.0, velocitytmp);
       cblas_dcopy(n, velocitytmp, 1, direction, 1);
 
       // start line search
@@ -206,7 +206,7 @@ void fc3d_ProjectedGradientOnCylinder(FrictionContactProblem* problem, double *r
         }
 #endif
         cblas_dcopy(n , q , 1 , velocitytmp, 1);
-        prodNumericsMatrix(n, n, 1.0, M, reaction, 1.0, velocitytmp);
+        NM_gemv(1.0, M, reaction, 1.0, velocitytmp);
 
 #ifdef VERBOSE_DEBUG
         printf("LS iteration %i step 3 \n", j);

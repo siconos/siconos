@@ -16,6 +16,10 @@
 #cmakedefine WITH_SUPERLU
 #cmakedefine WITH_SUPERLU_MT
 #cmakedefine WITH_SUPERLU_dist
+#cmakedefine WITH_MKL_PARDISO
+#cmakedefine WITH_MKL_SPBLAS
+#cmakedefine SICONOS_MKL_32
+#cmakedefine SICONOS_MKL_64
 #cmakedefine WITH_TIMERS
 #cmakedefine DUMP_PROBLEM
 #cmakedefine WITH_FCLIB
@@ -34,7 +38,7 @@
 // Is cblas available? 
 #cmakedefine HAS_CBLAS
 
-// Where does it comes from? 
+// Where does cblas comes from? 
 #cmakedefine HAS_MKL_CBLAS
 #cmakedefine HAS_ACCELERATE // includes also lapack from Accelerate
 #cmakedefine HAS_ATLAS_CBLAS 

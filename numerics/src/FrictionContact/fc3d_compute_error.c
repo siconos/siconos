@@ -108,7 +108,7 @@ int fc3d_compute_error_velocity(FrictionContactProblem* problem, double *z , dou
   cblas_dcopy(n , problem->q , incx , z , incy); // z <-q
 
   // Compute the current reaction
-  prodNumericsMatrix(n, n, 1.0, problem->M, w, 1.0, z);
+  NM_gemv(1.0, problem->M, w, 1.0, z);
 
   *error = 0.;
   double normUT = 0.0;
@@ -173,7 +173,7 @@ int fc3d_Tresca_compute_error(FrictionContactProblem* problem,
   double R;
   cblas_dcopy(n , problem->q , incx , w , incy); // w <-q
   // Compute the current velocity
-  /* prodNumericsMatrix(n, n, 1.0, problem->M, z, 1.0, w); */
+  /* NM_gemv(1.0, problem->M, z, 1.0, w); */
   prodNumericsMatrix3x3(n, n, problem->M, z, w);
   *error = 0.;
   int ic, ic3;

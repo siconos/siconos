@@ -52,7 +52,7 @@ void lcp_pathsearch(LinearComplementarityProblem* problem, double *z, double *w,
 
   /* w = F(z) = M z + q */
   cblas_dcopy(n, problem->q, 1, w, 1);
-  prodNumericsMatrix(n, n, 1.0, problem->M, z, 1.0, w);
+  NM_gemv(1.0, problem->M, z, 1.0, w);
 
   /* find x from z and w */
   ncp_pathsearch_compute_x_from_z(n, z, w, x);
@@ -60,7 +60,7 @@ void lcp_pathsearch(LinearComplementarityProblem* problem, double *z, double *w,
 
   /* compute F(x_plus) = q + M x_plus*/
   cblas_dcopy(n, problem->q, 1, w, 1);
-  prodNumericsMatrix(n, n, 1.0, problem->M, x_plus, 1.0, w);
+  NM_gemv(1.0, problem->M, x_plus, 1.0, w);
 
   /* r = F_+(x) = F(x_+) + x - x_+ */
   /* the real q = q - r = x_+ - x - M x_plus */
@@ -72,7 +72,7 @@ void lcp_pathsearch(LinearComplementarityProblem* problem, double *z, double *w,
   /* save original q */
   cblas_dcopy(n, problem->q, 1, x, 1);
   /* start with q = -M x_plus */
-  prodNumericsMatrix(n, n, -1.0, problem->M, x_plus, 0.0, problem->q);
+  NM_gemv(-1.0, problem->M, x_plus, 0.0, problem->q);
   /* we factorized computations and compute the final value of q */
   cblas_daxpy(n, -1.0, r, 1, problem->q, 1); /* q -= x - x_plus */
 
@@ -114,7 +114,7 @@ void lcp_pathsearch(LinearComplementarityProblem* problem, double *z, double *w,
   /* restore original q */
   cblas_dcopy(n, x, 1, problem->q, 1);
   cblas_dcopy(n, problem->q, 1, w, 1);
-  prodNumericsMatrix(n, n, 1.0, problem->M, z, 1.0, w);
+  NM_gemv(1.0, problem->M, z, 1.0, w);
 
   free(x);
   free(x_plus);

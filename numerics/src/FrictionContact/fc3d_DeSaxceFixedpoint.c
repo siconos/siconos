@@ -83,7 +83,7 @@ void fc3d_DeSaxceFixedPoint(FrictionContactProblem* problem, double *reaction, d
 
       /* velocitytmp <- q + M * reaction  */
       beta = 1.0;
-      prodNumericsMatrix(n, n, alpha, M, reaction, beta, velocitytmp);
+      NM_gemv(alpha, M, reaction, beta, velocitytmp);
 
       /* projection for each contact */
       for (contact = 0 ; contact < nc ; ++contact)

@@ -261,7 +261,7 @@ int test_prodNumericsMatrix(NumericsMatrix** MM)
   int incx = 1, incy = 1;
   cblas_dgemv(CblasColMajor, CblasNoTrans, n, n, alpha, M1->matrix0, n, x, incx, beta, yref, incy);
 
-  prodNumericsMatrix(n, n, alpha, M1, x, beta, y);
+  NM_gemv(alpha, M1, x, beta, y);
   double tol = 1e-12;
   int info = 0;
   for (i = 0; i < n; i++)
@@ -277,7 +277,7 @@ int test_prodNumericsMatrix(NumericsMatrix** MM)
 
   cblas_dgemv(CblasColMajor, CblasNoTrans, n, m, alpha, M3->matrix0, n, x2, incx, beta, yref2, incy);
 
-  prodNumericsMatrix(m, n, alpha, M3, x2, beta, y2);
+  NM_gemv(alpha, M3, x2, beta, y2);
   for (i = 0; i < n; i++)
   {
     if (fabs(y2[i] - yref2[i]) > tol) info = 1;
@@ -301,7 +301,7 @@ int test_prodNumericsMatrix(NumericsMatrix** MM)
     y[i] = 0.1 * i;
     y2[i] = 0.1 * i;
   }
-  prodNumericsMatrix(n, n, alpha, M2, x, beta, y);
+  NM_gemv(alpha, M2, x, beta, y);
   for (i = 0; i < n; i++)
   {
     if (fabs(y[i] - yref[i]) > tol) info = 1;
@@ -315,7 +315,7 @@ int test_prodNumericsMatrix(NumericsMatrix** MM)
 
 
 
-  prodNumericsMatrix(m, n, alpha, M4, x2, beta, y2);
+  NM_gemv(alpha, M4, x2, beta, y2);
   for (i = 0; i < n; i++)
   {
 
@@ -339,7 +339,7 @@ int test_prodNumericsMatrix(NumericsMatrix** MM)
   free(yref);
   free(yref2);
 
-  printf("== End of test prodNumericsMatrix(NumericsMatrix,vector), result = %d\n", info);
+  printf("== End of test NM_gemv(result = %d\n", info);
 
   return info;
 }
@@ -357,7 +357,7 @@ int test_prodNumericsMatrixNumericsMatrix(NumericsMatrix** MM)
 
 
   int info = -1;
-  printf("== Numerics tests: prodNumericsMatrixNumericsMatrix(NumericsMatrix,NumericsMatrix) == \n");
+  printf("== Numerics tests: NM_gemm(NumericsMatrix,NumericsMatrix) == \n");
   int i, j, k;
   double alpha = 1.0, beta = 0.0;
   double tol = 1e-12;
@@ -371,7 +371,7 @@ int test_prodNumericsMatrixNumericsMatrix(NumericsMatrix** MM)
   C.size1 = M1->size1;
   C.matrix0 = (double *)malloc(C.size0 * C.size1 * sizeof(double));
   MSAN_INIT_VAR(C.matrix0, C.size0 * C.size1);
-  prodNumericsMatrixNumericsMatrix(alpha, M1, M1, beta,  &C);
+  NM_gemm(alpha, M1, M1, beta,  &C);
 
   double * Cref = (double *)malloc(C.size0 * C.size1 * sizeof(double));
   double sum;
@@ -421,7 +421,7 @@ int test_prodNumericsMatrixNumericsMatrix(NumericsMatrix** MM)
   C2.size1 = M3->size1;
   C2.matrix0 = (double *)malloc(C2.size0 * C2.size1 * sizeof(double));
   MSAN_INIT_VAR(C2.matrix0, C2.size0 * C2.size1);
-  prodNumericsMatrixNumericsMatrix(alpha, M1, M3, beta,  &C2);
+  NM_gemm(alpha, M1, M3, beta,  &C2);
 
   double * C2ref = (double *)malloc(C2.size0 * C2.size1 * sizeof(double));
   for (i = 0; i < C2.size0; i++)
@@ -474,7 +474,7 @@ int test_prodNumericsMatrixNumericsMatrix(NumericsMatrix** MM)
   /* printSBM(SBM3); */
 
 
-  prodNumericsMatrixNumericsMatrix(alpha, M2, M2, beta,  &C3);
+  NM_gemm(alpha, M2, M2, beta,  &C3);
   //freeSBM(SBM3);
   printf("i= %i\n", i++);
 
@@ -520,7 +520,7 @@ int test_prodNumericsMatrixNumericsMatrix(NumericsMatrix** MM)
   allocateMemoryForProdSBMSBM(M2->matrix1, M4->matrix1, SBM4);
   /* printSBM(SBM4); */
 
-  prodNumericsMatrixNumericsMatrix(alpha, M2, M4, beta,  &C4);
+  NM_gemm(alpha, M2, M4, beta,  &C4);
 
 
   /*     Check if it is correct */
