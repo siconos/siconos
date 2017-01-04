@@ -29,37 +29,7 @@
 #ifdef HAVE_MPI
 
 /* thread_local madness for the MPI communicator */
-
-#ifndef __cplusplus
-
-  #if __STDC_VERSION__ >= 201112L
-    #include <threads.h>
-    #define tlsvar thread_local
-  #else
-
-    #if defined(__GNUC__)
-      #define tlsvar __thread 
-    #else
-      #error "Don't know how to create a thread-local variable"
-    #endif
-  #endif
-
-#else
-
-  #if SICONOS_CXXVERSION >= 201103L
-    #define tlsvar thread_local
-  #else
-    #if defined(__GNUC__)
-      #define tlsvar __thread
-    #elif defined(_MSC_VER)
-      #define tlsvar __declspec(thread)
-    #else
-      #error "Don't know how to create a thread-local variable"
-    #endif
-  #endif
-
-#endif
-
+#include "tlsdef.h"
 
 
 /* MPI_INIT should be called only once. Therefore we have to remember if this
@@ -77,7 +47,7 @@ tlsvar MPI_Comm NM_mpi_com = MPI_COMM_NULL;
     }
     return true;
   }
-#elif defined(__GNU__) & !defined(__APPLE__)
+#elif defined(__GNUC__) & !defined(__APPLE__)
 
   void cleanup_MPI(void) __attribute__ ((destructor))
   {
