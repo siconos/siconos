@@ -246,7 +246,7 @@ int soclcp_projectionOnConeWithLocalIteration_solve(SecondOrderConeLinearComplem
       projectionOnSecondOrderCone(&r[0], mu_i, nLocal);
 
       /* v <- q  */
-      cblas_dcopy(nLocal , qLocal , 1 , v, 1);
+      cblas_dcopy_msan(nLocal , qLocal , 1 , v, 1);
 
       /* v <- q + M * r  */
       cblas_dgemv(CblasColMajor,CblasNoTrans, nLocal, nLocal, 1.0, MLocal, nLocal, r, incx, 1.0, v, incy);
