@@ -16,6 +16,8 @@
  * limitations under the License.
 */
 
+#include "SiconosConfig.h"
+
 #include "Newton_methods.h"
 
 #include <stdio.h>
@@ -209,7 +211,12 @@ void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverO
 
   functions->compute_error(data, z, F, JacThetaF_merit, tol, &err);
 
-  unsigned log_hdf5 = SN_LOGLEVEL_ALL;
+#ifdef WITH_HDF5
+//  unsigned log_hdf5 = SN_LOGLEVEL_ALL;
+  unsigned log_hdf5 = SN_LOGLEVEL_NO;
+#else
+  unsigned log_hdf5 = SN_LOGLEVEL_NO;
+#endif
 
   char* hdf5_filename = getenv("SICONOS_HDF5_NAME");
   if (!hdf5_filename) hdf5_filename = "test.hdf5";
