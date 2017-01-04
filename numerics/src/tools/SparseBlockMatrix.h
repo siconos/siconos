@@ -191,7 +191,7 @@ extern "C"
   */
   void prodSBM(unsigned int sizeX, unsigned int sizeY,
                double alpha, const SparseBlockStructuredMatrix* const A,
-               const double* const x, double beta, double* y);
+               const double* x, double beta, double* y);
 
   /** SparseMatrix - vector product y = A*x + y for block of size 3x3
       \param[in] sizeX dim of the vectors x

@@ -77,7 +77,7 @@ static sparse_matrix_iterator sparseMatrixBegin(const CSparseMatrix* const spars
 static int sparseMatrixNext(sparse_matrix_iterator* it);
 
 
-void prodSBM(unsigned int sizeX, unsigned int sizeY, double alpha, const SparseBlockStructuredMatrix* const restrict A, const double* const restrict x, double beta, double* restrict y)
+void prodSBM(unsigned int sizeX, unsigned int sizeY, double alpha, const SparseBlockStructuredMatrix* const restrict A, const double* restrict x, double beta, double* restrict y)
 {
   /* Product SparseMat - vector, y = A*x (init = 1 = true) or y += A*x (init = 0 = false) */
 

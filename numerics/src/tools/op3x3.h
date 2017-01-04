@@ -282,7 +282,7 @@ static inline void mtv3x3(double* restrict a, double* restrict v, double* restri
  * \param[in] v v[3]
  * \param[out] r r[3]
  */
-static inline void mvp3x3(double* restrict a, double* restrict v, double* restrict r)
+static inline void mvp3x3(const double* restrict a, const double* restrict v, double* restrict r)
 {
 
   double* pr;
