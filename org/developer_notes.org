@@ -1,6 +1,13 @@
 
 This doc shall explain how a few Siconos developer internals work.
 
+* Docstring conventions
+
+Numpy convention
+
+https://github.com/numpy/numpy/blob/master/doc/HOWTO_DOCUMENT.rst.txt
+
+
 * Serialization
 
 ** Generated headers
