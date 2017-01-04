@@ -373,3 +373,5 @@ def source_read(app, docname, source):
 
 def setup(app):
     app.connect('source-read', source_read)
+
+autodoc_member_order = 'bysource'
