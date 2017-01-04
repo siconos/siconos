@@ -77,7 +77,7 @@ static sparse_matrix_iterator sparseMatrixBegin(const CSparseMatrix* const spars
 static int sparseMatrixNext(sparse_matrix_iterator* it);
 
 
-void prodSBM(unsigned int sizeX, unsigned int sizeY, double alpha, const SparseBlockStructuredMatrix* const A, const double* const x, double beta, double* y)
+void prodSBM(unsigned int sizeX, unsigned int sizeY, double alpha, const SparseBlockStructuredMatrix* const restrict A, const double* const restrict x, double beta, double* restrict y)
 {
   /* Product SparseMat - vector, y = A*x (init = 1 = true) or y += A*x (init = 0 = false) */
 
@@ -142,12 +142,19 @@ void prodSBM(unsigned int sizeX, unsigned int sizeY, double alpha, const SparseB
       if (currentRowNumber != 0)
         posInY += A->blocksize0[currentRowNumber - 1];
       /* Computes y[] += currentBlock*x[] */
-      cblas_dgemv(CblasColMajor, CblasNoTrans, nbRows, nbColumns, alpha, A->block[blockNum],
+      if (nbRows == 3 && nbColumns == 3)
+      {
+        mvp3x3(A->block[blockNum], &x[posInX], &y[posInY]);
+      }
+      else
+      {
+        cblas_dgemv(CblasColMajor, CblasNoTrans, nbRows, nbColumns, alpha, A->block[blockNum],
                   nbRows, &x[posInX], 1, 1.0, &y[posInY], 1);
+      }
     }
   }
 }
-void prodSBM3x3(unsigned int sizeX, unsigned int sizeY, const SparseBlockStructuredMatrix* const A,  double* const x, double* y)
+void prodSBM3x3(unsigned int sizeX, unsigned int sizeY, const SparseBlockStructuredMatrix* const restrict A,  double* const restrict x, double* restrict y)
 {
   /* Product SparseMat - vector, y = vector product y += alpha*A*x  for block of size 3x3 */
 
