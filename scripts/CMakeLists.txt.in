@@ -178,7 +178,7 @@ macro(link_setup _TARGET)
     target_link_libraries(${_TARGET} ${PRIVATE} ${_L})
   endforeach()
 
-  set(_LINKER_OPTIONS)
+  set(_LINKER_OPTIONS "@SICONOS_DEFAULT_LINKER_OPTIONS@")
   # Add user-defined linker options
   foreach(_O ${COMMAND_LINE_LINKER_OPTIONS})
     set(_LINKER_OPTIONS "${_LINKER_OPTIONS} ${_O}")
