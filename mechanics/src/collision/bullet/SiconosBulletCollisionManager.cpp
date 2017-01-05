@@ -823,7 +823,11 @@ void SiconosBulletCollisionManager_impl::createCollisionObject(
       btch.reset(new btConvexHullShape);
       for (int i=0; i < shrinkCH.vertices.size(); i++) {
         const btVector3 &v(shrinkCH.vertices[i]);
+#if defined(BT_BULLET_VERSION) && (BT_BULLET_VERSION <= 281)
+        btch->addPoint(v);
+#else
         btch->addPoint(v, false);
+#endif
       }
       ch->setInsideMargin(shrunkBy / _options.worldScale);
     }
