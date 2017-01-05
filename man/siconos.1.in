@@ -9,14 +9,14 @@ siconos \- Siconos C++ Compilation.
 .B \-a
 ]
 [
-.B \-build-dir
+.B \--build-dir
 .I DIRECTORY
 ]
 [
-.B \-clean-build
+.B \--clean-build
 ]
 [
-.B \-clean
+.B \-c | \--clean
 ]
 [
 .B \-D 
@@ -26,7 +26,7 @@ siconos \- Siconos C++ Compilation.
 .B \-g
 ]
 [
-.B \-h | \-help
+.B \-h | \--help
 ]
 [
 .B \-j JOBS
@@ -40,17 +40,17 @@ siconos \- Siconos C++ Compilation.
 .I LIBRARY
 ]
 [
-.B \-noexec
+.B \--noexec
 ]
 [
-.B \-nocomp
+.B \--nocomp
 ]
 [
-.B \-opt 
+.B \--opt 
 .I C++ COMPILER OPTION
 ]
 [
-.B \-ldopt 
+.B \--ldopt 
 .I LINKER OPTION
 ]
 [
@@ -58,19 +58,23 @@ siconos \- Siconos C++ Compilation.
 .I PREFIX COMMAND
 ]
 [
-.B \-plugin-dir
+.B \--plugin-dir
 .I PLUGIN DIRECTORY
 ]
 [
-.B \-plugins-dir
+.B \--plugins-dir
 .I PLUGINS DIRECTORY
 ]
 [
-.B \-src-dir
+.B \--src-dir
 .I SOURCES DIRECTORY
 ]
 [
 .B \-v
+]
+[
+.B \--generator
+.I Generator Name
 ]
 [
 .I sample[.cpp|.py]
@@ -86,7 +90,7 @@ The
 command compiles, links and runs a Siconos C++ input file. It compiles also
 C plugins and runs a python script.
 
-Siconos is a free (GNU license) software, dedicated to modeling,
+Siconos is a free (Apache license) software, dedicated to modeling,
 simulation and control of Non Smooth Dynamical Systems.
 
 .SH OPTIONS
@@ -99,14 +103,16 @@ The following command-line options are recognized by
 .I sample[.cpp|.py]
  directory.
 .TP
-.BI \-build-dir
+.BI \--build-dir
 .I DIRECTORY
  Compile inside specified directory. If /tmp, temp directories are created.
 .TP
-.BI \-clean-build
+.BI \--clean-build
  Clean build directory.
 .TP
-.BI \-clean
+.BI \-c 
+|
+.B \--clean
  Clean the current directory (deletes binary files, etc.).
 .TP
 .BI -D 
@@ -118,7 +124,7 @@ The following command-line options are recognized by
 .TP
 .BI \-h 
 |
-.B \-help
+.B \--help
  Print help.
 .TP
 .BI \-j
@@ -133,17 +139,21 @@ The following command-line options are recognized by
 .I LIBRARY
  Link with a library.
 .TP
-.BI \-noexec
+.BI \--noexec
  Do not run executable after compilation.
 .TP
-.BI \-nocomp
+.BI \--nocomp
  Do not compile executable before run.
 .TP
-.BI \-opt 
+.BI \-O
+.I N
+ set compiler optimization.
+.TP
+.BI \--opt 
 .I COMPILER OPTION
  Add option to compiler.
 .TP
-.BI \-ldopt 
+.BI \--ldopt 
 .I LINKER OPTION
  Add option to linker.
 .TP 
@@ -151,16 +161,16 @@ The following command-line options are recognized by
 .I PREFIX COMMAND
  Run a prefix command (time, valgrind, gdb, etc.).
 .TP
-.BI \-plugin-dir
+.BI \--plugin-dir
 .I PLUGIN DIRECTORY
  Compile a plugin with the sources under the specified plugin directory.
  The name of the compiled plugin is the name of the directory. The default is a directory named plugin.
 .TP
-.BI \-plugins-dir
+.BI \--plugins-dir
 .I PLUGINS DIRECTORY
  For each source file under the specified directory, compile a plugin. The default is a directory named plugins.
 .TP
-.BI \-src-dir
+.BI \--src-dir
 .I SOURCES DIRECTORY
  add all source files under the specified directory to the compilation of the executable.
 .TP
@@ -168,7 +178,10 @@ The following command-line options are recognized by
  Print 
 .BR make (1) 
 commands as they are executed.
-
+.TP
+.BI \--generator
+.I Generator Name
+ set the generator for cmake (the default is plateform dependent, but usually "Unix Makefiles" under *nix and MacOs). This is mainly useful for Windows users.
 
 .SH EXAMPLES
 
