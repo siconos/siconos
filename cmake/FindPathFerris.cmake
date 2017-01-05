@@ -12,9 +12,9 @@ IF(NOT PathFerris_VERSION)
   SET(PathFerris_VERSION "47")
 ENDIF(NOT PathFerris_VERSION)
 
-IF(NOT PathFerris_DIR AND GAMS_FOUND)
+IF(NOT PathFerris_DIR AND GAMSCAPI_FOUND)
   SET(PathFerris_DIR ${GAMS_DIR})
-ENDIF(NOT PathFerris_DIR AND GAMS_FOUND)
+ENDIF(NOT PathFerris_DIR AND GAMSCAPI_FOUND)
 
 # ----------------------------------------
 # Library == libpath${PathFerris_VERSION}
