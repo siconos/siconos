@@ -179,7 +179,7 @@ config = Configuration(
     include_dirs=include_dirs,
     cmdclass={'test': PyTest,
               'clean': clean},
-    classifiers=['License :: OSI Approved :: GNU Lesser General Public License v3 or later (LGPLv3+)',
+    classifiers=['License :: OSI Approved :: Apache Software License',
                  'Operating System :: MacOS',
                  'Operating System :: Microsoft :: Windows',
                  'Operating System :: POSIX :: Linux',
