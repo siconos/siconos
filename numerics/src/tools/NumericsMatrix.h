@@ -119,6 +119,7 @@ The following linear algebra operation are supported:
 #include <stdlib.h>
 #include <assert.h>
 #include <stdbool.h>
+
 #include "NumericsFwd.h"
 #include "SiconosConfig.h"
 #include "csparse.h" // For csi
@@ -553,7 +554,7 @@ extern "C"
    * \param A the matrix
    * \param solver_id the solver
    */
-  void NM_setSparseSolver(NumericsMatrix* A,unsigned solver_id);
+  void NM_setSparseSolver(NumericsMatrix* A, unsigned solver_id);
 
   /** Get Matrix internal data with initialization if needed.
    * \param[in,out] A a NumericsMatrix.

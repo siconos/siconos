@@ -123,7 +123,7 @@ static int gfc3d_AVI_gams_base(GlobalFrictionContactProblem* problem, double *re
   FC3D_gams_generate_first_constraints(&Akmat, problem->mu);
 
 
-  SN_Gams_set_dirs(options->solverParameters, defModel, defGAMSdir, model, sysdir, "/fc_vi.gms");
+  SN_Gams_set_dirs((SN_GAMSparams*)options->solverParameters, defModel, defGAMSdir, model, sysdir, "/fc_vi.gms");
 
   const char* filename = GAMSP_get_filename(options->solverParameters);
 
@@ -182,7 +182,7 @@ static int gfc3d_AVI_gams_base(GlobalFrictionContactProblem* problem, double *re
   }
 
   optHandle_t Opts[] = {Optr, solverOptPtr};
-  SN_Gams_set_options(options->solverParameters, Opts);
+  SN_Gams_set_options((SN_GAMSparams*)options->solverParameters, Opts);
 
   optWriteParameterFile(solverOptPtr, msg);
 

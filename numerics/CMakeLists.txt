@@ -71,6 +71,7 @@ library_project_setup()
 if(BUILD_AS_CPP)
   file(GLOB_RECURSE C_FILES ${CMAKE_CURRENT_SOURCE_DIR} *.c)
   set_source_files_properties(${C_FILES} PROPERTIES LANGUAGE CXX)
+  set(${COMPONENT}_LINKER_LANGUAGE CXX)
 endif()
 
 # --- tests ---

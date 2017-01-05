@@ -16,14 +16,12 @@
  * limitations under the License.
 */
 
-
-
-#include <stdio.h>
-#include "NonlinearComplementarityProblem.h"
-#include "SolverOptions.h"
-
 #include "SiconosConfig.h"
 
+#include <stdio.h>
+
+#include "NonlinearComplementarityProblem.h"
+#include "SolverOptions.h"
 #include "NCP_Solvers.h"
 
 #ifdef HAVE_PATHFERRIS
@@ -31,11 +29,12 @@
 #include <limits.h>
 #include <assert.h>
 
-#include "PATH_SDK/include/MCP_Interface.h"
+#include "NumericsMatrix.h"
+#include "numerics_verbose.h"
 
+#include "PATH_SDK/include/MCP_Interface.h"
 #include "PATH_SDK/include/Path.h"
 #include "PATH_SDK/include/PathOptions.h"
-
 #include "PATH_SDK/include/Macros.h"
 #include "PATH_SDK/include/Output_Interface.h"
 #include "PATH_SDK/include/Options.h"
@@ -43,12 +42,15 @@
 #include "PathAlgebra.h"
 
 #include "Path_interface.h"
-#include "NumericsMatrix.h"
-#include "numerics_verbose.h"
 
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
 #include "debug.h"
+
+#ifdef __cplusplus
+#undef restrict
+#define restrict __restrict
+#endif
 
 static CB_FUNC(void) ncp_PATH_problem_size(void* restrict id, int* restrict n, int* restrict nnz)
 {

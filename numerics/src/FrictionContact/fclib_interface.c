@@ -55,7 +55,7 @@ FrictionContactProblem* from_fclib_local(const struct fclib_local* fclib_problem
 {
   FrictionContactProblem* problem;
 
-  problem = malloc(sizeof(FrictionContactProblem));
+  problem = (FrictionContactProblem*)malloc(sizeof(FrictionContactProblem));
 
   problem->dimension = fclib_problem->spacedim;
   problem->mu = fclib_problem->mu;
@@ -133,7 +133,7 @@ int frictionContact_fclib_write(FrictionContactProblem* problem, char * title, c
 
   struct fclib_local   *fclib_problem;
 
-  fclib_problem = malloc(sizeof(struct fclib_local));
+  fclib_problem = (struct fclib_local*)malloc(sizeof(struct fclib_local));
 
   fclib_problem->spacedim = problem->dimension;
   fclib_problem->mu =  problem->mu;
@@ -141,12 +141,12 @@ int frictionContact_fclib_write(FrictionContactProblem* problem, char * title, c
 
   fclib_problem->s =  NULL;
 
-  fclib_problem->info = malloc(sizeof(struct fclib_info)) ;
+  fclib_problem->info = (struct fclib_info*)malloc(sizeof(struct fclib_info)) ;
   fclib_problem->info->title = title;
   fclib_problem->info->description = description;
   fclib_problem->info->math_info = mathInfo;
 
-  fclib_problem->W = malloc(sizeof(struct fclib_matrix));
+  fclib_problem->W = (struct fclib_matrix*)malloc(sizeof(struct fclib_matrix));
   fclib_problem->R = NULL;
   fclib_problem->V = NULL;
 
@@ -178,7 +178,7 @@ int frictionContact_fclib_write(FrictionContactProblem* problem, char * title, c
   }
   else if (problem ->M->storageType == NM_SPARSE_BLOCK) /* Sparse block storage */
   {
-    spmat = malloc(sizeof(CSparseMatrix));
+    spmat = (CSparseMatrix*)malloc(sizeof(CSparseMatrix));
     int MAYBE_UNUSED res = SBMtoSparseInitMemory(problem ->M->matrix1, spmat);
     res = SBMtoSparse(problem->M->matrix1, spmat);
     fclib_problem->W->nzmax = (int) spmat->nzmax;
@@ -261,7 +261,7 @@ GlobalFrictionContactProblem* from_fclib_global(const struct fclib_global* fclib
 {
   GlobalFrictionContactProblem* problem;
 
-  problem = malloc(sizeof(GlobalFrictionContactProblem));
+  problem = (GlobalFrictionContactProblem*)malloc(sizeof(GlobalFrictionContactProblem));
 
   problem->dimension = fclib_problem->spacedim;
   problem->mu = fclib_problem->mu;
@@ -395,9 +395,9 @@ int globalFrictionContact_fclib_write(
   /* globalFrictionContact_printInFile(problem, file); */
   DEBUG_PRINTF("construction of fclib_problem in %s with title = %s and description = %s\n", path, title, description);
   struct fclib_global *fclib_problem;
-  fclib_problem = malloc(sizeof(struct fclib_global));
+  fclib_problem = (struct fclib_global*)malloc(sizeof(struct fclib_global));
 
-  fclib_problem->info = malloc(sizeof(struct fclib_info)) ;
+  fclib_problem->info = (struct fclib_info*)malloc(sizeof(struct fclib_info)) ;
 
   fclib_problem->info->title = title;
   fclib_problem->info->description = description;
@@ -418,7 +418,7 @@ int globalFrictionContact_fclib_write(
   /* only coordinates (triplet) */
   if (problem->M->matrix2->triplet)
   {
-    fclib_problem->M = malloc(sizeof(struct fclib_matrix));
+    fclib_problem->M = (struct fclib_matrix*)malloc(sizeof(struct fclib_matrix));
     fclib_problem->M->n = (int) problem->M->matrix2->triplet->n;
     fclib_problem->M->m = (int) problem->M->matrix2->triplet->m;
     fclib_problem->M->nzmax= (int) problem->M->matrix2->triplet->nzmax;
@@ -441,7 +441,7 @@ int globalFrictionContact_fclib_write(
 
   if (problem->H->matrix2->triplet)
   {
-    fclib_problem->H = malloc(sizeof(struct fclib_matrix));
+    fclib_problem->H = (struct fclib_matrix*)malloc(sizeof(struct fclib_matrix));
     fclib_problem->H->n = (int) problem->H->matrix2->triplet->n;
     fclib_problem->H->m = (int) problem->H->matrix2->triplet->m;
     fclib_problem->H->nzmax= (int) problem->H->matrix2->triplet->nzmax;

@@ -23,6 +23,12 @@
  *  \brief definition of thread local variable
  */
 
+#if defined(__GNUC__)
+#define DESTRUCTOR_ATTR __attribute__ ((destructor))
+#else
+#define DESTRUCTOR_ATTR 
+#endif
+
 #ifndef __cplusplus
 
   #if __STDC_VERSION__ >= 201112L
@@ -36,6 +42,7 @@
       #error "Don't know how to create a thread-local variable"
     #endif
   #endif
+
 
 #else
 

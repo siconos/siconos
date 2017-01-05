@@ -406,7 +406,7 @@ static int fc3d_AVI_gams_base(FrictionContactProblem* problem, double *reaction,
   NM_null(&Akmat);
 
   DEBUG_PRINT("FC3D_AVI_GAMS :: seeting basic directories\n");
-  SN_Gams_set_dirs(options->solverParameters, defModel, defGAMSdir, model, sysdir, "/fc_vi-condensed.gms");
+  SN_Gams_set_dirs((SN_GAMSparams*)options->solverParameters, defModel, defGAMSdir, model, sysdir, "/fc_vi-condensed.gms");
 
   const char* filename = GAMSP_get_filename(options->solverParameters);
 
@@ -467,7 +467,7 @@ static int fc3d_AVI_gams_base(FrictionContactProblem* problem, double *reaction,
   getGamsOpt(Optr, sysdir);
 
   optHandle_t Opts[] = {Optr, solverOptPtr};
-  SN_Gams_set_options(options->solverParameters, Opts);
+  SN_Gams_set_options((SN_GAMSparams*)options->solverParameters, Opts);
 
   if (strcmp(solverName, "path"))
   {
@@ -1072,8 +1072,8 @@ bad_angle:
     SN_logh5_vec_double(problem->numberOfContacts, real_angles, "real_angles", logger_s->group);
     SN_logh5_vec_double(problem->numberOfContacts, residual_contact, "residual_contact", logger_s->group);
     /*  XXX buggy here, implement a SN_logh5_vec_integer */
-    SN_logh5_vec_int64(problem->numberOfContacts, type_contact, "type_contact", logger_s->group);
-    SN_logh5_vec_int64(problem->numberOfContacts, type_contact_avi, "type_contact_avi", logger_s->group);
+    SN_logh5_vec_uint64(problem->numberOfContacts, type_contact, "type_contact", logger_s->group);
+    SN_logh5_vec_uint64(problem->numberOfContacts, type_contact_avi, "type_contact_avi", logger_s->group);
     SN_logh5_end_iter(logger_s);
   }
 

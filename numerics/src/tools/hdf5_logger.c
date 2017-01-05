@@ -431,6 +431,22 @@ bool SN_logh5_vec_int64(size_t size, int64_t* vec, const char* name, hid_t loc_i
   return !status ? true : false;
 }
 
+bool SN_logh5_vec_uint64(size_t size, uint64_t* vec, const char* name, hid_t loc_id)
+{
+  assert(loc_id);
+  assert(vec);
+  assert(name);
+
+  hsize_t dims[1] = {size};
+  hid_t type = H5T_NATIVE_UINT_LEAST64;
+  herr_t status;
+
+  hid_t space =  H5Screate_simple(1, dims, NULL);
+  status = SN_logh5_write_dset(loc_id, name, type, space, vec);
+  status = H5Sclose(space);
+
+  return !status ? true : false;
+}
 #else /* WITH_HDF5 */
 
 bool SN_logh5_check_gzip(void)
@@ -511,5 +527,10 @@ bool SN_logh5_vec_int64(size_t size, int64_t* vec, const char* name, hid_t loc_i
   return false;
 }
 
+bool SN_logh5_vec_uint64(size_t size, uint64_t* vec, const char* name, hid_t loc_id)
+{
+  fprintf(stderr, "SN_logh5 :: Siconos/Numerics has been compiled with no HDF5 support!\n");
+  return false;
+}
 
 #endif /*  WITH_HDF5 */

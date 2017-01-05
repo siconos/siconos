@@ -53,8 +53,8 @@
 
 #include <stdint.h>
 
-const unsigned short int *__ctype_b;
-const int32_t *__ctype_tolower ;
+//const unsigned short int *__ctype_b;
+//const int32_t *__ctype_tolower ;
 
 /**
 

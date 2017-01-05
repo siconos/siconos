@@ -43,6 +43,12 @@
 #define DEBUG_MESSAGES
 #include "debug.h"
 #include "numerics_verbose.h"
+
+#if defined(__cplusplus)
+#undef restrict
+#define restrict __restrict
+#endif
+
 #if defined(USE_OUTPUT_INTERFACE)
 /* callback to register with PATH: output from PATH will go here */
 static CB_FUNC(void) messageCB (void *data, int mode, char *buf)

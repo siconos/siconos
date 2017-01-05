@@ -134,10 +134,10 @@ void fc3d_nonsmooth_Newton_AlartCurnier2(
   FC3D_Newton_data opaque_data;
   opaque_data.problem = problem;
   opaque_data.equation = &equation;
-  opaque_data.rho = calloc(problemSize, sizeof(double));
+  opaque_data.rho = (double*)calloc(problemSize, sizeof(double));
   for (size_t i = 0; i < problemSize; ++i) opaque_data.rho[i] = 1.;
-  opaque_data.Ax = calloc(_3problemSize, sizeof(double));
-  opaque_data.Bx = calloc(_3problemSize, sizeof(double));
+  opaque_data.Ax = (double*)calloc(_3problemSize, sizeof(double));
+  opaque_data.Bx = (double*)calloc(_3problemSize, sizeof(double));
   opaque_data.normq = cblas_dnrm2(problemSize, problem->q, 1);
   opaque_data.AwpB_data_computed = false;
 

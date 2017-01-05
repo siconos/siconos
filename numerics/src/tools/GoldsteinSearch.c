@@ -20,8 +20,8 @@
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
 #include "debug.h"
-#include "float.h"
 #include "numerics_verbose.h"
+#include <float.h>
 #include <assert.h>
 
 #include "SiconosBlas.h"

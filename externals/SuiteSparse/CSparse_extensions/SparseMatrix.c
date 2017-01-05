@@ -26,6 +26,10 @@
 
 #include "SiconosCompat.h"
 
+#if defined(__cplusplus)
+#undef restrict
+#define restrict __restrict
+#endif
 //#define VERBOSE_DEBUG
 
 /* add an entry to triplet matrix only if value is not (nearly) null */

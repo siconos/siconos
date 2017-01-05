@@ -23,6 +23,12 @@
 #ifndef DEBUG_H
 #define DEBUG_H
 
+#if __cplusplus < 201103L
+#ifndef DECIMAL_DIG
+#define DECIMAL_DIG __DECIMAL_DIG__
+#endif
+#endif
+
 #define ANSI_COLOR_RED     "\x1b[31m"
 #define ANSI_COLOR_GREEN   "\x1b[32m"
 #define ANSI_COLOR_YELLOW  "\x1b[33m"

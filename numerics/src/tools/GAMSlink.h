@@ -232,6 +232,16 @@ static inline void SN_GAMS_add_NV_from_gdx(SN_GAMS_gdx* gdx_data, double* vec, c
 #define idxerrorR(i, s) { idxErrorStr(Xptr, i, msg, GMS_SSSIZE); \
   printf("%s failed: %s\n",s,msg); return 1; }
 
+static inline const char* GAMSP_get_gams_dir(const void* GP)
+{
+  return ((SN_GAMSparams*) GP)->gams_dir;
+}
+
+static inline void GAMSP_set_gams_dir(void* GP, char* gams_dir)
+{
+  ((SN_GAMSparams*) GP)->gams_dir = gams_dir;
+}
+
 
 #define STR_VALUE(arg)      #arg
 #define SPACE_CONC(str1,str2) str1 " " str2

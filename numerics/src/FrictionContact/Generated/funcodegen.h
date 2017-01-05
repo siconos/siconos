@@ -11,7 +11,13 @@
 #include <assert.h>
 
 #ifndef epsilon
+/* C++ does not have hexadecimal floating-point support. C++17 may have it ... */
+#ifdef __cplusplus
+#include <limits>
+#define epsilon std::numeric_limits<double>::epsilon()
+#else
 #define epsilon 0x1.0000000000000p-52
+#endif
 #endif
 
 /*@ lemma one: \forall real mu; 2*mu*mu - 2*mu + 1 >= 0.5; */

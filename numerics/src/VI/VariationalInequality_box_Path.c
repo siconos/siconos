@@ -47,6 +47,11 @@
 //#define DEBUG_MESSAGES
 #include "debug.h"
 
+#if defined(__cplusplus)
+#undef restrict
+#define restrict __restrict
+#endif
+
 static CB_FUNC(void) PATH_problem_size(void* restrict id, int* restrict n, int* restrict nnz)
 {
   SN_generic_path_env* env = (SN_generic_path_env*) id;

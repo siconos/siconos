@@ -2384,7 +2384,7 @@ void NM_triplet_alloc(NumericsMatrix* A, csi nzmax)
 
 void NM_setSparseSolver(NumericsMatrix* A, unsigned solver_id)
 {
-  NM_linearSolverParams(A)->solver = solver_id;
+  NM_linearSolverParams(A)->solver = (NumericsSparseLinearSolver)solver_id;
 }
 
 unsigned NM_sparse_origin(NumericsMatrix* M)

@@ -38,7 +38,7 @@ double line_search_generic(int n, double theta, double preRHS, search_data* ls_d
   if (ls_data->nm_ref_data)
   {
     if (isfinite(alpha)) update_non_monotone_ref(ls_data->nm_ref_data, theta_ref);
-    else zero_nm_data(ls_data->nm_ref_data);
+    else zero_nm_data((nm_ref_struct*)ls_data->nm_ref_data);
   }
 
   return alpha;

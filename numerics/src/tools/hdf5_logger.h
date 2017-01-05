@@ -114,6 +114,8 @@ extern "C"
 
   bool SN_logh5_vec_int64(size_t size, int64_t* vec, const char* name, hid_t loc_id);
 
+  bool SN_logh5_vec_uint64(size_t size, uint64_t* vec, const char* name, hid_t loc_id);
+
   /** filter loglevel for the hdf5 logger. Useful to disable logging if the
    * hdf5 support that been disable.
    * \param l desired loglevel
