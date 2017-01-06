@@ -23,6 +23,7 @@
 #include "SiconosBlas.h"
 #include "Newton_methods.h"
 #include "VI_Newton.h"
+#include "sanitizer.h"
 
 typedef struct {
   NumericsMatrix* mat;
@@ -40,7 +41,7 @@ static int vi_compute_decent_dir_by_avi(void* problem, double* z, double* F, dou
 
   vi_pb->compute_nabla_F(vi_pb, n, z, relay_pb->M);
 
-  cblas_dcopy(n, F, 1, relay_pb->q, 1);
+  cblas_dcopy_msan(n, F, 1, relay_pb->q, 1);
   NM_gemv(-1.0, relay_pb->M, z, 1.0, relay_pb->q);
 
   int local_info = 0;
