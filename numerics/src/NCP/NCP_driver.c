@@ -23,10 +23,10 @@
 #include "NCP_Solvers.h"
 #include "NCP_cst.h"
 #include <stdlib.h>
-char * SICONOS_NCP_NEWTON_FBLSA_STR = "NCP Newton FBLSA";
-char * SICONOS_NCP_NEWTON_MINFBLSA_STR = "NCP Newton minFBLSA";
-char * SICONOS_NCP_PATHSEARCH_STR = "NCP Path search";
-char * SICONOS_NCP_PATH_STR = "NCP PATH";
+const char* const  SICONOS_NCP_NEWTON_FBLSA_STR = "NCP Newton FBLSA";
+const char* const  SICONOS_NCP_NEWTON_MINFBLSA_STR = "NCP Newton minFBLSA";
+const char* const  SICONOS_NCP_PATHSEARCH_STR = "NCP Path search";
+const char* const  SICONOS_NCP_PATH_STR = "NCP PATH";
 
 int ncp_driver(NonlinearComplementarityProblem* problem, double *z , double *F, SolverOptions* options)
 {

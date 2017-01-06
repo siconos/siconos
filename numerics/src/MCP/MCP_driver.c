@@ -27,9 +27,9 @@
 #include "NonSmoothDrivers.h"
 #include "numerics_verbose.h"
 
-char *SICONOS_MCP_FB_STR = "NewtonFB";
-char *SICONOS_MCP_NEWTON_FBLSA_STR = "Newton FBLSA";
-char *SICONOS_MCP_NEWTON_MINFBLSA_STR = "Newton minFBLSA";
+const char* const SICONOS_MCP_FB_STR = "NewtonFB";
+const char* const SICONOS_MCP_NEWTON_FBLSA_STR = "Newton FBLSA";
+const char* const SICONOS_MCP_NEWTON_MINFBLSA_STR = "Newton minFBLSA";
 
 int mcp_driver2(MixedComplementarityProblem2* problem, double *z , double *Fmcp, SolverOptions* options)
 {

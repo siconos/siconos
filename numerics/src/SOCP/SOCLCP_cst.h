@@ -2,7 +2,7 @@
 #define SOCLCP_CST_H
 /** \file SOCLCP_cst.h */
 /** \enum SOCLCP_SOLVER encode the list of solvers as integers to avoid mispelling
- * with char * variables
+ * with const char* const  variables
  */
 enum SOCLCP_SOLVER
 {
@@ -48,45 +48,45 @@ enum SOCLCP_SOLVER
 
 
 
-extern char *  SICONOS_FRICTION_2D_NSGS_STR ;
-extern char *  SICONOS_FRICTION_2D_PGS_STR ;
-extern char *  SICONOS_FRICTION_2D_CPG_STR ;
-extern char *  SICONOS_FRICTION_2D_LATIN_STR ;
-extern char *  SICONOS_FRICTION_2D_LEMKE_STR ;
-extern char *  SICONOS_FRICTION_2D_ENUM_STR ;
-extern char *  SICONOS_SOCLCP_NSGS_STR ;
-extern char *  SICONOS_SOCLCP_NSGSV_STR ;
-extern char *  SICONOS_SOCLCP_PROX_STR;
-extern char *  SICONOS_SOCLCP_TFP_STR ;
-extern char *  SICONOS_SOCLCP_NSN_AC_STR ;
-extern char *  SICONOS_SOCLCP_NSN_FB_STR ;
-extern char *  SICONOS_SOCLCP_DSFP_STR ;
-extern char *  SICONOS_SOCLCP_VI_EG_STR ;
-extern char *  SICONOS_SOCLCP_VI_FPP_STR ;
-extern char *  SICONOS_SOCLCP_EG_STR ;
-extern char *  SICONOS_SOCLCP_FPP_STR ;
-extern char *  SICONOS_SOCLCP_HP_STR ;
-extern char *  SICONOS_SOCLCP_NCPGlockerFBFixedPoint_STR;
-extern char *  SICONOS_SOCLCP_AlartCurnierNewton_STR;
-extern char *  SICONOS_SOCLCP_DampedAlartCurnierNewton_STR;
-extern char *  SICONOS_SOCLCP_NCPGlockerFBNewton_STR;
-extern char *  SICONOS_SOCLCP_ProjectionOnConeWithDiagonalization_STR;
-extern char *  SICONOS_SOCLCP_ProjectionOnCone_STR;
-extern char *  SICONOS_SOCLCP_ProjectionOnConeWithLocalIteration_STR;
-extern char *  SICONOS_SOCLCP_projectionOnConeWithRegularization_STR;
-extern char *  SICONOS_SOCLCP_NCPGlockerFBPATH_STR;
-extern char *  SICONOS_SOCLCP_projectionOnCylinder_STR;
-extern char *  SICONOS_SOCLCP_ProjectionOnCone_velocity_STR;
-extern char *  SICONOS_SOCLCP_PGoC_STR;
-extern char *  SICONOS_SOCLCP_DeSaxceFixedPoint_STR;
-extern char *  SICONOS_SOCLCP_GLOBAL_NSGS_WR_STR ;
-extern char *  SICONOS_SOCLCP_GLOBAL_NSGSV_WR_STR ;
-extern char *  SICONOS_SOCLCP_GLOBAL_PROX_WR_STR ;
-extern char *  SICONOS_SOCLCP_GLOBAL_DSFP_WR_STR ;
-extern char *  SICONOS_SOCLCP_GLOBAL_TFP_WR_STR ;
-extern char *  SICONOS_SOCLCP_GLOBAL_NSGS_STR ;
-extern char *  SICONOS_SOCLCP_GLOBAL_NSN_AC_WR_STR ;
-extern char *  SICONOS_SOCLCP_QUARTIC_STR ;
-extern char *  SICONOS_SOCLCP_QUARTIC_NU_STR ;
+extern const char* const   SICONOS_FRICTION_2D_NSGS_STR ;
+extern const char* const   SICONOS_FRICTION_2D_PGS_STR ;
+extern const char* const   SICONOS_FRICTION_2D_CPG_STR ;
+extern const char* const   SICONOS_FRICTION_2D_LATIN_STR ;
+extern const char* const   SICONOS_FRICTION_2D_LEMKE_STR ;
+extern const char* const   SICONOS_FRICTION_2D_ENUM_STR ;
+extern const char* const   SICONOS_SOCLCP_NSGS_STR ;
+extern const char* const   SICONOS_SOCLCP_NSGSV_STR ;
+extern const char* const   SICONOS_SOCLCP_PROX_STR;
+extern const char* const   SICONOS_SOCLCP_TFP_STR ;
+extern const char* const   SICONOS_SOCLCP_NSN_AC_STR ;
+extern const char* const   SICONOS_SOCLCP_NSN_FB_STR ;
+extern const char* const   SICONOS_SOCLCP_DSFP_STR ;
+extern const char* const   SICONOS_SOCLCP_VI_EG_STR ;
+extern const char* const   SICONOS_SOCLCP_VI_FPP_STR ;
+extern const char* const   SICONOS_SOCLCP_EG_STR ;
+extern const char* const   SICONOS_SOCLCP_FPP_STR ;
+extern const char* const   SICONOS_SOCLCP_HP_STR ;
+extern const char* const   SICONOS_SOCLCP_NCPGlockerFBFixedPoint_STR;
+extern const char* const   SICONOS_SOCLCP_AlartCurnierNewton_STR;
+extern const char* const   SICONOS_SOCLCP_DampedAlartCurnierNewton_STR;
+extern const char* const   SICONOS_SOCLCP_NCPGlockerFBNewton_STR;
+extern const char* const   SICONOS_SOCLCP_ProjectionOnConeWithDiagonalization_STR;
+extern const char* const   SICONOS_SOCLCP_ProjectionOnCone_STR;
+extern const char* const   SICONOS_SOCLCP_ProjectionOnConeWithLocalIteration_STR;
+extern const char* const   SICONOS_SOCLCP_projectionOnConeWithRegularization_STR;
+extern const char* const   SICONOS_SOCLCP_NCPGlockerFBPATH_STR;
+extern const char* const   SICONOS_SOCLCP_projectionOnCylinder_STR;
+extern const char* const   SICONOS_SOCLCP_ProjectionOnCone_velocity_STR;
+extern const char* const   SICONOS_SOCLCP_PGoC_STR;
+extern const char* const   SICONOS_SOCLCP_DeSaxceFixedPoint_STR;
+extern const char* const   SICONOS_SOCLCP_GLOBAL_NSGS_WR_STR ;
+extern const char* const   SICONOS_SOCLCP_GLOBAL_NSGSV_WR_STR ;
+extern const char* const   SICONOS_SOCLCP_GLOBAL_PROX_WR_STR ;
+extern const char* const   SICONOS_SOCLCP_GLOBAL_DSFP_WR_STR ;
+extern const char* const   SICONOS_SOCLCP_GLOBAL_TFP_WR_STR ;
+extern const char* const   SICONOS_SOCLCP_GLOBAL_NSGS_STR ;
+extern const char* const   SICONOS_SOCLCP_GLOBAL_NSN_AC_WR_STR ;
+extern const char* const   SICONOS_SOCLCP_QUARTIC_STR ;
+extern const char* const   SICONOS_SOCLCP_QUARTIC_NU_STR ;
 
 #endif

@@ -30,12 +30,12 @@
 #include "SiconosSets.h"
 #include "numerics_verbose.h"
 
-char *  SICONOS_VI_EG_STR = "VI_EG";
-char *  SICONOS_VI_FPP_STR = "VI_FPP";
-char *  SICONOS_VI_HP_STR = "VI_HP";
-char *  SICONOS_VI_BOX_QI_STR = "Box VI solver based on Qi C-function";
-char *  SICONOS_VI_BOX_AVI_LSA_STR = "Box VI solver based on the Newton-Josephy method";
-char *  SICONOS_VI_BOX_PATH_STR = "Box VI solver based on PATH solver";
+const char* const   SICONOS_VI_EG_STR = "VI_EG";
+const char* const   SICONOS_VI_FPP_STR = "VI_FPP";
+const char* const   SICONOS_VI_HP_STR = "VI_HP";
+const char* const   SICONOS_VI_BOX_QI_STR = "Box VI solver based on Qi C-function";
+const char* const   SICONOS_VI_BOX_AVI_LSA_STR = "Box VI solver based on the Newton-Josephy method";
+const char* const   SICONOS_VI_BOX_PATH_STR = "Box VI solver based on PATH solver";
 
 /* #define DEBUG_MESSAGES */
 /* #define DEBUT_STDOUT */
@@ -56,7 +56,7 @@ int variationalInequality_driver(VariationalInequality* problem,
     solver_options_print(options);
 
   /* Solver name */
-  /*char * name = options->solverName;*/
+  /*const char* const  name = options->solverName;*/
 
   int info = -1 ;
 

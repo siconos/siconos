@@ -29,6 +29,6 @@ enum AVI_SOLVER
   SICONOS_AVI_CAOFERRIS = 800,
 };
 
-extern char *  SICONOS_AVI_CAOFERRIS_STR;
+extern const char* const   SICONOS_AVI_CAOFERRIS_STR;
 
 #endif

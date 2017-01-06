@@ -23,7 +23,7 @@
 #include "assert.h"
 #include "NumericsMatrix.h"
 
-char *  SICONOS_AVI_CAOFERRIS_STR = "AVI from Cao & Ferris";
+const char* const SICONOS_AVI_CAOFERRIS_STR = "AVI from Cao & Ferris";
 
 int avi_driver(AffineVariationalInequalities* problem, double *z , double *w, SolverOptions* options)
 {

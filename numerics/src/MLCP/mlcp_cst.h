@@ -20,21 +20,21 @@ enum MLCP_SOLVER
   SICONOS_MLCP_PGS_SBM = 114
 };
 
-extern char*  SICONOS_NONAME_STR;
-extern char*  SICONOS_MLCP_PGS_STR;
-extern char*  SICONOS_MLCP_RPGS_STR;
-extern char*  SICONOS_MLCP_PSOR_STR;
-extern char*  SICONOS_MLCP_RPSOR_STR;
-extern char*  SICONOS_MLCP_PATH_STR;
-extern char*  SICONOS_MLCP_ENUM_STR;
-extern char*  SICONOS_MLCP_SIMPLEX_STR;
-extern char*  SICONOS_MLCP_DIRECT_ENUM_STR;
-extern char*  SICONOS_MLCP_PATH_ENUM_STR;
-extern char*  SICONOS_MLCP_DIRECT_SIMPLEX_STR;
-extern char*  SICONOS_MLCP_DIRECT_PATH_STR;
-extern char*  SICONOS_MLCP_DIRECT_PATH_ENUM_STR;
-extern char*  SICONOS_MLCP_FB_STR;
-extern char*  SICONOS_MLCP_DIRECT_FB_STR;
-extern char*  SICONOS_MLCP_PGS_SBM_STR;
+extern const char* const   SICONOS_NONAME_STR;
+extern const char* const   SICONOS_MLCP_PGS_STR;
+extern const char* const   SICONOS_MLCP_RPGS_STR;
+extern const char* const   SICONOS_MLCP_PSOR_STR;
+extern const char* const   SICONOS_MLCP_RPSOR_STR;
+extern const char* const   SICONOS_MLCP_PATH_STR;
+extern const char* const   SICONOS_MLCP_ENUM_STR;
+extern const char* const   SICONOS_MLCP_SIMPLEX_STR;
+extern const char* const   SICONOS_MLCP_DIRECT_ENUM_STR;
+extern const char* const   SICONOS_MLCP_PATH_ENUM_STR;
+extern const char* const   SICONOS_MLCP_DIRECT_SIMPLEX_STR;
+extern const char* const   SICONOS_MLCP_DIRECT_PATH_STR;
+extern const char* const   SICONOS_MLCP_DIRECT_PATH_ENUM_STR;
+extern const char* const   SICONOS_MLCP_FB_STR;
+extern const char* const   SICONOS_MLCP_DIRECT_FB_STR;
+extern const char* const   SICONOS_MLCP_PGS_SBM_STR;
 
 #endif

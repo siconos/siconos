@@ -31,14 +31,14 @@
 #include <time.h>
 #include "numerics_verbose.h"
 
-char*  SICONOS_RELAY_PGS_STR = "RELAY_PGS";
-char*  SICONOS_RELAY_PATH_STR = "RELAY_PATH";
-char*  SICONOS_RELAY_ENUM_STR = "RELAY_ENUM";
-char*  SICONOS_RELAY_NLGS_STR = "RELAY_NLGS";
-char*  SICONOS_RELAY_LEMKE_STR = "RELAY_LEMKE";
-char*  SICONOS_RELAY_LATIN_STR = "RELAY_LATIN";
-char*  SICONOS_RELAY_AVI_CAOFERRIS_STR = "RELAY_AVI_CAOFERRIS";
-char*  SICONOS_RELAY_AVI_CAOFERRIS_TEST_STR = "test version of the solver by Cao & Ferris; DO NOT USE!";
+const char* const   SICONOS_RELAY_PGS_STR = "RELAY_PGS";
+const char* const   SICONOS_RELAY_PATH_STR = "RELAY_PATH";
+const char* const   SICONOS_RELAY_ENUM_STR = "RELAY_ENUM";
+const char* const   SICONOS_RELAY_NLGS_STR = "RELAY_NLGS";
+const char* const   SICONOS_RELAY_LEMKE_STR = "RELAY_LEMKE";
+const char* const   SICONOS_RELAY_LATIN_STR = "RELAY_LATIN";
+const char* const   SICONOS_RELAY_AVI_CAOFERRIS_STR = "RELAY_AVI_CAOFERRIS";
+const char* const   SICONOS_RELAY_AVI_CAOFERRIS_TEST_STR = "test version of the solver by Cao & Ferris; DO NOT USE!";
 
 int relay_driver(RelayProblem* problem, double *z , double *w,
                  SolverOptions* options)
@@ -75,7 +75,7 @@ int relay_driver(RelayProblem* problem, double *z , double *w,
     solver_options_print(options);
 
   /* Solver name */
-  //char * name = options->solverName;
+  //const char* const  name = options->solverName;
 
   if (verbose == 1)
     printf(" ========================== Call %s solver for Relayproblem ==========================\n", solver_options_id_to_name(options->solverId));

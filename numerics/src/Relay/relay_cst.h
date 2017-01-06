@@ -37,12 +37,12 @@ enum RELAY_SOLVER
 
 
 
-extern char*  SICONOS_RELAY_PGS_STR;
-extern char*  SICONOS_RELAY_PATH_STR;
-extern char*  SICONOS_RELAY_ENUM_STR;
-extern char*  SICONOS_RELAY_NLGS_STR;
-extern char*  SICONOS_RELAY_LEMKE_STR;
-extern char*  SICONOS_RELAY_LATIN_STR;
-extern char*  SICONOS_RELAY_AVI_CAOFERRIS_STR;
-extern char*  SICONOS_RELAY_AVI_CAOFERRIS_TEST_STR;
+extern const char* const   SICONOS_RELAY_PGS_STR;
+extern const char* const   SICONOS_RELAY_PATH_STR;
+extern const char* const   SICONOS_RELAY_ENUM_STR;
+extern const char* const   SICONOS_RELAY_NLGS_STR;
+extern const char* const   SICONOS_RELAY_LEMKE_STR;
+extern const char* const   SICONOS_RELAY_LATIN_STR;
+extern const char* const   SICONOS_RELAY_AVI_CAOFERRIS_STR;
+extern const char* const   SICONOS_RELAY_AVI_CAOFERRIS_TEST_STR;
 #endif

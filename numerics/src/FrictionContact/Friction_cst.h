@@ -2,7 +2,7 @@
 #define FRICTION_CST_H
 /** \file Friction_cst.h */
 /** \enum FRICTION_SOLVER encode the list of solvers as integers, to avoid mispelling
- * with char * variables
+ * with const char* const  variables
  */
 enum FRICTION_SOLVER
 {
@@ -100,57 +100,57 @@ enum FRICTION_SOLVER
 
 
 
-extern char *  SICONOS_FRICTION_2D_NSGS_STR ;
-extern char *  SICONOS_FRICTION_2D_PGS_STR ;
-extern char *  SICONOS_FRICTION_2D_CPG_STR ;
-extern char *  SICONOS_FRICTION_2D_LATIN_STR ;
-extern char *  SICONOS_FRICTION_2D_LEMKE_STR ;
-extern char *  SICONOS_FRICTION_2D_ENUM_STR ;
-extern char *  SICONOS_FRICTION_3D_NSGS_STR ;
-extern char *  SICONOS_FRICTION_3D_NSGSV_STR ;
-extern char *  SICONOS_FRICTION_3D_PROX_STR;
-extern char *  SICONOS_FRICTION_3D_TFP_STR ;
-extern char *  SICONOS_FRICTION_3D_NSN_AC_STR ;
-extern char *  SICONOS_FRICTION_3D_NSN_FB_STR ;
-extern char *  SICONOS_FRICTION_3D_NSN_NM_STR ;
-extern char *  SICONOS_FRICTION_3D_DSFP_STR ;
-extern char *  SICONOS_FRICTION_3D_VI_EG_STR ;
-extern char *  SICONOS_FRICTION_3D_VI_FPP_STR ;
-extern char *  SICONOS_FRICTION_3D_EG_STR ;
-extern char *  SICONOS_FRICTION_3D_FPP_STR ;
-extern char *  SICONOS_FRICTION_3D_HP_STR ;
-extern char *  SICONOS_FRICTION_3D_NCPGlockerFBFixedPoint_STR;
-extern char *  SICONOS_FRICTION_3D_ONECONTACT_NSN_STR;
-extern char *  SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_STR;
-extern char *  SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID_STR;
-extern char *  SICONOS_FRICTION_3D_NCPGlockerFBNewton_STR;
-extern char *  SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithDiagonalization_STR;
-extern char *  SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone_STR;
-extern char *  SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration_STR;
-extern char *  SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithRegularization_STR;
-extern char *  SICONOS_FRICTION_3D_NCPGlockerFBPATH_STR;
-extern char *  SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCylinder_STR;
-extern char *  SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone_velocity_STR;
-extern char *  SICONOS_FRICTION_3D_PGoC_STR;
-extern char *  SICONOS_FRICTION_3D_DeSaxceFixedPoint_STR;
-extern char *  SICONOS_FRICTION_3D_GAMS_PATH_STR;
-extern char *  SICONOS_FRICTION_3D_GAMS_PATHVI_STR;
-extern char *  SICONOS_FRICTION_3D_GAMS_LCP_PATH_STR;
-extern char *  SICONOS_FRICTION_3D_GAMS_LCP_PATHVI_STR;
-extern char *  SICONOS_FRICTION_3D_SOCLCP_STR;
-extern char *  SICONOS_FRICTION_3D_ACLMFP_STR;
-extern char *  SICONOS_GLOBAL_FRICTION_3D_NSGS_WR_STR ;
-extern char *  SICONOS_GLOBAL_FRICTION_3D_NSGSV_WR_STR ;
-extern char *  SICONOS_GLOBAL_FRICTION_3D_PROX_WR_STR ;
-extern char *  SICONOS_GLOBAL_FRICTION_3D_DSFP_WR_STR ;
-extern char *  SICONOS_GLOBAL_FRICTION_3D_TFP_WR_STR ;
-extern char *  SICONOS_GLOBAL_FRICTION_3D_NSGS_STR ;
-extern char *  SICONOS_GLOBAL_FRICTION_3D_NSN_AC_WR_STR ;
-extern char *  SICONOS_GLOBAL_FRICTION_3D_NSN_AC_STR;
-extern char *  SICONOS_GLOBAL_FRICTION_3D_GAMS_PATH_STR;
-extern char *  SICONOS_GLOBAL_FRICTION_3D_GAMS_PATHVI_STR;
-extern char *  SICONOS_FRICTION_3D_ONECONTACT_QUARTIC_STR ;
-extern char *  SICONOS_FRICTION_3D_ONECONTACT_QUARTIC_NU_STR ;
+extern const char* const   SICONOS_FRICTION_2D_NSGS_STR ;
+extern const char* const   SICONOS_FRICTION_2D_PGS_STR ;
+extern const char* const   SICONOS_FRICTION_2D_CPG_STR ;
+extern const char* const   SICONOS_FRICTION_2D_LATIN_STR ;
+extern const char* const   SICONOS_FRICTION_2D_LEMKE_STR ;
+extern const char* const   SICONOS_FRICTION_2D_ENUM_STR ;
+extern const char* const   SICONOS_FRICTION_3D_NSGS_STR ;
+extern const char* const   SICONOS_FRICTION_3D_NSGSV_STR ;
+extern const char* const   SICONOS_FRICTION_3D_PROX_STR;
+extern const char* const   SICONOS_FRICTION_3D_TFP_STR ;
+extern const char* const   SICONOS_FRICTION_3D_NSN_AC_STR ;
+extern const char* const   SICONOS_FRICTION_3D_NSN_FB_STR ;
+extern const char* const   SICONOS_FRICTION_3D_NSN_NM_STR ;
+extern const char* const   SICONOS_FRICTION_3D_DSFP_STR ;
+extern const char* const   SICONOS_FRICTION_3D_VI_EG_STR ;
+extern const char* const   SICONOS_FRICTION_3D_VI_FPP_STR ;
+extern const char* const   SICONOS_FRICTION_3D_EG_STR ;
+extern const char* const   SICONOS_FRICTION_3D_FPP_STR ;
+extern const char* const   SICONOS_FRICTION_3D_HP_STR ;
+extern const char* const   SICONOS_FRICTION_3D_NCPGlockerFBFixedPoint_STR;
+extern const char* const   SICONOS_FRICTION_3D_ONECONTACT_NSN_STR;
+extern const char* const   SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_STR;
+extern const char* const   SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID_STR;
+extern const char* const   SICONOS_FRICTION_3D_NCPGlockerFBNewton_STR;
+extern const char* const   SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithDiagonalization_STR;
+extern const char* const   SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone_STR;
+extern const char* const   SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration_STR;
+extern const char* const   SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithRegularization_STR;
+extern const char* const   SICONOS_FRICTION_3D_NCPGlockerFBPATH_STR;
+extern const char* const   SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCylinder_STR;
+extern const char* const   SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone_velocity_STR;
+extern const char* const   SICONOS_FRICTION_3D_PGoC_STR;
+extern const char* const   SICONOS_FRICTION_3D_DeSaxceFixedPoint_STR;
+extern const char* const   SICONOS_FRICTION_3D_GAMS_PATH_STR;
+extern const char* const   SICONOS_FRICTION_3D_GAMS_PATHVI_STR;
+extern const char* const   SICONOS_FRICTION_3D_GAMS_LCP_PATH_STR;
+extern const char* const   SICONOS_FRICTION_3D_GAMS_LCP_PATHVI_STR;
+extern const char* const   SICONOS_FRICTION_3D_SOCLCP_STR;
+extern const char* const   SICONOS_FRICTION_3D_ACLMFP_STR;
+extern const char* const   SICONOS_GLOBAL_FRICTION_3D_NSGS_WR_STR ;
+extern const char* const   SICONOS_GLOBAL_FRICTION_3D_NSGSV_WR_STR ;
+extern const char* const   SICONOS_GLOBAL_FRICTION_3D_PROX_WR_STR ;
+extern const char* const   SICONOS_GLOBAL_FRICTION_3D_DSFP_WR_STR ;
+extern const char* const   SICONOS_GLOBAL_FRICTION_3D_TFP_WR_STR ;
+extern const char* const   SICONOS_GLOBAL_FRICTION_3D_NSGS_STR ;
+extern const char* const   SICONOS_GLOBAL_FRICTION_3D_NSN_AC_WR_STR ;
+extern const char* const   SICONOS_GLOBAL_FRICTION_3D_NSN_AC_STR;
+extern const char* const   SICONOS_GLOBAL_FRICTION_3D_GAMS_PATH_STR;
+extern const char* const   SICONOS_GLOBAL_FRICTION_3D_GAMS_PATHVI_STR;
+extern const char* const   SICONOS_FRICTION_3D_ONECONTACT_QUARTIC_STR ;
+extern const char* const   SICONOS_FRICTION_3D_ONECONTACT_QUARTIC_NU_STR ;
 
 enum SICONOS_FRICTION_3D_NSGS_IPARAM
 {

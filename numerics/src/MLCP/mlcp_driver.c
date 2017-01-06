@@ -30,22 +30,22 @@
 #include "numerics_verbose.h"
 #include "NumericsMatrix.h"
 
-char*  SICONOS_NONAME_STR = "NONAME";
-char*  SICONOS_MLCP_PGS_STR = "MLCP_PGS";
-char*  SICONOS_MLCP_RPGS_STR = "MLCP_RPGS";
-char*  SICONOS_MLCP_PSOR_STR = "MLCP_PSOR";
-char*  SICONOS_MLCP_RPSOR_STR = "MLCP_RPSOR";
-char*  SICONOS_MLCP_PATH_STR = "MLCP_PATH";
-char*  SICONOS_MLCP_ENUM_STR = "MLCP_ENUM";
-char*  SICONOS_MLCP_SIMPLEX_STR = "MLCP_SIMPLEX";
-char*  SICONOS_MLCP_DIRECT_ENUM_STR = "MLCP_DIRECT_ENUM";
-char*  SICONOS_MLCP_PATH_ENUM_STR = "MLCP_PATH_ENUM";
-char*  SICONOS_MLCP_DIRECT_SIMPLEX_STR = "MLCP_DIRECT_SIMPLEX";
-char*  SICONOS_MLCP_DIRECT_PATH_STR = "MLCP_DIRECT_PATH";
-char*  SICONOS_MLCP_DIRECT_PATH_ENUM_STR = "MLCP_DIRECT_PATH_ENUM";
-char*  SICONOS_MLCP_FB_STR = "MLCP_FB";
-char*  SICONOS_MLCP_DIRECT_FB_STR = "MLCP_DIRECT_FB";
-char*  SICONOS_MLCP_PGS_SBM_STR = "MLCP_PGS_SBM";
+const char* const   SICONOS_NONAME_STR = "NONAME";
+const char* const   SICONOS_MLCP_PGS_STR = "MLCP_PGS";
+const char* const   SICONOS_MLCP_RPGS_STR = "MLCP_RPGS";
+const char* const   SICONOS_MLCP_PSOR_STR = "MLCP_PSOR";
+const char* const   SICONOS_MLCP_RPSOR_STR = "MLCP_RPSOR";
+const char* const   SICONOS_MLCP_PATH_STR = "MLCP_PATH";
+const char* const   SICONOS_MLCP_ENUM_STR = "MLCP_ENUM";
+const char* const   SICONOS_MLCP_SIMPLEX_STR = "MLCP_SIMPLEX";
+const char* const   SICONOS_MLCP_DIRECT_ENUM_STR = "MLCP_DIRECT_ENUM";
+const char* const   SICONOS_MLCP_PATH_ENUM_STR = "MLCP_PATH_ENUM";
+const char* const   SICONOS_MLCP_DIRECT_SIMPLEX_STR = "MLCP_DIRECT_SIMPLEX";
+const char* const   SICONOS_MLCP_DIRECT_PATH_STR = "MLCP_DIRECT_PATH";
+const char* const   SICONOS_MLCP_DIRECT_PATH_ENUM_STR = "MLCP_DIRECT_PATH_ENUM";
+const char* const   SICONOS_MLCP_FB_STR = "MLCP_FB";
+const char* const   SICONOS_MLCP_DIRECT_FB_STR = "MLCP_DIRECT_FB";
+const char* const   SICONOS_MLCP_PGS_SBM_STR = "MLCP_PGS_SBM";
 
 
 int mlcp_alloc_working_memory(MixedLinearComplementarityProblem* problem, SolverOptions* options)
@@ -72,7 +72,7 @@ void mlcp_free_working_memory(MixedLinearComplementarityProblem* problem, Solver
 }
 void mlcp_driver_init(MixedLinearComplementarityProblem* problem, SolverOptions* options)
 {
-  //char * name = options->solverName;
+  //const char* const  name = options->solverName;
 
   switch (options->solverId)
   {
@@ -192,7 +192,7 @@ int mlcp_driver_get_dwork(MixedLinearComplementarityProblem* problem, SolverOpti
     return 0;
   }
 
-  /* char * name = options->solverName; */
+  /* const char* const  name = options->solverName; */
   /* if (strcmp(name , "DIRECT_ENUM") == 0) */
   /*   return  mlcp_direct_enum_getNbDWork(problem, options); */
   /* else if (strcmp(name , "PATH_ENUM") == 0) */
@@ -242,7 +242,7 @@ int mlcp_driver(MixedLinearComplementarityProblem* problem, double *z, double *w
    *************************************************/
 
   /* Solver name */
-  //  char * name = options->solverName;
+  //  const char* const  name = options->solverName;
 
   /*  if(verbose==1){
     printf(" ========================== Call %s solver ==========================\n", name);

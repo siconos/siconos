@@ -43,19 +43,19 @@
 
 #define MAX_ENV_SIZE 200
 
-char * SICONOS_NUMERICS_PROBLEM_LCP_STR = "LCP";
-char * SICONOS_NUMERICS_PROBLEM_MLCP_STR = "MLCP";
-char * SICONOS_NUMERICS_PROBLEM_NCP_STR = "NCP";
-char * SICONOS_NUMERICS_PROBLEM_MCP_STR = "MCP";
-char * SICONOS_NUMERICS_PROBLEM_EQUALITY_STR = "EQUALITY";
-char * SICONOS_NUMERICS_PROBLEM_FC2D_STR = "FC2D";
-char * SICONOS_NUMERICS_PROBLEM_FC3D_STR = "FC3D";
-char * SICONOS_NUMERICS_PROBLEM_VI_STR = "VI";
-char * SICONOS_NUMERICS_PROBLEM_AVI_STR = "AVI";
+const char* const SICONOS_NUMERICS_PROBLEM_LCP_STR = "LCP";
+const char* const SICONOS_NUMERICS_PROBLEM_MLCP_STR = "MLCP";
+const char* const SICONOS_NUMERICS_PROBLEM_NCP_STR = "NCP";
+const char* const SICONOS_NUMERICS_PROBLEM_MCP_STR = "MCP";
+const char* const SICONOS_NUMERICS_PROBLEM_EQUALITY_STR = "EQUALITY";
+const char* const SICONOS_NUMERICS_PROBLEM_FC2D_STR = "FC2D";
+const char* const SICONOS_NUMERICS_PROBLEM_FC3D_STR = "FC3D";
+const char* const SICONOS_NUMERICS_PROBLEM_VI_STR = "VI";
+const char* const SICONOS_NUMERICS_PROBLEM_AVI_STR = "AVI";
 
 static void recursive_solver_options_print(SolverOptions* options, int level);
 
-char * ns_problem_id_to_name(int id)
+const char * ns_problem_id_to_name(int id)
 {
   switch (id)
   {
@@ -520,7 +520,7 @@ void solver_options_set(SolverOptions* options, int solverId)
 
 }
 
-char * solver_options_id_to_name(int Id)
+const char * solver_options_id_to_name(int Id)
 {
   switch (Id)
   {

@@ -134,15 +134,15 @@ enum SICONOS_DPARAM
 #define SICONOS_DPARAM_NMS_MERIT_INCR 7
 
 
-extern char * SICONOS_NUMERICS_PROBLEM_LCP_STR;
-extern char * SICONOS_NUMERICS_PROBLEM_MLCP_STR;
-extern char * SICONOS_NUMERICS_PROBLEM_NCP_STR;
-extern char * SICONOS_NUMERICS_PROBLEM_MCP_STR;
-extern char * SICONOS_NUMERICS_PROBLEM_EQUALITY_STR;
-extern char * SICONOS_NUMERICS_PROBLEM_FC2D_STR;
-extern char * SICONOS_NUMERICS_PROBLEM_FC3D_STR;
-extern char * SICONOS_NUMERICS_PROBLEM_VI_STR;
-extern char * SICONOS_NUMERICS_PROBLEM_AVI_STR;
+extern const char* const SICONOS_NUMERICS_PROBLEM_LCP_STR;
+extern const char* const SICONOS_NUMERICS_PROBLEM_MLCP_STR;
+extern const char* const SICONOS_NUMERICS_PROBLEM_NCP_STR;
+extern const char* const SICONOS_NUMERICS_PROBLEM_MCP_STR;
+extern const char* const SICONOS_NUMERICS_PROBLEM_EQUALITY_STR;
+extern const char* const SICONOS_NUMERICS_PROBLEM_FC2D_STR;
+extern const char* const SICONOS_NUMERICS_PROBLEM_FC3D_STR;
+extern const char* const SICONOS_NUMERICS_PROBLEM_VI_STR;
+extern const char* const SICONOS_NUMERICS_PROBLEM_AVI_STR;
 
 
 #include "SolverOptions_helpers.h"
@@ -197,13 +197,13 @@ extern "C"
    * \param Id the id of the solver
    * \return the name of the solver
    */
-  char * solver_options_id_to_name(int Id);
+  const char * solver_options_id_to_name(int Id);
 
   /** return the name of a problem type (LCP, NCP, VI, ...) based on its id
    * \param id the id of the problem
    * \return the name of the problem
    */
-  char * ns_problem_id_to_name(int id);
+  const char * ns_problem_id_to_name(int id);
 
   /** free the solverData structure
    * \param options the structure to free

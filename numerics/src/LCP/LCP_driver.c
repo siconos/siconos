@@ -31,28 +31,28 @@
 /* #define DEBUG_MESSAGES */
 #include "debug.h"
 
-char *  SICONOS_LCP_LEMKE_STR = "Lemke";
-char *  SICONOS_LCP_NSGS_SBM_STR = "NSGS_SBM";
-char *  SICONOS_LCP_PGS_STR = "PGS";
-char *  SICONOS_LCP_CPG_STR = "CPG";
-char *  SICONOS_LCP_LATIN_STR = "Latin";
-char *  SICONOS_LCP_LATIN_W_STR = "Latin_w";
-char *  SICONOS_LCP_QP_STR = "QP";
-char *  SICONOS_LCP_NSQP_STR = "NSQP";
-char *  SICONOS_LCP_NEWTONMIN_STR = "NewtonMin";
-char *  SICONOS_LCP_NEWTON_FBLSA_STR = "NewtonFB";
-char *  SICONOS_LCP_NEWTON_MINFBLSA_STR = "NewtonMinFB";
-char *  SICONOS_LCP_PSOR_STR = "PSOR";
-char *  SICONOS_LCP_RPGS_STR = "RPGS";
-char *  SICONOS_LCP_PATH_STR = "PATH";
-char *  SICONOS_LCP_ENUM_STR = "ENUM";
-char *  SICONOS_LCP_AVI_CAOFERRIS_STR = "AVI CaoFerris";
-char *  SICONOS_LCP_PIVOT_STR = "Pivot based method";
-char *  SICONOS_LCP_BARD_STR = "Bard-type pivoting method";
-char *  SICONOS_LCP_MURTY_STR = "Murty's least index pivoting method";
-char *  SICONOS_LCP_PATHSEARCH_STR = "For testing only: solver used in the Pathsearch algorithm";
-char *  SICONOS_LCP_PIVOT_LUMOD_STR = "Pivot based method with BLU updates using LUMOD";
-char *  SICONOS_LCP_GAMS_STR = "Using GAMS solvers";
+const char* const   SICONOS_LCP_LEMKE_STR = "Lemke";
+const char* const   SICONOS_LCP_NSGS_SBM_STR = "NSGS_SBM";
+const char* const   SICONOS_LCP_PGS_STR = "PGS";
+const char* const   SICONOS_LCP_CPG_STR = "CPG";
+const char* const   SICONOS_LCP_LATIN_STR = "Latin";
+const char* const   SICONOS_LCP_LATIN_W_STR = "Latin_w";
+const char* const   SICONOS_LCP_QP_STR = "QP";
+const char* const   SICONOS_LCP_NSQP_STR = "NSQP";
+const char* const   SICONOS_LCP_NEWTONMIN_STR = "NewtonMin";
+const char* const   SICONOS_LCP_NEWTON_FBLSA_STR = "NewtonFB";
+const char* const   SICONOS_LCP_NEWTON_MINFBLSA_STR = "NewtonMinFB";
+const char* const   SICONOS_LCP_PSOR_STR = "PSOR";
+const char* const   SICONOS_LCP_RPGS_STR = "RPGS";
+const char* const   SICONOS_LCP_PATH_STR = "PATH";
+const char* const   SICONOS_LCP_ENUM_STR = "ENUM";
+const char* const   SICONOS_LCP_AVI_CAOFERRIS_STR = "AVI CaoFerris";
+const char* const   SICONOS_LCP_PIVOT_STR = "Pivot based method";
+const char* const   SICONOS_LCP_BARD_STR = "Bard-type pivoting method";
+const char* const   SICONOS_LCP_MURTY_STR = "Murty's least index pivoting method";
+const char* const   SICONOS_LCP_PATHSEARCH_STR = "For testing only: solver used in the Pathsearch algorithm";
+const char* const   SICONOS_LCP_PIVOT_LUMOD_STR = "Pivot based method with BLU updates using LUMOD";
+const char* const   SICONOS_LCP_GAMS_STR = "Using GAMS solvers";
 
 static int lcp_driver_SparseBlockMatrix(LinearComplementarityProblem* problem, double *z , double *w, SolverOptions* options);
 
@@ -102,7 +102,7 @@ int lcp_driver_SparseBlockMatrix(LinearComplementarityProblem* problem, double *
   *************************************************/
 
   /* Solver name */
-  //  char * name = options->solverName;
+  //  const char* const  name = options->solverName;
   if (verbose == 1)
     printf(" ========================== Call %s SparseBlockMatrix solver for Linear Complementarity problem ==========================\n", solver_options_id_to_name(options->solverId));
 

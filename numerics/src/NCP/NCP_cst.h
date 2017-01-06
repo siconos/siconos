@@ -35,9 +35,9 @@ enum NCP_SOLVER
 };
 
 
-extern char * SICONOS_NCP_NEWTON_FBLSA_STR;
-extern char * SICONOS_NCP_NEWTON_MINFBLSA_STR;
-extern char * SICONOS_NCP_PATHSEARCH_STR;
-extern char * SICONOS_NCP_PATH_STR;
+extern const char* const  SICONOS_NCP_NEWTON_FBLSA_STR;
+extern const char* const  SICONOS_NCP_NEWTON_MINFBLSA_STR;
+extern const char* const  SICONOS_NCP_PATHSEARCH_STR;
+extern const char* const  SICONOS_NCP_PATH_STR;
 
 #endif

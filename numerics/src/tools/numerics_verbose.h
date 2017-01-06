@@ -130,7 +130,7 @@ extern "C"
      \param functionName name of the function where error occurs
      \param message output message
   */
-  void numerics_error(char* functionName, char* message) NO_RETURN;
+  void numerics_error(const char* functionName, const char* message) NO_RETURN;
 
   /* message output without exit
      \param functionName name of the function where warning occurs

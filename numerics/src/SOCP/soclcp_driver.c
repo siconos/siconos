@@ -25,33 +25,33 @@
 #include "NonSmoothDrivers.h"
 #include "numerics_verbose.h"
 
-char *  SICONOS_SOCLCP_NSGS_STR = "SOCLCP_NSGS";
-char *  SICONOS_SOCLCP_NSGSV_STR = "SOCLCP_NSGSV";
-char *  SICONOS_SOCLCP_TFP_STR = "SOCLCP_TFP";
-char *  SICONOS_SOCLCP_NSN_AC_STR = "SOCLCP_NSN_AC";
-char *  SICONOS_SOCLCP_NSN_FB_STR = "SOCLCP_NSN_FB";
-char *  SICONOS_SOCLCP_DSFP_STR = "SOCLCP_DeSaxceFixedPoint";
-char *  SICONOS_SOCLCP_NCPGlockerFBFixedPoint_STR = "SOCLCP_NCPGlockerFBFixedPoint";
-char *  SICONOS_SOCLCP_AlartCurnierNewton_STR = "SOCLCP_AlartCurnierNewton";
-char *  SICONOS_SOCLCP_DampedAlartCurnierNewton_STR = "SOCLCP_DampedAlartCurnierNewton";
-char *  SICONOS_SOCLCP_NCPGlockerFBNewton_STR = "SOCLCP_NCPGlockerFBNewton";
-char * SICONOS_SOCLCP_ProjectionOnConeWithDiagonalization_STR = "SOCLCP_ProjectionOnConeWithDiagonalization";
-char * SICONOS_SOCLCP_ProjectionOnCone_STR = "SOCLCP_ProjectionOnCone";
-char * SICONOS_SOCLCP_ProjectionOnConeWithLocalIteration_STR = "SOCLCP_ProjectionOnConeWithLocalIteration";
-char * SICONOS_SOCLCP_projectionOnConeWithRegularization_STR = "SOCLCP_projectionOnConeWithRegularization";
-char * SICONOS_SOCLCP_NCPGlockerFBPATH_STR = "SOCLCP_NCPGlockerFBPATH";
-char * SICONOS_SOCLCP_projectionOnCylinder_STR = "SOCLCP_projectionOnCylinder";
-char * SICONOS_SOCLCP_ProjectionOnCone_velocity_STR = "SOCLCP_ProjectionOnCone_velocity";
-char * SICONOS_SOCLCP_PGoC_STR = "SOCLCP_PGoC";
-char * SICONOS_SOCLCP_DeSaxceFixedPoint_STR = "SOCLCP_DeSaxceFixedPoint";
-char * SICONOS_SOCLCP_EG_STR = "SOCLCP_ExtraGradient";
-char * SICONOS_SOCLCP_FPP_STR = "SOCLCP_FixedPointProjection";
-char * SICONOS_SOCLCP_VI_EG_STR = "SOCLCP_VI_ExtraGradient";
-char * SICONOS_SOCLCP_VI_FPP_STR = "SOCLCP_VI_FixedPointProjection";
-char * SICONOS_SOCLCP_HP_STR = "SOCLCP_HyperplaneProjection";
-char * SICONOS_SOCLCP_PROX_STR = "SOCLCP_PROX";
-char * SICONOS_SOCLCP_QUARTIC_STR = "SOCLCP_QUARTIC";
-char * SICONOS_SOCLCP_QUARTIC_NU_STR = "SOCLCP_QUARTIC_NU";
+const char* const   SICONOS_SOCLCP_NSGS_STR = "SOCLCP_NSGS";
+const char* const   SICONOS_SOCLCP_NSGSV_STR = "SOCLCP_NSGSV";
+const char* const   SICONOS_SOCLCP_TFP_STR = "SOCLCP_TFP";
+const char* const   SICONOS_SOCLCP_NSN_AC_STR = "SOCLCP_NSN_AC";
+const char* const   SICONOS_SOCLCP_NSN_FB_STR = "SOCLCP_NSN_FB";
+const char* const   SICONOS_SOCLCP_DSFP_STR = "SOCLCP_DeSaxceFixedPoint";
+const char* const   SICONOS_SOCLCP_NCPGlockerFBFixedPoint_STR = "SOCLCP_NCPGlockerFBFixedPoint";
+const char* const   SICONOS_SOCLCP_AlartCurnierNewton_STR = "SOCLCP_AlartCurnierNewton";
+const char* const   SICONOS_SOCLCP_DampedAlartCurnierNewton_STR = "SOCLCP_DampedAlartCurnierNewton";
+const char* const   SICONOS_SOCLCP_NCPGlockerFBNewton_STR = "SOCLCP_NCPGlockerFBNewton";
+const char* const  SICONOS_SOCLCP_ProjectionOnConeWithDiagonalization_STR = "SOCLCP_ProjectionOnConeWithDiagonalization";
+const char* const  SICONOS_SOCLCP_ProjectionOnCone_STR = "SOCLCP_ProjectionOnCone";
+const char* const  SICONOS_SOCLCP_ProjectionOnConeWithLocalIteration_STR = "SOCLCP_ProjectionOnConeWithLocalIteration";
+const char* const  SICONOS_SOCLCP_projectionOnConeWithRegularization_STR = "SOCLCP_projectionOnConeWithRegularization";
+const char* const  SICONOS_SOCLCP_NCPGlockerFBPATH_STR = "SOCLCP_NCPGlockerFBPATH";
+const char* const  SICONOS_SOCLCP_projectionOnCylinder_STR = "SOCLCP_projectionOnCylinder";
+const char* const  SICONOS_SOCLCP_ProjectionOnCone_velocity_STR = "SOCLCP_ProjectionOnCone_velocity";
+const char* const  SICONOS_SOCLCP_PGoC_STR = "SOCLCP_PGoC";
+const char* const  SICONOS_SOCLCP_DeSaxceFixedPoint_STR = "SOCLCP_DeSaxceFixedPoint";
+const char* const  SICONOS_SOCLCP_EG_STR = "SOCLCP_ExtraGradient";
+const char* const  SICONOS_SOCLCP_FPP_STR = "SOCLCP_FixedPointProjection";
+const char* const  SICONOS_SOCLCP_VI_EG_STR = "SOCLCP_VI_ExtraGradient";
+const char* const  SICONOS_SOCLCP_VI_FPP_STR = "SOCLCP_VI_FixedPointProjection";
+const char* const  SICONOS_SOCLCP_HP_STR = "SOCLCP_HyperplaneProjection";
+const char* const  SICONOS_SOCLCP_PROX_STR = "SOCLCP_PROX";
+const char* const  SICONOS_SOCLCP_QUARTIC_STR = "SOCLCP_QUARTIC";
+const char* const  SICONOS_SOCLCP_QUARTIC_NU_STR = "SOCLCP_QUARTIC_NU";
 
 
 int soclcp_driver(SecondOrderConeLinearComplementarityProblem* problem,
@@ -67,7 +67,7 @@ int soclcp_driver(SecondOrderConeLinearComplementarityProblem* problem,
     solver_options_print(options);
 
   /* Solver name */
-  /*char * name = options->solverName;*/
+  /*const char* const  name = options->solverName;*/
 
   int info = -1 ;
 

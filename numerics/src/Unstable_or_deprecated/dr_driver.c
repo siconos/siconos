@@ -52,7 +52,7 @@ int dr_driver(RelayProblem* problem, double *z , double *w, SolverOptions* optio
    *************************************************/
 
   /* Solver name
-  char * name = options->solverName;*/
+  const char* const  name = options->solverName;*/
 
   if (verbose == 1)
     printf(" ========================== Call %s solver for Relayproblem ==========================\n", solver_options_id_to_name(options->solverId));

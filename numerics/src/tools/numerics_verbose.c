@@ -38,7 +38,7 @@ void numerics_set_verbose(int newVerboseMode)
 }
 
 
-void numerics_error(char * functionName, char* message)
+void numerics_error(const char* functionName, const char* message)
 {
   char output[300] = "Numerics error - ";
   strcat(output, functionName);

@@ -58,26 +58,26 @@ enum LCP_PIVOT
   SICONOS_LCP_PIVOT_PATHSEARCH = 4
 };
 
-extern char *  SICONOS_LCP_LEMKE_STR;
-extern char *  SICONOS_LCP_NSGS_SBM_STR;
-extern char *  SICONOS_LCP_PGS_STR;
-extern char *  SICONOS_LCP_CPG_STR;
-extern char *  SICONOS_LCP_LATIN_STR;
-extern char *  SICONOS_LCP_LATIN_W_STR;
-extern char *  SICONOS_LCP_QP_STR;
-extern char *  SICONOS_LCP_NSQP_STR;
-extern char *  SICONOS_LCP_NEWTONMIN_STR;
-extern char *  SICONOS_LCP_NEWTON_FBLSA_STR;
-extern char *  SICONOS_LCP_NEWTON_MINFBLSA_STR;
-extern char *  SICONOS_LCP_PSOR_STR;
-extern char *  SICONOS_LCP_RPGS_STR;
-extern char *  SICONOS_LCP_PATH_STR;
-extern char *  SICONOS_LCP_ENUM_STR;
-extern char *  SICONOS_LCP_AVI_CAOFERRIS_STR;
-extern char *  SICONOS_LCP_PIVOT_STR;
-extern char *  SICONOS_LCP_BARD_STR;
-extern char *  SICONOS_LCP_MURTY_STR;
-extern char *  SICONOS_LCP_PATHSEARCH_STR;
-extern char *  SICONOS_LCP_PIVOT_LUMOD_STR;
-extern char *  SICONOS_LCP_GAMS_STR;
+extern const char* const   SICONOS_LCP_LEMKE_STR;
+extern const char* const   SICONOS_LCP_NSGS_SBM_STR;
+extern const char* const   SICONOS_LCP_PGS_STR;
+extern const char* const   SICONOS_LCP_CPG_STR;
+extern const char* const   SICONOS_LCP_LATIN_STR;
+extern const char* const   SICONOS_LCP_LATIN_W_STR;
+extern const char* const   SICONOS_LCP_QP_STR;
+extern const char* const   SICONOS_LCP_NSQP_STR;
+extern const char* const   SICONOS_LCP_NEWTONMIN_STR;
+extern const char* const   SICONOS_LCP_NEWTON_FBLSA_STR;
+extern const char* const   SICONOS_LCP_NEWTON_MINFBLSA_STR;
+extern const char* const   SICONOS_LCP_PSOR_STR;
+extern const char* const   SICONOS_LCP_RPGS_STR;
+extern const char* const   SICONOS_LCP_PATH_STR;
+extern const char* const   SICONOS_LCP_ENUM_STR;
+extern const char* const   SICONOS_LCP_AVI_CAOFERRIS_STR;
+extern const char* const   SICONOS_LCP_PIVOT_STR;
+extern const char* const   SICONOS_LCP_BARD_STR;
+extern const char* const   SICONOS_LCP_MURTY_STR;
+extern const char* const   SICONOS_LCP_PATHSEARCH_STR;
+extern const char* const   SICONOS_LCP_PIVOT_LUMOD_STR;
+extern const char* const   SICONOS_LCP_GAMS_STR;
 #endif
