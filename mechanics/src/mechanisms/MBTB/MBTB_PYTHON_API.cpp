@@ -756,7 +756,7 @@ void MBTB_moveBodyToPosWithSpeed(unsigned int numDS, SP::SiconosVector aPos, SP:
 {
   SP::SiconosVector q = sDS[numDS]->q();
   *q= *aPos;
-  SP::SiconosVector v = sDS[numDS]->velocity();
+  SP::SiconosVector v = sDS[numDS]->twist();
   *v= *aVel;
   MBTB_updateDSFromSiconos();
   _MBTB_updateContactFromDS();
@@ -826,9 +826,9 @@ void MBTB_BodySetIParam(unsigned int paramId,unsigned int bodyId,int v)
 }
 void MBTB_BodySetVelocity(unsigned int numDS, SP::SiconosVector aVel)
 {
-  SP::SiconosVector v = sDS[numDS]->velocity();
+  SP::SiconosVector v = sDS[numDS]->twist();
   *v= *aVel;
-  SP::SiconosVector v0 = sDS[numDS]->v0();
+  SP::SiconosVector v0 = sDS[numDS]->twist0();
   *v0=*aVel;
 }
 void MBTB_SetDParam(unsigned int paramId,double v)

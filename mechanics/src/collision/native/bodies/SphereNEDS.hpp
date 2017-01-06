@@ -55,7 +55,7 @@ public:
   inline double getVelocity(unsigned int pos)
   {
     assert(pos < 6);
-    return (_v->getValue(pos));
+    return (_twist->getValue(pos));
   };
 
   inline double getRadius() const

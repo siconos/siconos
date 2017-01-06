@@ -684,12 +684,12 @@ double MoreauJeanGOSI::computeResidu()
       // Get the state  (previous time step) from memory vector
       // -> var. indexed with "Old"
       SP::SiconosVector qold = d->qMemory()->getSiconosVector(0);
-      SP::SiconosVector vold = d->velocityMemory()->getSiconosVector(0);
+      SP::SiconosVector vold = d->twistMemory()->getSiconosVector(0);
 
 
       // Get the current state vector
       SP::SiconosVector q = d->q();
-      SP::SiconosVector v = d->velocity(); // v = v_k,i+1
+      SP::SiconosVector v = d->twist(); // v = v_k,i+1
 
       // Get the (constant mass matrix)
       SP::SiconosMatrix massMatrix = d->mass();
@@ -930,7 +930,7 @@ void MoreauJeanGOSI::computeFreeState()
 
       // Get state i (previous time step) from Memories -> var. indexed with "Old"
       SP::SiconosVector qold = d->qMemory()->getSiconosVector(0);
-      SP::SiconosVector vold = d->velocityMemory()->getSiconosVector(0);
+      SP::SiconosVector vold = d->twistMemory()->getSiconosVector(0);
 
       // --- ResiduFree computation ---
       // ResFree = M(v-vold) - h*[theta*forces(t) + (1-theta)*forces(told)]
@@ -943,7 +943,7 @@ void MoreauJeanGOSI::computeFreeState()
       // -- Update W --
       // Note: during computeW, mass and jacobians of forces will be computed/
       computeW(t, d, W);
-      SP::SiconosVector v = d->velocity(); // v = v_k,i+1
+      SP::SiconosVector v = d->twist(); // v = v_k,i+1
 
       // -- vfree =  v - W^{-1} ResiduFree --
       // At this point vfree = residuFree
@@ -1153,7 +1153,7 @@ void MoreauJeanGOSI::updatePosition(SP::DynamicalSystem ds)
   {
     // get dynamical system
     SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS> (ds);
-    SP::SiconosVector v = d->velocity();
+    SP::SiconosVector v = d->twist();
     DEBUG_PRINT("MoreauJeanGOSI::updateState()\n ")
       DEBUG_EXPR(d->display());
     DEBUG_PRINT("MoreauJeanGOSI::updateState() prev v\n")
@@ -1305,7 +1305,7 @@ void MoreauJeanGOSI::updateState(const unsigned int level)
 
       // get dynamical system
       SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS> (ds);
-      SP::SiconosVector v = d->velocity();
+      SP::SiconosVector v = d->twist();
       DEBUG_PRINT("MoreauJeanGOSI::updateState()\n ")
       DEBUG_EXPR(d->display());
       DEBUG_PRINT("MoreauJeanGOSI::updateState() prev v\n")

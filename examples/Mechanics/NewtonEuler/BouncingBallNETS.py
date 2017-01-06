@@ -140,7 +140,7 @@ dataPlot = empty((N, 16))
 # numpy pointers on dense Siconos vectors
 #
 q = ball.q()
-v = ball.velocity()
+v = ball.twist()
 p = ball.p(1)
 lambda_ = inter.lambda_(1)
 

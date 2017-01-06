@@ -136,7 +136,7 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
 
       // get left state from memory
       SP::SiconosVector qold = d->qMemory()->getSiconosVector(0);
-      SP::SiconosVector vold = d->velocityMemory()->getSiconosVector(0); // right limit
+      SP::SiconosVector vold = d->twistMemory()->getSiconosVector(0); // right limit
       //Mold = d->mass();
       assert(!d->mass()->isPLUInversed());
       Mold.reset(new SimpleMatrix(*(d->mass()))); // we copy the mass matrix to avoid its factorization
@@ -301,10 +301,10 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
 
       // get left state from memory
       SP::SiconosVector qold = d->qMemory()->getSiconosVector(0);
-      SP::SiconosVector vold = d->velocityMemory()->getSiconosVector(0);
+      SP::SiconosVector vold = d->twistMemory()->getSiconosVector(0);
 
       // initialize *it->residuFree and predicted right velocity (left limit)
-      SP::SiconosVector v = d->velocity(); //contains velocity v_{k+1}^- and not free velocity
+      SP::SiconosVector v = d->twist(); //contains velocity v_{k+1}^- and not free velocity
 
       v->zero();
 
@@ -466,10 +466,10 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
       {
         SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS> (ds);
         SP::SiconosVector residuFree = d->workspace(DynamicalSystem::freeresidu);
-        SP::SiconosVector v = d->velocity();
+        SP::SiconosVector v = d->twist();
         SP::SiconosVector q = d->q();
         SP::SiconosVector qold = d->qMemory()->getSiconosVector(0);
-        SP::SiconosVector vold = d->velocityMemory()->getSiconosVector(0); // right limit
+        SP::SiconosVector vold = d->twistMemory()->getSiconosVector(0); // right limit
 
         SP::SiconosMatrix M(new SimpleMatrix(*(d->mass()))); // we copy the mass matrix to avoid its factorization;
         DEBUG_EXPR(M->display());
@@ -561,7 +561,7 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
         vFree->zero();
         // get right state from memory
         SP::SiconosVector q = d->q(); // contains position q_{k+1}
-        SP::SiconosVector v = d->velocity(); // contains velocity v_{k+1}^- and not free velocity
+        SP::SiconosVector v = d->twist(); // contains velocity v_{k+1}^- and not free velocity
         SP::SiconosMatrix M(new SimpleMatrix(*(d->mass()))); // we copy the mass matrix to avoid its factorization;
 
         DEBUG_EXPR(q->display());
@@ -580,7 +580,7 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
         *residuFree += -0.5 * h * *vFree;
 
         /*  Compute the right limit of the (free) velocity at  t^+_k with contact force : */
-        SP::SiconosVector vold = d->velocityMemory()->getSiconosVector(0);
+        SP::SiconosVector vold = d->twistMemory()->getSiconosVector(0);
 
         *vFree = *vold - *residuFree;
         DEBUG_PRINT("vFree contains the  left limit of the (free) velocity at  t^-_{k+1} without contact force :\n");

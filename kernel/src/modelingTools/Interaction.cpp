@@ -389,7 +389,7 @@ void Interaction::initDSDataNewtonEuler(DynamicalSystem& ds, VectorOfVectors& wo
 //  DSlink[NewtonEulerR::xfree]->insertPtr(workVDS[NewtonEulerDS::xfree]);
   DSlink[NewtonEulerR::xfree]->insertPtr(ds.workspace(DynamicalSystem::free));
   DSlink[NewtonEulerR::q0]->insertPtr(neds.q());
-  DSlink[NewtonEulerR::velocity]->insertPtr(neds.velocity());
+  DSlink[NewtonEulerR::velocity]->insertPtr(neds.twist());
   //  DSlink[NewtonEulerR::deltaq]->insertPtr(neds.deltaq());
   DSlink[NewtonEulerR::dotq]->insertPtr(neds.dotq());
   //    data[NewtonEulerR::q2]->insertPtr( neds.acceleration());

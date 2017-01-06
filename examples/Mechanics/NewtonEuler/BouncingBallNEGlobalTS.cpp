@@ -243,7 +243,7 @@ int main(int argc, char* argv[])
     SimpleMatrix dataPlot(N + 1, outputSize);
 
     SP::SiconosVector q = ball->q();
-    SP::SiconosVector v = ball->velocity();
+    SP::SiconosVector v = ball->twist();
     SP::SiconosVector p = ball->p(1);
     SP::SiconosVector lambda = inter->lambda(1);
 

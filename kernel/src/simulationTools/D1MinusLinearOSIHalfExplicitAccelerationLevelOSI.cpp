@@ -117,7 +117,7 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
 
       // get left state from memory
       SP::SiconosVector qold = d->qMemory()->getSiconosVector(0);
-      SP::SiconosVector vold = d->velocityMemory()->getSiconosVector(0); // right limit
+      SP::SiconosVector vold = d->twistMemory()->getSiconosVector(0); // right limit
       //Mold = d->mass();
       assert(!d->mass()->isPLUInversed());
       Mold.reset(new SimpleMatrix(*(d->mass()))); // we copy the mass matrix to avoid its factorization
@@ -293,11 +293,11 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
 
       // get left state from memory
       SP::SiconosVector qold = d->qMemory()->getSiconosVector(0);
-      SP::SiconosVector vold = d->velocityMemory()->getSiconosVector(0);
+      SP::SiconosVector vold = d->twistMemory()->getSiconosVector(0);
 
       // initialize *it->residuFree and predicted right velocity (left limit)
       SP::SiconosVector residuFree = ds->workspace(DynamicalSystem::freeresidu); // contains residu without nonsmooth effect
-      SP::SiconosVector v = d->velocity(); //contains velocity v_{k+1}^- and not free velocity
+      SP::SiconosVector v = d->twist(); //contains velocity v_{k+1}^- and not free velocity
       residuFree->zero();
       v->zero();
 
@@ -444,10 +444,10 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
       {
         SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS> (ds);
         SP::SiconosVector residuFree = d->workspace(DynamicalSystem::freeresidu);
-        SP::SiconosVector v = d->velocity();
+        SP::SiconosVector v = d->twist();
         SP::SiconosVector q = d->q();
         SP::SiconosVector qold = d->qMemory()->getSiconosVector(0);
-        SP::SiconosVector vold = d->velocityMemory()->getSiconosVector(0); // right limit
+        SP::SiconosVector vold = d->twistMemory()->getSiconosVector(0); // right limit
 
         SP::SiconosMatrix M(new SimpleMatrix(*(d->mass()))); // we copy the mass matrix to avoid its factorization;
         DEBUG_EXPR(M->display());
@@ -529,7 +529,7 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
         accFree->zero();
         // get right state from memory
         SP::SiconosVector q = d->q(); // contains position q_{k+1}
-        SP::SiconosVector v = d->velocity(); // contains velocity v_{k+1}^- and not free velocity
+        SP::SiconosVector v = d->twist(); // contains velocity v_{k+1}^- and not free velocity
         SP::SiconosMatrix M(new SimpleMatrix(*(d->mass()))); // we copy the mass matrix to avoid its factorization;
 
         DEBUG_EXPR(accFree->display());

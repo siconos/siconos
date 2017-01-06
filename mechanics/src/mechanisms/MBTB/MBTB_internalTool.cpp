@@ -271,9 +271,9 @@ void _MBTB_displayStep()
       }
       printf("\n");
       printf("Velocity of body %i\n", numDS);
-      for(unsigned int ii=0; ii<sDS[numDS]->velocity()->size(); ii++)
+      for(unsigned int ii=0; ii<sDS[numDS]->twist()->size(); ii++)
       {
-        printf("%e",sDS[numDS]->velocity()->getValue(ii));
+        printf("%e",sDS[numDS]->twist()->getValue(ii));
         printf("\t");
       }
       printf("\n");
@@ -281,12 +281,12 @@ void _MBTB_displayStep()
       /*Ec of the DS*/
       //   printf("MBTB Ec computattiom masse matrix:\n");
       //    (sDS[numDS]->M())->display();
-      //    (sDS[numDS]->velocity())->display();
+      //    (sDS[numDS]->twist())->display();
       SiconosVector res(6);
-      prod(*(sDS[numDS]->mass()),*(sDS[numDS]->velocity()),res);
+      prod(*(sDS[numDS]->mass()),*(sDS[numDS]->twist()),res);
       double ec=0.0;
       for(int i=0; i<6; i++)
-        ec+=res.getValue(i)*sDS[numDS]->velocity()->getValue(i);
+        ec+=res.getValue(i)*sDS[numDS]->twist()->getValue(i);
       printf("%e\t",ec*0.5);
       printf("\n");
     }
@@ -446,20 +446,20 @@ void _MBTB_printStep(FILE *fp)
       fprintf(fp,"%e",sDS[numDS]->q()->getValue(ii));
       fprintf(fp,"\t");
     }
-    for(unsigned int ii=0; ii<sDS[numDS]->velocity()->size(); ii++)
+    for(unsigned int ii=0; ii<sDS[numDS]->twist()->size(); ii++)
     {
-      fprintf(fp,"%e",sDS[numDS]->velocity()->getValue(ii));
+      fprintf(fp,"%e",sDS[numDS]->twist()->getValue(ii));
       fprintf(fp,"\t");
     }
     /*Ec of the DS*/
     //   printf("MBTB Ec computattiom masse matrix:\n");
     //    (sDS[numDS]->M())->display();
-    //    (sDS[numDS]->velocity())->display();
+    //    (sDS[numDS]->twist())->display();
     SiconosVector res(6);
-    prod(*(sDS[numDS]->mass()),*(sDS[numDS]->velocity()),res);
+    prod(*(sDS[numDS]->mass()),*(sDS[numDS]->twist()),res);
     double ec=0.0;
     for(int i=0; i<6; i++)
-      ec+=res.getValue(i)*sDS[numDS]->velocity()->getValue(i);
+      ec+=res.getValue(i)*sDS[numDS]->twist()->getValue(i);
     fprintf(fp,"%e\t",ec*0.5);
     //    printf("ec=%e",ec*0.5);
   }

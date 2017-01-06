@@ -352,7 +352,7 @@ int main(int argc, char* argv[])
 
 
     SP::SiconosVector q1 = beam1->q();
-    SP::SiconosVector v1 = beam1->velocity();
+    SP::SiconosVector v1 = beam1->twist();
     SP::SiconosVector q2 = beam2->q();
     SP::SiconosVector q3 = beam3->q();
 

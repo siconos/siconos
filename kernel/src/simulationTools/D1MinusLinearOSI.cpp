@@ -246,12 +246,12 @@ void D1MinusLinearOSI::computeFreeState()
       SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS> (ds);
 
       // get left state from memory
-      SP::SiconosVector vold = d->velocityMemory()->getSiconosVector(0); // right limit
+      SP::SiconosVector vold = d->twistMemory()->getSiconosVector(0); // right limit
       DEBUG_EXPR(vold->display());
 
       // get right information
       SP::SiconosMatrix M(new SimpleMatrix(*(d->mass()))); // we copy the mass matrix to avoid its factorization;
-      SP::SiconosVector vfree = d->velocity(); // POINTER CONSTRUCTOR : contains free velocity
+      SP::SiconosVector vfree = d->twist(); // POINTER CONSTRUCTOR : contains free velocity
       (*vfree) = *(d->workspace(DynamicalSystem::freeresidu));
       DEBUG_EXPR(d->workspace(DynamicalSystem::freeresidu)->display());
 
@@ -319,7 +319,7 @@ void D1MinusLinearOSI::updateState(const unsigned int level)
     {
       SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS> (ds);
       SP::SiconosMatrix M(new SimpleMatrix(*(d->mass()))); // we copy the mass matrix to avoid its factorization;
-      SP::SiconosVector v = d->velocity(); // POINTER CONSTRUCTOR : contains new velocity
+      SP::SiconosVector v = d->twist(); // POINTER CONSTRUCTOR : contains new velocity
       if (d->p(1))
       {
 
