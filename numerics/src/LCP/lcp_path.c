@@ -18,6 +18,9 @@
 #include <stdio.h>
 #include "SiconosConfig.h"
 
+#include "LinearComplementarityProblem.h"
+#include "SolverOptions.h"
+
 #ifdef HAVE_PATHFERRIS
 #include <stdlib.h>
 #include <string.h>
@@ -26,8 +29,6 @@
 
 #include "SimpleLCP.h"
 #include "numerics_verbose.h"
-#include "LinearComplementarityProblem.h"
-#include "SolverOptions.h"
 #include "NumericsMatrix.h"
 #endif /*HAVE_PATHFERRIS*/
 
