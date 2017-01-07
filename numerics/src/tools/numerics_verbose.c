@@ -20,12 +20,13 @@
 #include <string.h>
 #include <stdlib.h>
 #include "numerics_verbose.h"
+#include "sn_error_handling.h"
 
 #include <stdarg.h>
 /* Default value for verbose mode: turned to off
 Warning: global variable
 */
-int verbose = 0;
+tlsvar int verbose = 0;
 
 void setNumericsVerbose(int newVerboseMode)
 {
@@ -40,14 +41,14 @@ void numerics_set_verbose(int newVerboseMode)
 
 void numerics_error(const char* functionName, const char* message)
 {
-  char output[300] = "Numerics error - ";
-  strcat(output, functionName);
-  strcat(output, " :\t");
-  strcat(output, message);
-  strcat(output, ".\n");
-  fprintf(stderr, "%s", output);
-  exit(EXIT_FAILURE);
+  char output[2048] = "Numerics error - ";
+  strncat(output, functionName, strlen(functionName) - 1);
+  strncat(output, ":\t", 3);
+  strncat(output, message, strlen(message) - 1);
+  strncat(output, ".\n", 3);
+  sn_fatal_error(SN_UNKOWN_ERROR, output);
 }
+
 /* the warning on vprintf is reported as a bug of clang ... --vacary */
 #ifdef __clang__
 #pragma clang diagnostic push

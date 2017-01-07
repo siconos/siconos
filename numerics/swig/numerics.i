@@ -24,6 +24,59 @@
 // basics, mostly numpy.i stuff. 
 %include start.i
 
+%include exception.i
+
+%{
+#include "tlsdef.h"
+#include "sn_error_handling.h"
+
+tlsvar char error_msg[2048];
+
+static char* format_exception_msg(const char* first_line)
+{
+  strncpy(error_msg, first_line, strlen(first_line)+1);
+  strncat(error_msg, "\n", 2);
+  const char* sn_msg = sn_fatal_error_msg();
+  strncat(error_msg, sn_msg, strlen(sn_msg) - 1);
+  return error_msg;
+}
+%}
+
+%exception {
+/* I'm HERE */
+/* TODO implement setjmp/longjmp here  + SWIG_exception */
+  switch (SN_SETJMP_EXTERNAL_START)
+  {
+  case SN_NO_ERROR:
+  {
+    $action
+    SN_SETJMP_EXTERNAL_STOP
+    break;
+  }
+  case SN_MEMORY_ALLOC_ERROR:
+  {
+    SWIG_exception(SWIG_MemoryError, format_exception_msg("Out of memory:"));
+    break;
+  }
+  case SN_UNSUPPORTED_LINALG_OP:
+  {
+    SWIG_exception(SWIG_RuntimeError, format_exception_msg("Unsupported linear algebra operation:"));
+    break;
+  }
+  case SN_PROBLEM_NOT_PROCESSABLE:
+  {
+    SWIG_exception(SWIG_RuntimeError, format_exception_msg("The given problem is not processable:"));
+    break;
+  }
+  default:
+  {
+    SWIG_exception(SWIG_UnknownError, format_exception_msg("Unknown error! Hopefully more info follow:"));
+    break;
+  }
+  }
+
+}
+
 // generated docstrings from doxygen xml output
 %include numerics-docstrings.i
 
@@ -95,6 +148,7 @@ namespace std11 = boost;
  %rename (LCP) LinearComplementarityProblem;
  %rename (MLCP) MixedLinearComplementarityProblem;
  %rename (MCP) MixedComplementarityProblem;
+ %rename (NCP) NonlinearComplementarityProblem;
  %rename (VI) VariationalInequality;
  %rename (AVI) AffineVariationalInequalities;
 
@@ -147,6 +201,8 @@ namespace std11 = boost;
 %include Numerics_typemaps_numericsmatrices.i
 %include NonSmoothDrivers.h
 %include solverOptions.i
+%import tlsdef.h
+%include numerics_verbose.h
 
 // this has to die --xhub
 // info param
@@ -211,20 +267,18 @@ namespace std11 = boost;
 #include "Friction_cst.h"
 #include "lcp_cst.h"
 #include "MCP_cst.h"
-#include "mlcp_cst.h"
 #include "NCP_cst.h"
+#include "mlcp_cst.h"
 #include "VI_cst.h"
 #include "GenericMechanical_cst.h"
 #include "fc2d_Solvers.h"
 #include "fc3d_Solvers.h"
 #include "gfc3d_Solvers.h"
 #include "MCP_Solvers.h"
+#include "NCP_Solvers.h"
 #include "MLCP_Solvers.h"
-#include "NonSmoothDrivers.h"  
+#include "NonSmoothDrivers.h"
   %}
-
-//Relay
-%include "relay_cst.h"
 
 %include numerics_MLCP.i
 
@@ -355,6 +409,7 @@ namespace std11 = boost;
 
 %include numerics_MCP.i
 %include Numerics_MCP2.i
+%include Numerics_NCP.i
 %include Numerics_VI.i
 
 

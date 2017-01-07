@@ -15,15 +15,15 @@
   VariationalInequality(PyObject* n)
   {
      VariationalInequality* vi = variationalInequality_new((int) PyInt_AsLong(n));
-     vi->F = &call_py_compute_F;
-     vi->compute_nabla_F = &call_py_compute_nabla_F;
+     vi->F = &call_py_compute_Fvi;
+     vi->compute_nabla_F = &call_py_compute_nabla_Fvi;
 
      if (vi->size < 1)
      {
        PyErr_SetString(PyExc_RuntimeError, "the size of the VI has to be positive");
        free(vi);
        PyErr_PrintEx(0);
-       exit(1);
+       return NULL;
      }
 
      return vi;
@@ -38,7 +38,7 @@
      PyObject* method_compute_F = PyObject_GetAttrString(py_compute, "compute_F");
      PyObject* method_compute_nabla_F = PyObject_GetAttrString(py_compute, "compute_nabla_F");
 
-     if (PyCallable_Check(method_compute_F) && PyCallable_Check(method_compute_nabla_F))
+     if (method_compute_F && method_compute_nabla_F && PyCallable_Check(method_compute_F) && PyCallable_Check(method_compute_nabla_F))
      {
        vi->env = (void*) malloc(sizeof(class_env_python));
        class_env_python* vi_env_python = (class_env_python*) vi->env;
@@ -51,10 +51,10 @@
      {
        if (PyCallable_Check(py_compute))
        {
-         vi->F = &call_py_compute_F;
+         vi->F = &call_py_compute_Fvi;
          vi->env = (void*) malloc(sizeof(functions_env_python));
          functions_env_python* vi_env_python = (functions_env_python*) vi->env;
-         vi_env_python->id = 0;
+         vi_env_python->id = ENV_IS_PYTHON_FUNCTIONS;
          vi_env_python->env_compute_function = py_compute;
        }
        else
@@ -64,7 +64,7 @@
          PyErr_SetString(PyExc_TypeError, "argument 2 must either be an object with a method compute_F and a method compute_nabla_F or a callable function");
          free(vi);
          PyErr_PrintEx(0);
-         exit(1);
+         return NULL;
        }
      }
 
@@ -76,7 +76,7 @@
    {
      if (PyCallable_Check(py_compute_nabla_F))
      {
-       $self->compute_nabla_F = &call_py_compute_nabla_F;
+       $self->compute_nabla_F = &call_py_compute_nabla_Fvi;
        functions_env_python* vi_env_python = (functions_env_python*) $self->env;
        vi_env_python->id = ENV_IS_PYTHON_FUNCTIONS;
        vi_env_python->env_compute_jacobian = py_compute_nabla_F;

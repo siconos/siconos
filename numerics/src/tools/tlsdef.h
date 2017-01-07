@@ -29,9 +29,13 @@
 #define DESTRUCTOR_ATTR 
 #endif
 
+
 #ifndef __cplusplus
 
-  #if __STDC_VERSION__ >= 201112L
+  #ifdef SWIG
+    #define tlsvar thread_local
+
+  #elif __STDC_VERSION__ >= 201112L
     #include <threads.h>
     #define tlsvar thread_local
   #else
@@ -47,10 +51,12 @@
     #endif
   #endif
 
-
 #else
 
-  #if SICONOS_CXXVERSION >= 201103L
+  #ifdef SWIG
+    #define tlsvar thread_local
+
+  #elif SICONOS_CXXVERSION >= 201103L
     #define tlsvar thread_local
   #else
     #if defined(__GNUC__) || (defined(__ICC) && defined(__linux))

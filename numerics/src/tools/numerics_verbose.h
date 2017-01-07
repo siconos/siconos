@@ -27,11 +27,10 @@
 #include <stdint.h>
 #include <stddef.h>
 
-
+#include "tlsdef.h"
 
 /* Verbose mode */
-extern int verbose;
-
+extern tlsvar int verbose;
 
 #if defined(__cplusplus) && !defined (BUILD_AS_CPP)
 extern "C"

@@ -61,9 +61,7 @@ SWIG_init(void);
 %}
 
 // numpy macros
-%include numpy.i 	
-
-%include numerics_verbose.h
+%include numpy.i
 
 %init %{
   import_array();

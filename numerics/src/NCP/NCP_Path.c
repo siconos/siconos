@@ -23,6 +23,7 @@
 #include "NonlinearComplementarityProblem.h"
 #include "SolverOptions.h"
 #include "NCP_Solvers.h"
+#include "sn_error_handling.h"
 
 #ifdef HAVE_PATHFERRIS
 
@@ -143,7 +144,7 @@ void ncp_path(NonlinearComplementarityProblem* problem, double *z, double* F, in
 
 void ncp_path(NonlinearComplementarityProblem* problem, double *z, double* F, int *info , SolverOptions* options)
 {
-  printf("ncp_path :: Path was not configured at compile time!\n");
+  sn_fatal_error(SN_NOT_COMPILED_ERROR, "ncp_path :: Path was not configured at compile time!\n");
 }
 
 #endif
