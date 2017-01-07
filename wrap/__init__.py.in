@@ -6,7 +6,18 @@ import sys
 
 version = '@SICONOS_VERSION@'
 __all__ = [@SICONOS_PYTHON_MODULES@]
-msg_start = '\nStarting @SICONOS_PYTHON_PACKAGE@, version '
-msg_start += str(version) + '.'
-print msg_start
 
+def _translate_cmake_option(option):
+    opt = option.upper()
+    return opt == "ON" or opt == "1" or opt == "TRUE"
+
+WITH_MUMPS = _translate_cmake_option("@WITH_MUMPS@")
+WITH_UMFPACK = _translate_cmake_option("@WITH_UMFPACK@")
+WITH_SUPERLU = _translate_cmake_option("@WITH_SUPERLU@")
+WITH_FCLIB = _translate_cmake_option("@WITH_FCLIB@")
+WITH_BULLET = _translate_cmake_option("@WITH_BULLET@")
+WITH_OCC = _translate_cmake_option("@WITH_OCC@")
+WITH_SERIALIZATION = _translate_cmake_option("@WITH_SERIALIZATION@")
+WITH_HDF5 = _translate_cmake_option("@WITH_HDF5@")
+WITH_OPENMP = _translate_cmake_option("@WITH_OPENMP@")
+WITH_PATHFERRIS = _translate_cmake_option("@HAVE_PATHFERRIS@")
