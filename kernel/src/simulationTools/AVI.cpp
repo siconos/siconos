@@ -134,8 +134,7 @@ int AVI::compute(double time)
 
   if (_numerics_problem->size != _sizeOutput)
   {
-    std::cout << "AVI::compute - size mismatch between AVI size and and the current size" << std::endl;
-    std::exit(EXIT_FAILURE);
+    RuntimeException::selfThrow("AVI::compute - size mismatch between AVI size and and the current size");
   }
 
   // --- Call Numerics driver ---
