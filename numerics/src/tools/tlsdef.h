@@ -36,8 +36,12 @@
     #define tlsvar thread_local
   #else
 
-    #if defined(__GNUC__)
-      #define tlsvar __thread 
+    #if defined(__GNUC__) || (defined(__ICC) && defined(__linux))
+      #define tlsvar __thread
+    #elif defined(__ICC) && defined(_WIN32)
+      #define tlsvar __declspec(thread)
+    #elif defined(SICONOS_ALLOW_GLOBAL)
+      #define tlsvar static
     #else
       #error "Don't know how to create a thread-local variable"
     #endif
@@ -49,10 +53,12 @@
   #if SICONOS_CXXVERSION >= 201103L
     #define tlsvar thread_local
   #else
-    #if defined(__GNUC__)
+    #if defined(__GNUC__) || (defined(__ICC) && defined(__linux))
       #define tlsvar __thread
-    #elif defined(_MSC_VER)
+    #elif defined(_MSC_VER) || (defined(__ICC) && defined(_WIN32))
       #define tlsvar __declspec(thread)
+    #elif defined(SICONOS_ALLOW_GLOBAL)
+      #define tlsvar static
     #else
       #error "Don't know how to create a thread-local variable"
     #endif
