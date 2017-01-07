@@ -16,13 +16,19 @@
  * limitations under the License.
 */
 #include <stdio.h>
+#include "SiconosConfig.h"
+
+#ifdef HAVE_PATHFERRIS
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
 #include "LCP_Solvers.h"
 
-#ifdef HAVE_PATHFERRIS
 #include "SimpleLCP.h"
+#include "numerics_verbose.h"
+#include "LinearComplementarityProblem.h"
+#include "SolverOptions.h"
+#include "NumericsMatrix.h"
 #endif /*HAVE_PATHFERRIS*/
 
 void lcp_path(LinearComplementarityProblem* problem, double *z, double *w, int *info , SolverOptions* options)

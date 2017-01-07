@@ -39,8 +39,8 @@
 
 #include "Path_interface.h"
 
-#define DEBUG_STDOUT
-#define DEBUG_MESSAGES
+//#define DEBUG_STDOUT
+//#define DEBUG_MESSAGES
 #include "debug.h"
 #include "numerics_verbose.h"
 
