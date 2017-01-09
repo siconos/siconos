@@ -7,6 +7,7 @@ import math
 import numpy as np
 import siconos.kernel as sk
 import scipy.sparse as scs
+import numpywrappers as npw
 
 
 class StringDS(sk.LagrangianLinearTIDS):
@@ -17,7 +18,7 @@ class StringDS(sk.LagrangianLinearTIDS):
     CLAMPED = 1
 
     def __init__(self, ndof, stiffness_coeff, density, diameter,
-                 length, q0, v0, tension, damping_parameters):
+                 length, umax, imax, tension, damping_parameters):
         """Build string
 
         Parameters
@@ -31,8 +32,12 @@ class StringDS(sk.LagrangianLinearTIDS):
         density : double
             linear mass density
         diameter, length, tension : double
-        q0, v0 : np.ndarrays
-            initial values for positions and velocities
+        umax : double
+            initial value of string maximum position
+            (assuming triangular shape)
+        imax : int
+            index of maximum initial position
+            (i.e. u[imax, t=0] = umax)
         damping_parameters: dictionnary
             constant parameters related to damping.
             keys must be ['nu_air', 'rho_air', 'delta_ve', '1/qte']
@@ -44,7 +49,7 @@ class StringDS(sk.LagrangianLinearTIDS):
 
         # for i in xrange(ndof):
         #     mass.setValue(i, i, density)
-        mass = np.identity(ndof)
+        mass = np.identity(ndof, dtype=np.float64)
         mass *= density
         self.stiffness_coeff = stiffness_coeff
         self.length = length
@@ -57,10 +62,23 @@ class StringDS(sk.LagrangianLinearTIDS):
         for name in self.__damping_parameters_names:
             assert name in self.damping_parameters.keys(), msg
         stiffness_mat, damping_mat = self.compute_linear_coeff()
+        q0 = self.compute_initial_state(imax, umax)
+        v0 = npw.zeros_like(q0)
         super(StringDS, self).__init__(q0, v0, mass)
         self.setCPtr(damping_mat)
         self.setKPtr(stiffness_mat)
         self.apply_boundary_conditions()
+
+    def compute_initial_state(self, imax, umax):
+        """Set initial positions of the string,
+        assuming a triangular shape, with u[imax] = umax.
+        """
+        dx = self.length / self._N
+        slope = umax / (imax * dx)
+        q0 = [slope * i * dx for i in xrange(imax)]
+        slope = umax / (imax * dx - self.length)
+        q0 += [slope * (i * dx - self.length) for i in xrange(imax, self.ndof)]
+        return npw.asrealarray(q0)
 
     def apply_boundary_conditions(self, bc_type=None):
         """Create and apply boundary conditions
@@ -80,14 +98,14 @@ class StringDS(sk.LagrangianLinearTIDS):
         C = 2S.Gamma.S^-1
         """
         # --- Compute 'S' matrix (normal modes) ---
-        indices = np.asarray(np.arange(self.ndof), dtype=np.float64)
+        indices = np.arange(self.ndof)
         row = indices.reshape(1, self.ndof)
-        s_mat = row * row.T
+        s_mat = npw.asrealarray(row * row.T)
         s_mat *= (math.pi / self._N)
         s_mat = math.sqrt(2. / self.length) * np.sin(s_mat)
         # --- Omega^2 matrix ---
-        omega = np.asarray([1. + self.stiffness_coeff * j ** 2
-                            for j in xrange(self.ndof)], dtype=np.float64)
+        omega = npw.asrealarray([1. + self.stiffness_coeff * j ** 2
+                                 for j in xrange(self.ndof)])
         coeff = (2 * math.pi * self.c0) ** 2
         omega *= coeff
         omega_mat = scs.csr_matrix((omega, (indices, indices)),
@@ -136,25 +154,6 @@ class StringDS(sk.LagrangianLinearTIDS):
         quality_factor_inv += self.damping_parameters['1/qte']
         return quality_factor_inv * math.pi * nu
 
-        # def compute_k(self):
-    #     """Compute 'K' matrix = density*L/ndof * Omega**2 S^T
-    #     """
-
-    #     k_matrix = scs.csr_matrix()k.SimpleMatrix(self.ndof, self.ndof, sk.SPARSE, self.ndof)
-    #     coeff = self.density * self.length / self.ndof
-        
-    #     it = xrange(1, self.ndof)
-    #     for i, j in it, it:
-    #         val = math.sqrt(2. / self.length) * math.sin(j * i * coeff)
-    #         s_matrix.setValue(i, j, val)
-    #     return s_matrix
-
-
-    
-    def computeMass(self, position=None):
-        """Update inertia matrix"""
-        print self._mass.nnz()
-        
 # class ModalString(String):
 #     """String with a modal space discretisation (see Issanchou ref)
 #     """

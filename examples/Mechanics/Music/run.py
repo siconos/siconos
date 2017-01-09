@@ -1,93 +1,68 @@
+"""Implementation of vibrating string model, described
+in JSV paper (Issanchou 2017) and using Siconos for contact
+simulation.
+"""
 from string_ds import StringDS
-import math
-import numpy as np
-import siconos.kernel as sk
+from fret import Fret, Guitar
 
-
-# initial conditions
-number_of_modes = 20
-ndof = number_of_modes + 2
-q0 = np.zeros((ndof, ), dtype=np.float64)
-q0[math.floor(ndof / 2)] = 1.8e-3
-v0 = np.zeros_like(q0)
+# ---- Description of the string ---
+# -- Geometry and material --
 length = 1.002
 diameter = 0.43e-3
 density = 1.17e-3
+# B is a function of Young Modulus (E),
+# moment of inertia ...
+# B = pi^2EI / (TL^2)
 B = 1.78e-5
+# tension
 T = 180.5
 # A dictionnary with parameters required to compute quality factor
 damping_parameters = {
     'nu_air': 1.8e-5,
     'rho_air': 1.2,
     'delta_ve': 4.5e-3,
-    '1/qte': 2.03e-4
-    }
-
-# The dynamical system (geometry, material ...)
-guitar = StringDS(ndof, B, density, diameter, length,
-                  q0, v0, T, damping_parameters)
+    '1/qte': 2.03e-4}
 
 
-print guitar.K()
-print guitar.C()
-print guitar.q()
+damping_parameters = {
+    'nu_air': 0.,
+    'rho_air': 0.,
+    'delta_ve': 0.,
+    '1/qte': 0.}
 
+# -- Spatial discretisation (modal proj) and initial conditions --
+number_of_modes = 1
+ndof = number_of_modes + 2
+imax = int(ndof / 2)
+# -- The dynamical system(s) --
+# ie guitar strings
+guitar_string = StringDS(ndof, B, density, diameter, length,
+                         umax=1.8e-3, imax=imax,
+                         tension=T, damping_parameters=damping_parameters)
 
-# Interaction
-# string-floor
-H = np.zeros((ndof, ), dtype=np.float64)
-b = [0.]
-ic = ndof / 2
-H[ic] = 1
-e = 0.9
-nslaw = sk.NewtonImpactNSL(e)
-relation = sk.LagrangianLinearTIR(H, b)
-inter = sk.Interaction(nslaw, relation)
+# -- The obstacles (Interactions) --
+# ie guitar fret(s)
+fret = Fret(guitar_string, position=[imax, 0.])
 
-# Model
+# -- The model to gather frets and strings and simulate the dynamics --
 t0 = 0.
-tend = 3.
-guitar_model = sk.Model(t0, tend)
+tend = 0.01
+guitar_model = Guitar(guitar_string, fret, [t0, tend], fs=8000.)
 
-# add the dynamical system to the non smooth dynamical system
-guitar_model.nonSmoothDynamicalSystem().insertDynamicalSystem(guitar)
+# -- Run the simulation --
 
-# link the interaction and the dynamical system
-guitar_model.nonSmoothDynamicalSystem().link(inter, guitar)
+k = 1
+print("Start simulation ...")
+while guitar_model.simu.hasNextEvent():
+    guitar_model.simu.computeOneStep()
+    guitar_model.save_state(k)
+    k += 1
+    guitar_model.simu.nextStep()
 
-# Simulation
-# (1) OneStepIntegrators
-theta = 0.5
-OSI = sk.MoreauJeanOSI(theta)
+print 'End of simulation process.'
 
-# (2) Time discretisation --
-Fs = 1960
-time_step = 1. / Fs
-t = sk.TimeDiscretisation(t0, time_step)
+# -- plot state vs time --
+guitar_model.plot_state()
 
-# (3) one step non smooth problem
-osnspb = sk.LCP()
-
-# (4) Simulation setup with (1) (2) (3)
-simu = sk.TimeStepping(t, OSI, osnspb)
-
-
-# end of model definition
-
-#
-# computation
-#
-
-# simulation initialization
-guitar_model.setSimulation(simu)
-guitar_model.initialize()
-
-while simu.hasNextEvent():
-    simu.computeOneStep()
-    #    k += 1
-    simu.nextStep()
-
-print guitar.q()
-# print mass
-# print mass.shape
-# #guitar.computeMass()
+# -- create string animation --
+guitar_model.plot_modes('string.mp4')

@@ -20,8 +20,8 @@
 #include "BoundaryCondition.hpp"
 
 
-#define DEBUG_MESSAGES
-#define DEBUG_STDOUT
+//#define DEBUG_MESSAGES
+//#define DEBUG_STDOUT
 #include "debug.h"
 
 FixedBC::FixedBC(SP::UnsignedIntVector newVelocityIndices) :
