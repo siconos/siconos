@@ -27,13 +27,8 @@
 #include <setjmp.h>
 #include <stdbool.h>
 
-extern tlsvar jmp_buf external_jmp_buf;
-extern tlsvar jmp_buf internal_jmp_buf;
-extern tlsvar bool external_jmp_buf_used;
-extern tlsvar bool internal_jmp_buf_used;
-
-#define SN_SETJMP_INTERNAL_START setjmp(internal_jmp_buf), internal_jmp_buf_used = true
-#define SN_STEJMP_INTERNAL_STOP internal_jmp_buf_used = false
+#define SN_SETJMP_INTERNAL_START setjmp(*sn_get_internal_jmp_buf())
+#define SN_SETJMP_INTERNAL_STOP sn_release_internal_jmp_buf();
 
 #define SN_SETJMP_EXTERNAL_START setjmp(*sn_get_jmp_buf())
 #define SN_SETJMP_EXTERNAL_STOP sn_release_jmp_buf();
@@ -46,9 +41,45 @@ extern "C"
 #endif
 
 
+  /* Get the external jmp buffer and mark it as used
+   * \return the external jmp buffer
+   */
   jmp_buf* sn_get_jmp_buf(void);
+
+  /** Release the internal jmp buffer: this indicates that it is no longer in
+   * use and that there should be no longjmp() call to this part of the stack.
+   * The user should call this function whenever the call to a numerics
+   * function has been successful*/
   void sn_release_jmp_buf(void);
+
+  /* Get the internal jmp buffer and mark it as used
+   * \warning this function is ment to be called inside the numerics library.
+   * To use the exception handler from an external library/executable, use
+   * sn_get_jmp_buf()
+   * \return the internal jmp buffer
+   */
+  jmp_buf* sn_get_internal_jmp_buf(void);
+
+  /** Release the internal jmp buffer: this indicates that it is no longer in
+   * use and that there should be no longjmp() call to this part of the stack.
+   * The user should call this function whenever the call to a numerics
+   * function has been successful.
+   * \warning This should not be called outside the numerics library. Use
+   * sn_release_jmp_buf() instead when calling from another library/executable
+   */
+  void sn_release_internal_jmp_buf(void);
+
+  /* Function to call whenever a fatal error occured. This function either call
+   * longjmp if setjmp has been called previously and is still active. If not,
+   * it calls abort().
+   * \param code error code
+   * \param msn error message
+   */
   void sn_fatal_error(SN_ERROR_T code, const char* msg);
+
+  /* Get the last error message
+   * \return the error message
+   */
   const char* sn_fatal_error_msg(void);
 
 #if defined(__cplusplus) && !defined (BUILD_AS_CPP)

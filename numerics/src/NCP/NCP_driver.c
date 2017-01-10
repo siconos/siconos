@@ -40,8 +40,7 @@ int ncp_driver(NonlinearComplementarityProblem* problem, double *z , double *F, 
   /* Output info. : 0: ok -  >0: error (which depends on the chosen solver) */
   int info = -1;
 
-  internal_jmp_buf_used = true;
-  int info_jmp = setjmp(internal_jmp_buf);
+  int info_jmp = SN_SETJMP_INTERNAL_START;
   if (info_jmp == SN_NO_ERROR)
   {
     switch (options->solverId)
@@ -70,6 +69,7 @@ int ncp_driver(NonlinearComplementarityProblem* problem, double *z , double *F, 
       if (info <= 0) /* info was not set or the solver was happy */
         info = info_;
     }
+    SN_SETJMP_INTERNAL_STOP
   }
   else
   {

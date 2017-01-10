@@ -40,6 +40,17 @@ void sn_release_jmp_buf(void)
   external_jmp_buf_used = false;
 }
 
+jmp_buf* sn_get_internal_jmp_buf(void)
+{
+  internal_jmp_buf_used = true;
+  return &external_jmp_buf;
+}
+
+void sn_release_internal_jmp_buf(void)
+{
+  internal_jmp_buf_used = false;
+}
+
 void sn_fatal_error(SN_ERROR_T code, const char* msg)
 {
   if (internal_jmp_buf_used)
