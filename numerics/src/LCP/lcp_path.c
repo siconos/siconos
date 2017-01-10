@@ -20,12 +20,12 @@
 
 #include "LinearComplementarityProblem.h"
 #include "SolverOptions.h"
+#include "LCP_Solvers.h"
 
 #ifdef HAVE_PATHFERRIS
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include "LCP_Solvers.h"
 
 #include "SimpleLCP.h"
 #include "numerics_verbose.h"
