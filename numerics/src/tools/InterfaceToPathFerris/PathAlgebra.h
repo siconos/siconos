@@ -6,7 +6,7 @@
   \author Franck Perignon , 26/05/2008
 */
 
-
+#include "SiconosConfig.h"
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"

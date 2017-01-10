@@ -97,6 +97,7 @@ with \f$C^{\alpha}_{\mu^\alpha} =\{ r^\alpha, \|r_{t}\| \leq \mu_{\alpha} |r^\al
 */
 
 #include "NumericsFwd.h"
+#include "SiconosConfig.h"
 #include <stdio.h>
 /** \struct GFC3D_workspace GlobalFrictionContactProblem.h
  * Workspace for GFC3D computations: factorized M (since we compute multiples

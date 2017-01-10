@@ -78,6 +78,8 @@
 */
 
 #include "NumericsFwd.h"
+#include "SiconosConfig.h"
+
 #include <stdio.h>
 /** \struct LinearComplementarityProblem LinearComplementarityProblem.h
  *  \brief Structure that contains and defines \ref LCProblem

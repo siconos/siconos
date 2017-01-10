@@ -28,6 +28,10 @@
 #include <limits.h>
 #include <assert.h>
 
+#if defined(__cplusplus)
+extern "C"
+{
+#endif
 #include "PATH_SDK/include/MCP_Interface.h"
 
 #include "PATH_SDK/include/Path.h"
@@ -36,6 +40,9 @@
 #include "PATH_SDK/include/Macros.h"
 #include "PATH_SDK/include/Output_Interface.h"
 #include "PATH_SDK/include/Options.h"
+#if defined(__cplusplus)
+}
+#endif
 
 #include "SiconosSets.h"
 #include "PathAlgebra.h"

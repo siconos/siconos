@@ -61,6 +61,7 @@
 */
 
 #include "NumericsFwd.h"
+#include "SiconosConfig.h"
 
 /** \struct RelayProblem RelayProblem.h
  * \brief Struct defining a Relay problem

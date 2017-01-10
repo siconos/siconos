@@ -29,6 +29,7 @@
 */
 
 #include "NumericsFwd.h"
+#include "SiconosConfig.h"
 
 /** \struct FrictionContactProblem_as_VI FrictionContactProblem_as_VI.h
  *

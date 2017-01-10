@@ -101,6 +101,8 @@
 
 #include <stdio.h>
 #include "NumericsFwd.h"
+#include "SiconosConfig.h"
+
 /** \struct MixedLinearComplementarityProblem MixedLinearComplementarityProblem.h
  *  The Structure that contains and defines  \ref MLCProblem. Find \f$(z,w)\f$ such that:\n
  * \f$

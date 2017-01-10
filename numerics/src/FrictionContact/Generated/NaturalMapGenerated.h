@@ -1,5 +1,8 @@
 #ifndef NaturalMapGenerated_h
 #define NaturalMapGenerated_h
+
+#include "SiconosConfig.h"
+
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {

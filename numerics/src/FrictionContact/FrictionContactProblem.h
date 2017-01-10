@@ -139,6 +139,7 @@ with \f$C^{\alpha}_{\mu^\alpha} =\{ r^\alpha, \|r_{t}\| \leq \mu_{\alpha} |r^\al
 */
 
 #include "NumericsFwd.h"
+#include "SiconosConfig.h"
 #include <stdio.h>
 
 /** \struct FrictionContactProblem FrictionContactProblem.h

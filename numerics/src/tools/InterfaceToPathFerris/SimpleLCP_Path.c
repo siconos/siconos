@@ -26,6 +26,11 @@
 
 #ifdef HAVE_PATHFERRIS
 
+#if defined(__cplusplus)
+extern "C"
+{
+#endif
+
 #include "PATH_SDK/include/MCP_Interface.h"
 
 #include "PATH_SDK/include/Path.h"
@@ -37,7 +42,12 @@
 #include "PATH_SDK/include/Output.h"
 #include "PATH_SDK/include/Options.h"
 #include "PATH_SDK/include/Output_Interface.h"
-typedef struct
+
+#if defined(__cplusplus)
+}
+#endif
+
+  typedef struct
 {
   int variables;
 
@@ -490,8 +500,6 @@ void SimpleLCP(int variables,
   return;
 }
 #else
-
-#include "PATH_SDK/include/Types.h"
 
 void SimpleLCP(int variables,
                int m_nnz, int *m_i, int *m_j, double *m_ij, double *q,

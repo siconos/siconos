@@ -48,10 +48,12 @@
 #ifndef SIMPLELCP_H
 #define SIMPLELCP_H
 
-#include "PATH_SDK/include/Types.h"
-/*because libpath46.so*/
-
+#include "SiconosConfig.h"
 #include <stdint.h>
+
+
+#include "PATH_SDK/include/Types.h"
+
 
 //const unsigned short int *__ctype_b;
 //const int32_t *__ctype_tolower ;
@@ -60,6 +62,10 @@
 
 
  */
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+extern "C"
+{
+#endif
 void SimpleLCP(int variables,
                int m_nnz, int *m_i, int *m_j, double *m_ij, double *q,
                double *lb, double *ub,
@@ -74,5 +80,10 @@ void printLCP(int variables,
 int nbNonNulElems(int n, double *M, double tol);
 void FortranToPathSparse(int n, double *M, double tol, int *m_i, int *m_j, double *m_ij);
 void ABCDtoM(int n , int m, double *A , double *B , double *C , double *D , double *a, double *b, double *M, double *q);
+
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+}
+#endif
+
 #endif
 
