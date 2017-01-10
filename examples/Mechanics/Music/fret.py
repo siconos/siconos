@@ -7,6 +7,7 @@ import numpywrappers as npw
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib import animation
+from scipy import signal
 
 
 class Fret(sk.Interaction):
@@ -87,20 +88,42 @@ class Guitar(sk.Model):
         qmax = self.data[:, 3 + self.fret_position]
         ndof = self.data.shape[1] - 3
         x = np.arange(ndof)
-        plt.subplot(321)
+        plt.subplot(341)
         plt.plot(time, qmax)
+        plt.title('displacements')
         plt.axhline(self.frets[0].position, color='b', linewidth=3)
-        plt.subplot(323)
+        plt.subplot(342)
+        f, t, Sxx = signal.spectrogram(qmax, self.fs)
+        plt.pcolormesh(t, f, Sxx)
+        plt.ylabel('Frequency [Hz]')
+        plt.xlabel('Time [sec]')
+        plt.title('dsp')
+        plt.subplot(343)
         plt.plot(time, dist)
         plt.axhline(0, color='b', linewidth=3)
-        plt.subplot(325)
+        plt.title('distance')
+        plt.subplot(344)
         plt.plot(time, lam)
-        plt.subplot(322)
+        plt.title('percussion')
+        plt.subplot(345)
         plt.plot(x, self.data[0, 3:])
-        plt.subplot(324)
-        plt.plot(x, self.data[self.nb_time_steps / 2, 3:])
-        plt.subplot(326)
+        plt.title('mode, t=0')
+        plt.subplot(346)
+        tint = self.nb_time_steps / 5
+        plt.plot(x, self.data[tint, 3:])
+        plt.title('mode, t1')
+        plt.subplot(347)
+        plt.plot(x, self.data[2 * tint, 3:])
+        plt.title('mode, t2')
+        plt.subplot(349)
+        plt.plot(x, self.data[3 * tint, 3:])
+        plt.title('mode, t3')
+        plt.subplot(3, 4, 10)
+        plt.plot(x, self.data[4 * tint, 3:])
+        plt.title('mode, t4')
+        plt.subplot(3, 4, 11)
         plt.plot(x, self.data[-1, 3:])
+        plt.title('mode, t5')
         plt.show()
 
     def plot_modes(self, movie_name):

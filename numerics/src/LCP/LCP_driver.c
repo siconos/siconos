@@ -178,7 +178,6 @@ int lcp_driver_DenseMatrix(LinearComplementarityProblem* problem, double *z , do
       z[0] = -q[0] / M[0];
       info = 0;
       options->dparam[1] = 0.0; /* Error */
-      printf("LCP TRIVIAL %f\n", z[0]);
       if (verbose > 0)
 	printf("LCP_driver_DenseMatrix: found trivial solution for the LCP (problem of size 1). \n");
       DEBUG_END("lcp_driver_DenseMatrix(...)\n")

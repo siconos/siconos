@@ -17,21 +17,17 @@ class StringDS(sk.LagrangianLinearTIDS):
     __damping_parameters_names = ['nu_air', 'rho_air', 'delta_ve', '1/qte']
     CLAMPED = 1
 
-    def __init__(self, ndof, stiffness_coeff, density, diameter,
-                 length, umax, imax, tension, damping_parameters):
+    def __init__(self, ndof, geometry_and_material,
+                 umax, imax, damping_parameters):
         """Build string
 
         Parameters
         ----------
         ndof : int
             system size
-        stiffness_coeff : double
-            'B' parameter in (10), i.e. the 'material' part
-            in eigenfrequencies. Depends on Young modulus,
-            moment of inertia ...
-        density : double
-            linear mass density
-        diameter, length, tension : double
+        geometry_and_material : dictionnary
+            description of the string, keys must be:
+            ['length', 'diameter', 'B', 'tension', 'density']
         umax : double
             initial value of string maximum position
             (assuming triangular shape)
@@ -50,13 +46,16 @@ class StringDS(sk.LagrangianLinearTIDS):
         # for i in xrange(ndof):
         #     mass.setValue(i, i, density)
         mass = np.identity(ndof, dtype=np.float64)
-        mass *= density
-        self.stiffness_coeff = stiffness_coeff
-        self.length = length
-        self.diameter = diameter
-        self.density = density
-        self.c0 = math.sqrt(tension / density)
-        self.tension = tension
+        self.density = geometry_and_material['density']
+        #mass *= self.density
+        self.stiffness_coeff = geometry_and_material['B']
+        # B is a function of Young Modulus (E),
+        # moment of inertia ...
+        # B = pi^2EI / (TL^2)
+        self.length = geometry_and_material['length']
+        self.diameter = geometry_and_material['diameter']
+        self.tension = geometry_and_material['tension']
+        self.c0 = math.sqrt(self.tension / self.density)
         self.damping_parameters = damping_parameters
         msg = 'StringDS : missing parameter value for damping.'
         for name in self.__damping_parameters_names:
@@ -79,6 +78,12 @@ class StringDS(sk.LagrangianLinearTIDS):
         slope = umax / (imax * dx - self.length)
         q0 += [slope * (i * dx - self.length) for i in xrange(imax, self.ndof)]
         return npw.asrealarray(q0)
+
+    def eigenfreq(self, j):
+        """Compute eigenfrequency number j
+        """
+        return j * self.c0 / self.length * math.sqrt(1 +
+                                                     self.stiffness_coeff * j)
 
     def apply_boundary_conditions(self, bc_type=None):
         """Create and apply boundary conditions
@@ -106,17 +111,17 @@ class StringDS(sk.LagrangianLinearTIDS):
         # --- Omega^2 matrix ---
         omega = npw.asrealarray([1. + self.stiffness_coeff * j ** 2
                                  for j in xrange(self.ndof)])
-        coeff = (2 * math.pi * self.c0) ** 2
+        coeff = (indices * math.pi * self.c0 / self.length) ** 2
         omega *= coeff
         omega_mat = scs.csr_matrix((omega, (indices, indices)),
                                    shape=(self.ndof, self.ndof))
         # S.Omega^2.S-1
         stiffness_mat = s_mat * omega_mat * s_mat.T
-        coeff = self.density * self.length / self._N
+        coeff = self.length / self._N
         stiffness_mat *= coeff
 
         # 2.S.Gamma.S-1
-        sigma = self.compute_damping(omega / (2. * math.pi))
+        sigma = self.compute_damping(np.sqrt(omega) / (2. * math.pi))
         sigma_mat = scs.csr_matrix((sigma, (indices, indices)),
                                    shape=(self.ndof, self.ndof))
         damping_mat = s_mat * sigma_mat * s_mat.T
@@ -141,155 +146,15 @@ class StringDS(sk.LagrangianLinearTIDS):
         nu_air = self.damping_parameters['nu_air']
         rho_air = self.damping_parameters['rho_air']
         delta_ve = self.damping_parameters['delta_ve']
-        r = np.sqrt(math.pi * nu_air * rho_air * nu)
+        r = np.sqrt(math.pi * nu_air * rho_air * nu[1:])
         r *= self.diameter
         r += nu_air
         r *= 2. * math.pi
-        q_air_inv = r / (2. * math.pi * self.density * nu)
+        q_air_inv = r / (2. * math.pi * self.density * nu[1:])
         q_ve_inv = 4 * self.length ** 2 * self.stiffness_coeff * self.density
         q_ve_inv *= delta_ve
-        q_ve_inv *= nu ** 2
+        q_ve_inv *= nu[1:] ** 2
         q_ve_inv /= self.tension
         quality_factor_inv = q_ve_inv + q_air_inv
         quality_factor_inv += self.damping_parameters['1/qte']
-        return quality_factor_inv * math.pi * nu
-
-# class ModalString(String):
-#     """String with a modal space discretisation (see Issanchou ref)
-#     """
-
-#     def __init__(self, nb_modes, **kwds):
-#         """
-#         """
-#         # number of elements in the mesh
-#         super(ModalString, self).__init__(**kwds)
-
-#         self.nb_elements = nb_elements
-#         nb_nodes = self.nb_elements + 1
-#         self.stress = np.zeros((nb_elements, ), dtype=np.float64)
-#         self.stress_right = np.zeros_like(self.stress)
-#         self.stress_left = np.zeros_like(self.stress)
-#         self.velocity = np.zeros_like(self.stress)
-#         self.displacement = np.zeros((nb_nodes, ), dtype=np.float64)
-#         self.velocity_right = np.zeros_like(self.stress)
-#         self.velocity_left = np.zeros_like(self.stress)
-#         self.celerity = math.sqrt(young_modulus / density)
-#         self.rho_c = density * self.celerity
-#         self.inv_rho_c = 1. / self.rho_c
-#         self.inv_cross_section = 1. / cross_section
-#         self.external_forces = np.zeros((nb_nodes, ), dtype=np.float64)
-#         self.space_step = length / nb_elements
-#         self.young_modulus = young_modulus
-#         self.length = length
-
-#     def apply_initial_state(self, u0, v0):
-#         """Apply initial condition for velocity and stress
-#         """
-#         assert v0.size == u0.size - 1
-#         assert v0.size == self.nb_elements
-#         self.velocity[...] = v0
-#         self.displacement[...] = u0
-#         self.stress[...] = u0[1:self.nb_elements + 1] - u0[:self.nb_elements]
-#         self.stress *= self.young_modulus / self.space_step
-
-#     def compute_external_forces(self, fleft, fright, body_force):
-#         """set external force distribution
-#         """
-#         self.external_forces[...] = body_force * self.space_step
-#         self.external_forces[0] *= 0.5
-#         self.external_forces[0] += fleft
-#         self.external_forces[-1] *= 0.5
-#         self.external_forces[-1] += fright
-
-#     def compute_stressed_inertial_state(self, dt):
-#         """Apply formula 1.17 to compute the new stressed-inertial state
-#         i.e stress and velocity of each element at the end of the time step.
-#         """
-#         # warning : in place computation
-#         self.stress *= -1
-#         self.stress += self.stress_left
-#         self.stress += self.stress_right
-#         self.velocity *= -1
-#         self.velocity += self.velocity_left
-#         self.velocity += self.velocity_right
-#         self.displacement += self.velocity * dt
-
-#     def compute_inner_nodes_right_values(self):
-#         """Apply formula 1.16 to compute right values of stress and velocity for inner
-#         nodes
-#         """
-#         for j in xrange(1, self.nb_elements):
-#             self.stress_right[j - 1] = self.velocity[j]
-#             self.stress_right[j - 1] -= self.velocity[j - 1]
-#             self.stress_right[j - 1] *= self.rho_c
-#             self.stress_right[j - 1] += self.stress[j]
-#             self.stress_right[j - 1] += self.stress[j - 1]
-#             self.stress_right[j - 1] += self.external_forces[j] * \
-#                 self.inv_cross_section
-#             self.stress_right[j - 1] *= 0.5
-#             self.velocity_right[j - 1] = (self.stress_right[j - 1] -
-#                                           self.stress[j]) * self.rho_c +\
-#                 self.velocity[j]
-
-#             # self.velocity_right[j - 1] = self.stress[j]
-#             # self.velocity_right[j - 1] -= self.stress[j - 1]
-#             # self.velocity_right[j - 1] += self.external_forces[j] * \
-#             #     self.inv_cross_section
-#             # self.velocity_right[j - 1] *= self.inv_rho_c
-#             # self.velocity_right[j - 1] += self.velocity[j]
-#             # self.velocity_right[j - 1] += self.velocity[j - 1]
-#             # self.velocity_right[j - 1] *= 0.5
-
-#     def apply_continuity_and_equilibrium(self):
-#         """Apply 1.15 to compute left values of stress and velocity in each element
-#         """
-#         self.stress_left[1:] = self.stress_right[: self.nb_elements - 1]
-#         self.stress_left[1:] -= self.external_forces[1:-1] * \
-#             self.inv_cross_section
-#         self.velocity_left[1:] = self.velocity_right[: self.nb_elements - 1]
-
-#     def apply_boundary_conditions(self):
-#         """Apply 1.20 to compute values of stress and velocity:
-#           - on the left for first element
-#           - on the right for last element
-#         """
-#         self.stress_left[0] = self.external_forces[0] * self.inv_cross_section
-#         self.stress_right[-1] = self.external_forces[-1] * \
-#             self.inv_cross_section
-#         self.velocity_left[0] = self.velocity[0]
-#         self.velocity_left[0] -= (self.stress_left[0] -
-#                                   self.stress[0]) * self.inv_rho_c
-#         self.velocity_right[-1] = self.velocity[-1]
-#         self.velocity_right[-1] += (self.stress_right[-1] -
-#                                     self.stress[-1]) * self.inv_rho_c
-
-#     def advance_step(self, dt):
-#         """compute rod state for next time.
-#         """
-#         assert dt == self.space_step / self.celerity
-#         self.compute_inner_nodes_right_values()
-#         self.apply_continuity_and_equilibrium()
-#         self.compute_stressed_inertial_state(dt)
-
-#     def plot_state(self):
-#         """plot current stress and velocity in the rod
-#         """
-#         x = np.linspace(0., self.length, self.nb_elements)
-#         plt.subplot(2, 1, 1)
-#         plt.plot(x, self.stress, label='stress')
-#         plt.legend()
-#         plt.subplot(2, 1, 2)
-#         plt.plot(x, self.velocity, label='velocity')
-#         plt.legend()
-#         plt.show()
-
-#     def __str__(self):
-#         res_v = np.concatenate((self.velocity_left, self.velocity,
-#                                 self.velocity_right),
-#                                axis=0).reshape(3, self.nb_elements)
-#         res_s = np.concatenate((self.stress_left, self.stress,
-#                                 self.stress_right),
-#                                axis=0).reshape(3, self.nb_elements)
-#         disp = 'velocities: \n' + str(res_v) + '\n stresses:\n' + str(res_s)
-#         disp += '\n displacements:\n' + str(self.displacement)
-#         return disp
+        return np.insert(quality_factor_inv * math.pi * nu[1:], 0, 0)
