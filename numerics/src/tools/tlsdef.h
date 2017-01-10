@@ -56,7 +56,7 @@
   #ifdef SWIG
     #define tlsvar
 
-  #elif defined(SICONOS_CXXVERSION) && (SICONOS_CXXVERSION >= 201103L)
+  #elif __cplusplus >= 201103L
     #define tlsvar thread_local
   #else
     #if defined(__GNUC__) || (defined(__ICC) && defined(__linux))
