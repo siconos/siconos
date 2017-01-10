@@ -33,7 +33,7 @@
 #ifndef __cplusplus
 
   #ifdef SWIG
-    #define tlsvar thread_local
+    #define tlsvar
 
   #elif __STDC_VERSION__ >= 201112L
     #include <threads.h>
@@ -45,7 +45,7 @@
     #elif defined(__ICC) && defined(_WIN32)
       #define tlsvar __declspec(thread)
     #elif defined(SICONOS_ALLOW_GLOBAL)
-      #define tlsvar static
+      #define tlsvar
     #else
       #error "Don't know how to create a thread-local variable"
     #endif
@@ -54,9 +54,9 @@
 #else
 
   #ifdef SWIG
-    #define tlsvar thread_local
+    #define tlsvar
 
-  #elif SICONOS_CXXVERSION >= 201103L
+  #elif defined(SICONOS_CXXVERSION) && (SICONOS_CXXVERSION >= 201103L)
     #define tlsvar thread_local
   #else
     #if defined(__GNUC__) || (defined(__ICC) && defined(__linux))
@@ -64,7 +64,7 @@
     #elif defined(_MSC_VER) || (defined(__ICC) && defined(_WIN32))
       #define tlsvar __declspec(thread)
     #elif defined(SICONOS_ALLOW_GLOBAL)
-      #define tlsvar static
+      #define tlsvar
     #else
       #error "Don't know how to create a thread-local variable"
     #endif
