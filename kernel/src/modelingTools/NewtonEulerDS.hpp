@@ -223,6 +223,17 @@ protected:
   /** jacobian of mGyr w.r.t twist*/
   SP::SimpleMatrix _jacobianMGyrtwist;
 
+  /** wrench (q,twist,t)= [ fExt - fInt ; mExt-nGyr - mInt ]^T */
+
+  SP::SiconosVector _wrench;
+
+  /** jacobian_q forces*/
+  SP::SimpleMatrix _jacobianWrenchq;
+
+  /** jacobian_{twist} forces*/
+  SP::SimpleMatrix _jacobianWrenchTwist;
+
+
   /** if true, we set the gyroscopic forces equal to 0 (default false) **/
   bool _nullifyMGyr;
 
@@ -307,15 +318,7 @@ protected:
    */
   SP::PluggedObject _pluginJactwistMInt;
 
-  /** wrench (q,twist,t)= [ fExt - fInt ; mExt-nGyr - mInt ]^T */
 
-  SP::SiconosVector _wrench;
-
-  /** jacobian_q forces*/
-  SP::SimpleMatrix _jacobianqWrench;
-
-  /** jacobian_{twist} forces*/
-  SP::SimpleMatrix _jacobiantwistWrench;
 
   /** Boundary condition applied to a dynamical system*/
   SP::BoundaryCondition _boundaryConditions;
@@ -572,7 +575,7 @@ public:
    */
   inline SP::SimpleMatrix jacobianqForces() const
   {
-    return _jacobianqWrench;
+    return _jacobianWrenchq;
   }
 
 
@@ -581,7 +584,7 @@ public:
    */
   inline SP::SimpleMatrix jacobianvForces() const
   {
-    return _jacobiantwistWrench;
+    return _jacobianWrenchTwist;
   }
   //  inline SP::SiconosMatrix jacobianZFL() const { return jacobianZFL; }
 

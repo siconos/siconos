@@ -508,7 +508,7 @@ void NewtonEulerDS::initForces()
   _wrench.reset(new SiconosVector(_n));
   _mGyr.reset(new SiconosVector(3,0.0));
   _jacobianMGyrtwist.reset(new SimpleMatrix(_n, _n));
-  _jacobiantwistWrench.reset(new SimpleMatrix(_n, _n));
+  _jacobianWrenchTwist.reset(new SimpleMatrix(_n, _n));
   DEBUG_END("NewtonEulerDS::initForces()\n")
 }
 
@@ -550,8 +550,8 @@ void NewtonEulerDS::initialize(double time, unsigned int sizeOfMemory)
   if ((_pluginJacqFInt->fPtr  || _computeJacobianFIntqByFD) && !_jacobianFIntq)
   {
     _jacobianFIntq.reset(new SimpleMatrix(3, _qDim));
-    if (!_jacobianqWrench)
-      _jacobianqWrench.reset(new SimpleMatrix(_n, _qDim));
+    if (!_jacobianWrenchq)
+      _jacobianWrenchq.reset(new SimpleMatrix(_n, _qDim));
   }
 
   if ((_pluginJactwistFInt->fPtr || _computeJacobianFInttwistByFD) && !_jacobianFInttwist)
@@ -562,8 +562,8 @@ void NewtonEulerDS::initialize(double time, unsigned int sizeOfMemory)
 
   if ((_pluginJacqMInt->fPtr || _computeJacobianMIntqByFD) && !_jacobianMIntq)
   {
-    if (!_jacobianqWrench)
-      _jacobianqWrench.reset(new SimpleMatrix(_n, _qDim));
+    if (!_jacobianWrenchq)
+      _jacobianWrenchq.reset(new SimpleMatrix(_n, _qDim));
     _jacobianMIntq.reset(new SimpleMatrix(3, _qDim));
   }
   if ((_pluginJactwistMInt->fPtr || _computeJacobianMInttwistByFD) && !_jacobianMInttwist)
@@ -572,8 +572,8 @@ void NewtonEulerDS::initialize(double time, unsigned int sizeOfMemory)
   if(_mExt)
   {
     _mExtObj.reset(new SiconosVector(3, 0));
-     if (!_jacobianqWrench)
-       _jacobianqWrench.reset(new SimpleMatrix(_n, _qDim));
+     if (!_jacobianWrenchq)
+       _jacobianWrenchq.reset(new SimpleMatrix(_n, _qDim));
      _jacobianMExtObjq.reset(new SimpleMatrix(3, _qDim));
   }
 
@@ -996,13 +996,13 @@ void NewtonEulerDS::computeForces(double time, SP::SiconosVector q, SP::SiconosV
 void NewtonEulerDS::computeJacobianqForces(double time)
 {
   DEBUG_BEGIN("NewtonEulerDS::computeJacobianqWrench(double time) \n");
-  if (_jacobianqWrench)
+  if (_jacobianWrenchq)
   {
-    _jacobianqWrench->zero();
+    _jacobianWrenchq->zero();
     if (_jacobianFIntq)
     {
       computeJacobianFIntq(time);
-      _jacobianqWrench->setBlock(0,0,-1.0 * *_jacobianFIntq);
+      _jacobianWrenchq->setBlock(0,0,-1.0 * *_jacobianFIntq);
     }
     if (_jacobianMIntq)
     {
@@ -1012,9 +1012,9 @@ void NewtonEulerDS::computeJacobianqForces(double time)
     if (_jacobianMExtObjq)
     {
       computeJacobianMExtObjqByFD(time, _q);
-      _jacobianqWrench->setBlock(3,0,1.0* *_jacobianMExtObjq);
+      _jacobianWrenchq->setBlock(3,0,1.0* *_jacobianMExtObjq);
     }
-    DEBUG_EXPR(_jacobianqWrench->display(););
+    DEBUG_EXPR(_jacobianWrenchq->display(););
   }
   //else nothing.
   DEBUG_END("NewtonEulerDS::computeJacobianqForces(double time) \n");
@@ -1023,18 +1023,18 @@ void NewtonEulerDS::computeJacobianqForces(double time)
 void NewtonEulerDS::computeJacobianvForces(double time)
 {
   DEBUG_BEGIN("NewtonEulerDS::computeJacobiantwistForces(double time) \n");
-  if (_jacobiantwistWrench)
+  if (_jacobianWrenchTwist)
   {
-    _jacobiantwistWrench->zero();
+    _jacobianWrenchTwist->zero();
     if (_jacobianFInttwist)
     {
       computeJacobianFIntv(time);
-      _jacobiantwistWrench->setBlock(0,0,-1.0 * *_jacobianFInttwist);
+      _jacobianWrenchTwist->setBlock(0,0,-1.0 * *_jacobianFInttwist);
     }
     if (_jacobianMInttwist)
     {
       computeJacobianMIntv(time);
-      _jacobiantwistWrench->setBlock(3,0,-1.0 * *_jacobianMInttwist);
+      _jacobianWrenchTwist->setBlock(3,0,-1.0 * *_jacobianMInttwist);
     }
     if (!_nullifyMGyr)
     {
@@ -1042,11 +1042,11 @@ void NewtonEulerDS::computeJacobianvForces(double time)
       {
         //computeJacobianMGyrtwistByFD(time,_q,_twist);
         computeJacobianMGyrtwist(time);
-        *_jacobiantwistWrench -= *_jacobianMGyrtwist;
+        *_jacobianWrenchTwist -= *_jacobianMGyrtwist;
       }
     }
-    // std::cout << "_jacobiantwistWrench : "<< std::endl;
-    // _jacobiantwistWrench->display();
+    // std::cout << "_jacobianWrenchTwist : "<< std::endl;
+    // _jacobianWrenchTwist->display();
   }
   //else nothing.
   DEBUG_END("NewtonEulerDS::computeJacobiantwistForces(double time) \n");
