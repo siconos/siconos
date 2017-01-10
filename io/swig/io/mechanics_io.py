@@ -68,7 +68,7 @@ try:
     from siconos.mechanics.collision import BodyDS, \
         SiconosSphere, SiconosBox, SiconosCylinder, SiconosPlane, \
         SiconosConvexHull, SiconosContactor, SiconosContactorSet, \
-        SiconosMesh
+        SiconosMesh, SiconosHeightMap
 
     try:
         from siconos.mechanics.collision.bullet import \
@@ -635,7 +635,25 @@ class ShapeCollection():
                                            contact_index)
 
                         self._io._keep.append(self._shapes[shape_name])
-                else:
+
+                elif self.attributes(shape_name)['type'] in ['heightmap']:
+
+                    if use_proposed:
+                        hm_data = self.shape(shape_name)
+                        r = hm_data.attrs['rect']
+                        assert(len(r)==2)
+                        hm = SiconosHeightMap(hm_data, r[0], r[1])
+                        dims = list(r) + [np.max(hm_data)-np.min(hm_data)]
+                        hm.setInsideMargin(
+                            hm_data.attrs.get('insideMargin', np.min(dims)*0.02))
+                        hm.setOutsideMargin(
+                            hm_data.attrs.get('outsideMargin', 0))
+
+                        self._shapes[shape_name] = hm
+                    else:
+                        throw
+
+                elif self.attributes(shape_name)['type'] in ['convex']:
                     # a convex point set
                     if use_proposed:
                         points = self.shape(shape_name)
@@ -658,6 +676,9 @@ class ShapeCollection():
                     else:
                         throw
                     self._shapes[shape_name] = convex
+
+                else:
+                    throw
 
             elif isinstance(self.url(shape_name), str) and \
                     os.path.exists(self.url(shape_name)):
@@ -1824,6 +1845,31 @@ class Hdf5():
             self.addMeshFromString(name, shape_data, scale=scale,
                                    insideMargin=insideMargin,
                                    outsideMargin=outsideMargin)
+
+    def addHeightMap(self, name, heightmap, rectangle,
+                     insideMargin=None, outsideMargin=None):
+        """
+        Add a heightmap represented as a SiconosMatrix
+        """
+        assert(heightmap.shape[0] > 2)
+        assert(heightmap.shape[1] > 2)
+        if name not in self._ref:
+            shape = self._ref.create_dataset(name, data=heightmap)
+            shape.attrs['id'] = self._number_of_shapes
+            shape.attrs['type'] = 'heightmap'
+
+            # measurements of the heightfield, i.e. length of sides of
+            # the rectangle where heightmap will be placed -- height
+            # is represented by heightmap values
+            assert(len(rectangle)==2)
+            shape.attrs['rect'] = rectangle # tuple (length x, length y)
+
+            if insideMargin is not None:
+                shape.attrs['insideMargin'] = insideMargin
+            if outsideMargin is not None:
+                shape.attrs['outsideMargin'] = outsideMargin
+            self._shapeid[name] = shape.attrs['id']
+            self._number_of_shapes += 1
 
     def addBRepFromString(self, name, shape_data):
         """

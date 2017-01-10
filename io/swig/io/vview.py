@@ -784,6 +784,35 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
                 mapper.SetInputConnection(reader.GetOutputPort())
                 mappers[shape_name] = (x for x in [mapper])
 
+        elif shape_type == 'heightmap':
+            points = vtk.vtkPoints()
+            shape = io.shapes()[shape_name]
+            extents = list(shape.attrs['rect']) + [numpy.max(shape) - numpy.min(shape)]
+
+            # Data points are adjusted to center tangentially, but
+            # vertical position is left alone; i.e., supports
+            # non-zero-centered data.  User must use contactor
+            # translation to compensate if desired, or simply adjust
+            # data itself to desired origin.
+            for x,d in enumerate(shape):
+                for y,v in enumerate(d):
+                    points.InsertNextPoint(
+                        float(x) / shape.shape[0] * extents[0] - extents[0]/2,
+                        float(y) / shape.shape[1] * extents[1] - extents[1]/2,
+                        v)
+
+            polydata = vtk.vtkPolyData()
+            polydata.SetPoints(points)
+            delaunay = vtk.vtkDelaunay2D()
+            delaunay.SetInputData(polydata)
+            delaunay.Update()
+            datasets[shape_name] = polydata
+            mapper = vtk.vtkPolyDataMapper()
+            mapper.SetInputConnection(delaunay.GetOutputPort())
+            add_compatiblity_methods(mapper)
+            mappers[shape_name] = None
+            mappers[shape_name] = (x for x in [mapper])
+
         elif shape_type == 'convex':
             # a convex shape
             points = vtk.vtkPoints()

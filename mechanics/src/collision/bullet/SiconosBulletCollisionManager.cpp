@@ -30,6 +30,7 @@
 #include "BulletFrom1DLocalFrameR.hpp"
 
 #include <map>
+#include <limits>
 #include <boost/format.hpp>
 #include <boost/make_shared.hpp>
 
@@ -69,6 +70,7 @@
 #include <BulletCollision/CollisionShapes/btConvexHullShape.h>
 #include <BulletCollision/CollisionShapes/btBvhTriangleMeshShape.h>
 #include <BulletCollision/CollisionShapes/btTriangleIndexVertexArray.h>
+#include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
 #include <LinearMath/btConvexHullComputer.h>
 
 #include <LinearMath/btQuaternion.h>
@@ -130,6 +132,20 @@ struct btSiconosMeshData : public btBvhTriangleMeshShape {
   SP::btTriangleIndexVertexArray btTriData;
 };
 #define BTMESHSHAPE btSiconosMeshData
+
+// Similarly, place to store height matrix
+struct btSiconosHeightData : public btHeightfieldTerrainShape {
+  btSiconosHeightData(int width, std11::shared_ptr< std::vector<btScalar> > data,
+                      btScalar min_height, btScalar max_height)
+    : btHeightfieldTerrainShape(width, data->size()/width, data->data(),
+                                0, // scale ignored for PHY_FLOAT
+                                min_height, max_height,
+                                2, PHY_FLOAT, false), // up = z, flip = false
+      _data(data), _min_height(min_height), _max_height(max_height) {}
+  std11::shared_ptr< std::vector<btScalar> > _data;
+  btScalar _min_height, _max_height;
+};
+#define BTHEIGHTSHAPE btSiconosHeightData
 
 // Default Bullet options
 SiconosBulletOptions::SiconosBulletOptions()
@@ -195,6 +211,11 @@ typedef BodyShapeRecordT<SP::SiconosMesh, std11::shared_ptr<btSiconosMeshData> >
 typedef std::map<const BodyDS*, std::vector<std11::shared_ptr<BodyMeshRecord> > >
   BodyMeshMap;
 
+typedef BodyShapeRecordT<SP::SiconosHeightMap, std11::shared_ptr<btSiconosHeightData> >
+  BodyHeightRecord;
+typedef std::map<const BodyDS*, std::vector<std11::shared_ptr<BodyHeightRecord> > >
+  BodyHeightMap;
+
 /** For associating static contactor sets and their offsets.
  * Pointer to this is what is returned as the opaque and unique
  * StaticContactorSetID so that they can be removed. */
@@ -232,6 +253,7 @@ protected:
   BodyCylinderMap bodyCylinderMap;
   BodyCHMap bodyCHMap;
   BodyMeshMap bodyMeshMap;
+  BodyHeightMap bodyHeightMap;
 
   SP::Simulation _simulation;
 
@@ -260,6 +282,10 @@ protected:
                              const SP::BodyDS ds,
                              const SP::SiconosMesh mesh,
                              const SP::SiconosContactor contactor);
+  void createCollisionObject(const SP::SiconosVector base,
+                             const SP::BodyDS ds,
+                             const SP::SiconosHeightMap height,
+                             const SP::SiconosContactor contactor);
 
   /* Call the above functions for each shape associated with a body or contactor. */
   void createCollisionObjectsForBodyContactorSet(
@@ -280,6 +306,7 @@ protected:
   void updateShape(BodyCylinderRecord &record);
   void updateShape(BodyCHRecord &record);
   void updateShape(BodyMeshRecord &record);
+  void updateShape(BodyHeightRecord &record);
 
   void updateAllShapesForDS(const BodyDS &bds);
   void updateShapePosition(const BodyShapeRecord &record);
@@ -412,6 +439,10 @@ void SiconosBulletCollisionManager_impl::updateAllShapesForDS(const BodyDS &bds)
   std::vector<std11::shared_ptr<BodyMeshRecord> >::iterator itm;
   for (itm = bodyMeshMap[&bds].begin(); itm != bodyMeshMap[&bds].end(); itm++)
     updateShape(**itm);
+
+  std::vector<std11::shared_ptr<BodyHeightRecord> >::iterator ith;
+  for (ith = bodyHeightMap[&bds].begin(); ith != bodyHeightMap[&bds].end(); ith++)
+    updateShape(**ith);
 }
 
 template<typename ST, typename BT, typename BR, typename BSM>
@@ -984,6 +1015,118 @@ void SiconosBulletCollisionManager_impl::updateShape(BodyMeshRecord &record)
   updateShapePosition(record);
 }
 
+void SiconosBulletCollisionManager_impl::createCollisionObject(
+  const SP::SiconosVector base,
+  const SP::BodyDS ds,
+  SP::SiconosHeightMap heightmap,
+  SP::SiconosContactor contactor)
+{
+  if (!heightmap->height_data())
+    throw SiconosException("No height matrix specified for heightmap.");
+
+  SP::SiconosMatrix data = heightmap->height_data();
+
+  if (!data || data->size(0) < 2 || data->size(1) < 2)
+    throw SiconosException("Height matrix does not have sufficient dimensions "
+                           "to represent a plane.");
+
+  // Create heightfield data for Bullet.  Make a copy in case data
+  // type btScalar is different from SiconosMatrix.
+  // Calculate min and max value at the same time.
+  double vmin = std::numeric_limits<double>::infinity();
+  double vmax = -vmin;
+  std11::shared_ptr< std::vector<btScalar> > heightfield(
+    std11::make_shared< std::vector<btScalar> >());
+
+  heightfield->resize(data->size(0) * data->size(1));
+
+  for (int i=0; i < data->size(0); i++) {
+    for (int j=0; j < data->size(1); j++) {
+      double v = data->getValue(i,j);
+      (*heightfield)[j*data->size(0)+i] = v;
+      if (v > vmax) vmax = v;
+      if (v < vmin) vmin = v;
+    }
+  }
+
+  // Create Bullet height object
+  SP::BTHEIGHTSHAPE btheight(std11::make_shared<BTHEIGHTSHAPE>(
+    data->size(0), heightfield, vmin, vmax));
+
+  // initialization
+  createCollisionObjectHelper<SP::SiconosHeightMap, SP::BTHEIGHTSHAPE,
+                              BodyHeightRecord, BodyHeightMap>
+    (base, ds, heightmap, btheight, bodyHeightMap, contactor);
+}
+
+#include <iostream>
+void SiconosBulletCollisionManager_impl::updateShape(BodyHeightRecord &record)
+{
+  SP::SiconosHeightMap height(record.shape);
+  SP::BTHEIGHTSHAPE btheight(record.btshape);
+
+  // Update shape parameters
+  if (height->version() != record.shape_version)
+  {
+    // btBvhTriangleHeightShape supports only outsideMargin.
+    // TODO: support insideMargin, scale the points by their normals.
+    btheight->setMargin(height->outsideMargin() * _options.worldScale);
+
+    // The local scaling determines the extents of the base of the heightmap
+    btheight->setLocalScaling(btVector3(
+      height->length_x() / height->height_data()->size(0),
+      height->length_y() / height->height_data()->size(1), 1));
+
+    //TODO vertical position offset to compensate for Bullet's centering
+    // TODO: Calculate the local Aabb
+    //btheight->recalcLocalAabb();
+
+    // TODO: Calculate inertia from a height.  For now we leave it at
+    // identity, the user can provide an inertia if desired.
+
+    // if (record.ds && record.ds->useContactorInertia())
+    //   updateContactorInertia(record.ds, btheight);
+
+    if (record.btobject->getBroadphaseHandle())
+    {
+      _collisionWorld->updateSingleAabb(&*record.btobject);
+      _collisionWorld->getBroadphase()->getOverlappingPairCache()->
+        cleanProxyFromPairs(record.btobject->getBroadphaseHandle(), &*_dispatcher);
+    }
+
+    record.shape_version = height->version();
+  }
+
+  updateShapePosition(record);
+
+  // Like updateShapePosition(record), but we have to pre-compensate
+  // the Bullet vertical centering of btHeightfieldTerrainShape.  Must
+  // be done before body rotation.
+
+  SiconosVector q(7);
+  if (record.base)
+    q = *record.base;
+  else {
+    q.zero();
+    q(3) = 1;
+  }
+
+  // Bullet automatically moves the center of the object to the
+  // vertical center of the heightfield, so we add it back.  (i.e. we
+  // assume the user will adjust offsets to taste in the heightfield
+  // data itself, or using contactor offset.)
+  // TODO: there is still a problem if body or contactor is rotated
+  btScalar mnz = btheight->_min_height, mxz = btheight->_max_height;
+  q(2) += (mxz-mnz)/2 + mnz;
+
+  DEBUG_PRINTF("updating shape position: %p(%ld) - %f, %f, %f\n",
+               &*box,box.use_count(), q(0), q(1), q(2));
+
+  btTransform t = offsetTransform(q, *record.contactor->offset);
+  t.setOrigin(t.getOrigin() * _options.worldScale);
+  record.btobject->setWorldTransform( t );
+}
+
 struct CreateCollisionObjectShapeVisitor : public SiconosVisitor
 {
   using SiconosVisitor::visit;
@@ -1008,6 +1151,8 @@ struct CreateCollisionObjectShapeVisitor : public SiconosVisitor
   void visit(SP::SiconosConvexHull shape)
     { impl.createCollisionObject(base, ds, shape, contactor); }
   void visit(SP::SiconosMesh shape)
+    { impl.createCollisionObject(base, ds, shape, contactor); }
+  void visit(SP::SiconosHeightMap shape)
     { impl.createCollisionObject(base, ds, shape, contactor); }
 };
 

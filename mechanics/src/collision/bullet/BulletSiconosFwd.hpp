@@ -36,6 +36,8 @@ DEFINE_SPTR(btBvhTriangleMeshShape);
 
 // extension of btBvhTriangleMeshShape used in Siconos to store mesh data
 DEFINE_SPTR(btSiconosMeshData);
+// extension of btHeightfieldTerrainShape used in Siconos to store height data
+DEFINE_SPTR(btSiconosHeightData);
 
 DEFINE_SPTR(btCollisionObject);
 DEFINE_SAPTR(btCollisionObject);

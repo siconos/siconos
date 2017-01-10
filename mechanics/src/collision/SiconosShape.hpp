@@ -287,4 +287,37 @@ public:
   ACCEPT_VISITORS();
 };
 
+class SiconosHeightMap : public SiconosShape,
+                         public std11::enable_shared_from_this<SiconosHeightMap>
+{
+private:
+  SiconosHeightMap() : SiconosShape() {};
+
+protected:
+  /** serialization hooks
+   */
+  ACCEPT_SERIALIZATION(SiconosHeightMap);
+  SP::SiconosMatrix _height_data;
+  double _length_x;
+  double _length_y;
+
+public:
+  SiconosHeightMap(SP::SiconosMatrix height_data,
+                   double length_x, double length_y)
+    : SiconosShape(), _height_data(height_data),
+      _length_x(length_x), _length_y(length_y)
+  {
+  }
+
+  SP::SiconosMatrix height_data() { return _height_data; }
+  double length_x() { return _length_x; }
+  double length_y() { return _length_y; }
+
+  virtual ~SiconosHeightMap() {}
+
+  /** visitors hook
+   */
+  ACCEPT_VISITORS();
+};
+
 #endif /* SiconosShape_h */
