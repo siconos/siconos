@@ -82,8 +82,8 @@ class StringDS(sk.LagrangianLinearTIDS):
     def eigenfreq(self, j):
         """Compute eigenfrequency number j
         """
-        return j * self.c0 / self.length * math.sqrt(1 +
-                                                     self.stiffness_coeff * j)
+        return 0.5 * j * self.c0 / self.length * \
+            math.sqrt(1 + self.stiffness_coeff * j)
 
     def apply_boundary_conditions(self, bc_type=None):
         """Create and apply boundary conditions
@@ -113,18 +113,21 @@ class StringDS(sk.LagrangianLinearTIDS):
                                  for j in xrange(self.ndof)])
         coeff = (indices * math.pi * self.c0 / self.length) ** 2
         omega *= coeff
-        omega_mat = scs.csr_matrix((omega, (indices, indices)),
-                                   shape=(self.ndof, self.ndof))
+        # omega_mat = scs.csr_matrix((omega, (indices, indices)),
+        #                            shape=(self.ndof, self.ndof))
+        omega_mat = np.diag(omega)
+        #omega[0] = 1.
         # S.Omega^2.S-1
-        stiffness_mat = s_mat * omega_mat * s_mat.T
+        stiffness_mat = np.dot(s_mat, np.dot(omega_mat, s_mat.T))
         coeff = self.length / self._N
         stiffness_mat *= coeff
 
         # 2.S.Gamma.S-1
         sigma = self.compute_damping(np.sqrt(omega) / (2. * math.pi))
-        sigma_mat = scs.csr_matrix((sigma, (indices, indices)),
-                                   shape=(self.ndof, self.ndof))
-        damping_mat = s_mat * sigma_mat * s_mat.T
+        # sigma_mat = scs.csr_matrix((sigma, (indices, indices)),
+        #                            shape=(self.ndof, self.ndof))
+        sigma_mat = np.diag(sigma)
+        damping_mat = np.dot(s_mat, np.dot(sigma_mat, s_mat.T))
         coeff = 2. * coeff
         damping_mat *= coeff
         return stiffness_mat, damping_mat

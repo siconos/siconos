@@ -23,14 +23,14 @@ damping_parameters = {
     'delta_ve': 4.5e-3,
     '1/qte': 2.03e-4}
 
-damping_parameters = {
-    'nu_air': 0.,
-    'rho_air': 0.,
-    'delta_ve': 0.,
-    '1/qte': 0.}
+# damping_parameters = {
+#     'nu_air': 0.,
+#     'rho_air': 0.,
+#     'delta_ve': 0.,
+#     '1/qte': 0.}
 
 # -- Spatial discretisation (modal proj) and initial conditions --
-number_of_modes = 1
+number_of_modes = 21
 ndof = number_of_modes + 2
 imax = int(ndof / 2)
 # -- The dynamical system(s) --
@@ -41,7 +41,7 @@ guitar_string = StringDS(ndof, geometry_and_material=G_string,
 
 # -- The obstacles (Interactions) --
 # ie guitar fret(s)
-fret = Fret(guitar_string, position=[imax, -0.005])
+fret = Fret(guitar_string, position=[imax, -0.00])
 
 # -- The model to gather frets and strings and simulate the dynamics --
 t0 = 0.

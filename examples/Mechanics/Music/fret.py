@@ -51,7 +51,7 @@ class Guitar(sk.Model):
 
         # -- Simulation --
         # (1) OneStepIntegrators
-        theta = 0.5
+        theta = 0.5001
         osi = sk.MoreauJeanOSI(theta)
         t0 = time_range[0]
         tend = time_range[1]
