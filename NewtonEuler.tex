@@ -6,210 +6,513 @@
   Author &  O. Bonnefon &2010\\
   Revision& section \ref{Sec:NE_motion} to \ref{Sec:NE_TD} V. Acary&  05/09/2011\\
   Revision& section \ref{Sec:NE_motion}  V. Acary&  01/06/2016\\
+  Revision& complete edition V. Acary&  06/01/2017\\
 
 \end{tabular}
-\section{The Equations of motion}
-\label{Sec:NE_motion}
-The equations of motion in the Newton-Euler(\cite{Wittenburg1977,Haug89} formalism can be stated as
+
+
+\section{The equations of motion}
+
+
+\def\cg{\sf \small g}
+In the maximal coordinates framework, the most natural choice for the kinematic  variables and for the formulation of the equations of motion is the Newton/Euler formalism, where the equation of motion describes the translational and rotational dynamics of each body using a specific choice of parameters. For the translational motion, the position of the center of mass $x_{\cg}\in \RR^3$ and its velocity  $v_{\cg} = \dot x_{\cg} \in \RR^3$ is usually chosen. For the rotational motion, a common choice is to choose the angular velocity  $\Omega \in \RR^3$ of the body expressed in the body--fixed frame. The orientation of the body is usually defined by the rotation matrix $R$ of the body-fixed frame with respect to a given inertial frame. The angular velocity can be then  expressed as :
 \begin{equation}
-  \label{eq:NewtonEuler}
+  \label{eq:angularvelocity}
+  \widetilde \Omega = R^\top \dot R, \text { or equivalently, } \dot R  = R \widetilde \Omega
+\end{equation}
+where the matrix $\widetilde \Omega \in \RR^{3 \times 3}$ is given by $\widetilde \Omega x = \Omega \times x$ for all $x\in \RR^3$. Using these coordinates, the equations of motion are given by 
+\begin{equation}
+  \label{eq:motion-NewtonEuler}
   \left\{\begin{array}{rcl}
-    M \dot V &=& F(X, V, \Omega, R), \\
-    I \dot \Omega + \Omega \wedge I\Omega &=&  M(X,V, \Omega, R), \\
-    \dot X &=& V, \\
-    \dot R &=& R \tilde \Omega,\quad R^{-1}=R^T,\quad  \det(R)=1 .
-\end{array}\right.
+      m \;\dot v_{\cg}  & = &f(t,x_{\cg}, v_{\cg},  R,  \Omega) \\
+      I \dot \Omega + \Omega \times I \Omega &= & M(t,x_{\cg}, v_{\cg}, R, \Omega) \\
+      \dot x_{\cg}&=& v_{\cg}\\
+      \dot R  &=& R \widetilde \Omega
+    \end{array}
+  \right.
+\end{equation}
+where $m> 0$ is the mass, $I\in \RR^{3\times 3}$ is the matrix of moments of inertia around the center of mass and the axis of the body--fixed frame.
+
+
+The vectors $f(\cdot)\in \RR^3$ and $M(\cdot)\in \RR^3$ are the total forces and torques applied to the body. It is important to outline that the total applied forces $f(\cdot)$ has to be expressed in a consistent frame w.r.t. to $v_{\cg}$. In our case, it hae to be expressed in the inertial frame. The same applies for the moment $M$ that has to be expressed in the body-fixed frame. If we consider a moment $m(\cdot)$ expressed in the inertial frame, then is has to be convected to  the body--fixed frame thanks to
+\begin{equation}
+  \label{eq:convected_moment}
+  M (\cdot) =R^\top  m (\cdot)
+\end{equation}
+
+\begin{ndrva}
+  todo : add the formulation in the inertial frame of the Euler equation with $\omega =R \Omega$
+\end{ndrva}
+
+In the numerical practice, the choice of the rotation matrix is not convenient since it introduces redundant parameters. Since $R$ must belong to $SO^+(3)$, we have also to satisfy $\det(R)=1$ and $R^{-1}=R^\top$. In Siconos we choose to parametrize the rotation with a unit quaternion $p \in \RR^4$ such that $R = \Phi(q)$ and $\dot p = \Psi(p)\Omega $. This parameterization has no singularity and has only one redundant variable that is determined by imposing $\|p\|=1$. Formulae for $\Phi$ and $\Psi$ can be found in any textbooks.
+
+\begin{ndrva}
+  todo : add the formulae
+\end{ndrva}
+
+We denote  by $q$ the vector of coordinates of the position and the orientation of the body, and by $v$ {the body twist}:
+\begin{equation}
+  q \coloneqq \begin{bmatrix}
+    x_{\cg}\\
+    p
+  \end{bmatrix},\quad 
+  v \coloneqq \begin{bmatrix}
+     v_{\cg}\\
+     \Omega
+   \end{bmatrix}.
+ \end{equation}
+ The relation between $v$ and the time derivative of $q$ is
+\begin{equation}
+  \label{eq:TT}
+  \dot q = 
+  \begin{bmatrix}
+     \dot x_{\cg}\\
+     \Psi(p) \dot p
+   \end{bmatrix}
+   = 
+   \begin{bmatrix}
+     I & 0 \\
+     0 & \Psi(p)
+   \end{bmatrix}
+   v
+   \coloneqq
+   T(q) v
+\end{equation}
+with $T(q) \in \RR^{7\times 6}$.
+{Note that the twist $v$ is not directly the time derivative of the coordinate vector as a major difference with Lagrangian systems. }
+
+
+\begin{ndrva}
+{ todo :Add an explicit formulae for the $T(q)$}
+\end{ndrva}
+%
+The Newton-Euler equation in compact form may be written as:
+\begin{equation}
+\label{eq:Newton-Euler-compact}
+ \left \{ 
+ \begin{aligned}
+  &\dot q=T(q)v, \\
+  & M \dot v = F(t, q, v)
+ \end{aligned}
+ \right.
+\end{equation}
+where $M\in\RR^{6\times6}$ is the total inertia matrix
+\begin{equation}
+  M:= \begin{pmatrix}
+    m I_{3\times 3} & 0 \\
+    0 & I 
+  \end{pmatrix},
+\end{equation}
+and $F(t, q, v)\in \RR^6$ collects all the forces and torques applied to the body
+\begin{equation}
+  F(t,q,v):= \begin{pmatrix}
+    f(t,x_{\cg},  v_{\cg}, R, \Omega ) \\
+    I \Omega \times \Omega + M(t,x_{\cg}, v_{\cg}, R, \Omega )
+  \end{pmatrix}.
+\end{equation}
+When a collection of bodies is considered, we will use the same notation as in~(\ref{eq:Newton-Euler-compact}) extending the definition of the variables $q,v$ and the operators $M,F$ in a straightforward way.
+
+\subsection{Mechanical systems  with bilateral and unilateral constraints}
+\label{section22}
+
+
+
+
+Let us consider that the system~(\ref{eq:Newton-Euler-compact}) is  subjected to $m$ constraints, with $m_{e}$ holonomic bilateral 
+constraints
+\begin{equation}
+  \label{eq:bilateral-constraints}
+  h^\alpha(q)=0, \alpha \in \mathcal{E}\subset\NN,  |\mathcal E| = m_e,
+\end{equation}
+and  $m_{i}$ unilateral constraints
+\begin{equation}
+  \label{eq:unilateral-constraints}
+  g_{\n}^\alpha(q)\geq 0, \alpha \in \mathcal{I}\subset\NN,  |\mathcal I| = m_i.
+\end{equation} 
+%
+Let us denote as $J^\alpha_h(q) = \nabla^\top_q h^\alpha(q)  $ the Jacobian matrix of the bilateral constraint $h^\alpha(q)$ with respect to $q$ and as $J^\alpha_{g_\n}(q)$ respectively for $g_{\n}^\alpha(q)$  .
+%
+The bilateral constraints at the velocity level can be obtained as:
+\begin{equation}
+  \label{eq:bilateral-constraints-velocity}
+ 0 = \dot h^\alpha(q)= J^\alpha_h(q)\dot q = J^\alpha_h(q) T(q) v \coloneqq H^\alpha(q)  v,\quad  \alpha \in \mathcal{E}.
+\end{equation}
+By duality and introducing a Lagrange multiplier $\lambda^\alpha, \alpha \in \mathcal E$, the constraint generates a force applied to the body equal to $H^{\alpha,\top}(q)\lambda^\alpha$. For the unilateral constraints, a Lagrange multiplier $\lambda_{\n}^\alpha, \alpha \in \mathcal I$ is also associated and the constraints at the velocity level can also be derived as
+\begin{equation}
+  \label{eq:unilateral-constraints-velocity}
+ 0 \leq  \dot g_\n^\alpha(q)= J^\alpha_{g_\n}(q) \dot q = J^\alpha_{g_\n}(q)  T(q) v , \text{ if } g_{\n}^\alpha(q) = 0,\quad  \alpha \in \mathcal{I}. 
+\end{equation}
+Again, the force applied to the body is given by $(J^\alpha_{g_\n}(q) T(q))^\top\lambda^\alpha_\n$. {Nevertheless, there is no reason that $\lambda^\alpha_\n =r^\alpha_\n$ and $u_\n = J^\alpha_{g_\n}(q) T(q) v$ if the $g_n$ is not chosen as the signed distance (the gap function)}. This is the reason why  we prefer  directly define the normal and the tangential local relative velocity with respect to the {twist vector} as
+\begin{equation}
+  \label{eq:unilateral-constraints-velocity-kinematic1}
+   u^\alpha_\n  \coloneqq G_\n^\alpha(q) v, \quad u^\alpha_\t  \coloneqq G_\t^\alpha(q) v, \quad \alpha \in \mathcal{I},
+\end{equation}
+and the associated force as $G_\n^{\alpha,\top}(q) r^{\alpha}_\n $ and $G_\t^{\alpha,\top}(q) r^{\alpha}_\t$. For the sake of simplicity, we use the notation $u^\alpha  \coloneqq G^\alpha(q) v$ and its associated total force generated by the contact $\alpha$ as $G^{\alpha,\top}(q) r^{\alpha} \coloneqq G_\n^{\alpha,\top}(q) r^{\alpha}_\n + G_\t^{\alpha,\top}(q) r^{\alpha}_\t $.
+
+The complete system of equation of motion can finally be written as
+\begin{numcases}{ }
+  ~~\dot q = T(q)v ,\nonumber \\[0.5ex]
+  ~~ M \dot v  = F(t,q,v) + H^\top(q) \lambda +  G^\top(q) r, \nonumber \\ [0.5ex]
+  ~~\begin{array}{ll}
+    H^\alpha(q) v  =  0 ,& \alpha \in \mathcal E \\[1ex]
+    \left. \begin{array}{ll}
+      r^\alpha= 0 , &\text{ if } g_{\n}^\alpha(q) > 0,\\[1ex]
+      {K}^{\alpha,*} \ni \widehat u^\alpha  \bot~ r^\alpha \in {K}^\alpha, &\text{ if } g_{\n}^\alpha(q) = 0, \\[1ex]
+      u_{\n}^{\alpha,+} = -e_r^\alpha u_{\n}^{\alpha,-}, &\text{ if } g_{\n}^\alpha(q) = 0 \text{ and } u_{\n}^{\alpha,-} \leq 0, 
+    \end{array}\right\} & \alpha \in \mathcal I  \label{eq:NewtonEuler-uni}
+\end{array}
+\end{numcases}
+where the definition of the variables $\lambda\in \RR^{m_e}, r\in \RR^{3m_i}$ and the operators $H,G$ are extended to collect all the variables for each constraints.
+
+Note that all the constraints are written at the velocity integrators. {Another strong advantage is the straightforward introduction of  the contact dissipation processes that are naturally written at the velocity level such as the Newton impact law and the Coulomb friction. Indeed, in Mechanics, dissipation processes are always given in terms of rates of changes, or if we prefer, in terms of velocities.}
+
+\paragraph{Siconos Notation} In the siconos notation, we have for the applied torques on the system the following decomposition
+\begin{equation}
+  F(t,q,v):= \begin{pmatrix}
+    f(t,x_{\cg},  v_{\cg}, R, \Omega ) \\
+    I \Omega \times \Omega + M(t,x_{\cg}, v_{\cg}, R, \Omega )
+  \end{pmatrix}
+  := \begin{pmatrix}
+    f_{ext}(t)  - f_{int}(x_{\cg},  v_{\cg}, R, \Omega ) \\
+    - m_{gyr}(\Omega) + m_{ext}(t) -  m_{int}(x_{\cg}, v_{\cg}, R, \Omega )
+  \end{pmatrix}.
 \end{equation}
 with
-\begin{itemize}
-\item $x_G,v_G$ (spatial or inertial) position and velocity of the center of mass expressed in a inertial frame of reference
-\item $\Omega$  the (convected) angular velocity vector expressed in the body--fixed frame (frame attached to the body), 
-\item $R$ rotation matrix from the inertial frame to the body--fixed frame \footnote{$R^{-1}=R^T, \det(R)=1$, \textit{i.e} $ R\in SO^+(3)$}
-\item $M=m\,I_{3\times 3}$ diagonal mass matrix
-\item $m \in \RR$ mass
-\item $I$ constant matrix of inertia moment 
-\item $F$ and $ M$ are the total applied (spatial) forces and  (convected) torques
+\begin{equation}
+  m_{gyr} := \begin{pmatrix}
+     \Omega \times I\Omega
+  \end{pmatrix}
+\end{equation}
+
+
+
+In the siconos notation, we have for the relation
+\begin{equation}
+  \label{eq:2}
+   C =   J^\alpha(q) \quad CT = J^\alpha(q)T(q)
+\end{equation}
+
+\paragraph{Computation of $T$ for unit quaternion}
+\begin{equation}
+  \label{eq:3}
+  \dot p = \frac  1 2 p 
+  \begin{bmatrix}
+    0 \\
+    \Omega
+  \end{bmatrix}
+\end{equation}
+Using the matrix representation of quaternion that encode the quaternion multiplication,
+\begin{equation}
+  \label{eq:4}
+   \hat p = \begin{bmatrix}
+     p_0 & -p_1 & -p_2 & -p_3 \\
+     p_1 & p_0 & -p_3 & p_2 \\
+     p_2 & p_3 & -p_0 & -p_1 \\
+     p_3 & -p_2 & p_1 & p_0 \\
+   \end{bmatrix},
+\end{equation}
+we get
+\begin{equation}
+  T(q)=\label{eq:5}
+  \begin{bmatrix}
+    I_{3\times 3} & & 0_{3\times 4} & \\
+    &   p_1 & p_0 & -p_3 & p_2 \\
+    0_{3\times 3} &   p_2 & p_3 & -p_0 & -p_1 \\
+    &   p_3 & -p_2 & p_1 & p_0 \\
+  \end{bmatrix}
+\end{equation}
+
+
+
+
+\section{Time integration scheme in scheme}
+
+
+\subsection{Moreau--Jean scheme based on a  $\theta$-method}
+The complete Moreau--Jean scheme based on a  $\theta$-method is written as follows
+ \begin{equation}
+    \label{eq:Moreau--Jean-theta}
+    \begin{cases}
+      ~~\begin{array}{l}
+        q_{k+1} = q_{k} + h T(q_{k+\theta}) v_{k+\theta} \quad \\[1ex]
+        M(v_{k+1}-v_k) - h  F(t_{k+\theta}, q_{k+\theta},v_{k+\theta}) =  H^\top(q_{k+1}) Q_{k+1} + G^\top(q_{k+1}) P_{k+1},\quad\,\\[1ex]
+      \end{array}\\
+      ~~\begin{array}{lcl}
+        \begin{array}{l}
+          H^\alpha(q_{k+1}) v_{k+1}  =  0\\
+        \end{array} & \left. \begin{array}{l}
+          \vphantom{H^\alpha(q_{k+1}) v_{k+1}  =  0}\\[1ex]
+        \end{array}\right\}    &\alpha \in \mathcal E  \\[1ex]
+      ~~~P_{k+1}^\alpha= 0, &
+      \left. \begin{array}{l}
+          \vphantom{P_{k+1}^\alpha= 0,  \delta^\alpha_{k+1}=0}\\[1ex]
+        \end{array}\right\}   & \alpha \not\in \mathcal I^\nu \\[1ex]
+      % 
+      % 
+      \begin{array}{l}
+          {K}^{\alpha,*} \ni \widehat u_{k+1}^\alpha~ \bot~ P_{k+1}^\alpha \in {K}^\alpha \\
+      \end{array} &
+      \left.\begin{array}{l}
+          \vphantom{{K}^{\alpha,*} \ni \widehat u_{k+1}^\alpha~ \bot~ P_{k+1}^\alpha \in {K}^\alpha} \\
+        \end{array}\right\}
+      &\alpha \in \mathcal I^\nu\\
+  \end{array}
+\end{cases}
+\end{equation}
+where $\mathcal I^\nu$ is the set of forecast constraints, that may be evaluated as
+\begin{equation}
+  \label{eq:10}
+  \mathcal I^\nu = \{\alpha \mid \bar g_\n^\alpha \coloneqq g_\n + \frac h 2 u^\alpha_\n \leq 0\}.
+\end{equation}
+
+
+\subsection{Semi-explicit version Moreau--Jean scheme based on a  $\theta$-method}
+
+\begin{equation}
+    \label{eq:Moreau--Jean-explicit}
+    \begin{cases}
+      ~~\begin{array}{l}
+        q_{k+1} = q_{k} + h T(q_{k}) v_{k+\theta} \quad \\[1ex]
+        M(v_{k+1}-v_k) - h  F(t_{k}, q_{k},v_{k}) =  H^\top(q_{k}) Q_{k+1}+  G^\top(q_{k}) P_{k+1},\quad\,\\[1ex]
+      \end{array}\\
+      ~~\begin{array}{lcl}
+        \begin{array}{l}
+          H^\alpha(q_{k+1}) v_{k+1}  =  0\\
+        \end{array} & \left. \begin{array}{l}
+          \vphantom{H^\alpha(q_{k+1}) v_{k+1}  =  0}\\[1ex]
+        \end{array}\right\}    &\alpha \in \mathcal E  \\[1ex]
+      ~~P_{k+1}^\alpha= 0, &
+      \left. \begin{array}{l}
+          \vphantom{P_{k+1}^\alpha= 0,  \delta^\alpha_{k+1}=0}\\[1ex]
+        \end{array}\right\}   & \alpha \not\in \mathcal I^\nu \\[1ex]
+      % 
+      % 
+      \begin{array}{l}
+          {K}^{\alpha,*} \ni \widehat u_{k+1}^\alpha~ \bot~ P_{k+1}^\alpha \in {K}^\alpha \\
+      \end{array} &
+      \left.\begin{array}{l}
+          \vphantom{{K}^{\alpha,*} \ni \widehat u_{k+1}^\alpha~ \bot~ P_{k+1}^\alpha \in {K}^\alpha} \\
+        \end{array}\right\}
+      &\alpha \in \mathcal I^\nu\\
+  \end{array}
+\end{cases}
+\end{equation}
+
+In this version, the new velocity $v_{k+1}$ can be computed explicitly, assuming that the inverse of $M$ is easily written, as
+
+\begin{equation}
+  \label{eq:Moreau--Jean-theta--explicit-v}
+  v_{k+1}   =  v_k + M^{-1} h  F(t_{k}, q_{k},v_{k}) +  M^{-1} (H^\top(q_{k}) Q_{k+1}+  G^\top(q_{k}) P_{k+1})
+\end{equation}
+
+
+\subsection{Nearly implicit version Moreau--Jean scheme based on a  $\theta$-method implemented in siconos}
+
+A first simplification is made considering a given value of $q_{k+1}$ in $T()$, $H()$ and $G()$ denoted by $\bar q_k$. This limits the computation of the Jacobians of this operators with respect to $q$. 
+\begin{equation}
+    \label{eq:Moreau--Jean-theta-nearly}
+    \begin{cases}
+      ~~\begin{array}{l}
+        q_{k+1} = q_{k} + h T(\bar q_k) v_{k+\theta} \quad \\[1ex]
+        M(v_{k+1}-v_k) - h  \theta F(t_{k+1}, q_{k+1},v_{k+1}) - h (1- \theta) F(t_{k}, q_{k},v_{k})  =  H^\top(\bar q_k) Q_{k+1} + G^\top(\bar q_k) P_{k+1},\quad\,\\[1ex]
+      \end{array}\\
+      ~~\begin{array}{lcl}
+        \begin{array}{l}
+          H^\alpha(\bar q_k) v_{k+1}  =  0\\
+        \end{array} & \left. \begin{array}{l}
+          \vphantom{H^\alpha(q_{k+1}) v_{k+1}  =  0}\\[1ex]
+        \end{array}\right\}    &\alpha \in \mathcal E  \\[1ex]
+      ~~P_{k+1}^\alpha= 0, &
+      \left. \begin{array}{l}
+          \vphantom{P_{k+1}^\alpha= 0,  \delta^\alpha_{k+1}=0}\\[1ex]
+        \end{array}\right\}   & \alpha \not\in \mathcal I^\nu \\[1ex]
+      % 
+      % 
+      \begin{array}{l}
+          {K}^{\alpha,*} \ni \widehat u_{k+1}^\alpha~ \bot~ P_{k+1}^\alpha \in {K}^\alpha \\
+      \end{array} &
+      \left.\begin{array}{l}
+          \vphantom{{K}^{\alpha,*} \ni \widehat u_{k+1}^\alpha~ \bot~ P_{k+1}^\alpha \in {K}^\alpha} \\
+        \end{array}\right\}
+      &\alpha \in \mathcal I^\nu\\
+  \end{array}
+\end{cases}
+\end{equation}
+The nonlinear residu is defined as
+\begin{equation}
+  \label{eq:Moreau--Jean-theta--nearly-residu}
+  \mathcal R(v) =  M(v-v_k) - h  \theta F(t_{k+1}, q(v),v) - h (1- \theta) F(t_{k}, q_{k},v_{k}) - H^\top(\bar q_k) Q_{k+1} - G^\top(\bar q_k) P_{k+1}
+\end{equation}
+with
+\begin{equation}
+  \label{eq:Moreau--Jean-theta--nearly-residu1}
+  q(v) = q_{k} + h T(\bar q_k)) ((1-\theta) v_k + \theta v).
+\end{equation}
+At each time step, we have to solve
+\begin{equation}
+  \label{eq:Moreau--Jean-theta--nearly-residu2}
+  \mathcal R(v_{k+1}) =  0
+\end{equation}
+together with the constraints.
+
+Let us write a linearization of the problem to design a Newton procedure:
+\begin{equation}
+  \label{eq:Moreau--Jean-theta--nearly-residu3}
+  \nabla^\top_v \mathcal R(v^{\tau}_{k+1})(v^{\tau+1}_{k+1}-v^{\tau}_{k+1}) = -  \mathcal R(v^{\tau}_{k+1}).
+\end{equation}
+The computation of $ \nabla^\top_v \mathcal R(v^{\tau}_{k+1})$ is as follows
+\begin{equation}
+  \label{eq:1}
+  \nabla^\top_v \mathcal R(v) = M - h \theta \nabla_v F(t_{k+1}, q(v),v)
+\end{equation}
+with
+\begin{equation}
+  \label{eq:6}
+  \begin{array}{lcl}
+    \nabla_v F(t_{k+1}, q(v),v) &=& D_2 F(t_{k+1}, q(v),v) \nabla_v q(v) + D_3 F(t_{k+1}, q(v),v) \\
+                                &=& h \theta D_2 F(t_{k+1}, q(v),v) T(\bar q_k) + D_3 F(t_{k+1}, q(v),v) \\
+  \end{array}
+\end{equation}
+where $D_i$ denotes the derivation with respect the $i^{th}$ variable. The complete Jacobian is then given by
+\begin{equation}
+  \label{eq:7}
+  \nabla^\top_v \mathcal R(v) = M - h \theta D_3 F(t_{k+1}, q(v),v) - h^2 \theta^2 D_2 F(t_{k+1}, q(v),v) T(\bar q_k)
+\end{equation}
+In siconos, we ask the user to provide the functions $D_3 F(t_{k+1}, q ,v )$ and $D_2 F(t_{k+1}, q,v)$.
+
+Let us denote by $W^{\tau}$ the inverse of  Jacobian of the residu,
+\begin{equation}
+  \label{eq:11}
+  W^{\tau} = (M - h \theta D_3 F(t_{k+1}, q(v),v) - h^2 \theta^2 D_2 F(t_{k+1}, q(v),v) T(\bar q_k))^{-1}.
+\end{equation}
+and by $\mathcal R_{free}(v)$ the free residu,
+\begin{equation}
+  \label{eq:12}
+  \mathcal R_{free}(v) =  M(v-v_k) - h  \theta F(t_{k+1}, q(v),v) - h (1- \theta) F(t_{k}, q_{k},v_{k}).
+\end{equation}
+
+The linear equation \ref{eq:Moreau--Jean-theta--nearly-residu3} that we have to solve is equivalent to
+\begin{equation}
+  \label{eq:13}
+  \boxed{v^{\tau+1}_{k+1} = v^{\tau}_{k+1} - W  \mathcal R_{free}(v^\tau_{k+1}) + W   H^\top(\bar q_k) Q^{\tau+1}_{k+1} + W G^\top(\bar q_k) P^{\tau+1}_{k+1}}
+\end{equation}
+We define  $v_{free}$ as
+\begin{equation}
+  \label{eq:15}
+  v_{free}  = v^{\tau}_{k+1} - W  \mathcal R_{free}(v^\tau_{k+1})
+\end{equation}
+
+The local velocity at contact can be written
+\begin{equation}
+  \label{eq:14}
+  u^{\tau+1}_{\n,k+1} = G(\bar q_k) [  v_{free}^{\tau} + W   H^\top(\bar q_k) Q^{\tau+1}_{k+1} + W G^\top(\bar q_k) P^{\tau+1}_{k+1}]
+\end{equation}
+and for the equality constraints
+\begin{equation}
+  \label{eq:14}
+  u^{\tau+1}_{k+1} = H(\bar q_k) [  v_{free}^{\tau} + W   H^\top(\bar q_k) Q^{\tau+1}_{k+1} + W G^\top(\bar q_k) P^{\tau+1}_{k+1}]
+\end{equation}
+Finally, we get a linear relation between $u^{\tau+1}_{\n,k+1}$ and the multiplier 
+\begin{equation}
+  \label{eq:16}
+ \boxed{ u^{\tau+1}_{k+1} =
+  \begin{bmatrix}
+    H(\bar q_k) \\
+    G(\bar q_k)
+  \end{bmatrix} v_{free}^{\tau}
+  +
+  \begin{bmatrix}
+    H(\bar q_k)W   H^\top(\bar q_k) & H(\bar q_k)W   G^\top(\bar q_k) \\
+    G(\bar q_k)W   H^\top(\bar q_k) & G(\bar q_k)W   G^\top(\bar q_k) \\
+  \end{bmatrix}
+  \begin{bmatrix}
+    Q^{\tau+1}_{k+1} \\
+    P^{\tau+1}_{k+1}
+  \end{bmatrix}}
+\end{equation}
+
+
+
+
+
+
+\paragraph{choices for $\bar q_k$} Two choices are possible for $\bar q_k$
+\begin{enumerate}
+\item $\bar q_k = q_k$
+\item $\bar q_k = q^{\tau}_{k+1}$
+\end{enumerate}
+
+\begin{ndrva}
+
+  todo list:
+  
+  \begin{itemize}
+
+
+  \item add the projection step for the unit quaternion
+
+  \item describe the computation of H and G that can be hybrid
+
+    
 \end{itemize}
 
-\begin{ndrva}
-  Add a formulation in terms of spatial angular velocity ($\omega = R
-  \Omega$) and the spatial total applied moment ($m = R M$) and add
-  the equation
-
-$$ I \dot \Omega + \Omega \wedge I\Omega =  R^T m(X,V, \Omega, R), $$
-
-
-\end{ndrva}
-\section{The relation}
-
-Let us define by $q$ by  the position and the orientation, we don't focus on the  representation of the orientation.
-\begin{equation}
-\label{Relation}
-\begin{array}{l}
-Y=H(q)  \\
-R=G(q,\lambda)
-\end{array}
-\end{equation}
-
-
-The first equation is derived:
-\[\dot Y = C \dot q + \dot H\]
-Let us assume that it exists an operator $T$ such that :
-\[T:  \left(\begin{array}{l} V\\ \Omega\end{array}\right) \to \dot q \]
-Using  this operator, (\ref{Relation}) leads to :
-\[\dot Y = C T \left(\begin{array}{l} V\\ \Omega\end{array}\right) + \dot H\]
-
-\section{Time discretization $t_k \to t_{k+1}$, and implementation in Siconos}
-\label{Sec:NE_TD}
-The goal of this section is to describe the computation done in Siconos. The unknown are denoted according to the Siconos convention.
-\subsection{The unknowns}
-
-The unknowns stored in the \texttt{NewtonEulerDS} class are the velocity
-\[\_v_{k}=\left(\begin{array}{c} V_k\\ \Omega _{k}\end{array}\right)\]
-and  the parameter $\_q_{k}$ that locates the system. Usually it may be the coordinate of the center of mass and a representation of the orientation (quaternion, Euler Angles, ...).
-
-\subsection{Explicit case}
-It consists in evaluating $\Omega  \wedge I\Omega $ in an explicit way. We note that it can cause trouble (numerical instabilities) for object having an important condition number of the inertial matrix.
-The dynamical system~(\ref{NE_Dyn1}) results in to the system:
-\begin{equation}
-  \left(\begin{array}{cc} m&0\\0&I\end{array}\right)
-   (\_v_{k+1}-\_v_{k})=
-   h\, \big[\_Fl_k +
-    (CT)^\top \lambda _{k+1}\big]
-  \end{equation}
-  with the total forces applied to the system \[\_Fl_k = \left(\begin{array}{c} Fext_k\\ Mext_k - \Omega _k \wedge I\Omega _k \end{array}\right)\]
-We note $W = \left(\begin{array}{cc} m&0\\0&I\end{array}\right) ^{-1} $
-
-\subsection{$\theta$ method case}
-It consists in evaluating $\Omega  \wedge I\Omega $ as $\Omega _{k+\theta}  \wedge I\Omega _{k+\theta} $.
-\begin{equation}
-  \left(\begin{array}{cc} m&0\\0&I\end{array}\right)
-   (\_v_{k+1}-\_v_{k})=
-   h (1-\theta)\_Fl_k + h \theta Fl_{k+1} +
-   (CT)^\top h\lambda _{k+1}
-  \label{eq:NE-thetaScheme} 
- \end{equation}
-
-Using the linearization $$Fl_{k+1} = \_Fl_{k}+\nabla _v Fl (\_v_{k+1}-\_v_{k})$$system~(\ref{eq:NE-thetaScheme}) leads to:
-\begin{equation}
-  \left(\left(\begin{array}{cc} m&0\\0&I\end{array}\right)-h\theta\nabla _v Fl\right)
-   (\_v_{k+1}-\_v_{k})=
-   h \_Fl_k + (CT)^\top h\lambda _{k+1}
-  \end{equation}
-and we set $W =  \left(\left(\begin{array}{cc} m&0\\0&I\end{array}\right)-h\theta\nabla _v Fl\right)^{-1} $
-
-
-\begin{ndrva}
-  From this point, I do not understand
-
-  Normally, $F_{ext}$ et $M_{ext}$ depends on $V,X,\Omega, R$. Where are the Jacobian ?  Where  is the substitution of the nonlinear equation in $q$ ?
 \end{ndrva}
 
 
-\[ (\Omega+\epsilon)  \wedge I(\Omega+\epsilon)=  \Omega  \wedge I\Omega + \epsilon \wedge I \Omega +  \Omega  \wedge I \epsilon + O(\epsilon ^2)\]
-case $\epsilon = h*e_i$ leads to:
+\subsection{Computation of the Jacobian in special case}
+
+\paragraph{Moment of gyroscopic forces}
+Let us denote by the basis vector $e_i$ given the $i^{th}$ column of the identity matrix $I_{3\times3}$. The Jacobian of $m_{gyr}$ is given by
 \begin{equation}
-  \label{eq:NE_nablaFL1}
-  \frac{\partial (\Omega \wedge I\Omega)}{\partial e_i}=e_i\wedge I\Omega+\Omega \wedge Ie_i
-  \end{equation}
-\[\nabla _v Fl = \left(\begin{array}{cc}
-0_{3x3}&0_{3x3}\\
-0_{3x3}&\left(\frac{\partial (\Omega \wedge I\Omega)}{\partial e_i}\right)_{i=1,2,3}
-\end{array}\right)\]
-
-\subsection{Building of the OSNSP}
-
-\begin{equation}
-  \label{NE_dis_explicit}
-  \fbox{$
-   \_v_{k+1}=
-   W (h \_Fl_k)+
-   W (CT)^\top h\lambda _{k+1}+ \_v_k
-   $}
-  \end{equation}
-  This computation is done in Moreau::updateState, using:
-  \[\_ResiduFree_k = -h \_Fl_k\]
-  \[Xfree_k = -W \_ResiduFree_k + \_v_k\]
-
-The relation~\ref{Relation} leads to the system:
-
-\[\dot Y _{k+1}= C T \_v_{k+1} + \dot H _{k} \]
-Substitute $  \_v_{k+1} $ using~\ref{NE_dis_explicit} leads:
-
-\[\dot Y _{k+1}= C T \lbrack W h\_Fl_k+
-   hW(CT)^\top \lambda _{k+1}+ \_v_k \rbrack
-   + \dot H _{k} = C T \lbrack  hW (CT)^\top \lambda _{k+1}+ Xfree_k \rbrack
-   + \dot H _{k}\]
-Ones gets:
-\[\fbox{$
-\dot Y _{k+1}= C T W (CT)^\top (h\lambda _{k+1}) + CT Xfree_k +\dot H _{k} $}\]
-
-
-Solving the one step problem gives $h\lambda _{k+1}$, and from~\ref{NE_dis_explicit} we get
-$ \_v_{k+1} $. At least, $ \_v_{k+1} $ is used to compute $\dot \_q_{k+1}$, provided $\_q_{k+1}$.
-
-\section{Quaternion case}
-Working in 3D, we chose $\_q= \left(\begin{array}{l} X_g \\q \end{array}\right) $. $X_g$ are the 3 coordinates of the center of mass, and $q$ is a quaternion
-  represented the orientation of solid. It means :
-  \[q_k(0,GM_0)q_k^c = (0,GM_k)\]
-Where G is the center of mass, and M any point of the solid.\\
-This section describes the $T$ operator in this case. Computation using quaternion leads to the relation:
-\[\dot q = \frac{1}{2} q (0,\Omega)\]
-So using the matrix formulation:
-\[\dot q = \frac{1}{2}  \left(\begin{array}{cccc} q_0&-q_1&-q_2&-q_3 \\ q_1&q_0&-q_3&q_2\\
-  q_2&q_3&q_0&-q_1\\ q_3&-q_2&q_1&q_0\end{array}\right)  \left(\begin{array}{c} 0 \\ \Omega
-  \end{array}\right) =
-  T_q   \Omega  \]
-  That lead to :
-  \[ \dot \_q = \left(\begin{array}{cc} I_3 & 0 \\ 0 &
-  T_q \end{array}\right) \left(\begin{array}{c} V\\ \Omega  \end{array}\right)  = T
-  \left(\begin{array}{c} V\\ \Omega  \end{array}\right)=T \_v\]
-
-It is noteworthy that $T$ must be updated at each step.
-
-\section{The Newton linearization applied to NewtonEuler formalisme}
-  Let us define the residu:
-\begin{equation}
-  \label{eq:newton_NE1_residu}
-  \mathcal R_k (v,\lambda) =W(v-v_k)-hF_{ext}-(CT)^\top\lambda
-\end{equation}
-The linearized residu is:
-\begin{equation}
-  \label{eq:newton_NE1_residuL}
-  \mathcal R_{L_k} (v,\lambda) =\mathcal R_k (v_k,\lambda_k)+W(v-v_k)-(CT)^\top(\lambda - \lambda_k)
+  \label{eq:8}
+  \nabla^\top_\Omega m_{gyr}(\Omega) = \nabla^\top_\Omega (\Omega \times I \Omega) =
+  \begin{bmatrix}
+    e_i \times I \Omega + \Omega \times I e_i, i =1,2,3
+  \end{bmatrix}
 \end{equation}
 
-Let us define $v_k^p$ and $\lambda_k^p$ the current Newton iteration, initialized with $v_k$ and $\lambda_k$.
-We are looking for $v_k^{p+1}$ and $\lambda_k^{p+1}$ such that $R_{L_k} (v_k^{p+1},\lambda_k^{p+1}) =0$. That is:
+\paragraph{Linear internal wrench}
+If the internal wrench  is given by
 \begin{equation}
-  \label{eq:newton_NE1_eq1}
-  0 =\mathcal R_k (v_k^p,\lambda_k^p)+W(v_k^{p+1}-v_k^p)-(CT)^\top(\lambda_k^{p+1} - \lambda_k^p)
+  \label{eq:9}
+  F_{int}(t,q,v) =
+  \begin{bmatrix}
+    f_{int}(t,q,v)\\
+    m_{int}(t,q,v)
+  \end{bmatrix}
+  = C v + K q, \quad C \in \RR^{6\times 6}, \quad K \in \RR^{6\times 7 }
 \end{equation}
-That leads to:
+we get
 \begin{equation}
-  \label{eq:newton_NE1_eq2}
-  v_k^{p+1} =v_k^p+W^{-1}[-\mathcal R_k (v_k^p,\lambda_k^p)+(CT)^\top(\lambda_k^{p+1} - \lambda_k^p)]
+  \label{eq:6}
+  \begin{array}{lcl}
+    \nabla_v F(t_{k+1}, q(v),v)  &=& h \theta K T(\bar q_k) + C \\
+    \nabla^\top_v \mathcal R(v) &=& M - h \theta C - h^2 \theta^2 K T(\bar q_k)
+  \end{array}
 \end{equation}
-The NSLAW is:
-\begin{equation}
-  \label{eq:newton_NE1_nslaw1}
-  \dot y_k^{p+1}=CTv_k^{p+1}
-\end{equation}
-that leads to the OSNSP:
-\begin{equation}
-  \label{eq:newton_NE1_osnsp}
-  \dot y_k^{p+1}=(CT)W^{-1}~(CT)^\top\lambda_k^{p+1}+(CT)[v_k^p-(CT)(CT)^\top\lambda_k^p-W^{-1}\mathcal R_k (v_k^p,\lambda_k^p)]
-\end{equation}
+
+
+
+
+
+
 \subsection{Siconos implementation}
 
-The expression:~$W(v_k^p-v_k)-hF_{ext}$ is saved in DS->residiFree.Moreau->computeResidu.\\
-The expression:~$\mathcal R_k(v_k^p,\lambda_k^p)=W(v_k^p-v_k)--hF_{ext}+(CT)^\top(\lambda_k^p)$ is saved in DS->workFree.\\
-The expression:~$vfree=\dot y_k^{p} - W^{-1} residufree$ is saved in DS->workFree. Moreau->computeFreeState.\\
-The computation:~ $y_k^{p+1}=vfree+W^{-1}\lambda_k^{p+1}$ is done in OSI::updateState.\\
-The OSNSP is :
-\begin{equation}
-  \dot y_k^{p+1}=(CT)W^{-1}~(CT)^\top\lambda_k^{p+1}+(CT)vfree+nslaweffect
-\end{equation}
+The expression:~$\mathcal R_{free}(v^\tau_{k+1}) = M(v-v_k) - h  \theta F(t_{k+1}, q(v^\tau_{k+1}),v^\tau_{k+1}) - h (1- \theta) F(t_{k}, q_{k},v_{k})$ is computed in {\tt MoreauJeanOSI::computeResidu()} and saved in {\tt ds->workspace(DynamicalSystem::freeresidu)}
+
+
+The expression:~$\mathcal R(v^\tau_{k+1}) =\mathcal R_{free}(v^\tau_{k+1}) - h (1- \theta) F(t_{k}, q_{k},v_{k}) - H^\top(\bar q_k) Q_{k+1} - G^\top(\bar q_k) P_{k+1}  $ is computed in {\tt MoreauJeanOSI::computeResidu()} and saved in {\tt ds->workspace(DynamicalSystem::free)}.
+\begin{ndrva}
+  really a bad name for the buffer {\tt ds->workspace(DynamicalSystem::free)}. Why we are chosing this name ? to save some memory ?
+\end{ndrva}
+
+
+The expression:~$v_{free}  = v^{\tau}_{k+1} - W  \mathcal R_{free}(v^\tau_{k+1})$ is compute in {\tt MoreauJeanOSI::computeFreeState()} and saved in {\tt d->workspace(DynamicalSystem::free)}. 
+
+
+
+The computation:~ $v^{\tau+1}_{k+1} = v_{free} + W   H^\top(\bar q_k) Q^{\tau+1}_{k+1} + W G^\top(\bar q_k) P^{\tau+1}_{k+1}$ is done in {\tt MoreauJeanOSI::updateState} and stored in {\tt d->twist()}.\\
+
 
 %%% Local Variables: 
 %%% mode: latex
