@@ -117,9 +117,14 @@ if(HAVE_SICONOS_MECHANICS)
     endif(NOT IS_DIRECTORY ${srcRendererPath})
   endforeach(rendererFile)
 
-  install(PROGRAMS renderer/renderer.py
-    DESTINATION bin RENAME siconos_renderer)
-  
+  if(INSTALL_PYTHON_SYMLINKS)
+    message("Setting up symlink install targets for externals Python executables")
+    install(CODE "execute_process(COMMAND sh -c \"test -e '${CMAKE_INSTALL_PREFIX}/bin/siconos_renderer' || ln -vs '${CMAKE_CURRENT_SOURCE_DIR}/renderer/renderer.py' '${CMAKE_INSTALL_PREFIX}/bin/siconos_renderer'\")")
+  else()
+    install(PROGRAMS renderer/renderer.py
+      DESTINATION bin RENAME siconos_renderer)
+  endif()
+
 endif()
 
 if(WITH_SERIALIZATION)
