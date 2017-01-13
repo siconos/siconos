@@ -15,9 +15,16 @@ if(WITH_PYTHON_WRAPPER)
 
   # -- Swig flags --
   if(SYSTEM_ARCHITECTURE)
-    set(CMAKE_SWIG_FLAGS "${CMAKE_SWIG_FLAGS};-D__${SYSTEM_ARCHITECTURE}__")
+    list(APPEND CMAKE_SWIG_FLAGS "-D__${SYSTEM_ARCHITECTURE}__")
   endif()
-  
+
+  if(PYTHON_VERSION_MAJOR VERSION_GREATER 2)
+    list(APPEND CMAKE_SWIG_FLAGS "-py3")
+  endif()
+
+  list(REMOVE_DUPLICATES CMAKE_SWIG_FLAGS)
+  set(CMAKE_SWIG_FLAGS "${CMAKE_SWIG_FLAGS}" CACHE INTERNAL "Swig flags")
+
   # -dirvtable      - Generate a pseudo virtual table for directors for faster dispatch
   # - without "dirprot", swig wrap public methods and only the 
   # protected methods needed to the interface to compile.
