@@ -41,16 +41,15 @@ import sys
 def copy_tree(src, dst, preserve_mode=1, preserve_times=1,
               preserve_symlinks=0, update=0, verbose=1, dry_run=0):
     if not dry_run and not os.path.isdir(src):
-        raise DistutilsFileError, \
-              "cannot copy tree '%s': not a directory" % src
+        raise DistutilsFileError("cannot copy tree '%s': not a directory" % src)
     try:
         names = os.listdir(src)
-    except os.error, (errno, errstr):
+    except os.error as er:
+        (errno, errstr) = er
         if dry_run:
             names = []
         else:
-            raise DistutilsFileError, \
-                  "error listing files in '%s': %s" % (src, errstr)
+            raise DistutilsFileError("error listing files in '%s': %s" % (src, errstr))
 
     if not dry_run:
         dir_util.mkpath(dst, verbose=verbose)
@@ -223,7 +222,7 @@ with_testing = get_cmake_option("@WITH_TESTING@")
 if with_testing:
     packages_for_tests.append('siconos.tests')
 
-for comp in with_component.keys():
+for comp in list(with_component.keys()):
     if with_component[comp]:
         packages.append('siconos.' + comp)
 
