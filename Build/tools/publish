@@ -2,19 +2,23 @@
 
 # documentation publication on http://siconos.gforge.inria.fr
 
-# ./publish [-r<sha>] [-u <gforge_user>] [-d]
+# ./publish [-r <sha>] [-u <gforge_user>] [-s <src dir ] [-b <build dir>] \
+#           [-w workdir] [-m]
 
 # -r followed by some git sha
 # -u followed by gforge login
+# -s followed by src directory
+# -b followed by build directory
 # -d : publish devel version
 
 # example:
 
 # to update site with current documentation
-# ./publish -u bremond -d
+# ./publish -u bremond -b \
+#  /scratch/maurice/build/maurice/siconos/master/Release -s ~/src/git/siconos
 
 # to update site with 3.5.x (=rev 3194) documentation
-# ./publish -r3194 -u bremond
+# ./publish -r3194 -u bremond [...]
 
 # Note: some rsync error may occurs due to some files modes on remote site
 
@@ -71,27 +75,42 @@ class WorkDir():
 
 devel = False
 user = getuser()
-
-mods = ['Docs', 'Numerics', 'Kernel', 'Front-End', 'IO', 'Mechanics', 'Control', 'Examples']
-
+srcdir = None
+builddir = None
 revision = 'HEAD'
+main_doc = False
 
 workdir_path = '/tmp/{0}/publish'.format(getuser())
 
 try:
-    opts, args = gnu_getopt(sys.argv[1:], 'r:u:d', ['workdir='])
+    opts, args = gnu_getopt(sys.argv[1:], 'r:u:s:b:w:dm', ['devel',
+                                                           'main',
+                                                           'revision=',
+                                                           'user=',
+                                                           'srcdir=',
+                                                           'builddir=',
+                                                           'workdir='])
 
     for o, a in opts:
-        if o == '-r':
+        if o in ['-m', '--main']:
+            main_doc = True
+            
+        if o in ['-r', '--revision']:
             revision = a
 
-        elif o == '-u':
+        elif o in ['-u', '--user']:
             user = a
 
-        elif o == '-d':
+        elif o in ['-d', '--devel']:
             devel = True
 
-        elif o == '--workdir':
+        elif o in ['-s', '--srcdir']:
+            srcdir = a
+
+        elif o in ['-b', '--builddir']:
+            builddir = a
+            
+        elif o in ['-w', '--workdir']:
             workdir_path = a
 
 except GetoptError, err:
@@ -100,25 +119,13 @@ except GetoptError, err:
     # -a not recognized'
     stop(2)
 
-
-class pathdict(dict):
-    def __init__(self, prefix):
-        self.prefix = prefix
-        dict.__init__(self)
-
-    def __getitem__(self, k):
-        if not os.path.exists(os.path.join(self.prefix, k)):
-            os.makedirs(os.path.join(self.prefix, k))
-        return os.path.join(self.prefix, dict(self).__getitem__(k))
-
-
 def get_version(path):
 
     with open(os.path.join(path, 'cmake', 'SiconosVersion.cmake')) as cmakefile:
         cmakefile_as_str = cmakefile.read()
-        majorm = re.findall(r"MAJOR_VERSION (\w+).*",cmakefile_as_str)
-        minorm = re.findall(r"MINOR_VERSION (\w+).*",cmakefile_as_str)
-        patchm = re.findall(r"PATCH_VERSION (\w+).*",cmakefile_as_str)
+        majorm = re.findall(r'MAJOR_VERSION (\w+).*',cmakefile_as_str)
+        minorm = re.findall(r'MINOR_VERSION (\w+).*',cmakefile_as_str)
+        patchm = re.findall(r'PATCH_VERSION (\w+).*',cmakefile_as_str)
         if len(majorm) > 0:
             return '{0}.{1}.{2}'.format(majorm[0],
                                         minorm[0],
@@ -128,60 +135,74 @@ def get_version(path):
 
 with WorkDir(workdir_path) as workdir:
 
-    builddir = pathdict(os.path.join(workdir, 'build'))
-    bsrcdir = pathdict(os.path.join(workdir,'src'))
-    srcdir = pathdict(os.path.join(workdir, 'src', 'siconos'))
+    if builddir is None:
+        builddir = os.path.join(workdir, 'build')
+
+    if srcdir is None:
+        bsrcdir = os.path.join(workdir,'src')
+        srcdir = os.path.join(workdir, 'src', 'siconos')
+
+    else:
+        bsrcdir = os.path.dirname(srcdir)
 
     try:
-        os.mkdir(os.path.join(workdir, 'build'))
-        os.mkdir(os.path.join(workdir, 'src'))
-        os.mkdir(os.path.join(workdir, 'src/siconos'))
+        os.mkdir(builddir)
+        os.mkdir(bsrcdir)
+        os.mkdir(srcdir)
     except OSError:
         pass
 
     # get sources
     try:
-        check_call(["git", "clone",
-                    "git+ssh://{0}@scm.gforge.inria.fr//gitroot/siconos/siconos.git".
-                    format(user)], cwd=bsrcdir.prefix)
+        check_call(['git', 'clone',
+                    'git@github.com:siconos/siconos.git'], cwd=bsrcdir)
     except:
         pass
 
-    check_call(["git", "checkout", revision], cwd=srcdir.prefix)
+    check_call(['git', 'checkout', revision], cwd=srcdir)
 
     if not devel:
-        version = get_version(os.path.join(srcdir.prefix, 'Numerics'))
-        assert(version is not None)
+        version = get_version(srcdir)
     else:
-        version = ''
+        version = 'devel'
 
-    for mod in mods:
-
-        builddir[mod] = mod
-        srcdir[mod] = mod
-
-        # make documentation
-        check_call(["cmake", srcdir[mod], "-DWITH_DOCUMENTATION=TRUE"],
-                   cwd=builddir[mod])
-        check_call(["make", "doc"], cwd=builddir[mod])
+    assert(version is not None)
+        
+    # make documentation
+    check_call(['cmake', srcdir, '-DWITH_DOCUMENTATION=TRUE'],
+               cwd=builddir)
+    check_call(['make', 'doc'], cwd=builddir)
 
     # second pass for make doc
-    for mod in mods:
+    check_call(['make', 'doc'], cwd=builddir)
 
-        check_call(["make", "doc"], cwd=builddir[mod])
-
+    generated_doc_path = os.path.join(builddir,
+                                      'Docs','build','html')
     # change local modes
-    for root, dirs, files in os.walk(os.path.join(builddir.prefix,
-                                                'GeneratedDocs')):
+    for root, dirs, files in os.walk(generated_doc_path):
         for d in dirs:
             os.chmod(os.path.join(root, d), 0o775)
         for f in files:
             os.chmod(os.path.join(root, f), 0o664)
 
-    os.chmod(os.path.join(builddir.prefix, 'GeneratedDocs'), 0o775)
+    os.chmod(generated_doc_path, 0o775)
+
+    doc_path = '{0}@scm.gforge.inria.fr:/home/groups/siconos/htdocs'.\
+               format(user)
+    
+    destination = os.path.join(doc_path, version)
 
     # upload
-    check_call(["rsync", "-rlvp",
-                os.path.join(builddir.prefix, 'GeneratedDocs/'),
-                '{0}@scm.gforge.inria.fr:/home/groups/siconos/htdocs/{1}'
-                .format(user, version)])
+    check_call(['rsync', '-rlvp', generated_doc_path,
+                destination])
+
+    # htaccess if this is the main documentation
+    if main_doc:
+        htaccess_filename =  os.path.join(workdir, '.htaccess')
+    
+        with open(htaccess_filename, 'w') as htaccess:
+            htaccess.write('redirect 301 /index.html http://siconos.gforge.inria.fr/{0}/html/index.html\n'.\
+                           format(version))
+
+        check_call(['rsync', htaccess_filename,
+                    doc_path])
