@@ -188,7 +188,8 @@ known_tasks = {'siconos---vm0':
                (siconos_numerics_only,
                 siconos_clang,
                 siconos_clang_asan,
-                siconos_clang_msan),
+                siconos_clang_msan,
+                siconos_documentation),
 
                'siconos---vm2':
                (siconos_ubuntu_15_10,
