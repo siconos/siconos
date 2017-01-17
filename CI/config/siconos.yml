@@ -109,6 +109,7 @@ pkgs:
       - python3-scipy
       - python3-matplotlib
 
+  # bullet & serialization for full doc
   documentation:
     ubuntu-16.04:
       - doxygen
@@ -120,13 +121,9 @@ pkgs:
       - sphinx-rtd-theme-common
       - pip-command
       - siconos-doc-pip-pkgs
-      - siconos-build
+      - bullet
+      - serialization
 
-  siconos-build:
-    any:
-      command:
-        mount
-      
   pip-command:
     debian:
       - python-pip
