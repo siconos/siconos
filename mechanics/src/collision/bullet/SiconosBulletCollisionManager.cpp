@@ -1059,7 +1059,6 @@ void SiconosBulletCollisionManager_impl::createCollisionObject(
     (base, ds, heightmap, btheight, bodyHeightMap, contactor);
 }
 
-#include <iostream>
 void SiconosBulletCollisionManager_impl::updateShape(BodyHeightRecord &record)
 {
   SP::SiconosHeightMap height(record.shape);
@@ -1097,12 +1096,30 @@ void SiconosBulletCollisionManager_impl::updateShape(BodyHeightRecord &record)
     record.shape_version = height->version();
   }
 
-  updateShapePosition(record);
-
   // Like updateShapePosition(record), but we have to pre-compensate
   // the Bullet vertical centering of btHeightfieldTerrainShape.  Must
   // be done before body rotation.
+  // Bullet automatically moves the center of the object to the
+  // vertical center of the heightfield, so combine it here with the
+  // contactor offset.
+  btScalar mnz = btheight->_min_height, mxz = btheight->_max_height;
+  btScalar z_offset = (mxz-mnz)/2 + mnz;
+  SiconosVector o(7);
+  o.zero();
+  o(2) = z_offset;
+  o(3) = 1;
 
+  btTransform t = offsetTransform(*record.contactor->offset, o);
+  o(0) = t.getOrigin().getX();
+  o(1) = t.getOrigin().getY();
+  o(2) = t.getOrigin().getZ();
+  o(3) = t.getRotation().getW();
+  o(4) = t.getRotation().getX();
+  o(5) = t.getRotation().getY();
+  o(6) = t.getRotation().getZ();
+
+  // Now apply the combined height and contactor offset o to the base
+  // transform q
   SiconosVector q(7);
   if (record.base)
     q = *record.base;
@@ -1110,19 +1127,11 @@ void SiconosBulletCollisionManager_impl::updateShape(BodyHeightRecord &record)
     q.zero();
     q(3) = 1;
   }
-
-  // Bullet automatically moves the center of the object to the
-  // vertical center of the heightfield, so we add it back.  (i.e. we
-  // assume the user will adjust offsets to taste in the heightfield
-  // data itself, or using contactor offset.)
-  // TODO: there is still a problem if body or contactor is rotated
-  btScalar mnz = btheight->_min_height, mxz = btheight->_max_height;
-  q(2) += (mxz-mnz)/2 + mnz;
+  t = offsetTransform(q, o);
 
   DEBUG_PRINTF("updating shape position: %p(%ld) - %f, %f, %f\n",
                &*box,box.use_count(), q(0), q(1), q(2));
 
-  btTransform t = offsetTransform(q, *record.contactor->offset);
   t.setOrigin(t.getOrigin() * _options.worldScale);
   record.btobject->setWorldTransform( t );
 }
