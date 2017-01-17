@@ -201,6 +201,9 @@ endforeach()
 # ========= Documentation =========
 if(WITH_DOCUMENTATION OR WITH_DOXY2SWIG OR WITH_DOXYGEN_WARNINGS)
   set(USE_DOXYGEN TRUE)
+  add_custom_target(upload
+    COMMENT documentation upload
+    COMMAND ${CMAKE_SOURCE_DIR}/Build/tools/publish.py -u ${GFORGE_USER} -s ${CMAKE_SOURCE_DIR} -b ${CMAKE_BINARY_DIR} -m)
 endif()
 
 if(WITH_DOCUMENTATION)

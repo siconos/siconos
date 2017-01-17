@@ -164,6 +164,16 @@ macro(add_docker_targets)
     ${DOCKER_IMAGE_AS_DIR}-make-install
     COMMENT "Docker make install : ${DOCKER_IMAGE}"
     COMMAND ${DOCKER_COMMAND} run -h ${DOCKER_HOSTNAME} --rm=true ${DOCKER_VFLAGS} --volumes-from=${DOCKER_WORKDIR_VOLUME} --volumes-from=${DOCKER_REPOSITORY}-${DOCKER_IMAGE}-usr-local --workdir=${DOCKER_WORKDIR} -t ${DOCKER_REPOSITORY}/${DOCKER_IMAGE} make ${DOCKER_MAKE_INSTALL_FLAGS} -ki install)
+
+  add_custom_target(
+    ${DOCKER_IMAGE_AS_DIR}-make-doc
+    COMMENT "Docker make doc : ${DOCKER_IMAGE}"
+    COMMAND ${DOCKER_COMMAND} run -h ${DOCKER_HOSTNAME} --rm=true ${DOCKER_VFLAGS} --volumes-from=${DOCKER_WORKDIR_VOLUME} --volumes-from=${DOCKER_REPOSITORY}-${DOCKER_IMAGE}-usr-local --workdir=${DOCKER_WORKDIR} -t ${DOCKER_REPOSITORY}/${DOCKER_IMAGE} make ${DOCKER_MAKE_DOC_FLAGS} -ki doc)
+
+  add_custom_target(
+    ${DOCKER_IMAGE_AS_DIR}-make-upload
+    COMMENT "Docker make upload : ${DOCKER_IMAGE}"
+    COMMAND ${DOCKER_COMMAND} run -h ${DOCKER_HOSTNAME} --rm=true ${DOCKER_VFLAGS} --volumes-from=${DOCKER_WORKDIR_VOLUME} --volumes-from=${DOCKER_REPOSITORY}-${DOCKER_IMAGE}-usr-local --workdir=${DOCKER_WORKDIR} -t ${DOCKER_REPOSITORY}/${DOCKER_IMAGE} make ${DOCKER_MAKE_UPLOAD_FLAGS} -ki upload)
   
   add_custom_target(
     ${DOCKER_IMAGE_AS_DIR}-make-clean
@@ -229,6 +239,20 @@ macro(add_docker_targets)
       )
   endif()
 
+  if(NOT TARGET docker-make-doc)
+    add_custom_target(
+      docker-make-doc
+      COMMENT "Docker make doc"
+      )
+  endif()
+
+  if(NOT TARGET docker-make-upload)
+    add_custom_target(
+      docker-make-upload
+      COMMENT "Docker make upload"
+      )
+  endif()
+
   if(NOT TARGET docker-make-clean)
     add_custom_target(
       docker-make-clean
@@ -257,6 +281,8 @@ macro(add_docker_targets)
   add_dependencies(docker-make ${DOCKER_IMAGE_AS_DIR}-make)
   add_dependencies(docker-make-test ${DOCKER_IMAGE_AS_DIR}-make-test)
   add_dependencies(docker-make-install ${DOCKER_IMAGE_AS_DIR}-make-install)
+  add_dependencies(docker-make-doc ${DOCKER_IMAGE_AS_DIR}-make-doc)
+  add_dependencies(docker-make-upload ${DOCKER_IMAGE_AS_DIR}-make-upload)
   add_dependencies(docker-make-clean ${DOCKER_IMAGE_AS_DIR}-make-clean)
   add_dependencies(docker-ctest ${DOCKER_IMAGE_AS_DIR}-ctest)
   add_dependencies(docker-interactive ${DOCKER_IMAGE_AS_DIR}-interactive)

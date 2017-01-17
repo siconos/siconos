@@ -94,7 +94,7 @@ try:
     for o, a in opts:
         if o in ['-m', '--main']:
             main_doc = True
-            
+
         if o in ['-r', '--revision']:
             revision = a
 
@@ -109,7 +109,7 @@ try:
 
         elif o in ['-b', '--builddir']:
             builddir = a
-            
+
         elif o in ['-w', '--workdir']:
             workdir_path = a
 
@@ -119,13 +119,15 @@ except GetoptError, err:
     # -a not recognized'
     stop(2)
 
+
 def get_version(path):
 
-    with open(os.path.join(path, 'cmake', 'SiconosVersion.cmake')) as cmakefile:
+    with open(os.path.join(path, 'cmake', 'SiconosVersion.cmake')) as\
+         cmakefile:
         cmakefile_as_str = cmakefile.read()
-        majorm = re.findall(r'MAJOR_VERSION (\w+).*',cmakefile_as_str)
-        minorm = re.findall(r'MINOR_VERSION (\w+).*',cmakefile_as_str)
-        patchm = re.findall(r'PATCH_VERSION (\w+).*',cmakefile_as_str)
+        majorm = re.findall(r'MAJOR_VERSION (\w+).*', cmakefile_as_str)
+        minorm = re.findall(r'MINOR_VERSION (\w+).*', cmakefile_as_str)
+        patchm = re.findall(r'PATCH_VERSION (\w+).*', cmakefile_as_str)
         if len(majorm) > 0:
             return '{0}.{1}.{2}'.format(majorm[0],
                                         minorm[0],
@@ -137,27 +139,34 @@ with WorkDir(workdir_path) as workdir:
 
     if builddir is None:
         builddir = os.path.join(workdir, 'build')
+        try:
+            os.mkdir(builddir)
+        except OSError:
+            pass
 
     if srcdir is None:
-        bsrcdir = os.path.join(workdir,'src')
+        bsrcdir = os.path.join(workdir, 'src')
         srcdir = os.path.join(workdir, 'src', 'siconos')
+
+        try:
+            os.mkdir(bsrcdir)
+        except OSError:
+            pass
+
+        try:
+            os.mkdir(srcdir)
+        except OSError:
+            pass
+        
+        # get sources
+        try:
+            check_call(['git', 'clone',
+                        'git@github.com:siconos/siconos.git'], cwd=bsrcdir)
+        except:
+            pass
 
     else:
         bsrcdir = os.path.dirname(srcdir)
-
-    try:
-        os.mkdir(builddir)
-        os.mkdir(bsrcdir)
-        os.mkdir(srcdir)
-    except OSError:
-        pass
-
-    # get sources
-    try:
-        check_call(['git', 'clone',
-                    'git@github.com:siconos/siconos.git'], cwd=bsrcdir)
-    except:
-        pass
 
     check_call(['git', 'checkout', revision], cwd=srcdir)
 
@@ -167,7 +176,7 @@ with WorkDir(workdir_path) as workdir:
         version = 'devel'
 
     assert(version is not None)
-        
+
     # make documentation
     check_call(['cmake', srcdir, '-DWITH_DOCUMENTATION=TRUE'],
                cwd=builddir)
@@ -177,7 +186,8 @@ with WorkDir(workdir_path) as workdir:
     check_call(['make', 'doc'], cwd=builddir)
 
     generated_doc_path = os.path.join(builddir,
-                                      'Docs','build','html')
+                                      'Docs', 'build', 'html')
+    
     # change local modes
     for root, dirs, files in os.walk(generated_doc_path):
         for d in dirs:
@@ -189,7 +199,7 @@ with WorkDir(workdir_path) as workdir:
 
     doc_path = '{0}@scm.gforge.inria.fr:/home/groups/siconos/htdocs'.\
                format(user)
-    
+
     destination = os.path.join(doc_path, version)
 
     # upload
@@ -198,11 +208,12 @@ with WorkDir(workdir_path) as workdir:
 
     # htaccess if this is the main documentation
     if main_doc:
-        htaccess_filename =  os.path.join(workdir, '.htaccess')
-    
+        htaccess_filename = os.path.join(workdir, '.htaccess')
+
         with open(htaccess_filename, 'w') as htaccess:
-            htaccess.write('redirect 301 /index.html http://siconos.gforge.inria.fr/{0}/html/index.html\n'.\
-                           format(version))
+            htaccess.write(
+                'redirect 301 /index.html http://siconos.gforge.inria.fr/{0}/html/index.html\n'.\
+                format(version))
 
         check_call(['rsync', htaccess_filename,
                     doc_path])

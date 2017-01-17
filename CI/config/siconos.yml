@@ -109,6 +109,40 @@ pkgs:
       - python3-scipy
       - python3-matplotlib
 
+  documentation:
+    ubuntu-16.04:
+      - doxygen
+      - python-sphinx
+      - python-sphinx-bootstrap-theme
+      - python-sphinx-rtd-theme
+      - sphinx-common
+      - sphinx-doc
+      - sphinx-rtd-theme-common
+      - pip-command
+      - siconos-doc-pip-pkgs
+      - siconos-build
+
+  siconos-build:
+    any:
+      command:
+        mount
+      
+  pip-command:
+    debian:
+      - python-pip
+      - pip-upgrade
+
+  pip-upgrade:
+    any:
+      command:
+        pip install --upgrade pip
+      
+  siconos-doc-pip-pkgs:
+    ubuntu-16.04:
+      command:
+        pip install sphinxcontrib-bibtex &&
+        pip install sphinxcontrib-doxylink
+      
   profiling:
     debian:
       - valgrind
@@ -364,7 +398,7 @@ pkgs:
 
   # ocaml package manager
 
-frama-c:
+  frama-c:
     any:
       command:
         opam init &&
