@@ -1082,28 +1082,30 @@ class Hdf5():
             body = None
             if use_proposed and mass == 0:
                 # a static object
-                for c in contactors:
-                    pos = (translation + orientation)
-                    shp = self._shape.get(c.data)
-                    conset = SiconosContactorSet()
-                    # TODO: segfault if we pass None for SiconosVector!
-                    conset.append(SiconosContactor(shp, [0,0,0,1,0,0,0], c.group))
-                    print('Adding shape %s to static contactor'%c.data, pos)
-                    self._broadphase.insertStaticContactorSet(conset, pos)
 
-                    self._static[name] = {
-                        'number': number,
-                        'origin': translation,
-                        'orientation': orientation,
-                        'transform': btTransform(btQuaternion(orientation[1],
-                                                              orientation[2],
-                                                              orientation[3],
-                                                              orientation[0]),
-                                                 btVector3(translation[0],
-                                                           translation[1],
-                                                           translation[2])),
-                        'shape': shp,
-                        }
+                cset = SiconosContactorSet()
+                csetpos = (translation + orientation)
+                for c in contactors:
+                    # TODO: segfault if we pass None for SiconosVector!
+                    shp = self._shape.get(c.data)
+                    pos = list(c.translation) + list(c.orientation)
+                    cset.append(SiconosContactor(shp, pos, c.group))
+                    print('Adding shape %s to static contactor'%c.data, pos)
+                self._broadphase.insertStaticContactorSet(cset, csetpos)
+
+                self._static[name] = {
+                    'number': number,
+                    'origin': translation,
+                    'orientation': orientation,
+                    'transform': btTransform(btQuaternion(orientation[1],
+                                                          orientation[2],
+                                                          orientation[3],
+                                                          orientation[0]),
+                                             btVector3(translation[0],
+                                                       translation[1],
+                                                       translation[2])),
+                    'shape': shp,
+                }
 
             elif use_original and mass == 0. and use_bullet:
                 # a static object
