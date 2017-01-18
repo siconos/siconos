@@ -135,12 +135,8 @@ void Spheres::init()
       FExt->setValue(2, -m * g);
       body->setFExtPtr(FExt);
 
-      // add the dynamical system to the one step integrator
-      osi->insertDynamicalSystem(body);
-
       // add the dynamical system in the non smooth dynamical system
       _model->nonSmoothDynamicalSystem()->insertDynamicalSystem(body);
-
     }
 
     // ------------------
@@ -152,7 +148,7 @@ void Spheres::init()
 
     // -- OneStepNsProblem --
 #ifdef WITH_GENERIC_SOLVER
-    osnspb_.reset(new GenericMechanical(SICONOS_FRICTION_3D_QUARTIC));
+    osnspb_.reset(new GenericMechanical(SICONOS_FRICTION_3D_ONECONTACT_QUARTIC));
 #else
     osnspb_.reset(new FrictionContact(3));
     osnspb_->numericsSolverOptions()->iparam[0] = 1000; // Max number of
@@ -171,9 +167,7 @@ void Spheres::init()
     osnspb_->setNumericsVerboseMode(0); // 0 silent, 1 verbose
     osnspb_->setKeepLambdaAndYState(true); // inject previous solution
 #endif
-    simulation_.reset(new TimeStepping(timedisc_));
-    simulation_->insertIntegrator(osi);
-    simulation_->insertNonSmoothProblem(osnspb_);
+    simulation_.reset(new TimeStepping(timedisc_, osi, osnspb_));
     //     simulation_->setCheckSolverFunction(localCheckSolverOuput);
 
     // --- Simulation initialization ---

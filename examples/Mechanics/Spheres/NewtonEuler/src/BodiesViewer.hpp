@@ -124,8 +124,8 @@ struct ForMassValue : public Question<double>
   ANSWER(Disk, mass()->getValue(0, 0));
   ANSWER(Circle, mass()->getValue(0, 0));
   ANSWER(SphereLDS, mass()->getValue(0, 0));
-  ANSWER(SphereNEDS, massValue());
-  IFBULLET(ANSWER(BulletDS, massValue()));
+  ANSWER(SphereNEDS, scalarMass());
+  IFBULLET(ANSWER(BulletDS, scalarMass()));
 };
 
 struct ForJachq : public Question<SP::SiconosMatrix>
