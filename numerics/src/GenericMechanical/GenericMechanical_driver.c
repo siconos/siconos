@@ -44,8 +44,8 @@
 /* #define GMP_WRITE_PRB */
 
 
-#define DEBUG_MESSAGES
-#define DEBUG_STDOUT
+//#define DEBUG_MESSAGES
+//#define DEBUG_STDOUT
 #include "debug.h"
 #include "LinearComplementarityProblem.h"
 #include "lcp_cst.h"
