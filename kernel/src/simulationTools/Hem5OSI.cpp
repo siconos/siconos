@@ -485,10 +485,6 @@ void Hem5OSI::initialize(Model& m)
       _qWork->insertPtr(lds.q());
       _vWork->insertPtr(lds.velocity());
       _aWork->insertPtr(lds.acceleration());
-      if (!lds.forces())
-      {
-        lds.initForces();
-      }
       _forcesWork->insertPtr(lds.forces());
     }
     else

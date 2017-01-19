@@ -26,7 +26,7 @@
 
 
 // Private function to set linked with members of Dynamical top class
-void LagrangianDS::connectToDS()
+void LagrangianDS::connectToDS(unsigned int steps)
 {
   // dim
   _n = 2 * _ndof;
@@ -43,6 +43,7 @@ void LagrangianDS::connectToDS()
   _x[0].reset(new SiconosVector(*_q[0], *_q[1]));
   _x[1].reset(new SiconosVector(*_q[1], *_q[2]));
   // Everything concerning rhs and its jacobian is handled in initRhs and computeXXX related functions.
+  DynamicalSystem::initMemory(steps);
 }
 void LagrangianDS::zeroPlugin()
 {
@@ -58,7 +59,8 @@ void LagrangianDS::zeroPlugin()
 }
 
 LagrangianDS::LagrangianDS(SP::SiconosVector newQ0, SP::SiconosVector newVelocity0):
-  DynamicalSystem(2 * newQ0->size()), _ndof(newQ0->size())
+  DynamicalSystem(2 * newQ0->size()), _ndof(newQ0->size()),
+  _hasConstantFExt(false)
 {
   zeroPlugin();
   // -- Memory allocation for vector and matrix members --
@@ -77,8 +79,12 @@ LagrangianDS::LagrangianDS(SP::SiconosVector newQ0, SP::SiconosVector newVelocit
   //   _xq.reset(new SiconosVector(dimension()));
   //   mXfree.reset(new SiconosVector(dimension()));
   //   r.reset(new SiconosVector(dimension()));
-
   /** \todo lazy Memory allocation */
+  _forces.reset(new SiconosVector(_ndof));
+  _jacobianqForces.reset(new SimpleMatrix(_ndof, _ndof));
+  _jacobianqDotForces.reset(new SimpleMatrix(_ndof, _ndof));
+
+   /** \todo lazy Memory allocation */
   _p.resize(3);
   _p[0].reset(new SiconosVector(_ndof));
   _p[1].reset(new SiconosVector(_ndof));
@@ -86,7 +92,7 @@ LagrangianDS::LagrangianDS(SP::SiconosVector newQ0, SP::SiconosVector newVelocit
   /** \todo lazy memory allocation */
   _pMemory.resize(3);
   // unsigned int steps=1;
-
+  
 
   // _pMemory[0].reset(new SiconosMemory(steps));
   // _pMemory[1].reset(new SiconosMemory(steps));
@@ -96,7 +102,8 @@ LagrangianDS::LagrangianDS(SP::SiconosVector newQ0, SP::SiconosVector newVelocit
 
 // -- Default constructor --
 LagrangianDS::LagrangianDS():
-  DynamicalSystem(Type::LagrangianDS), _ndof(0)
+  DynamicalSystem(Type::LagrangianDS), _ndof(0),
+  _hasConstantFExt(false)
 {
   zeroPlugin();
   // Protected constructor - Only call from derived class(es).
@@ -129,13 +136,20 @@ LagrangianDS::LagrangianDS(SP::SiconosVector newQ0, SP::SiconosVector newVelocit
   _q[2].reset(new SiconosVector(_ndof));
   _workspace[freeresidu].reset(new SiconosVector(dimension()));
   _workspace[free].reset(new SiconosVector(dimension()));
-
-
+  // We initialize it with a null vector of size 1, since z is required in plug-in functions call.
+  _z.reset(new SiconosVector(1));
+  
+  /** \todo lazy Memory allocation */
   _p.resize(3);
   _p[0].reset(new SiconosVector(_ndof));
   _p[1].reset(new SiconosVector(_ndof));
   _p[2].reset(new SiconosVector(_ndof));
   _pMemory.resize(3);
+  /** \todo lazy Memory allocation */
+  _forces.reset(new SiconosVector(_ndof));
+  _jacobianqForces.reset(new SimpleMatrix(_ndof, _ndof));
+  _jacobianqDotForces.reset(new SimpleMatrix(_ndof, _ndof));
+  
   /** \todo lazy memory allocation */
   //unsigned int steps=1;
   // _pMemory[0].reset(new SiconosMemory(steps));
@@ -160,7 +174,8 @@ LagrangianDS::LagrangianDS(SP::SiconosVector newQ0, SP::SiconosVector newVelocit
   _q[2].reset(new SiconosVector(_ndof));
   _workspace[freeresidu].reset(new SiconosVector(dimension()));
   _workspace[free].reset(new SiconosVector(dimension()));
-
+  // We initialize it with a null vector of size 1, since z is required in plug-in functions call.
+  _z.reset(new SiconosVector(1));
   // Mass
   setComputeMassFunction(SSLH::getPluginName(massName), SSLH::getPluginFunctionName(massName));
 
@@ -234,16 +249,6 @@ void LagrangianDS::initializeNonSmoothInput(unsigned int level)
     _pMemory[level].reset(new SiconosMemory(steps, _ndof));
 }
 
-void LagrangianDS::initForces()
-{
-  DEBUG_PRINT("LagrangianDS::initForces() is called\n");
-  _forces.reset(new SiconosVector(_ndof));
-  _jacobianqForces.reset(new SimpleMatrix(_ndof, _ndof));
-  _jacobianqDotForces.reset(new SimpleMatrix(_ndof, _ndof));
-}
-
-
-
 void LagrangianDS::resetAtInitialState()
 {
   if(_q0)
@@ -259,7 +264,6 @@ void LagrangianDS::resetAtInitialState()
   else
     RuntimeException::selfThrow("LagrangianDS::resetAtInitialState - initial velocity _velocity0 is null");
 
-  
 }
 
 
@@ -317,62 +321,6 @@ void LagrangianDS::initRhs(double time)
 
 void LagrangianDS::initialize(double time, unsigned int sizeOfMemory)
 {
-
-  // set q and q[1] to q0 and velocity0, initialize acceleration.
-  *_q[0] = *_q0;
-  *_q[1] = *_velocity0;
-
-  // If z has not been set, we initialize it with a null vector of size 1, since z is required in plug-in functions call.
-  if (! _z)
-    _z.reset(new SiconosVector(1));
-  if (_pluginFGyr->fPtr && !_fGyr)
-    _fGyr.reset(new SiconosVector(_ndof));
-  if (_pluginJacqDotFGyr->fPtr && !_jacobianFGyrqDot)
-    _jacobianFGyrqDot.reset(new SimpleMatrix(_ndof, _ndof));
-  if (_pluginJacqFGyr->fPtr && ! _jacobianFGyrq)
-    _jacobianFGyrq.reset(new SimpleMatrix(_ndof, _ndof));
-
-  if (_pluginFExt->fPtr && !_fExt)
-    _fExt.reset(new SiconosVector(_ndof));
-
-  if (_pluginFInt->fPtr && ! _fInt)
-    _fInt.reset(new SiconosVector(_ndof));
-  if (_pluginJacqFInt->fPtr && !_jacobianFIntq)
-    _jacobianFIntq.reset(new SimpleMatrix(_ndof, _ndof));
-  if (_pluginJacqDotFInt->fPtr && !_jacobianFIntqDot)
-    _jacobianFIntqDot.reset(new SimpleMatrix(_ndof, _ndof));
-
-  // This allocation should be done by OSI
-  // Memory allocation for fL and its jacobians.
-  initForces();
-
-
-  if (_boundaryConditions)
-  {
-    _reactionToBoundaryConditions.reset(new SiconosVector(_boundaryConditions->velocityIndices()->size()));
-  }
-
-
-  // Set links to variables of top-class DynamicalSystem.
-  // Warning: this results only in pointers links. No more memory allocation for vectors or matrices.
-  connectToDS(); // note that connection can not be done during constructor call, since user can complete the ds after (add plugin or anything else).
-  if (!_mass)
-    _mass.reset(new SimpleMatrix(_ndof, _ndof));
-
-
-
-  checkDynamicalSystem();
-  if (_forces)
-  {
-    computeForces(time); // Save a first value of force in Memory
-  }
-
-
-  //initRhs(time);
-
-
-
-
 }
 
 // --- GETTERS/SETTERS ---
@@ -509,10 +457,15 @@ void LagrangianDS::computeFInt(double time, SP::SiconosVector position, SP::Sico
 
 void LagrangianDS::computeFExt(double time)
 {
-  if (_pluginFExt->fPtr)
-    ((VectorFunctionOfTime)_pluginFExt->fPtr)(time, _ndof, &(*_fExt)(0), _z->size(), &(*_z)(0));
+  /* if the pointer has been set to an external vector
+   * after setting the plugin, we do not call the plugin */
+   if (!_hasConstantFExt)
+  {
+    if (_pluginFExt->fPtr)
+      ((VectorFunctionOfTime)_pluginFExt->fPtr)(time, _ndof, &(*_fExt)(0), _z->size(), &(*_z)(0));
+  }
+   
 }
-
 void LagrangianDS::computeFGyr()
 {
   if (_pluginFGyr->fPtr)
@@ -754,7 +707,6 @@ void LagrangianDS::display() const
 void LagrangianDS::initMemory(unsigned int steps)
 {
   DEBUG_PRINTF("LagrangianDS::initMemory(unsigned int steps) with steps = %i", steps);
-  DynamicalSystem::initMemory(steps);
   if (steps == 0)
     std::cout << "Warning : LagragianDS::initMemory with size equal to zero" <<std::endl;
   else
@@ -774,7 +726,8 @@ void LagrangianDS::initMemory(unsigned int steps)
 void LagrangianDS::swapInMemory()
 {
 
-  _xMemory->swap(*_x[0]);
+
+  
   _qMemory->swap(*_q[0]);
   _velocityMemory->swap(*_q[1]);
   _forcesMemory->swap(*_forces);
@@ -792,6 +745,10 @@ void LagrangianDS::swapInMemory()
   {
     _pMemory[2]->swap(*_p[2]);
   }
+  if (_x[0] && _xMemory)
+    _xMemory->swap(*_x[0]);
+
+  
 }
 
 /*must be remove, replace by the RelativeConvergenceCriteron of the simulation*/
@@ -861,46 +818,66 @@ void LagrangianDS::setComputeFGyrFunction(const std::string& pluginPath, const s
 {
   //    Plugin::setFunction(&computeFGyrPtr, pluginPath,functionName);
   _pluginFGyr->setComputeFunction(pluginPath, functionName);
+  if (!_fGyr)
+    _fGyr.reset(new SiconosVector(_ndof));
 }
 void LagrangianDS::setComputeFGyrFunction(FPtr5 fct)
 {
   _pluginFGyr->setComputeFunction((void *)fct);
   //    computeFGyrPtr=fct;
+  if (!_fGyr)
+    _fGyr.reset(new SiconosVector(_ndof));
 }
 void LagrangianDS::setComputeJacobianFIntqFunction(const std::string&  pluginPath, const std::string&  functionName)
 {
   //    Plugin::setFunction(&computeJacobianFIntqPtr, pluginPath,functionName);
   _pluginJacqFInt->setComputeFunction(pluginPath, functionName);
+  if (!_jacobianFIntq)
+    _jacobianFIntq.reset(new SimpleMatrix(_ndof, _ndof));
 }
 void LagrangianDS::setComputeJacobianFIntqDotFunction(const std::string&  pluginPath, const std::string&  functionName)
 {
   //    Plugin::setFunction(&computeJacobianFIntqDotPtr, pluginPath,functionName);
   _pluginJacqDotFInt->setComputeFunction(pluginPath, functionName);
+  if (!_jacobianFIntqDot)
+    _jacobianFIntqDot.reset(new SimpleMatrix(_ndof, _ndof));
 }
 void LagrangianDS::setComputeJacobianFIntqFunction(FPtr6 fct)
 {
   _pluginJacqFInt->setComputeFunction((void *)fct);
+  if (!_jacobianFIntq)
+    _jacobianFIntq.reset(new SimpleMatrix(_ndof, _ndof));
 }
 void LagrangianDS::setComputeJacobianFIntqDotFunction(FPtr6 fct)
 {
   _pluginJacqDotFInt->setComputeFunction((void *)fct);
+  if (!_jacobianFIntqDot)
+    _jacobianFIntqDot.reset(new SimpleMatrix(_ndof, _ndof));
 }
 void LagrangianDS::setComputeJacobianFGyrqFunction(const std::string&  pluginPath, const std::string&  functionName)
 {
   _pluginJacqFGyr->setComputeFunction(pluginPath, functionName); // Plugin::setFunction(&computeJacobianFGyrqPtr, pluginPath,functionName);
+  if(!_jacobianFGyrq)
+    _jacobianFGyrq.reset(new SimpleMatrix(_ndof, _ndof));
 }
 void LagrangianDS::setComputeJacobianFGyrqDotFunction(const std::string&  pluginPath, const std::string&  functionName)
 {
   _pluginJacqDotFGyr->setComputeFunction(pluginPath, functionName);
+  if ( !_jacobianFGyrqDot)
+    _jacobianFGyrqDot.reset(new SimpleMatrix(_ndof, _ndof));
   // Plugin::setFunction(&computeJacobianFGyrqDotPtr, pluginPath,functionName);
 }
 void LagrangianDS::setComputeJacobianFGyrqFunction(FPtr5 fct)
 {
   _pluginJacqFGyr->setComputeFunction((void *)fct);
+  if(!_jacobianFGyrq)
+    _jacobianFGyrq.reset(new SimpleMatrix(_ndof, _ndof));
 }//computeJacobianFGyrqPtr=fct;}
 void LagrangianDS::setComputeJacobianFGyrqDotFunction(FPtr5 fct)
 {
   _pluginJacqDotFGyr->setComputeFunction((void *)fct);
+  if ( !_jacobianFGyrqDot)
+    _jacobianFGyrqDot.reset(new SimpleMatrix(_ndof, _ndof));
 }//computeJacobianFGyrqDotPtr=fct;}
 
 double LagrangianDS::computeKineticEnergy()
@@ -927,4 +904,5 @@ void LagrangianDS::setBoundaryConditions(SP::BoundaryCondition newbd)
     std::cout << "Warning : LagrangianDS::setBoundaryConditions. old boundary conditions were pre-existing" <<std::endl;
   }
   _boundaryConditions = newbd;
+  _reactionToBoundaryConditions.reset(new SiconosVector(_boundaryConditions->velocityIndices()->size()));
 };
