@@ -341,16 +341,15 @@ NewtonEulerDS::NewtonEulerDS(SP::SiconosVector Q0, SP::SiconosVector Twist0,
   DEBUG_BEGIN("NewtonEulerDS::NewtonEulerDS(SP::SiconosVector Q0, SP::SiconosVector Twist0,double  mass, SP::SiconosMatrix inertialMatrix)\n");
 
   /* common code for constructors
-   * would be better to use delagation of constructors in c++11
+   * would be better to use delegation of constructors in c++11
    */
   init();
 
   // Initial conditions
   _q0 = Q0;
   _twist0 = Twist0;
-  (*_q) = (*_q0);
-  (*_twist) = (*_twist0);
-
+  resetAtInitialState();
+  
   _scalarMass = mass;
   if (inertialMatrix)
     _I = inertialMatrix;
