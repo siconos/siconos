@@ -346,6 +346,9 @@ public:
    */
   bool checkDynamicalSystem();
 
+  /** reset the state to the initial state */
+  void resetAtInitialState();
+    
   /** allocate memory for forces and its jacobians, if required.
    */
   void initForces();

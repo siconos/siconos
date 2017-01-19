@@ -118,6 +118,19 @@ void DynamicalSystem::zeroPlugin()
   _pluginJacxDotG.reset(new PluggedObject());
   _pluging.reset(new PluggedObject());
 }
+
+void DynamicalSystem::resetAtInitialState()
+{
+  if(_x0)
+  {
+    *(_x[0]) = *_x0;
+  }
+  else
+    RuntimeException::selfThrow("DynamicalSystem::resetAtInitialState() - initial state _x0 is null");
+  
+}
+
+
 // Setters
 
 void DynamicalSystem::setX0(const SiconosVector& newValue)

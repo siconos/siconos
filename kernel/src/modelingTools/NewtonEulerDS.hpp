@@ -370,6 +370,9 @@ public:
   /** destructor */
   virtual ~NewtonEulerDS();
 
+  /** reset the state to the initial state */
+  void resetAtInitialState();
+    
   /** Initialization function for the rhs and its jacobian.
    *  \param time the time of initialization
    */

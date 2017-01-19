@@ -110,6 +110,9 @@ void MoreauJeanOSI::initialize(Model& m)
 
     SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
 
+    ds->resetAtInitialState();
+
+    
     // W initialization
     initW(t0, ds, *dsi);
     Type::Siconos dsType = Type::value(*ds);
@@ -117,7 +120,19 @@ void MoreauJeanOSI::initialize(Model& m)
     {
       assert(_dynamicalSystemsGraph->properties(*dsi).W && "W is NULL");
       ds->allocateWorkVector(DynamicalSystem::local_buffer, _dynamicalSystemsGraph->properties(*dsi).W->size(0));
+
+      SP::LagrangianDS lds = std11::static_pointer_cast<LagrangianDS> (ds);
+      lds->computeForces(m.t0());
+      lds->swapInMemory();
     }
+    else if (dsType == Type::NewtonEulerDS)
+    {
+      SP::NewtonEulerDS neds = std11::static_pointer_cast<NewtonEulerDS> (ds);
+      neds->computeForces(m.t0());
+      neds->swapInMemory();
+    }
+
+    
   }
 
   SP::OneStepNSProblems  allOSNS  = _simulation->oneStepNSProblems();
@@ -734,6 +749,7 @@ double MoreauJeanOSI::computeResidu()
 
         // Cheaper version: get forces(ti,vi,qi) from memory
         SP::SiconosVector fold = d->forcesMemory()->getSiconosVector(0);
+
         double coef = -h * (1 - _theta);
         scal(coef, *fold, *residuFree, false);
 

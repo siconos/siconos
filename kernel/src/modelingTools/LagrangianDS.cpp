@@ -244,6 +244,24 @@ void LagrangianDS::initForces()
 
 
 
+void LagrangianDS::resetAtInitialState()
+{
+  if(_q0)
+  {
+    *(_q[0]) = *_q0;
+  }
+  else
+    RuntimeException::selfThrow("LagrangianDS::resetAtInitialState - initial position _q0 is null");
+  if(_velocity0)
+  {
+    *(_q[1]) = *_velocity0;
+  }
+  else
+    RuntimeException::selfThrow("LagrangianDS::resetAtInitialState - initial velocity _velocity0 is null");
+
+  
+}
+
 
 
 void LagrangianDS::initRhs(double time)

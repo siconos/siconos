@@ -492,31 +492,38 @@ void NewtonEulerDS::initializeNonSmoothInput(unsigned int level)
 void NewtonEulerDS::initRhs(double time)
 {
   //  _workMatrix.resize(sizeWorkMat);
-
   // Solve Mq[2]=fL+p.
   //*_q = *(_p[2]); // Warning: r/p update is done in Interactions/Relations
-
   if (_wrench)
   {
     computeForces(time);
     //      *_q += *_forces;
   }
-
 }
 
 void NewtonEulerDS::initialize(double time, unsigned int sizeOfMemory)
-{  // set q and q[1] to q0 and Twist0, initialize acceleration.
-  *_q = *_q0;
-  *_twist = *_twist0;
- 
-  // Set links to variables of top-class DynamicalSystem.
-  // Warning: this results only in pointers links.
-  // No more memory allocation for vectors or matrices.
-  connectToDS(); // note that connection can not be done during constructor call, since user can complete the ds after (add plugin or anything else).
-
-  initRhs(time);
-
+{
+  
 }
+
+void NewtonEulerDS::resetAtInitialState()
+{
+  if(_q0)
+  {
+     *_q = *_q0;
+  }
+  else
+    RuntimeException::selfThrow("NewtonEulerDS::resetAtInitialState - initial position _q0 is null");
+
+  // set q and q[1] to q0 and Twist0, initialize acceleration.
+  if(_twist0)
+  {
+    *_twist = *_twist0;
+  }
+  else
+    RuntimeException::selfThrow("NewtonEulerDS::resetAtInitialState - initial twist _twist0 is null");
+}
+
 
 void NewtonEulerDS::computeFExt(double time)
 {
