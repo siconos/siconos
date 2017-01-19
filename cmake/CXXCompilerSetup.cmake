@@ -50,6 +50,7 @@ if(DEV_MODE)
   # --- Clang ----
   #add_cxx_options("-Weverything" Clang) # like Wall and more
   add_cxx_options("-Werror=unreachable-code" "Clang")
+  #add_cxx_options("-std=c++11" "Clang")
   # --- All compilers but MSVC (Microsoft Visual C) ---
   if(NOT MSVC)
     add_cxx_options("-Wall")
