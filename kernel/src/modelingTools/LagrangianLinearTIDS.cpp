@@ -139,9 +139,6 @@ void LagrangianLinearTIDS::initialize(double time, unsigned int sizeOfMemory)
 
   // Initialize memory vectors
   initMemory(sizeOfMemory);
-
-  // rhs and its jacobian
-  //initRhs(time);
 }
 
 void LagrangianLinearTIDS::setK(const SiconosMatrix& newValue)

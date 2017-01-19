@@ -208,8 +208,6 @@ void FirstOrderNonLinearDS::initialize(double time, unsigned int sizeOfMemory)
   if (! _z)
     _z.reset(new SiconosVector(1));
 
-  // Initialize memory vectors
-  initMemory(sizeOfMemory);
 
   updatePlugins(time);
   if (_f)

@@ -349,8 +349,6 @@ void LagrangianDS::initialize(double time, unsigned int sizeOfMemory)
     computeForces(time); // Save a first value of force in Memory
   }
 
-  // Initialize memory vectors
-  initMemory(sizeOfMemory);
 
   //initRhs(time);
 

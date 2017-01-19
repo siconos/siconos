@@ -515,9 +515,7 @@ void NewtonEulerDS::initialize(double time, unsigned int sizeOfMemory)
   connectToDS(); // note that connection can not be done during constructor call, since user can complete the ds after (add plugin or anything else).
 
   initRhs(time);
-  
-  // Initialize memory vectors
-  initMemory(sizeOfMemory);
+
 }
 
 void NewtonEulerDS::computeFExt(double time)

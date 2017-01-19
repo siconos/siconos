@@ -48,6 +48,13 @@ void OneStepIntegrator::initialize( Model& m )
 
   // a subgraph has to be implemented.
   _dynamicalSystemsGraph = _simulation->nonSmoothDynamicalSystem()->topology()->dSG(0);
+
+  DynamicalSystemsGraph::VIterator dsi, dsend;
+  for (std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
+  {
+    if (!checkOSI(dsi)) continue;
+    _dynamicalSystemsGraph->bundle(*dsi)->initMemory(getSizeMem());
+  }
 }
 
 void OneStepIntegrator::computeInitialNewtonState()
