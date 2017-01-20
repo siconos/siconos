@@ -33,6 +33,7 @@
 #include <limits>
 #include <boost/format.hpp>
 #include <boost/make_shared.hpp>
+#include <CxxStd.hpp>
 
 #include <Model.hpp>
 #include <Relation.hpp>

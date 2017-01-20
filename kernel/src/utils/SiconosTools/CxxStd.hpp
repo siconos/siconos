@@ -16,7 +16,7 @@
  * limitations under the License.
 */
 /*! \file CxxStd.hpp
-  \brief Management of different c++ standarts and compiler
+  \brief Management of different c++ standards and compiler
 */
 
 
@@ -25,10 +25,16 @@
 #ifndef SICONOS_ISNAN
 #define SICONOS_ISNAN
 #if __cplusplus >= 201103L
-using ::isnan;
+#include <cmath>
+using std::isnan;
+using std::isinf;
 #else
 #if ((!defined(_MSC_VER)) && (!defined( __SUNPRO_CC)))
+#include <cmath>
 using std::isnan;
+using std::isinf;
+#else
+#include <math.h>
 #endif
 #endif
 #endif
