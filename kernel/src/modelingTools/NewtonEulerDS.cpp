@@ -349,7 +349,7 @@ NewtonEulerDS::NewtonEulerDS(SP::SiconosVector Q0, SP::SiconosVector Twist0,
   _q0 = Q0;
   _twist0 = Twist0;
   resetAtInitialState();
-  
+
   _scalarMass = mass;
   if (inertialMatrix)
     _I = inertialMatrix;
@@ -396,16 +396,22 @@ void NewtonEulerDS::init()
   _I.reset(new SimpleMatrix(3, 3));
   _I->eye();
   updateMassMatrix();
-  
+
   _wrench.reset(new SiconosVector(_n));
   _mGyr.reset(new SiconosVector(3,0.0));
 
+  /** The follwing jacobian are always allocated since we have always
+   * Gyroscopical forces that has non linear forces
+   * This should be remove if the integration is explicit or _nullifyMGyr(false) is set to true ?
+   */
 
-  _jacobianMGyrtwist.reset(new SimpleMatrix(_n, _n));
+  _jacobianMGyrtwist.reset(new SimpleMatrix(3, _n));
+  _jacobianWrenchTwist.reset(new SimpleMatrix(_n, _n));
+
 
   //We initialize _z with a null vector of size 1, since z is required in plug-in functions call.
   _z.reset(new SiconosVector(1));
- 
+
 }
 
 void NewtonEulerDS::updateMassMatrix()
@@ -502,7 +508,7 @@ void NewtonEulerDS::initRhs(double time)
 
 void NewtonEulerDS::initialize(double time, unsigned int sizeOfMemory)
 {
-  
+
 }
 
 void NewtonEulerDS::resetAtInitialState()
@@ -963,7 +969,7 @@ void NewtonEulerDS::computeJacobianvForces(double time)
       {
         //computeJacobianMGyrtwistByFD(time,_q,_twist);
         computeJacobianMGyrtwist(time);
-        *_jacobianWrenchTwist -= *_jacobianMGyrtwist;
+        _jacobianWrenchTwist->setBlock(3,0,-1.0 * *_jacobianMGyrtwist);
       }
     }
     // std::cout << "_jacobianWrenchTwist : "<< std::endl;
@@ -1000,7 +1006,7 @@ void NewtonEulerDS::computeJacobianMGyrtwist(double time)
       cross_product(omega, Iei, omega_Iei);
       cross_product(ei, Iomega, ei_Iomega);
       for (int j = 0; j < 3; j++)
-        _jacobianMGyrtwist->setValue(3 + j, 3 + i, ei_Iomega.getValue(j) + omega_Iei.getValue(j));
+        _jacobianMGyrtwist->setValue(j, 3 + i, ei_Iomega.getValue(j) + omega_Iei.getValue(j));
     }
     // Check if Jacobian is valid. Warning to the transpose operation in
     // _jacobianMGyrtwist->setValue(3 + j, 3 + i, ei_Iomega.getValue(j) + omega_Iei.getValue(j));
@@ -1130,7 +1136,7 @@ void NewtonEulerDS::setComputeJacobianFIntvFunction(const std::string&  pluginPa
   _pluginJactwistFInt->setComputeFunction(pluginPath, functionName);
   if (!_jacobianFInttwist)
     _jacobianFInttwist.reset(new SimpleMatrix(3, _n));
-  
+
 }
 void NewtonEulerDS::setComputeJacobianFIntqFunction(FInt_NE fct)
 {
@@ -1156,7 +1162,7 @@ void NewtonEulerDS::setComputeJacobianMIntqFunction(const std::string&  pluginPa
     _jacobianMIntq.reset(new SimpleMatrix(3, _qDim));
   if (!_jacobianWrenchq)
     _jacobianWrenchq.reset(new SimpleMatrix(_n, _qDim));
-  
+
 }
 void NewtonEulerDS::setComputeJacobianMIntvFunction(const std::string&  pluginPath, const std::string&  functionName)
 {
@@ -1207,5 +1213,5 @@ void NewtonEulerDS::setBoundaryConditions(SP::BoundaryCondition newbd)
   }
   _boundaryConditions = newbd;
   _reactionToBoundaryConditions.reset(new SiconosVector(_boundaryConditions->velocityIndices()->size()));
-  
+
 };
