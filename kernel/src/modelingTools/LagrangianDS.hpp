@@ -348,7 +348,7 @@ public:
   bool checkDynamicalSystem();
 
   /** reset the state to the initial state */
-  void resetAtInitialState();
+  void resetToInitialState();
    
   /** Initialization function for the rhs and its jacobian.
    *  \param time of initialization

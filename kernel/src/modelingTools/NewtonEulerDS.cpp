@@ -348,7 +348,7 @@ NewtonEulerDS::NewtonEulerDS(SP::SiconosVector Q0, SP::SiconosVector Twist0,
   // Initial conditions
   _q0 = Q0;
   _twist0 = Twist0;
-  resetAtInitialState();
+  resetToInitialState();
 
   _scalarMass = mass;
   if (inertialMatrix)
@@ -511,14 +511,14 @@ void NewtonEulerDS::initialize(double time, unsigned int sizeOfMemory)
 
 }
 
-void NewtonEulerDS::resetAtInitialState()
+void NewtonEulerDS::resetToInitialState()
 {
   if(_q0)
   {
      *_q = *_q0;
   }
   else
-    RuntimeException::selfThrow("NewtonEulerDS::resetAtInitialState - initial position _q0 is null");
+    RuntimeException::selfThrow("NewtonEulerDS::resetToInitialState - initial position _q0 is null");
 
   // set q and q[1] to q0 and Twist0, initialize acceleration.
   if(_twist0)
@@ -526,7 +526,7 @@ void NewtonEulerDS::resetAtInitialState()
     *_twist = *_twist0;
   }
   else
-    RuntimeException::selfThrow("NewtonEulerDS::resetAtInitialState - initial twist _twist0 is null");
+    RuntimeException::selfThrow("NewtonEulerDS::resetToInitialState - initial twist _twist0 is null");
 }
 
 

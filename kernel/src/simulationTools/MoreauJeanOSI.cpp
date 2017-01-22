@@ -110,9 +110,6 @@ void MoreauJeanOSI::initialize(Model& m)
 
     SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
 
-    ds->resetAtInitialState();
-
-    
     // W initialization
     initW(t0, ds, *dsi);
     Type::Siconos dsType = Type::value(*ds);

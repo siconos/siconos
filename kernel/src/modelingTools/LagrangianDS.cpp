@@ -249,20 +249,20 @@ void LagrangianDS::initializeNonSmoothInput(unsigned int level)
     _pMemory[level].reset(new SiconosMemory(steps, _ndof));
 }
 
-void LagrangianDS::resetAtInitialState()
+void LagrangianDS::resetToInitialState()
 {
   if(_q0)
   {
     *(_q[0]) = *_q0;
   }
   else
-    RuntimeException::selfThrow("LagrangianDS::resetAtInitialState - initial position _q0 is null");
+    RuntimeException::selfThrow("LagrangianDS::resetToInitialState - initial position _q0 is null");
   if(_velocity0)
   {
     *(_q[1]) = *_velocity0;
   }
   else
-    RuntimeException::selfThrow("LagrangianDS::resetAtInitialState - initial velocity _velocity0 is null");
+    RuntimeException::selfThrow("LagrangianDS::resetToInitialState - initial velocity _velocity0 is null");
 
 }
 

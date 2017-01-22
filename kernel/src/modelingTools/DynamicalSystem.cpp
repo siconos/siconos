@@ -119,14 +119,14 @@ void DynamicalSystem::zeroPlugin()
   _pluging.reset(new PluggedObject());
 }
 
-void DynamicalSystem::resetAtInitialState()
+void DynamicalSystem::resetToInitialState()
 {
   if(_x0)
   {
     *(_x[0]) = *_x0;
   }
   else
-    RuntimeException::selfThrow("DynamicalSystem::resetAtInitialState() - initial state _x0 is null");
+    RuntimeException::selfThrow("DynamicalSystem::resetToInitialState() - initial state _x0 is null");
   
 }
 

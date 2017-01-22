@@ -53,6 +53,7 @@ void OneStepIntegrator::initialize( Model& m )
   for (std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
   {
     if (!checkOSI(dsi)) continue;
+    _dynamicalSystemsGraph->bundle(*dsi)->resetToInitialState();
     _dynamicalSystemsGraph->bundle(*dsi)->initMemory(getSizeMem());
   }
 }

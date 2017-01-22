@@ -117,7 +117,7 @@ protected:
 
   void init();
 
-  
+
   // -- MEMBERS --
 
   /** _twist contains the twist of the Newton Euler dynamical system.
@@ -371,8 +371,8 @@ public:
   virtual ~NewtonEulerDS();
 
   /** reset the state to the initial state */
-  void resetAtInitialState();
-    
+  void resetToInitialState();
+
   /** Initialization function for the rhs and its jacobian.
    *  \param time the time of initialization
    */
