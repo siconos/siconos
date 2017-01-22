@@ -513,6 +513,7 @@ void NewtonEulerDS::initialize(double time, unsigned int sizeOfMemory)
 
 void NewtonEulerDS::resetToInitialState()
 {
+  // set q and q[1] to q0 and Twist0
   if(_q0)
   {
      *_q = *_q0;
@@ -520,7 +521,7 @@ void NewtonEulerDS::resetToInitialState()
   else
     RuntimeException::selfThrow("NewtonEulerDS::resetToInitialState - initial position _q0 is null");
 
-  // set q and q[1] to q0 and Twist0, initialize acceleration.
+
   if(_twist0)
   {
     *_twist = *_twist0;
@@ -881,8 +882,6 @@ void NewtonEulerDS::computeForces(double time, SP::SiconosVector q, SP::SiconosV
     if (_fInt)
     {
       computeFInt(time, q, twist);
-      // std::cout << "_fInt : "<< std::endl;
-      // _fInt->display();
       _wrench->setValue(0, _wrench->getValue(0) - _fInt->getValue(0));
       _wrench->setValue(1, _wrench->getValue(1) - _fInt->getValue(1));
       _wrench->setValue(2, _wrench->getValue(2) - _fInt->getValue(2));
@@ -891,8 +890,6 @@ void NewtonEulerDS::computeForces(double time, SP::SiconosVector q, SP::SiconosV
     if (_mInt)
     {
       computeMInt(time, q , twist);
-      SiconosVector aux(3);
-      ::changeFrameAbsToBody(q,_mInt); // We have to be sure that MInt is expressed in inertial frame.
       _wrench->setValue(3, _wrench->getValue(3) - _mInt->getValue(0));
       _wrench->setValue(4, _wrench->getValue(4) - _mInt->getValue(1));
       _wrench->setValue(5, _wrench->getValue(5) - _mInt->getValue(2));
@@ -906,8 +903,7 @@ void NewtonEulerDS::computeForces(double time, SP::SiconosVector q, SP::SiconosV
     }
     DEBUG_EXPR(_wrench->display());
     DEBUG_END("NewtonEulerDS::computeForces(double time, SP::SiconosVector q, SP::SiconosVector twist)\n")
-    // std::cout << "_wrench : "<< std::endl;
-    // _wrench->display();
+
   }
   else
   {
@@ -930,9 +926,8 @@ void NewtonEulerDS::computeJacobianqForces(double time)
     if (_jacobianMIntq)
     {
       computeJacobianMIntq(time);
-      ::changeFrameAbsToBody(_q,_jacobianMIntq); // We have to ensure that the Jacobian is expressed in inertial frame
     }
-    if (_jacobianMExtq)
+    if (_isMextExpressedInInertialFrame && mExt)
     {
       computeJacobianMExtqByFD(time, _q);
       _jacobianWrenchq->setBlock(3,0,1.0* *_jacobianMExtq);
@@ -972,8 +967,6 @@ void NewtonEulerDS::computeJacobianvForces(double time)
         _jacobianWrenchTwist->setBlock(3,0,-1.0 * *_jacobianMGyrtwist);
       }
     }
-    // std::cout << "_jacobianWrenchTwist : "<< std::endl;
-    // _jacobianWrenchTwist->display();
   }
   //else nothing.
   DEBUG_END("NewtonEulerDS::computeJacobiantwistForces(double time) \n");
