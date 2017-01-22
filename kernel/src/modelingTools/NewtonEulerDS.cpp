@@ -530,16 +530,20 @@ void NewtonEulerDS::resetToInitialState()
     RuntimeException::selfThrow("NewtonEulerDS::resetToInitialState - initial twist _twist0 is null");
 }
 
-
-void NewtonEulerDS::computeFExt(double time)
+void NewtonEulerDS::computeFExt(double time, SP::SiconosVector fExt)
 {
   /* if the pointer has been set to an external vector
    * after setting the plugin, we do not call the plugin */
-  if (!_hasConstantFExt)
+  if (_hasConstantFExt)
+  {
+    if(fExt != _fExt)
+      *fExt = *_fExt;
+  }
+  else
   {
     if (_pluginFExt->fPtr)
     {
-      ((FExt_NE)_pluginFExt->fPtr)(time, &(*_fExt)(0), _qDim, &(*_q0)(0) ); // parameter z are assumed to be equal to q0
+      ((FExt_NE)_pluginFExt->fPtr)(time, &(*fExt)(0), _qDim, &(*_q0)(0) ); // parameter z are assumed to be equal to q0
     }
   }
 }
@@ -868,7 +872,7 @@ void NewtonEulerDS::computeForces(double time, SP::SiconosVector q, SP::SiconosV
   {
     _wrench->zero();
     // 1 - Computes the required functions
-    computeFExt(time);
+    computeFExt(time,_fExt);
     if (_fExt)
     {
       _wrench->setBlock(0, *_fExt);
@@ -927,7 +931,7 @@ void NewtonEulerDS::computeJacobianqForces(double time)
     {
       computeJacobianMIntq(time);
     }
-    if (_isMextExpressedInInertialFrame && mExt)
+    if (_isMextExpressedInInertialFrame && _mExt)
     {
       computeJacobianMExtqByFD(time, _q);
       _jacobianWrenchq->setBlock(3,0,1.0* *_jacobianMExtq);

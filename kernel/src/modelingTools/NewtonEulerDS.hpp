@@ -759,9 +759,10 @@ public:
   void setComputeJacobianMIntvFunction(FInt_NE fct);
 
   /** default function to compute the external forces
-   *  \param time the current time
+   * \param time the current time
+   * \param[return] fExt the computed external force
    */
-  virtual void computeFExt(double time);
+  virtual void computeFExt(double time, SP::SiconosVector fExt);
 
   /** function to compute the external moments
    * The external moments are expressed by default in the body frame, since the Euler equation for
