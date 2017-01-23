@@ -98,6 +98,10 @@ protected:
    */
   bool _isNewtonConverge;
 
+  /** boolean variable to display Newton info
+   */
+  bool _displayNewtonConvergence;
+
   /** boolean variable to force an explicit evaluation of the Jacobians
    * mapping of relations only at the beginning of the time--step and
    * not in the Newton iteration
@@ -233,7 +237,11 @@ public:
   {
     return _isNewtonConverge;
   };
-
+  
+  void setDisplayNewtonConvergence(bool newval)
+  {
+    _displayNewtonConvergence = newval;
+  };
   bool explicitJacobiansOfRelation()
   {
   return  _explicitJacobiansOfRelation;

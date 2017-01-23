@@ -69,7 +69,8 @@ TimeStepping::TimeStepping(SP::TimeDiscretisation td,
     _newtonCumulativeNbIterations(0), _newtonOptions(SICONOS_TS_NONLINEAR),
     _newtonResiduDSMax(0.0), _newtonResiduYMax(0.0), _newtonResiduRMax(0.0),
     _computeResiduY(false),_computeResiduR(false),
-    _isNewtonConverge(false), _explicitJacobiansOfRelation(false)
+    _isNewtonConverge(false),_displayNewtonConvergence(false),
+    _explicitJacobiansOfRelation(false)
 {
 
   if (osi) insertIntegrator(osi);
@@ -83,7 +84,8 @@ TimeStepping::TimeStepping(SP::TimeDiscretisation td, int nb)
     _newtonCumulativeNbIterations(0), _newtonOptions(SICONOS_TS_NONLINEAR),
     _newtonResiduDSMax(0.0), _newtonResiduYMax(0.0), _newtonResiduRMax(0.0), _computeResiduY(false),
     _computeResiduR(false),
-    _isNewtonConverge(false), _explicitJacobiansOfRelation(false)
+    _isNewtonConverge(false),_displayNewtonConvergence(false),
+    _explicitJacobiansOfRelation(false)
 {
   (*_allNSProblems).resize(nb);
 }
@@ -594,14 +596,31 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
         if (hasNSProblems)
           saveYandLambdaInOldVariables();
       }
+
+      if (_displayNewtonConvergence)
+      {
+        std::cout << "TimeStepping::newtonSolve --  _newtonNbIterations =" << _newtonNbIterations << std::endl;
+        std::cout << "TimeStepping::newtonSolve --  _newtonResiduDSMax =" << _newtonResiduDSMax << std::endl;
+        std::cout << "TimeStepping::newtonSolve --  _newtonResiduYMax =" << _newtonResiduRMax << std::endl;
+        std::cout << "TimeStepping::newtonSolve --  _newtonResiduRMax =" << _newtonResiduRMax << std::endl;
+      }
+      else
+        {
       DEBUG_PRINTF("# _newtonNbIterations = %i\n",_newtonNbIterations);
       DEBUG_PRINTF("# _newtonResiduDSMax = %12.8e\t",_newtonResiduDSMax );
       DEBUG_PRINTF("# _newtonResiduYMax = %12.8e\t",_newtonResiduYMax );
       DEBUG_PRINTF("# _newtonResiduRMax = %12.8e\n",_newtonResiduRMax );
-
+        }
     }
     _newtonCumulativeNbIterations += _newtonNbIterations;
-    DEBUG_PRINTF("# _newtonCumulativeNbIterations= %i\n",_newtonCumulativeNbIterations );
+     if (_displayNewtonConvergence)
+      {
+        std::cout << "TimeStepping::newtonSolve --  _newtonCumulativeNbIterations =" << _newtonCumulativeNbIterations << std::endl;
+      }
+     else
+     {
+        DEBUG_PRINTF("# _newtonCumulativeNbIterations= %i\n",_newtonCumulativeNbIterations );
+     }
     if (!_isNewtonConverge)
     {
       std::cout << "TimeStepping::newtonSolve -- Newton process stopped: max. number of steps (" << maxStep <<
