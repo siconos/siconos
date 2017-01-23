@@ -178,7 +178,9 @@ with WorkDir(workdir_path) as workdir:
     assert(version is not None)
 
     # make documentation
-    check_call(['cmake', srcdir, '-DWITH_DOCUMENTATION=TRUE'],
+    check_call(['cmake', srcdir, '-DWITH_DOCUMENTATION=TRUE'] +
+               ['-DWITH_{0}_DOCUMENTATION=TRUE'.format(m) for m in
+                ['numerics', 'kernel', 'control', 'mechanics', 'io']],
                cwd=builddir)
     check_call(['make', 'doc'], cwd=builddir)
 
