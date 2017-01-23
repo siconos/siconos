@@ -70,6 +70,8 @@ void changeFrameBodyToAbs(SP::SiconosVector q, SP::SimpleMatrix m );
 void normalizeq(SP::SiconosVector q);
 double getAxisAngle(double q0, double q1, double q2, double q3, SP::SiconosVector axis );
 double getAxisAngle(SP::SiconosVector q, SP::SiconosVector axis );
+double getAxisAngle_variant(double q0, double q1, double q2, double q3, SP::SiconosVector axis );
+double getAxisAngle_variant(SP::SiconosVector q, SP::SiconosVector axis );
 void setAxisAngle(SP::SiconosVector q, SP::SiconosVector axis, double angle);
 
 void computeT(SP::SiconosVector q, SP::SimpleMatrix T);
@@ -562,6 +564,13 @@ public:
     _hasConstantMExt = true;
   }
 
+  /** get mGyr
+   *  \return pointer on a plugged vector
+   */
+  inline SP::SiconosVector mGyr() const
+  {
+    return _mGyr;
+  }
 
 
   // -- forces --
@@ -758,7 +767,12 @@ public:
    */
   void setComputeJacobianMIntvFunction(FInt_NE fct);
 
-  /** default function to compute the external forces
+  /**  function to compute the external forces
+   * \param time the current time
+   */
+  virtual void computeFExt(double time);
+
+ /** default function to compute the external forces
    * \param time the current time
    * \param[return] fExt the computed external force
    */
@@ -776,6 +790,7 @@ public:
    * \param[return] mExt the computed external moment
    */
   virtual void computeMExt(double time, SP::SiconosVector q, SP::SiconosVector mExt);
+  virtual void computeMExt(double time, SP::SiconosVector q);
 
   void computeJacobianMExtqByFD(double time, SP::SiconosVector q);
 

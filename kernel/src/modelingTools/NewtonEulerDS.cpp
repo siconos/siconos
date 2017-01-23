@@ -202,7 +202,7 @@ double getAxisAngle(double q0, double q1, double q2, double q3, SP::SiconosVecto
   DEBUG_BEGIN("getAxisAngle(double q0, double q1, double q2, double q3, SP::SiconosVector axis )\n");
   double angle = acos(q0) *2.0;
   //double f = sin( angle *0.5);
-  double f = sqrt(1-q0*q0); // cheaper than sin ?
+  double f = sqrt(1-q0*q0); // cheaper than sin ?  
   if (f !=0.0)
   {
     axis->setValue(0, q1/f);
@@ -218,12 +218,50 @@ double getAxisAngle(double q0, double q1, double q2, double q3, SP::SiconosVecto
   DEBUG_END("getAxisAngle(double q0, double q1, double q2, double q3, SP::SiconosVector axis )\n");
   return angle;
 }
+
 double getAxisAngle(SP::SiconosVector q, SP::SiconosVector axis )
 {
-  double angle = ::getAxisAngle(q->getValue(3),q->getValue(4),q->getValue(5),q->getValue(6),axis );
+  double angle = ::getAxisAngle(q->getValue(3),q->getValue(4),q->getValue(5),q->getValue(6),axis);
+  return angle;
+}
+double getAxisAngle_variant(double q0, double q1, double q2, double q3, SP::SiconosVector axis )
+{
+  DEBUG_BEGIN("getAxisAngle_variant(double q0, double q1, double q2, double q3, SP::SiconosVector axis )\n");
+
+  axis->setValue(0, q1);
+  axis->setValue(1, q2);
+  axis->setValue(2, q3);
+  
+  double norm_v = sqrt(q1*q1+q2*q2+q3*q3);
+  
+  double angle;
+
+  assert (norm_v < M_PI);
+  if (norm_v < 1e-12)
+  {
+    axis->setValue(0, 0.0);
+    axis->setValue(1, 0.0);
+    axis->setValue(2, 0.0);
+    angle = 0.0 ;
+  }
+  else
+  {
+    *axis *=  1.0/norm_v;
+    angle = 2.0 * asin(norm_v);
+  }
+  
+  DEBUG_PRINTF("angle= %12.8e\n", angle);
+  DEBUG_EXPR(axis->display(););
+  
+  DEBUG_END("getAxisAngle_variant(double q0, double q1, double q2, double q3, SP::SiconosVector axis )\n");
   return angle;
 }
 
+double getAxisAngle_variant(SP::SiconosVector q, SP::SiconosVector axis )
+{
+  double angle = ::getAxisAngle_variant(q->getValue(3),q->getValue(4),q->getValue(5),q->getValue(6),axis);
+  return angle;
+}
 
 void setAxisAngle(SP::SiconosVector q, SP::SiconosVector axis, double angle  )
 {
@@ -530,6 +568,17 @@ void NewtonEulerDS::resetToInitialState()
     RuntimeException::selfThrow("NewtonEulerDS::resetToInitialState - initial twist _twist0 is null");
 }
 
+void NewtonEulerDS::computeFExt(double time)
+{
+  // computeFExt(time, _fExt);
+  
+  if (_pluginFExt->fPtr)
+  {
+    ((FExt_NE)_pluginFExt->fPtr)(time, &(*_fExt)(0), _qDim, &(*_q0)(0) ); // parameter z are assumed to be equal to q0
+  }
+  
+}
+
 void NewtonEulerDS::computeFExt(double time, SP::SiconosVector fExt)
 {
   /* if the pointer has been set to an external vector
@@ -548,22 +597,42 @@ void NewtonEulerDS::computeFExt(double time, SP::SiconosVector fExt)
   }
 }
 
+/** This function has been added to avoid Swig director to wrap _MExt into numpy.array
+ * when we call  NewtonEulerDS::computeMExt(double time, SP::SiconosVector q, SP::SiconosVector mExt)
+ *  that calls in turn computeMExt(time, q, _mExt);
+ */
+void computeMExt_internal(double time, SP::SiconosVector q, bool hasConstantMExt, bool isMextExpressedInInertialFrame,
+                          unsigned int qDim, SP::SiconosVector q0, SP::PluggedObject pluginMExt, SP::SiconosVector mExt_attributes, SP::SiconosVector mExt)
+{
+  /* if the pointer has been set to an external vector
+   * after setting the plugin, we do not call the plugin */
+  if (hasConstantMExt)
+  {
+    if(mExt != mExt_attributes)
+      *mExt = *mExt_attributes;
+  }
+  else if (pluginMExt->fPtr)
+    ((FExt_NE)pluginMExt->fPtr)(time, &(*mExt)(0), qDim, &(*q0)(0) ); // parameter z are assumed to be equal to q0
+
+  if (isMextExpressedInInertialFrame && mExt)
+    ::changeFrameAbsToBody(q,mExt); 
+}
+
+
+void NewtonEulerDS::computeMExt(double time, SP::SiconosVector q)
+{
+  //computeMExt(time, q, _mExt);
+  computeMExt_internal(time, q, _hasConstantMExt, _isMextExpressedInInertialFrame,
+                       _qDim, _q0, _pluginMExt, _mExt, _mExt);
+}
+
+
 
 void NewtonEulerDS::computeMExt(double time, SP::SiconosVector q, SP::SiconosVector mExt)
 {
   DEBUG_BEGIN("NewtonEulerDS::computeMExt(...)\n");
-  /* if the pointer has been set to an external vector
-   * after setting the plugin, we do not call the plugin */
-  if (_hasConstantMExt)
-  {
-    if(mExt != _mExt)
-      *mExt = *_mExt;
-  }
-  else if (_pluginMExt->fPtr)
-    ((FExt_NE)_pluginMExt->fPtr)(time, &(*mExt)(0), _qDim, &(*_q0)(0) ); // parameter z are assumed to be equal to q0
-
-  if (_isMextExpressedInInertialFrame && mExt)
-    ::changeFrameAbsToBody(q,mExt);
+  computeMExt_internal(time, q, _hasConstantMExt, _isMextExpressedInInertialFrame,
+                       _qDim, _q0, _pluginMExt, _mExt, mExt);
   DEBUG_END("NewtonEulerDS::computeMExt(...)\n");
 }
 
@@ -728,7 +797,7 @@ void NewtonEulerDS::computeJacobianMGyrtwistByFD(double time, SP::SiconosVector 
     (*veps)(j) -= _epsilonFD;
     if (j<5) (*veps)(j+1) += _epsilonFD;
   }
-  DEBUG_EXPR(_jacobianMGyrv->display());
+  DEBUG_EXPR(_jacobianMGyrtwist->display());
   DEBUG_END("NewtonEulerDS::computeJacobianMGyrvByFD(...)\n");
 
 
@@ -834,23 +903,36 @@ void NewtonEulerDS::computeForces(double time)
   computeForces(time, _q, _twist);
 }
 
-void NewtonEulerDS::computeMGyr(SP::SiconosVector twist, SP::SiconosVector mGyr)
+
+/** This function has been added to avoid Swig director to wrap _mGyr into numpy.array
+ * when we call  NewtonEulerDS::computeMGyr(SP::SiconosVector twist) that calls in turn
+ * computeMGyr(twist, _mGyr)
+ */
+
+void computeMGyr_internal(SP::SiconosMatrix I ,SP::SiconosVector twist, SP::SiconosVector mGyr)
 {
-  // computation of \Omega times I \Omega (MGyr is in the l.h.s of the equation of motion)
-  DEBUG_BEGIN("NewtonEulerDS::computeMGyr(SP::SiconosVector twist, SP::SiconosVector mGyr)\n");
-  if (_I)
-  {
-    DEBUG_EXPR( _I->display());
+ if (I)
+ {
+    DEBUG_EXPR( I->display());
     DEBUG_EXPR( twist->display());
     SiconosVector omega(3);
     SiconosVector iomega(3);
     omega.setValue(0, twist->getValue(3));
     omega.setValue(1, twist->getValue(4));
     omega.setValue(2, twist->getValue(5));
-    prod(*_I, omega, iomega, true);
+    prod(*I, omega, iomega, true);
     cross_product(omega, iomega, *mGyr);
   }
+}
+void NewtonEulerDS::computeMGyr(SP::SiconosVector twist, SP::SiconosVector mGyr)
+{
+  // computation of \Omega times I \Omega (MGyr is in the l.h.s of the equation of motion)
+  DEBUG_BEGIN("NewtonEulerDS::computeMGyr(SP::SiconosVector twist, SP::SiconosVector mGyr)\n");
+ 
   DEBUG_EXPR(mGyr->display());
+
+  ::computeMGyr_internal(_I, twist, mGyr);
+ 
   DEBUG_END("NewtonEulerDS::computeMGyr(SP::SiconosVector twist, SP::SiconosVector mGyr)\n");
 
 }
@@ -858,7 +940,11 @@ void NewtonEulerDS::computeMGyr(SP::SiconosVector twist)
 {
   /*computation of \Omega times I \Omega*/
   //DEBUG_BEGIN("NewtonEulerDS::computeMGyr(SP::SiconosVector twist)\n");
-  computeMGyr( twist, _mGyr);
+  ::computeMGyr_internal(_I , twist, _mGyr);
+  std::cout << "NewtonEulerDS::computeMGyr(SP::SiconosVector twist) " << std::endl;
+  std::cout << _mGyr << std::endl;
+  _mGyr->display();
+  DEBUG_EXPR(_mGyr->display());
   //DEBUG_END("NewtonEulerDS::computeMGyr(SP::SiconosVector twist)\n");
 
 }
@@ -872,17 +958,17 @@ void NewtonEulerDS::computeForces(double time, SP::SiconosVector q, SP::SiconosV
   {
     _wrench->zero();
     // 1 - Computes the required functions
-    computeFExt(time,_fExt);
+    computeFExt(time);
     if (_fExt)
     {
       _wrench->setBlock(0, *_fExt);
     }
-    computeMExt(time,q,_mExt);
+    computeMExt(time,q);
     if (_mExt)
     {
       _wrench->setBlock(3, *_mExt);
     }
-
+    
     if (_fInt)
     {
       computeFInt(time, q, twist);
