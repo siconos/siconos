@@ -111,7 +111,7 @@ pkgs:
 
   # bullet & serialization for full doc
   documentation:
-    ubuntu-16.04:
+    debian:
       - doxygen
       - python-sphinx
       - python-sphinx-bootstrap-theme
