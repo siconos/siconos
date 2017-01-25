@@ -21,10 +21,10 @@
 #include <boost/math/quaternion.hpp>
 
 #include <iostream>
-// #define DEBUG_NOCOLOR
-// //#define DEBUG_BEGIN_END_ONLY
-//#define DEBUG_STDOUT
-//#define DEBUG_MESSAGES
+//#define DEBUG_NOCOLOR
+//#define DEBUG_BEGIN_END_ONLY
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
 #include <debug.h>
 
 
@@ -955,8 +955,6 @@ void NewtonEulerDS::computeMGyr(SP::SiconosVector twist)
 void NewtonEulerDS::computeForces(double time, SP::SiconosVector q, SP::SiconosVector twist)
 {
   DEBUG_BEGIN("NewtonEulerDS::computeForces(double time, SP::SiconosVector q, SP::SiconosVector twist)\n")
-    std::cout << "q" << std::endl;
-    q->display();
   // Warning: an operator (fInt ...) may be set (ie allocated and not NULL) but not plugged, that's why two steps are required here.
   if(_wrench)
   {
