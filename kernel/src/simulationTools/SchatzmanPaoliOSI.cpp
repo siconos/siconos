@@ -333,9 +333,9 @@ double SchatzmanPaoliOSI::computeResidu()
       SP::LagrangianLinearTIDS d = std11::static_pointer_cast<LagrangianLinearTIDS> (ds);
 
       // Get state i (previous time step) from Memories -> var. indexed with "Old"
-      SP::SiconosVector q_k = d->qMemory()->getSiconosVector(0); // q_k
-      SP::SiconosVector q_k_1 = d->qMemory()->getSiconosVector(1); // q_{k-1}
-      SP::SiconosVector v_k = d->velocityMemory()->getSiconosVector(0); //v_k
+      const SiconosVector& q_k = d->qMemory()->getSiconosVector(0); // q_k
+      const SiconosVector& q_k_1 = d->qMemory()->getSiconosVector(1); // q_{k-1}
+      const SiconosVector& v_k = d->velocityMemory()->getSiconosVector(0); //v_k
       //  std::cout << "SchatzmanPaoliOSI::computeResidu - q_k_1 =" <<std::endl;
       // q_k_1->display();
       //  std::cout << "SchatzmanPaoliOSI::computeResidu - q_k =" <<std::endl;
@@ -351,17 +351,17 @@ double SchatzmanPaoliOSI::computeResidu()
       //SP::SiconosVector v = d->velocity(); // v = v_k,i+1
 
       SP::SiconosMatrix M = d->mass();
-      prod(*M, (*q_k_1 - *q_k), *residuFree); // residuFree = M(-q_{k}+q_{k-1})
+      prod(*M, (q_k_1 - q_k), *residuFree); // residuFree = M(-q_{k}+q_{k-1})
 
       SP::SiconosMatrix K = d->K();
       if (K)
       {
-        prod(h * h, *K, *q_k, *residuFree, false); // residuFree += h^2*K*qi
+        prod(h * h, *K, q_k, *residuFree, false); // residuFree += h^2*K*qi
       }
 
       SP::SiconosMatrix C = d->C();
       if (C)
-        prod(h * h, *C, (1.0 / (2.0 * h)*_theta * (*q_k - *q_k_1) + (1.0 - _theta)* *v_k)  , *residuFree, false);
+        prod(h * h, *C, (1.0 / (2.0 * h)*_theta * (q_k - q_k_1) + (1.0 - _theta) * v_k)  , *residuFree, false);
       // residufree += h^2 C (\theta \Frac{q-q_{k-1}}{2h}+ (1-\theta) v_k))
 
 
@@ -468,7 +468,7 @@ void SchatzmanPaoliOSI::computeFreeState()
       SP::LagrangianLinearTIDS d = std11::static_pointer_cast<LagrangianLinearTIDS> (ds);
 
       // Get state i (previous time step) from Memories -> var. indexed with "Old"
-      SP::SiconosVector qold = d->qMemory()->getSiconosVector(0); // q_k
+      const SiconosVector& qold = d->qMemory()->getSiconosVector(0); // q_k
       //   SP::SiconosVector vold = d->velocityMemory()->getSiconosVector(0); //v_k
 
       // --- ResiduFree computation ---
@@ -482,7 +482,7 @@ void SchatzmanPaoliOSI::computeFreeState()
 
       W->PLUForwardBackwardInPlace(*qfree);
       *qfree *= -1.0;
-      *qfree += *qold;
+      *qfree += qold;
 
     }
     // 3 - Newton Euler Systems
@@ -527,13 +527,12 @@ struct SchatzmanPaoliOSI::_NSLEffectOnFreeOutput : public SiconosVisitor
     subCoord[2] = 0;
     subCoord[3] = subCoord[1];
     // Only the normal part is multiplied by e
-    SP::SiconosVector y_k_1 ;
-    y_k_1 = _inter->yMemory(_osnsp->inputOutputLevel())->getSiconosVector(1);
-
+    const SiconosVector& y_k_1(
+      _inter->yMemory(_osnsp->inputOutputLevel())->getSiconosVector(1));
 
     //  std::cout << "y_k_1 " << std::endl;
     // y_k_1->display();
-    subscal(e, *y_k_1, *(_inter->yForNSsolver()), subCoord, false);
+    subscal(e, y_k_1, *(_inter->yForNSsolver()), subCoord, false);
   }
 
   void visit(const NewtonImpactFrictionNSL& nslaw)
@@ -541,9 +540,9 @@ struct SchatzmanPaoliOSI::_NSLEffectOnFreeOutput : public SiconosVisitor
     double e;
     e = nslaw.en();
     // Only the normal part is multiplied by e
-    SP::SiconosVector y_k_1 ;
-    y_k_1 = _inter->yMemory(_osnsp->inputOutputLevel())->getSiconosVector(1);
-    (*_inter->yForNSsolver())(0) +=  e * (*y_k_1)(0);
+    const SiconosVector& y_k_1(
+      _inter->yMemory(_osnsp->inputOutputLevel())->getSiconosVector(1));
+    (*_inter->yForNSsolver())(0) +=  e * y_k_1(0);
 
   }
   void visit(const EqualityConditionNSL& nslaw)
@@ -717,25 +716,23 @@ void SchatzmanPaoliOSI::updateState(const unsigned int level)
         //        itindex != d->boundaryConditions()->velocityIndices()->end();
         //        ++itindex)
         //     v->setValue(*itindex, 0.0);
-        *q +=  * ds->workspace(DynamicalSystem::free);
+        *q += *ds->workspace(DynamicalSystem::free);
 
       }
       else
-        *q =  * ds->workspace(DynamicalSystem::free);
-
-
+        *q = *ds->workspace(DynamicalSystem::free);
 
       // Computation of the velocity
 
-      SP::SiconosVector v = d->velocity();
-      SP::SiconosVector q_k_1 = d->qMemory()->getSiconosVector(1); // q_{k-1}
+      SiconosVector& v = *d->velocity();
+      const SiconosVector& q_k_1 = d->qMemory()->getSiconosVector(1); // q_{k-1}
 
       //  std::cout << "SchatzmanPaoliOSI::updateState - q_k_1 =" <<std::endl;
       // q_k_1->display();
       //  std::cout << "SchatzmanPaoliOSI::updateState - q =" <<std::endl;
       // q->display();
 
-      *v = 1.0 / (2.0 * h) * (*q - *q_k_1);
+      v = 1.0 / (2.0 * h) * (*q - q_k_1);
       //  std::cout << "SchatzmanPaoliOSI::updateState - v =" <<std::endl;
       // v->display();
 

@@ -36,6 +36,8 @@
 // #define DEBUG_MESSAGES
 #include "debug.h"
 
+#include <boost/make_shared.hpp>
+
 /// @cond
 using namespace RELATION;
 
@@ -82,8 +84,8 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
       accFree->zero();
 
       // get left state from memory
-      SP::SiconosVector qold = d->qMemory()->getSiconosVector(0);
-      SP::SiconosVector vold = d->velocityMemory()->getSiconosVector(0); // right limit
+      SP::SiconosVector qold(std11::make_shared<SiconosVector>(d->qMemory()->getSiconosVector(0)));
+      SP::SiconosVector vold(std11::make_shared<SiconosVector>(d->velocityMemory()->getSiconosVector(0))); // right limit
       Mold = d->mass();
 
       DEBUG_EXPR(accFree->display());
@@ -116,8 +118,8 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
       accFree->zero();
 
       // get left state from memory
-      SP::SiconosVector qold = d->qMemory()->getSiconosVector(0);
-      SP::SiconosVector vold = d->twistMemory()->getSiconosVector(0); // right limit
+      const SiconosVector& qold = d->qMemory()->getSiconosVector(0);
+      const SiconosVector& vold = d->twistMemory()->getSiconosVector(0); // right limit
       //Mold = d->mass();
       assert(!d->mass()->isPLUInversed());
       Mold.reset(new SimpleMatrix(*(d->mass()))); // we copy the mass matrix to avoid its factorization
@@ -137,7 +139,8 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
 
       if (d->forces())
       {
-        d->computeForces(told, qold, vold);
+        d->computeForces(told, std11::make_shared<SiconosVector>(qold),
+                         std11::make_shared<SiconosVector>(vold));
         DEBUG_EXPR(d->forces()->display());
 
         *accFree += *(d->forces());
@@ -255,85 +258,85 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
     if ((dsType == Type::LagrangianDS) || (dsType == Type::LagrangianLinearTIDS))
     {
       SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
-      SP::SiconosVector accFree = d->workspace(DynamicalSystem::free); // contains acceleration without contact force
+      SiconosVector& accFree = *d->workspace(DynamicalSystem::free); // contains acceleration without contact force
 
       // get left state from memory
-      SP::SiconosVector qold = d->qMemory()->getSiconosVector(0);
-      SP::SiconosVector vold = d->velocityMemory()->getSiconosVector(0);
+      const SiconosVector& qold = d->qMemory()->getSiconosVector(0);
+      const SiconosVector& vold = d->velocityMemory()->getSiconosVector(0);
 
       // initialize *it->residuFree and predicted right velocity (left limit)
-      SP::SiconosVector residuFree = ds->workspace(DynamicalSystem::freeresidu); // contains residu without nonsmooth effect
-      SP::SiconosVector v = d->velocity(); //contains velocity v_{k+1}^- and not free velocity
-      residuFree->zero();
-      v->zero();
+      SiconosVector& residuFree = *ds->workspace(DynamicalSystem::freeresidu); // contains residu without nonsmooth effect
+      SiconosVector& v = *d->velocity(); //contains velocity v_{k+1}^- and not free velocity
+      residuFree.zero();
+      v.zero();
 
       DEBUG_EXPR(accFree->display());
       DEBUG_EXPR(qold->display());
       DEBUG_EXPR(vold->display());
 
 
-      *residuFree -= 0.5 * h**accFree;
+      residuFree -= 0.5 * h*accFree;
 
-      *v += h**accFree;
-      *v += *vold;
+      v += h*accFree;
+      v += vold;
 
-      DEBUG_EXPR(residuFree->display());
-      DEBUG_EXPR(v->display());
+      DEBUG_EXPR(residuFree.display());
+      DEBUG_EXPR(v.display());
 
       SP::SiconosVector q = d->q(); // POINTER CONSTRUCTOR : contains position q_{k+1}
-      *q = *qold;
+      *q = qold;
 
-      scal(0.5 * h, *vold + *v, *q, false);
+      scal(0.5 * h, vold + v, *q, false);
       DEBUG_EXPR(q->display());
     }
     else if (dsType == Type::NewtonEulerDS)
     {
       SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS> (ds);
-      SP::SiconosVector accFree = d->workspace(DynamicalSystem::free);
+      SiconosVector& accFree = *d->workspace(DynamicalSystem::free);
 
       // get left state from memory
-      SP::SiconosVector qold = d->qMemory()->getSiconosVector(0);
-      SP::SiconosVector vold = d->twistMemory()->getSiconosVector(0);
+      const SiconosVector& qold = d->qMemory()->getSiconosVector(0);
+      const SiconosVector& vold = d->twistMemory()->getSiconosVector(0);
 
       // initialize *it->residuFree and predicted right velocity (left limit)
-      SP::SiconosVector residuFree = ds->workspace(DynamicalSystem::freeresidu); // contains residu without nonsmooth effect
-      SP::SiconosVector v = d->twist(); //contains velocity v_{k+1}^- and not free velocity
-      residuFree->zero();
-      v->zero();
+      SiconosVector& residuFree = *ds->workspace(DynamicalSystem::freeresidu); // contains residu without nonsmooth effect
+      SiconosVector& v = *d->twist(); //contains velocity v_{k+1}^- and not free velocity
+      residuFree.zero();
+      v.zero();
 
-      DEBUG_EXPR(accFree->display());
-      DEBUG_EXPR(qold->display());
-      DEBUG_EXPR(vold->display());
+      DEBUG_EXPR(accFree.display());
+      DEBUG_EXPR(qold.display());
+      DEBUG_EXPR(vold.display());
 
 
-      *residuFree -= 0.5 * h**accFree;
+      residuFree -= 0.5 * h*accFree;
 
-      *v += h**accFree;
-      *v += *vold;
+      v += h*accFree;
+      v += vold;
 
-      DEBUG_EXPR(residuFree->display());
-      DEBUG_EXPR(v->display());
+      DEBUG_EXPR(residuFree.display());
+      DEBUG_EXPR(v.display());
 
       //first step consists in computing  \dot q.
       //second step consists in updating q.
       //
       SP::SiconosMatrix T = d->T();
-      SP::SiconosVector dotq = d->dotq();
-      prod(*T, *v, *dotq, true);
+      SiconosVector& dotq = *d->dotq();
+      prod(*T, v, dotq, true);
 
-      SP::SiconosVector dotqold = d->dotqMemory()->getSiconosVector(0);
+      const SiconosVector& dotqold = d->dotqMemory()->getSiconosVector(0);
 
-      SP::SiconosVector q = d->q(); // POINTER CONSTRUCTOR : contains position q_{k+1}
-      *q = *qold;
+      SiconosVector& q = *d->q(); // POINTER CONSTRUCTOR : contains position q_{k+1}
+      q = qold;
 
-      scal(0.5 * h, *dotqold + *dotq, *q, false);
+      scal(0.5 * h, dotqold + dotq, q, false);
       DEBUG_PRINT("new q before normalizing\n");
-      DEBUG_EXPR(q->display());
+      DEBUG_EXPR(q.display());
       //q[3:6] must be normalized
       d->normalizeq();
       d->computeT();
       DEBUG_PRINT("new q after normalizing\n");
-      DEBUG_EXPR(q->display());
+      DEBUG_EXPR(q.display());
 
 
 
@@ -415,8 +418,8 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
         SP::SiconosVector residuFree = d->workspace(DynamicalSystem::freeresidu);
         SP::SiconosVector v = d->velocity();
         SP::SiconosVector q = d->q();
-        SP::SiconosVector qold = d->qMemory()->getSiconosVector(0);
-        SP::SiconosVector vold = d->velocityMemory()->getSiconosVector(0); // right limit
+        const SiconosVector& qold = d->qMemory()->getSiconosVector(0);
+        const SiconosVector& vold = d->velocityMemory()->getSiconosVector(0); // right limit
 
         SP::SiconosMatrix M = d->mass(); // POINTER CONSTRUCTOR : contains mass matrix
 
@@ -443,31 +446,31 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
       else if (dsType == Type::NewtonEulerDS)
       {
         SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS> (ds);
-        SP::SiconosVector residuFree = d->workspace(DynamicalSystem::freeresidu);
+        SiconosVector& residuFree = *d->workspace(DynamicalSystem::freeresidu);
         SP::SiconosVector v = d->twist();
         SP::SiconosVector q = d->q();
-        SP::SiconosVector qold = d->qMemory()->getSiconosVector(0);
-        SP::SiconosVector vold = d->twistMemory()->getSiconosVector(0); // right limit
+        const SiconosVector qold = d->qMemory()->getSiconosVector(0);
+        const SiconosVector vold = d->twistMemory()->getSiconosVector(0); // right limit
 
         SP::SiconosMatrix M(new SimpleMatrix(*(d->mass()))); // we copy the mass matrix to avoid its factorization;
         DEBUG_EXPR(M->display());
 
         //residuFree->zero();
         v->zero();
-        SP::SiconosVector work_tdg = d->workspace(DynamicalSystem::free_tdg);
-        assert(work_tdg);
-        *residuFree = 0.5 * h**work_tdg;
-        work_tdg->zero();
+        assert(d->workspace(DynamicalSystem::free_tdg));
+        SiconosVector& work_tdg = *d->workspace(DynamicalSystem::free_tdg);
+        residuFree = 0.5 * h*work_tdg;
+        work_tdg.zero();
 
         if (d->forces())
         {
           d->computeForces(t, q, v);
-          *work_tdg += *(d->forces());
+          work_tdg += *(d->forces());
         }
 
-        M->PLUForwardBackwardInPlace(*work_tdg); // contains right (left limit) acceleration without contact force
-        *residuFree -= 0.5 * h**work_tdg;
-        DEBUG_EXPR(residuFree->display());
+        M->PLUForwardBackwardInPlace(work_tdg); // contains right (left limit) acceleration without contact force
+        residuFree -= 0.5 * h*work_tdg;
+        DEBUG_EXPR(residuFree.display());
       }
       else
         RuntimeException::selfThrow("D1MinusLinearOSI::computeResidu - not yet implemented for Dynamical system type: " + dsType);

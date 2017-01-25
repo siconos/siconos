@@ -301,6 +301,9 @@ typedef __mpz_struct mpz_t[1];
 
 %ignore OSNSMatrix::updateSizeAndPositions;
 
+%include std_vector.i
+%template (MemoryContainer) std::vector<SiconosVector>;
+
 // registered classes in KernelRegistration.i
 
 %include KernelRegistration.i

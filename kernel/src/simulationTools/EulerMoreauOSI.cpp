@@ -28,6 +28,8 @@
 #include "CxxStd.hpp"
 #include "OneStepNSProblem.hpp"
 
+#include <boost/make_shared.hpp>
+
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
 //#define DEBUG_WHERE_MESSAGES
@@ -323,7 +325,7 @@ double EulerMoreauOSI::computeResidu()
       // 1 - Compute the free residu (purely on the "smooth" dynamics)
 
       residuFree = *d.x(); // last saved value for x: could be x_k or x_{k+1}^alpha
-      SiconosVector& xold = *d.xMemory()->getSiconosVector(0);
+      const SiconosVector& xold = d.xMemory()->getSiconosVector(0);
       residuFree -= xold; // state x_k (at previous time step)
 
       SP::SiconosMatrix M = d.M();
@@ -340,7 +342,9 @@ double EulerMoreauOSI::computeResidu()
         {
           // computes f(t_k,x_k)
           //This computation is done since fold not  is up to date.
-          d.computef(told, xold);
+          // (computef calls a plugin function which may modify xold, must be copied)
+          SiconosVector xoldcopy(xold);
+          d.computef(told, xoldcopy);
           // residuFree += -h * (1 - _theta) * f(t_k,x_k)
           scal(coef, *d.f(), residuFree, false);
         }
@@ -367,7 +371,7 @@ double EulerMoreauOSI::computeResidu()
       else
       {
         scal(-h*_gamma, *d.r(), residu, false);
-        scal(-h*(1-_gamma), *d.rMemory()->getSiconosVector(0), residu, false);
+        scal(-h*(1-_gamma), d.rMemory()->getSiconosVector(0), residu, false);
       }
 
       normResidu = residu.norm2();
@@ -391,7 +395,7 @@ double EulerMoreauOSI::computeResidu()
       if (A) // residuFree += -h( A (\theta x_{k+1}^{\alpha} + (1-\theta) x_k)
       {
 
-        prod(*A, *d.xMemory()->getSiconosVector(0), xBuffer, true);
+        prod(*A, d.xMemory()->getSiconosVector(0), xBuffer, true);
         double coef = -h * (1 - _theta);
         scal(coef, xBuffer, residuFree, false);
 
@@ -401,7 +405,7 @@ double EulerMoreauOSI::computeResidu()
       }
 
       // final touch, residuFree += M(x_{k+1}^{\alpha} - x_k)
-      xBuffer = *d.x() - *d.xMemory()->getSiconosVector(0);
+      xBuffer = *d.x() - d.xMemory()->getSiconosVector(0);
       SP::SiconosMatrix M = d.M();
       if (M)
       {
@@ -489,7 +493,7 @@ void EulerMoreauOSI::computeFreeState()
 
       if (_useGamma)
       {
-        SiconosVector& rold = *d.rMemory()->getSiconosVector(0);
+        const SiconosVector& rold = d.rMemory()->getSiconosVector(0);
         double coeff = -h * (1 - _gamma);
         scal(coeff, rold, xfree, false); //  xfree += -h(1-gamma)*rold
       }
@@ -541,7 +545,7 @@ void EulerMoreauOSI::computeFreeState()
         deltaxForRelation = xfree;
 
         scal(_gamma, deltaxForRelation, deltaxForRelation);
-        SiconosVector& xold = *d.xMemory()->getSiconosVector(0);
+        const SiconosVector& xold = d.xMemory()->getSiconosVector(0);
 
         scal(1.0 - _gamma, xold, deltaxForRelation, false);
       }

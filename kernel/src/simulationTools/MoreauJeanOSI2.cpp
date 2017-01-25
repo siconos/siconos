@@ -24,6 +24,7 @@
 #include "LagrangianLinearTIDS.hpp"
 #include "FirstOrderLinearTIDS.hpp"
 
+#include <boost/make_shared.hpp>
 
 using namespace RELATION;
 
@@ -127,18 +128,18 @@ void MoreauJeanOSI2::computeFreeState()
       M = d->M();
       SP::SiconosVector ffree = d->workspace(DynamicalSystem::free);
       // x value at told
-      SP::SiconosVector xold = d->xMemory()->getSiconosVector(0);
+      const SiconosVector& xold = d->xMemory()->getSiconosVector(0);
 
       SP::SiconosMatrix A = d->A();
       if (A)
-        prod(h * (1 - _theta), *A, *xold, *ffree, true); // ffree = h*(1-theta)*A*xi
+        prod(h * (1 - _theta), *A, xold, *ffree, true); // ffree = h*(1-theta)*A*xi
       else
         ffree->zero();
       SP::SiconosVector b = d->b();
       if (b)
         scal(h, *b, *ffree, false); // ffree += hb
       if (M)
-        prod(*M, *xold, *ffree, false); // ffree += M*xi
+        prod(*M, xold, *ffree, false); // ffree += M*xi
     }
     // 3 - Lagrangian Non Linear Systems
     else if (dsType == Type::LagrangianDS)
@@ -158,8 +159,8 @@ void MoreauJeanOSI2::computeFreeState()
       SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
 
       // Get state i (previous time step) from Memories -> var. indexed with "Old"
-      SP::SiconosVector qold = d->qMemory()->getSiconosVector(0);
-      SP::SiconosVector vold = d->velocityMemory()->getSiconosVector(0); // vol =v_i
+      const SiconosVector& qold = d->qMemory()->getSiconosVector(0);
+      const SiconosVector& vold = d->velocityMemory()->getSiconosVector(0); // vol =v_i
 
       // --- ResiduFree computation ---
       // vFree pointer is used to compute and save ResiduFree in this first step.
@@ -170,14 +171,15 @@ void MoreauJeanOSI2::computeFreeState()
       computeW(t, d, *W);
 
       SP::SiconosMatrix M = d->mass();
-      SP::SiconosVector v = d->velocity(); // v = v_k,i+1
-      prod(*M, (*v - *vold), *ffree); // ffree = M(v - vold)
+      const SiconosVector& v = *d->velocity(); // v = v_k,i+1
+      prod(*M, (v - vold), *ffree); // ffree = M(v - vold)
 
       *ffree *= -1.0;
       if (d->forces()) // if fL exists
       {
         // computes forces(ti,vi,qi)
-        d->computeForces(told, qold, vold);
+        d->computeForces(told, std11::make_shared<SiconosVector>(qold),
+                         std11::make_shared<SiconosVector>(vold));
         double coef = h * (1 - _theta);
         // ffree += coef * fL_i
         scal(coef, *d->forces(), *ffree, false);
@@ -189,9 +191,9 @@ void MoreauJeanOSI2::computeFreeState()
         scal(coef, *d->forces(), *ffree, false);
       }
 
-      SP::SiconosVector  ftmp(new SiconosVector(*ffree));
-      prod(*W, (*v), *ftmp);
-      *ffree += *ftmp;
+      SiconosVector ftmp(*ffree);
+      prod(*W, v, ftmp);
+      *ffree += ftmp;
     }
     // 4 - Lagrangian Linear Systems
     else if (dsType == Type::LagrangianLinearTIDS)
@@ -209,30 +211,30 @@ void MoreauJeanOSI2::computeFreeState()
       SP::LagrangianLinearTIDS d = std11::static_pointer_cast<LagrangianLinearTIDS> (ds);
 
       // Get state i (previous time step) from Memories -> var. indexed with "Old"
-      SP::SiconosVector qold = d->qMemory()->getSiconosVector(0); // qi
-      SP::SiconosVector vold = d->velocityMemory()->getSiconosVector(0); //vi
+      const SiconosVector& qold = d->qMemory()->getSiconosVector(0); // qi
+      const SiconosVector& vold = d->velocityMemory()->getSiconosVector(0); //vi
 
       // --- ResiduFree computation ---
       // Velocity free and residu. vFree = RESfree (pointer equality !!).
-      SP::SiconosVector ffree = d->workspace(DynamicalSystem::free);
+      SiconosVector& ffree = *d->workspace(DynamicalSystem::free);
 
       SP::SiconosMatrix M = d->mass();
-      SP::SiconosVector v = d->velocity(); // v = v_k,i+1
-      prod(*W, (*v - *vold), *ffree); // ffree = W (vold)
+      SiconosVector& v = *d->velocity(); // v = v_k,i+1
+      prod(*W, (v - vold), ffree); // ffree = W (vold)
 
       // vFree pointer is used to compute and save ResiduFree in this first step.
       double coeff;
 
       SP::SiconosMatrix  C = d->C();
       if (C)
-        prod(-h, *C, *vold, *ffree, false); // ffree += -h*C*vi
+        prod(-h, *C, vold, ffree, false); // ffree += -h*C*vi
 
       SP::SiconosMatrix  K = d->K();
       if (K)
       {
         coeff = -h * h * _theta;
-        prod(coeff, *K, *vold, *ffree, false); // ffree += -h^2*theta*K*vi
-        prod(-h, *K, *qold, *ffree, false); // ffree += -h*K*qi
+        prod(coeff, *K, vold, ffree, false); // ffree += -h^2*theta*K*vi
+        prod(-h, *K, qold, ffree, false); // ffree += -h*K*qi
       }
 
       SP::SiconosVector  Fext = d->fExt();
@@ -241,11 +243,11 @@ void MoreauJeanOSI2::computeFreeState()
         // computes Fext(ti)
         d->computeFExt(told);
         coeff = h * (1 - _theta);
-        scal(coeff, *Fext, *ffree, false); // ffree += h*(1-theta) * fext(ti)
+        scal(coeff, *Fext, ffree, false); // ffree += h*(1-theta) * fext(ti)
         // computes Fext(ti+1)
         d->computeFExt(t);
         coeff = h * _theta;
-        scal(coeff, *Fext, *ffree, false); // ffree += h*theta * fext(ti+1)
+        scal(coeff, *Fext, ffree, false); // ffree += h*theta * fext(ti+1)
       }
 
     }

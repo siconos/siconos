@@ -24,33 +24,25 @@
 
 #define _2PI  2.0*M_PI
 
-void normalize(SP::SiconosVector q, unsigned int i);
-
-void normalize(SP::SiconosVector q, unsigned int i)
+static
+void normalize(SiconosVector& q, unsigned int i)
 {
+  q.setValue(i, fmod(q.getValue(i), _2PI));
 
-  q->setValue(i, fmod(q->getValue(i), _2PI));
-
-  assert(fabs(q->getValue(i)) - std::numeric_limits<double>::epsilon() >= 0.);
-  assert(fabs(q->getValue(i)) < _2PI);
-
+  assert(fabs(q.getValue(i)) - std::numeric_limits<double>::epsilon() >= 0.);
+  assert(fabs(q.getValue(i)) < _2PI);
 }
 
 void SphereLDS::computeMass()
 {
+  normalize(*q(), 3);
+  normalize(*q(), 4);
+  normalize(*q(), 5);
 
-  SP::SiconosVector qold;
-
-
+  // SS: Forcing modification of qold, is this necessary?
   if (qMemory() && qMemory()->nbVectorsInMemory() >= 1)
-    qold = qMemory()->getSiconosVector(0);
-
-  normalize(q(), 3);
-  normalize(q(), 4);
-  normalize(q(), 5);
-
-  if (qold)
   {
+    SiconosVector& qold = qMemory()->getSiconosVectorMutable(0);
     normalize(qold, 3);
     normalize(qold, 4);
     normalize(qold, 5);
@@ -159,10 +151,9 @@ SphereLDS::SphereLDS(double r, double m,
                      SP::SiconosVector vinit)
   : LagrangianDS(qinit, vinit), radius(r), massValue(m)
 {
-
-  normalize(q(), 3);
-  normalize(q(), 4);
-  normalize(q(), 5);
+  normalize(*q(), 3);
+  normalize(*q(), 4);
+  normalize(*q(), 5);
   _ndof = 6;
 
   assert(qinit->size() == _ndof);

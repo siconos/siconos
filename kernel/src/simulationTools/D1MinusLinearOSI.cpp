@@ -223,22 +223,22 @@ void D1MinusLinearOSI::computeFreeState()
       SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
 
       // get left state from memory
-      SP::SiconosVector vold = d->velocityMemory()->getSiconosVector(0); // right limit
+      const SiconosVector& vold = d->velocityMemory()->getSiconosVector(0); // right limit
       DEBUG_EXPR(vold->display());
 
       // get right information
       //SP::SiconosMatrix M = d->mass();
-      SP::SiconosVector vfree = d->velocity(); // POINTER CONSTRUCTOR : contains free velocity
-      (*vfree) = *(d->workspace(DynamicalSystem::freeresidu));
+      SiconosVector& vfree = *d->velocity(); // POINTER CONSTRUCTOR : contains free velocity
+      vfree = *(d->workspace(DynamicalSystem::freeresidu));
       DEBUG_EXPR(d->workspace(DynamicalSystem::freeresidu)->display());
       // d->computeMass();
       // M->resetLU();
       // M->PLUForwardBackwardInPlace(*vfree);
       // DEBUG_EXPR(M->display());
 
-      *vfree *= -1.;
-      *vfree += *vold;
-      DEBUG_EXPR(vfree->display());
+      vfree *= -1.;
+      vfree += vold;
+      DEBUG_EXPR(vfree.display());
     }
     else if (dsType == Type::NewtonEulerDS)
     {
@@ -246,20 +246,18 @@ void D1MinusLinearOSI::computeFreeState()
       SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS> (ds);
 
       // get left state from memory
-      SP::SiconosVector vold = d->twistMemory()->getSiconosVector(0); // right limit
-      DEBUG_EXPR(vold->display());
+      const SiconosVector& vold = d->twistMemory()->getSiconosVector(0); // right limit
+      DEBUG_EXPR(vold.display());
 
       // get right information
       SP::SiconosMatrix M(new SimpleMatrix(*(d->mass()))); // we copy the mass matrix to avoid its factorization;
-      SP::SiconosVector vfree = d->twist(); // POINTER CONSTRUCTOR : contains free velocity
-      (*vfree) = *(d->workspace(DynamicalSystem::freeresidu));
+      SiconosVector& vfree = *d->twist(); // POINTER CONSTRUCTOR : contains free velocity
+      vfree = *(d->workspace(DynamicalSystem::freeresidu));
       DEBUG_EXPR(d->workspace(DynamicalSystem::freeresidu)->display());
 
-      *vfree *= -1.;
-      *vfree += *vold;
-      DEBUG_EXPR(vfree->display());
-
-
+      vfree *= -1.;
+      vfree += vold;
+      DEBUG_EXPR(vfree.display());
     }
     else
       RuntimeException::selfThrow("D1MinusLinearOSI::computeResidu - not yet implemented for Dynamical system type: " + dsType);
