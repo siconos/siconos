@@ -23,8 +23,8 @@
 #include <iostream>
 // #define DEBUG_NOCOLOR
 // //#define DEBUG_BEGIN_END_ONLY
-// #define DEBUG_STDOUT
-// #define DEBUG_MESSAGES
+//#define DEBUG_STDOUT
+//#define DEBUG_MESSAGES
 #include <debug.h>
 
 
@@ -54,25 +54,28 @@ void computeRotationMatrix(double q0, double q1, double q2, double q3,
   // rotationMatrix->setValue(2, 2, quatBuff.R_component_4());
 
   /* direct computation https://en.wikipedia.org/wiki/Quaternions_and_spatial_rotation */
-  rotationMatrix->setValue(0, 0,     q0*q0 +q1*q1 -q2*q2 -q3*q3 );
+  rotationMatrix->setValue(0, 0,     q0*q0 +q1*q1 -q2*q2 -q3*q3);
   rotationMatrix->setValue(0, 1, 2.0*(q1*q2        - q0*q3));
   rotationMatrix->setValue(0, 2, 2.0*(q1*q3        + q0*q2));
 
-  rotationMatrix->setValue(1, 0, 2.0*(q1*q2        + q0*q3) );
-  rotationMatrix->setValue(1, 1,     q0*q0 -q1*q1 +q2*q2 -q3*q3 );
-  rotationMatrix->setValue(1, 2, 2.0*(q2*q3        - q0*q1) );
+  rotationMatrix->setValue(1, 0, 2.0*(q1*q2        + q0*q3));
+  rotationMatrix->setValue(1, 1,     q0*q0 -q1*q1 +q2*q2 -q3*q3);
+  rotationMatrix->setValue(1, 2, 2.0*(q2*q3        - q0*q1));
 
-  rotationMatrix->setValue(2, 0, 2.0*(q1*q3        - q0*q2) );
-  rotationMatrix->setValue(2, 1, 2.0*(q2*q3         + q0*q1) );
-  rotationMatrix->setValue(2, 2,     q0*q0 -q1*q1 -q2*q2 +q3*q3 );
+  rotationMatrix->setValue(2, 0, 2.0*(q1*q3        - q0*q2));
+  rotationMatrix->setValue(2, 1, 2.0*(q2*q3         + q0*q1));
+  rotationMatrix->setValue(2, 2,     q0*q0 -q1*q1 -q2*q2 +q3*q3);
 }
 
-void rotateAbsToBody(double q0, double q1, double q2, double q3, SP::SiconosVector v )
+void rotateAbsToBody(double q0, double q1, double q2, double q3, SP::SiconosVector v)
 {
   DEBUG_BEGIN("::rotateAbsToBody(double q0, double q1, double q2, double q3, SP::SiconosVector v )\n");
   DEBUG_EXPR(v->display(););
   DEBUG_PRINTF("( q0 = %e,  q1 = %e,  q2= %e,  q3= %e )\n", q0,q1,q2,q3);
 
+  assert(v);
+  assert(v->size()==3);
+  
   // First way. Using the rotation matrix
   // SP::SimpleMatrix rotationMatrix(new SimpleMatrix(3,3));
   // SiconosVector tmp(3);
@@ -111,14 +114,14 @@ void rotateAbsToBody(double q0, double q1, double q2, double q3, SP::SiconosVect
   DEBUG_END("::rotateAbsToBody(double q0, double q1, double q2, double q3, SP::SiconosVector v )\n");
 }
 
-void rotateAbsToBody(double q0, double q1, double q2, double q3, SP::SimpleMatrix m )
+void rotateAbsToBody(double q0, double q1, double q2, double q3, SP::SimpleMatrix m)
 {
   DEBUG_BEGIN("::rotateAbsToBody(double q0, double q1, double q2, double q3, SP::SimpleMatrix m )\n");
   DEBUG_EXPR(m->display(););
   DEBUG_PRINTF("( q0 = %e,  q1 = %e,  q2= %e,  q3= %e )\n", q0,q1,q2,q3);
 
   // Direct computation with cross product for each column
-  assert(m->size(0) == 3 && "::rotateAbsToBody(double q0, double q1, double q2, double q3, SP::SimpleMatrix m ) m must have 3 rows" );
+  assert(m->size(0) == 3 && "::rotateAbsToBody(double q0, double q1, double q2, double q3, SP::SimpleMatrix m ) m must have 3 rows");
   SiconosVector v(3);
   SiconosVector t(3), tmp(3);
   SiconosVector qvect(3);
@@ -144,40 +147,40 @@ void rotateAbsToBody(double q0, double q1, double q2, double q3, SP::SimpleMatri
 }
 
 
-void rotateAbsToBody(SP::SiconosVector q, SP::SiconosVector v )
+void rotateAbsToBody(SP::SiconosVector q, SP::SiconosVector v)
 {
   DEBUG_BEGIN("::rotateAbsToBody(SP::SiconosVector q, SP::SiconosVector v )\n");
   ::rotateAbsToBody(q->getValue(3),q->getValue(4),q->getValue(5),q->getValue(6), v);
   DEBUG_END("::rotateAbsToBody(SP::SiconosVector q, SP::SiconosVector v )\n");
 }
 
-void rotateAbsToBody(SP::SiconosVector q, SP::SimpleMatrix m )
+void rotateAbsToBody(SP::SiconosVector q, SP::SimpleMatrix m)
 {
   DEBUG_BEGIN("::rotateAbsToBody(SP::SiconosVector q, SP::SimpleMatrix m )\n");
   ::rotateAbsToBody(q->getValue(3),q->getValue(4),q->getValue(5),q->getValue(6),m);
   DEBUG_END("::rotateAbsToBody(SP::SiconosVector q, SP::SimpleMatrix m)\n");
 }
 
-void changeFrameAbsToBody(SP::SiconosVector q, SP::SiconosVector v )
+void changeFrameAbsToBody(SP::SiconosVector q, SP::SiconosVector v)
 {
   DEBUG_BEGIN("::changeFrameAbsToBody(SP::SiconosVector q, SP::SiconosVector v )\n");
   ::rotateAbsToBody(q->getValue(3),-q->getValue(4),-q->getValue(5),-q->getValue(6), v);
   DEBUG_END("::changeFrameAbsToBody(SP::SiconosVector q, SP::SiconosVector v )\n");
 }
-void changeFrameAbsToBody(SP::SiconosVector q, SP::SimpleMatrix m )
+void changeFrameAbsToBody(SP::SiconosVector q, SP::SimpleMatrix m)
 {
   DEBUG_BEGIN("::changeFrameAbsToBody(SP::SiconosVector q, SP::SimpleMatrix m )\n");
   ::rotateAbsToBody(q->getValue(3),-q->getValue(4),-q->getValue(5),-q->getValue(6), m);
   DEBUG_END("::changeFrameAbsToBody(SP::SiconosVector q, SP::SimpleMatrix m )\n");
 }
 
-void changeFrameBodyToAbs(SP::SiconosVector q, SP::SiconosVector v )
+void changeFrameBodyToAbs(SP::SiconosVector q, SP::SiconosVector v)
 {
   DEBUG_BEGIN("::changeFrameBodyToAbs(SP::SiconosVector q, SP::SiconosVector v )\n");
   ::rotateAbsToBody(q->getValue(3),q->getValue(4),q->getValue(5),q->getValue(6), v);
   DEBUG_END("::changeFrameBodyToAbs(SP::SiconosVector q, SP::SiconosVector v )\n");
 }
-void changeFrameBodyToAbs(SP::SiconosVector q, SP::SimpleMatrix m )
+void changeFrameBodyToAbs(SP::SiconosVector q, SP::SimpleMatrix m)
 {
   DEBUG_BEGIN("::changeFrameBodyToAbs(SP::SiconosVector q, SP::SimpleMatrix m )\n");
   ::rotateAbsToBody(q->getValue(3),q->getValue(4),q->getValue(5),q->getValue(6), m);
@@ -186,24 +189,24 @@ void changeFrameBodyToAbs(SP::SiconosVector q, SP::SimpleMatrix m )
 
 
 
-void computeRotationMatrix(SP::SiconosVector q, SP::SimpleMatrix rotationMatrix  )
+void computeRotationMatrix(SP::SiconosVector q, SP::SimpleMatrix rotationMatrix)
 {
   ::computeRotationMatrix(q->getValue(3),q->getValue(4),q->getValue(5),q->getValue(6),
                           rotationMatrix);
 }
-void computeRotationMatrixTransposed(SP::SiconosVector q, SP::SimpleMatrix rotationMatrix )
+void computeRotationMatrixTransposed(SP::SiconosVector q, SP::SimpleMatrix rotationMatrix)
 {
   ::computeRotationMatrix(q->getValue(3),-q->getValue(4),-q->getValue(5),-q->getValue(6),
-                               rotationMatrix);
+                          rotationMatrix);
 }
 
-double getAxisAngle(double q0, double q1, double q2, double q3, SP::SiconosVector axis )
+double axisAngleFromQuaternion(double q0, double q1, double q2, double q3, SP::SiconosVector axis)
 {
-  DEBUG_BEGIN("getAxisAngle(double q0, double q1, double q2, double q3, SP::SiconosVector axis )\n");
+  DEBUG_BEGIN("axisAngleFromQuaternion(double q0, double q1, double q2, double q3, SP::SiconosVector axis )\n");
   double angle = acos(q0) *2.0;
   //double f = sin( angle *0.5);
-  double f = sqrt(1-q0*q0); // cheaper than sin ?  
-  if (f !=0.0)
+  double f = sqrt(1-q0*q0); // cheaper than sin ?
+  if(f !=0.0)
   {
     axis->setValue(0, q1/f);
     axis->setValue(1, q2/f);
@@ -215,76 +218,81 @@ double getAxisAngle(double q0, double q1, double q2, double q3, SP::SiconosVecto
   }
   DEBUG_PRINTF("angle= %12.8e\n", angle);
   DEBUG_EXPR(axis->display(););
-  DEBUG_END("getAxisAngle(double q0, double q1, double q2, double q3, SP::SiconosVector axis )\n");
+  DEBUG_END("axisAngleFromQuaternion(double q0, double q1, double q2, double q3, SP::SiconosVector axis )\n");
   return angle;
 }
 
-double getAxisAngle(SP::SiconosVector q, SP::SiconosVector axis )
+double axisAngleFromQuaternion(SP::SiconosVector q, SP::SiconosVector axis)
 {
-  double angle = ::getAxisAngle(q->getValue(3),q->getValue(4),q->getValue(5),q->getValue(6),axis);
+  double angle = ::axisAngleFromQuaternion(q->getValue(3),q->getValue(4),q->getValue(5),q->getValue(6),axis);
   return angle;
 }
-double getAxisAngle_variant(double q0, double q1, double q2, double q3, SP::SiconosVector axis )
-{
-  DEBUG_BEGIN("getAxisAngle_variant(double q0, double q1, double q2, double q3, SP::SiconosVector axis )\n");
 
-  axis->setValue(0, q1);
-  axis->setValue(1, q2);
-  axis->setValue(2, q3);
-  
+void rotationVectorFromQuaternion(double q0, double q1, double q2, double q3, SP::SiconosVector rotationVector)
+{
+  DEBUG_BEGIN("rotationVectorFromQuaternion(double q0, double q1, double q2, double q3, SP::SiconosVector rotationVector )\n");
+
+  rotationVector->setValue(0, q1);
+  rotationVector->setValue(1, q2);
+  rotationVector->setValue(2, q3);
+
   double norm_v = sqrt(q1*q1+q2*q2+q3*q3);
-  
-  double angle;
-
-  assert (norm_v < M_PI);
-  if (norm_v < 1e-12)
+  assert(norm_v <= M_PI);  /* it should be called for a unit quaternion */
+  if(norm_v < 1e-12)
   {
-    axis->setValue(0, 0.0);
-    axis->setValue(1, 0.0);
-    axis->setValue(2, 0.0);
-    angle = 0.0 ;
+    rotationVector->setValue(0, 0.0);
+    rotationVector->setValue(1, 0.0);
+    rotationVector->setValue(2, 0.0);
   }
   else
   {
-    *axis *=  1.0/norm_v;
-    angle = 2.0 * asin(norm_v);
+    *rotationVector *=  2.0 * asin(norm_v)/norm_v;
   }
-  
-  DEBUG_PRINTF("angle= %12.8e\n", angle);
-  DEBUG_EXPR(axis->display(););
-  
-  DEBUG_END("getAxisAngle_variant(double q0, double q1, double q2, double q3, SP::SiconosVector axis )\n");
-  return angle;
+  DEBUG_EXPR(rotationVector->display(););
+  DEBUG_END("rotationVectorFromQuaternion(double q0, double q1, double q2, double q3, SP::SiconosVector rotationVector )\n");
 }
 
-double getAxisAngle_variant(SP::SiconosVector q, SP::SiconosVector axis )
+void rotationVectorFromQuaternion(SP::SiconosVector q, SP::SiconosVector rotationVector)
 {
-  double angle = ::getAxisAngle_variant(q->getValue(3),q->getValue(4),q->getValue(5),q->getValue(6),axis);
-  return angle;
+  ::rotationVectorFromQuaternion(q->getValue(3),q->getValue(4),q->getValue(5),q->getValue(6), rotationVector);
 }
 
-void setAxisAngle(SP::SiconosVector q, SP::SiconosVector axis, double angle  )
+
+void quaternionFromAxisAngle(SP::SiconosVector axis, double angle, SP::SiconosVector q)
 {
+  q->setValue(3,cos(angle/2.0));
+  q->setValue(4,axis->getValue(0)* sin(angle *0.5));
+  q->setValue(5,axis->getValue(1)* sin(angle *0.5));
+  q->setValue(6,axis->getValue(2)* sin(angle *0.5));
+}
 
-  double normv = sqrt(axis->getValue(0)*axis->getValue(0)+
-                      axis->getValue(1)*axis->getValue(1)+
-                      axis->getValue(2)*axis->getValue(2));
-
-  if (normv != 0.0)
+double sin_x(double x)
+{
+  if(std::abs(x) <= 1e-3)
   {
-    q->setValue(3, cos(angle/2.0));
-    double f = sin( angle *0.5);
-    q->setValue(4, axis->getValue(0)/normv * f);
-    q->setValue(5, axis->getValue(1)/normv * f);
-    q->setValue(6, axis->getValue(2)/normv * f);
+    return 1.0 + x*x / 3.0 + pow(x,4) * 2.0 / 15.0 + pow(x,6) * 17.0 / 315.0 + pow(x,8) * 62.0 / 2835.0;
   }
   else
   {
-    // we assume that the axis has to be well defined.
-    // we return a non unit quaternion.
-    q->zero();
+    return sin(x)/x;
   }
 }
+
+void quaternionFromRotationVector(SP::SiconosVector rotationVector, SP::SiconosVector q)
+{
+  double angle = sqrt(rotationVector->getValue(0)*rotationVector->getValue(0)+
+               rotationVector->getValue(1)*rotationVector->getValue(1)+
+               rotationVector->getValue(2)*rotationVector->getValue(2));
+
+  double f = 0.5 * sin_x(angle *0.5);
+
+  q->setValue(3,cos(angle/2.0));
+  q->setValue(4,rotationVector->getValue(0)* f);
+  q->setValue(5,rotationVector->getValue(1)* f);
+  q->setValue(6,rotationVector->getValue(2)* f);
+}
+
+
 
 void normalizeq(SP::SiconosVector q)
 {
@@ -389,7 +397,7 @@ NewtonEulerDS::NewtonEulerDS(SP::SiconosVector Q0, SP::SiconosVector Twist0,
   resetToInitialState();
 
   _scalarMass = mass;
-  if (inertialMatrix)
+  if(inertialMatrix)
     _I = inertialMatrix;
   updateMassMatrix();
 
@@ -511,9 +519,9 @@ void NewtonEulerDS::initializeNonSmoothInput(unsigned int level)
 {
   DEBUG_PRINTF("NewtonEulerDS::initializeNonSmoothInput(unsigned int level) for level = %i\n",level);
 
-  if (_p[level]->size() == 0)
+  if(_p[level]->size() == 0)
   {
-    if (level == 0)
+    if(level == 0)
     {
       _p[0]->resize(_qDim);
     }
@@ -537,7 +545,7 @@ void NewtonEulerDS::initRhs(double time)
   //  _workMatrix.resize(sizeWorkMat);
   // Solve Mq[2]=fL+p.
   //*_q = *(_p[2]); // Warning: r/p update is done in Interactions/Relations
-  if (_wrench)
+  if(_wrench)
   {
     computeForces(time);
     //      *_q += *_forces;
@@ -554,7 +562,7 @@ void NewtonEulerDS::resetToInitialState()
   // set q and q[1] to q0 and Twist0
   if(_q0)
   {
-     *_q = *_q0;
+    *_q = *_q0;
   }
   else
     RuntimeException::selfThrow("NewtonEulerDS::resetToInitialState - initial position _q0 is null");
@@ -571,28 +579,28 @@ void NewtonEulerDS::resetToInitialState()
 void NewtonEulerDS::computeFExt(double time)
 {
   // computeFExt(time, _fExt);
-  
-  if (_pluginFExt->fPtr)
+
+  if(_pluginFExt->fPtr)
   {
-    ((FExt_NE)_pluginFExt->fPtr)(time, &(*_fExt)(0), _qDim, &(*_q0)(0) ); // parameter z are assumed to be equal to q0
+    ((FExt_NE)_pluginFExt->fPtr)(time, &(*_fExt)(0), _qDim, &(*_q0)(0));  // parameter z are assumed to be equal to q0
   }
-  
+
 }
 
 void NewtonEulerDS::computeFExt(double time, SP::SiconosVector fExt)
 {
   /* if the pointer has been set to an external vector
    * after setting the plugin, we do not call the plugin */
-  if (_hasConstantFExt)
+  if(_hasConstantFExt)
   {
     if(fExt != _fExt)
       *fExt = *_fExt;
   }
   else
   {
-    if (_pluginFExt->fPtr)
+    if(_pluginFExt->fPtr)
     {
-      ((FExt_NE)_pluginFExt->fPtr)(time, &(*fExt)(0), _qDim, &(*_q0)(0) ); // parameter z are assumed to be equal to q0
+      ((FExt_NE)_pluginFExt->fPtr)(time, &(*fExt)(0), _qDim, &(*_q0)(0));  // parameter z are assumed to be equal to q0
     }
   }
 }
@@ -606,16 +614,16 @@ void computeMExt_internal(double time, SP::SiconosVector q, bool hasConstantMExt
 {
   /* if the pointer has been set to an external vector
    * after setting the plugin, we do not call the plugin */
-  if (hasConstantMExt)
+  if(hasConstantMExt)
   {
     if(mExt != mExt_attributes)
       *mExt = *mExt_attributes;
   }
-  else if (pluginMExt->fPtr)
-    ((FExt_NE)pluginMExt->fPtr)(time, &(*mExt)(0), qDim, &(*q0)(0) ); // parameter z are assumed to be equal to q0
+  else if(pluginMExt->fPtr)
+    ((FExt_NE)pluginMExt->fPtr)(time, &(*mExt)(0), qDim, &(*q0)(0));  // parameter z are assumed to be equal to q0
 
-  if (isMextExpressedInInertialFrame && mExt)
-    ::changeFrameAbsToBody(q,mExt); 
+  if(isMextExpressedInInertialFrame && mExt)
+    ::changeFrameAbsToBody(q,mExt);
 }
 
 
@@ -651,14 +659,14 @@ void NewtonEulerDS::computeJacobianMExtqByFD(double time, SP::SiconosVector q)
   SP::SiconosVector qeps(new SiconosVector(*q));
   _jacobianMExtq->zero();
   (*qeps)(0) += _epsilonFD;
-  for (int j =0; j < 7; j++)
+  for(int j =0; j < 7; j++)
   {
     computeMExt(time, qeps, mExt);
-    _jacobianMExtq->setValue(0,j,  (mExt->getValue(0) - mExt0)/_epsilonFD );
-    _jacobianMExtq->setValue(1,j,  (mExt->getValue(1) - mExt1)/_epsilonFD );
-    _jacobianMExtq->setValue(2,j,  (mExt->getValue(2) - mExt2)/_epsilonFD );
+    _jacobianMExtq->setValue(0,j, (mExt->getValue(0) - mExt0)/_epsilonFD);
+    _jacobianMExtq->setValue(1,j, (mExt->getValue(1) - mExt1)/_epsilonFD);
+    _jacobianMExtq->setValue(2,j, (mExt->getValue(2) - mExt2)/_epsilonFD);
     (*qeps)(j) -= _epsilonFD;
-    if (j<6) (*qeps)(j+1) += _epsilonFD;
+    if(j<6)(*qeps)(j+1) += _epsilonFD;
   }
   DEBUG_EXPR(_jacobianMExtq->display(););
   DEBUG_END("NewtonEulerDS::computeJacobianMExtvByFD(...)\n");
@@ -673,7 +681,7 @@ void NewtonEulerDS::computeFInt(double time, SP::SiconosVector q, SP::SiconosVec
 
 void NewtonEulerDS::computeFInt(double time, SP::SiconosVector q, SP::SiconosVector v, SP::SiconosVector fInt)
 {
-  if (_pluginFInt->fPtr)
+  if(_pluginFInt->fPtr)
     ((FInt_NE)_pluginFInt->fPtr)(time, &(*q)(0), &(*v)(0), &(*fInt)(0), _qDim,  &(*_q0)(0));// parameter z are assumed to be equal to q0
 }
 
@@ -685,7 +693,7 @@ void NewtonEulerDS::computeMInt(double time, SP::SiconosVector q, SP::SiconosVec
 
 void NewtonEulerDS::computeMInt(double time, SP::SiconosVector q, SP::SiconosVector v, SP::SiconosVector mInt)
 {
-  if (_pluginMInt->fPtr)
+  if(_pluginMInt->fPtr)
     ((FInt_NE)_pluginMInt->fPtr)(time, &(*q)(0), &(*v)(0), &(*mInt)(0), _qDim,  &(*_q0)(0));// parameter z are assumed to be equal to q0
 }
 
@@ -702,9 +710,9 @@ void NewtonEulerDS::computeJacobianFIntv(double time)
 void NewtonEulerDS::computeJacobianFIntq(double time, SP::SiconosVector q, SP::SiconosVector twist)
 {
   DEBUG_PRINT("NewtonEulerDS::computeJacobianFIntq(...) starts");
-  if (_pluginJacqFInt->fPtr)
+  if(_pluginJacqFInt->fPtr)
     ((FInt_NE)_pluginJacqFInt->fPtr)(time, &(*q)(0), &(*twist)(0), &(*_jacobianFIntq)(0, 0), _qDim,  &(*_q0)(0));
-  else if (_computeJacobianFIntqByFD)
+  else if(_computeJacobianFIntqByFD)
     computeJacobianFIntqByFD(time, q, twist);
   DEBUG_EXPR(_jacobianFIntq->display(););
   DEBUG_END("NewtonEulerDS::computeJacobianFIntq(...)");
@@ -723,14 +731,14 @@ void NewtonEulerDS::computeJacobianFIntqByFD(double time, SP::SiconosVector q, S
   SP::SiconosVector qeps(new SiconosVector(*q));
   _jacobianFIntq->zero();
   (*qeps)(0) += _epsilonFD;
-  for (int j =0; j < 7; j++)
+  for(int j =0; j < 7; j++)
   {
     computeFInt(time, qeps, twist, fInt);
-    _jacobianFIntq->setValue(0,j,  (fInt->getValue(0) - fInt0)/_epsilonFD );
-    _jacobianFIntq->setValue(1,j,  (fInt->getValue(1) - fInt1)/_epsilonFD );
-    _jacobianFIntq->setValue(2,j,  (fInt->getValue(2) - fInt2)/_epsilonFD );
+    _jacobianFIntq->setValue(0,j, (fInt->getValue(0) - fInt0)/_epsilonFD);
+    _jacobianFIntq->setValue(1,j, (fInt->getValue(1) - fInt1)/_epsilonFD);
+    _jacobianFIntq->setValue(2,j, (fInt->getValue(2) - fInt2)/_epsilonFD);
     (*qeps)(j) -= _epsilonFD;
-    if (j<6) (*qeps)(j+1) += _epsilonFD;
+    if(j<6)(*qeps)(j+1) += _epsilonFD;
   }
   DEBUG_END("NewtonEulerDS::computeJacobianFIntqByFD(...)\n");
 
@@ -739,9 +747,9 @@ void NewtonEulerDS::computeJacobianFIntqByFD(double time, SP::SiconosVector q, S
 
 void NewtonEulerDS::computeJacobianFIntv(double time, SP::SiconosVector q, SP::SiconosVector twist)
 {
-  if (_pluginJactwistFInt->fPtr)
+  if(_pluginJactwistFInt->fPtr)
     ((FInt_NE)_pluginJactwistFInt->fPtr)(time, &(*q)(0), &(*twist)(0), &(*_jacobianFInttwist)(0, 0), _qDim,  &(*_q0)(0));
-  else if (_computeJacobianFInttwistByFD)
+  else if(_computeJacobianFInttwistByFD)
     computeJacobianFIntvByFD(time, q, twist);
 }
 
@@ -759,14 +767,14 @@ void NewtonEulerDS::computeJacobianFIntvByFD(double time, SP::SiconosVector q, S
   _jacobianFInttwist->zero();
 
   (*veps)(0) += _epsilonFD;
-  for (int j =0; j < 6; j++)
+  for(int j =0; j < 6; j++)
   {
     computeFInt(time, q, veps, fInt);
-    _jacobianFInttwist->setValue(0,j,  (fInt->getValue(0) - fInt0)/_epsilonFD );
-    _jacobianFInttwist->setValue(1,j,  (fInt->getValue(1) - fInt1)/_epsilonFD );
-    _jacobianFInttwist->setValue(2,j,  (fInt->getValue(2) - fInt2)/_epsilonFD );
+    _jacobianFInttwist->setValue(0,j, (fInt->getValue(0) - fInt0)/_epsilonFD);
+    _jacobianFInttwist->setValue(1,j, (fInt->getValue(1) - fInt1)/_epsilonFD);
+    _jacobianFInttwist->setValue(2,j, (fInt->getValue(2) - fInt2)/_epsilonFD);
     (*veps)(j) -= _epsilonFD;
-    if (j<5) (*veps)(j+1) += _epsilonFD;
+    if(j<5)(*veps)(j+1) += _epsilonFD;
   }
 
   DEBUG_END("NewtonEulerDS::computeJacobianFIntvByFD(...)\n");
@@ -788,14 +796,14 @@ void NewtonEulerDS::computeJacobianMGyrtwistByFD(double time, SP::SiconosVector 
 
 
   (*veps)(0) += _epsilonFD;
-  for (int j =0; j < 6; j++)
+  for(int j =0; j < 6; j++)
   {
     computeMGyr(veps, mGyr);
-    _jacobianMGyrtwist->setValue(3,j,  (mGyr->getValue(0) - mGyr0)/_epsilonFD );
-    _jacobianMGyrtwist->setValue(4,j,  (mGyr->getValue(1) - mGyr1)/_epsilonFD );
-    _jacobianMGyrtwist->setValue(5,j,  (mGyr->getValue(2) - mGyr2)/_epsilonFD );
+    _jacobianMGyrtwist->setValue(3,j, (mGyr->getValue(0) - mGyr0)/_epsilonFD);
+    _jacobianMGyrtwist->setValue(4,j, (mGyr->getValue(1) - mGyr1)/_epsilonFD);
+    _jacobianMGyrtwist->setValue(5,j, (mGyr->getValue(2) - mGyr2)/_epsilonFD);
     (*veps)(j) -= _epsilonFD;
-    if (j<5) (*veps)(j+1) += _epsilonFD;
+    if(j<5)(*veps)(j+1) += _epsilonFD;
   }
   DEBUG_EXPR(_jacobianMGyrtwist->display());
   DEBUG_END("NewtonEulerDS::computeJacobianMGyrvByFD(...)\n");
@@ -814,9 +822,9 @@ void NewtonEulerDS::computeJacobianMIntv(double time)
 void NewtonEulerDS::computeJacobianMIntq(double time, SP::SiconosVector q, SP::SiconosVector twist)
 {
   DEBUG_PRINT("NewtonEulerDS::computeJacobianMIntq(...) starts");
-  if (_pluginJacqMInt->fPtr)
+  if(_pluginJacqMInt->fPtr)
     ((FInt_NE)_pluginJacqMInt->fPtr)(time, &(*q)(0), &(*twist)(0), &(*_jacobianMIntq)(0, 0), _qDim,  &(*_q0)(0));
-  else if (_computeJacobianMIntqByFD)
+  else if(_computeJacobianMIntqByFD)
     computeJacobianMIntqByFD(time, q, twist);
   DEBUG_EXPR(_jacobianMIntq->display());
   DEBUG_PRINT("NewtonEulerDS::computeJacobianMIntq(...) ends");
@@ -836,23 +844,23 @@ void NewtonEulerDS::computeJacobianMIntqByFD(double time, SP::SiconosVector q, S
   SP::SiconosVector qeps(new SiconosVector(*q));
 
   (*qeps)(0) += _epsilonFD;
-  for (int j =0; j < 7; j++)
+  for(int j =0; j < 7; j++)
   {
     computeMInt(time, qeps, twist, mInt);
-    _jacobianMIntq->setValue(0,j,  (mInt->getValue(0) - mInt0)/_epsilonFD );
-    _jacobianMIntq->setValue(1,j,  (mInt->getValue(1) - mInt1)/_epsilonFD );
-    _jacobianMIntq->setValue(2,j,  (mInt->getValue(2) - mInt2)/_epsilonFD );
+    _jacobianMIntq->setValue(0,j, (mInt->getValue(0) - mInt0)/_epsilonFD);
+    _jacobianMIntq->setValue(1,j, (mInt->getValue(1) - mInt1)/_epsilonFD);
+    _jacobianMIntq->setValue(2,j, (mInt->getValue(2) - mInt2)/_epsilonFD);
     (*qeps)(j) -= _epsilonFD;
-    if (j<6) (*qeps)(j+1) += _epsilonFD;
+    if(j<6)(*qeps)(j+1) += _epsilonFD;
   }
   DEBUG_PRINT("NewtonEulerDS::computeJacobianMIntqByFD(...) ends\n");
 }
 
 void NewtonEulerDS::computeJacobianMIntv(double time, SP::SiconosVector q, SP::SiconosVector twist)
 {
-  if (_pluginJactwistMInt->fPtr)
+  if(_pluginJactwistMInt->fPtr)
     ((FInt_NE)_pluginJactwistMInt->fPtr)(time, &(*q)(0), &(*twist)(0), &(*_jacobianMInttwist)(0, 0), _qDim,  &(*_q0)(0));
-  else if (_computeJacobianMInttwistByFD)
+  else if(_computeJacobianMInttwistByFD)
     computeJacobianMIntvByFD(time,  q, twist);
 }
 
@@ -869,14 +877,14 @@ void NewtonEulerDS::computeJacobianMIntvByFD(double time, SP::SiconosVector q, S
   SP::SiconosVector veps(new SiconosVector(*twist));
 
   (*veps)(0) += _epsilonFD;
-  for (int j =0; j < 6; j++)
+  for(int j =0; j < 6; j++)
   {
     computeMInt(time, q, veps, mInt);
-    _jacobianMInttwist->setValue(0,j,  (mInt->getValue(0) - mInt0)/_epsilonFD );
-    _jacobianMInttwist->setValue(1,j,  (mInt->getValue(1) - mInt1)/_epsilonFD );
-    _jacobianMInttwist->setValue(2,j,  (mInt->getValue(2) - mInt2)/_epsilonFD );
+    _jacobianMInttwist->setValue(0,j, (mInt->getValue(0) - mInt0)/_epsilonFD);
+    _jacobianMInttwist->setValue(1,j, (mInt->getValue(1) - mInt1)/_epsilonFD);
+    _jacobianMInttwist->setValue(2,j, (mInt->getValue(2) - mInt2)/_epsilonFD);
     (*veps)(j) -= _epsilonFD;
-    if (j<5) (*veps)(j+1) += _epsilonFD;
+    if(j<5)(*veps)(j+1) += _epsilonFD;
   }
   DEBUG_PRINT("NewtonEulerDS::computeJacobianMIntvByFD(...) ends\n");
 }
@@ -886,7 +894,7 @@ void NewtonEulerDS::computeRhs(double time, bool isDSup)
 {
   // if isDSup == true, this means that there is no need to re-compute mass ...
   //  *_q = *(_p[2]); // Warning: r/p update is done in Interactions/Relations
-  if (_wrench)
+  if(_wrench)
   {
     computeForces(time);
     //*_q += *_forces;
@@ -911,10 +919,10 @@ void NewtonEulerDS::computeForces(double time)
 
 void computeMGyr_internal(SP::SiconosMatrix I ,SP::SiconosVector twist, SP::SiconosVector mGyr)
 {
- if (I)
- {
-    DEBUG_EXPR( I->display());
-    DEBUG_EXPR( twist->display());
+  if(I)
+  {
+    DEBUG_EXPR(I->display());
+    DEBUG_EXPR(twist->display());
     SiconosVector omega(3);
     SiconosVector iomega(3);
     omega.setValue(0, twist->getValue(3));
@@ -928,11 +936,9 @@ void NewtonEulerDS::computeMGyr(SP::SiconosVector twist, SP::SiconosVector mGyr)
 {
   // computation of \Omega times I \Omega (MGyr is in the l.h.s of the equation of motion)
   DEBUG_BEGIN("NewtonEulerDS::computeMGyr(SP::SiconosVector twist, SP::SiconosVector mGyr)\n");
- 
-  DEBUG_EXPR(mGyr->display());
 
-  ::computeMGyr_internal(_I, twist, mGyr);
- 
+   ::computeMGyr_internal(_I, twist, mGyr);
+
   DEBUG_END("NewtonEulerDS::computeMGyr(SP::SiconosVector twist, SP::SiconosVector mGyr)\n");
 
 }
@@ -941,10 +947,6 @@ void NewtonEulerDS::computeMGyr(SP::SiconosVector twist)
   /*computation of \Omega times I \Omega*/
   //DEBUG_BEGIN("NewtonEulerDS::computeMGyr(SP::SiconosVector twist)\n");
   ::computeMGyr_internal(_I , twist, _mGyr);
-  std::cout << "NewtonEulerDS::computeMGyr(SP::SiconosVector twist) " << std::endl;
-  std::cout << _mGyr << std::endl;
-  _mGyr->display();
-  DEBUG_EXPR(_mGyr->display());
   //DEBUG_END("NewtonEulerDS::computeMGyr(SP::SiconosVector twist)\n");
 
 }
@@ -953,23 +955,25 @@ void NewtonEulerDS::computeMGyr(SP::SiconosVector twist)
 void NewtonEulerDS::computeForces(double time, SP::SiconosVector q, SP::SiconosVector twist)
 {
   DEBUG_BEGIN("NewtonEulerDS::computeForces(double time, SP::SiconosVector q, SP::SiconosVector twist)\n")
+    std::cout << "q" << std::endl;
+    q->display();
   // Warning: an operator (fInt ...) may be set (ie allocated and not NULL) but not plugged, that's why two steps are required here.
-  if (_wrench)
+  if(_wrench)
   {
     _wrench->zero();
     // 1 - Computes the required functions
     computeFExt(time);
-    if (_fExt)
+    if(_fExt)
     {
       _wrench->setBlock(0, *_fExt);
     }
     computeMExt(time,q);
-    if (_mExt)
+    if(_mExt)
     {
       _wrench->setBlock(3, *_mExt);
     }
-    
-    if (_fInt)
+
+    if(_fInt)
     {
       computeFInt(time, q, twist);
       _wrench->setValue(0, _wrench->getValue(0) - _fInt->getValue(0));
@@ -977,14 +981,14 @@ void NewtonEulerDS::computeForces(double time, SP::SiconosVector q, SP::SiconosV
       _wrench->setValue(2, _wrench->getValue(2) - _fInt->getValue(2));
 
     }
-    if (_mInt)
+    if(_mInt)
     {
       computeMInt(time, q , twist);
       _wrench->setValue(3, _wrench->getValue(3) - _mInt->getValue(0));
       _wrench->setValue(4, _wrench->getValue(4) - _mInt->getValue(1));
       _wrench->setValue(5, _wrench->getValue(5) - _mInt->getValue(2));
     }
-    if (!_nullifyMGyr)
+    if(!_nullifyMGyr)
     {
       computeMGyr(twist);
       _wrench->setValue(3, _wrench->getValue(3) - _mGyr->getValue(0));
@@ -1005,19 +1009,19 @@ void NewtonEulerDS::computeForces(double time, SP::SiconosVector q, SP::SiconosV
 void NewtonEulerDS::computeJacobianqForces(double time)
 {
   DEBUG_BEGIN("NewtonEulerDS::computeJacobianqWrench(double time) \n");
-  if (_jacobianWrenchq)
+  if(_jacobianWrenchq)
   {
     _jacobianWrenchq->zero();
-    if (_jacobianFIntq)
+    if(_jacobianFIntq)
     {
       computeJacobianFIntq(time);
       _jacobianWrenchq->setBlock(0,0,-1.0 * *_jacobianFIntq);
     }
-    if (_jacobianMIntq)
+    if(_jacobianMIntq)
     {
       computeJacobianMIntq(time);
     }
-    if (_isMextExpressedInInertialFrame && _mExt)
+    if(_isMextExpressedInInertialFrame && _mExt)
     {
       computeJacobianMExtqByFD(time, _q);
       _jacobianWrenchq->setBlock(3,0,1.0* *_jacobianMExtq);
@@ -1035,22 +1039,22 @@ void NewtonEulerDS::computeJacobianqForces(double time)
 void NewtonEulerDS::computeJacobianvForces(double time)
 {
   DEBUG_BEGIN("NewtonEulerDS::computeJacobiantwistForces(double time) \n");
-  if (_jacobianWrenchTwist)
+  if(_jacobianWrenchTwist)
   {
     _jacobianWrenchTwist->zero();
-    if (_jacobianFInttwist)
+    if(_jacobianFInttwist)
     {
       computeJacobianFIntv(time);
       _jacobianWrenchTwist->setBlock(0,0,-1.0 * *_jacobianFInttwist);
     }
-    if (_jacobianMInttwist)
+    if(_jacobianMInttwist)
     {
       computeJacobianMIntv(time);
       _jacobianWrenchTwist->setBlock(3,0,-1.0 * *_jacobianMInttwist);
     }
-    if (!_nullifyMGyr)
+    if(!_nullifyMGyr)
     {
-      if (_jacobianMGyrtwist)
+      if(_jacobianMGyrtwist)
       {
         //computeJacobianMGyrtwistByFD(time,_q,_twist);
         computeJacobianMGyrtwist(time);
@@ -1065,7 +1069,7 @@ void NewtonEulerDS::computeJacobianvForces(double time)
 void NewtonEulerDS::computeJacobianMGyrtwist(double time)
 {
   DEBUG_BEGIN("NewtonEulerDS::computeJacobianMGyrtwist(double time) \n");
-  if (_jacobianMGyrtwist)
+  if(_jacobianMGyrtwist)
   {
     //Omega /\ I \Omega:
     _jacobianMGyrtwist->zero();
@@ -1081,14 +1085,14 @@ void NewtonEulerDS::computeJacobianMGyrtwist(double time)
     SiconosVector omega_Iei(3);
 
     /*See equation of DevNotes.pdf, equation with label eq:NE_nablaFL1*/
-    for (int i = 0; i < 3; i++)
+    for(int i = 0; i < 3; i++)
     {
       ei.zero();
       ei.setValue(i, 1.0);
       prod(*_I, ei, Iei, true);
       cross_product(omega, Iei, omega_Iei);
       cross_product(ei, Iomega, ei_Iomega);
-      for (int j = 0; j < 3; j++)
+      for(int j = 0; j < 3; j++)
         _jacobianMGyrtwist->setValue(j, 3 + i, ei_Iomega.getValue(j) + omega_Iei.getValue(j));
     }
     // Check if Jacobian is valid. Warning to the transpose operation in
@@ -1111,31 +1115,31 @@ void NewtonEulerDS::display() const
   std::cout << "=====> NewtonEuler System display (number: " << _number << ")." <<std::endl;
   std::cout << "- _n : " << _n <<std::endl;
   std::cout << "- q " <<std::endl;
-  if (_q) _q->display();
+  if(_q) _q->display();
   else std::cout << "-> NULL" <<std::endl;
   std::cout << "- q0 " <<std::endl;
-  if (_q0) _q0->display();
+  if(_q0) _q0->display();
   std::cout << "- twist " <<std::endl;
-  if (_twist) _twist->display();
+  if(_twist) _twist->display();
   else std::cout << "-> NULL" <<std::endl;
   std::cout << "- twist0 " <<std::endl;
-  if (_twist0) _twist0->display();
+  if(_twist0) _twist0->display();
   else std::cout << "-> NULL" <<std::endl;
   std::cout << "- dotq " <<std::endl;
-  if (_dotq) _dotq->display();
+  if(_dotq) _dotq->display();
   else std::cout << "-> NULL" <<std::endl;
   std::cout << "- p[0] " <<std::endl;
-  if (_p[0]) _p[0]->display();
+  if(_p[0]) _p[0]->display();
   else std::cout << "-> NULL" <<std::endl;
   std::cout << "- p[1] " <<std::endl;
-  if (_p[1]) _p[1]->display();
+  if(_p[1]) _p[1]->display();
   else std::cout << "-> NULL" <<std::endl;
   std::cout << "- p[2] " <<std::endl;
-  if (_p[2]) _p[2]->display();
+  if(_p[2]) _p[2]->display();
   else std::cout << "-> NULL" <<std::endl;
   std::cout << "mass :" <<  _scalarMass <<std::endl;
   std::cout << "Inertia :" <<std::endl;
-  if (_I) _I->display();
+  if(_I) _I->display();
   else std::cout << "-> NULL" <<std::endl;
   std::cout << "===================================== " <<std::endl;
 }
@@ -1145,7 +1149,7 @@ void NewtonEulerDS::initMemory(unsigned int steps)
 {
   DynamicalSystem::initMemory(steps);
 
-  if (steps == 0)
+  if(steps == 0)
     std::cout << "Warning : NewtonEulerDS::initMemory with size equal to zero" <<std::endl;
   else
   {
@@ -1168,14 +1172,14 @@ void NewtonEulerDS::swapInMemory()
 
 void NewtonEulerDS::resetAllNonSmoothPart()
 {
-  if (_p[1])
+  if(_p[1])
     _p[1]->zero();
   else
     _p[1].reset(new SiconosVector(_n));
 }
 void NewtonEulerDS::resetNonSmoothPart(unsigned int level)
 {
-  if (_p[level]->size() > 0)
+  if(_p[level]->size() > 0)
     _p[level]->zero();
 }
 
@@ -1189,7 +1193,7 @@ void NewtonEulerDS::computeT()
 
 void NewtonEulerDS::computeTdot()
 {
-  if (!_Tdot)
+  if(!_Tdot)
   {
     _Tdot.reset(new SimpleMatrix(_qDim, _n));
     _Tdot->zero();
@@ -1208,67 +1212,67 @@ void NewtonEulerDS::setComputeJacobianFIntqFunction(const std::string&  pluginPa
 {
   //    Plugin::setFunction(&computeJacobianFIntqPtr, pluginPath,functionName);
   _pluginJacqFInt->setComputeFunction(pluginPath, functionName);
-  if (!_jacobianFIntq)
+  if(!_jacobianFIntq)
     _jacobianFIntq.reset(new SimpleMatrix(3, _qDim));
-  if (!_jacobianWrenchq)
+  if(!_jacobianWrenchq)
     _jacobianWrenchq.reset(new SimpleMatrix(_n, _qDim));
 }
 void NewtonEulerDS::setComputeJacobianFIntvFunction(const std::string&  pluginPath, const std::string&  functionName)
 {
   //    Plugin::setFunction(&computeJacobianFIntvPtr, pluginPath,functionName);
   _pluginJactwistFInt->setComputeFunction(pluginPath, functionName);
-  if (!_jacobianFInttwist)
+  if(!_jacobianFInttwist)
     _jacobianFInttwist.reset(new SimpleMatrix(3, _n));
 
 }
 void NewtonEulerDS::setComputeJacobianFIntqFunction(FInt_NE fct)
 {
   _pluginJacqFInt->setComputeFunction((void *)fct);
-  if (!_jacobianFIntq)
+  if(!_jacobianFIntq)
     _jacobianFIntq.reset(new SimpleMatrix(3, _qDim));
-  if (!_jacobianWrenchq)
+  if(!_jacobianWrenchq)
     _jacobianWrenchq.reset(new SimpleMatrix(_n, _qDim));
 }
 void NewtonEulerDS::setComputeJacobianFIntvFunction(FInt_NE fct)
 {
   _pluginJactwistFInt->setComputeFunction((void *)fct);
-  if (!_jacobianFInttwist)
+  if(!_jacobianFInttwist)
     _jacobianFInttwist.reset(new SimpleMatrix(3, _n));
-  if (!_jacobianWrenchTwist)
+  if(!_jacobianWrenchTwist)
     _jacobianWrenchTwist.reset(new SimpleMatrix(_n, _n));
 }
 
 void NewtonEulerDS::setComputeJacobianMIntqFunction(const std::string&  pluginPath, const std::string&  functionName)
 {
   _pluginJacqMInt->setComputeFunction(pluginPath, functionName);
-  if (!_jacobianMIntq)
+  if(!_jacobianMIntq)
     _jacobianMIntq.reset(new SimpleMatrix(3, _qDim));
-  if (!_jacobianWrenchq)
+  if(!_jacobianWrenchq)
     _jacobianWrenchq.reset(new SimpleMatrix(_n, _qDim));
 
 }
 void NewtonEulerDS::setComputeJacobianMIntvFunction(const std::string&  pluginPath, const std::string&  functionName)
 {
   _pluginJactwistMInt->setComputeFunction(pluginPath, functionName);
-  if (!_jacobianMInttwist)
+  if(!_jacobianMInttwist)
     _jacobianMInttwist.reset(new SimpleMatrix(3, _n));
-  if (!_jacobianWrenchTwist)
+  if(!_jacobianWrenchTwist)
     _jacobianWrenchTwist.reset(new SimpleMatrix(_n, _n));
 }
 void NewtonEulerDS::setComputeJacobianMIntqFunction(FInt_NE fct)
 {
   _pluginJacqMInt->setComputeFunction((void *)fct);
-  if (!_jacobianMIntq)
+  if(!_jacobianMIntq)
     _jacobianMIntq.reset(new SimpleMatrix(3, _qDim));
-  if (!_jacobianWrenchq)
+  if(!_jacobianWrenchq)
     _jacobianWrenchq.reset(new SimpleMatrix(_n, _qDim));
 }
 void NewtonEulerDS::setComputeJacobianMIntvFunction(FInt_NE fct)
 {
   _pluginJactwistMInt->setComputeFunction((void *)fct);
-  if (!_jacobianMInttwist)
+  if(!_jacobianMInttwist)
     _jacobianMInttwist.reset(new SimpleMatrix(3, _n));
-  if (!_jacobianWrenchTwist)
+  if(!_jacobianWrenchTwist)
     _jacobianWrenchTwist.reset(new SimpleMatrix(_n, _n));
 }
 
@@ -1291,7 +1295,8 @@ double NewtonEulerDS::computeKineticEnergy()
 }
 void NewtonEulerDS::setBoundaryConditions(SP::BoundaryCondition newbd)
 {
-  if(!_boundaryConditions){
+  if(!_boundaryConditions)
+  {
     std::cout << "Warning : NewtonEulerDS::setBoundaryConditions. old boundary conditions were pre-existing" <<std::endl;
   }
   _boundaryConditions = newbd;
