@@ -33,10 +33,10 @@
 #include "OneStepNSProblem.hpp"
 #include "BlockVector.hpp"
 
-// #define DEBUG_BEGIN_END_ONLY
-// #define DEBUG_STDOUT
-// #define DEBUG_NOCOLOR
-// #define DEBUG_MESSAGES
+//#define DEBUG_BEGIN_END_ONLY
+//#define DEBUG_STDOUT
+//#define DEBUG_NOCOLOR
+//#define DEBUG_MESSAGES
 //#define DEBUG_WHERE_MESSAGES
 #include <debug.h>
 
@@ -125,7 +125,17 @@ void MoreauJeanOSI::initialize(Model& m)
     else if (dsType == Type::NewtonEulerDS)
     {
       SP::NewtonEulerDS neds = std11::static_pointer_cast<NewtonEulerDS> (ds);
+
+      //Compute a first value of the dotq  to store it in  _dotqMemory
+      SP::SiconosMatrix T = neds->T();
+      SP::SiconosVector dotq = neds->dotq();
+      SP::SiconosVector v = neds->twist();
+      prod(*T, *v, *dotq, true);
+
+      //Compute a first value of the forces to store it in _forcesMemory
       neds->computeForces(m.t0());
+
+
       neds->swapInMemory();
     }
 
@@ -746,17 +756,18 @@ double MoreauJeanOSI::computeResidu()
 
         // Cheaper version: get forces(ti,vi,qi) from memory
         SP::SiconosVector fold = d->forcesMemory()->getSiconosVector(0);
+        DEBUG_PRINT("MoreauJeanOSI:: old forces :\n");
+        DEBUG_EXPR(fold->display(););
 
         double coef = -h * (1 - _theta);
         scal(coef, *fold, *residuFree, false);
 
-        // Expensive version to check ...
-        //d->computeForces(told,qold,vold);
+        //Expensive version to check ...
+        // d->computeForces(told,qold,vold);
+        // DEBUG_EXPR(d->forces()->display(););
         //double coef = -h * (1.0 - _theta);
         //scal(coef, *d->forces(), *residuFree, false);
 
-        DEBUG_PRINT("MoreauJeanOSI:: old forces :\n");
-        DEBUG_EXPR(d->forces()->display(););
         DEBUG_EXPR(residuFree->display(););
 
         // computes forces(ti,v,q)
@@ -1345,8 +1356,7 @@ void MoreauJeanOSI::updatePosition(SP::DynamicalSystem ds)
     // get dynamical system
     SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS> (ds);
     SP::SiconosVector v = d->twist();
-    DEBUG_EXPR(d->display());
-    DEBUG_EXPR(v->display());
+    //DEBUG_EXPR(d->display());
 
     //compute q
     //first step consists in computing  \dot q.
@@ -1354,20 +1364,27 @@ void MoreauJeanOSI::updatePosition(SP::DynamicalSystem ds)
     //
     SP::SiconosMatrix T = d->T();
     SP::SiconosVector dotq = d->dotq();
+    DEBUG_EXPR(v->display());
     prod(*T, *v, *dotq, true);
     DEBUG_EXPR(dotq->display());
 
     SP::SiconosVector q = d->q();
-
     //  -> get previous time step state
     SP::SiconosVector dotqold = d->dotqMemory()->getSiconosVector(0);
-    SP::SiconosVector qold = d->qMemory()->getSiconosVector(0);
+    DEBUG_EXPR(dotqold->display());
+
+    
     // *q = *qold + h*(theta * *v +(1.0 - theta)* *vold)
     double coeff = h * _theta;
     scal(coeff, *dotq, *q) ; // q = h*theta*v
+    
     coeff = h * (1 - _theta);
     scal(coeff, *dotqold, *q, false); // q += h(1-theta)*vold
-    *q += *qold;
+
+    SP::SiconosVector qold = d->qMemory()->getSiconosVector(0);
+    DEBUG_EXPR(qold->display());
+    *q += *qold;   // q += qold
+    
     DEBUG_PRINT("new q before normalizing\n");
     DEBUG_EXPR(q->display());
 
@@ -1489,8 +1506,8 @@ void MoreauJeanOSI::updateState(const unsigned int level)
       // get dynamical system
       SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS> (ds);
       SP::SiconosVector v = d->twist();
-      DEBUG_PRINT("MoreauJeanOSI::updateState()\n ")
-      DEBUG_EXPR(d->display());
+      // DEBUG_PRINT("MoreauJeanOSI::updateState()\n ")
+      // DEBUG_EXPR(d->display());
       DEBUG_PRINT("MoreauJeanOSI::updateState() prev v\n")
       DEBUG_EXPR(v->display());
 
