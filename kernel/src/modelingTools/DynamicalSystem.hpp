@@ -255,6 +255,10 @@ public:
    */
   virtual bool checkDynamicalSystem() = 0;
 
+  /** reset the state to the initial state */
+  virtual void resetToInitialState();
+
+  
   /*! @name Members access */
   //@{
 

@@ -114,34 +114,6 @@ void LagrangianLinearTIDS::initRhs(double time)
 void LagrangianLinearTIDS::initialize(double time, unsigned int sizeOfMemory)
 {
 
-  // set q and _q[1] to _q0 and velocity0, initialize acceleration.
-  *_q[0] = *_q0;
-  *_q[1] = *_velocity0;
-
-  if (_boundaryConditions)
-  {
-    _reactionToBoundaryConditions.reset(new SiconosVector(_boundaryConditions->velocityIndices()->size()));
-  }
-
-  if (!_forces)
-    _forces.reset(new SiconosVector(dimension()));
-  // If z has not been set, we initialize it with a null vector of
-  // size 1, since z is required in plug-in functions call.
-  if (! _z)
-    _z.reset(new SiconosVector(1));
-
-  // Set variables of top-class DynamicalSystem
-  connectToDS(); // note that connection can not be done during
-  // constructor call, since user can complete the ds
-  // after (add plugin or anything else).
-
-  checkDynamicalSystem();
-
-  // Initialize memory vectors
-  initMemory(sizeOfMemory);
-
-  // rhs and its jacobian
-  //initRhs(time);
 }
 
 void LagrangianLinearTIDS::setK(const SiconosMatrix& newValue)

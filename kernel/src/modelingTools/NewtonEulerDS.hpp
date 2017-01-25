@@ -41,16 +41,16 @@ void computeRotationMatrixTransposed(SP::SiconosVector q, SP::SimpleMatrix rotat
  * \param[in] q the position vector
  * \param[in,out] v the vector to be rotated
  */
-void rotateAbsToBody(SP::SiconosVector q, SP::SiconosVector v );
+void rotateAbsToBody(SP::SiconosVector q, SP::SiconosVector v);
 /* For a given position vector q, performs the rotation of the matrix m
  * w.r.t the quaternion that parametrize the rotation in q, that is the
  * rotation of the body fixed frame with respect to the inertial frame.
  * \param[in] q the position vector
  * \param[in,out] m the vector to be rotated
  */
-void rotateAbsToBody(SP::SiconosVector q, SP::SimpleMatrix m );
-void rotateAbsToBody(double q0, double q1, double q2, double q3, SP::SiconosVector v );
-void rotateAbsToBody(double q0, double q1, double q2, double q3, SP::SimpleMatrix m );
+void rotateAbsToBody(SP::SiconosVector q, SP::SimpleMatrix m);
+void rotateAbsToBody(double q0, double q1, double q2, double q3, SP::SiconosVector v);
+void rotateAbsToBody(double q0, double q1, double q2, double q3, SP::SimpleMatrix m);
 
 
 /* For a given position vector q, express the vector v given in
@@ -61,16 +61,20 @@ void rotateAbsToBody(double q0, double q1, double q2, double q3, SP::SimpleMatri
  * \param[in] q the position vector
  * \param[in,out] v the vector to be reexpressed
  */
-void changeFrameAbsToBody(SP::SiconosVector q, SP::SiconosVector v );
-void changeFrameAbsToBody(SP::SiconosVector q, SP::SimpleMatrix m );
+void changeFrameAbsToBody(SP::SiconosVector q, SP::SiconosVector v);
+void changeFrameAbsToBody(SP::SiconosVector q, SP::SimpleMatrix m);
 
-void changeFrameBodyToAbs(SP::SiconosVector q, SP::SiconosVector v );
-void changeFrameBodyToAbs(SP::SiconosVector q, SP::SimpleMatrix m );
+void changeFrameBodyToAbs(SP::SiconosVector q, SP::SiconosVector v);
+void changeFrameBodyToAbs(SP::SiconosVector q, SP::SimpleMatrix m);
 
 void normalizeq(SP::SiconosVector q);
-double getAxisAngle(double q0, double q1, double q2, double q3, SP::SiconosVector axis );
-double getAxisAngle(SP::SiconosVector q, SP::SiconosVector axis );
-void setAxisAngle(SP::SiconosVector q, SP::SiconosVector axis, double angle);
+double axisAngleFromQuaternion(double q0, double q1, double q2, double q3, SP::SiconosVector axis);
+double axisAngleFromQuaternion(SP::SiconosVector q, SP::SiconosVector axis);
+void rotationVectorFromQuaternion(double q0, double q1, double q2, double q3, SP::SiconosVector rotationVector);
+void rotationVectorFromQuaternion(SP::SiconosVector q, SP::SiconosVector rotationVector);
+
+void quaternionFromAxisAngle(SP::SiconosVector axis, double angle, SP::SiconosVector q);
+void quaternionFromRotationVector(SP::SiconosVector rotationVector, SP::SiconosVector q);
 
 void computeT(SP::SiconosVector q, SP::SimpleMatrix T);
 
@@ -114,7 +118,9 @@ protected:
   */
   ACCEPT_SERIALIZATION(NewtonEulerDS);
 
-  void internalInit(SP::SiconosVector Q0, SP::SiconosVector Twist0, double mass , SP::SiconosMatrix inertialMatrix);
+
+  void init();
+
 
   // -- MEMBERS --
 
@@ -127,9 +133,6 @@ protected:
 
   /** Initial twist */
   SP::SiconosVector _twist0;
-
-
-
 
   /** _q contains the representation of the system
    * In the current implementation, we have
@@ -190,40 +193,51 @@ protected:
   /** external forces of the system */
   SP::SiconosVector _fExt;
 
+  /** boolean if _fext is constant (set thanks to setFExtPtr for instance)
+   * false by default */
+  bool _hasConstantFExt;
+
   /** internal forces of the system */
   SP::SiconosVector _fInt;
 
-  /** external moment of the forces */
+  /** external moment expressed in the inertial frame */
   SP::SiconosVector _mExt;
 
-  /** external moment of the forces */
-  SP::SiconosVector _mExtObj;
+  /** boolean if _mext is constant (set thanks to setMExtPtr for instance)
+   * false by default */
+  bool _hasConstantMExt;
+
+  /** if true, we assume that mExt is given in inertialFrameset (default false)  */
+  bool _isMextExpressedInInertialFrame;
+
+  /** external moment expressed in the body-fixed frame  */
+  // SP::SiconosVector _mExtBodyFrame;
 
   /** internal moment of the forces */
   SP::SiconosVector _mInt;
 
-  /** jacobian_q FInt*/
+  /** jacobian_q FInt  w.r.t q*/
   SP::SimpleMatrix _jacobianFIntq;
 
-  /** jacobian_{v} FInt*/
+  /** jacobian_twist FInt  w.r.t the twist*/
   SP::SimpleMatrix _jacobianFInttwist;
 
-  /** jacobian_q MInt*/
+  /** jacobian_q MInt w.r.t q */
   SP::SimpleMatrix _jacobianMIntq;
 
-  /** jacobian_{twist} MInt*/
+  /** jacobian_twist MInt  w.r.t the twist*/
   SP::SimpleMatrix _jacobianMInttwist;
 
-  /** jacobian_{twist} MExtObj*/
-  SP::SimpleMatrix _jacobianMExtObjq;
+  /** jacobian_q MExt w.r.t q*/
+  SP::SimpleMatrix _jacobianMExtq;
 
   /** gyroscpical moment  */
   SP::SiconosVector _mGyr;
 
-  /** jacobian of mGyr w.r.t twist*/
+  /** jacobian_twist of mGyr w.r.t the twist*/
   SP::SimpleMatrix _jacobianMGyrtwist;
 
-  /** wrench (q,twist,t)= [ fExt - fInt ; mExt-nGyr - mInt ]^T */
+  /** wrench (q,twist,t)= [ fExt - fInt ; mExtBodyFrame - mGyr - mInt ]^T */
 
   SP::SiconosVector _wrench;
 
@@ -255,7 +269,7 @@ protected:
   /** Plugin to compute strength of external forces */
   SP::PluggedObject _pluginFExt;
 
-  /** Plugin to compute moments of external forces */
+  /** Plugin to compute the external moment expressed in the inertial frame  */
   SP::PluggedObject _pluginMExt;
 
   /** Plugin to compute strength of internal forces */
@@ -331,7 +345,7 @@ protected:
   /** set links with DS members
    */
   void connectToDS();
-
+  bool checkDynamicalSystem();
   /** Default constructor
    */
   NewtonEulerDS();
@@ -360,14 +374,8 @@ public:
   /** destructor */
   virtual ~NewtonEulerDS();
 
-  /** check that the system is complete (ie all required data are well set)
-   * \return a bool
-   */
-  bool checkDynamicalSystem();
-
-  /** allocate memory for forces and its jacobians, if required.
-   */
-  void initForces();
+  /** reset the state to the initial state */
+  void resetToInitialState();
 
   /** Initialization function for the rhs and its jacobian.
    *  \param time the time of initialization
@@ -457,7 +465,7 @@ public:
   {
     return _twist;
   }
-  
+
   inline SP::SiconosVector twist0() const
   {
     return _twist0;
@@ -546,6 +554,7 @@ public:
   inline void setFExtPtr(SP::SiconosVector newPtr)
   {
     _fExt = newPtr;
+    _hasConstantFExt = true;
   }
 
   /** set mExt to pointer newPtr
@@ -554,8 +563,16 @@ public:
   inline void setMExtPtr(SP::SiconosVector newPtr)
   {
     _mExt = newPtr;
+    _hasConstantMExt = true;
   }
 
+  /** get mGyr
+   *  \return pointer on a plugged vector
+   */
+  inline SP::SiconosVector mGyr() const
+  {
+    return _mGyr;
+  }
 
 
   // -- forces --
@@ -587,6 +604,15 @@ public:
     return _jacobianWrenchTwist;
   }
   //  inline SP::SiconosMatrix jacobianZFL() const { return jacobianZFL; }
+
+  inline void setIsMextExpressedInInertialFrame(bool value)
+  {
+    _isMextExpressedInInertialFrame= value;
+    if(!_jacobianMExtq)
+      _jacobianMExtq.reset(new SimpleMatrix(3, _qDim));
+    if(!_jacobianWrenchq)
+      _jacobianWrenchq.reset(new SimpleMatrix(_n, _qDim));
+  }
 
   inline void setNullifyMGyr(bool value)
   {
@@ -621,6 +647,9 @@ public:
   void setComputeFExtFunction(const std::string&  pluginPath, const std::string& functionName)
   {
     _pluginFExt->setComputeFunction(pluginPath, functionName);
+    if(!_fExt)
+      _fExt.reset(new SiconosVector(3, 0));
+    _hasConstantFExt = false;
   }
   /** allow to set a specified function to compute _mExt
    *  \param pluginPath the complete path to the plugin
@@ -629,6 +658,9 @@ public:
   void setComputeMExtFunction(const std::string&  pluginPath, const std::string& functionName)
   {
     _pluginMExt->setComputeFunction(pluginPath, functionName);
+    if(!_mExt)
+      _mExt.reset(new SiconosVector(3, 0));
+    _hasConstantMExt = false;
   }
 
   /** set a specified function to compute _fExt
@@ -637,6 +669,9 @@ public:
   void setComputeFExtFunction(FExt_NE fct)
   {
     _pluginFExt->setComputeFunction((void*)fct);
+    if(!_fExt)
+      _fExt.reset(new SiconosVector(3, 0));
+    _hasConstantFExt = false;
   }
 
   /** set a specified function to compute _mExt
@@ -645,6 +680,9 @@ public:
   void setComputeMExtFunction(FExt_NE fct)
   {
     _pluginMExt->setComputeFunction((void*)fct);
+    if(!_mExt)
+      _mExt.reset(new SiconosVector(3, 0));
+    _hasConstantMExt = false;
   }
 
   /** allow to set a specified function to compute _fInt
@@ -654,6 +692,8 @@ public:
   void setComputeFIntFunction(const std::string&  pluginPath, const std::string& functionName)
   {
     _pluginFInt->setComputeFunction(pluginPath, functionName);
+    if(!_fInt)
+      _fInt.reset(new SiconosVector(3, 0));
   }
   /** allow to set a specified function to compute _mInt
    *  \param pluginPath the complete path to the plugin
@@ -662,6 +702,8 @@ public:
   void setComputeMIntFunction(const std::string&  pluginPath, const std::string& functionName)
   {
     _pluginMInt->setComputeFunction(pluginPath, functionName);
+    if(!_mInt)
+      _mInt.reset(new SiconosVector(3, 0));
   }
 
   /** set a specified function to compute _fInt
@@ -670,14 +712,18 @@ public:
   void setComputeFIntFunction(FInt_NE fct)
   {
     _pluginFInt->setComputeFunction((void*)fct);
+    if(!_fInt)
+      _fInt.reset(new SiconosVector(3, 0));
   }
 
   /** set a specified function to compute _mInt
    *  \param fct a pointer on the plugin function
    */
-  void setComputeMExtFunction(FInt_NE fct)
+  void setComputeMIntFunction(FInt_NE fct)
   {
     _pluginMInt->setComputeFunction((void*)fct);
+    if(!_mInt)
+      _mInt.reset(new SiconosVector(3, 0));
   }
 
   /** allow to set a specified function to compute the jacobian w.r.t q of the internal forces
@@ -723,45 +769,44 @@ public:
    */
   void setComputeJacobianMIntvFunction(FInt_NE fct);
 
-  /** default function to compute the external forces
-   *  \param time the current time
+  /**  function to compute the external forces
+   * \param time the current time
    */
   virtual void computeFExt(double time);
 
-  /** default function to compute the external moments
+  /** default function to compute the external forces
+    * \param time the current time
+    * \param[return] fExt the computed external force
+    */
+  virtual void computeFExt(double time, SP::SiconosVector fExt);
+
+  /** function to compute the external moments
+   * The external moments are expressed by default in the body frame, since the Euler equation for
+   * Omega is written in the body--fixed frame.
+   * Nevertheless, if _isMextExpressedInInertialFrame) is set to true, we assume that the external moment
+   * is given in the inertial frame and we perform the rotation
    * \param time the current time
+   * \param q a given coordinates.
+   *  q is given in the case that mExt is expressed in inertial frame
+   *  (see _isMextExpressedInInertialFrame).
+   * \param[return] mExt the computed external moment
    */
-  virtual void computeMExt(double time);
-  virtual void computeMExt(double time, SP::SiconosVector mExt);
+  virtual void computeMExt(double time, SP::SiconosVector q, SP::SiconosVector mExt);
+  virtual void computeMExt(double time, SP::SiconosVector q);
 
-  virtual void computeMExtObj(double time);
-  virtual void computeMExtObj(double time, SP::SiconosVector q, SP::SiconosVector mExtObj );
-
-  void computeJacobianMExtObjqByFD(double time, SP::SiconosVector q);
+  void computeJacobianMExtqByFD(double time, SP::SiconosVector q);
 
   /** default function to compute the internal forces
    *  \param time the current time
    */
-  void computeFInt(double time);
+  // void computeFInt(double time);
 
-  /** default function to compute the internal moments
-   * \param time the current time
-   */
-  void computeMInt(double time);
-
-  /** default function to compute the internal forces
+  /** function to compute the internal forces
    * \param time the current time
    * \param q
    * \param v
    */
   void computeFInt(double time, SP::SiconosVector q, SP::SiconosVector v);
-
-  /** default function to compute the internal moments
-   * \param time the current time
-   * \param q
-   * \param v
-   */
-  void computeMInt(double time, SP::SiconosVector q, SP::SiconosVector v);
 
   /** default function to compute the internal forces
    * \param time the current time
@@ -770,6 +815,13 @@ public:
    * \param fInt the computed internal force vector
    */
   virtual void computeFInt(double time, SP::SiconosVector q, SP::SiconosVector v, SP::SiconosVector fInt);
+
+  /** default function to compute the internal moments
+   * \param time the current time
+   * \param q
+   * \param v
+   */
+  void computeMInt(double time, SP::SiconosVector q, SP::SiconosVector v);
 
   /** default function to compute the internal moments
    * \param time the current time
@@ -880,8 +932,8 @@ public:
    * \param twist SP::SiconosVector
    */
   virtual void computeJacobianFIntv(double time,
-                                       SP::SiconosVector position,
-                                       SP::SiconosVector twist);
+                                    SP::SiconosVector position,
+                                    SP::SiconosVector twist);
 
   /** To compute the jacobian w.r.t v of the internal forces
    * by forward finite difference
@@ -932,8 +984,8 @@ public:
    * \param twist SP::SiconosVector
    */
   virtual void computeJacobianMIntv(double time,
-                                       SP::SiconosVector position,
-                                       SP::SiconosVector twist);
+                                    SP::SiconosVector position,
+                                    SP::SiconosVector twist);
 
   /** To compute the jacobian w.r.t v of the internal moments
    * by forward finite difference

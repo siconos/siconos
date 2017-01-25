@@ -185,6 +185,10 @@ protected:
 
   /** external forces applied to the system */
   SP::SiconosVector _fExt;
+  
+  /** boolean if _fext is constant (set thanks to setFExtPtr for instance)
+   * false by default */
+  bool _hasConstantFExt;
 
   /** non-linear inertia term of the system */
   SP::SiconosVector _fGyr;
@@ -212,9 +216,6 @@ protected:
   /** Reaction to an applied  boundary condition */
   SP::SiconosVector _reactionToBoundaryConditions;
 
-  /** set links with DS members
-   */
-  void connectToDS();
 
   /** Default constructor
    */
@@ -346,10 +347,9 @@ public:
    */
   bool checkDynamicalSystem();
 
-  /** allocate memory for forces and its jacobians, if required.
-   */
-  void initForces();
-
+  /** reset the state to the initial state */
+  void resetToInitialState();
+   
   /** Initialization function for the rhs and its jacobian.
    *  \param time of initialization
    */
@@ -367,6 +367,9 @@ public:
    */
   void initializeNonSmoothInput(unsigned int level) ;
 
+  /** set links with DS members
+   */
+  void connectToDS(unsigned int steps);
   // === GETTERS AND SETTERS ===
 
   /** to get the value of ndof
@@ -587,6 +590,7 @@ public:
   inline void setFExtPtr(SP::SiconosVector newPtr)
   {
     _fExt = newPtr;
+    _hasConstantFExt = true;
   }
 
   // -- FGyr --
@@ -722,7 +726,8 @@ public:
   void setComputeMassFunction(const std::string&  pluginPath, const std::string&  functionName)
   {
     _pluginMass->setComputeFunction(pluginPath, functionName);
-    if (!_mass) _mass.reset(new SimpleMatrix(_ndof, _ndof));
+    if (!_mass)
+      _mass.reset(new SimpleMatrix(_ndof, _ndof));
   }
 
   /** set a specified function to compute Mass
@@ -731,6 +736,9 @@ public:
   void setComputeMassFunction(FPtr7 fct)
   {
     _pluginMass->setComputeFunction((void*)fct);
+    if (!_mass)
+      _mass.reset(new SimpleMatrix(_ndof, _ndof));
+
   }
 
   /** allow to set a specified function to compute FInt
@@ -740,7 +748,8 @@ public:
   void setComputeFIntFunction(const std::string&  pluginPath, const std::string&  functionName)
   {
     _pluginFInt->setComputeFunction(pluginPath, functionName);
-    if (!_fInt) _fInt.reset(new SiconosVector(_ndof));
+    if (!_fInt)
+      _fInt.reset(new SiconosVector(_ndof));
     //    Plugin::setFunction(&computeFIntPtr, pluginPath,functionName);
   }
 
@@ -750,6 +759,8 @@ public:
   void setComputeFIntFunction(FPtr6 fct)
   {
     _pluginFInt->setComputeFunction((void*)fct);
+    if (!_fInt)
+      _fInt.reset(new SiconosVector(_ndof));
     //    computeFIntPtr = fct;
   }
 
@@ -762,6 +773,7 @@ public:
     _pluginFExt->setComputeFunction(pluginPath, functionName);
     if (!_fExt) _fExt.reset(new SiconosVector(_ndof));
     //    Plugin::setFunction(&computeFExtPtr, pluginPath,functionName);
+    _hasConstantFExt = false;
   }
 
   /** set a specified function to compute fExt
@@ -770,7 +782,9 @@ public:
   void setComputeFExtFunction(VectorFunctionOfTime fct)
   {
     _pluginFExt->setComputeFunction((void*)fct);
+    if (!_fExt) _fExt.reset(new SiconosVector(_ndof));
     //   computeFExtPtr = fct ;
+    _hasConstantFExt = false;
   }
 
   /** allow to set a specified function to compute the inertia

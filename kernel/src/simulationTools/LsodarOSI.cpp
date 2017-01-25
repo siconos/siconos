@@ -229,8 +229,10 @@ void LsodarOSI::initialize(Model& m)
         Type::value(*ds) == Type::LagrangianLinearTIDS)
     {
       LagrangianDS& LDS = *std11::static_pointer_cast<LagrangianDS>(ds);
+      LDS.connectToDS(getSizeMem());
       _xWork->insertPtr(LDS.q());
       _xWork->insertPtr(LDS.velocity());
+
     }
     else
       _xWork->insertPtr(ds->x());
