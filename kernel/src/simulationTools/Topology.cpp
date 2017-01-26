@@ -106,8 +106,6 @@ Topology::addInteractionInIndexSet0(SP::Interaction inter, SP::DynamicalSystem d
   dsgv1 = _DSG[0]->add_vertex(ds1);
 
   SP::VectorOfVectors workVds1 = _DSG[0]->properties(dsgv1).workVectors;
-  std::cout<< "workVds1 " << _DSG[0]->properties(dsgv1).workVectors << std::endl;;
-
 
   SP::VectorOfVectors workVds2;
   if (!workVds1)
@@ -178,8 +176,6 @@ Topology::addInteractionInIndexSet0(SP::Interaction inter, SP::DynamicalSystem d
   assert(_IG[0]->is_vertex(inter));
   assert(_DSG[0]->is_edge(dsgv1, dsgv2, inter));
   assert(_DSG[0]->edges_number() == _IG[0]->size());
-  std::cout <<"_IG[0]->display();" << std::endl;
-  _IG[0]->display();
   return std::pair<DynamicalSystemsGraph::EDescriptor, InteractionsGraph::VDescriptor>(new_ed, ig_new_ve);
 }
 
