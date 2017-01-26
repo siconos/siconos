@@ -84,8 +84,8 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
       accFree->zero();
 
       // get left state from memory
-      SP::SiconosVector qold(std11::make_shared<SiconosVector>(d->qMemory()->getSiconosVector(0)));
-      SP::SiconosVector vold(std11::make_shared<SiconosVector>(d->velocityMemory()->getSiconosVector(0))); // right limit
+      SP::SiconosVector qold(std11::make_shared<SiconosVector>(d->qMemory().getSiconosVector(0)));
+      SP::SiconosVector vold(std11::make_shared<SiconosVector>(d->velocityMemory().getSiconosVector(0))); // right limit
       Mold = d->mass();
 
       DEBUG_EXPR(accFree->display());
@@ -118,8 +118,8 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
       accFree->zero();
 
       // get left state from memory
-      const SiconosVector& qold = d->qMemory()->getSiconosVector(0);
-      const SiconosVector& vold = d->twistMemory()->getSiconosVector(0); // right limit
+      const SiconosVector& qold = d->qMemory().getSiconosVector(0);
+      const SiconosVector& vold = d->twistMemory().getSiconosVector(0); // right limit
       //Mold = d->mass();
       assert(!d->mass()->isPLUInversed());
       Mold.reset(new SimpleMatrix(*(d->mass()))); // we copy the mass matrix to avoid its factorization
@@ -261,8 +261,8 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
       SiconosVector& accFree = *d->workspace(DynamicalSystem::free); // contains acceleration without contact force
 
       // get left state from memory
-      const SiconosVector& qold = d->qMemory()->getSiconosVector(0);
-      const SiconosVector& vold = d->velocityMemory()->getSiconosVector(0);
+      const SiconosVector& qold = d->qMemory().getSiconosVector(0);
+      const SiconosVector& vold = d->velocityMemory().getSiconosVector(0);
 
       // initialize *it->residuFree and predicted right velocity (left limit)
       SiconosVector& residuFree = *ds->workspace(DynamicalSystem::freeresidu); // contains residu without nonsmooth effect
@@ -295,8 +295,8 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
       SiconosVector& accFree = *d->workspace(DynamicalSystem::free);
 
       // get left state from memory
-      const SiconosVector& qold = d->qMemory()->getSiconosVector(0);
-      const SiconosVector& vold = d->twistMemory()->getSiconosVector(0);
+      const SiconosVector& qold = d->qMemory().getSiconosVector(0);
+      const SiconosVector& vold = d->twistMemory().getSiconosVector(0);
 
       // initialize *it->residuFree and predicted right velocity (left limit)
       SiconosVector& residuFree = *ds->workspace(DynamicalSystem::freeresidu); // contains residu without nonsmooth effect
@@ -324,7 +324,7 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
       SiconosVector& dotq = *d->dotq();
       prod(*T, v, dotq, true);
 
-      const SiconosVector& dotqold = d->dotqMemory()->getSiconosVector(0);
+      const SiconosVector& dotqold = d->dotqMemory().getSiconosVector(0);
 
       SiconosVector& q = *d->q(); // POINTER CONSTRUCTOR : contains position q_{k+1}
       q = qold;
@@ -418,8 +418,8 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
         SP::SiconosVector residuFree = d->workspace(DynamicalSystem::freeresidu);
         SP::SiconosVector v = d->velocity();
         SP::SiconosVector q = d->q();
-        const SiconosVector& qold = d->qMemory()->getSiconosVector(0);
-        const SiconosVector& vold = d->velocityMemory()->getSiconosVector(0); // right limit
+        const SiconosVector& qold = d->qMemory().getSiconosVector(0);
+        const SiconosVector& vold = d->velocityMemory().getSiconosVector(0); // right limit
 
         SP::SiconosMatrix M = d->mass(); // POINTER CONSTRUCTOR : contains mass matrix
 
@@ -449,8 +449,8 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
         SiconosVector& residuFree = *d->workspace(DynamicalSystem::freeresidu);
         SP::SiconosVector v = d->twist();
         SP::SiconosVector q = d->q();
-        const SiconosVector qold = d->qMemory()->getSiconosVector(0);
-        const SiconosVector vold = d->twistMemory()->getSiconosVector(0); // right limit
+        const SiconosVector qold = d->qMemory().getSiconosVector(0);
+        const SiconosVector vold = d->twistMemory().getSiconosVector(0); // right limit
 
         SP::SiconosMatrix M(new SimpleMatrix(*(d->mass()))); // we copy the mass matrix to avoid its factorization;
         DEBUG_EXPR(M->display());

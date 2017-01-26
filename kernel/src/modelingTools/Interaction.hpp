@@ -523,7 +523,7 @@ public:
    * \param level
    * \return a memory
    */
-  inline SP::SiconosMemory yMemory(unsigned int level) const
+  inline SiconosMemory& yMemory(unsigned int level)
   {
     return _yMemory[level];
   }
@@ -532,7 +532,7 @@ public:
    * \param level
    * \return a memory
    */
-  inline SP::SiconosMemory lambdaMemory(unsigned int level) const
+  inline SiconosMemory& lambdaMemory(unsigned int level)
   {
     return _lambdaMemory[level];
   }

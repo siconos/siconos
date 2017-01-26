@@ -126,7 +126,7 @@ protected:
   SP::PluggedObject _pluginM;
 
   /**  the previous r vectors */
-  SP::SiconosMemory _rMemory;
+  SiconosMemory _rMemory;
 
   /** Copy of M Matrix, used to solve systems like Mx = b with LU-factorization.
       (Warning: may not exist, used if we need to avoid factorization in place of M) */
@@ -174,7 +174,15 @@ public:
   /** get all the values of the state vector r stored in memory
    *  \return a memory vector
    */
-  inline SP::SiconosMemory rMemory() const
+  inline SiconosMemory& rMemory()
+  {
+    return _rMemory;
+  }
+
+  /** get all the values of the state vector r stored in memory
+   *  \return a memory vector
+   */
+  inline const SiconosMemory& rMemory() const
   {
     return _rMemory;
   }

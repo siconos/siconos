@@ -223,7 +223,7 @@ void D1MinusLinearOSI::computeFreeState()
       SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
 
       // get left state from memory
-      const SiconosVector& vold = d->velocityMemory()->getSiconosVector(0); // right limit
+      const SiconosVector& vold = d->velocityMemory().getSiconosVector(0); // right limit
       DEBUG_EXPR(vold->display());
 
       // get right information
@@ -246,7 +246,7 @@ void D1MinusLinearOSI::computeFreeState()
       SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS> (ds);
 
       // get left state from memory
-      const SiconosVector& vold = d->twistMemory()->getSiconosVector(0); // right limit
+      const SiconosVector& vold = d->twistMemory().getSiconosVector(0); // right limit
       DEBUG_EXPR(vold.display());
 
       // get right information

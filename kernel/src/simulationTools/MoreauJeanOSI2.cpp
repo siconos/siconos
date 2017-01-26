@@ -128,7 +128,7 @@ void MoreauJeanOSI2::computeFreeState()
       M = d->M();
       SP::SiconosVector ffree = d->workspace(DynamicalSystem::free);
       // x value at told
-      const SiconosVector& xold = d->xMemory()->getSiconosVector(0);
+      const SiconosVector& xold = d->xMemory().getSiconosVector(0);
 
       SP::SiconosMatrix A = d->A();
       if (A)
@@ -159,8 +159,8 @@ void MoreauJeanOSI2::computeFreeState()
       SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
 
       // Get state i (previous time step) from Memories -> var. indexed with "Old"
-      const SiconosVector& qold = d->qMemory()->getSiconosVector(0);
-      const SiconosVector& vold = d->velocityMemory()->getSiconosVector(0); // vol =v_i
+      const SiconosVector& qold = d->qMemory().getSiconosVector(0);
+      const SiconosVector& vold = d->velocityMemory().getSiconosVector(0); // vol =v_i
 
       // --- ResiduFree computation ---
       // vFree pointer is used to compute and save ResiduFree in this first step.
@@ -211,8 +211,8 @@ void MoreauJeanOSI2::computeFreeState()
       SP::LagrangianLinearTIDS d = std11::static_pointer_cast<LagrangianLinearTIDS> (ds);
 
       // Get state i (previous time step) from Memories -> var. indexed with "Old"
-      const SiconosVector& qold = d->qMemory()->getSiconosVector(0); // qi
-      const SiconosVector& vold = d->velocityMemory()->getSiconosVector(0); //vi
+      const SiconosVector& qold = d->qMemory().getSiconosVector(0); // qi
+      const SiconosVector& vold = d->velocityMemory().getSiconosVector(0); //vi
 
       // --- ResiduFree computation ---
       // Velocity free and residu. vFree = RESfree (pointer equality !!).

@@ -56,10 +56,10 @@ private:
   /** index to avoid removal and creation of vectors */
   MemoryContainer::size_type _indx;
 
-  /** default constructor, private. */
-  SiconosMemory() {};
-
 public:
+
+  /** default constructor. */
+  SiconosMemory() : _nbVectorsInMemory(0), _indx(0) {};
 
   /** constructor with size parameter.
    * \param size size of the MemoryContainer
@@ -145,6 +145,11 @@ public:
    */
   void swap(const SiconosVector& v);
 
+  /** puts a SiconosVector into the memory
+   * \param v the SiconosVector we want to put in memory, or do nothing if v is null
+   */
+  void swap(SP::SiconosVector v);
+
   /** displays the data of the memory object
    */
   void display() const;
@@ -152,7 +157,7 @@ public:
 };
 
 
-typedef std::vector<SP::SiconosMemory> VectorOfMemories;
+typedef std::vector<SiconosMemory> VectorOfMemories;
 
 #endif
 

@@ -208,7 +208,7 @@ protected:
 
 
   /** the  previous state vectors stored in memory*/
-  SP::SiconosMemory _xMemory;
+  SiconosMemory _xMemory;
 
   /** number of previous states stored in memory */
   unsigned int _stepsInMemory;
@@ -495,7 +495,15 @@ public:
   /** get all the values of the state vector x stored in a SiconosMemory object
    *  \return a pointer to the SiconosMemory object
    */
-  inline SP::SiconosMemory xMemory() const
+  inline SiconosMemory& xMemory()
+  {
+    return _xMemory;
+  }
+
+  /** get all the values of the state vector x stored in a SiconosMemory object
+   *  \return a pointer to the SiconosMemory object
+   */
+  inline const SiconosMemory& xMemory() const
   {
     return _xMemory;
   }

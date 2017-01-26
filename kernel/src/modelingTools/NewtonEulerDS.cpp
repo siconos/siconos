@@ -1242,10 +1242,10 @@ void NewtonEulerDS::initMemory(unsigned int steps)
     std::cout << "Warning : NewtonEulerDS::initMemory with size equal to zero" <<std::endl;
   else
   {
-    _qMemory.reset(new SiconosMemory(steps, _qDim));
-    _twistMemory.reset(new SiconosMemory(steps, _n));
-    _forcesMemory.reset(new SiconosMemory(steps, _n));
-    _dotqMemory.reset(new SiconosMemory(steps, _qDim));
+    _qMemory.setMemorySize(steps, _qDim);
+    _twistMemory.setMemorySize(steps, _n);
+    _forcesMemory.setMemorySize(steps, _n);
+    _dotqMemory.setMemorySize(steps, _qDim);
     swapInMemory();
   }
 }
@@ -1253,10 +1253,10 @@ void NewtonEulerDS::initMemory(unsigned int steps)
 void NewtonEulerDS::swapInMemory()
 {
   //  _xMemory->swap(_x[0]);
-  _qMemory->swap(*_q);
-  _twistMemory->swap(*_twist);
-  _dotqMemory->swap(*_dotq);
-  _forcesMemory->swap(*_wrench);
+  _qMemory.swap(*_q);
+  _twistMemory.swap(*_twist);
+  _dotqMemory.swap(*_dotq);
+  _forcesMemory.swap(*_wrench);
 }
 
 void NewtonEulerDS::resetAllNonSmoothPart()

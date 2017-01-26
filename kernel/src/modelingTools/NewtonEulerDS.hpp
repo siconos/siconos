@@ -158,10 +158,10 @@ protected:
   SP::SiconosVector _dotq;
 
   /** Memory vectors that stores the values within the time--step */
-  SP::SiconosMemory _twistMemory;
-  SP::SiconosMemory _qMemory;
-  SP::SiconosMemory _forcesMemory;
-  SP::SiconosMemory _dotqMemory;
+  SiconosMemory _twistMemory;
+  SiconosMemory _qMemory;
+  SiconosMemory _forcesMemory;
+  SiconosMemory _dotqMemory;
 
   /** Inertial matrix
    */
@@ -442,7 +442,7 @@ public:
   /** get all the values of the state vector q stored in memory
    *  \return a memory
    */
-  inline SP::SiconosMemory qMemory() const
+  inline SiconosMemory& qMemory()
   {
     return _qMemory;
   }
@@ -479,7 +479,7 @@ public:
   /** get all the values of the state vector twist stored in memory
    *  \return a memory
    */
-  inline SP::SiconosMemory twistMemory() const
+  inline SiconosMemory& twistMemory()
   {
     return _twistMemory;
   }
@@ -1047,11 +1047,11 @@ public:
     assert(_Tdot);
     return _Tdot;
   }
-  inline SP::SiconosMemory forcesMemory()
+  inline SiconosMemory& forcesMemory()
   {
     return _forcesMemory;
   }
-  inline SP::SiconosMemory dotqMemory()
+  inline SiconosMemory& dotqMemory()
   {
     return _dotqMemory;
   }

@@ -152,8 +152,28 @@ SiconosVector& SiconosMemory::getSiconosVectorMutable(const unsigned int index) 
 
 void SiconosMemory::swap(const SiconosVector& v)
 {
+  // Be robust to empty memory
+  if (size()==0)
+    return;
+
   // If _nbVectorsInMemory is this->size(), we remove the last element.
   (*this)[_indx] = v;
+  _nbVectorsInMemory = std::min(_nbVectorsInMemory+1, this->size());
+  if (_indx > 0)
+    _indx--;
+  else
+    _indx = this->size()-1;
+}
+
+void SiconosMemory::swap(SP::SiconosVector v)
+{
+  // Be robust to empty memory
+  // Be robust to null pointer
+  if (size()==0 || !v)
+    return;
+
+  // If _nbVectorsInMemory is this->size(), we remove the last element.
+  (*this)[_indx] = *v;
   _nbVectorsInMemory = std::min(_nbVectorsInMemory+1, this->size());
   if (_indx > 0)
     _indx--;

@@ -157,10 +157,10 @@ protected:
   SP::SiconosVector _velocity0;
 
   /** memory of previous coordinates of the system */
-  SP::SiconosMemory _qMemory;
+  SiconosMemory _qMemory;
 
   /** memory of previous velocities of the system */
-  SP::SiconosMemory _velocityMemory;
+  SiconosMemory _velocityMemory;
 
   SP::BlockMatrix _jacxRhs;
 
@@ -216,7 +216,7 @@ protected:
   SP::SiconosMatrix _jacobianqDotForces;
 
   /** memory of previous forces of the system */
-  SP::SiconosMemory _forcesMemory;
+  SiconosMemory _forcesMemory;
 
   /** Boundary condition applied to a dynamical system*/
   SP::BoundaryCondition _boundaryConditions;
@@ -450,7 +450,7 @@ public:
   /** get all the values of the state vector q stored in memory
    *  \return a memory
    */
-  inline SP::SiconosMemory qMemory() const
+  inline SiconosMemory& qMemory()
   {
     return _qMemory;
   }
@@ -507,7 +507,7 @@ public:
   /** get all the values of the state vector velocity stored in memory
    *  \return a memory
    */
-  inline SP::SiconosMemory velocityMemory() const
+  inline SiconosMemory& velocityMemory()
   {
     return _velocityMemory;
   }
@@ -539,7 +539,7 @@ public:
    * \param level
    *  \return a memory
    */
-  inline SP::SiconosMemory pMemory(unsigned int level) const
+  inline SiconosMemory& pMemory(unsigned int level)
   {
     return _pMemory[level];
   }
@@ -701,7 +701,7 @@ public:
   /** get forces
    *  \return pointer on a SiconosMemory
    */
-  inline SP::SiconosMemory forcesMemory()
+  inline SiconosMemory& forcesMemory()
   {
     return _forcesMemory;
   }

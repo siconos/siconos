@@ -587,8 +587,8 @@ void NewMarkAlphaOSI::computeCoefsDenseOutput(SP::DynamicalSystem ds)
   {
     SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS>(ds);
     const SiconosVector&
-      q_n( d->qMemory()->getSiconosVector(0) ),               // q_n
-      dotq_n( d->velocityMemory()->getSiconosVector(0) ),     // dotq_n
+      q_n( d->qMemory().getSiconosVector(0) ),               // q_n
+      dotq_n( d->velocityMemory().getSiconosVector(0) ),     // dotq_n
       ddotq_n( *d->workspace(DynamicalSystem::acce_memory) ), // ddotq_n
       q_np1( *d->q() ),                                       // q_{n+1}
       dotq_np1( *d->velocity() ),                             // dotq_{n+1}

@@ -141,7 +141,7 @@ void Interaction::initialize(double t0, InteractionProperties& interProp)
         for (unsigned int i = 0; i < _upperLevelForOutput + 1; ++i)
         {
           computeOutput(t0, interProp, i);
-          _yMemory[i]->swap(*_y[i]);
+          _yMemory[i].swap(*_y[i]);
         }
       }
     }
@@ -219,7 +219,7 @@ void Interaction::initializeMemory(bool computeResidu)
     _yOld[i].reset(new SiconosVector(nslawSize));
     _y_k[i].reset(new SiconosVector(nslawSize));
     assert(_steps > 0);
-    _yMemory[i].reset(new SiconosMemory(_steps, nslawSize));
+    _yMemory[i].setMemorySize(_steps, nslawSize);
 
     _y[i]->zero();
     _yOld[i]->zero();
@@ -235,7 +235,7 @@ void Interaction::initializeMemory(bool computeResidu)
     _lambda[i].reset(new SiconosVector(nslawSize));
     _lambdaOld[i].reset(new SiconosVector(nslawSize));
     _lambdaOld[i]->zero();
-    _lambdaMemory[i].reset(new SiconosMemory(_steps, nslawSize));
+    _lambdaMemory[i].setMemorySize(_steps, nslawSize);
   }
 }
 void Interaction::resetAllLambda()
@@ -627,12 +627,12 @@ void Interaction::swapInMemory()
   for (unsigned int  i = _lowerLevelForOutput; i < _upperLevelForOutput + 1 ; i++)
   {
     *(_y_k[i]) = *(_y[i]) ;
-    _yMemory[i]->swap(*_y[i]);
+    _yMemory[i].swap(*_y[i]);
   }
 
   for (unsigned int i = _lowerLevelForInput; i < _upperLevelForInput + 1  ; i++)
   {
-    _lambdaMemory[i]->swap(*_lambda[i]);
+    _lambdaMemory[i].swap(*_lambda[i]);
   }
 
 }

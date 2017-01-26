@@ -99,7 +99,7 @@ FirstOrderNonLinearDS::FirstOrderNonLinearDS(const FirstOrderNonLinearDS & FONLD
 {
   // Always initialized
   _fold.reset(new SiconosVector(*(FONLDS.fold())));
-  _rMemory.reset(new SiconosMemory(*(FONLDS.rMemory())));
+  _rMemory = FONLDS.rMemory();
 
   // Not always initialized
   if (FONLDS.getPluginF())
@@ -241,13 +241,13 @@ void FirstOrderNonLinearDS::initMemory(unsigned int steps)
   if (steps == 0)
     std::cout << "Warning : FirstOrderNonLinearDS::initMemory with size equal to zero" <<std::endl;
   else
-    _rMemory.reset(new SiconosMemory(steps, _n));
+    _rMemory.setMemorySize(steps, _n);
 }
 
 void FirstOrderNonLinearDS::swapInMemory()
 {
-  _xMemory->swap(*_x[0]);
-  _rMemory->swap(*_r);
+  _xMemory.swap(*_x[0]);
+  _rMemory.swap(*_r);
   *_fold = *_f;
 }
 

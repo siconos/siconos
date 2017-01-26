@@ -110,8 +110,8 @@ void SchatzmanPaoliOSI::initialize(Model& m)
       // v0->display();
       // We first swap the initial value contained in q and v after initialization.
 
-      d->qMemory()->swap(*q);
-      d->velocityMemory()->swap(*velocity);
+      d->qMemory().swap(*q);
+      d->velocityMemory().swap(*velocity);
 
       // we compute the new state values
       double h = _simulation->timeStep();
@@ -333,9 +333,9 @@ double SchatzmanPaoliOSI::computeResidu()
       SP::LagrangianLinearTIDS d = std11::static_pointer_cast<LagrangianLinearTIDS> (ds);
 
       // Get state i (previous time step) from Memories -> var. indexed with "Old"
-      const SiconosVector& q_k = d->qMemory()->getSiconosVector(0); // q_k
-      const SiconosVector& q_k_1 = d->qMemory()->getSiconosVector(1); // q_{k-1}
-      const SiconosVector& v_k = d->velocityMemory()->getSiconosVector(0); //v_k
+      const SiconosVector& q_k = d->qMemory().getSiconosVector(0); // q_k
+      const SiconosVector& q_k_1 = d->qMemory().getSiconosVector(1); // q_{k-1}
+      const SiconosVector& v_k = d->velocityMemory().getSiconosVector(0); //v_k
       //  std::cout << "SchatzmanPaoliOSI::computeResidu - q_k_1 =" <<std::endl;
       // q_k_1->display();
       //  std::cout << "SchatzmanPaoliOSI::computeResidu - q_k =" <<std::endl;
@@ -468,7 +468,7 @@ void SchatzmanPaoliOSI::computeFreeState()
       SP::LagrangianLinearTIDS d = std11::static_pointer_cast<LagrangianLinearTIDS> (ds);
 
       // Get state i (previous time step) from Memories -> var. indexed with "Old"
-      const SiconosVector& qold = d->qMemory()->getSiconosVector(0); // q_k
+      const SiconosVector& qold = d->qMemory().getSiconosVector(0); // q_k
       //   SP::SiconosVector vold = d->velocityMemory()->getSiconosVector(0); //v_k
 
       // --- ResiduFree computation ---
@@ -528,7 +528,7 @@ struct SchatzmanPaoliOSI::_NSLEffectOnFreeOutput : public SiconosVisitor
     subCoord[3] = subCoord[1];
     // Only the normal part is multiplied by e
     const SiconosVector& y_k_1(
-      _inter->yMemory(_osnsp->inputOutputLevel())->getSiconosVector(1));
+      _inter->yMemory(_osnsp->inputOutputLevel()).getSiconosVector(1));
 
     //  std::cout << "y_k_1 " << std::endl;
     // y_k_1->display();
@@ -541,7 +541,7 @@ struct SchatzmanPaoliOSI::_NSLEffectOnFreeOutput : public SiconosVisitor
     e = nslaw.en();
     // Only the normal part is multiplied by e
     const SiconosVector& y_k_1(
-      _inter->yMemory(_osnsp->inputOutputLevel())->getSiconosVector(1));
+      _inter->yMemory(_osnsp->inputOutputLevel()).getSiconosVector(1));
     (*_inter->yForNSsolver())(0) +=  e * y_k_1(0);
 
   }
@@ -725,7 +725,7 @@ void SchatzmanPaoliOSI::updateState(const unsigned int level)
       // Computation of the velocity
 
       SiconosVector& v = *d->velocity();
-      const SiconosVector& q_k_1 = d->qMemory()->getSiconosVector(1); // q_{k-1}
+      const SiconosVector& q_k_1 = d->qMemory().getSiconosVector(1); // q_{k-1}
 
       //  std::cout << "SchatzmanPaoliOSI::updateState - q_k_1 =" <<std::endl;
       // q_k_1->display();
