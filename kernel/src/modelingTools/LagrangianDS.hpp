@@ -134,6 +134,14 @@ protected:
   /** serialization hooks
   */
   ACCEPT_SERIALIZATION(LagrangianDS);
+
+  /** Common code for constructors
+   * should be replaced in C++11 by delegating constructors 
+   * \param ndof 
+   */
+  void init(unsigned int ndof);
+
+  
   // -- MEMBERS --
 
   /** number of degrees of freedom of the system */

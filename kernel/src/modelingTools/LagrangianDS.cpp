@@ -1,3 +1,4 @@
+
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
@@ -23,7 +24,95 @@
 #include "debug.h"
 #include <iostream>
 
+void LagrangianDS::init(unsigned int ndof)
+{
 
+  // -- Memory allocation for vector and matrix members --
+  _q.resize(3);
+  _q[0].reset(new SiconosVector(ndof));
+  _q[1].reset(new SiconosVector(ndof));
+  _q[2].reset(new SiconosVector(ndof));
+
+  _workspace[freeresidu].reset(new SiconosVector(ndof));
+  _workspace[free].reset(new SiconosVector(ndof));
+
+
+  /** \todo lazy Memory allocation */
+  _forces.reset(new SiconosVector(ndof));
+  _jacobianqForces.reset(new SimpleMatrix(ndof, ndof));
+  _jacobianqDotForces.reset(new SimpleMatrix(ndof, ndof));
+
+   /** \todo lazy Memory allocation */
+  _p.resize(3);
+  _p[0].reset(new SiconosVector(ndof));
+  _p[1].reset(new SiconosVector(ndof));
+  _p[2].reset(new SiconosVector(ndof));
+
+  /** \todo lazy memory allocation */
+  _pMemory.resize(3);
+
+  zeroPlugin();
+}
+
+
+LagrangianDS::LagrangianDS(SP::SiconosVector newQ0, SP::SiconosVector newVelocity0):
+  DynamicalSystem(2 * newQ0->size()), _ndof(newQ0->size()),
+  _hasConstantFExt(false)
+{
+  init(_ndof);
+  // Initial conditions
+  _q0 = newQ0;
+  _velocity0 = newVelocity0;
+}
+
+// From a set of data; Mass filled-in directly from a siconosMatrix -
+// This constructor leads to the minimum Lagrangian System form: \f$ M\ddot q = p \f$
+/**/
+LagrangianDS::LagrangianDS(SP::SiconosVector newQ0, SP::SiconosVector newVelocity0, SP::SiconosMatrix newMass):
+  DynamicalSystem(2 * newQ0->size()), _ndof(newQ0->size()),
+  _hasConstantFExt(false)
+{
+
+  init(_ndof);
+  // Initial conditions
+  _q0 = newQ0;
+  _velocity0 = newVelocity0;
+
+  // Mass matrix
+  _mass = newMass;
+}
+
+// From a set of data - Mass loaded from a plugin
+// This constructor leads to the minimum Lagrangian System form: \f$ M(q)\ddot q = p \f$
+LagrangianDS::LagrangianDS(SP::SiconosVector newQ0, SP::SiconosVector newVelocity0, const std::string& massName):
+  DynamicalSystem(), _ndof(newQ0->size()),
+  _hasConstantFExt(false)
+{
+  init(_ndof);
+  // Initial conditions
+  _q0 = newQ0;
+  _velocity0 = newVelocity0;
+
+  // Mass
+  setComputeMassFunction(SSLH::getPluginName(massName), SSLH::getPluginFunctionName(massName));
+}
+
+// -- Default constructor --
+LagrangianDS::LagrangianDS():
+  DynamicalSystem(Type::LagrangianDS), _ndof(0),
+  _hasConstantFExt(false)
+{
+  zeroPlugin();
+  // Protected constructor - Only call from derived class(es).
+  _q.resize(3);
+  _p.resize(3);
+  // !!! No plug-in connection !!!
+}
+
+// Destructor
+LagrangianDS::~LagrangianDS()
+{
+}
 
 // Private function to set linked with members of Dynamical top class
 void LagrangianDS::connectToDS(unsigned int steps)
@@ -57,145 +146,6 @@ void LagrangianDS::zeroPlugin()
   _pluginJacqFGyr.reset(new PluggedObject());
   _pluginJacqDotFGyr.reset(new PluggedObject());
 }
-
-LagrangianDS::LagrangianDS(SP::SiconosVector newQ0, SP::SiconosVector newVelocity0):
-  DynamicalSystem(2 * newQ0->size()), _ndof(newQ0->size()),
-  _hasConstantFExt(false)
-{
-  zeroPlugin();
-  // -- Memory allocation for vector and matrix members --
-  // Initial conditions
-  _q0 = newQ0;
-  _velocity0 = newVelocity0;
-
-  // Current state
-  _q.resize(3);
-  _q[0].reset(new SiconosVector(*_q0));
-  _q[1].reset(new SiconosVector(*_velocity0));
-  _q[2].reset(new SiconosVector(_ndof));
-  _workspace[freeresidu].reset(new SiconosVector(dimension()));
-  _workspace[free].reset(new SiconosVector(dimension()));
-  //   _xp.reset(new SiconosVector(dimension()));
-  //   _xq.reset(new SiconosVector(dimension()));
-  //   mXfree.reset(new SiconosVector(dimension()));
-  //   r.reset(new SiconosVector(dimension()));
-  /** \todo lazy Memory allocation */
-  _forces.reset(new SiconosVector(_ndof));
-  _jacobianqForces.reset(new SimpleMatrix(_ndof, _ndof));
-  _jacobianqDotForces.reset(new SimpleMatrix(_ndof, _ndof));
-
-   /** \todo lazy Memory allocation */
-  _p.resize(3);
-  _p[0].reset(new SiconosVector(_ndof));
-  _p[1].reset(new SiconosVector(_ndof));
-  _p[2].reset(new SiconosVector(_ndof));
-  /** \todo lazy memory allocation */
-  _pMemory.resize(3);
-  // unsigned int steps=1;
-  
-
-  // _pMemory[0].reset(new SiconosMemory(steps));
-  // _pMemory[1].reset(new SiconosMemory(steps));
-  // _pMemory[2].reset(new SiconosMemory(steps));
-
-}
-
-// -- Default constructor --
-LagrangianDS::LagrangianDS():
-  DynamicalSystem(Type::LagrangianDS), _ndof(0),
-  _hasConstantFExt(false)
-{
-  zeroPlugin();
-  // Protected constructor - Only call from derived class(es).
-  _q.resize(3);
-  _p.resize(3);
-  // !!! No plug-in connection !!!
-}
-
-// From a set of data; Mass filled-in directly from a siconosMatrix -
-// This constructor leads to the minimum Lagrangian System form: \f$ M\ddot q = p \f$
-/**/
-LagrangianDS::LagrangianDS(SP::SiconosVector newQ0, SP::SiconosVector newVelocity0, SP::SiconosMatrix newMass):
-  DynamicalSystem(2 * newQ0->size()), _ndof(newQ0->size())
-{
-  zeroPlugin();
-  // --- LAGRANGIAN INHERITED CLASS MEMBERS ---
-  // -- Memory allocation for vector and matrix members --
-
-  // Mass matrix
-  _mass = newMass;
-
-  // Initial conditions
-  _q0 = newQ0;
-  _velocity0 = newVelocity0;
-
-  // Current state
-  _q.resize(3);
-  _q[0].reset(new SiconosVector(*_q0));
-  _q[1].reset(new SiconosVector(*_velocity0));
-  _q[2].reset(new SiconosVector(_ndof));
-  _workspace[freeresidu].reset(new SiconosVector(dimension()));
-  _workspace[free].reset(new SiconosVector(dimension()));
-  // We initialize it with a null vector of size 1, since z is required in plug-in functions call.
-  _z.reset(new SiconosVector(1));
-  
-  /** \todo lazy Memory allocation */
-  _p.resize(3);
-  _p[0].reset(new SiconosVector(_ndof));
-  _p[1].reset(new SiconosVector(_ndof));
-  _p[2].reset(new SiconosVector(_ndof));
-  _pMemory.resize(3);
-  /** \todo lazy Memory allocation */
-  _forces.reset(new SiconosVector(_ndof));
-  _jacobianqForces.reset(new SimpleMatrix(_ndof, _ndof));
-  _jacobianqDotForces.reset(new SimpleMatrix(_ndof, _ndof));
-  
-  /** \todo lazy memory allocation */
-  //unsigned int steps=1;
-  // _pMemory[0].reset(new SiconosMemory(steps));
-  // _pMemory[1].reset(new SiconosMemory(steps));
-  // _pMemory[2].reset(new SiconosMemory(steps));
-}
-
-// From a set of data - Mass loaded from a plugin
-// This constructor leads to the minimum Lagrangian System form: \f$ M(q)\ddot q = p \f$
-LagrangianDS::LagrangianDS(SP::SiconosVector newQ0, SP::SiconosVector newVelocity0, const std::string& massName):
-  DynamicalSystem(), _ndof(newQ0->size())
-{
-  zeroPlugin();
-  // Initial conditions
-  _q0 = newQ0;
-  _velocity0 = newVelocity0;
-
-  // Current state
-  _q.resize(3);
-  _q[0].reset(new SiconosVector(*_q0));
-  _q[1].reset(new SiconosVector(*_velocity0));
-  _q[2].reset(new SiconosVector(_ndof));
-  _workspace[freeresidu].reset(new SiconosVector(dimension()));
-  _workspace[free].reset(new SiconosVector(dimension()));
-  // We initialize it with a null vector of size 1, since z is required in plug-in functions call.
-  _z.reset(new SiconosVector(1));
-  // Mass
-  setComputeMassFunction(SSLH::getPluginName(massName), SSLH::getPluginFunctionName(massName));
-
-  _p.resize(3);
-  _p[0].reset(new SiconosVector(_ndof));
-  _p[1].reset(new SiconosVector(_ndof));
-  _p[2].reset(new SiconosVector(_ndof));
-  _pMemory.resize(3);
-  /** \todo lazy memory allocation */
-  //unsigned int steps=1;
-  // _pMemory[0].reset(new SiconosMemory(steps));
-  // _pMemory[1].reset(new SiconosMemory(steps));
-  // _pMemory[2].reset(new SiconosMemory(steps));
-}
-
-// Destructor
-LagrangianDS::~LagrangianDS()
-{
-}
-
 bool LagrangianDS::checkDynamicalSystem()
 {
   bool output = true;
