@@ -84,6 +84,26 @@ void MoreauJeanGOSI::initialize(Model& m)
     if (dsType == Type::LagrangianLinearTIDS || dsType == Type::LagrangianDS)
     {
       ds->allocateWorkVector(DynamicalSystem::local_buffer, _dynamicalSystemsGraph->properties(*dsi).W->size(0));
+
+      SP::LagrangianDS lds = std11::static_pointer_cast<LagrangianDS> (ds);
+      lds->computeForces(m.t0());
+      lds->swapInMemory();
+    }
+    else if (dsType == Type::NewtonEulerDS)
+    {
+      SP::NewtonEulerDS neds = std11::static_pointer_cast<NewtonEulerDS> (ds);
+
+      //Compute a first value of the dotq  to store it in  _dotqMemory
+      SP::SiconosMatrix T = neds->T();
+      SP::SiconosVector dotq = neds->dotq();
+      SP::SiconosVector v = neds->twist();
+      prod(*T, *v, *dotq, true);
+
+      //Compute a first value of the forces to store it in _forcesMemory
+      neds->computeForces(m.t0());
+
+
+      neds->swapInMemory();
     }
   }
 

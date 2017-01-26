@@ -294,7 +294,7 @@ int main(int argc, char* argv[])
     SimpleMatrix dataPlotRef(dataPlot);
     dataPlotRef.zero();
 
-    ioMatrix::read("result.ref", "ascii", dataPlotRef);
+    ioMatrix::read("result-SBM.ref", "ascii", dataPlotRef);
 
     cout << "====> Comparison with reference file ..." << endl;
     std::cout << "Error w.r.t. reference file : " << (dataPlot - dataPlotRef).normInf() << std::endl;

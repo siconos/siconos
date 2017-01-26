@@ -22,6 +22,8 @@
 
 #include <SimpleMatrix.hpp>
 
+#include <CxxStd.hpp>
+
 BulletWeightedShape::BulletWeightedShape(SP::btCollisionShape shape, const double& mass) :
   _mass(mass),
   _shape(shape)

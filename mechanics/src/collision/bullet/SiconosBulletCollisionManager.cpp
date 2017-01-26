@@ -33,6 +33,7 @@
 #include <limits>
 #include <boost/format.hpp>
 #include <boost/make_shared.hpp>
+#include <CxxStd.hpp>
 
 #include <Model.hpp>
 #include <Relation.hpp>
@@ -689,7 +690,7 @@ void SiconosBulletCollisionManager_impl::createCollisionObject(
   SP::SiconosBox box,
   SP::SiconosContactor contactor)
 {
-  const double half = 0.5;
+  const btScalar half = 0.5;
 
 #ifdef USE_CONVEXHULL_FOR_BOX
   const btScalar pts[] = {
@@ -904,11 +905,11 @@ void SiconosBulletCollisionManager_impl::updateShape(BodyCHRecord &record)
 
 // If type of SiconosMatrix is the same as btScalar, we can avoid a copy
 template<typename SCALAR>
-std::pair<SP::btTriangleIndexVertexArray, btScalar*>
+std::pair<SP::btTriangleIndexVertexArray, SCALAR*>
 make_bt_vertex_array(SP::SiconosMesh mesh,
                      SCALAR _s1, SCALAR _s2)
 {
-  printf("make_bt_vertex_array: non-copy version\n");
+  assert(mesh->vertices()->size(1) == 3);
   SP::btTriangleIndexVertexArray bttris(
     std11::make_shared<btTriangleIndexVertexArray>(
       mesh->indexes()->size()/3,

@@ -118,7 +118,9 @@ protected:
   */
   ACCEPT_SERIALIZATION(NewtonEulerDS);
 
-
+  /** Common code for constructors
+   * should be replaced in C++11 by delegating constructors 
+   */
   void init();
 
 
@@ -595,7 +597,6 @@ public:
     return _jacobianWrenchq;
   }
 
-
   /** get JacobianvForces
    *  \return pointer on a SiconosMatrix
    */
@@ -783,18 +784,16 @@ public:
   /** function to compute the external moments
    * The external moments are expressed by default in the body frame, since the Euler equation for
    * Omega is written in the body--fixed frame.
-   * Nevertheless, if _isMextExpressedInInertialFrame) is set to true, we assume that the external moment
-   * is given in the inertial frame and we perform the rotation
+   * Nevertheless, if _isMextExpressedInInertialFrame) is set to true, we assume that 
+   * the external moment is given in the inertial frame and we perform the rotation afterwards
    * \param time the current time
-   * \param q a given coordinates.
-   *  q is given in the case that mExt is expressed in inertial frame
-   *  (see _isMextExpressedInInertialFrame).
    * \param[return] mExt the computed external moment
    */
-  virtual void computeMExt(double time, SP::SiconosVector q, SP::SiconosVector mExt);
-  virtual void computeMExt(double time, SP::SiconosVector q);
+  virtual void computeMExt(double time, SP::SiconosVector mExt);
+  virtual void computeMExt(double time);
 
-  void computeJacobianMExtqByFD(double time, SP::SiconosVector q);
+  void computeJacobianMExtqExpressedInInertialFrameByFD(double time, SP::SiconosVector q);
+  void computeJacobianMExtqExpressedInInertialFrame(double time, SP::SiconosVector q);
 
   /** default function to compute the internal forces
    *  \param time the current time
