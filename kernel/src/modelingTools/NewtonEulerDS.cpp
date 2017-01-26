@@ -67,15 +67,43 @@ void computeRotationMatrix(double q0, double q1, double q2, double q3,
   rotationMatrix->setValue(2, 2,     q0*q0 -q1*q1 -q2*q2 +q3*q3);
 }
 
+void computeJacobianConvectedVectorInBodyFrame(double q0, double q1, double q2, double q3,
+                                               SP::SimpleMatrix jacobian, SP:: SiconosVector v)
+{
+
+  /* This routine compute the jacobian with respect to p of R^T(p)v */
+  jacobian->zero();
+
+  double v0 = v->getValue(0);
+  double v1 = v->getValue(1);
+  double v2 = v->getValue(2);
+  
+  jacobian->setValue(0,3, q0*v0+q3*v1-q2*v2);
+  jacobian->setValue(0,4, q1*v0+q2*v1+q3*v2);
+  jacobian->setValue(0,5,-q2*v0+q1*v1-q0*v2);
+  jacobian->setValue(0,6,-q3*v0+q0*v1+q1*v2);
+
+  jacobian->setValue(1,3,-q3*v0+q0*v1+q1*v2);
+  jacobian->setValue(1,4, q2*v0-q1*v1+q0*v2);
+  jacobian->setValue(1,5, q1*v0+q2*v1+q3*v2);
+  jacobian->setValue(1,6,-q0*v0-q3*v1+q2*v2);
+
+  jacobian->setValue(2,3, q2*v0-q1*v1+q0*v2);
+  jacobian->setValue(2,4, q3*v0-q0*v1-q1*v2);
+  jacobian->setValue(2,5, q0*v0+q3*v1-q2*v2);
+  jacobian->setValue(2,6, q1*v0+q2*v1+q3*v2);
+
+  *jacobian *=2.0; 
+}
+
 void rotateAbsToBody(double q0, double q1, double q2, double q3, SP::SiconosVector v)
 {
   DEBUG_BEGIN("::rotateAbsToBody(double q0, double q1, double q2, double q3, SP::SiconosVector v )\n");
   DEBUG_EXPR(v->display(););
-  DEBUG_PRINTF("( q0 = %e,  q1 = %e,  q2= %e,  q3= %e )\n", q0,q1,q2,q3);
-
+  DEBUG_PRINTF("( q0 = %16.12e,  q1 = %16.12e,  q2= %16.12e,  q3= %16.12e )\n", q0,q1,q2,q3);
   assert(v);
   assert(v->size()==3);
-  
+
   // First way. Using the rotation matrix
   // SP::SimpleMatrix rotationMatrix(new SimpleMatrix(3,3));
   // SiconosVector tmp(3);
@@ -100,6 +128,7 @@ void rotateAbsToBody(double q0, double q1, double q2, double q3, SP::SiconosVect
   // *v += sin(angle)*t + (1.0-cos(angle))*tmp;
 
   // Direct computation with cross product
+  // Works only with unit quaternion
   SiconosVector t(3), tmp(3);
   SiconosVector qvect(3);
   qvect(0)=q1;
@@ -118,7 +147,7 @@ void rotateAbsToBody(double q0, double q1, double q2, double q3, SP::SimpleMatri
 {
   DEBUG_BEGIN("::rotateAbsToBody(double q0, double q1, double q2, double q3, SP::SimpleMatrix m )\n");
   DEBUG_EXPR(m->display(););
-  DEBUG_PRINTF("( q0 = %e,  q1 = %e,  q2= %e,  q3= %e )\n", q0,q1,q2,q3);
+  DEBUG_PRINTF("( q0 = %16.12e,  q1 = %16.12e,  q2= %16.12e,  q3= %16.12e )\n", q0,q1,q2,q3);
 
   // Direct computation with cross product for each column
   assert(m->size(0) == 3 && "::rotateAbsToBody(double q0, double q1, double q2, double q3, SP::SimpleMatrix m ) m must have 3 rows");
@@ -609,8 +638,10 @@ void NewtonEulerDS::computeFExt(double time, SP::SiconosVector fExt)
  * when we call  NewtonEulerDS::computeMExt(double time, SP::SiconosVector q, SP::SiconosVector mExt)
  *  that calls in turn computeMExt(time, q, _mExt);
  */
-void computeMExt_internal(double time, SP::SiconosVector q, bool hasConstantMExt, bool isMextExpressedInInertialFrame,
-                          unsigned int qDim, SP::SiconosVector q0, SP::PluggedObject pluginMExt, SP::SiconosVector mExt_attributes, SP::SiconosVector mExt)
+void computeMExt_internal(double time, bool hasConstantMExt,
+                          unsigned int qDim, SP::SiconosVector q0,
+                          SP::PluggedObject pluginMExt, SP::SiconosVector mExt_attributes,
+                          SP::SiconosVector mExt)
 {
   /* if the pointer has been set to an external vector
    * after setting the plugin, we do not call the plugin */
@@ -622,35 +653,46 @@ void computeMExt_internal(double time, SP::SiconosVector q, bool hasConstantMExt
   else if(pluginMExt->fPtr)
     ((FExt_NE)pluginMExt->fPtr)(time, &(*mExt)(0), qDim, &(*q0)(0));  // parameter z are assumed to be equal to q0
 
-  if(isMextExpressedInInertialFrame && mExt)
-    ::changeFrameAbsToBody(q,mExt);
 }
 
 
-void NewtonEulerDS::computeMExt(double time, SP::SiconosVector q)
+void NewtonEulerDS::computeMExt(double time)
 {
-  //computeMExt(time, q, _mExt);
-  computeMExt_internal(time, q, _hasConstantMExt, _isMextExpressedInInertialFrame,
-                       _qDim, _q0, _pluginMExt, _mExt, _mExt);
+  DEBUG_BEGIN("N3ewtonEulerDS::computeMExt(double time)\n");
+  computeMExt_internal(time,_hasConstantMExt,
+                       _qDim, _q0,
+                       _pluginMExt, _mExt, _mExt);
+  DEBUG_END("NewtonEulerDS::computeMExt(double time)\n");
 }
 
 
 
-void NewtonEulerDS::computeMExt(double time, SP::SiconosVector q, SP::SiconosVector mExt)
+void NewtonEulerDS::computeMExt(double time, SP::SiconosVector mExt)
 {
-  DEBUG_BEGIN("NewtonEulerDS::computeMExt(...)\n");
-  computeMExt_internal(time, q, _hasConstantMExt, _isMextExpressedInInertialFrame,
+  DEBUG_BEGIN("NewtonEulerDS::computeMExt(double time, SP::SiconosVector mExt)\n");
+  computeMExt_internal(time, _hasConstantMExt,
                        _qDim, _q0, _pluginMExt, _mExt, mExt);
-  DEBUG_END("NewtonEulerDS::computeMExt(...)\n");
+  DEBUG_END("NewtonEulerDS::computeMExt(double time, SP::SiconosVector mExt)\n");
 }
 
 
 
-void NewtonEulerDS::computeJacobianMExtqByFD(double time, SP::SiconosVector q)
+void NewtonEulerDS::computeJacobianMExtqExpressedInInertialFrameByFD(double time, SP::SiconosVector q)
 {
-  DEBUG_BEGIN("NewtonEulerDS::computeJacobianMExtvByFD(...)\n");
+  DEBUG_BEGIN("NewtonEulerDS::computeJacobianMExtqExpressedInInertialFrameByFD(...)\n");
+
+  /* The computation of Jacobian of R^T mExt is somehow very rough since the pertubation
+   * that we apply to q  that gives qeps does not provide a unit quaternion. The rotation
+   * is computed assuming that the quaternion is unit (see rotateAbsToBody(double q0, double 
+   * q1, double q2, double q3, SP::SiconosVector v)). 
+   */
+
   SP::SiconosVector mExt(new SiconosVector(3));
-  computeMExt(time, q, mExt);
+  computeMExt(time, mExt);
+  if(_isMextExpressedInInertialFrame)
+    ::changeFrameAbsToBody(q,mExt);
+  DEBUG_EXPR(q->display());
+  DEBUG_EXPR(mExt->display(););
 
   double mExt0 = mExt->getValue(0);
   double mExt1 = mExt->getValue(1);
@@ -658,10 +700,13 @@ void NewtonEulerDS::computeJacobianMExtqByFD(double time, SP::SiconosVector q)
 
   SP::SiconosVector qeps(new SiconosVector(*q));
   _jacobianMExtq->zero();
-  (*qeps)(0) += _epsilonFD;
-  for(int j =0; j < 7; j++)
+  (*qeps)(3) += _epsilonFD;
+  for(int j =3; j < 7; j++)
   {
-    computeMExt(time, qeps, mExt);
+    computeMExt(time, mExt);
+    if(_isMextExpressedInInertialFrame)
+      ::changeFrameAbsToBody(qeps,mExt);
+    DEBUG_EXPR(mExt->display(););
     _jacobianMExtq->setValue(0,j, (mExt->getValue(0) - mExt0)/_epsilonFD);
     _jacobianMExtq->setValue(1,j, (mExt->getValue(1) - mExt1)/_epsilonFD);
     _jacobianMExtq->setValue(2,j, (mExt->getValue(2) - mExt2)/_epsilonFD);
@@ -669,11 +714,43 @@ void NewtonEulerDS::computeJacobianMExtqByFD(double time, SP::SiconosVector q)
     if(j<6)(*qeps)(j+1) += _epsilonFD;
   }
   DEBUG_EXPR(_jacobianMExtq->display(););
-  DEBUG_END("NewtonEulerDS::computeJacobianMExtvByFD(...)\n");
-
+  DEBUG_END("NewtonEulerDS::computeJacobianMExtqExpressedInInertialFrameByFD(...)\n");
 
 }
 
+void NewtonEulerDS::computeJacobianMExtqExpressedInInertialFrame(double time, SP::SiconosVector q)
+{
+  DEBUG_BEGIN("NewtonEulerDS::computeJacobianMExtqExpressedInInertialFrame(...)\n");
+  bool isMextExpressedInInertialFrame_save = _isMextExpressedInInertialFrame;
+  _isMextExpressedInInertialFrame=false;
+  SP::SiconosVector mExt(new SiconosVector(3));
+  computeMExt(time, mExt);
+  if(_isMextExpressedInInertialFrame)
+    ::changeFrameAbsToBody(q,mExt);
+  DEBUG_EXPR(q->display());
+  DEBUG_EXPR(mExt->display());
+
+  _isMextExpressedInInertialFrame=isMextExpressedInInertialFrame_save;
+
+  double q0 = q->getValue(3);
+  double q1 = q->getValue(4);
+  double q2 = q->getValue(5);
+  double q3 = q->getValue(6);
+
+  computeJacobianConvectedVectorInBodyFrame(q0, q1,  q2,  q3, _jacobianMExtq, mExt);
+
+  DEBUG_EXPR(_jacobianMExtq->display());
+
+  // SP::SimpleMatrix jacobianMExtqtmp (new SimpleMatrix(*_jacobianMExtq));
+  // computeJacobianMExtqExpressedInInertialFrameByFD(time, q);
+
+  // std::cout << "#################  " << (*jacobianMExtqtmp- *_jacobianMExtq).normInf() << std::endl;
+  // assert((*jacobianMExtqtmp- *_jacobianMExtq).normInf()< 1e-10);
+
+  // DEBUG_EXPR(_jacobianMExtq->display(););
+  DEBUG_END("NewtonEulerDS::computeJacobianMExtqExpressedInInertialFrame(...)\n");
+
+}
 void NewtonEulerDS::computeFInt(double time, SP::SiconosVector q, SP::SiconosVector v)
 {
   computeFInt(time,  q,  v, _fInt);
@@ -686,15 +763,20 @@ void NewtonEulerDS::computeFInt(double time, SP::SiconosVector q, SP::SiconosVec
 }
 
 
+
 void NewtonEulerDS::computeMInt(double time, SP::SiconosVector q, SP::SiconosVector v)
 {
-  computeMInt(time, q, v, _mInt);
+   DEBUG_BEGIN("NewtonEulerDS::computeMInt(double time, SP::SiconosVector q, SP::SiconosVector v)\n");
+   computeMInt(time, q, v, _mInt);
+   DEBUG_END("NewtonEulerDS::computeMInt(double time, SP::SiconosVector q, SP::SiconosVector v)\n");
 }
 
 void NewtonEulerDS::computeMInt(double time, SP::SiconosVector q, SP::SiconosVector v, SP::SiconosVector mInt)
 {
+  DEBUG_BEGIN("NewtonEulerDS::computeMInt(double time, SP::SiconosVector q, SP::SiconosVector v, SP::SiconosVector mInt)\n");
   if(_pluginMInt->fPtr)
     ((FInt_NE)_pluginMInt->fPtr)(time, &(*q)(0), &(*v)(0), &(*mInt)(0), _qDim,  &(*_q0)(0));// parameter z are assumed to be equal to q0
+  DEBUG_END("NewtonEulerDS::computeMInt(double time, SP::SiconosVector q, SP::SiconosVector v, SP::SiconosVector mInt)\n");
 }
 
 
@@ -955,21 +1037,27 @@ void NewtonEulerDS::computeMGyr(SP::SiconosVector twist)
 void NewtonEulerDS::computeForces(double time, SP::SiconosVector q, SP::SiconosVector twist)
 {
   DEBUG_BEGIN("NewtonEulerDS::computeForces(double time, SP::SiconosVector q, SP::SiconosVector twist)\n")
-  // Warning: an operator (fInt ...) may be set (ie allocated and not NULL) but not plugged, that's why two steps are required here.
+
   if(_wrench)
   {
     _wrench->zero();
-    // 1 - Computes the required functions
-    computeFExt(time);
+
+    // External wrench
+
     if(_fExt)
     {
+      computeFExt(time);
       _wrench->setBlock(0, *_fExt);
     }
-    computeMExt(time,q);
     if(_mExt)
     {
+      computeMExt(time);
+      if(_isMextExpressedInInertialFrame)
+        ::changeFrameAbsToBody(q,_mExt);
       _wrench->setBlock(3, *_mExt);
     }
+
+    // Internal wrench
 
     if(_fInt)
     {
@@ -979,6 +1067,7 @@ void NewtonEulerDS::computeForces(double time, SP::SiconosVector q, SP::SiconosV
       _wrench->setValue(2, _wrench->getValue(2) - _fInt->getValue(2));
 
     }
+
     if(_mInt)
     {
       computeMInt(time, q , twist);
@@ -986,6 +1075,8 @@ void NewtonEulerDS::computeForces(double time, SP::SiconosVector q, SP::SiconosV
       _wrench->setValue(4, _wrench->getValue(4) - _mInt->getValue(1));
       _wrench->setValue(5, _wrench->getValue(5) - _mInt->getValue(2));
     }
+
+    // Gyroscopical effect
     if(!_nullifyMGyr)
     {
       computeMGyr(twist);
@@ -1021,7 +1112,7 @@ void NewtonEulerDS::computeJacobianqForces(double time)
     }
     if(_isMextExpressedInInertialFrame && _mExt)
     {
-      computeJacobianMExtqByFD(time, _q);
+      computeJacobianMExtqExpressedInInertialFrame(time, _q);
       _jacobianWrenchq->setBlock(3,0,1.0* *_jacobianMExtq);
     }
     DEBUG_EXPR(_jacobianWrenchq->display(););
