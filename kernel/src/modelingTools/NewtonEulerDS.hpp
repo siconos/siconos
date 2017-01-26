@@ -118,7 +118,9 @@ protected:
   */
   ACCEPT_SERIALIZATION(NewtonEulerDS);
 
-
+  /** Common code for constructors
+   * should be replaced in C++11 by delegating constructors 
+   */
   void init();
 
 
