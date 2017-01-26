@@ -106,9 +106,13 @@ Topology::addInteractionInIndexSet0(SP::Interaction inter, SP::DynamicalSystem d
   dsgv1 = _DSG[0]->add_vertex(ds1);
 
   SP::VectorOfVectors workVds1 = _DSG[0]->properties(dsgv1).workVectors;
+  std::cout<< "workVds1 " << _DSG[0]->properties(dsgv1).workVectors << std::endl;;
+
+
   SP::VectorOfVectors workVds2;
   if (!workVds1)
   {
+    // V.A. 210/06/2017 Could we defer  this initialization ?
     workVds1.reset(new VectorOfVectors());
     _DSG[0]->properties(dsgv1).workMatrices.reset(new VectorOfMatrices());
     ds1->initWorkSpace(*workVds1, *_DSG[0]->properties(dsgv1).workMatrices);
@@ -119,6 +123,7 @@ Topology::addInteractionInIndexSet0(SP::Interaction inter, SP::DynamicalSystem d
     workVds2 = _DSG[0]->properties(dsgv2).workVectors;
     if (!workVds2)
     {
+      // V.A. 210/06/2017 Could we defer  this initialization ?
       workVds2.reset(new VectorOfVectors());
       _DSG[0]->properties(dsgv2).workMatrices.reset(new VectorOfMatrices());
       ds2->initWorkSpace(*workVds2, *_DSG[0]->properties(dsgv2).workMatrices);
@@ -130,7 +135,6 @@ Topology::addInteractionInIndexSet0(SP::Interaction inter, SP::DynamicalSystem d
     ds2_ = ds1;
     workVds2 = workVds1;
   }
-
   // this may be a multi edges graph
   assert(!_DSG[0]->is_edge(dsgv1, dsgv2, inter));
   assert(!_IG[0]->is_vertex(inter));
@@ -138,34 +142,44 @@ Topology::addInteractionInIndexSet0(SP::Interaction inter, SP::DynamicalSystem d
   DynamicalSystemsGraph::EDescriptor new_ed;
   std11::tie(new_ed, ig_new_ve) = _DSG[0]->add_edge(dsgv1, dsgv2, inter, *_IG[0]);
   InteractionProperties& interProp = _IG[0]->properties(ig_new_ve);
+
+  // V.A. 210/06/2017 Could we defer  this initialization ?
   interProp.DSlink.reset(new VectorOfBlockVectors);
   interProp.workVectors.reset(new VectorOfVectors);
   interProp.workMatrices.reset(new VectorOfSMatrices);
+
+
   unsigned int nslawSize = inter->nonSmoothLaw()->size();
   interProp.block.reset(new SimpleMatrix(nslawSize, nslawSize));
-  inter->setDSLinkAndWorkspace(interProp, *ds1, *workVds1, *ds2_, *workVds2);
+  //inter->setDSLinkAndWorkspace(interProp, *ds1, *workVds1, *ds2_, *workVds2);
+
 
   // add self branches in vertex properties
   // note : boost graph SEGFAULT on self branch removal
   // see https://svn.boost.org/trac/boost/ticket/4622
   _IG[0]->properties(ig_new_ve).source = ds1;
   _IG[0]->properties(ig_new_ve).source_pos = 0;
+  _IG[0]->properties(ig_new_ve).workDS1Vectors = workVds1 ;
+
   if(!ds2)
   {
     _IG[0]->properties(ig_new_ve).target = ds1;
     _IG[0]->properties(ig_new_ve).target_pos = 0;
+    _IG[0]->properties(ig_new_ve).workDS2Vectors = workVds1 ;
   }
   else
   {
     _IG[0]->properties(ig_new_ve).target = ds2;
     _IG[0]->properties(ig_new_ve).target_pos = ds1->dimension();
+    _IG[0]->properties(ig_new_ve).workDS2Vectors = workVds2 ;
   }
 
   assert(_IG[0]->bundle(ig_new_ve) == inter);
   assert(_IG[0]->is_vertex(inter));
   assert(_DSG[0]->is_edge(dsgv1, dsgv2, inter));
   assert(_DSG[0]->edges_number() == _IG[0]->size());
-
+  std::cout <<"_IG[0]->display();" << std::endl;
+  _IG[0]->display();
   return std::pair<DynamicalSystemsGraph::EDescriptor, InteractionsGraph::VDescriptor>(new_ed, ig_new_ve);
 }
 

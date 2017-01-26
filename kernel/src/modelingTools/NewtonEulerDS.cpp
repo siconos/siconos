@@ -67,6 +67,37 @@ void computeRotationMatrix(double q0, double q1, double q2, double q3,
   rotationMatrix->setValue(2, 2,     q0*q0 -q1*q1 -q2*q2 +q3*q3);
 }
 
+
+void computeJacobianConvectedVectorInBodyFrame(double q0, double q1, double q2, double q3,
+                                               SP::SimpleMatrix jacobian, SP:: SiconosVector v)
+{
+
+  /* This routine compute the jacobian with respect to p of R^T(p)v */
+  jacobian->zero();
+
+  double v0 = v->getValue(0);
+  double v1 = v->getValue(1);
+  double v2 = v->getValue(2);
+
+  jacobian->setValue(0,3, q0*v0+q3*v1-q2*v2);
+  jacobian->setValue(0,4, q1*v0+q2*v1+q3*v2);
+  jacobian->setValue(0,5,-q2*v0+q1*v1-q0*v2);
+  jacobian->setValue(0,6,-q3*v0+q0*v1+q1*v2);
+
+  jacobian->setValue(1,3,-q3*v0+q0*v1+q1*v2);
+  jacobian->setValue(1,4, q2*v0-q1*v1+q0*v2);
+  jacobian->setValue(1,5, q1*v0+q2*v1+q3*v2);
+  jacobian->setValue(1,6,-q0*v0-q3*v1+q2*v2);
+
+  jacobian->setValue(2,3, q2*v0-q1*v1+q0*v2);
+  jacobian->setValue(2,4, q3*v0-q0*v1-q1*v2);
+  jacobian->setValue(2,5, q0*v0+q3*v1-q2*v2);
+  jacobian->setValue(2,6, q1*v0+q2*v1+q3*v2);
+
+  *jacobian *=2.0;
+}
+
+
 void rotateAbsToBody(double q0, double q1, double q2, double q3, SP::SiconosVector v)
 {
   DEBUG_BEGIN("::rotateAbsToBody(double q0, double q1, double q2, double q3, SP::SiconosVector v )\n");
@@ -648,7 +679,15 @@ void NewtonEulerDS::computeMExt(double time, SP::SiconosVector q, SP::SiconosVec
 
 void NewtonEulerDS::computeJacobianMExtqByFD(double time, SP::SiconosVector q)
 {
-  DEBUG_BEGIN("NewtonEulerDS::computeJacobianMExtvByFD(...)\n");
+
+  DEBUG_BEGIN("NewtonEulerDS::computeJacobianMExtqExpressedInInertialFrameByFD(...)\n");
+
+  /* The computation of Jacobian of R^T mExt is somehow very rough since the pertubation
+   * that we apply to q  that gives qeps does not provide a unit quaternion. The rotation
+   * is computed assuming that the quaternion is unit (see rotateAbsToBody(double q0, double
+   * q1, double q2, double q3, SP::SiconosVector v)).
+   */
+
   SP::SiconosVector mExt(new SiconosVector(3));
   computeMExt(time, q, mExt);
 

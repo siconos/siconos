@@ -126,9 +126,9 @@ class LagrangianDS : public DynamicalSystem
 {
 public:
 
-  /** List of indices used to save tmp work matrics (last one is the size of the present list) */
-  enum WorkNames {xfree, sizeWorkVec};
-  enum WorkMatrixNames {invMass, jacobianXBloc10, jacobianXBloc11, zeroMatrix, idMatrix, coeffs_denseoutput, sizeWorkMat};
+  /** List of indices used to save tmp work matrices (last one is the size of the present list) */
+  enum LagrangianDSWorkVectorId {sizeWorkVec};
+  enum LagrangianDSWorkMatrixId {invMass, jacobianXBloc10, jacobianXBloc11, zeroMatrix, idMatrix, coeffs_denseoutput, sizeWorkMat};
 
 protected:
   /** serialization hooks
@@ -1047,7 +1047,7 @@ public:
    *  \param sizeOfRows an int to set the size of rows
    *  \param sizeOfCols an int to set the size of cols
    */
-  inline void allocateWorkMatrix(const WorkMatrixNames & id, int sizeOfRows, int sizeOfCols)
+  inline void allocateWorkMatrix(const  LagrangianDSWorkMatrixId& id, int sizeOfRows, int sizeOfCols)
   {
     _workMatrix[id].reset(new SimpleMatrix(sizeOfRows, sizeOfCols));
   }
@@ -1056,7 +1056,7 @@ public:
    * \param id the id of the SimpleMatrix
    *  \return a SP::SimpleMatrix
    */
-  inline SP::SimpleMatrix workMatrix(const WorkMatrixNames & id) const
+  inline SP::SimpleMatrix workMatrix(const  LagrangianDSWorkMatrixId& id) const
   {
     return  _workMatrix[id];
   }

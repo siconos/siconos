@@ -271,6 +271,30 @@ void Simulation::initialize(SP::Model m, bool withOSI)
   for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
   {
     Interaction& inter = *indexSet0->bundle(*ui);
+  //   if (indexSet0->properties(*ui).source != indexSet0->properties(*ui).target)
+  //   {
+  //     DEBUG_PRINT("a two DS Interaction\n");
+  //     ds1 = indexSet0->properties(*ui).source;
+  //     ds2 = indexSet0->properties(*ui).target;
+  //   }
+  //   else
+  //   {
+  //     DEBUG_PRINT("a single DS Interaction\n");
+  //     ds1 = indexSet0->properties(*ui).source;
+  //     ds2 = ds1;
+  //   }
+
+
+  //   InteractionsGraph::OEIterator oei, oeiend;
+  //   for (std11::tie(oei, oeiend) = indexSet0->out_edges(*ui);
+  //        oei != oeiend; ++oei)
+  //     {
+  //       InteractionsGraph::EDescriptor ed1, ed2;
+  //       std11::tie(ed1, ed2) = indexSet0->edges(indexSet0->source(*oei), indexSet0->target(*oei));
+  //       std::cout << "ed1" << ed1 << std::endl;
+  //       std::cout << "ed2" << ed2 << std::endl;
+  //     }
+
     inter.initialize(_tinit, indexSet0->properties(*ui));
   }
 

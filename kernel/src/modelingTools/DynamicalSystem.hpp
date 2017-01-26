@@ -130,7 +130,7 @@ public:
   /** List of indices used to save tmp work vectors
    * The last value is the size of the present list, so you HAVE to leave it at the end position.
    */
-  enum WorkNames {local_buffer, freeresidu, free, qtmp, acce_memory, acce_like, free_tdg, sizeWorkV};
+  enum DSWorkVectorId {local_buffer, freeresidu, free, qtmp, acce_memory, acce_like, free_tdg, sizeWorkV};
 
 private:
   /** serialization hooks
@@ -532,7 +532,7 @@ public:
    * \param id  WorkNames
    * \return a SP::SiconosVector
    */
-  inline SP::SiconosVector workspace(const WorkNames& id) const
+  inline SP::SiconosVector workspace(const DSWorkVectorId& id) const
   {
     return _workspace[id];
   }
@@ -549,7 +549,7 @@ public:
    *  \param newVal a SP::SiconosVector
    *  \param id a std::string id
    */
-  inline void addWorkVector(SP::SiconosVector newVal, const WorkNames& id)
+  inline void addWorkVector(SP::SiconosVector newVal, const DSWorkVectorId& id)
   {
     *_workspace[id] = *newVal;
   }
@@ -557,7 +557,7 @@ public:
    *  \param newVal a SP::SiconosVector
    *  \param id a std::string id
    */
-  inline void subWorkVector(SP::SiconosVector newVal, const WorkNames& id)
+  inline void subWorkVector(SP::SiconosVector newVal, const DSWorkVectorId& id)
   {
     *_workspace[id] -= *newVal;
   }
@@ -566,7 +566,7 @@ public:
    *  \param id the id of the SiconosVector
    *  \param size an int to set the size
    */
-  inline void allocateWorkVector(const WorkNames& id, int size)
+  inline void allocateWorkVector(const DSWorkVectorId& id, int size)
   {
     _workspace[id].reset(new SiconosVector(size));
   }
