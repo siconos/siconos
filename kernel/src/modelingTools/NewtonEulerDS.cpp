@@ -463,10 +463,8 @@ void NewtonEulerDS::init()
   _twist.reset(new SiconosVector(_n));
 
   _dotq.reset(new SiconosVector(_qDim));
-  _workspace[freeresidu].reset(new SiconosVector(_n));
-  _workspace[free].reset(new SiconosVector(dimension()));
+
   _massMatrix.reset(new SimpleMatrix(_n, _n));
-  _luW.reset(new SimpleMatrix(_n, _n));
   _massMatrix->zero();
   _T.reset(new SimpleMatrix(_qDim, _n));
 
