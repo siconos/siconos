@@ -93,11 +93,17 @@ void SchatzmanPaoliOSI::initialize(Model& m)
   {
     if (!checkOSI(dsi)) continue;
     SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
+    VectorOfVectors& workVectors = *_dynamicalSystemsGraph->properties(*dsi).workVectors;
+ 
+
     Type::Siconos dsType = Type::value(*ds);
     if (dsType == Type::LagrangianLinearTIDS)
     {
       // Computation of the first step for starting
       SP::LagrangianLinearTIDS d = std11::static_pointer_cast<LagrangianLinearTIDS> (ds);
+      workVectors.resize(LagrangianDS::sizeWorkVec);
+      workVectors[LagrangianDS::residuFree].reset(new SiconosVector(d->dimension()));
+      workVectors[LagrangianDS::free].reset(new SiconosVector(d->dimension()));
 
       SP::SiconosVector q0  = d->q0();
       SP::SiconosVector q  = d->q();
@@ -312,7 +318,7 @@ double SchatzmanPaoliOSI::computeResidu()
     if (!checkOSI(dsi)) continue;
     SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
     dsType = Type::value(*ds); // Its type
-    SP::SiconosVector residuFree = ds->workspace(DynamicalSystem::freeresidu);
+    VectorOfVectors& workVectors = *_dynamicalSystemsGraph->properties(*dsi).workVectors;
 
     // 1 - Lagrangian Non Linear Systems
     if (dsType == Type::LagrangianDS)
@@ -329,6 +335,8 @@ double SchatzmanPaoliOSI::computeResidu()
       // for q != q_k, the formulae (1) is wrong.
       // in the sequel, only the equation (1) is implemented
 
+      
+      
       // -- Convert the DS into a Lagrangian one.
       SP::LagrangianLinearTIDS d = std11::static_pointer_cast<LagrangianLinearTIDS> (ds);
 
@@ -343,25 +351,28 @@ double SchatzmanPaoliOSI::computeResidu()
       //  std::cout << "SchatzmanPaoliOSI::computeResidu - v_k =" <<std::endl;
       // v_k->display();
 
+      
       // --- ResiduFree computation Equation (1) ---
-      residuFree->zero();
+      SiconosVector& residuFree = *workVectors[LagrangianDS::residuFree];
+      SiconosVector& free = *workVectors[LagrangianDS::free];
+      residuFree.zero();
       double coeff;
       // -- No need to update W --
 
       //SP::SiconosVector v = d->velocity(); // v = v_k,i+1
 
       SP::SiconosMatrix M = d->mass();
-      prod(*M, (*q_k_1 - *q_k), *residuFree); // residuFree = M(-q_{k}+q_{k-1})
+      prod(*M, (*q_k_1 - *q_k), residuFree); // residuFree = M(-q_{k}+q_{k-1})
 
       SP::SiconosMatrix K = d->K();
       if (K)
       {
-        prod(h * h, *K, *q_k, *residuFree, false); // residuFree += h^2*K*qi
+        prod(h * h, *K, *q_k, residuFree, false); // residuFree += h^2*K*qi
       }
 
       SP::SiconosMatrix C = d->C();
       if (C)
-        prod(h * h, *C, (1.0 / (2.0 * h)*_theta * (*q_k - *q_k_1) + (1.0 - _theta)* *v_k)  , *residuFree, false);
+        prod(h * h, *C, (1.0 / (2.0 * h)*_theta * (*q_k - *q_k_1) + (1.0 - _theta)* *v_k)  , residuFree, false);
       // residufree += h^2 C (\theta \Frac{q-q_{k-1}}{2h}+ (1-\theta) v_k))
 
 
@@ -371,11 +382,11 @@ double SchatzmanPaoliOSI::computeResidu()
         // computes Fext(ti)
         d->computeFExt(told);
         coeff = -h * h * (1 - _theta);
-        scal(coeff, *Fext, *residuFree, false); // residufree -= h^2*(1-_theta) * fext(ti)
+        scal(coeff, *Fext, residuFree, false); // residufree -= h^2*(1-_theta) * fext(ti)
         // computes Fext(ti+1)
         d->computeFExt(t);
         coeff = -h * h * _theta;
-        scal(coeff, *Fext, *residuFree, false); // residufree -= h^2*_theta * fext(ti+1)
+        scal(coeff, *Fext, residuFree, false); // residufree -= h^2*_theta * fext(ti+1)
       }
 
 
@@ -384,9 +395,9 @@ double SchatzmanPaoliOSI::computeResidu()
       // residuFree->display();
 
 
-      (* d->workspace(DynamicalSystem::free)) = *residuFree; // copy residuFree in Workfree
+      free = residuFree; // copy residuFree in Workfree
       if (d->p(0))
-        *(d->workspace(DynamicalSystem::free)) -= *d->p(0); // Compute Residu in Workfree Notation !!
+        free -= *d->p(0); // Compute Residu in Workfree Notation !!
 
       //  std::cout << "SchatzmanPaoliOSI::ComputeResidu LagrangianLinearTIDS p(0) :"  << std::endl;
       //  if (d->p(0))
@@ -400,7 +411,7 @@ double SchatzmanPaoliOSI::computeResidu()
 
       //     normResidu = d->workspace(DynamicalSystem::free)->norm2();
       normResidu = 0.0; // we assume that v = vfree + W^(-1) p
-      //     normResidu = realresiduFree->norm2();
+      //     normResidu = realresiduFree.norm2();
 
     }
     else if (dsType == Type::NewtonEulerDS)
@@ -443,9 +454,10 @@ void SchatzmanPaoliOSI::computeFreeState()
 
     ds = _dynamicalSystemsGraph->bundle(*dsi);
     dsType = Type::value(*ds); // Its type
+    VectorOfVectors& workVectors = *_dynamicalSystemsGraph->properties(*dsi).workVectors;
     W =  _dynamicalSystemsGraph->properties(*dsi).W; // Its W SchatzmanPaoliOSI matrix of iteration.
 
-    //1 - Lagrangian Non Linear Systems
+    //1 - Lagrangian Non Linear Systemsv
     if (dsType == Type::LagrangianDS)
     {
 
@@ -468,21 +480,22 @@ void SchatzmanPaoliOSI::computeFreeState()
       SP::LagrangianLinearTIDS d = std11::static_pointer_cast<LagrangianLinearTIDS> (ds);
 
       // Get state i (previous time step) from Memories -> var. indexed with "Old"
-      SP::SiconosVector qold = d->qMemory()->getSiconosVector(0); // q_k
+      SiconosVector& qold = *d->qMemory()->getSiconosVector(0); // q_k
       //   SP::SiconosVector vold = d->velocityMemory()->getSiconosVector(0); //v_k
 
       // --- ResiduFree computation ---
 
       // vFree pointer is used to compute and save ResiduFree in this first step.
+      SiconosVector& residuFree = *workVectors[LagrangianDS::residuFree];
+      SiconosVector& qfree = *workVectors[LagrangianDS::free];
 
 
       // Velocity free and residu. vFree = RESfree (pointer equality !!).
-      SP::SiconosVector qfree = d->workspace(DynamicalSystem::free);//workX[d];
-      (*qfree) = *(d->workspace(DynamicalSystem::freeresidu));
+      qfree = residuFree;
 
-      W->PLUForwardBackwardInPlace(*qfree);
-      *qfree *= -1.0;
-      *qfree += *qold;
+      W->PLUForwardBackwardInPlace(qfree);
+      qfree *= -1.0;
+      qfree += qold;
 
     }
     // 3 - Newton Euler Systems
@@ -687,7 +700,7 @@ void SchatzmanPaoliOSI::updateState(const unsigned int level)
   {
     if (!checkOSI(dsi)) continue;
     ds = _dynamicalSystemsGraph->bundle(*dsi);
-
+    VectorOfVectors& workVectors = *_dynamicalSystemsGraph->properties(*dsi).workVectors;
     W = _dynamicalSystemsGraph->properties(*dsi).W;
     // Get the DS type
 
@@ -698,17 +711,18 @@ void SchatzmanPaoliOSI::updateState(const unsigned int level)
     {
       // get dynamical system
       SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
+      SiconosVector& qfree = *workVectors[LagrangianDS::free];
 
       //    SiconosVector *vfree = d->velocityFree();
-      SP::SiconosVector q = d->q();
+      SiconosVector& q = *d->q();
       bool baux = dsType == Type::LagrangianDS && useRCC && _simulation->relativeConvergenceCriterionHeld();
       if (level != LEVELMAX)
       {
         // To compute q, we solve W(q - qfree) = p
         if (d->p(level))
         {
-          *q = *d->p(level); // q = p
-          W->PLUForwardBackwardInPlace(*q);
+          q = *d->p(level); // q = p
+          W->PLUForwardBackwardInPlace(q);
         }
 
         // if (d->boundaryConditions())
@@ -717,25 +731,25 @@ void SchatzmanPaoliOSI::updateState(const unsigned int level)
         //        itindex != d->boundaryConditions()->velocityIndices()->end();
         //        ++itindex)
         //     v->setValue(*itindex, 0.0);
-        *q +=  * ds->workspace(DynamicalSystem::free);
+        q +=  qfree;
 
       }
       else
-        *q =  * ds->workspace(DynamicalSystem::free);
+        q =  qfree;
 
 
 
       // Computation of the velocity
 
       SP::SiconosVector v = d->velocity();
-      SP::SiconosVector q_k_1 = d->qMemory()->getSiconosVector(1); // q_{k-1}
+      SiconosVector& q_k_1 = *d->qMemory()->getSiconosVector(1); // q_{k-1}
 
       //  std::cout << "SchatzmanPaoliOSI::updateState - q_k_1 =" <<std::endl;
       // q_k_1->display();
       //  std::cout << "SchatzmanPaoliOSI::updateState - q =" <<std::endl;
       // q->display();
 
-      *v = 1.0 / (2.0 * h) * (*q - *q_k_1);
+      *v = 1.0 / (2.0 * h) * (q - q_k_1);
       //  std::cout << "SchatzmanPaoliOSI::updateState - v =" <<std::endl;
       // v->display();
 
