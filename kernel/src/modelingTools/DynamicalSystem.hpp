@@ -553,6 +553,14 @@ public:
   {
     *_workspace[id] = *newVal;
   }
+  /** to add a temporary vector
+   *  \param newVal a SP::SiconosVector
+   *  \param id a std::string id
+   */
+  inline void addWorkVector(const SiconosVector& newVal, const DSWorkVectorId& id)
+  {
+    *_workspace[id] = newVal;
+  }
   /** sub a vector to a temporary one
    *  \param newVal a SP::SiconosVector
    *  \param id a std::string id
@@ -561,7 +569,14 @@ public:
   {
     *_workspace[id] -= *newVal;
   }
-
+  /** sub a vector to a temporary one
+   *  \param newVal a SP::SiconosVector
+   *  \param id a std::string id
+   */
+  inline void subWorkVector(const SiconosVector& newVal, const DSWorkVectorId& id)
+  {
+    *_workspace[id] -= newVal;
+  }
   /** to allocate memory for a new vector in tmp map
    *  \param id the id of the SiconosVector
    *  \param size an int to set the size
