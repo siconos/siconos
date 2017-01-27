@@ -53,8 +53,7 @@ public:
    * \param group1 first group
    * \param group2 second group */
   virtual SP::NonSmoothLaw nonSmoothLaw(long unsigned int group1,
-                                        long unsigned int group2)
-    { return _nslaws(group1, group2); }
+                                        long unsigned int group2);
 
 protected:
 
