@@ -33,10 +33,6 @@ void LagrangianDS::init(unsigned int ndof)
   _q[1].reset(new SiconosVector(ndof));
   _q[2].reset(new SiconosVector(ndof));
 
-  _workspace[freeresidu].reset(new SiconosVector(ndof));
-  _workspace[free].reset(new SiconosVector(ndof));
-
-
   /** \todo lazy Memory allocation */
   _forces.reset(new SiconosVector(ndof));
   _jacobianqForces.reset(new SimpleMatrix(ndof, ndof));

@@ -347,7 +347,8 @@ void Interaction::initDSDataLagrangian(DynamicalSystem& ds, VectorOfVectors& wor
 
   // Put q/velocity/acceleration of each DS into a block. (Pointers links, no copy!!)
 //  DSlink[LagrangianR::xfree]->insertPtr(workVDS[LagrangianDS::xfree]);
-  DSlink[LagrangianR::xfree]->insertPtr(ds.workspace(DynamicalSystem::free));
+  //DSlink[LagrangianR::xfree]->insertPtr(ds.workspace(DynamicalSystem::free));
+  DSlink[LagrangianR::xfree]->insertPtr(workVDS[LagrangianDS::free]);
   DSlink[LagrangianR::q0]->insertPtr(lds.q());
 
   DEBUG_PRINTF("DSlink[LagrangianR::q0]->insertPtr(lds.q()) with LagrangianR::q0 = %i\n",LagrangianR::q0);

@@ -127,7 +127,7 @@ class LagrangianDS : public DynamicalSystem
 public:
 
   /** List of indices used to save tmp work matrices (last one is the size of the present list) */
-  enum LagrangianDSWorkVectorId {sizeWorkVec};
+  enum LagrangianDSWorkVectorId {residuFree,free,sizeWorkVec};
   enum LagrangianDSWorkMatrixId {invMass, jacobianXBloc10, jacobianXBloc11, zeroMatrix, idMatrix, coeffs_denseoutput, sizeWorkMat};
 
 protected:
