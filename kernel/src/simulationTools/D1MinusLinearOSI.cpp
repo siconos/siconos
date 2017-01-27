@@ -32,6 +32,7 @@
 #include "OneStepNSProblem.hpp"
 
 //#define DEBUG_BEGIN_END_ONLY
+// #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
 #include "debug.h"
@@ -112,14 +113,23 @@ void D1MinusLinearOSI::initialize(Model & m)
 
     SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
     Type::Siconos dsType = Type::value(*ds);
+    VectorOfVectors& workVectors = *_dynamicalSystemsGraph->properties(*dsi).workVectors;
+
     if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
     {
-      SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
-      d->computeMass();
+      SP::LagrangianDS lds = std11::static_pointer_cast<LagrangianDS> (ds);
+      lds->computeMass();
+      workVectors.resize(LagrangianDS::sizeWorkVec);
+      workVectors[LagrangianDS::residuFree].reset(new SiconosVector(lds->dimension()));
+      workVectors[LagrangianDS::free].reset(new SiconosVector(lds->dimension()));
+
     }
     else if (dsType == Type::NewtonEulerDS)
     {
-      //SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS> (ds);
+      SP::NewtonEulerDS neds = std11::static_pointer_cast<NewtonEulerDS> (ds);
+      workVectors.resize(NewtonEulerDS::sizeWorkVec);
+      workVectors[NewtonEulerDS::residuFree].reset(new SiconosVector(neds->dimension()));
+      workVectors[NewtonEulerDS::free].reset(new SiconosVector(neds->dimension()));
     }
     else
       RuntimeException::selfThrow("D1MinusLinearOSI::initialize - not implemented for Dynamical system type: " + dsType);
@@ -193,10 +203,13 @@ double D1MinusLinearOSI::computeResidu()
   switch (_typeOfD1MinusLinearOSI)
   {
   case halfexplicit_acceleration_level:
+    DEBUG_END("D1MinusLinearOSI::computeResidu()\n");
     return computeResiduHalfExplicitAccelerationLevel();
   case halfexplicit_acceleration_level_full:
+    DEBUG_END("D1MinusLinearOSI::computeResidu()\n");
     return computeResiduHalfExplicitAccelerationLevelFull();
   case halfexplicit_velocity_level:
+    DEBUG_END("D1MinusLinearOSI::computeResidu()\n");
     return computeResiduHalfExplicitVelocityLevel();
   }
   RuntimeException::selfThrow("D1MinusLinearOSI::computeResidu() - not implemented for type of D1MinusLinearOSI: " + _typeOfD1MinusLinearOSI );
@@ -214,31 +227,33 @@ void D1MinusLinearOSI::computeFreeState()
   {
     if (!checkOSI(dsi)) continue;
     SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
-
     Type::Siconos dsType = Type::value(*ds);
+    VectorOfVectors& workVectors = *_dynamicalSystemsGraph->properties(*dsi).workVectors;
     /* \warning the following conditional statement should be removed with a MechanicalDS class */
     if ((dsType == Type::LagrangianDS) || (dsType == Type::LagrangianLinearTIDS))
     {
       // Lagrangian Systems
       SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
 
+
       // get left state from memory
-      SP::SiconosVector vold = d->velocityMemory()->getSiconosVector(0); // right limit
-      DEBUG_EXPR(vold->display());
+      SiconosVector& vold = *d->velocityMemory()->getSiconosVector(0); // right limit
+      DEBUG_EXPR(vold.display());
+      SiconosVector& residuFree = *workVectors[LagrangianDS::residuFree];
+      SiconosVector &vfree  = *d->velocity(); // POINTER CONSTRUCTOR : contains free velocity
 
       // get right information
       //SP::SiconosMatrix M = d->mass();
-      SP::SiconosVector vfree = d->velocity(); // POINTER CONSTRUCTOR : contains free velocity
-      (*vfree) = *(d->workspace(DynamicalSystem::freeresidu));
-      DEBUG_EXPR(d->workspace(DynamicalSystem::freeresidu)->display());
+      vfree =  residuFree;
+      DEBUG_EXPR(residuFree.display());
       // d->computeMass();
       // M->resetLU();
-      // M->PLUForwardBackwardInPlace(*vfree);
+      // M->PLUForwardBackwardInPlace(vfree);
       // DEBUG_EXPR(M->display());
 
-      *vfree *= -1.;
-      *vfree += *vold;
-      DEBUG_EXPR(vfree->display());
+      vfree *= -1.;
+      vfree += vold;
+      DEBUG_EXPR(vfree.display());
     }
     else if (dsType == Type::NewtonEulerDS)
     {
@@ -246,18 +261,21 @@ void D1MinusLinearOSI::computeFreeState()
       SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS> (ds);
 
       // get left state from memory
-      SP::SiconosVector vold = d->twistMemory()->getSiconosVector(0); // right limit
-      DEBUG_EXPR(vold->display());
+      SiconosVector& vold = *d->twistMemory()->getSiconosVector(0); // right limit
+      DEBUG_EXPR(vold.display());
+
 
       // get right information
       SP::SiconosMatrix M(new SimpleMatrix(*(d->mass()))); // we copy the mass matrix to avoid its factorization;
-      SP::SiconosVector vfree = d->twist(); // POINTER CONSTRUCTOR : contains free velocity
-      (*vfree) = *(d->workspace(DynamicalSystem::freeresidu));
-      DEBUG_EXPR(d->workspace(DynamicalSystem::freeresidu)->display());
+      SiconosVector &vfree = *d->twist(); // POINTER CONSTRUCTOR : contains free velocity
+      SiconosVector& residuFree = *workVectors[NewtonEulerDS::residuFree];
 
-      *vfree *= -1.;
-      *vfree += *vold;
-      DEBUG_EXPR(vfree->display());
+      vfree = residuFree;
+      DEBUG_EXPR(residuFree.display());
+
+      vfree *= -1.;
+      vfree += vold;
+      DEBUG_EXPR(vfree.display());
 
 
     }
