@@ -173,11 +173,11 @@ void LagrangianLinearTIDS::computeRhs(double time, bool)
   // Then we search for _q[2], such as Mass*_q[2] = _fExt - C_q[1] - K_q[0] + p.
   _workMatrix[invMass]->PLUForwardBackwardInPlace(*_q[2]);
 
-  // _workspace[free]->zero();
-  // computeForces(time, _q[0], _q[1]);
-  // *_workspace[free] = *_forces;
-  // // Then we search for _workspace[free], such as Mass*_workfree = _fExt - C_q[1] - K_q[0] .
-  // _workMatrix[invMass]->PLUForwardBackwardInPlace(*_workspace[free]);
+  _workspace[free]->zero();
+  computeForces(time, _q[0], _q[1]);
+  *_workspace[free] = *_forces;
+  // Then we search for _workspace[free], such as Mass*_workfree = _fExt - C_q[1] - K_q[0] .
+  _workMatrix[invMass]->PLUForwardBackwardInPlace(*_workspace[free]);
 
   //    std::cout << "LagrangianTIDS :: computeRhs " << std::endl ;
   //    std::cout << " q[2] " << std::endl ;
