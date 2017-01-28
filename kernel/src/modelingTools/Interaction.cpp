@@ -345,10 +345,15 @@ void Interaction::initDSDataLagrangian(DynamicalSystem& ds, VectorOfVectors& wor
   // convert vDS systems into LagrangianDS and put them in vLDS
   LagrangianDS& lds = static_cast<LagrangianDS&> (ds);
 
-  // Put q/velocity/acceleration of each DS into a block. (Pointers links, no copy!!)
-//  DSlink[LagrangianR::xfree]->insertPtr(workVDS[LagrangianDS::xfree]);
+  // Put q, velocity and acceleration of each DS into a block. (Pointers links, no copy!!)
+
+  std::cout << "workVDS" << workVDS.size() << std::endl;
+  std::cout << "workVDS" << workVDS.size() << std::endl;
+
+  if ( workVDS.size() != 0)
+    DSlink[LagrangianR::xfree]->insertPtr(workVDS[LagrangianDS::free]);
   //DSlink[LagrangianR::xfree]->insertPtr(ds.workspace(DynamicalSystem::free));
-  DSlink[LagrangianR::xfree]->insertPtr(workVDS[LagrangianDS::free]);
+
   DSlink[LagrangianR::q0]->insertPtr(lds.q());
 
   DEBUG_PRINTF("DSlink[LagrangianR::q0]->insertPtr(lds.q()) with LagrangianR::q0 = %i\n",LagrangianR::q0);

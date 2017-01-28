@@ -233,6 +233,10 @@ void LsodarOSI::initialize(Model& m)
       _xWork->insertPtr(LDS.q());
       _xWork->insertPtr(LDS.velocity());
 
+
+
+
+
     }
     else
       _xWork->insertPtr(ds->x());
