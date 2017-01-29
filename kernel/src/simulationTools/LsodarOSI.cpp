@@ -172,9 +172,25 @@ void LsodarOSI::computeRhs(double t, DynamicalSystemsGraph& DSG0)
   {
     if (!checkOSI(dsi)) continue;
     SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
+
+    // compute standard rhs stored in the dynamical system
     ds->computeRhs(t);
-    if (_extraAdditionalTerms)
+
+
+    VectorOfVectors& workVectors = *_dynamicalSystemsGraph->properties(*dsi).workVectors;
+    VectorOfMatrices& workMatrices = *_dynamicalSystemsGraph->properties(*dsi).workMatrices;
+    Type::Siconos dsType = Type::value(*ds);
+    if (dsType == Type::LagrangianLinearTIDS || dsType == Type::LagrangianDS)
     {
+      SP::LagrangianDS lds = std11::static_pointer_cast<LagrangianDS> (ds);
+      SiconosVector &free=*workVectors[LagrangianDS::free];
+      free.zero();
+      lds->computeForces(t);
+      free = *lds->forces();
+      workMatrices[LagrangianDS::invMass]->PLUForwardBackwardInPlace(free);
+    }
+    if (_extraAdditionalTerms)
+    { 
       DynamicalSystemsGraph::VDescriptor dsgVD = DSG0.descriptor(ds);
       _extraAdditionalTerms->addSmoothTerms(DSG0, dsgVD, t, ds->getRhs());
     }
@@ -225,15 +241,23 @@ void LsodarOSI::initialize(Model& m)
   {
     if (!checkOSI(dsi)) continue;
     SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
+    VectorOfVectors& workVectors = *_dynamicalSystemsGraph->properties(*dsi).workVectors;
+    VectorOfMatrices& workMatrices = *_dynamicalSystemsGraph->properties(*dsi).workMatrices;
+
     if (Type::value(*ds) == Type::LagrangianDS ||
         Type::value(*ds) == Type::LagrangianLinearTIDS)
     {
-      LagrangianDS& LDS = *std11::static_pointer_cast<LagrangianDS>(ds);
-      LDS.connectToDS(getSizeMem());
-      _xWork->insertPtr(LDS.q());
-      _xWork->insertPtr(LDS.velocity());
-
-
+      LagrangianDS& lds = *std11::static_pointer_cast<LagrangianDS>(ds);
+      lds.connectToDS(getSizeMem());
+      _xWork->insertPtr(lds.q());
+      _xWork->insertPtr(lds.velocity());
+      workVectors.resize(LagrangianDS::sizeWorkVec);
+      workVectors[LagrangianDS::free].reset(new SiconosVector(lds.dimension()));
+      workMatrices.resize(LagrangianDS::sizeWorkMat);
+      workMatrices[LagrangianDS::invMass].reset(new SimpleMatrix(*lds.mass()));
+      
+        
+      
 
 
 

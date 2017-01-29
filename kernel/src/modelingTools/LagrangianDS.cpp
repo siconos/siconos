@@ -512,14 +512,11 @@ void LagrangianDS::computeRhs(double time, bool isDSup)
 
   _workMatrix[invMass]->PLUForwardBackwardInPlace(*_q[2]);
 
-  _workspace[free]->zero();
-  computeForces(time, _q[0], _q[1]);
-  *_workspace[free] = *_forces;
-  // Then we search for _workspace[free], such as Mass*_workfree = forces .
-  _workMatrix[invMass]->PLUForwardBackwardInPlace(*_workspace[free]);
-
-
-
+  // _workspace[free]->zero();
+  // computeForces(time, _q[0], _q[1]);
+  // *_workspace[free] = *_forces;
+  // // Then we search for _workspace[free], such as Mass*_workfree = forces .
+  // _workMatrix[invMass]->PLUForwardBackwardInPlace(*_workspace[free]);
 
 }
 
