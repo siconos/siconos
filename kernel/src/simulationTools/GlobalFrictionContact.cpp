@@ -264,12 +264,12 @@ bool GlobalFrictionContact::preCompute(double time)
         
         if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
         {
-          SiconosVector& vfree = *workVectors[LagrangianDS::free];
+          SiconosVector& vfree = *workVectors[OneStepIntegrator::free];
           setBlock(vfree, _q, dss, 0, offset);
         }
         else  if (dsType == Type::NewtonEulerDS)
         {
-          SiconosVector& vfree = *workVectors[NewtonEulerDS::free];
+          SiconosVector& vfree = *workVectors[OneStepIntegrator::free];
           setBlock(vfree, _q, dss, 0, offset);
  
         }

@@ -34,7 +34,7 @@
  * NewMarkAlphaOSI is instantiated with values of beta, gamma, alpha_m, alpha_f and the list of concerned
  * dynamical systems. Each DynamicalSystem is associated to a SiconosMatrix named "W"
  *
- * W matrices are initialized and computed in initW and computeW.
+ * W matrices are initialized and computed in initializeIterationMatrixW and computeW.
  */
 class NewMarkAlphaOSI : public OneStepIntegrator
 {
@@ -198,7 +198,7 @@ public:
   /** initialize W matrix
     *  \param ds a pointer to DynamicalSystem
     */
-  void initW(SP::DynamicalSystem ds );
+  void initializeIterationMatrixW(SP::DynamicalSystem ds);
 
   /** compute W matrix
    *  \param ds a pointer to DynamicalSystem
@@ -223,7 +223,7 @@ public:
 
   /** initialize */
   void initialize(Model& m);
-
+  void initializeDynamicalSystem(Model& m,double t, SP::DynamicalSystem ds);
   /** prepare for Newton Iteration
    * \param time
    */

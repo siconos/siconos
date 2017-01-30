@@ -1226,7 +1226,7 @@ class Hdf5():
                     if use_proposed:
                         nsds.insertDynamicalSystem(body)
                         nsds.topology().setOSI(body, self._osi)
-                        nsds.topology().initW(
+                        nsds.topology().initializeIterationMatrixW(
                             self._model.simulation().nextTime(),
                             body, self._osi)
                         body.initialize(self._model.simulation().nextTime())

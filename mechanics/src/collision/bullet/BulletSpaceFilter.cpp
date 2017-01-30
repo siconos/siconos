@@ -26,6 +26,7 @@
 #include <SimulationTypeDef.hpp>
 #include <NonSmoothLaw.hpp>
 #include <OneStepIntegrator.hpp>
+#include <Topology.hpp>
 
 #include <BulletCollision/Gimpact/btGImpactCollisionAlgorithm.h>
 #include <BulletCollision/CollisionDispatch/btDefaultCollisionConfiguration.h>
@@ -101,31 +102,58 @@ struct ForPosition : public Question<SP::SiconosVector>
   ANSWER(BulletDS, q());
 };
 
-/* initW is not a member of OneStepIntegrator (should it be ?),
+// /* initializeIterationMatrixW is not a member of OneStepIntegrator (should it be ?),
+//    so we visit some integrators which provide this initialization.
+// */
+
+// /* first, a generic visitor is defined. */
+// struct CallInitW : public SiconosVisitor
+// {
+//   double time;
+//   SP::DynamicalSystem ds;
+//   DynamicalSystemsGraph::VDescriptor dsv;
+
+//   template<typename T>
+//   void operator()(const T& osi)
+//   {
+//     const_cast<T*>(&osi)->initializeIterationMatrixW(this->time, this->ds, this->dsv);
+//   }
+// };
+
+// /* the visit is made on classes which provide the function initializeIterationMatrixW */
+// typedef Visitor < Classes < MoreauJeanOSI,
+//                             MoreauJeanGOSI,
+//                             EulerMoreauOSI,
+//                             SchatzmanPaoliOSI >,
+//                   CallInitW >::Make InitW;
+
+
+/* initializeIterationMatrixW is not a member of OneStepIntegrator (should it be ?),
    so we visit some integrators which provide this initialization.
 */
 
 /* first, a generic visitor is defined. */
-struct CallInitW : public SiconosVisitor
+struct CallInitDS : public SiconosVisitor
 {
   double time;
   SP::DynamicalSystem ds;
-  DynamicalSystemsGraph::VDescriptor dsv;
-
+  SP::Model m ; 
   template<typename T>
   void operator()(const T& osi)
   {
-    const_cast<T*>(&osi)->initW(this->time, this->ds, this->dsv);
+    const_cast<T*>(&osi)->initializeDynamicalSystem(*(this->m), this->time, this->ds);
   }
 };
 
-/* the visit is made on classes which provide the function initW */
+/* the visit is made on classes which provide the function initializeIterationMatrixW */
+// typedef Visitor < Classes < MoreauJeanOSI >,
+//                   CallInitDS >::Make InitDynamicalSystem;
+
 typedef Visitor < Classes < MoreauJeanOSI,
                             MoreauJeanGOSI,
                             EulerMoreauOSI,
                             SchatzmanPaoliOSI >,
-                  CallInitW >::Make InitW;
-
+                  CallInitDS >::Make InitDynamicalSystem;
 
 BulletSpaceFilter::BulletSpaceFilter(SP::Model model) :
   SpaceFilter(),
@@ -480,12 +508,12 @@ void BulletSpaceFilter::addDynamicObject(SP::BulletDS ds,
   this->model()->nonSmoothDynamicalSystem()->topology()->setOSI(ds, osi);
 
   DynamicalSystemsGraph& dsg = *(this->model()->nonSmoothDynamicalSystem()->dynamicalSystems());
-  DynamicalSystemsGraph::VDescriptor dsv = dsg.descriptor(ds);
-  InitW initW;
-  initW.time = simulation->nextTime();
-  initW.ds = ds;
-  initW.dsv = dsv;
-  osi->accept(initW);
+  
+  InitDynamicalSystem initDS;
+  initDS.time = simulation->nextTime();
+  initDS.ds = ds;
+  initDS.m= this->model();
+  osi->accept(initDS);
 
   /* Initialize the DS at the current time */
   ds->initialize(simulation->nextTime(), osi->getSizeMem());

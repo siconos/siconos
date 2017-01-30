@@ -259,7 +259,7 @@ void EventDriven::initOSNS()
                                                         *  exist */
       RuntimeException::selfThrow
       ("EventDriven::initialize, an EventDriven simulation must have an 'impact' non smooth problem.");
-    
+
     if (!((*_allNSProblems)[SICONOS_OSNSP_ED_SMOOTH_ACC])) /* ie if the acceleration-level problem
                                                             * does not exist */
       RuntimeException::selfThrow
@@ -290,25 +290,7 @@ void EventDriven::initOSIs()
 {
   for (OSIIterator itosi = _allOSI->begin();  itosi != _allOSI->end(); ++itosi)
   {
-    // Initialize the acceleration like for NewMarkAlphaScheme
-    if ((*itosi)->getType() == OSI::NEWMARKALPHAOSI)
-    {
-      SP::NewMarkAlphaOSI osi_NewMark =  std11::static_pointer_cast<NewMarkAlphaOSI>(*itosi);
-      DynamicalSystemsGraph::VIterator dsi, dsend;
-      SP::DynamicalSystemsGraph osiDSGraph = (*itosi)->dynamicalSystemsGraph();
-      for (std11::tie(dsi, dsend) = osiDSGraph->vertices(); dsi != dsend; ++dsi)
-      {
-        if (!(*itosi)->checkOSI(dsi)) continue;
-        SP::DynamicalSystem ds = osiDSGraph->bundle(*dsi);
-        if ((Type::value(*ds) == Type::LagrangianDS) || (Type::value(*ds) == Type::LagrangianLinearTIDS))
-        {
-          SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS>(ds);
-          *(d->workspace(DynamicalSystem::acce_like)) = *(d->acceleration()); // set a0 = ddotq0
-          // Allocate the memory to stock coefficients of the polynomial for the dense output
-          d->allocateWorkMatrix(LagrangianDS::coeffs_denseoutput, ds->dimension(), (osi_NewMark->getOrderDenseOutput() + 1));
-        }
-      }
-    }
+
   }
 }
 
@@ -344,7 +326,7 @@ void EventDriven::initialize(SP::Model m, bool withOSI)
 
   Simulation::initialize(m, withOSI);
   // Initialization for all OneStepIntegrators
-  initOSIs();
+  //initOSIs();
   initOSIRhs();
 }
 
@@ -689,7 +671,7 @@ void EventDriven::advanceToEvent()
     for (it = _allOSI->begin(); it != _allOSI->end(); ++it)
     {
       (*it)->resetNonSmoothPart();
-      
+
       //====================================================================================
       //     cout << " Start of LsodarOSI integration" << endl;
       (*it)->integrate(_tinit, _tend, _tout, _istate); // integrate must

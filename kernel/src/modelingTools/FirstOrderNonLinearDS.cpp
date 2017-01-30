@@ -394,7 +394,7 @@ void FirstOrderNonLinearDS::resetNonSmoothPart(unsigned int level)
   //assert(0);
   _r->zero();
 }
-void FirstOrderNonLinearDS::initWorkSpace(VectorOfVectors& workVector, VectorOfMatrices& workMatrices)
+void FirstOrderNonLinearDS::initializeWorkSpace(VectorOfVectors& workVector, VectorOfMatrices& workMatrices)
 {
   workVector.resize(FirstOrderDS::sizeWorkV);
   workVector[FirstOrderDS::residu].reset(new SiconosVector(_n));

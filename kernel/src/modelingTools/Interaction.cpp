@@ -42,6 +42,10 @@
 
 #include "SimulationGraphs.hpp"
 
+// This should not be used here VA 27/01/2017
+#include "OneStepIntegrator.hpp"
+
+
 using namespace std;
 using namespace RELATION;
 
@@ -350,7 +354,7 @@ void Interaction::initDSDataLagrangian(DynamicalSystem& ds, VectorOfVectors& wor
 
   // Put q, velocity and acceleration of each DS into a block. (Pointers links, no copy!!)
 
-  DSlink[LagrangianR::xfree]->insertPtr(workVDS[LagrangianDS::free]);
+  DSlink[LagrangianR::xfree]->insertPtr(workVDS[OneStepIntegrator::free]);
   //DSlink[LagrangianR::xfree]->insertPtr(ds.workspace(DynamicalSystem::free));
 
   DSlink[LagrangianR::q0]->insertPtr(lds.q());
@@ -400,7 +404,7 @@ void Interaction::initDSDataNewtonEuler(DynamicalSystem& ds, VectorOfVectors& wo
   // convert vDS systems into NewtonEulerDS and put them in vLDS
   NewtonEulerDS& neds = static_cast<NewtonEulerDS&>(ds);
   // Put q/velocity/acceleration of each DS into a block. (Pointers links, no copy!!)
-  DSlink[NewtonEulerR::xfree]->insertPtr(workVDS[NewtonEulerDS::free]);
+  DSlink[NewtonEulerR::xfree]->insertPtr(workVDS[OneStepIntegrator::free]);
   //DSlink[NewtonEulerR::xfree]->insertPtr(ds.workspace(DynamicalSystem::free));
   DSlink[NewtonEulerR::q0]->insertPtr(neds.q());
   DSlink[NewtonEulerR::velocity]->insertPtr(neds.twist());

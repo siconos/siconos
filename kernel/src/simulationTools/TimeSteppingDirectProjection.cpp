@@ -177,12 +177,12 @@ void TimeSteppingDirectProjection::advanceToEvent()
     if (dsType == Type::NewtonEulerDS)
     {
       SP::NewtonEulerDS neds = std11::static_pointer_cast<NewtonEulerDS>(ds);
-      *workVectors[NewtonEulerDS::qtmp] = *neds->q();
+      *workVectors[OneStepIntegrator::qtmp] = *neds->q();
     }
     else if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
     {
       SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
-      *workVectors[LagrangianDS::qtmp] = * d->q();
+      *workVectors[OneStepIntegrator::qtmp] = * d->q();
 
     }
     else
@@ -248,7 +248,7 @@ void TimeSteppingDirectProjection::advanceToEvent()
       {
         SP::NewtonEulerDS neds = std11::static_pointer_cast<NewtonEulerDS>(ds);
         SP::SiconosVector q = neds->q();
-        SP::SiconosVector qtmp =  workVectors[NewtonEulerDS::qtmp];
+        SP::SiconosVector qtmp =  workVectors[OneStepIntegrator::qtmp];
 
 	DEBUG_EXPR_WE(std ::cout << "qtmp before  update " << std::endl;
 		       qtmp->display();
@@ -272,7 +272,7 @@ void TimeSteppingDirectProjection::advanceToEvent()
       {
         SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
         SP::SiconosVector q = d->q();
-        SP::SiconosVector qtmp =  workVectors[LagrangianDS::qtmp];
+        SP::SiconosVector qtmp =  workVectors[OneStepIntegrator::qtmp];
 
         if (d->p(0))
         {

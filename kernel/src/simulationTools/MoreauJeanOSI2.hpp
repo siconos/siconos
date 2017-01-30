@@ -42,7 +42,7 @@
  * - thetaMap, thetaMap[ds] = a double
  * ds being a SP::DynamicalSystem
  *
- * W matrices are initialized and computed in initW and computeW. Depending on the DS type, they
+ * W matrices are initialized and computed in initializeIterationMatrixW and computeW. Depending on the DS type, they
  * may depend on time and DS state (x).
  *
  * Main functions:

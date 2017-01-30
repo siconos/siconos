@@ -437,12 +437,12 @@ void TimeSteppingCombinedProjection::advanceToEvent()
       if (dsType == Type::NewtonEulerDS)
       {
         SP::NewtonEulerDS neds = std11::static_pointer_cast<NewtonEulerDS>(ds);
-        *workVectors[NewtonEulerDS::qtmp] = *neds->q();
+        *workVectors[OneStepIntegrator::qtmp] = *neds->q();
       }
       else if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
       {
         SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
-        *workVectors[LagrangianDS::qtmp] = * d->q();
+        *workVectors[OneStepIntegrator::qtmp] = * d->q();
       }
       else
         RuntimeException::selfThrow("TimeSteppingCombinedProjection::advanceToEvent() :: - Ds is not from NewtonEulerDS neither from LagrangianDS.");
@@ -504,7 +504,7 @@ void TimeSteppingCombinedProjection::advanceToEvent()
           SP::SiconosVector q = neds->q();
           
           
-          SP::SiconosVector qtmp = workVectors[NewtonEulerDS::qtmp];
+          SP::SiconosVector qtmp = workVectors[OneStepIntegrator::qtmp];
           if (neds->p(0))
           {
             //*q = * qtmp +  *neds->p(0);
@@ -523,7 +523,7 @@ void TimeSteppingCombinedProjection::advanceToEvent()
         {
           SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
           SP::SiconosVector q = d->q();
-          SP::SiconosVector qtmp = workVectors[LagrangianDS::qtmp];
+          SP::SiconosVector qtmp = workVectors[OneStepIntegrator::qtmp];
           if (d->p(0))
           {
             //*q = * qtmp +  *d->p(0);

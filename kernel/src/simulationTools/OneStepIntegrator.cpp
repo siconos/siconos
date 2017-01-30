@@ -45,18 +45,14 @@ void OneStepIntegrator::initialize( Model& m )
   {
     _extraAdditionalTerms->init(*m.nonSmoothDynamicalSystem()->topology()->dSG(0), m);
   }
-
   // a subgraph has to be implemented.
   _dynamicalSystemsGraph = _simulation->nonSmoothDynamicalSystem()->topology()->dSG(0);
-
-  DynamicalSystemsGraph::VIterator dsi, dsend;
-  for (std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
-  {
-    if (!checkOSI(dsi)) continue;
-    _dynamicalSystemsGraph->bundle(*dsi)->resetToInitialState();
-    _dynamicalSystemsGraph->bundle(*dsi)->initMemory(getSizeMem());
-  }
 }
+void OneStepIntegrator::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds)
+{
+  RuntimeException::selfThrow("OneStepIntegrator::initializeDynamicalSystem not implemented for integrator of type " + _integratorType);
+}
+
 
 void OneStepIntegrator::computeInitialNewtonState()
 {

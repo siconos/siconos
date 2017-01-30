@@ -754,8 +754,8 @@ public:
    * \param workVector the vectors needed for the integration
    * \param workMatrices the matrices needed for the integration
    */
-  virtual void initWorkSpace(VectorOfVectors& workVector, VectorOfMatrices& workMatrices) {};
-//  virtual void initWorkSpace(VectorOfVectors& workVector, VectorOfMatrices& workMatrices) = 0;
+  virtual void initializeWorkSpace(VectorOfVectors& workVector, VectorOfMatrices& workMatrices) {};
+//  virtual void initializeWorkSpace(VectorOfVectors& workVector, VectorOfMatrices& workMatrices) = 0;
 
   /** visitors hook
    */

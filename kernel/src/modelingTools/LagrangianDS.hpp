@@ -124,12 +124,6 @@
  */
 class LagrangianDS : public DynamicalSystem
 {
-public:
-
-  /** List of indices used to save tmp work matrices (last one is the size of the present list) */
-  enum LagrangianDSWorkVectorId {residuFree,free,local_buffer,free_tdg,qtmp,sizeWorkVec};
-  enum LagrangianDSWorkMatrixId {coeffs_denseoutput,sizeWorkMat};
-
 
 protected:
   /** serialization hooks
@@ -1084,33 +1078,33 @@ public:
   };
 
 
-  /** to allocate memory for a new tmp matrix
-   *  \param id the id of the SimpleMatrix
-   *  \param sizeOfRows an int to set the size of rows
-   *  \param sizeOfCols an int to set the size of cols
-   */
-  inline void allocateWorkMatrix(const  LagrangianDSWorkMatrixId& id, int sizeOfRows, int sizeOfCols)
-  {
-    _workMatrix[id].reset(new SimpleMatrix(sizeOfRows, sizeOfCols));
-  }
+  // /** to allocate memory for a new tmp matrix
+  //  *  \param id the id of the SimpleMatrix
+  //  *  \param sizeOfRows an int to set the size of rows
+  //  *  \param sizeOfCols an int to set the size of cols
+  //  */
+  // inline void allocateWorkMatrix(const  LagrangianDSWorkMatrixId& id, int sizeOfRows, int sizeOfCols)
+  // {
+  //   _workMatrix[id].reset(new SimpleMatrix(sizeOfRows, sizeOfCols));
+  // }
 
-  /** get a temporary saved matrix
-   * \param id the id of the SimpleMatrix
-   *  \return a SP::SimpleMatrix
-   */
-  inline SP::SimpleMatrix workMatrix(const  LagrangianDSWorkMatrixId& id) const
-  {
-    return  _workMatrix[id];
-  }
+  // /** get a temporary saved matrix
+  //  * \param id the id of the SimpleMatrix
+  //  *  \return a SP::SimpleMatrix
+  //  */
+  // inline SP::SimpleMatrix workMatrix(const  LagrangianDSWorkMatrixId& id) const
+  // {
+  //   return  _workMatrix[id];
+  // }
   /** get a temporary saved vector, ref by id
    * \param id  WorkNames
    * \return a SP::SiconosVector
    */
-  inline SP::SiconosVector workspace(const DSWorkVectorId& id) const
-  {
-    assert(0);
-    return _workspace[id];
-  }
+  // inline SP::SiconosVector workspace(const DSWorkVectorId& id) const
+  // {
+  //   assert(0);
+  //   return _workspace[id];
+  // }
   ACCEPT_STD_VISITORS();
 
 };

@@ -113,7 +113,7 @@ Topology::addInteractionInIndexSet0(SP::Interaction inter, SP::DynamicalSystem d
     // V.A. 210/06/2017 Could we defer  this initialization ?
     workVds1.reset(new VectorOfVectors());
     _DSG[0]->properties(dsgv1).workMatrices.reset(new VectorOfMatrices());
-    ds1->initWorkSpace(*workVds1, *_DSG[0]->properties(dsgv1).workMatrices);
+    ds1->initializeWorkSpace(*workVds1, *_DSG[0]->properties(dsgv1).workMatrices);
   }
   if(ds2)
   {
@@ -124,7 +124,7 @@ Topology::addInteractionInIndexSet0(SP::Interaction inter, SP::DynamicalSystem d
       // V.A. 210/06/2017 Could we defer  this initialization ?
       workVds2.reset(new VectorOfVectors());
       _DSG[0]->properties(dsgv2).workMatrices.reset(new VectorOfMatrices());
-      ds2->initWorkSpace(*workVds2, *_DSG[0]->properties(dsgv2).workMatrices);
+      ds2->initializeWorkSpace(*workVds2, *_DSG[0]->properties(dsgv2).workMatrices);
     }
   }
   else
@@ -233,7 +233,7 @@ void Topology::insertDynamicalSystem(SP::DynamicalSystem ds)
   DynamicalSystemsGraph::VDescriptor dsgv = _DSG[0]->add_vertex(ds);
   _DSG[0]->properties(dsgv).workVectors.reset(new VectorOfVectors());
   _DSG[0]->properties(dsgv).workMatrices.reset(new VectorOfMatrices());
-  ds->initWorkSpace(*_DSG[0]->properties(dsgv).workVectors, *_DSG[0]->properties(dsgv).workMatrices);
+  ds->initializeWorkSpace(*_DSG[0]->properties(dsgv).workVectors, *_DSG[0]->properties(dsgv).workMatrices);
 }
 
 void Topology::setName(SP::DynamicalSystem ds, const std::string& name)
@@ -248,38 +248,40 @@ void Topology::setName(SP::Interaction inter, const std::string& name)
   _IG[0]->name.insert(igv, name);
 }
 
-/* initW is not a member of OneStepIntegrator (should it be ?),
+/* initializeIterationMatrixW is not a member of OneStepIntegrator (should it be ?),
    so we visit some integrators which provide this initialization.
 */
 
 /* first, a generic visitor is defined. */
-struct CallInitW : public SiconosVisitor
+struct CallInitDS : public SiconosVisitor
 {
   double time;
   SP::DynamicalSystem ds;
-  DynamicalSystemsGraph::VDescriptor dsv;
-
+  SP::Model m ; 
   template<typename T>
   void operator()(const T& osi)
   {
-    const_cast<T*>(&osi)->initW(this->time, this->ds, this->dsv);
+    const_cast<T*>(&osi)->initializeDynamicalSystem(*(this->m), this->time, this->ds);
   }
 };
 
-/* the visit is made on classes which provide the function initW */
+/* the visit is made on classes which provide the function initializeIterationMatrixW */
+// typedef Visitor < Classes < MoreauJeanOSI >,
+//                   CallInitDS >::Make InitDynamicalSystem;
+
 typedef Visitor < Classes < MoreauJeanOSI,
                             MoreauJeanGOSI,
                             EulerMoreauOSI,
                             SchatzmanPaoliOSI >,
-                  CallInitW >::Make InitW;
+                  CallInitDS >::Make InitDynamicalSystem;
 
-void Topology::initW(double time, SP::DynamicalSystem ds, SP::OneStepIntegrator OSI)
+void Topology::initDS(SP::Model m, double time, SP::DynamicalSystem ds, SP::OneStepIntegrator OSI)
 {
-  InitW initW;
-  initW.time = 0;
-  initW.ds = ds;
-  initW.dsv = _DSG[0]->descriptor(ds);
-  OSI->accept(initW);
+  InitDynamicalSystem initDynamicalSystem;
+  initDynamicalSystem.time = 0;
+  initDynamicalSystem.ds = ds;
+  initDynamicalSystem.m = m;
+  OSI->accept(initDynamicalSystem);
 }
 
 void Topology::setOSI(SP::DynamicalSystem ds, SP::OneStepIntegrator OSI)
