@@ -217,8 +217,9 @@ public:
   /** initialize this relation
    * \param t0 initial time for this Interaction
    * \param interProp the InteractionProperties of this Interaction
+   * \param DSG the graph of dynamical systems
    */
-  void initialize(double t0, InteractionProperties& interProp);
+  void initialize(double t0, InteractionProperties& interProp, DynamicalSystemsGraph & DSG);
 
   /** check if Interaction is initialized
    * \return true if it is initialized

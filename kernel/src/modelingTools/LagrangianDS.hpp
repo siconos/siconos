@@ -128,7 +128,8 @@ public:
 
   /** List of indices used to save tmp work matrices (last one is the size of the present list) */
   enum LagrangianDSWorkVectorId {residuFree,free,sizeWorkVec};
-  enum LagrangianDSWorkMatrixId {invMass, jacobianXBloc10, jacobianXBloc11, zeroMatrix, idMatrix, coeffs_denseoutput, sizeWorkMat};
+  enum LagrangianDSWorkMatrixId {coeffs_denseoutput,  sizeWorkMat};
+
 
 protected:
   /** serialization hooks
@@ -136,12 +137,12 @@ protected:
   ACCEPT_SERIALIZATION(LagrangianDS);
 
   /** Common code for constructors
-   * should be replaced in C++11 by delegating constructors 
-   * \param ndof 
+   * should be replaced in C++11 by delegating constructors
+   * \param ndof
    */
   void init(unsigned int ndof);
 
-  
+
   // -- MEMBERS --
 
   /** number of degrees of freedom of the system */
@@ -162,8 +163,6 @@ protected:
   /** memory of previous velocities of the system */
   SP::SiconosMemory _velocityMemory;
 
-  SP::BlockMatrix _jacxRhs;
-
   /** "Reaction", generalized forces or imuplses due to the non smooth law
    * The index corresponds to the kinematic
    * level of the corresponding constraints. It mainly depends on what the simulation
@@ -182,6 +181,12 @@ protected:
   /** mass of the system */
   SP::SiconosMatrix _mass;
 
+  /** true i the  mass matrix is constant */
+  bool _hasConstantMass;
+
+  /** inverse or factorization of the mass of the system */
+  SP::SimpleMatrix _inverseMass;
+
   /** internal forces applied to  the system */
   SP::SiconosVector _fInt;
 
@@ -193,7 +198,7 @@ protected:
 
   /** external forces applied to the system */
   SP::SiconosVector _fExt;
-  
+
   /** boolean if _fext is constant (set thanks to setFExtPtr for instance)
    * false by default */
   bool _hasConstantFExt;
@@ -223,6 +228,15 @@ protected:
 
   /** Reaction to an applied  boundary condition */
   SP::SiconosVector _reactionToBoundaryConditions;
+
+  enum LagrangianDSRhsMatrices {jacobianXBloc10, jacobianXBloc11, zeroMatrix, idMatrix, numberOfRhsMatrices};
+  /** A container of matrices to save matrices that are involed in first order from of
+   * LagrangianDS system values (jacobianXBloc10, jacobianXBloc11, zeroMatrix, idMatrix)
+   * No get-set functions at the time. Only used as a protected member.*/
+  VectorOfSMatrices _rhsMatrices;
+
+  SP::BlockMatrix _jacxRhs;
+
 
 
   /** Default constructor
@@ -357,7 +371,7 @@ public:
 
   /** reset the state to the initial state */
   void resetToInitialState();
-   
+
   /** Initialization function for the rhs and its jacobian.
    *  \param time of initialization
    */
@@ -553,6 +567,13 @@ public:
   {
     return _mass;
   }
+  /** get inverseMass
+   *  \return pointer on a plugged-matrix
+   */
+  inline SP::SimpleMatrix inverseMass() const
+  {
+    return _inverseMass;
+  }
 
   /** set mass to pointer newPtr
    *  \param newPtr a plugged matrix SP
@@ -560,6 +581,7 @@ public:
   inline void setMassPtr(SP::SiconosMatrix newPtr)
   {
     _mass = newPtr;
+    _hasConstantMass = true;
   }
 
   // --- fInt ---
@@ -736,6 +758,7 @@ public:
     _pluginMass->setComputeFunction(pluginPath, functionName);
     if (!_mass)
       _mass.reset(new SimpleMatrix(_ndof, _ndof));
+    _hasConstantMass = false;
   }
 
   /** set a specified function to compute Mass
@@ -746,7 +769,7 @@ public:
     _pluginMass->setComputeFunction((void*)fct);
     if (!_mass)
       _mass.reset(new SimpleMatrix(_ndof, _ndof));
-
+    _hasConstantMass = false;
   }
 
   /** allow to set a specified function to compute FInt

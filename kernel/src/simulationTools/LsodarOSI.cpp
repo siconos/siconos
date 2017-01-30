@@ -176,7 +176,6 @@ void LsodarOSI::computeRhs(double t, DynamicalSystemsGraph& DSG0)
     // compute standard rhs stored in the dynamical system
     ds->computeRhs(t);
 
-
     VectorOfVectors& workVectors = *_dynamicalSystemsGraph->properties(*dsi).workVectors;
     VectorOfMatrices& workMatrices = *_dynamicalSystemsGraph->properties(*dsi).workMatrices;
     Type::Siconos dsType = Type::value(*ds);
@@ -184,10 +183,12 @@ void LsodarOSI::computeRhs(double t, DynamicalSystemsGraph& DSG0)
     {
       SP::LagrangianDS lds = std11::static_pointer_cast<LagrangianDS> (ds);
       SiconosVector &free=*workVectors[LagrangianDS::free];
-      free.zero();
-      lds->computeForces(t);
+
+      
+      // we assume that inverseMass and forces are updated after call of ds->computeRhs(t); 
+      //lds->computeForces(t);
       free = *lds->forces();
-      workMatrices[LagrangianDS::invMass]->PLUForwardBackwardInPlace(free);
+      lds->inverseMass()->PLUForwardBackwardInPlace(free);
     }
     if (_extraAdditionalTerms)
     { 
@@ -253,13 +254,7 @@ void LsodarOSI::initialize(Model& m)
       _xWork->insertPtr(lds.velocity());
       workVectors.resize(LagrangianDS::sizeWorkVec);
       workVectors[LagrangianDS::free].reset(new SiconosVector(lds.dimension()));
-      workMatrices.resize(LagrangianDS::sizeWorkMat);
-      workMatrices[LagrangianDS::invMass].reset(new SimpleMatrix(*lds.mass()));
-      
-        
-      
-
-
+      //workMatrices.resize(LagrangianDS::sizeWorkMat);
 
     }
     else

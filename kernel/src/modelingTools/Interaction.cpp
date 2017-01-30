@@ -117,22 +117,25 @@ void Interaction::setDSLinkAndWorkspace(InteractionProperties& interProp,
     }
 }
 
-void Interaction::initialize(double t0, InteractionProperties& interProp)
+void Interaction::initialize(double t0, InteractionProperties& interProp, DynamicalSystemsGraph & DSG)
                  // ,
                  //             DynamicalSystem& ds1, VectorOfVectors& workV1,
                  //             DynamicalSystem& ds2, VectorOfVectors& workV2)
 {
   if (!_initialized)
   {
-    DEBUG_BEGIN("Interaction::initialize(double t0, InteractionProperties& interProp ) \n");
+    DEBUG_BEGIN("Interaction::initialize(double t0, InteractionProperties& interProp, DynamicalSystemsGraph & DSG ) \n");
 
     bool computeResidu = _relation->requireResidu();
     initializeMemory(computeResidu);
 
     SP::DynamicalSystem ds1= interProp.source;
     SP::DynamicalSystem ds2= interProp.target;
-    SP::VectorOfVectors workVds1 = interProp.workDS1Vectors;
-    SP::VectorOfVectors workVds2 = interProp.workDS2Vectors;
+    SP::VectorOfVectors workVds1 = DSG.properties(DSG.descriptor(ds1)).workVectors;
+    SP::VectorOfVectors workVds2 = DSG.properties(DSG.descriptor(ds2)).workVectors;
+    
+    // SP::VectorOfVectors workVds1= interProp.workDS1Vectors;
+    // SP::VectorOfVectors workVds2 = interProp.workDS2Vectors;
 
     setDSLinkAndWorkspace(interProp, *ds1, *workVds1, *ds2, *workVds2);
 
@@ -169,7 +172,7 @@ void Interaction::initialize(double t0, InteractionProperties& interProp)
   }
 
   swapInMemory();
-  DEBUG_END("Interaction::initialize(double t0, InteractionProperties& interProp ) \n");
+  DEBUG_END("Interaction::initialize(double t0, InteractionProperties& interProp,  DynamicalSystemsGraph & DSG ) \n");
 
 }
 
@@ -347,11 +350,7 @@ void Interaction::initDSDataLagrangian(DynamicalSystem& ds, VectorOfVectors& wor
 
   // Put q, velocity and acceleration of each DS into a block. (Pointers links, no copy!!)
 
-  std::cout << "workVDS" << workVDS.size() << std::endl;
-  std::cout << "workVDS" << workVDS.size() << std::endl;
-
-  if ( workVDS.size() != 0)
-    DSlink[LagrangianR::xfree]->insertPtr(workVDS[LagrangianDS::free]);
+  DSlink[LagrangianR::xfree]->insertPtr(workVDS[LagrangianDS::free]);
   //DSlink[LagrangianR::xfree]->insertPtr(ds.workspace(DynamicalSystem::free));
 
   DSlink[LagrangianR::q0]->insertPtr(lds.q());

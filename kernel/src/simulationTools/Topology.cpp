@@ -157,19 +157,16 @@ Topology::addInteractionInIndexSet0(SP::Interaction inter, SP::DynamicalSystem d
   // see https://svn.boost.org/trac/boost/ticket/4622
   _IG[0]->properties(ig_new_ve).source = ds1;
   _IG[0]->properties(ig_new_ve).source_pos = 0;
-  _IG[0]->properties(ig_new_ve).workDS1Vectors = workVds1 ;
 
   if(!ds2)
   {
     _IG[0]->properties(ig_new_ve).target = ds1;
     _IG[0]->properties(ig_new_ve).target_pos = 0;
-    _IG[0]->properties(ig_new_ve).workDS2Vectors = workVds1 ;
   }
   else
   {
     _IG[0]->properties(ig_new_ve).target = ds2;
     _IG[0]->properties(ig_new_ve).target_pos = ds1->dimension();
-    _IG[0]->properties(ig_new_ve).workDS2Vectors = workVds2 ;
   }
 
   assert(_IG[0]->bundle(ig_new_ve) == inter);

@@ -1267,11 +1267,11 @@ void SpaceFilter::link(SP::Interaction inter, SP::DynamicalSystem ds1,
     if(has2DS)
       ds2->initializeNonSmoothInput(k);
   }
-
+  DynamicalSystemsGraph &DSG =  *model()->nonSmoothDynamicalSystem()->topology()->dSG(0);
   SP::InteractionsGraph indexSet0 = model()->nonSmoothDynamicalSystem()->topology()->indexSet0();
   InteractionsGraph::VDescriptor ui = indexSet0->descriptor(inter);
 
-  inter->initialize(model()->simulation()->nextTime(), indexSet0->properties(ui));
+  inter->initialize(model()->simulation()->nextTime(), indexSet0->properties(ui), DSG);
   //inter->initialize(model()->simulation()->nextTime(), ds1, ds2);
 }
 
