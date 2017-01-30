@@ -37,6 +37,7 @@
 #include "PluginTypes.hpp"
 #include "SiconosVisitor.hpp"
 
+#include <iostream>
 /**  Abstract class to handle Dynamical Systems => interface for
    derived classes (First Order or Lagrangian systems)
 
@@ -130,7 +131,7 @@ public:
   /** List of indices used to save tmp work vectors
    * The last value is the size of the present list, so you HAVE to leave it at the end position.
    */
-  enum DSWorkVectorId {local_buffer, freeresidu, free, qtmp, acce_memory, acce_like, free_tdg, sizeWorkV};
+  enum DSWorkVectorId {local_buffer, freeresidu, free, acce_memory, acce_like, sizeWorkV};
 
 private:
   /** serialization hooks
@@ -534,6 +535,8 @@ public:
    */
   inline SP::SiconosVector workspace(const DSWorkVectorId& id) const
   {
+    std::cout << "SP::SiconosVector workspace(const DSWorkVectorId& id) const is now obsolete" << std::endl;
+    std::cout << "prefer an implementaion based on graph properties" << std::endl;
     return _workspace[id];
   }
 

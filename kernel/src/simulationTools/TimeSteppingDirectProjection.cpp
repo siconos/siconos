@@ -173,15 +173,17 @@ void TimeSteppingDirectProjection::advanceToEvent()
   {
     SP::DynamicalSystem ds = dsGraph->bundle(*aVi2);
     Type::Siconos dsType = Type::value(*ds);
+    VectorOfVectors& workVectors = *dsGraph->properties(*aVi2).workVectors;
     if (dsType == Type::NewtonEulerDS)
     {
       SP::NewtonEulerDS neds = std11::static_pointer_cast<NewtonEulerDS>(ds);
-      neds->addWorkVector(neds->q(), DynamicalSystem::qtmp);
+      *workVectors[NewtonEulerDS::qtmp] = *neds->q();
     }
     else if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
     {
       SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
-      d->addWorkVector(d->q(), DynamicalSystem::qtmp);
+      *workVectors[LagrangianDS::qtmp] = * d->q();
+
     }
     else
       RuntimeException::selfThrow("TimeSteppingDirectProjection::advanceToEvent() :: - Ds is not from NewtonEulerDS neither from LagrangianDS.");
@@ -239,12 +241,14 @@ void TimeSteppingDirectProjection::advanceToEvent()
     for (DynamicalSystemsGraph::VIterator aVi2 = dsGraph->begin(); aVi2 != dsGraph->end(); ++aVi2)
     {
       SP::DynamicalSystem ds = dsGraph->bundle(*aVi2);
+      VectorOfVectors& workVectors = *dsGraph->properties(*aVi2).workVectors;
+
       Type::Siconos dsType = Type::value(*ds);
       if (dsType == Type::NewtonEulerDS)
       {
         SP::NewtonEulerDS neds = std11::static_pointer_cast<NewtonEulerDS>(ds);
         SP::SiconosVector q = neds->q();
-        SP::SiconosVector qtmp = neds->workspace(DynamicalSystem::qtmp);
+        SP::SiconosVector qtmp =  workVectors[NewtonEulerDS::qtmp];
 
 	DEBUG_EXPR_WE(std ::cout << "qtmp before  update " << std::endl;
 		       qtmp->display();
@@ -268,7 +272,7 @@ void TimeSteppingDirectProjection::advanceToEvent()
       {
         SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
         SP::SiconosVector q = d->q();
-        SP::SiconosVector qtmp = d->workspace(DynamicalSystem::qtmp);
+        SP::SiconosVector qtmp =  workVectors[LagrangianDS::qtmp];
 
         if (d->p(0))
         {

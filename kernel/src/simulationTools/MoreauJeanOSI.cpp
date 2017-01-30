@@ -110,19 +110,19 @@ void MoreauJeanOSI::initialize(Model& m)
 
     SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
     VectorOfVectors& workVectors = *_dynamicalSystemsGraph->properties(*dsi).workVectors;
-    
+
     // W initialization
     initW(t0, ds, *dsi);
     Type::Siconos dsType = Type::value(*ds);
     if (dsType == Type::LagrangianLinearTIDS || dsType == Type::LagrangianDS)
     {
       assert(_dynamicalSystemsGraph->properties(*dsi).W && "W is NULL");
-      ds->allocateWorkVector(DynamicalSystem::local_buffer, _dynamicalSystemsGraph->properties(*dsi).W->size(0));
 
       SP::LagrangianDS lds = std11::static_pointer_cast<LagrangianDS> (ds);
       workVectors.resize(LagrangianDS::sizeWorkVec);
       workVectors[LagrangianDS::residuFree].reset(new SiconosVector(lds->dimension()));
       workVectors[LagrangianDS::free].reset(new SiconosVector(lds->dimension()));
+      workVectors[LagrangianDS::local_buffer].reset(new SiconosVector(lds->dimension()));
 
       lds->computeForces(m.t0());
       lds->swapInMemory();
@@ -474,7 +474,7 @@ double MoreauJeanOSI::computeResidu()
     if (!checkOSI(dsi)) continue;
     ds = _dynamicalSystemsGraph->bundle(*dsi);
     VectorOfVectors& workVectors = *_dynamicalSystemsGraph->properties(*dsi).workVectors;
- 
+
     dsType = Type::value(*ds); // Its type
 
     // 3 - Lagrangian Non Linear Systems
@@ -620,7 +620,7 @@ double MoreauJeanOSI::computeResidu()
       SiconosVector& residuFree = *workVectors[LagrangianDS::residuFree];
       SiconosVector& free = *workVectors[LagrangianDS::free];
 
-      
+
       // Get state i (previous time step) from Memories -> var. indexed with "Old"
       SP::SiconosVector qold = d->qMemory()->getSiconosVector(0); // qi
       SP::SiconosVector vold = d->velocityMemory()->getSiconosVector(0); //vi
@@ -826,7 +826,7 @@ double MoreauJeanOSI::computeResidu()
       }
 
       free = residuFree;
-      
+
       if (d->p(1))
         free -= *d->p(1);// We use DynamicalSystem::free as tmp buffer
 
@@ -935,7 +935,7 @@ void MoreauJeanOSI::computeFreeState()
       // vFree pointer is used to compute and save ResiduFree in this first step.
       SiconosVector& residuFree = *workVectors[LagrangianDS::residuFree];
       SiconosVector& vfree = *workVectors[LagrangianDS::free];
-      
+
       vfree = residuFree;
 
       // -- Update W --
@@ -989,7 +989,7 @@ void MoreauJeanOSI::computeFreeState()
     else if (dsType == Type::NewtonEulerDS)
     {
       // IN to be updated at current time: W, M, q, v, fL
-      // IN at told: qi,vi, 
+      // IN at told: qi,vi,
 
       // Note: indices i/i+1 corresponds to value at the beginning/end of the time step.
       // Index k stands for Newton iteration and thus corresponds to the last computed
@@ -1015,7 +1015,7 @@ void MoreauJeanOSI::computeFreeState()
 
       SiconosVector& residuFree = *workVectors[NewtonEulerDS::residuFree];
       SiconosVector& vfree = *workVectors[NewtonEulerDS::free];
-      
+
 
       vfree = residuFree;
 
@@ -1221,7 +1221,7 @@ void MoreauJeanOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_int
 //        subprod(*C, *deltax, yForNSsolver, coord, true);
       }
       else
-      {
+      { 
         subprod(*C, *Xfree, yForNSsolver, coord, true);
       }
     }
@@ -1393,18 +1393,18 @@ void MoreauJeanOSI::updatePosition(SP::DynamicalSystem ds)
     SP::SiconosVector dotqold = d->dotqMemory()->getSiconosVector(0);
     DEBUG_EXPR(dotqold->display());
 
-    
+
     // *q = *qold + h*(theta * *v +(1.0 - theta)* *vold)
     double coeff = h * _theta;
     scal(coeff, *dotq, *q) ; // q = h*theta*v
-    
+
     coeff = h * (1 - _theta);
     scal(coeff, *dotqold, *q, false); // q += h(1-theta)*vold
 
     SP::SiconosVector qold = d->qMemory()->getSiconosVector(0);
     DEBUG_EXPR(qold->display());
     *q += *qold;   // q += qold
-    
+
     DEBUG_PRINT("new q before normalizing\n");
     DEBUG_EXPR(q->display());
 
@@ -1506,16 +1506,18 @@ void MoreauJeanOSI::updateState(const unsigned int level)
       }
 
       SP::SiconosVector q = d->q();
+      SiconosVector& local_buffer = *workVectors[LagrangianDS::local_buffer];
       // Save value of q in stateTmp for future convergence computation
       if (baux)
-        ds->addWorkVector(q, DynamicalSystem::local_buffer);
+        local_buffer = *q;
+
 
       updatePosition(ds);
 
       if (baux)
       {
-        ds->subWorkVector(q, DynamicalSystem::local_buffer);
-        double aux = ((ds->workspace(DynamicalSystem::local_buffer))->norm2()) / (ds->normRef());
+        local_buffer -= *q;
+        double aux = (local_buffer.norm2()) / (ds->normRef());
         if (aux > RelativeTol)
           _simulation->setRelativeConvergenceCriterionHeld(false);
       }
@@ -1540,7 +1542,7 @@ void MoreauJeanOSI::updateState(const unsigned int level)
 
       SiconosVector& vfree = *workVectors[NewtonEulerDS::free];
 
-      
+
       if (level != LEVELMAX && d->p(level) && d->p(level)->size() > 0)
       {
         /*d->p has been fill by the Relation->computeInput, it contains

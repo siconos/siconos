@@ -127,8 +127,8 @@ class LagrangianDS : public DynamicalSystem
 public:
 
   /** List of indices used to save tmp work matrices (last one is the size of the present list) */
-  enum LagrangianDSWorkVectorId {residuFree,free,sizeWorkVec};
-  enum LagrangianDSWorkMatrixId {coeffs_denseoutput,  sizeWorkMat};
+  enum LagrangianDSWorkVectorId {residuFree,free,local_buffer,free_tdg,qtmp,sizeWorkVec};
+  enum LagrangianDSWorkMatrixId {coeffs_denseoutput,sizeWorkMat};
 
 
 protected:
@@ -189,6 +189,17 @@ protected:
 
   /** internal forces applied to  the system */
   SP::SiconosVector _fInt;
+
+  // enum LagrangianDSJacobianId {F_Int_wrt_q, F_Int_wrt_qDot,
+  //                              F_Gyr_wrt_q, F_Gyr_wrt_qdot,
+  //                              Force_wrt_q, Forces_wrt_qDot,
+  //                              numberOfJacobians};
+
+  // /** A container of matrices to save jacobians matrices
+  //  * Id are given by LagrangianDSJacobianId
+  //  */
+
+  // VectorOfSMatrices _jacobians;
 
   /** jacobian_q FInt*/
   SP::SiconosMatrix _jacobianFIntq;
@@ -1091,7 +1102,15 @@ public:
   {
     return  _workMatrix[id];
   }
-
+  /** get a temporary saved vector, ref by id
+   * \param id  WorkNames
+   * \return a SP::SiconosVector
+   */
+  inline SP::SiconosVector workspace(const DSWorkVectorId& id) const
+  {
+    assert(0);
+    return _workspace[id];
+  }
   ACCEPT_STD_VISITORS();
 
 };

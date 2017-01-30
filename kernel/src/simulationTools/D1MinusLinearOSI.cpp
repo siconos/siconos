@@ -122,6 +122,7 @@ void D1MinusLinearOSI::initialize(Model & m)
       workVectors.resize(LagrangianDS::sizeWorkVec);
       workVectors[LagrangianDS::residuFree].reset(new SiconosVector(lds->dimension()));
       workVectors[LagrangianDS::free].reset(new SiconosVector(lds->dimension()));
+      workVectors[LagrangianDS::free_tdg].reset(new SiconosVector(lds->dimension()));
 
     }
     else if (dsType == Type::NewtonEulerDS)
@@ -130,6 +131,8 @@ void D1MinusLinearOSI::initialize(Model & m)
       workVectors.resize(NewtonEulerDS::sizeWorkVec);
       workVectors[NewtonEulerDS::residuFree].reset(new SiconosVector(neds->dimension()));
       workVectors[NewtonEulerDS::free].reset(new SiconosVector(neds->dimension()));
+      workVectors[NewtonEulerDS::free_tdg].reset(new SiconosVector(neds->dimension()));
+      
     }
     else
       RuntimeException::selfThrow("D1MinusLinearOSI::initialize - not implemented for Dynamical system type: " + dsType);

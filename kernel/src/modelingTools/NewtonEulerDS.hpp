@@ -112,7 +112,7 @@ void computeT(SP::SiconosVector q, SP::SimpleMatrix T);
 class NewtonEulerDS : public DynamicalSystem
 {
 public:
-  enum NewtonEulerDSWorkVectorId {residuFree,free,sizeWorkVec};
+  enum NewtonEulerDSWorkVectorId {residuFree,free,free_tdg,qtmp,sizeWorkVec};
 protected:
   /** serialization hooks
   */

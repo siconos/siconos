@@ -66,15 +66,17 @@ void MoreauJeanDirectProjectionOSI::initialize(Model& m)
     if (!checkOSI(dsi)) continue;
     SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
     Type::Siconos dsType = Type::value(*ds);
+    VectorOfVectors& workVectors = *_dynamicalSystemsGraph->properties(*dsi).workVectors;
+
     if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
     {
       SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
-      d->allocateWorkVector(DynamicalSystem::qtmp, d->ndof());
+      workVectors[LagrangianDS::qtmp].reset(new SiconosVector(d->ndof()));
     }
     else if (dsType == Type::NewtonEulerDS)
     {
       SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS>(ds);
-      d->allocateWorkVector(DynamicalSystem::qtmp, d->q()->size());
+      workVectors[NewtonEulerDS::qtmp].reset(new SiconosVector(d->getqDim()));
     }
     else
     {

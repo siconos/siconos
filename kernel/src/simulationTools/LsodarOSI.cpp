@@ -177,21 +177,18 @@ void LsodarOSI::computeRhs(double t, DynamicalSystemsGraph& DSG0)
     ds->computeRhs(t);
 
     VectorOfVectors& workVectors = *_dynamicalSystemsGraph->properties(*dsi).workVectors;
-    VectorOfMatrices& workMatrices = *_dynamicalSystemsGraph->properties(*dsi).workMatrices;
     Type::Siconos dsType = Type::value(*ds);
     if (dsType == Type::LagrangianLinearTIDS || dsType == Type::LagrangianDS)
     {
       SP::LagrangianDS lds = std11::static_pointer_cast<LagrangianDS> (ds);
       SiconosVector &free=*workVectors[LagrangianDS::free];
-
-      
-      // we assume that inverseMass and forces are updated after call of ds->computeRhs(t); 
+      // we assume that inverseMass and forces are updated after call of ds->computeRhs(t);
       //lds->computeForces(t);
       free = *lds->forces();
       lds->inverseMass()->PLUForwardBackwardInPlace(free);
     }
     if (_extraAdditionalTerms)
-    { 
+    {
       DynamicalSystemsGraph::VDescriptor dsgVD = DSG0.descriptor(ds);
       _extraAdditionalTerms->addSmoothTerms(DSG0, dsgVD, t, ds->getRhs());
     }
@@ -243,7 +240,6 @@ void LsodarOSI::initialize(Model& m)
     if (!checkOSI(dsi)) continue;
     SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
     VectorOfVectors& workVectors = *_dynamicalSystemsGraph->properties(*dsi).workVectors;
-    VectorOfMatrices& workMatrices = *_dynamicalSystemsGraph->properties(*dsi).workMatrices;
 
     if (Type::value(*ds) == Type::LagrangianDS ||
         Type::value(*ds) == Type::LagrangianLinearTIDS)
@@ -624,5 +620,3 @@ void LsodarOSI::display()
   std::cout << _intData[2] << ", " << _intData[3] << ", " << _intData[4] << ", " << _intData[5] << ", " << _intData[6]  << ", " << _intData[7]  << ", " << _intData[8] <<std::endl;
   std::cout << "====================================" <<std::endl;
 }
-
-

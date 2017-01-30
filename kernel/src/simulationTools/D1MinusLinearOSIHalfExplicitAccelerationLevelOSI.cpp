@@ -92,11 +92,8 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
       DEBUG_EXPR(vold->display());
       DEBUG_EXPR(Mold->display());
 
-      if (! d->workspace(DynamicalSystem::free_tdg))
-      {
-        d->allocateWorkVector(DynamicalSystem::free_tdg, d->dimension()) ;
-      }
-      work_tdg = d->workspace(DynamicalSystem::free_tdg);
+
+      work_tdg =  workVectors[LagrangianDS::free_tdg];
       work_tdg->zero();
       DEBUG_EXPR(work_tdg->display());
 
@@ -108,7 +105,8 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
         accFree += *(d->forces());
       }
       Mold->PLUForwardBackwardInPlace(accFree); // contains left (right limit) acceleration without contact force
-      d->addWorkVector(accFree,DynamicalSystem::free_tdg); // store the value in WorkFreeFree
+      *work_tdg = accFree; // store the value in WorkFreeFree
+      //d->addWorkVector(accFree,DynamicalSystem::free_tdg); // store the value in WorkFreeFree
       DEBUG_PRINT("accFree contains right limit acceleration at  t^+_k with contact force :\n");
       DEBUG_EXPR(accFree.display());
       DEBUG_PRINT("work_tdg contains right limit acceleration at t^+_k without contact force :\n");
@@ -130,12 +128,8 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
       DEBUG_EXPR(vold->display());
       DEBUG_EXPR(Mold->display());
 
-      if (! d->workspace(DynamicalSystem::free_tdg))
-      {
-        d->allocateWorkVector(DynamicalSystem::free_tdg, d->dimension()) ;
-      }
 
-      work_tdg = d->workspace(DynamicalSystem::free_tdg);
+      work_tdg =  workVectors[LagrangianDS::free_tdg];
       work_tdg->zero();
       DEBUG_EXPR(work_tdg->display());
 
@@ -147,8 +141,8 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
         accFree += *(d->forces());
       }
       Mold->PLUForwardBackwardInPlace(accFree); // contains left (right limit) acceleration without contact force
+      *work_tdg = accFree; // store the value in WorkFreeFree
 
-      d->addWorkVector(accFree,DynamicalSystem::free_tdg); // store the value in WorkFreeFree
       DEBUG_PRINT("accFree contains right limit acceleration at  t^+_k with contact force :\n");
       DEBUG_EXPR(accFree.display());
       DEBUG_PRINT("work_tdg contains right limit acceleration at t^+_k without contact force :\n");
@@ -430,7 +424,8 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
 
         //residuFree.zero();
         //v->zero();
-        SP::SiconosVector work_tdg = d->workspace(DynamicalSystem::free_tdg);
+        
+        SP::SiconosVector work_tdg = workVectors[LagrangianDS::free_tdg];
         assert(work_tdg);
         residuFree =  - 0.5 * h* *work_tdg;
 
@@ -462,7 +457,7 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
 
         //residuFree.zero();
         v->zero();
-        SP::SiconosVector work_tdg = d->workspace(DynamicalSystem::free_tdg);
+        SP::SiconosVector work_tdg = workVectors[NewtonEulerDS::free_tdg];
         assert(work_tdg);
         residuFree = 0.5 * h* *work_tdg;
         work_tdg->zero();

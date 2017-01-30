@@ -78,19 +78,19 @@ void MoreauJeanGOSI::initialize(Model& m)
 
     SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
     VectorOfVectors& workVectors = *_dynamicalSystemsGraph->properties(*dsi).workVectors;
- 
+
     // W initialization
     initW(t0, ds, *dsi);
     Type::Siconos dsType = Type::value(*ds);
     if (dsType == Type::LagrangianLinearTIDS || dsType == Type::LagrangianDS)
     {
-      ds->allocateWorkVector(DynamicalSystem::local_buffer, _dynamicalSystemsGraph->properties(*dsi).W->size(0));
-
       SP::LagrangianDS lds = std11::static_pointer_cast<LagrangianDS> (ds);
+
       workVectors.resize(LagrangianDS::sizeWorkVec);
       workVectors[LagrangianDS::residuFree].reset(new SiconosVector(lds->dimension()));
       workVectors[LagrangianDS::free].reset(new SiconosVector(lds->dimension()));
-      
+      workVectors[LagrangianDS::local_buffer].reset(new SiconosVector(lds->dimension()));
+
       lds->computeForces(m.t0());
       lds->swapInMemory();
     }
@@ -441,7 +441,7 @@ double MoreauJeanGOSI::computeResidu()
     if (!checkOSI(dsi)) continue;
     ds = _dynamicalSystemsGraph->bundle(*dsi);
     VectorOfVectors& workVectors = *_dynamicalSystemsGraph->properties(*dsi).workVectors;
- 
+
     dsType = Type::value(*ds); // Its type
 
     // 3 - Lagrangian Non Linear Systems
@@ -592,7 +592,7 @@ double MoreauJeanGOSI::computeResidu()
       DEBUG_EXPR(vold->display(););
       DEBUG_EXPR(d->q()->display(););
       DEBUG_EXPR(d->velocity()->display(););
-      
+
       SiconosVector& residuFree = *workVectors[LagrangianDS::residuFree];
       SiconosVector& free = *workVectors[LagrangianDS::free];
       // --- ResiduFree computation Equation (1) ---
@@ -864,7 +864,7 @@ void MoreauJeanGOSI::computeFreeState()
     dsType = Type::value(*ds); // Its type
     SiconosMatrix& W = *_dynamicalSystemsGraph->properties(*dsi).W;
     VectorOfVectors& workVectors = *_dynamicalSystemsGraph->properties(*dsi).workVectors;
-       
+
     // 3 - Lagrangian Non Linear Systems
     if (dsType == Type::LagrangianDS)
     {
@@ -1255,7 +1255,7 @@ void MoreauJeanGOSI::updateState(const unsigned int level)
     if (!checkOSI(dsi)) continue;
     SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
     VectorOfVectors& workVectors = *_dynamicalSystemsGraph->properties(*dsi).workVectors;
- 
+
     SiconosMatrix& W = *_dynamicalSystemsGraph->properties(*dsi).W;
     // Get the DS type
 
@@ -1268,7 +1268,7 @@ void MoreauJeanGOSI::updateState(const unsigned int level)
       // get dynamical system
       SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
       SiconosVector& vfree = *workVectors[LagrangianDS::free];
-      
+
       //    SiconosVector *vfree = d->velocityFree();
       SP::SiconosVector v = d->velocity();
       bool baux = dsType == Type::LagrangianDS && useRCC && _simulation->relativeConvergenceCriterionHeld();
@@ -1324,15 +1324,18 @@ void MoreauJeanGOSI::updateState(const unsigned int level)
       }
 
       SP::SiconosVector q = d->q();
+      SiconosVector& local_buffer = *workVectors[LagrangianDS::local_buffer];
+
       // Save value of q in stateTmp for future convergence computation
       if (baux)
-        ds->addWorkVector(q, DynamicalSystem::local_buffer);
+        local_buffer = *q;
+
 
       updatePosition(ds);
 
       if (baux)
       {
-        ds->subWorkVector(q, DynamicalSystem::local_buffer);
+        local_buffer -= *q;
         double aux = ((ds->workspace(DynamicalSystem::local_buffer))->norm2()) / (ds->normRef());
         if (aux > RelativeTol)
           _simulation->setRelativeConvergenceCriterionHeld(false);
@@ -1346,7 +1349,7 @@ void MoreauJeanGOSI::updateState(const unsigned int level)
       // get dynamical system
       SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS> (ds);
       SiconosVector& vfree = *workVectors[NewtonEulerDS::free];
-            
+
       SP::SiconosVector v = d->twist();
       DEBUG_PRINT("MoreauJeanGOSI::updateState()\n ")
       DEBUG_EXPR(d->display());
