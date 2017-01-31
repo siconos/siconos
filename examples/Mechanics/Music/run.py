@@ -30,7 +30,7 @@ damping_parameters = {
 #     '1/qte': 0.}
 
 # -- Spatial discretisation (modal proj) and initial conditions --
-number_of_modes = 21
+number_of_modes = 1001
 ndof = number_of_modes + 2
 imax = int(ndof / 2)
 # -- The dynamical system(s) --
@@ -46,7 +46,7 @@ fret = Fret(guitar_string, position=[imax, -0.00])
 # -- The model to gather frets and strings and simulate the dynamics --
 t0 = 0.
 tend = 0.31
-guitar_model = Guitar(guitar_string, fret, [t0, tend], fs=2.e4)
+guitar_model = Guitar(guitar_string, fret, [t0, tend], fs=2.01e5)
 
 # -- Run the simulation --
 
