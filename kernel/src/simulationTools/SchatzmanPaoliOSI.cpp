@@ -30,6 +30,10 @@
 #include "OneStepNSProblem.hpp"
 
 using namespace RELATION;
+//#define DEBUG_NOCOLOR
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
+#include "debug.h"
 
 // --- constructor from a set of data ---
 SchatzmanPaoliOSI::SchatzmanPaoliOSI(double theta):
@@ -83,9 +87,11 @@ SP::SiconosMatrix SchatzmanPaoliOSI::WBoundaryConditions(SP::DynamicalSystem ds)
 
 void SchatzmanPaoliOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds)
 {
+  DEBUG_BEGIN("SchatzmanPaoliOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds)\n");
   const DynamicalSystemsGraph::VDescriptor& dsv = _dynamicalSystemsGraph->descriptor(ds);
   VectorOfVectors& workVectors = *_dynamicalSystemsGraph->properties(dsv).workVectors;
-
+  _dynamicalSystemsGraph->bundle(dsv)->initMemory(getSizeMem());
+  _dynamicalSystemsGraph->bundle(dsv)->resetToInitialState();
 
   Type::Siconos dsType = Type::value(*ds);
   if(dsType == Type::LagrangianLinearTIDS)
@@ -128,7 +134,7 @@ void SchatzmanPaoliOSI::initializeDynamicalSystem(Model& m, double t, SP::Dynami
     //  std::cout << " vprev = " << std::endl;
     // vprev->display();
 
-
+    
 
   }
   // Memory allocation for workX. workX[ds*] corresponds to xfree (or vfree in lagrangian case).
@@ -136,9 +142,10 @@ void SchatzmanPaoliOSI::initializeDynamicalSystem(Model& m, double t, SP::Dynami
 
   // W initialization
   initializeIterationMatrixW(t, ds, dsv);
-
+  
   //      if ((*itDS)->getType() == Type::LagrangianDS || (*itDS)->getType() == Type::FirstOrderNonLinearDS)
-
+  DEBUG_EXPR(ds->display());
+  DEBUG_END("SchatzmanPaoliOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds)\n");
   
 }
 void SchatzmanPaoliOSI::initialize(Model& m)
@@ -294,7 +301,7 @@ void SchatzmanPaoliOSI::computeW(double t, SP::DynamicalSystem ds, SiconosMatrix
 
 double SchatzmanPaoliOSI::computeResidu()
 {
-
+  DEBUG_BEGIN("SchatzmanPaoliOSI::computeResidu()\n");
   // This function is used to compute the residu for each "SchatzmanPaoliOSI-discretized" dynamical system.
   // It then computes the norm of each of them and finally return the maximum
   // value for those norms.
@@ -322,6 +329,7 @@ double SchatzmanPaoliOSI::computeResidu()
   {
     if(!checkOSI(dsi)) continue;
     SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
+    
     dsType = Type::value(*ds); // Its type
     VectorOfVectors& workVectors = *_dynamicalSystemsGraph->properties(*dsi).workVectors;
 
@@ -344,22 +352,26 @@ double SchatzmanPaoliOSI::computeResidu()
 
       // -- Convert the DS into a Lagrangian one.
       SP::LagrangianLinearTIDS d = std11::static_pointer_cast<LagrangianLinearTIDS> (ds);
-
+      DEBUG_EXPR(d->display());
       // Get state i (previous time step) from Memories -> var. indexed with "Old"
       SP::SiconosVector q_k = d->qMemory()->getSiconosVector(0); // q_k
       SP::SiconosVector q_k_1 = d->qMemory()->getSiconosVector(1); // q_{k-1}
       SP::SiconosVector v_k = d->velocityMemory()->getSiconosVector(0); //v_k
-      //  std::cout << "SchatzmanPaoliOSI::computeResidu - q_k_1 =" <<std::endl;
-      // q_k_1->display();
-      //  std::cout << "SchatzmanPaoliOSI::computeResidu - q_k =" <<std::endl;
-      // q_k->display();
-      //  std::cout << "SchatzmanPaoliOSI::computeResidu - v_k =" <<std::endl;
-      // v_k->display();
+      
+       std::cout << "SchatzmanPaoliOSI::computeResidu - q_k_1 =" <<std::endl;
+      q_k_1->display();
+       std::cout << "SchatzmanPaoliOSI::computeResidu - q_k =" <<std::endl;
+      q_k->display();
+       std::cout << "SchatzmanPaoliOSI::computeResidu - v_k =" <<std::endl;
+      v_k->display();
 
 
       // --- ResiduFree computation Equation (1) ---
       SiconosVector& residuFree = *workVectors[OneStepIntegrator::residu_free];
       SiconosVector& free = *workVectors[OneStepIntegrator::free];
+
+      DEBUG_EXPR(free.display());
+      DEBUG_EXPR(residuFree.display());
       residuFree.zero();
       double coeff;
       // -- No need to update W --
@@ -394,7 +406,8 @@ double SchatzmanPaoliOSI::computeResidu()
         scal(coeff, *Fext, residuFree, false); // residufree -= h^2*_theta * fext(ti+1)
       }
 
-
+      DEBUG_EXPR(free.display());
+      DEBUG_EXPR(residuFree.display());
 
       //  std::cout << "SchatzmanPaoliOSI::ComputeResidu LagrangianLinearTIDS residufree :"  << std::endl;
       // residuFree->display();
@@ -403,7 +416,7 @@ double SchatzmanPaoliOSI::computeResidu()
       free = residuFree; // copy residuFree in Workfree
       if(d->p(0))
         free -= *d->p(0); // Compute Residu in Workfree Notation !!
-
+      DEBUG_EXPR(free.display());
       //  std::cout << "SchatzmanPaoliOSI::ComputeResidu LagrangianLinearTIDS p(0) :"  << std::endl;
       //  if (d->p(0))
       //    d->p(0)->display();
@@ -429,6 +442,7 @@ double SchatzmanPaoliOSI::computeResidu()
     if(normResidu > maxResidu) maxResidu = normResidu;
 
   }
+  DEBUG_END("SchatzmanPaoliOSI::computeResidu()\n");
   return maxResidu;
 }
 
@@ -780,7 +794,7 @@ void SchatzmanPaoliOSI::updateState(const unsigned int level)
 
       if(baux)
       {
-        *workVectors[OneStepIntegrator::local_buffer] = q;
+        *workVectors[OneStepIntegrator::local_buffer] -= q;
         double aux = (workVectors[OneStepIntegrator::local_buffer] ->norm2()) / (ds->normRef());
         if(aux > RelativeTol)
           _simulation->setRelativeConvergenceCriterionHeld(false);

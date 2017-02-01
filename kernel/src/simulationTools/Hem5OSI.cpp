@@ -460,9 +460,9 @@ void Hem5OSI::fprob(integer* IFCN,
 void Hem5OSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds)
 {
   const DynamicalSystemsGraph::VDescriptor& dsv = _dynamicalSystemsGraph->descriptor(ds);
-  //VectorOfVectors& workVectors = *_dynamicalSystemsGraph->properties(dsv).workVectors;
+  VectorOfVectors& workVectors = *_dynamicalSystemsGraph->properties(dsv).workVectors;
 
-
+  ds->resetToInitialState();
   if(Type::value(*ds) == Type::LagrangianDS ||
      Type::value(*ds) == Type::LagrangianLinearTIDS)
   {
@@ -471,12 +471,15 @@ void Hem5OSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem 
     _vWork->insertPtr(lds.velocity());
     _aWork->insertPtr(lds.acceleration());
     _forcesWork->insertPtr(lds.forces());
+    workVectors.resize(OneStepIntegrator::work_vector_of_vector_size);
+    workVectors[OneStepIntegrator::free].reset(new SiconosVector(lds.dimension()));
+
   }
   else
   {
     RuntimeException::selfThrow("Hem5OSI::initialize(), Only integration of Lagrangian DS is allowed");
   }
-  
+
 }
 void Hem5OSI::initialize(Model& m)
 {
@@ -497,20 +500,7 @@ void Hem5OSI::initialize(Model& m)
   for(DynamicalSystemsGraph::VIterator vi = dsGraph->begin(); vi != dsGraph->end(); ++vi)
   {
     SP::DynamicalSystem ds = dsGraph->bundle(*vi);
-    
-    if(Type::value(*ds) == Type::LagrangianDS ||
-        Type::value(*ds) == Type::LagrangianLinearTIDS)
-    {
-      LagrangianDS& lds = *std11::static_pointer_cast<LagrangianDS>(ds);
-      _qWork->insertPtr(lds.q());
-      _vWork->insertPtr(lds.velocity());
-      _aWork->insertPtr(lds.acceleration());
-      _forcesWork->insertPtr(lds.forces());
-    }
-    else
-    {
-      RuntimeException::selfThrow("Hem5OSI::initialize(), Only integration of Lagrangian DS is allowed");
-    }
+    initializeDynamicalSystem(m,  m.t0(),  ds);
   }
 
   // InteractionsGraph::VIterator ui, uiend;
