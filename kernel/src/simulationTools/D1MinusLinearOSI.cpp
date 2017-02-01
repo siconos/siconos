@@ -106,16 +106,20 @@ void D1MinusLinearOSI::initializeDynamicalSystem(Model& m, double t, SP::Dynamic
   const DynamicalSystemsGraph::VDescriptor& dsv = _dynamicalSystemsGraph->descriptor(ds);
 
   VectorOfVectors& workVectors = *_dynamicalSystemsGraph->properties(dsv).workVectors;
+  _dynamicalSystemsGraph->bundle(dsv)->initMemory(getSizeMem());
+  _dynamicalSystemsGraph->bundle(dsv)->resetToInitialState();
 
+  
   if(dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
   {
     SP::LagrangianDS lds = std11::static_pointer_cast<LagrangianDS> (ds);
     lds->computeMass();
+
     workVectors.resize(OneStepIntegrator::work_vector_of_vector_size);
     workVectors[OneStepIntegrator::residu_free].reset(new SiconosVector(lds->dimension()));
     workVectors[OneStepIntegrator::free].reset(new SiconosVector(lds->dimension()));
     workVectors[OneStepIntegrator::free_tdg].reset(new SiconosVector(lds->dimension()));
-
+    lds->swapInMemory();
   }
   else if(dsType == Type::NewtonEulerDS)
   {
@@ -124,7 +128,7 @@ void D1MinusLinearOSI::initializeDynamicalSystem(Model& m, double t, SP::Dynamic
     workVectors[OneStepIntegrator::residu_free].reset(new SiconosVector(neds->dimension()));
     workVectors[OneStepIntegrator::free].reset(new SiconosVector(neds->dimension()));
     workVectors[OneStepIntegrator::free_tdg].reset(new SiconosVector(neds->dimension()));
-
+    neds->swapInMemory();
   }
   else
     RuntimeException::selfThrow("D1MinusLinearOSI::initialize - not implemented for Dynamical system type: " + dsType);

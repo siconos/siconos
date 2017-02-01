@@ -36,8 +36,9 @@
 
 using namespace RELATION;
 
-//#define DEBUG_STDOUT
-//#define DEBUG_MESSAGES
+// #define DEBUG_NOCOLOR
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
 #include "debug.h"
 
 int LsodarOSI::count_NST = 0;
@@ -230,6 +231,7 @@ void LsodarOSI::jacobianfx(integer* sizeOfX, doublereal* time, doublereal* x, in
 
 void LsodarOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds)
 {
+  DEBUG_BEGIN("LsodarOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds)\n");
   VectorOfVectors& workVectors = *_dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).workVectors;
 
   if(Type::value(*ds) == Type::LagrangianDS ||
@@ -246,11 +248,14 @@ void LsodarOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSyste
   }
   else
     _xWork->insertPtr(ds->x());
+  
+  DEBUG_END("LsodarOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds)\n");
 }
 
 
 void LsodarOSI::initialize(Model& m)
 {
+  DEBUG_BEGIN("LsodarOSI::initialize(Model& m)\n");
   OneStepIntegrator::initialize(m);
   _xWork.reset(new BlockVector());
   std::string type;
@@ -262,6 +267,8 @@ void LsodarOSI::initialize(Model& m)
     if(!checkOSI(dsi)) continue;
     SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
     initializeDynamicalSystem(m, m.t0(),ds);
+    ds->resetToInitialState();
+    DEBUG_EXPR(ds->display());
   }
   //   Integer parameters for LSODAROSI are saved in vector intParam.
   //   The link with variable names in opkdmain.f is indicated in comments
@@ -338,6 +345,7 @@ void LsodarOSI::initialize(Model& m)
   //   2     scalar     array      RTOL*ABS(Y(i)) + ATOL(i)
   //   3     array      scalar     RTOL(i)*ABS(Y(i)) + ATOL
   //   4     array      array      RTOL(i)*ABS(Y(i)) + ATOL(i)
+  DEBUG_END("LsodarOSI::initialize(Model& m)\n");
 }
 
 void LsodarOSI::integrate(double& tinit, double& tend, double& tout, int& istate)

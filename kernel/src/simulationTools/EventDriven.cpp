@@ -32,8 +32,10 @@
 #include "Relation.hpp"
 #include "NonSmoothLaw.hpp"
 #include "NewtonEulerR.hpp"
-//#define DEBUG_MESSAGES
 
+// #define DEBUG_NOCOLOR
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
 #include <debug.h>
 
 using namespace std;
@@ -332,6 +334,9 @@ void EventDriven::initialize(SP::Model m, bool withOSI)
 
 void EventDriven::computef(OneStepIntegrator& osi, integer * sizeOfX, doublereal * time, doublereal * x, doublereal * xdot)
 {
+
+
+  DEBUG_BEGIN("EventDriven::computef(OneStepIntegrator& osi, integer * sizeOfX, doublereal * time, doublereal * x, doublereal * xdot)\n");
   // computeF is supposed to fill xdot in, using the definition of the
   // dynamical systems belonging to the osi
 
@@ -391,9 +396,12 @@ void EventDriven::computef(OneStepIntegrator& osi, integer * sizeOfX, doublereal
     else
     {
       SiconosVector& xtmp2 = ds.getRhs(); // Pointer link !
+      DEBUG_EXPR(xtmp2.display(););
       pos += xtmp2.copyData(&xdot[pos]);
     }
   }
+  DEBUG_END("EventDriven::computef(OneStepIntegrator& osi, integer * sizeOfX, doublereal * time, doublereal * x, doublereal * xdot)\n");
+    
 }
 
 void EventDriven::computeJacobianfx(OneStepIntegrator& osi,
