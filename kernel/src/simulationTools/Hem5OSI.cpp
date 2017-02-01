@@ -514,7 +514,6 @@ void Hem5OSI::initialize(Model& m)
   // }
 
 
-
 }
 void Hem5OSI::solout(integer* MODE,
                      integer* NSTEP,

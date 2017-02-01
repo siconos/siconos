@@ -269,8 +269,7 @@ void LsodarOSI::initialize(Model& m)
     if(!checkOSI(dsi)) continue;
     SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
     initializeDynamicalSystem(m, m.t0(),ds);
- 
-    DEBUG_EXPR(ds->display());
+    ds->resetToInitialState();
   }
   //   Integer parameters for LSODAROSI are saved in vector intParam.
   //   The link with variable names in opkdmain.f is indicated in comments
