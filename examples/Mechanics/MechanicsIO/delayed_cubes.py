@@ -4,7 +4,7 @@
 # Example of delayed object introduction with time_of_birth parameter
 #
 
-from siconos.mechanics.contact_detection.tools import Contactor
+from siconos.mechanics.collision.tools import Contactor
 from siconos.io.mechanics_io import Hdf5
 import siconos.numerics as Numerics
 
