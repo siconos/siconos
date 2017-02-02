@@ -13,7 +13,7 @@ import numpy as np
 # Creation of the hdf5 file for input/output
 with Hdf5() as io:
 
-    # Definition of a sphere
+    # Definition of a cylinder
     R =0.1
     L =2.0
     io.addPrimitiveShape('Cyl', 'Cylinder', (R, L))
