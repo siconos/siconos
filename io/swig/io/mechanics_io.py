@@ -1252,10 +1252,9 @@ class Hdf5():
             joint_type = self.joints()[name].attrs['type']
             joint_class = getattr(joints, joint_type)
 
-            joint_nslaw = EqualityConditionNSL(5)
-
             ds1_name = self.joints()[name].attrs['object1']
             ds1 = topo.getDynamicalSystem(ds1_name)
+            ds2 = None
 
             if 'object2' in self.joints()[name].attrs:
                 ds2_name = self.joints()[name].attrs['object2']
@@ -1268,9 +1267,6 @@ class Hdf5():
                 except NotImplementedError:
                     joint = joint_class(ds1, ds2,
                                         self.joints()[name].attrs['pivot_point'])
-                joint_inter = Interaction(5, joint_nslaw, joint)
-                self._model.nonSmoothDynamicalSystem().\
-                    link(joint_inter, ds1, ds2)
 
             else:
                 try:
@@ -1279,9 +1275,11 @@ class Hdf5():
                                         self.joints()[name].attrs['axis'])
                 except NotImplementedError:
                     joint = joint_class(ds1, self.joints()[name].attrs['pivot_point'])
-                joint_inter = Interaction(5, joint_nslaw, joint)
-                self._model.nonSmoothDynamicalSystem().\
-                    link(joint_inter, ds1)
+
+            joint_nslaw = EqualityConditionNSL(joint.numberOfConstraints())
+            joint_inter = Interaction(joint.numberOfConstraints(), joint_nslaw, joint)
+            self._model.nonSmoothDynamicalSystem().\
+                link(joint_inter, ds1, ds2)
 
     def importBoundaryConditions(self, name):
         if self._broadphase is not None:
