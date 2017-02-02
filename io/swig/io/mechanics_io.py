@@ -1305,6 +1305,12 @@ class Hdf5():
                               self.boundary_conditions()[name].attrs['omega'],
                               self.boundary_conditions()[name].attrs['phi'])
 
+            elif ( bc_type == 'FixedBC' ):
+                bc = bc_class(self.boundary_conditions()[name].attrs['indices'])
+
+            elif ( bc_type == 'BoundaryCondition' ):
+                bc = bc_class(self.boundary_conditions()[name].attrs['indices'],
+                              self.boundary_conditions()[name].attrs['v'])
 
             # set bc to the ds1
 
@@ -2158,7 +2164,7 @@ class Hdf5():
             joint.attrs['axis']=axis
 
     def addBoundaryCondition(self, name, object1, indices=None, bc_class='HarmonicBC',
-                             a=None, b=None, omega=None, phi=None):
+                             v=None, a=None, b=None, omega=None, phi=None):
         """
         add boundarycondition to the object object1
 
@@ -2174,6 +2180,10 @@ class Hdf5():
                 boundary_condition.attrs['b']= b
                 boundary_condition.attrs['omega']= omega
                 boundary_condition.attrs['phi']= phi
+            elif bc_class == 'BoundaryCondition' :
+                boundary_condition.attrs['v']= v
+            elif bc_class == 'FixedBC' :
+                pass # nothing to do
             else:
                 raise NotImplementedError
 
