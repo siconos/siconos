@@ -267,7 +267,7 @@ struct IsDense : public Question<bool>
     if (!require_dimensions(array,1) ||
       !require_native(array) || !require_fortran(array))
     {
-      PyErr_SetString(PyExc_TypeError, "The given object does not have the right structure. We expecg a 1 dimensional array (or list, tuple, ...)");
+      PyErr_SetString(PyExc_TypeError, "The given object does not have the right structure. We expect a 1 dimensional array (or list, tuple, ...)");
       PyObject_Print(vec, stderr, 0);
       return std11::shared_ptr<SiconosVector>();
     }
@@ -542,7 +542,7 @@ struct IsDense : public Question<bool>
     if (!require_dimensions(array,2) ||
         !require_native(array) || !require_fortran(array))
     {
-      PyErr_SetString(PyExc_TypeError, "The given object does not have the right structure. We expecg a 2 dimensional array (or list, tuple, ...)");
+      PyErr_SetString(PyExc_TypeError, "The given object does not have the right structure. We expect a 2 dimensional array (or list, tuple, ...)");
       PyObject_Print(obj, stderr, 0);
       return std11::shared_ptr<SimpleMatrix>();
     }
