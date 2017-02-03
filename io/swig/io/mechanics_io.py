@@ -2322,9 +2322,12 @@ class Hdf5():
 
         osnspb.numericsSolverOptions().internalSolvers.iparam[0]=100
         osnspb.numericsSolverOptions().dparam[0]=tolerance
+
+
+
         osnspb.setMaxSize(30000)
         osnspb.setMStorageType(1)
-        osnspb.setNumericsVerboseMode(False)
+        osnspb.setNumericsVerboseMode(numerics_verbose)
 
         # keep previous solution
         osnspb.setKeepLambdaAndYState(True)
