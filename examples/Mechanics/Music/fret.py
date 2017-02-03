@@ -13,15 +13,27 @@ from scipy import signal
 class Fret(sk.Interaction):
     """Build a fret as a siconos interaction
     """
-
     def __init__(self, string, position=None, restitution_coeff=1.):
         """"
         """
         # siconos relation
-        hmat = npw.zeros((1, string.ndof))
         self.position = position[1] * npw.ones(1)
         self.contact_index = position[0]
-        hmat[0, self.contact_index] = 1.
+        if string.modal_form:
+            coeff = 1.  # string.length / string._N
+            if string.use_sparse:
+                hmat = sk.SimpleMatrix(1, string.ndof, sk.SPARSE, string.ndof)
+                for i in xrange(string.ndof):
+                    val = coeff * string.s_mat[self.contact_index, i]
+                    hmat.setValue(0, i, val)
+            else:
+                hmat = npw.zeros((1, string.ndof))
+                hmat[...] = string.s_mat[self.contact_index, :]
+                hmat *= coeff
+        else:
+            hmat = npw.zeros((1, string.ndof))
+            hmat[0, self.contact_index] = 1.
+
         e = restitution_coeff
         nslaw = sk.NewtonImpactNSL(e)
         relation = sk.LagrangianLinearTIR(hmat, -self.position)
@@ -41,6 +53,7 @@ class Guitar(sk.Model):
             strings = [strings]
         if not isinstance(frets, list):
             frets = [frets]
+        self.modal_form = strings[0].modal_form
         self.frets = frets
         self.strings = strings
         for string in strings:
@@ -62,7 +75,6 @@ class Guitar(sk.Model):
         self.nb_time_steps = (int)((tend - t0) / self.time_step)
         # (3) one step non smooth problem
         osnspb = sk.LCP()
-
         # (4) Simulation setup with (1) (2) (3)
         self.simu = sk.TimeStepping(t, osi, osnspb)
 
@@ -77,20 +89,35 @@ class Guitar(sk.Model):
         """
         """
         self.data[k, 0] = self.simu.nextTime()
-        self.data[k, 3:] = self.strings[0].q()
+        if self.modal_form:
+            self.data[k, 3:] = np.dot(self.strings[0].s_mat,
+                                      self.strings[0].q())
+        else:
+            self.data[k, 3:] = self.strings[0].q()
         self.data[k, 1] = self.frets[0].y(0)
         self.data[k, 2] = self.frets[0].lambda_(1)
 
-    def plot_state(self):
+    def plot_state(self, nfig=1, pdffile=None):
+        """
+
+        Parameters
+        ----------
+        nfig : int
+            figure number
+        pdffile : string, optional
+            output file name, if needed. Default=None
+        """
+
         time = self.data[:, 0]
         dist = self.data[:, 1]
         lam = self.data[:, 2]
         qmax = self.data[:, 3 + self.fret_position]
         ndof = self.data.shape[1] - 3
         x = np.arange(ndof)
+        plt.figure(nfig)
         plt.subplot(341)
         plt.plot(time, qmax)
-        plt.title('displacements')
+        plt.title('displacements_' + str(self.modal_form))
         plt.axhline(self.frets[0].position, color='b', linewidth=3)
         plt.subplot(342)
         f, t, Sxx = signal.spectrogram(qmax, self.fs)
@@ -124,7 +151,10 @@ class Guitar(sk.Model):
         plt.subplot(3, 4, 11)
         plt.plot(x, self.data[-1, 3:])
         plt.title('mode, t5')
-        plt.show()
+        #if pdffile is not None:
+        #    plt.savefig(pdffile, format='pdf')
+        #plt.show()
+        return plt
 
     def plot_modes(self, movie_name):
         """
