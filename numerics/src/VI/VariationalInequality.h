@@ -69,6 +69,7 @@
 
 #include "NumericsFwd.h"
 #include <stdio.h>
+#include "SiconosConfig.h"
 
 typedef void * (FVIPtr)(void*, double *, double *);
 typedef void (*ptrFunctionVI)(void *self, int n, double* x, double* fx);
