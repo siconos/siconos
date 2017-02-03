@@ -51,9 +51,9 @@ guitar_string_sparse = StringDS(ndof, geometry_and_material=G_string,
 
 # -- The obstacles (Interactions) --
 # ie guitar fret(s)
-fret = Fret(guitar_string, position=[imax, -0.010])
-fret_m = Fret(guitar_string_m, position=[imax, -.002], restitution_coeff = 0.0)
-fret_sp = Fret(guitar_string_sparse, position=[imax, -0.010])
+fret = Fret(guitar_string, position=[imax, -0.00])
+fret_m = Fret(guitar_string_m, position=[imax, -0.00])
+fret_sp = Fret(guitar_string_sparse, position=[imax, -0.00])
 
 # -- The model to gather frets and strings and simulate the dynamics --
 t0 = 0.
@@ -78,8 +78,6 @@ def run_simu(model):
         k += 1
         model.simu.nextStep()
     print 'End of simulation process.'
-
-
 
 
 start_time = time.clock()
