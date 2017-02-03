@@ -2330,6 +2330,10 @@ class Hdf5():
         osnspb.setKeepLambdaAndYState(True)
 
         # (5) broadphase contact detection
+        if multipoints_iterations is not None:
+            if options is None:
+                options = SiconosBulletOptions()
+            options.useMultipointIterations = multipoints_iterations
         self._broadphase = space_filter(model, options)
 
         if use_original:
