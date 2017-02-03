@@ -30,12 +30,12 @@
 #endif
 
 
-#ifndef __cplusplus
+#if !defined(__cplusplus) || !defined(BUILD_AS_CPP)
 
   #ifdef SWIG
     #define tlsvar
 
-  #elif __STDC_VERSION__ >= 201112L
+  #elif __STDC_VERSION__ >= 201112L && defined(__STDC_NO_THREADS__) && __STDC_NO_THREADS__ == 0
     #include <threads.h>
     #define tlsvar thread_local
   #else
