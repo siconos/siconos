@@ -46,11 +46,11 @@ with Hdf5() as io:
     ch = ConvexHull(pts)
     inertia,volume=ch.inertia(ch.centroid())
 
-    # The cube object made with an unique Contactor : the tetrahedron shape.
-    # As a mass is given, it is a dynamic system involved in contact
-    # detection and in the simulation.  With no group id specified the
-    # Contactor belongs to group 0
-    io.addObject('cube', [Contactor('Tetra', collision_group=1)],
+    # The tetra object made with an unique Contactor : the tetrahedron
+    # shape.  As a mass is given, it is a dynamic system involved in
+    # contact detection and in the simulation.  With no group id
+    # specified the Contactor belongs to group 0
+    io.addObject('tetra', [Contactor('Tetra', collision_group=1)],
                  translation=[0, 0, 4],
                  velocity=[0, 0, 0, 0, 0, 0],
                  mass=1, inertia=inertia)
