@@ -153,7 +153,8 @@ SiconosBulletOptions::SiconosBulletOptions()
   : breakingThreshold(0.02)
   , worldScale(1.0)
   , useAxisSweep3(false)
-  , useMultipointIterations(true)
+  , perturbationIterations(5)
+  , minimumPointsPerturbationThreshold(5)
 {
 }
 
@@ -372,10 +373,15 @@ void SiconosBulletCollisionManager::initialize_impl()
   impl->_collisionConfiguration.reset(
     new btDefaultCollisionConfiguration());
 
-  if (_options.useMultipointIterations)
+  if (_options.perturbationIterations > 0
+      || _options.minimumPointsPerturbationThreshold > 0)
   {
-    impl->_collisionConfiguration->setConvexConvexMultipointIterations();
-    impl->_collisionConfiguration->setPlaneConvexMultipointIterations();
+    impl->_collisionConfiguration->setConvexConvexMultipointIterations(
+      _options.perturbationIterations,
+      _options.minimumPointsPerturbationThreshold);
+    impl->_collisionConfiguration->setPlaneConvexMultipointIterations(
+      _options.perturbationIterations,
+      _options.minimumPointsPerturbationThreshold);
   }
 
   impl->_dispatcher.reset(

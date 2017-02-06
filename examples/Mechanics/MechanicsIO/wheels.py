@@ -112,6 +112,5 @@ with Hdf5(mode='r+') as io:
            solver=Numerics.SICONOS_FRICTION_3D_NSGS,
            itermax=1000,
            tolerance=1e-4,
-           multipoints_iterations=True,
            numerics_verbose=False,
            output_frequency=None)

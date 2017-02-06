@@ -8,7 +8,6 @@ from siconos.mechanics.collision.tools import Contactor
 from siconos.io.mechanics_io import Hdf5
 import siconos.numerics as Numerics
 
-import pydoc
 # Creation of the hdf5 file for input/output
 with Hdf5() as io:
 
@@ -57,7 +56,6 @@ with Hdf5(mode='r+') as io:
     # of the International System of Units.
     # Because of fixed collision margins used in the collision detection,
     # sizes of small objects may need to be expressed in cm or mm.
-    print(pydoc.render_doc(io.run, "Help on %s"))
     io.run(with_timer=False,
             time_stepping=None,
             space_filter=None,
@@ -69,7 +67,6 @@ with Hdf5(mode='r+') as io:
             t0=0,
             T=10,
             h=0.0005,
-            multipoints_iterations=True,
             theta=0.50001,
             Newton_max_iter=20,
             set_external_forces=None,

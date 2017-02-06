@@ -2199,7 +2199,7 @@ class Hdf5():
             t0=0,
             T=10,
             h=0.0005,
-            multipoints_iterations=True,
+            multipoints_iterations=None,
             theta=0.50001,
             Newton_options=Kernel.SICONOS_TS_NONLINEAR,
             Newton_max_iter=20,
@@ -2332,11 +2332,13 @@ class Hdf5():
         # keep previous solution
         osnspb.setKeepLambdaAndYState(True)
 
-        # (5) broadphase contact detection
-        if multipoints_iterations is not None:
-            if options is None:
-                options = SiconosBulletOptions()
-            options.useMultipointIterations = multipoints_iterations
+        # Respect run() parameter for multipoints_iteratinos for
+        # backwards compatibility, but this is overridden by
+        # SiconosBulletOptions if one is provided.
+        if multipoints_iterations is not None and options is None:
+            options = SiconosBulletOptions()
+            options.perturbationIterations = 3*multipoints_iterations
+            options.minimumPointsPerturbationThreshold = 3*multipoints_iterations
         self._broadphase = space_filter(model, options)
 
         if use_original:

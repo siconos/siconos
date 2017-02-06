@@ -14,6 +14,12 @@ from siconos.mechanics.collision.convexhull import ConvexHull
 options = siconos.mechanics.collision.bullet.SiconosBulletOptions()
 options.worldScale = 1.0
 
+# Control the number of perturbations applied to generate multipoint
+# surface-surface contact manifolds.  Default is 5 and 5, this is
+# just demonstrating how to change them.
+options.perturbationIterations = 4
+options.minimumPointsPerturbationThreshold = 4
+
 # Creation of the hdf5 file for input/output
 with Hdf5() as io:
 
@@ -69,7 +75,6 @@ with Hdf5(mode='r+') as io:
 
     io.run(with_timer=False,
            options=options,
-           multipoints_iterations=True,
            t0=0,
            T=20,
            h=0.005,
