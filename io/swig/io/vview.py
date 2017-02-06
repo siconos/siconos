@@ -924,7 +924,11 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
 
             actor = vtk.vtkActor()
             if io.instances()[instance_name].attrs['mass'] > 0:
-                actor.GetProperty().SetOpacity(0.7)
+                actor.GetProperty().SetOpacity(
+                    config.get('dynamic_opacity',0.7))
+            else:
+                actor.GetProperty().SetOpacity(
+                    config.get('static_opacity',1.0))
 
             actor.GetProperty().SetColor(random_color())
             actor.SetMapper(fixed_mappers[contactor_name])
