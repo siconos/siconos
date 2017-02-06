@@ -43,6 +43,7 @@ struct SiconosBulletOptions
   bool useAxisSweep3;
   unsigned int perturbationIterations;
   unsigned int minimumPointsPerturbationThreshold;
+  double contactProcessingThreshold;
 };
 
 struct SiconosBulletStatistics

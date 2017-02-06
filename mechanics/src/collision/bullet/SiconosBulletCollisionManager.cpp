@@ -155,6 +155,7 @@ SiconosBulletOptions::SiconosBulletOptions()
   , useAxisSweep3(false)
   , perturbationIterations(5)
   , minimumPointsPerturbationThreshold(5)
+  , contactProcessingThreshold(0.03)
 {
 }
 
@@ -461,6 +462,9 @@ void SiconosBulletCollisionManager_impl::createCollisionObjectHelper(
 
   // create corresponding Bullet object and shape
   SP::btCollisionObject btobject(new btCollisionObject());
+
+  // default parameters
+  btobject->setContactProcessingThreshold(_options.contactProcessingThreshold);
 
   // associate the shape with the object
   btobject->setCollisionShape(&*btshape);
