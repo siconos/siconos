@@ -48,50 +48,67 @@ with Hdf5() as io:
     inertia,volume=ch.inertia(ch.centroid())
 
     # Copies of each object type, still and thrown horizontally.
+    x = -18
     y = -40
     vel = 20
+    spacing = 4
+
     io.addObject('tetra1', [Contactor('Tetra', collision_group=1)],
-                 translation=[-16, y, 2],
+                 translation=[x, y, 2],
                  velocity=[0, 0, 0, 0, 0, 0],
                  mass=1, inertia=inertia)
 
+    x += spacing
     io.addObject('tetra2', [Contactor('Tetra', collision_group=1)],
-                 translation=[-12, y, 2],
+                 translation=[x, y, 2],
                  velocity=[0, vel, 0, 0, 0, 0],
                  mass=1, inertia=inertia)
 
+    x += spacing
     io.addObject('cyl1', [Contactor('Cyl', collision_group=1)],
-                 translation=[-8, y, 2],
+                 translation=[x, y, 2],
                  velocity=[0, 0, 0, 0, 0, 0],
                  mass=1)
 
+    x += spacing
     io.addObject('cyl2', [Contactor('Cyl', collision_group=1)],
-                 translation=[-4, y, 2],
-                 velocity=[0, vel, 0, 0, 0, 0],
+                 translation=[x, y, 2], orientation=[(1,1,1), numpy.pi/4],
+                 velocity=[0, 0, 0, 0, 0, 1],
                  mass=1)
 
+    x += spacing
     io.addObject('cyl3', [Contactor('Cyl', collision_group=1)],
-                 translation=[0, y, 2], orientation=[(0,0,1), numpy.pi/2],
+                 translation=[x, y, 2],
                  velocity=[0, vel, 0, 0, 0, 0],
                  mass=1)
 
+    x += spacing
+    io.addObject('cyl4', [Contactor('Cyl', collision_group=1)],
+                 translation=[x, y, 2], orientation=[(0,0,1), numpy.pi/2],
+                 velocity=[0, vel, 0, 0, 0, 0],
+                 mass=1)
+
+    x += spacing
     io.addObject('ball1', [Contactor('Ball', collision_group=1)],
-                 translation=[4, y, 2],
+                 translation=[x, y, 2],
                  velocity=[0, 0, 0, 0, 0, 0],
                  mass=1)
 
+    x += spacing
     io.addObject('ball2', [Contactor('Ball', collision_group=1)],
-                 translation=[8, y, 2],
+                 translation=[x, y, 2],
                  velocity=[0, vel, 0, 0, 0, 0],
                  mass=1)
 
+    x += spacing
     io.addObject('box1', [Contactor('Cube', collision_group=1)],
-                 translation=[12, y, 2],
+                 translation=[x, y, 2],
                  velocity=[0, 0, 0, 0, 0, 0],
                  mass=1)
 
+    x += spacing
     io.addObject('box2', [Contactor('Cube', collision_group=1)],
-                 translation=[16, y, 2],
+                 translation=[x, y, 2],
                  velocity=[0, vel, 0, 0, 0, 0],
                  mass=1)
 
