@@ -48,7 +48,7 @@ with Hdf5() as io:
     inertia,volume=ch.inertia(ch.centroid())
 
     # Copies of each object type, still and thrown horizontally.
-    x = -18
+    x = -20
     y = -40
     vel = 20
     spacing = 4
@@ -112,11 +112,19 @@ with Hdf5() as io:
                  velocity=[0, vel, 0, 0, 0, 0],
                  mass=1)
 
+    x += spacing
+    stack_height = 3
+    for i in range(stack_height):
+        io.addObject('box%d'%(i+3), [Contactor('Cube', collision_group=1+(i%2))],
+                     translation=[x, y, i+1],
+                     velocity=[0, 0, 0, 0, 0, 0],
+                     mass=1)
+
     # the ground object made with the ground shape. As the mass is
     # not given, it is a static object only involved in contact
     # detection.
     io.addObject('ground', [Contactor('Ground', collision_group=2)],
-                 translation=[0, 0, -0.1])
+                 translation=[0, 0, 0])
 
 # Run the simulation from the inputs previously defined and add
 # results to the hdf5 file. The visualisation of the output may be done
