@@ -156,7 +156,7 @@ class StringDS(sk.LagrangianLinearTIDS):
         mass = np.identity(self.ndof, dtype=np.float64)
 
         # --- Omega^2 matrix ---
-        omega = npw.asrealarray([1. + self.stiffness_coeff * j ** 2
+        omega = npw.asrealarray([1. + self.stiffness_coeff * (j ** 2)
                                  for j in xrange(self.ndof)])
         indices = np.arange(self.ndof)
         coeff = (indices * math.pi * self.c0 / self.length) ** 2

@@ -64,7 +64,7 @@ class Guitar(sk.Model):
 
         # -- Simulation --
         # (1) OneStepIntegrators
-        theta = 0.5001
+        theta = 0.5
         osi = sk.MoreauJeanOSI(theta)
         t0 = time_range[0]
         tend = time_range[1]
@@ -111,7 +111,8 @@ class Guitar(sk.Model):
         time = self.data[:, 0]
         dist = self.data[:, 1]
         lam = self.data[:, 2]
-        qmax = self.data[:, 3 + self.fret_position]
+        
+        qmax = self.data[:, 3 + 3]
         ndof = self.data.shape[1] - 3
         x = np.arange(ndof)
         plt.figure(nfig)
@@ -151,6 +152,7 @@ class Guitar(sk.Model):
         plt.subplot(3, 4, 11)
         plt.plot(x, self.data[-1, 3:])
         plt.title('mode, t5')
+      
         #if pdffile is not None:
         #    plt.savefig(pdffile, format='pdf')
         #plt.show()
