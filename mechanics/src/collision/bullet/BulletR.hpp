@@ -29,14 +29,14 @@ private:
   */
   ACCEPT_SERIALIZATION(BulletR);
 
-  const SP::btManifoldPoint _contactPoints;
+  SP::btManifoldPoint _contactPoints;
 
   const double _y_correction_A;
   const double _y_correction_B;
   const double _scaling;
 
 public:
-  BulletR(SP::btManifoldPoint,
+  BulletR(const btManifoldPoint &,
           bool flip=false,
           double y_correction_A=0,
           double y_correction_B=0,
@@ -45,9 +45,18 @@ public:
   bool _flip; /* if true, points A and B are swapped from the point
                * view of the Relation. */
 
+  double _contactDistance;
+
+  // TODO used by BulletSpaceFilter
   SP::btManifoldPoint contactPoint() const
   {
     return _contactPoints;
+  };
+
+  // TODO used by BulletSpaceFilter
+  void setContactPoint(SP::btManifoldPoint p)
+  {
+    _contactPoints = p;
   };
 
   double y_correction_A() { return _y_correction_A; }
@@ -56,7 +65,7 @@ public:
 
   virtual void computeh(double time, BlockVector& q0, SiconosVector& y);
 
-  void updateVectors();
+  void updateContactPoints(const btManifoldPoint& point);
 
   ACCEPT_STD_VISITORS();
 };

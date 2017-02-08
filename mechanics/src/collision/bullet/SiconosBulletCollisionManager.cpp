@@ -1410,10 +1410,14 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
 
     if (it->point->m_userPersistentData)
     {
-      // do what's needed for an interaction already present
+      /* interaction already exists */
       SP::Interaction *p_inter =
         (SP::Interaction*)it->point->m_userPersistentData;
-      // (note: nothing for now!)
+
+      /* update the relation */
+      SP::BulletR rel(std11::static_pointer_cast<BulletR>((*p_inter)->relation()));
+      rel->updateContactPoints(*it->point);
+
       _stats.existing_interactions_processed ++;
     }
     else
@@ -1431,7 +1435,7 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
         double combined_margin =
           pairA->sshape->outsideMargin() + pairB->sshape->outsideMargin();
 
-        SP::BulletR rel(new BulletR(createSPtrbtManifoldPoint(*it->point),
+        SP::BulletR rel(new BulletR(*it->point,
                                     flip,
                                     pairA->sshape->outsideMargin(),
                                     pairB->sshape->outsideMargin(),

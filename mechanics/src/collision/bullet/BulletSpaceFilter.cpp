@@ -403,7 +403,8 @@ void BulletSpaceFilter::buildInteractions(double time)
                * the contact points and normal otherwise the relation
                * is to the wrong side */
               bool flip = !dsa && dsb;
-              SP::BulletR rel(new BulletR(cpoint, flip));
+              SP::BulletR rel(new BulletR(*cpoint, flip));
+              rel->setContactPoint(cpoint);
               inter.reset(new Interaction(3, nslaw, rel, 4 * i + z));
             }
             else
@@ -439,9 +440,12 @@ void BulletSpaceFilter::buildInteractions(double time)
 
           if (cpoint->m_userPersistentData)
           {
-            activeInteractions[static_cast<Interaction *>(cpoint->m_userPersistentData)] = true;
+            Interaction *inter = static_cast<Interaction *>(cpoint->m_userPersistentData);
+            activeInteractions[inter] = true;
             DEBUG_PRINTF("Interaction %p = true\n", static_cast<Interaction *>(cpoint->m_userPersistentData));
             DEBUG_PRINTF("cpoint %p  = true\n", &*cpoint);
+            SP::BulletR rel(std11::static_pointer_cast<BulletR>(inter->relation()));
+            rel->updateContactPoints(*cpoint);
           }
           else
           {
