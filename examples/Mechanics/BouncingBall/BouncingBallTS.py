@@ -23,7 +23,7 @@ from siconos.kernel import LagrangianLinearTIDS, NewtonImpactNSL,\
     LagrangianLinearTIR, Interaction, Model, MoreauJeanOSI,\
     TimeDiscretisation, LCP, TimeStepping
 
-from numpy import eye, empty
+from numpy import eye, empty, float64, zeros
 
 t0 = 0       # start time
 T = 10       # end time
@@ -101,12 +101,12 @@ bouncingBall.initialize()
 
 
 # the number of time steps
-N = (T - t0) / h
+N = int((T - t0) / h)
 
 # Get the values to be plotted
 # ->saved in a matrix dataPlot
 
-dataPlot = empty((N+1, 5))
+dataPlot = zeros((N+1, 5))
 
 #
 # numpy pointers on dense Siconos vectors
