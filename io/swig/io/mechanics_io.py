@@ -1479,15 +1479,8 @@ class Hdf5():
                         orientation = obj.attrs['orientation']
                         velocity = obj.attrs['velocity']
 
-                        center_of_mass = None
-
-                        # bodyframe center of mass
-                        # check for compatibility
-                        if 'center_of_mass' in obj.attrs:
-                            center_of_mass = \
-                                obj.attrs['center_of_mass'].astype(float)
-                        else:
-                            center_of_mass = [0, 0, 0]
+                    # bodyframe center of mass
+                    center_of_mass = floatv(obj.attrs.get('center_of_mass', [0,0,0]))
 
                     input_ctrs = [ctr for _n_, ctr in obj.items()]
 
