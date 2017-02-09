@@ -60,6 +60,9 @@ SWIG_init(void);
 #endif
 %}
 
+%include target_datatypes.i
+
+#ifdef SWIGPYTHON
 // numpy macros
 %include numpy.i
 
@@ -77,6 +80,11 @@ SWIG_init(void);
 
 // mandatory !
 %rename (lambda_) lambda;
+#endif /* SWIGPYTHON */
+
+#ifdef SWIGMATLAB
+%include numpy_matlab.i
+#endif /* SWIGMATLAB */
 
 #ifdef __cplusplus
 

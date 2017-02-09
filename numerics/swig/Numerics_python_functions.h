@@ -1,9 +1,7 @@
 
 // Heritage in C is wonderful
 
-typedef struct {
-  int id;
-} env_python;
+#include "Numerics_common_structs.h"
 
 typedef struct {
   int id;
@@ -47,7 +45,7 @@ static void call_py_compute_Fmcp(void *env, int n1, int n2, double* z, double* F
 
 #define PY_CALL_METHOD_OR_FUNCTION(ENV_STRUCT, METHOD_NAME, FIELD_FUNCTION, ...) \
 PyObject* py_out = NULL;\
-switch (((env_python*) ENV_STRUCT)->id)\
+switch (((env_target_lang*) ENV_STRUCT)->id)\
 {\
   case ENV_IS_PYTHON_CLASS:\
   {\
@@ -67,7 +65,6 @@ switch (((env_python*) ENV_STRUCT)->id)\
 if (py_out == NULL)\
 {\
   PyErr_PrintEx(0);\
-  exit(1);\
 }\
 Py_XDECREF(py_out);
 

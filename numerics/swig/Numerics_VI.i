@@ -3,7 +3,7 @@
 #include "VariationalInequality_Solvers.h"
 #include "VI_cst.h"
 #include "VariationalInequality_Solvers.h"
-  %}
+%}
 
 %include "VariationalInequality.h"
 %include "VariationalInequality_Solvers.h"
@@ -12,17 +12,18 @@
 %extend VariationalInequality
 {
 
-  VariationalInequality(PyObject* n)
+  VariationalInequality(SN_OBJ_TYPE* n)
   {
-     VariationalInequality* vi = variationalInequality_new((int) PyInt_AsLong(n));
-     vi->F = &call_py_compute_Fvi;
-     vi->compute_nabla_F = &call_py_compute_nabla_Fvi;
+     int nn;
+     SWIG_AsVal_int(n, &nn);
+     VariationalInequality* vi = variationalInequality_new(nn);
+     assert(vi);
 
      if (vi->size < 1)
      {
-       PyErr_SetString(PyExc_RuntimeError, "the size of the VI has to be positive");
+       SWIG_Error(SWIG_RuntimeError, "the size of the VI has to be positive");
+       TARGET_ERROR_VERBOSE;
        free(vi);
-       PyErr_PrintEx(0);
        return NULL;
      }
 
@@ -30,13 +31,18 @@
   }
 
 
-  VariationalInequality(PyObject* n, PyObject* py_compute)
+#ifdef SWIGPYTHON
+  VariationalInequality(SN_OBJ_TYPE* n, SN_OBJ_TYPE* py_compute)
   {
 
-     VariationalInequality* vi = variationalInequality_new((int) PyInt_AsLong(n));
+     int nn;
+     SWIG_AsVal_int(n, &nn);
+     VariationalInequality* vi = variationalInequality_new(nn);
 
-     PyObject* method_compute_F = PyObject_GetAttrString(py_compute, "compute_F");
-     PyObject* method_compute_nabla_F = PyObject_GetAttrString(py_compute, "compute_nabla_F");
+     SN_OBJ_TYPE* method_compute_F = NULL;
+     if (PyObject_HasAttrString(py_compute, "compute_F")) method_compute_F = PyObject_GetAttrString(py_compute, "compute_F");
+     SN_OBJ_TYPE* method_compute_nabla_F = NULL;
+     if (PyObject_HasAttrString(py_compute, "compute_nabla_F")) method_compute_nabla_F = PyObject_GetAttrString(py_compute, "compute_nabla_F");
 
      if (method_compute_F && method_compute_nabla_F && PyCallable_Check(method_compute_F) && PyCallable_Check(method_compute_nabla_F))
      {
@@ -44,8 +50,8 @@
        class_env_python* vi_env_python = (class_env_python*) vi->env;
        vi_env_python->id = ENV_IS_PYTHON_CLASS;
        vi_env_python->class_object = py_compute;
-       Py_DECREF(method_compute_F);
-       Py_DECREF(method_compute_nabla_F);
+       target_mem_mgmt_instr(method_compute_F);
+       target_mem_mgmt_instr(method_compute_nabla_F);
      }
      else
      {
@@ -59,11 +65,11 @@
        }
        else
        {
-         Py_XDECREF(method_compute_F);
-         Py_XDECREF(method_compute_nabla_F);
-         PyErr_SetString(PyExc_TypeError, "argument 2 must either be an object with a method compute_F and a method compute_nabla_F or a callable function");
+         target_mem_mgmtX_instr(method_compute_F);
+         target_mem_mgmtX_instr(method_compute_nabla_F);
+         SWIG_Error(SWIG_TypeError, "argument 2 must either be an object with a method compute_F and a method compute_nabla_F or a callable function");
+         TARGET_ERROR_VERBOSE;
          free(vi);
-         PyErr_PrintEx(0);
          return NULL;
        }
      }
@@ -72,7 +78,7 @@
    }
 
 
-   void set_compute_nabla_F(PyObject* py_compute_nabla_F)
+   void set_compute_nabla_F(SN_OBJ_TYPE* py_compute_nabla_F)
    {
      if (PyCallable_Check(py_compute_nabla_F))
      {
@@ -84,12 +90,12 @@
      }
      else
      {
-       PyErr_SetString(PyExc_TypeError, "argument 1 must be callable");
-       PyErr_PrintEx(0);
+       SWIG_Error(SWIG_TypeError, "argument 1 must be callable");
+       TARGET_ERROR_VERBOSE;
      }
    }
 
-   void set_box_constraints(PyObject* box_lower_bound, PyObject* box_upper_bound)
+   void set_box_constraints(SN_OBJ_TYPE* box_lower_bound, SN_OBJ_TYPE* box_upper_bound)
    {
      if ((PyObject_Length(box_lower_bound) == $self->size) && (PyObject_Length(box_upper_bound) == $self->size))
      {
@@ -101,19 +107,18 @@
 
        if (!convert_darray(box_lower_bound, box_c->lb) || !convert_darray(box_upper_bound, box_c->ub))
        {
-         PyErr_PrintEx(0);
+         TARGET_ERROR_VERBOSE;
          exit(1);
        }
      }
      else
      {
-       PyErr_SetString(PyExc_TypeError, "The arguments do not have the right length");
-       PyErr_PrintEx(0);
-       exit(1);
+       SWIG_Error(SWIG_TypeError, "The arguments do not have the right length");
+       TARGET_ERROR_VERBOSE;
      }
    }
 
-  void set_compute_F_and_nabla_F_as_C_functions(PyObject* lib_name, PyObject* compute_F_name, PyObject* compute_nabla_F_name)
+  void set_compute_F_and_nabla_F_as_C_functions(SN_OBJ_TYPE* lib_name, SN_OBJ_TYPE* compute_F_name, SN_OBJ_TYPE* compute_nabla_F_name)
   {
 %#if PY_MAJOR_VERSION < 3
     if(PyString_Check(lib_name) && PyString_Check(compute_F_name) && PyString_Check(compute_nabla_F_name))
@@ -134,23 +139,19 @@
     }
     else
     {
-      PyErr_SetString(PyExc_TypeError, "All arguments should be strings");
-      PyErr_PrintEx(0);
+      SWIG_Error(SWIG_TypeError, "All arguments should be strings");
+      TARGET_ERROR_VERBOSE;
     }
   }
+#endif /* SWIGPYTHON */
 
-    PyObject* get_env_as_long(void)
+    SN_OBJ_TYPE* get_env_as_long(void)
     {
-      return PyInt_FromLong((uintptr_t)&$self->env);
+      return SWIG_From_long((uintptr_t)&$self->env);
     }
 
   ~VariationalInequality()
   {
-    if ($self->nabla_F)
-    {
-      freeNumericsMatrix($self->nabla_F);
-      free($self->nabla_F);
-    }
     if ($self->set)
     {
       //black magic
@@ -164,8 +165,8 @@
         }
         default:
         {
-          PyErr_SetString(PyExc_TypeError, "unknown set type");
-          PyErr_PrintEx(0);
+          SWIG_Error(SWIG_TypeError, "unknown set type");
+          TARGET_ERROR_VERBOSE;
         }
       }
       free($self->set);
@@ -173,12 +174,12 @@
     }
     if ($self->env)
     {
-      if(((env_python*)$self->env)->id > 0)
+      if(((env_target_lang*)$self->env)->id > 0)
       {
         free($self->env);
       }
     }
-    free($self);
+    freeVariationalInequalityProblem($self);
   }
 };
 

@@ -37,100 +37,93 @@
 {
   FrictionContactProblem()
   {
-    FrictionContactProblem * FCP = (FrictionContactProblem *) malloc(sizeof(FrictionContactProblem));
-    FCP->M = NULL;
-    FCP->q = NULL;
-    FCP->mu = NULL;
-
-    return FCP;
+    return newFCP();
   }
 
 
   /* copy constructor */
-  FrictionContactProblem(PyObject *o)
+  FrictionContactProblem(SN_OBJ_TYPE *o)
   {
     FrictionContactProblem* fcp;
     FrictionContactProblem* FCP;
 
     %SN_INPUT_CHECK_RETURN(o, fcp, FrictionContactProblem);
 
-    FCP = (FrictionContactProblem *) malloc(sizeof(FrictionContactProblem));
+    FCP = newFCP();
     FCP->dimension = fcp->dimension;
-    FCP->M = fcp->M;
-    FCP->numberOfContacts = fcp->numberOfContacts;
-    FCP->q =  fcp->q;
-    FCP->mu = fcp->mu;
 
-    Py_INCREF(o);
+    FCP->M = NM_create(fcp->M->storageType, fcp->M->size0, fcp->M->size1);
+
+    NM_copy(FCP->M, fcp->M);
+
+    FCP->numberOfContacts = fcp->numberOfContacts;
+    size_t size =  fcp->dimension * fcp->numberOfContacts;
+
+    FCP->q = (double*) malloc(size * sizeof(double));
+    memcpy(FCP->q, fcp->q, size * sizeof(double));
+
+    FCP->q = (double*) malloc(size * sizeof(double));
+    memcpy(FCP->mu, fcp->mu, size * sizeof(double));
 
     return FCP;
   }
 
   /* */
-  FrictionContactProblem(PyObject *dim, PyObject *numberOfContacts, PyObject *M, PyObject *q, PyObject *mu)
+  FrictionContactProblem(SN_OBJ_TYPE *dim, SN_OBJ_TYPE *numberOfContacts, SN_OBJ_TYPE *M, SN_OBJ_TYPE *q, SN_OBJ_TYPE *mu)
   {
-    FrictionContactProblem * FC = (FrictionContactProblem *) malloc(sizeof(FrictionContactProblem));
-    FC->dimension = PyInt_AsLong(dim);
-    FC->numberOfContacts = PyInt_AsLong(numberOfContacts);
+    FrictionContactProblem * FC = newFCP();
+    SWIG_AsVal_int(dim, &FC->dimension);
+    SWIG_AsVal_int(numberOfContacts, &FC->numberOfContacts);
 
-    %SN_INPUT_CHECK_RETURN(q, FC->M, NumericsMatrix);
-    %SN_INPUT_CHECK_RETURN(q, FC->q, double);
-    %SN_INPUT_CHECK_RETURN(mu, FC->mu, double);
+    %NM_convert_from_target(M, (&FC->M), return NULL);
+
+    int is_new_objectq=0;
+    SN_ARRAY_TYPE* vector = obj_to_sn_vector(q, &is_new_objectq);
+
+    sn_check_size_mat_vec(FC->M->size0, vector, return NULL);
+    set_vec_from_target(FC->q, vector, , return NULL);
+
+    int is_new_objectmu = 0;
+    SN_ARRAY_TYPE* vectormu = obj_to_sn_vector(mu, &is_new_objectmu);
+
+    sn_check_size_mat_vec(FC->numberOfContacts, vectormu, return NULL);
+    set_vec_from_target(FC->mu, vectormu, , return NULL);
+
+    target_mem_mgmt(is_new_objectq, vector);
+    target_mem_mgmt(is_new_objectmu, vectormu);
 
     return FC;
 
   }
 
-  NumericsMatrix* rawM()
+  FrictionContactProblem(SN_OBJ_TYPE *dim, SN_OBJ_TYPE * M, SN_OBJ_TYPE * q, SN_OBJ_TYPE * mu)
   {
-    return $self->M;
+    FrictionContactProblem * FC = newFCP();
+
+    SWIG_AsVal_int(dim, &FC->dimension);
+
+    %NM_convert_from_target(M, (&FC->M), return NULL);
+
+    FC->numberOfContacts = FC->M->size0 / FC->dimension;
+
+    int is_new_objectq=0;
+    SN_ARRAY_TYPE* vector = obj_to_sn_vector(q, &is_new_objectq);
+
+    sn_check_size_mat_vec(FC->M->size0, vector, return NULL);
+    set_vec_from_target(FC->q, vector, , return NULL);
+
+    int is_new_objectmu = 0;
+    SN_ARRAY_TYPE* vectormu = obj_to_sn_vector(mu, &is_new_objectmu);
+
+    sn_check_size_mat_vec(FC->numberOfContacts, vectormu, return NULL);
+    set_vec_from_target(FC->mu, vectormu, , return NULL);
+
+    target_mem_mgmt(is_new_objectq, vector);
+    target_mem_mgmt(is_new_objectmu, vectormu);
+
+
+    return FC;
   }
-
-  FrictionContactProblem(PyObject *dim, PyObject *o1, PyObject *o2, PyObject *o3)
-    {
-
-      int is_new_object1=0;
-      int is_new_object2=0;
-      int is_new_object3=0;
-
-      PyArrayObject* array = obj_to_array_fortran_allow_conversion(o1, NPY_DOUBLE,&is_new_object1);
-      PyArrayObject* vector = obj_to_array_contiguous_allow_conversion(o2, NPY_DOUBLE, &is_new_object2);
-      PyArrayObject* mu_vector = obj_to_array_contiguous_allow_conversion(o3, NPY_DOUBLE, &is_new_object3);
-      FrictionContactProblem *FC;
-      // return pointer : free by std swig destructor
-      FC = (FrictionContactProblem *) malloc(sizeof(FrictionContactProblem));
-      size_t size0 = array_size(array,0);
-      size_t size1 = array_size(array,1);
-
-      FC->M = NM_create(NM_DENSE, size0, size1);
-
-      memcpy(FC->M->matrix0,array_data(array),size0*size1*sizeof(double));
-      FC->dimension = (int) PyInt_AsLong(dim);
-      FC->numberOfContacts = size0 / FC->dimension;
-      FC->q = (double *) malloc(size0*sizeof(double));
-      memcpy(FC->q,array_data(vector),size0*sizeof(double));
-      FC->mu = (double *) malloc(FC->numberOfContacts*sizeof(double));
-      memcpy(FC->mu,array_data(mu_vector),FC->numberOfContacts*sizeof(double));
-
-
-      // python mem management
-      if(is_new_object1 && array)
-      {
-        Py_DECREF(array);
-      }
-
-      if(is_new_object2 && vector)
-      {
-        Py_DECREF(vector);
-      }
-
-      if(is_new_object3 && mu_vector)
-      {
-        Py_DECREF(mu_vector);
-      }
-
-      return FC;
-    }
 
   ~FrictionContactProblem()
   {
@@ -154,8 +147,7 @@
       {
       char msg[1024];
       snprintf(msg, sizeof(msg), "frictionContactProblemFromFile: cannot load %s\n",filename);
-      PyErr_SetString(PyExc_RuntimeError, msg);
-      PyErr_PrintEx(0);
+      SWIG_Error(SWIG_RuntimeError, msg);
       free(problem);
       fclose(finput);
       return NULL;
@@ -170,11 +162,10 @@
     {
       char msg[1024];
       snprintf(msg, sizeof(msg), "frictionContactProblemFromFile: cannot open %s\n",filename);
-      PyErr_SetString(PyExc_RuntimeError, msg);
-      PyErr_PrintEx(0);
+      SWIG_Error(SWIG_RuntimeError, msg);
       return NULL;
     }
-    
+
   }
 
 %}

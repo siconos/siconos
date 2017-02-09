@@ -31,11 +31,10 @@
 #include "Newton_methods.h"
 %}
 
+#ifdef SWIGPYTHON
 #define FPyArray_SimpleNewFromData(nd, dims, typenum, data)             \
   PyArray_New(&PyArray_Type, nd, dims, typenum, NULL,                   \
               data, 0, NPY_ARRAY_FARRAY, NULL)
-
-// std python sequence -> C array
 
 // int
 %{
@@ -112,7 +111,7 @@ static int convert_darray(PyObject *input, double *ptr) {
     $1 = PyObject_Length($input);
     $2 = &temp[0];
  }
-
+#endif /* SWIGPYTHON */
 
 // cleanup
 %typemap(freearg) (int sized, double *dparam) {
@@ -129,14 +128,16 @@ static int convert_darray(PyObject *input, double *ptr) {
 }
 
 %typemap(argout) (int *info) {
-  Py_DECREF($result);
-  $result = PyInt_FromLong(*$1);
+  target_mem_mgmt_instr($result);
+  $result = SWIG_From_int(*$1);
  }
 
 %typemap(argout) (double *error) {
-  $result = PyFloat_FromDouble(*$1);
+  target_mem_mgmt_instr($result);
+  $result = SWIG_From_double(*$1);
  }
 
+#ifdef SWIGPYTHON
 %typemap(in) (int *iparam) {
   
   $1_type temp;
@@ -172,28 +173,57 @@ static int convert_darray(PyObject *input, double *ptr) {
   if (arg1) arg1->dSize = PyObject_Length($input);
 
  }
+#endif /* SWIGPYTHON */
+
+#ifdef SWIGMATLAB
+%typemap(in) (int* iparam) (SN_ARRAY_TYPE* array = NULL, int is_new_object = 0){
+   array = obj_to_sn_vector_int($input, &is_new_object);
+
+  if (!array)
+  {
+   SWIG_exception_fail(SWIG_TypeError, "Could not get a int from the object");
+  }
+
+  if (CHECK_ARRAY_VECTOR(array))
+  {
+   SWIG_exception_fail(SWIG_TypeError, "The given object does not have the right structure. We expect a vector (or list, tuple, ...)");
+  }
+
+  $1 = (int *) array_data(array);
+}
+ 
+ %typemap(memberin) (int* iparam) {
+  if (arg1) arg1->iSize = array_size(array2, 1) == 1 ? array_size(array2, 0) : array_size(array2, 1);
+  if (!$1) { $1 = (int*)malloc(arg1->iSize * sizeof(int)); }
+  else { $1 = (int*)realloc($1, arg1->iSize * sizeof(int)); }
+
+  memcpy($1, $input, arg1->iSize * sizeof(int));
+}
+
+%apply (double *z) { (double *dparam) };
+
+%typemap(memberin) (double *dparam) {
+  
+  if (arg1) arg1->dSize = array_size(array2, 1) == 1 ? array_size(array2, 0) : array_size(array2, 1);
+  if (!$1) { $1 = (double*)malloc(arg1->dSize * sizeof(double)); }
+  else { $1 = (double*)realloc($1, arg1->dSize * sizeof(double)); }
+
+  memcpy($1, $input, arg1->dSize * sizeof(double));
+}
+#endif /* SWIGMATLAB */
 
 // output lists
 
 %typemap(out) (int *iparam) {
-  $1_type piparam = $1;
-
-  npy_intp this_iparam_dim[1];
-  this_iparam_dim[0] = arg1->iSize;
-
-  $result = PyArray_SimpleNewFromData(1,this_iparam_dim,NPY_INT,piparam);
+  C_to_target_lang1_int($result, arg1->iSize, $1, SWIG_fail);
  }
 
 
 %typemap(out) (double *dparam) {
-  $1_type pdparam = $1;
-  
-  npy_intp this_dparam_dim[1];
-  this_dparam_dim[0] = arg1->dSize;
-
-  $result = PyArray_SimpleNewFromData(1, this_dparam_dim,NPY_DOUBLE,pdparam);
+  C_to_target_lang1($result, arg1->dSize, $1, SWIG_fail);
  }
 
+#ifdef SWIGPYTHON
 %fragment("NumPy_Fragments");
 
 %{
@@ -311,6 +341,7 @@ static int convert_darray(PyObject *input, double *ptr) {
   $1 = pycallback;
 
  }
+#endif /* SWIGPYTHON */
 
 %{
 #include "SolverOptions.h"
