@@ -1252,10 +1252,9 @@ class Hdf5():
             joint_type = self.joints()[name].attrs['type']
             joint_class = getattr(joints, joint_type)
 
-            joint_nslaw = EqualityConditionNSL(5)
-
             ds1_name = self.joints()[name].attrs['object1']
             ds1 = topo.getDynamicalSystem(ds1_name)
+            ds2 = None
 
             if 'object2' in self.joints()[name].attrs:
                 ds2_name = self.joints()[name].attrs['object2']
@@ -1268,9 +1267,6 @@ class Hdf5():
                 except NotImplementedError:
                     joint = joint_class(ds1, ds2,
                                         self.joints()[name].attrs['pivot_point'])
-                joint_inter = Interaction(5, joint_nslaw, joint)
-                self._model.nonSmoothDynamicalSystem().\
-                    link(joint_inter, ds1, ds2)
 
             else:
                 try:
@@ -1279,9 +1275,11 @@ class Hdf5():
                                         self.joints()[name].attrs['axis'])
                 except NotImplementedError:
                     joint = joint_class(ds1, self.joints()[name].attrs['pivot_point'])
-                joint_inter = Interaction(5, joint_nslaw, joint)
-                self._model.nonSmoothDynamicalSystem().\
-                    link(joint_inter, ds1)
+
+            joint_nslaw = EqualityConditionNSL(joint.numberOfConstraints())
+            joint_inter = Interaction(joint.numberOfConstraints(), joint_nslaw, joint)
+            self._model.nonSmoothDynamicalSystem().\
+                link(joint_inter, ds1, ds2)
 
     def importBoundaryConditions(self, name):
         if self._broadphase is not None:
@@ -1305,6 +1303,12 @@ class Hdf5():
                               self.boundary_conditions()[name].attrs['omega'],
                               self.boundary_conditions()[name].attrs['phi'])
 
+            elif ( bc_type == 'FixedBC' ):
+                bc = bc_class(self.boundary_conditions()[name].attrs['indices'])
+
+            elif ( bc_type == 'BoundaryCondition' ):
+                bc = bc_class(self.boundary_conditions()[name].attrs['indices'],
+                              self.boundary_conditions()[name].attrs['v'])
 
             # set bc to the ds1
 
@@ -2158,7 +2162,7 @@ class Hdf5():
             joint.attrs['axis']=axis
 
     def addBoundaryCondition(self, name, object1, indices=None, bc_class='HarmonicBC',
-                             a=None, b=None, omega=None, phi=None):
+                             v=None, a=None, b=None, omega=None, phi=None):
         """
         add boundarycondition to the object object1
 
@@ -2174,6 +2178,10 @@ class Hdf5():
                 boundary_condition.attrs['b']= b
                 boundary_condition.attrs['omega']= omega
                 boundary_condition.attrs['phi']= phi
+            elif bc_class == 'BoundaryCondition' :
+                boundary_condition.attrs['v']= v
+            elif bc_class == 'FixedBC' :
+                pass # nothing to do
             else:
                 raise NotImplementedError
 
@@ -2191,7 +2199,7 @@ class Hdf5():
             t0=0,
             T=10,
             h=0.0005,
-            multipoints_iterations=True,
+            multipoints_iterations=None,
             theta=0.50001,
             Newton_options=Kernel.SICONOS_TS_NONLINEAR,
             Newton_max_iter=20,
@@ -2314,14 +2322,23 @@ class Hdf5():
 
         osnspb.numericsSolverOptions().internalSolvers.iparam[0]=100
         osnspb.numericsSolverOptions().dparam[0]=tolerance
+
+
+
         osnspb.setMaxSize(30000)
         osnspb.setMStorageType(1)
-        osnspb.setNumericsVerboseMode(False)
+        osnspb.setNumericsVerboseMode(numerics_verbose)
 
         # keep previous solution
         osnspb.setKeepLambdaAndYState(True)
 
-        # (5) broadphase contact detection
+        # Respect run() parameter for multipoints_iteratinos for
+        # backwards compatibility, but this is overridden by
+        # SiconosBulletOptions if one is provided.
+        if multipoints_iterations is not None and options is None:
+            options = SiconosBulletOptions()
+            options.perturbationIterations = 3*multipoints_iterations
+            options.minimumPointsPerturbationThreshold = 3*multipoints_iterations
         self._broadphase = space_filter(model, options)
 
         if use_original:

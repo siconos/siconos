@@ -11,6 +11,12 @@ import siconos.numerics as Numerics
 
 import random
 
+import siconos
+options = siconos.mechanics.collision.bullet.SiconosBulletOptions()
+options.worldScale = 1.0
+options.perturbationIterations = 7
+options.minimumPointsPerturbationThreshold = 7
+
 n_cube=3
 n_row=2
 n_col=2
@@ -104,10 +110,10 @@ with Hdf5(mode='r+') as io:
            face_class=None,
            edge_class=None,
            gravity_scale=1,
+           options = options,
            t0=0,
            T=nstep*step,
            h=step,
-           multipoints_iterations=True,
            theta=0.50001,
            Newton_max_iter=1,
            set_external_forces=None,

@@ -16,12 +16,16 @@ from siconos.io.mechanics_io import tmpfile as io_tmpfile
 ## Persistent configuration
 config = {'window_size': [600,600]}
 config_fn = os.path.join(os.environ['HOME'], '.config', 'siconos_vview.json')
+should_save_config = True
 
 def load_configuration():
+    global should_save_config
     if os.path.exists(config_fn):
         try:
             config.update(json.load(open(config_fn)))
+            should_save_config = True
         except:
+            should_save_config = False
             print("Warning: Error loading configuration `{}'".format(config_fn))
 
 def save_configuration():
@@ -920,7 +924,11 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
 
             actor = vtk.vtkActor()
             if io.instances()[instance_name].attrs['mass'] > 0:
-                actor.GetProperty().SetOpacity(0.7)
+                actor.GetProperty().SetOpacity(
+                    config.get('dynamic_opacity',0.7))
+            else:
+                actor.GetProperty().SetOpacity(
+                    config.get('static_opacity',1.0))
 
             actor.GetProperty().SetColor(random_color())
             actor.SetMapper(fixed_mappers[contactor_name])
@@ -1538,4 +1546,5 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
 
 # Update configuration and save it
 config['window_size'] = renderer_window.GetSize()
-save_configuration()
+if should_save_config:
+    save_configuration()

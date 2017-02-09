@@ -111,7 +111,7 @@ void NewtonEulerDSTest::testNewtonEulerDSQuaternion()
   double angle= 1e24;
   double angleref = 1e24;
 
-  angle = ::getAxisAngle(q0, axis );
+  angle = ::axisAngleFromQuaternion(q0, axis );
   std::cout << "q0 angle : " <<angle<<std::endl;
   std::cout << "q0 axis : " << std::endl;
   axis->display();
@@ -150,9 +150,7 @@ void NewtonEulerDSTest::testNewtonEulerDSQuaternion()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testNewtonEulerDSQuaternionC : ", *(R) == Rref, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testNewtonEulerDSQuaternionC : ", *(v) == *(vref), true);
 
-
-
-  angle =::getAxisAngle(q01, axis );
+  angle = ::axisAngleFromQuaternion(q01, axis);
   std::cout << "q01 angle : " <<angle<<std::endl;
   std::cout << "q01 axis : " << std::endl;
   axis->display();
@@ -188,7 +186,7 @@ void NewtonEulerDSTest::testNewtonEulerDSQuaternion()
   std::cout << "q02 angle : " <<angle<<std::endl;
   std::cout << "q02 axis : " << std::endl;
   axis->display();
-  ::setAxisAngle(q02,axis,angle);
+  ::quaternionFromAxisAngle(axis,angle,q02);
   std::cout << "q02  : " << std::endl;
   q02->display();
 
@@ -232,7 +230,7 @@ void NewtonEulerDSTest::testNewtonEulerDSQuaternion()
   std::cout << "q03 angle : " <<angle<<std::endl;
   std::cout << "q03 axis : " << std::endl;
   axis->display();
-  ::setAxisAngle(q03,axis,angle);
+  ::quaternionFromAxisAngle(axis,angle,q03);
   std::cout << "q03  : " << std::endl;
   q03->display();
 
@@ -285,7 +283,7 @@ void NewtonEulerDSTest::testNewtonEulerDSQuaternionMatrix()
   std::cout << "q03 angle : " <<angle<<std::endl;
   std::cout << "q03 axis : " << std::endl;
   axis->display();
-  ::setAxisAngle(q03,axis,angle);
+  ::quaternionFromAxisAngle(axis,angle,q03);
   std::cout << "q03  : " << std::endl;
   q03->display();
 

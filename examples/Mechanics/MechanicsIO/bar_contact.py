@@ -70,7 +70,7 @@ with Hdf5() as io:
   trans=[0,0,4.0*scale]
   ori = [math.cos(angle/2.0),0.0,math.sin(angle/2.0),0]
   axis = numpy.zeros(3)
-  angle_test = Kernel.getAxisAngle(trans+ori, axis)
+  angle_test = Kernel.axisAngleFromQuaternion(trans+ori, axis)
   print angle_test,axis
   print('ori initial', ori)
   io.addObject('bar', [Contactor('Bar')],

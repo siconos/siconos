@@ -9,11 +9,17 @@ from siconos.mechanics.collision.tools import Contactor
 from siconos.io.mechanics_io import Hdf5
 import siconos.numerics as Numerics
 import siconos.io.mechanics_io
+from siconos.mechanics.collision.convexhull import ConvexHull
 
 options = siconos.mechanics.collision.bullet.SiconosBulletOptions()
 options.worldScale = 1.0
 
-import pydoc
+# Control the number of perturbations applied to generate multipoint
+# surface-surface contact manifolds.  Default is 5 and 5, this is
+# just demonstrating how to change them.
+options.perturbationIterations = 4
+options.minimumPointsPerturbationThreshold = 4
+
 # Creation of the hdf5 file for input/output
 with Hdf5() as io:
 
@@ -36,14 +42,18 @@ with Hdf5() as io:
                                   collision_group1=1,
                                   collision_group2=2)
 
-    # The cube object made with an unique Contactor : the tetrahedron shape.
-    # As a mass is given, it is a dynamic system involved in contact
-    # detection and in the simulation.  With no group id specified the
-    # Contactor belongs to group 0
-    io.addObject('cube', [Contactor('Tetra', collision_group=1)],
+    # computation of inertia and volume
+    ch = ConvexHull(pts)
+    inertia,volume=ch.inertia(ch.centroid())
+
+    # The tetra object made with an unique Contactor : the tetrahedron
+    # shape.  As a mass is given, it is a dynamic system involved in
+    # contact detection and in the simulation.  With no group id
+    # specified the Contactor belongs to group 0
+    io.addObject('tetra', [Contactor('Tetra', collision_group=1)],
                  translation=[0, 0, 4],
                  velocity=[0, 0, 0, 0, 0, 0],
-                 mass=1)
+                 mass=1, inertia=inertia)
 
     # the ground object made with the ground shape. As the mass is
     # not given, it is a static object only involved in contact
@@ -65,7 +75,6 @@ with Hdf5(mode='r+') as io:
 
     io.run(with_timer=False,
            options=options,
-           multipoints_iterations=True,
            t0=0,
            T=20,
            h=0.005,

@@ -360,6 +360,9 @@ void TimeStepping::update(unsigned int levelInput)
   // need this until mechanics' BulletTimeStepping class is removed
   updateWorldFromDS();
 
+  // Update interactions if a manager was provided
+  updateInteractions();
+
   // 3 - compute output ( x ... -> y)
   if (!_allNSProblems->empty())
   {
@@ -451,9 +454,6 @@ void TimeStepping::run()
 void TimeStepping::advanceToEvent()
 {
   DEBUG_PRINTF("TimeStepping::advanceToEvent(). Time =%f\n",getTkp1());
-
-  // Update interactions if a manager was provided
-  updateInteractions();
 
   // Initialize lambdas of all interactions.
   SP::InteractionsGraph indexSet0 = _nsds->
