@@ -1015,28 +1015,60 @@ struct IsDense : public Question<bool>
 %{
   static inline int sequenceToUnsignedIntVector(
     PyObject *input,
-    std11::shared_ptr<std::vector<unsigned int> > ptr)
+    std11::shared_ptr<std::vector<unsigned int> >& ptr)
   {
     if (!PySequence_Check(input)) {
       PyErr_SetString(PyExc_TypeError,"Expecting a sequence");
       return 0;
     }
 
+    ptr.reset(new std::vector<unsigned int>());
     assert(ptr);
 
+    PyArray_Descr* descrto = PyArray_DescrFromType(NPY_ULONG);
     for (int i =0; i <  PyObject_Length(input); i++)
     {
       PyObject *o = PySequence_GetItem(input,i);
-      if (!PyInt_Check(o)) {
+      unsigned int u;
+
+      if (PyInt_Check(o)) {
+        long v = PyInt_AsLong(o);
+        if (v == -1 && PyErr_Occurred())
+          return 0;
+        u = static_cast<unsigned int>(v);
+      } else if (PyLong_Check(o)) {
+        long v = PyLong_AsLong(o);
+        if (v == -1 && PyErr_Occurred())
+          return 0;
+        u = static_cast<unsigned int>(v);
+      } else if (PyArray_CheckScalar(o)) {
+        PyArray_Descr* descrfrom = PyArray_DescrFromObject(o, NULL);
+        if (!PyDataType_ISINTEGER(descrfrom)) {
+          Py_XDECREF(o);
+          PyErr_SetString(PyExc_ValueError,"Expecting a sequence of ints");
+          return 0;
+        }
+
+        // We must use UNSAFE casting, otherwise user would have to
+        // ensure to provide unsigned numpy arrays.
+        if (PyArray_CanCastTypeTo(descrfrom, descrto,
+                                  NPY_UNSAFE_CASTING))
+        {
+          PyArray_CastScalarToCtype(o, &u, descrto);
+        }
+        else {
+          Py_XDECREF(o);
+          PyErr_SetString(PyExc_ValueError,"Expecting a sequence of ints");
+          return 0;
+        }
+      }
+      else {
         Py_XDECREF(o);
         PyErr_SetString(PyExc_ValueError,"Expecting a sequence of ints");
         return 0;
       }
 
-      if (PyInt_AsLong(o) == -1 && PyErr_Occurred())
-        return 0;
-
-      ptr->push_back(static_cast<unsigned int>(PyInt_AsLong(o)));
+      ptr->push_back(u);
 
       Py_DECREF(o);
     }
@@ -1048,13 +1080,10 @@ struct IsDense : public Question<bool>
 // int sequence => std::vector<unsigned int>
 %typemap(in,fragment="NumPy_Fragments") std11::shared_ptr<std::vector<unsigned int> > (std11::shared_ptr<std::vector<unsigned int> > temp)
 {
-  temp.reset(new std::vector<unsigned int>());
-  if (!sequenceToUnsignedIntVector($input, temp))
+  if (!sequenceToUnsignedIntVector($input, $1))
   {
     SWIG_fail;
   }
-  $1 = temp; // temp deallocation is done at object destruction
-             // thanks to shared ptr ref counting
 }
 
 
