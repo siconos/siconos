@@ -155,6 +155,48 @@ static inline void fillBasePyarray(PyObject* pyarray, SharedPointerKeeper* saved
    $1 = (PyArrayObject*) $input;
 }
 
+//////////////////////////////////////////////////////////////////////////////
+// allow integers to be numpy types
+%{
+static int
+Siconos_AsVal_int (PyObject *obj, int* val)
+{
+#if PY_VERSION_HEX < 0x03000000
+  if (PyInt_Check(obj)) {
+    if (val) *val = PyInt_AsLong(obj);
+    return SWIG_OK;
+  } else
+#endif
+  if (PyLong_Check(obj)) {
+    long v = PyLong_AsLong(obj);
+    if (!PyErr_Occurred()) {
+      if (val) *val = v;
+      return SWIG_OK;
+    } else {
+      PyErr_Clear();
+      return SWIG_OverflowError;
+    }
+  }
+  if (PyArray_CheckScalar(obj)) {
+    int x = PyArray_PyIntAsInt(obj);
+    if (x == -1 && PyErr_Occurred())
+      return SWIG_TypeError;
+    if (val) *val = x;
+    return SWIG_OK;
+  }
+  return SWIG_TypeError;
+}
+%}
+%typemap(typecheck) int {
+  int ecode = Siconos_AsVal_int($input, &$1);
+  $1 = SWIG_IsOK(ecode);
+}
+%typemap(in) int {
+  int ecode = Siconos_AsVal_int($input, &$1);
+  if (!SWIG_IsOK(ecode))
+    SWIG_exception_fail(ecode, "Expected int");
+}
+
 
 //////////////////////////////////////////////////////////////////////////////
 // check on input : a numpy array or a TYPE
