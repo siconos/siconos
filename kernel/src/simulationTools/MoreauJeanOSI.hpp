@@ -87,7 +87,7 @@ const unsigned int MOREAUSTEPSINMEMORY = 1;
  * of theta and the list of concerned dynamical systems.
  *
  * Each DynamicalSystem is associated to a SiconosMatrix, named "W", the "iteration" matrix"
- * W matrices are initialized and computed in initW and computeW. Depending on the DS type,
+ * W matrices are initialized and computed in initializeIterationMatrixW and computeW. Depending on the DS type,
  * they may depend on time t and DS state x.
  *
  * For mechanical systems, the implementation uses _p for storing the
@@ -254,7 +254,7 @@ public:
   inline void setUseGammaForRelation(bool newUseGammaForRelation)
   {
     _useGammaForRelation = newUseGammaForRelation;
-    if (_useGammaForRelation) _useGamma = false;
+    if(_useGammaForRelation) _useGamma = false;
   };
 
   /** get boolean _explicitNewtonEulerDSOperators for the relation
@@ -281,12 +281,14 @@ public:
    */
   virtual void initialize(Model& m);
 
-  /** init W MoreauJeanOSI matrix at time t
+
+  void initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds);
+
+  /** initialize iteration matrix W MoreauJeanOSI matrix at time t
    *  \param time
    *  \param ds a pointer to DynamicalSystem
-   *  \param dsv a descriptor of the ds on the graph (redundant to avoid invocation)
    */
-  void initW(double time, SP::DynamicalSystem ds, DynamicalSystemsGraph::VDescriptor& dsv);
+  void initializeIterationMatrixW(double time, SP::DynamicalSystem ds);
 
   /** compute W MoreauJeanOSI matrix at time t
    *  \param time (double)
@@ -301,11 +303,11 @@ public:
    */
   void computeWBoundaryConditions(SP::DynamicalSystem ds, SiconosMatrix& WBoundaryConditions);
 
-  /** init WBoundaryConditionsMap[ds] MoreauJeanOSI
+  /** initialize iteration matrix WBoundaryConditionsMap[ds] MoreauJeanOSI
    *  \param ds a pointer to DynamicalSystem
    *  \param dsv a descriptor of the ds on the graph (redundant)
    */
-  void initWBoundaryConditions(SP::DynamicalSystem ds, DynamicalSystemsGraph::VDescriptor& dsv);
+  void initializeIterationMatrixWBoundaryConditions(SP::DynamicalSystem ds, const DynamicalSystemsGraph::VDescriptor& dsv);
 
 
   /** compute the initial state of the Newton loop.

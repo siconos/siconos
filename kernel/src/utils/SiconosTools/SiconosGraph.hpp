@@ -859,7 +859,9 @@ public:
 
   void display() const
   {
-
+    std::cout << "vertices number :" << vertices_number() << std::endl;
+        
+    std::cout << "edges number :" << edges_number() << std::endl;
     VIterator vi, viend;
     for (std11::tie(vi, viend) = vertices();
          vi != viend; ++vi)

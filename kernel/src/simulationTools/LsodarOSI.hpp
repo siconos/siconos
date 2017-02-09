@@ -243,6 +243,7 @@ public:
    */
   void initialize(Model& m);
 
+  void initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds);
   /** integrate the system, between tinit and tend (->iout=true), with possible stop at tout (->iout=false)
    *  \param tinit initial time
    *  \param tend end time
@@ -275,12 +276,18 @@ public:
   /** Return current number of rhs call (for all lsodar-like OSIs!)
    * \return int
    */
-  static int count_rhs_call() {return count_NFE;}
+  static int count_rhs_call()
+  {
+    return count_NFE;
+  }
 
   /** Return the number of lsodar steps already done (for all lsodar-like OSIs!)
    * \return int
    */
-  static int count_steps() {return count_NST;}
+  static int count_steps()
+  {
+    return count_NST;
+  }
 
   /** visitors hook
   */

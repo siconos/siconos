@@ -124,11 +124,6 @@
  */
 class LagrangianDS : public DynamicalSystem
 {
-public:
-
-  /** List of indices used to save tmp work matrics (last one is the size of the present list) */
-  enum WorkNames {xfree, sizeWorkVec};
-  enum WorkMatrixNames {invMass, jacobianXBloc10, jacobianXBloc11, zeroMatrix, idMatrix, coeffs_denseoutput, sizeWorkMat};
 
 protected:
   /** serialization hooks
@@ -136,12 +131,12 @@ protected:
   ACCEPT_SERIALIZATION(LagrangianDS);
 
   /** Common code for constructors
-   * should be replaced in C++11 by delegating constructors 
-   * \param ndof 
+   * should be replaced in C++11 by delegating constructors
+   * \param ndof
    */
   void init(unsigned int ndof);
 
-  
+
   // -- MEMBERS --
 
   /** number of degrees of freedom of the system */
@@ -162,8 +157,6 @@ protected:
   /** memory of previous velocities of the system */
   SP::SiconosMemory _velocityMemory;
 
-  SP::BlockMatrix _jacxRhs;
-
   /** "Reaction", generalized forces or imuplses due to the non smooth law
    * The index corresponds to the kinematic
    * level of the corresponding constraints. It mainly depends on what the simulation
@@ -182,8 +175,25 @@ protected:
   /** mass of the system */
   SP::SiconosMatrix _mass;
 
+  /** true i the  mass matrix is constant */
+  bool _hasConstantMass;
+
+  /** inverse or factorization of the mass of the system */
+  SP::SimpleMatrix _inverseMass;
+
   /** internal forces applied to  the system */
   SP::SiconosVector _fInt;
+
+  // enum LagrangianDSJacobianId {F_Int_wrt_q, F_Int_wrt_qDot,
+  //                              F_Gyr_wrt_q, F_Gyr_wrt_qdot,
+  //                              Force_wrt_q, Forces_wrt_qDot,
+  //                              numberOfJacobians};
+
+  // /** A container of matrices to save jacobians matrices
+  //  * Id are given by LagrangianDSJacobianId
+  //  */
+
+  // VectorOfSMatrices _jacobians;
 
   /** jacobian_q FInt*/
   SP::SiconosMatrix _jacobianFIntq;
@@ -193,7 +203,7 @@ protected:
 
   /** external forces applied to the system */
   SP::SiconosVector _fExt;
-  
+
   /** boolean if _fext is constant (set thanks to setFExtPtr for instance)
    * false by default */
   bool _hasConstantFExt;
@@ -223,6 +233,15 @@ protected:
 
   /** Reaction to an applied  boundary condition */
   SP::SiconosVector _reactionToBoundaryConditions;
+
+  enum LagrangianDSRhsMatrices {jacobianXBloc10, jacobianXBloc11, zeroMatrix, idMatrix, numberOfRhsMatrices};
+  /** A container of matrices to save matrices that are involed in first order from of
+   * LagrangianDS system values (jacobianXBloc10, jacobianXBloc11, zeroMatrix, idMatrix)
+   * No get-set functions at the time. Only used as a protected member.*/
+  VectorOfSMatrices _rhsMatrices;
+
+  SP::BlockMatrix _jacxRhs;
+
 
 
   /** Default constructor
@@ -357,7 +376,7 @@ public:
 
   /** reset the state to the initial state */
   void resetToInitialState();
-   
+
   /** Initialization function for the rhs and its jacobian.
    *  \param time of initialization
    */
@@ -553,6 +572,13 @@ public:
   {
     return _mass;
   }
+  /** get inverseMass
+   *  \return pointer on a plugged-matrix
+   */
+  inline SP::SimpleMatrix inverseMass() const
+  {
+    return _inverseMass;
+  }
 
   /** set mass to pointer newPtr
    *  \param newPtr a plugged matrix SP
@@ -560,6 +586,7 @@ public:
   inline void setMassPtr(SP::SiconosMatrix newPtr)
   {
     _mass = newPtr;
+    _hasConstantMass = true;
   }
 
   // --- fInt ---
@@ -736,6 +763,7 @@ public:
     _pluginMass->setComputeFunction(pluginPath, functionName);
     if (!_mass)
       _mass.reset(new SimpleMatrix(_ndof, _ndof));
+    _hasConstantMass = false;
   }
 
   /** set a specified function to compute Mass
@@ -746,7 +774,7 @@ public:
     _pluginMass->setComputeFunction((void*)fct);
     if (!_mass)
       _mass.reset(new SimpleMatrix(_ndof, _ndof));
-
+    _hasConstantMass = false;
   }
 
   /** allow to set a specified function to compute FInt
@@ -1050,25 +1078,33 @@ public:
   };
 
 
-  /** to allocate memory for a new tmp matrix
-   *  \param id the id of the SimpleMatrix
-   *  \param sizeOfRows an int to set the size of rows
-   *  \param sizeOfCols an int to set the size of cols
-   */
-  inline void allocateWorkMatrix(const WorkMatrixNames & id, int sizeOfRows, int sizeOfCols)
-  {
-    _workMatrix[id].reset(new SimpleMatrix(sizeOfRows, sizeOfCols));
-  }
+  // /** to allocate memory for a new tmp matrix
+  //  *  \param id the id of the SimpleMatrix
+  //  *  \param sizeOfRows an int to set the size of rows
+  //  *  \param sizeOfCols an int to set the size of cols
+  //  */
+  // inline void allocateWorkMatrix(const  LagrangianDSWorkMatrixId& id, int sizeOfRows, int sizeOfCols)
+  // {
+  //   _workMatrix[id].reset(new SimpleMatrix(sizeOfRows, sizeOfCols));
+  // }
 
-  /** get a temporary saved matrix
-   * \param id the id of the SimpleMatrix
-   *  \return a SP::SimpleMatrix
+  // /** get a temporary saved matrix
+  //  * \param id the id of the SimpleMatrix
+  //  *  \return a SP::SimpleMatrix
+  //  */
+  // inline SP::SimpleMatrix workMatrix(const  LagrangianDSWorkMatrixId& id) const
+  // {
+  //   return  _workMatrix[id];
+  // }
+  /** get a temporary saved vector, ref by id
+   * \param id  WorkNames
+   * \return a SP::SiconosVector
    */
-  inline SP::SimpleMatrix workMatrix(const WorkMatrixNames & id) const
-  {
-    return  _workMatrix[id];
-  }
-
+  // inline SP::SiconosVector workspace(const DSWorkVectorId& id) const
+  // {
+  //   assert(0);
+  //   return _workspace[id];
+  // }
   ACCEPT_STD_VISITORS();
 
 };

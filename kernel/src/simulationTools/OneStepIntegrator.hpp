@@ -71,10 +71,19 @@
  */
 class OneStepIntegrator :public std11::enable_shared_from_this<OneStepIntegrator>
 {
+
+public :
+  /** List of indices used to save tmp work matrices and vectors (last one is the size of the present list) */
+  enum OSI_DSWorkVectorId {local_buffer, residu_free, free, free_tdg,
+                           qtmp, acce_memory, acce_like, work_vector_of_vector_size};
+ 
+  enum OSI_DSWorkMatrixId {dense_output_coefficients, work_vector_of_matrix_size};
+
 protected:
 /** serialization hooks
  */
   ACCEPT_SERIALIZATION(OneStepIntegrator);
+
 
 
 /** type/name of the Integrator */
@@ -207,7 +216,8 @@ public:
    */
   virtual void initialize(Model& m ) = 0;
 
-
+  virtual void initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds) = 0;
+  
   /** compute the initial state of the Newton loop.
    */
   virtual void computeInitialNewtonState();

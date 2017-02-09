@@ -271,7 +271,7 @@ void Simulation::initialize(SP::Model m, bool withOSI)
   for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
   {
     Interaction& inter = *indexSet0->bundle(*ui);
-    inter.initialize(_tinit, indexSet0->properties(*ui));
+    inter.initialize(_tinit, indexSet0->properties(*ui), *DSG);
   }
 
   // Initialize OneStepNSProblem(s). Depends on the type of simulation.
@@ -322,7 +322,8 @@ void Simulation::initializeInteraction(double time, SP::Interaction inter)
   InteractionsGraph::VDescriptor ui = indexSet0->descriptor(inter);
 
   // This calls computeOutput() and initializes qMemory and q_k.
-  inter->initialize(time, indexSet0->properties(ui));
+  DynamicalSystemsGraph &DSG = *_nsds->topology()->dSG(0);
+  inter->initialize(time, indexSet0->properties(ui), DSG);
 }
 
 

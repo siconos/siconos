@@ -42,7 +42,7 @@ const unsigned int SCHATZMANPAOLISTEPSINMEMORY = 2;
  * concerned dynamical systems.  Each DynamicalSystem is associated to
  * a SiconosMatrix, named "W"
  *
- * W matrices are initialized and computed in initW and
+ * W matrices are initialized and computed in initializeIterationMatrixW and
  * computeW. Depending on the DS type, they may depend on time and DS
  * state (x).
  *
@@ -226,7 +226,7 @@ public:
   inline void setUseGammaForRelation(bool newUseGammaForRelation)
   {
     _useGammaForRelation = newUseGammaForRelation;
-    if (_useGammaForRelation) _useGamma = false;
+    if(_useGammaForRelation) _useGamma = false;
   };
 
 
@@ -236,14 +236,14 @@ public:
       invariant systems, we compute time invariant operator (example :
       W)
    */
-  void initialize(Model& m );
-
-  /** init W SchatzmanPaoliOSI matrix at time t
+  void initialize(Model& m);
+  void initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds);
+  /** initialize iteration matrix W SchatzmanPaoliOSI matrix at time t
    *  \param time (double)
    *  \param ds a pointer to DynamicalSystem
    *  \param dsv a descriptor of the ds on the graph (redundant)
    */
-  void initW(double time, SP::DynamicalSystem ds, DynamicalSystemsGraph::VDescriptor& dsv);
+  void initializeIterationMatrixW(double time, SP::DynamicalSystem ds, const DynamicalSystemsGraph::VDescriptor& dsv);
 
   /** compute W SchatzmanPaoliOSI matrix at time t
    *  \param time the time (double)
@@ -258,11 +258,11 @@ public:
    */
   void computeWBoundaryConditions(SP::DynamicalSystem ds, SiconosMatrix& WBoundaryConditions);
 
-  /** init WBoundaryConditionsMap[ds] SchatzmanPaoliOSI
+  /** initialize iteration matrix WBoundaryConditionsMap[ds] SchatzmanPaoliOSI
    *  \param ds a pointer to DynamicalSystem
    *  \param dsv a descriptor of the ds on the graph (redundant to avoid invocation)
    */
-  void initWBoundaryConditions(SP::DynamicalSystem ds, DynamicalSystemsGraph::VDescriptor& dsv);
+  void initializeIterationMatrixWBoundaryConditions(SP::DynamicalSystem ds, const DynamicalSystemsGraph::VDescriptor& dsv);
 
   /** return the maximum of all norms for the "SchatzmanPaoliOSI-discretized" residus of DS
    *  \return a double

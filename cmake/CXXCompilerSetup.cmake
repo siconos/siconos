@@ -50,14 +50,13 @@ if(DEV_MODE)
   # --- Clang ----
   #add_cxx_options("-Weverything" Clang) # like Wall and more
   add_cxx_options("-Werror=unreachable-code" "Clang")
-  #add_cxx_options("-std=c++11" "Clang")
   # --- All compilers but MSVC (Microsoft Visual C) ---
   if(NOT MSVC)
     add_cxx_options("-Wall")
   endif()
   add_cxx_options("-Wuninitialized")
   add_cxx_options("-Werror=unknown-warning-option" Clang)
-
+  add_cxx_options("-Wno-unused-local-typedef")
   # --- Options for any compiler ----
   add_cxx_options("-Wextra -Wno-unused-parameter")
   # -- warnings to errors --

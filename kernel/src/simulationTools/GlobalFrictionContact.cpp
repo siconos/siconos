@@ -25,6 +25,7 @@
 #include "NewtonImpactFrictionNSL.hpp"
 #include "MoreauJeanGOSI.hpp" // Numerics Header
 #include "LagrangianDS.hpp"
+#include "NewtonEulerDS.hpp"
 #include "NewtonImpactNSL.hpp"
 #include "OSNSMatrix.hpp"
 
@@ -255,9 +256,24 @@ bool GlobalFrictionContact::preCompute(double time)
       // compute q (aka free velocity) = v^k + contribution from forces
       OneStepIntegrator& Osi = *DSG0.properties(DSG0.descriptor(ds)).osi;
       OSI::TYPES osiType = Osi.getType();
+      Type::Siconos dsType ; // Type of the current DS.
+      dsType = Type::value(*ds); // Its type
       if (osiType == OSI::MOREAUJEANOSI2)
       {
-        setBlock(*ds->workspace(DynamicalSystem::free), _q, dss, 0, offset);
+        VectorOfVectors& workVectors = *DSG0.properties(DSG0.descriptor(ds)).workVectors;
+        
+        if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
+        {
+          SiconosVector& vfree = *workVectors[OneStepIntegrator::free];
+          setBlock(vfree, _q, dss, 0, offset);
+        }
+        else  if (dsType == Type::NewtonEulerDS)
+        {
+          SiconosVector& vfree = *workVectors[OneStepIntegrator::free];
+          setBlock(vfree, _q, dss, 0, offset);
+ 
+        }
+          
       }
       else
       {

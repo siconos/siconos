@@ -32,6 +32,7 @@
 
 #include "OneStepNSProblem.hpp"
 
+// #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
 #include "debug.h"
@@ -62,58 +63,59 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
   DEBUG_EXPR(std::cout<< "allOSNS->size()   "  << allOSNS->size() << std::endl << std::endl);
 
 // -- LEFT SIDE --
-  DynamicalSystemsGraph::VIterator dsi, dsend;
-  for (std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
-  {
-    if (!checkOSI(dsi)) continue;
-    SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
 
+  DynamicalSystemsGraph::VIterator dsi, dsend;
+  for(std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
+  {
+    if(!checkOSI(dsi)) continue;
+    SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
     Type::Siconos dsType = Type::value(*ds);
-    SP::SiconosVector accFree;
+
+    VectorOfVectors& workVectors = *_dynamicalSystemsGraph->properties(*dsi).workVectors;
     SP::SiconosVector work_tdg;
     SP::SiconosMatrix Mold;
-    DEBUG_EXPR((*it)->display());
 
-    if ((dsType == Type::LagrangianDS) || (dsType == Type::LagrangianLinearTIDS))
+    if((dsType == Type::LagrangianDS) || (dsType == Type::LagrangianLinearTIDS))
     {
       SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
-      accFree = d->workspace(DynamicalSystem::free); /* POINTER CONSTRUCTOR : will contain
-                                                       * the acceleration without contact force */
-      accFree->zero();
+      SiconosVector& accFree = *workVectors[OneStepIntegrator::free];/* POINTER CONSTRUCTOR : will contain
+                                                                 * the acceleration without contact force */
+      accFree.zero();
 
       // get left state from memory
       SP::SiconosVector qold = d->qMemory()->getSiconosVector(0);
       SP::SiconosVector vold = d->velocityMemory()->getSiconosVector(0); // right limit
       Mold = d->mass();
 
-      DEBUG_EXPR(accFree->display());
+      DEBUG_EXPR(accFree.display());
       DEBUG_EXPR(qold->display());
       DEBUG_EXPR(vold->display());
       DEBUG_EXPR(Mold->display());
 
-      if (! d->workspace(DynamicalSystem::free_tdg))
-      {
-        d->allocateWorkVector(DynamicalSystem::free_tdg, d->dimension()) ;
-      }
-      work_tdg = d->workspace(DynamicalSystem::free_tdg);
+
+      work_tdg =  workVectors[OneStepIntegrator::free_tdg];
       work_tdg->zero();
       DEBUG_EXPR(work_tdg->display());
 
-      if (d->forces())
+      if(d->forces())
       {
         d->computeForces(told, qold, vold);
         DEBUG_EXPR(d->forces()->display());
 
-        *accFree += *(d->forces());
+        accFree += *(d->forces());
       }
-      Mold->PLUForwardBackwardInPlace(*accFree); // contains left (right limit) acceleration without contact force
-      d->addWorkVector(accFree,DynamicalSystem::free_tdg); // store the value in WorkFreeFree
+      Mold->PLUForwardBackwardInPlace(accFree); // contains left (right limit) acceleration without contact force
+      *work_tdg = accFree; // store the value in WorkFreeFree
+      //d->addWorkVector(accFree,DynamicalSystem::free_tdg); // store the value in WorkFreeFree
+      DEBUG_PRINT("accFree contains right limit acceleration at  t^+_k with contact force :\n");
+      DEBUG_EXPR(accFree.display());
+      DEBUG_PRINT("work_tdg contains right limit acceleration at t^+_k without contact force :\n");
+      DEBUG_EXPR(work_tdg->display());
     }
     else if(dsType == Type::NewtonEulerDS)
     {
       SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS> (ds);
-      accFree = d->workspace(DynamicalSystem::free); // POINTER CONSTRUCTOR : contains acceleration without contact force
-      accFree->zero();
+      SiconosVector& accFree = *workVectors[OneStepIntegrator::free];
 
       // get left state from memory
       SP::SiconosVector qold = d->qMemory()->getSiconosVector(0);
@@ -121,31 +123,30 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
       //Mold = d->mass();
       assert(!d->mass()->isPLUInversed());
       Mold.reset(new SimpleMatrix(*(d->mass()))); // we copy the mass matrix to avoid its factorization
-      DEBUG_EXPR(accFree->display());
+      DEBUG_EXPR(accFree.display());
       DEBUG_EXPR(qold->display());
       DEBUG_EXPR(vold->display());
       DEBUG_EXPR(Mold->display());
 
-      if (! d->workspace(DynamicalSystem::free_tdg))
-      {
-        d->allocateWorkVector(DynamicalSystem::free_tdg, d->dimension()) ;
-      }
 
-      work_tdg = d->workspace(DynamicalSystem::free_tdg);
+      work_tdg =  workVectors[OneStepIntegrator::free_tdg];
       work_tdg->zero();
       DEBUG_EXPR(work_tdg->display());
 
-      if (d->forces())
+      if(d->forces())
       {
         d->computeForces(told, qold, vold);
         DEBUG_EXPR(d->forces()->display());
 
-        *accFree += *(d->forces());
+        accFree += *(d->forces());
       }
-      Mold->PLUForwardBackwardInPlace(*accFree); // contains left (right limit) acceleration without contact force
+      Mold->PLUForwardBackwardInPlace(accFree); // contains left (right limit) acceleration without contact force
+      *work_tdg = accFree; // store the value in WorkFreeFree
 
-      d->addWorkVector(accFree,DynamicalSystem::free_tdg); // store the value in WorkFreeFree
-
+      DEBUG_PRINT("accFree contains right limit acceleration at  t^+_k with contact force :\n");
+      DEBUG_EXPR(accFree.display());
+      DEBUG_PRINT("work_tdg contains right limit acceleration at t^+_k without contact force :\n");
+      DEBUG_EXPR(work_tdg->display());
     }
     else
     {
@@ -153,37 +154,34 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
     }
 
 
-    DEBUG_PRINT("accFree contains right limit acceleration at  t^+_k with contact force :\n");
-    DEBUG_EXPR(accFree->display());
-    DEBUG_PRINT("work_tdg contains right limit acceleration at t^+_k without contact force :\n");
-    DEBUG_EXPR(work_tdg->display());
+
 
   }
 
 
-  if (!allOSNS->empty())
+  if(!allOSNS->empty())
   {
-    if (indexSet2->size() >0)
+    if(indexSet2->size() >0)
     {
       InteractionsGraph::VIterator ui, uiend;
       SP::Interaction inter;
-      for (std11::tie(ui, uiend) = indexSet2->vertices(); ui != uiend; ++ui)
+      for(std11::tie(ui, uiend) = indexSet2->vertices(); ui != uiend; ++ui)
       {
         inter = indexSet2->bundle(*ui);
         inter->relation()->computeJach(t, *inter, indexSet2->properties(*ui));
         inter->relation()->computeJacg(told, *inter, indexSet2->properties(*ui));
       }
 
-      if (_simulation->nonSmoothDynamicalSystem()->topology()->hasChanged())
+      if(_simulation->nonSmoothDynamicalSystem()->topology()->hasChanged())
       {
-        for (OSNSIterator itOsns = allOSNS->begin(); itOsns != allOSNS->end(); ++itOsns)
+        for(OSNSIterator itOsns = allOSNS->begin(); itOsns != allOSNS->end(); ++itOsns)
         {
           (*itOsns)->setHasBeenUpdated(false);
         }
       }
       assert((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]);
 
-      if (((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]->hasInteractions())) // it should be equivalent to indexSet2
+      if(((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]->hasInteractions()))  // it should be equivalent to indexSet2
       {
         DEBUG_PRINT("We compute lambda^+_{k} \n");
         (*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]->compute(told);
@@ -197,34 +195,38 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
       _simulation->nonSmoothDynamicalSystem()->pushInteractionsInMemory();
       _simulation->nonSmoothDynamicalSystem()->updateInput(_simulation->nextTime(),2);
 
-      for (std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
+  
+      for(std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
       {
-        if (!checkOSI(dsi)) continue;
+        if(!checkOSI(dsi)) continue;
         SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
 
         Type::Siconos dsType = Type::value(*ds);
-        if ((dsType == Type::LagrangianDS) || (dsType == Type::LagrangianLinearTIDS))
+        VectorOfVectors& workVectors = *_dynamicalSystemsGraph->properties(*dsi).workVectors;
+
+        if((dsType == Type::LagrangianDS) || (dsType == Type::LagrangianLinearTIDS))
         {
           SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
-          SP::SiconosVector accFree = d->workspace(DynamicalSystem::free); // POINTER CONSTRUCTOR : contains acceleration without contact force
+          SiconosVector& accFree = *workVectors[OneStepIntegrator::free];
 
           SP::SiconosVector dummy(new SiconosVector(*(d->p(2)))); // value = contact force
           SP::SiconosMatrix Mold = d->mass();
           Mold->PLUForwardBackwardInPlace(*dummy);
-          *accFree  += *(dummy);
+          accFree  += *(dummy);
 
           DEBUG_EXPR(d->p(2)->display());
         }
-        else if (dsType == Type::NewtonEulerDS)
+        else if(dsType == Type::NewtonEulerDS)
         {
           SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS> (ds);
-          SP::SiconosVector accFree = d->workspace(DynamicalSystem::free); // POINTER CONSTRUCTOR : contains acceleration without contact force
+          SiconosVector& accFree = *workVectors[OneStepIntegrator::free];
+
 
           SP::SiconosVector dummy(new SiconosVector(*(d->p(2)))); // value = contact force
           SP::SiconosMatrix Mold(new SimpleMatrix(*(d->mass())));  // we copy the mass matrix to avoid its factorization
           DEBUG_EXPR(Mold->display());
           Mold->PLUForwardBackwardInPlace(*dummy);
-          *accFree  += *(dummy);
+          accFree  += *(dummy);
 
           DEBUG_EXPR(d->p(2)->display());
 
@@ -243,41 +245,42 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
 
   DEBUG_PRINT("\n PREDICT RIGHT HAND SIDE\n");
 
-  for (std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
+  for(std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
   {
-    if (!checkOSI(dsi)) continue;
+    if(!checkOSI(dsi)) continue;
     SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
+    VectorOfVectors& workVectors = *_dynamicalSystemsGraph->properties(*dsi).workVectors;
 
 
     // type of the current DS
     Type::Siconos dsType = Type::value(*ds);
     /* \warning the following conditional statement should be removed with a MechanicalDS class */
-    if ((dsType == Type::LagrangianDS) || (dsType == Type::LagrangianLinearTIDS))
+    if((dsType == Type::LagrangianDS) || (dsType == Type::LagrangianLinearTIDS))
     {
       SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
-      SP::SiconosVector accFree = d->workspace(DynamicalSystem::free); // contains acceleration without contact force
+      SiconosVector& residuFree = *workVectors[OneStepIntegrator::residu_free];// contains residu without nonsmooth effect
+      SiconosVector& accFree = *workVectors[OneStepIntegrator::free];
 
       // get left state from memory
       SP::SiconosVector qold = d->qMemory()->getSiconosVector(0);
       SP::SiconosVector vold = d->velocityMemory()->getSiconosVector(0);
 
       // initialize *it->residuFree and predicted right velocity (left limit)
-      SP::SiconosVector residuFree = ds->workspace(DynamicalSystem::freeresidu); // contains residu without nonsmooth effect
       SP::SiconosVector v = d->velocity(); //contains velocity v_{k+1}^- and not free velocity
-      residuFree->zero();
+      residuFree.zero();
       v->zero();
 
-      DEBUG_EXPR(accFree->display());
+      DEBUG_EXPR(accFree.display());
       DEBUG_EXPR(qold->display());
       DEBUG_EXPR(vold->display());
 
 
-      *residuFree -= 0.5 * h**accFree;
+      residuFree -= 0.5 * h* accFree;
 
-      *v += h**accFree;
+      *v += h* accFree;
       *v += *vold;
 
-      DEBUG_EXPR(residuFree->display());
+      DEBUG_EXPR(residuFree.display());
       DEBUG_EXPR(v->display());
 
       SP::SiconosVector q = d->q(); // POINTER CONSTRUCTOR : contains position q_{k+1}
@@ -286,32 +289,31 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
       scal(0.5 * h, *vold + *v, *q, false);
       DEBUG_EXPR(q->display());
     }
-    else if (dsType == Type::NewtonEulerDS)
+    else if(dsType == Type::NewtonEulerDS)
     {
       SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS> (ds);
-      SP::SiconosVector accFree = d->workspace(DynamicalSystem::free);
-
+      SiconosVector& residuFree = *workVectors[OneStepIntegrator::residu_free];// contains residu without nonsmooth effect
+      SiconosVector& accFree = *workVectors[OneStepIntegrator::free];
       // get left state from memory
       SP::SiconosVector qold = d->qMemory()->getSiconosVector(0);
       SP::SiconosVector vold = d->twistMemory()->getSiconosVector(0);
 
       // initialize *it->residuFree and predicted right velocity (left limit)
-      SP::SiconosVector residuFree = ds->workspace(DynamicalSystem::freeresidu); // contains residu without nonsmooth effect
       SP::SiconosVector v = d->twist(); //contains velocity v_{k+1}^- and not free velocity
-      residuFree->zero();
+      residuFree.zero();
       v->zero();
 
-      DEBUG_EXPR(accFree->display());
+      DEBUG_EXPR(accFree.display());
       DEBUG_EXPR(qold->display());
       DEBUG_EXPR(vold->display());
 
 
-      *residuFree -= 0.5 * h**accFree;
+      residuFree -= 0.5 * h* accFree;
 
-      *v += h**accFree;
+      *v += h* accFree;
       *v += *vold;
 
-      DEBUG_EXPR(residuFree->display());
+      DEBUG_EXPR(residuFree.display());
       DEBUG_EXPR(v->display());
 
       //first step consists in computing  \dot q.
@@ -363,11 +365,11 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
    *  Compute _isThereImpactInTheTimeStep
    */
   _isThereImpactInTheTimeStep = false;
-  if (!allOSNS->empty())
+  if(!allOSNS->empty())
   {
 
-    for (unsigned int level = _simulation->levelMinForOutput();
-         level < _simulation->levelMaxForOutput(); level++)
+    for(unsigned int level = _simulation->levelMinForOutput();
+        level < _simulation->levelMaxForOutput(); level++)
     {
       _simulation->nonSmoothDynamicalSystem()->updateOutput(_simulation->nextTime(),level);
     }
@@ -376,7 +378,7 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
     SP::Topology topo =  _simulation->nonSmoothDynamicalSystem()->topology();
     SP::InteractionsGraph indexSet3 = topo->indexSet(3);
 
-    if (indexSet3->size() > 0)
+    if(indexSet3->size() > 0)
     {
       _isThereImpactInTheTimeStep = true;
       DEBUG_PRINT("There is an impact in the step. indexSet3->size() > 0. _isThereImpactInTheTimeStep = true;\n");
@@ -397,22 +399,23 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
    * we recompute residuFree by adding   the contribution of the external forces at the end
    * and the contribution of the nonimpulsive contact forces that are computed by solving the osnsp.
    */
-  if (_isThereImpactInTheTimeStep)
+  if(_isThereImpactInTheTimeStep)
   {
 
     DEBUG_PRINT("There is an impact in the step. indexSet3->size() > 0.  _isThereImpactInTheTimeStep = true\n");
-    for (std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
+    for(std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
     {
-      if (!checkOSI(dsi)) continue;
+      if(!checkOSI(dsi)) continue;
       SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
+      VectorOfVectors& workVectors = *_dynamicalSystemsGraph->properties(*dsi).workVectors;
 
       // type of the current DS
       Type::Siconos dsType = Type::value(*ds);
       /* \warning the following conditional statement should be removed with a MechanicalDS class */
-      if ((dsType == Type::LagrangianDS) || (dsType == Type::LagrangianLinearTIDS))
+      if((dsType == Type::LagrangianDS) || (dsType == Type::LagrangianLinearTIDS))
       {
         SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
-        SP::SiconosVector residuFree = d->workspace(DynamicalSystem::freeresidu);
+        SiconosVector& residuFree = *workVectors[OneStepIntegrator::residu_free];
         SP::SiconosVector v = d->velocity();
         SP::SiconosVector q = d->q();
         SP::SiconosVector qold = d->qMemory()->getSiconosVector(0);
@@ -420,16 +423,17 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
 
         SP::SiconosMatrix M = d->mass(); // POINTER CONSTRUCTOR : contains mass matrix
 
-        //residuFree->zero();
+        //residuFree.zero();
         //v->zero();
-        SP::SiconosVector work_tdg = d->workspace(DynamicalSystem::free_tdg);
+
+        SP::SiconosVector work_tdg = workVectors[OneStepIntegrator::free_tdg];
         assert(work_tdg);
-        *residuFree =  - 0.5 * h**work_tdg;
+        residuFree =  - 0.5 * h* *work_tdg;
 
 
         d->computeMass();
         DEBUG_EXPR(M->display());
-        if (d->forces())
+        if(d->forces())
         {
           d->computeForces(t, q, v);
           *work_tdg = *(d->forces());
@@ -437,13 +441,13 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
         }
 
         M->PLUForwardBackwardInPlace(*work_tdg); // contains right (left limit) acceleration without contact force
-        *residuFree -= 0.5 * h**work_tdg;
-        DEBUG_EXPR(residuFree->display());
+        residuFree -= 0.5 * h**work_tdg;
+        DEBUG_EXPR(residuFree.display());
       }
-      else if (dsType == Type::NewtonEulerDS)
+      else if(dsType == Type::NewtonEulerDS)
       {
         SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS> (ds);
-        SP::SiconosVector residuFree = d->workspace(DynamicalSystem::freeresidu);
+        SiconosVector& residuFree = *workVectors[OneStepIntegrator::residu_free];
         SP::SiconosVector v = d->twist();
         SP::SiconosVector q = d->q();
         SP::SiconosVector qold = d->qMemory()->getSiconosVector(0);
@@ -452,22 +456,22 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
         SP::SiconosMatrix M(new SimpleMatrix(*(d->mass()))); // we copy the mass matrix to avoid its factorization;
         DEBUG_EXPR(M->display());
 
-        //residuFree->zero();
+        //residuFree.zero();
         v->zero();
-        SP::SiconosVector work_tdg = d->workspace(DynamicalSystem::free_tdg);
+        SP::SiconosVector work_tdg = workVectors[OneStepIntegrator::free_tdg];
         assert(work_tdg);
-        *residuFree = 0.5 * h**work_tdg;
+        residuFree = 0.5 * h* *work_tdg;
         work_tdg->zero();
 
-        if (d->forces())
+        if(d->forces())
         {
           d->computeForces(t, q, v);
           *work_tdg += *(d->forces());
         }
 
         M->PLUForwardBackwardInPlace(*work_tdg); // contains right (left limit) acceleration without contact force
-        *residuFree -= 0.5 * h**work_tdg;
-        DEBUG_EXPR(residuFree->display());
+        residuFree -= 0.5 * h**work_tdg;
+        DEBUG_EXPR(residuFree.display());
       }
       else
         RuntimeException::selfThrow("D1MinusLinearOSI::computeResidu - not yet implemented for Dynamical system type: " + dsType);
@@ -479,72 +483,74 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
     // -- RIGHT SIDE --
     // calculate acceleration without contact force
 
-    for (std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
+    for(std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
     {
-      if (!checkOSI(dsi)) continue;
+      if(!checkOSI(dsi)) continue;
       SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
+      VectorOfVectors& workVectors = *_dynamicalSystemsGraph->properties(*dsi).workVectors;
 
-    
+
       // type of the current DS
       Type::Siconos dsType = Type::value(*ds);
       /* \warning the following conditional statement should be removed with a MechanicalDS class */
-      if ((dsType == Type::LagrangianDS) || (dsType == Type::LagrangianLinearTIDS))
+      if((dsType == Type::LagrangianDS) || (dsType == Type::LagrangianLinearTIDS))
       {
 
         SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
-        SP::SiconosVector accFree = d->workspace(DynamicalSystem::free); // POINTER CONSTRUCTOR : contains acceleration without contact force
-        accFree->zero();
+        SiconosVector& accFree = *workVectors[OneStepIntegrator::free];
+        accFree.zero();
         // get right state from memory
         SP::SiconosVector q = d->q(); // contains position q_{k+1}
         SP::SiconosVector v = d->velocity(); // contains velocity v_{k+1}^- and not free velocity
         SP::SiconosMatrix M = d->mass(); // POINTER CONSTRUCTOR : contains mass matrix
 
-        DEBUG_EXPR(accFree->display());
+        DEBUG_EXPR(accFree.display());
         DEBUG_EXPR(q->display());
         DEBUG_EXPR(v->display());
         // Lagrangian Nonlinear Systems
-        if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
+        if(dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
         {
           d->computeMass();
 
           DEBUG_EXPR(M->display());
-          if (d->forces())
+          if(d->forces())
           {
             d->computeForces(t, q, v);
-            *accFree += *(d->forces());
+            accFree += *(d->forces());
           }
         }
         else
           RuntimeException::selfThrow
           ("D1MinusLinearOSI::computeResidu - not yet implemented for Dynamical system type: " + dsType);
 
-        M->PLUForwardBackwardInPlace(*accFree); // contains right (left limit) acceleration without contact force
+        M->PLUForwardBackwardInPlace(accFree); // contains right (left limit) acceleration without contact force
         DEBUG_PRINT("accFree contains left limit acceleration at  t^-_{k+1} without contact force :\n");
-        DEBUG_EXPR(accFree->display());
-       }
-      else if (dsType == Type::NewtonEulerDS)
+        DEBUG_EXPR(accFree.display());
+      }
+      else if(dsType == Type::NewtonEulerDS)
       {
         SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS> (ds);
-        SP::SiconosVector accFree = d->workspace(DynamicalSystem::free); // POINTER CONSTRUCTOR : contains acceleration without contact force
-        accFree->zero();
+        SiconosVector& accFree = *workVectors[OneStepIntegrator::free];
+
+        accFree.zero();
         // get right state from memory
         SP::SiconosVector q = d->q(); // contains position q_{k+1}
         SP::SiconosVector v = d->twist(); // contains velocity v_{k+1}^- and not free velocity
         SP::SiconosMatrix M(new SimpleMatrix(*(d->mass()))); // we copy the mass matrix to avoid its factorization;
 
-        DEBUG_EXPR(accFree->display());
+        DEBUG_EXPR(accFree.display());
         DEBUG_EXPR(q->display());
         DEBUG_EXPR(v->display());
 
-        if (d->forces())
+        if(d->forces())
         {
           d->computeForces(t, q, v);
-          *accFree += *(d->forces());
+          accFree += *(d->forces());
         }
 
-        M->PLUForwardBackwardInPlace(*accFree); // contains right (left limit) acceleration without contact force
+        M->PLUForwardBackwardInPlace(accFree); // contains right (left limit) acceleration without contact force
         DEBUG_PRINT("accFree contains left limit acceleration at  t^-_{k+1} without contact force :\n");
-        DEBUG_EXPR(accFree->display());
+        DEBUG_EXPR(accFree.display());
       }
       else
         RuntimeException::selfThrow("D1MinusLinearOSI::computeResidu - not yet implemented for Dynamical system type: " + dsType);
@@ -552,7 +558,7 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
     }
 
     // solve a LCP at acceleration level only for contacts which have been active at the beginning of the time-step
-    if (!allOSNS->empty())
+    if(!allOSNS->empty())
     {
       // for (unsigned int level = _simulation->levelMinForOutput(); level < _simulation->levelMaxForOutput(); level++)
       // {
@@ -562,47 +568,48 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
       DEBUG_PRINT("We compute lambda^-_{k+1} \n");
       InteractionsGraph::VIterator ui, uiend;
       SP::Interaction inter;
-      for (std11::tie(ui, uiend) = indexSet2->vertices(); ui != uiend; ++ui)
+      for(std11::tie(ui, uiend) = indexSet2->vertices(); ui != uiend; ++ui)
       {
         inter = indexSet2->bundle(*ui);
         inter->relation()->computeJach(t, *inter, indexSet2->properties(*ui));
         inter->relation()->computeJacg(t, *inter, indexSet2->properties(*ui));
       }
-      if (_simulation->nonSmoothDynamicalSystem()->topology()->hasChanged())
+      if(_simulation->nonSmoothDynamicalSystem()->topology()->hasChanged())
       {
-        for (OSNSIterator itOsns = allOSNS->begin(); itOsns != allOSNS->end(); ++itOsns)
+        for(OSNSIterator itOsns = allOSNS->begin(); itOsns != allOSNS->end(); ++itOsns)
         {
           (*itOsns)->setHasBeenUpdated(false);
         }
       }
 
-      if (((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]->hasInteractions()))
+      if(((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]->hasInteractions()))
       {
         (*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]->compute(t);
         DEBUG_EXPR((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]->display(););
         _simulation->nonSmoothDynamicalSystem()->updateInput(_simulation->nextTime(),2);
       }
     }
-    for (std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
+    for(std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
     {
-      if (!checkOSI(dsi)) continue;
+      if(!checkOSI(dsi)) continue;
       SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
-      
-   
+      VectorOfVectors& workVectors = *_dynamicalSystemsGraph->properties(*dsi).workVectors;
+
+
       // type of the current DS
       Type::Siconos dsType = Type::value(*ds);
       /* \warning the following conditional statement should be removed with a MechanicalDS class */
-      if ((dsType == Type::LagrangianDS) || (dsType == Type::LagrangianLinearTIDS))
+      if((dsType == Type::LagrangianDS) || (dsType == Type::LagrangianLinearTIDS))
       {
         SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
-        SP::SiconosVector accFree = d->workspace(DynamicalSystem::free); // contains acceleration without contact force
+        SiconosVector& residuFree = *workVectors[OneStepIntegrator::residu_free];
+        SiconosVector& accFree = *workVectors[OneStepIntegrator::free];
 
         // initialize *it->residuFree
-        SP::SiconosVector residuFree = ds->workspace(DynamicalSystem::freeresidu); // POINTER CONSTRUCTOR : contains residu without nonsmooth effect
-        *residuFree -= 0.5 * h**accFree;
-        DEBUG_EXPR(accFree->display());
+        residuFree -= 0.5 * h* accFree;
+        DEBUG_EXPR(accFree.display());
 
-        if (d->p(2))
+        if(d->p(2))
         {
 
           // get right state from memory
@@ -612,22 +619,21 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
           SP::SiconosVector dummy(new SiconosVector(*(d->p(2)))); // value = contact force
 
           M->PLUForwardBackwardInPlace(*dummy);
-          *residuFree -= 0.5 * h**dummy;
+          residuFree -= 0.5 * h**dummy;
 
         }
-        DEBUG_EXPR(residuFree->display());
+        DEBUG_EXPR(residuFree.display());
       }
-      else if (dsType == Type::NewtonEulerDS)
+      else if(dsType == Type::NewtonEulerDS)
       {
         SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS> (ds);
-        SP::SiconosVector accFree = d->workspace(DynamicalSystem::free); // contains acceleration without contact force
-
+        SiconosVector& residuFree = *workVectors[OneStepIntegrator::residu_free];
+        SiconosVector& accFree = *workVectors[OneStepIntegrator::free];
         // initialize *it->residuFree
-        SP::SiconosVector residuFree = ds->workspace(DynamicalSystem::freeresidu); // POINTER CONSTRUCTOR : contains residu without nonsmooth effect
-        *residuFree -= 0.5 * h**accFree;
-        DEBUG_EXPR(accFree->display());
+        residuFree -= 0.5 * h* accFree;
+        DEBUG_EXPR(accFree.display());
 
-        if (d->p(2))
+        if(d->p(2))
         {
           // get right state from memory
           SP::SiconosMatrix M(new SimpleMatrix(*(d->mass()))); // we copy the mass matrix to avoid its factorization;
@@ -636,10 +642,10 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
           SP::SiconosVector dummy(new SiconosVector(*(d->p(2)))); // value = contact force
 
           M->PLUForwardBackwardInPlace(*dummy);
-          *residuFree -= 0.5 * h**dummy;
+          residuFree -= 0.5 * h**dummy;
 
         }
-        DEBUG_EXPR(residuFree->display());
+        DEBUG_EXPR(residuFree.display());
       }
       else
         RuntimeException::selfThrow("D1MinusLinearOSI::computeResidu - not yet implemented for Dynamical system type: " + dsType);
@@ -697,16 +703,16 @@ void D1MinusLinearOSI::computeFreeOutputHalfExplicitAccelerationLevel(Interactio
   SiconosVector& yForNSsolver = *inter->yForNSsolver();
 
   // define Xfree for velocity and acceleration level
-  if (((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp)
+  if(((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp)
   {
     //Xfree = inter->dataX();
     /* get the current velocity  of the aggregated ds */
-    if (relationType == Lagrangian)
+    if(relationType == Lagrangian)
     {
       Xfree = DSlink[LagrangianR::q1];
       DEBUG_PRINT("Xfree = DSlink[LagrangianR::q1];\n");
-   }
-    else if (relationType == NewtonEuler)
+    }
+    else if(relationType == NewtonEuler)
     {
       Xfree = DSlink[NewtonEulerR::velocity];
       DEBUG_PRINT("Xfree = DSlink[LagrangianR::veclocity];\n");
@@ -718,14 +724,14 @@ void D1MinusLinearOSI::computeFreeOutputHalfExplicitAccelerationLevel(Interactio
     assert(Xfree);
 
   }
-  else if (((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]).get() == osnsp)
+  else if(((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]).get() == osnsp)
   {
     /* get the "free" acceleration of the aggregated ds */
-    if (relationType == Lagrangian)
+    if(relationType == Lagrangian)
     {
       Xfree = DSlink[LagrangianR::xfree];
     }
-    else if (relationType == NewtonEuler)
+    else if(relationType == NewtonEuler)
     {
       Xfree = DSlink[NewtonEulerR::xfree];
     }
@@ -744,12 +750,12 @@ void D1MinusLinearOSI::computeFreeOutputHalfExplicitAccelerationLevel(Interactio
   assert(mainInteraction->relation());
 
   // only Lagrangian Systems
-  if (relationType == Lagrangian)
+  if(relationType == Lagrangian)
   {
     // in yForNSsolver the linear part of velocity or acceleration relation will be saved
     C = std11::static_pointer_cast<LagrangianR>(mainInteraction->relation())->C();
 
-    if (C)
+    if(C)
     {
       assert(Xfree);
 
@@ -774,7 +780,7 @@ void D1MinusLinearOSI::computeFreeOutputHalfExplicitAccelerationLevel(Interactio
     xcoord[7] = sizeY;
 
 
-    if (((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp)
+    if(((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp)
     {
 
       /*  explicit time dependence -> partial time derivative has to be added */
@@ -789,16 +795,16 @@ void D1MinusLinearOSI::computeFreeOutputHalfExplicitAccelerationLevel(Interactio
       //   subprod(*ID, *(std11::static_pointer_cast<LagrangianRheonomousR>(inter->relation())->hDot()), yForNSsolver, xcoord, false);
       // }
 
-      if  (relationSubType == RheonomousR)
+      if(relationSubType == RheonomousR)
         RuntimeException::selfThrow("D1MinusLinearOSI::computeFreeOutput is not implemented  at velocity level for LagrangianRheonomousR.");
       SP::SiconosVisitor nslEffectOnFreeOutput(new _NSLEffectOnFreeOutput(osnsp, inter));
       inter->nonSmoothLaw()->accept(*nslEffectOnFreeOutput);
     }
 
 
-    if (((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]).get() == osnsp)
+    if(((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]).get() == osnsp)
     {
-      if (relationSubType == ScleronomousR) // acceleration term involving Hessian matrix of Relation with respect to degree is added
+      if(relationSubType == ScleronomousR)  // acceleration term involving Hessian matrix of Relation with respect to degree is added
       {
         DEBUG_PRINT("D1MinusLinearOSI::computeFreeOutput. acceleration term involving Hessian matrix of Relation\n");
         DEBUG_EXPR(yForNSsolver.display(););
@@ -811,11 +817,11 @@ void D1MinusLinearOSI::computeFreeOutputHalfExplicitAccelerationLevel(Interactio
 
 
   }
-  else if (relationType == NewtonEuler)
+  else if(relationType == NewtonEuler)
   {
     SP::SiconosMatrix CT =  std11::static_pointer_cast<NewtonEulerR>(mainInteraction->relation())->jachqT();
     DEBUG_EXPR(CT->display());
-    if (CT)
+    if(CT)
     {
       coord[3] = CT->size(1);
       coord[5] = CT->size(1);
@@ -829,7 +835,7 @@ void D1MinusLinearOSI::computeFreeOutputHalfExplicitAccelerationLevel(Interactio
 
 
 
-    if (((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]).get() == osnsp)
+    if(((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]).get() == osnsp)
     {
       // in yForNSsolver corrections have to be added
       SP::SiconosMatrix ID(new SimpleMatrix(sizeY, sizeY));
@@ -867,7 +873,7 @@ void D1MinusLinearOSI::computeFreeOutputHalfExplicitAccelerationLevel(Interactio
     }
     DEBUG_EXPR(yForNSsolver.display(););
 
-    if (((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp) // impact terms are added
+    if(((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp)  // impact terms are added
     {
       SP::SiconosVisitor nslEffectOnFreeOutput(new _NSLEffectOnFreeOutput(osnsp, inter));
       inter->nonSmoothLaw()->accept(*nslEffectOnFreeOutput);
@@ -886,10 +892,10 @@ bool D1MinusLinearOSI::addInteractionInIndexSetHalfExplicitAccelerationLevel(SP:
 {
   DEBUG_PRINT("D1MinusLinearOSI::addInteractionInIndexSetHalfExplicitAccelerationLevel.\n");
 
-  if (i == 1)
+  if(i == 1)
   {
     DEBUG_PRINT(" level == 1\n");
-    if (Type::value(*(inter->nonSmoothLaw())) == Type::EqualityConditionNSL)
+    if(Type::value(*(inter->nonSmoothLaw())) == Type::EqualityConditionNSL)
     {
       return true;
     }
@@ -899,14 +905,14 @@ bool D1MinusLinearOSI::addInteractionInIndexSetHalfExplicitAccelerationLevel(SP:
     return (y <= DEFAULT_TOL_D1MINUS);
 
   }
-  else if (i == 2)
+  else if(i == 2)
   {
     DEBUG_PRINT(" level == 2\n");
-    if (Type::value(*(inter->nonSmoothLaw())) == Type::EqualityConditionNSL)
+    if(Type::value(*(inter->nonSmoothLaw())) == Type::EqualityConditionNSL)
     {
       return true;
     }
-/* Active for non-impulsive forces computation */
+    /* Active for non-impulsive forces computation */
     double y = (*(inter->y(0)))(0); // current position
     double yDot = (*(inter->y(1)))(0); // current position
     DEBUG_PRINTF("y= %24.16e\n", y);
@@ -915,9 +921,9 @@ bool D1MinusLinearOSI::addInteractionInIndexSetHalfExplicitAccelerationLevel(SP:
     DEBUG_EXPR(std::cout << std::boolalpha << (yDot <= DEFAULT_TOL_D1MINUS) <<std::endl;);
     return (y <= DEFAULT_TOL_D1MINUS) && (yDot <= DEFAULT_TOL_D1MINUS);
   }
-  else if (i == 3)
+  else if(i == 3)
   {
-    if (Type::value(*(inter->nonSmoothLaw())) == Type::EqualityConditionNSL)
+    if(Type::value(*(inter->nonSmoothLaw())) == Type::EqualityConditionNSL)
     {
       return false;
     }
@@ -925,7 +931,8 @@ bool D1MinusLinearOSI::addInteractionInIndexSetHalfExplicitAccelerationLevel(SP:
     DEBUG_PRINT(" level == 3\n");
     double y = (*(inter->y(0)))(0); // current position
     double yOld = (*(inter->yOld(0)))(0); // old position
-    DEBUG_PRINTF("y= %24.16e\n", y);  DEBUG_PRINTF("yOld= %24.16e\n", yOld);
+    DEBUG_PRINTF("y= %24.16e\n", y);
+    DEBUG_PRINTF("yOld= %24.16e\n", yOld);
     /* if Interaction has not been active in the previous calculation
        and now becomes active */
     return (y <= DEFAULT_TOL_D1MINUS && yOld > DEFAULT_TOL_D1MINUS);

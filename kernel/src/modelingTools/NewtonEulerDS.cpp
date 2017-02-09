@@ -67,6 +67,7 @@ void computeRotationMatrix(double q0, double q1, double q2, double q3,
   rotationMatrix->setValue(2, 2,     q0*q0 -q1*q1 -q2*q2 +q3*q3);
 }
 
+
 void computeJacobianConvectedVectorInBodyFrame(double q0, double q1, double q2, double q3,
                                                SP::SimpleMatrix jacobian, SP:: SiconosVector v)
 {
@@ -77,7 +78,7 @@ void computeJacobianConvectedVectorInBodyFrame(double q0, double q1, double q2, 
   double v0 = v->getValue(0);
   double v1 = v->getValue(1);
   double v2 = v->getValue(2);
-  
+
   jacobian->setValue(0,3, q0*v0+q3*v1-q2*v2);
   jacobian->setValue(0,4, q1*v0+q2*v1+q3*v2);
   jacobian->setValue(0,5,-q2*v0+q1*v1-q0*v2);
@@ -93,8 +94,10 @@ void computeJacobianConvectedVectorInBodyFrame(double q0, double q1, double q2, 
   jacobian->setValue(2,5, q0*v0+q3*v1-q2*v2);
   jacobian->setValue(2,6, q1*v0+q2*v1+q3*v2);
 
+
   *jacobian *=2.0; 
 }
+
 
 void rotateAbsToBody(double q0, double q1, double q2, double q3, SP::SiconosVector v)
 {
@@ -460,10 +463,8 @@ void NewtonEulerDS::init()
   _twist.reset(new SiconosVector(_n));
 
   _dotq.reset(new SiconosVector(_qDim));
-  _workspace[freeresidu].reset(new SiconosVector(_n));
-  _workspace[free].reset(new SiconosVector(dimension()));
+
   _massMatrix.reset(new SimpleMatrix(_n, _n));
-  _luW.reset(new SimpleMatrix(_n, _n));
   _massMatrix->zero();
   _T.reset(new SimpleMatrix(_qDim, _n));
 
@@ -679,12 +680,13 @@ void NewtonEulerDS::computeMExt(double time, SP::SiconosVector mExt)
 
 void NewtonEulerDS::computeJacobianMExtqExpressedInInertialFrameByFD(double time, SP::SiconosVector q)
 {
+
   DEBUG_BEGIN("NewtonEulerDS::computeJacobianMExtqExpressedInInertialFrameByFD(...)\n");
 
   /* The computation of Jacobian of R^T mExt is somehow very rough since the pertubation
    * that we apply to q  that gives qeps does not provide a unit quaternion. The rotation
-   * is computed assuming that the quaternion is unit (see rotateAbsToBody(double q0, double 
-   * q1, double q2, double q3, SP::SiconosVector v)). 
+   * is computed assuming that the quaternion is unit (see rotateAbsToBody(double q0, double
+   * q1, double q2, double q3, SP::SiconosVector v)).
    */
 
   SP::SiconosVector mExt(new SiconosVector(3));

@@ -118,6 +118,8 @@ const double DEFAULT_TOL_D1MINUS  = 1e-8;
 
 class D1MinusLinearOSI : public OneStepIntegrator
 {
+public :
+
 protected:
 
   /** nslaw effects */
@@ -152,7 +154,8 @@ public:
                                      halfexplicit_acceleration_level_full,
                                      explicit_velocity_level,
                                      halfexplicit_velocity_level,
-                                     numberOfTypeOfD1MinusLinearOSI };
+                                     numberOfTypeOfD1MinusLinearOSI
+                                    };
 
   /** basic constructor
    */
@@ -189,7 +192,10 @@ public:
    * D1MinusLinearOSI::halfexplicit_velocity_level,
    * D1MinusLinearOSI::numberOfTypeOfD1MinusLinearOSI
    */
-  unsigned int typeOfD1MinusLinearOSI(){return _typeOfD1MinusLinearOSI;};
+  unsigned int typeOfD1MinusLinearOSI()
+  {
+    return _typeOfD1MinusLinearOSI;
+  };
 
   /** get the number of index sets required for the simulation
    * \return unsigned int
@@ -200,7 +206,7 @@ public:
    *  invariant systems, we compute time invariant operator
    */
   virtual void initialize(Model& m);
-
+  void initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds);
   /** return the maximum of all norms for the residus of DS
    *  \post{ds->residuFree will be calculated, ds->q() contains new position, ds->velocity contains predicted velocity}
    *  \return double
@@ -301,12 +307,12 @@ public:
   */
   virtual bool removeInteractionInIndexSetHalfExplicitAccelerationLevel(SP::Interaction inter, unsigned int i);
 
- /** Apply the rule to one Interaction to known if is it should be included
-   * in the IndexSet of level i
-   * \param inter the involved interaction
-   * \param i the index set level
-   * \return a boolean if it needs to be added or not
-   */
+  /** Apply the rule to one Interaction to known if is it should be included
+    * in the IndexSet of level i
+    * \param inter the involved interaction
+    * \param i the index set level
+    * \return a boolean if it needs to be added or not
+    */
   virtual bool addInteractionInIndexSetHalfExplicitVelocityLevel(SP::Interaction inter, unsigned int i);
 
   /** Apply the rule to one Interaction to known if is it should be removed

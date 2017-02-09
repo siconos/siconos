@@ -93,7 +93,7 @@ const unsigned int EULERMOREAUSTEPSINMEMORY = 1;
  * concerned dynamical systems.
  *
  * Each DynamicalSystem is associated to a SiconosMatrix, named "W", which is the "iteration" matrix.
- * W matrices are initialized and computed in initW and computeW. Depending on the DS type, they may
+ * W matrices are initialized and computed in initializeIterationMatrixW and computeW. Depending on the DS type, they may
  * depend on time t and DS state x.
  *
  * For first order systems, the implementation uses _r for storing the
@@ -264,7 +264,7 @@ public:
   inline void setUseGammaForRelation(bool newUseGammaForRelation)
   {
     _useGammaForRelation = newUseGammaForRelation;
-    if (_useGammaForRelation) _useGamma = false;
+    if(_useGammaForRelation) _useGamma = false;
   };
 
 
@@ -275,13 +275,13 @@ public:
       W)
    */
   virtual void initialize(Model& m);
-
-  /** init W EulerMoreauOSI matrix at time t
+  void initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds);
+  /** initialize iteration matrix W EulerMoreauOSI matrix at time t
    *  \param time the time (double)
    *  \param ds a pointer to DynamicalSystem
    *  \param dsv a descriptor of the ds on the graph (redundant to avoid invocation)
    */
-  void initW(double time, SP::DynamicalSystem ds, DynamicalSystemsGraph::VDescriptor& dsv);
+  void initializeIterationMatrixW(double time, SP::DynamicalSystem ds, const DynamicalSystemsGraph::VDescriptor& dsv);
 
   /** compute W EulerMoreauOSI matrix at time t
    *  \param time the current time
@@ -296,10 +296,10 @@ public:
    */
   void computeWBoundaryConditions(SP::DynamicalSystem ds);
 
-  /** init WBoundaryConditionsMap[ds] EulerMoreauOSI
+  /** initialize iteration matrix WBoundaryConditionsMap[ds] EulerMoreauOSI
    *  \param ds a pointer to DynamicalSystem
    */
-  void initWBoundaryConditions(SP::DynamicalSystem ds);
+  void initializeIterationMatrixWBoundaryConditions(SP::DynamicalSystem ds);
 
   /** Computes the residuFree and residu of all the DynamicalSystems
    *  \return the maximum of the 2-norm over all the residu

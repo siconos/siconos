@@ -61,20 +61,22 @@ void MoreauJeanDirectProjectionOSI::initialize(Model& m)
 
   MoreauJeanOSI::initialize(m);
   DynamicalSystemsGraph::VIterator dsi, dsend;
-  for (std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
+  for(std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
   {
-    if (!checkOSI(dsi)) continue;
+    if(!checkOSI(dsi)) continue;
     SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
     Type::Siconos dsType = Type::value(*ds);
-    if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
+    VectorOfVectors& workVectors = *_dynamicalSystemsGraph->properties(*dsi).workVectors;
+
+    if(dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
     {
       SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
-      d->allocateWorkVector(DynamicalSystem::qtmp, d->ndof());
+      workVectors[OneStepIntegrator::qtmp].reset(new SiconosVector(d->ndof()));
     }
-    else if (dsType == Type::NewtonEulerDS)
+    else if(dsType == Type::NewtonEulerDS)
     {
       SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS>(ds);
-      d->allocateWorkVector(DynamicalSystem::qtmp, d->q()->size());
+      workVectors[OneStepIntegrator::qtmp].reset(new SiconosVector(d->getqDim()));
     }
     else
     {
@@ -110,7 +112,7 @@ bool MoreauJeanDirectProjectionOSI::addInteractionInIndexSet(SP::Interaction int
   double y = (inter->y(i - 1))->getValue(0); // for i=1 y(i-1) is the position
   double yDot = (inter->y(i))->getValue(0); // for i=1 y(i) is the velocity
   double gamma = 1.0 / 2.0;
-  if (_useGamma)
+  if(_useGamma)
   {
     gamma = _gamma;
   }
@@ -126,7 +128,7 @@ bool MoreauJeanDirectProjectionOSI::addInteractionInIndexSet(SP::Interaction int
 
   assert(!isnan(y));
 #ifdef DEBUG_MESSAGES
-  if (y <= _activateYPosThreshold)
+  if(y <= _activateYPosThreshold)
     DEBUG_PRINT("MoreauJeanDirectProjectionOSI::addInteractionInIndexSet ACTIVATE.\n");
 #endif
   return (y <= _activateYPosThreshold);
@@ -140,7 +142,7 @@ bool MoreauJeanDirectProjectionOSI::removeInteractionInIndexSet(SP::Interaction 
   double y = (inter->y(i - 1))->getValue(0); // for i=1 y(i-1) is the position
   double yDot = (inter->y(i))->getValue(0); // for i=1 y(i) is the velocity
   double gamma = 1.0 / 2.0;
-  if (_useGamma)
+  if(_useGamma)
   {
     gamma = _gamma;
   }
@@ -153,7 +155,7 @@ bool MoreauJeanDirectProjectionOSI::removeInteractionInIndexSet(SP::Interaction 
 
   assert(!isnan(y));
 #ifdef DEBUG_MESSAGES
-  if (y > _deactivateYPosThreshold && yDot >= _deactivateYVelThreshold)
+  if(y > _deactivateYPosThreshold && yDot >= _deactivateYVelThreshold)
     DEBUG_PRINT("MoreauJeanDirectProjectionOSI::removeInteractionInIndexSet DEACTIVATE.\n");
 #endif
   return (y > _deactivateYPosThreshold && yDot >= _deactivateYVelThreshold);
@@ -180,7 +182,7 @@ bool MoreauJeanDirectProjectionOSI::addInteractionInIndexSet(SP::Interaction int
 
   assert(!isnan(y));
 
-  if (y <= _activateYPosThreshold)
+  if(y <= _activateYPosThreshold)
     DEBUG_PRINT("MoreauJeanDirectProjectionOSI::addInteractionInIndexSet ACTIVATE.\n");
   return (y <= _activateYPosThreshold);
 }
@@ -200,7 +202,7 @@ bool MoreauJeanDirectProjectionOSI::removeInteractionInIndexSet(SP::Interaction 
                _deactivateYVelThreshold);
 
   assert(!isnan(y));
-  if (y > _deactivateYPosThreshold && lambda <= _deactivateYVelThreshold)
+  if(y > _deactivateYPosThreshold && lambda <= _deactivateYVelThreshold)
     DEBUG_PRINT("MoreauJeanDirectProjectionOSI::removeInteractionInIndexSet DEACTIVATE.\n");
   return (y > _deactivateYPosThreshold && lambda <= _deactivateYVelThreshold);
 }
@@ -224,7 +226,7 @@ bool MoreauJeanDirectProjectionOSI::addInteractionInIndexSet(SP::Interaction int
 
   assert(!isnan(y));
 
-  if (y <= _activateYPosThreshold)
+  if(y <= _activateYPosThreshold)
     DEBUG_PRINT("MoreauJeanDirectProjectionOSI::addInteractionInIndexSet ACTIVATE.\n");
   return (y <= _activateYPosThreshold);
 }
@@ -244,7 +246,7 @@ bool MoreauJeanDirectProjectionOSI::removeInteractionInIndexSet(SP::Interaction 
                _deactivateYVelThreshold);
 
   assert(!isnan(y));
-  if (y > _deactivateYPosThreshold)
+  if(y > _deactivateYPosThreshold)
     DEBUG_PRINT("MoreauJeanDirectProjectionOSI::removeInteractionInIndexSet DEACTIVATE.\n");
   return (y > _deactivateYPosThreshold);
 }

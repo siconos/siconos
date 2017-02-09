@@ -82,7 +82,6 @@ struct InteractionProperties
   SP::VectorOfVectors workVectors;     /**< set of SiconosVector, mostly to have continuous memory vectors (not the case with BlockVector in DSlink) */
   SP::VectorOfSMatrices workMatrices;  /**< To store jacobians */
 
-
   ACCEPT_SERIALIZATION(InteractionProperties);
 };
 

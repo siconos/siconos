@@ -241,7 +241,7 @@ int main(int argc, char* argv[])
     // Comparison with a reference file
     SimpleMatrix dataPlotRef(dataPlot);
     dataPlotRef.zero();
-    ioMatrix::read("BouncingBallTwoContactsED.cpp", "ascii", dataPlotRef);
+    ioMatrix::read("BouncingBallTwoContactsED.ref", "ascii", dataPlotRef);
 
     std:: cout << " Error ="<< (dataPlot - dataPlotRef).normInf() << std::endl;
 
@@ -256,10 +256,12 @@ int main(int argc, char* argv[])
   catch (SiconosException e)
   {
     cout << e.report() << endl;
+    return 1;
   }
   catch (...)
   {
     cout << "Exception caught." << endl;
+    return 1;
   }
   cout << "Computation Time: " << time.elapsed()  << endl;
 }

@@ -111,8 +111,6 @@ void computeT(SP::SiconosVector q, SP::SimpleMatrix T);
  */
 class NewtonEulerDS : public DynamicalSystem
 {
-public:
-  enum WorkNames {xfree, sizeWorkVec};
 protected:
   /** serialization hooks
   */
@@ -173,10 +171,6 @@ protected:
 
   /** used for concatenate _I and _scalarMass.I_3 */
   SP::SimpleMatrix _massMatrix;
-
-  /** Contains the LU factorization of the Mass (or the iteration matrix.).
-   */
-  SP::SimpleMatrix _luW;
 
   /** Matrix depending on the parametrization of the orientation
    * \f$v = T(q) \dot q\f$

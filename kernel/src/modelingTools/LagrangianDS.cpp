@@ -33,10 +33,6 @@ void LagrangianDS::init(unsigned int ndof)
   _q[1].reset(new SiconosVector(ndof));
   _q[2].reset(new SiconosVector(ndof));
 
-  _workspace[freeresidu].reset(new SiconosVector(ndof));
-  _workspace[free].reset(new SiconosVector(ndof));
-
-
   /** \todo lazy Memory allocation */
   _forces.reset(new SiconosVector(ndof));
   _jacobianqForces.reset(new SimpleMatrix(ndof, ndof));
@@ -57,7 +53,7 @@ void LagrangianDS::init(unsigned int ndof)
 
 LagrangianDS::LagrangianDS(SP::SiconosVector newQ0, SP::SiconosVector newVelocity0):
   DynamicalSystem(2 * newQ0->size()), _ndof(newQ0->size()),
-  _hasConstantFExt(false)
+  _hasConstantMass(false), _hasConstantFExt(false)
 {
   init(_ndof);
   // Initial conditions
@@ -70,7 +66,8 @@ LagrangianDS::LagrangianDS(SP::SiconosVector newQ0, SP::SiconosVector newVelocit
 /**/
 LagrangianDS::LagrangianDS(SP::SiconosVector newQ0, SP::SiconosVector newVelocity0, SP::SiconosMatrix newMass):
   DynamicalSystem(2 * newQ0->size()), _ndof(newQ0->size()),
-  _hasConstantFExt(false)
+  _hasConstantMass(true), _hasConstantFExt(false)
+
 {
 
   init(_ndof);
@@ -86,6 +83,7 @@ LagrangianDS::LagrangianDS(SP::SiconosVector newQ0, SP::SiconosVector newVelocit
 // This constructor leads to the minimum Lagrangian System form: \f$ M(q)\ddot q = p \f$
 LagrangianDS::LagrangianDS(SP::SiconosVector newQ0, SP::SiconosVector newVelocity0, const std::string& massName):
   DynamicalSystem(), _ndof(newQ0->size()),
+  _hasConstantMass(false),
   _hasConstantFExt(false)
 {
   init(_ndof);
@@ -100,7 +98,7 @@ LagrangianDS::LagrangianDS(SP::SiconosVector newQ0, SP::SiconosVector newVelocit
 // -- Default constructor --
 LagrangianDS::LagrangianDS():
   DynamicalSystem(Type::LagrangianDS), _ndof(0),
-  _hasConstantFExt(false)
+  _hasConstantMass(false),_hasConstantFExt(false)
 {
   zeroPlugin();
   // Protected constructor - Only call from derived class(es).
@@ -220,7 +218,7 @@ void LagrangianDS::resetToInitialState()
 
 void LagrangianDS::initRhs(double time)
 {
-  _workMatrix.resize(sizeWorkMat);
+  _rhsMatrices.resize(numberOfRhsMatrices);
 
   // Solve Mq[2]=fL+p.
   *_q[2] = *(_p[2]); // Warning: r/p update is done in Interactions/Relations
@@ -231,10 +229,11 @@ void LagrangianDS::initRhs(double time)
     *_q[2] += *_forces;
   }
   computeMass();
-  // Copy of Mass into _workMatrix for LU-factorization.
 
-  _workMatrix[invMass].reset(new SimpleMatrix(*_mass));
-  _workMatrix[invMass]->PLUForwardBackwardInPlace(*_q[2]);
+  // Copy of Mass into _workMatrix for LU-factorization.
+  if (!_inverseMass)
+    _inverseMass.reset(new SimpleMatrix(*_mass));
+  _inverseMass->PLUForwardBackwardInPlace(*_q[2]);
 
   bool flag1 = false, flag2 = false;
   if (_jacobianqForces)
@@ -242,8 +241,8 @@ void LagrangianDS::initRhs(double time)
     // Solve MjacobianX(1,0) = jacobianFL[0]
     computeJacobianqForces(time);
 
-    _workMatrix[jacobianXBloc10].reset(new SimpleMatrix(*_jacobianqForces));
-    _workMatrix[invMass]->PLUForwardBackwardInPlace(*_workMatrix[jacobianXBloc10]);
+    _rhsMatrices[jacobianXBloc10].reset(new SimpleMatrix(*_jacobianqForces));
+    _inverseMass->PLUForwardBackwardInPlace(*_rhsMatrices[jacobianXBloc10]);
     flag1 = true;
   }
 
@@ -251,22 +250,26 @@ void LagrangianDS::initRhs(double time)
   {
     // Solve MjacobianX(1,1) = jacobianFL[1]
     computeJacobianqDotForces(time);
-    _workMatrix[jacobianXBloc11].reset(new SimpleMatrix(*_jacobianqDotForces));
-    _workMatrix[invMass]->PLUForwardBackwardInPlace(*_workMatrix[jacobianXBloc11]);
+    _rhsMatrices[jacobianXBloc11].reset(new SimpleMatrix(*_jacobianqDotForces));
+    _inverseMass->PLUForwardBackwardInPlace(*_rhsMatrices[jacobianXBloc11]);
     flag2 = true;
   }
 
-  _workMatrix[zeroMatrix].reset(new SimpleMatrix(_ndof, _ndof, Siconos::ZERO));
-  _workMatrix[idMatrix].reset(new SimpleMatrix(_ndof, _ndof, Siconos::IDENTITY));
+  _rhsMatrices[zeroMatrix].reset(new SimpleMatrix(_ndof, _ndof, Siconos::ZERO));
+  _rhsMatrices[idMatrix].reset(new SimpleMatrix(_ndof, _ndof, Siconos::IDENTITY));
 
   if (flag1 && flag2)
-    _jacxRhs.reset(new BlockMatrix(_workMatrix[zeroMatrix], _workMatrix[idMatrix], _workMatrix[jacobianXBloc10], _workMatrix[jacobianXBloc11]));
+    _jacxRhs.reset(new BlockMatrix(_rhsMatrices[zeroMatrix], _rhsMatrices[idMatrix],
+                                   _rhsMatrices[jacobianXBloc10], _rhsMatrices[jacobianXBloc11]));
   else if (flag1) // flag2 = false
-    _jacxRhs.reset(new BlockMatrix(_workMatrix[zeroMatrix], _workMatrix[idMatrix], _workMatrix[jacobianXBloc10], _workMatrix[zeroMatrix]));
+    _jacxRhs.reset(new BlockMatrix(_rhsMatrices[zeroMatrix], _rhsMatrices[idMatrix],
+                                   _rhsMatrices[jacobianXBloc10], _rhsMatrices[zeroMatrix]));
   else if (flag2) // flag1 = false
-    _jacxRhs.reset(new BlockMatrix(_workMatrix[zeroMatrix], _workMatrix[idMatrix], _workMatrix[zeroMatrix], _workMatrix[jacobianXBloc11]));
+    _jacxRhs.reset(new BlockMatrix(_rhsMatrices[zeroMatrix], _rhsMatrices[idMatrix],
+                                   _rhsMatrices[zeroMatrix], _rhsMatrices[jacobianXBloc11]));
   else
-    _jacxRhs.reset(new BlockMatrix(_workMatrix[zeroMatrix], _workMatrix[idMatrix], _workMatrix[zeroMatrix], _workMatrix[zeroMatrix]));
+    _jacxRhs.reset(new BlockMatrix(_rhsMatrices[zeroMatrix], _rhsMatrices[idMatrix],
+                                   _rhsMatrices[zeroMatrix], _rhsMatrices[zeroMatrix]));
 }
 
 void LagrangianDS::initialize(double time, unsigned int sizeOfMemory)
@@ -377,10 +380,13 @@ void LagrangianDS::computeMass()
 {
   DEBUG_PRINT("LagrangianDS::computeMass()\n");
   DEBUG_EXPR(_q[0]->display());
-  if (_pluginMass->fPtr)
+  if (!_hasConstantMass)
   {
-    ((FPtr7)_pluginMass->fPtr)(_ndof, &(*_q[0])(0), &(*_mass)(0, 0), _z->size(), &(*_z)(0));
-    _mass->resetLU();
+    if (_pluginMass->fPtr)
+    {
+      ((FPtr7)_pluginMass->fPtr)(_ndof, &(*_q[0])(0), &(*_mass)(0, 0), _z->size(), &(*_z)(0));
+      _mass->resetLU();
+    }
   }
   DEBUG_EXPR(_mass->display());
 }
@@ -501,29 +507,20 @@ void LagrangianDS::computeRhs(double time, bool isDSup)
     *_q[2] += *_forces;
   }
 
-  // mass and inv(mass) computatiton
-  if (!isDSup) // if it is necessary to re-compute mass, FInt ..., ie if they have not been compiled during the present time step
+  // mass and inv(mass) computation
+  if (!isDSup && !_hasConstantMass) // if it is necessary to re-compute mass, FInt ..., ie if they have not been compiled during the present time step
+  {
     computeMass();
-
+    *_inverseMass = *_mass;
+  }
 
   // Computes q[2] = inv(mass)*(fL+p) by solving Mq[2]=fL+p.
-  // -- Case 1: if mass is constant, then a copy of imass is LU-factorized during initialization and saved into _workMatrix[invMass].
-  // -- Case 2: mass is not constant, we copy it into _workMatrix[invMass]
+  // -- Case 1: if mass is constant, then a copy of imass is LU-factorized during initialization and saved into _inverseMasse
+  // -- Case 2: mass is not constant, we copy it into _inverseMass
   // Then we proceed with PLUForwardBackward.
 
   //  if(mass->isPlugged()) : mass may be not plugged in LagrangianDS children
-  *_workMatrix[invMass] = *_mass;
-
-  _workMatrix[invMass]->PLUForwardBackwardInPlace(*_q[2]);
-
-  _workspace[free]->zero();
-  computeForces(time, _q[0], _q[1]);
-  *_workspace[free] = *_forces;
-  // Then we search for _workspace[free], such as Mass*_workfree = forces .
-  _workMatrix[invMass]->PLUForwardBackwardInPlace(*_workspace[free]);
-
-
-
+  _inverseMass->PLUForwardBackwardInPlace(*_q[2]);
 
 }
 
@@ -535,14 +532,14 @@ void LagrangianDS::computeJacobianRhsx(double time, bool isDSup)
     computeMass();
 
   //  if(mass->isPlugged()) : mass may b not plugged in LagrangianDS children
-  *_workMatrix[invMass] = *_mass;
+  *_inverseMass = *_mass;
 
   if (_jacobianqForces)
   {
     SP::SiconosMatrix bloc10 = _jacxRhs->block(1, 0);
     computeJacobianqForces(time);
     *bloc10 = *_jacobianqForces;
-    _workMatrix[invMass]->PLUForwardBackwardInPlace(*bloc10);
+    _inverseMass->PLUForwardBackwardInPlace(*bloc10);
   }
 
   if (_jacobianqDotForces)
@@ -550,7 +547,7 @@ void LagrangianDS::computeJacobianRhsx(double time, bool isDSup)
     SP::SiconosMatrix bloc11 = _jacxRhs->block(1, 1);
     computeJacobianqDotForces(time);
     *bloc11 = *_jacobianqDotForces;
-    _workMatrix[invMass]->PLUForwardBackwardInPlace(*bloc11);
+    _inverseMass->PLUForwardBackwardInPlace(*bloc11);
   }
 }
 
@@ -769,7 +766,7 @@ void LagrangianDS::computePostImpactVelocity()
   // When this function is call, q[1] is supposed to be pre-impact velocity.
   // We solve M(v+ - v-) = p - The result is saved in(place of) p[1].
   SiconosVector tmp(*_p[1]);
-  _workMatrix[invMass]->PLUForwardBackwardInPlace(tmp);
+  _inverseMass->PLUForwardBackwardInPlace(tmp);
   *_q[1] += tmp;  // v+ = v- + p
 }
 

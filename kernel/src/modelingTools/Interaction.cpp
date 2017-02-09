@@ -42,6 +42,10 @@
 
 #include "SimulationGraphs.hpp"
 
+// This should not be used here VA 27/01/2017
+#include "OneStepIntegrator.hpp"
+
+
 using namespace std;
 using namespace RELATION;
 
@@ -87,6 +91,7 @@ void Interaction::setDSLinkAndWorkspace(InteractionProperties& interProp,
     initData(DSlink);
     // Initialize interaction work vectors, depending on Dynamical systems
     // linked to the interaction.
+
     initDSData(ds1, workV1, DSlink);
 
     if(&ds1 != &ds2)
@@ -116,16 +121,27 @@ void Interaction::setDSLinkAndWorkspace(InteractionProperties& interProp,
     }
 }
 
-void Interaction::initialize(double t0, InteractionProperties& interProp)
+void Interaction::initialize(double t0, InteractionProperties& interProp, DynamicalSystemsGraph & DSG)
+                 // ,
+                 //             DynamicalSystem& ds1, VectorOfVectors& workV1,
+                 //             DynamicalSystem& ds2, VectorOfVectors& workV2)
 {
   if (!_initialized)
   {
-  DEBUG_BEGIN("Interaction::initialize(double t0, InteractionProperties& interProp ) \n");
+    DEBUG_BEGIN("Interaction::initialize(double t0, InteractionProperties& interProp, DynamicalSystemsGraph & DSG ) \n");
 
     bool computeResidu = _relation->requireResidu();
     initializeMemory(computeResidu);
 
+    SP::DynamicalSystem ds1= interProp.source;
+    SP::DynamicalSystem ds2= interProp.target;
+    SP::VectorOfVectors workVds1 = DSG.properties(DSG.descriptor(ds1)).workVectors;
+    SP::VectorOfVectors workVds2 = DSG.properties(DSG.descriptor(ds2)).workVectors;
+    
+    // SP::VectorOfVectors workVds1= interProp.workDS1Vectors;
+    // SP::VectorOfVectors workVds2 = interProp.workDS2Vectors;
 
+    setDSLinkAndWorkspace(interProp, *ds1, *workVds1, *ds2, *workVds2);
 
 
     if (_steps > 1) // Multi--step methods
@@ -160,7 +176,7 @@ void Interaction::initialize(double t0, InteractionProperties& interProp)
   }
 
   swapInMemory();
-  DEBUG_END("Interaction::initialize(double t0, InteractionProperties& interProp ) \n");
+  DEBUG_END("Interaction::initialize(double t0, InteractionProperties& interProp,  DynamicalSystemsGraph & DSG ) \n");
 
 }
 
@@ -336,9 +352,11 @@ void Interaction::initDSDataLagrangian(DynamicalSystem& ds, VectorOfVectors& wor
   // convert vDS systems into LagrangianDS and put them in vLDS
   LagrangianDS& lds = static_cast<LagrangianDS&> (ds);
 
-  // Put q/velocity/acceleration of each DS into a block. (Pointers links, no copy!!)
-//  DSlink[LagrangianR::xfree]->insertPtr(workVDS[LagrangianDS::xfree]);
-  DSlink[LagrangianR::xfree]->insertPtr(ds.workspace(DynamicalSystem::free));
+  // Put q, velocity and acceleration of each DS into a block. (Pointers links, no copy!!)
+
+  DSlink[LagrangianR::xfree]->insertPtr(workVDS[OneStepIntegrator::free]);
+  //DSlink[LagrangianR::xfree]->insertPtr(ds.workspace(DynamicalSystem::free));
+
   DSlink[LagrangianR::q0]->insertPtr(lds.q());
 
   DEBUG_PRINTF("DSlink[LagrangianR::q0]->insertPtr(lds.q()) with LagrangianR::q0 = %i\n",LagrangianR::q0);
@@ -386,8 +404,8 @@ void Interaction::initDSDataNewtonEuler(DynamicalSystem& ds, VectorOfVectors& wo
   // convert vDS systems into NewtonEulerDS and put them in vLDS
   NewtonEulerDS& neds = static_cast<NewtonEulerDS&>(ds);
   // Put q/velocity/acceleration of each DS into a block. (Pointers links, no copy!!)
-//  DSlink[NewtonEulerR::xfree]->insertPtr(workVDS[NewtonEulerDS::xfree]);
-  DSlink[NewtonEulerR::xfree]->insertPtr(ds.workspace(DynamicalSystem::free));
+  DSlink[NewtonEulerR::xfree]->insertPtr(workVDS[OneStepIntegrator::free]);
+  //DSlink[NewtonEulerR::xfree]->insertPtr(ds.workspace(DynamicalSystem::free));
   DSlink[NewtonEulerR::q0]->insertPtr(neds.q());
   DSlink[NewtonEulerR::velocity]->insertPtr(neds.twist());
   //  DSlink[NewtonEulerR::deltaq]->insertPtr(neds.deltaq());

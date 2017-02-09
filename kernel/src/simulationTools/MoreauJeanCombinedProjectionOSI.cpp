@@ -30,21 +30,22 @@ void MoreauJeanCombinedProjectionOSI::initialize(Model& m)
 
   MoreauJeanOSI::initialize(m);
   DynamicalSystemsGraph::VIterator dsi, dsend;
-  for (std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
+  for(std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
   {
-    if (!checkOSI(dsi)) continue;
+    if(!checkOSI(dsi)) continue;
     SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
     Type::Siconos dsType = Type::value(*ds);
+    VectorOfVectors& workVectors = *_dynamicalSystemsGraph->properties(*dsi).workVectors;
 
-    if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
+    if(dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
     {
       SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
-      d->allocateWorkVector(DynamicalSystem::qtmp, d->ndof());
+      workVectors[OneStepIntegrator::qtmp].reset(new SiconosVector(d->ndof()));
     }
-    else if (dsType == Type::NewtonEulerDS)
+    else if(dsType == Type::NewtonEulerDS)
     {
       SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS>(ds);
-      d->allocateWorkVector(DynamicalSystem::qtmp, d->q()->size());
+      workVectors[OneStepIntegrator::qtmp].reset(new SiconosVector(d->getqDim()));
     }
     else
     {
@@ -61,27 +62,27 @@ bool MoreauJeanCombinedProjectionOSI::addInteractionInIndexSet(SP::Interaction i
 {
   assert(i == 1 || i == 2);
   //double h = _simulation->timeStep();
-  if (i == 1) // index set for resolution at the velocity
+  if(i == 1)  // index set for resolution at the velocity
   {
     double y = (inter->y(0))->getValue(0); // y(0) is the position
     DEBUG_PRINTF("MoreauJeanCombinedProjectionOSI::addInteractionInIndexSet yref=%e \n", y);
     DEBUG_EXPR(
-    if (y <= 0)
+      if(y <= 0)
       printf("MoreauJeanCombinedProjectionOSI::addInteractionInIndexSet ACTIVATE in indexSet level = %i.\n", i);
-      )
-    return (y <= 0);
+    )
+      return (y <= 0);
   }
-  else if (i == 2)  //  special index for the projection
+  else if(i == 2)   //  special index for the projection
   {
     DEBUG_EXPR(
-    double lambda = 0;
-    lambda = (inter->lambda(1))->getValue(0); // lambda(1) is the contact impulse for MoreauJeanOSI scheme
-    printf("MoreauJeanCombinedProjectionOSI::addInteractionInIndexSet lambdaref=%e \n", lambda);
-    if (lambda > 0)
+      double lambda = 0;
+      lambda = (inter->lambda(1))->getValue(0); // lambda(1) is the contact impulse for MoreauJeanOSI scheme
+      printf("MoreauJeanCombinedProjectionOSI::addInteractionInIndexSet lambdaref=%e \n", lambda);
+      if(lambda > 0)
       printf("MoreauJeanCombinedProjectionOSI::addInteractionInIndexSet ACTIVATE in indexSet level = %i.\n", i);
-      )
-    //    return (lambda > 0);
-    return true;
+    )
+      //    return (lambda > 0);
+      return true;
   }
   else
   {
