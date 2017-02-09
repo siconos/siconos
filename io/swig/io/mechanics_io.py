@@ -1089,7 +1089,7 @@ class Hdf5():
                     # TODO: segfault if we pass None for SiconosVector!
                     shp = self._shape.get(c.data)
                     pos = list(c.translation) + list(c.orientation)
-                    cset.append(SiconosContactor(shp, pos, c.group))
+                    cset.append(SiconosContactor(shp, pos, int(c.group)))
                     print('Adding shape %s to static contactor'%c.data, pos)
                 self._broadphase.insertStaticContactorSet(cset, csetpos)
 
@@ -1162,14 +1162,13 @@ class Hdf5():
                     elif np.shape(inertia) != (3,3):
                         print('Wrong shape of inertia')
                     have_inertia = True
+                    body = body_class(translation + orientation, velocity, mass, inertia)
                 else:
                     # necessary because SWIG crashes on None
-                    inertia = []
                     have_inertia = False
 
-                body = body_class(translation + orientation,
-                                  velocity,
-                                  mass, inertia)
+                    body = body_class(translation + orientation,
+                                  velocity, mass)
                 if have_inertia:
                     body.setUseContactorInertia(False)
 
@@ -1177,7 +1176,7 @@ class Hdf5():
                 for c in contactors:
                     shp = self._shape.get(c.data)
                     pos = list(c.translation) + list(c.orientation)
-                    cset.append(SiconosContactor(shp, pos, c.group))
+                    cset.append(SiconosContactor(shp, pos, int(c.group)))
 
                 body.setContactors(cset)
 
@@ -1214,7 +1213,7 @@ class Hdf5():
             if body:
                 # set id number
                 if number is not None:
-                    body.setNumber(number)
+                    body.setNumber(int(number))
 
                 # set external forces
                 self._set_external_forces(body)
@@ -1307,7 +1306,7 @@ class Hdf5():
                 bc = bc_class(self.boundary_conditions()[name].attrs['indices'])
 
             elif ( bc_type == 'BoundaryCondition' ):
-                bc = bc_class(self.boundary_conditions()[name].attrs['indices'],
+                bc = bc_class(self.boundary_conditions()[name].attrs['indices'].tolist(),
                               self.boundary_conditions()[name].attrs['v'])
 
             # set bc to the ds1
