@@ -1086,7 +1086,6 @@ class Hdf5():
                 cset = SiconosContactorSet()
                 csetpos = (translation + orientation)
                 for c in contactors:
-                    # TODO: segfault if we pass None for SiconosVector!
                     shp = self._shape.get(c.data)
                     pos = list(c.translation) + list(c.orientation)
                     cset.append(SiconosContactor(shp, pos, c.group))
@@ -1163,8 +1162,6 @@ class Hdf5():
                         print('Wrong shape of inertia')
                     have_inertia = True
                 else:
-                    # necessary because SWIG crashes on None
-                    inertia = []
                     have_inertia = False
 
                 body = body_class(translation + orientation,
