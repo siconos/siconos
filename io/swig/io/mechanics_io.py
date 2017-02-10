@@ -2421,10 +2421,10 @@ class Hdf5():
                     + self._broadphase.statistics().existing_interactions_processed)
             elif use_original:
                 number_of_contacts = (self._model.simulation()
-                                   .oneStepNSProblem(0).getSizeOutput()/3)
+                                   .oneStepNSProblem(0).getSizeOutput()//3)
 
             if number_of_contacts > 0 :
-                print('number of contacts',self._model.simulation().oneStepNSProblem(0).getSizeOutput()/3)
+                print('number of contacts',self._model.simulation().oneStepNSProblem(0).getSizeOutput()//3)
                 self.printSolverInfos()
 
             if violation_verbose and number_of_contacts > 0 :
