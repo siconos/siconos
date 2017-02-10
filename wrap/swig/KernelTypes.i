@@ -199,6 +199,43 @@ Siconos_AsVal_int (PyObject *obj, int* val)
 
 
 //////////////////////////////////////////////////////////////////////////////
+// allow double to be numpy types
+%{
+static int
+Siconos_AsVal_double (PyObject *obj, double* val)
+{
+  double v=0;
+  int ok=0;
+  if (PyFloat_Check(obj)) {
+    v = PyFloat_AsDouble(obj);
+    ok = 1;
+  }
+  else {
+    PyObject *fobj = PyNumber_Float(obj);
+    if (fobj) {
+      v = PyFloat_AsDouble(fobj);
+      ok = 1;
+      Py_DECREF(fobj);
+    }
+  }
+  if (!ok || (v == -1.0 && PyErr_Occurred()))
+    return SWIG_TypeError;
+  if (val) *val = v;
+  return SWIG_OK;
+}
+%}
+%typemap(typecheck) double {
+  int ecode = Siconos_AsVal_double($input, NULL);
+  $1 = SWIG_IsOK(ecode);
+}
+%typemap(in) double {
+  int ecode = Siconos_AsVal_double($input, &$1);
+  if (!SWIG_IsOK(ecode))
+    SWIG_exception_fail(ecode, "Expected float/double");
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
 // check on input : a numpy array or a TYPE
 %define TYPECHECK(TYPE)
 %typecheck(SWIG_TYPECHECK_DOUBLE_ARRAY)
