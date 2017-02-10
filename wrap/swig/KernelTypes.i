@@ -156,82 +156,75 @@ static inline void fillBasePyarray(PyObject* pyarray, SharedPointerKeeper* saved
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// allow integers to be numpy types
-%{
-static int
-Siconos_AsVal_int (PyObject *obj, int* val)
-{
-#if PY_VERSION_HEX < 0x03000000
-  if (PyInt_Check(obj)) {
-    if (val) *val = PyInt_AsLong(obj);
-    return SWIG_OK;
-  } else
-#endif
-  if (PyLong_Check(obj)) {
-    long v = PyLong_AsLong(obj);
-    if (!PyErr_Occurred()) {
-      if (val) *val = v;
-      return SWIG_OK;
-    } else {
-      PyErr_Clear();
-      return SWIG_OverflowError;
+// allow unsigned int be numpy types
+%typecheck(SWIG_TYPECHECK_INTEGER,fragment="SWIG_AsVal_int") unsigned int {
+  int ecode = SWIG_AsVal_int($input, NULL);
+  $1 = SWIG_IsOK(ecode);
+  if (!$1) {
+    if (PyArray_CheckAnyScalar($input)) {
+      int x = PyArray_PyIntAsInt($input);
+      $1 = !(x == -1 && PyErr_Occurred());
     }
   }
-  if (PyArray_CheckScalar(obj)) {
-    int x = PyArray_PyIntAsInt(obj);
+}
+%typemap(in,fragment="SWIG_AsVal_int") unsigned int {
+  int x;
+  int ecode = SWIG_AsVal_int($input, &x);
+  if (SWIG_IsOK(ecode)) {
+    if (x < 0)
+      SWIG_exception_fail(SWIG_ValueError, "Expected unsigned int");
+  } else if (PyArray_CheckScalar($input)) {
+    // TODO: By treating as int, we lose half the range of the
+    // unsigned int!  Okay for current uses of unsigned int in
+    // Siconos.
+    x = PyArray_PyIntAsInt($input);
     if (x == -1 && PyErr_Occurred())
-      return SWIG_TypeError;
-    if (val) *val = x;
-    return SWIG_OK;
+      SWIG_exception_fail(SWIG_TypeError, "Expected unsigned int");
+    if (x < 0) {
+      SWIG_exception_fail(SWIG_ValueError, "Expected unsigned int");
+    }
   }
-  return SWIG_TypeError;
+  $1 = (unsigned int) x;
 }
-%}
-%typemap(typecheck) int {
-  int ecode = Siconos_AsVal_int($input, NULL);
+
+//////////////////////////////////////////////////////////////////////////////
+// allow integers to be numpy types
+%typecheck(SWIG_TYPECHECK_INTEGER,fragment="SWIG_AsVal_int") int {
+  int ecode = SWIG_AsVal_int($input, NULL);
   $1 = SWIG_IsOK(ecode);
+  if (!$1) {
+    if (PyArray_CheckAnyScalar($input)) {
+      int x = PyArray_PyIntAsInt($input);
+      $1 = !(x == -1 && PyErr_Occurred());
+    }
+  }
 }
-%typemap(in) int {
-  int ecode = Siconos_AsVal_int($input, &$1);
-  if (!SWIG_IsOK(ecode))
-    SWIG_exception_fail(ecode, "Expected int");
+%typemap(in,fragment="SWIG_AsVal_int") int {
+  int ecode = SWIG_AsVal_int($input, &$1);
+  if (!SWIG_IsOK(ecode)) {
+    if (PyArray_CheckScalar($input)) {
+      $1 = PyArray_PyIntAsInt($input);
+      if ($1 == -1 && PyErr_Occurred())
+        SWIG_exception_fail(SWIG_TypeError, "Expected int");
+    }
+  }
 }
 
 
 //////////////////////////////////////////////////////////////////////////////
 // allow double to be numpy types
-%{
-static int
-Siconos_AsVal_double (PyObject *obj, double* val)
-{
-  double v=0;
-  int ok=0;
-  if (PyFloat_Check(obj)) {
-    v = PyFloat_AsDouble(obj);
-    ok = 1;
-  }
-  else {
-    PyObject *fobj = PyNumber_Float(obj);
-    if (fobj) {
-      v = PyFloat_AsDouble(fobj);
-      ok = 1;
-      Py_DECREF(fobj);
-    }
-  }
-  if (!ok || (v == -1.0 && PyErr_Occurred()))
-    return SWIG_TypeError;
-  if (val) *val = v;
-  return SWIG_OK;
+%typecheck(SWIG_TYPECHECK_DOUBLE,fragment="SWIG_AsVal_double") double {
+  $1 = PyArray_CheckAnyScalar($input);
 }
-%}
-%typemap(typecheck) double {
-  int ecode = Siconos_AsVal_double($input, NULL);
-  $1 = SWIG_IsOK(ecode);
-}
-%typemap(in) double {
-  int ecode = Siconos_AsVal_double($input, &$1);
-  if (!SWIG_IsOK(ecode))
-    SWIG_exception_fail(ecode, "Expected float/double");
+%typemap(in,fragment="SWIG_AsVal_double") double {
+  int ecode = SWIG_AsVal_double($input, &$1);
+  if (!SWIG_IsOK(ecode)) {
+    PyArray_Descr *totype = PyArray_DescrFromType(NPY_DOUBLE);
+    PyArray_CastScalarToCtype($input, &$1, totype);
+    Py_XDECREF(totype);
+    if ($1 == -1.0 && PyErr_Occurred())
+      SWIG_exception_fail(ecode, "Expected float/double");
+  }
 }
 
 
@@ -1101,7 +1094,8 @@ struct IsDense : public Question<bool>
 }
 
 // python int sequence => std::vector<unsigned int>
-%{
+%fragment("sequenceToUnsignedIntVector","header",fragment="SWIG_AsVal_int")
+{
   static inline int sequenceToUnsignedIntVector(
     PyObject *input,
     std11::shared_ptr<std::vector<unsigned int> >& ptr)
@@ -1120,65 +1114,35 @@ struct IsDense : public Question<bool>
     ptr.reset(new std::vector<unsigned int>());
     assert(ptr);
 
-    PyArray_Descr* descrto = PyArray_DescrFromType(NPY_UINT);
-    for (int i =0; i <  PyObject_Length(input); i++)
+    unsigned int i = 0;
+    PyObject *o = NULL;
+    for (i = 0; i < PyObject_Length(input); i++)
     {
-      PyObject *o = PySequence_GetItem(input,i);
-      unsigned int u;
-
-      if (PyInt_Check(o)) {
-        long v = PyInt_AsLong(o);
-        if (v == -1 && PyErr_Occurred())
-          return 0;
-        u = static_cast<unsigned int>(v);
-      } else if (PyLong_Check(o)) {
-        long v = PyLong_AsLong(o);
-        if (v == -1 && PyErr_Occurred())
-          return 0;
-        u = static_cast<unsigned int>(v);
-      } else if (PyArray_CheckScalar(o)) {
-        PyArray_Descr* descrfrom = PyArray_DescrFromScalar(o);
-        if (!PyDataType_ISINTEGER(descrfrom)) {
-          Py_XDECREF(o);
-          Py_XDECREF(descrto);
-          Py_XDECREF(descrfrom);
-          PyErr_SetString(PyExc_ValueError,"Expecting a sequence of ints");
-          return 0;
-        }
-
-        // We must use UNSAFE casting, otherwise user would have to
-        // ensure to provide unsigned numpy arrays.
-        if (!PyArray_CanCastTypeTo(descrfrom, descrto,
-                                   NPY_UNSAFE_CASTING)
-            || PyArray_CastScalarToCtype(o, &u, descrto) == -1)
-        {
-          Py_XDECREF(o);
-          Py_XDECREF(descrto);
-          Py_XDECREF(descrfrom);
-          PyErr_SetString(PyExc_ValueError,"Expecting a sequence of ints");
-          return 0;
-        }
-        Py_XDECREF(descrfrom);
+      o = PySequence_GetItem(input,i);
+      int x;
+      int ecode = SWIG_AsVal_int(o, &x);
+      if (!SWIG_IsOK(ecode) && PyArray_CheckScalar(o)) {
+        // TODO: By treating as int, we lose half the range of the
+        // unsigned int!  Okay for current uses of unsigned int in
+        // Siconos.
+        x = PyArray_PyIntAsInt(o);
       }
-      else {
-        Py_XDECREF(o);
-        Py_XDECREF(descrto);
-        PyErr_SetString(PyExc_ValueError,"Expecting a sequence of ints");
-        return 0;
-      }
-
-      ptr->push_back(u);
-
+      if (x < 0)
+        break;
+      ptr->push_back((unsigned int) x);
       Py_DECREF(o);
     }
-    Py_XDECREF(descrto);
+    if (i < PyObject_Length(input)) {
+      Py_XDECREF(o);
+      PyErr_SetString(PyExc_ValueError,"Expecting a sequence of unsigned int");
+      return 0;
+    }
     return 1;
   }
-%}
-
+}
 
 // int sequence => std::vector<unsigned int>
-%typemap(in,fragment="NumPy_Fragments") std11::shared_ptr<std::vector<unsigned int> > (std11::shared_ptr<std::vector<unsigned int> > temp)
+%typemap(in,fragment="sequenceToUnsignedIntVector") std11::shared_ptr<std::vector<unsigned int> > (std11::shared_ptr<std::vector<unsigned int> > temp)
 {
   if (!sequenceToUnsignedIntVector($input, $1))
   {
