@@ -141,7 +141,9 @@ void Interaction::initialize(double t0, InteractionProperties& interProp, Dynami
     // SP::VectorOfVectors workVds1= interProp.workDS1Vectors;
     // SP::VectorOfVectors workVds2 = interProp.workDS2Vectors;
 
-    setDSLinkAndWorkspace(interProp, *ds1, *workVds1, *ds2, *workVds2);
+
+    
+    //setDSLinkAndWorkspace(interProp, *ds1, *workVds1, *ds2, *workVds2);
 
 
     if (_steps > 1) // Multi--step methods
@@ -333,7 +335,7 @@ void Interaction::initDataLagrangian(VectorOfBlockVectors& DSlink)
 
   DEBUG_PRINT("Interaction::initDataLagrangian()\n");
   DSlink.resize(LagrangianR::DSlinkSize);
-  DSlink[LagrangianR::xfree].reset(new BlockVector());
+  //DSlink[LagrangianR::xfree].reset(new BlockVector());
   DSlink[LagrangianR::q0].reset(new BlockVector()); // displacement
   DSlink[LagrangianR::q1].reset(new BlockVector()); // velocity
   DSlink[LagrangianR::q2].reset(new BlockVector()); // acceleration
@@ -354,7 +356,7 @@ void Interaction::initDSDataLagrangian(DynamicalSystem& ds, VectorOfVectors& wor
 
   // Put q, velocity and acceleration of each DS into a block. (Pointers links, no copy!!)
 
-  DSlink[LagrangianR::xfree]->insertPtr(workVDS[OneStepIntegrator::free]);
+  //DSlink[LagrangianR::xfree]->insertPtr(workVDS[OneStepIntegrator::free]);
   //DSlink[LagrangianR::xfree]->insertPtr(ds.workspace(DynamicalSystem::free));
 
   DSlink[LagrangianR::q0]->insertPtr(lds.q());
@@ -381,7 +383,7 @@ void Interaction::initDataNewtonEuler(VectorOfBlockVectors& DSlink)
 {
   DEBUG_BEGIN("Interaction::initDataNewtonEuler(VectorOfBlockVectors& DSlink)\n");
   DSlink.resize(NewtonEulerR::DSlinkSize);
-  DSlink[NewtonEulerR::xfree].reset(new BlockVector());
+  //DSlink[NewtonEulerR::xfree].reset(new BlockVector());
   DSlink[NewtonEulerR::q0].reset(new BlockVector()); // displacement
   DSlink[NewtonEulerR::velocity].reset(new BlockVector()); // velocity
 //  DSlink[NewtonEulerR::deltaq].reset(new BlockVector());
@@ -404,7 +406,6 @@ void Interaction::initDSDataNewtonEuler(DynamicalSystem& ds, VectorOfVectors& wo
   // convert vDS systems into NewtonEulerDS and put them in vLDS
   NewtonEulerDS& neds = static_cast<NewtonEulerDS&>(ds);
   // Put q/velocity/acceleration of each DS into a block. (Pointers links, no copy!!)
-  DSlink[NewtonEulerR::xfree]->insertPtr(workVDS[OneStepIntegrator::free]);
   //DSlink[NewtonEulerR::xfree]->insertPtr(ds.workspace(DynamicalSystem::free));
   DSlink[NewtonEulerR::q0]->insertPtr(neds.q());
   DSlink[NewtonEulerR::velocity]->insertPtr(neds.twist());

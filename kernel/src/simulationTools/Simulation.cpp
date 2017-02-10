@@ -219,7 +219,6 @@ void Simulation::initialize(SP::Model m, bool withOSI)
         _nsds->topology()->setOSI(ds,*_allOSI->begin());
         //std::cout << "By default, if the user has not set the OSI, we assign the first OSI to all DS"<<std::endl;
       }
-
       osi = DSG->properties(*dsi).osi;
       ds->initialize(m->t0(), osi->getSizeMem());
     }

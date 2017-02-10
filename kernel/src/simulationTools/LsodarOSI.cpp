@@ -255,7 +255,7 @@ void LsodarOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSyste
 }
 
 
-void LsodarOSI::initialize(Model& m)
+void LsodarOSI::initialize(Model& m )
 {
   DEBUG_BEGIN("LsodarOSI::initialize(Model& m)\n");
   OneStepIntegrator::initialize(m);
@@ -270,6 +270,7 @@ void LsodarOSI::initialize(Model& m)
     SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
     initializeDynamicalSystem(m, m.t0(),ds);
     ds->resetToInitialState();
+    //ds->swapInMemory();
   }
   //   Integer parameters for LSODAROSI are saved in vector intParam.
   //   The link with variable names in opkdmain.f is indicated in comments

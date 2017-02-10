@@ -138,7 +138,57 @@ void MoreauJeanOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalS
   }
 
 }
+void MoreauJeanOSI::initializeInteraction(double t0, Interaction &inter,
+                                          InteractionProperties& interProp,
+                                          DynamicalSystemsGraph & DSG)
+{
 
+
+  
+  SP::DynamicalSystem ds1= interProp.source;
+  SP::DynamicalSystem ds2= interProp.target;
+
+  assert(interProp.DSlink);
+  
+
+  
+  VectorOfBlockVectors& DSlink = *interProp.DSlink;
+  VectorOfVectors& workVInter = *interProp.workVectors;
+  VectorOfSMatrices& workMInter = *interProp.workMatrices;
+  
+  RELATION::TYPES relationType = inter.relation()->getType();
+
+  VectorOfVectors &workVds1 = *DSG.properties(DSG.descriptor(ds1)).workVectors;
+  if (relationType == Lagrangian)
+    {
+      DSlink[LagrangianR::xfree].reset(new BlockVector());
+      DSlink[LagrangianR::xfree]->insertPtr(workVds1[OneStepIntegrator::free]);
+    }  
+  else if (relationType == NewtonEuler)
+    {
+      DSlink.resize(NewtonEulerR::DSlinkSize);
+      DSlink[NewtonEulerR::xfree]->insertPtr(workVds1[OneStepIntegrator::free]);
+    }
+  
+  if (ds1 != ds2)
+    {
+      VectorOfVectors &workVds2 = *DSG.properties(DSG.descriptor(ds2)).workVectors;
+      if (relationType == Lagrangian)
+	{
+	  DSlink[LagrangianR::xfree].reset(new BlockVector());
+	  DSlink[LagrangianR::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
+	}  
+      else if (relationType == NewtonEuler)
+	{
+	  DSlink.resize(NewtonEulerR::DSlinkSize);
+	  DSlink[NewtonEulerR::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
+	}
+    }
+  
+  
+
+  
+}
 void MoreauJeanOSI::initialize(Model& m)
 {
   OneStepIntegrator::initialize(m);
@@ -163,6 +213,19 @@ void MoreauJeanOSI::initialize(Model& m)
   ((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY])->setIndexSetLevel(1);
   ((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY])->setInputOutputLevel(1);
   //  ((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY])->initialize(_simulation);
+
+  SP::InteractionsGraph indexSet0 = m.nonSmoothDynamicalSystem()->topology()->indexSet0();
+  InteractionsGraph::VIterator ui, uiend;
+  for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+  {
+    Interaction& inter = *indexSet0->bundle(*ui);
+    
+    initializeInteraction(t0, inter, indexSet0->properties(*ui), *_dynamicalSystemsGraph);
+  }
+
+
+
+  
 }
 
 

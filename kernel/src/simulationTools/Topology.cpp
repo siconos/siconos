@@ -149,7 +149,7 @@ Topology::addInteractionInIndexSet0(SP::Interaction inter, SP::DynamicalSystem d
 
   unsigned int nslawSize = inter->nonSmoothLaw()->size();
   interProp.block.reset(new SimpleMatrix(nslawSize, nslawSize));
-  //inter->setDSLinkAndWorkspace(interProp, *ds1, *workVds1, *ds2_, *workVds2);
+  inter->setDSLinkAndWorkspace(interProp, *ds1, *workVds1, *ds2_, *workVds2);
 
 
   // add self branches in vertex properties
