@@ -188,7 +188,7 @@ Siconos_AsVal_int (PyObject *obj, int* val)
 }
 %}
 %typemap(typecheck) int {
-  int ecode = Siconos_AsVal_int($input, &$1);
+  int ecode = Siconos_AsVal_int($input, NULL);
   $1 = SWIG_IsOK(ecode);
 }
 %typemap(in) int {
