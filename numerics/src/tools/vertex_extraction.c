@@ -43,12 +43,14 @@
 #pragma GCC diagnostic ignored "-Wunused-function"
 #include "lp_lib.h"
 
+#include "NumericsMatrix.h"
 
 
 void siconos_find_vertex(const polyhedron* P, unsigned size, int* basis)
 {
   unsigned nrows = P->size_ineq;
-  double* restrict H = P->H;
+  assert(P->H->matrix0);
+  double* restrict H = P->H->matrix0;
   double* restrict K = P->K;
   lprec *lp;
   lp = make_lp(nrows, nrows+size);

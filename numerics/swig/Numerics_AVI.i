@@ -63,7 +63,7 @@
 
       SN_ARRAY_TYPE* vector = obj_to_sn_vector(K_vec, &is_new_object2); 
       sn_check_array_type(vector, TARGET_ERROR_VERBOSE);
-      sn_check_size_mat_vec($self->poly->H, vector, TARGET_ERROR_VERBOSE);
+      sn_check_size_mat_vec($self->poly->H->size0, vector, TARGET_ERROR_VERBOSE);
 
       set_vec_from_target($self->poly->K, vector, , TARGET_ERROR_VERBOSE);
 
