@@ -97,9 +97,13 @@ protected:
  */
   SP::DynamicalSystemsGraph _dynamicalSystemsGraph;
 
-/** size of the memory for the integrator */
+  /** size of the memory for the integrator */
   unsigned int _sizeMem;
 
+  /** steps of the integrator
+   */
+  unsigned int _steps;
+  
 /** A link to the simulation that owns this OSI */
   SP::Simulation _simulation;
 

@@ -47,6 +47,7 @@ using namespace RELATION;
 MoreauJeanOSI::MoreauJeanOSI(double theta, double gamma):
   OneStepIntegrator(OSI::MOREAUJEANOSI), _useGammaForRelation(false),_explicitNewtonEulerDSOperators(false)
 {
+  _steps=1;
   _theta = theta;
   if(!isnan(gamma))
   {
@@ -142,22 +143,22 @@ void MoreauJeanOSI::initializeInteraction(double t0, Interaction &inter,
                                           InteractionProperties& interProp,
                                           DynamicalSystemsGraph & DSG)
 {
-
-
-  
   SP::DynamicalSystem ds1= interProp.source;
   SP::DynamicalSystem ds2= interProp.target;
 
   assert(interProp.DSlink);
   
-
-  
   VectorOfBlockVectors& DSlink = *interProp.DSlink;
-  VectorOfVectors& workVInter = *interProp.workVectors;
-  VectorOfSMatrices& workMInter = *interProp.workMatrices;
-  
-  RELATION::TYPES relationType = inter.relation()->getType();
+  // VectorOfVectors& workVInter = *interProp.workVectors;
+  // VectorOfSMatrices& workMInter = *interProp.workMatrices;
 
+  Relation &relation =  *inter.relation();  
+  RELATION::TYPES relationType = relation.getType();
+
+  bool computeResidu = relation.requireResidu();
+  inter.initializeMemory(computeResidu,_steps);
+
+  /* allocate ant set work vectors for the osi */
   VectorOfVectors &workVds1 = *DSG.properties(DSG.descriptor(ds1)).workVectors;
   if (relationType == Lagrangian)
     {
@@ -169,7 +170,7 @@ void MoreauJeanOSI::initializeInteraction(double t0, Interaction &inter,
       DSlink.resize(NewtonEulerR::DSlinkSize);
       DSlink[NewtonEulerR::xfree]->insertPtr(workVds1[OneStepIntegrator::free]);
     }
-  
+   
   if (ds1 != ds2)
     {
       VectorOfVectors &workVds2 = *DSG.properties(DSG.descriptor(ds2)).workVectors;
@@ -185,7 +186,34 @@ void MoreauJeanOSI::initializeInteraction(double t0, Interaction &inter,
 	}
     }
   
+  // if (_steps > 1) // Multi--step methods
+  //   {
+  //     // Compute the old Values of Output with stored values in Memory
+  //     for (unsigned int k = 0; k < _steps - 1; k++)
+  //     {
+  //       /** ComputeOutput to fill the Memory
+  //        * We assume the state x is stored in xMemory except for the  initial
+  //        * condition which has not been swap yet.
+  //        */
+  //       //        relation()->LinkDataFromMemory(k);
+  //       for (unsigned int i = 0; i < _upperLevelForOutput + 1; ++i)
+  //       {
+  //         computeOutput(t0, interProp, i);
+  //         _yMemory[i]->swap(*_y[i]);
+  //       }
+  //     }
+  //   }
   
+   // Compute a first value for the output
+    inter.computeOutput(t0, interProp, 0);
+
+    // prepare the gradients
+    relation.computeJach(t0, inter, interProp);
+    for (unsigned int i = 0; i < inter.upperLevelForOutput() + 1; ++i)
+      {
+      inter.computeOutput(t0, interProp, i);
+    }
+    inter.swapInMemory();
 
   
 }

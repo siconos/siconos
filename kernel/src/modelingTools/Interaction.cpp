@@ -50,6 +50,117 @@ using namespace std;
 using namespace RELATION;
 
 // --- CONSTRUCTORS ---
+struct Interaction::_setLevels : public SiconosVisitor
+{
+  /* we set the _lowerLevelForOutput, _upperLevelForOutput,
+     _lowerLevelForOutput, _upperLevelForOutput
+     w.r.t to the choice of the nslaw and the relation 
+   */
+  using SiconosVisitor::visit;
+
+  Interaction* _interaction;
+
+  _setLevels(Interaction * inter) :
+    _interaction(inter) {};
+
+ 
+  void visit(const NewtonImpactNSL& nslaw)
+  {
+    RELATION::TYPES relationType = _interaction->relation()->getType();
+    if (relationType == Lagrangian || relationType == NewtonEuler)
+    {
+      _interaction->setLowerLevelForOutput(0);
+      _interaction->setUpperLevelForOutput(1);
+     
+      _interaction->setLowerLevelForInput(0);
+      _interaction->setUpperLevelForInput(1);
+
+    }  
+    else
+    {
+	RuntimeException::selfThrow("Interaction::_setLevels::visit - unknown relation type: ");
+    }
+  }
+
+  void visit(const NewtonImpactFrictionNSL& nslaw)
+  {
+    RELATION::TYPES relationType = _interaction->relation()->getType();
+    if (relationType == Lagrangian || relationType == NewtonEuler)
+    {
+      _interaction->setLowerLevelForOutput(0);
+      _interaction->setUpperLevelForOutput(1);
+     
+      _interaction->setLowerLevelForInput(0);
+      _interaction->setUpperLevelForInput(1);
+
+    }  
+    else
+    {
+	RuntimeException::selfThrow("Interaction::_setLevels::visit - unknown relation type: ");
+    }
+  }
+  void visit(const EqualityConditionNSL& nslaw)
+  {
+    ;
+  }
+  void visit(const MixedComplementarityConditionNSL& nslaw)
+  {
+    ;
+  }
+};
+
+
+void Interaction::init()
+{
+
+  std11::shared_ptr<_setLevels> setLevels;
+  setLevels.reset(new _setLevels(this));
+  _nslaw->accept(*(setLevels.get()));
+  
+  // Memory allocation for y and lambda
+
+  //  assert(_upperLevelForOutput >=0);
+  assert(_upperLevelForOutput >= _lowerLevelForOutput);
+  //  assert(_upperLevelForInput >=0);
+  assert(_upperLevelForInput >= _lowerLevelForInput);
+
+   // in order to simplify we size from 0 to _upperLevelForXXX
+  _y.resize(_upperLevelForOutput + 1) ;
+  _yOld.resize(_upperLevelForOutput + 1);
+  _y_k.resize(_upperLevelForOutput + 1);
+
+  _lambda.resize(_upperLevelForInput + 1);
+  _lambdaOld.resize(_upperLevelForInput + 1);
+
+  // get the dimension of the non smooth law, ie the size of an Interaction blocks (one per relation)
+  unsigned int nslawSize = nslaw()->size();
+
+  for (unsigned int i = _lowerLevelForOutput ;
+       i < _upperLevelForOutput + 1 ;
+       i++)
+  {
+    _y[i].reset(new SiconosVector(nslawSize));
+    _yOld[i].reset(new SiconosVector(nslawSize));
+    _y_k[i].reset(new SiconosVector(nslawSize));
+
+    _y[i]->zero();
+    _yOld[i]->zero();
+    _y_k[i]->zero();
+  }
+
+
+  for (unsigned int i = _lowerLevelForInput ;
+       i < _upperLevelForInput + 1 ;
+       i++)
+  {
+    DEBUG_PRINTF("Interaction::initializeMemory(). _lambda[%i].reset()\n",i)
+    _lambda[i].reset(new SiconosVector(nslawSize));
+    _lambdaOld[i].reset(new SiconosVector(nslawSize));
+    _lambdaOld[i]->zero();
+  }
+}
+
+
 
 /* initialisation with empty set */
 Interaction::Interaction(unsigned int interactionSize,
@@ -58,14 +169,18 @@ Interaction::Interaction(unsigned int interactionSize,
                          unsigned int number) :
   _initialized(false), _number(number), _interactionSize(interactionSize),
   _sizeOfDS(0), _has2Bodies(false), _y(2),  _nslaw(NSL), _relation(rel)
-{}
+{
+  init();
+}
 
 Interaction::Interaction(SP::NonSmoothLaw NSL,
                          SP::Relation rel,
                          unsigned int number) :
   _initialized(false), _number(number), _interactionSize(NSL->size()),
   _sizeOfDS(0), _has2Bodies(false), _y(2),  _nslaw(NSL), _relation(rel)
-{}
+{
+  init();    
+}
 
 
 void Interaction::setDSLinkAndWorkspace(InteractionProperties& interProp,
@@ -126,59 +241,47 @@ void Interaction::initialize(double t0, InteractionProperties& interProp, Dynami
                  //             DynamicalSystem& ds1, VectorOfVectors& workV1,
                  //             DynamicalSystem& ds2, VectorOfVectors& workV2)
 {
-  if (!_initialized)
-  {
-    DEBUG_BEGIN("Interaction::initialize(double t0, InteractionProperties& interProp, DynamicalSystemsGraph & DSG ) \n");
+  // if (!_initialized)
+  // {
+  //   DEBUG_BEGIN("Interaction::initialize(double t0, InteractionProperties& interProp, DynamicalSystemsGraph & DSG ) \n");
 
-    bool computeResidu = _relation->requireResidu();
-    initializeMemory(computeResidu);
-
-    SP::DynamicalSystem ds1= interProp.source;
-    SP::DynamicalSystem ds2= interProp.target;
-    SP::VectorOfVectors workVds1 = DSG.properties(DSG.descriptor(ds1)).workVectors;
-    SP::VectorOfVectors workVds2 = DSG.properties(DSG.descriptor(ds2)).workVectors;
-    
-    // SP::VectorOfVectors workVds1= interProp.workDS1Vectors;
-    // SP::VectorOfVectors workVds2 = interProp.workDS2Vectors;
+  //   // SP::VectorOfVectors workVds1= interProp.workDS1Vectors;
+  //   // SP::VectorOfVectors workVds2 = interProp.workDS2Vectors;
 
 
-    
-    //setDSLinkAndWorkspace(interProp, *ds1, *workVds1, *ds2, *workVds2);
+  //   // if (_steps > 1) // Multi--step methods
+  //   // {
+  //   //   // Compute the old Values of Output with stored values in Memory
+  //   //   for (unsigned int k = 0; k < _steps - 1; k++)
+  //   //   {
+  //   //     /** ComputeOutput to fill the Memory
+  //   //      * We assume the state x is stored in xMemory except for the  initial
+  //   //      * condition which has not been swap yet.
+  //   //      */
+  //   //     //        relation()->LinkDataFromMemory(k);
+  //   //     for (unsigned int i = 0; i < _upperLevelForOutput + 1; ++i)
+  //   //     {
+  //   //       computeOutput(t0, interProp, i);
+  //   //       _yMemory[i]->swap(*_y[i]);
+  //   //     }
+  //   //   }
+  //   // }
+  //   // // Compute a first value for the output
+  //   // computeOutput(t0, interProp, 0);
 
+  //   // // prepare the gradients
+  //   // _relation->computeJach(t0, *this, interProp);
 
-    if (_steps > 1) // Multi--step methods
-    {
-      // Compute the old Values of Output with stored values in Memory
-      for (unsigned int k = 0; k < _steps - 1; k++)
-      {
-        /** ComputeOutput to fill the Memory
-         * We assume the state x is stored in xMemory except for the  initial
-         * condition which has not been swap yet.
-         */
-        //        relation()->LinkDataFromMemory(k);
-        for (unsigned int i = 0; i < _upperLevelForOutput + 1; ++i)
-        {
-          computeOutput(t0, interProp, i);
-          _yMemory[i]->swap(*_y[i]);
-        }
-      }
-    }
-    // Compute a first value for the output
-    computeOutput(t0, interProp, 0);
+  //   // Compute y values for t0
+  //   // for (unsigned int i = 0; i < _upperLevelForOutput + 1; ++i)
+  //   // {
+  //   //   computeOutput(t0, interProp, i);
+  //   // }
+  //   _initialized = true;
+  // }
 
-    // prepare the gradients
-    _relation->computeJach(t0, *this, interProp);
-
-    // Compute y values for t0
-    for (unsigned int i = 0; i < _upperLevelForOutput + 1; ++i)
-    {
-      computeOutput(t0, interProp, i);
-    }
-    _initialized = true;
-  }
-
-  swapInMemory();
-  DEBUG_END("Interaction::initialize(double t0, InteractionProperties& interProp,  DynamicalSystemsGraph & DSG ) \n");
+  //swapInMemory();
+  //DEBUG_END("Interaction::initialize(double t0, InteractionProperties& interProp,  DynamicalSystemsGraph & DSG ) \n");
 
 }
 
@@ -186,7 +289,7 @@ void Interaction::initialize(double t0, InteractionProperties& interProp, Dynami
 // since we need to know the relative degree to know
 // "numberOfDerivatives", while numberOfRelations and the size of the
 // non smooth law are required inputs to compute the relative degree.
-void Interaction::initializeMemory(bool computeResidu)
+void Interaction::initializeMemory(bool computeResidu, unsigned int steps)
 {
 
   DEBUG_PRINT("Interaction::initializeMemory() \n");
@@ -204,57 +307,28 @@ void Interaction::initializeMemory(bool computeResidu)
   //  assert(_upperLevelForInput >=0);
   assert(_upperLevelForInput >= _lowerLevelForInput);
 
-
-
-  // in order to simplify we size from 0 to _upperLevelForXXX
-  _y.resize(_upperLevelForOutput + 1) ;
-  _yOld.resize(_upperLevelForOutput + 1);
-  _y_k.resize(_upperLevelForOutput + 1);
-
-  _lambda.resize(_upperLevelForInput + 1);
-  _lambdaOld.resize(_upperLevelForInput + 1);
-
   _yMemory.resize(_upperLevelForOutput + 1);
   _lambdaMemory.resize(_upperLevelForInput + 1);
-
-
-
-  // get the dimension of the non smooth law, ie the size of an Interaction blocks (one per relation)
   unsigned int nslawSize = nslaw()->size();
+
+  for (unsigned int i = _lowerLevelForOutput ; i < _upperLevelForOutput + 1 ; i++)
+    _yMemory[i].reset(new SiconosMemory(steps, nslawSize));
+  
+  for (unsigned int i = _lowerLevelForInput ; i < _upperLevelForInput + 1 ; i++)
+  {
+    DEBUG_PRINTF("Interaction::initializeMemory(). _lambda[%i].reset()\n",i)
+    _lambdaMemory[i].reset(new SiconosMemory(steps, nslawSize));
+  }
+
   // XXX hm hm -- xhub
   if (computeResidu)
   {
     _h_alpha.reset(new SiconosVector(nslawSize));
     _residuY.reset(new SiconosVector(nslawSize));
   }
+  
   _yForNSsolver.reset(new SiconosVector(nslawSize));
-
-  for (unsigned int i = _lowerLevelForOutput ;
-       i < _upperLevelForOutput + 1 ;
-       i++)
-  {
-    _y[i].reset(new SiconosVector(nslawSize));
-    _yOld[i].reset(new SiconosVector(nslawSize));
-    _y_k[i].reset(new SiconosVector(nslawSize));
-    assert(_steps > 0);
-    _yMemory[i].reset(new SiconosMemory(_steps, nslawSize));
-
-    _y[i]->zero();
-    _yOld[i]->zero();
-    _y_k[i]->zero();
-  }
-
-
-  for (unsigned int i = _lowerLevelForInput ;
-       i < _upperLevelForInput + 1 ;
-       i++)
-  {
-    DEBUG_PRINTF("Interaction::initializeMemory(). _lambda[%i].reset()\n",i)
-    _lambda[i].reset(new SiconosVector(nslawSize));
-    _lambdaOld[i].reset(new SiconosVector(nslawSize));
-    _lambdaOld[i]->zero();
-    _lambdaMemory[i].reset(new SiconosMemory(_steps, nslawSize));
-  }
+  
 }
 void Interaction::resetAllLambda()
 {
