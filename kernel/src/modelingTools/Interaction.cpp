@@ -57,13 +57,36 @@ struct Interaction::_setLevels : public SiconosVisitor
      w.r.t to the choice of the nslaw and the relation 
    */
   using SiconosVisitor::visit;
-
+  
   Interaction* _interaction;
 
   _setLevels(Interaction * inter) :
     _interaction(inter) {};
 
- 
+  void visit(const ComplementarityConditionNSL& nslaw)
+  {
+    RELATION::TYPES relationType = _interaction->relation()->getType();
+    if (relationType == FirstOrder)
+    {
+      _interaction->setLowerLevelForOutput(0);
+      _interaction->setUpperLevelForOutput(0);
+      
+      _interaction->setLowerLevelForInput(0);
+      _interaction->setUpperLevelForInput(0);
+    }  
+    else
+    {
+	RuntimeException::selfThrow("Interaction::_setLevels::visit - unknown relation type: ");
+    };
+  }
+  // void visit(const EqualityConditionNSL& nslaw)
+  // {
+  //   ;
+  // }
+  // void visit(const MixedComplementarityConditionNSL& nslaw)
+  // {
+  //   ;
+  // }
   void visit(const NewtonImpactNSL& nslaw)
   {
     RELATION::TYPES relationType = _interaction->relation()->getType();
@@ -99,24 +122,12 @@ struct Interaction::_setLevels : public SiconosVisitor
 	RuntimeException::selfThrow("Interaction::_setLevels::visit - unknown relation type: ");
     }
   }
-  void visit(const EqualityConditionNSL& nslaw)
-  {
-    ;
-  }
-  void visit(const MixedComplementarityConditionNSL& nslaw)
-  {
-    ;
-  }
+
 };
 
 
 void Interaction::init()
-{
-
-  std11::shared_ptr<_setLevels> setLevels;
-  setLevels.reset(new _setLevels(this));
-  _nslaw->accept(*(setLevels.get()));
-  
+{  
   // Memory allocation for y and lambda
 
   //  assert(_upperLevelForOutput >=0);
@@ -170,6 +181,10 @@ Interaction::Interaction(unsigned int interactionSize,
   _initialized(false), _number(number), _interactionSize(interactionSize),
   _sizeOfDS(0), _has2Bodies(false), _y(2),  _nslaw(NSL), _relation(rel)
 {
+  std11::shared_ptr<_setLevels> setLevels;
+  setLevels.reset(new _setLevels(this));
+  _nslaw->accept(*(setLevels.get()));
+
   init();
 }
 
@@ -179,7 +194,10 @@ Interaction::Interaction(SP::NonSmoothLaw NSL,
   _initialized(false), _number(number), _interactionSize(NSL->size()),
   _sizeOfDS(0), _has2Bodies(false), _y(2),  _nslaw(NSL), _relation(rel)
 {
-  init();    
+  std11::shared_ptr<_setLevels> setLevels;
+  setLevels.reset(new _setLevels(this));
+  _nslaw->accept(*(setLevels.get()));
+  init();
 }
 
 

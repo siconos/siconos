@@ -25,33 +25,48 @@
 //#define DEBUG_WHERE_MESSAGES
 #include <debug.h>
 
+
+void MoreauJeanCombinedProjectionOSI::initializeInteraction(double t0, Interaction &inter,
+                                          InteractionProperties& interProp,
+                                          DynamicalSystemsGraph & DSG)
+{
+  DEBUG_BEGIN("MoreauJeanOSI::initializeInteraction(...)\n");
+  MoreauJeanOSI::initializeInteraction(t0, inter, interProp, DSG);
+  DEBUG_END("MoreauJeanOSI::initializeInteraction(...)\n");
+}
+void MoreauJeanCombinedProjectionOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds)
+{
+  DEBUG_BEGIN("MoreauJeanCombinedProjectionOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds) \n");
+ 
+  MoreauJeanOSI::initializeDynamicalSystem(m, t, ds);
+  
+  const DynamicalSystemsGraph::VDescriptor& dsv = _dynamicalSystemsGraph->descriptor(ds);
+  VectorOfVectors& workVectors = *_dynamicalSystemsGraph->properties(dsv).workVectors;
+  Type::Siconos dsType = Type::value(*ds);
+  if(dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
+  {
+    SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
+    workVectors[OneStepIntegrator::qtmp].reset(new SiconosVector(d->ndof()));
+  }
+  else if(dsType == Type::NewtonEulerDS)
+  {
+    SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS>(ds);
+    workVectors[OneStepIntegrator::qtmp].reset(new SiconosVector(d->getqDim()));
+  }
+  else
+  {
+    RuntimeException::selfThrow("MoreauJeanCombinedProjectionOSI::initialize() - DS not of the right type");
+  }
+
+  
+
+  
+  DEBUG_END("MoreauJeanCombinedProjectionOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds) \n");
+}
+
 void MoreauJeanCombinedProjectionOSI::initialize(Model& m)
 {
-
   MoreauJeanOSI::initialize(m);
-  DynamicalSystemsGraph::VIterator dsi, dsend;
-  for(std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
-  {
-    if(!checkOSI(dsi)) continue;
-    SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
-    Type::Siconos dsType = Type::value(*ds);
-    VectorOfVectors& workVectors = *_dynamicalSystemsGraph->properties(*dsi).workVectors;
-
-    if(dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
-    {
-      SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
-      workVectors[OneStepIntegrator::qtmp].reset(new SiconosVector(d->ndof()));
-    }
-    else if(dsType == Type::NewtonEulerDS)
-    {
-      SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS>(ds);
-      workVectors[OneStepIntegrator::qtmp].reset(new SiconosVector(d->getqDim()));
-    }
-    else
-    {
-      RuntimeException::selfThrow("MoreauJeanCombinedProjectionOSI::initialize() - DS not of the right type");
-    }
-  }
 }
 
 

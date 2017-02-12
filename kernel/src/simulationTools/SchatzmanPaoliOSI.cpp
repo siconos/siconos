@@ -166,12 +166,14 @@ void SchatzmanPaoliOSI::initializeInteraction(double t0, Interaction &inter,
   Relation &relation =  *inter.relation();
   RELATION::TYPES relationType = relation.getType();
 
+  bool isInitializationNeeded = false;
   /* We check the allocation of _y and _lambda */
   if (inter.lowerLevelForOutput() != 0 || inter.upperLevelForOutput() != 0)
   {
     //RuntimeException::selfThrow("MoreauJeanOSI::initializeInteraction, we must resize _y");
     inter.setUpperLevelForOutput(0);
     inter.setLowerLevelForOutput(0);
+    isInitializationNeeded = true;
   }
 
   if (inter.lowerLevelForInput() != 0 || inter.upperLevelForInput() != 0)
@@ -179,7 +181,10 @@ void SchatzmanPaoliOSI::initializeInteraction(double t0, Interaction &inter,
     //RuntimeException::selfThrow("MoreauJeanOSI::initializeInteraction, we must resize _lambda");
     inter.setUpperLevelForInput(0);
     inter.setLowerLevelForInput(0);
+    isInitializationNeeded = true;
   }
+  if (isInitializationNeeded)
+    inter.init();
 
 
 
@@ -189,30 +194,28 @@ void SchatzmanPaoliOSI::initializeInteraction(double t0, Interaction &inter,
   /* allocate ant set work vectors for the osi */
   VectorOfVectors &workVds1 = *DSG.properties(DSG.descriptor(ds1)).workVectors;
   if (relationType == Lagrangian)
-    {
-      DSlink[LagrangianR::xfree].reset(new BlockVector());
-      DSlink[LagrangianR::xfree]->insertPtr(workVds1[OneStepIntegrator::free]);
-    }
+  {
+    DSlink[LagrangianR::xfree].reset(new BlockVector());
+    DSlink[LagrangianR::xfree]->insertPtr(workVds1[OneStepIntegrator::free]);
+  }
   else if (relationType == NewtonEuler)
-    {
-      DSlink.resize(NewtonEulerR::DSlinkSize);
-      DSlink[NewtonEulerR::xfree]->insertPtr(workVds1[OneStepIntegrator::free]);
-    }
+  {
+    DSlink[NewtonEulerR::xfree].reset(new BlockVector());
+    DSlink[NewtonEulerR::xfree]->insertPtr(workVds1[OneStepIntegrator::free]);
+  }
 
   if (ds1 != ds2)
+  {
+    VectorOfVectors &workVds2 = *DSG.properties(DSG.descriptor(ds2)).workVectors;
+    if (relationType == Lagrangian)
     {
-      VectorOfVectors &workVds2 = *DSG.properties(DSG.descriptor(ds2)).workVectors;
-      if (relationType == Lagrangian)
-	{
-	  DSlink[LagrangianR::xfree].reset(new BlockVector());
-	  DSlink[LagrangianR::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
-	}
-      else if (relationType == NewtonEuler)
-	{
-	  DSlink.resize(NewtonEulerR::DSlinkSize);
-	  DSlink[NewtonEulerR::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
-	}
+      DSlink[LagrangianR::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
     }
+    else if (relationType == NewtonEuler)
+    {
+      DSlink[NewtonEulerR::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
+    }
+  }
 
   if (_steps > 1) // Multi--step methods
   {

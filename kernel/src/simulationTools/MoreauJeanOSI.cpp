@@ -173,7 +173,7 @@ void MoreauJeanOSI::initializeInteraction(double t0, Interaction &inter,
     }  
   else if (relationType == NewtonEuler)
     {
-      DSlink.resize(NewtonEulerR::DSlinkSize);
+      DSlink[NewtonEulerR::xfree].reset(new BlockVector());
       DSlink[NewtonEulerR::xfree]->insertPtr(workVds1[OneStepIntegrator::free]);
     }
    
@@ -182,12 +182,10 @@ void MoreauJeanOSI::initializeInteraction(double t0, Interaction &inter,
       VectorOfVectors &workVds2 = *DSG.properties(DSG.descriptor(ds2)).workVectors;
       if (relationType == Lagrangian)
 	{
-	  DSlink[LagrangianR::xfree].reset(new BlockVector());
 	  DSlink[LagrangianR::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
 	}  
       else if (relationType == NewtonEuler)
 	{
-	  DSlink.resize(NewtonEulerR::DSlinkSize);
 	  DSlink[NewtonEulerR::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
 	}
     }

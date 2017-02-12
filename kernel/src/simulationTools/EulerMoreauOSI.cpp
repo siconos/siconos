@@ -27,6 +27,7 @@
 #include "NonSmoothLaw.hpp"
 #include "CxxStd.hpp"
 #include "OneStepNSProblem.hpp"
+#include "BlockVector.hpp"
 
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
@@ -39,6 +40,7 @@ using namespace RELATION;
 EulerMoreauOSI::EulerMoreauOSI(double theta):
   OneStepIntegrator(OSI::EULERMOREAUOSI), _gamma(1.0), _useGamma(false), _useGammaForRelation(false)
 {
+  _steps=1;
   _theta = theta;
 }
 
@@ -46,6 +48,7 @@ EulerMoreauOSI::EulerMoreauOSI(double theta):
 EulerMoreauOSI::EulerMoreauOSI(double theta, double gamma):
   OneStepIntegrator(OSI::EULERMOREAUOSI), _useGammaForRelation(false)
 {
+  _steps=1;
   _theta = theta;
   _gamma = gamma;
   _useGamma = true;
@@ -91,6 +94,63 @@ void EulerMoreauOSI::initializeDynamicalSystem(Model& m, double t, SP::Dynamical
   initializeIterationMatrixW(t, ds, dsv);
   ds->allocateWorkVector(DynamicalSystem::local_buffer, _dynamicalSystemsGraph->properties(dsv).W->size(0));
 }
+void EulerMoreauOSI::initializeInteraction(double t0, Interaction &inter,
+                                          InteractionProperties& interProp,
+                                          DynamicalSystemsGraph & DSG)
+{
+  SP::DynamicalSystem ds1= interProp.source;
+  SP::DynamicalSystem ds2= interProp.target;
+
+  assert(interProp.DSlink);
+  
+  VectorOfBlockVectors& DSlink = *interProp.DSlink;
+  // VectorOfVectors& workVInter = *interProp.workVectors;
+  // VectorOfSMatrices& workMInter = *interProp.workMatrices;
+
+  Relation &relation =  *inter.relation();  
+  RELATION::TYPES relationType = relation.getType();
+
+  if (inter.lowerLevelForOutput() != 0 || inter.upperLevelForOutput() != 0)
+    RuntimeException::selfThrow("EulerMoreauOSI::initializeInteraction, we must resize _y");
+  
+  if (inter.lowerLevelForInput() >  0|| inter.upperLevelForInput() < 0)
+    RuntimeException::selfThrow("EulerMoreauOSI::initializeInteraction, we must resize _lambda");
+  
+  bool computeResidu = relation.requireResidu();
+  inter.initializeMemory(computeResidu,_steps);
+
+  /* allocate ant set work vectors for the osi */
+  VectorOfVectors &workVds1 = *DSG.properties(DSG.descriptor(ds1)).workVectors;
+  if (relationType == FirstOrder)
+    {
+      DSlink[FirstOrderR::xfree].reset(new BlockVector());
+      DSlink[FirstOrderR::xfree]->insertPtr(workVds1[OneStepIntegrator::free]);
+    }  
+
+   
+  if (ds1 != ds2)
+    {
+      VectorOfVectors &workVds2 = *DSG.properties(DSG.descriptor(ds2)).workVectors;
+      if (relationType == Lagrangian)
+      {
+        DSlink[FirstOrderR::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
+      }  
+    }
+    
+  
+  // Compute a first value for the output
+    inter.computeOutput(t0, interProp, 0);
+
+    // prepare the gradients
+    relation.computeJach(t0, inter, interProp);
+    for (unsigned int i = 0; i < inter.upperLevelForOutput() + 1; ++i)
+      {
+      inter.computeOutput(t0, interProp, i);
+    }
+    inter.swapInMemory();
+
+  
+}
 
 void EulerMoreauOSI::initialize(Model& m)
 {
@@ -106,6 +166,17 @@ void EulerMoreauOSI::initialize(Model& m)
     SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
     initializeDynamicalSystem(m, t0,  ds);
   }
+
+  SP::InteractionsGraph indexSet0 = m.nonSmoothDynamicalSystem()->topology()->indexSet0();
+  InteractionsGraph::VIterator ui, uiend;
+  for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+  {
+    Interaction& inter = *indexSet0->bundle(*ui);
+    
+    initializeInteraction(t0, inter, indexSet0->properties(*ui), *_dynamicalSystemsGraph);
+  }
+
+  
 }
 void EulerMoreauOSI::initializeIterationMatrixW(double t, SP::DynamicalSystem ds, const DynamicalSystemsGraph::VDescriptor& dsv)
 {

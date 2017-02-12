@@ -111,6 +111,7 @@ void Hem5OSI_solout_wrapper(integer* MODE,
 Hem5OSI::Hem5OSI():
   OneStepIntegrator(OSI::HEM5OSI), _idid(0)
 {
+  _steps=1;
   _intData.resize(9);
   for(int i = 0; i < 9; i++) _intData[i] = 0;
   _sizeMem = 2;
@@ -481,6 +482,112 @@ void Hem5OSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem 
   }
 
 }
+
+
+void Hem5OSI::initializeInteraction(double t0, Interaction &inter,
+                                    InteractionProperties& interProp,
+                                    DynamicalSystemsGraph & DSG)
+{
+  SP::DynamicalSystem ds1= interProp.source;
+  SP::DynamicalSystem ds2= interProp.target;
+
+  assert(interProp.DSlink);
+
+  VectorOfBlockVectors& DSlink = *interProp.DSlink;
+  // VectorOfVectors& workVInter = *interProp.workVectors;
+  // VectorOfSMatrices& workMInter = *interProp.workMatrices;
+
+  Relation &relation =  *inter.relation();
+  NonSmoothLaw & nslaw = *inter.nslaw();
+  RELATION::TYPES relationType = relation.getType();
+  Type::Siconos nslType = Type::value(nslaw);
+
+  
+  unsigned int lowerLevelForOutput=0;
+  unsigned int upperLevelForOutput=2;
+  unsigned int lowerLevelForInput=1;
+  unsigned int upperLevelForInput=2;
+  if (nslType == Type::NewtonImpactNSL || nslType == Type::MultipleImpactNSL)
+  {
+    lowerLevelForOutput = 0;
+    upperLevelForOutput = 2 ;
+    lowerLevelForInput = 1;
+    upperLevelForInput = 2;
+  }
+  else if (nslType ==  Type::NewtonImpactFrictionNSL)
+  {
+    lowerLevelForOutput = 0;
+    upperLevelForOutput = 4;
+    lowerLevelForInput = 1;
+    upperLevelForInput = 2;
+    RuntimeException::selfThrow("HEM5OSI::initializeInteraction  not yet implemented for nonsmooth law of type NewtonImpactFrictionNSL");
+  }
+  else
+    RuntimeException::selfThrow("HEM5OSI::initializeInteraction not yet implemented  for nonsmooth of type");
+
+  bool isInitializationNeeded = false;
+  if (inter.lowerLevelForOutput() != lowerLevelForOutput || inter.upperLevelForOutput() != upperLevelForOutput)
+  {
+    //  RuntimeException::selfThrow("D1MinusLinearOSI::initializeInteraction, we must resize _y");
+    inter.setUpperLevelForOutput(upperLevelForOutput);
+    inter.setLowerLevelForOutput(lowerLevelForOutput);
+    isInitializationNeeded = true;
+  }
+  if (inter.lowerLevelForInput() > lowerLevelForInput || inter.upperLevelForInput() < upperLevelForInput)
+  {
+    //RuntimeException::selfThrow("D1MinusLinearOSI::initializeInteraction, we must resize _lambda");
+     inter.setUpperLevelForInput(upperLevelForInput);
+     inter.setLowerLevelForInput(lowerLevelForInput);
+     isInitializationNeeded = true;
+  }
+
+  if (isInitializationNeeded)
+    inter.init();
+
+  bool computeResidu = relation.requireResidu();
+  inter.initializeMemory(computeResidu,_steps);
+
+  /* allocate ant set work vectors for the osi */
+  VectorOfVectors &workVds1 = *DSG.properties(DSG.descriptor(ds1)).workVectors;
+  if (relationType == Lagrangian)
+  {
+    DSlink[LagrangianR::xfree].reset(new BlockVector());
+    DSlink[LagrangianR::xfree]->insertPtr(workVds1[OneStepIntegrator::free]);
+  }
+  // else if (relationType == NewtonEuler)
+  // {
+  //   DSlink[NewtonEulerR::xfree].reset(new BlockVector());
+  //   DSlink[NewtonEulerR::xfree]->insertPtr(workVds1[OneStepIntegrator::free]);
+  // }
+
+  if (ds1 != ds2)
+  {
+    VectorOfVectors &workVds2 = *DSG.properties(DSG.descriptor(ds2)).workVectors;
+    if (relationType == Lagrangian)
+    {
+      DSlink[LagrangianR::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
+    }
+    // else if (relationType == NewtonEuler)
+    // {
+    //   DSlink[NewtonEulerR::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
+    // }
+  }
+
+
+  // Compute a first value for the output
+  inter.computeOutput(t0, interProp, 0);
+
+  // prepare the gradients
+  relation.computeJach(t0, inter, interProp);
+  for (unsigned int i = 0; i < inter.upperLevelForOutput() + 1; ++i)
+  {
+    inter.computeOutput(t0, interProp, i);
+  }
+  inter.swapInMemory();
+
+}
+
+
 void Hem5OSI::initialize(Model& m)
 {
 
@@ -503,6 +610,17 @@ void Hem5OSI::initialize(Model& m)
     initializeDynamicalSystem(m,  m.t0(),  ds);
   }
 
+  
+  SP::InteractionsGraph indexSet0 = m.nonSmoothDynamicalSystem()->topology()->indexSet0();
+  InteractionsGraph::VIterator ui, uiend;
+  for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+  {
+    Interaction& inter = *indexSet0->bundle(*ui);
+    initializeInteraction(m.t0(), inter, indexSet0->properties(*ui), *_dynamicalSystemsGraph);
+  }
+
+
+  
   // InteractionsGraph::VIterator ui, uiend;
   // SP::InteractionsGraph indexSet0
   //   = _simulation->nonSmoothDynamicalSystem()->topology()->indexSet(0);

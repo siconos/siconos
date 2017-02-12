@@ -173,7 +173,7 @@ private:
   struct _setLevels;
   friend struct Interaction::_setLevels;
 
-  void init();
+
 
   
   // === PRIVATE FUNCTIONS ===
@@ -226,6 +226,10 @@ public:
    */
   void initialize(double t0, InteractionProperties& interProp, DynamicalSystemsGraph & DSG);
 
+
+  
+  void init();
+  
   /** check if Interaction is initialized
    * \return true if it is initialized
    */

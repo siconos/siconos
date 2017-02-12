@@ -224,6 +224,9 @@ public:
   /** initialize */
   void initialize(Model& m);
   void initializeDynamicalSystem(Model& m,double t, SP::DynamicalSystem ds);
+  void initializeInteraction(double t0, Interaction &inter,
+                             InteractionProperties& interProp,
+                             DynamicalSystemsGraph & DSG);
   /** prepare for Newton Iteration
    * \param time
    */

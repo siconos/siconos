@@ -25,12 +25,13 @@
 #include "Model.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
 #include "OneStepNSProblem.hpp"
-
+#include "BlockVector.hpp"
 using namespace RELATION;
 
 NewMarkAlphaOSI::NewMarkAlphaOSI(double new_beta, double new_gamma, double new_alpha_m, double new_alpha_f, bool flag = false):
   OneStepIntegrator(OSI::NEWMARKALPHAOSI)
 {
+  _steps=1;
   _beta = new_beta;
   _gamma = new_gamma;
   _alpha_m = new_alpha_m;
@@ -42,6 +43,7 @@ NewMarkAlphaOSI::NewMarkAlphaOSI(double new_beta, double new_gamma, double new_a
 NewMarkAlphaOSI::NewMarkAlphaOSI(double _rho_infty, bool flag = false):
   OneStepIntegrator(OSI::NEWMARKALPHAOSI)
 {
+  _steps=1;
   _alpha_m = (2 * _rho_infty - 1) / (_rho_infty + 1);
   _alpha_f = _rho_infty / (_rho_infty + 1);
   _gamma = 0.5 + _alpha_f - _alpha_m;
@@ -395,6 +397,7 @@ void NewMarkAlphaOSI::initializeDynamicalSystem(Model& m, double t, SP::Dynamica
 
     SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS>(ds);
     workVectors.resize(OneStepIntegrator::work_vector_of_vector_size);
+    //workVectors[OneStepIntegrator::free].reset(new SiconosVector(d->dimension()));
     workVectors[OneStepIntegrator::acce_like].reset(new SiconosVector(*(d->acceleration()))); // set a0 = ddotq0
     workVectors[OneStepIntegrator::acce_memory].reset(new SiconosVector(*(d->acceleration()))); // set a0 = ddotq0
 
@@ -418,6 +421,109 @@ void NewMarkAlphaOSI::initializeDynamicalSystem(Model& m, double t, SP::Dynamica
 
 
 }
+void NewMarkAlphaOSI::initializeInteraction(double t0, Interaction &inter,
+                                             InteractionProperties& interProp,
+                                             DynamicalSystemsGraph & DSG)
+{
+  SP::DynamicalSystem ds1= interProp.source;
+  SP::DynamicalSystem ds2= interProp.target;
+
+  assert(interProp.DSlink);
+
+  VectorOfBlockVectors& DSlink = *interProp.DSlink;
+  // VectorOfVectors& workVInter = *interProp.workVectors;
+  // VectorOfSMatrices& workMInter = *interProp.workMatrices;
+
+  Relation &relation =  *inter.relation();
+  NonSmoothLaw & nslaw = *inter.nslaw();
+  RELATION::TYPES relationType = relation.getType();
+  Type::Siconos nslType = Type::value(nslaw);
+
+  unsigned int lowerLevelForOutput=0;
+  unsigned int upperLevelForOutput=2;
+  unsigned int lowerLevelForInput=1;
+  unsigned int upperLevelForInput=2;
+  
+  if (nslType == Type::NewtonImpactNSL || nslType == Type::MultipleImpactNSL)
+  {
+    lowerLevelForOutput = 0;
+    upperLevelForOutput = 2 ;
+    lowerLevelForInput = 1;
+    upperLevelForInput = 2;
+  }
+  else if (nslType ==  Type::NewtonImpactFrictionNSL)
+  {
+    lowerLevelForOutput = 0;
+    upperLevelForOutput = 4;
+    lowerLevelForInput = 1;
+    upperLevelForInput = 2;
+    RuntimeException::selfThrow("NewMarkAlphaOSI::initializeInteraction  not yet implemented for nonsmooth law of type NewtonImpactFrictionNSL");
+  }
+  else
+    RuntimeException::selfThrow("NewMarkAlphaOSI::initializeInteraction not yet implemented  for nonsmooth of type");
+
+  bool isInitializationNeeded = false;
+  if (inter.lowerLevelForOutput() != lowerLevelForOutput || inter.upperLevelForOutput() != upperLevelForOutput)
+  {
+    //  RuntimeException::selfThrow("D1MinusLinearOSI::initializeInteraction, we must resize _y");
+    inter.setUpperLevelForOutput(upperLevelForOutput);
+    inter.setLowerLevelForOutput(lowerLevelForOutput);
+    isInitializationNeeded = true;
+  }
+  if (inter.lowerLevelForInput() > lowerLevelForInput || inter.upperLevelForInput() < upperLevelForInput)
+  {
+    //RuntimeException::selfThrow("D1MinusLinearOSI::initializeInteraction, we must resize _lambda");
+     inter.setUpperLevelForInput(upperLevelForInput);
+     inter.setLowerLevelForInput(lowerLevelForInput);
+     isInitializationNeeded = true;
+  }
+
+  if (isInitializationNeeded)
+    inter.init();
+
+  bool computeResidu = relation.requireResidu();
+  inter.initializeMemory(computeResidu,_steps);
+
+  /* allocate ant set work vectors for the osi */
+  VectorOfVectors &workVds1 = *DSG.properties(DSG.descriptor(ds1)).workVectors;
+  if (relationType == Lagrangian)
+  {
+    DSlink[LagrangianR::xfree].reset(new BlockVector());
+    DSlink[LagrangianR::xfree]->insertPtr(workVds1[OneStepIntegrator::free]);
+  }
+  // else if (relationType == NewtonEuler)
+  // {
+  //   DSlink[NewtonEulerR::xfree].reset(new BlockVector());
+  //   DSlink[NewtonEulerR::xfree]->insertPtr(workVds1[OneStepIntegrator::free]);
+  // }
+
+  if (ds1 != ds2)
+  {
+    VectorOfVectors &workVds2 = *DSG.properties(DSG.descriptor(ds2)).workVectors;
+    if (relationType == Lagrangian)
+    {
+      DSlink[LagrangianR::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
+    }
+    // else if (relationType == NewtonEuler)
+    // {
+    //   DSlink[NewtonEulerR::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
+    // }
+  }
+
+
+  // Compute a first value for the output
+  inter.computeOutput(t0, interProp, 0);
+
+  // prepare the gradients
+  relation.computeJach(t0, inter, interProp);
+  for (unsigned int i = 0; i < inter.upperLevelForOutput() + 1; ++i)
+  {
+    inter.computeOutput(t0, interProp, i);
+  }
+  inter.swapInMemory();
+
+}
+
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 void NewMarkAlphaOSI::initialize(Model& m)
@@ -432,6 +538,15 @@ void NewMarkAlphaOSI::initialize(Model& m)
     SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
     initializeDynamicalSystem(m, m.t0(), ds);
   }
+
+  SP::InteractionsGraph indexSet0 = m.nonSmoothDynamicalSystem()->topology()->indexSet0();
+  InteractionsGraph::VIterator ui, uiend;
+  for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+  {
+    Interaction& inter = *indexSet0->bundle(*ui);
+    initializeInteraction(m.t0(), inter, indexSet0->properties(*ui), *_dynamicalSystemsGraph);
+  }
+  
 }
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

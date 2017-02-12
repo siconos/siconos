@@ -209,7 +209,7 @@ public:
   void initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds);
   void initializeInteraction(double t0, Interaction &inter,
                              InteractionProperties& interProp,
-                             DynamicalSystemsGraph & DSG) {};
+                             DynamicalSystemsGraph & DSG);
   /** return the maximum of all norms for the residus of DS
    *  \post{ds->residuFree will be calculated, ds->q() contains new position, ds->velocity contains predicted velocity}
    *  \return double

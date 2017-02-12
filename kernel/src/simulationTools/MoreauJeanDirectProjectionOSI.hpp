@@ -134,7 +134,10 @@ public:
       W)
   */
   void initialize(Model& m);
-
+  void initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds);
+  void initializeInteraction(double t0, Interaction &inter,
+			     InteractionProperties& interProp,
+			     DynamicalSystemsGraph & DSG);
   /** Apply the rule to one Interaction to known if is it should be included
    * in the IndexSet of level i
    * \param inter concerned interaction
