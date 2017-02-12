@@ -191,7 +191,7 @@ extern "C"
    * \return 0 if successfull
    */
   int frictionContact_newFromFile(FrictionContactProblem*  problem, FILE* file);
-  
+
   /** read a FrictionContactProblem in a file (numerics .dat format) from its filename
    * \param problem the problem to read
    * \param filename the name of the target file
@@ -217,6 +217,9 @@ extern "C"
       NumericsMatrix* M, double* q, double* mu);
 
 
+  /* create an empty FrictionContactProblem
+   * \return an empty fcp */
+  FrictionContactProblem* newFCP(void);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

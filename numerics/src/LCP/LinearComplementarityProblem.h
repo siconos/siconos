@@ -133,6 +133,12 @@ extern "C"
    *  \param problem  pointer to a LinearComplementarityProblem to delete
    */
   void freeLinearComplementarityProblem(LinearComplementarityProblem* problem);
+
+  /** Create new LCP and clear its fields
+   * \return a LinearComplementarityProblem
+   */
+  LinearComplementarityProblem* newLCP(void);
+
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif

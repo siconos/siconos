@@ -16,34 +16,31 @@
  * limitations under the License.
 */
 
-#include <stdio.h>
-#include "SiconosConfig.h"
+#include "NonlinearComplementarityProblem.h"
 #include "NumericsMatrix.h"
 
-#ifdef WITH_LPSOLVE
-#include "vertex_extraction.h"
 
-int main(void)
+void freeNCP(NonlinearComplementarityProblem* ncp)
 {
-  double Hdat[] = {1,  0, -1, 0,
-                0,  1, 0, -1};
+  if (ncp->nabla_F)
+  {
+    freeNumericsMatrix(ncp->nabla_F);
+    free(ncp->nabla_F);
+    ncp->nabla_F = NULL;
+  }
 
-  NumericsMatrix* H = NM_create_from_data(NM_DENSE, 4, 2, Hdat);
-
-  double K[] = {-2, -3, -7, -8};
-
-  polyhedron P = { SICONOS_SET_POLYHEDRON, 4, 0, H, K, NULL, NULL};
-
-  int basis[11] = {0};
-
-  siconos_find_vertex(&P, 2, basis);
-
-  for(unsigned i = 0; i < 11; ++i) printf("%d ", basis[i]);
-  printf("\n");
-  return 0;
+  free(ncp);
 }
-#else
 
-#error no LP solver configured
+NonlinearComplementarityProblem* newNCP(void)
+{
+  NonlinearComplementarityProblem* ncp = (NonlinearComplementarityProblem*) malloc(sizeof(NonlinearComplementarityProblem));
 
-#endif
+  ncp->n = 0;
+  ncp->compute_F = NULL;
+  ncp->compute_nabla_F = NULL;
+  ncp->nabla_F = NULL;
+  ncp->env = NULL;
+
+  return ncp;
+}

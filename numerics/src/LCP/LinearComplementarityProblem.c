@@ -18,7 +18,6 @@
 #ifndef LCP_PROBLEM_C
 #define LCP_PROBLEM_C
 
-
 #include <stdio.h>
 #include <math.h>
 #include <stdlib.h>
@@ -101,14 +100,29 @@ int linearComplementarity_newFromFilename(LinearComplementarityProblem* problem,
 
 void freeLinearComplementarityProblem(LinearComplementarityProblem* problem)
 {
-  freeNumericsMatrix(problem->M);
-  free(problem->M);
-  free(problem->q);
+  if (problem->M)
+  {
+    freeNumericsMatrix(problem->M);
+    free(problem->M);
+    problem->M = NULL;
+  }
+  if (problem->q)
+  {
+    free(problem->q);
+    problem->q = NULL;
+  }
+
   free(problem);
-  problem = NULL;
 }
 
+LinearComplementarityProblem*  newLCP(void)
+{
+  LinearComplementarityProblem * LCP = (LinearComplementarityProblem *) malloc(sizeof(LinearComplementarityProblem));
+  LCP->size = 0;
+  LCP->M = NULL;
+  LCP->q = NULL;
 
+  return LCP;
+}
 
 #endif
-

@@ -103,7 +103,15 @@ extern "C"
    */
   void freeMixedComplementarityProblem(MixedComplementarityProblem* problem);
 
+  /** free an MCP problem 
+   * \param mcp structure to free
+   */
+  void freeMCP(MixedComplementarityProblem2* mcp);
 
+  /** create an empty MCP problem
+   * \return an MixedComplementarityProblem instance
+   */
+  MixedComplementarityProblem2* newMCP(void);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
