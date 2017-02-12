@@ -251,6 +251,9 @@ public:
    */
   void initialize(Model& m);
   void initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds);
+  void initializeInteraction(double t0, Interaction &inter,
+                             InteractionProperties& interProp,
+                             DynamicalSystemsGraph & DSG) {};
   /** integrate the system, between tinit and tend (->iout=true), with possible stop at tout (->iout=false)
    *  \param tinit initial time
    *  \param tend end time

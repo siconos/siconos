@@ -88,7 +88,9 @@ public:
   /** initialization of the ZeroOrderHoldOSI integrator */
   void initialize(Model& m);
   void initializeDynamicalSystem(Model& m, double time, SP::DynamicalSystem ds);
-
+  void initializeInteraction(double t0, Interaction &inter,
+                             InteractionProperties& interProp,
+                             DynamicalSystemsGraph & DSG) {};
   /** return the maximum of all norms for the "ZeroOrderHoldOSI-discretized" residus of DS
     \return a double
     */

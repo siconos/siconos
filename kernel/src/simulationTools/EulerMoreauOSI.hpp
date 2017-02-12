@@ -276,6 +276,9 @@ public:
    */
   virtual void initialize(Model& m);
   void initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds);
+  void initializeInteraction(double t0, Interaction &inter,
+                             InteractionProperties& interProp,
+                             DynamicalSystemsGraph & DSG) {};
   /** initialize iteration matrix W EulerMoreauOSI matrix at time t
    *  \param time the time (double)
    *  \param ds a pointer to DynamicalSystem

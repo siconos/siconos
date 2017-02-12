@@ -221,6 +221,9 @@ public:
   virtual void initialize(Model& m ) = 0;
 
   virtual void initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds) = 0;
+  virtual void initializeInteraction(double t0, Interaction &inter,
+				     InteractionProperties& interProp,
+				     DynamicalSystemsGraph & DSG) = 0;
   
   /** compute the initial state of the Newton loop.
    */

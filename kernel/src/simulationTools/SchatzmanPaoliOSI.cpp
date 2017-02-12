@@ -28,6 +28,7 @@
 #include "MultipleImpactNSL.hpp"
 #include "NewtonImpactFrictionNSL.hpp"
 #include "OneStepNSProblem.hpp"
+#include "BlockVector.hpp"
 
 using namespace RELATION;
 //#define DEBUG_NOCOLOR
@@ -39,6 +40,7 @@ using namespace RELATION;
 SchatzmanPaoliOSI::SchatzmanPaoliOSI(double theta):
   OneStepIntegrator(OSI::SCHATZMANPAOLIOSI), _gamma(1.0), _useGamma(false), _useGammaForRelation(false)
 {
+  _steps=2;
   _theta = theta;
   _sizeMem = SCHATZMANPAOLISTEPSINMEMORY ;
 }
@@ -47,6 +49,7 @@ SchatzmanPaoliOSI::SchatzmanPaoliOSI(double theta):
 SchatzmanPaoliOSI::SchatzmanPaoliOSI(double theta, double gamma):
   OneStepIntegrator(OSI::SCHATZMANPAOLIOSI), _useGammaForRelation(false)
 {
+  _steps=2;
   _theta = theta;
   _gamma = gamma;
   _useGamma = true;
@@ -134,7 +137,7 @@ void SchatzmanPaoliOSI::initializeDynamicalSystem(Model& m, double t, SP::Dynami
     //  std::cout << " vprev = " << std::endl;
     // vprev->display();
 
-    
+
 
   }
   // Memory allocation for workX. workX[ds*] corresponds to xfree (or vfree in lagrangian case).
@@ -142,11 +145,107 @@ void SchatzmanPaoliOSI::initializeDynamicalSystem(Model& m, double t, SP::Dynami
 
   // W initialization
   initializeIterationMatrixW(t, ds, dsv);
-  
+
   //      if ((*itDS)->getType() == Type::LagrangianDS || (*itDS)->getType() == Type::FirstOrderNonLinearDS)
   DEBUG_EXPR(ds->display());
   DEBUG_END("SchatzmanPaoliOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds)\n");
-  
+
+}
+
+
+void SchatzmanPaoliOSI::initializeInteraction(double t0, Interaction &inter,
+                                          InteractionProperties& interProp,
+                                          DynamicalSystemsGraph & DSG)
+{
+  SP::DynamicalSystem ds1= interProp.source;
+  SP::DynamicalSystem ds2= interProp.target;
+
+  assert(interProp.DSlink);
+  VectorOfBlockVectors& DSlink = *interProp.DSlink;
+
+  Relation &relation =  *inter.relation();
+  RELATION::TYPES relationType = relation.getType();
+
+  /* We check the allocation of _y and _lambda */
+  if (inter.lowerLevelForOutput() != 0 || inter.upperLevelForOutput() != 0)
+  {
+    //RuntimeException::selfThrow("MoreauJeanOSI::initializeInteraction, we must resize _y");
+    inter.setUpperLevelForOutput(0);
+    inter.setLowerLevelForOutput(0);
+  }
+
+  if (inter.lowerLevelForInput() != 0 || inter.upperLevelForInput() != 0)
+  {
+    //RuntimeException::selfThrow("MoreauJeanOSI::initializeInteraction, we must resize _lambda");
+    inter.setUpperLevelForInput(0);
+    inter.setLowerLevelForInput(0);
+  }
+
+
+
+  bool computeResidu = relation.requireResidu();
+  inter.initializeMemory(computeResidu,_steps);
+
+  /* allocate ant set work vectors for the osi */
+  VectorOfVectors &workVds1 = *DSG.properties(DSG.descriptor(ds1)).workVectors;
+  if (relationType == Lagrangian)
+    {
+      DSlink[LagrangianR::xfree].reset(new BlockVector());
+      DSlink[LagrangianR::xfree]->insertPtr(workVds1[OneStepIntegrator::free]);
+    }
+  else if (relationType == NewtonEuler)
+    {
+      DSlink.resize(NewtonEulerR::DSlinkSize);
+      DSlink[NewtonEulerR::xfree]->insertPtr(workVds1[OneStepIntegrator::free]);
+    }
+
+  if (ds1 != ds2)
+    {
+      VectorOfVectors &workVds2 = *DSG.properties(DSG.descriptor(ds2)).workVectors;
+      if (relationType == Lagrangian)
+	{
+	  DSlink[LagrangianR::xfree].reset(new BlockVector());
+	  DSlink[LagrangianR::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
+	}
+      else if (relationType == NewtonEuler)
+	{
+	  DSlink.resize(NewtonEulerR::DSlinkSize);
+	  DSlink[NewtonEulerR::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
+	}
+    }
+
+  if (_steps > 1) // Multi--step methods
+  {
+    // Compute the old Values of Output with stored values in Memory
+    for (unsigned int k = 0; k < _steps - 1; k++)
+    {
+      /** ComputeOutput to fill the Memory
+       * We assume the state x is stored in xMemory except for the  initial
+       * condition which has not been swap yet.
+       */
+      //        relation()->LinkDataFromMemory(k);
+      for (unsigned int i = 0; i < inter.upperLevelForOutput() + 1; ++i)
+      {
+        inter.computeOutput(t0, interProp, i);
+        //_yMemory[i]->swap(*_y[i]);
+      }
+    }
+    inter.swapInMemory();
+
+  }
+
+   // Compute a first value for the output
+    inter.computeOutput(t0, interProp, 0);
+
+    // prepare the gradients
+    relation.computeJach(t0, inter, interProp);
+    for (unsigned int i = 0; i < inter.upperLevelForOutput() + 1; ++i)
+    {
+      inter.computeOutput(t0, interProp, i);
+    }
+    inter.swapInMemory();
+
+
 }
 void SchatzmanPaoliOSI::initialize(Model& m)
 {
@@ -160,6 +259,14 @@ void SchatzmanPaoliOSI::initialize(Model& m)
     if(!checkOSI(dsi)) continue;
     SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
     initializeDynamicalSystem(m, t0, ds);
+  }
+
+  SP::InteractionsGraph indexSet0 = m.nonSmoothDynamicalSystem()->topology()->indexSet0();
+  InteractionsGraph::VIterator ui, uiend;
+  for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+  {
+    Interaction& inter = *indexSet0->bundle(*ui);
+    initializeInteraction(t0, inter, indexSet0->properties(*ui), *_dynamicalSystemsGraph);
   }
 }
 void SchatzmanPaoliOSI::initializeIterationMatrixW(double t, SP::DynamicalSystem ds, const DynamicalSystemsGraph::VDescriptor& dsv)
@@ -329,7 +436,7 @@ double SchatzmanPaoliOSI::computeResidu()
   {
     if(!checkOSI(dsi)) continue;
     SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
-    
+
     dsType = Type::value(*ds); // Its type
     VectorOfVectors& workVectors = *_dynamicalSystemsGraph->properties(*dsi).workVectors;
 
@@ -357,13 +464,13 @@ double SchatzmanPaoliOSI::computeResidu()
       SP::SiconosVector q_k = d->qMemory()->getSiconosVector(0); // q_k
       SP::SiconosVector q_k_1 = d->qMemory()->getSiconosVector(1); // q_{k-1}
       SP::SiconosVector v_k = d->velocityMemory()->getSiconosVector(0); //v_k
-      
-       std::cout << "SchatzmanPaoliOSI::computeResidu - q_k_1 =" <<std::endl;
-      q_k_1->display();
-       std::cout << "SchatzmanPaoliOSI::computeResidu - q_k =" <<std::endl;
-      q_k->display();
-       std::cout << "SchatzmanPaoliOSI::computeResidu - v_k =" <<std::endl;
-      v_k->display();
+
+      //  std::cout << "SchatzmanPaoliOSI::computeResidu - q_k_1 =" <<std::endl;
+      // q_k_1->display();
+      //  std::cout << "SchatzmanPaoliOSI::computeResidu - q_k =" <<std::endl;
+      // q_k->display();
+      //  std::cout << "SchatzmanPaoliOSI::computeResidu - v_k =" <<std::endl;
+      // v_k->display();
 
 
       // --- ResiduFree computation Equation (1) ---

@@ -155,6 +155,12 @@ void MoreauJeanOSI::initializeInteraction(double t0, Interaction &inter,
   Relation &relation =  *inter.relation();  
   RELATION::TYPES relationType = relation.getType();
 
+  if (inter.lowerLevelForOutput() != 0 || inter.upperLevelForOutput() != 1)
+     RuntimeException::selfThrow("MoreauJeanOSI::initializeInteraction, we must resize _y");
+  
+  if (inter.lowerLevelForInput() > 1 || inter.upperLevelForInput() < 1)
+     RuntimeException::selfThrow("MoreauJeanOSI::initializeInteraction, we must resize _lambda");
+  
   bool computeResidu = relation.requireResidu();
   inter.initializeMemory(computeResidu,_steps);
 
@@ -186,25 +192,7 @@ void MoreauJeanOSI::initializeInteraction(double t0, Interaction &inter,
 	}
     }
   
-  // if (_steps > 1) // Multi--step methods
-  //   {
-  //     // Compute the old Values of Output with stored values in Memory
-  //     for (unsigned int k = 0; k < _steps - 1; k++)
-  //     {
-  //       /** ComputeOutput to fill the Memory
-  //        * We assume the state x is stored in xMemory except for the  initial
-  //        * condition which has not been swap yet.
-  //        */
-  //       //        relation()->LinkDataFromMemory(k);
-  //       for (unsigned int i = 0; i < _upperLevelForOutput + 1; ++i)
-  //       {
-  //         computeOutput(t0, interProp, i);
-  //         _yMemory[i]->swap(*_y[i]);
-  //       }
-  //     }
-  //   }
-  
-   // Compute a first value for the output
+  // Compute a first value for the output
     inter.computeOutput(t0, interProp, 0);
 
     // prepare the gradients
