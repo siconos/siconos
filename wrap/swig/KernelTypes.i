@@ -214,24 +214,26 @@ static inline void fillBasePyarray(PyObject* pyarray, SharedPointerKeeper* saved
 
 //////////////////////////////////////////////////////////////////////////////
 // allow double to be numpy types
-// (could also use,
-//   $1 = PyArray_CanCoerceScalar(PyArray_ObjectType($input, 0),
-//                                NPY_DOUBLE, NPY_FLOAT_SCALAR);)
 %typecheck(SWIG_TYPECHECK_DOUBLE,fragment="SWIG_AsVal_double") double {
   $1 = PyArray_CheckAnyScalar($input);
 }
 %typemap(in,fragment="SWIG_AsVal_double") double {
   int ecode = SWIG_AsVal_double($input, &$1);
   if (!SWIG_IsOK(ecode) && PyArray_CheckAnyScalar($input)) {
-    PyArray_Descr *totype = PyArray_DescrFromType(NPY_DOUBLE);
-    // TODO: numpy bug?  PyArray_CastScalarToCtype seems to segfault
-    // if you pass a 0-dimensional array
-    // (e.g. np.array(0.0,dtype=np.float32), even though
-    // CanCoerceScalar and CheckAnyScalar both return 1.
-    PyArray_CastScalarToCtype($input, &$1, totype);
-    Py_XDECREF(totype);
-    if ($1 == -1.0 && PyErr_Occurred())
-      %argument_fail(ecode, "$type", $symname, $argnum);
+    $1 = PyFloat_AsDouble($input);
+    if ($1 == -1.0 && PyErr_Occurred()) {
+      PyObject *o = PyNumber_Float($input);
+      if (o) {
+        $1 = PyFloat_AsDouble(o);
+        if ($1 == -1.0 && PyErr_Occurred()) {
+          Py_DECREF(o);
+          %argument_fail(SWIG_TypeError, "$type", $symname, $argnum);
+        }
+        Py_DECREF(o);
+      }
+      else
+        %argument_fail(SWIG_TypeError, "$type", $symname, $argnum);
+    }
   }
 }
 
