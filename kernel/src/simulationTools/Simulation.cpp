@@ -201,8 +201,6 @@ void Simulation::initialize(SP::Model m, bool withOSI)
 
   if (withOSI)
   {
-
-
     if (numberOfOSI() == 0)
       RuntimeException::selfThrow("Simulation::initialize No OSI !");
 
@@ -223,7 +221,7 @@ void Simulation::initialize(SP::Model m, bool withOSI)
       ds->initialize(m->t0(), osi->getSizeMem());
     }
 
-
+    _numberOfIndexSets=0;
     // === OneStepIntegrators initialization ===
     for (OSIIterator itosi = _allOSI->begin();
          itosi != _allOSI->end(); ++itosi)
@@ -239,7 +237,7 @@ void Simulation::initialize(SP::Model m, bool withOSI)
 
       (*itosi)->setSimulationPtr(shared_from_this());
       (*itosi)->initialize(*m);
-
+      _numberOfIndexSets = std::max<int>((*itosi)->numberOfIndexSets(), _numberOfIndexSets);
     }
   }
 
@@ -436,296 +434,6 @@ void Simulation::processEvents()
 }
 
 
-
-/** a visitor to set the level(s) parameter in Interaction
- *  and to compute the levelMin and levelMax
- */
-// class NonSmoothLaw;
-// class DynamicalSystem;
-// class OneStepIntegrator;
-// class MoreauJeanOSI;
-struct Simulation::SetupLevels : public SiconosVisitor
-{
-  using SiconosVisitor::visit;
-
-  SP::Simulation _parent;
-  SP::Interaction _interaction;
-  SP::NonSmoothLaw _nonSmoothLaw;
-  SP::DynamicalSystem _ds;
-  SetupLevels(SP::Simulation s, SP::Interaction inter,
-              SP::DynamicalSystem ds) :
-    _parent(s), _interaction(inter), _ds(ds)
-  {
-    _nonSmoothLaw = inter->nonSmoothLaw();
-  };
-
-  void visit(const MoreauJeanOSI&)
-  {
- 
-    unsigned int lowerLevelForOutput = _interaction->lowerLevelForOutput();
-    unsigned int upperLevelForOutput = _interaction->upperLevelForOutput();
-    unsigned int lowerLevelForInput = _interaction->lowerLevelForInput();
-    unsigned int upperLevelForInput = _interaction->upperLevelForInput();
-  
-    _parent->_levelMinForInput = std::min<int>(lowerLevelForInput, _parent->_levelMinForInput);
-    _parent->_levelMaxForInput = std::max<int>(upperLevelForInput, _parent->_levelMaxForInput);
-    _parent->_levelMinForOutput = std::min<int>(lowerLevelForOutput, _parent->_levelMinForInput);
-    _parent->_levelMaxForOutput = std::max<int>(upperLevelForOutput, _parent->_levelMaxForInput);
-
-    _parent->_numberOfIndexSets = std::max<int>(_parent->_levelMaxForOutput + 1, _parent->_numberOfIndexSets);
-
-  };
-
-  void visit(const MoreauJeanGOSI&)
-  {
-    unsigned int lowerLevelForOutput = _interaction->lowerLevelForOutput();
-    unsigned int upperLevelForOutput = _interaction->upperLevelForOutput();
-    unsigned int lowerLevelForInput = _interaction->lowerLevelForInput();
-    unsigned int upperLevelForInput = _interaction->upperLevelForInput();
- 
-    _parent->_levelMinForInput = std::min<int>(lowerLevelForInput, _parent->_levelMinForInput);
-    _parent->_levelMaxForInput = std::max<int>(upperLevelForInput, _parent->_levelMaxForInput);
-    _parent->_levelMinForOutput = std::min<int>(lowerLevelForOutput, _parent->_levelMinForInput);
-    _parent->_levelMaxForOutput = std::max<int>(upperLevelForOutput, _parent->_levelMaxForInput);
-
-    _parent->_numberOfIndexSets = std::max<int>(_parent->_levelMaxForOutput + 1, _parent->_numberOfIndexSets);
-
-
-  };
-
-  void visit(const EulerMoreauOSI&)
-  {
-
-    unsigned int lowerLevelForOutput = _interaction->lowerLevelForOutput();
-    unsigned int upperLevelForOutput = _interaction->upperLevelForOutput();
-    unsigned int lowerLevelForInput = _interaction->lowerLevelForInput();
-    unsigned int upperLevelForInput = _interaction->upperLevelForInput();
-    
-    _parent->_levelMinForInput = std::min<int>(lowerLevelForInput, _parent->_levelMinForInput);
-    _parent->_levelMaxForInput = std::max<int>(upperLevelForInput, _parent->_levelMaxForInput);
-    _parent->_levelMinForOutput = std::min<int>(lowerLevelForOutput, _parent->_levelMinForInput);
-    _parent->_levelMaxForOutput = std::max<int>(upperLevelForOutput, _parent->_levelMaxForInput);
-
-    _parent->_numberOfIndexSets = std::max<int>(_parent->_levelMaxForOutput + 1, _parent->_numberOfIndexSets);
-   
-
-  };
-
-
-
-
-  void visit(const MoreauJeanDirectProjectionOSI& moreauCPOSI)
-  {
- 
-    unsigned int lowerLevelForOutput = _interaction->lowerLevelForOutput();
-    unsigned int upperLevelForOutput = _interaction->upperLevelForOutput();
-    unsigned int lowerLevelForInput = _interaction->lowerLevelForInput();
-    unsigned int upperLevelForInput = _interaction->upperLevelForInput();
-    
-    _parent->_levelMinForInput = std::min<int>(lowerLevelForInput, _parent->_levelMinForInput);
-    _parent->_levelMaxForInput = std::max<int>(upperLevelForInput, _parent->_levelMaxForInput);
-    _parent->_levelMinForOutput = std::min<int>(lowerLevelForOutput, _parent->_levelMinForInput);
-    _parent->_levelMaxForOutput = std::max<int>(upperLevelForOutput, _parent->_levelMaxForInput);
-    _parent->_numberOfIndexSets = std::max<int>(_parent->_levelMaxForOutput + 1, _parent->_numberOfIndexSets);
-
-    
-  };
-
-
-  void visit(const MoreauJeanCombinedProjectionOSI& moreauCPOSI)
-  {
-
-    unsigned int lowerLevelForOutput = _interaction->lowerLevelForOutput();
-    unsigned int upperLevelForOutput = _interaction->upperLevelForOutput();
-    unsigned int lowerLevelForInput = _interaction->lowerLevelForInput();
-    unsigned int upperLevelForInput = _interaction->upperLevelForInput();
-  
-
-    _parent->_levelMinForInput = std::min<int>(lowerLevelForInput, _parent->_levelMinForInput);
-    _parent->_levelMaxForInput = std::max<int>(upperLevelForInput, _parent->_levelMaxForInput);
-    _parent->_levelMinForOutput = std::min<int>(lowerLevelForOutput, _parent->_levelMinForInput);
-    _parent->_levelMaxForOutput = std::max<int>(upperLevelForOutput, _parent->_levelMaxForInput);
-    _parent->_numberOfIndexSets = std::max<int>(_parent->_levelMaxForOutput + 1, _parent->_numberOfIndexSets);
-
-  };
-
-
-
-  void visit(const SchatzmanPaoliOSI&)
-  {
-    
-    unsigned int lowerLevelForOutput = _interaction->lowerLevelForOutput();
-    unsigned int upperLevelForOutput = _interaction->upperLevelForOutput();
-    unsigned int lowerLevelForInput = _interaction->lowerLevelForInput();
-    unsigned int upperLevelForInput = _interaction->upperLevelForInput();
-
-
-    _parent->_levelMinForInput = std::min<int>(lowerLevelForInput, _parent->_levelMinForInput);
-    _parent->_levelMaxForInput = std::max<int>(upperLevelForInput, _parent->_levelMaxForInput);
-    _parent->_levelMinForOutput = std::min<int>(lowerLevelForOutput, _parent->_levelMinForInput);
-    _parent->_levelMaxForOutput = std::max<int>(upperLevelForOutput, _parent->_levelMaxForInput);
-
-
-    _parent->_numberOfIndexSets = std::max<int>(_parent->_levelMaxForOutput + 1, _parent->_numberOfIndexSets);
-
-  };
-  void visit(const D1MinusLinearOSI& d1OSI)
-  {
-
-    unsigned int lowerLevelForOutput = _interaction->lowerLevelForOutput();
-    unsigned int upperLevelForOutput = _interaction->upperLevelForOutput();
-    unsigned int lowerLevelForInput = _interaction->lowerLevelForInput();
-    unsigned int upperLevelForInput = _interaction->upperLevelForInput();
-
-    _parent->_levelMinForInput = std::min<int>(lowerLevelForInput, _parent->_levelMinForInput);
-    _parent->_levelMaxForInput = std::max<int>(upperLevelForInput, _parent->_levelMaxForInput);
-    _parent->_levelMinForOutput = std::min<int>(lowerLevelForOutput, _parent->_levelMinForInput);
-    _parent->_levelMaxForOutput = std::max<int>(upperLevelForOutput, _parent->_levelMaxForInput);
-
-    /* Get the number of required index sets. */
-
-    unsigned int nbIndexSets =  d1OSI.numberOfIndexSets();
-    _parent->_numberOfIndexSets = std::max<int>(nbIndexSets, _parent->_numberOfIndexSets);
-
-  };
-
-  void visit(const LsodarOSI&)
-  {
-
-    unsigned int lowerLevelForOutput = _interaction->lowerLevelForOutput();
-    unsigned int upperLevelForOutput = _interaction->upperLevelForOutput();
-    unsigned int lowerLevelForInput = _interaction->lowerLevelForInput();
-    unsigned int upperLevelForInput = _interaction->upperLevelForInput();
-
-    _parent->_levelMinForInput = std::min<int>(lowerLevelForInput, _parent->_levelMinForInput);
-    _parent->_levelMaxForInput = std::max<int>(upperLevelForInput, _parent->_levelMaxForInput);
-    _parent->_levelMinForOutput = std::min<int>(lowerLevelForOutput, _parent->_levelMinForInput);
-    _parent->_levelMaxForOutput = std::max<int>(upperLevelForOutput, _parent->_levelMaxForInput);
-
-    _parent->_numberOfIndexSets = std::max<int>(_parent->_levelMaxForOutput + 1, _parent->_numberOfIndexSets);
-
-  };
-
-
-  void visit(const Hem5OSI&)
-  {
-    
-    unsigned int lowerLevelForOutput = _interaction->lowerLevelForOutput();
-    unsigned int upperLevelForOutput = _interaction->upperLevelForOutput();
-    unsigned int lowerLevelForInput = _interaction->lowerLevelForInput();
-    unsigned int upperLevelForInput = _interaction->upperLevelForInput();
-
-
-    _parent->_levelMinForInput = std::min<int>(lowerLevelForInput, _parent->_levelMinForInput);
-    _parent->_levelMaxForInput = std::max<int>(upperLevelForInput, _parent->_levelMaxForInput);
-    _parent->_levelMinForOutput = std::min<int>(lowerLevelForOutput, _parent->_levelMinForInput);
-    _parent->_levelMaxForOutput = std::max<int>(upperLevelForOutput, _parent->_levelMaxForInput);
-    _parent->_numberOfIndexSets = std::max<int>(_parent->_levelMaxForOutput + 1, _parent->_numberOfIndexSets);
-
-
-  };
-
-  void visit(const NewMarkAlphaOSI&)
-  {
-    unsigned int lowerLevelForOutput = LEVELMAX;
-    unsigned int upperLevelForOutput = 0;
-    unsigned int lowerLevelForInput = LEVELMAX;
-    unsigned int upperLevelForInput = 0;
-
-    Type::Siconos dsType = Type::value(*_ds);
-
-    /** there is only a test on the dstype and simulation since  we assume that
-     * we implicitely the nonsmooth law when a DS type is chosen
-     */
-
-    if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
-    {
-      if (Type::value(*_parent) == Type::EventDriven)
-      {
-        Type::Siconos nslType = Type::value(*_nonSmoothLaw);
-        if (nslType == Type::NewtonImpactNSL || nslType == Type::MultipleImpactNSL)
-        {
-          lowerLevelForOutput = 0;
-          upperLevelForOutput = 2 ;
-          lowerLevelForInput = 1;
-          upperLevelForInput = 2;
-        }
-        else if (nslType ==  Type::NewtonImpactFrictionNSL)
-        {
-          lowerLevelForOutput = 0;
-          upperLevelForOutput = 4;
-          lowerLevelForInput = 1;
-          upperLevelForInput = 2;
-          RuntimeException::selfThrow("Simulation::SetupLevels::visit - simulation of type: " + Type::name(*_parent) + " not yet implemented for nonsmooth law of type NewtonImpactFrictionNSL");
-        }
-        else
-        {
-          RuntimeException::selfThrow("Simulation::SetupLevels::visit - simulation of type: " + Type::name(*_parent) + "not yet implemented  for nonsmooth of type");
-        }
-      }
-      else
-        RuntimeException::selfThrow("Simulation::SetupLevels::visit - unknown simulation type: " + Type::name(*_parent));
-    }
-    else RuntimeException::selfThrow("Simulation::SetupLevels::visit - not yet implemented for Dynamical system type :" + dsType);
-
-    _parent->_levelMinForInput = std::min<int>(lowerLevelForInput, _parent->_levelMinForInput);
-    _parent->_levelMaxForInput = std::max<int>(upperLevelForInput, _parent->_levelMaxForInput);
-    _parent->_levelMinForOutput = std::min<int>(lowerLevelForOutput, _parent->_levelMinForInput);
-    _parent->_levelMaxForOutput = std::max<int>(upperLevelForOutput, _parent->_levelMaxForInput);
-    _parent->_numberOfIndexSets = std::max<int>(_parent->_levelMaxForOutput + 1, _parent->_numberOfIndexSets);
-    _interaction->setLowerLevelForOutput(lowerLevelForOutput);
-    _interaction->setUpperLevelForOutput(upperLevelForOutput);
-
-    _interaction->setLowerLevelForInput(lowerLevelForInput);
-    _interaction->setUpperLevelForInput(upperLevelForInput);
-
-    //_interaction->setSteps(1);
-  };
-
-
-
-
-  void visit(const ZeroOrderHoldOSI&)
-  {
-    unsigned int lowerLevelForOutput = LEVELMAX;
-    unsigned int upperLevelForOutput = 0;
-    unsigned int lowerLevelForInput = LEVELMAX;
-    unsigned int upperLevelForInput = 0;
-
-    Type::Siconos dsType = Type::value(*_ds);
-
-    if (dsType == Type::FirstOrderNonLinearDS || dsType == Type::FirstOrderLinearDS || dsType == Type::FirstOrderLinearTIDS)
-    {
-      if (Type::name(*_parent) == "TimeStepping")
-      {
-        lowerLevelForOutput = 0;
-        upperLevelForOutput = 0;
-        lowerLevelForInput = 0;
-        upperLevelForInput = 0;
-      }
-      else
-        RuntimeException::selfThrow("Simulation::SetupLevels::visit - unknown simulation type: " + Type::name(*_parent));
-    }
-    else
-      RuntimeException::selfThrow("Simulation::SetupLevels::visit - not yet implemented for Dynamical system type :" + dsType);
-
-    _parent->_levelMinForInput = std::min<int>(lowerLevelForInput, _parent->_levelMinForInput);
-    _parent->_levelMaxForInput = std::max<int>(upperLevelForInput, _parent->_levelMaxForInput);
-    _parent->_levelMinForOutput = std::min<int>(lowerLevelForOutput, _parent->_levelMinForInput);
-    _parent->_levelMaxForOutput = std::max<int>(upperLevelForOutput, _parent->_levelMaxForInput);
-    _parent->_numberOfIndexSets = std::max<int>(_parent->_levelMaxForOutput + 1, _parent->_numberOfIndexSets);
-    _interaction->setLowerLevelForOutput(lowerLevelForOutput);
-    _interaction->setUpperLevelForOutput(upperLevelForOutput);
-
-    _interaction->setLowerLevelForInput(lowerLevelForInput);
-    _interaction->setUpperLevelForInput(upperLevelForInput);
-
-    //_interaction->setSteps(1);
-  };
-
-
-};
-
 void Simulation::computeLevelsForInputAndOutput(SP::Interaction inter, bool init)
 {
   DEBUG_PRINT("Simulation::computeLevelsForInputAndOutput(SP::Interaction inter, bool init)\n");
@@ -741,11 +449,19 @@ void Simulation::computeLevelsForInputAndOutput(SP::Interaction inter, bool init
 
   if (!osi)
     RuntimeException::selfThrow("Simulation::computeLevelsForInputAndOutput osi does not exists");
+  
   indexSet0->properties(indexSet0->descriptor(inter)).osi = osi;
-  std11::shared_ptr<SetupLevels> setupLevels;
 
-  setupLevels.reset(new SetupLevels(shared_from_this(), inter, ds));
-  osi->accept(*(setupLevels.get()));
+  unsigned int lowerLevelForOutput = inter->lowerLevelForOutput();
+  unsigned int upperLevelForOutput = inter->upperLevelForOutput();
+  unsigned int lowerLevelForInput = inter->lowerLevelForInput();
+  unsigned int upperLevelForInput = inter->upperLevelForInput();
+
+  _levelMinForInput = std::min<int>(lowerLevelForInput, _levelMinForInput);
+  _levelMaxForInput = std::max<int>(upperLevelForInput, _levelMaxForInput);
+  _levelMinForOutput = std::min<int>(lowerLevelForOutput, _levelMinForOutput);
+  _levelMaxForOutput = std::max<int>(upperLevelForOutput, _levelMaxForOutput);
+  
   if (!init) // We are not computing the levels at the initialization
   {
     SP::Topology topo = _nsds->topology();

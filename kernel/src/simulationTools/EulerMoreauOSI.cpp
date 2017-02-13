@@ -102,20 +102,20 @@ void EulerMoreauOSI::initializeInteraction(double t0, Interaction &inter,
   SP::DynamicalSystem ds2= interProp.target;
 
   assert(interProp.DSlink);
-  
+
   VectorOfBlockVectors& DSlink = *interProp.DSlink;
   // VectorOfVectors& workVInter = *interProp.workVectors;
   // VectorOfSMatrices& workMInter = *interProp.workMatrices;
 
-  Relation &relation =  *inter.relation();  
+  Relation &relation =  *inter.relation();
   RELATION::TYPES relationType = relation.getType();
 
   if (inter.lowerLevelForOutput() != 0 || inter.upperLevelForOutput() != 0)
     RuntimeException::selfThrow("EulerMoreauOSI::initializeInteraction, we must resize _y");
-  
+
   if (inter.lowerLevelForInput() >  0|| inter.upperLevelForInput() < 0)
     RuntimeException::selfThrow("EulerMoreauOSI::initializeInteraction, we must resize _lambda");
-  
+
   bool computeResidu = relation.requireResidu();
   inter.initializeMemory(computeResidu,_steps);
 
@@ -125,19 +125,19 @@ void EulerMoreauOSI::initializeInteraction(double t0, Interaction &inter,
     {
       DSlink[FirstOrderR::xfree].reset(new BlockVector());
       DSlink[FirstOrderR::xfree]->insertPtr(workVds1[OneStepIntegrator::free]);
-    }  
+    }
 
-   
+
   if (ds1 != ds2)
     {
       VectorOfVectors &workVds2 = *DSG.properties(DSG.descriptor(ds2)).workVectors;
       if (relationType == Lagrangian)
       {
         DSlink[FirstOrderR::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
-      }  
+      }
     }
-    
-  
+
+
   // Compute a first value for the output
     inter.computeOutput(t0, interProp, 0);
 
@@ -149,7 +149,7 @@ void EulerMoreauOSI::initializeInteraction(double t0, Interaction &inter,
     }
     inter.swapInMemory();
 
-  
+
 }
 
 void EulerMoreauOSI::initialize(Model& m)
@@ -172,11 +172,11 @@ void EulerMoreauOSI::initialize(Model& m)
   for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
   {
     Interaction& inter = *indexSet0->bundle(*ui);
-    
+
     initializeInteraction(t0, inter, indexSet0->properties(*ui), *_dynamicalSystemsGraph);
   }
 
-  
+
 }
 void EulerMoreauOSI::initializeIterationMatrixW(double t, SP::DynamicalSystem ds, const DynamicalSystemsGraph::VDescriptor& dsv)
 {
