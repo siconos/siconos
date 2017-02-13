@@ -164,6 +164,7 @@ static inline void fillBasePyarray(PyObject* pyarray, SharedPointerKeeper* saved
     if (PyArray_CheckAnyScalar($input)) {
       int x = PyArray_PyIntAsInt($input);
       $1 = !(x == -1 && PyErr_Occurred());
+      PyErr_Clear();
     }
   }
 }
@@ -196,6 +197,7 @@ static inline void fillBasePyarray(PyObject* pyarray, SharedPointerKeeper* saved
     if (PyArray_CheckAnyScalar($input)) {
       int x = PyArray_PyIntAsInt($input);
       $1 = !(x == -1 && PyErr_Occurred());
+      PyErr_Clear();
     }
   }
 }
