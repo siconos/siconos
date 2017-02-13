@@ -136,7 +136,23 @@ struct Interaction::_setLevels : public SiconosVisitor
 	RuntimeException::selfThrow("Interaction::_setLevels::visit - unknown relation type: ");
     }
   }
+  void visit(const MultipleImpactNSL& nslaw)
+  {
+    RELATION::TYPES relationType = _interaction->relation()->getType();
+    if (relationType == Lagrangian || relationType == NewtonEuler)
+    {
+      _interaction->setLowerLevelForOutput(0);
+      _interaction->setUpperLevelForOutput(1);
+     
+      _interaction->setLowerLevelForInput(0);
+      _interaction->setUpperLevelForInput(1);
 
+    }  
+    else
+    {
+	RuntimeException::selfThrow("Interaction::_setLevels::visit - unknown relation type: ");
+    }
+  }
 };
 
 
@@ -192,7 +208,7 @@ Interaction::Interaction(unsigned int interactionSize,
                          SP::NonSmoothLaw NSL,
                          SP::Relation rel,
                          unsigned int number) :
-  _initialized(false), _number(number), _interactionSize(interactionSize),
+  _number(number), _interactionSize(interactionSize),
   _sizeOfDS(0), _has2Bodies(false), _y(2),  _nslaw(NSL), _relation(rel)
 {
   std11::shared_ptr<_setLevels> setLevels;
@@ -205,7 +221,7 @@ Interaction::Interaction(unsigned int interactionSize,
 Interaction::Interaction(SP::NonSmoothLaw NSL,
                          SP::Relation rel,
                          unsigned int number) :
-  _initialized(false), _number(number), _interactionSize(NSL->size()),
+  _number(number), _interactionSize(NSL->size()),
   _sizeOfDS(0), _has2Bodies(false), _y(2),  _nslaw(NSL), _relation(rel)
 {
   std11::shared_ptr<_setLevels> setLevels;
@@ -724,10 +740,6 @@ void Interaction::display() const
 {
   std::cout << "======= Interaction display number " << _number <<" =======" <<std::endl;
 
-  if (_initialized)
-    std::cout << "The interaction is initialized" <<std::endl;
-  else
-    cout << "The interaction is not initialized" << endl;
   cout << "| lowerLevelForOutput : " << _lowerLevelForOutput << endl;
   cout << "| upperLevelForOutput : " << _upperLevelForOutput << endl;
   cout << "| lowerLevelForInput : " << _lowerLevelForInput << endl;
@@ -736,51 +748,49 @@ void Interaction::display() const
   cout << "| _sizeOfDS : " << _sizeOfDS << endl;
 
   cout << "| "  ; _relation->display();
-  if (_initialized)
-  {
-    for (unsigned int i = 0; i < _upperLevelForOutput + 1; i++)
+  for (unsigned int i = 0; i < _upperLevelForOutput + 1; i++)
     {
 
       std::cout << "| y[" << i  << "] : ";
       if (_y[i])
-      {
-        if (_y[i]->size() >= 5) std::cout <<std::endl;
-        _y[i]->display();
-      }
+	{
+	  if (_y[i]->size() >= 5) std::cout <<std::endl;
+	  _y[i]->display();
+	}
       else std::cout << "->NULL" <<std::endl;
     }
-    for (unsigned int i = 0; i < _upperLevelForOutput + 1; i++)
+  for (unsigned int i = 0; i < _upperLevelForOutput + 1; i++)
     {
       std::cout << "| yOld[" << i  << "] : ";
       if (_yOld[i])
-      {
-        if (_yOld[i]->size() >= 5) std::cout <<std::endl;
-        _yOld[i]->display();
-      }
+	{
+	  if (_yOld[i]->size() >= 5) std::cout <<std::endl;
+	  _yOld[i]->display();
+	}
       else std::cout << "->NULL" <<std::endl;
     }
-    for (unsigned int i = 0; i < _upperLevelForOutput + 1; i++)
+  for (unsigned int i = 0; i < _upperLevelForOutput + 1; i++)
     {
       std::cout << "| y_k[" << i  << "] : ";
       if (_y_k[i])
-      {
-        if (_y_k[i]->size() >= 5) std::cout <<std::endl;
-        _y_k[i]->display();
-      }
+	{
+	  if (_y_k[i]->size() >= 5) std::cout <<std::endl;
+	  _y_k[i]->display();
+	}
       else std::cout << "->NULL" <<std::endl;
     }
-    for (unsigned int i = 0; i < _upperLevelForInput + 1; i++)
+  for (unsigned int i = 0; i < _upperLevelForInput + 1; i++)
     {
       std::cout << "| lambda[" << i  << "] : ";
       if (_lambda[i])
-      {
-        if (_lambda[i]->size() >= 5) std::cout <<std::endl;
-        _lambda[i]->display();
-      }
+	{
+	  if (_lambda[i]->size() >= 5) std::cout <<std::endl;
+	  _lambda[i]->display();
+	}
       else std::cout << "->NULL" <<std::endl;
     }
 
-  }
+  
   std::cout << "===================================" <<std::endl;
 }
 

@@ -73,8 +73,6 @@ private:
   /** serialization hooks
   */
   ACCEPT_SERIALIZATION(Interaction);
-  /**initialization flag */
-  bool _initialized;
 
   /** number specific to each Interaction */
   unsigned int _number;
@@ -186,7 +184,7 @@ private:
 public:
 
   /** Default constructor. */
-  Interaction():_initialized(false), _number(0), _interactionSize(0), _sizeOfDS(0), _has2Bodies(false), _y(2)
+  Interaction(): _number(0), _interactionSize(0), _sizeOfDS(0), _has2Bodies(false), _y(2)
   {};
 
    /** Constructor with interaction size, NonSmoothLaw and Relation.
