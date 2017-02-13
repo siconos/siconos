@@ -64,11 +64,15 @@ void D1MinusLinearOSI::_NSLEffectOnFreeOutput::visit(const NewtonImpactNSL& nsla
 
 
 D1MinusLinearOSI::D1MinusLinearOSI() :
-  OneStepIntegrator(OSI::D1MINUSLINEAROSI), _typeOfD1MinusLinearOSI(halfexplicit_acceleration_level) {}
+  OneStepIntegrator(OSI::D1MINUSLINEAROSI), _typeOfD1MinusLinearOSI(halfexplicit_acceleration_level)
+{
+  _steps =2; //Two evaluations of lambda(2) are made for each time--step
+}
 
 D1MinusLinearOSI::D1MinusLinearOSI(unsigned int type) :
   OneStepIntegrator(OSI::D1MINUSLINEAROSI)
 {
+  _steps =2; //Two evaluations of lambda(2) are made for each time--step
   setTypeOfD1MinusLinearOSI(type);
 }
 
@@ -109,7 +113,7 @@ void D1MinusLinearOSI::initializeDynamicalSystem(Model& m, double t, SP::Dynamic
   _dynamicalSystemsGraph->bundle(dsv)->initMemory(getSizeMem());
   _dynamicalSystemsGraph->bundle(dsv)->resetToInitialState();
 
-  
+
   if(dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
   {
     SP::LagrangianDS lds = std11::static_pointer_cast<LagrangianDS> (ds);
@@ -192,14 +196,120 @@ void D1MinusLinearOSI::initialize(Model & m)
     isOSNSPinitialized = true ;
     break;
   }
+
   if(!isOSNSPinitialized)
   {
     RuntimeException::selfThrow("D1MinusLinearOSI::initialize() - not implemented for type of D1MinusLinearOSI: " + _typeOfD1MinusLinearOSI);
   }
+
+  SP::InteractionsGraph indexSet0 = m.nonSmoothDynamicalSystem()->topology()->indexSet0();
+  InteractionsGraph::VIterator ui, uiend;
+  for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+  {
+    Interaction& inter = *indexSet0->bundle(*ui);
+    initializeInteraction(m.t0(), inter, indexSet0->properties(*ui), *_dynamicalSystemsGraph);
+  }
+
+
   DEBUG_END("D1MinusLinearOSI::initialize() \n");
 }
 
+void D1MinusLinearOSI::initializeInteraction(double t0, Interaction &inter,
+                                             InteractionProperties& interProp,
+                                             DynamicalSystemsGraph & DSG)
+{
+  SP::DynamicalSystem ds1= interProp.source;
+  SP::DynamicalSystem ds2= interProp.target;
 
+  assert(interProp.DSlink);
+
+  VectorOfBlockVectors& DSlink = *interProp.DSlink;
+  // VectorOfVectors& workVInter = *interProp.workVectors;
+  // VectorOfSMatrices& workMInter = *interProp.workMatrices;
+
+  Relation &relation =  *inter.relation();
+  RELATION::TYPES relationType = relation.getType();
+
+  bool isInitializationNeeded = false;
+  if (inter.lowerLevelForOutput() != 0 || inter.upperLevelForOutput() != 2)
+  {
+    //  RuntimeException::selfThrow("D1MinusLinearOSI::initializeInteraction, we must resize _y");
+    inter.setUpperLevelForOutput(2);
+    inter.setLowerLevelForOutput(0);
+    isInitializationNeeded = true;
+  }
+  if (inter.lowerLevelForInput() > 1 || inter.upperLevelForInput() < 2)
+  {
+    //RuntimeException::selfThrow("D1MinusLinearOSI::initializeInteraction, we must resize _lambda");
+     inter.setUpperLevelForInput(2);
+     inter.setLowerLevelForInput(1);
+     isInitializationNeeded = true;
+  }
+
+  if (isInitializationNeeded)
+    inter.init();
+
+  bool computeResidu = relation.requireResidu();
+  inter.initializeMemory(computeResidu,_steps);
+
+  /* allocate ant set work vectors for the osi */
+  VectorOfVectors &workVds1 = *DSG.properties(DSG.descriptor(ds1)).workVectors;
+  if (relationType == Lagrangian)
+  {
+    DSlink[LagrangianR::xfree].reset(new BlockVector());
+    DSlink[LagrangianR::xfree]->insertPtr(workVds1[OneStepIntegrator::free]);
+  }
+  else if (relationType == NewtonEuler)
+  {
+    DSlink[NewtonEulerR::xfree].reset(new BlockVector());
+    DSlink[NewtonEulerR::xfree]->insertPtr(workVds1[OneStepIntegrator::free]);
+  }
+
+  if (ds1 != ds2)
+  {
+    VectorOfVectors &workVds2 = *DSG.properties(DSG.descriptor(ds2)).workVectors;
+    if (relationType == Lagrangian)
+    {
+      DSlink[LagrangianR::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
+    }
+    else if (relationType == NewtonEuler)
+    {
+      DSlink[NewtonEulerR::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
+    }
+  }
+  if (_steps > 1) // Multi--step methods
+  {
+    // Compute the old Values of Output with stored values in Memory
+    for (unsigned int k = 0; k < _steps - 1; k++)
+    {
+      /** ComputeOutput to fill the Memory
+       * We assume the state x is stored in xMemory except for the  initial
+       * condition which has not been swap yet.
+       */
+      //        relation()->LinkDataFromMemory(k);
+      for (unsigned int i = 0; i < inter.upperLevelForOutput() + 1; ++i)
+      {
+        inter.computeOutput(t0, interProp, i);
+        //_yMemory[i]->swap(*_y[i]);
+      }
+    }
+    inter.swapInMemory();
+
+  }
+
+  // Compute a first value for the output
+  inter.computeOutput(t0, interProp, 0);
+
+  // prepare the gradients
+  relation.computeJach(t0, inter, interProp);
+  for (unsigned int i = 0; i < inter.upperLevelForOutput() + 1; ++i)
+  {
+    inter.computeOutput(t0, interProp, i);
+  }
+  inter.swapInMemory();
+
+
+}
 
 double D1MinusLinearOSI::computeResidu()
 {

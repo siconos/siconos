@@ -97,9 +97,13 @@ protected:
  */
   SP::DynamicalSystemsGraph _dynamicalSystemsGraph;
 
-/** size of the memory for the integrator */
+  /** size of the memory for the integrator */
   unsigned int _sizeMem;
 
+  /** steps of the integrator
+   */
+  unsigned int _steps;
+  
 /** A link to the simulation that owns this OSI */
   SP::Simulation _simulation;
 
@@ -215,8 +219,31 @@ public:
    * \param m a Model
    */
   virtual void initialize(Model& m ) = 0;
+  
+  /** initialization of the work vectors and matrices (properties) related to 
+   *  one dynamical system on the graph and needed by the osi 
+   * \param m the Model
+   * \param t time of initialization
+   * \param ds the dynamical system   
+   */
+  virtual void initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds) =0 ;
 
-  virtual void initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds) = 0;
+  /** initialization of the work vectors and matrices (properties) related to 
+   *  one interaction on the graph and needed by the osi 
+   * \param t0 time of initialization
+   * \param inter the interaction
+   * \param interProp the properties on the graph
+   * \param DSG the dynamical systems graph
+   */
+  virtual void initializeInteraction(double t0, Interaction &inter,
+			     InteractionProperties& interProp,
+			     DynamicalSystemsGraph & DSG) =0 ;
+
+  /** get the number of index sets required for the simulation
+   * \return unsigned int
+   */
+  virtual unsigned int numberOfIndexSets() const=0;
+  
   
   /** compute the initial state of the Newton loop.
    */

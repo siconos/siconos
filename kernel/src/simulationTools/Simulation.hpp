@@ -159,13 +159,6 @@ protected:
    */
   bool _linkOrUnlink;
 
-  /** initializations of levels
-   *
-   */
-  struct SetupLevels;
-  friend struct Simulation::SetupLevels;
-
-
   /** default constructor.
    */
   Simulation() {};

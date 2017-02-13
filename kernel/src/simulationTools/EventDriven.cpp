@@ -41,6 +41,7 @@
 using namespace std;
 using namespace RELATION;
 
+
 /** defaut constructor
  *  \param a pointer to a timeDiscretisation (linked to the model that owns this simulation)
  */

@@ -28,6 +28,7 @@
 #include "Model.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
 
+#include "debug.h"
 #include <mlcp_cst.h>
 
 using namespace RELATION;
@@ -515,14 +516,53 @@ void MLCPProjectOnConstraints::updateInteractionBlocksOLD()
 void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const InteractionsGraph::VDescriptor& vd)
 {
   SP::InteractionsGraph indexSet = simulation()->indexSet(indexSetLevel());
-
-  SP::DynamicalSystem DS1 = indexSet->properties(vd).source;
-  SP::DynamicalSystem DS2 = indexSet->properties(vd).target;
   SP::Interaction inter = indexSet->bundle(vd);
-  SP::OneStepIntegrator Osi = indexSet->properties(vd).osi;
+
+  // At most 2 DS are linked by an Interaction
+  SP::DynamicalSystem ds1;
+  SP::DynamicalSystem ds2;
   unsigned int pos1, pos2;
+  // --- Get the dynamical system(s) (edge(s)) connected to the current interaction (vertex) ---
+  if (indexSet->properties(vd).source != indexSet->properties(vd).target)
+  {
+    DEBUG_PRINT("a two DS Interaction\n");
+    ds1 = indexSet->properties(vd).source;
+    ds2 = indexSet->properties(vd).target;
+  }
+  else
+  {
+    DEBUG_PRINT("a single DS Interaction\n");
+    ds1 = indexSet->properties(vd).source;
+    ds2 = ds1;
+    // \warning this looks like some debug code, but it gets executed even with NDEBUG.
+    // may be compiler does something smarter, but still it should be rewritten. --xhub
+    InteractionsGraph::OEIterator oei, oeiend;
+    for (std11::tie(oei, oeiend) = indexSet->out_edges(vd);
+         oei != oeiend; ++oei)
+    {
+      // note : at most 4 edges
+      ds2 = indexSet->bundle(*oei);
+      if (ds2 != ds1)
+      {
+        assert(false);
+        break;
+      }
+    }
+  }
+  assert(ds1);
+  assert(ds2);
   pos1 = indexSet->properties(vd).source_pos;
   pos2 = indexSet->properties(vd).target_pos;
+
+  // We assume that all ds in vertex_inter have the same osi.
+  // SP::OneStepIntegrator Osi = indexSet->properties(vd).osi;
+  // //SP::OneStepIntegrator Osi = simulation()->integratorOfDS(ds);
+  // OSI::TYPES  osiType = Osi->getType();
+  DynamicalSystemsGraph& DSG0 = *simulation()->nonSmoothDynamicalSystem()->dynamicalSystems();
+
+  OneStepIntegrator& osi1 = *DSG0.properties(DSG0.descriptor(ds1)).osi;
+  //OneStepIntegrator& osi2 = *DSG0.properties(DSG0.descriptor(ds2)).osi;
+
 
   unsigned int sizeY = 0;
   sizeY = std11::static_pointer_cast<OSNSMatrixProjectOnConstraints>
@@ -535,10 +575,10 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
   //   std::cout << "indexSet :"<< indexSet << std::endl;
   //   std::cout << "vd :"<< vd << std::endl;
   //  indexSet->display();
-  //  std::cout << "DS1 :" << std::endl;
-  // DS1->display();
-  //  std::cout << "DS2 :" << std::endl;
-  // DS2->display();
+  //  std::cout << "ds1 :" << std::endl;
+  // ds1->display();
+  //  std::cout << "ds2 :" << std::endl;
+  // ds2->display();
 #endif
   assert(indexSet->blockProj[vd]);
   SP::SiconosMatrix currentInteractionBlock = indexSet->blockProj[vd];
@@ -591,10 +631,10 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
   // loop over the common DS
   bool endl = false;
   unsigned int pos = pos1;
-  for (SP::DynamicalSystem ds = DS1; !endl; ds = DS2)
+  for (SP::DynamicalSystem ds = ds1; !endl; ds = ds2)
   {
-    assert(ds == DS1 || ds == DS2);
-    endl = (ds == DS2);
+    assert(ds == ds1 || ds == ds2);
+    endl = (ds == ds2);
 
     if (Type::value(*ds) == Type::LagrangianLinearTIDS ||
         Type::value(*ds) == Type::LagrangianDS)
@@ -637,7 +677,7 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
 
       if (_useMassNormalization)
       {
-        SP::SiconosMatrix centralInteractionBlock = getOSIMatrix(Osi, ds);
+        SP::SiconosMatrix centralInteractionBlock = getOSIMatrix(osi1, ds);
         centralInteractionBlock->PLUForwardBackwardInPlace(*work);
         prod(*leftInteractionBlock, *work, *currentInteractionBlock, false);
         //      gemm(CblasNoTrans,CblasNoTrans,1.0,*leftInteractionBlock,*work,1.0,*currentInteractionBlock);
@@ -721,7 +761,7 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
 
 
       }
-      
+
     }
     else
       RuntimeException::selfThrow("MLCPProjectOnConstraints::computeDiagonalInteractionBlock - ds is not from NewtonEulerDS neither a LagrangianDS.");
@@ -733,11 +773,11 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
     std::cout << "MLCPProjectOnConstraints::computeDiagonalInteractionBlock DiaginteractionBlock " << std::endl;
     currentInteractionBlock->display();
 #endif
-    // Set pos for next loop. 
+    // Set pos for next loop.
     pos = pos2;
-     
+
   }
-  
+
 }
 
 void MLCPProjectOnConstraints::computeInteractionBlock(const InteractionsGraph::EDescriptor& ed)
@@ -761,6 +801,8 @@ void MLCPProjectOnConstraints::computeInteractionBlock(const InteractionsGraph::
   SP::DynamicalSystem ds = indexSet->bundle(ed);
   SP::Interaction inter1 = indexSet->bundle(indexSet->source(ed));
   SP::Interaction inter2 = indexSet->bundle(indexSet->target(ed));
+  DynamicalSystemsGraph& DSG0 = *simulation()->nonSmoothDynamicalSystem()->dynamicalSystems();
+  OneStepIntegrator& Osi = *DSG0.properties(DSG0.descriptor(ds)).osi;
   // For the edge 'ds', we need to find relative position of this ds
   // in inter1 and inter2 relation matrices (--> pos1 and pos2 below)
   // - find if ds is source or target in inter_i
@@ -770,7 +812,6 @@ void MLCPProjectOnConstraints::computeInteractionBlock(const InteractionsGraph::
   // source of inter1 :
   vertex_inter = indexSet->source(ed);
   VectorOfSMatrices& workMInter1 = *indexSet->properties(vertex_inter).workMatrices;
-  SP::OneStepIntegrator Osi = indexSet->properties(vertex_inter).osi;
   SP::DynamicalSystem tmpds = indexSet->properties(vertex_inter).source;
   if (tmpds == ds)
     pos1 =  indexSet->properties(vertex_inter).source_pos;
@@ -790,19 +831,19 @@ void MLCPProjectOnConstraints::computeInteractionBlock(const InteractionsGraph::
     tmpds  = indexSet->properties(vertex_inter).target;
     pos2 =  indexSet->properties(vertex_inter).target_pos;
   }
-    
+
   unsigned int index1 = indexSet->index(indexSet->source(ed));
   unsigned int index2 = indexSet->index(indexSet->target(ed));
-    
+
   unsigned int sizeY1 = 0;
   sizeY1 = std11::static_pointer_cast<OSNSMatrixProjectOnConstraints>
     (_M)->computeSizeForProjection(inter1);
   unsigned int sizeY2 = 0;
   sizeY2 = std11::static_pointer_cast<OSNSMatrixProjectOnConstraints>
     (_M)->computeSizeForProjection(inter2);
-    
+
   SP::SiconosMatrix currentInteractionBlock;
-    
+
   assert(index1 != index2);
 
   if (index2 > index1) // upper block
@@ -1040,14 +1081,14 @@ void MLCPProjectOnConstraints::postComputeLagrangianR(SP::Interaction inter, uns
   lr->jachq()->display();
   printf("MLCPProjectOnConstraints::postComputeLagrangianR q before update\n");
 
-  
+
   SP::InteractionsGraph indexSet = simulation()->indexSet(indexSetLevel());
   InteractionsGraph::VDescriptor ui = indexSet->descriptor(inter);
   InteractionsGraph::OEIterator oei, oeiend;
     for(std11::tie(oei, oeiend) = indexSet->out_edges(ui);
         oei != oeiend; ++oei)
     {
-      
+
       SP::LagrangianDS lds =  std11::static_pointer_cast<LagrangianDS>(indexSet->bundle(*oei));
       lds->q()->display();
   }
@@ -1138,7 +1179,7 @@ void MLCPProjectOnConstraints::postComputeLagrangianR(SP::Interaction inter, uns
   printf("MLCPProjectOnConstraints::postComputeLagrangianR _z\n");
   _z->display();
   printf("MLCPProjectOnConstraints::postComputeLagrangianR updated\n");
-  
+
   VectorOfBlockVectors& DSlink = *(indexSet->properties(ui)).DSlink;
 //  (*DSlink[LagrangianR::q0]).display();
 //  (lr->q())->display();

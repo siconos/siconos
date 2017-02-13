@@ -73,8 +73,6 @@ private:
   /** serialization hooks
   */
   ACCEPT_SERIALIZATION(Interaction);
-  /**initialization flag */
-  bool _initialized;
 
   /** number specific to each Interaction */
   unsigned int _number;
@@ -144,8 +142,7 @@ private:
   /** memory of previous coordinates of the system */
   VectorOfMemories _lambdaMemory;
 
-  /** Size (depth) of the Memory*/
-  unsigned int _steps;
+
 
   /** result of the computeInput function */
   VectorOfVectors _lambda;
@@ -171,6 +168,12 @@ private:
   /* work vector to compute qblock, XXX maybe it shouldn't exist */
   SP::SiconosVector _yForNSsolver;
 
+  struct _setLevels;
+  friend struct Interaction::_setLevels;
+
+
+
+  
   // === PRIVATE FUNCTIONS ===
 
   /** copy constructor => private, no copy nor pass-by-value.
@@ -181,7 +184,7 @@ private:
 public:
 
   /** Default constructor. */
-  Interaction():_initialized(false), _number(0), _interactionSize(0), _sizeOfDS(0), _has2Bodies(false), _y(2)
+  Interaction(): _number(0), _interactionSize(0), _sizeOfDS(0), _has2Bodies(false), _y(2)
   {};
 
    /** Constructor with interaction size, NonSmoothLaw and Relation.
@@ -214,20 +217,9 @@ public:
    */
   void setDSLinkAndWorkspace(InteractionProperties& interProp, DynamicalSystem& ds1, VectorOfVectors& workV1, DynamicalSystem& ds2, VectorOfVectors& workV2);
 
-  /** initialize this relation
-   * \param t0 initial time for this Interaction
-   * \param interProp the InteractionProperties of this Interaction
-   * \param DSG the graph of dynamical systems
+  /** Common init  code for contructors.
    */
-  void initialize(double t0, InteractionProperties& interProp, DynamicalSystemsGraph & DSG);
-
-  /** check if Interaction is initialized
-   * \return true if it is initialized
-   */
-  bool isInitialized() const
-  {
-    return _initialized;
-  }
+  void init();
 
   /** set all lambda to zero
    */
@@ -241,7 +233,7 @@ public:
   /** build y and \f$\lambda\f$ vectors
    * \param computeResiduY if true the residu on y is computed and memory allocation is done for _residuY and _h_alpha
   */
-  void initializeMemory(bool computeResiduY);
+  void initializeMemory(bool computeResiduY, unsigned int steps);
 
   // === GETTERS/SETTERS ===
   /** get the value of number
@@ -511,13 +503,6 @@ public:
   void setYOldPtr(const unsigned int i, SP::SiconosVector v);
 
 
-  /** set yOld[i] to pointer newPtr
-   * \param newval  a SP::SiconosVector  and an unsigned int
-   */
-  void setSteps(unsigned int newval)
-  {
-    _steps = newval;
-  };
 
 
   /** get all the values of the state vector y stored in memory

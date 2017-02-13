@@ -147,7 +147,7 @@ void TimeStepping::updateIndexSet(unsigned int i)
   SP::InteractionsGraph indexSet1 = topo->indexSet(1);
   assert(indexSet0);
   assert(indexSet1);
-
+  DynamicalSystemsGraph& DSG0= *nonSmoothDynamicalSystem()->dynamicalSystems();
   topo->setHasChanged(false);
 
   DEBUG_PRINTF("TimeStepping::updateIndexSet(unsigned int i). update indexSets start : indexSet0 size : %ld\n", indexSet0->size());
@@ -172,9 +172,13 @@ void TimeStepping::updateIndexSet(unsigned int i)
       indexSet0->color(inter1_descr0) = boost::gray_color;
       if (Type::value(*(inter1->nonSmoothLaw())) != Type::EqualityConditionNSL)
       {
-        SP::OneStepIntegrator Osi = indexSet1->properties(*ui1).osi;
+	// We assume that the integrator of the ds1 drive the update of the index set
+        //SP::OneStepIntegrator Osi = indexSet1->properties(*ui1).osi;
+	SP::DynamicalSystem ds1 = indexSet1->properties(*ui1).source;
+	OneStepIntegrator& osi = *DSG0.properties(DSG0.descriptor(ds1)).osi;
+	
         //if(predictorDeactivate(inter1,i))
-        if (Osi->removeInteractionInIndexSet(inter1, i))
+        if (osi.removeInteractionInIndexSet(inter1, i))
         {
           // Interaction is not active
           // ui1 becomes invalid
@@ -265,8 +269,12 @@ void TimeStepping::updateIndexSet(unsigned int i)
         bool activate = true;
         if (Type::value(*(inter0->nonSmoothLaw())) != Type::EqualityConditionNSL)
         {
-          SP::OneStepIntegrator Osi = indexSet0->properties(*ui0).osi;
-          activate = Osi->addInteractionInIndexSet(inter0, i);
+          //SP::OneStepIntegrator Osi = indexSet0->properties(*ui0).osi;
+	  // We assume that the integrator of the ds1 drive the update of the index set
+	  SP::DynamicalSystem ds1 = indexSet1->properties(*ui0).source;
+	  OneStepIntegrator& osi = *DSG0.properties(DSG0.descriptor(ds1)).osi;
+
+          activate = osi.addInteractionInIndexSet(inter0, i);
         }
         if (activate)
         {

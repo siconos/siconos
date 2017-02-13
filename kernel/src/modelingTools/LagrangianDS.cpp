@@ -641,8 +641,11 @@ void LagrangianDS::display() const
   else std::cout << "-> NULL" <<std::endl;
   std::cout << "- q0 " <<std::endl;
   if (_q0) _q0->display();
-  std::cout << "- v " <<std::endl;
+  std::cout << "- velocity " <<std::endl;
   if (_q[1]) _q[1]->display();
+  else std::cout << "-> NULL" <<std::endl;
+  std::cout << "- acceleration " <<std::endl;
+  if (_q[2]) _q[2]->display();
   else std::cout << "-> NULL" <<std::endl;
   std::cout << "- v0 " <<std::endl;
   if (_velocity0) _velocity0->display();

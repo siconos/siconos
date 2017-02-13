@@ -182,23 +182,29 @@ bool GlobalFrictionContact::preCompute(double time)
 
       assert(Type::value(*(inter.nonSmoothLaw())) == Type::NewtonImpactFrictionNSL);
       _mu->push_back(std11::static_pointer_cast<NewtonImpactFrictionNSL>(inter.nonSmoothLaw())->mu());
+      
+      SP::DynamicalSystem ds1 = indexSet.properties(*ui).source;
+      SP::DynamicalSystem ds2 = indexSet.properties(*ui).target;
+      OneStepIntegrator& Osi1 = *DSG0.properties(DSG0.descriptor(ds1)).osi;
+      OneStepIntegrator& Osi2 = *DSG0.properties(DSG0.descriptor(ds2)).osi;
+      
+      //OneStepIntegrator& Osi = *indexSet.properties(*ui).osi;
 
-      OneStepIntegrator& Osi = *indexSet.properties(*ui).osi;
-      OSI::TYPES osiType = Osi.getType();
-      if (osiType == OSI::MOREAUJEANOSI2)
+      OSI::TYPES osi1Type = Osi1.getType();
+      OSI::TYPES osi2Type = Osi2.getType();
+      if (osi1Type == OSI::MOREAUJEANOSI2  && osi2Type == OSI::MOREAUJEANOSI2)
       {
-        static_cast<MoreauJeanGOSI&>(Osi).NSLcontrib(inter, *this);
+        static_cast<MoreauJeanGOSI&>(Osi1).NSLcontrib(inter, *this);
       }
       else
       {
-        RuntimeException::selfThrow("GlobalFrictionContact::computeq. Not yet implemented for Integrator type : " + osiType);
+        RuntimeException::selfThrow("GlobalFrictionContact::computeq. Not yet implemented for Integrator type : " + osi1Type);
       }
       setBlock(*inter.yForNSsolver(), _b, 3, 0, pos);
       nnzH += inter.getLeftInteractionBlock(workMInter).nnz();
       pos += 3;
 
-      SP::DynamicalSystem ds1 = indexSet.properties(*ui).source;
-      SP::DynamicalSystem ds2 = indexSet.properties(*ui).target;
+
       SiconosMatrix* W = DSG0.properties(DSG0.descriptor(ds1)).W.get();
       assert(W);
       bool inserted = dsMat.insert(std::make_pair(ds1, W)).second;

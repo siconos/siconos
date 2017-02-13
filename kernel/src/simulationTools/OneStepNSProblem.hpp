@@ -333,7 +333,7 @@ public:
       \param ds the concerned dynamical system
       \return the required matrix.
   */
-  SP::SimpleMatrix getOSIMatrix(SP::OneStepIntegrator osi, SP::DynamicalSystem ds);
+  SP::SimpleMatrix getOSIMatrix(OneStepIntegrator& osi, SP::DynamicalSystem ds);
 
   /** visitors hook
    */

@@ -1,6 +1,8 @@
-set  term X11
+#set  term X11
 set multiplot
 
+resultfile = 'SimplePendulumResult.dat'
+resultfile_ref = 'result_AlphaScheme.ref'
 
 basheight = 0.45
 heightoff = -0.85
@@ -30,8 +32,10 @@ set origin 0.0,winheight*3.0+heightoff
 #"SimplePendulumResult.dat" u 1:3 t "Mass 1 Velocity" w l,\
 #"SimplePendulumResult.dat" u 1:4 t "x1" w l
 
-plot\
-"SimplePendulumResult.dat" u 1:6 t "v1" w l
+plot \
+resultfile u 1:6 t "v1" w l,\
+resultfile_ref every ::1 u 1:6 t "v1_ref" w l
+
 
 
 
@@ -40,5 +44,6 @@ set origin 0.0,winheight*2.0+heightoff-0.01
 set xrange [-0.0:2]
 set yrange [-2:2]
 
-plot "SimplePendulumResult.dat" u 4:5 t "Mass 1 trajectory" w l
+plot resultfile u 4:5 t "Mass 1 trajectory" w l,\
+     resultfile_ref every ::1  u 4:5 t "Mass 1 trajectory (ref)" w l,\
 

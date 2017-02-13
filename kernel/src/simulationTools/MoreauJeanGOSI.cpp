@@ -47,6 +47,7 @@ using namespace RELATION;
 MoreauJeanGOSI::MoreauJeanGOSI(double theta, double gamma):
   OneStepIntegrator(OSI::MOREAUJEANOSI2), _useGammaForRelation(false), _explicitNewtonEulerDSOperators(false)
 {
+  _steps=1;
   _theta = theta;
   if(!isnan(gamma))
   {
@@ -97,8 +98,74 @@ void MoreauJeanGOSI::initializeDynamicalSystem(Model& m, double t, SP::Dynamical
 
 
       neds->swapInMemory();
-    }  
+    }
 }
+
+void MoreauJeanGOSI::initializeInteraction(double t0, Interaction &inter,
+                                          InteractionProperties& interProp,
+                                          DynamicalSystemsGraph & DSG)
+{
+  SP::DynamicalSystem ds1= interProp.source;
+  SP::DynamicalSystem ds2= interProp.target;
+
+  assert(interProp.DSlink);
+
+  VectorOfBlockVectors& DSlink = *interProp.DSlink;
+  // VectorOfVectors& workVInter = *interProp.workVectors;
+  // VectorOfSMatrices& workMInter = *interProp.workMatrices;
+
+  Relation &relation =  *inter.relation();
+  RELATION::TYPES relationType = relation.getType();
+
+  if (inter.lowerLevelForOutput() != 0 || inter.upperLevelForOutput() != 1)
+     RuntimeException::selfThrow("MoreauJeanOSI::initializeInteraction, we must resize _y");
+
+  if (inter.lowerLevelForInput() > 1 || inter.upperLevelForInput() < 1)
+     RuntimeException::selfThrow("MoreauJeanOSI::initializeInteraction, we must resize _lambda");
+
+  bool computeResidu = relation.requireResidu();
+  inter.initializeMemory(computeResidu,_steps);
+
+  /* allocate ant set work vectors for the osi */
+  VectorOfVectors &workVds1 = *DSG.properties(DSG.descriptor(ds1)).workVectors;
+  if (relationType == Lagrangian)
+  {
+    DSlink[LagrangianR::xfree].reset(new BlockVector());
+    DSlink[LagrangianR::xfree]->insertPtr(workVds1[OneStepIntegrator::free]);
+  }
+  else if (relationType == NewtonEuler)
+  {
+    DSlink[NewtonEulerR::xfree].reset(new BlockVector());
+    DSlink[NewtonEulerR::xfree]->insertPtr(workVds1[OneStepIntegrator::free]);
+  }
+
+  if (ds1 != ds2)
+  {
+    VectorOfVectors &workVds2 = *DSG.properties(DSG.descriptor(ds2)).workVectors;
+    if (relationType == Lagrangian)
+    {
+      DSlink[LagrangianR::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
+    }
+    else if (relationType == NewtonEuler)
+    {
+      DSlink[NewtonEulerR::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
+    }
+  }
+
+  // Compute a first value for the output
+    inter.computeOutput(t0, interProp, 0);
+
+    // prepare the gradients
+    relation.computeJach(t0, inter, interProp);
+    for (unsigned int i = 0; i < inter.upperLevelForOutput() + 1; ++i)
+      {
+      inter.computeOutput(t0, interProp, i);
+    }
+    inter.swapInMemory();
+
+
+}
+
 
 void MoreauJeanGOSI::initialize(Model& m)
 {
@@ -119,10 +186,25 @@ void MoreauJeanGOSI::initialize(Model& m)
     initializeDynamicalSystem(m, t0, ds);
   }
 
+
   SP::OneStepNSProblems  allOSNS  = _simulation->oneStepNSProblems();
   ((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY])->setIndexSetLevel(1);
   ((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY])->setInputOutputLevel(1);
   //  ((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY])->initialize(_simulation);
+
+
+  SP::InteractionsGraph indexSet0 = m.nonSmoothDynamicalSystem()->topology()->indexSet0();
+  InteractionsGraph::VIterator ui, uiend;
+  for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+  {
+    Interaction& inter = *indexSet0->bundle(*ui);
+
+    initializeInteraction(t0, inter, indexSet0->properties(*ui), *_dynamicalSystemsGraph);
+  }
+
+
+
+
 }
 
 void MoreauJeanGOSI::initializeIterationMatrixW(double t, SP::DynamicalSystem ds, const DynamicalSystemsGraph::VDescriptor& dsv)

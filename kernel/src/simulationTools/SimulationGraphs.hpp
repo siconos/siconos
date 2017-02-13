@@ -76,7 +76,6 @@ struct InteractionProperties
   unsigned int source_pos;
   SP::DynamicalSystem target;
   unsigned int target_pos;
-  SP::OneStepIntegrator osi;
   bool forControl;                     /**< true if the relation is used to add a control input to a DS */
   SP::VectorOfBlockVectors DSlink;     /**< pointer links to DS variables needed for computation, mostly x (or q), z, r (or p) */
   SP::VectorOfVectors workVectors;     /**< set of SiconosVector, mostly to have continuous memory vectors (not the case with BlockVector in DSlink) */
