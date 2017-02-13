@@ -219,24 +219,9 @@ public:
    */
   void setDSLinkAndWorkspace(InteractionProperties& interProp, DynamicalSystem& ds1, VectorOfVectors& workV1, DynamicalSystem& ds2, VectorOfVectors& workV2);
 
-  /** initialize this relation
-   * \param t0 initial time for this Interaction
-   * \param interProp the InteractionProperties of this Interaction
-   * \param DSG the graph of dynamical systems
+  /** Common init  code for contructors.
    */
-  void initialize(double t0, InteractionProperties& interProp, DynamicalSystemsGraph & DSG);
-
-
-  
   void init();
-  
-  /** check if Interaction is initialized
-   * \return true if it is initialized
-   */
-  bool isInitialized() const
-  {
-    return _initialized;
-  }
 
   /** set all lambda to zero
    */

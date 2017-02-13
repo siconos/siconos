@@ -798,6 +798,7 @@ void TimeSteppingCombinedProjection::updateIndexSet(unsigned int i)
   SP::InteractionsGraph indexSet0 = topo->indexSet(0);
   SP::InteractionsGraph indexSet1 = topo->indexSet(1);
   SP::InteractionsGraph indexSet2 = topo->indexSet(2);
+  DynamicalSystemsGraph& DSG0= *nonSmoothDynamicalSystem()->dynamicalSystems();
   assert(indexSet0);
   assert(indexSet1);
   assert(indexSet2);
@@ -870,8 +871,12 @@ void TimeSteppingCombinedProjection::updateIndexSet(unsigned int i)
           bool activate = true;
           if (Type::value(*(inter0->nonSmoothLaw())) != Type::EqualityConditionNSL)
           {
-            SP::OneStepIntegrator Osi = indexSet0->properties(*ui0).osi;
-            activate = Osi->addInteractionInIndexSet(inter0, i);
+            //SP::OneStepIntegrator Osi = indexSet0->properties(*ui0).osi;
+            // We assume that the integrator of the ds1 drive the update of the index set
+            SP::DynamicalSystem ds1 = indexSet1->properties(*ui0).source;
+            OneStepIntegrator& osi = *DSG0.properties(DSG0.descriptor(ds1)).osi;
+            
+            activate = osi.addInteractionInIndexSet(inter0, i);
           }
           if (activate)
           {
@@ -935,8 +940,12 @@ void TimeSteppingCombinedProjection::updateIndexSet(unsigned int i)
       bool activate = true;
       if (Type::value(*(inter1->nonSmoothLaw())) != Type::EqualityConditionNSL)
       {
-        SP::OneStepIntegrator Osi = indexSet1->properties(*ui1).osi;
-        activate = Osi->addInteractionInIndexSet(inter1, i);
+        //SP::OneStepIntegrator Osi = indexSet1->properties(*ui1).osi;
+        // We assume that the integrator of the ds1 drive the update of the index set
+        SP::DynamicalSystem ds1 = indexSet1->properties(*ui1).source;
+        OneStepIntegrator& osi = *DSG0.properties(DSG0.descriptor(ds1)).osi;
+
+        activate = osi.addInteractionInIndexSet(inter1, i);
       }
       if (activate)
       {

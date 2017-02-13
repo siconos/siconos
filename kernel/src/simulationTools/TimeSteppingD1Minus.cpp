@@ -103,6 +103,7 @@ void TimeSteppingD1Minus::updateIndexSet(unsigned int i)
   SP::InteractionsGraph indexSetCurrent = topo->indexSet(i); // ACTIVE Interactions for IMPACTS
   assert(indexSet0);
   assert(indexSetCurrent);
+  DynamicalSystemsGraph& DSG0= *nonSmoothDynamicalSystem()->dynamicalSystems();
   topo->setHasChanged(false); // only with changed topology, OSNS will be forced to update themselves
 
 
@@ -116,15 +117,20 @@ void TimeSteppingD1Minus::updateIndexSet(unsigned int i)
   {
 
     SP::Interaction inter = indexSet0->bundle(*uip);
-    SP::OneStepIntegrator Osi = indexSetCurrent->properties(*uip).osi;
+
+    // We assume that the integrator of the ds1 drive the update of the index set
+    //SP::OneStepIntegrator Osi = indexSetCurrent->properties(*uip).osi;
+    SP::DynamicalSystem ds1 = indexSetCurrent->properties(*uip).source;
+    OneStepIntegrator& osi = *DSG0.properties(DSG0.descriptor(ds1)).osi;
+	
     if ((!indexSetCurrent->is_vertex(inter))
-        and (Osi->addInteractionInIndexSet(inter, i)))
+        and (osi.addInteractionInIndexSet(inter, i)))
     {
       indexSetCurrent->copy_vertex(inter, *indexSet0);
       topo->setHasChanged(true);
     }
     else if ((indexSetCurrent->is_vertex(inter))
-             and !(Osi->addInteractionInIndexSet(inter, i)))
+             and !(osi.addInteractionInIndexSet(inter, i)))
     {
       indexSetCurrent->remove_vertex(inter);
       topo->setHasChanged(true);

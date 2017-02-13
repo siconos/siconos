@@ -17,7 +17,7 @@
 */
 #include <assert.h>
 #include <iostream>
-// #define DEBUG_BEGIN_END_ONLY
+//#define DEBUG_BEGIN_END_ONLY
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
 #include "debug.h"
@@ -42,12 +42,11 @@
 
 #include "SimulationGraphs.hpp"
 
-// This should not be used here VA 27/01/2017
-#include "OneStepIntegrator.hpp"
-
-
 using namespace std;
 using namespace RELATION;
+
+
+
 
 // --- CONSTRUCTORS ---
 struct Interaction::_setLevels : public SiconosVisitor
@@ -79,14 +78,29 @@ struct Interaction::_setLevels : public SiconosVisitor
 	RuntimeException::selfThrow("Interaction::_setLevels::visit - unknown relation type: ");
     };
   }
-  // void visit(const EqualityConditionNSL& nslaw)
-  // {
-  //   ;
-  // }
+
   // void visit(const MixedComplementarityConditionNSL& nslaw)
   // {
   //   ;
   // }
+  void visit(const EqualityConditionNSL& nslaw)
+  {
+    RELATION::TYPES relationType = _interaction->relation()->getType();
+    if (relationType == Lagrangian || relationType == NewtonEuler)
+    {
+      _interaction->setLowerLevelForOutput(0);
+      _interaction->setUpperLevelForOutput(1);
+     
+      _interaction->setLowerLevelForInput(0);
+      _interaction->setUpperLevelForInput(1);
+
+    }  
+    else
+    {
+	RuntimeException::selfThrow("Interaction::_setLevels::visit - unknown relation type: ");
+    }
+    ;
+  }
   void visit(const NewtonImpactNSL& nslaw)
   {
     RELATION::TYPES relationType = _interaction->relation()->getType();
@@ -202,106 +216,64 @@ Interaction::Interaction(SP::NonSmoothLaw NSL,
 
 
 void Interaction::setDSLinkAndWorkspace(InteractionProperties& interProp,
-                             DynamicalSystem& ds1, VectorOfVectors& workV1,
-                             DynamicalSystem& ds2, VectorOfVectors& workV2)
+					DynamicalSystem& ds1, VectorOfVectors& workV1,
+					DynamicalSystem& ds2, VectorOfVectors& workV2)
 {
+  DEBUG_BEGIN("Interaction::setDSLinkAndWorkspace(...)\n");
 
-    assert(relation() && "Interaction::initialize failed, relation() == NULL");
+  assert(relation() && "Interaction::initialize failed, relation() == NULL");
+  assert(nslaw() && "Interaction::initialize failed, non smooth law == NULL");
 
-    assert(nslaw() && "Interaction::initialize failed, non smooth law == NULL");
+  // compute number of relations.
 
-    // compute number of relations.
-
-    if (_interactionSize != nslaw()->size())
+  if (_interactionSize != nslaw()->size())
     {
       RuntimeException::selfThrow("Interaction::initialize() - _interactionSize != nslaw()->size() . Obsolete !");
     }
 
-    VectorOfBlockVectors& DSlink = *interProp.DSlink;
-    VectorOfVectors& workVInter = *interProp.workVectors;
-    VectorOfSMatrices& workMInter = *interProp.workMatrices;
+  VectorOfBlockVectors& DSlink = *interProp.DSlink;
+  VectorOfVectors& workVInter = *interProp.workVectors;
+  VectorOfSMatrices& workMInter = *interProp.workMatrices;
+  
+  initData(DSlink);
+  // Initialize interaction work vectors, depending on Dynamical systems
+  // linked to the interaction.
 
-    initData(DSlink);
-    // Initialize interaction work vectors, depending on Dynamical systems
-    // linked to the interaction.
+  initDSData(ds1, workV1, DSlink);
 
-    initDSData(ds1, workV1, DSlink);
-
-    if(&ds1 != &ds2)
+  if(&ds1 != &ds2)
     {
+      DEBUG_PRINT("ds1 != ds2\n");
+      DEBUG_PRINTF("ds1 number %i", ds1.number())
+      DEBUG_PRINTF("ds2 number %i", ds2.number())
       initDSData(ds2, workV2, DSlink);
     }
 
-    bool computeResidu = _relation->requireResidu();
+  bool computeResidu = _relation->requireResidu();
 
-    // Relation initializes the work vectors and matrices
-    _relation->initialize(*this, DSlink, workVInter, workMInter);
+  // Relation initializes the work vectors and matrices
+  _relation->initialize(*this, DSlink, workVInter, workMInter);
 
-    if (computeResidu)
+  if (computeResidu)
     {
       RELATION::TYPES relationType = _relation->getType();
       if (relationType == FirstOrder)
-      {
-        if (!workVInter[FirstOrderR::g_alpha])
-          workVInter[FirstOrderR::g_alpha].reset(new SiconosVector(_sizeOfDS));
-        if (!workVInter[FirstOrderR::vec_residuR])
-          workVInter[FirstOrderR::vec_residuR].reset(new SiconosVector(_sizeOfDS));
-      }
+	{
+	  if (!workVInter[FirstOrderR::g_alpha])
+	    workVInter[FirstOrderR::g_alpha].reset(new SiconosVector(_sizeOfDS));
+	  if (!workVInter[FirstOrderR::vec_residuR])
+	    workVInter[FirstOrderR::vec_residuR].reset(new SiconosVector(_sizeOfDS));
+	}
       else if (relationType == Lagrangian)
         RuntimeException::selfThrow("Interaction::initialize() - computeResiduR for LagrangianR is not implemented");
       else if (relationType == NewtonEuler)
         RuntimeException::selfThrow("Interaction::initialize() - computeResiduR for NewtonEulerR is not implemented");
     }
+
+  DEBUG_END(" Interaction::setDSLinkAndWorkspace(...)\n");
 }
 
-void Interaction::initialize(double t0, InteractionProperties& interProp, DynamicalSystemsGraph & DSG)
-                 // ,
-                 //             DynamicalSystem& ds1, VectorOfVectors& workV1,
-                 //             DynamicalSystem& ds2, VectorOfVectors& workV2)
-{
-  // if (!_initialized)
-  // {
-  //   DEBUG_BEGIN("Interaction::initialize(double t0, InteractionProperties& interProp, DynamicalSystemsGraph & DSG ) \n");
 
-  //   // SP::VectorOfVectors workVds1= interProp.workDS1Vectors;
-  //   // SP::VectorOfVectors workVds2 = interProp.workDS2Vectors;
-
-
-  //   // if (_steps > 1) // Multi--step methods
-  //   // {
-  //   //   // Compute the old Values of Output with stored values in Memory
-  //   //   for (unsigned int k = 0; k < _steps - 1; k++)
-  //   //   {
-  //   //     /** ComputeOutput to fill the Memory
-  //   //      * We assume the state x is stored in xMemory except for the  initial
-  //   //      * condition which has not been swap yet.
-  //   //      */
-  //   //     //        relation()->LinkDataFromMemory(k);
-  //   //     for (unsigned int i = 0; i < _upperLevelForOutput + 1; ++i)
-  //   //     {
-  //   //       computeOutput(t0, interProp, i);
-  //   //       _yMemory[i]->swap(*_y[i]);
-  //   //     }
-  //   //   }
-  //   // }
-  //   // // Compute a first value for the output
-  //   // computeOutput(t0, interProp, 0);
-
-  //   // // prepare the gradients
-  //   // _relation->computeJach(t0, *this, interProp);
-
-  //   // Compute y values for t0
-  //   // for (unsigned int i = 0; i < _upperLevelForOutput + 1; ++i)
-  //   // {
-  //   //   computeOutput(t0, interProp, i);
-  //   // }
-  //   _initialized = true;
-  // }
-
-  //swapInMemory();
-  //DEBUG_END("Interaction::initialize(double t0, InteractionProperties& interProp,  DynamicalSystemsGraph & DSG ) \n");
-
-}
 
 // Initialize and InitializeMemory are separated in two functions
 // since we need to know the relative degree to know

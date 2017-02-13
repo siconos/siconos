@@ -34,8 +34,8 @@
 #include "BlockVector.hpp"
 
 //#define DEBUG_BEGIN_END_ONLY
-// #define DEBUG_STDOUT
-// #define DEBUG_NOCOLOR
+//#define DEBUG_NOCOLOR
+//#define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
 // #define DEBUG_WHERE_MESSAGES
 #include <debug.h>
@@ -121,7 +121,7 @@ void MoreauJeanOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalS
   else if(dsType == Type::NewtonEulerDS)
   {
     SP::NewtonEulerDS neds = std11::static_pointer_cast<NewtonEulerDS> (ds);
-
+    DEBUG_PRINTF("neds->number() %i \n",neds->number());
     workVectors.resize(OneStepIntegrator::work_vector_of_vector_size);
     workVectors[OneStepIntegrator::residu_free].reset(new SiconosVector(neds->dimension()));
     workVectors[OneStepIntegrator::free].reset(new SiconosVector(neds->dimension()));
@@ -145,10 +145,12 @@ void MoreauJeanOSI::initializeInteraction(double t0, Interaction &inter,
 {
   SP::DynamicalSystem ds1= interProp.source;
   SP::DynamicalSystem ds2= interProp.target;
+  assert(ds1);
+  assert(ds2);
 
-  assert(interProp.DSlink);
-  
+    
   VectorOfBlockVectors& DSlink = *interProp.DSlink;
+  assert(interProp.DSlink);
   // VectorOfVectors& workVInter = *interProp.workVectors;
   // VectorOfSMatrices& workMInter = *interProp.workMatrices;
 
@@ -165,28 +167,81 @@ void MoreauJeanOSI::initializeInteraction(double t0, Interaction &inter,
   inter.initializeMemory(computeResidu,_steps);
 
   /* allocate ant set work vectors for the osi */
-  VectorOfVectors &workVds1 = *DSG.properties(DSG.descriptor(ds1)).workVectors;
-  if (relationType == Lagrangian)
+  
+  if(checkOSI(DSG.descriptor(ds1)))
     {
-      DSlink[LagrangianR::xfree].reset(new BlockVector());
-      DSlink[LagrangianR::xfree]->insertPtr(workVds1[OneStepIntegrator::free]);
-    }  
-  else if (relationType == NewtonEuler)
-    {
-      DSlink[NewtonEulerR::xfree].reset(new BlockVector());
-      DSlink[NewtonEulerR::xfree]->insertPtr(workVds1[OneStepIntegrator::free]);
-    }
-   
-  if (ds1 != ds2)
-    {
-      VectorOfVectors &workVds2 = *DSG.properties(DSG.descriptor(ds2)).workVectors;
+      DEBUG_PRINTF("ds1->number() %i is taken in to account\n", ds1->number());
+      assert(DSG.properties(DSG.descriptor(ds1)).workVectors);
+      VectorOfVectors &workVds1 = *DSG.properties(DSG.descriptor(ds1)).workVectors;
+     
+	
       if (relationType == Lagrangian)
 	{
-	  DSlink[LagrangianR::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
+	  if (!DSlink[LagrangianR::xfree])
+	    {
+	      DSlink[LagrangianR::xfree].reset(new BlockVector());
+	      DSlink[LagrangianR::xfree]->insertPtr(workVds1[OneStepIntegrator::free]);
+	    }
+	  else
+	    {
+	      DSlink[LagrangianR::xfree]->setVectorPtr(0,workVds1[OneStepIntegrator::free]);
+	    }
 	}  
       else if (relationType == NewtonEuler)
 	{
-	  DSlink[NewtonEulerR::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
+	  if (!DSlink[NewtonEulerR::xfree])
+	    {
+	      DSlink[NewtonEulerR::xfree].reset(new BlockVector());
+	      DSlink[NewtonEulerR::xfree]->insertPtr(workVds1[OneStepIntegrator::free]);
+	    }
+	  else
+	    {
+	      DSlink[NewtonEulerR::xfree]->setVectorPtr(0,workVds1[OneStepIntegrator::free]);
+	    }
+	}
+    }
+  DEBUG_PRINTF("ds1->number() %i\n",ds1->number());
+  DEBUG_PRINTF("ds2->number() %i\n",ds2->number());
+ 
+  if (ds1 != ds2)
+    {
+      DEBUG_PRINT("ds1 != ds2\n");
+      
+      if(checkOSI(DSG.descriptor(ds2)))
+	{
+	  DEBUG_PRINTF("ds2->number() %i is taken in to account\n",ds2->number());
+	  assert(DSG.properties(DSG.descriptor(ds2)).workVectors);
+	  VectorOfVectors &workVds2 = *DSG.properties(DSG.descriptor(ds2)).workVectors;
+	  if (relationType == Lagrangian)
+	    {
+	      if (!DSlink[LagrangianR::xfree])
+		{
+		  DSlink[LagrangianR::xfree].reset(new BlockVector());
+		  //dummy insertion to reserve first vector for ds1
+		  DSlink[LagrangianR::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
+		  DSlink[LagrangianR::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
+		}
+	      else
+		{
+		  DSlink[LagrangianR::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
+		}
+	      
+	    }  
+	  else if (relationType == NewtonEuler)
+	    {
+	      if (!DSlink[NewtonEulerR::xfree])
+		{
+		  DSlink[NewtonEulerR::xfree].reset(new BlockVector());
+		  DSlink[NewtonEulerR::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
+		  DSlink[NewtonEulerR::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
+		}
+	      else
+		{
+		  assert(DSlink[NewtonEulerR::xfree]);
+		  assert(workVds2[OneStepIntegrator::free]);
+		  DSlink[NewtonEulerR::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
+		}
+	    }
 	}
     }
   
@@ -1256,7 +1311,7 @@ void MoreauJeanOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_int
   SP::BlockVector Xfree;
 
   /** \todo VA. All of these values should be stored in a node in the interactionGraph
-   * corrseponding to the Interaction
+   * corresponding to the Interaction
    * when a MoreauJeanOSI scheme is used.
    */
 

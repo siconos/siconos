@@ -26,14 +26,8 @@
 #include "LagrangianDS.hpp"
 
 // One Step Integrators
-#include "EulerMoreauOSI.hpp"
-#include "MoreauJeanOSI.hpp"
-#include "LsodarOSI.hpp"
-#include "Hem5OSI.hpp"
-#include "NewMarkAlphaOSI.hpp"
-#include "D1MinusLinearOSI.hpp"
-#include "SchatzmanPaoliOSI.hpp"
-#include "ZeroOrderHoldOSI.hpp"
+#include "OneStepIntegrator.hpp"
+
 // One Step Non Smooth Problems
 #include "LCP.hpp"
 #include "QP.hpp"
@@ -263,14 +257,6 @@ void Simulation::initialize(SP::Model m, bool withOSI)
     }
   }
 
-  InteractionsGraph::VIterator ui, uiend;
-  SP::InteractionsGraph indexSet0 = _nsds->topology()->indexSet0();
-  for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
-  {
-    Interaction& inter = *indexSet0->bundle(*ui);
-    inter.initialize(_tinit, indexSet0->properties(*ui), *DSG);
-  }
-
   // Initialize OneStepNSProblem(s). Depends on the type of simulation.
   // Warning FP : must be done in any case, even if the interactions set
   // is empty.
@@ -320,11 +306,50 @@ void Simulation::initializeInteraction(double time, SP::Interaction inter)
 
   // This calls computeOutput() and initializes qMemory and q_k.
   DynamicalSystemsGraph &DSG = *_nsds->topology()->dSG(0);
-  inter->initialize(time, indexSet0->properties(ui), DSG);
   
-  SP::OneStepIntegrator osi = indexSet0->properties(ui).osi;
-  osi->initializeInteraction(time, *inter, indexSet0->properties(ui),  DSG);
+  //SP::OneStepIntegrator osi = indexSet0->properties(ui).osi;
+  SP::DynamicalSystem ds1;
+  SP::DynamicalSystem ds2;
+  // --- Get the dynamical system(s) (edge(s)) connected to the current interaction (vertex) ---
+  if (indexSet0->properties(ui).source != indexSet0->properties(ui).target)
+  {
+    DEBUG_PRINT("a two DS Interaction\n");
+    ds1 = indexSet0->properties(ui).source;
+    ds2 = indexSet0->properties(ui).target;
+  }
+  else
+  {
+    DEBUG_PRINT("a single DS Interaction\n");
+    ds1 = indexSet0->properties(ui).source;
+    ds2 = ds1;
+    // \warning this looks like some debug code, but it gets executed even with NDEBUG.
+    // may be compiler does something smarter, but still it should be rewritten. --xhub
+    InteractionsGraph::OEIterator oei, oeiend;
+    for (std11::tie(oei, oeiend) = indexSet0->out_edges(ui);
+         oei != oeiend; ++oei)
+    {
+      // note : at most 4 edges
+      ds2 = indexSet0->bundle(*oei);
+      if (ds2 != ds1)
+      {
+        assert(false);
+        break;
+      }
+    }
+  }
+  assert(ds1);
+  assert(ds2);
   
+  OneStepIntegrator& osi1 = *DSG.properties(DSG.descriptor(ds1)).osi;
+  OneStepIntegrator& osi2 = *DSG.properties(DSG.descriptor(ds2)).osi;
+
+  if (&osi1 == &osi2 )
+    osi1.initializeInteraction(time, *inter, indexSet0->properties(ui),  DSG);
+  else
+    {
+      osi1.initializeInteraction(time, *inter, indexSet0->properties(ui),  DSG);
+      osi2.initializeInteraction(time, *inter, indexSet0->properties(ui),  DSG);
+    }
 }
 
 
@@ -450,7 +475,7 @@ void Simulation::computeLevelsForInputAndOutput(SP::Interaction inter, bool init
   if (!osi)
     RuntimeException::selfThrow("Simulation::computeLevelsForInputAndOutput osi does not exists");
   
-  indexSet0->properties(indexSet0->descriptor(inter)).osi = osi;
+  //indexSet0->properties(indexSet0->descriptor(inter)).osi = osi;
 
   unsigned int lowerLevelForOutput = inter->lowerLevelForOutput();
   unsigned int upperLevelForOutput = inter->upperLevelForOutput();

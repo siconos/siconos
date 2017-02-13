@@ -9,7 +9,7 @@
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
+ * Unless required by applicable law or agreed to in writing, softwareﬁ
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
@@ -167,28 +167,23 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
   SP::InteractionsGraph indexSet = simulation()->indexSet(indexSetLevel());
   SP::Interaction inter = indexSet->bundle(vd);
   // Get osi property from interaction
-  // We assume that all ds in vertex_inter have the same osi.
-  SP::OneStepIntegrator Osi = indexSet->properties(vd).osi;
-  //SP::OneStepIntegrator Osi = simulation()->integratorOfDS(ds);
-  OSI::TYPES  osiType = Osi->getType();
-
 
   // At most 2 DS are linked by an Interaction
-  SP::DynamicalSystem DS1;
-  SP::DynamicalSystem DS2;
+  SP::DynamicalSystem ds1;
+  SP::DynamicalSystem ds2;
   unsigned int pos1, pos2;
   // --- Get the dynamical system(s) (edge(s)) connected to the current interaction (vertex) ---
   if (indexSet->properties(vd).source != indexSet->properties(vd).target)
   {
     DEBUG_PRINT("a two DS Interaction\n");
-    DS1 = indexSet->properties(vd).source;
-    DS2 = indexSet->properties(vd).target;
+    ds1 = indexSet->properties(vd).source;
+    ds2 = indexSet->properties(vd).target;
   }
   else
   {
     DEBUG_PRINT("a single DS Interaction\n");
-    DS1 = indexSet->properties(vd).source;
-    DS2 = DS1;
+    ds1 = indexSet->properties(vd).source;
+    ds2 = ds1;
     // \warning this looks like some debug code, but it gets executed even with NDEBUG.
     // may be compiler does something smarter, but still it should be rewritten. --xhub
     InteractionsGraph::OEIterator oei, oeiend;
@@ -196,18 +191,20 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
          oei != oeiend; ++oei)
     {
       // note : at most 4 edges
-      DS2 = indexSet->bundle(*oei);
-      if (DS2 != DS1)
+      ds2 = indexSet->bundle(*oei);
+      if (ds2 != ds1)
       {
         assert(false);
         break;
       }
     }
   }
-  assert(DS1);
-  assert(DS2);
+  assert(ds1);
+  assert(ds2);
   pos1 = indexSet->properties(vd).source_pos;
   pos2 = indexSet->properties(vd).target_pos;
+
+  DynamicalSystemsGraph& DSG0 = *simulation()->nonSmoothDynamicalSystem()->dynamicalSystems();
 
   // --- Check block size ---
   assert(indexSet->properties(vd).block->size(0) == inter->nonSmoothLaw()->size());
@@ -237,11 +234,15 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
   // loop over the DS connected to the interaction.
   bool endl = false;
   unsigned int pos = pos1;
-  for (SP::DynamicalSystem ds = DS1; !endl; ds = DS2)
+  for (SP::DynamicalSystem ds = ds1; !endl; ds = ds2)
   {
-    assert(ds == DS1 || ds == DS2);
-    endl = (ds == DS2);
+    assert(ds == ds1 || ds == ds2);
+    endl = (ds == ds2);
+
+    OneStepIntegrator& osi = *DSG0.properties(DSG0.descriptor(ds)).osi;
+    OSI::TYPES osiType = osi.getType();
     unsigned int sizeDS = ds->dimension();
+    
     // get _interactionBlocks corresponding to the current DS
     // These _interactionBlocks depends on the relation type.
     leftInteractionBlock.reset(new SimpleMatrix(nslawSize, sizeDS));
@@ -257,23 +258,23 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
 
       if (osiType == OSI::EULERMOREAUOSI)
       {
-        if ((std11::static_pointer_cast<EulerMoreauOSI> (Osi))->useGamma() || (std11::static_pointer_cast<EulerMoreauOSI> (Osi))->useGammaForRelation())
+        if ((static_cast<EulerMoreauOSI&> (osi)).useGamma() || (static_cast<EulerMoreauOSI&> (osi)).useGammaForRelation())
         {
-          *rightInteractionBlock *= (std11::static_pointer_cast<EulerMoreauOSI> (Osi))->gamma();
+          *rightInteractionBlock *= (static_cast<EulerMoreauOSI&> (osi)).gamma();
         }
       }
 
       // for ZOH, we have a different formula ...
-      if (osiType == OSI::ZOHOSI && indexSet->properties(vd).forControl)
+      if ((osiType == OSI::ZOHOSI) && indexSet->properties(vd).forControl)
       {
-        *rightInteractionBlock = std11::static_pointer_cast<ZeroOrderHoldOSI>(Osi)->Bd(ds);
+        *rightInteractionBlock = static_cast<ZeroOrderHoldOSI&>(osi).Bd(ds);
         prod(*leftInteractionBlock, *rightInteractionBlock, *currentInteractionBlock, false);
       }
       else
       {
         // centralInteractionBlock contains a lu-factorized matrix and we solve
         // centralInteractionBlock * X = rightInteractionBlock with PLU
-        SP::SiconosMatrix centralInteractionBlock = getOSIMatrix(Osi, ds);
+        SP::SiconosMatrix centralInteractionBlock = getOSIMatrix(osi, ds);
         centralInteractionBlock->PLUForwardBackwardInPlace(*rightInteractionBlock);
         inter->computeKhat(*rightInteractionBlock, workMInter, h); // if K is non 0
 
@@ -319,7 +320,7 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
       // (inter1 == inter2)
       SP::SiconosMatrix work(new SimpleMatrix(*leftInteractionBlock));
       work->trans();
-      SP::SiconosMatrix centralInteractionBlock = getOSIMatrix(Osi, ds);
+      SP::SiconosMatrix centralInteractionBlock = getOSIMatrix(osi, ds);
       DEBUG_EXPR(centralInteractionBlock->display(););
       DEBUG_EXPR_WE(std::cout <<  std::boolalpha << " centralInteractionBlock->isPLUFactorized() = "<< centralInteractionBlock->isPLUFactorized() << std::endl;);
       centralInteractionBlock->PLUForwardBackwardInPlace(*work);
@@ -333,7 +334,7 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
 
 
     }
-    else RuntimeException::selfThrow("LinearOSNS::computeInteractionBlock not yet implemented for relation of type " + relationType);
+    else RuntimeException::selfThrow("LinearOSNS::computeDiagonalInteractionBlock not yet implemented for relation of type " + relationType);
     // Set pos for next loop.
     pos = pos2;
   }
@@ -342,7 +343,7 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
 
 void LinearOSNS::computeInteractionBlock(const InteractionsGraph::EDescriptor& ed)
 {
-  
+
   DEBUG_PRINT("LinearOSNS::computeInteractionBlock(const InteractionsGraph::EDescriptor& ed)\n");
 
   // Computes matrix _interactionBlocks[inter1][inter2] (and allocates memory if
@@ -360,7 +361,10 @@ void LinearOSNS::computeInteractionBlock(const InteractionsGraph::EDescriptor& e
   SP::Interaction inter1 = indexSet->bundle(indexSet->source(ed));
   SP::Interaction inter2 = indexSet->bundle(indexSet->target(ed));
   // Once again we assume that inter1 and inter2 have the same osi ...
-  SP::OneStepIntegrator Osi = indexSet->properties(indexSet->source(ed)).osi;
+  //SP::OneStepIntegrator Osi = indexSet->properties(indexSet->source(ed)).osi;
+  DynamicalSystemsGraph& DSG0 = *simulation()->nonSmoothDynamicalSystem()->dynamicalSystems();
+  OneStepIntegrator& Osi = *DSG0.properties(DSG0.descriptor(ds)).osi;
+
 
   // For the edge 'ds', we need to find relative position of this ds
   // in inter1 and inter2 relation matrices (--> pos1 and pos2 below)
@@ -538,31 +542,78 @@ void LinearOSNS::computeqBlock(InteractionsGraph::VDescriptor& vertex_inter, uns
 
   // Get the osi for the concerned interaction. Note FP: this must be a property
   // of ds rather than interaction?
-  SP::OneStepIntegrator Osi = indexSet->properties(vertex_inter).osi;
-  //SP::OneStepIntegrator Osi = simulation()->integratorOfDS(ds);
+  //SP::OneStepIntegrator Osi = indexSet->properties(vertex_inter).osi;
+  // At most 2 DS are linked by an Interaction
+  SP::DynamicalSystem ds1;
+  SP::DynamicalSystem ds2;
+  // --- Get the dynamical system(s) (edge(s)) connected to the current interaction (vertex) ---
+  if (indexSet->properties(vertex_inter).source != indexSet->properties(vertex_inter).target)
+  {
+    DEBUG_PRINT("a two DS Interaction\n");
+    ds1 = indexSet->properties(vertex_inter).source;
+    ds2 = indexSet->properties(vertex_inter).target;
+  }
+  else
+  {
+    DEBUG_PRINT("a single DS Interaction\n");
+    ds1 = indexSet->properties(vertex_inter).source;
+    ds2 = ds1;
+    // \warning this looks like some debug code, but it gets executed even with NDEBUG.
+    // may be compiler does something smarter, but still it should be rewritten. --xhub
+    InteractionsGraph::OEIterator oei, oeiend;
+    for (std11::tie(oei, oeiend) = indexSet->out_edges(vertex_inter);
+         oei != oeiend; ++oei)
+    {
+      // note : at most 4 edges
+      ds2 = indexSet->bundle(*oei);
+      if (ds2 != ds1)
+      {
+        assert(false);
+        break;
+      }
+    }
+  }
+  assert(ds1);
+  assert(ds2);
+
+  // We assume that all ds in vertex_inter have the same osi.
+  // SP::OneStepIntegrator Osi = indexSet->properties(vd).osi;
+  // //SP::OneStepIntegrator Osi = simulation()->integratorOfDS(ds);
+  // OSI::TYPES  osiType = Osi->getType();
+
+
+  
+  DynamicalSystemsGraph& DSG0 = *simulation()->nonSmoothDynamicalSystem()->dynamicalSystems();
+
+  OneStepIntegrator& osi1 = *DSG0.properties(DSG0.descriptor(ds1)).osi;
+  OneStepIntegrator& osi2 = *DSG0.properties(DSG0.descriptor(ds2)).osi;
+
+  OSI::TYPES osi1Type = osi1.getType();
+  OSI::TYPES osi2Type = osi2.getType();
+
   SP::Interaction inter = indexSet->bundle(vertex_inter);
-  OSI::TYPES  osiType = Osi->getType();
   unsigned int sizeY = inter->nonSmoothLaw()->size();
 
-  if (osiType == OSI::EULERMOREAUOSI ||
-      osiType == OSI::MOREAUJEANOSI ||
-      osiType == OSI::MOREAUDIRECTPROJECTIONOSI ||
-      osiType == OSI::LSODAROSI ||
-      osiType == OSI::NEWMARKALPHAOSI ||
-      osiType == OSI::D1MINUSLINEAROSI ||
-      osiType == OSI::SCHATZMANPAOLIOSI ||
-      osiType == OSI::ZOHOSI)
+  if ((osi1Type == OSI::EULERMOREAUOSI && osi2Type == OSI::EULERMOREAUOSI) ||
+      (osi1Type == OSI::MOREAUJEANOSI  && osi2Type == OSI::MOREAUJEANOSI  )||
+      (osi1Type == OSI::MOREAUDIRECTPROJECTIONOSI && osi2Type == OSI::MOREAUDIRECTPROJECTIONOSI) ||
+      (osi1Type == OSI::LSODAROSI && osi2Type == OSI::LSODAROSI  ) ||
+      (osi1Type == OSI::NEWMARKALPHAOSI && osi2Type == OSI::NEWMARKALPHAOSI  ) ||
+      (osi1Type == OSI::D1MINUSLINEAROSI && osi2Type == OSI::D1MINUSLINEAROSI  ) ||
+      (osi1Type == OSI::SCHATZMANPAOLIOSI && osi2Type == OSI::SCHATZMANPAOLIOSI ) ||
+      (osi1Type == OSI::ZOHOSI && osi2Type == OSI::ZOHOSI))
   {
-    Osi->computeFreeOutput(vertex_inter, this);
+    // We assume that the osi of ds1 osi1 is intergrating the interaction
+    osi1.computeFreeOutput(vertex_inter, this);
     setBlock(*inter->yForNSsolver(), _q, sizeY , 0, pos);
     DEBUG_EXPR(_q->display());
   }
-  else if (osiType == OSI::MOREAUJEANOSI2)
+  else if (osi1Type == OSI::MOREAUJEANOSI2 && osi2Type == OSI::MOREAUJEANOSI2)
   {
 
   }
   else
-    RuntimeException::selfThrow("LinearOSNS::computeqBlock not yet implemented for OSI of type " + osiType);
+    RuntimeException::selfThrow("LinearOSNS::computeqBlock not yet implemented for OSI1 and OSI2 of type " + osi1Type  + osi2Type);
 
 }
 

@@ -397,7 +397,7 @@ void OneStepNSProblem::initialize(SP::Simulation sim)
     _maxSize = simulation()->nonSmoothDynamicalSystem()->topology()->numberOfConstraints();
 }
 
-SP::SimpleMatrix OneStepNSProblem::getOSIMatrix(SP::OneStepIntegrator Osi, SP::DynamicalSystem ds)
+SP::SimpleMatrix OneStepNSProblem::getOSIMatrix(OneStepIntegrator& Osi, SP::DynamicalSystem ds)
 {
   // Connect block to the OSI matrix of a dynamical system for the current simulation.
   // Matrix depends on OSI type.
@@ -405,21 +405,21 @@ SP::SimpleMatrix OneStepNSProblem::getOSIMatrix(SP::OneStepIntegrator Osi, SP::D
   OSI::TYPES osiType; // type of the current one step integrator
   Type::Siconos dsType; // type of the current Dynamical System
 
-  osiType = Osi->getType();
+  osiType = Osi.getType();
   dsType = Type::value(*ds);
 
   if (osiType == OSI::MOREAUJEANOSI
       || osiType == OSI::MOREAUDIRECTPROJECTIONOSI)
   {
-      block = (std11::static_pointer_cast<MoreauJeanOSI> (Osi))->W(ds); // get its W matrix ( pointer link!)
+      block = (static_cast<MoreauJeanOSI&> (Osi)).W(ds); // get its W matrix ( pointer link!)
   }
   else if (osiType == OSI::SCHATZMANPAOLIOSI)
   {
-      block = (std11::static_pointer_cast<SchatzmanPaoliOSI> (Osi))->W(ds); // get its W matrix ( pointer link!)
+      block = (static_cast<SchatzmanPaoliOSI&> (Osi)).W(ds); // get its W matrix ( pointer link!)
   }
   else if (osiType == OSI::EULERMOREAUOSI)
   {
-    block = (std11::static_pointer_cast<EulerMoreauOSI>(Osi))->W(ds); // get its W matrix ( pointer link!)
+    block = (static_cast<EulerMoreauOSI&>(Osi)).W(ds); // get its W matrix ( pointer link!)
   }
   else if (osiType == OSI::LSODAROSI) // Warning: LagrangianDS only at the time !!!
   {
@@ -436,7 +436,7 @@ SP::SimpleMatrix OneStepNSProblem::getOSIMatrix(SP::OneStepIntegrator Osi, SP::D
       RuntimeException::selfThrow("OneStepNSProblem::getOSIMatrix not yet implemented for NewmarkAlphaOSI Integrator with dynamical system of type " + dsType);
     }
     //
-    SP::OneStepNSProblems  allOSNS  = Osi->simulation()->oneStepNSProblems();
+    SP::OneStepNSProblems  allOSNS  = Osi.simulation()->oneStepNSProblems();
     // If LCP at acceleration level
     if (((*allOSNS)[SICONOS_OSNSP_ED_SMOOTH_ACC]).get() == this)
     {
@@ -444,7 +444,7 @@ SP::SimpleMatrix OneStepNSProblem::getOSIMatrix(SP::OneStepIntegrator Osi, SP::D
     }
     else // It LCP at position level
     {
-      block = (std11::static_pointer_cast<NewMarkAlphaOSI>(Osi))->W(ds);
+      block = (static_cast<NewMarkAlphaOSI&>(Osi)).W(ds);
     }
   } // End Newmark OSI
   else if (osiType == OSI::D1MINUSLINEAROSI)
@@ -481,9 +481,9 @@ SP::SimpleMatrix OneStepNSProblem::getOSIMatrix(SP::OneStepIntegrator Osi, SP::D
   else if (osiType == OSI::ZOHOSI)
   {
     if (!block)
-      block.reset(new SimpleMatrix((std11::static_pointer_cast<ZeroOrderHoldOSI>(Osi))->Ad(ds)));
+      block.reset(new SimpleMatrix((static_cast<ZeroOrderHoldOSI&>(Osi)).Ad(ds)));
     else
-      *block = (std11::static_pointer_cast<ZeroOrderHoldOSI>(Osi))->Ad(ds);
+      *block = (static_cast<ZeroOrderHoldOSI&>(Osi)).Ad(ds);
   }
   else
     RuntimeException::selfThrow("OneStepNSProblem::getOSIMatrix not yet implemented for Integrator of type " + osiType);
