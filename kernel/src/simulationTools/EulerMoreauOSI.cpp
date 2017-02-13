@@ -118,25 +118,55 @@ void EulerMoreauOSI::initializeInteraction(double t0, Interaction &inter,
 
   bool computeResidu = relation.requireResidu();
   inter.initializeMemory(computeResidu,_steps);
-
-  /* allocate ant set work vectors for the osi */
-  VectorOfVectors &workVds1 = *DSG.properties(DSG.descriptor(ds1)).workVectors;
-  if (relationType == FirstOrder)
+  if(checkOSI(DSG.descriptor(ds1)))
     {
-      DSlink[FirstOrderR::xfree].reset(new BlockVector());
-      DSlink[FirstOrderR::xfree]->insertPtr(workVds1[OneStepIntegrator::free]);
-    }
+      DEBUG_PRINTF("ds1->number() %i is taken in to account\n", ds1->number());
+      assert(DSG.properties(DSG.descriptor(ds1)).workVectors);
+      VectorOfVectors &workVds1 = *DSG.properties(DSG.descriptor(ds1)).workVectors;
 
-
-  if (ds1 != ds2)
-    {
-      VectorOfVectors &workVds2 = *DSG.properties(DSG.descriptor(ds2)).workVectors;
-      if (relationType == Lagrangian)
+      
+      if (relationType == FirstOrder)
       {
-        DSlink[FirstOrderR::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
+        if (!DSlink[FirstOrderR::xfree])
+        {
+          DSlink[FirstOrderR::xfree].reset(new BlockVector());
+          DSlink[FirstOrderR::xfree]->insertPtr(workVds1[OneStepIntegrator::free]);
+        }
+        else
+        {
+          DSlink[FirstOrderR::xfree]->setVectorPtr(0,workVds1[OneStepIntegrator::free]);
+        }
       }
     }
+  DEBUG_PRINTF("ds1->number() %i\n",ds1->number());
+  DEBUG_PRINTF("ds2->number() %i\n",ds2->number());
 
+  if (ds1 != ds2)
+  {
+    DEBUG_PRINT("ds1 != ds2\n");
+
+    if(checkOSI(DSG.descriptor(ds2)))
+    {
+      DEBUG_PRINTF("ds2->number() %i is taken in to account\n",ds2->number());
+      assert(DSG.properties(DSG.descriptor(ds2)).workVectors);
+      VectorOfVectors &workVds2 = *DSG.properties(DSG.descriptor(ds2)).workVectors;
+      if (relationType == FirstOrder)
+	    {
+	      if (!DSlink[FirstOrderR::xfree])
+        {
+          DSlink[FirstOrderR::xfree].reset(new BlockVector());
+          //dummy insertion to reserve first vector for ds1
+          DSlink[FirstOrderR::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
+          DSlink[FirstOrderR::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
+        }
+	      else
+        {
+          DSlink[FirstOrderR::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
+        }
+
+	    }
+    }
+  }
 
   // Compute a first value for the output
     inter.computeOutput(t0, interProp, 0);
