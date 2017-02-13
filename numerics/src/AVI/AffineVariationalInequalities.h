@@ -69,11 +69,11 @@
  */
 struct AffineVariationalInequalities
 {
-  unsigned int size; /**<  size of the problem */
+  unsigned int size; /**< size of the problem */
   NumericsMatrix* M; /**< M matrix of the AVI (see the mathematical description)*/
   double* q; /**< vector of the AVI (see the mathematical description)*/
   double* d; /**< Covering vector (optional) */
-  polyhedron* poly; /** Polyhedra where the solution has to belong */
+  polyhedron* poly; /**< Polyhedra where the solution has to belong */
 };
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
@@ -82,41 +82,45 @@ extern "C"
 #endif
   /** \fn void AVI_display(AffineVariationalInequalities* problem)
    *  \brief function to display a AffineVariationalInequalities
-   *  \param  problem pointer to a AffineVariationalInequalities to display
+   *  \param  avi pointer to a AffineVariationalInequalities to display
    */
-  void AVI_display(AffineVariationalInequalities* problem);
+  void AVI_display(AffineVariationalInequalities* avi);
 
   /** \fn int AVI_printInFile(AffineVariationalInequalities*  problem, FILE* file)
    *  \brief function to write in a file a AffineVariationalInequalities
-   *  \param problem pointer to a AffineVariationalInequalities to print
+   *  \param avi pointer to a AffineVariationalInequalities to print
    *  \param file pointer to a FILE
    *  \return 1 if successfull
    */
-  int AVI_printInFile(AffineVariationalInequalities* problem, FILE* file);
+  int AVI_printInFile(AffineVariationalInequalities* avi, FILE* file);
 
-  /** \fn  int AVI_newFromFile(AffineVariationalInequalities* problem, FILE* file)
+  /** \fn  int AVI_newFromFile(AffineVariationalInequalities* avi, FILE* file)
    *  \brief function to read and create a AffineVariationalInequalities
    *   from a file
-   *  \param problem pointer to a AffineVariationalInequalities to create
+   *  \param avi pointer to a AffineVariationalInequalities to create
    *  \param file pointer to a FILE
    *  \return 1 if successfull
    */
-  int AVI_newFromFile(AffineVariationalInequalities* problem, FILE* file);
+  int AVI_newFromFile(AffineVariationalInequalities* avi, FILE* file);
 
-  /** \fn  int AVI_newFromFilename(AffineVariationalInequalities* problem, FILE* file)
+  /** \fn  int AVI_newFromFilename(AffineVariationalInequalities* avi, FILE* file)
    *  \brief function to read and create a AffineVariationalInequalities
    *   from a file
-   *  \param problem pointer to a AffineVariationalInequalities to create
+   *  \param avi pointer to a AffineVariationalInequalities to create
    *  \param filename that contains the AVI
    *  \return 1 if successfull
    */
-  int AVI_newFromFilename(AffineVariationalInequalities* problem, char* filename);
+  int AVI_newFromFilename(AffineVariationalInequalities* avi, char* filename);
 
-  /** \fn  void freeAVI(AffineVariationalInequalities* problem)
+  /** \fn  void freeAVI(AffineVariationalInequalities* avi)
    *  \brief function to delete a AffineVariationalInequalities
-   *  \param problem  pointer to a AffineVariationalInequalities to delete
+   *  \param avi  pointer to a AffineVariationalInequalities to delete
    */
-  void freeAVI(AffineVariationalInequalities* problem);
+  void freeAVI(AffineVariationalInequalities* avi);
+
+  /** Create an empty AVI struct
+   * \return an empty AffineVariationalInequalities*/
+  AffineVariationalInequalities* newAVI(void);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

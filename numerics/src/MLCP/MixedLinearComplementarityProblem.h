@@ -212,6 +212,10 @@ extern "C"
    */
   void freeMixedLinearComplementarityProblem(MixedLinearComplementarityProblem* problem);
 
+  /** create empty MLCP
+   * \return empy MLCP
+   */
+  MixedLinearComplementarityProblem* newMLCP(void);
 
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)

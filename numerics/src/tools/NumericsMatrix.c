@@ -1215,6 +1215,11 @@ void NM_copy(const NumericsMatrix* const A, NumericsMatrix* B)
   B->size0 = A->size0;
   B->size1 = A->size1;
 
+  if (B->storageType >= 0 && B->storageType != A->storageType)
+  {
+    NM_internalData_free(B);
+  }
+  B->storageType = A->storageType;
   switch (A->storageType)
   {
   case NM_DENSE:

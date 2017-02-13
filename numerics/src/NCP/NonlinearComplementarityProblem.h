@@ -63,4 +63,14 @@ struct NonlinearComplementarityProblem
                When called from C, it can reference a data struct containing variables needed for the computations.*/
 };
 
+  /** free an NCP problem 
+   * \param ncp structure to free
+   */
+  void freeNCP(NonlinearComplementarityProblem* ncp);
+
+  /** create an empty NCP problem
+   * \return an MixedComplementarityProblem instance
+   */
+  NonlinearComplementarityProblem* newNCP(void);
+
 #endif

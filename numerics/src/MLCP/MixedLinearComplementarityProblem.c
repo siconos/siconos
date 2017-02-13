@@ -511,4 +511,28 @@ void freeMixedLinearComplementarityProblem(MixedLinearComplementarityProblem* pr
   }
   free(problem);
 }
+
+MixedLinearComplementarityProblem* newMLCP(void)
+{
+  MixedLinearComplementarityProblem* mlcp = (MixedLinearComplementarityProblem*) malloc(sizeof(MixedLinearComplementarityProblem));
+
+  mlcp->isStorageType1 = 0;
+  mlcp->isStorageType2 = 0;
+  mlcp->m = 0;
+  mlcp->n = 0;
+
+  mlcp->blocksRows = NULL;
+  mlcp->blocksIsComp = NULL;
+
+  mlcp->M = NULL;
+  mlcp->q = NULL;
+  mlcp->A = NULL;
+  mlcp->B = NULL;
+  mlcp->C = NULL;
+  mlcp->D = NULL;
+  mlcp->a = NULL;
+  mlcp->b = NULL;
+
+  return mlcp;
+}
 #endif

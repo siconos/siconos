@@ -111,7 +111,7 @@ void AVI::initialize(SP::Simulation sim)
     _numerics_problem->poly->id = SICONOS_SET_POLYHEDRON;
     _numerics_problem->poly->size_ineq = K.size();
     _numerics_problem->poly->size_eq = 0;
-    _numerics_problem->poly->H = H.getArray();
+    _numerics_problem->poly->H = NM_create_from_data(NM_DENSE, K.size(), nc.size(), H.getArray());
     _numerics_problem->poly->K = K.getArray();
     _numerics_problem->poly->Heq = NULL;
     _numerics_problem->poly->Keq= NULL;

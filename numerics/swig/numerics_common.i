@@ -32,7 +32,7 @@
     }
     else
     {
-      PyErr_SetString(PyExc_RuntimeError, "Unknown friction contact problem solver");
+      SWIG_Error(SWIG_RuntimeError, "Unknown friction contact problem solver");
       free(SO);
       return NULL;
     }

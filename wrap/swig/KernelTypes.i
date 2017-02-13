@@ -155,6 +155,85 @@ static inline void fillBasePyarray(PyObject* pyarray, SharedPointerKeeper* saved
    $1 = (PyArrayObject*) $input;
 }
 
+//////////////////////////////////////////////////////////////////////////////
+// allow integers to be numpy types
+%{
+static int
+Siconos_AsVal_int (PyObject *obj, int* val)
+{
+#if PY_VERSION_HEX < 0x03000000
+  if (PyInt_Check(obj)) {
+    if (val) *val = PyInt_AsLong(obj);
+    return SWIG_OK;
+  } else
+#endif
+  if (PyLong_Check(obj)) {
+    long v = PyLong_AsLong(obj);
+    if (!PyErr_Occurred()) {
+      if (val) *val = v;
+      return SWIG_OK;
+    } else {
+      PyErr_Clear();
+      return SWIG_OverflowError;
+    }
+  }
+  if (PyArray_CheckScalar(obj)) {
+    int x = PyArray_PyIntAsInt(obj);
+    if (x == -1 && PyErr_Occurred())
+      return SWIG_TypeError;
+    if (val) *val = x;
+    return SWIG_OK;
+  }
+  return SWIG_TypeError;
+}
+%}
+%typemap(typecheck) int {
+  int ecode = Siconos_AsVal_int($input, NULL);
+  $1 = SWIG_IsOK(ecode);
+}
+%typemap(in) int {
+  int ecode = Siconos_AsVal_int($input, &$1);
+  if (!SWIG_IsOK(ecode))
+    SWIG_exception_fail(ecode, "Expected int");
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+// allow double to be numpy types
+%{
+static int
+Siconos_AsVal_double (PyObject *obj, double* val)
+{
+  double v=0;
+  int ok=0;
+  if (PyFloat_Check(obj)) {
+    v = PyFloat_AsDouble(obj);
+    ok = 1;
+  }
+  else {
+    PyObject *fobj = PyNumber_Float(obj);
+    if (fobj) {
+      v = PyFloat_AsDouble(fobj);
+      ok = 1;
+      Py_DECREF(fobj);
+    }
+  }
+  if (!ok || (v == -1.0 && PyErr_Occurred()))
+    return SWIG_TypeError;
+  if (val) *val = v;
+  return SWIG_OK;
+}
+%}
+%typemap(typecheck) double {
+  int ecode = Siconos_AsVal_double($input, NULL);
+  $1 = SWIG_IsOK(ecode);
+}
+%typemap(in) double {
+  int ecode = Siconos_AsVal_double($input, &$1);
+  if (!SWIG_IsOK(ecode))
+    SWIG_exception_fail(ecode, "Expected float/double");
+}
+
 
 //////////////////////////////////////////////////////////////////////////////
 // check on input : a numpy array or a TYPE
@@ -256,6 +335,9 @@ struct IsDense : public Question<bool>
 
   SP::SiconosVector SP_SiconosVector_from_numpy(PyObject* vec, PyArrayObject** array_p, int* is_new_object)
   {
+    if (vec==Py_None)
+      return SP::SiconosVector();
+
     PyArrayObject* array = obj_to_array_fortran_allow_conversion(vec, NPY_DOUBLE, is_new_object);
 
     if (!array)
@@ -293,7 +375,7 @@ struct IsDense : public Question<bool>
 
     // try a conversion from std11::shared_ptr<SiconosVector>
     res1 = SWIG_ConvertPtrAndOwn(vec, &argp1, $descriptor(std11::shared_ptr<SiconosVector> *), 0 |  0 , &newmem);
-    if (SWIG_IsOK(res1))
+    if (SWIG_IsOK(res1) && argp1)
     {
       if (newmem & SWIG_CAST_NEW_MEMORY)
       {
@@ -311,6 +393,7 @@ struct IsDense : public Question<bool>
     {
       return SP_SiconosVector_from_numpy(vec, array_p, is_new_object);
     }
+    return SP::SiconosVector();
   }
 
   SiconosVector* SiconosVector_in(PyObject* vec, PyArrayObject** array_p, int* is_new_object, std::vector<SP::SiconosVector>& keeper)
@@ -321,7 +404,7 @@ struct IsDense : public Question<bool>
 
     // try a conversion from SiconosVector
     res1 = SWIG_ConvertPtr(vec, &argp1, $descriptor(SiconosVector *), 0 |  0);
-    if (SWIG_IsOK(res1))
+    if (SWIG_IsOK(res1) && argp1)
     {
     // no newmem & SWIG_CAST_NEW_MEMORY + tempshared for non SP
       smartarg1 = reinterpret_cast< SiconosVector * >(argp1);
@@ -531,6 +614,9 @@ struct IsDense : public Question<bool>
 
   SP::SimpleMatrix SimpleMatrix_from_numpy(PyObject* obj, PyArrayObject** array_p, int* is_new_object)
   {
+    if (obj==Py_None)
+      return SP::SimpleMatrix();
+
     PyArrayObject* array = obj_to_array_fortran_allow_conversion(obj, NPY_DOUBLE, is_new_object);
     if (!array)
     {
@@ -639,7 +725,6 @@ struct IsDense : public Question<bool>
 {
   // %typemap(in,fragment="SiconosVector") (std11::shared_ptr<SiconosVector>)
   $1 = SP_SiconosVector_in($input, &array, &is_new_object);
-  if (!$1) SWIG_fail;
 }
 
 %typemap(in,fragment="SiconosVector")
@@ -654,11 +739,12 @@ struct IsDense : public Question<bool>
   {
     void * swig_argp;
     int swig_res = SWIG_ConvertPtr($input, &swig_argp, $descriptor(SP::SiconosVector *), 0);
-    if (SWIG_IsOK(swig_res))
+    if (SWIG_IsOK(swig_res) && swig_argp)
     {
       $1 = (%reinterpret_cast(swig_argp, SP::SiconosVector *))->get();
+      if (!$1) { SWIG_exception_fail(SWIG_ValueError, "expected vector"); }
     }
-    else {  SWIG_fail; }
+    else { SWIG_exception_fail(SWIG_ValueError, "expected vector"); }
   }
 }
 
@@ -673,11 +759,12 @@ struct IsDense : public Question<bool>
   {
     void * swig_argp;
     int swig_res = SWIG_ConvertPtr($input, &swig_argp, $descriptor(SP::SiconosVector *), 0);
-    if (SWIG_IsOK(swig_res))
+    if (SWIG_IsOK(swig_res) && swig_argp)
     {
       $1 = (%reinterpret_cast(swig_argp, SP::SiconosVector *))->get();
+      if (!$1) { SWIG_exception_fail(SWIG_ValueError, "expected vector"); }
     }
-    else {  SWIG_fail; }
+    else { SWIG_exception_fail(SWIG_ValueError, "expected vector"); }
   }
 }
 
@@ -807,7 +894,7 @@ struct IsDense : public Question<bool>
 
    // try a conversion from a SiconosMatrix
   res1 = SWIG_ConvertPtrAndOwn($input, &argp1, $descriptor(SP::TYPE *), 0 |  0 , &newmem);
-  if (SWIG_IsOK(res1))
+  if (SWIG_IsOK(res1) && argp1)
   {
     if (newmem & SWIG_CAST_NEW_MEMORY)
     {
@@ -824,7 +911,7 @@ struct IsDense : public Question<bool>
   else
   {
     bool ok = SiconosMatrix_from_python($input, &array, &is_new_object, &$1);
-    if (!ok) SWIG_fail;
+    if (!ok) { SWIG_exception_fail(SWIG_ValueError, "expected matrix"); }
   }
 }
 
@@ -835,14 +922,15 @@ struct IsDense : public Question<bool>
    bool ok = SiconosMatrix_from_python($input, &array, &is_new_object, &$1, keeper);
    if (!ok)
    {
-     void * swig_argp;
+     void* swig_argp=0;
      int swig_res = SWIG_ConvertPtr($input, &swig_argp, $descriptor(SP::TYPE *), 0);
-     if (SWIG_IsOK(swig_res))
+     if (SWIG_IsOK(swig_res) && swig_argp)
      {
        $1 = (%reinterpret_cast(swig_argp, SP::TYPE *))->get();
      }
-     else {  SWIG_fail; }
+     else { SWIG_exception_fail(SWIG_ValueError, "expected matrix"); }
    }
+   if (!$1) { SWIG_exception_fail(SWIG_ValueError, "expected matrix"); }
 }
 
 %typemap(in, fragment="SiconosMatrix")
@@ -852,14 +940,15 @@ struct IsDense : public Question<bool>
    bool ok = SiconosMatrix_from_python($input, &array, &is_new_object, &$1, keeper);
    if (!ok)
    {
-     void * swig_argp;
+     void* swig_argp=0;
      int swig_res = SWIG_ConvertPtr($input, &swig_argp, $descriptor(SP::TYPE *), 0);
-     if (SWIG_IsOK(swig_res))
+     if (SWIG_IsOK(swig_res) && swig_argp)
      {
        $1 = (%reinterpret_cast(swig_argp, SP::TYPE *))->get();
      }
-     else {  SWIG_fail; }
+     else { SWIG_exception_fail(SWIG_ValueError, "expected matrix"); }
    }
+   if (!$1) { SWIG_exception_fail(SWIG_ValueError, "expected matrix"); }
 }
 
 %typemap(freearg) (std11::shared_ptr<TYPE>)
@@ -1015,31 +1104,74 @@ struct IsDense : public Question<bool>
 %{
   static inline int sequenceToUnsignedIntVector(
     PyObject *input,
-    std11::shared_ptr<std::vector<unsigned int> > ptr)
+    std11::shared_ptr<std::vector<unsigned int> >& ptr)
   {
+    // Return success but leave ptr as nullptr if input is None
+    if (input == Py_None) {
+      ptr.reset();
+      return 1;
+    }
+
     if (!PySequence_Check(input)) {
       PyErr_SetString(PyExc_TypeError,"Expecting a sequence");
       return 0;
     }
 
+    ptr.reset(new std::vector<unsigned int>());
     assert(ptr);
 
+    PyArray_Descr* descrto = PyArray_DescrFromType(NPY_UINT);
     for (int i =0; i <  PyObject_Length(input); i++)
     {
       PyObject *o = PySequence_GetItem(input,i);
-      if (!PyInt_Check(o)) {
+      unsigned int u;
+
+      if (PyInt_Check(o)) {
+        long v = PyInt_AsLong(o);
+        if (v == -1 && PyErr_Occurred())
+          return 0;
+        u = static_cast<unsigned int>(v);
+      } else if (PyLong_Check(o)) {
+        long v = PyLong_AsLong(o);
+        if (v == -1 && PyErr_Occurred())
+          return 0;
+        u = static_cast<unsigned int>(v);
+      } else if (PyArray_CheckScalar(o)) {
+        PyArray_Descr* descrfrom = PyArray_DescrFromScalar(o);
+        if (!PyDataType_ISINTEGER(descrfrom)) {
+          Py_XDECREF(o);
+          Py_XDECREF(descrto);
+          Py_XDECREF(descrfrom);
+          PyErr_SetString(PyExc_ValueError,"Expecting a sequence of ints");
+          return 0;
+        }
+
+        // We must use UNSAFE casting, otherwise user would have to
+        // ensure to provide unsigned numpy arrays.
+        if (!PyArray_CanCastTypeTo(descrfrom, descrto,
+                                   NPY_UNSAFE_CASTING)
+            || PyArray_CastScalarToCtype(o, &u, descrto) == -1)
+        {
+          Py_XDECREF(o);
+          Py_XDECREF(descrto);
+          Py_XDECREF(descrfrom);
+          PyErr_SetString(PyExc_ValueError,"Expecting a sequence of ints");
+          return 0;
+        }
+        Py_XDECREF(descrfrom);
+      }
+      else {
         Py_XDECREF(o);
+        Py_XDECREF(descrto);
         PyErr_SetString(PyExc_ValueError,"Expecting a sequence of ints");
         return 0;
       }
 
-      if (PyInt_AsLong(o) == -1 && PyErr_Occurred())
-        return 0;
-
-      ptr->push_back(static_cast<unsigned int>(PyInt_AsLong(o)));
+      ptr->push_back(u);
 
       Py_DECREF(o);
     }
+    Py_XDECREF(descrto);
     return 1;
   }
 %}
@@ -1048,13 +1180,10 @@ struct IsDense : public Question<bool>
 // int sequence => std::vector<unsigned int>
 %typemap(in,fragment="NumPy_Fragments") std11::shared_ptr<std::vector<unsigned int> > (std11::shared_ptr<std::vector<unsigned int> > temp)
 {
-  temp.reset(new std::vector<unsigned int>());
-  if (!sequenceToUnsignedIntVector($input, temp))
+  if (!sequenceToUnsignedIntVector($input, $1))
   {
     SWIG_fail;
   }
-  $1 = temp; // temp deallocation is done at object destruction
-             // thanks to shared ptr ref counting
 }
 
 

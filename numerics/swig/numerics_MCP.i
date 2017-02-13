@@ -25,13 +25,13 @@
      return MCP;
    }
 
-  void set_computeFmcp(PyObject *o)
+  void set_computeFmcp(SN_OBJ_TYPE *o)
   {
     set_my_callback_Fmcp(o);
     $self->computeFmcp = (my_call_to_callback_Fmcp);
   }
 
-  void set_computeNablaFmcp(PyObject *o)
+  void set_computeNablaFmcp(SN_OBJ_TYPE *o)
   {
 
     set_my_callback_NablaFmcp(o);
@@ -74,18 +74,18 @@
 
 
 
-  MixedComplementarityProblem(PyObject *sizeEq, PyObject *sizeIneq, PyObject *o1, PyObject *o2)
+  MixedComplementarityProblem(SN_OBJ_TYPE *sizeEq, SN_OBJ_TYPE *sizeIneq, SN_OBJ_TYPE *o1, SN_OBJ_TYPE *o2)
   {
      MixedComplementarityProblem* MCP;
      MCP =  (MixedComplementarityProblem *) malloc(sizeof(MixedComplementarityProblem));
 
-     MCP->sizeEqualities = (int) PyInt_AsLong(sizeEq);
-     MCP->sizeInequalities = (int) PyInt_AsLong(sizeIneq);
+     SWIG_AsVal_int(sizeEq, &MCP->sizeEqualities);
+     SWIG_AsVal_int(sizeIneq, &MCP->sizeInequalities);
      int size =  MCP->sizeEqualities +  MCP->sizeInequalities;
 
      if (size<1)
      {
-       PyErr_SetString(PyExc_RuntimeError, "sizeEqualities + sizeInequalities has to be positive");
+       SWIG_Error(SWIG_RuntimeError, "sizeEqualities + sizeInequalities has to be positive");
        MCP->Fmcp = NULL;
        MCP->nablaFmcp = NULL;
        freeMixedComplementarityProblem(MCP);
@@ -104,7 +104,7 @@
      }
      else
      {
-       PyErr_SetString(PyExc_TypeError, "argument 3 must be callable");
+       SWIG_Error(SWIG_TypeError, "argument 3 must be callable");
        free(MCP->Fmcp);
        free(MCP->nablaFmcp);
        MCP->Fmcp = NULL;
@@ -121,7 +121,7 @@
      }
      else
      {
-       PyErr_SetString(PyExc_TypeError, "argument 4 must be callable");
+       SWIG_Error(SWIG_TypeError, "argument 4 must be callable");
        free(MCP->Fmcp);
        free(MCP->nablaFmcp);
        MCP->Fmcp = NULL;
@@ -142,6 +142,3 @@
     freeMixedComplementarityProblem($self);
   }
 };
-
-
-

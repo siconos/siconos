@@ -63,7 +63,8 @@ int avi_caoferris(AffineVariationalInequalities* problem, double *z, double *w, 
 
   siconos_find_vertex(problem->poly, n, basis);
   DEBUG_PRINT_VEC_INT(basis, nrows+1);
-  const double* H = problem->poly->H;
+  const double* H = problem->poly->H->matrix0;
+  assert(H);
   const double* K = problem->poly->K;
   /* Set of active constraints */
   unsigned* A = (unsigned*)malloc(n*sizeof(unsigned));

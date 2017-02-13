@@ -42,8 +42,10 @@ int main(void)
   x[0] = 50*erand48(xsubi1);
   x[1] = 50*erand48(xsubi2);
   /* column major */
-  double H[8] = {1.0, -TS/2.0, -1.0, TS/2.0, 0.0, 1.0, 0.0, -1.0};
+  double Hdat[8] = {1.0, -TS/2.0, -1.0, TS/2.0, 0.0, 1.0, 0.0, -1.0};
   double K[4] = {-1.0, -1.0, -1.0, -1.0};
+
+  NumericsMatrix* H = NM_create_from_data(NM_DENSE, 4, 2, Hdat);
 
   double v1[] = {-1.0, -1.0 -TS/2.0};
   double v2[] = {-1.0, 1.0 -TS/2.0};

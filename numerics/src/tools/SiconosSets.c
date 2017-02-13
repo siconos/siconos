@@ -18,6 +18,7 @@
 
 
 #include "SiconosSets.h"
+#include "NumericsMatrix.h"
 #include <stdlib.h>
 #include <assert.h>
 #include <stdio.h>
@@ -100,6 +101,7 @@ void free_polyhedron(polyhedron* poly)
   assert(poly);
   if (poly->H)
   {
+    freeNumericsMatrix(poly->H);
     free(poly->H);
     poly->H = NULL;
   }
@@ -110,6 +112,7 @@ void free_polyhedron(polyhedron* poly)
   }
   if (poly->Heq)
   {
+    freeNumericsMatrix(poly->Heq);
     free(poly->Heq);
     poly->Heq = NULL;
   }

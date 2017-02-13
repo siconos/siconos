@@ -3,7 +3,7 @@
 #include "AVI_Solvers.h"
 #include "AVI_cst.h"
 #include "VariationalInequality_Solvers.h"
-  %}
+%}
 
 
 %include "AffineVariationalInequalities.h"
@@ -14,89 +14,69 @@
 {
   AffineVariationalInequalities()
    {
-     AffineVariationalInequalities* avi;
-     avi = (AffineVariationalInequalities *) malloc(sizeof(AffineVariationalInequalities));
-     avi->size = 0;
-     avi->M = NULL;
-     avi->q = NULL;
-     avi->d = NULL;
-     avi->poly = NULL;
-
+     AffineVariationalInequalities* avi = newAVI();
      return avi;
    }
 
 
-  AffineVariationalInequalities(PyObject* mat, PyObject* vec)
+  AffineVariationalInequalities(SN_OBJ_TYPE* mat, SN_OBJ_TYPE* vec)
   {
 
 
-     AffineVariationalInequalities* avi;
-     avi = (AffineVariationalInequalities *) malloc(sizeof(AffineVariationalInequalities));
-     avi->d = NULL;
-     avi->poly = NULL;
+     AffineVariationalInequalities* avi = newAVI();
 
-      int is_new_object1=0;
-      int is_new_object2=0;
-      PyArrayObject* array = obj_to_array_fortran_allow_conversion(mat, NPY_DOUBLE,&is_new_object1);
-      assert(array);
-      PyArrayObject* vector = obj_to_array_contiguous_allow_conversion(vec, NPY_DOUBLE, &is_new_object2); 
-      assert(vector);
-      NumericsMatrix *M = newNumericsMatrix();
-      fillNumericsMatrix(M, NM_DENSE, array_size(array, 0), array_size(array, 1), array_data(array));
+     int is_new_object2=0;
+     SN_ARRAY_TYPE* vector = obj_to_sn_vector(vec, &is_new_object2); 
 
-      avi->size = M->size0;
-      avi->M = M;
-      avi->q = (double*)array_data(vector);
+     %NM_convert_from_target(mat, (&avi->M), return NULL);
+
+     if (avi->M->size0 != avi->M->size1)
+     {
+       SWIG_Error(SWIG_ValueError, "A non square matrix has been given");
+       freeAVI(avi);
+       return NULL;
+     }
+
+     sn_check_array_type(vector, return NULL);
+     sn_check_size_mat_vec(avi->M->size0, vector, return NULL);
+
+     avi->size = avi->M->size0;
+     set_vec_from_target(avi->q, vector, , return NULL);
 
       // python mem management
-      if(is_new_object1 && array)
-      {
-        Py_DECREF(array);
-      }
-
-      if(is_new_object2 && vector)
-      {
-        Py_DECREF(vector);
-       }
+      target_mem_mgmt(is_new_object2, vector);
 
      return avi;
    }
 
-   void set_polyhedron(PyObject* H_mat, PyObject* K_vec)
+   void set_polyhedron(SN_OBJ_TYPE* H_mat, SN_OBJ_TYPE* K_vec)
    {
      $self->poly = (polyhedron*) malloc(sizeof(polyhedron));
-      int is_new_object1=0;
       int is_new_object2=0;
-      PyArrayObject* array = obj_to_array_fortran_allow_conversion(H_mat, NPY_DOUBLE,&is_new_object1);
-      assert(array);
-      PyArrayObject* vector = obj_to_array_contiguous_allow_conversion(K_vec, NPY_DOUBLE, &is_new_object2); 
-      assert(vector);
-      $self->poly->size_ineq = array_size(array, 0);
+      %NM_convert_from_target(H_mat, (&$self->poly->H), TARGET_ERROR_VERBOSE);
+
+      if ($self->poly->H->size1 != $self->size)
+      {
+        SWIG_Error(SWIG_TypeError, "The matrix does not have the right number of column");
+        TARGET_ERROR_VERBOSE;
+      }
+
+      SN_ARRAY_TYPE* vector = obj_to_sn_vector(K_vec, &is_new_object2); 
+      sn_check_array_type(vector, TARGET_ERROR_VERBOSE);
+      sn_check_size_mat_vec($self->poly->H->size0, vector, TARGET_ERROR_VERBOSE);
+
+      set_vec_from_target($self->poly->K, vector, , TARGET_ERROR_VERBOSE);
+
+      $self->poly->size_ineq = $self->poly->H->size0;
       $self->poly->size_eq = 0;
-      $self->poly->H = (double*)array_data(array);
-      $self->poly->K = (double*)array_data(vector);
       $self->poly->Heq = NULL;
       $self->poly->Keq = NULL;
 
-    if (array_size(array, 1) != $self->size)
-     {
-       PyErr_SetString(PyExc_TypeError, "The matrix does not have the right number of column");
-       PyErr_PrintEx(0);
-       exit(1);
-     }
    }
 
   ~AffineVariationalInequalities()
   {
-    if ($self->poly)
-    {
-      free($self->poly);
-    }
-    if ($self->M)
-    {
-      free($self->M);
-    }
-    free($self);
+    freeAVI($self);
   }
 };
 

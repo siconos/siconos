@@ -182,6 +182,18 @@ void freeFrictionContactProblem(FrictionContactProblem* problem)
 
 }
 
+FrictionContactProblem* newFCP(void)
+{
+  FrictionContactProblem* fcp = (FrictionContactProblem*) malloc(sizeof(FrictionContactProblem));
+  fcp->dimension = 0;
+  fcp->numberOfContacts = 0;
+  fcp->M = NULL;
+  fcp->q = NULL;
+  fcp->mu = NULL;
+
+  return fcp;
+}
+
 FrictionContactProblem* frictionContactProblem_new(int dim, int nc, NumericsMatrix* M, double* q, double* mu)
 {
   FrictionContactProblem* fcp = (FrictionContactProblem*) malloc(sizeof(FrictionContactProblem));

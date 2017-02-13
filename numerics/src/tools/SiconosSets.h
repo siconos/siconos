@@ -59,9 +59,9 @@ struct polyhedron
   int id; /**< id of the structure, usually solver specific */
   unsigned size_ineq; /**< number of inequalities */
   unsigned size_eq; /**< number of equalities */
-  double* H; /**< H matrix in an (H,K) representation of a polytope H x <= K */
+  NumericsMatrix* H; /**< H matrix in an (H,K) representation of a polytope H x <= K */
   double* K; /**< K vector in an (H,K) representation of a polytope H x <= K */
-  double* Heq; /**< Heq matrix for the equality constraints Heq x = Keq */
+  NumericsMatrix* Heq; /**< Heq matrix for the equality constraints Heq x = Keq */
   double* Keq; /**< Keq vector for the equality constraints Heq x = Keq */
 };
 
