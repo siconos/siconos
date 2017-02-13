@@ -37,8 +37,8 @@
 using namespace RELATION;
 
 // #define DEBUG_NOCOLOR
-#define DEBUG_STDOUT
-#define DEBUG_MESSAGES
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
 #include "debug.h"
 
 int LsodarOSI::count_NST = 0;
