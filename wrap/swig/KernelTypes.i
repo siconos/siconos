@@ -173,16 +173,16 @@ static inline void fillBasePyarray(PyObject* pyarray, SharedPointerKeeper* saved
   int ecode = SWIG_AsVal_int($input, &x);
   if (SWIG_IsOK(ecode)) {
     if (x < 0)
-      SWIG_exception_fail(SWIG_ValueError, "Expected unsigned int");
+      %argument_fail(ecode, "$type", $symname, $argnum);
   } else if (PyArray_CheckScalar($input)) {
     // TODO: By treating as int, we lose half the range of the
     // unsigned int!  Okay for current uses of unsigned int in
     // Siconos.
     x = PyArray_PyIntAsInt($input);
     if (x == -1 && PyErr_Occurred())
-      SWIG_exception_fail(SWIG_TypeError, "Expected unsigned int");
+      %argument_fail(SWIG_TypeError, "$type", $symname, $argnum);
     if (x < 0) {
-      SWIG_exception_fail(SWIG_ValueError, "Expected unsigned int");
+      %argument_fail(SWIG_ValueError, "$type", $symname, $argnum);
     }
   }
   $1 = (unsigned int) x;
@@ -203,32 +203,37 @@ static inline void fillBasePyarray(PyObject* pyarray, SharedPointerKeeper* saved
 }
 %typemap(in,fragment="SWIG_AsVal_int") int {
   int ecode = SWIG_AsVal_int($input, &$1);
-  if (!SWIG_IsOK(ecode)) {
-    if (PyArray_CheckScalar($input)) {
-      $1 = PyArray_PyIntAsInt($input);
-      if ($1 == -1 && PyErr_Occurred())
-        SWIG_exception_fail(SWIG_TypeError, "Expected int");
-    }
+  if (!SWIG_IsOK(ecode) && PyArray_CheckAnyScalar($input))
+  {
+    $1 = PyArray_PyIntAsInt($input);
+    if ($1 == -1 && PyErr_Occurred())
+      %argument_fail(SWIG_TypeError, "$type", $symname, $argnum);
   }
 }
 
 
 //////////////////////////////////////////////////////////////////////////////
 // allow double to be numpy types
+// (could also use,
+//   $1 = PyArray_CanCoerceScalar(PyArray_ObjectType($input, 0),
+//                                NPY_DOUBLE, NPY_FLOAT_SCALAR);)
 %typecheck(SWIG_TYPECHECK_DOUBLE,fragment="SWIG_AsVal_double") double {
   $1 = PyArray_CheckAnyScalar($input);
 }
 %typemap(in,fragment="SWIG_AsVal_double") double {
   int ecode = SWIG_AsVal_double($input, &$1);
-  if (!SWIG_IsOK(ecode)) {
+  if (!SWIG_IsOK(ecode) && PyArray_CheckAnyScalar($input)) {
     PyArray_Descr *totype = PyArray_DescrFromType(NPY_DOUBLE);
+    // TODO: numpy bug?  PyArray_CastScalarToCtype seems to segfault
+    // if you pass a 0-dimensional array
+    // (e.g. np.array(0.0,dtype=np.float32), even though
+    // CanCoerceScalar and CheckAnyScalar both return 1.
     PyArray_CastScalarToCtype($input, &$1, totype);
     Py_XDECREF(totype);
     if ($1 == -1.0 && PyErr_Occurred())
-      SWIG_exception_fail(ecode, "Expected float/double");
+      %argument_fail(ecode, "$type", $symname, $argnum);
   }
 }
-
 
 //////////////////////////////////////////////////////////////////////////////
 // check on input : a numpy array or a TYPE
