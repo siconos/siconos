@@ -41,8 +41,8 @@
 #include "Tools.hpp"
 
 using namespace RELATION;
-//#define DEBUG_STDOUT
-//#define DEBUG_MESSAGES
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
 #include "debug.h"
 
 LinearOSNS::LinearOSNS(): OneStepNSProblem(), _MStorageType(0), _keepLambdaAndYState(true)
@@ -596,14 +596,16 @@ void LinearOSNS::computeqBlock(InteractionsGraph::VDescriptor& vertex_inter, uns
 
   if ((osi1Type == OSI::EULERMOREAUOSI && osi2Type == OSI::EULERMOREAUOSI) ||
       (osi1Type == OSI::MOREAUJEANOSI  && osi2Type == OSI::MOREAUJEANOSI  )||
-      (osi1Type == OSI::MOREAUDIRECTPROJECTIONOSI && osi2Type == OSI::MOREAUDIRECTPROJECTIONOSI) ||
+      (osi1Type == OSI::MOREAUDIRECTPROJECTIONOSI &&
+       osi2Type == OSI::MOREAUDIRECTPROJECTIONOSI) ||
       (osi1Type == OSI::LSODAROSI && osi2Type == OSI::LSODAROSI  ) ||
       (osi1Type == OSI::NEWMARKALPHAOSI && osi2Type == OSI::NEWMARKALPHAOSI  ) ||
       (osi1Type == OSI::D1MINUSLINEAROSI && osi2Type == OSI::D1MINUSLINEAROSI  ) ||
       (osi1Type == OSI::SCHATZMANPAOLIOSI && osi2Type == OSI::SCHATZMANPAOLIOSI ) ||
       (osi1Type == OSI::ZOHOSI && osi2Type == OSI::ZOHOSI))
   {
-    // We assume that the osi of ds1 osi1 is intergrating the interaction
+    // We assume that the osi of ds1 osi1 is integrating the interaction
+    this->display();
     osi1.computeFreeOutput(vertex_inter, this);
     setBlock(*inter->yForNSsolver(), _q, sizeY , 0, pos);
     DEBUG_EXPR(_q->display());
