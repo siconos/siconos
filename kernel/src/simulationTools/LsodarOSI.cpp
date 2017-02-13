@@ -37,8 +37,8 @@
 using namespace RELATION;
 
 // #define DEBUG_NOCOLOR
-// #define DEBUG_STDOUT
-// #define DEBUG_MESSAGES
+#define DEBUG_STDOUT
+#define DEBUG_MESSAGES
 #include "debug.h"
 
 int LsodarOSI::count_NST = 0;
@@ -238,10 +238,12 @@ void LsodarOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSyste
   ds->resetToInitialState();
   
   if(Type::value(*ds) == Type::LagrangianDS ||
-      Type::value(*ds) == Type::LagrangianLinearTIDS)
+     Type::value(*ds) == Type::LagrangianLinearTIDS)
   {
     LagrangianDS& lds = *std11::static_pointer_cast<LagrangianDS>(ds);
     lds.connectToDS(getSizeMem());
+    lds.initRhs(t);
+ 
     _xWork->insertPtr(lds.q());
     _xWork->insertPtr(lds.velocity());
     workVectors.resize(OneStepIntegrator::work_vector_of_vector_size);
@@ -251,6 +253,7 @@ void LsodarOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSyste
   }
   else
     _xWork->insertPtr(ds->x());
+
   
   DEBUG_END("LsodarOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds)\n");
 }
@@ -356,6 +359,7 @@ void LsodarOSI::initializeInteraction(double t0, Interaction &inter,
   }
   inter.swapInMemory();
 
+  
 }
 void LsodarOSI::initialize(Model& m)
 {
@@ -374,7 +378,7 @@ void LsodarOSI::initialize(Model& m)
     ds->resetToInitialState();
     //ds->swapInMemory();
   }
-
+  
   SP::InteractionsGraph indexSet0 = m.nonSmoothDynamicalSystem()->topology()->indexSet0();
   InteractionsGraph::VIterator ui, uiend;
   for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
@@ -383,13 +387,9 @@ void LsodarOSI::initialize(Model& m)
     initializeInteraction(m.t0(), inter, indexSet0->properties(*ui), *_dynamicalSystemsGraph);
   }
 
+  computeRhs(m.t0(),*_dynamicalSystemsGraph);
 
 
-
-
-
-
-  
   //   Integer parameters for LSODAROSI are saved in vector intParam.
   //   The link with variable names in opkdmain.f is indicated in comments
 
@@ -660,6 +660,7 @@ void LsodarOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, 
     if(relationType == Lagrangian)
     {
       Xfree = DSlink[LagrangianR::xfree];
+      DEBUG_EXPR(Xfree->display(););
     }
     // else if  (relationType == NewtonEuler)
     // {
