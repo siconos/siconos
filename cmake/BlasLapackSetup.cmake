@@ -79,6 +79,8 @@ elseif(USE_OpenBLAS)
   endif()
 elseif(USE_APPLE_FRAMEWORK)
   set(BLA_VENDOR Apple)
+elseif(USE_MATLAB)
+  set(BLA_VENDOR MATLAB)
   # TODO: LAPACK or LAPACKE
 endif()
 

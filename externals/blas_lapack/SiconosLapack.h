@@ -71,6 +71,10 @@ extern "C"
 #if defined(HAS_ACCELERATE)
 #include "SiconosAppleLapack.h"
 
+ // --- MATLAB ---
+#elif defined(HAS_MATLAB_LAPACK)
+#include "SiconosMATLABLapack.h"
+
 // --- Atlas ---
 #elif defined(HAS_ATLAS_LAPACK) || !defined(HAS_LAPACKE)
 #include "SiconosAtlasLapack.h"
