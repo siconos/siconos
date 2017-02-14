@@ -1,5 +1,9 @@
 %extend MixedComplementarityProblem2
 {
+  CALL_COMPUTE_F(mcp, (void*))
+
+  CALL_COMPUTE_NABLA_F(mcp, (void*))
+
   MixedComplementarityProblem2()
    {
      MixedComplementarityProblem2* MCP = newMCP();
@@ -77,14 +81,12 @@
 
      return MCP;
    }
+#endif /* SWIGPYTHON */
 
-  MixedComplementarityProblem2(SN_OBJ_TYPE* n1, SN_OBJ_TYPE* n2, SN_OBJ_TYPE* py_compute_Fmcp, SN_OBJ_TYPE* py_compute_nabla_Fmcp)
+  MixedComplementarityProblem2(SN_OBJ_TYPE* n1, SN_OBJ_TYPE* n2, SN_OBJ_TYPE* compute_F, SN_OBJ_TYPE* compute_nabla_F)
   {
-     MixedComplementarityProblem2* MCP;
-     MCP =  (MixedComplementarityProblem2 *) malloc(sizeof(MixedComplementarityProblem2));
+     MixedComplementarityProblem2* MCP = newMCP();
 
-     MCP->compute_Fmcp = &call_py_compute_Fmcp;
-     MCP->compute_nabla_Fmcp = &call_py_compute_nabla_Fmcp;
      SWIG_AsVal_int(n1, &MCP->n1);
      SWIG_AsVal_int(n2, &MCP->n2);
      int size =  MCP->n1 +  MCP->n2;
@@ -100,42 +102,13 @@
        MCP->nabla_Fmcp = NM_create(NM_DENSE, size, size);
      }
 
-     MCP->env = (void*) malloc(sizeof(functions_env_python));
-     functions_env_python* mcp_env_python = (functions_env_python*) MCP->env;
-     mcp_env_python->id = ENV_IS_PYTHON_FUNCTIONS;
-
-     if (PyCallable_Check(py_compute_Fmcp)) 
-     {
-       mcp_env_python->env_compute_function = py_compute_Fmcp;
-     }
-     else
-     {
-       SWIG_Error(SWIG_TypeError, "argument 3 must be callable");
-       freeNumericsMatrix(MCP->nabla_Fmcp);
-       free(MCP->nabla_Fmcp);
-       free(MCP->env);
-       free(MCP);
-       return NULL;
-     }
-
-
-     if (PyCallable_Check(py_compute_nabla_Fmcp))
-     {
-       mcp_env_python->env_compute_jacobian = py_compute_nabla_Fmcp;
-     }
-     else
-     {
-       SWIG_Error(SWIG_TypeError, "argument 4 must be callable");
-       freeNumericsMatrix(MCP->nabla_Fmcp);
-       free(MCP->nabla_Fmcp);
-       free(MCP->env);
-       free(MCP);
-       return NULL;
-     }
+     check_save_target_fn(compute_F, MCP->env, env_compute_function, MixedComplementarityProblem2_call_compute_F, MCP->compute_Fmcp, 2);
+     check_save_target_fn(compute_nabla_F, MCP->env, env_compute_jacobian, MixedComplementarityProblem2_call_compute_nabla_F, MCP->compute_nabla_Fmcp, 3);
 
      return MCP;
    }
 
+#ifdef SWIGPYTHON
   void set_compute_F_and_nabla_F_as_C_functions(SN_OBJ_TYPE* lib_name, SN_OBJ_TYPE* compute_F_name, SN_OBJ_TYPE* compute_nabla_F_name)
   {
 %#if PY_MAJOR_VERSION < 3

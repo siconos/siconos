@@ -12,6 +12,10 @@
 %extend VariationalInequality
 {
 
+  CALL_COMPUTE_F(vi, VI_get_env)
+
+  CALL_COMPUTE_NABLA_F(vi, VI_get_env)
+
   VariationalInequality(SN_OBJ_TYPE* n)
   {
      int nn;
@@ -27,74 +31,56 @@
        return NULL;
      }
 
+     vi->nabla_F = NM_create(NM_DENSE, nn, nn);
+
      return vi;
   }
 
 
-#ifdef SWIGPYTHON
-  VariationalInequality(SN_OBJ_TYPE* n, SN_OBJ_TYPE* py_compute)
+  VariationalInequality(SN_OBJ_TYPE* n, SN_OBJ_TYPE* compute)
   {
 
      int nn;
      SWIG_AsVal_int(n, &nn);
      VariationalInequality* vi = variationalInequality_new(nn);
 
+     vi->nabla_F = NM_create(NM_DENSE, nn, nn);
+
+#ifdef SWIGPYTHON
      SN_OBJ_TYPE* method_compute_F = NULL;
-     if (PyObject_HasAttrString(py_compute, "compute_F")) method_compute_F = PyObject_GetAttrString(py_compute, "compute_F");
+     if (PyObject_HasAttrString(compute, "compute_F")) method_compute_F = PyObject_GetAttrString(compute, "compute_F");
      SN_OBJ_TYPE* method_compute_nabla_F = NULL;
-     if (PyObject_HasAttrString(py_compute, "compute_nabla_F")) method_compute_nabla_F = PyObject_GetAttrString(py_compute, "compute_nabla_F");
+     if (PyObject_HasAttrString(compute, "compute_nabla_F")) method_compute_nabla_F = PyObject_GetAttrString(compute, "compute_nabla_F");
 
      if (method_compute_F && method_compute_nabla_F && PyCallable_Check(method_compute_F) && PyCallable_Check(method_compute_nabla_F))
      {
        vi->env = (void*) malloc(sizeof(class_env_python));
        class_env_python* vi_env_python = (class_env_python*) vi->env;
        vi_env_python->id = ENV_IS_PYTHON_CLASS;
-       vi_env_python->class_object = py_compute;
+       vi_env_python->class_object = compute;
        target_mem_mgmt_instr(method_compute_F);
        target_mem_mgmt_instr(method_compute_nabla_F);
      }
      else
+#endif /* SWIGPYTHON */
      {
-       if (PyCallable_Check(py_compute))
-       {
-         vi->F = &call_py_compute_Fvi;
-         vi->env = (void*) malloc(sizeof(functions_env_python));
-         functions_env_python* vi_env_python = (functions_env_python*) vi->env;
-         vi_env_python->id = ENV_IS_PYTHON_FUNCTIONS;
-         vi_env_python->env_compute_function = py_compute;
-       }
-       else
-       {
-         target_mem_mgmtX_instr(method_compute_F);
-         target_mem_mgmtX_instr(method_compute_nabla_F);
-         SWIG_Error(SWIG_TypeError, "argument 2 must either be an object with a method compute_F and a method compute_nabla_F or a callable function");
-         TARGET_ERROR_VERBOSE;
-         free(vi);
-         return NULL;
-       }
+       check_save_target_fn(compute, vi->env, env_compute_function, VariationalInequality_call_compute_F, vi->F, 2);
      }
 
+#ifdef SWIGPYTHON
+     target_mem_mgmtX_instr(method_compute_F);
+     target_mem_mgmtX_instr(method_compute_nabla_F);
+#endif /* SWIGPYTHON */
      return vi;
    }
 
 
-   void set_compute_nabla_F(SN_OBJ_TYPE* py_compute_nabla_F)
+   void set_compute_nabla_F(SN_OBJ_TYPE* compute_nabla_F)
    {
-     if (PyCallable_Check(py_compute_nabla_F))
-     {
-       $self->compute_nabla_F = &call_py_compute_nabla_Fvi;
-       functions_env_python* vi_env_python = (functions_env_python*) $self->env;
-       vi_env_python->id = ENV_IS_PYTHON_FUNCTIONS;
-       vi_env_python->env_compute_jacobian = py_compute_nabla_F;
-       $self->nabla_F = NM_create(NM_DENSE, $self->size, $self->size);
-     }
-     else
-     {
-       SWIG_Error(SWIG_TypeError, "argument 1 must be callable");
-       TARGET_ERROR_VERBOSE;
-     }
+     check_save_target_fn(compute_nabla_F, $self->env, env_compute_jacobian, VariationalInequality_call_compute_nabla_F, $self->compute_nabla_F, 1);
    }
 
+#ifdef SWIGPYTHON
    void set_box_constraints(SN_OBJ_TYPE* box_lower_bound, SN_OBJ_TYPE* box_upper_bound)
    {
      if ((PyObject_Length(box_lower_bound) == $self->size) && (PyObject_Length(box_upper_bound) == $self->size))
@@ -134,8 +120,6 @@
 
     $self->F = (ptrFunctionVI)p_compute_F;
     $self->compute_nabla_F = (ptrFunctionVI_nabla)p_compute_nabla_F;
-
-    $self->nabla_F = NM_create(NM_DENSE, $self->size, $self->size);
     }
     else
     {

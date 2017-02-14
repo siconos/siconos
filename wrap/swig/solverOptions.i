@@ -128,12 +128,16 @@ static int convert_darray(PyObject *input, double *ptr) {
 }
 
 %typemap(argout) (int *info) {
+#ifdef SWIGPYTHON
   target_mem_mgmt_instr($result);
+#endif
   $result = SWIG_From_int(*$1);
  }
 
 %typemap(argout) (double *error) {
+#ifdef SWIGPYTHON
   target_mem_mgmt_instr($result);
+#endif
   $result = SWIG_From_double(*$1);
  }
 

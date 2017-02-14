@@ -419,6 +419,8 @@ namespace std11 = boost;
 
 %include numerics_common.i
 
+%include Numerics_callback.i
+
 #ifdef SWIGPYTHON
 %include Numerics_for_python_callback.i
 %include numerics_MCP.i
