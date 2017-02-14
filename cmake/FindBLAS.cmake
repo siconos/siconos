@@ -45,7 +45,7 @@ if(NOT BLAS_FOUND)
     endif()
   endif()
 
-  macro(check_blas_Libraries LIBRARIES _prefix _name _flags _list _thread)
+  macro(check_blas_libraries LIBRARIES _prefix _name _flags _list _thread)
     # This macro checks for the existence of the combination of libraries
     # given by _list.  If the combination is found, this macro checks (using the
     # Check_Fortran_Function_Exists and/or Check_function_exists macros) whether
@@ -130,7 +130,12 @@ if(NOT BLAS_FOUND)
       #endif()
       #else()
       ## First we check cblas interface
-      check_function_exists("cblas_${_name}" ${_prefix}${_combined_name}_WORKS)
+      if (_libraries_work MATCHES "mwblas")
+        set(_symbol_name "${_name}_")
+      else()
+        set(_symbol_name "cblas_${_name}")
+      endif()
+      check_function_exists("${_symbol_name}" ${_prefix}${_combined_name}_WORKS)
       # and then, if required, fortran interface
       if (_CHECK_FORTRAN)
 	check_fortran_function_exists("${_name}" ${_prefix}${_combined_name}_WORKS_F)
@@ -285,6 +290,28 @@ if(NOT BLAS_FOUND)
     endif (BLAS_LIBRARIES)
   endif()
 
+  ## MATLAB ##
+  if((NOT BLAS_LIBRARIES)
+    AND ((NOT WITH_BLAS) OR (WITH_BLAS MATCHES "MATLAB")))
+    set(MATLAB_LIB_NAME "mwblas")
+    message(STATUS "Try to find blas in MATLAB ...")
+    check_blas_libraries(
+      BLAS_LIBRARIES
+      BLAS
+      dgemm
+      ""
+      "${MATLAB_LIB_NAME}"
+      "")
+    if(BLAS_LIBRARIES)
+      set(WITH_BLAS "MATLAB" CACHE STRING "Blas implementation type [mkl/openblas/atlas/accelerate/generic]" FORCE)
+      set(BLAS_HEADER blas.h CACHE STRING "Blas header name")
+      set(BLAS_INCLUDE_SUFFIXES "extern/include")
+      list(GET BLAS_LIBRARIES 0 _MBLAS_LIB)
+      get_filename_component(_bdir ${_MBLAS_LIB} DIRECTORY)
+      set(INCLUDE_DIR_HINTS "${_bdir}/../../")
+    endif(BLAS_LIBRARIES)
+  endif()
+
   ## Generic BLAS library? ##
   if((NOT BLAS_LIBRARIES)
       AND ((NOT WITH_BLAS) OR (WITH_BLAS STREQUAL "generic")))
@@ -301,7 +328,7 @@ if(NOT BLAS_FOUND)
       set(BLAS_HEADER cblas.h CACHE STRING "Blas header name")
     endif()
   endif()
-  
+
   ## Generic BLAS library (if cblas not found in blas) ##
   if((NOT BLAS_LIBRARIES)
       AND ((NOT WITH_BLAS) OR (WITH_BLAS STREQUAL "generic")))
@@ -341,11 +368,12 @@ if(NOT BLAS_FOUND)
       get_filename_component(_bdir ${BLAS_LIBRARY_DIR} PATH)
       set(BLAS_DIR ${_bdir} CACHE PATH "Blas implementation location." FORCE)
     endif()
-    
+
     set(BLAS_INC_DIR ${BLAS_DIR}/include)
     ## Use BLAS_DIR to set path for cmake search. 
     ## If pkg-config has been used, maybe it gives some hints about headers location ...
     message(STATUS pkg hints : ${INCLUDE_DIR_HINTS})
+    message(STATUS BLAS_INC_DIR : ${BLAS_INC_DIR})
     ## Note Franck : it seems that find_path process does not work as expected on Macosx : it does not respect the search sequence described
     # in cmake doc (i.e. CMAKE_PREFIX, then HINTS, PATHS ... ) and always turn to find apple framework cblas if
     # NO_DEFAULT_PATH is not set. 

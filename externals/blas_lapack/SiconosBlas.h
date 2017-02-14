@@ -42,6 +42,15 @@ extern "C"
 #include <cblas.h>
 #elif defined(HAS_ACCELERATE)
 #include <Accelerate.h>
+#elif defined(HAS_MATLAB_BLAS)
+#include <blas.h>
+#define cblas_daxpy daxpy
+#define  cblas_dcopy dcopy
+#define  cblas_ddot ddot
+#define  cblas_dgemm dgemm
+#define  cblas_dgemv dgemv
+#define  cblas_dnrm2 dnrm2
+#define  cblas_dscal dscal
 #else
 #include <cblas.h>
 #endif 
