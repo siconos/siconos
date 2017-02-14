@@ -170,8 +170,8 @@ int main(int argc, char *argv[])
 
   dataPlot.resize(cmp,outputSize);
   ioMatrix::write(filename, "ascii", dataPlot, "noDim");
-  //  if (argc==1)
-  if(argc== 10)
+  if (argc==1)
+  //if(argc== 10)
   {
     SimpleMatrix dataPlotRef(dataPlot);
     dataPlotRef.zero();
