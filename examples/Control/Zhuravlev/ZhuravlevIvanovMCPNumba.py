@@ -33,7 +33,7 @@ Fmcp = np.empty((4,))
 
 #@jit("void(i8,i8,double[:],double[:])",nopython=True)
 #@jit("void(i8,i8,double[:],double[:])")
-def mcp_function(n1, n2, z, F):
+def mcp_function(n, z, F):
 #    print("z --------------------------------------")
 #    print(z)
     _kappa = .7
@@ -64,7 +64,7 @@ def mcp_function(n1, n2, z, F):
 
 #@jit("void(i8,i8,double[:],double[:,:])",nopython=True)
 #@jit("void(i8,i8,double[:],double[:,:])")
-def mcp_Nablafunction(n1, n2, z, nabla_Fmcp):
+def mcp_Nablafunction(n, z, nabla_Fmcp):
     _kappa = .7
     _g = 9.81
     theta = 1.0

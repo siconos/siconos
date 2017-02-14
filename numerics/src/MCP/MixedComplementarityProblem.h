@@ -49,8 +49,8 @@
     things will be clearer ...
  */
 typedef void (*ptrFunctionMCP)(int size , double* z, double * F);
-typedef void (*ptrFunctionMCP2)(void* env, int n1, int n2, double* z, double * F);
-typedef void (*ptrFunctionMCP_nabla)(void* env, int n1, int n2, double* z, NumericsMatrix * F);
+typedef void (*ptrFunctionMCP2)(void* env, int n, double* z, double * F);
+typedef void (*ptrFunctionMCP_nabla)(void* env, int n, double* z, NumericsMatrix * F);
 
 /** \struct  MixedComplementarityProblem MixedComplementarityProblem.h
  * The structure that defines a Mixed Complementarity problem (MCP) : Find two vectors \f$(z,w \in {{\mathrm{I\!R}}}^{n+m})\f$ such that:\n
