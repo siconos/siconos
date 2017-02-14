@@ -7,11 +7,11 @@
 #elif _MSC_VER
 #define strdup _strdup
 #else
-static inline char* strdup(char* src)
+static inline char* strdup(const char* src)
 {
   size_t len = strlen(src) + 1;
   char* dest = (char*)malloc(len * sizeof(char));
-  strcpy(dest, src, len);
+  strncpy(dest, src, len);
   return dest;
 }
 #endif
