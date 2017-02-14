@@ -75,7 +75,7 @@ struct Interaction::_setLevels : public SiconosVisitor
     }
     else
     {
-	RuntimeException::selfThrow("Interaction::_setLevels::visit - unknown relation type: ");
+      RuntimeException::selfThrow("Interaction::_setLevels::visit - unknown relation type for the nslaw ");
     };
   }
   void visit(const RelayNSL& nslaw)
@@ -91,13 +91,25 @@ struct Interaction::_setLevels : public SiconosVisitor
     }
     else
     {
-	RuntimeException::selfThrow("Interaction::_setLevels::visit - unknown relation type: ");
+	RuntimeException::selfThrow("Interaction::_setLevels::visit - unknown relation type for the nslaw ");
     };
   }
-  // void visit(const MixedComplementarityConditionNSL& nslaw)
-  // {
-  //   ;
-  // }
+  void visit(const MixedComplementarityConditionNSL& nslaw)
+  {
+    RELATION::TYPES relationType = _interaction->relation()->getType();
+    if (relationType == FirstOrder)
+    {
+      _interaction->setLowerLevelForOutput(0);
+      _interaction->setUpperLevelForOutput(0);
+
+      _interaction->setLowerLevelForInput(0);
+      _interaction->setUpperLevelForInput(0);
+    }
+    else
+    {
+      RuntimeException::selfThrow("Interaction::_setLevels::visit - unknown relation type for the nslaw ");
+    };
+  }
   void visit(const EqualityConditionNSL& nslaw)
   {
     RELATION::TYPES relationType = _interaction->relation()->getType();
@@ -112,7 +124,7 @@ struct Interaction::_setLevels : public SiconosVisitor
     }
     else
     {
-	RuntimeException::selfThrow("Interaction::_setLevels::visit - unknown relation type: ");
+	RuntimeException::selfThrow("Interaction::_setLevels::visit - unknown relation type for the nslaw ");
     }
     ;
   }
@@ -130,7 +142,7 @@ struct Interaction::_setLevels : public SiconosVisitor
     }
     else
     {
-	RuntimeException::selfThrow("Interaction::_setLevels::visit - unknown relation type: ");
+	RuntimeException::selfThrow("Interaction::_setLevels::visit - unknown relation type for the nslaw ");
     }
   }
 
@@ -148,7 +160,7 @@ struct Interaction::_setLevels : public SiconosVisitor
     }
     else
     {
-	RuntimeException::selfThrow("Interaction::_setLevels::visit - unknown relation type: ");
+	RuntimeException::selfThrow("Interaction::_setLevels::visit - unknown relation type for the nslaw ");
     }
   }
   void visit(const MultipleImpactNSL& nslaw)
@@ -165,7 +177,7 @@ struct Interaction::_setLevels : public SiconosVisitor
     }
     else
     {
-	RuntimeException::selfThrow("Interaction::_setLevels::visit - unknown relation type: ");
+	RuntimeException::selfThrow("Interaction::_setLevels::visit - unknown relation type for the nslaw ");
     }
   }
 };
