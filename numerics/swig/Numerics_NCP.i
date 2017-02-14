@@ -11,6 +11,10 @@
 
 %extend NonlinearComplementarityProblem
 {
+  CALL_COMPUTE_F(ncp, (void*))
+
+  CALL_COMPUTE_NABLA_F(ncp, (void*))
+
   NonlinearComplementarityProblem()
    {
      NonlinearComplementarityProblem* NCP = newNCP();
@@ -41,8 +45,7 @@
 #ifdef SWIGPYTHON
   NonlinearComplementarityProblem(SN_OBJ_TYPE* n, SN_OBJ_TYPE* py_compute)
   {
-     NonlinearComplementarityProblem* NCP;
-     NCP =  (NonlinearComplementarityProblem *) malloc(sizeof(NonlinearComplementarityProblem));
+     NonlinearComplementarityProblem* NCP = newNCP();
 
      NCP->compute_F = &call_py_compute_Fncp;
      NCP->compute_nabla_F = &call_py_compute_nabla_Fncp;
@@ -86,14 +89,12 @@
 
      return NCP;
    }
+#endif /* SWIGPYTHON */
 
-  NonlinearComplementarityProblem(SN_OBJ_TYPE* n, SN_OBJ_TYPE* py_compute_F, SN_OBJ_TYPE* py_compute_nabla_F)
+  NonlinearComplementarityProblem(SN_OBJ_TYPE* n, SN_OBJ_TYPE* compute_F, SN_OBJ_TYPE* compute_nabla_F)
   {
-     NonlinearComplementarityProblem* NCP;
-     NCP =  (NonlinearComplementarityProblem *) malloc(sizeof(NonlinearComplementarityProblem));
+     NonlinearComplementarityProblem* NCP = newNCP();
 
-     NCP->compute_F = &call_py_compute_Fncp;
-     NCP->compute_nabla_F = &call_py_compute_nabla_Fncp;
      SWIG_AsVal_unsigned_SS_int(n, &NCP->n);
 
      if (NCP->n<1)
@@ -107,42 +108,13 @@
        NCP->nabla_F = NM_create(NM_DENSE, NCP->n, NCP->n);
      }
 
-     NCP->env = (void*) malloc(sizeof(functions_env_python));
-     functions_env_python* ncp_env_python = (functions_env_python*) NCP->env;
-     ncp_env_python->id = ENV_IS_PYTHON_FUNCTIONS;
-
-     if (PyCallable_Check(py_compute_F)) 
-     {
-       ncp_env_python->env_compute_function = py_compute_F;
-     }
-     else
-     {
-       SWIG_Error(SWIG_TypeError, "argument 3 must be callable");
-       freeNumericsMatrix(NCP->nabla_F);
-       free(NCP->nabla_F);
-       free(NCP->env);
-       free(NCP);
-       return NULL;
-     }
-
-
-     if (PyCallable_Check(py_compute_nabla_F))
-     {
-       ncp_env_python->env_compute_jacobian = py_compute_nabla_F;
-     }
-     else
-     {
-       SWIG_Error(SWIG_TypeError, "argument 4 must be callable");
-       freeNumericsMatrix(NCP->nabla_F);
-       free(NCP->nabla_F);
-       free(NCP->env);
-       free(NCP);
-       return NULL;
-     }
+     check_save_target_fn(compute_F, NCP->env, env_compute_function, NonlinearComplementarityProblem_call_compute_F, NCP->compute_F, 2);
+     check_save_target_fn(compute_nabla_F, NCP->env, env_compute_jacobian, NonlinearComplementarityProblem_call_compute_nabla_F, NCP->compute_nabla_F, 3);
 
      return NCP;
    }
 
+#ifdef SWIGPYTHON
   void set_compute_F_and_nabla_F_as_C_functions(SN_OBJ_TYPE* lib_name, SN_OBJ_TYPE* compute_F_name, SN_OBJ_TYPE* compute_nabla_F_name)
   {
 %#if PY_MAJOR_VERSION < 3
