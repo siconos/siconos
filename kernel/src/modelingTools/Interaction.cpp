@@ -53,10 +53,10 @@ struct Interaction::_setLevels : public SiconosVisitor
 {
   /* we set the _lowerLevelForOutput, _upperLevelForOutput,
      _lowerLevelForOutput, _upperLevelForOutput
-     w.r.t to the choice of the nslaw and the relation 
+     w.r.t to the choice of the nslaw and the relation
    */
   using SiconosVisitor::visit;
-  
+
   Interaction* _interaction;
 
   _setLevels(Interaction * inter) :
@@ -69,16 +69,31 @@ struct Interaction::_setLevels : public SiconosVisitor
     {
       _interaction->setLowerLevelForOutput(0);
       _interaction->setUpperLevelForOutput(0);
-      
+
       _interaction->setLowerLevelForInput(0);
       _interaction->setUpperLevelForInput(0);
-    }  
+    }
     else
     {
 	RuntimeException::selfThrow("Interaction::_setLevels::visit - unknown relation type: ");
     };
   }
+  void visit(const RelayNSL& nslaw)
+  {
+    RELATION::TYPES relationType = _interaction->relation()->getType();
+    if (relationType == FirstOrder)
+    {
+      _interaction->setLowerLevelForOutput(0);
+      _interaction->setUpperLevelForOutput(0);
 
+      _interaction->setLowerLevelForInput(0);
+      _interaction->setUpperLevelForInput(0);
+    }
+    else
+    {
+	RuntimeException::selfThrow("Interaction::_setLevels::visit - unknown relation type: ");
+    };
+  }
   // void visit(const MixedComplementarityConditionNSL& nslaw)
   // {
   //   ;
@@ -90,11 +105,11 @@ struct Interaction::_setLevels : public SiconosVisitor
     {
       _interaction->setLowerLevelForOutput(0);
       _interaction->setUpperLevelForOutput(1);
-     
+
       _interaction->setLowerLevelForInput(0);
       _interaction->setUpperLevelForInput(1);
 
-    }  
+    }
     else
     {
 	RuntimeException::selfThrow("Interaction::_setLevels::visit - unknown relation type: ");
@@ -108,11 +123,11 @@ struct Interaction::_setLevels : public SiconosVisitor
     {
       _interaction->setLowerLevelForOutput(0);
       _interaction->setUpperLevelForOutput(1);
-     
+
       _interaction->setLowerLevelForInput(0);
       _interaction->setUpperLevelForInput(1);
 
-    }  
+    }
     else
     {
 	RuntimeException::selfThrow("Interaction::_setLevels::visit - unknown relation type: ");
@@ -126,11 +141,11 @@ struct Interaction::_setLevels : public SiconosVisitor
     {
       _interaction->setLowerLevelForOutput(0);
       _interaction->setUpperLevelForOutput(1);
-     
+
       _interaction->setLowerLevelForInput(0);
       _interaction->setUpperLevelForInput(1);
 
-    }  
+    }
     else
     {
 	RuntimeException::selfThrow("Interaction::_setLevels::visit - unknown relation type: ");
@@ -143,11 +158,11 @@ struct Interaction::_setLevels : public SiconosVisitor
     {
       _interaction->setLowerLevelForOutput(0);
       _interaction->setUpperLevelForOutput(1);
-     
+
       _interaction->setLowerLevelForInput(0);
       _interaction->setUpperLevelForInput(1);
 
-    }  
+    }
     else
     {
 	RuntimeException::selfThrow("Interaction::_setLevels::visit - unknown relation type: ");
@@ -157,7 +172,7 @@ struct Interaction::_setLevels : public SiconosVisitor
 
 
 void Interaction::init()
-{  
+{
   // Memory allocation for y and lambda
 
   //  assert(_upperLevelForOutput >=0);
@@ -250,7 +265,7 @@ void Interaction::setDSLinkAndWorkspace(InteractionProperties& interProp,
   VectorOfBlockVectors& DSlink = *interProp.DSlink;
   VectorOfVectors& workVInter = *interProp.workVectors;
   VectorOfSMatrices& workMInter = *interProp.workMatrices;
-  
+
   initData(DSlink);
   // Initialize interaction work vectors, depending on Dynamical systems
   // linked to the interaction.
@@ -319,7 +334,7 @@ void Interaction::initializeMemory(bool computeResidu, unsigned int steps)
 
   for (unsigned int i = _lowerLevelForOutput ; i < _upperLevelForOutput + 1 ; i++)
     _yMemory[i].reset(new SiconosMemory(steps, nslawSize));
-  
+
   for (unsigned int i = _lowerLevelForInput ; i < _upperLevelForInput + 1 ; i++)
   {
     DEBUG_PRINTF("Interaction::initializeMemory(). _lambda[%i].reset()\n",i)
@@ -332,9 +347,9 @@ void Interaction::initializeMemory(bool computeResidu, unsigned int steps)
     _h_alpha.reset(new SiconosVector(nslawSize));
     _residuY.reset(new SiconosVector(nslawSize));
   }
-  
+
   _yForNSsolver.reset(new SiconosVector(nslawSize));
-  
+
 }
 void Interaction::resetAllLambda()
 {
@@ -790,7 +805,7 @@ void Interaction::display() const
       else std::cout << "->NULL" <<std::endl;
     }
 
-  
+
   std::cout << "===================================" <<std::endl;
 }
 
