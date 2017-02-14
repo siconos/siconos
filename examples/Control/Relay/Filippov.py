@@ -37,7 +37,7 @@ numInter = 2
 ninter = 2
 theta = 0.5
 alpha = .01
-N = ceil((T-t0)/h)
+N = int((T-t0)/h)
 
 # matrices
 A = zeros((2,2))
