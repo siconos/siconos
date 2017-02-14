@@ -32,8 +32,6 @@
 #define restrict __restrict
 #endif
 
-#include "SiconosSets.h"
-
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
 #include "debug.h"
@@ -46,7 +44,7 @@
 #include "NumericsMatrix.h"
 
 
-void siconos_find_vertex(const polyhedron* P, unsigned size, int* basis)
+void siconos_find_vertex(const polyhedron* P, unsigned size, lapack_int* basis)
 {
   unsigned nrows = P->size_ineq;
   assert(P->H->matrix0);
@@ -87,7 +85,26 @@ void siconos_find_vertex(const polyhedron* P, unsigned size, int* basis)
     exit(EXIT_FAILURE);
   }
 
-  get_basis(lp, basis, FALSE);
+  int* lp_basis = NULL;
+  if (sizeof(lapack_int) != sizeof(int))
+  {
+    lp_basis = (int*)malloc((nrows + 1)*sizeof(int));
+  }
+  else
+  {
+    lp_basis = (int*)basis;
+  }
+
+  get_basis(lp, lp_basis, FALSE);
+
+  if (sizeof(lapack_int) != sizeof(int))
+  {
+    for (size_t i = 0; i < (nrows + 1); ++i)
+    {
+      basis[i] = (lapack_int)lp_basis[i];
+    }
+  }
+
 #ifdef DEBUG_STDOUT
   print_solution(lp, 3);
 #endif

@@ -55,7 +55,7 @@ struct dataComplementarityConf
   struct dataComplementarityConf * prev;
   int Usable;
   int used;
-  int* IPV;
+  lapack_int* IPV;
 };
 
 static double * spCurDouble = 0;
@@ -93,6 +93,14 @@ int * myiMalloc(int n)
   spCurInt = spCurInt + n;
   return aux;
 }
+// XXX this is going to fail
+static lapack_int * myiMalloc2(int n)
+{
+  lapack_int * aux = (lapack_int*)spCurInt;
+  spCurInt = (int*)&aux[n];
+  return aux;
+}
+
 int mlcp_direct_getNbIWork(MixedLinearComplementarityProblem* problem, SolverOptions* options)
 {
   return (problem->n + problem->m) * (options->iparam[5] + 1) + options->iparam[5] * problem->m;
@@ -154,7 +162,7 @@ void mlcp_direct_reset()
 }
 int internalPrecompute(MixedLinearComplementarityProblem* problem)
 {
-  int INFO = 0;
+  lapack_int INFO = 0;
   mlcp_buildM(spFirstCC->zw, spFirstCC->M, problem->M->matrix0, sN, sM, sNbLines);
   if (verbose)
   {
@@ -196,7 +204,7 @@ int internalAddConfig(MixedLinearComplementarityProblem* problem, int * zw, int 
   if (init)
   {
     spFirstCC->zw = myiMalloc(sM);
-    spFirstCC->IPV = myiMalloc(sNpM);
+    spFirstCC->IPV = myiMalloc2(sNpM);
     spFirstCC->M = mydMalloc(sNpM * sNpM);
   }
   for (i = 0; i < sM; i++)
@@ -264,7 +272,7 @@ void mlcp_direct_addConfigFromWSolution(MixedLinearComplementarityProblem* probl
 int solveWithCurConfig(MixedLinearComplementarityProblem* problem)
 {
   int lin;
-  int INFO = 0;
+  lapack_int INFO = 0;
   double ALPHA = 1;
   double BETA = 0;
   int INCX = 1;

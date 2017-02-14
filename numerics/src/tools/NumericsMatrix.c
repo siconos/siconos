@@ -1893,7 +1893,7 @@ int NM_gesv_expert(NumericsMatrix* A, double *b, unsigned keep)
   DEBUG_BEGIN("NM_gesv_expert(NumericsMatrix* A, double *b, unsigned keep)\n");
   assert(A->size0 == A->size1);
 
-  int info = 1;
+  lapack_int info = 1;
 
   switch (A->storageType)
   {
@@ -2221,7 +2221,7 @@ int NM_gesv_expert(NumericsMatrix* A, double *b, unsigned keep)
    * problems, but the calling function has to check the return code.*/
 //  CHECK_RETURN(info);
   DEBUG_END("NM_gesv_expert(NumericsMatrix* A, double *b, unsigned keep)\n");
-  return info;
+  return (int)info;
 }
 
 void NM_update_size(NumericsMatrix* A)

@@ -34,7 +34,7 @@
 #include "numerics_verbose.h"
 //#define TEST_COND
 //#define OUTPUT_DEBUG
-extern int *Global_ipiv;
+extern lapack_int *Global_ipiv;
 extern int  Global_MisInverse;
 extern int  Global_MisLU;
 
@@ -76,9 +76,9 @@ int reformulationIntoLocalProblem(GlobalFrictionContactProblem* problem, Frictio
     int n = M->size0;
     int m = H->size1;
     int nm = n * m;
-    int infoDGETRF = 0;
-    int infoDGETRS = 0;
-    Global_ipiv = (int *)malloc(n * sizeof(int));
+    lapack_int infoDGETRF = 0;
+    lapack_int infoDGETRS = 0;
+    Global_ipiv = (lapack_int *)malloc(n * sizeof(lapack_int));
 
 
     double *Htmp = (double*)malloc(nm * sizeof(double));
@@ -151,7 +151,7 @@ int reformulationIntoLocalProblem(GlobalFrictionContactProblem* problem, Frictio
     int m = H->size1;
 
     assert(!Global_ipiv);
-    Global_ipiv = (int *)malloc(n * sizeof(int));
+    Global_ipiv = (lapack_int *)malloc(n * sizeof(lapack_int));
 
     // compute W = H^T M^-1 H
     //Copy Htmp <- H
@@ -248,7 +248,7 @@ int reformulationIntoLocalProblem(GlobalFrictionContactProblem* problem, Frictio
     double  condW;
     condW = cond(WInverse, m, m);
 
-    int* ipiv = (int *)malloc(m * sizeof(*ipiv));
+    lapack_int* ipiv = (lapack_int *)malloc(m * sizeof(lapack_int));
     int infoDGETRF = 0;
     DGETRF(m, m, WInverse, m, ipiv, &infoDGETRF);
     assert(!infoDGETRF);
@@ -336,7 +336,7 @@ int computeGlobalVelocity(GlobalFrictionContactProblem* problem, double * reacti
     /* Compute globalVelocity <- M^(-1) globalVelocity*/
     assert(Global_ipiv);
     assert(Global_MisLU);
-    int infoDGETRS = 0;
+    lapack_int infoDGETRS = 0;
     DGETRS(LA_NOTRANS, n, 1,   problem->M->matrix0, n, Global_ipiv, globalVelocity , n, &infoDGETRS);
 
     assert(!infoDGETRS);

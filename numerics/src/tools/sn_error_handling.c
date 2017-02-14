@@ -29,6 +29,9 @@ tlsvar bool internal_jmp_buf_used = false;
 tlsvar const char* internal_jmp_buf_err = NULL;
 tlsvar const char* external_jmp_buf_err = NULL;
 
+typedef void (*external_fault_handler_t)(size_t, const char*);
+tlsvar external_fault_handler_t external_fault_handler = NULL;
+
 jmp_buf* sn_get_jmp_buf(void)
 {
   external_jmp_buf_used = true;
@@ -43,7 +46,7 @@ void sn_release_jmp_buf(void)
 jmp_buf* sn_get_internal_jmp_buf(void)
 {
   internal_jmp_buf_used = true;
-  return &external_jmp_buf;
+  return &internal_jmp_buf;
 }
 
 void sn_release_internal_jmp_buf(void)
@@ -53,6 +56,11 @@ void sn_release_internal_jmp_buf(void)
 
 void sn_fatal_error(SN_ERROR_T code, const char* msg)
 {
+  if (external_fault_handler)
+  {
+    (*external_fault_handler)(code, msg);
+  }
+
   if (internal_jmp_buf_used)
   {
     internal_jmp_buf_used = false;
