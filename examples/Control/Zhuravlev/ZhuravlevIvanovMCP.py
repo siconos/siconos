@@ -27,7 +27,7 @@ class ZI(object):
         self.f_eval = 0
         self.nabla_eval = 0
 
-    def compute_Fmcp(self, n1, n2, z, F):
+    def compute_Fmcp(self, n, z, F):
         l0 = 2.0*z[0] - 1.0
         l1 = 2.0*z[2] - 1.0
         r = self.computeg(l0, l1)
@@ -39,7 +39,7 @@ class ZI(object):
         self.f_eval += 1
         pass
 
-    def compute_nabla_Fmcp(self, n1, n2, z, nabla_Fmcp):
+    def compute_nabla_Fmcp(self, n, z, nabla_Fmcp):
         l0 = 2.0*z[0] - 1.0
         l1 = 2.0*z[2] - 1.0
         Jacg = self.h*self.computeJacg(l0, l1)

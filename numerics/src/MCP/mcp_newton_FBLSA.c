@@ -31,7 +31,7 @@ void FB_compute_F_mcp(void* data_opaque, double* z, double* Fmcp)
 {
   // Computation of the new value F(z)
   MixedComplementarityProblem2* data = (MixedComplementarityProblem2 *)data_opaque;
-  data->compute_Fmcp(data->env, data->n1, data->n2, z, Fmcp);
+  data->compute_Fmcp(data->env, data->n1 + data->n2, z, Fmcp);
 }
 
 void FB_compute_H_mcp(void* data_opaque, double* z, double* Fmcp, double* workV1, double* workV2, NumericsMatrix* H)
@@ -39,7 +39,7 @@ void FB_compute_H_mcp(void* data_opaque, double* z, double* Fmcp, double* workV1
   MixedComplementarityProblem2* data = (MixedComplementarityProblem2 *)data_opaque;
 
   assert(data->nabla_Fmcp);
-  data->compute_nabla_Fmcp(data->env, data->n1, data->n2, z, data->nabla_Fmcp);
+  data->compute_nabla_Fmcp(data->env, data->n1 + data->n2, z, data->nabla_Fmcp);
 
   Jac_F_FB(data->n1, data->n2, z, Fmcp, workV1, workV2, data->nabla_Fmcp, H);
 }
