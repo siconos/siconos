@@ -40,7 +40,7 @@ double cond(double * A, int n, int m)
   double *Atmp = (double *)malloc(size);
   memcpy(Atmp, A, size);
 
-  int InfoDGSVD = -1;
+  lapack_int InfoDGSVD = -1;
 
   double * superb =  (double *)malloc((min(m, n) - 1)* sizeof(double));
   DGESVD(JOBU, JOBVT, n, m, A, n, S, U, LDU, VT, LDVT, superb, &InfoDGSVD);

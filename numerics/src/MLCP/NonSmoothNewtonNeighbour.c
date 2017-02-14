@@ -42,7 +42,7 @@ static  double *sPrevDirDescent;
 static  double *szaux ;
 static  double *szzaux ;
 static  double *sz2 ;
-static  int* sipiv ;
+static  lapack_int* sipiv ;
 static  int* sW2V;
 
 static int scmp = 0;
@@ -457,7 +457,7 @@ int nonSmoothNewtonNeigh(int n, double* z, NewtonFunctionPtr* phi, NewtonFunctio
 
   int incx = 1;
   /*   int n2 = n*n; */
-  int infoDGESV;
+  lapack_int infoDGESV;
 
   /** merit function and its jacobian */
   double psi_z;

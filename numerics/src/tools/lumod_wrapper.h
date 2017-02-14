@@ -25,6 +25,8 @@
 #include "NumericsMatrix.h"
 #include "assert.h"
 
+#include "SiconosLapack.h"
+
 #define SN_LUMOD_NEED_REFACTORIZATION 1
 
 /**\struct SN_lumod_dense_data lumod_wrapper.h
@@ -34,7 +36,7 @@ typedef struct {
   unsigned maxmod; /**< maximum number of changes */
   unsigned k; /**< number of rows (or columns) of C */
   double* LU_H; /**< LU factors of the initial matrix H */
-  int* ipiv_LU_H; /**< pivot for the LU factorization of H*/
+  lapack_int* ipiv_LU_H; /**< pivot for the LU factorization of H*/
   unsigned* factorized_basis; /**< basis when H was factorized and storing for the info where the columns of the non basic variables are in U and when a basic variable exited */
   int* row_col_indx; /**< Store the information to which column or row the variable correspond */
   double* Uk; /**< matrix which keeps track of modified columns in Hk*/

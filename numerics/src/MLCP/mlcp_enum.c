@@ -193,9 +193,9 @@ void mlcp_enum(MixedLinearComplementarityProblem* problem, double *z, double *w,
   int lin;
   int npm = (problem->n) + (problem->m);
   int NRHS = 1;
-  int * ipiv;
+  lapack_int * ipiv;
   int check;
-  int LAinfo = 0;
+  lapack_int LAinfo = 0;
   *info = 0;
   sMl = problem->M->size0;
   sNn = problem->n;
@@ -356,10 +356,10 @@ void mlcp_enum_Block(MixedLinearComplementarityProblem* problem, double *z, doub
   int lin;
   int npm = (problem->n) + (problem->m);
   int NRHS = 1;
-  int * ipiv;
+  lapack_int * ipiv;
   int * indexInBlock;
   int check;
-  int LAinfo = 0;
+  lapack_int LAinfo = 0;
   int useDGELS = options->iparam[4];
   *info = 0;
   assert(problem->M);

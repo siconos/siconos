@@ -59,7 +59,7 @@ int avi_caoferris(AffineVariationalInequalities* problem, double *z, double *w, 
   double* copyA = (double*)malloc(n*n*sizeof(double));
   double* B_I_T = (double*)malloc(n*(n_I)*sizeof(double));
   double* d_vec = (double *)malloc(nrows*sizeof(double));
-  int* basis = (int *)malloc((2*nrows+1)*sizeof(int));
+  lapack_int* basis = (lapack_int *)malloc((2*nrows+1)*sizeof(lapack_int));
 
   siconos_find_vertex(problem->poly, n, basis);
   DEBUG_PRINT_VEC_INT(basis, nrows+1);
@@ -68,10 +68,10 @@ int avi_caoferris(AffineVariationalInequalities* problem, double *z, double *w, 
   const double* K = problem->poly->K;
   /* Set of active constraints */
   unsigned* A = (unsigned*)malloc(n*sizeof(unsigned));
-  int* active_constraints = &basis[nrows+1];
+  lapack_int* active_constraints = &basis[nrows+1];
 
   /* set active_constraints to 1 at the beginning */
-  memset(active_constraints, -1, nrows*sizeof(int));
+  memset(active_constraints, -1, nrows*sizeof(lapack_int));
   DEBUG_PRINT_VEC_INT(active_constraints, nrows);
   unsigned indx_B_I_T = 0;
   for (unsigned i = 1; i <= nrows; ++i)
@@ -111,8 +111,8 @@ int avi_caoferris(AffineVariationalInequalities* problem, double *z, double *w, 
   DEBUG_PRINT_MAT(B_I_T, n, n_I);
 
   /* get LU for B_A_T */
-  int* ipiv = basis;
-  int infoLAPACK = 0;
+  lapack_int* ipiv = basis;
+  lapack_int infoLAPACK = 0;
 
   /* LU factorisation of B_A_T  */
   DGETRF(n, n, B_A_T, n, ipiv, &infoLAPACK);

@@ -677,8 +677,8 @@ int init_M_lemke_warm_start(int n, double* restrict u, double* restrict mat, dou
   }
 
   /* data for LAPACKE */
-  int *ipiv = (int*)malloc((n+1)*sizeof(int));
-  int info = 0;
+  lapack_int *ipiv = (lapack_int*)malloc((n+1)*sizeof(lapack_int));
+  lapack_int info = 0;
 
   /* Compute LU factorisation of basis */
   DGETRF(n, n, mat_basic, n, ipiv, &info);

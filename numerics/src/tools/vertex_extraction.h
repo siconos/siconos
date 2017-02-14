@@ -24,13 +24,14 @@
 #define vertex_extraction_h
 
 #include "SiconosSets.h"
+#include "SiconosLapack.h"
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {
 #endif
 
-  void siconos_find_vertex(const polyhedron* P, unsigned size, int* basis);
+  void siconos_find_vertex(const polyhedron* P, unsigned size, lapack_int* basis);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

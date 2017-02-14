@@ -1628,8 +1628,8 @@ int inverseDiagSBM(const SparseBlockStructuredMatrix*  M)
   unsigned int currentRowNumber ;
   size_t colNumber;
   unsigned int nbRows, nbColumns;
-  int infoDGETRF = 0;
-  int infoDGETRI = 0;
+  lapack_int infoDGETRF = 0;
+  lapack_int infoDGETRI = 0;
   int info = 0;
   for (currentRowNumber = 0 ; currentRowNumber < M->filled1 - 1; ++currentRowNumber)
   {
@@ -1649,7 +1649,7 @@ int inverseDiagSBM(const SparseBlockStructuredMatrix*  M)
       assert(nbRows == nbColumns);
 
 
-      int* ipiv = (int *)malloc(nbRows * sizeof(int));
+      lapack_int* ipiv = (lapack_int *)malloc(nbRows * sizeof(lapack_int));
 
       DGETRF(nbRows, nbColumns, M->block[blockNum], nbRows, ipiv, &infoDGETRF);
       assert(!infoDGETRF);
