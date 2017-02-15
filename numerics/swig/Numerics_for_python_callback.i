@@ -180,45 +180,42 @@ static void  my_call_to_callback_Fmcp (int size, double *z, double *F)
 
 }
 
-  static void call_py_compute_Fmcp(void *env, int n1, int n2, double* z, double* Fmcp)
+  static void call_py_compute_Fmcp(void *env, int n, double* z, double* Fmcp)
   {
     npy_intp dim[1];
-    dim[0] = n1 + n2;
+    dim[0] = n;
 
     PyObject* py_z = FPyArray_SimpleNewFromData(1, dim, NPY_DOUBLE, z);
     PyObject* py_Fmcp = FPyArray_SimpleNewFromData(1, dim, NPY_DOUBLE, Fmcp);
 
-    PyObject* py_n1 = PyInt_FromLong(n1);
-    PyObject* py_n2 = PyInt_FromLong(n2);
+    PyObject* py_n = PyInt_FromLong(n);
 
-    PY_CALL_METHOD_OR_FUNCTION(env, "compute_Fmcp", env_compute_function, py_n1, py_n2, py_z, py_Fmcp)
+    PY_CALL_METHOD_OR_FUNCTION(env, "compute_Fmcp", env_compute_function, py_n, py_z, py_Fmcp)
 
-    Py_DECREF(py_n1);
-    Py_DECREF(py_n2);
+    Py_DECREF(py_n);
     Py_DECREF(py_z);
     Py_DECREF(py_Fmcp);
 
   };
 
-  static void call_py_compute_nabla_Fmcp(void *env, int n1, int n2, double* z, NumericsMatrix* nabla_Fmcp)
+  static void call_py_compute_nabla_Fmcp(void *env, int n, double* z, NumericsMatrix* nabla_Fmcp)
   {
     npy_intp dim[1];
-    dim[0] = n1 + n2;
+    dim[0] = n;
 
     npy_intp dim2[2];
-    dim2[0] = n1 + n2;
-    dim2[1] = n1 + n2;
+    dim2[0] = n;
+    dim2[1] = n;
 
     PyObject* py_z = FPyArray_SimpleNewFromData(1, dim, NPY_DOUBLE, z);
     assert(nabla_Fmcp->matrix0 && "only dense matrix is supported");
     PyObject* py_nabla_Fmcp = FPyArray_SimpleNewFromData(2, dim2, NPY_DOUBLE, nabla_Fmcp->matrix0);
 
-    PyObject* py_n1 = PyInt_FromLong(n1);
-    PyObject* py_n2 = PyInt_FromLong(n2);
+    PyObject* py_n = PyInt_FromLong(n);
 
-    PY_CALL_METHOD_OR_FUNCTION(env, "compute_nabla_Fmcp", env_compute_jacobian, py_n1, py_n2, py_z, py_nabla_Fmcp)
-    Py_DECREF(py_n1);
-    Py_DECREF(py_n2);
+    PY_CALL_METHOD_OR_FUNCTION(env, "compute_nabla_Fmcp", env_compute_jacobian, py_n, py_z, py_nabla_Fmcp)
+
+    Py_DECREF(py_n);
     Py_DECREF(py_z);
     Py_DECREF(py_nabla_Fmcp);
 

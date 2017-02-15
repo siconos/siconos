@@ -27,8 +27,8 @@ static void call_py_compute_Fvi(void *env, int n, double* z, double* F);
 static void call_py_compute_nabla_Fncp(void *env, int n, double* z, NumericsMatrix* nabla_F);
 static void call_py_compute_Fncp(void *env, int n, double* z, double* F);
 
-static void call_py_compute_nabla_Fmcp(void *env, int n1, int n2, double* z, NumericsMatrix* nabla_Fmcp);
-static void call_py_compute_Fmcp(void *env, int n1, int n2, double* z, double* Fmcp);
+static void call_py_compute_nabla_Fmcp(void *env, int n, double* z, NumericsMatrix* nabla_Fmcp);
+static void call_py_compute_Fmcp(void *env, int n, double* z, double* Fmcp);
 
 #define PY_CALL_METHOD_OR_FUNCTION(ENV_STRUCT, METHOD_NAME, FIELD_FUNCTION, OUTPUT, ...) \
 PyObject* py_out = NULL;\
