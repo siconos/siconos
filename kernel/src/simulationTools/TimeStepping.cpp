@@ -413,6 +413,10 @@ void TimeStepping::initializeNewtonLoop()
     (*it)->computeResidu();
   }
 
+  // Since computeInitialNewtonState updates each DS position we must
+  // update the Interaction set here as well as during update().
+  updateInteractions();
+
   if (indexSet0->size()>0)
   {
     //    assert(_levelMinForOutput >=0);
