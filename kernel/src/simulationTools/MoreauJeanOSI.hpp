@@ -114,8 +114,7 @@ protected:
   */
   ACCEPT_SERIALIZATION(MoreauJeanOSI);
 
-  /** Stl map that associates a theta parameter for the integration
-  *  scheme to each DynamicalSystem of the OSI */
+  /** theta-scheme parameter */
   double _theta;
 
   /** A gamma parameter for the integration scheme to each DynamicalSystem of the OSI
@@ -123,7 +122,7 @@ protected:
    */
   double _gamma;
 
-  /** a boolean to know if the parameter must be used or not
+  /** a boolean to know if the gamma-parameter must be used or not
    */
   bool _useGamma;
 

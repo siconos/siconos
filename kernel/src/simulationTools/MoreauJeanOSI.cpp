@@ -142,10 +142,7 @@ void MoreauJeanOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalS
     neds->computeForces(t);
     neds->swapInMemory();
   }
-  for (unsigned int k = _levelMinForInput ; k < _levelMaxForInput + 1; k++)
-  {
-    ds->initializeNonSmoothInput(k);
-  }
+
 }
 void MoreauJeanOSI::initializeInteraction(double t0, Interaction &inter,
                                           InteractionProperties& interProp,
@@ -156,13 +153,10 @@ void MoreauJeanOSI::initializeInteraction(double t0, Interaction &inter,
   assert(ds1);
   assert(ds2);
 
-
   VectorOfBlockVectors& DSlink = *interProp.DSlink;
   assert(interProp.DSlink);
-  // VectorOfVectors& workVInter = *interProp.workVectors;
-  // VectorOfSMatrices& workMInter = *interProp.workMatrices;
 
-  Relation &relation =  *inter.relation();
+  Relation &relation =  *inter.relation();  
   RELATION::TYPES relationType = relation.getType();
 
 
@@ -191,46 +185,46 @@ void MoreauJeanOSI::initializeInteraction(double t0, Interaction &inter,
   inter.initializeMemory(computeResidu,_steps);
 
   /* allocate ant set work vectors for the osi */
-
+  
   if(checkOSI(DSG.descriptor(ds1)))
-  {
-    DEBUG_PRINTF("ds1->number() %i is taken in to account\n", ds1->number());
-    assert(DSG.properties(DSG.descriptor(ds1)).workVectors);
-    VectorOfVectors &workVds1 = *DSG.properties(DSG.descriptor(ds1)).workVectors;
-
-
-    if (relationType == Lagrangian)
     {
-      if (!DSlink[LagrangianR::xfree])
+      DEBUG_PRINTF("ds1->number() %i is taken in to account\n", ds1->number());
+      assert(DSG.properties(DSG.descriptor(ds1)).workVectors);
+      VectorOfVectors &workVds1 = *DSG.properties(DSG.descriptor(ds1)).workVectors;
+     
+	
+      if (relationType == Lagrangian)
+	{
+	  if (!DSlink[LagrangianR::xfree])
 	    {
 	      DSlink[LagrangianR::xfree].reset(new BlockVector());
 	      DSlink[LagrangianR::xfree]->insertPtr(workVds1[OneStepIntegrator::free]);
 	    }
-      else
+	  else
 	    {
 	      DSlink[LagrangianR::xfree]->setVectorPtr(0,workVds1[OneStepIntegrator::free]);
 	    }
-    }
-    else if (relationType == NewtonEuler)
-    {
-      if (!DSlink[NewtonEulerR::xfree])
+	}  
+      else if (relationType == NewtonEuler)
+	{
+	  if (!DSlink[NewtonEulerR::xfree])
 	    {
 	      DSlink[NewtonEulerR::xfree].reset(new BlockVector());
 	      DSlink[NewtonEulerR::xfree]->insertPtr(workVds1[OneStepIntegrator::free]);
 	    }
-      else
+	  else
 	    {
 	      DSlink[NewtonEulerR::xfree]->setVectorPtr(0,workVds1[OneStepIntegrator::free]);
 	    }
+	}
     }
-  }
   DEBUG_PRINTF("ds1->number() %i\n",ds1->number());
   DEBUG_PRINTF("ds2->number() %i\n",ds2->number());
-
+ 
   if (ds1 != ds2)
     {
       DEBUG_PRINT("ds1 != ds2\n");
-
+      
       if(checkOSI(DSG.descriptor(ds2)))
 	{
 	  DEBUG_PRINTF("ds2->number() %i is taken in to account\n",ds2->number());
@@ -249,8 +243,8 @@ void MoreauJeanOSI::initializeInteraction(double t0, Interaction &inter,
 		{
 		  DSlink[LagrangianR::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
 		}
-
-	    }
+	      
+	    }  
 	  else if (relationType == NewtonEuler)
 	    {
 	      if (!DSlink[NewtonEulerR::xfree])
@@ -268,7 +262,7 @@ void MoreauJeanOSI::initializeInteraction(double t0, Interaction &inter,
 	    }
 	}
     }
-
+  
   // Compute a first value for the output
     inter.computeOutput(t0, interProp, 0);
 
@@ -280,7 +274,7 @@ void MoreauJeanOSI::initializeInteraction(double t0, Interaction &inter,
     }
     inter.swapInMemory();
 
-
+  
 }
 void MoreauJeanOSI::initialize(Model& m)
 {
@@ -312,7 +306,7 @@ void MoreauJeanOSI::initialize(Model& m)
   for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
   {
     Interaction& inter = *indexSet0->bundle(*ui);
-
+    
     initializeInteraction(t0, inter, indexSet0->properties(*ui), *_dynamicalSystemsGraph);
   }
 
@@ -520,8 +514,13 @@ void MoreauJeanOSI::computeW(double t, DynamicalSystem& ds, SiconosMatrix& W)
 
 
     LagrangianDS& d = static_cast<LagrangianDS&> (ds);
-    d.computeMass();
-    W = *d.mass();
+    if(d.mass())
+      {
+	d.computeMass();
+	W = *d.mass();
+      }
+    else
+      W.eye();
 
     if(d.jacobianqDotForces())
     {
@@ -576,7 +575,7 @@ void MoreauJeanOSI::computeInitialNewtonState()
 {
   DEBUG_BEGIN("MoreauJeanOSI::computeInitialNewtonState()\n");
   // Compute the position value giving the initial velocity.
-  // The goal of to save one newton iteration for nearly linear system
+  // The goal is to save one newton iteration for nearly linear system
   DynamicalSystemsGraph::VIterator dsi, dsend;
   for(std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
   {
@@ -595,7 +594,7 @@ void MoreauJeanOSI::computeInitialNewtonState()
         computeT(qold,d.T());
       }
     }
-    // The goal is to converge in one iteration of the system is almost linear
+    // The goal is to converge in one iteration if the system is almost linear
     // we start the Newton loop q = q0+hv0
     updatePosition(ds);
   }

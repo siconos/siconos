@@ -184,16 +184,11 @@ protected:
   /** internal forces applied to  the system */
   SP::SiconosVector _fInt;
 
+  // Should we use this enum to clarify notations in LagrangianDS?
   // enum LagrangianDSJacobianId {Jacobian_FInt_wrt_q, Jacobian_FInt_wrt_qDot,
   //                              Jacobian_FGyr_wrt_q, Jacobian_FGyr_wrt_qdot,
   //                              Jacobian_Force_wrt_q, Jacobian_Forces_wrt_qDot,
   //                              numberOfJacobians};
-
-  // /** A container of matrices to save jacobians matrices
-  //  * Id are given by LagrangianDSJacobianId
-  //  */
-
-  // VectorOfSMatrices _jacobians;
 
   /** jacobian_q FInt*/
   SP::SiconosMatrix _jacobianFIntq;
@@ -242,12 +237,9 @@ protected:
 
   SP::BlockMatrix _jacxRhs;
 
-
-
   /** Default constructor
    */
   LagrangianDS();
-
 
   // pointers to functions member to compute plug-in functions
 
@@ -387,7 +379,7 @@ public:
    *  \param time of initialisation, default value = 0
    *  \param size the size of the memory, default size = 1.
    */
-  void initialize(double time = 0, unsigned int size = 1) ;
+  void initialize(double time = 0, unsigned int size = 1){} ;
 
   /** dynamical system initialization function for _p
    *  \param level for _p
@@ -1077,34 +1069,6 @@ public:
     return _reactionToBoundaryConditions;
   };
 
-
-  // /** to allocate memory for a new tmp matrix
-  //  *  \param id the id of the SimpleMatrix
-  //  *  \param sizeOfRows an int to set the size of rows
-  //  *  \param sizeOfCols an int to set the size of cols
-  //  */
-  // inline void allocateWorkMatrix(const  LagrangianDSWorkMatrixId& id, int sizeOfRows, int sizeOfCols)
-  // {
-  //   _workMatrix[id].reset(new SimpleMatrix(sizeOfRows, sizeOfCols));
-  // }
-
-  // /** get a temporary saved matrix
-  //  * \param id the id of the SimpleMatrix
-  //  *  \return a SP::SimpleMatrix
-  //  */
-  // inline SP::SimpleMatrix workMatrix(const  LagrangianDSWorkMatrixId& id) const
-  // {
-  //   return  _workMatrix[id];
-  // }
-  /** get a temporary saved vector, ref by id
-   * \param id  WorkNames
-   * \return a SP::SiconosVector
-   */
-  // inline SP::SiconosVector workspace(const DSWorkVectorId& id) const
-  // {
-  //   assert(0);
-  //   return _workspace[id];
-  // }
   ACCEPT_STD_VISITORS();
 
 };

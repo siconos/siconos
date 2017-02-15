@@ -432,9 +432,6 @@ void Interaction::initDataFirstOrder(VectorOfBlockVectors& DSlink)
   // Get the DS concerned by the interaction of this relation
   DSlink.resize(FirstOrderR::DSlinkSize);
   DSlink[FirstOrderR::x].reset(new BlockVector());
-  DSlink[FirstOrderR::xfree].reset(new BlockVector());
-  DSlink[FirstOrderR::xPartialNS].reset(new BlockVector());
-  DSlink[FirstOrderR::deltax].reset(new BlockVector()); // displacements
   DSlink[FirstOrderR::r].reset(new BlockVector());
   DSlink[FirstOrderR::z].reset(new BlockVector());
 }
@@ -444,9 +441,6 @@ void Interaction::initDSDataFirstOrder(DynamicalSystem& ds, VectorOfVectors& wor
   // Put x/r ... of each DS into a block. (Pointers links, no copy!!)
   FirstOrderNonLinearDS& lds = static_cast<FirstOrderNonLinearDS&>(ds);
   DSlink[FirstOrderR::x]->insertPtr(lds.x());
-  DSlink[FirstOrderR::xfree]->insertPtr(workVDS[FirstOrderDS::xfree]);
-  DSlink[FirstOrderR::xPartialNS]->insertPtr(workVDS[FirstOrderDS::xPartialNS]);
-  DSlink[FirstOrderR::deltax]->insertPtr(workVDS[FirstOrderDS::deltaxForRelation]);
   DSlink[FirstOrderR::r]->insertPtr(lds.r());
   DSlink[FirstOrderR::z]->insertPtr(lds.z());
 }
@@ -456,7 +450,6 @@ void Interaction::initDataLagrangian(VectorOfBlockVectors& DSlink)
 
   DEBUG_PRINT("Interaction::initDataLagrangian()\n");
   DSlink.resize(LagrangianR::DSlinkSize);
-  //DSlink[LagrangianR::xfree].reset(new BlockVector());
   DSlink[LagrangianR::q0].reset(new BlockVector()); // displacement
   DSlink[LagrangianR::q1].reset(new BlockVector()); // velocity
   DSlink[LagrangianR::q2].reset(new BlockVector()); // acceleration
@@ -476,10 +469,6 @@ void Interaction::initDSDataLagrangian(DynamicalSystem& ds, VectorOfVectors& wor
   LagrangianDS& lds = static_cast<LagrangianDS&> (ds);
 
   // Put q, velocity and acceleration of each DS into a block. (Pointers links, no copy!!)
-
-  //DSlink[LagrangianR::xfree]->insertPtr(workVDS[OneStepIntegrator::free]);
-  //DSlink[LagrangianR::xfree]->insertPtr(ds.workspace(DynamicalSystem::free));
-
   DSlink[LagrangianR::q0]->insertPtr(lds.q());
 
   DEBUG_PRINTF("DSlink[LagrangianR::q0]->insertPtr(lds.q()) with LagrangianR::q0 = %i\n",LagrangianR::q0);
@@ -527,7 +516,6 @@ void Interaction::initDSDataNewtonEuler(DynamicalSystem& ds, VectorOfVectors& wo
   // convert vDS systems into NewtonEulerDS and put them in vLDS
   NewtonEulerDS& neds = static_cast<NewtonEulerDS&>(ds);
   // Put q/velocity/acceleration of each DS into a block. (Pointers links, no copy!!)
-  //DSlink[NewtonEulerR::xfree]->insertPtr(ds.workspace(DynamicalSystem::free));
   DSlink[NewtonEulerR::q0]->insertPtr(neds.q());
   DSlink[NewtonEulerR::velocity]->insertPtr(neds.twist());
   //  DSlink[NewtonEulerR::deltaq]->insertPtr(neds.deltaq());

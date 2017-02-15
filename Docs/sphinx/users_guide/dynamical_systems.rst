@@ -35,6 +35,7 @@ n-dimensional set of equations where
 Under some specific conditions, we can rewrite this as:
 
 .. math::
+
    \dot x = rhs(x, t, z)
 
 "rhs" means right-hand side.
@@ -95,8 +96,9 @@ Non linear
 They are described by the following set:
 
 .. math::
-   M\dot x(t) &=& f(t,x,z) + r \\
-   x(t_0)&=&x_0 
+
+   M\dot x(t) &= f(t,x,z) + r \\
+   x(t_0)&=x_0 
 
 with:
 
@@ -116,8 +118,9 @@ with:
 We have:
 
 .. math::
-   rhs &=& M^{-1}(f(t,x,z)+r) \\
-   \nabla_x rhs &=& M^{-1}\nabla_x f(t,x,z)
+
+   rhs &= M^{-1}(f(t,x,z)+r) \\
+   \nabla_x rhs &= M^{-1}\nabla_x f(t,x,z)
 
 Other variables are those of :doxysiconos:`DynamicalSystem` class, but some of them are not defined and thus not usable:
 
@@ -132,8 +135,8 @@ Described by the set of n equations and initial conditions:
 
 .. math::
 
-   \dot x(t) &=& A(t,z)x(t)+ b(t,z)+r \\
-   x(t_0)&=&x_0 	
+   \dot x(t) &= A(t,z)x(t)+ b(t,z)+r \\
+   x(t_0)&=x_0 	
 
 With:
 
@@ -149,8 +152,8 @@ And we have:
 
 .. math::
    
-   rhs &=& M^{-1}(A(t,z)x(t)+b(t,z)) \\
-   \nabla_x rhs&=& M^{-1}(A(t,z)
+   rhs &= M^{-1}(A(t,z)x(t)+b(t,z)) \\
+   \nabla_x rhs&= M^{-1}(A(t,z)
 
 Linear and time-invariant
 """""""""""""""""""""""""
@@ -161,8 +164,8 @@ Derived from FirstOrderLinearDS, described by the set of n equations and initial
 
 .. math::
    
-   \dot x(t) &=& Ax(t)+ b + r \\
-   x(t_0)&=&x_0 
+   \dot x(t) &= Ax(t)+ b + r \\
+   x(t_0)&=x_0 
 
 Same as for FirstOrderLinearDS but with A and b constant (ie no plug-in).
 
@@ -178,9 +181,9 @@ Lagrangian second order non linear systems are described by the following set of
 
 .. math::
    
-   Mass(q,z) \ddot q &=& f_L(t,\dot q , q , z) + p \\
-   q(t_0) &=& q0 \\
-   \dot q(t_0) &=& velocity0 
+   Mass(q,z) \ddot q &= f_L(t,\dot q , q , z) + p \\
+   q(t_0) &= q0 \\
+   \dot q(t_0) &= velocity0 
 
 with:
 
@@ -235,6 +238,7 @@ Linear and time-invariant
 class LagrangianLinearTIDS, derived from LagrangianDS.
 
 .. math::
+
    Mass \ddot q + C \dot q + K q =  F_{Ext}(t,z) + p
 
 With:
@@ -249,6 +253,7 @@ Other variables are those of :doxysiconos:`DynamicalSystem` and LagrangianDS cla
 And we have:
 
 .. math::
+
    rhs = \left[
    \begin{array}{c} 
    \dot q \\

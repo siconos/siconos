@@ -115,7 +115,7 @@ branch constitutive equations, the dynamics of the system writes
    -v_{DR1}\\
    -v_{DF2}\\
    i_{DF1}\\
-   i_{DR2}
+   i_{DR2} 
    \end{array}\right]
 
 and if we denote
@@ -229,9 +229,7 @@ with
 
 .. math::
 
-   y&=&\left[ \begin{array}{c}i_{DR1}\\i_{DF2}\\-v_{DF1}\\-v_{DR2}\end{array} \right],
-   C &=& \left[ \begin{array}{cccc}\frac{1}{R} & \frac{1}{R} & -1 & 0\\ \frac{1}{R} & \frac{1}{R} & 0 & -1\\1 & 0 & 0 & 0\\0 & 1 & 0 & 0\end{array} \right],
-   D=\left[ \begin{array}{c}-v_{DR1}\\-v_{DF2}\\i_{DF1}\\i_{DR2}\end{array} \right]
+   y=\left[ \begin{array}{c}i_{DR1}\\i_{DF2}\\-v_{DF1}\\-v_{DR2}\end{array} \right], C= \left[ \begin{array}{cccc}\frac{1}{R} & \frac{1}{R} & -1 & 0\\ \frac{1}{R} & \frac{1}{R} & 0 & -1\\1 & 0 & 0 & 0\\0 & 1 & 0 & 0\end{array} \right], D=\left[ \begin{array}{c}-v_{DR1}\\-v_{DF2}\\i_{DF1}\\i_{DR2}\end{array} \right]
 
 and recalling that
 
@@ -291,8 +289,8 @@ Notice that a complete :doxysiconos:`FirstOrderLinearTIR` writes
 
 .. math::
 
-   y &=& Cx + D\lambda + Fz + e \\
-   r &=& B\lambda
+   y &= Cx + D\lambda + Fz + e \\
+   r &= B\lambda
 
 All components not set during build are considered to be zero (which is the case here for F and e).
 
@@ -377,9 +375,9 @@ time :math:`t_i` and :math:`t_{i+1}`. The integration of the equation over the t
 
 .. math::
 
-   x_{i+1} &=& x^{free}_{i}  +  hW^{-1}r_{i+1} \\
-   W &=& (M - h\theta A) \\
-   x^{free}_i &=&  x_i + h W^{-1}(A x_i + b)
+   x_{i+1} &= x^{free}_{i}  +  hW^{-1}r_{i+1} \\
+   W &= (M - h\theta A) \\
+   x^{free}_i &=  x_i + h W^{-1}(A x_i + b)
 
 This corresponds to :doxysiconos:`EulerMoreauOSI` integrators, which inherits from :doxysiconos:`OneStepIntegrator`. Check :ref:`time_integrators` to find a complete review of integrators available in the software.
 
@@ -397,16 +395,16 @@ Considering the following discretization of the previously defined relations and
 
 .. math::
    
-   y_{i+1} &=& C(t_{i+1})x_{i+1} + D(t_{i+1})\lambda_{i+1} \\	
-   R_{i+1} &=& B(t_{i+1})\lambda_{i+1}\\
-   0 \leq y_{i+1}\ &\perp&  \lambda_{i+1} \geq 0  \\
+   y_{i+1} &= C(t_{i+1})x_{i+1} + D(t_{i+1})\lambda_{i+1} \\	
+   R_{i+1} &= B(t_{i+1})\lambda_{i+1}\\
+   0 \leq y_{i+1}\ &\perp  \lambda_{i+1} \geq 0  \\
 
 we get
 
 .. math::
 
-   y_{i+1} &=& q + M\lambda_{i+1} \\
-   0 \leq y_{i+1}\ &\perp&  \lambda_{i+1} \geq 0  \\
+   y_{i+1} &= q + M\lambda_{i+1} \\
+   0 \leq y_{i+1}\ &\perp  \lambda_{i+1} \geq 0  \\
   
 with
 

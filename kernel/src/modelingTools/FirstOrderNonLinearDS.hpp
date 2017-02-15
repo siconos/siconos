@@ -28,10 +28,6 @@
 
 typedef void (*FNLDSPtrfct)(double, unsigned int, const double*, double*, unsigned int, double*);
 
-namespace FirstOrderDS {
-  enum WorkNames {residu, residuFree, xfree, xPartialNS, deltaxForRelation, xBuffer, sizeWorkV};
-}
-
 /**  General First Order Non Linear Dynamical Systems - \f$ M \dot{x} = f(x,t,z) + r, \quad x(t_0) = x_0 \f$
  *
  *  \author SICONOS Development Team - copyright INRIA
@@ -441,12 +437,6 @@ public:
 
   /** Reset the PluggedObjects */
   virtual void zeroPlugin();
-
-  /** Initialize the workspace elements
-   * \param workVector the vectors needed for the integration
-   * \param workMatrices the matrices needed for the integration
-   */
-  virtual void initializeWorkSpace(VectorOfVectors& workVector, VectorOfMatrices& workMatrices);
 
   ACCEPT_STD_VISITORS();
 

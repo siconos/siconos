@@ -45,8 +45,6 @@ FirstOrderNonLinearDS::FirstOrderNonLinearDS(SP::SiconosVector newX0):
   _x[0].reset(new SiconosVector(*_x0));
   _x[1].reset(new SiconosVector(_n));
 
-  //mG
-  _workspace[free].reset(new SiconosVector(dimension()));
   _fold.reset(new SiconosVector(dimension()));
   _f.reset(new SiconosVector(_n));
   _b.reset(new SiconosVector(dimension()));
@@ -75,7 +73,6 @@ FirstOrderNonLinearDS::FirstOrderNonLinearDS(SP::SiconosVector newX0, const std:
   _f.reset(new SiconosVector(_n));
   _b.reset(new SiconosVector(dimension()));
   _jacobianfx.reset(new SimpleMatrix(_n, _n));
-  _workspace[free].reset(new SiconosVector(dimension()));
   _r.reset(new SiconosVector(dimension()));
   _fold.reset(new SiconosVector(dimension()));
 
@@ -394,14 +391,3 @@ void FirstOrderNonLinearDS::resetNonSmoothPart(unsigned int level)
   //assert(0);
   _r->zero();
 }
-void FirstOrderNonLinearDS::initializeWorkSpace(VectorOfVectors& workVector, VectorOfMatrices& workMatrices)
-{
-  workVector.resize(FirstOrderDS::sizeWorkV);
-  workVector[FirstOrderDS::residu].reset(new SiconosVector(_n));
-  workVector[FirstOrderDS::residuFree].reset(new SiconosVector(_n));
-  workVector[FirstOrderDS::xfree].reset(new SiconosVector(_n));
-  workVector[FirstOrderDS::xPartialNS].reset(new SiconosVector(_n));
-  workVector[FirstOrderDS::deltaxForRelation].reset(new SiconosVector(_n));
-  workVector[FirstOrderDS::xBuffer].reset(new SiconosVector(_n));
-}
-

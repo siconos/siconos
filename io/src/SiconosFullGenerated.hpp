@@ -366,8 +366,6 @@ SICONOS_IO_REGISTER(DynamicalSystem,
   (_pluging)
   (_r)
   (_stepsInMemory)
-  (_workMatrix)
-  (_workspace)
   (_x)
   (_x0)
   (_xMemory)

@@ -540,17 +540,6 @@ double SchatzmanPaoliOSI::computeResidu()
       if(d->p(0))
         free -= *d->p(0); // Compute Residu in Workfree Notation !!
       DEBUG_EXPR(free.display());
-      //  std::cout << "SchatzmanPaoliOSI::ComputeResidu LagrangianLinearTIDS p(0) :"  << std::endl;
-      //  if (d->p(0))
-      //    d->p(0)->display();
-      //  else
-      //     std::cout << " p(0) :"  << std::endl;
-      //  std::cout << "SchatzmanPaoliOSI::ComputeResidu LagrangianLinearTIDS residu :"  << std::endl;
-      // d->workspace(DynamicalSystem::free)->display();
-
-
-
-      //     normResidu = d->workspace(DynamicalSystem::free)->norm2();
       normResidu = 0.0; // we assume that v = vfree + W^(-1) p
       //     normResidu = realresiduFree.norm2();
 
@@ -791,11 +780,6 @@ void SchatzmanPaoliOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex
       else
       {
         subprod(*C, *Xfree, yForNSsolver, coord, true);
-        //        subprod(*C,*(*(mainInteraction->dynamicalSystemsBegin()))->workspace(DynamicalSystem::free),*Yp,coord,true);
-        //        if (mainInteraction->dynamicalSystems()->size() == 2)
-        //        {
-        //          subprod(*C,*(*++(mainInteraction->dynamicalSystemsBegin()))->workspace(DynamicalSystem::free),*Yp,coord,false);
-        //        }
       }
 
     }
@@ -939,7 +923,6 @@ void SchatzmanPaoliOSI::updateState(const unsigned int)
       //       v->display();
       // #endif
 
-      //       *v +=  * ds->workspace(DynamicalSystem::free);
 
       // #ifdef SCHATZMANPAOLI_NE_DEBUG
       //       std::cout<<"SchatzmanPaoliOSI::updatestate work free"<<endl;

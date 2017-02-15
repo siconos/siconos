@@ -13,7 +13,7 @@ G_string = {
     'length': 1.002,
     'diameter': 0.43e-3,
     'density': 1.17e-3,
-    'B': 0.0, # 1.78e-5,
+    'B': 0.,  # 1.78e-5,
     'tension': 180.5,
 }
 
@@ -23,6 +23,12 @@ G_string = {
 #     'rho_air': 1.2,
 #     'delta_ve': 4.5e-3,
 #     '1/qte': 2.03e-4}
+
+damping_parameters = {
+    'nu_air': 1.8e-5,
+    'rho_air': 1.2,
+    'delta_ve': 4.5e-3,
+    '1/qte': 2.03e-4}
 
 damping_parameters = {
     'nu_air': 0.,
@@ -36,32 +42,32 @@ ndof = number_of_modes + 2
 imax = int(ndof / 2)
 # -- The dynamical system(s) --
 # ie guitar strings
-guitar_string = StringDS(ndof, geometry_and_material=G_string,
-                         damping_parameters=damping_parameters,
-                         umax=1.8e-3, imax=imax,
-                         modal_form=False)
+# guitar_string = StringDS(ndof, geometry_and_material=G_string,
+#                          damping_parameters=damping_parameters,
+#                          umax=1.8e-3, imax=imax,
+#                          modal_form=False)
 guitar_string_m = StringDS(ndof, geometry_and_material=G_string,
                            damping_parameters=damping_parameters,
                            umax=1.8e-3, imax=imax, use_sparse=False,
                            modal_form=True)
-guitar_string_sparse = StringDS(ndof, geometry_and_material=G_string,
-                                damping_parameters=damping_parameters,
-                                umax=1.8e-3, imax=imax, use_sparse=True,
-                                modal_form=True)
+# guitar_string_sparse = StringDS(ndof, geometry_and_material=G_string,
+#                                 damping_parameters=damping_parameters,
+#                                 umax=1.8e-3, imax=imax, use_sparse=True,
+#                                 modal_form=True)
 
 # -- The obstacles (Interactions) --
 # ie guitar fret(s)
-fret = Fret(guitar_string, position=[imax, -0.00])
-fret_m = Fret(guitar_string_m, position=[imax, -0.00])
-fret_sp = Fret(guitar_string_sparse, position=[imax, -0.00])
+# fret = Fret(guitar_string, position=[imax, -0.00])
+fret_m = Fret(guitar_string_m, position=[imax, -0.00], restitution_coeff=0.)
+# fret_sp = Fret(guitar_string_sparse, position=[imax, -0.00])
 
 # -- The model to gather frets and strings and simulate the dynamics --
 t0 = 0.
 tend = 0.11
 guitar_model = Guitar(guitar_string, fret, [t0, tend], fs=2.01e5)
-guitar_model_m = Guitar(guitar_string_m, fret_m, [t0, tend], fs=2.01e5)
-guitar_model_sparse = Guitar(guitar_string_sparse, fret_sp,
-                             [t0, tend], fs=2.01e5)
+#guitar_model_m = Guitar(guitar_string_m, fret_m, [t0, tend], fs=2.01e5)
+#guitar_model_sparse = Guitar(guitar_string_sparse, fret_sp,
+#                             [t0, tend], fs=2.01e5)
 
 # -- Run the simulation --
 
@@ -71,18 +77,16 @@ def run_simu(model):
     k = 1
     print("Start simulation ...")
     while model.simu.hasNextEvent():
-        if (k%100==0):
-            print ('step = ', k, '---- time = ',  model.simu.nextTime(), '------------------------')
+        if k % 100 == 0:
+            print('step = ', k, '---- time = ',
+                  model.simu.nextTime(),
+                  '------------------------')
         model.simu.computeOneStep()
         model.save_state(k)
         k += 1
         model.simu.nextStep()
-    print 'End of simulation process.'
+    print('End of simulation process.')
 
-
-start_time = time.clock()
-run_simu(guitar_model)
-print 'duration (std form): ', time.clock() - start_time
 
 # start_time = time.clock()
 # run_simu(guitar_model_m)
@@ -91,6 +95,9 @@ print 'duration (std form): ', time.clock() - start_time
 # start_time = time.clock()
 # run_simu(guitar_model_sparse)
 # print 'duration (modal form, sparse): ', time.clock() - start_time
+start_time = time.clock()
+run_simu(guitar_model)
+print('duration (modal form, no sparse): ', time.clock() - start_time)
 
 
 plt.ioff()

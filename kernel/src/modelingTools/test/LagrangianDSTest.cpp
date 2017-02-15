@@ -63,7 +63,7 @@ void LagrangianDSTest::testBuildLagrangianDS4()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS4D : ", ds->ndof() == 3, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS4L : ", *(ds->mass()) == *(mass), true);
 
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNewtonEulerDS1D : ", ds->computeKineticEnergy() == 87.0, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE(" testBuildLagrangianDS4L : ", ds->computeKineticEnergy() == 87.0, true);
   std::cout << "--> Constructor 4 test ended with success." <<std::endl;
 }
 
@@ -82,7 +82,7 @@ void LagrangianDSTest::testBuildLagrangianDS5()
   std11::static_pointer_cast<LagrangianDS>(ds)->computeMass();
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS5L : ", *(std11::static_pointer_cast<LagrangianDS>(ds)->mass()) == (*mass), true);
 
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNewtonEulerDS1D : ", std11::static_pointer_cast<LagrangianDS>(ds)->computeKineticEnergy() == 87.0, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE(" testBuildLagrangianDS5L: ", std11::static_pointer_cast<LagrangianDS>(ds)->computeKineticEnergy() == 87.0, true);
   std::cout << "--> Constructor 5 test ended with success." <<std::endl;
 }
 

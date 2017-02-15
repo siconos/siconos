@@ -127,12 +127,6 @@
 class DynamicalSystem
 {
 
-public:
-  /** List of indices used to save tmp work vectors
-   * The last value is the size of the present list, so you HAVE to leave it at the end position.
-   */
-  enum DSWorkVectorId {local_buffer, freeresidu, free, acce_memory, acce_like, sizeWorkV};
-
 private:
   /** serialization hooks
   */
@@ -213,14 +207,6 @@ protected:
 
   /** number of previous states stored in memory */
   unsigned int _stepsInMemory;
-
-  /** A container of vectors to save temporary values (for Newton convergence computation for example)*/
-  VectorOfVectors _workspace;
-
-  /** A container of matrices to save temporary values (zeroMatrix, idMatrix, inverse of Mass or any tmp work matrix ...)
-   * No get-set functions at the time. Only used as a protected member.*/
-  VectorOfSMatrices _workMatrix;
-
   // ===== CONSTRUCTORS =====
 
   /** default constructors/destructor
@@ -519,78 +505,6 @@ public:
     _stepsInMemory = steps;
   }
 
-  // ===== WORK VECTOR =====
-
-  /** get the vector of temporary saved vector
-   *  \return a VectorOfVectors (map that links std::string to vectors)
-   */
-  inline VectorOfVectors workspace() const
-  {
-    return _workspace;
-  }
-
-  /** get a temporary saved vector, ref by id
-   * \param id  WorkNames
-   * \return a SP::SiconosVector
-   */
-  inline SP::SiconosVector workspace(const DSWorkVectorId& id) const
-  {
-    std::cout << "SP::SiconosVector workspace(const DSWorkVectorId& id) const is now obsolete" << std::endl;
-    std::cout << "prefer an implementaion based on graph properties" << std::endl;
-    return _workspace[id];
-  }
-
-  /** set WorkVector
-   *  \param newVect a VectorOfVectors
-   */
-  inline void setWorkVector(const VectorOfVectors& newVect)
-  {
-    _workspace = newVect;
-  }
-
-  /** to add a temporary vector
-   *  \param newVal a SP::SiconosVector
-   *  \param id a std::string id
-   */
-  inline void addWorkVector(SP::SiconosVector newVal, const DSWorkVectorId& id)
-  {
-    *_workspace[id] = *newVal;
-  }
-  /** to add a temporary vector
-   *  \param newVal a SP::SiconosVector
-   *  \param id a std::string id
-   */
-  inline void addWorkVector(const SiconosVector& newVal, const DSWorkVectorId& id)
-  {
-    *_workspace[id] = newVal;
-  }
-  /** sub a vector to a temporary one
-   *  \param newVal a SP::SiconosVector
-   *  \param id a std::string id
-   */
-  inline void subWorkVector(SP::SiconosVector newVal, const DSWorkVectorId& id)
-  {
-    *_workspace[id] -= *newVal;
-  }
-  /** sub a vector to a temporary one
-   *  \param newVal a SP::SiconosVector
-   *  \param id a std::string id
-   */
-  inline void subWorkVector(const SiconosVector& newVal, const DSWorkVectorId& id)
-  {
-    *_workspace[id] -= newVal;
-  }
-  /** to allocate memory for a new vector in tmp map
-   *  \param id the id of the SiconosVector
-   *  \param size an int to set the size
-   */
-  inline void allocateWorkVector(const DSWorkVectorId& id, int size)
-  {
-    _workspace[id].reset(new SiconosVector(size));
-  }
-
-  //@}
-
   /** Determine whether this is a linear DS
    * \return true if the Dynamical system is linear.
    */
@@ -749,13 +663,6 @@ public:
   {
     return _pluginJacxDotG;
   };
-
-  /** Initialize the workspace elements
-   * \param workVector the vectors needed for the integration
-   * \param workMatrices the matrices needed for the integration
-   */
-  virtual void initializeWorkSpace(VectorOfVectors& workVector, VectorOfMatrices& workMatrices) {};
-//  virtual void initializeWorkSpace(VectorOfVectors& workVector, VectorOfMatrices& workMatrices) = 0;
 
   /** visitors hook
    */

@@ -113,7 +113,6 @@ Topology::addInteractionInIndexSet0(SP::Interaction inter, SP::DynamicalSystem d
     // V.A. 210/06/2017 Could we defer  this initialization ?
     workVds1.reset(new VectorOfVectors());
     _DSG[0]->properties(dsgv1).workMatrices.reset(new VectorOfMatrices());
-    ds1->initializeWorkSpace(*workVds1, *_DSG[0]->properties(dsgv1).workMatrices);
   }
   if(ds2)
   {
@@ -124,7 +123,6 @@ Topology::addInteractionInIndexSet0(SP::Interaction inter, SP::DynamicalSystem d
       // V.A. 210/06/2017 Could we defer  this initialization ?
       workVds2.reset(new VectorOfVectors());
       _DSG[0]->properties(dsgv2).workMatrices.reset(new VectorOfMatrices());
-      ds2->initializeWorkSpace(*workVds2, *_DSG[0]->properties(dsgv2).workMatrices);
     }
   }
   else
@@ -233,7 +231,6 @@ void Topology::insertDynamicalSystem(SP::DynamicalSystem ds)
   DynamicalSystemsGraph::VDescriptor dsgv = _DSG[0]->add_vertex(ds);
   _DSG[0]->properties(dsgv).workVectors.reset(new VectorOfVectors());
   _DSG[0]->properties(dsgv).workMatrices.reset(new VectorOfMatrices());
-  ds->initializeWorkSpace(*_DSG[0]->properties(dsgv).workVectors, *_DSG[0]->properties(dsgv).workMatrices);
 }
 
 void Topology::setName(SP::DynamicalSystem ds, const std::string& name)

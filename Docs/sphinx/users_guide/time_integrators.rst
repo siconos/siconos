@@ -12,9 +12,9 @@ For first-order dynamical systems, in an 'event-capturing' simulation strategy.
   
 .. math::
 
-   M x_{k+1} &=& M x_{k} +h\theta f(x_{k+1},t_{k+1})+h(1-\theta) f(x_k,t_k) + h \gamma r(t_{k+1}) + h(1-\gamma)r(t_k) \\
-   y_{k+1} &=&  h(t_{k+1},x_{k+1},\lambda _{k+1}) \\
-   r_{k+1} &=& g(x_{k+1},\lambda_{k+1},t_{k+1})\\
+   M x_{k+1} &= M x_{k} +h\theta f(x_{k+1},t_{k+1})+h(1-\theta) f(x_k,t_k) + h \gamma r(t_{k+1}) + h(1-\gamma)r(t_k) \\
+   y_{k+1} &=  h(t_{k+1},x_{k+1},\lambda _{k+1}) \\
+   r_{k+1} &= g(x_{k+1},\lambda_{k+1},t_{k+1})\\
 
 with a nonsmooth law linking :math:`y_{k+1}` and :math:`\lambda_{k+1}`,
 and :math:`\theta \in [0,1], \gamma \in [0,1]`.

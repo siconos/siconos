@@ -60,7 +60,6 @@ void ZeroOrderHoldOSI::initializeDynamicalSystem(Model& m, double t, SP::Dynamic
 
   DynamicalSystemsGraph& DSG0 = *_dynamicalSystemsGraph;
   InteractionsGraph& IG0 = *_simulation->nonSmoothDynamicalSystem()->topology()->indexSet0();
-//VectorOfVectors& workVectors = *_dynamicalSystemsGraph->properties(dsv).workVectors;
   Type::Siconos dsType = Type::value(*ds);
 
   if((dsType != Type::FirstOrderLinearDS) && (dsType != Type::FirstOrderLinearTIDS))
@@ -127,11 +126,10 @@ void ZeroOrderHoldOSI::initializeDynamicalSystem(Model& m, double t, SP::Dynamic
     }
   }
 
-  ds->allocateWorkVector(DynamicalSystem::local_buffer, ds->dimension());
-  for (unsigned int k = _levelMinForInput ; k < _levelMaxForInput + 1; k++)
-  {
-    ds->initializeNonSmoothInput(k);
-  }
+  // Get work buffers from the graph
+  const DynamicalSystemsGraph::VDescriptor& dsv = _dynamicalSystemsGraph->descriptor(ds);
+  VectorOfVectors& workVectors = *_dynamicalSystemsGraph->properties(dsv).workVectors;
+  workVectors[OneStepIntegrator::free].reset(new SiconosVector(ds->dimension()));
 }
 
 void ZeroOrderHoldOSI::initializeInteraction(double t0, Interaction &inter,
@@ -144,8 +142,6 @@ void ZeroOrderHoldOSI::initializeInteraction(double t0, Interaction &inter,
   assert(interProp.DSlink);
 
   VectorOfBlockVectors& DSlink = *interProp.DSlink;
-  // VectorOfVectors& workVInter = *interProp.workVectors;
-  // VectorOfSMatrices& workMInter = *interProp.workMatrices;
 
   Relation &relation =  *inter.relation();
   RELATION::TYPES relationType = relation.getType();
@@ -294,7 +290,7 @@ void ZeroOrderHoldOSI::computeFreeState()
       if(d.b() && !DSG0.AdInt.at(dsgVD)->isConst())
         DSG0.AdInt.at(dsgVD)->integrate();
 
-      SiconosVector& xfree = *workVectors[FirstOrderDS::xfree];
+      SiconosVector& xfree = *workVectors[OneStepIntegrator::free];
       prod(DSG0.Ad.at(dsgVD)->mat(), *d.x(), xfree); // xfree = Ad*xold
       if(d.b())
       {
@@ -534,7 +530,7 @@ void ZeroOrderHoldOSI::updateState(const unsigned int level)
       SiconosVector& x = *d.x();
       // 1 - First Order Linear Time Invariant Systems
       // \Phi is already computed
-      x = *workVectors[FirstOrderDS::xfree]; // x = xfree = Phi*xold (+ Bd*u ) (+  Ld*e)
+      x = *workVectors[OneStepIntegrator::free]; // x = xfree = Phi*xold (+ Bd*u ) (+  Ld*e)
       if(level != LEVELMAX)
       {
         SP::Interaction interC;

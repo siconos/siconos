@@ -32,13 +32,6 @@ using namespace std::placeholders;
 #include <boost/weak_ptr.hpp>
 #endif
 
-
-
-OneStepIntegrator::OneStepIntegrator(const OSI::TYPES& id):
-  _integratorType(id), _sizeMem(1)
-{
-}
-
 void OneStepIntegrator::initialize( Model& m )
 {
   if (_extraAdditionalTerms)
@@ -53,27 +46,6 @@ void OneStepIntegrator::initializeDynamicalSystem(Model& m, double t, SP::Dynami
   RuntimeException::selfThrow("OneStepIntegrator::initializeDynamicalSystem not implemented for integrator of type " + _integratorType);
 }
 
-
-void OneStepIntegrator::computeInitialNewtonState()
-{
-  // Default behavior :  do nothing and used the current state as starting state of the Newton iteration
-}
-
-double OneStepIntegrator::computeResidu()
-{
-  RuntimeException::selfThrow("OneStepIntegrator::computeResidu not implemented for integrator of type " + _integratorType);
-  return 0.0;
-}
-
-void OneStepIntegrator::computeFreeState()
-{
-  RuntimeException::selfThrow("OneStepIntegrator::computeFreeState not implemented for integrator of type " + _integratorType);
-}
-
-void OneStepIntegrator::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, OneStepNSProblem* osnsp)
-{
-  RuntimeException::selfThrow("OneStepIntegrator::computeFreeOutput not implemented for integrator of type " + _integratorType);
-}
 
 void OneStepIntegrator::resetNonSmoothPart()
 {

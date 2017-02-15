@@ -804,14 +804,7 @@ double MoreauJeanGOSI::computeResidu()
         free -= *d->p(1); // Compute Residu in Workfree Notation !!
       // We use DynamicalSystem::free as tmp buffer
 
-      //      std::cout << "MoreauJeanGOSI::ComputeResidu LagrangianLinearTIDS residu :"  << std::endl;
-      //      d->workspace(DynamicalSystem::free)->display();
-
-
-      //     normResidu = d->workspace(DynamicalSystem::free)->norm2();
       normResidu = 0.0; // we assume that v = vfree + W^(-1) p
-      //     normResidu = realresiduFree->norm2();
-      //DEBUG_PRINTF("normResidu (really computed) = %e\n", d->workspace(DynamicalSystem::free)->norm2() );
     }
     else if(dsType == Type::NewtonEulerDS)
     {
@@ -1442,7 +1435,7 @@ void MoreauJeanGOSI::updateState(const unsigned int )
       if(baux)
       {
         local_buffer -= *q;
-        double aux = ((ds->workspace(DynamicalSystem::local_buffer))->norm2()) / (ds->normRef());
+        double aux = (local_buffer.norm2()) / (ds->normRef());
         if(aux > RelativeTol)
           _simulation->setRelativeConvergenceCriterionHeld(false);
       }

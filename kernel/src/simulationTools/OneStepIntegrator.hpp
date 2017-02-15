@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 /*! \file
 
   Basic class to handle with dynamical system integrators over a time step.
@@ -74,27 +74,26 @@ class OneStepIntegrator :public std11::enable_shared_from_this<OneStepIntegrator
 
 public :
   /** List of indices used to save tmp work matrices and vectors (last one is the size of the present list) */
-  enum OSI_DSWorkVectorId {local_buffer, residu_free, free, free_tdg,
+  enum OSI_DSWorkVectorId {local_buffer, residu, residu_free, free, free_tdg, x_partial_ns, delta_x_for_relation,
                            qtmp, acce_memory, acce_like, work_vector_of_vector_size};
 
   enum OSI_DSWorkMatrixId {dense_output_coefficients, work_vector_of_matrix_size};
 
 protected:
-/** serialization hooks
- */
+  /** serialization hooks
+   */
   ACCEPT_SERIALIZATION(OneStepIntegrator);
 
 
-
-/** type/name of the Integrator */
+  /** type/name of the Integrator */
   OSI::TYPES _integratorType;
 
-/** a graph of dynamical systems to integrate
- * For the moment, we point to the graph of dynamical systems in
- * in the topology. We use the properties "osi" to check if the dynamical
- * system is integrated by this osi. It has to be improved by using a subgraph
- * to avoid the use of checkOSI
- */
+  /** a graph of dynamical systems to integrate
+   * For the moment, we point to the graph of dynamical systems in
+   * in the topology. We use the properties "osi" to check if the dynamical
+   * system is integrated by this osi. It has to be improved by using a subgraph
+   * to avoid the use of checkOSI
+   */
   SP::DynamicalSystemsGraph _dynamicalSystemsGraph;
 
   /** size of the memory for the integrator */
@@ -130,13 +129,13 @@ protected:
 /** A link to the simulation that owns this OSI */
   SP::Simulation _simulation;
 
-/** basic constructor with Id
- *  \param type integrator type/name
- */
-  OneStepIntegrator(const OSI::TYPES& type);
+  /** basic constructor with Id
+   *  \param type integrator type/name
+   */
+  OneStepIntegrator(const OSI::TYPES& type): _integratorType(type), _sizeMem(1) {};
 
-/** default constructor
- */
+  /** default constructor
+   */
   OneStepIntegrator() {};
 
   /** struct to add terms in the integration. Useful for Control */
@@ -145,22 +144,22 @@ protected:
 private:
 
 
-/** copy constructor, private, no copy nor pass-by value allowed */
+  /** copy constructor, private, no copy nor pass-by value allowed */
   OneStepIntegrator(const OneStepIntegrator&);
 
-/** assignment (private => forbidden)
- * \param  OSI
- * \return OneStepIntegrator&
- */
+  /** assignment (private => forbidden)
+   * \param  OSI
+   * \return OneStepIntegrator&
+   */
   OneStepIntegrator& operator=(const OneStepIntegrator& OSI);
 
 public:
 
-/** destructor
- */
+  /** destructor
+   */
   virtual ~OneStepIntegrator() {};
 
-// --- GETTERS/SETTERS ---
+  // --- GETTERS/SETTERS ---
 
   /** get the type of the OneStepIntegrator
    *  \return std::string : the type of the OneStepIntegrator
@@ -179,7 +178,7 @@ public:
   };
 
   /** Check if the dynamical system bundle in the node of the
-   * _dynamicalSystemGraph is interagted or not by this osi.
+   * _dynamicalSystemGraph is integrated by this osi.
    * \param dsi the iterator on the node of the graph
    */
   inline bool checkOSI(DynamicalSystemsGraph::VIterator dsi)
@@ -188,7 +187,7 @@ public:
   };
 
   /** Check if the dynamical system bundle in the node of the
-   * _dynamicalSystemGraph is interagted or not by this osi.
+   * _dynamicalSystemGraph is integrated by this osi.
    * \param dsgv the descriptor on the node of the graph
    */
   inline bool checkOSI(DynamicalSystemsGraph::VDescriptor dsgv)
@@ -204,7 +203,7 @@ public:
     return _dynamicalSystemsGraph;
   };
 
-  /** get _sizeMem value
+  /** get number of internal memory vectors needed for the integration scheme
    *  \return an unsigned int
    */
   inline unsigned int getSizeMem() const
@@ -212,7 +211,7 @@ public:
     return _sizeMem;
   };
 
-  /** set _sizeMem
+  /** set the number of internal memory vectors needed for the integration scheme
    *  \param newValue an unsigned int
    */
   inline void setSizeMem(unsigned int newValue)
@@ -286,23 +285,37 @@ public:
 
   /** compute the initial state of the Newton loop.
    */
-  virtual void computeInitialNewtonState();
+  virtual void computeInitialNewtonState(){
+    // Default behavior :  does nothing and used the current state as starting state of the Newton iteration
+  }
 
   /** return the maximum of all norms for the discretized residus of DS
    *  \return a double
    */
-  virtual double computeResidu();
+  virtual double computeResidu(){
+    // default : error
+    RuntimeException::selfThrow("OneStepIntegrator::computeResidu not implemented for integrator of type " + _integratorType);
+    return 0.0;
+  }
 
   /** integrates the Dynamical System linked to this integrator, without taking constraints
    * into account.
    */
-  virtual void computeFreeState();
+  virtual void computeFreeState(){
+    // default : error
+    RuntimeException::selfThrow("OneStepIntegrator::computeFreeState not implemented for integrator of type " + _integratorType);
+  }
+
 
   /** integrates the Interaction linked to this integrator, without taking non-smooth effects into account
    * \param vertex_inter of the interaction graph
    * \param osnsp pointer to OneStepNSProblem
    */
-  virtual void computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, OneStepNSProblem* osnsp);
+  virtual void computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, OneStepNSProblem* osnsp)
+  {
+    // default : error
+    RuntimeException::selfThrow("OneStepIntegrator::computeFreeOutput not implemented for integrator of type " + _integratorType);
+  }
 
   /** integrate the system, between tinit and tend (->iout=true), with possible stop at tout (->iout=false)
    *  \param tinit initial time

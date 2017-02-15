@@ -31,7 +31,6 @@ DynamicalSystem::DynamicalSystem():
   zeroPlugin();
   _normRef = 1;
   _x.resize(2);
-  _workspace.resize(sizeWorkV);
   _z.reset(new SiconosVector(1));
 }
 
@@ -42,8 +41,6 @@ DynamicalSystem::DynamicalSystem(unsigned int newN):
   zeroPlugin();
   _normRef = 1;
   _x.resize(2);
-  _workspace.resize(sizeWorkV);
-  _workspace[freeresidu].reset(new SiconosVector(dimension()));
   _r.reset(new SiconosVector(dimension()));
   _z.reset(new SiconosVector(1));
 }
@@ -56,8 +53,6 @@ DynamicalSystem::DynamicalSystem(const DynamicalSystem & ds):
   _n = ds.n();
   _normRef = ds.normRef();
   _x0.reset(new SiconosVector(*(ds.x0())));
-  _workspace.resize(sizeWorkV);
-  _workspace[freeresidu].reset(new SiconosVector(*(ds.workspace(freeresidu))));
   _r.reset(new SiconosVector(*(ds.r())));
   _x.resize(2);
   _x[0].reset(new SiconosVector(*(ds.x())));
@@ -83,17 +78,6 @@ DynamicalSystem::DynamicalSystem(const DynamicalSystem & ds):
   if (ds.xMemory())
     _xMemory.reset(new SiconosMemory(*(ds.xMemory())));
   _stepsInMemory = ds.stepsInMemory();
-
-  _workspace.resize(sizeWorkV);
-
-  if (ds.workspace(local_buffer))
-    _workspace[local_buffer].reset(new SiconosVector(*(ds.workspace(local_buffer))));
-  if (ds.workspace(free))
-    _workspace[free].reset(new SiconosVector(*(ds.workspace(free))));
-  //  _workspace[sizeWorkV].reset(new SiconosVector(*(ds.workspace(sizeWorkV))));
-  // XXX See how to implement the copy of _workMatrix
-
-//  _workFree.reset(new SiconosVector(*(ds.workspace(DynamicalSystem::free))));
 }
 
 bool DynamicalSystem::checkDynamicalSystem()
