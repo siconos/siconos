@@ -36,9 +36,9 @@
 #include "TypeName.hpp"
 // for Debug
 // #define DEBUG_BEGIN_END_ONLY
-// #define DEBUG_NOCOLOR
-// #define DEBUG_STDOUT
-// #define DEBUG_MESSAGES
+#define DEBUG_NOCOLOR
+#define DEBUG_STDOUT
+#define DEBUG_MESSAGES
 #include <debug.h>
 #include <fstream>
 
@@ -215,47 +215,45 @@ void Simulation::initialize(SP::Model m, bool withOSI)
       ds->initialize(m->t0(), osi->getSizeMem());
     }
 
+
+
+    // This is the default
+    _levelMinForInput = LEVELMAX;
+    _levelMaxForInput = 0;
+    _levelMinForOutput = LEVELMAX;
+    _levelMaxForOutput = 0;
+
     _numberOfIndexSets=0;
+
     // === OneStepIntegrators initialization ===
     for (OSIIterator itosi = _allOSI->begin();
          itosi != _allOSI->end(); ++itosi)
     {
-      // for (DSIterator itds = (*itosi)->dynamicalSystems()->begin();
-      //      itds != (*itosi)->dynamicalSystems()->end();
-      //      ++itds)
-      // {
-      //   (*itds)->initialize(startingTime(),
-      //                       (*itosi)->getSizeMem());
-      //   addInOSIMap(*itds, *itosi);
-      // }
-
       (*itosi)->setSimulationPtr(shared_from_this());
       (*itosi)->initialize(*m);
       _numberOfIndexSets = std::max<int>((*itosi)->numberOfIndexSets(), _numberOfIndexSets);
+
+      /* V.A. This operation should be osi dependent only
+       * in a near future, we should only use _level*For* osi only
+       */
+      _levelMinForInput = std::min<int>((*itosi)->levelMinForOutput(), _levelMinForInput);
+      _levelMaxForInput = std::max<int>((*itosi)->levelMaxForOutput(), _levelMaxForInput);
+      _levelMinForOutput = std::min<int>((*itosi)->levelMinForInput(), _levelMinForOutput);
+      _levelMaxForOutput = std::max<int>((*itosi)->levelMaxForInput(), _levelMaxForOutput);
+
     }
   }
-
-  // This is the default
-  _levelMinForInput = LEVELMAX;
-  _levelMaxForInput = 0;
-  _levelMinForOutput = LEVELMAX;
-  _levelMaxForOutput = 0;
-
-  computeLevelsForInputAndOutput();
-
-  // Loop over all DS in the graph, to reset NS part of each DS.
-  // Note FP : this was formerly done in inter->initialize call with local levels values
-  // but I think it's ok (better?) to do it with the simulation levels values.
-  DynamicalSystemsGraph::VIterator dsi, dsend;
-  SP::DynamicalSystemsGraph DSG = _nsds->topology()->dSG(0);
-  for (std11::tie(dsi, dsend) = DSG->vertices(); dsi != dsend; ++dsi)
+  SP::Topology topo = _nsds->topology();
+  unsigned int indxSize = topo->indexSetsSize();
+  assert (_numberOfIndexSets >0);
+  if ((indxSize == LEVELMAX) || (indxSize < _numberOfIndexSets ))
   {
-    //assert(_levelMinForInput <= _levelMaxForInput);
-    for (unsigned int k = _levelMinForInput ; k < _levelMaxForInput + 1; k++)
-    {
-      DSG->bundle(*dsi)->initializeNonSmoothInput(k);
-    }
+    topo->indexSetsResize(_numberOfIndexSets);
+    // Init if the size has changed
+    for (unsigned int i = indxSize; i < topo->indexSetsSize(); i++) // ++i ???
+      topo->resetIndexSetPtr(i);
   }
+
 
   // Initialize OneStepNSProblem(s). Depends on the type of simulation.
   // Warning FP : must be done in any case, even if the interactions set
@@ -298,7 +296,6 @@ void Simulation::initializeInteraction(double time, SP::Interaction inter)
 {
   // determine which (lower and upper) levels are required for this Interaction
   // in this Simulation.
-  computeLevelsForInputAndOutput(inter);
 
   // Get the interaction properties from the topology for initialization.
   SP::InteractionsGraph indexSet0 = _nsds->topology()->indexSet0();
@@ -306,7 +303,7 @@ void Simulation::initializeInteraction(double time, SP::Interaction inter)
 
   // This calls computeOutput() and initializes qMemory and q_k.
   DynamicalSystemsGraph &DSG = *_nsds->topology()->dSG(0);
-  
+
   //SP::OneStepIntegrator osi = indexSet0->properties(ui).osi;
   SP::DynamicalSystem ds1;
   SP::DynamicalSystem ds2;
@@ -339,7 +336,7 @@ void Simulation::initializeInteraction(double time, SP::Interaction inter)
   }
   assert(ds1);
   assert(ds2);
-  
+
   OneStepIntegrator& osi1 = *DSG.properties(DSG.descriptor(ds1)).osi;
   OneStepIntegrator& osi2 = *DSG.properties(DSG.descriptor(ds2)).osi;
 
@@ -459,70 +456,6 @@ void Simulation::processEvents()
 }
 
 
-void Simulation::computeLevelsForInputAndOutput(SP::Interaction inter, bool init)
-{
-  DEBUG_PRINT("Simulation::computeLevelsForInputAndOutput(SP::Interaction inter, bool init)\n");
-
- /** \warning. We test only for the first Dynamical of the interaction.
-   * we assume that the osi(s) are consistent for one interaction
-   */
-  SP::InteractionsGraph indexSet0 = _nsds->topology()->indexSet(0);
-  SP::DynamicalSystem ds = indexSet0->properties(indexSet0->descriptor(inter)).source;
-
-  SP::DynamicalSystemsGraph DSG0 = _nsds->topology()->dSG(0);
-  SP::OneStepIntegrator osi = DSG0->properties(DSG0->descriptor(ds)).osi;
-
-  if (!osi)
-    RuntimeException::selfThrow("Simulation::computeLevelsForInputAndOutput osi does not exists");
-  
-  _levelMinForInput = osi->levelMinForOutput();
-  _levelMaxForInput = osi->levelMaxForOutput();
-  _levelMinForOutput = osi->levelMinForInput();
-  _levelMaxForOutput = osi->levelMaxForInput();
-  
-  if (!init) // We are not computing the levels at the initialization
-  {
-    SP::Topology topo = _nsds->topology();
-    unsigned int indxSize = topo->indexSetsSize();
-    assert (_numberOfIndexSets >0);
-    if ((indxSize == LEVELMAX) || (indxSize < _numberOfIndexSets ))
-    {
-      topo->indexSetsResize(_numberOfIndexSets);
-      // Init if the size has changed
-      for (unsigned int i = indxSize; i < topo->indexSetsSize(); i++) // ++i ???
-        topo->resetIndexSetPtr(i);
-    }
-  }
-}
-
-void Simulation::computeLevelsForInputAndOutput()
-{
-  DEBUG_PRINT("Simulation::computeLevelsForInputAndOutput()\n");
-
-  SP::Topology topo = _nsds->topology();
-
-  InteractionsGraph::VIterator ui, uiend;
-  SP::InteractionsGraph indexSet0 = topo->indexSet0();
-  for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
-  {
-    computeLevelsForInputAndOutput(indexSet0->bundle(*ui), true);
-  }
-
-  unsigned int indxSize = topo->indexSetsSize();
-  if ((indxSize == LEVELMAX) || (indxSize < _numberOfIndexSets ))
-  {
-    topo->indexSetsResize(_numberOfIndexSets );
-    // Init if the size has changed
-    for (unsigned int i = indxSize; i < topo->indexSetsSize(); i++) // ++i ???
-      topo->resetIndexSetPtr(i);
-  }
-  DEBUG_PRINTF("_numberOfIndexSets =%d\n", _numberOfIndexSets);
-  DEBUG_PRINTF("_levelMinForInput =%d\n", _levelMinForInput);
-  DEBUG_PRINTF("_levelMaxForInput =%d\n", _levelMaxForInput);
-  DEBUG_PRINTF("_levelMinForOutput =%d\n", _levelMinForInput);
-  DEBUG_PRINTF("_levelMaxForOutput =%d\n", _levelMaxForInput);
-}
-
 void Simulation::updateT(double T)
 {
   _T = T;
@@ -539,19 +472,6 @@ void Simulation::link(SP::Interaction inter,
   nonSmoothDynamicalSystem()->link(inter, ds1, ds2);
 
   initializeInteraction(nextTime(), inter);
-
-  // Note FP : ds init should probably be done once and only once for
-  // all ds (like in simulation->initialize()) but where/when?
-  // Note SS : in InteractionManager::buildGraph()?
-  unsigned int levelMinForInput = inter->lowerLevelForInput();
-  unsigned int levelMaxForInput = inter->upperLevelForInput();
-  bool has2DS = inter->has2Bodies();
-  for (unsigned int k = levelMinForInput ; k < levelMaxForInput + 1; k++)
-  {
-    ds1->initializeNonSmoothInput(k);
-    if(has2DS)
-      ds2->initializeNonSmoothInput(k);
-  }
 
   _linkOrUnlink = true;
 }

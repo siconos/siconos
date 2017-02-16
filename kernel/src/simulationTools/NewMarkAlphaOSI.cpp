@@ -430,7 +430,10 @@ void NewMarkAlphaOSI::initializeDynamicalSystem(Model& m, double t, SP::Dynamica
   {
     RuntimeException::selfThrow("In NewMarkAlphaOSI::initialize: this type of DS is not yet implemented");
   }
-
+  for (unsigned int k = _levelMinForInput ; k < _levelMaxForInput + 1; k++)
+  {
+    ds->initializeNonSmoothInput(k);
+  }
   DEBUG_END("NewMarkAlphaOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds)\n")
 
 

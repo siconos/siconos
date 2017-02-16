@@ -253,7 +253,10 @@ void LsodarOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSyste
   }
   else
     _xWork->insertPtr(ds->x());
-
+  for (unsigned int k = _levelMinForInput ; k < _levelMaxForInput + 1; k++)
+  {
+    ds->initializeNonSmoothInput(k);
+  }
   
   DEBUG_END("LsodarOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds)\n");
 }

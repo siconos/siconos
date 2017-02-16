@@ -144,6 +144,11 @@ void D1MinusLinearOSI::initializeDynamicalSystem(Model& m, double t, SP::Dynamic
   }
   else
     RuntimeException::selfThrow("D1MinusLinearOSI::initialize - not implemented for Dynamical system type: " + dsType);
+
+  for (unsigned int k = _levelMinForInput ; k < _levelMaxForInput + 1; k++)
+  {
+    ds->initializeNonSmoothInput(k);
+  }
 }
 
 

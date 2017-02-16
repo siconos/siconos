@@ -77,35 +77,6 @@ TimeSteppingCombinedProjection::~TimeSteppingCombinedProjection()
 }
 
 
-void TimeSteppingCombinedProjection::computeLevelsForInputAndOutput(SP::Interaction inter, bool init)
-{
-  Simulation::computeLevelsForInputAndOutput(inter, init);
-  // Add the  specific indexSets
-  if (!init) // We are not computing the levels at the initialization
-  {
-    SP::Topology topo = _nsds->topology();
-    unsigned int indxSize = topo->indexSetsSize();
-    if (indxSize == _indexSetLevelForProjection)
-    {
-      topo->indexSetsResize(indxSize + 1);
-      topo->resetIndexSetPtr(indxSize);
-    }
-  }
-}
-
-void TimeSteppingCombinedProjection::computeLevelsForInputAndOutput()
-{
-  Simulation::computeLevelsForInputAndOutput();
-  // Add the  specific indexSets
-  SP::Topology topo = _nsds->topology();
-  unsigned int indxSize = topo->indexSetsSize();
-  if (indxSize == _indexSetLevelForProjection)
-  {
-    topo->indexSetsResize(indxSize + 1);
-    topo->resetIndexSetPtr(indxSize);
-  }
-}
-
 
 struct TimeSteppingCombinedProjection::_SimulationEffectOnOSNSP : public SiconosVisitor
 {

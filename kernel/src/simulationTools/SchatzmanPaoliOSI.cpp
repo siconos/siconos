@@ -154,6 +154,11 @@ void SchatzmanPaoliOSI::initializeDynamicalSystem(Model& m, double t, SP::Dynami
   // W initialization
   initializeIterationMatrixW(t, ds, dsv);
 
+  for (unsigned int k = _levelMinForInput ; k < _levelMaxForInput + 1; k++)
+  {
+    ds->initializeNonSmoothInput(k);
+  }
+
   //      if ((*itDS)->getType() == Type::LagrangianDS || (*itDS)->getType() == Type::FirstOrderNonLinearDS)
   DEBUG_EXPR(ds->display());
   DEBUG_END("SchatzmanPaoliOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds)\n");

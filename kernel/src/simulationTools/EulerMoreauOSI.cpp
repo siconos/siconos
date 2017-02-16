@@ -101,6 +101,10 @@ void EulerMoreauOSI::initializeDynamicalSystem(Model& m, double t, SP::Dynamical
   // W initialization
   initializeIterationMatrixW(t, ds, dsv);
   ds->allocateWorkVector(DynamicalSystem::local_buffer, _dynamicalSystemsGraph->properties(dsv).W->size(0));
+  for (unsigned int k = _levelMinForInput ; k < _levelMaxForInput + 1; k++)
+  {
+    ds->initializeNonSmoothInput(k);
+  }
 }
 void EulerMoreauOSI::initializeInteraction(double t0, Interaction &inter,
                                           InteractionProperties& interProp,

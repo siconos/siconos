@@ -480,7 +480,10 @@ void Hem5OSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem 
   {
     RuntimeException::selfThrow("Hem5OSI::initialize(), Only integration of Lagrangian DS is allowed");
   }
-
+  for (unsigned int k = _levelMinForInput ; k < _levelMaxForInput + 1; k++)
+  {
+    ds->initializeNonSmoothInput(k);
+  }
 }
 
 
