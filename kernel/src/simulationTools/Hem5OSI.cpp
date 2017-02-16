@@ -526,14 +526,15 @@ void Hem5OSI::initializeInteraction(double t0, Interaction &inter,
     RuntimeException::selfThrow("HEM5OSI::initializeInteraction not yet implemented  for nonsmooth of type");
 
   bool isInitializationNeeded = false;
-  if (inter.lowerLevelForOutput() != lowerLevelForOutput || inter.upperLevelForOutput() != upperLevelForOutput)
+  if (!(inter.lowerLevelForOutput() <= lowerLevelForOutput && inter.upperLevelForOutput()  >= upperLevelForOutput ))
   {
     //  RuntimeException::selfThrow("D1MinusLinearOSI::initializeInteraction, we must resize _y");
     inter.setUpperLevelForOutput(upperLevelForOutput);
     inter.setLowerLevelForOutput(lowerLevelForOutput);
     isInitializationNeeded = true;
   }
-  if (inter.lowerLevelForInput() > lowerLevelForInput || inter.upperLevelForInput() < upperLevelForInput)
+
+  if (!(inter.lowerLevelForInput() <= lowerLevelForInput && inter.upperLevelForInput() >= upperLevelForInput ))
   {
     //RuntimeException::selfThrow("D1MinusLinearOSI::initializeInteraction, we must resize _lambda");
      inter.setUpperLevelForInput(upperLevelForInput);

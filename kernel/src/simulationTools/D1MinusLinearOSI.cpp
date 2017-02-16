@@ -230,19 +230,26 @@ void D1MinusLinearOSI::initializeInteraction(double t0, Interaction &inter,
   Relation &relation =  *inter.relation();
   RELATION::TYPES relationType = relation.getType();
 
+
+  /* Check that the interaction has the correct initialization for y and lambda */
+  unsigned int neededLowerLevelForOutput =0 ;
+  unsigned int neededUpperLevelForOutput =2 ;
+
   bool isInitializationNeeded = false;
-  if (inter.lowerLevelForOutput() != 0 || inter.upperLevelForOutput() != 2)
+  if (!(inter.lowerLevelForOutput() <= neededLowerLevelForOutput && inter.upperLevelForOutput()  >= neededUpperLevelForOutput ))
   {
     //  RuntimeException::selfThrow("D1MinusLinearOSI::initializeInteraction, we must resize _y");
-    inter.setUpperLevelForOutput(2);
-    inter.setLowerLevelForOutput(0);
+    inter.setLowerLevelForOutput(neededLowerLevelForOutput);
+    inter.setUpperLevelForOutput(neededUpperLevelForOutput);
     isInitializationNeeded = true;
   }
-  if (inter.lowerLevelForInput() > 1 || inter.upperLevelForInput() < 2)
+  unsigned int neededLowerLevelForInput =1 ;
+  unsigned int neededUpperLevelForInput =2 ;
+  if (!(inter.lowerLevelForInput() <= neededLowerLevelForInput && inter.upperLevelForInput() >= neededUpperLevelForInput ))
   {
     //RuntimeException::selfThrow("D1MinusLinearOSI::initializeInteraction, we must resize _lambda");
-     inter.setUpperLevelForInput(2);
-     inter.setLowerLevelForInput(1);
+     inter.setLowerLevelForInput(neededLowerLevelForInput);
+     inter.setUpperLevelForInput(neededUpperLevelForInput);
      isInitializationNeeded = true;
   }
 

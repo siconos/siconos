@@ -148,33 +148,55 @@ void MoreauJeanOSI::initializeInteraction(double t0, Interaction &inter,
   assert(ds1);
   assert(ds2);
 
-    
+
   VectorOfBlockVectors& DSlink = *interProp.DSlink;
   assert(interProp.DSlink);
   // VectorOfVectors& workVInter = *interProp.workVectors;
   // VectorOfSMatrices& workMInter = *interProp.workMatrices;
 
-  Relation &relation =  *inter.relation();  
+  Relation &relation =  *inter.relation();
   RELATION::TYPES relationType = relation.getType();
 
-  if (inter.lowerLevelForOutput() != 0 || inter.upperLevelForOutput() != 1)
-     RuntimeException::selfThrow("MoreauJeanOSI::initializeInteraction, we must resize _y");
-  
-  if (inter.lowerLevelForInput() > 1 || inter.upperLevelForInput() < 1)
-     RuntimeException::selfThrow("MoreauJeanOSI::initializeInteraction, we must resize _lambda");
-  
+
+  /* Check that the interaction has the correct initialization for y and lambda */
+  unsigned int neededLowerLevelForOutput =0 ;
+  unsigned int neededUpperLevelForOutput =1 ;
+
+  bool isInitializationNeeded = false;
+
+  if (!(inter.lowerLevelForOutput() <= neededLowerLevelForOutput && inter.upperLevelForOutput()  >= neededUpperLevelForOutput ))
+  {
+    //RuntimeException::selfThrow("MoreauJeanOSI::initializeInteraction, we must resize _y");
+    inter.setLowerLevelForOutput(neededLowerLevelForOutput);
+    inter.setUpperLevelForOutput(neededUpperLevelForOutput);
+    isInitializationNeeded = true;
+  }
+
+  unsigned int neededLowerLevelForInput =1 ;
+  unsigned int neededUpperLevelForInput =1 ;
+  if (!(inter.lowerLevelForInput() <= neededLowerLevelForInput && inter.upperLevelForInput() >= neededUpperLevelForInput ))
+  {
+    // RuntimeException::selfThrow("MoreauJeanOSI::initializeInteraction, we must resize _lambda");
+    inter.setLowerLevelForInput(neededLowerLevelForInput);
+    inter.setUpperLevelForInput(neededUpperLevelForInput);
+    isInitializationNeeded = true;
+  }
+
+  if (isInitializationNeeded)
+    inter.init();
+
   bool computeResidu = relation.requireResidu();
   inter.initializeMemory(computeResidu,_steps);
 
   /* allocate ant set work vectors for the osi */
-  
+
   if(checkOSI(DSG.descriptor(ds1)))
     {
       DEBUG_PRINTF("ds1->number() %i is taken in to account\n", ds1->number());
       assert(DSG.properties(DSG.descriptor(ds1)).workVectors);
       VectorOfVectors &workVds1 = *DSG.properties(DSG.descriptor(ds1)).workVectors;
-     
-	
+
+
       if (relationType == Lagrangian)
 	{
 	  if (!DSlink[LagrangianR::xfree])
@@ -186,7 +208,7 @@ void MoreauJeanOSI::initializeInteraction(double t0, Interaction &inter,
 	    {
 	      DSlink[LagrangianR::xfree]->setVectorPtr(0,workVds1[OneStepIntegrator::free]);
 	    }
-	}  
+	}
       else if (relationType == NewtonEuler)
 	{
 	  if (!DSlink[NewtonEulerR::xfree])
@@ -202,11 +224,11 @@ void MoreauJeanOSI::initializeInteraction(double t0, Interaction &inter,
     }
   DEBUG_PRINTF("ds1->number() %i\n",ds1->number());
   DEBUG_PRINTF("ds2->number() %i\n",ds2->number());
- 
+
   if (ds1 != ds2)
     {
       DEBUG_PRINT("ds1 != ds2\n");
-      
+
       if(checkOSI(DSG.descriptor(ds2)))
 	{
 	  DEBUG_PRINTF("ds2->number() %i is taken in to account\n",ds2->number());
@@ -225,8 +247,8 @@ void MoreauJeanOSI::initializeInteraction(double t0, Interaction &inter,
 		{
 		  DSlink[LagrangianR::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
 		}
-	      
-	    }  
+
+	    }
 	  else if (relationType == NewtonEuler)
 	    {
 	      if (!DSlink[NewtonEulerR::xfree])
@@ -244,7 +266,7 @@ void MoreauJeanOSI::initializeInteraction(double t0, Interaction &inter,
 	    }
 	}
     }
-  
+
   // Compute a first value for the output
     inter.computeOutput(t0, interProp, 0);
 
@@ -256,7 +278,7 @@ void MoreauJeanOSI::initializeInteraction(double t0, Interaction &inter,
     }
     inter.swapInMemory();
 
-  
+
 }
 void MoreauJeanOSI::initialize(Model& m)
 {
@@ -288,13 +310,13 @@ void MoreauJeanOSI::initialize(Model& m)
   for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
   {
     Interaction& inter = *indexSet0->bundle(*ui);
-    
+
     initializeInteraction(t0, inter, indexSet0->properties(*ui), *_dynamicalSystemsGraph);
   }
 
 
 
-  
+
 }
 
 

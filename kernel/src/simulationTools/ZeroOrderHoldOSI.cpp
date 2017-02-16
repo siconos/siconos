@@ -140,12 +140,28 @@ void ZeroOrderHoldOSI::initializeInteraction(double t0, Interaction &inter,
 
   Relation &relation =  *inter.relation();
   RELATION::TYPES relationType = relation.getType();
-
-  if (inter.lowerLevelForOutput() != 0 || inter.upperLevelForOutput() != 0)
-    RuntimeException::selfThrow("EulerMoreauOSI::initializeInteraction, we must resize _y");
-
-  if (inter.lowerLevelForInput() >  0|| inter.upperLevelForInput() < 0)
-    RuntimeException::selfThrow("EulerMoreauOSI::initializeInteraction, we must resize _lambda");
+  /* Check that the interaction has the correct initialization for y and lambda */
+  unsigned int neededLowerLevelForOutput =0 ;
+  unsigned int neededUpperLevelForOutput =0 ;
+  bool isInitializationNeeded = false;
+  if (!(inter.lowerLevelForOutput() <= neededLowerLevelForOutput && inter.upperLevelForOutput()  >= neededUpperLevelForOutput ))
+  {
+    //RuntimeException::selfThrow("ZeroOrderHoldOSI::initializeInteraction, we must resize _y");
+    inter.setLowerLevelForOutput(neededLowerLevelForOutput);
+    inter.setUpperLevelForOutput(neededUpperLevelForOutput);
+    isInitializationNeeded = true;
+  }
+  unsigned int neededLowerLevelForInput =0 ;
+  unsigned int neededUpperLevelForInput =0 ;
+  if (!(inter.lowerLevelForInput() <= neededLowerLevelForInput && inter.upperLevelForInput() >= neededUpperLevelForInput ))
+  {
+    // RuntimeException::selfThrow("ZeroOrderHoldOSI::initializeInteraction, we must resize _lambda");
+    inter.setLowerLevelForInput(neededLowerLevelForInput);
+    inter.setUpperLevelForInput(neededUpperLevelForInput);
+    isInitializationNeeded = true;
+  }
+  if (isInitializationNeeded)
+    inter.init();
 
   bool computeResidu = relation.requireResidu();
   inter.initializeMemory(computeResidu,_steps);
