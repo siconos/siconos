@@ -94,6 +94,25 @@ void OneStepIntegrator::resetNonSmoothPart(unsigned int level)
     _dynamicalSystemsGraph->bundle(*dsi)->resetNonSmoothPart(level);
   }
 }
+void OneStepIntegrator::updateOutput(double time)
+{
+  /** VA. 16/02/2017 This should normally be done only for interaction managed by the osi */
+  for (unsigned int level = _levelMinForOutput;
+       level < _levelMaxForOutput + 1;
+       level++)
+    _simulation->nonSmoothDynamicalSystem()->updateOutput(time,level);
+}
+
+void OneStepIntegrator::updateInput(double time)
+{
+  /** VA. 16/02/2017 This should normally be done only for interaction managed by the osi */
+  for (unsigned int level = _levelMinForOutput;
+       level < _levelMaxForOutput + 1;
+       level++)
+    _simulation->nonSmoothDynamicalSystem()->updateInput(time,level);
+}
+
+
 
 void OneStepIntegrator::display()
 {

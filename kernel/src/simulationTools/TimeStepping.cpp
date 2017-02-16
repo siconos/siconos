@@ -356,13 +356,16 @@ void TimeStepping::update(unsigned int levelInput)
 {
   DEBUG_BEGIN("TimeStepping::update(unsigned int levelInput)\n");
   DEBUG_PRINTF("levelInput = % i \n",levelInput);
-
+  OSIIterator itOSI;
   // 1 - compute input (lambda -> r)
   if (!_allNSProblems->empty())
-    _nsds->updateInput(nextTime(),levelInput);
-
+  {
+    for (itOSI = _allOSI->begin(); itOSI != _allOSI->end() ; ++itOSI)
+      (*itOSI)->updateInput(nextTime());
+    //_nsds->updateInput(nextTime(),levelInput);
+  }
   // 2 - compute state for each dynamical system
-  OSIIterator itOSI;
+
   for (itOSI = _allOSI->begin(); itOSI != _allOSI->end() ; ++itOSI)
     (*itOSI)->updateState(levelInput);
 
@@ -375,10 +378,8 @@ void TimeStepping::update(unsigned int levelInput)
   // 3 - compute output ( x ... -> y)
   if (!_allNSProblems->empty())
   {
-    for (unsigned int level = _levelMinForOutput;
-         level < _levelMaxForOutput + 1;
-         level++)
-      _nsds->updateOutput(nextTime(),level);
+    for (itOSI = _allOSI->begin(); itOSI != _allOSI->end() ; ++itOSI)
+      (*itOSI)->updateOutput(nextTime());
   }
   DEBUG_END("TimeStepping::update(unsigned int levelInput)\n");
 
@@ -420,12 +421,11 @@ void TimeStepping::initializeNewtonLoop()
 
   if (indexSet0->size()>0)
   {
-    //    assert(_levelMinForOutput >=0);
-    assert(_levelMaxForOutput >= _levelMinForOutput);
-    //    assert(_levelMinForInput >=0);
-    assert(_levelMaxForInput >= _levelMinForInput);
-    _nsds->updateOutput(nextTime(),_levelMinForOutput);
-    _nsds->updateInput(nextTime(),_levelMaxForInput);
+    for (OSIIterator itOSI = _allOSI->begin(); itOSI != _allOSI->end() ; ++itOSI)
+    {
+      (*itOSI)->updateOutput(nextTime());
+      (*itOSI)->updateInput(nextTime());
+    }
   }
 
   SP::DynamicalSystemsGraph dsGraph = _nsds->dynamicalSystems();
