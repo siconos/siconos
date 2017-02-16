@@ -323,6 +323,17 @@ public:
    */
   virtual void updateState(const unsigned int level) = 0;
 
+  /** update the output of the Interaction attached to this Integrator
+   *  \param level level of interest for the dynamics
+   */
+  void updateOutput(double time);
+
+  /** update the input of the Interaction attached to this Integrator
+   *  \param level level of interest for the dynamics
+   */
+  void updateInput(double time);
+
+
   /** print the data to the screen
    */
   virtual void display() = 0;
