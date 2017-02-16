@@ -47,7 +47,13 @@ using namespace RELATION;
 
 // --- constructor from a minimum set of data ---
 ZeroOrderHoldOSI::ZeroOrderHoldOSI():
-  OneStepIntegrator(OSI::ZOHOSI), _useGammaForRelation(false) {}
+  OneStepIntegrator(OSI::ZOHOSI), _useGammaForRelation(false)
+{
+  _levelMinForOutput= 0;
+  _levelMaxForOutput =0;
+  _levelMinForInput =0;
+  _levelMaxForInput =0;
+}
 
 void ZeroOrderHoldOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds)
 {
@@ -141,23 +147,20 @@ void ZeroOrderHoldOSI::initializeInteraction(double t0, Interaction &inter,
   Relation &relation =  *inter.relation();
   RELATION::TYPES relationType = relation.getType();
   /* Check that the interaction has the correct initialization for y and lambda */
-  unsigned int neededLowerLevelForOutput =0 ;
-  unsigned int neededUpperLevelForOutput =0 ;
   bool isInitializationNeeded = false;
-  if (!(inter.lowerLevelForOutput() <= neededLowerLevelForOutput && inter.upperLevelForOutput()  >= neededUpperLevelForOutput ))
+  if (!(inter.lowerLevelForOutput() <= _levelMinForOutput && inter.upperLevelForOutput()  >= _levelMaxForOutput ))
   {
     //RuntimeException::selfThrow("ZeroOrderHoldOSI::initializeInteraction, we must resize _y");
-    inter.setLowerLevelForOutput(neededLowerLevelForOutput);
-    inter.setUpperLevelForOutput(neededUpperLevelForOutput);
+    inter.setLowerLevelForOutput(_levelMinForOutput);
+    inter.setUpperLevelForOutput(_levelMaxForOutput);
     isInitializationNeeded = true;
   }
-  unsigned int neededLowerLevelForInput =0 ;
-  unsigned int neededUpperLevelForInput =0 ;
-  if (!(inter.lowerLevelForInput() <= neededLowerLevelForInput && inter.upperLevelForInput() >= neededUpperLevelForInput ))
+
+  if (!(inter.lowerLevelForInput() <= _levelMinForInput && inter.upperLevelForInput() >= _levelMaxForInput ))
   {
     // RuntimeException::selfThrow("ZeroOrderHoldOSI::initializeInteraction, we must resize _lambda");
-    inter.setLowerLevelForInput(neededLowerLevelForInput);
-    inter.setUpperLevelForInput(neededUpperLevelForInput);
+    inter.setLowerLevelForInput(_levelMinForInput);
+    inter.setUpperLevelForInput(_levelMaxForInput);
     isInitializationNeeded = true;
   }
   if (isInitializationNeeded)

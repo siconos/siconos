@@ -40,6 +40,10 @@ using namespace RELATION;
 EulerMoreauOSI::EulerMoreauOSI(double theta):
   OneStepIntegrator(OSI::EULERMOREAUOSI), _gamma(1.0), _useGamma(false), _useGammaForRelation(false)
 {
+  _levelMinForOutput= 0;
+  _levelMaxForOutput =0;
+  _levelMinForInput =0;
+  _levelMaxForInput =0;
   _steps=1;
   _theta = theta;
 }
@@ -48,6 +52,10 @@ EulerMoreauOSI::EulerMoreauOSI(double theta):
 EulerMoreauOSI::EulerMoreauOSI(double theta, double gamma):
   OneStepIntegrator(OSI::EULERMOREAUOSI), _useGammaForRelation(false)
 {
+  _levelMinForOutput= 0;
+  _levelMaxForOutput =0;
+  _levelMinForInput =0;
+  _levelMaxForInput =0;
   _steps=1;
   _theta = theta;
   _gamma = gamma;
@@ -111,23 +119,20 @@ void EulerMoreauOSI::initializeInteraction(double t0, Interaction &inter,
   RELATION::TYPES relationType = relation.getType();
 
   /* Check that the interaction has the correct initialization for y and lambda */
-  unsigned int neededLowerLevelForOutput =0 ;
-  unsigned int neededUpperLevelForOutput =0 ;
+
   bool isInitializationNeeded = false;
-  if (!(inter.lowerLevelForOutput() <= neededLowerLevelForOutput && inter.upperLevelForOutput()  >= neededUpperLevelForOutput ))
+  if (!(inter.lowerLevelForOutput() <= _levelMinForOutput && inter.upperLevelForOutput()  >= _levelMaxForOutput ))
   {
     //RuntimeException::selfThrow("EulerMoreauOSI::initializeInteraction, we must resize _y");
-    inter.setLowerLevelForOutput(neededLowerLevelForOutput);
-    inter.setUpperLevelForOutput(neededUpperLevelForOutput);
+    inter.setLowerLevelForOutput(_levelMinForOutput);
+    inter.setUpperLevelForOutput(_levelMaxForOutput );
     isInitializationNeeded = true;
   }
-  unsigned int neededLowerLevelForInput =0 ;
-  unsigned int neededUpperLevelForInput =0 ;
-  if (!(inter.lowerLevelForInput() <= neededLowerLevelForInput && inter.upperLevelForInput() >= neededUpperLevelForInput ))
+  if (!(inter.lowerLevelForInput() <= _levelMinForInput && inter.upperLevelForInput() >= _levelMaxForInput ))
   {
     // RuntimeException::selfThrow("EulerMoreauOSI::initializeInteraction, we must resize _lambda");
-    inter.setLowerLevelForInput(neededLowerLevelForInput);
-    inter.setUpperLevelForInput(neededUpperLevelForInput);
+    inter.setLowerLevelForInput(_levelMinForInput);
+    inter.setUpperLevelForInput(_levelMaxForInput);
     isInitializationNeeded = true;
   }
   if (isInitializationNeeded)
@@ -141,7 +146,7 @@ void EulerMoreauOSI::initializeInteraction(double t0, Interaction &inter,
       assert(DSG.properties(DSG.descriptor(ds1)).workVectors);
       VectorOfVectors &workVds1 = *DSG.properties(DSG.descriptor(ds1)).workVectors;
 
-      
+
       if (relationType == FirstOrder)
       {
         if (!DSlink[FirstOrderR::xfree])

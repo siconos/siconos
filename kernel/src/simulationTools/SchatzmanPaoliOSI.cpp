@@ -31,7 +31,7 @@
 #include "BlockVector.hpp"
 
 using namespace RELATION;
-//#define DEBUG_NOCOLOR
+// #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
 #include "debug.h"
@@ -40,6 +40,10 @@ using namespace RELATION;
 SchatzmanPaoliOSI::SchatzmanPaoliOSI(double theta):
   OneStepIntegrator(OSI::SCHATZMANPAOLIOSI), _gamma(1.0), _useGamma(false), _useGammaForRelation(false)
 {
+  _levelMinForOutput= 0;
+  _levelMaxForOutput =0;
+  _levelMinForInput =0;
+  _levelMaxForInput =0;
   _steps=2;
   _theta = theta;
   _sizeMem = SCHATZMANPAOLISTEPSINMEMORY ;
@@ -49,6 +53,10 @@ SchatzmanPaoliOSI::SchatzmanPaoliOSI(double theta):
 SchatzmanPaoliOSI::SchatzmanPaoliOSI(double theta, double gamma):
   OneStepIntegrator(OSI::SCHATZMANPAOLIOSI), _useGammaForRelation(false)
 {
+  _levelMinForOutput= 0;
+  _levelMaxForOutput =0;
+  _levelMinForInput=0;
+  _levelMaxForInput=0;
   _steps=2;
   _theta = theta;
   _gamma = gamma;
@@ -166,28 +174,28 @@ void SchatzmanPaoliOSI::initializeInteraction(double t0, Interaction &inter,
   Relation &relation =  *inter.relation();
   RELATION::TYPES relationType = relation.getType();
 
+  /* Check that the interaction has the correct initialization for y and lambda */
   bool isInitializationNeeded = false;
-  /* We check the allocation of _y and _lambda */
-  if (inter.lowerLevelForOutput() != 0 || inter.upperLevelForOutput() != 0)
+  if (!(inter.lowerLevelForOutput() <= _levelMinForOutput && inter.upperLevelForOutput()  >= _levelMaxForOutput ))
   {
-    //RuntimeException::selfThrow("MoreauJeanOSI::initializeInteraction, we must resize _y");
-    inter.setUpperLevelForOutput(0);
-    inter.setLowerLevelForOutput(0);
+    //RuntimeException::selfThrow("MoreauJeanCombinedProjectionOSI::initializeInteraction, we must resize _y");
+    inter.setLowerLevelForOutput(_levelMinForOutput);
+    inter.setUpperLevelForOutput(_levelMaxForOutput);
     isInitializationNeeded = true;
   }
 
-  if (inter.lowerLevelForInput() != 0 || inter.upperLevelForInput() != 0)
+  if (!(inter.lowerLevelForInput() <= _levelMinForInput && inter.upperLevelForInput() >=  _levelMaxForInput ))
   {
-    //RuntimeException::selfThrow("MoreauJeanOSI::initializeInteraction, we must resize _lambda");
-    inter.setUpperLevelForInput(0);
-    inter.setLowerLevelForInput(0);
+    // RuntimeException::selfThrow("MoreauJeanCombinedProjectionOSI::initializeInteraction, we must resize _lambda");
+    inter.setLowerLevelForInput(_levelMinForInput);
+    inter.setUpperLevelForInput(_levelMaxForInput);
     isInitializationNeeded = true;
   }
   if (isInitializationNeeded)
+  {
+    std::cout << "we reinit the inter"<<std::endl;
     inter.init();
-
-
-
+  }
   bool computeResidu = relation.requireResidu();
   inter.initializeMemory(computeResidu,_steps);
 
@@ -671,10 +679,8 @@ struct SchatzmanPaoliOSI::_NSLEffectOnFreeOutput : public SiconosVisitor
     // Only the normal part is multiplied by e
     SP::SiconosVector y_k_1 ;
     y_k_1 = _inter->yMemory(_osnsp->inputOutputLevel())->getSiconosVector(1);
-
-
-    //  std::cout << "y_k_1 " << std::endl;
-    // y_k_1->display();
+    DEBUG_PRINTF("_osnsp->inputOutputLevel() = %i \n ",_osnsp->inputOutputLevel() );
+    DEBUG_EXPR(y_k_1->display());;
     subscal(e, *y_k_1, *(_inter->yForNSsolver()), subCoord, false);
   }
 
@@ -701,6 +707,8 @@ struct SchatzmanPaoliOSI::_NSLEffectOnFreeOutput : public SiconosVisitor
 
 void SchatzmanPaoliOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, OneStepNSProblem* osnsp)
 {
+
+  DEBUG_BEGIN("SchatzmanPaoliOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, OneStepNSProblem* osnsp)\n");
   /** \warning: ensures that it can also work with two different osi for two different ds ?
    */
 
@@ -750,7 +758,7 @@ void SchatzmanPaoliOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex
   SP::Interaction mainInteraction = inter;
   assert(mainInteraction);
   assert(mainInteraction->relation());
-
+  DEBUG_EXPR(inter->display(););
   if(relationSubType == LinearTIR)
   {
 
@@ -805,6 +813,7 @@ void SchatzmanPaoliOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex
     inter->nonSmoothLaw()->accept(*nslEffectOnFreeOutput);
   }
 
+  DEBUG_END("SchatzmanPaoliOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, OneStepNSProblem* osnsp)\n");
 
 }
 void SchatzmanPaoliOSI::integrate(double& tinit, double& tend, double& tout, int&)
@@ -814,7 +823,9 @@ void SchatzmanPaoliOSI::integrate(double& tinit, double& tend, double& tout, int
 
 void SchatzmanPaoliOSI::updateState(const unsigned int level)
 {
-
+  DEBUG_BEGIN("SchatzmanPaoliOSI::updateState(const unsigned int level)\n");
+  DEBUG_PRINTF("level = %i\n", level);
+  DEBUG_PRINTF("LEVELMAX = %i\n", LEVELMAX);
   double h = _simulation->timeStep();
 
   double RelativeTol = _simulation->relativeConvergenceTol();
@@ -982,6 +993,8 @@ void SchatzmanPaoliOSI::updateState(const unsigned int level)
     }
     else RuntimeException::selfThrow("SchatzmanPaoliOSI::updateState - not yet implemented for Dynamical system type: " + dsType);
   }
+  DEBUG_END("SchatzmanPaoliOSI::updateState(const unsigned int level)\n");
+
 }
 
 

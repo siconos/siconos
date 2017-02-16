@@ -355,6 +355,7 @@ void TimeStepping::nextStep()
 void TimeStepping::update(unsigned int levelInput)
 {
   DEBUG_BEGIN("TimeStepping::update(unsigned int levelInput)\n");
+  DEBUG_PRINTF("levelInput = % i \n",levelInput);
 
   // 1 - compute input (lambda -> r)
   if (!_allNSProblems->empty())

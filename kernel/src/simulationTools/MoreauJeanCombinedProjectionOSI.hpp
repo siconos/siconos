@@ -66,7 +66,7 @@ public:
   /** constructor from theta value only
    *  \param theta value for all these DS.
    */
-  explicit MoreauJeanCombinedProjectionOSI(double theta) : MoreauJeanOSI(theta) {}  ;
+  explicit MoreauJeanCombinedProjectionOSI(double theta);
 
   /** destructor
    */

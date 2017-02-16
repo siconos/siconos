@@ -475,17 +475,10 @@ void Simulation::computeLevelsForInputAndOutput(SP::Interaction inter, bool init
   if (!osi)
     RuntimeException::selfThrow("Simulation::computeLevelsForInputAndOutput osi does not exists");
   
-  //indexSet0->properties(indexSet0->descriptor(inter)).osi = osi;
-
-  unsigned int lowerLevelForOutput = inter->lowerLevelForOutput();
-  unsigned int upperLevelForOutput = inter->upperLevelForOutput();
-  unsigned int lowerLevelForInput = inter->lowerLevelForInput();
-  unsigned int upperLevelForInput = inter->upperLevelForInput();
-
-  _levelMinForInput = std::min<int>(lowerLevelForInput, _levelMinForInput);
-  _levelMaxForInput = std::max<int>(upperLevelForInput, _levelMaxForInput);
-  _levelMinForOutput = std::min<int>(lowerLevelForOutput, _levelMinForOutput);
-  _levelMaxForOutput = std::max<int>(upperLevelForOutput, _levelMaxForOutput);
+  _levelMinForInput = osi->levelMinForOutput();
+  _levelMaxForInput = osi->levelMaxForOutput();
+  _levelMinForOutput = osi->levelMinForInput();
+  _levelMaxForOutput = osi->levelMaxForInput();
   
   if (!init) // We are not computing the levels at the initialization
   {
