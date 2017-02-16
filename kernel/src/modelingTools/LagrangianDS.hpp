@@ -184,10 +184,11 @@ protected:
   /** internal forces applied to  the system */
   SP::SiconosVector _fInt;
 
-  // enum LagrangianDSJacobianId {F_Int_wrt_q, F_Int_wrt_qDot,
-  //                              F_Gyr_wrt_q, F_Gyr_wrt_qdot,
-  //                              Force_wrt_q, Forces_wrt_qDot,
+  // enum LagrangianDSJacobianId {Jacobian_FInt_wrt_q, Jacobian_FInt_wrt_qDot,
+  //                              Jacobian_FGyr_wrt_q, Jacobian_FGyr_wrt_qdot,
+  //                              Jacobian_Force_wrt_q, Jacobian_Forces_wrt_qDot,
   //                              numberOfJacobians};
+
 
   // /** A container of matrices to save jacobians matrices
   //  * Id are given by LagrangianDSJacobianId
