@@ -47,6 +47,10 @@ using namespace RELATION;
 MoreauJeanOSI::MoreauJeanOSI(double theta, double gamma):
   OneStepIntegrator(OSI::MOREAUJEANOSI), _useGammaForRelation(false),_explicitNewtonEulerDSOperators(false)
 {
+  _levelMinForOutput= 0;
+  _levelMaxForOutput =1;
+  _levelMinForInput =0;
+  _levelMaxForInput =1;
   _steps=1;
   _theta = theta;
   if(!isnan(gamma))
@@ -159,26 +163,20 @@ void MoreauJeanOSI::initializeInteraction(double t0, Interaction &inter,
 
 
   /* Check that the interaction has the correct initialization for y and lambda */
-  unsigned int neededLowerLevelForOutput =0 ;
-  unsigned int neededUpperLevelForOutput =1 ;
-
   bool isInitializationNeeded = false;
-
-  if (!(inter.lowerLevelForOutput() <= neededLowerLevelForOutput && inter.upperLevelForOutput()  >= neededUpperLevelForOutput ))
+  if (!(inter.lowerLevelForOutput() <= _levelMinForOutput && inter.upperLevelForOutput()  >= _levelMaxForOutput ))
   {
     //RuntimeException::selfThrow("MoreauJeanOSI::initializeInteraction, we must resize _y");
-    inter.setLowerLevelForOutput(neededLowerLevelForOutput);
-    inter.setUpperLevelForOutput(neededUpperLevelForOutput);
+    inter.setLowerLevelForOutput(_levelMinForOutput);
+    inter.setUpperLevelForOutput(_levelMaxForOutput);
     isInitializationNeeded = true;
   }
 
-  unsigned int neededLowerLevelForInput =1 ;
-  unsigned int neededUpperLevelForInput =1 ;
-  if (!(inter.lowerLevelForInput() <= neededLowerLevelForInput && inter.upperLevelForInput() >= neededUpperLevelForInput ))
+  if (!(inter.lowerLevelForInput() <= _levelMinForInput && inter.upperLevelForInput() >= _levelMaxForInput ))
   {
     // RuntimeException::selfThrow("MoreauJeanOSI::initializeInteraction, we must resize _lambda");
-    inter.setLowerLevelForInput(neededLowerLevelForInput);
-    inter.setUpperLevelForInput(neededUpperLevelForInput);
+    inter.setLowerLevelForInput(_levelMinForInput);
+    inter.setUpperLevelForInput(_levelMaxForInput);
     isInitializationNeeded = true;
   }
 

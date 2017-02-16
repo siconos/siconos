@@ -67,12 +67,20 @@ D1MinusLinearOSI::D1MinusLinearOSI() :
   OneStepIntegrator(OSI::D1MINUSLINEAROSI), _typeOfD1MinusLinearOSI(halfexplicit_acceleration_level)
 {
   _steps =2; //Two evaluations of lambda(2) are made for each time--step
+  _levelMinForOutput= 0;
+  _levelMaxForOutput =2;
+  _levelMinForInput =1;
+  _levelMaxForInput =2;
 }
 
 D1MinusLinearOSI::D1MinusLinearOSI(unsigned int type) :
   OneStepIntegrator(OSI::D1MINUSLINEAROSI)
 {
   _steps =2; //Two evaluations of lambda(2) are made for each time--step
+  _levelMinForOutput= 0;
+  _levelMaxForOutput =2;
+  _levelMinForInput =1;
+  _levelMaxForInput =2;
   setTypeOfD1MinusLinearOSI(type);
 }
 
@@ -232,25 +240,22 @@ void D1MinusLinearOSI::initializeInteraction(double t0, Interaction &inter,
 
 
   /* Check that the interaction has the correct initialization for y and lambda */
-  unsigned int neededLowerLevelForOutput =0 ;
-  unsigned int neededUpperLevelForOutput =2 ;
 
   bool isInitializationNeeded = false;
-  if (!(inter.lowerLevelForOutput() <= neededLowerLevelForOutput && inter.upperLevelForOutput()  >= neededUpperLevelForOutput ))
+
+  if (!(inter.lowerLevelForOutput() <= _levelMinForOutput && inter.upperLevelForOutput()  >= _levelMaxForOutput ))
   {
     //  RuntimeException::selfThrow("D1MinusLinearOSI::initializeInteraction, we must resize _y");
-    inter.setLowerLevelForOutput(neededLowerLevelForOutput);
-    inter.setUpperLevelForOutput(neededUpperLevelForOutput);
+    inter.setLowerLevelForOutput(_levelMinForOutput);
+    inter.setUpperLevelForOutput(_levelMaxForOutput);
     isInitializationNeeded = true;
   }
-  unsigned int neededLowerLevelForInput =1 ;
-  unsigned int neededUpperLevelForInput =2 ;
-  if (!(inter.lowerLevelForInput() <= neededLowerLevelForInput && inter.upperLevelForInput() >= neededUpperLevelForInput ))
+  if (!(inter.lowerLevelForInput() <= _levelMinForInput && inter.upperLevelForInput() >= _levelMaxForInput ))
   {
     //RuntimeException::selfThrow("D1MinusLinearOSI::initializeInteraction, we must resize _lambda");
-     inter.setLowerLevelForInput(neededLowerLevelForInput);
-     inter.setUpperLevelForInput(neededUpperLevelForInput);
-     isInitializationNeeded = true;
+    inter.setLowerLevelForInput(_levelMinForInput);
+    inter.setUpperLevelForInput(_levelMaxForInput);
+    isInitializationNeeded = true;
   }
 
   if (isInitializationNeeded)

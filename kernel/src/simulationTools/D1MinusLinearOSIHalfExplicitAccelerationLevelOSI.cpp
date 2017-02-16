@@ -368,8 +368,8 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
   if(!allOSNS->empty())
   {
 
-    for(unsigned int level = _simulation->levelMinForOutput();
-        level < _simulation->levelMaxForOutput(); level++)
+    for(unsigned int level = levelMinForOutput();
+        level < levelMaxForOutput(); level++)
     {
       _simulation->nonSmoothDynamicalSystem()->updateOutput(_simulation->nextTime(),level);
     }

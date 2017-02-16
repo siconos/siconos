@@ -76,7 +76,7 @@ public :
   /** List of indices used to save tmp work matrices and vectors (last one is the size of the present list) */
   enum OSI_DSWorkVectorId {local_buffer, residu_free, free, free_tdg,
                            qtmp, acce_memory, acce_like, work_vector_of_vector_size};
- 
+
   enum OSI_DSWorkMatrixId {dense_output_coefficients, work_vector_of_matrix_size};
 
 protected:
@@ -104,6 +104,26 @@ protected:
    */
   unsigned int _steps;
   
+  /** _levelMinForOutput is the minimum level for the output
+   * needed by the OneStepIntegrator
+   */
+  unsigned int _levelMinForOutput;
+
+  /** _levelMaxForOutput is the maximunm level for the output 
+   * needed by the OneStepIntegrator
+   */
+  unsigned int _levelMaxForOutput;
+
+  /** _levelMinForInput is the minimum level for the input 
+   * needed by the OneStepIntegrator
+   */
+  unsigned int _levelMinForInput;
+
+  /** _levelMaxForInput is the maximum level for the input 
+   * needed by the OneStepIntegrator
+   */
+  unsigned int _levelMaxForInput;
+
 /** A link to the simulation that owns this OSI */
   SP::Simulation _simulation;
 
@@ -219,17 +239,17 @@ public:
    * \param m a Model
    */
   virtual void initialize(Model& m ) = 0;
-  
-  /** initialization of the work vectors and matrices (properties) related to 
-   *  one dynamical system on the graph and needed by the osi 
+
+  /** initialization of the work vectors and matrices (properties) related to
+   *  one dynamical system on the graph and needed by the osi
    * \param m the Model
    * \param t time of initialization
-   * \param ds the dynamical system   
+   * \param ds the dynamical system
    */
   virtual void initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds) =0 ;
 
-  /** initialization of the work vectors and matrices (properties) related to 
-   *  one interaction on the graph and needed by the osi 
+  /** initialization of the work vectors and matrices (properties) related to
+   *  one interaction on the graph and needed by the osi
    * \param t0 time of initialization
    * \param inter the interaction
    * \param interProp the properties on the graph
@@ -243,8 +263,24 @@ public:
    * \return unsigned int
    */
   virtual unsigned int numberOfIndexSets() const=0;
-  
-  
+
+  virtual unsigned int levelMinForOutput()
+  {
+    return _levelMinForOutput;
+  }
+  virtual unsigned int levelMaxForOutput()
+  {
+    return _levelMaxForOutput;
+  }
+  virtual unsigned int levelMinForInput()
+  {
+    return _levelMinForInput;
+  }
+  virtual unsigned int levelMaxForInput()
+  {
+    return _levelMaxForInput;
+  }
+
   /** compute the initial state of the Newton loop.
    */
   virtual void computeInitialNewtonState();
