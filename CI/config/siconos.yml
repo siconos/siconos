@@ -113,6 +113,7 @@ pkgs:
   documentation:
     debian:
       - doxygen
+      - graphviz
       - python-sphinx
       - python-sphinx-bootstrap-theme
       - python-sphinx-rtd-theme
@@ -135,7 +136,7 @@ pkgs:
         pip install --upgrade pip
       
   siconos-doc-pip-pkgs:
-    ubuntu-16.04:
+    ubuntu:
       command:
         pip install sphinxcontrib-bibtex &&
         pip install sphinxcontrib-doxylink
