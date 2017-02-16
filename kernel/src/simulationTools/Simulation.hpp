@@ -530,18 +530,6 @@ public:
    */
   void processEvents();
 
-  /** compute for the first time the _level* variables
-   * \warning it should only be called during initialize, if there are Interactions.
-   * Otherwise, call the overloaded method when addind a Relation
-   */
-  virtual void computeLevelsForInputAndOutput();
-
-  /** Update the _level* attributes
-   * \param inter a new SP::Interaction
-   * \param init bool to determine if we are in the initialisation phase
-   */
-  virtual void computeLevelsForInputAndOutput(SP::Interaction inter, bool init = false);
-
 
   /** set staticLevels
    * \param b decides whether levels should be computed at each iteration

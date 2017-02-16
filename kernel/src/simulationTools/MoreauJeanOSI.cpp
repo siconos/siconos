@@ -141,7 +141,10 @@ void MoreauJeanOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalS
     neds->computeForces(t);
     neds->swapInMemory();
   }
-
+  for (unsigned int k = _levelMinForInput ; k < _levelMaxForInput + 1; k++)
+  {
+    ds->initializeNonSmoothInput(k);
+  }
 }
 void MoreauJeanOSI::initializeInteraction(double t0, Interaction &inter,
                                           InteractionProperties& interProp,
@@ -189,37 +192,37 @@ void MoreauJeanOSI::initializeInteraction(double t0, Interaction &inter,
   /* allocate ant set work vectors for the osi */
 
   if(checkOSI(DSG.descriptor(ds1)))
+  {
+    DEBUG_PRINTF("ds1->number() %i is taken in to account\n", ds1->number());
+    assert(DSG.properties(DSG.descriptor(ds1)).workVectors);
+    VectorOfVectors &workVds1 = *DSG.properties(DSG.descriptor(ds1)).workVectors;
+
+
+    if (relationType == Lagrangian)
     {
-      DEBUG_PRINTF("ds1->number() %i is taken in to account\n", ds1->number());
-      assert(DSG.properties(DSG.descriptor(ds1)).workVectors);
-      VectorOfVectors &workVds1 = *DSG.properties(DSG.descriptor(ds1)).workVectors;
-
-
-      if (relationType == Lagrangian)
-	{
-	  if (!DSlink[LagrangianR::xfree])
+      if (!DSlink[LagrangianR::xfree])
 	    {
 	      DSlink[LagrangianR::xfree].reset(new BlockVector());
 	      DSlink[LagrangianR::xfree]->insertPtr(workVds1[OneStepIntegrator::free]);
 	    }
-	  else
+      else
 	    {
 	      DSlink[LagrangianR::xfree]->setVectorPtr(0,workVds1[OneStepIntegrator::free]);
 	    }
-	}
-      else if (relationType == NewtonEuler)
-	{
-	  if (!DSlink[NewtonEulerR::xfree])
+    }
+    else if (relationType == NewtonEuler)
+    {
+      if (!DSlink[NewtonEulerR::xfree])
 	    {
 	      DSlink[NewtonEulerR::xfree].reset(new BlockVector());
 	      DSlink[NewtonEulerR::xfree]->insertPtr(workVds1[OneStepIntegrator::free]);
 	    }
-	  else
+      else
 	    {
 	      DSlink[NewtonEulerR::xfree]->setVectorPtr(0,workVds1[OneStepIntegrator::free]);
 	    }
-	}
     }
+  }
   DEBUG_PRINTF("ds1->number() %i\n",ds1->number());
   DEBUG_PRINTF("ds2->number() %i\n",ds2->number());
 
@@ -311,9 +314,6 @@ void MoreauJeanOSI::initialize(Model& m)
 
     initializeInteraction(t0, inter, indexSet0->properties(*ui), *_dynamicalSystemsGraph);
   }
-
-
-
 
 }
 

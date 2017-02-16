@@ -118,6 +118,10 @@ void MoreauJeanDirectProjectionOSI::initializeDynamicalSystem(Model& m, double t
     RuntimeException::selfThrow("MoreauJeanDirectProjectionOSI::initialize() - DS not of the right type");
   }
   DEBUG_END("MoreauJeanCombinedProjectionOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds) \n");
+  for (unsigned int k = _levelMinForInput ; k < _levelMaxForInput + 1; k++)
+  {
+    ds->initializeNonSmoothInput(k);
+  }
 }
 
 

@@ -128,7 +128,10 @@ void ZeroOrderHoldOSI::initializeDynamicalSystem(Model& m, double t, SP::Dynamic
   }
 
   ds->allocateWorkVector(DynamicalSystem::local_buffer, ds->dimension());
-
+  for (unsigned int k = _levelMinForInput ; k < _levelMaxForInput + 1; k++)
+  {
+    ds->initializeNonSmoothInput(k);
+  }
 }
 
 void ZeroOrderHoldOSI::initializeInteraction(double t0, Interaction &inter,
