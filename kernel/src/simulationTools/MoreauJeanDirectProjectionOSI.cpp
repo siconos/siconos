@@ -63,14 +63,35 @@ void MoreauJeanDirectProjectionOSI::initializeInteraction(double t0, Interaction
                                           DynamicalSystemsGraph & DSG)
 {
   DEBUG_BEGIN("MoreauJeanDirectProjectionOSI::initializeInteraction(...)\n");
+  
+
+  unsigned int neededLowerLevelForOutput =0 ;
+  unsigned int neededUpperLevelForOutput =1 ;
+
+  bool isInitializationNeeded = false;
+
+  if (!(inter.lowerLevelForOutput() <= neededLowerLevelForOutput && inter.upperLevelForOutput()  >= neededUpperLevelForOutput ))
+  {
+    //RuntimeException::selfThrow("MoreauJeanDirectProjectionOSI::initializeInteraction, we must resize _y");
+    inter.setLowerLevelForOutput(neededLowerLevelForOutput);
+    inter.setUpperLevelForOutput(neededUpperLevelForOutput);
+    isInitializationNeeded = true;
+  }
+
+  unsigned int neededLowerLevelForInput =0 ;
+  unsigned int neededUpperLevelForInput =1 ;
+  if (!(inter.lowerLevelForInput() <= neededLowerLevelForInput && inter.upperLevelForInput() >= neededUpperLevelForInput ))
+  {
+    // RuntimeException::selfThrow("MoreauJeanDirectProjectionOSI::initializeInteraction, we must resize _lambda");
+    inter.setLowerLevelForInput(neededLowerLevelForInput);
+    inter.setUpperLevelForInput(neededUpperLevelForInput);
+    isInitializationNeeded = true;
+  }
+  
+  if (isInitializationNeeded)
+    inter.init();
   MoreauJeanOSI::initializeInteraction(t0, inter, interProp, DSG);
-  
-  if (inter.lowerLevelForOutput() != 0 || inter.upperLevelForOutput() != 1)
-    RuntimeException::selfThrow("MoreauJeanDirectProjectionOSI::initializeInteraction, we must resize _y");
-  
-  if (inter.lowerLevelForInput() > 0 || inter.upperLevelForInput() < 1)
-     RuntimeException::selfThrow("MoreauJeanDirectProjectionOSI::initializeInteraction, we must resize _lambda");
- 
+
   
   
   DEBUG_END("MoreauJeanDirectProjectionOSI::initializeInteraction(...)\n");

@@ -31,7 +31,35 @@ void MoreauJeanCombinedProjectionOSI::initializeInteraction(double t0, Interacti
                                           DynamicalSystemsGraph & DSG)
 {
   DEBUG_BEGIN("MoreauJeanOSI::initializeInteraction(...)\n");
+
+  unsigned int neededLowerLevelForOutput =0 ;
+  unsigned int neededUpperLevelForOutput =1 ;
+
+  bool isInitializationNeeded = false;
+
+  if (!(inter.lowerLevelForOutput() <= neededLowerLevelForOutput && inter.upperLevelForOutput()  >= neededUpperLevelForOutput ))
+  {
+    //RuntimeException::selfThrow("MoreauJeanCombinedProjectionOSI::initializeInteraction, we must resize _y");
+    inter.setLowerLevelForOutput(neededLowerLevelForOutput);
+    inter.setUpperLevelForOutput(neededUpperLevelForOutput);
+    isInitializationNeeded = true;
+  }
+
+  unsigned int neededLowerLevelForInput =0 ;
+  unsigned int neededUpperLevelForInput =1 ;
+  if (!(inter.lowerLevelForInput() <= neededLowerLevelForInput && inter.upperLevelForInput() >= neededUpperLevelForInput ))
+  {
+    // RuntimeException::selfThrow("MoreauJeanCombinedProjectionOSI::initializeInteraction, we must resize _lambda");
+    inter.setLowerLevelForInput(neededLowerLevelForInput);
+    inter.setUpperLevelForInput(neededUpperLevelForInput);
+    isInitializationNeeded = true;
+  }
+  
+  if (isInitializationNeeded)
+    inter.init();
+  
   MoreauJeanOSI::initializeInteraction(t0, inter, interProp, DSG);
+
   DEBUG_END("MoreauJeanOSI::initializeInteraction(...)\n");
 }
 void MoreauJeanCombinedProjectionOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds)

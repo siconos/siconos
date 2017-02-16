@@ -116,12 +116,33 @@ void MoreauJeanGOSI::initializeInteraction(double t0, Interaction &inter,
 
   Relation &relation =  *inter.relation();
   RELATION::TYPES relationType = relation.getType();
+  /* Check that the interaction has the correct initialization for y and lambda */
+  unsigned int neededLowerLevelForOutput =0 ;
+  unsigned int neededUpperLevelForOutput =1 ;
 
-  if (inter.lowerLevelForOutput() != 0 || inter.upperLevelForOutput() != 1)
-     RuntimeException::selfThrow("MoreauJeanOSI::initializeInteraction, we must resize _y");
+  bool isInitializationNeeded = false;
 
-  if (inter.lowerLevelForInput() > 1 || inter.upperLevelForInput() < 1)
-     RuntimeException::selfThrow("MoreauJeanOSI::initializeInteraction, we must resize _lambda");
+  if (!(inter.lowerLevelForOutput() <= neededLowerLevelForOutput && inter.upperLevelForOutput()  >= neededUpperLevelForOutput ))
+  {
+    //RuntimeException::selfThrow("MoreauJeanGOSI::initializeInteraction, we must resize _y");
+    inter.setLowerLevelForOutput(neededLowerLevelForOutput);
+    inter.setUpperLevelForOutput(neededUpperLevelForOutput);
+    isInitializationNeeded = true;
+  }
+
+  unsigned int neededLowerLevelForInput =1 ;
+  unsigned int neededUpperLevelForInput =1 ;
+  if (!(inter.lowerLevelForInput() <= neededLowerLevelForInput && inter.upperLevelForInput() >= neededUpperLevelForInput ))
+  {
+    // RuntimeException::selfThrow("MoreauJeanGOSI::initializeInteraction, we must resize _lambda");
+    inter.setLowerLevelForInput(neededLowerLevelForInput);
+    inter.setUpperLevelForInput(neededUpperLevelForInput);
+    isInitializationNeeded = true;
+  }
+
+  if (isInitializationNeeded)
+    inter.init();
+
 
   bool computeResidu = relation.requireResidu();
   inter.initializeMemory(computeResidu,_steps);
