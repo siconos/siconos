@@ -73,7 +73,7 @@ typedef void (*FNLDSPtrfct)(double, unsigned int, const double*, double*, unsign
  *
  * At the time:
  *  - M is considered to be constant. (ie no plug-in, no jacobian ...)
- *  - M is not allocated by default. The only way to use M is setM or setMPtr.
+ *  - M is not allocated by default. The only way to use M is setMPtr.
  *
  */
 class FirstOrderNonLinearDS : public DynamicalSystem
@@ -83,6 +83,11 @@ protected:
   */
   ACCEPT_SERIALIZATION(FirstOrderNonLinearDS);
 
+  /** Common code for constructors
+      should be replaced in C++11 by delegating constructors
+      \param intial_state vector of initial values for state
+   */
+  void _init(SP::SiconosVector initial_state);
 
   /** Matrix coefficient of \f$ \dot x \f$ */
   SP::SiconosMatrix _M;
@@ -124,13 +129,15 @@ protected:
   /**  the previous r vectors */
   SP::SiconosMemory _rMemory;
 
-  /** Copy of M Matrix, used to solve systems like Mx = b with LU-factorization.
+  /** Copy of M Matrix, LU-factorized, used to solve systems like Mx = b with LU-factorization.
       (Warning: may not exist, used if we need to avoid factorization in place of M) */
   SP::SiconosMatrix _invM;
 
-  /** default constructor
-   */
+  /** default constructor */
   FirstOrderNonLinearDS(): DynamicalSystem() {};
+
+  /** Reset the PluggedObjects */
+  virtual void _zeroPlugin();
 
 
 public:
@@ -160,11 +167,6 @@ public:
    */
   virtual ~FirstOrderNonLinearDS() {};
 
-  /** check that the system is complete (ie all required data are well set)
-   * \return a bool
-   */
-  bool checkDynamicalSystem();
-
   // rMemory
 
   /** get all the values of the state vector r stored in memory
@@ -192,31 +194,21 @@ public:
   }
 
   // --- invM ---
-  /** get the value of invM
+  /** get a copy of the inverse of M operator
    *  \return SimpleMatrix
    */
-  inline const SimpleMatrix getInvMSimple() const
+  inline const SimpleMatrix getInvM() const
   {
     return *_invM;
   }
 
-  /** get invM
-   *  \return pointer on a SiconosMatrix
+  /** get a link to the inverse of M operator
+   *  \return pointer to a SiconosMatrix
    */
   inline SP::SiconosMatrix invM() const
   {
     return _invM;
   }
-
-  /** set the value of invM to newValue
-   *  \param newValue the new value
-   */
-  void setInvM(const SiconosMatrix& newValue);
-
-  /** link invM with a new pointer
-   *  \param newPtr the new value
-   */
-  void setInvMPtr(SP::SiconosMatrix newPtr);
 
   // --- f ---
 
@@ -227,6 +219,8 @@ public:
   {
     return _f;
   }
+
+  /** returns previous value of rhs -->OSI Related!!*/
   inline SP::SiconosVector fold() const
   {
     return _fold;
@@ -267,7 +261,7 @@ public:
   /** set b
    *  \param b a SiconosVector
    */
-  inline void setb(SP::SiconosVector b)
+  inline void setbPtr(SP::SiconosVector b)
   {
     _b = b;
   }
@@ -278,16 +272,9 @@ public:
   void initRhs(double time);
 
   /** Call all plugged-function to initialize plugged-object values
-      \param time the time used in the computations
+      \param time value
    */
   virtual void updatePlugins(double time);
-
-  /** dynamical system initialization function except for _r :
-   *  mainly set memory and compute value for initial state values.
-   *  \param time time of initialisation, default value = 0
-   *  \param sizeOfMemory the size of the memory, default size = 1.
-   */
-  void initialize(double time = 0, unsigned int sizeOfMemory = 1);
 
   /** dynamical system initialization function for NonSmoothInput _r
    *  \param level for _r
@@ -434,9 +421,6 @@ public:
   {
     return _pluginM;
   };
-
-  /** Reset the PluggedObjects */
-  virtual void zeroPlugin();
 
   ACCEPT_STD_VISITORS();
 

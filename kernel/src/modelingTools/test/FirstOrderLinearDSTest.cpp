@@ -54,7 +54,6 @@ void FirstOrderLinearDSTest::testBuildFirstOrderLinearDS1()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS1C : ", ds->x0() == x0, true);
 
   double time = 1.5;
-  ds->initialize(time);
   ds->computeA(time);
   ds->computeb(time);
   ds->computeRhs(time);
@@ -89,7 +88,7 @@ void FirstOrderLinearDSTest::testSetBPtr()
 {
   std::cout << "--> Test: setBPtr." <<std::endl;
   SP::FirstOrderLinearDS ds1(new FirstOrderLinearDS(x0));
-  ds1->setb(b0);
+  ds1->setbPtr(b0);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetBPtr : ", ds1->b() == b0, true);
   std::cout << "--> setBPtr test ended with success." <<std::endl;
 }

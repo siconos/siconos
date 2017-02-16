@@ -119,7 +119,7 @@ protected:
   /** Common code for constructors
    * should be replaced in C++11 by delegating constructors 
    */
-  void init();
+  void _init();
 
 
   // -- MEMBERS --
@@ -341,12 +341,11 @@ protected:
   /** set links with DS members
    */
   void connectToDS();
-  bool checkDynamicalSystem();
   /** Default constructor
    */
   NewtonEulerDS();
 
-  void zeroPlugin();
+  void _zeroPlugin();
 
 public:
 
@@ -377,13 +376,6 @@ public:
    *  \param time the time of initialization
    */
   void initRhs(double time) ;
-
-  /** dynamical system initialization function except for _p:
-   *  mainly set memory and compute plug-in for initial state values.
-   *  \param time the time of initialization, default value = 0
-   *  \param size the size of the memory, default size = 1.
-   */
-  void initialize(double time = 0, unsigned int size = 1) ;
 
   /** dynamical system initialization function for _p
    *  \param level for _p

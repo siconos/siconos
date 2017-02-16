@@ -72,18 +72,20 @@ public:
 
   /** === CONSTRUCTORS/DESTRUCTOR === */
 
-  /** constructor from a set of data
+  /** initial state and constant A matrix
    *  \param x0 the initial state of this DynamicalSystem
    *  \param A the A matrix
    */
-  FirstOrderLinearTIDS(SP::SiconosVector x0, SP::SiconosMatrix A);
+  FirstOrderLinearTIDS(SP::SiconosVector x0, SP::SiconosMatrix A):
+    FirstOrderLinearDS(x0, A){};
 
-  /** constructor from a set of data
+  /** initial state, constant A matrix, constant b vector
    *  \param x0 the initial state of this DynamicalSystem
    *  \param A the A matrix
    *  \param b the b vector
    */
-  FirstOrderLinearTIDS(SP::SiconosVector x0, SP::SiconosMatrix A, SP::SiconosVector b);
+  FirstOrderLinearTIDS(SP::SiconosVector x0, SP::SiconosMatrix A, SP::SiconosVector b):
+    FirstOrderLinearDS(x0, A, b){};
 
   /** Copy constructor
    * \param FOLTIDS the FirstOrderLinearTIDS to copy
@@ -100,8 +102,6 @@ public:
   {
     return true;
   }
-
-
 
   /** Initialization function for the rhs and its jacobian.
    *  \param time of initialization.
@@ -130,9 +130,7 @@ public:
    * \param time unused
    */
   virtual void updatePlugins(double time)
-  {
-    ;
-  };
+  {};
 
   ACCEPT_STD_VISITORS();
 

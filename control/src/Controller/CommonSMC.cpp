@@ -54,7 +54,7 @@ void CommonSMC::initialize(const Model& m)
     _DS_SMC.reset(new FirstOrderNonLinearDS(*(std11::static_pointer_cast<FirstOrderNonLinearDS>(DS))));
   // We have to reset the _pluginb
   SP::SiconosVector dummyb(new SiconosVector(_DS_SMC->n(), 0));
-  std11::static_pointer_cast<FirstOrderNonLinearDS>(_DS_SMC)->setb(dummyb);
+  std11::static_pointer_cast<FirstOrderNonLinearDS>(_DS_SMC)->setbPtr(dummyb);
   }
   else if (dsType == Type::FirstOrderLinearDS)
   {
@@ -62,14 +62,14 @@ void CommonSMC::initialize(const Model& m)
     std11::static_pointer_cast<FirstOrderLinearDS>(_DS_SMC)->setComputebFunction(NULL);
   // We have to reset the _pluginb
   SP::SiconosVector dummyb(new SiconosVector(_DS_SMC->n(), 0));
-  std11::static_pointer_cast<FirstOrderLinearDS>(_DS_SMC)->setb(dummyb);
+  std11::static_pointer_cast<FirstOrderLinearDS>(_DS_SMC)->setbPtr(dummyb);
   }
   else if (dsType == Type::FirstOrderLinearTIDS)
   {
     _DS_SMC.reset(new FirstOrderLinearTIDS(*(std11::static_pointer_cast<FirstOrderLinearTIDS>(DS))));
   // We have to reset the _pluginb
   SP::SiconosVector dummyb(new SiconosVector(_DS_SMC->n(), 0));
-  std11::static_pointer_cast<FirstOrderLinearDS>(_DS_SMC)->setb(dummyb);
+  std11::static_pointer_cast<FirstOrderLinearDS>(_DS_SMC)->setbPtr(dummyb);
   }
   else
   {

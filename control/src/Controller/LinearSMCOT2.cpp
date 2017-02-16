@@ -94,7 +94,7 @@ void LinearSMCOT2::initialize(const Model& m)
   // _DSPred->setXPtr(_Xhat);
   _Xhat = _DSPred->x();
   SP::SiconosVector dummyb(new SiconosVector(_B->size(0), 0));
-  _DSPred->setb(dummyb);
+  _DSPred->setbPtr(dummyb);
   prod(*_B, *_u, *_DSPred->b());
 
   //  _Xhat.reset(new SiconosVector(_nDim, 0));

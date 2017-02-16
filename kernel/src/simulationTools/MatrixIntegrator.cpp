@@ -65,7 +65,7 @@ void MatrixIntegrator::commonInit(const DynamicalSystem& ds, const Model& m)
   {
      const FirstOrderLinearDS& cfolds = static_cast<const FirstOrderLinearDS&>(ds);
      _DS.reset(new FirstOrderLinearDS(cfolds));
-     std11::static_pointer_cast<FirstOrderLinearDS>(_DS)->zeroPlugin();
+     // std11::static_pointer_cast<FirstOrderLinearDS>(_DS)->zeroPlugin();
      if (cfolds.getPluginA()->isPlugged())
      {
        std11::static_pointer_cast<FirstOrderLinearDS>(_DS)->setPluginA(cfolds.getPluginA());
@@ -95,7 +95,7 @@ void MatrixIntegrator::integrate()
   if (!Ecol && _E)
   {
     Ecol.reset(new SiconosVector(_DS->n(), 0));
-    static_cast<FirstOrderLinearDS&>(*_DS).setb(Ecol);
+    static_cast<FirstOrderLinearDS&>(*_DS).setbPtr(Ecol);
   }
   unsigned int p = _mat->size(1);
   for (unsigned int i = 0; i < p; i++)

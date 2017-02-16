@@ -102,6 +102,9 @@ protected:
    */
   FirstOrderLinearDS(): FirstOrderNonLinearDS() {};
 
+  /** Reset all the plugins */
+  virtual void _zeroPlugin();
+
 public:
 
   /** === CONSTRUCTORS/DESTRUCTOR === */
@@ -139,11 +142,6 @@ public:
   /** destructor */
   virtual ~FirstOrderLinearDS() {};
 
-  /** check that the system is complete (ie all required data are well set)
-   * \return a bool
-   */
-  bool checkDynamicalSystem();
-
   /** say that the system is linear
    * \return true if the DynamicalSystem is linear.
    */
@@ -157,9 +155,6 @@ public:
    */
   void initRhs(double time) ;
 
-  /** Call all plugged-function to initialize plugged-object values
-      \param time the time to give to the plugin functions
-   */
   virtual void updatePlugins(double time);
 
   // --- getter and setter ---
@@ -299,9 +294,6 @@ public:
   {
     _pluginb = newPluginB;
   };
-
-  /** Reset all the plugins */
-  virtual void zeroPlugin();
 
   ACCEPT_STD_VISITORS();
 

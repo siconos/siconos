@@ -77,20 +77,20 @@
  */
 class LagrangianLinearTIDS : public LagrangianDS
 {
+
 protected:
   /** serialization hooks
   */
   ACCEPT_SERIALIZATION(LagrangianLinearTIDS);
-
-
-  /** default constructor */
-  LagrangianLinearTIDS() : LagrangianDS() {};
 
   /** specific matrix for a LagrangianLinearTIDS */
   SP::SiconosMatrix _K;
 
   /** specific matrix for a LagrangianLinearTIDS */
   SP::SiconosMatrix _C;
+
+  /** default constructor */
+  LagrangianLinearTIDS():LagrangianDS() {};
 
 public:
 
@@ -108,15 +108,11 @@ public:
    *  \param v0 initial velocity of this DynamicalSystem
    *  \param M mass matrix of this DynamicalSystem
    */
-  LagrangianLinearTIDS(SP::SiconosVector q0, SP::SiconosVector v0, SP::SiconosMatrix M);
+  LagrangianLinearTIDS(SP::SiconosVector q0, SP::SiconosVector v0, SP::SiconosMatrix M):
+    LagrangianDS(q0, v0, M){};
 
   /** destructor */
-  ~LagrangianLinearTIDS();
-
-  /** check that the system is complete (ie all required data are well set)
-   * \return a bool
-   */
-  bool checkDynamicalSystem();
+  ~LagrangianLinearTIDS(){};
 
   /**
    * \return true if the Dynamical system is linear.
@@ -126,19 +122,10 @@ public:
     return true;
   }
 
-
-
   /** Initialization function for the rhs and its jacobian.
    *  \param t time of initialization
    */
   void initRhs(double t) ;
-
-  /** dynamical system initialization function except for _p:
-   *  mainly set memory and compute plug-in for initial state values.
-   *  \param t time of initialisation, default value = 0
-   *  \param n the size of the memory, default size = 1.
-   */
-  void initialize(double t = 0, unsigned int n = 1) ;
 
   // --- GETTERS AND SETTERS ---
 

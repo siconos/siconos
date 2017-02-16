@@ -28,7 +28,7 @@ n-dimensional set of equations where
 * t is the time
 * :math:`x \in R^{n}` is the state. 
 * :math:`\dot x` the derivative of the state according to time
-* :math:`z \in R^{s}` is a vector of arbitrary algebraic variables, some sort of discret state.
+* :math:`z \in R^{s}` is a vector of arbitrary algebraic variables, some sort of discrete state.
   For example, z may be used to set some perturbation parameters, or anything else.
 * :math:`g : \mathbb{R}^{n} \times \mathbb{R}^n \times \mathbb{R} \times \mathbb{R}^s \to \mathbb{R}^{n}`.
 

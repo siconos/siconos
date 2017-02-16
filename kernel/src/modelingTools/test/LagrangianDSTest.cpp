@@ -56,8 +56,6 @@ void LagrangianDSTest::testBuildLagrangianDS4()
   std::cout << "--> Test: constructor 4." <<std::endl;
 
   SP::LagrangianDS ds(new LagrangianDS(q0, velocity0, mass));
-  double time = 1.5;
-  ds->initialize(time);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS4A : ", Type::value(*ds) == Type::LagrangianDS, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS4B : ", ds->number() == 0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS4D : ", ds->ndof() == 3, true);
@@ -73,8 +71,6 @@ void LagrangianDSTest::testBuildLagrangianDS5()
   std::cout << "--> Test: constructor 5." <<std::endl;
   std::string plugin = "TestPlugin:computeMass";
   SP::DynamicalSystem ds(new LagrangianDS(q0, velocity0, plugin));
-  double time = 1.5;
-  ds->initialize(time);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS5A : ", Type::value(*ds) == Type::LagrangianDS, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS5B : ", ds->number() == 0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS5D : ", std11::static_pointer_cast<LagrangianDS>(ds)->ndof() == 3, true);

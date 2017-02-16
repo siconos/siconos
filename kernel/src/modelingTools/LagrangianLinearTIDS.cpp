@@ -37,46 +37,6 @@ LagrangianLinearTIDS::LagrangianLinearTIDS(SP::SiconosVector newQ0, SP::SiconosV
 
 }
 
-// --- Constructor from a set of data - Mass, no K and no C ---
-LagrangianLinearTIDS::LagrangianLinearTIDS(SP::SiconosVector newQ0, SP::SiconosVector newVelocity0,
-    SP::SiconosMatrix newMass):
-  LagrangianDS(newQ0, newVelocity0, newMass)
-{
-}
-//LagrangianLinearTIDS::LagrangianLinearTIDS(const SiconosVector& newQ0, const SiconosVector& newVelocity0, const SiconosMatrix& newMass):
-//  LagrangianDS(createSPtrSiconosVector((SiconosVector&)newQ0), createSPtrSiconosVector((SiconosVector&)newVelocity0), createSPtrSiconosMatrix((SimpleMatrix&)newMass)){
-//}
-LagrangianLinearTIDS::~LagrangianLinearTIDS()
-{}
-
-bool LagrangianLinearTIDS::checkDynamicalSystem()
-{
-  bool output = true;
-  // _ndof
-  if (_ndof == 0)
-  {
-    RuntimeException::selfThrow("LagrangianLinearTIDS::checkDynamicalSystem - number of degrees of freedom is equal to 0.");
-    output = false;
-  }
-
-  // q0 and velocity0
-  if (! _q0 || ! _velocity0)
-  {
-    RuntimeException::selfThrow("LagrangianLinearTIDS::checkDynamicalSystem - initial conditions are badly set.");
-    output = false;
-  }
-
-  // Mass
-  if (! _mass)
-  {
-    RuntimeException::selfThrow("LagrangianLinearTIDS::checkDynamicalSystem - Mass is not set.");
-    output = false;
-  }
-
-  if (!output) std::cout << "LagrangianLinearTIDS Warning: your dynamical system seems to be uncomplete (check = false)" <<std::endl;
-  return output;
-}
-
 void LagrangianLinearTIDS::initRhs(double time)
 {
   _rhsMatrices.resize(numberOfRhsMatrices);
@@ -109,11 +69,6 @@ void LagrangianLinearTIDS::initRhs(double time)
 
   _jacxRhs.reset(new BlockMatrix(_rhsMatrices[zeroMatrix], _rhsMatrices[idMatrix],
                                  _rhsMatrices[jacobianXBloc10], _rhsMatrices[jacobianXBloc11]));
-}
-
-void LagrangianLinearTIDS::initialize(double time, unsigned int sizeOfMemory)
-{
-
 }
 
 void LagrangianLinearTIDS::setK(const SiconosMatrix& newValue)

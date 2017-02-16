@@ -398,7 +398,7 @@ NewtonEulerDS::NewtonEulerDS():
   /* common code for constructors
    * would be better to use delagation of constructors in c++11
    */
-  init();
+  _init();
 }
 
 
@@ -421,7 +421,7 @@ NewtonEulerDS::NewtonEulerDS(SP::SiconosVector Q0, SP::SiconosVector Twist0,
   /* common code for constructors
    * would be better to use delegation of constructors in c++11
    */
-  init();
+  _init();
 
   // Initial conditions
   _q0 = Q0;
@@ -442,13 +442,13 @@ NewtonEulerDS::NewtonEulerDS(SP::SiconosVector Q0, SP::SiconosVector Twist0,
   DEBUG_END("NewtonEulerDS::NewtonEulerDS(SP::SiconosVector Q0, SP::SiconosVector Twist0,double  mass, SP::SiconosMatrix inertialMatrix)\n");
 }
 
-void NewtonEulerDS::init()
+void NewtonEulerDS::_init()
 {
   _p.resize(3);
   _p[0].reset(new SiconosVector());
   _p[1].reset(new SiconosVector(_n)); // Needed in NewtonEulerR
   _p[2].reset(new SiconosVector());
-  zeroPlugin();
+  _zeroPlugin();
   //assert(0);
 
   // --- NEWTONEULER INHERITED CLASS MEMBERS ---
@@ -512,7 +512,7 @@ void NewtonEulerDS::updateMassMatrix()
 
 }
 
-void NewtonEulerDS::zeroPlugin()
+void NewtonEulerDS::_zeroPlugin()
 {
   _pluginFExt.reset(new PluggedObject());
   _pluginMExt.reset(new PluggedObject());
@@ -538,11 +538,6 @@ void NewtonEulerDS::setInertia(double ix, double iy, double iz)
   (*_I)(2, 2) = iz;
 
   updateMassMatrix();
-}
-
-bool NewtonEulerDS::checkDynamicalSystem()
-{
-  return true;
 }
 
 void NewtonEulerDS::initializeNonSmoothInput(unsigned int level)
@@ -580,11 +575,6 @@ void NewtonEulerDS::initRhs(double time)
     computeForces(time);
     //      *_q += *_forces;
   }
-}
-
-void NewtonEulerDS::initialize(double time, unsigned int sizeOfMemory)
-{
-
 }
 
 void NewtonEulerDS::resetToInitialState()

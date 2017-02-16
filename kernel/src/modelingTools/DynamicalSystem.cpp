@@ -17,40 +17,47 @@
 */
 #include "DynamicalSystem.hpp"
 
+#define DEBUG_MESSAGES
+#define DEBUG_STDOUT
+#include "debug.h"
+
 #include <iostream>
 
 
-unsigned int DynamicalSystem::count = 0;
+unsigned int DynamicalSystem::__count = 0;
+
+void DynamicalSystem::_init()
+{
+  DEBUG_PRINT("internal _init from DynamicalSystem\n");
+  
+  _zeroPlugin();
+  _normRef = 1;
+  _x.resize(2);
+  _z.reset(new SiconosVector(1));
+  _r.reset(new SiconosVector(_n));
+}
 
 // ===== CONSTRUCTORS =====
 
 // Default constructor (protected)
 DynamicalSystem::DynamicalSystem():
-  _number(count++), _n(0), _stepsInMemory(1)
+  _number(__count++), _n(0), _stepsInMemory(1)
 {
-  zeroPlugin();
-  _normRef = 1;
-  _x.resize(2);
-  _z.reset(new SiconosVector(1));
+  _init();
 }
 
 // From a minimum set of data
-DynamicalSystem::DynamicalSystem(unsigned int newN):
-  _number(count++), _n(newN), _stepsInMemory(1)
+DynamicalSystem::DynamicalSystem(unsigned int dimension):
+  _number(__count++), _n(dimension), _stepsInMemory(1)
 {
-  zeroPlugin();
-  _normRef = 1;
-  _x.resize(2);
-  _r.reset(new SiconosVector(dimension()));
-  _z.reset(new SiconosVector(1));
+  _init();
 }
 
 // Copy constructor
 DynamicalSystem::DynamicalSystem(const DynamicalSystem & ds):
-  _number(count++)
+  _number(__count++), _n(ds.n()), _stepsInMemory(ds.stepsInMemory())
 {
   // The following data should always be initialize
-  _n = ds.n();
   _normRef = ds.normRef();
   _x0.reset(new SiconosVector(*(ds.x0())));
   _r.reset(new SiconosVector(*(ds.r())));
@@ -80,24 +87,9 @@ DynamicalSystem::DynamicalSystem(const DynamicalSystem & ds):
   _stepsInMemory = ds.stepsInMemory();
 }
 
-bool DynamicalSystem::checkDynamicalSystem()
+void DynamicalSystem::_zeroPlugin()
 {
-  bool output = true;
-  // n
-  if (_n == 0)
-  {
-    RuntimeException::selfThrow("DynamicalSystem::checkDynamicalSystem - number of degrees of freedom is equal to 0.");
-    output = false;
-  }
-  if (!_x0)
-  {
-    RuntimeException::selfThrow("DynamicalSystem::checkDynamicalSystem - x0 not set.");
-    output = false;
-  }
-  return output;
-}
-void DynamicalSystem::zeroPlugin()
-{
+  DEBUG_PRINT("zero Plug from DynamicalSystem\n");
   _pluginJacgx.reset(new PluggedObject());
   _pluginJacxDotG.reset(new PluggedObject());
   _pluging.reset(new PluggedObject());
@@ -121,8 +113,7 @@ void DynamicalSystem::setX0(const SiconosVector& newValue)
 {
   // check dimensions ...
   if (newValue.size() != _n)
-    RuntimeException::selfThrow("DynamicalSystem::setX0 - inconsistent sizes between x0 input and n - Maybe you forget to set n?");
-
+    RuntimeException::selfThrow("DynamicalSystem::setX0 - inconsistent sizes between x0 input and system dimension.");
   if (_x0)
     *_x0 = newValue;
 
@@ -137,7 +128,7 @@ void DynamicalSystem::setX0Ptr(SP::SiconosVector newPtr)
 {
   // check dimensions ...
   if (newPtr->size() != _n)
-    RuntimeException::selfThrow("DynamicalSystem::setX0Ptr - inconsistent sizes between x0 input and n - Maybe you forget to set n?");
+    RuntimeException::selfThrow("DynamicalSystem::setX0Ptr - inconsistent sizes between x0 input and system dimension.");
   _x0 = newPtr;
   _normRef = _x0->norm2() + 1;
 }
@@ -149,7 +140,7 @@ void DynamicalSystem::setX(const SiconosVector& newValue)
 
   // check dimensions ...
   if (newValue.size() != _n)
-    RuntimeException::selfThrow("DynamicalSystem::setX - inconsistent sizes between x input and n - Maybe you forget to set n?");
+    RuntimeException::selfThrow("DynamicalSystem::setX - inconsistent sizes between x input and system dimension.");
 
   if (! _x[0])
     _x[0].reset(new SiconosVector(newValue));
@@ -163,7 +154,7 @@ void DynamicalSystem::setXPtr(SP::SiconosVector newPtr)
 
   // check dimensions ...
   if (newPtr->size() != _n)
-    RuntimeException::selfThrow("DynamicalSystem::setXPtr - inconsistent sizes between x input and n - Maybe you forget to set n?");
+    RuntimeException::selfThrow("DynamicalSystem::setXPtr - inconsistent sizes between x input and system dimension.");
 
   _x[0] = newPtr;
 }
@@ -174,7 +165,7 @@ void DynamicalSystem::setRhs(const SiconosVector& newValue)
 
   // check dimensions ...
   if (newValue.size() != _n)
-    RuntimeException::selfThrow("DynamicalSystem::setRhs - inconsistent sizes between x input and n - Maybe you forget to set n?");
+    RuntimeException::selfThrow("DynamicalSystem::setRhs - inconsistent sizes between rhs input and system dimension.");
 
   if (! _x[1])
     _x[1].reset(new SiconosVector(newValue));
@@ -188,7 +179,7 @@ void DynamicalSystem::setRhsPtr(SP::SiconosVector newPtr)
 
   // check dimensions ...
   if (newPtr->size() != _n)
-    RuntimeException::selfThrow("DynamicalSystem::setRhsPtr - inconsistent sizes between x input and n - Maybe you forget to set n?");
+    RuntimeException::selfThrow("DynamicalSystem::setRhsPtr - inconsistent sizes between rhs input and system dimension.");
 
   _x[1] = newPtr;
 }
@@ -196,7 +187,7 @@ void DynamicalSystem::setR(const SiconosVector& newValue)
 {
   // check dimensions ...
   if (newValue.size() != _n)
-    RuntimeException::selfThrow("DynamicalSystem::setR - inconsistent sizes between x0 input and n - Maybe you forget to set n?");
+    RuntimeException::selfThrow("DynamicalSystem::setR - inconsistent sizes between input and system dimension.");
 
   if (_r)
     *_r = newValue;
@@ -209,7 +200,7 @@ void DynamicalSystem::setRPtr(SP::SiconosVector newPtr)
 {
   // check dimensions ...
   if (newPtr->size() != _n)
-    RuntimeException::selfThrow("DynamicalSystem::setRPtr - inconsistent sizes between x0 input and n - Maybe you forget to set n?");
+    RuntimeException::selfThrow("DynamicalSystem::setRPtr - inconsistent sizes between input and system dimension.");
 
   _r = newPtr;
 
@@ -219,7 +210,7 @@ void DynamicalSystem::setJacobianRhsx(const SiconosMatrix& newValue)
 {
   // check dimensions ...
   if (newValue.size(0) != _n || newValue.size(1) != _n)
-    RuntimeException::selfThrow("DynamicalSystem::setJacobianRhsx - inconsistent sizes between jacobianRhsx input and n - Maybe you forget to set n?");
+    RuntimeException::selfThrow("DynamicalSystem::setJacobianRhsx - inconsistent sizes between and system dimension.");
 
   if (_jacxRhs)
     *_jacxRhs = newValue;
@@ -232,7 +223,7 @@ void DynamicalSystem::setJacobianRhsxPtr(SP::SiconosMatrix newPtr)
 {
   // check dimensions ...
   if (newPtr->size(0) != _n || newPtr->size(1) != _n)
-    RuntimeException::selfThrow("DynamicalSystem::setJacobianRhsxPtr - inconsistent sizes between _jacxRhs input and n - Maybe you forget to set n?");
+    RuntimeException::selfThrow("DynamicalSystem::setJacobianRhsxPtr - inconsistent sizes between and system dimension.");
 
   _jacxRhs = newPtr;
 }

@@ -24,13 +24,18 @@
 #include "debug.h"
 #include <iostream>
 
-void LagrangianDS::init(unsigned int ndof)
+void LagrangianDS::_init(unsigned int ndof, SP::SiconosVector position, SP::SiconosVector velocity)
 {
+  assert(ndof > 0 && "lagrangian dynamical system dimension should be greater than 0.");
+
+  // Set initial conditions
+  _q0 = position;
+  _velocity0 = velocity;
 
   // -- Memory allocation for vector and matrix members --
   _q.resize(3);
-  _q[0].reset(new SiconosVector(ndof));
-  _q[1].reset(new SiconosVector(ndof));
+  _q[0].reset(new SiconosVector(*_q0));
+  _q[1].reset(new SiconosVector(*_velocity0));
   _q[2].reset(new SiconosVector(ndof));
 
   /** \todo lazy Memory allocation */
@@ -45,52 +50,41 @@ void LagrangianDS::init(unsigned int ndof)
   _p[2].reset(new SiconosVector(ndof));
 
   /** \todo lazy memory allocation */
-  _pMemory.resize(3);
+  //  _pMemory.resize(3);
 
-  zeroPlugin();
+  _zeroPlugin();
 }
 
 
-LagrangianDS::LagrangianDS(SP::SiconosVector newQ0, SP::SiconosVector newVelocity0):
-  DynamicalSystem(2 * newQ0->size()), _ndof(newQ0->size()),
+LagrangianDS::LagrangianDS(SP::SiconosVector q0, SP::SiconosVector v0):
+  DynamicalSystem(2 * q0->size()), _ndof(v0->size()),
   _hasConstantMass(false), _hasConstantFExt(false)
 {
-  init(_ndof);
   // Initial conditions
-  _q0 = newQ0;
-  _velocity0 = newVelocity0;
+  _init(_ndof, q0, v0);
 }
 
 // From a set of data; Mass filled-in directly from a siconosMatrix -
 // This constructor leads to the minimum Lagrangian System form: \f$ M\ddot q = p \f$
 /**/
-LagrangianDS::LagrangianDS(SP::SiconosVector newQ0, SP::SiconosVector newVelocity0, SP::SiconosMatrix newMass):
-  DynamicalSystem(2 * newQ0->size()), _ndof(newQ0->size()),
+LagrangianDS::LagrangianDS(SP::SiconosVector q0, SP::SiconosVector v0, SP::SiconosMatrix newMass):
+  DynamicalSystem(2 * q0->size()), _ndof(v0->size()),
   _hasConstantMass(true), _hasConstantFExt(false)
 
 {
-
-  init(_ndof);
-  // Initial conditions
-  _q0 = newQ0;
-  _velocity0 = newVelocity0;
-
+  _init(_ndof, q0, v0);
   // Mass matrix
   _mass = newMass;
 }
 
 // From a set of data - Mass loaded from a plugin
 // This constructor leads to the minimum Lagrangian System form: \f$ M(q)\ddot q = p \f$
-LagrangianDS::LagrangianDS(SP::SiconosVector newQ0, SP::SiconosVector newVelocity0, const std::string& massName):
-  DynamicalSystem(), _ndof(newQ0->size()),
+LagrangianDS::LagrangianDS(SP::SiconosVector q0, SP::SiconosVector v0, const std::string& massName):
+  DynamicalSystem(), _ndof(q0->size()),
   _hasConstantMass(false),
   _hasConstantFExt(false)
 {
-  init(_ndof);
-  // Initial conditions
-  _q0 = newQ0;
-  _velocity0 = newVelocity0;
-
+  _init(_ndof, q0, v0);
   // Mass
   setComputeMassFunction(SSLH::getPluginName(massName), SSLH::getPluginFunctionName(massName));
 }
@@ -100,16 +94,11 @@ LagrangianDS::LagrangianDS():
   DynamicalSystem(Type::LagrangianDS), _ndof(0),
   _hasConstantMass(false),_hasConstantFExt(false)
 {
-  zeroPlugin();
+  _zeroPlugin();
   // Protected constructor - Only call from derived class(es).
   _q.resize(3);
   _p.resize(3);
   // !!! No plug-in connection !!!
-}
-
-// Destructor
-LagrangianDS::~LagrangianDS()
-{
 }
 
 // Private function to set linked with members of Dynamical top class
@@ -132,9 +121,9 @@ void LagrangianDS::connectToDS(unsigned int steps)
   // Everything concerning rhs and its jacobian is handled in initRhs and computeXXX related functions.
   DynamicalSystem::initMemory(steps);
 }
-void LagrangianDS::zeroPlugin()
+void LagrangianDS::_zeroPlugin()
 {
-  DynamicalSystem::zeroPlugin();
+  DynamicalSystem::_zeroPlugin();
   _pluginMass.reset(new PluggedObject());
   _pluginFInt.reset(new PluggedObject());
   _pluginFExt.reset(new PluggedObject());
@@ -144,49 +133,29 @@ void LagrangianDS::zeroPlugin()
   _pluginJacqFGyr.reset(new PluggedObject());
   _pluginJacqDotFGyr.reset(new PluggedObject());
 }
-bool LagrangianDS::checkDynamicalSystem()
-{
-  bool output = true;
-  // ndof
-  if (_ndof == 0)
-  {
-    RuntimeException::selfThrow("LagrangianDS::checkDynamicalSystem - number of degrees of freedom is equal to 0.");
-    output = false;
-  }
 
-  // q0 and velocity0
-  if (! _q0 || ! _velocity0)
-  {
-    RuntimeException::selfThrow("LagrangianDS::checkDynamicalSystem - initial conditions are badly set.");
-    output = false;
-  }
+// bool LagrangianDS::checkDynamicalSystem()
+// {
+//   bool output = true;
+//   // fInt
+//   if ((_fInt && _pluginFInt->fPtr) && (! _jacobianFIntq || ! _jacobianFIntqDot))
+//     // ie if fInt is defined and not constant => its Jacobian must be defined (but not necessarily plugged)
+//   {
+//     RuntimeException::selfThrow("LagrangianDS::checkDynamicalSystem - You defined fInt but not its Jacobian (according to q and velocity).");
+//     output = false;
+//   }
 
-  // Mass
-  if (! _mass)
-  {
-    RuntimeException::selfThrow("LagrangianDS::checkDynamicalSystem - Mass not set.");
-    output = false;
-  }
+//   // FGyr
+//   if ((_fGyr  && _pluginFGyr->fPtr) && (! _jacobianFGyrq || ! _jacobianFGyrqDot))
+//     // ie if FGyr is defined and not constant => its Jacobian must be defined (but not necessarily plugged)
+//   {
+//     RuntimeException::selfThrow("LagrangianDS::checkDynamicalSystem - You defined FGyr but not its Jacobian (according to q and velocity).");
+//     output = false;
+//   }
 
-  // fInt
-  if ((_fInt && _pluginFInt->fPtr) && (! _jacobianFIntq || ! _jacobianFIntqDot))
-    // ie if fInt is defined and not constant => its Jacobian must be defined (but not necessarily plugged)
-  {
-    RuntimeException::selfThrow("LagrangianDS::checkDynamicalSystem - You defined fInt but not its Jacobian (according to q and velocity).");
-    output = false;
-  }
-
-  // FGyr
-  if ((_fGyr  && _pluginFGyr->fPtr) && (! _jacobianFGyrq || ! _jacobianFGyrqDot))
-    // ie if FGyr is defined and not constant => its Jacobian must be defined (but not necessarily plugged)
-  {
-    RuntimeException::selfThrow("LagrangianDS::checkDynamicalSystem - You defined FGyr but not its Jacobian (according to q and velocity).");
-    output = false;
-  }
-
-  if (!output) std::cout << "LagrangianDS Warning: your dynamical system seems to be uncomplete (check = false)" <<std::endl;
-  return output;
-}
+//   if (!output) std::cout << "LagrangianDS Warning: your dynamical system seems to be uncomplete (check = false)" <<std::endl;
+//   return output;
+// }
 
 void LagrangianDS::initializeNonSmoothInput(unsigned int level)
 {

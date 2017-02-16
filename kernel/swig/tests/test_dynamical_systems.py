@@ -1,0 +1,137 @@
+#!/usr/bin/env python
+
+from siconos.tests_setup import working_dir
+import os
+import siconos.kernel as sk
+import numpy as np
+
+# List of all existing DS classes
+ds_classes = [sk.FirstOrderNonLinearDS, sk.FirstOrderLinearDS,
+              sk.FirstOrderLinearTIDS,
+              sk.LagrangianDS, sk.LagrangianLinearTIDS, sk.NewtonEulerDS]
+
+
+def test_first_order_nlds():
+    """Build and test first order non linear ds
+    """
+    ndof = 3
+    x0 = np.zeros(ndof, dtype=np.float64)
+    ds = sk.FirstOrderNonLinearDS(x0)
+    ds.display()
+    time = 1.2
+    ds.computeRhs(time)
+    ds.computeJacobianRhsx(time)
+    assert ds.dimension() == ndof
+    assert not ds.isLinear()
+    assert np.allclose(ds.x0(), x0)
+    assert np.allclose(ds.x(), x0)
+    assert np.allclose(ds.rhs(), 0.)
+    ds.computef(time, ds.x())
+    assert np.allclose(ds.rhs(), ds.f())
+    ds.initRhs(time)
+    assert np.allclose(ds.jacobianRhsx(), 0.)
+    assert np.allclose(ds.jacobianRhsx(), ds.jacobianfx())
+
+
+def test_first_order_lds():
+    """Build and test first order linear
+    and time-invariant coeff. ds
+    """
+    ndof = 3
+    x0 = np.random.random(ndof)
+    time = 1.2
+    ds_list = []
+    a_mat = np.random.random((ndof, ndof))
+    b_vec = np.random.random((ndof, ))
+    ds_list.append(sk.FirstOrderLinearDS(x0))
+    ds_list.append(sk.FirstOrderLinearDS(x0, a_mat))
+    ds_list.append(sk.FirstOrderLinearDS(x0, a_mat, b_vec))
+
+    for ds in ds_list:
+        assert ds.isLinear()
+        assert ds.dimension() == ndof
+        assert np.allclose(ds.x0(), x0)
+        assert np.allclose(ds.x(), x0)
+        assert np.allclose(ds.r(), 0.)
+
+        rhs = np.zeros_like(ds.x())
+        jac_ref = np.zeros((ndof, ndof), dtype=np.float64)
+        if isinstance(ds.A(), np.ndarray):
+            jac_ref += a_mat
+            rhs += np.dot(a_mat, ds.x())
+        if isinstance(ds.b(), np.ndarray):
+            rhs += ds.b()
+        ds.computef(time, ds.x())
+        assert np.allclose(rhs, ds.f())
+
+        ds.initRhs(time)
+        assert np.allclose(rhs, ds.rhs())
+        if isinstance(ds.A(), np.ndarray):
+            assert np.allclose(ds.jacobianRhsx(), jac_ref)
+            assert np.allclose(ds.jacobianRhsx(), ds.jacobianfx())
+
+
+def test_first_order_ltids():
+    """Build and test first order linear
+    and time-invariant coeff. ds
+    """
+    ndof = 3
+    x0 = np.zeros(ndof, dtype=np.float64)
+    time = 1.2
+    ds_list = []
+    a_mat = np.random.random((ndof, ndof))
+    b_vec = np.random.random((ndof, ))
+    ds_list.append(sk.FirstOrderLinearTIDS(x0, a_mat))
+    ds_list.append(sk.FirstOrderLinearTIDS(x0, a_mat, b_vec))
+
+    for ds in ds_list:
+        assert ds.isLinear()
+        assert ds.dimension() == ndof
+        assert np.allclose(ds.x0(), x0)
+        assert np.allclose(ds.x(), x0)
+        assert np.allclose(ds.r(), 0.)
+
+        rhs = np.dot(a_mat, ds.x())
+        if isinstance(ds.b(), np.ndarray):
+            rhs += ds.b()
+        ds.computef(time, ds.x())
+        assert np.allclose(rhs, ds.f())
+
+        ds.initRhs(time)
+        assert np.allclose(rhs, ds.rhs())
+        assert np.allclose(ds.jacobianRhsx(), a_mat)
+        assert np.allclose(ds.jacobianRhsx(), ds.jacobianfx())
+
+
+def test_lagrangian_ds():
+    """Build and test lagrangian ds
+    """
+    ndof = 3
+    q0 = np.zeros(ndof, dtype=np.float64)
+    v0 = np.zeros_like(q0)
+    q0[...] = [1, 2, 3]
+    v0[...] = [4, 5, 6]
+
+    mass = np.asarray(np.diag([1, 2, 3]), dtype=np.float64)
+    ds = sk.LagrangianDS(q0, v0, mass)
+    ec = ds.computeKineticEnergy()
+    assert ec == 87.
+    assert ds.dimension() == ndof
+    assert np.allclose(ds.mass(), mass)
+
+
+def test_lagrangian_tids():
+    """Build and test lagrangian linear and time-invariant ds
+    """
+    ndof = 3
+    q0 = np.zeros(ndof, dtype=np.float64)
+    v0 = np.zeros_like(q0)
+    q0[...] = [1, 2, 3]
+    v0[...] = [4, 5, 6]
+
+    mass = np.asarray(np.diag([1, 2, 3]), dtype=np.float64)
+    ds = sk.LagrangianLinearTIDS(q0, v0, mass)
+    ec = ds.computeKineticEnergy()
+    assert ec == 87.
+    assert ds.dimension() == ndof
+    assert np.allclose(ds.mass(), mass)

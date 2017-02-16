@@ -39,10 +39,9 @@
 
 #include <iostream>
 /**  Abstract class to handle Dynamical Systems => interface for
-   derived classes (First Order or Lagrangian systems)
+   derived classes (First Order, Lagrangian systems, NewtonEuler)
 
    \author SICONOS Development Team - copyright INRIA
-   \version 3.0.0.
    \date (Creation) January 15, 2007
 
   This class is used to describe dynamical systems of the form :
@@ -133,7 +132,7 @@ private:
   ACCEPT_SERIALIZATION(DynamicalSystem);
 
   /** used to set ds number */
-  static unsigned int count;
+  static unsigned int __count;
 
   /** copy constructor => private, no copy nor pass-by-value.
    */
@@ -177,7 +176,6 @@ protected:
       system. */
   SP::SiconosVector _z;
 
-
   /** DynamicalSystem plug-in to compute \f$ g(t,\dot x,x,z) \f$
    *  @param   current time
    *  @param   the size of the vector x
@@ -209,38 +207,32 @@ protected:
   unsigned int _stepsInMemory;
   // ===== CONSTRUCTORS =====
 
-  /** default constructors/destructor
-   */
+  /** default constructor */
   DynamicalSystem();
-  virtual void zeroPlugin();
 
-protected:
-  /** a vector reserved to compute the freeState.*/
-//  SP::SiconosVector _workFree;
-
-public:
-
-  /** constructor from a set of data
-   *  \param newN int : size of the system (n)
+  /**  minimal constructor, from state dimension
+   *  \param dimension size of the system (n)
    */
-  DynamicalSystem(unsigned int newN);
+  DynamicalSystem(unsigned int dimension);
 
   /** Copy constructor
    * \param ds the DynamicalSystem to copy
    */
   DynamicalSystem(const DynamicalSystem & ds);
-  // ===== DESTRUCTOR =====
+  
+  /** build all _plugin... PluggedObject */
+  virtual void _zeroPlugin();
 
-  /** destructor
+  /** Common code for constructors
+      should be replaced in C++11 by delegating constructors
+      \param intial_state vector of initial values for state
    */
-  virtual ~DynamicalSystem() {}
+  void _init();
 
-  //@}
+public:
 
-  /** check that the system is complete (ie all required data are well set)
-   * \return a bool
-   */
-  virtual bool checkDynamicalSystem() = 0;
+  /** destructor */
+  virtual ~DynamicalSystem() {};
 
   /** reset the state to the initial state */
   virtual void resetToInitialState();
@@ -249,7 +241,6 @@ public:
   /*! @name Members access */
   //@{
 
-  // --- Number ---
 
   /** to get the number of the DynamicalSystem
    *  \return the value of number
@@ -269,32 +260,23 @@ public:
     return old_n;
   }
 
-  /** reset the global DynamicSystem counter
+  /** reset the global DynamicSystem counter (for ids)
    *  \return the previous value of count
    */
   static inline int resetCount(int new_count=0)
   {
-    int old_count = count;
-    count = new_count;
+    int old_count = __count;
+    __count = new_count;
     return old_count;
   }
 
   // --- n ---
 
-  /** allow to get n, the dimension, i.e. the size of the state x of the DynamicalSystem
-   *  \return the value of n
+  /** \return the size of the vector state x of the DynamicalSystem
    */
   inline unsigned int n() const
   {
     return _n;
-  }
-
-  /** allows to set the value of n
-   *  \param newN an integer to set the value of n
-   */
-  inline void setN(unsigned int newN)
-  {
-    _n = newN;
   }
 
   /** return the dim. of the system (n for first order, ndof for Lagrangian).
@@ -306,18 +288,15 @@ public:
     return _n;
   };
 
-  // --- X0 ---
-
-  /** get the value of x0, the initial state of the DynamicalSystem
+  /** get a copy of the initial state vector
    *  \return SiconosVector
-   *  \warning: SiconosVector is an abstract class => can not be an lvalue => return SiconosVector
    */
   inline const SiconosVector getX0() const
   {
     return *_x0;
   }
 
-  /** get x0, the initial state of the DynamicalSystem
+  /** get the initial state vector
    *  \return pointer on a SiconosVector
    */
   inline SP::SiconosVector x0() const
@@ -325,39 +304,36 @@ public:
     return _x0;
   };
 
-  /** get _normRef
-   * \return a reference to _normRef
+  /** get some reference norm for the system, equal to ||x0||_2 + 1
+   * \return a double
    */
   inline double normRef() const
   {
     return _normRef;
   };
 
-  // --- R ---
-
-  /** get the value of r
-   * \warning: SiconosVector is an abstract class => can not be an lvalue => return SiconosVector
-   *  \return a vector
+  /** get a copy of r vector (input due to nonsmooth behavior)
+   *  \return a SiconosVector
    */
   inline const SiconosVector getR() const
   {
     return *_r;
   }
 
-  /** get r
-   *  \return pointer on a SiconosVector
+  /** get r vector (input due to nonsmooth behavior)
+   *  \return SP::SiconosVector
    */
   inline SP::SiconosVector r() const
   {
     return _r;
   }
 
-  /** set the value of r to newValue
+  /** reset r vector (input due to nonsmooth behavior)
    *  \param newValue SiconosVector 
    */
   void setR(const SiconosVector& newValue );
 
-  /** set R to pointer newPtr
+  /** set r vector (input due to nonsmooth behavior) to pointer newPtr
    *  \param newPtr SP::SiconosVector newPtr
    */
   void setRPtr(SP::SiconosVector newPtr);
@@ -371,8 +347,6 @@ public:
    *  \param newPtr SP::SiconosVector newPtr
    */
   void setX0Ptr(SP::SiconosVector newPtr);
-
-  // --- X ---
 
   /** get the value of \f$ x \f$, the state of the DynamicalSystem
    * \return SiconosVector
@@ -402,17 +376,16 @@ public:
 
   // ---  Rhs ---
 
-  /** get the value of the right-hand side, \f$ \dot x \f$, derivative of the state of the DynamicalSystem.
+  /** get a copy of the right-hand side vector, (i.e. \f$ \dot x \f$)
    *  \return SiconosVector
-   * \warning: SiconosVector is an abstract class => can not be an lvalue => return SiconosVector
    */
   inline SiconosVector& getRhs() const
   {
     return *(_x[1]);
   }
 
-  /** get the right-hand side, \f$ \dot x \f$, the derivative of the state of the DynamicalSystem.
-   *  \return a pointer on a SiconosVector
+  /** get the right-hand side vector, (i.e. \f$ \dot x \f$)
+   *  \return SP::SiconosVector
    */
   inline SP::SiconosVector rhs() const
   {
@@ -518,13 +491,6 @@ public:
    * \param time of initialization
    */
   virtual void initRhs(double time) = 0 ;
-
-  /** dynamical system initialization function except for _r :
-   *  mainly set memory and compute value for initial state values.
-   *  \param time of initialisation, default value = 0
-   *  \param size the size of the memory, default size = 1.
-   */
-  virtual void initialize(double time = 0, unsigned int size = 1) = 0;
 
   /** dynamical system initialization function for NonSmoothInput _r
    *  \param level of _r.

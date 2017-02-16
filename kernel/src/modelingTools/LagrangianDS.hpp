@@ -38,7 +38,7 @@
  * Lagrangian Non Linear Dynamical System of the form :
  * \f[
  * \begin{cases}
- * M(q,z) \dot v + N(v, q, z) + F_{Int}(v , q , t, z) = F_{Ext}(t, z) + p \\
+ * M(q,z) \dot v + F_{gyr}(v, q, z) + F_{Int}(v , q , t, z) = F_{Ext}(t, z) + p \\
  * \dot q = v
  * \end{cases}
  * \f]
@@ -52,7 +52,7 @@
  *       Interaction.
  * - \f$ M(q) \in R^{ndof \times ndof} \f$ is the inertia term saved
  *       in the SiconosMatrix mass.
- * - \f$ N(\dot q, q) \in R^{ndof}\f$ is the non linear inertia term
+ * - \f$ F_{gyr}(\dot q, q) \in R^{ndof}\f$ is the non linear inertia term
  *       saved in the SiconosVector _fGyr.
  * - \f$ F_{Int}(\dot q , q , t) \in R^{ndof} \f$ are the internal
  *       forces saved in the SiconosVector fInt.
@@ -70,7 +70,7 @@
  * - \f$F(v, q, t, z) \in R^{ndof} \f$ collects the total forces
  * acting on the system, that is
  * \f[ F(v, q, t, z) =  F_{Ext}(t, z) -  FGyr(v, q, z) + F_{Int}(v, q , t, z) \f]
- * This vector is stored in the  SiconosVector _Forces
+ * This vector is stored in the  SiconosVector _forces
  *
  * Links with first order DynamicalSystem top-class are:
  *
@@ -124,17 +124,19 @@
  */
 class LagrangianDS : public DynamicalSystem
 {
-
+  
 protected:
   /** serialization hooks
   */
   ACCEPT_SERIALIZATION(LagrangianDS);
 
   /** Common code for constructors
-   * should be replaced in C++11 by delegating constructors
-   * \param ndof
+      should be replaced in C++11 by delegating constructors
+      \param ndof
+      \param position vector of initial positions
+      \param velocity vector of initial velocities
    */
-  void init(unsigned int ndof);
+  void _init(unsigned int ndof, SP::SiconosVector position, SP::SiconosVector velocity);
 
 
   // -- MEMBERS --
@@ -237,10 +239,6 @@ protected:
 
   SP::BlockMatrix _jacxRhs;
 
-  /** Default constructor
-   */
-  LagrangianDS();
-
   // pointers to functions member to compute plug-in functions
 
   /** LagrangianDS plug-in to compute mass(q,t) - id = "mass"
@@ -332,7 +330,12 @@ protected:
   //  FPtr5 computeJacobianFGyrqDotPtr;
   SP::PluggedObject _pluginJacqDotFGyr;
 
-  virtual void zeroPlugin();
+  /** build all _plugin... PluggedObject */
+  virtual void _zeroPlugin();
+
+  /** Default constructor */
+  LagrangianDS();
+
 public:
 
   // === CONSTRUCTORS - DESTRUCTOR ===
@@ -359,12 +362,7 @@ public:
   LagrangianDS(SP::SiconosVector position, SP::SiconosVector velocity, const std::string& plugin);
 
   /** destructor */
-  virtual ~LagrangianDS();
-
-  /** check that the system is complete (ie all required data are well set)
-   * \return a bool
-   */
-  bool checkDynamicalSystem();
+  virtual ~LagrangianDS(){};
 
   /** reset the state to the initial state */
   void resetToInitialState();
@@ -373,13 +371,6 @@ public:
    *  \param time of initialization
    */
   void initRhs(double time) ;
-
-  /** dynamical system initialization function except for _p:
-   *  mainly set memory and compute plug-in for initial state values.
-   *  \param time of initialisation, default value = 0
-   *  \param size the size of the memory, default size = 1.
-   */
-  void initialize(double time = 0, unsigned int size = 1){} ;
 
   /** dynamical system initialization function for _p
    *  \param level for _p
