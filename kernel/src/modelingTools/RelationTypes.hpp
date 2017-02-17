@@ -37,5 +37,5 @@ Include files related to the different types of relations
 #include "LagrangianScleronomousR.hpp"
 #include "LagrangianRheonomousR.hpp"
 #include "LagrangianCompliantR.hpp"
-
+#include "LagrangianCompliantLinearTIR.hpp"
 #endif

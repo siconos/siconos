@@ -65,7 +65,17 @@ struct Interaction::_setLevels : public SiconosVisitor
   void visit(const ComplementarityConditionNSL& nslaw)
   {
     RELATION::TYPES relationType = _interaction->relation()->getType();
+    RELATION::SUBTYPES subType = _interaction->relation()->getSubType();
+
     if (relationType == FirstOrder)
+    {
+      _interaction->setLowerLevelForOutput(0);
+      _interaction->setUpperLevelForOutput(0);
+
+      _interaction->setLowerLevelForInput(0);
+      _interaction->setUpperLevelForInput(0);
+    }
+    else if (relationType == Lagrangian && subType == CompliantLinearTIR )
     {
       _interaction->setLowerLevelForOutput(0);
       _interaction->setUpperLevelForOutput(0);

@@ -152,8 +152,6 @@ public:
     ;
   }
 
-
-
   ACCEPT_STD_VISITORS();
 
 };

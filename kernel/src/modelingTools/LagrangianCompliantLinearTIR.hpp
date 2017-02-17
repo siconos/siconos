@@ -16,10 +16,9 @@
  * limitations under the License.
 */
 /*! \file LagrangianLinearTIR.hpp
-
  */
-#ifndef LAGRANGIANLINEARRELATION_H
-#define LAGRANGIANLINEARRELATION_H
+#ifndef LAGRANGIANCOMPLIANTLINEARRELATION_H
+#define LAGRANGIANCOMPLIANTLINEARRELATION_H
 
 #include "LagrangianR.hpp"
 
@@ -33,26 +32,35 @@
 Lagrangian Relation with:
 
 \f[
-y= Cq + e + Fz
+y= Cq + e + D\lambda + Fz
 \f]
 
 \f[
 p = C^t \lambda
 \f]
 
-C is the only required input to built a LagrangianLinearTIR.
+C is the only required input to built a LagrangianCompliantLinearTIR.
+D is mandatory and may represent a stiffness in the relation
+
+
+
 
  */
-class LagrangianLinearTIR : public LagrangianR
+class LagrangianCompliantLinearTIR : public LagrangianR
 {
 
 protected:
   /** serialization hooks
   */
-  ACCEPT_SERIALIZATION(LagrangianLinearTIR);
+  ACCEPT_SERIALIZATION(LagrangianCompliantLinearTIR);
+
+
 
   /** C*/
   //SP::SimpleMatrix C;
+
+  /** D matrix, coefficient of lambda in y */
+  //SP::SimpleMatrix D;
 
   /** F matrix, coefficient of z */
   SP::SimpleMatrix _F;
@@ -64,31 +72,34 @@ public:
 
   /** Default constructor
   */
-  LagrangianLinearTIR() : LagrangianR(RELATION::LinearTIR) {};
+  LagrangianCompliantLinearTIR() : LagrangianR(RELATION::CompliantLinearTIR) {};
 
   /** create the Relation from a set of data
-  *  \param C the matrix C
+  *  \param C the matrix C 
+  *  \param D the matrix D
   */
-  LagrangianLinearTIR(SP::SimpleMatrix C);
+  LagrangianCompliantLinearTIR(SP::SimpleMatrix C, SP::SimpleMatrix D);
+  
+  /** create the Relation from a set of data
+  *  \param C the matrix C 
+  *  \param D the matrix D
+  *  \param e the vector e
+  */
+  LagrangianCompliantLinearTIR(SP::SimpleMatrix C, SP::SimpleMatrix D, SP::SiconosVector e);
 
   /** create the Relation from a set of data
   *  \param C the matrix C
+  *  \param D the matrix D
   *  \param F the matrix F
   *  \param e the vector e
   */
-  LagrangianLinearTIR(SP::SimpleMatrix C,  SP::SimpleMatrix F, SP::SiconosVector e);
-
-  /** create the Relation from a set of data
-  *  \param C the matrix C
-  *  \param e the vector e
-  */
-  LagrangianLinearTIR(SP::SimpleMatrix C, SP::SiconosVector e);
+  LagrangianCompliantLinearTIR(SP::SimpleMatrix C, SP::SimpleMatrix D, SP::SimpleMatrix F, SP::SiconosVector e);
 
   /** destructor
   */
-  virtual ~LagrangianLinearTIR() {};
+  virtual ~LagrangianCompliantLinearTIR() {};
 
-  /** initialize LagrangianLinearTIR specific operators.
+  /** initialize LagrangianCompliantLinearTIR specific operators.
    * \param inter an Interaction using this relation
    * \param DSlink
    * \param workV
@@ -233,6 +244,6 @@ public:
 
 };
 
-TYPEDEF_SPTR(LagrangianLinearTIR)
+TYPEDEF_SPTR(LagrangianCompliantLinearTIR)
 
 #endif
