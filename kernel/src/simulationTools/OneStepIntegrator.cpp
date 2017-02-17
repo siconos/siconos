@@ -106,11 +106,23 @@ void OneStepIntegrator::updateOutput(double time)
 void OneStepIntegrator::updateInput(double time)
 {
   /** VA. 16/02/2017 This should normally be done only for interaction managed by the osi */
-  for (unsigned int level = _levelMinForOutput;
-       level < _levelMaxForOutput + 1;
+  for (unsigned int level = _levelMinForInput;
+       level < _levelMaxForInput + 1;
        level++)
     _simulation->nonSmoothDynamicalSystem()->updateInput(time,level);
 }
+void OneStepIntegrator::updateOutput(double time, unsigned int level)
+{
+  /** VA. 16/02/2017 This should normally be done only for interaction managed by the osi */
+  _simulation->nonSmoothDynamicalSystem()->updateOutput(time,level);
+}
+
+void OneStepIntegrator::updateInput(double time, unsigned int level)
+{
+  /** VA. 16/02/2017 This should normally be done only for interaction managed by the osi */
+  _simulation->nonSmoothDynamicalSystem()->updateInput(time,level);
+}
+
 
 
 

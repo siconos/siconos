@@ -75,8 +75,8 @@ void TimeSteppingDirectProjection::initOSNS()
   (*_allNSProblems)[SICONOS_OSNSP_TS_POS]->setIndexSetLevel(_indexSetLevelForProjection);
   (*_allNSProblems)[SICONOS_OSNSP_TS_POS]->setInputOutputLevel(0);
 
-  (*_allNSProblems)[SICONOS_OSNSP_TS_VELOCITY]->setIndexSetLevel(_levelMaxForInput);
-  (*_allNSProblems)[SICONOS_OSNSP_TS_VELOCITY]->setInputOutputLevel(_levelMaxForInput);
+  (*_allNSProblems)[SICONOS_OSNSP_TS_VELOCITY]->setIndexSetLevel(1);
+  (*_allNSProblems)[SICONOS_OSNSP_TS_VELOCITY]->setInputOutputLevel(1);
 }
 
 void TimeSteppingDirectProjection::nextStep()
@@ -575,7 +575,7 @@ void TimeSteppingDirectProjection::newtonSolve(double criterion, unsigned int ma
     else
       checkSolverOutputProjectOnConstraints(info, this);
 
-    update(_levelMaxForInput);
+    update();
 
     //isNewtonConverge = newtonCheckConvergence(criterion);
     if (!_allNSProblems->empty() &&   indexSet->size()>0)
@@ -613,7 +613,7 @@ void TimeSteppingDirectProjection::newtonSolve(double criterion, unsigned int ma
       else
         checkSolverOutputProjectOnConstraints(info, this);
 
-      update(_levelMaxForInput);
+      update();
       isNewtonConverge = newtonCheckConvergence(criterion);
       if (!isNewtonConverge && !info)
       {
