@@ -23,6 +23,7 @@
 #include "LagrangianLinearTIDS.hpp"
 #include "NewtonEulerR.hpp"
 #include "LagrangianRheonomousR.hpp"
+#include "LagrangianCompliantLinearTIR.hpp"
 #include "NewtonImpactNSL.hpp"
 #include "MultipleImpactNSL.hpp"
 #include "NewtonImpactFrictionNSL.hpp"
@@ -1293,6 +1294,10 @@ struct MoreauJeanOSI::_NSLEffectOnFreeOutput : public SiconosVisitor
   {
     ;
   }
+  void visit(const ComplementarityConditionNSL& nslaw)
+  {
+    ;
+  }
 };
 
 
@@ -1424,11 +1429,44 @@ void MoreauJeanOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_int
         else
           RuntimeException::selfThrow("MoreauJeanOSI::computeFreeOutput not yet implemented for SICONOS_OSNSP ");
       }
+      if(relationSubType == CompliantLinearTIR)
+      {
+        if(((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp)
+        {
+          double h = _simulation->timeStep();
+          yForNSsolver *= h * _theta ;
+
+          /* we have to check that the value are at the beginnning of the time step */
+          SiconosVector q = *DSlink[LagrangianR::q0];
+          SiconosVector z = *DSlink[LagrangianR::z];
+          SiconosVector v = *DSlink[LagrangianR::q1];
+
+
+          // + C q_k
+          subprod(*C, q, yForNSsolver, coord, false);
+          // + h(1-_theta)v_k
+
+          v *= (1-_theta)* h ;
+          subprod(*C, v, yForNSsolver, coord, false);
+
+          SP::SiconosVector e = std11::static_pointer_cast<LagrangianCompliantLinearTIR>(inter->relation())->e();
+          if (e)
+            yForNSsolver += *e;
+
+        }
+        else
+          RuntimeException::selfThrow("MoreauJeanOSI::computeFreeOutput not yet implemented for SICONOS_OSNSP ");
+      }
+
+
+
       // For the relation of type LagrangianScleronomousR
       if(relationSubType == ScleronomousR)
       {
 
       }
+
+
     }
 
   }

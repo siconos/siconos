@@ -28,6 +28,7 @@
 #include "FirstOrderLinearR.hpp"
 #include "FirstOrderLinearTIR.hpp"
 #include "LagrangianLinearTIR.hpp"
+#include "LagrangianCompliantLinearTIR.hpp"
 #include "NewtonImpactNSL.hpp"
 #include "MultipleImpactNSL.hpp"
 #include "NewtonImpactFrictionNSL.hpp"
@@ -216,7 +217,8 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
   SP::SiconosMatrix currentInteractionBlock = indexSet->properties(vd).block;
   SP::SiconosMatrix leftInteractionBlock, rightInteractionBlock;
 
-  RELATION::TYPES relationType;
+  RELATION::TYPES relationType = inter->relation()->getType();
+  RELATION::SUBTYPES relationSubType= inter->relation()->getSubType();
   double h = simulation()->currentTimeStep();
 
   // General form of the interactionBlock is : interactionBlock =
@@ -242,7 +244,7 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
     OneStepIntegrator& osi = *DSG0.properties(DSG0.descriptor(ds)).osi;
     OSI::TYPES osiType = osi.getType();
     unsigned int sizeDS = ds->dimension();
-    
+
     // get _interactionBlocks corresponding to the current DS
     // These _interactionBlocks depends on the relation type.
     leftInteractionBlock.reset(new SimpleMatrix(nslawSize, sizeDS));
@@ -331,6 +333,15 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
       //*currentInteractionBlock *=h;
       DEBUG_EXPR(currentInteractionBlock->display(););
       //assert(currentInteractionBlock->isSymmetric(1e-10));
+      if (relationSubType == CompliantLinearTIR)
+      {
+        if (osiType == OSI::MOREAUJEANOSI)
+        {
+          * currentInteractionBlock *= (static_cast<EulerMoreauOSI&> (osi)).theta() ;
+          * currentInteractionBlock +=  *std11::static_pointer_cast<LagrangianCompliantLinearTIR>(inter->relation())->D()/simulation()->timeStep() ;
+        }
+
+      }
 
 
     }
@@ -582,7 +593,7 @@ void LinearOSNS::computeqBlock(InteractionsGraph::VDescriptor& vertex_inter, uns
   // OSI::TYPES  osiType = Osi->getType();
 
 
-  
+
   DynamicalSystemsGraph& DSG0 = *simulation()->nonSmoothDynamicalSystem()->dynamicalSystems();
 
   OneStepIntegrator& osi1 = *DSG0.properties(DSG0.descriptor(ds1)).osi;
