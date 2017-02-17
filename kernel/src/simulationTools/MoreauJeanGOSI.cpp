@@ -1347,10 +1347,10 @@ void MoreauJeanGOSI::updatePosition(SP::DynamicalSystem ds)
   }
 }
 
-void MoreauJeanGOSI::updateState(const unsigned int level)
+void MoreauJeanGOSI::updateState(const unsigned int )
 {
 
-  DEBUG_PRINT("MoreauJeanGOSI::updateState(const unsigned int level)\n");
+  DEBUG_PRINT("MoreauJeanGOSI::updateState(const unsigned int )\n");
 
   double RelativeTol = _simulation->relativeConvergenceTol();
   bool useRCC = _simulation->useRelativeConvergenceCriteron();
@@ -1372,7 +1372,7 @@ void MoreauJeanGOSI::updateState(const unsigned int level)
     // 3 - Lagrangian Systems
     if(dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
     {
-      DEBUG_PRINT("MoreauJeanGOSI::updateState(const unsigned int level), dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS \n");
+      DEBUG_PRINT("MoreauJeanGOSI::updateState(const unsigned int ), dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS \n");
       // get dynamical system
       SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
       SiconosVector& vfree = *workVectors[OneStepIntegrator::free];
@@ -1381,14 +1381,12 @@ void MoreauJeanGOSI::updateState(const unsigned int level)
       SP::SiconosVector v = d->velocity();
       bool baux = dsType == Type::LagrangianDS && useRCC && _simulation->relativeConvergenceCriterionHeld();
 
-      // level == LEVELMAX => p(level) does not even exists (segfault)
-      // \warning VA 04/08/2015. Why must we check that  d->p(level)->size() > 0 ?
-      if(level != LEVELMAX && d->p(level) && d->p(level)->size() > 0)
+      if( d->p(_levelMaxForInput) && d->p(_levelMaxForInput)->size() > 0)
       {
 
-        assert(((d->p(level)).get()) &&
-               " MoreauJeanGOSI::updateState() *d->p(level) == NULL.");
-        *v = *d->p(level); // v = p
+        assert(((d->p(_levelMaxForInput)).get()) &&
+               " MoreauJeanGOSI::updateState() *d->p(_levelMaxForInput) == NULL.");
+        *v = *d->p(_levelMaxForInput); // v = p
         if(d->boundaryConditions())
           for(std::vector<unsigned int>::iterator
               itindex = d->boundaryConditions()->velocityIndices()->begin() ;
@@ -1419,9 +1417,9 @@ void MoreauJeanGOSI::updateState(const unsigned int level)
           _WBoundaryConditionsMap[ds->number()]->getCol(bc, *columntmp);
           /*\warning we assume that W is symmetric in the Lagrangian case*/
           double value = - inner_prod(*columntmp, *v);
-          if(level != LEVELMAX && d->p(level)&& d->p(level)->size() > 0)
+          if( d->p(_levelMaxForInput)&& d->p(_levelMaxForInput)->size() > 0)
           {
-            value += (d->p(level))->getValue(*itindex);
+            value += (d->p(_levelMaxForInput))->getValue(*itindex);
           }
           /* \warning the computation of reactionToBoundaryConditions take into
              account the contact impulse but not the external and internal forces.
@@ -1452,7 +1450,7 @@ void MoreauJeanGOSI::updateState(const unsigned int level)
     }
     else if(dsType == Type::NewtonEulerDS)
     {
-      DEBUG_PRINT("MoreauJeanGOSI::updateState(const unsigned int level), dsType == Type::NewtonEulerDS \n");
+      DEBUG_PRINT("MoreauJeanGOSI::updateState(const unsigned int ), dsType == Type::NewtonEulerDS \n");
 
       // get dynamical system
       SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS> (ds);
@@ -1464,16 +1462,11 @@ void MoreauJeanGOSI::updateState(const unsigned int level)
       DEBUG_PRINT("MoreauJeanGOSI::updateState() prev v\n")
       DEBUG_EXPR(v->display());
 
-      // failure on bullet sims
-      // d->p(level) is checked in next condition
-      // assert(((d->p(level)).get()) &&
-      //       " MoreauJeanGOSI::updateState() *d->p(level) == NULL.");
-
-      if(level != LEVELMAX && d->p(level) && d->p(level)->size() > 0)
+      if(d->p(_levelMaxForInput) && d->p(_levelMaxForInput)->size() > 0)
       {
         /*d->p has been fill by the Relation->computeInput, it contains
           B \lambda _{k+1}*/
-        *v = *d->p(level); // v = p
+        *v = *d->p(_levelMaxForInput); // v = p
         if(d->boundaryConditions())
           for(std::vector<unsigned int>::iterator
               itindex = d->boundaryConditions()->velocityIndices()->begin() ;
@@ -1483,7 +1476,7 @@ void MoreauJeanGOSI::updateState(const unsigned int level)
 
         W.PLUForwardBackwardInPlace(*v);
 
-        DEBUG_EXPR(d->p(level)->display());
+        DEBUG_EXPR(d->p(_levelMaxForInput)->display());
         DEBUG_PRINT("MoreauJeanGOSI::updatestate W CT lambda\n");
         DEBUG_EXPR(v->display());
         *v +=  vfree;
@@ -1508,9 +1501,9 @@ void MoreauJeanGOSI::updateState(const unsigned int level)
           _WBoundaryConditionsMap[ds->number()]->getCol(bc, *columntmp);
           /*\warning we assume that W is symmetric in the Lagrangian case*/
           double value = - inner_prod(*columntmp, *v);
-          if(level != LEVELMAX && d->p(level) && d->p(level)->size() > 0)
+          if(d->p(_levelMaxForInput) && d->p(_levelMaxForInput)->size() > 0)
           {
-            value += (d->p(level))->getValue(*itindex);
+            value += (d->p(_levelMaxForInput))->getValue(*itindex);
           }
           /* \warning the computation of reactionToBoundaryConditions take into
              account the contact impulse but not the external and internal forces.

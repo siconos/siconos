@@ -94,26 +94,6 @@ protected:
    */
   SP::InteractionManager _interman;
 
-  /** _levelMinForOutput is the minimum level for the output
-   * (Interaction::_lowerlevelForOutput) for all the interactions
-   */
-  unsigned int _levelMinForOutput;
-
-  /** _levelMaxForOutput is the maximunm level for the output
-   * (Interaction::_upperlevelForOutput) for all the interactions
-   */
-  unsigned int _levelMaxForOutput;
-
-  /** _levelMinForInput is the minimum level for the input
-   * (Interaction::_lowerlevelForInput) for all the interactions
-   */
-  unsigned int _levelMinForInput;
-
-  /** _levelMaxForInput is the maximum level for the input
-   * (Interaction::_upperlevelForInput) for all the interactions
-   */
-  unsigned int _levelMaxForInput;
-
   /** _numberOfIndexSets is the number of index sets that we need for
    * simulation. It corresponds for most of the simulation to
    * _numberOfIndexSets = _levelMaxForOutput + 1
@@ -335,24 +315,6 @@ public:
   }
 
 
-  inline unsigned int levelMinForOutput() const
-  {
-    return _levelMinForOutput;
-  };
-
-  inline unsigned int levelMaxForOutput() const
-  {
-    return _levelMaxForOutput;
-  };
-  inline unsigned int levelMinForInput() const
-  {
-    return _levelMinForInput;
-  };
-
-  inline unsigned int levelMaxForInput() const
-  {
-    return _levelMaxForInput;
-  };
 
   /** get allNSProblems[name], a specific OneStepNSProblem
       \param id number of the required osnspb

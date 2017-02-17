@@ -826,11 +826,10 @@ void SchatzmanPaoliOSI::integrate(double& tinit, double& tend, double& tout, int
   RuntimeException::selfThrow("SchatzmanPaoliOSI::integrate - not yet implemented :");
 }
 
-void SchatzmanPaoliOSI::updateState(const unsigned int level)
+void SchatzmanPaoliOSI::updateState(const unsigned int)
 {
-  DEBUG_BEGIN("SchatzmanPaoliOSI::updateState(const unsigned int level)\n");
-  DEBUG_PRINTF("level = %i\n", level);
-  DEBUG_PRINTF("LEVELMAX = %i\n", LEVELMAX);
+  DEBUG_BEGIN("SchatzmanPaoliOSI::updateState(const unsigned int )\n");
+
   double h = _simulation->timeStep();
 
   double RelativeTol = _simulation->relativeConvergenceTol();
@@ -861,26 +860,18 @@ void SchatzmanPaoliOSI::updateState(const unsigned int level)
       //    SiconosVector *vfree = d->velocityFree();
       SiconosVector& q = *d->q();
       bool baux = dsType == Type::LagrangianDS && useRCC && _simulation->relativeConvergenceCriterionHeld();
-      if(level != LEVELMAX)
+
+      // To compute q, we solve W(q - qfree) = p
+      if(d->p(_levelMaxForInput))
       {
-        // To compute q, we solve W(q - qfree) = p
-        if(d->p(level))
-        {
-          q = *d->p(level); // q = p
-          W->PLUForwardBackwardInPlace(q);
-        }
-
-        // if (d->boundaryConditions())
-        //   for (vector<unsigned int>::iterator
-        //        itindex = d->boundaryConditions()->velocityIndices()->begin() ;
-        //        itindex != d->boundaryConditions()->velocityIndices()->end();
-        //        ++itindex)
-        //     v->setValue(*itindex, 0.0);
-        q +=  qfree;
-
+        q = *d->p(_levelMaxForInput); // q = p
+        W->PLUForwardBackwardInPlace(q);
       }
       else
-        q =  qfree;
+        q.zero();
+
+      q +=  qfree;
+
 
 
 
@@ -998,7 +989,7 @@ void SchatzmanPaoliOSI::updateState(const unsigned int level)
     }
     else RuntimeException::selfThrow("SchatzmanPaoliOSI::updateState - not yet implemented for Dynamical system type: " + dsType);
   }
-  DEBUG_END("SchatzmanPaoliOSI::updateState(const unsigned int level)\n");
+  DEBUG_END("SchatzmanPaoliOSI::updateState(const unsigned int)\n");
 
 }
 

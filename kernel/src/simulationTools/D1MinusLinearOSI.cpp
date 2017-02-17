@@ -432,10 +432,9 @@ void D1MinusLinearOSI::computeFreeState()
 
 }
 
-void D1MinusLinearOSI::updateState(const unsigned int level)
+void D1MinusLinearOSI::updateState(const unsigned int)
 {
-  DEBUG_BEGIN("D1MinusLinearOSI::updateState(const unsigned int level)\n");
-  DEBUG_PRINTF("with level  = %i\n",level);
+  DEBUG_BEGIN("D1MinusLinearOSI::updateState(const unsigned int)\n");
 
   DynamicalSystemsGraph::VIterator dsi, dsend;
   for(std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
@@ -504,7 +503,7 @@ void D1MinusLinearOSI::updateState(const unsigned int level)
 
   }
 
-  DEBUG_END("\n D1MinusLinearOSI::updateState(const unsigned int level)\n");
+  DEBUG_END("\n D1MinusLinearOSI::updateState(const unsigned int )\n");
 
 }
 

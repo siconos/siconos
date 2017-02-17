@@ -339,9 +339,6 @@ void TimeStepping::initOSNS()
     // initialization of  OneStepNonSmoothProblem
     for (OSNSIterator itOsns = _allNSProblems->begin(); itOsns != _allNSProblems->end(); ++itOsns)
     {
-      /* Default choices for the index set  (indexSet(_levelMinForInput))
-       * and input/output y[_levelMinForInput], lambda[_levelMinForInput] that is considered in osns */
-
       (*itOsns)->initialize(shared_from_this());
     }
   }
@@ -352,10 +349,9 @@ void TimeStepping::nextStep()
   processEvents();
 }
 
-void TimeStepping::update(unsigned int levelInput)
+void TimeStepping::update(unsigned int)
 {
-  DEBUG_BEGIN("TimeStepping::update(unsigned int levelInput)\n");
-  DEBUG_PRINTF("levelInput = % i \n",levelInput);
+  DEBUG_BEGIN("TimeStepping::update(unsigned int )\n");
   OSIIterator itOSI;
   // 1 - compute input (lambda -> r)
   if (!_allNSProblems->empty())
@@ -367,7 +363,7 @@ void TimeStepping::update(unsigned int levelInput)
   // 2 - compute state for each dynamical system
 
   for (itOSI = _allOSI->begin(); itOSI != _allOSI->end() ; ++itOSI)
-    (*itOSI)->updateState(levelInput);
+    (*itOSI)->updateState();
 
   // need this until mechanics' BulletTimeStepping class is removed
   updateWorldFromDS();
@@ -564,7 +560,7 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
     else
       checkSolverOutput(info, this);
 
-    update(_levelMaxForInput);
+    update();
 
     if (hasNSProblems)
       saveYandLambdaInOldVariables();
@@ -601,7 +597,7 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
       else
         checkSolverOutput(info, this);
 
-      update(_levelMaxForInput);
+      update();
       _isNewtonConverge = newtonCheckConvergence(criterion);
 
       if (!_isNewtonConverge && !info)
