@@ -161,7 +161,7 @@ public:
 
   /** update input, state of each dynamical system and output
    *  \param level lambda order used to compute input
-   * level is set to 0 by default since in all time-stepping schemes we update all the state 
+   * level is set to 0 by default since in all time-stepping schemes we update all the state
    */
   virtual void update(unsigned int level=0);
 

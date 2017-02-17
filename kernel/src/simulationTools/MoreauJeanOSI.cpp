@@ -1658,6 +1658,8 @@ void MoreauJeanOSI::updateState(const unsigned int )
         {
           _dynamicalSystemsGraph->properties(*dsi).WBoundaryConditions->getCol(bc, *columntmp);
           /*\warning we assume that W is symmetric in the Lagrangian case*/
+          if (!_dynamicalSystemsGraph->properties(*dsi).W->isSymmetric(1e-10))
+            std::cout <<"Warning, we apply boundary conditions assuming W symmetric" << std::endl;
           double value = - inner_prod(*columntmp, *v);
           if( d->p(_levelMaxForInput)&& d->p(_levelMaxForInput)->size() > 0)
           {
