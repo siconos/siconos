@@ -51,6 +51,8 @@ namespace RELATION
     RheonomousR,
     /** Compliant (lagrangian only) */
     CompliantR,
+    /** CompliantLinearTIR (lagrangian only) */
+    CompliantLinearTIR,
     /** */
     Type1R,
     /** */
