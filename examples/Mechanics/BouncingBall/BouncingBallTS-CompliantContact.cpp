@@ -40,7 +40,7 @@ int main(int argc, char* argv[])
     unsigned int nDof = 3;           // degrees of freedom for the ball
     double t0 = 0;                   // initial computation time
     double T = 10;                  // final computation time
-    double h = 0.005;                // time step
+    double h = 0.0005;                // time step
     double position_init = 1.0;      // initial position for lowest bead.
     double velocity_init = 0.0;      // initial velocity for lowest bead.
     double theta = 0.5;              // theta for MoreauJeanOSI integrator
@@ -78,14 +78,14 @@ int main(int argc, char* argv[])
     // --------------------
 
     // -- nslaw --
-    double e = 0.9;
+    double e = 1.0;
 
     // Interaction ball-roof with impact
     //
     SP::SimpleMatrix H(new SimpleMatrix(1, nDof));
     (*H)(0, 0) = -1.0;
     SP::SiconosVector b(new SiconosVector(1));
-    (*b)(0) = - R;
+    (*b)(0) = height - R- .2;
 
     SP::NonSmoothLaw nslaw(new NewtonImpactNSL(e));
     SP::Relation relation(new LagrangianLinearTIR(H,b));
@@ -93,16 +93,16 @@ int main(int argc, char* argv[])
     SP::Interaction inter(new Interaction(1, nslaw, relation));
 
     // -- nslaw --
-    double stiffness = 10.0;
+    double compliance = 0.01;
 
     // Interaction ball-floor with a compliant spring
     SP::SimpleMatrix Hfloor(new SimpleMatrix(1, nDof));
     (*Hfloor)(0, 0) = 1.0;
      SP::SimpleMatrix Kfloor(new SimpleMatrix(1, 1));
-    (*Kfloor)(0, 0) = stiffness;
+    (*Kfloor)(0, 0) = compliance;
 
     SP::SiconosVector bfloor(new SiconosVector(1));
-    (*bfloor)(0) = height - R;
+    (*bfloor)(0) = - R;
     SP::NonSmoothLaw nslawfloor(new ComplementarityConditionNSL(1));
 
     SP::Relation relationfloor(new LagrangianCompliantLinearTIR(Hfloor,Kfloor, bfloor));
@@ -201,10 +201,10 @@ int main(int argc, char* argv[])
     cout  << "End of computation - Number of iterations done: " << k - 1 << endl;
     cout << "Computation Time " << time.elapsed()  << endl;
 
-  //   // --- Output files ---
-  //   cout << "====> Output file writing ..." << endl;
-  //   dataPlot.resize(k, outputSize);
-  //   ioMatrix::write("result.dat", "ascii", dataPlot, "noDim");
+    // --- Output files ---
+    cout << "====> Output file writing ..." << endl;
+    dataPlot.resize(k, outputSize);
+    ioMatrix::write("result.dat", "ascii", dataPlot, "noDim");
   //   std::cout << "Comparison with a reference file" << std::endl;
   //   SimpleMatrix dataPlotRef(dataPlot);
   //   dataPlotRef.zero();
