@@ -928,7 +928,7 @@ void EulerMoreauOSI::integrate(double& tinit, double& tend, double& tout, int&)
   }
 }
 
-void EulerMoreauOSI::updateState(const unsigned int level)
+void EulerMoreauOSI::updateState(const unsigned int)
 {
 
   DEBUG_PRINT("EulerMoreauOSI::updateState\n");
@@ -964,36 +964,29 @@ void EulerMoreauOSI::updateState(const unsigned int level)
 
       // TODO ???
       bool baux = (useRCC && dsType == Type::FirstOrderNonLinearDS && _simulation->relativeConvergenceCriterionHeld());
-      if(level != LEVELMAX)
+
+      //    SP::SiconosVector xFree = d->xFree();
+
+      // Save value of q in local_buffer for relative convergence computation
+      if(baux)
+        *workVectors[FirstOrderDS::xBuffer] = x;
+
+      //        std::cout <<boolalpha << _useGamma << std::endl;
+      //        std::cout <<_gamma << std::endl;
+      if(_useGamma)
       {
-
-        //    SP::SiconosVector xFree = d->xFree();
-
-        // Save value of q in local_buffer for relative convergence computation
-        if(baux)
-          *workVectors[FirstOrderDS::xBuffer] = x;
-
-        //        std::cout <<boolalpha << _useGamma << std::endl;
-        //        std::cout <<_gamma << std::endl;
-        if(_useGamma)
-        {
-          // XXX UseGamma broken ? -- xhub
-          scal(_gamma * h, *d.r(), x); // x = gamma*h*r
-        }
-        else
-        {
-          scal(h, *d.r(), x); // x = h*r
-        }
-
-        W.PLUForwardBackwardInPlace(x); // x = h* W^{-1} *r
-
-        x += *workVectors[FirstOrderDS::xfree]; // x+=xfree
+        // XXX UseGamma broken ? -- xhub
+        scal(_gamma * h, *d.r(), x); // x = gamma*h*r
       }
       else
       {
-        RuntimeException::selfThrow("EulerMoreauOSI::updateState - level != LEVELMAX is not supposed to happen !");
-        x = *workVectors[FirstOrderDS::xfree]; // x = xfree
+        scal(h, *d.r(), x); // x = h*r
       }
+
+      W.PLUForwardBackwardInPlace(x); // x = h* W^{-1} *r
+
+      x += *workVectors[FirstOrderDS::xfree]; // x+=xfree
+
 
       if(baux)
       {

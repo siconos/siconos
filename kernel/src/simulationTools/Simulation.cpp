@@ -216,15 +216,6 @@ void Simulation::initialize(SP::Model m, bool withOSI)
     }
 
 
-
-    // This is the default
-    _levelMinForInput = LEVELMAX;
-    _levelMaxForInput = 0;
-    _levelMinForOutput = LEVELMAX;
-    _levelMaxForOutput = 0;
-
-    _numberOfIndexSets=0;
-
     // === OneStepIntegrators initialization ===
     for (OSIIterator itosi = _allOSI->begin();
          itosi != _allOSI->end(); ++itosi)
@@ -232,15 +223,6 @@ void Simulation::initialize(SP::Model m, bool withOSI)
       (*itosi)->setSimulationPtr(shared_from_this());
       (*itosi)->initialize(*m);
       _numberOfIndexSets = std::max<int>((*itosi)->numberOfIndexSets(), _numberOfIndexSets);
-
-      /* V.A. This operation should be osi dependent only
-       * in a near future, we should only use _level*For* osi only
-       */
-      _levelMinForInput = std::min<int>((*itosi)->levelMinForOutput(), _levelMinForInput);
-      _levelMaxForInput = std::max<int>((*itosi)->levelMaxForOutput(), _levelMaxForInput);
-      _levelMinForOutput = std::min<int>((*itosi)->levelMinForInput(), _levelMinForOutput);
-      _levelMaxForOutput = std::max<int>((*itosi)->levelMaxForInput(), _levelMaxForOutput);
-
     }
   }
   SP::Topology topo = _nsds->topology();

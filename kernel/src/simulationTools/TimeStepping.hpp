@@ -160,9 +160,10 @@ public:
   virtual void nextStep();
 
   /** update input, state of each dynamical system and output
-   *  \param levelInput lambda order used to compute input
+   *  \param level lambda order used to compute input
+   * level is set to 0 by default since in all time-stepping schemes we update all the state 
    */
-  void update(unsigned int levelInput);
+  virtual void update(unsigned int level=0);
 
   /** integrates all the DynamicalSystems taking not into account nslaw, reactions (ie non-smooth part) ...
   */
