@@ -323,7 +323,13 @@ public:
    * level is set to 0 by default since in all time-stepping schemes we update all the state
    * whatever the value of level
    */
-  virtual void updateState(const unsigned int level = 0) = 0;
+  virtual void updateState(const unsigned int level) = 0;
+
+  /** update the state of the DynamicalSystem attached to this Integrator
+   * level is set to 0 by default since in all time-stepping schemes we update all the state
+   * whatever the value of level
+   */
+  void updateState() { updateState(0); }
 
   /** update the output of the Interaction attached to this Integrator
    */
