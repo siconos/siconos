@@ -13,7 +13,7 @@ from siconos.mechanics.collision.bullet import SiconosBulletOptions
 
 options = SiconosBulletOptions()
 options.worldScale = 1.0
-options.breakingThreshold = 0.04
+options.contactBreakingThreshold = 0.04
 
 # Creation of the hdf5 file for input/output
 with Hdf5() as io:

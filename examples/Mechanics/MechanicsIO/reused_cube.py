@@ -14,7 +14,7 @@ siconos.io.mechanics_io.use_proposed = True
 
 options = siconos.mechanics.collision.bullet.SiconosBulletOptions()
 options.worldScale = 1.0
-options.breakingThreshold = 0.01
+options.contactBreakingThreshold = 0.01
 
 import pydoc
 # Creation of the hdf5 file for input/output
