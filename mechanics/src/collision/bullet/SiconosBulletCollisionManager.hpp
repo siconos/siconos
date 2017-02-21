@@ -38,12 +38,12 @@ struct SiconosBulletOptions
 {
   SiconosBulletOptions();
 
-  double breakingThreshold;
+  double contactBreakingThreshold;
+  double contactProcessingThreshold;
   double worldScale;
   bool useAxisSweep3;
   unsigned int perturbationIterations;
   unsigned int minimumPointsPerturbationThreshold;
-  double contactProcessingThreshold;
 };
 
 struct SiconosBulletStatistics

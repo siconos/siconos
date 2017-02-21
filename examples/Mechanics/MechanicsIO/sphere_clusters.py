@@ -14,7 +14,7 @@ import numpy as np
 
 options = SiconosBulletOptions()
 options.worldScale = 1.0
-options.breakingThreshold = 0.01
+options.contactBreakingThreshold = 0.01
 
 sphere_count = 0
 cluster_count = 0

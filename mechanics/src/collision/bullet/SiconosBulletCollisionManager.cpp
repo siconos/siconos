@@ -150,12 +150,12 @@ struct btSiconosHeightData : public btHeightfieldTerrainShape {
 
 // Default Bullet options
 SiconosBulletOptions::SiconosBulletOptions()
-  : breakingThreshold(0.02)
+  : contactBreakingThreshold(0.02)
+  , contactProcessingThreshold(0.03)
   , worldScale(1.0)
   , useAxisSweep3(false)
   , perturbationIterations(3)
   , minimumPointsPerturbationThreshold(3)
-  , contactProcessingThreshold(0.03)
 {
 }
 
@@ -1370,7 +1370,7 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
   gContactDestroyedCallback = this->bulletContactClear;
 
   // Important parameter controlling contact point making and breaking
-  gContactBreakingThreshold = _options.breakingThreshold;
+  gContactBreakingThreshold = _options.contactBreakingThreshold;
 
   // 1. perform bullet collision detection
   impl->_collisionWorld->performDiscreteCollisionDetection();
