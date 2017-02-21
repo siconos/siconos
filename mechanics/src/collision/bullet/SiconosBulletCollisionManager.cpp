@@ -153,8 +153,8 @@ SiconosBulletOptions::SiconosBulletOptions()
   : breakingThreshold(0.02)
   , worldScale(1.0)
   , useAxisSweep3(false)
-  , perturbationIterations(5)
-  , minimumPointsPerturbationThreshold(5)
+  , perturbationIterations(3)
+  , minimumPointsPerturbationThreshold(3)
   , contactProcessingThreshold(0.03)
 {
 }
@@ -1227,6 +1227,7 @@ public:
     const btCollisionObject* objectA;
     const btCollisionObject* objectB;
     btManifoldPoint* point;
+    btPersistentManifold* manifold;
   };
 
   class iterator {
@@ -1237,7 +1238,6 @@ public:
     unsigned int numContacts;
     unsigned int manifold_index;
     unsigned int contact_index;
-    btPersistentManifold* contactManifold;
     iterator(SP::btCollisionWorld _world)
     {
       numManifolds = 0;
@@ -1271,11 +1271,11 @@ public:
         manifold_index ++;
         if (manifold_index < numManifolds)
         {
-          contactManifold = world->getDispatcher()->
+          data.manifold = world->getDispatcher()->
             getManifoldByIndexInternal(manifold_index);
-          data.objectA = contactManifold->getBody0();
-          data.objectB = contactManifold->getBody1();
-          numContacts = contactManifold->getNumContacts();
+          data.objectA = data.manifold->getBody0();
+          data.objectB = data.manifold->getBody1();
+          numContacts = data.manifold->getNumContacts();
           contact_index = 0;
         }
         else
@@ -1284,7 +1284,7 @@ public:
           return *this;
         }
       }
-      data.point = &(contactManifold->getContactPoint(contact_index));
+      data.point = &(data.manifold->getContactPoint(contact_index));
       return *this;
     };
 
@@ -1448,6 +1448,19 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
 
         inter.reset(new Interaction(3, nslaw, rel, 0 /*4 * i + z*/));
         _stats.new_interactions_created ++;
+
+        // For future contact points on this manifold, the
+        // btManifoldPersistentContact's breaking threshold is used to
+        // determine whether points should be added or replaced.  We
+        // want to bias towards adding them, so we set it to a low
+        // value here.  (See btPersistentManifold::getCacheEntry())
+        it->manifold->setContactBreakingThreshold(1e-10);
+
+        // Hopefully in the future we can have more control over how
+        // Bullet decides which points are kept stable.  Incorrect
+        // contact caching leads to too few contact points, or
+        // unstable "cycling" behaviour in the contact points,
+        // allowing objects to fall through each other.
       }
       else
       {
