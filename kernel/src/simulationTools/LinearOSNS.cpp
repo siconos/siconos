@@ -42,6 +42,7 @@
 #include "Tools.hpp"
 
 using namespace RELATION;
+// #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
 #include "debug.h"
@@ -615,7 +616,8 @@ void LinearOSNS::computeqBlock(InteractionsGraph::VDescriptor& vertex_inter, uns
       (osi1Type == OSI::SCHATZMANPAOLIOSI && osi2Type == OSI::SCHATZMANPAOLIOSI ) ||
       (osi1Type == OSI::ZOHOSI && osi2Type == OSI::ZOHOSI))
   {
-    // We assume that the osi of ds1 osi1 is integrating the interaction
+    // We assume that the osi of ds1 (osi1) is integrating the interaction
+    DEBUG_EXPR(display());
     osi1.computeFreeOutput(vertex_inter, this);
     setBlock(*inter->yForNSsolver(), _q, sizeY , 0, pos);
     DEBUG_EXPR(_q->display());

@@ -19,6 +19,7 @@
 #include <iostream>
 //#define DEBUG_BEGIN_END_ONLY
 // #define DEBUG_STDOUT
+// #define DEBUG_NOCOLOR
 // #define DEBUG_MESSAGES
 #include "debug.h"
 
@@ -844,7 +845,11 @@ void Interaction::computeOutput(double time, InteractionProperties& interProp, u
 
 void Interaction::computeInput(double time, InteractionProperties& interProp, unsigned int level)
 {
+  DEBUG_BEGIN("Interaction::computeInput(...)\n");
+  DEBUG_PRINTF("time= %f\t",time);
+  DEBUG_PRINTF("level= %i\n",level);
   relation()->computeInput(time, *this, interProp, level);
+  DEBUG_END("Interaction::computeInput(...)\n");
 }
 
 

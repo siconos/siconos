@@ -785,11 +785,7 @@ double EventDriven::computeResiduConstraints()
         {
           _maxResiduGap = abs(_y);
         }
-        //
-#ifdef DEBUG_MESSAGES
-        cout << "Contraint residu: " << _y <<endl;
-#endif
-        //
+        DEBUG_PRINTF("Constraint residu: =  %e \n", _y);
       }
     }
     else
@@ -797,11 +793,8 @@ double EventDriven::computeResiduConstraints()
       RuntimeException::selfThrow("In EventDriven::predictionNewtonIteration, the current OSI must be NewMarkAlpha scheme!!!");
     }
   }
-  //
-#ifdef DEBUG_MESSAGES
-  cout << "Maximum constraint residu: " << _maxResiduGap <<endl;
-#endif
-  //
+
+  DEBUG_PRINTF("Maximum constraint residu = %e \n", _maxResiduGap);
   return _maxResiduGap;
 }
 
@@ -906,6 +899,7 @@ void EventDriven::correctionNewtonIteration()
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 void EventDriven::newtonSolve(double criterion, unsigned int maxStep)
 {
+  DEBUG_BEGIN("EventDriven::newtonSolve(double criterion, unsigned int maxStep)\n");
   _isNewtonConverge = false;
   _newtonNbIterations = 0; // number of Newton iterations
   int info = 0;
@@ -920,10 +914,10 @@ void EventDriven::newtonSolve(double criterion, unsigned int maxStep)
     // Check convergence
     _isNewtonConverge = newtonCheckConvergence(_newtonTolerance);
     //
-#ifdef DEBUG_MESSAGES
-    cout << "Iteration: " << _newtonNbIterations <<endl;
-    cout << "Convergence: " << _isNewtonConverge <<endl;
-#endif
+
+    DEBUG_PRINTF("Iteration:  %i \n",_newtonNbIterations );
+    DEBUG_PRINTF("Convergence:  %s \n",(_isNewtonConverge)?"true":"false");
+
     //
     if (_isNewtonConverge)
     {
@@ -946,6 +940,7 @@ void EventDriven::newtonSolve(double criterion, unsigned int maxStep)
     // Correction of the state of all Dynamical Systems
     correctionNewtonIteration();
   }
+  DEBUG_END("EventDriven::newtonSolve(double criterion, unsigned int maxStep)\n");
 }
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
