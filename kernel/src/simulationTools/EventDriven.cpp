@@ -582,8 +582,7 @@ void EventDriven::updateSmoothState()
     (*itOSI)->updateState(2);
 }
 
-
-void EventDriven::update(unsigned int levelInput)
+void EventDriven::updateState(unsigned int levelInput)
 {
   assert(levelInput <= 2);
   if (levelInput == 1)
@@ -594,6 +593,10 @@ void EventDriven::update(unsigned int levelInput)
   {
     updateSmoothState();
   }
+}
+
+void EventDriven::updateOutput(unsigned int levelInput)
+{
   // Update output (y)
   _nsds->updateOutput(nextTime(),levelInput);
   // Warning: index sets are not updated in this function !!
@@ -627,9 +630,9 @@ void EventDriven::advanceToEvent()
     // Update input of level 2 >>> has already been done in newtonSolve
     // Update state of all Dynamicall Systems >>>  has already been done in newtonSolve
     // Update outputs of levels 0, 1, 2
-    _nsds->updateOutput(nextTime(),0);
-    _nsds->updateOutput(nextTime(),1);
-    _nsds->updateOutput(nextTime(),2);
+    updateOutput(0);
+    updateOutput(1);
+    updateOutput(2);
     // Detect whether or not some events occur during the integration step
     _minConstraint = detectEvents();
     //
@@ -720,9 +723,9 @@ void EventDriven::advanceToEvent()
     }
     // Set model time to _tout
     //update output[0], output[1], output[2]
-    _nsds->updateOutput(nextTime(),0);
-    _nsds->updateOutput(nextTime(),1);
-    _nsds->updateOutput(nextTime(),2);
+    updateOutput(0);
+    updateOutput(1);
+    updateOutput(2);
     //update lambda[2], input[2] and indexSet[2] with double consitions for the case there is no new event added during time integration, otherwise, this
     // update is done when the new event is processed
     if (!isNewEventOccur)

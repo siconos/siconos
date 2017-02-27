@@ -146,6 +146,13 @@ protected:
   /** Call the interaction manager one if is registered, otherwise do nothing. */
   void updateInteractions();
 
+  /*TS set the ds->q memory, the world (CAD model for example) must be updated.
+    Overload this method to update user model.*/
+  virtual void updateWorldFromDS()
+  {
+    ;
+  };
+
 private:
 
   /** copy constructor. Private => no copy nor pass-by value.
@@ -404,10 +411,28 @@ public:
    */
   int computeOneStepNSProblem(int nb);
 
-  /** update input, state of each dynamical system and output
+  /** update input
    *  \param level lambda order used to compute input
+   * level is set to 0 by default since in all time-stepping schemes we update all the state
    */
-  virtual void update(unsigned int level) = 0;
+  virtual void updateInput(unsigned int level=0);
+
+  /** update state of each dynamical system
+   */
+  virtual void updateState(unsigned int level=0);
+
+  /** update output
+   *  \param level lambda order used to compute output
+   * level is set to 0 by default since in all time-stepping schemes we update all the state
+   */
+  virtual void updateOutput(unsigned int level=0);
+
+  /** update output, state, and input
+   *  \param level lambda order used to compute input
+   * level is set to 0 by default since in all time-stepping schemes we update all the state
+   */
+  void update(unsigned int level=0)
+    { updateInput(level); updateState(level); updateOutput(level); }
 
   /** run the simulation, from t0 to T
    * with default parameters if any particular settings has been done
