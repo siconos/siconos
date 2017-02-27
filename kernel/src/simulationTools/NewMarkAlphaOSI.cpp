@@ -28,6 +28,7 @@
 #include "OneStepNSProblem.hpp"
 #include "BlockVector.hpp"
 using namespace RELATION;
+// #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
 #include "debug.h"
@@ -142,6 +143,7 @@ void NewMarkAlphaOSI::computeW(SP::DynamicalSystem ds, SiconosMatrix& W)
 
 double NewMarkAlphaOSI::computeResidu()
 {
+  DEBUG_BEGIN("NewMarkAlphaOSI::computeResidu() \n");
   // Compute the residual for each Dynamical system at step n and at iteration k
   // R_{n,k} = M_{n,k} ddotq_{n,k} - F_{n,k} - p_{n,k}
   // R_free = M_{n,k} ddotq_{n,k} - F_{n,k};
@@ -222,26 +224,24 @@ double NewMarkAlphaOSI::computeResidu()
         maxResidu = normResidu;
       }
       //
-#ifdef DEBUG_NEWMARK
-      std::cout.precision(15);
-      std::cout << "Residu Free: ";
-      residuFree.display();
-      std::cout << "Residu: ";
-      _residu->display();
-      std::cout << "ResiduMax: " << maxResidu <<std::endl;
-#endif
+
+      DEBUG_EXPR(residuFree.display(););
+      DEBUG_EXPR(_residu->display(););
+
     }
     else
     {
       RuntimeException::selfThrow("In NewMarkAlphaOSI::computeResidu(t,ds), this type of Dynamical System is not yet implemented");
     }
   }
+  DEBUG_END("NewMarkAlphaOSI::computeResidu() \n");
   return maxResidu;
 }
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 void NewMarkAlphaOSI::computeFreeState()
 {
+  DEBUG_BEGIN("NewMarkAlphaOSI::computeFreeState()\n");
   // Compute delta q_free = - ((W_{n,k})^-1)*R_free
   //Loop through the set of DS
   SP::DynamicalSystem ds;   // Current Dynamical System.
@@ -258,8 +258,8 @@ void NewMarkAlphaOSI::computeFreeState()
     dsType = Type::value(*ds); // Its type
     // Get iteration matrix W, make sure that W was updated before
     W = _dynamicalSystemsGraph->properties(*dsi).W; // Its W matrix of iteration.
-    
-   
+
+
     SiconosVector& residuFree = *workVectors[OneStepIntegrator::residu_free];
     SiconosVector& qfree = *workVectors[OneStepIntegrator::free];
 
@@ -271,22 +271,21 @@ void NewMarkAlphaOSI::computeFreeState()
       W->PLUForwardBackwardInPlace(qfree); //_qfree = (W^-1)*R_free
       qfree *= -1.0; //_qfree = -(W^-1)*R_free
       //
-#ifdef DEBUG_NEWMARK
-      std::cout << "delta q_free: " <<std::endl;
-      qfree.display();
-#endif
+      DEBUG_EXPR(qfree.display(););
     }
     else
     {
       RuntimeException::selfThrow("In NewMarkAlphaOSI::computeResidu(t,ds), this type of Dynamical System is not yet implemented");
     }
   }
+  DEBUG_END("NewMarkAlphaOSI::computeFreeState()\n");
 }
 
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 void NewMarkAlphaOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, OneStepNSProblem* osnsp)
 {
+   DEBUG_BEGIN("NewMarkAlphaOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, OneStepNSProblem* osnsp)\n");
   double t = _simulation->nextTime();
   SP::InteractionsGraph indexSet = osnsp->simulation()->indexSet(osnsp->indexSetLevel());
   SP::Interaction inter = indexSet->bundle(vertex_inter);
@@ -308,7 +307,7 @@ void NewMarkAlphaOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_i
     q_free = DSlink[LagrangianR::xfree];
   }
   assert(q_free);
-
+  DEBUG_EXPR(q_free->display(););
 
   // get pointer to yForNSsolver vector
   SiconosVector& yForNSsolver = *inter->yForNSsolver();
@@ -376,15 +375,14 @@ void NewMarkAlphaOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_i
         RuntimeException::selfThrow("NewMarkAlphaOSI::computeFreeOutput, this OSNSP does not exist");
       }
     }
-#ifdef DEBUG_NEWMARK
-    std::cout << "Free output yForNSsolver: ";
-    yForNSsolver.display();
-#endif
+
+    DEBUG_EXPR(yForNSsolver.display(););
   }
   else
   {
     RuntimeException::selfThrow("In NewMarkAlphaOSI::computeFreeOutput, this type of relation is not yet implemented");
   }
+  DEBUG_END("NewMarkAlphaOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, OneStepNSProblem* osnsp)\n");
 }
 
 void NewMarkAlphaOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds)
@@ -395,6 +393,9 @@ void NewMarkAlphaOSI::initializeDynamicalSystem(Model& m, double t, SP::Dynamica
 
   VectorOfVectors& workVectors = *_dynamicalSystemsGraph->properties(dsv).workVectors;
   VectorOfMatrices& workMatrices = *_dynamicalSystemsGraph->properties(dsv).workMatrices;
+
+
+  ds->resetToInitialState();
 
   // W initialization
   initializeIterationMatrixW(ds);
@@ -411,7 +412,10 @@ void NewMarkAlphaOSI::initializeDynamicalSystem(Model& m, double t, SP::Dynamica
 
     workVectors.resize(OneStepIntegrator::work_vector_of_vector_size);
     workVectors[OneStepIntegrator::residu_free].reset(new SiconosVector(d->dimension()));
-    workVectors[OneStepIntegrator::free].reset(new SiconosVector(d->dimension()));
+    //workVectors[OneStepIntegrator::free].reset(new SiconosVector(d->dimension()));
+    workVectors[OneStepIntegrator::free].reset(new SiconosVector(*(d->acceleration())));
+
+
     workVectors[OneStepIntegrator::acce_like].reset(new SiconosVector(*(d->acceleration()))); // set a0 = ddotq0
     workVectors[OneStepIntegrator::acce_memory].reset(new SiconosVector(*(d->acceleration()))); // set a0 = ddotq0
 
@@ -461,7 +465,7 @@ void NewMarkAlphaOSI::initializeInteraction(double t0, Interaction &inter,
   unsigned int upperLevelForOutput=2;
   unsigned int lowerLevelForInput=1;
   unsigned int upperLevelForInput=2;
-  
+
   if (nslType == Type::NewtonImpactNSL || nslType == Type::MultipleImpactNSL)
   {
     lowerLevelForOutput = 0;
@@ -585,6 +589,7 @@ void NewMarkAlphaOSI::prepareNewtonIteration(double time)
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 void NewMarkAlphaOSI::prediction()
 {
+  DEBUG_BEGIN("NewMarkAlphaOSI::prediction()\n");
   // Step size
   double h = _simulation->nextTime() - _simulation->startingTime();
   if(h < 100 * MACHINE_PREC)
@@ -612,42 +617,31 @@ void NewMarkAlphaOSI::prediction()
       // Save the acceleration before the prediction
       acce_like = *(_ddotq);
 
-      DEBUG_EXPR(
-        std::cout.precision(15);
-        std::cout << "Before prediction" <<std::endl;
-        std::cout << "Position q: ";
-        _q->display();
-        std::cout << "Velocity dotq: ";
-        _dotq->display();
-        std::cout << "Acceleration ddotq: ";
-        _ddotq->display();
-        std::cout << "Acceleration-like a: ";
-        acce_like.display();
-        );
+      DEBUG_PRINT("Before prediction :\n")
+      DEBUG_EXPR(_q->display(););
+      DEBUG_EXPR(_dotq->display(););
+      DEBUG_EXPR(_ddotq->display(););
+      DEBUG_EXPR(acce_like.display(););
+
       *_q = *_q + (*_dotq) * h + acce_like * (h*h * (0.5 - _beta)); // q_{n+1} = q_n + (h^2)*(0.5 - beta)*a_n
       *_dotq = *_dotq + acce_like * (h * (1 - _gamma));              // dotq_{n+1} = dotq_n + h*(1 - gamma)*a_n
       acce_like = (_alpha_f / (1 - _alpha_m)) * (*_ddotq) - (_alpha_m / (1 - _alpha_m)) * acce_like; // a_{n+1} = (alpha_f*ddotq_n - alpha_m*a_n)/(1 - alpha_m)
       *_q = *_q + (h*h * _beta) * acce_like;
       *_dotq = *_dotq + (h * _gamma) * acce_like;
       _ddotq->zero();
-      DEBUG_EXPR(
-        std::cout.precision(15);
-        std::cout << "After prediction" <<std::endl;
-        std::cout << "Position q: ";
-        _q->display();
-        std::cout << "Velocity dotq: ";
-        _dotq->display();
-        std::cout << "Acceleration ddotq: ";
-        _ddotq->display();
-        std::cout << "Acceleration-like a: ";
-        acce_like.display();
-        );
+
+      DEBUG_PRINT("After prediction :\n")
+      DEBUG_EXPR(_q->display(););
+      DEBUG_EXPR(_dotq->display(););
+      DEBUG_EXPR(_ddotq->display(););
+      DEBUG_EXPR(acce_like.display(););
     }
     else
     {
       RuntimeException::selfThrow("In NewMarkAlphaOSI::prediction: this type of DS is not yet implemented");
     }
   }
+  DEBUG_END("NewMarkAlphaOSI::prediction()\n");
 }
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -672,7 +666,7 @@ void NewMarkAlphaOSI::correction()
     SiconosVector& residuFree = *workVectors[OneStepIntegrator::residu_free];
     SiconosVector& acce_like = *workVectors[OneStepIntegrator::acce_like];
 
-    
+
     dsType = Type::value(*ds); // Its type
     if((dsType == Type::LagrangianDS) || (dsType == Type::LagrangianLinearTIDS))
     {
@@ -686,21 +680,15 @@ void NewMarkAlphaOSI::correction()
       *(d->velocity()) += (gamma_prime / h) * (*delta_q); // dotq_{n+1,k+1} = dotq_{n+1,k} + (gamma_prime/h)*delta_q
       *(d->acceleration()) += beta_prime / (h*h) * (*delta_q); // ddotq_{n+1,k+1} = ddotq_{n+1,k} + (beta_prime/h^2)*delta_q
       //a_{n+1,k+1} = a_{n+1,k} + ((1-alpha_f)/(1-alpha_m))*(beta_prime/h^2)*delta_q
-      
+
       acce_like += ((1 - _alpha_f) / (1 - _alpha_m)) * ((beta_prime / (h*h)) * (*delta_q));
-      //
-#ifdef DEBUG_NEWMARK
-      std::cout.precision(15);
-      std::cout << "After correction" <<std::endl;
-      std::cout << "Position q : ";
-      d->q()->display();
-      std::cout << "Velocity dotq : ";
-      d->velocity()->display();
-      std::cout << "Acceleration ddotq : ";
-      d->acceleration()->display();
-      std::cout << "Acceleration-like a : ";
-      acce_like.display();
-#endif
+
+      DEBUG_PRINT("After correction : \n");
+      DEBUG_EXPR(d->q()->display(););
+      DEBUG_EXPR(d->velocity()->display(););
+      DEBUG_EXPR(d->acceleration()->display(););
+      DEBUG_EXPR(acce_like.display(););
+
     }
     else
     {
