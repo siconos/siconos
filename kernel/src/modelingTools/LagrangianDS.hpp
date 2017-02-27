@@ -189,7 +189,6 @@ protected:
   //                              Jacobian_Force_wrt_q, Jacobian_Forces_wrt_qDot,
   //                              numberOfJacobians};
 
-  
   // /** A container of matrices to save jacobians matrices
   //  * Id are given by LagrangianDSJacobianId
   //  */

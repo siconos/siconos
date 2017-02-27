@@ -83,7 +83,7 @@ void LagrangianCompliantLinearTIR::computeOutput(double time, Interaction& inter
 
   prod(*_jachq, *DSlink[LagrangianR::q0 + derivativeNumber], y);
   prod(*_jachlambda, lambda, y, false);
-  
+
   if (derivativeNumber == 0)
   {
     if (_e)

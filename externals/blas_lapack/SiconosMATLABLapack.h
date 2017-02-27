@@ -29,7 +29,7 @@
 //#define COMPLEX_TYPES
 #undef complex
 
-#include <lapack.h> 
+#include <lapack.h>
 #define LAPACK_NAME FORTRAN_WRAPPER
 
 #define lapack_int ptrdiff_t
@@ -46,7 +46,7 @@
 
 // --- DGESVD ---
   // Note FP : we need to call WRAP_DGESVD two times, one to find optimal lwork
-  // and one for the real computation. 
+  // and one for the real computation.
   // We may add a test on info value to call lwork only once?
 #define WRAP_DGESVD(F,A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,INFO)      \
   lapack_int lwork = -1;                                                \
@@ -56,15 +56,15 @@
   work = realloc(work,lwork*sizeof(*work));                             \
   F(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,work,&lwork,INFO);               \
   free(work);
-  
+
 // --- DGETRS ---
 #define WRAP_DGETRS(F,A1,A2,A3,A4,A5,A6,A7,A8,INFO) \
   F(A1,A2,A3,A4,A5,A6,A7,A8,INFO)
-  
+
 // --- DGESV ---
 #define WRAP_DGESV(F,A1,A2,A3,A4,A5,A6,A7,INFO) \
   F(A1,A2,A3,A4,A5,A6,A7,INFO)
-  
+
 // --- DGELS ---
 #define WRAP_DGELS(F,A1,A2,A3,A4,A5,A6,A7,A8,INFO)                      \
   lapack_int lwork = -1;                                            \
@@ -74,7 +74,7 @@
   work = realloc(work,lwork*sizeof(*work));                             \
   F(A1,A2,A3,A4,A5,A6,A7,A8,work,&lwork,INFO);                          \
   free(work);                                                           \
-  
+
 // --- DGETRI ---
 #define WRAP_DGETRI(F,A1,A2,A3,A4,INFO)                                 \
   lapack_int lwork = -1;                                            \
@@ -86,15 +86,15 @@
   C_WORK = (double*)realloc(C_WORK, lwork * sizeof *C_WORK); \
   F(A1,A2,A3,A4,C_WORK,&lwork,INFO);                                    \
   free(C_WORK);                                                         \
-  
+
 // --- DPOTRF ---
 #define WRAP_DPOTRF(F,A1,A2,A3,A4,INFO)                                 \
   F(A1,A2,A3,A4,INFO);                                                  \
-  
+
 // --- DGETRF ---
 #define WRAP_DGETRF(F,A1,A2,A3,A4,A5,INFO)      \
   F(A1,A2,A3,A4,A5,INFO)
-  
+
 // --- DTRTRS ---
 #define WRAP_DTRTRS(F,A1,A2,A3,A4,A5,A6,A7,A8,A9,INFO) \
   F(A1,A2,A3,A4,A5,A6,A7,A8,A9,INFO)

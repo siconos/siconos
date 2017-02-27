@@ -24,8 +24,9 @@
 
 #include "BlockVector.hpp"
 #include "SimulationGraphs.hpp"
-//#define DEBUG_MESSAGES
-//#define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
+// #define DEBUG_STDOUT
+// #define DEBUG_NOCOLOR
 #include "debug.h"
 
 
@@ -179,7 +180,7 @@ void LagrangianScleronomousR::computeOutput(double time, Interaction& inter, Int
 
 void LagrangianScleronomousR::computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level)
 {
-  DEBUG_PRINT("void LagrangianScleronomousR::computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level) \n");
+  DEBUG_BEGIN("void LagrangianScleronomousR::computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level) \n");
 
   DEBUG_PRINTF("level = %i\n", level);
   VectorOfBlockVectors& DSlink = *interProp.DSlink;
@@ -189,10 +190,13 @@ void LagrangianScleronomousR::computeInput(double time, Interaction& inter, Inte
   computeJachq(q, z);
   // get lambda of the concerned interaction
   SiconosVector& lambda = *inter.lambda(level);
+  DEBUG_EXPR(lambda.display(););
+  DEBUG_EXPR(_jachq->display(););
   // data[name] += trans(G) * lambda
   prod(lambda, *_jachq, *DSlink[LagrangianR::p0 + level], false);
   DEBUG_EXPR(DSlink[LagrangianR::p0 + level]->display(););
   *DSlink[LagrangianR::z] = z;
+  DEBUG_END("void LagrangianScleronomousR::computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level) \n");
 }
 
 void LagrangianScleronomousR::computeJach(double time, Interaction& inter, InteractionProperties& interProp)

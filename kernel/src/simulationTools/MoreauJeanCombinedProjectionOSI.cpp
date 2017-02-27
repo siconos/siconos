@@ -31,7 +31,7 @@ MoreauJeanCombinedProjectionOSI::MoreauJeanCombinedProjectionOSI(double theta) :
   _levelMaxForOutput =1;
   _levelMinForInput =0;
   _levelMaxForInput =1;
-  //_integratorType = OSI::MOREAUDIRECTPROJECTIONOSI; 
+  //_integratorType = OSI::MOREAUDIRECTPROJECTIONOSI;
 }
 
 
@@ -58,10 +58,10 @@ void MoreauJeanCombinedProjectionOSI::initializeInteraction(double t0, Interacti
     inter.setUpperLevelForInput(_levelMaxForInput);
     isInitializationNeeded = true;
   }
-  
+
   if (isInitializationNeeded)
     inter.init();
-  
+
   MoreauJeanOSI::initializeInteraction(t0, inter, interProp, DSG);
 
   DEBUG_END("MoreauJeanOSI::initializeInteraction(...)\n");

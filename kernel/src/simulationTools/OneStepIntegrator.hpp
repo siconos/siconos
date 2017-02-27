@@ -109,17 +109,20 @@ protected:
    */
   unsigned int _levelMinForOutput;
 
-  /** _levelMaxForOutput is the maximunm level for the output 
+
+  /** _levelMaxForOutput is the maximum level for the output
    * needed by the OneStepIntegrator
    */
   unsigned int _levelMaxForOutput;
 
-  /** _levelMinForInput is the minimum level for the input 
+
+  /** _levelMinForInput is the minimum level for the input
    * needed by the OneStepIntegrator
    */
   unsigned int _levelMinForInput;
 
-  /** _levelMaxForInput is the maximum level for the input 
+
+  /** _levelMaxForInput is the maximum level for the input
    * needed by the OneStepIntegrator
    */
   unsigned int _levelMaxForInput;

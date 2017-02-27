@@ -12,7 +12,7 @@
   case NM_SPARSE_BLOCK:
   case NM_SPARSE:
   {
-    // XXX Quite a bit of overhead here 
+    // XXX Quite a bit of overhead here
     %NM_convert_from_target(target_mat, &(mat), TARGET_ERROR_VERBOSE);
     break;
   }
@@ -75,4 +75,3 @@ static void call_compute_F (void *problem, int n, double* z, double* F) \
     target_mem_mgmt_instr(target_nabla_F); \
     target_mem_mgmt_instr(target_n); \
   };
-

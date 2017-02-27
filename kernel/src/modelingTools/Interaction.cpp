@@ -19,6 +19,7 @@
 #include <iostream>
 //#define DEBUG_BEGIN_END_ONLY
 // #define DEBUG_STDOUT
+// #define DEBUG_NOCOLOR
 // #define DEBUG_MESSAGES
 #include "debug.h"
 
@@ -88,6 +89,7 @@ struct Interaction::_setLevels : public SiconosVisitor
       RuntimeException::selfThrow("Interaction::_setLevels::visit - unknown relation type for the nslaw ");
     };
   }
+  
   void visit(const RelayNSL& nslaw)
   {
     RELATION::TYPES relationType = _interaction->relation()->getType();
@@ -101,9 +103,10 @@ struct Interaction::_setLevels : public SiconosVisitor
     }
     else
     {
-	RuntimeException::selfThrow("Interaction::_setLevels::visit - unknown relation type for the nslaw ");
+      RuntimeException::selfThrow("Interaction::_setLevels::visit - unknown relation type for the nslaw ");
     };
   }
+  
   void visit(const MixedComplementarityConditionNSL& nslaw)
   {
     RELATION::TYPES relationType = _interaction->relation()->getType();
@@ -120,6 +123,7 @@ struct Interaction::_setLevels : public SiconosVisitor
       RuntimeException::selfThrow("Interaction::_setLevels::visit - unknown relation type for the nslaw ");
     };
   }
+  
   void visit(const EqualityConditionNSL& nslaw)
   {
     RELATION::TYPES relationType = _interaction->relation()->getType();
@@ -844,7 +848,11 @@ void Interaction::computeOutput(double time, InteractionProperties& interProp, u
 
 void Interaction::computeInput(double time, InteractionProperties& interProp, unsigned int level)
 {
+  DEBUG_BEGIN("Interaction::computeInput(...)\n");
+  DEBUG_PRINTF("time= %f\t",time);
+  DEBUG_PRINTF("level= %i\n",level);
   relation()->computeInput(time, *this, interProp, level);
+  DEBUG_END("Interaction::computeInput(...)\n");
 }
 
 

@@ -75,13 +75,13 @@ public:
   LagrangianCompliantLinearTIR() : LagrangianR(RELATION::CompliantLinearTIR) {};
 
   /** create the Relation from a set of data
-  *  \param C the matrix C 
+  *  \param C the matrix C
   *  \param D the matrix D
   */
   LagrangianCompliantLinearTIR(SP::SimpleMatrix C, SP::SimpleMatrix D);
-  
+
   /** create the Relation from a set of data
-  *  \param C the matrix C 
+  *  \param C the matrix C
   *  \param D the matrix D
   *  \param e the vector e
   */

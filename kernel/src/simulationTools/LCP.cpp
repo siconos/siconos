@@ -18,7 +18,8 @@
 #include "LCP.hpp"
 #include "OSNSMatrix.hpp"
 // #define DEBUG_STDOUT
-// #define DEBUG_MESSAGES 1
+// #define DEBUG_MESSAGES
+// #define DEBUG_NOCOLOR
 #include "debug.h"
 
 // --- numerics headers ---
