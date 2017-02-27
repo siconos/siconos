@@ -236,15 +236,6 @@ public:
    */
   double minDistance(SP::Hashed h);
 
-
-  /** Insert a new interaction and link it to 1 or 2 ds.
-      \param inter the new interaction.
-      \param ds1 a SP::DynamicalSystem.
-      \param ds2 a SP::DynamicalSystem (optional).
-  */
-  void link(SP::Interaction inter, SP::DynamicalSystem ds1,
-            SP::DynamicalSystem ds2 = SP::DynamicalSystem());
-
   /** Broadphase contact detection: add interactions in indexSet 0.
    *  \param time the current time.
    */

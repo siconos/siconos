@@ -424,17 +424,17 @@ void BulletSpaceFilter::buildInteractions(double time)
             if (dsa && !dsb)
             {
                 cpoint->m_userPersistentData = &*inter;
-                link(inter, dsa);
+                model()->simulation()->link(inter, dsa);
             }
             else if (!dsa && dsb)
             {
                 cpoint->m_userPersistentData = &*inter;
-                link(inter, dsb);
+                model()->simulation()->link(inter, dsb);
             }
             else if (dsa && dsb && (dsa != dsb))
             {
                 cpoint->m_userPersistentData = &*inter;
-                link(inter, dsa, dsb);
+                model()->simulation()->link(inter, dsa, dsb);
             }
           }
 
