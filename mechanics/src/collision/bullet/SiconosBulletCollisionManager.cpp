@@ -1446,19 +1446,6 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
 
         inter.reset(new Interaction(3, nslaw, rel, 0 /*4 * i + z*/));
         _stats.new_interactions_created ++;
-
-        // For future contact points on this manifold, the
-        // btManifoldPersistentContact's breaking threshold is used to
-        // determine whether points should be added or replaced.  We
-        // want to bias towards adding them, so we set it to a low
-        // value here.  (See btPersistentManifold::getCacheEntry())
-        it->manifold->setContactBreakingThreshold(1e-10);
-
-        // Hopefully in the future we can have more control over how
-        // Bullet decides which points are kept stable.  Incorrect
-        // contact caching leads to too few contact points, or
-        // unstable "cycling" behaviour in the contact points,
-        // allowing objects to fall through each other.
       }
       else
       {
