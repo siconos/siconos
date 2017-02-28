@@ -452,10 +452,10 @@ struct UpdateShapeVisitor : public SiconosVisitor
 
 void SiconosBulletCollisionManager_impl::updateAllShapesForDS(const BodyDS &bds)
 {
-  SP::UpdateShapeVisitor updateShapeVisitor(std11::make_shared<UpdateShapeVisitor>(*this));
+  UpdateShapeVisitor updateShapeVisitor(*this);
   std::vector<std11::shared_ptr<BodyShapeRecord> >::iterator it;
   for (it = bodyShapeMap[&bds].begin(); it != bodyShapeMap[&bds].end(); it++)
-    (*it)->acceptSP(updateShapeVisitor);
+    (*it)->accept(updateShapeVisitor);
 }
 
 template<typename ST, typename BT, typename BR>
