@@ -53,7 +53,6 @@ Note that not all files from the current location are listed below, since some o
 #include "NewMarkAlphaOSI.hpp"
 #include "MoreauJeanDirectProjectionOSI.hpp"
 #include "MoreauJeanCombinedProjectionOSI.hpp"
-#include "MoreauJeanOSI2.hpp"
 #include "D1MinusLinearOSI.hpp"
 #include "SchatzmanPaoliOSI.hpp"
 #include "ZeroOrderHoldOSI.hpp"
