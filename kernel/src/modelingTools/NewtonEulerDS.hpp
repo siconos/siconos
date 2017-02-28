@@ -30,6 +30,9 @@ typedef void (*FInt_NE)(double t, double* q, double* v, double *f, unsigned int 
 typedef void (*FExt_NE)(double t, double* f, unsigned int size_z, double *z);
 
 
+void compositionLawLieGroup(SiconosVector& a, SiconosVector& b, SiconosVector& ab);
+void compositionLawLieGroup(SiconosVector& a, SiconosVector& b);
+
 void computeRotationMatrix(double q0, double q1, double q2, double q3, SP::SimpleMatrix rotationMatrix);
 
 void computeRotationMatrix(SP::SiconosVector q,  SP::SimpleMatrix rotationMatrix);
@@ -75,7 +78,7 @@ void rotationVectorFromQuaternion(SP::SiconosVector q, SP::SiconosVector rotatio
 
 void quaternionFromAxisAngle(SP::SiconosVector axis, double angle, SP::SiconosVector q);
 void quaternionFromRotationVector(SP::SiconosVector rotationVector, SP::SiconosVector q);
-
+void quaternionFromTwistVector(SiconosVector& twist, SiconosVector& q);
 void computeT(SP::SiconosVector q, SP::SimpleMatrix T);
 
 
