@@ -24,6 +24,22 @@
 #include <MechanicsFwd.hpp>
 
 #include "BulletSiconosFwd.hpp"
+
+#undef SICONOS_VISITABLES
+#define SICONOS_VISITABLES()                    \
+  KERNEL_CLASSES()                              \
+  MECHANICS_CLASSES()                           \
+  REGISTER(BodyShapeRecord)                     \
+  REGISTER(BodyBoxRecord)                       \
+  REGISTER(BodySphereRecord)                    \
+  REGISTER(BodyCHRecord)                        \
+  REGISTER(BodyPlaneRecord)                     \
+  REGISTER(BodyCylinderRecord)                  \
+  REGISTER(BodyMeshRecord)                      \
+  REGISTER(BodyHeightRecord)
+
+DEFINE_SPTR(UpdateShapeVisitor)
+
 #include "SiconosBulletCollisionManager.hpp"
 #include "BodyDS.hpp"
 #include "BulletR.hpp"
@@ -175,6 +191,8 @@ struct BodyShapeRecord
   SP::btCollisionObject btobject;
   SP::SiconosContactor contactor;
   unsigned int shape_version;
+
+  VIRTUAL_ACCEPT_VISITORS();
 };
 
 template <typename SICONOSSHAPE, typename BULLETSHAPE>
@@ -188,36 +206,28 @@ struct BodyShapeRecordT : BodyShapeRecord
   BULLETSHAPE btshape;
 };
 
-// Body-Shape map types
-typedef BodyShapeRecordT<SP::SiconosBox, SP::BTBOXSHAPE> BodyBoxRecord;
-typedef std::map<const BodyDS*, std::vector<std11::shared_ptr<BodyBoxRecord> > >
-  BodyBoxMap;
+#define SHAPE_RECORD(X,SICONOSSHAPE,BULLETSHAPE)                        \
+  struct X : public BodyShapeRecord, std11::enable_shared_from_this<X> { \
+    X(SP::SiconosVector base, SP::BodyDS ds,                            \
+      SICONOSSHAPE sh, BULLETSHAPE btsh,                                \
+      SP::btCollisionObject btobj, SP::SiconosContactor con)            \
+      : BodyShapeRecord(base, ds, sh, btobj, con), shape(sh), btshape(btsh) {} \
+    SICONOSSHAPE shape;                                                 \
+    BULLETSHAPE btshape;                                                \
+    ACCEPT_VISITORS();                                                  \
+  };
 
-typedef BodyShapeRecordT<SP::SiconosSphere, SP::BTSPHERESHAPE> BodySphereRecord;
-typedef std::map<const BodyDS*, std::vector<std11::shared_ptr<BodySphereRecord> > >
-  BodySphereMap;
+// Body-Shape record types
+SHAPE_RECORD(BodyBoxRecord, SP::SiconosBox, SP::BTBOXSHAPE);
+SHAPE_RECORD(BodySphereRecord, SP::SiconosSphere, SP::BTSPHERESHAPE);
+SHAPE_RECORD(BodyCHRecord, SP::SiconosConvexHull, SP::BTCHSHAPE);
+SHAPE_RECORD(BodyPlaneRecord, SP::SiconosPlane, SP::BTPLANESHAPE);
+SHAPE_RECORD(BodyCylinderRecord, SP::SiconosCylinder, SP::BTCYLSHAPE);
+SHAPE_RECORD(BodyMeshRecord, SP::SiconosMesh, std11::shared_ptr<btSiconosMeshData>);
+SHAPE_RECORD(BodyHeightRecord, SP::SiconosHeightMap, std11::shared_ptr<btSiconosHeightData>);
 
-typedef BodyShapeRecordT<SP::SiconosConvexHull, SP::BTCHSHAPE> BodyCHRecord;
-typedef std::map<const BodyDS*, std::vector<std11::shared_ptr<BodyCHRecord> > >
-  BodyCHMap;
-
-typedef BodyShapeRecordT<SP::SiconosPlane, SP::BTPLANESHAPE> BodyPlaneRecord;
-typedef std::map<const BodyDS*, std::vector<std11::shared_ptr<BodyPlaneRecord> > >
-  BodyPlaneMap;
-
-typedef BodyShapeRecordT<SP::SiconosCylinder, SP::BTCYLSHAPE> BodyCylinderRecord;
-typedef std::map<const BodyDS*, std::vector<std11::shared_ptr<BodyCylinderRecord> > >
-  BodyCylinderMap;
-
-typedef BodyShapeRecordT<SP::SiconosMesh, std11::shared_ptr<btSiconosMeshData> >
-  BodyMeshRecord;
-typedef std::map<const BodyDS*, std::vector<std11::shared_ptr<BodyMeshRecord> > >
-  BodyMeshMap;
-
-typedef BodyShapeRecordT<SP::SiconosHeightMap, std11::shared_ptr<btSiconosHeightData> >
-  BodyHeightRecord;
-typedef std::map<const BodyDS*, std::vector<std11::shared_ptr<BodyHeightRecord> > >
-  BodyHeightMap;
+typedef std::map<const BodyDS*, std::vector<std11::shared_ptr<BodyShapeRecord> > >
+  BodyShapeMap;
 
 /** For associating static contactor sets and their offsets.
  * Pointer to this is what is returned as the opaque and unique
@@ -248,15 +258,8 @@ protected:
     _staticContactorSetRecords;
 
   /* During iteration over DSs for position updates we need to access
-   * btCollisionObject, so need a map DS->btXShape. We don't use an
-   * SP::BodyDS because we need to use it from a const visitor. */
-  BodySphereMap bodySphereMap;
-  BodyPlaneMap bodyPlaneMap;
-  BodyBoxMap bodyBoxMap;
-  BodyCylinderMap bodyCylinderMap;
-  BodyCHMap bodyCHMap;
-  BodyMeshMap bodyMeshMap;
-  BodyHeightMap bodyHeightMap;
+   * btCollisionObject, so need a map DS->btXShape. */
+  BodyShapeMap bodyShapeMap;
 
   SP::Simulation _simulation;
 
@@ -298,9 +301,9 @@ protected:
 
   /* A helper function used to initialise new shapes, generic to the
    * shape type */
-  template<typename ST, typename BT, typename BR, typename BSM>
+  template<typename ST, typename BT, typename BR>
   void createCollisionObjectHelper(SP::SiconosVector base, SP::BodyDS ds,
-                                   ST& shape, BT& btshape, BSM& bodyShapeMap,
+                                   ST& shape, BT& btshape, BodyShapeMap& bodyShapeMap,
                                    SP::SiconosContactor contactor);
 
   void updateShape(BodySphereRecord &record);
@@ -334,6 +337,7 @@ public:
   friend class SiconosBulletCollisionManager;
   friend class CollisionUpdateVisitor;
   friend class CreateCollisionObjectShapeVisitor;
+  friend class UpdateShapeVisitor;
 };
 
 SiconosCollisionManager::StaticContactorSetID
@@ -422,41 +426,42 @@ SiconosBulletCollisionManager::~SiconosBulletCollisionManager()
   impl->_collisionWorld.reset();
 }
 
+struct UpdateShapeVisitor : public SiconosVisitor
+{
+  using SiconosVisitor::visit;
+  SiconosBulletCollisionManager_impl &impl;
+
+  UpdateShapeVisitor(SiconosBulletCollisionManager_impl &_impl)
+    : impl(_impl) {}
+
+  void visit(std11::shared_ptr<BodyPlaneRecord> record)
+    { impl.updateShape(*record); }
+  void visit(std11::shared_ptr<BodySphereRecord> record)
+    { impl.updateShape(*record); }
+  void visit(std11::shared_ptr<BodyBoxRecord> record)
+    { impl.updateShape(*record); }
+  void visit(std11::shared_ptr<BodyCylinderRecord> record)
+    { impl.updateShape(*record); }
+  void visit(std11::shared_ptr<BodyCHRecord> record)
+    { impl.updateShape(*record); }
+  void visit(std11::shared_ptr<BodyMeshRecord> record)
+    { impl.updateShape(*record); }
+  void visit(std11::shared_ptr<BodyHeightRecord> record)
+    { impl.updateShape(*record); }
+};
+
 void SiconosBulletCollisionManager_impl::updateAllShapesForDS(const BodyDS &bds)
 {
-  std::vector<std11::shared_ptr<BodyPlaneRecord> >::iterator itp;
-  for (itp = bodyPlaneMap[&bds].begin(); itp != bodyPlaneMap[&bds].end(); itp++)
-    updateShape(**itp);
-
-  std::vector<std11::shared_ptr<BodySphereRecord> >::iterator its;
-  for (its = bodySphereMap[&bds].begin(); its != bodySphereMap[&bds].end(); its++)
-    updateShape(**its);
-
-  std::vector<std11::shared_ptr<BodyBoxRecord> >::iterator itb;
-  for (itb = bodyBoxMap[&bds].begin(); itb != bodyBoxMap[&bds].end(); itb++)
-    updateShape(**itb);
-
-  std::vector<std11::shared_ptr<BodyCylinderRecord> >::iterator ity;
-  for (ity = bodyCylinderMap[&bds].begin(); ity != bodyCylinderMap[&bds].end(); ity++)
-    updateShape(**ity);
-
-  std::vector<std11::shared_ptr<BodyCHRecord> >::iterator itc;
-  for (itc = bodyCHMap[&bds].begin(); itc != bodyCHMap[&bds].end(); itc++)
-    updateShape(**itc);
-
-  std::vector<std11::shared_ptr<BodyMeshRecord> >::iterator itm;
-  for (itm = bodyMeshMap[&bds].begin(); itm != bodyMeshMap[&bds].end(); itm++)
-    updateShape(**itm);
-
-  std::vector<std11::shared_ptr<BodyHeightRecord> >::iterator ith;
-  for (ith = bodyHeightMap[&bds].begin(); ith != bodyHeightMap[&bds].end(); ith++)
-    updateShape(**ith);
+  SP::UpdateShapeVisitor updateShapeVisitor(std11::make_shared<UpdateShapeVisitor>(*this));
+  std::vector<std11::shared_ptr<BodyShapeRecord> >::iterator it;
+  for (it = bodyShapeMap[&bds].begin(); it != bodyShapeMap[&bds].end(); it++)
+    (*it)->acceptSP(updateShapeVisitor);
 }
 
-template<typename ST, typename BT, typename BR, typename BSM>
+template<typename ST, typename BT, typename BR>
 void SiconosBulletCollisionManager_impl::createCollisionObjectHelper(
   SP::SiconosVector base, SP::BodyDS ds, ST& shape, BT& btshape,
-  BSM& bodyShapeMap, SP::SiconosContactor contactor)
+  BodyShapeMap& bodyShapeMap, SP::SiconosContactor contactor)
 {
   assert(base && "Collision objects must have a base position.");
 
@@ -570,9 +575,8 @@ void SiconosBulletCollisionManager_impl::createCollisionObject(
 #endif
 
   // initialization
-  createCollisionObjectHelper<SP::SiconosSphere, SP::BTSPHERESHAPE,
-                              BodySphereRecord, BodySphereMap>
-    (base, ds, sphere, btsphere, bodySphereMap, contactor);
+  createCollisionObjectHelper<SP::SiconosSphere, SP::BTSPHERESHAPE, BodySphereRecord>
+    (base, ds, sphere, btsphere, bodyShapeMap, contactor);
 }
 
 void SiconosBulletCollisionManager_impl::updateContactorInertia(
@@ -664,9 +668,8 @@ void SiconosBulletCollisionManager_impl::createCollisionObject(
 #endif
 
   // initialization
-  createCollisionObjectHelper<SP::SiconosPlane, SP::BTPLANESHAPE,
-                              BodyPlaneRecord, BodyPlaneMap>
-    (base, ds, plane, btplane, bodyPlaneMap, contactor);
+  createCollisionObjectHelper<SP::SiconosPlane, SP::BTPLANESHAPE, BodyPlaneRecord>
+    (base, ds, plane, btplane, bodyShapeMap, contactor);
 }
 
 void SiconosBulletCollisionManager_impl::updateShape(BodyPlaneRecord& record)
@@ -726,9 +729,8 @@ void SiconosBulletCollisionManager_impl::createCollisionObject(
 #endif
 
   // initialization
-  createCollisionObjectHelper<SP::SiconosBox, SP::BTBOXSHAPE,
-                              BodyBoxRecord, BodyBoxMap>
-    (base, ds, box, btbox, bodyBoxMap, contactor);
+  createCollisionObjectHelper<SP::SiconosBox, SP::BTBOXSHAPE, BodyBoxRecord>
+    (base, ds, box, btbox, bodyShapeMap, contactor);
 }
 
 void SiconosBulletCollisionManager_impl::updateShape(BodyBoxRecord &record)
@@ -779,9 +781,8 @@ void SiconosBulletCollisionManager_impl::createCollisionObject(
   SP::BTCYLSHAPE btcylinder(new BTCYLSHAPE(btVector3(1.0, 1.0, 1.0)));
 
   // initialization
-  createCollisionObjectHelper<SP::SiconosCylinder, SP::BTCYLSHAPE,
-                              BodyCylinderRecord, BodyCylinderMap>
-    (base, ds, cylinder, btcylinder, bodyCylinderMap, contactor);
+  createCollisionObjectHelper<SP::SiconosCylinder, SP::BTCYLSHAPE, BodyCylinderRecord>
+    (base, ds, cylinder, btcylinder, bodyShapeMap, contactor);
 }
 
 void SiconosBulletCollisionManager_impl::updateShape(BodyCylinderRecord &record)
@@ -880,9 +881,8 @@ void SiconosBulletCollisionManager_impl::createCollisionObject(
   btch->recalcLocalAabb();
 
   // initialization
-  createCollisionObjectHelper<SP::SiconosConvexHull, SP::BTCHSHAPE,
-                              BodyCHRecord, BodyCHMap>
-    (base, ds, ch, btch, bodyCHMap, contactor);
+  createCollisionObjectHelper<SP::SiconosConvexHull, SP::BTCHSHAPE, BodyCHRecord>
+    (base, ds, ch, btch, bodyShapeMap, contactor);
 }
 
 void SiconosBulletCollisionManager_impl::updateShape(BodyCHRecord &record)
@@ -989,9 +989,8 @@ void SiconosBulletCollisionManager_impl::createCollisionObject(
   btmesh->btScalarVertices = datapair.second;
 
   // initialization
-  createCollisionObjectHelper<SP::SiconosMesh, SP::BTMESHSHAPE,
-                              BodyMeshRecord, BodyMeshMap>
-    (base, ds, mesh, btmesh, bodyMeshMap, contactor);
+  createCollisionObjectHelper<SP::SiconosMesh, SP::BTMESHSHAPE, BodyMeshRecord>
+    (base, ds, mesh, btmesh, bodyShapeMap, contactor);
 }
 
 void SiconosBulletCollisionManager_impl::updateShape(BodyMeshRecord &record)
@@ -1065,9 +1064,8 @@ void SiconosBulletCollisionManager_impl::createCollisionObject(
     data->size(0), heightfield, vmin, vmax));
 
   // initialization
-  createCollisionObjectHelper<SP::SiconosHeightMap, SP::BTHEIGHTSHAPE,
-                              BodyHeightRecord, BodyHeightMap>
-    (base, ds, heightmap, btheight, bodyHeightMap, contactor);
+  createCollisionObjectHelper<SP::SiconosHeightMap, SP::BTHEIGHTSHAPE, BodyHeightRecord>
+    (base, ds, heightmap, btheight, bodyShapeMap, contactor);
 }
 
 void SiconosBulletCollisionManager_impl::updateShape(BodyHeightRecord &record)
@@ -1330,11 +1328,7 @@ struct CollisionUpdateVisitor : public SiconosVisitor
   void visit(SP::BodyDS bds)
   {
     if (bds->contactors()) {
-      BodyBoxMap::iterator it = impl.bodyBoxMap.find(&*bds);
-      if (impl.bodyBoxMap.find(&*bds) == impl.bodyBoxMap.end()
-          && impl.bodyCHMap.find(&*bds) == impl.bodyCHMap.end()
-          && impl.bodySphereMap.find(&*bds) == impl.bodySphereMap.end()
-          && impl.bodyPlaneMap.find(&*bds) == impl.bodyPlaneMap.end())
+      if (impl.bodyShapeMap.find(&*bds) == impl.bodyShapeMap.end())
       {
         impl.createCollisionObjectsForBodyContactorSet(bds);
       }
