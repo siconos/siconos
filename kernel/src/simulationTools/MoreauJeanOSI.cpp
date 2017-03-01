@@ -1564,7 +1564,6 @@ void MoreauJeanOSI::updatePosition(DynamicalSystem& ds)
     // get dynamical system
     NewtonEulerDS& d = static_cast<NewtonEulerDS&> (ds);
 
-
     // SiconosVector &v = *d.twist();
     // DEBUG_EXPR(d.display());
 
@@ -1577,7 +1576,6 @@ void MoreauJeanOSI::updatePosition(DynamicalSystem& ds)
     // DEBUG_EXPR(v.display());
     // prod(T, v, dotq, true);
     // DEBUG_EXPR(dotq.display());
-
     // SiconosVector& q = *d.q();
     // //  -> get previous time step state
     // SiconosVector& dotqold = *d.dotqMemory()->getSiconosVector(0);
@@ -1621,11 +1619,15 @@ void MoreauJeanOSI::updatePosition(DynamicalSystem& ds)
     q.setValue(1,velocityIncrement->getValue(1));
     q.setValue(2,velocityIncrement->getValue(2));
     quaternionFromTwistVector(*velocityIncrement, q);
+
+    DEBUG_EXPR(q.display());
+    compositionLawLieGroup(qold, q);
     DEBUG_EXPR(q.display());
     compositionLawLieGroup(qold, q);
     DEBUG_EXPR(q.display());
 
 
+    
   }
   DEBUG_END("MoreauJeanOSI::updatePosition(SP::DynamicalSystem ds)\n");
 
