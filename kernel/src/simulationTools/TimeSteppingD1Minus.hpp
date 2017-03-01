@@ -66,11 +66,6 @@ public:
    */
   virtual void updateIndexSet(unsigned int i);
 
-  /** update input, state and output of DynamicalSystems
-   *  \param levelInput to be updated for input
-   */
-  virtual void update(unsigned int levelInput);
-
   /** run the simulation, from t0 to T */
   virtual void run();
 

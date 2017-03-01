@@ -349,38 +349,6 @@ void TimeStepping::nextStep()
   processEvents();
 }
 
-void TimeStepping::update(unsigned int)
-{
-  DEBUG_BEGIN("TimeStepping::update(unsigned int )\n");
-  OSIIterator itOSI;
-  // 1 - compute input (lambda -> r)
-  if (!_allNSProblems->empty())
-  {
-    for (itOSI = _allOSI->begin(); itOSI != _allOSI->end() ; ++itOSI)
-      (*itOSI)->updateInput(nextTime());
-    //_nsds->updateInput(nextTime(),levelInput);
-  }
-  // 2 - compute state for each dynamical system
-
-  for (itOSI = _allOSI->begin(); itOSI != _allOSI->end() ; ++itOSI)
-    (*itOSI)->updateState();
-
-  // need this until mechanics' BulletTimeStepping class is removed
-  updateWorldFromDS();
-
-  // Update interactions if a manager was provided
-  updateInteractions();
-
-  // 3 - compute output ( x ... -> y)
-  if (!_allNSProblems->empty())
-  {
-    for (itOSI = _allOSI->begin(); itOSI != _allOSI->end() ; ++itOSI)
-      (*itOSI)->updateOutput(nextTime());
-  }
-  DEBUG_END("TimeStepping::update(unsigned int levelInput)\n");
-
-}
-
 void TimeStepping::computeFreeState()
 {
   DEBUG_BEGIN("TimeStepping::computeFreeState()\n");
@@ -396,14 +364,11 @@ void TimeStepping::computeOneStep()
   advanceToEvent();
 }
 
-
 void TimeStepping::initializeNewtonLoop()
 {
   DEBUG_BEGIN("TimeStepping::initializeNewtonLoop()\n");
   double tkp1 = getTkp1();
   assert(!isnan(tkp1));
-
-  SP::InteractionsGraph indexSet0 = _nsds->topology()->indexSet0();
 
   for (OSIIterator it = _allOSI->begin(); it != _allOSI->end() ; ++it)
   {
@@ -415,6 +380,7 @@ void TimeStepping::initializeNewtonLoop()
   // update the Interaction set here as well as during update().
   updateInteractions();
 
+  SP::InteractionsGraph indexSet0 = _nsds->topology()->indexSet0();
   if (indexSet0->size()>0)
   {
     for (OSIIterator itOSI = _allOSI->begin(); itOSI != _allOSI->end() ; ++itOSI)
@@ -539,8 +505,6 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
   _newtonNbIterations = 0; // number of Newton iterations
   int info = 0;
   bool isLinear  = _nsds->isLinear();
-  InteractionsGraph& indexSet0 = *_nsds->topology()->indexSet0();
-  bool hasNSProblems = (!_allNSProblems->empty() &&   indexSet0.size() > 0) ? true : false;
 
   initializeNewtonLoop();
 
@@ -551,6 +515,8 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
     DEBUG_PRINTF("TimeStepping::newtonSolve(). _newtonNbIterations = %i\n", _newtonNbIterations);
     prepareNewtonIteration();
     computeFreeState();
+    InteractionsGraph& indexSet0 = *_nsds->topology()->indexSet0();
+    bool hasNSProblems = (!_allNSProblems->empty() &&   indexSet0.size() > 0) ? true : false;
     if (hasNSProblems)
       info = computeOneStepNSProblem(SICONOS_OSNSP_TS_VELOCITY);
     // Check output from solver (convergence or not ...)
@@ -562,6 +528,7 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
 
     update();
 
+    hasNSProblems = (!_allNSProblems->empty() &&   indexSet0.size() > 0) ? true : false;
     if (hasNSProblems)
       saveYandLambdaInOldVariables();
   }
@@ -569,6 +536,7 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
   else if (_newtonOptions == SICONOS_TS_NONLINEAR)
   {
     //  while((!_isNewtonConverge)&&(_newtonNbIterations < maxStep)&&(!info))
+    //_isNewtonConverge = newtonCheckConvergence(criterion);
     while ((!_isNewtonConverge) && (_newtonNbIterations < maxStep))
     {
       DEBUG_BEGIN("          \n");
@@ -587,6 +555,8 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
 
       // if((*_allNSProblems)[SICONOS_OSNSP_TS_VELOCITY]->simulation())
       // is also relevant here.
+      InteractionsGraph& indexSet0 = *_nsds->topology()->indexSet0();
+      bool hasNSProblems = (!_allNSProblems->empty() &&   indexSet0.size() > 0) ? true : false;
       if (hasNSProblems)
       {
         info = computeOneStepNSProblem(SICONOS_OSNSP_TS_VELOCITY);
@@ -597,11 +567,20 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
       else
         checkSolverOutput(info, this);
 
-      update();
+      updateInput();
+      updateState();
+
+      if (!_isNewtonConverge && _newtonNbIterations < maxStep) {
+        updateInteractions();
+        hasNSProblems = (!_allNSProblems->empty() &&   indexSet0.size() > 0) ? true : false;
+        updateOutput();
+      }
       _isNewtonConverge = newtonCheckConvergence(criterion);
 
       if (!_isNewtonConverge && !info)
       {
+        hasNSProblems = (!_allNSProblems->empty() &&   indexSet0.size() > 0) ? true : false;
+
         if (hasNSProblems)
           saveYandLambdaInOldVariables();
       }
@@ -641,7 +620,6 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
   else
     RuntimeException::selfThrow("TimeStepping::NewtonSolve failed. Unknow newtonOptions: " + _newtonOptions);
   DEBUG_END("TimeStepping::newtonSolve(double criterion, unsigned int maxStep)\n");
-
 }
 
 bool TimeStepping::newtonCheckConvergence(double criterion)

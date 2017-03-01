@@ -159,12 +159,6 @@ public:
   /** increment model current time according to User TimeDiscretisation and call SaveInMemory. */
   virtual void nextStep();
 
-  /** update input, state of each dynamical system and output
-   *  \param level lambda order used to compute input
-   * level is set to 0 by default since in all time-stepping schemes we update all the state
-   */
-  virtual void update(unsigned int level=0);
-
   /** integrates all the DynamicalSystems taking not into account nslaw, reactions (ie non-smooth part) ...
   */
   void computeFreeState();
@@ -360,16 +354,6 @@ public:
   {
     return _newtonResiduRMax;
   };
-
-
-  /*TS set the ds->q memory, the world (CAD model for example) must be updated.
-    Overload this method to update user model.*/
-  virtual void updateWorldFromDS()
-  {
-    ;
-  };
-
-
 
   /** visitors hook
   */

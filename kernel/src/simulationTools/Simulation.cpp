@@ -475,3 +475,42 @@ void Simulation::updateInteractions()
       initOSNS();
   }
 }
+
+void Simulation::updateInput(unsigned int)
+{
+  DEBUG_BEGIN("Simulation::updateInput()\n");
+  OSIIterator itOSI;
+  // 1 - compute input (lambda -> r)
+  if (!_allNSProblems->empty())
+  {
+    for (itOSI = _allOSI->begin(); itOSI != _allOSI->end() ; ++itOSI)
+      (*itOSI)->updateInput(nextTime());
+    //_nsds->updateInput(nextTime(),levelInput);
+  }
+  DEBUG_END("Simulation::updateInput()\n");
+}
+
+void Simulation::updateState(unsigned int)
+{
+  DEBUG_BEGIN("Simulation::updateState()\n");
+  OSIIterator itOSI;
+  // 2 - compute state for each dynamical system
+  for (itOSI = _allOSI->begin(); itOSI != _allOSI->end() ; ++itOSI)
+    (*itOSI)->updateState();
+
+  DEBUG_END("Simulation::updateState()\n");
+}
+
+void Simulation::updateOutput(unsigned int)
+{
+  DEBUG_BEGIN("Simulation::updateOutput()\n");
+
+  // 3 - compute output ( x ... -> y)
+  if (!_allNSProblems->empty())
+  {
+    OSIIterator itOSI;
+    for (itOSI = _allOSI->begin(); itOSI != _allOSI->end() ; ++itOSI)
+      (*itOSI)->updateOutput(nextTime());
+  }
+  DEBUG_END("Simulation::updateOutput()\n");
+}

@@ -288,10 +288,20 @@ public:
 
   void updateSmoothState();
 
-  /** update input, output and indexSets.
+  /** update input
    *  \param level of lambda  used to compute input
    */
-  void update(unsigned int level);
+  void updateInput(unsigned int level) {}
+
+  /** update state.
+   *  \param level of lambda  used to compute input
+   */
+  void updateState(unsigned int level);
+
+  /** update output and indexSets.
+   *  \param level of lambda  used to compute input
+   */
+  void updateOutput(unsigned int level);
 
   /** Initialize EventDriven **/
 

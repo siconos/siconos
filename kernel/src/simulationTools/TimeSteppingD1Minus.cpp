@@ -64,10 +64,8 @@ void TimeSteppingD1Minus::initOSNS()
     //update all index sets
     updateIndexSets();
 
-
     // update output
-    for (OSIIterator itOSI = _allOSI->begin(); itOSI != _allOSI->end() ; ++itOSI)
-      (*itOSI)->updateOutput(nextTime());
+    updateOutput();
   }
 }
 
@@ -163,29 +161,6 @@ void TimeSteppingD1Minus::updateIndexSet(unsigned int i)
   DEBUG_PRINTF("\nINDEXSETS AFTER UPDATE for level i = %i\n", i);
   DEBUG_PRINTF(" indexSet0 size : %ld\n", indexSet0->size());
   DEBUG_PRINTF(" indexSet(%i) size : %ld\n", i, topo->indexSet(i)->size());
-}
-
-void TimeSteppingD1Minus::update(unsigned int level)
-{
-  // compute input (lambda -> r)
-  if (!_allNSProblems->empty())
-  {
-    for (OSIIterator itOSI = _allOSI->begin(); itOSI != _allOSI->end() ; ++itOSI)
-      (*itOSI)->updateInput(nextTime(),level);
-    //_nsds->updateInput(nextTime(),levelInput);
-  }
-
-  // compute state for each dynamical system
-  for (OSIIterator itOSI = _allOSI->begin(); itOSI != _allOSI->end(); ++itOSI)
-    (*itOSI)->updateState();
-
-
-  // 3 - compute output ( x ... -> y)
-  if (!_allNSProblems->empty())
-  {
-    for (OSIIterator itOSI = _allOSI->begin(); itOSI != _allOSI->end() ; ++itOSI)
-      (*itOSI)->updateOutput(nextTime(),level);
-  }
 }
 
 void TimeSteppingD1Minus::run()

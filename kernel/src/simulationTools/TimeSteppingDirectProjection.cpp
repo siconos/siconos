@@ -613,10 +613,12 @@ void TimeSteppingDirectProjection::newtonSolve(double criterion, unsigned int ma
       else
         checkSolverOutputProjectOnConstraints(info, this);
 
-      update();
+      updateInput();
+      updateState();
       isNewtonConverge = newtonCheckConvergence(criterion);
       if (!isNewtonConverge && !info)
       {
+        updateOutput();
         if (!_allNSProblems->empty() &&  indexSet->size()>0)
           saveYandLambdaInOldVariables();
       }
