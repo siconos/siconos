@@ -15,12 +15,32 @@
 
 
 \def\cg{\sf \small g}
-In the maximal coordinates framework, the most natural choice for the kinematic  variables and for the formulation of the equations of motion is the Newton/Euler formalism, where the equation of motion describes the translational and rotational dynamics of each body using a specific choice of parameters. For the translational motion, the position of the center of mass $x_{\cg}\in \RR^3$ and its velocity  $v_{\cg} = \dot x_{\cg} \in \RR^3$ is usually chosen. For the rotational motion, a common choice is to choose the angular velocity  $\Omega \in \RR^3$ of the body expressed in the body--fixed frame. The orientation of the body is usually defined by the rotation matrix $R$ of the body-fixed frame with respect to a given inertial frame. The angular velocity can be then  expressed as :
+In the maximal coordinates framework, the most natural choice for the kinematic  variables and for the formulation of the equations of motion is the Newton/Euler formalism, where the equation of motion describes the translational and rotational dynamics of each body using a specific choice of parameters. For the translational motion, the position of the center of mass $x_{\cg}\in \RR^3$ and its velocity  $v_{\cg} = \dot x_{\cg} \in \RR^3$ is usually chosen. For the orientation of the body is usually defined by the rotation matrix $R$ of the body-fixed frame with respect to a given inertial frame.
+
+For the rotational motion, a common choice is to choose the rotational velocity  $\Omega \in \RR^3$ of the body expressed in the body--fixed frame. This choice comes from the formulation of a rigid body motion of a point $X$ in the inertial frame as
+\begin{equation}
+  \label{eq:28}
+  x(t) = \Phi(t,X) = x_{\cg}(t) + R(t) X.
+\end{equation}
+The velocity of this point can be written as
+\begin{equation}
+  \label{eq:29}
+  \dot x(t) = v_{\cg} + \dot R(t) X
+\end{equation}
+Since $R^\top R=I$, we get $R^\top \dot R + \dot R^\top R =0$. We can conclude that it exists a matrix $\tilde \Omega := R^\top \dot R $ such that $\tilde \Omega + \tilde \Omega^\top=0$, i.e. a skew symmetric matrix. The notation $\tilde \Omega$ comes from the fact that there is a bijection between the skew symmetric matrix in $\RR^{3\times3}$ and $\RR^3$ such that
+\begin{equation}
+  \label{eq:30}
+  \tilde \Omega x  = \Omega \times x, \quad \forall x\in RR^3.
+\end{equation}
+The rotational velocity is then related to the $R$ by :
 \begin{equation}
   \label{eq:angularvelocity}
   \widetilde \Omega = R^\top \dot R, \text { or equivalently, } \dot R  = R \widetilde \Omega
 \end{equation}
-where the matrix $\widetilde \Omega \in \RR^{3 \times 3}$ is given by $\widetilde \Omega x = \Omega \times x$ for all $x\in \RR^3$. Using these coordinates, the equations of motion are given by 
+
+
+
+Using these coordinates, the equations of motion are given by 
 \begin{equation}
   \label{eq:motion-NewtonEuler}
   \left\{\begin{array}{rcl}
@@ -33,22 +53,27 @@ where the matrix $\widetilde \Omega \in \RR^{3 \times 3}$ is given by $\widetild
 \end{equation}
 where $m> 0$ is the mass, $I\in \RR^{3\times 3}$ is the matrix of moments of inertia around the center of mass and the axis of the body--fixed frame.
 
-
 The vectors $f(\cdot)\in \RR^3$ and $M(\cdot)\in \RR^3$ are the total forces and torques applied to the body. It is important to outline that the total applied forces $f(\cdot)$ has to be expressed in a consistent frame w.r.t. to $v_{\cg}$. In our case, it hae to be expressed in the inertial frame. The same applies for the moment $M$ that has to be expressed in the body-fixed frame. If we consider a moment $m(\cdot)$ expressed in the inertial frame, then is has to be convected to  the body--fixed frame thanks to
 \begin{equation}
   \label{eq:convected_moment}
   M (\cdot) =R^\top  m (\cdot)
 \end{equation}
 
+
+\begin{remark}
+If we perform the time derivation of $RR^\top =I$ rather than $R^\top R=I$, we get $R \dot R^\top + \dot R R^\top =0$.  We can conclude that it exists a matrix $\tilde \omega := \dot R R^\top $ such that $\tilde \omega + \tilde \omega^\top=0$, i.e. a skew symmetric matrix. Clearly, we have
+ \begin{equation}
+   \label{eq:31}
+   \tilde \omega = R \tilde \Omega R^\top
+ \end{equation}
+ and it can be proved that is equivalent to $ \omega =R \Omega$. The vector $\omega$ is the rotational velocity expressed in the inertial frame.
+\end{remark}
+ 
 \begin{ndrva}
-  todo : add the formulation in the inertial frame of the Euler equation with $\omega =R \Omega$
+  todo : add the formulation in the inertial frame of the Euler equation with $\omega =R \Omega$.
 \end{ndrva}
 
-In the numerical practice, the choice of the rotation matrix is not convenient since it introduces redundant parameters. Since $R$ must belong to $SO^+(3)$, we have also to satisfy $\det(R)=1$ and $R^{-1}=R^\top$. In Siconos we choose to parametrize the rotation with a unit quaternion $p \in \RR^4$ such that $R = \Phi(q)$ and $\dot p = \Psi(p)\Omega $. This parameterization has no singularity and has only one redundant variable that is determined by imposing $\|p\|=1$. Formulae for $\Phi$ and $\Psi$ can be found in any textbooks.
-
-\begin{ndrva}
-  todo : add the formulae
-\end{ndrva}
+In the numerical practice, the choice of the rotation matrix is not convenient since it introduces redundant parameters. Since $R$ must belong to $SO^+(3)$, we have also to satisfy $\det(R)=1$ and $R^{-1}=R^\top$. In Siconos we choose to parametrize the rotation with a unit quaternion $p \in \RR^4$ such that $R = \Phi(p)$ and $\dot p = \Psi(p)\Omega $. This parameterization has no singularity and has only one redundant variable that is determined by imposing $\|p\|=1$. Formulae for $\Phi$ and $\Psi$ can be found in any textbooks.
 
 We denote  by $q$ the vector of coordinates of the position and the orientation of the body, and by $v$ {the body twist}:
 \begin{equation}
@@ -81,20 +106,228 @@ We denote  by $q$ the vector of coordinates of the position and the orientation 
 with $T(q) \in \RR^{7\times 6}$.
 {Note that the twist $v$ is not directly the time derivative of the coordinate vector as a major difference with Lagrangian systems. }
 
+\paragraph{Quaternions and rotation} Let us recall some basic properties of a quaternion $p$ that is a collection of $4$ real parameters $(p_0,p_1,p_2,p_3)$. The first is considered as a scalar and three last as a vector in $\RR^3$ denoted by $\vv{p}$. The quaternion can written as $p=(p_0,p_1,p_2,p_3)$ or $p=(p_0,\vv{p})$. The norm of a quaternion is given by $|p|^2=p\bar p = p_o^2+p_1^2+p_2^2+p_3^2$.
+ With this notation, the quaternion product is defined by
+\begin{equation}
+  \label{eq:25}
+  p \circ q =
+  \begin{bmatrix}
+    p_oq_o - \vv{p}\vv{q} \\
+    p_0\vv{q}+q_o\vv{p} + \vv{p}\times\vv{q}
+  \end{bmatrix}.
+\end{equation}
+The inverse element for the quaternion product is $e= (1,\vv{0})$. Let us note that 
+\begin{equation}
+  \label{eq:36}
+  (0,\vv{p})\circ (0,\vv(q)) = - (0,\vv{q})\circ (0,\vv(p)).
+\end{equation}
+The quaternion multiplication can also be represented as a matrix operation in $\RR^{4\times4}$. Indeed, we have
+\begin{equation}
+  \label{eq:26}
+  p \circ q  =
+  \begin{bmatrix}
+    q_0 p_0 -q_1p_1-q_2p_2-q_3p_3\\
+    q_0 p_1 +q_1p_0-q_2p_3+q_3p_2\\
+    q_0 p_2 +q_1p_3+q_2p_0-q_3p_1\\
+    q_0 p_3 -q_1p_2+q_2p_1+q_3p_0\\
+  \end{bmatrix}
+\end{equation}
+that can be represented as
+\begin{equation}
+  \label{eq:26}
+  p \circ q  =
+  \begin{bmatrix}
+    p_0 & -p_1 & -p_2 & -p_3 \\
+    p_1 & p_0 & -p_3 & p_2 \\
+    p_2 & p_3 & p_0 & -p_1 \\
+    p_3 & -p_2 & p_1 & p_0 \\
+  \end{bmatrix}
+  \begin{bmatrix}
+    q_0\\
+    q_1\\
+    q_2\\
+    q_3
+  \end{bmatrix} := [p_\circ]q
+\end{equation}
+or
+\begin{equation}
+  \label{eq:26}
+  p \circ q  = 
+  \begin{bmatrix}
+    q_0 & -q_1 & -q_2 & -q_3 \\
+    q_1 & q_0 & q_3 & -q_2 \\
+    q_2 & -q_3 & q_0 & q_1 \\
+    q_3 & q_2 & -q_1 & q_0 \\
+  \end{bmatrix}
+  \begin{bmatrix}
+    p_0\\
+    p_1\\
+    p_2\\
+    p_3
+  \end{bmatrix} := [{}_\circ q] p
+\end{equation}
 
-\begin{ndrva}
-{ todo :Add an explicit formulae for the $T(q)$}
-\end{ndrva}
+The adjoint quaternion of $p$ is denoted by
+\begin{equation}
+  \bar p =
+  \begin{pmatrix}
+    p_0, -p_1, -p_2, -p_3
+  \end{pmatrix} = (p_0, - \vv{p})
+\end{equation}
+In particular, we have $p \circ \bar p = \bar p \circ p = |p|^2 e$. This allows to define the reciprocal of a non zero quaternion by
+\begin{equation}
+  \label{eq:32}
+  p ^{-1} = \frac 1 {|p|^2} \bar p
+\end{equation}
+
+\paragraph{Unit quaternion and rotation}
+A quaternion $p$is said to be unit if $|p| =1$. For two vectors $x\in \RR^3$ and $x'\in \RR^3$, we define the quaternion $p_x = (0,x)$ and  $p_{x'} = (0,x')$.
+For a given unit quaternion $p$, the transformation
+\begin{equation}
+  \label{eq:20}
+  p_{x'} = p \circ p_x \circ \bar p 
+\end{equation}
+defines a rotation $R$ such that $x'  = R x$ given by
+\begin{equation}
+  \label{eq:21}
+  x' = (p_0^2- p^\top \vv{p}) x +2 p_0(\vv{p}\times x) +  2 (\vv{p}^\top x) p = R x
+\end{equation}
+The rotation matrix may be computed as 
+\begin{equation}
+  \label{eq:19}
+  R = \Phi(p) =
+  \begin{bmatrix}
+    1-2 p_2^2- 2 p_3^2 & 2(p_1p_2-p_3p_0) & 2(p_1p_3+p_2p_0)\\
+    2(p_1p_2+p_3p_0) & 1-2 p_1^2- 2 p_3^2 & 2(p_2p_3-p_1p_0)\\
+    2(p_1p_3-p_2p_0) & 2(p_2p_3+p_1p_0)  & 1-2 p_1^2- 2 p_2^2\\
+  \end{bmatrix}
+\end{equation} 
+
+
+\paragraph{Computation of the time derivative of a unit  quaternion associated with a rotation.}
+The derivation with respect to time can obtained as follows. The rotation transformation for a unit quaternion is given by
+\begin{equation}
+  \label{eq:33}
+  p_{x'}(t) = p(t) \circ p_x \circ \bar p(t) =  p(t) \circ p_x \circ p^{-1}(t)
+\end{equation}
+and can be derived as
+\begin{equation}
+  \label{eq:33}
+  \begin{array}{lcl}
+    \dot p_{x'}(t) &=& \dot p(t) \circ p_x \circ p^{-1}(t) + p(t) \circ p_x \circ \dot p^{-1}(t) \\
+                  &=& \dot p(t) \circ p^{-1}(t)  \circ   p_{x'}(t)  +      p_{x'}(t) \circ p(t)  \circ \dot p^{-1}(t)    
+  \end{array}
+\end{equation}
+From $p(t) \circ p^{-1}(t) =e$, we get
+\begin{equation}
+  \label{eq:34}
+  \dot p(t) \circ p^{-1}(t) + p \circ \dot p^{-1}(t) = 0
+\end{equation}
+so (\ref{eq:33}) can be rewritten
+\begin{equation}
+  \label{eq:35}
+  \begin{array}{lcl}
+    \dot p_{x'}(t) = \dot p(t) \circ p^{-1}(t)   \circ   p_{x'}(t)  -    p_{x'}(t) \circ  \dot p(t) \circ p^{-1}(t)
+  \end{array}
+\end{equation}
+The scalar part of $\dot p(t) \circ p^{-1}(t)$ is $p_o \dot p_0 + \vv{p}^T\vv{\dot p}$. Since $p$ is a unit quaternion, this scalar part is zero.
+The quaternion product $\dot p(t) \circ p^{-1}(t)$ and  $p_{x'}(t)$ is a product of quaternions with zero scalar part (see~\eqref{eq:36}), so we have 
+\begin{equation}
+  \label{eq:35}
+  \begin{array}{lcl}
+    \dot p_{x'}(t) = 2 \dot p(t) \circ p^{-1}(t)   \circ p_{x'}(t).
+  \end{array}
+\end{equation}
+In terms of vector of $\RR^3$, this corresponds to
+\begin{equation}
+  \label{eq:4}
+  \dot x'(t) = 2 \vv{ \dot p(t) \circ p^{-1}(t) } \times x'(t).
+\end{equation}
+Since $x'(t) = R(t) x$, we have $\dot x' = \dot R(t) x = \tilde \omega(t) R(t) x  = \tilde \omega(t) x'(t) $. Comparing \eqref{eq:4} and \eqref{eq:4}, we get
+\begin{equation}
+  \label{eq:37}
+  \tilde \omega(t) = 2 \vv{ \dot p(t) \circ p^{-1}(t) } 
+\end{equation}
+or equivalently
+\begin{equation}
+  \dot p(t) \circ p^{-1}(t) = \frac 1 2 (0, \omega(t) )
+  \label{eq:38}
+\end{equation}
+Finally, we can conclude that
+\begin{equation}
+  \label{eq:39}
+  \dot p(t) =\frac 1 2 (0, \omega ) \circ p(t).
+\end{equation}
+Since $\omega(t)=R(t)\Omega(t)$, we have
+\begin{equation}
+  \label{eq:40}
+  (0, \omega(t) ) = (0, R(t) \Omega(t) ) = p(t) \circ (0, \Omega(t) ) \circ \bar p(t) = p(t) \circ (0, \Omega(t) ) \circ  p^{-1}(t)
+\end{equation}
+and then
+\begin{equation}
+  \label{eq:41}
+  \dot p(t) =\frac 1 2 p(t) \circ(0, \Omega(t) ) .
+\end{equation}
+
+The time derivation is compactly written
+\begin{equation}
+  \label{eq:3}
+  \dot p = \frac  1 2 p  \circ(0, \Omega ) = \frac 1 2 [p_\circ] p_{\Omega} =  \Psi(p)\Omega ,
+\end{equation}
+and using the matrix representation of product of  quaternion
+we get
+\begin{equation}
+  \label{eq:27}
+  \Psi(p) = \frac  1 2  \begin{bmatrix}
+    -p_1 & -p_2 & -p_3 \\
+    p_0 & -p_3 & p_2 \\
+    p_3 & p_0 & -p_1 \\
+    -p_2 & p_1 & p_0 \\
+  \end{bmatrix}
+\end{equation}
+
+The relation \eqref{eq:41} can be also inverted by writing
+\begin{equation}
+  \label{eq:42}
+   (0, \Omega(t) ) = 2 p^{-1}(t) \circ \dot p(t)
+\end{equation}
+Using again  matrix representation of product of  quaternion, we get 
+\begin{equation}
+  \label{eq:42}
+  \Omega(t)  = 2 \vv{p^{-1}(t) \circ \dot p(t)}  = \frac  1 2  \begin{bmatrix}
+    -p_1 & p_0 & p_3 & -p_2 \\
+    -p_2 & -p_3 & p_0 & p_1 \\
+    -p_3 & p_2 & -p_1  & p_0\\
+  \end{bmatrix}\dot p(t) = \Psi(p)^\top \dot p(t)
+\end{equation}
+Note that we have $\Psi^\top(p)\Psi(p)= I_{4\times 4 }$ and  $\Psi(p)\Psi^\top(p)= I_{3\times 3 }$ 
+\paragraph{Computation of $T$ for unit quaternion}
+
+
+and then 
+\begin{equation}
+  T(q)=\frac 1 2 \label{eq:5}
+  \begin{bmatrix}
+    2 I_{3\times 3} & & 0_{3\times 3} & \\
+    &   -p_1 & -p_2 & -p_3 \\
+    0_{4\times 3}  &  p_0 & -p_3 & p_2 \\
+    & p_3 & p_0 & -p_1 \\
+    & -p_2 & p_1 & p_0 
+  \end{bmatrix}
+\end{equation}
+
+\paragraph{Newton-Euler equation in compact form}
+
 %
 The Newton-Euler equation in compact form may be written as:
 \begin{equation}
 \label{eq:Newton-Euler-compact}
- \left \{ 
+\boxed{ \left \{ 
  \begin{aligned}
   &\dot q=T(q)v, \\
   & M \dot v = F(t, q, v)
  \end{aligned}
- \right.
+ \right.}
 \end{equation}
 where $M\in\RR^{6\times6}$ is the total inertia matrix
 \begin{equation}
@@ -111,6 +344,31 @@ and $F(t, q, v)\in \RR^6$ collects all the forces and torques applied to the bod
   \end{pmatrix}.
 \end{equation}
 When a collection of bodies is considered, we will use the same notation as in~(\ref{eq:Newton-Euler-compact}) extending the definition of the variables $q,v$ and the operators $M,F$ in a straightforward way.
+
+\subsection{Playing with rotations and quaternions}
+
+Let us define the Lie group $SO(3)$ of linear proper orthogonal transformation by its matrix representation
+\begin{equation}SO(3)
+  \label{eq:43}
+  SO(3) = \{R \in \RR^{3\times3}\mid R^TR=I , det(R) = +1  \}
+\end{equation}
+with the Lie group composition $( \circ )$ law given by $R_1\circ R_2 = R_1R_2$ for $R_1,R_2\in SO(3)$. At any point of $R\in SO(3)$, the tangent space is noted $T_RSO(3)$ and the Lie algebra $\mathfrak{so}(3)$  that is the tangent at the identity element is the set of skew--symmetric matrices:
+\begin{equation}
+  \label{eq:44}
+  \mathfrak{so}(3) = \{\Omega \mid \Omega + \tilde \Omega=0\}.
+\end{equation}
+The notation $\tilde \Omega$ is implied by the fact that the Lie algebra is isomorphic to $\RR^3$. For a given vector $\Omega \in \RR^3$, the skew--symmetric matrix is given by
+\begin{equation}
+  \label{eq:45}
+  \tilde \Omega =
+  \begin{bmatrix}
+    0 & -\Omega_3 & \Omega_2 \\
+    \Omega_3 & 0 & -\Omega_1 \\
+    -\Omega_2  & \Omega_1 & 0
+  \end{bmatrix}
+\end{equation}
+such that $\tilde \Omega x = \Omega \times x$
+
 
 \subsection{Mechanical systems  with bilateral and unilateral constraints}
 \label{section22}
@@ -174,12 +432,12 @@ Note that all the constraints are written at the velocity integrators. {Another 
   \end{pmatrix}
   := \begin{pmatrix}
     f_{ext}(t)  - f_{int}(x_{\cg},  v_{\cg}, R, \Omega ) \\
-    - m_{gyr}(\Omega) + m_{ext}(t) -  m_{int}(x_{\cg}, v_{\cg}, R, \Omega )
+    - M_{gyr}(\Omega) + M_{ext}(t) -  M_{int}(x_{\cg}, v_{\cg}, R, \Omega )
   \end{pmatrix}.
 \end{equation}
 with
 \begin{equation}
-  m_{gyr} := \begin{pmatrix}
+  M_{gyr} := \begin{pmatrix}
      \Omega \times I\Omega
   \end{pmatrix}
 \end{equation}
@@ -192,35 +450,8 @@ In the siconos notation, we have for the relation
    C =   J^\alpha(q) \quad CT = J^\alpha(q)T(q)
 \end{equation}
 
-\paragraph{Computation of $T$ for unit quaternion}
-\begin{equation}
-  \label{eq:3}
-  \dot p = \frac  1 2 p 
-  \begin{bmatrix}
-    0 \\
-    \Omega
-  \end{bmatrix}
-\end{equation}
-Using the matrix representation of quaternion that encode the quaternion multiplication,
-\begin{equation}
-  \label{eq:4}
-   \hat p = \begin{bmatrix}
-     p_0 & -p_1 & -p_2 & -p_3 \\
-     p_1 & p_0 & -p_3 & p_2 \\
-     p_2 & p_3 & -p_0 & -p_1 \\
-     p_3 & -p_2 & p_1 & p_0 \\
-   \end{bmatrix},
-\end{equation}
-we get
-\begin{equation}
-  T(q)=\label{eq:5}
-  \begin{bmatrix}
-    I_{3\times 3} & & 0_{3\times 4} & \\
-    &   p_1 & p_0 & -p_3 & p_2 \\
-    0_{3\times 3} &   p_2 & p_3 & -p_0 & -p_1 \\
-    &   p_3 & -p_2 & p_1 & p_0 \\
-  \end{bmatrix}
-\end{equation}
+
+
 
 
 
@@ -462,10 +693,10 @@ Finally, we get a linear relation between $u^{\tau+1}_{\n,k+1}$ and the multipli
 \subsection{Computation of the Jacobian in special case}
 
 \paragraph{Moment of gyroscopic forces}
-Let us denote by the basis vector $e_i$ given the $i^{th}$ column of the identity matrix $I_{3\times3}$. The Jacobian of $m_{gyr}$ is given by
+Let us denote by the basis vector $e_i$ given the $i^{th}$ column of the identity matrix $I_{3\times3}$. The Jacobian of $M_{gyr}$ is given by
 \begin{equation}
   \label{eq:8}
-  \nabla^\top_\Omega m_{gyr}(\Omega) = \nabla^\top_\Omega (\Omega \times I \Omega) =
+  \nabla^\top_\Omega M_{gyr}(\Omega) = \nabla^\top_\Omega (\Omega \times I \Omega) =
   \begin{bmatrix}
     e_i \times I \Omega + \Omega \times I e_i, i =1,2,3
   \end{bmatrix}
@@ -478,7 +709,7 @@ If the internal wrench  is given by
   F_{int}(t,q,v) =
   \begin{bmatrix}
     f_{int}(t,q,v)\\
-    m_{int}(t,q,v)
+    M_{int}(t,q,v)
   \end{bmatrix}
   = C v + K q, \quad C \in \RR^{6\times 6}, \quad K \in \RR^{6\times 7 }
 \end{equation}
@@ -491,6 +722,39 @@ we get
   \end{array}
 \end{equation}
 
+\paragraph{External moment given in the inertial frame}
+
+If the external moment denoted by $m_{ext} (t)$ is expressed in inertial frame, we have
+\begin{equation}
+  \label{eq:18}
+  M_{ext}(q,t) = R^T m_{ext}(t)= \Phi(p) m_{ext}(t)
+\end{equation}
+In that case, $  M_{ext}(q,t)$ appears as a function $q$ and we need to compute its Jacobian w.r.t $q$. This computation needs the computation of
+\begin{equation}
+  \label{eq:22}
+  \nabla_{p} M_{ext}(q,t) = \nabla_{p} \Phi(p) m_{ext}(t) 
+\end{equation}
+Let us compute first
+\begin{equation}
+  \label{eq:23}
+  \Phi(p) m_{ext}(t)  =
+  \begin{bmatrix}
+    (1-2 p_2^2- 2 p_3^2)m_{ext,1} + 2(p_1p_2-p_3p_0)m_{ext,2} + 2(p_1p_3+p_2p_0)m_{ext,3}\\
+    2(p_1p_2+p_3p_0)m_{ext,1}  +(1-2 p_1^2- 2 p_3^2)m_{ext,2} + 2(p_2p_3-p_1p_0)m_{ext,3}\\
+    2(p_1p_3-p_2p_0)m_{ext,1}  + 2(p_2p_3+p_1p_0)m_{ext,2}  + (1-2 p_1^2- 2 p_2^2)m_{ext,3}\\
+  \end{bmatrix}
+\end{equation}
+Then we get
+\begin{equation}
+  \label{eq:24}
+  \begin{array}{l}
+  \nabla_{p} \Phi(p) m_{ext}(t)  =\\
+  \begin{bmatrix}
+    -2 p_3 m_{ext,2} + 2 p_2 m_{ext,3} & 2p_2 m_{ext,2}+2 p_3 m_{ext,3}  & -4 p_2 m_{ext,1} +2p_1 m_{ext,2}+2 p_0 m_{ext,3} & -3 p_3 m_{ext,1} -2p_0 m_{ext,2} +2 p_1m_{ext,3}  \\
+    2p_3 m_{ext,1} -2p_1m_{ext,3}  & 2p_2m_{ext,1} -4p_1 m_{ext,2} -2p_1 m_{ext,3} & & &  \\
+  \end{bmatrix}
+  \end{array}
+\end{equation}
 
 
 
