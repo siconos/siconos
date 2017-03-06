@@ -827,7 +827,7 @@ int fc3d_nsgs_setDefaultSolverOptions(SolverOptions* options)
 
   options->dparam[SICONOS_DPARAM_TOL] = 1e-4;
   options->internalSolvers = (SolverOptions *)malloc(sizeof(SolverOptions));
-  fc3d_onecontact_nonsmooth_Newtow_setDefaultSolverOptions(options->internalSolvers);
+  fc3d_onecontact_nonsmooth_Newton_setDefaultSolverOptions(options->internalSolvers);
 
   return 0;
 }

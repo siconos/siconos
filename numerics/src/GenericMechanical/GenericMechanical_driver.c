@@ -533,12 +533,12 @@ void genericMechanicalProblem_setDefaultSolverOptions(SolverOptions* options, in
     fc3d_unitary_enumerative_setDefaultSolverOptions(&options->internalSolvers[1]);
     break;
   case SICONOS_FRICTION_3D_ONECONTACT_NSN:
-    fc3d_onecontact_nonsmooth_Newtow_setDefaultSolverOptions(&options->internalSolvers[1]);
+    fc3d_onecontact_nonsmooth_Newton_setDefaultSolverOptions(&options->internalSolvers[1]);
     (&options->internalSolvers[1])->solverId=SICONOS_FRICTION_3D_ONECONTACT_NSN;
     //(&options->internalSolvers[1])->iparam[10]=1; /* VA 26/11/2015 For robustness reasons on mechanisms, we choose the JeanMoreau formulation */
     break;
   case SICONOS_FRICTION_3D_ONECONTACT_NSN_GP:
-    fc3d_onecontact_nonsmooth_Newtow_setDefaultSolverOptions(&options->internalSolvers[1]);
+    fc3d_onecontact_nonsmooth_Newton_setDefaultSolverOptions(&options->internalSolvers[1]);
     //(&options->internalSolvers[1])->iparam[10]=1; /* VA 26/11/2015 For robustness reasons on mechanisms, we choose the JeanMoreau formulation */
     break;
   case SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration:
