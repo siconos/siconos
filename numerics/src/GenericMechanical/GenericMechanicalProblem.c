@@ -98,6 +98,7 @@ void * addProblem(GenericMechanicalProblem * pGMP, int problemType, int size)
   newProblem->nextProblem = 0;
   newProblem->type = problemType;
   newProblem->size = size;
+  newProblem->error = 0;
   pGMP->size += size;
   if (size > pGMP->maxLocalSize)
     pGMP->maxLocalSize = size;
