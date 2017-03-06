@@ -114,18 +114,22 @@ unsigned int D1MinusLinearOSI::numberOfIndexSets() const
 }
 void D1MinusLinearOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds)
 {
-  Type::Siconos dsType = Type::value(*ds);
+  // Get work buffers from the graph
   const DynamicalSystemsGraph::VDescriptor& dsv = _dynamicalSystemsGraph->descriptor(ds);
-
   VectorOfVectors& workVectors = *_dynamicalSystemsGraph->properties(dsv).workVectors;
+  // Initialize memory buffers
   _dynamicalSystemsGraph->bundle(dsv)->initMemory(getSizeMem());
+  // Force dynamical system to its initial state
   _dynamicalSystemsGraph->bundle(dsv)->resetToInitialState();
-
-
+  // Check dynamical system type
+  Type::Siconos dsType = Type::value(*ds);
+  assert(dsType == Type::LagrangianLinearTIDS || dsType == Type::LagrangianDS || Type::NewtonEulerDS);
+  
   if(dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
   {
     SP::LagrangianDS lds = std11::static_pointer_cast<LagrangianDS> (ds);
-    lds->computeMass();
+    lds->init_generalized_coordinates(2); // acceleration is required for the ds
+    lds->init_inverse_mass(); // invMass required to update post-impact velocity
 
     workVectors.resize(OneStepIntegrator::work_vector_of_vector_size);
     workVectors[OneStepIntegrator::residu_free].reset(new SiconosVector(lds->dimension()));
@@ -136,6 +140,7 @@ void D1MinusLinearOSI::initializeDynamicalSystem(Model& m, double t, SP::Dynamic
   else if(dsType == Type::NewtonEulerDS)
   {
     SP::NewtonEulerDS neds = std11::static_pointer_cast<NewtonEulerDS> (ds);
+    neds->init_inverse_mass(); // invMass required to update post-impact velocity
     workVectors.resize(OneStepIntegrator::work_vector_of_vector_size);
     workVectors[OneStepIntegrator::residu_free].reset(new SiconosVector(neds->dimension()));
     workVectors[OneStepIntegrator::free].reset(new SiconosVector(neds->dimension()));
@@ -162,7 +167,6 @@ void D1MinusLinearOSI::initialize(Model & m)
   for(std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
   {
     if(!checkOSI(dsi)) continue;
-
     SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
     initializeDynamicalSystem(m, m.t0(),  ds);
   }
@@ -385,7 +389,6 @@ void D1MinusLinearOSI::computeFreeState()
       SiconosVector &vfree  = *d->velocity(); // POINTER CONSTRUCTOR : contains free velocity
 
       // get right information
-      //SP::SiconosMatrix M = d->mass();
       vfree =  residuFree;
       DEBUG_EXPR(residuFree.display());
       // d->computeMass();
@@ -408,7 +411,7 @@ void D1MinusLinearOSI::computeFreeState()
 
 
       // get right information
-      SP::SiconosMatrix M(new SimpleMatrix(*(d->mass()))); // we copy the mass matrix to avoid its factorization;
+      //SP::SiconosMatrix M(new SimpleMatrix(*(d->mass()))); // we copy the mass matrix to avoid its factorization;
       SiconosVector &vfree = *d->twist(); // POINTER CONSTRUCTOR : contains free velocity
       SiconosVector& residuFree = *workVectors[OneStepIntegrator::residu_free];
 
@@ -450,7 +453,6 @@ void D1MinusLinearOSI::updateState(const unsigned int)
     if((dsType == Type::LagrangianDS) || (dsType == Type::LagrangianLinearTIDS))
     {
       SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
-      SP::SiconosMatrix M = d->mass();
       SP::SiconosVector v = d->velocity();
 
       DEBUG_PRINT("Position and velocity before update\n");
@@ -464,7 +466,11 @@ void D1MinusLinearOSI::updateState(const unsigned int)
         /* copy the value of the impulse */
         SP::SiconosVector dummy(new SiconosVector(*(d->p(1))));
         /* Compute the velocity jump due to the impulse */
-        M->PLUForwardBackwardInPlace(*dummy);
+	if(d->inverseMass())
+	  {
+	    d->update_inverse_mass();
+	    d->inverseMass()->PLUForwardBackwardInPlace(*dummy);
+	  }
         /* Add the velocity jump to the free velocity */
         *v += *dummy;
       }
@@ -477,14 +483,17 @@ void D1MinusLinearOSI::updateState(const unsigned int)
     else if(dsType == Type::NewtonEulerDS)
     {
       SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS> (ds);
-      SP::SiconosMatrix M(new SimpleMatrix(*(d->mass()))); // we copy the mass matrix to avoid its factorization;
       SP::SiconosVector v = d->twist(); // POINTER CONSTRUCTOR : contains new velocity
       if(d->p(1))
       {
 
         // Update the velocity
         SP::SiconosVector dummy(new SiconosVector(*(d->p(1)))); // value = nonsmooth impulse
-        M->PLUForwardBackwardInPlace(*dummy); // solution for its velocity equivalent
+	if(d->inverseMass())
+	  {
+	    d->update_inverse_mass();
+	    d->inverseMass()->PLUForwardBackwardInPlace(*dummy);
+	  }
         *v += *dummy; // add free velocity
 
         // update \f$ \dot q \f$

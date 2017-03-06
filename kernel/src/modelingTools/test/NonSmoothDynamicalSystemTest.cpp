@@ -84,9 +84,3 @@ void NonSmoothDynamicalSystemTest::testinsertInteraction()
   std::cout << " ------- test insertInteractiontest ok -------" <<std::endl;
 }
 
-void NonSmoothDynamicalSystemTest::End()
-{
-  std::cout << "===================================================" <<std::endl;
-  std::cout << " ===== End of NonSmoothDynamicalSystem tests ===== " <<std::endl;
-  std::cout << "===================================================" <<std::endl;
-}

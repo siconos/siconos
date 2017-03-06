@@ -391,9 +391,3 @@ void NewtonEulerDSTest::testNewtonEulerDSQuaternionMatrix()
 
 // }
 
-void NewtonEulerDSTest::End()
-{
-  std::cout << "======================================" <<std::endl;
-  std::cout << " ===== End of NewtonEulerDS tests ===== " <<std::endl;
-  std::cout << "======================================" <<std::endl;
-}

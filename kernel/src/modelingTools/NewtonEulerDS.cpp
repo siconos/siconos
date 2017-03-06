@@ -365,18 +365,6 @@ void computeT(SP::SiconosVector q, SP::SimpleMatrix T)
 
 }
 
-
-
-// Private function to set linked with members of Dynamical top class
-void NewtonEulerDS::connectToDS()
-{
-  // dim
-  _n = 2 * 3;
-
-}
-
-
-
 // From a set of data; Mass filled-in directly from a siconosMatrix -
 // This constructor leads to the minimum NewtonEuler System form: \f$ M\ddot q = p \f$
 /*
@@ -567,6 +555,9 @@ void NewtonEulerDS::initializeNonSmoothInput(unsigned int level)
 
 void NewtonEulerDS::initRhs(double time)
 {
+  // dim
+  _n = 2 * 3;
+
   //  _workMatrix.resize(sizeWorkMat);
   // Solve Mq[2]=fL+p.
   //*_q = *(_p[2]); // Warning: r/p update is done in Interactions/Relations
@@ -594,6 +585,24 @@ void NewtonEulerDS::resetToInitialState()
   }
   else
     RuntimeException::selfThrow("NewtonEulerDS::resetToInitialState - initial twist _twist0 is null");
+}
+
+void NewtonEulerDS::init_inverse_mass()
+{
+  if(_massMatrix && !_inverseMass)
+    {
+      updateMassMatrix();
+      _inverseMass.reset(new SimpleMatrix(*_massMatrix));
+    }
+}
+
+void NewtonEulerDS::update_inverse_mass()
+{
+  if(_massMatrix && _inverseMass)
+    {
+      updateMassMatrix();
+      *_inverseMass = *_massMatrix;
+    }
 }
 
 void NewtonEulerDS::computeFExt(double time)
@@ -1238,7 +1247,7 @@ void NewtonEulerDS::initMemory(unsigned int steps)
     _twistMemory.reset(new SiconosMemory(steps, _n));
     _forcesMemory.reset(new SiconosMemory(steps, _n));
     _dotqMemory.reset(new SiconosMemory(steps, _qDim));
-    swapInMemory();
+    //    swapInMemory(); Useless, done in osi->initializeDynamicalSystem
   }
 }
 

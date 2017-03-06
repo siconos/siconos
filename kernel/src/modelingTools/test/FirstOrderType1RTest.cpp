@@ -72,10 +72,3 @@ void FirstOrderType1RTest::testBuildFirstOrderType1R2()
   //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R2g : ", R2->getJacgName(0)=="TestPlugin:Jg0T1", true);
   std::cout << "--> Constructor2 test ended with success." <<std::endl;
 }
-
-void FirstOrderType1RTest::End()
-{
-  std::cout << "==========================================" <<std::endl;
-  std::cout << " ===== End of FirstOrderType1R Tests ===== " <<std::endl;
-  std::cout << "==========================================" <<std::endl;
-}

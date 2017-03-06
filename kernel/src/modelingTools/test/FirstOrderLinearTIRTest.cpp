@@ -147,9 +147,3 @@ void FirstOrderLinearTIRTest::testGetJacPtr()
   std::cout << "--> setBPtr test ended with success." <<std::endl;
 }
 
-void FirstOrderLinearTIRTest::End()
-{
-  std::cout << "===========================================" <<std::endl;
-  std::cout << " ===== End of FirstOrderLinearTIR Tests ===== " <<std::endl;
-  std::cout << "=========================================== " <<std::endl;
-}

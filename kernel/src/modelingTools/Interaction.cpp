@@ -477,15 +477,15 @@ void Interaction::initDSDataLagrangian(DynamicalSystem& ds, VectorOfVectors& wor
   DEBUG_EXPR(std::cout << DSlink[LagrangianR::q0] << std::endl;);
 
   DSlink[LagrangianR::q1]->insertPtr(lds.velocity());
-  DSlink[LagrangianR::q2]->insertPtr(lds.acceleration());
+  if(lds.acceleration())
+    DSlink[LagrangianR::q2]->insertPtr(lds.acceleration());
   DSlink[LagrangianR::z]->insertPtr(lds.z());
 
   // Put NonsmoothInput _p of each DS into a block. (Pointers links, no copy!!)
   for (unsigned int k = 0; k < 3; k++)
   {
-    assert(lds.p(k));
-    assert(DSlink[LagrangianR::p0 + k]);
-    DSlink[LagrangianR::p0 + k]->insertPtr(lds.p(k));
+    if(lds.p(k) && DSlink[LagrangianR::p0 + k])
+      DSlink[LagrangianR::p0 + k]->insertPtr(lds.p(k));
   }
 }
 

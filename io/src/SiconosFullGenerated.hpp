@@ -359,11 +359,7 @@ SICONOS_IO_REGISTER_WITH_BASES(LagrangianDS,(DynamicalSystem),
 SICONOS_IO_REGISTER(DynamicalSystem,
   (_jacxRhs)
   (_n)
-  (_normRef)
   (_number)
-  (_pluginJacgx)
-  (_pluginJacxDotG)
-  (_pluging)
   (_r)
   (_stepsInMemory)
   (_x)

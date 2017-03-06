@@ -142,10 +142,3 @@ void LagrangianLinearTIRTest::testGetJacPtr()
 
   std::cout << "--> setBPtr test ended with success." <<std::endl;
 }
-
-void LagrangianLinearTIRTest::End()
-{
-  std::cout << "===========================================" <<std::endl;
-  std::cout << " ===== End of LagrangianLinearTIR Tests ===== " <<std::endl;
-  std::cout << "=========================================== " <<std::endl;
-}

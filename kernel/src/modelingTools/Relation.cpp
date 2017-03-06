@@ -50,21 +50,21 @@ Relation::~Relation()
 const std::string Relation::getJachxName() const
 {
   if (_pluginJachx->fPtr)
-    return _pluginJachx->getPluginName();
+    return _pluginJachx->pluginName();
   return "unamed";
 }
 
 const std::string Relation::gethName() const
 {
   if (_pluginh->fPtr)
-    return _pluginh->getPluginName();
+    return _pluginh->pluginName();
   return "unamed";
 
 }
 const std::string Relation::getgName() const
 {
   if (_pluging->fPtr)
-    return _pluging->getPluginName();
+    return _pluging->pluginName();
   return "unamed";
 
 }

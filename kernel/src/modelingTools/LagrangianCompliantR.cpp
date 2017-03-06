@@ -45,14 +45,14 @@ void LagrangianCompliantR::zeroPlugin()
 const std::string LagrangianCompliantR::getJachlambdaName() const
 {
   if (_pluginJachlambda->fPtr)
-    return _pluginJachlambda->getPluginName();
+    return _pluginJachlambda->pluginName();
   return "unamed";
 
 }
 const std::string LagrangianCompliantR::getJachqName() const
 {
   if (_pluginJachq->fPtr)
-    return _pluginJachq->getPluginName();
+    return _pluginJachq->pluginName();
   return "unamed";
 }
 

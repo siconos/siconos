@@ -85,6 +85,30 @@ Second case::
 
 Note that the signature (\e ie the number and type of arguments) of the function you use in your plugin  must be exactly the same as the one given in kernel/src/plugin/DefaultPlugin.cpp for the corresponding function. 
 
+
+Common interface
+----------------
+
+The following functions are (and must) be present in any class derived from DynamicalSystems
+
+* :doxysiconos:`DynamicalSystem::initRhs()`
+
+* :doxysiconos:`DynamicalSystem::icomputeRhs(time)`
+
+* :doxysiconos:`DynamicalSystem::computeJacobianRhsx(time)`
+  
+* :doxysiconos:`DynamicalSystem::initializeNonSmoothInput(level)`
+
+* :doxysiconos:`DynamicalSystem::swapInMemory()`
+
+* :doxysiconos:`DynamicalSystem::display()`
+
+* :doxysiconos:`DynamicalSystem::resetAllNonSmoothPart()`
+
+* :doxysiconos:`DynamicalSystem::resetNonSmoothPart(level)`
+  
+
+
 First order dynamical systems
 -----------------------------
 

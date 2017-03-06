@@ -147,8 +147,34 @@ with
 
    
 Notes, remarks, questions
-=========================
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
 * Quel nom pour "modal" Moreau-Jean? i.e. qui est à la source (ref?) du schéma de Bilbao?
 * Vérif comportement de W quand :math:`\Delta t \rightarrow 0`
 
+Non-smooth problem formulation
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+.. math::
+
+   \dot y &= S_c \dot q \\
+   P &= S_c^T\lambda
+
+.. math::
+
+   \dot y_c^{i+1} &= S_c \dot q^{i+1} \\
+   P^{i+1} &= S_c^T\lambda^{i+1}
+
+
+.. math::
+   
+   \dot y^{i+1} &= S_cv^{i} - S_cW^{-1}(\Delta tKq^i + 2\Delta t \Sigma^* v^i) + S_cW^{-1}S_c^T\lambda^{i+1} \\
+           &= q_{LCP} + M_{LCP}\lambda^{i+1}
+
+with
+
+.. math::
+
+   0 \leq \dot y^{i+1} \perp \lambda^{i+1} \geq 0
+   

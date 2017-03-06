@@ -427,14 +427,6 @@ void Simulation::processEvents()
       updateIndexSets();
     }
   }
-
-  /* should be evaluated only if needed */
-  SP::DynamicalSystemsGraph dsGraph = _nsds->dynamicalSystems();
-  for (DynamicalSystemsGraph::VIterator vi = dsGraph->begin(); vi != dsGraph->end(); ++vi)
-  {
-    dsGraph->bundle(*vi)->endStep();
-  }
-
 }
 
 

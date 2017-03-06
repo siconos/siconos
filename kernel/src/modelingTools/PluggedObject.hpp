@@ -27,17 +27,23 @@
   \brief utilities for plugin definition to compute matrices or vectors from user-defined functions.
 */
 
+
+/** Class to deal with plugged functions 
+
+A plugin is a C-function defined in some external file.
+
+This object handles a function pointer to this C-function.
+*/
 class PluggedObject
 {
 private:
 
-  /** serialization hooks
-  */
+  /* serialization hooks */
   ACCEPT_SERIALIZATION(PluggedObject);
 
 protected:
 
-  /** Plugin name of the form "fileName:functionName" */
+  /** Plugin name, should be of the form "fileName:functionName" */
   std::string _pluginName;
 
 public:
@@ -99,18 +105,11 @@ public:
   /** Return the name of the plugin used to compute fPtr
    * \return _pluginName (a std::string)
    */
-  inline std::string getPluginName(void) const
+  inline std::string pluginName(void) const
   {
     return _pluginName;
   };
 
-  /** Set the name of the plugin function
-      \param name a std::string of the form "pluginFile:functionName", without extension for pluginFile
-  */
-  inline void setPluginName(const std::string& name)
-  {
-    _pluginName = name;
-  };
 };
 
 #endif

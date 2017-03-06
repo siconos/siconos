@@ -87,14 +87,8 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
       SP::SiconosVector qold = d->qMemory()->getSiconosVector(0);
       SP::SiconosVector vold = d->velocityMemory()->getSiconosVector(0); // right limit
 
-      /* retrieve the mass matrix */
-      d->computeMass();
-      Mold = d->mass();
-
       DEBUG_EXPR(qold->display());
       DEBUG_EXPR(vold->display());
-      DEBUG_EXPR(Mold->display());
-      DEBUG_EXPR_WE(std::cout <<  std::boolalpha << " Mold->isPLUFactorized() = "<< Mold->isPLUFactorized() << std::endl;);
 
       /* compute the force and store in vFree */
       if(d->forces())
@@ -106,7 +100,11 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
 
       /* Compute the acceleration due to the external force */
       /* vFree contains left (right limit) acceleration without contact force */
-      Mold->PLUForwardBackwardInPlace(vFree);
+      if(d->inverseMass())
+	{
+	  d->update_inverse_mass();
+	  d->inverseMass()->PLUForwardBackwardInPlace(vFree);
+	}
 
       /* Store the value of vFree in d->workspace(DynamicalSystem::free_tdg called workFree_tdg*/
       workFree_tdg =  workVectors[OneStepIntegrator::free_tdg];
@@ -139,9 +137,6 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
       // get left state from memory
       SP::SiconosVector qold = d->qMemory()->getSiconosVector(0);
       SP::SiconosVector vold = d->twistMemory()->getSiconosVector(0); // right limit
-      //Mold = d->mass();
-      assert(!d->mass()->isPLUInversed());
-      Mold.reset(new SimpleMatrix(*(d->mass()))); // we copy the mass matrix to avoid its factorization
       DEBUG_EXPR(vFree.display());
       DEBUG_EXPR(qold->display());
       DEBUG_EXPR(vold->display());
@@ -155,9 +150,11 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
 
         vFree += *(d->forces());
       }
-      Mold->PLUForwardBackwardInPlace(vFree); // contains left (right limit) acceleration without contact force
-
-
+      if(d->inverseMass())
+	{
+	  d->update_inverse_mass();
+	  d->inverseMass()->PLUForwardBackwardInPlace(vFree); // contains left (right limit) acceleration without contact force
+	}
 
       workFree_tdg =  workVectors[OneStepIntegrator::free_tdg];;
       workFree_tdg->zero();
@@ -262,13 +259,11 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
       DEBUG_EXPR(p2->display());
       /* we homogenize p(2) to a force for the user output   */
       *p2 /= h;
-
-
-      SP::SiconosMatrix Mold = d->mass();
-      DEBUG_EXPR(Mold->display(););
-
-      Mold->PLUForwardBackwardInPlace(*dummy);
-
+      if(d->inverseMass())
+	{
+	  d->update_inverse_mass();
+	  d->inverseMass()->PLUForwardBackwardInPlace(*dummy);
+	}
       DEBUG_EXPR(vFree.display());
       DEBUG_EXPR(dummy->display());
 
@@ -317,9 +312,11 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
       /* we homogenize p(2) to a force for the user output   */
       *p2 /= h;
 
-      SP::SiconosMatrix Mold(new SimpleMatrix(*(d->mass())));  // we copy the mass matrix to avoid its factorization
-      DEBUG_EXPR(Mold->display());
-      Mold->PLUForwardBackwardInPlace(*dummy);
+      if(d->inverseMass())
+	{
+	  d->update_inverse_mass();
+	  d->inverseMass()->PLUForwardBackwardInPlace(*dummy);
+	}
 
       DEBUG_EXPR(vFree.display());
       DEBUG_EXPR(qold->display());
@@ -437,8 +434,6 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
         SP::SiconosVector qold = d->qMemory()->getSiconosVector(0);
         SP::SiconosVector vold = d->velocityMemory()->getSiconosVector(0); // right limit
 
-        SP::SiconosMatrix M = d->mass(); // POINTER CONSTRUCTOR : contains mass matrix
-
         //residuFree->zero();
         //v->zero();
         SP::SiconosVector workFree_tdg =  workVectors[OneStepIntegrator::free_tdg];
@@ -447,8 +442,6 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
         residuFree =  - 0.5 * h**workFree_tdg;
 
         workFree_tdg->zero();
-        d->computeMass();
-        DEBUG_EXPR(M->display());
         if(d->forces())
         {
           DEBUG_EXPR(q->display(););
@@ -459,8 +452,13 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
           *workFree_tdg += *(d->forces());
 
         }
+	if(d->inverseMass())
+	  {
+	  d->update_inverse_mass();
+	  d->inverseMass()->PLUForwardBackwardInPlace(*workFree_tdg);
+	  // contains right (left limit) acceleration without contact force
+	}
 
-        M->PLUForwardBackwardInPlace(*workFree_tdg); // contains right (left limit) acceleration without contact force
         DEBUG_EXPR(workFree_tdg->display());
         residuFree -= 0.5 * h**workFree_tdg;
         DEBUG_EXPR(residuFree.display());
@@ -475,10 +473,6 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
         SP::SiconosVector qold = d->qMemory()->getSiconosVector(0);
         SP::SiconosVector vold = d->twistMemory()->getSiconosVector(0); // right limit
 
-        SP::SiconosMatrix M(new SimpleMatrix(*(d->mass()))); // we copy the mass matrix to avoid its factorization;
-        DEBUG_EXPR(M->display());
-
-
         v->zero();
         SP::SiconosVector workFree_tdg = workVectors[OneStepIntegrator::free_tdg];
         assert(workFree_tdg);
@@ -490,8 +484,13 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
           d->computeForces(t, q, v);
           *workFree_tdg += *(d->forces());
         }
+	if(d->inverseMass())
+	  {
+	  d->update_inverse_mass();
+	  d->inverseMass()->PLUForwardBackwardInPlace(*workFree_tdg);
+	  // contains right (left limit) acceleration without contact force
+	}
 
-        M->PLUForwardBackwardInPlace(*workFree_tdg); // contains right (left limit) acceleration without contact force
         residuFree -= 0.5 * h**workFree_tdg;
         DEBUG_EXPR(residuFree.display());
       }
@@ -529,8 +528,6 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
         // Lagrangian Nonlinear Systems
         if(dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
         {
-          d->computeMass();
-          DEBUG_EXPR(M->display());
           if(d->forces())
           {
             d->computeForces(t, q, v);
@@ -542,7 +539,11 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
           RuntimeException::selfThrow
           ("D1MinusLinearOSI::computeResidu - not yet implemented for Dynamical system type: " + dsType);
 
-        M->PLUForwardBackwardInPlace(vFree);
+	if(d->inverseMass())
+	  {
+	    d->update_inverse_mass();
+	    d->inverseMass()->PLUForwardBackwardInPlace(vFree);
+	  }
         /* vFree contains right (left limit) acceleration without contact force */
         SiconosVector& residuFree = *workVectors[OneStepIntegrator::residu_free];
         residuFree += -0.5 * h * vFree;
@@ -565,7 +566,6 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
         // get right state from memory
         SP::SiconosVector q = d->q(); // contains position q_{k+1}
         SP::SiconosVector v = d->twist(); // contains velocity v_{k+1}^- and not free velocity
-        SP::SiconosMatrix M(new SimpleMatrix(*(d->mass()))); // we copy the mass matrix to avoid its factorization;
 
         DEBUG_EXPR(q->display());
         DEBUG_EXPR(v->display());
@@ -576,8 +576,11 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
           vFree += *(d->forces());
         }
 
-        M->PLUForwardBackwardInPlace(vFree);
-
+	if(d->inverseMass())
+	  {
+	    d->update_inverse_mass();
+	    d->inverseMass()->PLUForwardBackwardInPlace(vFree);
+	  }
         /* workFree_tdg contains right (left limit) acceleration without contact force */
         SiconosVector& residuFree = *workVectors[OneStepIntegrator::residu_free];
 
@@ -646,8 +649,6 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
         {
 
           // get right state from memory
-          SP::SiconosMatrix M = d->mass();
-          DEBUG_EXPR(M->display());
           DEBUG_EXPR(d->p(2)->display());
           SP::SiconosVector p2 = d->p(2);
           SP::SiconosVector dummy(new SiconosVector(*p2)); // value = contact force
@@ -655,7 +656,11 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
           /* we homogenize p(2) to a force for the user output   */
           *p2 *= 2.0/h;
 
-          M->PLUForwardBackwardInPlace(*dummy);
+	  if(d->inverseMass())
+	    {
+	      d->update_inverse_mass();
+	      d->inverseMass()->PLUForwardBackwardInPlace(*dummy);
+	    }
           residuFree -=  *dummy;
 
         }
@@ -669,14 +674,16 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
         if(d->p(2))
         {
           // get right state from memory
-          SP::SiconosMatrix M(new SimpleMatrix(*(d->mass()))); // we copy the mass matrix to avoid its factorization;
-          DEBUG_EXPR(M->display());
           SP::SiconosVector p2 = d->p(2);
           SP::SiconosVector dummy(new SiconosVector(*p2)); // value = contact force
           DEBUG_EXPR(p2->display());
           /* we homogenize p(2) to a force for the user output   */
           *p2 *= 2.0/h;
-          M->PLUForwardBackwardInPlace(*dummy);
+	  if(d->inverseMass())
+	    {
+	      d->update_inverse_mass();
+	      d->inverseMass()->PLUForwardBackwardInPlace(*dummy);
+	    }
           residuFree -=  *dummy;
 
         }
@@ -685,6 +692,8 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
       else
         RuntimeException::selfThrow("D1MinusLinearOSI::computeResidu - not yet implemented for Dynamical system type: " + dsType);
 
+
+      
       /**
        * \f[
        * \begin{cases}

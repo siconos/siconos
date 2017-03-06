@@ -302,9 +302,8 @@ public:
   /** initialize iteration matrix W EulerMoreauOSI matrix at time t
    *  \param time the time (double)
    *  \param ds a pointer to DynamicalSystem
-   *  \param dsv a descriptor of the ds on the graph (redundant to avoid invocation)
    */
-  void initializeIterationMatrixW(double time, SP::DynamicalSystem ds, const DynamicalSystemsGraph::VDescriptor& dsv);
+  void initializeIterationMatrixW(double time, SP::DynamicalSystem ds);
 
   /** compute W EulerMoreauOSI matrix at time t
    *  \param time the current time

@@ -76,7 +76,7 @@ def test_diode_bridge():
     k = 0
     h = bridge_simulation.timeStep()
     # Number of time steps
-    N = (total_time - t0) / h
+    N = int((total_time - t0) / h)
 
     # Get the values to be plotted
     # ->saved in a matrix dataPlot

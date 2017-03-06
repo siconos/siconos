@@ -58,7 +58,7 @@ void LinearSMC::actuate()
   Type::Siconos dsType = Type::value(*_DS_SMC);
   if (dsType == Type::FirstOrderNonLinearDS)
   {
-    _DS_SMC->computef(_simulationSMC->startingTime());
+    _DS_SMC->computef(_simulationSMC->startingTime(), _DS_SMC->x());
     _DS_SMC->swapInMemory();
 //    _DS_SMC->computef(_simulationSMC->startingTime());
 //    *_DS_SMC->fold() = *_DS_SMC->f();

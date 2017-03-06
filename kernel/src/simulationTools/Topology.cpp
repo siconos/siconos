@@ -284,7 +284,6 @@ void Topology::initDS(SP::Model m, double time, SP::DynamicalSystem ds, SP::OneS
 void Topology::setOSI(SP::DynamicalSystem ds, SP::OneStepIntegrator OSI)
 {
   _DSG[0]->properties(_DSG[0]->descriptor(ds)).osi = OSI;
-  ds->initMemory(OSI->getSizeMem());
 }
 
 void Topology::setControlProperty(SP::Interaction inter,

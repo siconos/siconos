@@ -211,12 +211,6 @@ public:
    */
   void display() const;
 
-  /** calculate an indicator that gives convergence information for
-   *  the DSs
-   *  \return a double
-   */
-  double nsdsConvergenceIndicator();
-
   /** return false is one of the interations is not linear.  else
    *  return true.
    *  \return a bool

@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 #include "LsodarOSI.hpp"
 #include "EventDriven.hpp"
@@ -143,9 +143,9 @@ void LsodarOSI::updateData()
 
   atol.reset(new doublereal[sizeTol]) ;  // atol, absolute tolerance
   for(unsigned int i = 0; i < sizeTol; i++)
-  {
-    atol[i] = 0.0;
-  }
+    {
+      atol[i] = 0.0;
+    }
 
 
 
@@ -171,30 +171,30 @@ void LsodarOSI::computeRhs(double t, DynamicalSystemsGraph& DSG0)
 
   DynamicalSystemsGraph::VIterator dsi, dsend;
   for(std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
-  {
-    if(!checkOSI(dsi)) continue;
-    SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
-
-    // compute standard rhs stored in the dynamical system
-    ds->computeRhs(t);
-
-    VectorOfVectors& workVectors = *_dynamicalSystemsGraph->properties(*dsi).workVectors;
-    Type::Siconos dsType = Type::value(*ds);
-    if(dsType == Type::LagrangianLinearTIDS || dsType == Type::LagrangianDS)
     {
-      SP::LagrangianDS lds = std11::static_pointer_cast<LagrangianDS> (ds);
-      SiconosVector &free=*workVectors[OneStepIntegrator::free];
-      // we assume that inverseMass and forces are updated after call of ds->computeRhs(t);
-      //lds->computeForces(t);
-      free = *lds->forces();
-      lds->inverseMass()->PLUForwardBackwardInPlace(free);
+      if(!checkOSI(dsi)) continue;
+      SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
+
+      // compute standard rhs stored in the dynamical system
+      ds->computeRhs(t);
+
+      VectorOfVectors& workVectors = *_dynamicalSystemsGraph->properties(*dsi).workVectors;
+      Type::Siconos dsType = Type::value(*ds);
+      if(dsType == Type::LagrangianLinearTIDS || dsType == Type::LagrangianDS)
+	{
+	  SP::LagrangianDS lds = std11::static_pointer_cast<LagrangianDS> (ds);
+	  SiconosVector &free=*workVectors[OneStepIntegrator::free];
+	  // we assume that inverseMass and forces are updated after call of ds->computeRhs(t);
+	  free = *lds->forces();
+	  if(lds->inverseMass())
+	    lds->inverseMass()->PLUForwardBackwardInPlace(free);
+	}
+      if(_extraAdditionalTerms)
+	{
+	  DynamicalSystemsGraph::VDescriptor dsgVD = DSG0.descriptor(ds);
+	  _extraAdditionalTerms->addSmoothTerms(DSG0, dsgVD, t, ds->getRhs());
+	}
     }
-    if(_extraAdditionalTerms)
-    {
-      DynamicalSystemsGraph::VDescriptor dsgVD = DSG0.descriptor(ds);
-      _extraAdditionalTerms->addSmoothTerms(DSG0, dsgVD, t, ds->getRhs());
-    }
-  }
 }
 
 void LsodarOSI::computeJacobianRhs(double t, DynamicalSystemsGraph& DSG0)
@@ -202,16 +202,16 @@ void LsodarOSI::computeJacobianRhs(double t, DynamicalSystemsGraph& DSG0)
 
   DynamicalSystemsGraph::VIterator dsi, dsend;
   for(std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
-  {
-    if(!checkOSI(dsi)) continue;
-    SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
-    ds->computeJacobianRhsx(t);
-    if(_extraAdditionalTerms)
     {
-      DynamicalSystemsGraph::VDescriptor dsgVD = DSG0.descriptor(ds);
-      _extraAdditionalTerms->addJacobianRhsContribution(DSG0, dsgVD, t, *(ds->jacobianRhsx()));
+      if(!checkOSI(dsi)) continue;
+      SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
+      ds->computeJacobianRhsx(t);
+      if(_extraAdditionalTerms)
+	{
+	  DynamicalSystemsGraph::VDescriptor dsgVD = DSG0.descriptor(ds);
+	  _extraAdditionalTerms->addJacobianRhsContribution(DSG0, dsgVD, t, *(ds->jacobianRhsx()));
+	}
     }
-  }
 }
 
 void LsodarOSI::f(integer* sizeOfX, doublereal* time, doublereal* x, doublereal* xdot)
@@ -233,37 +233,37 @@ void LsodarOSI::jacobianfx(integer* sizeOfX, doublereal* time, doublereal* x, in
 void LsodarOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds)
 {
   DEBUG_BEGIN("LsodarOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds)\n");
+  // Get work buffers from the graph
+  const DynamicalSystemsGraph::VDescriptor& dsv = _dynamicalSystemsGraph->descriptor(ds);
   VectorOfVectors& workVectors = *_dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).workVectors;
+  // Initialize memory buffers
+  _dynamicalSystemsGraph->bundle(dsv)->initMemory(getSizeMem());
+  // Force dynamical system to its initial state
+  _dynamicalSystemsGraph->bundle(dsv)->resetToInitialState();
+  Type::Siconos dsType = Type::value(*ds);
 
-  ds->resetToInitialState();
+  ds->initRhs(t);
   
-  if(Type::value(*ds) == Type::LagrangianDS ||
-     Type::value(*ds) == Type::LagrangianLinearTIDS)
-  {
-    LagrangianDS& lds = *std11::static_pointer_cast<LagrangianDS>(ds);
-    lds.connectToDS(getSizeMem());
-    lds.initRhs(t);
- 
-    _xWork->insertPtr(lds.q());
-    _xWork->insertPtr(lds.velocity());
-    workVectors.resize(OneStepIntegrator::work_vector_of_vector_size);
-    workVectors[OneStepIntegrator::free].reset(new SiconosVector(lds.dimension()));
-    //workMatrices.resize(LagrangianDS::sizeWorkMat);
-   
-  }
+  if(dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
+    {
+      LagrangianDS& lds = *std11::static_pointer_cast<LagrangianDS>(ds);
+      // TODO FP: use buffer in graph for xWork?
+      _xWork->insertPtr(lds.q());
+      _xWork->insertPtr(lds.velocity());
+      workVectors.resize(OneStepIntegrator::work_vector_of_vector_size);
+      workVectors[OneStepIntegrator::free].reset(new SiconosVector(lds.dimension()));
+    }
   else
     _xWork->insertPtr(ds->x());
-  for (unsigned int k = _levelMinForInput ; k < _levelMaxForInput + 1; k++)
-  {
-    ds->initializeNonSmoothInput(k);
-  }
+
+  ds->swapInMemory();
   
   DEBUG_END("LsodarOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds)\n");
 }
 
 void LsodarOSI::initializeInteraction(double t0, Interaction &inter,
-                                             InteractionProperties& interProp,
-                                             DynamicalSystemsGraph & DSG)
+				      InteractionProperties& interProp,
+				      DynamicalSystemsGraph & DSG)
 {
   SP::DynamicalSystem ds1= interProp.source;
   SP::DynamicalSystem ds2= interProp.target;
@@ -285,38 +285,38 @@ void LsodarOSI::initializeInteraction(double t0, Interaction &inter,
   unsigned int upperLevelForInput=2;
   
   if (nslType == Type::NewtonImpactNSL || nslType == Type::MultipleImpactNSL)
-  {
-    lowerLevelForOutput = 0;
-    upperLevelForOutput = 2 ;
-    lowerLevelForInput = 1;
-    upperLevelForInput = 2;
-  }
+    {
+      lowerLevelForOutput = 0;
+      upperLevelForOutput = 2 ;
+      lowerLevelForInput = 1;
+      upperLevelForInput = 2;
+    }
   else if (nslType ==  Type::NewtonImpactFrictionNSL)
-  {
-    lowerLevelForOutput = 0;
-    upperLevelForOutput = 4;
-    lowerLevelForInput = 1;
-    upperLevelForInput = 2;
-    RuntimeException::selfThrow("LsodarOSI::initializeInteraction  not yet implemented for nonsmooth law of type NewtonImpactFrictionNSL");
-  }
+    {
+      lowerLevelForOutput = 0;
+      upperLevelForOutput = 4;
+      lowerLevelForInput = 1;
+      upperLevelForInput = 2;
+      RuntimeException::selfThrow("LsodarOSI::initializeInteraction  not yet implemented for nonsmooth law of type NewtonImpactFrictionNSL");
+    }
   else
     RuntimeException::selfThrow("LsodarOSI::initializeInteraction not yet implemented  for nonsmooth of type");
 
   bool isInitializationNeeded = false;
   if (!(inter.lowerLevelForOutput() <= lowerLevelForOutput && inter.upperLevelForOutput()  >= upperLevelForOutput ))
-  {
-    //  RuntimeException::selfThrow("LsodarOSI::initializeInteraction, we must resize _y");
-    inter.setUpperLevelForOutput(upperLevelForOutput);
-    inter.setLowerLevelForOutput(lowerLevelForOutput);
-    isInitializationNeeded = true;
-  }
- if (!(inter.lowerLevelForInput() <= lowerLevelForInput && inter.upperLevelForInput() >= upperLevelForInput ))
-  {
-    //RuntimeException::selfThrow("LsodarOSI::initializeInteraction, we must resize _lambda");
-     inter.setUpperLevelForInput(upperLevelForInput);
-     inter.setLowerLevelForInput(lowerLevelForInput);
-     isInitializationNeeded = true;
-  }
+    {
+      //  RuntimeException::selfThrow("LsodarOSI::initializeInteraction, we must resize _y");
+      inter.setUpperLevelForOutput(upperLevelForOutput);
+      inter.setLowerLevelForOutput(lowerLevelForOutput);
+      isInitializationNeeded = true;
+    }
+  if (!(inter.lowerLevelForInput() <= lowerLevelForInput && inter.upperLevelForInput() >= upperLevelForInput ))
+    {
+      //RuntimeException::selfThrow("LsodarOSI::initializeInteraction, we must resize _lambda");
+      inter.setUpperLevelForInput(upperLevelForInput);
+      inter.setLowerLevelForInput(lowerLevelForInput);
+      isInitializationNeeded = true;
+    }
 
   if (isInitializationNeeded)
     inter.init();
@@ -327,10 +327,10 @@ void LsodarOSI::initializeInteraction(double t0, Interaction &inter,
   /* allocate ant set work vectors for the osi */
   VectorOfVectors &workVds1 = *DSG.properties(DSG.descriptor(ds1)).workVectors;
   if (relationType == Lagrangian)
-  {
-    DSlink[LagrangianR::xfree].reset(new BlockVector());
-    DSlink[LagrangianR::xfree]->insertPtr(workVds1[OneStepIntegrator::free]);
-  }
+    {
+      DSlink[LagrangianR::xfree].reset(new BlockVector());
+      DSlink[LagrangianR::xfree]->insertPtr(workVds1[OneStepIntegrator::free]);
+    }
   // else if (relationType == NewtonEuler)
   // {
   //   DSlink[NewtonEulerR::xfree].reset(new BlockVector());
@@ -338,17 +338,17 @@ void LsodarOSI::initializeInteraction(double t0, Interaction &inter,
   // }
 
   if (ds1 != ds2)
-  {
-    VectorOfVectors &workVds2 = *DSG.properties(DSG.descriptor(ds2)).workVectors;
-    if (relationType == Lagrangian)
     {
-      DSlink[LagrangianR::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
+      VectorOfVectors &workVds2 = *DSG.properties(DSG.descriptor(ds2)).workVectors;
+      if (relationType == Lagrangian)
+	{
+	  DSlink[LagrangianR::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
+	}
+      // else if (relationType == NewtonEuler)
+      // {
+      //   DSlink[NewtonEulerR::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
+      // }
     }
-    // else if (relationType == NewtonEuler)
-    // {
-    //   DSlink[NewtonEulerR::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
-    // }
-  }
 
 
   // Compute a first value for the output
@@ -357,9 +357,9 @@ void LsodarOSI::initializeInteraction(double t0, Interaction &inter,
   // prepare the gradients
   relation.computeJach(t0, inter, interProp);
   for (unsigned int i = 0; i < inter.upperLevelForOutput() + 1; ++i)
-  {
-    inter.computeOutput(t0, interProp, i);
-  }
+    {
+      inter.computeOutput(t0, interProp, i);
+    }
   inter.swapInMemory();
 
   
@@ -374,21 +374,21 @@ void LsodarOSI::initialize(Model& m)
 
   DynamicalSystemsGraph::VIterator dsi, dsend;
   for(std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
-  {
-    if(!checkOSI(dsi)) continue;
-    SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
-    initializeDynamicalSystem(m, m.t0(),ds);
-    ds->resetToInitialState();
-    //ds->swapInMemory();
-  }
+    {
+      if(!checkOSI(dsi)) continue;
+      SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
+      initializeDynamicalSystem(m, m.t0(),ds);
+      //ds->resetToInitialState();
+      //ds->swapInMemory();
+    }
   
   SP::InteractionsGraph indexSet0 = m.nonSmoothDynamicalSystem()->topology()->indexSet0();
   InteractionsGraph::VIterator ui, uiend;
   for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
-  {
-    Interaction& inter = *indexSet0->bundle(*ui);
-    initializeInteraction(m.t0(), inter, indexSet0->properties(*ui), *_dynamicalSystemsGraph);
-  }
+    {
+      Interaction& inter = *indexSet0->bundle(*ui);
+      initializeInteraction(m.t0(), inter, indexSet0->properties(*ui), *_dynamicalSystemsGraph);
+    }
 
   computeRhs(m.t0(),*_dynamicalSystemsGraph);
 
@@ -499,9 +499,9 @@ void LsodarOSI::integrate(double& tinit, double& tend, double& tout, int& istate
 
   *_xtmp = *_xWork;
   if(istate == 3)
-  {
-    istate = 1; // restart TEMPORARY
-  }
+    {
+      istate = 1; // restart TEMPORARY
+    }
 
   _intData[4] = istate;
 
@@ -531,17 +531,17 @@ void LsodarOSI::integrate(double& tinit, double& tend, double& tout, int& istate
 
   // === Post ===
   if(_intData[4] < 0)  // if istate < 0 => LSODAROSI failed
-  {
-    std::cout << "LSodar::integrate(...) failed - Istate = " << _intData[4] <<std::endl;
-    std::cout << " -1 means excess work done on this call (perhaps wrong JT, or so small tolerance (ATOL and RTOL), or small maximum number of steps for one call (MXSTEP)). You should increase ATOL or RTOL or increase the MXSTEP" <<std::endl;
-    std::cout << " -2 means excess accuracy requested (tolerances too small)." <<std::endl;
-    std::cout << " -3 means illegal input detected (see printed message)." <<std::endl;
-    std::cout << " -4 means repeated error test failures (check all inputs)." <<std::endl;
-    std::cout << " -5 means repeated convergence failures (perhaps bad Jacobian supplied or wrong choice of JT or tolerances)." <<std::endl;
-    std::cout << " -6 means error weight became zero during problem. (Solution component i vanished, and ATOL or ATOL(i) = 0.)" <<std::endl;
-    std::cout << " -7 means work space insufficient to finish (see messages)." <<std::endl;
-    RuntimeException::selfThrow("LsodarOSI, integration failed");
-  }
+    {
+      std::cout << "LSodar::integrate(...) failed - Istate = " << _intData[4] <<std::endl;
+      std::cout << " -1 means excess work done on this call (perhaps wrong JT, or so small tolerance (ATOL and RTOL), or small maximum number of steps for one call (MXSTEP)). You should increase ATOL or RTOL or increase the MXSTEP" <<std::endl;
+      std::cout << " -2 means excess accuracy requested (tolerances too small)." <<std::endl;
+      std::cout << " -3 means illegal input detected (see printed message)." <<std::endl;
+      std::cout << " -4 means repeated error test failures (check all inputs)." <<std::endl;
+      std::cout << " -5 means repeated convergence failures (perhaps bad Jacobian supplied or wrong choice of JT or tolerances)." <<std::endl;
+      std::cout << " -6 means error weight became zero during problem. (Solution component i vanished, and ATOL or ATOL(i) = 0.)" <<std::endl;
+      std::cout << " -7 means work space insufficient to finish (see messages)." <<std::endl;
+      RuntimeException::selfThrow("LsodarOSI, integration failed");
+    }
 
   *_xWork = *_xtmp;
   istate = _intData[4];
@@ -550,10 +550,10 @@ void LsodarOSI::integrate(double& tinit, double& tend, double& tout, int& istate
 
 
   if(istate == 3)
-  {
-    //      std:: std::cout << "ok\n";
-    assert(true);
-  }
+    {
+      //      std:: std::cout << "ok\n";
+      assert(true);
+    }
   // Update counters
   count_NST = iwork[10];
   count_NFE = iwork[11];
@@ -567,26 +567,26 @@ void LsodarOSI::updateState(const unsigned int level)
 
   DynamicalSystemsGraph::VIterator dsi, dsend;
   if(level == 1)  // ie impact case: compute velocity
-  {
-    for(std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
     {
-      if(!checkOSI(dsi)) continue;
-      SP::LagrangianDS lds = std11::static_pointer_cast<LagrangianDS>(_dynamicalSystemsGraph->bundle(*dsi));
-      lds->computePostImpactVelocity();
+      for(std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
+	{
+	  if(!checkOSI(dsi)) continue;
+	  SP::LagrangianDS lds = std11::static_pointer_cast<LagrangianDS>(_dynamicalSystemsGraph->bundle(*dsi));
+	  lds->computePostImpactVelocity();
+	}
     }
-  }
   else if(level == 2)
-  {
-    double time = _simulation->nextTime();
-    for(std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
     {
-      if(!checkOSI(dsi)) continue;
-      {
-        SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
-        ds->update(time);
-      }
+      double time = _simulation->nextTime();
+      for(std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
+	{
+	  if(!checkOSI(dsi)) continue;
+	  {
+	    SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
+	    ds->update(time);
+	  }
+	}
     }
-  }
   else RuntimeException::selfThrow("LsodarOSI::updateState(index), index is out of range. Index = " + level);
 }
 
@@ -652,101 +652,101 @@ void LsodarOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, 
   // All of these values should be stored in the node corrseponding to the Interactionwhen a MoreauJeanOSI scheme is used.
 
   /* V.A. 10/10/2010
-       * Following the type of OSNS  we need to retrieve the velocity or the acceleration
-       * This tricks is not very nice but for the moment the OSNS do not known if
-       * it is in accelaration of not
-       */
+   * Following the type of OSNS  we need to retrieve the velocity or the acceleration
+   * This tricks is not very nice but for the moment the OSNS do not known if
+   * it is in accelaration of not
+   */
 
   //SP::OneStepNSProblems  allOSNS  = _simulation->oneStepNSProblems();
   if(((*allOSNS)[SICONOS_OSNSP_ED_SMOOTH_ACC]).get() == osnsp)
-  {
-    if(relationType == Lagrangian)
     {
-      Xfree = DSlink[LagrangianR::xfree];
-      DEBUG_EXPR(Xfree->display(););
+      if(relationType == Lagrangian)
+	{
+	  Xfree = DSlink[LagrangianR::xfree];
+	  DEBUG_EXPR(Xfree->display(););
+	}
+      // else if  (relationType == NewtonEuler)
+      // {
+      //   Xfree = inter->data(NewtonEulerR::free);
+      // }
+      assert(Xfree);
+      //        std::cout << "Computeqblock Xfree (Gamma)========" << std::endl;
+      //       Xfree->display();
     }
-    // else if  (relationType == NewtonEuler)
-    // {
-    //   Xfree = inter->data(NewtonEulerR::free);
-    // }
-    assert(Xfree);
-    //        std::cout << "Computeqblock Xfree (Gamma)========" << std::endl;
-    //       Xfree->display();
-  }
   else  if(((*allOSNS)[SICONOS_OSNSP_ED_IMPACT]).get() == osnsp)
-  {
-    Xfree = DSlink[LagrangianR::q1];
-    //        std::cout << "Computeqblock Xfree (Velocity)========" << std::endl;
-    //       Xfree->display();
+    {
+      Xfree = DSlink[LagrangianR::q1];
+      //        std::cout << "Computeqblock Xfree (Velocity)========" << std::endl;
+      //       Xfree->display();
 
-  }
+    }
   else
     RuntimeException::selfThrow(" computeqBlock for Event Event-driven is wrong ");
 
   if(relationType == Lagrangian)
-  {
-    C = mainInteraction->relation()->C();
-    if(C)
     {
-      assert(Xfree);
+      C = mainInteraction->relation()->C();
+      if(C)
+	{
+	  assert(Xfree);
 
-      coord[3] = C->size(1);
-      coord[5] = C->size(1);
+	  coord[3] = C->size(1);
+	  coord[5] = C->size(1);
 
-      subprod(*C, *Xfree, yForNSsolver, coord, true);
+	  subprod(*C, *Xfree, yForNSsolver, coord, true);
+	}
+
+      SP::SiconosMatrix ID(new SimpleMatrix(sizeY, sizeY));
+      ID->eye();
+
+      Index xcoord(8);
+      xcoord[0] = 0;
+      xcoord[1] = sizeY;
+      xcoord[2] = 0;
+      xcoord[3] = sizeY;
+      xcoord[4] = 0;
+      xcoord[5] = sizeY;
+      xcoord[6] = 0;
+      xcoord[7] = sizeY;
+      // For the relation of type LagrangianRheonomousR
+      if(relationSubType == RheonomousR)
+	{
+	  if(((*allOSNS)[SICONOS_OSNSP_ED_SMOOTH_ACC]).get() == osnsp)
+	    {
+	      RuntimeException::selfThrow("LsodarOSI::computeFreeOutput not yet implemented for LCP at acceleration level with LagrangianRheonomousR");
+	    }
+	  else if(((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp)
+	    {
+	      SiconosVector q = *DSlink[LagrangianR::q0];
+	      SiconosVector z = *DSlink[LagrangianR::z];
+
+	      std11::static_pointer_cast<LagrangianRheonomousR>(inter->relation())->computehDot(simulation()->getTkp1(), q, z);
+	      *DSlink[LagrangianR::z] = z;
+	      subprod(*ID, *(std11::static_pointer_cast<LagrangianRheonomousR>(inter->relation())->hDot()), yForNSsolver, xcoord, false); // y += hDot
+	    }
+	  else
+	    RuntimeException::selfThrow("LsodarOSI::computeFreeOutput not implemented for SICONOS_OSNSP ");
+	}
+      // For the relation of type LagrangianScleronomousR
+      if(relationSubType == ScleronomousR)
+	{
+	  if(((*allOSNS)[SICONOS_OSNSP_ED_SMOOTH_ACC]).get() == osnsp)
+	    {
+	      std11::static_pointer_cast<LagrangianScleronomousR>(inter->relation())->computedotjacqhXqdot(simulation()->getTkp1(), *inter, DSlink);
+	      subprod(*ID, *(std11::static_pointer_cast<LagrangianScleronomousR>(inter->relation())->dotjacqhXqdot()), yForNSsolver, xcoord, false); // y += NonLinearPart
+	    }
+	}
     }
-
-    SP::SiconosMatrix ID(new SimpleMatrix(sizeY, sizeY));
-    ID->eye();
-
-    Index xcoord(8);
-    xcoord[0] = 0;
-    xcoord[1] = sizeY;
-    xcoord[2] = 0;
-    xcoord[3] = sizeY;
-    xcoord[4] = 0;
-    xcoord[5] = sizeY;
-    xcoord[6] = 0;
-    xcoord[7] = sizeY;
-    // For the relation of type LagrangianRheonomousR
-    if(relationSubType == RheonomousR)
-    {
-      if(((*allOSNS)[SICONOS_OSNSP_ED_SMOOTH_ACC]).get() == osnsp)
-      {
-        RuntimeException::selfThrow("LsodarOSI::computeFreeOutput not yet implemented for LCP at acceleration level with LagrangianRheonomousR");
-      }
-      else if(((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp)
-      {
-        SiconosVector q = *DSlink[LagrangianR::q0];
-        SiconosVector z = *DSlink[LagrangianR::z];
-
-        std11::static_pointer_cast<LagrangianRheonomousR>(inter->relation())->computehDot(simulation()->getTkp1(), q, z);
-        *DSlink[LagrangianR::z] = z;
-        subprod(*ID, *(std11::static_pointer_cast<LagrangianRheonomousR>(inter->relation())->hDot()), yForNSsolver, xcoord, false); // y += hDot
-      }
-      else
-        RuntimeException::selfThrow("LsodarOSI::computeFreeOutput not implemented for SICONOS_OSNSP ");
-    }
-    // For the relation of type LagrangianScleronomousR
-    if(relationSubType == ScleronomousR)
-    {
-      if(((*allOSNS)[SICONOS_OSNSP_ED_SMOOTH_ACC]).get() == osnsp)
-      {
-        std11::static_pointer_cast<LagrangianScleronomousR>(inter->relation())->computedotjacqhXqdot(simulation()->getTkp1(), *inter, DSlink);
-        subprod(*ID, *(std11::static_pointer_cast<LagrangianScleronomousR>(inter->relation())->dotjacqhXqdot()), yForNSsolver, xcoord, false); // y += NonLinearPart
-      }
-    }
-  }
   else
     RuntimeException::selfThrow("LsodarOSI::computeFreeOutput not yet implemented for Relation of type " + relationType);
   if(((*allOSNS)[SICONOS_OSNSP_ED_IMPACT]).get() == osnsp)
-  {
-    if(inter->relation()->getType() == Lagrangian || inter->relation()->getType() == NewtonEuler)
     {
-      SP::SiconosVisitor nslEffectOnFreeOutput(new _NSLEffectOnFreeOutput(osnsp, inter));
-      inter->nonSmoothLaw()->accept(*nslEffectOnFreeOutput);
+      if(inter->relation()->getType() == Lagrangian || inter->relation()->getType() == NewtonEuler)
+	{
+	  SP::SiconosVisitor nslEffectOnFreeOutput(new _NSLEffectOnFreeOutput(osnsp, inter));
+	  inter->nonSmoothLaw()->accept(*nslEffectOnFreeOutput);
+	}
     }
-  }
 
 }
 void LsodarOSI::display()

@@ -63,19 +63,6 @@ void NonSmoothDynamicalSystem::display() const
 }
 
 #include <limits>
-double NonSmoothDynamicalSystem::nsdsConvergenceIndicator()
-{
-  // calculate the max value of all DS convergence indicators
-  double convergenceIndicator = -std::numeric_limits<double>::infinity();
-  double dsIndic ;
-  DynamicalSystemsGraph::VIterator vi;
-  for (vi = dynamicalSystems()->begin(); vi != dynamicalSystems()->end(); ++vi)
-  {
-    dsIndic = dynamicalSystems()->bundle(*vi)->dsConvergenceIndicator();
-    if (dsIndic > convergenceIndicator) convergenceIndicator = dsIndic;
-  }
-  return(convergenceIndicator);
-}
 
 void NonSmoothDynamicalSystem::link(SP::Interaction inter, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2)
 {

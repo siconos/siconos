@@ -44,10 +44,3 @@ void LagrangianCompliantRTest::testBuildLagrangianCompliantR0()
   std::cout << " data Constructor LagrangianCompliantR ok" <<std::endl;
 }
 
-
-void LagrangianCompliantRTest::End()
-{
-  std::cout << "==============================================" <<std::endl;
-  std::cout << " ===== End of LagrangianCompliantR tests ===== " <<std::endl;
-  std::cout << "==============================================" <<std::endl;
-}

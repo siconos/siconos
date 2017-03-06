@@ -37,14 +37,11 @@ private:
   // tests to be done ...
 
   CPPUNIT_TEST(testBuildLagrangianRheonomousR0);
-  CPPUNIT_TEST(End);
-
   CPPUNIT_TEST_SUITE_END();
 
   // \todo exception test
 
   void testBuildLagrangianRheonomousR0();
-  void End();
 
 
 public:

@@ -310,14 +310,30 @@ void Hem5OSI::fprob(integer* IFCN,
           Type::value(*ds) == Type::LagrangianLinearTIDS)
       {
         LagrangianDS& lds = *std11::static_pointer_cast<LagrangianDS>(ds);
-        lds.computeMass();
-        for(unsigned int ii =pos ; ii < ((unsigned int)(*NV)+pos); ii ++)
-        {
-          for(unsigned int jj =pos ; jj < ((unsigned int)(*NV)+pos); jj ++)
-          {
-            AM[ii + jj*(int)(*NV)] = lds.mass()->getValue(ii,jj) ;
-          }
-        }
+	if(lds.mass())
+	  {
+	    lds.computeMass();
+	    for(unsigned int ii =pos ; ii < ((unsigned int)(*NV)+pos); ii ++)
+	      {
+		for(unsigned int jj =pos ; jj < ((unsigned int)(*NV)+pos); jj ++)
+		  {
+		    AM[ii + jj*(int)(*NV)] = lds.mass()->getValue(ii,jj) ;
+		  }
+	      }
+	  }
+	else
+	  {
+	    for(unsigned int ii =pos ; ii < ((unsigned int)(*NV)+pos); ii ++)
+	      {
+		for(unsigned int jj =pos ; jj < ((unsigned int)(*NV)+pos); jj ++)
+		  {
+		    if(ii == jj)
+		      AM[ii + jj*(int)(*NV)] = 1.;
+		    else
+		      AM[ii + jj*(int)(*NV)] = 0.;
+		  }
+	      }
+	  }
         pos += lds.dimension();
       }
       else
@@ -343,7 +359,7 @@ void Hem5OSI::fprob(integer* IFCN,
         LagrangianDS& lds = *std11::static_pointer_cast<LagrangianDS>(ds);
         fillqWork(NQ,q);
         fillvWork(NV,v);
-        lds.computeForces((double)*time);
+        lds.computeForces((double)*time, lds.q(), lds.velocity());
       }
       else if(Type::value(*ds) == Type::NewtonEulerDS)
       {
@@ -460,14 +476,20 @@ void Hem5OSI::fprob(integer* IFCN,
 // }
 void Hem5OSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds)
 {
+  // Get work buffers from the graph
   const DynamicalSystemsGraph::VDescriptor& dsv = _dynamicalSystemsGraph->descriptor(ds);
   VectorOfVectors& workVectors = *_dynamicalSystemsGraph->properties(dsv).workVectors;
+  // Initialize memory buffers
+  _dynamicalSystemsGraph->bundle(dsv)->initMemory(getSizeMem());
+  // Force dynamical system to its initial state
+  _dynamicalSystemsGraph->bundle(dsv)->resetToInitialState();
+  Type::Siconos dsType = Type::value(*ds);
 
-  ds->resetToInitialState();
-  if(Type::value(*ds) == Type::LagrangianDS ||
-     Type::value(*ds) == Type::LagrangianLinearTIDS)
+  if(dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
   {
     LagrangianDS& lds = *std11::static_pointer_cast<LagrangianDS>(ds);
+    lds.init_inverse_mass(); // invMass required to update post-impact velocity
+
     _qWork->insertPtr(lds.q());
     _vWork->insertPtr(lds.velocity());
     _aWork->insertPtr(lds.acceleration());
@@ -480,10 +502,8 @@ void Hem5OSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem 
   {
     RuntimeException::selfThrow("Hem5OSI::initialize(), Only integration of Lagrangian DS is allowed");
   }
-  for (unsigned int k = _levelMinForInput ; k < _levelMaxForInput + 1; k++)
-  {
-    ds->initializeNonSmoothInput(k);
-  }
+
+  ds->swapInMemory();
 }
 
 

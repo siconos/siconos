@@ -43,10 +43,3 @@ void LagrangianScleronomousRTest::testBuildLagrangianScleronomousR2()
   std::cout << " data Constructor LagrangianScleronomousR ok" <<std::endl;
 }
 
-
-void LagrangianScleronomousRTest::End()
-{
-  std::cout << "=================================================" <<std::endl;
-  std::cout << " ===== End of LagrangianScleronomousR tests ===== " <<std::endl;
-  std::cout << "=================================================" <<std::endl;
-}

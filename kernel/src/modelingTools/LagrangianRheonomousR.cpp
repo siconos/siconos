@@ -79,14 +79,14 @@ void LagrangianRheonomousR::zeroPlugin()
 const std::string LagrangianRheonomousR::getJachqName() const
 {
   if (_pluginJachq->fPtr)
-    return _pluginJachq->getPluginName();
+    return _pluginJachq->pluginName();
   return "unamed";
 }
 const std::string LagrangianRheonomousR::gethDotName() const
 {
 
   if (_pluginhDot->fPtr)
-    return _pluginhDot->getPluginName();
+    return _pluginhDot->pluginName();
   return "unamed";
 }
 

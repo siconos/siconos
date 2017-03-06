@@ -29,10 +29,8 @@ FirstOrderLinearDS::FirstOrderLinearDS(SP::SiconosVector newX0, const std::strin
   FirstOrderNonLinearDS(newX0)
 {
   _zeroPlugin();
-  _pluginA->setComputeFunction(APlugin);
-  _A.reset(new SimpleMatrix(dimension(), dimension()));
-  _pluginb->setComputeFunction(bPlugin);
-  _b.reset(new SiconosVector(dimension()));
+  setComputeAFunction(SSLH::getPluginName(APlugin), SSLH::getPluginFunctionName(APlugin));
+  setComputebFunction(SSLH::getPluginName(bPlugin), SSLH::getPluginFunctionName(bPlugin));
   // dot x = A(t)x + b(t)
 }
 
@@ -71,9 +69,12 @@ FirstOrderLinearDS::FirstOrderLinearDS(SP::SiconosVector newX0, SP::SiconosMatri
 // Copy constructor
 FirstOrderLinearDS::FirstOrderLinearDS(const FirstOrderLinearDS & FOLDS): FirstOrderNonLinearDS(FOLDS)
 {
-  _A.reset(new SimpleMatrix(*(FOLDS.A())));
-  _b.reset(new SiconosVector(*(FOLDS.b())));
-
+  _zeroPlugin();
+  if(FOLDS.A())
+    _A.reset(new SimpleMatrix(*(FOLDS.A())));
+  if(FOLDS.b())
+    _b.reset(new SiconosVector(*(FOLDS.b())));
+  
   if (Type::value(FOLDS) == Type::FirstOrderLinearDS)
   {
     _pluginA.reset(new PluggedObject(*(FOLDS.getPluginA())));
@@ -109,23 +110,29 @@ void FirstOrderLinearDS::updatePlugins(double time)
 
 void FirstOrderLinearDS::setComputeAFunction(const std::string& pluginPath, const std::string& functionName)
 {
+  if(!_A)
+    _A.reset(new SimpleMatrix(_n, _n));
   _pluginA->setComputeFunction(pluginPath, functionName);
 }
 
 void FirstOrderLinearDS::setComputeAFunction(LDSPtrFunction fct)
 {
+  if(!_A)
+    _A.reset(new SimpleMatrix(_n, _n));
   _pluginA->setComputeFunction((void*)fct);
 }
 
 void FirstOrderLinearDS::setComputebFunction(const std::string& pluginPath, const std::string& functionName)
 {
-  _pluginb->setComputeFunction(pluginPath, functionName);
   if (!_b)
-    _b.reset(new SiconosVector(dimension()));
+    _b.reset(new SiconosVector(_n));
+  _pluginb->setComputeFunction(pluginPath, functionName);
 }
 
 void FirstOrderLinearDS::setComputebFunction(LDSPtrFunction fct)
 {
+  if(!_b)
+    _b.reset(new SiconosVector(_n));
   _pluginb->setComputeFunction((void*)fct);
 }
 
@@ -183,9 +190,10 @@ void FirstOrderLinearDS::computeJacobianRhsx(double time, bool isDSup)
 	{
 	  computeM(time);
 	  *_jacxRhs = *_A;
-	  // copy M into invM for LU-factorisation, at the first call of this function.
 	  if (! _invM)
 	    _invM.reset(new SimpleMatrix(*_M));
+	  else if(_pluginM->fPtr) // if M is plugged, invM must be updated
+	    *_invM = *_M;
 	  // solve MjacobianRhsx = A
 	  _invM->PLUForwardBackwardInPlace(*_jacxRhs);
 	}
@@ -197,36 +205,6 @@ void FirstOrderLinearDS::display() const
 {
   std::cout << "=== Linear system display, " << _number << std::endl;
   std::cout << "=============================" << std::endl;
-}
-
-void FirstOrderLinearDS::computef(double time)
-{
-  DEBUG_PRINT("compute f in FirstOrderLinearDS");
-
-  if(_A)
-    {
-      computeA(time);
-      prod(*_A, *_x[0], *_f);
-    }
-  if (_b)
-    {
-      computeb(time);
-      *_f += *_b;
-    }
-}
-
-void FirstOrderLinearDS::computef(double time, SiconosVector& x2)
-{
-  if(_A)
-    {
-      computeA(time);
-      prod(*_A, x2, *_f);
-    }
-  if (_b)
-    {
-      computeb(time);
-      *_f += *_b;
-    }
 }
 
 void FirstOrderLinearDS::setA(const SiconosMatrix& newA)

@@ -44,10 +44,3 @@ void LagrangianRheonomousRTest::testBuildLagrangianRheonomousR0()
   std::cout << " data Constructor LagrangianRheonomousR ok" <<std::endl;
 }
 
-
-void LagrangianRheonomousRTest::End()
-{
-  std::cout << "=================================================" <<std::endl;
-  std::cout << " ===== End of LagrangianRheonomousR tests ===== " <<std::endl;
-  std::cout << "=================================================" <<std::endl;
-}

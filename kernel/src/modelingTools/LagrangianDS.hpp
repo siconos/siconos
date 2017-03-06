@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 /*! \file LagrangianDS.hpp
   \brief LagrangianDS class - Second Order Non Linear Dynamical Systems.
@@ -27,107 +27,96 @@
 #include "BoundaryCondition.hpp"
 #include "SiconosConst.hpp"
 
-/** Lagrangian non linear dynamical systems - Derived from DynamicalSystem -
- *
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
- *  \date (Creation) Apr 29, 2004
- *
- * \class LagrangianDS
- * The class LagrangianDS  defines  and computes a generic ndof-dimensional
- * Lagrangian Non Linear Dynamical System of the form :
- * \f[
- * \begin{cases}
- * M(q,z) \dot v + F_{gyr}(v, q, z) + F_{Int}(v , q , t, z) = F_{Ext}(t, z) + p \\
- * \dot q = v
- * \end{cases}
- * \f]
- * where
- * - \f$q \in R^{ndof} \f$ is the set of the generalized coordinates,
- * - \f$ \dot q =v \in R^{ndof} \f$ the velocity, i. e. the time
- *      derivative of the generalized coordinates (Lagrangian systems).
- * - \f$ \ddot q =\dot v \in R^{ndof} \f$ the acceleration, i. e. the second
- *       time derivative of the generalized coordinates.
- * - \f$ p \in R^{ndof} \f$ the reaction forces due to the Non Smooth
- *       Interaction.
- * - \f$ M(q) \in R^{ndof \times ndof} \f$ is the inertia term saved
- *       in the SiconosMatrix mass.
- * - \f$ F_{gyr}(\dot q, q) \in R^{ndof}\f$ is the non linear inertia term
- *       saved in the SiconosVector _fGyr.
- * - \f$ F_{Int}(\dot q , q , t) \in R^{ndof} \f$ are the internal
- *       forces saved in the SiconosVector fInt.
- * - \f$ F_{Ext}(t) \in R^{ndof} \f$ are the external forces saved in
- *       the SiconosVector fExt.
- * - \f$ z \in R^{zSize}\f$ is a vector of arbitrary algebraic
- *       variables, some sort of discrete state.
- *
- * The equation of motion is also shortly denoted as:
- * \f[
- * M(q,z) \dot v = F(v, q, t, z) + p
- * \f]
- *
- * where
- * - \f$F(v, q, t, z) \in R^{ndof} \f$ collects the total forces
- * acting on the system, that is
- * \f[ F(v, q, t, z) =  F_{Ext}(t, z) -  FGyr(v, q, z) + F_{Int}(v, q , t, z) \f]
- * This vector is stored in the  SiconosVector _forces
- *
- * Links with first order DynamicalSystem top-class are:
- *
- * \f$ n= 2 ndof \f$
- * \f$ x = \left[\begin{array}{c}q \\ \dot q\end{array}\right]\f$
- *
- * The rhs is given by:
- * \f[
- * \dot x = \left[\begin{array}{c}
- *  \dot q  \                                           \
- * \ddot q = M^{-1}(q)\left[F(v, q , t, z) + p \right]\\
- * \end{array}\right]
- * \f]
- * Its jacobian is:
- * \f[
- * \nabla_{x}rhs(x,t) = \left[\begin{array}{cc}
- *  0  & I \\
- * \nabla_{q}(M^{-1}(q)F(v, q , t, z)) &  \nabla_{\dot q}(M^{-1}(q)F(v, q , t, z)) \\
- * \end{array}\right]
- * \f]
- *  The input due to the non smooth law is:
- * \f[
- * r = \left[\begin{array}{c}0 \\ p \end{array}\right]
- * \f]
- *
- *  Main functionalities to handle a LagrangianDS are:
- *
- * - Construction: the only required operator is M. All the operators
- *      can be set using the plug-in mechanism.
- * - Initialization: compute state members and operators for time=t0
- *     (usually done when calling simulation->initialize)
- * - Computation at time t, thanks to "compute" functions. Any call to
- *      one of the following functions requires that the plug-in
- *      has been set properly thanks to the corresponding setPluginFunction:
- *        => computeMass     (setComputeMassFunction)
- *        => computeFInt     (setComputeFIntFunction)
- *        => computeFExt     (setComputeFExtFunction)
- *        => computeFGyr      (setComputeFGyrFunction)
- *        => computeJacobianFIntq         (setComputeJacobianFIntqFunction)
- *        => computeJacobianFintVelocity  (setComputeJacobianFintVelocityFunction)
- *        => computeJacobianFGyrq          (setComputeJacobianFGyrqFunction)
- *        => computeJacobianFGyrVelocity   (setComputeJacobianFGyrVelocityFunction)
- *        => computeRhs            (no set function)
- *        => computeJacobianRhsx   (no set function)
- *
- * About notation:
- *    - q[i] is the derivative number i of q.
- * Thus: q[0]=\f$ q \f$, global coordinates, q[1]=\f$ \dot q\f$, velocity, q[2]=\f$ \ddot q \f$, acceleration.
- *
- *
- */
+/** Lagrangian non linear dynamical systems - \f$M(q,z) \dot v = F(v, q, t, z) + p \f$
+ 
+    \author SICONOS Development Team - copyright INRIA
+    \date (Creation) Apr 29, 2004
+    
+    This class defines and computes a generic ndof-dimensional
+    Lagrangian Non Linear Dynamical System of the form :
+    
+    \f[
+    \begin{cases}
+    M(q,z) \dot v + F_{gyr}(v, q, z) + F_{int}(v , q , t, z) = F_{ext}(t, z) + p  \\
+    \dot q = v
+    \end{cases}
+    \f]
+    
+    where
+    - \f$q \in R^{ndof} \f$ is the set of the generalized coordinates,
+    - \f$ \dot q =v \in R^{ndof} \f$ the velocity, i. e. the time
+    derivative of the generalized coordinates (Lagrangian systems).
+    - \f$ \ddot q =\dot v \in R^{ndof} \f$ the acceleration, i. e. the second
+    time derivative of the generalized coordinates.
+    - \f$ p \in R^{ndof} \f$ the reaction forces due to the Non Smooth
+    Interaction.
+    - \f$ M(q) \in R^{ndof \times ndof} \f$ is the inertia term saved
+    in the SiconosMatrix mass().
+    - \f$ F_{gyr}(\dot q, q) \in R^{ndof}\f$ is the non linear inertia term
+    saved in the SiconosVector fGyr().
+    - \f$ F_{int}(\dot q , q , t) \in R^{ndof} \f$ are the internal
+    forces saved in the SiconosVector fInt().
+    - \f$ F_{ext}(t) \in R^{ndof} \f$ are the external forces saved in
+    the SiconosVector fExt().
+    - \f$ z \in R^{zSize}\f$ is a vector of arbitrary algebraic
+    variables, some sort of discrete state.
+ 
+    The equation of motion is also shortly denoted as:
+    \f[
+    M(q,z) \dot v = F(v, q, t, z) + p
+    \f]
+    
+    where
+    - \f$F(v, q, t, z) \in R^{ndof} \f$ collects the total forces
+    acting on the system, that is
+    \f[ F(v, q, t, z) =  F_{ext}(t, z) -  F_{gyr}(v, q, z) + F_{int}(v, q , t, z) \f]
+    This vector is stored in the  SiconosVector forces()
+
+  
+    q[i] is the derivative number i of q.
+    Thus: q[0]=\f$ q \f$, global coordinates, q[1]=\f$ \dot q\f$, velocity, q[2]=\f$ \ddot q \f$, acceleration.
+ 
+    The following operators (and their jacobians) can be plugged, in the usual way (see User Guide, 'User-defined plugins')
+   
+    - \f$M(q)\f$ (computeMass())
+    - \f$F_{gyr}(v, q, z)\f$ (computeFGyr())
+    - \f$F_{int}(v , q , t, z)\f$ (computeFInt())
+    - \f$F_{ext}(t, z)\f$ (computeFExt())
+    
+    
+  
+
+    If required (e.g. for Event-Driven like simulation), reformulation as a first-order system (DynamicalSystem)
+    is possible, with:
+    
+    - \f$ n= 2 ndof \f$
+    - \f$ x = \left[\begin{array}{c}q \\ \dot q\end{array}\right]\f$
+    - rhs given by:
+    \f[
+    \dot x = \left[\begin{array}{c}
+    \dot q \\
+    \ddot q = M^{-1}(q)\left[F(v, q , t, z) + p \right]\\
+    \end{array}\right]
+    \f]
+    - jacobian of the rhs, with respect to x
+    \f[
+    \nabla_{x}rhs(x,t) = \left[\begin{array}{cc}
+    0  & I \\
+    \nabla_{q}(M^{-1}(q)F(v, q , t, z)) &  \nabla_{\dot q}(M^{-1}(q)F(v, q , t, z)) \\
+    \end{array}\right]
+    \f]
+    - input due to the non smooth law:
+    \f[
+    r = \left[\begin{array}{c}0 \\ p \end{array}\right]
+    \f]
+ 
+    
+*/
 class LagrangianDS : public DynamicalSystem
 {
   
 protected:
-  /** serialization hooks
-  */
+  /* serialization hooks */
   ACCEPT_SERIALIZATION(LagrangianDS);
 
   /** Common code for constructors
@@ -135,9 +124,8 @@ protected:
       \param ndof
       \param position vector of initial positions
       \param velocity vector of initial velocities
-   */
+  */
   void _init(unsigned int ndof, SP::SiconosVector position, SP::SiconosVector velocity);
-
 
   // -- MEMBERS --
 
@@ -248,7 +236,6 @@ protected:
    * @param  size of vector z
    * @param[in,out] z : a vector of user-defined parameters
    */
-  //  void (*computeMassPtr)(unsigned int, double*, double*, unsigned int, double*);
   SP::PluggedObject _pluginMass;
 
 
@@ -271,7 +258,6 @@ protected:
    * @param  size of vector z
    * @param[in,out] z : a vector of user-defined parameters
    */
-  //  void (*computeFExtPtr)(double, unsigned int, double*, unsigned int, double* );
   SP::PluggedObject _pluginFExt;
 
   /** LagrangianDS plug-in to compute \f$FGyr(\dot q, q)\f$, id = "FGyr"
@@ -282,7 +268,6 @@ protected:
    * @param  size of vector z
    * @param[in,out] z  : a vector of user-defined parameters
    */
-  //  FPtr5 computeFGyrPtr;
   SP::PluggedObject _pluginFGyr;
 
   /** LagrangianDS plug-in to compute \f$\nabla_qF_{Int}(\dot q, q, t)\f$, id = "jacobianFIntq"
@@ -294,7 +279,6 @@ protected:
    * @param  size of vector z
    * @param[in,out] z  : a vector of user-defined parameters
    */
-  //  FPtr6 computeJacobianFIntqPtr;
   SP::PluggedObject _pluginJacqFInt;
 
   /** LagrangianDS plug-in to compute \f$\nabla_{\dot q}F_{Int}(\dot q, q, t)\f$, id = "jacobianFIntqDot"
@@ -306,7 +290,6 @@ protected:
    * @param  size of vector z
    * @param[in,out] z  : a vector of user-defined parameters
    */
-  //  FPtr6 computeJacobianFIntqDotPtr;
   SP::PluggedObject _pluginJacqDotFInt;
 
   /** LagrangianDS plug-in to compute \f$\nabla_qFGyr(\dot q, q)\f$, id = "jacobianFGyrq"
@@ -317,8 +300,8 @@ protected:
    * @param  size of vector z
    * @param[in,out] z  : a vector of user-defined parameters
    */
-  //  FPtr5 computeJacobianFGyrqPtr;
   SP::PluggedObject _pluginJacqFGyr;
+
   /** LagrangianDS plug-in to compute \f$\nabla_{\dot q}FGyr(\dot q, q)\f$, id = "jacobianFGyrqDot"
    * @param sizeOfq : size of vector q
    * @param q : pointer to the first element of q
@@ -327,26 +310,23 @@ protected:
    * @param  size of vector z
    * @param[in,out] z  : a vector of user-defined parameters
    */
-  //  FPtr5 computeJacobianFGyrqDotPtr;
   SP::PluggedObject _pluginJacqDotFGyr;
 
   /** build all _plugin... PluggedObject */
-  virtual void _zeroPlugin();
+  void _zeroPlugin();
 
   /** Default constructor */
-  LagrangianDS();
+  LagrangianDS():DynamicalSystem(Type::LagrangianDS){};
 
 public:
 
-  // === CONSTRUCTORS - DESTRUCTOR ===
-
-  /** constructor from a minimum set of data
+  /** constructor from initial state only, \f$dv = p \f$
    *  \param position SiconosVector : initial coordinates of this DynamicalSystem
    *  \param velocity SiconosVector : initial velocity of this DynamicalSystem
    */
   LagrangianDS(SP::SiconosVector position, SP::SiconosVector velocity);
 
-  /** constructor from a minimum set of data
+  /** constructor from initial state and mass, \f$Mdv = p \f$
    *  \param position SiconosVector : initial coordinates of this DynamicalSystem
    *  \param velocity SiconosVector : initial velocity of this DynamicalSystem
    *  \param mass SiconosMatrix : mass matrix
@@ -354,7 +334,7 @@ public:
   LagrangianDS(SP::SiconosVector position,
                SP::SiconosVector velocity, SP::SiconosMatrix mass);
 
-  /** constructor from a minimum set of data
+  /** constructor from initial state and mass (plugin) \f$Mdv = p \f$
    *  \param position SiconosVector : initial coordinates of this DynamicalSystem
    *  \param velocity SiconosVector : initial velocity of this DynamicalSystem
    *  \param plugin std::string: plugin path to compute mass matrix
@@ -364,52 +344,104 @@ public:
   /** destructor */
   virtual ~LagrangianDS(){};
 
+  /*! @name Right-hand side computation */
+  //@{
+
   /** reset the state to the initial state */
   void resetToInitialState();
 
-  /** Initialization function for the rhs and its jacobian.
-   *  \param time of initialization
+  /** allocate (if needed)  and compute rhs and its jacobian.
+   * \param time of initialization
    */
   void initRhs(double time) ;
 
-  /** dynamical system initialization function for _p
-   *  \param level for _p
+  /** set nonsmooth input to zero
+   *  \param int input-level to be initialized.
    */
   void initializeNonSmoothInput(unsigned int level) ;
 
-  /** set links with DS members
+  /** update right-hand side for the current state
+   *  \param double time of interest
+   *  \param bool isDSup flag to avoid recomputation of operators
    */
-  void connectToDS(unsigned int steps);
-  // === GETTERS AND SETTERS ===
+  virtual void computeRhs(double time, bool isDSup = false);
 
-  /** to get the value of ndof
-   *  \return the value of ndof
+  /** update \f$\nabla_x rhs\f$ for the current state
+   *  \param double time of interest
+   *  \param bool isDSup flag to avoid recomputation of operators
    */
-  inline unsigned int ndof() const
+  virtual void computeJacobianRhsx(double time, bool isDSup = false);
+
+  /** reset non-smooth part of the rhs (i.e. p), for all 'levels' */
+  void resetAllNonSmoothPart();
+
+  /** set nonsmooth part of the rhs (i.e. p) to zero for a given level
+   * \param level
+   */
+  void resetNonSmoothPart(unsigned int level);
+
+  /** get gradient according to \f$ x \f$ of the right-hand side (pointer)
+   *  \return pointer on a SiconosMatrix
+   */
+  inline SP::BlockMatrix jacobianRhsx() const
   {
-    return _ndof;
-  };
+    return _jacxRhs;
+  }
 
-  /** to set ndof
-   *  \param newNdof unsigned int : the value to set ndof
+  /** set the value of the right-hand side, \f$ \dot x \f$
+   *  \param newValue SiconosVector
    */
-  inline void setNdof(unsigned int newNdof)
+  void setRhs(const SiconosVector& newValue)
   {
-    _ndof = newNdof;
-  };
+    RuntimeException::selfThrow("LagrangianDS - setRhs call is forbidden for 2nd order systems.");
+  }
 
-  /** return the dim. of the system (n for first order, ndof for Lagrangian).
-   * Useful to avoid if(typeOfDS) when size is required.
+  /** set right-hand side, \f$ \dot x \f$ (pointer link)
+   *  \param newPtr SP::SiconosVector
+   */
+  void setRhsPtr(SP::SiconosVector newPtr)
+  {
+    RuntimeException::selfThrow("LagrangianDS - setRhsPtr call is forbidden for 2nd order systems.");
+  }
+  
+  /** function to compute \f$F(v,q,t,z)\f$ for the current state
+   *  \param time the current time
+   */
+  virtual void computeForces(double time);
+  
+  /** Compute \f$F(v,q,t,z)\f$
+   *  \param time the current time
+   *  \param q SP::SiconosVector: pointers on q
+   *  \param velocity SP::SiconosVector: pointers on velocity
+   */
+  virtual void computeForces(double time,
+                             SP::SiconosVector q,
+                             SP::SiconosVector velocity);
+
+  /** Compute \f$\nabla_qF(v,q,t,z)\f$ for current \f$q,v\f$
+      Default function to compute forces
+   *  \param time the current time
+   */
+  virtual void computeJacobianqForces(double time);
+
+  /** Compute \f$\nabla_{\dot q}F(v,q,t,z)\f$ for current \f$q,v\f$
+   *  \param time the current time
+   */
+  virtual void computeJacobianqDotForces(double time);
+
+  ///@}
+
+  /*! @name Attributes access 
+    @{ */
+
+  /** return the number of degrees of freedom of the system
    *  \return an unsigned int.
    */
   virtual inline unsigned int dimension() const
   {
     return _ndof;
   }
-
-  // -- q --
-
-  /** get q
+  /** generalized coordinates of the system (vector of size dimension())
    *  \return pointer on a SiconosVector
    */
   inline SP::SiconosVector q() const
@@ -417,19 +449,17 @@ public:
     return _q[0];
   }
 
-  /** set the value of q to newValue
+  /** set value of generalized coordinates vector (copy)
    *  \param newValue
    */
   void setQ(const SiconosVector& newValue);
 
-  /** set Q to pointer newPtr
+  /** set value of generalized coordinates vector (pointer link)
    *  \param newPtr
    */
   void setQPtr(SP::SiconosVector newPtr);
 
-  // -- q0 --
-
-  /** get q0
+  /** return initial state of the system 
    *  \return pointer on a SiconosVector
    */
   inline SP::SiconosVector q0() const
@@ -437,29 +467,17 @@ public:
     return _q0;
   }
 
-  /** set the value of q0 to newValue
+  /** set initial state (copy)
    *  \param newValue
    */
   void setQ0(const SiconosVector& newValue);
 
-  /** set Q0 to pointer newPtr
+  /** set initial state (pointer link)
    *  \param newPtr
    */
   void setQ0Ptr(SP::SiconosVector newPtr);
 
-  // Q memory
-
-  /** get all the values of the state vector q stored in memory
-   *  \return a memory
-   */
-  inline SP::SiconosMemory qMemory() const
-  {
-    return _qMemory;
-  }
-
-  // -- velocity --
-
-  /** get velocity
+  /** get velocity vector (pointer link)
    *  \return pointer on a SiconosVector
    */
   inline SP::SiconosVector velocity() const
@@ -467,19 +485,17 @@ public:
     return _q[1];
   }
 
-  /** set the value of velocity to newValue
+  /** set velocity vector (copy)
    *  \param newValue
    */
   void setVelocity(const SiconosVector& newValue);
 
-  /** set Velocity to pointer newPtr
+  /** set velocity vector (pointer link)
    *  \param newPtr
    */
   void setVelocityPtr(SP::SiconosVector newPtr);
 
-  // -- velocity0 --
-
-  /** get velocity0
+  /** get initial velocity (pointer)
    *  \return pointer on a SiconosVector
    */
   inline SP::SiconosVector velocity0() const
@@ -487,36 +503,24 @@ public:
     return _velocity0;
   }
 
-  /** set the value of velocity0 to newValue
+  /** set initial velocity (copy)
    *  \param newValue
    */
   void setVelocity0(const SiconosVector& newValue);
 
-  /** set Velocity0 to pointer newPtr
+  /** set initial velocity (pointer link)
    *  \param newPtr
    */
   void setVelocity0Ptr(SP::SiconosVector newPtr) ;
 
-  // -- acceleration --
-
-  /** get acceleration
+  /** get acceleration (pointer link)
    *  \return pointer on a SiconosVector
    */
-  SP::SiconosVector acceleration() const ;
-
-  // Velocity memory
-
-  /** get all the values of the state vector velocity stored in memory
-   *  \return a memory
-   */
-  inline SP::SiconosMemory velocityMemory() const
-  {
-    return _velocityMemory;
-  }
-
-  // -- p --
-
-  /** get p
+  SP::SiconosVector acceleration() const {
+    return _q[2];
+  };
+  
+  /** get input due to nonsmooth interaction, \f$p\f$
    *  \param level unsigned int, required level for p
    *  \return pointer on a SiconosVector
    */
@@ -525,38 +529,28 @@ public:
     return _p[level];
   }
 
-  /** set the value of p to newValue
+  /** set nonsmooth input (copy)
    *  \param newValue
    *  \param level required level for p
    */
   void setP(const SiconosVector& newValue, unsigned int level);
 
-  /** set P to pointer newPtr
+  /** set nonsmooth input (pointer link)
    *  \param newPtr
-   *  \param level required level for p, default
+   *  \param level required level for p
    */
   void setPPtr(SP::SiconosVector newPtr, unsigned int level);
 
-  /** get all the values of the state vector p stored in memory
-   * \param level
-   *  \return a memory
-   */
-  inline SP::SiconosMemory pMemory(unsigned int level) const
-  {
-    return _pMemory[level];
-  }
-
-  // -- Mass --
-
-  /** get mass
-   *  \return pointer on a plugged-matrix
+  /** get mass matrix (pointer link)
+   *  \return SP::SiconosMatrix
    */
   inline SP::SiconosMatrix mass() const
   {
     return _mass;
   }
-  /** get inverseMass
-   *  \return pointer on a plugged-matrix
+  
+  /** get (pointer) LU-factorization of the mass, used for LU-forward-backward computation
+   *  \return pointer SP::SimpleMatrix
    */
   inline SP::SimpleMatrix inverseMass() const
   {
@@ -572,9 +566,7 @@ public:
     _hasConstantMass = true;
   }
 
-  // --- fInt ---
-
-  /** get fInt
+  /** get \$F_{int}\$ (pointer link)
    *  \return pointer on a plugged vector
    */
   inline SP::SiconosVector fInt() const
@@ -583,7 +575,7 @@ public:
   }
 
 
-  /** set fInt to pointer newPtr
+  /** set  \$F_{int}\$ (pointer link)
    *  \param newPtr a SP to plugged vector
    */
   inline void setFIntPtr(SP::SiconosVector newPtr)
@@ -591,9 +583,7 @@ public:
     _fInt = newPtr;
   }
 
-  // -- Fext --
-
-  /** get fExt
+  /** get \f$F_{ext}\f$, (pointer link)
    *  \return pointer on a plugged vector
    */
   inline SP::SiconosVector fExt() const
@@ -602,7 +592,7 @@ public:
   }
 
 
-  /** set fExt to pointer newPtr
+  /** set \f$F_{ext}\f$, (pointer link)
    *  \param newPtr a SP to a Simple vector
    */
   inline void setFExtPtr(SP::SiconosVector newPtr)
@@ -611,53 +601,47 @@ public:
     _hasConstantFExt = true;
   }
 
-  // -- FGyr --
-
-  /** get FGyr
+  /** get \f$F_{gyr}\f$, (pointer link)
    *  \return pointer on a plugged vector
    */
-  inline SP::SiconosVector FGyr() const
+  inline SP::SiconosVector fGyr() const
   {
     return _fGyr;
   }
 
-
-  /** set FGyr to pointer newPtr
+  /** set \f$F_{gyr}\f$, (pointer link)
    *  \param newPtr a SP to plugged vector
    */
   inline void setFGyrPtr(SP::SiconosVector newPtr)
   {
     _fGyr = newPtr;
   }
-
-
-  // -- Jacobian FInt --
-
-  /** get jacobianFIntq
+  
+  /** get \f$\nabla_qF_{int}\f$, (pointer link)
    *  \return pointer on a SiconosMatrix
    */
   inline SP::SiconosMatrix jacobianFIntq() const
   {
     return _jacobianFIntq;
   }
-  /** get jacobianFIntqDot
+
+  /** get \f$\nabla_{\dot q}F_{int}\f$, (pointer link)
    *  \return pointer on a SiconosMatrix
    */
   inline SP::SiconosMatrix jacobianFIntqDot() const
   {
     return _jacobianFIntqDot;
   }
-  //  inline SP::SiconosMatrix jacobianZFInt() const { return jacobianZFInt; }
 
-
-  /** set jacobianFIntq to pointer newPtr
+  /** set \f$\nabla_{q}F_{int}\f$, (pointer link)
    *  \param newPtr a SP SiconosMatrix
    */
   inline void setJacobianFIntqPtr(SP::SiconosMatrix newPtr)
   {
     _jacobianFIntq = newPtr;
   }
-  /** set jacobianFIntqDot to pointer newPtr
+
+  /** set \f$\nabla_{\dot q}F_{int}\f$, (pointer link)
    *  \param newPtr a SP SiconosMatrix
    */
   inline void setJacobianFIntqDotPtr(SP::SiconosMatrix newPtr)
@@ -665,17 +649,14 @@ public:
     _jacobianFIntqDot = newPtr;
   }
 
-  // -- Jacobian FGyr --
-
-
-  /** get jacobianFGyrq
+  /** get \f$\nabla_{q}F_{gyr}\f$, (pointer link)
    *  \return pointer on a SiconosMatrix
    */
   inline SP::SiconosMatrix jacobianFGyrq() const
   {
     return _jacobianFGyrq;
   }
-  /** get jacobianFGyrqDot
+  /** get \f$\nabla_{\dot q}F_{gyr}\f$, (pointer link)
    *  \return pointer on a SiconosMatrix
    */
   inline SP::SiconosMatrix jacobianFGyrqDot() const
@@ -683,15 +664,15 @@ public:
     return _jacobianFGyrqDot;
   }
 
-
-  /** set jacobianFGyrq to pointer newPtr
+  /** get \f$\nabla_{q}F_{gyr}\f$, (pointer link)
    *  \param newPtr a SP SiconosMatrix
    */
   inline void setJacobianFGyrqPtr(SP::SiconosMatrix newPtr)
   {
     _jacobianFGyrq = newPtr;
   }
-  /** set jacobianFGyrqDot to pointer newPtr
+  
+  /** get \f$\nabla_{\dot q}F_{gyr}\f$, (pointer link)
    *  \param newPtr a SP SiconosMatrix
    */
   inline void setJacobianFGyrqDotPtr(SP::SiconosMatrix newPtr)
@@ -699,43 +680,83 @@ public:
     _jacobianFGyrqDot = newPtr;
   }
 
-  // -- forces --
-
-  /** get forces
+  /** get \f$ F(v,q,t,z)\f$ (pointer  link)
    *  \return pointer on a SiconosVector
    */
   inline SP::SiconosVector forces() const
   {
     return _forces;
   }
-  /** get forces
+  
+  /** get \f$ \nabla_qF(v,q,t,z)\f$ (pointer  link)
+   *  \return pointer on a SiconosMatrix
+   */
+  virtual inline SP::SiconosMatrix jacobianqForces() const
+  {
+    return _jacobianqForces;
+  }
+
+  /** get \f$ \nabla_{\dot q}F(v,q,t,z)\f$ (pointer  link)
+   *  \return pointer on a SiconosMatrix
+   */
+  virtual inline SP::SiconosMatrix jacobianqDotForces() const
+  {
+    return _jacobianqDotForces;
+  }
+
+  ///@}
+
+  /*! @name Memory vectors management 
+    @{ */
+
+  /** get all the values of the state vector q stored in memory
+   *  \return a memory
+   */
+  inline SP::SiconosMemory qMemory() const
+  {
+    return _qMemory;
+  }
+
+  /** get all the values of the state vector velocity stored in memory
+   *  \return a memory
+   */
+  inline SP::SiconosMemory velocityMemory() const
+  {
+    return _velocityMemory;
+  }
+
+  /** get all the values of the state vector p stored in memory
+   * \param level
+   *  \return a memory
+   */
+  inline SP::SiconosMemory pMemory(unsigned int level) const
+  {
+    return _pMemory[level];
+  }
+
+  /** get forces in memory buff
    *  \return pointer on a SiconosMemory
    */
   inline SP::SiconosMemory forcesMemory()
   {
     return _forcesMemory;
   }
-  // -- Jacobian forces --
 
-
-  /** get JacobianForces
-   *  \return pointer on a SiconosMatrix
+  /** initialize the SiconosMemory objects with a positive size.
+   *  \param size the size of the SiconosMemory. must be >= 0
    */
-  inline SP::SiconosMatrix jacobianqForces() const
-  {
-    return _jacobianqForces;
-  }
+  void initMemory(unsigned int size);
 
-  /** get JacobianqDotForces
-   *  \return pointer on a SiconosMatrix
+  /** push the current values of x, q and r in the stored previous values
+   *  xMemory, qMemory, rMemory,
+   * \todo Modify the function swapIn Memory with the new Object Memory
    */
-  inline SP::SiconosMatrix jacobianqDotForces() const
-  {
-    return _jacobianqDotForces;
-  }
-  //  inline SP::SiconosMatrix jacobianZFL() const { return jacobianZFL; }
+  void swapInMemory();
 
-  // --- PLUGINS RELATED FUNCTIONS ---
+  ///@}
+
+  /*! @name Plugins management  */
+  //@{
 
   /** allow to set a specified function to compute the mass
    *  \param pluginPath std::string : the complete path to the plugin
@@ -791,7 +812,6 @@ public:
   {
     _pluginFExt->setComputeFunction(pluginPath, functionName);
     if (!_fExt) _fExt.reset(new SiconosVector(_ndof));
-    //    Plugin::setFunction(&computeFExtPtr, pluginPath,functionName);
     _hasConstantFExt = false;
   }
 
@@ -858,14 +878,6 @@ public:
    */
   void setComputeJacobianFGyrqDotFunction(FPtr5 fct);
 
-  /** get gradient according to \f$ x \f$ of the right-hand side (pointer)
-   *  \return pointer on a SiconosMatrix
-   */
-  inline SP::BlockMatrix jacobianRhsx() const
-  {
-    return _jacxRhs;
-  }
-
   /** default function to compute the mass
    */
   virtual void computeMass();
@@ -905,7 +917,7 @@ public:
    *  \param velocity value used to evaluate the inertia forces
    */
   virtual void computeFGyr(SP::SiconosVector position,
-                          SP::SiconosVector velocity);
+			   SP::SiconosVector velocity);
 
   /** To compute the jacobian w.r.t q of the internal forces
    *  \param time the current time
@@ -953,78 +965,23 @@ public:
    *  \param velocity value used to evaluate the jacobian
    */
   virtual void computeJacobianFGyrqDot(SP::SiconosVector position, SP::SiconosVector velocity);
-
-  /** Default function to compute the right-hand side term
-   *  \param time current time
-   *  \param isDSup flag to avoid recomputation of operators
+  
+  /**default function to update the plugins functions using a new time:
+   * \param time  the current time
    */
-  virtual void computeRhs(double time, bool isDSup = false);
+  virtual void updatePlugins(double time) {};
+  
+  ///@}
 
-  /** Default function to compute jacobian of the right-hand side term according to x
-   *  \param time the current time
-   *  \param isDSup flag to avoid recomputation of operators
-   */
-  virtual void computeJacobianRhsx(double time, bool isDSup = false);
+  /*! @name Miscellaneous public methods */
+  //@{
 
-  /** Default function to compute forces
-   *  \param time the current time
-   */
-  virtual void computeForces(double time);
-
-  /** function to compute forces with some specific values for q and velocity (ie not those of the current state).
-   *  \param time the current time
-   *  \param q SP::SiconosVector: pointers on q
-   *  \param velocity SP::SiconosVector: pointers on velocity
-   */
-  virtual void computeForces(double time,
-                             SP::SiconosVector q,
-                             SP::SiconosVector velocity);
-
-  /** Default function to compute the jacobian w.r.t. q of forces
-   *  \param time the current time
-   */
-  virtual void computeJacobianqForces(double time);
-
-  /** Default function to compute the jacobian w.r.t. qDot of forces
-   *  \param time the current time
-   */
-  virtual void computeJacobianqDotForces(double time);
-
-
-  /** To compute the kinetic energy
-   */
+  /** To compute the kinetic energy */
   double computeKineticEnergy();
 
-  // --- miscellaneous ---
-
-  /** print the data to the screen
+  /** print the data of the dynamical system on the standard output
    */
   void display() const;
-
-  /** initialize the SiconosMemory objects with a positive size.
-   *  \param size the size of the SiconosMemory. must be >= 0
-   */
-  void initMemory(unsigned int size);
-
-  /** push the current values of x, q and r in the stored previous values
-   *  xMemory, qMemory, rMemory,
-   * \todo Modify the function swapIn Memory with the new Object Memory
-   */
-  void swapInMemory();
-
-  /** To compute \f$\frac{|q_{i+1} - qi|}{|q_i|}\f$ where \f$ q_{i+1}\f$ represents the present state and \f$ q_i\f$ the previous one
-   * \return a double
-   */
-  /*  double dsConvergenceIndicator(); */
-
-  /** set p[...] to zero
-   */
-  void resetAllNonSmoothPart();
-
-  /** set p[...] to zero for a given level
-      \param level
-   */
-  void resetNonSmoothPart(unsigned int level);
 
   /** Computes post-impact velocity, using pre-impact velocity and impulse (p) value.
    * Used in EventDriven (LsodarOSI->updateState)
@@ -1060,6 +1017,29 @@ public:
     return _reactionToBoundaryConditions;
   };
 
+  /** Allocate memory for q[level], level > 1
+      Useful for some integrators that need
+      q[2] or other coordinates vectors.
+      \param int the required level
+   */
+  void init_generalized_coordinates(unsigned int level);
+
+  /** Allocate memory for the lu factorization of the mass of the system.
+      Useful for some integrators with system inversion involving the mass
+  */
+  void init_inverse_mass();
+
+  /** Update the content of the lu factorization of the mass of the system,
+      if required.
+  */
+  void update_inverse_mass();
+
+  /** Allocate memory for forces and its jacobian.
+  */
+  void init_forces();
+  
+  ///@}
+  
   ACCEPT_STD_VISITORS();
 
 };

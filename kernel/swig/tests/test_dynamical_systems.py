@@ -27,10 +27,10 @@ def test_first_order_nlds():
     assert np.allclose(ds.x(), x0)
     assert np.allclose(ds.rhs(), 0.)
     ds.computef(time, ds.x())
-    assert np.allclose(ds.rhs(), ds.f())
+    assert ds.f() is None
     ds.initRhs(time)
+    assert ds.jacobianfx() is None
     assert np.allclose(ds.jacobianRhsx(), 0.)
-    assert np.allclose(ds.jacobianRhsx(), ds.jacobianfx())
 
 
 def test_first_order_lds():
@@ -62,11 +62,12 @@ def test_first_order_lds():
         if isinstance(ds.b(), np.ndarray):
             rhs += ds.b()
         ds.computef(time, ds.x())
-        assert np.allclose(rhs, ds.f())
+        if ds.f() is not None:
+            assert np.allclose(rhs, ds.f())
 
         ds.initRhs(time)
         assert np.allclose(rhs, ds.rhs())
-        if isinstance(ds.A(), np.ndarray):
+        if ds.A() is not None:
             assert np.allclose(ds.jacobianRhsx(), jac_ref)
             assert np.allclose(ds.jacobianRhsx(), ds.jacobianfx())
 
@@ -92,11 +93,8 @@ def test_first_order_ltids():
         assert np.allclose(ds.r(), 0.)
 
         rhs = np.dot(a_mat, ds.x())
-        if isinstance(ds.b(), np.ndarray):
+        if ds.b() is not None:
             rhs += ds.b()
-        ds.computef(time, ds.x())
-        assert np.allclose(rhs, ds.f())
-
         ds.initRhs(time)
         assert np.allclose(rhs, ds.rhs())
         assert np.allclose(ds.jacobianRhsx(), a_mat)
@@ -130,8 +128,25 @@ def test_lagrangian_tids():
     v0[...] = [4, 5, 6]
 
     mass = np.asarray(np.diag([1, 2, 3]), dtype=np.float64)
-    ds = sk.LagrangianLinearTIDS(q0, v0, mass)
+    stiffness = np.zeros((ndof, ndof), dtype=np.float64)
+    stiffness.flat[...] = np.arange(9)
+    damping = np.zeros_like(stiffness)
+    damping.flat[...] = np.arange(9, 18)
+    ds = sk.LagrangianLinearTIDS(q0, v0, mass, stiffness, damping)
     ec = ds.computeKineticEnergy()
     assert ec == 87.
     assert ds.dimension() == ndof
     assert np.allclose(ds.mass(), mass)
+    assert np.allclose(ds.K(), stiffness)
+    assert np.allclose(ds.C(), damping)
+    q = ds.q()
+    v = ds.velocity()
+    fref = -np.dot(stiffness, q)
+    fref -= np.dot(damping, v)
+    time = 0.3
+    ds.computeForces(time, q, v)
+    assert np.allclose(fref, ds.forces())
+    ds.computeJacobianqForces(time)
+    assert np.allclose(stiffness, ds.jacobianqForces())
+    ds.computeJacobianqDotForces(time)
+    assert np.allclose(damping, ds.jacobianqDotForces())

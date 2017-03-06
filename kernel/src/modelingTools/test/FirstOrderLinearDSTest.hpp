@@ -36,24 +36,23 @@ private:
 
   // tests to be done ...
 
+  CPPUNIT_TEST(testBuildFirstOrderLinearDS0);
   CPPUNIT_TEST(testBuildFirstOrderLinearDS1);
   //  CPPUNIT_TEST(testSetA);
   CPPUNIT_TEST(testSetAPtr);
   //  CPPUNIT_TEST(testSetB);
   CPPUNIT_TEST(testSetBPtr);
-  CPPUNIT_TEST(End);
 
   CPPUNIT_TEST_SUITE_END();
 
   // \todo exception test
 
+  void testBuildFirstOrderLinearDS0();
   void testBuildFirstOrderLinearDS1();
   //  void testSetA();
   void testSetAPtr();
   //  void testSetB();
   void testSetBPtr();
-  void End();
-
   // Members
 
   SP::SiconosVector x0;

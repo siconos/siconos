@@ -66,14 +66,19 @@ MoreauJeanGOSI::MoreauJeanGOSI(double theta, double gamma):
 }
 void MoreauJeanGOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds)
 {
-
+  // Get work buffers from the graph
   const DynamicalSystemsGraph::VDescriptor& dsv = _dynamicalSystemsGraph->descriptor(ds);
   VectorOfVectors& workVectors = *_dynamicalSystemsGraph->properties(dsv).workVectors;
+  // Initialize memory buffers
+  _dynamicalSystemsGraph->bundle(dsv)->initMemory(getSizeMem());
+  // Force dynamical system to its initial state
+  _dynamicalSystemsGraph->bundle(dsv)->resetToInitialState();
+  // Check dynamical system type
+  Type::Siconos dsType = Type::value(*ds);
 
-    // W initialization
-    initializeIterationMatrixW(t, ds, dsv);
-    Type::Siconos dsType = Type::value(*ds);
-    if(dsType == Type::LagrangianLinearTIDS || dsType == Type::LagrangianDS)
+  // Compute W (iteration matrix)
+  initializeIterationMatrixW(t, ds);
+  if(dsType == Type::LagrangianLinearTIDS || dsType == Type::LagrangianDS)
     {
       SP::LagrangianDS lds = std11::static_pointer_cast<LagrangianDS> (ds);
 
@@ -82,7 +87,7 @@ void MoreauJeanGOSI::initializeDynamicalSystem(Model& m, double t, SP::Dynamical
       workVectors[OneStepIntegrator::free].reset(new SiconosVector(lds->dimension()));
       workVectors[OneStepIntegrator::local_buffer].reset(new SiconosVector(lds->dimension()));
 
-      lds->computeForces(m.t0());
+      lds->computeForces(m.t0(), lds->q(), lds->velocity());
       lds->swapInMemory();
     }
     else if(dsType == Type::NewtonEulerDS)
@@ -98,12 +103,8 @@ void MoreauJeanGOSI::initializeDynamicalSystem(Model& m, double t, SP::Dynamical
       prod(*T, *v, *dotq, true);
 
       //Compute a first value of the forces to store it in _forcesMemory
-      neds->computeForces(m.t0());
+      neds->computeForces(m.t0(), neds->q(), v);
       neds->swapInMemory();
-    }
-    for (unsigned int k = _levelMinForInput ; k < _levelMaxForInput + 1; k++)
-    {
-      ds->initializeNonSmoothInput(k);
     }
 }
 
@@ -199,13 +200,9 @@ void MoreauJeanGOSI::initialize(Model& m)
   for(std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
   {
     if(!checkOSI(dsi)) continue;
-    // Memory allocation for workX. workX[ds*] corresponds to xfree (or vfree in lagrangian case).
-    // workX[*itDS].reset(new SiconosVector((*itDS)->dimension()));
-
     SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
     initializeDynamicalSystem(m, t0, ds);
   }
-
 
   SP::OneStepNSProblems  allOSNS  = _simulation->oneStepNSProblems();
   ((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY])->setIndexSetLevel(1);
@@ -227,29 +224,40 @@ void MoreauJeanGOSI::initialize(Model& m)
 
 }
 
-void MoreauJeanGOSI::initializeIterationMatrixW(double t, SP::DynamicalSystem ds, const DynamicalSystemsGraph::VDescriptor& dsv)
+void MoreauJeanGOSI::initializeIterationMatrixW(double t, SP::DynamicalSystem ds)
 {
   DEBUG_PRINT("MoreauJeanGOSI::initializeIterationMatrixW starts\n");
   // This function:
-  // - allocate memory for a matrix W
+  // - allocate memory for the matrix W
+  // - update its content for the current (initial) state of the dynamical system, depending on its type.
 
-  if(!ds || !dsv)
+  if(!ds)
     RuntimeException::selfThrow("MoreauJeanGOSI::initializeIterationMatrixW(t, ds, dsv) - ds == NULL or dsv == NULL");
 
   if(!(checkOSI(_dynamicalSystemsGraph->descriptor(ds))))
     RuntimeException::selfThrow("MoreauJeanOSI::initializeIterationMatrixW(t,ds) - ds does not belong to the OSI.");
 
+  const DynamicalSystemsGraph::VDescriptor& dsv = _dynamicalSystemsGraph->descriptor(ds);
+  
   if(_dynamicalSystemsGraph->properties(dsv).W)
     RuntimeException::selfThrow("MoreauJeanGOSI::initializeIterationMatrixW(t,ds) - W(ds) is already in the map and has been initialized.");
 
   double h = _simulation->timeStep();
   Type::Siconos dsType = Type::value(*ds);
-
-
+  unsigned int sizeW = ds->dimension();
   if(dsType == Type::LagrangianDS)
   {
     SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
-    _dynamicalSystemsGraph->properties(dsv).W.reset(new SimpleMatrix(*d->mass()));
+     if(d->mass())
+      {
+	d->computeMass(d->q());
+	_dynamicalSystemsGraph->properties(dsv).W.reset(new SimpleMatrix(*d->mass())); //*W = *d->mass();
+      }
+    else
+      {
+	_dynamicalSystemsGraph->properties(dsv).W.reset(new SimpleMatrix(sizeW, sizeW));
+	_dynamicalSystemsGraph->properties(dsv).W->eye();
+      }
     // Compute the W matrix
     computeW(t, ds, *_dynamicalSystemsGraph->properties(dsv).W);
     // WBoundaryConditions initialization
@@ -318,7 +326,7 @@ void MoreauJeanGOSI::initializeIterationMatrixWBoundaryConditions(SP::DynamicalS
   {
     if(_WBoundaryConditionsMap.find(dsN) != _WBoundaryConditionsMap.end())
       RuntimeException::selfThrow("MoreauJeanGOSI::initializeIterationMatrixWBoundaryConditions(t,ds) - WBoundaryConditions(ds) is already in the map and has been initialized.");
-
+    
     // Memory allocation for WBoundaryConditions
     unsigned int sizeWBoundaryConditions = ds->dimension(); // n for first order systems, ndof for lagrangian.
 
@@ -432,8 +440,13 @@ void MoreauJeanGOSI::computeW(double t, SP::DynamicalSystem ds, SiconosMatrix& W
     SP::SiconosMatrix K = d->jacobianqForces(); // jacobian according to q
     SP::SiconosMatrix C = d->jacobianqDotForces(); // jacobian according to velocity
 
-    d->computeMass();
-    W = *d->mass();
+    if(d->mass())
+      {
+	d->computeMass(d->q());
+	W = *d->mass();
+      }
+    else
+      W.zero();
 
     if(C)
     {
@@ -568,9 +581,6 @@ double MoreauJeanGOSI::computeResidu()
       SP::SiconosVector vold = d->velocityMemory()->getSiconosVector(0);
       SP::SiconosVector q = d->q();
 
-
-      d->computeMass();
-      SP::SiconosMatrix M = d->mass();
       SP::SiconosVector v = d->velocity(); // v = v_k,i+1
       //residuFree.zero();
       DEBUG_EXPR(residuFree.display());
@@ -580,12 +590,13 @@ double MoreauJeanGOSI::computeResidu()
       DEBUG_EXPR(q->display());
       DEBUG_EXPR(v->display());
 
-      DEBUG_EXPR(M->display());
-
-
-      //    std::cout << "(*v-*vold)->norm2()" << (*v-*vold).norm2() << std::endl;
-
-      prod(*M, (*v - *vold), residuFree); // residuFree = M(v - vold)
+      residuFree = *v;
+      sub(residuFree, *vold, residuFree);
+      if(d->mass())
+	{
+	  d->computeMass(d->q());
+	  prod(*(d->mass()), residuFree, residuFree); // residuFree = M(v - vold)
+	}
 
       if(d->forces())
       {
@@ -1434,8 +1445,9 @@ void MoreauJeanGOSI::updateState(const unsigned int )
 
       if(baux)
       {
+	double ds_norm_ref = 1. + ds->x0()->norm2(); // Should we save this in the graph?
         local_buffer -= *q;
-        double aux = (local_buffer.norm2()) / (ds->normRef());
+        double aux = (local_buffer.norm2()) / ds_norm_ref;
         if(aux > RelativeTol)
           _simulation->setRelativeConvergenceCriterionHeld(false);
       }

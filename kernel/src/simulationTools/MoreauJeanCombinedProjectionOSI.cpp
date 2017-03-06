@@ -78,7 +78,7 @@ void MoreauJeanCombinedProjectionOSI::initializeDynamicalSystem(Model& m, double
   if(dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
   {
     SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
-    workVectors[OneStepIntegrator::qtmp].reset(new SiconosVector(d->ndof()));
+    workVectors[OneStepIntegrator::qtmp].reset(new SiconosVector(d->dimension()));
   }
   else if(dsType == Type::NewtonEulerDS)
   {

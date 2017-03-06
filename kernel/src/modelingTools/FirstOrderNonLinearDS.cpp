@@ -29,14 +29,10 @@
 void FirstOrderNonLinearDS::_init(SP::SiconosVector initial_state)
 {
   DEBUG_PRINT("internal _init from FirstOrderNonLinearDS\n");
-  // Done in base class:
-  // _normRef = 1;
-  // _x.resize(2);
-  // z is always initialized with a null vector of size 1, since z is required in plug-in functions call.
-  // _z.reset(new SiconosVector(1));
-  // _r.reset(new SiconosVector(_n));
 
-  
+  // Memory allocation only for required parts of the DS:
+  // state (initial and current). All other operators are optional and
+  // allocated with 'set'-like methods.
   assert(_n > 0 && "dynamical system dimension should be greater than 0.");
   // Set initial conditions
   _x0 = initial_state;
@@ -47,26 +43,9 @@ void FirstOrderNonLinearDS::_init(SP::SiconosVector initial_state)
   // _x.resize(2); done in base class constructor.
   _x[0].reset(new SiconosVector(*_x0));
   _x[1].reset(new SiconosVector(_n));
-
-  /** \todo lazy Memory allocation */
-  // 
-  _f.reset(new SiconosVector(_n));
-
-  //_b.reset(new SiconosVector(_n));
-  // _M and _b reset are not needed, since the only way to set them is by using set function, from SP::
-
-  _jacobianfx.reset(new SimpleMatrix(_n, _n));
-
+  _r.reset(new SiconosVector(_n)); // FP: move this to initializeNonSmoothInput?
   _zeroPlugin();
-  
-  // memory???
 }
-
-
-//   updatePlugins(time);
-//   if (_f)
-//     *_fold = *_f;
-
 
 // From a minimum set of data
 FirstOrderNonLinearDS::FirstOrderNonLinearDS(SP::SiconosVector initial_state):
@@ -81,52 +60,45 @@ FirstOrderNonLinearDS::FirstOrderNonLinearDS(SP::SiconosVector initial_state, co
   DynamicalSystem(initial_state->size())
 {
   _init(initial_state);
-  
   // == f and its jacobian ==
   // Allocation and link with the plug-in
-  _pluginf->setComputeFunction(fPlugin);
-  _pluginJacxf->setComputeFunction(jacobianfxPlugin);
-
-  // dot x  = f(x, z , t)
+  setComputeFFunction(SSLH::getPluginName(fPlugin), SSLH::getPluginFunctionName(fPlugin));
+  setComputeJacobianfxFunction(SSLH::getPluginName(jacobianfxPlugin), SSLH::getPluginFunctionName(jacobianfxPlugin));
+  // dot x  = f(x, z , t) + r
 }
 
 // Copy constructor
 FirstOrderNonLinearDS::FirstOrderNonLinearDS(const FirstOrderNonLinearDS & FONLDS): DynamicalSystem(FONLDS)
 {
-  _init(FONLDS.x0());
-
-  // Always initialized
-  _fold.reset(new SiconosVector(*(FONLDS.fold())));
-  _rMemory.reset(new SiconosMemory(*(FONLDS.rMemory())));
-
-  // Not always initialized
-  if (FONLDS.getPluginF())
-    _pluginf.reset(new PluggedObject(*(FONLDS.getPluginF())));
-  if (FONLDS.getPluginJacxf())
-    _pluginJacxf.reset(new PluggedObject(*(FONLDS.getPluginJacxf())));
-  if (FONLDS.jacobianfx())
-    _jacobianfx.reset(new SimpleMatrix(*(FONLDS.jacobianfx())));
-
+  _zeroPlugin();
+  
   if (FONLDS.M())
     _M.reset(new SimpleMatrix(*(FONLDS.M())));
   if (FONLDS.f())
     _f.reset(new SiconosVector(*(FONLDS.f())));
-
+  if (FONLDS.jacobianfx())
+    _jacobianfx.reset(new SimpleMatrix(*(FONLDS.jacobianfx())));
   if (FONLDS.b())
     _b.reset(new SiconosVector(*(FONLDS.b())));
-
+  if (FONLDS.getPluginF())
+    _pluginf.reset(new PluggedObject(*(FONLDS.getPluginF())));
+  if (FONLDS.getPluginJacxf())
+    _pluginJacxf.reset(new PluggedObject(*(FONLDS.getPluginJacxf())));
   if (FONLDS.getPluginM())
     _pluginM.reset(new PluggedObject(*(FONLDS.getPluginM())));
-
-  // data - not always initialized
   if (FONLDS.invM())
     _invM.reset(new SimpleMatrix(*(FONLDS.invM())));
+
+  // Memory stuff to me moved to graph/osi
+  if(FONLDS.fold())
+    _fold.reset(new SiconosVector(*(FONLDS.fold())));
+  if(FONLDS.rMemory())
+    _rMemory.reset(new SiconosMemory(*(FONLDS.rMemory())));
 }
 
 
 void FirstOrderNonLinearDS::_zeroPlugin()
 {
-  DEBUG_PRINT("zero Plug from FirstOrderNonLinearDS\n");
   _pluginf.reset(new PluggedObject());
   _pluginJacxf.reset(new PluggedObject());
   _pluginM.reset(new PluggedObject());
@@ -134,38 +106,40 @@ void FirstOrderNonLinearDS::_zeroPlugin()
 
 void FirstOrderNonLinearDS::initRhs(double time)
 {
-  // compute initial values for f and jacobianfx, initialize right-hand side.
-  computeRhs(time); // this will compute, if required, f and M.
+  computeRhs(time);
 
+
+  // !! jacxRhs must always be allocated (we must check this?)!!
   if (! _jacxRhs)  // if not allocated with a set or anything else
   {
     if (_jacobianfx && ! _M)  // if M is not defined, then jacobianfx = jacobianRhsx, no memory allocation for that one.
       _jacxRhs = _jacobianfx;
-    else if (_jacobianfx && _M)
+    else//  if (_jacobianfx && _M) or if(!jacobianRhsx)
       _jacxRhs.reset(new SimpleMatrix(_n, _n));
 
     // else no allocation, jacobian is equal to 0.
   }
+  computeJacobianRhsx(time);
 }
 
 void FirstOrderNonLinearDS::updatePlugins(double time)
 {
   if (_M)
     computeM(time);
-
-  computef(time);
-  computeJacobianfx(time);
+  if(_f)
+    {
+      computef(time, _x[0]);
+      computeJacobianfx(time, _x[0]);
+    }
 }
 
 void FirstOrderNonLinearDS::initializeNonSmoothInput(unsigned int level)
 {
-
   /**\warning V.A. _r should be initialized here and not in  the constructor
-   * The level should also be used if we need more thatn one _r
+   * The level should also be used if we need more that one _r
    */
-
-  // reset  r to zero.
-  _r->zero();
+  if (!_r)
+    _r.reset(new SiconosVector(_n));
 }
 
 
@@ -176,7 +150,7 @@ void FirstOrderNonLinearDS::initMemory(unsigned int steps)
 {
   DynamicalSystem::initMemory(steps);
 
-  if(!_fold)
+  if(_f && !_fold)
     _fold.reset(new SiconosVector(_n));
 
   if (steps == 0)
@@ -188,76 +162,77 @@ void FirstOrderNonLinearDS::initMemory(unsigned int steps)
 void FirstOrderNonLinearDS::swapInMemory()
 {
   _xMemory->swap(*_x[0]);
-  _rMemory->swap(*_r);
-  *_fold = *_f;
+  if(_rMemory && _r)
+    _rMemory->swap(*_r);
+  if(_f && _fold)
+    *_fold = *_f;
 }
 
 // ===== COMPUTE PLUGINS FUNCTIONS =====
 
 void FirstOrderNonLinearDS::setComputeMFunction(const std::string& pluginPath, const std::string& functionName)
 {
+  if(!_M)
+    _M.reset(new SimpleMatrix(_n, _n));
+
   _pluginM->setComputeFunction(pluginPath, functionName);
 }
 
 void FirstOrderNonLinearDS::setComputeMFunction(FPtr1 fct)
 {
+  if(!_M)
+    _M.reset(new SimpleMatrix(_n, _n));
+
   _pluginM->setComputeFunction((void *)fct);
 }
 
 void FirstOrderNonLinearDS::setComputeFFunction(const std::string& pluginPath, const std::string& functionName)
 {
+  if(!_f)
+    _f.reset(new SiconosVector(_n));
+  
   _pluginf->setComputeFunction(pluginPath, functionName);
 }
 
 void FirstOrderNonLinearDS::setComputeFFunction(FPtr1 fct)
 {
+  if(!_f)
+    _f.reset(new SiconosVector(_n));
   _pluginf->setComputeFunction((void *)fct);
 }
 
 void FirstOrderNonLinearDS::setComputeJacobianfxFunction(const std::string& pluginPath, const std::string& functionName)
 {
+  if(!_jacobianfx)
+    _jacobianfx.reset(new SimpleMatrix(_n, _n));
   _pluginJacxf->setComputeFunction(pluginPath, functionName);
 }
 
 void FirstOrderNonLinearDS::setComputeJacobianfxFunction(FPtr1 fct)
 {
+  if(!_jacobianfx)
+    _jacobianfx.reset(new SimpleMatrix(_n, _n));
   _pluginJacxf->setComputeFunction((void *)fct);
 }
 
 void FirstOrderNonLinearDS::computeM(double time)
 {
-  // second argument is useless at the time - Used in derived classes
-  if (_pluginM->fPtr)
+  if (_pluginM->fPtr && _M) 
   {
     ((FNLDSPtrfct)_pluginM->fPtr)(time, _n, &((*(_x[0]))(0)), &(*_M)(0, 0), _z->size(), &(*_z)(0));
   }
 }
 
-void FirstOrderNonLinearDS::computef(double time)
+void FirstOrderNonLinearDS::computef(double time, SP::SiconosVector state)
 {
   if (_f && _pluginf->fPtr)
-    ((FNLDSPtrfct)_pluginf->fPtr)(time, _n, _x[0]->getArray(), _f->getArray(), _z->size(), &(*_z)(0));
+    ((FNLDSPtrfct)_pluginf->fPtr)(time, _n, &(*state)(0) , &(*_f)(0), _z->size(), &(*_z)(0));
 }
 
-void FirstOrderNonLinearDS::computef(double time, SiconosVector& x2)
+void FirstOrderNonLinearDS::computeJacobianfx(double time, SP::SiconosVector state)
 {
-  if (_f && _pluginf->fPtr)
-    ((FNLDSPtrfct)_pluginf->fPtr)(time, _n, &((x2)(0)) , &(*_f)(0), _z->size(), &(*_z)(0));
-  // else nothing!
-}
-
-void FirstOrderNonLinearDS::computeJacobianfx(double time, bool isDSUp)
-{
-  // second argument is useless at the time - Used in derived classes
   if (_jacobianfx && _pluginJacxf->fPtr)
-    ((FNLDSPtrfct)_pluginJacxf->fPtr)(time, _n, &((*(_x[0]))(0)), &(*_jacobianfx)(0, 0), _z->size(), &(*_z)(0));
-}
-
-void FirstOrderNonLinearDS::computeJacobianfx(double time, const SiconosVector& x2)
-{
-  // second argument is useless at the time - Used in derived classes
-  if (_jacobianfx && _pluginJacxf->fPtr)
-    ((FNLDSPtrfct)_pluginJacxf->fPtr)(time, _n, x2.getArray(), &(*_jacobianfx)(0, 0), _z->size(), _z->getArray());
+    ((FNLDSPtrfct)_pluginJacxf->fPtr)(time, _n, state->getArray(), &(*_jacobianfx)(0, 0), _z->size(), _z->getArray());
 }
 
 void FirstOrderNonLinearDS::computeRhs(double time, bool isDSUp)
@@ -270,15 +245,19 @@ void FirstOrderNonLinearDS::computeRhs(double time, bool isDSUp)
 
   if (_f)
   {
-    computef(time);
+    computef(time, _x[0]);
     *(_x[1]) += *_f;
   }
 
   if (_M)
   {
+    computeM(time);
     // allocate invM at the first call of the present function
     if (! _invM)
       _invM.reset(new SimpleMatrix(*_M));
+    else if(_pluginM->fPtr) // if M is plugged, invM must be updated
+      *_invM = *_M;
+    
     _invM->PLUForwardBackwardInPlace(*_x[1]);
   }
 }
@@ -289,16 +268,21 @@ void FirstOrderNonLinearDS::computeJacobianRhsx(double time, bool isDSUp)
 
   // compute jacobian of rhs according to x, = M-1(jacobianfx + jacobianX(T.u))
   // At the time, second term is set to zero.
-  assert(!_pluginJacxf->fPtr && "FirstOrderNonLinearDS::computeJacobianRhsx: there is no plugin to compute the jacobian of f");
+  //assert(!_pluginJacxf->fPtr && "FirstOrderNonLinearDS::computeJacobianRhsx: there is no plugin to compute the jacobian of f");
 
-  computeJacobianfx(time);
+  computeJacobianfx(time, _x[0]);
   // solve M*jacobianXRhS = jacobianfx
   if (_M && _jacobianfx)
   {
     *_jacxRhs = *_jacobianfx;
     // copy _M into _invM for LU-factorisation, at the first call of this function.
+
+    computeM(time);
+    
     if (! _invM)
       _invM.reset(new SimpleMatrix(*_M));
+    else if(_pluginM->fPtr) // if M is plugged, invM must be updated
+      *_invM = *_M;
     _invM->PLUForwardBackwardInPlace(*_jacxRhs);
   }
   // else jacobianRhsx = jacobianfx, pointers equality set in initRhs

@@ -216,7 +216,7 @@ void LagrangianScleronomousR::computeJach(double time, Interaction& inter, Inter
 const std::string LagrangianScleronomousR::getJachqName() const
 {
   if (_pluginJachq->fPtr)
-    return _pluginJachq->getPluginName();
+    return _pluginJachq->pluginName();
   return "unamed";
 
 }

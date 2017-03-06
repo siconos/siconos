@@ -96,7 +96,7 @@ int main(int argc, char* argv[])
 
     // link the interaction and the dynamical system
     CircuitRLCD->nonSmoothDynamicalSystem()->link(InterCircuitRLCD, LSCircuitRLCD);
-
+    CircuitRLCD->nonSmoothDynamicalSystem()->display();
 
     // ------------------
     // --- Simulation ---
