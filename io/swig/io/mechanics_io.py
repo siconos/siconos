@@ -2349,6 +2349,9 @@ class Hdf5():
         if time_stepping == Kernel.TimeSteppingDirectProjection:
             osnspb_pos=Kernel.MLCPProjectOnConstraints(Numerics.SICONOS_MLCP_ENUM, 1.0)
             simulation=time_stepping(timedisc, self._osi, osnspb, osnspb_pos)
+            simulation.setProjectionMaxIteration(20)
+            simulation.setConstraintTolUnilateral(1e-08);
+            simulation.setConstraintTol(1e-08);
         else:
             simulation=time_stepping(timedisc)
             simulation.insertIntegrator(self._osi)
