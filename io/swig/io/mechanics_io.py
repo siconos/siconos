@@ -2346,9 +2346,13 @@ class Hdf5():
             """)
 
         # (6) Simulation setup with (1) (2) (3) (4) (5)
-        simulation=time_stepping(timedisc)
-        simulation.insertIntegrator(self._osi)
-        simulation.insertNonSmoothProblem(osnspb)
+        if time_stepping == Kernel.TimeSteppingDirectProjection:
+            osnspb_pos=Kernel.MLCPProjectOnConstraints(Numerics.SICONOS_MLCP_ENUM, 1.0)
+            simulation=time_stepping(timedisc, self._osi, osnspb, osnspb_pos)
+        else:
+            simulation=time_stepping(timedisc)
+            simulation.insertIntegrator(self._osi)
+            simulation.insertNonSmoothProblem(osnspb)
         if use_proposed:
             simulation.insertInteractionManager(self._broadphase)
 

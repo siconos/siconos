@@ -143,6 +143,7 @@ namespace std
 // yes, undefined private copy constructors
 %feature("notabstract") TimeStepping;
 %feature("notabstract") TimeSteppingCombinedProjection;
+%feature("notabstract") TimeSteppingDirectProjection;
 %feature("notabstract") EventDriven;
 
 // common declarations with Numerics
