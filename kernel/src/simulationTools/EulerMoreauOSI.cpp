@@ -132,8 +132,6 @@ void EulerMoreauOSI::initializeInteraction(double t0, Interaction &inter,
 {
   SP::DynamicalSystem ds1= interProp.source;
   SP::DynamicalSystem ds2= interProp.target;
-  assert(ds1);
-  assert(ds2);
 
   assert(interProp.DSlink);
 
@@ -471,7 +469,7 @@ double EulerMoreauOSI::computeResidu()
   double told = _simulation->startingTime(); // Beginning of the time step
   double h = time - told; // time step length
 
-  DEBUG_PRINTF("nextTime %f\n", t);
+  DEBUG_PRINTF("nextTime %f\n", time);
   DEBUG_PRINTF("startingTime %f\n", told);
   DEBUG_PRINTF("time step size %f\n", h);
 
@@ -511,19 +509,19 @@ double EulerMoreauOSI::computeResidu()
 	  // Note: indices k/k+1 corresponds to value at the beginning/end of the time step.
 	  // Newton iterate are x and r
 
-	  SP::FirstOrderNonLinearDS fonlds = std11::static_pointer_cast<FirstOrderNonLinearDS>(ds);
-	  SP::FirstOrderLinearDS folds = std11::static_pointer_cast<FirstOrderLinearDS>(ds);
-
+	  FirstOrderNonLinearDS& fonlds = *std11::static_pointer_cast<FirstOrderNonLinearDS>(ds);
+	  FirstOrderLinearDS& folds = *std11::static_pointer_cast<FirstOrderLinearDS>(ds);
+	  
 	  // 1 - Compute the free residu (purely on the "smooth" dynamics)
 
-	  residuFree = *(fonlds->x()); // last saved value for x: could be x_k or x_{k+1}^alpha
-	  SP::SiconosVector xold = fonlds->xMemory()->getSiconosVector(0);
-	  residuFree -= *xold; // state x_k (at previous time step)
+	  residuFree = *(fonlds.x()); // last saved value for x: could be x_k or x_{k+1}^alpha
+	  SiconosVector& xold = *fonlds.xMemory()->getSiconosVector(0);
+	  residuFree -= xold; // state x_k (at previous time step)
 
-	  SP::SiconosMatrix M = fonlds->M();
+	  SP::SiconosMatrix M = fonlds.M();
 	  if(M)
 	    {
-	      fonlds->computeM(time);
+	      fonlds.computeM(time);
 	      prod(*M, residuFree, residuFree, true);
 	    }
 	  // at this step, we have residuFree = M(x - x_k)
@@ -536,28 +534,28 @@ double EulerMoreauOSI::computeResidu()
 	      // No fold in FirstOrderLinearDS.
 	      // residu is used as a tmp buffer to compute Ax + b
 	      residu.zero();
-	      if(folds->A())
+	      if(folds.A())
 		{
-		  folds->computeA(told);
-		  prod(*folds->A(), *xold, residu); 
+		  folds.computeA(told);
+		  prod(*folds.A(), xold, residu); 
 		}
-	      if(folds->b())
+	      if(folds.b())
 		{
-		  folds->computeb(told);
-		  residu += *folds->b();
+		  folds.computeb(told);
+		  residu += *folds.b();
 		}
 	      // residuFree += -h * (1 - _theta) * f(t_k,x_k)
 	      scal(coef, residu, residuFree, false);
 	      residu.zero();
-	      if(folds->A())
+	      if(folds.A())
 		{
-		  folds->computeA(time);
-		  prod(*folds->A(), *folds->x(), residu); 
+		  folds.computeA(time);
+		  prod(*folds.A(), *folds.x(), residu); 
 		}
-	      if(folds->b())
+	      if(folds.b())
 		{
-		  folds->computeb(time);
-		  residu += *folds->b();
+		  folds.computeb(time);
+		  residu += *folds.b();
 		}
 	      // residuFree += -h * _theta * f(t_{x+1}, x_{k+1}^alpha)
 	      coef = -h * _theta;
@@ -565,18 +563,18 @@ double EulerMoreauOSI::computeResidu()
 	    }
 	  else if(dsType == Type::FirstOrderNonLinearDS) // FirstOrderNonLinearDS
 	    {
-	      if(fonlds->f())
+	      if(fonlds.f())
 		{
 		  coef = -h * (1 - _theta);
 		  // for these systems, fold is available
 		  // residuFree += -h * (1 - _theta) * f(t_k,x_k)
-		  scal(coef, *fonlds->fold(), residuFree, false);
+		  scal(coef, *fonlds.fold(), residuFree, false);
 		  
 		  // computes f(t_{x+1}, x_{k+1}^alpha)
-		  fonlds->computef(time, fonlds->x());
+		  fonlds.computef(time, fonlds.x());
 		  coef = -h * _theta;
 		  // residuFree += -h * _theta * f(t_{x+1}, x_{k+1}^alpha)
-		  scal(coef, *(fonlds->f()), residuFree, false);
+		  scal(coef, *(fonlds.f()), residuFree, false);
 		}
 	    }
 	  
@@ -585,12 +583,12 @@ double EulerMoreauOSI::computeResidu()
 	  
 	  if(!_useGamma)  // no gamma
 	    {
-	      scal(-h, *fonlds->r(), residu, false); // residu = residu - h*r
+	      scal(-h, *fonlds.r(), residu, false); // residu = residu - h*r
 	    }
 	  else
 	    {
-	      scal(-h*_gamma, *fonlds->r(), residu, false);
-	      scal(-h*(1-_gamma), *fonlds->rMemory()->getSiconosVector(0), residu, false);
+	      scal(-h*_gamma, *fonlds.r(), residu, false);
+	      scal(-h*(1-_gamma), *fonlds.rMemory()->getSiconosVector(0), residu, false);
 	    }
 	  
 	  normResidu = residu.norm2();
@@ -600,31 +598,30 @@ double EulerMoreauOSI::computeResidu()
       // 2 - First Order Linear Systems with Time Invariant coefficients
       else if(dsType == Type::FirstOrderLinearTIDS)
 	{
-	  SP::FirstOrderLinearTIDS foltids = std11::static_pointer_cast<FirstOrderLinearTIDS>(ds);
+	  FirstOrderLinearTIDS& foltids = *std11::static_pointer_cast<FirstOrderLinearTIDS>(ds);
 	  //Don't use W because it is LU factorized
 	  //Residu : R_{free} = M(x^{\alpha}_{k+1} - x_{k}) -h( A (\theta x^{\alpha}_{k+1} + (1-\theta)  x_k) +b_{k+1})
-	  if(foltids->b())
-	    residuFree = *(foltids->b());
+	  if(foltids.b())
+	    residuFree = *(foltids.b());
 	  else
 	    residuFree.zero();
 
 	  // residu is used as a temp buffer
-	  SP::SiconosVector xold = foltids->xMemory()->getSiconosVector(0);
-	  if(foltids->A())  // residuFree += -h( A (\theta x_{k+1}^{\alpha} + (1-\theta) x_k)
+	  if(foltids.A())  // residuFree += -h( A (\theta x_{k+1}^{\alpha} + (1-\theta) x_k)
 	    {
-	      SP::SiconosMatrix A = foltids->A();
-	      prod(*A, *xold, residu, true);
+	      SP::SiconosMatrix A = foltids.A();
+	      prod(*A, *foltids.xMemory()->getSiconosVector(0), residu, true);
 	      double coef = -h * (1 - _theta);
 	      scal(coef, residu, residuFree, false);
 
-	      prod(*A, *(foltids->x()), residu, true);
+	      prod(*A, *(foltids.x()), residu, true);
 	      coef = -h * _theta;
 	      scal(coef, residu, residuFree, false);
 	    }
 
 	  // residuFree += M(x_{k+1}^{\alpha} - x_k)
-	  residu = *(foltids->x()) - *xold;
-	  SP::SiconosMatrix M = foltids->M();
+	  residu = *(foltids.x()) - *foltids.xMemory()->getSiconosVector(0);
+	  SP::SiconosMatrix M = foltids.M();
 	  if(M)
 	    {
 	      prod(*M, residu, residuFree, false);
@@ -1015,7 +1012,7 @@ void EulerMoreauOSI::integrate(double& tinit, double& tend, double& tout, int&)
     }
 }
 
-void EulerMoreauOSI::updateState(const unsigned int level)
+void EulerMoreauOSI::updateState(const unsigned int)
 {
 
   DEBUG_PRINT("EulerMoreauOSI::updateState\n");
@@ -1051,37 +1048,27 @@ void EulerMoreauOSI::updateState(const unsigned int level)
 
 	  // TODO ???
 	  bool baux = (useRCC && dsType == Type::FirstOrderNonLinearDS && _simulation->relativeConvergenceCriterionHeld());
-	  if(level != LEVELMAX)
+	  
+	  //    SP::SiconosVector xFree = d->xFree();
+
+	  // Save value of q in local_buffer for relative convergence computation
+	  if(baux)
+	    *workVectors[OneStepIntegrator::local_buffer] = x;
+
+	  if(_useGamma)
 	    {
-
-	      //    SP::SiconosVector xFree = d->xFree();
-
-	      // Save value of q in local_buffer for relative convergence computation
-	      if(baux)
-		*workVectors[OneStepIntegrator::local_buffer] = x;
-
-	      //        std::cout <<boolalpha << _useGamma << std::endl;
-	      //        std::cout <<_gamma << std::endl;
-	      if(_useGamma)
-		{
-		  // XXX UseGamma broken ? -- xhub
-		  scal(_gamma * h, *d.r(), x); // x = gamma*h*r
-		}
-	      else
-		{
-		  scal(h, *d.r(), x); // x = h*r
-		}
-
-	      W.PLUForwardBackwardInPlace(x); // x = h* W^{-1} *r
-
-	      x += *workVectors[OneStepIntegrator::free]; // x+=xfree
+	      // XXX UseGamma broken ? -- xhub
+	      scal(_gamma * h, *d.r(), x); // x = gamma*h*r
 	    }
 	  else
 	    {
-	      RuntimeException::selfThrow("EulerMoreauOSI::updateState - level != LEVELMAX is not supposed to happen !");
-	      x = *workVectors[OneStepIntegrator::free]; // x = xfree
+	      scal(h, *d.r(), x); // x = h*r
 	    }
+	  
+	  W.PLUForwardBackwardInPlace(x); // x = h* W^{-1} *r
 
+	  x += *workVectors[OneStepIntegrator::free]; // x+=xfree
+	
 	  if(baux)
 	    {
 	      double ds_norm_ref = 1. + ds->x0()->norm2(); // Should we save this in the graph?

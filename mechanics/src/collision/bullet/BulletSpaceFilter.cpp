@@ -519,8 +519,8 @@ void BulletSpaceFilter::addDynamicObject(SP::BulletDS ds,
   initDS.m= this->model();
   osi->accept(initDS);
 
-  /* Initialize the DS at the current time */
-  ds->initialize(simulation->nextTime(), osi->getSizeMem());
+  // /* Initialize the DS at the current time */
+  // ds->initialize(simulation->nextTime(), osi->getSizeMem());
 
   /* Partially re-initialize the simulation. */
   simulation->initialize(this->model(), false);

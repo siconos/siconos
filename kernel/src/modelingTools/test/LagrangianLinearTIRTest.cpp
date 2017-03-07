@@ -48,15 +48,15 @@ void LagrangianLinearTIRTest::testBuildLagrangianLinearTIR1()
   std::cout << "--> Constructor 1 test ended with success." <<std::endl;
 }
 
-// data constructor (5)
-void LagrangianLinearTIRTest::testBuildLagrangianLinearTIR2()
-{
-  std::cout << "--> Test: constructor 2." <<std::endl;
-  SP::LagrangianLinearTIR folr(new LagrangianLinearTIR(C, D, F, e));
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIR2f : ", folr->getType() == RELATION::Lagrangian, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIR2g : ", folr->getSubType() == RELATION::LinearTIR, true);
-  std::cout << "--> Constructor 2 test ended with success." <<std::endl;
-}
+// // data constructor (5)
+// void LagrangianLinearTIRTest::testBuildLagrangianLinearTIR2()
+// {
+//   std::cout << "--> Test: constructor 2." <<std::endl;
+//   SP::LagrangianLinearTIR folr(new LagrangianLinearTIR(C, D, F, e));
+//   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIR2f : ", folr->getType() == RELATION::Lagrangian, true);
+//   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIR2g : ", folr->getSubType() == RELATION::LinearTIR, true);
+//   std::cout << "--> Constructor 2 test ended with success." <<std::endl;
+// }
 
 // data constructor (5)
 void LagrangianLinearTIRTest::testBuildLagrangianLinearTIR3()

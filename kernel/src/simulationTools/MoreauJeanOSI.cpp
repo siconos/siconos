@@ -684,8 +684,8 @@ double MoreauJeanOSI::computeResidu()
       DEBUG_EXPR(q.display());
       DEBUG_EXPR(v.display());
 
-      residuFree = *v;
-      sub(residuFree, *vold, residuFree);
+      residuFree = v;
+      sub(residuFree, vold, residuFree);
       if(d.mass())
 	{
 	  d.computeMass(d.q());
@@ -1716,7 +1716,7 @@ void MoreauJeanOSI::updateState(const unsigned int )
 
       if(baux)
       {
-	double ds_norm_ref = 1. + ds->x0()->norm2(); // Should we save this in the graph?
+	double ds_norm_ref = 1. + ds.x0()->norm2(); // Should we save this in the graph?
         local_buffer -= q;
         double aux = (local_buffer.norm2()) / ds_norm_ref;
         if(aux > RelativeTol)

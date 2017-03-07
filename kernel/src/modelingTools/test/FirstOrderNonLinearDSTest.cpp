@@ -61,15 +61,16 @@ void FirstOrderNonLinearDSTest::testBuildFirstOrderNonLinearDS1()
   ds->computeJacobianfx(time, ds->x());
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS1 : ", ds->f() == NULL, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS1 : ", ds->jacobianfx() == NULL, true);
-  
+   
   SiconosVector zero(3);
+  SimpleMatrix m0(3,3);
   ds->update(time);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS1 : ", *(ds->rhs()) == zero, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS1 : ", ds->jacobianRhsx() == NULL, true);
 
   ds->initRhs(time);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS1 : ", *(ds->rhs()) == zero, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS1 : ", ds->jacobianRhsx() == NULL, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS1 : ", *(ds->jacobianRhsx()) == m0, true);
 
   ds->setComputeFFunction("TestPlugin", "computef");
   ds->setComputeJacobianfxFunction("TestPlugin", "computeJacobianfx");
@@ -116,8 +117,9 @@ void FirstOrderNonLinearDSTest::testBuildFirstOrderNonLinearDS2()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2 : ", ds->jacobianRhsx() == NULL, true);
 
   ds->initRhs(time);
+  SimpleMatrix m0(3,3);  
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2 : ", *(ds->rhs()) == zero, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2 : ", ds->jacobianRhsx() == NULL, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2 : ", *(ds->jacobianRhsx()) == m0, true);
   
   std::cout << "--> Constructor 2 test ended with success." <<std::endl;
 }

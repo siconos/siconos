@@ -189,7 +189,7 @@ def test_bouncing_ball2():
     weight = np.zeros(ball.dimension())
     weight[0] = -m * g
     ball.setFExtPtr(weight)
-    
+
     # a ball with its own computeFExt
     class Ball(sk.LagrangianLinearTIDS):
 
