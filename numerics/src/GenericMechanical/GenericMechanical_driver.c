@@ -538,6 +538,7 @@ void genericMechanicalProblem_setDefaultSolverOptions(SolverOptions* options, in
     //(&options->internalSolvers[1])->iparam[10]=1; /* VA 26/11/2015 For robustness reasons on mechanisms, we choose the JeanMoreau formulation */
     break;
   case SICONOS_FRICTION_3D_ONECONTACT_NSN_GP:
+  case SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID:
     fc3d_onecontact_nonsmooth_Newton_setDefaultSolverOptions(&options->internalSolvers[1]);
     //(&options->internalSolvers[1])->iparam[10]=1; /* VA 26/11/2015 For robustness reasons on mechanisms, we choose the JeanMoreau formulation */
     break;

@@ -2287,10 +2287,11 @@ class Hdf5():
         # (2) Time discretisation --
         timedisc=TimeDiscretisation(t0, h)
 
-
+        fc_index=0
         if (friction_contact_trace == False) :
             if len(joints) > 0:
                 osnspb=GenericMechanical(SICONOS_FRICTION_3D_ONECONTACT_NSN)
+                fc_index=1
             else:
                 osnspb=FrictionContact(3, solver)
         else:
@@ -2298,22 +2299,23 @@ class Hdf5():
 
         self._contact_index_set = contact_index_set
 
-        osnspb.numericsSolverOptions().iparam[0]=itermax
+        # Global solver options
+        solverOptions = osnspb.numericsSolverOptions()
+        solverOptions.iparam[0]=itermax
         # -- full error evaluation
-        #osnspb.numericsSolverOptions().iparam[1]=Numerics.SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_FULL
+        #solverOptions.iparam[1]=Numerics.SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_FULL
         # --  Adaptive error evaluation
-        #osnspb.numericsSolverOptions().iparam[1]=Numerics.SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_ADAPTIVE
-        #osnspb.numericsSolverOptions().iparam[8]=1
+        #solverOptions.iparam[1]=Numerics.SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_ADAPTIVE
+        #solverOptions.iparam[8]=1
         # -- light error evaluation with full final
-        osnspb.numericsSolverOptions().iparam[1]= Numerics.SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT
-        osnspb.numericsSolverOptions().iparam[14]= Numerics.SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION_TRUE
+        solverOptions.iparam[1] = Numerics.SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT
+        solverOptions.iparam[14] = Numerics.SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION_TRUE
+        solverOptions.dparam[0] = tolerance
 
-        osnspb.numericsSolverOptions().internalSolvers[0].solverId = Numerics.SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID
-
-        osnspb.numericsSolverOptions().internalSolvers[0].iparam[0]=100
-        osnspb.numericsSolverOptions().dparam[0]=tolerance
-
-
+        # Friction one-contact solver options
+        fcOptions = solverOptions.internalSolvers[fc_index]
+        fcOptions.solverId = Numerics.SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID
+        fcOptions.iparam[0] = 100  # Local solver iterations
 
         osnspb.setMaxSize(30000)
         osnspb.setMStorageType(1)
