@@ -2308,9 +2308,9 @@ class Hdf5():
         osnspb.numericsSolverOptions().iparam[1]= Numerics.SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT
         osnspb.numericsSolverOptions().iparam[14]= Numerics.SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION_TRUE
 
-        osnspb.numericsSolverOptions().internalSolvers.solverId = Numerics.SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID
+        osnspb.numericsSolverOptions().internalSolvers[0].solverId = Numerics.SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID
 
-        osnspb.numericsSolverOptions().internalSolvers.iparam[0]=100
+        osnspb.numericsSolverOptions().internalSolvers[0].iparam[0]=100
         osnspb.numericsSolverOptions().dparam[0]=tolerance
 
 
