@@ -228,6 +228,7 @@ void genericMechanicalProblem_GS(GenericMechanicalProblem* pGMP, double * reacti
   double * sol = 0;
   double * w = 0;
   int resLocalSolver = 0;
+  int local_solver_error_occurred = 0;
   //printf("genericMechanicalProblem_GS \n");
   //displayGMP(pGMP);
   double * pPrevReaction = NULL;
@@ -269,6 +270,7 @@ void genericMechanicalProblem_GS(GenericMechanicalProblem* pGMP, double * reacti
       //}
       //curSize=m->blocksize0[currentRowNumber] - posInX;
       curSize = curProblem->size;
+      curProblem->error = 0;
       /*about the diagonal block:*/
       //diagBlockNumber = NM_extract_diag_blockPos(m,currentRowNumber);
       //diagBlockNumber = NM_extract_diag_blockPos(numMat,currentRowNumber,posInX,size);
@@ -339,8 +341,10 @@ void genericMechanicalProblem_GS(GenericMechanicalProblem* pGMP, double * reacti
       default:
         printf("genericMechanical_GS Numerics : genericMechanicalProblem_GS unknown problem type %d.\n", curProblem->type);
       }
-      if (resLocalSolver)
-        printf("Local solver FAILED, GS continue\n");
+      if (resLocalSolver) {
+        curProblem->error = 1;
+        local_solver_error_occurred = 1;
+      }
 
       DEBUG_PRINTF("GS it %d, the line number is %d:\n", it, currentRowNumber);
       /* DEBUG_EXPR(for (int ii = 0; ii < pGMP->size; ii++) */
@@ -430,6 +434,19 @@ void genericMechanicalProblem_GS(GenericMechanicalProblem* pGMP, double * reacti
     printf("---GenericalMechanical_drivers, CV %d at it=%d, itTotal=%d.\n", SScmp, it, SScmpTotal);
 #endif
   }
+
+  if (local_solver_error_occurred) {
+    currentRowNumber = 0;
+    curProblem =  pGMP->firstListElem;
+    while (curProblem) {
+      if (curProblem->error)
+        printf("genericMechanical_GS Numerics : Local solver FAILED row %d of type %s\n",
+               currentRowNumber, ns_problem_id_to_name(curProblem->type));
+      curProblem = curProblem->nextProblem;
+      currentRowNumber++;
+    }
+  }
+
   //printf("---GenericalMechanical_drivers,  IT=%d, err=%e.\n",it,*err);
   if (! options->dWork)
     free(pPrevReaction);

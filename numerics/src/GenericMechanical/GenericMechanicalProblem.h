@@ -47,6 +47,7 @@ struct listNumericsProblem
   void * problem;
   double *q;/*a pointer on the q of the problem*/
   int size;/*size of the local problem.(needed because of dense case)*/
+  int error;/*non-zero if there was an error reported*/
   struct listNumericsProblem * nextProblem;
   struct listNumericsProblem * prevProblem;
 };
