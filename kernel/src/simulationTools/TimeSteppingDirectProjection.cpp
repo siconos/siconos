@@ -102,12 +102,10 @@ void TimeSteppingDirectProjection::advanceToEvent()
 
   DEBUG_PRINT("TimeStepping::newtonSolve begin :\n");
 
-  // Update interactions if a manager was provided
-  updateInteractions();
-
   if (!_doOnlyProj)
     TimeStepping::newtonSolve(_newtonTolerance, _newtonMaxIteration);
-
+  else
+    updateInteractions();
 
   DEBUG_EXPR_WE(std::cout << "TimeStepping::newtonSolve end : Number of iterations=" << getNewtonNbIterations() << "\n";
 		std::cout << "                              : newtonResiduDSMax=" << newtonResiduDSMax() << "\n";
@@ -286,6 +284,7 @@ void TimeSteppingDirectProjection::advanceToEvent()
     }
 
     updateWorldFromDS();
+    updateInteractions();
 
     computeCriteria(&runningProjection);
 
@@ -618,6 +617,7 @@ void TimeSteppingDirectProjection::newtonSolve(double criterion, unsigned int ma
       isNewtonConverge = newtonCheckConvergence(criterion);
       if (!isNewtonConverge && !info)
       {
+        updateInteractions();
         updateOutput();
         if (!_allNSProblems->empty() &&  indexSet->size()>0)
           saveYandLambdaInOldVariables();
