@@ -38,6 +38,10 @@
 
 int avi_caoferris(AffineVariationalInequalities* problem, double *z, double *w, SolverOptions* options)
 {
+  assert(problem);
+  assert(problem->M);
+  assert(problem->q);
+  assert(problem->poly);
   unsigned n = problem->size;
   assert(n > 0);
   unsigned nrows = problem->poly->size_ineq;

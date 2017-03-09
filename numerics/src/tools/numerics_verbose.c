@@ -49,12 +49,26 @@ void numerics_error(const char* functionName, const char* message)
   sn_fatal_error(SN_UNKOWN_ERROR, output);
 }
 
+void numerics_error_nonfatal(const char* fn_name, const char* msg)
+{
+  size_t fn_name_len = strlen(fn_name);
+  size_t msg_len = strlen(msg);
+  char* output = (char*)malloc(fn_name_len + msg_len + 7);
+  strncpy(output, fn_name, fn_name_len);
+  strncat(output, ":\t", 3);
+  strncat(output, msg, msg_len);
+  strncat(output, ".\n", 3);
+  fputs(output, stderr);
+  free(output);
+
+}
+
 /* the warning on vprintf is reported as a bug of clang ... --vacary */
 #ifdef __clang__
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wformat-nonliteral"
 #endif
-void numerics_warning(char * functionName, char* fmt, ...)
+void numerics_warning(const char * functionName, char* fmt, ...)
 {
   char output[200] = "Numerics warning - ";
   strcat(output, functionName);

@@ -131,11 +131,17 @@ extern "C"
   */
   void numerics_error(const char* functionName, const char* message) NO_RETURN;
 
+  /* log error message without exit
+     \param fn_name name of the function where the error occurs
+     \param msg output message
+  */
+  void numerics_error_nonfatal(const char* fn_name, const char* msg);
+
   /* message output without exit
      \param functionName name of the function where warning occurs
      \param message output message
   */
-  void numerics_warning(char * functionName, char* fmt, ...);
+  void numerics_warning(const char * functionName, char* fmt, ...);
 
   void numerics_printf(const char * fmt, ...);
   
