@@ -157,7 +157,7 @@ with WorkDir(workdir_path) as workdir:
             os.mkdir(srcdir)
         except OSError:
             pass
-        
+
         # get sources
         try:
             check_call(['git', 'clone',
@@ -189,7 +189,7 @@ with WorkDir(workdir_path) as workdir:
 
     generated_doc_path = os.path.join(builddir,
                                       'Docs', 'build', 'html')
-    
+
     # change local modes
     for root, dirs, files in os.walk(generated_doc_path):
         for d in dirs:
@@ -205,7 +205,7 @@ with WorkDir(workdir_path) as workdir:
     destination = os.path.join(doc_path, version)
 
     # upload
-    check_call(['rsync', '-rlvp', generated_doc_path,
+    check_call(['rsync', '-rlvp', '-e', '\'ssh -o "StrictHostKeyChecking no"\'', generated_doc_path,
                 destination])
 
     # htaccess if this is the main documentation
