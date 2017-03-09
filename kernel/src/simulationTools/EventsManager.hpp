@@ -292,7 +292,7 @@ public:
   /** get TimeDiscretisation
    * \return the TimeDiscretisation in use for the time integration
    */
-  inline const TimeDiscretisation& timeDiscretisation() const { return *_td;};
+  inline TimeDiscretisation& timeDiscretisation() const { return *_td;};
 
   /** update final time
    * \param T the new final time
