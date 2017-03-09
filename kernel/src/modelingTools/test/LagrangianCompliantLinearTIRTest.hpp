@@ -15,34 +15,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#ifndef __LagrangianLinearTIRTest__
-#define __LagrangianLinearTIRTest__
+#ifndef __LagrangianCompliantLinearTIRTest__
+#define __LagrangianCompliantLinearTIRTest__
 
 #include <cppunit/extensions/HelperMacros.h>
 #include "NonSmoothDynamicalSystem.hpp"
-#include "LagrangianLinearTIR.hpp"
+#include "LagrangianCompliantLinearTIR.hpp"
 
-class LagrangianLinearTIRTest : public CppUnit::TestFixture
+class LagrangianCompliantLinearTIRTest : public CppUnit::TestFixture
 {
 
 private:
   /** serialization hooks
   */
-  ACCEPT_SERIALIZATION(LagrangianLinearTIRTest);
+  ACCEPT_SERIALIZATION(LagrangianCompliantLinearTIRTest);
 
 
   // Name of the tests suite
-  CPPUNIT_TEST_SUITE(LagrangianLinearTIRTest);
+  CPPUNIT_TEST_SUITE(LagrangianCompliantLinearTIRTest);
 
   // tests to be done ...
 
-  CPPUNIT_TEST(testBuildLagrangianLinearTIR1);
-  CPPUNIT_TEST(testBuildLagrangianLinearTIR2);
-  CPPUNIT_TEST(testBuildLagrangianLinearTIR3);
-  CPPUNIT_TEST(testBuildLagrangianLinearTIR4);
-  //  CPPUNIT_TEST(testBuildLagrangianLinearTIR5);
-  //  CPPUNIT_TEST(testBuildLagrangianLinearTIR6);
+  CPPUNIT_TEST(testBuildLagrangianCompliantLinearTIR1);
+  CPPUNIT_TEST(testBuildLagrangianCompliantLinearTIR2);
+  CPPUNIT_TEST(testBuildLagrangianCompliantLinearTIR3);
   CPPUNIT_TEST(testSetCPtr);
+  CPPUNIT_TEST(testSetDPtr);
   CPPUNIT_TEST(testSetFPtr);
   CPPUNIT_TEST(testSetEPtr);
   CPPUNIT_TEST(testGetJacPtr);
@@ -52,13 +50,13 @@ private:
 
   // \todo exception test
 
-  void testBuildLagrangianLinearTIR0();
-  void testBuildLagrangianLinearTIR1();
-  void testBuildLagrangianLinearTIR2();
-  void testBuildLagrangianLinearTIR3();
-  void testBuildLagrangianLinearTIR4();
+  void testBuildLagrangianCompliantLinearTIR0();
+  void testBuildLagrangianCompliantLinearTIR1();
+  void testBuildLagrangianCompliantLinearTIR2();
+  void testBuildLagrangianCompliantLinearTIR3();
 
   void testSetCPtr();
+  void testSetDPtr();
   void testSetFPtr();
   void testSetEPtr();
   void testGetJacPtr();
@@ -66,7 +64,7 @@ private:
 
   // Members
 
-  SP::SimpleMatrix C, B, F;
+  SP::SimpleMatrix C, B, F, D;
   SP::SiconosVector e;
   SP::NonSmoothDynamicalSystem nsds;
 
