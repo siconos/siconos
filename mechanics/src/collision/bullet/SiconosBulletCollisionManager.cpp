@@ -185,6 +185,8 @@ struct BodyShapeRecord
                   SP::btCollisionObject btobj, SP::SiconosContactor con)
     : base(b), ds(d), sshape(sh), btobject(btobj), contactor(con),
       shape_version(sh->version()) {}
+  virtual ~BodyShapeRecord() {}
+
   SP::SiconosVector base;
   SP::BodyDS ds;
   SP::SiconosShape sshape;
