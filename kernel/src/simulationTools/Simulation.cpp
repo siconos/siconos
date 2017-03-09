@@ -75,11 +75,6 @@ Simulation::~Simulation()
   if (statOut.is_open()) statOut.close();
 }
 
-void Simulation::setTimeDiscretisationPtr(SP::TimeDiscretisation td)
-{
-  _eventsManager->setTimeDiscretisationPtr(td);
-}
-
 double Simulation::getTk() const
 {
   return _eventsManager->getTk();

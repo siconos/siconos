@@ -205,11 +205,6 @@ public:
     _name = newName;
   }
 
-  /** set the TimeDiscretisation of the Simulation
-   *  \param[in] td the new TimeDiscretisation
-   */
-  void setTimeDiscretisationPtr(SP::TimeDiscretisation td);
-
   /** get time instant k of the time discretisation
    *  \return the time instant t_k
    */
