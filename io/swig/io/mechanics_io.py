@@ -1847,8 +1847,8 @@ class Hdf5():
         """
         Add a heightmap represented as a SiconosMatrix
         """
-        assert(heightmap.shape[0] > 2)
-        assert(heightmap.shape[1] > 2)
+        assert(heightmap.shape[0] >= 2)
+        assert(heightmap.shape[1] >= 2)
         if name not in self._ref:
             shape = self._ref.create_dataset(name, data=heightmap)
             shape.attrs['id'] = self._number_of_shapes

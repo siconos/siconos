@@ -1082,8 +1082,8 @@ void SiconosBulletCollisionManager_impl::updateShape(BodyHeightRecord &record)
 
     // The local scaling determines the extents of the base of the heightmap
     btheight->setLocalScaling(btVector3(
-      height->length_x() / height->height_data()->size(0),
-      height->length_y() / height->height_data()->size(1), 1));
+      height->length_x() / (height->height_data()->size(0)-1),
+      height->length_y() / (height->height_data()->size(1)-1), 1));
 
     //TODO vertical position offset to compensate for Bullet's centering
     // TODO: Calculate the local Aabb
