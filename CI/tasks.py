@@ -120,7 +120,7 @@ siconos_clang = siconos_ubuntu_16_10.copy()(
     ci_config=('with_bullet', 'with_py3'),
     with_examples=False,
     remove_pkgs=['python-env'],
-    add_pkgs=['clang-3.9', 'bullet', 'cppunit_clang-3-9', 'wget', 'xz', 'python3-env', 'path', 'h5py3'])  # h5py-3 for mechanics.io
+    add_pkgs=['clang-3.9', 'bullet', 'cppunit_clang-3.9', 'wget', 'xz', 'python3-env', 'path', 'h5py3'])  # h5py-3 for mechanics.io
 
 siconos_clang_asan = siconos_clang.copy()(
     ci_config=('with_asan_clang', 'with_mumps', 'with_hdf5', 'with_serialization', 'with_py3'),
