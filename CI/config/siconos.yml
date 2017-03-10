@@ -364,7 +364,11 @@ pkgs:
                /opt/conda/bin/conda install numpy scipy lxml pytest matplotlib vtk &&
                /opt/conda/bin/conda install -c https://conda.anaconda.org/dlr-sc pythonocc-core &&
                rm /opt/conda/lib/libgfortran.so* &&
-               rm /opt/conda/pkgs/*.tar.bz2 -f
+               rm /opt/conda/pkgs/*.tar.bz2 -f &&
+               for i in $(ls /opt/conda/lib/libvtk*.so); do ii=$(echo $i | sed s/-.*/.so/); ln -s $i $ii ; done
+
+               # conda is borken as of 10/03/2017: we need to install vtk by hand and the lib provided by conda ahave their name sufficex by -MV.mv.
+               # So we have to create the right symlink :( --xhub
 
                #echo 'export PATH=/opt/conda/bin:$PATH' > /etc/profile.d/conda.sh &&
                #echo 'export PATH=/opt/conda/bin:$PATH' >> $HOME/.profile &&
