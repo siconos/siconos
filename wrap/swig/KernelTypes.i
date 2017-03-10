@@ -723,7 +723,7 @@ struct IsDense : public Question<bool>
 }
 
 //////////////////////////////////////////////////////////////////////////////
-%typemap(in,fragment="SiconosVector") (std11::shared_ptr<SiconosVector>) (PyArrayObject* array=NULL, int is_new_object)
+%typemap(in,fragment="SiconosVector") (std11::shared_ptr<SiconosVector>) (PyArrayObject* array = NULL, int is_new_object = 0)
 {
   // %typemap(in,fragment="SiconosVector") (std11::shared_ptr<SiconosVector>)
   $1 = SP_SiconosVector_in($input, &array, &is_new_object);
@@ -731,7 +731,7 @@ struct IsDense : public Question<bool>
 
 %typemap(in,fragment="SiconosVector")
   const SiconosVector &
-  (PyArrayObject* array=NULL, int is_new_object, std::vector<SP::SiconosVector> keeper)
+  (PyArrayObject* array=NULL, int is_new_object = 0, std::vector<SP::SiconosVector> keeper)
 {
   // %typemap(in,fragment="NumPy_Fragments")
   // %TYPE (PyArrayObject* array=NULL, int
@@ -751,7 +751,7 @@ struct IsDense : public Question<bool>
 }
 
 %typemap(in,fragment="SiconosVector") SiconosVector &
-(PyArrayObject* array=NULL, int is_new_object, std::vector<SP::SiconosVector> keeper)
+(PyArrayObject* array=NULL, int is_new_object = 0, std::vector<SP::SiconosVector> keeper)
 {
   // %typemap(in,fragment="NumPy_Fragments")
   // %TYPE (PyArrayObject* array=NULL, int
@@ -885,7 +885,7 @@ struct IsDense : public Question<bool>
 //////////////////////////////////////////////////////////////////////////////
 %define TYPEMAP_MATRIX(TYPE)
 // numpy or TYPE on input -> TYPE
-%typemap(in, fragment="SiconosMatrix") (std11::shared_ptr<TYPE>) (PyArrayObject* array=NULL, int is_new_object)
+%typemap(in, fragment="SiconosMatrix") (std11::shared_ptr<TYPE>) (PyArrayObject* array=NULL, int is_new_object = 0)
 {
 
   void *argp1=0;
@@ -919,7 +919,7 @@ struct IsDense : public Question<bool>
 
 %typemap(in, fragment="SiconosMatrix")
   const TYPE &
-  (PyArrayObject* array = NULL, int is_new_object, std::vector<SP::TYPE> keeper)
+  (PyArrayObject* array = NULL, int is_new_object = 0, std::vector<SP::TYPE> keeper)
 {
    bool ok = SiconosMatrix_from_python($input, &array, &is_new_object, &$1, keeper);
    if (!ok)
@@ -937,7 +937,7 @@ struct IsDense : public Question<bool>
 
 %typemap(in, fragment="SiconosMatrix")
   TYPE&
-  (PyArrayObject* array = NULL, int is_new_object, std::vector<SP::TYPE> keeper)
+  (PyArrayObject* array = NULL, int is_new_object = 0, std::vector<SP::TYPE> keeper)
 {
    bool ok = SiconosMatrix_from_python($input, &array, &is_new_object, &$1, keeper);
    if (!ok)
