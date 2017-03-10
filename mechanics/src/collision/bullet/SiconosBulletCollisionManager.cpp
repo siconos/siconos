@@ -1080,7 +1080,8 @@ void SiconosBulletCollisionManager_impl::updateShape(BodyHeightRecord &record)
   {
     // btBvhTriangleHeightShape supports only outsideMargin.
     // TODO: support insideMargin, scale the points by their normals.
-    btheight->setMargin(height->outsideMargin() * _options.worldScale);
+    btheight->setMargin((height->insideMargin() + height->outsideMargin())
+                        * _options.worldScale);
 
     // The local scaling determines the extents of the base of the heightmap
     btheight->setLocalScaling(btVector3(
@@ -1114,7 +1115,7 @@ void SiconosBulletCollisionManager_impl::updateShape(BodyHeightRecord &record)
   // vertical center of the heightfield, so combine it here with the
   // contactor offset.
   btScalar mnz = btheight->_min_height, mxz = btheight->_max_height;
-  btScalar z_offset = (mxz-mnz)/2 + mnz;
+  btScalar z_offset = (mxz-mnz)/2 + mnz - height->insideMargin();
   SiconosVector o(7);
   o.zero();
   o(2) = z_offset;
