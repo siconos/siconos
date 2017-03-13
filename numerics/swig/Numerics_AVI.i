@@ -51,11 +51,11 @@
 
    void set_polyhedron(SN_OBJ_TYPE* H_mat, SN_OBJ_TYPE* K_vec)
    {
-     $self->poly = (polyhedron*) malloc(sizeof(polyhedron));
+     $self->poly.split = (polyhedron*) malloc(sizeof(polyhedron));
       int is_new_object2=0;
-      %NM_convert_from_target(H_mat, (&$self->poly->H), TARGET_ERROR_VERBOSE);
+      %NM_convert_from_target(H_mat, (&$self->poly.split->H), TARGET_ERROR_VERBOSE);
 
-      if ($self->poly->H->size1 != $self->size)
+      if ($self->poly.split->H->size1 != $self->size)
       {
         SWIG_Error(SWIG_TypeError, "The matrix does not have the right number of column");
         TARGET_ERROR_VERBOSE;
@@ -63,14 +63,14 @@
 
       SN_ARRAY_TYPE* vector = obj_to_sn_vector(K_vec, &is_new_object2); 
       sn_check_array_type(vector, TARGET_ERROR_VERBOSE);
-      sn_check_size_mat_vec($self->poly->H->size0, vector, TARGET_ERROR_VERBOSE);
+      sn_check_size_mat_vec($self->poly.split->H->size0, vector, TARGET_ERROR_VERBOSE);
 
-      set_vec_from_target($self->poly->K, vector, , TARGET_ERROR_VERBOSE);
+      set_vec_from_target($self->poly.split->K, vector, , TARGET_ERROR_VERBOSE);
 
-      $self->poly->size_ineq = $self->poly->H->size0;
-      $self->poly->size_eq = 0;
-      $self->poly->Heq = NULL;
-      $self->poly->Keq = NULL;
+      $self->poly.split->size_ineq = $self->poly.split->H->size0;
+      $self->poly.split->size_eq = 0;
+      $self->poly.split->Heq = NULL;
+      $self->poly.split->Keq = NULL;
 
    }
 
