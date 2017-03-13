@@ -73,7 +73,7 @@ protected:
   /** copy constructor (private=> no copy nor pass-by value allowed)
    * \param notUsed notused
    */
-  NonSmoothLaw(const NonSmoothLaw& notUsed) {};
+  NonSmoothLaw(const NonSmoothLaw& notUsed): _size(0) {};
 
 public:
   /** basic constructor

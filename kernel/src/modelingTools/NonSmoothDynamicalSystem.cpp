@@ -16,7 +16,6 @@
  * limitations under the License.
 */
 #include "NonSmoothDynamicalSystem.hpp"
-#include "Topology.hpp"
 #include "Interaction.hpp"
 #include "LagrangianLinearTIDS.hpp"
 #include "FirstOrderLinearTIDS.hpp"
@@ -30,6 +29,9 @@ using namespace std::placeholders;
 #include <boost/bind.hpp>
 #include <boost/weak_ptr.hpp>
 #endif
+
+#include <limits>
+
 
 #include "debug.h"
 
@@ -62,7 +64,6 @@ void NonSmoothDynamicalSystem::display() const
   std::cout << "===================================================" <<std::endl;
 }
 
-#include <limits>
 double NonSmoothDynamicalSystem::nsdsConvergenceIndicator()
 {
   // calculate the max value of all DS convergence indicators
@@ -177,7 +178,7 @@ void NonSmoothDynamicalSystem::updateOutput(double time, unsigned int level)
 
   // To compute output(level) (ie with y[level]) for all Interactions.
   //  assert(level>=0);
-  
+
   DEBUG_BEGIN("NonSmoothDynamicalSystem::updateOutput(unsigned int level)\n");
   DEBUG_PRINTF("with level = %i\n", level);
   InteractionsGraph::VIterator ui, uiend;

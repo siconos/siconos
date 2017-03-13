@@ -350,10 +350,9 @@ public:
   // --- R ---
 
   /** get the value of r
-   * \warning: SiconosVector is an abstract class => can not be an lvalue => return SiconosVector
    *  \return a vector
    */
-  inline const SiconosVector getR() const
+  inline const SiconosVector& getR() const
   {
     return *_r;
   }
