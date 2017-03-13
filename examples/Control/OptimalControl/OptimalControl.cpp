@@ -95,7 +95,7 @@ int main()
   aM->setSimulation(aS);
   aM->initialize();
 
-  setNumericsVerbose(0);
+  numerics_set_verbose(0);
 
 
   SP::SiconosVector  x = aDS->x();
@@ -130,9 +130,9 @@ int main()
   {
     k++;
     //      if (cmp==150)
-    // setNumericsVerbose(à);
+    // numerics_set_verbose(à);
     //      else if (cmp==151)
-    setNumericsVerbose(1);
+    numerics_set_verbose(1);
     ++show_progress;
 
     cmp++;

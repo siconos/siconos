@@ -27,7 +27,6 @@
 
 // Matrices storage
 TYPEDEF_STRUCT(NumericsMatrix)
-TYPEDEF_STRUCT(polyhedron)
 TYPEDEF_STRUCT(NumericsSparseMatrix)
 TYPEDEF_STRUCT(NumericsSparseLinearSolverParams)
 TYPEDEF_STRUCT(SparseBlockStructuredMatrix)

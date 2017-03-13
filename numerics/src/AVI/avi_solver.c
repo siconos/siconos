@@ -24,6 +24,7 @@
 #include "NumericsMatrix.h"
 
 const char* const SICONOS_AVI_CAOFERRIS_STR = "AVI from Cao & Ferris";
+const char* const SICONOS_AVI_PATHAVI_STR = "PATHVI";
 
 int avi_driver(AffineVariationalInequalities* problem, double *z , double *w, SolverOptions* options)
 {
@@ -38,7 +39,7 @@ int avi_driver(AffineVariationalInequalities* problem, double *z , double *w, So
 
   assert(options->isSet);
 
-  if (!problem || !problem->M || !problem->q || !problem->poly || !options)
+  if (!problem || !problem->M || !problem->q || !options)
   {
     numerics_error_nonfatal("avi_driver", "Problem data is incomplete: you need to set at least M, q and poly");
     return -1;
@@ -59,8 +60,15 @@ int avi_driver(AffineVariationalInequalities* problem, double *z , double *w, So
   switch (id)
   {
   case SICONOS_AVI_CAOFERRIS:
+  {
     info = avi_caoferris(problem, z, w, options);
     break;
+  }
+  case SICONOS_AVI_PATHAVI:
+  {
+    info = avi_pathavi(problem, z, w, options);
+    break;
+  }
   /*error */
   default:
   {
