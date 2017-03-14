@@ -78,6 +78,12 @@
 class DynamicalSystem
 {
 
+public:
+  /** List of indices used to save tmp work vectors
+   * The last value is the size of the present list, so you HAVE to leave it at the end position.
+   */
+  enum DSWorkVectorId {local_buffer, freeresidu, free, acce_memory, acce_like, sizeWorkV};
+
 private:
   /* serialization hooks */
   ACCEPT_SERIALIZATION(DynamicalSystem);

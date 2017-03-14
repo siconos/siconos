@@ -325,7 +325,7 @@ void solver_options_copy(SolverOptions* options_ori, SolverOptions* options)
 
   options->numberOfInternalSolvers =  options_ori->numberOfInternalSolvers;
   if (options->numberOfInternalSolvers)
-    options->internalSolvers = (SolverOptions *)malloc(options->numberOfInternalSolvers*sizeof(SolverOptions));
+    options->internalSolvers = (SolverOptions *)calloc(options->numberOfInternalSolvers, sizeof(SolverOptions));
   for (int i = 0  ; i < options->numberOfInternalSolvers; i++ )
   {
     SolverOptions * internal_options_ori = options_ori->internalSolvers + i;

@@ -16,7 +16,7 @@ mu = np.array([0.1])
 
 reactions = np.array([0., 0., 0.])
 velocities = np.array([0., 0., 0.])
-sn.setNumericsVerbose(2)
+sn.numerics_set_verbose(2)
 FCP = sn.FrictionContactProblem(3, M, q, mu)
 
 

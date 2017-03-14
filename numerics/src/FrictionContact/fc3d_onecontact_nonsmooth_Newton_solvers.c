@@ -295,7 +295,7 @@ void fc3d_onecontact_nonsmooth_Newton_AC_update(int contact, FrictionContactProb
 }
 
 
-int fc3d_onecontact_nonsmooth_Newtow_setDefaultSolverOptions(SolverOptions* options)
+int fc3d_onecontact_nonsmooth_Newton_setDefaultSolverOptions(SolverOptions* options)
 {
   if (verbose > 0)
   {

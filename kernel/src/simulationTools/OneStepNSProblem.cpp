@@ -501,5 +501,5 @@ void OneStepNSProblem::printStat()
 }
 void OneStepNSProblem::setNumericsVerboseMode(bool vMode)
 {
-  setNumericsVerbose(vMode);
+  numerics_set_verbose(vMode);
 }

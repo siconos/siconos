@@ -19,6 +19,8 @@
 #define NCP_PROBLEM_H
 
 #include "NumericsFwd.h"
+#include "SiconosConfig.h"
+
 
 /*!\file NonlinearComplementarityProblem.h
  * \brief data structure to formalize a Nonlinear Complementarity Problem (NCP)
@@ -54,7 +56,7 @@ typedef void (*ptrFunctionJacNCP)(void* env, int n, double* z, NumericsMatrix* j
  */
 struct NonlinearComplementarityProblem
 {
-  unsigned int n; /**< size of the problem */
+  unsigned n; /**< size of the problem */
   ptrFunctionNCP compute_F; /**< pointer to the function used to compute \f$F(z)\f$ */
   ptrFunctionJacNCP compute_nabla_F; /**< pointer to the function used to compute \f$\nabla_z F(z)\f$ */
   NumericsMatrix* nabla_F; /**< storage for \f$\nabla_z F\f$*/
@@ -63,6 +65,10 @@ struct NonlinearComplementarityProblem
                When called from C, it can reference a data struct containing variables needed for the computations.*/
 };
 
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+extern "C"
+{
+#endif
   /** free an NCP problem 
    * \param ncp structure to free
    */
@@ -72,5 +78,9 @@ struct NonlinearComplementarityProblem
    * \return an MixedComplementarityProblem instance
    */
   NonlinearComplementarityProblem* newNCP(void);
+
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+}
+#endif
 
 #endif

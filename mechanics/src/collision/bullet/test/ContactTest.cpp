@@ -53,7 +53,7 @@ struct BounceParams
     printf("  position:           %.3g\n", position);
     printf("  insideMargin:       %.3g\n", insideMargin);
     printf("  outsideMargin:      %.3g\n", outsideMargin);
-    //printf("  breakingThreshold:  %.3g\n", options.breakingThreshold);
+    printf("  breakingThreshold:  %.3g\n", options.contactBreakingThreshold);
     printf("  worldScale:         %.3g\n", options.worldScale);
   }
 };
@@ -501,7 +501,7 @@ void ContactTest::t4()
   params.outsideMargin = 0.1;
 
   SiconosBulletOptions options;
-  //options.breakingThreshold = 0.4;
+  options.contactBreakingThreshold = 0.4;
   options.worldScale = 1.0;
   params.options = options;
 

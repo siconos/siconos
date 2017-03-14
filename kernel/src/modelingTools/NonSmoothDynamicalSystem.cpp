@@ -16,7 +16,6 @@
  * limitations under the License.
 */
 #include "NonSmoothDynamicalSystem.hpp"
-#include "Topology.hpp"
 #include "Interaction.hpp"
 #include "LagrangianLinearTIDS.hpp"
 #include "FirstOrderLinearTIDS.hpp"
@@ -30,6 +29,9 @@ using namespace std::placeholders;
 #include <boost/bind.hpp>
 #include <boost/weak_ptr.hpp>
 #endif
+
+#include <limits>
+
 
 #include "debug.h"
 
@@ -61,8 +63,6 @@ void NonSmoothDynamicalSystem::display() const
   _topology->indexSet0()->display();
   std::cout << "===================================================" <<std::endl;
 }
-
-#include <limits>
 
 void NonSmoothDynamicalSystem::link(SP::Interaction inter, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2)
 {

@@ -289,19 +289,10 @@ public:
     return _td->currentTimeStep(_k);
   }
 
-  /** Set a new TimeDiscretisation
-   * \param td the new TimeDiscretisation
-   */
-  inline void setTimeDiscretisationPtr(SP::TimeDiscretisation td)
-  {
-    _td = td;
-    _k = 0;
-  }
-
   /** get TimeDiscretisation
    * \return the TimeDiscretisation in use for the time integration
    */
-  inline SP::TimeDiscretisation timeDiscretisation() const { return _td;};
+  inline const TimeDiscretisation& timeDiscretisation() const { return *_td;};
 
   /** update final time
    * \param T the new final time

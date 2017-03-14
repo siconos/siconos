@@ -42,7 +42,7 @@ Library for the modeling and simulation of nonsmooth dynamical systems.
 
 ## siconos/mechanics (C++)
 
-Component for the simualtion of mechanical systems in interaction with their environment:
+Component for the simulation of mechanical systems in interaction with their environment:
 * Contact detection procedure between simple primitives (homemade) and meshes [bullet3](https://github.com/bulletphysics/bullet3)
 * Contact detection between Brep representation based on [oce. Open CASCADE Community Edition](https://github.com/tpaviot/oce) and on [pythonOCC](https://github.com/tpaviot/pythonocc) 3D CAD/CAM package for python 
 
@@ -54,7 +54,7 @@ Library to add a controller to a simulation. For now almost all the implemented 
 
 This component can be used to 
 * serialize almost any simulation using [boost::serialization](http://www.boost.org/doc/libs/1_60_0/libs/serialization/doc/index.html)
-* generate mechanical examples from HDF5 and to write HDF5 in view of vizualization through [vtk](http://www.vtk.org)
+* generate mechanical examples from HDF5 and to write HDF5 in view of visualization through [vtk](http://www.vtk.org)
 
 # License
 

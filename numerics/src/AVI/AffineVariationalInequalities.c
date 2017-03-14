@@ -114,6 +114,7 @@ int AVI_newFromFilename(AffineVariationalInequalities* avi, char* filename)
 
 void freeAVI(AffineVariationalInequalities* avi)
 {
+  assert(avi);
   if (avi->M)
   {
     freeNumericsMatrix(avi->M);
@@ -121,22 +122,22 @@ void freeAVI(AffineVariationalInequalities* avi)
     avi->M = NULL;
   }
 
-  if (avi->q)
+  if (avi->poly.set->id == SICONOS_SET_POLYHEDRON)
   {
-    free(avi->q);
+    free_polyhedron(avi->poly.split);
+    avi->poly.split = NULL;
+  }
+  else if (avi->poly.set->id == SICONOS_SET_POLYHEDRON_UNIFIED)
+  {
+    free_polyhedron_unified(avi->poly.unif);
+    avi->poly.unif = NULL;
   }
 
-  if (avi->poly)
-  {
-    free_polyhedron(avi->poly);
-    avi->poly = NULL;
-  }
+  if (avi->q) { free(avi->q); avi->q = NULL; }
+  if (avi->d) { free(avi->d); avi->d = NULL; }
+  if (avi->lb) { free(avi->lb); avi->lb = NULL; }
+  if (avi->ub) { free(avi->ub); avi->ub = NULL; }
 
-  if (avi->d)
-  {
-    free(avi->d);
-    avi->d = NULL;
-  }
   free(avi);
 }
 
@@ -148,7 +149,10 @@ AffineVariationalInequalities* newAVI(void)
   avi->M = NULL;
   avi->q = NULL;
   avi->d = NULL;
-  avi->poly = NULL;
+  avi->poly.set = NULL;
+  avi->lb = NULL;
+  avi->ub = NULL;
+  avi->cones = NULL;
 
   return avi;
 }

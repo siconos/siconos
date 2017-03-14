@@ -57,6 +57,7 @@ if(WITH_${COMPONENT}_TESTING)
     LagrangianScleronomousRTest.cpp
     LagrangianRheonomousRTest.cpp
     LagrangianCompliantRTest.cpp
+    LagrangianCompliantLinearTIRTest.cpp
     LagrangianDSTest.cpp
     LagrangianLinearTIDSTest.cpp
     NewtonEulerDSTest.cpp)

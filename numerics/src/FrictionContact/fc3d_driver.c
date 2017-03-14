@@ -218,6 +218,7 @@ int fc3d_driver(FrictionContactProblem* problem,
   }
   case SICONOS_FRICTION_3D_ONECONTACT_NSN:
   case SICONOS_FRICTION_3D_ONECONTACT_NSN_GP:
+  case SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID:
   {
     numerics_printf(" ========================== Call Newton-based solver for one contact Friction-Contact 3D problem ==========================\n");
     fc3d_onecontact_nonsmooth_Newton_solvers_initialize(problem, problem, options);

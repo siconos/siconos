@@ -29,7 +29,7 @@ int globalFrictionContact_test_function(FILE * f, SolverOptions * options)
 
   int k, info = -1 ;
   GlobalFrictionContactProblem* problem = (GlobalFrictionContactProblem *)malloc(sizeof(GlobalFrictionContactProblem));
-  setNumericsVerbose(1);
+  numerics_set_verbose(1);
 
   info = globalFrictionContact_newFromFile(problem, f);
   globalFrictionContact_display(problem);

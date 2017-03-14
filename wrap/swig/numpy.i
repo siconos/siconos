@@ -17,7 +17,11 @@
 
 %#if defined(__GNUC__)
 %#pragma GCC diagnostic push
+%#ifdef __cplusplus
+%#pragma GCC diagnostic ignored "-Wmissing-declarations"
+%#else
 %#pragma GCC diagnostic ignored "-Wmissing-prototypes"
+%#endif
 %#endif
 
 %#if NPY_API_VERSION < 0x00000007

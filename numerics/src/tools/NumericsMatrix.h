@@ -672,6 +672,19 @@ extern "C"
    * otherwise*/
   unsigned NM_sparse_origin(NumericsMatrix* M);
 
+  /** return the number of non-zero element. For a dense matrix, it is the
+   * product of the dimensions (e.g. an upper bound). For a sparse matrix, it is the true number
+   * \param M the matrix
+   * \return the number (or an upper bound) of non-zero elements in the matrix
+   */
+  size_t NM_nnz(const NumericsMatrix* M);
+
+  /** return the sparse matrix that has the original label
+   * \param M the matrix
+   * \return the sparse matrix that is at the origin, or NULL if an error occur
+   **/
+  CSparseMatrix* NM_sparse_get_origin(const NumericsMatrix* M);
+
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif

@@ -1847,8 +1847,8 @@ class Hdf5():
         """
         Add a heightmap represented as a SiconosMatrix
         """
-        assert(heightmap.shape[0] > 2)
-        assert(heightmap.shape[1] > 2)
+        assert(heightmap.shape[0] >= 2)
+        assert(heightmap.shape[1] >= 2)
         if name not in self._ref:
             shape = self._ref.create_dataset(name, data=heightmap)
             shape.attrs['id'] = self._number_of_shapes
@@ -2287,10 +2287,11 @@ class Hdf5():
         # (2) Time discretisation --
         timedisc=TimeDiscretisation(t0, h)
 
-
+        fc_index=0
         if (friction_contact_trace == False) :
             if len(joints) > 0:
                 osnspb=GenericMechanical(SICONOS_FRICTION_3D_ONECONTACT_NSN)
+                fc_index=1
             else:
                 osnspb=FrictionContact(3, solver)
         else:
@@ -2298,22 +2299,23 @@ class Hdf5():
 
         self._contact_index_set = contact_index_set
 
-        osnspb.numericsSolverOptions().iparam[0]=itermax
+        # Global solver options
+        solverOptions = osnspb.numericsSolverOptions()
+        solverOptions.iparam[0]=itermax
         # -- full error evaluation
-        #osnspb.numericsSolverOptions().iparam[1]=Numerics.SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_FULL
+        #solverOptions.iparam[1]=Numerics.SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_FULL
         # --  Adaptive error evaluation
-        #osnspb.numericsSolverOptions().iparam[1]=Numerics.SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_ADAPTIVE
-        #osnspb.numericsSolverOptions().iparam[8]=1
+        #solverOptions.iparam[1]=Numerics.SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_ADAPTIVE
+        #solverOptions.iparam[8]=1
         # -- light error evaluation with full final
-        osnspb.numericsSolverOptions().iparam[1]= Numerics.SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT
-        osnspb.numericsSolverOptions().iparam[14]= Numerics.SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION_TRUE
+        solverOptions.iparam[1] = Numerics.SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT
+        solverOptions.iparam[14] = Numerics.SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION_TRUE
+        solverOptions.dparam[0] = tolerance
 
-        osnspb.numericsSolverOptions().internalSolvers.solverId = Numerics.SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID
-
-        osnspb.numericsSolverOptions().internalSolvers.iparam[0]=100
-        osnspb.numericsSolverOptions().dparam[0]=tolerance
-
-
+        # Friction one-contact solver options
+        fcOptions = solverOptions.internalSolvers[fc_index]
+        fcOptions.solverId = Numerics.SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID
+        fcOptions.iparam[0] = 100  # Local solver iterations
 
         osnspb.setMaxSize(30000)
         osnspb.setMStorageType(1)
@@ -2344,9 +2346,20 @@ class Hdf5():
             """)
 
         # (6) Simulation setup with (1) (2) (3) (4) (5)
-        simulation=time_stepping(timedisc)
-        simulation.insertIntegrator(self._osi)
-        simulation.insertNonSmoothProblem(osnspb)
+        if time_stepping == Kernel.TimeSteppingDirectProjection:
+            osnspb_pos=Kernel.MLCPProjectOnConstraints(Numerics.SICONOS_MLCP_ENUM, 1.0)
+            osnspb_pos.setMaxSize(30000)
+            osnspb_pos.setMStorageType(0) # "not yet implemented for sparse storage"
+            osnspb_pos.setNumericsVerboseMode(numerics_verbose)
+            osnspb_pos.setKeepLambdaAndYState(True)
+            simulation=time_stepping(timedisc, self._osi, osnspb, osnspb_pos)
+            simulation.setProjectionMaxIteration(20)
+            simulation.setConstraintTolUnilateral(1e-08);
+            simulation.setConstraintTol(1e-08);
+        else:
+            simulation=time_stepping(timedisc)
+            simulation.insertIntegrator(self._osi)
+            simulation.insertNonSmoothProblem(osnspb)
         if use_proposed:
             simulation.insertInteractionManager(self._broadphase)
 

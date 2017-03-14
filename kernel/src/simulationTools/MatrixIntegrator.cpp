@@ -54,7 +54,7 @@ MatrixIntegrator::MatrixIntegrator(const DynamicalSystem& ds, const Model& m)
 
 void MatrixIntegrator::commonInit(const DynamicalSystem& ds, const Model& m)
 {
-  _TD.reset(new TimeDiscretisation(*m.simulation()->eventsManager()->timeDiscretisation()));
+  _TD.reset(new TimeDiscretisation(m.simulation()->eventsManager()->timeDiscretisation()));
   Type::Siconos dsType = Type::value(ds);
   if (dsType == Type::FirstOrderLinearTIDS)
   {

@@ -36,7 +36,7 @@ extern "C"
 %}
 
  /* fclib_solution */
-%typemap(in) (double *v) (SN_ARRAY_TYPE* array=NULL, int is_new_object) {
+%typemap(in) (double *v) (SN_ARRAY_TYPE* array=NULL, int is_new_object = 0) {
   array = obj_to_array_allow_conversion($input, NPY_DOUBLE, &is_new_object);
   $1 = (double *) array_data(array);
  }

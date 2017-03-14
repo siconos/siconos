@@ -27,9 +27,8 @@
 #include "NonSmoothDynamicalSystem.hpp"
 
 //Default constructor
-OSNSMultipleImpact::OSNSMultipleImpact(): LinearOSNS()
+OSNSMultipleImpact::OSNSMultipleImpact(): LinearOSNS(), _typeCompLaw("BiStiffness")
 {
-  _typeCompLaw = "BiStiffness";
   _nStepSave = 100;
   _tolImpact = DEFAULT__tolImpact;
   _Tol_Vel = DEFAULT_TOL_VEL;
@@ -130,7 +129,7 @@ void OSNSMultipleImpact::SetSizeDataSave(unsigned int var)
   _sizeDataSave = var;
 }
 //---------------------------------------------------------------------------------------------------
-void OSNSMultipleImpact::WriteVectorIntoMatrix(const SiconosVector m, const unsigned int pos_row, const unsigned int pos_col)
+void OSNSMultipleImpact::WriteVectorIntoMatrix(const SiconosVector& m, const unsigned int pos_row, const unsigned int pos_col)
 {
   for (unsigned int i = 0; i < m.size(); ++i)
   {
