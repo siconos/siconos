@@ -70,16 +70,16 @@ int main(int argc, char* argv[])
     // -------------------
     SP::NonSmoothLaw nslaw1(new NewtonImpactFrictionNSL(eN, eT, mu, 2));
     SP::Relation relation1(new LagrangianScleronomousR("PendulumPlugin:g1", "PendulumPlugin:W1"));
-    SP::Interaction inter1(new Interaction(2, nslaw1, relation1, 1));
+    SP::Interaction inter1(new Interaction(nslaw1, relation1));
 
     SP::NonSmoothLaw nslaw2(new NewtonImpactFrictionNSL(eN, 0.0, 0.0, 2));
     //SP::NonSmoothLaw nslaw2(new NewtonImpactNSL(eN));
     SP::Relation relation2(new LagrangianScleronomousR("PendulumPlugin:g2", "PendulumPlugin:W2"));
-    SP::Interaction inter2(new Interaction(2, nslaw2, relation2, 2));
+    SP::Interaction inter2(new Interaction(nslaw2, relation2));
 
     SP::NonSmoothLaw nslaw3(new NewtonImpactFrictionNSL(eN, 0.0, 0.0, 2));
     SP::Relation relation3(new LagrangianScleronomousR("PendulumPlugin:g3", "PendulumPlugin:W3"));
-    SP::Interaction inter3(new Interaction(2, nslaw3, relation3, 2));
+    SP::Interaction inter3(new Interaction(nslaw3, relation3));
 
     // -------------
     // --- Model ---

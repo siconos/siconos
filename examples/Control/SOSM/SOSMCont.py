@@ -73,7 +73,7 @@ myNslaw = RelayNSL(2)
 myNslaw.display()
 
 nameInter = 'processInteraction'
-myProcessInteraction = Interaction(ninter, myNslaw,
+myProcessInteraction = Interaction(myNslaw,
         myProcessRelation)
 myNSDS = NonSmoothDynamicalSystem()
 myNSDS.insertDynamicalSystem(process)

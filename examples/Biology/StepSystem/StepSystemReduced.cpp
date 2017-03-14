@@ -75,7 +75,7 @@ int main(int argc, char *argv[])
 // unsigned int sNSLawSize = 4;
 
 //****BUILD THE INTERACTION
-  SP::Interaction aI(new Interaction(sNSLawSize,aNSL,aR));
+  SP::Interaction aI(new Interaction(aNSL,aR));
 
 //****BUILD THE SYSTEM
   SP::Model  aM(new Model(0,sTf));

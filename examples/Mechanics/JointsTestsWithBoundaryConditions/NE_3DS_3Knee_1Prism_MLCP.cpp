@@ -310,11 +310,11 @@ int main(int argc, char* argv[])
     // relation3->setJachq(H3);
     // relation4->setJachq(H4);
 
-    SP::Interaction inter1(new Interaction(KneeJointR::numberOfConstraints(), nslaw1, relation1));
-    SP::Interaction inter2(new Interaction(KneeJointR::numberOfConstraints(), nslaw2, relation2));
-    SP::Interaction inter3(new Interaction(KneeJointR::numberOfConstraints(), nslaw3, relation3));
-    SP::Interaction inter4(new Interaction(PrismaticJointR::numberOfConstraints(), nslaw4, relation4));
-    SP::Interaction interFloor(new Interaction(1, nslaw0, relation0));
+    SP::Interaction inter1(new Interaction(nslaw1, relation1));
+    SP::Interaction inter2(new Interaction(nslaw2, relation2));
+    SP::Interaction inter3(new Interaction(nslaw3, relation3));
+    SP::Interaction inter4(new Interaction(nslaw4, relation4));
+    SP::Interaction interFloor(new Interaction(nslaw0, relation0));
     // -------------
     // --- Model ---
     // -------------

@@ -69,7 +69,7 @@ int main()
 
 
   //****BUILD THE INTERACTION
-  SP::Interaction aI(new Interaction(sNSLawSize, aNSL, aR));
+  SP::Interaction aI(new Interaction(aNSL, aR));
   //****BUILD THE SYSTEM
   SP::Model  aM(new Model(0, sT));
   aM->nonSmoothDynamicalSystem()->insertDynamicalSystem(aDS);

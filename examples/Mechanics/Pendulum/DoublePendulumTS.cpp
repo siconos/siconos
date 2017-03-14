@@ -105,12 +105,12 @@ int main(int argc, char* argv[])
     string G = "DoublePendulumPlugin:G0";
     SP::NonSmoothLaw nslaw(new NewtonImpactNSL(e));
     SP::Relation relation(new LagrangianScleronomousR("DoublePendulumPlugin:h0", G));
-    SP::Interaction inter(new Interaction(1, nslaw, relation));
+    SP::Interaction inter(new Interaction(nslaw, relation));
 
     string G1 = "DoublePendulumPlugin:G1";
     SP::NonSmoothLaw nslaw1(new NewtonImpactNSL(e1));
     SP::Relation relation1(new LagrangianScleronomousR("DoublePendulumPlugin:h1", G1));
-    SP::Interaction inter1(new Interaction(1, nslaw1, relation1));
+    SP::Interaction inter1(new Interaction(nslaw1, relation1));
 
     // -------------
     // --- Model ---

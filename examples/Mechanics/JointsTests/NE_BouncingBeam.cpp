@@ -179,8 +179,8 @@ int main(int argc, char* argv[])
     axe1->setValue(2, 1);
     
     SP::NewtonEulerR relation4(new PrismaticJointR(bouncingbeam, axe1));
-    SP::Interaction inter4(new Interaction(PrismaticJointR::numberOfConstraints(), nslaw4, relation4));
-    SP::Interaction interFloor(new Interaction(1, nslaw0, relation0));
+    SP::Interaction inter4(new Interaction(nslaw4, relation4));
+    SP::Interaction interFloor(new Interaction(nslaw0, relation0));
 
     // -------------
     // --- Model ---

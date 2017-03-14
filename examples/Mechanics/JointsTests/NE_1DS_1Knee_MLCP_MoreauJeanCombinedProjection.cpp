@@ -166,7 +166,7 @@ int main(int argc, char* argv[])
     //        - a point in the spatial frame (absolute frame) where the knee is defined P
     SP::NewtonEulerR relation1(new KneeJointR(beam1, P));
 
-    SP::Interaction inter1(new Interaction(KneeJointR::numberOfConstraints(), nslaw1, relation1));
+    SP::Interaction inter1(new Interaction(nslaw1, relation1));
 
     // -------------
     // --- Model ---

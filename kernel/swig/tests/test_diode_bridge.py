@@ -44,7 +44,7 @@ def test_diode_bridge():
     diode_bridge_relation.setDPtr(D)
 
     nslaw = ComplementarityConditionNSL(4)
-    bridge_interaction = Interaction(4, nslaw, diode_bridge_relation, 1)
+    bridge_interaction = Interaction(nslaw, diode_bridge_relation)
 
     # Model
     diode_bridge = Model(t0, total_time, model_title)

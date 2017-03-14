@@ -86,7 +86,7 @@ void OSNSPTest::testAVI()
   _DS.reset(new FirstOrderLinearTIDS(_x0, _A, _b));
   _TD.reset(new TimeDiscretisation(_t0, _h));
   _model.reset(new Model(_t0, _T));
-  SP::Interaction inter(new Interaction(_n, nslaw, rel));
+  SP::Interaction inter(new Interaction(nslaw, rel));
   _osi.reset(new EulerMoreauOSI(_theta));
   _model->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DS);
   _model->nonSmoothDynamicalSystem()->topology()->setOSI(_DS, _osi);

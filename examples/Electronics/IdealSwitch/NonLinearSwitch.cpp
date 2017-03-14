@@ -94,7 +94,7 @@ int main()
   */
 
   //****BUILD THE INTERACTION
-  SP::Interaction aI(new Interaction(sNSLawSize, aNSL, aR));
+  SP::Interaction aI(new Interaction(aNSL, aR));
   //  aI->insert(LSDiodeBridge);
   //****BUILD THE SYSTEM
 

@@ -64,7 +64,7 @@ myProcessRelation = MyR.MyR(C,B)
 myNslaw = RelayNSL(2)
 myNslaw.display()
 
-myProcessInteraction = Interaction(ninter, myNslaw,
+myProcessInteraction = Interaction(myNslaw,
         myProcessRelation)
 myNSDS = NonSmoothDynamicalSystem()
 myNSDS.insertDynamicalSystem(process)

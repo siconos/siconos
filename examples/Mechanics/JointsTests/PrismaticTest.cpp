@@ -111,7 +111,7 @@ int main(int argc, char* argv[])
 
     SP::NewtonEulerR relation1(new PrismaticJointR(beam1, axe1));
     relation1->setJachq(H1);
-    SP::Interaction inter1(new Interaction(PrismaticJointR::numberOfConstraints(), nslaw1, relation1));
+    SP::Interaction inter1(new Interaction(nslaw1, relation1));
     // -------------
     // --- Model ---
     // -------------

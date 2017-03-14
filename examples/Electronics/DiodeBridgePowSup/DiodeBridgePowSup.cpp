@@ -106,7 +106,7 @@ int main(int argc, char* argv[])
 
     SP::ComplementarityConditionNSL nslaw(new ComplementarityConditionNSL(4));
 
-    SP::Interaction InterDiodeBridgePowSup(new Interaction(4, nslaw, LTIRDiodeBridgePowSup));
+    SP::Interaction InterDiodeBridgePowSup(new Interaction(nslaw, LTIRDiodeBridgePowSup));
 
     // --- Model creation ---
     SP::Model DiodeBridgePowSup(new Model(t0, T, Modeltitle));

@@ -88,7 +88,7 @@ ball.setFExtPtr(weight)
 nslaw = NewtonImpactNSL(e)
 relation = BouncingBallR(r)
 
-inter = Interaction(1, nslaw, relation)
+inter = Interaction(nslaw, relation)
 
 #
 # Model

@@ -1444,7 +1444,7 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
           _stats.interaction_warnings ++;
         }
 
-        inter.reset(new Interaction(3, nslaw, rel/*4 * i + z*/));
+        inter.reset(new Interaction(nslaw, rel/*4 * i + z*/));
         _stats.new_interactions_created ++;
       }
       else
@@ -1453,7 +1453,7 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
         {
           SP::BulletFrom1DLocalFrameR rel(
             new BulletFrom1DLocalFrameR(createSPtrbtManifoldPoint(*it->point)));
-          inter.reset(new Interaction(1, nslaw, rel /*4 * i + z*/));
+          inter.reset(new Interaction(nslaw, rel /*4 * i + z*/));
         }
       }
 

@@ -144,7 +144,7 @@ int main(int argc, char* argv[])
       // (*(bvector[i])) (1) = *b(i);
       (bvector[i])->setValue(0, (*b)(i));
       relationVector[i].reset(new LagrangianLinearTIR(Hvector[i], bvector[i]));
-      interactionVector[i].reset(new Interaction(1, nslaw, relationVector[i]));
+      interactionVector[i].reset(new Interaction(nslaw, relationVector[i]));
       RX90->nonSmoothDynamicalSystem()->link(interactionVector[i], arm);
     }
    

@@ -106,7 +106,7 @@ int main(int argc, char* argv[])
 
     SP::NonSmoothLaw nslaw(new ComplementarityConditionNSL(2));
 
-    SP::Interaction InterCollpitts(new Interaction(2, nslaw, LTIRCollpitts, 1));
+    SP::Interaction InterCollpitts(new Interaction(nslaw, LTIRCollpitts));
 
     // --- Model creation ---
     SP::Model Collpitts(new Model(t0, T, Modeltitle));

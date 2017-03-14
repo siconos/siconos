@@ -100,7 +100,7 @@ LTIRDiodeBridge = FirstOrderLinearTIR(C, B)
 LTIRDiodeBridge.setDPtr(D)
 
 nslaw = ComplementarityConditionNSL(4)
-InterDiodeBridge = Interaction(4, nslaw, LTIRDiodeBridge, 1)
+InterDiodeBridge = Interaction(nslaw, LTIRDiodeBridge)
 
 
 #

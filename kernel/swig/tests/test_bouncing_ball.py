@@ -48,7 +48,7 @@ def test_bouncing_ball1():
 
     nslaw = sk.NewtonImpactNSL(e)
     relation = sk.LagrangianLinearTIR(H)
-    inter = sk.Interaction(1, nslaw, relation)
+    inter = sk.Interaction(nslaw, relation)
 
     #
     # Model
@@ -217,8 +217,8 @@ def test_bouncing_ball2():
     relation = sk.LagrangianLinearTIR(H)
     relation_d = sk.LagrangianLinearTIR(H)
 
-    inter = sk.Interaction(1, nslaw, relation)
-    inter_d = sk.Interaction(1, nslaw_d, relation_d)
+    inter = sk.Interaction(nslaw, relation)
+    inter_d = sk.Interaction(nslaw_d, relation_d)
 
     #
     # Model

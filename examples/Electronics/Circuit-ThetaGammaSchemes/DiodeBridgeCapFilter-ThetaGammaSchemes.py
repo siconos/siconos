@@ -117,7 +117,7 @@ LTIRDiodeBridgeCapFilter = FirstOrderLinearTIR(C, B)
 LTIRDiodeBridgeCapFilter.setDPtr(D)
 
 nslaw = ComplementarityConditionNSL(4)
-InterDiodeBridgeCapFilter = Interaction(4, nslaw, LTIRDiodeBridgeCapFilter, 1)
+InterDiodeBridgeCapFilter = Interaction(nslaw, LTIRDiodeBridgeCapFilter)
 
 #
 # Model

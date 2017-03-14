@@ -230,7 +230,7 @@ int main(int argc, char* argv[])
       //
       nslaw = SP::NonSmoothLaw(new MultipleImpactNSL(ResCoef, Stiff, ElasPow));
       relation = SP::Relation(new LagrangianLinearTIR(H, E));
-      interaction = SP::Interaction(new Interaction(1, nslaw, relation));
+      interaction = SP::Interaction(new Interaction(nslaw, relation));
       if (j == 0) // for contact wall-ball
         BallChain->nonSmoothDynamicalSystem()->link(interaction, VecOfallDS[j]);
       else // For ball-ball contact

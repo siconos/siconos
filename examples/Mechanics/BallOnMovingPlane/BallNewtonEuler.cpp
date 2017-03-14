@@ -191,7 +191,7 @@ int main(int argc, char* argv[])
 
     // Version with my_NewtonEulerR()
     SP::NewtonEulerR relation0(new my_NewtonEulerR(radius));
-    SP::Interaction inter(new Interaction(nslawsize, nslaw0, relation0));
+    SP::Interaction inter(new Interaction(nslaw0, relation0));
 
     // -------------
     // --- Model ---

@@ -112,7 +112,7 @@ relation.setDPtr(M)
 
 nslaw = sk.ComplementarityConditionNSL(ninter)
 
-interaction = sk.Interaction(ninter, nslaw, relation)
+interaction = sk.Interaction(nslaw, relation)
 
 # -- The Model --
 circuit = sk.Model(t0, T, 'train')

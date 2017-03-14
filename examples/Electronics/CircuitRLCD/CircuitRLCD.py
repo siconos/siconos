@@ -88,7 +88,7 @@ LTIRCircuitRLCD = sk.FirstOrderLinearTIR(C, B)
 LTIRCircuitRLCD.setDPtr(D)
 
 nslaw = sk.ComplementarityConditionNSL(1)
-InterCircuitRLCD = sk.Interaction(1, nslaw, LTIRCircuitRLCD)
+InterCircuitRLCD = sk.Interaction(nslaw, LTIRCircuitRLCD)
 
 
 #

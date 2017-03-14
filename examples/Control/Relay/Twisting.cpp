@@ -77,7 +77,7 @@ int main(int argc, char* argv[])
     (*K)(3) = -1.0;
     SP::NonSmoothLaw nslaw(new NormalConeNSL(nslawSize, H, K));
 
-    SP::Interaction twistingInteraction(new Interaction(ninter, nslaw, twistingRelation));
+    SP::Interaction twistingInteraction(new Interaction(nslaw, twistingRelation));
 
     // -------------
     // --- Model ---
