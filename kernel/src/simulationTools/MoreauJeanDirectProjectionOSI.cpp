@@ -89,7 +89,7 @@ void MoreauJeanDirectProjectionOSI::initializeInteraction(double t0, Interaction
   }
   
   if (isInitializationNeeded)
-    inter.init();
+    inter.reset();
   MoreauJeanOSI::initializeInteraction(t0, inter, interProp, DSG);
 
   
@@ -122,15 +122,6 @@ void MoreauJeanDirectProjectionOSI::initializeDynamicalSystem(Model& m, double t
   {
     ds->initializeNonSmoothInput(k);
   }
-}
-
-
-
-void MoreauJeanDirectProjectionOSI::initialize(Model& m)
-{
-
-  MoreauJeanOSI::initialize(m);
-  
 }
 
 void MoreauJeanDirectProjectionOSI::computeFreeState()

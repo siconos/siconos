@@ -23,6 +23,9 @@
 #include "SimulationGraphs.hpp"
 
 #include <iostream>
+#define DEBUG_STDOUT
+#define DEBUG_MESSAGES
+#include "debug.h"
 
 using namespace RELATION;
 
@@ -95,11 +98,17 @@ void LagrangianLinearTIR::computeOutput(double time, Interaction& inter, Interac
 
 void LagrangianLinearTIR::computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level)
 {
+  
   // get lambda of the concerned interaction
   SiconosVector& lambda = *inter.lambda(level);
   VectorOfBlockVectors& DSlink = *interProp.DSlink;
   // computation of p = Ht lambda
+  DEBUG_BEGIN("LTIR::computeInp()\n");
+  DSlink[LagrangianR::p0 + level]->display();
+  std::cout << level << std::endl;
   prod(lambda, *_jachq, *DSlink[LagrangianR::p0 + level], false);
+  DSlink[LagrangianR::p0 + level]->display();
+  DEBUG_BEGIN("LTIR END ()\n");
 }
 
 void LagrangianLinearTIR::display() const

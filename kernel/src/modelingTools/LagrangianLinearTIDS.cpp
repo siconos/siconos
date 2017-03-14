@@ -134,7 +134,7 @@ void LagrangianLinearTIDS::display() const
 void LagrangianLinearTIDS::computeForces(double time, SP::SiconosVector q2, SP::SiconosVector v2)
 {
   DEBUG_PRINT("LagrangianLinearTIDS::computeForces(double time, SP::SiconosVector q2, SP::SiconosVector v2) \n");
-  // Warning: an operator (fInt ...) may be set (ie allocated and not NULL) but not plugged, that's why two steps are required here.
+
   if (!_forces)
   {
     _forces.reset(new SiconosVector(_ndof));

@@ -278,7 +278,10 @@ public:
       invariant systems, we compute time invariant operator (example :
       W)
    */
-  virtual void initialize(Model& m);
+  //virtual void initialize(Model& m);
+
+  
+  virtual void initialize_nonsmooth_problems();
 
   /** initialization of the work vectors and matrices (properties) related to 
    *  one dynamical system on the graph and needed by the osi 

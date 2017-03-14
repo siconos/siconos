@@ -127,6 +127,7 @@ int main(int argc, char* argv[])
     cout << "====> Initialisation ..." << endl;
     //bouncingBall->nonSmoothDynamicalSystem()->topology()->setOSI(ball, OSI);
     bouncingBall->initialize();
+    cout << "====> Initialisation END ..." << endl;
 
     // -- set the integrator for the ball --
 

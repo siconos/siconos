@@ -56,7 +56,6 @@ int LCP::compute(double time)
   DEBUG_PRINTF("_indexSetLevel = %i\n", _indexSetLevel);
   DEBUG_EXPR(display(););
 
-
   if (_sizeOutput != 0)
   {
 

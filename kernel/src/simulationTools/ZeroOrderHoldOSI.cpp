@@ -63,7 +63,7 @@ void ZeroOrderHoldOSI::initializeDynamicalSystem(Model& m, double t, SP::Dynamic
   const DynamicalSystemsGraph::VDescriptor& dsv = _dynamicalSystemsGraph->descriptor(ds);
   Type::Siconos dsType = Type::value(*ds);
   // Initialize memory buffers
-  _dynamicalSystemsGraph->bundle(dsv)->initMemory(getSizeMem());
+  //_dynamicalSystemsGraph->bundle(dsv)->initMemory(getSizeMem());
 
   if((dsType != Type::FirstOrderLinearDS) && (dsType != Type::FirstOrderLinearTIDS))
     RuntimeException::selfThrow("ZeroOrderHoldOSI::initialize - the DynamicalSystem does not have the right type");
@@ -110,7 +110,7 @@ void ZeroOrderHoldOSI::initializeDynamicalSystem(Model& m, double t, SP::Dynamic
       if(indxIter == 0)
       {
         indxIter++;
-        if(!relR.isJacLgPlugged())
+        if(!relR.getPluginJacLg()->isPlugged())
         {
           DSG0.Bd[dsgVD].reset(new MatrixIntegrator(*ds, m, relR.B()));
           if(DSG0.Bd.at(dsgVD)->isConst())
@@ -166,7 +166,7 @@ void ZeroOrderHoldOSI::initializeInteraction(double t0, Interaction &inter,
     isInitializationNeeded = true;
   }
   if (isInitializationNeeded)
-    inter.init();
+    inter.reset();
 
   bool computeResidu = relation.requireResidu();
   inter.initializeMemory(computeResidu,_steps);
@@ -204,18 +204,21 @@ void ZeroOrderHoldOSI::initializeInteraction(double t0, Interaction &inter,
 
 }
 
-void ZeroOrderHoldOSI::initialize(Model& m)
-{
-  OneStepIntegrator::initialize(m);
-  DynamicalSystemsGraph::VIterator dsi, dsend;
+// void ZeroOrderHoldOSI::initialize(Model& m)
+// {
+//   OneStepIntegrator::initialize(m);
+//   DynamicalSystemsGraph::VIterator dsi, dsend;
 
-  for(std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
-  {
-    if(!checkOSI(dsi)) continue;
-    SP::DynamicalSystem  ds = _dynamicalSystemsGraph->bundle(*dsi);
-    initializeDynamicalSystem(m,m.t0(),ds);
-  }
-}
+//   for(std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
+//   {
+//     if(!checkOSI(dsi)) continue;
+//     SP::DynamicalSystem  ds = _dynamicalSystemsGraph->bundle(*dsi);
+//     initializeDynamicalSystem(m,m.t0(),ds);
+//   }
+
+//   // Note FP : NO Call to InitializeInteractions???
+  
+// }
 
 double ZeroOrderHoldOSI::computeResidu()
 {

@@ -78,19 +78,19 @@ Topology::~Topology()
 }
 
 std::pair<DynamicalSystemsGraph::EDescriptor, InteractionsGraph::VDescriptor>
-Topology::addInteractionInIndexSet0(SP::Interaction inter, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2)
+Topology::__addInteractionInIndexSet0(SP::Interaction inter, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2)
 {
   // !! Private function !!
+  // 
+  // This function must
+  // - insert interaction and ds into IG/DSG
+  // - update graph properties related to modeling (DSlink ...)
   //
-  // Add inter and ds into IG/DSG
+  // Expected result : all interaction methods can be safely called after a call
+  // to this function (whatever the simulation is, if it exists or not).
 
-  // Compute number of constraints
-  unsigned int nsLawSize = inter->nonSmoothLaw()->size();
-  unsigned int m = inter->getSizeOfY() / nsLawSize;
-  if (m > 1)
-    RuntimeException::selfThrow("Topology::addInteractionInIndexSet0 - m > 1. Obsolete !");
-
-  _numberOfConstraints += nsLawSize;
+  // Update total number of constraints
+  _numberOfConstraints += inter->nonSmoothLaw()->size();
 
   SP::DynamicalSystem ds2_ = ds2;
   // _DSG is the hyper forest : (vertices : dynamical systems, edges :
@@ -105,32 +105,33 @@ Topology::addInteractionInIndexSet0(SP::Interaction inter, SP::DynamicalSystem d
   DynamicalSystemsGraph::VDescriptor dsgv1, dsgv2;
   dsgv1 = _DSG[0]->add_vertex(ds1);
 
-  SP::VectorOfVectors workVds1 = _DSG[0]->properties(dsgv1).workVectors;
-
-  SP::VectorOfVectors workVds2;
-  if (!workVds1)
-  {
-    // V.A. 210/06/2017 Could we defer  this initialization ?
-    workVds1.reset(new VectorOfVectors());
-    _DSG[0]->properties(dsgv1).workMatrices.reset(new VectorOfMatrices());
-  }
+  // SP::VectorOfVectors workVds1 = _DSG[0]->properties(dsgv1).workVectors;
+  // // Note FP: all the work below must have been done during insertDynamicalSystem
+  // or even later, during simulation init
+  // SP::VectorOfVectors workVds2;
+  // if (!workVds1)
+  //   {
+  //   // V.A. 210/06/2017 Could we defer  this initialization ?
+  //     workVds1.reset(new VectorOfVectors());
+  //   _DSG[0]->properties(dsgv1).workMatrices.reset(new VectorOfMatrices());
+  //   }
   if(ds2)
-  {
-    dsgv2 = _DSG[0]->add_vertex(ds2);
-    workVds2 = _DSG[0]->properties(dsgv2).workVectors;
-    if (!workVds2)
     {
-      // V.A. 210/06/2017 Could we defer  this initialization ?
-      workVds2.reset(new VectorOfVectors());
-      _DSG[0]->properties(dsgv2).workMatrices.reset(new VectorOfMatrices());
+      dsgv2 = _DSG[0]->add_vertex(ds2);
+      // workVds2 = _DSG[0]->properties(dsgv2).workVectors;
+      // if (!workVds2)
+      // 	{
+      // 	  // V.A. 210/06/2017 Could we defer  this initialization ?
+      // 	  workVds2.reset(new VectorOfVectors());
+      // 	  _DSG[0]->properties(dsgv2).workMatrices.reset(new VectorOfMatrices());
+      // 	}
     }
-  }
   else
-  {
-    dsgv2 = dsgv1;
-    ds2_ = ds1;
-    workVds2 = workVds1;
-  }
+    {
+      dsgv2 = dsgv1;
+      ds2_ = ds1;
+      //workVds2 = workVds1;
+    }
   // this may be a multi edges graph
   assert(!_DSG[0]->is_edge(dsgv1, dsgv2, inter));
   assert(!_IG[0]->is_vertex(inter));
@@ -138,17 +139,22 @@ Topology::addInteractionInIndexSet0(SP::Interaction inter, SP::DynamicalSystem d
   DynamicalSystemsGraph::EDescriptor new_ed;
   std11::tie(new_ed, ig_new_ve) = _DSG[0]->add_edge(dsgv1, dsgv2, inter, *_IG[0]);
   InteractionProperties& interProp = _IG[0]->properties(ig_new_ve);
+  inter->initialize_ds_links(interProp, *ds1, *ds2_);
+
 
   // V.A. 210/06/2017 Could we defer  this initialization ?
-  interProp.DSlink.reset(new VectorOfBlockVectors);
-  interProp.workVectors.reset(new VectorOfVectors);
+  // F.P. No! DSlink must be uptodate as soon as the
+  // interaction is connected to ds, to ensure computeInput/computeOutput
+  // run properly.
+  // But yes for workVectors and Matrices that are buffers
+  // related to simulation objects.
+  //interProp.DSlink.reset(new VectorOfBlockVectors);
+  
+  // interProp.workVectors.reset(new VectorOfVectors);
   interProp.workMatrices.reset(new VectorOfSMatrices);
 
-
-  unsigned int nslawSize = inter->nonSmoothLaw()->size();
-  interProp.block.reset(new SimpleMatrix(nslawSize, nslawSize));
-  inter->setDSLinkAndWorkspace(interProp, *ds1, *workVds1, *ds2_, *workVds2);
-
+  // unsigned int nslawSize = inter->nonSmoothLaw()->size();
+  // interProp.block.reset(new SimpleMatrix(nslawSize, nslawSize));
 
   // add self branches in vertex properties
   // note : boost graph SEGFAULT on self branch removal
@@ -171,6 +177,10 @@ Topology::addInteractionInIndexSet0(SP::Interaction inter, SP::DynamicalSystem d
   assert(_IG[0]->is_vertex(inter));
   assert(_DSG[0]->is_edge(dsgv1, dsgv2, inter));
   assert(_DSG[0]->edges_number() == _IG[0]->size());
+
+
+
+  
   return std::pair<DynamicalSystemsGraph::EDescriptor, InteractionsGraph::VDescriptor>(new_ed, ig_new_ve);
 }
 
@@ -215,7 +225,7 @@ struct VertexIsRemoved
 
 /* remove an interaction : remove edges (Interaction) from _DSG if
    corresponding vertices are removed from _IG */
-void Topology::removeInteractionFromIndexSet(SP::Interaction inter)
+void Topology::__removeInteractionFromIndexSet(SP::Interaction inter)
 {
 
   SP::DynamicalSystem ds1 = _IG[0]->properties(_IG[0]->descriptor(inter)).source;
@@ -229,8 +239,8 @@ void Topology::removeInteractionFromIndexSet(SP::Interaction inter)
 void Topology::insertDynamicalSystem(SP::DynamicalSystem ds)
 {
   DynamicalSystemsGraph::VDescriptor dsgv = _DSG[0]->add_vertex(ds);
-  _DSG[0]->properties(dsgv).workVectors.reset(new VectorOfVectors());
-  _DSG[0]->properties(dsgv).workMatrices.reset(new VectorOfMatrices());
+  // _DSG[0]->properties(dsgv).workVectors.reset(new VectorOfVectors());
+  // _DSG[0]->properties(dsgv).workMatrices.reset(new VectorOfMatrices());
 }
 
 void Topology::setName(SP::DynamicalSystem ds, const std::string& name)
@@ -310,7 +320,7 @@ void Topology::removeInteraction(SP::Interaction inter)
   DEBUG_PRINTF("removeInteraction : %p\n", &*inter);
 
   assert(_DSG[0]->edges_number() == _IG[0]->size());
-  removeInteractionFromIndexSet(inter);
+  __removeInteractionFromIndexSet(inter);
   assert(_DSG[0]->edges_number() == _IG[0]->size());
 }
 
@@ -320,29 +330,23 @@ Topology::link(SP::Interaction inter, SP::DynamicalSystem ds, SP::DynamicalSyste
 {
   DEBUG_PRINTF("Topology::link : inter %p, ds1 %p, ds2 %p\n", &*inter, &*ds,
                &*ds2);
+
+  // If the interaction is already in the graph remove it
   if (indexSet0()->is_vertex(inter))
   {
-    removeInteractionFromIndexSet(inter);
+    __removeInteractionFromIndexSet(inter);
   }
 
-  unsigned int sumOfDSSizes = 0, sumOfZSizes = 0;
-
+  // Compute interaction dimension (sum of involved dynamical systems sizes)
+  unsigned int sumOfDSSizes = 0;
   sumOfDSSizes += ds->dimension();
-  if(ds->z())
-    sumOfZSizes += ds->z()->size();
-
-  if(ds2)
-  {
+  if(ds2){
     sumOfDSSizes += ds2->dimension();
-    if(ds->z())
-      sumOfZSizes += ds2->z()->size();
     inter->setHas2Bodies(true);
   }
-  DEBUG_PRINTF("sumOfDSSizes = %i\t, sumOfZSizes = %i\n ", sumOfDSSizes, sumOfZSizes);
+  inter->setDSSizes(sumOfDSSizes);
 
-  inter->setDSSizes(sumOfDSSizes, sumOfZSizes);
-
-  return addInteractionInIndexSet0(inter, ds, ds2);
+  return __addInteractionInIndexSet0(inter, ds, ds2);
 }
 
 bool Topology::hasInteraction(SP::Interaction inter) const

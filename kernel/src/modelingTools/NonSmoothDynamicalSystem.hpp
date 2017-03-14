@@ -108,7 +108,7 @@ public:
     return _topology->dSG(0);
   }
 
-  /** add a dynamical system
+  /** add a dynamical system into the DS graph (as a vertex)
    * \param ds a pointer to the system to add
    */
   inline void insertDynamicalSystem(SP::DynamicalSystem ds)

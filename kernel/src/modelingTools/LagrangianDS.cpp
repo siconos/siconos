@@ -415,10 +415,8 @@ void LagrangianDS::computeJacobianFGyrqDot(SP::SiconosVector position, SP::Sicon
 
 void LagrangianDS::computeRhs(double time, bool isDSup)
 {
-  DEBUG_PRINT("LagDS computeRhs \n");
-
   // if isDSup == true, this means that there is no need to re-compute mass ...
-  
+  DEBUG_BEGIN("LagrangianDS::computeRhs()\n");
   *_q[2] = *(_p[2]); // Warning: r/p update is done in Interactions/Relations
 
   if(_forces)
@@ -477,30 +475,28 @@ void LagrangianDS::computeJacobianRhsx(double time, bool isDSup)
   }
 }
 
-void LagrangianDS::computeForces(double time)
-{
-  DEBUG_PRINT("CF LagDS vtime = \n");
+// void LagrangianDS::computeForces(double time)
+// {
+//   DEBUG_PRINT("CF LagDS vtime = \n");
 
-  computeForces(time, _q[0], _q[1]);
-  DEBUG_PRINT("END CF LagDS vtime = \n");
-}
+//   computeForces(time, _q[0], _q[1]);
+//   DEBUG_PRINT("END CF LagDS vtime = \n");
+// }
 
 void LagrangianDS::computeForces(double time, SP::SiconosVector position, SP::SiconosVector velocity)
 {
-  DEBUG_PRINT("CF LagDS vfull \n");
-
-  // Warning: an operator (fInt ...) may be set (ie allocated and not NULL) but not plugged, that's why two steps are required here.
   if (!_forces)
   {
     _forces.reset(new SiconosVector(_ndof));
   }
   else
     _forces->zero();
+
   // 1 - Computes the required function
   computeFInt(time, position, velocity);
   computeFExt(time);
   computeFGyr(position, velocity);
-
+  
   // seems ok.
   // if (_forces.use_count() == 1)
   // {
@@ -508,16 +504,15 @@ void LagrangianDS::computeForces(double time, SP::SiconosVector position, SP::Si
   //   // either fInt, FGyr OR fExt.
   //_forces->zero();
 
-    if (_fInt)
-      *_forces -= *_fInt;
-
-    if (_fExt)
-      *_forces += *_fExt;
-
-    if (_fGyr)
-      *_forces -= *_fGyr;
+  if (_fInt)
+    *_forces -= *_fInt;
+  
+  if (_fExt)
+    *_forces += *_fExt;
+  
+  if (_fGyr)
+    *_forces -= *_fGyr;
   // }
-  DEBUG_PRINT("END CF LagDS vfull \n");
 }
 
 void LagrangianDS::computeJacobianqForces(double time)
@@ -599,7 +594,7 @@ void LagrangianDS::display() const
 // --- Functions for memory handling ---
 void LagrangianDS::initMemory(unsigned int steps)
 {
-  DEBUG_PRINTF("LagrangianDS::initMemory(unsigned int steps) with steps = %i", steps);
+  DEBUG_PRINTF("LagrangianDS::initMemory(unsigned int steps) with steps = %i\n", steps);
   if (steps == 0)
     std::cout << "Warning : LagragianDS::initMemory with size equal to zero" <<std::endl;
   else
@@ -663,10 +658,13 @@ void LagrangianDS::computePostImpactVelocity()
 {
   // When this function is call, q[1] is supposed to be pre-impact velocity.
   // We solve M(v+ - v-) = p - The result is saved in(place of) p[1].
+  DEBUG_BEGIN("LagrangianDS::computePostImpactV()\n");
   SiconosVector tmp(*_p[1]);
   if(_inverseMass)
     _inverseMass->PLUForwardBackwardInPlace(tmp);
   *_q[1] += tmp;  // v+ = v- + p
+  DEBUG_BEGIN("LagrangianDS::computePostImpactV() END \n");
+ 
 }
 
 void LagrangianDS::setComputeFGyrFunction(const std::string& pluginPath, const std::string&  functionName)

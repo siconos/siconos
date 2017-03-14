@@ -405,14 +405,14 @@ void BulletSpaceFilter::buildInteractions(double time)
               bool flip = !dsa && dsb;
               SP::BulletR rel(new BulletR(*cpoint, flip));
               rel->setContactPoint(cpoint);
-              inter.reset(new Interaction(3, nslaw, rel, 4 * i + z));
+              inter.reset(new Interaction(3, nslaw, rel));//, 4 * i + z));
             }
             else
             {
               if (nslaw->size() == 1)
               {
               SP::BulletFrom1DLocalFrameR rel(new BulletFrom1DLocalFrameR(cpoint));
-              inter.reset(new Interaction(1, nslaw, rel, 4 * i + z));
+              inter.reset(new Interaction(1, nslaw, rel));//, 4 * i + z));
               }
             }
 

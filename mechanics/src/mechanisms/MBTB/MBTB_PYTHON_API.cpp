@@ -451,7 +451,7 @@ void MBTB_ContactBuild(unsigned int numContact, const std::string& ContactName,
   {
     sContacts[numContact]->_et=et;
     SP::NonSmoothLaw nslaw0(new NewtonImpactFrictionNSL(en,et,mu,3));
-    sInterContacts[numContact].reset(new Interaction(3,nslaw0,sContacts[numContact]->relation(),numContact));
+    sInterContacts[numContact].reset(new Interaction(3,nslaw0,sContacts[numContact]->relation()));
     // MB : contactName is already in MBTB_Contact!
     // sInterContacts[numContact]->setId(ContactName);
   }
@@ -459,7 +459,7 @@ void MBTB_ContactBuild(unsigned int numContact, const std::string& ContactName,
   {
     SP::NewtonImpactNSL lNSL(new NewtonImpactNSL(sContacts[numContact]->_en));
     sInterContacts[numContact].reset(new Interaction(1,lNSL,
-                                                     sContacts[numContact]->relation(),numContact));
+                                                     sContacts[numContact]->relation()));
 //    sInterContacts[numContact]->setId(ContactName);
   }
 

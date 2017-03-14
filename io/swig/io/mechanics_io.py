@@ -1226,7 +1226,7 @@ class Hdf5():
                         nsds.topology().initDS(self._model,
                             self._model.simulation().nextTime(),
                             body, self._osi)
-                        body.initialize(self._model.simulation().nextTime())
+                        #body.initialize(self._model.simulation().nextTime())
                         self._model.simulation().initialize(
                             self._model, False)
                     elif use_original:

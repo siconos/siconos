@@ -240,15 +240,19 @@ public:
   /** initialise the integrator
    * \param m a Model
    */
-  virtual void initialize(Model& m ) = 0;
+  virtual void initialize(Model& m ); //= 0;
 
+  /** Initialization process of the nonsmooth problems
+   linked to this OSI*/
+  virtual void initialize_nonsmooth_problems(){};
+  
   /** initialization of the work vectors and matrices (properties) related to
    *  one dynamical system on the graph and needed by the osi
    * \param m the Model
    * \param t time of initialization
    * \param ds the dynamical system
    */
-  virtual void initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds) =0 ;
+  virtual void initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds) = 0 ;
 
   /** initialization of the work vectors and matrices (properties) related to
    *  one interaction on the graph and needed by the osi

@@ -399,9 +399,9 @@ void NewMarkAlphaOSI::initializeDynamicalSystem(Model& m, double t, SP::Dynamica
   VectorOfVectors& workVectors = *_dynamicalSystemsGraph->properties(dsv).workVectors;
   VectorOfMatrices& workMatrices = *_dynamicalSystemsGraph->properties(dsv).workMatrices;
   // Initialize memory buffers
-  _dynamicalSystemsGraph->bundle(dsv)->initMemory(getSizeMem());
-  // Force dynamical system to its initial state
-  _dynamicalSystemsGraph->bundle(dsv)->resetToInitialState();
+  // _dynamicalSystemsGraph->bundle(dsv)->initMemory(getSizeMem());
+  // // Force dynamical system to its initial state
+  // _dynamicalSystemsGraph->bundle(dsv)->resetToInitialState();
   // Check dynamical system type
   Type::Siconos dsType = Type::value(*ds);
   assert(dsType == Type::LagrangianLinearTIDS || dsType == Type::LagrangianDS);
@@ -461,7 +461,7 @@ void NewMarkAlphaOSI::initializeInteraction(double t0, Interaction &inter,
   // VectorOfSMatrices& workMInter = *interProp.workMatrices;
 
   Relation &relation =  *inter.relation();
-  NonSmoothLaw & nslaw = *inter.nslaw();
+  NonSmoothLaw & nslaw = *inter.nonSmoothLaw();
   RELATION::TYPES relationType = relation.getType();
   Type::Siconos nslType = Type::value(nslaw);
 
@@ -505,7 +505,7 @@ void NewMarkAlphaOSI::initializeInteraction(double t0, Interaction &inter,
   }
 
   if (isInitializationNeeded)
-    inter.init();
+    inter.reset();
 
   bool computeResidu = relation.requireResidu();
   inter.initializeMemory(computeResidu,_steps);
@@ -551,30 +551,30 @@ void NewMarkAlphaOSI::initializeInteraction(double t0, Interaction &inter,
 }
 
 
-//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-void NewMarkAlphaOSI::initialize(Model& m)
-{
-  // Initialize OneStepIntegrator
-  OneStepIntegrator::initialize(m);
-  // Initialize W, acceleration-like for all ds
-  DynamicalSystemsGraph::VIterator dsi, dsend;
-  for(std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
-  {
-    if(!checkOSI(dsi)) continue;
-    SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
-    initializeDynamicalSystem(m, m.t0(), ds);
-  }
+// //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+// void NewMarkAlphaOSI::initialize(Model& m)
+// {
+//   // Initialize OneStepIntegrator
+//   OneStepIntegrator::initialize(m);
+//   // Initialize W, acceleration-like for all ds
+//   DynamicalSystemsGraph::VIterator dsi, dsend;
+//   for(std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
+//   {
+//     if(!checkOSI(dsi)) continue;
+//     SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
+//     initializeDynamicalSystem(m, m.t0(), ds);
+//   }
 
-  SP::InteractionsGraph indexSet0 = m.nonSmoothDynamicalSystem()->topology()->indexSet0();
-  InteractionsGraph::VIterator ui, uiend;
-  for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
-  {
-    Interaction& inter = *indexSet0->bundle(*ui);
-    initializeInteraction(m.t0(), inter, indexSet0->properties(*ui), *_dynamicalSystemsGraph);
-  }
+//   SP::InteractionsGraph indexSet0 = m.nonSmoothDynamicalSystem()->topology()->indexSet0();
+//   InteractionsGraph::VIterator ui, uiend;
+//   for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+//   {
+//     Interaction& inter = *indexSet0->bundle(*ui);
+//     initializeInteraction(m.t0(), inter, indexSet0->properties(*ui), *_dynamicalSystemsGraph);
+//   }
 
 
-}
+// }
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 void NewMarkAlphaOSI::prepareNewtonIteration(double time)

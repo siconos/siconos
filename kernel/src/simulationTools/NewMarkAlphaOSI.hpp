@@ -222,7 +222,7 @@ public:
                                  OneStepNSProblem* osnsp);
 
   /** initialize */
-  void initialize(Model& m);
+  //  void initialize(Model& m);
 
   /** initialization of the work vectors and matrices (properties) related to
    *  one dynamical system on the graph and needed by the osi

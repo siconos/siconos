@@ -60,7 +60,7 @@ void MoreauJeanCombinedProjectionOSI::initializeInteraction(double t0, Interacti
   }
 
   if (isInitializationNeeded)
-    inter.init();
+    inter.reset();
 
   MoreauJeanOSI::initializeInteraction(t0, inter, interProp, DSG);
 
@@ -96,15 +96,6 @@ void MoreauJeanCombinedProjectionOSI::initializeDynamicalSystem(Model& m, double
   
   DEBUG_END("MoreauJeanCombinedProjectionOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds) \n");
 }
-
-void MoreauJeanCombinedProjectionOSI::initialize(Model& m)
-{
-  MoreauJeanOSI::initialize(m);
-}
-
-
-
-
 
 bool MoreauJeanCombinedProjectionOSI::addInteractionInIndexSet(SP::Interaction inter, unsigned int i)
 {

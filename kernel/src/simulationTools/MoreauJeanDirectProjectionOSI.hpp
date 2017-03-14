@@ -129,12 +129,6 @@ public:
     _activateYVelThreshold = newValue;
   };
 
-  /** initialization of the integrator; for linear time
-      invariant systems, we compute time invariant operator (example :
-      W)
-  */
-  void initialize(Model& m);
-  
   /** initialization of the work vectors and matrices (properties) related to
    *  one dynamical system on the graph and needed by the osi
    * \param m the Model

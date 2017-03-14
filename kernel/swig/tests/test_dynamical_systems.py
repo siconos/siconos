@@ -5,10 +5,48 @@ import os
 import siconos.kernel as sk
 import numpy as np
 
-# List of all existing DS classes
-ds_classes = [sk.FirstOrderNonLinearDS, sk.FirstOrderLinearDS,
-              sk.FirstOrderLinearTIDS,
-              sk.LagrangianDS, sk.LagrangianLinearTIDS, sk.NewtonEulerDS]
+ndof = 3
+nn = 2 * ndof
+x0 = np.zeros(nn, dtype=np.float64)
+q0 = np.zeros(ndof, dtype=np.float64)
+v0 = np.zeros(ndof, dtype=np.float64)
+q_ne = np.zeros(nn + 1, dtype=np.float64)
+inertia = np.eye(ndof, dtype=np.float64)
+a_mat = np.asarray(np.random.random((nn, nn)), dtype=np.float64)
+
+# List of all existing DS classes and standard initialisation paramaters
+ds_classes = {
+    sk.FirstOrderNonLinearDS: (x0,),
+    sk.FirstOrderLinearDS: (x0, a_mat),
+    sk.FirstOrderLinearTIDS: (x0, a_mat),
+    sk.LagrangianDS: (q0, v0, inertia),
+    sk.LagrangianLinearTIDS: (q0, v0, inertia),
+    sk.NewtonEulerDS: (q_ne, x0, 1., inertia)}
+
+
+def test_ds_interface():
+    """Tests methods that should be available
+    for all dynamical systems
+    """
+    time = 1.
+
+    for args in ds_classes:
+        class_name = args
+        attr = ds_classes[args]
+        ds = class_name(*attr)
+        print class_name, attr[0]
+        ds.initializeNonSmoothInput(1)
+        ds.resetAllNonSmoothPart()
+        ds.resetNonSmoothPart(1)
+        ds.initRhs(time)
+        ds.computeRhs(time)
+        assert ds.number() >= 0
+        assert ds.rhs() is not None
+        ds.update(time)
+        ds.resetToInitialState()
+        ds.display()
+        ds.computeJacobianRhsx(time)
+        assert ds.jacobianRhsx() is not None
 
 
 def test_first_order_nlds():
@@ -76,18 +114,15 @@ def test_first_order_ltids():
     """Build and test first order linear
     and time-invariant coeff. ds
     """
-    ndof = 3
-    x0 = np.zeros(ndof, dtype=np.float64)
     time = 1.2
     ds_list = []
-    a_mat = np.random.random((ndof, ndof))
-    b_vec = np.random.random((ndof, ))
+    b_vec = np.random.random((nn, ))
     ds_list.append(sk.FirstOrderLinearTIDS(x0, a_mat))
     ds_list.append(sk.FirstOrderLinearTIDS(x0, a_mat, b_vec))
 
     for ds in ds_list:
         assert ds.isLinear()
-        assert ds.dimension() == ndof
+        assert ds.dimension() == nn
         assert np.allclose(ds.x0(), x0)
         assert np.allclose(ds.x(), x0)
         assert np.allclose(ds.r(), 0.)
@@ -104,9 +139,6 @@ def test_first_order_ltids():
 def test_lagrangian_ds():
     """Build and test lagrangian ds
     """
-    ndof = 3
-    q0 = np.zeros(ndof, dtype=np.float64)
-    v0 = np.zeros_like(q0)
     q0[...] = [1, 2, 3]
     v0[...] = [4, 5, 6]
 
@@ -121,9 +153,6 @@ def test_lagrangian_ds():
 def test_lagrangian_tids():
     """Build and test lagrangian linear and time-invariant ds
     """
-    ndof = 3
-    q0 = np.zeros(ndof, dtype=np.float64)
-    v0 = np.zeros_like(q0)
     q0[...] = [1, 2, 3]
     v0[...] = [4, 5, 6]
 

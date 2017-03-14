@@ -144,7 +144,7 @@ void CommonSMC::initialize(const Model& m)
   if (!_nsLawSMC)  _nsLawSMC.reset(new RelayNSL(sDim, -_alpha, _alpha));
   if (!_OSNSPB_SMC) _OSNSPB_SMC.reset(new Relay(_numericsSolverId));
 
-  _interactionSMC.reset(new Interaction(sDim, _nsLawSMC, _relationSMC));
+  _interactionSMC.reset(new Interaction(_nsLawSMC, _relationSMC));
 
   if (dsType == Type::FirstOrderNonLinearDS)
   {

@@ -407,7 +407,7 @@ public:
   /** function to compute \f$F(v,q,t,z)\f$ for the current state
    *  \param time the current time
    */
-  virtual void computeForces(double time);
+  //virtual void computeForces(double time);
   
   /** Compute \f$F(v,q,t,z)\f$
    *  \param time the current time

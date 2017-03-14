@@ -236,7 +236,7 @@ public:
       invariant systems, we compute time invariant operator (example :
       W)
    */
-  void initialize(Model& m);
+  //void initialize(Model& m);
 
   /** initialization of the work vectors and matrices (properties) related to
    *  one dynamical system on the graph and needed by the osi

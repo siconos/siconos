@@ -102,13 +102,12 @@ private:
   \return a vertex descriptor of the new vertex in IndexSet0
   */
   std::pair<DynamicalSystemsGraph::EDescriptor, InteractionsGraph::VDescriptor>
-  addInteractionInIndexSet0(SP::Interaction inter, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2 = SP::DynamicalSystem());
+  __addInteractionInIndexSet0(SP::Interaction inter, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2 = SP::DynamicalSystem());
 
-  /** remove the Interactions of the interactions from _IG and
-   * _DSG
-   * \param inter the Interaction to remove
+  /** remove an Interaction from _IG and _DSG
+   * \param inter a pointer to the Interaction to be removed
    */
-  void removeInteractionFromIndexSet(SP::Interaction inter);
+  void __removeInteractionFromIndexSet(SP::Interaction inter);
 
 public:
 

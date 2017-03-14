@@ -479,10 +479,10 @@ void Hem5OSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem 
   // Get work buffers from the graph
   const DynamicalSystemsGraph::VDescriptor& dsv = _dynamicalSystemsGraph->descriptor(ds);
   VectorOfVectors& workVectors = *_dynamicalSystemsGraph->properties(dsv).workVectors;
-  // Initialize memory buffers
-  _dynamicalSystemsGraph->bundle(dsv)->initMemory(getSizeMem());
-  // Force dynamical system to its initial state
-  _dynamicalSystemsGraph->bundle(dsv)->resetToInitialState();
+  // // Initialize memory buffers
+  // _dynamicalSystemsGraph->bundle(dsv)->initMemory(getSizeMem());
+  // // Force dynamical system to its initial state
+  // _dynamicalSystemsGraph->bundle(dsv)->resetToInitialState();
   Type::Siconos dsType = Type::value(*ds);
 
   if(dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
@@ -521,7 +521,7 @@ void Hem5OSI::initializeInteraction(double t0, Interaction &inter,
   // VectorOfSMatrices& workMInter = *interProp.workMatrices;
 
   Relation &relation =  *inter.relation();
-  NonSmoothLaw & nslaw = *inter.nslaw();
+  NonSmoothLaw & nslaw = *inter.nonSmoothLaw();
   RELATION::TYPES relationType = relation.getType();
   Type::Siconos nslType = Type::value(nslaw);
 
@@ -566,7 +566,7 @@ void Hem5OSI::initializeInteraction(double t0, Interaction &inter,
   }
 
   if (isInitializationNeeded)
-    inter.init();
+    inter.reset();
 
   bool computeResidu = relation.requireResidu();
   inter.initializeMemory(computeResidu,_steps);
@@ -617,31 +617,31 @@ void Hem5OSI::initialize(Model& m)
 
   DEBUG_PRINT("Hem5OSI::initialize(Model& m)\n");
 
-  OneStepIntegrator::initialize(m);
   _qWork.reset(new BlockVector());
   _vWork.reset(new BlockVector());
   _aWork.reset(new BlockVector());
   _uWork.reset(new BlockVector());
   _lambdaWork.reset(new BlockVector());
   _forcesWork.reset(new BlockVector());
+  OneStepIntegrator::initialize(m);
 
-  // initialize xxxWork with xxx values of the dynamical systems present in the set.
-  SP::DynamicalSystemsGraph dsGraph = _dynamicalSystemsGraph;
+  // // initialize xxxWork with xxx values of the dynamical systems present in the set.
+  // SP::DynamicalSystemsGraph dsGraph = _dynamicalSystemsGraph;
 
-  for(DynamicalSystemsGraph::VIterator vi = dsGraph->begin(); vi != dsGraph->end(); ++vi)
-  {
-    SP::DynamicalSystem ds = dsGraph->bundle(*vi);
-    initializeDynamicalSystem(m,  m.t0(),  ds);
-  }
+  // for(DynamicalSystemsGraph::VIterator vi = dsGraph->begin(); vi != dsGraph->end(); ++vi)
+  // {
+  //   SP::DynamicalSystem ds = dsGraph->bundle(*vi);
+  //   initializeDynamicalSystem(m,  m.t0(),  ds);
+  // }
 
   
-  SP::InteractionsGraph indexSet0 = m.nonSmoothDynamicalSystem()->topology()->indexSet0();
-  InteractionsGraph::VIterator ui, uiend;
-  for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
-  {
-    Interaction& inter = *indexSet0->bundle(*ui);
-    initializeInteraction(m.t0(), inter, indexSet0->properties(*ui), *_dynamicalSystemsGraph);
-  }
+  // SP::InteractionsGraph indexSet0 = m.nonSmoothDynamicalSystem()->topology()->indexSet0();
+  // InteractionsGraph::VIterator ui, uiend;
+  // for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+  // {
+  //   Interaction& inter = *indexSet0->bundle(*ui);
+  //   initializeInteraction(m.t0(), inter, indexSet0->properties(*ui), *_dynamicalSystemsGraph);
+  // }
 
 
   

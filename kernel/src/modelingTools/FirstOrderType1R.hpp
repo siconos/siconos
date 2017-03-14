@@ -62,13 +62,13 @@ public:
   /** default constructor */
   FirstOrderType1R() : FirstOrderR(RELATION::Type1R) {};
 
-  /** data constructor
+  /** build from plugin for \f$h(x,z)\f$ and \f$g(\lambda, z)\f$
   *  \param pluginh the plugin to compute h
   *  \param pluging the plugin to compute g
   */
   FirstOrderType1R(const std::string& pluginh, const std::string& pluging);
 
-  /** data constructor
+  /** build from plugin for \f$h(x,z)\f$,\f$g(\lambda, z) \f$ and their gradients
   *  \param pluginh the plugin to compute h
   *  \param pluging the plugin to compute g
   *  \param pluginJachx the plugin to compute \f$\nabla_x h\f$
@@ -76,8 +76,7 @@ public:
   */
   FirstOrderType1R(const std::string& pluginh, const std::string& pluging, const std::string& pluginJachx, const std::string& pluginJacglambda);
 
-  /** destructor
-  */
+  /** destructor */
   ~FirstOrderType1R() {};
 
   /** initialize the relation (check sizes, memory allocation ...)
@@ -94,7 +93,7 @@ public:
   * \param z the external input
   * \param y the "output" vector
   */
-void computeh(double time, SiconosVector& x, SiconosVector& z, SiconosVector& y);
+  void computeh(double time, SiconosVector& x, SiconosVector& z, SiconosVector& y);
 
   /** default function to compute g
   * \param time the current time

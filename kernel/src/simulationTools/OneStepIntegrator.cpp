@@ -40,11 +40,53 @@ void OneStepIntegrator::initialize( Model& m )
   }
   // a subgraph has to be implemented.
   _dynamicalSystemsGraph = _simulation->nonSmoothDynamicalSystem()->topology()->dSG(0);
+
+  double t0 = _simulation->startingTime();
+  
+  // 1 - Loop over all dynamical systems
+  //  For each ds, allocate/initialize the required buffers in the ds graph
+  // (workDS and workMatrices properties, that depend both on osi and ds types)
+  // Note FP : what if a DS is associated with more than one osi?
+  DynamicalSystemsGraph::VIterator dsi, dsend;
+  for(std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
+  {
+    if(!checkOSI(dsi)) continue;
+    SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
+    _dynamicalSystemsGraph->properties(*dsi).workVectors.reset(new VectorOfVectors());
+    _dynamicalSystemsGraph->properties(*dsi).workMatrices.reset(new VectorOfMatrices());
+
+    // Initialize memory buffers
+    ds->initMemory(getSizeMem());
+    // Force dynamical system to its initial state
+    ds->resetToInitialState();
+    // part of the work which depends on osi and/or DS types.
+    initializeDynamicalSystem(m, t0, ds);
+  }
+
+  // 2 - Nonsmooth problems : set levels and initialize. Depends on OSI type.
+  // Note FP : is it the right place for this initialization??
+  initialize_nonsmooth_problems();
+
+  // 3 - Loop over all interactions of index set 0.
+  // For each interaction, allocate/initialize buffers in the interaction graph
+  // (DSlink property) and connect/fill these buffers with DS buffers.
+  // This strongly depends on the DS and OSI types.
+  SP::InteractionsGraph indexSet0 = m.nonSmoothDynamicalSystem()->topology()->indexSet0();
+  InteractionsGraph::VIterator ui, uiend;
+  for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+  {
+    Interaction& inter = *indexSet0->bundle(*ui);
+    
+    initializeInteraction(t0, inter, 
+			  indexSet0->properties(*ui), *_dynamicalSystemsGraph);
+  }
+  
 }
-void OneStepIntegrator::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds)
-{
-  RuntimeException::selfThrow("OneStepIntegrator::initializeDynamicalSystem not implemented for integrator of type " + _integratorType);
-}
+
+// void OneStepIntegrator::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds)
+// {
+//   RuntimeException::selfThrow("OneStepIntegrator::initializeDynamicalSystem not implemented for integrator of type " + _integratorType);
+// }
 
 
 void OneStepIntegrator::resetNonSmoothPart()

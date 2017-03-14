@@ -83,7 +83,7 @@ protected:
    * \param workM : work vectors
   */
   void initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
-  void zeroPlugin();
+  void _zeroPlugin();
 
 public:
 
@@ -122,9 +122,6 @@ public:
   * \param z vector of parameters
   */
   virtual void computeJachlambda(double time, SiconosVector& q0, SiconosVector& lambda, SiconosVector& z);
-
-  const std::string getJachlambdaName() const;
-  const std::string getJachqName() const;
 
   /** to compute output
   *  \param time the current time

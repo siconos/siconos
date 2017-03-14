@@ -6,7 +6,7 @@
 #
 
 from siconos.mechanics.collision.tools import Contactor
-from mechanics_io import Hdf5
+from siconos.io.mechanics_io import Hdf5
 import siconos.numerics as Numerics
 
 import random

@@ -146,17 +146,13 @@ void SimpleMatrix::PLUForwardBackwardInPlace(SiconosMatrix &B)
     // and then solve
     if (B.num() == 1)
     {
-      std::cout << "Version Sparse-Dense" << std::endl;
       inplace_solve(*sparse(), *(B.dense()), ublas::lower_tag());
       inplace_solve(ublas::trans(*sparse()), *(B.dense()), ublas::upper_tag());
-      std::cout << "End Version Sparse-Dense" << std::endl;
     }
     else if (B.num() == 4)
     {
-      std::cout << "Start Version Sparse-SParse" << std::endl;
       inplace_solve(*sparse(), *(B.sparse()), ublas::lower_tag());
       inplace_solve(ublas::trans(*sparse()), *(B.sparse()), ublas::upper_tag());
-      std::cout << "End Version Sparse-Sparse" << std::endl;
     }
     else
       SiconosMatrixException::selfThrow(" SimpleMatrix::PLUInverseInPlace: only implemented for dense ans sparse matrices in RHS.");

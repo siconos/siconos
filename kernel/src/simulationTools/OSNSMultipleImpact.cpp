@@ -307,7 +307,7 @@ void OSNSMultipleImpact::BuildParaContact()
   for (std11::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
   {
     SP::Interaction inter = indexSet->bundle(*ui);
-    SP::NonSmoothLaw nslaw = inter->nslaw();
+    SP::NonSmoothLaw nslaw = inter->nonSmoothLaw();
     SP::MultipleImpactNSL Mulnslaw = std11::dynamic_pointer_cast<MultipleImpactNSL>(nslaw);
     assert(Mulnslaw && "In OSNSMultipleImpact::BuildStiffResCofVec, non-smooth law used must be MultipleImpactNSL!!!");
     // Get the relative position of inter-interactionBlock in the vector _velocityContact

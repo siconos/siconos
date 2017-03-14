@@ -312,18 +312,7 @@ public:
     return _allNSProblems->size();
   }
 
-  /* get a OSNSP by number.
-   * \param unsigned int number of OSNSP
-   * \return SP::Onestepnsproblem
-   */
-  inline SP::OneStepNSProblem oneStepNSProblem(unsigned int number) const
-  {
-    return (*_allNSProblems)[number];
-  }
-
-
-
-  /** get allNSProblems[name], a specific OneStepNSProblem
+  /** get a OneStep nonsmooth problem of the simulation, identify with its number.
       \param id number of the required osnspb
       \return a pointer to OneStepNSProblem
    */

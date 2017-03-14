@@ -99,10 +99,10 @@ void EulerMoreauOSI::initializeDynamicalSystem(Model& m, double t, SP::Dynamical
   // Get work buffers from the graph
   const DynamicalSystemsGraph::VDescriptor& dsv = _dynamicalSystemsGraph->descriptor(ds);
   VectorOfVectors& workVectors = *_dynamicalSystemsGraph->properties(dsv).workVectors;
-  // Initialize memory buffers
-  _dynamicalSystemsGraph->bundle(dsv)->initMemory(getSizeMem());
-  // Force dynamical system to its initial state
-  _dynamicalSystemsGraph->bundle(dsv)->resetToInitialState();
+  // // Initialize memory buffers
+  // _dynamicalSystemsGraph->bundle(dsv)->initMemory(getSizeMem());
+  // // Force dynamical system to its initial state
+  // _dynamicalSystemsGraph->bundle(dsv)->resetToInitialState();
   // Check dynamical system type
   SP::FirstOrderNonLinearDS fods = std11::static_pointer_cast<FirstOrderNonLinearDS> (ds);
   Type::Siconos dsType = Type::value(*ds);
@@ -158,7 +158,7 @@ void EulerMoreauOSI::initializeInteraction(double t0, Interaction &inter,
     isInitializationNeeded = true;
   }
   if (isInitializationNeeded)
-    inter.init();
+    inter.reset();
 
   bool computeResidu = relation.requireResidu();
   inter.initializeMemory(computeResidu,_steps);
@@ -257,29 +257,29 @@ void EulerMoreauOSI::initializeInteraction(double t0, Interaction &inter,
 
 }
 
-void EulerMoreauOSI::initialize(Model& m)
-{
-  OneStepIntegrator::initialize(m);
-  // Get initial time
-  double t0 = _simulation->startingTime();
+// void EulerMoreauOSI::initialize(Model& m)
+// {
+//   OneStepIntegrator::initialize(m);
+//   // Get initial time
+//   double t0 = _simulation->startingTime();
 
-  DynamicalSystemsGraph::VIterator dsi, dsend;
-  for(std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
-    {
-      if(!checkOSI(dsi)) continue;
-      SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
-      initializeDynamicalSystem(m, t0,  ds);
-    }
+//   DynamicalSystemsGraph::VIterator dsi, dsend;
+//   for(std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
+//     {
+//       if(!checkOSI(dsi)) continue;
+//       SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
+//       initializeDynamicalSystem(m, t0,  ds);
+//     }
 
-  SP::InteractionsGraph indexSet0 = m.nonSmoothDynamicalSystem()->topology()->indexSet0();
-  InteractionsGraph::VIterator ui, uiend;
-  for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
-    {
-      Interaction& inter = *indexSet0->bundle(*ui);
+//   SP::InteractionsGraph indexSet0 = m.nonSmoothDynamicalSystem()->topology()->indexSet0();
+//   InteractionsGraph::VIterator ui, uiend;
+//   for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+//     {
+//       Interaction& inter = *indexSet0->bundle(*ui);
 
-      initializeInteraction(t0, inter, indexSet0->properties(*ui), *_dynamicalSystemsGraph);
-    }
-}
+//       initializeInteraction(t0, inter, indexSet0->properties(*ui), *_dynamicalSystemsGraph);
+//     }
+// }
 
 void EulerMoreauOSI::initializeIterationMatrixW(double time, SP::DynamicalSystem ds)
 {

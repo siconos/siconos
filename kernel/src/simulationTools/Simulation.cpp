@@ -203,16 +203,9 @@ void Simulation::initialize(SP::Model m, bool withOSI)
     SP::DynamicalSystemsGraph DSG = _nsds->topology()->dSG(0);
     for (std11::tie(dsi, dsend) = DSG->vertices(); dsi != dsend; ++dsi)
     {
-      SP::OneStepIntegrator osi = DSG->properties(*dsi).osi;
-      SP::DynamicalSystem ds = DSG->bundle(*dsi);
-      if (!osi)
-      {
-        // By default, if the user has not set the OSI, we assign the first OSI to all DS
-        _nsds->topology()->setOSI(ds,*_allOSI->begin());
-        //std::cout << "By default, if the user has not set the OSI, we assign the first OSI to all DS"<<std::endl;
-      }
-      osi = DSG->properties(*dsi).osi;
-      //ds->initialize(m->t0(), osi->getSizeMem());
+      // By default, if the user has not set the OSI, we assign the first OSI to all DS
+      if (!DSG->properties(*dsi).osi)
+        _nsds->topology()->setOSI(DSG->bundle(*dsi), *_allOSI->begin());
     }
 
 

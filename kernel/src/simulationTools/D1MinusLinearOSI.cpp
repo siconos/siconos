@@ -118,9 +118,9 @@ void D1MinusLinearOSI::initializeDynamicalSystem(Model& m, double t, SP::Dynamic
   const DynamicalSystemsGraph::VDescriptor& dsv = _dynamicalSystemsGraph->descriptor(ds);
   VectorOfVectors& workVectors = *_dynamicalSystemsGraph->properties(dsv).workVectors;
   // Initialize memory buffers
-  _dynamicalSystemsGraph->bundle(dsv)->initMemory(getSizeMem());
-  // Force dynamical system to its initial state
-  _dynamicalSystemsGraph->bundle(dsv)->resetToInitialState();
+  // _dynamicalSystemsGraph->bundle(dsv)->initMemory(getSizeMem());
+  // // Force dynamical system to its initial state
+  // _dynamicalSystemsGraph->bundle(dsv)->resetToInitialState();
   // Check dynamical system type
   Type::Siconos dsType = Type::value(*ds);
   assert(dsType == Type::LagrangianLinearTIDS || dsType == Type::LagrangianDS || Type::NewtonEulerDS);
@@ -156,23 +156,8 @@ void D1MinusLinearOSI::initializeDynamicalSystem(Model& m, double t, SP::Dynamic
   }
 }
 
-
-void D1MinusLinearOSI::initialize(Model & m)
+void D1MinusLinearOSI::initialize_nonsmooth_problems()
 {
-  DEBUG_BEGIN("D1MinusLinearOSI::initialize() \n");
-
-  OneStepIntegrator::initialize(m);
-
-  DynamicalSystemsGraph::VIterator dsi, dsend;
-  for(std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
-  {
-    if(!checkOSI(dsi)) continue;
-    SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
-    initializeDynamicalSystem(m, m.t0(),  ds);
-  }
-
-  DEBUG_PRINTF("D1MinusLinearOSI::initialize(). Type of OSI  %i ", _typeOfD1MinusLinearOSI);
-
   SP::OneStepNSProblems allOSNSP  = _simulation->oneStepNSProblems(); // all OSNSP
 
   bool isOSNSPinitialized = false ;
@@ -218,18 +203,82 @@ void D1MinusLinearOSI::initialize(Model & m)
   {
     RuntimeException::selfThrow("D1MinusLinearOSI::initialize() - not implemented for type of D1MinusLinearOSI: " + _typeOfD1MinusLinearOSI);
   }
-
-  SP::InteractionsGraph indexSet0 = m.nonSmoothDynamicalSystem()->topology()->indexSet0();
-  InteractionsGraph::VIterator ui, uiend;
-  for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
-  {
-    Interaction& inter = *indexSet0->bundle(*ui);
-    initializeInteraction(m.t0(), inter, indexSet0->properties(*ui), *_dynamicalSystemsGraph);
-  }
-
-
-  DEBUG_END("D1MinusLinearOSI::initialize() \n");
 }
+
+
+// void D1MinusLinearOSI::initialize(Model & m)
+// {
+//   DEBUG_BEGIN("D1MinusLinearOSI::initialize() \n");
+
+//   OneStepIntegrator::initialize(m);
+
+//   DynamicalSystemsGraph::VIterator dsi, dsend;
+//   for(std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
+//   {
+//     if(!checkOSI(dsi)) continue;
+//     SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
+//     initializeDynamicalSystem(m, m.t0(),  ds);
+//   }
+
+//   DEBUG_PRINTF("D1MinusLinearOSI::initialize(). Type of OSI  %i ", _typeOfD1MinusLinearOSI);
+
+//   SP::OneStepNSProblems allOSNSP  = _simulation->oneStepNSProblems(); // all OSNSP
+
+//   bool isOSNSPinitialized = false ;
+//   switch(_typeOfD1MinusLinearOSI)
+//   {
+//   case halfexplicit_acceleration_level:
+//     // set evaluation levels (first is of velocity, second of acceleration type)
+//     (*allOSNSP)[SICONOS_OSNSP_TS_VELOCITY]->setIndexSetLevel(1);
+//     (*allOSNSP)[SICONOS_OSNSP_TS_VELOCITY]->setInputOutputLevel(1);
+//     (*allOSNSP)[SICONOS_OSNSP_TS_VELOCITY]->initialize(_simulation);
+
+//     (*allOSNSP)[SICONOS_OSNSP_TS_VELOCITY + 1]->setIndexSetLevel(2);
+//     (*allOSNSP)[SICONOS_OSNSP_TS_VELOCITY + 1]->setInputOutputLevel(2);
+//     (*allOSNSP)[SICONOS_OSNSP_TS_VELOCITY + 1]->initialize(_simulation);
+//     isOSNSPinitialized = true ;
+//     DEBUG_EXPR((*allOSNSP)[SICONOS_OSNSP_TS_VELOCITY + 1]->display());
+//     break;
+//   case halfexplicit_acceleration_level_full:
+//     // set evaluation levels (first is of velocity, second of acceleration type)
+//     (*allOSNSP)[SICONOS_OSNSP_TS_VELOCITY]->setIndexSetLevel(1);
+//     (*allOSNSP)[SICONOS_OSNSP_TS_VELOCITY]->setInputOutputLevel(1);
+//     (*allOSNSP)[SICONOS_OSNSP_TS_VELOCITY]->initialize(_simulation);
+
+//     (*allOSNSP)[SICONOS_OSNSP_TS_VELOCITY + 1]->setIndexSetLevel(2);
+//     (*allOSNSP)[SICONOS_OSNSP_TS_VELOCITY + 1]->setInputOutputLevel(2);
+//     (*allOSNSP)[SICONOS_OSNSP_TS_VELOCITY + 1]->initialize(_simulation);
+//     isOSNSPinitialized = true ;
+//     break;
+//   case halfexplicit_velocity_level:
+//     // set evaluation levels (first is of velocity, second of acceleration type)
+//     (*allOSNSP)[SICONOS_OSNSP_TS_VELOCITY]->setIndexSetLevel(1);
+//     (*allOSNSP)[SICONOS_OSNSP_TS_VELOCITY]->setInputOutputLevel(1);
+//     (*allOSNSP)[SICONOS_OSNSP_TS_VELOCITY]->initialize(_simulation);
+
+//     (*allOSNSP)[SICONOS_OSNSP_TS_VELOCITY + 1]->setIndexSetLevel(1); /** !!! */
+//     (*allOSNSP)[SICONOS_OSNSP_TS_VELOCITY + 1]->setInputOutputLevel(2);
+//     (*allOSNSP)[SICONOS_OSNSP_TS_VELOCITY + 1]->initialize(_simulation);
+//     isOSNSPinitialized = true ;
+//     break;
+//   }
+
+//   if(!isOSNSPinitialized)
+//   {
+//     RuntimeException::selfThrow("D1MinusLinearOSI::initialize() - not implemented for type of D1MinusLinearOSI: " + _typeOfD1MinusLinearOSI);
+//   }
+
+//   SP::InteractionsGraph indexSet0 = m.nonSmoothDynamicalSystem()->topology()->indexSet0();
+//   InteractionsGraph::VIterator ui, uiend;
+//   for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+//   {
+//     Interaction& inter = *indexSet0->bundle(*ui);
+//     initializeInteraction(m.t0(), inter, indexSet0->properties(*ui), *_dynamicalSystemsGraph);
+//   }
+
+
+//   DEBUG_END("D1MinusLinearOSI::initialize() \n");
+// }
 
 void D1MinusLinearOSI::initializeInteraction(double t0, Interaction &inter,
                                              InteractionProperties& interProp,
@@ -268,7 +317,7 @@ void D1MinusLinearOSI::initializeInteraction(double t0, Interaction &inter,
   }
 
   if (isInitializationNeeded)
-    inter.init();
+    inter.reset();
 
   bool computeResidu = relation.requireResidu();
   inter.initializeMemory(computeResidu,_steps);

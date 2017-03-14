@@ -34,11 +34,11 @@
 #include "OneStepNSProblem.hpp"
 #include "BlockVector.hpp"
 
-//#define DEBUG_BEGIN_END_ONLY
-// #define DEBUG_NOCOLOR
-// #define DEBUG_STDOUT
-// #define DEBUG_MESSAGES
-// #define DEBUG_WHERE_MESSAGES
+#define DEBUG_BEGIN_END_ONLY
+#define DEBUG_NOCOLOR
+#define DEBUG_STDOUT
+#define DEBUG_MESSAGES
+#define DEBUG_WHERE_MESSAGES
 #include <debug.h>
 
 
@@ -105,9 +105,9 @@ void MoreauJeanOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalS
   const DynamicalSystemsGraph::VDescriptor& dsv = _dynamicalSystemsGraph->descriptor(ds);
   VectorOfVectors& workVectors = *_dynamicalSystemsGraph->properties(dsv).workVectors;
   // Initialize memory buffers
-  _dynamicalSystemsGraph->bundle(dsv)->initMemory(getSizeMem());
-  // Force dynamical system to its initial state
-  _dynamicalSystemsGraph->bundle(dsv)->resetToInitialState();
+  // _dynamicalSystemsGraph->bundle(dsv)->initMemory(getSizeMem());
+  // // Force dynamical system to its initial state
+  // _dynamicalSystemsGraph->bundle(dsv)->resetToInitialState();
   // Check dynamical system type
   Type::Siconos dsType = Type::value(*ds);
   assert(dsType == Type::LagrangianLinearTIDS || dsType == Type::LagrangianDS || Type::NewtonEulerDS);
@@ -149,7 +149,6 @@ void MoreauJeanOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalS
     neds->computeForces(t, neds->q(), v);
     neds->swapInMemory();
   }
-
   
 }
 void MoreauJeanOSI::initializeInteraction(double t0, Interaction &inter,
@@ -161,6 +160,16 @@ void MoreauJeanOSI::initializeInteraction(double t0, Interaction &inter,
   assert(ds1);
   assert(ds2);
 
+  // ========== COMMON TO ALL OSI ==========
+  
+  interProp.workVectors.reset(new VectorOfVectors);
+  interProp.workMatrices.reset(new VectorOfSMatrices);
+  unsigned int nslawSize = inter.nonSmoothLaw()->size();
+  interProp.block.reset(new SimpleMatrix(nslawSize, nslawSize));
+  // inter.setDSLinkAndWorkspace(interProp, *ds1, *workVds1, *ds2_, *workVds2);
+
+  // ======== END COMMON TO ALL OSI ========
+  
   VectorOfBlockVectors& DSlink = *interProp.DSlink;
   assert(interProp.DSlink);
 
@@ -187,7 +196,7 @@ void MoreauJeanOSI::initializeInteraction(double t0, Interaction &inter,
   }
 
   if (isInitializationNeeded)
-    inter.init();
+    inter.reset();
 
   bool computeResidu = relation.requireResidu();
   inter.initializeMemory(computeResidu,_steps);
@@ -284,34 +293,43 @@ void MoreauJeanOSI::initializeInteraction(double t0, Interaction &inter,
 
   
 }
-void MoreauJeanOSI::initialize(Model& m)
+
+void MoreauJeanOSI::initialize_nonsmooth_problems()
 {
-  OneStepIntegrator::initialize(m);
-  // Get initial time
-  double t0 = _simulation->startingTime();
-
-  DynamicalSystemsGraph::VIterator dsi, dsend;
-  for(std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
-  {
-    if(!checkOSI(dsi)) continue;
-    SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
-    initializeDynamicalSystem(m, t0, ds);
-  }
-
   SP::OneStepNSProblems  allOSNS  = _simulation->oneStepNSProblems();
   ((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY])->setIndexSetLevel(1);
   ((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY])->setInputOutputLevel(1);
   //  ((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY])->initialize(_simulation);
-
-  SP::InteractionsGraph indexSet0 = m.nonSmoothDynamicalSystem()->topology()->indexSet0();
-  InteractionsGraph::VIterator ui, uiend;
-  for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
-  {
-    Interaction& inter = *indexSet0->bundle(*ui);
-    
-    initializeInteraction(t0, inter, indexSet0->properties(*ui), *_dynamicalSystemsGraph);
-  }
 }
+
+// void MoreauJeanOSI::initialize(Model& m)
+// {
+//   OneStepIntegrator::initialize(m);
+//   // Get initial time
+//   double t0 = _simulation->startingTime();
+
+//   DynamicalSystemsGraph::VIterator dsi, dsend;
+//   for(std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
+//   {
+//     if(!checkOSI(dsi)) continue;
+//     SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
+//     initializeDynamicalSystem(m, t0, ds);
+//   }
+
+//   SP::OneStepNSProblems  allOSNS  = _simulation->oneStepNSProblems();
+//   ((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY])->setIndexSetLevel(1);
+//   ((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY])->setInputOutputLevel(1);
+//   //  ((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY])->initialize(_simulation);
+
+//   SP::InteractionsGraph indexSet0 = m.nonSmoothDynamicalSystem()->topology()->indexSet0();
+//   InteractionsGraph::VIterator ui, uiend;
+//   for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+//   {
+//     Interaction& inter = *indexSet0->bundle(*ui);
+    
+//     initializeInteraction(t0, inter, indexSet0->properties(*ui), *_dynamicalSystemsGraph);
+//   }
+// }
 
 
 void MoreauJeanOSI::initializeIterationMatrixW(double time, SP::DynamicalSystem ds)
@@ -368,6 +386,7 @@ void MoreauJeanOSI::initializeIterationMatrixW(double time, SP::DynamicalSystem 
 	_dynamicalSystemsGraph->properties(dsv).W.reset(new SimpleMatrix(sizeW, sizeW));
 	_dynamicalSystemsGraph->properties(dsv).W->eye();
       }
+
     SP::SiconosMatrix K = d->K();
     SP::SiconosMatrix C = d->C();
     SP::SiconosMatrix W = _dynamicalSystemsGraph->properties(dsv).W;
@@ -399,8 +418,6 @@ void MoreauJeanOSI::initializeIterationMatrixW(double time, SP::DynamicalSystem 
   // Remark: W is not LU-factorized nor inversed here.
   // Function PLUForwardBackward will do that if required.
   DEBUG_END("MoreauJeanOSI::initializeIterationMatrixW\n");
-
-
 }
 
 
