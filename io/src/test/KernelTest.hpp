@@ -36,6 +36,7 @@ class KernelTest : public CppUnit::TestFixture
   void t8();
 #endif
 
+  std::string BBxml;
 public:
   void setUp();
   void tearDown();
