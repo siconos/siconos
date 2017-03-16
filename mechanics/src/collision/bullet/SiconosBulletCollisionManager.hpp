@@ -42,6 +42,7 @@ struct SiconosBulletOptions
   double contactProcessingThreshold;
   double worldScale;
   bool useAxisSweep3;
+  bool clearOverlappingPairCache;
   unsigned int perturbationIterations;
   unsigned int minimumPointsPerturbationThreshold;
 };
@@ -85,6 +86,8 @@ public:
   bool removeStaticContactorSet(StaticContactorSetID id);
 
   void updateInteractions(SP::Simulation simulation);
+
+  void clearOverlappingPairCache();
 
   const SiconosBulletOptions &options() const { return _options; }
   const SiconosBulletStatistics &statistics() const { return _stats; }

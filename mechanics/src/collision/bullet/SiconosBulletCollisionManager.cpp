@@ -170,6 +170,7 @@ SiconosBulletOptions::SiconosBulletOptions()
   , contactProcessingThreshold(0.03)
   , worldScale(1.0)
   , useAxisSweep3(false)
+  , clearOverlappingPairCache(false)
   , perturbationIterations(3)
   , minimumPointsPerturbationThreshold(3)
 {
@@ -1346,6 +1347,10 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
   SP::SiconosVisitor updateVisitor(new CollisionUpdateVisitor(*impl));
   simulation->nonSmoothDynamicalSystem()->visitDynamicalSystems(updateVisitor);
 
+  // Clear cache automatically before collision detection if requested
+  if (_options.clearOverlappingPairCache)
+    clearOverlappingPairCache();
+
   if (! impl->_queuedCollisionObjects.empty())
   {
 
@@ -1469,6 +1474,26 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
 
         /* link bodies by the new interaction */
         simulation->link(inter, pairA->ds, pairB->ds);
+      }
+    }
+  }
+}
+
+void SiconosBulletCollisionManager::clearOverlappingPairCache()
+{
+  if (!impl->_collisionWorld) return;
+
+  BodyShapeMap::iterator it;
+  btOverlappingPairCache *pairCache =
+    impl->_collisionWorld->getBroadphase()->getOverlappingPairCache();
+
+  for (it = impl->bodyShapeMap.begin(); it != impl->bodyShapeMap.end(); it++)
+  {
+    std::vector< std11::shared_ptr<BodyShapeRecord> >::iterator rec;
+    for (rec = it->second.begin(); rec != it->second.end(); rec++) {
+      if ((*rec)->btobject) {
+        pairCache-> cleanProxyFromPairs((*rec)->btobject->getBroadphaseHandle(),
+                                        &*impl->_dispatcher);
       }
     }
   }

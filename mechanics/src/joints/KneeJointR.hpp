@@ -89,6 +89,8 @@ public:
 
   virtual void computeDotJachq(double time, SP::SiconosVector qdot1, SP::SiconosVector qdot2=SP::SiconosVector());
 
+  SP::SiconosVector P() { return _P0; }
+
 protected:
 
   virtual void Jd1d2(double X1, double Y1, double Z1, double q10, double q11, double q12, double q13,

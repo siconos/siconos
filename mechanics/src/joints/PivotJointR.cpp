@@ -41,9 +41,7 @@ PivotJointR::PivotJointR(SP::NewtonEulerDS d1, SP::NewtonEulerDS d2, SP::Siconos
   // _Ax=quatBuff.R_component_2();
   // _Ay=quatBuff.R_component_3();
   // _Az=quatBuff.R_component_4();
-  _Ax = A->getValue(0);
-  _Ay = A->getValue(1);
-  _Az = A->getValue(2);
+  _A.reset( new SiconosVector(*A) );
   buildA1A2();
 }
 /* constructor,
@@ -54,9 +52,7 @@ PivotJointR::PivotJointR(SP::NewtonEulerDS d1, SP::NewtonEulerDS d2, SP::Siconos
 */
 PivotJointR::PivotJointR(SP::NewtonEulerDS d1, SP::SiconosVector P0, SP::SiconosVector A, bool absolutRef): KneeJointR(d1, P0, absolutRef)
 {
-  _Ax = A->getValue(0);
-  _Ay = A->getValue(1);
-  _Az = A->getValue(2);
+  _A.reset( new SiconosVector(*A) );
   buildA1A2();
 }
 
@@ -77,6 +73,9 @@ void PivotJointR::initComponents(Interaction& inter, VectorOfBlockVectors& DSlin
 }
 void PivotJointR::buildA1A2()
 {
+  double _Ax = (*_A)(0);
+  double _Ay = (*_A)(1);
+  double _Az = (*_A)(2);
   if (orthoBaseFromVector(&_Ax, &_Ay, &_Az, &_A1x, &_A1y, &_A1z, &_A2x, &_A2y, &_A2z))
     RuntimeException::selfThrow("PivotJointR::initComponents. Problem in calling orthoBaseFromVector");
   assert(fabs(_A1x * _Ax + _A1y * _Ay + _A1z * _Az) < 1e-9 && "PivotJoint, _A1 wrong\n");
