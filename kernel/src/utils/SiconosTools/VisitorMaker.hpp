@@ -76,10 +76,11 @@ struct Call : public Action
 
   using Action::visit;
 
-  virtual void visit(const T& x)
+  virtual void visit(T& x)
   {
     (*this)(x);
   }
+
 };
 
 template<typename T, typename Action>
@@ -89,7 +90,7 @@ struct NoCall : public Action
 
   using Action::visit;
 
-  virtual void visit(const T& x)
+  virtual void visit(T& x)
   {
   }
 };

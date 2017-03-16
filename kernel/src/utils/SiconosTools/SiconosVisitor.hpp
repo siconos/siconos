@@ -97,7 +97,7 @@
 /** hooks to be inserted in class definition */
 #define ACCEPT_STD_VISITORS()                                           \
   template<typename Archive> friend class SiconosSerializer;            \
-  virtual void accept(SiconosVisitor& tourist) const { tourist.visit(*this); } \
+  virtual void accept(SiconosVisitor& tourist) { tourist.visit(*this); } \
   virtual void acceptSerializer(SiconosVisitor& serializer) { serializer.visit(*this); } \
   virtual inline Type::Siconos acceptType(FindType& ft) const { return ft.visit(*this); } \
 
