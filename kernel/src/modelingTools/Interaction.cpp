@@ -371,7 +371,6 @@ void Interaction::initialize_ds_links(InteractionProperties& interaction_propert
   // The dynamical systems linked to the interaction (2 at most, ds2 may be equal to ds1).
   RELATION::TYPES relationType = _relation->getType();
 
-  ds1.display();
   if (relationType == FirstOrder)
     __initDataFirstOrder(DSlink, ds1, ds2);
   
@@ -384,26 +383,14 @@ void Interaction::initialize_ds_links(InteractionProperties& interaction_propert
     RuntimeException::selfThrow("Interaction::initData unknown initialization procedure for \
         a relation of type: " + relationType);
   
-  // // -- Stage 2 : create buffers (in the graph) that will be used for relation/interaction internal operations --
-  // // Relation initializes the work vectors and matrices
-  // VectorOfVectors& workVInter = *interProp.workVectors;
-  // VectorOfSMatrices& workMInter = *interProp.workMatrices;
-  // _relation->initialize(*this, DSlink, workVInter, workMInter);
-  // if (_relation->requireResidu())
-  //   {
-  //     RELATION::TYPES relationType = _relation->getType();
-  //     if (relationType == FirstOrder)
-  // 	{
-  // 	  if (!workVInter[FirstOrderR::g_alpha])
-  // 	    workVInter[FirstOrderR::g_alpha].reset(new SiconosVector(_sizeOfDS));
-  // 	  if (!workVInter[FirstOrderR::vec_residuR])
-  // 	    workVInter[FirstOrderR::vec_residuR].reset(new SiconosVector(_sizeOfDS));
-  // 	}
-  //     else if (relationType == Lagrangian)
-  //       RuntimeException::selfThrow("Interaction::initialize() - computeResiduR for LagrangianR is not implemented");
-  //     else if (relationType == NewtonEuler)
-  //       RuntimeException::selfThrow("Interaction::initialize() - computeResiduR for NewtonEulerR is not implemented");
-  //   }
+  // -- Stage 2 : create buffers (in the graph) that will be used for relation/interaction internal operations --
+  // Relation initializes the work vectors and matrices
+  //
+  interaction_properties.workVectors.reset(new VectorOfVectors);
+  interaction_properties.workMatrices.reset(new VectorOfSMatrices);
+  VectorOfVectors& workVInter = *interaction_properties.workVectors;
+  VectorOfSMatrices& workMInter = *interaction_properties.workMatrices;
+  _relation->initialize(*this, DSlink, workVInter, workMInter);
 }
 
 
@@ -510,7 +497,6 @@ void Interaction::__initDataLagrangian(VectorOfBlockVectors& DSlink, DynamicalSy
   DSlink[LagrangianR::p1].reset(new BlockVector());
   DSlink[LagrangianR::p2].reset(new BlockVector());
   DSlink[LagrangianR::z].reset(new BlockVector());
-  ds1.display();
   __initDSDataLagrangian(ds1, DSlink);
   if(&ds1 != &ds2)
     __initDSDataLagrangian(ds2, DSlink);
@@ -528,11 +514,6 @@ void Interaction::__initDSDataLagrangian(DynamicalSystem& ds, VectorOfBlockVecto
 
   // Put q, velocity and acceleration of each DS into a block. (Pointers links, no copy!!)
   DSlink[LagrangianR::q0]->insertPtr(lds.q());
-
-  DEBUG_PRINTF("DSlink[LagrangianR::q0]->insertPtr(lds.q()) with LagrangianR::q0 = %i\n",LagrangianR::q0);
-  DEBUG_EXPR(DSlink[LagrangianR::q0]->display());
-  DEBUG_EXPR(lds.q()->display());
-  DEBUG_EXPR(std::cout << DSlink[LagrangianR::q0] << std::endl;);
 
   DSlink[LagrangianR::q1]->insertPtr(lds.velocity());
   if(lds.acceleration())

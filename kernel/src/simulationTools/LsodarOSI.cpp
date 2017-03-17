@@ -77,6 +77,13 @@ LsodarOSI::LsodarOSI():
   for(int i = 0; i < 9; i++) _intData[i] = 0;
   _sizeMem = 2;
   _steps=1;
+
+  // Set levels. This may depend on the nonsmooth law and will be updated during initializeInteraction(...) call.
+  _levelMinForOutput=0;
+  _levelMaxForOutput=2;
+  _levelMinForInput=1;
+  _levelMaxForInput=2;
+
 }
 
 void LsodarOSI::setTol(integer newItol, SA::doublereal newRtol, SA::doublereal newAtol)
@@ -168,16 +175,13 @@ void LsodarOSI::fillXWork(integer* sizeOfX, doublereal* x)
 
 void LsodarOSI::computeRhs(double t, DynamicalSystemsGraph& DSG0)
 {
-
   DynamicalSystemsGraph::VIterator dsi, dsend;
   for(std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
     {
       if(!checkOSI(dsi)) continue;
       SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
-
       // compute standard rhs stored in the dynamical system
       ds->computeRhs(t);
-
       VectorOfVectors& workVectors = *_dynamicalSystemsGraph->properties(*dsi).workVectors;
       Type::Siconos dsType = Type::value(*ds);
       if(dsType == Type::LagrangianLinearTIDS || dsType == Type::LagrangianDS)
@@ -269,7 +273,7 @@ void LsodarOSI::initializeInteraction(double t0, Interaction &inter,
   SP::DynamicalSystem ds2= interProp.target;
   
   assert(interProp.DSlink);
-  inter.initialize_ds_links(interProp, *ds1, *ds2);
+
   VectorOfBlockVectors& DSlink = *interProp.DSlink;
   // VectorOfVectors& workVInter = *interProp.workVectors;
   // VectorOfSMatrices& workMInter = *interProp.workMatrices;
@@ -278,49 +282,28 @@ void LsodarOSI::initializeInteraction(double t0, Interaction &inter,
   NonSmoothLaw & nslaw = *inter.nonSmoothLaw();
   RELATION::TYPES relationType = relation.getType();
   Type::Siconos nslType = Type::value(nslaw);
-
-  unsigned int lowerLevelForOutput=0;
-  unsigned int upperLevelForOutput=2;
-  unsigned int lowerLevelForInput=1;
-  unsigned int upperLevelForInput=2;
   
   if (nslType == Type::NewtonImpactNSL || nslType == Type::MultipleImpactNSL)
     {
-      lowerLevelForOutput = 0;
-      upperLevelForOutput = 2 ;
-      lowerLevelForInput = 1;
-      upperLevelForInput = 2;
+      _levelMinForOutput = 0;
+      _levelMaxForOutput = 2 ;
+      _levelMinForInput = 1;
+      _levelMaxForInput = 2;
     }
   else if (nslType ==  Type::NewtonImpactFrictionNSL)
     {
-      lowerLevelForOutput = 0;
-      upperLevelForOutput = 4;
-      lowerLevelForInput = 1;
-      upperLevelForInput = 2;
+      _levelMinForOutput = 0;
+      _levelMaxForOutput = 4;
+      _levelMinForInput = 1;
+      _levelMaxForInput = 2;
       RuntimeException::selfThrow("LsodarOSI::initializeInteraction  not yet implemented for nonsmooth law of type NewtonImpactFrictionNSL");
     }
   else
     RuntimeException::selfThrow("LsodarOSI::initializeInteraction not yet implemented  for nonsmooth of type");
 
-  bool isInitializationNeeded = false;
-  if (!(inter.lowerLevelForOutput() <= lowerLevelForOutput && inter.upperLevelForOutput()  >= upperLevelForOutput ))
-    {
-      //  RuntimeException::selfThrow("LsodarOSI::initializeInteraction, we must resize _y");
-      inter.setUpperLevelForOutput(upperLevelForOutput);
-      inter.setLowerLevelForOutput(lowerLevelForOutput);
-      isInitializationNeeded = true;
-    }
-  if (!(inter.lowerLevelForInput() <= lowerLevelForInput && inter.upperLevelForInput() >= upperLevelForInput ))
-    {
-      //RuntimeException::selfThrow("LsodarOSI::initializeInteraction, we must resize _lambda");
-      inter.setUpperLevelForInput(upperLevelForInput);
-      inter.setLowerLevelForInput(lowerLevelForInput);
-      isInitializationNeeded = true;
-    }
-
-  if (isInitializationNeeded)
-    inter.reset();
-
+  // Check if interations levels (i.e. y and lambda sizes) are compliant with the current osi.
+  _check_and_update_interaction_levels(inter);
+  // Initialize/allocate memory buffers in interaction.
   bool computeResidu = relation.requireResidu();
   inter.initializeMemory(computeResidu,_steps);
 
@@ -328,8 +311,13 @@ void LsodarOSI::initializeInteraction(double t0, Interaction &inter,
   VectorOfVectors &workVds1 = *DSG.properties(DSG.descriptor(ds1)).workVectors;
   if (relationType == Lagrangian)
     {
+      LagrangianDS& lds = *std11::static_pointer_cast<LagrangianDS> (ds1);
       DSlink[LagrangianR::xfree].reset(new BlockVector());
       DSlink[LagrangianR::xfree]->insertPtr(workVds1[OneStepIntegrator::free]);
+      DSlink[LagrangianR::p2].reset(new BlockVector());
+      DSlink[LagrangianR::p2]->insertPtr(lds.p(2));
+      DSlink[LagrangianR::q2].reset(new BlockVector());
+      DSlink[LagrangianR::q2]->insertPtr(lds.acceleration());
     }
   // else if (relationType == NewtonEuler)
   // {
@@ -337,32 +325,25 @@ void LsodarOSI::initializeInteraction(double t0, Interaction &inter,
   //   DSlink[NewtonEulerR::xfree]->insertPtr(workVds1[OneStepIntegrator::free]);
   // }
 
+
+  
   if (ds1 != ds2)
     {
       VectorOfVectors &workVds2 = *DSG.properties(DSG.descriptor(ds2)).workVectors;
       if (relationType == Lagrangian)
 	{
+	  LagrangianDS& lds = *std11::static_pointer_cast<LagrangianDS> (ds2);
 	  DSlink[LagrangianR::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
+	  DSlink[LagrangianR::p2]->insertPtr(lds.p(2));
+	  DSlink[LagrangianR::q2]->insertPtr(lds.acceleration());
 	}
       // else if (relationType == NewtonEuler)
       // {
       //   DSlink[NewtonEulerR::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
       // }
     }
-
-
-  // Compute a first value for the output
-  inter.computeOutput(t0, interProp, 0);
-
-  // prepare the gradients
-  relation.computeJach(t0, inter, interProp);
-  for (unsigned int i = 0; i < inter.upperLevelForOutput() + 1; ++i)
-    {
-      inter.computeOutput(t0, interProp, i);
-    }
-  inter.swapInMemory();
-
   
+
 }
 void LsodarOSI::initialize(Model& m)
 {
@@ -564,7 +545,6 @@ void LsodarOSI::integrate(double& tinit, double& tend, double& tout, int& istate
 void LsodarOSI::updateState(const unsigned int level)
 {
   // Compute all required (ie time-dependent) data for the DS of the OSI.
-
   DynamicalSystemsGraph::VIterator dsi, dsend;
   if(level == 1)  // ie impact case: compute velocity
     {

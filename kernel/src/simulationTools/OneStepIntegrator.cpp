@@ -22,7 +22,7 @@
 #include "DynamicalSystem.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
 #include "ExtraAdditionalTerms.hpp"
-
+#include "Relation.hpp"
 #include <SiconosConfig.h>
 #if defined(SICONOS_STD_FUNCTIONAL) && !defined(SICONOS_USE_BOOST_FOR_CXX11)
 #include <functional>
@@ -76,11 +76,69 @@ void OneStepIntegrator::initialize( Model& m )
   for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
   {
     Interaction& inter = *indexSet0->bundle(*ui);
+    unsigned int nslawSize = inter.nonSmoothLaw()->size();
+    InteractionProperties& interaction_properties = indexSet0->properties(*ui);
+    // init block property. Note FP: this should probably be moved
+    // to OSNSPb init?
+    interaction_properties.block.reset(new SimpleMatrix(nslawSize, nslawSize));
+
+    // Update DSlink : this depends on OSI and relation types.
+    initializeInteraction(t0, inter, interaction_properties, *_dynamicalSystemsGraph);
+
+    // Update interaction attributes (output)
+    if (_steps > 1) // Multi--step methods
+      {
+	// Compute the old Values of Output with stored values in Memory
+	for (unsigned int k = 0; k < _steps - 1; k++)
+	  {
+	    /** ComputeOutput to fill the Memory
+	     * We assume the state x is stored in xMemory except for the  initial
+	     * condition which has not been swap yet.
+	     */
+	    //        relation()->LinkDataFromMemory(k);
+	    for (unsigned int i = 0; i < inter.upperLevelForOutput() + 1; ++i)
+	      {
+		inter.computeOutput(t0, interaction_properties, i);
+		//_yMemory[i]->swap(*_y[i]);
+	      }
+	  }
+	inter.swapInMemory();
+	
+      }
+    // Compute a first value for the output
+    inter.computeOutput(t0, interaction_properties, 0);
     
-    initializeInteraction(t0, inter, 
-			  indexSet0->properties(*ui), *_dynamicalSystemsGraph);
+    // prepare the gradients
+    inter.relation()->computeJach(t0, inter, interaction_properties);
+    for (unsigned int i = 0; i < inter.upperLevelForOutput() + 1; ++i)
+      {
+      inter.computeOutput(t0, interaction_properties, i);
+    }
+    inter.swapInMemory();
   }
+}
+
+
+void OneStepIntegrator::_check_and_update_interaction_levels(Interaction& inter)
+{
   
+  bool isInitializationNeeded = false;
+  if (!(inter.lowerLevelForOutput() <= _levelMinForOutput && inter.upperLevelForOutput()  >= _levelMaxForOutput ))
+  {
+    inter.setLowerLevelForOutput(_levelMinForOutput);
+    inter.setUpperLevelForOutput(_levelMaxForOutput);
+    isInitializationNeeded = true;
+  }
+
+  if (!(inter.lowerLevelForInput() <= _levelMinForInput && inter.upperLevelForInput() >= _levelMaxForInput ))
+  {
+    inter.setLowerLevelForInput(_levelMinForInput);
+    inter.setUpperLevelForInput(_levelMaxForInput);
+    isInitializationNeeded = true;
+  }
+
+  if (isInitializationNeeded)
+    inter.reset();
 }
 
 // void OneStepIntegrator::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds)
@@ -108,6 +166,7 @@ void OneStepIntegrator::resetNonSmoothPart(unsigned int level)
     _dynamicalSystemsGraph->bundle(*dsi)->resetNonSmoothPart(level);
   }
 }
+
 void OneStepIntegrator::updateOutput(double time)
 {
   /** VA. 16/02/2017 This should normally be done only for interaction managed by the osi */
@@ -125,6 +184,7 @@ void OneStepIntegrator::updateInput(double time)
        level++)
     _simulation->nonSmoothDynamicalSystem()->updateInput(time,level);
 }
+
 void OneStepIntegrator::updateOutput(double time, unsigned int level)
 {
   /** VA. 16/02/2017 This should normally be done only for interaction managed by the osi */

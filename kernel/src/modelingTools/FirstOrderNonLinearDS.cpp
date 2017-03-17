@@ -19,8 +19,8 @@
 #include "FirstOrderNonLinearDS.hpp"
 #include "PluginTypes.hpp"
 
-#define DEBUG_MESSAGES
-#define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
+// #define DEBUG_STDOUT
 #include "debug.h"
 #include <iostream>
 

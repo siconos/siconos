@@ -10,7 +10,7 @@ include(OutOfSourcesBuild)
 include(SiconosTools)
 
 include(WindowsSiconosSetup)
-set(tests_timeout 15 CACHE INTERNAL "Limit time for tests (in seconds)")
+set(tests_timeout 35 CACHE INTERNAL "Limit time for tests (in seconds)")
 
 if(WITH_DOCKER)
   find_program(HAVE_DOCKER docker)

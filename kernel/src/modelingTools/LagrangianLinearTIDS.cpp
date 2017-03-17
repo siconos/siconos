@@ -17,8 +17,8 @@
 */
 #include "LagrangianLinearTIDS.hpp"
 #include "BlockMatrix.hpp"
-#define DEBUG_STDOUT
-#define DEBUG_MESSAGES
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
 #include "debug.h"
 
 #include <iostream>
@@ -55,7 +55,8 @@ void LagrangianLinearTIDS::initRhs(double time)
   if (_K)
   {
     //  bloc10 of jacobianX is solution of Mass*Bloc10 = K
-    _rhsMatrices[jacobianXBloc10].reset(new SimpleMatrix(-1 * *_K));
+    if(!_rhsMatrices[jacobianXBloc10])
+      _rhsMatrices[jacobianXBloc10].reset(new SimpleMatrix(-1 * *_K));
     _inverseMass->PLUForwardBackwardInPlace(*_rhsMatrices[jacobianXBloc10]);
     _jacxRhs->block(1,0) = _rhsMatrices[jacobianXBloc10];
   }
@@ -65,7 +66,8 @@ void LagrangianLinearTIDS::initRhs(double time)
   if (_C)
   {
     //  bloc11 of jacobianX is solution of Mass*Bloc11 = C
-    _rhsMatrices[jacobianXBloc11].reset(new SimpleMatrix(-1 * *_C));
+    if(!_rhsMatrices[jacobianXBloc11])
+      _rhsMatrices[jacobianXBloc11].reset(new SimpleMatrix(-1 * *_C));
     _inverseMass->PLUForwardBackwardInPlace(*_rhsMatrices[jacobianXBloc11]);
     _jacxRhs->block(1,1) = _rhsMatrices[jacobianXBloc11];
   }
@@ -74,8 +76,8 @@ void LagrangianLinearTIDS::initRhs(double time)
   //   _rhsMatrices[jacobianXBloc11] = _rhsMatrices[zeroMatrix] ;
 
   if(_C || _K)
-    _jacxRhs.reset(new BlockMatrix(_rhsMatrices[zeroMatrix], _rhsMatrices[idMatrix],
-				   _rhsMatrices[jacobianXBloc10], _rhsMatrices[jacobianXBloc11]));
+      _jacxRhs.reset(new BlockMatrix(_rhsMatrices[zeroMatrix], _rhsMatrices[idMatrix],
+				     _rhsMatrices[jacobianXBloc10], _rhsMatrices[jacobianXBloc11]));
 }
 
 void LagrangianLinearTIDS::setK(const SiconosMatrix& newValue)

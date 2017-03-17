@@ -91,13 +91,10 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
       DEBUG_EXPR(vold->display());
 
       /* compute the force and store in vFree */
-      if(d->forces())
-      {
-        d->computeForces(told, qold, vold);
-        DEBUG_EXPR(d->forces()->display());
-        vFree += *(d->forces());
-      }
-
+      d->computeForces(told, qold, vold);
+      DEBUG_EXPR(d->forces()->display());
+      vFree += *(d->forces());
+    
       /* Compute the acceleration due to the external force */
       /* vFree contains left (right limit) acceleration without contact force */
       if(d->inverseMass())
@@ -143,13 +140,10 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
       DEBUG_EXPR(Mold->display());
 
 
-      if(d->forces())
-      {
-        d->computeForces(told, qold, vold);
-        DEBUG_EXPR(d->forces()->display());
-
-        vFree += *(d->forces());
-      }
+      d->computeForces(told, qold, vold);
+      DEBUG_EXPR(d->forces()->display());
+      vFree += *(d->forces());
+      
       if(d->inverseMass())
 	{
 	  d->update_inverse_mass();
@@ -442,16 +436,14 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
         residuFree =  - 0.5 * h**workFree_tdg;
 
         workFree_tdg->zero();
-        if(d->forces())
-        {
-          DEBUG_EXPR(q->display(););
-          DEBUG_EXPR(v->display(););
-          d->forces()->zero();
-          d->computeForces(t, q, v);
-          DEBUG_EXPR(d->forces()->display(););
-          *workFree_tdg += *(d->forces());
+	DEBUG_EXPR(q->display(););
+	DEBUG_EXPR(v->display(););
+	d->forces()->zero();
+	d->computeForces(t, q, v);
+	DEBUG_EXPR(d->forces()->display(););
+	*workFree_tdg += *(d->forces());
 
-        }
+        
 	if(d->inverseMass())
 	  {
 	  d->update_inverse_mass();
@@ -479,11 +471,9 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
         residuFree = 0.5 * h**workFree_tdg;
         workFree_tdg->zero();
 
-        if(d->forces())
-        {
-          d->computeForces(t, q, v);
-          *workFree_tdg += *(d->forces());
-        }
+	d->computeForces(t, q, v);
+	*workFree_tdg += *(d->forces());
+        
 	if(d->inverseMass())
 	  {
 	  d->update_inverse_mass();
@@ -528,12 +518,10 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
         // Lagrangian Nonlinear Systems
         if(dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
         {
-          if(d->forces())
-          {
-            d->computeForces(t, q, v);
-            DEBUG_EXPR(d->forces()->display());
-            vFree += *(d->forces());
-          }
+	  d->computeForces(t, q, v);
+	  DEBUG_EXPR(d->forces()->display());
+	  vFree += *(d->forces());
+          
         }
         else
           RuntimeException::selfThrow
@@ -570,11 +558,9 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
         DEBUG_EXPR(q->display());
         DEBUG_EXPR(v->display());
 
-        if(d->forces())
-        {
-          d->computeForces(t, q, v);
-          vFree += *(d->forces());
-        }
+	d->computeForces(t, q, v);
+	vFree += *(d->forces());
+        
 
 	if(d->inverseMass())
 	  {

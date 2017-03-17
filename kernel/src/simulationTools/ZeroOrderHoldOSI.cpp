@@ -141,33 +141,17 @@ void ZeroOrderHoldOSI::initializeInteraction(double t0, Interaction &inter,
 {
   SP::DynamicalSystem ds1= interProp.source;
   SP::DynamicalSystem ds2= interProp.target;
-
-  assert(interProp.DSlink);
+  assert(ds1);
+  assert(ds2);
 
   VectorOfBlockVectors& DSlink = *interProp.DSlink;
 
-  Relation &relation =  *inter.relation();
+  Relation &relation =  *inter.relation();  
   RELATION::TYPES relationType = relation.getType();
-  /* Check that the interaction has the correct initialization for y and lambda */
-  bool isInitializationNeeded = false;
-  if (!(inter.lowerLevelForOutput() <= _levelMinForOutput && inter.upperLevelForOutput()  >= _levelMaxForOutput ))
-  {
-    //RuntimeException::selfThrow("ZeroOrderHoldOSI::initializeInteraction, we must resize _y");
-    inter.setLowerLevelForOutput(_levelMinForOutput);
-    inter.setUpperLevelForOutput(_levelMaxForOutput);
-    isInitializationNeeded = true;
-  }
 
-  if (!(inter.lowerLevelForInput() <= _levelMinForInput && inter.upperLevelForInput() >= _levelMaxForInput ))
-  {
-    // RuntimeException::selfThrow("ZeroOrderHoldOSI::initializeInteraction, we must resize _lambda");
-    inter.setLowerLevelForInput(_levelMinForInput);
-    inter.setUpperLevelForInput(_levelMaxForInput);
-    isInitializationNeeded = true;
-  }
-  if (isInitializationNeeded)
-    inter.reset();
-
+  // Check if interations levels (i.e. y and lambda sizes) are compliant with the current osi.
+  _check_and_update_interaction_levels(inter);
+  // Initialize/allocate memory buffers in interaction.
   bool computeResidu = relation.requireResidu();
   inter.initializeMemory(computeResidu,_steps);
 
@@ -188,37 +172,7 @@ void ZeroOrderHoldOSI::initializeInteraction(double t0, Interaction &inter,
         DSlink[FirstOrderR::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
       }
     }
-
-
-  // Compute a first value for the output
-    inter.computeOutput(t0, interProp, 0);
-
-    // prepare the gradients
-    relation.computeJach(t0, inter, interProp);
-    for (unsigned int i = 0; i < inter.upperLevelForOutput() + 1; ++i)
-      {
-      inter.computeOutput(t0, interProp, i);
-    }
-    inter.swapInMemory();
-
-
 }
-
-// void ZeroOrderHoldOSI::initialize(Model& m)
-// {
-//   OneStepIntegrator::initialize(m);
-//   DynamicalSystemsGraph::VIterator dsi, dsend;
-
-//   for(std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
-//   {
-//     if(!checkOSI(dsi)) continue;
-//     SP::DynamicalSystem  ds = _dynamicalSystemsGraph->bundle(*dsi);
-//     initializeDynamicalSystem(m,m.t0(),ds);
-//   }
-
-//   // Note FP : NO Call to InitializeInteractions???
-  
-// }
 
 double ZeroOrderHoldOSI::computeResidu()
 {

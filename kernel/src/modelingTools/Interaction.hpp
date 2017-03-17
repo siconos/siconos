@@ -785,28 +785,6 @@ public:
 
   void computeKhat(SiconosMatrix& m, VectorOfSMatrices& workM, double h) const;
 
-
-  /**  get the single value used to build indexSets Warning: the
-   * relativePosition depends on NsLawSize and/or type.  This means
-   * that at the time, for the interactionBlock of y that corresponds to
-   * the present relation, the first scalar value is used.  For
-   * example, for friction, normal part is in first position, followed
-   * by the tangential parts.
-   * \param i derivative number i of output
-   * \return double
-   */
-  inline double getYRef(unsigned int i) const
-  {
-
-    return (*_y[i])(0);
-  }
-
-  inline double getLambdaRef(unsigned int i) const
-  {
-    // get the single value used to build indexSets
-    return (*_lambda[i])(0);
-  }
-
   // --- Residu functions
 
   inline SP::SiconosVector residuY() const

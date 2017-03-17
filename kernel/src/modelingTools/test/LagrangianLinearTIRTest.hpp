@@ -37,6 +37,7 @@ private:
   // tests to be done ...
 
   CPPUNIT_TEST(testBuildLagrangianLinearTIR1);
+  CPPUNIT_TEST(testBuildLagrangianLinearTIR2);
   CPPUNIT_TEST(testBuildLagrangianLinearTIR3);
   CPPUNIT_TEST(testBuildLagrangianLinearTIR4);
   //  CPPUNIT_TEST(testBuildLagrangianLinearTIR5);
@@ -51,6 +52,7 @@ private:
 
   void testBuildLagrangianLinearTIR0();
   void testBuildLagrangianLinearTIR1();
+  void testBuildLagrangianLinearTIR2();
   void testBuildLagrangianLinearTIR3();
   void testBuildLagrangianLinearTIR4();
 

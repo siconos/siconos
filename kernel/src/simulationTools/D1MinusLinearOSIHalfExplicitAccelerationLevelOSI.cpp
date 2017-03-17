@@ -96,13 +96,11 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
       work_tdg->zero();
       DEBUG_EXPR(work_tdg->display());
 
-      if(d->forces())
-      {
-        d->computeForces(told, qold, vold);
-        DEBUG_EXPR(d->forces()->display());
+      d->computeForces(told, qold, vold);
+      DEBUG_EXPR(d->forces()->display());
 
-        accFree += *(d->forces());
-      }
+      accFree += *(d->forces());
+      
       if(d->inverseMass())
 	{
 	  d->update_inverse_mass();
@@ -134,13 +132,11 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
       work_tdg->zero();
       DEBUG_EXPR(work_tdg->display());
 
-      if(d->forces())
-      {
-        d->computeForces(told, qold, vold);
-        DEBUG_EXPR(d->forces()->display());
+      d->computeForces(told, qold, vold);
+      DEBUG_EXPR(d->forces()->display());
 
-        accFree += *(d->forces());
-      }
+      accFree += *(d->forces());
+      
       if(d->inverseMass())
 	{
 	  d->update_inverse_mass();
@@ -438,12 +434,10 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
         residuFree =  - 0.5 * h* *work_tdg;
 
 
-        if(d->forces())
-        {
-          d->computeForces(t, q, v);
-          *work_tdg = *(d->forces());
-          DEBUG_EXPR(d->forces()->display());
-        }
+	d->computeForces(t, q, v);
+	*work_tdg = *(d->forces());
+	DEBUG_EXPR(d->forces()->display());
+        
 	if(d->inverseMass())
 	  {
 	    d->update_inverse_mass();
@@ -468,11 +462,9 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
         residuFree = 0.5 * h* *work_tdg;
         work_tdg->zero();
 
-        if(d->forces())
-        {
-          d->computeForces(t, q, v);
-          *work_tdg += *(d->forces());
-        }
+	d->computeForces(t, q, v);
+	*work_tdg += *(d->forces());
+        
 
 	if(d->inverseMass())
 	  {
@@ -518,11 +510,8 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
         if(dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
         {
           DEBUG_EXPR(M->display());
-          if(d->forces())
-          {
-            d->computeForces(t, q, v);
-            accFree += *(d->forces());
-          }
+	  d->computeForces(t, q, v);
+	  accFree += *(d->forces());
         }
         else
           RuntimeException::selfThrow
@@ -549,12 +538,9 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
         DEBUG_EXPR(q->display());
         DEBUG_EXPR(v->display());
 
-        if(d->forces())
-        {
-          d->computeForces(t, q, v);
-          accFree += *(d->forces());
-        }
-
+	d->computeForces(t, q, v);
+	accFree += *(d->forces());
+        
 	if(d->inverseMass())
 	  {
 	    d->update_inverse_mass();

@@ -141,6 +141,12 @@ protected:
   /** struct to add terms in the integration. Useful for Control */
   SP::ExtraAdditionalTerms _extraAdditionalTerms;
 
+  /** Compare interaction and current OSI levels for input and output.
+      Reset interaction if they are not compliant.
+      \param inter a reference to an Interaction
+  */
+  void _check_and_update_interaction_levels(Interaction& inter);
+  
 private:
 
 
@@ -152,6 +158,7 @@ private:
    * \return OneStepIntegrator&
    */
   OneStepIntegrator& operator=(const OneStepIntegrator& OSI);
+
 
 public:
 
@@ -240,7 +247,7 @@ public:
   /** initialise the integrator
    * \param m a Model
    */
-  virtual void initialize(Model& m ); //= 0;
+  virtual void initialize(Model& m );
 
   /** Initialization process of the nonsmooth problems
    linked to this OSI*/
@@ -263,7 +270,7 @@ public:
    */
   virtual void initializeInteraction(double t0, Interaction &inter,
 			     InteractionProperties& interProp,
-			     DynamicalSystemsGraph & DSG) =0 ;
+			     DynamicalSystemsGraph & DSG) = 0 ;
 
   /** get the number of index sets required for the simulation
    * \return unsigned int

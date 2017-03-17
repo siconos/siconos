@@ -23,8 +23,8 @@
 #include "SimulationGraphs.hpp"
 
 #include <iostream>
-#define DEBUG_STDOUT
-#define DEBUG_MESSAGES
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
 #include "debug.h"
 
 using namespace RELATION;
@@ -76,7 +76,6 @@ void LagrangianLinearTIR::computeOutput(double time, Interaction& inter, Interac
   // get y and lambda of the interaction
   SiconosVector& y = *inter.y(derivativeNumber);
   VectorOfBlockVectors& DSlink = *interProp.DSlink;
-
   prod(*_jachq, *DSlink[LagrangianR::q0 + derivativeNumber], y);
 
   if (derivativeNumber == 0)
@@ -92,8 +91,6 @@ void LagrangianLinearTIR::computeOutput(double time, Interaction& inter, Interac
     SiconosVector& lambda = *inter.lambda(derivativeNumber);
     prod(*_jachlambda, lambda, y, false);
   }
-
-
 }
 
 void LagrangianLinearTIR::computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level)
@@ -103,11 +100,8 @@ void LagrangianLinearTIR::computeInput(double time, Interaction& inter, Interact
   SiconosVector& lambda = *inter.lambda(level);
   VectorOfBlockVectors& DSlink = *interProp.DSlink;
   // computation of p = Ht lambda
-  DEBUG_BEGIN("LTIR::computeInp()\n");
-  DSlink[LagrangianR::p0 + level]->display();
-  std::cout << level << std::endl;
+  DEBUG_PRINTF("LTIR::computeInp()%d\n", level);
   prod(lambda, *_jachq, *DSlink[LagrangianR::p0 + level], false);
-  DSlink[LagrangianR::p0 + level]->display();
   DEBUG_BEGIN("LTIR END ()\n");
 }
 

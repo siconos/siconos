@@ -150,9 +150,6 @@ Topology::__addInteractionInIndexSet0(SP::Interaction inter, SP::DynamicalSystem
   // related to simulation objects.
   //interProp.DSlink.reset(new VectorOfBlockVectors);
   
-  // interProp.workVectors.reset(new VectorOfVectors);
-  interProp.workMatrices.reset(new VectorOfSMatrices);
-
   // unsigned int nslawSize = inter->nonSmoothLaw()->size();
   // interProp.block.reset(new SimpleMatrix(nslawSize, nslawSize));
 

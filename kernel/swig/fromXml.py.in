@@ -387,7 +387,7 @@ def buildModelXML(xmlFile):
                 _additionalInputsNSLaw(nslxml, nslaw, dataNSL[nslawName])
 
         # Finally, create the Interaction and insert it in NSDS
-        inter = SK.Interaction(nslaw.size(), nslaw, relation)
+        inter = SK.Interaction(nslaw, relation)
         dsL = interxml.DS_Concerned
         if len(dsL) == 1:
             nsds.link(inter, allDS[dsL[0]])

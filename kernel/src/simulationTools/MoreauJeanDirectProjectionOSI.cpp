@@ -64,38 +64,6 @@ MoreauJeanDirectProjectionOSI::MoreauJeanDirectProjectionOSI(double theta, doubl
   _activateYVelThreshold =   SICONOS_MPC_DEFAULT_ACTIVATION_VEL_THRESHOLD;
 }
 
-
-
-void MoreauJeanDirectProjectionOSI::initializeInteraction(double t0, Interaction &inter,
-                                          InteractionProperties& interProp,
-                                          DynamicalSystemsGraph & DSG)
-{
-  DEBUG_BEGIN("MoreauJeanDirectProjectionOSI::initializeInteraction(...)\n");
-  
-  bool isInitializationNeeded = false;
-  if (!(inter.lowerLevelForOutput() <= _levelMinForOutput && inter.upperLevelForOutput()  >= _levelMaxForOutput ))
-  {
-    //RuntimeException::selfThrow("MoreauJeanDirectProjectionOSI::initializeInteraction, we must resize _y");
-    inter.setLowerLevelForOutput(_levelMinForOutput);
-    inter.setUpperLevelForOutput(_levelMaxForOutput);
-    isInitializationNeeded = true;
-  }
-  if (!(inter.lowerLevelForInput() <= _levelMinForInput && inter.upperLevelForInput() >= _levelMaxForInput ))
-  {
-    // RuntimeException::selfThrow("MoreauJeanDirectProjectionOSI::initializeInteraction, we must resize _lambda");
-    inter.setLowerLevelForInput(_levelMinForInput);
-    inter.setUpperLevelForInput(_levelMaxForInput);
-    isInitializationNeeded = true;
-  }
-  
-  if (isInitializationNeeded)
-    inter.reset();
-  MoreauJeanOSI::initializeInteraction(t0, inter, interProp, DSG);
-
-  
-  
-  DEBUG_END("MoreauJeanDirectProjectionOSI::initializeInteraction(...)\n");
-}
 void MoreauJeanDirectProjectionOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds)
 {
   DEBUG_BEGIN("MoreauJeanDirectProjectionOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds) \n");

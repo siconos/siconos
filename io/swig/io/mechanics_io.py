@@ -1274,7 +1274,7 @@ class Hdf5():
                     joint = joint_class(ds1, self.joints()[name].attrs['pivot_point'])
 
             joint_nslaw = EqualityConditionNSL(joint.numberOfConstraints())
-            joint_inter = Interaction(joint.numberOfConstraints(), joint_nslaw, joint)
+            joint_inter = Interaction(joint_nslaw, joint)
             self._model.nonSmoothDynamicalSystem().\
                 link(joint_inter, ds1, ds2)
 
@@ -1311,7 +1311,7 @@ class Hdf5():
 
             ds1.setBoundaryConditions(bc);
 
-            #joint_inter = Interaction(5, joint_nslaw, joint)
+            #joint_inter = Interaction(joint_nslaw, joint)
             #    self._model.nonSmoothDynamicalSystem().\
             #        link(joint_inter, ds1)
 
@@ -1382,7 +1382,7 @@ class Hdf5():
 
             relation.setOffset(offset)
 
-            inter = Interaction(3, nslaw, relation)
+            inter = Interaction(nslaw, relation)
 
             if ds2 is not None:
                 self._model.nonSmoothDynamicalSystem().link(inter, ds1, ds2)

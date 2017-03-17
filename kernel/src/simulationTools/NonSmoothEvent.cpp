@@ -84,8 +84,6 @@ void NonSmoothEvent::process(Simulation& simulation)
     //---> solve acceleration LCP if IndexSet[2] is not empty
     if (indexSet2->size() > 0)
     {
-      DEBUG_BEGIN("NSEV::LCP acc()\n");
-	    
       // solve LCP-acceleration
       eventDriven.computeOneStepNSProblem(SICONOS_OSNSP_ED_SMOOTH_ACC); // solveLCPAcceleration();
       // update input of level 2, acceleration and output of level 2
@@ -93,8 +91,6 @@ void NonSmoothEvent::process(Simulation& simulation)
       // for all index in IndexSets[2], update the index set according to y[2] and/or lambda[2] sign.
       eventDriven.updateIndexSetsWithDoubleCondition();
     }
-   DEBUG_BEGIN("END NSEV::update()\n");
-  
 
     // Save results in memory
     simulation.nonSmoothDynamicalSystem()->swapInMemory();  // To save pre-impact values

@@ -18,8 +18,8 @@
 #include "LagrangianDS.hpp"
 #include "BlockVector.hpp"
 #include "BlockMatrix.hpp"
-#define DEBUG_STDOUT
-#define DEBUG_MESSAGES
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
 #include "debug.h"
 #include <iostream>
 
@@ -165,16 +165,26 @@ void LagrangianDS::initRhs(double time)
   // One exception: zero and identity matrices, used to filled in M and jacobianfx.
 
   // Initial conditions and state
+
+  // WARNING : this function is supposed to be called
+  // by the OneStepIntegrator, and maybe several times for the same DS
+  // if the system is involved in more than one interaction. So, we must check
+  // if p2 and q2 already exist to be sure that DSlink won't be lost.
+
   _x0.reset(new SiconosVector(*_q0, *_velocity0));
+  
   _x[0].reset(new SiconosVector(*_q[0], *_q[1]));
 
-  _q[2].reset(new SiconosVector(_ndof));
+  if(!_q[2])
+    _q[2].reset(new SiconosVector(_ndof));
+
   _x[1].reset(new SiconosVector(*_q[1], *_q[2]));
 
   // Everything concerning rhs and its jacobian is handled in initRhs and computeXXX related functions.
   _rhsMatrices.resize(numberOfRhsMatrices);
   
-  _p[2].reset(new SiconosVector(_ndof));
+  if(!_p[2])
+    _p[2].reset(new SiconosVector(_ndof));
 
   init_forces();  
   init_inverse_mass();
@@ -201,8 +211,10 @@ void LagrangianDS::initRhs(double time)
     flag2 = true;
   }
 
-  _rhsMatrices[zeroMatrix].reset(new SimpleMatrix(_ndof, _ndof, Siconos::ZERO));
-  _rhsMatrices[idMatrix].reset(new SimpleMatrix(_ndof, _ndof, Siconos::IDENTITY));
+  if(!_rhsMatrices[zeroMatrix])
+    _rhsMatrices[zeroMatrix].reset(new SimpleMatrix(_ndof, _ndof, Siconos::ZERO));
+  if(!_rhsMatrices[idMatrix])
+    _rhsMatrices[idMatrix].reset(new SimpleMatrix(_ndof, _ndof, Siconos::IDENTITY));
 
   if (flag1 && flag2)
     _jacxRhs.reset(new BlockMatrix(_rhsMatrices[zeroMatrix], _rhsMatrices[idMatrix],
@@ -416,14 +428,13 @@ void LagrangianDS::computeJacobianFGyrqDot(SP::SiconosVector position, SP::Sicon
 void LagrangianDS::computeRhs(double time, bool isDSup)
 {
   // if isDSup == true, this means that there is no need to re-compute mass ...
-  DEBUG_BEGIN("LagrangianDS::computeRhs()\n");
   *_q[2] = *(_p[2]); // Warning: r/p update is done in Interactions/Relations
 
-  if(_forces)
-    {
-      computeForces(time, _q[0], _q[1]);
-      *_q[2] += *_forces;
-    }
+  // if(_forces)
+  //   {
+  computeForces(time, _q[0], _q[1]);
+  *_q[2] += *_forces;
+  //#  }
   
   // Computes q[2] = inv(mass)*(fL+p) by solving Mq[2]=fL+p.
   // -- Case 1: if mass is constant, then a copy of imass is LU-factorized during initialization and saved into _inverseMasse
@@ -439,8 +450,8 @@ void LagrangianDS::computeRhs(double time, bool isDSup)
   //  if(mass->isPlugged()) : mass may be not plugged in LagrangianDS children
   if(_inverseMass) 
     _inverseMass->PLUForwardBackwardInPlace(*_q[2]);
-  _x[1].reset(new SiconosVector(*_q[1], *_q[2]));
-  DEBUG_PRINT("LagDS end computeRhs \n");    
+  //_x[1].reset(new SiconosVector(*_q[1], *_q[2])); // Do we really need this connection?
+
 }
 
 void LagrangianDS::computeJacobianRhsx(double time, bool isDSup)

@@ -34,11 +34,11 @@
 #include "OneStepNSProblem.hpp"
 #include "BlockVector.hpp"
 
-#define DEBUG_BEGIN_END_ONLY
-#define DEBUG_NOCOLOR
-#define DEBUG_STDOUT
-#define DEBUG_MESSAGES
-#define DEBUG_WHERE_MESSAGES
+// #define DEBUG_BEGIN_END_ONLY
+// #define DEBUG_NOCOLOR
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
+// #define DEBUG_WHERE_MESSAGES
 #include <debug.h>
 
 
@@ -160,44 +160,14 @@ void MoreauJeanOSI::initializeInteraction(double t0, Interaction &inter,
   assert(ds1);
   assert(ds2);
 
-  // ========== COMMON TO ALL OSI ==========
-  
-  interProp.workVectors.reset(new VectorOfVectors);
-  interProp.workMatrices.reset(new VectorOfSMatrices);
-  unsigned int nslawSize = inter.nonSmoothLaw()->size();
-  interProp.block.reset(new SimpleMatrix(nslawSize, nslawSize));
-  // inter.setDSLinkAndWorkspace(interProp, *ds1, *workVds1, *ds2_, *workVds2);
-
-  // ======== END COMMON TO ALL OSI ========
-  
   VectorOfBlockVectors& DSlink = *interProp.DSlink;
-  assert(interProp.DSlink);
 
   Relation &relation =  *inter.relation();  
   RELATION::TYPES relationType = relation.getType();
 
-
-  /* Check that the interaction has the correct initialization for y and lambda */
-  bool isInitializationNeeded = false;
-  if (!(inter.lowerLevelForOutput() <= _levelMinForOutput && inter.upperLevelForOutput()  >= _levelMaxForOutput ))
-  {
-    //RuntimeException::selfThrow("MoreauJeanOSI::initializeInteraction, we must resize _y");
-    inter.setLowerLevelForOutput(_levelMinForOutput);
-    inter.setUpperLevelForOutput(_levelMaxForOutput);
-    isInitializationNeeded = true;
-  }
-
-  if (!(inter.lowerLevelForInput() <= _levelMinForInput && inter.upperLevelForInput() >= _levelMaxForInput ))
-  {
-    // RuntimeException::selfThrow("MoreauJeanOSI::initializeInteraction, we must resize _lambda");
-    inter.setLowerLevelForInput(_levelMinForInput);
-    inter.setUpperLevelForInput(_levelMaxForInput);
-    isInitializationNeeded = true;
-  }
-
-  if (isInitializationNeeded)
-    inter.reset();
-
+  // Check if interations levels (i.e. y and lambda sizes) are compliant with the current osi.
+  _check_and_update_interaction_levels(inter);
+  // Initialize/allocate memory buffers in interaction.
   bool computeResidu = relation.requireResidu();
   inter.initializeMemory(computeResidu,_steps);
 
@@ -279,19 +249,6 @@ void MoreauJeanOSI::initializeInteraction(double t0, Interaction &inter,
 	    }
 	}
     }
-  
-  // Compute a first value for the output
-    inter.computeOutput(t0, interProp, 0);
-
-    // prepare the gradients
-    relation.computeJach(t0, inter, interProp);
-    for (unsigned int i = 0; i < inter.upperLevelForOutput() + 1; ++i)
-      {
-      inter.computeOutput(t0, interProp, i);
-    }
-    inter.swapInMemory();
-
-  
 }
 
 void MoreauJeanOSI::initialize_nonsmooth_problems()
@@ -301,36 +258,6 @@ void MoreauJeanOSI::initialize_nonsmooth_problems()
   ((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY])->setInputOutputLevel(1);
   //  ((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY])->initialize(_simulation);
 }
-
-// void MoreauJeanOSI::initialize(Model& m)
-// {
-//   OneStepIntegrator::initialize(m);
-//   // Get initial time
-//   double t0 = _simulation->startingTime();
-
-//   DynamicalSystemsGraph::VIterator dsi, dsend;
-//   for(std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
-//   {
-//     if(!checkOSI(dsi)) continue;
-//     SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
-//     initializeDynamicalSystem(m, t0, ds);
-//   }
-
-//   SP::OneStepNSProblems  allOSNS  = _simulation->oneStepNSProblems();
-//   ((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY])->setIndexSetLevel(1);
-//   ((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY])->setInputOutputLevel(1);
-//   //  ((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY])->initialize(_simulation);
-
-//   SP::InteractionsGraph indexSet0 = m.nonSmoothDynamicalSystem()->topology()->indexSet0();
-//   InteractionsGraph::VIterator ui, uiend;
-//   for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
-//   {
-//     Interaction& inter = *indexSet0->bundle(*ui);
-    
-//     initializeInteraction(t0, inter, indexSet0->properties(*ui), *_dynamicalSystemsGraph);
-//   }
-// }
-
 
 void MoreauJeanOSI::initializeIterationMatrixW(double time, SP::DynamicalSystem ds)
 {
