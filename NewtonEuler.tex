@@ -73,9 +73,204 @@ If we perform the time derivation of $RR^\top =I$ rather than $R^\top R=I$, we g
   todo : add the formulation in the inertial frame of the Euler equation with $\omega =R \Omega$.
 \end{ndrva}
 
-In the numerical practice, the choice of the rotation matrix is not convenient since it introduces redundant parameters. Since $R$ must belong to $SO^+(3)$, we have also to satisfy $\det(R)=1$ and $R^{-1}=R^\top$. In Siconos we choose to parametrize the rotation with a unit quaternion $p \in \RR^4$ such that $R = \Phi(p)$ and $\dot p = \Psi(p)\Omega $. This parameterization has no singularity and has only one redundant variable that is determined by imposing $\|p\|=1$. Formulae for $\Phi$ and $\Psi$ can be found in any textbooks.
+\section{Playing with rotations and quaternions}
+\subsection{ Lie group $SO(3)$ of finite rotations and Lie algebra $\mathfrak{so}(3)$ of infinitesimal rotations}
 
-We denote  by $q$ the vector of coordinates of the position and the orientation of the body, and by $v$ {the body twist}:
+Recall that the Lie group $SO(3)$ of linear proper orthogonal transformation by its matrix representation
+\begin{equation}SO(3)
+  \label{eq:43}
+  SO(3) = \{R \in \RR^{3\times3}\mid R^TR=I , det(R) = +1  \}
+\end{equation}
+with the Lie group composition $( \circ )$ law given by $R_1\circ R_2 = R_1R_2$ for $R_1,R_2\in SO(3)$. The identity element is $e = I_{3\times 3}$. At any point of $R\in SO(3)$, the tangent space is noted $T_RSO(3)$ is the set of tangent vectors at a point $R$. Given a smooth curve $S(\cdot) : t\in \RR \mapsto S(t)\in SO(3)$ in $SO(3)$ such that $S(O)= R$, a tangent vector at $R$ is defined by
+\begin{equation}
+  \label{eq:59}
+  a = \left. \frac{d}{dt} (S(t)) \right|_{t=0}.
+\end{equation}
+
+\paragraph{Left representation of  the tangent space at $R$, $T_RSO(3)$ }
+Since $S(t)\in SO(3)$, we have $S(t)S(t)^T=I$ and then $\frac{d}{dt} (S(t)) = \dot S(t)S^T(t) +  S(t) \dot S^T(t) =0$. At $t=0$, we get
+\begin{equation}
+  \label{eq:60}
+ a R^T +  R a^T =0.
+\end{equation}
+We conclude that it exists a skew--symmetric matrix $\tilde \Omega = R^T a$ such that $\tilde \Omega^T + \tilde \Omega =0$. Therefore a possible representation of  $T_RSO(3)$ is
+\begin{equation}
+  \label{eq:58}
+  T_RSO(3) = \{ a = R \tilde \Omega \in \RR^{3\times 3} \mid \tilde \Omega^T + \tilde \Omega =0 \}.
+\end{equation}
+
+For $R=I$, the tangent space is directly given by the set of  skew--symmetric matrices:
+\begin{equation}
+  \label{eq:58}
+  T_ISO(3) = \{ a = \tilde \Omega\in \RR^{3\times 3} \mid \tilde \Omega^T + \tilde \Omega =0 \}.
+\end{equation}
+Firstly, it is possible to show that $T_ISO(3)$ with the Lie Bracket $[\cdot,\cdot]$ defined by the matrix commutator
+\begin{equation}
+  \label{eq:61}
+  [A,B] = AB-BA
+\end{equation}
+is a Lie algebra. For skew symmetric matrices, the commutator can be expressed with the cross product in $\RR^3$
+\begin{equation}
+  \label{eq:62}
+  [\tilde \Omega, \tilde \Gamma] = \tilde \Omega \tilde \Gamma - \tilde \Gamma \tilde \Omega = \widetilde{ \Omega \Gamma}
+\end{equation}
+The specific notation $\mathfrak{so}(3)$  is generally introduced for the Lie algebra at the identity point
+\begin{equation}
+  \label{eq:44}
+  \mathfrak{so}(3) =\{\Omega\in \RR^{3\times 3} \mid \Omega + \tilde \Omega^T =0\}.
+\end{equation}
+and we use   $T_ISO(3) =  \mathfrak{so}(3)$ whenever there is no ambiguity  The notation $\tilde \Omega$ is implied by the fact that the Lie algebra is isomorphic to $\RR^3$ thanks to the operator $\widetilde{(\cdot)} :\RR^3 \rightarrow \mathfrak{so}(3)$ and defined by
+\begin{equation}
+  \label{eq:45}
+ \widetilde{(\cdot)}: \Omega \mapsto \tilde \Omega =
+  \begin{bmatrix}
+    0 & -\Omega_3 & \Omega_2 \\
+    \Omega_3 & 0 & -\Omega_1 \\
+    -\Omega_2  & \Omega_1 & 0
+  \end{bmatrix}
+\end{equation}
+Note that $\tilde \Omega x = \Omega \times x$. With this notation the commutator can be expressed as
+\begin{equation}
+  \label{eq:63}
+  [\tilde \Omega, \tilde \Gamma] = \Omega \times \Gamma
+\end{equation}
+
+Let us come back to the representation of  $T_RSO(3)$ given in~\eqref{eq:58}. It is clear it can expressed with a representation that relies on $\mathfrak{so}(3)$
+\begin{equation}
+  \label{eq:64}
+   T_RSO(3) = \{ a = R \tilde \Omega \in \RR^{3\times 3} \mid \tilde \Omega \in \mathfrak{so}(3) \}.
+\end{equation}
+With \eqref{eq:64}, we see that there a linear map that relates $T_RSO(3)$ to  $\mathfrak{so}(3)$.
+
+Let us recall the definition of a action on a Lie group. An general (left)  action of Lie Group $\mathcal G$ on a manifold $\mathcal M$ is a smooth map $\Lambda: \mathcal G \times \mathcal \mathcal M \rightarrow \mathcal M$ satisfying
+\begin{equation}
+  \label{eq:66}
+  \begin{array}[lcl]{rcl}
+    \Lambda(I,y) &=& y, \quad \forall y \in \mathcal M \\
+    \Lambda(R,\Lambda(S,y)) &=& \Lambda(RS,y) , \quad \forall R,S \in \mathcal G  \forall y \in \mathcal M \\
+  \end{array}
+\end{equation}
+A special group action that is  the left translation map for a point $R \in SO(3)$ 
+\begin{equation}
+  \label{eq:65}
+  \begin{array}[lcl]{rcl}
+    L_R& :  & SO(3)  \rightarrow  SO(3)\\
+            & & R \times S  \mapsto L_R(S) = R \circ S = RS\\
+  \end{array}
+\end{equation}
+which is diffeomorphism on $SO(3)$. In that case, we identify the manifold and the group.
+
+A given smooth curve  $S(\cdot) : t\in \RR \mapsto S(t)\in \mathcal G$ in $\mathcal G$ such that $S(0)= I$ produces a flow $\Lambda(S(t),cdot)$ on $\mathcal M$ and by differentiation we find a vector field
+\begin{equation}
+  \label{eq:67}
+    F(y) = \left. \frac{d}{dt} (\Lambda(S(t),y) \right|_{t=0}.
+\end{equation}
+For our application where  $\mathcal G = \mathcal M = SO(3)$, we get
+\begin{equation}
+  \label{eq:68}
+  F(y) = \left. \frac{d}{dt} S(t)\circ y \right|_{t=0} = \dot S(0) \circ y \in X(\mathcal M)
+\end{equation}
+Since $S(\cdot)$ is a smooth curve in $\mathcal G$, $\dot S(0)$ is a tangent vector at the point $S(0)=I$, that is an element $a = \tilde \Omega  \in \mathfrak{so}(3) $ defined by the relation~\eqref{eq:59}. Therefore, the vector field in \eqref{eq:68} is a tangent vector field and we get
+\begin{equation}
+  \label{eq:70}
+  \dot y(t) = F(y(t)) = \tilde \Omega y(t) = \Omega \times y(t).
+\end{equation}
+
+\begin{ndrva}
+  what happens at $S(0)=R$, with $ a =R \tilde \Omega =\dot S(0)$ and then $\dot y(t) = F(y(t)) = R \tilde \Omega y(t) =  R\Omega \times y(t)= \dot S(0) y(t) $. What else ? 
+\end{ndrva}
+
+
+\paragraph{Exponential map}
+Let us now define $\lambda_* :  \mathfrak{so}(3) \rightarrow \mathcal X(\mathcal M)$ be defined as
+\begin{equation}
+  \label{eq:69}
+  \lambda_*(a)(y) = \left. \frac{d}{ds} (\Lambda(S(s),y) \right|_{s=0}
+\end{equation}
+for a smooth curve  $S(s) \in \mathcal G$ such that $S(0) =I$ and $S'(0)=a$.
+
+
+\paragraph{Adjoint representation}
+
+
+Its derivative with respect to $S$, $DL_R(S)$ defines a diffeomorphism between $T_SSO(3)$ and $T_{RS}SO(3)$. In particular, for $S=I_{3\times3}$, we get
+\begin{equation}
+  \label{eq:49}
+  \begin{array}{rcl}
+    DL_R(I_{3\times3}) : \mathfrak{so}(3) & \rightarrow & T_R SO(3) \\
+    \tilde \Omega &\mapsto &DL_R(I_{3\times3})\cdot \tilde \Omega = R \tilde \Omega
+  \end{array}
+\end{equation}
+We end up with a possible representation of $T_{R} SO(3)$ as
+\begin{equation}
+  \label{eq:48}
+  T_{R} SO(3) =\{\tilde \Omega_R \mid \tilde \Omega_R = DL_R(I_{3\times3})\cdot \tilde \Omega = R \tilde \Omega, \tilde \Omega \in\mathfrak{so}(3)  \}.
+\end{equation}
+In other words, a tangent vector $\tilde \Omega \in \mathfrak{so}(3)$ defines a left invariant vector field on $SO(3)$ at the point $R$ given by $R \tilde \Omega$.
+
+
+
+\begin{ndrva}
+  explain briefly the notion of left-invariant vector field 
+\end{ndrva}
+%\href{https://en.wikipedia.org/wiki/Lie_group}{https://en.wikipedia.org/wiki/Lie_group}
+%Finally, the straight line $\alpha \tilde \Omega$ for $\Omega$ 
+For a given $\tilde \Omega \in \mathfrak{so}(3)=T_{I_{3\times3}} SO(3) $, let us consider the differential equation
+\begin{equation}
+  \label{eq:50}
+  \begin{cases}
+    \dot R(t) = R \tilde \Omega\\
+    R(0) = I
+  \end{cases}
+\end{equation}
+Since $R \tilde \Omega$ defines a left invariant vector field on $SO(3)$, the solution of this differential equation will stay in $SO(3)$. Let us recall the definition of the matrix exponential,
+\begin{equation}
+  \label{eq:53}
+  \exp(A) = \sum_{k=0}^{\infty} \frac {1}{k!} A^k
+\end{equation}
+A trivial solution of \eqref{eq:50} is $R(t) = \exp(t\tilde\Omega) $ since
+\begin{equation}
+  \label{eq:51}
+  \frac {d}{dt}(\exp(At)) = \exp(At) A.
+\end{equation}
+More generally, with the initial condition $R(t_0)= R_0$, we get the solution
+\begin{equation}
+R(t) = R_0 \exp((t-t_0)\tilde\Omega)\label{eq:54}
+\end{equation}
+
+
+
+Another interpretation is as follows. From a (incremental) rotation vector, $\Omega$ and its associated matrix $\tilde \Omega$, we obtain a rotation matrix in $SO(3)$ by the exponentation of the tangent vector field:
+\begin{equation}
+  \label{eq:52}
+  R = \exp(\tilde\Omega).
+\end{equation}
+Since we note that $\tilde \Omega^ 3 = - \theta^2 \tilde \Omega$ with $\theta = \|\Omega\|$, it is possible to get a closed form of the matrix exponential of $\tilde \Omega$
+\begin{equation}
+  \label{eq:55}
+  \begin{array}[lcl]{lcl}
+     \exp(\tilde \Omega) &=& \sum_{k=0}^{\infty} \frac {1}{k!} (\tilde \Omega)^k \\
+                         &=&  I_{3\times 3} + \sum_{k=0}^{\infty} \frac {(-1)^k}{(2k+1)!} ( \theta)^{2k+1} \tilde \Omega + (\sum_{k=0}^{\infty} \frac {(-1)^k}{(2k)!} ( \theta)^{2k} -1)\tilde \Omega^2\\
+                         &=&  I_{3\times 3} +\sin{\theta}\tilde \Omega +  (\cos(\theta)-1)\tilde \Omega^2 \\                   
+  \end{array} 
+\end{equation}
+that is
+\begin{equation}
+  \label{eq:56}
+  R = I_{3\times 3} +\sin{\theta}\tilde \Omega +  (\cos(\theta)-1)\tilde \Omega^2.
+\end{equation}
+The formula \eqref{eq:56} is the Euler--Rodrigues formula that allows to compute the rotation matrix on closed form.
+
+The differential of the exponential mapping, denoted by $D_A\exp$ is defined as the 'right trivialized' tangent of the exponential map (see Definition 2.18 in~\cite{Iserles.ea_AN2000})
+\begin{equation}
+  \label{eq:57}
+  \frac{d}{dt} (\exp(A(t))) = D_A\exp(A'(t)) \exp(A(t))
+\end{equation}
+
+\section{Parametrization using quaternions}
+
+
+In the numerical practice, the choice of the rotation matrix is not convenient since it introduces redundant parameters. Since $R$ must belong to $SO^+(3)$, we have also to satisfy $\det(R)=1$ and $R^{-1}=R^\top$. In general, we use a reduced vector of parameters $p\in\RR^{n_p}$ such $R = \Phi(p)$ and $\dot p = \psi(p)\Omega $. We denote  by $q$ the vector of coordinates of the position and the orientation of the body, and by $v$ {the body twist}:
 \begin{equation}
   q \coloneqq \begin{bmatrix}
     x_{\cg}\\
@@ -92,12 +287,12 @@ We denote  by $q$ the vector of coordinates of the position and the orientation 
   \dot q = 
   \begin{bmatrix}
      \dot x_{\cg}\\
-     \Psi(p) \dot p
+     \psi(p) \dot p
    \end{bmatrix}
    = 
    \begin{bmatrix}
      I & 0 \\
-     0 & \Psi(p)
+     0 & \psi(p)
    \end{bmatrix}
    v
    \coloneqq
@@ -106,7 +301,10 @@ We denote  by $q$ the vector of coordinates of the position and the orientation 
 with $T(q) \in \RR^{7\times 6}$.
 {Note that the twist $v$ is not directly the time derivative of the coordinate vector as a major difference with Lagrangian systems. }
 
-\paragraph{Quaternions and rotation} Let us recall some basic properties of a quaternion $p$ that is a collection of $4$ real parameters $(p_0,p_1,p_2,p_3)$. The first is considered as a scalar and three last as a vector in $\RR^3$ denoted by $\vv{p}$. The quaternion can written as $p=(p_0,p_1,p_2,p_3)$ or $p=(p_0,\vv{p})$. The norm of a quaternion is given by $|p|^2=p\bar p = p_o^2+p_1^2+p_2^2+p_3^2$.
+\paragraph{Quaternions and rotation} 
+
+In Siconos we choose to parametrize the rotation with a unit quaternion $p \in \RR^4$ such that $R = \Phi(p)$ and $\dot p = 1/2 \Psi(p)\Omega $. This parameterization has no singularity and has only one redundant variable that is determined by imposing $\|p\|=1$.
+ Let us recall some basic properties of a quaternion $p$ that is a collection of $4$ real parameters $(p_0,p_1,p_2,p_3)$. The first is considered as a scalar and three last as a vector in $\RR^3$ denoted by $\vv{p}$. The quaternion can written as $p=(p_0,p_1,p_2,p_3)$ or $p=(p_0,\vv{p})$. The norm of a quaternion is given by $|p|^2=p^\top p = p_o^2+p_1^2+p_2^2+p_3^2$.
  With this notation, the quaternion product is defined by
 \begin{equation}
   \label{eq:25}
@@ -230,7 +428,12 @@ so (\ref{eq:33}) can be rewritten
     \dot p_{x'}(t) = \dot p(t) \circ p^{-1}(t)   \circ   p_{x'}(t)  -    p_{x'}(t) \circ  \dot p(t) \circ p^{-1}(t)
   \end{array}
 \end{equation}
-The scalar part of $\dot p(t) \circ p^{-1}(t)$ is $p_o \dot p_0 + \vv{p}^T\vv{\dot p}$. Since $p$ is a unit quaternion, this scalar part is zero.
+The scalar part of $\dot p(t) \circ p^{-1}(t)$ is $(\dot p(t) \circ p^{-1}(t))_0 = p_o \dot p_0 + \vv{p}^T\vv{\dot p}$. Since $p$ is a unit quaternion, we have
+\begin{equation}
+  \label{eq:46}
+  |p|=1 \implies \frac{d}{dt} (p^\top p) = 0 =  \dot p^\top p + p^\top \dot p =   2( p_o \dot p_0 + \vv{p}^T\vv{\dot p}).
+\end{equation}
+Therefore, the scalar part $(\dot p(t) \circ p^{-1}(t))_0 =0$.
 The quaternion product $\dot p(t) \circ p^{-1}(t)$ and  $p_{x'}(t)$ is a product of quaternions with zero scalar part (see~\eqref{eq:36}), so we have 
 \begin{equation}
   \label{eq:35}
@@ -243,7 +446,7 @@ In terms of vector of $\RR^3$, this corresponds to
   \label{eq:4}
   \dot x'(t) = 2 \vv{ \dot p(t) \circ p^{-1}(t) } \times x'(t).
 \end{equation}
-Since $x'(t) = R(t) x$, we have $\dot x' = \dot R(t) x = \tilde \omega(t) R(t) x  = \tilde \omega(t) x'(t) $. Comparing \eqref{eq:4} and \eqref{eq:4}, we get
+Since $x'(t) = R(t) x$, we have $\dot x' = \dot R(t) x = \tilde \omega(t) R(t) x  = \tilde \omega(t) x'(t) $. Comparing \eqref{eq:35} and \eqref{eq:4}, we get
 \begin{equation}
   \label{eq:37}
   \tilde \omega(t) = 2 \vv{ \dot p(t) \circ p^{-1}(t) } 
@@ -272,20 +475,19 @@ and then
 The time derivation is compactly written
 \begin{equation}
   \label{eq:3}
-  \dot p = \frac  1 2 p  \circ(0, \Omega ) = \frac 1 2 [p_\circ] p_{\Omega} =  \Psi(p)\Omega ,
+  \dot p = \frac  1 2 p  \circ(0, \Omega ) = \frac 1 2 [p_\circ] p_{\Omega} = \frac 1 2 \Psi(p)\Omega ,
 \end{equation}
 and using the matrix representation of product of  quaternion
 we get
 \begin{equation}
   \label{eq:27}
-  \Psi(p) = \frac  1 2  \begin{bmatrix}
+  \Psi(p) =  \begin{bmatrix}
     -p_1 & -p_2 & -p_3 \\
     p_0 & -p_3 & p_2 \\
     p_3 & p_0 & -p_1 \\
     -p_2 & p_1 & p_0 \\
   \end{bmatrix}
 \end{equation}
-
 The relation \eqref{eq:41} can be also inverted by writing
 \begin{equation}
   \label{eq:42}
@@ -294,17 +496,14 @@ The relation \eqref{eq:41} can be also inverted by writing
 Using again  matrix representation of product of  quaternion, we get 
 \begin{equation}
   \label{eq:42}
-  \Omega(t)  = 2 \vv{p^{-1}(t) \circ \dot p(t)}  = \frac  1 2  \begin{bmatrix}
+  \Omega(t)  = 2 \vv{p^{-1}(t) \circ \dot p(t)}  = 2  \begin{bmatrix}
     -p_1 & p_0 & p_3 & -p_2 \\
     -p_2 & -p_3 & p_0 & p_1 \\
     -p_3 & p_2 & -p_1  & p_0\\
-  \end{bmatrix}\dot p(t) = \Psi(p)^\top \dot p(t)
+  \end{bmatrix}\dot p(t) = 2 \Psi(p)^\top \dot p(t)
 \end{equation}
 Note that we have $\Psi^\top(p)\Psi(p)= I_{4\times 4 }$ and  $\Psi(p)\Psi^\top(p)= I_{3\times 3 }$ 
-\paragraph{Computation of $T$ for unit quaternion}
-
-
-and then 
+\paragraph{Computation of $T$ for unit quaternion} The operator $T(q)$ is directly obtained as
 \begin{equation}
   T(q)=\frac 1 2 \label{eq:5}
   \begin{bmatrix}
@@ -345,35 +544,28 @@ and $F(t, q, v)\in \RR^6$ collects all the forces and torques applied to the bod
 \end{equation}
 When a collection of bodies is considered, we will use the same notation as in~(\ref{eq:Newton-Euler-compact}) extending the definition of the variables $q,v$ and the operators $M,F$ in a straightforward way.
 
-\subsection{Playing with rotations and quaternions}
 
-Let us define the Lie group $SO(3)$ of linear proper orthogonal transformation by its matrix representation
-\begin{equation}SO(3)
-  \label{eq:43}
-  SO(3) = \{R \in \RR^{3\times3}\mid R^TR=I , det(R) = +1  \}
-\end{equation}
-with the Lie group composition $( \circ )$ law given by $R_1\circ R_2 = R_1R_2$ for $R_1,R_2\in SO(3)$. At any point of $R\in SO(3)$, the tangent space is noted $T_RSO(3)$ and the Lie algebra $\mathfrak{so}(3)$  that is the tangent at the identity element is the set of skew--symmetric matrices:
+\begin{ndrva}
+  todo :
+  \begin{itemize}
+  \item computation of the directional derivative of $R(\Omega)= exp(\tilde \Omega)$ in the direction $\tilde\Omega$, to get $T(\Omega)$  
+  \end{itemize}
+\end{ndrva}
+
+\paragraph{Quaternion representation}If the Lie group is described by unit quaternion, we get
 \begin{equation}
-  \label{eq:44}
-  \mathfrak{so}(3) = \{\Omega \mid \Omega + \tilde \Omega=0\}.
+  \label{eq:47}
+  SO(3) = \{p = (p_0,\vv{p}) \in \RR^{4}\mid |p|=1  \}
 \end{equation}
-The notation $\tilde \Omega$ is implied by the fact that the Lie algebra is isomorphic to $\RR^3$. For a given vector $\Omega \in \RR^3$, the skew--symmetric matrix is given by
-\begin{equation}
-  \label{eq:45}
-  \tilde \Omega =
-  \begin{bmatrix}
-    0 & -\Omega_3 & \Omega_2 \\
-    \Omega_3 & 0 & -\Omega_1 \\
-    -\Omega_2  & \Omega_1 & 0
-  \end{bmatrix}
-\end{equation}
-such that $\tilde \Omega x = \Omega \times x$
+with the composition law  $p_1\circ p_2$ given by the quaternion product.
+
+
+
+Note that the concept of exponential map for Lie group that are not parameterized by matrices is also possible.
 
 
 \subsection{Mechanical systems  with bilateral and unilateral constraints}
 \label{section22}
-
-
 
 
 Let us consider that the system~(\ref{eq:Newton-Euler-compact}) is  subjected to $m$ constraints, with $m_{e}$ holonomic bilateral 

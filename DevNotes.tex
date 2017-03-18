@@ -59,6 +59,7 @@
 \fancyfoot[R]{\texttt{file DevNotes.tex -- \isodayandtime}}
 
 
+\everymath{\displaystyle}
 \begingroup
 \count0=\time \divide\count0by60 % Hour
 \count2=\count0 \multiply\count2by-60 \advance\count2by\time
@@ -73,6 +74,9 @@
 
 \def\free{{\sf free}}
 
+%\usepackage{xcolor} % for colors in document (red for title, gray for English)
+% Hyperref: links in document. Most links are hidden (black color) except URLs (blue)
+%\usepackage[colorlinks=true,urlcolor=blue,linkcolor=black,citecolor=black]{hyperref}
 
 \begin{document}
 \thispagestyle{empty}
@@ -939,6 +943,9 @@ Warning: default constructor is always private or protected and apart from the o
 
 \chapter{Alart--Curnier Formulation}
 \input{AlartCurnier.tex}
+
+\bibliographystyle{plain}
+\bibliography{bibli}
 \end{document}
 
 
