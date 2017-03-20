@@ -632,15 +632,13 @@ SICONOS_IO_REGISTER(Model,
   (_t0)
   (_title))
 SICONOS_IO_REGISTER_WITH_BASES(PivotJointR,(KneeJointR),
+  (_A)
   (_A1x)
   (_A1y)
   (_A1z)
   (_A2x)
   (_A2y)
-  (_A2z)
-  (_Ax)
-  (_Ay)
-  (_Az))
+  (_A2z))
 SICONOS_IO_REGISTER_WITH_BASES(SphereLDSPlanR,(LagrangianScleronomousR),
   (A)
   (B)
