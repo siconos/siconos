@@ -151,9 +151,8 @@ void MoreauJeanOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalS
   }
   
 }
-void MoreauJeanOSI::initializeInteraction(double t0, Interaction &inter,
-                                          InteractionProperties& interProp,
-                                          DynamicalSystemsGraph & DSG)
+void MoreauJeanOSI::fill_ds_links(Interaction &inter, InteractionProperties& interProp,
+				  DynamicalSystemsGraph & DSG)
 {
   SP::DynamicalSystem ds1= interProp.source;
   SP::DynamicalSystem ds2= interProp.target;

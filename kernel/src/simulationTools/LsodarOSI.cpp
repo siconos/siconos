@@ -78,7 +78,7 @@ LsodarOSI::LsodarOSI():
   _sizeMem = 2;
   _steps=1;
 
-  // Set levels. This may depend on the nonsmooth law and will be updated during initializeInteraction(...) call.
+  // Set levels. This may depend on the nonsmooth law and will be updated during fill_ds_links(...) call.
   _levelMinForOutput=0;
   _levelMaxForOutput=2;
   _levelMinForInput=1;
@@ -265,9 +265,9 @@ void LsodarOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSyste
   DEBUG_END("LsodarOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds)\n");
 }
 
-void LsodarOSI::initializeInteraction(double t0, Interaction &inter,
-				      InteractionProperties& interProp,
-				      DynamicalSystemsGraph & DSG)
+void LsodarOSI::fill_ds_links(Interaction &inter,
+			      InteractionProperties& interProp,
+			      DynamicalSystemsGraph & DSG)
 {
   SP::DynamicalSystem ds1= interProp.source;
   SP::DynamicalSystem ds2= interProp.target;
@@ -296,10 +296,10 @@ void LsodarOSI::initializeInteraction(double t0, Interaction &inter,
       _levelMaxForOutput = 4;
       _levelMinForInput = 1;
       _levelMaxForInput = 2;
-      RuntimeException::selfThrow("LsodarOSI::initializeInteraction  not yet implemented for nonsmooth law of type NewtonImpactFrictionNSL");
+      RuntimeException::selfThrow("LsodarOSI::fill_ds_links  not yet implemented for nonsmooth law of type NewtonImpactFrictionNSL");
     }
   else
-    RuntimeException::selfThrow("LsodarOSI::initializeInteraction not yet implemented  for nonsmooth of type");
+    RuntimeException::selfThrow("LsodarOSI::fill_ds_links not yet implemented  for nonsmooth of type");
 
   // Check if interations levels (i.e. y and lambda sizes) are compliant with the current osi.
   _check_and_update_interaction_levels(inter);
@@ -342,9 +342,8 @@ void LsodarOSI::initializeInteraction(double t0, Interaction &inter,
       //   DSlink[NewtonEulerR::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
       // }
     }
-  
-
 }
+
 void LsodarOSI::initialize(Model& m)
 {
   DEBUG_BEGIN("LsodarOSI::initialize(Model& m)\n");
@@ -368,7 +367,7 @@ void LsodarOSI::initialize(Model& m)
   // for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
   //   {
   //     Interaction& inter = *indexSet0->bundle(*ui);
-  //     initializeInteraction(m.t0(), inter, indexSet0->properties(*ui), *_dynamicalSystemsGraph);
+  //     fill_ds_links(m.t0(), inter, indexSet0->properties(*ui), *_dynamicalSystemsGraph);
   //   }
 
   computeRhs(m.t0(),*_dynamicalSystemsGraph);

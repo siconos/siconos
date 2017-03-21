@@ -263,15 +263,21 @@ public:
 
   /** initialization of the work vectors and matrices (properties) related to
    *  one interaction on the graph and needed by the osi
-   * \param t0 time of initialization
    * \param inter the interaction
    * \param interProp the properties on the graph
    * \param DSG the dynamical systems graph
    */
-  virtual void initializeInteraction(double t0, Interaction &inter,
+  virtual void fill_ds_links(Interaction &inter,
 			     InteractionProperties& interProp,
 			     DynamicalSystemsGraph & DSG) = 0 ;
 
+  /** compute interaction output (y) for all levels and swaps in memory
+      \param inter the interaction to update
+      \param time value for output computation
+      \param interaction_properties properties of the interaction, in the Interaction Graph I0
+   */
+  void update_interaction_output(Interaction& inter, double time, InteractionProperties& interaction_properties);
+  
   /** get the number of index sets required for the simulation
    * \return unsigned int
    */

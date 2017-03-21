@@ -42,7 +42,7 @@ NewMarkAlphaOSI::NewMarkAlphaOSI(double new_beta, double new_gamma, double new_a
   _alpha_f = new_alpha_f;
   _orderDenseOutput = 5.0;
   _IsVelocityLevel = flag;
-  // Set levels. This may depend on the nonsmooth law and will be updated during initializeInteraction(...) call.
+  // Set levels. This may depend on the nonsmooth law and will be updated during fill_ds_links(...) call.
   _levelMinForOutput=0;
   _levelMaxForOutput=2;
   _levelMinForInput=1;
@@ -59,7 +59,7 @@ NewMarkAlphaOSI::NewMarkAlphaOSI(double _rho_infty, bool flag = false):
   _beta = 0.25 * std::pow((_gamma + 0.5), 2);
   _orderDenseOutput = 5.0;
   _IsVelocityLevel = flag;
-  // Set levels. This may depend on the nonsmooth law and will be updated during initializeInteraction(...) call.
+  // Set levels. This may depend on the nonsmooth law and will be updated during fill_ds_links(...) call.
   _levelMinForOutput=0;
   _levelMaxForOutput=2;
   _levelMinForInput=1;
@@ -456,9 +456,9 @@ void NewMarkAlphaOSI::initializeDynamicalSystem(Model& m, double t, SP::Dynamica
 
 
     }
-void NewMarkAlphaOSI::initializeInteraction(double t0, Interaction &inter,
-					    InteractionProperties& interProp,
-					    DynamicalSystemsGraph & DSG)
+void NewMarkAlphaOSI::fill_ds_links(Interaction &inter,
+				    InteractionProperties& interProp,
+				    DynamicalSystemsGraph & DSG)
 {
   SP::DynamicalSystem ds1= interProp.source;
   SP::DynamicalSystem ds2= interProp.target;
@@ -491,10 +491,10 @@ void NewMarkAlphaOSI::initializeInteraction(double t0, Interaction &inter,
       _levelMaxForOutput = 4;
       _levelMinForInput = 1;
       _levelMaxForInput = 2;
-      RuntimeException::selfThrow("NewMarkAlphaOSI::initializeInteraction  not yet implemented for nonsmooth law of type NewtonImpactFrictionNSL");
+      RuntimeException::selfThrow("NewMarkAlphaOSI::fill_ds_links  not yet implemented for nonsmooth law of type NewtonImpactFrictionNSL");
     }
   else
-    RuntimeException::selfThrow("NewMarkAlphaOSI::initializeInteraction not yet implemented  for nonsmooth of type");
+    RuntimeException::selfThrow("NewMarkAlphaOSI::fill_ds_links not yet implemented  for nonsmooth of type");
 
   // Check if interations levels (i.e. y and lambda sizes) are compliant with the current osi.
   _check_and_update_interaction_levels(inter);

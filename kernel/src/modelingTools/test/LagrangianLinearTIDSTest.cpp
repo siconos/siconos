@@ -46,10 +46,10 @@ void LagrangianLinearTIDSTest::setUp()
 
   rhsK.reset(new SimpleMatrix(*K));
   rhsC.reset(new SimpleMatrix(*C));
-  invM.reset(new SimpleMatrix(3,3));
-  (*invM)(0,0) = -1.; (*invM)(1,1) = -0.5; (*invM)(2,2) = -1./3;
-  prod(*invM, *K, *rhsK, true);
-  prod(*invM, *C, *rhsC, true);
+  minus_inv_M.reset(new SimpleMatrix(3,3));
+  (*minus_inv_M)(0,0) = -1.; (*minus_inv_M)(1,1) = -0.5; (*minus_inv_M)(2,2) = -1./3;
+  prod(*minus_inv_M, *K, *rhsK, true);
+  prod(*minus_inv_M, *C, *rhsC, true);
 }
 
 void LagrangianLinearTIDSTest::tearDown()
@@ -92,12 +92,18 @@ void LagrangianLinearTIDSTest::testBuildLagrangianLinearTIDS1()
   double time = 1.;
   ds->initRhs(time);
   SiconosVector x0(*q0, *velocity0);
-  SiconosVector rhs0(*velocity0, zero);
+  SiconosVector acc0(3);
+  prod(*K, *q0, acc0, true);
+  prod(*C, *velocity0, acc0, false);
+  prod(*minus_inv_M, acc0, acc0, true);
+  SiconosVector rhs0(*velocity0, acc0);
+  
   SP::SiconosMatrix m0(new SimpleMatrix(3,3, Siconos::ZERO));
   SimpleMatrix i0(3,3); // new SimpleMatrix(3,3));//, Siconos::IDENTITY));
   i0(0,0) = i0(1,1) = i0(2,2) = 1.;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS1 : ", ds->n() == 2 * 3, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS1 : ", *(ds->x0()) == x0, true);
+  
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS1 : ", *(ds->rhs()) == rhs0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS1 : ", *(ds->jacobianRhsx()->block(0,0)) == *m0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS1 : ", *(ds->jacobianRhsx()->block(0,1)) == i0, true);
@@ -118,7 +124,7 @@ void LagrangianLinearTIDSTest::testBuildLagrangianLinearTIDS1()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS1 : ", *(ds->fExt()) == time* *x01, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS1 : ", *(ds->forces()) == -1.* f0, true);
   ds->computeRhs(time);
-  prod(*invM, f0, f0, true);
+  prod(*minus_inv_M, f0, f0, true);
   SiconosVector rhs1(*velocity0, f0); 
   ds->computeJacobianRhsx(time);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS1 : ", *(ds->rhs()) == rhs1, true);

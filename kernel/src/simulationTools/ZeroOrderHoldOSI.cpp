@@ -135,9 +135,9 @@ void ZeroOrderHoldOSI::initializeDynamicalSystem(Model& m, double t, SP::Dynamic
   workVectors[OneStepIntegrator::free].reset(new SiconosVector(ds->dimension()));
 }
 
-void ZeroOrderHoldOSI::initializeInteraction(double t0, Interaction &inter,
-                                          InteractionProperties& interProp,
-                                          DynamicalSystemsGraph & DSG)
+void ZeroOrderHoldOSI::fill_ds_links(Interaction &inter,
+				     InteractionProperties& interProp,
+				     DynamicalSystemsGraph & DSG)
 {
   SP::DynamicalSystem ds1= interProp.source;
   SP::DynamicalSystem ds2= interProp.target;

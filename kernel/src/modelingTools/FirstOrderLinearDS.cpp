@@ -16,8 +16,8 @@
  * limitations under the License.
 */
 #include "FirstOrderLinearDS.hpp"
-#define DEBUG_MESSAGES
-#define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
+// #define DEBUG_STDOUT
 #include "debug.h"
 #include <iostream>
 

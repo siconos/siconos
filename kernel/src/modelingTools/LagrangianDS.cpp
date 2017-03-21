@@ -419,6 +419,7 @@ void LagrangianDS::computeJacobianFGyrq(SP::SiconosVector position, SP::SiconosV
   if (_jacobianFGyrq && _pluginJacqFGyr->fPtr)
     ((FPtr5)_pluginJacqFGyr->fPtr)(_ndof, &(*position)(0), &(*velocity)(0), &(*_jacobianFGyrq)(0, 0), _z->size(), &(*_z)(0));
 }
+
 void LagrangianDS::computeJacobianFGyrqDot(SP::SiconosVector position, SP::SiconosVector velocity)
 {
   if (_jacobianFGyrqDot && _pluginJacqDotFGyr->fPtr)
@@ -450,8 +451,9 @@ void LagrangianDS::computeRhs(double time, bool isDSup)
   //  if(mass->isPlugged()) : mass may be not plugged in LagrangianDS children
   if(_inverseMass) 
     _inverseMass->PLUForwardBackwardInPlace(*_q[2]);
-  //_x[1].reset(new SiconosVector(*_q[1], *_q[2])); // Do we really need this connection?
-
+  
+  _x[1]->setBlock(0, *_q[1]);
+  _x[1]->setBlock(_ndof, *_q[2]);
 }
 
 void LagrangianDS::computeJacobianRhsx(double time, bool isDSup)
@@ -486,14 +488,6 @@ void LagrangianDS::computeJacobianRhsx(double time, bool isDSup)
   }
 }
 
-// void LagrangianDS::computeForces(double time)
-// {
-//   DEBUG_PRINT("CF LagDS vtime = \n");
-
-//   computeForces(time, _q[0], _q[1]);
-//   DEBUG_PRINT("END CF LagDS vtime = \n");
-// }
-
 void LagrangianDS::computeForces(double time, SP::SiconosVector position, SP::SiconosVector velocity)
 {
   if (!_forces)
@@ -524,6 +518,7 @@ void LagrangianDS::computeForces(double time, SP::SiconosVector position, SP::Si
   if (_fGyr)
     *_forces -= *_fGyr;
   // }
+
 }
 
 void LagrangianDS::computeJacobianqForces(double time)
@@ -675,7 +670,6 @@ void LagrangianDS::computePostImpactVelocity()
     _inverseMass->PLUForwardBackwardInPlace(tmp);
   *_q[1] += tmp;  // v+ = v- + p
   DEBUG_BEGIN("LagrangianDS::computePostImpactV() END \n");
- 
 }
 
 void LagrangianDS::setComputeFGyrFunction(const std::string& pluginPath, const std::string&  functionName)
@@ -683,54 +677,71 @@ void LagrangianDS::setComputeFGyrFunction(const std::string& pluginPath, const s
   _pluginFGyr->setComputeFunction(pluginPath, functionName);
   if (!_fGyr)
     _fGyr.reset(new SiconosVector(_ndof));
+  init_forces();
 }
+
 void LagrangianDS::setComputeFGyrFunction(FPtr5 fct)
 {
   _pluginFGyr->setComputeFunction((void *)fct);
   if (!_fGyr)
     _fGyr.reset(new SiconosVector(_ndof));
+  init_forces();
 }
+
 void LagrangianDS::setComputeJacobianFIntqFunction(const std::string&  pluginPath, const std::string&  functionName)
 {
   _pluginJacqFInt->setComputeFunction(pluginPath, functionName);
   if (!_jacobianFIntq)
     _jacobianFIntq.reset(new SimpleMatrix(_ndof, _ndof));
+  init_forces();
 }
+
 void LagrangianDS::setComputeJacobianFIntqDotFunction(const std::string&  pluginPath, const std::string&  functionName)
 {
   _pluginJacqDotFInt->setComputeFunction(pluginPath, functionName);
   if (!_jacobianFIntqDot)
     _jacobianFIntqDot.reset(new SimpleMatrix(_ndof, _ndof));
+  init_forces();
 }
+
 void LagrangianDS::setComputeJacobianFIntqFunction(FPtr6 fct)
 {
   _pluginJacqFInt->setComputeFunction((void *)fct);
   if (!_jacobianFIntq)
     _jacobianFIntq.reset(new SimpleMatrix(_ndof, _ndof));
+  init_forces();
 }
+
 void LagrangianDS::setComputeJacobianFIntqDotFunction(FPtr6 fct)
 {
   _pluginJacqDotFInt->setComputeFunction((void *)fct);
   if (!_jacobianFIntqDot)
     _jacobianFIntqDot.reset(new SimpleMatrix(_ndof, _ndof));
+  init_forces();
 }
+
 void LagrangianDS::setComputeJacobianFGyrqFunction(const std::string&  pluginPath, const std::string&  functionName)
 {
   _pluginJacqFGyr->setComputeFunction(pluginPath, functionName);
   if(!_jacobianFGyrq)
     _jacobianFGyrq.reset(new SimpleMatrix(_ndof, _ndof));
+  init_forces();
 }
+
 void LagrangianDS::setComputeJacobianFGyrqDotFunction(const std::string&  pluginPath, const std::string&  functionName)
 {
   _pluginJacqDotFGyr->setComputeFunction(pluginPath, functionName);
   if ( !_jacobianFGyrqDot)
     _jacobianFGyrqDot.reset(new SimpleMatrix(_ndof, _ndof));
+  init_forces();
 }
+
 void LagrangianDS::setComputeJacobianFGyrqFunction(FPtr5 fct)
 {
   _pluginJacqFGyr->setComputeFunction((void *)fct);
   if(!_jacobianFGyrq)
     _jacobianFGyrq.reset(new SimpleMatrix(_ndof, _ndof));
+  init_forces();
 }
 
 void LagrangianDS::setComputeJacobianFGyrqDotFunction(FPtr5 fct)

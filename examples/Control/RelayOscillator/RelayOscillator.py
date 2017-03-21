@@ -63,7 +63,7 @@ LTIRRelayOscillator=FirstOrderLinearTIR(C,B)
 LTIRRelayOscillator.setDPtr(D)
 
 nslaw=RelayNSL(1)
-InterRelayOscillator=Interaction(nslaw,LTIRRelayOscillator,1)
+InterRelayOscillator=Interaction(nslaw,LTIRRelayOscillator)
 
 
 #

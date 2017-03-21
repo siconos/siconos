@@ -66,7 +66,7 @@ void NonSmoothDynamicalSystem::display() const
 
 void NonSmoothDynamicalSystem::link(SP::Interaction inter, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2)
 {
-  _mIsLinear = ((inter)->relation()->isLinear() && _mIsLinear);
+  _mIsLinear = (inter->relation()->isLinear() && _mIsLinear);
   _topology->link(inter, ds1, ds2);
 };
 

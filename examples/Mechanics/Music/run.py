@@ -46,7 +46,7 @@ imax = int(ndof / 2)
 #                          damping_parameters=damping_parameters,
 #                          umax=1.8e-3, imax=imax,
 #                          modal_form=False)
-guitar_string_m = StringDS(ndof, geometry_and_material=G_string,
+guitar_string = StringDS(ndof, geometry_and_material=G_string,
                            damping_parameters=damping_parameters,
                            umax=1.8e-3, imax=imax, use_sparse=False,
                            modal_form=True)
@@ -58,7 +58,7 @@ guitar_string_m = StringDS(ndof, geometry_and_material=G_string,
 # -- The obstacles (Interactions) --
 # ie guitar fret(s)
 # fret = Fret(guitar_string, position=[imax, -0.00])
-fret_m = Fret(guitar_string_m, position=[imax, -0.00], restitution_coeff=0.)
+fret = Fret(guitar_string, position=[imax, -0.00], restitution_coeff=0.)
 # fret_sp = Fret(guitar_string_sparse, position=[imax, -0.00])
 
 # -- The model to gather frets and strings and simulate the dynamics --

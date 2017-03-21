@@ -147,7 +147,7 @@ void FirstOrderLinearR::initComponents(Interaction& inter, VectorOfBlockVectors&
 
 void FirstOrderLinearR::computeC(double time, SiconosVector& z, SimpleMatrix& C)
 {
-  if (_C && _pluginJachx->fPtr)
+  if (_pluginJachx->fPtr)
   {
     ((FOMatPtr1)(_pluginJachx->fPtr))(time, C.size(0), C.size(1), &(C)(0, 0), z.size(), &(z)(0));
   }
@@ -155,7 +155,7 @@ void FirstOrderLinearR::computeC(double time, SiconosVector& z, SimpleMatrix& C)
 
 void FirstOrderLinearR::computeD(double time, SiconosVector& z, SimpleMatrix& D)
 {
-  if (_D && _pluginJachlambda->fPtr)
+  if (_pluginJachlambda->fPtr)
   {
     ((FOMatPtr1)(_pluginJachlambda->fPtr))(time, D.size(0), D.size(1), &(D)(0, 0), z.size(), &(z)(0));
   }
@@ -163,7 +163,7 @@ void FirstOrderLinearR::computeD(double time, SiconosVector& z, SimpleMatrix& D)
 
 void FirstOrderLinearR::computeF(double time, SiconosVector& z, SimpleMatrix& F)
 {
-  if (_F && _pluginf->fPtr)
+  if (_pluginf->fPtr)
   {
     ((FOMatPtr1)(_pluginf->fPtr))(time, F.size(0), F.size(1), &(F)(0, 0), z.size(), &(z)(0));
   }
@@ -172,7 +172,7 @@ void FirstOrderLinearR::computeF(double time, SiconosVector& z, SimpleMatrix& F)
 void FirstOrderLinearR::computee(double time, SiconosVector& z, SiconosVector& e)
 {
 
-  if (_e && _plugine->fPtr)
+  if (_plugine->fPtr)
   {
     ((FOVecPtr) _plugine->fPtr)(time, e.size(), &(e)(0), z.size(), &(z)(0));
   }
@@ -180,7 +180,7 @@ void FirstOrderLinearR::computee(double time, SiconosVector& z, SiconosVector& e
 
 void FirstOrderLinearR::computeB(double time, SiconosVector& z, SimpleMatrix& B)
 {
-  if (_B && _pluginJacglambda->fPtr)
+  if (_pluginJacglambda->fPtr)
   {
     ((FOMatPtr1) _pluginJacglambda->fPtr)(time, B.size(0), B.size(1), &(B)(0, 0), z.size(), &(z)(0));
   }

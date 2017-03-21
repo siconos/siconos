@@ -108,9 +108,9 @@ void MoreauJeanGOSI::initializeDynamicalSystem(Model& m, double t, SP::Dynamical
     }
 }
 
-void MoreauJeanGOSI::initializeInteraction(double t0, Interaction &inter,
-                                          InteractionProperties& interProp,
-                                          DynamicalSystemsGraph & DSG)
+void MoreauJeanGOSI::fill_ds_links(Interaction &inter,
+				   InteractionProperties& interProp,
+				   DynamicalSystemsGraph & DSG)
 {
   SP::DynamicalSystem ds1= interProp.source;
   SP::DynamicalSystem ds2= interProp.target;

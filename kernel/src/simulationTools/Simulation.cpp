@@ -264,9 +264,6 @@ void Simulation::initialize(SP::Model m, bool withOSI)
 
 void Simulation::initializeInteraction(double time, SP::Interaction inter)
 {
-  // determine which (lower and upper) levels are required for this Interaction
-  // in this Simulation.
-
   // Get the interaction properties from the topology for initialization.
   SP::InteractionsGraph indexSet0 = _nsds->topology()->indexSet0();
   InteractionsGraph::VDescriptor ui = indexSet0->descriptor(inter);
@@ -310,12 +307,18 @@ void Simulation::initializeInteraction(double time, SP::Interaction inter)
   OneStepIntegrator& osi1 = *DSG.properties(DSG.descriptor(ds1)).osi;
   OneStepIntegrator& osi2 = *DSG.properties(DSG.descriptor(ds2)).osi;
 
+  InteractionProperties& i_prop = indexSet0->properties(ui);
   if (&osi1 == &osi2 )
-    osi1.initializeInteraction(time, *inter, indexSet0->properties(ui),  DSG);
+    {
+      osi1.fill_ds_links(*inter, i_prop,  DSG);
+      osi1.update_interaction_output(*inter, time, i_prop);
+    }
   else
     {
-      osi1.initializeInteraction(time, *inter, indexSet0->properties(ui),  DSG);
-      osi2.initializeInteraction(time, *inter, indexSet0->properties(ui),  DSG);
+      osi1.fill_ds_links(*inter, i_prop,  DSG);
+      osi1.update_interaction_output(*inter, time, i_prop);
+      osi2.fill_ds_links(*inter, i_prop,  DSG);
+      osi2.update_interaction_output(*inter, time, i_prop);
     }
 }
 

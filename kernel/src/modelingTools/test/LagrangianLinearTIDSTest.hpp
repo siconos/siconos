@@ -48,7 +48,7 @@ private:
   // Members
 
   SP::SiconosVector q0, velocity0;
-  SP::SiconosMatrix mass, K, C, rhsK, rhsC, invM;
+  SP::SiconosMatrix mass, K, C, rhsK, rhsC, minus_inv_M;
 
 public:
   void setUp();

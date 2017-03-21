@@ -83,41 +83,58 @@ void OneStepIntegrator::initialize( Model& m )
     interaction_properties.block.reset(new SimpleMatrix(nslawSize, nslawSize));
 
     // Update DSlink : this depends on OSI and relation types.
-    initializeInteraction(t0, inter, interaction_properties, *_dynamicalSystemsGraph);
+    fill_ds_links(inter, interaction_properties, *_dynamicalSystemsGraph);
 
     // Update interaction attributes (output)
-    if (_steps > 1) // Multi--step methods
-      {
-	// Compute the old Values of Output with stored values in Memory
-	for (unsigned int k = 0; k < _steps - 1; k++)
-	  {
-	    /** ComputeOutput to fill the Memory
-	     * We assume the state x is stored in xMemory except for the  initial
-	     * condition which has not been swap yet.
-	     */
-	    //        relation()->LinkDataFromMemory(k);
-	    for (unsigned int i = 0; i < inter.upperLevelForOutput() + 1; ++i)
-	      {
-		inter.computeOutput(t0, interaction_properties, i);
-		//_yMemory[i]->swap(*_y[i]);
-	      }
-	  }
-	inter.swapInMemory();
-	
-      }
-    // Compute a first value for the output
-    inter.computeOutput(t0, interaction_properties, 0);
+    update_interaction_output(inter, t0, interaction_properties);
     
-    // prepare the gradients
-    inter.relation()->computeJach(t0, inter, interaction_properties);
-    for (unsigned int i = 0; i < inter.upperLevelForOutput() + 1; ++i)
-      {
-      inter.computeOutput(t0, interaction_properties, i);
-    }
-    inter.swapInMemory();
   }
 }
 
+void OneStepIntegrator::update_interaction_output(Interaction& inter, double time, InteractionProperties& interaction_properties)
+{
+  // - compute interaction output (y) for all levels
+  // - swaps in memory
+
+  // This function:
+  // - is called during osi->initialize()
+  // - may be called by simulation when an interaction is inserted on the fly
+  //    for instance:
+  //      - contact detection
+  //      - inter = ew interaction + link with ds
+  //      - simu->osi->fill_ds_links(inter)
+  //      - simu->osi->update_interaction_output()
+  
+  if (_steps > 1) // Multi--step methods
+    {
+      // Compute the old Values of Output with stored values in Memory
+      for (unsigned int k = 0; k < _steps - 1; k++)
+	{
+	  /** ComputeOutput to fill the Memory
+	   * We assume the state x is stored in xMemory except for the  initial
+	   * condition which has not been swap yet.
+	   */
+	  //        relation()->LinkDataFromMemory(k);
+	  for (unsigned int i = 0; i < inter.upperLevelForOutput() + 1; ++i)
+	    {
+	      inter.computeOutput(time, interaction_properties, i);
+	      //_yMemory[i]->swap(*_y[i]);
+	    }
+	}
+      inter.swapInMemory();
+	
+    }
+  // Compute a first value for the output
+  inter.computeOutput(time, interaction_properties, 0);
+    
+  // prepare the gradients
+  inter.relation()->computeJach(time, inter, interaction_properties);
+  for (unsigned int i = 0; i < inter.upperLevelForOutput() + 1; ++i)
+    {
+      inter.computeOutput(time, interaction_properties, i);
+    }
+  inter.swapInMemory();
+}
 
 void OneStepIntegrator::_check_and_update_interaction_levels(Interaction& inter)
 {

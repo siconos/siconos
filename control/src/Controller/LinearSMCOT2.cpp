@@ -58,8 +58,17 @@ void LinearSMCOT2::initialize(const Model& m)
   dsType = Type::value(*DS);
   if (dsType == Type::FirstOrderLinearDS)
   {
-    _DSPhi.reset(new FirstOrderLinearDS(*(std11::static_pointer_cast<FirstOrderLinearDS>(DS))));
-    _DSPred.reset(new FirstOrderLinearDS(*(std11::static_pointer_cast<FirstOrderLinearDS>(DS))));
+    FirstOrderLinearDS& fods = static_cast<FirstOrderLinearDS&>(*DS);
+    SP::SiconosVector x0(new SiconosVector(*fods.x0()));
+    SP::SiconosMatrix A = fods.A();
+    SP::SiconosVector b = fods.b();
+    if(fods.A() && fods.b())
+      {
+	SP::SiconosMatrix A(new SimpleMatrix(*fods.A()));
+	SP::SiconosVector b(new SiconosVector(*fods.b()));
+	_DSPhi.reset(new FirstOrderLinearDS(x0, A, b));//(std11::static_pointer_cast<FirstOrderLinearDS>(DS))));
+	_DSPred.reset(new FirstOrderLinearDS(x0, A, b));//(*(std11::static_pointer_cast<FirstOrderLinearDS>(DS))));
+      }
   }
   else if (dsType == Type::FirstOrderLinearTIDS)
   {
@@ -72,8 +81,8 @@ void LinearSMCOT2::initialize(const Model& m)
   }
 
   // We have to reset _pluginb
-  _DSPhi->setComputebFunction(NULL);
-  _DSPred->setComputebFunction(NULL);
+  // _DSPhi->setComputebFunction(NULL);
+  // _DSPred->setComputebFunction(NULL);
   // XXX What if there is more than one sensor ...
 
   _indx = 0;
