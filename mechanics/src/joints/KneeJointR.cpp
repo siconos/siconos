@@ -77,6 +77,7 @@ void KneeJointR::checkInitPos( SP::SiconosVector x1 ,  SP::SiconosVector x2 )
     q23 = x2->getValue(6);
   }
 
+  /*
   if (Hx(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23) > DBL_EPSILON )
   {
     std::cout << "KneeJointR::checkInitPos( SP::SiconosVector x1 ,  SP::SiconosVector x2 )" << std::endl;
@@ -92,14 +93,13 @@ void KneeJointR::checkInitPos( SP::SiconosVector x1 ,  SP::SiconosVector x2 )
     std::cout << "KneeJointR::checkInitPos( SP::SiconosVector x1 ,  SP::SiconosVector x2 )" << std::endl;
     std::cout << " Hz is large :" << Hz(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23) << std::endl;
   }
-     
-  
+  */
+
   // printf("checkInitPos Hx : %e\n", Hx(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23));
   // printf("checkInitPos Hy : %e\n", Hy(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23));
   // printf("checkInitPos Hz : %e\n", Hz(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23));
-
-
 }
+
 KneeJointR::KneeJointR(SP::NewtonEulerDS d1, SP::NewtonEulerDS d2, SP::SiconosVector P): NewtonEulerR()
 {
   _P0.reset(new SiconosVector(3));

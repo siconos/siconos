@@ -81,8 +81,8 @@ void PivotJointR::buildA1A2()
   assert(fabs(_A1x * _Ax + _A1y * _Ay + _A1z * _Az) < 1e-9 && "PivotJoint, _A1 wrong\n");
   assert(fabs(_A2x * _Ax + _A2y * _Ay + _A2z * _Az) < 1e-9 && "PivotJoint, _A2 wrong\n");
   assert(fabs(_A1x * _A2x + _A1y * _A2y + _A1z * _A2z) < 1e-9 && "PivotJoint, _A12 wrong\n");
-  std::cout << "JointPivot: _A1x _A1y _A1z :" << _A1x << " " << _A1y << " " << _A1z << std::endl;
-  std::cout << "JointPivot: _A2x _A2y _A2z :" << _A2x << " " << _A2y << " " << _A2z << std::endl;
+  // std::cout << "JointPivot: _A1x _A1y _A1z :" << _A1x << " " << _A1y << " " << _A1z << std::endl;
+  // std::cout << "JointPivot: _A2x _A2y _A2z :" << _A2x << " " << _A2y << " " << _A2z << std::endl;
 }
 void PivotJointR::Jd1d2(double X1, double Y1, double Z1, double q10, double q11, double q12, double q13, double X2, double Y2, double Z2, double q20, double q21, double q22, double q23)
 {

@@ -1048,11 +1048,13 @@ void NewtonEulerDS::computeForces(double time, SP::SiconosVector q, SP::SiconosV
     if(_fExt)
     {
       computeFExt(time);
+      assert(!isnan(_fExt->vector_sum()));
       _wrench->setBlock(0, *_fExt);
     }
     if(_mExt)
     {
       computeMExt(time);
+      assert(!isnan(_mExt->vector_sum()));
       if(_isMextExpressedInInertialFrame)
         ::changeFrameAbsToBody(q,_mExt);
       _wrench->setBlock(3, *_mExt);
@@ -1063,6 +1065,7 @@ void NewtonEulerDS::computeForces(double time, SP::SiconosVector q, SP::SiconosV
     if(_fInt)
     {
       computeFInt(time, q, twist);
+      assert(!isnan(_fInt->vector_sum()));
       _wrench->setValue(0, _wrench->getValue(0) - _fInt->getValue(0));
       _wrench->setValue(1, _wrench->getValue(1) - _fInt->getValue(1));
       _wrench->setValue(2, _wrench->getValue(2) - _fInt->getValue(2));
@@ -1072,6 +1075,7 @@ void NewtonEulerDS::computeForces(double time, SP::SiconosVector q, SP::SiconosV
     if(_mInt)
     {
       computeMInt(time, q , twist);
+      assert(!isnan(_mInt->vector_sum()));
       _wrench->setValue(3, _wrench->getValue(3) - _mInt->getValue(0));
       _wrench->setValue(4, _wrench->getValue(4) - _mInt->getValue(1));
       _wrench->setValue(5, _wrench->getValue(5) - _mInt->getValue(2));
@@ -1081,6 +1085,7 @@ void NewtonEulerDS::computeForces(double time, SP::SiconosVector q, SP::SiconosV
     if(!_nullifyMGyr)
     {
       computeMGyr(twist);
+      assert(!isnan(_mGyr->vector_sum()));
       _wrench->setValue(3, _wrench->getValue(3) - _mGyr->getValue(0));
       _wrench->setValue(4, _wrench->getValue(4) - _mGyr->getValue(1));
       _wrench->setValue(5, _wrench->getValue(5) - _mGyr->getValue(2));
