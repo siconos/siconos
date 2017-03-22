@@ -796,10 +796,12 @@ void SiconosBulletCollisionManager_impl::updateShape(BodyCylinderRecord &record)
   // Update shape parameters
   if (cyl->version() != record.shape_version)
   {
-    double m = cyl->insideMargin();
+    // Bullet cylinder has an inside margin, so we add the outside
+    // margin explicitly.
+    double m = cyl->outsideMargin();
 
-    double radius = (cyl->radius() - m) * _options.worldScale;
-    double length = (cyl->length() - m) * _options.worldScale;
+    double radius = (cyl->radius() + m) * _options.worldScale;
+    double length = (cyl->length() + m) * _options.worldScale;
 
     assert(radius > 0 && length > 0);
 
