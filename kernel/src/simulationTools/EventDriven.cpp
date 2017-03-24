@@ -452,7 +452,7 @@ void EventDriven::computeJacobianfx(OneStepIntegrator& osi,
     if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
     {
       LagrangianDS& lds = static_cast<LagrangianDS&>(ds);
-      BlockMatrix& jacotmp = *lds.jacobianRhsx();
+      BlockMatrix& jacotmp = static_cast<BlockMatrix&>(*lds.jacobianRhsx());
       for (unsigned int j = 0; j < lds.n(); ++j)
       {
         for (unsigned int k = 0; k < lds.dimension(); ++k)
