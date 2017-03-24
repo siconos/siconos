@@ -530,11 +530,7 @@ void Hem5OSI::fill_ds_links(Interaction &inter,
   RELATION::TYPES relationType = relation.getType();
   Type::Siconos nslType = Type::value(nslaw);
 
-  
-  unsigned int lowerLevelForOutput=0;
-  unsigned int upperLevelForOutput=2;
-  unsigned int lowerLevelForInput=1;
-  unsigned int upperLevelForInput=2;
+
   if (nslType == Type::NewtonImpactNSL || nslType == Type::MultipleImpactNSL)
     {
       _levelMinForOutput = 0;

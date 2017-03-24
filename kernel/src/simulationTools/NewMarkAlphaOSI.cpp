@@ -473,10 +473,6 @@ void NewMarkAlphaOSI::fill_ds_links(Interaction &inter,
   NonSmoothLaw & nslaw = *inter.nonSmoothLaw();
   Type::Siconos nslType = Type::value(nslaw);
 
-  unsigned int lowerLevelForOutput=0;
-  unsigned int upperLevelForOutput=2;
-  unsigned int lowerLevelForInput=1;
-  unsigned int upperLevelForInput=2;
   
   if (nslType == Type::NewtonImpactNSL || nslType == Type::MultipleImpactNSL)
     {
