@@ -330,8 +330,23 @@ public:
    */
   SP::Interaction getInteraction(unsigned int requiredNumber);
 
+  /** get Interactions for a given DS
+   * \return a vector of pointers to Interaction
+   */
+  std::vector<SP::Interaction> interactionsForDS(SP::DynamicalSystem) const;
 
-  
+  /** get Interactions for a given pair of DSs
+   * \return a vector of pointers to Interaction
+   */
+  std::vector<SP::Interaction> interactionsForPairOfDS(
+    SP::DynamicalSystem ds1,
+    SP::DynamicalSystem ds2=SP::DynamicalSystem()) const;
+
+  /** get DynamicalSystems for a given Interaction
+   * \return a vector of pointers to DynamicalSystem
+   */
+  std::vector<SP::DynamicalSystem>
+    dynamicalSystemsForInteraction(SP::Interaction) const;
 
   /** Helper to get the descriptor in DSG0 from a DynamicalSystem
    *  \param ds DynamicalSystem of which we want the descriptor

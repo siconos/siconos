@@ -491,3 +491,61 @@ SP::Interaction Topology::getInteraction(unsigned int requiredNumber)
 
   return inter;
 }
+
+std::vector<SP::Interaction> Topology::interactionsForDS(
+  SP::DynamicalSystem ds) const
+{
+  InteractionsGraph::VIterator ui, uiend;
+  SP::Interaction inter;
+  std::vector<SP::Interaction> result;
+  if (!ds) return result;
+  for (std11::tie(ui, uiend) = _IG[0]->vertices(); ui != uiend; ++ui)
+  {
+    inter = _IG[0]->bundle(*ui);
+    SP::DynamicalSystem ds1 = _IG[0]->properties(_IG[0]->descriptor(inter)).source;
+    SP::DynamicalSystem ds2 = _IG[0]->properties(_IG[0]->descriptor(inter)).target;
+    if (ds == ds1 || ds == ds2)
+      result.push_back(inter);
+  }
+  return result;
+}
+
+std::vector<SP::Interaction> Topology::interactionsForPairOfDS(
+  SP::DynamicalSystem dsA,
+  SP::DynamicalSystem dsB) const
+{
+  InteractionsGraph::VIterator ui, uiend;
+  SP::Interaction inter;
+  std::vector<SP::Interaction> result;
+  if (!dsA && !dsB) return result;
+  for (std11::tie(ui, uiend) = _IG[0]->vertices(); ui != uiend; ++ui)
+  {
+    inter = _IG[0]->bundle(*ui);
+    SP::DynamicalSystem ds1 = _IG[0]->properties(_IG[0]->descriptor(inter)).source;
+    SP::DynamicalSystem ds2 = _IG[0]->properties(_IG[0]->descriptor(inter)).target;
+    int found = 0;
+    if (dsA == ds1)
+      found = 1;
+    else if (dsA == ds2)
+      found = 2;
+    if (found==2 && dsB != ds1)
+      found = 0;
+    else if (found==1 && dsB == ds2)
+      found = 0;
+    if (found)
+      result.push_back(inter);
+  }
+  return result;
+}
+
+std::vector<SP::DynamicalSystem>
+Topology::dynamicalSystemsForInteraction(
+  SP::Interaction inter) const
+{
+  SP::DynamicalSystem ds1 = _IG[0]->properties(_IG[0]->descriptor(inter)).source;
+  SP::DynamicalSystem ds2 = _IG[0]->properties(_IG[0]->descriptor(inter)).target;
+  std::vector<SP::DynamicalSystem> result;
+  if (ds1) result.push_back(ds1);
+  if (ds2 && ds1 != ds2) result.push_back(ds2);
+  return result;
+}
