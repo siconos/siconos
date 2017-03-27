@@ -1412,6 +1412,36 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
     if (pairA->ds == pairB->ds)
       continue;
 
+    // If the two bodies are already connected by another type of
+    // relation (e.g. EqualityCondition == they have a joint between
+    // them), then don't create contact constraints, because it leads
+    // to an ill-conditioned problem.
+    if (pairA->ds && pairB->ds)
+    {
+      InteractionsGraph::VIterator ui, uiend;
+      SP::InteractionsGraph indexSet0 = simulation->nonSmoothDynamicalSystem()->topology()->indexSet0();
+      bool match = false;
+      for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+      {
+        SP::Interaction inter( indexSet0->bundle(*ui) );
+        SP::BodyDS ds1( std11::dynamic_pointer_cast<BodyDS>(
+                          indexSet0->properties(*ui).source) );
+        SP::BodyDS ds2( std11::dynamic_pointer_cast<BodyDS>(
+                          indexSet0->properties(*ui).target) );
+        if (ds1 && ds2 && ((&*ds1==&*pairA->ds) && (&*ds2==&*pairB->ds)
+                           || (&*ds1==&*pairB->ds) && (&*ds2==&*pairA->ds)))
+        {
+          // Only match on non-BulletR interactions, i.e. non-contact relations
+          SP::BulletR br ( std11::dynamic_pointer_cast<BulletR>(inter->relation()) );
+          if (!br)
+            match = true;
+          break;
+        }
+      }
+      if (match)
+        continue;
+    }
+
     if (it->point->m_userPersistentData)
     {
       /* interaction already exists */
