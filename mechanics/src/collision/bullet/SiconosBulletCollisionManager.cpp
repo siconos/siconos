@@ -801,11 +801,11 @@ void SiconosBulletCollisionManager_impl::updateShape(BodyCylinderRecord &record)
     double m = cyl->outsideMargin();
 
     double radius = (cyl->radius() + m) * _options.worldScale;
-    double length = (cyl->length() + m) * _options.worldScale;
+    double length = (cyl->length()/2 + m) * _options.worldScale;
 
     assert(radius > 0 && length > 0);
 
-    btcyl->setLocalScaling(btVector3(radius, length/2, radius));
+    btcyl->setLocalScaling(btVector3(radius, length, radius));
     btcyl->setMargin((cyl->insideMargin() + cyl->outsideMargin()) * _options.worldScale);
 
     if (record.ds && record.ds->useContactorInertia())
