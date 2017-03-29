@@ -101,13 +101,21 @@ SP::SiconosMatrix MoreauJeanOSI::WBoundaryConditions(SP::DynamicalSystem ds)
 
 void MoreauJeanOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds)
 {
-  // Get work buffers from the graph
+  // Create new work buffers, store in the graph
   const DynamicalSystemsGraph::VDescriptor& dsv = _dynamicalSystemsGraph->descriptor(ds);
-  VectorOfVectors& workVectors = *_dynamicalSystemsGraph->properties(dsv).workVectors;
+  SP::VectorOfVectors wv = std11::make_shared<VectorOfVectors>(
+    OneStepIntegrator::work_vector_of_vector_size);
+  SP::VectorOfMatrices wm = std11::make_shared<VectorOfMatrices>();
+  _dynamicalSystemsGraph->properties(dsv).workVectors = wv;
+  _dynamicalSystemsGraph->properties(dsv).workMatrices = wm;
+  VectorOfVectors& workVectors = *wv;
+
   // Initialize memory buffers
-  // _dynamicalSystemsGraph->bundle(dsv)->initMemory(getSizeMem());
-  // // Force dynamical system to its initial state
-  // _dynamicalSystemsGraph->bundle(dsv)->resetToInitialState();
+  ds->initMemory(getSizeMem());
+
+  // Force dynamical system to its initial state
+  ds->resetToInitialState();
+
   // Check dynamical system type
   Type::Siconos dsType = Type::value(*ds);
   assert(dsType == Type::LagrangianLinearTIDS || dsType == Type::LagrangianDS || Type::NewtonEulerDS);
@@ -121,7 +129,6 @@ void MoreauJeanOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalS
 
     // buffers allocation (inside the graph)
     SP::LagrangianDS lds = std11::static_pointer_cast<LagrangianDS> (ds);
-    workVectors.resize(OneStepIntegrator::work_vector_of_vector_size);
     workVectors[OneStepIntegrator::residu_free].reset(new SiconosVector(lds->dimension()));
     workVectors[OneStepIntegrator::free].reset(new SiconosVector(lds->dimension()));
     workVectors[OneStepIntegrator::local_buffer].reset(new SiconosVector(lds->dimension()));
@@ -135,7 +142,6 @@ void MoreauJeanOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalS
     SP::NewtonEulerDS neds = std11::static_pointer_cast<NewtonEulerDS> (ds);
     DEBUG_PRINTF("neds->number() %i \n",neds->number());
     // buffers allocation (into the graph)
-    workVectors.resize(OneStepIntegrator::work_vector_of_vector_size);
     workVectors[OneStepIntegrator::residu_free].reset(new SiconosVector(neds->dimension()));
     workVectors[OneStepIntegrator::free].reset(new SiconosVector(neds->dimension()));
 

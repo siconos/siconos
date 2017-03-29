@@ -236,8 +236,6 @@ void Topology::__removeInteractionFromIndexSet(SP::Interaction inter)
 void Topology::insertDynamicalSystem(SP::DynamicalSystem ds)
 {
   DynamicalSystemsGraph::VDescriptor dsgv = _DSG[0]->add_vertex(ds);
-  // _DSG[0]->properties(dsgv).workVectors.reset(new VectorOfVectors());
-  // _DSG[0]->properties(dsgv).workMatrices.reset(new VectorOfMatrices());
 }
 
 void Topology::setName(SP::DynamicalSystem ds, const std::string& name)
