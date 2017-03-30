@@ -533,6 +533,13 @@ void PrismaticJointR::Jd1d2(double X1, double Y1, double Z1, double q10, double 
     _jachq->setValue(4, 11, q12);
     _jachq->setValue(4, 12, -q11);
     _jachq->setValue(4, 13, _jachq->getValue(3, 12));
+
+    for (int i=0; i<2; i++) {
+      for (int j=3; j<7; j++) {
+        _jachq->setValue(i,j, -_jachq->getValue(i,j));
+        _jachq->setValue(i,j+7, -_jachq->getValue(i,j+7));
+      }
+    }
     return;
   }
 }
