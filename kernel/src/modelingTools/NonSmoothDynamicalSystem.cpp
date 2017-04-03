@@ -19,6 +19,7 @@
 #include "Interaction.hpp"
 #include "LagrangianLinearTIDS.hpp"
 #include "FirstOrderLinearTIDS.hpp"
+#include "OneStepIntegrator.hpp"
 #include "Relation.hpp"
 
 #include <SiconosConfig.h>
@@ -190,5 +191,22 @@ void NonSmoothDynamicalSystem::visitDynamicalSystems(SP::SiconosVisitor visitor)
   for (; dsi != dsiend; ++dsi)
   {
     dsg.bundle(*dsi)->acceptSP(visitor);
+  }
+}
+
+void NonSmoothDynamicalSystem::insertDynamicalSystem(SP::DynamicalSystem ds,
+                                                     SP::Model m, double time,
+                                                     SP::OneStepIntegrator osi)
+{
+  _topology->insertDynamicalSystem(ds);
+  _mIsLinear = ((ds)->isLinear() && _mIsLinear);
+
+  // If no OSI, or OSI has no DSG yet, assume DS will be initialized later.
+  // (Typically, during Simulation::initialize())
+  if (osi)
+  {
+    _topology->setOSI(ds, osi);
+    if (m && osi->dynamicalSystemsGraph())
+      osi->initializeDynamicalSystem(*m, time, ds);
   }
 }

@@ -159,8 +159,6 @@ public:
    */
   void setOSI(SP::DynamicalSystem ds, SP::OneStepIntegrator OSI);
 
-  void initDS(SP::Model m, double time, SP::DynamicalSystem ds, SP::OneStepIntegrator OSI);
-
    /** link two dynamical systems to a relation
    * \param inter a SP::Interaction
    * \param ds a SP::DynamicalSystem

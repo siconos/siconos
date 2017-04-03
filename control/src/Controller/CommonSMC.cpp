@@ -155,8 +155,8 @@ void CommonSMC::initialize(const Model& m)
     _integratorSMC.reset(new ZeroOrderHoldOSI());
   }
 
-  _SMC->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DS_SMC);
-  _SMC->nonSmoothDynamicalSystem()->topology()->setOSI(_DS_SMC, _integratorSMC);
+  _SMC->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DS_SMC, _SMC,
+                                                          t0, _integratorSMC);
   _SMC->nonSmoothDynamicalSystem()->setName(_DS_SMC, "plant_SMC");
   _SMC->nonSmoothDynamicalSystem()->link(_interactionSMC, _DS_SMC);
   _SMC->nonSmoothDynamicalSystem()->setControlProperty(_interactionSMC, true);

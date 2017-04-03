@@ -208,7 +208,7 @@ BounceResult bounceTest(std::string moving,
     body->setFExtPtr(FExt);
 
     // -- Add the dynamical systems into the non smooth dynamical system
-    model->nonSmoothDynamicalSystem()->insertDynamicalSystem(body);
+    model->nonSmoothDynamicalSystem()->insertDynamicalSystem(body, model, t0, osi);
 
     // -- Time discretisation --
     SP::TimeDiscretisation timedisc(new TimeDiscretisation(t0, h));

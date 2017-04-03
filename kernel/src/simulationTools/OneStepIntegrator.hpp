@@ -146,7 +146,13 @@ protected:
       \param inter a reference to an Interaction
   */
   void _check_and_update_interaction_levels(Interaction& inter);
-  
+
+  /** initialization of the work vectors and matrices (properties) related to
+   *  one dynamical system on the graph and needed by the osi -- common code.
+   * \param ds the dynamical system
+   */
+  SP::VectorOfVectors initializeDynamicalSystemWorkVectors(SP::DynamicalSystem ds);
+
 private:
 
 
@@ -252,7 +258,7 @@ public:
   /** Initialization process of the nonsmooth problems
    linked to this OSI*/
   virtual void initialize_nonsmooth_problems(){};
-  
+
   /** initialization of the work vectors and matrices (properties) related to
    *  one dynamical system on the graph and needed by the osi
    * \param m the Model

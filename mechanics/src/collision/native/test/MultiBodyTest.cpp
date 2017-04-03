@@ -254,9 +254,7 @@ void Disks::init(std::string disks_input)
       body->setFExtPtr(FExt);
 
       // add the dynamical system in the non smooth dynamical system
-      _model->nonSmoothDynamicalSystem()->insertDynamicalSystem(body);
-      _model->nonSmoothDynamicalSystem()->topology()->setOSI(body, osi);
-
+      _model->nonSmoothDynamicalSystem()->insertDynamicalSystem(body, _model, t0, osi);
     }
 
 

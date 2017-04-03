@@ -93,8 +93,8 @@ void ControlSimulation::setTheta(unsigned int newTheta)
 
 void ControlSimulation::addDynamicalSystem(SP::DynamicalSystem ds, const std::string& name)
 {
-  _model->nonSmoothDynamicalSystem()->insertDynamicalSystem(ds);
-  _model->nonSmoothDynamicalSystem()->topology()->setOSI(ds, _processIntegrator);
+  _model->nonSmoothDynamicalSystem()->insertDynamicalSystem(
+    ds, _model, _processSimulation->nextTime(), _processIntegrator);
 
   if (!name.empty())
   {
