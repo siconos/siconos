@@ -643,7 +643,7 @@ void LagrangianDS::swapInMemory()
     _xMemory->swap(*_x[0]);
 }
 
-void LagrangianDS::resetAllNonSmoothPart()
+void LagrangianDS::resetAllNonSmoothParts()
 {
   if(_p[0])
     _p[0]->zero();

@@ -189,19 +189,19 @@ void Hem5OSI::updateIntData()
   int NBLK = 1;                // NBLK : number of block of M
 
   if(MODE <=3)
-    {
-      LL = 8 * ((int)_intData[1] * (int)_intData[3])
-	+ 4 * ((int)_intData[1] + (int)_intData[3])*((int)_intData[1] + (int)_intData[3]);
-      LDG = _intData[3];
-      LDF = _intData[3];
-      NZA = LDG + std::max(LDG,LDF) + NMRC*NMRC*NBLK;
-      IS  = 0; // Sparse solver MA28 is not called
-      IXS = 0; // Sparse solver MA28 is not called
-    }
+  {
+    LL = 8 * ((int)_intData[1] * (int)_intData[3])
+      + 4 * ((int)_intData[1] + (int)_intData[3])*((int)_intData[1] + (int)_intData[3]);
+    LDG = _intData[3];
+    LDF = _intData[3];
+    NZA = LDG + std::max(LDG,LDF) + NMRC*NMRC*NBLK;
+    IS  = 0; // Sparse solver MA28 is not called
+    IXS = 0; // Sparse solver MA28 is not called
+  }
   if(MODE >3)
-    {
-      RuntimeException::selfThrow("Hem5OSI::updateIntData(), MODE >3 Sparse case not implemented ...");
-    }
+  {
+    RuntimeException::selfThrow("Hem5OSI::updateIntData(), MODE >3 Sparse case not implemented ...");
+  }
 
   // 5 - LWK length of real array rwork
   _intData[6] = 19 + 27*(int)_intData[0] + 28 * (int)_intData[1] + 27 * (int)_intData[2]
@@ -226,9 +226,9 @@ void Hem5OSI::updateData()
 
   atol.reset(new doublereal[sizeTol]) ;    // atol, absolute tolerance
   for(unsigned int i = 0; i < sizeTol; i++)
-    {
-      atol[i] = 0.0;
-    }
+  {
+    atol[i] = 0.0;
+  }
 
   iwork.reset(new integer[_intData[7]]);
   for(int i = 0; i < _intData[7]; i++) iwork[i] = 0;
@@ -256,22 +256,22 @@ void Hem5OSI::computeRhs(double t)
 {
   DynamicalSystemsGraph::VIterator dsi, dsend;
   for(std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
-    {
-      if(!checkOSI(dsi)) continue;
-      SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
-      ds->computeRhs(t);
-    }
+  {
+    if(!checkOSI(dsi)) continue;
+    SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
+    ds->computeRhs(t);
+  }
 }
 
 void Hem5OSI::computeJacobianRhs(double t)
 {
   DynamicalSystemsGraph::VIterator dsi, dsend;
   for(std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
-    {
-      if(!checkOSI(dsi)) continue;
-      SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
-      ds->computeJacobianRhsx(t);
-    }
+  {
+    if(!checkOSI(dsi)) continue;
+    SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
+    ds->computeJacobianRhsx(t);
+  }
 }
 
 void Hem5OSI::fprob(integer* IFCN,
@@ -306,167 +306,167 @@ void Hem5OSI::fprob(integer* IFCN,
   int ifcn = (int)(*IFCN);
 
   if((ifcn == 1) || (ifcn >= 7))  // compute Mass AM
+  {
+    unsigned int pos=0;
+    for(DynamicalSystemsGraph::VIterator vi = dsGraph->begin(); vi != dsGraph->end(); ++vi)
     {
-      unsigned int pos=0;
-      for(DynamicalSystemsGraph::VIterator vi = dsGraph->begin(); vi != dsGraph->end(); ++vi)
-	{
-	  SP::DynamicalSystem ds = dsGraph->bundle(*vi);
-	  if(Type::value(*ds) == Type::LagrangianDS ||
-	     Type::value(*ds) == Type::LagrangianLinearTIDS)
+      SP::DynamicalSystem ds = dsGraph->bundle(*vi);
+      if(Type::value(*ds) == Type::LagrangianDS ||
+         Type::value(*ds) == Type::LagrangianLinearTIDS)
 	    {
 	      LagrangianDS& lds = *std11::static_pointer_cast<LagrangianDS>(ds);
 	      if(lds.mass())
-		{
-		  lds.computeMass();
-		  for(unsigned int ii =pos ; ii < ((unsigned int)(*NV)+pos); ii ++)
-		    {
-		      for(unsigned int jj =pos ; jj < ((unsigned int)(*NV)+pos); jj ++)
-			{
-			  AM[ii + jj*(int)(*NV)] = lds.mass()->getValue(ii,jj) ;
-			}
-		    }
-		}
+        {
+          lds.computeMass();
+          for(unsigned int ii =pos ; ii < ((unsigned int)(*NV)+pos); ii ++)
+          {
+            for(unsigned int jj =pos ; jj < ((unsigned int)(*NV)+pos); jj ++)
+            {
+              AM[ii + jj*(int)(*NV)] = lds.mass()->getValue(ii,jj) ;
+            }
+          }
+        }
 	      else
-		{
-		  for(unsigned int ii =pos ; ii < ((unsigned int)(*NV)+pos); ii ++)
-		    {
-		      for(unsigned int jj =pos ; jj < ((unsigned int)(*NV)+pos); jj ++)
-			{
-			  if(ii == jj)
-			    AM[ii + jj*(int)(*NV)] = 1.;
-			  else
-			    AM[ii + jj*(int)(*NV)] = 0.;
-			}
-		    }
-		}
+        {
+          for(unsigned int ii =pos ; ii < ((unsigned int)(*NV)+pos); ii ++)
+          {
+            for(unsigned int jj =pos ; jj < ((unsigned int)(*NV)+pos); jj ++)
+            {
+              if(ii == jj)
+                AM[ii + jj*(int)(*NV)] = 1.;
+              else
+                AM[ii + jj*(int)(*NV)] = 0.;
+            }
+          }
+        }
 	      pos += lds.dimension();
 	    }
-	  else
+      else
 	    {
 	      RuntimeException::selfThrow("Hem5OSI::fprob(), Only integration of Lagrangian DS is allowed");
 	    }
-	  DEBUG_EXPR(
-		     for(int kk =0 ; kk < (int)(*NV)* (int)(*NV); kk ++)
-		       {
-			 std::cout << AM[kk] << std::endl;
-		       }
-		     );
-	}
+      DEBUG_EXPR(
+        for(int kk =0 ; kk < (int)(*NV)* (int)(*NV); kk ++)
+        {
+          std::cout << AM[kk] << std::endl;
+        }
+        );
     }
+  }
   if((ifcn ==1) || (ifcn == 5) || (ifcn == 7) || (ifcn==8))  // compute F
+  {
+    for(DynamicalSystemsGraph::VIterator vi = dsGraph->begin(); vi != dsGraph->end(); ++vi)
     {
-      for(DynamicalSystemsGraph::VIterator vi = dsGraph->begin(); vi != dsGraph->end(); ++vi)
-	{
-	  SP::DynamicalSystem ds = dsGraph->bundle(*vi);
-	  if(Type::value(*ds) == Type::LagrangianDS ||
-	     Type::value(*ds) == Type::LagrangianLinearTIDS)
+      SP::DynamicalSystem ds = dsGraph->bundle(*vi);
+      if(Type::value(*ds) == Type::LagrangianDS ||
+         Type::value(*ds) == Type::LagrangianLinearTIDS)
 	    {
 	      LagrangianDS& lds = *std11::static_pointer_cast<LagrangianDS>(ds);
 	      fillqWork(NQ,q);
 	      fillvWork(NV,v);
 	      lds.computeForces((double)*time, lds.q(), lds.velocity());
 	    }
-	  else if(Type::value(*ds) == Type::NewtonEulerDS)
+      else if(Type::value(*ds) == Type::NewtonEulerDS)
 	    {
 	      RuntimeException::selfThrow("Hem5OSI::fprob(), Integration of Newton Euler DS not yet implemented.");
 	    }
-	  else
+      else
 	    {
 	      RuntimeException::selfThrow("Hem5OSI::fprob(), Only integration of Lagrangian DS is allowed");
 	    }
-	}
-      for(unsigned int ii =0 ; ii < (unsigned int)(*NV); ii ++)
-	{
-	  F[ii] = _forcesWork->getValue(ii) ;
-	}
     }
-  if(ifcn == 4)  // compute G (constraints)
+    for(unsigned int ii =0 ; ii < (unsigned int)(*NV); ii ++)
     {
-      InteractionsGraph::VIterator ui, uiend;
-      SP::InteractionsGraph indexSet2
-	= _simulation->nonSmoothDynamicalSystem()->topology()->indexSet(2);
-      assert(indexSet2);
-      for(std11::tie(ui, uiend) = indexSet2->vertices(); ui != uiend; ++ui)
-	{
-	  SP::Interaction inter = indexSet2->bundle(*ui);
-	  inter->computeOutput(t, indexSet2->properties(*ui), 0);
-	  assert(0);
-	}
-
+      F[ii] = _forcesWork->getValue(ii) ;
     }
+  }
+  if(ifcn == 4)  // compute G (constraints)
+  {
+    InteractionsGraph::VIterator ui, uiend;
+    SP::InteractionsGraph indexSet2
+      = _simulation->nonSmoothDynamicalSystem()->topology()->indexSet(2);
+    assert(indexSet2);
+    for(std11::tie(ui, uiend) = indexSet2->vertices(); ui != uiend; ++ui)
+    {
+      SP::Interaction inter = indexSet2->bundle(*ui);
+      inter->computeOutput(t, indexSet2->properties(*ui), 0);
+      assert(0);
+    }
+
+  }
 
   if((ifcn == 6) || (ifcn >= 10))   // compute GP ( Jacobian of the constraints)
+  {
+    InteractionsGraph::VIterator ui, uiend;
+    SP::InteractionsGraph indexSet2 = _simulation->nonSmoothDynamicalSystem()->topology()->indexSet(2);
+    for(std11::tie(ui, uiend) = indexSet2->vertices(); ui != uiend; ++ui)
     {
-      InteractionsGraph::VIterator ui, uiend;
-      SP::InteractionsGraph indexSet2 = _simulation->nonSmoothDynamicalSystem()->topology()->indexSet(2);
-      for(std11::tie(ui, uiend) = indexSet2->vertices(); ui != uiend; ++ui)
-	{
-	  SP::Interaction inter = indexSet2->bundle(*ui);
-	  inter->relation()->computeJach(t, *inter, indexSet2->properties(*ui));
-	  assert(0);
-	}
+      SP::Interaction inter = indexSet2->bundle(*ui);
+      inter->relation()->computeJach(t, *inter, indexSet2->properties(*ui));
+      assert(0);
     }
+  }
 
   if((ifcn == 5) || (ifcn == 7))   // compute GPP ( Hessian of the constraints)
-    {
-      //RuntimeException::selfThrow("Hem5OSI::fprob(), G_qq is not available");
-      std::cout << "Hem5OSI::fprob(), G_qq is not available " << std::endl;
-    }
+  {
+    //RuntimeException::selfThrow("Hem5OSI::fprob(), G_qq is not available");
+    std::cout << "Hem5OSI::fprob(), G_qq is not available " << std::endl;
+  }
 
   if((ifcn == 3) || (ifcn == 6) || (ifcn >= 10))   // compute GT (partial time derivative of the constraints)
+  {
+    InteractionsGraph::VIterator ui, uiend;
+    SP::InteractionsGraph indexSet2 = _simulation->nonSmoothDynamicalSystem()->topology()->indexSet(2);
+    for(std11::tie(ui, uiend) = indexSet2->vertices(); ui != uiend; ++ui)
     {
-      InteractionsGraph::VIterator ui, uiend;
-      SP::InteractionsGraph indexSet2 = _simulation->nonSmoothDynamicalSystem()->topology()->indexSet(2);
-      for(std11::tie(ui, uiend) = indexSet2->vertices(); ui != uiend; ++ui)
-	{
-	  SP::Interaction inter = indexSet2->bundle(*ui);
-	  inter->relation()->computeJach(t, *inter, indexSet2->properties(*ui));
-	  assert(0);
-	}
+      SP::Interaction inter = indexSet2->bundle(*ui);
+      inter->relation()->computeJach(t, *inter, indexSet2->properties(*ui));
+      assert(0);
     }
+  }
 
   if(ifcn == 0)  // compute UDOT
+  {
+    for(int ii = 0; ii < (int)*NU ; ii++)
     {
-      for(int ii = 0; ii < (int)*NU ; ii++)
-	{
-	  assert(0);
-	}
+      assert(0);
     }
+  }
 
   if((ifcn == 1) || (ifcn == 2) || (ifcn == 10))   // compute QDOT
+  {
+    unsigned int pos=0;
+    for(DynamicalSystemsGraph::VIterator vi = dsGraph->begin(); vi != dsGraph->end(); ++vi)
     {
-      unsigned int pos=0;
-      for(DynamicalSystemsGraph::VIterator vi = dsGraph->begin(); vi != dsGraph->end(); ++vi)
-	{
-	  SP::DynamicalSystem ds = dsGraph->bundle(*vi);
-	  if(Type::value(*ds) == Type::LagrangianDS ||
-	     Type::value(*ds) == Type::LagrangianLinearTIDS)
+      SP::DynamicalSystem ds = dsGraph->bundle(*vi);
+      if(Type::value(*ds) == Type::LagrangianDS ||
+         Type::value(*ds) == Type::LagrangianLinearTIDS)
 	    {
 	      LagrangianDS& lds = *std11::static_pointer_cast<LagrangianDS>(ds);
 	      unsigned int dim = lds.dimension();
 	      for(unsigned int i =0 ; i < dim ; i++)
-		{
-		  QDOT[i+pos] = v[i+pos];
-		}
+        {
+          QDOT[i+pos] = v[i+pos];
+        }
 	      pos +=dim ;
 	    }
-	  else if(Type::value(*ds) == Type::NewtonEulerDS)
+      else if(Type::value(*ds) == Type::NewtonEulerDS)
 	    {
 	      RuntimeException::selfThrow("Hem5OSI::fprob(), Integration of Newton Euler DS not yet implemented.");
 	    }
-	  else
+      else
 	    {
 	      RuntimeException::selfThrow("Hem5OSI::fprob(), Only integration of Mechanical DS is allowed");
 	    }
 
-	}
-      DEBUG_EXPR(
-		 for(int kk =0 ; kk < (int)(*NV); kk ++)
-		   {
-		     std::cout << QDOT[kk] << std::endl;
-		   }
-		 );
     }
+    DEBUG_EXPR(
+      for(int kk =0 ; kk < (int)(*NV); kk ++)
+      {
+        std::cout << QDOT[kk] << std::endl;
+      }
+      );
+  }
 
   DEBUG_PRINTF("END : Hem5OSI::fprob(integer* IFCN,...) with IFCN = %i \n \n", (int)*IFCN);
 }
@@ -491,30 +491,30 @@ void Hem5OSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem 
   Type::Siconos dsType = Type::value(*ds);
 
   if(dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
-    {
-      LagrangianDS& lds = *std11::static_pointer_cast<LagrangianDS>(ds);
-      lds.init_inverse_mass(); // invMass required to update post-impact velocity
+  {
+    LagrangianDS& lds = *std11::static_pointer_cast<LagrangianDS>(ds);
+    lds.init_inverse_mass(); // invMass required to update post-impact velocity
 
-      _qWork->insertPtr(lds.q());
-      _vWork->insertPtr(lds.velocity());
-      _aWork->insertPtr(lds.acceleration());
-      _forcesWork->insertPtr(lds.forces());
-      workVectors.resize(OneStepIntegrator::work_vector_of_vector_size);
-      workVectors[OneStepIntegrator::free].reset(new SiconosVector(lds.dimension()));
+    _qWork->insertPtr(lds.q());
+    _vWork->insertPtr(lds.velocity());
+    _aWork->insertPtr(lds.acceleration());
+    _forcesWork->insertPtr(lds.forces());
+    workVectors.resize(OneStepIntegrator::work_vector_of_vector_size);
+    workVectors[OneStepIntegrator::free].reset(new SiconosVector(lds.dimension()));
 
-    }
+  }
   else
-    {
-      RuntimeException::selfThrow("Hem5OSI::initialize(), Only integration of Lagrangian DS is allowed");
-    }
+  {
+    RuntimeException::selfThrow("Hem5OSI::initialize(), Only integration of Lagrangian DS is allowed");
+  }
 
   ds->swapInMemory();
 }
 
 
 void Hem5OSI::fill_ds_links(Interaction &inter,
-			    InteractionProperties& interProp,
-			    DynamicalSystemsGraph & DSG)
+                            InteractionProperties& interProp,
+                            DynamicalSystemsGraph & DSG)
 {
   SP::DynamicalSystem ds1= interProp.source;
   SP::DynamicalSystem ds2= interProp.target;
@@ -530,22 +530,21 @@ void Hem5OSI::fill_ds_links(Interaction &inter,
   RELATION::TYPES relationType = relation.getType();
   Type::Siconos nslType = Type::value(nslaw);
 
-
   if (nslType == Type::NewtonImpactNSL || nslType == Type::MultipleImpactNSL)
-    {
-      _levelMinForOutput = 0;
-      _levelMaxForOutput = 2 ;
-      _levelMinForInput = 1;
-      _levelMaxForInput = 2;
-    }
+  {
+    _levelMinForOutput = 0;
+    _levelMaxForOutput = 2 ;
+    _levelMinForInput = 1;
+    _levelMaxForInput = 2;
+  }
   else if (nslType ==  Type::NewtonImpactFrictionNSL)
-    {
-      _levelMinForOutput = 0;
-      _levelMaxForOutput = 4;
-      _levelMinForInput = 1;
-      _levelMaxForInput = 2;
-      RuntimeException::selfThrow("HEM5OSI::fill_ds_links  not yet implemented for nonsmooth law of type NewtonImpactFrictionNSL");
-    }
+  {
+    _levelMinForOutput = 0;
+    _levelMaxForOutput = 4;
+    _levelMinForInput = 1;
+    _levelMaxForInput = 2;
+    RuntimeException::selfThrow("HEM5OSI::fill_ds_links  not yet implemented for nonsmooth law of type NewtonImpactFrictionNSL");
+  }
   else
     RuntimeException::selfThrow("HEM5OSI::fill_ds_links not yet implemented  for nonsmooth of type");
 
@@ -558,10 +557,10 @@ void Hem5OSI::fill_ds_links(Interaction &inter,
   /* allocate ant set work vectors for the osi */
   VectorOfVectors &workVds1 = *DSG.properties(DSG.descriptor(ds1)).workVectors;
   if (relationType == Lagrangian)
-    {
-      DSlink[LagrangianR::xfree].reset(new BlockVector());
-      DSlink[LagrangianR::xfree]->insertPtr(workVds1[OneStepIntegrator::free]);
-    }
+  {
+    DSlink[LagrangianR::xfree].reset(new BlockVector());
+    DSlink[LagrangianR::xfree]->insertPtr(workVds1[OneStepIntegrator::free]);
+  }
   // else if (relationType == NewtonEuler)
   // {
   //   DSlink[NewtonEulerR::xfree].reset(new BlockVector());
@@ -569,17 +568,17 @@ void Hem5OSI::fill_ds_links(Interaction &inter,
   // }
 
   if (ds1 != ds2)
+  {
+    VectorOfVectors &workVds2 = *DSG.properties(DSG.descriptor(ds2)).workVectors;
+    if (relationType == Lagrangian)
     {
-      VectorOfVectors &workVds2 = *DSG.properties(DSG.descriptor(ds2)).workVectors;
-      if (relationType == Lagrangian)
-	{
-	  DSlink[LagrangianR::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
-	}
-      // else if (relationType == NewtonEuler)
-      // {
-      //   DSlink[NewtonEulerR::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
-      // }
+      DSlink[LagrangianR::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
     }
+    // else if (relationType == NewtonEuler)
+    // {
+    //   DSlink[NewtonEulerR::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
+    // }
+  }
 }
 
 
@@ -633,10 +632,10 @@ unsigned int Hem5OSI::numberOfConstraints()
   SP::SiconosVector y;
   unsigned int n = 0;
   for(std11::tie(ui, uiend) = indexSet2->vertices(); ui != uiend; ++ui)
-    {
-      SP::Interaction inter = indexSet2->bundle(*ui);
-      n++;
-    }
+  {
+    SP::Interaction inter = indexSet2->bundle(*ui);
+    n++;
+  }
   return n;
 }
 
@@ -664,18 +663,18 @@ void Hem5OSI::integrate(double& tinit, double& tend, double& tout, int& idid)
 
   updateIntData();
   if(!_qtmp)
-    {
-      _qtmp.reset(new SiconosVector(_qWork->size()));
-    }
+  {
+    _qtmp.reset(new SiconosVector(_qWork->size()));
+  }
   else
     _qtmp->resize((int)_intData[0],true);
 
   DEBUG_PRINTF("Hem5OSI::integrate() _intData[0] (NQ) = %i \n",_intData[0]);
 
   if(!_vtmp)
-    {
-      _vtmp.reset(new SiconosVector(_vWork->size()));
-    }
+  {
+    _vtmp.reset(new SiconosVector(_vWork->size()));
+  }
   else
     _vtmp->resize((int)_intData[1],true);
 
@@ -684,16 +683,16 @@ void Hem5OSI::integrate(double& tinit, double& tend, double& tout, int& idid)
   DEBUG_PRINTF("Hem5OSI::integrate() _intData[2] (NU) = %i \n",_intData[2]);
 
   if(!_atmp)
-    {
-      _atmp.reset(new SiconosVector(_vWork->size()));
-    }
+  {
+    _atmp.reset(new SiconosVector(_vWork->size()));
+  }
   else
     _atmp->resize((int)_intData[1],true);
 
   if(!_lambdatmp)
-    {
-      _lambdatmp.reset(new SiconosVector(_intData[3],0.0));
-    }
+  {
+    _lambdatmp.reset(new SiconosVector(_intData[3],0.0));
+  }
   else
     _lambdatmp->resize((int)_intData[3],true);
   DEBUG_PRINTF("Hem5OSI::integrate() _intData[3] (NL) = %i \n",_intData[3]);
@@ -815,15 +814,15 @@ void Hem5OSI::integrate(double& tinit, double& tend, double& tout, int& idid)
 
   // === Post ===
   if(_idid < 0)  // if istate < 0 => HEM2 failed
-    {
-      std::cout << "Hem5OSI::integrate(...) failed - idid = " << _idid <<std::endl;
-      std::cout << " -1 means input is not consistent" <<std::endl;
-      std::cout << " -2 means larger NMAX needed." <<std::endl;
-      std::cout << " -3 means step size becomes too small." <<std::endl;
-      std::cout << " -4 means matrix is singular" <<std::endl;
-      std::cout << " -5 means initial projection: no convergence" <<std::endl;
-      RuntimeException::selfThrow("Hem5OSI::integrate(), integration failed");
-    }
+  {
+    std::cout << "Hem5OSI::integrate(...) failed - idid = " << _idid <<std::endl;
+    std::cout << " -1 means input is not consistent" <<std::endl;
+    std::cout << " -2 means larger NMAX needed." <<std::endl;
+    std::cout << " -3 means step size becomes too small." <<std::endl;
+    std::cout << " -4 means matrix is singular" <<std::endl;
+    std::cout << " -5 means initial projection: no convergence" <<std::endl;
+    RuntimeException::selfThrow("Hem5OSI::integrate(), integration failed");
+  }
 
   DEBUG_EXPR_WE(std::cout << "HEM5 Statitics : " <<std::endl;
                 std::cout << "NSTEP = " << iwork[30] <<std::endl;
@@ -852,11 +851,11 @@ void Hem5OSI::integrate(double& tinit, double& tend, double& tout, int& idid)
   SP::SiconosVector y;
   unsigned int pos=0;
   for(std11::tie(ui, uiend) = indexSet2->vertices(); ui != uiend; ++ui)
-    {
-      SP::Interaction inter = indexSet2->bundle(*ui);
-      inter->lambda(2)->setValue(0,(*_lambdatmp)(pos));
-      pos++;
-    }
+  {
+    SP::Interaction inter = indexSet2->bundle(*ui);
+    inter->lambda(2)->setValue(0,(*_lambdatmp)(pos));
+    pos++;
+  }
 
   tout  = tinit_DR; // real ouput time
   tend  = tend_DR;  // necessary for next start of HEM5
@@ -869,26 +868,26 @@ void Hem5OSI::updateState(const unsigned int level)
   // Compute all required (ie time-dependent) data for the DS of the OSI.
   DynamicalSystemsGraph::VIterator dsi, dsend;
   if(level == 1)  // ie impact case: compute velocity
+  {
+    for(std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
     {
-      for(std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
-	{
-	  if(!checkOSI(dsi)) continue;
-	  SP::LagrangianDS lds = std11::static_pointer_cast<LagrangianDS>(_dynamicalSystemsGraph->bundle(*dsi));
-	  lds->computePostImpactVelocity();
-	}
+      if(!checkOSI(dsi)) continue;
+      SP::LagrangianDS lds = std11::static_pointer_cast<LagrangianDS>(_dynamicalSystemsGraph->bundle(*dsi));
+      lds->computePostImpactVelocity();
     }
+  }
   else if(level == 2)
+  {
+    double time = _simulation->nextTime();
+    for(std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
     {
-      double time = _simulation->nextTime();
-      for(std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
-	{
-	  if(!checkOSI(dsi)) continue;
-	  {
-	    SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
-	    ds->update(time);
-	  }
-	}
+      if(!checkOSI(dsi)) continue;
+      {
+        SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
+        ds->update(time);
+      }
     }
+  }
   else RuntimeException::selfThrow("Hem5OSI::updateState(index), index is out of range. Index = " + level);
 }
 
@@ -958,63 +957,63 @@ void Hem5OSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, On
 
   //SP::OneStepNSProblems  allOSNS  = _simulation->oneStepNSProblems();
   if(((*allOSNS)[SICONOS_OSNSP_ED_SMOOTH_ACC]).get() == osnsp)
+  {
+    if(relationType == Lagrangian)
     {
-      if(relationType == Lagrangian)
-	{
-	  Xfree = DSlink[LagrangianR::xfree];
-	}
-      // else if  (relationType == NewtonEuler)
-      // {
-      //   Xfree = inter->data(NewtonEulerR::free);
-      // }
-      assert(Xfree);
-      //        std::cout << "Computeqblock Xfree (Gamma)========" << std::endl;
-      //       Xfree->display();
+      Xfree = DSlink[LagrangianR::xfree];
     }
+    // else if  (relationType == NewtonEuler)
+    // {
+    //   Xfree = inter->data(NewtonEulerR::free);
+    // }
+    assert(Xfree);
+    //        std::cout << "Computeqblock Xfree (Gamma)========" << std::endl;
+    //       Xfree->display();
+  }
   else  if(((*allOSNS)[SICONOS_OSNSP_ED_IMPACT]).get() == osnsp)
-    {
+  {
 
-      Xfree = DSlink[LagrangianR::q1];
-      //        std::cout << "Computeqblock Xfree (Velocity)========" << std::endl;
-      //       Xfree->display();
+    Xfree = DSlink[LagrangianR::q1];
+    //        std::cout << "Computeqblock Xfree (Velocity)========" << std::endl;
+    //       Xfree->display();
 
-    }
+  }
   else
     RuntimeException::selfThrow(" computeqBlock for Event Event-driven is wrong ");
 
   if(relationType == Lagrangian)
+  {
+    C = mainInteraction->relation()->C();
+    if(C)
     {
-      C = mainInteraction->relation()->C();
-      if(C)
-	{
-	  assert(Xfree);
+      assert(Xfree);
 
-	  coord[3] = C->size(1);
-	  coord[5] = C->size(1);
+      coord[3] = C->size(1);
+      coord[5] = C->size(1);
 
-	  subprod(*C, *Xfree, yForNSsolver, coord, true);
-	}
+      subprod(*C, *Xfree, yForNSsolver, coord, true);
+    }
 
-      SP::SiconosMatrix ID(new SimpleMatrix(sizeY, sizeY));
-      ID->eye();
+    SP::SiconosMatrix ID(new SimpleMatrix(sizeY, sizeY));
+    ID->eye();
 
-      Index xcoord(8);
-      xcoord[0] = 0;
-      xcoord[1] = sizeY;
-      xcoord[2] = 0;
-      xcoord[3] = sizeY;
-      xcoord[4] = 0;
-      xcoord[5] = sizeY;
-      xcoord[6] = 0;
-      xcoord[7] = sizeY;
-      // For the relation of type LagrangianRheonomousR
-      if(relationSubType == RheonomousR)
-	{
-	  if(((*allOSNS)[SICONOS_OSNSP_ED_SMOOTH_ACC]).get() == osnsp)
+    Index xcoord(8);
+    xcoord[0] = 0;
+    xcoord[1] = sizeY;
+    xcoord[2] = 0;
+    xcoord[3] = sizeY;
+    xcoord[4] = 0;
+    xcoord[5] = sizeY;
+    xcoord[6] = 0;
+    xcoord[7] = sizeY;
+    // For the relation of type LagrangianRheonomousR
+    if(relationSubType == RheonomousR)
+    {
+      if(((*allOSNS)[SICONOS_OSNSP_ED_SMOOTH_ACC]).get() == osnsp)
 	    {
 	      RuntimeException::selfThrow("Hem5OSI::computeFreeOutput not yet implemented for LCP at acceleration level with LagrangianRheonomousR");
 	    }
-	  else if(((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp)
+      else if(((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp)
 	    {
 	      SiconosVector q = *DSlink[LagrangianR::q0];
 	      SiconosVector z = *DSlink[LagrangianR::z];
@@ -1022,29 +1021,29 @@ void Hem5OSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, On
 	      *DSlink[LagrangianR::z] = z;
 	      subprod(*ID, *(std11::static_pointer_cast<LagrangianRheonomousR>(inter->relation())->hDot()), yForNSsolver, xcoord, false); // y += hDot
 	    }
-	  else
-	    RuntimeException::selfThrow("Hem5OSI::computeFreeOutput not implemented for SICONOS_OSNSP ");
-	}
-      // For the relation of type LagrangianScleronomousR
-      if(relationSubType == ScleronomousR)
-	{
-	  if(((*allOSNS)[SICONOS_OSNSP_ED_SMOOTH_ACC]).get() == osnsp)
+      else
+        RuntimeException::selfThrow("Hem5OSI::computeFreeOutput not implemented for SICONOS_OSNSP ");
+    }
+    // For the relation of type LagrangianScleronomousR
+    if(relationSubType == ScleronomousR)
+    {
+      if(((*allOSNS)[SICONOS_OSNSP_ED_SMOOTH_ACC]).get() == osnsp)
 	    {
 	      std11::static_pointer_cast<LagrangianScleronomousR>(inter->relation())->computedotjacqhXqdot(simulation()->getTkp1(), *inter, DSlink);
 	      subprod(*ID, *(std11::static_pointer_cast<LagrangianScleronomousR>(inter->relation())->dotjacqhXqdot()), yForNSsolver, xcoord, false); // y += NonLinearPart
 	    }
-	}
     }
+  }
   else
     RuntimeException::selfThrow("Hem5OSI::computeFreeOutput not yet implemented for Relation of type " + relationType);
   if(((*allOSNS)[SICONOS_OSNSP_ED_IMPACT]).get() == osnsp)
+  {
+    if(inter->relation()->getType() == Lagrangian || inter->relation()->getType() == NewtonEuler)
     {
-      if(inter->relation()->getType() == Lagrangian || inter->relation()->getType() == NewtonEuler)
-	{
-	  SP::SiconosVisitor nslEffectOnFreeOutput(new _NSLEffectOnFreeOutput(osnsp, inter));
-	  inter->nonSmoothLaw()->accept(*nslEffectOnFreeOutput);
-	}
+      SP::SiconosVisitor nslEffectOnFreeOutput(new _NSLEffectOnFreeOutput(osnsp, inter));
+      inter->nonSmoothLaw()->accept(*nslEffectOnFreeOutput);
     }
+  }
 
 }
 void Hem5OSI::display()

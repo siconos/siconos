@@ -141,6 +141,8 @@ protected:
 
 public:
 
+  enum {RESIDU_FREE, VFREE, BUFFER, WORK_LENGTH};
+ 
   /** constructor from theta value only
    *  \param theta value for all linked DS (default = 0.5).
    *  \param gamma value for all linked DS (default = NaN and gamma is not used).
@@ -280,7 +282,8 @@ public:
    */
   //virtual void initialize(Model& m);
 
-  
+  /** Initialization process of the nonsmooth problems
+      linked to this OSI*/
   virtual void initialize_nonsmooth_problems();
 
   /** initialization of the work vectors and matrices (properties) related to 
@@ -323,13 +326,13 @@ public:
    *  \param ds a pointer to DynamicalSystem
    *  \param WBoundaryConditions write the result in WBoundaryConditions
    */
-  void computeWBoundaryConditions(SP::DynamicalSystem ds, SiconosMatrix& WBoundaryConditions);
+  void _computeWBoundaryConditions(DynamicalSystem& ds, SiconosMatrix& WBoundaryConditions, SiconosMatrix& iteration_matrix);
 
   /** initialize iteration matrix WBoundaryConditionsMap[ds] MoreauJeanOSI
    *  \param ds a pointer to DynamicalSystem
    *  \param dsv a descriptor of the ds on the graph (redundant)
    */
-  void initializeIterationMatrixWBoundaryConditions(SP::DynamicalSystem ds, const DynamicalSystemsGraph::VDescriptor& dsv);
+  void _initializeIterationMatrixWBoundaryConditions(DynamicalSystem& ds, const DynamicalSystemsGraph::VDescriptor& dsv);
 
 
   /** compute the initial state of the Newton loop.
@@ -353,16 +356,14 @@ public:
    */
   virtual void computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, OneStepNSProblem* osnsp);
 
-  /** Apply the rule to one Interaction to known if is it should be included
-   * in the IndexSet of level i
+  /** Apply the rule to one Interaction to know if it should be included in the IndexSet of level i
    * \param inter the Interaction to test
    * \param i level of the IndexSet
    * \return Boolean
    */
   virtual bool addInteractionInIndexSet(SP::Interaction inter, unsigned int i);
 
-  /** Apply the rule to one Interaction to known if is it should be removed
-   * in the IndexSet of level i
+  /** Apply the rule to one Interaction to know if it should be removed from the IndexSet of level i
    * \param inter the Interaction to test
    * \param i level of the IndexSet
    * \return Boolean

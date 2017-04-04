@@ -29,7 +29,6 @@
 /** Non Smooth Problem Formalization and Simulation
 
    \author SICONOS Development Team - copyright INRIA
-   \version 3.0.0.
    \date (Creation) Apr 26, 2004
 
   This is an abstract class, that provides an interface to define a
@@ -76,26 +75,25 @@ class OneStepNSProblem
 {
 
 protected:
-  /** serialization hooks
-  */
+  /* serialization hooks */
   ACCEPT_SERIALIZATION(OneStepNSProblem);
 
   /** Numerics solver id */
   int _numerics_solver_id;
 
-  /** Numerics structure used to solve solver options */
+  /** Numerics solver properties */
   SP::SolverOptions _numerics_solver_options;
 
-  /** size of the problem to solve */
+  /** size of the nonsmooth problem */
   unsigned int _sizeOutput;
 
-  /** link to the simulation that owns the NSPb */
+  /** link to the simulation that owns the nonsmooth problem */
   SP::Simulation _simulation;
 
   /** level of index sets that is considered by this osnsp */
   unsigned int _indexSetLevel;
 
-  /** level of input and output variables ofs osnsp.
+  /** level of input and output variables of the nonsmooth problems.
    *  We consider that the osnsp computes y[_inputOutputLevel] and lambda[_inputOutputLevel]
    */
   unsigned int _inputOutputLevel;
@@ -107,9 +105,6 @@ protected:
       dimension of the problem. It must not exceed ...
   */
   unsigned int _maxSize;
-
-  /** Number of calls to the solver */
-  unsigned int _nbIter;
 
   /*During Newton it, this flag allows to update the numerics matrices only once if necessary.*/
   bool _hasBeenUpdated;
@@ -152,23 +147,14 @@ public:
     return _numerics_solver_options;
   };
 
-  /** get dimension of the problem
-   *  \return an unsigned ing
+  /** returns the dimension of the nonsmooth problem
    */
   inline unsigned int getSizeOutput() const
   {
     return _sizeOutput;
   }
 
-  /** set the value of sizeOutput
-   *  \param newVal an unsigned int
-   */
-  inline void setSizeOutput(const unsigned int newVal)
-  {
-    _sizeOutput = newVal;
-  }
-
-  /** get the Simulation
+  /** get the simulation which owns this nonsmooth problem
    *  \return a pointer on Simulation
    */
   inline SP::Simulation simulation() const
@@ -199,8 +185,6 @@ public:
   {
     _indexSetLevel = newVal;
   }
-
-
 
   /** get the Input/Output level
    *  \return an unsigned int
@@ -234,36 +218,15 @@ public:
     _maxSize = newVal;
   }
 
-  /** get the number of call to ns solver
-   *  \return: an unsigned int
-   */
-  inline unsigned int getNumberOfIterations() const
-  {
-    return _nbIter;
-  };
-
+  /** Turn on/off verbose mode in numerics solver*/
   void setNumericsVerboseMode(bool vMode);
-
-  /** reset stat (nbIter and CPUtime)
-   */
-  inline void resetStat()
-  {
-    _nbIter = 0;
-  };
 
   /** Check if the OSNSPb has interactions.
       \return bool = true if the  osnsp has interactions, i.e. indexSet(_indexSetLevel)->size >0 
    */
   bool hasInteractions() const;
 
-  /** display stat. info (CPU time and nb of iterations achieved)
-   */
-  void printStat();
-
-  virtual void display() const
-  {
-    ;
-  }
+  virtual void display() const {}
 
   /** Display the set of blocks for  a given indexSet
    * \param  indexSet  the concerned index set
@@ -335,8 +298,7 @@ public:
   */
   SP::SimpleMatrix getOSIMatrix(OneStepIntegrator& osi, SP::DynamicalSystem ds);
 
-  /** visitors hook
-   */
+  /* visitors hook */
   ACCEPT_STD_VISITORS();
 
 };

@@ -89,7 +89,7 @@ struct Interaction::_setLevels : public SiconosVisitor
       RuntimeException::selfThrow("Interaction::_setLevels::visit - unknown relation type for the nslaw ");
     };
   }
-  
+
   void visit(const RelayNSL& nslaw)
   {
     RELATION::TYPES relationType = _interaction->relation()->getType();
@@ -106,7 +106,7 @@ struct Interaction::_setLevels : public SiconosVisitor
       RuntimeException::selfThrow("Interaction::_setLevels::visit - unknown relation type for the nslaw ");
     };
   }
-  
+
  void visit(const NormalConeNSL& nslaw)
   {
     RELATION::TYPES relationType = _interaction->relation()->getType();
@@ -140,7 +140,7 @@ struct Interaction::_setLevels : public SiconosVisitor
       RuntimeException::selfThrow("Interaction::_setLevels::visit - unknown relation type for the nslaw ");
     };
   }
-  
+
   void visit(const EqualityConditionNSL& nslaw)
   {
     RELATION::TYPES relationType = _interaction->relation()->getType();
@@ -248,13 +248,13 @@ void Interaction::reset()
       _y[i].reset(new SiconosVector(nslawSize));
       _yOld[i].reset(new SiconosVector(nslawSize));
       _y_k[i].reset(new SiconosVector(nslawSize));
-      
+
       _y[i]->zero();
       _yOld[i]->zero();
       _y_k[i]->zero();
     }
-  
-  
+
+
   for (unsigned int i = _lowerLevelForInput ;
        i < _upperLevelForInput + 1 ;
        i++)
@@ -278,7 +278,7 @@ void Interaction::__init()
 
   assert(_relation && "Interaction::__init failed, relation() == NULL");
   assert(_nslaw && "Interaction::__inits, non smooth law == NULL");
-  
+
   // -- Set upper/lower levels, according to the nslaw --
   std11::shared_ptr<_setLevels> setLevels;
   setLevels.reset(new _setLevels(this));
@@ -376,13 +376,13 @@ void Interaction::initialize_ds_links(InteractionProperties& interaction_propert
   
   else if (relationType == Lagrangian)
     __initDataLagrangian(DSlink, ds1, ds2);
-  
+
   else if (relationType == NewtonEuler)
     __initDataNewtonEuler(DSlink, ds1, ds2);
   else
     RuntimeException::selfThrow("Interaction::initData unknown initialization procedure for \
         a relation of type: " + relationType);
-  
+
   // -- Stage 2 : create buffers (in the graph) that will be used for relation/interaction internal operations --
   // Relation initializes the work vectors and matrices
   //
@@ -465,7 +465,7 @@ void Interaction::resetLambda(unsigned int level)
 // classes, one for each type of relation
  void Interaction::__initDataFirstOrder(VectorOfBlockVectors& DSlink, DynamicalSystem& ds1, DynamicalSystem& ds2)
 {
-  
+
   DSlink.resize(FirstOrderR::DSlinkSize);
   DSlink[FirstOrderR::x].reset(new BlockVector());
   DSlink[FirstOrderR::r].reset(new BlockVector());
@@ -473,7 +473,7 @@ void Interaction::resetLambda(unsigned int level)
   __initDSDataFirstOrder(ds1, DSlink);
   if(&ds1 != &ds2)
     __initDSDataFirstOrder(ds2, DSlink);
-    
+ 
 }
 
 void Interaction::__initDSDataFirstOrder(DynamicalSystem& ds, VectorOfBlockVectors& DSlink)
@@ -507,7 +507,8 @@ void Interaction::__initDSDataLagrangian(DynamicalSystem& ds, VectorOfBlockVecto
 {
   // check dynamical system type
   assert((Type::value(ds) == Type::LagrangianLinearTIDS ||
-          Type::value(ds) == Type::LagrangianDS));
+          Type::value(ds) == Type::LagrangianDS ||
+          Type::value(ds) == Type::LagrangianLinearDiagonalDS));
 
   // convert vDS systems into LagrangianDS and put them in vLDS
   LagrangianDS& lds = static_cast<LagrangianDS&> (ds);

@@ -38,12 +38,12 @@
 #include "SiconosVisitor.hpp"
 
 #include <iostream>
-/** Abstract interface to Dynamical Systems 
-     
+/** Abstract interface to Dynamical Systems
+
     \author SICONOS Development Team - copyright INRIA
     \date (Creation) January 15, 2007
 
-    
+
     This class is used to describe dynamical systems of the form :
     \f[
     g(\dot x, x, t, z) = 0
@@ -57,7 +57,7 @@
      to set some perturbation parameters, to control the system (z
      set by actuators) and so on.
      - \f$ g : R^{n} \times R  \to  R^{n}   \f$ .
-     
+
   By default, the DynamicalSystem is considered to be an Initial Value
   Problem (IVP) and the initial conditions are given by
 
@@ -72,7 +72,7 @@
   \f]
 
   In that case, \f$ \nabla_{\dot x} g \f$ must be invertible.
-  
+
 */
 
 class DynamicalSystem
@@ -148,7 +148,7 @@ protected:
    * \param ds the DynamicalSystem to copy
    */
   DynamicalSystem(const DynamicalSystem & ds);
-  
+
   /** Initialize all PluggedObject whether they are used or not.
    */
   virtual void _zeroPlugin() = 0;
@@ -181,7 +181,7 @@ public:
    *  \param double time of interest
    */
   void update(double time);
-  
+
   /** update right-hand side for the current state
    *  \param double time of interest
    *  \param bool isDSup flag to avoid recomputation of operators
@@ -195,7 +195,7 @@ public:
   virtual void computeJacobianRhsx(double time , bool isDSup = false) = 0;
 
   /** reset nonsmooth part of the rhs, for all 'levels' */
-  virtual void resetAllNonSmoothPart() = 0;
+  virtual void resetAllNonSmoothParts() = 0;
 
   /** set nonsmooth part of the rhs to zero for a given level
    * \param level
@@ -204,8 +204,8 @@ public:
 
   ///@}
 
-  /*! @name Attributes access 
-    
+  /*! @name Attributes access
+
     For each 'Member' : \n
     - Member() returns a pointer to the object
     - getMember() a copy of the object

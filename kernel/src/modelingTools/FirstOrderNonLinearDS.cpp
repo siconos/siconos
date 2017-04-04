@@ -307,7 +307,7 @@ void FirstOrderNonLinearDS::display() const
   std::cout << " ============================================" <<std::endl;
 }
 
-void FirstOrderNonLinearDS::resetAllNonSmoothPart()
+void FirstOrderNonLinearDS::resetAllNonSmoothParts()
 {
   _r->zero();
 }

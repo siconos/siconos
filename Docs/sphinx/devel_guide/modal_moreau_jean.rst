@@ -75,7 +75,7 @@ Bilbao exact scheme writes:
 
    \begin{array}{ccc}
    Kq &\approx \Theta Kq^i + \frac{(\mathcal{I}-\Theta)K}{2}(q^{i+1} + q^{i-1}) \\
-   C\dot q &\approx -\frac{1}{\Delta t}\Sigma^*(q^{i+1} - q^{i-1}) \\
+   C\dot q &\approx \frac{1}{\Delta t}\Sigma^*(q^{i+1} - q^{i-1}) \\
    \end{array}
 
 for :math:`\Theta = diag(\theta_k)` and :math:`\Sigma^* = diag(\sigma_k^*)` some diagonal matrices, with
@@ -93,7 +93,7 @@ for :math:`\Theta = diag(\theta_k)` and :math:`\Sigma^* = diag(\sigma_k^*)` some
    Dynamics       & Moreau-Jean                       &         Modal-Moreau-Jean \\
    \int_{t^i}^{t^{i+1}} Mdv & \approx M(v^{i+1}-v^{i}) & \approx M(v^{i+1}-v^{i}) \\
    \int_{t^i}^{t^{i+1}} Kqdt & \approx \Delta t(\theta Kq^{i+1} + (1 - \theta) Kq^i) & \approx \Delta t\Theta Kq^i + \frac{\Delta t}{2}(\mathcal{I}-\Theta)K(q^{i+1} + q^{i-1}) \\
-   \int_{t^i}^{t^{i+1}} Cvdt & \approx \Delta t(\theta Cv^{i+1} + (1 - \theta) Cv^i) & \approx -\Sigma^*(q^{i+1} - q^{i-1})\\
+   \int_{t^i}^{t^{i+1}} Cvdt & \approx \Delta t(\theta Cv^{i+1} + (1 - \theta) Cv^i) & \approx \Sigma^*(q^{i+1} - q^{i-1})\\
    \int_{t^i}^{t^{i+1}} dr & \approx p^{i+1} & \approx p^{i+1} \\
     \end{array}
 
@@ -113,7 +113,7 @@ And for MMJ:
 
 .. math::
 
-   M(v^{i+1}-v^{i}) + \Delta t\Theta Kq^i + \frac{\Delta t}{2}(\mathcal{I}-\Theta)K(q^{i+1} + q^{i-1}) -\Sigma^*(q^{i+1} - q^{i-1}) = p^{i+1}
+   M(v^{i+1}-v^{i}) + \Delta t\Theta Kq^i + \frac{\Delta t}{2}(\mathcal{I}-\Theta)K(q^{i+1} + q^{i-1}) +\Sigma^*(q^{i+1} - q^{i-1}) = p^{i+1}
 
 With :math:`q^{i+1} = q^{i} + \Delta tv^{i+1}`, we get
 
@@ -126,14 +126,16 @@ and
 
 .. math::
    
-   [M + \frac{\Delta t^2}{2}(\mathcal{I} - \Theta)K - \Delta t\Sigma^*] (v^{i+1}-v^{i}) + \Delta tKq^i - 2\Delta t \Sigma^* v^i = p^{i+1} \\
+   [M + \frac{\Delta t^2}{2}(\mathcal{I} - \Theta)K + \Delta t\Sigma^*] (v^{i+1}-v^{i}) + \Delta tKq^i + 2\Delta t \Sigma^* v^i = p^{i+1} \\
    
 
 Both discretisations writes
    
 .. math::
    
-   W(v^{i+1}-v^{i}) = v_{free}^i + p^{i+1}
+   W(v^{i+1}-v^{i}) = \tilde v_{free}^i + p^{i+1} \\
+   or \\
+   v^{i+1} = v^i_{free} + W^{-1}p^{i+1} \\
 
 with
 
@@ -141,8 +143,8 @@ with
 
    \begin{array}{c|c|c}
    & Moreau-Jean                       &         Modal-Moreau-Jean \\
-   W & = M + \Delta t^2\theta^2 K + \Delta t\theta C & = M + \frac{\Delta t^2}{2}(\mathcal{I} - \Theta)K - \Delta t\Sigma^*\\
-   v_{free}^{i} &=  -\Delta tKq^i -(\Delta t^2\theta K + \Delta tC) v^i & = -\Delta tKq^i + 2\Delta t \Sigma^* v^i \\
+   W & = M + \Delta t^2\theta^2 K + \Delta t\theta C & = M + \frac{\Delta t^2}{2}(\mathcal{I} - \Theta)K + \Delta t\Sigma^*\\
+   v_{free}^{i} &= v^i - W^{-1}(\Delta tKq^i + (\Delta t^2\theta K + \Delta tC) v^i) & = v^i - W^{-1}(\Delta tKq^i + 2\Delta t \Sigma^* v^i) \\
    \end{array}
 
    

@@ -186,6 +186,13 @@ public:
     return _IG[0];
   }
 
+  SP::InteractionProperties interaction_properties(unsigned int index, SP::Interaction inter)
+  {
+    InteractionsGraph::VDescriptor ui = indexSet(index)->descriptor(inter);
+    SP::InteractionProperties inter_prop(new InteractionProperties(indexSet(index)->properties(ui)));
+    return inter_prop;
+  };
+
   /** get a pointer to the graph at level num of Interactions
    * \param num the number of indexSet
    * \return a SP::InteractionsGraph

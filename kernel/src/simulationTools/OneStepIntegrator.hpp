@@ -15,9 +15,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/*! \file
+/*! \file OnestepIntegrator.hpp
 
-  Basic class to handle with dynamical system integrators over a time step.
+  Base class (i.e. common interface) for dynamical system integration over a time step.
 */
 
 #ifndef ONESTEPINTEGRATOR_H
@@ -29,25 +29,9 @@
 #include "OneStepIntegratorTypes.hpp"
 #include "SimulationGraphs.hpp"
 
-// work around gccxml bug that does not accept an argument ot the deprecated attribute
-#ifndef __GCCXML__
-
-#ifdef __GNUC__
-#define DEPRECATED_OSI_API(func) func __attribute__ ((deprecated ("This constructor of function is deprecrated and will be removed in the next major Siconos release! Use the insertDynamicalSystem method in NonSmoothDynamicalSystem !")))
-#elif defined(_MSC_VER)
-#define DEPRECATED_OSI_API(func) __declspec(deprecated("This constructor will be removed in the next major Siconos release and does not work with MSVC 2013 ! Use the insertDynamicalSystem method in NonSmoothDynamicalSystem !")) func
-#else
-#define DEPRECATED_OSI_API(func) func
-#endif
-
-#else
-#define DEPRECATED_OSI_API(func) func
-#endif
-
 /**  Generic class to manage DynamicalSystem(s) time-integration
  *
  *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
  *  \date (Creation) Apr 26, 2004
  *
  * !!! This is a virtual class, interface for some specific integrators !!!
@@ -58,9 +42,8 @@
  * <li> MoreauJeanOSI </li>
  * <li> MoreauJeanCombinedProjectionOSI </li>
  * <li> MoreauJeanDirectProjectionOSI </li>
+ * <li> MoreauJeanBilbaoOSI </li>
  * <li> D1MinusLinearOSI </li>
- * <li> D1MinusLinearOSIHalfExplicitAccelerationLevelOSI </li>
- * <li> D1MinusLinearOSIHalfExplicitVelocityLevelOSI </li>
  * <li> SchatzmanPaoliOSI </li>
  * <li> LsodarOSI </li>
  * <li> Hem5OSI </li>
@@ -80,17 +63,15 @@ public :
   enum OSI_DSWorkMatrixId {dense_output_coefficients, work_vector_of_matrix_size};
 
 protected:
-  /** serialization hooks
-   */
+  /* serialization hooks */
   ACCEPT_SERIALIZATION(OneStepIntegrator);
-
 
   /** type/name of the Integrator */
   OSI::TYPES _integratorType;
 
   /** a graph of dynamical systems to integrate
    * For the moment, we point to the graph of dynamical systems in
-   * in the topology. We use the properties "osi" to check if the dynamical
+   * the topology. We use the properties "osi" to check if the dynamical
    * system is integrated by this osi. It has to be improved by using a subgraph
    * to avoid the use of checkOSI
    */
@@ -99,44 +80,36 @@ protected:
   /** size of the memory for the integrator */
   unsigned int _sizeMem;
 
-  /** steps of the integrator
-   */
+  /** steps of the integrator */
   unsigned int _steps;
-  
+
   /** _levelMinForOutput is the minimum level for the output
    * needed by the OneStepIntegrator
    */
   unsigned int _levelMinForOutput;
-
 
   /** _levelMaxForOutput is the maximum level for the output
    * needed by the OneStepIntegrator
    */
   unsigned int _levelMaxForOutput;
 
-
   /** _levelMinForInput is the minimum level for the input
    * needed by the OneStepIntegrator
    */
   unsigned int _levelMinForInput;
-
 
   /** _levelMaxForInput is the maximum level for the input
    * needed by the OneStepIntegrator
    */
   unsigned int _levelMaxForInput;
 
-/** A link to the simulation that owns this OSI */
+  /** A link to the simulation that owns this OSI */
   SP::Simulation _simulation;
 
-  /** basic constructor with Id
+  /** basic constructor with OSI Id
    *  \param type integrator type/name
    */
   OneStepIntegrator(const OSI::TYPES& type): _integratorType(type), _sizeMem(1) {};
-
-  /** default constructor
-   */
-  OneStepIntegrator() {};
 
   /** struct to add terms in the integration. Useful for Control */
   SP::ExtraAdditionalTerms _extraAdditionalTerms;
@@ -146,9 +119,11 @@ protected:
       \param inter a reference to an Interaction
   */
   void _check_and_update_interaction_levels(Interaction& inter);
-  
-private:
 
+  /** default constructor */
+  OneStepIntegrator() {};
+
+private:
 
   /** copy constructor, private, no copy nor pass-by value allowed */
   OneStepIntegrator(const OneStepIntegrator&);
@@ -166,51 +141,27 @@ public:
    */
   virtual ~OneStepIntegrator() {};
 
-  // --- GETTERS/SETTERS ---
+  /*! @name Attributes access
+    @{ */
 
-  /** get the type of the OneStepIntegrator
-   *  \return std::string : the type of the OneStepIntegrator
-   */
+  /** id of the integrator (see list in OSI::TYPES enum)
+      \return int
+  */
   inline OSI::TYPES getType() const
   {
     return _integratorType;
   }
 
-  /** set the type of the OneStepIntegrator
-   *  \param newType std::string : the type of the OneStepIntegrator
-   */
-  inline void setType(const OSI::TYPES& newType)
-  {
-    _integratorType = newType;
-  };
-
-  /** Check if the dynamical system bundle in the node of the
-   * _dynamicalSystemGraph is integrated by this osi.
-   * \param dsi the iterator on the node of the graph
-   */
-  inline bool checkOSI(DynamicalSystemsGraph::VIterator dsi)
-  {
-    return  (_dynamicalSystemsGraph->properties(*dsi).osi.get()) == this;
-  };
-
-  /** Check if the dynamical system bundle in the node of the
-   * _dynamicalSystemGraph is integrated by this osi.
-   * \param dsgv the descriptor on the node of the graph
-   */
-  inline bool checkOSI(DynamicalSystemsGraph::VDescriptor dsgv)
-  {
-    return  (_dynamicalSystemsGraph->properties(dsgv).osi.get()) == this;
-  };
-
-  /** get the set of DynamicalSystem associated with the Integrator
-   *  \return a SP::DynamicalSystemsGraph
+  /** get the graph of dynamical systems associated with the Integrator
+      warning: returns the whole ds graph, not only ds integrated by the present osi.
+      \return a SP::DynamicalSystemsGraph
    */
   inline SP::DynamicalSystemsGraph dynamicalSystemsGraph() const
   {
     return _dynamicalSystemsGraph;
   };
 
-  /** get number of internal memory vectors needed for the integration scheme
+  /** get number of internal memory vectors needed in dynamical systems integrated with this osi.
    *  \return an unsigned int
    */
   inline unsigned int getSizeMem() const
@@ -218,15 +169,7 @@ public:
     return _sizeMem;
   };
 
-  /** set the number of internal memory vectors needed for the integration scheme
-   *  \param newValue an unsigned int
-   */
-  inline void setSizeMem(unsigned int newValue)
-  {
-    _sizeMem = newValue;
-  };
-
-  /** get the Simulation that owns the OneStepIntegrator
+  /** get the Simulation that owns the OneStepIntegrator (pointer link)
    *  \return a pointer to Simulation
    */
   inline SP::Simulation simulation() const
@@ -242,7 +185,47 @@ public:
     _simulation = newS;
   }
 
-  // --- OTHERS ... ---
+  /** minimal level required for output var used with this integration scheme.
+      var[level] is the derivative of order 'level' of var.
+  */
+  virtual unsigned int levelMinForOutput()
+  {
+    return _levelMinForOutput;
+  }
+
+  /** maximal level required for output var used with this integration scheme.
+      var[level] is the derivative of order 'level' of var.
+   */
+  virtual unsigned int levelMaxForOutput()
+  {
+    return _levelMaxForOutput;
+  }
+
+  /** minimal level required for input var used with this integration scheme.
+      var[level] is the derivative of order 'level' of var.
+   */
+  virtual unsigned int levelMinForInput()
+  {
+    return _levelMinForInput;
+  }
+
+  /** maximal level required for input var used with this integration scheme.
+      var[level] is the derivative of order 'level' of var.
+   */
+  virtual unsigned int levelMaxForInput()
+  {
+    return _levelMaxForInput;
+  }
+
+  /** get the number of index sets required for the simulation
+   * \return unsigned int
+   */
+  virtual unsigned int numberOfIndexSets() const = 0;
+
+  /** @} end of members access group. */
+
+  /*! @name internal memory (graph properties) management
+    @{ */
 
   /** initialise the integrator
    * \param m a Model
@@ -250,9 +233,9 @@ public:
   virtual void initialize(Model& m );
 
   /** Initialization process of the nonsmooth problems
-   linked to this OSI*/
+      linked to this OSI*/
   virtual void initialize_nonsmooth_problems(){};
-  
+
   /** initialization of the work vectors and matrices (properties) related to
    *  one dynamical system on the graph and needed by the osi
    * \param m the Model
@@ -268,40 +251,23 @@ public:
    * \param DSG the dynamical systems graph
    */
   virtual void fill_ds_links(Interaction &inter,
-			     InteractionProperties& interProp,
-			     DynamicalSystemsGraph & DSG) = 0 ;
+                             InteractionProperties& interProp,
+                             DynamicalSystemsGraph & DSG) = 0 ;
+
+
+  /** @} end of internal memory management functions */
+
+  /*! @name Computation functions
+    @{ */
 
   /** compute interaction output (y) for all levels and swaps in memory
       \param inter the interaction to update
       \param time value for output computation
       \param interaction_properties properties of the interaction, in the Interaction Graph I0
-   */
+  */
   void update_interaction_output(Interaction& inter, double time, InteractionProperties& interaction_properties);
-  
-  /** get the number of index sets required for the simulation
-   * \return unsigned int
-   */
-  virtual unsigned int numberOfIndexSets() const=0;
 
-  virtual unsigned int levelMinForOutput()
-  {
-    return _levelMinForOutput;
-  }
-  virtual unsigned int levelMaxForOutput()
-  {
-    return _levelMaxForOutput;
-  }
-  virtual unsigned int levelMinForInput()
-  {
-    return _levelMinForInput;
-  }
-  virtual unsigned int levelMaxForInput()
-  {
-    return _levelMaxForInput;
-  }
-
-  /** compute the initial state of the Newton loop.
-   */
+  /** compute the initial state (for dynamical system variables) of the Newton loop. */
   virtual void computeInitialNewtonState(){
     // Default behavior :  does nothing and used the current state as starting state of the Newton iteration
   }
@@ -316,13 +282,13 @@ public:
   }
 
   /** integrates the Dynamical System linked to this integrator, without taking constraints
-   * into account.
+      into account.
    */
-  virtual void computeFreeState(){
+  virtual void computeFreeState()
+  {
     // default : error
     RuntimeException::selfThrow("OneStepIntegrator::computeFreeState not implemented for integrator of type " + _integratorType);
   }
-
 
   /** integrates the Interaction linked to this integrator, without taking non-smooth effects into account
    * \param vertex_inter of the interaction graph
@@ -334,17 +300,17 @@ public:
     RuntimeException::selfThrow("OneStepIntegrator::computeFreeOutput not implemented for integrator of type " + _integratorType);
   }
 
-  /** integrate the system, between tinit and tend (->iout=true), with possible stop at tout (->iout=false)
-   *  \param tinit initial time
-   *  \param tend end time
+  /** integrate the system, between tinit and tend, with possible stop at tout
+   *  \param tinit start time
+   *  \param tend expected end time
    *  \param tout real end time
-   *  \param idid flag used in EventDriven schemes
+   *  \param idid extra flag, meaningful only for OSI used in EventDriven schemes
    */
   virtual void integrate(double& tinit, double& tend, double& tout, int& idid) = 0;
 
-  /** set to zero all the r vectors of the DynamicalSystems of the present OSI
+  /** set to zero all the r vectors of the DynamicalSystems integrated by this OSI
    */
-  void resetNonSmoothPart();
+  void resetAllNonSmoothParts();
 
   /** set to zero all the r vectors of the DynamicalSystems of the present OSI for a given level
    * \param level
@@ -382,13 +348,16 @@ public:
    */
   void updateInput(double time, unsigned int level);
 
+  /** */
+  virtual void prepareNewtonIteration(double time) = 0;
+  /** @} end of computation functions */
+
+  /*! @name Misc
+    @{ */
+
   /** print the data to the screen
    */
   virtual void display() = 0;
-
-  /**
-   */
-  virtual void prepareNewtonIteration(double time) = 0;
 
   /** Apply the rule to one Interaction to known if is it should be included
    * in the IndexSet of level i
@@ -431,9 +400,25 @@ public:
   {
     _extraAdditionalTerms = eat;
   }
-
-  /** visitors hook
+  /** True if the dynamical system (a vertex in the ds graph) is integrated by this osi.
+      \param dsi the iterator on the node of the graph corresponding to the dynamical system of interest.
    */
+  inline bool checkOSI(DynamicalSystemsGraph::VIterator dsi)
+  {
+    return  (_dynamicalSystemsGraph->properties(*dsi).osi.get()) == this;
+  };
+
+  /** True if the dynamical system (a vertex in the ds graph) is integrated by this osi.
+      \param dsgv the descriptor of the node in the graph corresponding to the dynamical system of interest.
+   */
+  inline bool checkOSI(DynamicalSystemsGraph::VDescriptor dsgv)
+  {
+    return  (_dynamicalSystemsGraph->properties(dsgv).osi.get()) == this;
+  };
+
+  /** @} end of misc */
+
+  /* visitors hook */
   VIRTUAL_ACCEPT_VISITORS(OneStepIntegrator);
 
 };

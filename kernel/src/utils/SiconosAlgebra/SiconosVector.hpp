@@ -372,6 +372,15 @@ public:
   SiconosVector& operator -=(const SiconosVector& v);
   SiconosVector& operator -=(const BlockVector& v);
 
+  /** component-wise exponential of a vector
+      \param SiconosVector input, such that result (this) = exp(input)
+  */
+  void exp(SiconosVector& input);
+
+  /** component-wise exponential of a vector, in-place.
+      this = exp(this)
+  */
+  void exp_in_place();
 
   friend SiconosVector& operator *= (SiconosVector& v, const double& s);
 

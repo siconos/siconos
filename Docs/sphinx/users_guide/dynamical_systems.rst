@@ -103,7 +103,7 @@ The following functions are (and must) be present in any class derived from Dyna
 
 * :doxysiconos:`DynamicalSystem::display()`
 
-* :doxysiconos:`DynamicalSystem::resetAllNonSmoothPart()`
+* :doxysiconos:`DynamicalSystem::resetAllNonSmoothParts()`
 
 * :doxysiconos:`DynamicalSystem::resetNonSmoothPart(level)`
   

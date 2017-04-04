@@ -449,6 +449,7 @@ void Simulation::unlink(SP::Interaction inter)
 
 void Simulation::updateInteractions()
 {
+
   // Update interactions if a manager was provided
   if (_interman) {
     _linkOrUnlink = false;

@@ -36,7 +36,7 @@ def test_ds_interface():
         ds = class_name(*attr)
         print class_name, attr[0]
         ds.initializeNonSmoothInput(1)
-        ds.resetAllNonSmoothPart()
+        ds.resetAllNonSmoothParts()
         ds.resetNonSmoothPart(1)
         ds.initRhs(time)
         ds.computeRhs(time)

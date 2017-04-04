@@ -1265,7 +1265,7 @@ void NewtonEulerDS::swapInMemory()
   _forcesMemory->swap(*_wrench);
 }
 
-void NewtonEulerDS::resetAllNonSmoothPart()
+void NewtonEulerDS::resetAllNonSmoothParts()
 {
   if(_p[1])
     _p[1]->zero();

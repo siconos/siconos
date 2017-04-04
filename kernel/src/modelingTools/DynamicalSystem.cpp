@@ -63,7 +63,8 @@ DynamicalSystem::DynamicalSystem(const DynamicalSystem & ds):
   // The following data should always be initialize
   if(ds.x0())
     _x0.reset(new SiconosVector(*(ds.x0())));
-  _r.reset(new SiconosVector(*(ds.r())));
+  if(ds.r())
+    _r.reset(new SiconosVector(*(ds.r())));
   _x.resize(2);
   if(ds.x())
      _x[0].reset(new SiconosVector(*(ds.x())));

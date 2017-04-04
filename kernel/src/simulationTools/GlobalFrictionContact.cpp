@@ -192,7 +192,7 @@ bool GlobalFrictionContact::preCompute(double time)
 
       OSI::TYPES osi1Type = Osi1.getType();
       OSI::TYPES osi2Type = Osi2.getType();
-      if (osi1Type == OSI::MOREAUJEANOSI2  && osi2Type == OSI::MOREAUJEANOSI2)
+      if (osi1Type == OSI::MOREAUJEANGOSI  && osi2Type == OSI::MOREAUJEANGOSI)
       {
         static_cast<MoreauJeanGOSI&>(Osi1).NSLcontrib(inter, *this);
       }
@@ -264,7 +264,7 @@ bool GlobalFrictionContact::preCompute(double time)
       OSI::TYPES osiType = Osi.getType();
       Type::Siconos dsType ; // Type of the current DS.
       dsType = Type::value(*ds); // Its type
-      if (osiType == OSI::MOREAUJEANOSI2)
+      if (osiType == OSI::MOREAUJEANGOSI)
       {
         VectorOfVectors& workVectors = *DSG0.properties(DSG0.descriptor(ds)).workVectors;
         

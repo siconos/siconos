@@ -139,10 +139,10 @@ public:
 
   ///@}
 
-  /*! @name Attributes access 
+  /*! @name Attributes access
     @{ */
-  
-  /** get a copy od f the stiffness matrix
+
+  /** get a copy of the stiffness matrix
    *  \return SimpleMatrix
    */
   inline const SimpleMatrix getK() const
@@ -206,9 +206,9 @@ public:
   {
     return _C;
   }
-  
+
   ///@}
-  
+
   /*! @name Miscellaneous public methods */
   //@{
   

@@ -17,6 +17,7 @@
   PY_REGISTER(Topology);                                                \
   PY_REGISTER(LagrangianDS);                                            \
   PY_REGISTER(LagrangianLinearTIDS);                                    \
+  PY_REGISTER(LagrangianLinearDiagonalDS);                              \
   PY_REGISTER(NewtonEulerDS);                                           \
   PY_REGISTER(FirstOrderNonLinearDS);                                   \
   PY_REGISTER(FirstOrderLinearDS);                                      \
@@ -52,6 +53,7 @@
   PY_REGISTER(FrictionContact);                                         \
   PY_REGISTER(EulerMoreauOSI);                                          \
   PY_REGISTER(MoreauJeanOSI);                                           \
+  PY_REGISTER(MoreauJeanBilbaoOSI);                                     \
   PY_REGISTER(MoreauJeanCombinedProjectionOSI);                         \
   PY_REGISTER(MoreauJeanDirectProjectionOSI);                           \
   PY_REGISTER(ZeroOrderHoldOSI);                                        \

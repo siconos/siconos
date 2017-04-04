@@ -194,7 +194,7 @@ public:
   void computeJacobianRhsx(double time, bool isDSUp = false);
 
   /** reset non-smooth part of the rhs (i.e. r), for all 'levels' */
-  virtual void resetAllNonSmoothPart();
+  virtual void resetAllNonSmoothParts();
 
   /** set nonsmooth part of the rhs (i.e. r) to zero for a given level
    * \param level

@@ -87,7 +87,7 @@ void OneStepIntegrator::initialize( Model& m )
 
     // Update interaction attributes (output)
     update_interaction_output(inter, t0, interaction_properties);
-    
+
   }
 }
 
@@ -104,7 +104,7 @@ void OneStepIntegrator::update_interaction_output(Interaction& inter, double tim
   //      - inter = ew interaction + link with ds
   //      - simu->osi->fill_ds_links(inter)
   //      - simu->osi->update_interaction_output()
-  
+
   if (_steps > 1) // Multi--step methods
     {
       // Compute the old Values of Output with stored values in Memory
@@ -164,13 +164,13 @@ void OneStepIntegrator::_check_and_update_interaction_levels(Interaction& inter)
 // }
 
 
-void OneStepIntegrator::resetNonSmoothPart()
+void OneStepIntegrator::resetAllNonSmoothParts()
 {
  DynamicalSystemsGraph::VIterator dsi, dsend;
   for (std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
   {
     if (!checkOSI(dsi)) continue;
-    _dynamicalSystemsGraph->bundle(*dsi)->resetAllNonSmoothPart();
+    _dynamicalSystemsGraph->bundle(*dsi)->resetAllNonSmoothParts();
   }
 }
 

@@ -63,6 +63,7 @@ DEFINE_SPTR(TimeDiscretisation)
 // Dynamical systems
 DEFINE_SPTR(DynamicalSystem)
 DEFINE_SPTR(LagrangianLinearTIDS)
+DEFINE_SPTR(LagrangianLinearDiagonalDS)
 DEFINE_SPTR(NewtonEulerDS)
 
 DEFINE_SPTR(Event)
@@ -91,6 +92,7 @@ DEFINE_SPTR(NewtonEulerFrom3DLocalFrameR)
 // OSI
 DEFINE_SPTR(EulerMoreauOSI)
 DEFINE_SPTR(MoreauJeanOSI)
+DEFINE_SPTR(MoreauJeanBilbaoOSI)
 DEFINE_SPTR(MoreauJeanGOSI)
 DEFINE_SPTR(MoreauJeanCombinedProjectionOSI)
 DEFINE_SPTR(MoreauJeanDirectProjectionOSI)

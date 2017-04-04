@@ -558,7 +558,6 @@ SICONOS_IO_REGISTER(OneStepNSProblem,
   (_indexSetLevel)
   (_inputOutputLevel)
   (_maxSize)
-  (_nbIter)
   (_simulation)
   (_sizeOutput))
 SICONOS_IO_REGISTER(OSNSMatrix,

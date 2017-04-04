@@ -688,7 +688,7 @@ void EventDriven::advanceToEvent()
     OSIIterator it;
     for (it = _allOSI->begin(); it != _allOSI->end(); ++it)
     {
-      (*it)->resetNonSmoothPart();
+      (*it)->resetAllNonSmoothParts();
 
       //====================================================================================
       //     cout << " Start of LsodarOSI integration" << endl;

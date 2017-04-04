@@ -582,12 +582,22 @@ void prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C, bool
 
 void axpy_prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C, bool init)
 {
+
   // To compute C = A * B (init = true) or C += A * B (init = false) using ublas axpy_prod.
+  // High speedup for sparse matrices.
+  // Warning FP: ublas::axpy_prod(A, B, C, init) with init = True is equivalent
+  // to C = A*B with C.clear BEFORE product. So C==A or B must be forbidden.
+  // See http://www.boost.org/doc/libs/1_63_0/libs/numeric/ublas/doc/products.html
+  //
+
   if ((A.size(1) != B.size(0)))
-    SiconosMatrixException::selfThrow("Matrix function prod(A,B,C): inconsistent sizes");
+    SiconosMatrixException::selfThrow("Matrix function axpy_prod(A,B,C): inconsistent sizes");
 
   if (A.size(0) != C.size(0) || B.size(1) != C.size(1))
-    SiconosMatrixException::selfThrow("Matrix function prod(A,B,C): inconsistent sizes");
+    SiconosMatrixException::selfThrow("Matrix function axpy_prod(A,B,C): inconsistent sizes");
+
+  if(&A == &C || &B == &C)
+    SiconosMatrixException::selfThrow("Matrix function axpy_prod(A,B,C): C must be different from A and B.");
 
   assert(!(A.isPLUFactorized()) && "A is PLUFactorized in prod !!" );
   assert(!(B.isPLUFactorized()) && "B is PLUFactorized in prod !!" );
@@ -607,24 +617,20 @@ void axpy_prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C,
 
   if (numA == 7) // A = identity ...
   {
-    if (!init) C += B;
+    if (!init)
+      C += B;
     else
-    {
-      if (&C != &B)
-        C = B; // if C and B are two different objects.
-      // else nothing
-    }
+      C = B; // if C and B are two different objects.
   }
 
   else if (numB == 7) // B = identity
   {
-    if (!init) C += A;
+    if (!init)
+      C += A;
     else
-    {
-      if (&C != &A) C = A; // if C and A are two different objects.
-      // else nothing
-    }
+      C = A; // if C and A are two different objects.
   }
+
 
   else if (numA == 6 || numB == 6) // if A or B = 0
   {
@@ -638,168 +644,95 @@ void axpy_prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C,
   }
   else // neither A or B is equal to identity or zero.
   {
-    if (&C == &A) // if common memory between A and C
+    switch (numC)
     {
-      switch (numA)
+    case 1:
+      if (numB == 1)
       {
-      case 1:
-        if (numB == 1)
-          ublas::axpy_prod(*A.dense(), *B.dense(), *A.dense(), init);
-        else if (numB == 2)
-          ublas::axpy_prod(*A.dense(), *B.triang(), *A.dense(), init);
-        else if (numB == 3)
-          ublas::axpy_prod(*A.dense(), *B.sym(), *A.dense(), init);
-        else if (numB == 4)
-          ublas::axpy_prod(*A.dense(), *B.sparse(), *A.dense(), init);
-        else //if(numB==5)
-          ublas::axpy_prod(*A.dense(), *B.banded(), *A.dense(), init);
-        break;
-      case 2:
-        //        if(numB != 2)
-        SiconosMatrixException::selfThrow("Matrix function axpy_prod(A,B,C): wrong type for C (according to A and B types).");
-        //        ublas::axpy_prod(*A.triang(), *B.triang(), *A.triang(), init);
-        break;
-      case 3:
-        //if(numB != 3)
-        SiconosMatrixException::selfThrow("Matrix function axpy_prod(A,B,C): wrong type for C (according to A and B types).");
-        //ublas::axpy_prod(*A.sym(), *B.sym(), *A.sym(), init);
-        break;
-      case 4:
-        //        if(numB != 4)
-        SiconosMatrixException::selfThrow("Matrix function axpy_prod(A,B,C): wrong type for C (according to A and B types).");
-        //ublas::axpy_prod(*A.sparse(), *B.sparse(), *A.sparse(),init);
-        break;
-      default:
-        SiconosMatrixException::selfThrow("Matrix function axpy_prod(A,B,C): wrong type for C (according to A and B types).");
-      }
-    }
-    else if (&C == &B)
-    {
-      switch (numB)
-      {
-      case 1:
         if (numA == 1)
-          ublas::axpy_prod(*A.dense(), *B.dense(), *B.dense(), init);
+          ublas::axpy_prod(*A.dense(), *B.dense(), *C.dense(), init);
         else if (numA == 2)
-          ublas::axpy_prod(*A.triang(), *B.dense(), *B.dense(), init);
+          ublas::axpy_prod(*A.triang(), *B.dense(), *C.dense(), init);
         else if (numA == 3)
-          ublas::axpy_prod(*A.sym(), *B.dense(), *B.dense(), init);
+          ublas::axpy_prod(*A.sym(), *B.dense(), *C.dense(), init);
         else if (numA == 4)
-          ublas::axpy_prod(*A.sparse(), *B.dense(), *B.dense(), init);
-        else //if(numB==5)
-          ublas::axpy_prod(*A.banded(), *B.dense(), *B.dense(), init);
-        break;
-      case 2:
-        //if(numA != 2)
-        SiconosMatrixException::selfThrow("Matrix function axpy_prod(A,B,C): wrong type for C (according to A and B types).");
-        //        ublas::axpy_prod(*A.triang(), *B.triang(),*B.triang(), init);
-        break;
-      case 3:
-        //        if(numA != 3)
-        SiconosMatrixException::selfThrow("Matrix function axpy_prod(A,B,C): wrong type for C (according to A and B types).");
-        //ublas::axpy_prod(*A.sym(), *B.sym(), *B.sym(), init);
-        break;
-      case 4:
-        //        if(numA != 4)
-        SiconosMatrixException::selfThrow("Matrix function axpy_prod(A,B,C): wrong type for C (according to A and B types).");
-        //ublas::axpy_prod(*A.sparse(), *B.sparse(), *B.sparse(), init);
-        break;
-      default:
-        SiconosMatrixException::selfThrow("Matrix function axpy_prod(A,B,C): wrong type for C (according to A and B types).");
+          ublas::axpy_prod(*A.sparse(), *B.dense(), *C.dense(), init);
+        else// if(numA==5)
+          ublas::axpy_prod(*A.banded(), *B.dense(), *C.dense(), init);
       }
-    }
-    else // if no alias between C and A or B.
-    {
-      switch (numC)
+      else if (numB == 2)
       {
-      case 1:
-        if (numB == 1)
-        {
-          if (numA == 1)
-            ublas::axpy_prod(*A.dense(), *B.dense(), *C.dense(), init);
-          else if (numA == 2)
-            ublas::axpy_prod(*A.triang(), *B.dense(), *C.dense(), init);
-          else if (numA == 3)
-            ublas::axpy_prod(*A.sym(), *B.dense(), *C.dense(), init);
-          else if (numA == 4)
-            ublas::axpy_prod(*A.sparse(), *B.dense(), *C.dense(), init);
-          else// if(numA==5)
-            ublas::axpy_prod(*A.banded(), *B.dense(), *C.dense(), init);
-        }
-        else if (numB == 2)
-        {
-          if (numA == 1)
-            ublas::axpy_prod(*A.dense(), *B.triang(), *C.dense(), init);
-          else if (numA == 2)
-            ublas::axpy_prod(*A.triang(), *B.triang(), *C.dense(), init);
-          else if (numA == 3)
-            ublas::axpy_prod(*A.sym(), *B.triang(), *C.dense(), init);
-          else if (numA == 4)
-            ublas::axpy_prod(*A.sparse(), *B.triang(), *C.dense(), init);
-          else //if(numA==5)
-            ublas::axpy_prod(*A.banded(), *B.triang(), *C.dense(), init);
-        }
-        else if (numB == 3)
-        {
-          if (numA == 1)
-            ublas::axpy_prod(*A.dense(), *B.sym(), *C.dense(), init);
-          else if (numA == 2)
-            ublas::axpy_prod(*A.triang(), *B.sym(), *C.dense(), init);
-          else if (numA == 3)
-            ublas::axpy_prod(*A.sym(), *B.sym(), *C.dense(), init);
-          else if (numA == 4)
-            ublas::axpy_prod(*A.sparse(), *B.sym(), *C.dense(), init);
-          else // if (numA == 5)
-            ublas::axpy_prod(*A.banded(), *B.sym(), *C.dense(), init);
-        }
-        else if (numB == 4)
-        {
-          if (numA == 1)
-            ublas::axpy_prod(*A.dense(), *B.sparse(), *C.dense(), init);
-          else if (numA == 2)
-            ublas::axpy_prod(*A.triang(), *B.sparse(), *C.dense(), init);
-          else if (numA == 3)
-            ublas::axpy_prod(*A.sym(), *B.sparse(), *C.dense(), init);
-          else if (numA == 4)
-            ublas::axpy_prod(*A.sparse(), *B.sparse(), *C.dense(), init);
-          else //if(numA==5){
-            ublas::axpy_prod(*A.banded(), *B.sparse(), *C.dense(), init);
-        }
-        else //if(numB==5)
-        {
-          if (numA == 1)
-            ublas::axpy_prod(*A.dense(), *B.banded(), *C.dense(), init);
-          else if (numA == 2)
-            ublas::axpy_prod(*A.triang(), *B.banded(), *C.dense(), init);
-          else if (numA == 3)
-            ublas::axpy_prod(*A.sym(), *B.banded(), *C.dense(), init);
-          else if (numA == 4)
-            ublas::axpy_prod(*A.sparse(), *B.banded(), *C.dense(), init);
-          else //if(numA==5)
-            ublas::axpy_prod(*A.banded(), *B.banded(), *C.dense(), init);
-        }
-        break;
-      case 2:
-        // if(numA!= 2 || numB != 2)
-        SiconosMatrixException::selfThrow("Matrix function axpy_prod(A,B,C): wrong type for C (according to A and B types).");
-        //ublas::axpy_prod(*A.triang(), *B.triang(),*C.triang(), init);
-        break;
-      case 3:
-        //        if(numA!= 3 || numB != 3)
-        SiconosMatrixException::selfThrow("Matrix function axpy_prod(A,B,C): wrong type for C (according to A and B types).");
-        //ublas::axpy_prod(*A.sym(), *B.sym(),*C.sym(),init);
-        break;
-      case 4:
-        if (numA != 4 || numB != 4)
-          SiconosMatrixException::selfThrow("Matrix function axpy_prod(A,B,C): wrong type for C (according to A and B types).");
-        ublas::sparse_prod(*A.sparse(), *B.sparse(), *C.sparse(), init);
-        break;
-      default:
-        SiconosMatrixException::selfThrow("Matrix function axpy_prod(A,B,C): wrong type for C (according to A and B types).");
+        if (numA == 1)
+          ublas::axpy_prod(*A.dense(), *B.triang(), *C.dense(), init);
+        else if (numA == 2)
+          ublas::axpy_prod(*A.triang(), *B.triang(), *C.dense(), init);
+        else if (numA == 3)
+          ublas::axpy_prod(*A.sym(), *B.triang(), *C.dense(), init);
+        else if (numA == 4)
+          ublas::axpy_prod(*A.sparse(), *B.triang(), *C.dense(), init);
+        else //if(numA==5)
+          ublas::axpy_prod(*A.banded(), *B.triang(), *C.dense(), init);
       }
+      else if (numB == 3)
+      {
+        if (numA == 1)
+          ublas::axpy_prod(*A.dense(), *B.sym(), *C.dense(), init);
+        else if (numA == 2)
+          ublas::axpy_prod(*A.triang(), *B.sym(), *C.dense(), init);
+        else if (numA == 3)
+          ublas::axpy_prod(*A.sym(), *B.sym(), *C.dense(), init);
+        else if (numA == 4)
+          ublas::axpy_prod(*A.sparse(), *B.sym(), *C.dense(), init);
+        else // if (numA == 5)
+          ublas::axpy_prod(*A.banded(), *B.sym(), *C.dense(), init);
+      }
+      else if (numB == 4)
+      {
+        if (numA == 1)
+          ublas::axpy_prod(*A.dense(), *B.sparse(), *C.dense(), init);
+        else if (numA == 2)
+          ublas::axpy_prod(*A.triang(), *B.sparse(), *C.dense(), init);
+        else if (numA == 3)
+          ublas::axpy_prod(*A.sym(), *B.sparse(), *C.dense(), init);
+        else if (numA == 4)
+          ublas::axpy_prod(*A.sparse(), *B.sparse(), *C.dense(), init);
+        else //if(numA==5){
+          ublas::axpy_prod(*A.banded(), *B.sparse(), *C.dense(), init);
+      }
+      else //if(numB==5)
+      {
+        if (numA == 1)
+          ublas::axpy_prod(*A.dense(), *B.banded(), *C.dense(), init);
+        else if (numA == 2)
+          ublas::axpy_prod(*A.triang(), *B.banded(), *C.dense(), init);
+        else if (numA == 3)
+          ublas::axpy_prod(*A.sym(), *B.banded(), *C.dense(), init);
+        else if (numA == 4)
+          ublas::axpy_prod(*A.sparse(), *B.banded(), *C.dense(), init);
+        else //if(numA==5)
+          ublas::axpy_prod(*A.banded(), *B.banded(), *C.dense(), init);
+      }
+      break;
+    case 2:
+      // if(numA!= 2 || numB != 2)
+      SiconosMatrixException::selfThrow("Matrix function axpy_prod(A,B,C): wrong type for C (according to A and B types).");
+      //ublas::axpy_prod(*A.triang(), *B.triang(),*C.triang(), init);
+      break;
+    case 3:
+      //        if(numA!= 3 || numB != 3)
+      SiconosMatrixException::selfThrow("Matrix function axpy_prod(A,B,C): wrong type for C (according to A and B types).");
+      //ublas::axpy_prod(*A.sym(), *B.sym(),*C.sym(),init);
+      break;
+    case 4:
+      if (numA != 4 || numB != 4)
+        SiconosMatrixException::selfThrow("Matrix function axpy_prod(A,B,C): wrong type for C (according to A and B types).");
+      ublas::sparse_prod(*A.sparse(), *B.sparse(), *C.sparse(), init);
+      break;
+    default:
+      SiconosMatrixException::selfThrow("Matrix function axpy_prod(A,B,C): wrong type for C (according to A and B types).");
     }
-  if(!C.isBlock())
-    C.resetLU();
+    if(!C.isBlock())
+      C.resetLU();
   }
 }
 
