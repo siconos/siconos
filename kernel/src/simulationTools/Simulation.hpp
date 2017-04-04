@@ -385,6 +385,16 @@ public:
    *  topology updates. */
   virtual void initializeInteraction(double time, SP::Interaction inter);
 
+  /** Associate an OSI with a DynamicalSystem in the graph and
+   *  initialize any necessary graph properties.
+   *  \param osi The OneStepIntegrator to associate with the DynamicalSystem.
+   *  \param ds The DynamicalSystem, which must be already inserted
+   *            into the NonSmoothDynamicalSystem.
+   *  \param m The Model for initializing the OSI.
+   *  \param time The current time for initializing the OSI. */
+  void initializeOSIforDS(SP::OneStepIntegrator osi, SP::DynamicalSystem ds,
+                          SP::Model m, double time);
+
   /** Set an object to automatically manage interactions during the simulation */
   void insertInteractionManager(SP::InteractionManager manager)
     { _interman = manager; }

@@ -67,12 +67,8 @@ MoreauJeanGOSI::MoreauJeanGOSI(double theta, double gamma):
 void MoreauJeanGOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds)
 {
   // Get work buffers from the graph
-  const DynamicalSystemsGraph::VDescriptor& dsv = _dynamicalSystemsGraph->descriptor(ds);
-  VectorOfVectors& workVectors = *_dynamicalSystemsGraph->properties(dsv).workVectors;
-  // Initialize memory buffers
-  // _dynamicalSystemsGraph->bundle(dsv)->initMemory(getSizeMem());
-  // // Force dynamical system to its initial state
-  // _dynamicalSystemsGraph->bundle(dsv)->resetToInitialState();
+  VectorOfVectors& workVectors = *initializeDynamicalSystemWorkVectors(ds);
+
   // Check dynamical system type
   Type::Siconos dsType = Type::value(*ds);
 

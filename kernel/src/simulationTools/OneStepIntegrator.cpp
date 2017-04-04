@@ -32,6 +32,28 @@ using namespace std::placeholders;
 #include <boost/weak_ptr.hpp>
 #endif
 
+SP::VectorOfVectors
+OneStepIntegrator::initializeDynamicalSystemWorkVectors(SP::DynamicalSystem ds)
+{
+  const DynamicalSystemsGraph::VDescriptor& dsv =
+    _dynamicalSystemsGraph->descriptor(ds);
+
+  // Create new work buffers, store in the graph
+  SP::VectorOfVectors wv = std11::make_shared<VectorOfVectors>(
+    OneStepIntegrator::work_vector_of_vector_size);
+  SP::VectorOfMatrices wm = std11::make_shared<VectorOfMatrices>();
+  _dynamicalSystemsGraph->properties(dsv).workVectors = wv;
+  _dynamicalSystemsGraph->properties(dsv).workMatrices = wm;
+
+  // Initialize memory buffers
+  ds->initMemory(getSizeMem());
+
+  // Force dynamical system to its initial state
+  ds->resetToInitialState();
+
+  return wv;
+}
+
 void OneStepIntegrator::initialize( Model& m )
 {
   if (_extraAdditionalTerms)
@@ -42,7 +64,7 @@ void OneStepIntegrator::initialize( Model& m )
   _dynamicalSystemsGraph = _simulation->nonSmoothDynamicalSystem()->topology()->dSG(0);
 
   double t0 = _simulation->startingTime();
-  
+
   // 1 - Loop over all dynamical systems
   //  For each ds, allocate/initialize the required buffers in the ds graph
   // (workDS and workMatrices properties, that depend both on osi and ds types)
@@ -52,14 +74,6 @@ void OneStepIntegrator::initialize( Model& m )
   {
     if(!checkOSI(dsi)) continue;
     SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
-    _dynamicalSystemsGraph->properties(*dsi).workVectors.reset(new VectorOfVectors());
-    _dynamicalSystemsGraph->properties(*dsi).workMatrices.reset(new VectorOfMatrices());
-
-    // Initialize memory buffers
-    ds->initMemory(getSizeMem());
-    // Force dynamical system to its initial state
-    ds->resetToInitialState();
-    // part of the work which depends on osi and/or DS types.
     initializeDynamicalSystem(m, t0, ds);
   }
 

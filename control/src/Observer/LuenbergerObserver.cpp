@@ -88,7 +88,6 @@ void LuenbergerObserver::initialize(const Model& m)
   std11::static_pointer_cast<ZeroOrderHoldOSI>(_integrator)->setExtraAdditionalTerms(
       std11::shared_ptr<ControlZOHAdditionalTerms>(new ControlZOHAdditionalTerms()));
   _model->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DS);
-  _model->nonSmoothDynamicalSystem()->topology()->setOSI(_DS, _integrator);
 
   // Add the necessary properties
   DynamicalSystemsGraph& DSG0 = *_model->nonSmoothDynamicalSystem()->topology()->dSG(0);

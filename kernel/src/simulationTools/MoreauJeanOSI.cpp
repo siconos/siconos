@@ -99,22 +99,9 @@ SP::SiconosMatrix MoreauJeanOSI::WBoundaryConditions(SP::DynamicalSystem ds)
 }
 
 
-void MoreauJeanOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds)
+void MoreauJeanOSI::initializeDynamicalSystem(Model&, double t, SP::DynamicalSystem ds)
 {
-  // Create new work buffers, store in the graph
-  const DynamicalSystemsGraph::VDescriptor& dsv = _dynamicalSystemsGraph->descriptor(ds);
-  SP::VectorOfVectors wv = std11::make_shared<VectorOfVectors>(
-    OneStepIntegrator::work_vector_of_vector_size);
-  SP::VectorOfMatrices wm = std11::make_shared<VectorOfMatrices>();
-  _dynamicalSystemsGraph->properties(dsv).workVectors = wv;
-  _dynamicalSystemsGraph->properties(dsv).workMatrices = wm;
-  VectorOfVectors& workVectors = *wv;
-
-  // Initialize memory buffers
-  ds->initMemory(getSizeMem());
-
-  // Force dynamical system to its initial state
-  ds->resetToInitialState();
+  VectorOfVectors& workVectors = *initializeDynamicalSystemWorkVectors(ds);
 
   // Check dynamical system type
   Type::Siconos dsType = Type::value(*ds);
@@ -125,8 +112,6 @@ void MoreauJeanOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalS
 
   if(dsType == Type::LagrangianLinearTIDS || dsType == Type::LagrangianDS)
   {
-    assert(_dynamicalSystemsGraph->properties(dsv).W && "W is NULL");
-
     // buffers allocation (inside the graph)
     SP::LagrangianDS lds = std11::static_pointer_cast<LagrangianDS> (ds);
     workVectors[OneStepIntegrator::residu_free].reset(new SiconosVector(lds->dimension()));

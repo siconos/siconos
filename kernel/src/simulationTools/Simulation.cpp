@@ -497,3 +497,15 @@ void Simulation::updateOutput(unsigned int)
   }
   DEBUG_END("Simulation::updateOutput()\n");
 }
+
+void Simulation::initializeOSIforDS(SP::OneStepIntegrator osi,
+                                    SP::DynamicalSystem ds,
+                                    SP::Model m, double time)
+{
+  _nsds->topology()->setOSI(ds, osi);
+
+  // If no Model, or OSI has no DSG yet, assume DS will be initialized
+  // later.  (Typically, during Simulation::initialize())
+  if (m && osi->dynamicalSystemsGraph())
+    osi->initializeDynamicalSystem(*m, time, ds);
+}

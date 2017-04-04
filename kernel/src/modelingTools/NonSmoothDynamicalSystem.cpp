@@ -19,6 +19,7 @@
 #include "Interaction.hpp"
 #include "LagrangianLinearTIDS.hpp"
 #include "FirstOrderLinearTIDS.hpp"
+#include "OneStepIntegrator.hpp"
 #include "Relation.hpp"
 
 #include <SiconosConfig.h>
@@ -191,4 +192,10 @@ void NonSmoothDynamicalSystem::visitDynamicalSystems(SP::SiconosVisitor visitor)
   {
     dsg.bundle(*dsi)->acceptSP(visitor);
   }
+}
+
+void NonSmoothDynamicalSystem::insertDynamicalSystem(SP::DynamicalSystem ds)
+{
+  _topology->insertDynamicalSystem(ds);
+  _mIsLinear = ((ds)->isLinear() && _mIsLinear);
 }
