@@ -106,10 +106,10 @@ void SlidingReducedOrderObserver::initialize(const Model& m)
 
   // all necessary things for simulation
   _simulation.reset(new TimeStepping(_td, 0));
-  _simulation->insertIntegrator(_integrator);
+  _simulation->initializeOSIforDS(_integrator, _DS, _model, t0);
   _model->setSimulation(_simulation);
   _model->initialize();
- 
+
   // initialize error
   *_y = _sensor->y();
 }

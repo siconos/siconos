@@ -40,7 +40,7 @@ void ZOHTest::init()
   _sim.reset(new TimeStepping(_TD, 0));
   _ZOH.reset(new ZeroOrderHoldOSI());
   _model->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DS);
-  _sim->insertIntegrator(_ZOH);
+  _sim->initializeOSIforDS(_DS, _ZOH, _model, _t0);
   _model->setSimulation(_sim);
   _model->initialize();
 }
@@ -157,11 +157,11 @@ void ZOHTest::testMatrixIntegration2()
   _model.reset(new Model(_t0, _T));
   SP::Interaction inter(new Interaction(nslaw, rel));
   _ZOH.reset(new ZeroOrderHoldOSI());
-  _model->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DS, _model, _t0, _ZOH);
+  _model->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DS);
   _model->nonSmoothDynamicalSystem()->link(inter, _DS);
   _model->nonSmoothDynamicalSystem()->setControlProperty(inter, true);
   _sim.reset(new TimeStepping(_TD, 1));
-  _sim->insertIntegrator(_ZOH);
+  _sim->initializeOSIforDS(_ZOH, _DS, _model, _t0);
   SP::Relay osnspb(new Relay());
   _sim->insertNonSmoothProblem(osnspb);
   _model->setSimulation(_sim);
@@ -224,11 +224,11 @@ void ZOHTest::testMatrixIntegration3()
   _model.reset(new Model(_t0, _T));
   SP::Interaction inter(new Interaction(nslaw, rel));
   _ZOH.reset(new ZeroOrderHoldOSI());
-  _model->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DS, _model, _t0, _ZOH);
+  _model->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DS);
   _model->nonSmoothDynamicalSystem()->link(inter, _DS);
   _model->nonSmoothDynamicalSystem()->setControlProperty(inter, true);
   _sim.reset(new TimeStepping(_TD, 1));
-  _sim->insertIntegrator(_ZOH);
+  _sim->initializeOSIforDS(_ZOH, _DS, _model, _t0);
   SP::Relay osnspb(new Relay());
   _sim->insertNonSmoothProblem(osnspb);
   _model->setSimulation(_sim);
@@ -297,11 +297,11 @@ void ZOHTest::testMatrixIntegration4()
   _model.reset(new Model(_t0, _T));
   SP::Interaction inter(new Interaction(nslaw, rel));
   _ZOH.reset(new ZeroOrderHoldOSI());
-  _model->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DS, _model, _t0, _ZOH);
+  _model->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DS);
   _model->nonSmoothDynamicalSystem()->link(inter, _DS);
   _model->nonSmoothDynamicalSystem()->setControlProperty(inter, true);
   _sim.reset(new TimeStepping(_TD, 1));
-  _sim->insertIntegrator(_ZOH);
+  _sim->initializeOSIforDS(_ZOH, _DS, _model, _t0);
   SP::Relay osnspb(new Relay());
   _sim->insertNonSmoothProblem(osnspb);
   _model->setSimulation(_sim);
