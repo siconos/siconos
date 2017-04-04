@@ -111,8 +111,7 @@ void LinearSMCOT2::initialize(const Model& m)
 
   _modelPhi.reset(new Model(_t0, _T));
   _PhiOSI.reset(new LsodarOSI());
-  _modelPhi->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DSPhi, _modelPhi,
-                                                               _t0, _PhiOSI);
+  _modelPhi->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DSPhi);
   _simulPhi.reset(new EventDriven(_tdPhi, 0));
   _simulPhi->insertIntegrator(_PhiOSI);
   _modelPhi->setSimulation(_simulPhi);
@@ -120,8 +119,7 @@ void LinearSMCOT2::initialize(const Model& m)
   // Integration for Gamma
   _modelPred.reset(new Model(_t0, _T));
   _PredOSI.reset(new LsodarOSI());
-  _modelPred->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DSPred, _modelPred,
-                                                                _t0, _PredOSI);
+  _modelPred->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DSPred);
   _simulPred.reset(new EventDriven(_tdPred, 0));
   _simulPred->insertIntegrator(_PredOSI);
   _modelPred->setSimulation(_simulPred);

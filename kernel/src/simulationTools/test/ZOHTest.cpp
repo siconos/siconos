@@ -39,7 +39,7 @@ void ZOHTest::init()
   _model.reset(new Model(_t0, _T));
   _sim.reset(new TimeStepping(_TD, 0));
   _ZOH.reset(new ZeroOrderHoldOSI());
-  _model->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DS, _model, _t0, _ZOH);
+  _model->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DS);
   _sim->insertIntegrator(_ZOH);
   _model->setSimulation(_sim);
   _model->initialize();
