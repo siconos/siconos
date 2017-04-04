@@ -104,7 +104,12 @@ void MoreauJeanOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalS
 {
   // Get work buffers from the graph
   const DynamicalSystemsGraph::VDescriptor& dsv = _dynamicalSystemsGraph->descriptor(ds);
-  VectorOfVectors& workVectors = *_dynamicalSystemsGraph->properties(dsv).workVectors;
+
+  SP::VectorOfVectors wv = std11::make_shared<VectorOfVectors>(MoreauJeanOSI::WORK_LENGTH);
+  SP::VectorOfMatrices wm = std11::make_shared<VectorOfMatrices>(); // Here? 
+  _dynamicalSystemsGraph->properties(dsv).workVectors = wv;
+  _dynamicalSystemsGraph->properties(dsv).workMatrices = wm;
+  VectorOfVectors& workVectors = * wv;
   // Initialize memory buffers
   ds->initMemory(getSizeMem());
 
@@ -125,7 +130,6 @@ void MoreauJeanOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalS
 
     // buffers allocation (inside the graph)
     SP::LagrangianDS lds = std11::static_pointer_cast<LagrangianDS> (ds);
-    workVectors.resize(MoreauJeanOSI::WORK_LENGTH);
     workVectors[MoreauJeanOSI::RESIDU_FREE].reset(new SiconosVector(lds->dimension()));
     workVectors[MoreauJeanOSI::VFREE].reset(new SiconosVector(lds->dimension()));
     workVectors[MoreauJeanOSI::BUFFER].reset(new SiconosVector(lds->dimension()));
@@ -139,7 +143,6 @@ void MoreauJeanOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalS
     SP::NewtonEulerDS neds = std11::static_pointer_cast<NewtonEulerDS> (ds);
     DEBUG_PRINTF("neds->number() %i \n",neds->number());
     // buffers allocation (into the graph)
-    workVectors.resize(MoreauJeanOSI::WORK_LENGTH);
     workVectors[MoreauJeanOSI::RESIDU_FREE].reset(new SiconosVector(neds->dimension()));
     workVectors[MoreauJeanOSI::VFREE].reset(new SiconosVector(neds->dimension()));
 
