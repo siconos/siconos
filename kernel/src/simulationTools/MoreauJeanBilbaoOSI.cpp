@@ -122,16 +122,6 @@ void MoreauJeanBilbaoOSI::fill_ds_links(Interaction &inter, InteractionPropertie
   }
 }
 
-// void MoreauJeanBilbaoOSI::_compute_theta()
-// {
-//   // update theta parameters for the scheme.
-//   // Theta is a diagonal matrix, each diagonal value depends on the dynamical system (stiffness and damping)
-//   // and on the time step.
-//   double time_step = _simulation->timeStep();
-
-
-// }
-
 void MoreauJeanBilbaoOSI::initialize_nonsmooth_problems()
 {
   SP::OneStepNSProblems  allOSNS  = _simulation->oneStepNSProblems();
