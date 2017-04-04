@@ -123,4 +123,4 @@ with Hdf5(mode='r+') as io:
            itermax=100,
            tolerance=1e-4,
            numerics_verbose=False,
-           output_frequency=100)
+           output_frequency=1)

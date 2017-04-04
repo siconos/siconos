@@ -2343,6 +2343,9 @@ class Hdf5():
         # (6) Simulation setup with (1) (2) (3) (4) (5)
         if time_stepping == Kernel.TimeSteppingDirectProjection:
             osnspb_pos=Kernel.MLCPProjectOnConstraints(Numerics.SICONOS_MLCP_ENUM, 1.0)
+            so_pos = osnspb.numericsSolverOptions()
+            so_pos.iparam[0]=itermax
+            so_pos.dparam[0]=tolerance
             osnspb_pos.setMaxSize(30000)
             osnspb_pos.setMStorageType(0) # "not yet implemented for sparse storage"
             osnspb_pos.setNumericsVerboseMode(numerics_verbose)

@@ -116,5 +116,9 @@ with Hdf5() as io:
 # with the vview command.
 with Hdf5(mode='r+') as io:
 
-    io.run(time_stepping=Kernel.TimeSteppingDirectProjection,
+    io.run(h=0.01,
+           T=20,
+           tolerance=1e-8,
+           itermax=1000,
+           time_stepping=Kernel.TimeSteppingDirectProjection,
            osi=Kernel.MoreauJeanDirectProjectionOSI)
