@@ -111,7 +111,11 @@ public:
   /** add a dynamical system into the DS graph (as a vertex)
    * \param ds a pointer to the system to add
    */
-  void insertDynamicalSystem(SP::DynamicalSystem ds);
+  inline void insertDynamicalSystem(SP::DynamicalSystem ds)
+  {
+    _topology->insertDynamicalSystem(ds);
+    _mIsLinear = ((ds)->isLinear() && _mIsLinear);
+  };
 
   /** get Dynamical system number I
    * \param nb the identifier of the DynamicalSystem to get
