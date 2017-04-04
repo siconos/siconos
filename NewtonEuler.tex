@@ -10,7 +10,7 @@
 
 \end{tabular}
 
-
+\def\glaw{\cdot}
 \section{The equations of motion}
 
 
@@ -37,8 +37,6 @@ The rotational velocity is then related to the $R$ by :
   \label{eq:angularvelocity}
   \widetilde \Omega = R^\top \dot R, \text { or equivalently, } \dot R  = R \widetilde \Omega
 \end{equation}
-
-
 
 Using these coordinates, the equations of motion are given by 
 \begin{equation}
@@ -193,7 +191,7 @@ Recall that the Lie group $SO(3)$ of linear proper orthogonal transformation by 
   \label{eq:47}
   SO(3) = \{R \in \RR^{3\times3}\mid R^TR=I , det(R) = +1  \}
 \end{equation}
-with the Lie group law given by $R_1\circ R_2 = R_1R_2$ for $R_1,R_2\in SO(3)$. The identity element is $e = I_{3\times 3}$. At any point of $R\in SO(3)$, the tangent space $T_RSO(3)$ is the set of tangent vectors at a point $R$.
+with the Lie group law given by $R_1\glaw R_2 = R_1R_2$ for $R_1,R_2\in SO(3)$. The identity element is $e = I_{3\times 3}$. At any point of $R\in SO(3)$, the tangent space $T_RSO(3)$ is the set of tangent vectors at a point $R$.
 
 \paragraph{Left representation of  the tangent space at $R$, $T_RSO(3)$ } Let $S(t)$ be  a smooth curve $S(\cdot) : t\in \RR \mapsto S(t)\in SO(3)$ in $SO(3)$ such that $S(O)= R$.
 Since $S(t)\in SO(3)$, we have $S(t)S(t)^T=I$ and then $\frac{d}{dt} (S(t)) = \dot S(t)S^T(t) +  S(t) \dot S^T(t) =0$. At $t=0$, we get
@@ -242,7 +240,7 @@ The notation $\tilde \Omega$ is implied by the fact that the Lie algebra is isom
 \end{equation}
 Note that $\tilde \Omega x = \Omega \times x$.
 
-\paragraph{ A special  (left)  action of Lie Group $\mathcal G$ on a manifold $\mathcal M$. } 
+\paragraph{ A special  (right)  action of Lie Group $\mathcal G$ on a manifold $\mathcal M$. } 
 
 Let us come back to the representation of  $T_RSO(3)$ given in~\eqref{eq:49}. It is clear it can expressed with a representation that relies on $\mathfrak{so}(3)$
 \begin{equation}
@@ -257,13 +255,13 @@ A special group action that is  the left translation map for a point $R \in SO(3
   \label{eq:59}
   \begin{array}[lcl]{rcl}
     L_R& :&   SO(3)  \rightarrow  SO(3)\\
-       & &  S  \mapsto L_R(S) = R \circ S = RS\\
+       & &  S  \mapsto L_R(S) = R \glaw S = RS\\
   \end{array}
 \end{equation}
-which is diffeomorphism on $SO(3)$. In that case, we identify the manifold and the group. So, $L_R$ can be viewed as a left or a right group action. We choose a right action. For our application where $\mathcal G = \mathcal M = SO(3)$ and $\Lambda^r(R,S) = L_{R}(S) =  R \circ S $, we get
+which is diffeomorphism on $SO(3)$. In that case, we identify the manifold and the group. So, $L_R$ can be viewed as a left or a right group action. We choose a right action. For our application where $\mathcal G = \mathcal M = SO(3)$ and $\Lambda^r(R,S) = L_{R}(S) =  R \glaw S $, we get
 \begin{equation}
   \label{eq:60}
-   \lambda^r_{*}(a)(R) = \left. \frac{d}{dt} L_{R}(S(t)) \right|_{t=0} \left. \frac{d}{dt} R \circ S(t) \right|_{t=0} =  R \circ \dot S(0) = R  \dot S(0)  \in X(\mathcal M)
+   \lambda^r_{*}(a)(R) = \left. \frac{d}{dt} L_{R}(S(t)) \right|_{t=0} \left. \frac{d}{dt} R \glaw S(t) \right|_{t=0} =  R \glaw \dot S(0) = R  \dot S(0)  \in X(\mathcal M)
 \end{equation}
 Since $S(\cdot)$ is a smooth curve in $\mathcal G$, $\dot S(0)$ is a tangent vector at the point $S(0)=I$, that is an element $a = \tilde \Omega  \in \mathfrak{so}(3) $ defined by the relation~\eqref{eq:33}. Therefore, the vector field in \eqref{eq:60} is a tangent vector field and we get
 \begin{equation}
@@ -277,13 +275,13 @@ In~\cite{Bruls.Cardona2010}, the linear operator $\lambda^r_{*}(a)$  is defined 
   \label{eq:62}
   \begin{array}{rcl}
     DL_R(I_{3\times3}) : \mathfrak{so}(3) & \rightarrow & T_R SO(3) \\
-    \tilde \Omega &\mapsto &DL_R(I_{3\times3})\cdot \tilde \Omega = R \tilde \Omega
+    \tilde \Omega &\mapsto &DL_R(I_{3\times3}). \tilde \Omega = R \tilde \Omega
   \end{array}
 \end{equation}
 We end up with a possible representation of $T_{R} SO(3)$ as
 \begin{equation}
   \label{eq:63}
-  T_{R} SO(3) =\{\tilde \Omega_R \mid \tilde \Omega_R = DL_R(I_{3\times3})\cdot \tilde \Omega = R \tilde \Omega, \tilde \Omega \in\mathfrak{so}(3)  \}.
+  T_{R} SO(3) =\{\tilde \Omega_R \mid \tilde \Omega_R = DL_R(I_{3\times3}). \tilde \Omega = R \tilde \Omega, \tilde \Omega \in\mathfrak{so}(3)  \}.
 \end{equation}
 In other words, a tangent vector $\tilde \Omega \in \mathfrak{so}(3)$ defines a left invariant vector field on $SO(3)$ at the point $R$ given by $R \tilde \Omega$.
 
@@ -296,33 +294,43 @@ In other words, a tangent vector $\tilde \Omega \in \mathfrak{so}(3)$ defines a 
 
 
 \paragraph{Exponential map $\expm \mathfrak{so(3)} \rightarrow SO(3)$}
-The relations \eqref{eq:24} and \eqref{eq:25} shows that is possible to define tangent vector field from a group action.
+The relations \eqref{eq:24} and \eqref{eq:25} shows that is possible to define tangent vector field from a group action. We can directly apply Theorem~\ref{Theorem:solutionofLieODE} and we get that the solution of
+\begin{equation}
+  \label{eq:130}
+  \begin{cases}
+  \dot R(t) = \lambda^r_{*}(a)(R(t)) = R(t)  \tilde \Omega \\
+  R(0) = R_0
+\end{cases}
+\end{equation}
+ is
+\begin{equation}
+  \label{eq:138}
+  R(t) = R_0 \expm(t \tilde \Omega)
+\end{equation}
 
-We can directly apply Theorem. Let us do a simple computation.
-Let us assume that the solution can be sought as $y(t) = \Lambda(R(t),y_0)$. The initial condition imposes that  $y(t_0) = y_0 = \Lambda(I,y_0) = \Lambda(R(t_0),y_0)$ that implies $R(t_0)=I$. Since $\Lambda(R(t),y_0)$ is the flow that is produces by $R(s)$ and let us try to find the relation satisfied by $S(\cdot)$. We have
+Let us do the  computation in this case. Let us assume that the solution can be sought as $R(t) = \Lambda^r(y_o,S(t))$. The initial condition imposes that  $R(0) = R_0 = \Lambda(R_0,I) = \Lambda(R_0,S(0))$ that implies $S(0)=I$. Since $\Lambda(R_0,S(t))$ is the flow that is produces by $S(t)$ and let us try to find the relation satisfied by $S(\cdot)$. For a smooth curve $T(s) \in SO(3)$ such that $\dot T(0)= \tilde \Omega$, we have
 \begin{equation}
   \label{eq:64}
   \begin{array}[lcl]{lcl}
-    \dot y(t) = \lambda_*(\tilde \Omega)(y) &=& \left. \frac{d}{ds} (\Lambda(S(s),y(t)) \right|_{s=0} \\
-                                &=& \left. \frac{d}{ds} (\Lambda(S(s), \Lambda(R(t),y_0 ) \right|_{s=0} \\
-                                &=& \left. \frac{d}{ds} (\Lambda(S(s), \Lambda(R(t),y_0 ) \right|_{s=0} \\
-                                &=& \left. \frac{d}{ds} (\Lambda(S(s)\circ R(t),y_0 ) \right|_{s=0} \\
-                                &=& D_1 \Lambda(S'(0)\circ R(t),y_0 ) \\
-                                &=& D_1 \Lambda(\tilde \Omega\circ R(t),y_0 )
+    \dot R(t) = \lambda^r_*(\tilde \Omega)(R(t)) &=& \left. \frac{d}{ds}\Lambda^r(R(t),T(s)) \right|_{s=0} \\
+                                &=& \left. \frac{d}{ds} \Lambda^r(\Lambda(R_0, S(t)),T(s)) \right|_{s=0} \\
+                                &=& \left. \frac{d}{ds} (\Lambda^r(R_0, S(t)\glaw T(s)) \right|_{s=0} \\
+                                &=& D_2 \Lambda^r(R_0, \glaw S(t) \glaw \dot T(0) ) \\
+                                &=& D_2 \Lambda^r(R_0,  S(t)\glaw \tilde \Omega )
   \end{array}
 \end{equation}
-On the other side, the relation $y(t) = \Lambda(R(t),y_0)$ gives $\dot y(t) = D_1 \Lambda(R'(t),y_0 )$ and we conclude that
+On the other side, the relation $y(t) = \Lambda^r(y_0,S(t))$ gives $\dot y(t) = D_2 \Lambda^r(y_0,S'(t))$ and we conclude that
 \begin{equation}
   \label{eq:65}
   \begin{cases}
-    R'(t) = \tilde\Omega\circ R(t)  = \tilde\Omega R(t)\\
-    R'(0) = I.
+    \dot S(t) =  S(t)\glaw\tilde\Omega    = S(t) \tilde \Omega\\
+    S(0) = I.
   \end{cases}
 \end{equation}
 The ordinary differential equation~\eqref{eq:65} is a matrix ODE that admits the following solution
 \begin{equation}
   \label{eq:66}
-  R(t) = \expm(t\tilde\Omega)
+  S(t) = \expm(t\tilde\Omega)
 \end{equation}
 where $\exp : \RR^{3\times 3} \rightarrow \RR^{3\times 3}$ is the matrix exponential defined by
 \begin{equation}
@@ -331,7 +339,7 @@ where $\exp : \RR^{3\times 3} \rightarrow \RR^{3\times 3}$ is the matrix exponen
     \expm(A) &=& \sum_{k=0}^{\infty} \frac {1}{k!} (A)^k.
   \end{array}
 \end{equation}
-We conclude that $y(t) =\Lambda(R(t),y_0) = \exp(t\tilde\Omega) y_0 $ is the solution of \eqref{eq:35}.
+We conclude that $R(t) =\Lambda(R_0,S(t)) = R_0\expm(t\tilde\Omega)$ is the solution of \eqref{eq:35}.
 
 We can use the closed form solution for the matrix exponential of $t \tilde\Omega  \in \mathfrak{so}(3)$ as
 \begin{equation}
@@ -393,26 +401,75 @@ Using the formula~\eqref{eq:43} and the fact that $\ad_\Omega(\Gamma) = \Tilde\O
 \begin{equation}
   \label{eq:122}
   \begin{array}{lcl}
-    \dexp_{\Omega}(\Gamma) &=& \sum_{k=0}^\infty \frac{(-1)^k}{(k+1)!} \ad_\Omega^k (\Gamma) \\
-                          &=& \sum_{k=0}^\infty \frac{(-1)^k}{(k+1)!} \tilde\Omega^k \Gamma \\
+    \dexp_{\tilde\Omega}(\tilde\Gamma) &=& \sum_{k=0}^\infty \frac{1}{(k+1)!} \ad_{\tilde \Omega}^k (\tilde\Gamma) \\
+                                       &=& \sum_{k=0}^\infty \frac{1}{(k+1)!} \tilde\Omega^k \tilde \Gamma \\
   \end{array}
 \end{equation}
 Using again the fact that $\tilde\Omega^3 = -\theta^2 \tilde\Omega$, we get
 \begin{equation}
   \label{eq:123}
    \begin{array}{lcl}
-     \dexp_{\Omega} &=& \sum_{k=0}^\infty  \frac{(-1)^k}{(k+1)!} \tilde\Omega^k \\
-                    &=& I  + \sum_{k=0}^\infty  \frac{(-1)^k}{((2(k+1))!} \theta^{2k} \tilde\Omega + \sum_{k=0}^\infty  \frac{(-1)^k}{((2(k+1)+1)!} \theta^{2k} \tilde\Omega^2\\
+     \dexp_{\tilde\Omega} &=& \sum_{k=0}^\infty  \frac{1}{(k+1)!} \tilde\Omega^k \\
+                          &=& I  + \sum_{k=0}^\infty  \frac{(-1)^k}{((2(k+1))!} \theta^{2k} \tilde\Omega + \sum_{k=0}^\infty  \frac{(-1)^k}{((2(k+1)+1)!} \theta^{2k} \tilde\Omega^2\\
   \end{array}
 \end{equation}
 Hence, we get
 \begin{equation}
   \label{eq:124}
    \begin{array}{lcl}
-     \dexp_{\Omega}  &=& I  + \frac{(1-\cos(\theta))}{\theta^2}\tilde\Omega + \frac{(\theta-\sin(\theta))}{\theta^3}\tilde\Omega^2 
+     \dexp_{\tilde\Omega}  &=& I  + \frac{(1-\cos(\theta))}{\theta^2}\tilde\Omega + \frac{(\theta-\sin(\theta))}{\theta^3}\tilde\Omega^2 
   \end{array}
 \end{equation}
+Since $\dexp_{\tilde\Omega}$ is a linear mapping from $\mathfrak{so(3)}$ to $\mathfrak{so(3)}$, we will use the following notation
+\begin{equation}
+  \label{eq:172}
+  \dexp_{\tilde\Omega}\tilde\Gamma  \coloneqq T(\Omega)
+\end{equation}
+with
+\begin{equation}
+  \label{eq:173}
+   T(\Omega) \coloneqq I  + \frac{(1-\cos(\theta))}{\theta^2}\tilde\Omega + \frac{(\theta-\sin(\theta))}{\theta^3}\tilde\Omega^2  \in \RR^{3\times 3}
+\end{equation}
 
+\subsection{Newton method and differential of a map $f : \mathcal G \rightarrow \mathfrak g$}
+Let us first define the differential of the map $f : \mathcal SO(3) \rightarrow \mathfrak{so(3)}$ as its left trivialization, we get
+\begin{equation}
+  \label{eq:179}
+   \dd f_R (\tilde\Omega) =  \left.\frac{d}{dt} f(R \exp(t \tilde\Omega )) \right|_{t=0}
+\end{equation}
+The computation of this differential is non linear with respect to $\tilde\Omega$.
+
+Sometimes, it can be formally written as
+\begin{equation}
+  \label{eq:180}
+  \dd f_R (\tilde\Omega) = C(\tilde\Omega)\tilde\Omega 
+\end{equation}
+Nevertheless, an explicit expression of $C(\cdot)$ is not necessarily trivial. 
+
+Let us consider a first simple example of a mapping $f(R) = \widetilde{R  x}$ for a given $x\in\RR^3$. The computation yields
+\begin{equation}
+  \label{eq:181}
+  \begin{array}{rcl}
+    \dd f_R (\tilde\Omega) &=& \widetilde{ \left.\frac{d}{dt} R \exp(t \tilde\Omega) x  \right|_{t=0}} \\
+                           &=& \widetilde{R \left.\frac{d}{dt}\exp(t \tilde\Omega)\right|_{t=0}  x} \\
+                           &=& \widetilde{R \left. \dexp_{\tilde\Omega}(\tilde\Omega)\exp(t \tilde\Omega) \right|_{t=0}  x} \\
+                           &=& \widetilde{R \dexp_{\tilde\Omega}(\tilde\Omega) x} \\
+                           &=& \widetilde{R T(\Omega) \tilde\Omega  x} \\
+                           &=& \widetilde{-R T(\Omega) \tilde x \Omega } 
+  \end{array}
+\end{equation}
+In that case, it is difficult a expression as in \eqref{eq:180}, but considering the function $g(R)$ such that $f(R) = \widetilde g(x)$ we get
+\begin{equation}
+  \label{eq:181}
+  \begin{array}{rcl}
+    \dd g_R (\tilde\Omega)  =- R T(\Omega) \tilde x \Omega  = C(\Omega) \Omega
+  \end{array}
+\end{equation}
+with
+\begin{equation}
+  \label{eq:182}
+   C(\Omega) = -R T(\Omega) \tilde x
+\end{equation}
 
 
 \section{Lie group of unit quaternions $\HH_1$ and pure imaginary quaternions $\HH_p$.}
@@ -422,7 +479,7 @@ In Siconos we choose to parametrize the rotation with a unit quaternion $p \in \
 
 
 \paragraph{Quaternion definition.} There is many ways to define quaternions. The most convenient one is to define a quaternion as 
-a $2\times 2$ complex matrix, that is an element of $\CC^{2\times 2}$. For this end, we write for $z \ in \CC$, $z=a+ib$ with $a,b in \RR^2$ ans $i^2=-1$ and its conjugate $\bar z= a-ib$. Let ${e, \bf, i, j, k}$ the following matrices in $\CC^{2\times 2}$
+a $2\times 2$ complex matrix, that is an element of $\CC^{2\times 2}$. For this end, we write for $z \ in \CC$, $z=a+ib$ with $a,b \in \RR^2$ ans $i^2=-1$ and its conjugate $\bar z= a-ib$. Let ${e, \bf, i, j, k}$ the following matrices in $\CC^{2\times 2}$
 \begin{equation}
   \label{eq:127}
   e =
@@ -473,10 +530,10 @@ With the definition of $\HH$ as a set of complex matrices, It can be show that $
 
 \paragraph{Representation of quaternions} Thanks to the equations~\eqref{eq:128}, ~\eqref{eq:128} and ~\eqref{eq:129}, we see that there are several manner to represent a quaternion $p\in \HH$. It can be represented as a complex matrix as in~\eqref{eq:129}. It can also be represented as a vector in $\RR^4$ , $p= [p_0,p_1,p_2,p_3]$ with the isomorphism~\eqref{eq:128}. In other words,  $\HH$ is isomorphic to $\RR^4$.  The first element $p_0$ can also be viewed as  a scalar and three last as a vector in $\RR^3$ denoted by $\vv{p} = [p_1,p_2,p_3]$, and in that case, $\HH$ is viewed as $\RR\times \RR^3$. The quaternion can be written as $p=(p_0,\vv{p})$.
 
-\paragraph{Quaternion product} The quaternion product denoted by $\cdot \circ \cdot $ is naturally defined as the product of complex matrices. With its representation in $\RR\times \RR^3$, the quaternion product is defined by
+\paragraph{Quaternion product} The quaternion product denoted by $p \glaw q $ for $p,q\in \HH_1$ is naturally defined as the product of complex matrices. With its representation in $\RR\times \RR^3$, the quaternion product is defined by
 \begin{equation}
   \label{eq:73}
-  p \circ q =
+  p \glaw q =
   \begin{bmatrix}
     p_oq_o - \vv{p}\vv{q} \\
     p_0\vv{q}+q_o\vv{p} + \vv{p}\times\vv{q}
@@ -487,17 +544,16 @@ Since the product is a matrix product, it is not communicative, but it is associ
 e=  \begin{bmatrix}
     1 & 0 \\
     0 & 1  \\
-  \end{bmatrix} =(1,\vv{0})\label{eq:57}
-\end{equation}
-. Let us note that 
+  \end{bmatrix} =(1,\vv{0})\label{eq:57}.
+\end{equation}Let us note that 
 \begin{equation}
   \label{eq:74}
-  (0,\vv{p})\circ (0,\vv(q)) = - (0,\vv{q})\circ (0,\vv{p}).
+  (0,\vv{p})\glaw (0,\vv(q)) = - (0,\vv{q})\glaw (0,\vv{p}).
 \end{equation}
 The quaternion multiplication can also be represented as a matrix operation in $\RR^{4\times4}$. Indeed, we have
 \begin{equation}
   \label{eq:75}
-  p \circ q  =
+  p \glaw q  =
   \begin{bmatrix}
     q_0 p_0 -q_1p_1-q_2p_2-q_3p_3\\
     q_0 p_1 +q_1p_0-q_2p_3+q_3p_2\\
@@ -508,7 +564,7 @@ The quaternion multiplication can also be represented as a matrix operation in $
 that can be represented as
 \begin{equation}
   \label{eq:76}
-  p \circ q  =
+  p \glaw q  =
   \begin{bmatrix}
     p_0 & -p_1 & -p_2 & -p_3 \\
     p_1 & p_0 & -p_3 & p_2 \\
@@ -520,12 +576,12 @@ that can be represented as
     q_1\\
     q_2\\
     q_3
-  \end{bmatrix} := [p_\circ]q
+  \end{bmatrix} := [p_\glaw]q
 \end{equation}
 or
 \begin{equation}
   \label{eq:77}
-  p \circ q  = 
+  p \glaw q  = 
   \begin{bmatrix}
     q_0 & -q_1 & -q_2 & -q_3 \\
     q_1 & q_0 & q_3 & -q_2 \\
@@ -537,7 +593,7 @@ or
     p_1\\
     p_2\\
     p_3
-  \end{bmatrix} := [{}_\circ q] p
+  \end{bmatrix} := [{}_\glaw q] p
 \end{equation}
 
 \paragraph{Adjoint quaternion, inverse and norm}
@@ -558,7 +614,7 @@ The adjoint quaternion of $p$ is denoted by
 We note that
 \begin{equation}
   \label{eq:131}
-  p \circ p^\star = 
+  p \glaw p^\star = 
   \begin{bmatrix}
       x &y  \\
       - \bar y  & \bar x
@@ -573,7 +629,7 @@ We note that
 \end{equation}
 
 
-The norm of a quaternion is given by $|p|^2=p^\top p = p_o^2+p_1^2+p_2^2+p_3^2$. In particular, we have $p \circ p^\star = p^\star \circ p = |p|^2 e$. This allows to define the reciprocal of a non zero quaternion by
+The norm of a quaternion is given by $|p|^2=p^\top p = p_o^2+p_1^2+p_2^2+p_3^2$. In particular, we have $p \glaw p^\star = p^\star \glaw p = |p|^2 e$. This allows to define the reciprocal of a non zero quaternion by
 \begin{equation}
   \label{eq:78}
   p ^{-1} = \frac 1 {|p|^2} p^\star
@@ -585,7 +641,7 @@ For two vectors $x\in \RR^3$ and $x'\in \RR^3$, we define the quaternion $p_x = 
 For a given unit quaternion $p$, the transformation
 \begin{equation}
   \label{eq:79}
-  p_{x'} = p \circ p_x \circ  p^\star 
+  p_{x'} = p \glaw p_x \glaw  p^\star 
 \end{equation}
 defines a rotation $R$ such that $x'  = R x$ given by
 \begin{equation}
@@ -608,76 +664,76 @@ The rotation matrix may be computed as
 The derivation with respect to time can obtained as follows. The rotation transformation for a unit quaternion is given by
 \begin{equation}
   \label{eq:82}
-  p_{x'}(t) = p(t) \circ p_x \circ p^\star(t) =  p(t) \circ p_x \circ p^{-1}(t)
+  p_{x'}(t) = p(t) \glaw p_x \glaw p^\star(t) =  p(t) \glaw p_x \glaw p^{-1}(t)
 \end{equation}
 and can be derived as
 \begin{equation}
   \label{eq:83}
   \begin{array}{lcl}
-    \dot p_{x'}(t) &=& \dot p(t) \circ p_x \circ p^{-1}(t) + p(t) \circ p_x \circ \dot p^{-1}(t) \\
-                  &=& \dot p(t) \circ p^{-1}(t)  \circ   p_{x'}(t)  +      p_{x'}(t) \circ p(t)  \circ \dot p^{-1}(t)    
+    \dot p_{x'}(t) &=& \dot p(t) \glaw p_x \glaw p^{-1}(t) + p(t) \glaw p_x \glaw \dot p^{-1}(t) \\
+                  &=& \dot p(t) \glaw p^{-1}(t)  \glaw   p_{x'}(t)  +      p_{x'}(t) \glaw p(t)  \glaw \dot p^{-1}(t)    
   \end{array}
 \end{equation}
-From $p(t) \circ p^{-1}(t) =e$, we get
+From $p(t) \glaw p^{-1}(t) =e$, we get
 \begin{equation}
   \label{eq:84}
-  \dot p(t) \circ p^{-1}(t) + p \circ \dot p^{-1}(t) = 0
+  \dot p(t) \glaw p^{-1}(t) + p \glaw \dot p^{-1}(t) = 0
 \end{equation}
 so (\ref{eq:82}) can be rewritten
 \begin{equation}
   \label{eq:85}
   \begin{array}{lcl}
-    \dot p_{x'}(t) = \dot p(t) \circ p^{-1}(t)   \circ   p_{x'}(t)  -    p_{x'}(t) \circ  \dot p(t) \circ p^{-1}(t)
+    \dot p_{x'}(t) = \dot p(t) \glaw p^{-1}(t)   \glaw   p_{x'}(t)  -    p_{x'}(t) \glaw  \dot p(t) \glaw p^{-1}(t)
   \end{array}
 \end{equation}
-The scalar part of $\dot p(t) \circ p^{-1}(t)$ is $(\dot p(t) \circ p^{-1}(t))_0 = p_o \dot p_0 + \vv{p}^T\vv{\dot p}$. Since $p$ is a unit quaternion, we have
+The scalar part of $\dot p(t) \glaw p^{-1}(t)$ is $(\dot p(t) \glaw p^{-1}(t))_0 = p_o \dot p_0 + \vv{p}^T\vv{\dot p}$. Since $p$ is a unit quaternion, we have
 \begin{equation}
   \label{eq:86}
   |p|=1 \implies \frac{d}{dt} (p^\top p) = 0 =  \dot p^\top p + p^\top \dot p =   2( p_o \dot p_0 + \vv{p}^T\vv{\dot p}).
 \end{equation}
-Therefore, the scalar part $(\dot p(t) \circ p^{-1}(t))_0 =0$.
-The quaternion product $\dot p(t) \circ p^{-1}(t)$ and  $p_{x'}(t)$ is a product of quaternions with zero scalar part (see~\eqref{eq:74}), so we have 
+Therefore, the scalar part $(\dot p(t) \glaw p^{-1}(t))_0 =0$.
+The quaternion product $\dot p(t) \glaw p^{-1}(t)$ and  $p_{x'}(t)$ is a product of quaternions with zero scalar part (see~\eqref{eq:74}), so we have 
 \begin{equation}
   \label{eq:87}
   \begin{array}{lcl}
-    \dot p_{x'}(t) = 2 \dot p(t) \circ p^{-1}(t)   \circ p_{x'}(t).
+    \dot p_{x'}(t) = 2 \dot p(t) \glaw p^{-1}(t)   \glaw p_{x'}(t).
   \end{array}
 \end{equation}
 In terms of vector of $\RR^3$, this corresponds to
 \begin{equation}
   \label{eq:88}
-  \dot x'(t) = 2 \vv{ \dot p(t) \circ p^{-1}(t) } \times x'(t).
+  \dot x'(t) = 2 \vv{ \dot p(t) \glaw p^{-1}(t) } \times x'(t).
 \end{equation}
 Since $x'(t) = R(t) x$, we have $\dot x' = \dot R(t) x = \tilde \omega(t) R(t) x  = \tilde \omega(t) x'(t) $. Comparing \eqref{eq:87} and \eqref{eq:88}, we get
 \begin{equation}
   \label{eq:89}
-  \tilde \omega(t)  = 2 \vv{ \dot p(t) \circ p^{-1}(t) } 
+  \tilde \omega(t)  = 2 \vv{ \dot p(t) \glaw p^{-1}(t) } 
 \end{equation}
 or equivalently
 \begin{equation}
-  \dot p(t) \circ p^{-1}(t) = (0, \frac{\omega(t)}{2} )
+  \dot p(t) \glaw p^{-1}(t) = (0, \frac{\omega(t)}{2} )
   \label{eq:90}
 \end{equation}
 Finally, we can conclude that
 \begin{equation}
   \label{eq:91}
-  \dot p(t) = (0, \frac{\omega(t)}2 ) \circ p(t).
+  \dot p(t) = (0, \frac{\omega(t)}2 ) \glaw p(t).
 \end{equation}
 Since $\omega(t)=R(t)\Omega(t)$, we have
 \begin{equation}
   \label{eq:92}
-  (0, \omega(t) ) = (0, R(t) \Omega(t) ) = p(t) \circ (0, \Omega(t) ) \circ \bar p(t) = p(t) \circ (0, \Omega(t) ) \circ  p^{-1}(t)
+  (0, \omega(t) ) = (0, R(t) \Omega(t) ) = p(t) \glaw (0, \Omega(t) ) \glaw \bar p(t) = p(t) \glaw (0, \Omega(t) ) \glaw  p^{-1}(t)
 \end{equation}
 and then
 \begin{equation}
   \label{eq:93}
-  \dot p(t) =\frac 1 2 p(t) \circ(0, \Omega(t) ) .
+  \dot p(t) =\frac 1 2 p(t) \glaw(0, \Omega(t) ) .
 \end{equation}
 
 The time derivation is compactly written
 \begin{equation}
   \label{eq:94}
-  \dot p = \frac  1 2 p  \circ(0, \frac\Omega 2 ) =  [p_\circ] p_{\frac \Omega 2} = \Psi(p)\frac \Omega 2,
+  \dot p = \frac  1 2 p  \glaw(0, \frac\Omega 2 ) =  [p_\glaw] p_{\frac \Omega 2} = \Psi(p)\frac \Omega 2,
 \end{equation}
 and using the matrix representation of product of  quaternion
 we get
@@ -693,12 +749,12 @@ we get
 The relation \eqref{eq:93} can be also inverted by writing
 \begin{equation}
   \label{eq:96}
-   (0, \Omega(t) ) = 2 p^{-1}(t) \circ \dot p(t)
+   (0, \Omega(t) ) = 2 p^{-1}(t) \glaw \dot p(t)
 \end{equation}
 Using again  matrix representation of product of  quaternion, we get 
 \begin{equation}
   \label{eq:97}
-  \Omega(t)  = 2 \vv{p^{-1}(t) \circ \dot p(t)}  = 2  \begin{bmatrix}
+  \Omega(t)  = 2 \vv{p^{-1}(t) \glaw \dot p(t)}  = 2  \begin{bmatrix}
     -p_1 & p_0 & p_3 & -p_2 \\
     -p_2 & -p_3 & p_0 & p_1 \\
     -p_3 & p_2 & -p_1  & p_0\\
@@ -717,7 +773,7 @@ Note that we have $\Psi^\top(p)\Psi(p)= I_{4\times 4 }$ and  $\Psi(p)\Psi^\top(p
 The set of all unit quaternions that we denote $\HH_1$ is the set of unitary matrices of determinant equal to $1$. From~\eqref{eq:131}, we get that
 \begin{equation}
   \label{eq:126}
-  p \circ p^\star = e  
+  p \glaw p^\star = e  
 \end{equation}
 It implies that the set $\HH_1$ is the set of special unitary complex matrices. The set is a Lie group usually denoted as $SU(2)$. Since we used multiple representation of a quaternion, we continue to use $\HH_1 \approx SU(2)$ as a notation but with the Lie group structure implied by $SU(2)$.
 
@@ -727,25 +783,25 @@ Since $q(t)\in H_1$, we have $|q(t)|=1$ and then $\frac{d}{dt} |q(t)| = 2(q_0(0)
   \label{eq:48}
   2(p_0 a_0 + \vec{p}^T \vec{a})= 0.
 \end{equation}
-This relation imposes that the quaternions $2 p^\star \circ a \in H_1$ and $2 a \circ p^\star \in H_1$, that is, have to be pure quaternions. Therefore, it exists $\omega in \RR^2$  and $\Omega \in \RR^3$ such that
+This relation imposes that the quaternions $2 p^\star \glaw a \in H_1$ and $2 a \glaw p^\star \in H_1$, that is, have to be pure quaternions. Therefore, it exists $\omega \in \RR^3$  and $\Omega \in \RR^3$ such that
 \begin{equation}
   \label{eq:132}
-  (0, \Omega) = 2 p ^\star \circ a 
+  (0, \Omega) = 2 p ^\star \glaw a 
 \end{equation}
 and
 \begin{equation}
   \label{eq:132}
-  (0, \omega) = 2 a\circ p^\star
+  (0, \omega) = 2 a\glaw p^\star
 \end{equation}
 In other terms, the tangent vector spaces at $p \in \HH_1$ can be represented as a left reprensentation
 \begin{equation}
   \label{eq:133}
-  T_p\HH_1 = \{ a \mid a = p \circ (0, \frac \Omega 2 ), \Omega \in \RR^3\}
+  T_p\HH_1 = \{ a \mid a = p \glaw (0, \frac \Omega 2 ), \Omega \in \RR^3\}
 \end{equation}
 or a right reprenstation
 \begin{equation}
-  \label{eq:133}
-  T_p{\HH_1} = \{ a \mid a =  (0, \frac \omega 2 ) \circ p, \omega \in \RR^3\}
+  \label{eq:1330}
+  T_p{\HH_1} = \{ a \mid a =  (0, \frac \omega 2 ) \glaw p, \omega \in \RR^3\}
 \end{equation}
 
 At $p=e$, we get the Lie algebra defined by
@@ -753,8 +809,207 @@ At $p=e$, we get the Lie algebra defined by
   \label{eq:134}
   \mathfrak h_1 =  T_e{\HH_1} =  \{ a = (0, \frac \omega 2 ), \omega \in \RR^3 \}
 \end{equation}
-\section{Newton-Euler equation in quaternion  form}
+equipped with the Lie bracket given the matrix commutator
+\begin{equation}
+  \label{eq:135}
+  [p,q] = p \glaw q- q\glaw p.
+\end{equation}
+We can easily verify that for $a = (0, \frac \Omega 2 ), \, b = (0, \frac \Gamma 2 ) \in \mathfrak h_1 $, we have
+\begin{equation}
+  \label{eq:136}
+  [a,b] = (0, \frac \Omega 2 ) \glaw (0, \frac \Gamma 2 ) - (0, \frac \Gamma 2 ) \glaw  (0, \frac \Omega 2 )  = (0, \frac{\Omega\times \Gamma}{2}) \in \mathfrak h_1
+\end{equation}
+As for $\mathfrak so(3)$,  the Lie algebra $\mathfrak h_1$ is isomorphic to $\RR^3$ thanks to the operator $\widehat{(\cdot)} :\RR^3 \rightarrow \mathfrak h_1$ and defined by
+\begin{equation}
+  \label{eq:54}
+ \widehat{(\cdot)}: \Omega \mapsto \widehat \Omega = (0, \frac \Omega 2 ) 
+\end{equation}
+\begin{equation}
+  \label{eq:137}
+  [\widehat{\Omega},\widehat{\Gamma}] = \widehat{\Omega \times \Gamma} 
+\end{equation}
 
+
+\paragraph{ A special  (right)  action of Lie Group $\mathcal G$ on a manifold $\mathcal M$. } 
+Let us come back to the representation of  $T_p\HH_1$ given in~\eqref{eq:133}. It is clear it can expressed with a representation that relies on $\mathfrak h_1$
+\begin{equation}
+  \label{eq:158}
+   T_RSO(3) = \{ a = p \glaw  \widehat \Omega \mid \widehat \Omega \in \mathfrak h_1 \}.
+\end{equation}
+With \eqref{eq:58}, we see that there is a linear map that relates $T_p\HH_1$ to  $\mathfrak h_1$. This linear map defines a vector field. 
+
+
+A special group action is defined by the left translation map for a point $p \in \HH_1$ 
+\begin{equation}
+  \label{eq:159}
+  \begin{array}[lcl]{rcl}
+    L_p& :&   \HH_1 \rightarrow  \HH_1\\
+       & &  q  \mapsto L_p(q) = p \glaw q\\
+  \end{array}
+\end{equation}
+which is diffeomorphism on $\HH_1$. In that case, we identify the manifold and the group. So, $L_p$ can be viewed as a left or a right group action. We choose a right action. For our application where $\mathcal G = \mathcal M = \HH_1$ and $\Lambda^r(p,q) = L_{p}(q) =  p \glaw q $, we get
+\begin{equation}
+  \label{eq:160}
+   \lambda^r_{*}(a)(p) = \left. \frac{d}{dt} L_{p}(q(t)) \right|_{t=0}  = \left. \frac{d}{dt} p \glaw q(t) \right|_{t=0} =  p \glaw \dot q(0) = p  \glaw \dot q(0)  \in X(\mathcal M)
+ \end{equation}
+ for a smooth curve $q(t)$ in $\HH_1$.
+Since $q(\cdot)$ is a smooth curve in $\HH_1$, $\dot q(0)$ is a tangent vector at the point $q(0)=I$, that is an element $a = \widehat  \Omega  \in \mathfrak h_1 $ defined by the relation~\eqref{eq:33}. Therefore, the vector field in \eqref{eq:160} is a tangent vector field and we get
+\begin{equation}
+  \label{eq:161}
+  \dot p(t) = \lambda^r_{*}(a)(p(t)) = p(t)  \glaw \widehat \Omega
+\end{equation}
+\paragraph{Exponential map $\expq : \mathfrak h_1 \rightarrow \HH_1$}
+We can directly apply Theorem~\ref{Theorem:solutionofLieODE} and we get that the solution of
+\begin{equation}
+  \label{eq:130}
+  \begin{cases}
+  \dot p(t) = \lambda^r_{*}(a)(p(t)) = p(t) \glaw \widehat \Omega \\
+  p(0) = Rp_0
+\end{cases}
+\end{equation}
+ is
+\begin{equation}
+  \label{eq:138}
+  p(t) = p_0 \expq(t \widehat \Omega)
+\end{equation}
+The exponential mapping $\expq : \mathfrak h_1 \rightarrow \HH_1$ can also be defined as $\expq(\widehat \Omega) = q(1)$ where $q (t)$ satisfies the  differential equation
+\begin{equation}
+  \label{eq:235}
+  \dot q(t) = q(t) \cdot \widehat \Omega , \quad q (0) = e.
+\end{equation}
+Using the quaternion product, the exponential map can be expressed as
+\begin{equation}
+  \label{eq:232}
+  \expq(t \widehat \Omega ) = \sum_{k=0}^\infty \frac{(t\widehat \Omega)^k}{k!}
+\end{equation}
+since it is  a solution of \eqref{eq:130}. A simple computation allows to check this claim:
+\begin{equation}
+  \label{eq:233}
+   \frac{d}{dt}\expq(t \widehat \Omega ) = \sum_{k=1}^\infty  k t^{k-1} \frac{ \widehat \Omega ^k}{k!} =  \sum_{k=0}^\infty  t^{k} \frac{t \widehat \Omega ^k}{k!}\glaw  \widehat \Omega  =   \expq(t \widehat \Omega ) \glaw \widehat \Omega.
+\end{equation}
+
+A closed form relation for the form the quaternion exponential can also be found by noting that
+\begin{equation}
+  \label{eq:140}
+  \widehat \Omega ^2  = - \left(\frac \theta 2 \right)^2 e, \text{ and } \widehat \Omega ^3  = - \left(\frac \theta 2 \right)^2 \widehat \Omega.
+\end{equation}
+A simple expansion of \eqref{eq:232} at $t=1$ equals
+\begin{equation}
+  \label{eq:141}
+  \begin{array}{lcl}
+    \expq(\widehat \Omega ) &=& \sum_{k=0}^\infty \frac{(\widehat \Omega)^k}{k!}\\
+                            &=& \sum_{k=0}^\infty \frac{(-1)^k}{(2k)!}\left(\frac \theta 2 \right)^{2k} e + \sum_{k=0}^\infty \frac{(-1)^k}{(2k+1)!} \left(\frac \theta 2 \right)^{2k+1} \widehat \Omega \\
+                            &=& \cos(\frac \theta 2) e + \frac{\sin(\frac \theta 2)}{\frac \theta 2} \widehat \Omega \\
+  \end{array}
+\end{equation}
+that is
+\begin{equation}
+  \label{eq:144}
+  \expq(\widehat \Omega )  = (\cos(\frac \theta 2), \sin(\frac \theta 2) \frac{\Omega}{\theta}   ).
+\end{equation}
+
+\paragraph{Adjoint representation}
+In the case of $\HH_1$, the definition of the operator $\Ad$ gives
+\begin{equation}
+  \label{eq:121}
+  \Ad_p(\widehat\Omega)  = p\glaw \widehat\Omega p^\star
+\end{equation}
+ and then mapping $\ad_{\widehat\Omega}(\widehat \Gamma)$ is defined by
+\begin{equation}
+  \label{eq:56}
+  \ad_{\widehat\Omega}(\widehat\Gamma) = \widehat \Omega \widehat\Gamma - \widehat \Gamma \widehat\Omega  =  [\widehat \Omega,\widehat \Gamma] = \widehat{\Omega \times \Gamma}.
+\end{equation}
+Using the isomorphism between $\mathfrak h_1$ and $\RR^3$, we can use the  the mapping $\ad_{\Omega}(\Gamma) : \RR^3\times\RR^3 \rightarrow \RR^3$ given by \eqref{eq:55} to get 
+\begin{equation}
+  \label{eq:145}
+   \ad_{\widehat\Omega}(\widehat\Gamma) = \widehat{\Omega \times \Gamma} = \widehat{\ad_{\Omega}(\Gamma)} =  \widehat{\tilde \Omega \Gamma}
+\end{equation}
+
+\paragraph{Differential of the exponential map $\dexpq$}
+The differential of the exponential mapping, denoted by $\dexpq$ is defined as the 'right trivialized' tangent of the exponential map 
+\begin{equation}
+  \label{eq:71}
+  \frac{d}{dt} (\expq(\widehat \Omega(t))) = \dexpq_{\widehat\Omega(t)}(\frac{d \widehat{\Omega}(t)}{dt}) \expq(\widehat\Omega(t))
+\end{equation}
+
+An explicit expression of $\dexp_{\widehat\Omega}(\widehat\Gamma)$ can also be developed either by developing the expansion and~\eqref{eq:137}.
+\begin{equation}
+  \label{eq:168}
+   \dexpq_{\widehat\Omega}(\Gamma) = \sum_{k=0}^\infty \frac{1}{(k+1)!} \ad_{\widehat\Omega}^k (\widehat\Gamma) = \widehat{T(\Omega)\Gamma}
+\end{equation}
+
+\begin{remark}
+Note that the time derivative in $\RR^4$ is not differential mapping.
+The standard time derivative of $\expq$ in the expression \eqref{eq:144} gives
+\begin{equation}
+  \label{eq:171}
+    \frac{d}{dt}\expq(\widehat \Gamma(t)) = (- \frac{\sin(\theta)}{\theta} \Omega^T\Gamma, \frac{\sin(\theta)}{\theta}\Gamma  +\frac{\theta \cos(\theta)-\sin(\theta)}{\theta^3}\Omega^T\Omega \Gamma  )
+\end{equation}
+that can be expressed in $\RR^4$ by
+\begin{equation}
+  \label{eq:175}
+  \frac{d}{dt}\expq(\widehat \Gamma(t))  = \nabla \expq(\widehat\Omega) \widehat{\dot\Omega} 
+\end{equation}
+with
+\begin{equation}
+  \label{eq:176}
+  \nabla \expq(\widehat\Omega) =
+  \begin{bmatrix}
+    - \frac{\sin(\theta)}{\theta} \Omega^T \\
+    \frac{\sin(\theta)}{\theta}I  +\frac{\theta \cos(\theta)-\sin(\theta)}{\theta^3}\Omega^T\Omega
+  \end{bmatrix}
+\end{equation}
+
+Clearly, we have 
+\begin{equation}
+  \label{eq:177}
+  \nabla \expq(\widehat\Omega) \neq  \dexpq_{\widehat\Omega}
+\end{equation}
+\end{remark}
+
+
+\paragraph{Directional derivative and Jacobians of functions of a quaternion}
+\begin{ndrva}
+  experimental
+\end{ndrva}
+
+Let $f : \HH_1 \rightarrow \RR $ be a mapping from the group to $\RR^3$. The directional derivative of $f$ in the direction $\widehat \Omega \in \mathfrak h_1$ at $p\in \HH_1$ is 
+defined by
+\begin{equation}
+  \label{eq:139}
+ df_p(\widehat \Omega) =\left. \frac{d}{dt} f(p\glaw \expq(t\widehat \Omega)) \right|_{t=0}
+\end{equation}
+
+As a first simple example let us choose $f(p) = \vv{p \glaw p_x \glaw p^\star}$ for a given $x \in \RR^3 $, we get
+\begin{equation}
+  \label{eq:142}
+  \begin{array}{lcl}
+    D Id \cdot \widehat \Omega (p) = (\widehat \Omega^r f )(p) &=& \left. \frac{d}{dt}\vv{p\glaw \expq(t\widehat \Omega) \glaw p_x \glaw (p \glaw \expq(t\widehat \Omega))^\star}  \right|_{t=0}\\
+                                                               & = & \vv{p\glaw \frac{d}{dt}\left. \expq(t\widehat \Omega) \right|_{t=0} \glaw p_x \glaw p^\star +  p \glaw p_x \glaw (p \glaw\frac{d}{dt}\left. \expq(t\widehat \Omega) \right|_{t=0})^\star}\\                                              
+  \end{array}
+\end{equation}
+We have form the definition of the time derivative of the exponential
+\begin{equation}
+  \label{eq:143}
+  \begin{array}{lcl}
+    \frac{d}{dt}\left. \expq(t\widehat \Omega) \right|_{t=0} &=&  \left. \dexpq_{\widehat\Omega}(\widehat \Omega)\expq(t\widehat \Omega) \right|_{t=0} \\
+                                                            &=&  \dexpq_{\widehat\Omega}(\widehat \Omega)
+  \end{array}
+\end{equation}
+
+Then, the directional derivative can be written
+\begin{equation}
+  \label{eq:146}
+  \begin{array}{lcl}
+    D Id \cdot \widehat \Omega (p) &=& \vv{p\glaw \dexpq_{\widehat\Omega}(\widehat \Omega)\glaw p_x \glaw p^\star  + p \glaw p_x \glaw (\dexpq_{\widehat\Omega}(\widehat \Omega))^* \glaw  p^\star } \\
+  &=& \vv{p\glaw ( \dexpq_{\widehat\Omega}(\widehat \Omega)\glaw p_x +   p_x \glaw (\dexpq_{\widehat\Omega}(\widehat \Omega))^*) \glaw  p^\star } 
+  \end{array}
+\end{equation}
+
+
+
+
+\section{Newton-Euler equation in quaternion  form}
 
 \paragraph{Computation of $T$ for unit quaternion} The operator $T(q)$ is directly obtained as
 \begin{equation}
@@ -785,7 +1040,7 @@ At $p=e$, we get the Lie algebra defined by
   \label{eq:99}
   SO(3) = \{p = (p_0,\vv{p}) \in \RR^{4}\mid |p|=1  \}
 \end{equation}
-with the composition law  $p_1\circ p_2$ given by the quaternion product.
+with the composition law  $p_1\glaw p_2$ given by the quaternion product.
 
 
 
