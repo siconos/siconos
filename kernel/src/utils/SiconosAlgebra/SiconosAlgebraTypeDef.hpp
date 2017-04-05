@@ -54,8 +54,6 @@
 
 #include "SiconosFwd.hpp"
 
-#include "SiconosVisitor.hpp"
-
 /** Const from old version of SiconosVector - To be reviewed */
 const char N_DOUBLE_PRECISION[] = "%1.52e "; // double mantisse precision /!\ DEPENDS ON MACHINE
 const unsigned int M_MAXSIZEFORDISPLAY = 10;

@@ -83,28 +83,28 @@ const SiconosVector prod(const SiconosMatrix& A, const SiconosVector& x)
     if (numX == 1)
     {
       if (numA == 1)
-        return (DenseVect)(prod(*A.dense(), *x.dense()));
+        return (DenseVect)(prod(*A.dense(), x.dense()));
       else if (numA == 2)
-        return (DenseVect)(prod(*A.triang(), *x.dense()));
+        return (DenseVect)(prod(*A.triang(), x.dense()));
       else if (numA == 3)
-        return (DenseVect)(prod(*A.sym(), *x.dense()));
+        return (DenseVect)(prod(*A.sym(), x.dense()));
       else if (numA == 4)
-        return (DenseVect)(prod(*A.sparse(), *x.dense()));
+        return (DenseVect)(prod(*A.sparse(), x.dense()));
       else // if(numA==5)
-        return (DenseVect)(prod(*A.banded(), *x.dense()));
+        return (DenseVect)(prod(*A.banded(), x.dense()));
     }
     else //if(numX == 4)
     {
       if (numA == 1)
-        return (DenseVect)(prod(*A.dense(), *x.sparse()));
+        return (DenseVect)(prod(*A.dense(), x.sparse()));
       else if (numA == 2)
-        return (DenseVect)(prod(*A.triang(), *x.sparse()));
+        return (DenseVect)(prod(*A.triang(), x.sparse()));
       else if (numA == 3)
-        return (DenseVect)(prod(*A.sym(), *x.sparse()));
+        return (DenseVect)(prod(*A.sym(), x.sparse()));
       else if (numA == 4)
-        return (DenseVect)(prod(*A.sparse(), *x.sparse()));
+        return (DenseVect)(prod(*A.sparse(), x.sparse()));
       else // if(numA==5)
-        return (DenseVect)(prod(*A.banded(), *x.sparse()));
+        return (DenseVect)(prod(*A.banded(), x.sparse()));
     }
   }
 }
@@ -157,15 +157,15 @@ void prod(double a, const SiconosMatrix& A, const SiconosVector& x, SiconosVecto
                 SiconosMatrixException::selfThrow("prod(A,x,y) error: y (output) must be a dense vector.");
 
               if (numA == 1)
-                noalias(*y.dense()) = a * ublas::prod(*A.dense(), *x.dense());
+                noalias(y.dense()) = a * ublas::prod(*A.dense(), x.dense());
               else if (numA == 2)
-                noalias(*y.dense()) = a * ublas::prod(*A.triang(), *x.dense());
+                noalias(y.dense()) = a * ublas::prod(*A.triang(), x.dense());
               else if (numA == 3)
-                noalias(*y.dense()) = a * ublas::prod(*A.sym(), *x.dense());
+                noalias(y.dense()) = a * ublas::prod(*A.sym(), x.dense());
               else if (numA == 4)
-                noalias(*y.dense()) = a * ublas::prod(*A.sparse(), *x.dense());
+                noalias(y.dense()) = a * ublas::prod(*A.sparse(), x.dense());
               else //if(numA==5)
-                noalias(*y.dense()) = a * ublas::prod(*A.banded(), *x.dense());
+                noalias(y.dense()) = a * ublas::prod(*A.banded(), x.dense());
             }
             else //if(numX == 4)
             {
@@ -173,20 +173,20 @@ void prod(double a, const SiconosMatrix& A, const SiconosVector& x, SiconosVecto
                 SiconosMatrixException::selfThrow("prod(A,x,y) error: y (output) must be a dense vector.");
 
               if (numA == 1)
-                noalias(*y.dense()) = a * ublas::prod(*A.dense(), *x.sparse());
+                noalias(y.dense()) = a * ublas::prod(*A.dense(), x.sparse());
               else if (numA == 2)
-                noalias(*y.dense()) = a * ublas::prod(*A.triang(), *x.sparse());
+                noalias(y.dense()) = a * ublas::prod(*A.triang(), x.sparse());
               else if (numA == 3)
-                noalias(*y.dense()) = a * ublas::prod(*A.sym(), *x.sparse());
+                noalias(y.dense()) = a * ublas::prod(*A.sym(), x.sparse());
               else if (numA == 4)
               {
                 if (numY == 1)
-                  noalias(*y.dense()) = a * ublas::prod(*A.sparse(), *x.sparse());
+                  noalias(y.dense()) = a * ublas::prod(*A.sparse(), x.sparse());
                 else
-                  noalias(*y.sparse()) = a * ublas::prod(*A.sparse(), *x.sparse());
+                  noalias(y.sparse()) = a * ublas::prod(*A.sparse(), x.sparse());
               }
               else //if(numA==5)
-                noalias(*y.dense()) = a * ublas::prod(*A.banded(), *x.sparse());
+                noalias(y.dense()) = a * ublas::prod(*A.banded(), x.sparse());
             }
           }
           else // if x and y are the same object => alias
@@ -194,28 +194,28 @@ void prod(double a, const SiconosMatrix& A, const SiconosVector& x, SiconosVecto
             if (numX == 1)
             {
               if (numA == 1)
-                *y.dense() = a * ublas::prod(*A.dense(), *x.dense());
+                y.dense() = a * ublas::prod(*A.dense(), x.dense());
               else if (numA == 2)
-                *y.dense() = a * ublas::prod(*A.triang(), *x.dense());
+                y.dense() = a * ublas::prod(*A.triang(), x.dense());
               else if (numA == 3)
-                *y.dense() = a * ublas::prod(*A.sym(), *x.dense());
+                y.dense() = a * ublas::prod(*A.sym(), x.dense());
               else if (numA == 4)
-                *y.dense() = a * ublas::prod(*A.sparse(), *x.dense());
+                y.dense() = a * ublas::prod(*A.sparse(), x.dense());
               else //if(numA==5)
-                *y.dense() = a * ublas::prod(*A.banded(), *x.dense());
+                y.dense() = a * ublas::prod(*A.banded(), x.dense());
             }
             else //if(numX == 4)
             {
               if (numA == 1)
-                *y.sparse() = a * ublas::prod(*A.dense(), *x.sparse());
+                y.sparse() = a * ublas::prod(*A.dense(), x.sparse());
               else if (numA == 2)
-                *y.sparse() = a * ublas::prod(*A.triang(), *x.sparse());
+                y.sparse() = a * ublas::prod(*A.triang(), x.sparse());
               else if (numA == 3)
-                *y.sparse() = a * ublas::prod(*A.sym(), *x.sparse());
+                y.sparse() = a * ublas::prod(*A.sym(), x.sparse());
               else if (numA == 4)
-                *y.sparse() = a * ublas::prod(*A.sparse(), *x.sparse());
+                y.sparse() = a * ublas::prod(*A.sparse(), x.sparse());
               else //if(numA==5)
-                *y.sparse() = a * ublas::prod(*A.banded(), *x.sparse());
+                y.sparse() = a * ublas::prod(*A.banded(), x.sparse());
             }
           }
         }
@@ -229,15 +229,15 @@ void prod(double a, const SiconosMatrix& A, const SiconosVector& x, SiconosVecto
                 SiconosMatrixException::selfThrow("prod(A,x,y) error: y (output) must be a dense vector.");
 
               if (numA == 1)
-                noalias(*y.dense()) += a * ublas::prod(*A.dense(), *x.dense());
+                noalias(y.dense()) += a * ublas::prod(*A.dense(), x.dense());
               else if (numA == 2)
-                noalias(*y.dense()) += a * ublas::prod(*A.triang(), *x.dense());
+                noalias(y.dense()) += a * ublas::prod(*A.triang(), x.dense());
               else if (numA == 3)
-                noalias(*y.dense()) += a * ublas::prod(*A.sym(), *x.dense());
+                noalias(y.dense()) += a * ublas::prod(*A.sym(), x.dense());
               else if (numA == 4)
-                noalias(*y.dense()) += a * ublas::prod(*A.sparse(), *x.dense());
+                noalias(y.dense()) += a * ublas::prod(*A.sparse(), x.dense());
               else //if(numA==5)
-                noalias(*y.dense()) += a * ublas::prod(*A.banded(), *x.dense());
+                noalias(y.dense()) += a * ublas::prod(*A.banded(), x.dense());
             }
             else //if(numX == 4)
             {
@@ -245,20 +245,20 @@ void prod(double a, const SiconosMatrix& A, const SiconosVector& x, SiconosVecto
                 SiconosMatrixException::selfThrow("prod(A,x,y) error: y (output) must be a dense vector.");
 
               if (numA == 1)
-                noalias(*y.dense()) += a * ublas::prod(*A.dense(), *x.sparse());
+                noalias(y.dense()) += a * ublas::prod(*A.dense(), x.sparse());
               else if (numA == 2)
-                noalias(*y.dense()) += a * ublas::prod(*A.triang(), *x.sparse());
+                noalias(y.dense()) += a * ublas::prod(*A.triang(), x.sparse());
               else if (numA == 3)
-                noalias(*y.dense()) += a * ublas::prod(*A.sym(), *x.sparse());
+                noalias(y.dense()) += a * ublas::prod(*A.sym(), x.sparse());
               else if (numA == 4)
               {
                 if (numY == 1)
-                  noalias(*y.dense()) += a * ublas::prod(*A.sparse(), *x.sparse());
+                  noalias(y.dense()) += a * ublas::prod(*A.sparse(), x.sparse());
                 else
-                  noalias(*y.sparse()) += a * ublas::prod(*A.sparse(), *x.sparse());
+                  noalias(y.sparse()) += a * ublas::prod(*A.sparse(), x.sparse());
               }
               else //if(numA==5)
-                noalias(*y.dense()) += a * ublas::prod(*A.banded(), *x.sparse());
+                noalias(y.dense()) += a * ublas::prod(*A.banded(), x.sparse());
             }
           }
           else // if x and y are the same object => alias
@@ -266,28 +266,28 @@ void prod(double a, const SiconosMatrix& A, const SiconosVector& x, SiconosVecto
             if (numX == 1)
             {
               if (numA == 1)
-                *y.dense() += a * ublas::prod(*A.dense(), *x.dense());
+                y.dense() += a * ublas::prod(*A.dense(), x.dense());
               else if (numA == 2)
-                *y.dense() += a * ublas::prod(*A.triang(), *x.dense());
+                y.dense() += a * ublas::prod(*A.triang(), x.dense());
               else if (numA == 3)
-                *y.dense() += a * ublas::prod(*A.sym(), *x.dense());
+                y.dense() += a * ublas::prod(*A.sym(), x.dense());
               else if (numA == 4)
-                *y.dense() += a * ublas::prod(*A.sparse(), *x.dense());
+                y.dense() += a * ublas::prod(*A.sparse(), x.dense());
               else //if(numA==5)
-                *y.dense() += a * ublas::prod(*A.banded(), *x.dense());
+                y.dense() += a * ublas::prod(*A.banded(), x.dense());
             }
             else //if(numX == 4)
             {
               if (numA == 1)
-                *y.sparse() += a * ublas::prod(*A.dense(), *x.sparse());
+                y.sparse() += a * ublas::prod(*A.dense(), x.sparse());
               else if (numA == 2)
-                *y.sparse() += a * ublas::prod(*A.triang(), *x.sparse());
+                y.sparse() += a * ublas::prod(*A.triang(), x.sparse());
               else if (numA == 3)
-                *y.sparse() += a * ublas::prod(*A.sym(), *x.sparse());
+                y.sparse() += a * ublas::prod(*A.sym(), x.sparse());
               else if (numA == 4)
-                *y.sparse() += a * ublas::prod(*A.sparse(), *x.sparse());
+                y.sparse() += a * ublas::prod(*A.sparse(), x.sparse());
               else //if(numA==5)
-                *y.sparse() += a * ublas::prod(*A.banded(), *x.sparse());
+                y.sparse() += a * ublas::prod(*A.banded(), x.sparse());
             }
           }
         }
@@ -347,15 +347,15 @@ void prod(const SiconosVector& x, const SiconosMatrix& A, SiconosVector& y, bool
               SiconosMatrixException::selfThrow("prod(x,A,y) error: y (output) must be a dense vector.");
 
             if (numA == 1)
-              noalias(*y.dense()) = ublas::prod(trans(*A.dense()), *x.dense());
+              noalias(y.dense()) = ublas::prod(trans(*A.dense()), x.dense());
             else if (numA == 2)
-              noalias(*y.dense()) = ublas::prod(trans(*A.triang()), *x.dense());
+              noalias(y.dense()) = ublas::prod(trans(*A.triang()), x.dense());
             else if (numA == 3)
-              noalias(*y.dense()) = ublas::prod(trans(*A.sym()), *x.dense());
+              noalias(y.dense()) = ublas::prod(trans(*A.sym()), x.dense());
             else if (numA == 4)
-              noalias(*y.dense()) = ublas::prod(trans(*A.sparse()), *x.dense());
+              noalias(y.dense()) = ublas::prod(trans(*A.sparse()), x.dense());
             else //if(numA==5)
-              noalias(*y.dense()) = ublas::prod(trans(*A.banded()), *x.dense());
+              noalias(y.dense()) = ublas::prod(trans(*A.banded()), x.dense());
           }
           else //if(numX == 4)
           {
@@ -363,20 +363,20 @@ void prod(const SiconosVector& x, const SiconosMatrix& A, SiconosVector& y, bool
               SiconosMatrixException::selfThrow("prod(x,A,y) error: y (output) must be a dense vector.");
 
             if (numA == 1)
-              noalias(*y.dense()) = ublas::prod(trans(*A.dense()), *x.sparse());
+              noalias(y.dense()) = ublas::prod(trans(*A.dense()), x.sparse());
             else if (numA == 2)
-              noalias(*y.dense()) = ublas::prod(trans(*A.triang()), *x.sparse());
+              noalias(y.dense()) = ublas::prod(trans(*A.triang()), x.sparse());
             else if (numA == 3)
-              noalias(*y.dense()) = ublas::prod(trans(*A.sym()), *x.sparse());
+              noalias(y.dense()) = ublas::prod(trans(*A.sym()), x.sparse());
             else if (numA == 4)
             {
               if (numY == 1)
-                noalias(*y.dense()) = ublas::prod(trans(*A.sparse()), *x.sparse());
+                noalias(y.dense()) = ublas::prod(trans(*A.sparse()), x.sparse());
               else
-                noalias(*y.sparse()) = ublas::prod(trans(*A.sparse()), *x.sparse());
+                noalias(y.sparse()) = ublas::prod(trans(*A.sparse()), x.sparse());
             }
             else //if(numA==5)
-              noalias(*y.dense()) = ublas::prod(trans(*A.banded()), *x.sparse());
+              noalias(y.dense()) = ublas::prod(trans(*A.banded()), x.sparse());
           }
         }
         else // if x and y are the same object => alias
@@ -384,28 +384,28 @@ void prod(const SiconosVector& x, const SiconosMatrix& A, SiconosVector& y, bool
           if (numX == 1)
           {
             if (numA == 1)
-              *y.dense() = ublas::prod(trans(*A.dense()), *x.dense());
+              y.dense() = ublas::prod(trans(*A.dense()), x.dense());
             else if (numA == 2)
-              *y.dense() = ublas::prod(trans(*A.triang()), *x.dense());
+              y.dense() = ublas::prod(trans(*A.triang()), x.dense());
             else if (numA == 3)
-              *y.dense() = ublas::prod(trans(*A.sym()), *x.dense());
+              y.dense() = ublas::prod(trans(*A.sym()), x.dense());
             else if (numA == 4)
-              *y.dense() = ublas::prod(trans(*A.sparse()), *x.dense());
+              y.dense() = ublas::prod(trans(*A.sparse()), x.dense());
             else //if(numA==5)
-              *y.dense() = ublas::prod(trans(*A.banded()), *x.dense());
+              y.dense() = ublas::prod(trans(*A.banded()), x.dense());
           }
           else //if(numX == 4)
           {
             if (numA == 1)
-              *y.sparse() = ublas::prod(trans(*A.dense()), *x.sparse());
+              y.sparse() = ublas::prod(trans(*A.dense()), x.sparse());
             else if (numA == 2)
-              *y.sparse() = ublas::prod(trans(*A.triang()), *x.sparse());
+              y.sparse() = ublas::prod(trans(*A.triang()), x.sparse());
             else if (numA == 3)
-              *y.sparse() = ublas::prod(trans(*A.sym()), *x.sparse());
+              y.sparse() = ublas::prod(trans(*A.sym()), x.sparse());
             else if (numA == 4)
-              *y.sparse() = ublas::prod(trans(*A.sparse()), *x.sparse());
+              y.sparse() = ublas::prod(trans(*A.sparse()), x.sparse());
             else //if(numA==5)
-              *y.sparse() = ublas::prod(trans(*A.banded()), *x.sparse());
+              y.sparse() = ublas::prod(trans(*A.banded()), x.sparse());
           }
         }
       }
@@ -420,15 +420,15 @@ void prod(const SiconosVector& x, const SiconosMatrix& A, SiconosVector& y, bool
               SiconosMatrixException::selfThrow("prod(x,A,y) error: y (output) must be a dense vector.");
 
             if (numA == 1)
-              noalias(*y.dense()) += ublas::prod(trans(*A.dense()), *x.dense());
+              noalias(y.dense()) += ublas::prod(trans(*A.dense()), x.dense());
             else if (numA == 2)
-              noalias(*y.dense()) += ublas::prod(trans(*A.triang()), *x.dense());
+              noalias(y.dense()) += ublas::prod(trans(*A.triang()), x.dense());
             else if (numA == 3)
-              noalias(*y.dense()) += ublas::prod(trans(*A.sym()), *x.dense());
+              noalias(y.dense()) += ublas::prod(trans(*A.sym()), x.dense());
             else if (numA == 4)
-              noalias(*y.dense()) += ublas::prod(trans(*A.sparse()), *x.dense());
+              noalias(y.dense()) += ublas::prod(trans(*A.sparse()), x.dense());
             else //if(numA==5)
-              noalias(*y.dense()) += ublas::prod(trans(*A.banded()), *x.dense());
+              noalias(y.dense()) += ublas::prod(trans(*A.banded()), x.dense());
           }
           else //if(numX == 4)
           {
@@ -436,20 +436,20 @@ void prod(const SiconosVector& x, const SiconosMatrix& A, SiconosVector& y, bool
               SiconosMatrixException::selfThrow("prod(x,A,y) error: y (output) must be a dense vector.");
 
             if (numA == 1)
-              noalias(*y.dense()) += ublas::prod(trans(*A.dense()), *x.sparse());
+              noalias(y.dense()) += ublas::prod(trans(*A.dense()), x.sparse());
             else if (numA == 2)
-              noalias(*y.dense()) += ublas::prod(trans(*A.triang()), *x.sparse());
+              noalias(y.dense()) += ublas::prod(trans(*A.triang()), x.sparse());
             else if (numA == 3)
-              noalias(*y.dense()) += ublas::prod(trans(*A.sym()), *x.sparse());
+              noalias(y.dense()) += ublas::prod(trans(*A.sym()), x.sparse());
             else if (numA == 4)
             {
               if (numY == 1)
-                noalias(*y.dense()) += ublas::prod(trans(*A.sparse()), *x.sparse());
+                noalias(y.dense()) += ublas::prod(trans(*A.sparse()), x.sparse());
               else
-                noalias(*y.sparse()) += ublas::prod(trans(*A.sparse()), *x.sparse());
+                noalias(y.sparse()) += ublas::prod(trans(*A.sparse()), x.sparse());
             }
             else //if(numA==5)
-              noalias(*y.dense()) += ublas::prod(trans(*A.banded()), *x.sparse());
+              noalias(y.dense()) += ublas::prod(trans(*A.banded()), x.sparse());
           }
         }
         else // if x and y are the same object => alias
@@ -457,28 +457,28 @@ void prod(const SiconosVector& x, const SiconosMatrix& A, SiconosVector& y, bool
           if (numX == 1)
           {
             if (numA == 1)
-              *y.dense() += ublas::prod(trans(*A.dense()), *x.dense());
+              y.dense() += ublas::prod(trans(*A.dense()), x.dense());
             else if (numA == 2)
-              *y.dense() += ublas::prod(trans(*A.triang()), *x.dense());
+              y.dense() += ublas::prod(trans(*A.triang()), x.dense());
             else if (numA == 3)
-              *y.dense() += ublas::prod(trans(*A.sym()), *x.dense());
+              y.dense() += ublas::prod(trans(*A.sym()), x.dense());
             else if (numA == 4)
-              *y.dense() += ublas::prod(trans(*A.sparse()), *x.dense());
+              y.dense() += ublas::prod(trans(*A.sparse()), x.dense());
             else //if(numA==5)
-              *y.dense() += ublas::prod(trans(*A.banded()), *x.dense());
+              y.dense() += ublas::prod(trans(*A.banded()), x.dense());
           }
           else //if(numX == 4)
           {
             if (numA == 1)
-              *y.sparse() += ublas::prod(trans(*A.dense()), *x.sparse());
+              y.sparse() += ublas::prod(trans(*A.dense()), x.sparse());
             else if (numA == 2)
-              *y.sparse() += ublas::prod(trans(*A.triang()), *x.sparse());
+              y.sparse() += ublas::prod(trans(*A.triang()), x.sparse());
             else if (numA == 3)
-              *y.sparse() += ublas::prod(trans(*A.sym()), *x.sparse());
+              y.sparse() += ublas::prod(trans(*A.sym()), x.sparse());
             else if (numA == 4)
-              *y.sparse() += ublas::prod(trans(*A.sparse()), *x.sparse());
+              y.sparse() += ublas::prod(trans(*A.sparse()), x.sparse());
             else //if(numA==5)
-              *y.sparse() += ublas::prod(trans(*A.banded()), *x.sparse());
+              y.sparse() += ublas::prod(trans(*A.banded()), x.sparse());
           }
         }
       }
@@ -536,18 +536,18 @@ void prod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, bool
           if (numY != 1)
             SiconosMatrixException::selfThrow("prod(A,x,y) error: y (output) must be a dense vector.");
 
-          assert(y.dense() != x.dense());
+          assert(&y.dense() != &x.dense());
 
           if (numA == 1)
-            noalias(*y.dense()) = ublas::prod(*A.dense(), *x.dense());
+            noalias(y.dense()) = ublas::prod(*A.dense(), x.dense());
           else if (numA == 2)
-            noalias(*y.dense()) = ublas::prod(*A.triang(), *x.dense());
+            noalias(y.dense()) = ublas::prod(*A.triang(), x.dense());
           else if (numA == 3)
-            noalias(*y.dense()) = ublas::prod(*A.sym(), *x.dense());
+            noalias(y.dense()) = ublas::prod(*A.sym(), x.dense());
           else if (numA == 4)
-            noalias(*y.dense()) = ublas::prod(*A.sparse(), *x.dense());
+            noalias(y.dense()) = ublas::prod(*A.sparse(), x.dense());
           else //if(numA==5)
-            noalias(*y.dense()) = ublas::prod(*A.banded(), *x.dense());
+            noalias(y.dense()) = ublas::prod(*A.banded(), x.dense());
         }
         else //if(numX == 4)
         {
@@ -555,20 +555,20 @@ void prod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, bool
             SiconosMatrixException::selfThrow("prod(A,x,y) error: y (output) must be a dense vector.");
 
           if (numA == 1)
-            noalias(*y.dense()) = ublas::prod(*A.dense(), *x.sparse());
+            noalias(y.dense()) = ublas::prod(*A.dense(), x.sparse());
           else if (numA == 2)
-            noalias(*y.dense()) = ublas::prod(*A.triang(), *x.sparse());
+            noalias(y.dense()) = ublas::prod(*A.triang(), x.sparse());
           else if (numA == 3)
-            noalias(*y.dense()) = ublas::prod(*A.sym(), *x.sparse());
+            noalias(y.dense()) = ublas::prod(*A.sym(), x.sparse());
           else if (numA == 4)
           {
             if (numY == 1)
-              noalias(*y.dense()) = ublas::prod(*A.sparse(), *x.sparse());
+              noalias(y.dense()) = ublas::prod(*A.sparse(), x.sparse());
             else
-              noalias(*y.sparse()) = ublas::prod(*A.sparse(), *x.sparse());
+              noalias(y.sparse()) = ublas::prod(*A.sparse(), x.sparse());
           }
           else //if(numA==5)
-            noalias(*y.dense()) = ublas::prod(*A.banded(), *x.sparse());
+            noalias(y.dense()) = ublas::prod(*A.banded(), x.sparse());
         }
       }
       else // if x and y are the same object => alias
@@ -576,28 +576,28 @@ void prod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, bool
         if (numX == 1)
         {
           if (numA == 1)
-            *y.dense() = ublas::prod(*A.dense(), *x.dense());
+            y.dense() = ublas::prod(*A.dense(), x.dense());
           else if (numA == 2)
-            *y.dense() = ublas::prod(*A.triang(), *x.dense());
+            y.dense() = ublas::prod(*A.triang(), x.dense());
           else if (numA == 3)
-            *y.dense() = ublas::prod(*A.sym(), *x.dense());
+            y.dense() = ublas::prod(*A.sym(), x.dense());
           else if (numA == 4)
-            *y.dense() = ublas::prod(*A.sparse(), *x.dense());
+            y.dense() = ublas::prod(*A.sparse(), x.dense());
           else //if(numA==5)
-            *y.dense() = ublas::prod(*A.banded(), *x.dense());
+            y.dense() = ublas::prod(*A.banded(), x.dense());
         }
         else //if(numX == 4)
         {
           if (numA == 1)
-            *y.sparse() = ublas::prod(*A.dense(), *x.sparse());
+            y.sparse() = ublas::prod(*A.dense(), x.sparse());
           else if (numA == 2)
-            *y.sparse() = ublas::prod(*A.triang(), *x.sparse());
+            y.sparse() = ublas::prod(*A.triang(), x.sparse());
           else if (numA == 3)
-            *y.sparse() = ublas::prod(*A.sym(), *x.sparse());
+            y.sparse() = ublas::prod(*A.sym(), x.sparse());
           else if (numA == 4)
-            *y.sparse() = ublas::prod(*A.sparse(), *x.sparse());
+            y.sparse() = ublas::prod(*A.sparse(), x.sparse());
           else //if(numA==5)
-            *y.sparse() = ublas::prod(*A.banded(), *x.sparse());
+            y.sparse() = ublas::prod(*A.banded(), x.sparse());
         }
       }
     }
@@ -611,15 +611,15 @@ void prod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, bool
             SiconosMatrixException::selfThrow("prod(A,x,y) error: y (output) must be a dense vector.");
 
           if (numA == 1)
-            noalias(*y.dense()) += ublas::prod(*A.dense(), *x.dense());
+            noalias(y.dense()) += ublas::prod(*A.dense(), x.dense());
           else if (numA == 2)
-            noalias(*y.dense()) += ublas::prod(*A.triang(), *x.dense());
+            noalias(y.dense()) += ublas::prod(*A.triang(), x.dense());
           else if (numA == 3)
-            noalias(*y.dense()) += ublas::prod(*A.sym(), *x.dense());
+            noalias(y.dense()) += ublas::prod(*A.sym(), x.dense());
           else if (numA == 4)
-            noalias(*y.dense()) += ublas::prod(*A.sparse(), *x.dense());
+            noalias(y.dense()) += ublas::prod(*A.sparse(), x.dense());
           else //if(numA==5)
-            noalias(*y.dense()) += ublas::prod(*A.banded(), *x.dense());
+            noalias(y.dense()) += ublas::prod(*A.banded(), x.dense());
         }
         else //if(numX == 4)
         {
@@ -627,20 +627,20 @@ void prod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, bool
             SiconosMatrixException::selfThrow("prod(A,x,y) error: y (output) must be a dense vector.");
 
           if (numA == 1)
-            noalias(*y.dense()) += ublas::prod(*A.dense(), *x.sparse());
+            noalias(y.dense()) += ublas::prod(*A.dense(), x.sparse());
           else if (numA == 2)
-            noalias(*y.dense()) += ublas::prod(*A.triang(), *x.sparse());
+            noalias(y.dense()) += ublas::prod(*A.triang(), x.sparse());
           else if (numA == 3)
-            noalias(*y.dense()) += ublas::prod(*A.sym(), *x.sparse());
+            noalias(y.dense()) += ublas::prod(*A.sym(), x.sparse());
           else if (numA == 4)
           {
             if (numY == 1)
-              noalias(*y.dense()) += ublas::prod(*A.sparse(), *x.sparse());
+              noalias(y.dense()) += ublas::prod(*A.sparse(), x.sparse());
             else
-              noalias(*y.sparse()) += ublas::prod(*A.sparse(), *x.sparse());
+              noalias(y.sparse()) += ublas::prod(*A.sparse(), x.sparse());
           }
           else //if(numA==5)
-            noalias(*y.dense()) += ublas::prod(*A.banded(), *x.sparse());
+            noalias(y.dense()) += ublas::prod(*A.banded(), x.sparse());
         }
       }
       else // if x and y are the same object => alias
@@ -648,28 +648,28 @@ void prod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, bool
         if (numX == 1)
         {
           if (numA == 1)
-            *y.dense() += ublas::prod(*A.dense(), *x.dense());
+            y.dense() += ublas::prod(*A.dense(), x.dense());
           else if (numA == 2)
-            *y.dense() += ublas::prod(*A.triang(), *x.dense());
+            y.dense() += ublas::prod(*A.triang(), x.dense());
           else if (numA == 3)
-            *y.dense() += ublas::prod(*A.sym(), *x.dense());
+            y.dense() += ublas::prod(*A.sym(), x.dense());
           else if (numA == 4)
-            *y.dense() += ublas::prod(*A.sparse(), *x.dense());
+            y.dense() += ublas::prod(*A.sparse(), x.dense());
           else //if(numA==5)
-            *y.dense() += ublas::prod(*A.banded(), *x.dense());
+            y.dense() += ublas::prod(*A.banded(), x.dense());
         }
         else //if(numX == 4)
         {
           if (numA == 1)
-            *y.sparse() += ublas::prod(*A.dense(), *x.sparse());
+            y.sparse() += ublas::prod(*A.dense(), x.sparse());
           else if (numA == 2)
-            *y.sparse() += ublas::prod(*A.triang(), *x.sparse());
+            y.sparse() += ublas::prod(*A.triang(), x.sparse());
           else if (numA == 3)
-            *y.sparse() += ublas::prod(*A.sym(), *x.sparse());
+            y.sparse() += ublas::prod(*A.sym(), x.sparse());
           else if (numA == 4)
-            *y.sparse() += ublas::prod(*A.sparse(), *x.sparse());
+            y.sparse() += ublas::prod(*A.sparse(), x.sparse());
           else //if(numA==5)
-            *y.sparse() += ublas::prod(*A.banded(), *x.sparse());
+            y.sparse() += ublas::prod(*A.banded(), x.sparse());
         }
       }
     }
@@ -723,15 +723,15 @@ void axpy_prod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y,
               SiconosMatrixException::selfThrow("prod(A,x,y) error: y (output) must be a dense vector.");
 
             if (numA == 1)
-              ublas::axpy_prod(*A.dense(), *x.dense(), *y.dense(), init);
+              ublas::axpy_prod(*A.dense(), x.dense(), y.dense(), init);
             else if (numA == 2)
-              ublas::axpy_prod(*A.triang(), *x.dense(), *y.dense(), init);
+              ublas::axpy_prod(*A.triang(), x.dense(), y.dense(), init);
             else if (numA == 3)
-              ublas::axpy_prod(*A.sym(), *x.dense(), *y.dense(), init);
+              ublas::axpy_prod(*A.sym(), x.dense(), y.dense(), init);
             else if (numA == 4)
-              ublas::axpy_prod(*A.sparse(), *x.dense(), *y.dense(), init);
+              ublas::axpy_prod(*A.sparse(), x.dense(), y.dense(), init);
             else //if(numA==5)
-              ublas::axpy_prod(*A.banded(), *x.dense(), *y.dense(), init);
+              ublas::axpy_prod(*A.banded(), x.dense(), y.dense(), init);
           }
           else //if(numX == 4)
           {
@@ -739,20 +739,20 @@ void axpy_prod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y,
               SiconosMatrixException::selfThrow("axpy_prod(A,x,y) error: y (output) must be a dense vector.");
 
             if (numA == 1)
-              ublas::axpy_prod(*A.dense(), *x.sparse(), *y.dense(), init);
+              ublas::axpy_prod(*A.dense(), x.sparse(), y.dense(), init);
             else if (numA == 2)
-              ublas::axpy_prod(*A.triang(), *x.sparse(), *y.dense(), init);
+              ublas::axpy_prod(*A.triang(), x.sparse(), y.dense(), init);
             else if (numA == 3)
-              ublas::axpy_prod(*A.sym(), *x.sparse(), *y.dense(), init);
+              ublas::axpy_prod(*A.sym(), x.sparse(), y.dense(), init);
             else if (numA == 4)
             {
               if (numY == 1)
-                ublas::axpy_prod(*A.sparse(), *x.sparse(), *y.dense(), init);
+                ublas::axpy_prod(*A.sparse(), x.sparse(), y.dense(), init);
               else
-                ublas::axpy_prod(*A.sparse(), *x.sparse(), *y.sparse(), init);
+                ublas::axpy_prod(*A.sparse(), x.sparse(), y.sparse(), init);
             }
             else //if(numA==5)
-              ublas::axpy_prod(*A.banded(), *x.sparse(), *y.dense(), init);
+              ublas::axpy_prod(*A.banded(), x.sparse(), y.dense(), init);
           }
         }
         else // if x and y are the same object => alias
@@ -760,28 +760,28 @@ void axpy_prod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y,
           if (numX == 1)
           {
             if (numA == 1)
-              ublas::axpy_prod(*A.dense(), *x.dense(), *x.dense(), init);
+              ublas::axpy_prod(*A.dense(), x.dense(), x.dense(), init);
             else if (numA == 2)
-              ublas::axpy_prod(*A.triang(), *x.dense(), *x.dense(), init);
+              ublas::axpy_prod(*A.triang(), x.dense(), x.dense(), init);
             else if (numA == 3)
-              ublas::axpy_prod(*A.sym(), *x.dense(), *x.dense(), init);
+              ublas::axpy_prod(*A.sym(), x.dense(), x.dense(), init);
             else if (numA == 4)
-              ublas::axpy_prod(*A.sparse(), *x.dense(), *x.dense(), init);
+              ublas::axpy_prod(*A.sparse(), x.dense(), x.dense(), init);
             else //if(numA==5)
-              ublas::axpy_prod(*A.banded(), *x.dense(), *x.dense(), init);
+              ublas::axpy_prod(*A.banded(), x.dense(), x.dense(), init);
           }
           else //if(numX == 4)
           {
             if (numA == 1)
-              ublas::axpy_prod(*A.dense(), *x.sparse(), *x.sparse(), init);
+              ublas::axpy_prod(*A.dense(), x.sparse(), x.sparse(), init);
             else if (numA == 2)
-              ublas::axpy_prod(*A.triang(), *x.sparse(), *x.sparse(), init);
+              ublas::axpy_prod(*A.triang(), x.sparse(), x.sparse(), init);
             else if (numA == 3)
-              ublas::axpy_prod(*A.sym(), *x.sparse(), *x.sparse(), init);
+              ublas::axpy_prod(*A.sym(), x.sparse(), x.sparse(), init);
             else if (numA == 4)
-              ublas::axpy_prod(*A.sparse(), *x.sparse(), *x.sparse(), init);
+              ublas::axpy_prod(*A.sparse(), x.sparse(), x.sparse(), init);
             else //if(numA==5)
-              ublas::axpy_prod(*A.banded(), *x.sparse(), *x.sparse(), init);
+              ublas::axpy_prod(*A.banded(), x.sparse(), x.sparse(), init);
           }
         }
       }
@@ -801,7 +801,7 @@ void gemvtranspose(double a, const SiconosMatrix& A, const SiconosVector& x, dou
   if (numA != 1 || numX != 1 || numY != 1)
     SiconosMatrixException::selfThrow("gemv(...) failed: reserved to dense matrices or vectors.");
 
-  siconosBindings::blas::gemv(a, siconosBindings::trans(*A.dense()), *x.dense(), b, *y.dense());
+  siconosBindings::blas::gemv(a, siconosBindings::trans(*A.dense()), x.dense(), b, y.dense());
 }
 
 void gemv(double a, const SiconosMatrix& A, const SiconosVector& x, double b, SiconosVector& y)
@@ -816,5 +816,5 @@ void gemv(double a, const SiconosMatrix& A, const SiconosVector& x, double b, Si
   if (numA != 1 || numX != 1 || numY != 1)
     SiconosMatrixException::selfThrow("gemv(...) failed: reserved to dense matrices or vectors.");
 
-  siconosBindings::blas::gemv(a, *A.dense(), *x.dense(), b, *y.dense());
+  siconosBindings::blas::gemv(a, *A.dense(), x.dense(), b, y.dense());
 }

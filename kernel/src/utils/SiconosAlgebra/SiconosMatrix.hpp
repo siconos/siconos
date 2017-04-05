@@ -26,6 +26,7 @@
 
 #include "SiconosAlgebraTypeDef.hpp"
 #include "SiconosMatrixException.hpp"
+#include "SiconosVisitor.hpp"
 
 /** Union of DenseMat pointer, TriangMat pointer BandedMat, SparseMat, SymMat, Zero and Identity mat pointers.
  */

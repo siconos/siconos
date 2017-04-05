@@ -19,8 +19,9 @@
 #include "SiconosConfig.h"
 
 #include "SiconosAlgebraTypeDef.hpp"
+#include "SiconosVectorStorage.hpp"
 
-#include <boost/numeric/ublas/io.hpp>            // for >> 
+#include <boost/numeric/ublas/io.hpp>            // for >>
 //#include <boost/numeric/ublas/vector_proxy.hpp>  // for project
 #include <boost/numeric/ublas/vector_sparse.hpp>
 
@@ -31,91 +32,928 @@
 #include <boost/numeric/bindings/std/vector.hpp>
 namespace siconosBindings = boost::numeric::bindings::blas;
 
-#include "SimpleMatrix.hpp"
-#include "BlockVector.hpp"
+class SimpleMatrix;
+
 #include "ioVector.hpp"
 #include "SiconosVector.hpp"
 #include "SiconosAlgebra.hpp"
-
+#include "BlockVector.hpp"
 //#define DEBUG_MESSAGES
 #include "debug.h"
 
-// Do not document
-/// @cond
-#include "Question.hpp"
+#include <boost/move/unique_ptr.hpp>
 
-struct IsDense : public Question<bool>
+#include <boost/tuple/tuple.hpp>
+
+#undef VISITOR_CLASSES
+#define VISITOR_CLASSES() \
+  REGISTER(DenseVectStorage) \
+  REGISTER(SparseVectStorage)
+
+#include <VisitorMaker.hpp>
+
+#include <iostream>
+#include <typeinfo>
+
+using namespace Experimental;
+
+
+template<typename P1, typename P2=empty, typename P3=empty, typename P4=empty>
+struct ParamVisitor : public SiconosVisitor
 {
-  using SiconosVisitor::visit;
+  const boost::tuple<const P1&, const P2&, const P3&, const P4&> _param;
+  typedef const boost::tuple<const P1&, const P2&, const P3&, const P4&> arguments_type;
 
-  void visit(const SiconosVector& v)
-  {
-    answer = v._dense;
-  }
+  ParamVisitor(const arguments_type& args) : _param(args) {};
 
-  void visit(const BlockVector& v)
+  virtual ~ParamVisitor() {};
+
+  const P1& param1() const { return boost::get<0>(_param); };
+  const P2& param2() const { return boost::get<1>(_param); };
+  const P3& param3() const { return boost::get<2>(_param); };
+  const P4& param4() const { return boost::get<3>(_param); };
+};
+
+
+template<>
+struct ParamVisitor<empty, empty, empty, empty> : public SiconosVisitor
+{
+  virtual ~ParamVisitor() {};
+};
+
+template<typename P>
+struct ParamVisitor<P, empty, empty, empty> : public SiconosVisitor
+{
+  typedef const P arguments_type;
+  const arguments_type& _param;
+
+  ParamVisitor(const arguments_type& a) : _param(a) {};
+
+  virtual ~ParamVisitor() {};
+
+  const P& param() const { return _param; };
+  const P& param1() const { return _param; };
+};
+
+template<typename P1, typename P2>
+struct ParamVisitor<P1, P2, empty, empty> : public SiconosVisitor
+{
+  typedef boost::tuple<const P1&, const P2&> arguments_type;
+  const arguments_type& _param;
+
+  ParamVisitor(const arguments_type& args) : _param(args) {};
+
+  virtual ~ParamVisitor() {};
+
+  const P1& param1() const { return boost::get<0>(_param); };
+  const P2& param2() const { return boost::get<1>(_param); };
+
+};
+
+template<typename P1, typename P2, typename P3>
+struct ParamVisitor<P1, P2, P3, empty> : public SiconosVisitor
+{
+  typedef boost::tuple<const P1&, const P2&, const P3&> arguments_type;
+  const arguments_type& _param;
+
+  ParamVisitor(const arguments_type& args) : _param(args) {};
+
+  virtual ~ParamVisitor() {};
+
+  const P1& param1() const { return boost::get<0>(_param); };
+  const P2& param2() const { return boost::get<1>(_param); };
+  const P3& param3() const { return boost::get<2>(_param); };
+
+};
+
+template<typename C, typename P1, typename P2=empty, typename P3=empty>
+struct ParamModifier : public SiconosVisitor
+{
+  typedef boost::tuple<const P1&, const P2&, const P3&, C&> arguments_type;
+  arguments_type& _param;
+
+  ParamModifier(arguments_type& args) : _param(args) {};
+
+  virtual ~ParamModifier() {};
+
+  C& modifiable() { return boost::get<3>(_param); };
+  const P1& param1() const { return boost::get<0>(_param); };
+  const P2& param2() const { return boost::get<1>(_param); };
+  const P3& param3() const { return boost::get<2>(_param); };
+};
+
+template<typename C, typename P1, typename P2>
+struct ParamModifier<C, P1, P2, empty> : public SiconosVisitor
+{
+  typedef boost::tuple<const P1&, const P2&, C&> arguments_type;
+  arguments_type& _param;
+
+  ParamModifier(arguments_type& args) : _param(args) {};
+
+  virtual ~ParamModifier() {};
+
+  C& modifiable() { return boost::get<2>(_param); };
+  const P1& param1() const { return boost::get<0>(_param); };
+  const P2& param2() const { return boost::get<1>(_param); };
+};
+
+template<typename C, typename P1>
+struct ParamModifier<C, P1, empty, empty> : public SiconosVisitor
+{
+  typedef boost::tuple<const P1&, C&> arguments_type;
+  arguments_type& _param;
+
+  ParamModifier(arguments_type& args) : _param(args) {};
+
+  virtual ~ParamModifier() {};
+
+  C& modifiable() { return boost::get<1>(_param); };
+  const P1& param1() const { return boost::get<0>(_param); };
+};
+
+
+
+template<typename C>
+struct Modifier : public SiconosVisitor
+{
+  typedef C arguments_type;
+  arguments_type& _param;
+
+  Modifier(arguments_type& object) : _param(object) {};
+  arguments_type& modifiable() { return _param; };
+
+  virtual ~Modifier() {};
+};
+
+#undef REGISTER
+#define REGISTER(X) X,
+template <typename V, typename P=empty>
+struct make_visitor : public Visitor<Classes< VISITOR_CLASSES() empty>, V>::Make
+{
+
+  typedef typename Visitor<Classes< VISITOR_CLASSES() empty>, V>::Make base_type;
+
+  make_visitor()  {};
+
+  make_visitor(const typename base_type::arguments_type& args) :
+    base_type(const_cast<typename base_type::arguments_type&>(args)) {};
+
+};
+
+template<typename V, typename T>
+void apply_visitor(T& obj)
+{
+  make_visitor<V> visitor = make_visitor<V>();
+  obj.accept(visitor);
+};
+
+template<typename V, typename T, typename P>
+void apply_visitor(T& obj, const P& param)
+{
+  const typename make_visitor<V, P>::arguments_type args = typename make_visitor<V, P>::arguments_type(param);
+  make_visitor<V, P> visitor(args);
+  obj.accept(visitor);
+};
+
+template<typename V, typename T>
+void apply_visitor(T& obj, unsigned int param)
+{
+  make_visitor<V, unsigned int> visitor(param);
+  obj.accept(visitor);
+};
+
+template<typename V, typename T, typename P1, typename P2>
+void apply_visitor(T& obj, const P1& param1, const P2& param2)
+{
+  typedef typename V::arguments_type P;
+  const typename make_visitor<V, P>::arguments_type args = typename make_visitor<V, P>::arguments_type(param1, param2);
+  make_visitor<V, P> visitor(args);
+  obj.accept(visitor);
+};
+
+template<typename V, typename T, typename P1, typename P2, typename P3>
+void apply_visitor(T& obj, const P1& param1, const P2& param2, const P3& param3)
+{
+  typedef typename V::arguments_type P;
+  typename make_visitor<V, P>::arguments_type args = typename make_visitor<V, P>::arguments_type(param1, param2, param3);
+  make_visitor<V, P> visitor(args);
+  obj.accept(visitor);
+};
+
+template<typename V, typename T, typename P1, typename P2, typename P3, typename P4>
+void apply_visitor(T& obj, const P1& param1, const P2& param2, const P3& param3, const P4& param4)
+{
+  typedef typename V::arguments_type P;
+  typename make_visitor<V, P>::arguments_type args = typename make_visitor<V, P>::arguments_type(param1, param2, param3, param4);
+  make_visitor<V, P> visitor(args);
+  obj.accept(visitor);
+};
+
+template<typename V, typename R, typename T>
+R apply_visitor(T& obj)
+{
+  make_visitor<V> visitor;
+  obj.accept(visitor);
+  return visitor.answer;
+};
+
+template<typename V, typename R, typename P, typename T>
+R apply_visitor(T& obj, const P& param)
+{
+  make_visitor<V, P> visitor(param);
+  obj.accept(visitor);
+  return visitor.answer;
+};
+
+template<typename V, typename R, typename T>
+R apply_visitor(T& obj, unsigned int& param)
+{
+  make_visitor<V, unsigned int> visitor(param);
+  obj.accept(visitor);
+  return visitor.answer;
+};
+
+
+/* modifiers equivalents */
+template <typename V>
+struct make_modifier : public Visitor<Classes< VISITOR_CLASSES() empty>, V>::Make
+{
+
+  typedef typename Visitor<Classes< VISITOR_CLASSES() empty>, V>::Make base_type;
+  typedef typename base_type::arguments_type arguments_type;
+
+  make_modifier(arguments_type& p) :
+    base_type(p) {};
+
+};
+
+
+template<typename V, typename P>
+typename Visitor<Classes< VISITOR_CLASSES() empty>, V>::Make xmake_modifier(typename Visitor<Classes< VISITOR_CLASSES() empty>, V>::Make::arguments_type& p) { return typename Visitor<Classes< VISITOR_CLASSES() empty>, V>::Make(p);};
+
+
+
+template<typename V, typename T>
+void apply_modifier(T& obj)
+{
+  make_modifier<V> modifier = make_modifier<V>();
+  obj.accept(modifier);
+};
+
+template<typename V, typename T, typename P>
+void apply_modifier(T& obj, P& param)
+{
+  typename make_modifier<V>::arguments_type args = typename make_modifier<V>::arguments_type(param);
+  make_modifier<V> modifier = make_modifier<V>(args);
+  obj.accept(modifier);
+};
+
+template<typename V, typename T, typename P1, typename P2>
+void apply_modifier(T& obj, const P1& param1, P2& param2)
+{
+  typename make_modifier<V>::arguments_type args = typename make_modifier<V>::arguments_type(param1, param2);
+  make_modifier<V> modifier(args);
+  obj.accept(modifier);
+};
+
+template<typename V, typename T, typename P1, typename P2, typename P3>
+void apply_modifier(T& obj, const P1& param1, const P2& param2, P3& param3)
+{
+  typedef boost::tuple<const P1&, const P2&, P3&> P;
+  make_modifier<V> modifier(P(param1, param2, param3));
+  obj.accept(modifier);
+};
+
+template<typename V, typename T, typename P1, typename P2, typename P3, typename P4>
+void apply_modifier(T& obj, const P1& param1, const P2& param2, const P3& param3, P4& param4)
+{
+  typedef boost::tuple<const P1&, const P2&, const P3&, P4&> P;
+  make_modifier<V> modifier(P(param1, param2, param3, param4));
+  obj.accept(modifier);
+};
+
+template<typename V, typename R, typename T>
+R apply_modifier(T& obj)
+{
+  make_modifier<V> modifier;
+  obj.accept(modifier);
+  return modifier.answer;
+};
+
+template<typename V, typename R, typename P, typename T>
+R apply_modifier(T& obj, const P& param)
+{
+  make_modifier<V> modifier(param);
+  obj.accept(modifier);
+  return modifier.answer;
+};
+/* --- */
+
+
+struct Resize : public ParamVisitor<size_t>
+{
+
+  Resize(size_t size) : ParamVisitor(size) {};
+
+  template<typename T>
+  void operator() (T& v)
   {
-    answer = false;
+    return v.internal_data.resize(this->param());
+  };
+};
+
+struct Fill : public ParamVisitor<const double>
+{
+
+  Fill(const double& value) : ParamVisitor(value) {};
+
+  template<typename T>
+  void operator() (T& v)
+  {
+    for (unsigned int i = 0; i < v.internal_data.size(); ++i)
+    {
+      v.internal_data[i] = this->param();
+    }
   }
 };
 
-struct IsSparse : public Question<bool>
-{
-
-  using SiconosVisitor::visit;
-
-  void visit(const SiconosVector& v)
+template<>
+void Fill::operator()<DenseVect> (DenseVect& v)
   {
-    answer = !v._dense;
+    bindings::set(this->param(), v);
   }
 
-  void visit(const BlockVector& v)
+struct Size : public SiconosVisitor
+{
+  size_t answer;
+  template<typename T>
+  void operator() (const T& v)
   {
-    answer = false;
+    answer = v.internal_data.size();
+  };
+};
+
+struct Zero : public SiconosVisitor
+{
+  template<typename T>
+  void operator () (T& storage)
+  {
+    storage.internal_data *= 0.;
   }
 };
 
-struct IsBlock : public Question<bool>
+template<>
+void Zero::operator()<DenseVectStorage> (DenseVectStorage& dv)
 {
-  using SiconosVisitor::visit;
+  siconosBindings::scal(0.0, dv.internal_data);
+};
 
-  void visit(const SiconosVector& v)
-  {
-    answer = false;
-  }
+struct NormInf : public SiconosVisitor
+{
+  double answer;
 
-  void visit(const BlockVector& v)
+  template<typename T>
+  void operator () (const T& storage)
   {
-    answer = true;
+    answer = norm_inf(storage.internal_data);
+  };
+};
+
+struct Norm2 : public SiconosVisitor
+{
+  double answer;
+
+  template<typename T>
+  void operator () (const T& storage)
+  {
+    answer = ublas::norm_2(storage.internal_data);
+  };
+};
+
+struct Sum : public SiconosVisitor
+{
+  double answer;
+
+  template<typename T>
+  void operator () (const T& storage)
+  {
+    answer = sum(storage.internal_data);
+  };
+};
+
+struct Display : public ParamVisitor<unsigned int>
+{
+
+  Display(unsigned int precision) : ParamVisitor(precision) {};
+
+  template<typename T>
+  void operator () (const T& storage)
+  {
+    std::cout.setf(std::ios::scientific);
+    std::cout.precision(this->param());
+    std::cout << storage.internal_data << std::endl;
+  };
+};
+
+struct ToString : public SiconosVisitor
+{
+
+  std::stringstream sstr;
+  std::string answer;
+
+  template<typename T>
+  void operator() (const T& storage)
+  {
+    sstr << storage.internal_data;
+    sstr >> answer;
+    answer = answer.substr(4, answer.size() - 5); // Remove "[size](" at the beginning of the std::string
+    std::string::size_type pos;
+    while ((pos = answer.find(",")) != std::string::npos) // Replace "," by " " in the std::string
+      answer[pos] = ' ';
   }
 };
 
-/// @endcond
+struct GetValue : public ParamVisitor<unsigned int>
+{
+  double answer;
 
+  GetValue(unsigned int param) : ParamVisitor(param) {};
+
+  template<typename T>
+  void operator() (const T& storage)
+  {
+    answer = storage.internal_data(this->param());
+  };
+};
+
+struct GetRValue : public ParamVisitor<unsigned int>
+{
+  double* answer;
+
+  GetRValue(unsigned int param) : ParamVisitor(param) {};
+
+  template<typename T>
+  void operator() (const T& storage)
+  {
+    answer = &(storage.internal_data(this->param()));
+  };
+
+
+};
+
+template<>
+void GetRValue::operator()<SparseVectStorage> (const SparseVectStorage& storage)
+{
+//  answer = (&(storage.internal_data(this->param()).ref()));
+}
+
+struct SetValue : public ParamVisitor<unsigned int, double>
+{
+
+  typedef ParamVisitor<unsigned int, double> base_type;
+  SetValue(const base_type::arguments_type& args) :
+    base_type(args) {};
+
+  template<typename T>
+  void operator() (T& storage) const
+  {
+    storage.internal_data(this->param1()) = this->param2();
+  };
+};
+
+struct SetBlock : public ParamVisitor<unsigned int, SiconosVector>
+{
+  typedef ParamVisitor<unsigned int, SiconosVector> base_type;
+
+  SetBlock(const base_type::arguments_type& args) : base_type(args) {};
+
+  template<typename T>
+  void operator() (T& storage)
+  {
+    unsigned int index = this->param1();
+    const SiconosVector& vIn = this->param2();
+
+    if (index >= vIn.size() || index >= storage.internal_data.size())
+    {
+      SiconosVectorException::selfThrow("SiconosVector::setBlock : index ouf of range");
+    }
+
+    unsigned int end = vIn.size() + index;
+    if (end > storage.internal_data.size())
+    {
+      SiconosVectorException::selfThrow("SiconosVector::setBlock : invalid ranges");
+    }
+
+    noalias(ublas::subrange(storage.internal_data, index, end)) = vIn.dense();
+
+  };
+};
+
+/* idem copy, visitor for both parameters */
+template <typename C>
+struct IToBlock : public ParamVisitor<C, unsigned int, unsigned int, unsigned int>
+{
+  template <typename T>
+  void operator() (T& storage)
+  {
+
+    C& vOut = * this->param1();
+    unsigned int sizeB = this->param2();
+    unsigned int startIn = this->param3();
+    unsigned int startOut = this->param4();
+
+    // To copy a subBlock of the vector (from position startIn to startIn+sizeB) into vOut (from pos. startOut to startOut+sizeB).
+    // Check dim ...
+    assert(startIn < storage.internal_data.size() && "vector toBlock(v1,v2,...): start position in input vector is out of range.");
+
+    assert(startOut < vOut.size() && "vector toBlock(v1,v2,...): start position in output vector is out of range.");
+
+    assert(startIn + sizeB <= storage.internal_data.size() && "vector toBlock(v1,v2,...): end position in input vector is out of range.");
+    assert(startOut + sizeB <= vOut.size() && "vector toBlock(v1,v2,...): end position in output vector is out of range.");
+
+    unsigned int endOut = startOut + sizeB;
+
+    noalias(ublas::subrange(vOut, startOut, endOut)) = ublas::subrange(storage.internal_data, startIn, startIn + sizeB);
+  };
+};
+
+
+struct ToBlock : public ParamVisitor<SiconosVectorStorage, unsigned int, unsigned int, unsigned int>
+{
+  template<typename T>
+  void operator() (T& storage)
+  {
+    apply_visitor<IToBlock<T> >(this->param1(), this->param2(), this->param3(), this->param4());
+  };
+};
+
+struct Scal : public ParamVisitor<double>
+{
+
+  Scal(const double& value) : ParamVisitor(value) {};
+
+  template<typename T>
+  void operator() (T& storage)
+  {
+    storage.internal_data *= this->param();
+  };
+};
+
+template<>
+void Scal::operator()<DenseVectStorage> (DenseVectStorage& dv)
+{
+  siconosBindings::scal(this->param(), dv.internal_data);
+};
+
+
+template<typename C>
+struct IDot : public ParamVisitor<C>
+{
+
+  double answer;
+
+  IDot(const C& p) : ParamVisitor<C>(p) {};
+
+  template<typename T>
+  void operator() (const T& storage)
+  {
+    answer = inner_prod(this->param1().internal_data, storage.internal_data);
+  };
+};
+
+double inner_prod(DenseVect& v1, DenseVect& v2)
+{
+  return siconosBindings::dot(v1, v2);
+}
+
+struct Dot : public ParamVisitor<SiconosVectorStorage>
+{
+
+  double answer;
+
+  Dot(const SiconosVectorStorage& st) : ParamVisitor(st) {};
+
+  template<typename T>
+  void operator() (const T& storage)
+  {
+    /* const_cast : VisitorMaker makes visitors on non const references */
+    answer = apply_visitor<IDot<T>, double>(const_cast<SiconosVectorStorage&>(this->param()), storage);
+  };
+};
+
+template<typename OP, typename S, typename P1=empty, typename P2=empty, typename P3=empty>
+struct InternBiOp : public ParamModifier<S, P1, P2, P3>
+{
+  typedef ParamModifier<S, P1, P2, P3> base_type;
+
+  InternBiOp(typename base_type::arguments_type& p) : base_type(p) {};
+
+  template<typename T>
+    void operator() (const T& storage)
+  {
+    static OP op;
+    op(this->param1(), this->param2(), this->param3(), storage.internal_data, this->modifiable());
+  };
+
+};
+
+
+template<typename OP, typename S>
+struct InternBiOp<OP, S, empty, empty, empty> : public Modifier<S>
+{
+  typedef Modifier<S> base_type;
+
+  InternBiOp(typename base_type::arguments_type& p) : base_type(p) {};
+
+  template<typename T>
+    void operator() (T& storage)
+  {
+    /* OP modify last argument */
+    static OP op;
+    op(storage.internal_data, this->modifiable());
+  };
+
+};
+
+template<typename OP, typename S, typename P1>
+struct InternBiOp<OP, S, P1, empty, empty> : public ParamModifier<S, P1>
+{
+  typedef ParamModifier<S, P1> base_type;
+
+  InternBiOp(typename base_type::arguments_type& p) : base_type(p) {};
+
+  template<typename T>
+    void operator() (T& storage)
+  {
+    static OP op;
+    op(this->param1(), storage.internal_data, this->modifiable());
+  };
+
+};
+
+
+template<typename OP, typename S, typename P1, typename P2>
+struct InternBiOp<OP, S, P1, P2, empty> : public ParamModifier<S, P1, P2>
+{
+  typedef ParamModifier<S, P1, P2> base_type;
+
+  InternBiOp(typename base_type::arguments_type& p) : base_type(p) {};
+
+  template<typename T>
+    void operator() (T& storage)
+  {
+    OP(this->param1(), this->param2(), storage.internal_data, this->modifiable());
+  };
+
+};
+
+
+
+
+
+/* double pass visitors:
+   - store arguments in param
+   - visit arg1 and apply internal visitor with visited arg1 as param on param
+*/
+template<typename OP, typename P1=empty, typename P2=empty>
+struct BiOperator : public ParamModifier<SiconosVectorStorage, P1, P2>
+{
+
+  typedef ParamModifier<SiconosVectorStorage, P1, P2> base_type;
+  BiOperator(typename base_type::arguments_type& st) : base_type(st) {};
+
+  template<typename T>
+  void operator() (T& storage)
+  {
+    apply_modifier<InternBiOp<OP, T> >(storage, this->param1(), this->param2(), this->modifiable());
+  };
+};
+
+
+template<typename OP>
+struct BiOperator<OP, empty, empty> : public Modifier<SiconosVectorStorage>
+{
+  typedef Modifier<SiconosVectorStorage> base_type;
+
+  /* the storage that is going to be modified is first kept in an argument */
+  BiOperator(typename base_type::arguments_type& st) : base_type(st) {};
+
+  template<typename T>
+  void operator() (T& storage)
+  {
+    /* visit and modify param which is unknown at this level */
+    apply_modifier<InternBiOp<OP, typename T::storage_type> >(this->modifiable(), storage.internal_data);
+  };
+};
+
+template<typename OP, typename P1>
+struct BiOperator<OP, P1, empty> : public ParamModifier<SiconosVectorStorage, P1>
+{
+  typedef ParamModifier<SiconosVectorStorage, P1> base_type;
+
+  BiOperator(typename base_type::arguments_type& st) : base_type(st) {};
+
+  template<typename T>
+  void operator() (T& storage)
+  {
+    apply_modifier<InternBiOp<OP, typename T::storage_type, P1> >(this->modifiable(), this->param1(), storage.internal_data);
+  };
+};
+
+
+
+
+struct OpPlus
+{
+  template<typename T1, typename T2>
+  void operator()(const T2& y, T1& x)
+  {
+    x += y;
+  }
+};
+
+struct OpMinus
+{
+  template<typename T1, typename T2>
+  void operator()(const T2& y, T1& x)
+  {
+    x -= y;
+  }
+};
+
+struct OpCopy
+{
+  template<typename T1, typename T2>
+  void operator()(const T2& y, T1& x)
+  {
+    x.resize(y.size());
+    x = y;
+  };
+};
+
+template<>
+void OpCopy::operator()(const DenseVectStorage& dv2, DenseVectStorage& dv1)
+{
+  dv1.internal_data.resize(dv2.internal_data.size());
+  siconosBindings::copy(dv2.internal_data, dv1.internal_data);
+}
+
+struct OpAxpy
+{
+  template<typename T1, typename T2>
+  void operator()(const double& param, const T2& x, T1& y)
+  {
+    T2 tmp = param*x;
+    y += tmp;
+  }
+};
+
+
+
+struct OpAddBlock
+{
+  template<typename T1, typename T2>
+  void operator() (unsigned int param1, const T1& storage1, T2& storage2)
+  {
+    unsigned int index = param1;
+    unsigned int end = storage2.size();
+    if ((index + end) > storage1.size())
+    {
+      SiconosVectorException::selfThrow("SiconosVector::addBlock : invalid ranges");
+    }
+
+    noalias(ublas::subrange(storage2, index, index + end)) += storage1;
+  };
+};
+
+struct OpSubBlock
+{
+  template<typename T1, typename T2>
+  void operator() (unsigned int param1, const T1& storage1, T2& storage2)
+  {
+    unsigned int index = param1;
+    unsigned int end = storage2.size();
+    if ((index + end) > storage1.size())
+    {
+      SiconosVectorException::selfThrow("SiconosVector::subBlock : invalid ranges");
+    }
+
+    noalias(ublas::subrange(storage2, index, index + end)) -= storage1;
+  };
+};
+
+struct OpSubscal
+{
+  template<typename T1, typename T2>
+  void operator() (const double& param1, const Index& param2, bool param3, const T1& storage1, T2& storage2)
+  {
+    const double& a = param1;
+    Index& coord = param2;
+    bool init = param3;
+
+    unsigned int dimX = coord[1] - coord[0];
+    unsigned int dimY = coord[3] - coord[2];
+
+    typename T1::type& x = storage1;
+    typename T2::type& y = storage2;
+
+    if (dimY != dimX)
+    {
+      SiconosVectorException::selfThrow("subscal(a,x,y,...) error: inconsistent sizes between (sub)x and (sub)y.");
+    }
+    if (dimY > y.size() || dimX > x.size())
+    {
+      SiconosVectorException::selfThrow("subscal(a,x,y,...) error: input index too large.");
+    }
+    if(&x == &y)
+    {
+      ublas::vector_range<typename T2::type> subY(y, ublas::range(coord[2], coord[3]));
+      if (coord[0] == coord[2])
+      {
+        if (init)
+          subY *= a;
+        else
+          subY *= (1.0 + a);
+      }
+      else
+      {
+        ublas::vector_range<typename T1::type> subX(x, ublas::range(coord[0], coord[1]));
+        if (init)
+          subY = a * subX;
+        else
+          subY += a * subX;
+      }
+    }
+    else
+    {
+      ublas::vector_range<typename T1::type> subX(x, ublas::range(coord[0], coord[1]));
+      ublas::vector_range<typename T2::type> subY(y, ublas::range(coord[2], coord[3]));
+      if (init)
+      {
+        noalias(subY) = a * subX;
+      }
+      else
+      {
+        noalias(subY) += a * subX;
+      }
+    }
+  }
+};
+
+
+struct Plus : public BiOperator<OpPlus>
+{
+  typedef BiOperator<OpPlus> base_type;
+  Plus(base_type::arguments_type& args) : base_type(args) {};
+};
+struct Minus : public BiOperator<OpMinus>
+{
+  typedef BiOperator<OpMinus> base_type;
+  Minus(base_type::arguments_type& args) : base_type(args) {};
+};
+struct Copy : public BiOperator<OpCopy>
+{
+  typedef BiOperator<OpCopy> base_type;
+  Copy(base_type::arguments_type& args) : base_type(args) {};
+};
+struct AddBlock : public BiOperator<OpAddBlock, unsigned int>
+{
+  typedef BiOperator<OpAddBlock, unsigned int> base_type;
+  AddBlock(base_type::arguments_type& args) : base_type(args) {};
+};
+struct SubBlock : public BiOperator<OpSubBlock, unsigned int>
+{
+  typedef BiOperator<OpSubBlock, unsigned int> base_type;
+  SubBlock(base_type::arguments_type& args) : base_type(args) {};
+};
+struct Axpy : public BiOperator<OpAxpy, double>
+{
+  typedef BiOperator<OpAxpy, double> base_type;
+  Axpy(base_type::arguments_type& args) : base_type(args) {};
+};
+//struct Subscal : public BiOperator<OpSubscal, double, const Index, bool>
+//{
+//  typedef BiOperator<OpSubscal, double, const Index, bool> base_type;
+//  Subscal(base_type::arguments_type& args) : base_type(args) {};
+//};
 
 // =================================================
 //                CONSTRUCTORS
 // =================================================
 
 // Default
-SiconosVector::SiconosVector()
-{
-  _dense = true;
-  vect.Dense = new DenseVect(ublas::zero_vector<double>());
-}
+SiconosVector::SiconosVector() : _storage(new DenseVectStorage()) {};
 
 // parameters: dimension and type.
 SiconosVector::SiconosVector(unsigned row, Siconos::UBLAS_TYPE type)
 {
   if (type == Siconos::SPARSE)
   {
-    _dense = false;
-    vect.Sparse = new SparseVect(ublas::zero_vector<double>(row));
+    _storage = new SparseVectStorage(row);
   }
   else if (type == Siconos::DENSE)
   {
-    _dense = true;
-    vect.Dense = new DenseVect(ublas::zero_vector<double>(row));
+    _storage = new DenseVectStorage(row);
   }
   else
   {
@@ -128,14 +966,12 @@ SiconosVector::SiconosVector(unsigned row, double val, Siconos::UBLAS_TYPE type)
 {
   if (type == Siconos::SPARSE)
   {
-    _dense = false;
-    vect.Sparse = new SparseVect(row);
+    _storage = new SparseVectStorage(row);
     fill(val);
   }
   else if (type == Siconos::DENSE)
   {
-    _dense = true;
-    vect.Dense = new DenseVect(ublas::scalar_vector<double>(row, val));
+    _storage = new DenseVectStorage(row, val);
   }
   else
   {
@@ -149,46 +985,35 @@ SiconosVector::SiconosVector(const std::vector<double>& v, Siconos::UBLAS_TYPE t
   if (typ != Siconos::DENSE)
     SiconosVectorException::selfThrow("SiconosVector::constructor(Siconos::UBLAS_TYPE, std::vector<double>, unsigned int) : invalid type given");
 
-  _dense = true;
-  vect.Dense = new DenseVect(v.size());
-  std::copy(v.begin(), v.end(), (vect.Dense)->begin());
+ _storage = new DenseVectStorage(v.size());
+ std::copy(v.begin(), v.end(), static_cast<DenseVectStorage*>(_storage)->internal_data.begin());
 }
 
 // Copy
-SiconosVector::SiconosVector(const SiconosVector &svect) : std11::enable_shared_from_this<SiconosVector>()
+SiconosVector::SiconosVector(const SiconosVector &svect) :
+  std11::enable_shared_from_this<SiconosVector>()
 {
-  if (ask<IsDense>(svect)) // dense
+  if (Type::value(svect.storage()) == Type::SparseVectStorage)
   {
-    _dense = true;
-    vect.Dense = new DenseVect(svect.size());
-    noalias(*vect.Dense) = (*svect.dense());
-    // std::copy((vect.Dense)->begin(), (vect.Dense)->end(), (svect.dense())->begin());
+    _storage = new SparseVectStorage(svect.size());
   }
-  else //sparse
+  else
   {
-    _dense = false;
-    vect.Sparse = new SparseVect(svect.size());
-    noalias(*vect.Sparse) = (*svect.sparse());
-    //std::copy((vect.Sparse)->begin(), (vect.Sparse)->end(), (svect.sparse())->begin());
+    _storage = new DenseVectStorage(svect.size());
   }
-
-  // Note FP: using constructor + noalias = (or std::copy) is more
-  // efficient than a call to ublas::vector copy constructor, this for
-  // large or small vectors.
+  apply_modifier<Copy>(svect.storage(), this->storage());
 }
 
 // Copy from BlockVector
 SiconosVector::SiconosVector(const BlockVector & vIn) : std11::enable_shared_from_this<SiconosVector>()
 {
-  if (ask<IsDense>(**(vIn.begin()))) // dense
+  if (Type::value(**(vIn.begin())) == Type::DenseVectStorage)
   {
-    _dense = true;
-    vect.Dense = new DenseVect(vIn.size());
+    _storage = new DenseVectStorage(vIn.size());
   }
   else
   {
-    _dense = false;
-    vect.Sparse = new SparseVect(vIn.size());
+    _storage = new SparseVectStorage(vIn.size());
   }
 
   VectorOfVectors::const_iterator it;
@@ -203,23 +1028,20 @@ SiconosVector::SiconosVector(const BlockVector & vIn) : std11::enable_shared_fro
 
 SiconosVector::SiconosVector(const DenseVect& m)
 {
-  _dense = true;
-  vect.Dense = new DenseVect(m.size());
-  noalias(*vect.Dense) = m;
+  _storage = new DenseVectStorage(m.size());
+  noalias(this->dense()) = m;
 
 }
 
 SiconosVector::SiconosVector(const SparseVect& m)
 {
-  _dense = false;
-  vect.Sparse = new SparseVect(m.size());
-  noalias(*vect.Sparse) = m;
+  _storage = new SparseVectStorage(m.size());
+  noalias(this->sparse()) = m;
 }
 
 SiconosVector::SiconosVector(const std::string &file, bool ascii)
 {
-  _dense = true;
-  vect.Dense = new DenseVect();
+  _storage = new DenseVectStorage();
   if (ascii)
   {
     ioVector::read(file, *this, ioVector::ASCII_IN);
@@ -233,15 +1055,14 @@ SiconosVector::SiconosVector(const std::string &file, bool ascii)
 SiconosVector::SiconosVector(const SiconosVector& v1, const SiconosVector& v2)
 {
   unsigned int size1 = v1.size();
-  if (ask<IsDense>(v1) && ask<IsDense>(v2))
+
+  if (Type::value(v1.storage()) && Type::value(v2.storage()))
   {
-    _dense = true;
-    vect.Dense = new DenseVect(size1 + v2.size());
+    _storage = new DenseVectStorage(size1 + v2.size());
   }
-  else if (ask<IsSparse>(v1) && ask<IsSparse>(v2))
+  else if (Type::value(v2.storage()) && Type::value(v2.storage()))
   {
-    _dense = false;
-    vect.Sparse = new SparseVect(size1 + v2.size());
+    _storage = new SparseVectStorage(size1 + v2.size());
   }
   else
   {
@@ -253,9 +1074,7 @@ SiconosVector::SiconosVector(const SiconosVector& v1, const SiconosVector& v2)
 
 SiconosVector::~SiconosVector()
 {
-  if (_dense)
-    delete(vect.Dense);
-  else delete(vect.Sparse);
+  if (_storage) delete(_storage);
 }
 
 
@@ -263,37 +1082,48 @@ SiconosVector::~SiconosVector()
 //        get Ublas component (dense or sparse)
 // =================================================
 
-const DenseVect SiconosVector::getDense(unsigned int) const
+unsigned int SiconosVector::num() const
 {
-  if (!_dense)
-    SiconosVectorException::selfThrow("SiconosVector::getDense(unsigned int row, unsigned int col) : the current vector is not a Dense vector");
-
-  return *vect.Dense;
+  if (Type::value(*_storage) == Type::DenseVectStorage)
+  {
+    return 1;
+  }
+  else
+    if (Type::value(*_storage) == Type::SparseVectStorage)
+    {
+      return 4;
+    }
+    else
+    {
+      return 0;
+    }
 }
 
-const SparseVect SiconosVector::getSparse(unsigned int)const
+DenseVect& SiconosVector::dense(unsigned int) const
 {
-
-  if (_dense)
-    SiconosVectorException::selfThrow("SiconosVector::getSparse(unsigned int row, unsigned int col) : the current vector is not a Sparse vector");
-
-  return *vect.Sparse;
+  if (Type::value(*_storage) != Type::DenseVectStorage)
+  {
+    SiconosVectorException::selfThrow("SiconosVector::Densevect(unsigned int) : cannot get dense storage.");
+  }
+  return static_cast<DenseVectStorage*>(_storage)->internal_data;
 }
 
-SparseVect* SiconosVector::sparse(unsigned int)const
+SparseVect& SiconosVector::sparse(unsigned int)const
 {
-
-  if (_dense)
-    SiconosVectorException::selfThrow("SiconosVector::sparse(unsigned int row, unsigned int col) : the current vector is not a Sparse vector");
-
-  return vect.Sparse;
+  if (Type::value(*_storage) != Type::SparseVectStorage)
+  {
+    SiconosVectorException::selfThrow("SiconosVector::Sparsevect(unsigned int) : cannot get sparse storage.");
+  }
+  return static_cast<SparseVectStorage*>(_storage)->internal_data;
 }
 
 double* SiconosVector::getArray() const
 {
-  assert(vect.Dense && "SiconosVector::getArray() : not yet implemented for sparse vector.");
-
-  return &(((*vect.Dense).data())[0]);
+  if (Type::value(*_storage) != Type::DenseVectStorage)
+  {
+    SiconosVectorException::selfThrow("SiconosVector::getArray() : cannot get array for this kind of vector.");
+  }
+  return &(((static_cast<DenseVectStorage*>(_storage)->internal_data).data())[0]);
 }
 
 // ===========================
@@ -302,15 +1132,7 @@ double* SiconosVector::getArray() const
 
 void SiconosVector::zero()
 {
-  if (_dense)
-    siconosBindings::scal(0.0, *vect.Dense);
-
-  else
-  {
-    assert(vect.Sparse);
-    *vect.Sparse *= 0.0;
-  }
-
+  apply_visitor<Zero>(this->storage());
 }
 
 void SiconosVector::setVector(unsigned int , const SiconosVector& newV)
@@ -321,17 +1143,9 @@ void SiconosVector::setVector(unsigned int , const SiconosVector& newV)
   *this = newV ;
 }
 
-void SiconosVector::fill(double value)
+void SiconosVector::fill(const double& value)
 {
-  if (!_dense)
-  {
-    for (unsigned int i = 0; i < (vect.Sparse)->size(); ++i)
-      (vect.Sparse)->push_back(i, value);
-  }
-  else
-    siconosBindings::set(value, *vect.Dense);
-
-
+  apply_visitor<Fill>(this->storage(), value);
 }
 
 //=======================
@@ -340,10 +1154,7 @@ void SiconosVector::fill(double value)
 
 void SiconosVector::resize(unsigned int n, bool preserve)
 {
-  if (_dense)
-    (vect.Dense)->resize(n, preserve);
-  else
-    (vect.Sparse)->resize(n, preserve);
+  apply_visitor<Resize>(this->storage(), n);
 }
 
 //=======================
@@ -352,42 +1163,28 @@ void SiconosVector::resize(unsigned int n, bool preserve)
 
 double SiconosVector::normInf() const
 {
-  if (_dense)
-    return norm_inf(*vect.Dense);
-  else //if(num==4)
-    return norm_inf(*vect.Sparse);
+  return apply_visitor<NormInf, double>(this->storage());
 }
 
 double SiconosVector::norm2() const
 {
-  if (_dense)
-    return ublas::norm_2(*vect.Dense);
-  else //if(num==4)
-    return ublas::norm_2(*vect.Sparse);
+  return apply_visitor<Norm2, double>(this->storage());
 }
 //======================================
 // get sum of all elements of the vector
 //=====================================
 double SiconosVector::vector_sum() const
 {
-  if (_dense)
-    return ublas::sum(*vect.Dense);
-  else
-    return ublas::sum(*vect.Sparse);
+  return apply_visitor<Sum, double>(this->storage());
 }
 
 //=====================
 // screen display
 //=====================
 
-void SiconosVector::display()const
+void SiconosVector::display(unsigned int n)const
 {
-  std::cout.setf(std::ios::scientific);
-  std::cout.precision(6);
-  if (_dense)
-    std::cout << *vect.Dense << std::endl;
-  else if (vect.Sparse)
-    std::cout << *vect.Sparse << std::endl;
+  apply_visitor<Display>(this->storage(), n);
 }
 
 //============================
@@ -396,18 +1193,7 @@ void SiconosVector::display()const
 
 const std::string SiconosVector::toString() const
 {
-  std::stringstream sstr;
-  std::string s;
-  if (_dense)
-    sstr << *vect.Dense;
-  else
-    sstr << *vect.Sparse;
-  sstr >> s;
-  s = s.substr(4, s.size() - 5); // Remove "[size](" at the beginning of the std::string
-  std::string::size_type pos;
-  while ((pos = s.find(",")) != std::string::npos) // Replace "," by " " in the std::string
-    s[pos] = ' ';
-  return s;
+  return apply_visitor<ToString, std::string>(this->storage());
 }
 
 //=============================
@@ -416,181 +1202,63 @@ const std::string SiconosVector::toString() const
 
 double SiconosVector::getValue(unsigned int row) const
 {
-  assert(row < size() && "SiconosVector::getValue(index) : Index out of range");
-
-  if (_dense)
-    return (*vect.Dense)(row);
-  else
-    return (*vect.Sparse)(row);
+  return apply_visitor<GetValue, unsigned int>(this->storage(), row);
 }
 
-void SiconosVector::setValue(unsigned int row, double value)
+void SiconosVector::setValue(unsigned int row, const double value)
 {
-  assert(row < size() && "SiconosVector::setValue(index, value) : Index out of range");
-  if (_dense)
-    (*vect.Dense)(row) = value ;
-  else
-    (*vect.Sparse)(row) = value;
+  return apply_visitor<SetValue>(this->storage(), row, value);
 }
 
-double& SiconosVector::operator()(unsigned int row)
-{
-  assert(row < size() && "SiconosVector::operator ( index ): Index out of range");
-
-  if (_dense)
-    return (*vect.Dense)(row);
-  else
-    return (*vect.Sparse)(row).ref();
-}
+//double& SiconosVector::operator()(unsigned int row)
+//{
+//  return *apply_visitor<GetRValue, double* >(this->storage(), row);
+//}
 
 double SiconosVector::operator()(unsigned int row) const
 {
-  assert(row < size() && "SiconosVector::operator ( index ): Index out of range");
-
-  if (_dense)
-    return (*vect.Dense)(row);
-  else
-    return ((*vect.Sparse)(row)).ref();
+  return getValue(row);
 }
 
-//============================================
-// Access (get or set) to blocks of elements
-//============================================
+// //============================================
+// // Access (get or set) to blocks of elements
+// //============================================
 
 void SiconosVector::setBlock(unsigned int index, const SiconosVector& vIn)
 {
-  // Set current vector elements, starting from position "index", to the values of vector vIn
-
-  // Exceptions ...
-  assert(&vIn != this && "SiconosVector::this->setBlock(pos,vIn): vIn = this.");
-
-  assert(index < size() && "SiconosVector::setBlock : invalid ranges");
-
-  unsigned int end = vIn.size() + index;
-  assert(end <= size() && "SiconosVector::setBlock : invalid ranges");
-
-  assert (vIn.num() == num() && "SiconosVector::setBlock: inconsistent types.");
-
-  if (_dense)
-    noalias(ublas::subrange(*vect.Dense, index, end)) = *vIn.dense();
-  else
-    noalias(ublas::subrange(*vect.Sparse, index, end)) = *vIn.sparse();
+  apply_visitor<SetBlock>(this->storage(), index, vIn);
 }
 
-void SiconosVector::toBlock(SiconosVector& vOut, unsigned int sizeB, unsigned int startIn, unsigned int startOut) const
-{
-  // To copy a subBlock of the vector (from position startIn to startIn+sizeB) into vOut (from pos. startOut to startOut+sizeB).
-  // Check dim ...
-  assert(startIn < size() && "vector toBlock(v1,v2,...): start position in input vector is out of range.");
-
-  assert(startOut < vOut.size() && "vector toBlock(v1,v2,...): start position in output vector is out of range.");
-
-  assert(startIn + sizeB <= size() && "vector toBlock(v1,v2,...): end position in input vector is out of range.");
-  assert(startOut + sizeB <= vOut.size() && "vector toBlock(v1,v2,...): end position in output vector is out of range.");
-
-  unsigned int endOut = startOut + sizeB;
-  unsigned int numIn = num();
-  unsigned int numOut = vOut.num();
-
-  if (numIn == numOut)
-  {
-    if (numIn == 1) // vIn / vOut are Dense
-      noalias(ublas::subrange(*vOut.dense(), startOut, endOut)) = ublas::subrange(*vect.Dense, startIn, startIn + sizeB);
-    else // if(numIn == 4)// vIn / vOut are Sparse
-      noalias(ublas::subrange(*vOut.sparse(), startOut, endOut)) = ublas::subrange(*vect.Sparse, startIn, startIn + sizeB);
-  }
-  else // vIn and vout of different types ...
-  {
-    if (numIn == 1) // vIn Dense
-      noalias(ublas::subrange(*vOut.sparse(), startOut, endOut)) = ublas::subrange(*vect.Dense, startIn, startIn + sizeB);
-    else // if(numIn == 4)// vIn Sparse
-      noalias(ublas::subrange(*vOut.dense(), startOut, endOut)) = ublas::subrange(*vect.Sparse, startIn, startIn + sizeB);
-  }
-}
+//void SiconosVector::toBlock(SiconosVector& vOut, unsigned int sizeB, unsigned int startIn, unsigned int startOut) const
+//{
+// apply_visitor<ToBlock>(this->storage(), vOut.storage(), sizeB, startIn, startOut);
+//}
 
 void SiconosVector::addBlock(unsigned int index, const SiconosVector& vIn)
 {
-  // Add vIn to the current vector, starting from position "index".
-  // vIn may be a BlockVector.
-
-  //if ( num != 1 ) SiconosVectorException::selfThrow("SiconosVector::addBlock : vector should be dense");
-
-  if (&vIn == this)
-    SiconosVectorException::selfThrow("SiconosVector::this->addBlock(pos,vIn): vIn = this.");
-
-  unsigned int end = vIn.size();
-  if ((index + end) > size()) SiconosVectorException::selfThrow("SiconosVector::addBlock : invalid ranges");
-
-  unsigned int numVin = vIn.num();
-
-  if (numVin != num()) SiconosVectorException::selfThrow("SiconosVector::addBlock : inconsistent types.");
-
-  if (_dense)
-    noalias(ublas::subrange(*vect.Dense, index, index + end)) += *vIn.dense();
-  else
-    noalias(ublas::subrange(*vect.Sparse, index, index + end)) += *vIn.sparse();
+  apply_modifier<AddBlock>(vIn.storage(), index, this->storage());
 }
 
 void SiconosVector::subBlock(unsigned int index, const SiconosVector& vIn)
 {
-  // Add vIn from the current vector, starting from position "index".
-  // vIn may be a BlockVector.
-
-  //  if ( num != 1 ) SiconosVectorException::selfThrow("SiconosVector::subBlock : vector should be dense");
-
-  unsigned int end = vIn.size();
-  if ((index + end) > size()) SiconosVectorException::selfThrow("SiconosVector::subBlock : invalid ranges");
-
-  unsigned int numVin = vIn.num();
-  if (numVin != num()) SiconosVectorException::selfThrow("SiconosVector::subBlock : inconsistent types.");
-
-  if (_dense)
-    noalias(ublas::subrange(*vect.Dense, index, index + end)) -= *vIn.dense();
-  else
-    noalias(ublas::subrange(*vect.Sparse, index, index + end)) -= *vIn.sparse();
+  apply_modifier<SubBlock>(vIn.storage(), index, this->storage());
 }
 
-//===============
-//  Assignment
-//===============
+// //===============
+// //  Assignment
+// //===============
 
 SiconosVector& SiconosVector::operator = (const SiconosVector& vIn)
 {
-  if (&vIn == this) return *this; // auto-assignment.
-
-  assert(size() == vIn.size() && "SiconosVector::operator = failed: inconsistent sizes.");
-
-  unsigned int vInNum = vIn.num();
+  if (&vIn == this)
   {
-    switch (num())
-    {
-    case 1:
-      switch (vInNum)
-      {
-      case 1:
-        //siconosBindings::copy(*vIn.dense(),*vect.Dense);
-        noalias(*vect.Dense) = *vIn.dense();
-        break;
-      case 4:
-        noalias(*vect.Dense) = *vIn.sparse();
-        break;
-      default:
-        SiconosVectorException::selfThrow("SiconosVector::operator = : invalid type given");
-        break;
-      }
-      break;
-    case 4:
-      if (vInNum == 4)
-        noalias(*vect.Sparse) = *vIn.sparse();
-      else
-        SiconosVectorException::selfThrow("SiconosVector::operator = : can not set sparse = dense.");
-      break;
-    default:
-      SiconosVectorException::selfThrow("SiconosVector::operator = : invalid type given");
-      break;
-    }
+    return *this; // auto-assignment.
   }
-  return *this;
+  else
+  {
+    apply_modifier<Copy>(vIn.storage(), this->storage());
+    return *this;
+  }
 }
 
 SiconosVector& SiconosVector::operator = (const BlockVector& vIn)
@@ -608,41 +1276,52 @@ SiconosVector& SiconosVector::operator = (const BlockVector& vIn)
 
 SiconosVector& SiconosVector::operator = (const DenseVect& d)
 {
-  if (!_dense)
-    SiconosVectorException::selfThrow("SiconosVector::operator = DenseVect : forbidden: the current vector is not dense.");
-  if (d.size() != size())
+  if (Type::value(this->storage()) != Type::DenseVectStorage)
+  {
+    SiconosVectorException::selfThrow("SiconosVector::operator = DenseVect : current vector is not dense.");
+  }
+  if (this->size() != d.size())
+  {
     SiconosVectorException::selfThrow("SiconosVector::operator = DenseVect : inconsistent size.");
-
-  siconosBindings::copy(d, *vect.Dense);
+  }
+  siconosBindings::copy(d, this->dense());
   return *this;
 }
 
 SiconosVector& SiconosVector::operator = (const SparseVect& sp)
 {
-  if (_dense)
+  if (Type::value(this->storage()) != Type::SparseVectStorage)
+  {
     SiconosVectorException::selfThrow("SiconosVector::operator = SparseVect : current vector is not sparse.");
-  if (sp.size() != size())
+  }
+  if (this->size() != sp.size())
+  {
     SiconosVectorException::selfThrow("SiconosVector::operator = SparseVect : inconsistent size.");
+  }
 
-  noalias(*vect.Sparse) = sp;
+  noalias(this->sparse()) = sp;
 
   return *this;
 }
 
 SiconosVector& SiconosVector::operator = (const double* d)
 {
-  assert(_dense && "SiconosVector::operator = double* : forbidden: the current vector is not dense.");
-
-  siconosBindings::detail::copy(vect.Dense->size(), d, 1, getArray(), 1);
+  if (Type::value(this->storage()) == Type::SparseVectStorage)
+  {
+    SiconosVectorException::selfThrow("SiconosVector::operator = double* : forbidden: the current vector is not dense.");
+  }
+  siconosBindings::detail::copy(this->size(), d, 1, getArray(), 1);
   return *this;
 }
 
 unsigned SiconosVector::copyData(double* data) const
 {
-  assert(_dense && "SiconosVector::copyData : forbidden: the current vector is not dense.");
-
-  unsigned size = vect.Dense->size();
-  siconosBindings::detail::copy(vect.Dense->size(), getArray(), 1, data, 1);
+  if (Type::value(this->storage()) == Type::SparseVectStorage)
+  {
+    SiconosVectorException::selfThrow("SiconosVector::copyData : forbidden: the current vector is not dense.");
+  }
+  unsigned size = this->size();
+  siconosBindings::detail::copy(size, getArray(), 1, data, 1);
   return size;
 }
 
@@ -653,52 +1332,7 @@ unsigned SiconosVector::copyData(double* data) const
 
 SiconosVector& SiconosVector::operator += (const SiconosVector& vIn)
 {
-  if (&vIn == this) // alias
-  {
-    // Note: using this *= 2.0 is much more time-consuming.
-    switch (num())
-    {
-    case 1:
-      *vect.Dense += *vect.Dense;
-      break;
-    case 4:
-      *vect.Sparse += *vect.Sparse;
-      break;
-    default:
-      SiconosVectorException::selfThrow("SiconosVector::operator += : invalid type given");
-      break;
-    }
-    return *this;
-  }
-
-  unsigned int vInNum = vIn.num();
-  {
-    switch (num())
-    {
-    case 1:
-      switch (vInNum)
-      {
-      case 1:
-        noalias(*vect.Dense) += *vIn.dense();
-        break;
-      case 4:
-        noalias(*vect.Dense) += *vIn.sparse();
-        break;
-      default:
-        SiconosVectorException::selfThrow("SiconosVector::operator += : invalid type given");
-        break;
-      }
-      break;
-    case 4:
-      if (vInNum == 4)
-        noalias(*vect.Sparse) += *vIn.sparse();
-      else SiconosVectorException::selfThrow("SiconosVector::operator += : can not add a dense to a sparse.");
-      break;
-    default:
-      SiconosVectorException::selfThrow("SiconosVector::operator += : invalid type given");
-      break;
-    }
-  }
+  apply_modifier<Plus>(vIn.storage(), this->storage());
   return *this;
 }
 SiconosVector& SiconosVector::operator += (const BlockVector& vIn)
@@ -715,40 +1349,7 @@ SiconosVector& SiconosVector::operator += (const BlockVector& vIn)
 
 SiconosVector& SiconosVector::operator -= (const SiconosVector& vIn)
 {
-  if (&vIn == this)
-  {
-    this->zero();
-    return *this;
-  }
-
-  unsigned int vInNum = vIn.num();
-  {
-    switch (num())
-    {
-    case 1:
-      switch (vInNum)
-      {
-      case 1:
-        noalias(*vect.Dense) -= *vIn.dense();
-        break;
-      case 4:
-        noalias(*vect.Dense) -= *vIn.sparse();
-        break;
-      default:
-        SiconosVectorException::selfThrow("SiconosVector::operator -= : invalid type given");
-        break;
-      }
-      break;
-    case 4:
-      if (vInNum == 4)
-        noalias(*vect.Sparse) -= *vIn.sparse();
-      else SiconosVectorException::selfThrow("SiconosVector::operator -= : can not sub a dense to a sparse.");
-      break;
-    default:
-      SiconosVectorException::selfThrow("SiconosVector::operator -= : invalid type given");
-      break;
-    }
-  }
+  apply_modifier<Minus>(vIn.storage(), this->storage());
   return *this;
 }
 
@@ -783,51 +1384,21 @@ bool operator == (const SiconosVector &m, const SiconosVector &x)
 
 SiconosVector operator * (const  SiconosVector&m, double d)
 {
-  unsigned int numM = m.num();
-
-  if (numM == 1)
-  {
-    // Copy m into p and call siconosBindings::scal(d,p), p = d*p.
-    DenseVect p = *m.dense();
-    siconosBindings::scal(d, p);
-    return p;
-  }
-  else// if(numM==4)
-  {
-    return (SparseVect)(*m.sparse() * d);
-  }
+  SiconosVector tmp = m;
+  apply_visitor<Scal>(tmp.storage(), d);
+  return tmp;
 }
 
 SiconosVector operator * (double d, const  SiconosVector&m)
 {
-  unsigned int numM = m.num();
-
-  if (numM == 1)
-  {
-    // Copy m into p and call siconosBindings::scal(d,p), p = d*p.
-    DenseVect p = *m.dense();
-    siconosBindings::scal(d, p);
-    return p;
-  }
-  else// if(numM==4)
-  {
-    return (SparseVect)(*m.sparse() * d);
-  }
+  SiconosVector tmp = m;
+  apply_visitor<Scal>(tmp.storage(), d);
+  return tmp;
 }
 
 SiconosVector operator / (const SiconosVector &m, double d)
 {
-  unsigned int numM = m.num();
-
-  if (numM == 1)
-  {
-    DenseVect p = *m.dense();
-    siconosBindings::scal((1.0 / d), p);
-    return p;
-  }
-
-  else// if(numM==4){
-    return (SparseVect)(*m.sparse() / d);
+  return m * (1.0/d);
 }
 
 //====================
@@ -836,85 +1407,15 @@ SiconosVector operator / (const SiconosVector &m, double d)
 
 SiconosVector operator + (const  SiconosVector& x, const  SiconosVector& y)
 {
-  if (x.size() != y.size())
-    SiconosVectorException::selfThrow("SiconosVector, x + y: inconsistent sizes");
-
-  unsigned int numX = x.num();
-  unsigned int numY = y.num();
-
-  if (numX == numY) // x, y SiconosVector of the same type
-  {
-    if (numX == 1)
-    {
-      //    siconosBindings::xpy(*x.dense(),p);
-      //    return p;
-      return (DenseVect)(*x.dense() + *y.dense());
-    }
-    else
-      return (SparseVect)(*x.sparse() + *y.sparse());
-  }
-
-  else // x, y SiconosVector with y and x of different types
-  {
-    if (numX == 1)
-      return (DenseVect)(*x.dense() + *y.sparse());
-    else
-      return (DenseVect)(*x.sparse() + *y.dense());
-  }
-
+  SiconosVector tmp = x;
+  tmp += y;
+  return tmp;
 }
 
 void add(const SiconosVector& x, const SiconosVector& y, SiconosVector& z)
 {
-  // Computes z = x + y in an "optimized" way (in comparison with operator +)
-
-  if (x.size() != y.size() || x.size() != z.size())
-    SiconosVectorException::selfThrow("add(x,y,z): inconsistent sizes");
-
-  unsigned int numX = x.num();
-  unsigned int numY = y.num();
-  unsigned int numZ = z.num();
-
-  if (&z == &x) // x, and z are the same object.
-  {
-    z += y;
-  }
-  else if (&z == &y) // y and z are the same object, different from x
-  {
-    z += x;
-  }
-  else // No common memory between x,y and z
-  {
-
-    if (numZ != 0) // z is a SiconosVector
-    {
-      if (numX == numY && numX != 0) // x, y SiconosVector of the same type
-      {
-        if (numX == 1)
-        {
-          if (numZ != 1)
-            SiconosVectorException::selfThrow("SiconosVector addition, add(x,y,z) failed - Addition of two dense vectors into a sparse.");
-          noalias(*z.dense()) = *x.dense() + *y.dense() ;
-        }
-        else
-        {
-          if (numZ == 1)
-            noalias(*z.dense()) = *x.sparse() + *y.sparse() ;
-          else
-            noalias(*z.sparse()) = *x.sparse() + *y.sparse() ;
-        }
-      }
-      else if (numX != 0 && numY != 0) // x and y of different types => z must be dense.
-      {
-        if (numZ != 1)
-          SiconosVectorException::selfThrow("SiconosVector addition, add(x,y,z) failed - z can not be sparse.");
-        if (numX == 1)
-          noalias(*z.dense()) = *x.dense() + *y.sparse();
-        else
-          noalias(*z.dense()) = *x.sparse() + *y.dense() ;
-      }
-    }
-  }
+  apply_modifier<Copy>(x.storage(), z.storage());
+  z += y;
 }
 
 //======================
@@ -923,111 +1424,19 @@ void add(const SiconosVector& x, const SiconosVector& y, SiconosVector& z)
 
 SiconosVector operator - (const  SiconosVector& x, const  SiconosVector& y)
 {
-  if (x.size() != y.size())
-    SiconosVectorException::selfThrow("SiconosVector, x - y: inconsistent sizes");
-
-  unsigned int numX = x.num();
-  unsigned int numY = y.num();
-
-  if (numX == numY) // x, y SiconosVector of the same type
-  {
-    if (numX == 1)
-    {
-      //    siconosBindings::xpy(*x.dense(),p);
-      //    return p;
-      return (DenseVect)(*x.dense() - *y.dense());
-    }
-    else
-      return (SparseVect)(*x.sparse() - *y.sparse());
-  }
-  else // x, y SiconosVector with y and x of different types
-  {
-    if (numX == 1)
-      return (DenseVect)(*x.dense() - *y.sparse());
-    else
-      return (DenseVect)(*x.sparse() - *y.dense());
-  }
+  SiconosVector tmp = x;
+  tmp -= y;
+  return tmp;
 }
 
 void sub(const SiconosVector& x, const SiconosVector& y, SiconosVector& z)
 {
-  // Computes z = x - y in an "optimized" way (in comparison with operator +)
-
-  if (x.size() != y.size() || x.size() != z.size())
-    SiconosVectorException::selfThrow("sub(x,y,z): inconsistent sizes");
-
-  unsigned int numX = x.num();
-  unsigned int numY = y.num();
-  unsigned int numZ = z.num();
-
-  if (&z == &x) // x and z are the same object.
-  {
-    z -= y;
-  }
-  else if (&z == &y) // y and z are the same object
-  {
-    {
-      if (numX == 1)
-      {
-        if (numZ != 1)
-          SiconosVectorException::selfThrow("SiconosVector subtraction, sub(x,y,z) failed - Subtraction of two dense vectors into a sparse.");
-        *z.dense() = *x.dense() - *y.dense() ;
-      }
-      else
-      {
-        if (numZ == 1)
-          *z.dense() = *x.sparse() - *y.dense() ;
-        else
-          *z.sparse() = *x.sparse() - *y.sparse() ;
-      }
-    }
-  }
-  else // No common memory between x or y and z
-  {
-
-    if (numZ != 0) // z is a SiconosVector
-    {
-      if (numX == numY && numX != 0) // x, y SiconosVector of the same type
-      {
-        if (numX == 1)
-        {
-          if (numZ != 1)
-            SiconosVectorException::selfThrow("SiconosVector addition, sub(x,y,z) failed - Addition of two dense vectors into a sparse.");
-          noalias(*z.dense()) = *x.dense() - *y.dense() ;
-        }
-        else
-        {
-          if (numZ == 1)
-            noalias(*z.dense()) = *x.sparse() - *y.sparse() ;
-          else
-            noalias(*z.sparse()) = *x.sparse() - *y.sparse() ;
-        }
-      }
-      else if (numX != 0 && numY != 0) // x and y of different types => z must be dense.
-      {
-        if (numZ != 1)
-          SiconosVectorException::selfThrow("SiconosVector addition, sub(x,y,z) failed - z can not be sparse.");
-        if (numX == 1)
-          noalias(*z.dense()) = *x.dense() - *y.sparse();
-        else
-          noalias(*z.dense()) = *x.sparse() - *y.dense() ;
-      }
-    }
-  }
+  apply_modifier<Copy>(x.storage(), z.storage());
+  z -= y;
 }
 
-void axpby(double a, const SiconosVector& x, double b, SiconosVector& y)
+/*void axpby(double a, const SiconosVector& x, double b, SiconosVector& y)
 {
-  // Computes y = ax + by
-
-  if (x.size() != y.size())
-    SiconosVectorException::selfThrow("axpby(x,y,z): inconsistent sizes");
-
-  unsigned int numX = x.num();
-  unsigned int numY = y.num();
-
-  if (numX == numY) // x and y of the same type
-  {
     if (numX == 1) // all dense
     {
       siconosBindings::scal(b, *y.dense());
@@ -1089,229 +1498,36 @@ void axpy(double a, const SiconosVector& x, SiconosVector& y)
     }
   }
 }
+*/
 
 double inner_prod(const SiconosVector &x, const SiconosVector &m)
 {
-  if (x.size() != m.size())
-    SiconosVectorException::selfThrow("inner_prod: inconsistent sizes");
-
-  unsigned int numM = m.num();
-  unsigned int numX = x.num();
-
-  if (numX == numM)
-  {
-    if (numM == 1)
-      return siconosBindings::dot(*x.dense(), *m.dense());
-    else
-      return inner_prod(*x.sparse(), *m.sparse());
-  }
-  else if (numM == 1)
-    return inner_prod(*x.sparse(), *m.dense());
-  else
-    return inner_prod(*x.dense(), *m.sparse());
+  return apply_visitor<Dot, double>(x.storage(), m.storage());
 }
 
-// outer_prod(v,w) = trans(v)*w
-SimpleMatrix outer_prod(const SiconosVector &x, const SiconosVector& m)
-{
-  unsigned int numM = m.num();
-  unsigned int numX = x.num();
-
-  if (numM == 1)
-  {
-    if (numX == 1)
-      return (DenseMat)(outer_prod(*x.dense(), *m.dense()));
-
-    else// if(numX == 4)
-      return (DenseMat)(outer_prod(*x.sparse(), *m.dense()));
-  }
-  else // if(numM == 4)
-  {
-    if (numX == 1)
-      return (DenseMat)(outer_prod(*x.dense(), *m.sparse()));
-
-    else //if(numX == 4)
-      return (DenseMat)(outer_prod(*x.sparse(), *m.sparse()));
-  }
-}
+//// outer_prod(v,w) = trans(v)*w
+//SimpleMatrix outer_prod(const SiconosVector &x, const SiconosVector& m)
+//{
+//  return apply_visitor<OuterProd>(x, m);
+//}
 
 void scal(double a, const SiconosVector & x, SiconosVector & y, bool init)
 {
-  // To compute y = a *x (init = true) or y += a*x (init = false)
-
-  if (&x == &y)
+  if(init)
   {
-    if (init)
-      y *= a;
-    else
-    {
-      y *= (1.0 + a);
-    }
+    apply_modifier<Copy>(y.storage(), x.storage());
+    apply_modifier<Scal>(y.storage(), a);
   }
   else
   {
-    unsigned int sizeX = x.size();
-    unsigned int sizeY = y.size();
-
-    if (sizeX != sizeY)
-      SiconosVectorException::selfThrow("scal(a,SiconosVector,SiconosVector) failed, sizes are not consistent.");
-
-    unsigned int numY = y.num();
-    unsigned int numX = x.num();
-    if (numX == numY)
-    {
-
-      if (numX == 1) // ie if both are Dense
-      {
-        if (init)
-          //siconosBindings::axpby(a,*x.dense(),0.0,*y.dense());
-          noalias(*y.dense()) = a * *x.dense();
-        else
-          noalias(*y.dense()) += a * *x.dense();
-      }
-      else  // if both are sparse
-      {
-        if (init)
-          noalias(*y.sparse()) = a**x.sparse();
-        else
-          noalias(*y.sparse()) += a**x.sparse();
-      }
-    }
-    else
-    {
-      if (numY == 0 || numX == 0) // if y or x is block
-      {
-        if (init)
-        {
-          y = x;
-          y *= a;
-        }
-        else
-        {
-          SiconosVector tmp(x);
-          tmp *= a;
-          y += tmp;
-        }
-      }
-      else
-      {
-        if (numY == 1) // if y is dense
-        {
-          if (init)
-            noalias(*y.dense()) = a**x.sparse();
-          else
-            noalias(*y.dense()) += a**x.sparse();
-
-        }
-        else
-          SiconosVectorException::selfThrow("SiconosVector::scal(a,dense,sparse) not allowed.");
-      }
-    }
+    apply_modifier<Axpy>(y.storage(), a, x.storage());
   }
 }
 
-void subscal(double a, const SiconosVector & x, SiconosVector & y, const Index& coord, bool init)
-{
-  // To compute sub_y = a *sub_x (init = true) or sub_y += a*sub_x (init = false)
-  // Coord  = [r0x r1x r0y r1y];
-  // subX is the sub-vector of x, for row numbers between r0x and r1x-1.
-  // The same for y with riy.
-
-
-  // Check dimensions
-  unsigned int dimX = coord[1] - coord[0];
-  unsigned int dimY = coord[3] - coord[2];
-  if (dimY != dimX)
-    SiconosVectorException::selfThrow("subscal(a,x,y,...) error: inconsistent sizes between (sub)x and (sub)y.");
-  if (dimY > y.size() || dimX > x.size())
-    SiconosVectorException::selfThrow("subscal(a,x,y,...) error: input index too large.");
-
-  unsigned int numY = y.num();
-  unsigned int numX = x.num();
-
-  if (&x == &y) // if x and y are the same object
-  {
-    if (numX == 1) // Dense
-    {
-      ublas::vector_range<DenseVect> subY(*y.dense(), ublas::range(coord[2], coord[3]));
-      if (coord[0] == coord[2])
-      {
-        if (init)
-          subY *= a;
-        else
-          subY *= (1.0 + a);
-      }
-      else
-      {
-        ublas::vector_range<DenseVect> subX(*x.dense(), ublas::range(coord[0], coord[1]));
-        if (init)
-          subY = a * subX;
-        else
-          subY += a * subX;
-      }
-    }
-    else //if (numX == 4) // Sparse
-    {
-      ublas::vector_range<SparseVect> subY(*y.sparse(), ublas::range(coord[2], coord[3]));
-      if (coord[0] == coord[2])
-      {
-        if (init)
-          subY *= a;
-        else
-          subY *= (1.0 + a);
-      }
-      else
-      {
-        ublas::vector_range<SparseVect> subX(*x.sparse(), ublas::range(coord[0], coord[1]));
-        if (init)
-          subY = a * subX;
-        else
-          subY += a * subX;
-      }
-    }
-  }
-  else
-  {
-    if (numX == numY)
-    {
-      if (numX == 1) // ie if both are Dense
-      {
-        ublas::vector_range<DenseVect> subX(*x.dense(), ublas::range(coord[0], coord[1]));
-        ublas::vector_range<DenseVect> subY(*y.dense(), ublas::range(coord[2], coord[3]));
-
-        if (init)
-          noalias(subY) = a * subX;
-        else
-          noalias(subY) += a * subX;
-      }
-      else  // if both are sparse
-      {
-        ublas::vector_range<SparseVect> subX(*x.sparse(), ublas::range(coord[0], coord[1]));
-        ublas::vector_range<SparseVect> subY(*y.sparse(), ublas::range(coord[2], coord[3]));
-
-        if (init)
-          noalias(subY) = a * subX;
-        else
-          noalias(subY) += a * subX;
-      }
-    }
-    else // x and y of different types ...
-    {
-      if (numY == 1) // y dense, x sparse
-      {
-        ublas::vector_range<DenseVect> subY(*y.dense(), ublas::range(coord[2], coord[3]));
-        ublas::vector_range<SparseVect> subX(*x.sparse(), ublas::range(coord[0], coord[1]));
-
-        if (init)
-          noalias(subY) = a * subX;
-        else
-          noalias(subY) += a * subX;
-      }
-      else // y sparse, x dense => fails
-        SiconosVectorException::selfThrow("SiconosVector::subscal(a,dense,sparse) not allowed.");
-    }
-  }
-}
+//void subscal(double a, const SiconosVector & x, SiconosVector & y, const Index& coord, bool init)
+//{
+//  apply_modifier<Subscal>(x.storage(), a, coord, init, y.storage());
+//}
 void cross_product(const SiconosVector& V1, const SiconosVector& V2, SiconosVector& VOUT)
 {
   if (V1.size() != 3 || V2.size() != 3 || VOUT.size() != 3)
@@ -1391,57 +1607,27 @@ void getMin(const SiconosVector& V, double& minvalue, unsigned int& idmin){
   };
 }
 */
-void setBlock(const SiconosVector& vIn, SP::SiconosVector vOut, unsigned int sizeB,
-              unsigned int startIn, unsigned int startOut)
-{
-  unsigned int endOut = startOut + sizeB;
-  unsigned int numIn = vIn.num();
-  unsigned int numOut = vOut->num();
-  assert(vOut->size() >= endOut && "The output vector is too small");
-  if (numIn == numOut)
-  {
-    if (numIn == 1) // vIn / vOut are Dense
-      noalias(ublas::subrange(*vOut->dense(), startOut, endOut)) = ublas::subrange(*vIn.dense(), startIn, startIn + sizeB);
-    else // if(numIn == 4)// vIn / vOut are Sparse
-      noalias(ublas::subrange(*vOut->sparse(), startOut, endOut)) = ublas::subrange(*vIn.sparse(), startIn, startIn + sizeB);
-  }
-  else // vIn and vout of different types ...
-  {
-    if (numIn == 1) // vIn Dense
-      noalias(ublas::subrange(*vOut->sparse(), startOut, endOut)) = ublas::subrange(*vIn.dense(), startIn, startIn + sizeB);
-    else // if(numIn == 4)// vIn Sparse
-      noalias(ublas::subrange(*vOut->dense(), startOut, endOut)) = ublas::subrange(*vIn.sparse(), startIn, startIn + sizeB);
-  }
-}
+//void setBlock(const SiconosVector& vIn, SP::SiconosVector vOut, unsigned int sizeB,
+//              unsigned int startIn, unsigned int startOut)
+//{
+//  apply_visitor<ToBlock>(vIn.storage(), vOut->storage(), sizeB, startIn, startOut);
+//}
 
 unsigned int SiconosVector::size(void) const
 {
-  if (!_dense)
-  {
-    return (vect.Sparse->size());
-  }
-  else
-  {
-    return (vect.Dense->size());
-  }
+  return apply_visitor<Size, unsigned int>(this->storage());
 }
 
 SiconosVector& operator *= (SiconosVector& v, const double& s)
 {
-  if (v._dense)
-    *v.dense() *= s;
-  else
-    *v.sparse() *= s;
+
+  apply_visitor<Scal>(v.storage(), s);
   return v;
 }
 
 
 SiconosVector& operator /= (SiconosVector& v, const double& s)
 {
-  if (v._dense)
-    *v.dense() /= s;
-  else
-    *v.sparse() /= s;
+  apply_visitor<Scal>(v.storage(), 1.0/s);
   return v;
 }
-

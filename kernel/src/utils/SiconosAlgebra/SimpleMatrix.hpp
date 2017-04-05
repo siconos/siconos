@@ -22,6 +22,7 @@
 #ifndef __SimpleMatrix__
 #define __SimpleMatrix__
 
+#include "SiconosVisitor.hpp"
 #include "SimpleMatrixFriends.hpp"
 
 /**Input parameter for copy and transpose constructor.*/

@@ -66,21 +66,22 @@ void subprod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, c
     if (init)
     {
       if (numY == 1)
-        ublas::subrange(*y.dense(), coord[6], coord[7]) *= 0.0;
+        ublas::subrange(
+          y.dense(), coord[6], coord[7]) *= 0.0;
       else //if(numY==4)
-        ublas::subrange(*y.sparse(), coord[6], coord[7]) *= 0.0;
+        ublas::subrange(y.sparse(), coord[6], coord[7]) *= 0.0;
     }
     //else nothing
   }
   else if (numA == 7) // A = identity
   {
     if (!init)
-      ublas::subrange(*y.dense(), coord[6], coord[7]) += ublas::subrange(*x.dense(), coord[4], coord[5]);
+      ublas::subrange(y.dense(), coord[6], coord[7]) += ublas::subrange(x.dense(), coord[4], coord[5]);
     else
     {
       // if x and y do not share memory (ie are different objects)
       if (&x != &y)
-        noalias(ublas::subrange(*y.dense(), coord[6], coord[7])) = ublas::subrange(*x.dense(), coord[4], coord[5]);
+        noalias(ublas::subrange(y.dense(), coord[6], coord[7])) = ublas::subrange(x.dense(), coord[4], coord[5]);
 
       // else nothing
     }
@@ -95,11 +96,11 @@ void subprod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, c
         {
           if (numX == 1)
           {
-            ublas::vector_range<DenseVect> subX(*x.dense(), ublas::range(coord[4], coord[5]));
+            ublas::vector_range<DenseVect> subX(x.dense(), ublas::range(coord[4], coord[5]));
 
             if (numY != 1)
               SiconosMatrixException::selfThrow("prod(A,x,y) error: y (output) must be a dense vector.");
-            ublas::vector_range<DenseVect> subY(*y.dense(), ublas::range(coord[6], coord[7]));
+            ublas::vector_range<DenseVect> subY(y.dense(), ublas::range(coord[6], coord[7]));
 
             if (numA == 1)
             {
@@ -133,25 +134,25 @@ void subprod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, c
           }
           else //if(numX == 4)
           {
-            ublas::vector_range<SparseVect> subX(*x.sparse(), ublas::range(coord[4], coord[5]));
+            ublas::vector_range<SparseVect> subX(x.sparse(), ublas::range(coord[4], coord[5]));
             if (numY != 1 && numA != 4)
               SiconosMatrixException::selfThrow("prod(A,x,y) error: y (output) must be a dense vector.");
 
             if (numA == 1)
             {
-              ublas::vector_range<DenseVect> subY(*y.dense(), ublas::range(coord[6], coord[7]));
+              ublas::vector_range<DenseVect> subY(y.dense(), ublas::range(coord[6], coord[7]));
               ublas::matrix_range<DenseMat> subA(*A.dense(), ublas::range(coord[0], coord[1]), ublas::range(coord[2], coord[3]));
               noalias(subY) = ublas::prod(subA, subX);
             }
             else if (numA == 2)
             {
-              ublas::vector_range<DenseVect> subY(*y.dense(), ublas::range(coord[6], coord[7]));
+              ublas::vector_range<DenseVect> subY(y.dense(), ublas::range(coord[6], coord[7]));
               ublas::matrix_range<TriangMat> subA(*A.triang(), ublas::range(coord[0], coord[1]), ublas::range(coord[2], coord[3]));
               noalias(subY) = ublas::prod(subA, subX);
             }
             else if (numA == 3)
             {
-              ublas::vector_range<DenseVect> subY(*y.dense(), ublas::range(coord[6], coord[7]));
+              ublas::vector_range<DenseVect> subY(y.dense(), ublas::range(coord[6], coord[7]));
               ublas::matrix_range<SymMat> subA(*A.sym(), ublas::range(coord[0], coord[1]), ublas::range(coord[2], coord[3]));
               noalias(subY) = ublas::prod(subA, subX);
             }
@@ -164,19 +165,19 @@ void subprod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, c
 
               if (numY == 1)
               {
-                ublas::vector_range<DenseVect> subY(*y.dense(), ublas::range(coord[6], coord[7]));
+                ublas::vector_range<DenseVect> subY(y.dense(), ublas::range(coord[6], coord[7]));
                 noalias(subY) = ublas::prod(subA, subX);
               }
               else
               {
-                ublas::vector_range<SparseVect> subY(*y.sparse(), ublas::range(coord[6], coord[7]));
+                ublas::vector_range<SparseVect> subY(y.sparse(), ublas::range(coord[6], coord[7]));
                 noalias(subY) = ublas::prod(subA, subX);
               }
 #endif
             }
             else //if(numA==5)
             {
-              ublas::vector_range<DenseVect> subY(*y.dense(), ublas::range(coord[6], coord[7]));
+              ublas::vector_range<DenseVect> subY(y.dense(), ublas::range(coord[6], coord[7]));
               ublas::matrix_range<BandedMat> subA(*A.banded(), ublas::range(coord[0], coord[1]), ublas::range(coord[2], coord[3]));
               noalias(subY) = ublas::prod(subA, subX);
             }
@@ -186,7 +187,7 @@ void subprod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, c
         {
           if (numX == 1)
           {
-            ublas::vector_range<DenseVect> subY(*y.dense(), ublas::range(coord[4], coord[5]));
+            ublas::vector_range<DenseVect> subY(y.dense(), ublas::range(coord[4], coord[5]));
             if (numA == 1)
             {
               ublas::matrix_range<DenseMat> subA(*A.dense(), ublas::range(coord[0], coord[1]), ublas::range(coord[2], coord[3]));
@@ -219,7 +220,7 @@ void subprod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, c
           }
           else //if(numX == 4)
           {
-            ublas::vector_range<SparseVect> subY(*y.sparse(), ublas::range(coord[4], coord[5]));
+            ublas::vector_range<SparseVect> subY(y.sparse(), ublas::range(coord[4], coord[5]));
             if (numA == 1)
             {
               ublas::matrix_range<DenseMat> subA(*A.dense(), ublas::range(coord[0], coord[1]), ublas::range(coord[2], coord[3]));
@@ -258,11 +259,11 @@ void subprod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, c
         {
           if (numX == 1)
           {
-            ublas::vector_range<DenseVect> subX(*x.dense(), ublas::range(coord[4], coord[5]));
+            ublas::vector_range<DenseVect> subX(x.dense(), ublas::range(coord[4], coord[5]));
 
             if (numY != 1)
               SiconosMatrixException::selfThrow("prod(A,x,y) error: y (output) must be a dense vector.");
-            ublas::vector_range<DenseVect> subY(*y.dense(), ublas::range(coord[6], coord[7]));
+            ublas::vector_range<DenseVect> subY(y.dense(), ublas::range(coord[6], coord[7]));
 
             if (numA == 1)
             {
@@ -296,25 +297,25 @@ void subprod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, c
           }
           else //if(numX == 4)
           {
-            ublas::vector_range<SparseVect> subX(*x.sparse(), ublas::range(coord[4], coord[5]));
+            ublas::vector_range<SparseVect> subX(x.sparse(), ublas::range(coord[4], coord[5]));
             if (numY != 1 && numA != 4)
               SiconosMatrixException::selfThrow("prod(A,x,y) error: y (output) must be a dense vector.");
 
             if (numA == 1)
             {
-              ublas::vector_range<DenseVect> subY(*y.dense(), ublas::range(coord[6], coord[7]));
+              ublas::vector_range<DenseVect> subY(y.dense(), ublas::range(coord[6], coord[7]));
               ublas::matrix_range<DenseMat> subA(*A.dense(), ublas::range(coord[0], coord[1]), ublas::range(coord[2], coord[3]));
               noalias(subY) += ublas::prod(subA, subX);
             }
             else if (numA == 2)
             {
-              ublas::vector_range<DenseVect> subY(*y.dense(), ublas::range(coord[6], coord[7]));
+              ublas::vector_range<DenseVect> subY(y.dense(), ublas::range(coord[6], coord[7]));
               ublas::matrix_range<TriangMat> subA(*A.triang(), ublas::range(coord[0], coord[1]), ublas::range(coord[2], coord[3]));
               noalias(subY) += ublas::prod(subA, subX);
             }
             else if (numA == 3)
             {
-              ublas::vector_range<DenseVect> subY(*y.dense(), ublas::range(coord[6], coord[7]));
+              ublas::vector_range<DenseVect> subY(y.dense(), ublas::range(coord[6], coord[7]));
               ublas::matrix_range<SymMat> subA(*A.sym(), ublas::range(coord[0], coord[1]), ublas::range(coord[2], coord[3]));
               noalias(subY) += ublas::prod(subA, subX);
             }
@@ -326,19 +327,19 @@ void subprod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, c
               ublas::matrix_range<SparseMat> subA(*A.sparse(), ublas::range(coord[0], coord[1]), ublas::range(coord[2], coord[3]));
               if (numY == 1)
               {
-                ublas::vector_range<DenseVect> subY(*y.dense(), ublas::range(coord[6], coord[7]));
+                ublas::vector_range<DenseVect> subY(y.dense(), ublas::range(coord[6], coord[7]));
                 noalias(subY) += ublas::prod(subA, subX);
               }
               else
               {
-                ublas::vector_range<SparseVect> subY(*y.sparse(), ublas::range(coord[6], coord[7]));
+                ublas::vector_range<SparseVect> subY(y.sparse(), ublas::range(coord[6], coord[7]));
                 noalias(subY) += ublas::prod(subA, subX);
               }
 #endif
             }
             else //if(numA==5)
             {
-              ublas::vector_range<DenseVect> subY(*y.dense(), ublas::range(coord[6], coord[7]));
+              ublas::vector_range<DenseVect> subY(y.dense(), ublas::range(coord[6], coord[7]));
               ublas::matrix_range<BandedMat> subA(*A.banded(), ublas::range(coord[0], coord[1]), ublas::range(coord[2], coord[3]));
               noalias(subY) += ublas::prod(subA, subX);
             }
@@ -348,7 +349,7 @@ void subprod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, c
         {
           if (numX == 1)
           {
-            ublas::vector_range<DenseVect> subY(*y.dense(), ublas::range(coord[4], coord[5]));
+            ublas::vector_range<DenseVect> subY(y.dense(), ublas::range(coord[4], coord[5]));
             if (numA == 1)
             {
               ublas::matrix_range<DenseMat> subA(*A.dense(), ublas::range(coord[0], coord[1]), ublas::range(coord[2], coord[3]));
@@ -381,7 +382,7 @@ void subprod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, c
           }
           else //if(numX == 4)
           {
-            ublas::vector_range<SparseVect> subY(*y.sparse(), ublas::range(coord[4], coord[5]));
+            ublas::vector_range<SparseVect> subY(y.sparse(), ublas::range(coord[4], coord[5]));
             if (numA == 1)
             {
               ublas::matrix_range<DenseMat> subA(*A.dense(), ublas::range(coord[0], coord[1]), ublas::range(coord[2], coord[3]));

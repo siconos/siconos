@@ -45,6 +45,9 @@
   REGISTER(FrictionContact)                            \
   REGISTER(GlobalFrictionContact)                      \
   REGISTER(SiconosVector)                              \
+  REGISTER(SiconosVectorStorage)                                    \
+  REGISTER(DenseVectStorage)                           \
+  REGISTER(SparseVectStorage)                          \
   REGISTER(SimpleMatrix)                               \
   REGISTER(BlockVector)                                \
   REGISTER(BlockMatrix)                                \
@@ -63,10 +66,10 @@
   REGISTER(LagrangianLinearTIR)                        \
   REGISTER(NewtonEulerDS)                              \
   REGISTER(NewtonEulerR)                               \
-  REGISTER_STRUCT(DynamicalSystemsGraph)               \
-  REGISTER_STRUCT(InteractionsGraph)                   \
-  REGISTER_STRUCT(DynamicalSystemsSubGraph)            \
-  REGISTER_STRUCT(InteractionsSubGraph)
+  REGISTER(DynamicalSystemsGraph)                      \
+  REGISTER(InteractionsGraph)                          \
+  REGISTER(DynamicalSystemsSubGraph)                   \
+  REGISTER(InteractionsSubGraph)
 
 #ifndef SICONOS_VISITABLES
 #define SICONOS_VISITABLES()                    \

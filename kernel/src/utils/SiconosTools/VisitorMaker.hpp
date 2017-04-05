@@ -28,7 +28,6 @@
 #include <boost/mpl/if.hpp>
 #include <boost/mpl/vector.hpp>
 #include <boost/mpl/fold.hpp>
-
 /* With visitors on base classes, matches of derived classes is possible
    in a templated visitor operator, example:
 
@@ -66,13 +65,15 @@ ds->accept(getVelocity)->display();
 
 */
 
-
 namespace Experimental {
 
 template<typename T, typename Action>
 struct Call : public Action
 {
   typedef Call<T, Action> type;
+  typedef typename Action::arguments_type arguments_type;
+  Call() : Action() {};
+  Call(arguments_type& args) : Action(args) {};
 
   using Action::visit;
 
@@ -87,6 +88,10 @@ template<typename T, typename Action>
 struct NoCall : public Action
 {
   typedef NoCall type;
+
+  typedef typename Action::arguments_type arguments_type;
+  NoCall() : Action() {};
+  NoCall(arguments_type& args) : Action(args) {};
 
   using Action::visit;
 
@@ -213,6 +218,8 @@ struct Filter
 {
   struct _T : public T, public C
   {
+    _T() : T() {};
+    _T(typename T::arguments_type& args) : T(args) {};
     typedef _T Action;
   };
 

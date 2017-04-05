@@ -173,7 +173,7 @@ void SimpleMatrix::PLUForwardBackwardInPlace(SiconosVector &B)
 
 
   DenseMat tmpB(B.size(), 1);
-  ublas::column(tmpB, 0) = *(B.dense()); // Conversion of vector to matrix. Temporary solution.
+  ublas::column(tmpB, 0) = (B.dense()); // Conversion of vector to matrix. Temporary solution.
   int info;
 
   if (_num == 1)
@@ -218,7 +218,7 @@ void SimpleMatrix::PLUForwardBackwardInPlace(SiconosVector &B)
     SiconosMatrixException::selfThrow("SimpleMatrix::PLUForwardBackwardInPlace failed.");
   else
   {
-    noalias(*(B.dense())) = ublas::column(tmpB, 0);
+    noalias((B.dense())) = ublas::column(tmpB, 0);
   }
 }
 
@@ -264,7 +264,7 @@ void SimpleMatrix::SolveByLeastSquares(SiconosVector &B)
     SiconosMatrixException::selfThrow("SimpleMatrix::SolveByLeastSquares(SiconosVector &B) failed. Not yet implemented for V being a BlockVector.");
 
   DenseMat tmpB(B.size(), 1);
-  ublas::column(tmpB, 0) = *(B.dense()); // Conversion of vector to matrix. Temporary solution.
+  ublas::column(tmpB, 0) = (B.dense()); // Conversion of vector to matrix. Temporary solution.
   int info = 0;
 
 #ifdef USE_OPTIMAL_WORKSPACE
@@ -280,7 +280,7 @@ void SimpleMatrix::SolveByLeastSquares(SiconosVector &B)
   }
   else
   {
-    noalias(*(B.dense())) = ublas::column(tmpB, 0);
+    noalias((B.dense())) = ublas::column(tmpB, 0);
   }
 
 }

@@ -659,7 +659,7 @@ void BlockMatrix::getRow(unsigned int r, SiconosVector &v) const
     start = stop;
     SP::SiconosMatrix tmp = (*_mat)(numRow, j);
     stop += tmp->size(1);
-    ublas::subrange(*(v.dense()), start, stop) = ublas::row(*(tmp->dense()), posRow);
+    ublas::subrange((v.dense()), start, stop) = ublas::row(*(tmp->dense()), posRow);
   }
 }
 
@@ -687,7 +687,7 @@ void BlockMatrix::getCol(unsigned int c, SiconosVector &v) const
     start = stop;
     SP::SiconosMatrix tmp = (*_mat)(i, numCol);
     stop += tmp->size(0);
-    ublas::subrange(*(v.dense()), start, stop) = ublas::column(tmp->getDense(), posCol);
+    ublas::subrange((v.dense()), start, stop) = ublas::column(tmp->getDense(), posCol);
   }
 }
 
@@ -710,7 +710,7 @@ void BlockMatrix::setRow(unsigned int r, const SiconosVector &v)
     start = stop;
     SP::SiconosMatrix tmp = (*_mat)(numRow, j);
     stop += tmp->size(1);
-    ublas::row(*(tmp->dense()), posRow) = ublas::subrange(*(v.dense()), start, stop);
+    ublas::row(*(tmp->dense()), posRow) = ublas::subrange((v.dense()), start, stop);
   }
 }
 
@@ -733,7 +733,7 @@ void BlockMatrix::setCol(unsigned int col, const SiconosVector &v)
     start = stop;
     SP::SiconosMatrix tmp = (*_mat)(i, numCol);
     stop += tmp->size(0);
-    ublas::column(*(tmp->dense()), posCol) = ublas::subrange(*(v.dense()), start, stop);
+    ublas::column(*(tmp->dense()), posCol) = ublas::subrange((v.dense()), start, stop);
   }
 }
 

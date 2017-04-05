@@ -164,6 +164,7 @@ SICONOS_VISITABLES()
 #undef REGISTER_BASE_EXTERN
 #define REGISTER_BASE(X,Y) REGISTER(X)
 #define REGISTER_BASE_EXTERN(X,Y) REGISTER(X)
+
 namespace Type
 {
 enum Siconos
@@ -215,6 +216,7 @@ struct FindType
 
 struct SiconosVisitor
 {
+  typedef struct{} arguments_type;
   SICONOS_VISITABLES()
   virtual ~SiconosVisitor() {};
 };

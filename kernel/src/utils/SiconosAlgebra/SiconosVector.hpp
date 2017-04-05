@@ -25,16 +25,9 @@
 #include "SiconosAlgebraTypeDef.hpp"
 #include "SiconosVectorFriends.hpp"
 #include "SiconosVectorException.hpp"
+#include "SiconosVisitor.hpp"
 
-/** Union of DenseVect and SparseVect pointers -
-    Siconos::DENSE, num = 1,
-    SPARSE, num = 4
- */
-union VECTOR_UBLAS_TYPE
-{
-  DenseVect *Dense; // num = 1
-  SparseVect *Sparse; // num = 4
-};
+class SiconosVectorStorage;
 
 /** Vectors of double. (Interface to various types of Boost-Ublas vectors).
  *
@@ -56,13 +49,7 @@ protected:
   */
   ACCEPT_SERIALIZATION(SiconosVector);
 
-
-  bool _dense;
-
-  /**
-   * Union of pointers to the ublas vector type (dense or sparse)
-   */
-  VECTOR_UBLAS_TYPE vect;
+  SiconosVectorStorage* _storage;
 
 public:
   /** Default constructor
@@ -122,6 +109,13 @@ public:
    */
   ~SiconosVector();
 
+  /** get storage reference
+   */
+  SiconosVectorStorage& storage() const
+  {
+    return *_storage;
+  }
+
   /** get the vector size, ie the total number of (double) elements in the vector
    *  \return unsigned int
    */
@@ -139,38 +133,19 @@ public:
   /** Get the type number of the current vector.
    * \return an unsigned int
    */
-  unsigned int num() const
-  {
-    if (_dense) return 1;
-    else return 4;
-  }
+  unsigned int num() const;
 
   /** get the ublas embedded vector if it's type is Dense
    *  \param pos unsigned int: position of the required vector (useless for SiconosVector, default = 0)
    *  \return a DenseVect
    */
-  const DenseVect getDense(unsigned int pos = 0) const;
+  DenseVect& dense(unsigned int pos = 0) const;
 
   /** get the ublas embedded vector if it's type is Sparse
    *  \param pos unsigned int: position of the required vector (useless for SiconosVector, default = 0)
    *  \return a SparseVect
    */
-  const SparseVect getSparse(unsigned int pos = 0) const;
-
-  /** get a pointer to the ublas embedded vector if it's type is Dense
-   *  \param pos unsigned int: position of the required vector (useless for SiconosVector, default = 0)
-   *  \return a DenseVect*
-   */
-  inline DenseVect* dense(unsigned int pos = 0) const
-  {
-    return vect.Dense;
-  };
-
-  /** get a pointer to the ublas embedded vector if it's type is Sparse
-   *  \param pos unsigned int: position of the required vector (useless for SiconosVector, default = 0)
-   *  \return a SparseVect*
-   */
-  SparseVect* sparse(unsigned int pos = 0) const;
+  SparseVect& sparse(unsigned int pos = 0) const;
 
   /** return the array of double values of the vector
    *  \return a pointer to the array
@@ -204,8 +179,9 @@ public:
   double vector_sum() const;
 
   /** display data on standard output
+   * \param n float precision
    */
-  void display(void) const;
+  void display(unsigned int n=6) const;
 
   /** return the current object. This function is really useful only for block vector
    * \return a pointer to a SiconosVector
@@ -243,7 +219,7 @@ public:
   /** set all values of the vector component to input value.
    * \param a double
    */
-  void fill(double a);
+  void fill(const double& a);
 
   /** put data of the vector into a std::string
    * \return std::string
@@ -262,7 +238,7 @@ public:
    *  \param i an unsigned int
    *  \param value
    */
-  void setValue(unsigned int i, double value);
+  void setValue(unsigned int i, const double value);
 
   /** get the element at position i in the vector
    *  \param i an integer
@@ -403,9 +379,9 @@ public:
 
   friend void sub(const SiconosVector&, const SiconosVector&, SiconosVector&);
 
-  friend void axpby(double, const SiconosVector&, double, SiconosVector&);
+//  friend void axpby(double, const SiconosVector&, double, SiconosVector&);
 
-  friend void axpy(double, const SiconosVector&, SiconosVector&);
+//  friend void axpy(double, const SiconosVector&, SiconosVector&);
 
   friend double inner_prod(const SiconosVector&, const SiconosVector&);
 
@@ -430,12 +406,6 @@ public:
 
   friend void  getMin(const SiconosVector&, double &, unsigned int &);
   */
-
-  friend struct IsDense;
-
-  friend struct IsSparse;
-
-  friend struct IsBlock;
 
   //  temporary workaround, the visitor has to be removed or rework -- xhub
   ACCEPT_NONVIRTUAL_VISITORS();
