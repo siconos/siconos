@@ -12,6 +12,7 @@ import numpy as np
 import h5py
 import bisect
 import time
+import pickle
 
 import tempfile
 from contextlib import contextmanager
@@ -991,113 +992,80 @@ class Hdf5():
                         velocity, contactors, mass, given_inertia, body_class,
                         shape_class, face_class, edge_class, number=None):
 
-        if mass is None or mass == 0.:
-            # a static object
-            body = None
-
-        else:
-
+        if mass > 0.:
             if body_class is None:
                 body_class = occ.OccBody
 
-            if given_inertia is not None:
-                inertia = given_inertia
-            else:
-                from OCC.GProp import GProp_GProps
-                from OCC.BRepGProp import brepgprop_VolumeProperties
-                from OCC.gp import gp_Ax1, gp_Dir
-
-                # compute mass and inertia from associated instances of Volume
-                volumes = filter(lambda s: isinstance(s, Volume),
-                                 contactors)
-
-                props = GProp_GProps()
-
-                for volume in volumes:
-
-                    iprops = GProp_GProps()
-                    ishape = occ.OccContactShape(
-                        self._shape.get(volume.data,
-                                        shape_class, face_class,
-                                        edge_class, new_instance=True)).data()
-
-                    # the shape relative displacement
-                    occ.occ_move(ishape, volume.translation)
-
-                    brepgprop_VolumeProperties(ishape, iprops)
-
-                    if volume.parameters is not None and \
-                       hasattr(volume.parameters, 'density'):
-                        density = volume.parameters.density
-                    else:
-                        density = 1
-
-                    props.Add(iprops, density)
-
-                # in props density=1
-                global_density = mass / props.Mass()
-                computed_com = props.Center_Of_Mass()
-
-                # center of mass shift
-                translation = np.subtract(translation,
-                                          [computed_com.Coord(1),
-                                           computed_com.Coord(2),
-                                           computed_com.Coord(3)])
-
-                I1 = global_density * props.MomentOfInertia(
-                    gp_Ax1(computed_com, gp_Dir(1, 0, 0)))
-                I2 = global_density * props.MomentOfInertia(
-                    gp_Ax1(computed_com, gp_Dir(0, 1, 0)))
-                I3 = global_density * props.MomentOfInertia(
-                    gp_Ax1(computed_com, gp_Dir(0, 0, 1)))
-
-                # computed_inertia = density * props.MatrixOfInertia()
-                inertia = [I1, I2, I3]
+            assert (given_inertia is not None)
+            inertia = given_inertia
 
             body = body_class(
-                translation + orientation, velocity, mass, inertia)
+                list(translation) + list(orientation), velocity, mass, inertia)
 
             if number is not None:
                 body.setNumber(number)
+        else:
+            # a static object
+            body = None
 
-            for rank, contactor in enumerate(contactors):
+        ctors_data = set([contactor.data for contactor in contactors])
 
-                contact_shape = None
-                reference_shape = occ.OccContactShape(
-                    self._shape.get(contactor.data,
-                                    shape_class, face_class,
-                                    edge_class, new_instance=True))
-                self._keep.append(reference_shape)
+        ref_shape = {ctor_data: occ.OccContactShape(
+            self._shape.get(ctor_data,
+                            shape_class, face_class,
+                            edge_class, new_instance=True))
+                     for ctor_data in ctors_data}
 
-                if hasattr(contactor, 'contact_type'):
+        ref_added = dict()
+        for contactor in contactors:
 
-                    if contactor.contact_type == 'Face':
-                        contact_shape = \
-                                    occ.OccContactFace(reference_shape,
-                                                       contactor.contact_index)
+            contact_shape = None
+            reference_shape = ref_shape[contactor.data]
 
-                    elif contactor.contact_type == 'Edge':
-                        contact_shape = \
-                                    occ.OccContactEdge(reference_shape,
-                                                       contactor.contact_index)
+            self._keep.append(reference_shape)
 
-                if contact_shape is not None:
+            if hasattr(contactor, 'contact_type'):
 
-                    if name not in self._occ_contactors:
-                        self._occ_contactors[name] = dict()
-                    self._occ_contactors[name][contactor.instance_name] = rank
+                if contactor.contact_type == 'Face':
+                    contact_shape = \
+                                occ.OccContactFace(reference_shape,
+                                                   contactor.contact_index)
 
+                elif contactor.contact_type == 'Edge':
+                    contact_shape = \
+                                occ.OccContactEdge(reference_shape,
+                                                   contactor.contact_index)
+
+            if contact_shape is not None:
+
+                if name not in self._occ_contactors:
+                    self._occ_contactors[name] = dict()
+
+                self._occ_contactors[name][contactor.instance_name] = \
+                                                        contact_shape
+
+                if body is not None:
                     body.addContactShape(contact_shape,
                                          contactor.translation,
                                          contactor.orientation,
                                          contactor.group)
-
                 else:
+                    occ.occ_move(contact_shape, list(contactor.translation) +\
+                                 list(contactor.orientation))
+
+            if reference_shape not in ref_added:
+                if body is not None:
                     body.addShape(reference_shape.shape(),
                                   contactor.translation,
                                   contactor.orientation)
+                else:
+                    occ.occ_move(reference_shape.shape(),
+                                 list(contactor.translation) +\
+                                 list(contactor.orientation))
+                ref_added[reference_shape] = True
 
-                self._set_external_forces(body)
+        if body is not None:
+            self._set_external_forces(body)
 
             # add the dynamical system to the non smooth
             # dynamical system
@@ -1507,8 +1475,8 @@ class Hdf5():
                 topology()
 
             pinter = self.permanent_interactions()[name]
-            body1_name=pinter.attrs['body1_name']
-            body2_name=pinter.attrs['body2_name']
+            body1_name = pinter.attrs['body1_name']
+            body2_name = pinter.attrs['body2_name']
 
             ds1 = occ.cast_OccBody(topo.getDynamicalSystem(body1_name))
             try:
@@ -1532,27 +1500,22 @@ class Hdf5():
             cg2 = int(ctr2.attrs['group'])
             nslaw = self._broadphase.nslaw(cg1, cg2)
 
-            if self.verbose:
-                print (body1_name, self._occ_contactors[body1_name])
-            cocs1_rank = self._occ_contactors[body1_name][contactor1_name]
-            cocs1 = ds1.contactShape(cocs1_rank)
+            cocs1 = self._occ_contactors[body1_name][contactor1_name]
+            cocs2 = self._occ_contactors[body2_name][contactor2_name]
 
-            if body2_name in self._occ_contactors:
-                cocs2_rank = self._occ_contactors[body2_name][contactor2_name]
-                cocs2 = ds2.contactShape(cocs2_rank)
-            else:
-                topods2 = self._shape.get(ctr2.attrs['name'])
-                self._keep.append(topods2)
-                ocs2 = occ.OccContactShape(topods2)
+            # else:
+            #     topods2 = self._shape.get(ctr2.attrs['name'])
+            #     self._keep.append(topods2)
+            #     ocs2 = occ.OccContactShape(topods2)
 
-                index2 = int(ctr2.attrs['contact_index'])
+            #     index2 = int(ctr2.attrs['contact_index'])
 
-                ctact_t2 = ctr2.attrs['type']
+            #     ctact_t2 = ctr2.attrs['type']
 
-                ctactbuild = {'Face': occ.OccContactFace,
-                              'Edge': occ.OccContactEdge}
+            #     ctactbuild = {'Face': occ.OccContactFace,
+            #                   'Edge': occ.OccContactEdge}
 
-                cocs2 = ctactbuild[ctact_t2](ocs2, index2)
+            #     cocs2 = ctactbuild[ctact_t2](ocs2, index2)
 
             cp1 = occ.ContactPoint(cocs1)
             cp2 = occ.ContactPoint(cocs2)
@@ -1741,11 +1704,79 @@ class Hdf5():
                             velocities[id_vlast, 1] ==
                             self.instances()[name].attrs['id'])[0]
                         xvel = velocities[id_vlast[id_vlast_inst[0]], :]
-                        velocity = (xvel[2], xvel[3], xvel[4],
-                                    xvel[5], xvel[6], xvel[7])
-                        self.importObject(name, body_class, shape_class,
-                                          face_class, edge_class,
-                                          translation, orientation, velocities)
+                        velocity = (xvel[2], xvel[3], xvel[4], xvel[5], xvel[6], xvel[7])
+
+                    # start from initial conditions
+                    else:
+                        print ('Import  dynamic or static object number ', obj.attrs['id'], 'from initial state')
+                        print ('                object name   ', name)
+                        translation = obj.attrs['translation']
+                        orientation = obj.attrs['orientation']
+                        velocity = obj.attrs['velocity']
+
+                    # bodyframe center of mass
+                    center_of_mass = None
+
+                    # bodyframe center of mass
+                    # check for compatibility
+                    if 'center_of_mass' in obj.attrs:
+                        center_of_mass = \
+                                obj.attrs['center_of_mass'].astype(float)
+                    else:
+                        center_of_mass = [0, 0, 0]
+
+                    input_ctrs = [ctr for _n_, ctr in obj.items()]
+
+                    contactors = []
+                    occ_type = False
+                    for ctr in input_ctrs:
+                        if 'type' in ctr.attrs:
+                            # occ contact
+                            occ_type = True
+                            contactors.append(
+                                Contactor(
+                                    instance_name=ctr.attrs['instance_name'],
+                                    shape_data=ctr.attrs['name'],
+                                    collision_group=ctr.attrs['group'].astype(int),
+                                    contact_type=ctr.attrs['type'],
+                                    contact_index=ctr.attrs['contact_index'].astype(int),
+                                    relative_translation=np.subtract(ctr.attrs['translation'].astype(float), center_of_mass),
+                                    relative_orientation=ctr.attrs['orientation'].astype(float)))
+                        elif 'group' in ctr.attrs:
+                            # bullet contact
+                            assert not occ_type
+                            contactors.append(
+                                Contactor(
+                                    instance_name=ctr.attrs['instance_name'],
+                                    shape_data=ctr.attrs['name'],
+                                    collision_group=ctr.attrs['group'].astype(int),
+                                    relative_translation=np.subtract(ctr.attrs['translation'].astype(float), center_of_mass),
+                                    relative_orientation=ctr.attrs['orientation'].astype(float)))
+                        else:
+                            # occ shape
+                            occ_type = True
+                            # fix: not only contactors here
+                            contactors.append(
+                                Volume(
+                                    instance_name=ctr.attrs['instance_name'],
+                                    shape_data=ctr.attrs['name'],
+                                    parameters=pickle.loads(ctr.attrs['parameters']),
+                                    relative_translation=np.subtract(ctr.attrs['translation'].astype(float), center_of_mass),
+                                    relative_orientation=ctr.attrs['orientation'].astype(float)))
+
+                    if 'inertia' in obj.attrs:
+                        inertia = obj.attrs['inertia']
+                    else:
+                        inertia = None
+
+                    if occ_type:
+                        # Occ object
+                        self.importOccObject(
+                            name, floatv(translation), floatv(orientation),
+                            floatv(velocity), contactors, float(mass),
+                            inertia, body_class, shape_class, face_class,
+                            edge_class,
+                            number = self.instances()[name].attrs['id'])
                     else:
                         # start from initial conditions
                         self.importObject(name, body_class, shape_class,
@@ -2255,6 +2286,66 @@ class Hdf5():
 
         if name not in self._input:
 
+            com_translation = [0., 0., 0.]
+
+            if inertia is None and mass > 0.:
+                volumes = filter(lambda s: isinstance(s, Volume),
+                                 shapes)
+                if len(volumes) > 0:
+                    # a computed inertia and center of mass
+                    # occ only
+                    from OCC.GProp import GProp_GProps
+                    from OCC.BRepGProp import brepgprop_VolumeProperties
+                    from OCC.gp import gp_Ax1, gp_Dir
+                    volumes = filter(lambda s: isinstance(s, Volume),
+                                     shapes)
+
+                    props = GProp_GProps()
+
+                    for volume in volumes:
+
+                        iprops = GProp_GProps()
+                        iishape = self._shape.get(volume.data,
+                                                  shape_class=None, face_class=None,
+                                                  edge_class=None, new_instance=True)
+                        ishape = occ.OccContactShape(iishape).data()
+
+                        # the shape relative displacement
+                        occ.occ_move(ishape, list(volume.translation) +\
+                                     list(volume.orientation))
+
+                        brepgprop_VolumeProperties(iishape, iprops)
+
+                        if volume.parameters is not None and \
+                           hasattr(volume.parameters, 'density'):
+                            density = volume.parameters.density
+                        else:
+                            density = 1
+
+                        props.Add(iprops, density)
+
+                    assert (props.Mass() > 0.)
+                    global_density = mass / props.Mass()
+                    computed_com = props.CentreOfMass()
+                    I1 = global_density * props.MomentOfInertia(
+                        gp_Ax1(computed_com, gp_Dir(1, 0, 0)))
+                    I2 = global_density * props.MomentOfInertia(
+                        gp_Ax1(computed_com, gp_Dir(0, 1, 0)))
+                    I3 = global_density * props.MomentOfInertia(
+                        gp_Ax1(computed_com, gp_Dir(0, 0, 1)))
+
+                    inertia = [I1, I2, I3]
+                    center_of_mass = np.array([computed_com.Coord(1),
+                                               computed_com.Coord(2),
+                                               computed_com.Coord(3)])
+
+                    print('computed inertia:', I1, I2, I3)
+                    print('computed center of mass:',
+                          computed_com.Coord(1),
+                          computed_com.Coord(2),
+                          computed_com.Coord(3))
+
+
             obj=group(self._input, name)
 
             if time_of_birth >= 0:
@@ -2267,6 +2358,7 @@ class Hdf5():
             obj.attrs['orientation']=ori
             obj.attrs['velocity']=velocity
             obj.attrs['center_of_mass']=center_of_mass
+
             if inertia is not None:
                 obj.attrs['inertia']=inertia
             if allow_self_collide is not None:
@@ -2293,7 +2385,7 @@ class Hdf5():
 
                 if hasattr(ctor, 'parameters') and \
                         ctor.parameters is not None:
-                    dat.attrs['parameters'] = ctor.parameters
+                    dat.attrs['parameters'] = pickle.dumps(ctor.parameters)
 
                 if hasattr(ctor, 'contact_type') and \
                    ctor.contact_type is not None:

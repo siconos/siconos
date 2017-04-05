@@ -1,6 +1,20 @@
 from math import cos, sin
 from numpy.linalg import norm
 
+class Material(object):
+    """Some material properties that may be associated to shapes.
+
+    Parameter
+    ---------
+
+    density: float
+        The material density.
+    """
+
+    def __init__(self,
+                 density):
+        self.density = density
+
 
 class MovedShape(object):
     """A shape with a reference to some shape data and that is moved by a
@@ -111,7 +125,7 @@ class Volume(Shape):
     def __init__(self,
                  shape_data,
                  instance_name=None,
-                 parameters=None,
+                 parameters=Material(density=1),
                  relative_translation=[0, 0, 0],
                  relative_orientation=[1, 0, 0, 0]):
         self.instance_name = instance_name
@@ -174,16 +188,3 @@ class Contactor(Shape):
                                         relative_orientation)
 
 
-class Material(object):
-    """Some material properties that may be associated to shapes.
-
-    Parameter
-    ---------
-
-    density: float
-        The material density.
-    """
-
-    def __init__(self,
-                 density):
-        self.density = density

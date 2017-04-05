@@ -233,10 +233,9 @@ typedef __mpz_struct mpz_t[1];
 %include "SiconosAlgebraTypeDef.hpp"
 %include "SiconosAlgebra.hpp"
 
+%include "SimulationGraphs.hpp"
+
 %import "RelationNamespace.hpp";
-
-
-
 
 %inline
 %{

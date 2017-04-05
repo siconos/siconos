@@ -9,6 +9,7 @@
 
 #include <cadmbtb.hpp>
 
+
 void occ_move(TopoDS_Shape& shape, const SiconosVector& q)
 {
   const gp_Vec translat = gp_Vec(q(0), q(1), q(2));
