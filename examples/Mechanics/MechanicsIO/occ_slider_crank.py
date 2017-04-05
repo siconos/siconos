@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from siconos.mechanics.collision.tools import Shape, Contactor
+from siconos.mechanics.collision.tools import Volume, Contactor
 from siconos.io.mechanics_io import Hdf5
 import siconos.io.mechanics_io
 
@@ -47,18 +47,18 @@ with Hdf5() as io:
     io.addShapeDataFromFile('AxisBody',
                             '../Mechanisms/SliderCrank/CAD/AxisBody2.stp')
 
-    io.addObject('part1', [Shape(shape_data='body1',
-                                 instance_name='Body1',
-                                 relative_translation=[-0.5*l1, 0., 0.],
-                                 relative_orientation=[(0, 1, 0), 0. ])],
+    io.addObject('part1', [Volume(shape_data='body1',
+                                  instance_name='Body1',
+                                  relative_translation=[-0.5*l1, 0., 0.],
+                                  relative_orientation=[(0, 1, 0), 0. ])],
                  translation=[0.5*l1, 0., 0.],
                  velocity=[0., 0., -0.5 * w10 * l1, 0., w10, 0.],
                  mass=0.038,
                  inertia=[7.4e-5, 1, 1.])
 
-    io.addObject('part2', [Shape(shape_data='body2',
-                                 instance_name='Body2',
-                                 relative_translation=[-0.5 * l2, 0., 0.])],
+    io.addObject('part2', [Volume(shape_data='body2',
+                                  instance_name='Body2',
+                                  relative_translation=[-0.5 * l2, 0., 0.])],
                  translation=[l1 + 0.5*l2, 0., 0.],
                  orientation=[0., 0., 1., 0.],
                  velocity=[0., 0., -0.5 * w10 * l1, 0., w20, 0.],

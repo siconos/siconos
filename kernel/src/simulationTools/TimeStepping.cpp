@@ -441,6 +441,9 @@ void TimeStepping::advanceToEvent()
     indexSet0->bundle(*ui)->resetAllLambda();
   }
   newtonSolve(_newtonTolerance, _newtonMaxIteration);
+
+  updateWorldFromDS();
+  updateInteractions();
 }
 
 /*update of the nabla */
