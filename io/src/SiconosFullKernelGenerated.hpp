@@ -232,6 +232,10 @@ SICONOS_IO_REGISTER_WITH_BASES(LagrangianR,(Relation),
   (_jachq)
   (_jachqDot)
   (_pluginJachq))
+SICONOS_IO_REGISTER_WITH_BASES(LagrangianLinearDiagonalDS,(LagrangianDS),
+  (_damping)
+  (_mu)
+  (_stiffness))
 SICONOS_IO_REGISTER_WITH_BASES(FirstOrderNonLinearDS,(DynamicalSystem),
   (_M)
   (_b)
@@ -348,6 +352,8 @@ SICONOS_IO_REGISTER_WITH_BASES(LagrangianDS,(DynamicalSystem),
   (_velocityMemory))
 SICONOS_IO_REGISTER(ExtraAdditionalTerms,
 )
+SICONOS_IO_REGISTER_WITH_BASES(MoreauJeanBilbaoOSI,(OneStepIntegrator),
+)
 SICONOS_IO_REGISTER(InteractionManager,
   (_nslaws))
 SICONOS_IO_REGISTER_WITH_BASES(TimeDiscretisationEvent,(Event),
@@ -448,12 +454,6 @@ SICONOS_IO_REGISTER_WITH_BASES(TimeSteppingDirectProjection,(TimeStepping),
   (_maxViolationUnilateral)
   (_nbProjectionIteration)
   (_projectionMaxIteration))
-SICONOS_IO_REGISTER_WITH_BASES(ZeroOrderHoldOSI,(OneStepIntegrator),
-  (_useGammaForRelation))
-SICONOS_IO_REGISTER_WITH_BASES(Equality,(LinearOSNS),
-)
-SICONOS_IO_REGISTER_WITH_BASES(GenericMechanical,(LinearOSNS),
-)
 SICONOS_IO_REGISTER_WITH_BASES(LinearOSNS,(OneStepNSProblem),
   (_M)
   (_MStorageType)
@@ -461,6 +461,12 @@ SICONOS_IO_REGISTER_WITH_BASES(LinearOSNS,(OneStepNSProblem),
   (_q)
   (_w)
   (_z))
+SICONOS_IO_REGISTER_WITH_BASES(ZeroOrderHoldOSI,(OneStepIntegrator),
+  (_useGammaForRelation))
+SICONOS_IO_REGISTER_WITH_BASES(Equality,(LinearOSNS),
+)
+SICONOS_IO_REGISTER_WITH_BASES(GenericMechanical,(LinearOSNS),
+)
 SICONOS_IO_REGISTER_WITH_BASES(MoreauJeanCombinedProjectionOSI,(MoreauJeanOSI),
 )
 SICONOS_IO_REGISTER_WITH_BASES(MoreauJeanDirectProjectionOSI,(MoreauJeanOSI),
@@ -507,6 +513,17 @@ SICONOS_IO_REGISTER(Simulation,
   (statOut))
 SICONOS_IO_REGISTER_WITH_BASES(LCP,(LinearOSNS),
 )
+SICONOS_IO_REGISTER(OneStepIntegrator,
+  (_dynamicalSystemsGraph)
+  (_extraAdditionalTerms)
+  (_integratorType)
+  (_levelMaxForInput)
+  (_levelMaxForOutput)
+  (_levelMinForInput)
+  (_levelMinForOutput)
+  (_simulation)
+  (_sizeMem)
+  (_steps))
 SICONOS_IO_REGISTER_WITH_BASES(MLCP,(LinearOSNS),
   (_curBlock)
   (_m)
@@ -542,17 +559,6 @@ SICONOS_IO_REGISTER(EventsManager,
   (_events)
   (_k)
   (_td))
-SICONOS_IO_REGISTER(OneStepIntegrator,
-  (_dynamicalSystemsGraph)
-  (_extraAdditionalTerms)
-  (_integratorType)
-  (_levelMaxForInput)
-  (_levelMaxForOutput)
-  (_levelMinForInput)
-  (_levelMinForOutput)
-  (_simulation)
-  (_sizeMem)
-  (_steps))
 SICONOS_IO_REGISTER(OneStepNSProblem,
   (_hasBeenUpdated)
   (_indexSetLevel)
@@ -648,11 +654,13 @@ void siconos_io_register_generated(Archive& ar)
   ar.register_type(static_cast<LagrangianRheonomousR*>(NULL));
   ar.register_type(static_cast<FirstOrderNonLinearR*>(NULL));
   ar.register_type(static_cast<Interaction*>(NULL));
+  ar.register_type(static_cast<LagrangianLinearDiagonalDS*>(NULL));
   ar.register_type(static_cast<FirstOrderNonLinearDS*>(NULL));
   ar.register_type(static_cast<LagrangianScleronomousR*>(NULL));
   ar.register_type(static_cast<LagrangianLinearTIDS*>(NULL));
   ar.register_type(static_cast<NewtonEulerDS*>(NULL));
   ar.register_type(static_cast<LagrangianDS*>(NULL));
+  ar.register_type(static_cast<MoreauJeanBilbaoOSI*>(NULL));
   ar.register_type(static_cast<InteractionManager*>(NULL));
   ar.register_type(static_cast<TimeDiscretisationEvent*>(NULL));
   ar.register_type(static_cast<TimeSteppingCombinedProjection*>(NULL));
