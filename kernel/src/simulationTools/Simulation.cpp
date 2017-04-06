@@ -498,3 +498,20 @@ void Simulation::updateOutput(unsigned int)
   }
   DEBUG_END("Simulation::updateOutput()\n");
 }
+
+void Simulation::prepareIntegratorForDS(SP::OneStepIntegrator osi,
+                                        SP::DynamicalSystem ds,
+                                        SP::Model m, double time)
+{
+  // Keep OSI in the set, no effect if already present.
+  insertIntegrator(osi);
+
+  // Associate the OSI to the DS in the topology.
+  _nsds->topology()->setOSI(ds, osi);
+
+  // Prepare work vectors, etc.
+  // If no Model, or OSI has no DSG yet, assume DS will be initialized
+  // later.  (Typically, during Simulation::initialize())
+  if (m && osi->dynamicalSystemsGraph())
+    osi->initializeDynamicalSystem(*m, time, ds);
+}

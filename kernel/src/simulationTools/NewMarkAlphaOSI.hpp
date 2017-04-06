@@ -53,6 +53,7 @@ protected:
    * _IsVelocityLevel = false: constraints at the position are handled
    */
   bool _IsVelocityLevel;
+
   /**
    * Default constructor
   */

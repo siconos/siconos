@@ -120,6 +120,12 @@ protected:
   */
   void _check_and_update_interaction_levels(Interaction& inter);
 
+  /** initialization of the work vectors and matrices (properties) related to
+   *  one dynamical system on the graph and needed by the osi -- common code.
+   * \param ds the dynamical system
+   */
+  SP::VectorOfVectors _initializeDSWorkVectors(SP::DynamicalSystem ds);
+
   /** default constructor */
   OneStepIntegrator() {};
 

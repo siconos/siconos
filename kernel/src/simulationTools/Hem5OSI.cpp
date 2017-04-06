@@ -482,12 +482,8 @@ void Hem5OSI::fprob(integer* IFCN,
 void Hem5OSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds)
 {
   // Get work buffers from the graph
-  const DynamicalSystemsGraph::VDescriptor& dsv = _dynamicalSystemsGraph->descriptor(ds);
-  VectorOfVectors& workVectors = *_dynamicalSystemsGraph->properties(dsv).workVectors;
-  // // Initialize memory buffers
-  // _dynamicalSystemsGraph->bundle(dsv)->initMemory(getSizeMem());
-  // // Force dynamical system to its initial state
-  // _dynamicalSystemsGraph->bundle(dsv)->resetToInitialState();
+  VectorOfVectors& workVectors = *_initializeDSWorkVectors(ds);
+
   Type::Siconos dsType = Type::value(*ds);
 
   if(dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)

@@ -115,12 +115,8 @@ unsigned int D1MinusLinearOSI::numberOfIndexSets() const
 void D1MinusLinearOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds)
 {
   // Get work buffers from the graph
-  const DynamicalSystemsGraph::VDescriptor& dsv = _dynamicalSystemsGraph->descriptor(ds);
-  VectorOfVectors& workVectors = *_dynamicalSystemsGraph->properties(dsv).workVectors;
-  // Initialize memory buffers
-  // _dynamicalSystemsGraph->bundle(dsv)->initMemory(getSizeMem());
-  // // Force dynamical system to its initial state
-  // _dynamicalSystemsGraph->bundle(dsv)->resetToInitialState();
+  VectorOfVectors& workVectors = *_initializeDSWorkVectors(ds);
+
   // Check dynamical system type
   Type::Siconos dsType = Type::value(*ds);
   assert(dsType == Type::LagrangianLinearTIDS || dsType == Type::LagrangianDS || Type::NewtonEulerDS);

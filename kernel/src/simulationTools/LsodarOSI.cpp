@@ -238,7 +238,8 @@ void LsodarOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSyste
 {
   DEBUG_BEGIN("LsodarOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds)\n");
   // Get work buffers from the graph
-  VectorOfVectors& workVectors = *_dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).workVectors;
+  VectorOfVectors& workVectors = *_initializeDSWorkVectors(ds);
+
   Type::Siconos dsType = Type::value(*ds);
 
   ds->initRhs(t); // This will create p[2] and other required vectors/buffers

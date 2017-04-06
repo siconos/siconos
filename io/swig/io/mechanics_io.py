@@ -1066,7 +1066,6 @@ class Hdf5():
             # dynamical system
             nsds = self._model.nonSmoothDynamicalSystem()
             nsds.insertDynamicalSystem(body)
-            nsds.topology().setOSI(body, self._osi)
             nsds.setName(body, str(name))
 
     def importBulletObject(self, name, translation, orientation,
@@ -1222,13 +1221,10 @@ class Hdf5():
                     nsds = self._model.nonSmoothDynamicalSystem()
                     if use_proposed:
                         nsds.insertDynamicalSystem(body)
-                        nsds.topology().setOSI(body, self._osi)
-                        nsds.topology().initDS(self._model,
-                            self._model.simulation().nextTime(),
-                            body, self._osi)
-                        #body.initialize(self._model.simulation().nextTime())
-                        self._model.simulation().initialize(
-                            self._model, False)
+                        self._model.simulation().prepareIntegratorForDS(
+                            self._osi, body, self._model,
+                            self._model.simulation().nextTime())
+                        self._model.simulation().initialize(self._model, False)
                     elif use_original:
                         self._broadphase.addDynamicObject(
                             body,
@@ -1238,7 +1234,6 @@ class Hdf5():
                 else:
                     nsds = self._model.nonSmoothDynamicalSystem()
                     nsds.insertDynamicalSystem(body)
-                    nsds.topology().setOSI(body, self._osi)
                     nsds.setName(body, str(name))
 
     def importJoint(self, name):

@@ -156,13 +156,12 @@ void CommonSMC::initialize(const Model& m)
   }
 
   _SMC->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DS_SMC);
-  _SMC->nonSmoothDynamicalSystem()->topology()->setOSI(_DS_SMC, _integratorSMC);
   _SMC->nonSmoothDynamicalSystem()->setName(_DS_SMC, "plant_SMC");
   _SMC->nonSmoothDynamicalSystem()->link(_interactionSMC, _DS_SMC);
   _SMC->nonSmoothDynamicalSystem()->setControlProperty(_interactionSMC, true);
   _SMC->nonSmoothDynamicalSystem()->topology()->setName(_interactionSMC, "Sgn_SMC");
   _simulationSMC->setName("linear sliding mode controller simulation");
-  _simulationSMC->insertIntegrator(_integratorSMC);
+  _simulationSMC->prepareIntegratorForDS(_integratorSMC, _DS_SMC, _SMC, t0);
   // OneStepNsProblem
   _OSNSPB_SMC->numericsSolverOptions()->dparam[0] = _precision;
   //    std::cout << _OSNSPB_SMC->numericsSolverOptions()->dparam[0] <<std::endl;

@@ -20,23 +20,6 @@
 #include "NonSmoothDynamicalSystem.hpp"
 #include "Interaction.hpp"
 #include "EqualityConditionNSL.hpp"
-
-
-#include "MoreauJeanOSI.hpp"
-#include "MoreauJeanGOSI.hpp"
-#include "EulerMoreauOSI.hpp"
-#include "SchatzmanPaoliOSI.hpp"
-
-#define VISITOR_CLASSES() \
-  REGISTER(MoreauJeanOSI) \
-  REGISTER(MoreauJeanGOSI) \
-  REGISTER(EulerMoreauOSI) \
-  REGISTER(SchatzmanPaoliOSI)
-
-#include <VisitorMaker.hpp>
-using namespace Experimental;
-
-// to be removed, once the mess with allOSI and OSIDynamicalSystems has been cleaned -- xhub
 #include "OneStepIntegrator.hpp"
 
 #if (__cplusplus >= 201103L) && !defined(USE_BOOST_FOR_CXX11)
@@ -248,42 +231,6 @@ void Topology::setName(SP::Interaction inter, const std::string& name)
 {
   InteractionsGraph::VDescriptor igv = _IG[0]->descriptor(inter);
   _IG[0]->name.insert(igv, name);
-}
-
-/* initializeIterationMatrixW is not a member of OneStepIntegrator (should it be ?),
-   so we visit some integrators which provide this initialization.
-*/
-
-/* first, a generic visitor is defined. */
-struct CallInitDS : public SiconosVisitor
-{
-  double time;
-  SP::DynamicalSystem ds;
-  SP::Model m ; 
-  template<typename T>
-  void operator()(const T& osi)
-  {
-    const_cast<T*>(&osi)->initializeDynamicalSystem(*(this->m), this->time, this->ds);
-  }
-};
-
-/* the visit is made on classes which provide the function initializeIterationMatrixW */
-// typedef Visitor < Classes < MoreauJeanOSI >,
-//                   CallInitDS >::Make InitDynamicalSystem;
-
-typedef Visitor < Classes < MoreauJeanOSI,
-                            MoreauJeanGOSI,
-                            EulerMoreauOSI,
-                            SchatzmanPaoliOSI >,
-                  CallInitDS >::Make InitDynamicalSystem;
-
-void Topology::initDS(SP::Model m, double time, SP::DynamicalSystem ds, SP::OneStepIntegrator OSI)
-{
-  InitDynamicalSystem initDynamicalSystem;
-  initDynamicalSystem.time = 0;
-  initDynamicalSystem.ds = ds;
-  initDynamicalSystem.m = m;
-  OSI->accept(initDynamicalSystem);
 }
 
 void Topology::setOSI(SP::DynamicalSystem ds, SP::OneStepIntegrator OSI)

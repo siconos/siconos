@@ -96,13 +96,8 @@ SP::SiconosMatrix EulerMoreauOSI::WBoundaryConditions(SP::DynamicalSystem ds)
 
 void EulerMoreauOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds)
 {
-  // Get work buffers from the graph
-  const DynamicalSystemsGraph::VDescriptor& dsv = _dynamicalSystemsGraph->descriptor(ds);
-  VectorOfVectors& workVectors = *_dynamicalSystemsGraph->properties(dsv).workVectors;
-  // // Initialize memory buffers
-  // _dynamicalSystemsGraph->bundle(dsv)->initMemory(getSizeMem());
-  // // Force dynamical system to its initial state
-  // _dynamicalSystemsGraph->bundle(dsv)->resetToInitialState();
+  VectorOfVectors& workVectors = *_initializeDSWorkVectors(ds);
+
   // Check dynamical system type
   SP::FirstOrderNonLinearDS fods = std11::static_pointer_cast<FirstOrderNonLinearDS> (ds);
   Type::Siconos dsType = Type::value(*ds);

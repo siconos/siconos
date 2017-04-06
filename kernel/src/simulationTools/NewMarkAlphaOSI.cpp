@@ -404,9 +404,12 @@ void NewMarkAlphaOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_i
 void NewMarkAlphaOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds)
 {
   DEBUG_BEGIN("NewMarkAlphaOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds)\n")
-    // Get work buffers from the graph
-    const DynamicalSystemsGraph::VDescriptor& dsv = _dynamicalSystemsGraph->descriptor(ds);
-  VectorOfVectors& workVectors = *_dynamicalSystemsGraph->properties(dsv).workVectors;
+
+  // Get work buffers from the graph
+  VectorOfVectors& workVectors = *_initializeDSWorkVectors(ds);
+
+  // Get work matrices from the graph
+  const DynamicalSystemsGraph::VDescriptor& dsv = _dynamicalSystemsGraph->descriptor(ds);
   VectorOfMatrices& workMatrices = *_dynamicalSystemsGraph->properties(dsv).workMatrices;
   // Initialize memory buffers
   // _dynamicalSystemsGraph->bundle(dsv)->initMemory(getSizeMem());

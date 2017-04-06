@@ -509,15 +509,9 @@ void BulletSpaceFilter::addDynamicObject(SP::BulletDS ds,
 
   /* Insert the new DS into the OSI, model, and simulation. */
   this->model()->nonSmoothDynamicalSystem()->insertDynamicalSystem(ds);
-  this->model()->nonSmoothDynamicalSystem()->topology()->setOSI(ds, osi);
-  InitDynamicalSystem initDS;
-  initDS.time = simulation->nextTime();
-  initDS.ds = ds;
-  initDS.m= this->model();
-  osi->accept(initDS);
 
-  // /* Initialize the DS at the current time */
-  // ds->initialize(simulation->nextTime(), osi->getSizeMem());
+  /* Associate/initialize the OSI */
+  simulation->prepareIntegratorForDS(osi, ds, this->model(), simulation->nextTime());
 
   /* Partially re-initialize the simulation. */
   simulation->initialize(this->model(), false);
