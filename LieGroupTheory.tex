@@ -249,7 +249,7 @@ If we identify the manifold $\mathcal M$ with the group $\mathcal G$, The left a
 If we consider $L_z(y)$ as a right group action $ L_z(y) = \Lambda^r( z, y) =z \glaw y $, by differentiation we get a $L'_z : T \mathfrak g \cong  \mathfrak g \rightarrow T_z\mathcal G$ with $\dot\rho (0)=a$ such that
 \begin{equation}
   \label{eq:150}
-  \lambda^r_{*}(a)(z) = L'_z(a) = \left.\frac{d}{ds}{ \Lambda^r (z, \rho(s)}\right|_{s=0} = z \glaw a
+  \lambda^r_{*}(a)(z) = L'_z(a) = \left.\frac{d}{ds}{ \Lambda^r (z, \rho(s))}\right|_{s=0} = z \glaw a
 \end{equation}
 The map
 \begin{equation}
@@ -327,7 +327,7 @@ Another important relation relating $\Ad$, $\ad$ and $\exp$ is
             & &  v \mapsto \exp'_a(v)  = \left.\frac{d}{dt} \exp(a+tv)\right|_{t=0}
   \end{array}
 \end{equation}
-The definition is very similar to the definition of the directional derivative of $\exp$ in the direction $v \in \mathfrak g$ at a point $a\in\mathfrak g$. Using the expression \eqref{eq:153} of the tangent space at $\exp(a)$, we can defined another expression of the differential map denoted as $\dexp_a : \mathfrak g  \rightarrow \mathfrak g$ such that
+The definition is very similar to the definition of the directional derivative of $\exp$ in the direction $v \in \mathfrak g$ at a point $a\in\mathfrak g$. Using the expression \eqref{eq:153} of the tangent space at $\exp(a)$, we can defined another expression of the differential map denoted as $\dlexp_a : \mathfrak g  \rightarrow \mathfrak g$ such that
 \begin{equation}
   \label{eq:156}
   \dlexp_a = L'_{\exp^{-1}(a)} \glaw \exp_a' = L'_{\exp(-a)} \glaw \exp_a' 
@@ -385,12 +385,12 @@ An explicit formula relates $\dexp_{a}$ to the iteration of the adjoint operator
 As for $\Ad_a$ and $\ad_a$, the mapping $\dexp_{a}(b)$ is a linear mapping in its second argument for a fixed $a$. Using the relation~\eqref{eq:164}, we can also relate the right and the lest trivialization tangent
 \begin{equation}
   \label{eq:165}
-\dlexp_a (b) =   (\Ad_{\exp(a)} \glaw \dexp(a))(b) = (\exp(\ad_{-a}) \glaw \frac{e - \exp\glaw\ad_a}{\ad_a})(b) = \frac{e - \exp\glaw\ad_{-a}}{\ad_a} = \dexp_{-a}
+\dlexp_a (b) =   (\Ad_{\exp(a)} \glaw \dexp(a))(b) = (\exp(\ad_{-a}) \glaw \frac{e - \exp\glaw\ad_a}{\ad_a})(b) = \frac{e - \exp\glaw\ad_{-a}}{\ad_a}(b) = \dexp_{-a}(b)
 \end{equation}
 It is also possible to define the  the ``left trivialized'' tangent of the exponential map
 \begin{equation}
   \label{eq:46}
-   \frac{d}{dt} (\exp(a(t))) =  \exp(a(t)) \dexp_{-a(t)}(a'(t)) =  \exp(a(t)) \dlexp_{a(t)}(a'(t))
+   \frac{d}{dt} (\exp(a(t))) =  \exp(a(t)) \dlexp_{a(t)}(a'(t)) = \exp(a(t)) \dexp_{-a(t)}(a'(t)) 
 \end{equation}
 
 \begin{ndrva}

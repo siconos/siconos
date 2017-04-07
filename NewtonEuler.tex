@@ -11,10 +11,11 @@
 \end{tabular}
 
 \def\glaw{\cdot}
+\def\cg{\sf \small g}
+
 \section{The equations of motion}
 
 
-\def\cg{\sf \small g}
 In the maximal coordinates framework, the most natural choice for the kinematic  variables and for the formulation of the equations of motion is the Newton/Euler formalism, where the equation of motion describes the translational and rotational dynamics of each body using a specific choice of parameters. For the translational motion, the position of the center of mass $x_{\cg}\in \RR^3$ and its velocity  $v_{\cg} = \dot x_{\cg} \in \RR^3$ is usually chosen. For the orientation of the body is usually defined by the rotation matrix $R$ of the body-fixed frame with respect to a given inertial frame.
 
 For the rotational motion, a common choice is to choose the rotational velocity  $\Omega \in \RR^3$ of the body expressed in the body--fixed frame. This choice comes from the formulation of a rigid body motion of a point $X$ in the inertial frame as
@@ -25,12 +26,12 @@ For the rotational motion, a common choice is to choose the rotational velocity 
 The velocity of this point can be written as
 \begin{equation}
   \label{eq:2}
-  \dot x(t) = v_{\cg} + \dot R(t) X
+  \dot x(t) = v_{\cg}(t) + \dot R(t) X
 \end{equation}
-Since $R^\top R=I$, we get $R^\top \dot R + \dot R^\top R =0$. We can conclude that it exists a matrix $\tilde \Omega := R^\top \dot R $ such that $\tilde \Omega + \tilde \Omega^\top=0$, i.e. a skew symmetric matrix. The notation $\tilde \Omega$ comes from the fact that there is a bijection between the skew syExmmetric matrix in $\RR^{3\times3}$ and $\RR^3$ such that
+Since $R^\top R=I$, we get $R^\top \dot R + \dot R^\top R =0$. We can conclude that it exists a matrix $\tilde \Omega := R^\top \dot R $ such that $\tilde \Omega + \tilde \Omega^\top=0$, i.e. a skew symmetric matrix. The notation $\tilde \Omega$ comes from the fact that there is a bijection between the skew symmetric matrix in $\RR^{3\times3}$ and $\RR^3$ such that
 \begin{equation}
   \label{eq:3}
-  \tilde \Omega x  = \Omega \times x, \quad \forall x\in RR^3.
+  \tilde \Omega x  = \Omega \times x, \quad \forall x\in \RR^3.
 \end{equation}
 The rotational velocity is then related to the $R$ by :
 \begin{equation}
@@ -64,7 +65,29 @@ If we perform the time derivation of $RR^\top =I$ rather than $R^\top R=I$, we g
    \label{eq:4}
    \tilde \omega = R \tilde \Omega R^\top
  \end{equation}
- and it can be proved that is equivalent to $ \omega =R \Omega$. The vector $\omega$ is the rotational velocity expressed in the inertial frame.
+ and it can be proved that is equivalent to $ \omega =R \Omega$. The vector $\omega$ is the rotational velocity expressed in the inertial frame. The equation of motion can also be expressed in the inertial frame as follows
+  \begin{equation}
+  \label{eq:motion-NewtonEuler-inertial}
+  \left\{\begin{array}{rcl}
+      m \;\dot v_{\cg}  & = &f(t,x_{\cg}, v_{\cg},  R,  R^T \omega) \\
+      J(R) \dot \omega + \omega \times J(R) \omega &= & m(t,x_{\cg}, v_{\cg}, R, \omega) \\
+      \dot x_{\cg}&=& v_{\cg}\\
+      \dot R  &=& \widetilde \omega R
+    \end{array}
+  \right.
+\end{equation}
+where the matrix $J(R) = R I R^T$ is the inertia matrix in the inertial frame.
+Defining the angular momentum with respect to the inertial frame as
+\begin{equation}
+  \label{eq:1}
+  \pi(t) = J(R(t)) \omega(t)
+\end{equation}
+the equation of the angular motion is derived from the balance equation of the angular momentum
+\begin{equation}
+  \label{eq:5}
+  \dot \pi(t) = m(t,x_{\cg}, v_{\cg}, R, \omega)).
+\end{equation}
+
 \end{remark}
 
 For a given constant (time invariant) $\tilde \Omega$, let us consider the differential equation
@@ -185,48 +208,49 @@ When a collection of bodies is considered, we will use the same notation as in~(
 
 \input{LieGroupTheory.tex}
 \section{ Lie group $SO(3)$ of finite rotations and Lie algebra $\mathfrak{so}(3)$ of infinitesimal rotations}
+The presentation is this section follows the notation and the developments taken from~\cite{Iserles.ea_AN2000,Munthe-Kaas.BIT1998}. For more details on Lie groups and Lie algebra, we refer to \cite{Varadarajan_book1984} and \cite{Helgason_Book1978}.
 
-Recall that the Lie group $SO(3)$ of linear proper orthogonal transformation by its matrix representation
+
+The Lie group $SO(3)$ is the group of linear proper orthogonal transformations in $\RR^3$ that may be represented by a set of matrices in $\RR^{3\times 3}$ as
 \begin{equation}
   \label{eq:47}
   SO(3) = \{R \in \RR^{3\times3}\mid R^TR=I , det(R) = +1  \}
 \end{equation}
-with the Lie group law given by $R_1\glaw R_2 = R_1R_2$ for $R_1,R_2\in SO(3)$. The identity element is $e = I_{3\times 3}$. At any point of $R\in SO(3)$, the tangent space $T_RSO(3)$ is the set of tangent vectors at a point $R$.
+with the group law given by $R_1\glaw R_2 = R_1R_2$ for $R_1,R_2\in SO(3)$. The identity element is $e = I_{3\times 3}$. At any point of $R\in SO(3)$, the tangent space $T_RSO(3)$ is the set of tangent vectors at a point $R$.
 
-\paragraph{Left representation of  the tangent space at $R$, $T_RSO(3)$ } Let $S(t)$ be  a smooth curve $S(\cdot) : t\in \RR \mapsto S(t)\in SO(3)$ in $SO(3)$ such that $S(O)= R$.
-Since $S(t)\in SO(3)$, we have $S(t)S(t)^T=I$ and then $\frac{d}{dt} (S(t)) = \dot S(t)S^T(t) +  S(t) \dot S^T(t) =0$. At $t=0$, we get
+\paragraph{Left representation of  the tangent space at $R$, $T_RSO(3)$ } Let $S(t)$ be a smooth curve $S(\cdot) : \RR  \rightarrow SO(3)$ in $SO(3)$. An element $a$ of the tangent space at $R$ is given by 
 \begin{equation}
-  \label{eq:48}
- a R^T +  R a^T =0.
+  \label{eq:174}
+  a  = \left.\frac{d}{dt} S(t)\right|_{t=0}
 \end{equation}
-We conclude that it exists a skew--symmetric matrix $\tilde \Omega = R^T a$ such that $\tilde \Omega^T + \tilde \Omega =0$. Therefore a possible representation of  $T_RSO(3)$ is
+such that $S(0)= R$.
+Since $S(t)\in SO(3)$, we have  $\frac{d}{dt} (S(t)) = \dot S(t)S^T(t) +  S(t) \dot S^T(t) =0$. At $t=0$, we get $a R^T +  R a^T =0$.
+We conclude that it exists a skew--symmetric matrix $\tilde \Omega = R^T a$ such that $\tilde \Omega^T + \tilde \Omega =0$. Hence, a possible representation of  $T_RSO(3)$ is
 \begin{equation}
   \label{eq:49}
   T_RSO(3) = \{ a = R \tilde \Omega \in \RR^{3\times 3} \mid \tilde \Omega^T + \tilde \Omega =0 \}.
 \end{equation}
-
 For $R=I$, the tangent space is directly given by the set of  skew--symmetric matrices:
 \begin{equation}
   \label{eq:50}
-  T_ISO(3) = \{ a = \tilde \Omega\in \RR^{3\times 3} \mid \tilde \Omega^T + \tilde \Omega =0 \}.
+  T_ISO(3) = \{ \tilde \Omega\in \RR^{3\times 3} \mid \tilde \Omega^T + \tilde \Omega =0 \}.
 \end{equation}
-Firstly, it is possible to show that $T_ISO(3)$ with the Lie Bracket $[\cdot,\cdot]$ defined by the matrix commutator
+The tangent space $T_ISO(3)$ with the Lie Bracket $[\cdot,\cdot]$ defined by the matrix commutator
 \begin{equation}
   \label{eq:51}
   [A,B] = AB-BA
 \end{equation}
-is a Lie algebra. For skew symmetric matrices, the commutator can be expressed with the cross product in $\RR^3$
-\begin{equation}
-  \label{eq:52}
-  [\tilde \Omega, \tilde \Gamma] = \tilde \Omega \tilde \Gamma - \tilde \Gamma \tilde \Omega
-\end{equation}
-The  Lie algebra  $\mathfrak{so}(3)$  is 
+is a Lie algebra that is denoted by
 \begin{equation}
   \label{eq:53}
   \mathfrak{so}(3) =\{\Omega\in \RR^{3\times 3} \mid \Omega + \tilde \Omega^T =0\}.
 \end{equation}
-and we use   $T_ISO(3) =  \mathfrak{so}(3)$ whenever there is no ambiguity.
-
+ For skew symmetric matrices, the commutator can be expressed with the cross product in $\RR^3$
+\begin{equation}
+  \label{eq:52}
+  [\tilde \Omega, \tilde \Gamma] = \tilde \Omega \tilde \Gamma - \tilde \Gamma \tilde \Omega= \widetilde{\Omega \times \Gamma }
+\end{equation}
+We use   $T_ISO(3) \cong  \mathfrak{so}(3)$ whenever there is no ambiguity.
 
 The notation $\tilde \Omega$ is implied by the fact that the Lie algebra is isomorphic to $\RR^3$ thanks to the operator $\widetilde{(\cdot)} :\RR^3 \rightarrow \mathfrak{so}(3)$ and defined by
 \begin{equation}
@@ -247,10 +271,7 @@ Let us come back to the representation of  $T_RSO(3)$ given in~\eqref{eq:49}. It
   \label{eq:58}
    T_RSO(3) = \{ a = R \tilde \Omega \in \RR^{3\times 3} \mid \tilde \Omega \in \mathfrak{so}(3) \}.
 \end{equation}
-With \eqref{eq:58}, we see that there is a linear map that relates $T_RSO(3)$ to  $\mathfrak{so}(3)$. We formalize that in the following paragraph.
-
-
-A special group action that is  the left translation map for a point $R \in SO(3)$ 
+With \eqref{eq:58}, we see that there is a linear map that relates $T_RSO(3)$ to  $\mathfrak{so}(3)$. This can be formalize by noting that the left translation map for a point $R \in SO(3)$ 
 \begin{equation}
   \label{eq:59}
   \begin{array}[lcl]{rcl}
@@ -258,12 +279,13 @@ A special group action that is  the left translation map for a point $R \in SO(3
        & &  S  \mapsto L_R(S) = R \glaw S = RS\\
   \end{array}
 \end{equation}
-which is diffeomorphism on $SO(3)$. In that case, we identify the manifold and the group. So, $L_R$ can be viewed as a left or a right group action. We choose a right action. For our application where $\mathcal G = \mathcal M = SO(3)$ and $\Lambda^r(R,S) = L_{R}(S) =  R \glaw S $, we get
+which is diffeomorphism on $SO(3)$ is a group action. In our case, we identify the manifold and the group. Hence, the mapping $L_R$ can be viewed as a left or a right group action. We choose a right action such that $\Lambda^r(R,S) = L_{R}(S) =  R \glaw S $. By differentiation, we get a mapping $L'_R: T_I\mathfrak{so(3)} \cong \mathfrak{so(3)} \rightarrow T_R SO(3)$. For a given $\tilde\Omega \in \mathfrak{so(3)}$ and a point $R$, the differential $L'_R$ by computing the tangent vector field $\lambda^r_{*}(a)(R)$ of the group action  $\Lambda^r(R,S)$ for a smooth curve $S(t) : \RR \rightarrow S0(3)$ such that $\dot S(0) = \tilde\Omega$:
 \begin{equation}
   \label{eq:60}
-   \lambda^r_{*}(a)(R) = \left. \frac{d}{dt} L_{R}(S(t)) \right|_{t=0} \left. \frac{d}{dt} R \glaw S(t) \right|_{t=0} =  R \glaw \dot S(0) = R  \dot S(0)  \in X(\mathcal M)
-\end{equation}
-Since $S(\cdot)$ is a smooth curve in $\mathcal G$, $\dot S(0)$ is a tangent vector at the point $S(0)=I$, that is an element $a = \tilde \Omega  \in \mathfrak{so}(3) $ defined by the relation~\eqref{eq:33}. Therefore, the vector field in \eqref{eq:60} is a tangent vector field and we get
+   \lambda^r_{*}(a)(R) \coloneqq  \left. \frac{d}{dt} \Lambda^r(R,S(t)) \right|_{t=0} = \left. \frac{d}{dt} L_{R}(S(t)) \right|_{t=0} =  \left. \frac{d}{dt} R \glaw S(t) \right|_{t=0} =  R \glaw \dot S(0) = R \tilde\Omega \in X(\mathcal M)
+ \end{equation}
+%
+Therefore, the vector field in \eqref{eq:60} is a tangent vector field that defines a Lie-Type ordinary differential equation
 \begin{equation}
   \label{eq:61}
   \dot R(t) = \lambda^r_{*}(a)(R(t)) = R(t)  \tilde \Omega
@@ -423,7 +445,7 @@ Hence, we get
 Since $\dexp_{\tilde\Omega}$ is a linear mapping from $\mathfrak{so(3)}$ to $\mathfrak{so(3)}$, we will use the following notation
 \begin{equation}
   \label{eq:172}
-  \dexp_{\tilde\Omega}\tilde\Gamma  \coloneqq T(\Omega)
+  \dexp_{\tilde\Omega}\tilde\Gamma  \coloneqq T(\Omega)\tilde\Gamma 
 \end{equation}
 with
 \begin{equation}
@@ -432,13 +454,36 @@ with
 \end{equation}
 
 \subsection{Newton method and differential of a map $f : \mathcal G \rightarrow \mathfrak g$}
-Let us first define the differential of the map $f : \mathcal SO(3) \rightarrow \mathfrak{so(3)}$ as its left trivialization, we get
+Finally, let us define the differential of the map $f : SO(3) \rightarrow \mathfrak {so}(3)$ as
 \begin{equation}
-  \label{eq:179}
-   \dd f_R (\tilde\Omega) =  \left.\frac{d}{dt} f(R \exp(t \tilde\Omega )) \right|_{t=0}
+  \label{eq:183}
+  \begin{array}[rcl]{rcl}
+    f'_R : T_RSO(3) &\rightarrow&T_{f(R)}\mathfrak {so}(3) \cong  \mathfrak {so}(3)\\
+           a &\mapsto& \left.\frac{d}{dt} f(R\glaw \expm(t L'_{R^{-1}}(a))) \right|_{t=0}
+  \end{array}
 \end{equation}
-The computation of this differential is non linear with respect to $\tilde\Omega$.
+The image of $b$ by $f'_z$   is obtained by first identifying $a$ with an element of $\tilde\Omega \in \mathfrak {so}(3)$ thanks to the left representation of $T_{f(R)}\mathfrak {so}(3)$ view the left translation map $\tilde\Omega= t L'_R(b)$. The exponential mapping transforms $\tilde\Omega$ an element $S$ of the Lie Group $SO(3)$. Then $f'_z$ is obtained by
+\begin{equation}
+  \label{eq:184}
+  f'_R(b) = \lim_{t\rightarrow 0} \frac{f(R\glaw S) - f(R)}{t}
+\end{equation}
+As we have done for the exponential mapping, it is possible to get a left trivialization of  
+\begin{equation}
+  \label{eq:185}
+  \dd f_R = (f\circ L_R)' = f'_R \circ L'_R
+\end{equation}
+thus
+\begin{equation}
+  \label{eq:186}
+  \dd f_R (\tilde\Omega) =  f'_R \circ L'_R(\tilde\Omega) = f'_R(L'_R(\tilde\Omega)) =  \left.\frac{d}{dt} f(R\glaw \expm(t \tilde\Omega )) \right|_{t=0}
+\end{equation}
 
+\begin{ndrva}
+  The computation of this differential is non linear with respect to $\tilde\Omega$.
+
+
+  not clear if we write $\dd f_R (\tilde\Omega)$. Better understand the link with $\dexp_{\tilde \Omega}{\tilde\Gamma}$
+\end{ndrva}
 Sometimes, it can be formally written as
 \begin{equation}
   \label{eq:180}
@@ -458,7 +503,7 @@ Let us consider a first simple example of a mapping $f(R) = \widetilde{R  x}$ fo
                            &=& \widetilde{-R T(\Omega) \tilde x \Omega } 
   \end{array}
 \end{equation}
-In that case, it is difficult a expression as in \eqref{eq:180}, but considering the function $g(R)$ such that $f(R) = \widetilde g(x)$ we get
+In that case, it is difficult to find a expression as in \eqref{eq:180}, but considering the function $g(R)$ such that $f(R) = \widetilde g(x)$ we get
 \begin{equation}
   \label{eq:181}
   \begin{array}{rcl}
@@ -479,7 +524,7 @@ In Siconos we choose to parametrize the rotation with a unit quaternion $p \in \
 
 
 \paragraph{Quaternion definition.} There is many ways to define quaternions. The most convenient one is to define a quaternion as 
-a $2\times 2$ complex matrix, that is an element of $\CC^{2\times 2}$. For this end, we write for $z \ in \CC$, $z=a+ib$ with $a,b \in \RR^2$ ans $i^2=-1$ and its conjugate $\bar z= a-ib$. Let ${e, \bf, i, j, k}$ the following matrices in $\CC^{2\times 2}$
+a $2\times 2$ complex matrix, that is an element of $\CC^{2\times 2}$. For this end, we write for $z \in \CC$, $z=a+ib$ with $a,b \in \RR^2$ and $i^2=-1$ and its conjugate $\bar z= a-ib$. Let ${e, \bf, i, j, k}$ the following matrices in $\CC^{2\times 2}$
 \begin{equation}
   \label{eq:127}
   e =
@@ -528,7 +573,7 @@ where $x = p_0 + i p_1$ and $y = p_2 + i p_3$. The matrices in $\HH$ are called 
 
 With the definition of $\HH$ as a set of complex matrices, It can be show that $\HH$ is a real vector space of dimension $4$ with basis ${e, \bf, i, j, k}$. Furthermore, with the matrix product, $\HH$ is a real algebra.
 
-\paragraph{Representation of quaternions} Thanks to the equations~\eqref{eq:128}, ~\eqref{eq:128} and ~\eqref{eq:129}, we see that there are several manner to represent a quaternion $p\in \HH$. It can be represented as a complex matrix as in~\eqref{eq:129}. It can also be represented as a vector in $\RR^4$ , $p= [p_0,p_1,p_2,p_3]$ with the isomorphism~\eqref{eq:128}. In other words,  $\HH$ is isomorphic to $\RR^4$.  The first element $p_0$ can also be viewed as  a scalar and three last as a vector in $\RR^3$ denoted by $\vv{p} = [p_1,p_2,p_3]$, and in that case, $\HH$ is viewed as $\RR\times \RR^3$. The quaternion can be written as $p=(p_0,\vv{p})$.
+\paragraph{Representation of quaternions} Thanks to the equations~\eqref{eq:128}, ~\eqref{eq:128} and ~\eqref{eq:129}, we see that there are several manner to represent a quaternion $p\in \HH$. It can be represented as a complex matrix as in~\eqref{eq:129}. It can also be represented as a vector in $\RR^4$ , $p= [p_0,p_1,p_2,p_3]$ with the isomorphism~\eqref{eq:128}. In other words,  $\HH$ is isomorphic to $\RR^4$.  The first element $p_0$ can also be viewed as  a scalar and three last ones as a vector in $\RR^3$ denoted by $\vv{p} = [p_1,p_2,p_3]$, and in that case, $\HH$ is viewed as $\RR\times \RR^3$. The quaternion can be written as $p=(p_0,\vv{p})$.
 
 \paragraph{Quaternion product} The quaternion product denoted by $p \glaw q $ for $p,q\in \HH_1$ is naturally defined as the product of complex matrices. With its representation in $\RR\times \RR^3$, the quaternion product is defined by
 \begin{equation}
@@ -637,7 +682,7 @@ The norm of a quaternion is given by $|p|^2=p^\top p = p_o^2+p_1^2+p_2^2+p_3^2$.
 A quaternion $p$ is said to be unit if $|p| =1$. 
 
 \paragraph{Unit quaternion and rotation}
-For two vectors $x\in \RR^3$ and $x'\in \RR^3$, we define the quaternion $p_x = (0,x)$ and  $p_{x'} = (0,x')$.
+For two vectors $x\in \RR^3$ and $x'\in \RR^3$, we define the quaternion $p_x = (0,x)\in \HH_p$ and  $p_{x'} = (0,x')\in \HH_p$.
 For a given unit quaternion $p$, the transformation
 \begin{equation}
   \label{eq:79}
@@ -775,7 +820,7 @@ The set of all unit quaternions that we denote $\HH_1$ is the set of unitary mat
   \label{eq:126}
   p \glaw p^\star = e  
 \end{equation}
-It implies that the set $\HH_1$ is the set of special unitary complex matrices. The set is a Lie group usually denoted as $SU(2)$. Since we used multiple representation of a quaternion, we continue to use $\HH_1 \approx SU(2)$ as a notation but with the Lie group structure implied by $SU(2)$.
+It implies that the set $\HH_1$ is the set of special unitary complex matrices. The set is a Lie group usually denoted as $SU(2)$. Since we used multiple representation of a quaternion, we continue to use $\HH_1 \cong SU(2)$ as a notation but with the Lie group structure implied by $SU(2)$.
 
 Let us compute the tangent vector at a point $p \in \HH_1$. Let $q(t)$ be  a smooth curve $q(\cdot) : t\in \RR \mapsto q(t)\in H_1$ in $H_1$ such that $q(O)= p$.
 Since $q(t)\in H_1$, we have $|q(t)|=1$ and then $\frac{d}{dt} |q(t)| = 2(q_0(0) \dot q_0(0) + \vec{q}^T(0) \vec{\dot q}(0) ) =0$. At $t=0$, we get
@@ -793,12 +838,12 @@ and
   \label{eq:132}
   (0, \omega) = 2 a\glaw p^\star
 \end{equation}
-In other terms, the tangent vector spaces at $p \in \HH_1$ can be represented as a left reprensentation
+In other terms, the tangent vector spaces at $p \in \HH_1$ can be represented as a left representation
 \begin{equation}
   \label{eq:133}
   T_p\HH_1 = \{ a \mid a = p \glaw (0, \frac \Omega 2 ), \Omega \in \RR^3\}
 \end{equation}
-or a right reprenstation
+or a right representation
 \begin{equation}
   \label{eq:1330}
   T_p{\HH_1} = \{ a \mid a =  (0, \frac \omega 2 ) \glaw p, \omega \in \RR^3\}
@@ -807,9 +852,9 @@ or a right reprenstation
 At $p=e$, we get the Lie algebra defined by
 \begin{equation}
   \label{eq:134}
-  \mathfrak h_1 =  T_e{\HH_1} =  \{ a = (0, \frac \omega 2 ), \omega \in \RR^3 \}
+  \mathfrak h_1 =  T_e{\HH_1} =  \{ a = (0, \frac \Omega 2 ), \Omega \in \RR^3 \}
 \end{equation}
-equipped with the Lie bracket given the matrix commutator
+equipped with the Lie bracket given by the commutator
 \begin{equation}
   \label{eq:135}
   [p,q] = p \glaw q- q\glaw p.
@@ -824,6 +869,7 @@ As for $\mathfrak so(3)$,  the Lie algebra $\mathfrak h_1$ is isomorphic to $\RR
   \label{eq:54}
  \widehat{(\cdot)}: \Omega \mapsto \widehat \Omega = (0, \frac \Omega 2 ) 
 \end{equation}
+With this operator, the Lie Bracket can be written
 \begin{equation}
   \label{eq:137}
   [\widehat{\Omega},\widehat{\Gamma}] = \widehat{\Omega \times \Gamma} 
@@ -837,8 +883,6 @@ Let us come back to the representation of  $T_p\HH_1$ given in~\eqref{eq:133}. I
    T_RSO(3) = \{ a = p \glaw  \widehat \Omega \mid \widehat \Omega \in \mathfrak h_1 \}.
 \end{equation}
 With \eqref{eq:58}, we see that there is a linear map that relates $T_p\HH_1$ to  $\mathfrak h_1$. This linear map defines a vector field. 
-
-
 A special group action is defined by the left translation map for a point $p \in \HH_1$ 
 \begin{equation}
   \label{eq:159}
@@ -858,6 +902,7 @@ Since $q(\cdot)$ is a smooth curve in $\HH_1$, $\dot q(0)$ is a tangent vector a
   \label{eq:161}
   \dot p(t) = \lambda^r_{*}(a)(p(t)) = p(t)  \glaw \widehat \Omega
 \end{equation}
+
 \paragraph{Exponential map $\expq : \mathfrak h_1 \rightarrow \HH_1$}
 We can directly apply Theorem~\ref{Theorem:solutionofLieODE} and we get that the solution of
 \begin{equation}
