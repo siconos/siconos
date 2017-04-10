@@ -37,6 +37,7 @@
 %{
 #include <SiconosKernel.hpp>
 #include <SiconosAlgebra.hpp>
+#include <SiconosVectorStorage.hpp>
 #include <boost/numeric/ublas/matrix_sparse.hpp>
 #include <SiconosVisitor.hpp>
 #include "addons.hpp"
@@ -233,7 +234,6 @@ typedef __mpz_struct mpz_t[1];
 
 %include "SiconosAlgebraTypeDef.hpp"
 %include "SiconosAlgebra.hpp"
-
 %import "RelationNamespace.hpp";
 
 

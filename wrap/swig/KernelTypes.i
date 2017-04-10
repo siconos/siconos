@@ -298,25 +298,14 @@ static inline void fillBasePyarray(PyObject* pyarray, SharedPointerKeeper* saved
 
 %{
 #include <Question.hpp>
+#include <SiconosVectorStorage.hpp>
 #include <SiconosVector.hpp>
-struct IsDense : public Question<bool>
-{
-  using SiconosVisitor::visit;
-
-  void visit(const SiconosVector& v)
-  {
-    answer = v._dense;
-  }
-
-  void visit(const BlockVector& v)
-  {
-    answer = false;
-  }
-};
 %}
 
 %fragment("SiconosVector", "header", fragment="NumPy_Fragments")
 {
+#include <Question.hpp>
+#include <SiconosVectorStorage.hpp>
   PyObject * SiconosVector_to_numpy(SiconosVector const & v)
   {
     npy_intp this_vector_dim[1] = { v.size() };
@@ -424,7 +413,7 @@ struct IsDense : public Question<bool>
   {
     if(v)
     {
-      if (ask<IsDense>(*v))
+      if (Type::value(v->storage()) == Type::DenseVectStorage)
       {
         return SP_SiconosVector_to_numpy(v);
       }

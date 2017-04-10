@@ -14,5 +14,6 @@
 
 %include SiconosMatrix.hpp
 %include SimpleMatrix.hpp
+%include SiconosVectorStorage.hpp
 %include SiconosVector.hpp
 %include BlockVector.hpp

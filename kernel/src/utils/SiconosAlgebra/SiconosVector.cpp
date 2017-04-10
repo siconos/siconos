@@ -19,7 +19,6 @@
 #include "SiconosConfig.h"
 
 #include "SiconosAlgebraTypeDef.hpp"
-#include "SiconosVectorStorage.hpp"
 
 #include <boost/numeric/ublas/io.hpp>            // for >>
 //#include <boost/numeric/ublas/vector_proxy.hpp>  // for project
@@ -30,9 +29,12 @@
 #include <boost/numeric/bindings/blas.hpp>
 #include <boost/numeric/bindings/ublas/vector.hpp>
 #include <boost/numeric/bindings/std/vector.hpp>
-namespace siconosBindings = boost::numeric::bindings::blas;
 
-class SimpleMatrix;
+namespace bindings = boost::numeric::bindings::blas;
+
+#include "SiconosVectorStorage.hpp"
+
+#include "SimpleMatrix.hpp"
 
 #include "ioVector.hpp"
 #include "SiconosVector.hpp"
@@ -40,6 +42,7 @@ class SimpleMatrix;
 #include "BlockVector.hpp"
 //#define DEBUG_MESSAGES
 #include "debug.h"
+#include "TypeName.hpp"
 
 #include <boost/move/unique_ptr.hpp>
 
@@ -174,15 +177,15 @@ struct ParamModifier<C, P1, empty, empty> : public SiconosVisitor
 
 
 template<typename C>
-struct Modifier : public SiconosVisitor
+struct SimpleModifier : public SiconosVisitor
 {
   typedef C arguments_type;
   arguments_type& _param;
 
-  Modifier(arguments_type& object) : _param(object) {};
+  SimpleModifier(arguments_type& object) : _param(object) {};
   arguments_type& modifiable() { return _param; };
 
-  virtual ~Modifier() {};
+  virtual ~SimpleModifier() {};
 };
 
 #undef REGISTER
@@ -210,7 +213,7 @@ void apply_visitor(T& obj)
 template<typename V, typename T, typename P>
 void apply_visitor(T& obj, const P& param)
 {
-  const typename make_visitor<V, P>::arguments_type args = typename make_visitor<V, P>::arguments_type(param);
+  const typename make_visitor<V, P>::arguments_type& args = typename make_visitor<V, P>::arguments_type(param);
   make_visitor<V, P> visitor(args);
   obj.accept(visitor);
 };
@@ -226,7 +229,7 @@ template<typename V, typename T, typename P1, typename P2>
 void apply_visitor(T& obj, const P1& param1, const P2& param2)
 {
   typedef typename V::arguments_type P;
-  const typename make_visitor<V, P>::arguments_type args = typename make_visitor<V, P>::arguments_type(param1, param2);
+  const typename make_visitor<V, P>::arguments_type& args = typename make_visitor<V, P>::arguments_type(param1, param2);
   make_visitor<V, P> visitor(args);
   obj.accept(visitor);
 };
@@ -244,7 +247,7 @@ template<typename V, typename T, typename P1, typename P2, typename P3, typename
 void apply_visitor(T& obj, const P1& param1, const P2& param2, const P3& param3, const P4& param4)
 {
   typedef typename V::arguments_type P;
-  typename make_visitor<V, P>::arguments_type args = typename make_visitor<V, P>::arguments_type(param1, param2, param3, param4);
+  typename make_visitor<V, P>::arguments_type& args = typename make_visitor<V, P>::arguments_type(param1, param2, param3, param4);
   make_visitor<V, P> visitor(args);
   obj.accept(visitor);
 };
@@ -276,15 +279,16 @@ R apply_visitor(T& obj, unsigned int& param)
 
 /* modifiers equivalents */
 template <typename V>
-struct make_modifier : public Visitor<Classes< VISITOR_CLASSES() empty>, V>::Make
+struct make_modifier : public Modifier<Classes< VISITOR_CLASSES() empty>, V>::Make
 {
 
-  typedef typename Visitor<Classes< VISITOR_CLASSES() empty>, V>::Make base_type;
+  typedef typename Modifier<Classes< VISITOR_CLASSES() empty>, V>::Make base_type;
   typedef typename base_type::arguments_type arguments_type;
 
   make_modifier(arguments_type& p) :
     base_type(p) {};
 
+  make_modifier() {};
 };
 
 
@@ -292,20 +296,25 @@ template<typename V, typename P>
 typename Visitor<Classes< VISITOR_CLASSES() empty>, V>::Make xmake_modifier(typename Visitor<Classes< VISITOR_CLASSES() empty>, V>::Make::arguments_type& p) { return typename Visitor<Classes< VISITOR_CLASSES() empty>, V>::Make(p);};
 
 
-
 template<typename V, typename T>
 void apply_modifier(T& obj)
 {
   make_modifier<V> modifier = make_modifier<V>();
-  obj.accept(modifier);
+  obj.accept_modifier(modifier);
+};
+
+template<typename V, typename T, typename P>
+void apply_modifier(T& obj, const P& param)
+{
+  make_modifier<V> modifier = make_modifier<V>(param);
+  obj.accept_modifier(modifier);
 };
 
 template<typename V, typename T, typename P>
 void apply_modifier(T& obj, P& param)
 {
-  typename make_modifier<V>::arguments_type args = typename make_modifier<V>::arguments_type(param);
-  make_modifier<V> modifier = make_modifier<V>(args);
-  obj.accept(modifier);
+  make_modifier<V> modifier = make_modifier<V>(param);
+  obj.accept_modifier(modifier);
 };
 
 template<typename V, typename T, typename P1, typename P2>
@@ -313,30 +322,30 @@ void apply_modifier(T& obj, const P1& param1, P2& param2)
 {
   typename make_modifier<V>::arguments_type args = typename make_modifier<V>::arguments_type(param1, param2);
   make_modifier<V> modifier(args);
-  obj.accept(modifier);
+  obj.accept_modifier(modifier);
 };
 
 template<typename V, typename T, typename P1, typename P2, typename P3>
 void apply_modifier(T& obj, const P1& param1, const P2& param2, P3& param3)
 {
-  typedef boost::tuple<const P1&, const P2&, P3&> P;
-  make_modifier<V> modifier(P(param1, param2, param3));
-  obj.accept(modifier);
+  typename make_modifier<V>::arguments_type args = typename make_modifier<V>::arguments_type(param1, param2, param3);
+  make_modifier<V> modifier(args);
+  obj.accept_modifier(modifier);
 };
 
 template<typename V, typename T, typename P1, typename P2, typename P3, typename P4>
 void apply_modifier(T& obj, const P1& param1, const P2& param2, const P3& param3, P4& param4)
 {
-  typedef boost::tuple<const P1&, const P2&, const P3&, P4&> P;
-  make_modifier<V> modifier(P(param1, param2, param3, param4));
-  obj.accept(modifier);
+  typename make_modifier<V>::arguments_type args = typename make_modifier<V>::arguments_type(param1, param2, param3, param4);
+  make_modifier<V> modifier(args);
+  obj.accept_modifier(modifier);
 };
 
 template<typename V, typename R, typename T>
 R apply_modifier(T& obj)
 {
   make_modifier<V> modifier;
-  obj.accept(modifier);
+  obj.accept_modifier(modifier);
   return modifier.answer;
 };
 
@@ -344,7 +353,7 @@ template<typename V, typename R, typename P, typename T>
 R apply_modifier(T& obj, const P& param)
 {
   make_modifier<V> modifier(param);
-  obj.accept(modifier);
+  obj.accept_modifier(modifier);
   return modifier.answer;
 };
 /* --- */
@@ -405,7 +414,7 @@ struct Zero : public SiconosVisitor
 template<>
 void Zero::operator()<DenseVectStorage> (DenseVectStorage& dv)
 {
-  siconosBindings::scal(0.0, dv.internal_data);
+  bindings::scal(0.0, dv.internal_data);
 };
 
 struct NormInf : public SiconosVisitor
@@ -493,7 +502,7 @@ struct GetRValue : public ParamVisitor<unsigned int>
   GetRValue(unsigned int param) : ParamVisitor(param) {};
 
   template<typename T>
-  void operator() (const T& storage)
+  void operator() (T& storage)
   {
     answer = &(storage.internal_data(this->param()));
   };
@@ -502,9 +511,9 @@ struct GetRValue : public ParamVisitor<unsigned int>
 };
 
 template<>
-void GetRValue::operator()<SparseVectStorage> (const SparseVectStorage& storage)
+void GetRValue::operator()<SparseVectStorage> (SparseVectStorage& storage)
 {
-//  answer = (&(storage.internal_data(this->param()).ref()));
+  answer = &(storage.internal_data(this->param()).ref());
 }
 
 struct SetValue : public ParamVisitor<unsigned int, double>
@@ -550,43 +559,6 @@ struct SetBlock : public ParamVisitor<unsigned int, SiconosVector>
 };
 
 /* idem copy, visitor for both parameters */
-template <typename C>
-struct IToBlock : public ParamVisitor<C, unsigned int, unsigned int, unsigned int>
-{
-  template <typename T>
-  void operator() (T& storage)
-  {
-
-    C& vOut = * this->param1();
-    unsigned int sizeB = this->param2();
-    unsigned int startIn = this->param3();
-    unsigned int startOut = this->param4();
-
-    // To copy a subBlock of the vector (from position startIn to startIn+sizeB) into vOut (from pos. startOut to startOut+sizeB).
-    // Check dim ...
-    assert(startIn < storage.internal_data.size() && "vector toBlock(v1,v2,...): start position in input vector is out of range.");
-
-    assert(startOut < vOut.size() && "vector toBlock(v1,v2,...): start position in output vector is out of range.");
-
-    assert(startIn + sizeB <= storage.internal_data.size() && "vector toBlock(v1,v2,...): end position in input vector is out of range.");
-    assert(startOut + sizeB <= vOut.size() && "vector toBlock(v1,v2,...): end position in output vector is out of range.");
-
-    unsigned int endOut = startOut + sizeB;
-
-    noalias(ublas::subrange(vOut, startOut, endOut)) = ublas::subrange(storage.internal_data, startIn, startIn + sizeB);
-  };
-};
-
-
-struct ToBlock : public ParamVisitor<SiconosVectorStorage, unsigned int, unsigned int, unsigned int>
-{
-  template<typename T>
-  void operator() (T& storage)
-  {
-    apply_visitor<IToBlock<T> >(this->param1(), this->param2(), this->param3(), this->param4());
-  };
-};
-
 struct Scal : public ParamVisitor<double>
 {
 
@@ -602,7 +574,7 @@ struct Scal : public ParamVisitor<double>
 template<>
 void Scal::operator()<DenseVectStorage> (DenseVectStorage& dv)
 {
-  siconosBindings::scal(this->param(), dv.internal_data);
+  bindings::scal(this->param(), dv.internal_data);
 };
 
 
@@ -623,7 +595,7 @@ struct IDot : public ParamVisitor<C>
 
 double inner_prod(DenseVect& v1, DenseVect& v2)
 {
-  return siconosBindings::dot(v1, v2);
+  return bindings::dot(v1, v2);
 }
 
 struct Dot : public ParamVisitor<SiconosVectorStorage>
@@ -641,6 +613,38 @@ struct Dot : public ParamVisitor<SiconosVectorStorage>
   };
 };
 
+
+template<typename C>
+struct IOuterProd : public ParamVisitor<C>
+{
+
+  SimpleMatrix answer;
+
+  IOuterProd(const C& p) : ParamVisitor<C>(p) {};
+
+  template<typename T>
+  void operator() (const T& storage)
+  {
+    answer = outer_prod(this->param1().internal_data, storage.internal_data);
+  };
+};
+
+
+struct OuterProd : public ParamVisitor<SiconosVectorStorage>
+{
+
+  SimpleMatrix answer;
+
+  OuterProd(const SiconosVectorStorage& st) : ParamVisitor(st) {};
+
+  template<typename T>
+  void operator() (const T& storage)
+  {
+    /* const_cast : VisitorMaker makes visitors on non const references */
+    answer = apply_visitor<IOuterProd<T>, SimpleMatrix>(const_cast<SiconosVectorStorage&>(this->param()), storage);
+  };
+};
+
 template<typename OP, typename S, typename P1=empty, typename P2=empty, typename P3=empty>
 struct InternBiOp : public ParamModifier<S, P1, P2, P3>
 {
@@ -649,7 +653,7 @@ struct InternBiOp : public ParamModifier<S, P1, P2, P3>
   InternBiOp(typename base_type::arguments_type& p) : base_type(p) {};
 
   template<typename T>
-    void operator() (const T& storage)
+  void operator() (const T& storage)
   {
     static OP op;
     op(this->param1(), this->param2(), this->param3(), storage.internal_data, this->modifiable());
@@ -659,9 +663,9 @@ struct InternBiOp : public ParamModifier<S, P1, P2, P3>
 
 
 template<typename OP, typename S>
-struct InternBiOp<OP, S, empty, empty, empty> : public Modifier<S>
+struct InternBiOp<OP, S, empty, empty, empty> : public SimpleModifier<S>
 {
-  typedef Modifier<S> base_type;
+  typedef SimpleModifier<S> base_type;
 
   InternBiOp(typename base_type::arguments_type& p) : base_type(p) {};
 
@@ -702,7 +706,8 @@ struct InternBiOp<OP, S, P1, P2, empty> : public ParamModifier<S, P1, P2>
   template<typename T>
     void operator() (T& storage)
   {
-    OP(this->param1(), this->param2(), storage.internal_data, this->modifiable());
+    static OP op;
+    op(this->param1(), this->param2(), storage.internal_data, this->modifiable());
   };
 
 };
@@ -715,8 +720,23 @@ struct InternBiOp<OP, S, P1, P2, empty> : public ParamModifier<S, P1, P2>
    - store arguments in param
    - visit arg1 and apply internal visitor with visited arg1 as param on param
 */
-template<typename OP, typename P1=empty, typename P2=empty>
-struct BiOperator : public ParamModifier<SiconosVectorStorage, P1, P2>
+template<typename OP, typename P1=empty, typename P2=empty, typename P3=empty>
+struct BiOperator : public ParamModifier<SiconosVectorStorage, P1, P2, P3>
+{
+
+  typedef ParamModifier<SiconosVectorStorage, P1, P2, P3> base_type;
+  BiOperator(typename base_type::arguments_type& st) : base_type(st) {};
+
+  template<typename T>
+  void operator() (T& storage)
+  {
+    apply_modifier<InternBiOp<OP, typename T::storage_type, P1, P2, P3> >(this->modifiable(), this->param1(), this->param2(), this->param3(), storage.internal_data);
+  };
+};
+
+template<typename OP, typename P1, typename P2>
+struct BiOperator<OP, P1, P2, empty> :
+  public ParamModifier<SiconosVectorStorage, P1, P2>
 {
 
   typedef ParamModifier<SiconosVectorStorage, P1, P2> base_type;
@@ -725,29 +745,16 @@ struct BiOperator : public ParamModifier<SiconosVectorStorage, P1, P2>
   template<typename T>
   void operator() (T& storage)
   {
-    apply_modifier<InternBiOp<OP, T> >(storage, this->param1(), this->param2(), this->modifiable());
-  };
-};
-
-
-template<typename OP>
-struct BiOperator<OP, empty, empty> : public Modifier<SiconosVectorStorage>
-{
-  typedef Modifier<SiconosVectorStorage> base_type;
-
-  /* the storage that is going to be modified is first kept in an argument */
-  BiOperator(typename base_type::arguments_type& st) : base_type(st) {};
-
-  template<typename T>
-  void operator() (T& storage)
-  {
-    /* visit and modify param which is unknown at this level */
-    apply_modifier<InternBiOp<OP, typename T::storage_type> >(this->modifiable(), storage.internal_data);
+    /* visit and modify modifiable() which is unknown at this level */
+    apply_modifier<InternBiOp<OP, typename T::storage_type, P1, P2> >
+      (this->modifiable(), this->param1(), this->param2(),
+       storage.internal_data);
   };
 };
 
 template<typename OP, typename P1>
-struct BiOperator<OP, P1, empty> : public ParamModifier<SiconosVectorStorage, P1>
+struct BiOperator<OP, P1, empty, empty> :
+  public ParamModifier<SiconosVectorStorage, P1>
 {
   typedef ParamModifier<SiconosVectorStorage, P1> base_type;
 
@@ -756,7 +763,27 @@ struct BiOperator<OP, P1, empty> : public ParamModifier<SiconosVectorStorage, P1
   template<typename T>
   void operator() (T& storage)
   {
-    apply_modifier<InternBiOp<OP, typename T::storage_type, P1> >(this->modifiable(), this->param1(), storage.internal_data);
+    /* visit and modify modifiable() which is unknown at this level */
+    apply_modifier<InternBiOp<OP, typename T::storage_type, P1> >
+      (this->modifiable(), this->param1(), storage.internal_data);
+  };
+};
+
+
+
+template<typename OP>
+struct BiOperator<OP, empty, empty, empty> : public SimpleModifier<SiconosVectorStorage>
+{
+  typedef SimpleModifier<SiconosVectorStorage> base_type;
+
+  /* the storage that is going to be modified is first kept in an argument */
+  BiOperator(typename base_type::arguments_type& st) : base_type(st) {};
+
+  template<typename T>
+  void operator() (T& storage)
+  {
+    /* visit and modify modifiable() which is unknown at this level */
+    apply_modifier<InternBiOp<OP, typename T::storage_type> >(this->modifiable(), storage.internal_data);
   };
 };
 
@@ -795,7 +822,7 @@ template<>
 void OpCopy::operator()(const DenseVectStorage& dv2, DenseVectStorage& dv1)
 {
   dv1.internal_data.resize(dv2.internal_data.size());
-  siconosBindings::copy(dv2.internal_data, dv1.internal_data);
+  bindings::copy(dv2.internal_data, dv1.internal_data);
 }
 
 struct OpAxpy
@@ -808,6 +835,42 @@ struct OpAxpy
   }
 };
 
+struct OpAxpby
+{
+  template<typename T1, typename T2>
+  void operator()(const double& a, const double& b, const T2& x, T1& y)
+  {
+    y *= b;
+    y += a * x;
+  }
+};
+
+template<>
+void OpAxpby::operator()<DenseVect, DenseVect>(const double& a,
+                                               const double& b,
+                                               const DenseVect& x,
+                                               DenseVect& y)
+{
+  bindings::scal(b, y);
+  bindings::axpy(a, x, y);
+}
+
+template<>
+void OpAxpby::operator()<SparseVect, SparseVect>(const double& a,
+                                                 const double& b,
+                                                 const SparseVect& x,
+                                                 SparseVect& y)
+{
+  y *= b;
+  if (&y != &x)
+  {
+    noalias(y) += a*x;
+  }
+  else
+  {
+    y += a*x;
+  }
+}
 
 
 struct OpAddBlock
@@ -842,20 +905,46 @@ struct OpSubBlock
   };
 };
 
+struct OpToBlock
+{
+  template <typename T1, typename T2>
+  void operator() (unsigned int param1, unsigned int param2, unsigned int param3, const T1& storage1, T2& storage2)
+  {
+    T2& vOut = storage2;
+    unsigned int sizeB = param1;
+    unsigned int startIn = param2;
+    unsigned int startOut = param3;
+
+    // To copy a subBlock of the vector (from position startIn to startIn+sizeB) into vOut (from pos. startOut to startOut+sizeB).
+    // Check dim ...
+    assert(startIn < storage1.size() && "vector toBlock(v1,v2,...): start position in input vector is out of range.");
+
+    assert(startOut < vOut.size() && "vector toBlock(v1,v2,...): start position in output vector is out of range.");
+
+    assert(startIn + sizeB <= storage1.size() && "vector toBlock(v1,v2,...): end position in input vector is out of range.");
+    assert(startOut + sizeB <= vOut.size() && "vector toBlock(v1,v2,...): end position in output vector is out of range.");
+
+    unsigned int endOut = startOut + sizeB;
+
+    noalias(ublas::subrange(vOut, startOut, endOut)) = ublas::subrange(storage1, startIn, startIn + sizeB);
+  };
+};
+
+
 struct OpSubscal
 {
   template<typename T1, typename T2>
   void operator() (const double& param1, const Index& param2, bool param3, const T1& storage1, T2& storage2)
   {
     const double& a = param1;
-    Index& coord = param2;
+    const Index& coord = param2;
     bool init = param3;
 
     unsigned int dimX = coord[1] - coord[0];
     unsigned int dimY = coord[3] - coord[2];
 
-    typename T1::type& x = storage1;
-    typename T2::type& y = storage2;
+    const T1& x = storage1;
+    T2& y = storage2;
 
     if (dimY != dimX)
     {
@@ -865,9 +954,9 @@ struct OpSubscal
     {
       SiconosVectorException::selfThrow("subscal(a,x,y,...) error: input index too large.");
     }
-    if(&x == &y)
+    if((void*)&x == (void*)&y)
     {
-      ublas::vector_range<typename T2::type> subY(y, ublas::range(coord[2], coord[3]));
+      ublas::vector_range<T2> subY(y, ublas::range(coord[2], coord[3]));
       if (coord[0] == coord[2])
       {
         if (init)
@@ -877,7 +966,7 @@ struct OpSubscal
       }
       else
       {
-        ublas::vector_range<typename T1::type> subX(x, ublas::range(coord[0], coord[1]));
+        const ublas::vector_range<const T1> subX(x, ublas::range(coord[0], coord[1]));
         if (init)
           subY = a * subX;
         else
@@ -886,8 +975,8 @@ struct OpSubscal
     }
     else
     {
-      ublas::vector_range<typename T1::type> subX(x, ublas::range(coord[0], coord[1]));
-      ublas::vector_range<typename T2::type> subY(y, ublas::range(coord[2], coord[3]));
+      const ublas::vector_range<const T1> subX(x, ublas::range(coord[0], coord[1]));
+      ublas::vector_range<T2> subY(y, ublas::range(coord[2], coord[3]));
       if (init)
       {
         noalias(subY) = a * subX;
@@ -931,11 +1020,24 @@ struct Axpy : public BiOperator<OpAxpy, double>
   typedef BiOperator<OpAxpy, double> base_type;
   Axpy(base_type::arguments_type& args) : base_type(args) {};
 };
-//struct Subscal : public BiOperator<OpSubscal, double, const Index, bool>
-//{
-//  typedef BiOperator<OpSubscal, double, const Index, bool> base_type;
-//  Subscal(base_type::arguments_type& args) : base_type(args) {};
-//};
+
+struct Axpby : public BiOperator<OpAxpby, double, double>
+{
+  typedef BiOperator<OpAxpby, double, double> base_type;
+  Axpby(base_type::arguments_type& args) : base_type(args) {};
+};
+
+struct Subscal : public BiOperator<OpSubscal, double, const Index, bool>
+{
+  typedef BiOperator<OpSubscal, double, const Index, bool> base_type;
+  Subscal(base_type::arguments_type& args) : base_type(args) {};
+};
+struct ToBlock : public BiOperator<OpToBlock, unsigned int, unsigned int, unsigned int>
+{
+  typedef BiOperator<OpToBlock, unsigned int, unsigned int, unsigned int> base_type;
+  ToBlock(base_type::arguments_type& args) : base_type(args) {};
+};
+
 
 // =================================================
 //                CONSTRUCTORS
@@ -1132,7 +1234,7 @@ double* SiconosVector::getArray() const
 
 void SiconosVector::zero()
 {
-  apply_visitor<Zero>(this->storage());
+  apply_modifier<Zero>(this->storage());
 }
 
 void SiconosVector::setVector(unsigned int , const SiconosVector& newV)
@@ -1145,7 +1247,7 @@ void SiconosVector::setVector(unsigned int , const SiconosVector& newV)
 
 void SiconosVector::fill(const double& value)
 {
-  apply_visitor<Fill>(this->storage(), value);
+  apply_modifier<Fill>(this->storage(), value);
 }
 
 //=======================
@@ -1154,7 +1256,7 @@ void SiconosVector::fill(const double& value)
 
 void SiconosVector::resize(unsigned int n, bool preserve)
 {
-  apply_visitor<Resize>(this->storage(), n);
+  apply_modifier<Resize>(this->storage(), n);
 }
 
 //=======================
@@ -1207,13 +1309,13 @@ double SiconosVector::getValue(unsigned int row) const
 
 void SiconosVector::setValue(unsigned int row, const double value)
 {
-  return apply_visitor<SetValue>(this->storage(), row, value);
+  return apply_modifier<SetValue>(this->storage(), row, value);
 }
 
-//double& SiconosVector::operator()(unsigned int row)
-//{
-//  return *apply_visitor<GetRValue, double* >(this->storage(), row);
-//}
+double& SiconosVector::operator()(unsigned int row)
+{
+  return *apply_modifier<GetRValue, double* >(this->storage(), row);
+};
 
 double SiconosVector::operator()(unsigned int row) const
 {
@@ -1226,13 +1328,13 @@ double SiconosVector::operator()(unsigned int row) const
 
 void SiconosVector::setBlock(unsigned int index, const SiconosVector& vIn)
 {
-  apply_visitor<SetBlock>(this->storage(), index, vIn);
+  apply_modifier<SetBlock>(this->storage(), index, vIn);
 }
 
-//void SiconosVector::toBlock(SiconosVector& vOut, unsigned int sizeB, unsigned int startIn, unsigned int startOut) const
-//{
-// apply_visitor<ToBlock>(this->storage(), vOut.storage(), sizeB, startIn, startOut);
-//}
+void SiconosVector::toBlock(SiconosVector& vOut, unsigned int sizeB, unsigned int startIn, unsigned int startOut) const
+{
+  apply_modifier<ToBlock>(this->storage(), sizeB, startIn, startOut, vOut.storage());
+}
 
 void SiconosVector::addBlock(unsigned int index, const SiconosVector& vIn)
 {
@@ -1284,7 +1386,7 @@ SiconosVector& SiconosVector::operator = (const DenseVect& d)
   {
     SiconosVectorException::selfThrow("SiconosVector::operator = DenseVect : inconsistent size.");
   }
-  siconosBindings::copy(d, this->dense());
+  bindings::copy(d, this->dense());
   return *this;
 }
 
@@ -1310,7 +1412,7 @@ SiconosVector& SiconosVector::operator = (const double* d)
   {
     SiconosVectorException::selfThrow("SiconosVector::operator = double* : forbidden: the current vector is not dense.");
   }
-  siconosBindings::detail::copy(this->size(), d, 1, getArray(), 1);
+  bindings::detail::copy(this->size(), d, 1, getArray(), 1);
   return *this;
 }
 
@@ -1321,7 +1423,7 @@ unsigned SiconosVector::copyData(double* data) const
     SiconosVectorException::selfThrow("SiconosVector::copyData : forbidden: the current vector is not dense.");
   }
   unsigned size = this->size();
-  siconosBindings::detail::copy(size, getArray(), 1, data, 1);
+  bindings::detail::copy(size, getArray(), 1, data, 1);
   return size;
 }
 
@@ -1385,14 +1487,14 @@ bool operator == (const SiconosVector &m, const SiconosVector &x)
 SiconosVector operator * (const  SiconosVector&m, double d)
 {
   SiconosVector tmp = m;
-  apply_visitor<Scal>(tmp.storage(), d);
+  apply_modifier<Scal>(tmp.storage(), d);
   return tmp;
 }
 
 SiconosVector operator * (double d, const  SiconosVector&m)
 {
   SiconosVector tmp = m;
-  apply_visitor<Scal>(tmp.storage(), d);
+  apply_modifier<Scal>(tmp.storage(), d);
   return tmp;
 }
 
@@ -1435,70 +1537,19 @@ void sub(const SiconosVector& x, const SiconosVector& y, SiconosVector& z)
   z -= y;
 }
 
-/*void axpby(double a, const SiconosVector& x, double b, SiconosVector& y)
-{
-    if (numX == 1) // all dense
-    {
-      siconosBindings::scal(b, *y.dense());
-      siconosBindings::axpy(a, *x.dense(), *y.dense());
-    }
-    else // all sparse
-    {
-      *y.sparse() *= b;
-      if (&y != &x)
-        noalias(*y.sparse()) += a**x.sparse();
-      else
-        *y.sparse() += a**x.sparse();
-    }
-  }
 
-  else // x and y of different types
-  {
-    y *= b;
-    {
-      if (numX == 1)
-        *y.sparse() += a**x.dense();
-      else
-        *y.dense() +=  a**x.sparse();
-    }
-  }
+
+
+void axpby(double a, const SiconosVector& x, double b, SiconosVector& y)
+{
+  apply_modifier<Axpby>(x.storage(), a, b, y.storage());
 }
 
 void axpy(double a, const SiconosVector& x, SiconosVector& y)
 {
-  // Computes y = ax + y
-
-  if (x.size() != y.size())
-    SiconosVectorException::selfThrow("axpy(x,y,z): inconsistent sizes");
-
-  unsigned int numX = x.num();
-  unsigned int numY = y.num();
-
-  if (numX == numY) // x and y of the same type
-  {
-    if (numX == 1) // all dense
-      siconosBindings::axpy(a, *x.dense(), *y.dense());
-
-    else // all sparse
-    {
-      if (&y != &x)
-        noalias(*y.sparse()) += a**x.sparse();
-      else
-        *y.sparse() += a**x.sparse();
-    }
-  }
-
-  else // x and y of different types
-  {
-    {
-      if (numX == 1)
-        *y.sparse() += a**x.dense();
-      else
-        *y.dense() +=  a**x.sparse();
-    }
-  }
+  apply_modifier<Axpy>(x.storage(), a, y.storage());
 }
-*/
+
 
 double inner_prod(const SiconosVector &x, const SiconosVector &m)
 {
@@ -1506,10 +1557,10 @@ double inner_prod(const SiconosVector &x, const SiconosVector &m)
 }
 
 //// outer_prod(v,w) = trans(v)*w
-//SimpleMatrix outer_prod(const SiconosVector &x, const SiconosVector& m)
-//{
-//  return apply_visitor<OuterProd>(x, m);
-//}
+SimpleMatrix outer_prod(const SiconosVector &x, const SiconosVector& m)
+{
+  return apply_visitor<OuterProd, SimpleMatrix>(x.storage(), m.storage());
+}
 
 void scal(double a, const SiconosVector & x, SiconosVector & y, bool init)
 {
@@ -1524,10 +1575,10 @@ void scal(double a, const SiconosVector & x, SiconosVector & y, bool init)
   }
 }
 
-//void subscal(double a, const SiconosVector & x, SiconosVector & y, const Index& coord, bool init)
-//{
-//  apply_modifier<Subscal>(x.storage(), a, coord, init, y.storage());
-//}
+void subscal(double a, const SiconosVector & x, SiconosVector & y, const Index& coord, bool init)
+{
+  apply_modifier<Subscal>(x.storage(), a, coord, init, y.storage());
+}
 void cross_product(const SiconosVector& V1, const SiconosVector& V2, SiconosVector& VOUT)
 {
   if (V1.size() != 3 || V2.size() != 3 || VOUT.size() != 3)
@@ -1607,11 +1658,11 @@ void getMin(const SiconosVector& V, double& minvalue, unsigned int& idmin){
   };
 }
 */
-//void setBlock(const SiconosVector& vIn, SP::SiconosVector vOut, unsigned int sizeB,
-//              unsigned int startIn, unsigned int startOut)
-//{
-//  apply_visitor<ToBlock>(vIn.storage(), vOut->storage(), sizeB, startIn, startOut);
-//}
+void setBlock(const SiconosVector& vIn, SP::SiconosVector vOut, unsigned int sizeB,
+              unsigned int startIn, unsigned int startOut)
+{
+  apply_modifier<ToBlock>(const_cast<SiconosVectorStorage&>(vIn.storage()), sizeB, startIn, startOut, const_cast<SiconosVectorStorage&>(vOut->storage()));
+}
 
 unsigned int SiconosVector::size(void) const
 {
@@ -1621,13 +1672,13 @@ unsigned int SiconosVector::size(void) const
 SiconosVector& operator *= (SiconosVector& v, const double& s)
 {
 
-  apply_visitor<Scal>(v.storage(), s);
+  apply_modifier<Scal>(v.storage(), s);
   return v;
 }
 
 
 SiconosVector& operator /= (SiconosVector& v, const double& s)
 {
-  apply_visitor<Scal>(v.storage(), 1.0/s);
+  apply_modifier<Scal>(v.storage(), 1.0/s);
   return v;
 }

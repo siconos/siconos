@@ -16,7 +16,7 @@
  * limitations under the License.
 */
 
-#include "SiconosVectorStorage.hpp"
+
 #include "SiconosVector.hpp"
 
 #include "BlockVector.hpp"

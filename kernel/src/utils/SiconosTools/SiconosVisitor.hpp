@@ -65,9 +65,7 @@
 /* convenient macros */
 #define SICONOS_VISITOR_QUOTE(M) #M
 
-#define SICONOS_VISITOR_FAIL(X)                                         \
-  { RuntimeException::selfThrow                                         \
-      ( SICONOS_VISITOR_QUOTE(you must define a visit function for X in a derived class of SiconosVisitor)); }
+
 
 
 /** hook to be inserted in a virtual class definiton */
@@ -83,6 +81,11 @@
     RuntimeException::selfThrow                                         \
       ( "accept: no visitor defined");                                  \
   };                                                                    \
+  virtual void accept_modifier(SiconosVisitor&)                         \
+  {                                                                     \
+    RuntimeException::selfThrow                                         \
+      ( "accept: no modifier defined");                                 \
+  };                                                                    \
   virtual void acceptSerializer(SiconosVisitor&)                        \
   {                                                                     \
     RuntimeException::selfThrow                                         \
@@ -97,7 +100,8 @@
 /** hooks to be inserted in class definition */
 #define ACCEPT_STD_VISITORS()                                           \
   template<typename Archive> friend class SiconosSerializer;            \
-  virtual void accept(SiconosVisitor& tourist) { tourist.visit(*this); } \
+  virtual void accept(SiconosVisitor& tourist) const { tourist.visit(*this); } \
+  virtual void accept_modifier(SiconosVisitor& tourist) { tourist.visit(*this); } \
   virtual void acceptSerializer(SiconosVisitor& serializer) { serializer.visit(*this); } \
   virtual inline Type::Siconos acceptType(FindType& ft) const { return ft.visit(*this); } \
 
@@ -198,12 +202,16 @@ struct FindType
   SICONOS_VISITABLES()
 };
 
+#define SICONOS_VISITOR_FAIL(X)                                         \
+  RuntimeException::selfThrow                                           \
+      ( SICONOS_VISITOR_QUOTE(you must define a visit function for X in a derived class of SiconosVisitor))
+
 /* the base visitor */
 #undef REGISTER
 #define REGISTER(X)             \
-  virtual void visit(std11::shared_ptr<X>) SICONOS_VISITOR_FAIL(SP :: X); \
-  virtual void visit(X&) SICONOS_VISITOR_FAIL(X);                         \
-  virtual void visit(const X&) SICONOS_VISITOR_FAIL(X);
+  virtual void visit(std11::shared_ptr<X>) { SICONOS_VISITOR_FAIL(SP :: X);}; \
+  virtual void visit(X&) { SICONOS_VISITOR_FAIL(X);};                   \
+  virtual void visit(const X&) { SICONOS_VISITOR_FAIL(X);};             \
 
 #undef REGISTER_STRUCT
 #define REGISTER_STRUCT(X) REGISTER(X)
