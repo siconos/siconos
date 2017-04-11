@@ -38,6 +38,11 @@ protected:
   SP::SiconosVector _A;
   double _A1x, _A1y, _A1z;
   double _A2x, _A2y, _A2z;
+
+  /*Initial conditions*/
+  double _q2to1w, _q2to1x, _q2to1y, _q2to1z;
+  double _initial_AscalA1, _initial_AscalA2;
+
   void buildA1A2();
 
   virtual void Jd1d2(double X1, double Y1, double Z1, double q10, double q11, double q12, double q13, double X2, double Y2, double Z2, double q20, double q21, double q22, double q23);
