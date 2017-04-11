@@ -72,7 +72,7 @@ int main(int argc, char *argv[])
   SP::NonSmoothLaw aNSL(new RelayNSL(sNSLawSize, lb, ub));
   
   //****BUILD THE INTERACTION
-  SP::Interaction aI(new Interaction(sNSLawSize,aNSL,aR));
+  SP::Interaction aI(new Interaction(aNSL,aR));
 
 //****BUILD THE model
   SP::Model  aM(new Model(0,sTf));

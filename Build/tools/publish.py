@@ -123,7 +123,7 @@ except GetoptError, err:
 def get_version(path):
 
     with open(os.path.join(path, 'cmake', 'SiconosVersion.cmake')) as\
-         cmakefile:
+            cmakefile:
         cmakefile_as_str = cmakefile.read()
         majorm = re.findall(r'MAJOR_VERSION (\w+).*', cmakefile_as_str)
         minorm = re.findall(r'MINOR_VERSION (\w+).*', cmakefile_as_str)
@@ -157,11 +157,11 @@ with WorkDir(workdir_path) as workdir:
             os.mkdir(srcdir)
         except OSError:
             pass
-        
+
         # get sources
         try:
-            check_call(['git', 'clone',
-                        'git@github.com:siconos/siconos.git'], cwd=bsrcdir)
+            check_call(['git', 'clone', 'git@github.com:siconos/siconos.git'],
+                       cwd=bsrcdir)
         except:
             pass
 
@@ -187,9 +187,8 @@ with WorkDir(workdir_path) as workdir:
     # second pass for make doc
     check_call(['make', 'doc'], cwd=builddir)
 
-    generated_doc_path = os.path.join(builddir,
-                                      'Docs', 'build', 'html')
-    
+    generated_doc_path = os.path.join(builddir, 'Docs', 'build', 'html')
+
     # change local modes
     for root, dirs, files in os.walk(generated_doc_path):
         for d in dirs:
@@ -205,8 +204,8 @@ with WorkDir(workdir_path) as workdir:
     destination = os.path.join(doc_path, version)
 
     # upload
-    check_call(['rsync', '-rlvp', generated_doc_path,
-                destination])
+    check_call(['rsync', '-rlvp', '-e', 'ssh -o "StrictHostKeyChecking no"',
+                generated_doc_path, destination])
 
     # htaccess if this is the main documentation
     if main_doc:
@@ -217,5 +216,4 @@ with WorkDir(workdir_path) as workdir:
                 'redirect 301 /index.html http://siconos.gforge.inria.fr/{0}/html/index.html\n'.\
                 format(version))
 
-        check_call(['rsync', htaccess_filename,
-                    doc_path])
+        check_call(['rsync', htaccess_filename, doc_path])

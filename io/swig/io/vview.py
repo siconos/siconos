@@ -801,8 +801,8 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
             for x,d in enumerate(shape):
                 for y,v in enumerate(d):
                     points.InsertNextPoint(
-                        float(x) / shape.shape[0] * extents[0] - extents[0]/2,
-                        float(y) / shape.shape[1] * extents[1] - extents[1]/2,
+                        float(x) / (shape.shape[0]-1) * extents[0] - extents[0]/2,
+                        float(y) / (shape.shape[1]-1) * extents[1] - extents[1]/2,
                         v)
 
             polydata = vtk.vtkPolyData()

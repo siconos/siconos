@@ -128,15 +128,15 @@ extern "C"
 
   /** General interface to solvers for Affine Variational Inequalities (AVI)
     \param[in] problem the AffineVariationalInequalities structure which handles the problem (M,q)
-    \param[in,out] sol a n-vector of doubles which contains the solution of the problem.
-    \param[in,out] value a n-vector of doubles which contains the solution of the problem.
+    \param[in,out] z a n-vector of doubles which contains the solution of the problem.
+    \param[in,out] w a n-vector of doubles which contains the solution of the problem.
     \param[in,out] options structure used to define the solver(s) and their parameters
     \return info termination value
     - 0 : successful\n
     - >0 : otherwise see each solver for more information about the log info
     \author Olivier Huber
   */
-  int avi_driver(AffineVariationalInequalities* problem, double *sol, double *value, SolverOptions* options);
+  int avi_driver(AffineVariationalInequalities* problem, double* z, double* w, SolverOptions* options);
 
   /** General interface to solver for MCP problems
       \param[in] problem the MixedComplementarityProblem structure which handles the problem

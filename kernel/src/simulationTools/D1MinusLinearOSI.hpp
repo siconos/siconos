@@ -205,8 +205,9 @@ public:
   /** initialization of the D1MinusLinearOSI integrator; for linear time
    *  invariant systems, we compute time invariant operator
    */
-  virtual void initialize(Model& m);
- 
+  // virtual void initialize(Model& m);
+  virtual void initialize_nonsmooth_problems();
+
   /** initialization of the work vectors and matrices (properties) related to
    *  one dynamical system on the graph and needed by the osi
    * \param m the Model
@@ -217,15 +218,12 @@ public:
 
   /** initialization of the work vectors and matrices (properties) related to
    *  one interaction on the graph and needed by the osi
-   * \param t0 time of initialization
    * \param inter the interaction
    * \param interProp the properties on the graph
    * \param DSG the dynamical systems graph
    */
-  void initializeInteraction(double t0, Interaction &inter,
-			     InteractionProperties& interProp,
+  void fill_ds_links(Interaction &inter, InteractionProperties& interProp,
 			     DynamicalSystemsGraph & DSG);
-
   
   /** return the maximum of all norms for the residus of DS
    *  \post{ds->residuFree will be calculated, ds->q() contains new position, ds->velocity contains predicted velocity}

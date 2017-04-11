@@ -19,7 +19,7 @@ def test_smc1():
             t = sin(50*time)
             # XXX fix this !
             u = [t, -t]
-            self.setb(u)
+            self.setbPtr(u)
 
     # variable declaration
     ndof = 2   # Number of degrees of freedom of your system
@@ -60,8 +60,7 @@ def test_smc1():
     processSimulation.setName("plant simulation")
     # Declaration of the integrator
     processIntegrator = ZeroOrderHoldOSI()
-    process.nonSmoothDynamicalSystem().topology().setOSI(processDS, processIntegrator)
-    processSimulation.insertIntegrator(processIntegrator)
+    processSimulation.prepareIntegratorForDS(processIntegrator, processDS, process, t0)
     # Actuator, Sensor & ControlManager
     control = ControlManager(processSimulation)
     sens = LinearSensor(processDS, sensorC, sensorD)
@@ -118,7 +117,7 @@ def test_smc2():
         def computeb(self, time):
             t = sin(50*time)
             u = [t, -t]
-            self.setb(u)
+            self.setbPtr(u)
 
     # variable declaration
     ndof = 2   # Number of degrees of freedom of your system
@@ -144,7 +143,7 @@ def test_smc2():
     # Declaration of the Dynamical System
     processDS = MyFOLDS(x0, A)
     # XXX b is not automatically created ...
-    processDS.setb([0, 0])
+    processDS.setbPtr([0, 0])
     sim = ControlZOHSimulation(t0, T, h)
     sim.addDynamicalSystem(processDS)
     # time discretisation

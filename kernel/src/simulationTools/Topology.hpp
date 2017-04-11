@@ -102,13 +102,12 @@ private:
   \return a vertex descriptor of the new vertex in IndexSet0
   */
   std::pair<DynamicalSystemsGraph::EDescriptor, InteractionsGraph::VDescriptor>
-  addInteractionInIndexSet0(SP::Interaction inter, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2 = SP::DynamicalSystem());
+  __addInteractionInIndexSet0(SP::Interaction inter, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2 = SP::DynamicalSystem());
 
-  /** remove the Interactions of the interactions from _IG and
-   * _DSG
-   * \param inter the Interaction to remove
+  /** remove an Interaction from _IG and _DSG
+   * \param inter a pointer to the Interaction to be removed
    */
-  void removeInteractionFromIndexSet(SP::Interaction inter);
+  void __removeInteractionFromIndexSet(SP::Interaction inter);
 
 public:
 
@@ -160,8 +159,6 @@ public:
    */
   void setOSI(SP::DynamicalSystem ds, SP::OneStepIntegrator OSI);
 
-  void initDS(SP::Model m, double time, SP::DynamicalSystem ds, SP::OneStepIntegrator OSI);
-
    /** link two dynamical systems to a relation
    * \param inter a SP::Interaction
    * \param ds a SP::DynamicalSystem
@@ -186,6 +183,13 @@ public:
   {
     return _IG[0];
   }
+
+  SP::InteractionProperties interaction_properties(unsigned int index, SP::Interaction inter)
+  {
+    InteractionsGraph::VDescriptor ui = indexSet(index)->descriptor(inter);
+    SP::InteractionProperties inter_prop(new InteractionProperties(indexSet(index)->properties(ui)));
+    return inter_prop;
+  };
 
   /** get a pointer to the graph at level num of Interactions
    * \param num the number of indexSet
@@ -331,8 +335,23 @@ public:
    */
   SP::Interaction getInteraction(unsigned int requiredNumber);
 
+  /** get Interactions for a given DS
+   * \return a vector of pointers to Interaction
+   */
+  std::vector<SP::Interaction> interactionsForDS(SP::DynamicalSystem) const;
 
-  
+  /** get Interactions for a given pair of DSs
+   * \return a vector of pointers to Interaction
+   */
+  std::vector<SP::Interaction> interactionsForPairOfDS(
+    SP::DynamicalSystem ds1,
+    SP::DynamicalSystem ds2=SP::DynamicalSystem()) const;
+
+  /** get DynamicalSystems for a given Interaction
+   * \return a vector of pointers to DynamicalSystem
+   */
+  std::vector<SP::DynamicalSystem>
+    dynamicalSystemsForInteraction(SP::Interaction) const;
 
   /** Helper to get the descriptor in DSG0 from a DynamicalSystem
    *  \param ds DynamicalSystem of which we want the descriptor

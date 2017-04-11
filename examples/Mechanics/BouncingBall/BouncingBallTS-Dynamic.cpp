@@ -154,7 +154,7 @@ int main(int argc, char* argv[])
     while (s->hasNextEvent())
     {
       if (k==200) {
-        inter.reset(new Interaction(1, nslaw, relation));
+        inter.reset(new Interaction(nslaw, relation));
 
         // link the interaction and the dynamical system
         bouncingBall->nonSmoothDynamicalSystem()->link(inter, ball);

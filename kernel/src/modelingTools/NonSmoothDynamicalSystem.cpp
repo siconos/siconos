@@ -16,7 +16,6 @@
  * limitations under the License.
 */
 #include "NonSmoothDynamicalSystem.hpp"
-#include "Topology.hpp"
 #include "Interaction.hpp"
 #include "LagrangianLinearTIDS.hpp"
 #include "FirstOrderLinearTIDS.hpp"
@@ -30,6 +29,9 @@ using namespace std::placeholders;
 #include <boost/bind.hpp>
 #include <boost/weak_ptr.hpp>
 #endif
+
+#include <limits>
+
 
 #include "debug.h"
 
@@ -62,24 +64,9 @@ void NonSmoothDynamicalSystem::display() const
   std::cout << "===================================================" <<std::endl;
 }
 
-#include <limits>
-double NonSmoothDynamicalSystem::nsdsConvergenceIndicator()
-{
-  // calculate the max value of all DS convergence indicators
-  double convergenceIndicator = -std::numeric_limits<double>::infinity();
-  double dsIndic ;
-  DynamicalSystemsGraph::VIterator vi;
-  for (vi = dynamicalSystems()->begin(); vi != dynamicalSystems()->end(); ++vi)
-  {
-    dsIndic = dynamicalSystems()->bundle(*vi)->dsConvergenceIndicator();
-    if (dsIndic > convergenceIndicator) convergenceIndicator = dsIndic;
-  }
-  return(convergenceIndicator);
-}
-
 void NonSmoothDynamicalSystem::link(SP::Interaction inter, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2)
 {
-  _mIsLinear = ((inter)->relation()->isLinear() && _mIsLinear);
+  _mIsLinear = (inter->relation()->isLinear() && _mIsLinear);
   _topology->link(inter, ds1, ds2);
 };
 

@@ -205,11 +205,6 @@ public:
     _name = newName;
   }
 
-  /** set the TimeDiscretisation of the Simulation
-   *  \param[in] td the new TimeDiscretisation
-   */
-  void setTimeDiscretisationPtr(SP::TimeDiscretisation td);
-
   /** get time instant k of the time discretisation
    *  \return the time instant t_k
    */
@@ -312,18 +307,7 @@ public:
     return _allNSProblems->size();
   }
 
-  /* get a OSNSP by number.
-   * \param unsigned int number of OSNSP
-   * \return SP::Onestepnsproblem
-   */
-  inline SP::OneStepNSProblem oneStepNSProblem(unsigned int number) const
-  {
-    return (*_allNSProblems)[number];
-  }
-
-
-
-  /** get allNSProblems[name], a specific OneStepNSProblem
+  /** get a OneStep nonsmooth problem of the simulation, identify with its number.
       \param id number of the required osnspb
       \return a pointer to OneStepNSProblem
    */
@@ -400,6 +384,18 @@ public:
   /** Initialize a single Interaction for this Simulation, used for dynamic
    *  topology updates. */
   virtual void initializeInteraction(double time, SP::Interaction inter);
+
+  /** Associate an OSI with a DynamicalSystem in the graph and
+   *  initialize any necessary graph properties (e.g. work vectors).
+   *  Inserts the integrator into the set if not already present.
+   *
+   *  \param osi The OneStepIntegrator to associate with the DynamicalSystem.
+   *  \param ds The DynamicalSystem, which must be already inserted
+   *            into the NonSmoothDynamicalSystem.
+   *  \param m The Model for initializing the OSI.
+   *  \param time The current time for initializing the OSI. */
+  void prepareIntegratorForDS(SP::OneStepIntegrator osi, SP::DynamicalSystem ds,
+                              SP::Model m=SP::Model(), double time=0);
 
   /** Set an object to automatically manage interactions during the simulation */
   void insertInteractionManager(SP::InteractionManager manager)

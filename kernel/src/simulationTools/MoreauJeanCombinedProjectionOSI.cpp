@@ -35,37 +35,6 @@ MoreauJeanCombinedProjectionOSI::MoreauJeanCombinedProjectionOSI(double theta) :
 }
 
 
-void MoreauJeanCombinedProjectionOSI::initializeInteraction(double t0, Interaction &inter,
-                                          InteractionProperties& interProp,
-                                          DynamicalSystemsGraph & DSG)
-{
-  DEBUG_BEGIN("MoreauJeanOSI::initializeInteraction(...)\n");
-
-  bool isInitializationNeeded = false;
-
-  if (!(inter.lowerLevelForOutput() <= _levelMinForOutput && inter.upperLevelForOutput()  >= _levelMaxForOutput ))
-  {
-    //RuntimeException::selfThrow("MoreauJeanCombinedProjectionOSI::initializeInteraction, we must resize _y");
-    inter.setLowerLevelForOutput(_levelMinForOutput);
-    inter.setUpperLevelForOutput(_levelMaxForOutput);
-    isInitializationNeeded = true;
-  }
-
-  if (!(inter.lowerLevelForInput() <= _levelMinForInput && inter.upperLevelForInput() >= _levelMaxForInput ))
-  {
-    // RuntimeException::selfThrow("MoreauJeanCombinedProjectionOSI::initializeInteraction, we must resize _lambda");
-    inter.setLowerLevelForInput(_levelMinForInput);
-    inter.setUpperLevelForInput(_levelMaxForInput);
-    isInitializationNeeded = true;
-  }
-
-  if (isInitializationNeeded)
-    inter.init();
-
-  MoreauJeanOSI::initializeInteraction(t0, inter, interProp, DSG);
-
-  DEBUG_END("MoreauJeanOSI::initializeInteraction(...)\n");
-}
 void MoreauJeanCombinedProjectionOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds)
 {
   DEBUG_BEGIN("MoreauJeanCombinedProjectionOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds) \n");
@@ -78,7 +47,7 @@ void MoreauJeanCombinedProjectionOSI::initializeDynamicalSystem(Model& m, double
   if(dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
   {
     SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
-    workVectors[OneStepIntegrator::qtmp].reset(new SiconosVector(d->ndof()));
+    workVectors[OneStepIntegrator::qtmp].reset(new SiconosVector(d->dimension()));
   }
   else if(dsType == Type::NewtonEulerDS)
   {
@@ -96,15 +65,6 @@ void MoreauJeanCombinedProjectionOSI::initializeDynamicalSystem(Model& m, double
   
   DEBUG_END("MoreauJeanCombinedProjectionOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds) \n");
 }
-
-void MoreauJeanCombinedProjectionOSI::initialize(Model& m)
-{
-  MoreauJeanOSI::initialize(m);
-}
-
-
-
-
 
 bool MoreauJeanCombinedProjectionOSI::addInteractionInIndexSet(SP::Interaction inter, unsigned int i)
 {

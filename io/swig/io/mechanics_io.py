@@ -1066,7 +1066,6 @@ class Hdf5():
             # dynamical system
             nsds = self._model.nonSmoothDynamicalSystem()
             nsds.insertDynamicalSystem(body)
-            nsds.topology().setOSI(body, self._osi)
             nsds.setName(body, str(name))
 
     def importBulletObject(self, name, translation, orientation,
@@ -1222,13 +1221,10 @@ class Hdf5():
                     nsds = self._model.nonSmoothDynamicalSystem()
                     if use_proposed:
                         nsds.insertDynamicalSystem(body)
-                        nsds.topology().setOSI(body, self._osi)
-                        nsds.topology().initDS(self._model,
-                            self._model.simulation().nextTime(),
-                            body, self._osi)
-                        body.initialize(self._model.simulation().nextTime())
-                        self._model.simulation().initialize(
-                            self._model, False)
+                        self._model.simulation().prepareIntegratorForDS(
+                            self._osi, body, self._model,
+                            self._model.simulation().nextTime())
+                        self._model.simulation().initialize(self._model, False)
                     elif use_original:
                         self._broadphase.addDynamicObject(
                             body,
@@ -1238,7 +1234,6 @@ class Hdf5():
                 else:
                     nsds = self._model.nonSmoothDynamicalSystem()
                     nsds.insertDynamicalSystem(body)
-                    nsds.topology().setOSI(body, self._osi)
                     nsds.setName(body, str(name))
 
     def importJoint(self, name):
@@ -1274,7 +1269,7 @@ class Hdf5():
                     joint = joint_class(ds1, self.joints()[name].attrs['pivot_point'])
 
             joint_nslaw = EqualityConditionNSL(joint.numberOfConstraints())
-            joint_inter = Interaction(joint.numberOfConstraints(), joint_nslaw, joint)
+            joint_inter = Interaction(joint_nslaw, joint)
             self._model.nonSmoothDynamicalSystem().\
                 link(joint_inter, ds1, ds2)
 
@@ -1311,7 +1306,7 @@ class Hdf5():
 
             ds1.setBoundaryConditions(bc);
 
-            #joint_inter = Interaction(5, joint_nslaw, joint)
+            #joint_inter = Interaction(joint_nslaw, joint)
             #    self._model.nonSmoothDynamicalSystem().\
             #        link(joint_inter, ds1)
 
@@ -1382,7 +1377,7 @@ class Hdf5():
 
             relation.setOffset(offset)
 
-            inter = Interaction(3, nslaw, relation)
+            inter = Interaction(nslaw, relation)
 
             if ds2 is not None:
                 self._model.nonSmoothDynamicalSystem().link(inter, ds1, ds2)
@@ -1847,8 +1842,8 @@ class Hdf5():
         """
         Add a heightmap represented as a SiconosMatrix
         """
-        assert(heightmap.shape[0] > 2)
-        assert(heightmap.shape[1] > 2)
+        assert(heightmap.shape[0] >= 2)
+        assert(heightmap.shape[1] >= 2)
         if name not in self._ref:
             shape = self._ref.create_dataset(name, data=heightmap)
             shape.attrs['id'] = self._number_of_shapes

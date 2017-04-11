@@ -69,6 +69,6 @@ parameters: c and d
 
 .. math::
 
-   \dot y &=0&, \  d \leq \lambda \leq c \\
-   \dot y &\geq 0&, \ \lambda =  c \\
-   \dot y &\leq 0&, \ \lambda =  d \\
+   \dot y &=0, \  d \leq \lambda \leq c \\
+   \dot y &\geq 0, \ \lambda =  c \\
+   \dot y &\leq 0, \ \lambda =  d \\

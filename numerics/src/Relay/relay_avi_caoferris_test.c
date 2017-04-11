@@ -47,7 +47,7 @@ void relay_avi_caoferris_test(RelayProblem* problem, double *z, double *w, int *
   avi_pb.M = problem->M;
   avi_pb.q = problem->q;
   polyhedron poly;
-  avi_pb.poly = &poly;
+  avi_pb.poly.split = &poly;
 
   poly.id = SICONOS_SET_POLYHEDRON;
   poly.size_ineq = s;

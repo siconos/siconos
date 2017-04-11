@@ -24,7 +24,11 @@
 
 CPPUNIT_TEST_SUITE_REGISTRATION(KernelTest);
 
-void KernelTest::setUp() {};
+void KernelTest::setUp()
+{
+  BBxml = "BouncingBall1.xml";
+}
+
 void KernelTest::tearDown() {};
 
 void KernelTest::t0()
@@ -252,7 +256,7 @@ void KernelTest::t5()
   SP::NonSmoothLaw nslaw(new NewtonImpactNSL(e));
   SP::Relation relation(new LagrangianLinearTIR(H));
 
-  SP::Interaction inter(new Interaction(1, nslaw, relation));
+  SP::Interaction inter(new Interaction(nslaw, relation));
 
   // -------------
   // --- Model ---
@@ -293,10 +297,9 @@ void KernelTest::t5()
   bouncingBall->setSimulation(s);
   bouncingBall->initialize();
 
+  Siconos::save(bouncingBall, BBxml);
 
-  Siconos::save(bouncingBall, "BouncingBall1.xml");
-
-  SP::Model bouncingBallFromFile = Siconos::load("BouncingBall1.xml");
+  SP::Model bouncingBallFromFile = Siconos::load(BBxml);
 
   CPPUNIT_ASSERT((bouncingBallFromFile->t0() == bouncingBall->t0()));
   // in depth comparison?
@@ -310,7 +313,7 @@ void KernelTest::t5()
 
 void KernelTest::t6()
 {
-  SP::Model bouncingBall = Siconos::load("BouncingBall1.xml");
+  SP::Model bouncingBall = Siconos::load(BBxml);
 
   try
   {

@@ -291,14 +291,10 @@ void NewtonEulerR::computeJach(double time, Interaction& inter, InteractionPrope
 
 void NewtonEulerR::computeDotJachq(double time, BlockVector& workQ, BlockVector& workZ, BlockVector& workQdot)
 {
-  if (_plugindotjacqh)
-  {
-    if (_plugindotjacqh->fPtr)
+  if (_dotjachq && _plugindotjacqh->fPtr)
     {
       ((FPtr2)(_plugindotjacqh->fPtr))(workQ.size(), &(workQ)(0), workQdot.size(), &(workQdot)(0), &(*_dotjachq)(0, 0), workZ.size(), &(workZ)(0));
-      // Copy data that might have been changed in the plug-in call.
     }
-  }
 }
 
 void  NewtonEulerR::computeSecondOrderTimeDerivativeTerms(double time, Interaction& inter, VectorOfBlockVectors& DSlink, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2)

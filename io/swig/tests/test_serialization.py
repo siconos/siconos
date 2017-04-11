@@ -77,7 +77,7 @@ def test_serialization4():
 
     nslaw = NewtonImpactNSL(e)
     relation = LagrangianLinearTIR(H)
-    inter = Interaction(1, nslaw, relation)
+    inter = Interaction(nslaw, relation)
 
     #
     # Model

@@ -431,8 +431,7 @@ void TimeStepping::advanceToEvent()
   DEBUG_PRINTF("TimeStepping::advanceToEvent(). Time =%f\n",getTkp1());
 
   // Initialize lambdas of all interactions.
-  SP::InteractionsGraph indexSet0 = _nsds->
-                                    topology()->indexSet(0);
+  SP::InteractionsGraph indexSet0 = _nsds->topology()->indexSet(0);
   InteractionsGraph::VIterator ui, uiend, vnext;
   std11::tie(ui, uiend) = indexSet0->vertices();
   for (vnext = ui; ui != uiend; ui = vnext)
@@ -448,10 +447,11 @@ void TimeStepping::advanceToEvent()
 void   TimeStepping::prepareNewtonIteration()
 {
   DEBUG_BEGIN("TimeStepping::prepareNewtonIteration()\n");
+  double tkp1 = getTkp1();
   for (OSIIterator itosi = _allOSI->begin();
        itosi != _allOSI->end(); ++itosi)
   {
-    (*itosi)->prepareNewtonIteration(getTkp1());
+    (*itosi)->prepareNewtonIteration(tkp1);
   }
 
   if(!_explicitJacobiansOfRelation)
@@ -463,8 +463,8 @@ void   TimeStepping::prepareNewtonIteration()
     {
       inter = indexSet0->bundle(*ui);
       InteractionProperties& interProp = indexSet0->properties(*ui);
-      inter->relation()->computeJach(getTkp1(), *inter, interProp);
-      inter->relation()->computeJacg(getTkp1(), *inter, interProp);
+      inter->relation()->computeJach(tkp1, *inter, interProp);
+      inter->relation()->computeJacg(tkp1, *inter, interProp);
       // Note FP : prepare call below is only useful for FirstOrderType2R.
       // We should check if we really need this ...
       inter->relation()->prepareNewtonIteration(*inter, interProp);

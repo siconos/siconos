@@ -10,6 +10,7 @@ include(OutOfSourcesBuild)
 include(SiconosTools)
 
 include(WindowsSiconosSetup)
+set(tests_timeout 35 CACHE INTERNAL "Limit time for tests (in seconds)")
 
 if(WITH_DOCKER)
   find_program(HAVE_DOCKER docker)
@@ -165,6 +166,8 @@ ENDIF(HAS_BULLET)
 		  WORKING_DIRECTORY ${bin_dir})
 	      endif()
  	      add_test(${target_name} ${CMAKE_COMMAND} -E chdir ${bin_dir} ${SICONOS_SCRIPT} ${_P})
+	      set_tests_properties(${target_name} PROPERTIES TIMEOUT ${tests_timeout})
+
  	    endif()
 	  endif()
         endforeach()

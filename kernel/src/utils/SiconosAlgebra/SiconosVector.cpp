@@ -58,6 +58,9 @@ namespace bindings = boost::numeric::bindings::blas;
 #include <iostream>
 #include <typeinfo>
 
+#include <cmath>        // std::exp(double)
+#include <algorithm>    // std::transform
+
 using namespace Experimental;
 
 
@@ -1636,6 +1639,23 @@ void getMin(const SiconosVector& V, double& minvalue, unsigned int& idmin)
     };
   };
 }
+
+
+struct exp_op { double operator() (double d) const { return std::exp(d); } };
+
+void SiconosVector::exp_in_place()
+{
+  // struct exp_op { double operator() (double d) const { return std::exp(d); } };
+  // assert(num() == 1);
+  // std::transform(vect.Dense->begin(), vect.Dense->end(), vect.Dense->begin(), exp_op);
+}
+
+void SiconosVector::exp(SiconosVector& input)
+{
+  // assert(num() == 1 && input.num()==1);
+  // std::transform(input.dense()->begin(), input.dense()->end(), vect.Dense->begin(), exp_op);
+}
+
 
 //
 /*

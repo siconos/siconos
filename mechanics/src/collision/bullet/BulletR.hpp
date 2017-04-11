@@ -59,6 +59,11 @@ public:
     _contactPoints = p;
   };
 
+  double distance() const
+  {
+    return _contactDistance;
+  };
+
   double y_correction_A() { return _y_correction_A; }
   double y_correction_B() { return _y_correction_A; }
   double y_correction() { return _y_correction_A + _y_correction_B; }

@@ -1,1 +1,3 @@
-rc.fedora-core16
+#!/bin/sh
+
+yum install -y pytest

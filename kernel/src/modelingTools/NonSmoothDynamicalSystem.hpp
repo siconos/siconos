@@ -108,7 +108,7 @@ public:
     return _topology->dSG(0);
   }
 
-  /** add a dynamical system
+  /** add a dynamical system into the DS graph (as a vertex)
    * \param ds a pointer to the system to add
    */
   inline void insertDynamicalSystem(SP::DynamicalSystem ds)
@@ -172,12 +172,6 @@ public:
    */
   void link(SP::Interaction inter, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2 = SP::DynamicalSystem());
 
-  // inline void setOSI(SP::DynamicalSystem ds, SP::OneStepIntegrator OSI)
-  // {
-  //   _topology->setOSI(ds, OSI);
-  //   _mIsLinear = ((ds)->isLinear() && _mIsLinear);
-  // };
-
   /** set the name for this Dynamical System
    * \param ds a pointer to the system
    * \param name the name of the DynamicalSystem
@@ -210,12 +204,6 @@ public:
   /** display the data of the Non Smooth Dynamical System
    */
   void display() const;
-
-  /** calculate an indicator that gives convergence information for
-   *  the DSs
-   *  \return a double
-   */
-  double nsdsConvergenceIndicator();
 
   /** return false is one of the interations is not linear.  else
    *  return true.
@@ -253,7 +241,7 @@ public:
 
   /** compute r thanks to lambda[level] for all Interactions
     * \param time
-    *   \param level lambda level
+    * \param level lambda level
    */
   void updateInput(double time, unsigned int level);
 

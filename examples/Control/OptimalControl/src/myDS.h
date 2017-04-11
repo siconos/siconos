@@ -94,30 +94,17 @@ public:
    */
   virtual ~MyDS();
 
-
-  /** Default function to compute \f$ f: (x,t)\f$
-   * \param double time : current time
-   */
-  virtual void computef(double);
-
   /** function to compute \f$ f: (x,t)\f$ with x different from current saved state.
    * \param double time : current time
    * \param SP::SiconosVector
    */
-  virtual void computef(double, SiconosVector&);
-
-  /** Default function to compute \f$ \nabla_x f: (x,t) \in R^{n} \times R  \mapsto  R^{n \times n} \f$
-   *  \param double time : current time
-   *  \param bool isDSup : flag to avoid recomputation of operators
-   *  \exception RuntimeException
-   */
-  virtual void computeJacobianfx(double, bool  = false);
+  virtual void computef(double, SP::SiconosVector);
 
   /** Default function to compute \f$ \nabla_x f: (x,t) \in R^{n} \times R  \mapsto  R^{n \times n} \f$ with x different from current saved state.
    *  \param double time : current time
    *  \param SP::SiconosVector
    */
-  virtual void computeJacobianfx(double, const SiconosVector& v);
+  virtual void computeJacobianfx(double, SP::SiconosVector v);
 
   /** Default function to the right-hand side term
    *  \param double time : current time

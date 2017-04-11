@@ -117,7 +117,7 @@ LTIRDiodeBridgeCapFilter = FirstOrderLinearTIR(C, B)
 LTIRDiodeBridgeCapFilter.setDPtr(D)
 
 nslaw = ComplementarityConditionNSL(4)
-InterDiodeBridgeCapFilter = Interaction(4, nslaw, LTIRDiodeBridgeCapFilter, 1)
+InterDiodeBridgeCapFilter = Interaction(nslaw, LTIRDiodeBridgeCapFilter)
 
 #
 # Model
@@ -164,7 +164,7 @@ k = 0
 h = aTS.timeStep()
 print("Timestep : ", h)
 # Number of time steps
-N = (T - t0) / h
+N = int((T - t0) / h)
 print("Number of steps : ", N)
 
 # Get the values to be plotted

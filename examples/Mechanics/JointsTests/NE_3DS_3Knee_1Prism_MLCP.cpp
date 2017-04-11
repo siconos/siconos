@@ -278,11 +278,11 @@ int main(int argc, char* argv[])
     // relation3->setJachq(H3);
     // relation4->setJachq(H4);
 
-    SP::Interaction inter1(new Interaction(KneeJointR::numberOfConstraints(), nslaw1, relation1));
-    SP::Interaction inter2(new Interaction(KneeJointR::numberOfConstraints(), nslaw2, relation2));
-    SP::Interaction inter3(new Interaction(KneeJointR::numberOfConstraints(), nslaw3, relation3));
-    SP::Interaction inter4(new Interaction(PrismaticJointR::numberOfConstraints(), nslaw4, relation4));
-    SP::Interaction interFloor(new Interaction(1, nslaw0, relation0));
+    SP::Interaction inter1(new Interaction(nslaw1, relation1));
+    SP::Interaction inter2(new Interaction(nslaw2, relation2));
+    SP::Interaction inter3(new Interaction(nslaw3, relation3));
+    SP::Interaction inter4(new Interaction(nslaw4, relation4));
+    SP::Interaction interFloor(new Interaction(nslaw0, relation0));
     // -------------
     // --- Model ---
     // -------------
@@ -303,12 +303,8 @@ int main(int argc, char* argv[])
 
     // -- (1) OneStepIntegrators --
     SP::MoreauJeanOSI OSI1(new MoreauJeanOSI(theta));
-    myModel->nonSmoothDynamicalSystem()->topology()->setOSI(beam1,OSI1);
     SP::MoreauJeanOSI OSI2(new MoreauJeanOSI(theta));
-    myModel->nonSmoothDynamicalSystem()->topology()->setOSI(beam2,OSI2);
-    //OSI2->insertDynamicalSystem(beam2);
     SP::MoreauJeanOSI OSI3(new MoreauJeanOSI(theta));
-    myModel->nonSmoothDynamicalSystem()->topology()->setOSI(beam3,OSI3);
 
     // -- (2) Time discretisation --
     SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
@@ -320,6 +316,10 @@ int main(int argc, char* argv[])
     SP::TimeStepping s(new TimeStepping(t, OSI1, osnspb));
     s->insertIntegrator(OSI2);
     s->insertIntegrator(OSI3);
+    s->prepareIntegratorForDS(OSI1, beam1, myModel, t0);
+    s->prepareIntegratorForDS(OSI2, beam2, myModel, t0);
+    s->prepareIntegratorForDS(OSI3, beam3, myModel, t0);
+
     //    s->setComputeResiduY(true);
     //  s->setUseRelativeConvergenceCriteron(false);
     myModel->setSimulation(s);

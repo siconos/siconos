@@ -75,7 +75,7 @@ int frictionContact_test_function(FILE * f, SolverOptions * options)
 
   int k, info = -1 ;
   FrictionContactProblem* problem = (FrictionContactProblem *)malloc(sizeof(FrictionContactProblem));
-  /* setNumericsVerbose(1); */
+  /* numerics_set_verbose(1); */
   info = frictionContact_newFromFile(problem, f);
 
   FILE * foutput  =  fopen("checkinput.dat", "w");

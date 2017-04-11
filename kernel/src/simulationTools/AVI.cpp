@@ -85,7 +85,7 @@ struct AVI::_BoundsNSLEffect : public SiconosVisitor
 AVI::AVI(int numericsSolverId): LinearOSNS(numericsSolverId)
 {
   _numerics_problem.reset(new AffineVariationalInequalities);
-  _numerics_problem->poly = new polyhedron;
+  _numerics_problem->poly.split = new polyhedron;
   solver_options_set(_numerics_solver_options.get(), numericsSolverId);
 }
 
@@ -108,13 +108,13 @@ void AVI::initialize(SP::Simulation sim)
     SimpleMatrix& H = nc.H();
     _numerics_problem->size = nc.size();
     _numerics_problem->d = NULL;
-    _numerics_problem->poly->id = SICONOS_SET_POLYHEDRON;
-    _numerics_problem->poly->size_ineq = K.size();
-    _numerics_problem->poly->size_eq = 0;
-    _numerics_problem->poly->H = NM_create_from_data(NM_DENSE, K.size(), nc.size(), H.getArray());
-    _numerics_problem->poly->K = K.getArray();
-    _numerics_problem->poly->Heq = NULL;
-    _numerics_problem->poly->Keq= NULL;
+    _numerics_problem->poly.split->id = SICONOS_SET_POLYHEDRON;
+    _numerics_problem->poly.split->size_ineq = K.size();
+    _numerics_problem->poly.split->size_eq = 0;
+    _numerics_problem->poly.split->H = NM_create_from_data(NM_DENSE, K.size(), nc.size(), H.getArray());
+    _numerics_problem->poly.split->K = K.getArray();
+    _numerics_problem->poly.split->Heq = NULL;
+    _numerics_problem->poly.split->Keq= NULL;
 
     // we do not support more than one interaction
     if (!(nbInter++ == 0))
@@ -182,6 +182,6 @@ void AVI::setSolverId(int solverId)
 AVI::~AVI()
 {
   solver_options_delete(&*_numerics_solver_options);
-  delete _numerics_problem->poly;
+  delete _numerics_problem->poly.split;
 }
 

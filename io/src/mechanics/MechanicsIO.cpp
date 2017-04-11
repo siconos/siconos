@@ -165,7 +165,7 @@ void contactPointProcess(SiconosVector& answer,
   const SiconosVector& nc = *rel.nc();
   const SimpleMatrix& jachqT = *rel.jachqT();
   double id = inter.number();
-  double mu = ask<ForMu>(*inter.nslaw());
+  double mu = ask<ForMu>(*inter.nonSmoothLaw());
   SiconosVector cf(jachqT.size(1));
   prod(*inter.lambda(1), jachqT, cf, true);
   answer.setValue(0, mu);

@@ -99,22 +99,22 @@ int main(int argc, char* argv[])
     // -- corner 1 --
     SP::NonSmoothLaw nslaw1(new NewtonImpactNSL(e1));
     SP::Relation relation1(new LagrangianScleronomousR("SliderCrankPlugin:g1", "SliderCrankPlugin:W1", "SliderCrankPlugin:W1dot"));
-    SP::Interaction inter1(new Interaction(1, nslaw1, relation1, 1));
+    SP::Interaction inter1(new Interaction(nslaw1, relation1));
 
     // -- corner 2 --
     SP::NonSmoothLaw nslaw2(new NewtonImpactNSL(e2));
     SP::Relation relation2(new LagrangianScleronomousR("SliderCrankPlugin:g2", "SliderCrankPlugin:W2", "SliderCrankPlugin:W2dot"));
-    SP::Interaction inter2(new Interaction(1, nslaw2, relation2, 2));
+    SP::Interaction inter2(new Interaction(nslaw2, relation2));
 
     // -- corner 3 --
     SP::NonSmoothLaw nslaw3(new NewtonImpactNSL(e3));
     SP::Relation relation3(new LagrangianScleronomousR("SliderCrankPlugin:g3", "SliderCrankPlugin:W3", "SliderCrankPlugin:W3dot"));
-    SP::Interaction inter3(new Interaction(1, nslaw3, relation3, 3));
+    SP::Interaction inter3(new Interaction(nslaw3, relation3));
 
     // -- corner 4 --
     SP::NonSmoothLaw nslaw4(new NewtonImpactNSL(e4));
     SP::Relation relation4(new LagrangianScleronomousR("SliderCrankPlugin:g4", "SliderCrankPlugin:W4", "SliderCrankPlugin:W4dot"));
-    SP::Interaction inter4(new Interaction(1, nslaw4, relation4, 4));
+    SP::Interaction inter4(new Interaction(nslaw4, relation4));
 
     // -------------
     // --- Model ---

@@ -163,7 +163,7 @@ The smooth dynamics which is valid almost everywhere for the Lebesgue measure :m
 
 .. math::
 
-   M(q) \ddot q^+ +  F_{int}(t, q,  v^+)&=& F_{ext}(t) +  f^+ \quad (dt-a.e.)
+   M(q) \ddot q^+ +  F_{int}(t, q,  v^+)&= F_{ext}(t) +  f^+ \quad (dt-a.e.)
 
 where we assume that :math:`f^+=f^-=f\, (dt-a.e.)`.
 
@@ -178,7 +178,7 @@ The following smooth systems are then to be solved:
 
 To solve these systems, at each time, i.e. to known the configuration after each events and to integrate it numerically, it is useful to express the complementarity laws at different kinematics level. We also introduce the pre-defined index sets (about index sets, see \ref docSimuIndexSets):\n
 
-:math:`\I_0` is the set of all the potential UnitaryRelations (UR).
+:math:`I_0` is the set of all the potential UnitaryRelations (UR).
 :math:`I_1 = \{ ur_\alpha\in I_{0} , y_{\alpha} = 0 \}` (or if the UR is in :math:`I_1` then contact occurs).
 :math:`I_2 = \{ ur_\alpha\in I_{1} , \dot y_{\alpha} = 0 \}` (or if the UR is in :math:`I_2`, contact remains, no take off).
 
@@ -236,16 +236,16 @@ Implementation in Siconos
 According to \ref doc_lagds, in Siconos, the Dynamics of Lagrangian systems is written as:
 
 .. math::
-   M(q) \ddot q + fGyr(\dot q, q) + F_{Int}(\dot q , q , t) &=& F_{Ext}(t) + p \\
+   M(q) \ddot q + fGyr(\dot q, q) + F_{Int}(\dot q , q , t) &= F_{Ext}(t) + p \\
 
 Next,:math:`fGyr` term will be forget and considered as included in :math:`F_{Int}`.
 And Lagrangian relations are (see \ref docRelationLag): 
 
 .. math::
 
-   y &=& h(Q) \\
-   \dot y &=& \nabla_q h(Q)\dot Q \\
-   P &=& \nabla_q h(Q)^t\lambda 
+   y &= h(Q) \\
+   \dot y &= \nabla_q h(Q)\dot Q \\
+   P &= \nabla_q h(Q)^t\lambda 
 
 Q (resp. P) being a collection of all the q (resp. p) of the Dynamical Systems involved in the Interaction.
 
@@ -309,9 +309,9 @@ The function g(x,t) is given by:
 
 .. math::
 
-   g(x,t) &=& y[0], \quad \forall \alpha \in I_0 - I_2 \\
+   g(x,t) &= y[0], \quad \forall \alpha \in I_0 - I_2 \\
    \\
-   g(x,t) &=& \lambda[2], \quad \forall \alpha \in I_2
+   g(x,t) &= \lambda[2], \quad \forall \alpha \in I_2
    
 Corresponding code::
 

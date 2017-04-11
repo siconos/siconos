@@ -27,9 +27,8 @@
 #include "NonSmoothDynamicalSystem.hpp"
 
 //Default constructor
-OSNSMultipleImpact::OSNSMultipleImpact(): LinearOSNS()
+OSNSMultipleImpact::OSNSMultipleImpact(): LinearOSNS(), _typeCompLaw("BiStiffness")
 {
-  _typeCompLaw = "BiStiffness";
   _nStepSave = 100;
   _tolImpact = DEFAULT__tolImpact;
   _Tol_Vel = DEFAULT_TOL_VEL;
@@ -130,7 +129,7 @@ void OSNSMultipleImpact::SetSizeDataSave(unsigned int var)
   _sizeDataSave = var;
 }
 //---------------------------------------------------------------------------------------------------
-void OSNSMultipleImpact::WriteVectorIntoMatrix(const SiconosVector m, const unsigned int pos_row, const unsigned int pos_col)
+void OSNSMultipleImpact::WriteVectorIntoMatrix(const SiconosVector& m, const unsigned int pos_row, const unsigned int pos_col)
 {
   for (unsigned int i = 0; i < m.size(); ++i)
   {
@@ -307,7 +306,7 @@ void OSNSMultipleImpact::BuildParaContact()
   for (std11::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
   {
     SP::Interaction inter = indexSet->bundle(*ui);
-    SP::NonSmoothLaw nslaw = inter->nslaw();
+    SP::NonSmoothLaw nslaw = inter->nonSmoothLaw();
     SP::MultipleImpactNSL Mulnslaw = std11::dynamic_pointer_cast<MultipleImpactNSL>(nslaw);
     assert(Mulnslaw && "In OSNSMultipleImpact::BuildStiffResCofVec, non-smooth law used must be MultipleImpactNSL!!!");
     // Get the relative position of inter-interactionBlock in the vector _velocityContact

@@ -37,15 +37,11 @@ private:
   // tests to be done ...
 
   CPPUNIT_TEST(testBuildLagrangianCompliantR0);
-  CPPUNIT_TEST(End);
-
   CPPUNIT_TEST_SUITE_END();
 
   // \todo exception test
 
   void testBuildLagrangianCompliantR0();
-  void End();
-
   // Members
 
 public:

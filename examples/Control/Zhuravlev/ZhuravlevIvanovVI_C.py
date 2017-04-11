@@ -77,7 +77,7 @@ if __name__ == '__main__':
     sol[0, :] = xk
 
     k = 0
-    #SN.setNumericsVerbose(3)
+    #SN.numerics_set_verbose(3)
 
     while t <= T:
         k += 1

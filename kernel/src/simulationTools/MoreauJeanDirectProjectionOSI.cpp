@@ -64,38 +64,6 @@ MoreauJeanDirectProjectionOSI::MoreauJeanDirectProjectionOSI(double theta, doubl
   _activateYVelThreshold =   SICONOS_MPC_DEFAULT_ACTIVATION_VEL_THRESHOLD;
 }
 
-
-
-void MoreauJeanDirectProjectionOSI::initializeInteraction(double t0, Interaction &inter,
-                                          InteractionProperties& interProp,
-                                          DynamicalSystemsGraph & DSG)
-{
-  DEBUG_BEGIN("MoreauJeanDirectProjectionOSI::initializeInteraction(...)\n");
-  
-  bool isInitializationNeeded = false;
-  if (!(inter.lowerLevelForOutput() <= _levelMinForOutput && inter.upperLevelForOutput()  >= _levelMaxForOutput ))
-  {
-    //RuntimeException::selfThrow("MoreauJeanDirectProjectionOSI::initializeInteraction, we must resize _y");
-    inter.setLowerLevelForOutput(_levelMinForOutput);
-    inter.setUpperLevelForOutput(_levelMaxForOutput);
-    isInitializationNeeded = true;
-  }
-  if (!(inter.lowerLevelForInput() <= _levelMinForInput && inter.upperLevelForInput() >= _levelMaxForInput ))
-  {
-    // RuntimeException::selfThrow("MoreauJeanDirectProjectionOSI::initializeInteraction, we must resize _lambda");
-    inter.setLowerLevelForInput(_levelMinForInput);
-    inter.setUpperLevelForInput(_levelMaxForInput);
-    isInitializationNeeded = true;
-  }
-  
-  if (isInitializationNeeded)
-    inter.init();
-  MoreauJeanOSI::initializeInteraction(t0, inter, interProp, DSG);
-
-  
-  
-  DEBUG_END("MoreauJeanDirectProjectionOSI::initializeInteraction(...)\n");
-}
 void MoreauJeanDirectProjectionOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds)
 {
   DEBUG_BEGIN("MoreauJeanDirectProjectionOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds) \n");
@@ -106,7 +74,7 @@ void MoreauJeanDirectProjectionOSI::initializeDynamicalSystem(Model& m, double t
   if(dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
   {
     SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
-    workVectors[OneStepIntegrator::qtmp].reset(new SiconosVector(d->ndof()));
+    workVectors[OneStepIntegrator::qtmp].reset(new SiconosVector(d->dimension()));
   }
   else if(dsType == Type::NewtonEulerDS)
   {
@@ -122,15 +90,6 @@ void MoreauJeanDirectProjectionOSI::initializeDynamicalSystem(Model& m, double t
   {
     ds->initializeNonSmoothInput(k);
   }
-}
-
-
-
-void MoreauJeanDirectProjectionOSI::initialize(Model& m)
-{
-
-  MoreauJeanOSI::initialize(m);
-  
 }
 
 void MoreauJeanDirectProjectionOSI::computeFreeState()

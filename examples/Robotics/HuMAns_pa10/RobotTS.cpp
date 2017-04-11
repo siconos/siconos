@@ -87,7 +87,7 @@ int main(int argc, char* argv[])
     SP::NonSmoothLaw nslaw(new NewtonImpactNSL(e));
     string G = "RobotPlugin:G2";
     SP::Relation relation(new LagrangianScleronomousR("RobotPlugin:h2", G));
-    SP::Interaction inter(new Interaction(2, nslaw, relation, 0));
+    SP::Interaction inter(new Interaction(nslaw, relation, 0));
 
     // => angular stops
 
@@ -125,7 +125,7 @@ int main(int argc, char* argv[])
 
     SP::NonSmoothLaw nslaw2(new NewtonImpactNSL(e2));
     SP::Relation relation2(new LagrangianLinearTIR(H, b));
-    SP::Interaction inter2(new Interaction(4, nslaw2, relation2, 1));
+    SP::Interaction inter2(new Interaction(nslaw2, relation2, 1));
 
     // -------------
     // --- Model ---

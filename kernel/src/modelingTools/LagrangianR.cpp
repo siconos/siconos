@@ -40,9 +40,9 @@ void LagrangianR::initialize(Interaction& inter, VectorOfBlockVectors& DSlink, V
   initComponents(inter, DSlink, workV, workM);
 }
 
-void LagrangianR::zeroPlugin()
+void LagrangianR::_zeroPlugin()
 {
-  Relation::zeroPlugin();
+  Relation::_zeroPlugin();
   _pluginJachq.reset(new PluggedObject());
 }
 void LagrangianR::display() const

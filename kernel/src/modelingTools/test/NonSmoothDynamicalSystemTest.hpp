@@ -41,8 +41,6 @@ private:
   CPPUNIT_TEST(testBuildNonSmoothDynamicalSystem2);
   CPPUNIT_TEST(testinsertDynamicalSystem);
   CPPUNIT_TEST(testinsertInteraction);
-  CPPUNIT_TEST(End);
-
   CPPUNIT_TEST_SUITE_END();
 
   // \todo exception test
@@ -51,7 +49,6 @@ private:
   void testBuildNonSmoothDynamicalSystem2();
   void testinsertDynamicalSystem();
   void testinsertInteraction();
-  void End();
 
 public:
   void setUp();

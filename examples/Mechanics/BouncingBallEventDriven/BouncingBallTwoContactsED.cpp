@@ -92,10 +92,10 @@ int main(int argc, char* argv[])
     SP::NonSmoothLaw  nslaw(new NewtonImpactNSL(e));
     // Interaction at contact 1 (ball-floor)
     SP::Relation relation1(new LagrangianLinearTIR(H1, E1));
-    SP::Interaction inter1(new Interaction(1, nslaw, relation1));
+    SP::Interaction inter1(new Interaction(nslaw, relation1));
     // Interaction at contact 2 (ball-ceiling)
     SP::Relation relation2(new LagrangianLinearTIR(H2, E2));
-    SP::Interaction inter2(new Interaction(1, nslaw, relation2));
+    SP::Interaction inter2(new Interaction(nslaw, relation2));
     // --------------------------------
     // --- NonSmoothDynamicalSystem ---
     // --------------------------------

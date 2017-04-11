@@ -109,12 +109,12 @@ protected:
   SP::SiconosVector _dotjacqhXqdot;
 
   /** reset all plugins */
-  virtual void zeroPlugin();
+  virtual void _zeroPlugin();
 
   /** basic constructor */
   LagrangianScleronomousR(): LagrangianR(RELATION::ScleronomousR)
   {
-    zeroPlugin();
+    _zeroPlugin();
   }
 
   virtual void initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
@@ -219,7 +219,6 @@ public:
   void computeInput(double time, Interaction& inter, InteractionProperties& interProp,
                     unsigned int level = 0);
 
-  const std::string getJachqName() const;
 
   ACCEPT_STD_VISITORS();
 

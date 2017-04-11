@@ -31,7 +31,7 @@
 #include "NonSmoothDynamicalSystem.hpp"
 #include "OneStepNSProblem.hpp"
 
-//#define DEBUG_BEGIN_END_ONLY
+// #define DEBUG_BEGIN_END_ONLY
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
@@ -114,18 +114,18 @@ unsigned int D1MinusLinearOSI::numberOfIndexSets() const
 }
 void D1MinusLinearOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds)
 {
+  // Get work buffers from the graph
+  VectorOfVectors& workVectors = *_initializeDSWorkVectors(ds);
+
+  // Check dynamical system type
   Type::Siconos dsType = Type::value(*ds);
-  const DynamicalSystemsGraph::VDescriptor& dsv = _dynamicalSystemsGraph->descriptor(ds);
-
-  VectorOfVectors& workVectors = *_dynamicalSystemsGraph->properties(dsv).workVectors;
-  _dynamicalSystemsGraph->bundle(dsv)->initMemory(getSizeMem());
-  _dynamicalSystemsGraph->bundle(dsv)->resetToInitialState();
-
-
+  assert(dsType == Type::LagrangianLinearTIDS || dsType == Type::LagrangianDS || Type::NewtonEulerDS);
+  
   if(dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
   {
     SP::LagrangianDS lds = std11::static_pointer_cast<LagrangianDS> (ds);
-    lds->computeMass();
+    lds->init_generalized_coordinates(2); // acceleration is required for the ds
+    lds->init_inverse_mass(); // invMass required to update post-impact velocity
 
     workVectors.resize(OneStepIntegrator::work_vector_of_vector_size);
     workVectors[OneStepIntegrator::residu_free].reset(new SiconosVector(lds->dimension()));
@@ -136,6 +136,7 @@ void D1MinusLinearOSI::initializeDynamicalSystem(Model& m, double t, SP::Dynamic
   else if(dsType == Type::NewtonEulerDS)
   {
     SP::NewtonEulerDS neds = std11::static_pointer_cast<NewtonEulerDS> (ds);
+    neds->init_inverse_mass(); // invMass required to update post-impact velocity
     workVectors.resize(OneStepIntegrator::work_vector_of_vector_size);
     workVectors[OneStepIntegrator::residu_free].reset(new SiconosVector(neds->dimension()));
     workVectors[OneStepIntegrator::free].reset(new SiconosVector(neds->dimension()));
@@ -149,26 +150,11 @@ void D1MinusLinearOSI::initializeDynamicalSystem(Model& m, double t, SP::Dynamic
   {
     ds->initializeNonSmoothInput(k);
   }
+
 }
 
-
-void D1MinusLinearOSI::initialize(Model & m)
+void D1MinusLinearOSI::initialize_nonsmooth_problems()
 {
-  DEBUG_BEGIN("D1MinusLinearOSI::initialize() \n");
-
-  OneStepIntegrator::initialize(m);
-
-  DynamicalSystemsGraph::VIterator dsi, dsend;
-  for(std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
-  {
-    if(!checkOSI(dsi)) continue;
-
-    SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
-    initializeDynamicalSystem(m, m.t0(),  ds);
-  }
-
-  DEBUG_PRINTF("D1MinusLinearOSI::initialize(). Type of OSI  %i ", _typeOfD1MinusLinearOSI);
-
   SP::OneStepNSProblems allOSNSP  = _simulation->oneStepNSProblems(); // all OSNSP
 
   bool isOSNSPinitialized = false ;
@@ -214,58 +200,26 @@ void D1MinusLinearOSI::initialize(Model & m)
   {
     RuntimeException::selfThrow("D1MinusLinearOSI::initialize() - not implemented for type of D1MinusLinearOSI: " + _typeOfD1MinusLinearOSI);
   }
-
-  SP::InteractionsGraph indexSet0 = m.nonSmoothDynamicalSystem()->topology()->indexSet0();
-  InteractionsGraph::VIterator ui, uiend;
-  for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
-  {
-    Interaction& inter = *indexSet0->bundle(*ui);
-    initializeInteraction(m.t0(), inter, indexSet0->properties(*ui), *_dynamicalSystemsGraph);
-  }
-
-
-  DEBUG_END("D1MinusLinearOSI::initialize() \n");
 }
 
-void D1MinusLinearOSI::initializeInteraction(double t0, Interaction &inter,
-                                             InteractionProperties& interProp,
-                                             DynamicalSystemsGraph & DSG)
+void D1MinusLinearOSI::fill_ds_links(Interaction &inter,
+				     InteractionProperties& interProp,
+				     DynamicalSystemsGraph & DSG)
 {
   SP::DynamicalSystem ds1= interProp.source;
   SP::DynamicalSystem ds2= interProp.target;
-
-  assert(interProp.DSlink);
+  assert(ds1);
+  assert(ds2);
 
   VectorOfBlockVectors& DSlink = *interProp.DSlink;
-  // VectorOfVectors& workVInter = *interProp.workVectors;
-  // VectorOfSMatrices& workMInter = *interProp.workMatrices;
+  assert(interProp.DSlink);
 
-  Relation &relation =  *inter.relation();
+  Relation &relation =  *inter.relation();  
   RELATION::TYPES relationType = relation.getType();
 
-
-  /* Check that the interaction has the correct initialization for y and lambda */
-
-  bool isInitializationNeeded = false;
-
-  if (!(inter.lowerLevelForOutput() <= _levelMinForOutput && inter.upperLevelForOutput()  >= _levelMaxForOutput ))
-  {
-    //  RuntimeException::selfThrow("D1MinusLinearOSI::initializeInteraction, we must resize _y");
-    inter.setLowerLevelForOutput(_levelMinForOutput);
-    inter.setUpperLevelForOutput(_levelMaxForOutput);
-    isInitializationNeeded = true;
-  }
-  if (!(inter.lowerLevelForInput() <= _levelMinForInput && inter.upperLevelForInput() >= _levelMaxForInput ))
-  {
-    //RuntimeException::selfThrow("D1MinusLinearOSI::initializeInteraction, we must resize _lambda");
-    inter.setLowerLevelForInput(_levelMinForInput);
-    inter.setUpperLevelForInput(_levelMaxForInput);
-    isInitializationNeeded = true;
-  }
-
-  if (isInitializationNeeded)
-    inter.init();
-
+  // Check if interations levels (i.e. y and lambda sizes) are compliant with the current osi.
+  _check_and_update_interaction_levels(inter);
+  // Initialize/allocate memory buffers in interaction.
   bool computeResidu = relation.requireResidu();
   inter.initializeMemory(computeResidu,_steps);
 
@@ -273,6 +227,10 @@ void D1MinusLinearOSI::initializeInteraction(double t0, Interaction &inter,
   VectorOfVectors &workVds1 = *DSG.properties(DSG.descriptor(ds1)).workVectors;
   if (relationType == Lagrangian)
   {
+    LagrangianDS& lds = *std11::static_pointer_cast<LagrangianDS> (ds1);
+    DSlink[LagrangianR::p2].reset(new BlockVector());
+    DSlink[LagrangianR::p2]->insertPtr(lds.p(2));
+
     DSlink[LagrangianR::xfree].reset(new BlockVector());
     DSlink[LagrangianR::xfree]->insertPtr(workVds1[OneStepIntegrator::free]);
   }
@@ -288,44 +246,15 @@ void D1MinusLinearOSI::initializeInteraction(double t0, Interaction &inter,
     if (relationType == Lagrangian)
     {
       DSlink[LagrangianR::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
+      LagrangianDS& lds = *std11::static_pointer_cast<LagrangianDS> (ds2);
+      DSlink[LagrangianR::p2]->insertPtr(lds.p(2));
+
     }
     else if (relationType == NewtonEuler)
     {
       DSlink[NewtonEulerR::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
     }
   }
-  if (_steps > 1) // Multi--step methods
-  {
-    // Compute the old Values of Output with stored values in Memory
-    for (unsigned int k = 0; k < _steps - 1; k++)
-    {
-      /** ComputeOutput to fill the Memory
-       * We assume the state x is stored in xMemory except for the  initial
-       * condition which has not been swap yet.
-       */
-      //        relation()->LinkDataFromMemory(k);
-      for (unsigned int i = 0; i < inter.upperLevelForOutput() + 1; ++i)
-      {
-        inter.computeOutput(t0, interProp, i);
-        //_yMemory[i]->swap(*_y[i]);
-      }
-    }
-    inter.swapInMemory();
-
-  }
-
-  // Compute a first value for the output
-  inter.computeOutput(t0, interProp, 0);
-
-  // prepare the gradients
-  relation.computeJach(t0, inter, interProp);
-  for (unsigned int i = 0; i < inter.upperLevelForOutput() + 1; ++i)
-  {
-    inter.computeOutput(t0, interProp, i);
-  }
-  inter.swapInMemory();
-
-
 }
 
 double D1MinusLinearOSI::computeResidu()
@@ -385,7 +314,6 @@ void D1MinusLinearOSI::computeFreeState()
       SiconosVector &vfree  = *d->velocity(); // POINTER CONSTRUCTOR : contains free velocity
 
       // get right information
-      //SP::SiconosMatrix M = d->mass();
       vfree =  residuFree;
       DEBUG_EXPR(residuFree.display());
       // d->computeMass();
@@ -408,7 +336,7 @@ void D1MinusLinearOSI::computeFreeState()
 
 
       // get right information
-      SP::SiconosMatrix M(new SimpleMatrix(*(d->mass()))); // we copy the mass matrix to avoid its factorization;
+      //SP::SiconosMatrix M(new SimpleMatrix(*(d->mass()))); // we copy the mass matrix to avoid its factorization;
       SiconosVector &vfree = *d->twist(); // POINTER CONSTRUCTOR : contains free velocity
       SiconosVector& residuFree = *workVectors[OneStepIntegrator::residu_free];
 
@@ -450,7 +378,6 @@ void D1MinusLinearOSI::updateState(const unsigned int)
     if((dsType == Type::LagrangianDS) || (dsType == Type::LagrangianLinearTIDS))
     {
       SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
-      SP::SiconosMatrix M = d->mass();
       SP::SiconosVector v = d->velocity();
 
       DEBUG_PRINT("Position and velocity before update\n");
@@ -464,7 +391,11 @@ void D1MinusLinearOSI::updateState(const unsigned int)
         /* copy the value of the impulse */
         SP::SiconosVector dummy(new SiconosVector(*(d->p(1))));
         /* Compute the velocity jump due to the impulse */
-        M->PLUForwardBackwardInPlace(*dummy);
+	if(d->inverseMass())
+	  {
+	    d->update_inverse_mass();
+	    d->inverseMass()->PLUForwardBackwardInPlace(*dummy);
+	  }
         /* Add the velocity jump to the free velocity */
         *v += *dummy;
       }
@@ -477,14 +408,17 @@ void D1MinusLinearOSI::updateState(const unsigned int)
     else if(dsType == Type::NewtonEulerDS)
     {
       SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS> (ds);
-      SP::SiconosMatrix M(new SimpleMatrix(*(d->mass()))); // we copy the mass matrix to avoid its factorization;
       SP::SiconosVector v = d->twist(); // POINTER CONSTRUCTOR : contains new velocity
       if(d->p(1))
       {
 
         // Update the velocity
         SP::SiconosVector dummy(new SiconosVector(*(d->p(1)))); // value = nonsmooth impulse
-        M->PLUForwardBackwardInPlace(*dummy); // solution for its velocity equivalent
+	if(d->inverseMass())
+	  {
+	    d->update_inverse_mass();
+	    d->inverseMass()->PLUForwardBackwardInPlace(*dummy);
+	  }
         *v += *dummy; // add free velocity
 
         // update \f$ \dot q \f$

@@ -62,7 +62,6 @@ SpaceFilter::SpaceFilter(unsigned int bboxfactor,
               SP::FMatrix moving_plans) :
     _bboxfactor(bboxfactor),
     _cellsize(cellsize),
-    _interID(0),
     _model(model),
     _nslaws(new NSLawMatrix()),
     _plans(plans),
@@ -80,7 +79,6 @@ SpaceFilter::SpaceFilter(unsigned int bboxfactor,
               SP::SiconosMatrix plans) :
     _bboxfactor(bboxfactor),
     _cellsize(cellsize),
-    _interID(0),
     _model(model),
     _nslaws(new NSLawMatrix()),
     _plans(plans),
@@ -326,9 +324,7 @@ struct SpaceFilter::_CircularFilter : public SiconosVisitor
         SP::NonSmoothLaw nslaw = (*parent->_nslaws)(DSG0->groupId[DSG0->descriptor(ds1)],
                                                     DSG0->groupId[DSG0->descriptor(ds2)]);
 
-        SP::Interaction inter(new Interaction(2,
-                                              nslaw,
-                                              rel, parent->_interID++));
+        SP::Interaction inter(new Interaction(nslaw, rel));
         parent->model()->simulation()->link(inter, ds1, ds2);
       }
     }
@@ -432,10 +428,7 @@ struct SpaceFilter::_SphereLDSFilter : public SiconosVisitor
         SP::NonSmoothLaw nslaw = (*parent->_nslaws)(DSG0->groupId[DSG0->descriptor(ds1)],
                                                     DSG0->groupId[DSG0->descriptor(ds2)]);
 
-        SP::Interaction inter(new Interaction(3,
-                                              nslaw,
-                                              rel, parent->_interID++));
-
+        SP::Interaction inter(new Interaction(nslaw, rel));
         parent->model()->simulation()->link(inter, ds1, ds2);
       }
     }
@@ -521,9 +514,7 @@ struct SpaceFilter::_SphereNEDSFilter : public SiconosVisitor
         SP::NonSmoothLaw nslaw = (*parent->_nslaws)(DSG0->groupId[DSG0->descriptor(ds1)],
                                                     DSG0->groupId[DSG0->descriptor(ds2)]);
 
-        SP::Interaction inter(new Interaction(3,
-                                              nslaw,
-                                              rel, parent->_interID++));
+        SP::Interaction inter(new Interaction(nslaw, rel));
 
         parent->model()->simulation()->link(inter, ds1, ds2);
       }
@@ -718,9 +709,7 @@ void SpaceFilter::_PlanCircularFilter(double A, double B, double C,
       SP::NonSmoothLaw nslaw = (*_nslaws)(DSG0->groupId[DSG0->descriptor(ds)],
                                           DSG0->groupId[DSG0->descriptor(ds)]);
 
-      SP::Interaction inter(new Interaction(2,
-                                            nslaw,
-                                            relp, _interID++));
+      SP::Interaction inter(new Interaction(nslaw, relp));
       DEBUG_PRINTF("insert interaction : %d\n", inter->number());
       model()->simulation()->link(inter, ds);
     }
@@ -801,9 +790,7 @@ void SpaceFilter::_MovingPlanCircularFilter(unsigned int i, SP::CircularDS ds, d
       SP::NonSmoothLaw nslaw = (*_nslaws)(DSG0->groupId[DSG0->descriptor(ds)],
                                           DSG0->groupId[DSG0->descriptor(ds)]);
 
-      SP::Interaction inter(new Interaction(2,
-                                            nslaw,
-                                            relp, _interID++));
+      SP::Interaction inter(new Interaction(nslaw, relp));
       model()->simulation()->link(inter, ds);
     }
   }
@@ -873,9 +860,7 @@ void SpaceFilter::_PlanSphereLDSFilter(double A, double B, double C, double D, S
       SP::NonSmoothLaw nslaw = (*_nslaws)(DSG0->groupId[DSG0->descriptor(ds)],
                                                   DSG0->groupId[DSG0->descriptor(ds)]);
 
-      SP::Interaction inter(new Interaction(3,
-                                            nslaw,
-                                            relp, _interID++));
+      SP::Interaction inter(new Interaction(nslaw, relp));
       model()->simulation()->link(inter, ds);
     }
   }
@@ -946,9 +931,7 @@ void SpaceFilter::_PlanSphereNEDSFilter(double A, double B, double C, double D, 
       SP::NonSmoothLaw nslaw = (*_nslaws)(DSG0->groupId[DSG0->descriptor(ds)],
                                           DSG0->groupId[DSG0->descriptor(ds)]);
 
-      SP::Interaction inter(new Interaction(3,
-                                            nslaw,
-                                            relp, _interID++));
+      SP::Interaction inter(new Interaction(nslaw, relp));
       model()->simulation()->link(inter, ds);
     }
   }

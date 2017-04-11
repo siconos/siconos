@@ -90,7 +90,7 @@ int main(int argc, char* argv[])
     SP::NonSmoothLaw nslaw(new NewtonImpactNSL(e));
     SP::Relation relation(new LagrangianLinearTIR(H,b));
 
-    SP::Interaction inter(new Interaction(1, nslaw, relation));
+    SP::Interaction inter(new Interaction(nslaw, relation));
 
     // -- nslaw --
     double compliance = 0.01;
@@ -107,7 +107,7 @@ int main(int argc, char* argv[])
 
     SP::Relation relationfloor(new LagrangianCompliantLinearTIR(Hfloor,Kfloor, bfloor));
 
-    SP::Interaction interfloor(new Interaction(1, nslawfloor, relationfloor));
+    SP::Interaction interfloor(new Interaction(nslawfloor, relationfloor));
 
 
 

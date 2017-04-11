@@ -170,6 +170,7 @@ SiconosBulletOptions::SiconosBulletOptions()
   , contactProcessingThreshold(0.03)
   , worldScale(1.0)
   , useAxisSweep3(false)
+  , clearOverlappingPairCache(false)
   , perturbationIterations(3)
   , minimumPointsPerturbationThreshold(3)
 {
@@ -185,6 +186,8 @@ struct BodyShapeRecord
                   SP::btCollisionObject btobj, SP::SiconosContactor con)
     : base(b), ds(d), sshape(sh), btobject(btobj), contactor(con),
       shape_version(sh->version()) {}
+  virtual ~BodyShapeRecord() {}
+
   SP::SiconosVector base;
   SP::BodyDS ds;
   SP::SiconosShape sshape;
@@ -793,14 +796,16 @@ void SiconosBulletCollisionManager_impl::updateShape(BodyCylinderRecord &record)
   // Update shape parameters
   if (cyl->version() != record.shape_version)
   {
-    double m = cyl->insideMargin();
+    // Bullet cylinder has an inside margin, so we add the outside
+    // margin explicitly.
+    double m = cyl->outsideMargin();
 
-    double radius = (cyl->radius() - m) * _options.worldScale;
-    double length = (cyl->length() - m) * _options.worldScale;
+    double radius = (cyl->radius() + m) * _options.worldScale;
+    double length = (cyl->length()/2 + m) * _options.worldScale;
 
     assert(radius > 0 && length > 0);
 
-    btcyl->setLocalScaling(btVector3(radius, length/2, radius));
+    btcyl->setLocalScaling(btVector3(radius, length, radius));
     btcyl->setMargin((cyl->insideMargin() + cyl->outsideMargin()) * _options.worldScale);
 
     if (record.ds && record.ds->useContactorInertia())
@@ -1078,12 +1083,13 @@ void SiconosBulletCollisionManager_impl::updateShape(BodyHeightRecord &record)
   {
     // btBvhTriangleHeightShape supports only outsideMargin.
     // TODO: support insideMargin, scale the points by their normals.
-    btheight->setMargin(height->outsideMargin() * _options.worldScale);
+    btheight->setMargin((height->insideMargin() + height->outsideMargin())
+                        * _options.worldScale);
 
     // The local scaling determines the extents of the base of the heightmap
     btheight->setLocalScaling(btVector3(
-      height->length_x() / height->height_data()->size(0),
-      height->length_y() / height->height_data()->size(1), 1));
+      height->length_x() / (height->height_data()->size(0)-1),
+      height->length_y() / (height->height_data()->size(1)-1), 1));
 
     //TODO vertical position offset to compensate for Bullet's centering
     // TODO: Calculate the local Aabb
@@ -1112,7 +1118,7 @@ void SiconosBulletCollisionManager_impl::updateShape(BodyHeightRecord &record)
   // vertical center of the heightfield, so combine it here with the
   // contactor offset.
   btScalar mnz = btheight->_min_height, mxz = btheight->_max_height;
-  btScalar z_offset = (mxz-mnz)/2 + mnz;
+  btScalar z_offset = (mxz-mnz)/2 + mnz - height->insideMargin();
   SiconosVector o(7);
   o.zero();
   o(2) = z_offset;
@@ -1343,6 +1349,10 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
   SP::SiconosVisitor updateVisitor(new CollisionUpdateVisitor(*impl));
   simulation->nonSmoothDynamicalSystem()->visitDynamicalSystems(updateVisitor);
 
+  // Clear cache automatically before collision detection if requested
+  if (_options.clearOverlappingPairCache)
+    clearOverlappingPairCache();
+
   if (! impl->_queuedCollisionObjects.empty())
   {
 
@@ -1402,6 +1412,36 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
     if (pairA->ds == pairB->ds)
       continue;
 
+    // If the two bodies are already connected by another type of
+    // relation (e.g. EqualityCondition == they have a joint between
+    // them), then don't create contact constraints, because it leads
+    // to an ill-conditioned problem.
+    if (pairA->ds && pairB->ds)
+    {
+      InteractionsGraph::VIterator ui, uiend;
+      SP::InteractionsGraph indexSet0 = simulation->nonSmoothDynamicalSystem()->topology()->indexSet0();
+      bool match = false;
+      for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+      {
+        SP::Interaction inter( indexSet0->bundle(*ui) );
+        SP::BodyDS ds1( std11::dynamic_pointer_cast<BodyDS>(
+                          indexSet0->properties(*ui).source) );
+        SP::BodyDS ds2( std11::dynamic_pointer_cast<BodyDS>(
+                          indexSet0->properties(*ui).target) );
+        if (ds1 && ds2 && ((&*ds1==&*pairA->ds) && (&*ds2==&*pairB->ds)
+                           || (&*ds1==&*pairB->ds) && (&*ds2==&*pairA->ds)))
+        {
+          // Only match on non-BulletR interactions, i.e. non-contact relations
+          SP::BulletR br ( std11::dynamic_pointer_cast<BulletR>(inter->relation()) );
+          if (!br)
+            match = true;
+          break;
+        }
+      }
+      if (match)
+        continue;
+    }
+
     if (it->point->m_userPersistentData)
     {
       /* interaction already exists */
@@ -1444,7 +1484,7 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
           _stats.interaction_warnings ++;
         }
 
-        inter.reset(new Interaction(3, nslaw, rel, 0 /*4 * i + z*/));
+        inter.reset(new Interaction(nslaw, rel/*4 * i + z*/));
         _stats.new_interactions_created ++;
       }
       else
@@ -1453,7 +1493,7 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
         {
           SP::BulletFrom1DLocalFrameR rel(
             new BulletFrom1DLocalFrameR(createSPtrbtManifoldPoint(*it->point)));
-          inter.reset(new Interaction(1, nslaw, rel, 0 /*4 * i + z*/));
+          inter.reset(new Interaction(nslaw, rel /*4 * i + z*/));
         }
       }
 
@@ -1466,6 +1506,26 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
 
         /* link bodies by the new interaction */
         simulation->link(inter, pairA->ds, pairB->ds);
+      }
+    }
+  }
+}
+
+void SiconosBulletCollisionManager::clearOverlappingPairCache()
+{
+  if (!impl->_collisionWorld) return;
+
+  BodyShapeMap::iterator it;
+  btOverlappingPairCache *pairCache =
+    impl->_collisionWorld->getBroadphase()->getOverlappingPairCache();
+
+  for (it = impl->bodyShapeMap.begin(); it != impl->bodyShapeMap.end(); it++)
+  {
+    std::vector< std11::shared_ptr<BodyShapeRecord> >::iterator rec;
+    for (rec = it->second.begin(); rec != it->second.end(); rec++) {
+      if ((*rec)->btobject) {
+        pairCache-> cleanProxyFromPairs((*rec)->btobject->getBroadphaseHandle(),
+                                        &*impl->_dispatcher);
       }
     }
   }

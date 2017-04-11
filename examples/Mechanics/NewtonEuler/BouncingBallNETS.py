@@ -37,7 +37,7 @@ class BouncingBallR(NewtonEulerFrom1DLocalFrameR):
 
     def computeOutput(self, time, interaction, interProp, derivativeNumber):
 
-        print(interProp.DSlink)
+        #print(interProp.DSlink)
         if derivativeNumber == 0:
             self.computeh(interProp.DSlink[NewtonEulerR.q0], interaction.y(0))
         else:
@@ -88,7 +88,7 @@ ball.setFExtPtr(weight)
 nslaw = NewtonImpactNSL(e)
 relation = BouncingBallR(r)
 
-inter = Interaction(1, nslaw, relation)
+inter = Interaction(nslaw, relation)
 
 #
 # Model

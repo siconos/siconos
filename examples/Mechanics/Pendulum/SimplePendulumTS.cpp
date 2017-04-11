@@ -111,7 +111,7 @@ int main(int argc, char* argv[])
     string G = "SimplePendulumPlugin:G0";
     SP::NonSmoothLaw nslaw(new NewtonImpactNSL(e));
     SP::Relation relation(new LagrangianScleronomousR("SimplePendulumPlugin:h0", G));
-    SP::Interaction inter(new Interaction(1, nslaw, relation));
+    SP::Interaction inter(new Interaction(nslaw, relation));
 
     // -------------
     // --- Model ---

@@ -124,14 +124,14 @@ int main(int argc, char* argv[])
 
     SP::NonSmoothLaw nslaw(new NewtonImpactNSL(e));
     SP::Relation relation01(new LagrangianScleronomousR("TwolinkMultiFlexPlugin:h01", "TwolinkMultiFlexPlugin:G01"));
-    SP::Interaction inter01(new Interaction(1, nslaw, relation01));
+    SP::Interaction inter01(new Interaction(nslaw, relation01));
     SP::Relation relation02(new LagrangianScleronomousR("TwolinkMultiFlexPlugin:h02", "TwolinkMultiFlexPlugin:G02"));
-    SP::Interaction inter02(new Interaction(1, nslaw, relation02));
+    SP::Interaction inter02(new Interaction(nslaw, relation02));
     
     SP::Relation relation31(new LagrangianScleronomousR("TwolinkMultiFlexPlugin:h31", "TwolinkMultiFlexPlugin:G31"));
-    SP::Interaction inter31(new Interaction(1, nslaw, relation31));
+    SP::Interaction inter31(new Interaction(nslaw, relation31));
     SP::Relation relation32(new LagrangianScleronomousR("TwolinkMultiFlexPlugin:h32", "TwolinkMultiFlexPlugin:G32"));
-    SP::Interaction inter32(new Interaction(1, nslaw, relation32));
+    SP::Interaction inter32(new Interaction(nslaw, relation32));
     // -------------
     // --- Model ---
     // -------------

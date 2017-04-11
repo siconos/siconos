@@ -50,17 +50,8 @@ class LagrangianCompliantLinearTIR : public LagrangianR
 {
 
 protected:
-  /** serialization hooks
-  */
+  /* serialization hooks */
   ACCEPT_SERIALIZATION(LagrangianCompliantLinearTIR);
-
-
-
-  /** C*/
-  //SP::SimpleMatrix C;
-
-  /** D matrix, coefficient of lambda in y */
-  //SP::SimpleMatrix D;
 
   /** F matrix, coefficient of z */
   SP::SimpleMatrix _F;

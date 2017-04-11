@@ -53,7 +53,7 @@ particle_relation = sk.FirstOrderLinearR(C, B)
 
 nslaw = sk.RelayNSL(ninter)
 
-particle_interaction = sk.Interaction(ninter, nslaw, particle_relation)
+particle_interaction = sk.Interaction(nslaw, particle_relation)
 
 # -- The Model --
 filippov = sk.Model(t0, T)

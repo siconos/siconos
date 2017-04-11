@@ -72,8 +72,6 @@ void NewtonEulerDSTest::testBuildNewtonEulerDS1()
   std::cout << "--> Test: constructor 1." <<std::endl;
 
   SP::NewtonEulerDS ds(new NewtonEulerDS(q0, velocity0, mass,  inertia ));
-  double time = 1.5;
-  ds->initialize(time);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNewtonEulerDS1A : ", Type::value(*ds) == Type::NewtonEulerDS, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNewtonEulerDS1B : ", ds->number() == 0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNewtonEulerDS1D : ", ds->dimension() == 6, true);
@@ -393,9 +391,3 @@ void NewtonEulerDSTest::testNewtonEulerDSQuaternionMatrix()
 
 // }
 
-void NewtonEulerDSTest::End()
-{
-  std::cout << "======================================" <<std::endl;
-  std::cout << " ===== End of NewtonEulerDS tests ===== " <<std::endl;
-  std::cout << "======================================" <<std::endl;
-}

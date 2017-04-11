@@ -122,7 +122,7 @@ int main(int argc, char* argv[])
     LTIRDiodeBridgeCapFilter->setDPtr(Int_D);
     SP::NonSmoothLaw nslaw(new ComplementarityConditionNSL(4));
 
-    SP::Interaction InterDiodeBridgeCapFilter(new Interaction(4, nslaw, LTIRDiodeBridgeCapFilter));
+    SP::Interaction InterDiodeBridgeCapFilter(new Interaction(nslaw, LTIRDiodeBridgeCapFilter));
 
     // --- Model creation ---
     SP::Model DiodeBridgeCapFilter(new Model(t0, T, Modeltitle));

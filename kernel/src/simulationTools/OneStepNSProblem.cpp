@@ -24,6 +24,7 @@
 #include "Model.hpp"
 #include "EulerMoreauOSI.hpp"
 #include "MoreauJeanOSI.hpp"
+#include "MoreauJeanBilbaoOSI.hpp"
 #include "SchatzmanPaoliOSI.hpp"
 #include "NewMarkAlphaOSI.hpp"
 #include "LagrangianDS.hpp"
@@ -39,7 +40,7 @@
 
 
 OneStepNSProblem::OneStepNSProblem():
-  _indexSetLevel(0), _inputOutputLevel(0), _maxSize(0), _nbIter(0), _hasBeenUpdated(false)
+  _indexSetLevel(0), _inputOutputLevel(0), _maxSize(0), _hasBeenUpdated(false)
 {
   _numerics_solver_options.reset(new SolverOptions);
   _numerics_solver_options->iWork = NULL;   _numerics_solver_options->callback = NULL;
@@ -51,7 +52,7 @@ OneStepNSProblem::OneStepNSProblem():
 // Constructor with given simulation and a pointer on Solver (Warning, solver is an optional argument)
 OneStepNSProblem::OneStepNSProblem(int numericsSolverId):
   _numerics_solver_id(numericsSolverId), _sizeOutput(0),
-  _indexSetLevel(0), _inputOutputLevel(0), _maxSize(0), _nbIter(0), _hasBeenUpdated(false)
+  _indexSetLevel(0), _inputOutputLevel(0), _maxSize(0), _hasBeenUpdated(false)
 {
 
   _numerics_solver_options.reset(new SolverOptions);
@@ -63,7 +64,6 @@ OneStepNSProblem::OneStepNSProblem(int numericsSolverId):
 bool OneStepNSProblem::hasInteractions() const
 {
   return _simulation->nonSmoothDynamicalSystem()->topology()->indexSet(_indexSetLevel)->size() > 0 ;
-   //return _simulation->nonSmoothDynamicalSystem()->topology()->indexSet(0)->size() > 0 ;
 }
 
 void OneStepNSProblem::updateInteractionBlocks()
@@ -413,6 +413,10 @@ SP::SimpleMatrix OneStepNSProblem::getOSIMatrix(OneStepIntegrator& Osi, SP::Dyna
   {
       block = (static_cast<MoreauJeanOSI&> (Osi)).W(ds); // get its W matrix ( pointer link!)
   }
+  else if (osiType == OSI::MOREAUJEANBILBAOOSI)
+  {
+    block = (static_cast<MoreauJeanBilbaoOSI&> (Osi)).iteration_matrix(ds); // get its W matrix ( pointer link!)
+  }
   else if (osiType == OSI::SCHATZMANPAOLIOSI)
   {
       block = (static_cast<SchatzmanPaoliOSI&> (Osi)).W(ds); // get its W matrix ( pointer link!)
@@ -495,11 +499,7 @@ void OneStepNSProblem::setSolverId(int solverId)
   RuntimeException::selfThrow("OneStepNSProblem::setSolverId - this virtual method should be implemented in all derived classes!");
 }
 
-void OneStepNSProblem::printStat()
-{
-  std::cout << " Number of iterations done: " << _nbIter <<std::endl;
-}
 void OneStepNSProblem::setNumericsVerboseMode(bool vMode)
 {
-  setNumericsVerbose(vMode);
+  numerics_set_verbose(vMode);
 }

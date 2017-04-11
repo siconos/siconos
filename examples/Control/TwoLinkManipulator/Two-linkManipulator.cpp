@@ -116,11 +116,11 @@ int main(int argc, char* argv[])
 
     SP::NonSmoothLaw nslaw(new NewtonImpactNSL(e));
     //SP::Relation relation(new LagrangianScleronomousR("Two-linkPlugin:h0", "Two-linkPlugin:G0"));
-    //SP::Interaction inter(new Interaction(2, nslaw, relation));
+    //SP::Interaction inter(new Interaction(nslaw, relation));
     SP::Relation relation01(new LagrangianScleronomousR("Two-linkPlugin:h01", "Two-linkPlugin:G01"));
-    SP::Interaction inter01(new Interaction(1, nslaw, relation01));
+    SP::Interaction inter01(new Interaction(nslaw, relation01));
     SP::Relation relation02(new LagrangianScleronomousR("Two-linkPlugin:h02", "Two-linkPlugin:G02"));
-    SP::Interaction inter02(new Interaction(1, nslaw, relation02));
+    SP::Interaction inter02(new Interaction(nslaw, relation02));
 
     SP::SimpleMatrix H10(new SimpleMatrix(1, 2));
     SP::SiconosVector b10(new SiconosVector(1));
@@ -130,7 +130,7 @@ int main(int argc, char* argv[])
 
     SP::NonSmoothLaw nslaw2(new NewtonImpactNSL(e2));
     SP::Relation relation10(new LagrangianLinearTIR(H10, b10));
-    SP::Interaction inter10(new Interaction(1, nslaw2, relation10));
+    SP::Interaction inter10(new Interaction(nslaw2, relation10));
 
     SP::SimpleMatrix H11(new SimpleMatrix(1, 2));
     SP::SiconosVector b11(new SiconosVector(1));
@@ -139,7 +139,7 @@ int main(int argc, char* argv[])
     (*b11)(0) = 0;
 
     SP::Relation relation11(new LagrangianLinearTIR(H11, b11));
-    SP::Interaction inter11(new Interaction(1, nslaw2, relation11));
+    SP::Interaction inter11(new Interaction(nslaw2, relation11));
 
     SP::SimpleMatrix H20(new SimpleMatrix(1, 2));
     SP::SiconosVector b20(new SiconosVector(1));
@@ -148,7 +148,7 @@ int main(int argc, char* argv[])
     (*b20)(0) = 0.0001;
 
     SP::Relation relation20(new LagrangianLinearTIR(H20, b20));
-    SP::Interaction inter20(new Interaction(1, nslaw2, relation20));
+    SP::Interaction inter20(new Interaction(nslaw2, relation20));
 
     SP::SimpleMatrix H21(new SimpleMatrix(1, 2));
     SP::SiconosVector b21(new SiconosVector(1));
@@ -158,7 +158,7 @@ int main(int argc, char* argv[])
 
 
     SP::Relation relation21(new LagrangianLinearTIR(H21, b21));
-    SP::Interaction inter21(new Interaction(1, nslaw2, relation21));
+    SP::Interaction inter21(new Interaction(nslaw2, relation21));
 
     // -------------
     // --- Model ---

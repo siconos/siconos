@@ -89,7 +89,6 @@
 %ignore getWMap;
 %ignore getWBoundaryConditionsMap;
 %ignore getDSBlocks;
-%ignore getInvMSimple;
 %ignore getInvMBlock;
 
 %warnfilter(509) rotateAbsToBody;

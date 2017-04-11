@@ -74,12 +74,6 @@ public:
 
   // --- OTHER FUNCTIONS ---
 
-  /** initialization of the integrator; for linear time
-      invariant systems, we compute time invariant operator (example :
-      W)
-  */
-  void initialize(Model& m);
- 
   /** initialization of the work vectors and matrices (properties) related to
    *  one dynamical system on the graph and needed by the osi
    * \param m the Model
@@ -87,17 +81,6 @@ public:
    * \param ds the dynamical system
    */
   void initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds);
-
-  /** initialization of the work vectors and matrices (properties) related to
-   *  one interaction on the graph and needed by the osi
-   * \param t0 time of initialization
-   * \param inter the interaction
-   * \param interProp the properties on the graph
-   * \param DSG the dynamical systems graph
-   */
-  void initializeInteraction(double t0, Interaction &inter,
-			     InteractionProperties& interProp,
-			     DynamicalSystemsGraph & DSG);
 
   /** get the number of index sets required for the simulation
    * \return unsigned int

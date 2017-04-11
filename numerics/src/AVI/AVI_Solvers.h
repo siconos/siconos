@@ -67,6 +67,18 @@ extern "C"
    */
   int avi_caoferris(AffineVariationalInequalities* problem, double *z, double* w, SolverOptions* options);
 
+  /** avi_pathavi is using PATHVI, a direct solver for VI based on pivoting method principle for degenerate problem \n
+   *  Ref: "A structure-preserving Pivotal Method for Affine Variational Inequalities" Y. Kim, O. Huber, M.C. Ferris, Math Prog B (2017)\n
+   * \param[in] problem structure that represents the AVI (M, q, K)
+   * \param[in,out] z on call contains the initial solution and on return holds the solution of the problem.
+   * \param[in,out] w defined as Mz + q
+   * \param[in,out] options structure used to define the solver and its parameters.
+   *
+   * \return info about the convergence: 0 ok; 1 ...
+   *\author Olivier Huber
+   */
+  int avi_pathavi(AffineVariationalInequalities* problem, double *z, double *w, SolverOptions* options);
+
   /** This function computes the input vector \f$ w = Mz + q \f$ and checks the validity of the vector z as a solution \n
    * of the AVI : \n
    * \f$

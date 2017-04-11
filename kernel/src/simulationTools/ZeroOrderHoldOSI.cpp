@@ -57,10 +57,12 @@ ZeroOrderHoldOSI::ZeroOrderHoldOSI():
 
 void ZeroOrderHoldOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds)
 {
+  // Get work buffers from the graph
+  VectorOfVectors& workVectors = *_initializeDSWorkVectors(ds);
 
   DynamicalSystemsGraph& DSG0 = *_dynamicalSystemsGraph;
   InteractionsGraph& IG0 = *_simulation->nonSmoothDynamicalSystem()->topology()->indexSet0();
-//VectorOfVectors& workVectors = *_dynamicalSystemsGraph->properties(dsv).workVectors;
+
   Type::Siconos dsType = Type::value(*ds);
 
   if((dsType != Type::FirstOrderLinearDS) && (dsType != Type::FirstOrderLinearTIDS))
@@ -108,7 +110,7 @@ void ZeroOrderHoldOSI::initializeDynamicalSystem(Model& m, double t, SP::Dynamic
       if(indxIter == 0)
       {
         indxIter++;
-        if(!relR.isJacLgPlugged())
+        if(!relR.getPluginJacLg()->isPlugged())
         {
           DSG0.Bd[dsgVD].reset(new MatrixIntegrator(*ds, m, relR.B()));
           if(DSG0.Bd.at(dsgVD)->isConst())
@@ -127,48 +129,28 @@ void ZeroOrderHoldOSI::initializeDynamicalSystem(Model& m, double t, SP::Dynamic
     }
   }
 
-  ds->allocateWorkVector(DynamicalSystem::local_buffer, ds->dimension());
-  for (unsigned int k = _levelMinForInput ; k < _levelMaxForInput + 1; k++)
-  {
-    ds->initializeNonSmoothInput(k);
-  }
+  // Get work buffers from the graph
+  workVectors.resize(OneStepIntegrator::work_vector_of_vector_size);
+  workVectors[OneStepIntegrator::free].reset(new SiconosVector(ds->dimension()));
 }
 
-void ZeroOrderHoldOSI::initializeInteraction(double t0, Interaction &inter,
-                                          InteractionProperties& interProp,
-                                          DynamicalSystemsGraph & DSG)
+void ZeroOrderHoldOSI::fill_ds_links(Interaction &inter,
+				     InteractionProperties& interProp,
+				     DynamicalSystemsGraph & DSG)
 {
   SP::DynamicalSystem ds1= interProp.source;
   SP::DynamicalSystem ds2= interProp.target;
-
-  assert(interProp.DSlink);
+  assert(ds1);
+  assert(ds2);
 
   VectorOfBlockVectors& DSlink = *interProp.DSlink;
-  // VectorOfVectors& workVInter = *interProp.workVectors;
-  // VectorOfSMatrices& workMInter = *interProp.workMatrices;
 
-  Relation &relation =  *inter.relation();
+  Relation &relation =  *inter.relation();  
   RELATION::TYPES relationType = relation.getType();
-  /* Check that the interaction has the correct initialization for y and lambda */
-  bool isInitializationNeeded = false;
-  if (!(inter.lowerLevelForOutput() <= _levelMinForOutput && inter.upperLevelForOutput()  >= _levelMaxForOutput ))
-  {
-    //RuntimeException::selfThrow("ZeroOrderHoldOSI::initializeInteraction, we must resize _y");
-    inter.setLowerLevelForOutput(_levelMinForOutput);
-    inter.setUpperLevelForOutput(_levelMaxForOutput);
-    isInitializationNeeded = true;
-  }
 
-  if (!(inter.lowerLevelForInput() <= _levelMinForInput && inter.upperLevelForInput() >= _levelMaxForInput ))
-  {
-    // RuntimeException::selfThrow("ZeroOrderHoldOSI::initializeInteraction, we must resize _lambda");
-    inter.setLowerLevelForInput(_levelMinForInput);
-    inter.setUpperLevelForInput(_levelMaxForInput);
-    isInitializationNeeded = true;
-  }
-  if (isInitializationNeeded)
-    inter.init();
-
+  // Check if interations levels (i.e. y and lambda sizes) are compliant with the current osi.
+  _check_and_update_interaction_levels(inter);
+  // Initialize/allocate memory buffers in interaction.
   bool computeResidu = relation.requireResidu();
   inter.initializeMemory(computeResidu,_steps);
 
@@ -189,33 +171,6 @@ void ZeroOrderHoldOSI::initializeInteraction(double t0, Interaction &inter,
         DSlink[FirstOrderR::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
       }
     }
-
-
-  // Compute a first value for the output
-    inter.computeOutput(t0, interProp, 0);
-
-    // prepare the gradients
-    relation.computeJach(t0, inter, interProp);
-    for (unsigned int i = 0; i < inter.upperLevelForOutput() + 1; ++i)
-      {
-      inter.computeOutput(t0, interProp, i);
-    }
-    inter.swapInMemory();
-
-
-}
-
-void ZeroOrderHoldOSI::initialize(Model& m)
-{
-  OneStepIntegrator::initialize(m);
-  DynamicalSystemsGraph::VIterator dsi, dsend;
-
-  for(std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
-  {
-    if(!checkOSI(dsi)) continue;
-    SP::DynamicalSystem  ds = _dynamicalSystemsGraph->bundle(*dsi);
-    initializeDynamicalSystem(m,m.t0(),ds);
-  }
 }
 
 double ZeroOrderHoldOSI::computeResidu()
@@ -294,7 +249,7 @@ void ZeroOrderHoldOSI::computeFreeState()
       if(d.b() && !DSG0.AdInt.at(dsgVD)->isConst())
         DSG0.AdInt.at(dsgVD)->integrate();
 
-      SiconosVector& xfree = *workVectors[FirstOrderDS::xfree];
+      SiconosVector& xfree = *workVectors[OneStepIntegrator::free];
       prod(DSG0.Ad.at(dsgVD)->mat(), *d.x(), xfree); // xfree = Ad*xold
       if(d.b())
       {
@@ -534,7 +489,7 @@ void ZeroOrderHoldOSI::updateState(const unsigned int level)
       SiconosVector& x = *d.x();
       // 1 - First Order Linear Time Invariant Systems
       // \Phi is already computed
-      x = *workVectors[FirstOrderDS::xfree]; // x = xfree = Phi*xold (+ Bd*u ) (+  Ld*e)
+      x = *workVectors[OneStepIntegrator::free]; // x = xfree = Phi*xold (+ Bd*u ) (+  Ld*e)
       if(level != LEVELMAX)
       {
         SP::Interaction interC;

@@ -122,7 +122,7 @@ int main(int argc, char* argv[])
     //std::vector<SP::Interaction > interOfBeads(nBeads-1);
     // for (unsigned int i =0; i< nBeads-1; i++)
     // {
-    //   interOfBeads[i].reset(new Interaction(1, nslaw, relationOfBeads));
+    //   interOfBeads[i].reset(new Interaction(nslaw, relationOfBeads));
     // }
 
     // This works !!
@@ -131,7 +131,7 @@ int main(int argc, char* argv[])
     // for (unsigned int i =0; i< nBeads-1; i++)
     // {
     //   relationOfBeads[i].reset(new LagrangianLinearTIR(HOfBeads,bOfBeads));
-    //   interOfBeads[i].reset(new Interaction(1, nslaw, relationOfBeads[i]));
+    //   interOfBeads[i].reset(new Interaction(nslaw, relationOfBeads[i]));
     // }
 
 
@@ -222,7 +222,7 @@ int main(int argc, char* argv[])
             ncontact++;
             // std::cout << "Number of contact = " << ncontact << std::endl;
 
-            inter.reset(new Interaction(1, nslaw, relation));
+            inter.reset(new Interaction(nslaw, relation));
             columnOfBeads->nonSmoothDynamicalSystem()->link(inter, beads[0]);
             s->initializeInteraction(s->nextTime(), inter);
 
@@ -249,7 +249,7 @@ int main(int argc, char* argv[])
             // std::cout << "Number of contact = " << ncontact << std::endl;
 
             relationOfBeads[i].reset(new LagrangianLinearTIR(HOfBeads, bOfBeads));
-            interOfBeads[i].reset(new Interaction(1, nslaw, relationOfBeads[i]));
+            interOfBeads[i].reset(new Interaction(nslaw, relationOfBeads[i]));
 
             columnOfBeads->nonSmoothDynamicalSystem()->link(interOfBeads[i], beads[i], beads[i+1]);
             s->initializeInteraction(s->nextTime(), interOfBeads[i]);

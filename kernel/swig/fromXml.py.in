@@ -387,7 +387,7 @@ def buildModelXML(xmlFile):
                 _additionalInputsNSLaw(nslxml, nslaw, dataNSL[nslawName])
 
         # Finally, create the Interaction and insert it in NSDS
-        inter = SK.Interaction(nslaw.size(), nslaw, relation)
+        inter = SK.Interaction(nslaw, relation)
         dsL = interxml.DS_Concerned
         if len(dsL) == 1:
             nsds.link(inter, allDS[dsL[0]])
@@ -421,8 +421,7 @@ def buildModelXML(xmlFile):
             _additionalInputsOSI(osixml, osi, dataOSI[osiType])
             print(osixml.DS_Concerned)
             for dsN in osixml.DS_Concerned:
-                model.nonSmoothDynamicalSystem().topology().setOSI(allDS[dsN], osi)
-            sim.insertIntegrator(osi)
+                sim.prepareIntegratorForDS(osi, allDS[dsN], model, sim.nextTime())
             allOSI.append(osi)
 
     # OSNSPB

@@ -55,9 +55,6 @@ protected:
   */
   ACCEPT_SERIALIZATION(FirstOrderType2R);
 
-//  /** \f$\nabla_x g\f$ aka K*/
-//  SP::SimpleMatrix _jacgx;
-
 public:
   
   /** Basic contructor */

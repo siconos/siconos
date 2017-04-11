@@ -77,9 +77,9 @@ struct InteractionProperties
   SP::DynamicalSystem target;
   unsigned int target_pos;
   bool forControl;                     /**< true if the relation is used to add a control input to a DS */
-  SP::VectorOfBlockVectors DSlink;     /**< pointer links to DS variables needed for computation, mostly x (or q), z, r (or p) */
-  SP::VectorOfVectors workVectors;     /**< set of SiconosVector, mostly to have continuous memory vectors (not the case with BlockVector in DSlink) */
-  SP::VectorOfSMatrices workMatrices;  /**< To store jacobians */
+  SP::VectorOfBlockVectors DSlink;     /**< pointer links to DS variables needed for computation, mostly used in Relations (computeOutput and computeInput) and OneStepIntegrator classes. */
+  SP::VectorOfVectors workVectors;     /**< set of SiconosVector, useful to ensure contiguous memory vectors, used as buffers in OneStepIntegrator classes. */
+  SP::VectorOfSMatrices workMatrices;  /**< Internal buffers used on simulation size, to store jacobians or other temporary matrices. */
 
   ACCEPT_SERIALIZATION(InteractionProperties);
 };
@@ -90,7 +90,7 @@ struct DynamicalSystemProperties
   SP::SiconosMatrix upper_block;          /**< i,j block i<j */
   SP::SiconosMatrix lower_block;          /**< i,j block i>j */
   SP::VectorOfVectors workVectors;        /**< Used for instance in Newton iteration */
-  SP::VectorOfMatrices workMatrices;      /**< Mostly for Lagrangian system */
+  SP::VectorOfMatrices workMatrices;      /**< Mostly for Lagrangian system.*/
   SP::OneStepIntegrator osi;              /**< Integrator used for the given DynamicalSystem */
   SP::SimpleMatrix W;                    /**< Matrix for integration */
   SP::SimpleMatrix WBoundaryConditions;  /**< Matrix for integration of boundary conditions*/
@@ -98,6 +98,8 @@ struct DynamicalSystemProperties
 
   ACCEPT_SERIALIZATION(DynamicalSystemProperties);
 };
+
+// Note FP : workMatrices in DSProperties is used only in  NewmarkAlphaOSI => maybe it should be replaced with interprop workMat?
 
 struct GraphProperties
 {

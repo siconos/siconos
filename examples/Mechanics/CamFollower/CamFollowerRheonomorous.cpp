@@ -102,7 +102,7 @@ int main(int argc, char* argv[])
     SP::SiconosVector param2(new SiconosVector(1)); // Here we only set one parameter, the DS number.
     (*param2)(0) = rpm;
 
-    SP::Interaction inter(new Interaction(1, nslaw0, relation0));
+    SP::Interaction inter(new Interaction(nslaw0, relation0));
     // -------------
     // --- Model ---
     // -------------

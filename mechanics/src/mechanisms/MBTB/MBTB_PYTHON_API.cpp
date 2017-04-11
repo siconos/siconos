@@ -423,8 +423,7 @@ void MBTB_JointBuild(unsigned int numJ,const std::string& JointName,
 //  sInterJoints[numJ].reset(new Interaction(JointName, sAllDSByInter[numJ],
 //                                           numJ, lNbEq , lNSL,
 //                                           sJointRelations[numJ]->_jointR));
-  sInterJoints[numJ].reset(new Interaction(lNbEq , lNSL,
-                                           sJointRelations[numJ]->_jointR));
+  sInterJoints[numJ].reset(new Interaction(lNSL, sJointRelations[numJ]->_jointR));
   sJointRelations[numJ]->_interaction = sInterJoints[numJ];
   // myModel->nonSmoothDynamicalSystem()->link(sInterJoints[numJ],
   //                                           sDS[indexDS1]);
@@ -451,15 +450,15 @@ void MBTB_ContactBuild(unsigned int numContact, const std::string& ContactName,
   {
     sContacts[numContact]->_et=et;
     SP::NonSmoothLaw nslaw0(new NewtonImpactFrictionNSL(en,et,mu,3));
-    sInterContacts[numContact].reset(new Interaction(3,nslaw0,sContacts[numContact]->relation(),numContact));
+    sInterContacts[numContact].reset(new Interaction(nslaw0,sContacts[numContact]->relation()));
     // MB : contactName is already in MBTB_Contact!
     // sInterContacts[numContact]->setId(ContactName);
   }
   else
   {
     SP::NewtonImpactNSL lNSL(new NewtonImpactNSL(sContacts[numContact]->_en));
-    sInterContacts[numContact].reset(new Interaction(1,lNSL,
-                                                     sContacts[numContact]->relation(),numContact));
+    sInterContacts[numContact].reset(new Interaction(lNSL,
+                                                     sContacts[numContact]->relation()));
 //    sInterContacts[numContact]->setId(ContactName);
   }
 

@@ -35,7 +35,7 @@ protected:
   PivotJointR() : KneeJointR() {};
 
   /*Axis coordonates*/
-  double _Ax, _Ay, _Az;
+  SP::SiconosVector _A;
   double _A1x, _A1y, _A1z;
   double _A2x, _A2y, _A2z;
   void buildA1A2();
@@ -66,14 +66,13 @@ public:
    */
   virtual ~PivotJointR() {};
 
+  SP::SiconosVector A() { return _A; }
+
   virtual void computeh(double time, BlockVector& q0, SiconosVector& y);
 
   /** Get the number of constraints defined in the joint
       \return the number of constraints
    */
   static unsigned int numberOfConstraints() { return 5; }
-
-
-
 };
 #endif // PivotJointRELATION_H

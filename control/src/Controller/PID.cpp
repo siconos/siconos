@@ -44,7 +44,7 @@ void PID::initialize(const Model& m)
   _u.reset(new SiconosVector(1, 0));
   Actuator::initialize(m);
 
-  _curDeltaT = m.simulation()->eventsManager()->timeDiscretisation()->currentTimeStep(0);
+  _curDeltaT = m.simulation()->currentTimeStep();
 
   // initialize _err
   _err.reset(new boost::circular_buffer<double> (3));

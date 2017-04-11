@@ -31,7 +31,6 @@ TYPEDEF_SPTR(MuStorage)
 /** Base (abstract) class for linear non-smooth problems
 
     \author SICONOS Development Team - copyright INRIA
-    \version 3.0.0.
     \date (Creation) November 13, 2010
 
     Base class for linear non-smooth problems, usually in the form:
@@ -49,21 +48,19 @@ TYPEDEF_SPTR(MuStorage)
 class LinearOSNS : public OneStepNSProblem
 {
 protected:
-  /** serialization hooks
-  */
+  /* serialization hooks */
   ACCEPT_SERIALIZATION(LinearOSNS);
 
-
-  /** contains the vector w of a LinearOSNS system */
+  /** vector w of a LinearOSNS system */
   SP::SiconosVector _w;
 
-  /** contains the vector z of a LinearOSNS system */
+  /** vector z of a LinearOSNS system */
   SP::SiconosVector _z;
 
-  /** contains the matrix M of a LinearOSNS system */
+  /** matrix M of a LinearOSNS system */
   SP::OSNSMatrix _M;
 
-  /** contains the vector q of a LinearOSNS system */
+  /** vector q of a LinearOSNS system */
   SP::SiconosVector _q;
 
   /** Storage type for M - 0: SiconosMatrix (dense), 1: Sparse Storage
@@ -100,73 +97,57 @@ public:
   virtual ~LinearOSNS() {};
 
   // --- W ---
-  /** get the value of w, the initial state of the DynamicalSystem
-   *  \return a SiconosVector
-   *  \warning: SiconosVector is an abstract class => can not be an
-   *  lvalue => return SiconosVector
+  /** copy of the current value of vector w
+      \return a SiconosVector
    */
   inline const SiconosVector getW() const
   {
     return *_w;
   }
 
-  /** get w, the initial state of the DynamicalSystem
-   *  \return pointer on a SiconosVector
-   */
+  /** current w vector (pointer link)
+      \return pointer on a SiconosVector
+  */
   inline SP::SiconosVector w() const
   {
     return _w;
   }
 
-  /** set the value of w to newValue
-   *  \param newValue the new SiconosVector
-   */
-  void setW(const SiconosVector& newValue);
-
-  /** set w to pointer newPtr
-   *  \param newPtr the new SP::SiconosVector
-   */
+  /** set w vector (pointer link)
+      \param newPtr the new SP::SiconosVector
+  */
   inline void setWPtr(SP::SiconosVector newPtr)
   {
     _w = newPtr;
   }
 
   // --- Z ---
-  /** get the value of z, the initial state of the DynamicalSystem
-   *  \return SiconosVector
-   *  \warning: SiconosVector is an abstract class => can not be an
-   *  lvalue => return SiconosVector
+  /** copy of the current value of vector z
+      \return a SiconosVector
    */
   inline const SiconosVector getz() const
   {
     return *_z;
   }
 
-  /** get z, the initial state of the DynamicalSystem
-   *  \return pointer on a SiconosVector
-   */
+  /** current z vector (pointer link)
+      \return pointer on a SiconosVector
+  */
   inline SP::SiconosVector z() const
   {
     return _z;
   }
 
-  /** set the value of z to newValue
-   *  \param newValue a SiconosVector
-   */
-  void setz(const SiconosVector& newValue);
-
-  /** set z to pointer newPtr
-   *  \param newPtr a SP::SiconosVector
-   */
+  /** set z vector (pointer link)
+      \param newPtr the new SP::SiconosVector
+  */
   inline void setzPtr(SP::SiconosVector newPtr)
   {
     _z = newPtr;
   }
 
-  // --- M ---
-
-  /** get M
-   *  \return pointer on a OSNSMatrix
+  /** M matrix (pointer link)
+      \return pointer on a OSNSMatrix
    */
   inline SP::OSNSMatrix M() const
   {
@@ -174,16 +155,15 @@ public:
   }
 
   /** set M to pointer newPtr
-   *  \param newM the new M matrix
+      \param newM the new M matrix
    */
   inline void setMPtr(SP::OSNSMatrix newM)
   {
     _M = newM;
   }
 
-  // --- Q ---
   /** get the value of q, the constant vector in the LinearOSNS
-   *  \return SiconosVector
+      \return SiconosVector
    */
   inline const SiconosVector getQ() const
   {
@@ -191,23 +171,23 @@ public:
   }
 
   /** get q, the the constant vector in the LinearOSNS
-   *  \return pointer on a SiconosVector
-   */
+      \return pointer on a SiconosVector
+  */
   inline SP::SiconosVector q() const
   {
     return _q;
   }
 
   /** set q to pointer newPtr
-   *  \param newQ the new q vector
+      \param newQ the new q vector
    */
   inline void setQPtr(SP::SiconosVector newQ)
   {
     _q = newQ;
   }
 
-  /** get the type of storage for M
-   * \return the type of storage
+  /** get the type of storage used for M
+      \return int (0: dense, 1:sparse)
    */
   inline int getMStorageType() const
   {
@@ -217,7 +197,7 @@ public:
   /** set which type of storage will be used for M
    * \warning this function does not allocate any memory for M,
    * it just sets an indicator for future use
-   * \param i an integer
+   * \param i (0:dense, 1:sparse)
    */
   inline void setMStorageType(int i)
   {
@@ -229,6 +209,7 @@ public:
 
   /** initialize the _M matrix */
   virtual void initOSNSMatrix();
+ 
   /** To initialize the LinearOSNS problem(computes topology ...)
       \param sim the simulation owning this OSNSPB
   */
@@ -255,7 +236,7 @@ public:
    */
   void computeq(double time);
 
-  /** pre-treatment for LinearOSNS
+  /** build problem coefficients (if required)
       \param time the current time
       \return true if succeeded
    */
@@ -267,7 +248,7 @@ public:
    */
   virtual int compute(double time) = 0;
 
-  /** post-treatment for LinearOSNS
+  /** update interactions variables (y and lambda) according to current problem found solutions.
    */
   virtual void postCompute();
 
@@ -275,18 +256,16 @@ public:
    */
   virtual void display() const;
 
-  /** set if if _w and _z vectors are initialized with
-      previous values of Y and Lambda when a change occurs in problem
-      size
-    * \param val true if we keep the previous values
-    */
+  /** choose initialisation behavior for w and z.
+      \param val true: init w and z with previous values
+      of y and lambda saved in interactions, false: init to 0.
+  */
   void setKeepLambdaAndYState(bool val)
   {
     _keepLambdaAndYState = val ;
   }
 
-  /** visitors hook
-   */
+  /* visitors hook */
   ACCEPT_STD_VISITORS();
 
 

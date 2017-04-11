@@ -45,9 +45,7 @@ y &=& C(t,z)x(t) + F(t,z)z + D(t,z)\lambda + e(t,z) \\
 R &=& B(t,z) \lambda
 \f}
 
-All coefficients can be plugged or not. Use isPlugged[name] to check if name ( = "C", "F" etc) is plugged.
-
-Note: the connections (pointers equalities) between C, D, B and jacobianH and jacobianG of FirstOrderR class are done during initialize.
+The following operators can be plugged: \f$ B(t,z), C(t,z), D(t,z), e(t,z), F(t,z)\f$
 
  */
 class FirstOrderLinearR : public FirstOrderR

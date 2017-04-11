@@ -18,7 +18,7 @@
 # limitations under the License.
 #
 
-from siconos.kernel import *
+import siconos.kernel as sk
 from siconos.control.simulation import ControlManager
 from siconos.control.sensor import LinearSensor
 from siconos.control.controller import PID
@@ -32,33 +32,33 @@ from numpy.linalg import norm
 
 # variable declaration
 t0 = 0.0   # start time
-T = 100.0 # end time
+T = 100.0  # end time
 h = 0.05  # time step
-xFinal = 0.0 # target position
+xFinal = 0.0  # target position
 theta = 0.5
-N = ceil((T-t0)/h + 10) # number of time steps
-outputSize = 5 # number of variable to store at each time step
+N = int((T - t0) / h + 10)  # number of time steps
+outputSize = 5  # number of variable to store at each time step
 
 # Matrix declaration
-A = zeros((2,2))
-A[0,1] = 1
+A = zeros((2, 2))
+A[0, 1] = 1
 B = [[0], [1]]
-x0 = [10.,10.]
-C = [[1., 0]] # we have to specify ndmin=2, so it's understood as
+x0 = [10., 10.]
+C = [[1., 0]]  # we have to specify ndmin=2, so it's understood as
 K = [.25, .125, 2]
 
 # Declaration of the Dynamical System
-doubleIntegrator = FirstOrderLinearTIDS(x0, A)
+doubleIntegrator = sk.FirstOrderLinearTIDS(x0, A)
 # Model
-process = Model(t0, T)
+process = sk.Model(t0, T)
 process.nonSmoothDynamicalSystem().insertDynamicalSystem(doubleIntegrator)
 # Declaration of the integrator
-OSI = EulerMoreauOSI(theta)
+OSI = sk.EulerMoreauOSI(theta)
 # time discretisation
-t = TimeDiscretisation(t0, h)
-tSensor = TimeDiscretisation(t0, h)
-tActuator = TimeDiscretisation(t0, h)
-s = TimeStepping(t, 0)
+t = sk.TimeDiscretisation(t0, h)
+tSensor = sk.TimeDiscretisation(t0, h)
+tActuator = sk.TimeDiscretisation(t0, h)
+s = sk.TimeStepping(t, 0)
 s.insertIntegrator(OSI)
 
 # Actuator, Sensor & ControlManager
@@ -80,12 +80,13 @@ act.setDeltaT(h)
 #eventsManager = s.eventsManager()
 
 # Matrix for data storage
-dataPlot = empty((3*N+3, outputSize))
+dataPlot = zeros((3 * N + 3, outputSize))
 dataPlot[0, 0] = process.t0()
 dataPlot[0, 1] = doubleIntegrator.x()[0]
 dataPlot[0, 2] = doubleIntegrator.x()[1]
-dataPlot[0, 3] = doubleIntegrator.b()[0]
-dataPlot[0, 4] = doubleIntegrator.b()[1]
+if doubleIntegrator.b() is not None:
+    dataPlot[0, 3] = doubleIntegrator.b()[0]
+    dataPlot[0, 4] = doubleIntegrator.b()[1]
 
 # Main loop
 k = 1
@@ -95,8 +96,9 @@ while(s.hasNextEvent()):
         dataPlot[k, 0] = s.nextTime()
         dataPlot[k, 1] = doubleIntegrator.x()[0]
         dataPlot[k, 2] = doubleIntegrator.x()[1]
-        dataPlot[k, 3] = doubleIntegrator.b()[0]
-        dataPlot[k, 4] = doubleIntegrator.b()[1]
+        if doubleIntegrator.b() is not None:
+            dataPlot[k, 3] = doubleIntegrator.b()[0]
+            dataPlot[k, 4] = doubleIntegrator.b()[1]
         k += 1
     s.nextStep()
 # Save to disk
@@ -104,11 +106,11 @@ savetxt('output.txt', dataPlot)
 # Plot interesting data
 subplot(211)
 title('position')
-plot(dataPlot[:,0], dataPlot[:,1])
+plot(dataPlot[:, 0], dataPlot[:, 1])
 grid()
 subplot(212)
 title('velocity')
-plot(dataPlot[:,0], dataPlot[:,2])
+plot(dataPlot[:, 0], dataPlot[:, 2])
 grid()
 savefig("pid.png")
 # TODO

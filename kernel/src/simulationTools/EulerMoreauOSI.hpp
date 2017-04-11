@@ -274,7 +274,7 @@ public:
       invariant systems, we compute time invariant operator (example :
       W)
    */
-  virtual void initialize(Model& m);
+  //virtual void initialize(Model& m);
   /** initialization of the work vectors and matrices (properties) related to
    *  one dynamical system on the graph and needed by the osi
    * \param m the Model
@@ -285,14 +285,13 @@ public:
 
   /** initialization of the work vectors and matrices (properties) related to
    *  one interaction on the graph and needed by the osi
-   * \param t0 time of initialization
    * \param inter the interaction
    * \param interProp the properties on the graph
    * \param DSG the dynamical systems graph
    */
-  void initializeInteraction(double t0, Interaction &inter,
-			     InteractionProperties& interProp,
-			     DynamicalSystemsGraph & DSG);
+  void fill_ds_links(Interaction &inter,
+		     InteractionProperties& interProp,
+		     DynamicalSystemsGraph & DSG);
 
   /** get the number of index sets required for the simulation
    * \return unsigned int
@@ -302,9 +301,8 @@ public:
   /** initialize iteration matrix W EulerMoreauOSI matrix at time t
    *  \param time the time (double)
    *  \param ds a pointer to DynamicalSystem
-   *  \param dsv a descriptor of the ds on the graph (redundant to avoid invocation)
    */
-  void initializeIterationMatrixW(double time, SP::DynamicalSystem ds, const DynamicalSystemsGraph::VDescriptor& dsv);
+  void initializeIterationMatrixW(double time, SP::DynamicalSystem ds);
 
   /** compute W EulerMoreauOSI matrix at time t
    *  \param time the current time

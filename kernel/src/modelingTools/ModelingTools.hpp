@@ -36,6 +36,7 @@ Note that not all files from the current location are listed below, since some o
 #include "FirstOrderType2R.hpp"
 
 #include "LagrangianLinearTIDS.hpp"
+#include "LagrangianLinearDiagonalDS.hpp"
 #include "FirstOrderLinearTIDS.hpp"
 #include "NewtonEulerDS.hpp"
 #include "NewtonEulerR.hpp"

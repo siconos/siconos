@@ -38,15 +38,12 @@ private:
 
   CPPUNIT_TEST(testBuildFirstOrderType1R1);
   CPPUNIT_TEST(testBuildFirstOrderType1R2);
-  CPPUNIT_TEST(End);
-
   CPPUNIT_TEST_SUITE_END();
 
   // \todo exception test
 
   void testBuildFirstOrderType1R1();
   void testBuildFirstOrderType1R2();
-  void End();
 
   // Members
 

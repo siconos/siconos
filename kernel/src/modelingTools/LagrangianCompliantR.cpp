@@ -30,32 +30,17 @@ using namespace RELATION;
 // constructor from a set of data
 LagrangianCompliantR::LagrangianCompliantR(const std::string& pluginh, const std::string& pluginJacobianhq, const std::string& pluginJacobianhlambda) : LagrangianR(CompliantR)
 {
-  zeroPlugin();
+  _zeroPlugin();
   setComputehFunction(SSLH::getPluginName(pluginh), SSLH::getPluginFunctionName(pluginh));
   _pluginJachq->setComputeFunction(SSLH::getPluginName(pluginJacobianhq), SSLH::getPluginFunctionName(pluginJacobianhq));
   _pluginJachlambda->setComputeFunction(SSLH::getPluginName(pluginJacobianhlambda), SSLH::getPluginFunctionName(pluginJacobianhlambda));
 }
 
-void LagrangianCompliantR::zeroPlugin()
+void LagrangianCompliantR::_zeroPlugin()
 {
   _pluginJachq.reset(new PluggedObject());
   _pluginJachlambda.reset(new PluggedObject());
 }
-
-const std::string LagrangianCompliantR::getJachlambdaName() const
-{
-  if (_pluginJachlambda->fPtr)
-    return _pluginJachlambda->getPluginName();
-  return "unamed";
-
-}
-const std::string LagrangianCompliantR::getJachqName() const
-{
-  if (_pluginJachq->fPtr)
-    return _pluginJachq->getPluginName();
-  return "unamed";
-}
-
 
 void LagrangianCompliantR::initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
 {
@@ -72,33 +57,24 @@ void LagrangianCompliantR::computeh(double time, SiconosVector& q0, SiconosVecto
 {
   if (_pluginh->fPtr)
   {
-    // get vector y of the current interaction
-
-    // Warning: temporary method to have contiguous values in memory, copy of block to simple.
     ((FPtr2)(_pluginh->fPtr))(q0.size(), &(q0)(0), y.size(), &(lambda)(0), &(y)(0), z.size(), &(z)(0));
-
   }
 }
 
 void LagrangianCompliantR::computeJachq(double time, SiconosVector& q0, SiconosVector& lambda, SiconosVector& z)
 {
 
-  if (_pluginJachq->fPtr)
+  if (_jachq && _pluginJachq->fPtr)
   {
-    // Warning: temporary method to have contiguous values in memory, copy of block to simple.
-    // get vector lambda of the current interaction
     ((FPtr2)(_pluginJachq->fPtr))(q0.size(), &(q0)(0), lambda.size(), &(lambda)(0), &(*_jachq)(0, 0), z.size(), &(z)(0));
-    // Copy data that might have been changed in the plug-in call.
   }
 }
 void LagrangianCompliantR::computeJachlambda(double time, SiconosVector& q0, SiconosVector& lambda, SiconosVector& z)
 {
 
-  if (_pluginJachlambda->fPtr)
+  if (_jachlambda && _pluginJachlambda->fPtr)
   {
-    // get vector lambda of the current interaction
     ((FPtr2)_pluginJachlambda->fPtr)(q0.size(), &(q0)(0), lambda.size(), &(lambda)(0), &(*_jachlambda)(0, 0), z.size(), &(z)(0));
-    // Copy data that might have been changed in the plug-in call.
   }
 }
 
