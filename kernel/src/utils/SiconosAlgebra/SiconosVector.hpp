@@ -379,9 +379,9 @@ public:
 
   friend void sub(const SiconosVector&, const SiconosVector&, SiconosVector&);
 
-//  friend void axpby(double, const SiconosVector&, double, SiconosVector&);
+  friend void axpby(double, const SiconosVector&, double, SiconosVector&);
 
-//  friend void axpy(double, const SiconosVector&, SiconosVector&);
+  friend void axpy(double, const SiconosVector&, SiconosVector&);
 
   friend double inner_prod(const SiconosVector&, const SiconosVector&);
 

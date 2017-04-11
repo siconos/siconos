@@ -64,8 +64,8 @@ using namespace Experimental;
 template<typename P1, typename P2=empty, typename P3=empty, typename P4=empty>
 struct ParamVisitor : public SiconosVisitor
 {
-  const boost::tuple<const P1&, const P2&, const P3&, const P4&> _param;
-  typedef const boost::tuple<const P1&, const P2&, const P3&, const P4&> arguments_type;
+  typedef boost::tuple<const P1&, const P2&, const P3&, const P4&> arguments_type;
+  const arguments_type& _param;
 
   ParamVisitor(const arguments_type& args) : _param(args) {};
 
@@ -542,7 +542,7 @@ struct SetBlock : public ParamVisitor<unsigned int, SiconosVector>
     unsigned int index = this->param1();
     const SiconosVector& vIn = this->param2();
 
-    if (index >= vIn.size() || index >= storage.internal_data.size())
+    if (index >= storage.internal_data.size())
     {
       SiconosVectorException::selfThrow("SiconosVector::setBlock : index ouf of range");
     }
@@ -625,7 +625,7 @@ struct IOuterProd : public ParamVisitor<C>
   template<typename T>
   void operator() (const T& storage)
   {
-    answer = outer_prod(this->param1().internal_data, storage.internal_data);
+    answer = outer_prod(storage.internal_data, this->param1().internal_data);
   };
 };
 
@@ -641,7 +641,7 @@ struct OuterProd : public ParamVisitor<SiconosVectorStorage>
   void operator() (const T& storage)
   {
     /* const_cast : VisitorMaker makes visitors on non const references */
-    answer = apply_visitor<IOuterProd<T>, SimpleMatrix>(const_cast<SiconosVectorStorage&>(this->param()), storage);
+    answer = apply_visitor<IOuterProd<T>, SimpleMatrix >(const_cast<SiconosVectorStorage&>(this->param()), storage);
   };
 };
 
@@ -674,7 +674,7 @@ struct InternBiOp<OP, S, empty, empty, empty> : public SimpleModifier<S>
   {
     /* OP modify last argument */
     static OP op;
-    op(storage.internal_data, this->modifiable());
+    op(this->modifiable(), storage.internal_data);
   };
 
 };
@@ -819,10 +819,10 @@ struct OpCopy
 };
 
 template<>
-void OpCopy::operator()(const DenseVectStorage& dv2, DenseVectStorage& dv1)
+void OpCopy::operator()(const DenseVect& dv2, DenseVect& dv1)
 {
-  dv1.internal_data.resize(dv2.internal_data.size());
-  bindings::copy(dv2.internal_data, dv1.internal_data);
+  dv1.resize(dv2.size());
+  bindings::copy(dv2, dv1);
 }
 
 struct OpAxpy
@@ -1103,7 +1103,7 @@ SiconosVector::SiconosVector(const SiconosVector &svect) :
   {
     _storage = new DenseVectStorage(svect.size());
   }
-  apply_modifier<Copy>(svect.storage(), this->storage());
+  apply_modifier<Copy>(this->storage(), svect.storage());
 }
 
 // Copy from BlockVector
@@ -1333,7 +1333,7 @@ void SiconosVector::setBlock(unsigned int index, const SiconosVector& vIn)
 
 void SiconosVector::toBlock(SiconosVector& vOut, unsigned int sizeB, unsigned int startIn, unsigned int startOut) const
 {
-  apply_modifier<ToBlock>(this->storage(), sizeB, startIn, startOut, vOut.storage());
+  apply_modifier<ToBlock>(vOut.storage(), sizeB, startIn, startOut, this->storage());
 }
 
 void SiconosVector::addBlock(unsigned int index, const SiconosVector& vIn)
@@ -1547,7 +1547,7 @@ void axpby(double a, const SiconosVector& x, double b, SiconosVector& y)
 
 void axpy(double a, const SiconosVector& x, SiconosVector& y)
 {
-  apply_modifier<Axpy>(x.storage(), a, y.storage());
+  apply_modifier<Axpy>(y.storage(), a, x.storage());
 }
 
 
@@ -1559,7 +1559,7 @@ double inner_prod(const SiconosVector &x, const SiconosVector &m)
 //// outer_prod(v,w) = trans(v)*w
 SimpleMatrix outer_prod(const SiconosVector &x, const SiconosVector& m)
 {
-  return apply_visitor<OuterProd, SimpleMatrix>(x.storage(), m.storage());
+  return apply_visitor<OuterProd, SimpleMatrix >(x.storage(), m.storage());
 }
 
 void scal(double a, const SiconosVector & x, SiconosVector & y, bool init)
@@ -1577,7 +1577,7 @@ void scal(double a, const SiconosVector & x, SiconosVector & y, bool init)
 
 void subscal(double a, const SiconosVector & x, SiconosVector & y, const Index& coord, bool init)
 {
-  apply_modifier<Subscal>(x.storage(), a, coord, init, y.storage());
+  apply_modifier<Subscal>(y.storage(), a, coord, init, x.storage());
 }
 void cross_product(const SiconosVector& V1, const SiconosVector& V2, SiconosVector& VOUT)
 {

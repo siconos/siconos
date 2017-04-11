@@ -115,7 +115,7 @@ double inner_prod(const SiconosVector&, const SiconosVector&);
 // *  \param 2 SiconosVectors
 // *  \return a SimpleMatrix
 // */
-//SimpleMatrix outer_prod(const SiconosVector&, const SiconosVector&);
+SimpleMatrix outer_prod(const SiconosVector&, const SiconosVector&);
 
 /** multiplication of a vector by a scalar, y = a*x (init = true) or y += a*x (init = false)
  *  \param a a double
