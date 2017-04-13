@@ -783,6 +783,7 @@ SICONOS_IO_REGISTER_WITH_BASES(PrismaticJointR,(NewtonEulerR),
   (_V2y)
   (_V2z)
   (_axis0)
+  (_q1cq201)
   (_q1cq202)
   (_q1cq203)
   (_q1cq204))
