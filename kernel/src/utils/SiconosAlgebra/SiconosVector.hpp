@@ -28,7 +28,7 @@
 #include "SiconosVisitor.hpp"
 
 class SiconosVectorStorage;
-
+class Storage;
 /** Vectors of double. (Interface to various types of Boost-Ublas vectors).
  *
  * \author SICONOS Development Team - copyright INRIA
@@ -108,13 +108,6 @@ public:
   /** destructor
    */
   ~SiconosVector();
-
-  /** get storage reference
-   */
-  SiconosVectorStorage& storage() const
-  {
-    return *_storage;
-  }
 
   /** get the vector size, ie the total number of (double) elements in the vector
    *  \return unsigned int
@@ -406,7 +399,12 @@ public:
 
   friend void getMax(const SiconosVector&, double &, unsigned int &);
 
-  friend void  getMin(const SiconosVector&, double &, unsigned int &);
+  friend void getMin(const SiconosVector&, double &, unsigned int &);
+
+  friend class Storage;
+//  friend SiconosVectorStorage& storage(SiconosVector&);
+
+//  friend const SiconosVectorStorage& storage(const SiconosVector&);
 
   /*
   friend SiconosVector abs_wise(const SiconosVector&);
@@ -420,7 +418,4 @@ public:
   ACCEPT_NONVIRTUAL_VISITORS();
 
 };
-
-
-
 #endif

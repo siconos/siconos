@@ -52,4 +52,30 @@ struct SparseVectStorage : public SiconosVectorStorage
   ACCEPT_STD_VISITORS();
 };
 
+#include <boost/type_traits.hpp>
+#include <boost/mpl/if.hpp>
+
+/* to be forwarded as a friend class */
+struct Storage
+{
+  template<typename T, typename V>
+  struct forward_const
+  {
+    typedef typename boost::mpl::if_<boost::is_const<T>, const V, V>::type type;
+  };
+
+  template<typename T>
+  static typename forward_const<T, SiconosVectorStorage>::type& get(T& v)
+  {
+    return *v._storage;
+  }
+};
+
+
+template<typename T>
+static typename Storage::forward_const<T, SiconosVectorStorage>::type& storage(T& v)
+{
+  return Storage::get(v);
+};
+
 #endif

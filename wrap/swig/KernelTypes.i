@@ -413,7 +413,7 @@ static inline void fillBasePyarray(PyObject* pyarray, SharedPointerKeeper* saved
   {
     if(v)
     {
-      if (Type::value(v->storage()) == Type::DenseVectStorage)
+      if (Type::value(storage(*v)) == Type::DenseVectStorage)
       {
         return SP_SiconosVector_to_numpy(v);
       }
