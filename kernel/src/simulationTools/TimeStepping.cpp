@@ -379,6 +379,7 @@ void TimeStepping::initializeNewtonLoop()
   // Since computeInitialNewtonState updates each DS position we must
   // update the Interaction set here as well as during update().
   updateInteractions();
+  updateWorldFromDS();
 
   SP::InteractionsGraph indexSet0 = _nsds->topology()->indexSet0();
   if (indexSet0->size()>0)
@@ -572,6 +573,7 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
 
       if (!_isNewtonConverge && _newtonNbIterations < maxStep) {
         updateInteractions();
+        updateWorldFromDS();
         hasNSProblems = (!_allNSProblems->empty() &&   indexSet0.size() > 0) ? true : false;
         updateOutput();
       }
