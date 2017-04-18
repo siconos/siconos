@@ -265,9 +265,9 @@ void MoreauJeanBilbaoOSI::_initialize_iteration_matrix(SP::DynamicalSystem ds)
 
 void MoreauJeanBilbaoOSI::_compute_osi_parameters_v1(LagrangianLinearDiagonalDS& lldds, VectorOfVectors& work, SimpleMatrix& iteration_matrix)
 {
-  SiconosVector& omega2 = *lldds.stiffness();
-  SiconosVector & damp = *lldds.damping();
-  SiconosMatrix& mass = *lldds.mass();
+  SP::SiconosVector omega2 = lldds.stiffness();
+  SP::SiconosVector damp = lldds.damping();
+  SP::SiconosMatrix mass = lldds.mass();
 
   double one_minus_theta, dt_sigma_star;
   double time_step = _simulation->timeStep();
@@ -275,10 +275,20 @@ void MoreauJeanBilbaoOSI::_compute_osi_parameters_v1(LagrangianLinearDiagonalDS&
   unsigned int ndof = lldds.dimension();
   double one = 1.;
   double two = 2.;
+  double omega2k, sigmak, massk;
   for(unsigned int k=0;k<ndof;++k)
   {
-    compute_parameters(time_step, omega2(k), 0.5 * damp(k), one_minus_theta, dt_sigma_star);
-    iteration_matrix(k, k) = one / (mass(k, k) + coeff * one_minus_theta * omega2(k) + dt_sigma_star);
+    massk = 1.;
+    sigmak = 0.;
+    omega2k = 0.;
+    if(mass)
+      massk = (*mass)(k, k);
+    if(damp)
+      sigmak = 0.5 * (*damp)(k);
+    if(omega2)
+      omega2k = (*omega2)(k);
+    compute_parameters(time_step, omega2k, sigmak, one_minus_theta, dt_sigma_star);
+    iteration_matrix(k, k) = one / (massk + coeff * one_minus_theta * omega2k + dt_sigma_star);
     (*work[MoreauJeanBilbaoOSI::ONE_MINUS_THETA])(k) = one_minus_theta;
     (*work[MoreauJeanBilbaoOSI::TWO_DT_SIGMA_STAR])(k) = two * dt_sigma_star;
   }
@@ -292,7 +302,7 @@ void MoreauJeanBilbaoOSI::compute_parameters(double time_step, double omega2, do
   double ek = std::exp(-sigma * time_step);
   std::complex<double> buff = std::sqrt(std::complex<double>(sigma*sigma -omega2)) * time_step;
   std::complex<double> cAk = ek * (std::exp(buff) + std::exp(-buff));
-  assert(std::imag(cAk) < 1e-16);
+  assert(std::imag(cAk) < 1e-12);
   double Ak = std::real(cAk);
   double one = 1.;
   double two = 2.;

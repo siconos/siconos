@@ -82,7 +82,7 @@ void OneStepNSProblem::updateInteractionBlocks()
   //  to be computed if interi and interj are in IndexSet1 AND if interi and
   //  interj have common DynamicalSystems.
   //
-  // The possible cases are:
+
   //
   //  - If 1 and 2 are true then it does nothing. 3 is not checked.
   //  - If 1 == true, 2 == false, 3 == false, it does nothing.
@@ -98,7 +98,6 @@ void OneStepNSProblem::updateInteractionBlocks()
   // we put diagonal informations on vertices
   // self loops with bgl are a *nightmare* at the moment
   // (patch 65198 on standard boost install)
-
   if (indexSet->properties().symmetric)
   {
     DEBUG_PRINT("OneStepNSProblem::updateInteractionBlocks(). Symmetric case");
@@ -214,7 +213,6 @@ void OneStepNSProblem::updateInteractionBlocks()
     DEBUG_PRINT("OneStepNSProblem::updateInteractionBlocks(). Non symmetric case\n");
 
     InteractionsGraph::VIterator vi, viend;
-
     for (std11::tie(vi, viend) = indexSet->vertices();
          vi != viend; ++vi)
     {

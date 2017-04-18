@@ -7,6 +7,9 @@ import numpy as np
 import siconos.kernel as sk
 # import scipy.sparse as scs
 import numpywrappers as npw
+import matplotlib.pyplot as plt
+#from scipy import signal
+from matplotlib import animation
 
 
 class StringDS(sk.LagrangianLinearDiagonalDS):
@@ -62,11 +65,10 @@ class StringDS(sk.LagrangianLinearDiagonalDS):
         for name in self.__damping_parameters_names:
             assert name in self.damping_parameters.keys(), msg
         self.s_mat = self.compute_s_mat()
-        mass, stiffness_mat, damping_mat = self.compute_linear_coeff()
+        stiffness_mat, damping_mat = self.compute_linear_coeff()
         q0 = self.compute_initial_state_modal(imax, umax)
         v0 = npw.zeros_like(q0)
-        super(StringDS, self).__init__(q0, v0, mass,
-                                       stiffness_mat, damping_mat)
+        super(StringDS, self).__init__(q0, v0, stiffness_mat, damping_mat)
 
     def _compute_initial_state_std(self, imax, umax):
         """Set initial positions of the string,
@@ -103,8 +105,7 @@ class StringDS(sk.LagrangianLinearDiagonalDS):
         C = 2.Gamma
         M = I
         """
-        mass = np.ones(self.n_modes, dtype=np.float64)
-
+        #mass = np.ones(self.n_modes, dtype=np.float64)
         # --- Omega^2 vector ---
         omega2 = npw.asrealarray([1. + self.stiffness_coeff * (j ** 2)
                                   for j in xrange(1, self.n_modes + 1)])
@@ -117,15 +118,16 @@ class StringDS(sk.LagrangianLinearDiagonalDS):
         sigma = self.compute_damping(np.sqrt(omega2) / (2. * math.pi))
         damping_mat = npw.asrealarray(sigma)
         damping_mat *= 2.
-        return mass, stiffness_mat, damping_mat
+        return stiffness_mat, damping_mat
 
     def compute_s_mat(self):
         """Compute 'S' matrix (normal modes)
         """
-        indices = np.arange(1, self.n_modes + 1)
+        nn = self.n_modes + 1
+        indices = np.arange(1, nn)
         row = indices.reshape(1, self.n_modes)
         s_mat = npw.asrealarray(row * row.T)
-        s_mat *= (math.pi / self.n_modes)
+        s_mat *= (math.pi / nn)
         s_mat[...] = math.sqrt(2. / self.length) * np.sin(s_mat)
         return s_mat
 
@@ -166,24 +168,296 @@ class Fret(sk.Interaction):
     * Newton impact nonsmooth law
     * Lagrangian Linear Time-invariant relation
     """
-    def __init__(self, string, position=None, restitution_coeff=1.):
+    def __init__(self, string, contact_positions, restitution_coeff=1.):
         """
         Parameters
         ----------
         string : :class:`StringDS`
             the dynamical system linked to this interaction
-        positon : tuple or list
-            position[0] = horizontal index position of the contact point
-            position[1] = vertical position of the fret
+        contact_positons : tuple
+            contact_positions[0] = horizontal index position
+             of the contact point
+            contact_positions[1] = vertical position of the fret
         restitution_coeff : double, optional
             coefficient of restitution, default=1.
         """
-        # siconos relation
-        self.position = position[1] * npw.ones(1)
-        self.contact_index = position[0]
+        # vertical positions of the contact points
         hmat = npw.zeros((1, string.n_modes))
-        hmat[...] = string.s_mat[self.contact_index, :]
+        dx = string.length / (string.n_modes + 1)
+        hmat[0, :] = string.s_mat[contact_positions[0] - 1, :]
+        # compute contact point horizontal position
+        self.contact_pos = dx * contact_positions[0]
+        # set contact index (mind that boundary points
+        # are not included in fret/ds)
+        self.contact_index = contact_positions[0] - 1
+        # Build nslaw, relation and interaction
         e = restitution_coeff
         nslaw = sk.NewtonImpactNSL(e)
-        relation = sk.LagrangianLinearTIR(hmat, -self.position)
+        relation = sk.LagrangianLinearTIR(hmat, [-contact_positions[1]])
         super(Fret, self).__init__(nslaw, relation)
+
+
+class Guitar(sk.Model):
+    """DS (strings) and interaction (frets)
+    'assembly' to build a NSDS
+    """
+
+    def __init__(self, strings_and_frets, time_range, fs,
+                 integrators=None, default_integrator=None):
+        """
+        Parameters
+        ----------
+        strings_and_frets : python dictionnary
+            keys = interactions (Fret). See notes below.
+            values = dynamical systems (StringDS)
+        time_range : list
+            time range for the simulation.
+        fs : double
+            sampling frequency
+        integrators : dictionnary, optional
+            integrators[some_ds] = osi class name
+            (MoreauJeanOSI or MoreauJeanBilbaoOSI).
+            Default: Bilbao for all ds.
+        default_integrator: sk.OneStepIntegrator
+            default osi type (if integrators is not set
+            or for ds not present in integrators).
+            Default = Bilbao.
+
+        Notes
+        -----
+        * strings_and_frets.keys() : interactions
+        * strings_and_frets.values() : dynamical systems
+        * so, strings_and_frets[some_interaction] returns the ds
+        linked to some_interaction.
+        * For integrators:
+          - to use Bilbao for all ds : do not set
+            integrators and default_integrator params
+          - to choose the integrator: set default_integrator=OSI
+            OSI being some siconos OneStepIntegrator class.
+          - to explicitely set the integrator for each ds:
+            set integrators dictionnary, with
+            integrators[some_ds] = OSI (OneStepIntegrator class)
+            all ds not set in integrators will be integrated
+            with default_integrator.
+        """
+        # Build siconos model object (input = time range)
+        super(Guitar, self).__init__(time_range[0], time_range[1])
+        # iterate through ds and interactions in the input dictionnary
+        # - insert ds into the nonsmooth dynamical system
+        # - link each ds to its interaction
+        nsds = self.nonSmoothDynamicalSystem()
+        for interaction in strings_and_frets:
+            ds = strings_and_frets[interaction]
+            assert isinstance(interaction, Fret)
+            assert isinstance(ds, StringDS)
+            nsds.insertDynamicalSystem(ds)
+            # link the interaction and the dynamical system
+            nsds.link(interaction, ds)
+        self.strings_and_frets = strings_and_frets
+        # -- Simulation --
+        moreau_bilbao = sk.MoreauJeanBilbaoOSI()
+        moreau_jean = sk.MoreauJeanOSI(0.500001)
+        default_integrator = moreau_bilbao
+        if default_integrator is 'MoreauJean':
+            default_integrator = moreau_jean
+
+        # (2) Time discretisation --
+        t0 = time_range[0]
+        tend = time_range[1]
+        self.fs = fs
+        self.time_step = 1. / fs
+        t = sk.TimeDiscretisation(t0, self.time_step)
+        self.nb_time_steps = (int)((tend - t0) / self.time_step)
+        # (3) one step non smooth problem
+        osnspb = sk.LCP()
+        # (4) Simulation setup with (1) (2) (3)
+        self.simu = sk.TimeStepping(t, default_integrator, osnspb)
+        if integrators is not None:
+            self.simulation.insertIntegrator(integrators[ds])
+            for ds in integrators:
+                nsds.setOSI(ds, integrators[ds])
+        # simulation initialization
+        self.setSimulation(self.simu)
+        self.initialize()
+        # internal buffers, used to save data for each time step.
+        # A dict of buffers to save ds variables for all time steps
+        self.data_ds = {}
+        for ds in self.strings_and_frets.values():
+            ndof = ds.dimension()
+            self.data_ds[ds] = npw.zeros((self.nb_time_steps + 1, ndof))
+        # A dict of buffers to save interactions variables for all time steps
+        self.data_interactions = {}
+        for interaction in self.strings_and_frets:
+            nbc = interaction.getSizeOfY()
+            self.data_interactions[interaction] = \
+                npw.zeros((self.nb_time_steps + 1, 2 * nbc))
+        # time instants
+        self.time = npw.zeros(self.nb_time_steps + 1)
+
+    def save_interaction_state(self, k, interaction):
+        """Save ds positions, velocity,
+        and contact points local variables.
+
+        Parameters
+        ----------
+        k : int
+            current iteration number
+        interaction : Fret
+            interaction of interest
+        """
+        nbc = interaction.getSizeOfY()
+        self.data_interactions[interaction][k, 1:1 + nbc] = interaction.y(0)
+        self.data_interactions[interaction][k, 1 + nbc:] = \
+            interaction.lambda_(1)
+
+    def save_ds_state(self, k, ds):
+        """Save ds positions, velocity,
+        and contact points local variables.
+
+        Parameters
+        ----------
+        k : int
+            current iteration number
+        ds : StringDS
+            dynamical system of interest
+        """
+        self.data_ds[ds][k, :] = np.dot(ds.s_mat, ds.q())
+
+    def plot_ds_state(self, ds, indices=None,
+                      nfig=1, pdffile=None):
+        """Plot collected data (positions ...) of a dynamical system
+
+        Parameters
+        ----------
+        ds : StringDS
+            dynamical system of interest
+        indices : list of int, optional
+            indices (dof) to be plotted. If None
+            plot all dof.
+        nfig : int
+            figure number
+        pdffile : string, optional
+            output file name, if needed. Default=None
+        """
+        data = self.data_ds[ds]
+        # current interaction
+        # number of contact points
+        # distance(s) string/fret
+        ndof = ds.dimension()
+        x = np.linspace(0, ds.length, ndof + 2)
+        x = x[1:-1]
+        plt.figure(nfig, figsize=(17, 8))
+        # Plot string displacements, at contact points, according to time
+        plt.subplot(341)
+        if indices is None:
+            indices = np.arange(ndof)
+            for ind in indices:
+                plt.plot(self.time, data[:, ind])
+            plt.title('displacements')
+        else:
+            iplot = 1
+            for ind in indices:
+                plt.subplot(3, 4, iplot)
+                if iplot < 5:
+                    iplot += 1
+                # plot ind - 1 because boundaries points
+                # are not included in the ds
+                plt.plot(self.time, data[:, ind - 1])
+                plt.title('displacements at dof ' + str(ind))
+
+        # plt.subplot(342)
+        # #f, t, Sxx = signal.spectrogram(pos[0], self.fs)
+        # #plt.pcolormesh(t, f, Sxx)
+        # plt.ylabel('Frequency [Hz]')
+        # plt.xlabel('Time [sec]')
+        # plt.title('dsp')
+        # plt.subplot(343)
+        # output frequency, for modes
+        nb_points = 8
+        time_ind = np.arange(nb_points) * self.nb_time_steps / nb_points
+        time_ind[-1] = -1
+        interactions = self.interactions_linked_to_ds(ds)
+        nbc = len(interactions)
+        for k in range(nb_points):
+            plt.subplot(3, 4, 5 + k)
+            plt.plot(x, data[time_ind[k], :])
+            plt.title('mode, t=' + str(self.time[time_ind[k]]))
+            for ic in range(nbc):
+                plt.plot((interactions[ic].contact_pos,
+                          interactions[ic].contact_pos),
+                         (-1.e-4, -interactions[ic].relation().e()[0]),
+                         'o-')
+        plt.subplots_adjust(hspace=0.8)
+        return plt
+
+    def interactions_linked_to_ds(self, ds):
+        """Return a list of all interactions linked to a given
+        ds.
+        """
+        return [k for k in self.strings_and_frets
+                if self.strings_and_frets[k] in [ds]]
+
+    def plot_interaction(self, interaction, nfig=1):
+        """Plot collected data (positions ...) of an interaction
+
+        Parameters
+        ----------
+        interaction : Fret
+             interaction of interest
+        nfig : int
+            figure number
+        """
+        data = self.data_interactions[interaction]
+        # current interaction
+        # number of contact points
+        nbc = interaction.getSizeOfY()
+        # distance(s) string/fret
+        dist = data[:, :nbc]
+        # reaction(s) (impulse) at contact(s)
+        lam = data[:, nbc:2 * nbc]
+        plt.figure(nfig, figsize=(17, 8))
+        plt.subplot(121)
+        plt.plot(self.time, dist)
+        plt.axhline(0, color='b', linewidth=3)
+        plt.title('distance')
+        plt.subplot(122)
+        plt.plot(self.time, lam)
+        plt.title('percussion')
+        return plt
+
+    def plot_modes(self, ds, movie_name):
+        """Create animation from simulation results,
+        for a given ds.
+        """
+        interactions = self.interactions_linked_to_ds(ds)
+        nbc = len(interactions)
+  
+        fig = plt.figure()
+        ndof = ds.dimension()
+        length = ds.length
+        ax = plt.axes(xlim=(0, length), ylim=(-2.e-3, 2e-3))
+        line, = ax.plot([], [], lw=2)
+        for ic in range(nbc):
+            plt.plot((interactions[ic].contact_pos,
+                      interactions[ic].contact_pos),
+                     (-1.e-4,
+                      -interactions[ic].relation().e()[0]),
+                     'o-')
+
+        # initialization function: plot the background of each frame
+        def init():
+            line.set_data([], [])
+            return line,
+
+        def animate(i):
+            x = np.linspace(0., length, ndof)
+            y = self.data_ds[ds][i, :]
+            line.set_data(x, y)
+            return line,
+
+        #call the animator.
+        # blit=True means only re-draw the parts that have changed.
+        anim = animation.FuncAnimation(fig, animate, init_func=init,
+                                       frames=int(self.nb_time_steps / 20.),
+                                       interval=20, blit=True)
+        anim.save(movie_name, fps=30, extra_args=['-vcodec', 'libx264'])

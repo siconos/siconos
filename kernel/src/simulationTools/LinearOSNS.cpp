@@ -379,7 +379,8 @@ void LinearOSNS::computeInteractionBlock(const InteractionsGraph::EDescriptor& e
   // Once again we assume that inter1 and inter2 have the same osi ...
   //SP::OneStepIntegrator Osi = indexSet->properties(indexSet->source(ed)).osi;
   DynamicalSystemsGraph& DSG0 = *simulation()->nonSmoothDynamicalSystem()->dynamicalSystems();
-  OneStepIntegrator& Osi = *DSG0.properties(DSG0.descriptor(ds)).osi;
+  OneStepIntegrator& osi = *DSG0.properties(DSG0.descriptor(ds)).osi;
+  OSI::TYPES osiType = osi.getType();
 
 
   // For the edge 'ds', we need to find relative position of this ds
@@ -472,7 +473,7 @@ void LinearOSNS::computeInteractionBlock(const InteractionsGraph::EDescriptor& e
     inter2->getRightInteractionBlockForDS(pos2, rightInteractionBlock, workMInter2);
     // centralInteractionBlock contains a lu-factorized matrix and we solve
     // centralInteractionBlock * X = rightInteractionBlock with PLU
-    SP::SiconosMatrix centralInteractionBlock = getOSIMatrix(Osi, ds);
+    SP::SiconosMatrix centralInteractionBlock = getOSIMatrix(osi, ds);
     centralInteractionBlock->PLUForwardBackwardInPlace(*rightInteractionBlock);
 
     //      integration of r with theta method removed
@@ -510,7 +511,7 @@ void LinearOSNS::computeInteractionBlock(const InteractionsGraph::EDescriptor& e
 
     SP::BoundaryCondition bc;
     Type::Siconos dsType = Type::value(*ds);
-    if (dsType == Type::LagrangianLinearTIDS || dsType == Type::LagrangianDS)
+    if (dsType == Type::LagrangianLinearTIDS || dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearDiagonalDS)
     {
       SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
       if (d->boundaryConditions()) bc = d->boundaryConditions();
@@ -533,19 +534,36 @@ void LinearOSNS::computeInteractionBlock(const InteractionsGraph::EDescriptor& e
       }
     }
 
-    // inter1 != inter2
-    rightInteractionBlock.reset(new SimpleMatrix(nslawSize2, sizeDS));
-    inter2->getLeftInteractionBlockForDS(pos2, rightInteractionBlock, workMInter2);
-
-    // Warning: we use getLeft for Right interactionBlock
-    // because right = transpose(left) and because of
-    // size checking inside the getBlock function, a
-    // getRight call will fail.
-    rightInteractionBlock->trans();
-    SP::SimpleMatrix centralInteractionBlock = getOSIMatrix(Osi, ds);
-    centralInteractionBlock->PLUForwardBackwardInPlace(*rightInteractionBlock);
-    //*currentInteractionBlock +=  *leftInteractionBlock ** work;
-    prod(*leftInteractionBlock, *rightInteractionBlock, *currentInteractionBlock, false);
+    if(osiType == OSI::MOREAUJEANBILBAOOSI || dsType == Type::LagrangianLinearDiagonalDS)
+    {
+      // Rightinteractionblock used first as buffer to save left * W-1
+      rightInteractionBlock.reset(new SimpleMatrix(nslawSize2, sizeDS));
+      //SP::SiconosMatrix work(new SimpleMatrix(*leftInteractionBlock));
+      // Get inverse of the iteration matrix
+      SiconosMatrix& inv_iteration_matrix = *getOSIMatrix(osi, ds);
+      // remind that W contains the inverse of the iteration matrix
+      axpy_prod(*leftInteractionBlock, inv_iteration_matrix, *rightInteractionBlock, true);
+      // Then save block corresponding to the 'right' interaction into leftInteractionBlock
+      inter2->getLeftInteractionBlockForDS(pos2, leftInteractionBlock, workMInter2);
+      leftInteractionBlock->trans();
+      // and compute LW-1R == rightInteractionBlock * leftInteractionBlock into currentInteractionBlock
+      prod(*rightInteractionBlock, *leftInteractionBlock, *currentInteractionBlock, false);
+    }
+    else
+    {
+      // inter1 != inter2
+      rightInteractionBlock.reset(new SimpleMatrix(nslawSize2, sizeDS));
+      inter2->getLeftInteractionBlockForDS(pos2, rightInteractionBlock, workMInter2);
+      rightInteractionBlock->trans();
+      // Warning: we use getLeft for Right interactionBlock
+      // because right = transpose(left) and because of
+      // size checking inside the getBlock function, a
+      // getRight call will fail.
+      SP::SimpleMatrix centralInteractionBlock = getOSIMatrix(osi, ds);
+      centralInteractionBlock->PLUForwardBackwardInPlace(*rightInteractionBlock);
+      //*currentInteractionBlock +=  *leftInteractionBlock ** work;
+      prod(*leftInteractionBlock, *rightInteractionBlock, *currentInteractionBlock, false);
+    }
   }
   else RuntimeException::selfThrow("LinearOSNS::computeInteractionBlock not yet implemented for relation of type " + relationType1);
 

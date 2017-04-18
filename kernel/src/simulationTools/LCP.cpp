@@ -87,7 +87,6 @@ int LCP::compute(double time)
     DEBUG_EXPR(display());
 
   }
-
   return info;
 }
 
