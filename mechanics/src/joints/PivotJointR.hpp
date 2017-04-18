@@ -40,7 +40,7 @@ protected:
   double _A2x, _A2y, _A2z;
 
   /*Initial conditions*/
-  double _q2to1w, _q2to1x, _q2to1y, _q2to1z;
+  double _cq2q101, _cq2q102, _cq2q103, _cq2q104;
   double _initial_AscalA1, _initial_AscalA2;
 
   void buildA1A2();

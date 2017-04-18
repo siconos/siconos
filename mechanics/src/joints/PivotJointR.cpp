@@ -41,8 +41,8 @@
  * A2 = np.array([0, Symbol('_A2x'), Symbol('_A2y'), Symbol('_A2z')])
  * q1 = np.array([Symbol('q10'), Symbol('q11'), Symbol('q12'), Symbol('q13')])
  * q2 = np.array([Symbol('q20'), Symbol('q21'), Symbol('q22'), Symbol('q23')])
- * q2to1 = np.array([Symbol('_q2to1w'),Symbol('_q2to1x'),
- *                   Symbol('_q2to1y'),Symbol('_q2to1z')])
+ * cq2q10 = np.array([Symbol('_cq2q101'),Symbol('_cq2q102'),
+ *                    Symbol('_cq2q103'),Symbol('_cq2q104')])
  *
  * qinv = lambda q: np.array([q[0],-q[1],-q[2],-q[3]])
  * qmul = lambda a,b: np.array([
@@ -60,12 +60,12 @@ PivotJointR::PivotJointR(SP::NewtonEulerDS d1, SP::NewtonEulerDS d2, SP::Siconos
                                        (*d1->q())(5), (*d1->q())(6));
   ::boost::math::quaternion<double> q2((*d2->q())(3), (*d2->q())(4),
                                        (*d2->q())(5), (*d2->q())(6));
-  ::boost::math::quaternion<double> q2to1(q1 / q2);
+  ::boost::math::quaternion<double> cq2q10(1.0 / q2 * q1);
 
-  _q2to1w = q2to1.R_component_1();
-  _q2to1x = q2to1.R_component_2();
-  _q2to1y = q2to1.R_component_3();
-  _q2to1z = q2to1.R_component_4();
+  _cq2q101 = cq2q10.R_component_1();
+  _cq2q102 = cq2q10.R_component_2();
+  _cq2q103 = cq2q10.R_component_3();
+  _cq2q104 = cq2q10.R_component_4();
 
   buildA1A2();
 
@@ -127,7 +127,7 @@ void PivotJointR::Jd1d2(double X1, double Y1, double Z1, double q10, double q11,
 {
   KneeJointR::Jd1d2(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23);
 
-  ::boost::math::quaternion<double> quat2to1_inv(_q2to1w,-_q2to1x,-_q2to1y,-_q2to1z);
+  ::boost::math::quaternion<double> quat2to1_inv(_cq2q101,-_cq2q102,-_cq2q103,-_cq2q104);
   ::boost::math::quaternion<double> quat1_inv(q10,-q11,-q12,-q13);
   ::boost::math::quaternion<double> quat2_inv(q20,-q21,-q22,-q23);
   ::boost::math::quaternion<double> quatBuff;
@@ -150,21 +150,21 @@ void PivotJointR::Jd1d2(double X1, double Y1, double Z1, double q10, double q11,
 
   // sympy expression: [AscalA1.diff(x) for x in q1]
   _jachq->setValue(3, 3,
-                   _A1x*(-_q2to1w*q21 - _q2to1x*q20 + _q2to1y*q23 - _q2to1z*q22)
-                   + _A1y*(-_q2to1w*q22 - _q2to1x*q23 - _q2to1y*q20 + _q2to1z*q21)
-                   + _A1z*(-_q2to1w*q23 + _q2to1x*q22 - _q2to1y*q21 - _q2to1z*q20));
+                   _A1x*(-_cq2q101*q21 - _cq2q102*q20 + _cq2q103*q23 - _cq2q104*q22)
+                   + _A1y*(-_cq2q101*q22 - _cq2q102*q23 - _cq2q103*q20 + _cq2q104*q21)
+                   + _A1z*(-_cq2q101*q23 + _cq2q102*q22 - _cq2q103*q21 - _cq2q104*q20));
   _jachq->setValue(3, 4,
-                   _A1x*(_q2to1w*q20 - _q2to1x*q21 - _q2to1y*q22 - _q2to1z*q23)
-                   + _A1y*(-_q2to1w*q23 + _q2to1x*q22 - _q2to1y*q21 - _q2to1z*q20)
-                   + _A1z*(_q2to1w*q22 + _q2to1x*q23 + _q2to1y*q20 - _q2to1z*q21));
+                   _A1x*(_cq2q101*q20 - _cq2q102*q21 - _cq2q103*q22 - _cq2q104*q23)
+                   + _A1y*(-_cq2q101*q23 + _cq2q102*q22 - _cq2q103*q21 - _cq2q104*q20)
+                   + _A1z*(_cq2q101*q22 + _cq2q102*q23 + _cq2q103*q20 - _cq2q104*q21));
   _jachq->setValue(3, 5,
-                   _A1x*(_q2to1w*q23 - _q2to1x*q22 + _q2to1y*q21 + _q2to1z*q20)
-                   + _A1y*(_q2to1w*q20 - _q2to1x*q21 - _q2to1y*q22 - _q2to1z*q23)
-                   + _A1z*(-_q2to1w*q21 - _q2to1x*q20 + _q2to1y*q23 - _q2to1z*q22));
+                   _A1x*(_cq2q101*q23 - _cq2q102*q22 + _cq2q103*q21 + _cq2q104*q20)
+                   + _A1y*(_cq2q101*q20 - _cq2q102*q21 - _cq2q103*q22 - _cq2q104*q23)
+                   + _A1z*(-_cq2q101*q21 - _cq2q102*q20 + _cq2q103*q23 - _cq2q104*q22));
   _jachq->setValue(3, 6,
-                   _A1x*(-_q2to1w*q22 - _q2to1x*q23 - _q2to1y*q20 + _q2to1z*q21)
-                   + _A1y*(_q2to1w*q21 + _q2to1x*q20 - _q2to1y*q23 + _q2to1z*q22)
-                   + _A1z*(_q2to1w*q20 - _q2to1x*q21 - _q2to1y*q22 - _q2to1z*q23));
+                   _A1x*(-_cq2q101*q22 - _cq2q102*q23 - _cq2q103*q20 + _cq2q104*q21)
+                   + _A1y*(_cq2q101*q21 + _cq2q102*q20 - _cq2q103*q23 + _cq2q104*q22)
+                   + _A1z*(_cq2q101*q20 - _cq2q102*q21 - _cq2q103*q22 - _cq2q104*q23));
 
   _jachq->setValue(3, 7, 0);
   _jachq->setValue(3, 8, 0);
@@ -172,21 +172,21 @@ void PivotJointR::Jd1d2(double X1, double Y1, double Z1, double q10, double q11,
 
   // sympy expression: [AscalA1.diff(x) for x in q2]
   _jachq->setValue(3, 10,
-                   _A1x*(_q2to1w*q11 - _q2to1x*q10 - _q2to1y*q13 + _q2to1z*q12)
-                   + _A1y*(_q2to1w*q12 + _q2to1x*q13 - _q2to1y*q10 - _q2to1z*q11)
-                   + _A1z*(_q2to1w*q13 - _q2to1x*q12 + _q2to1y*q11 - _q2to1z*q10));
+                   _A1x*(_cq2q101*q11 - _cq2q102*q10 - _cq2q103*q13 + _cq2q104*q12)
+                   + _A1y*(_cq2q101*q12 + _cq2q102*q13 - _cq2q103*q10 - _cq2q104*q11)
+                   + _A1z*(_cq2q101*q13 - _cq2q102*q12 + _cq2q103*q11 - _cq2q104*q10));
   _jachq->setValue(3, 11,
-                   _A1x*(-_q2to1w*q10 - _q2to1x*q11 + _q2to1y*q12 + _q2to1z*q13)
-                   + _A1y*(_q2to1w*q13 - _q2to1x*q12 - _q2to1y*q11 + _q2to1z*q10)
-                   + _A1z*(-_q2to1w*q12 - _q2to1x*q13 - _q2to1y*q10 - _q2to1z*q11));
+                   _A1x*(-_cq2q101*q10 - _cq2q102*q11 + _cq2q103*q12 + _cq2q104*q13)
+                   + _A1y*(_cq2q101*q13 - _cq2q102*q12 - _cq2q103*q11 + _cq2q104*q10)
+                   + _A1z*(-_cq2q101*q12 - _cq2q102*q13 - _cq2q103*q10 - _cq2q104*q11));
   _jachq->setValue(3, 12,
-                   _A1x*(-_q2to1w*q13 - _q2to1x*q12 - _q2to1y*q11 - _q2to1z*q10)
-                   + _A1y*(-_q2to1w*q10 + _q2to1x*q11 - _q2to1y*q12 + _q2to1z*q13)
-                   + _A1z*(_q2to1w*q11 + _q2to1x*q10 - _q2to1y*q13 - _q2to1z*q12));
+                   _A1x*(-_cq2q101*q13 - _cq2q102*q12 - _cq2q103*q11 - _cq2q104*q10)
+                   + _A1y*(-_cq2q101*q10 + _cq2q102*q11 - _cq2q103*q12 + _cq2q104*q13)
+                   + _A1z*(_cq2q101*q11 + _cq2q102*q10 - _cq2q103*q13 - _cq2q104*q12));
   _jachq->setValue(3, 13,
-                   _A1x*(_q2to1w*q12 - _q2to1x*q13 + _q2to1y*q10 - _q2to1z*q11)
-                   + _A1y*(-_q2to1w*q11 - _q2to1x*q10 - _q2to1y*q13 - _q2to1z*q12)
-                   + _A1z*(-_q2to1w*q10 + _q2to1x*q11 + _q2to1y*q12 - _q2to1z*q13));
+                   _A1x*(_cq2q101*q12 - _cq2q102*q13 + _cq2q103*q10 - _cq2q104*q11)
+                   + _A1y*(-_cq2q101*q11 - _cq2q102*q10 - _cq2q103*q13 - _cq2q104*q12)
+                   + _A1z*(-_cq2q101*q10 + _cq2q102*q11 + _cq2q103*q12 - _cq2q104*q13));
 
   _jachq->setValue(4, 0, 0);
   _jachq->setValue(4, 1, 0);
@@ -194,21 +194,21 @@ void PivotJointR::Jd1d2(double X1, double Y1, double Z1, double q10, double q11,
 
   // sympy expression: [AscalA2.diff(x) for x in q1]
   _jachq->setValue(4, 3,
-                   _A2x*(-_q2to1w*q21 - _q2to1x*q20 + _q2to1y*q23 - _q2to1z*q22)
-                   + _A2y*(-_q2to1w*q22 - _q2to1x*q23 - _q2to1y*q20 + _q2to1z*q21)
-                   + _A2z*(-_q2to1w*q23 + _q2to1x*q22 - _q2to1y*q21 - _q2to1z*q20));
+                   _A2x*(-_cq2q101*q21 - _cq2q102*q20 + _cq2q103*q23 - _cq2q104*q22)
+                   + _A2y*(-_cq2q101*q22 - _cq2q102*q23 - _cq2q103*q20 + _cq2q104*q21)
+                   + _A2z*(-_cq2q101*q23 + _cq2q102*q22 - _cq2q103*q21 - _cq2q104*q20));
   _jachq->setValue(4, 4,
-                   _A2x*(_q2to1w*q20 - _q2to1x*q21 - _q2to1y*q22 - _q2to1z*q23)
-                   + _A2y*(-_q2to1w*q23 + _q2to1x*q22 - _q2to1y*q21 - _q2to1z*q20)
-                   + _A2z*(_q2to1w*q22 + _q2to1x*q23 + _q2to1y*q20 - _q2to1z*q21));
+                   _A2x*(_cq2q101*q20 - _cq2q102*q21 - _cq2q103*q22 - _cq2q104*q23)
+                   + _A2y*(-_cq2q101*q23 + _cq2q102*q22 - _cq2q103*q21 - _cq2q104*q20)
+                   + _A2z*(_cq2q101*q22 + _cq2q102*q23 + _cq2q103*q20 - _cq2q104*q21));
   _jachq->setValue(4, 5,
-                   _A2x*(_q2to1w*q23 - _q2to1x*q22 + _q2to1y*q21 + _q2to1z*q20)
-                   + _A2y*(_q2to1w*q20 - _q2to1x*q21 - _q2to1y*q22 - _q2to1z*q23)
-                   + _A2z*(-_q2to1w*q21 - _q2to1x*q20 + _q2to1y*q23 - _q2to1z*q22));
+                   _A2x*(_cq2q101*q23 - _cq2q102*q22 + _cq2q103*q21 + _cq2q104*q20)
+                   + _A2y*(_cq2q101*q20 - _cq2q102*q21 - _cq2q103*q22 - _cq2q104*q23)
+                   + _A2z*(-_cq2q101*q21 - _cq2q102*q20 + _cq2q103*q23 - _cq2q104*q22));
   _jachq->setValue(4, 6,
-                   _A2x*(-_q2to1w*q22 - _q2to1x*q23 - _q2to1y*q20 + _q2to1z*q21)
-                   + _A2y*(_q2to1w*q21 + _q2to1x*q20 - _q2to1y*q23 + _q2to1z*q22)
-                   + _A2z*(_q2to1w*q20 - _q2to1x*q21 - _q2to1y*q22 - _q2to1z*q23));
+                   _A2x*(-_cq2q101*q22 - _cq2q102*q23 - _cq2q103*q20 + _cq2q104*q21)
+                   + _A2y*(_cq2q101*q21 + _cq2q102*q20 - _cq2q103*q23 + _cq2q104*q22)
+                   + _A2z*(_cq2q101*q20 - _cq2q102*q21 - _cq2q103*q22 - _cq2q104*q23));
 
   _jachq->setValue(4, 7, 0);
   _jachq->setValue(4, 8, 0);
@@ -216,21 +216,21 @@ void PivotJointR::Jd1d2(double X1, double Y1, double Z1, double q10, double q11,
 
   // sympy expression: [AscalA2.diff(x) for x in q1]
   _jachq->setValue(4, 10,
-                   _A2x*(_q2to1w*q11 - _q2to1x*q10 - _q2to1y*q13 + _q2to1z*q12)
-                   + _A2y*(_q2to1w*q12 + _q2to1x*q13 - _q2to1y*q10 - _q2to1z*q11)
-                   + _A2z*(_q2to1w*q13 - _q2to1x*q12 + _q2to1y*q11 - _q2to1z*q10));
+                   _A2x*(_cq2q101*q11 - _cq2q102*q10 - _cq2q103*q13 + _cq2q104*q12)
+                   + _A2y*(_cq2q101*q12 + _cq2q102*q13 - _cq2q103*q10 - _cq2q104*q11)
+                   + _A2z*(_cq2q101*q13 - _cq2q102*q12 + _cq2q103*q11 - _cq2q104*q10));
   _jachq->setValue(4, 11,
-                   _A2x*(-_q2to1w*q10 - _q2to1x*q11 + _q2to1y*q12 + _q2to1z*q13)
-                   + _A2y*(_q2to1w*q13 - _q2to1x*q12 - _q2to1y*q11 + _q2to1z*q10)
-                   + _A2z*(-_q2to1w*q12 - _q2to1x*q13 - _q2to1y*q10 - _q2to1z*q11));
+                   _A2x*(-_cq2q101*q10 - _cq2q102*q11 + _cq2q103*q12 + _cq2q104*q13)
+                   + _A2y*(_cq2q101*q13 - _cq2q102*q12 - _cq2q103*q11 + _cq2q104*q10)
+                   + _A2z*(-_cq2q101*q12 - _cq2q102*q13 - _cq2q103*q10 - _cq2q104*q11));
   _jachq->setValue(4, 12,
-                   _A2x*(-_q2to1w*q13 - _q2to1x*q12 - _q2to1y*q11 - _q2to1z*q10)
-                   + _A2y*(-_q2to1w*q10 + _q2to1x*q11 - _q2to1y*q12 + _q2to1z*q13)
-                   + _A2z*(_q2to1w*q11 + _q2to1x*q10 - _q2to1y*q13 - _q2to1z*q12));
+                   _A2x*(-_cq2q101*q13 - _cq2q102*q12 - _cq2q103*q11 - _cq2q104*q10)
+                   + _A2y*(-_cq2q101*q10 + _cq2q102*q11 - _cq2q103*q12 + _cq2q104*q13)
+                   + _A2z*(_cq2q101*q11 + _cq2q102*q10 - _cq2q103*q13 - _cq2q104*q12));
   _jachq->setValue(4, 13,
-                   _A2x*(_q2to1w*q12 - _q2to1x*q13 + _q2to1y*q10 - _q2to1z*q11)
-                   + _A2y*(-_q2to1w*q11 - _q2to1x*q10 - _q2to1y*q13 - _q2to1z*q12)
-                   + _A2z*(-_q2to1w*q10 + _q2to1x*q11 + _q2to1y*q12 - _q2to1z*q13));
+                   _A2x*(_cq2q101*q12 - _cq2q102*q13 + _cq2q103*q10 - _cq2q104*q11)
+                   + _A2y*(-_cq2q101*q11 - _cq2q102*q10 - _cq2q103*q13 - _cq2q104*q12)
+                   + _A2z*(-_cq2q101*q10 + _cq2q102*q11 + _cq2q103*q12 - _cq2q104*q13));
 
   /*proj_with_q
   for (unsigned int ii=0; ii <_jachq->size(0); ii++)
@@ -305,21 +305,21 @@ double PivotJointR::AscalA1(double q10, double q11, double q12, double q13, doub
    * (taking into account original difference in orientation q2to1).
    *
    * sympy expression:
-   * AscalA1 = np.dot(A1,qmul(qinv(qmul(q2,q2to1)),q1)) - initial_AscalA1
+   * AscalA1 = np.dot(A1,qmul(qinv(qmul(q2,cq2q10)),q1)) - initial_AscalA1
    */
 
-  return _A1x*(q10*(-_q2to1w*q21 - _q2to1x*q20 + _q2to1y*q23 - _q2to1z*q22)
-               + q11*(_q2to1w*q20 - _q2to1x*q21 - _q2to1y*q22 - _q2to1z*q23)
-               - q12*(-_q2to1w*q23 + _q2to1x*q22 - _q2to1y*q21 - _q2to1z*q20)
-               + q13*(-_q2to1w*q22 - _q2to1x*q23 - _q2to1y*q20 + _q2to1z*q21))
-    + _A1y*(q10*(-_q2to1w*q22 - _q2to1x*q23 - _q2to1y*q20 + _q2to1z*q21)
-            + q11*(-_q2to1w*q23 + _q2to1x*q22 - _q2to1y*q21 - _q2to1z*q20)
-            + q12*(_q2to1w*q20 - _q2to1x*q21 - _q2to1y*q22 - _q2to1z*q23)
-            - q13*(-_q2to1w*q21 - _q2to1x*q20 + _q2to1y*q23 - _q2to1z*q22))
-    + _A1z*(q10*(-_q2to1w*q23 + _q2to1x*q22 - _q2to1y*q21 - _q2to1z*q20)
-            - q11*(-_q2to1w*q22 - _q2to1x*q23 - _q2to1y*q20 + _q2to1z*q21)
-            + q12*(-_q2to1w*q21 - _q2to1x*q20 + _q2to1y*q23 - _q2to1z*q22)
-            + q13*(_q2to1w*q20 - _q2to1x*q21 - _q2to1y*q22 - _q2to1z*q23));
+  return _A1x*(q10*(-_cq2q101*q21 - _cq2q102*q20 + _cq2q103*q23 - _cq2q104*q22)
+               + q11*(_cq2q101*q20 - _cq2q102*q21 - _cq2q103*q22 - _cq2q104*q23)
+               - q12*(-_cq2q101*q23 + _cq2q102*q22 - _cq2q103*q21 - _cq2q104*q20)
+               + q13*(-_cq2q101*q22 - _cq2q102*q23 - _cq2q103*q20 + _cq2q104*q21))
+    + _A1y*(q10*(-_cq2q101*q22 - _cq2q102*q23 - _cq2q103*q20 + _cq2q104*q21)
+            + q11*(-_cq2q101*q23 + _cq2q102*q22 - _cq2q103*q21 - _cq2q104*q20)
+            + q12*(_cq2q101*q20 - _cq2q102*q21 - _cq2q103*q22 - _cq2q104*q23)
+            - q13*(-_cq2q101*q21 - _cq2q102*q20 + _cq2q103*q23 - _cq2q104*q22))
+    + _A1z*(q10*(-_cq2q101*q23 + _cq2q102*q22 - _cq2q103*q21 - _cq2q104*q20)
+            - q11*(-_cq2q101*q22 - _cq2q102*q23 - _cq2q103*q20 + _cq2q104*q21)
+            + q12*(-_cq2q101*q21 - _cq2q102*q20 + _cq2q103*q23 - _cq2q104*q22)
+            + q13*(_cq2q101*q20 - _cq2q102*q21 - _cq2q103*q22 - _cq2q104*q23));
 }
 
 double PivotJointR::AscalA2(double q10, double q11, double q12, double q13, double q20, double q21, double q22, double q23)
@@ -329,21 +329,21 @@ double PivotJointR::AscalA2(double q10, double q11, double q12, double q13, doub
    * (taking into account original difference in orientation q2to1).
    *
    * sympy expression:
-   * AscalA2 = np.dot(A2,qmul(qinv(qmul(q2,q2to1)),q1)) - initial_AscalA2
+   * AscalA2 = np.dot(A2,qmul(qinv(qmul(q2,cq2q10)),q1)) - initial_AscalA2
    */
 
-  return _A2x*(q10*(-_q2to1w*q21 - _q2to1x*q20 + _q2to1y*q23 - _q2to1z*q22)
-               + q11*(_q2to1w*q20 - _q2to1x*q21 - _q2to1y*q22 - _q2to1z*q23)
-               - q12*(-_q2to1w*q23 + _q2to1x*q22 - _q2to1y*q21 - _q2to1z*q20)
-               + q13*(-_q2to1w*q22 - _q2to1x*q23 - _q2to1y*q20 + _q2to1z*q21))
-    + _A2y*(q10*(-_q2to1w*q22 - _q2to1x*q23 - _q2to1y*q20 + _q2to1z*q21)
-            + q11*(-_q2to1w*q23 + _q2to1x*q22 - _q2to1y*q21 - _q2to1z*q20)
-            + q12*(_q2to1w*q20 - _q2to1x*q21 - _q2to1y*q22 - _q2to1z*q23)
-            - q13*(-_q2to1w*q21 - _q2to1x*q20 + _q2to1y*q23 - _q2to1z*q22))
-    + _A2z*(q10*(-_q2to1w*q23 + _q2to1x*q22 - _q2to1y*q21 - _q2to1z*q20)
-            - q11*(-_q2to1w*q22 - _q2to1x*q23 - _q2to1y*q20 + _q2to1z*q21)
-            + q12*(-_q2to1w*q21 - _q2to1x*q20 + _q2to1y*q23 - _q2to1z*q22)
-            + q13*(_q2to1w*q20 - _q2to1x*q21 - _q2to1y*q22 - _q2to1z*q23));
+  return _A2x*(q10*(-_cq2q101*q21 - _cq2q102*q20 + _cq2q103*q23 - _cq2q104*q22)
+               + q11*(_cq2q101*q20 - _cq2q102*q21 - _cq2q103*q22 - _cq2q104*q23)
+               - q12*(-_cq2q101*q23 + _cq2q102*q22 - _cq2q103*q21 - _cq2q104*q20)
+               + q13*(-_cq2q101*q22 - _cq2q102*q23 - _cq2q103*q20 + _cq2q104*q21))
+    + _A2y*(q10*(-_cq2q101*q22 - _cq2q102*q23 - _cq2q103*q20 + _cq2q104*q21)
+            + q11*(-_cq2q101*q23 + _cq2q102*q22 - _cq2q103*q21 - _cq2q104*q20)
+            + q12*(_cq2q101*q20 - _cq2q102*q21 - _cq2q103*q22 - _cq2q104*q23)
+            - q13*(-_cq2q101*q21 - _cq2q102*q20 + _cq2q103*q23 - _cq2q104*q22))
+    + _A2z*(q10*(-_cq2q101*q23 + _cq2q102*q22 - _cq2q103*q21 - _cq2q104*q20)
+            - q11*(-_cq2q101*q22 - _cq2q102*q23 - _cq2q103*q20 + _cq2q104*q21)
+            + q12*(-_cq2q101*q21 - _cq2q102*q20 + _cq2q103*q23 - _cq2q104*q22)
+            + q13*(_cq2q101*q20 - _cq2q102*q21 - _cq2q103*q22 - _cq2q104*q23));
 }
 
 void PivotJointR::computeh(double time, BlockVector& q0, SiconosVector& y)
