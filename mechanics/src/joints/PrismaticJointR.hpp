@@ -134,8 +134,7 @@ public:
   void Jd1d2(double X1, double Y1, double Z1, double q10, double q11, double q12, double q13,
              double X2, double Y2, double Z2, double q20, double q21, double q22, double q23);
 
-  void Jd2(double X1, double Y1, double Z1, double q10, double q11, double q12, double q13,
-           double X2, double Y2, double Z2, double q20, double q21, double q22, double q23);
+  void Jd1(double X1, double Y1, double Z1, double q10, double q11, double q12, double q13);
 
   void DotJd1d2(double Xdot1, double Ydot1, double Zdot1, double qdot10, double qdot11, double qdot12, double qdot13,
                 double Xdot2, double Ydot2, double Zdot2, double qdot20, double qdot21, double qdot22, double qdot23);
