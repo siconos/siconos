@@ -1243,6 +1243,8 @@ class Hdf5():
 
             joint_type = self.joints()[name].attrs['type']
             joint_class = getattr(joints, joint_type)
+            absolute = self.joints()[name].attrs.get('absolute', None)
+            absolute = [[True if absolute else False], []][absolute is None]
 
             ds1_name = self.joints()[name].attrs['object1']
             ds1 = topo.getDynamicalSystem(ds1_name)
@@ -1252,21 +1254,24 @@ class Hdf5():
                 ds2_name = self.joints()[name].attrs['object2']
                 ds2 = topo.getDynamicalSystem(ds2_name)
                 try:
-                    joint = joint_class(ds1,
-                                        ds2,
+                    joint = joint_class(ds1, ds2,
                                         self.joints()[name].attrs['pivot_point'],
-                                        self.joints()[name].attrs['axis'])
+                                        self.joints()[name].attrs['axis'],
+                                        *absolute)
                 except NotImplementedError:
                     joint = joint_class(ds1, ds2,
-                                        self.joints()[name].attrs['pivot_point'])
+                                        self.joints()[name].attrs['pivot_point'],
+                                        *absolute)
 
             else:
                 try:
                     joint = joint_class(ds1,
                                         self.joints()[name].attrs['pivot_point'],
-                                        self.joints()[name].attrs['axis'])
+                                        self.joints()[name].attrs['axis'],
+                                        *absolute)
                 except NotImplementedError:
-                    joint = joint_class(ds1, self.joints()[name].attrs['pivot_point'])
+                    joint = joint_class(ds1, self.joints()[name].attrs['pivot_point'],
+                                        *absolute)
 
             joint_nslaw = EqualityConditionNSL(joint.numberOfConstraints())
             joint_inter = Interaction(joint_nslaw, joint)
@@ -2132,8 +2137,7 @@ class Hdf5():
             nslaw.attrs['gid2']=collision_group2
 
     def addJoint(self, name, object1, object2=None, pivot_point=[0, 0, 0],
-                 axis=[0, 1, 0],
-                 joint_class='PivotJointR'):
+                 axis=[0, 1, 0], joint_class='PivotJointR', absolute=None):
         """
         add a joint between two objects
         """
@@ -2145,6 +2149,8 @@ class Hdf5():
             joint.attrs['type']=joint_class
             joint.attrs['pivot_point']=pivot_point
             joint.attrs['axis']=axis
+            if absolute is True or absolute is False:
+                joint.attrs['absolute']=absolute
 
     def addBoundaryCondition(self, name, object1, indices=None, bc_class='HarmonicBC',
                              v=None, a=None, b=None, omega=None, phi=None):

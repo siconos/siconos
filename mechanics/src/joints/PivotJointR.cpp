@@ -88,8 +88,25 @@ PivotJointR::PivotJointR(SP::NewtonEulerDS d1, SP::NewtonEulerDS d2, SP::Siconos
 */
 PivotJointR::PivotJointR(SP::NewtonEulerDS d1, SP::SiconosVector P0, SP::SiconosVector A, bool absolutRef): KneeJointR(d1, P0, absolutRef)
 {
+  ::boost::math::quaternion<double> q1((*d1->q())(3), (*d1->q())(4),
+                                       (*d1->q())(5), (*d1->q())(6));
+  ::boost::math::quaternion<double> cq2q10(q1);
+
+  _cq2q101 = cq2q10.R_component_1();
+  _cq2q102 = cq2q10.R_component_2();
+  _cq2q103 = cq2q10.R_component_3();
+  _cq2q104 = cq2q10.R_component_4();
+
   _A.reset( new SiconosVector(*A) );
   buildA1A2();
+
+  _initial_AscalA1 = AscalA1((*d1->q())(3), (*d1->q())(4),
+                             (*d1->q())(5), (*d1->q())(6),
+                             1, 0, 0, 0);
+
+  _initial_AscalA2 = AscalA2((*d1->q())(3), (*d1->q())(4),
+                             (*d1->q())(5), (*d1->q())(6),
+                             1, 0, 0, 0);
 }
 
 void PivotJointR::initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
@@ -126,23 +143,6 @@ void PivotJointR::buildA1A2()
 void PivotJointR::Jd1d2(double X1, double Y1, double Z1, double q10, double q11, double q12, double q13, double X2, double Y2, double Z2, double q20, double q21, double q22, double q23)
 {
   KneeJointR::Jd1d2(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23);
-
-  ::boost::math::quaternion<double> quat2to1_inv(_cq2q101,-_cq2q102,-_cq2q103,-_cq2q104);
-  ::boost::math::quaternion<double> quat1_inv(q10,-q11,-q12,-q13);
-  ::boost::math::quaternion<double> quat2_inv(q20,-q21,-q22,-q23);
-  ::boost::math::quaternion<double> quatBuff;
-
-  quatBuff = quat2to1_inv * quat1_inv;
-  double a10 = quatBuff.R_component_1();
-  double a11 = quatBuff.R_component_2();
-  double a12 = quatBuff.R_component_3();
-  double a13 = quatBuff.R_component_4();
-
-  quatBuff = quat2to1_inv * quat2_inv;
-  double a20 = quatBuff.R_component_1();
-  double a21 = quatBuff.R_component_2();
-  double a22 = quatBuff.R_component_3();
-  double a23 = quatBuff.R_component_4();
 
   _jachq->setValue(3, 0, 0);
   _jachq->setValue(3, 1, 0);
@@ -265,18 +265,48 @@ void PivotJointR::Jd1(double X1, double Y1, double Z1, double q10, double q11, d
   _jachq->setValue(3, 0, 0);
   _jachq->setValue(3, 1, 0);
   _jachq->setValue(3, 2, 0);
-  _jachq->setValue(3, 3, 0);
-  _jachq->setValue(3, 4, _A1x);
-  _jachq->setValue(3, 5, _A1y);
-  _jachq->setValue(3, 6, _A1z);
+
+  // sympy expression: [AscalA1.diff(x) for x in q1]
+  _jachq->setValue(3, 3,
+                   _A1x*(- _cq2q102)
+                   + _A1y*(- _cq2q103)
+                   + _A1z*(- _cq2q104));
+  _jachq->setValue(3, 4,
+                   _A1x*(_cq2q101)
+                   + _A1y*(- _cq2q104)
+                   + _A1z*(_cq2q103));
+  _jachq->setValue(3, 5,
+                   _A1x*(_cq2q104)
+                   + _A1y*(_cq2q101)
+                   + _A1z*(- _cq2q102));
+  _jachq->setValue(3, 6,
+                   _A1x*(- _cq2q103)
+                   + _A1y*(_cq2q102)
+                   + _A1z*(_cq2q101));
+
 
   _jachq->setValue(4, 0, 0);
   _jachq->setValue(4, 1, 0);
   _jachq->setValue(4, 2, 0);
-  _jachq->setValue(4, 3, 0);
-  _jachq->setValue(4, 4, _A2x);
-  _jachq->setValue(4, 5, _A2y);
-  _jachq->setValue(4, 6, _A2z);
+
+  // sympy expression: [AscalA2.diff(x) for x in q1]
+  _jachq->setValue(4, 3,
+                   _A2x*(- _cq2q102)
+                   + _A2y*(- _cq2q103)
+                   + _A2z*(- _cq2q104));
+  _jachq->setValue(4, 4,
+                   _A2x*(_cq2q101)
+                   + _A2y*(- _cq2q104)
+                   + _A2z*(_cq2q103));
+  _jachq->setValue(4, 5,
+                   _A2x*(_cq2q104)
+                   + _A2y*(_cq2q101)
+                   + _A2z*(- _cq2q102));
+  _jachq->setValue(4, 6,
+                   _A2x*(- _cq2q103)
+                   + _A2y*(_cq2q102)
+                   + _A2z*(_cq2q101));
+
   /*proj_with_q
       for (unsigned int ii=0; ii <_jachq->size(0); ii++)
         for (unsigned int jj=0; jj <_jachq->size(1); jj++)

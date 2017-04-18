@@ -65,11 +65,15 @@ public:
                                   ie P contains the coordinates of the Knee point, in the object frame G1.
   */
   KneeJointR(SP::NewtonEulerDS d1, SP::NewtonEulerDS d2, SP::SiconosVector P);
+
   /* constructor,
      \param a SP::NewtonEulerDS d1, a dynamical system containing the intial position
-     \param a SP::SiconosVector P, P contains the coordinates of the Knee point, in the absolute frame.
+     \param a SP::SiconosVector P, P contains the coordinates of the Knee point
+     \param bool indicating whether P is in the absolute frame (=true, default)
+            default) or the frame of the DS (=false)
   */
-  KneeJointR(SP::NewtonEulerDS d1, SP::SiconosVector P0, bool absolutRef = true);
+  KneeJointR(SP::NewtonEulerDS d1, SP::SiconosVector P, bool absoluteRef = true);
+
   /** destructor
    */
   void checkInitPos(SP::SiconosVector q1, SP::SiconosVector q2);

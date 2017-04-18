@@ -148,11 +148,12 @@ KneeJointR::KneeJointR(SP::NewtonEulerDS d1, SP::NewtonEulerDS d2, SP::SiconosVe
 
 
 }
+
 /* constructor,
    \param a SP::NewtonEulerDS d1, a dynamical system containing the intial position
-   \param a SP::SiconosVector P0, if (absolutRef) P0 contains the coordinates of the Knee point, in the absolute frame, when d1 is located in the initial position.
-   else P0 contains the coordinates of the Knee point, in the frame of d1,
-   ie P0 in the frame of the object, ie G1P0 in the obsolut frame with d1->q=(x,y,z,1,0,0,0).
+   \param a SP::SiconosVector P, P contains the coordinates of the Knee point
+   \param bool indicating whether P is in the absolute frame (=true, default)
+   default) or the frame of the DS (=false) with orientation (1,0,0,0)
 */
 KneeJointR::KneeJointR(SP::NewtonEulerDS d1, SP::SiconosVector P0, bool absolutRef): NewtonEulerR()
 {
