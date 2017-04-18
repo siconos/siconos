@@ -33,15 +33,15 @@
 
 /*
  * This file contains some code generated using sympy.  The following
- * is the necessary predule:
+ * is the necessary prelude:
  *
  * from sympy import Symbol
  * import numpy as np
  *
  * q1 = np.array([Symbol('q10'), Symbol('q11'), Symbol('q12'), Symbol('q13')])
  * q2 = np.array([Symbol('q20'), Symbol('q21'), Symbol('q22'), Symbol('q23')])
- * q2to1 = np.array([Symbol('_q2to1w'),Symbol('_q2to1x'),
- *                   Symbol('_q2to1y'),Symbol('_q2to1z')])
+ * cq2q10 = np.array([Symbol('_cq2q101'),Symbol('_cq2q102'),
+ *                    Symbol('_cq2q103'),Symbol('_cq2q104')])
  * G10G20d1 = np.array([0, Symbol('_G10G20d1x'),
  *                      Symbol('_G10G20d1y'), Symbol('_G10G20d1z')])
  * G1 = np.array([0, Symbol('X1'), Symbol('Y1'), Symbol('Z1')])
@@ -58,29 +58,6 @@
  *
  * unrot = lambda V,q: qmul(qinv(q), qmul(V, q))
  * rot = lambda V,q: qmul(q, qmul(V, qinv(q)))
- *
- * G1G2d1 = unrot(G2-G1, q1)
- *
- * H  = lambda V: np.dot(V, G1G2d1)
- * H0 = lambda V: np.dot(V, G10G20d1)
- *
- * H1 = H(V1) - H0(V1)
- * H2 = H(V2) - H0(V2)
- *
- * jachqH1H2 = [[H1.diff(G1[1]), H1.diff(G1[2]), H1.diff(G1[3]),
- *           H1.diff(q1[0]), H1.diff(q1[1]), H1.diff(q1[2]), H1.diff(q1[3]),
- *           H1.diff(G2[1]), H1.diff(G2[2]), H1.diff(G2[3]),
- *           H1.diff(q2[0]), H1.diff(q2[1]), H1.diff(q2[2]), H1.diff(q2[3])],
- *          [H2.diff(G1[1]), H2.diff(G1[2]), H2.diff(G1[3]),
- *           H2.diff(q1[0]), H2.diff(q1[1]), H2.diff(q1[2]), H2.diff(q1[3]),
- *           H2.diff(G2[1]), H2.diff(G2[2]), H2.diff(G2[3]),
- *           H2.diff(q2[0]), H2.diff(q2[1]), H2.diff(q2[2]), H2.diff(q2[3])]]
- *
- * q1cq2 = qmul(q1,qinv(qmul(q2,q2to1)))
- *
- * H3 = q1cq2[1]
- * H4 = q1cq2[2]
- * H5 = q1cq2[3]
  */
 
 /**axe is the axis of the prismatic joint, in the frame of the first DS, d1.*/
@@ -103,9 +80,10 @@ void PrismaticJointR::displayInitialPosition()
   std::cout << "V1 :" << _V1x << " " << _V1y << " " << _V1z << "\n";
   std::cout << "V2 :" << _V2x << " " << _V2y << " " << _V2z << "\n";
   std::cout << "G10G20d1 :" << _G10G20d1x << " " << _G10G20d1y << " " << _G10G20d1z << "\n";
-  std::cout << "q1cq2 :" << _q1cq201 << " " << _q1cq202 << " " << _q1cq203 << " " << _q1cq204 << "\n";
-
+  std::cout << "cq2c10 :" << _cq2q101 << " " << _cq2q102
+            << " " << _cq2q103 << " " << _cq2q104 << "\n";
 }
+
 void PrismaticJointR::computeFromInitialPosition(SP::SiconosVector q1, SP::SiconosVector q2)
 {
   computeV1V2FromAxis();
@@ -125,11 +103,11 @@ void PrismaticJointR::computeFromInitialPosition(SP::SiconosVector q1, SP::Sicon
   _G10G20d1x = quatBuff.R_component_2();
   _G10G20d1y = quatBuff.R_component_3();
   _G10G20d1z = quatBuff.R_component_4();
-  quatBuff = quat1 / quat2;
-  _q1cq201 = quatBuff.R_component_1();
-  _q1cq202 = quatBuff.R_component_2();
-  _q1cq203 = quatBuff.R_component_3();
-  _q1cq204 = quatBuff.R_component_4();
+  quatBuff = 1.0/quat2 * quat1;
+  _cq2q101 = quatBuff.R_component_1();
+  _cq2q102 = quatBuff.R_component_2();
+  _cq2q103 = quatBuff.R_component_3();
+  _cq2q104 = quatBuff.R_component_4();
   //  displayInitialPosition();
 }
 
@@ -314,38 +292,38 @@ double PrismaticJointR::H2(double X1, double Y1, double Z1, double q10, double q
 
 /* sympy expression:
  *
- * q1cq2 = qmul(q1,qinv(qmul(q2,q2to1)))
+ * q2to1 = qmul(q1,qinv(qmul(q2,cq2q10)))
  *
- * H3 = q1cq2[1]
- * H4 = q1cq2[2]
- * H5 = q1cq2[3]
+ * H3 = q2to1[1]
+ * H4 = q2to1[2]
+ * H5 = q2to1[3]
  */
 
 /* The options were    : operatorarrow */
 double PrismaticJointR::H3(double X1, double Y1, double Z1, double q10, double q11, double q12, double q13, double X2, double Y2, double Z2, double q20, double q21, double q22, double q23)
 {
-  {
-    return q10*(-_q1cq201*q21 - _q1cq202*q20 + _q1cq203*q23 - _q1cq204*q22)
-      + q11*(_q1cq201*q20 - _q1cq202*q21 - _q1cq203*q22 - _q1cq204*q23)
-      + q12*(-_q1cq201*q23 + _q1cq202*q22 - _q1cq203*q21 - _q1cq204*q20)
-      - q13*(-_q1cq201*q22 - _q1cq202*q23 - _q1cq203*q20 + _q1cq204*q21);
-  }
+  return q10*(-_cq2q101*q21 - _cq2q102*q20 + _cq2q103*q23 - _cq2q104*q22)
+    + q11*(_cq2q101*q20 - _cq2q102*q21 - _cq2q103*q22 - _cq2q104*q23)
+    + q12*(-_cq2q101*q23 + _cq2q102*q22 - _cq2q103*q21 - _cq2q104*q20)
+    - q13*(-_cq2q101*q22 - _cq2q102*q23 - _cq2q103*q20 + _cq2q104*q21);
 }
 
 /* The options were    : operatorarrow */
 double PrismaticJointR::H4(double X1, double Y1, double Z1, double q10, double q11, double q12, double q13, double X2, double Y2, double Z2, double q20, double q21, double q22, double q23)
 {
-  {
-    return q10*(-_q1cq201*q22 - _q1cq202*q23 - _q1cq203*q20 + _q1cq204*q21) - q11*(-_q1cq201*q23 + _q1cq202*q22 - _q1cq203*q21 - _q1cq204*q20) + q12*(_q1cq201*q20 - _q1cq202*q21 - _q1cq203*q22 - _q1cq204*q23) + q13*(-_q1cq201*q21 - _q1cq202*q20 + _q1cq203*q23 - _q1cq204*q22);
-  }
+  return q10*(-_cq2q101*q22 - _cq2q102*q23 - _cq2q103*q20 + _cq2q104*q21)
+    - q11*(-_cq2q101*q23 + _cq2q102*q22 - _cq2q103*q21 - _cq2q104*q20)
+    + q12*(_cq2q101*q20 - _cq2q102*q21 - _cq2q103*q22 - _cq2q104*q23)
+    + q13*(-_cq2q101*q21 - _cq2q102*q20 + _cq2q103*q23 - _cq2q104*q22);
 }
 
 /* The options were    : operatorarrow */
 double PrismaticJointR::H5(double X1, double Y1, double Z1, double q10, double q11, double q12, double q13, double X2, double Y2, double Z2, double q20, double q21, double q22, double q23)
 {
-  {
-    return q10*(-_q1cq201*q23 + _q1cq202*q22 - _q1cq203*q21 - _q1cq204*q20) + q11*(-_q1cq201*q22 - _q1cq202*q23 - _q1cq203*q20 + _q1cq204*q21) - q12*(-_q1cq201*q21 - _q1cq202*q20 + _q1cq203*q23 - _q1cq204*q22) + q13*(_q1cq201*q20 - _q1cq202*q21 - _q1cq203*q22 - _q1cq204*q23);
-  }
+  return q10*(-_cq2q101*q23 + _cq2q102*q22 - _cq2q103*q21 - _cq2q104*q20)
+    + q11*(-_cq2q101*q22 - _cq2q102*q23 - _cq2q103*q20 + _cq2q104*q21)
+    - q12*(-_cq2q101*q21 - _cq2q102*q20 + _cq2q103*q23 - _cq2q104*q22)
+    + q13*(_cq2q101*q20 - _cq2q102*q21 - _cq2q103*q22 - _cq2q104*q23);
 }
 
 void PrismaticJointR::Jd1d2(double X1, double Y1, double Z1, double q10, double q11, double q12, double q13, double X2, double Y2, double Z2, double q20, double q21, double q22, double q23)
@@ -452,45 +430,45 @@ void PrismaticJointR::Jd1d2(double X1, double Y1, double Z1, double q10, double 
   _jachq->setValue(2, 0, 0.0);
   _jachq->setValue(2, 1, 0.0);
   _jachq->setValue(2, 2, 0.0);
-  _jachq->setValue(2, 3, -_q1cq201*q21 - _q1cq202*q20 + _q1cq203*q23 - _q1cq204*q22);
-  _jachq->setValue(2, 4, _q1cq201*q20 - _q1cq202*q21 - _q1cq203*q22 - _q1cq204*q23);
-  _jachq->setValue(2, 5, -_q1cq201*q23 + _q1cq202*q22 - _q1cq203*q21 - _q1cq204*q20);
-  _jachq->setValue(2, 6, _q1cq201*q22 + _q1cq202*q23 + _q1cq203*q20 - _q1cq204*q21);
+  _jachq->setValue(2, 3, -_cq2q101*q21 - _cq2q102*q20 + _cq2q103*q23 - _cq2q104*q22);
+  _jachq->setValue(2, 4, _cq2q101*q20 - _cq2q102*q21 - _cq2q103*q22 - _cq2q104*q23);
+  _jachq->setValue(2, 5, -_cq2q101*q23 + _cq2q102*q22 - _cq2q103*q21 - _cq2q104*q20);
+  _jachq->setValue(2, 6, _cq2q101*q22 + _cq2q102*q23 + _cq2q103*q20 - _cq2q104*q21);
   _jachq->setValue(2, 7, 0.0);
   _jachq->setValue(2, 8, 0.0);
   _jachq->setValue(2, 9, 0.0);
-  _jachq->setValue(2, 10, _q1cq201*q11 - _q1cq202*q10 + _q1cq203*q13 - _q1cq204*q12);
-  _jachq->setValue(2, 11, -_q1cq201*q10 - _q1cq202*q11 - _q1cq203*q12 - _q1cq204*q13);
-  _jachq->setValue(2, 12, _q1cq201*q13 + _q1cq202*q12 - _q1cq203*q11 - _q1cq204*q10);
-  _jachq->setValue(2, 13, -_q1cq201*q12 + _q1cq202*q13 + _q1cq203*q10 - _q1cq204*q11);
+  _jachq->setValue(2, 10, _cq2q101*q11 - _cq2q102*q10 + _cq2q103*q13 - _cq2q104*q12);
+  _jachq->setValue(2, 11, -_cq2q101*q10 - _cq2q102*q11 - _cq2q103*q12 - _cq2q104*q13);
+  _jachq->setValue(2, 12, _cq2q101*q13 + _cq2q102*q12 - _cq2q103*q11 - _cq2q104*q10);
+  _jachq->setValue(2, 13, -_cq2q101*q12 + _cq2q102*q13 + _cq2q103*q10 - _cq2q104*q11);
   _jachq->setValue(3, 0, 0.0);
   _jachq->setValue(3, 1, 0.0);
   _jachq->setValue(3, 2, 0.0);
-  _jachq->setValue(3, 3, -_q1cq201*q22 - _q1cq202*q23 - _q1cq203*q20 + _q1cq204*q21);
-  _jachq->setValue(3, 4, _q1cq201*q23 - _q1cq202*q22 + _q1cq203*q21 + _q1cq204*q20);
-  _jachq->setValue(3, 5, _q1cq201*q20 - _q1cq202*q21 - _q1cq203*q22 - _q1cq204*q23);
-  _jachq->setValue(3, 6, -_q1cq201*q21 - _q1cq202*q20 + _q1cq203*q23 - _q1cq204*q22);
+  _jachq->setValue(3, 3, -_cq2q101*q22 - _cq2q102*q23 - _cq2q103*q20 + _cq2q104*q21);
+  _jachq->setValue(3, 4, _cq2q101*q23 - _cq2q102*q22 + _cq2q103*q21 + _cq2q104*q20);
+  _jachq->setValue(3, 5, _cq2q101*q20 - _cq2q102*q21 - _cq2q103*q22 - _cq2q104*q23);
+  _jachq->setValue(3, 6, -_cq2q101*q21 - _cq2q102*q20 + _cq2q103*q23 - _cq2q104*q22);
   _jachq->setValue(3, 7, 0.0);
   _jachq->setValue(3, 8, 0.0);
   _jachq->setValue(3, 9, 0.0);
-  _jachq->setValue(3, 10, _q1cq201*q12 - _q1cq202*q13 - _q1cq203*q10 + _q1cq204*q11);
-  _jachq->setValue(3, 11, -_q1cq201*q13 - _q1cq202*q12 + _q1cq203*q11 + _q1cq204*q10);
-  _jachq->setValue(3, 12, -_q1cq201*q10 - _q1cq202*q11 - _q1cq203*q12 - _q1cq204*q13);
-  _jachq->setValue(3, 13, _q1cq201*q11 - _q1cq202*q10 + _q1cq203*q13 - _q1cq204*q12);
+  _jachq->setValue(3, 10, _cq2q101*q12 - _cq2q102*q13 - _cq2q103*q10 + _cq2q104*q11);
+  _jachq->setValue(3, 11, -_cq2q101*q13 - _cq2q102*q12 + _cq2q103*q11 + _cq2q104*q10);
+  _jachq->setValue(3, 12, -_cq2q101*q10 - _cq2q102*q11 - _cq2q103*q12 - _cq2q104*q13);
+  _jachq->setValue(3, 13, _cq2q101*q11 - _cq2q102*q10 + _cq2q103*q13 - _cq2q104*q12);
   _jachq->setValue(4, 0, 0.0);
   _jachq->setValue(4, 1, 0.0);
   _jachq->setValue(4, 2, 0.0);
-  _jachq->setValue(4, 3, -_q1cq201*q23 + _q1cq202*q22 - _q1cq203*q21 - _q1cq204*q20);
-  _jachq->setValue(4, 4, -_q1cq201*q22 - _q1cq202*q23 - _q1cq203*q20 + _q1cq204*q21);
-  _jachq->setValue(4, 5, _q1cq201*q21 + _q1cq202*q20 - _q1cq203*q23 + _q1cq204*q22);
-  _jachq->setValue(4, 6, _q1cq201*q20 - _q1cq202*q21 - _q1cq203*q22 - _q1cq204*q23);
+  _jachq->setValue(4, 3, -_cq2q101*q23 + _cq2q102*q22 - _cq2q103*q21 - _cq2q104*q20);
+  _jachq->setValue(4, 4, -_cq2q101*q22 - _cq2q102*q23 - _cq2q103*q20 + _cq2q104*q21);
+  _jachq->setValue(4, 5, _cq2q101*q21 + _cq2q102*q20 - _cq2q103*q23 + _cq2q104*q22);
+  _jachq->setValue(4, 6, _cq2q101*q20 - _cq2q102*q21 - _cq2q103*q22 - _cq2q104*q23);
   _jachq->setValue(4, 7, 0.0);
   _jachq->setValue(4, 8, 0.0);
   _jachq->setValue(4, 9, 0.0);
-  _jachq->setValue(4, 10, _q1cq201*q13 + _q1cq202*q12 - _q1cq203*q11 - _q1cq204*q10);
-  _jachq->setValue(4, 11, _q1cq201*q12 - _q1cq202*q13 - _q1cq203*q10 + _q1cq204*q11);
-  _jachq->setValue(4, 12, -_q1cq201*q11 + _q1cq202*q10 - _q1cq203*q13 + _q1cq204*q12);
-  _jachq->setValue(4, 13, -_q1cq201*q10 - _q1cq202*q11 - _q1cq203*q12 - _q1cq204*q13);
+  _jachq->setValue(4, 10, _cq2q101*q13 + _cq2q102*q12 - _cq2q103*q11 - _cq2q104*q10);
+  _jachq->setValue(4, 11, _cq2q101*q12 - _cq2q102*q13 - _cq2q103*q10 + _cq2q104*q11);
+  _jachq->setValue(4, 12, -_cq2q101*q11 + _cq2q102*q10 - _cq2q103*q13 + _cq2q104*q12);
+  _jachq->setValue(4, 13, -_cq2q101*q10 - _cq2q102*q11 - _cq2q103*q12 - _cq2q104*q13);
 }
 
 void PrismaticJointR::Jd2(double X1, double Y1, double Z1, double q10, double q11, double q12, double q13, double X2, double Y2, double Z2, double q20, double q21, double q22, double q23)

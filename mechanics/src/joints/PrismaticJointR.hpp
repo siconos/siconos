@@ -74,10 +74,10 @@ public:
   double _G10G20d1y;
   double _G10G20d1z;
 
-  double _q1cq201;
-  double _q1cq202;
-  double _q1cq203;
-  double _q1cq204;
+  double _cq2q101;
+  double _cq2q102;
+  double _cq2q103;
+  double _cq2q104;
 
   /** constructor from two dynamical systems and an axis
    *  \param d1 first  DynamicalSystem link by the  joint
