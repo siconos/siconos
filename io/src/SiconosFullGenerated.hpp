@@ -24,6 +24,7 @@
 #include "KneeJointR.hpp"
 #include "PivotJointR.hpp"
 #include "PrismaticJointR.hpp"
+#include "FixedJointR.hpp"
 #include "BodyDS.hpp"
 #include "SiconosShape.hpp"
 #include "SiconosCollisionManager.hpp"
@@ -686,6 +687,14 @@ SICONOS_IO_REGISTER_WITH_BASES(ExternalBody,(LagrangianDS),
 )
 SICONOS_IO_REGISTER_WITH_BASES(Circle,(CircularDS),
 )
+SICONOS_IO_REGISTER_WITH_BASES(FixedJointR,(NewtonEulerR),
+  (_G10G20d1x)
+  (_G10G20d1y)
+  (_G10G20d1z)
+  (_cq2q101)
+  (_cq2q102)
+  (_cq2q103)
+  (_cq2q104))
 SICONOS_IO_REGISTER_WITH_BASES(KneeJointR,(NewtonEulerR),
   (_G1P0x)
   (_G1P0y)
@@ -1072,6 +1081,7 @@ void siconos_io_register_generated(Archive& ar)
   ar.register_type(static_cast<SphereLDSSphereLDSR*>(NULL));
   ar.register_type(static_cast<SphereNEDSSphereNEDSR*>(NULL));
   ar.register_type(static_cast<Circle*>(NULL));
+  ar.register_type(static_cast<FixedJointR*>(NULL));
   ar.register_type(static_cast<KneeJointR*>(NULL));
   ar.register_type(static_cast<SphereLDS*>(NULL));
   ar.register_type(static_cast<SphereNEDSPlanR*>(NULL));

@@ -26,7 +26,9 @@ input_headers = {
                   "SiconosBodies.hpp",
                   "CircleCircleR.hpp", "CircularDS.hpp",
                   "KneeJointR.hpp", "PivotJointR.hpp",
-                  "PrismaticJointR.hpp", "BodyDS.hpp", "SiconosShape.hpp",
+                  "PrismaticJointR.hpp",
+                  "FixedJointR.hpp",
+                  "BodyDS.hpp", "SiconosShape.hpp",
                   "SiconosCollisionManager.hpp"],
 
     # fix missing forwards for Control

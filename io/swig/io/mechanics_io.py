@@ -1259,9 +1259,12 @@ class Hdf5():
                                         self.joints()[name].attrs['axis'],
                                         *absolute)
                 except NotImplementedError:
-                    joint = joint_class(ds1, ds2,
-                                        self.joints()[name].attrs['pivot_point'],
-                                        *absolute)
+                    try:
+                        joint = joint_class(ds1, ds2,
+                                            self.joints()[name].attrs['pivot_point'],
+                                            *absolute)
+                    except NotImplementedError:
+                        joint = joint_class(ds1, ds2, *absolute)
 
             else:
                 try:
@@ -1270,8 +1273,12 @@ class Hdf5():
                                         self.joints()[name].attrs['axis'],
                                         *absolute)
                 except NotImplementedError:
-                    joint = joint_class(ds1, self.joints()[name].attrs['pivot_point'],
-                                        *absolute)
+                    try:
+                        joint = joint_class(ds1,
+                                            self.joints()[name].attrs['pivot_point'],
+                                            *absolute)
+                    except NotImplementedError:
+                        joint = joint_class(ds1, *absolute)
 
             joint_nslaw = EqualityConditionNSL(joint.numberOfConstraints())
             joint_inter = Interaction(joint_nslaw, joint)
