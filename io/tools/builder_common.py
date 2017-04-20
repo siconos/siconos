@@ -28,6 +28,7 @@ input_headers = {
                   "KneeJointR.hpp", "PivotJointR.hpp",
                   "PrismaticJointR.hpp",
                   "FixedJointR.hpp",
+                  "CylindricalJointR.hpp",
                   "BodyDS.hpp", "SiconosShape.hpp",
                   "SiconosCollisionManager.hpp"],
 

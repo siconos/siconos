@@ -25,6 +25,7 @@
 #include "PivotJointR.hpp"
 #include "PrismaticJointR.hpp"
 #include "FixedJointR.hpp"
+#include "CylindricalJointR.hpp"
 #include "BodyDS.hpp"
 #include "SiconosShape.hpp"
 #include "SiconosCollisionManager.hpp"
@@ -777,6 +778,24 @@ SICONOS_IO_REGISTER(SiconosShape,
   (_inside_margin)
   (_outside_margin)
   (_version))
+SICONOS_IO_REGISTER_WITH_BASES(CylindricalJointR,(NewtonEulerR),
+  (_G10G20d1x)
+  (_G10G20d1y)
+  (_G10G20d1z)
+  (_P)
+  (_V1)
+  (_V1x)
+  (_V1y)
+  (_V1z)
+  (_V2)
+  (_V2x)
+  (_V2y)
+  (_V2z)
+  (_axis0)
+  (_cq2q101)
+  (_cq2q102)
+  (_cq2q103)
+  (_cq2q104))
 SICONOS_IO_REGISTER(FMatrix,
 )
 SICONOS_IO_REGISTER_WITH_BASES(PrismaticJointR,(NewtonEulerR),
@@ -1094,6 +1113,7 @@ void siconos_io_register_generated(Archive& ar)
   ar.register_type(static_cast<BodyDS*>(NULL));
   ar.register_type(static_cast<CircularDS*>(NULL));
   ar.register_type(static_cast<SiconosShape*>(NULL));
+  ar.register_type(static_cast<CylindricalJointR*>(NULL));
   ar.register_type(static_cast<FMatrix*>(NULL));
   ar.register_type(static_cast<PrismaticJointR*>(NULL));
   ar.register_type(static_cast<SiconosContactor*>(NULL));
