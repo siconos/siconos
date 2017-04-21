@@ -59,29 +59,18 @@ public:
    */
   SP::SiconosVector _V2;
 
-  /** _P is the point defining the location of the line created by
-   * _axis0.  It is stored in the q1 frame. */
-  SP::SiconosVector _P;
-
-  /** Convenient storage of the components of _V1 and _V2
-   */
-  double _V1x;
-  double _V1y;
-  double _V1z;
-  double _V2x;
-  double _V2y;
-  double _V2z;
-
-  /**
-   */
-  double _G10G20d1x;
-  double _G10G20d1y;
-  double _G10G20d1z;
-
   double _cq2q101;
   double _cq2q102;
   double _cq2q103;
   double _cq2q104;
+
+  /** P is the point defining the location of the line created by
+   * _axis0.  It is stored in the q1 frame, i.e. the vector from
+   * initial G1 to P, called _G1P0. */
+  SP::SiconosVector _G1P0;
+
+  /** _G2P0 is the vector from initial G1 to P */
+  SP::SiconosVector _G2P0;
 
   /** constructor from two dynamical systems and an axis
    *  \param d1 first  DynamicalSystem link by the  joint
@@ -90,7 +79,8 @@ public:
    *           in the body frame of d1
    */
   CylindricalJointR(SP::NewtonEulerDS d1, SP::NewtonEulerDS d2,
-                    SP::SiconosVector A);
+                    SP::SiconosVector P, SP::SiconosVector A,
+                    bool absoluteRef = false);
 
   /** constructor from one dynamical systems and an axis
    *  \param d1 the  DynamicalSystem link by the  joint
@@ -117,22 +107,6 @@ public:
   virtual void computeJachq(double time, Interaction& inter, SP::BlockVector q0 );
 
   virtual void computeh(double time, BlockVector& q0, SiconosVector& y);
-
-  double H1(
-    double X1, double Y1, double Z1, double q10, double q11, double q12, double q13,
-    double X2, double Y2, double Z2, double q20, double q21, double q22, double q23);
-
-  double H2(
-    double X1, double Y1, double Z1, double q10, double q11, double q12, double q13,
-    double X2, double Y2, double Z2, double q20, double q21, double q22, double q23);
-
-  double H3(
-    double X1, double Y1, double Z1, double q10, double q11, double q12, double q13,
-    double X2, double Y2, double Z2, double q20, double q21, double q22, double q23);
-
-  double H4(
-    double X1, double Y1, double Z1, double q10, double q11, double q12, double q13,
-    double X2, double Y2, double Z2, double q20, double q21, double q22, double q23);
 
   void Jd1d2(
     double X1, double Y1, double Z1, double q10, double q11, double q12, double q13,
