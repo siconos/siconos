@@ -138,7 +138,6 @@ void MLCP::computeDiagonalInteractionBlock(const InteractionsGraph::VDescriptor&
 
 bool MLCP::preCompute(double time)
 {
-  _hasBeenUpdated=false;
   bool res = LinearOSNS::preCompute(time);
   _numerics_problem.n = _n;
   _numerics_problem.m = _m;
