@@ -2205,6 +2205,9 @@ class Hdf5():
             solver=Numerics.SICONOS_FRICTION_3D_NSGS,
             itermax=100000,
             tolerance=1e-8,
+            projection_itermax=20,
+            projection_tolerance=1e-8,
+            projection_tolerance_unilateral=1e-8,
             numerics_verbose=False,
             violation_verbose=False,
             output_frequency=None,
@@ -2356,14 +2359,17 @@ class Hdf5():
         # (6) Simulation setup with (1) (2) (3) (4) (5)
         if time_stepping == Kernel.TimeSteppingDirectProjection:
             osnspb_pos=Kernel.MLCPProjectOnConstraints(Numerics.SICONOS_MLCP_ENUM, 1.0)
+            so_pos = osnspb.numericsSolverOptions()
+            so_pos.iparam[0]=itermax
+            so_pos.dparam[0]=tolerance
             osnspb_pos.setMaxSize(30000)
             osnspb_pos.setMStorageType(0) # "not yet implemented for sparse storage"
             osnspb_pos.setNumericsVerboseMode(numerics_verbose)
             osnspb_pos.setKeepLambdaAndYState(True)
             simulation=time_stepping(timedisc, self._osi, osnspb, osnspb_pos)
-            simulation.setProjectionMaxIteration(20)
-            simulation.setConstraintTolUnilateral(1e-08);
-            simulation.setConstraintTol(1e-08);
+            simulation.setProjectionMaxIteration(projection_itermax)
+            simulation.setConstraintTolUnilateral(projection_tolerance_unilateral);
+            simulation.setConstraintTol(projection_tolerance);
         else:
             simulation=time_stepping(timedisc)
             simulation.insertIntegrator(self._osi)

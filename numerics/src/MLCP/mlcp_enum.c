@@ -207,6 +207,7 @@ void mlcp_enum(MixedLinearComplementarityProblem* problem, double *z, double *w,
   sU = z;
   sV = z + problem->n;
   tol = options->dparam[0];
+  int itermax = options->iparam[0];
 
   sMref = problem->M->matrix0;
   /*  LWORK = 2*npm; LWORK >= max( 1, MN + max( MN, NRHS ) ) where MN = min(M,N)*/
@@ -236,7 +237,7 @@ void mlcp_enum(MixedLinearComplementarityProblem* problem, double *z, double *w,
   ipiv = sW2V + sMm;
 
   initEnum(problem->m);
-  while (nextEnum(sW2V))
+  while (nextEnum(sW2V) && itermax-- > 0)
   {
     mlcp_buildM(sW2V, sM, sMref, sNn, sMm, sMl);
     buildQ();
@@ -377,6 +378,7 @@ void mlcp_enum_Block(MixedLinearComplementarityProblem* problem, double *z, doub
   /*sW2=w+(sMl-problem->m); sW2 size :m */
   sU = z;
   tol = options->dparam[0];
+  int itermax = options->iparam[0];
 
   sMref = problem->M->matrix0;
   /*  LWORK = 2*npm; LWORK >= max( 1, MN + max( MN, NRHS ) ) where MN = min(M,N)*/
@@ -411,7 +413,7 @@ void mlcp_enum_Block(MixedLinearComplementarityProblem* problem, double *z, doub
   *info = 0;
   mlcp_buildIndexInBlock(problem, indexInBlock);
   initEnum(problem->m);
-  while (nextEnum(sW2V))
+  while (nextEnum(sW2V) && itermax-- > 0)
   {
     mlcp_buildM_Block(sW2V, sM, sMref, sNn, sMm, sMl, indexInBlock);
     buildQ();

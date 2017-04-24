@@ -471,15 +471,6 @@ void   TimeStepping::prepareNewtonIteration()
       inter->relation()->prepareNewtonIteration(*inter, interProp);
     }
   }
-
-  bool topoHasChanged = _nsds->topology()->hasChanged();
-  if (topoHasChanged)
-  {
-    for (OSNSIterator itOsns = _allNSProblems->begin(); itOsns != _allNSProblems->end(); ++itOsns)
-    {
-      (*itOsns)->setHasBeenUpdated(false);
-    }
-  }
   DEBUG_END("TimeStepping::prepareNewtonIteration()\n");
 }
 

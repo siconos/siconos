@@ -214,7 +214,6 @@ void TimeSteppingDirectProjection::advanceToEvent()
     if (info)
     {
       std::cout << " TimeSteppingDirectProjection::advanceToEvent() project on constraints. solver failed." <<std::endl ;
-      return;
     }
     _nsds->updateInput(nextTime(),0);
 
@@ -365,7 +364,6 @@ void TimeSteppingDirectProjection::advanceToEvent()
     std::cout << "TimeSteppingDirectProjection::advanceToEvent() Max number of projection iterations reached (" << _nbProjectionIteration << ")"  <<std::endl ;
     printf("              max criteria equality =  %e.\n", _maxViolationEquality);
     printf("              max criteria unilateral =  %e.\n", _maxViolationUnilateral);
-    RuntimeException::selfThrow("youyou");
   }
 
 

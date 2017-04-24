@@ -332,10 +332,18 @@ int Simulation::computeOneStepNSProblem(int Id)
   if (!(*_allNSProblems)[Id])
     RuntimeException::selfThrow("Simulation - computeOneStepNSProblem, OneStepNSProblem == NULL, Id: " + Id);
 
+  // Before compute, inform all OSNSs if topology has changed
+  if (_nsds->topology()->hasChanged())
+  {
+    for (OSNSIterator itOsns = _allNSProblems->begin();
+         itOsns != _allNSProblems->end(); ++itOsns)
+    {
+      (*itOsns)->setHasBeenUpdated(false);
+    }
+  }
+
   DEBUG_END("Simulation::computeOneStepNSProblem(int Id)\n");
   return (*_allNSProblems)[Id]->compute(nextTime());
-
-
 }
 
 
@@ -455,8 +463,14 @@ void Simulation::updateInteractions()
     _linkOrUnlink = false;
     _interman->updateInteractions(shared_from_this());
 
-    if (_linkOrUnlink)
+    if (_linkOrUnlink) {
       initOSNS();
+
+      // Since initOSNS calls updateIndexSets() which resets the
+      // topology->hasChanged() flag, it must be specified explicitly.
+      // Otherwise OneStepNSProblem may fail to update its matrices.
+      _nsds->topology()->setHasChanged(true);
+    }
   }
 }
 
