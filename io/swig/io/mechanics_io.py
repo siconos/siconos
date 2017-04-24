@@ -2192,6 +2192,9 @@ class Hdf5():
             solver=Numerics.SICONOS_FRICTION_3D_NSGS,
             itermax=100000,
             tolerance=1e-8,
+            projection_itermax=20,
+            projection_tolerance=1e-8,
+            projection_tolerance_unilateral=1e-8,
             numerics_verbose=False,
             violation_verbose=False,
             output_frequency=None,
@@ -2351,9 +2354,9 @@ class Hdf5():
             osnspb_pos.setNumericsVerboseMode(numerics_verbose)
             osnspb_pos.setKeepLambdaAndYState(True)
             simulation=time_stepping(timedisc, self._osi, osnspb, osnspb_pos)
-            simulation.setProjectionMaxIteration(20)
-            simulation.setConstraintTolUnilateral(1e-08);
-            simulation.setConstraintTol(1e-08);
+            simulation.setProjectionMaxIteration(projection_itermax)
+            simulation.setConstraintTolUnilateral(projection_tolerance_unilateral);
+            simulation.setConstraintTol(projection_tolerance);
         else:
             simulation=time_stepping(timedisc)
             simulation.insertIntegrator(self._osi)
