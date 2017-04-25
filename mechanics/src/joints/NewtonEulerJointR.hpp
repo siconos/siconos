@@ -44,10 +44,13 @@ protected:
 public:
 
   /** Compute the vector of linear and angular positions of the free axes */
-  virtual void computehDoF(double time, BlockVector& q0, SiconosVector& y) {}
+  virtual void computehDoF(double time, BlockVector& q0, SiconosVector& y,
+                           unsigned int axis=0) {}
 
   /** Compute the jacobian of linear and angular DoF with respect to some q */
-  virtual void computeJachqDoF(double time, BlockVector& q0, SiconosMatrix& jachq) {}
+  virtual void computeJachqDoF(double time, Interaction& inter,
+                               SP::BlockVector q0, SimpleMatrix& jachq,
+                               unsigned int axis=0) {}
 
   /** Compute the vector of linear and angular velocities of the free axes */
   virtual void computeVelDoF(double time, BlockVector& q0, SiconosVector& v) {}

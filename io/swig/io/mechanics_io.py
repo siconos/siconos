@@ -775,7 +775,8 @@ class Hdf5():
         self._domain_data = None
         self._solv_data = None
         self._input = None
-        self._nslaws = None
+        self._nslaws_data = None
+        self._nslaws = dict()
         self._out = None
         self._data = None
         self._ref = None
@@ -833,7 +834,7 @@ class Hdf5():
         self._solv_data = data(self._data, 'solv', 4,
                                use_compression = self._use_compression)
         self._input = group(self._data, 'input')
-        self._nslaws = group(self._data, 'nslaws')
+        self._nslaws_data = group(self._data, 'nslaws')
 
         if self._shape_filename is None:
             if self._collision_margin:
@@ -920,7 +921,7 @@ class Hdf5():
         """
         Non smooth laws between group of contactors.
         """
-        return self._nslaws
+        return self._nslaws_data
 
     def joints(self):
         """
@@ -936,19 +937,21 @@ class Hdf5():
 
     def importNonSmoothLaw(self, name):
         if self._broadphase is not None:
-            nslawClass = getattr(Kernel, self._nslaws[name].attrs['type'])
-            # only this one at the moment
-            assert(nslawClass == Kernel.NewtonImpactFrictionNSL)
-            nslaw = nslawClass(float(self._nslaws[name].attrs['e']), 0.,
-                               float(self._nslaws[name].attrs['mu']), 3)
-            if use_proposed:
-                self._broadphase.insertNonSmoothLaw(nslaw,
-                                        int(self._nslaws[name].attrs['gid1']),
-                                        int(self._nslaws[name].attrs['gid2']));
-            elif use_original:
-                self._broadphase.insert(nslaw,
-                                        int(self._nslaws[name].attrs['gid1']),
-                                        int(self._nslaws[name].attrs['gid2']))
+            nslawClass = getattr(Kernel, self._nslaws_data[name].attrs['type'])
+            if nslawClass == Kernel.NewtonImpactFrictionNSL:
+                nslaw = nslawClass(float(self._nslaws_data[name].attrs['e']), 0.,
+                                   float(self._nslaws_data[name].attrs['mu']), 3)
+            elif nslawClass == Kernel.NewtonImpactNSL:
+                nslaw = nslawClass(float(self._nslaws_data[name].attrs['e']))
+            assert(nslaw)
+            self._nslaws[name] = nslaw
+            gid1 = int(self._nslaws_data[name].attrs['gid1'])
+            gid2 = int(self._nslaws_data[name].attrs['gid2'])
+            if gid1 >= 0 and gid2 >= 0:
+                if use_proposed:
+                    self._broadphase.insertNonSmoothLaw(nslaw, gid1, gid2)
+                elif use_original:
+                    self._broadphase.insert(nslaw, gid1, gid2)
 
     def importOccObject(self, name, translation, orientation,
                         velocity, contactors, mass, given_inertia, body_class,
@@ -1251,6 +1254,8 @@ class Hdf5():
             absolute = [[True if absolute else False], []][absolute is None]
             allow_self_collide = self.joints()[name].attrs.get(
                 'allow_self_collide',None)
+            stops = self.joints()[name].attrs.get('stops',None)
+            nslaws = self.joints()[name].attrs.get('nslaws',None)
 
             ds1_name = self.joints()[name].attrs['object1']
             ds1 = topo.getDynamicalSystem(ds1_name)
@@ -1292,6 +1297,25 @@ class Hdf5():
             joint_inter = Interaction(joint_nslaw, joint)
             self._model.nonSmoothDynamicalSystem().\
                 link(joint_inter, ds1, ds2)
+
+            # Add a e=0 joint by default, otherwise user can specify
+            # the impact law by name or a list of names for each axis.
+            if stops is not None:
+                assert np.shape(stops)[1] == 3, 'Joint stops shape must be (?,3)'
+                if nslaws is None:
+                    nslaws = [Kernel.NewtonImpactNSL(0.0)]*np.shape(stops)[0]
+                elif isinstance(nslaws,str):
+                    nslaws = [self._nslaws[nslaws]]*np.shape(stops)[0]
+                else:
+                    assert(np.shape(nslaws)[0]==np.shape(stops)[0])
+                    nslaws = [self._nslaws[nsl] for nsl in nslaws]
+                for nsl, (axis, pos, dir) in zip(nslaws,stops):
+                    # "bool()" is needed because type of dir is
+                    # numpy.bool_, which SWIG doesn't handle well.
+                    stop = joints.JointStopR(joint, pos, bool(dir<0), int(axis))
+                    stop_inter = Interaction(nsl, stop)
+                    self._model.nonSmoothDynamicalSystem().\
+                        link(stop_inter, ds1, ds2)
 
     def importBoundaryConditions(self, name):
         if self._broadphase is not None:
@@ -1554,7 +1578,7 @@ class Hdf5():
                             number = self.instances()[name].attrs['id'])
             # import nslaws
             # note: no time of birth for nslaws and joints
-            for name in self._nslaws:
+            for name in self._nslaws_data:
                 self.importNonSmoothLaw(name)
 
             for name in self.joints():
@@ -2146,17 +2170,40 @@ class Hdf5():
         gid1 and gid2 define the group identifiants.
 
         """
-        if name not in self._nslaws:
-            nslaw=self._nslaws.create_dataset(name, (0,))
+        if name not in self._nslaws_data:
+            nslaw=self._nslaws_data.create_dataset(name, (0,))
             nslaw.attrs['type']='NewtonImpactFrictionNSL'
             nslaw.attrs['mu']=mu
             nslaw.attrs['e']=e
             nslaw.attrs['gid1']=collision_group1
             nslaw.attrs['gid2']=collision_group2
 
+    # Note, default groups are -1 here, indicating not to add them to
+    # the nslaw lookup table for contacts, since 1D impacts are
+    # useless in this case.  They are however useful for joint stops.
+    def addNewtonImpactNSL(self, name, e=0, collision_group1=-1,
+                           collision_group2=-1):
+        """
+        Add a nonsmooth law for contact between 2 groups.
+        Only NewtonImpactNSL are supported.
+        name is a user identifier and must be unique,
+        e is the coefficient of restitution on the contact normal,
+        gid1 and gid2 define the group identifiers.
+
+        As opposed to addNewtonImpactFrictionNSL, the default groups are
+        -1, making the NSL unassociated with point contacts.  It can
+        by used for joint stops however.
+        """
+        if name not in self._nslaws_data:
+            nslaw=self._nslaws_data.create_dataset(name, (0,))
+            nslaw.attrs['type']='NewtonImpactNSL'
+            nslaw.attrs['e']=e
+            nslaw.attrs['gid1']=collision_group1
+            nslaw.attrs['gid2']=collision_group2
+
     def addJoint(self, name, object1, object2=None, pivot_point=[0, 0, 0],
                  axis=[0, 1, 0], joint_class='PivotJointR', absolute=None,
-                 allow_self_collide=None):
+                 allow_self_collide=None, nslaws=None, stops=None):
         """
         add a joint between two objects
         """
@@ -2172,6 +2219,11 @@ class Hdf5():
                 joint.attrs['absolute']=absolute
             if allow_self_collide in [True, False]:
                 joint.attrs['allow_self_collide']=allow_self_collide
+            if nslaws is not None:
+                joint.attrs['nslaws'] = nslaws # either name of one nslaw, or a
+                                               # list of names same length as stops
+            if stops is not None:
+                joint.attrs['stops'] = stops # must be a table of [[axis,pos,dir]..]
 
     def addBoundaryCondition(self, name, object1, indices=None, bc_class='HarmonicBC',
                              v=None, a=None, b=None, omega=None, phi=None):

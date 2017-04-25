@@ -102,6 +102,24 @@ public:
 
   void computeV1V2FromAxis();
 
+  /** Compute the vector of linear and angular positions of the free axes */
+  virtual void computehDoF(double time, BlockVector& q0, SiconosVector& y,
+                           unsigned int axis);
+
+  /** Compute the jacobian of linear and angular DoF with respect to some q */
+  virtual void computeJachqDoF(double time, Interaction& inter,
+                               SP::BlockVector q0, SimpleMatrix& jachq,
+                               unsigned int axis);
+
+  /** Compute the vector of linear and angular velocities of the free axes */
+  virtual void computeVelDoF(double time, BlockVector& q0, SiconosVector& v);
+
+  /** Project a vector (assumed to be in q1 frame) onto the given
+   * 0-indexed free axis. Useful for calculating velocities in the
+   * axis, or for calculating axis-aligned forces applied to connected
+   * bodies. */
+  virtual void projectOntoAxis(SP::SiconosVector v, SP::SiconosVector ans, int axis=0);
+
   /** destructor
    */
   virtual ~PrismaticJointR() {};

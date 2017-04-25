@@ -10,3 +10,4 @@ PY_FULL_REGISTER(PivotJointR);
 PY_FULL_REGISTER(PrismaticJointR);
 PY_FULL_REGISTER(FixedJointR);
 PY_FULL_REGISTER(CylindricalJointR);
+PY_FULL_REGISTER(JointStopR);

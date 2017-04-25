@@ -154,7 +154,6 @@ void PrismaticJointR::computeV1V2FromAxis()
 
 void PrismaticJointR::computeJachq(double time, Interaction& inter,  SP::BlockVector q0)
 {
-
   DEBUG_PRINT("PrismaticJointR::computeJachq(double time, Interaction& inter, SP::BlockVector q0 ) \n");
 
   _jachq->zero();
@@ -561,4 +560,189 @@ void PrismaticJointR::DotJd1d2(double Xdot1, double Ydot1, double Zdot1, double 
 void PrismaticJointR::DotJd2(double Xdot1, double Ydot1, double Zdot1, double qdot10, double qdot11, double qdot12, double qdot13,
                              double X2, double Y2, double Z2, double qdot20, double qdot21, double qdot22, double qdot23)
 {
+}
+
+/** Compute the vector of linear and angular positions of the degrees of freedom */
+void PrismaticJointR::computehDoF(double time, BlockVector& q0, SiconosVector& y,
+                                  unsigned int axis)
+{
+  // Normally we fill y starting at axis up to the number of columns,
+  // but in this case there is only one, so just don't do anything if
+  // it doesn't match.
+  if (axis != 0)
+    return;
+
+  SP::SiconosVector q1 = (q0.getAllVect())[0];
+  double X1 = q1->getValue(0);
+  double Y1 = q1->getValue(1);
+  double Z1 = q1->getValue(2);
+  double q10 = q1->getValue(3);
+  double q11 = q1->getValue(4);
+  double q12 = q1->getValue(5);
+  double q13 = q1->getValue(6);
+  double X2 = 0;
+  double Y2 = 0;
+  double Z2 = 0;
+  double q20 = 1;
+  double q21 = 0;
+  double q22 = 0;
+  double q23 = 0;
+
+  if (q0.getNumberOfBlocks()>1)
+  {
+    SP::SiconosVector q2 = (q0.getAllVect())[1];
+    X2 = q2->getValue(0);
+    Y2 = q2->getValue(1);
+    Z2 = q2->getValue(2);
+    q20 = q2->getValue(3);
+    q21 = q2->getValue(4);
+    q22 = q2->getValue(5);
+    q23 = q2->getValue(6);
+  }
+
+  y.setValue(0, -_G10G20d1x*_axis0->getValue(0)
+             - _G10G20d1y*_axis0->getValue(1)
+             - _G10G20d1z*_axis0->getValue(2)
+             + _axis0->getValue(0)
+               *(q10*(q10*(-X1 + X2) - q12*(-Z1 + Z2) + q13*(-Y1 + Y2))
+                 - q11*(-q11*(-X1 + X2) - q12*(-Y1 + Y2) - q13*(-Z1 + Z2))
+                 - q12*(q10*(-Z1 + Z2) - q11*(-Y1 + Y2) + q12*(-X1 + X2))
+                 + q13*(q10*(-Y1 + Y2) + q11*(-Z1 + Z2) - q13*(-X1 + X2)))
+             + _axis0->getValue(1)
+               *(q10*(q10*(-Y1 + Y2) + q11*(-Z1 + Z2) - q13*(-X1 + X2))
+                 + q11*(q10*(-Z1 + Z2) - q11*(-Y1 + Y2) + q12*(-X1 + X2))
+                 - q12*(-q11*(-X1 + X2) - q12*(-Y1 + Y2) - q13*(-Z1 + Z2))
+                 - q13*(q10*(-X1 + X2) - q12*(-Z1 + Z2) + q13*(-Y1 + Y2)))
+             + _axis0->getValue(2)
+               *(q10*(q10*(-Z1 + Z2) - q11*(-Y1 + Y2) + q12*(-X1 + X2))
+                 - q11*(q10*(-Y1 + Y2) + q11*(-Z1 + Z2) - q13*(-X1 + X2))
+                 + q12*(q10*(-X1 + X2) - q12*(-Z1 + Z2) + q13*(-Y1 + Y2))
+                 - q13*(-q11*(-X1 + X2) - q12*(-Y1 + Y2) - q13*(-Z1 + Z2))));
+}
+
+/** Compute the jacobian of linear and angular DoF with respect to some q */
+void PrismaticJointR::computeJachqDoF(double time, Interaction& inter,
+                                      SP::BlockVector q0, SimpleMatrix& jachq,
+                                      unsigned int axis)
+{
+  // Normally we fill jachq starting at axis up to the number of rows,
+  // but in this case there is only one, so just don't do anything if
+  // it doesn't match.
+  if (axis != 0)
+    return;
+
+  SP::SiconosVector q1 = (q0->getAllVect())[0];
+  double X1 = q1->getValue(0);
+  double Y1 = q1->getValue(1);
+  double Z1 = q1->getValue(2);
+  double q10 = q1->getValue(3);
+  double q11 = q1->getValue(4);
+  double q12 = q1->getValue(5);
+  double q13 = q1->getValue(6);
+  double X2 = 0;
+  double Y2 = 0;
+  double Z2 = 0;
+  double q20 = 1;
+  double q21 = 0;
+  double q22 = 0;
+  double q23 = 0;
+
+  if (q0->getNumberOfBlocks()>1)
+  {
+    SP::SiconosVector q2 = (q0->getAllVect())[1];
+    X2 = q2->getValue(0);
+    Y2 = q2->getValue(1);
+    Z2 = q2->getValue(2);
+    q20 = q2->getValue(3);
+    q21 = q2->getValue(4);
+    q22 = q2->getValue(5);
+    q23 = q2->getValue(6);
+  }
+
+  jachq.setValue(0, 0, _axis0->getValue(0)*(-pow(q10,2) - pow(q11,2)
+                                            + pow(q12,2) + pow(q13,2))
+                 + _axis0->getValue(1)*(2*q10*q13 - 2*q11*q12)
+                 + _axis0->getValue(2)*(-2*q10*q12 - 2*q11*q13));
+  jachq.setValue(0, 1, _axis0->getValue(0)*(-2*q10*q13 - 2*q11*q12)
+                 + _axis0->getValue(1)*(-pow(q10,2) + pow(q11,2)
+                                        - pow(q12,2) + pow(q13,2))
+                 + _axis0->getValue(2)*(2*q10*q11 - 2*q12*q13));
+  jachq.setValue(0, 2, _axis0->getValue(0)*(2*q10*q12 - 2*q11*q13)
+                 + _axis0->getValue(1)*(-2*q10*q11 - 2*q12*q13)
+                 + _axis0->getValue(2)*(-pow(q10,2) + pow(q11,2)
+                                        + pow(q12,2) - pow(q13,2)));
+  jachq.setValue(0, 3, _axis0->getValue(0)*(2*q10*(-X1 + X2)
+                                            - 2*q12*(-Z1 + Z2) + 2*q13*(-Y1 + Y2))
+                 + _axis0->getValue(1)*(2*q10*(-Y1 + Y2) + 2*q11*(-Z1 + Z2)
+                                        - 2*q13*(-X1 + X2))
+                 + _axis0->getValue(2)*(2*q10*(-Z1 + Z2) - 2*q11*(-Y1 + Y2)
+                                        + 2*q12*(-X1 + X2)));
+  jachq.setValue(0, 4, _axis0->getValue(0)*(q11*(-X1 + X2) - q11*(X1 - X2)
+                                            + q12*(-Y1 + Y2) - q12*(Y1 - Y2)
+                                            + 2*q13*(-Z1 + Z2))
+                 + _axis0->getValue(1)*(2*q10*(-Z1 + Z2) - q11*(-Y1 + Y2)
+                                        + q11*(Y1 - Y2) + q12*(-X1 + X2)
+                                        - q12*(X1 - X2))
+                 + _axis0->getValue(2)*(-q10*(-Y1 + Y2) + q10*(Y1 - Y2)
+                                        - 2*q11*(-Z1 + Z2) + q13*(-X1 + X2)
+                                        - q13*(X1 - X2)));
+  jachq.setValue(0, 5, _axis0->getValue(0)*(-q10*(-Z1 + Z2) + q10*(Z1 - Z2)
+                                            + q11*(-Y1 + Y2) - q11*(Y1 - Y2)
+                                            - 2*q12*(-X1 + X2))
+                 + _axis0->getValue(1)*(2*q11*(-X1 + X2) + q12*(-Y1 + Y2)
+                                        - q12*(Y1 - Y2) + q13*(-Z1 + Z2)
+                                        - q13*(Z1 - Z2))
+                 + _axis0->getValue(2)*(2*q10*(-X1 + X2) - q12*(-Z1 + Z2)
+                                        + q12*(Z1 - Z2) + q13*(-Y1 + Y2)
+                                        - q13*(Y1 - Y2)));
+  jachq.setValue(0, 6, _axis0->getValue(0)*(2*q10*(-Y1 + Y2) + q11*(-Z1 + Z2)
+                                            - q11*(Z1 - Z2) - q13*(-X1 + X2)
+                                            + q13*(X1 - X2))
+                 + _axis0->getValue(1)*(-q10*(-X1 + X2) + q10*(X1 - X2)
+                                        + q12*(-Z1 + Z2) - q12*(Z1 - Z2)
+                                        - 2*q13*(-Y1 + Y2))
+                 + _axis0->getValue(2)*(q11*(-X1 + X2) - q11*(X1 - X2)
+                                        + 2*q12*(-Y1 + Y2) + q13*(-Z1 + Z2)
+                                        - q13*(Z1 - Z2)));
+
+  if (q0->getNumberOfBlocks()>1)
+  {
+    jachq.setValue(0, 7, _axis0->getValue(0)*(pow(q10,2) + pow(q11,2)
+                                              - pow(q12,2) - pow(q13,2))
+                   + _axis0->getValue(1)*(-2*q10*q13 + 2*q11*q12)
+                   + _axis0->getValue(2)*(2*q10*q12 + 2*q11*q13));
+    jachq.setValue(0, 8, _axis0->getValue(0)*(2*q10*q13 + 2*q11*q12)
+                   + _axis0->getValue(1)*(pow(q10,2) - pow(q11,2)
+                                          + pow(q12,2) - pow(q13,2))
+                   + _axis0->getValue(2)*(-2*q10*q11 + 2*q12*q13));
+    jachq.setValue(0, 9, _axis0->getValue(0)*(-2*q10*q12 + 2*q11*q13)
+                   + _axis0->getValue(1)*(2*q10*q11 + 2*q12*q13)
+                   + _axis0->getValue(2)*(pow(q10,2) - pow(q11,2)
+                                          - pow(q12,2) + pow(q13,2)));
+    jachq.setValue(0, 10, 0);
+    jachq.setValue(0, 11, 0);
+    jachq.setValue(0, 12, 0);
+    jachq.setValue(0, 13, 0);
+  }
+}
+
+/** Compute the vector of linear and angular velocities of the free axes */
+void PrismaticJointR::computeVelDoF(double time, BlockVector& q0, SiconosVector& v)
+{
+}
+
+/** Project a vector (assumed to be in q1 frame) onto the given
+ * 0-indexed free axis. Useful for calculating velocities in the
+ * axis, or for calculating axis-aligned forces applied to connected
+ * bodies. */
+void PrismaticJointR::projectOntoAxis(SP::SiconosVector v, SP::SiconosVector ans,
+                                      int axis)
+{
+  if (axis != 0) return;
+
+  // We assume that _axis0 is normalized
+  double L = (*v)(0)*(*_axis0)(0) + (*v)(1)*(*_axis0)(1) + (*v)(2)*(*_axis0)(2);
+  (*ans)(0) = (*_axis0)(0) * L;
+  (*ans)(1) = (*_axis0)(1) * L;
+  (*ans)(2) = (*_axis0)(2) * L;
 }
