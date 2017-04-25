@@ -43,11 +43,48 @@ protected:
 
 public:
 
+  /** Compute the vector of linear and angular positions of the free axes */
+  virtual void computehDoF(double time, BlockVector& q0, SiconosVector& y) {}
+
+  /** Compute the jacobian of linear and angular DoF with respect to some q */
+  virtual void computeJachqDoF(double time, BlockVector& q0, SiconosMatrix& jachq) {}
+
+  /** Compute the vector of linear and angular velocities of the free axes */
+  virtual void computeVelDoF(double time, BlockVector& q0, SiconosVector& v) {}
+
+  /** Project a vector (assumed to be in q1 frame) onto the given
+   * 0-indexed free axis. Useful for calculating velocities in the
+   * axis, or for calculating axis-aligned forces applied to connected
+   * bodies. */
+  virtual void projectOntoAxis(SP::SiconosVector v, SP::SiconosVector ans, int axis=0)
+    {}
+
   /** Return the value of the _allowSelfCollide flag. */
   bool allowSelfCollide() { return _allowSelfCollide; }
 
   /** Set the value of the _allowSelfCollide flag. */
   void setAllowSelfCollide(bool x) { _allowSelfCollide = x; }
+
+  /** Get the number of constraints defined in the joint
+      \return the number of constraints
+   */
+  virtual unsigned int numberOfConstraints() = 0;
+
+  /** Return the number of degrees of freedom of this joint.
+      \return the number of degrees of freedom (DoF)
+   */
+  virtual unsigned int numberOfDoF() = 0;
+
+  typedef enum {
+    DOF_TYPE_INVALID=0,
+    DOF_TYPE_LINEAR=1,
+    DOF_TYPE_ANGULAR=2,
+  } DoF_Type;
+
+  /** Return the type of a degree of freedom of this joint.
+      \return the type of the degree of freedom (DoF)
+   */
+  virtual DoF_Type typeOfDoF(unsigned int axis) = 0;
 
   /** destructor
    */

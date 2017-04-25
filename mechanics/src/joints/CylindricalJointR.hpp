@@ -118,8 +118,20 @@ public:
   /** Get the number of constraints defined in the joint
       \return the number of constraints
    */
-  static unsigned int numberOfConstraints() { return 4; }
+  virtual unsigned int numberOfConstraints() { return 4; }
 
+  /** Return the number of degrees of freedom of this joint.
+      \return the number of degrees of freedom (DoF)
+   */
+  virtual unsigned int numberOfDoF() { return 2; }
+
+  /** Return the type of a degree of freedom of this joint.
+      \return the type of the degree of freedom (DoF)
+  */
+  virtual DoF_Type typeOfDoF(unsigned int axis) {
+    if (axis==0) return DOF_TYPE_LINEAR;
+    else if (axis==1) return DOF_TYPE_ANGULAR;
+    else return DOF_TYPE_INVALID;
+  }
 };
-
 #endif  //CylindricalJointRELATION_H
