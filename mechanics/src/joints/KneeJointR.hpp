@@ -22,19 +22,19 @@
 
 #include <MechanicsFwd.hpp>
 #include <SiconosFwd.hpp>
-#include <NewtonEulerR.hpp>
+#include <NewtonEulerJointR.hpp>
 
 /** \class KneeJointR
  *  \brief This class implements a knee joint between one or two Newton/Euler Dynamical system
  *
  */
-class KneeJointR : public NewtonEulerR
+class KneeJointR : public NewtonEulerJointR
 {
 protected:
   /** serialization hooks
    */
   ACCEPT_SERIALIZATION(KneeJointR);
-  KneeJointR(): NewtonEulerR() {};
+  KneeJointR(): NewtonEulerJointR() {};
 
   /** Coordinate of the knee point in the body frame of the first dynamical system _d1
    */

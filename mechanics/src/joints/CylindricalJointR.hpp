@@ -24,7 +24,7 @@
 
 #include <MechanicsFwd.hpp>
 #include <SiconosFwd.hpp>
-#include <NewtonEulerR.hpp>
+#include <NewtonEulerJointR.hpp>
 
 /** \class CylindricalJointR
  *  \brief This class implements a cylindrical joint between one or
@@ -34,13 +34,13 @@
  * From a given axis, we construct two unit othorgonal vectors to the
  *  axis V1 and V2 such that (axis,V1,V2) is an orthogonal frame
  */
-class CylindricalJointR : public NewtonEulerR
+class CylindricalJointR : public NewtonEulerJointR
 {
 protected:
   /** serialization hooks
    */
   ACCEPT_SERIALIZATION(CylindricalJointR);
-  CylindricalJointR(): NewtonEulerR() {};
+  CylindricalJointR(): NewtonEulerJointR() {};
 
 public:
   /** Axis of the cylindrical point in the inertial frame of reference

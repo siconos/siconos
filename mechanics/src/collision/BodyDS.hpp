@@ -43,6 +43,10 @@ protected:
   SP::SiconosContactorSet _contactors;
   bool _useContactorInertia;
 
+  /** If false, bodies connected to this body by a joint will not
+   * collide. See also NewtonEulerJointR::_allowSelfCollide */
+  bool _allowSelfCollide;
+
 public:
 
   BodyDS(SP::SiconosVector position,
@@ -55,6 +59,12 @@ public:
   void setUseContactorInertia(bool use) { _useContactorInertia = use; }
 
   bool useContactorInertia() { return _useContactorInertia; }
+
+  /** Return the value of the _allowSelfCollide flag. */
+  bool allowSelfCollide() { return _allowSelfCollide; }
+
+  /** Set the value of the _allowSelfCollide flag. */
+  void setAllowSelfCollide(bool x) { _allowSelfCollide = x; }
 
   /** Access the contactor set associated with this body.
    * \return A SP::SiconosContactorSet */

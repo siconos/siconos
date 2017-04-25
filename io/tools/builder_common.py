@@ -29,6 +29,7 @@ input_headers = {
                   "PrismaticJointR.hpp",
                   "FixedJointR.hpp",
                   "CylindricalJointR.hpp",
+                  "NewtonEulerJointR.hpp",
                   "BodyDS.hpp", "SiconosShape.hpp",
                   "SiconosCollisionManager.hpp"],
 

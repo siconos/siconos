@@ -62,6 +62,7 @@ DEFINE_SPTR(UpdateShapeVisitor)
 #include <FrictionContact.hpp>
 #include <SiconosMatrix.hpp>
 #include <boost/numeric/ublas/matrix.hpp>
+#include <NewtonEulerJointR.hpp>
 
 #include <Question.hpp>
 
@@ -1433,9 +1434,20 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
         {
           // Only match on non-BulletR interactions, i.e. non-contact relations
           SP::BulletR br ( std11::dynamic_pointer_cast<BulletR>(inter->relation()) );
-          if (!br)
-            match = true;
-          break;
+          if (!br) {
+            SP::NewtonEulerJointR jr (
+              std11::dynamic_pointer_cast<NewtonEulerJointR>(inter->relation()) );
+
+            /* If it is a joint, check the joint self-collide property */
+            if (jr && !jr->allowSelfCollide())
+              match = true;
+
+            /* If any non-contact relation is found, both bodies must
+             * allow self-collide */
+            if (!pairA->ds->allowSelfCollide() || !pairB->ds->allowSelfCollide())
+              match = true;
+          }
+          if (match) break;
         }
       }
       if (match)

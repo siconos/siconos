@@ -61,13 +61,15 @@
  */
 
 /**axe is the axis of the prismatic joint, in the frame of the first DS, d1.*/
-PrismaticJointR::PrismaticJointR(SP::NewtonEulerDS d1, SP::NewtonEulerDS d2, SP::SiconosVector axis): NewtonEulerR()
+PrismaticJointR::PrismaticJointR(SP::NewtonEulerDS d1, SP::NewtonEulerDS d2, SP::SiconosVector axis)
+  : NewtonEulerJointR()
 {
   _axis0 = axis;
   computeFromInitialPosition(d1->q(),d2->q());
 }
 /*axis is the axis of the prismatic joint, in the absolute frame.*/
-PrismaticJointR::PrismaticJointR(SP::NewtonEulerDS d1, SP::SiconosVector axis): NewtonEulerR()
+PrismaticJointR::PrismaticJointR(SP::NewtonEulerDS d1, SP::SiconosVector axis)
+  : NewtonEulerJointR()
 {
   //    _d1=NULL;
   _axis0 = axis;

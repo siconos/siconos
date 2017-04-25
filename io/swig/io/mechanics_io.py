@@ -1169,6 +1169,10 @@ class Hdf5():
                 if have_inertia:
                     body.setUseContactorInertia(False)
 
+                self_collide = self._input[name].get('allow_self_collide',None)
+                if self_collide is not None:
+                    body.setAllowSelfCollide(not not self_collide)
+
                 cset = SiconosContactorSet()
                 for c in contactors:
                     shp = self._shape.get(c.data)
@@ -1245,6 +1249,8 @@ class Hdf5():
             joint_class = getattr(joints, joint_type)
             absolute = self.joints()[name].attrs.get('absolute', None)
             absolute = [[True if absolute else False], []][absolute is None]
+            allow_self_collide = self.joints()[name].attrs.get(
+                'allow_self_collide',None)
 
             ds1_name = self.joints()[name].attrs['object1']
             ds1 = topo.getDynamicalSystem(ds1_name)
@@ -1280,6 +1286,8 @@ class Hdf5():
                     except NotImplementedError:
                         joint = joint_class(ds1, *absolute)
 
+            if allow_self_collide is not None:
+                joint.setAllowSelfCollide(not not allow_self_collide)
             joint_nslaw = EqualityConditionNSL(joint.numberOfConstraints())
             joint_inter = Interaction(joint_nslaw, joint)
             self._model.nonSmoothDynamicalSystem().\
@@ -2008,7 +2016,8 @@ class Hdf5():
                   orientation=[1, 0, 0, 0],
                   velocity=[0, 0, 0, 0, 0, 0],
                   mass=0, center_of_mass=[0, 0, 0],
-                  inertia=None, time_of_birth=-1):
+                  inertia=None, time_of_birth=-1,
+                  allow_self_collide=False):
         """Add an object with associated shapes as a list of Volume or
         Contactor objects. Contact detection and processing is
         defined by the Contactor objects. The Volume objects are used for
@@ -2079,6 +2088,8 @@ class Hdf5():
             obj.attrs['center_of_mass']=center_of_mass
             if inertia is not None:
                 obj.attrs['inertia']=inertia
+            if allow_self_collide is not None:
+                obj.attrs['allow_self_collide']=allow_self_collide
 
             contactors = shapes
 
@@ -2144,7 +2155,8 @@ class Hdf5():
             nslaw.attrs['gid2']=collision_group2
 
     def addJoint(self, name, object1, object2=None, pivot_point=[0, 0, 0],
-                 axis=[0, 1, 0], joint_class='PivotJointR', absolute=None):
+                 axis=[0, 1, 0], joint_class='PivotJointR', absolute=None,
+                 allow_self_collide=None):
         """
         add a joint between two objects
         """
@@ -2156,8 +2168,10 @@ class Hdf5():
             joint.attrs['type']=joint_class
             joint.attrs['pivot_point']=pivot_point
             joint.attrs['axis']=axis
-            if absolute is True or absolute is False:
+            if absolute in [True, False]:
                 joint.attrs['absolute']=absolute
+            if allow_self_collide in [True, False]:
+                joint.attrs['allow_self_collide']=allow_self_collide
 
     def addBoundaryCondition(self, name, object1, indices=None, bc_class='HarmonicBC',
                              v=None, a=None, b=None, omega=None, phi=None):

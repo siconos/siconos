@@ -100,7 +100,7 @@ void KneeJointR::checkInitPos( SP::SiconosVector x1 ,  SP::SiconosVector x2 )
   // printf("checkInitPos Hz : %e\n", Hz(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23));
 }
 
-KneeJointR::KneeJointR(SP::NewtonEulerDS d1, SP::NewtonEulerDS d2, SP::SiconosVector P): NewtonEulerR()
+KneeJointR::KneeJointR(SP::NewtonEulerDS d1, SP::NewtonEulerDS d2, SP::SiconosVector P): NewtonEulerJointR()
 {
   _P0.reset(new SiconosVector(3));
   *_P0 = *P;
@@ -155,7 +155,7 @@ KneeJointR::KneeJointR(SP::NewtonEulerDS d1, SP::NewtonEulerDS d2, SP::SiconosVe
    \param bool indicating whether P is in the absolute frame (=true, default)
    default) or the frame of the DS (=false) with orientation (1,0,0,0)
 */
-KneeJointR::KneeJointR(SP::NewtonEulerDS d1, SP::SiconosVector P0, bool absolutRef): NewtonEulerR()
+KneeJointR::KneeJointR(SP::NewtonEulerDS d1, SP::SiconosVector P0, bool absolutRef): NewtonEulerJointR()
 {
   _P0.reset(new SiconosVector(3));
   *_P0 = *P0;

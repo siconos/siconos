@@ -26,6 +26,7 @@
 #include "PrismaticJointR.hpp"
 #include "FixedJointR.hpp"
 #include "CylindricalJointR.hpp"
+#include "NewtonEulerJointR.hpp"
 #include "BodyDS.hpp"
 #include "SiconosShape.hpp"
 #include "SiconosCollisionManager.hpp"
@@ -696,7 +697,7 @@ SICONOS_IO_REGISTER_WITH_BASES(FixedJointR,(NewtonEulerR),
   (_cq2q102)
   (_cq2q103)
   (_cq2q104))
-SICONOS_IO_REGISTER_WITH_BASES(KneeJointR,(NewtonEulerR),
+SICONOS_IO_REGISTER_WITH_BASES(KneeJointR,(NewtonEulerJointR),
   (_G1P0x)
   (_G1P0y)
   (_G1P0z)
@@ -704,6 +705,8 @@ SICONOS_IO_REGISTER_WITH_BASES(KneeJointR,(NewtonEulerR),
   (_G2P0y)
   (_G2P0z)
   (_P0))
+SICONOS_IO_REGISTER_WITH_BASES(NewtonEulerJointR,(NewtonEulerR),
+  (_allowSelfCollide))
 SICONOS_IO_REGISTER_WITH_BASES(SphereLDS,(LagrangianDS),
   (I)
   (massValue)
@@ -769,6 +772,7 @@ SICONOS_IO_REGISTER_WITH_BASES(SiconosCollisionManager,(InteractionManager),
 SICONOS_IO_REGISTER_WITH_BASES(SphereNEDS,(NewtonEulerDS),
   (radius))
 SICONOS_IO_REGISTER_WITH_BASES(BodyDS,(NewtonEulerDS),
+  (_allowSelfCollide)
   (_contactors)
   (_useContactorInertia))
 SICONOS_IO_REGISTER_WITH_BASES(CircularDS,(LagrangianDS),
@@ -778,7 +782,7 @@ SICONOS_IO_REGISTER(SiconosShape,
   (_inside_margin)
   (_outside_margin)
   (_version))
-SICONOS_IO_REGISTER_WITH_BASES(CylindricalJointR,(NewtonEulerR),
+SICONOS_IO_REGISTER_WITH_BASES(CylindricalJointR,(NewtonEulerJointR),
   (_G1P0)
   (_G2P0)
   (_V1)
@@ -790,7 +794,7 @@ SICONOS_IO_REGISTER_WITH_BASES(CylindricalJointR,(NewtonEulerR),
   (_cq2q104))
 SICONOS_IO_REGISTER(FMatrix,
 )
-SICONOS_IO_REGISTER_WITH_BASES(PrismaticJointR,(NewtonEulerR),
+SICONOS_IO_REGISTER_WITH_BASES(PrismaticJointR,(NewtonEulerJointR),
   (_G10G20d1x)
   (_G10G20d1y)
   (_G10G20d1z)
@@ -1094,6 +1098,7 @@ void siconos_io_register_generated(Archive& ar)
   ar.register_type(static_cast<Circle*>(NULL));
   ar.register_type(static_cast<FixedJointR*>(NULL));
   ar.register_type(static_cast<KneeJointR*>(NULL));
+  ar.register_type(static_cast<NewtonEulerJointR*>(NULL));
   ar.register_type(static_cast<SphereLDS*>(NULL));
   ar.register_type(static_cast<SphereNEDSPlanR*>(NULL));
   ar.register_type(static_cast<CircleCircleR*>(NULL));

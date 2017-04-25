@@ -82,7 +82,7 @@ public: quatOrientation(const SiconosVector& v)
 CylindricalJointR::CylindricalJointR(SP::NewtonEulerDS d1, SP::NewtonEulerDS d2,
                                      SP::SiconosVector P, SP::SiconosVector A,
                                      bool absoluteRef)
-  : NewtonEulerR()
+  : NewtonEulerJointR()
   , _G1P0(std11::make_shared<SiconosVector>(3))
 {
   // in the two-DS case, _P is unused.
@@ -103,7 +103,7 @@ CylindricalJointR::CylindricalJointR(SP::NewtonEulerDS d1, SP::NewtonEulerDS d2,
 CylindricalJointR::CylindricalJointR(SP::NewtonEulerDS d1,
                                      SP::SiconosVector P, SP::SiconosVector A,
                                      bool absoluteRef)
-  : NewtonEulerR()
+  : NewtonEulerJointR()
   , _G1P0(std11::make_shared<SiconosVector>(3))
 {
   if (P) *_G1P0 = *P; else _G1P0->zero();
