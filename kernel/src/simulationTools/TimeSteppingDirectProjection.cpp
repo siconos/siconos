@@ -192,6 +192,8 @@ void TimeSteppingDirectProjection::advanceToEvent()
     _nbProjectionIteration++;
     DEBUG_PRINTF("TimeSteppingDirectProjection projection step = %d\n", _nbProjectionIteration);
 
+    updateInteractions();
+
     SP::InteractionsGraph indexSet = _nsds->topology()->indexSet(0);
     InteractionsGraph::VIterator ui, uiend;
     for (std11::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
@@ -283,7 +285,6 @@ void TimeSteppingDirectProjection::advanceToEvent()
     }
 
     updateWorldFromDS();
-    updateInteractions();
 
     computeCriteria(&runningProjection);
 
