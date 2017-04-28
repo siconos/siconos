@@ -1345,6 +1345,7 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
                             self._renderer.GetActiveCamera().SetViewUp(
                                 -1, -1, 1)
                             self._view_cycle = -1
+                    self._renderer.ResetCameraClippingRange()
 
             if key == 's':
                 if not self._recording:
