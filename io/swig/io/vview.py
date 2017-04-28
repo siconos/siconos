@@ -487,8 +487,8 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
 
     times = list(set(dpos_data[:, 0]))
     times.sort()
-
-    ndyna = len(numpy.where(dpos_data[:, 0] == times[0]))
+    if (len(times) == 0):
+        print('No dynamic data found!  Empty simulation.')
 
     if cf_prov is not None:
         cf_prov._time = min(times[:])
@@ -978,13 +978,22 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
     pos_data = dpos_data[:].copy()
     spos_data = spos_data[:].copy()
 
-    def set_actors_visibility(id_t):
+    def set_actors_visibility(id_t=None):
         for instance, actor in actors.items():
-            if instance < 0 or instance in pos_data[id_t, 1]:
-                # actor.GetProperty().SetColor(0,0,1)
+            # Instance is a static object
+            visible = instance < 0
+            # Instance is in the current timestep
+            if id_t:
+                visible = visible or instance in pos_data[id_t, 1]
+            # Instance has time of birth <= 0
+            else:
+                tob = [io.instances()[k].attrs['time_of_birth']
+                       for k in io.instances()
+                       if io.instances()[k].attrs['id'] == instance][0]
+                visible = visible or tob <= 0
+            if visible:
                 actor.VisibilityOn()
             else:
-                # actor.GetProperty().SetColor(0,1,0)
                 actor.VisibilityOff()
 
     if cf_prov is not None:
@@ -1004,12 +1013,24 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
     except IOError as e:
         pass
 
-    id_t0 = numpy.where(dpos_data[:, 0] == min(dpos_data[:, 0]))
+    try:
+        # Positions at first time step
+        id_t0 = numpy.where(dpos_data[:, 0] == min(dpos_data[:, 0]))
+        pos_t0 = pos_data[id_t0, 1:9]
+    except ValueError:
+        # Collect positions from init data
+        id_t0 = None
+        pos_t0 = numpy.array([
+            numpy.hstack(([io.instances()[k].attrs['id']]
+                          ,io.instances()[k].attrs['translation']
+                          ,io.instances()[k].attrs['orientation']))
+            for k in io.instances()
+            if io.instances()[k].attrs['id'] >= 0])
 
     if numpy.shape(spos_data)[0] > 0:
         set_positionv(spos_data[:, 1:9])
 
-    set_positionv(pos_data[id_t0, 1:9])
+    set_positionv(pos_t0)
 
     set_actors_visibility(id_t0)
 
@@ -1137,24 +1158,32 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
 
     class InputObserver():
 
-        def __init__(self, times, slider_repres):
-            self._stimes = set(times)
+        def __init__(self, times=None, slider_repres=None):
             self._opacity = 1.0
-            self._time_step = (max(self._stimes) - min(self._stimes)) \
-                / len(self._stimes)
-            self._time = min(times)
-            self._slider_repres = slider_repres
             self._current_id = vtk.vtkIdTypeArray()
             self._renderer = renderer
             self._renderer_window = renderer_window
-            self._times = times
             self._image_counter = 0
             self._view_cycle = -1
-
             self._recording = False
+            self._times = None
+
+            if times is None or len(times)==0:
+                return
+            self._times = times
+            self._stimes = set(times)
+            self._time_step = (max(self._stimes) - min(self._stimes)) \
+                / len(self._stimes)
+            self._time = min(times)
+            if slider_repres is None:
+                return
+            self._slider_repres = slider_repres
 
         def update(self):
             global cf_prov
+            if self._times is None:
+                renderer_window.Render()
+                return
             index = bisect.bisect_left(self._times, self._time)
             index = max(0, index)
             index = min(index, len(self._times) - 1)
@@ -1212,7 +1241,7 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
                     cf_prov = CFprov(cf_data, dom_data)
                 times = list(set(dpos_data[:, 0]))
                 times.sort()
-                ndyna = len(numpy.where(dpos_data[:, 0] == times[0]))
+
                 if len(spos_data) > 0:
                     instances = set(dpos_data[:, 1]).union(
                         set(spos_data[:, 1]))
@@ -1377,45 +1406,45 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
                     self._recording = False
                     recorder.End()
 
-    slider_repres = vtk.vtkSliderRepresentation2D()
+    if len(times) > 0:
+        slider_repres = vtk.vtkSliderRepresentation2D()
 
-    if min_time is None:
-        min_time = times[0]
+        if min_time is None:
+            min_time = times[0]
+        if max_time is None:
+            max_time = times[len(times) - 1]
 
-    if max_time is None:
-        max_time = times[len(times) - 1]
+        slider_repres.SetMinimumValue(min_time)
+        slider_repres.SetMaximumValue(max_time)
+        slider_repres.SetValue(min_time)
+        slider_repres.SetTitleText("time")
+        slider_repres.GetPoint1Coordinate(
+        ).SetCoordinateSystemToNormalizedDisplay()
+        slider_repres.GetPoint1Coordinate().SetValue(0.4, 0.9)
+        slider_repres.GetPoint2Coordinate(
+        ).SetCoordinateSystemToNormalizedDisplay()
+        slider_repres.GetPoint2Coordinate().SetValue(0.9, 0.9)
 
-    slider_repres.SetMinimumValue(min_time)
-    slider_repres.SetMaximumValue(max_time)
-    slider_repres.SetValue(min_time)
-    slider_repres.SetTitleText("time")
-    slider_repres.GetPoint1Coordinate(
-    ).SetCoordinateSystemToNormalizedDisplay()
-    slider_repres.GetPoint1Coordinate().SetValue(0.4, 0.9)
-    slider_repres.GetPoint2Coordinate(
-    ).SetCoordinateSystemToNormalizedDisplay()
-    slider_repres.GetPoint2Coordinate().SetValue(0.9, 0.9)
+        slider_repres.SetSliderLength(0.02)
+        slider_repres.SetSliderWidth(0.03)
+        slider_repres.SetEndCapLength(0.01)
+        slider_repres.SetEndCapWidth(0.03)
+        slider_repres.SetTubeWidth(0.005)
+        slider_repres.SetLabelFormat("%3.4lf")
+        slider_repres.SetTitleHeight(0.02)
+        slider_repres.SetLabelHeight(0.02)
 
-    slider_repres.SetSliderLength(0.02)
-    slider_repres.SetSliderWidth(0.03)
-    slider_repres.SetEndCapLength(0.01)
-    slider_repres.SetEndCapWidth(0.03)
-    slider_repres.SetTubeWidth(0.005)
-    slider_repres.SetLabelFormat("%3.4lf")
-    slider_repres.SetTitleHeight(0.02)
-    slider_repres.SetLabelHeight(0.02)
+        slider_widget = vtk.vtkSliderWidget()
+        slider_widget.SetInteractor(interactor_renderer)
+        slider_widget.SetRepresentation(slider_repres)
+        slider_widget.KeyPressActivationOff()
+        slider_widget.SetAnimationModeToAnimate()
+        slider_widget.SetEnabled(True)
 
-    slider_widget = vtk.vtkSliderWidget()
-    slider_widget.SetInteractor(interactor_renderer)
-    slider_widget.SetRepresentation(slider_repres)
-    slider_widget.KeyPressActivationOff()
-    slider_widget.SetAnimationModeToAnimate()
-    slider_widget.SetEnabled(True)
-
-    input_observer = InputObserver(times, slider_repres)
-
-    slider_widget.AddObserver("InteractionEvent", input_observer.time)
-
+        input_observer = InputObserver(times, slider_repres)
+        slider_widget.AddObserver("InteractionEvent", input_observer.time)
+    else:
+        input_observer = InputObserver()
     interactor_renderer.AddObserver('KeyPressEvent', input_observer.key)
 
     # Create a vtkLight, and set the light parameters.
@@ -1504,7 +1533,8 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
     tview_prec.GetRenderer().SetBackground(.9, .9, .9)
     tview_prec.GetRenderer().Render()
 
-    slwsc, slrepsc = make_slider('Scale',
+    if io.contact_forces_data().shape[0] > 0:
+        slwsc, slrepsc = make_slider('Scale',
                                  make_scale_observer([cone_glyph, cylinder_glyph, sphere_glypha, sphere_glyphb, arrow_glyph]
                                                      ),
                                  interactor_renderer,
@@ -1513,7 +1543,8 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
                                  cf_scale_factor + cf_scale_factor / 2,
                                  0.01, 0.01, 0.01, 0.7)
 
-    xslwsc, xslrepsc = make_slider('Time scale',
+    if len(times) > 0:
+        xslwsc, xslrepsc = make_slider('Time scale',
                                    make_time_scale_observer(
                                        slider_repres, input_observer),
                                    interactor_renderer,
