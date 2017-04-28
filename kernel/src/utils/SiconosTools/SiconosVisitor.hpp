@@ -81,7 +81,7 @@
     RuntimeException::selfThrow                                         \
       ( "accept: no visitor defined");                                  \
   };                                                                    \
-  virtual void accept_modifier(SiconosVisitor&)                         \
+  virtual void accept(SiconosVisitor&)                                  \
   {                                                                     \
     RuntimeException::selfThrow                                         \
       ( "accept: no modifier defined");                                 \
@@ -101,7 +101,7 @@
 #define ACCEPT_STD_VISITORS()                                           \
   template<typename Archive> friend class SiconosSerializer;            \
   virtual void accept(SiconosVisitor& tourist) const { tourist.visit(*this); } \
-  virtual void accept_modifier(SiconosVisitor& tourist) { tourist.visit(*this); } \
+  virtual void accept(SiconosVisitor& tourist) { tourist.visit(*this); } \
   virtual void acceptSerializer(SiconosVisitor& serializer) { serializer.visit(*this); } \
   virtual inline Type::Siconos acceptType(FindType& ft) const { return ft.visit(*this); } \
 
@@ -204,14 +204,18 @@ struct FindType
 
 #define SICONOS_VISITOR_FAIL(X)                                         \
   RuntimeException::selfThrow                                           \
-      ( SICONOS_VISITOR_QUOTE(you must define a visit function for X in a derived class of SiconosVisitor))
+      ( SICONOS_VISITOR_QUOTE(you must define a visit function for X& in a derived class of SiconosVisitor))
+
+#define SICONOS_VISITOR_CONST_FAIL(X)                                   \
+  RuntimeException::selfThrow                                           \
+      ( SICONOS_VISITOR_QUOTE(you must define a visit function for const X& in a derived class of SiconosVisitor))
 
 /* the base visitor */
 #undef REGISTER
 #define REGISTER(X)             \
   virtual void visit(std11::shared_ptr<X>) { SICONOS_VISITOR_FAIL(SP :: X);}; \
   virtual void visit(X&) { SICONOS_VISITOR_FAIL(X);};                   \
-  virtual void visit(const X&) { SICONOS_VISITOR_FAIL(X);};             \
+  virtual void visit(const X&) { SICONOS_VISITOR_CONST_FAIL(X);};
 
 #undef REGISTER_STRUCT
 #define REGISTER_STRUCT(X) REGISTER(X)

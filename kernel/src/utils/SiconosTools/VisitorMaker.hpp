@@ -99,9 +99,10 @@ struct NoCall : public Action
 
   using Action::visit;
 
-  virtual void visit(T& x)
+  virtual void visit(visitable_type& x)
   {
   }
+
 };
 
 
@@ -235,18 +236,10 @@ struct Filter
     >::type Make;
   };
 
-template<typename C, typename T>
+  template<typename C, typename T, typename IsModifier=boost::mpl::true_>
 struct Visitor
 {
-  typedef typename Filter<C, T, boost::mpl::false_>::Make LocalFilter;
-
-  typedef typename GlobalVisitor<LocalFilter>::Make Make;
-};
-
-template<typename C, typename T>
-struct Modifier
-{
-  typedef typename Filter<C, T, boost::mpl::true_>::Make LocalFilter;
+  typedef typename Filter<C, T, IsModifier>::Make LocalFilter;
 
   typedef typename GlobalVisitor<LocalFilter>::Make Make;
 };

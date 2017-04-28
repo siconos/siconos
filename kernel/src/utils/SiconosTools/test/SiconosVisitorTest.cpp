@@ -84,7 +84,7 @@ void SiconosVisitorTest::t2()
 
   };
 
-  DynamicalSystem *ds = new LagrangianDS();
+  const DynamicalSystem *ds = new LagrangianDS();
 
   try
   {

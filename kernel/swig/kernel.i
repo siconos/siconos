@@ -91,6 +91,8 @@
 %ignore getDSBlocks;
 %ignore getInvMBlock;
 
+%ignore Experimental;
+
 %warnfilter(509) rotateAbsToBody;
 %warnfilter(509) changeFrameAbsToBody;
 %warnfilter(509) changeFrameBodyToAbs;
@@ -197,7 +199,6 @@ namespace std
  // segfaults...
  // we cannot share data struct
  //%import Numerics.i
-
 %include "SiconosConst.hpp"
 
 %include "SiconosVisitables.hpp"

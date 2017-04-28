@@ -105,8 +105,6 @@ public:
    */
   SiconosVector(const SiconosVector& v1, const SiconosVector& v2);
 
-  /** destructor
-   */
   ~SiconosVector();
 
   /** get the vector size, ie the total number of (double) elements in the vector
