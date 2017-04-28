@@ -319,7 +319,7 @@ const std::string SiconosVector::toString() const
 
 double SiconosVector::getValue(unsigned int row) const
 {
-  return apply_visitor<GetValue, unsigned int>(storage(*this), row);
+  return apply_visitor<GetValue, double>(storage(*this), row);
 }
 
 void SiconosVector::setValue(unsigned int row, const double value)

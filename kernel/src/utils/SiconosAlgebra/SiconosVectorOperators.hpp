@@ -175,7 +175,7 @@ struct SetValue : public ParamVisitor<unsigned int, double>
 {
 
   typedef ParamVisitor<unsigned int, double> base_type;
-  SetValue(base_type::arguments_type args) :
+  SetValue(const base_type::arguments_type& args) :
     base_type(args) {};
 
   template<typename T>

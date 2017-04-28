@@ -282,7 +282,8 @@ void Interaction::__init()
   // -- Set upper/lower levels, according to the nslaw --
   std11::shared_ptr<_setLevels> setLevels;
   setLevels.reset(new _setLevels(this));
-  _nslaw->accept(*(setLevels.get()));
+  const NonSmoothLaw& nslaw = *_nslaw;
+  nslaw.accept(*(setLevels.get()));
 
   // Ensure consistency between interaction and nslaw sizes
   if (_interactionSize != _nslaw->size())

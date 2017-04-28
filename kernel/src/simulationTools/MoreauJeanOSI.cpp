@@ -1553,7 +1553,8 @@ void MoreauJeanOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_int
   if(inter.relation()->getType() == Lagrangian || inter.relation()->getType() == NewtonEuler)
   {
     _NSLEffectOnFreeOutput nslEffectOnFreeOutput = _NSLEffectOnFreeOutput(osnsp, inter);
-    inter.nonSmoothLaw()->accept(nslEffectOnFreeOutput);
+    const NonSmoothLaw& nslaw = *inter.nonSmoothLaw();
+    nslaw.accept(nslEffectOnFreeOutput);
   }
 }
 
