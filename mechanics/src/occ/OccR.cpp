@@ -30,13 +30,13 @@ OccR::OccR(const ContactPoint& contact1,
   default:
     RuntimeException::selfThrow("OccR: Unknown distance calculator");
   }
-  this->_contact2.contactShape().accept(*this->_geometer);
+  this->_contact2.contactShape().accept_reader(*this->_geometer);
 }
 
 
 void OccR::computeh(double time, BlockVector& q0, SiconosVector& y)
 {
-  this->_contact2.contactShape().accept(*this->_geometer);
+  this->_contact2.contactShape().accept_reader(*this->_geometer);
 
   ContactShapeDistance& dist = this->_geometer->answer;
 

@@ -1134,7 +1134,7 @@ void MoreauJeanGOSI::NSLcontrib(Interaction& inter, OneStepNSProblem& osnsp)
   if(inter.relation()->getType() == Lagrangian || inter.relation()->getType() == NewtonEuler)
   {
     _NSLEffectOnFreeOutput nslEffectOnFreeOutput = _NSLEffectOnFreeOutput(osnsp, inter);
-    inter.nonSmoothLaw()->accept(nslEffectOnFreeOutput);
+    inter.nonSmoothLaw()->accept_reader(nslEffectOnFreeOutput);
   }
 }
 

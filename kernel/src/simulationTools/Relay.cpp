@@ -135,7 +135,7 @@ int Relay::compute(double time)
     // the relation type and on the non smooth law
     unsigned int pos = _M->getPositionOfInteractionBlock(*inter);
     SP::SiconosVisitor NSLEffect(new _BoundsNSLEffect(this, inter, pos));
-    inter->nonSmoothLaw()->accept(*NSLEffect);
+    inter->nonSmoothLaw()->accept_reader(*NSLEffect);
   }
 
   // --- Call Numerics driver ---

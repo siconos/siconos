@@ -728,7 +728,7 @@ void SchatzmanPaoliOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex
   if(inter->relation()->getSubType() == LinearTIR)
   {
     SP::SiconosVisitor nslEffectOnFreeOutput(new _NSLEffectOnFreeOutput(osnsp, inter));
-    inter->nonSmoothLaw()->accept(*nslEffectOnFreeOutput);
+    inter->nonSmoothLaw()->accept_reader(*nslEffectOnFreeOutput);
   }
 
   DEBUG_END("SchatzmanPaoliOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, OneStepNSProblem* osnsp)\n");

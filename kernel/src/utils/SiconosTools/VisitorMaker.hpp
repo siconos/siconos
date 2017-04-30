@@ -106,7 +106,7 @@ struct NoCall : public Action
 };
 
 
-  template<typename T, typename Pred, typename IsModifier=boost::mpl::true_ >
+  template<typename T, typename Pred, typename IsModifier>
 class VisitMaker
 {
 private:
@@ -137,7 +137,7 @@ public:
 #define REGISTER_BASE(X, Y) REGISTER(X)
 #define REGISTER_BASE_EXTERN(X, Y)
 
-  template<typename T>
+  template<typename T, typename IsModifier>
   struct GlobalVisitor
   {
     typedef typename
@@ -149,7 +149,7 @@ public:
 #undef REGISTER_BASE
 #undef REGISTER_BASE_EXTERN
 
-#define REGISTER(X) >
+#define REGISTER(X) , IsModifier >
 #define REGISTER_STRUCT(X)
 #define REGISTER_BASE(X, Y) REGISTER(X)
 #define REGISTER_BASE_EXTERN(X, Y)
@@ -241,8 +241,12 @@ struct Visitor
 {
   typedef typename Filter<C, T, IsModifier>::Make LocalFilter;
 
-  typedef typename GlobalVisitor<LocalFilter>::Make Make;
+  typedef typename GlobalVisitor<LocalFilter, IsModifier>::Make Make;
 };
+
+
+  typedef boost::mpl::true_ VisitorWriter;
+  typedef boost::mpl::false_ VisitorReader;
 
 }
 

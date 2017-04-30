@@ -84,7 +84,17 @@
   virtual void accept(SiconosVisitor&)                                  \
   {                                                                     \
     RuntimeException::selfThrow                                         \
-      ( "accept: no modifier defined");                                 \
+      ( "accept: no writer defined");                                 \
+  };                                                                    \
+  virtual void accept_reader(SiconosVisitor&) const                     \
+  {                                                                     \
+    RuntimeException::selfThrow                                         \
+      ( "accept: no visitor defined");                                  \
+  };                                                                    \
+  virtual void accept_writer(SiconosVisitor&)                         \
+  {                                                                     \
+    RuntimeException::selfThrow                                         \
+      ( "accept: no writer defined");                                 \
   };                                                                    \
   virtual void acceptSerializer(SiconosVisitor&)                        \
   {                                                                     \
@@ -102,12 +112,17 @@
   template<typename Archive> friend class SiconosSerializer;            \
   virtual void accept(SiconosVisitor& tourist) const { tourist.visit(*this); } \
   virtual void accept(SiconosVisitor& tourist) { tourist.visit(*this); } \
+  virtual void accept_reader(SiconosVisitor& tourist) const { tourist.visit(*this); } \
+  virtual void accept_writer(SiconosVisitor& tourist) { tourist.visit(*this); } \
   virtual void acceptSerializer(SiconosVisitor& serializer) { serializer.visit(*this); } \
   virtual inline Type::Siconos acceptType(FindType& ft) const { return ft.visit(*this); } \
 
 #define ACCEPT_NONVIRTUAL_VISITORS()                                    \
   template<typename Archive> friend class SiconosSerializer;            \
   void accept(SiconosVisitor& tourist) const { tourist.visit(*this); }  \
+  void accept(SiconosVisitor& tourist) { tourist.visit(*this); }        \
+  void accept_reader(SiconosVisitor& tourist) const { tourist.visit(*this); } \
+  void accept_writer(SiconosVisitor& tourist) { tourist.visit(*this); } \
   void acceptSerializer(SiconosVisitor& serializer) { serializer.visit(*this); } \
   inline Type::Siconos acceptType(FindType& ft) const { return ft.visit(*this); } \
 
@@ -123,6 +138,9 @@
   template<typename Archive> friend class SiconosSerializer;            \
   virtual void acceptBase(SiconosVisitor& tourist) const { tourist.visit(*static_cast<const BASE *>(this)); } \
   virtual void accept(SiconosVisitor& tourist) const { tourist.visit(*this); } \
+  virtual void accept(SiconosVisitor& tourist)       { tourist.visit(*this); } \
+  virtual void accept_reader(SiconosVisitor& tourist) const { tourist.visit(*this); } \
+  virtual void accept_writer(SiconosVisitor& tourist)       { tourist.visit(*this); } \
   virtual void acceptSerializerBase(SiconosVisitor& serializer) { serializer.visit(*static_cast<const BASE *>(this)); } \
   virtual void acceptSerializer(SiconosVisitor& serializer) { serializer.visit(*this); } \
   virtual inline Type::Siconos acceptType(FindType& ft) const { return ft.visit(*static_cast<const BASE *>(this)); } \
@@ -131,6 +149,7 @@
   template<typename Archive> friend class SiconosSerializer;            \
   void acceptBase(SiconosVisitor& tourist) const { tourist.visit(*static_cast<const BASE *>(this)); } \
   void accept(SiconosVisitor& tourist) const { tourist.visit(*this); } \
+  void accept(SiconosVisitor& tourist) { tourist.visit(*this); }  \
   void acceptSerializerBase(SiconosVisitor& serializer) { serializer.visit(*static_cast<const BASE *>(this)); } \
   void acceptSerializer(SiconosVisitor& serializer) { serializer.visit(*this); } \
   inline Type::Siconos acceptType(FindType& ft) const { return ft.visit(*static_cast<const BASE *>(this)); } \

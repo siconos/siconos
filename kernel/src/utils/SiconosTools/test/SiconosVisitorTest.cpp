@@ -90,7 +90,7 @@ void SiconosVisitorTest::t2()
   {
     MyVisitor myvisitor;
 
-    ds->accept(myvisitor);
+    ds->accept_reader(myvisitor);
 
     delete(ds);
   }
