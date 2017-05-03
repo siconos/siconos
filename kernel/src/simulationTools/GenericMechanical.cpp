@@ -21,9 +21,11 @@
 #include "Model.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
 #include "NewtonImpactFrictionNSL.hpp"
+#include "RelayNSL.hpp"
 #include "OSNSMatrix.hpp"
 #include "GenericMechanicalProblem.h" // from numerics, for GM problem struct
 #include "FrictionContactProblem.h" // from numerics, for GM problem struct
+#include "RelayProblem.h" // from numerics, for GM problem struct
 #include "GenericMechanical_Solvers.h"
 using namespace RELATION;
 
@@ -81,6 +83,21 @@ void GenericMechanical::computeDiagonalInteractionBlock(const InteractionsGraph:
       addProblem(_pnumerics_GMP, SICONOS_NUMERICS_PROBLEM_LCP, size);
 #ifdef GMP_DEBUG
       printf(" Type::NewtonImpactNSL\n");
+#endif
+    }
+    else if (Type::value(*(inter->nonSmoothLaw()))
+             == Type::RelayNSL)
+    {
+      RelayProblem * pAux =
+        (RelayProblem *)addProblem(_pnumerics_GMP, SICONOS_NUMERICS_PROBLEM_RELAY, size);
+      SP::RelayNSL nsLaw =
+        std11::static_pointer_cast<RelayNSL> (inter->nonSmoothLaw());
+      for (int i=0; i<size; i++) {
+        pAux->lb[i] = nsLaw->lb();
+        pAux->ub[i] = nsLaw->ub();
+      }
+#ifdef GMP_DEBUG
+      printf(" Type::RelayNSL\n");
 #endif
     }
     else if (Type::value(*(inter->nonSmoothLaw()))

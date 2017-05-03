@@ -52,6 +52,7 @@ const char* const SICONOS_NUMERICS_PROBLEM_FC2D_STR = "FC2D";
 const char* const SICONOS_NUMERICS_PROBLEM_FC3D_STR = "FC3D";
 const char* const SICONOS_NUMERICS_PROBLEM_VI_STR = "VI";
 const char* const SICONOS_NUMERICS_PROBLEM_AVI_STR = "AVI";
+const char* const SICONOS_NUMERICS_PROBLEM_RELAY_STR = "RELAY";
 
 static void recursive_solver_options_print(SolverOptions* options, int level);
 
