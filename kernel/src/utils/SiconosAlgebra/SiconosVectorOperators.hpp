@@ -2,7 +2,7 @@
 #define SiconosVectorOperators_hpp
 #include "SiconosVectorStorage.hpp"
 
-namespace bindings = boost::numeric::bindings::blas;
+#include <boost/numeric/ublas/vector_proxy.hpp>
 
 struct Resize : public ParamVisitor<const size_t>
 {
@@ -33,10 +33,8 @@ struct Fill : public ParamVisitor<const double>
 };
 
 template<>
-void Fill::operator()<DenseVect> (DenseVect& v)
-  {
-    bindings::set(this->param(), v);
-  }
+void Fill::operator()<DenseVect> (DenseVect& v);
+
 
 struct Size : public SiconosVisitor
 {
@@ -58,10 +56,7 @@ struct Zero : public SiconosVisitor
 };
 
 template<>
-void Zero::operator()<DenseVectStorage> (DenseVectStorage& dv)
-{
-  bindings::scal(0.0, dv.internal_data);
-};
+void Zero::operator()<DenseVectStorage> (DenseVectStorage& dv);
 
 struct Sum : public SiconosVisitor
 {
@@ -164,12 +159,7 @@ struct GetRValue : public ParamVisitor<unsigned int>
 };
 
 template<>
-void GetRValue::operator()<SparseVectStorage> (SparseVectStorage& storage)
-{
-  assert (this->param() <= storage.internal_data.size());
-
-  answer = &(storage.internal_data(this->param()).ref());
-}
+void GetRValue::operator()<SparseVectStorage> (SparseVectStorage& storage);
 
 struct SetValue : public ParamVisitor<unsigned int, double>
 {
@@ -226,11 +216,7 @@ struct Scal : public ParamVisitor<const double>
 };
 
 template<>
-void Scal::operator()<DenseVectStorage> (DenseVectStorage& dv)
-{
-  bindings::scal(this->param(), dv.internal_data);
-};
-
+void Scal::operator()<DenseVectStorage> (DenseVectStorage& dv);
 
 template<typename C>
 struct IDot : public ParamVisitor<const C&>
@@ -247,10 +233,7 @@ struct IDot : public ParamVisitor<const C&>
   };
 };
 
-double inner_prod(DenseVect& v1, DenseVect& v2)
-{
-  return bindings::dot(v1, v2);
-}
+double inner_prod(DenseVect& v1, DenseVect& v2);
 
 struct Dot : public ParamVisitor<const SiconosVectorStorage&>
 {
@@ -437,11 +420,7 @@ struct OpCopy
 };
 
 template<>
-void OpCopy::operator()(const DenseVect& dv2, DenseVect& dv1)
-{
-  dv1.resize(dv2.size());
-  bindings::copy(dv2, dv1);
-}
+void OpCopy::operator()(const DenseVect& dv2, DenseVect& dv1);
 
 struct OpAxpy
 {
@@ -467,29 +446,13 @@ template<>
 void OpAxpby::operator()<DenseVect, DenseVect>(const DenseVect& x,
                                                const double& a,
                                                const double& b,
-                                               DenseVect& y)
-{
-  bindings::scal(b, y);
-  bindings::axpy(a, x, y);
-}
+                                               DenseVect& y);
 
 template<>
 void OpAxpby::operator()<SparseVect, SparseVect>(const SparseVect& x,
                                                  const double& a,
                                                  const double& b,
-                                                 SparseVect& y)
-{
-  y *= b;
-  if (&y != &x)
-  {
-    noalias(y) += a*x;
-  }
-  else
-  {
-    y += a*x;
-  }
-}
-
+                                                 SparseVect& y);
 
 struct OpAddBlock
 {

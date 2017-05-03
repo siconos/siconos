@@ -5,11 +5,6 @@
 #include "SiconosVisitor.hpp"
 #include "SiconosVectorException.hpp"
 
-#include <boost/numeric/bindings/ublas/vector_proxy.hpp>
-#include <boost/numeric/bindings/blas.hpp>
-#include <boost/numeric/bindings/ublas/vector.hpp>
-#include <boost/numeric/bindings/std/vector.hpp>
-
 #include <boost/array.hpp>
 #include <vector>
 #include <boost/numeric/ublas/vector.hpp>
@@ -45,6 +40,34 @@ struct DenseVectStorage : public SiconosVectorStorage
   ACCEPT_STD_VISITORS();
 };
 
+template<size_t N>
+struct BoundedVectStorage : public SiconosVectorStorage
+{
+  typedef ublas::vector<double, ublas::bounded_array<double, N> > storage_type;
+  storage_type internal_data;
+  BoundedVectStorage() : internal_data() {};
+  BoundedVectStorage(size_t r) : internal_data(r) {};
+
+  BoundedVectStorage(size_t r, double val) : internal_data(r, val) {};
+
+  virtual ~BoundedVectStorage() {};
+
+  ACCEPT_STD_VISITORS();
+};
+
+/* issue with forwarding typedefs */
+#define BOUNDED_VECT_STORAGE_INSTANCE(N) \
+  struct BoundedVectStorage##N : public BoundedVectStorage<N>  \
+  {                                                           \
+    BoundedVectStorage##N() : BoundedVectStorage<N>() {};     \
+    BoundedVectStorage##N(size_t r) : BoundedVectStorage<N>(r) {}; \
+    BoundedVectStorage##N(size_t r, double val) : BoundedVectStorage<N>(r, val) {};                      \
+  }
+
+BOUNDED_VECT_STORAGE_INSTANCE(3);
+BOUNDED_VECT_STORAGE_INSTANCE(4);
+BOUNDED_VECT_STORAGE_INSTANCE(6);
+BOUNDED_VECT_STORAGE_INSTANCE(7);
 
 struct SparseVectStorage : public SiconosVectorStorage
 {
@@ -87,8 +110,9 @@ static typename Storage::forward_const<T, SiconosVectorStorage>::type& storage(T
 };
 
 #undef VISITOR_CLASSES
-#define VISITOR_CLASSES() \
-  REGISTER(DenseVectStorage) \
+#define VISITOR_CLASSES()                       \
+  REGISTER(DenseVectStorage)                    \
+  REGISTER(BoundedVectStorage7)                   \
   REGISTER(SparseVectStorage)
 
 #include <VisitorMaker.hpp>

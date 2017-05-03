@@ -38,6 +38,7 @@
 #include <SiconosKernel.hpp>
 #include <SiconosAlgebra.hpp>
 #include <SiconosVectorStorage.hpp>
+#include <BoundedVector.hpp>
 #include <boost/numeric/ublas/matrix_sparse.hpp>
 #include <SiconosVisitor.hpp>
 #include "addons.hpp"

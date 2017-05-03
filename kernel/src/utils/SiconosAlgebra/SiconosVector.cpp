@@ -42,6 +42,7 @@
 #include "debug.h"
 #include "TypeName.hpp"
 
+namespace bindings = boost::numeric::bindings::blas;
 
 template<typename C>
 struct IOuterProd : public ParamVisitor<const C&>
@@ -125,8 +126,7 @@ SiconosVector::SiconosVector(const std::vector<double>& v, Siconos::UBLAS_TYPE t
 }
 
 // Copy
-SiconosVector::SiconosVector(const SiconosVector &svect) :
-  std11::enable_shared_from_this<SiconosVector>()
+SiconosVector::SiconosVector(const SiconosVector &svect) : boost::enable_shared_from_this<SiconosVector>()
 {
   this->_storage = apply_visitor<StorageAllocator, SiconosVectorStorage*>(storage(svect), svect.size());
   // *this <- svect
@@ -134,7 +134,7 @@ SiconosVector::SiconosVector(const SiconosVector &svect) :
 }
 
 // Copy from BlockVector
-SiconosVector::SiconosVector(const BlockVector & vIn) : std11::enable_shared_from_this<SiconosVector>()
+SiconosVector::SiconosVector(const BlockVector & vIn) : boost::enable_shared_from_this<SiconosVector>()
 {
   this->_storage = apply_visitor<StorageAllocator, SiconosVectorStorage*>(storage(**vIn.begin()), vIn.size());
   VectorOfVectors::const_iterator it;
@@ -188,6 +188,8 @@ SiconosVector::SiconosVector(const SiconosVector& v1, const SiconosVector& v2)
   setBlock(0, v1);
   setBlock(size1, v2);
 }
+
+SiconosVector::SiconosVector(SiconosVectorStorage& storage) : _storage(&storage) {};
 
 SiconosVector::~SiconosVector()
 {

@@ -105,7 +105,12 @@ public:
    */
   SiconosVector(const SiconosVector& v1, const SiconosVector& v2);
 
-  ~SiconosVector();
+  /** constructor from SiconosVectorStorage reference
+   * \param storage the SiconosVectorStorage
+   */
+  SiconosVector(SiconosVectorStorage& storage);
+
+  virtual ~SiconosVector();
 
   /** get the vector size, ie the total number of (double) elements in the vector
    *  \return unsigned int

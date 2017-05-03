@@ -300,6 +300,7 @@ static inline void fillBasePyarray(PyObject* pyarray, SharedPointerKeeper* saved
 #include <Question.hpp>
 #include <SiconosVectorStorage.hpp>
 #include <SiconosVector.hpp>
+#include <BoundedVector.hpp>
 %}
 
 %fragment("SiconosVector", "header", fragment="NumPy_Fragments")

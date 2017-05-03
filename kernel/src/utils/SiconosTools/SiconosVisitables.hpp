@@ -46,9 +46,13 @@
   REGISTER(FrictionContact)                            \
   REGISTER(GlobalFrictionContact)                      \
   REGISTER(SiconosVector)                              \
-  REGISTER(SiconosVectorStorage)                                    \
+  REGISTER(SiconosVectorStorage)                       \
   REGISTER(DenseVectStorage)                           \
   REGISTER(SparseVectStorage)                          \
+  REGISTER(BoundedVectStorage3)                        \
+  REGISTER(BoundedVectStorage4)                        \
+  REGISTER(BoundedVectStorage6)                        \
+  REGISTER(BoundedVectStorage7)                        \
   REGISTER(SimpleMatrix)                               \
   REGISTER(BlockVector)                                \
   REGISTER(BlockMatrix)                                \
