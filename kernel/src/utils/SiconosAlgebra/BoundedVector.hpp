@@ -6,36 +6,33 @@
 
 #include "SiconosVectorOperators.hpp"
 
-template<size_t N>
-class BoundedVector : public SiconosVector
-{
-public:
-  BoundedVector() : SiconosVector(_bounded_storage) {};
+#define MAKE_BOUNDED_VECTOR(N)                                \
+  class SiconosVector##N : public SiconosVector               \
+  {                                                           \
+  public:                                                     \
+    SiconosVector##N() : SiconosVector(_bounded_storage) {};            \
+                                                                        \
+    SiconosVector##N(const SiconosVector& svect) : SiconosVector(_bounded_storage) \
+    {                                                                   \
+      apply_visitor<Copy>(storage(svect), storage(*this));              \
+    };                                                                  \
+    SiconosVector##N(const SiconosVector##N& svect) : SiconosVector(_bounded_storage) \
+    {                                                                   \
+      apply_visitor<Copy>(storage(svect), storage(*this));              \
+    };                                                                  \
+                                                                        \
+    ~SiconosVector##N() { this->_storage = NULL; };                     \
+                                                                        \
+  protected:                                                            \
+    ACCEPT_SERIALIZATION(SiconosVector);                                \
+                                                                        \
+    BoundedVectStorage##N _bounded_storage;                             \
+                                                                        \
+  }
 
-  BoundedVector(const SiconosVector& svect) : SiconosVector(_bounded_storage)
-  {
-    apply_visitor<Copy>(storage(svect), storage(*this));
-  };
-  BoundedVector(const BoundedVector<N>& svect) : SiconosVector(_bounded_storage)
-  {
-    apply_visitor<Copy>(storage(svect), storage(*this));
-  };
-
-  ~BoundedVector() { this->_storage = NULL; };
-
-
-protected:
-  /** serialization hooks
-   */
-  ACCEPT_SERIALIZATION(SiconosVector);
-
-  BoundedVectStorage<N> _bounded_storage;
-
-};
-
-typedef BoundedVector<3> SiconosVector3;
-typedef BoundedVector<4> SiconosVector4;
-typedef BoundedVector<6> SiconosVector6;
-typedef BoundedVector<7> SiconosVector7;
+MAKE_BOUNDED_VECTOR(3);
+MAKE_BOUNDED_VECTOR(4);
+MAKE_BOUNDED_VECTOR(6);
+MAKE_BOUNDED_VECTOR(7);
 
 #endif

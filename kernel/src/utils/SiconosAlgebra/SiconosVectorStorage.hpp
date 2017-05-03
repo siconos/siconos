@@ -57,11 +57,13 @@ struct BoundedVectStorage : public SiconosVectorStorage
 
 /* issue with forwarding typedefs */
 #define BOUNDED_VECT_STORAGE_INSTANCE(N) \
-  struct BoundedVectStorage##N : public BoundedVectStorage<N>  \
-  {                                                           \
-    BoundedVectStorage##N() : BoundedVectStorage<N>() {};     \
-    BoundedVectStorage##N(size_t r) : BoundedVectStorage<N>(r) {}; \
-    BoundedVectStorage##N(size_t r, double val) : BoundedVectStorage<N>(r, val) {};                      \
+  struct BoundedVectStorage##N : public BoundedVectStorage<N>                       \
+  {                                                                                 \
+    BoundedVectStorage##N() : BoundedVectStorage<N>() {};                           \
+    BoundedVectStorage##N(size_t r) : BoundedVectStorage<N>(r) {};                  \
+    BoundedVectStorage##N(size_t r, double val) : BoundedVectStorage<N>(r, val) {}; \
+                                                                                    \
+   ACCEPT_STD_VISITORS();                                                           \
   }
 
 BOUNDED_VECT_STORAGE_INSTANCE(3);
@@ -112,7 +114,10 @@ static typename Storage::forward_const<T, SiconosVectorStorage>::type& storage(T
 #undef VISITOR_CLASSES
 #define VISITOR_CLASSES()                       \
   REGISTER(DenseVectStorage)                    \
-  REGISTER(BoundedVectStorage7)                   \
+  REGISTER(BoundedVectStorage3)                 \
+  REGISTER(BoundedVectStorage4)                 \
+  REGISTER(BoundedVectStorage6)                 \
+  REGISTER(BoundedVectStorage7)                 \
   REGISTER(SparseVectStorage)
 
 #include <VisitorMaker.hpp>
