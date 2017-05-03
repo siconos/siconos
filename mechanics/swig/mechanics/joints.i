@@ -11,3 +11,4 @@ PY_FULL_REGISTER(PrismaticJointR);
 PY_FULL_REGISTER(FixedJointR);
 PY_FULL_REGISTER(CylindricalJointR);
 PY_FULL_REGISTER(JointStopR);
+PY_FULL_REGISTER(JointFrictionR);

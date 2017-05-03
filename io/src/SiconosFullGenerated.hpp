@@ -28,6 +28,7 @@
 #include "CylindricalJointR.hpp"
 #include "NewtonEulerJointR.hpp"
 #include "JointStopR.hpp"
+#include "JointFrictionR.hpp"
 #include "BodyDS.hpp"
 #include "SiconosShape.hpp"
 #include "SiconosCollisionManager.hpp"
@@ -779,6 +780,12 @@ SICONOS_IO_REGISTER_WITH_BASES(BodyDS,(NewtonEulerDS),
 SICONOS_IO_REGISTER_WITH_BASES(CircularDS,(LagrangianDS),
   (massValue)
   (radius))
+SICONOS_IO_REGISTER_WITH_BASES(JointFrictionR,(NewtonEulerR),
+  (_axis)
+  (_axisMax)
+  (_axisMin)
+  (_jachqTmp)
+  (_joint))
 SICONOS_IO_REGISTER_WITH_BASES(JointStopR,(NewtonEulerR),
   (_axis)
   (_axisMax)
@@ -1117,6 +1124,7 @@ void siconos_io_register_generated(Archive& ar)
   ar.register_type(static_cast<SphereNEDS*>(NULL));
   ar.register_type(static_cast<BodyDS*>(NULL));
   ar.register_type(static_cast<CircularDS*>(NULL));
+  ar.register_type(static_cast<JointFrictionR*>(NULL));
   ar.register_type(static_cast<JointStopR*>(NULL));
   ar.register_type(static_cast<SiconosShape*>(NULL));
   ar.register_type(static_cast<CylindricalJointR*>(NULL));

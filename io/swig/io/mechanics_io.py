@@ -943,6 +943,10 @@ class Hdf5():
                                    float(self._nslaws_data[name].attrs['mu']), 3)
             elif nslawClass == Kernel.NewtonImpactNSL:
                 nslaw = nslawClass(float(self._nslaws_data[name].attrs['e']))
+            elif nslawClass == Kernel.RelayNSL:
+                nslaw = nslawClass(int(self._nslaws_data[name].attrs['size']),
+                                   float(self._nslaws_data[name].attrs['lb']),
+                                   float(self._nslaws_data[name].attrs['ub']))
             assert(nslaw)
             self._nslaws[name] = nslaw
             gid1 = int(self._nslaws_data[name].attrs['gid1'])
@@ -1256,6 +1260,7 @@ class Hdf5():
                 'allow_self_collide',None)
             stops = self.joints()[name].attrs.get('stops',None)
             nslaws = self.joints()[name].attrs.get('nslaws',None)
+            friction = self.joints()[name].attrs.get('friction',None)
 
             ds1_name = self.joints()[name].attrs['object1']
             ds1 = topo.getDynamicalSystem(ds1_name)
@@ -1313,9 +1318,16 @@ class Hdf5():
                     # "bool()" is needed because type of dir is
                     # numpy.bool_, which SWIG doesn't handle well.
                     stop = joints.JointStopR(joint, pos, bool(dir<0), int(axis))
-                    stop_inter = Interaction(nsl, stop)
+                    stop_inter = Interaction(nslaws[0], stop)
                     self._model.nonSmoothDynamicalSystem().\
                         link(stop_inter, ds1, ds2)
+
+            if friction is not None:
+                nslaw = self._nslaws[friction]
+                fr = joints.JointFrictionR(joint, 0) #TODO axis list
+                fr_inter = Interaction(nslaw, fr)
+                self._model.nonSmoothDynamicalSystem().\
+                    link(fr_inter, ds1, ds2)
 
     def importBoundaryConditions(self, name):
         if self._broadphase is not None:
@@ -2201,9 +2213,34 @@ class Hdf5():
             nslaw.attrs['gid1']=collision_group1
             nslaw.attrs['gid2']=collision_group2
 
+    # Note, default groups are -1 here, indicating not to add them to
+    # the nslaw lookup table for contacts, since 1D impacts are
+    # useless in this case.  They are however useful for joint friction.
+    def addRelayNSL(self, name, lb, ub, size=1, collision_group1=-1,
+                    collision_group2=-1):
+        """
+        Add a nonsmooth law for contact between 2 groups.
+        Only NewtonImpactNSL are supported.
+        name is a user identifier and must be unique,
+        e is the coefficient of restitution on the contact normal,
+        gid1 and gid2 define the group identifiers.
+
+        As opposed to addNewtonImpactFrictionNSL, the default groups are
+        -1, making the NSL unassociated with point contacts.  It can
+        by used for joint stops however.
+        """
+        if name not in self._nslaws_data:
+            nslaw=self._nslaws_data.create_dataset(name, (0,))
+            nslaw.attrs['type']='RelayNSL'
+            nslaw.attrs['size']=size
+            nslaw.attrs['lb']=lb
+            nslaw.attrs['ub']=ub
+            nslaw.attrs['gid1']=collision_group1
+            nslaw.attrs['gid2']=collision_group2
+
     def addJoint(self, name, object1, object2=None, pivot_point=[0, 0, 0],
                  axis=[0, 1, 0], joint_class='PivotJointR', absolute=None,
-                 allow_self_collide=None, nslaws=None, stops=None):
+                 allow_self_collide=None, nslaws=None, stops=None, friction=None):
         """
         add a joint between two objects
         """
@@ -2224,6 +2261,9 @@ class Hdf5():
                                                # list of names same length as stops
             if stops is not None:
                 joint.attrs['stops'] = stops # must be a table of [[axis,pos,dir]..]
+            if friction is not None:
+                joint.attrs['friction'] = friction # must be an NSL name (e.g. RelayNSL)
+
 
     def addBoundaryCondition(self, name, object1, indices=None, bc_class='HarmonicBC',
                              v=None, a=None, b=None, omega=None, phi=None):
