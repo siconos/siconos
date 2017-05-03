@@ -101,6 +101,15 @@ struct Interaction::_setLevels : public SiconosVisitor
       _interaction->setLowerLevelForInput(0);
       _interaction->setUpperLevelForInput(0);
     }
+    else if (relationType == Lagrangian || relationType == NewtonEuler)
+    {
+      // For friction
+      _interaction->setLowerLevelForOutput(0);
+      _interaction->setUpperLevelForOutput(1);
+
+      _interaction->setLowerLevelForInput(0);
+      _interaction->setUpperLevelForInput(1);
+    }
     else
     {
       RuntimeException::selfThrow("Interaction::_setLevels::visit - unknown relation type for the nslaw ");

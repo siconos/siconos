@@ -267,7 +267,8 @@ void TimeStepping::updateIndexSet(unsigned int i)
         SP::Interaction inter0 = indexSet0->bundle(*ui0);
         assert(!indexSet1->is_vertex(inter0));
         bool activate = true;
-        if (Type::value(*(inter0->nonSmoothLaw())) != Type::EqualityConditionNSL)
+        if (Type::value(*(inter0->nonSmoothLaw())) != Type::EqualityConditionNSL
+            && Type::value(*(inter0->nonSmoothLaw())) != Type::RelayNSL)
         {
           //SP::OneStepIntegrator Osi = indexSet0->properties(*ui0).osi;
 	  // We assume that the integrator of the ds1 drive the update of the index set

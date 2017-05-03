@@ -1359,6 +1359,12 @@ struct MoreauJeanOSI::_NSLEffectOnFreeOutput : public SiconosVisitor
     subscal(e, *_inter.y_k(_osnsp->inputOutputLevel()), *(_inter.yForNSsolver()), subCoord, false);
   }
 
+  void visit(const RelayNSL& nslaw)
+  {
+    // since velocity lower-/upper-bounds are fully specified in NSL,
+    // nothing to do here
+  }
+
   void visit(const NewtonImpactFrictionNSL& nslaw)
   {
     double e;
