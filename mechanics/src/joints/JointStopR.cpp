@@ -62,7 +62,7 @@ JointStopR::JointStopR(SP::NewtonEulerJointR joint, SP::SiconosVector pos,
   , _dir(dir)
 {
   _axisMin = 100;
-  _axisMax = -100;
+  _axisMax = 0;
   for (int i=0; i < _axis->size(); i++)
   {
     if ((*_axis)[i] > _axisMax) _axisMax = (*_axis)[i];
