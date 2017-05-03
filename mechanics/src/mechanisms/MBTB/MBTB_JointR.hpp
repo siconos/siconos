@@ -16,7 +16,7 @@ public:
   //! it is assumed that _interaction
   SP::Interaction  _interaction;
   //! it is assumed that _joinrR is a pivot.
-  SP::NewtonEulerR _jointR;
+  SP::NewtonEulerJointR _jointR;
   //! The first dynamical systems of the joint.
   SP::NewtonEulerDS _ds1;
 

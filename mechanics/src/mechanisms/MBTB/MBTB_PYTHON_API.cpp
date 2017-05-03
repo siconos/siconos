@@ -372,7 +372,6 @@ void MBTB_JointBuild(unsigned int numJ,const std::string& JointName,
   /*BUILD H SimpleMatrix and NSLAW*/
   if(jointType == PIVOT_0 || jointType == PIVOT_1)
   {
-    lNbEq = PivotJointR::numberOfConstraints();
     nbDS=1;
     if(jointType == PIVOT_1)
     {
@@ -382,12 +381,7 @@ void MBTB_JointBuild(unsigned int numJ,const std::string& JointName,
   else if(jointType == PRISMATIC_0)
   {
     nbDS=1;
-    lNbEq =PrismaticJointR::numberOfConstraints();
   }
-  SP::SimpleMatrix lH(new SimpleMatrix(lNbEq ,nbDS*qDim));
-  lH->zero();
-  SP::EqualityConditionNSL lNSL(new EqualityConditionNSL(lNbEq));
-
 
   SP::SiconosVector P(new SiconosVector(3));
   SP::SiconosVector A(new SiconosVector(3));
@@ -419,6 +413,13 @@ void MBTB_JointBuild(unsigned int numJ,const std::string& JointName,
     sJointRelations[numJ]->_ds1 = sDS[indexDS1];
     sAllDSByInter[numJ].insert(sDS[indexDS1]);
   }
+
+  lNbEq = sJointRelations[numJ]->_jointR->numberOfConstraints();
+
+  SP::SimpleMatrix lH(new SimpleMatrix(lNbEq ,nbDS*qDim));
+  lH->zero();
+  SP::EqualityConditionNSL lNSL(new EqualityConditionNSL(lNbEq));
+
   sJointRelations[numJ]->_jointR->setJachq(lH);
 //  sInterJoints[numJ].reset(new Interaction(JointName, sAllDSByInter[numJ],
 //                                           numJ, lNbEq , lNSL,
