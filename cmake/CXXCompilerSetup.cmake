@@ -10,7 +10,7 @@
 if(NOT CMAKE_CXX_COMPILER OR NOT CMAKE_CXX_COMPILER_WORKS)
   message(ABORT "no cxx compiler")
 endif()
-
+#add_definitions(-DBOOST_NOEXCEPT)
 # For SiconosConfig.h
 option(SICONOS_USE_BOOST_FOR_CXX11 "Prefer BOOST features over C++ standard features even if C++xy is enabled" ON)
 option(SICONOS_USE_MAP_FOR_HASH "Prefer std::map to std::unordered_map even if C++xy is enabled" ON)
@@ -25,6 +25,7 @@ set("CXXVERSION_CUR" "${CXXVERSION}:${CMAKE_CXX_STANDARD}")
 
 # For SiconosConfig.h
 detect_cxx_std_shared_ptr(SICONOS_STD_SHARED_PTR)
+
 detect_cxx_std_array(SICONOS_STD_ARRAY)
 detect_cxx_std_unordered_map(SICONOS_STD_UNORDERED_MAP)
 detect_cxx_std_tuple(SICONOS_STD_TUPLE)

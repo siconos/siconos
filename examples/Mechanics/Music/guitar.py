@@ -76,11 +76,11 @@ class StringDS(sk.LagrangianLinearDiagonalDS):
         """
         dx = self.length / (self.n_modes + 1)
         slope = umax / (imax * dx)
-        q0 = [slope * i * dx for i in xrange(imax)]
+        u0 = [slope * i * dx for i in xrange(imax)]
         slope = umax / (imax * dx - self.length)
-        q0 += [slope * (i * dx - self.length)
+        u0 += [slope * (i * dx - self.length)
                for i in xrange(imax, self.n_modes + 2)]
-        return npw.asrealarray(q0[1:-1])
+        return npw.asrealarray(u0[1:-1])
 
     def compute_initial_state_modal(self, imax, umax):
         """Set initial positions of the string,
@@ -273,7 +273,7 @@ class Guitar(sk.Model):
         # (4) Simulation setup with (1) (2) (3)
         self.simu = sk.TimeStepping(t, default_integrator, osnspb)
         if integrators is not None:
-            self.simulation.insertIntegrator(integrators[ds])
+            self.simu.insertIntegrator(integrators[ds])
             for ds in integrators:
                 nsds.setOSI(ds, integrators[ds])
         # simulation initialization

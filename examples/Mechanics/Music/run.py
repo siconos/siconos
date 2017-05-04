@@ -12,11 +12,11 @@ import numpy as np
 # ======== Description of the string(s) ==========
 # -- Geometry and material --
 G_string = {
-    'length': 1.002,
+    'length': 1. , #1.002,
     'diameter': 0.43e-3,
-    'density': 1.17e-3,
-    'B': 1.97e-5,
-    'tension': 180.5,
+    'density': 1., #1.17e-3,
+    'B': 0., #1.97e-5,
+    'tension': 1.#180.5,
 }
 
 # A dictionnary with parameters required to compute quality factor
@@ -27,7 +27,7 @@ damping_parameters = {
     '1/qte': 2.03e-4}
 
 # -- Spatial discretisation (modal proj) and initial conditions --
-number_of_modes = 1002
+number_of_modes = 3
 # position (index) of the max value of initial state
 # --> middle of the string
 imiddle = int((number_of_modes + 2) / 2)

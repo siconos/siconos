@@ -17,8 +17,6 @@
 */
 #include "NonSmoothDynamicalSystem.hpp"
 #include "Interaction.hpp"
-#include "LagrangianLinearTIDS.hpp"
-#include "FirstOrderLinearTIDS.hpp"
 #include "Relation.hpp"
 
 #include <SiconosConfig.h>
