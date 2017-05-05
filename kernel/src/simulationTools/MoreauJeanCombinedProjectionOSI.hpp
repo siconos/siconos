@@ -85,7 +85,7 @@ public:
   /** get the number of index sets required for the simulation
    * \return unsigned int
    */
-  unsigned int numberOfIndexSets() const {return 2;};
+  unsigned int numberOfIndexSets() const {return 3;};
 
 
   /** Apply the rule to one Interaction to known if is it should be included
