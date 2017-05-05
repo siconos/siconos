@@ -1,4 +1,5 @@
 #include "MBTB_JointR.hpp"
+#include "NewtonEulerJointR.hpp"
 #include <boost/math/quaternion.hpp>
 //#define MBTB_JOINTR_DEBUG
 

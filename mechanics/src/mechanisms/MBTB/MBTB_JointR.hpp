@@ -1,6 +1,7 @@
 #ifndef MBTB_JOINTR
 #define MBTB_JOINTR
 #include "SiconosKernel.hpp"
+#include "MechanicsFwd.hpp"
 /**
  * \brief This class implements a joint in a multi-bodies system.
  * It is an aggregation to the class siconos::NewtonEulerR. Mainly, it consists in adding members needed for the computation of joint forces.

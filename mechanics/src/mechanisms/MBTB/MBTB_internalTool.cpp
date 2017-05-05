@@ -5,6 +5,7 @@
 #include "ace.h"
 #include "MBTB_TimeSteppingProj.hpp"
 #include "MBTB_TimeSteppingCombinedProj.hpp"
+#include "NewtonEulerJointR.hpp"
 
 void _MBTB_updateContactFromDS()
 {
