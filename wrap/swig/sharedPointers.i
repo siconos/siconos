@@ -44,7 +44,10 @@ namespace STD11 {
 // boost >= 1.40
 #if (BOOST_VERSION >= 104000)
 %ignore std11::enable_shared_from_this::operator=;
-%import "boost//smart_ptr/detail/sp_noexcept.hpp"
+// boost >= 1.64
+#if (BOOST_VERSION >= 106400)
+%import "boost/smart_ptr/detail/sp_noexcept.hpp"
+#endif
 %import "boost/smart_ptr/enable_shared_from_this.hpp"
 #else
 %import "boost/enable_shared_from_this.hpp"
