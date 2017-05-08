@@ -115,6 +115,9 @@ SP::SiconosVector SiconosMemory::getSiconosVector(const unsigned int index) cons
 
 void SiconosMemory::swap(const SiconosVector& v)
 {
+  // In case of no memory (e.g. ZeroOrderHoldOSI), do nothing.
+  if (_size == 0)
+    return;
   // If vectorMemory size is _size, we remove its last element.
   *(*_vectorMemory)[_indx] = v;
   _nbVectorsInMemory = std::min(_nbVectorsInMemory+1, _size);
