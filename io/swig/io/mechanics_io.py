@@ -1318,7 +1318,7 @@ class Hdf5():
                     # "bool()" is needed because type of dir is
                     # numpy.bool_, which SWIG doesn't handle well.
                     stop = joints.JointStopR(joint, pos, bool(dir<0), int(axis))
-                    stop_inter = Interaction(nslaws[0], stop)
+                    stop_inter = Interaction(nsl, stop)
                     self._model.nonSmoothDynamicalSystem().\
                         link(stop_inter, ds1, ds2)
 
