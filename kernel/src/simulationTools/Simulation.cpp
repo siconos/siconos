@@ -521,6 +521,7 @@ void Simulation::prepareIntegratorForDS(SP::OneStepIntegrator osi,
   insertIntegrator(osi);
 
   // Associate the OSI to the DS in the topology.
+  assert(_nsds && "Simulation::prepareIntegratorForDS requires an NSDS.");
   _nsds->topology()->setOSI(ds, osi);
 
   // Prepare work vectors, etc.

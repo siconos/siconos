@@ -330,6 +330,14 @@ public:
     return _nsds;
   }
 
+  /** set the NonSmoothDynamicalSystem of the Simulation
+   *  \param newPtr a pointer on NonSmoothDynamicalSystem
+   */
+  void setNonSmoothDynamicalSystemPtr(SP::NonSmoothDynamicalSystem newPtr)
+  {
+    _nsds = newPtr;
+  }
+
   /** get tolerance
    *  \return a double
    */
