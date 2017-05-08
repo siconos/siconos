@@ -132,6 +132,7 @@ void ZeroOrderHoldOSI::initializeDynamicalSystem(Model& m, double t, SP::Dynamic
   // Get work buffers from the graph
   workVectors.resize(OneStepIntegrator::work_vector_of_vector_size);
   workVectors[OneStepIntegrator::free].reset(new SiconosVector(ds->dimension()));
+  workVectors[OneStepIntegrator::delta_x_for_relation].reset(new SiconosVector(ds->dimension()));
 }
 
 void ZeroOrderHoldOSI::fill_ds_links(Interaction &inter,
@@ -171,6 +172,14 @@ void ZeroOrderHoldOSI::fill_ds_links(Interaction &inter,
         DSlink[FirstOrderR::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
       }
     }
+
+  if (!DSlink[FirstOrderR::deltax])
+  {
+    DSlink[FirstOrderR::deltax].reset(new BlockVector());
+    DSlink[FirstOrderR::deltax]->insertPtr(workVds1[OneStepIntegrator::delta_x_for_relation]);
+  }
+  else
+    DSlink[FirstOrderR::deltax]->setVectorPtr(0,workVds1[OneStepIntegrator::delta_x_for_relation]);
 }
 
 double ZeroOrderHoldOSI::computeResidu()
