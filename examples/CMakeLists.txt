@@ -1,7 +1,7 @@
 # Set minimum version for cmake
 cmake_minimum_required(VERSION 3.0.2)
 
-set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../cmake)
+set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
 # Force out-of-source build
 include(OutOfSourcesBuild)
