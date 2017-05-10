@@ -156,7 +156,7 @@ void ZeroOrderHoldOSI::fill_ds_links(Interaction &inter,
   inter.initializeMemory(computeResidu,_steps);
 
   /* allocate and set work vectors for the osi */
-  if (checkOSI(DSG.descriptor(ds1)) || checkOSI(DSG.descriptor(ds2)))
+  if (!(checkOSI(DSG.descriptor(ds1)) && checkOSI(DSG.descriptor(ds2))))
   {
     RuntimeException::selfThrow("ZeroOrderHoldOSI::fill_ds_links. The implementation is not correct for two different OSI for one interaction");
   }

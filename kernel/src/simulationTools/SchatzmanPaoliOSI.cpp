@@ -183,7 +183,7 @@ void SchatzmanPaoliOSI::fill_ds_links(Interaction &inter,
   bool computeResidu = relation.requireResidu();
   inter.initializeMemory(computeResidu,_steps);
 
-  if (checkOSI(DSG.descriptor(ds1)) || checkOSI(DSG.descriptor(ds2)))
+  if (!(checkOSI(DSG.descriptor(ds1)) && checkOSI(DSG.descriptor(ds2))))
   {
     RuntimeException::selfThrow("D1MinusLinearOSI::fill_ds_links. The implementation is not correct for two different OSI for one interaction");
   }
