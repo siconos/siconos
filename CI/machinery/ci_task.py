@@ -16,7 +16,7 @@ class CiTask():
                  srcs=None,
                  targets=None,
                  cmake_cmd=None,
-                 directories=None):
+                 directories=[]):
         self._fast = fast
         self._distrib = distrib
         self._mode = mode
@@ -76,6 +76,8 @@ class CiTask():
 
             if add_directories is not None:
                 directories = self._directories + add_directories
+            else:
+                directories = self._directories
 
             if with_examples:
                 if 'examples' not in srcs:

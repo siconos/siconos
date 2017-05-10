@@ -72,7 +72,7 @@ siconos_documentation = siconos_default.copy()(
     distrib='ubuntu:16.10',
     ci_config='with_documentation',
     add_pkgs=['documentation'],
-    add_directories=[os.path.join('home', '.ssh')],
+    add_directories=[os.path.join(home, '.ssh')],
     targets={'.': ['docker-build', 'docker-cmake', 'docker-make',
                    'docker-make-install',
                    'docker-make-doc', 'docker-make-upload']})
