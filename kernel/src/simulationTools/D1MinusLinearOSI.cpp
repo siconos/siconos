@@ -223,10 +223,6 @@ void D1MinusLinearOSI::fill_ds_links(Interaction &inter,
   bool computeResidu = relation.requireResidu();
   inter.initializeMemory(computeResidu,_steps);
 
-  ds1->display();
-  ds2->display();
-
-
   if (!(checkOSI(DSG.descriptor(ds1)) && checkOSI(DSG.descriptor(ds2))))
   {
     std::cout << "checkOSI(DSG.descriptor(ds1)): "
