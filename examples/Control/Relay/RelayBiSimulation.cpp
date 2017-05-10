@@ -122,7 +122,7 @@ int main(int argc, char* argv[])
     // -- OneStepIntegrators --
     double theta = 0.5;
     SP::EulerMoreauOSI processIntegrator(new EulerMoreauOSI(theta));
-    processSimulation->prepareIntegratorForDS(processIntegrator, processDS, process, t0);
+
 
     // -------------
     // --- Model controller ---
@@ -141,8 +141,7 @@ int main(int argc, char* argv[])
     // -- OneStepIntegrators --
     double controllertheta = 0.5;
     SP::EulerMoreauOSI controllerIntegrator(new EulerMoreauOSI(controllertheta));
-    controllerSimulation->prepareIntegratorForDS(controllerIntegrator, controllerDS,
-                                                 controller, t0);
+
 
     // -- OneStepNsProblem --
     SP::LCP controllerLCP(new LCP());
