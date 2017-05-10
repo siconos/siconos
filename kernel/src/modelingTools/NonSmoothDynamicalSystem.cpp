@@ -30,7 +30,9 @@ using namespace std::placeholders;
 
 #include <limits>
 
-
+// #define DEBUG_NOCOLOR
+// #define DEBUG_MESSAGES
+// #define DEBUG_STDOUT
 #include "debug.h"
 
 
