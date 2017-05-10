@@ -82,6 +82,16 @@ public:
    */
   void initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds);
 
+  /** initialization of the work vectors and matrices (properties) related to
+   *  one interaction on the graph and needed by the osi
+   * \param inter the interaction
+   * \param interProp the properties on the graph
+   * \param DSG the dynamical systems graph
+   */
+  void fill_ds_links(Interaction &inter,
+                     InteractionProperties& interProp,
+                     DynamicalSystemsGraph & DSG);
+
   /** get the number of index sets required for the simulation
    * \return unsigned int
    */
