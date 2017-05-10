@@ -318,3 +318,11 @@ void FirstOrderNonLinearDS::resetNonSmoothPart(unsigned int level)
   //assert(0);
   _r->zero();
 }
+
+void FirstOrderNonLinearDS::setb(const SiconosVector& b)
+{
+  if (_b)
+    *_b = b;
+  else
+    _b.reset(new SiconosVector(b));
+}

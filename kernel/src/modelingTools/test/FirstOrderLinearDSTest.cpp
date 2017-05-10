@@ -70,7 +70,8 @@ void FirstOrderLinearDSTest::testBuildFirstOrderLinearDS0()
   ds->setComputeMFunction("TestPlugin", "computeM");
   ds->computeM(time);
   SimpleMatrix Mref(3,3);
-  Mref(0,0) = 1. * time; Mref(1,1) = 2. * time; Mref(2,2) = 3. * time; 
+  Mref(0,0) = 1. * time; Mref(1,1) = 2. * time; Mref(2,2) = 3. * time;
+  std::cout << "MLMLMQLSQML " << std::numeric_limits<double>::epsilon() << std::endl ;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS1 : ", *(ds->M()) == Mref, true);
   std::cout << "--> Constructor 0 test ended with success." <<std::endl;
 }
@@ -114,7 +115,7 @@ void FirstOrderLinearDSTest::testBuildFirstOrderLinearDS1()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS1 : ", *(ds->jacobianRhsx()) == Mref, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS1 : ", *(ds->b()) == time* *x01, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS1 : ", *(ds->A()) == 2 * *A0, true);
-
+  
   std::cout << "--> Constructor 3 test ended with success." <<std::endl;
 }
 

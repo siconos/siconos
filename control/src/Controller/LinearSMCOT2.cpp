@@ -60,15 +60,20 @@ void LinearSMCOT2::initialize(const Model& m)
   {
     FirstOrderLinearDS& fods = static_cast<FirstOrderLinearDS&>(*DS);
     SP::SiconosVector x0(new SiconosVector(*fods.x0()));
-    SP::SiconosMatrix A = fods.A();
-    SP::SiconosVector b = fods.b();
-    if(fods.A() && fods.b())
-      {
-	SP::SiconosMatrix A(new SimpleMatrix(*fods.A()));
-	SP::SiconosVector b(new SiconosVector(*fods.b()));
-	_DSPhi.reset(new FirstOrderLinearDS(x0, A, b));//(std11::static_pointer_cast<FirstOrderLinearDS>(DS))));
-	_DSPred.reset(new FirstOrderLinearDS(x0, A, b));//(*(std11::static_pointer_cast<FirstOrderLinearDS>(DS))));
-      }
+    _DSPhi.reset(new FirstOrderLinearDS(x0));//(std11::static_pointer_cast<FirstOrderLinearDS>(DS))));
+    _DSPred.reset(new FirstOrderLinearDS(x0));//(*(std11::static_pointer_cast<FirstOrderLinearDS>(DS))));
+    if(fods.A())
+    {
+      SP::SiconosMatrix A(new SimpleMatrix(*fods.A()));
+      _DSPhi->setA(*fods.A());
+      _DSPred->setA(*fods.A());
+    }
+    if(fods.b())
+    {
+      SP::SiconosVector b(new SiconosVector(*fods.b()));
+      _DSPhi->setb(*fods.b());
+      _DSPred->setb(*fods.b());
+    }
   }
   else if (dsType == Type::FirstOrderLinearTIDS)
   {

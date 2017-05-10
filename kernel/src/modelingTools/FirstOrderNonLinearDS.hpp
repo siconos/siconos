@@ -97,6 +97,7 @@ protected:
   /** value of f(x,t,z) */
   SP::SiconosVector _f;
 
+  // Note FP: isn't it strange to define b in this class here rather than in Linear derived class?
   /** strength vector */
   SP::SiconosVector _b;
 
@@ -284,6 +285,11 @@ public:
   {
     _b = b;
   }
+
+  /** set b vector (copy)
+   *  \param b a SiconosVector
+   */
+  void setb(const SiconosVector& b);
 
   /** @} end of members access group. */
 
