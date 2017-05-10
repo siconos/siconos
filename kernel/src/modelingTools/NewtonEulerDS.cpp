@@ -433,9 +433,7 @@ NewtonEulerDS::NewtonEulerDS(SP::SiconosVector Q0, SP::SiconosVector Twist0,
 void NewtonEulerDS::_init()
 {
   _p.resize(3);
-  _p[0].reset(new SiconosVector());
   _p[1].reset(new SiconosVector(_n)); // Needed in NewtonEulerR
-  _p[2].reset(new SiconosVector());
   _zeroPlugin();
   //assert(0);
 
