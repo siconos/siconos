@@ -223,6 +223,13 @@ void D1MinusLinearOSI::fill_ds_links(Interaction &inter,
   bool computeResidu = relation.requireResidu();
   inter.initializeMemory(computeResidu,_steps);
 
+
+  if (checkOSI(DSG.descriptor(ds1)) || checkOSI(DSG.descriptor(ds2)))
+  {
+    RuntimeException::selfThrow("D1MinusLinearOSI::fill_ds_links. The implementation is not correct for two different OSI for one interaction");
+  }
+
+
   /* allocate ant set work vectors for the osi */
   VectorOfVectors &workVds1 = *DSG.properties(DSG.descriptor(ds1)).workVectors;
   if (relationType == Lagrangian)

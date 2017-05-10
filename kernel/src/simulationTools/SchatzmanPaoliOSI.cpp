@@ -183,7 +183,12 @@ void SchatzmanPaoliOSI::fill_ds_links(Interaction &inter,
   bool computeResidu = relation.requireResidu();
   inter.initializeMemory(computeResidu,_steps);
 
-  /* allocate ant set work vectors for the osi */
+  if (checkOSI(DSG.descriptor(ds1)) || checkOSI(DSG.descriptor(ds2)))
+  {
+    RuntimeException::selfThrow("D1MinusLinearOSI::fill_ds_links. The implementation is not correct for two different OSI for one interaction");
+  }
+
+  /* allocate and set work vectors for the osi */
   VectorOfVectors &workVds1 = *DSG.properties(DSG.descriptor(ds1)).workVectors;
   if (relationType == Lagrangian)
   {
@@ -209,7 +214,6 @@ void SchatzmanPaoliOSI::fill_ds_links(Interaction &inter,
       DSlink[LagrangianR::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
       LagrangianDS& lds = *std11::static_pointer_cast<LagrangianDS> (ds2);
       DSlink[LagrangianR::p0]->insertPtr(lds.p(0));
-
     }
     else if (relationType == NewtonEuler)
     {
