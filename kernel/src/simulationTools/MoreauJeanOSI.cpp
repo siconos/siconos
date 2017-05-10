@@ -102,6 +102,7 @@ SP::SiconosMatrix MoreauJeanOSI::WBoundaryConditions(SP::DynamicalSystem ds)
 
 void MoreauJeanOSI::initializeDynamicalSystem(Model&, double t, SP::DynamicalSystem ds)
 {
+  DEBUG_BEGIN("MoreauJeanOSI::initializeDynamicalSystem(Model&, double t, SP::DynamicalSystem ds)\n");
   VectorOfVectors& workVectors = *_initializeDSWorkVectors(ds);
   workVectors.resize(MoreauJeanOSI::WORK_LENGTH);
 
@@ -143,11 +144,13 @@ void MoreauJeanOSI::initializeDynamicalSystem(Model&, double t, SP::DynamicalSys
     neds->computeForces(t, neds->q(), v);
     neds->swapInMemory();
   }
+  DEBUG_END("MoreauJeanOSI::initializeDynamicalSystem(Model&, double t, SP::DynamicalSystem ds)\n");
 
 }
 void MoreauJeanOSI::fill_ds_links(Interaction &inter, InteractionProperties& interProp,
                                   DynamicalSystemsGraph & DSG)
 {
+  DEBUG_BEGIN("MoreauJeanOSI::fill_ds_links(Interaction &inter, InteractionProperties& interProp, DynamicalSystemsGraph & DSG)\n");
   SP::DynamicalSystem ds1= interProp.source;
   SP::DynamicalSystem ds2= interProp.target;
   assert(ds1);
@@ -164,7 +167,7 @@ void MoreauJeanOSI::fill_ds_links(Interaction &inter, InteractionProperties& int
   bool computeResidu = relation.requireResidu();
   inter.initializeMemory(computeResidu,_steps);
 
-  /* allocate ant set work vectors for the osi */
+  /* allocate and set work vectors for the osi */
 
   if(checkOSI(DSG.descriptor(ds1)))
   {
@@ -241,6 +244,8 @@ void MoreauJeanOSI::fill_ds_links(Interaction &inter, InteractionProperties& int
 	    }
     }
   }
+  DEBUG_END("MoreauJeanOSI::fill_ds_links(Interaction &inter, InteractionProperties& interProp, DynamicalSystemsGraph & DSG)\n");
+
 }
 
 void MoreauJeanOSI::initialize_nonsmooth_problems()

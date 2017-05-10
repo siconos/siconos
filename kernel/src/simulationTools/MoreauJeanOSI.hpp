@@ -300,9 +300,9 @@ public:
    * \param interProp the properties on the graph
    * \param DSG the dynamical systems graph
    */
-  void fill_ds_links(Interaction &inter,
-		     InteractionProperties& interProp,
-		     DynamicalSystemsGraph & DSG);
+  virtual void fill_ds_links(Interaction &inter,
+                             InteractionProperties& interProp,
+                             DynamicalSystemsGraph & DSG);
 
   /** get the number of index sets required for the simulation
    * \return unsigned int
