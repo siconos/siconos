@@ -32,19 +32,19 @@ IF(SOURCE_IS_GIT_REPO MATCHES "^true\n")
   # Jenkins always works in detached head mode, so we have to work a bit more to get the branch name
   # sorry this does not work for my pull request
   # http://cdash-bipop.inrialpes.fr/viewConfigure.php?buildid=25783
-  EXECUTE_PROCESS(COMMAND
-    ${GIT_EXECUTABLE} branch -r --contains ${SOURCE_ABBREV_GIT_SHA1}
-    OUTPUT_VARIABLE SOURCE_GIT_BRANCHES
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+  # EXECUTE_PROCESS(COMMAND
+  #   ${GIT_EXECUTABLE} branch -r --contains ${SOURCE_ABBREV_GIT_SHA1}
+  #   OUTPUT_VARIABLE SOURCE_GIT_BRANCHES
+  #   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 
-  IF(SOURCE_GIT_BRANCHES)
-    STRING(REGEX REPLACE "^.*origin/" "" SOURCE_GIT_BRANCHES2 ${SOURCE_GIT_BRANCHES})
-    STRING(REGEX REPLACE "\n.*$" "" SOURCE_GIT_BRANCH ${SOURCE_GIT_BRANCHES2})
+  # IF(SOURCE_GIT_BRANCHES)
+  #   STRING(REGEX REPLACE "^.*origin/" "" SOURCE_GIT_BRANCHES2 ${SOURCE_GIT_BRANCHES})
+  #   STRING(REGEX REPLACE "\n.*$" "" SOURCE_GIT_BRANCH ${SOURCE_GIT_BRANCHES2})
     
-    MESSAGE(STATUS "GIT_BRANCH :: ${SOURCE_GIT_BRANCH}")
-  ENDIF()
+  #   MESSAGE(STATUS "GIT_BRANCH :: ${SOURCE_GIT_BRANCH}")
+  # ENDIF()
 
-  # just imagine a world without Jenkins...
+  # So, just imagine a world without Jenkins...
   IF(NOT SOURCE_GIT_BRANCH)
     EXECUTE_PROCESS(COMMAND
       ${GIT_EXECUTABLE} rev-parse --abbrev-ref HEAD
