@@ -173,12 +173,12 @@ int main(int argc, char* argv[])
     // SP::SimpleMatrix H4(new SimpleMatrix(PrismaticJointR::numberOfConstraints(), qDim));
     // H4->zero();
 
-    SP::NonSmoothLaw nslaw4(new EqualityConditionNSL(PrismaticJointR::numberOfConstraints()));
     SP::SiconosVector axe1(new SiconosVector(3));
     axe1->zero();
     axe1->setValue(2, 1);
-    
-    SP::NewtonEulerR relation4(new PrismaticJointR(bouncingbeam, axe1));
+    SP::PrismaticJointR relation4(new PrismaticJointR(bouncingbeam, axe1));
+    SP::NonSmoothLaw nslaw4(new EqualityConditionNSL(relation4->numberOfConstraints()));
+
     SP::Interaction inter4(new Interaction(nslaw4, relation4));
     SP::Interaction interFloor(new Interaction(nslaw0, relation0));
 

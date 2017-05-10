@@ -102,15 +102,19 @@ int main(int argc, char* argv[])
 
     // Interaction ball-floor
     //
-    SP::SimpleMatrix H1(new SimpleMatrix(PrismaticJointR::numberOfConstraints(), qDim));
-    H1->zero();
-    SP::NonSmoothLaw nslaw1(new EqualityConditionNSL(PrismaticJointR::numberOfConstraints()));
     SP::SiconosVector axe1(new SiconosVector(3));
     axe1->zero();
     axe1->setValue(2, 1);
 
-    SP::NewtonEulerR relation1(new PrismaticJointR(beam1, axe1));
+    SP::PrismaticJointR relation1(new PrismaticJointR(beam1, axe1));
+
+
+    SP::SimpleMatrix H1(new SimpleMatrix(relation1->numberOfConstraints(), qDim));
+    H1->zero();
     relation1->setJachq(H1);
+
+    SP::NonSmoothLaw nslaw1(new EqualityConditionNSL(relation1->numberOfConstraints()));
+
     SP::Interaction inter1(new Interaction(nslaw1, relation1));
     // -------------
     // --- Model ---

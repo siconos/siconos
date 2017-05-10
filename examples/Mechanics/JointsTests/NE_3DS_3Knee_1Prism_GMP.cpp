@@ -224,40 +224,41 @@ int main(int argc, char* argv[])
     // --------------------
 
     //
-    SP::SimpleMatrix H1(new SimpleMatrix(KneeJointR::numberOfConstraints(), qDim));
-    H1->zero();
-    SP::SimpleMatrix H2(new SimpleMatrix(KneeJointR::numberOfConstraints(), 2 * qDim));
-    SP::SimpleMatrix H3(new SimpleMatrix(KneeJointR::numberOfConstraints(), 2 * qDim));
-    H2->zero();
-    H3->zero();
-    SP::NonSmoothLaw nslaw1(new EqualityConditionNSL(KneeJointR::numberOfConstraints()));
-    SP::NonSmoothLaw nslaw2(new EqualityConditionNSL(KneeJointR::numberOfConstraints()));
-    SP::NonSmoothLaw nslaw3(new EqualityConditionNSL(KneeJointR::numberOfConstraints()));
 
     //SP::NonSmoothLaw nslaw3(new EqualityConditionNSLKneeJointR::numberOfConstraints()());
     SP::SiconosVector P(new SiconosVector(3));
     P->zero();
 
-    SP::NewtonEulerR relation1(new KneeJointR(beam1, P));
+    SP::KneeJointR relation1(new KneeJointR(beam1, P));
 
-    SP::SiconosVector G20(new SiconosVector(3));
+
     P->zero();
     P->setValue(0, L1 / 2);
-    SP::NewtonEulerR relation2(new KneeJointR(beam1, beam2, P));
+    SP::KneeJointR relation2(new KneeJointR(beam1, beam2, P));
     P->zero();
     P->setValue(0, -L1 / 2);
-    SP::NewtonEulerR relation3(new KneeJointR(beam2, beam3, P));
+    SP::KneeJointR relation3(new KneeJointR(beam2, beam3, P));
+
+    SP::SimpleMatrix H1(new SimpleMatrix(relation1->numberOfConstraints(), qDim));
+    H1->zero();
+    SP::SimpleMatrix H2(new SimpleMatrix(relation2->numberOfConstraints(), 2 * qDim));
+    SP::SimpleMatrix H3(new SimpleMatrix(relation3->numberOfConstraints(), 2 * qDim));
+    H2->zero();
+    H3->zero();
+    SP::NonSmoothLaw nslaw1(new EqualityConditionNSL(relation1->numberOfConstraints()));
+    SP::NonSmoothLaw nslaw2(new EqualityConditionNSL(relation2->numberOfConstraints()));
+    SP::NonSmoothLaw nslaw3(new EqualityConditionNSL(relation3->numberOfConstraints()));
 
 
     //relation Prismatic
 
-    SP::SimpleMatrix H4(new SimpleMatrix(PrismaticJointR::numberOfConstraints(), qDim));
-    H4->zero();
-    SP::NonSmoothLaw nslaw4(new EqualityConditionNSL(PrismaticJointR::numberOfConstraints()));
-    SP::SiconosVector axe1(new SiconosVector(3));
+     SP::SiconosVector axe1(new SiconosVector(3));
     axe1->zero();
     axe1->setValue(2, 1);
-    SP::NewtonEulerR relation4(new PrismaticJointR(beam3, axe1));
+    SP::PrismaticJointR relation4(new PrismaticJointR(beam3, axe1));
+    SP::SimpleMatrix H4(new SimpleMatrix(relation4->numberOfConstraints(), qDim));
+    H4->zero();
+    SP::NonSmoothLaw nslaw4(new EqualityConditionNSL(relation4->numberOfConstraints()));
 
     relation1->setJachq(H1);
     relation2->setJachq(H2);
@@ -302,9 +303,6 @@ int main(int argc, char* argv[])
     SP::TimeStepping s(new TimeStepping(t, OSI1, osnspb));
     s->insertIntegrator(OSI2);
     s->insertIntegrator(OSI3);
-    s->prepareIntegratorForDS(OSI1, beam1, myModel, t0);
-    s->prepareIntegratorForDS(OSI2, beam2, myModel, t0);
-    s->prepareIntegratorForDS(OSI3, beam3, myModel, t0);
     //    s->setComputeResiduY(true);
     //  s->setUseRelativeConvergenceCriteron(false);
     myModel->setSimulation(s);
