@@ -21,7 +21,7 @@
 
 #include "Topology.hpp"
 #include "MatrixIntegrator.hpp"
-
+#include "SimpleMatrix.hpp"
 void ControlLinearAdditionalTermsTS::init(DynamicalSystemsGraph& DSG0, const Model& model)
 {
   // Do nothing here

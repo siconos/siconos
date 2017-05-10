@@ -24,10 +24,9 @@
 #ifndef INTERACTION_H
 #define INTERACTION_H
 
-#include "DynamicalSystemsSet.hpp"
 #include "RelationNamespace.hpp"
-
 #include "SiconosPointers.hpp"
+#include "SiconosVector.hpp"
 #include "SiconosFwd.hpp"
 #include <vector>
 

@@ -28,6 +28,7 @@
 
 #include "MechanicsFwd.hpp"
 #include "LagrangianRheonomousR.hpp"
+#include "PluggedObject.hpp"
 
 typedef double(*FTime)(double);
 

@@ -17,7 +17,8 @@
 */
 #include "FirstOrderLinearR.hpp"
 #include "Interaction.hpp"
-
+#include "PluggedObject.hpp"
+#include "SimpleMatrix.hpp"
 #include "BlockVector.hpp"
 #include "SimulationGraphs.hpp"
 

@@ -18,6 +18,9 @@ TYPEDEF_SPTR(NumericsMatrix)
 // ----------------
 
 /* Kernel */
+
+
+
 DEFINE_SPTR(BlockCSRMatrix)
 
 DEFINE_SPTR(Interaction)
@@ -68,7 +71,6 @@ DEFINE_SPTR(NewtonEulerDS)
 
 DEFINE_SPTR(Event)
 DEFINE_SPTR(NonSmoothLaw)
-DEFINE_SPTR(DynamicalSystemsSet)
 
 DEFINE_SPTR(MatrixIntegrator)
 DEFINE_SPTR(PluggedObject)
@@ -84,6 +86,8 @@ DEFINE_SPTR(BlockVector)
 DEFINE_SPTR(OSNSMatrix)
 
 DEFINE_SPTR(SiconosMemory)
+#include <vector>
+typedef std::vector<SP::SiconosMemory> VectorOfMemories;
 
 DEFINE_SPTR(NewtonEulerR)
 DEFINE_SPTR(NewtonEulerFrom1DLocalFrameR)

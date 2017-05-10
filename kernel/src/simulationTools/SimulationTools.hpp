@@ -38,7 +38,6 @@ Note that not all files from the current location are listed below, since some o
 #include "MLCP.hpp"
 #include "MLCPProjectOnConstraints.hpp"
 #include "AVI.hpp"
-//#include "MLCP2.hpp"
 #include "GenericMechanical.hpp"
 //#include "mlcpDefaultSolver.hpp"
 #include "QP.hpp"

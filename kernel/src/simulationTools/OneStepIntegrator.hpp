@@ -25,7 +25,6 @@
 
 #include "SiconosConst.hpp"
 #include "SimulationTypeDef.hpp"
-#include "DynamicalSystemsSet.hpp"
 #include "OneStepIntegratorTypes.hpp"
 #include "SimulationGraphs.hpp"
 

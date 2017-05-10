@@ -22,8 +22,8 @@
 #define NSDS_H
 
 #include "SiconosPointers.hpp"
-#include "DynamicalSystemsSet.hpp"
 #include "Topology.hpp"
+#include "DynamicalSystem.hpp"
 
 /** the Non Smooth Dynamical System consists of DynamicalSystem
  *  and Interaction regrouped together in a Topology object,

@@ -329,7 +329,6 @@ void  NewtonEulerR::computeSecondOrderTimeDerivativeTerms(double time, Interacti
   // Compute the product of jachq and Tdot --> jachqTdot
 
   unsigned int k = 0;
-  DSIterator itDS;
   unsigned int ySize = inter.getSizeOfY();
   unsigned int xSize = inter.getSizeOfDS();
   SP::SimpleMatrix auxBloc(new SimpleMatrix(ySize, 7));

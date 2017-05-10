@@ -157,44 +157,44 @@ void KernelTest::t3()
 
 }
 
-void KernelTest::t4()
-{
-  SP::SiconosMatrix m(new SimpleMatrix(3, 3));
-  SP::SiconosVector v(new SiconosVector(3));
-  SP::SiconosVector q(new SiconosVector(3));
+// void KernelTest::t4()
+// {
+//   SP::SiconosMatrix m(new SimpleMatrix(3, 3));
+//   SP::SiconosVector v(new SiconosVector(3));
+//   SP::SiconosVector q(new SiconosVector(3));
 
-  m->eye();
+//   m->eye();
 
 
-  SP::DynamicalSystem ds1(new LagrangianDS(q, v, m));
-  SP::DynamicalSystem ds2(new LagrangianDS(q, v, m));
+//   SP::DynamicalSystem ds1(new LagrangianDS(q, v, m));
+//   SP::DynamicalSystem ds2(new LagrangianDS(q, v, m));
 
-  SP::DynamicalSystemsSet dsset(new DynamicalSystemsSet());
+//   SP::DynamicalSystemsSet dsset(new DynamicalSystemsSet());
 
-  dsset->insert(ds1);
-  dsset->insert(ds2);
+//   dsset->insert(ds1);
+//   dsset->insert(ds2);
 
-  std::ofstream ofs("t4.xml");
-  {
-    boost::archive::xml_oarchive oa(ofs);
-    oa.register_type(static_cast<SimpleMatrix*>(NULL));
-    oa.register_type(static_cast<SiconosVector*>(NULL));
-    oa.register_type(static_cast<LagrangianDS*>(NULL));
-    oa << NVP(dsset);
-  }
+//   std::ofstream ofs("t4.xml");
+//   {
+//     boost::archive::xml_oarchive oa(ofs);
+//     oa.register_type(static_cast<SimpleMatrix*>(NULL));
+//     oa.register_type(static_cast<SiconosVector*>(NULL));
+//     oa.register_type(static_cast<LagrangianDS*>(NULL));
+//     oa << NVP(dsset);
+//   }
 
-  SP::DynamicalSystemsSet dssetfromfile(new DynamicalSystemsSet());
+//   SP::DynamicalSystemsSet dssetfromfile(new DynamicalSystemsSet());
 
-  std::ifstream ifs("t4.xml");
-  {
-    boost::archive::xml_iarchive ia(ifs);
-    ia.register_type(static_cast<SimpleMatrix*>(NULL));
-    ia.register_type(static_cast<SiconosVector*>(NULL));
-    ia.register_type(static_cast<LagrangianDS*>(NULL));
-    ia >> NVP(dssetfromfile);
-  }
+//   std::ifstream ifs("t4.xml");
+//   {
+//     boost::archive::xml_iarchive ia(ifs);
+//     ia.register_type(static_cast<SimpleMatrix*>(NULL));
+//     ia.register_type(static_cast<SiconosVector*>(NULL));
+//     ia.register_type(static_cast<LagrangianDS*>(NULL));
+//     ia >> NVP(dssetfromfile);
+//   }
 
-}
+// }
 
 
 #include "SiconosRestart.hpp"

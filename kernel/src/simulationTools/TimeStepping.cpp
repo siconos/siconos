@@ -313,8 +313,6 @@ void TimeStepping::initOSNS()
   // Interactions
   SP::OneStepIntegrator  osi;
 
-  ConstDSIterator itDS;
-
   SP::Topology topo =  _nsds->topology();
   SP::InteractionsGraph indexSet0 = topo->indexSet(0);
 

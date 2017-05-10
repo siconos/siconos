@@ -27,7 +27,6 @@
 #include "SiconosFwd.hpp"
 // #include "EventsManager.hpp"
 // #include "SiconosPointers.hpp"
-// #include "DynamicalSystemsSet.hpp"
 #include <fstream>
 // #include "Model.hpp"
 // #include "NonSmoothDynamicalSystem.hpp"

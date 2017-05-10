@@ -386,7 +386,6 @@ void MBTB_JointBuild(unsigned int numJ,const std::string& JointName,
   SP::SiconosVector P(new SiconosVector(3));
   SP::SiconosVector A(new SiconosVector(3));
   SP::SiconosVector ds1CenterOfMass = sDS[indexDS1]->centerOfMass();
-  //DynamicalSystemsSet lallDS;
   P->setValue(0,jointPosition->getValue(3)-ds1CenterOfMass->getValue(0));
   P->setValue(1,jointPosition->getValue(4)-ds1CenterOfMass->getValue(1));
   P->setValue(2,jointPosition->getValue(5)-ds1CenterOfMass->getValue(2));

@@ -109,14 +109,14 @@ void GlobalFrictionContact::initialize(SP::Simulation sim)
   {
     if (_MStorageType == 0)
       _M.reset(new OSNSMatrix(_maxSize, 0));
-    else // if(MStorageType == 1) size = number of DSBlocks = number of DS in the largest considered DynamicalSystemsSet
+    else // if(MStorageType == 1) size = number of DSBlocks = number of DS in the largest considered graph of ds
       _M.reset(new OSNSMatrix(simulation()->nonSmoothDynamicalSystem()->dynamicalSystems()->size(), 1));
   }
   if (!_H)
   {
     if (_MStorageType == 0)
       _H.reset(new OSNSMatrix(_maxSize, 0));
-    else // if(_MStorageType == 1) size = number of DSBlocks = number of DS in the largest considered DynamicalSystemsSet
+    else // if(_MStorageType == 1) size = number of DSBlocks = number of DS in the largest considered graph of ds
       _H.reset(new OSNSMatrix(simulation()->nonSmoothDynamicalSystem()->dynamicalSystems()->size(), simulation()->indexSet(_indexSetLevel)->size()   , 1));
   }
 
