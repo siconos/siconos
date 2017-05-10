@@ -159,7 +159,7 @@ void MoreauJeanCombinedProjectionOSI::fill_ds_links(Interaction &inter, Interact
         }
 	      else
         {
-          assert(DSlink[NewtonEulerR::xfree]);
+          assert(DSlink[NewtonEulerR::p0]);
           DSlink[NewtonEulerR::p0]->insertPtr(neds.p(0));
         }
 	    }
