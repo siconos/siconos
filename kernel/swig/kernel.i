@@ -266,6 +266,16 @@ typedef __mpz_struct mpz_t[1];
     return std11::dynamic_pointer_cast<NewtonImpactFrictionNSL>(nslaw);
   }
 
+  SP::RelayNSL cast_RelayNSL(SP::NonSmoothLaw nslaw)
+  {
+    return std11::dynamic_pointer_cast<RelayNSL>(nslaw);
+  }
+
+  SP::NewtonImpactNSL cast_NewtonImpactNSL(SP::NonSmoothLaw nslaw)
+  {
+    return std11::dynamic_pointer_cast<NewtonImpactNSL>(nslaw);
+  }
+
 %}
 
 //namespace std {
