@@ -55,7 +55,7 @@ JointFrictionR::JointFrictionR(SP::NewtonEulerJointR joint, SP::UnsignedIntVecto
 {
   _axisMin = 100;
   _axisMax = 0;
-  for (int i=0; i < _axis->size(); i++)
+  for (unsigned int i=0; i < _axis->size(); i++)
   {
     if ((*_axis)[i] > _axisMax) _axisMax = (*_axis)[i];
     if ((*_axis)[i] < _axisMin) _axisMin = (*_axis)[i];
@@ -86,8 +86,8 @@ void JointFrictionR::computeJachq(double time, Interaction& inter, SP::BlockVect
   // Copy indicated axes into the friction jacobian, negative and positive sides
   // NOTE trying ==1 using Relay, maybe don't need LCP formulation
   assert(_jachq->size(0)==1);
-  for (int i=0; i<1; i++)
-    for (int j=0; j<_jachq->size(1); j++) {
+  for (unsigned int i=0; i<1; i++)
+    for (unsigned int j=0; j<_jachq->size(1); j++) {
       _jachq->setValue(i,j,_jachqTmp->getValue((*_axis)[i],j) * (i==1?1:-1));
     }
 }
