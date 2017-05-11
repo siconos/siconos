@@ -1272,7 +1272,7 @@ void NewtonEulerDS::resetAllNonSmoothParts()
 }
 void NewtonEulerDS::resetNonSmoothPart(unsigned int level)
 {
-  if(_p[level]->size() > 0)
+  if(_p[level])
     _p[level]->zero();
 }
 
