@@ -168,37 +168,34 @@ void MoreauJeanOSI::fill_ds_links(Interaction &inter, InteractionProperties& int
   inter.initializeMemory(computeResidu,_steps);
 
   /* allocate and set work vectors for the osi */
+  unsigned int xfree =0;
+  if (relationType == Lagrangian)
+  {
+    xfree = LagrangianR::xfree;
+  }
+  else if (relationType == NewtonEuler)
+  {
+    xfree = NewtonEulerR::xfree;
+  }
+
+  if (ds1 != ds2)
+  {
+    DEBUG_PRINT("ds1 != ds2\n");
+    if ((!DSlink[xfree]) || (DSlink[xfree]->size() !=2 ))
+      DSlink[xfree].reset(new BlockVector(2));
+  }
+  else
+  {
+    if ((!DSlink[xfree]) || (DSlink[xfree]->size() !=1 ))
+      DSlink[xfree].reset(new BlockVector(1));
+  }
 
   if(checkOSI(DSG.descriptor(ds1)))
   {
-    DEBUG_PRINTF("ds1->number() %i is taken in to account\n", ds1->number());
+    DEBUG_PRINTF("ds1->number() %i is taken into account\n", ds1->number());
     assert(DSG.properties(DSG.descriptor(ds1)).workVectors);
     VectorOfVectors &workVds1 = *DSG.properties(DSG.descriptor(ds1)).workVectors;
-
-    if (relationType == Lagrangian)
-    {
-      if (!DSlink[LagrangianR::xfree])
-	    {
-	      DSlink[LagrangianR::xfree].reset(new BlockVector());
-	      DSlink[LagrangianR::xfree]->insertPtr(workVds1[MoreauJeanOSI::VFREE]);
-	    }
-      else
-	    {
-	      DSlink[LagrangianR::xfree]->setVectorPtr(0,workVds1[MoreauJeanOSI::VFREE]);
-	    }
-    }
-    else if (relationType == NewtonEuler)
-    {
-      if (!DSlink[NewtonEulerR::xfree])
-	    {
-	      DSlink[NewtonEulerR::xfree].reset(new BlockVector());
-	      DSlink[NewtonEulerR::xfree]->insertPtr(workVds1[MoreauJeanOSI::VFREE]);
-	    }
-      else
-	    {
-	      DSlink[NewtonEulerR::xfree]->setVectorPtr(0,workVds1[MoreauJeanOSI::VFREE]);
-	    }
-    }
+    DSlink[xfree]->setVectorPtr(0,workVds1[MoreauJeanOSI::VFREE]);
   }
   DEBUG_PRINTF("ds1->number() %i\n",ds1->number());
   DEBUG_PRINTF("ds2->number() %i\n",ds2->number());
@@ -206,42 +203,12 @@ void MoreauJeanOSI::fill_ds_links(Interaction &inter, InteractionProperties& int
   if (ds1 != ds2)
   {
     DEBUG_PRINT("ds1 != ds2\n");
-
     if(checkOSI(DSG.descriptor(ds2)))
     {
-      DEBUG_PRINTF("ds2->number() %i is taken in to account\n",ds2->number());
+      DEBUG_PRINTF("ds2->number() %i is taken into account\n",ds2->number());
       assert(DSG.properties(DSG.descriptor(ds2)).workVectors);
       VectorOfVectors &workVds2 = *DSG.properties(DSG.descriptor(ds2)).workVectors;
-      if (relationType == Lagrangian)
-	    {
-	      if (!DSlink[LagrangianR::xfree])
-        {
-          DSlink[LagrangianR::xfree].reset(new BlockVector());
-          //dummy insertion to reserve first vector for ds1
-          DSlink[LagrangianR::xfree]->insertPtr(workVds2[MoreauJeanOSI::VFREE]);
-          DSlink[LagrangianR::xfree]->insertPtr(workVds2[MoreauJeanOSI::VFREE]);
-        }
-	      else
-        {
-          DSlink[LagrangianR::xfree]->insertPtr(workVds2[MoreauJeanOSI::VFREE]);
-        }
-
-	    }
-      else if (relationType == NewtonEuler)
-	    {
-	      if (!DSlink[NewtonEulerR::xfree])
-        {
-          DSlink[NewtonEulerR::xfree].reset(new BlockVector());
-          DSlink[NewtonEulerR::xfree]->insertPtr(workVds2[MoreauJeanOSI::VFREE]);
-          DSlink[NewtonEulerR::xfree]->insertPtr(workVds2[MoreauJeanOSI::VFREE]);
-        }
-	      else
-        {
-          assert(DSlink[NewtonEulerR::xfree]);
-          assert(workVds2[MoreauJeanOSI::VFREE]);
-          DSlink[NewtonEulerR::xfree]->insertPtr(workVds2[MoreauJeanOSI::VFREE]);
-        }
-	    }
+      DSlink[xfree]->setVectorPtr(1,workVds2[MoreauJeanOSI::VFREE]);
     }
   }
   DEBUG_END("MoreauJeanOSI::fill_ds_links(Interaction &inter, InteractionProperties& interProp, DynamicalSystemsGraph & DSG)\n");

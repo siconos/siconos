@@ -124,36 +124,43 @@ void MoreauJeanDirectProjectionOSI::fill_ds_links(Interaction &inter, Interactio
   Relation &relation =  *inter.relation();
   RELATION::TYPES relationType = relation.getType();
 
+
+  unsigned int p0 =0;
+  if (relationType == Lagrangian)
+  {
+    p0 = LagrangianR::p0;
+  }
+  else if (relationType == NewtonEuler)
+  {
+    p0 = NewtonEulerR::p0;
+  }
+  DSlink[p0]->display();
+  if (ds1 != ds2)
+  {
+    DEBUG_PRINT("ds1 != ds2\n");
+    if ((!DSlink[p0]) || (DSlink[p0]->size() !=2))
+      DSlink[p0].reset(new BlockVector(2));
+  }
+  else
+  {
+    if ((!DSlink[p0]) || (DSlink[p0]->size() !=1))
+      DSlink[p0].reset(new BlockVector(1));
+  }
+
   if(checkOSI(DSG.descriptor(ds1)))
   {
-    DEBUG_PRINTF("ds1->number() %i is taken in to account\n", ds1->number());
+    DEBUG_PRINTF("ds1->number() %i is taken into account\n", ds1->number());
     assert(DSG.properties(DSG.descriptor(ds1)).workVectors);
-
     if (relationType == Lagrangian)
     {
       LagrangianDS& lds = *std11::static_pointer_cast<LagrangianDS> (ds1);
-      if (!DSlink[LagrangianR::p0])
-	    {
-	      DSlink[LagrangianR::p0].reset(new BlockVector());
-	      DSlink[LagrangianR::p0]->insertPtr(lds.p(0));
-	    }
-      else
-	    {
-        DSlink[LagrangianR::p0]->insertPtr(lds.p(0));
-	    }
+      DSlink[p0]->display();
+      DSlink[p0]->setVectorPtr(0,lds.p(0));
     }
     else if (relationType == NewtonEuler)
     {
       NewtonEulerDS& neds = *std11::static_pointer_cast<NewtonEulerDS> (ds1);
-      if (!DSlink[NewtonEulerR::p0])
-	    {
-	      DSlink[NewtonEulerR::p0].reset(new BlockVector());
-        DSlink[NewtonEulerR::p0]->insertPtr(neds.p(0));
-	    }
-      else
-	    {
-        DSlink[NewtonEulerR::p0]->insertPtr(neds.p(0));
-	    }
+      DSlink[p0]->setVectorPtr(0,neds.p(0));
     }
   }
   DEBUG_PRINTF("ds1->number() %i\n",ds1->number());
@@ -162,44 +169,23 @@ void MoreauJeanDirectProjectionOSI::fill_ds_links(Interaction &inter, Interactio
   if (ds1 != ds2)
   {
     DEBUG_PRINT("ds1 != ds2\n");
-
     if(checkOSI(DSG.descriptor(ds2)))
     {
-      DEBUG_PRINTF("ds2->number() %i is taken in to account\n",ds2->number());
+      DEBUG_PRINTF("ds2->number() %i is taken into account\n",ds2->number());
       assert(DSG.properties(DSG.descriptor(ds2)).workVectors);
       if (relationType == Lagrangian)
-	    {
+      {
         LagrangianDS& lds = *std11::static_pointer_cast<LagrangianDS> (ds2);
-	      if (!DSlink[LagrangianR::p0])
-        {
-          DSlink[LagrangianR::p0].reset(new BlockVector());
-          //dummy insertion to reserve first vector for ds1
-           DSlink[LagrangianR::p0]->insertPtr(lds.p(0));
-           DSlink[LagrangianR::p0]->insertPtr(lds.p(0));
-        }
-	      else
-        {
-          DSlink[LagrangianR::p0]->insertPtr(lds.p(0));
-        }
-
-	    }
+        DSlink[p0]->setVectorPtr(1,lds.p(0));
+      }
       else if (relationType == NewtonEuler)
-	    {
+      {
         NewtonEulerDS& neds = *std11::static_pointer_cast<NewtonEulerDS> (ds2);
-	      if (!DSlink[NewtonEulerR::p0])
-        {
-          DSlink[NewtonEulerR::p0].reset(new BlockVector());
-          DSlink[NewtonEulerR::p0]->insertPtr(neds.p(0));
-          DSlink[NewtonEulerR::p0]->insertPtr(neds.p(0));
-        }
-	      else
-        {
-          assert(DSlink[NewtonEulerR::xfree]);
-          DSlink[NewtonEulerR::p0]->insertPtr(neds.p(0));
-        }
-	    }
+        DSlink[p0]->setVectorPtr(1,neds.p(0));
+      }
     }
   }
+
 
 
   DEBUG_END("MoreauJeanDirectProjectionOSI::fill_ds_links(Interaction &inter, InteractionProperties& interProp, DynamicalSystemsGraph & DSG)\n");
