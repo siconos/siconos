@@ -345,7 +345,7 @@ void MBTB_BodyBuild(unsigned int numDS, const std::string& BodyName,  double mas
 
 
   sDS[numDS].reset(p);
-  sAllDS.insert(sDS[numDS]);
+  //sAllDS.insert(sDS[numDS]);
   // std::cout << "MBTB_BodyBuild()" <<std::endl;
   // sDS[numDS]->display();
   // myModel->nonSmoothDynamicalSystem()->insertDynamicalSystem(sDS[numDS]);
@@ -397,20 +397,20 @@ void MBTB_JointBuild(unsigned int numJ,const std::string& JointName,
   {
     sJointRelations[numJ]->_jointR.reset(new PivotJointR(sDS[ indexDS1],sDS[indexDS2],P,A));
     sJointRelations[numJ]->_ds1 = sDS[indexDS1];
-    sAllDSByInter[numJ].insert(sDS[indexDS1]);
-    sAllDSByInter[numJ].insert(sDS[indexDS2]);
+    //sAllDSByInter[numJ].insert(sDS[indexDS1]);
+    //sAllDSByInter[numJ].insert(sDS[indexDS2]);
   }
   else if(jointType == PIVOT_0)
   {
     sJointRelations[numJ]->_jointR.reset(new PivotJointR(sDS[indexDS1],P,A,false));
     sJointRelations[numJ]->_ds1 = sDS[indexDS1];
-    sAllDSByInter[numJ].insert(sDS[indexDS1]);
+    // sAllDSByInter[numJ].insert(sDS[indexDS1]);
   }
   else if(jointType == PRISMATIC_0)
   {
     sJointRelations[numJ]->_jointR.reset(new PrismaticJointR(sDS[indexDS1],A));
     sJointRelations[numJ]->_ds1 = sDS[indexDS1];
-    sAllDSByInter[numJ].insert(sDS[indexDS1]);
+    // sAllDSByInter[numJ].insert(sDS[indexDS1]);
   }
 
   lNbEq = sJointRelations[numJ]->_jointR->numberOfConstraints();
