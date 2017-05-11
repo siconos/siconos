@@ -326,14 +326,20 @@ public:
    * \return a DynamicalSystem
    */
   SP::DynamicalSystem getDynamicalSystem(std::string name);
-  
 
   /** Get a interaction using its number
    *  \warning O(n) complexity
    *  \param requiredNumber the required number
-   *  \return a Interaction
+   *  \return an Interaction
    */
   SP::Interaction getInteraction(unsigned int requiredNumber);
+
+  /** Get a interaction using its name
+   *  \warning O(n) complexity
+   *  \param name the name of the Interaction
+   *  \return an Interaction pointer
+   */
+  SP::Interaction getInteraction(std::string name);
 
   /** get Interactions for a given DS
    * \return a vector of pointers to Interaction

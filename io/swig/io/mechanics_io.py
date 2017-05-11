@@ -1249,8 +1249,8 @@ class Hdf5():
 
     def importJoint(self, name):
         if self._broadphase is not None:
-            topo = self._model.nonSmoothDynamicalSystem().\
-                topology()
+            nsds = self._model.nonSmoothDynamicalSystem()
+            topo = nsds.topology()
 
             joint_type = self.joints()[name].attrs['type']
             joint_class = getattr(joints, joint_type)
@@ -1302,6 +1302,7 @@ class Hdf5():
             joint_inter = Interaction(joint_nslaw, joint)
             self._model.nonSmoothDynamicalSystem().\
                 link(joint_inter, ds1, ds2)
+            nsds.setName(joint_inter, str(name))
 
             # Add a e=0 joint by default, otherwise user can specify
             # the impact law by name or a list of names for each axis.
@@ -1314,13 +1315,14 @@ class Hdf5():
                 else:
                     assert(np.shape(nslaws)[0]==np.shape(stops)[0])
                     nslaws = [self._nslaws[nsl] for nsl in nslaws]
-                for nsl, (axis, pos, dir) in zip(nslaws,stops):
+                for n, (nsl, (axis, pos, dir)) in enumerate(zip(nslaws,stops)):
                     # "bool()" is needed because type of dir is
                     # numpy.bool_, which SWIG doesn't handle well.
                     stop = joints.JointStopR(joint, pos, bool(dir<0), int(axis))
                     stop_inter = Interaction(nsl, stop)
                     self._model.nonSmoothDynamicalSystem().\
                         link(stop_inter, ds1, ds2)
+                    nsds.setName(stop_inter, '%s_stop%d'%(str(name),n))
 
             if friction is not None:
                 nslaw = self._nslaws[friction]
@@ -1328,6 +1330,7 @@ class Hdf5():
                 fr_inter = Interaction(nslaw, fr)
                 self._model.nonSmoothDynamicalSystem().\
                     link(fr_inter, ds1, ds2)
+                nsds.setName(fr_inter, str(name)+'_friction')
 
     def importBoundaryConditions(self, name):
         if self._broadphase is not None:

@@ -432,9 +432,21 @@ SP::Interaction Topology::getInteraction(unsigned int requiredNumber)
       return inter;
   }
 
-  RuntimeException::selfThrow("Topology::getInteractiob(n) inter not found.");
+  RuntimeException::selfThrow("Topology::getInteraction(n) inter not found.");
 
   return inter;
+}
+
+SP::Interaction Topology::getInteraction(std::string name)
+{
+  DynamicalSystemsGraph::VIterator vi, vdend;
+  for (std11::tie(vi, vdend) = _IG[0]->vertices(); vi != vdend; ++vi)
+  {
+    if (name == _IG[0]->name.at(*vi))
+      return _IG[0]->bundle(*vi);
+  }
+
+  RuntimeException::selfThrow("Topology::getInteracton() inter not found.");
 }
 
 std::vector<SP::Interaction> Topology::interactionsForDS(

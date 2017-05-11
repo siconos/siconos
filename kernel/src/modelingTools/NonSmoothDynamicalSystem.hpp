@@ -181,6 +181,15 @@ public:
     _topology->setName(ds, name);
   };
 
+  /** set the name for this Interaction
+   * \param interaction a pointer to the Interaction
+   * \param name the name of the Interaction
+   */
+  inline void setName(SP::Interaction interaction, const std::string& name)
+  {
+    _topology->setName(interaction, name);
+  };
+
 
     /** specify id the given Interaction is for controlling the DS
    * \param inter the Interaction
