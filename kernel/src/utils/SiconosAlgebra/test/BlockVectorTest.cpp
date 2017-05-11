@@ -179,6 +179,64 @@ void BlockVectorTest::testConstructor4()
   std::cout << "--> Constructor 4 test ended with success." <<std::endl;
 }
 
+// with number of blocks an empty vector
+void BlockVectorTest::testConstructor5()
+{
+  std::cout << "--> Test: constructor 5." <<std::endl;
+  SP::BlockVector  v(new BlockVector(3));
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", v->size() == 0, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", v->getNumberOfBlocks() == 3, true);
+  v->display();
+
+
+  // test insertion
+  SP::SiconosVector  w(new SiconosVector(3, 2));
+  v->insertPtr(w);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", v->size() == 3, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", v->getNumberOfBlocks() == 4, true);
+
+
+  //set Vector
+  v->setVectorPtr(2,w);
+  v->display();
+
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", v->size() == 6, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", v->getNumberOfBlocks() == 4, true);
+
+  SP::SiconosVector  ww(new SiconosVector(5, 3));
+  v->setVectorPtr(0,ww);
+  v->display();
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", v->size() == 11, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", v->getNumberOfBlocks() == 4, true);
+
+  v->insertPtr(ww);
+  std::cout << "v->getNumberOfBlocks()" << v->getNumberOfBlocks() << std::endl;
+  std::cout << "v->size()" << v->size() << std::endl;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", v->size() == 16, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", v->getNumberOfBlocks() == 5, true);
+  v->display();
+  Index tab = v->getTabIndex();
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", tab.size() == 5, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", tab[0] == 5, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", tab[1] == 5, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", tab[2] == 8, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", tab[3] == 11, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", tab[4] == 16, true);
+
+  v->setVectorPtr(2,ww);
+  v->display();
+  tab = v->getTabIndex();
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", v->size() == 18, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", v->getNumberOfBlocks() == 5, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", tab.size() == 5, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", tab[0] == 5, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", tab[1] == 5, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", tab[2] == 10, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", tab[3] == 13, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", tab[4] == 18, true);
+
+  std::cout << "--> Constructor 5 test ended with success." <<std::endl;
+}
 
 // zero
 void BlockVectorTest::testZero()

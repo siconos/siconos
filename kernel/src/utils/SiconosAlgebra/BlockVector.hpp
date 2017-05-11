@@ -52,6 +52,14 @@ private:
   /** tabindex[i] = tabindex[i-1] + ni, ni being the size of svref[i]. */
   SP::Index _tabIndex;
 
+  /* recompute the _sizeV */
+  void updateSizeV();
+
+  /* recompute the _tabIndex */
+  void updateTabIndex();
+
+
+
 public:
 
   /** Set a subblock of the current vector with the content (copy) of a SiconosVector
@@ -77,7 +85,17 @@ public:
    */
   BlockVector(SP::SiconosVector v1, SP::SiconosVector v2);
 
+  /** contructor with a BlockVector of n (numberOfBlocks) blocks
+   * of the same size (dim) filled with a new vector
+   *  \param numberOfBlocks number of blocks
+   *  \param dim dimension of the vector
+   */
   BlockVector(unsigned int numberOfBlocks, unsigned int dim);
+
+  /** contructor with a BlockVector of n (numberOfBlocks) blocks that point on NULL
+   *  \param numberOfBlocks number of blocks
+   */
+  BlockVector(unsigned int numberOfBlocks);
 
   /** destructor
    */
