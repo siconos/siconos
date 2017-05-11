@@ -530,18 +530,15 @@ void NewtonEulerDS::initializeNonSmoothInput(unsigned int level)
 {
   DEBUG_PRINTF("NewtonEulerDS::initializeNonSmoothInput(unsigned int level) for level = %i\n",level);
 
-  if(_p[level]->size() == 0)
+  if(!_p[level])
   {
     if(level == 0)
     {
-      _p[0]->resize(_qDim);
+      _p[level].reset(new SiconosVector(_qDim));
     }
     else
-    {
-      _p[level]->resize(_n);
-    }
+      _p[level].reset(new SiconosVector(_n));
   }
-
 
 #ifdef DEBUG_MESSAGES
   DEBUG_PRINT("display() after initialization");
