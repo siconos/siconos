@@ -181,12 +181,12 @@ void MoreauJeanOSI::fill_ds_links(Interaction &inter, InteractionProperties& int
   if (ds1 != ds2)
   {
     DEBUG_PRINT("ds1 != ds2\n");
-    if ((!DSlink[xfree]) || (DSlink[xfree]->size() !=2 ))
+    if ((!DSlink[xfree]) || (DSlink[xfree]->getNumberOfBlocks() !=2 ))
       DSlink[xfree].reset(new BlockVector(2));
   }
   else
   {
-    if ((!DSlink[xfree]) || (DSlink[xfree]->size() !=1 ))
+    if ((!DSlink[xfree]) || (DSlink[xfree]->getNumberOfBlocks() !=1 ))
       DSlink[xfree].reset(new BlockVector(1));
   }
 
