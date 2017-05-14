@@ -112,7 +112,7 @@ public:
    *  \param i unsigned int(i=0, row, i=1 col)
    *  \return an unsigned int
    */
-  unsigned int getNumberOfBlocks(unsigned int i) const;
+  unsigned int numberOfBlocks(unsigned int i) const;
 
   /** get DenseMat matrix
    *  \param row an unsigned int, position of the block (row) - Useless for SimpleMatrix

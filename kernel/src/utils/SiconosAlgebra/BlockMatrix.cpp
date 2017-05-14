@@ -41,8 +41,8 @@ BlockMatrix::BlockMatrix(const SiconosMatrix &m): SiconosMatrix(0), _dimRow(0), 
   if (m.isBlock())
   {
     const BlockMatrix& mB = static_cast<const BlockMatrix&>(m);
-    unsigned int nbRows = m.getNumberOfBlocks(0);
-    unsigned int nbCols = m.getNumberOfBlocks(1);
+    unsigned int nbRows = m.numberOfBlocks(0);
+    unsigned int nbCols = m.numberOfBlocks(1);
     _tabRow->reserve(nbRows);
     _tabCol->reserve(nbCols);
 
@@ -93,8 +93,8 @@ BlockMatrix::BlockMatrix(const SiconosMatrix &m): SiconosMatrix(0), _dimRow(0), 
 
 BlockMatrix::BlockMatrix(const BlockMatrix &m): SiconosMatrix(0), _dimRow(0), _dimCol(0)
 {
-  unsigned int nbRows = m.getNumberOfBlocks(0);
-  unsigned int nbCols = m.getNumberOfBlocks(1);
+  unsigned int nbRows = m.numberOfBlocks(0);
+  unsigned int nbCols = m.numberOfBlocks(1);
   _tabRow.reset(new Index());
   _tabCol.reset(new Index());
   _tabRow->reserve(nbRows);
@@ -220,7 +220,7 @@ BlockMatrix::~BlockMatrix()
 //    get number of blocks
 // =================================================
 
-unsigned int BlockMatrix::getNumberOfBlocks(unsigned int dim) const
+unsigned int BlockMatrix::numberOfBlocks(unsigned int dim) const
 {
   if (dim == 0)
     return _tabRow->size();
@@ -494,7 +494,7 @@ double BlockMatrix::normInf()const
 
 void BlockMatrix::display(void)const
 {
-  std::cout << "==========> BlockMatrix (" << getNumberOfBlocks(0) << " X " << getNumberOfBlocks(1) << " blocks): " << std::endl;
+  std::cout << "==========> BlockMatrix (" << numberOfBlocks(0) << " X " << numberOfBlocks(1) << " blocks): " << std::endl;
   BlocksMat::iterator1 it;
   BlocksMat::iterator2 it2;
   for (it = _mat->begin1(); it != _mat->end1(); ++it)

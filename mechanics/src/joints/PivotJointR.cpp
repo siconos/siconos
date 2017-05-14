@@ -389,7 +389,7 @@ void PivotJointR::computeh(double time, BlockVector& q0, SiconosVector& y)
   double q21 = 0;
   double q22 = 0;
   double q23 = 0;
-  if(q0.getNumberOfBlocks()>1)
+  if(q0.numberOfBlocks()>1)
   {
     q20 = q0.getValue(10);
     q21 = q0.getValue(11);

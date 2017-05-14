@@ -159,7 +159,7 @@ public:
   /** get size (in block-components) 
    * \return unsigned int NumberOfBlocksInARow
    */
-  inline unsigned int getNumberOfBlocksInARow() const
+  inline unsigned int numberOfBlocksInARow() const
   {
     return _nr;
   };

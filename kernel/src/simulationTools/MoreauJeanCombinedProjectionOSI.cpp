@@ -102,12 +102,12 @@ void MoreauJeanCombinedProjectionOSI::fill_ds_links(Interaction &inter, Interact
   if (ds1 != ds2)
   {
     DEBUG_PRINT("ds1 != ds2\n");
-    if ((!DSlink[p0]) || (DSlink[p0]->getNumberOfBlocks() !=2))
+    if ((!DSlink[p0]) || (DSlink[p0]->numberOfBlocks() !=2))
       DSlink[p0].reset(new BlockVector(2));
   }
   else
   {
-    if ((!DSlink[p0]) || (DSlink[p0]->getNumberOfBlocks() !=1))
+    if ((!DSlink[p0]) || (DSlink[p0]->numberOfBlocks() !=1))
       DSlink[p0].reset(new BlockVector(1));
   }
 

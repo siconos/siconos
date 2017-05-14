@@ -127,7 +127,7 @@ void FixedJointR::computeh(double time, BlockVector& q0, SiconosVector& y)
   double q22 = 0;
   double q23 = 0;
 
-  if (q0.getNumberOfBlocks()>1)
+  if (q0.numberOfBlocks()>1)
   {
     X2 = q0.getValue(7);
     Y2 = q0.getValue(8);
@@ -193,7 +193,7 @@ void FixedJointR::computeJachq(double time, Interaction& inter, SP::BlockVector 
   double q22 = 0;
   double q23 = 0;
 
-  if(q0->getNumberOfBlocks()>1)
+  if(q0->numberOfBlocks()>1)
   {
     SP::SiconosVector q2 = (q0->getAllVect())[1];
     X2 = q2->getValue(0);

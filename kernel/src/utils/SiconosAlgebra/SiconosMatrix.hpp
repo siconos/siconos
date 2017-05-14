@@ -147,7 +147,7 @@ public:
    *  \param i unsigned int(i=0, row, i=1 col)
    *  \return an unsigned int. 1 as default for SimpleMatrix.
    */
-  inline virtual unsigned int getNumberOfBlocks(unsigned int i) const
+  inline virtual unsigned int numberOfBlocks(unsigned int i) const
   {
     return 1;
   };

@@ -195,7 +195,7 @@ void NewtonEulerFrom1DLocalFrameR::computeJachq(double time, Interaction& inter,
     _jachq->setValue(0, 9, -_Nc->getValue(2));
   }
 
-  for (unsigned int iDS =0 ; iDS < q0->getNumberOfBlocks()  ; iDS++)
+  for (unsigned int iDS =0 ; iDS < q0->numberOfBlocks()  ; iDS++)
   {
     SP::SiconosVector q = (q0->getAllVect())[iDS];
     double sign = 1.0;
@@ -254,7 +254,7 @@ void NewtonEulerFrom1DLocalFrameR::computeJachqT(Interaction& inter, SP::BlockVe
 {
   DEBUG_BEGIN("NewtonEulerFrom1DLocalFrameR::computeJachqT(Interaction& inter, SP::BlockVector q0 \n")
     
-  if (q0->getNumberOfBlocks()>1)
+  if (q0->numberOfBlocks()>1)
   {
     NIcomputeJachqTFromContacts((q0->getAllVect())[0], (q0->getAllVect())[1]);
   }

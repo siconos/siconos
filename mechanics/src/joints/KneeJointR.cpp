@@ -482,7 +482,7 @@ void KneeJointR::computeJachq(double time, Interaction& inter, SP::BlockVector q
   double q21 = 0;
   double q22 = 0;
   double q23 = 0;
-  if(q0->getNumberOfBlocks()>1)
+  if(q0->numberOfBlocks()>1)
   {
     SP::SiconosVector q2 = (q0->getAllVect())[1];
     X2 = q2->getValue(0);
@@ -607,7 +607,7 @@ void KneeJointR::DotJd1d2(double Xdot1, double Ydot1, double Zdot1,
 void KneeJointR::computeDotJachq(double time, BlockVector& workQ, BlockVector& workZ, BlockVector& workQdot)
 {
   DEBUG_PRINT("KneeJointR::computeDotJachq(double time, Interaction& inter) starts \n");
-  if (workQdot.getNumberOfBlocks()>1)
+  if (workQdot.numberOfBlocks()>1)
   {
     computeDotJachq(time, (workQdot.getAllVect())[0], (workQdot.getAllVect())[1]);
   }
@@ -762,7 +762,7 @@ void KneeJointR::computeh(double time, BlockVector& q0, SiconosVector& y)
   double q21 = 0;
   double q22 = 0;
   double q23 = 0;
-  if(q0.getNumberOfBlocks()>1)
+  if(q0.numberOfBlocks()>1)
   {
     // SP::SiconosVector x2 = _d2->q();
     // DEBUG_EXPR( _d2->q()->display(););

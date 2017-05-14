@@ -154,7 +154,7 @@ public:
   /** get the number of Blocks
    *  \return unsigned int
    */
-  inline unsigned int getNumberOfBlocks() const
+  inline unsigned int numberOfBlocks() const
   {
     return _tabIndex->size();
   };

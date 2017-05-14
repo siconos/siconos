@@ -238,7 +238,7 @@ void NewtonEulerR::computeJachqT(Interaction& inter, SP::BlockVector q0)
   Index dimIndex(2);
   Index startIndex(4);
 
-  for (unsigned int i =0 ; i < q0->getNumberOfBlocks()  ; i++)
+  for (unsigned int i =0 ; i < q0->numberOfBlocks()  ; i++)
   {
     SP::SiconosVector q = (q0->getAllVect())[i];
     startIndex[0] = 0;

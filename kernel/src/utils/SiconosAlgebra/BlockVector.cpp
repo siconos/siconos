@@ -44,7 +44,7 @@ BlockVector::BlockVector()
 BlockVector::BlockVector(const BlockVector &v)
 {
   _sizeV = 0;
-  unsigned int nbBlocks = v.getNumberOfBlocks();
+  unsigned int nbBlocks = v.numberOfBlocks();
   _tabIndex.reset(new Index());
   _tabIndex->reserve(nbBlocks);
   _vect.reserve(nbBlocks);

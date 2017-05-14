@@ -211,7 +211,7 @@ void CylindricalJointR::computeJachq(double time, Interaction& inter,  SP::Block
   double q12 = q1->getValue(5);
   double q13 = q1->getValue(6);
 
-  if(q0->getNumberOfBlocks()>1)
+  if(q0->numberOfBlocks()>1)
   {
     SP::SiconosVector q2 = (q0->getAllVect())[1];
     double X2 = q2->getValue(0);
@@ -245,7 +245,7 @@ void CylindricalJointR::computeh(double time, BlockVector& q0, SiconosVector& y)
   double q22 = 0;
   double q23 = 0;
 
-  if (q0.getNumberOfBlocks()>1)
+  if (q0.numberOfBlocks()>1)
   {
     SP::SiconosVector q2 = (q0.getAllVect())[1];
     X2 = q2->getValue(0);
