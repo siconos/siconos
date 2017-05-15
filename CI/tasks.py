@@ -195,11 +195,11 @@ known_tasks = {'siconos---vm0':
                 siconos_debian_mechanisms),
 
                'siconos---vm1':
-               (siconos_numerics_only,
+               (siconos_documentation,
+                siconos_numerics_only,
                 siconos_clang,
                 siconos_clang_asan,
-                siconos_clang_msan,
-                siconos_documentation),
+                siconos_clang_msan),
 
                'siconos---vm2':
                (siconos_ubuntu_15_10,
