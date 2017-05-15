@@ -202,11 +202,11 @@ void Simulation::initialize(SP::Model m, bool withOSI)
       if (!DSG->properties(*dsi).osi)
       {
         _nsds->topology()->setOSI(DSG->bundle(*dsi), *_allOSI->begin());
-        if (*_allOSI->begin() != *_allOSI->end())
+        if (++_allOSI->begin() != _allOSI->end())
         {
           std::cout <<"Warning. The simulation has multiple OSIs but the DS number "
                     << DSG->bundle(*dsi)->number()
-                    << " is not affected to an OSI. We affect the first OSI to this DS."
+                    << " is not assigned to an OSI. We assign the first OSI to this DS."
                     << std::endl;
 
         }
