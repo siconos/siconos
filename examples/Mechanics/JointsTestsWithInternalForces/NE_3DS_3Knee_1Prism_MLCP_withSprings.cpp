@@ -273,7 +273,7 @@ int main(int argc, char* argv[])
 
     SP::SiconosVector axe1(new SiconosVector(3));
     axe1->zero();
-    axe1->setValue(2, 1);
+    axe1->setValue(0, 1);
     SP::PrismaticJointR relation4(new PrismaticJointR(beam3, axe1));
     SP::NonSmoothLaw nslaw4(new EqualityConditionNSL(relation4->numberOfConstraints()));
 
@@ -302,8 +302,11 @@ int main(int argc, char* argv[])
 
     // -- (1) OneStepIntegrators --
     SP::MoreauJeanOSI OSI1(new MoreauJeanOSI(theta));
+    myModel->nonSmoothDynamicalSystem()->topology()->setOSI(beam1,OSI1);
     SP::MoreauJeanOSI OSI2(new MoreauJeanOSI(theta));
+    myModel->nonSmoothDynamicalSystem()->topology()->setOSI(beam2,OSI2);
     SP::MoreauJeanOSI OSI3(new MoreauJeanOSI(theta));
+    myModel->nonSmoothDynamicalSystem()->topology()->setOSI(beam3,OSI3);
 
     // -- (2) Time discretisation --
     SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
@@ -436,23 +439,23 @@ int main(int argc, char* argv[])
 
     // --- Output files ---
     cout << "====> Output file writing ..." << endl;
-    ioMatrix::write("NE_3DS_3Knee_1Prism_MLCP.dat", "ascii", dataPlot, "noDim");
+    ioMatrix::write("NE_3DS_3Knee_1Prism_MLCP.dat", "ascii", dataPlot);
     ioMatrix::write("NE_3DS_3Knee_1Prism_MLCP_beam1.dat", "ascii", beam1Plot, "noDim");
     ioMatrix::write("NE_3DS_3Knee_1Prism_MLCP_beam2.dat", "ascii", beam2Plot, "noDim");
     ioMatrix::write("NE_3DS_3Knee_1Prism_MLCP_beam3.dat", "ascii", beam3Plot, "noDim");
 
-    //std::cout << "====> Comparison with reference file ..." << std::endl;
+    std::cout << "====> Comparison with reference file ..." << std::endl;
 
-    // SimpleMatrix dataPlotRef(dataPlot);
-    // dataPlotRef.zero();
-    // ioMatrix::read("NE_3DS_3Knee_1Prism_MLCP.ref", "ascii", dataPlotRef);
-    // std::cout << "Error w.r.t. reference file : " << (dataPlot - dataPlotRef).normInf() << std::endl;
-    // if ((dataPlot - dataPlotRef).normInf() > 1e-7)
-    // {
-    //   (dataPlot - dataPlotRef).display();
-    //   std::cout << "Warning. The results is rather different from the reference file." << std::endl;
-    //   return 1;
-    // }
+    SimpleMatrix dataPlotRef(dataPlot);
+    dataPlotRef.zero();
+    ioMatrix::read("NE_3DS_3Knee_1Prism_MLCP.ref", "ascii", dataPlotRef);
+    std::cout << "Error w.r.t. reference file : " << (dataPlot - dataPlotRef).normInf() << std::endl;
+    if ((dataPlot - dataPlotRef).normInf() > 1e-7)
+    {
+      (dataPlot - dataPlotRef).display();
+      std::cout << "Warning. The results is rather different from the reference file." << std::endl;
+      return 1;
+    }
 
     fclose(pFile);
   }

@@ -18,8 +18,8 @@
 
 /*!\file NE....cpp
   \brief \ref EMNE_MULTIBIDY - C++ input file, Time-Stepping version - O.B.
-
-  A multiby example.
+  
+  A multibody example.
   Direct description of the model.
   Simulation with a Time-Stepping scheme.
 */
@@ -254,7 +254,7 @@ int main(int argc, char* argv[])
 
      SP::SiconosVector axe1(new SiconosVector(3));
     axe1->zero();
-    axe1->setValue(2, 1);
+    axe1->setValue(0, 1);
     SP::PrismaticJointR relation4(new PrismaticJointR(beam3, axe1));
     SP::SimpleMatrix H4(new SimpleMatrix(relation4->numberOfConstraints(), qDim));
     H4->zero();

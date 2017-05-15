@@ -1,5 +1,5 @@
 
-resultfile ="NE_3DS_3Knee_1Prism_MLCP.dat"
+resultfile ="NE_3DS_3Knee_1Prism_GMP.dat"
 #resultfile ="NE_3DS_3Knee_1Prism_MLCP_D1MinusLinear.dat"
 
 resultfile ="NE_3DS_3Knee_1Prism_MLCP_MoreauJeanCombinedProjection.dat"

@@ -264,7 +264,7 @@ int main(int argc, char* argv[])
     // H4->zero();
     SP::SiconosVector axe1(new SiconosVector(3));
     axe1->zero();
-    axe1->setValue(2, 1);
+    axe1->setValue(0, 1);
     SP::PrismaticJointR relation4(new PrismaticJointR(beam3, axe1));
     // relation1->setJachq(H1); // Remark V.A. Why do we need to set the Jacobian outside
     // relation2->setJachq(H2);

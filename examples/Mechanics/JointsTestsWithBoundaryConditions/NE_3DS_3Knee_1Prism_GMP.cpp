@@ -268,9 +268,9 @@ int main(int argc, char* argv[])
 
     SP::SiconosVector axe1(new SiconosVector(3));
     axe1->zero();
-    axe1->setValue(2, 1);
+    axe1->setValue(0, 1);
     SP::PrismaticJointR relation4(new PrismaticJointR(beam3, axe1));
-    
+
     SP::NonSmoothLaw nslaw4(new EqualityConditionNSL(relation4->numberOfConstraints()));
 
 
@@ -299,8 +299,14 @@ int main(int argc, char* argv[])
 
     // -- (1) OneStepIntegrators --
     SP::MoreauJeanOSI OSI1(new MoreauJeanOSI(theta));
+    myModel->nonSmoothDynamicalSystem()->topology()->setOSI(beam1,OSI1);
+
     SP::MoreauJeanOSI OSI2(new MoreauJeanOSI(theta));
+    myModel->nonSmoothDynamicalSystem()->topology()->setOSI(beam2,OSI2);
+
     SP::MoreauJeanOSI OSI3(new MoreauJeanOSI(theta));
+    myModel->nonSmoothDynamicalSystem()->topology()->setOSI(beam3,OSI3);
+
 
     // -- (2) Time discretisation --
     SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
