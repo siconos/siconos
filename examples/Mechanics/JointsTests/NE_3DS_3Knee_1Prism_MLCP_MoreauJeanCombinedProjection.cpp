@@ -276,7 +276,7 @@ int main(int argc, char* argv[])
     // H4->zero();
     SP::SiconosVector axe1(new SiconosVector(3));
     axe1->zero();
-    axe1->setValue(2, 1);
+    axe1->setValue(0, 1);
     SP::PrismaticJointR relation4(new PrismaticJointR(beam3, axe1));
     // relation1->setJachq(H1); // Remark V.A. Why do we need to set the Jacobian outside
     // relation2->setJachq(H2);
@@ -322,8 +322,12 @@ int main(int argc, char* argv[])
 
 
     SP::TimeSteppingCombinedProjection s(new TimeSteppingCombinedProjection(t, OSI, osnspb, osnspb_pos));
+    s->setNonSmoothDynamicalSystemPtr(myModel->nonSmoothDynamicalSystem());
+    s->prepareIntegratorForDS(OSI, beam1, myModel, t0);
+    s->prepareIntegratorForDS(OSI, beam2, myModel, t0);
+    s->prepareIntegratorForDS(OSI, beam3, myModel, t0);
     s->setProjectionMaxIteration(1000);
-    s->setConstraintTolUnilateral(1e-08);
+    s->setConstraintTol(1e-08);
     s->setConstraintTolUnilateral(1e-08);
     myModel->setSimulation(s);
 
@@ -449,9 +453,9 @@ int main(int argc, char* argv[])
     cout << "====> Output file writing ..." << endl;
     dataPlot.resize(k, outputSize);
     ioMatrix::write("NE_3DS_3Knee_1Prism_MLCP_MoreauJeanCombinedProjection.dat", "ascii", dataPlot, "noDim");
-    ioMatrix::write("NE_3DS_3Knee_1Prism_MLCP_beam1.dat", "ascii", beam1Plot, "noDim");
-    ioMatrix::write("NE_3DS_3Knee_1Prism_MLCP_beam2.dat", "ascii", beam2Plot, "noDim");
-    ioMatrix::write("NE_3DS_3Knee_1Prism_MLCP_beam3.dat", "ascii", beam3Plot, "noDim");
+    ioMatrix::write("NE_3DS_3Knee_1Prism_beam1.dat", "ascii", beam1Plot, "noDim");
+    ioMatrix::write("NE_3DS_3Knee_1Prism_beam2.dat", "ascii", beam2Plot, "noDim");
+    ioMatrix::write("NE_3DS_3Knee_1Prism_beam3.dat", "ascii", beam3Plot, "noDim");
 
     SimpleMatrix dataPlotRef(dataPlot);
     dataPlotRef.zero();
