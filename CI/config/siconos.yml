@@ -428,6 +428,6 @@ pkgs:
   documentation-upload-ssh-setup:
     any:
       command:
-        mkdir -p /root/.ssh
-        cp /builds/.ssh/id_rsa.pub /root/.ssh
+        mkdir -p /root/.ssh &&
+        cp /builds/.ssh/id_rsa.pub /root/.ssh &&
         cp /builds/.ssh/id_rsa /root/.ssh
