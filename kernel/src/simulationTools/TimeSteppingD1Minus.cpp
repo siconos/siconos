@@ -28,12 +28,15 @@
 #include "NewtonEulerR.hpp"
 #include "TypeName.hpp"
 #include "NonSmoothLaw.hpp"
-//#define DEBUG_STDOUT
-//#define DEBUG_MESSAGES
+
+// #define DEBUG_NOCOLOR
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
 #include "debug.h"
 #include "Model.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
 #include "EventsManager.hpp"
+#include "OneStepNSProblem.hpp"
 
 #include <ciso646>
 
@@ -252,6 +255,25 @@ void TimeSteppingD1Minus::advanceToEvent()
 
   // indexset (I_{k+1}^+) is calculated in Simulation::processEvent
 }
+
+
+void TimeSteppingD1Minus::updateInput(unsigned int level)
+{
+  DEBUG_BEGIN("TimeSteppingD1Minus::updateInput(unsigned int level)\n");
+  OSIIterator itOSI;
+  // 1 - compute input (lambda -> r)
+  if (!_allNSProblems->empty())
+  {
+    for (itOSI = _allOSI->begin(); itOSI != _allOSI->end() ; ++itOSI)
+      (*itOSI)->updateInput(nextTime(),level);
+    //_nsds->updateInput(nextTime(),levelInput);
+  }
+  DEBUG_END("TimeSteppingD1Minus::updateInput(unsigned int level)\n");
+
+}
+
+
+
 
 // void TimeSteppingD1Minus::updateInput(unsigned int level)
 // {
