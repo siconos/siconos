@@ -43,15 +43,10 @@ int main(int argc, char* argv[])
     double t0 = 0;                   // initial computation time
     double h = 0.001;                // time step
     double T = 10;
-    double L1 = 1.0;
-    double L2 = 2.0;
-    double L3 = 1.0;
     double theta = 1.0;              // theta for MoreauJeanOSI integrator
     double g = 9.81; // Gravity
     double m = 1.;
-    double wx = 0.0;
-    double wz = 0.0;
-    double wy = 0.0;
+
     // -------------------------
     // --- Dynamical systems ---
     // -------------------------
@@ -167,7 +162,6 @@ int main(int argc, char* argv[])
 
     boost::timer time;
     time.restart();
-    int NewtonIt = 0;
     Index dimIndex(2);
     Index startIndex(4);
     int cmp = 0;
