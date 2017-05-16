@@ -64,10 +64,15 @@ siconos_ubuntu_15_10 = siconos_default.copy()(
     add_pkgs=['umfpack'],
     distrib='ubuntu:15.10')
 
+import os
+from os.path import expanduser
+home = expanduser("~")
+
 siconos_documentation = siconos_default.copy()(
     distrib='ubuntu:16.10',
     ci_config='with_documentation',
     add_pkgs=['documentation'],
+    add_directories=[os.path.join(home, '.ssh:/root/.ssh')],
     targets={'.': ['docker-build', 'docker-cmake', 'docker-make',
                    'docker-make-install',
                    'docker-make-doc', 'docker-make-upload']})
@@ -190,11 +195,11 @@ known_tasks = {'siconos---vm0':
                 siconos_debian_mechanisms),
 
                'siconos---vm1':
-               (siconos_numerics_only,
+               (siconos_documentation,
+                siconos_numerics_only,
                 siconos_clang,
                 siconos_clang_asan,
-                siconos_clang_msan,
-                siconos_documentation),
+                siconos_clang_msan),
 
                'siconos---vm2':
                (siconos_ubuntu_15_10,

@@ -2,6 +2,70 @@ import os
 import shutil
 from subprocess import check_call, CalledProcessError
 import copy
+import time
+import multiprocessing
+
+
+class TimeoutException(Exception):
+    pass
+
+
+class RunableProcessing(multiprocessing.Process):
+    def __init__(self, func, *args, **kwargs):
+        self.queue = multiprocessing.Queue(maxsize=1)
+        args = (func,) + args
+        multiprocessing.Process.__init__(self, target=self.run_func, args=args,
+                                         kwargs=kwargs)
+
+    def run_func(self, func, *args, **kwargs):
+        try:
+            result = func(*args, **kwargs)
+            self.queue.put((True, result))
+        except Exception as e:
+            self.queue.put((False, e))
+
+    def done(self):
+        return self.queue.full()
+
+    def result(self):
+        return self.queue.get()
+
+
+def timeout(seconds, force_kill=True):
+    if seconds == 0:
+        def wrapper(function):
+            return function
+        return wrapper
+    else:
+        def wrapper(function):
+            def inner(*args, **kwargs):
+                now = time.time()
+                proc = RunableProcessing(function, *args, **kwargs)
+                proc.start()
+                proc.join(seconds)
+                if proc.is_alive():
+                    if force_kill:
+                        proc.terminate()
+                    runtime = int(time.time() - now)
+                    raise TimeoutException(
+                        'timed out after {0} seconds'.format(runtime))
+                if not proc.done():
+                    proc.terminate()
+                assert proc.done()
+                success, result = proc.result()
+                if success:
+                    # return time.time() - now, result
+                    return result
+                else:
+                    # raise time.time() - now, result
+                    raise result
+            return inner
+        return wrapper
+
+
+@timeout(3000)
+def call(*args, **kwargs):
+    return check_call(*args, **kwargs)
 
 
 class CiTask():
@@ -15,7 +79,8 @@ class CiTask():
                  pkgs=None,
                  srcs=None,
                  targets=None,
-                 cmake_cmd=None):
+                 cmake_cmd=None,
+                 directories=[]):
         self._fast = fast
         self._distrib = distrib
         self._mode = mode
@@ -25,6 +90,7 @@ class CiTask():
         self._srcs = srcs
         self._targets = targets
         self._cmake_cmd = cmake_cmd
+        self._directories = directories
 
     def build_dir(self, src):
         if isinstance(self._ci_config, str):
@@ -45,6 +111,7 @@ class CiTask():
                  ci_config=self._ci_config, fast=self._fast, pkgs=self._pkgs,
                  srcs=self._srcs, targets=self._targets,
                  cmake_cmd=self._cmake_cmd,
+                 add_directories=None,
                  add_pkgs=None, remove_pkgs=None, add_srcs=None,
                  remove_srcs=None, add_targets=None, remove_targets=None,
                  with_examples=False):
@@ -71,6 +138,11 @@ class CiTask():
                 targets = list(
                     filter(lambda p: p not in remove_targets, targets))
 
+            if add_directories is not None:
+                directories = self._directories + add_directories
+            else:
+                directories = self._directories
+
             if with_examples:
                 if 'examples' not in srcs:
                     srcs = srcs + ['examples']
@@ -86,7 +158,7 @@ class CiTask():
                     targets.pop('examples')
 
             return CiTask(mode, build_configuration, distrib, ci_config, fast,
-                          pkgs, srcs, targets, cmake_cmd)
+                          pkgs, srcs, targets, cmake_cmd, directories)
         return init
 
     def run(self, root_dir, targets_override=None):
@@ -141,6 +213,9 @@ class CiTask():
                           '-DDOCKER_TEMPLATE={0}'.format('-'.join(templ_list)),
                           '-DDOCKER_PROJECT_SOURCE_DIR={0}'.format(full_src)]
 
+            if self._directories is not None:
+                cmake_args.append('-DDOCKER_SHARED_DIRECTORIES={0}'.format(';'.join(self._directories)))
+
             # for examples ...
             if not os.path.samefile(root_dir, full_src):
                 cmake_args.append('-DDOCKER_SHARED_DIRECTORIES={:}'.format(
@@ -161,11 +236,11 @@ class CiTask():
                 full_cmd = ['cmake'] + cmake_args + [os.path.join(full_src,
                                                                   'CI')]
                 print("cmake command is: {:}".format(' '.join(full_cmd)))
-                check_call(full_cmd, cwd=bdir)
+                call(full_cmd, cwd=bdir)
 
                 for target in self._targets[src]:
 
-                    check_call(['make'] + ['-ki'] + [target], cwd=bdir)
+                    call(['make'] + ['-ki'] + [target], cwd=bdir)
 
             except CalledProcessError as error:
                 return_code = 1
@@ -180,13 +255,13 @@ class CiTask():
             bdir = self.build_dir(src)
 
             try:
-                check_call(['make'] + ['docker-clean-usr-local'],
+                call(['make'] + ['docker-clean-usr-local'],
                            cwd=bdir)
 
                 if not self._fast:
 
-                    check_call(['make'] + ['docker-clean'],
-                               cwd=bdir)
+                    call(['make'] + ['docker-clean'],
+                         cwd=bdir)
 
             except CalledProcessError as error:
                     print(error)
