@@ -459,17 +459,20 @@ void D1MinusLinearOSI::updateState(const unsigned int)
 
 void D1MinusLinearOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, OneStepNSProblem* osnsp)
 {
-  DEBUG_PRINT("\n D1MinusLinearOSI::computeFreeOutput(), start\n");
+  DEBUG_PRINT("D1MinusLinearOSI::computeFreeOutput(), start\n");
   switch(_typeOfD1MinusLinearOSI)
   {
   case halfexplicit_acceleration_level:
     computeFreeOutputHalfExplicitAccelerationLevel(vertex_inter,osnsp);
+    DEBUG_END("D1MinusLinearOSI::computeFreeOutput()\n");
     return;
   case halfexplicit_acceleration_level_full:
     computeFreeOutputHalfExplicitAccelerationLevel(vertex_inter,osnsp);
+    DEBUG_END("D1MinusLinearOSI::computeFreeOutput()\n");
     return;
   case halfexplicit_velocity_level:
     computeFreeOutputHalfExplicitVelocityLevel(vertex_inter,osnsp);
+    DEBUG_END("D1MinusLinearOSI::computeFreeOutput()\n");
     return;
   }
   RuntimeException::selfThrow("D1MinusLinearOSI::computeResidu() - not implemented for type of D1MinusLinearOSI: " + _typeOfD1MinusLinearOSI);
