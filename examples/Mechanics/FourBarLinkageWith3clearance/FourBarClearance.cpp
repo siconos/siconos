@@ -99,6 +99,7 @@ int main(int argc, char* argv[])
     // --- Dynamical systems ---
     // -------------------------
 
+
     // --- DS: slidercrank ---
 
     // Initial position (angles in radian)
@@ -128,6 +129,7 @@ int main(int argc, char* argv[])
     fourbar->setComputeFIntFunction("FourBarClearancePlugin.so", "FInt");
     fourbar->setComputeJacobianFIntqDotFunction("FourBarClearancePlugin.so", "jacobianFIntqDot");
     fourbar->setComputeJacobianFIntqFunction("FourBarClearancePlugin.so", "jacobianFIntq");
+
 
     // -------------------
     // --- Interactions---
