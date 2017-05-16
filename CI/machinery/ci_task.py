@@ -2,6 +2,70 @@ import os
 import shutil
 from subprocess import check_call, CalledProcessError
 import copy
+import time
+import multiprocessing
+
+
+class TimeoutException(Exception):
+    pass
+
+
+class RunableProcessing(multiprocessing.Process):
+    def __init__(self, func, *args, **kwargs):
+        self.queue = multiprocessing.Queue(maxsize=1)
+        args = (func,) + args
+        multiprocessing.Process.__init__(self, target=self.run_func, args=args,
+                                         kwargs=kwargs)
+
+    def run_func(self, func, *args, **kwargs):
+        try:
+            result = func(*args, **kwargs)
+            self.queue.put((True, result))
+        except Exception as e:
+            self.queue.put((False, e))
+
+    def done(self):
+        return self.queue.full()
+
+    def result(self):
+        return self.queue.get()
+
+
+def timeout(seconds, force_kill=True):
+    if seconds == 0:
+        def wrapper(function):
+            return function
+        return wrapper
+    else:
+        def wrapper(function):
+            def inner(*args, **kwargs):
+                now = time.time()
+                proc = RunableProcessing(function, *args, **kwargs)
+                proc.start()
+                proc.join(seconds)
+                if proc.is_alive():
+                    if force_kill:
+                        proc.terminate()
+                    runtime = int(time.time() - now)
+                    raise TimeoutException(
+                        'timed out after {0} seconds'.format(runtime))
+                if not proc.done():
+                    proc.terminate()
+                assert proc.done()
+                success, result = proc.result()
+                if success:
+                    # return time.time() - now, result
+                    return result
+                else:
+                    # raise time.time() - now, result
+                    raise result
+            return inner
+        return wrapper
+
+
+@timeout(1800)
+def call(*args, **kwargs):
+    return check_call(*args, **kwargs)
 
 
 class CiTask():
@@ -172,11 +236,11 @@ class CiTask():
                 full_cmd = ['cmake'] + cmake_args + [os.path.join(full_src,
                                                                   'CI')]
                 print("cmake command is: {:}".format(' '.join(full_cmd)))
-                check_call(full_cmd, cwd=bdir)
+                call(full_cmd, cwd=bdir)
 
                 for target in self._targets[src]:
 
-                    check_call(['make'] + ['-ki'] + [target], cwd=bdir)
+                    call(['make'] + ['-ki'] + [target], cwd=bdir)
 
             except CalledProcessError as error:
                 return_code = 1
@@ -191,13 +255,13 @@ class CiTask():
             bdir = self.build_dir(src)
 
             try:
-                check_call(['make'] + ['docker-clean-usr-local'],
+                call(['make'] + ['docker-clean-usr-local'],
                            cwd=bdir)
 
                 if not self._fast:
 
-                    check_call(['make'] + ['docker-clean'],
-                               cwd=bdir)
+                    call(['make'] + ['docker-clean'],
+                         cwd=bdir)
 
             except CalledProcessError as error:
                     print(error)
