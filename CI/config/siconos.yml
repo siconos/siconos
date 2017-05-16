@@ -134,7 +134,6 @@ pkgs:
       - siconos-doc-pip-pkgs
       - bullet
       - serialization
-      - documentation-upload-ssh-setup
 
   pip-command:
     debian:
@@ -425,9 +424,3 @@ pkgs:
         make &&
         make install
 
-  documentation-upload-ssh-setup:
-    any:
-      command:
-        mkdir -p /root/.ssh &&
-        cp /builds/.ssh/id_rsa.pub /root/.ssh &&
-        cp /builds/.ssh/id_rsa /root/.ssh
