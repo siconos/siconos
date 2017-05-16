@@ -63,7 +63,7 @@ def timeout(seconds, force_kill=True):
         return wrapper
 
 
-@timeout(1800)
+@timeout(3000)
 def call(*args, **kwargs):
     return check_call(*args, **kwargs)
 
