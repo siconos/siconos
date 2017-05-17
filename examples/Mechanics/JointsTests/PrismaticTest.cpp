@@ -25,6 +25,7 @@
 #include "SiconosKernel.hpp"
 #include "KneeJointR.hpp"
 #include "PrismaticJointR.hpp"
+#include <boost/math/quaternion.hpp>
 #include <math.h>
 using namespace std;
 
@@ -67,18 +68,17 @@ int main(int argc, char* argv[])
     double angle = M_PI / 5;
     SiconosVector V1(3);
     V1.zero();
-    V1.setValue(2, 1);
     V1.setValue(0, 3);
     V1.setValue(1, 2);
+    V1.setValue(2, 1);
     double Vnorm = V1.norm2();
-    V1.setValue(1, V1.getValue(1) / Vnorm);
     V1.setValue(0, V1.getValue(0) / Vnorm);
+    V1.setValue(1, V1.getValue(1) / Vnorm);
     V1.setValue(2, V1.getValue(2) / Vnorm);
     q10->setValue(3, cos(angle));
     q10->setValue(4, V1.getValue(0)*sin(angle));
     q10->setValue(5, V1.getValue(1)*sin(angle));
     q10->setValue(6, V1.getValue(2)*sin(angle));
-
 
     // -- The dynamical system --
     SP::NewtonEulerDS beam1(new NewtonEulerDS(q10, v10, m, I1));
@@ -98,8 +98,15 @@ int main(int argc, char* argv[])
     // Interaction ball-floor
     //
     SP::SiconosVector axe1(new SiconosVector(3));
-    axe1->zero();
-    axe1->setValue(2, 1);
+
+    // Rotate (0,0,1) to beam1 frame
+    boost::math::quaternion<double> quatA1(0, 0, 0, 1);
+    boost::math::quaternion<double> quat10(q10->getValue(3), q10->getValue(4),
+                                           q10->getValue(5), q10->getValue(6));
+    boost::math::quaternion<double> tmp = 1.0/quat10 * quatA1 * quat10;
+    axe1->setValue(0, tmp.R_component_2());
+    axe1->setValue(1, tmp.R_component_3());
+    axe1->setValue(2, tmp.R_component_4());
 
     SP::PrismaticJointR relation1(new PrismaticJointR(beam1, axe1));
 
