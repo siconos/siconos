@@ -33,7 +33,6 @@ except GetoptError as err:
     exit(2)
 
 tasks = None
-brutal_clean = False
 targets_override = None
 verbose = False
 run = False
@@ -71,8 +70,6 @@ for o, a in opts:
     if o in ('--targets',):
         targets_override = a.split(',')
 
-    if o in ('--brutal-docker-clean',):
-        brutal_clean = True
 
 hostname = gethostname().split('.')[0]
 
@@ -107,27 +104,9 @@ if run:
             sys.stderr.write(str(e))
 
     for task in tasks:
+        try:
 
-        task.clean()
+            task.clean()
 
-# docker specific, to be moved elsewhere
-if brutal_clean:
-
-    # clean everything (-> maybe once a week?)
-    def mklist(sstr):
-        return filter(lambda s: s != '', sstr.strip().split('\n'))
-
-    running_containers = mklist(check_output(['docker', 'ps', '-q']))
-
-    if len(running_containers) > 0:
-        check_call(['docker', 'kill'] + running_containers)
-
-    containers = mklist(check_output(['docker', 'ps', '-a', '-q']))
-    if len(containers) > 0:
-        check_call(['docker', 'rm'] + containers)
-
-    images = mklist(check_output(['docker', 'images', '-q']))[1:]
-    if len(images) > 0:
-        check_call(['docker', 'rmi'] + images)
-
-    exit(return_code)
+        except Exception as e:
+            sys.stderr.write(str(e))

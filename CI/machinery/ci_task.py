@@ -113,8 +113,7 @@ class CiTask():
                  cmake_cmd=self._cmake_cmd,
                  add_directories=None,
                  add_pkgs=None, remove_pkgs=None, add_srcs=None,
-                 remove_srcs=None, add_targets=None, remove_targets=None,
-                 with_examples=False):
+                 remove_srcs=None, add_targets=None, remove_targets=None):
 
             # WARNING: remember that default arg are mutable in python
             # http://docs.python-guide.org/en/latest/writing/gotchas/
@@ -142,20 +141,6 @@ class CiTask():
                 directories = self._directories + add_directories
             else:
                 directories = self._directories
-
-            if with_examples:
-                if 'examples' not in srcs:
-                    srcs = srcs + ['examples']
-                    targets = copy.deepcopy(targets)
-                    targets.update({'.': ['docker-build', 'docker-ctest',
-                                          'docker-make-install'],
-                                    'examples': ['docker-build', 'docker-ctest']})
-
-            else:
-                if 'examples' in srcs:
-                    srcs.remove('examples')
-                if 'examples' in targets:
-                    targets.pop('examples')
 
             return CiTask(mode, build_configuration, distrib, ci_config, fast,
                           pkgs, srcs, targets, cmake_cmd, directories)
@@ -190,18 +175,11 @@ class CiTask():
             templ_list = [p.replace('+', 'x')
                           for p in self._pkgs if p not in redundants]
 
-            # special case for examples
-            #
-            # not generic, to be moved somewhere else
-            #
-            if src is 'examples':
-                ci_config_args = 'examples'
+            # hm python is so lovely
+            if isinstance(self._ci_config, str):
+                ci_config_args = self._ci_config
             else:
-                # hm python is so lovely
-                if isinstance(self._ci_config, str):
-                    ci_config_args = self._ci_config
-                else:
-                    ci_config_args = ','.join(self._ci_config)
+                ci_config_args = ','.join(self._ci_config)
 
             cmake_args = ['-DMODE={0}'.format(self._mode),
                           '-DCI_CONFIG={0}'.format(ci_config_args),
@@ -214,9 +192,10 @@ class CiTask():
                           '-DDOCKER_PROJECT_SOURCE_DIR={0}'.format(full_src)]
 
             if self._directories is not None:
-                cmake_args.append('-DDOCKER_SHARED_DIRECTORIES={0}'.format(';'.join(self._directories)))
+                cmake_args.append('-DDOCKER_SHARED_DIRECTORIES={0}'.format(
+                    ';'.join(self._directories)))
 
-            # for examples ...
+            # for examples ..
             if not os.path.samefile(root_dir, full_src):
                 cmake_args.append('-DDOCKER_SHARED_DIRECTORIES={:}'.format(
                     root_dir))
@@ -233,8 +212,12 @@ class CiTask():
                                                             self._cmake_cmd)]
 
             try:
-                full_cmd = ['cmake'] + cmake_args + [os.path.join(full_src,
-                                                                  'CI')]
+                if os.path.exists(os.path.join(full_src, 'CI')):
+                    full_cmd = ['cmake'] + cmake_args + [os.path.join(full_src,
+                                                                      'CI')]
+                else:
+                    full_cmd = ['cmake'] + cmake_args + [full_src]
+                    
                 print("cmake command is: {:}".format(' '.join(full_cmd)))
                 call(full_cmd, cwd=bdir)
 

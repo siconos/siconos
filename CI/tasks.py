@@ -82,14 +82,14 @@ siconos_ubuntu_15_10_with_mechanisms = siconos_default.copy()(
     add_pkgs=['pythonocc-conda', 'wget', 'bash', 'bzip2',
               'pythonocc-conda-dep'],
     cmake_cmd='Build/ci-scripts/conda.sh',
-    with_examples=True,
+    add_srcs=['examples'],
     distrib='debian:stretch')
 
 siconos_debian_mechanisms = siconos_default.copy()(
     ci_config='with_mechanisms',
     add_pkgs=['wget', 'bash', 'bullet', 'h5py', 'oce-pythonocc-deps',
               'oce-pythonocc'],
-    with_examples=True,
+    add_srcs=['examples'],
     distrib='debian:latest')
 
 
@@ -97,7 +97,7 @@ siconos_ubuntu_latest_mechanisms = siconos_default.copy()(
     ci_config='with_mechanisms',
     add_pkgs=['wget', 'bash', 'bullet', 'h5py', 'oce-pythonocc-deps',
               'oce-pythonocc'],
-    with_examples=True,
+    add_srcs=['examples'],
     distrib='ubuntu:latest')
 
 siconos_numerics_only = siconos_ubuntu_16_10.copy()(
@@ -119,11 +119,11 @@ siconos_openblas_lapacke = siconos_default.copy()(
     ci_config='with_umfpack',
     remove_pkgs=['atlas-lapack'],
     add_pkgs=['openblas-lapacke', 'umfpack', 'path', 'wget'],  # wget for path
-    with_examples=True)
+    add_srcs=['examples'])
 
 siconos_clang = siconos_ubuntu_16_10.copy()(
     ci_config=('with_bullet', 'with_py3'),
-    with_examples=False,
+    add_srcs=['examples'],
     remove_pkgs=['python-env'],
     add_pkgs=['clang-3.9', 'bullet', 'cppunit_clang-3.9', 'wget', 'xz', 'python3-env', 'path', 'h5py3'])  # h5py-3 for mechanics.io
 
@@ -131,12 +131,12 @@ siconos_clang_asan = siconos_clang.copy()(
     ci_config=('with_asan_clang', 'with_mumps', 'with_hdf5', 'with_serialization', 'with_py3'),
     add_pkgs=['mumps', 'hdf5', 'serialization'],
     build_configuration='Debug',
-    with_examples=False)
+    add_srcs=['examples'])
 
 # <clang-3.7.1 does not support linux 4.2
 # This will likely hurt you
 siconos_clang_msan = siconos_default.copy()(
-    with_examples=False,
+    add_srcs=['examples'],
     distrib='debian:jessie',
     ci_config='with_msan',
     build_configuration='Debug',
@@ -152,8 +152,7 @@ siconos_gcc_asan = siconos_fedora_latest.copy()(
     ci_config=('with_asan', 'with_mumps', 'with_hdf5', 'with_serialization'),
     cmake_cmd='Build/ci-scripts/fedora-mpi.sh',
     add_pkgs=['mumps', 'hdf5', 'asan', 'serialization', 'path', 'wget'],   # wget for path
-    build_configuration='Debug',
-    with_examples=False)
+    build_configuration='Debug')
 
 siconos_gcc_asan_latest = siconos_fedora_latest.copy()(
     ci_config=('with_asan', 'with_mumps', 'with_hdf5', 'with_serialization'),
@@ -176,12 +175,16 @@ siconos_with_mumps = siconos_default.copy()(
 
 siconos_default_examples = siconos_default.copy()(
     ci_config='examples',
-    with_examples=True,
-    fast=False)
+    targets={'.': ['docker-build', 'docker-cmake', 'docker-make',
+                   'docker-make-install'],
+             'examples': ['docker-build', 'docker-ctest']},
+    add_srcs=['examples'],
+    fast=True)
 
 siconos_frama_c = siconos_default.copy()(
     ci_config='with_frama_c',
-    add_pkgs=['opam', 'frama-c', 'libgtksourceview2.0-dev', 'libgnomecanvas2-dev', 'aspcud', 'm4',
+    add_pkgs=['opam', 'frama-c', 'libgtksourceview2.0-dev',
+              'libgnomecanvas2-dev', 'aspcud', 'm4',
               'unzip', 'coq', 'ocaml', 'z3'])
 
 #
@@ -192,24 +195,26 @@ known_tasks = {'siconos---vm0':
                 siconos_gcc_asan,
                 siconos_gcc_asan_latest,
                 siconos_ubuntu_15_10_with_mechanisms,
-                siconos_debian_mechanisms),
+                siconos_debian_mechanisms,
+                siconos_ubuntu_15_10),
 
                'siconos---vm1':
                (siconos_documentation,
                 siconos_numerics_only,
                 siconos_clang,
                 siconos_clang_asan,
-                siconos_clang_msan),
+                siconos_clang_msan,
+                siconos_ubuntu_15_04,
+                siconos_ubuntu_14_04),
 
                'siconos---vm2':
-               (siconos_ubuntu_15_10,
-                siconos_ubuntu_15_04,
-                siconos_ubuntu_14_04,
-                siconos_profiling),
+               (),
 
                'siconos---vm3':
                (siconos_debian_latest,
                 siconos_openblas_lapacke,
                 siconos_serialization,
                 siconos_with_mumps,
-                siconos_default_examples)}
+                siconos_default_examples,
+                siconos_profiling,
+                siconos_ubuntu_17_04)}
