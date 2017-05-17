@@ -216,4 +216,5 @@ known_tasks = {'siconos---vm0':
                 siconos_serialization,
                 siconos_with_mumps,
                 siconos_default_examples,
-                siconos_profiling)}
+                siconos_profiling,
+                siconos_ubuntu_17_04)}
