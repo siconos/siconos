@@ -92,9 +92,6 @@ int main(int argc, char* argv[])
     SimpleMatrix H(1, nDof);
     H(0, 0) = 1.0;
     SP::NonSmoothLaw nslaw0(new NewtonImpactNSL(e));
-    DynamicalSystemsSet dsConcerned;
-    dsConcerned.insert(lds);
-
     vector<string> listofG2(1);
     listofG2[0] = "FollowerPlugin:FollowerComputeG0";
     SP::Relation relation0(new LagrangianRheonomousR("FollowerPlugin:FollowerComputeH1", "FollowerPlugin:FollowerComputeG10", "FollowerPlugin:FollowerComputeG11"));

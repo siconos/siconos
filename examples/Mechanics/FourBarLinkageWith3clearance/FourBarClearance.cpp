@@ -99,9 +99,6 @@ int main(int argc, char* argv[])
     // --- Dynamical systems ---
     // -------------------------
 
-    // unsigned int i;
-    DynamicalSystemsSet allDS; // the list of DS
-
     // --- DS: slidercrank ---
 
     // Initial position (angles in radian)
@@ -131,8 +128,6 @@ int main(int argc, char* argv[])
     fourbar->setComputeFIntFunction("FourBarClearancePlugin.so", "FInt");
     fourbar->setComputeJacobianFIntqDotFunction("FourBarClearancePlugin.so", "jacobianFIntqDot");
     fourbar->setComputeJacobianFIntqFunction("FourBarClearancePlugin.so", "jacobianFIntq");
-
-    allDS.insert(fourbar);
 
     // -------------------
     // --- Interactions---

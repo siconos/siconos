@@ -205,13 +205,11 @@ int main(int argc, char* argv[])
     SP::Relation relation;
     SP::Interaction interaction;
     double ResCoef, Stiff, ElasPow;
-    DynamicalSystemsSet DSSet_interaction;
     for (unsigned int j = 0; j < NumberContacts; ++j)
     {
       ResCoef = (*ResCofContacts)(j) ;
       Stiff = (*StiffContacts)(j);
       ElasPow = (*ElasCofContacts)(j);
-      DSSet_interaction.clear();
       if (j == 0) // for contact wall-ball
       {
         H = SP::SimpleMatrix(new SimpleMatrix(1, nDofBall));

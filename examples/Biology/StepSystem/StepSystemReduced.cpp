@@ -1,4 +1,3 @@
-
 #include "SiconosKernel.hpp"
 #include "const.h"
 #include "NonlinearRelationReduced2.h"
@@ -58,9 +57,6 @@ int main(int argc, char *argv[])
 
   SP::MyDS aDS ;
   aDS.reset(new MyDS(xti));
-
-  DynamicalSystemsSet  Inter_DS ;
-  Inter_DS.insert(aDS);
 
 //******BUILD THE RELATION
   SP::NonlinearRelationReduced2 aR;
