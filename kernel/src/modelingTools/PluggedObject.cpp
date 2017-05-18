@@ -19,7 +19,7 @@
 
 #include "SSLH.hpp"
 #include "PluggedObject.hpp"
-
+#include <assert.h>
 PluggedObject::PluggedObject(): _pluginName("unplugged")
 {
   fPtr = NULL;
