@@ -41,7 +41,7 @@ using namespace RELATION;
 
 double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
 {
-  DEBUG_PRINT("\n D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel(), starts\n");
+  DEBUG_BEGIN("D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel(), starts\n");
 
   double t = _simulation->nextTime(); // end of the time step
   double told = _simulation->startingTime(); // beginning of the time step
@@ -90,14 +90,14 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
       d->computeForces(told, qold, vold);
       DEBUG_EXPR(d->forces()->display());
       vFree += *(d->forces());
-    
+
       /* Compute the acceleration due to the external force */
       /* vFree contains left (right limit) acceleration without contact force */
       if(d->inverseMass())
-	{
-	  d->update_inverse_mass();
-	  d->inverseMass()->PLUForwardBackwardInPlace(vFree);
-	}
+      {
+        d->update_inverse_mass();
+        d->inverseMass()->PLUForwardBackwardInPlace(vFree);
+      }
 
       /* Store the value of vFree in d->workspace(DynamicalSystem::free_tdg called work_tdg*/
       work_tdg =  workVectors[OneStepIntegrator::free_tdg];
@@ -136,12 +136,12 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
       d->computeForces(told, qold, vold);
       DEBUG_EXPR(d->forces()->display());
       vFree += *(d->forces());
-      
+
       if(d->inverseMass())
-	{
-	  d->update_inverse_mass();
-	  d->inverseMass()->PLUForwardBackwardInPlace(vFree); // contains left (right limit) acceleration without contact force
-	}
+      {
+        d->update_inverse_mass();
+        d->inverseMass()->PLUForwardBackwardInPlace(vFree); // contains left (right limit) acceleration without contact force
+      }
 
       work_tdg =  workVectors[OneStepIntegrator::free_tdg];;
       work_tdg->zero();
@@ -242,10 +242,10 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
       /* we homogenize p(2) to a force for the user output   */
       *p2 /= h;
       if(d->inverseMass())
-	{
-	  d->update_inverse_mass();
-	  d->inverseMass()->PLUForwardBackwardInPlace(*dummy);
-	}
+      {
+        d->inverseMass()->PLUForwardBackwardInPlace(*dummy);
+        DEBUG_EXPR(d->inverseMass()->display(););
+      }
       DEBUG_EXPR(vFree.display());
       DEBUG_EXPR(dummy->display());
 
@@ -294,10 +294,10 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
       *p2 /= h;
 
       if(d->inverseMass())
-	{
-	  d->update_inverse_mass();
-	  d->inverseMass()->PLUForwardBackwardInPlace(*dummy);
-	}
+      {
+        d->update_inverse_mass();
+        d->inverseMass()->PLUForwardBackwardInPlace(*dummy);
+      }
 
       DEBUG_EXPR(vFree.display());
       DEBUG_EXPR(qold->display());
@@ -385,13 +385,13 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
   }
 
   /* If _isThereImpactInTheTimeStep = true;
-  * we recompute residuFree by removing the contribution of the nonimpulsive contact forces.
-  * We add the contribution of the external forces at the end
-  * of the time--step
-  * If _isThereImpactInTheTimeStep = false;
-  * we recompute residuFree by adding   the contribution of the external forces at the end
-  * and the contribution of the nonimpulsive contact forces that are computed by solving the osnsp.
-  */
+   * we recompute residuFree by removing the contribution of the nonimpulsive contact forces.
+   * We add the contribution of the external forces at the end
+   * of the time--step
+   * If _isThereImpactInTheTimeStep = false;
+   * we recompute residuFree by adding   the contribution of the external forces at the end
+   * and the contribution of the nonimpulsive contact forces that are computed by solving the osnsp.
+   */
   if(_isThereImpactInTheTimeStep)
   {
 
@@ -421,19 +421,19 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
         DEBUG_EXPR(work_tdg->display());
         residuFree =  - 0.5 * h**work_tdg;
 
-	DEBUG_EXPR(q->display(););
-	DEBUG_EXPR(v->display(););
-	d->computeForces(t, q, v);
-	DEBUG_EXPR(d->forces()->display(););
-	*work_tdg = *(d->forces());
+        DEBUG_EXPR(q->display(););
+        DEBUG_EXPR(v->display(););
+        d->computeForces(t, q, v);
+        DEBUG_EXPR(d->forces()->display(););
+        *work_tdg = *(d->forces());
 
-        
-	if(d->inverseMass())
-	  {
-	  d->update_inverse_mass();
-	  d->inverseMass()->PLUForwardBackwardInPlace(*work_tdg);
-	  // contains right (left limit) acceleration without contact force
-	}
+
+        if(d->inverseMass())
+        {
+          d->update_inverse_mass();
+          d->inverseMass()->PLUForwardBackwardInPlace(*work_tdg);
+          // contains right (left limit) acceleration without contact force
+        }
 
         DEBUG_EXPR(work_tdg->display());
         residuFree -= 0.5 * h**work_tdg;
@@ -455,15 +455,15 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
         residuFree = 0.5 * h**work_tdg;
         work_tdg->zero();
 
-	d->computeForces(t, q, v);
-	*work_tdg += *(d->forces());
-        
-	if(d->inverseMass())
-	  {
-	  d->update_inverse_mass();
-	  d->inverseMass()->PLUForwardBackwardInPlace(*work_tdg);
-	  // contains right (left limit) acceleration without contact force
-	}
+        d->computeForces(t, q, v);
+        *work_tdg += *(d->forces());
+
+        if(d->inverseMass())
+        {
+          d->update_inverse_mass();
+          d->inverseMass()->PLUForwardBackwardInPlace(*work_tdg);
+          // contains right (left limit) acceleration without contact force
+        }
 
         residuFree -= 0.5 * h**work_tdg;
         DEBUG_EXPR(residuFree.display());
@@ -501,20 +501,20 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
         // Lagrangian Nonlinear Systems
         if(dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
         {
-	  d->computeForces(t, q, v);
-	  DEBUG_EXPR(d->forces()->display());
-	  vFree += *(d->forces());
-          
+          d->computeForces(t, q, v);
+          DEBUG_EXPR(d->forces()->display());
+          vFree += *(d->forces());
+
         }
         else
           RuntimeException::selfThrow
-          ("D1MinusLinearOSI::computeResidu - not yet implemented for Dynamical system type: " + dsType);
+            ("D1MinusLinearOSI::computeResidu - not yet implemented for Dynamical system type: " + dsType);
 
-	if(d->inverseMass())
-	  {
-	    d->update_inverse_mass();
-	    d->inverseMass()->PLUForwardBackwardInPlace(vFree);
-	  }
+        if(d->inverseMass())
+        {
+          d->update_inverse_mass();
+          d->inverseMass()->PLUForwardBackwardInPlace(vFree);
+        }
         /* vFree contains right (left limit) acceleration without contact force */
         SiconosVector& residuFree = *workVectors[OneStepIntegrator::residu_free];
         residuFree += -0.5 * h * vFree;
@@ -541,15 +541,15 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
         DEBUG_EXPR(q->display());
         DEBUG_EXPR(v->display());
 
-	d->computeForces(t, q, v);
-	vFree += *(d->forces());
-        
+        d->computeForces(t, q, v);
+        vFree += *(d->forces());
 
-	if(d->inverseMass())
-	  {
-	    d->update_inverse_mass();
-	    d->inverseMass()->PLUForwardBackwardInPlace(vFree);
-	  }
+
+        if(d->inverseMass())
+        {
+          d->update_inverse_mass();
+          d->inverseMass()->PLUForwardBackwardInPlace(vFree);
+        }
         /* work_tdg contains right (left limit) acceleration without contact force */
         SiconosVector& residuFree = *workVectors[OneStepIntegrator::residu_free];
 
@@ -620,15 +620,15 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
           DEBUG_EXPR(d->p(2)->display());
           SP::SiconosVector p2 = d->p(2);
           SiconosVector dummy(*(d->p(2)));
-	  DEBUG_EXPR(p2->display());
+          DEBUG_EXPR(p2->display());
           /* we homogenize p(2) to a force for the user output   */
           *p2 *= 2.0/h;
 
-	  if(d->inverseMass())
-	    {
-	      d->update_inverse_mass();
-	      d->inverseMass()->PLUForwardBackwardInPlace(dummy);
-	    }
+          if(d->inverseMass())
+          {
+            d->update_inverse_mass();
+            d->inverseMass()->PLUForwardBackwardInPlace(dummy);
+          }
           residuFree -=  dummy;
 
         }
@@ -643,15 +643,15 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
         {
           // get right state from memory
           SP::SiconosVector p2 = d->p(2);
-	  SiconosVector dummy(*(d->p(2))); // value = contact force
+          SiconosVector dummy(*(d->p(2))); // value = contact force
           DEBUG_EXPR(p2->display());
           /* we homogenize p(2) to a force for the user output   */
           *p2 *= 2.0/h;
-	  if(d->inverseMass())
-	    {
-	      d->update_inverse_mass();
-	      d->inverseMass()->PLUForwardBackwardInPlace(dummy);
-	    }
+          if(d->inverseMass())
+          {
+            d->update_inverse_mass();
+            d->inverseMass()->PLUForwardBackwardInPlace(dummy);
+          }
           residuFree -=  dummy;
 
         }
@@ -679,7 +679,7 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
   } // No impact
 
 
-  DEBUG_PRINT("\n D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel(), ends\n");
+  DEBUG_END("D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel(), ends\n");
 
   return 0.; // there is no Newton iteration and the residuum is assumed to vanish
 }
@@ -710,7 +710,8 @@ void D1MinusLinearOSI::computeFreeOutputHalfExplicitVelocityLevel(InteractionsGr
   SP::SiconosMatrix C; // Jacobian of Relation with respect to degree of freedom
   SP::BlockVector Xfree; // free degree of freedom
   SiconosVector& yForNSsolver = *inter->yForNSsolver();
-
+  DEBUG_PRINT("yForNSsolver before\n");
+  DEBUG_EXPR(yForNSsolver.display(););
   // define Xfree for velocity and acceleration level
   if(((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp)
   {
@@ -773,7 +774,7 @@ void D1MinusLinearOSI::computeFreeOutputHalfExplicitVelocityLevel(InteractionsGr
       coord[5] = C->size(1);
       subprod(*C, *Xfree, yForNSsolver, coord, true);
     }
-
+    DEBUG_EXPR(yForNSsolver.display(););
     /*  explicit time dependence -> partial time derivative has to be added */
     if(relationSubType == RheonomousR)
     {
