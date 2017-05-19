@@ -154,7 +154,6 @@ void MoreauJeanDirectProjectionOSI::fill_ds_links(Interaction &inter, Interactio
     if (relationType == Lagrangian)
     {
       LagrangianDS& lds = *std11::static_pointer_cast<LagrangianDS> (ds1);
-      DSlink[p0]->display();
       DSlink[p0]->setVectorPtr(0,lds.p(0));
     }
     else if (relationType == NewtonEuler)
