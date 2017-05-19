@@ -65,15 +65,16 @@ PrismaticJointR::PrismaticJointR(SP::NewtonEulerDS d1, SP::NewtonEulerDS d2, SP:
   : NewtonEulerJointR()
 {
   _axis0 = axis;
-  computeFromInitialPosition(d1->q(),d2->q());
+  computeFromInitialPosition(d1->q(), d2->q(), false);
 }
 /*axis is the axis of the prismatic joint, in the absolute frame.*/
-PrismaticJointR::PrismaticJointR(SP::NewtonEulerDS d1, SP::SiconosVector axis)
+PrismaticJointR::PrismaticJointR(SP::NewtonEulerDS d1, SP::SiconosVector axis,
+                                 bool absoluteRef)
   : NewtonEulerJointR()
 {
   //    _d1=NULL;
   _axis0 = axis;
-  computeFromInitialPosition(d1->q());
+  computeFromInitialPosition(d1->q(), SP::SiconosVector(), absoluteRef);
 }
 void PrismaticJointR::displayInitialPosition()
 {
@@ -86,9 +87,10 @@ void PrismaticJointR::displayInitialPosition()
             << " " << _cq2q103 << " " << _cq2q104 << "\n";
 }
 
-void PrismaticJointR::computeFromInitialPosition(SP::SiconosVector q1, SP::SiconosVector q2)
+void PrismaticJointR::computeFromInitialPosition(SP::SiconosVector q1,
+                                                 SP::SiconosVector q2,
+                                                 bool absoluteRef)
 {
-  computeV1V2FromAxis();
   SP::SiconosVector q2i(new SiconosVector(7));
   q2i->zero();
   q2i->setValue(3, 1);
@@ -98,6 +100,20 @@ void PrismaticJointR::computeFromInitialPosition(SP::SiconosVector q1, SP::Sicon
 
   ::boost::math::quaternion<double>    quat1(q1->getValue(3), q1->getValue(4), q1->getValue(5), q1->getValue(6));
   ::boost::math::quaternion<double>    quat2(q2i->getValue(3), q2i->getValue(4), q2i->getValue(5), q2i->getValue(6));
+
+  if (absoluteRef)
+  {
+    // Adjust axis to be in q1 frame
+    boost::math::quaternion<double> quatA(0, _axis0->getValue(0),
+                                          _axis0->getValue(1), _axis0->getValue(2));
+    boost::math::quaternion<double> tmp = 1.0/quat1 * quatA * quat1;
+    _axis0->setValue(0, tmp.R_component_2());
+    _axis0->setValue(1, tmp.R_component_3());
+    _axis0->setValue(2, tmp.R_component_4());
+  }
+
+  computeV1V2FromAxis();
+
   ::boost::math::quaternion<double>    quat1_inv(q1->getValue(3), -q1->getValue(4), -q1->getValue(5), -q1->getValue(6));
   ::boost::math::quaternion<double>    quatG10G20_abs(0, q2i->getValue(0) - q1->getValue(0), q2i->getValue(1) - q1->getValue(1), q2i->getValue(2) - q1->getValue(2));
   ::boost::math::quaternion<double>    quatBuff(0, 0, 0, 0);

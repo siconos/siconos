@@ -43,7 +43,7 @@ protected:
   PrismaticJointR(): NewtonEulerJointR() {};
 
 public:
-  /** Axis of the prismatic point in the inertial frame of reference
+  /** Axis of the prismatic point in the q1 inertial frame of reference
    */
   SP::SiconosVector _axis0;
 
@@ -93,10 +93,12 @@ public:
    * \param axis SiconosVector of size 3 that defines the prismatic axis
    *  in the inertial frame of reference
    */
-  PrismaticJointR(SP::NewtonEulerDS d1, SP::SiconosVector axis);
+  PrismaticJointR(SP::NewtonEulerDS d1, SP::SiconosVector axis,
+                  bool absoluteRef=false);
 
-
-  void computeFromInitialPosition(SP::SiconosVector q2, SP::SiconosVector q1=SP::SiconosVector());
+  void computeFromInitialPosition(SP::SiconosVector q2,
+                                  SP::SiconosVector q1=SP::SiconosVector(),
+                                  bool absoluteRef=false);
 
   void displayInitialPosition();
 

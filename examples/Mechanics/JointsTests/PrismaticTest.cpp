@@ -96,20 +96,13 @@ int main(int argc, char* argv[])
     // --------------------
 
     // Interaction ball-floor
-    //
-    SP::SiconosVector axe1(new SiconosVector(3));
+    // -- prismatic axis 0,0,1 in absolute frame: ball can only move in Z
+    SP::SiconosVector axis1(new SiconosVector(3));
+    axis1->setValue(0, 0);
+    axis1->setValue(1, 0);
+    axis1->setValue(2, 1);
 
-    // Rotate (0,0,1) to beam1 frame
-    boost::math::quaternion<double> quatA1(0, 0, 0, 1);
-    boost::math::quaternion<double> quat10(q10->getValue(3), q10->getValue(4),
-                                           q10->getValue(5), q10->getValue(6));
-    boost::math::quaternion<double> tmp = 1.0/quat10 * quatA1 * quat10;
-    axe1->setValue(0, tmp.R_component_2());
-    axe1->setValue(1, tmp.R_component_3());
-    axe1->setValue(2, tmp.R_component_4());
-
-    SP::PrismaticJointR relation1(new PrismaticJointR(beam1, axe1));
-
+    SP::PrismaticJointR relation1(new PrismaticJointR(beam1, axis1, true));
 
     SP::SimpleMatrix H1(new SimpleMatrix(relation1->numberOfConstraints(), qDim));
     H1->zero();
