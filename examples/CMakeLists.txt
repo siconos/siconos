@@ -94,7 +94,8 @@ else()
     list(APPEND NO_TEST_FILES
       NewtonEuler)
    endif()
-  
+
+   
   include(CTest)
 
   # python specific part
@@ -116,19 +117,21 @@ else()
     set(NO_TEST_FILES ${NO_TEST_FILES} SMCElectroPneumaticItw Twisting)
   endif()
 
-  IF(HAS_BULLET)
-    LIST(APPEND EXAMPLES_DIRECTORIES Mechanics/ContactDetection)
-
+  if(HAS_BULLET)
+    list(APPEND EXAMPLES_DIRECTORIES Mechanics/ContactDetection)
+    
     if(HAS_PYTHON_WRAPPER)
       find_python_module(h5py)
       if(NOT h5py_FOUND)
-        LIST(APPEND NO_TEST_FILES "BulletIO")
+        list(APPEND NO_TEST_FILES "BulletIO")
       endif(NOT h5py_FOUND)
     else(HAS_PYTHON_WRAPPER)
-      LIST(APPEND NO_TEST_FILES "BulletIO")
+      list(APPEND NO_TEST_FILES "BulletIO")
     endif(HAS_PYTHON_WRAPPER)
-ENDIF(HAS_BULLET)
-
+  else()
+    list(APPEND NO_TEST_FILES BulletBouncingBox)
+  endif()
+  
   # Scan each dir in examples_directories and collect source files
   foreach(_D ${EXAMPLES_DIRECTORIES})
     message("Scan example directory ${_D}")
