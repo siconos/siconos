@@ -64,6 +64,11 @@ siconos_ubuntu_15_10 = siconos_default.copy()(
     add_pkgs=['umfpack'],
     distrib='ubuntu:15.10')
 
+siconos_cxx_11_ubuntu_17_04 = siconos_default.copy()(
+    distrib='ubuntu:17.04',
+    ci_config='with_cxx11')
+
+
 import os
 from os.path import expanduser
 home = expanduser("~")

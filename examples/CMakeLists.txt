@@ -54,16 +54,6 @@ else()
   
   set(NO_TEST_FILES QGL tools)
 
-  # FIND_PACKAGE(Siconos)
-  # STRING(FIND "${installed_targets}" "mechanics" mechanics_installed )
-  # IF (${mechanics_installed} LESS 0)
-  #   list(APPEND NO_TEST_FILES
-  #     JointsTests)
-  #   list(APPEND NO_TEST_FILES
-  #     NewtonEuler)
-  #  endif()
-  
-  
   # sharing a double between an executable and a library is hackisch
   IF(MSVC)
     SET(NO_TEST_FILES ${NO_TEST_FILES} RockingBlock Pendulum)
@@ -88,10 +78,22 @@ else()
   message("============================================================================================")
   
   list(APPEND CMAKE_MODULE_PATH ${SICONOS_INSTALL_DIR}/share/siconos/cmake)
-  
-  # include siconos config
+  # find_package: look for siconosConfig.cmake file in CMAKE_MODULE_PATH
+  # --> this set siconos_ROOT_DIR to the directory where siconos is installed
+  # Remark : we may also use the package registry magic to find siconos:
+  # see https://cmake.org/cmake/help/git-master/manual/cmake-packages.7.html#creating-packages
   include(SiconosVersion)
   find_package(siconos ${SICONOS_VERSION} REQUIRED)
+  
+  # Some examples need mechanics component. Do not include
+  # them if mechanics not found.
+  string(FIND "${installed_targets}" "mechanics" mechanics_installed )
+  if (${mechanics_installed} LESS 0)
+    list(APPEND NO_TEST_FILES
+      JointsTests)
+    list(APPEND NO_TEST_FILES
+      NewtonEuler)
+   endif()
   
   include(CTest)
 
