@@ -41,17 +41,6 @@ else()
   include(CXXCompilerSetup)
   include(CCompilerSetup)
   
-  set(EXAMPLES_DIRECTORIES
-    Numerics
-    Biology
-    Control
-    Electronics
-    Mechanics
-    Robotics/HuMAns_pa10
-    Spheres/Lagrangian
-    Spheres/NewtonEuler
-    )
-  
   set(NO_TEST_FILES QGL tools)
 
   # sharing a double between an executable and a library is hackisch
@@ -84,16 +73,62 @@ else()
   # see https://cmake.org/cmake/help/git-master/manual/cmake-packages.7.html#creating-packages
   include(SiconosVersion)
   find_package(siconos ${SICONOS_VERSION} REQUIRED)
+
+  # Minimal set of examples (i.e. assume at least numerics component)
+  set(EXAMPLES_DIRECTORIES
+    Numerics
+    )
+  
+  string(FIND "${installed_targets}" "kernel" kernel_installed )
+  string(FIND "${installed_targets}" "control" control_installed )
+  string(FIND "${installed_targets}" "mechanics" mechanics_installed )
+  string(FIND "${installed_targets}" "io" io_installed )
+
+  # Kernel component examples
+  if(${kernel_installed} GREATER -1)
+    set(EXAMPLES_DIRECTORIES
+      ${EXAMPLES_DIRECTORIES}
+      Biology
+      Electronics
+      Mechanics
+      Robotics/HuMAns_pa10
+      Spheres/Lagrangian
+      Spheres/NewtonEuler
+      )
+  endif()
+
+  # Control component examples
+  if(${control_installed} GREATER -1)
+    set(EXAMPLES_DIRECTORIES
+      ${EXAMPLES_DIRECTORIES}
+      Control
+      )
+  endif()
+
   
   # Some examples need mechanics component. Do not include
   # them if mechanics not found.
+  # Note FP : we should move all examples that require mechanics component in a specific directory
   string(FIND "${installed_targets}" "mechanics" mechanics_installed )
+
+  # set the list of directories of examples based on mechanics component.
+  set(mechanics_examples
+    JointsTests
+    NewtonEuler
+    RockFall
+    RigidBodiesCollection
+    OCC_Examples
+    InterestingDynamics
+    GranularMaterial
+    GeometricPrimitives
+    DirectProjection
+    )
+
   if (${mechanics_installed} LESS 0)
-    list(APPEND NO_TEST_FILES
-      JointsTests)
-    list(APPEND NO_TEST_FILES
-      NewtonEuler)
-   endif()
+    foreach(_dir ${mechanics_examples})
+      list(APPEND NO_TEST_FILES ${_dir})
+    endforeach()
+  endif()
 
    
   include(CTest)
@@ -116,6 +151,8 @@ else()
   if(NOT HAS_ONE_LP_SOLVER)
     set(NO_TEST_FILES ${NO_TEST_FILES} SMCElectroPneumaticItw Twisting)
   endif()
+
+  # Bullet examples
 
   if(HAS_BULLET)
     list(APPEND EXAMPLES_DIRECTORIES Mechanics/ContactDetection)
