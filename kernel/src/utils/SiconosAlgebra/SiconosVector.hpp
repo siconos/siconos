@@ -108,9 +108,9 @@ public:
 
   /** constructor with an input file
    *  \param filename a std::string which contain the file path
-   *  \param b a boolean to indicate if the file is in ascii
+   *  \param is_ascii a boolean to indicate if the file is in ascii
    */
-  SiconosVector(const std::string& filename, bool b = true);
+  SiconosVector(const std::string& filename, bool is_ascii);
 
   /** constructor for the concatenation of two vectors
    * \param v1 the first vector
