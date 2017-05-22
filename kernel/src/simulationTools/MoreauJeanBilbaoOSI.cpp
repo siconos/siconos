@@ -42,10 +42,11 @@ MoreauJeanBilbaoOSI::MoreauJeanBilbaoOSI():
 void MoreauJeanBilbaoOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds)
 {
   // Get work buffers from the graph
-  const DynamicalSystemsGraph::VDescriptor& dsv = _dynamicalSystemsGraph->descriptor(ds);
-  if(!(checkOSI(dsv)))
-    RuntimeException::selfThrow("MoreauJeanBilbaoOSI::initializeDynamicalSystem(m,t,ds) - ds does not belong to the OSI.");
-  VectorOfVectors& work_ds = *_dynamicalSystemsGraph->properties(dsv).workVectors;
+  // const DynamicalSystemsGraph::VDescriptor& dsv = _dynamicalSystemsGraph->descriptor(ds);
+  //if(!(checkOSI(dsv)))
+  // RuntimeException::selfThrow("MoreauJeanBilbaoOSI::initializeDynamicalSystem(m,t,ds) - ds does not belong to the OSI.");
+  VectorOfVectors& work_ds = *_initializeDSWorkVectors(ds);
+  //VectorOfVectors& work_ds = *_dynamicalSystemsGraph->properties(dsv).workVectors;
   Type::Siconos dsType = Type::value(*ds);
   if(dsType != Type::LagrangianLinearDiagonalDS)
     RuntimeException::selfThrow("MoreauJeanBilbaoOSI::initializeDynamicalSystem - not yet implemented for Dynamical system of type : " + Type::name(*ds));

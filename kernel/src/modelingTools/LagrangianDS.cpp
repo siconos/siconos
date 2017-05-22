@@ -23,9 +23,9 @@
 #include "debug.h"
 #include <iostream>
 
-void LagrangianDS::_init(unsigned int ndof, SP::SiconosVector position, SP::SiconosVector velocity)
+void LagrangianDS::_init(SP::SiconosVector position, SP::SiconosVector velocity)
 {
-  assert(ndof > 0 && "lagrangian dynamical system dimension should be greater than 0.");
+  assert(_ndof > 0 && "lagrangian dynamical system dimension should be greater than 0.");
 
   // Set initial conditions
   _q0 = position;
@@ -38,7 +38,7 @@ void LagrangianDS::_init(unsigned int ndof, SP::SiconosVector position, SP::Sico
 
   /** \todo lazy Memory allocation */
   _p.resize(3);
-  _p[1].reset(new SiconosVector(ndof));
+  _p[1].reset(new SiconosVector(_ndof));
 
   _zeroPlugin();
 }
@@ -50,7 +50,7 @@ LagrangianDS::LagrangianDS(SP::SiconosVector q0, SP::SiconosVector v0):
   _hasConstantMass(true), _hasConstantFExt(true)
 {
   // Initial conditions
-  _init(_ndof, q0, v0);
+  _init(q0, v0);
 }
 
 // From initial state and constant mass matrix, \f$ M\ddot q = p \f$
@@ -59,7 +59,7 @@ LagrangianDS::LagrangianDS(SP::SiconosVector q0, SP::SiconosVector v0, SP::Sicon
   _hasConstantMass(true), _hasConstantFExt(true)
 
 {
-  _init(_ndof, q0, v0);
+  _init(q0, v0);
   // Mass matrix
   _mass = newMass;
 }
@@ -70,7 +70,7 @@ LagrangianDS::LagrangianDS(SP::SiconosVector q0, SP::SiconosVector v0, const std
   DynamicalSystem(), _ndof(q0->size()),
   _hasConstantMass(false), _hasConstantFExt(true)
 {
-  _init(_ndof, q0, v0);
+  _init(q0, v0);
   // Mass
   _mass.reset(new SimpleMatrix(_ndof, _ndof));
   setComputeMassFunction(SSLH::getPluginName(massName), SSLH::getPluginFunctionName(massName));

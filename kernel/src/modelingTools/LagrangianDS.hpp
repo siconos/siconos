@@ -121,11 +121,10 @@ protected:
 
   /** Common code for constructors
       should be replaced in C++11 by delegating constructors
-      \param ndof
       \param position vector of initial positions
       \param velocity vector of initial velocities
   */
-  void _init(unsigned int ndof, SP::SiconosVector position, SP::SiconosVector velocity);
+  void _init(SP::SiconosVector position, SP::SiconosVector velocity);
 
   // -- MEMBERS --
 
