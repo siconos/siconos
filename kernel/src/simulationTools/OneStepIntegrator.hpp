@@ -108,7 +108,10 @@ protected:
   /** basic constructor with OSI Id
    *  \param type integrator type/name
    */
-  OneStepIntegrator(const OSI::TYPES& type): _integratorType(type), _sizeMem(1) {};
+  OneStepIntegrator(const OSI::TYPES& type)
+    : _integratorType(type), _sizeMem(1), _steps(0),
+      _levelMinForOutput(0), _levelMaxForOutput(0),
+      _levelMinForInput(0), _levelMaxForInput(0) {};
 
   /** struct to add terms in the integration. Useful for Control */
   SP::ExtraAdditionalTerms _extraAdditionalTerms;
