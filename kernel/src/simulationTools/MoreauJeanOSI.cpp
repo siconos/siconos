@@ -840,7 +840,9 @@ double MoreauJeanOSI::computeResidu()
       free = residuFree; // copy residuFree into free
       if(d.p(1))
         free-= *d.p(1); // Compute Residu in Workfree Notation !!
-      // We use DynamicalSystem::free as tmp buffer
+      // We use free as tmp buffer
+      DEBUG_EXPR(free.display());
+      DEBUG_EXPR(residuFree.display());
 
       normResidu = 0.0; // we assume that v = vfree + W^(-1) p
       //     normResidu = realresiduFree->norm2();
@@ -1173,8 +1175,11 @@ void MoreauJeanOSI::computeFreeState()
       // vFree pointer is used to compute and save ResiduFree in this first step.
 
       // Velocity free and residu. vFree = RESfree (pointer equality !!).
+      SiconosVector& residuFree = *workVectors[MoreauJeanOSI::RESIDU_FREE];
       SiconosVector& vfree = *workVectors[MoreauJeanOSI::VFREE];
 
+      vfree = residuFree;
+      DEBUG_EXPR(vfree.display());
       W.PLUForwardBackwardInPlace(vfree);
       vfree *= -1.0;
       vfree += vold;
@@ -1364,7 +1369,7 @@ void MoreauJeanOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_int
 {
   /** \warning: ensures that it can also work with two different osi for two different ds ?
    */
-
+  DEBUG_BEGIN("MoreauJeanOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, OneStepNSProblem* osnsp)\n");
   SP::OneStepNSProblems allOSNS  = _simulation->oneStepNSProblems();
   InteractionsGraph& indexSet = *osnsp->simulation()->indexSet(osnsp->indexSetLevel());
   assert(indexSet.bundle(vertex_inter));
@@ -1409,7 +1414,7 @@ void MoreauJeanOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_int
   }
 
   assert(Xfree);
-
+  DEBUG_EXPR(Xfree->display(););
 
   Interaction& mainInteraction = inter;
   assert(mainInteraction.relation());
@@ -1514,7 +1519,7 @@ void MoreauJeanOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_int
         else
           RuntimeException::selfThrow("MoreauJeanOSI::computeFreeOutput not yet implemented for SICONOS_OSNSP ");
       }
-
+      DEBUG_EXPR(yForNSsolver.display(););
 
 
       // For the relation of type LagrangianScleronomousR
@@ -1533,6 +1538,10 @@ void MoreauJeanOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_int
     _NSLEffectOnFreeOutput nslEffectOnFreeOutput = _NSLEffectOnFreeOutput(osnsp, inter);
     inter.nonSmoothLaw()->accept(nslEffectOnFreeOutput);
   }
+  DEBUG_EXPR(yForNSsolver.display(););
+
+
+  DEBUG_END("MoreauJeanOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, OneStepNSProblem* osnsp)\n");
 }
 
 void MoreauJeanOSI::integrate(double& tinit, double& tend, double& tout, int& notUsed)
