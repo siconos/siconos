@@ -134,7 +134,7 @@ void MoreauJeanDirectProjectionOSI::fill_ds_links(Interaction &inter, Interactio
   {
     p0 = NewtonEulerR::p0;
   }
-  DSlink[p0]->display();
+
   if (ds1 != ds2)
   {
     DEBUG_PRINT("ds1 != ds2\n");
