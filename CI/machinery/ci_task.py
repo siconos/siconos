@@ -1,7 +1,11 @@
+"""CI task management
+
+Note : this should remain independant of siconos.
+
+"""
 import os
 import shutil
 from subprocess import check_call, CalledProcessError
-import copy
 import time
 import multiprocessing
 
@@ -81,6 +85,9 @@ class CiTask():
                  targets=None,
                  cmake_cmd=None,
                  directories=[]):
+        """Create a task, see examples in tasks.py.
+        """
+                 
         self._fast = fast
         self._distrib = distrib
         self._mode = mode
@@ -93,6 +100,9 @@ class CiTask():
         self._directories = directories
 
     def build_dir(self, src):
+        """Return a name
+        depending on src, distrib and task name
+        """
         if isinstance(self._ci_config, str):
             ci_config_name = self._ci_config
         else:
@@ -105,6 +115,9 @@ class CiTask():
         return ','.join(self._pkgs)
 
     def copy(self):
+        """Copy constructor :
+         duplicate a task and possibly extend configuration of the result.
+        """
         def init(mode=self._mode,
                  build_configuration=self._build_configuration,
                  distrib=self._distrib,
@@ -146,17 +159,17 @@ class CiTask():
                           pkgs, srcs, targets, cmake_cmd, directories)
         return init
 
-    def run(self, root_dir, targets_override=None):
+    def run(self, root_dir, targets_override=None, dry_run=False):
 
         return_code = 0
 
         for src in self._srcs:
-
+            # --- Path to CMakeLists.txt ---
             full_src = os.path.join(root_dir, src)
-
             if targets_override is not None:
                 self._targets[src] = targets_override
 
+            # --- Create build dir for src config ---
             bdir = self.build_dir(src)
 
             if os.path.exists(bdir):
@@ -181,6 +194,7 @@ class CiTask():
             else:
                 ci_config_args = ','.join(self._ci_config)
 
+            # --- List of arguments for cmake command ---
             cmake_args = ['-DMODE={0}'.format(self._mode),
                           '-DCI_CONFIG={0}'.format(ci_config_args),
                           '-DWITH_DOCKER=1',
@@ -217,13 +231,18 @@ class CiTask():
                                                                       'CI')]
                 else:
                     full_cmd = ['cmake'] + cmake_args + [full_src]
-                    
-                print("cmake command is: {:}".format(' '.join(full_cmd)))
-                call(full_cmd, cwd=bdir)
-
-                for target in self._targets[src]:
-
-                    call(['make'] + ['-ki'] + [target], cwd=bdir)
+                print 'ifjifui', full_src
+                if not dry_run:
+                    print("cmake command is: {:}".format(' '.join(full_cmd)))
+                    call(full_cmd, cwd=bdir)
+                    for target in self._targets[src]:
+                        call(['make'] + ['-ki'] + [target], cwd=bdir)
+                else:
+                    msg = 'Would call: \n  - {:}'.format(' '.join(full_cmd))
+                    msg += '\n  - make - ki target, \n for target in '
+                    msg += '{:}'.format(' '.join(self._targets[src]))
+                    msg += '\n both from path ' + bdir
+                    print msg
 
             except CalledProcessError as error:
                 return_code = 1
@@ -238,8 +257,7 @@ class CiTask():
             bdir = self.build_dir(src)
 
             try:
-                call(['make'] + ['docker-clean-usr-local'],
-                           cwd=bdir)
+                call(['make'] + ['docker-clean-usr-local'], cwd=bdir)
 
                 if not self._fast:
 

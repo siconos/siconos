@@ -1,13 +1,19 @@
-#
-# Siconos specific
-#
+""" List of all possible 'tasks', i.e. ci configurations.
 
+WARNING : this is siconos specific!!
+
+A task, see :class:`machinery.ci_tasks.CiTask` must be defined with at least:
+* a name (ci_config)
+* a distribution (name:version)
+* a list of dependencies (pkgs)
+
+"""
 from machinery.ci_task import CiTask
 import os
 
 #
-# 1. where the packages are defined
-#
+# 1. where the packages configurations are defined
+# Used in driver.py.
 database = os.path.join('config', 'siconos.yml')
 
 #
