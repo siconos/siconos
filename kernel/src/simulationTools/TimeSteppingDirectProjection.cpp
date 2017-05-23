@@ -30,9 +30,9 @@
 #include "OneStepNSProblem.hpp"
 
 static CheckSolverFPtr checkSolverOutputProjectOnConstraints = NULL;
-
-//#define DEBUG_STDOUT
-//#define DEBUG_MESSAGES
+// #define DEBUG_NOCOLOR
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
 #include "debug.h"
 //#define CORRECTIONSVELOCITIES
 TimeSteppingDirectProjection::TimeSteppingDirectProjection(SP::TimeDiscretisation td,
@@ -100,7 +100,7 @@ void TimeSteppingDirectProjection::advanceToEvent()
 {
   /** First step, Solve the standard velocity formulation.*/
 
-  DEBUG_PRINT("TimeStepping::newtonSolve begin :\n");
+  DEBUG_BEGIN("TimeStepping::newtonSolve\n");
 
   if (!_doOnlyProj)
     TimeStepping::newtonSolve(_newtonTolerance, _newtonMaxIteration);
@@ -368,10 +368,7 @@ void TimeSteppingDirectProjection::advanceToEvent()
   }
 
 
-
-
-  DEBUG_PRINT("TimeSteppingDirectProjection::newtonSolve end projection:\n");
-
+  DEBUG_END("TimeSteppingDirectProjection::newtonSolve()\n");
 
   return;
   //#ifdef TSPROJ_CORRECTIONVELOCITIES
@@ -481,9 +478,6 @@ void TimeSteppingDirectProjection::advanceToEvent()
   //     }
   //   }
   //#endif
-#ifdef TSPROJ_DEBUG
-  std::cout << "TimeSteppingDirectProjection::newtonSolve end projection:\n";
-#endif
 
 }
 
