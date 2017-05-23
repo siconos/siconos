@@ -163,7 +163,7 @@ int withLevel(unsigned int mylevel)
     // -- (3) one step non smooth problem
     SP::OneStepNSProblem osnspb(new LCP());
     SP::OneStepNSProblem osnspb_pos(new MLCPProjectOnConstraints(SICONOS_MLCP_ENUM));
-
+    osnspb_pos->numericsSolverOptions()->iparam[0]=2000;
     // -- (4) Simulation setup with (1) (2) (3)
     unsigned int levelForProjection = mylevel; //(default =1)
     SP::TimeSteppingDirectProjection s(new TimeSteppingDirectProjection(t, OSI, osnspb, osnspb_pos, levelForProjection));
