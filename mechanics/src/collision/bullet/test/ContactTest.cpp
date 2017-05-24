@@ -386,7 +386,7 @@ void ContactTest::t2()
     BounceParams params;
     params.trace = false;
     params.dynamic = false;
-    params.size = 0.01;
+    params.size = 1.0;
     params.mass = 1.0;
     params.position = 3.0;
     params.timestep = 0.005;
@@ -443,14 +443,14 @@ void ContactTest::t3()
     printf("\n==== t3\n");
 
     BounceParams params[3];
-    params[0].trace = true;
+    params[0].trace = false;
     params[0].dynamic = false;
     params[0].size = 0.02;
     params[0].mass = 0.02;
     params[0].position = 10.0;
     params[0].timestep = 0.005;
-    params[0].insideMargin = 0.1;
-    params[0].outsideMargin = 0.1;
+    params[0].insideMargin = 0.005;
+    params[0].outsideMargin = 0.005;
 
     params[1] = params[0];
     params[1].size = 0.1;
