@@ -157,13 +157,21 @@ public:
 
   /** get Interaction number I
    * \param nb the identifier of the Interaction to get
-   * \return a pointer on Interaction
+   * \return a pointer to an Interaction
    */
   inline SP::Interaction interaction(int nb) const
   {
     return _topology->getInteraction(nb);
   }
 
+  /** get Interaction named name
+   * \param nb the name of the Interaction to get
+   * \return a pointer to an Interaction
+   */
+  inline SP::Interaction interaction(std::string name) const
+  {
+    return _topology->getInteraction(name);
+  }
 
   /** link an interaction to two dynamical systems
    * \param inter the interaction

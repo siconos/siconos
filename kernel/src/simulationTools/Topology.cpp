@@ -334,7 +334,7 @@ void Topology::clear()
   _isTopologyUpToDate = false;
 }
 
-SP::DynamicalSystem Topology::getDynamicalSystem(unsigned int requiredNumber)
+SP::DynamicalSystem Topology::getDynamicalSystem(unsigned int requiredNumber) const
 {
   DynamicalSystemsGraph::VIterator vi, vdend;
   SP::DynamicalSystem ds;
@@ -353,7 +353,7 @@ SP::DynamicalSystem Topology::getDynamicalSystem(unsigned int requiredNumber)
 }
 
 
-SP::DynamicalSystem Topology::getDynamicalSystem(std::string name)
+SP::DynamicalSystem Topology::getDynamicalSystem(std::string name) const
 {
   DynamicalSystemsGraph::VIterator vi, vdend;
   for (std11::tie(vi, vdend) = _DSG[0]->vertices(); vi != vdend; ++vi)
@@ -419,7 +419,7 @@ unsigned int Topology::numberOfInvolvedDS(unsigned int inumber)
   return return_value;
 }
 
-SP::Interaction Topology::getInteraction(unsigned int requiredNumber)
+SP::Interaction Topology::getInteraction(unsigned int requiredNumber) const
 {
   InteractionsGraph::VIterator vi, vdend;
   SP::Interaction inter;
@@ -435,7 +435,7 @@ SP::Interaction Topology::getInteraction(unsigned int requiredNumber)
   return inter;
 }
 
-SP::Interaction Topology::getInteraction(std::string name)
+SP::Interaction Topology::getInteraction(std::string name) const
 {
   DynamicalSystemsGraph::VIterator vi, vdend;
   for (std11::tie(vi, vdend) = _IG[0]->vertices(); vi != vdend; ++vi)

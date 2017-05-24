@@ -318,28 +318,28 @@ public:
    * \param requiredNumber the required number
    * \return a DynamicalSystem
    */
-  SP::DynamicalSystem getDynamicalSystem(unsigned int requiredNumber);
+  SP::DynamicalSystem getDynamicalSystem(unsigned int requiredNumber) const;
 
   /** Get a dynamical system using its name
    *  \warning O(n) complexity
    *  \param name the name of the dynamical system
    * \return a DynamicalSystem
    */
-  SP::DynamicalSystem getDynamicalSystem(std::string name);
+  SP::DynamicalSystem getDynamicalSystem(std::string name) const;
 
   /** Get a interaction using its number
    *  \warning O(n) complexity
    *  \param requiredNumber the required number
    *  \return an Interaction
    */
-  SP::Interaction getInteraction(unsigned int requiredNumber);
+  SP::Interaction getInteraction(unsigned int requiredNumber) const;
 
   /** Get a interaction using its name
    *  \warning O(n) complexity
    *  \param name the name of the Interaction
    *  \return an Interaction pointer
    */
-  SP::Interaction getInteraction(std::string name);
+  SP::Interaction getInteraction(std::string name) const;
 
   /** get Interactions for a given DS
    * \return a vector of pointers to Interaction
