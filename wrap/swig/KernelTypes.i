@@ -401,16 +401,30 @@ struct IsDense : public Question<bool>
   SiconosVector* SiconosVector_in(PyObject* vec, PyArrayObject** array_p, int* is_new_object, std::vector<SP::SiconosVector>& keeper)
   {
     void *argp1=0;
+    int res0=0;
     int res1=0;
-    SiconosVector* smartarg1 = NULL;
+    int newmem = 0;
+    std11::shared_ptr<SiconosVector> tempshared1 ;
+    std11::shared_ptr<SiconosVector> *smartarg1 = NULL;
+    SiconosVector* smartarg2 = NULL;
+
+    // try a conversion from std11::shared_ptr<SiconosVector>
+    res0 = SWIG_ConvertPtr(vec, &argp1, $descriptor(std11::shared_ptr<SiconosVector> *), 0 |  0);
+    if (SWIG_IsOK(res0) && argp1)
+    {
+      // return the raw pointer -- assuming it will be used
+      // temporarily, therefore no ownership or keeper needed.
+      smartarg1 = reinterpret_cast< std11::shared_ptr<SiconosVector> * >(argp1);
+      return smartarg1->get();
+    }
 
     // try a conversion from SiconosVector
     res1 = SWIG_ConvertPtr(vec, &argp1, $descriptor(SiconosVector *), 0 |  0);
     if (SWIG_IsOK(res1) && argp1)
     {
-    // no newmem & SWIG_CAST_NEW_MEMORY + tempshared for non SP
-      smartarg1 = reinterpret_cast< SiconosVector * >(argp1);
-      return  smartarg1;
+      // no newmem & SWIG_CAST_NEW_MEMORY + tempshared for non SP
+      smartarg2 = reinterpret_cast< SiconosVector * >(argp1);
+      return  smartarg2;
     }
     else
     {
