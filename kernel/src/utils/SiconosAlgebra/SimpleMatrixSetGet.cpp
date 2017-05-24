@@ -556,28 +556,28 @@ void SimpleMatrix::getRow(unsigned int r, SiconosVector &vOut) const
     {
       if (_num == 1)
       {
-        noalias(*(vOut.dense())) = ublas::row(*mat.Dense, r);
+        noalias((vOut.dense())) = ublas::row(*mat.Dense, r);
       }
       else if (_num == 2)
       {
-        noalias(*(vOut.dense())) = ublas::row(*mat.Triang, r);
+        noalias((vOut.dense())) = ublas::row(*mat.Triang, r);
       }
       else if (_num == 3)
       {
-        noalias(*(vOut.dense())) = ublas::row(*mat.Sym, r);
+        noalias((vOut.dense())) = ublas::row(*mat.Sym, r);
       }
       else if (_num == 4)
       {
-        noalias(*(vOut.dense())) = ublas::row(*mat.Sparse, r);
+        noalias((vOut.dense())) = ublas::row(*mat.Sparse, r);
       }
       else //if(_num==5){
-        noalias(*(vOut.dense())) = ublas::row(*mat.Banded, r);
+        noalias((vOut.dense())) = ublas::row(*mat.Banded, r);
     }
     else // if numV == 4
     {
       if (_num == 4)
       {
-        noalias(*(vOut.sparse())) = ublas::row(*mat.Sparse, r);
+        noalias((vOut.sparse())) = ublas::row(*mat.Sparse, r);
       }
       else
         SiconosMatrixException::selfThrow("getRow(row,v): inconsistent types between this (not sparse) and v (sparse).");
@@ -603,15 +603,15 @@ void SimpleMatrix::setRow(unsigned int r, const SiconosVector& vIn)
     {
       if (numV == 1)
       {
-        noalias(ublas::row(*mat.Dense, r)) = *vIn.dense();
+        noalias(ublas::row(*mat.Dense, r)) = vIn.dense();
       }
       else if (numV == 4)
       {
-        noalias(ublas::row(*mat.Dense, r)) = *vIn.sparse();
+        noalias(ublas::row(*mat.Dense, r)) = vIn.sparse();
       }
     }
     else if (_num == 4 && numV == 4)
-      noalias(ublas::row(*mat.Sparse, r)) = *vIn.sparse();
+      noalias(ublas::row(*mat.Sparse, r)) = vIn.sparse();
     else
       SiconosMatrixException::selfThrow("setRow(row,v): inconsistent types between current matrix and v.");
   }
@@ -644,28 +644,28 @@ void SimpleMatrix::getCol(unsigned int r, SiconosVector &vOut)const
 
       if (_num == 1)
       {
-        noalias(*(vOut.dense())) = ublas::column(*mat.Dense, r);
+        noalias((vOut.dense())) = ublas::column(*mat.Dense, r);
       }
       else if (_num == 2)
       {
-        noalias(*(vOut.dense())) = ublas::column(*mat.Triang, r);
+        noalias((vOut.dense())) = ublas::column(*mat.Triang, r);
       }
       else if (_num == 3)
       {
-        noalias(*(vOut.dense())) = ublas::column(*mat.Sym, r);
+        noalias((vOut.dense())) = ublas::column(*mat.Sym, r);
       }
       else if (_num == 4)
       {
-        noalias(*(vOut.dense())) = ublas::column(*mat.Sparse, r);
+        noalias((vOut.dense())) = ublas::column(*mat.Sparse, r);
       }
       else //if(_num==5){
-        noalias(*(vOut.dense())) = ublas::column(*mat.Banded, r);
+        noalias((vOut.dense())) = ublas::column(*mat.Banded, r);
     }
     else // if _numV == 4
     {
       if (_num == 4)
       {
-        noalias(*(vOut.sparse())) = ublas::column(*mat.Sparse, r);
+        noalias((vOut.sparse())) = ublas::column(*mat.Sparse, r);
       }
       else
         SiconosMatrixException::selfThrow("getCol(col,v): inconsistent types between this (not sparse) and v (sparse).");
@@ -691,15 +691,15 @@ void SimpleMatrix::setCol(unsigned int r, const SiconosVector &vIn)
     {
       if (numV == 1)
       {
-        noalias(ublas::column(*mat.Dense, r)) = *vIn.dense();
+        noalias(ublas::column(*mat.Dense, r)) = vIn.dense();
       }
       else if (numV == 4)
       {
-        noalias(ublas::column(*mat.Dense, r)) = *vIn.sparse();
+        noalias(ublas::column(*mat.Dense, r)) = vIn.sparse();
       }
     }
     else if (_num == 4 && numV == 4)
-      noalias(ublas::column(*mat.Sparse, r)) = *vIn.sparse();
+      noalias(ublas::column(*mat.Sparse, r)) = vIn.sparse();
     else
       SiconosMatrixException::selfThrow("setCol(col,v): inconsistent types between current matrix and v.");
   }
@@ -734,26 +734,26 @@ void SimpleMatrix::getSubRow(unsigned int r, unsigned int pos, SP::SiconosVector
       if (_num == 1)
       {
         //      noalias(*(vOut->dense())) = ublas::row(ublas::subrange(*mat.Dense, r, r+1,pos, endPos),0);
-        noalias(*(vOut->dense())) = ublas::matrix_vector_slice<DenseMat >(*mat.Dense, ublas::slice(r, 0, nbEl), ublas::slice(pos, 1, nbEl));
+        noalias((vOut->dense())) = ublas::matrix_vector_slice<DenseMat >(*mat.Dense, ublas::slice(r, 0, nbEl), ublas::slice(pos, 1, nbEl));
       }
       else if (_num == 2)
       {
-        noalias(*(vOut->dense())) = ublas::matrix_vector_slice<TriangMat >(*mat.Triang, ublas::slice(r, 0, nbEl), ublas::slice(pos, 1, nbEl));
+        noalias((vOut->dense())) = ublas::matrix_vector_slice<TriangMat >(*mat.Triang, ublas::slice(r, 0, nbEl), ublas::slice(pos, 1, nbEl));
       }
       else if (_num == 3)
       {
-        noalias(*(vOut->dense())) = ublas::matrix_vector_slice<SymMat >(*mat.Sym, ublas::slice(r, 0, nbEl), ublas::slice(pos, 1, nbEl));
+        noalias((vOut->dense())) = ublas::matrix_vector_slice<SymMat >(*mat.Sym, ublas::slice(r, 0, nbEl), ublas::slice(pos, 1, nbEl));
       }
       else if (_num == 4)
       {
         // #ifdef BOOST_LIMITATION
         //         SiconosMatrixException("SimpleMatrix::getSubRow warning - ublas::matrix_vector_slice<SparseMat> does not exist for your boost distribution and your architecture.");
         // #else
-        noalias(*(vOut->dense())) = ublas::matrix_vector_slice<SparseMat >(*mat.Sparse, ublas::slice(r, 0, nbEl), ublas::slice(pos, 1, nbEl));
+        noalias((vOut->dense())) = ublas::matrix_vector_slice<SparseMat >(*mat.Sparse, ublas::slice(r, 0, nbEl), ublas::slice(pos, 1, nbEl));
         // #endif
       }
       else //if(_num==5){
-        noalias(*(vOut->dense())) = ublas::matrix_vector_slice<BandedMat >(*mat.Banded, ublas::slice(r, 0, nbEl), ublas::slice(pos, 1, nbEl));
+        noalias((vOut->dense())) = ublas::matrix_vector_slice<BandedMat >(*mat.Banded, ublas::slice(r, 0, nbEl), ublas::slice(pos, 1, nbEl));
     }
     else // if numV == 4
     {
@@ -762,7 +762,7 @@ void SimpleMatrix::getSubRow(unsigned int r, unsigned int pos, SP::SiconosVector
 #ifdef BOOST_LIMITATION
         SiconosMatrixException("SimpleMatrix::getSubRow warning - ublas::matrix_vector_slice<SparseMat> does not exist for your boost distribution and your architecture.");
 #else
-        noalias(*(vOut->sparse())) = ublas::matrix_vector_slice<SparseMat >(*mat.Sparse, ublas::slice(r, 0, nbEl), ublas::slice(pos, 1, nbEl));
+        noalias((vOut->sparse())) = ublas::matrix_vector_slice<SparseMat >(*mat.Sparse, ublas::slice(r, 0, nbEl), ublas::slice(pos, 1, nbEl));
 #endif
       }
       else
@@ -791,18 +791,18 @@ void SimpleMatrix::setSubRow(unsigned int r, unsigned int pos, SP::SiconosVector
     {
       if (numV == 1)
       {
-        noalias(ublas::matrix_vector_slice<DenseMat >(*mat.Dense, ublas::slice(r, 0, nbEl), ublas::slice(pos, 1, nbEl))) = *vIn->dense();
+        noalias(ublas::matrix_vector_slice<DenseMat >(*mat.Dense, ublas::slice(r, 0, nbEl), ublas::slice(pos, 1, nbEl))) = vIn->dense();
       }
       else if (numV == 4)
       {
-        ublas::matrix_vector_slice<DenseMat >(*mat.Dense, ublas::slice(r, 0, nbEl), ublas::slice(pos, 1, nbEl)) = *vIn->sparse();
+        ublas::matrix_vector_slice<DenseMat >(*mat.Dense, ublas::slice(r, 0, nbEl), ublas::slice(pos, 1, nbEl)) = vIn->sparse();
       }
     }
     else if (_num == 4 && numV == 4)
 #ifdef BOOST_LIMITATION
       SiconosMatrixException("SimpleMatrix::setSubRow warning - ublas::matrix_vector_slice<SparseMat> does not exist for your boost distribution and your architecture.");
 #else
-      ublas::matrix_vector_slice<SparseMat >(*mat.Sparse, ublas::slice(r, 0, nbEl), ublas::slice(pos, 1, nbEl)) = *vIn->sparse();
+      ublas::matrix_vector_slice<SparseMat >(*mat.Sparse, ublas::slice(r, 0, nbEl), ublas::slice(pos, 1, nbEl)) = vIn->sparse();
 #endif
     else
       SiconosMatrixException::selfThrow("setSubRow(row,v): inconsistent types between current matrix and v.");
@@ -838,26 +838,26 @@ void SimpleMatrix::getSubCol(unsigned int r, unsigned int pos, SP::SiconosVector
       if (_num == 1)
       {
         //      noalias(*(vOut->dense())) = ublas::row(ublas::subrange(*mat.Dense, r, r+1,pos, endPos),0);
-        noalias(*(vOut->dense())) = ublas::matrix_vector_slice<DenseMat >(*mat.Dense, ublas::slice(pos, 1, nbEl), ublas::slice(r, 0, nbEl));
+        noalias((vOut->dense())) = ublas::matrix_vector_slice<DenseMat >(*mat.Dense, ublas::slice(pos, 1, nbEl), ublas::slice(r, 0, nbEl));
       }
       else if (_num == 2)
       {
-        noalias(*(vOut->dense())) = ublas::matrix_vector_slice<TriangMat >(*mat.Triang, ublas::slice(pos, 1, nbEl), ublas::slice(r, 0, nbEl));
+        noalias((vOut->dense())) = ublas::matrix_vector_slice<TriangMat >(*mat.Triang, ublas::slice(pos, 1, nbEl), ublas::slice(r, 0, nbEl));
       }
       else if (_num == 3)
       {
-        noalias(*(vOut->dense())) = ublas::matrix_vector_slice<SymMat >(*mat.Sym, ublas::slice(pos, 1, nbEl), ublas::slice(r, 0, nbEl));
+        noalias((vOut->dense())) = ublas::matrix_vector_slice<SymMat >(*mat.Sym, ublas::slice(pos, 1, nbEl), ublas::slice(r, 0, nbEl));
       }
       else if (_num == 4)
       {
 #ifdef BOOST_LIMITATION
         SiconosMatrixException("SimpleMatrix::getSubCol warning - ublas::matrix_vector_slice<SparseMat> does not exist for your boost distribution and your architecture.");
 #else
-        noalias(*(vOut->dense())) = ublas::matrix_vector_slice<SparseMat >(*mat.Sparse, ublas::slice(pos, 1, nbEl), ublas::slice(r, 0, nbEl));
+        noalias((vOut->dense())) = ublas::matrix_vector_slice<SparseMat >(*mat.Sparse, ublas::slice(pos, 1, nbEl), ublas::slice(r, 0, nbEl));
 #endif
       }
       else //if(_num==5){
-        noalias(*(vOut->dense())) = ublas::matrix_vector_slice<BandedMat >(*mat.Banded, ublas::slice(pos, 1, nbEl), ublas::slice(r, 0, nbEl));
+        noalias((vOut->dense())) = ublas::matrix_vector_slice<BandedMat >(*mat.Banded, ublas::slice(pos, 1, nbEl), ublas::slice(r, 0, nbEl));
     }
     else // if numV == 4
     {
@@ -866,7 +866,7 @@ void SimpleMatrix::getSubCol(unsigned int r, unsigned int pos, SP::SiconosVector
 #ifdef BOOST_LIMITATION
         SiconosMatrixException("SimpleMatrix::getSubCol warning - ublas::matrix_vector_slice<SparseMat> does not exist for your boost distribution and your architecture.");
 #else
-        noalias(*(vOut->sparse())) = ublas::matrix_vector_slice<SparseMat >(*mat.Sparse, ublas::slice(pos, 1, nbEl), ublas::slice(r, 0, nbEl));
+        noalias((vOut->sparse())) = ublas::matrix_vector_slice<SparseMat >(*mat.Sparse, ublas::slice(pos, 1, nbEl), ublas::slice(r, 0, nbEl));
 #endif
       }
       else
@@ -895,18 +895,18 @@ void SimpleMatrix::setSubCol(unsigned int r, unsigned int pos, SP::SiconosVector
     {
       if (numV == 1)
       {
-        noalias(ublas::matrix_vector_slice<DenseMat >(*mat.Dense, ublas::slice(pos, 1, nbEl), ublas::slice(r, 0, nbEl))) = *vIn->dense();
+        noalias(ublas::matrix_vector_slice<DenseMat >(*mat.Dense, ublas::slice(pos, 1, nbEl), ublas::slice(r, 0, nbEl))) = vIn->dense();
       }
       else if (numV == 4)
       {
-        ublas::matrix_vector_slice<DenseMat >(*mat.Dense, ublas::slice(pos, 1, nbEl), ublas::slice(r, 0, nbEl)) = *vIn->sparse();
+        ublas::matrix_vector_slice<DenseMat >(*mat.Dense, ublas::slice(pos, 1, nbEl), ublas::slice(r, 0, nbEl)) = vIn->sparse();
       }
     }
     else if (_num == 4 && numV == 4)
 #ifdef BOOST_LIMITATION
       SiconosMatrixException("SimpleMatrix::setSubCol warning - ublas::matrix_vector_slice<SparseMat> does not exist for your boost distribution and your architecture.");
 #else
-      ublas::matrix_vector_slice<SparseMat >(*mat.Sparse, ublas::slice(pos, 1, nbEl), ublas::slice(r, 0, nbEl)) = *vIn->sparse();
+      ublas::matrix_vector_slice<SparseMat >(*mat.Sparse, ublas::slice(pos, 1, nbEl), ublas::slice(r, 0, nbEl)) = vIn->sparse();
 #endif
     else
       SiconosMatrixException::selfThrow("setSubCol(row,v): inconsistent types between current matrix and v.");

@@ -61,10 +61,10 @@ namespace Siconos {
         jobz = 'N';
 
 #ifdef USE_OPTIMAL_WORKSPACE
-      info += lapack::syev(jobz, s_a, *eigenval.dense(), lapack::optimal_workspace());
+      info += lapack::syev(jobz, s_a, eigenval.dense(), lapack::optimal_workspace());
 #endif
 #ifdef USE_MINIMAL_WORKSPACE
-      info += lapack::syev(jobz, s_a, *eigenval.dense(), lapack::minimal_workspace());
+      info += lapack::syev(jobz, s_a, eigenval.dense(), lapack::minimal_workspace());
 #endif
       std::cout << "Compute eigenvalues ..." << std::endl;
       return info;

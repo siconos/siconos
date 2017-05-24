@@ -59,17 +59,17 @@ namespace ioVector
     }
     else
     {
-      DenseVect *p = m.dense();
+      DenseVect& p = m.dense();
       // Read the dimension of the vector in the first line of the input file
       // Just use to check that sizes are consistents.
       if(inputType != "noDim")
       {
         unsigned int dim;
         infile >> dim;
-        if (dim != p->size())
-          p->resize(dim);
+        if (dim != p.size())
+          p.resize(dim);
       }
-      copy((std::istream_iterator<double>(infile)), std::istream_iterator<double>(), (p->data()).begin());
+      copy((std::istream_iterator<double>(infile)), std::istream_iterator<double>(), (p.data()).begin());
     }
     infile.close();
     return true;
@@ -106,13 +106,13 @@ namespace ioVector
     
       if (m.num() == 1)
       {
-        DenseVect*  p = m.dense();
-        std::copy(p->begin(), p->end(), std::ostream_iterator<double>(outfile, " "));
+        DenseVect&  p = m.dense();
+        std::copy(p.begin(), p.end(), std::ostream_iterator<double>(outfile, " "));
       }
       else if (m.num() == 4)
       {
-        SparseVect* p = m.sparse();
-        std::copy(p->begin(), p->end(), std::ostream_iterator<double>(outfile, " "));
+        SparseVect& p = m.sparse();
+        std::copy(p.begin(), p.end(), std::ostream_iterator<double>(outfile, " "));
       }
    }
     outfile.close();

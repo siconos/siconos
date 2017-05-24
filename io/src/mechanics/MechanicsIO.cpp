@@ -260,7 +260,7 @@ SP::SimpleMatrix MechanicsIO::visitAllVerticesForVector(const G& graph) const
       vi!=viend; ++vi, ++current_row)
   {
     T getter;
-    graph.bundle(*vi)->accept(getter);
+    graph.bundle(*vi)->accept_reader(getter);
     const SiconosVector& data = *getter.result;
     result->resize(current_row+1, data.size());
     result->setRow(current_row, data);
@@ -278,7 +278,7 @@ SP::SiconosVector MechanicsIO::visitAllVerticesForDouble(const G& graph) const
       vi!=viend; ++vi, ++current_row)
   {
     T getter;
-    graph.bundle(*vi)->accept(getter);
+    graph.bundle(*vi)->accept_reader(getter);
     result->setValue(current_row, *getter.result);
   }
   return result;
@@ -290,7 +290,7 @@ SP::SimpleMatrix MechanicsIO::positions(const Model& model) const
 
   typedef
     Visitor < Classes < LagrangianDS, NewtonEulerDS >,
-              GetPosition >::Make Getter;
+              GetPosition, VisitorReader >::Make Getter;
 
   return visitAllVerticesForVector<Getter>
     (*(model.nonSmoothDynamicalSystem()->topology()->dSG(0)));
@@ -301,7 +301,7 @@ SP::SimpleMatrix MechanicsIO::velocities(const Model& model) const
 {
   typedef
     Visitor < Classes < LagrangianDS, NewtonEulerDS >,
-              GetVelocity>::Make Getter;
+              GetVelocity, VisitorReader >::Make Getter;
 
   return visitAllVerticesForVector<Getter>
     (*model.nonSmoothDynamicalSystem()->topology()->dSG(0));
@@ -329,10 +329,10 @@ SP::SimpleMatrix MechanicsIO::contactPoints(const Model& model,
                           PrismaticJointR,
                           KneeJointR,
                           PivotJointR>,
-                        ContactPointVisitor>::Make ContactPointInspector;
+                        ContactPointVisitor, VisitorReader>::Make ContactPointInspector;
       ContactPointInspector inspector;
       inspector.inter = graph.bundle(*vi);
-      graph.bundle(*vi)->relation()->accept(inspector);
+      graph.bundle(*vi)->relation()->accept_reader(inspector);
       const SiconosVector& data = inspector.answer;
       if (data.size() == 14) result->setRow(current_row, data);
     }
@@ -361,10 +361,10 @@ SP::SimpleMatrix MechanicsIO::domains(const Model& model) const
                           PrismaticJointR,
                           KneeJointR,
                           PivotJointR>,
-                        ContactPointDomainVisitor>::Make DomainInspector;
+                        ContactPointDomainVisitor, VisitorReader>::Make DomainInspector;
       DomainInspector inspector;
       inspector.inter = graph.bundle(*vi);
-      graph.bundle(*vi)->relation()->accept(inspector);
+      graph.bundle(*vi)->relation()->accept_reader(inspector);
       const SiconosVector& data = inspector.answer;
       if (data.size() == 2) result->setRow(current_row, data);
     }

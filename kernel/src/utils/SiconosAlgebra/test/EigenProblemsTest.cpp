@@ -67,7 +67,7 @@ void EigenProblemsTest::testSyev()
   for( unsigned int i = 0; i < size; ++i )
   {
     error.plus_assign(ublas::prod( *A->dense(), column(*EigenVectors->dense(), i) ));
-    error.minus_assign((*EigenValues->dense())(i)*column(*EigenVectors->dense(),i));
+    error.minus_assign((EigenValues->dense())(i)*column(*EigenVectors->dense(),i));
   }
   // Check ...
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSyev 1: ", norm_2(error) < 10 * std::numeric_limits< double >::epsilon() , true);

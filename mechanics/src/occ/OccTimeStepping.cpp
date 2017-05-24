@@ -48,7 +48,7 @@ void OccTimeStepping::updateWorldFromDS()
 
   for (; dsi != dsiend; ++dsi)
   {
-    dsg.bundle(*dsi)->accept(up);
+    dsg.bundle(*dsi)->accept_writer(up);
   }
 
 }

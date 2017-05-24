@@ -111,10 +111,10 @@ void axpy(double, const SiconosVector&, SiconosVector&);
  */
 double inner_prod(const SiconosVector&, const SiconosVector&);
 
-/** compute the product m1 * trans(m2)
- *  \param 2 SiconosVectors
- *  \return a SimpleMatrix
- */
+///** compute the product m1 * trans(m2)
+// *  \param 2 SiconosVectors
+// *  \return a SimpleMatrix
+// */
 SimpleMatrix outer_prod(const SiconosVector&, const SiconosVector&);
 
 /** multiplication of a vector by a scalar, y = a*x (init = true) or y += a*x (init = false)

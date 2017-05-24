@@ -24,6 +24,7 @@
 #define BLOCKVECTOR_H
 
 #include "SiconosAlgebraTypeDef.hpp"
+#include "SiconosVisitor.hpp"
 
 /** Object to handle block-vectors (ie list of SP::SiconosVector)
  *

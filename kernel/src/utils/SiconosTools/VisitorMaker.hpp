@@ -28,7 +28,6 @@
 #include <boost/mpl/if.hpp>
 #include <boost/mpl/vector.hpp>
 #include <boost/mpl/fold.hpp>
-
 /* With visitors on base classes, matches of derived classes is possible
    in a templated visitor operator, example:
 
@@ -66,36 +65,48 @@ ds->accept(getVelocity)->display();
 
 */
 
-
 namespace Experimental {
 
-template<typename T, typename Action>
+  template<typename T, typename Action, typename IsModifier>
 struct Call : public Action
 {
-  typedef Call<T, Action> type;
+  typedef Call<T, Action, IsModifier> type;
+  typedef typename Action::arguments_type arguments_type;
+  typedef typename boost::mpl::if_<IsModifier, T, const T>::type visitable_type;
+
+  Call() : Action() {};
+  Call(arguments_type& args) : Action(args) {};
 
   using Action::visit;
 
-  virtual void visit(const T& x)
+  virtual void visit(visitable_type& x)
   {
     (*this)(x);
   }
+
 };
 
-template<typename T, typename Action>
+  template<typename T, typename Action, typename IsModifier>
 struct NoCall : public Action
 {
-  typedef NoCall type;
+  typedef NoCall<T, Action, IsModifier> type;
+
+  typedef typename Action::arguments_type arguments_type;
+  typedef typename boost::mpl::if_<IsModifier, T, const T>::type visitable_type;
+
+  NoCall() : Action() {};
+  NoCall(arguments_type& args) : Action(args) {};
 
   using Action::visit;
 
-  virtual void visit(const T& x)
+  virtual void visit(visitable_type& x)
   {
   }
+
 };
 
 
-template<typename T, typename Pred>
+  template<typename T, typename Pred, typename IsModifier>
 class VisitMaker
 {
 private:
@@ -110,8 +121,8 @@ private:
 public:
   typedef typename
   boost::mpl::eval_if<Condition,
-                      Call<T, typename Pred::Action>,
-                      NoCall<T, typename Pred::Action> >::type Action;
+                      Call<T, typename Pred::Action, IsModifier>,
+                      NoCall<T, typename Pred::Action, IsModifier> >::type Action;
 
 };
 
@@ -126,7 +137,7 @@ public:
 #define REGISTER_BASE(X, Y) REGISTER(X)
 #define REGISTER_BASE_EXTERN(X, Y)
 
-  template<typename T>
+  template<typename T, typename IsModifier>
   struct GlobalVisitor
   {
     typedef typename
@@ -138,7 +149,7 @@ public:
 #undef REGISTER_BASE
 #undef REGISTER_BASE_EXTERN
 
-#define REGISTER(X) >
+#define REGISTER(X) , IsModifier >
 #define REGISTER_STRUCT(X)
 #define REGISTER_BASE(X, Y) REGISTER(X)
 #define REGISTER_BASE_EXTERN(X, Y)
@@ -207,11 +218,13 @@ struct Classes<T1, T2, T3, T4, T5, T6, T7, T8, empty>
 };
 
 /* build final visitor */
-template<typename C, typename T>
+  template<typename C, typename T, typename IsModifier>
 struct Filter
 {
   struct _T : public T, public C
   {
+    _T() : T() {};
+    _T(typename T::arguments_type& args) : T(args) {};
     typedef _T Action;
   };
 
@@ -219,18 +232,21 @@ struct Filter
   boost::mpl::fold<
     typename C::Base,
     _T,
-    VisitMaker<boost::mpl::_2, boost::mpl::_1 >
+    VisitMaker<boost::mpl::_2, boost::mpl::_1, IsModifier>
     >::type Make;
-};
+  };
 
-template<typename C, typename T>
+  template<typename C, typename T, typename IsModifier=boost::mpl::true_>
 struct Visitor
 {
-  typedef typename Filter<C, T>::Make LocalFilter;
+  typedef typename Filter<C, T, IsModifier>::Make LocalFilter;
 
-  typedef typename GlobalVisitor<LocalFilter>::Make Make;
-
+  typedef typename GlobalVisitor<LocalFilter, IsModifier>::Make Make;
 };
+
+
+  typedef boost::mpl::true_ VisitorWriter;
+  typedef boost::mpl::false_ VisitorReader;
 
 }
 

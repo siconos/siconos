@@ -694,7 +694,7 @@ void SpaceFilter::_PlanCircularFilter(double A, double B, double C,
          oei != oeiend; ++oei)
     {
       DSG0->bundle(*oei)
-      ->relation()->accept(isSameDiskPlanR);
+      ->relation()->accept_reader(isSameDiskPlanR);
       if (DSG0->bundle(DSG0->target(*oei)) == ds
           && isSameDiskPlanR.flag)
       {
@@ -722,7 +722,7 @@ void SpaceFilter::_PlanCircularFilter(double A, double B, double C,
          oei != oeiend; ++oei)
     {
       DSG0->bundle(*oei)
-      ->relation()->accept(isSameDiskPlanR);
+      ->relation()->accept_reader(isSameDiskPlanR);
 
       if (DSG0->bundle(DSG0->target(*oei)) == ds
           && isSameDiskPlanR.flag)
@@ -776,7 +776,7 @@ void SpaceFilter::_MovingPlanCircularFilter(unsigned int i, SP::CircularDS ds, d
          oei != oeiend; ++oei)
     {
       DSG0->bundle(*oei)
-      ->relation()->accept(isSameDiskMovingPlanR);
+      ->relation()->accept_reader(isSameDiskMovingPlanR);
       if (DSG0->bundle(DSG0->target(*oei)) == ds
           && isSameDiskMovingPlanR.flag)
       {
@@ -802,7 +802,7 @@ void SpaceFilter::_MovingPlanCircularFilter(unsigned int i, SP::CircularDS ds, d
          oei != oeiend; ++oei)
     {
       DSG0->bundle(*oei)
-      ->relation()->accept(isSameDiskMovingPlanR);
+      ->relation()->accept_reader(isSameDiskMovingPlanR);
 
       if (DSG0->bundle(DSG0->target(*oei)) == ds
           && isSameDiskMovingPlanR.flag)
@@ -846,7 +846,7 @@ void SpaceFilter::_PlanSphereLDSFilter(double A, double B, double C, double D, S
          oei != oeiend; ++oei)
     {
       DSG0->bundle(*oei)
-      ->relation()->accept(IsSameSpherePlanR);
+      ->relation()->accept_reader(IsSameSpherePlanR);
       if (DSG0->bundle(DSG0->target(*oei)) == ds
           && IsSameSpherePlanR.flag)
       {
@@ -872,7 +872,7 @@ void SpaceFilter::_PlanSphereLDSFilter(double A, double B, double C, double D, S
          oei != oeiend; ++oei)
     {
       DSG0->bundle(*oei)
-      ->relation()->accept(IsSameSpherePlanR);
+      ->relation()->accept_reader(IsSameSpherePlanR);
 
       if (DSG0->bundle(DSG0->target(*oei)) == ds
           && IsSameSpherePlanR.flag)
@@ -917,7 +917,7 @@ void SpaceFilter::_PlanSphereNEDSFilter(double A, double B, double C, double D, 
          oei != oeiend; ++oei)
     {
       DSG0->bundle(*oei)
-      ->relation()->accept(isSameSpherePlanR);
+      ->relation()->accept_reader(isSameSpherePlanR);
       if (DSG0->bundle(DSG0->target(*oei)) == ds
           && isSameSpherePlanR.flag)
       {
@@ -943,7 +943,7 @@ void SpaceFilter::_PlanSphereNEDSFilter(double A, double B, double C, double D, 
          oei != oeiend; ++oei)
     {
       DSG0->bundle(*oei)
-      ->relation()->accept(isSameSpherePlanR);
+      ->relation()->accept_reader(isSameSpherePlanR);
 
       if (DSG0->bundle(DSG0->target(*oei)) == ds
           && isSameSpherePlanR.flag)

@@ -16,16 +16,20 @@
  * limitations under the License.
 */
 
+
+#include "SiconosVector.hpp"
+
 #include "BlockVector.hpp"
 
 #include <boost/numeric/ublas/vector_proxy.hpp>  // for project
 #include <boost/numeric/ublas/vector_sparse.hpp>
 #include <vector>
 
-#include "SiconosVector.hpp"
+
+
+
 
 #include "SiconosAlgebra.hpp"
-
 
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
@@ -387,9 +391,9 @@ BlockVector& BlockVector::operator -= (const SiconosVector& vIn)
     currentNum = (*it)->num();
     if(numVIn != currentNum) SiconosVectorException::selfThrow("BlockVector::addSimple : inconsistent types.");
     if(numVIn == 1)
-      noalias(*(*it)->dense()) -=  ublas::subrange(*vIn.dense(), index, index + currentSize) ;
+      ublas::noalias((*it)->dense()) -=  ublas::subrange(vIn.dense(), index, index + currentSize) ;
     else
-      noalias(*(*it)->sparse()) -=  ublas::subrange(*vIn.sparse(), index, index + currentSize) ;
+      ublas::noalias((*it)->sparse()) -=  ublas::subrange(vIn.sparse(), index, index + currentSize) ;
     index += currentSize;
   }
   return *this;
@@ -434,9 +438,9 @@ BlockVector& BlockVector::operator += (const SiconosVector& vIn)
     currentNum = (*it)->num();
     if(numVIn != currentNum) SiconosVectorException::selfThrow("BlockVector::addSimple : inconsistent types.");
     if(numVIn == 1)
-      noalias(*(*it)->dense()) += ublas::subrange(*vIn.dense(), index, index + currentSize) ;
+      noalias((*it)->dense()) += ublas::subrange(vIn.dense(), index, index + currentSize) ;
     else
-      noalias(*(*it)->sparse()) += ublas::subrange(*vIn.sparse(), index, index + currentSize) ;
+      noalias((*it)->sparse()) += ublas::subrange(vIn.sparse(), index, index + currentSize) ;
     index += currentSize;
   }
   return *this;

@@ -502,7 +502,7 @@ void MoreauJeanBilbaoOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vert
     subprod(C, x_free, yForNSsolver, coord, true);
   }
   _NSLEffectOnFreeOutput nslEffectOnFreeOutput = _NSLEffectOnFreeOutput(osnsp, inter);
-  inter.nonSmoothLaw()->accept(nslEffectOnFreeOutput);
+  inter.nonSmoothLaw()->accept_reader(nslEffectOnFreeOutput);
 
 }
 

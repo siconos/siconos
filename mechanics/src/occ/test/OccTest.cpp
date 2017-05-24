@@ -201,7 +201,7 @@ void OccTest::distance()
 
   SP::Geometer geometer = ask<WhichGeometer<CadmbtbDistanceType> >(body1->contactShape(0));
 
-  body2->contactShape(0).accept(*geometer);
+  body2->contactShape(0).accept_reader(*geometer);
 
   ContactShapeDistance& dist = geometer->answer;
 

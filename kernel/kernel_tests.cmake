@@ -29,7 +29,7 @@ if(WITH_${COMPONENT}_TESTING)
   BEGIN_TEST(src/utils/SiconosAlgebra/test)
 
   NEW_TEST(testSiconosAlgebra
-    BlockMatrixTest.cpp  SimpleMatrixTest.cpp BlockVectorTest.cpp  SiconosVectorTest.cpp EigenProblemsTest.cpp AlgebraToolsTest.cpp)
+    BlockMatrixTest.cpp  SimpleMatrixTest.cpp BlockVectorTest.cpp SiconosVectorOperatorsTest.cpp SiconosVectorTest.cpp EigenProblemsTest.cpp AlgebraToolsTest.cpp)
   END_TEST()
   
   # Siconos Memory

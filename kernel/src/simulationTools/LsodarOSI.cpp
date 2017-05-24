@@ -728,7 +728,7 @@ void LsodarOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, 
     if(inter->relation()->getType() == Lagrangian || inter->relation()->getType() == NewtonEuler)
     {
       SP::SiconosVisitor nslEffectOnFreeOutput(new _NSLEffectOnFreeOutput(osnsp, inter));
-      inter->nonSmoothLaw()->accept(*nslEffectOnFreeOutput);
+      inter->nonSmoothLaw()->accept_reader(*nslEffectOnFreeOutput);
     }
   }
 

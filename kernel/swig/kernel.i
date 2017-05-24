@@ -37,6 +37,8 @@
 %{
 #include <SiconosKernel.hpp>
 #include <SiconosAlgebra.hpp>
+#include <SiconosVectorStorage.hpp>
+#include <BoundedVector.hpp>
 #include <boost/numeric/ublas/matrix_sparse.hpp>
 #include <SiconosVisitor.hpp>
 #include "addons.hpp"
@@ -89,6 +91,8 @@
 %ignore getWBoundaryConditionsMap;
 %ignore getDSBlocks;
 %ignore getInvMBlock;
+
+%ignore Experimental;
 
 %warnfilter(509) rotateAbsToBody;
 %warnfilter(509) changeFrameAbsToBody;
@@ -196,7 +200,6 @@ namespace std
  // segfaults...
  // we cannot share data struct
  //%import Numerics.i
-
 %include "SiconosConst.hpp"
 
 %include "SiconosVisitables.hpp"
@@ -232,7 +235,6 @@ typedef __mpz_struct mpz_t[1];
 
 %include "SiconosAlgebraTypeDef.hpp"
 %include "SiconosAlgebra.hpp"
-
 %import "RelationNamespace.hpp";
 
 

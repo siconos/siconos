@@ -84,13 +84,13 @@ void SiconosVisitorTest::t2()
 
   };
 
-  DynamicalSystem *ds = new LagrangianDS();
+  const DynamicalSystem *ds = new LagrangianDS();
 
   try
   {
     MyVisitor myvisitor;
 
-    ds->accept(myvisitor);
+    ds->accept_reader(myvisitor);
 
     delete(ds);
   }

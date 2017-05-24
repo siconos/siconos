@@ -2132,7 +2132,7 @@ void SimpleMatrixTest::testOperators8_5()
   coord[6] = 0;
   coord[7] = size;
   subprod(*A, *v, *y, coord, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_5: ", norm_inf(*y->dense() - prod(*A->dense(), *v->dense())) < tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_5: ", norm_inf(y->dense() - prod(*A->dense(), v->dense())) < tol, true);
 
   // Simple = Simple * Block, all dense
   // subprod but with full matrix/vectors
@@ -2278,7 +2278,7 @@ void SimpleMatrixTest::testOperators8_6()
   coord[6] = 0;
   coord[7] = size;
   subprod(*A, *v, *y, coord, false);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_6: ", norm_inf(*y->dense() - prod(*A->dense(), *v->dense()) - *v->dense()) < tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_6: ", norm_inf(y->dense() - prod(*A->dense(), v->dense()) - v->dense()) < tol, true);
 
   // Simple = Simple * Block, all dense
   // subprod but with full matrix/vectors
@@ -2816,24 +2816,24 @@ void SimpleMatrixTest::testProd() // y = A*x
 
   // Triang * ...
   *res2 = prod(*tmp2, *v);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testProd: ", norm_2(res2->getDense() - prod(tmp2->getTriang(), v->getDense())) < tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testProd: ", norm_2(res2->dense() - prod(tmp2->getTriang(), v->dense())) < tol, true);
   *res2 = prod(*tmp2, *w);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testProd: ", norm_2(res2->getDense() - prod(tmp2->getTriang(), w->getSparse())) < tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testProd: ", norm_2(res2->dense() - prod(tmp2->getTriang(), w->sparse())) < tol, true);
   //   Sym * ...
   *res2 = prod(*tmp3, *v);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testProd: ", norm_2(res2->getDense() - prod(tmp3->getSym(), v->getDense())) < tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testProd: ", norm_2(res2->dense() - prod(tmp3->getSym(), v->dense())) < tol, true);
   *res2 = prod(*tmp3, *w);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testProd: ", norm_2(res2->getDense() - prod(tmp3->getSym(), w->getSparse())) < tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testProd: ", norm_2(res2->dense() - prod(tmp3->getSym(), w->sparse())) < tol, true);
   // Sparse * ...
   *res = prod(*tmp4, *vv);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testProd: ", norm_2(res->getDense() - prod(tmp4->getSparse(), vv->getDense())) < tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testProd: ", norm_2(res->dense() - prod(tmp4->getSparse(), vv->dense())) < tol, true);
   *res = prod(*tmp4, *ww);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testProd: ", norm_2(res->getDense() - prod(tmp4->getSparse(), ww->getSparse())) < tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testProd: ", norm_2(res->dense() - prod(tmp4->getSparse(), ww->sparse())) < tol, true);
   // Triang * ...
   *res = prod(*tmp5, *v);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testProd: ", norm_2(res->getDense() - prod(tmp5->getBanded(), v->getDense())) < tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testProd: ", norm_2(res->dense() - prod(tmp5->getBanded(), v->dense())) < tol, true);
   *res = prod(*tmp5, *w);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testProd: ", norm_2(res->getDense() - prod(tmp5->getBanded(), w->getSparse())) < tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testProd: ", norm_2(res->dense() - prod(tmp5->getBanded(), w->sparse())) < tol, true);
   std::cout << "-->  test prod ended with success." <<std::endl;
 
   delete sv2;
@@ -2924,24 +2924,24 @@ void SimpleMatrixTest::testProdBis()
 
   // Triang * ...
   prod(*tmp2, *v, *res2);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testProdBis: ", norm_2(res2->getDense() - prod(tmp2->getTriang(), v->getDense())) < tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testProdBis: ", norm_2(res2->dense() - prod(tmp2->getTriang(), v->dense())) < tol, true);
   prod(*tmp2, *w, *res2);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testProdBis: ", norm_2(res2->getDense() - prod(tmp2->getTriang(), w->getSparse())) < tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testProdBis: ", norm_2(res2->dense() - prod(tmp2->getTriang(), w->sparse())) < tol, true);
   //   Sym * ...
   prod(*tmp3, *v, *res2);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testProdBis: ", norm_2(res2->getDense() - prod(tmp3->getSym(), v->getDense())) < tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testProdBis: ", norm_2(res2->dense() - prod(tmp3->getSym(), v->dense())) < tol, true);
   prod(*tmp3, *w, *res2);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testProdBis: ", norm_2(res2->getDense() - prod(tmp3->getSym(), w->getSparse())) < tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testProdBis: ", norm_2(res2->dense() - prod(tmp3->getSym(), w->sparse())) < tol, true);
   // Sparse * ...
   prod(*tmp4, *vv, *res);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testProdBis: ", norm_2(res->getDense() - prod(tmp4->getSparse(), vv->getDense())) < tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testProdBis: ", norm_2(res->dense() - prod(tmp4->getSparse(), vv->dense())) < tol, true);
   prod(*tmp4, *ww, *res);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testProdBis: ", norm_2(res->getDense() - prod(tmp4->getSparse(), ww->getSparse())) < tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testProdBis: ", norm_2(res->dense() - prod(tmp4->getSparse(), ww->sparse())) < tol, true);
   // Banded * ...
   prod(*tmp5, *v, *res);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testProdBis: ", norm_2(res->getDense() - prod(tmp5->getBanded(), v->getDense())) < tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testProdBis: ", norm_2(res->dense() - prod(tmp5->getBanded(), v->dense())) < tol, true);
   prod(*tmp5, *w, *res);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testProdBis: ", norm_2(res->getDense() - prod(tmp5->getBanded(), w->getSparse())) < tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testProdBis: ", norm_2(res->dense() - prod(tmp5->getBanded(), w->sparse())) < tol, true);
   std::cout << "-->  test prodBis ended with success." <<std::endl;
 }
 
@@ -3073,24 +3073,24 @@ void SimpleMatrixTest::testProdTer()
 
   // Triang * ...
   prod(*tmp2, *v, *res2);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testProdTer: ", norm_2(res2->getDense() - prod(tmp2->getTriang(), v->getDense())) < tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testProdTer: ", norm_2(res2->dense() - prod(tmp2->getTriang(), v->dense())) < tol, true);
   prod(*tmp2, *w, *res2);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testProdTer: ", norm_2(res2->getDense() - prod(tmp2->getTriang(), w->getSparse())) < tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testProdTer: ", norm_2(res2->dense() - prod(tmp2->getTriang(), w->sparse())) < tol, true);
   //   Sym * ...
   prod(*tmp3, *v, *res2);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testProdTer: ", norm_2(res2->getDense() - prod(tmp3->getSym(), v->getDense())) < tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testProdTer: ", norm_2(res2->dense() - prod(tmp3->getSym(), v->dense())) < tol, true);
   prod(*tmp3, *w, *res2);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testProdTer: ", norm_2(res2->getDense() - prod(tmp3->getSym(), w->getSparse())) < tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testProdTer: ", norm_2(res2->dense() - prod(tmp3->getSym(), w->sparse())) < tol, true);
   // Sparse * ...
   prod(*tmp4, *vv, *res);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testProdTer: ", norm_2(res->getDense() - prod(tmp4->getSparse(), vv->getDense())) < tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testProdTer: ", norm_2(res->dense() - prod(tmp4->getSparse(), vv->dense())) < tol, true);
   prod(*tmp4, *ww, *res);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testProdTer: ", norm_2(res->getDense() - prod(tmp4->getSparse(), ww->getSparse())) < tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testProdTer: ", norm_2(res->dense() - prod(tmp4->getSparse(), ww->sparse())) < tol, true);
   // Banded * ...
   prod(*tmp5, *v, *res);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testProdTer: ", norm_2(res->getDense() - prod(tmp5->getBanded(), v->getDense())) < tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testProdTer: ", norm_2(res->dense() - prod(tmp5->getBanded(), v->dense())) < tol, true);
   prod(*tmp5, *w, *res);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testProdTer: ", norm_2(res->getDense() - prod(tmp5->getBanded(), w->getSparse())) < tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testProdTer: ", norm_2(res->dense() - prod(tmp5->getBanded(), w->sparse())) < tol, true);
   std::cout << "-->  test prodTer ended with success." <<std::endl;
 }
 

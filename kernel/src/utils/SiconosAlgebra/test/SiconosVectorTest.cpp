@@ -196,7 +196,7 @@ void SiconosVectorTest::testConstructor5()
   SP::SiconosVector v(new SiconosVector(*dv));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", v->isBlock(), false);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", v->size() == dv->size(), true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor6 : ", norm_inf(v->getDense() - *dv) < tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor6 : ", norm_inf(v->dense() - *dv) < tol, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", v->num() == 1, true);
 
   std::cout << "--> Constructor 5 test ended with success." <<std::endl;
@@ -209,7 +209,7 @@ void SiconosVectorTest::testConstructor6()
   SP::SiconosVector v(new SiconosVector(*sv));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor6 : ", v->isBlock(), false);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor6 : ", v->size() == sv->size(), true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor6 : ", norm_inf(v->getSparse() - *sv) < tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor6 : ", norm_inf(v->sparse() - *sv) < tol, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor6 : ", v->num() == 4, true);
   std::cout << "--> Constructor 6 test ended with success." <<std::endl;
 }
@@ -458,22 +458,22 @@ void SiconosVectorTest::testOperators2()
   SP::SiconosVector w(new SiconosVector(*sv));
   z->zero();
   *z += *w;
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators2 : ", norm_inf(*z->dense() - *w->sparse()) < tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators2 : ", norm_inf(z->dense() - w->sparse()) < tol, true);
   *z *= 3;
   *z -= *w;
   for (unsigned int i = 0; i < size; i++)
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators2 : ", norm_inf(*z->dense() - 2 * *w->sparse()) < tol, true);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators2 : ", norm_inf(z->dense() - 2 * w->sparse()) < tol, true);
   *z /= 2.0;
   for (unsigned int i = 0; i < size; i++)
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators2 : ", norm_inf(*z->dense() - *w->sparse()) < tol, true);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators2 : ", norm_inf(z->dense() - w->sparse()) < tol, true);
 
   // sparse += -= sparse
   SP::SiconosVector v(new SiconosVector(5, Siconos::SPARSE));
   *v += *w;
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators2 : ", norm_inf(v->getSparse() - *sv) < tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators2 : ", norm_inf(v->sparse() - *sv) < tol, true);
   *v *= 3;
   *v -= *w;
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators2 : ", norm_inf(v->getSparse() - 2 * *sv) < tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators2 : ", norm_inf(v->sparse() - 2 * *sv) < tol, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators2 : ", v->num() == 4, true);
   std::cout << "--> operators2 test ended with success." <<std::endl;
 }
@@ -512,47 +512,47 @@ void SiconosVectorTest::testOperators4()
 
   //  dense = a*dense or dense/a
   *z = a**x; //
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators4 : ", norm_2(z->getDense() - a * x->getDense()) < tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators4 : ", norm_2(z->dense() - a * x->dense()) < tol, true);
   z->zero();
   *z = *x * a; //
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators4 : ", norm_2(z->getDense() - a * x->getDense()) < tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators4 : ", norm_2(z->dense() - a * x->dense()) < tol, true);
   z->zero();
   *z = a1**x; //
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators4 : ", norm_2(z->getDense() - a1 * x->getDense()) < tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators4 : ", norm_2(z->dense() - a1 * x->dense()) < tol, true);
   z->zero();
   *z = *x * a1; //
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators4 : ", norm_2(z->getDense() - a1 * x->getDense()) < tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators4 : ", norm_2(z->dense() - a1 * x->dense()) < tol, true);
   z->zero();
   *z = *x / a; //
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators4 : ", norm_2(z->getDense() - x->getDense() / a) < tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators4 : ", norm_2(z->dense() - x->dense() / a) < tol, true);
   z->zero();
   *z = *x / a1; //
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators4 : ", norm_2(z->getDense() - x->getDense() / a1) < tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators4 : ", norm_2(z->dense() - x->dense() / a1) < tol, true);
   z->zero();
 
   //  sparse = a*sparse or sparse/a
   x.reset(new SiconosVector(*sv));
   z.reset(new SiconosVector(size, Siconos::SPARSE));
   *z = a**x; //
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators4 : ", norm_2(z->getSparse() - a * x->getSparse()) < tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators4 : ", norm_2(z->sparse() - a * x->sparse()) < tol, true);
   z->zero();
   *z = *x * a; //
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators4 : ", norm_2(z->getSparse() - a * x->getSparse()) < tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators4 : ", norm_2(z->sparse() - a * x->sparse()) < tol, true);
   z->zero();
   *z = a1**x; //
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators4 : ", norm_2(z->getSparse() - a1 * x->getSparse()) < tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators4 : ", norm_2(z->sparse() - a1 * x->sparse()) < tol, true);
   z->zero();
   *z = *x * a1; //
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators4 : ", norm_2(z->getSparse() - a1 * x->getSparse()) < tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators4 : ", norm_2(z->sparse() - a1 * x->sparse()) < tol, true);
   z->zero();
 
   // Following tests failed. Sparse init pb. To be reviewed.
 
   //   *z = (*x)/a; //
-  //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators4 : ",norm_2(z->getSparse()-x->getSparse()/a)<tol, true);
+  //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators4 : ",norm_2(z->sparse()-x->sparse()/a)<tol, true);
   //   z->zero();
   //   *z = (*x)/a1; //
-  //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators4 : ",norm_2(z->getSparse()-x->getSparse()/a1)<tol, true);
+  //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators4 : ",norm_2(z->sparse()-x->sparse()/a1)<tol, true);
 
   // simple = a * block
   z.reset(new SiconosVector(size));
@@ -657,21 +657,21 @@ void SiconosVectorTest::testOperators4Bis()
 
   //  dense = a*dense or dense/a
   scal(a, *x, *z); //
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators4Bis : ", norm_2(z->getDense() - a * x->getDense()) < tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators4Bis : ", norm_2(z->dense() - a * x->dense()) < tol, true);
   z->zero();
   scal(1.0 / a, *x, *z);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators4Bis : ", norm_2(z->getDense() - x->getDense() / a) < tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators4Bis : ", norm_2(z->dense() - x->dense() / a) < tol, true);
   z->zero();
 
   //  sparse = a*sparse or sparse/a
   x.reset(new SiconosVector(*sv));
   z.reset(new SiconosVector(size, Siconos::SPARSE));
   scal(a, *x, *z);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators4Bis : ", norm_2(z->getSparse() - a * x->getSparse()) < tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators4Bis : ", norm_2(z->sparse() - a * x->sparse()) < tol, true);
   z->zero();
   // Following tests failed. Sparse init pb. To be reviewed.
   scal(1.0 / a, *x, *z);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators4Bis : ", norm_2(z->getSparse() - x->getSparse() / a) < tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators4Bis : ", norm_2(z->sparse() - x->sparse() / a) < tol, true);
 
   // simple = a * block
   z.reset(new SiconosVector(size));
@@ -718,9 +718,9 @@ void SiconosVectorTest::testOperators4Ter()
   z->zero();
   //  dense += a*dense or dense/a
   scal(a, *x, *z, false); //
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators4Ter : ", norm_2(z->getDense() - a * x->getDense()) < tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators4Ter : ", norm_2(z->dense() - a * x->dense()) < tol, true);
   scal(a, *x, *z, false); //
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators4Ter : ", norm_2(z->getDense() - 2 * a * x->getDense()) < tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators4Ter : ", norm_2(z->dense() - 2 * a * x->dense()) < tol, true);
 
   //  sparse += a*sparse or sparse/a
   x.reset(new SiconosVector(*sv));
@@ -728,7 +728,7 @@ void SiconosVectorTest::testOperators4Ter()
   z->zero();
   scal(a, *x, *z, false);
   scal(a, *x, *z, false);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators4Ter : ", norm_2(z->getSparse() - 2 * a * x->getSparse()) < tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators4Ter : ", norm_2(z->sparse() - 2 * a * x->sparse()) < tol, true);
 
 
   //  // simple = a * block
@@ -1028,7 +1028,7 @@ void SiconosVectorTest::testOperators8()
   *res = outer_prod(*tmp1, *w); // dense*sparse
   for (unsigned int i = 0 ; i < size1; ++i)
     for (unsigned int j = 0; j < size; ++j)
-      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8 : ", ((*res)(i, j) - (*tmp1)(i) * (w->getSparse())(j)) < tol , true);
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8 : ", ((*res)(i, j) - (*tmp1)(i) * (w->sparse())(j)) < tol , true);
 
   res->zero();
   SP::SiconosVector v(new SiconosVector(*sv));
@@ -1036,13 +1036,13 @@ void SiconosVectorTest::testOperators8()
   *res2 = outer_prod(*v, *w); // sparse*sparse
   for (unsigned int i = 0 ; i < size1; ++i)
     for (unsigned int j = 0; j < size; ++j)
-      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8 : ", ((*res2)(i, j) - (v->getSparse())(i) * (w->getSparse())(j)) < tol , true);
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8 : ", ((*res2)(i, j) - (v->sparse())(i) * (w->sparse())(j)) < tol , true);
   res->zero();
 
   *res2 = outer_prod(*v, *x); // sparse*dense
   for (unsigned int i = 0 ; i < size1; ++i)
     for (unsigned int j = 0; j < size; ++j)
-      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8 : ", ((*res2)(i, j) - (v->getSparse())(i) * (*x)(j)) < tol , true);
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8 : ", ((*res2)(i, j) - (v->sparse())(i) * (*x)(j)) < tol , true);
 
   std::cout << "--> operators8 test ended with success." <<std::endl;
 }
@@ -1125,7 +1125,7 @@ void SiconosVectorTest::testSubscal()
   for (unsigned int i = 0; i < size; ++i)
   {
     if (i != 4 && i != 5)
-      CPPUNIT_ASSERT_EQUAL_MESSAGE("testSubscal : ", fabs((*ys->sparse())(i) - (*yref->dense())(i)) < tol, true);
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testSubscal : ", fabs((ys->sparse())(i) - (yref->dense())(i)) < tol, true);
   }
   std::cout << "-->  subscal test ended with success." <<std::endl;
 }

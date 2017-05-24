@@ -785,7 +785,7 @@ void D1MinusLinearOSI::computeFreeOutputHalfExplicitVelocityLevel(InteractionsGr
     if(((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp)
     {
       SP::SiconosVisitor nslEffectOnFreeOutput(new _NSLEffectOnFreeOutput(osnsp, inter));
-      inter->nonSmoothLaw()->accept(*nslEffectOnFreeOutput);
+      inter->nonSmoothLaw()->accept_reader(*nslEffectOnFreeOutput);
     }
 
     if(((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]).get() == osnsp)
@@ -815,7 +815,7 @@ void D1MinusLinearOSI::computeFreeOutputHalfExplicitVelocityLevel(InteractionsGr
     if(((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp)
     {
       SP::SiconosVisitor nslEffectOnFreeOutput(new _NSLEffectOnFreeOutput(osnsp, inter));
-      inter->nonSmoothLaw()->accept(*nslEffectOnFreeOutput);
+      inter->nonSmoothLaw()->accept_reader(*nslEffectOnFreeOutput);
     }
 
     if(((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]).get() == osnsp)
