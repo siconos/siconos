@@ -26,6 +26,7 @@
 #include <boost/numeric/ublas/vector_proxy.hpp>
 
 #include "SiconosAlgebra.hpp"
+#include "Tools.hpp"
 
 using  std::cout;
 using std::endl;
@@ -505,6 +506,36 @@ void BlockMatrix::display(void)const
     }
   }
   std::cout << "===========================================================================================" << std::endl;
+}
+
+//=====================
+// convert to a string
+//=====================
+
+std::string BlockMatrix::toString() const
+{
+  return ::toString(*this);
+}
+
+//=====================
+// convert to an ostream
+//=====================
+
+std::ostream& operator<<(std::ostream& os, const BlockMatrix& bm)
+{
+  BlocksMat::iterator1 it;
+  BlocksMat::iterator2 it2;
+  os << "[" << bm.numberOfBlocks(0) << "," << bm.numberOfBlocks(1) << "](";
+  for (it = bm._mat->begin1(); it != bm._mat->end1(); ++it)
+  {
+    for (it2 = it.begin(); it2 != it.end(); ++it2)
+    {
+      if (it2 != it.begin()) os << ",";
+      if (*it2) os << **it2; else os << "(nil)";
+    }
+  }
+  os << ")";
+  return os;
 }
 
 //=============================

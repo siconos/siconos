@@ -12,7 +12,25 @@
 %warnfilter(504) SimpleMatrix::ACCEPT_STD_VISITORS();
 %warnfilter(509) SiconosVector;
 
+%ignore operator<<(std::ostream& os, const SiconosMatrix& bv);
+%ignore operator<<(std::ostream& os, const SimpleMatrix& bv);
+%ignore operator<<(std::ostream& os, const SiconosVector& bv);
+%ignore operator<<(std::ostream& os, const BlockVector& bv);
+
 %include SiconosMatrix.hpp
 %include SimpleMatrix.hpp
 %include SiconosVector.hpp
 %include BlockVector.hpp
+
+%extend SiconosMatrix{
+  std::string __str__() { return $self->toString(); }
+}
+%extend SimpleMatrix{
+  std::string __str__() { return $self->toString(); }
+}
+%extend SiconosVector{
+  std::string __str__() { return $self->toString(); }
+}
+%extend BlockVector{
+  std::string __str__() { return $self->toString(); }
+}

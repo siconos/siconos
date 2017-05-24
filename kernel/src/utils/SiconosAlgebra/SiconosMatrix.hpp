@@ -303,6 +303,18 @@ public:
    */
   virtual void display() const = 0;
 
+  /** put data of the matrix into a std::string
+   * \return std::string
+   */
+  virtual std::string toString() const = 0;
+
+  /** send data of the matrix to an ostream
+   * \param os An output stream
+   * \param sm a SiconosMatrix
+   * \return The same output stream
+   */
+  friend std::ostream& operator<<(std::ostream& os, const SiconosMatrix& sm);
+
   // Note: in the following functions, row and col are general;
   // that means that for a SimpleMatrix m, m(i,j) is index (i,j) element but
   // for a BlockMatrix w that contains 2 SiconosMatrix of size 3

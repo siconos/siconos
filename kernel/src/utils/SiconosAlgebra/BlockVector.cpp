@@ -25,6 +25,7 @@
 #include "SiconosVector.hpp"
 
 #include "SiconosAlgebra.hpp"
+#include "Tools.hpp"
 
 
 //#define DEBUG_STDOUT
@@ -198,6 +199,30 @@ void BlockVector::display() const
   }
 }
 
+//=====================
+// convert to a string
+//=====================
+
+std::string BlockVector::toString() const
+{
+  return ::toString(*this);
+}
+
+//=====================
+// convert to an ostream
+//=====================
+
+std::ostream& operator<<(std::ostream& os, const BlockVector& bv)
+{
+  VectorOfVectors::const_iterator it;
+  os << "[" << bv._vect.size() << "](";
+  for(it = bv._vect.begin(); it != bv._vect.end(); ++it) {
+    if (it != bv._vect.begin()) os << ",";
+    if (*it) os << **it; else os << "(nil)";
+  }
+  os << ")";
+  return os;
+}
 
 //=============================
 // Elements access (get or set)

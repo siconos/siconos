@@ -248,7 +248,14 @@ public:
   /** put data of the vector into a std::string
    * \return std::string
    */
-  const std::string toString() const;
+  std::string toString() const;
+
+  /** send data of the matrix to an ostream
+   * \param os An output stream
+   * \param sv a SiconosVector
+   * \return The same output stream
+   */
+  friend std::ostream& operator<<(std::ostream& os, const SiconosVector& sv);
 
   //************************** VECTORS HANDLING AND OPERATORS *******************************
 

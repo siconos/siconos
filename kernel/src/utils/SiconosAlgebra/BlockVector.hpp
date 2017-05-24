@@ -174,6 +174,18 @@ public:
    */
   void display(void) const;
 
+  /** put data of the vector into a std::string
+   * \return std::string
+   */
+  std::string toString() const;
+
+  /** send data of the matrix to an ostream
+   * \param os An output stream
+   * \param bv a BlockVector
+   * \return The same output stream
+   */
+  friend std::ostream& operator<<(std::ostream& os, const BlockVector& bv);
+
   /** return the element vector[i]
    *  \param i an unsigned int
    *  \return a double

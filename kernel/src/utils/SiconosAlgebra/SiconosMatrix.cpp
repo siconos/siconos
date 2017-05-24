@@ -209,3 +209,9 @@ bool SiconosMatrix::fillCSC(CSparseMatrix* csc, size_t row_off, size_t col_off, 
 
   return true;
 }
+
+std::ostream& operator<<(std::ostream& os, const SiconosMatrix& sm)
+{
+  os << sm.toString();
+  return os;
+}

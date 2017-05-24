@@ -19,6 +19,7 @@
 #include "SiconosConfig.h"
 
 #include "SiconosAlgebraTypeDef.hpp"
+#include "Tools.hpp"
 
 #include <boost/numeric/ublas/io.hpp>            // for >> 
 //#include <boost/numeric/ublas/vector_proxy.hpp>  // for project
@@ -396,20 +397,22 @@ void SiconosVector::display()const
 // Convert vector to a std::string
 //============================
 
-const std::string SiconosVector::toString() const
+std::string SiconosVector::toString() const
 {
-  std::stringstream sstr;
-  std::string s;
-  if (_dense)
-    sstr << *vect.Dense;
+  return ::toString(*this);
+}
+
+//=====================
+// convert to an ostream
+//=====================
+
+std::ostream& operator<<(std::ostream& os, const SiconosVector& sv)
+{
+  if (sv._dense)
+    os << *sv.vect.Dense;
   else
-    sstr << *vect.Sparse;
-  sstr >> s;
-  s = s.substr(4, s.size() - 5); // Remove "[size](" at the beginning of the std::string
-  std::string::size_type pos;
-  while ((pos = s.find(",")) != std::string::npos) // Replace "," by " " in the std::string
-    s[pos] = ' ';
-  return s;
+    os << *sv.vect.Sparse;
+  return os;
 }
 
 //=============================

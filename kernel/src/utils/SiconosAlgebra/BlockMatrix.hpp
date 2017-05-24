@@ -260,6 +260,18 @@ public:
    */
   void display() const;
 
+  /** put data of the matrix into a std::string
+   * \return std::string
+   */
+  std::string toString() const;
+
+  /** send data of the matrix to an ostream
+   * \param os An output stream
+   * \param bm a BlockMatrix
+   * \return The same output stream
+   */
+  friend std::ostream& operator<<(std::ostream& os, const BlockMatrix& bm);
+
   /** get or set the element matrix[i,j]
    *  \param i an unsigned int 
    *  \param j an unsigned int 
