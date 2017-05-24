@@ -424,8 +424,9 @@ void KernelTest::t7()
 
   SP::DynamicalSystem ds1, ds2;
 
-  SP::SiconosVector q(new SiconosVector());
-  SP::SiconosVector v(new SiconosVector());
+  // Must be size=1, cannot deserialize a LagrangianDS with _ndof==0
+  SP::SiconosVector q(new SiconosVector(1));
+  SP::SiconosVector v(new SiconosVector(1));
 
   ds1.reset(new Disk(1, 1, q, v));
 
