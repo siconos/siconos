@@ -432,8 +432,6 @@ SP::Interaction Topology::getInteraction(unsigned int requiredNumber)
       return inter;
   }
 
-  RuntimeException::selfThrow("Topology::getInteraction(n) inter not found.");
-
   return inter;
 }
 
@@ -446,7 +444,7 @@ SP::Interaction Topology::getInteraction(std::string name)
       return _IG[0]->bundle(*vi);
   }
 
-  RuntimeException::selfThrow("Topology::getInteracton() inter not found.");
+  return SP::Interaction();
 }
 
 std::vector<SP::Interaction> Topology::interactionsForDS(
