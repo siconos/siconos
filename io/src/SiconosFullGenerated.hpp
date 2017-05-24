@@ -651,6 +651,7 @@ SICONOS_IO_REGISTER_WITH_BASES(PivotJointR,(KneeJointR),
   (_cq2q102)
   (_cq2q103)
   (_cq2q104)
+  (_initial_AscalA)
   (_initial_AscalA1)
   (_initial_AscalA2))
 SICONOS_IO_REGISTER_WITH_BASES(SphereLDSPlanR,(LagrangianScleronomousR),

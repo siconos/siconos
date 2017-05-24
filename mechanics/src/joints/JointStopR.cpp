@@ -102,9 +102,10 @@ void JointStopR::computeh(double time, BlockVector& q0, SiconosVector& y)
   if (case_onestop || case_posneg)
   {
     _joint->computehDoF(time, q0, y, (*_axis)[0]);
+
+    y.setValue(0, (y.getValue(0) - _pos->getValue(0)) * _dir->getValue(0));
     if (case_posneg)
-      y.setValue(1, (y.getValue(0) + _pos->getValue(1)) * _dir->getValue(1));
-    y.setValue(0, (y.getValue(0) + _pos->getValue(0)) * _dir->getValue(0));
+      y.setValue(1, (y.getValue(0) - _pos->getValue(1)) * _dir->getValue(1));
     return;
   }
 
@@ -113,9 +114,10 @@ void JointStopR::computeh(double time, BlockVector& q0, SiconosVector& y)
   _joint->computehDoF(time, q0, tmp_y, _axisMin);
 
   // Copy and scale each stop for its axis/position/direction
-  for (unsigned int i=0; i < y.size(); i++)
+  for (unsigned int i=0; i < y.size(); i++) {
     y.setValue(i, (tmp_y.getValue((*_axis)[i])
-                   + _pos->getValue(i))*_dir->getValue(i));
+                   - _pos->getValue(i))*_dir->getValue(i));
+  }
 }
 
 void JointStopR::computeJachq(double time, Interaction& inter, SP::BlockVector q0)

@@ -41,14 +41,30 @@ protected:
 
   /*Initial conditions*/
   double _cq2q101, _cq2q102, _cq2q103, _cq2q104;
-  double _initial_AscalA1, _initial_AscalA2;
+  double _initial_AscalA, _initial_AscalA1, _initial_AscalA2;
 
   void buildA1A2();
 
+  /** Compute the vector of linear and angular positions of the free axes */
+  virtual void computehDoF(double time, BlockVector& q0, SiconosVector& y,
+                           unsigned int axis);
+
+  /** Compute the jacobian of linear and angular DoF with respect to some q */
+  virtual void computeJachqDoF(double time, Interaction& inter,
+                               SP::BlockVector q0, SimpleMatrix& jachq,
+                               unsigned int axis);
+
   virtual void Jd1d2(double X1, double Y1, double Z1, double q10, double q11, double q12, double q13, double X2, double Y2, double Z2, double q20, double q21, double q22, double q23);
   virtual void Jd1(double X1, double Y1, double Z1, double q10, double q11, double q12, double q13);
-  double AscalA1(double q10, double q11, double q12, double q13, double q20, double q21, double q22, double q23);
-  double AscalA2(double q10, double q11, double q12, double q13, double q20, double q21, double q22, double q23);
+
+  void rot2to1(double q10, double q11, double q12, double q13,
+               double q20, double q21, double q22, double q23,
+               double *q2to1w, double *q2to1x,
+               double *q2to1y, double *q2to1z);
+
+  double AscalA1(double q2to1x, double q2to1y, double q2to1z);
+  double AscalA2(double q2to1x, double q2to1y, double q2to1z);
+  double AscalA(double q2to1x, double q2to1y, double q2to1z);
 
   virtual void initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& work);
 

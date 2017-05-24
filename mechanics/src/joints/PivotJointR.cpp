@@ -52,6 +52,12 @@
  *          a[0] * b[3] + a[1] * b[2] - a[2] * b[1] + a[3] * b[0]])
  */
 
+// Wrap value in interval [-pi,pi]
+static double piwrap(double x)
+{
+  return fmod(x + 3*M_PI, 2*M_PI) - M_PI;
+}
+
 PivotJointR::PivotJointR(SP::NewtonEulerDS d1, SP::NewtonEulerDS d2, SP::SiconosVector P, SP::SiconosVector A): KneeJointR(d1, d2, P)
 {
   _A.reset( new SiconosVector(*A) );
@@ -69,15 +75,19 @@ PivotJointR::PivotJointR(SP::NewtonEulerDS d1, SP::NewtonEulerDS d2, SP::Siconos
 
   buildA1A2();
 
-  _initial_AscalA1 = AscalA1((*d1->q())(3), (*d1->q())(4),
-                             (*d1->q())(5), (*d1->q())(6),
-                             (*d2->q())(3), (*d2->q())(4),
-                             (*d2->q())(5), (*d2->q())(6));
+  double rot2to1w, rot2to1x, rot2to1y, rot2to1z;
+  rot2to1((*d1->q())(3), (*d1->q())(4), (*d1->q())(5), (*d1->q())(6),
+          (*d2->q())(3), (*d2->q())(4), (*d2->q())(5), (*d2->q())(6),
+          &rot2to1w, &rot2to1x, &rot2to1y, &rot2to1z);
 
-  _initial_AscalA2 = AscalA2((*d1->q())(3), (*d1->q())(4),
-                             (*d1->q())(5), (*d1->q())(6),
-                             (*d2->q())(3), (*d2->q())(4),
-                             (*d2->q())(5), (*d2->q())(6));
+  _initial_AscalA1 = AscalA1(rot2to1x, rot2to1y, rot2to1z);
+  _initial_AscalA2 = AscalA2(rot2to1x, rot2to1y, rot2to1z);
+
+  // In case of joint constraints, it's okay to use dot product=0, but
+  // in the case of the free axis we must measure the actual angle
+  // using atan2 so that stops can be placed correctly.
+  double Adot2to1 = AscalA(rot2to1x, rot2to1y, rot2to1z);
+  _initial_AscalA = 2*atan2(rot2to1w, Adot2to1);
 }
 
 /* constructor,
@@ -100,13 +110,18 @@ PivotJointR::PivotJointR(SP::NewtonEulerDS d1, SP::SiconosVector P0, SP::Siconos
   _A.reset( new SiconosVector(*A) );
   buildA1A2();
 
-  _initial_AscalA1 = AscalA1((*d1->q())(3), (*d1->q())(4),
-                             (*d1->q())(5), (*d1->q())(6),
-                             1, 0, 0, 0);
+  double rot2to1w, rot2to1x, rot2to1y, rot2to1z;
+  rot2to1((*d1->q())(3), (*d1->q())(4), (*d1->q())(5), (*d1->q())(6),
+          1, 0, 0, 0, &rot2to1w, &rot2to1x, &rot2to1y, &rot2to1z);
 
-  _initial_AscalA2 = AscalA2((*d1->q())(3), (*d1->q())(4),
-                             (*d1->q())(5), (*d1->q())(6),
-                             1, 0, 0, 0);
+  _initial_AscalA1 = AscalA1(rot2to1x, rot2to1y, rot2to1z);
+  _initial_AscalA2 = AscalA2(rot2to1x, rot2to1y, rot2to1z);
+
+  // In case of joint constraints, it's okay to use dot product=0, but
+  // in the case of the free axis we must measure the actual angle
+  // using atan2 so that stops can be placed correctly.
+  double Adot2to1 = AscalA(rot2to1x, rot2to1y, rot2to1z);
+  _initial_AscalA = 2*atan2(rot2to1w, Adot2to1);
 }
 
 void PivotJointR::initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
@@ -323,57 +338,77 @@ void PivotJointR::Jd1(double X1, double Y1, double Z1, double q10, double q11, d
 
 }
 
+void PivotJointR::rot2to1(double q10, double q11, double q12, double q13,
+                          double q20, double q21, double q22, double q23,
+                          double *rot2to1w, double *rot2to1x,
+                          double *rot2to1y, double *rot2to1z)
+{
+  /*
+   * The current rotation vector taking into account initial rotation
+   * difference.
+   *
+   * sympy expression:
+   * rot2to1 = qmul(qinv(qmul(q2,cq2q10)),q1)
+   */
 
+  if (rot2to1w)
+  *rot2to1w = (q10*(_cq2q101*q20 - _cq2q102*q21 - _cq2q103*q22 - _cq2q104*q23)
+               - q11*(-_cq2q101*q21 - _cq2q102*q20 + _cq2q103*q23 - _cq2q104*q22)
+               - q12*(-_cq2q101*q22 - _cq2q102*q23 - _cq2q103*q20 + _cq2q104*q21)
+               - q13*(-_cq2q101*q23 + _cq2q102*q22 - _cq2q103*q21 - _cq2q104*q20));
+  *rot2to1x = (q10*(-_cq2q101*q21 - _cq2q102*q20 + _cq2q103*q23 - _cq2q104*q22)
+               + q11*(_cq2q101*q20 - _cq2q102*q21 - _cq2q103*q22 - _cq2q104*q23)
+               - q12*(-_cq2q101*q23 + _cq2q102*q22 - _cq2q103*q21 - _cq2q104*q20)
+               + q13*(-_cq2q101*q22 - _cq2q102*q23 - _cq2q103*q20 + _cq2q104*q21));
+  *rot2to1y = (q10*(-_cq2q101*q22 - _cq2q102*q23 - _cq2q103*q20 + _cq2q104*q21)
+               + q11*(-_cq2q101*q23 + _cq2q102*q22 - _cq2q103*q21 - _cq2q104*q20)
+               + q12*(_cq2q101*q20 - _cq2q102*q21 - _cq2q103*q22 - _cq2q104*q23)
+               - q13*(-_cq2q101*q21 - _cq2q102*q20 + _cq2q103*q23 - _cq2q104*q22));
+  *rot2to1z = (q10*(-_cq2q101*q23 + _cq2q102*q22 - _cq2q103*q21 - _cq2q104*q20)
+               - q11*(-_cq2q101*q22 - _cq2q102*q23 - _cq2q103*q20 + _cq2q104*q21)
+               + q12*(-_cq2q101*q21 - _cq2q102*q20 + _cq2q103*q23 - _cq2q104*q22)
+               + q13*(_cq2q101*q20 - _cq2q102*q21 - _cq2q103*q22 - _cq2q104*q23));
+}
 
-
-
-
-double PivotJointR::AscalA1(double q10, double q11, double q12, double q13, double q20, double q21, double q22, double q23)
+double PivotJointR::AscalA1(double rot2to1x, double rot2to1y, double rot2to1z)
 {
   /*
    * The angle between A1 and rotation q2-to-q1 must be zero,
-   * (taking into account original difference in orientation q2to1).
+   * (taking into account original difference in orientation rot2to1).
    *
    * sympy expression:
-   * AscalA1 = np.dot(A1,qmul(qinv(qmul(q2,cq2q10)),q1)) - initial_AscalA1
+   * AscalA1 = np.dot(A1,rot2to1) - initial_AscalA1
    */
 
-  return _A1x*(q10*(-_cq2q101*q21 - _cq2q102*q20 + _cq2q103*q23 - _cq2q104*q22)
-               + q11*(_cq2q101*q20 - _cq2q102*q21 - _cq2q103*q22 - _cq2q104*q23)
-               - q12*(-_cq2q101*q23 + _cq2q102*q22 - _cq2q103*q21 - _cq2q104*q20)
-               + q13*(-_cq2q101*q22 - _cq2q102*q23 - _cq2q103*q20 + _cq2q104*q21))
-    + _A1y*(q10*(-_cq2q101*q22 - _cq2q102*q23 - _cq2q103*q20 + _cq2q104*q21)
-            + q11*(-_cq2q101*q23 + _cq2q102*q22 - _cq2q103*q21 - _cq2q104*q20)
-            + q12*(_cq2q101*q20 - _cq2q102*q21 - _cq2q103*q22 - _cq2q104*q23)
-            - q13*(-_cq2q101*q21 - _cq2q102*q20 + _cq2q103*q23 - _cq2q104*q22))
-    + _A1z*(q10*(-_cq2q101*q23 + _cq2q102*q22 - _cq2q103*q21 - _cq2q104*q20)
-            - q11*(-_cq2q101*q22 - _cq2q102*q23 - _cq2q103*q20 + _cq2q104*q21)
-            + q12*(-_cq2q101*q21 - _cq2q102*q20 + _cq2q103*q23 - _cq2q104*q22)
-            + q13*(_cq2q101*q20 - _cq2q102*q21 - _cq2q103*q22 - _cq2q104*q23));
+  return _A1x*rot2to1x + _A1y*rot2to1y + _A1z*rot2to1z;
 }
 
-double PivotJointR::AscalA2(double q10, double q11, double q12, double q13, double q20, double q21, double q22, double q23)
+double PivotJointR::AscalA2(double rot2to1x, double rot2to1y, double rot2to1z)
 {
   /*
    * The angle between A2 and rotation q2-to-q1 must be zero,
-   * (taking into account original difference in orientation q2to1).
+   * (taking into account original difference in orientation rot2to1).
    *
    * sympy expression:
-   * AscalA2 = np.dot(A2,qmul(qinv(qmul(q2,cq2q10)),q1)) - initial_AscalA2
+   * AscalA2 = np.dot(A2,rot2to1) - initial_AscalA2
    */
 
-  return _A2x*(q10*(-_cq2q101*q21 - _cq2q102*q20 + _cq2q103*q23 - _cq2q104*q22)
-               + q11*(_cq2q101*q20 - _cq2q102*q21 - _cq2q103*q22 - _cq2q104*q23)
-               - q12*(-_cq2q101*q23 + _cq2q102*q22 - _cq2q103*q21 - _cq2q104*q20)
-               + q13*(-_cq2q101*q22 - _cq2q102*q23 - _cq2q103*q20 + _cq2q104*q21))
-    + _A2y*(q10*(-_cq2q101*q22 - _cq2q102*q23 - _cq2q103*q20 + _cq2q104*q21)
-            + q11*(-_cq2q101*q23 + _cq2q102*q22 - _cq2q103*q21 - _cq2q104*q20)
-            + q12*(_cq2q101*q20 - _cq2q102*q21 - _cq2q103*q22 - _cq2q104*q23)
-            - q13*(-_cq2q101*q21 - _cq2q102*q20 + _cq2q103*q23 - _cq2q104*q22))
-    + _A2z*(q10*(-_cq2q101*q23 + _cq2q102*q22 - _cq2q103*q21 - _cq2q104*q20)
-            - q11*(-_cq2q101*q22 - _cq2q102*q23 - _cq2q103*q20 + _cq2q104*q21)
-            + q12*(-_cq2q101*q21 - _cq2q102*q20 + _cq2q103*q23 - _cq2q104*q22)
-            + q13*(_cq2q101*q20 - _cq2q102*q21 - _cq2q103*q22 - _cq2q104*q23));
+  return _A2x*rot2to1x + _A2y*rot2to1y + _A2z*rot2to1z;
+}
+
+double PivotJointR::AscalA(double rot2to1x, double rot2to1y, double rot2to1z)
+{
+  /*
+   * The angle between A and rotation q2-to-q1 must be zero,
+   * (taking into account original difference in orientation rot2to1).
+   *
+   * sympy expression:
+   * AscalA = np.dot(A,rot2to1) - initial_AscalA
+   */
+
+  return _A->getValue(0)*rot2to1x
+    + _A->getValue(1)*rot2to1y
+    + _A->getValue(2)*rot2to1z;
 }
 
 void PivotJointR::computeh(double time, BlockVector& q0, SiconosVector& y)
@@ -397,7 +432,203 @@ void PivotJointR::computeh(double time, BlockVector& q0, SiconosVector& y)
     q23 = q0.getValue(13);
   }
 
-  y.setValue(3, AscalA1(q10, q11, q12, q13, q20, q21, q22, q23) - _initial_AscalA1);
-  y.setValue(4, AscalA2(q10, q11, q12, q13, q20, q21, q22, q23) - _initial_AscalA2);
+  double rot2to1x, rot2to1y, rot2to1z;
+  rot2to1(q10, q11, q12, q13, q20, q21, q22, q23,
+          NULL, &rot2to1x, &rot2to1y, &rot2to1z);
 
+  y.setValue(3, AscalA1(rot2to1x, rot2to1y, rot2to1z) - _initial_AscalA1);
+  y.setValue(4, AscalA2(rot2to1x, rot2to1y, rot2to1z) - _initial_AscalA2);
+}
+
+/** Compute the vector of linear and angular positions of the free axes */
+void PivotJointR::computehDoF(double time, BlockVector& q0, SiconosVector& y,
+                              unsigned int axis)
+{
+  // Normally we fill y starting at axis up to the number of columns,
+  // but in this case there is only one, so just don't do anything if
+  // it doesn't match.
+  if (axis != 0)
+    return;
+
+  SP::SiconosVector q1 = (q0.getAllVect())[0];
+  double X1 = q1->getValue(0);
+  double Y1 = q1->getValue(1);
+  double Z1 = q1->getValue(2);
+  double q10 = q1->getValue(3);
+  double q11 = q1->getValue(4);
+  double q12 = q1->getValue(5);
+  double q13 = q1->getValue(6);
+  double X2 = 0;
+  double Y2 = 0;
+  double Z2 = 0;
+  double q20 = 1;
+  double q21 = 0;
+  double q22 = 0;
+  double q23 = 0;
+
+  if (q0.numberOfBlocks()>1)
+  {
+    SP::SiconosVector q2 = (q0.getAllVect())[1];
+    X2 = q2->getValue(0);
+    Y2 = q2->getValue(1);
+    Z2 = q2->getValue(2);
+    q20 = q2->getValue(3);
+    q21 = q2->getValue(4);
+    q22 = q2->getValue(5);
+    q23 = q2->getValue(6);
+  }
+
+  double rot2to1w, rot2to1x, rot2to1y, rot2to1z;
+  rot2to1(q10, q11, q12, q13, q20, q21, q22, q23,
+          &rot2to1w, &rot2to1x, &rot2to1y, &rot2to1z);
+
+  // In case of joint constraints, it's okay to use dot product=0, but
+  // in the case of the free axis we must measure the actual angle
+  // using atan2 so that stops can be placed correctly.
+  double Adot2to1 = AscalA(rot2to1x, rot2to1y, rot2to1z);
+  y.setValue(0, piwrap(2*atan2(rot2to1w, Adot2to1) - _initial_AscalA));
+}
+
+/** Compute the jacobian of linear and angular DoF with respect to some q */
+void PivotJointR::computeJachqDoF(double time, Interaction& inter,
+                                  SP::BlockVector q0, SimpleMatrix& jachq,
+                                  unsigned int axis)
+{
+  // Normally we fill jachq starting at axis up to the number of rows,
+  // but in this case there is only one, so just don't do anything if
+  // it doesn't match.
+  if (axis != 0)
+    return;
+
+  SP::SiconosVector q1 = (q0->getAllVect())[0];
+  double X1 = q1->getValue(0);
+  double Y1 = q1->getValue(1);
+  double Z1 = q1->getValue(2);
+  double q10 = q1->getValue(3);
+  double q11 = q1->getValue(4);
+  double q12 = q1->getValue(5);
+  double q13 = q1->getValue(6);
+  double X2 = 0;
+  double Y2 = 0;
+  double Z2 = 0;
+  double q20 = 1;
+  double q21 = 0;
+  double q22 = 0;
+  double q23 = 0;
+
+  if (q0->numberOfBlocks()>1)
+  {
+    SP::SiconosVector q2 = (q0->getAllVect())[1];
+    X2 = q2->getValue(0);
+    Y2 = q2->getValue(1);
+    Z2 = q2->getValue(2);
+    q20 = q2->getValue(3);
+    q21 = q2->getValue(4);
+    q22 = q2->getValue(5);
+    q23 = q2->getValue(6);
+  }
+
+  jachq.setValue(0, 0, 0);
+  jachq.setValue(0, 1, 0);
+  jachq.setValue(0, 2, 0);
+
+  /*
+   * sympy expression:
+   *
+   * rot2to1 = qmul(qinv(qmul(q2,cq2q10)),q1)
+   * Adot2to1 = np.dot(A, rot2to1)
+   * angle = atan2(rot2to1[0], Adot2to1)
+   *
+   * [angle.diff(x) for x in q1]
+   * r, e = cse(exprs=[angle.diff(x) for x in q1]
+   *                 +[angle.diff(x) for x in q2],
+   *            order='canonical')
+   * for v,x in r: print('double {} = {};'.format(v,ccode(x)))
+   * for i in range(4): print('jachq.setValue(0, {}, {});'.format(i+3,e[i]))
+   */
+
+  double x0 = _cq2q103*q23;
+  double x1 = _cq2q101*q21;
+  double x2 = _cq2q102*q20;
+  double x3 = _cq2q104*q22;
+  double x4 = x0 - x1 - x2 - x3;
+  double x5 = _cq2q104*q21;
+  double x6 = _cq2q101*q22;
+  double x7 = _cq2q102*q23;
+  double x8 = _cq2q103*q20;
+  double x9 = x5 - x6 - x7 - x8;
+  double x10 = _cq2q102*q22;
+  double x11 = _cq2q101*q23;
+  double x12 = _cq2q103*q21;
+  double x13 = _cq2q104*q20;
+  double x14 = x10 - x11 - x12 - x13;
+  double x15 = q11*x4;
+  double x16 = q12*x9;
+  double x17 = q13*x14;
+  double x18 = _cq2q101*q20 - _cq2q102*q21 - _cq2q103*q22 - _cq2q104*q23;
+  double x19 = q10*x18;
+  double x20 = _A->getValue(0)*(q10*x4 + q11*x18 - q12*x14 + q13*x9) + _A->getValue(1)*(q10*x9 + q11*x14 + q12*x18 - q13*x4) + _A->getValue(2)*(q10*x14 - q11*x9 + q12*x4 + q13*x18);
+  double x21 = 1.0/(pow(x20, 2) + pow(-x15 - x16 - x17 + x19, 2));
+  double x22 = 2*x21*(x15 + x16 + x17 - x19);
+  double x23 = 2*x20*x21;
+  double x24 = -x5 + x6 + x7 + x8;
+  double x25 = -x0 + x1 + x2 + x3;
+  double x26 = -x10 + x11 + x12 + x13;
+  double x27 = _cq2q101*q11;
+  double x28 = _cq2q102*q10;
+  double x29 = -x28;
+  double x30 = x27 + x29;
+  double x31 = _cq2q104*q12;
+  double x32 = _cq2q103*q13;
+  double x33 = -x32;
+  double x34 = _cq2q101*q12;
+  double x35 = _cq2q102*q13;
+  double x36 = _cq2q103*q10;
+  double x37 = -x36;
+  double x38 = _cq2q104*q11;
+  double x39 = -x38;
+  double x40 = x37 + x39;
+  double x41 = _cq2q101*q13;
+  double x42 = _cq2q102*q12;
+  double x43 = -x42;
+  double x44 = x41 + x43;
+  double x45 = _cq2q103*q11;
+  double x46 = _cq2q104*q10;
+  double x47 = -x46;
+  double x48 = _cq2q101*q10;
+  double x49 = _cq2q102*q11;
+  double x50 = _cq2q103*q12;
+  double x51 = _cq2q104*q13;
+  double x52 = x50 + x51;
+  double x53 = -x48;
+  double x54 = -x45;
+  double x55 = -x35;
+  double x56 = -x31;
+  double x57 = x49 + x53;
+  double x58 = x33 + x56;
+  double x59 = x47 + x54;
+  double x60 = x34 + x55;
+
+  jachq.setValue(0, 3, x18*x23 + x22*(_A->getValue(0)*x4 + _A->getValue(1)*x9 + _A->getValue(2)*x14));
+  jachq.setValue(0, 4, x22*(_A->getValue(0)*x18 + _A->getValue(1)*x14 + _A->getValue(2)*x24) + x23*x25);
+  jachq.setValue(0, 5, x22*(_A->getValue(0)*x26 + _A->getValue(1)*x18 + _A->getValue(2)*x4) + x23*x24);
+  jachq.setValue(0, 6, x22*(_A->getValue(0)*x9 + _A->getValue(1)*x25 + _A->getValue(2)*x18) + x23*x26);
+
+  if (q0->numberOfBlocks()<2)
+    return;
+
+  jachq.setValue(0, 7, 0);
+  jachq.setValue(0, 8, 0);
+  jachq.setValue(0, 9, 0);
+
+  /*
+   * sympy expression:
+   *
+   * for i in range(4): print('jachq.setValue(0, {}, {});'.format(i+10,e[i+4]))
+  */
+
+  jachq.setValue(0, 10, x22*(_A->getValue(0)*(x30 + x31 + x33) + _A->getValue(1)*(x34 + x35 + x40) + _A->getValue(2)*(x44 + x45 + x47)) + x23*(x48 + x49 + x52));
+  jachq.setValue(0, 11, x22*(_A->getValue(0)*(-x49 + x52 + x53) + _A->getValue(1)*(x44 + x46 + x54) + _A->getValue(2)*(-x34 + x40 + x55)) + x23*(x30 + x32 + x56));
+  jachq.setValue(0, 12, x22*(_A->getValue(0)*(-x41 + x43 + x59) + _A->getValue(1)*(-x50 + x51 + x57) + _A->getValue(2)*(x27 + x28 + x58)) + x23*(x37 + x38 + x60));
+  jachq.setValue(0, 13, x22*(_A->getValue(0)*(x36 + x39 + x60) + _A->getValue(1)*(-x27 + x29 + x58) + _A->getValue(2)*(x50 - x51 + x57)) + x23*(x41 + x42 + x59));
 }
