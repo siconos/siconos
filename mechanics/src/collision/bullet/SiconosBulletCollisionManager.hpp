@@ -25,6 +25,7 @@
 #define SiconosBulletCollisionManager_h
 
 #include <MechanicsFwd.hpp>
+#include <BulletSiconosFwd.hpp>
 
 #include <SiconosCollisionManager.hpp>
 #include <SiconosShape.hpp>
@@ -78,6 +79,15 @@ public:
 protected:
   SiconosBulletOptions _options;
   SiconosBulletStatistics _stats;
+
+  /*! Provided so that creation of collision points can be overridden. */
+  virtual SP::BulletR makeBulletR(SP::BodyDS ds1, SP::SiconosShape shape1,
+                                  SP::BodyDS ds2, SP::SiconosShape shape2,
+                                  const btManifoldPoint &,
+                                  bool flip=false,
+                                  double y_correction_A=0,
+                                  double y_correction_B=0,
+                                  double scaling=1);
 
 public:
   StaticContactorSetID insertStaticContactorSet(

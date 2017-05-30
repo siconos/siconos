@@ -1319,9 +1319,24 @@ bool SiconosBulletCollisionManager::bulletContactClear(void* userPersistentData)
   SP::Interaction *p_inter = (SP::Interaction*)userPersistentData;
   assert(p_inter!=NULL && "Contact point's stored (SP::Interaction*) is null!");
   DEBUG_PRINTF("unlinking interaction %p\n", &**p_inter);
+  std11::static_pointer_cast<BulletR>((*p_inter)->relation())->preDelete();
   gSimulation->unlink(*p_inter);
   delete p_inter;
   return false;
+}
+
+SP::BulletR SiconosBulletCollisionManager::makeBulletR(SP::BodyDS ds1,
+                                                       SP::SiconosShape shape1,
+                                                       SP::BodyDS ds2,
+                                                       SP::SiconosShape shape2,
+                                                       const btManifoldPoint &p,
+                                                       bool flip,
+                                                       double y_correction_A,
+                                                       double y_correction_B,
+                                                       double scaling)
+{
+  return std11::make_shared<BulletR>(p, flip, y_correction_A,
+                                     y_correction_B, scaling);
 }
 
 struct CollisionUpdateVisitor : public SiconosVisitor
@@ -1481,7 +1496,9 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
         double combined_margin =
           pairA->sshape->outsideMargin() + pairB->sshape->outsideMargin();
 
-        SP::BulletR rel(new BulletR(*it->point,
+        SP::BulletR rel(makeBulletR(pairA->ds, pairA->sshape,
+                                    pairB->ds, pairB->sshape,
+                                    *it->point,
                                     flip,
                                     pairA->sshape->outsideMargin(),
                                     pairB->sshape->outsideMargin(),

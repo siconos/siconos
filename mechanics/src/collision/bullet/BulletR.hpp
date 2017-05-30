@@ -70,7 +70,9 @@ public:
 
   virtual void computeh(double time, BlockVector& q0, SiconosVector& y);
 
-  void updateContactPoints(const btManifoldPoint& point);
+  virtual void updateContactPoints(const btManifoldPoint& point);
+
+  virtual void preDelete() { printf("BulletR::preDelete\n");}
 
   ACCEPT_STD_VISITORS();
 };
