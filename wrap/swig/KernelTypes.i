@@ -47,6 +47,93 @@
 %rename  (__eq__) operator==;
 %rename  (__ne__) operator!=;
 
+// Default swig typemap checks only for shared_ptr, but in some cases
+// it is a normal pointer.  We insert a normal pointer check before
+// the usual shared_ptr check.
+%define REF_PTR(TYPE)
+%typemap(in) TYPE&
+%{
+  {
+    int newmem = 0;
+    void *argp$argnum;
+    int res$argnum = SWIG_ConvertPtrAndOwn($input, &argp$argnum, $descriptor(TYPE *),  0 , &newmem);
+    if (SWIG_IsOK(res$argnum)) {
+      $1 = static_cast<TYPE*>(argp$argnum);
+    }
+    else
+    {
+      res$argnum = SWIG_ConvertPtrAndOwn($input, &argp$argnum, $descriptor(std11::shared_ptr< TYPE >*),  0 , &newmem);
+      if (!SWIG_IsOK(res$argnum)) {
+        %argument_fail(SWIG_ValueError, "$type", $symname, $argnum);
+      }
+      if (!argp$argnum) {
+        %argument_fail(SWIG_ValueError, "$type", $symname, $argnum);
+      }
+      if (newmem & SWIG_CAST_NEW_MEMORY) {
+        std11::shared_ptr< TYPE > tempshared$argnum
+          (*reinterpret_cast< std11::shared_ptr<  TYPE > * >(argp$argnum));
+        delete reinterpret_cast< std11::shared_ptr<  TYPE > * >(argp$argnum);
+        $1 = const_cast< TYPE * >(tempshared$argnum.get());
+      } else {
+        $1 = const_cast< TYPE * >(reinterpret_cast< std11::shared_ptr<  TYPE > * >(argp$argnum)->get());
+      }
+    }
+  }
+%}
+%typemap(in) (const TYPE&)
+%{
+  {
+    int newmem = 0;
+    void *argp$argnum;
+    int res$argnum = SWIG_ConvertPtrAndOwn($input, &argp$argnum, $descriptor(TYPE *),  0 , &newmem);
+    if (SWIG_IsOK(res$argnum)) {
+      $1 = static_cast<TYPE*>(argp$argnum);
+    }
+    else
+    {
+      res$argnum = SWIG_ConvertPtrAndOwn($input, &argp$argnum, $descriptor(std11::shared_ptr< TYPE >*),  0 , &newmem);
+      if (!SWIG_IsOK(res$argnum)) {
+        %argument_fail(SWIG_ValueError, "$type", $symname, $argnum);
+      }
+      if (!argp$argnum) {
+        %argument_fail(SWIG_ValueError, "$type", $symname, $argnum);
+      }
+      if (newmem & SWIG_CAST_NEW_MEMORY) {
+        std11::shared_ptr< TYPE > tempshared$argnum
+          (*reinterpret_cast< std11::shared_ptr< TYPE > * >(argp$argnum));
+        delete reinterpret_cast< std11::shared_ptr< TYPE > * >(argp$argnum);
+        $1 = const_cast< TYPE * >(tempshared$argnum.get());
+      } else {
+        $1 = const_cast< TYPE * >(reinterpret_cast< std11::shared_ptr< TYPE > * >(argp$argnum)->get());
+      }
+    }
+  }
+%}
+%typecheck(SWIG_TYPECHECK_POINTER) (TYPE&)
+%{
+  {
+    void *ptr;
+    int res = SWIG_ConvertPtr($input, &ptr, $descriptor(TYPE *), 0);
+    $1 = SWIG_CheckState(res);
+    if (!$1) {
+      res = SWIG_ConvertPtr($input, &ptr, $descriptor(std11::shared_ptr< TYPE > *), 0);
+      $1 = SWIG_CheckState(res);
+    }
+  }
+%}
+%typecheck(SWIG_TYPECHECK_POINTER) (const TYPE&)
+%{
+  {
+    void *ptr;
+    int res = SWIG_ConvertPtr($input, &ptr, $descriptor(TYPE *), 0);
+    $1 = SWIG_CheckState(res);
+    if (!$1) {
+      res = SWIG_ConvertPtr($input, &ptr, $descriptor(std11::shared_ptr< TYPE > *), 0);
+      $1 = SWIG_CheckState(res);
+    }
+  }
+%}
+%enddef
 
 #undef PY_REGISTER_WITHOUT_DIRECTOR
 
@@ -70,6 +157,7 @@
 %template (shared ## TYPE) STD11::enable_shared_from_this<TYPE>;
 %shared_ptr(TYPE);
 %make_picklable(TYPE, Kernel);
+REF_PTR(TYPE);
 %enddef
 
 

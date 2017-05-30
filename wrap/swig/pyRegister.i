@@ -42,6 +42,7 @@
 
 %shared_ptr(TYPE);
 %make_picklable(TYPE, Kernel);
+REF_PTR(TYPE)
 %enddef
 
 %define PY_REGISTER(TYPE)
@@ -92,6 +93,7 @@ PY_REGISTER_WITHOUT_HEADER(TYPE)
 %shared_ptr(TYPE);
 %include TYPE.hpp
 %make_picklable(TYPE, Kernel);
+REF_PTR(TYPE)
 %enddef
 
 %define PY_REGISTER_WITHOUT_DIRECTOR(TYPE)
@@ -114,4 +116,5 @@ PY_REGISTER_WITHOUT_HEADER(TYPE)
 %template (shared ## TYPE) STD11::enable_shared_from_this<TYPE>;
 %shared_ptr(TYPE);
 %make_picklable(TYPE, Kernel);
+REF_PTR(TYPE)
 %enddef
