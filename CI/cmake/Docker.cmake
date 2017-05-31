@@ -83,19 +83,20 @@ macro(add_docker_targets)
   string(REPLACE ":" "-" DOCKER_WORKDIR_VOLUME ${DOCKER_WORKDIR_VOLUME})
   string(REPLACE "." "-" DOCKER_WORKDIR_VOLUME ${DOCKER_WORKDIR_VOLUME})
 
-  set(DOCKER_CMAKE_FLAGS_WITHOUT_DOCKER)
-  set(_useless_cmake_opt -DMODE= -DCI_CONFIG= -DBUILD_CONFIGURATION=)
-  foreach(_f ${DOCKER_CMAKE_FLAGS})
-    string(REGEX MATCH "^-DDOCKER_.*" _mf ${_f})
-    if (NOT _mf)
-      list(APPEND DOCKER_CMAKE_FLAGS_WITHOUT_DOCKER ${_f})
-    endif()
-   foreach(_opt ${_useless_cmake_opt})
-      string(REGEX MATCH "^${_opt}.*" _mf ${_f})
-      if (_mf)
-	list(REMOVE_ITEM DOCKER_CMAKE_FLAGS_WITHOUT_DOCKER ${_f})
-      endif()
-    endforeach()
+  set(CTEST_OPTIONS_WITHOUT_DOCKER)
+  # List of options (-DOPTION=VALUE ...) to be passed to ctest
+  # Warning : these are not siconos conf. options for cmake but
+  # the options needed by ctest to prepare the pipeline (cmake, make ...)
+  # like SITE, config file ...
+  # If CI_OPTIONS is empty, default.cmake will be used.
+  set(CTEST_OPTIONS ${CI_OPTIONS};-DWITH_DOCKER=0;-V)
+
+
+  foreach(_f ${CTEST_OPTIONS})
+	string(REGEX MATCH "^-DDOCKER_.*" _mf ${_f})
+	if (NOT _mf)
+	  list(APPEND CTEST_OPTIONS_WITHOUT_DOCKER ${_f})
+	endif()
   endforeach()
 
   
@@ -123,7 +124,7 @@ macro(add_docker_targets)
     SET(DOCKER_CMAKE_WRAPPER "cmake")
   ENDIF(DOCKER_CMAKE_WRAPPER)
 
-  message(STATUS "Docker cmake flags : ${DOCKER_CMAKE_FLAGS_WITHOUT_DOCKER}")
+  message(STATUS "ctest flags : ${CTEST_OPTIONS_WITHOUT_DOCKER}")
   message(STATUS "Docker make flags : ${DOCKER_MAKE_FLAGS}")
   message(STATUS "Docker make test flags : ${DOCKER_MAKE_TEST_FLAGS}")
   message(STATUS "Docker hostname : ${DOCKER_HOSTNAME}")
@@ -157,8 +158,7 @@ macro(add_docker_targets)
   add_custom_target(
     ${DOCKER_IMAGE_AS_DIR}-build
     COMMENT "Docker Build : ${DOCKER_IMAGE}"
-    COMMAND cd Docker/Context/${DOCKER_REPOSITORY}/${DOCKER_IMAGE_AS_DIR} && docker build -t ${DOCKER_REPOSITORY}/${DOCKER_IMAGE}
-    .
+    COMMAND cd Docker/Context/${DOCKER_REPOSITORY}/${DOCKER_IMAGE_AS_DIR} && docker build -t ${DOCKER_REPOSITORY}/${DOCKER_IMAGE} .
     )
 
   # bind DOCKER_WORKDIR inside container
@@ -186,7 +186,7 @@ macro(add_docker_targets)
   add_custom_target(
     ${DOCKER_IMAGE_AS_DIR}-cmake
     COMMENT "Docker cmake : ${DOCKER_IMAGE}"
-    COMMAND ${DOCKER_COMMAND} run -h ${DOCKER_HOSTNAME} --rm=true ${DOCKER_VFLAGS} --volumes-from=${DOCKER_WORKDIR_VOLUME} --volumes-from=${DOCKER_REPOSITORY}-${DOCKER_IMAGE}-usr-local --workdir=${DOCKER_WORKDIR} -t ${DOCKER_REPOSITORY}/${DOCKER_IMAGE} ${DOCKER_CMAKE_WRAPPER} ${DOCKER_PROJECT_SOURCE_DIR} ${DOCKER_CMAKE_FLAGS_WITHOUT_DOCKER})
+    COMMAND ${DOCKER_COMMAND} run -h ${DOCKER_HOSTNAME} --rm=true ${DOCKER_VFLAGS} --volumes-from=${DOCKER_WORKDIR_VOLUME} --volumes-from=${DOCKER_REPOSITORY}-${DOCKER_IMAGE}-usr-local --workdir=${DOCKER_WORKDIR} -t ${DOCKER_REPOSITORY}/${DOCKER_IMAGE} ${DOCKER_CMAKE_WRAPPER} ${DOCKER_PROJECT_SOURCE_DIR} ${SICONOS_CMAKE_OPTIONS} -DCOMPONENTS=${SICONOS_COMPONENTS} VERBATIM)
   
   # == target to run make inside previously created docker container ==
   # Build siconos inside docker container
@@ -233,7 +233,7 @@ macro(add_docker_targets)
   add_custom_target(
     ${DOCKER_IMAGE_AS_DIR}-ctest
     COMMENT "Docker ctest : ${DOCKER_IMAGE}"
-    COMMAND ${DOCKER_COMMAND} run -h ${DOCKER_HOSTNAME} --rm=true ${DOCKER_VFLAGS} --volumes-from=${DOCKER_WORKDIR_VOLUME} --volumes-from=${DOCKER_REPOSITORY}-${DOCKER_IMAGE}-usr-local --workdir=${DOCKER_WORKDIR} -t ${DOCKER_REPOSITORY}/${DOCKER_IMAGE} ctest -DCTEST_SOURCE_DIRECTORY=${DOCKER_PROJECT_SOURCE_DIR} -DCTEST_BINARY_DIRECTORY=${DOCKER_WORKDIR} -S ${DOCKER_CTEST_DRIVER} -DSITE=${DOCKER_HOSTNAME} -DCMAKE_WRAPPER=${DOCKER_CMAKE_WRAPPER} ${DOCKER_CMAKE_FLAGS_WITHOUT_DOCKER})
+    COMMAND ${DOCKER_COMMAND} run -h ${DOCKER_HOSTNAME} --rm=true ${DOCKER_VFLAGS} --volumes-from=${DOCKER_WORKDIR_VOLUME} --volumes-from=${DOCKER_REPOSITORY}-${DOCKER_IMAGE}-usr-local --workdir=${DOCKER_WORKDIR} -t ${DOCKER_REPOSITORY}/${DOCKER_IMAGE} ctest -DCTEST_SOURCE_DIRECTORY=${DOCKER_PROJECT_SOURCE_DIR} -DCTEST_BINARY_DIRECTORY=${DOCKER_WORKDIR} -S ${DOCKER_CTEST_DRIVER} -DSITE=${DOCKER_HOSTNAME} -DCMAKE_WRAPPER=${DOCKER_CMAKE_WRAPPER} ${CTEST_OPTIONS_WITHOUT_DOCKER})
 
   add_custom_target(
     ${DOCKER_IMAGE_AS_DIR}-interactive

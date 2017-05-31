@@ -172,10 +172,10 @@ class CiTask():
             # --- Create build dir for src config ---
             bdir = self.build_dir(src)
 
-            if os.path.exists(bdir):
-                shutil.rmtree(bdir, ignore_errors=True)
-
-            os.makedirs(bdir)
+            if not dry_run:
+                if os.path.exists(bdir):
+                    shutil.rmtree(bdir, ignore_errors=True)
+                os.makedirs(bdir)
 
 
             #
@@ -231,7 +231,6 @@ class CiTask():
                                                                       'CI')]
                 else:
                     full_cmd = ['cmake'] + cmake_args + [full_src]
-                print 'ifjifui', full_src
                 if not dry_run:
                     print("cmake command is: {:}".format(' '.join(full_cmd)))
                     call(full_cmd, cwd=bdir)

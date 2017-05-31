@@ -21,7 +21,7 @@ Create a task
 
     set_option(DEV_MODE ON)
     set_option(WITH_PYTHON_WRAPPER OFF)
-    set_components("externals;numerics")
+    set_components(externals;numerics)
 
   By default, variables not set in my_task_name.cmake are read from cmake/siconos_default.cmake.
 

@@ -27,6 +27,22 @@ default = CiTask(
     srcs=['.'],
     targets={'.': ['docker-build', 'docker-ctest']})
 
+minimal = CiTask(
+    ci_config='minimal',
+    distrib='ubuntu:16.10',
+    pkgs=['build-base', 'gcc', 'gfortran', 'gnu-c++',
+          'atlas-lapack', 'python-minimal'],
+    srcs=['.'],
+    targets={'.': ['docker-build', 'docker-ctest']})
+
+minimal_with_python = CiTask(
+    ci_config='minimal_with_python',
+    distrib='ubuntu:16.10',
+    pkgs=['build-base', 'gcc', 'gfortran', 'gnu-c++',
+          'atlas-lapack', 'python-dev'],
+    srcs=['.'],
+    targets={'.': ['docker-build', 'docker-ctest']})
+
 #
 # 3. all the tasks
 #
@@ -173,10 +189,10 @@ siconos_with_mumps = siconos_default.copy()(
 #         - conf, make and make test of siconos examples
 
 # Case1 : siconos 'basics' components, numerics, kernel, control and related examples
-siconos_light_examples = siconos_default.copy()(
+siconos_light_examples = minimal.copy()(
     ci_config='examples_light',
     targets={'.': ['docker-build', 'docker-cmake', 'docker-make',
-                   'docker-make-install'],
+                   'docker-make-install', 'docker-make-clean'],
              'examples': ['docker-build', 'docker-ctest']},
     add_srcs=['examples'])
 
@@ -219,7 +235,9 @@ known_tasks = {'siconos---vm0':
                 siconos_ubuntu_15_10),
 
                'siconos---vm1':
-               (siconos_documentation,
+               (minimal,
+                minimal_with_python,
+                siconos_documentation,
                 siconos_numerics_only,
                 siconos_clang,
                 siconos_clang_asan,
