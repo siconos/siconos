@@ -72,7 +72,7 @@ public:
 
   virtual void updateContactPoints(const btManifoldPoint& point);
 
-  virtual void preDelete() { printf("BulletR::preDelete\n");}
+  virtual void preDelete() {}
 
   ACCEPT_STD_VISITORS();
 };
