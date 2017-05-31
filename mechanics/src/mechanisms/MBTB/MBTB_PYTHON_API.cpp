@@ -248,6 +248,9 @@ void MBTB_BodyBuild(unsigned int numDS, const std::string& BodyName,  double mas
   p =new MBTB_Body(q10,v10,mass,inertialMatrix,modelCenterMass,
                    BodyName, BodyName);
 
+
+  // We fix a ds number just to be able to use postprocessing based on hdf5 file
+  p->setNumber(numDS+1);
   // set external forces plugin
   if(pluginFextFct.length()>1)
   {
