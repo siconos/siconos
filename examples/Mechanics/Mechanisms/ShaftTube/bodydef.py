@@ -25,6 +25,7 @@ inertialMatrix=numpy.array([((1.91e+1,0,0),(0,1.91e+1,0),(0,0,2.68e+1))])
 ## REQUIRED the CAD files.
 afile=['./CAD/tube.stp']
 
+
 ## REQUIRED the library for the pluged forces.
 if apple :
     plugin='TubePlugin.dylib'
@@ -32,9 +33,10 @@ else :
     plugin='TubePlugin'    
 
 ## REQUIRED the external forces.
-fctf=numpy.array(['externalForceG'])
+fctfext=numpy.array(['externalForceG'])
 ## REQUIRED the external momentums.
-fctm=numpy.array(['externalMomentumY'])
+fctmext=numpy.array(['externalMomentumY'])
+
 #Description###################################################################################################
 NBJOINTS=0 # number of joints
 
