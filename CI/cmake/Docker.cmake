@@ -45,6 +45,11 @@ macro(add_docker_targets)
     message(FATAL_ERROR "Docker : DOCKER_REPOSITORY unset")
   endif()
 
+  # Default behavior: use all components 
+  if(NOT SICONOS_COMPONENTS)
+	include(Tools)
+	set_components(externals;numerics;kernel;control;mechanics;io)
+  endif()
   # ================== Create Dockerfile ==================
   # 
   # Set Dockerfile name
