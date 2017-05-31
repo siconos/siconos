@@ -16,11 +16,12 @@ if(CI_CONFIG)
 endif()
 
 message(STATUS "CI options are : ${CI_OPTIONS}")
+message(STATUS "Siconos CMake options are : ${SICONOS_OPTIONS}")
 
 # ---------- Docker or not docker ... ------------------------
 if(WITH_DOCKER)
-  find_program(HAVE_DOCKER docker)
-  if(HAVE_DOCKER)
+  find_program(DOCKER_COMMAND docker)
+  if(DOCKER_COMMAND)
     set(DOCKER_MKSENV_COMMAND ${CMAKE_SOURCE_DIR}/machinery/mksenv.py)
     set(DOCKER_MKSENV_INPUT ${CMAKE_SOURCE_DIR}/config/siconos.yml)
     set(DOCKER_REPOSITORY ci_driver)

@@ -8,7 +8,9 @@ Developer guide
    :maxdepth: 3
 
    modal_moreau_jean
+   about_ci
    plugins
+   
 
 To do.
 

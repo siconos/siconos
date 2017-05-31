@@ -17,6 +17,7 @@
 #include <math_Function.hxx>
 #include <math_BrentMinimum.hxx>
 #include <math_FunctionSetWithDerivatives.hxx>
+#include <math_Vector.hxx>
 #include <Precision.hxx>
 
 
