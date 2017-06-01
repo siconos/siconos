@@ -9,24 +9,7 @@
 // to avoid name conflicts
 %{
 #define SWIG_FILE_WITH_INIT
-
-#ifdef __cplusplus
-extern "C"
-#endif
-
-SWIGEXPORT
-#if PY_VERSION_HEX >= 0x03000000
-PyObject*
-#else
-void
-#endif
-SWIG_init(void);
-
-#ifdef __cplusplus
 #include <sstream>
-#endif
-
-
 #if defined(Py_COMPLEXOBJECT_H)
 #undef c_sum
 #undef c_diff
@@ -80,6 +63,7 @@ SWIG_init(void);
 
 // mandatory !
 %rename (lambda_) lambda;
+<<<<<<< Updated upstream
 #endif /* SWIGPYTHON */
 
 #ifdef SWIGMATLAB
@@ -91,3 +75,5 @@ SWIG_init(void);
 %include ignored_functions.i
 
 #endif
+=======
+>>>>>>> Stashed changes
