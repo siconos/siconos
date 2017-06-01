@@ -320,14 +320,14 @@ void Simulation::initializeInteraction(double time, SP::Interaction inter)
   InteractionProperties& i_prop = indexSet0->properties(ui);
   if (&osi1 == &osi2 )
     {
-      osi1.fill_ds_links(*inter, i_prop,  DSG);
+      osi1.fillDSLinks(*inter, i_prop,  DSG);
       osi1.update_interaction_output(*inter, time, i_prop);
     }
   else
     {
-      osi1.fill_ds_links(*inter, i_prop,  DSG);
+      osi1.fillDSLinks(*inter, i_prop,  DSG);
       osi1.update_interaction_output(*inter, time, i_prop);
-      osi2.fill_ds_links(*inter, i_prop,  DSG);
+      osi2.fillDSLinks(*inter, i_prop,  DSG);
       osi2.update_interaction_output(*inter, time, i_prop);
     }
 }

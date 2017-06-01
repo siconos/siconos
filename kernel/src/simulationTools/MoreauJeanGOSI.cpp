@@ -104,7 +104,7 @@ void MoreauJeanGOSI::initializeDynamicalSystem(Model& m, double t, SP::Dynamical
     }
 }
 
-void MoreauJeanGOSI::fill_ds_links(Interaction &inter,
+void MoreauJeanGOSI::fillDSLinks(Interaction &inter,
 				   InteractionProperties& interProp,
 				   DynamicalSystemsGraph & DSG)
 {
@@ -126,7 +126,7 @@ void MoreauJeanGOSI::fill_ds_links(Interaction &inter,
 
   if (checkOSI(DSG.descriptor(ds1)) || checkOSI(DSG.descriptor(ds2)))
   {
-    RuntimeException::selfThrow("MoreauJeanGOSI::fill_ds_links. The implementation is not correct for two different OSI for one interaction");
+    RuntimeException::selfThrow("MoreauJeanGOSI::fillDSLinks. The implementation is not correct for two different OSI for one interaction");
   }
 
   /* allocate and set work vectors for the osi */

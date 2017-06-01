@@ -239,7 +239,7 @@ public:
    * \param interProp the properties on the graph
    * \param DSG the dynamical systems graph
    */
-  void fill_ds_links(Interaction &inter,
+  void fillDSLinks(Interaction &inter,
 		     InteractionProperties& interProp,
 		     DynamicalSystemsGraph & DSG);
 

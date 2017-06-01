@@ -222,7 +222,7 @@ public:
    * \param interProp the properties on the graph
    * \param DSG the dynamical systems graph
    */
-  void fill_ds_links(Interaction &inter, InteractionProperties& interProp,
+  void fillDSLinks(Interaction &inter, InteractionProperties& interProp,
 			     DynamicalSystemsGraph & DSG);
   
   /** return the maximum of all norms for the residus of DS

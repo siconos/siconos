@@ -159,7 +159,7 @@ void SchatzmanPaoliOSI::initializeDynamicalSystem(Model& m, double t, SP::Dynami
 }
 
 
-void SchatzmanPaoliOSI::fill_ds_links(Interaction &inter,
+void SchatzmanPaoliOSI::fillDSLinks(Interaction &inter,
 				      InteractionProperties& interProp,
 				      DynamicalSystemsGraph & DSG)
 {
@@ -185,7 +185,7 @@ void SchatzmanPaoliOSI::fill_ds_links(Interaction &inter,
 
   if (!(checkOSI(DSG.descriptor(ds1)) && checkOSI(DSG.descriptor(ds2))))
   {
-    RuntimeException::selfThrow("D1MinusLinearOSI::fill_ds_links. The implementation is not correct for two different OSI for one interaction");
+    RuntimeException::selfThrow("D1MinusLinearOSI::fillDSLinks. The implementation is not correct for two different OSI for one interaction");
   }
 
   /* allocate and set work vectors for the osi */

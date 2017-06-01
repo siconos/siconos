@@ -121,7 +121,7 @@ void EulerMoreauOSI::initializeDynamicalSystem(Model& m, double t, SP::Dynamical
 
 }
 
-void EulerMoreauOSI::fill_ds_links(Interaction &inter,
+void EulerMoreauOSI::fillDSLinks(Interaction &inter,
 				   InteractionProperties& interProp,
 				   DynamicalSystemsGraph & DSG)
 {

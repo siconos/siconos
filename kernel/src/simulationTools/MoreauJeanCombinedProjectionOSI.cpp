@@ -74,12 +74,12 @@ void MoreauJeanCombinedProjectionOSI::initializeDynamicalSystem(Model& m, double
   DEBUG_END("MoreauJeanCombinedProjectionOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds) \n");
 }
 
-void MoreauJeanCombinedProjectionOSI::fill_ds_links(Interaction &inter, InteractionProperties& interProp,
+void MoreauJeanCombinedProjectionOSI::fillDSLinks(Interaction &inter, InteractionProperties& interProp,
                                   DynamicalSystemsGraph & DSG)
 {
-  DEBUG_BEGIN("MoreauJeanCombinedProjectionOSI::fill_ds_links(Interaction &inter, InteractionProperties& interProp, DynamicalSystemsGraph & DSG)\n");
+  DEBUG_BEGIN("MoreauJeanCombinedProjectionOSI::fillDSLinks(Interaction &inter, InteractionProperties& interProp, DynamicalSystemsGraph & DSG)\n");
 
-  MoreauJeanOSI::fill_ds_links(inter, interProp,DSG);
+  MoreauJeanOSI::fillDSLinks(inter, interProp,DSG);
 
   SP::DynamicalSystem ds1= interProp.source;
   SP::DynamicalSystem ds2= interProp.target;
@@ -152,7 +152,7 @@ void MoreauJeanCombinedProjectionOSI::fill_ds_links(Interaction &inter, Interact
 
 
 
-  DEBUG_END("MoreauJeanCombinedProjectionOSI::fill_ds_links(Interaction &inter, InteractionProperties& interProp, DynamicalSystemsGraph & DSG)\n");
+  DEBUG_END("MoreauJeanCombinedProjectionOSI::fillDSLinks(Interaction &inter, InteractionProperties& interProp, DynamicalSystemsGraph & DSG)\n");
 
 
 }

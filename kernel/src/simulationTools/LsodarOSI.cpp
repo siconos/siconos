@@ -79,7 +79,7 @@ LsodarOSI::LsodarOSI():
   _sizeMem = 2;
   _steps=1;
 
-  // Set levels. This may depend on the nonsmooth law and will be updated during fill_ds_links(...) call.
+  // Set levels. This may depend on the nonsmooth law and will be updated during fillDSLinks(...) call.
   _levelMinForOutput=0;
   _levelMaxForOutput=2;
   _levelMinForInput=1;
@@ -262,7 +262,7 @@ void LsodarOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSyste
   DEBUG_END("LsodarOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds)\n");
 }
 
-void LsodarOSI::fill_ds_links(Interaction &inter,
+void LsodarOSI::fillDSLinks(Interaction &inter,
                               InteractionProperties& interProp,
                               DynamicalSystemsGraph & DSG)
 {
@@ -293,10 +293,10 @@ void LsodarOSI::fill_ds_links(Interaction &inter,
     _levelMaxForOutput = 4;
     _levelMinForInput = 1;
     _levelMaxForInput = 2;
-    RuntimeException::selfThrow("LsodarOSI::fill_ds_links  not yet implemented for nonsmooth law of type NewtonImpactFrictionNSL");
+    RuntimeException::selfThrow("LsodarOSI::fillDSLinks  not yet implemented for nonsmooth law of type NewtonImpactFrictionNSL");
   }
   else
-    RuntimeException::selfThrow("LsodarOSI::fill_ds_links not yet implemented  for nonsmooth of type");
+    RuntimeException::selfThrow("LsodarOSI::fillDSLinks not yet implemented  for nonsmooth of type");
 
   // Check if interations levels (i.e. y and lambda sizes) are compliant with the current osi.
   _check_and_update_interaction_levels(inter);
@@ -308,7 +308,7 @@ void LsodarOSI::fill_ds_links(Interaction &inter,
 
   if (!(checkOSI(DSG.descriptor(ds1)) && checkOSI(DSG.descriptor(ds2))))
   {
-    RuntimeException::selfThrow("LsodarOSI::fill_ds_links. The implementation is not correct for two different OSI for one interaction");
+    RuntimeException::selfThrow("LsodarOSI::fillDSLinks. The implementation is not correct for two different OSI for one interaction");
   }
 
 
@@ -372,7 +372,7 @@ void LsodarOSI::initialize(Model& m)
   // for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
   //   {
   //     Interaction& inter = *indexSet0->bundle(*ui);
-  //     fill_ds_links(m.t0(), inter, indexSet0->properties(*ui), *_dynamicalSystemsGraph);
+  //     fillDSLinks(m.t0(), inter, indexSet0->properties(*ui), *_dynamicalSystemsGraph);
   //   }
 
   computeRhs(m.t0(),*_dynamicalSystemsGraph);

@@ -116,7 +116,7 @@ Hem5OSI::Hem5OSI():
   for(int i = 0; i < 9; i++) _intData[i] = 0;
   _sizeMem = 2;
   _timeStep = INITIAL_GUESS_TS;
-  // Set levels. This may depend on the nonsmooth law and will be updated during fill_ds_links(...) call.
+  // Set levels. This may depend on the nonsmooth law and will be updated during fillDSLinks(...) call.
   _levelMinForOutput=0;
   _levelMaxForOutput=2;
   _levelMinForInput=1;
@@ -508,7 +508,7 @@ void Hem5OSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem 
 }
 
 
-void Hem5OSI::fill_ds_links(Interaction &inter,
+void Hem5OSI::fillDSLinks(Interaction &inter,
                             InteractionProperties& interProp,
                             DynamicalSystemsGraph & DSG)
 {
@@ -539,10 +539,10 @@ void Hem5OSI::fill_ds_links(Interaction &inter,
     _levelMaxForOutput = 4;
     _levelMinForInput = 1;
     _levelMaxForInput = 2;
-    RuntimeException::selfThrow("HEM5OSI::fill_ds_links  not yet implemented for nonsmooth law of type NewtonImpactFrictionNSL");
+    RuntimeException::selfThrow("HEM5OSI::fillDSLinks  not yet implemented for nonsmooth law of type NewtonImpactFrictionNSL");
   }
   else
-    RuntimeException::selfThrow("HEM5OSI::fill_ds_links not yet implemented  for nonsmooth of type");
+    RuntimeException::selfThrow("HEM5OSI::fillDSLinks not yet implemented  for nonsmooth of type");
 
   // Check if interations levels (i.e. y and lambda sizes) are compliant with the current osi.
   _check_and_update_interaction_levels(inter);
@@ -553,7 +553,7 @@ void Hem5OSI::fill_ds_links(Interaction &inter,
   /* allocate and set work vectors for the osi */
   if (!(checkOSI(DSG.descriptor(ds1)) && checkOSI(DSG.descriptor(ds2))))
   {
-    RuntimeException::selfThrow("LsodarOSI::fill_ds_links. The implementation is not correct for two different OSI for one interaction");
+    RuntimeException::selfThrow("LsodarOSI::fillDSLinks. The implementation is not correct for two different OSI for one interaction");
   }
 
   VectorOfVectors &workVds1 = *DSG.properties(DSG.descriptor(ds1)).workVectors;

@@ -202,7 +202,7 @@ void D1MinusLinearOSI::initialize_nonsmooth_problems()
   }
 }
 
-void D1MinusLinearOSI::fill_ds_links(Interaction &inter,
+void D1MinusLinearOSI::fillDSLinks(Interaction &inter,
 				     InteractionProperties& interProp,
 				     DynamicalSystemsGraph & DSG)
 {
@@ -233,7 +233,7 @@ void D1MinusLinearOSI::fill_ds_links(Interaction &inter,
               << checkOSI(DSG.descriptor(ds2)) << std::endl;
 
 
-    RuntimeException::selfThrow("D1MinusLinearOSI::fill_ds_links. The implementation is not correct for two different OSI for one interaction");
+    RuntimeException::selfThrow("D1MinusLinearOSI::fillDSLinks. The implementation is not correct for two different OSI for one interaction");
   }
 
 

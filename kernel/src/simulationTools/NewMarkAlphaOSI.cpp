@@ -42,7 +42,7 @@ NewMarkAlphaOSI::NewMarkAlphaOSI(double new_beta, double new_gamma, double new_a
   _alpha_f = new_alpha_f;
   _orderDenseOutput = 5.0;
   _IsVelocityLevel = flag;
-  // Set levels. This may depend on the nonsmooth law and will be updated during fill_ds_links(...) call.
+  // Set levels. This may depend on the nonsmooth law and will be updated during fillDSLinks(...) call.
   _levelMinForOutput=0;
   _levelMaxForOutput=2;
   _levelMinForInput=1;
@@ -59,7 +59,7 @@ NewMarkAlphaOSI::NewMarkAlphaOSI(double _rho_infty, bool flag = false):
   _beta = 0.25 * std::pow((_gamma + 0.5), 2);
   _orderDenseOutput = 5.0;
   _IsVelocityLevel = flag;
-  // Set levels. This may depend on the nonsmooth law and will be updated during fill_ds_links(...) call.
+  // Set levels. This may depend on the nonsmooth law and will be updated during fillDSLinks(...) call.
   _levelMinForOutput=0;
   _levelMaxForOutput=2;
   _levelMinForInput=1;
@@ -459,7 +459,7 @@ void NewMarkAlphaOSI::initializeDynamicalSystem(Model& m, double t, SP::Dynamica
 
 
     }
-void NewMarkAlphaOSI::fill_ds_links(Interaction &inter,
+void NewMarkAlphaOSI::fillDSLinks(Interaction &inter,
                                     InteractionProperties& interProp,
                                     DynamicalSystemsGraph & DSG)
 {
@@ -489,10 +489,10 @@ void NewMarkAlphaOSI::fill_ds_links(Interaction &inter,
     _levelMaxForOutput = 4;
     _levelMinForInput = 1;
     _levelMaxForInput = 2;
-    RuntimeException::selfThrow("NewMarkAlphaOSI::fill_ds_links  not yet implemented for nonsmooth law of type NewtonImpactFrictionNSL");
+    RuntimeException::selfThrow("NewMarkAlphaOSI::fillDSLinks  not yet implemented for nonsmooth law of type NewtonImpactFrictionNSL");
   }
   else
-    RuntimeException::selfThrow("NewMarkAlphaOSI::fill_ds_links not yet implemented  for nonsmooth of type");
+    RuntimeException::selfThrow("NewMarkAlphaOSI::fillDSLinks not yet implemented  for nonsmooth of type");
 
   // Check if interations levels (i.e. y and lambda sizes) are compliant with the current osi.
   _check_and_update_interaction_levels(inter);
@@ -503,7 +503,7 @@ void NewMarkAlphaOSI::fill_ds_links(Interaction &inter,
   /* allocate and set work vectors for the osi */
   if (!(checkOSI(DSG.descriptor(ds1)) && checkOSI(DSG.descriptor(ds2))))
   {
-    RuntimeException::selfThrow("NewMarkAlphaOSI::fill_ds_links. The implementation is not correct for two different OSI for one interaction");
+    RuntimeException::selfThrow("NewMarkAlphaOSI::fillDSLinks. The implementation is not correct for two different OSI for one interaction");
   }
   VectorOfVectors &workVds1 = *DSG.properties(DSG.descriptor(ds1)).workVectors;
   if (relationType == Lagrangian)

@@ -97,7 +97,7 @@ void OneStepIntegrator::initialize( Model& m )
     interaction_properties.block.reset(new SimpleMatrix(nslawSize, nslawSize));
 
     // Update DSlink : this depends on OSI and relation types.
-    fill_ds_links(inter, interaction_properties, *_dynamicalSystemsGraph);
+    fillDSLinks(inter, interaction_properties, *_dynamicalSystemsGraph);
 
     // Update interaction attributes (output)
     update_interaction_output(inter, t0, interaction_properties);
@@ -116,7 +116,7 @@ void OneStepIntegrator::update_interaction_output(Interaction& inter, double tim
   //    for instance:
   //      - contact detection
   //      - inter = ew interaction + link with ds
-  //      - simu->osi->fill_ds_links(inter)
+  //      - simu->osi->fillDSLinks(inter)
   //      - simu->osi->update_interaction_output()
 
   if (_steps > 1) // Multi--step methods

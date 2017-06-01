@@ -60,7 +60,7 @@ public:
    * \param interProp the properties on the graph
    * \param DSG the dynamical systems graph
    */
-  virtual void fill_ds_links(Interaction &inter,
+  virtual void fillDSLinks(Interaction &inter,
 			     InteractionProperties& interProp,
 			     DynamicalSystemsGraph & DSG);
 

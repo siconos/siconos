@@ -62,7 +62,7 @@ void MoreauJeanBilbaoOSI::initializeDynamicalSystem(Model& m, double t, SP::Dyna
   lldds.swapInMemory();
 }
 
-void MoreauJeanBilbaoOSI::fill_ds_links(Interaction &inter, InteractionProperties& interaction_properties,
+void MoreauJeanBilbaoOSI::fillDSLinks(Interaction &inter, InteractionProperties& interaction_properties,
 				  DynamicalSystemsGraph & DSG)
 {
   // Get the dynamical systems linked by inter
@@ -475,7 +475,7 @@ void MoreauJeanBilbaoOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vert
   // Get relation and non smooth law types
   // RELATION::TYPES relationType = inter.relation()->getType();
   // RELATION::SUBTYPES relationSubType = inter.relation()->getSubType();
-  // check relation type: done in fill_ds_links.
+  // check relation type: done in fillDSLinks.
   // if(relationType != Lagrangian || relationSubType != LinearR)
   //   RuntimeException::selfThrow("MoreauJeanBilbaoOSI::computeFreeOutput only Lagrangian Linear Relations are allowed.");
 
