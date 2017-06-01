@@ -19,6 +19,7 @@
 #include "SiconosConfig.h"
 
 #include "SiconosAlgebraTypeDef.hpp"
+#include "SiconosVectorIterator.hpp"
 #include "Tools.hpp"
 
 #include <boost/numeric/ublas/io.hpp>            // for >> 
@@ -1467,3 +1468,30 @@ SiconosVector& operator /= (SiconosVector& v, const double& s)
   return v;
 }
 
+SiconosVector::iterator SiconosVector::begin()
+{
+  return SiconosVector::iterator(*this, 0);
+}
+
+SiconosVector::const_iterator SiconosVector::begin() const
+{
+  return SiconosVector::const_iterator(*this, 0);
+}
+
+SiconosVector::iterator SiconosVector::end()
+{
+  return SiconosVector::iterator(*this, size());
+}
+
+SiconosVector::const_iterator SiconosVector::end() const
+{
+  return SiconosVector::const_iterator(*this, size());
+}
+
+SiconosVector::operator std::vector<double>()
+{
+  std::vector<double> v;
+  v.resize(size());
+  std::copy(begin(), end(), v.begin());
+  return v;
+}

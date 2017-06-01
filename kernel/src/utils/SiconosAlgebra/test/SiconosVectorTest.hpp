@@ -73,6 +73,9 @@ private:
   CPPUNIT_TEST(testOperators7);
   CPPUNIT_TEST(testOperators8);
   CPPUNIT_TEST(testSubscal);
+  CPPUNIT_TEST(testStdOstream);
+  CPPUNIT_TEST(testStdVectorCast);
+  CPPUNIT_TEST(testIterators);
   CPPUNIT_TEST(End);
 
   CPPUNIT_TEST_SUITE_END();
@@ -110,6 +113,9 @@ private:
   void testOperators7();
   void testOperators8();
   void testSubscal();
+  void testStdOstream();
+  void testStdVectorCast();
+  void testIterators();
   void End();
   // Members
 
