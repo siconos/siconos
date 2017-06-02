@@ -26,11 +26,8 @@
 #include "SiconosVectorFriends.hpp"
 #include "SiconosVectorException.hpp"
 
-/* Forward declarations for types in SiconosVectorIterator.hpp */
-template< typename V, typename T > class SiconosVectorIteratorType;
-
-typedef SiconosVectorIteratorType<SiconosVector, double> SiconosVectorIterator;
-typedef SiconosVectorIteratorType<const SiconosVector, const double> SiconosVectorConstIterator;
+class SiconosVectorIterator;
+class SiconosVectorConstIterator;
 
 /** Union of DenseVect and SparseVect pointers -
     Siconos::DENSE, num = 1,
