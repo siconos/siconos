@@ -31,7 +31,7 @@ def test_getVector():
 
 
 def test_castVector():
-    i = [1.0,2.0,3.0]
+    i = [1.0,4.0,3.0]
     v = K.SiconosVector([1,2,3])
     assert str(v) == '[3](1,2,3)'
     repr(v)
@@ -54,7 +54,7 @@ def test_castVector():
         assert x == y
     for x,y in zip(np.array(v),i):
         assert x == y
-    assert 2.0 in v
+    assert 3.0 in v
     assert 5.0 not in v
 
 
