@@ -157,7 +157,6 @@ void MoreauJeanOSI::fillDSLinks(Interaction &inter, InteractionProperties& inter
   assert(ds2);
 
   VectorOfBlockVectors& DSlink = *interProp.DSlink;
-
   Relation &relation =  *inter.relation();
   RELATION::TYPES relationType = relation.getType();
 

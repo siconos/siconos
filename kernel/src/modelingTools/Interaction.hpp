@@ -161,9 +161,6 @@ private:
   /** The residu y of the newton iterations*/
   SP::SiconosVector _residuY;
 
-  /*value of h at the current newton iteration*/
-  SP::SiconosVector _h_alpha;
-
   /* work vector to compute qblock, XXX maybe it shouldn't exist */
   SP::SiconosVector _yForNSsolver;
 
@@ -791,15 +788,11 @@ public:
     return _residuY;
   }
 
-  inline SP::SiconosVector Halpha() const
-  {
-    return _h_alpha;
-  }
 
   /*  Compute the residuY.
    * \param time
    */
-  void computeResiduY(double time);
+  void computeResiduY(double time, VectorOfVectors& workV);
 
   /* Compute the residuR.
    * \param time

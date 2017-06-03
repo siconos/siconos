@@ -253,26 +253,26 @@ void Interaction::reset()
   for (unsigned int i = _lowerLevelForOutput ;
        i < _upperLevelForOutput + 1 ;
        i++)
-    {
-      _y[i].reset(new SiconosVector(nslawSize));
-      _yOld[i].reset(new SiconosVector(nslawSize));
-      _y_k[i].reset(new SiconosVector(nslawSize));
+  {
+    _y[i].reset(new SiconosVector(nslawSize));
+    _yOld[i].reset(new SiconosVector(nslawSize));
+    _y_k[i].reset(new SiconosVector(nslawSize));
 
-      _y[i]->zero();
-      _yOld[i]->zero();
-      _y_k[i]->zero();
-    }
+    _y[i]->zero();
+    _yOld[i]->zero();
+    _y_k[i]->zero();
+  }
 
-
+  
   for (unsigned int i = _lowerLevelForInput ;
        i < _upperLevelForInput + 1 ;
        i++)
-    {
-      DEBUG_PRINTF("Interaction::initializeMemory(). _lambda[%i].reset()\n",i)
-	_lambda[i].reset(new SiconosVector(nslawSize));
-      _lambdaOld[i].reset(new SiconosVector(nslawSize));
-      _lambdaOld[i]->zero();
-    }
+  {
+    DEBUG_PRINTF("Interaction::initializeMemory(). _lambda[%i].reset()\n",i)
+      _lambda[i].reset(new SiconosVector(nslawSize));
+    _lambdaOld[i].reset(new SiconosVector(nslawSize));
+    _lambdaOld[i]->zero();
+  }
 }
 
 
@@ -440,12 +440,7 @@ void Interaction::initializeMemory(bool computeResidu, unsigned int steps)
   }
 
   // XXX hm hm -- xhub
-  if (computeResidu)
-  {
-    _h_alpha.reset(new SiconosVector(nslawSize));
-    _residuY.reset(new SiconosVector(nslawSize));
-  }
-
+  
   _yForNSsolver.reset(new SiconosVector(nslawSize));
 
 }
@@ -1112,13 +1107,18 @@ void Interaction::computeKhat(SiconosMatrix& m, VectorOfSMatrices& workM, double
   }
 }
 
-void Interaction::computeResiduY(double time)
+void Interaction::computeResiduY(double time,  VectorOfVectors& workV)
 {
   //Residu_y = y_alpha_k+1 - H_alpha;
-  *_residuY = *_h_alpha;
-  scal(-1, *_residuY, *_residuY);
 
-  (*_residuY) += *(y(0));
+  SiconosVector&  residuY = *workV[FirstOrderR::vec_residuY];
+  residuY = *workV[FirstOrderR::h_alpha];
+  scal(-1, residuY, residuY);
+  residuY += *(y(0));
+
+  // *_residuY = *_h_alpha;
+  // scal(-1, *_residuY, *_residuY);
+  // (*_residuY) += *(y(0));
 
 }
 

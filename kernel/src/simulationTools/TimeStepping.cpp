@@ -404,7 +404,8 @@ void TimeStepping::initializeNewtonLoop()
     InteractionsGraph::VIterator ui, uiend;
     for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
     {
-      indexSet0->bundle(*ui)->computeResiduY(tkp1);
+      VectorOfVectors& workV = *indexSet0->properties(*ui).workVectors;
+      indexSet0->bundle(*ui)->computeResiduY(tkp1, workV);
     }
   }
   DEBUG_END("TimeStepping::initializeNewtonLoop()\n");
@@ -658,8 +659,11 @@ bool TimeStepping::newtonCheckConvergence(double criterion)
     for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
     {
       inter = indexSet0->bundle(*ui);
-      inter->computeResiduY(getTkp1());
-      residu = inter->residuY()->norm2();
+      VectorOfVectors& workV = *indexSet0->properties(*ui).workVectors;
+
+      inter->computeResiduY(getTkp1(), workV);
+      residu = workV[FirstOrderR::vec_residuY]->norm2();
+//      inter->residuY()->norm2();
       if (residu > _newtonResiduYMax) _newtonResiduYMax = residu;
       if (residu > criterion)
       {

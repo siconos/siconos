@@ -345,6 +345,7 @@ void ZeroOrderHoldOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_
   SP::Interaction inter = indexSet->bundle(vertex_inter);
 
   VectorOfBlockVectors& DSlink = *indexSet->properties(vertex_inter).DSlink;
+  VectorOfVectors& workV = *indexSet->properties(vertex_inter).workVectors;
   // Get relation and non smooth law types
   RELATION::TYPES relationType = inter->relation()->getType();
   RELATION::SUBTYPES relationSubType = inter->relation()->getSubType();
@@ -409,9 +410,9 @@ void ZeroOrderHoldOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_
       {
         RuntimeException::selfThrow("ZeroOrderHoldOSI::ComputeFreeOutput not yet implemented with useGammaForRelation() for FirstorderR and Typ2R and H_alpha->getValue() should return the mid-point value");
       }
-      SP::SiconosVector H_alpha = inter->Halpha();
-      assert(H_alpha);
-      yForNSsolver += *H_alpha;
+     
+      SiconosVector& hAlpha= *workV[FirstOrderR::h_alpha];
+      yForNSsolver += hAlpha;
     }
 
     else

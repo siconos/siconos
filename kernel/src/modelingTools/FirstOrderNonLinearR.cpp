@@ -44,6 +44,8 @@ void FirstOrderNonLinearR::initComponents(Interaction& inter, VectorOfBlockVecto
   workV[FirstOrderR::vec_r].reset(new SiconosVector(sizeDS));
   workV[FirstOrderR::vec_x].reset(new SiconosVector(sizeDS));
   workV[FirstOrderR::vec_z].reset(new SiconosVector(sizeZ));
+  
+  workV[FirstOrderR::h_alpha].reset(new SiconosVector(sizeY));
   workV[FirstOrderR::g_alpha].reset(new SiconosVector(sizeDS));
 
   workM[FirstOrderR::mat_C].reset(new SimpleMatrix(sizeY, sizeDS));
@@ -179,7 +181,8 @@ void FirstOrderNonLinearR::computeOutput(double time, Interaction& inter, Intera
   SiconosVector& z = *workV[FirstOrderR::vec_z];
   z = *DSlink[FirstOrderR::z];
 
-  computeh(time, x, *inter.lambda(level), z, *inter.Halpha());
+  SiconosVector hAlpha =  *workV[FirstOrderR::h_alpha];
+  computeh(time, x, *inter.lambda(level), z, hAlpha);
 
   *DSlink[FirstOrderR::z] = z;
 }

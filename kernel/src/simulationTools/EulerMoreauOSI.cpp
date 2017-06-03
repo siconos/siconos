@@ -839,10 +839,8 @@ void EulerMoreauOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_in
 	{
 	  RuntimeException::selfThrow("EulerMoreauOSI::ComputeFreeOutput not yet implemented with useGammaForRelation() for FirstorderR and Type2R and H_alpha->getValue() should return the mid-point value");
 	}
-
-      H_alpha = inter->Halpha();
-      assert(H_alpha);
-      yForNSsolver += *H_alpha;
+      SiconosVector& hAlpha= *workV[FirstOrderR::h_alpha];
+      yForNSsolver += hAlpha;
     }
   else if(relationType == FirstOrder && relationSubType == Type1R)
     {
@@ -873,11 +871,10 @@ void EulerMoreauOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_in
 	{
 	  RuntimeException::selfThrow("EulerMoreauOSI::ComputeFreeOutput not yet implemented with useGammaForRelation() for FirstorderR and Typ2R and H_alpha->getValue() should return the mid-point value");
 	}
-      H_alpha = inter->Halpha();
-      if(H_alpha)
-	{
-	  yForNSsolver += *H_alpha;
-	}
+      if(workV[FirstOrderR::h_alpha])
+      {
+        yForNSsolver += *workV[FirstOrderR::h_alpha];
+      }
     }
   else // First Order Linear Relation
     {
