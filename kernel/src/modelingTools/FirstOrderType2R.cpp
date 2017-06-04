@@ -125,9 +125,10 @@ void FirstOrderType2R::computeOutput(double time, Interaction& inter, Interactio
   y += *inter.yOld(level);
 
   DEBUG_PRINT("FirstOrderType2R::computeOutput : ResiduY() \n");
-  DEBUG_EXPR(inter.residuY()->display());
+  SiconosVector& residuY = *workV[FirstOrderR::vec_residuY];
+  DEBUG_EXPR(residuY().display());
 
-  y -= *inter.residuY();
+  y -= residuY;
   DEBUG_PRINT("FirstOrderType2R::computeOutput : y(level) \n");
   DEBUG_EXPR(y.display());
 

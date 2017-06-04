@@ -158,9 +158,6 @@ private:
   /** the type of Relation of the interaction */
   SP::Relation _relation;
 
-  /** The residu y of the newton iterations*/
-  SP::SiconosVector _residuY;
-
   /* work vector to compute qblock, XXX maybe it shouldn't exist */
   SP::SiconosVector _yForNSsolver;
 
@@ -284,7 +281,6 @@ public:
   void resetLambda(unsigned int level);
 
   /** build memories vectors for y and \f$\lambda\f$
-   * \param computeResiduY if true the residu on y is computed and memory allocation is done for _residuY and _h_alpha
    * \param steps number of required memories (depends on the OSI)
   */
   void initializeMemory(bool computeResiduY, unsigned int steps);
@@ -783,12 +779,6 @@ public:
 
   // --- Residu functions
 
-  inline SP::SiconosVector residuY() const
-  {
-    return _residuY;
-  }
-
-
   /*  Compute the residuY.
    * \param time
    */
@@ -800,7 +790,7 @@ public:
    * \param workV the work vectors of the DynamicalSystem
    */
   void computeResiduR(double time, VectorOfBlockVectors& DSlink, VectorOfVectors& workV) ;
-  
+
 };
 
 #endif // INTERACTION_H

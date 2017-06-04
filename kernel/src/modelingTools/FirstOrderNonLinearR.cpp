@@ -156,9 +156,11 @@ void FirstOrderNonLinearR::computeOutput(double time, Interaction& inter, Intera
   y += *inter.yOld(level);
 
   DEBUG_PRINT("FirstOrderNonLinearR::computeOutput : ResiduY() \n");
-  DEBUG_EXPR(inter.residuY()->display());
+  SiconosVector& residuY = *workV[FirstOrderR::vec_residuY];
+  DEBUG_EXPR(residuY().display());
 
-  y -= *inter.residuY();
+  y -= residuY;
+  
   DEBUG_PRINT("FirstOrderNonLinearR::computeOutput : y(level) \n");
   DEBUG_EXPR(y.display());
 
