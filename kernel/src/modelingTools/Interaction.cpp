@@ -1114,19 +1114,25 @@ void Interaction::computeKhat(SiconosMatrix& m, VectorOfSMatrices& workM, double
 
 void Interaction::computeResiduY(double time)
 {
+  DEBUG_BEGIN("Interaction::computeResiduY(double time)\n")
   //Residu_y = y_alpha_k+1 - H_alpha;
   *_residuY = *_h_alpha;
   scal(-1, *_residuY, *_residuY);
 
   (*_residuY) += *(y(0));
+  DEBUG_EXPR(_residuY->display(););
+  DEBUG_END("Interaction::computeResiduY(double time)\n")
 
 }
 
 void Interaction::computeResiduR(double time, VectorOfBlockVectors& DSlink, VectorOfVectors& workV)
 {
+  DEBUG_BEGIN("Interaction::computeResiduR(double time, VectorOfBlockVectors& DSlink, VectorOfVectors& workV)\n")
   //Residu_r = r_alpha_k+1 - g_alpha;
   *workV[FirstOrderR::vec_residuR] = *DSlink[FirstOrderR::r];
   *workV[FirstOrderR::vec_residuR] -= *workV[FirstOrderR::g_alpha];
+  DEBUG_EXPR(workV[FirstOrderR::vec_residuR]->display(););
+  DEBUG_END("Interaction::computeResiduR(double time, VectorOfBlockVectors& DSlink, VectorOfVectors& workV)\n")
 
 //RuntimeException::selfThrow("Interaction::computeResiduR do not use this function");
 }
