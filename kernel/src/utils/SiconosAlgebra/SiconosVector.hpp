@@ -26,6 +26,9 @@
 #include "SiconosVectorFriends.hpp"
 #include "SiconosVectorException.hpp"
 
+class SiconosVectorIterator;
+class SiconosVectorConstIterator;
+
 /** Union of DenseVect and SparseVect pointers -
     Siconos::DENSE, num = 1,
     SPARSE, num = 4
@@ -257,6 +260,27 @@ public:
    */
   friend std::ostream& operator<<(std::ostream& os, const SiconosVector& sv);
 
+  /** for iterator interface */
+  typedef SiconosVectorIterator iterator;
+
+  /** for iterator interface */
+  typedef SiconosVectorConstIterator const_iterator;
+
+  /** for iterator interface */
+  iterator begin();
+
+  /** for iterator interface */
+  const_iterator begin() const;
+
+  /** for iterator interface */
+  iterator end();
+
+  /** for iterator interface */
+  const_iterator end() const;
+
+  /** cast an SiconosVector to an std::vector<double> (performs copy) */
+  operator std::vector<double>();
+
   //************************** VECTORS HANDLING AND OPERATORS *******************************
 
   /** get the element at position i in the vector
@@ -458,6 +482,6 @@ public:
 
 };
 
-
+#include "SiconosVectorIterator.hpp"
 
 #endif

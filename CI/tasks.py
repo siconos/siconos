@@ -39,7 +39,7 @@ minimal_with_python = CiTask(
     ci_config='minimal_with_python',
     distrib='ubuntu:16.10',
     pkgs=['build-base', 'gcc', 'gfortran', 'gnu-c++',
-          'atlas-lapack', 'python-dev'],
+          'atlas-lapack', 'python-env'],
     srcs=['.'],
     targets={'.': ['docker-build', 'docker-ctest']})
 
