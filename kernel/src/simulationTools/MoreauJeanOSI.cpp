@@ -161,13 +161,11 @@ void MoreauJeanOSI::fillDSLinks(Interaction &inter, InteractionProperties& inter
   
   VectorOfVectors& workV = *interProp.workVectors;
   workV.resize(MoreauJeanOSI::WORK_INTERACTION_LENGTH);
-  
   workV[MoreauJeanOSI::OSNSP_RHS].reset(new SiconosVector(inter.getSizeOfY()));
 
   VectorOfBlockVectors& DSlink = *interProp.DSlink;
   Relation &relation =  *inter.relation();
 
-  
   RELATION::TYPES relationType = relation.getType();
 
   // Check if interations levels (i.e. y and lambda sizes) are compliant with the current osi.
@@ -1555,7 +1553,6 @@ void MoreauJeanOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_int
   if(inter.relation()->getType() == Lagrangian || inter.relation()->getType() == NewtonEuler)
   {
     _NSLEffectOnFreeOutput nslEffectOnFreeOutput = _NSLEffectOnFreeOutput(osnsp, inter,
-
                                                                           indexSet.properties(vertex_inter));
     inter.nonSmoothLaw()->accept(nslEffectOnFreeOutput);
   }
