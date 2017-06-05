@@ -22,6 +22,8 @@
 #include "NewtonEulerDS.hpp"
 #include "LagrangianLinearTIDS.hpp"
 #include "LagrangianLinearDiagonalDS.hpp"
+
+#include "FirstOrderR.hpp"
 #include "NewtonEulerR.hpp"
 #include "LagrangianRheonomousR.hpp"
 #include "LagrangianCompliantLinearTIR.hpp"
@@ -155,9 +157,17 @@ void MoreauJeanOSI::fillDSLinks(Interaction &inter, InteractionProperties& inter
   SP::DynamicalSystem ds2= interProp.target;
   assert(ds1);
   assert(ds2);
+  assert(interProp.workVectors);
+  
+  VectorOfVectors& workV = *interProp.workVectors;
+  workV.resize(MoreauJeanOSI::WORK_INTERACTION_LENGTH);
+  
+  workV[MoreauJeanOSI::OSNSP_RHS].reset(new SiconosVector(inter.getSizeOfY()));
 
   VectorOfBlockVectors& DSlink = *interProp.DSlink;
   Relation &relation =  *inter.relation();
+
+  
   RELATION::TYPES relationType = relation.getType();
 
   // Check if interations levels (i.e. y and lambda sizes) are compliant with the current osi.
@@ -1319,9 +1329,10 @@ struct MoreauJeanOSI::_NSLEffectOnFreeOutput : public SiconosVisitor
 
   OneStepNSProblem * _osnsp;
   Interaction& _inter;
-
-  _NSLEffectOnFreeOutput(OneStepNSProblem *p, Interaction& inter) :
-    _osnsp(p), _inter(inter) {};
+  InteractionProperties& _interProp;
+  
+  _NSLEffectOnFreeOutput(OneStepNSProblem *p, Interaction& inter, InteractionProperties& interProp) :
+    _osnsp(p), _inter(inter), _interProp(interProp) {};
 
   void visit(const NewtonImpactNSL& nslaw)
   {
@@ -1332,7 +1343,9 @@ struct MoreauJeanOSI::_NSLEffectOnFreeOutput : public SiconosVisitor
     subCoord[1] = _inter.nonSmoothLaw()->size();
     subCoord[2] = 0;
     subCoord[3] = subCoord[1];
-    subscal(e, *_inter.y_k(_osnsp->inputOutputLevel()), *(_inter.yForNSsolver()), subCoord, false);
+    //VectorOfVectors &workV = *_interProp.workVectors;
+    SiconosVector & osnsp_rhs = *(*_interProp.workVectors)[MoreauJeanOSI::OSNSP_RHS];
+    subscal(e, *_inter.y_k(_osnsp->inputOutputLevel()), osnsp_rhs, subCoord, false);
   }
 
   void visit(const RelayNSL& nslaw)
@@ -1346,7 +1359,9 @@ struct MoreauJeanOSI::_NSLEffectOnFreeOutput : public SiconosVisitor
     double e;
     e = nslaw.en();
     // Only the normal part is multiplied by e
-    (*_inter.yForNSsolver())(0) +=  e * (*_inter.y_k(_osnsp->inputOutputLevel()))(0);
+    
+    SiconosVector & osnsp_rhs = *(*_interProp.workVectors)[MoreauJeanOSI::OSNSP_RHS];
+    osnsp_rhs (0) +=  e * (*_inter.y_k(_osnsp->inputOutputLevel()))(0);
 
   }
   void visit(const EqualityConditionNSL& nslaw)
@@ -1380,6 +1395,7 @@ void MoreauJeanOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_int
   RELATION::TYPES relationType = inter.relation()->getType();
   RELATION::SUBTYPES relationSubType = inter.relation()->getSubType();
 
+  
   unsigned int sizeY = inter.nonSmoothLaw()->size();
 
   unsigned int relativePosition = 0;
@@ -1392,8 +1408,12 @@ void MoreauJeanOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_int
   coord[6] = 0;
   coord[7] = sizeY;
   SP::SiconosMatrix  F;
-//  SP::BlockVector deltax;
-  SiconosVector& yForNSsolver = *inter.yForNSsolver();
+  //  SP::BlockVector deltax;
+  
+  //SiconosVector& yForNSsolver = *inter.yForNSsolver()
+
+  SiconosVector& osnsp_rhs = *(*indexSet.properties(vertex_inter).workVectors)[MoreauJeanOSI::OSNSP_RHS];
+  
   SP::BlockVector Xfree;
 
   /** \todo VA. All of these values should be stored in a node in the interactionGraph
@@ -1429,7 +1449,7 @@ void MoreauJeanOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_int
       // corresponding interactionBlock in each Interaction for each ds of the
       // current Interaction.
       // XXX Big quirks !!! -- xhub
-      subprod(CT, *Xfree, yForNSsolver, coord, true);
+      subprod(CT, *Xfree, osnsp_rhs, coord, true);
     }
 
   }
@@ -1448,11 +1468,11 @@ void MoreauJeanOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_int
       if(_useGammaForRelation)
       {
         RuntimeException::selfThrow("MoreauJeanOSI::computeFreeOutput Configuration not possible");
-//        subprod(C, *deltax, yForNSsolver, coord, true);
+//        subprod(C, *deltax, osnsp_rhs, coord, true);
       }
       else
       {
-        subprod(C, *Xfree, yForNSsolver, coord, true);
+        subprod(C, *Xfree, osnsp_rhs, coord, true);
       }
     }
 
@@ -1481,7 +1501,7 @@ void MoreauJeanOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_int
 
           std11::static_pointer_cast<LagrangianRheonomousR>(inter.relation())->computehDot(simulation()->getTkp1(), q, z);
           *DSlink[LagrangianR::z] = z;
-          subprod(*ID, *(std11::static_pointer_cast<LagrangianRheonomousR>(inter.relation())->hDot()), yForNSsolver, xcoord, false); // y += hDot
+          subprod(*ID, *(std11::static_pointer_cast<LagrangianRheonomousR>(inter.relation())->hDot()), osnsp_rhs, xcoord, false); // y += hDot
         }
         else
           RuntimeException::selfThrow("MoreauJeanOSI::computeFreeOutput not yet implemented for SICONOS_OSNSP ");
@@ -1493,7 +1513,7 @@ void MoreauJeanOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_int
 
           SiconosMatrix&  C = *mainInteraction.relation()->C() ;
           double h = _simulation->timeStep();
-          yForNSsolver *= h * _theta ;
+          osnsp_rhs *= h * _theta ;
 
           /* we have to check that the value are at the beginnning of the time step */
           SiconosVector q = *DSlink[LagrangianR::q0];
@@ -1502,23 +1522,23 @@ void MoreauJeanOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_int
 
 
           // + C q_k
-          subprod(C, q, yForNSsolver, coord, false);
+          subprod(C, q, osnsp_rhs, coord, false);
           // + h(1-_theta)v_k
 
           v *= (1-_theta)* h ;
-          subprod(C, v, yForNSsolver, coord, false);
+          subprod(C, v, osnsp_rhs, coord, false);
 
 
           if (std11::static_pointer_cast<LagrangianCompliantLinearTIR>(inter.relation())->e())
           {
             SiconosVector& e = *std11::static_pointer_cast<LagrangianCompliantLinearTIR>(inter.relation())->e();
-            yForNSsolver += e;
+            osnsp_rhs += e;
           }
         }
         else
           RuntimeException::selfThrow("MoreauJeanOSI::computeFreeOutput not yet implemented for SICONOS_OSNSP ");
       }
-      DEBUG_EXPR(yForNSsolver.display(););
+      DEBUG_EXPR(osnsp_rhs.display(););
 
 
       // For the relation of type LagrangianScleronomousR
@@ -1534,10 +1554,12 @@ void MoreauJeanOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_int
 
   if(inter.relation()->getType() == Lagrangian || inter.relation()->getType() == NewtonEuler)
   {
-    _NSLEffectOnFreeOutput nslEffectOnFreeOutput = _NSLEffectOnFreeOutput(osnsp, inter);
+    _NSLEffectOnFreeOutput nslEffectOnFreeOutput = _NSLEffectOnFreeOutput(osnsp, inter,
+
+                                                                          indexSet.properties(vertex_inter));
     inter.nonSmoothLaw()->accept(nslEffectOnFreeOutput);
   }
-  DEBUG_EXPR(yForNSsolver.display(););
+  DEBUG_EXPR(osnsp_rhs.display(););
 
 
   DEBUG_END("MoreauJeanOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, OneStepNSProblem* osnsp)\n");
