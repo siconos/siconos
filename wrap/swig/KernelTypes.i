@@ -790,10 +790,20 @@ struct IsDense : public Question<bool>
 
     if (!SWIG_IsOK(swig_res))
     {
-      SP::SiconosMatrix tmp = SimpleMatrix_from_numpy(obj, array_p, is_new_object);
-      if (!tmp) { return false; }
-      keeper.push_back(tmp);
-      *c_result = tmp.get();
+      swig_res = SWIG_ConvertPtr(obj, &swig_argp, $descriptor(SP::SiconosMatrix *),  0  | 0);
+
+      if (!SWIG_IsOK(swig_res))
+      {
+        SP::SiconosMatrix tmp = SimpleMatrix_from_numpy(obj, array_p, is_new_object);
+        if (!tmp) { return false; }
+        keeper.push_back(tmp);
+        *c_result = tmp.get();
+      }
+      else if (swig_argp)
+      {
+        *c_result = (reinterpret_cast< SP::SiconosMatrix * >(swig_argp))->get();
+        if (SWIG_IsNewObj(swig_res)) delete reinterpret_cast< SP::SiconosMatrix * >(swig_argp);
+      }
     }
     else if (swig_argp)
     {
@@ -810,10 +820,20 @@ struct IsDense : public Question<bool>
 
     if (!SWIG_IsOK(swig_res))
     {
-      SP::SimpleMatrix tmp = SimpleMatrix_from_numpy(obj, array_p, is_new_object);
-      if (!tmp) { return false; }
-      keeper.push_back(tmp);
-      *c_result = tmp.get();
+      swig_res = SWIG_ConvertPtr(obj, &swig_argp, $descriptor(SP::SimpleMatrix *),  0  | 0);
+
+      if (!SWIG_IsOK(swig_res))
+      {
+        SP::SimpleMatrix tmp = SimpleMatrix_from_numpy(obj, array_p, is_new_object);
+        if (!tmp) { return false; }
+        keeper.push_back(tmp);
+        *c_result = tmp.get();
+      }
+      else if (swig_argp)
+      {
+        *c_result = (reinterpret_cast< SP::SimpleMatrix * >(swig_argp))->get();
+        if (SWIG_IsNewObj(swig_res)) delete reinterpret_cast< SP::SimpleMatrix * >(swig_argp);
+      }
     }
     else if (swig_argp)
     {
