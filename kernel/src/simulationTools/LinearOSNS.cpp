@@ -621,14 +621,30 @@ void LinearOSNS::computeqBlock(InteractionsGraph::VDescriptor& vertex_inter, uns
   unsigned int sizeY = inter->nonSmoothLaw()->size();
 
   if ((osi1Type == OSI::EULERMOREAUOSI && osi2Type == OSI::EULERMOREAUOSI) ||
-      (osi1Type == OSI::LSODAROSI && osi2Type == OSI::LSODAROSI  ) ||
-      (osi1Type == OSI::NEWMARKALPHAOSI && osi2Type == OSI::NEWMARKALPHAOSI  ) ||
       (osi1Type == OSI::ZOHOSI && osi2Type == OSI::ZOHOSI))
   {
     // We assume that the osi of ds1 (osi1) is integrating the interaction
     DEBUG_EXPR(display());
     osi1.computeFreeOutput(vertex_inter, this);
     setBlock(*inter->yForNSsolver(), _q, sizeY , 0, pos);
+    DEBUG_EXPR(_q->display());
+  }
+  else if ((osi1Type == OSI::LSODAROSI && osi2Type == OSI::LSODAROSI  ) )
+  {
+    // We assume that the osi of ds1 (osi1) is integrating the interaction
+    DEBUG_EXPR(display());
+    osi1.computeFreeOutput(vertex_inter, this);
+    SiconosVector& osnsp_rhs = *(*indexSet->properties(vertex_inter).workVectors)[LsodarOSI::OSNSP_RHS];
+    setBlock(osnsp_rhs, _q, sizeY , 0, pos);
+    DEBUG_EXPR(_q->display());
+  }
+  else if ((osi1Type == OSI::NEWMARKALPHAOSI && osi2Type == OSI::NEWMARKALPHAOSI  ))
+  {
+    // We assume that the osi of ds1 (osi1) is integrating the interaction
+    DEBUG_EXPR(display());
+    osi1.computeFreeOutput(vertex_inter, this);
+    SiconosVector& osnsp_rhs = *(*indexSet->properties(vertex_inter).workVectors)[NewMarkAlphaOSI::OSNSP_RHS];
+    setBlock(osnsp_rhs, _q, sizeY , 0, pos);
     DEBUG_EXPR(_q->display());
   }
   else if ((osi1Type == OSI::SCHATZMANPAOLIOSI && osi2Type == OSI::SCHATZMANPAOLIOSI ) )

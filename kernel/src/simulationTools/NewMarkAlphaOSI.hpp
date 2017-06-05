@@ -60,6 +60,9 @@ protected:
   NewMarkAlphaOSI() {};
 
 public:
+
+  enum {OSNSP_RHS,WORK_INTERACTION_LENGTH};
+
   /** constructor with only parameters beta, gamma, alpha_m, alpha_f
   * \param beta double
   * \param gamma double

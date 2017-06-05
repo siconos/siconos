@@ -77,6 +77,10 @@ private:
   friend struct _NSLEffectOnFreeOutput;
 
 public:
+  
+  enum {OSNSP_RHS,WORK_INTERACTION_LENGTH};
+
+
   /** Lsodar counter : Number of steps taken for the problem so far. */
   static int count_NST;
   /** Number of RHS evaluations for the problem so far. */

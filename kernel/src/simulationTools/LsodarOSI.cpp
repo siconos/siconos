@@ -256,9 +256,9 @@ void LsodarOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSyste
   }
   else
     _xWork->insertPtr(ds->x());
-  
+
   ds->swapInMemory();
-  
+
   DEBUG_END("LsodarOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds)\n");
 }
 
@@ -268,9 +268,13 @@ void LsodarOSI::fillDSLinks(Interaction &inter,
 {
   SP::DynamicalSystem ds1= interProp.source;
   SP::DynamicalSystem ds2= interProp.target;
-  
-  assert(interProp.DSlink);
 
+
+  VectorOfVectors& workV = *interProp.workVectors;
+  workV.resize(LsodarOSI::WORK_INTERACTION_LENGTH);
+  workV[LsodarOSI::OSNSP_RHS].reset(new SiconosVector(inter.getSizeOfY()));
+
+  assert(interProp.DSlink);
   VectorOfBlockVectors& DSlink = *interProp.DSlink;
   // VectorOfVectors& workVInter = *interProp.workVectors;
   // VectorOfSMatrices& workMInter = *interProp.workMatrices;
@@ -279,7 +283,7 @@ void LsodarOSI::fillDSLinks(Interaction &inter,
   NonSmoothLaw & nslaw = *inter.nonSmoothLaw();
   RELATION::TYPES relationType = relation.getType();
   Type::Siconos nslType = Type::value(nslaw);
-  
+
   if (nslType == Type::NewtonImpactNSL || nslType == Type::MultipleImpactNSL)
   {
     _levelMinForOutput = 0;
@@ -331,7 +335,7 @@ void LsodarOSI::fillDSLinks(Interaction &inter,
   // }
 
 
-  
+
   if (ds1 != ds2)
   {
     VectorOfVectors &workVds2 = *DSG.properties(DSG.descriptor(ds2)).workVectors;
@@ -366,7 +370,7 @@ void LsodarOSI::initialize(Model& m)
   //     //ds->resetToInitialState();
   //     //ds->swapInMemory();
   //   }
-  
+
   // SP::InteractionsGraph indexSet0 = m.nonSmoothDynamicalSystem()->topology()->indexSet0();
   // InteractionsGraph::VIterator ui, uiend;
   // for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
@@ -580,9 +584,9 @@ struct LsodarOSI::_NSLEffectOnFreeOutput : public SiconosVisitor
 
   OneStepNSProblem * _osnsp;
   SP::Interaction _inter;
-
-  _NSLEffectOnFreeOutput(OneStepNSProblem *p, SP::Interaction inter) :
-    _osnsp(p), _inter(inter) {};
+  InteractionProperties& _interProp;
+  _NSLEffectOnFreeOutput(OneStepNSProblem *p, SP::Interaction inter, InteractionProperties& interProp) :
+    _osnsp(p), _inter(inter), _interProp(interProp) {};
 
   void visit(const NewtonImpactNSL& nslaw)
   {
@@ -593,7 +597,8 @@ struct LsodarOSI::_NSLEffectOnFreeOutput : public SiconosVisitor
     subCoord[1] = _inter->nonSmoothLaw()->size();
     subCoord[2] = 0;
     subCoord[3] = subCoord[1];
-    subscal(e, *_inter->yOld(_osnsp->inputOutputLevel()), *(_inter->yForNSsolver()), subCoord, false); // q = q + e * q
+    SiconosVector & osnsp_rhs = *(*_interProp.workVectors)[LsodarOSI::OSNSP_RHS];
+    subscal(e, *_inter->yOld(_osnsp->inputOutputLevel()), osnsp_rhs, subCoord, false); // q = q + e * q
   }
 
   // visit function added by Son (9/11/2010)
@@ -629,7 +634,8 @@ void LsodarOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, 
   SP::SiconosMatrix  C;
   //   SP::SiconosMatrix  D;
   //   SP::SiconosMatrix  F;
-  SiconosVector& yForNSsolver = *inter->yForNSsolver();
+  SiconosVector& osnsp_rhs = *(*indexSet->properties(vertex_inter).workVectors)[LsodarOSI::OSNSP_RHS];
+
   SP::BlockVector Xfree;
 
 
@@ -677,7 +683,7 @@ void LsodarOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, 
       coord[3] = C->size(1);
       coord[5] = C->size(1);
 
-      subprod(*C, *Xfree, yForNSsolver, coord, true);
+      subprod(*C, *Xfree, osnsp_rhs, coord, true);
     }
 
     SP::SiconosMatrix ID(new SimpleMatrix(sizeY, sizeY));
@@ -706,7 +712,7 @@ void LsodarOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, 
 
 	      std11::static_pointer_cast<LagrangianRheonomousR>(inter->relation())->computehDot(simulation()->getTkp1(), q, z);
 	      *DSlink[LagrangianR::z] = z;
-	      subprod(*ID, *(std11::static_pointer_cast<LagrangianRheonomousR>(inter->relation())->hDot()), yForNSsolver, xcoord, false); // y += hDot
+	      subprod(*ID, *(std11::static_pointer_cast<LagrangianRheonomousR>(inter->relation())->hDot()), osnsp_rhs, xcoord, false); // y += hDot
 	    }
       else
         RuntimeException::selfThrow("LsodarOSI::computeFreeOutput not implemented for SICONOS_OSNSP ");
@@ -717,7 +723,7 @@ void LsodarOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, 
       if(((*allOSNS)[SICONOS_OSNSP_ED_SMOOTH_ACC]).get() == osnsp)
 	    {
 	      std11::static_pointer_cast<LagrangianScleronomousR>(inter->relation())->computedotjacqhXqdot(simulation()->getTkp1(), *inter, DSlink);
-	      subprod(*ID, *(std11::static_pointer_cast<LagrangianScleronomousR>(inter->relation())->dotjacqhXqdot()), yForNSsolver, xcoord, false); // y += NonLinearPart
+	      subprod(*ID, *(std11::static_pointer_cast<LagrangianScleronomousR>(inter->relation())->dotjacqhXqdot()), osnsp_rhs, xcoord, false); // y += NonLinearPart
 	    }
     }
   }
@@ -727,7 +733,7 @@ void LsodarOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, 
   {
     if(inter->relation()->getType() == Lagrangian || inter->relation()->getType() == NewtonEuler)
     {
-      SP::SiconosVisitor nslEffectOnFreeOutput(new _NSLEffectOnFreeOutput(osnsp, inter));
+      SP::SiconosVisitor nslEffectOnFreeOutput(new _NSLEffectOnFreeOutput(osnsp, inter, indexSet->properties(vertex_inter)));
       inter->nonSmoothLaw()->accept(*nslEffectOnFreeOutput);
     }
   }
