@@ -58,8 +58,8 @@ void D1MinusLinearOSI::_NSLEffectOnFreeOutput::visit(const NewtonImpactNSL& nsla
   subCoord[1] = _inter->nonSmoothLaw()->size();
   subCoord[2] = 0;
   subCoord[3] = subCoord[1];
-//  subscal(e, *(_inter->y_k(_osnsp->inputOutputLevel())), *(_inter->yForNSsolver()), subCoord, false);
-  subscal(e, *(_inter->yForNSsolver()), *(_inter->yForNSsolver()), subCoord, false);
+  SiconosVector & osnsp_rhs = *(*_interProp.workVectors)[D1MinusLinearOSI::OSNSP_RHS];
+  subscal(e, osnsp_rhs, osnsp_rhs, subCoord, false);
 }
 
 
@@ -211,10 +211,14 @@ void D1MinusLinearOSI::fillDSLinks(Interaction &inter,
   assert(ds1);
   assert(ds2);
 
+  VectorOfVectors& workV = *interProp.workVectors;
+  workV.resize(D1MinusLinearOSI::WORK_INTERACTION_LENGTH);
+  workV[D1MinusLinearOSI::OSNSP_RHS].reset(new SiconosVector(inter.getSizeOfY()));
+
   VectorOfBlockVectors& DSlink = *interProp.DSlink;
   assert(interProp.DSlink);
 
-  Relation &relation =  *inter.relation();  
+  Relation &relation =  *inter.relation();
   RELATION::TYPES relationType = relation.getType();
 
   // Check if interations levels (i.e. y and lambda sizes) are compliant with the current osi.

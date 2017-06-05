@@ -130,9 +130,9 @@ protected:
 
     OneStepNSProblem* _osnsp;
     SP::Interaction _inter;
-
-    _NSLEffectOnFreeOutput(OneStepNSProblem *p, SP::Interaction inter) :
-      _osnsp(p), _inter(inter) {};
+    InteractionProperties& _interProp;
+    _NSLEffectOnFreeOutput(OneStepNSProblem *p, SP::Interaction inter, InteractionProperties& interProp) :
+      _osnsp(p), _inter(inter), _interProp(interProp) {};
 
     void visit(const NewtonImpactNSL& nslaw);
     void visit(const EqualityConditionNSL& nslaw)
@@ -156,6 +156,8 @@ public:
                                      halfexplicit_velocity_level,
                                      numberOfTypeOfD1MinusLinearOSI
                                     };
+
+  enum {OSNSP_RHS,WORK_INTERACTION_LENGTH};
 
   /** basic constructor
    */

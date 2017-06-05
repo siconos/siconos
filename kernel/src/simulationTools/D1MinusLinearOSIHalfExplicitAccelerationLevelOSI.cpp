@@ -692,7 +692,9 @@ void D1MinusLinearOSI::computeFreeOutputHalfExplicitAccelerationLevel(Interactio
   coord[7] = sizeY;
   SP::SiconosMatrix C; // Jacobian of Relation with respect to degree of freedom
   SP::BlockVector Xfree; // free degree of freedom
-  SiconosVector& yForNSsolver = *inter->yForNSsolver();
+
+  SiconosVector& osnsp_rhs = *(*indexSet->properties(vertex_inter).workVectors)[D1MinusLinearOSI::OSNSP_RHS];
+
 
   // define Xfree for velocity and acceleration level
   if(((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp)
@@ -744,7 +746,7 @@ void D1MinusLinearOSI::computeFreeOutputHalfExplicitAccelerationLevel(Interactio
   // only Lagrangian Systems
   if(relationType == Lagrangian)
   {
-    // in yForNSsolver the linear part of velocity or acceleration relation will be saved
+    // in osnsp_rhs the linear part of velocity or acceleration relation will be saved
     C = std11::static_pointer_cast<LagrangianR>(mainInteraction->relation())->C();
 
     if(C)
@@ -752,11 +754,11 @@ void D1MinusLinearOSI::computeFreeOutputHalfExplicitAccelerationLevel(Interactio
       assert(Xfree);
       coord[3] = C->size(1);
       coord[5] = C->size(1);
-      subprod(*C, *Xfree, yForNSsolver, coord, true);
+      subprod(*C, *Xfree, osnsp_rhs, coord, true);
     }
-    DEBUG_EXPR(yForNSsolver.display(););
+    DEBUG_EXPR(osnsp_rhs.display(););
 
-    // in yForNSsolver corrections have to be added
+    // in osnsp_rhs corrections have to be added
     SP::SiconosMatrix ID(new SimpleMatrix(sizeY, sizeY));
     ID->eye();
 
@@ -783,12 +785,12 @@ void D1MinusLinearOSI::computeFreeOutputHalfExplicitAccelerationLevel(Interactio
 
       //   std11::static_pointer_cast<LagrangianRheonomousR>(inter->relation())->computehDot(simulation()->getTkp1(), q, z);
       //   *DSlink[LagrangianR::z] = z;
-      //   subprod(*ID, *(std11::static_pointer_cast<LagrangianRheonomousR>(inter->relation())->hDot()), yForNSsolver, xcoord, false);
+      //   subprod(*ID, *(std11::static_pointer_cast<LagrangianRheonomousR>(inter->relation())->hDot()), osnsp_rhs, xcoord, false);
       // }
 
       if(relationSubType == RheonomousR)
         RuntimeException::selfThrow("D1MinusLinearOSI::computeFreeOutput is not implemented  at velocity level for LagrangianRheonomousR.");
-      SP::SiconosVisitor nslEffectOnFreeOutput(new _NSLEffectOnFreeOutput(osnsp, inter));
+      SP::SiconosVisitor nslEffectOnFreeOutput(new _NSLEffectOnFreeOutput(osnsp, inter, indexSet->properties(vertex_inter)));
       inter->nonSmoothLaw()->accept(*nslEffectOnFreeOutput);
     }
 
@@ -798,11 +800,11 @@ void D1MinusLinearOSI::computeFreeOutputHalfExplicitAccelerationLevel(Interactio
       if(relationSubType == ScleronomousR)  // acceleration term involving Hessian matrix of Relation with respect to degree is added
       {
         DEBUG_PRINT("D1MinusLinearOSI::computeFreeOutput. acceleration term involving Hessian matrix of Relation\n");
-        DEBUG_EXPR(yForNSsolver.display(););
+        DEBUG_EXPR(osnsp_rhs.display(););
         std11::static_pointer_cast<LagrangianScleronomousR>(inter->relation())->computedotjacqhXqdot(simulation()->getTkp1(), *inter, DSlink);
-        subprod(*ID, *(std11::static_pointer_cast<LagrangianScleronomousR>(inter->relation())->dotjacqhXqdot()), yForNSsolver, xcoord, false);
+        subprod(*ID, *(std11::static_pointer_cast<LagrangianScleronomousR>(inter->relation())->dotjacqhXqdot()), osnsp_rhs, xcoord, false);
       }
-      DEBUG_EXPR(yForNSsolver.display(););
+      DEBUG_EXPR(osnsp_rhs.display(););
 
     }
 
@@ -821,14 +823,14 @@ void D1MinusLinearOSI::computeFreeOutputHalfExplicitAccelerationLevel(Interactio
       // corresponding interactionBlock in each Interaction for each ds of the
       // current Interaction.
       // XXX Big quirks !!! -- xhub
-      subprod(*CT, *Xfree, yForNSsolver, coord, true);
+      subprod(*CT, *Xfree, osnsp_rhs, coord, true);
     }
 
 
 
     if(((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]).get() == osnsp)
     {
-      // in yForNSsolver corrections have to be added
+      // in osnsp_rhs corrections have to be added
       SP::SiconosMatrix ID(new SimpleMatrix(sizeY, sizeY));
       ID->eye();
 
@@ -843,7 +845,7 @@ void D1MinusLinearOSI::computeFreeOutputHalfExplicitAccelerationLevel(Interactio
       xcoord[7] = sizeY;
 
       DEBUG_PRINT("D1MinusLinearOSI::computeFreeOutput.\n Adding the additional terms of the second order time derivative of constraints.\n");
-      DEBUG_EXPR(yForNSsolver.display(););
+      DEBUG_EXPR(osnsp_rhs.display(););
 
       /** Compute additional terms of the second order time derivative of constraints
        *
@@ -857,23 +859,23 @@ void D1MinusLinearOSI::computeFreeOutputHalfExplicitAccelerationLevel(Interactio
 
       DEBUG_EXPR((std11::static_pointer_cast<NewtonEulerR>(inter->relation())->secondOrderTimeDerivativeTerms())->display());
 
-      subprod(*ID, *(std11::static_pointer_cast<NewtonEulerR>(inter->relation())->secondOrderTimeDerivativeTerms()), yForNSsolver, xcoord, false);
-      DEBUG_EXPR(yForNSsolver.display(););
+      subprod(*ID, *(std11::static_pointer_cast<NewtonEulerR>(inter->relation())->secondOrderTimeDerivativeTerms()), osnsp_rhs, xcoord, false);
+      DEBUG_EXPR(osnsp_rhs.display(););
 
 
     }
-    DEBUG_EXPR(yForNSsolver.display(););
+    DEBUG_EXPR(osnsp_rhs.display(););
 
     if(((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp)  // impact terms are added
     {
-      SP::SiconosVisitor nslEffectOnFreeOutput(new _NSLEffectOnFreeOutput(osnsp, inter));
+      SP::SiconosVisitor nslEffectOnFreeOutput(new _NSLEffectOnFreeOutput(osnsp, inter, indexSet->properties(vertex_inter)));
       inter->nonSmoothLaw()->accept(*nslEffectOnFreeOutput);
     }
   }
   else
     RuntimeException::selfThrow("D1MinusLinearOSI::computeFreeOutput - not implemented for Relation of type " + relationType);
 
-  DEBUG_EXPR(yForNSsolver.display(););
+  DEBUG_EXPR(osnsp_rhs.display(););
   DEBUG_END("D1MinusLinearOSI::computeFreeOutputHalfExplicitAccelerationLevel ends\n");
 
 }

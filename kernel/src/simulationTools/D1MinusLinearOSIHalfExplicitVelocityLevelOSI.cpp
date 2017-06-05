@@ -709,9 +709,14 @@ void D1MinusLinearOSI::computeFreeOutputHalfExplicitVelocityLevel(InteractionsGr
   coord[7] = sizeY;
   SP::SiconosMatrix C; // Jacobian of Relation with respect to degree of freedom
   SP::BlockVector Xfree; // free degree of freedom
-  SiconosVector& yForNSsolver = *inter->yForNSsolver();
-  DEBUG_PRINT("yForNSsolver before\n");
-  DEBUG_EXPR(yForNSsolver.display(););
+
+
+
+  SiconosVector& osnsp_rhs = *(*indexSet->properties(vertex_inter).workVectors)[D1MinusLinearOSI::OSNSP_RHS];
+
+
+  DEBUG_PRINT("osnsp_rhs before\n");
+  DEBUG_EXPR(osnsp_rhs.display(););
   // define Xfree for velocity and acceleration level
   if(((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp)
   {
@@ -762,7 +767,7 @@ void D1MinusLinearOSI::computeFreeOutputHalfExplicitVelocityLevel(InteractionsGr
   // only Lagrangian Systems
   if(relationType == Lagrangian)
   {
-    // in yForNSsolver the linear part of velocity or acceleration relation will be saved
+    // in osnsp_rhs the linear part of velocity or acceleration relation will be saved
     C = std11::static_pointer_cast<LagrangianR>(mainInteraction->relation())->C();
 
     DEBUG_EXPR(C->display(););
@@ -772,9 +777,9 @@ void D1MinusLinearOSI::computeFreeOutputHalfExplicitVelocityLevel(InteractionsGr
       assert(Xfree);
       coord[3] = C->size(1);
       coord[5] = C->size(1);
-      subprod(*C, *Xfree, yForNSsolver, coord, true);
+      subprod(*C, *Xfree, osnsp_rhs, coord, true);
     }
-    DEBUG_EXPR(yForNSsolver.display(););
+    DEBUG_EXPR(osnsp_rhs.display(););
     /*  explicit time dependence -> partial time derivative has to be added */
     if(relationSubType == RheonomousR)
     {
@@ -784,7 +789,7 @@ void D1MinusLinearOSI::computeFreeOutputHalfExplicitVelocityLevel(InteractionsGr
     /* add the contribution due to the coefficient of restitution*/
     if(((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp)
     {
-      SP::SiconosVisitor nslEffectOnFreeOutput(new _NSLEffectOnFreeOutput(osnsp, inter));
+      SP::SiconosVisitor nslEffectOnFreeOutput(new _NSLEffectOnFreeOutput(osnsp, inter, indexSet->properties(vertex_inter)));
       inter->nonSmoothLaw()->accept(*nslEffectOnFreeOutput);
     }
 
@@ -792,7 +797,7 @@ void D1MinusLinearOSI::computeFreeOutputHalfExplicitVelocityLevel(InteractionsGr
     {
       /*Do nothing*/
     }
-    DEBUG_EXPR(yForNSsolver.display(););
+    DEBUG_EXPR(osnsp_rhs.display(););
   }
   /*Newton-Euler */
   else if(relationType == NewtonEuler)
@@ -808,13 +813,13 @@ void D1MinusLinearOSI::computeFreeOutputHalfExplicitVelocityLevel(InteractionsGr
       // corresponding interactionBlock in each Interaction for each ds of the
       // current Interaction.
       // XXX Big quirks !!! -- xhub
-      subprod(*CT, *Xfree, yForNSsolver, coord, true);
+      subprod(*CT, *Xfree, osnsp_rhs, coord, true);
     }
 
     /* add the contribution due to the coefficient of restitution*/
     if(((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp)
     {
-      SP::SiconosVisitor nslEffectOnFreeOutput(new _NSLEffectOnFreeOutput(osnsp, inter));
+      SP::SiconosVisitor nslEffectOnFreeOutput(new _NSLEffectOnFreeOutput(osnsp, inter, indexSet->properties(vertex_inter)));
       inter->nonSmoothLaw()->accept(*nslEffectOnFreeOutput);
     }
 
@@ -822,7 +827,7 @@ void D1MinusLinearOSI::computeFreeOutputHalfExplicitVelocityLevel(InteractionsGr
     {
       /* Do nothing*/
     }
-    DEBUG_EXPR(yForNSsolver.display(););
+    DEBUG_EXPR(osnsp_rhs.display(););
   }
 
 
@@ -830,7 +835,7 @@ void D1MinusLinearOSI::computeFreeOutputHalfExplicitVelocityLevel(InteractionsGr
   else
     RuntimeException::selfThrow("D1MinusLinearOSI::computeFreeOutput - not implemented for Relation of type " + relationType);
 
-  DEBUG_EXPR(yForNSsolver.display(););
+  DEBUG_EXPR(osnsp_rhs.display(););
 
 
 
