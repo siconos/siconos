@@ -26,8 +26,8 @@
 #include "SiconosVectorFriends.hpp"
 #include "SiconosVectorException.hpp"
 
-class SiconosVectorIterator;
-class SiconosVectorConstIterator;
+struct SiconosVectorIterator;
+struct SiconosVectorConstIterator;
 
 /** Union of DenseVect and SparseVect pointers -
     Siconos::DENSE, num = 1,
