@@ -61,11 +61,15 @@ const unsigned int SCHATZMANPAOLISTEPSINMEMORY = 2;
  */
 class SchatzmanPaoliOSI : public OneStepIntegrator
 {
+public:
+   enum {OSNSP_RHS,WORK_INTERACTION_LENGTH};
+
 protected:
   /** serialization hooks
   */
   ACCEPT_SERIALIZATION(SchatzmanPaoliOSI);
 
+ 
 
   /** Stl map that associates a theta parameter for the integration
   *  scheme to each DynamicalSystem of the OSI */

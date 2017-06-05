@@ -23,6 +23,7 @@
 #include "MoreauJeanBilbaoOSI.hpp"
 #include "D1MinusLinearOSI.hpp"
 #include "EulerMoreauOSI.hpp"
+#include "SchatzmanPaoliOSI.hpp"
 #include "LsodarOSI.hpp"
 #include "NewMarkAlphaOSI.hpp"
 #include "ZeroOrderHoldOSI.hpp"
@@ -622,14 +623,21 @@ void LinearOSNS::computeqBlock(InteractionsGraph::VDescriptor& vertex_inter, uns
   if ((osi1Type == OSI::EULERMOREAUOSI && osi2Type == OSI::EULERMOREAUOSI) ||
       (osi1Type == OSI::LSODAROSI && osi2Type == OSI::LSODAROSI  ) ||
       (osi1Type == OSI::NEWMARKALPHAOSI && osi2Type == OSI::NEWMARKALPHAOSI  ) ||
-      (osi1Type == OSI::SCHATZMANPAOLIOSI && osi2Type == OSI::SCHATZMANPAOLIOSI ) ||
       (osi1Type == OSI::ZOHOSI && osi2Type == OSI::ZOHOSI))
   {
-
     // We assume that the osi of ds1 (osi1) is integrating the interaction
     DEBUG_EXPR(display());
     osi1.computeFreeOutput(vertex_inter, this);
     setBlock(*inter->yForNSsolver(), _q, sizeY , 0, pos);
+    DEBUG_EXPR(_q->display());
+  }
+  else if ((osi1Type == OSI::SCHATZMANPAOLIOSI && osi2Type == OSI::SCHATZMANPAOLIOSI ) )
+  {
+    // We assume that the osi of ds1 (osi1) is integrating the interaction
+    DEBUG_EXPR(display());
+    osi1.computeFreeOutput(vertex_inter, this);
+    SiconosVector& osnsp_rhs = *(*indexSet->properties(vertex_inter).workVectors)[SchatzmanPaoliOSI::OSNSP_RHS];
+    setBlock(osnsp_rhs, _q, sizeY , 0, pos);
     DEBUG_EXPR(_q->display());
   }
   else if ((osi1Type == OSI::D1MINUSLINEAROSI && osi2Type == OSI::D1MINUSLINEAROSI  ))
@@ -642,7 +650,7 @@ void LinearOSNS::computeqBlock(InteractionsGraph::VDescriptor& vertex_inter, uns
     DEBUG_EXPR(_q->display());
   }
 
-  
+
   else if ((osi1Type == OSI::MOREAUJEANOSI  && osi2Type == OSI::MOREAUJEANOSI  )||
            (osi1Type == OSI::MOREAUDIRECTPROJECTIONOSI && osi2Type == OSI::MOREAUDIRECTPROJECTIONOSI) ||
            (osi1Type == OSI::MOREAUJEANBILBAOOSI && osi2Type == OSI::MOREAUJEANBILBAOOSI ))
@@ -654,7 +662,7 @@ void LinearOSNS::computeqBlock(InteractionsGraph::VDescriptor& vertex_inter, uns
     setBlock(osnsp_rhs, _q, sizeY , 0, pos);
     DEBUG_EXPR(_q->display());
   }
-           
+
   else if (osi1Type == OSI::MOREAUJEANGOSI && osi2Type == OSI::MOREAUJEANGOSI)
   {
 

@@ -168,6 +168,10 @@ void SchatzmanPaoliOSI::fillDSLinks(Interaction &inter,
   assert(ds1);
   assert(ds2);
 
+  VectorOfVectors& workV = *interProp.workVectors;
+  workV.resize(SchatzmanPaoliOSI::WORK_INTERACTION_LENGTH);
+  workV[SchatzmanPaoliOSI::OSNSP_RHS].reset(new SiconosVector(inter.getSizeOfY()));
+
   VectorOfBlockVectors& DSlink = *interProp.DSlink;
   // Note FP: call (again) initalize to update DSlinks, since some new fields
   // must be taken into account for this OSI (acceleration for example).
@@ -590,9 +594,10 @@ struct SchatzmanPaoliOSI::_NSLEffectOnFreeOutput : public SiconosVisitor
 
   OneStepNSProblem* _osnsp;
   SP::Interaction _inter;
+  InteractionProperties& _interProp;
 
-  _NSLEffectOnFreeOutput(OneStepNSProblem *p, SP::Interaction inter) :
-    _osnsp(p), _inter(inter) {};
+  _NSLEffectOnFreeOutput(OneStepNSProblem *p, SP::Interaction inter, InteractionProperties& interProp) :
+    _osnsp(p), _inter(inter), _interProp(interProp) {};
 
   void visit(const NewtonImpactNSL& nslaw)
   {
@@ -608,7 +613,8 @@ struct SchatzmanPaoliOSI::_NSLEffectOnFreeOutput : public SiconosVisitor
     y_k_1 = _inter->yMemory(_osnsp->inputOutputLevel())->getSiconosVector(1);
     DEBUG_PRINTF("_osnsp->inputOutputLevel() = %i \n ",_osnsp->inputOutputLevel() );
     DEBUG_EXPR(y_k_1->display());;
-    subscal(e, *y_k_1, *(_inter->yForNSsolver()), subCoord, false);
+    SiconosVector & osnsp_rhs = *(*_interProp.workVectors)[SchatzmanPaoliOSI::OSNSP_RHS];
+    subscal(e, *y_k_1,osnsp_rhs, subCoord, false);
   }
 
   void visit(const NewtonImpactFrictionNSL& nslaw)
@@ -618,7 +624,8 @@ struct SchatzmanPaoliOSI::_NSLEffectOnFreeOutput : public SiconosVisitor
     // Only the normal part is multiplied by e
     SP::SiconosVector y_k_1 ;
     y_k_1 = _inter->yMemory(_osnsp->inputOutputLevel())->getSiconosVector(1);
-    (*_inter->yForNSsolver())(0) +=  e * (*y_k_1)(0);
+    SiconosVector & osnsp_rhs = *(*_interProp.workVectors)[SchatzmanPaoliOSI::OSNSP_RHS];
+    osnsp_rhs (0) +=  e * (*y_k_1)(0);
 
   }
   void visit(const EqualityConditionNSL& nslaw)
@@ -664,7 +671,8 @@ void SchatzmanPaoliOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex
   SP::SiconosMatrix  D;
   SP::SiconosMatrix  F;
   SP::BlockVector deltax;
-  SiconosVector& yForNSsolver = *inter->yForNSsolver();
+  SiconosVector& osnsp_rhs = *(*indexSet->properties(vertex_inter).workVectors)[SchatzmanPaoliOSI::OSNSP_RHS];
+
   SP::SiconosVector e;
   SP::BlockVector Xfree;
 
@@ -708,11 +716,11 @@ void SchatzmanPaoliOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex
       if(_useGammaForRelation)
       {
         assert(deltax);
-        subprod(*C, *deltax, yForNSsolver, coord, true);
+        subprod(*C, *deltax, osnsp_rhs, coord, true);
       }
       else
       {
-        subprod(*C, *Xfree, yForNSsolver, coord, true);
+        subprod(*C, *Xfree, osnsp_rhs, coord, true);
       }
 
     }
@@ -720,7 +728,7 @@ void SchatzmanPaoliOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex
     e = ltir->e();
     if(e)
     {
-      yForNSsolver += *e;
+      osnsp_rhs += *e;
     }
 
   }
@@ -731,7 +739,7 @@ void SchatzmanPaoliOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex
 
   if(inter->relation()->getSubType() == LinearTIR)
   {
-    SP::SiconosVisitor nslEffectOnFreeOutput(new _NSLEffectOnFreeOutput(osnsp, inter));
+    SP::SiconosVisitor nslEffectOnFreeOutput(new _NSLEffectOnFreeOutput(osnsp, inter, indexSet->properties(vertex_inter)));
     inter->nonSmoothLaw()->accept(*nslEffectOnFreeOutput);
   }
 
