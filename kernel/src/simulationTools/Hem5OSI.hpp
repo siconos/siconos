@@ -109,6 +109,8 @@ private:
 
 
 public:
+  
+  enum {OSNSP_RHS,WORK_INTERACTION_LENGTH};
 
   /** constructor from a minimum set of data
    */

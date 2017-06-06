@@ -517,6 +517,10 @@ void Hem5OSI::fillDSLinks(Interaction &inter,
 
   assert(interProp.DSlink);
 
+  VectorOfVectors& workV = *interProp.workVectors;
+  workV.resize(Hem5OSI::WORK_INTERACTION_LENGTH);
+  workV[Hem5OSI::OSNSP_RHS].reset(new SiconosVector(inter.getSizeOfY()));
+  
   VectorOfBlockVectors& DSlink = *interProp.DSlink;
   // VectorOfVectors& workVInter = *interProp.workVectors;
   // VectorOfSMatrices& workMInter = *interProp.workMatrices;
@@ -898,9 +902,9 @@ struct Hem5OSI::_NSLEffectOnFreeOutput : public SiconosVisitor
 
   OneStepNSProblem * _osnsp;
   SP::Interaction _inter;
-
-  _NSLEffectOnFreeOutput(OneStepNSProblem *p, SP::Interaction inter) :
-    _osnsp(p), _inter(inter) {};
+  InteractionProperties& _interProp;
+  _NSLEffectOnFreeOutput(OneStepNSProblem *p, SP::Interaction inter, InteractionProperties& interProp) :
+    _osnsp(p), _inter(inter), _interProp(interProp)  {};
 
   void visit(const NewtonImpactNSL& nslaw)
   {
@@ -911,7 +915,8 @@ struct Hem5OSI::_NSLEffectOnFreeOutput : public SiconosVisitor
     subCoord[1] = _inter->nonSmoothLaw()->size();
     subCoord[2] = 0;
     subCoord[3] = subCoord[1];
-    subscal(e, *_inter->yOld(_osnsp->inputOutputLevel()), *(_inter->yForNSsolver()), subCoord, false); // q = q + e * q
+    SiconosVector & osnsp_rhs = *(*_interProp.workVectors)[Hem5OSI::OSNSP_RHS];
+    subscal(e, *_inter->yOld(_osnsp->inputOutputLevel()), osnsp_rhs, subCoord, false); // q = q + e * q
   }
 
   // visit function added by Son (9/11/2010)
@@ -946,7 +951,7 @@ void Hem5OSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, On
   SP::SiconosMatrix  C;
   //   SP::SiconosMatrix  D;
   //   SP::SiconosMatrix  F;
-  SiconosVector& yForNSsolver = *inter->yForNSsolver();
+  SiconosVector& osnsp_rhs = *(*indexSet->properties(vertex_inter).workVectors)[Hem5OSI::OSNSP_RHS];
   SP::BlockVector Xfree;
 
 
@@ -992,7 +997,7 @@ void Hem5OSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, On
       coord[3] = C->size(1);
       coord[5] = C->size(1);
 
-      subprod(*C, *Xfree, yForNSsolver, coord, true);
+      subprod(*C, *Xfree, osnsp_rhs, coord, true);
     }
 
     SP::SiconosMatrix ID(new SimpleMatrix(sizeY, sizeY));
@@ -1020,7 +1025,7 @@ void Hem5OSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, On
 	      SiconosVector z = *DSlink[LagrangianR::z];
 	      std11::static_pointer_cast<LagrangianRheonomousR>(inter->relation())->computehDot(simulation()->getTkp1(), q, z);
 	      *DSlink[LagrangianR::z] = z;
-	      subprod(*ID, *(std11::static_pointer_cast<LagrangianRheonomousR>(inter->relation())->hDot()), yForNSsolver, xcoord, false); // y += hDot
+	      subprod(*ID, *(std11::static_pointer_cast<LagrangianRheonomousR>(inter->relation())->hDot()), osnsp_rhs, xcoord, false); // y += hDot
 	    }
       else
         RuntimeException::selfThrow("Hem5OSI::computeFreeOutput not implemented for SICONOS_OSNSP ");
@@ -1031,7 +1036,7 @@ void Hem5OSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, On
       if(((*allOSNS)[SICONOS_OSNSP_ED_SMOOTH_ACC]).get() == osnsp)
 	    {
 	      std11::static_pointer_cast<LagrangianScleronomousR>(inter->relation())->computedotjacqhXqdot(simulation()->getTkp1(), *inter, DSlink);
-	      subprod(*ID, *(std11::static_pointer_cast<LagrangianScleronomousR>(inter->relation())->dotjacqhXqdot()), yForNSsolver, xcoord, false); // y += NonLinearPart
+	      subprod(*ID, *(std11::static_pointer_cast<LagrangianScleronomousR>(inter->relation())->dotjacqhXqdot()), osnsp_rhs, xcoord, false); // y += NonLinearPart
 	    }
     }
   }
@@ -1041,7 +1046,7 @@ void Hem5OSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, On
   {
     if(inter->relation()->getType() == Lagrangian || inter->relation()->getType() == NewtonEuler)
     {
-      SP::SiconosVisitor nslEffectOnFreeOutput(new _NSLEffectOnFreeOutput(osnsp, inter));
+      SP::SiconosVisitor nslEffectOnFreeOutput(new _NSLEffectOnFreeOutput(osnsp, inter, indexSet->properties(vertex_inter)));
       inter->nonSmoothLaw()->accept(*nslEffectOnFreeOutput);
     }
   }

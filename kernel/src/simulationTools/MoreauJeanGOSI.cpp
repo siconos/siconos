@@ -112,7 +112,9 @@ void MoreauJeanGOSI::fillDSLinks(Interaction &inter,
   SP::DynamicalSystem ds2= interProp.target;
   assert(ds1);
   assert(ds2);
-
+  VectorOfVectors& workV = *interProp.workVectors;
+  workV.resize(MoreauJeanGOSI::WORK_INTERACTION_LENGTH);
+  workV[MoreauJeanGOSI::OSNSP_RHS].reset(new SiconosVector(inter.getSizeOfY()));
   VectorOfBlockVectors& DSlink = *interProp.DSlink;
 
   Relation &relation =  *inter.relation();  
@@ -1100,9 +1102,10 @@ struct MoreauJeanGOSI::_NSLEffectOnFreeOutput : public SiconosVisitor
 
   OneStepNSProblem& _osnsp;
   Interaction& _inter;
+  InteractionProperties& _interProp;
 
-  _NSLEffectOnFreeOutput(OneStepNSProblem& p, Interaction& inter) :
-    _osnsp(p), _inter(inter) {};
+  _NSLEffectOnFreeOutput(OneStepNSProblem& p, Interaction& inter, InteractionProperties& interProp) :
+    _osnsp(p), _inter(inter), _interProp(interProp) {};
 
   void visit(const NewtonImpactNSL& nslaw)
   {
@@ -1113,7 +1116,8 @@ struct MoreauJeanGOSI::_NSLEffectOnFreeOutput : public SiconosVisitor
     subCoord[1] = _inter.nonSmoothLaw()->size();
     subCoord[2] = 0;
     subCoord[3] = subCoord[1];
-    subscal(e, *_inter.y_k(_osnsp.inputOutputLevel()), *(_inter.yForNSsolver()), subCoord, true);
+    SiconosVector & osnsp_rhs = *(*_interProp.workVectors)[MoreauJeanGOSI::OSNSP_RHS];
+    subscal(e, *_inter.y_k(_osnsp.inputOutputLevel()), osnsp_rhs, subCoord, true);
   }
 
   void visit(const NewtonImpactFrictionNSL& nslaw)
@@ -1121,7 +1125,8 @@ struct MoreauJeanGOSI::_NSLEffectOnFreeOutput : public SiconosVisitor
     double e;
     e = nslaw.en();
     // Only the normal part is multiplied by e
-    (*_inter.yForNSsolver())(0) =  e * (*_inter.y_k(_osnsp.inputOutputLevel()))(0);
+    SiconosVector & osnsp_rhs = *(*_interProp.workVectors)[MoreauJeanGOSI::OSNSP_RHS];
+    osnsp_rhs(0) =  e * (*_inter.y_k(_osnsp.inputOutputLevel()))(0);
 
   }
   void visit(const EqualityConditionNSL& nslaw)
@@ -1134,12 +1139,14 @@ struct MoreauJeanGOSI::_NSLEffectOnFreeOutput : public SiconosVisitor
   }
 };
 
-void MoreauJeanGOSI::NSLcontrib(Interaction& inter, OneStepNSProblem& osnsp)
+void MoreauJeanGOSI::NSLcontrib(SP::Interaction inter, OneStepNSProblem& osnsp)
 {
-  if(inter.relation()->getType() == Lagrangian || inter.relation()->getType() == NewtonEuler)
+  if(inter->relation()->getType() == Lagrangian || inter->relation()->getType() == NewtonEuler)
   {
-    _NSLEffectOnFreeOutput nslEffectOnFreeOutput = _NSLEffectOnFreeOutput(osnsp, inter);
-    inter.nonSmoothLaw()->accept(nslEffectOnFreeOutput);
+    InteractionsGraph& indexSet = *osnsp.simulation()->indexSet(osnsp.indexSetLevel());
+    InteractionsGraph::VDescriptor ivd = indexSet.descriptor(inter);
+    _NSLEffectOnFreeOutput nslEffectOnFreeOutput = _NSLEffectOnFreeOutput(osnsp, *inter, indexSet.properties(ivd) );
+    inter->nonSmoothLaw()->accept(nslEffectOnFreeOutput);
   }
 }
 

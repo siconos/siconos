@@ -177,17 +177,17 @@ bool GlobalFrictionContact::preCompute(double time)
     InteractionsGraph::VIterator ui, uiend;
     for (std11::tie(ui, uiend) = indexSet.vertices(); ui != uiend; ++ui)
     {
-      Interaction& inter = *indexSet.bundle(*ui);
+      SP::Interaction inter = indexSet.bundle(*ui);
       VectorOfSMatrices& workMInter = *indexSet.properties(*ui).workMatrices;
 
-      assert(Type::value(*(inter.nonSmoothLaw())) == Type::NewtonImpactFrictionNSL);
-      _mu->push_back(std11::static_pointer_cast<NewtonImpactFrictionNSL>(inter.nonSmoothLaw())->mu());
-      
+      assert(Type::value(*(inter->nonSmoothLaw())) == Type::NewtonImpactFrictionNSL);
+      _mu->push_back(std11::static_pointer_cast<NewtonImpactFrictionNSL>(inter->nonSmoothLaw())->mu());
+
       SP::DynamicalSystem ds1 = indexSet.properties(*ui).source;
       SP::DynamicalSystem ds2 = indexSet.properties(*ui).target;
       OneStepIntegrator& Osi1 = *DSG0.properties(DSG0.descriptor(ds1)).osi;
       OneStepIntegrator& Osi2 = *DSG0.properties(DSG0.descriptor(ds2)).osi;
-      
+
       //OneStepIntegrator& Osi = *indexSet.properties(*ui).osi;
 
       OSI::TYPES osi1Type = Osi1.getType();
@@ -200,8 +200,11 @@ bool GlobalFrictionContact::preCompute(double time)
       {
         RuntimeException::selfThrow("GlobalFrictionContact::computeq. Not yet implemented for Integrator type : " + osi1Type);
       }
-      setBlock(*inter.yForNSsolver(), _b, 3, 0, pos);
-      nnzH += inter.getLeftInteractionBlock(workMInter).nnz();
+
+
+      SiconosVector& osnsp_rhs = *(*indexSet.properties(*ui).workVectors)[MoreauJeanGOSI::OSNSP_RHS];
+      setBlock(osnsp_rhs, _b, 3, 0, pos);
+      nnzH += inter->getLeftInteractionBlock(workMInter).nnz();
       pos += 3;
 
 
@@ -267,7 +270,7 @@ bool GlobalFrictionContact::preCompute(double time)
       if (osiType == OSI::MOREAUJEANGOSI)
       {
         VectorOfVectors& workVectors = *DSG0.properties(DSG0.descriptor(ds)).workVectors;
-        
+
         if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
         {
           SiconosVector& vfree = *workVectors[OneStepIntegrator::free];
@@ -277,9 +280,9 @@ bool GlobalFrictionContact::preCompute(double time)
         {
           SiconosVector& vfree = *workVectors[OneStepIntegrator::free];
           setBlock(vfree, _q, dss, 0, offset);
- 
+
         }
-          
+
       }
       else
       {

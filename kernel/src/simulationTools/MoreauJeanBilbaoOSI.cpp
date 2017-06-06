@@ -71,6 +71,10 @@ void MoreauJeanBilbaoOSI::fillDSLinks(Interaction &inter, InteractionProperties&
   assert(ds1);
   assert(ds2);
 
+  VectorOfVectors& workV = *interaction_properties.workVectors;
+  workV.resize(MoreauJeanBilbaoOSI::WORK_INTERACTION_LENGTH);
+  workV[MoreauJeanBilbaoOSI::OSNSP_RHS].reset(new SiconosVector(inter.getSizeOfY()));
+
   // work vector of the interaction (from interaction_properties)
   VectorOfBlockVectors& DSlink = *interaction_properties.DSlink;
 
@@ -446,9 +450,9 @@ struct MoreauJeanBilbaoOSI::_NSLEffectOnFreeOutput : public SiconosVisitor
 
   OneStepNSProblem * _osnsp;
   Interaction& _inter;
-
-  _NSLEffectOnFreeOutput(OneStepNSProblem *p, Interaction& inter) :
-    _osnsp(p), _inter(inter) {};
+  InteractionProperties& _interProp;
+  _NSLEffectOnFreeOutput(OneStepNSProblem *p, Interaction& inter, InteractionProperties& interProp) :
+    _osnsp(p), _inter(inter), _interProp(interProp) {};
 
   void visit(const NewtonImpactNSL& nslaw)
   {
@@ -459,7 +463,8 @@ struct MoreauJeanBilbaoOSI::_NSLEffectOnFreeOutput : public SiconosVisitor
     subCoord[1] = _inter.nonSmoothLaw()->size();
     subCoord[2] = 0;
     subCoord[3] = subCoord[1];
-    subscal(e, *_inter.y_k(_osnsp->inputOutputLevel()), *(_inter.yForNSsolver()), subCoord, false);
+    SiconosVector & osnsp_rhs = *(*_interProp.workVectors)[MoreauJeanBilbaoOSI::OSNSP_RHS];
+    subscal(e, *_inter.y_k(_osnsp->inputOutputLevel()), osnsp_rhs, subCoord, false);
   }
 
 };
@@ -491,17 +496,18 @@ void MoreauJeanBilbaoOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vert
   coord[7] = sizeY;
   // buffer used to save output
   BlockVector& x_free = *DSlink[LagrangianR::xfree];
-  SiconosVector& yForNSsolver = *inter.yForNSsolver();
+  SiconosVector& osnsp_rhs = *(*indexSet.properties(vertex_inter).workVectors)[MoreauJeanBilbaoOSI::OSNSP_RHS];
+
 
   if(inter.relation()->C())
   {
     SiconosMatrix&  C = *inter.relation()->C() ;
     coord[3] = C.size(1);
     coord[5] = C.size(1);
-    // yForNSsolver[coord] = C.x_free
-    subprod(C, x_free, yForNSsolver, coord, true);
+    // osnsp_rhs[coord] = C.x_free
+    subprod(C, x_free, osnsp_rhs, coord, true);
   }
-  _NSLEffectOnFreeOutput nslEffectOnFreeOutput = _NSLEffectOnFreeOutput(osnsp, inter);
+  _NSLEffectOnFreeOutput nslEffectOnFreeOutput = _NSLEffectOnFreeOutput(osnsp, inter, indexSet.properties(vertex_inter));
   inter.nonSmoothLaw()->accept(nslEffectOnFreeOutput);
 
 }

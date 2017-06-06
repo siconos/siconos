@@ -158,9 +158,6 @@ private:
   /** the type of Relation of the interaction */
   SP::Relation _relation;
 
-  /* work vector to compute qblock, XXX maybe it shouldn't exist */
-  SP::SiconosVector _yForNSsolver;
-
   struct _setLevels;
   friend struct Interaction::_setLevels;
 
@@ -731,14 +728,6 @@ public:
    *  \param level order of _lambda used to compute input.
    */
   void computeInput(double time, InteractionProperties& interProp, unsigned int level = 0);
-
-  /** Get the _yForNssolver vector
-   * \return the y part used in the solver
-   */
-  inline SP::SiconosVector yForNSsolver() const
-  {
-    return _yForNSsolver;
-  }
 
   /** gets the matrix used in interactionBlock computation, (left * W * right), depends on the relation type (ex, LinearTIR, left = C, right = B).
    *  \param workM

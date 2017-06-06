@@ -143,6 +143,8 @@ protected:
   friend struct _NSLEffectOnFreeOutput;
 
 public:
+  
+  enum {OSNSP_RHS,WORK_INTERACTION_LENGTH};
 
   /** constructor from theta value only
    *  \param theta value for all linked DS (default = 0.5).
@@ -412,7 +414,7 @@ public:
    * \param inter the interaction (for y_k)
    * \param osnsp the non-smooth integrator
    */
-  void NSLcontrib(Interaction& inter, OneStepNSProblem& osnsp);
+  void NSLcontrib(SP::Interaction inter, OneStepNSProblem& osnsp);
 
   /** Displays the data of the MoreauJeanGOSI's integrator
    */

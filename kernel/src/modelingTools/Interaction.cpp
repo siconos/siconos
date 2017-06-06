@@ -439,9 +439,6 @@ void Interaction::initializeMemory(bool computeResidu, unsigned int steps)
     _lambdaMemory[i].reset(new SiconosMemory(steps, nslawSize));
   }
 
-  // XXX hm hm -- xhub
-  
-  _yForNSsolver.reset(new SiconosVector(nslawSize));
 
 }
 
