@@ -238,7 +238,6 @@ SICONOS_IO_REGISTER(Interaction,
   (__count)
   (_absolutePosition)
   (_absolutePositionProj)
-  (_h_alpha)
   (_has2Bodies)
   (_interactionSize)
   (_lambda)
@@ -249,12 +248,10 @@ SICONOS_IO_REGISTER(Interaction,
   (_nslaw)
   (_number)
   (_relation)
-  (_residuY)
   (_sizeOfDS)
   (_upperLevelForInput)
   (_upperLevelForOutput)
   (_y)
-  (_yForNSsolver)
   (_yMemory)
   (_yOld)
   (_y_k))
@@ -520,9 +517,6 @@ SICONOS_IO_REGISTER_WITH_BASES(TimeStepping,(Simulation),
   (_newtonResiduRMax)
   (_newtonResiduYMax)
   (_newtonTolerance))
-SICONOS_IO_REGISTER_WITH_BASES(Relay,(LinearOSNS),
-  (_lb)
-  (_ub))
 SICONOS_IO_REGISTER(Simulation,
   (_T)
   (_allNSProblems)
@@ -543,8 +537,6 @@ SICONOS_IO_REGISTER(Simulation,
   (_tout)
   (_useRelativeConvergenceCriterion)
   (statOut))
-SICONOS_IO_REGISTER_WITH_BASES(LCP,(LinearOSNS),
-)
 SICONOS_IO_REGISTER(OneStepIntegrator,
   (_dynamicalSystemsGraph)
   (_extraAdditionalTerms)
@@ -556,6 +548,11 @@ SICONOS_IO_REGISTER(OneStepIntegrator,
   (_simulation)
   (_sizeMem)
   (_steps))
+SICONOS_IO_REGISTER_WITH_BASES(Relay,(LinearOSNS),
+  (_lb)
+  (_ub))
+SICONOS_IO_REGISTER_WITH_BASES(LCP,(LinearOSNS),
+)
 SICONOS_IO_REGISTER_WITH_BASES(MLCP,(LinearOSNS),
   (_curBlock)
   (_m)
