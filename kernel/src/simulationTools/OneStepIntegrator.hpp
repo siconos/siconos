@@ -308,6 +308,19 @@ public:
     RuntimeException::selfThrow("OneStepIntegrator::computeFreeOutput not implemented for integrator of type " + _integratorType);
   }
 
+  /** compute the residu of the output of the relation (y)
+   * This computation depends on the type of OSI
+   * \param time time of computation
+   * \param indexSet the index set of the interaction that are concerned
+   */
+  virtual double computeResiduOutput(double time, SP::InteractionsGraph indexSet);
+  /** compute the residu of the input of the relation (R or p)
+   * This computation depends on the type of OSI
+   * \param time time of computation
+   * \param indexSet the index set of the interaction that are concerned
+   */
+  virtual double computeResiduInput(double time, SP::InteractionsGraph indexSet);
+  
   /** integrate the system, between tinit and tend, with possible stop at tout
    *  \param tinit start time
    *  \param tend expected end time

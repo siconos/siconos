@@ -332,6 +332,11 @@ public:
    */
   virtual void computeFreeState();
 
+  
+  double computeResiduOutput(double time, SP::InteractionsGraph indexSet);
+  
+  double computeResiduInput(double time, SP::InteractionsGraph indexSet);
+
   /** integrates the Interaction linked to this integrator, without taking non-smooth effects into account
    * \param vertex_inter of the interaction graph
    * \param osnsp pointer to OneStepNSProblem

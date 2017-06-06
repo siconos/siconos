@@ -1044,3 +1044,41 @@ void EulerMoreauOSI::display()
     }
   std::cout << "================================" <<std::endl;
 }
+
+
+double EulerMoreauOSI::computeResiduOutput(double time, SP::InteractionsGraph indexSet)
+{
+
+  double residu =0.0;
+  InteractionsGraph::VIterator ui, uiend;
+  for (std11::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
+  {
+    VectorOfVectors& workV = *indexSet->properties(*ui).workVectors;
+    SiconosVector&  residuY = *workV[FirstOrderR::vec_residuY];
+    Interaction & inter = *indexSet->bundle(*ui);
+    residuY = *workV[FirstOrderR::h_alpha];
+    scal(-1, residuY, residuY);
+    residuY += *(inter.y(0));
+    DEBUG_EXPR(residuY.display(););
+    residu = std::max(residu,residuY.norm2());
+  }
+  return residu;
+}
+double EulerMoreauOSI::computeResiduInput(double time, SP::InteractionsGraph indexSet)
+{
+  double residu =0.0;
+  InteractionsGraph::VIterator ui, uiend;
+  for (std11::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
+  {
+    InteractionProperties& interProp = indexSet->properties(*ui);
+    VectorOfVectors& workV = *interProp.workVectors;
+    VectorOfBlockVectors& DSlink = *interProp.DSlink;
+    SiconosVector&  residuR = *workV[FirstOrderR::vec_residuR];
+    //Residu_r = r_alpha_k+1 - g_alpha;
+    residuR = *DSlink[FirstOrderR::r];
+    residuR -= *workV[FirstOrderR::g_alpha];
+    DEBUG_EXPR(residuR.display(););
+    residu = std::max(residu,residuR.norm2()); 
+  }
+  return residu;
+}

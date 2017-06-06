@@ -766,19 +766,6 @@ public:
 
   void computeKhat(SiconosMatrix& m, VectorOfSMatrices& workM, double h) const;
 
-  // --- Residu functions
-
-  /*  Compute the residuY.
-   * \param time
-   */
-  void computeResiduY(double time, VectorOfVectors& workV);
-
-  /* Compute the residuR.
-   * \param time
-   * \param DSlink the container of the link to DynamicalSystem attributes
-   * \param workV the work vectors of the DynamicalSystem
-   */
-  void computeResiduR(double time, VectorOfBlockVectors& DSlink, VectorOfVectors& workV) ;
 
 };
 

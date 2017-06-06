@@ -401,11 +401,10 @@ void TimeStepping::initializeNewtonLoop()
 
   if (_computeResiduY)
   {
-    InteractionsGraph::VIterator ui, uiend;
-    for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+    double residu =0.0;
+    for (OSIIterator itOSI = _allOSI->begin(); itOSI != _allOSI->end() ; ++itOSI)
     {
-      VectorOfVectors& workV = *indexSet0->properties(*ui).workVectors;
-      indexSet0->bundle(*ui)->computeResiduY(tkp1, workV);
+      residu =  (*itOSI)->computeResiduOutput(tkp1, indexSet0);
     }
   }
   DEBUG_END("TimeStepping::initializeNewtonLoop()\n");
@@ -652,25 +651,29 @@ bool TimeStepping::newtonCheckConvergence(double criterion)
     //check residuy.
     _newtonResiduYMax = 0.0;
     residu = 0.0;
+    
     SP::InteractionsGraph indexSet0 = _nsds->topology()->indexSet0();
-
-    InteractionsGraph::VIterator ui, uiend;
-    SP::Interaction inter;
-    for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+    for (OSIIterator itOSI = _allOSI->begin(); itOSI != _allOSI->end() ; ++itOSI)
     {
-      inter = indexSet0->bundle(*ui);
-      VectorOfVectors& workV = *indexSet0->properties(*ui).workVectors;
-
-      inter->computeResiduY(getTkp1(), workV);
-      residu = workV[FirstOrderR::vec_residuY]->norm2();
-//      inter->residuY()->norm2();
-      if (residu > _newtonResiduYMax) _newtonResiduYMax = residu;
-      if (residu > criterion)
-      {
-        checkConvergence = false;
-      }
+      residu = std::max(residu,(*itOSI)->computeResiduOutput(getTkp1(), indexSet0));
     }
+    
+
+//     InteractionsGraph::VIterator ui, uiend;
+//     SP::Interaction inter;
+//     for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+//     {
+//       inter = indexSet0->bundle(*ui);
+//       VectorOfVectors& workV = *indexSet0->properties(*ui).workVectors;
+
+//       inter->computeResiduY(, workV);
+//       residu = workV[FirstOrderR::vec_residuY]->norm2();
+//     inter->residuY()->norm2();
+    if (residu > _newtonResiduYMax) _newtonResiduYMax = residu;
+    if (residu > criterion)
+      checkConvergence = false;
   }
+  
   if (_computeResiduR)
   {
     //check residur.
@@ -678,24 +681,30 @@ bool TimeStepping::newtonCheckConvergence(double criterion)
     residu = 0.0;
     SP::InteractionsGraph indexSet0 = _nsds->topology()->indexSet0();
 
-    InteractionsGraph::VIterator ui, uiend;
-    SP::Interaction inter;
-    for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+    for (OSIIterator itOSI = _allOSI->begin(); itOSI != _allOSI->end() ; ++itOSI)
     {
-      inter = indexSet0->bundle(*ui);
-      VectorOfBlockVectors& DSlink = *indexSet0->properties(*ui).DSlink;
-      VectorOfVectors& workV = *indexSet0->properties(*ui).workVectors;
+      residu = std::max(residu,(*itOSI)->computeResiduInput(getTkp1(), indexSet0));
+    }
+    
+    
+    // InteractionsGraph::VIterator ui, uiend;
+    // SP::Interaction inter;
+    // for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+    // {
+    //   inter = indexSet0->bundle(*ui);
+    //   VectorOfBlockVectors& DSlink = *indexSet0->properties(*ui).DSlink;
+    //   VectorOfVectors& workV = *indexSet0->properties(*ui).workVectors;
 
-      inter->computeResiduR(getTkp1(), DSlink, workV);
-      // TODO support other DS
-      residu = workV[FirstOrderR::vec_residuR]->norm2();
-      if (residu > _newtonResiduRMax) _newtonResiduRMax = residu;
-      if (residu > criterion)
-      {
-        checkConvergence = false;
-      }
+    //   inter->computeResiduR(getTkp1(), DSlink, workV);
+    //   // TODO support other DS
+    //   residu = workV[FirstOrderR::vec_residuR]->norm2();
+    if (residu > _newtonResiduRMax) _newtonResiduRMax = residu;
+    if (residu > criterion)
+    {
+      checkConvergence = false;
     }
   }
+  
 
   return(checkConvergence);
 }
