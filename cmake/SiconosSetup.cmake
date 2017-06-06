@@ -86,7 +86,11 @@ endif()
 # (interp and lib)
 # Warning FP : python is always required, at least
 # for siconos script.
-find_package(PythonFull REQUIRED)
+if(WITH_PYTHON_WRAPPER)
+  find_package(PythonFull REQUIRED)
+else()
+  find_package(PythonInterp REQUIRED)
+endif()
 get_filename_component(PYTHON_EXE_NAME ${PYTHON_EXECUTABLE} NAME)
 if(WITH_PYTHON_WRAPPER OR WITH_DOCUMENTATION)
   include(FindPythonModule)

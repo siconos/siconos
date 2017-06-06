@@ -189,7 +189,7 @@ siconos_with_mumps = siconos_default.copy()(
 #         - conf, make and make test of siconos examples
 
 # Case1 : siconos 'basics' components, numerics, kernel, control and related examples
-siconos_light_examples = minimal.copy()(
+siconos_light_examples = minimal_with_python.copy()(
     ci_config='examples_light',
     targets={'.': ['docker-build', 'docker-cmake', 'docker-make',
                    'docker-make-install', 'docker-make-clean'],
@@ -197,7 +197,7 @@ siconos_light_examples = minimal.copy()(
     add_srcs=['examples'])
 
 # Case2 : siconos with mechanics components and bullet + related examples
-siconos_all_examples = siconos_default.copy()(
+siconos_all_examples = minimal_with_python.copy()(
     ci_config='examples_all',
     targets={'.': ['docker-build', 'docker-cmake', 'docker-make',
                    'docker-make-install'],
