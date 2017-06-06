@@ -620,63 +620,46 @@ void LinearOSNS::computeqBlock(InteractionsGraph::VDescriptor& vertex_inter, uns
   SP::Interaction inter = indexSet->bundle(vertex_inter);
   unsigned int sizeY = inter->nonSmoothLaw()->size();
 
+  // We assume that the osi of ds1 (osi1) is integrating the interaction
+  DEBUG_EXPR(display());
   if ((osi1Type == OSI::EULERMOREAUOSI && osi2Type == OSI::EULERMOREAUOSI) ||
       (osi1Type == OSI::ZOHOSI && osi2Type == OSI::ZOHOSI))
   {
-    // We assume that the osi of ds1 (osi1) is integrating the interaction
-    DEBUG_EXPR(display());
     osi1.computeFreeOutput(vertex_inter, this);
-    setBlock(*inter->yForNSsolver(), _q, sizeY , 0, pos);
-    DEBUG_EXPR(_q->display());
-  }
-  else if ((osi1Type == OSI::LSODAROSI && osi2Type == OSI::LSODAROSI  ) )
-  {
-    // We assume that the osi of ds1 (osi1) is integrating the interaction
-    DEBUG_EXPR(display());
-    osi1.computeFreeOutput(vertex_inter, this);
-    SiconosVector& osnsp_rhs = *(*indexSet->properties(vertex_inter).workVectors)[LsodarOSI::OSNSP_RHS];
+    SiconosVector& osnsp_rhs = *(*indexSet->properties(vertex_inter).workVectors)[FirstOrderR::osnsp_rhs];
     setBlock(osnsp_rhs, _q, sizeY , 0, pos);
-    DEBUG_EXPR(_q->display());
   }
-  else if ((osi1Type == OSI::NEWMARKALPHAOSI && osi2Type == OSI::NEWMARKALPHAOSI  ))
-  {
-    // We assume that the osi of ds1 (osi1) is integrating the interaction
-    DEBUG_EXPR(display());
-    osi1.computeFreeOutput(vertex_inter, this);
-    SiconosVector& osnsp_rhs = *(*indexSet->properties(vertex_inter).workVectors)[NewMarkAlphaOSI::OSNSP_RHS];
-    setBlock(osnsp_rhs, _q, sizeY , 0, pos);
-    DEBUG_EXPR(_q->display());
-  }
-  else if ((osi1Type == OSI::SCHATZMANPAOLIOSI && osi2Type == OSI::SCHATZMANPAOLIOSI ) )
-  {
-    // We assume that the osi of ds1 (osi1) is integrating the interaction
-    DEBUG_EXPR(display());
-    osi1.computeFreeOutput(vertex_inter, this);
-    SiconosVector& osnsp_rhs = *(*indexSet->properties(vertex_inter).workVectors)[SchatzmanPaoliOSI::OSNSP_RHS];
-    setBlock(osnsp_rhs, _q, sizeY , 0, pos);
-    DEBUG_EXPR(_q->display());
-  }
-  else if ((osi1Type == OSI::D1MINUSLINEAROSI && osi2Type == OSI::D1MINUSLINEAROSI  ))
-  {
-    // We assume that the osi of ds1 (osi1) is integrating the interaction
-    DEBUG_EXPR(display());
-    osi1.computeFreeOutput(vertex_inter, this);
-    SiconosVector& osnsp_rhs = *(*indexSet->properties(vertex_inter).workVectors)[D1MinusLinearOSI::OSNSP_RHS];
-    setBlock(osnsp_rhs, _q, sizeY , 0, pos);
-    DEBUG_EXPR(_q->display());
-  }
-
-
   else if ((osi1Type == OSI::MOREAUJEANOSI  && osi2Type == OSI::MOREAUJEANOSI  )||
            (osi1Type == OSI::MOREAUDIRECTPROJECTIONOSI && osi2Type == OSI::MOREAUDIRECTPROJECTIONOSI) ||
            (osi1Type == OSI::MOREAUJEANBILBAOOSI && osi2Type == OSI::MOREAUJEANBILBAOOSI ))
   {
-    // We assume that the osi of ds1 (osi1) is integrating the interaction
-    DEBUG_EXPR(display());
     osi1.computeFreeOutput(vertex_inter, this);
     SiconosVector& osnsp_rhs = *(*indexSet->properties(vertex_inter).workVectors)[MoreauJeanOSI::OSNSP_RHS];
     setBlock(osnsp_rhs, _q, sizeY , 0, pos);
-    DEBUG_EXPR(_q->display());
+  }
+  else if ((osi1Type == OSI::LSODAROSI && osi2Type == OSI::LSODAROSI  ) )
+  {
+    osi1.computeFreeOutput(vertex_inter, this);
+    SiconosVector& osnsp_rhs = *(*indexSet->properties(vertex_inter).workVectors)[LsodarOSI::OSNSP_RHS];
+    setBlock(osnsp_rhs, _q, sizeY , 0, pos);
+  }
+  else if ((osi1Type == OSI::NEWMARKALPHAOSI && osi2Type == OSI::NEWMARKALPHAOSI  ))
+  {
+    osi1.computeFreeOutput(vertex_inter, this);
+    SiconosVector& osnsp_rhs = *(*indexSet->properties(vertex_inter).workVectors)[NewMarkAlphaOSI::OSNSP_RHS];
+    setBlock(osnsp_rhs, _q, sizeY , 0, pos);
+  }
+  else if ((osi1Type == OSI::SCHATZMANPAOLIOSI && osi2Type == OSI::SCHATZMANPAOLIOSI ) )
+  {
+    osi1.computeFreeOutput(vertex_inter, this);
+    SiconosVector& osnsp_rhs = *(*indexSet->properties(vertex_inter).workVectors)[SchatzmanPaoliOSI::OSNSP_RHS];
+    setBlock(osnsp_rhs, _q, sizeY , 0, pos);
+  }
+  else if ((osi1Type == OSI::D1MINUSLINEAROSI && osi2Type == OSI::D1MINUSLINEAROSI  ))
+  {
+    osi1.computeFreeOutput(vertex_inter, this);
+    SiconosVector& osnsp_rhs = *(*indexSet->properties(vertex_inter).workVectors)[D1MinusLinearOSI::OSNSP_RHS];
+    setBlock(osnsp_rhs, _q, sizeY , 0, pos);
   }
 
   else if (osi1Type == OSI::MOREAUJEANGOSI && osi2Type == OSI::MOREAUJEANGOSI)
@@ -685,7 +668,7 @@ void LinearOSNS::computeqBlock(InteractionsGraph::VDescriptor& vertex_inter, uns
   }
   else
     RuntimeException::selfThrow("LinearOSNS::computeqBlock not yet implemented for OSI1 and OSI2 of type " + osi1Type  + osi2Type);
-
+  DEBUG_EXPR(_q->display());
 }
 
 void LinearOSNS::computeq(double time)

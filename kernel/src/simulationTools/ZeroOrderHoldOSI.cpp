@@ -145,9 +145,12 @@ void ZeroOrderHoldOSI::fillDSLinks(Interaction &inter,
   assert(ds1);
   assert(ds2);
 
+  VectorOfVectors& workV = *interProp.workVectors;
+  workV[FirstOrderR::osnsp_rhs].reset(new SiconosVector(inter.getSizeOfY()));
+
   VectorOfBlockVectors& DSlink = *interProp.DSlink;
 
-  Relation &relation =  *inter.relation();  
+  Relation &relation =  *inter.relation();
   RELATION::TYPES relationType = relation.getType();
 
   // Check if interations levels (i.e. y and lambda sizes) are compliant with the current osi.
@@ -302,9 +305,9 @@ struct ZeroOrderHoldOSI::_NSLEffectOnFreeOutput : public SiconosVisitor
 
   OneStepNSProblem * _osnsp;
   SP::Interaction _inter;
-
-  _NSLEffectOnFreeOutput(OneStepNSProblem *p, SP::Interaction inter) :
-    _osnsp(p), _inter(inter) {};
+  InteractionProperties& _interProp;
+  _NSLEffectOnFreeOutput(OneStepNSProblem *p, SP::Interaction inter, InteractionProperties& interProp) :
+    _osnsp(p), _inter(inter), _interProp(interProp) {};
 
   void visit(const NewtonImpactNSL& nslaw)
   {
@@ -315,7 +318,8 @@ struct ZeroOrderHoldOSI::_NSLEffectOnFreeOutput : public SiconosVisitor
     subCoord[1] = _inter->nonSmoothLaw()->size();
     subCoord[2] = 0;
     subCoord[3] = subCoord[1];
-    subscal(e, *_inter->y_k(_osnsp->inputOutputLevel()), *(_inter->yForNSsolver()), subCoord, false);
+    SiconosVector & osnsp_rhs = *(*_interProp.workVectors)[FirstOrderR::osnsp_rhs];
+    subscal(e, *_inter->y_k(_osnsp->inputOutputLevel()), osnsp_rhs, subCoord, false);
   }
 
   void visit(const NewtonImpactFrictionNSL& nslaw)
@@ -323,7 +327,8 @@ struct ZeroOrderHoldOSI::_NSLEffectOnFreeOutput : public SiconosVisitor
     double e;
     e = nslaw.en();
     // Only the normal part is multiplied by e
-    (*_inter->yForNSsolver())(0) +=  e * (*_inter->y_k(_osnsp->inputOutputLevel()))(0);
+    SiconosVector & osnsp_rhs = *(*_interProp.workVectors)[FirstOrderR::osnsp_rhs];
+    osnsp_rhs(0) +=  e * (*_inter->y_k(_osnsp->inputOutputLevel()))(0);
 
   }
   void visit(const EqualityConditionNSL& nslaw)
@@ -365,10 +370,10 @@ void ZeroOrderHoldOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_
   coord[7] = sizeY;
 
 
-  // All of these values should be stored in the node corrseponding to the UR when a MoreauJeanOSI scheme is used.
   SP::BlockVector deltax;
   deltax = DSlink[FirstOrderR::deltax];
-  SiconosVector& yForNSsolver = *inter->yForNSsolver();
+
+  SiconosVector& osnsp_rhs = *(*indexSet->properties(vertex_inter).workVectors)[FirstOrderR::osnsp_rhs];
 
   SP::BlockVector Xfree;
   if(relationType == FirstOrder)
@@ -394,15 +399,15 @@ void ZeroOrderHoldOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_
       {
         coord[3] = D->size(1);
         coord[5] = D->size(1);
-        subprod(*D, *lambda, yForNSsolver, coord, true);
+        subprod(*D, *lambda, osnsp_rhs, coord, true);
 
-        yForNSsolver *= -1.0;
+        osnsp_rhs *= -1.0;
       }
       if(C)
       {
         coord[3] = C->size(1);
         coord[5] = C->size(1);
-        subprod(*C, *deltax, yForNSsolver, coord, false);
+        subprod(*C, *deltax, osnsp_rhs, coord, false);
 
       }
 
@@ -410,9 +415,9 @@ void ZeroOrderHoldOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_
       {
         RuntimeException::selfThrow("ZeroOrderHoldOSI::ComputeFreeOutput not yet implemented with useGammaForRelation() for FirstorderR and Typ2R and H_alpha->getValue() should return the mid-point value");
       }
-     
+
       SiconosVector& hAlpha= *workV[FirstOrderR::h_alpha];
-      yForNSsolver += hAlpha;
+      osnsp_rhs += hAlpha;
     }
 
     else
@@ -433,11 +438,11 @@ void ZeroOrderHoldOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_
 
         if(_useGammaForRelation)
         {
-          subprod(*C, *deltax, yForNSsolver, coord, true);
+          subprod(*C, *deltax, osnsp_rhs, coord, true);
         }
         else
         {
-          subprod(*C, *Xfree, yForNSsolver, coord, true);
+          subprod(*C, *Xfree, osnsp_rhs, coord, true);
         }
       }
 
@@ -459,13 +464,13 @@ void ZeroOrderHoldOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_
         }
 
         if(e)
-          yForNSsolver += *e;
+          osnsp_rhs += *e;
 
         if(F)
         {
           coord[3] = F->size(1);
           coord[5] = F->size(1);
-          subprod(*F, *DSlink[FirstOrderR::z], yForNSsolver, coord, false);
+          subprod(*F, *DSlink[FirstOrderR::z], osnsp_rhs, coord, false);
         }
       }
 

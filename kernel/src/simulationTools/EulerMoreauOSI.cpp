@@ -28,7 +28,6 @@
 #include "CxxStd.hpp"
 #include "OneStepNSProblem.hpp"
 #include "BlockVector.hpp"
-
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
 //#define DEBUG_WHERE_MESSAGES
@@ -129,7 +128,9 @@ void EulerMoreauOSI::fillDSLinks(Interaction &inter,
   SP::DynamicalSystem ds2= interProp.target;
   assert(ds1);
   assert(ds2);
-
+  
+  VectorOfVectors& workV = *interProp.workVectors;
+  workV[FirstOrderR::osnsp_rhs].reset(new SiconosVector(inter.getSizeOfY()));
   VectorOfBlockVectors& DSlink = *interProp.DSlink;
 
   Relation &relation =  *inter.relation();  
@@ -149,30 +150,30 @@ void EulerMoreauOSI::fillDSLinks(Interaction &inter,
 
 
       if (relationType == FirstOrder)
-	{
-	  if (!DSlink[FirstOrderR::xfree])
-	    {
-	      DSlink[FirstOrderR::xfree].reset(new BlockVector());
-	      DSlink[FirstOrderR::xfree]->insertPtr(workVds1[OneStepIntegrator::free]);
-	    }
-	  else
-	    DSlink[FirstOrderR::xfree]->setVectorPtr(0,workVds1[OneStepIntegrator::free]);
+      {
+        if (!DSlink[FirstOrderR::xfree])
+        {
+          DSlink[FirstOrderR::xfree].reset(new BlockVector());
+          DSlink[FirstOrderR::xfree]->insertPtr(workVds1[OneStepIntegrator::free]);
+        }
+        else
+          DSlink[FirstOrderR::xfree]->setVectorPtr(0,workVds1[OneStepIntegrator::free]);
 
-	  if (!DSlink[FirstOrderR::xPartialNS])
-	    {
-	      DSlink[FirstOrderR::xPartialNS].reset(new BlockVector());
-	      DSlink[FirstOrderR::xPartialNS]->insertPtr(workVds1[OneStepIntegrator::x_partial_ns]);
-	    }
-	  else
-	    DSlink[FirstOrderR::xPartialNS]->setVectorPtr(0,workVds1[OneStepIntegrator::x_partial_ns]);
-	  if (!DSlink[FirstOrderR::deltax])
-	    {
-	      DSlink[FirstOrderR::deltax].reset(new BlockVector());
-	      DSlink[FirstOrderR::deltax]->insertPtr(workVds1[OneStepIntegrator::delta_x_for_relation]);
-	    }
-	  else
-	    DSlink[FirstOrderR::deltax]->setVectorPtr(0,workVds1[OneStepIntegrator::delta_x_for_relation]);
-	}
+        if (!DSlink[FirstOrderR::xPartialNS])
+        {
+          DSlink[FirstOrderR::xPartialNS].reset(new BlockVector());
+          DSlink[FirstOrderR::xPartialNS]->insertPtr(workVds1[OneStepIntegrator::x_partial_ns]);
+        }
+        else
+          DSlink[FirstOrderR::xPartialNS]->setVectorPtr(0,workVds1[OneStepIntegrator::x_partial_ns]);
+        if (!DSlink[FirstOrderR::deltax])
+        {
+          DSlink[FirstOrderR::deltax].reset(new BlockVector());
+          DSlink[FirstOrderR::deltax]->insertPtr(workVds1[OneStepIntegrator::delta_x_for_relation]);
+        }
+        else
+          DSlink[FirstOrderR::deltax]->setVectorPtr(0,workVds1[OneStepIntegrator::delta_x_for_relation]);
+      }
     }
   DEBUG_PRINTF("ds1->number() %i\n",ds1->number());
   DEBUG_PRINTF("ds2->number() %i\n",ds2->number());
@@ -794,8 +795,9 @@ void EulerMoreauOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_in
   SP::SiconosVector H_alpha;
 
   deltax = DSlink[FirstOrderR::deltax];
-  SiconosVector& yForNSsolver = *inter->yForNSsolver();
 
+  SiconosVector& osnsp_rhs = *(*indexSet->properties(vertex_inter).workVectors)[FirstOrderR::osnsp_rhs];
+  
   Xfree = DSlink[FirstOrderR::xfree];
 
   assert(Xfree);
@@ -818,20 +820,20 @@ void EulerMoreauOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_in
 	{
 	  coord[3] = D->size(1);
 	  coord[5] = D->size(1);
-	  subprod(*D, lambda, yForNSsolver, coord, true);
+	  subprod(*D, lambda, osnsp_rhs, coord, true);
 
-	  yForNSsolver *= -1.0;
+	  osnsp_rhs *= -1.0;
 	}
       else
 	{
-	  subscal(0, yForNSsolver, yForNSsolver, coord, true);
+	  subscal(0, osnsp_rhs, osnsp_rhs, coord, true);
 	}
 
       if(C)
 	{
 	  coord[3] = C->size(1);
 	  coord[5] = C->size(1);
-	  subprod(*C, *deltax, yForNSsolver, coord, false);
+	  subprod(*C, *deltax, osnsp_rhs, coord, false);
 
 	}
 
@@ -840,7 +842,7 @@ void EulerMoreauOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_in
 	  RuntimeException::selfThrow("EulerMoreauOSI::ComputeFreeOutput not yet implemented with useGammaForRelation() for FirstorderR and Type2R and H_alpha->getValue() should return the mid-point value");
 	}
       SiconosVector& hAlpha= *workV[FirstOrderR::h_alpha];
-      yForNSsolver += hAlpha;
+      osnsp_rhs += hAlpha;
     }
   else if(relationType == FirstOrder && relationSubType == Type1R)
     {
@@ -856,14 +858,14 @@ void EulerMoreauOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_in
 	{
 	  coord[3] = F->size(1);
 	  coord[5] = F->size(1);
-	  subprod(*F, *DSlink[FirstOrderR::z], yForNSsolver, coord, true);
+	  subprod(*F, *DSlink[FirstOrderR::z], osnsp_rhs, coord, true);
 
 	}
       if(C)
 	{
 	  coord[3] = C->size(1);
 	  coord[5] = C->size(1);
-	  subprod(*C, *Xfree, yForNSsolver, coord, false);
+	  subprod(*C, *Xfree, osnsp_rhs, coord, false);
 
 	}
 
@@ -873,7 +875,7 @@ void EulerMoreauOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_in
 	}
       if(workV[FirstOrderR::h_alpha])
       {
-        yForNSsolver += *workV[FirstOrderR::h_alpha];
+        osnsp_rhs += *workV[FirstOrderR::h_alpha];
       }
     }
   else // First Order Linear Relation
@@ -892,11 +894,11 @@ void EulerMoreauOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_in
 
 	  if(_useGammaForRelation)
 	    {
-	      subprod(*C, *deltax, yForNSsolver, coord, true);
+	      subprod(*C, *deltax, osnsp_rhs, coord, true);
 	    }
 	  else
 	    {
-	      subprod(*C, *Xfree, yForNSsolver, coord, true);
+	      subprod(*C, *Xfree, osnsp_rhs, coord, true);
 	    }
 	}
 
@@ -919,13 +921,13 @@ void EulerMoreauOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_in
 	    }
 
 	  if(e)
-	    yForNSsolver += *e;
+	    osnsp_rhs += *e;
 
 	  if(F)
 	    {
 	      coord[3] = F->size(1);
 	      coord[5] = F->size(1);
-	      subprod(*F, *DSlink[FirstOrderR::z], yForNSsolver, coord, false);
+	      subprod(*F, *DSlink[FirstOrderR::z], osnsp_rhs, coord, false);
 	    }
 	}
 
