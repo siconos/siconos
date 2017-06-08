@@ -82,6 +82,8 @@ if(WITH_GIT)
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 endif()
 
+string(TIMESTAMP BUILD_TIMESTAMP)
+
 # ---- Python ---
 # (interp and lib)
 # Warning FP : python is always required, at least
