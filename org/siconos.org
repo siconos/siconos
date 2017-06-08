@@ -843,6 +843,12 @@ candidates for integrating Siconos as a back-end/engine.
 | RoboCup       | https://sourceforge.net/projects/sserver/ | Robotics    | SimSpark            | C++      | LGPL 3     |
 | OpenSimulator | http://opensimulator.org/                 | "Cloud" sim | ODE / Bullet(expr.) | C#       | Permissive |
 
+** Materials modeling
+
+| Name | URL                      | Type | Language | Licence      |
+|------+--------------------------+------+----------+--------------|
+| Vega | http://run.usc.edu/vega/ | FEM  | C++      | 3-clause BSD |
+
 * Footnotes
 
 
