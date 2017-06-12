@@ -43,6 +43,11 @@ protected:
   double _cq2q101, _cq2q102, _cq2q103, _cq2q104;
   double _initial_AscalA, _initial_AscalA1, _initial_AscalA2;
 
+  /** Cumulative number of twists around the joint relative to initial
+   * angular difference. */
+  int _twistCount;    // TODO: Should be in a graph work vector?
+  int _previousAngle; // Needed to track _twistCount, TODO: work vector?
+
   void buildA1A2();
 
   /** Compute the vector of linear and angular positions of the free axes */

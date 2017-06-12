@@ -88,6 +88,8 @@ PivotJointR::PivotJointR(SP::NewtonEulerDS d1, SP::NewtonEulerDS d2, SP::Siconos
   // using atan2 so that stops can be placed correctly.
   double Adot2to1 = AscalA(rot2to1x, rot2to1y, rot2to1z);
   _initial_AscalA = 2*atan2(rot2to1w, Adot2to1);
+  _twistCount = 0;
+  _previousAngle = 0;
 }
 
 /* constructor,
@@ -122,6 +124,8 @@ PivotJointR::PivotJointR(SP::NewtonEulerDS d1, SP::SiconosVector P0, SP::Siconos
   // using atan2 so that stops can be placed correctly.
   double Adot2to1 = AscalA(rot2to1x, rot2to1y, rot2to1z);
   _initial_AscalA = 2*atan2(rot2to1w, Adot2to1);
+  _twistCount = 0;
+  _previousAngle = 0;
 }
 
 void PivotJointR::initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
@@ -486,7 +490,18 @@ void PivotJointR::computehDoF(double time, BlockVector& q0, SiconosVector& y,
   // in the case of the free axis we must measure the actual angle
   // using atan2 so that stops can be placed correctly.
   double Adot2to1 = AscalA(rot2to1x, rot2to1y, rot2to1z);
-  y.setValue(0, piwrap(2*atan2(rot2to1w, Adot2to1) - _initial_AscalA));
+  double wrappedAngle = piwrap(2*atan2(rot2to1w, Adot2to1) - _initial_AscalA);
+
+  // Count the number of twists around the angle, and report the
+  // unwrapped angle.  Needed to implement joint stops near pi.
+  if (wrappedAngle < -M_PI*3/4 && _previousAngle > M_PI*3/4)
+    _twistCount ++;
+  else if (wrappedAngle > M_PI*3/4 && _previousAngle < -M_PI*3/4)
+    _twistCount --;
+  _previousAngle = wrappedAngle;
+  double unwrappedAngle = wrappedAngle + 2*M_PI*_twistCount;
+
+  y.setValue(0, unwrappedAngle);
 }
 
 /** Compute the jacobian of linear and angular DoF with respect to some q */
