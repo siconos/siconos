@@ -88,7 +88,7 @@ void JointFrictionR::computeJachq(double time, Interaction& inter, SP::BlockVect
   assert(_jachq->size(0)==1);
   for (unsigned int i=0; i<1; i++)
     for (unsigned int j=0; j<_jachq->size(1); j++) {
-      _jachq->setValue(i,j,_jachqTmp->getValue((*_axis)[i],j) * (i==1?1:-1));
+      _jachq->setValue(i,j,_jachqTmp->getValue((*_axis)[i]-_axisMin,j) * (i==1?1:-1));
     }
 }
 
