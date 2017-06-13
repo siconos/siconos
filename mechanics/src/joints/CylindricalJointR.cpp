@@ -78,6 +78,12 @@ public: quatOrientation(const SiconosVector& v)
   (v.getValue(3),v.getValue(4),v.getValue(5),v.getValue(6)) {}
 };
 
+// Wrap value in interval [-pi,pi]
+static double piwrap(double x)
+{
+  return fmod(x + 3*M_PI, 2*M_PI) - M_PI;
+}
+
 /**axe is the axis of the cylindrical joint, in the frame of the first DS, d1.*/
 CylindricalJointR::CylindricalJointR(SP::NewtonEulerDS d1, SP::NewtonEulerDS d2,
                                      SP::SiconosVector P, SP::SiconosVector A,
@@ -97,6 +103,8 @@ CylindricalJointR::CylindricalJointR(SP::NewtonEulerDS d1, SP::NewtonEulerDS d2,
 
   _axis0 = A;
   computeFromInitialPosition(d1->q(),d2->q());
+  _twistCount = 0;
+  _previousAngle = 0;
 }
 
 /*axis is the axis of the cylindrical joint, in the absolute frame.*/
@@ -116,6 +124,8 @@ CylindricalJointR::CylindricalJointR(SP::NewtonEulerDS d1,
 
   _axis0 = A;
   computeFromInitialPosition(d1->q());
+  _twistCount = 0;
+  _previousAngle = 0;
 }
 
 void CylindricalJointR::computeFromInitialPosition(SP::SiconosVector q1, SP::SiconosVector q2)
@@ -165,6 +175,15 @@ void CylindricalJointR::computeFromInitialPosition(SP::SiconosVector q1, SP::Sic
   _G2P0->setValue(0, tmp.R_component_2());
   _G2P0->setValue(1, tmp.R_component_3());
   _G2P0->setValue(2, tmp.R_component_4());
+
+  /* Compute initial positions/angles of degrees of freedom */
+  _previousAngle = 0.0;
+  _twistCount = 0;
+  _initialAngle = 0.0;
+  BlockVector q0(q1, q2);
+  SiconosVector tmpy(1);
+  this->computehDoF(0, q0, tmpy, 1);
+  _initialAngle = tmpy(0);
 }
 
 void CylindricalJointR::computeV1V2FromAxis()
@@ -574,4 +593,326 @@ void CylindricalJointR::Jd1(double X1, double Y1, double Z1, double q10, double 
   _jachq->setValue(3, 4, _cq2q101*x42 - _cq2q102*x56 - _cq2q103*x43 + _cq2q104*x44 + x46*x57 + x48*x55 - x50*x54);
   _jachq->setValue(3, 5, _cq2q101*x44 + _cq2q102*x43 - _cq2q103*x56 - _cq2q104*x42 + x46*x54 - x48*x53 + x50*x57);
   _jachq->setValue(3, 6, _cq2q101*x43 - _cq2q102*x44 + _cq2q103*x42 - _cq2q104*x56 - x46*x55 + x48*x57 + x50*x53);
+}
+
+/** Compute the vector of linear and angular positions of the free axes */
+void CylindricalJointR::computehDoF(double time, BlockVector& q0, SiconosVector& y,
+                                    unsigned int axis)
+{
+  if (axis > 1)
+    return;
+
+  SP::SiconosVector q1 = (q0.getAllVect())[0];
+  double X1 = q1->getValue(0);
+  double Y1 = q1->getValue(1);
+  double Z1 = q1->getValue(2);
+  double q10 = q1->getValue(3);
+  double q11 = q1->getValue(4);
+  double q12 = q1->getValue(5);
+  double q13 = q1->getValue(6);
+  double X2 = 0;
+  double Y2 = 0;
+  double Z2 = 0;
+  double q20 = 1;
+  double q21 = 0;
+  double q22 = 0;
+  double q23 = 0;
+
+  if (q0.numberOfBlocks()>1)
+  {
+    SP::SiconosVector q2 = (q0.getAllVect())[1];
+    X2 = q2->getValue(0);
+    Y2 = q2->getValue(1);
+    Z2 = q2->getValue(2);
+    q20 = q2->getValue(3);
+    q21 = q2->getValue(4);
+    q22 = q2->getValue(5);
+    q23 = q2->getValue(6);
+  }
+
+  /*
+   * sympy expression:
+   *
+   * HPos = np.dot(rot(A,q1), HP)
+   * HAngDot = np.dot(rot(A,q1), q2to1)
+   * HAng = 2*sympy.atan2(q2to1[0], HAngDot)
+   *
+   * # We call atan2 ourselves
+   * HDoF = [HPos,HAngDot,q2to1[0]]
+   *
+   * # But calculate the full derivative symbolically
+   * jachqDoF = [[h.diff(d) for d in dq] for h in [HPos,HAng]]
+   */
+
+  /* Pre-calculations */
+  const double x0 = _axis0->getValue(0)*q11 + _axis0->getValue(1)*q12 + _axis0->getValue(2)*q13;
+  const double x1 = _axis0->getValue(0)*q10 - _axis0->getValue(1)*q13 + _axis0->getValue(2)*q12;
+  const double x2 = _axis0->getValue(0)*q13 + _axis0->getValue(1)*q10 - _axis0->getValue(2)*q11;
+  const double x3 = -_axis0->getValue(0)*q12 + _axis0->getValue(1)*q11 + _axis0->getValue(2)*q10;
+  const double x4 = -q10*x0 + q11*x1 + q12*x2 + q13*x3;
+  const double x5 = _G1P0->getValue(0)*q11 + _G1P0->getValue(1)*q12 + _G1P0->getValue(2)*q13;
+  const double x6 = _G2P0->getValue(0)*q21 + _G2P0->getValue(1)*q22 + _G2P0->getValue(2)*q23;
+  const double x7 = _G2P0->getValue(0)*q20 - _G2P0->getValue(1)*q23 + _G2P0->getValue(2)*q22;
+  const double x8 = _G2P0->getValue(0)*q23 + _G2P0->getValue(1)*q20 - _G2P0->getValue(2)*q21;
+  const double x9 = -_G2P0->getValue(0)*q22 + _G2P0->getValue(1)*q21 + _G2P0->getValue(2)*q20;
+  const double x10 = _G1P0->getValue(0)*q10 - _G1P0->getValue(1)*q13 + _G1P0->getValue(2)*q12;
+  const double x11 = _G1P0->getValue(0)*q13 + _G1P0->getValue(1)*q10 - _G1P0->getValue(2)*q11;
+  const double x12 = -_G1P0->getValue(0)*q12 + _G1P0->getValue(1)*q11 + _G1P0->getValue(2)*q10;
+  const double x13 = q10*x1 + q11*x0 + q12*x3 - q13*x2;
+  const double x14 = q10*x3 + q11*x2 - q12*x1 + q13*x0;
+  const double x15 = q10*x2 - q11*x3 + q12*x0 + q13*x1;
+  const double x16 = _cq2q101*q21 + _cq2q102*q20 - _cq2q103*q23 + _cq2q104*q22;
+  const double x17 = -_cq2q101*q20 + _cq2q102*q21 + _cq2q103*q22 + _cq2q104*q23;
+  const double x18 = _cq2q101*q23 - _cq2q102*q22 + _cq2q103*q21 + _cq2q104*q20;
+  const double x19 = _cq2q101*q22 + _cq2q102*q23 + _cq2q103*q20 - _cq2q104*q21;
+  const double x20 = q10*x17;
+  const double x21 = q11*x16;
+  const double x22 = q12*x19;
+  const double x23 = q13*x18;
+
+  /* Linear axis */
+  unsigned int i = 0;
+  if (axis+i == 0 && y.size() > i)
+  {
+    /* axis 0 = Linear position */
+    y.setValue(i, -x13*(X1 - X2 + q10*x10 + q11*x5 + q12*x12 - q13*x11
+                        - q20*x7 - q21*x6 - q22*x9 + q23*x8)
+                  - x14*(Z1 - Z2 + q10*x12 + q11*x11 - q12*x10 + q13*x5
+                         - q20*x9 - q21*x8 + q22*x7 - q23*x6)
+                  - x15*(Y1 - Y2 + q10*x11 - q11*x12 + q12*x5 + q13*x10
+                         - q20*x8 + q21*x9 - q22*x6 - q23*x7)
+                  + x4*(q10*x5 - q11*x10 - q12*x11 - q13*x12 - q20*x6
+                        + q21*x7 + q22*x8 + q23*x9));
+
+    i ++;
+  }
+
+  /* Rotational axis */
+  if (axis+i == 1 && y.size() > i)
+  {
+    /* The dot product with the rotational free axis taking into
+     * account original angular difference. */
+    double Adot2to1 = -x13*(q10*x16 + q11*x17 + q12*x18 - q13*x19)
+                     - x14*(q10*x18 + q11*x19 - q12*x16 + q13*x17)
+                     - x15*(q10*x19 - q11*x18 + q12*x17 + q13*x16)
+                     + x4*(x20 - x21 - x22 - x23);
+
+    // We only need the w part of the quaternion for atan2
+    // (see rot2to1() in PivotJointR.cpp, and sympy expression above.)
+    double rot2to1w = -x20 + x21 + x22 + x23;
+
+    // In case of joint constraints, it's okay to use dot product=0, but
+    // in the case of the free axis we must measure the actual angle
+    // using atan2 so that stops can be placed correctly.
+    double wrappedAngle = piwrap(2*atan2(rot2to1w, Adot2to1) - _initialAngle);
+
+    // Count the number of twists around the angle, and report the
+    // unwrapped angle.  Needed to implement joint stops near pi.
+    if (wrappedAngle < -M_PI*3/4 && _previousAngle > M_PI*3/4)
+      _twistCount ++;
+    else if (wrappedAngle > M_PI*3/4 && _previousAngle < -M_PI*3/4)
+      _twistCount --;
+    _previousAngle = wrappedAngle;
+    double unwrappedAngle = wrappedAngle + 2*M_PI*_twistCount;
+
+    /* axis 1 = Angular position */
+    y.setValue(i, unwrappedAngle);
+    i ++;
+  }
+}
+
+/** Compute the jacobian of linear and angular DoF with respect to some q */
+void CylindricalJointR::computeJachqDoF(double time, Interaction& inter,
+                                        SP::BlockVector q0, SimpleMatrix& jachq,
+                                        unsigned int axis)
+{
+  if (axis > 1)
+    return;
+
+  SP::SiconosVector q1 = (q0->getAllVect())[0];
+  double X1 = q1->getValue(0);
+  double Y1 = q1->getValue(1);
+  double Z1 = q1->getValue(2);
+  double q10 = q1->getValue(3);
+  double q11 = q1->getValue(4);
+  double q12 = q1->getValue(5);
+  double q13 = q1->getValue(6);
+  double X2 = 0;
+  double Y2 = 0;
+  double Z2 = 0;
+  double q20 = 1;
+  double q21 = 0;
+  double q22 = 0;
+  double q23 = 0;
+
+  if (q0->numberOfBlocks()>1)
+  {
+    SP::SiconosVector q2 = (q0->getAllVect())[1];
+    X2 = q2->getValue(0);
+    Y2 = q2->getValue(1);
+    Z2 = q2->getValue(2);
+    q20 = q2->getValue(3);
+    q21 = q2->getValue(4);
+    q22 = q2->getValue(5);
+    q23 = q2->getValue(6);
+  }
+
+  /*
+   * sympy expression:
+   *
+   * HPos = np.dot(rot(A,q1), HP)
+   * HAngDot = np.dot(rot(A,q1), q2to1)
+   * HAng = 2*sympy.atan2(q2to1[0], HAngDot)
+   *
+   * # We call atan2 ourselves
+   * HDoF = [HPos,HAngDot,q2to1[0]]
+   *
+   * # But calculate the full derivative symbolically
+   * jachqDoF = [[h.diff(d) for d in dq] for h in [HPos,HAng]]
+   */
+
+  /* Pre-calculations */
+  const double x0 = _axis0->getValue(0)*q11 + _axis0->getValue(1)*q12 + _axis0->getValue(2)*q13;
+  const double x1 = q11*x0;
+  const double x2 = _axis0->getValue(0)*q13 + _axis0->getValue(1)*q10 - _axis0->getValue(2)*q11;
+  const double x3 = q13*x2;
+  const double x4 = _axis0->getValue(0)*q10 - _axis0->getValue(1)*q13 + _axis0->getValue(2)*q12;
+  const double x5 = q10*x4;
+  const double x6 = -_axis0->getValue(0)*q12 + _axis0->getValue(1)*q11 + _axis0->getValue(2)*q10;
+  const double x7 = q12*x6;
+  const double x8 = q11*x6;
+  const double x9 = q12*x0;
+  const double x10 = q10*x2;
+  const double x11 = q13*x4;
+  const double x12 = q12*x4;
+  const double x13 = q13*x0;
+  const double x14 = q10*x6;
+  const double x15 = q11*x2;
+  const double x16 = _G1P0->getValue(0)*q10 - _G1P0->getValue(1)*q13 + _G1P0->getValue(2)*q12;
+  const double x17 = x1 - x3 + x5 + x7;
+  const double x18 = -_G1P0->getValue(0)*q12 + _G1P0->getValue(1)*q11 + _G1P0->getValue(2)*q10;
+  const double x19 = -x12 + x13 + x14 + x15;
+  const double x20 = _G1P0->getValue(0)*q13 + _G1P0->getValue(1)*q10 - _G1P0->getValue(2)*q11;
+  const double x21 = x10 + x11 - x8 + x9;
+  const double x22 = _G1P0->getValue(0)*q11 + _G1P0->getValue(1)*q12 + _G1P0->getValue(2)*q13;
+  const double x23 = _G2P0->getValue(0)*q21 + _G2P0->getValue(1)*q22 + _G2P0->getValue(2)*q23;
+  const double x24 = _G2P0->getValue(0)*q23 + _G2P0->getValue(1)*q20 - _G2P0->getValue(2)*q21;
+  const double x25 = _G2P0->getValue(0)*q20 - _G2P0->getValue(1)*q23 + _G2P0->getValue(2)*q22;
+  const double x26 = -_G2P0->getValue(0)*q22 + _G2P0->getValue(1)*q21 + _G2P0->getValue(2)*q20;
+  const double x27 = X1 - X2 + q10*x16 + q11*x22 + q12*x18 - q13*x20 - q20*x25 - q21*x23 - q22*x26 + q23*x24;
+  const double x28 = Z1 - Z2 + q10*x18 + q11*x20 - q12*x16 + q13*x22 - q20*x26 - q21*x24 + q22*x25 - q23*x23;
+  const double x29 = Y1 - Y2 + q10*x20 - q11*x18 + q12*x22 + q13*x16 - q20*x24 + q21*x26 - q22*x23 - q23*x25;
+  const double x30 = _cq2q103*q23;
+  const double x31 = _cq2q101*q21;
+  const double x32 = _cq2q102*q20;
+  const double x33 = _cq2q104*q22;
+  const double x34 = _cq2q104*q21;
+  const double x35 = _cq2q101*q22;
+  const double x36 = _cq2q102*q23;
+  const double x37 = _cq2q103*q20;
+  const double x38 = _cq2q102*q22;
+  const double x39 = _cq2q101*q23;
+  const double x40 = _cq2q103*q21;
+  const double x41 = _cq2q104*q20;
+  const double x42 = _cq2q101*q20;
+  const double x43 = _cq2q102*q21;
+  const double x44 = _cq2q103*q22;
+  const double x45 = _cq2q104*q23;
+  const double x46 = -q10*(x42 - x43 - x44 - x45) + q11*(x30 - x31 - x32 - x33) + q12*(x34 - x35 - x36 - x37) + q13*(x38 - x39 - x40 - x41);
+  const double x47 = -x34 + x35 + x36 + x37;
+  const double x48 = q13*x47;
+  const double x49 = -x30 + x31 + x32 + x33;
+  const double x50 = q10*x49;
+  const double x51 = -x42 + x43 + x44 + x45;
+  const double x52 = q11*x51;
+  const double x53 = -x38 + x39 + x40 + x41;
+  const double x54 = q12*x53;
+  const double x55 = x48 - x50 - x52 - x54;
+  const double x56 = q12*x49;
+  const double x57 = q10*x53;
+  const double x58 = q11*x47;
+  const double x59 = q13*x51;
+  const double x60 = x56 - x57 - x58 - x59;
+  const double x61 = q11*x53;
+  const double x62 = q10*x47;
+  const double x63 = q12*x51;
+  const double x64 = q13*x49;
+  const double x65 = x61 - x62 - x63 - x64;
+  const double x66 = -q10*x0 + q11*x4 + q12*x2 + q13*x6;
+  const double x67 = x17*x55 + x19*x60 + x21*x65 + x46*x66;
+  const double x68 = q10*x51;
+  const double x69 = q11*x49;
+  const double x70 = q12*x47;
+  const double x71 = q13*x53;
+  const double x72 = x68 - x69 - x70 - x71;
+  const double x73 = 2*_axis0->getValue(0)*q10 - 2*_axis0->getValue(1)*q13 + 2*_axis0->getValue(2)*q12;
+  const double x74 = -2*_axis0->getValue(0)*q12 + 2*_axis0->getValue(1)*q11 + 2*_axis0->getValue(2)*q10;
+  const double x75 = 2*_axis0->getValue(0)*q13 + 2*_axis0->getValue(1)*q10 - 2*_axis0->getValue(2)*q11;
+  const double x76 = -x17*(-x48 + x50 + x52 + x54) - x19*(-x56 + x57 + x58 + x59) - x21*(-x61 + x62 + x63 + x64) + x66*x72;
+  const double x77 = 2/(pow(x72, 2) + pow(x76, 2));
+  const double x78 = -x68 + x69 + x70 + x71;
+  const double x79 = 2*_axis0->getValue(0)*q11 + 2*_axis0->getValue(1)*q12 + 2*_axis0->getValue(2)*q13;
+  const double x80 = _cq2q101*q10 + _cq2q102*q11 + _cq2q103*q12 + _cq2q104*q13;
+  const double x81 = _cq2q101*q11 - _cq2q102*q10 + _cq2q103*q13 - _cq2q104*q12;
+  const double x82 = _cq2q101*q12 - _cq2q102*q13 - _cq2q103*q10 + _cq2q104*q11;
+  const double x83 = _cq2q101*q13 + _cq2q102*q12 - _cq2q103*q11 - _cq2q104*q10;
+
+  /* Linear axis */
+  unsigned int i = 0;
+  if (axis+i == 0 && jachq.size(0) > i)
+  {
+    /* axis 0 = Linear position */
+    jachq.setValue(i, 0, -x1 + x3 - x5 - x7);
+    jachq.setValue(i, 1, -x10 - x11 + x8 - x9);
+    jachq.setValue(i, 2, x12 - x13 - x14 - x15);
+    jachq.setValue(i, 3, -2*x16*x17 - 2*x18*x19 - 2*x2*x29 - 2*x20*x21 - 2*x27*x4 - 2*x28*x6);
+    jachq.setValue(i, 4, -2*x0*x27 - 2*x17*x22 + 2*x18*x21 - 2*x19*x20 - 2*x2*x28 + 2*x29*x6);
+    jachq.setValue(i, 5, -2*x0*x29 + 2*x16*x19 - 2*x17*x18 - 2*x21*x22 - 2*x27*x6 + 2*x28*x4);
+    jachq.setValue(i, 6, -2*x0*x28 - 2*x16*x21 + 2*x17*x20 - 2*x19*x22 + 2*x2*x27 - 2*x29*x4);
+
+    if (q0->numberOfBlocks()>=2)
+    {
+      jachq.setValue(i, 7, x17);
+      jachq.setValue(i, 8, x21);
+      jachq.setValue(i, 9, x19);
+      jachq.setValue(i, 10, 2*x17*x25 + 2*x19*x26 + 2*x21*x24);
+      jachq.setValue(i, 11, 2*x17*x23 + 2*x19*x24 - 2*x21*x26);
+      jachq.setValue(i, 12, 2*x17*x26 - 2*x19*x25 + 2*x21*x23);
+      jachq.setValue(i, 13, -2*x17*x24 + 2*x19*x23 + 2*x21*x25);
+    }
+
+    i++;
+  }
+
+  /* Rotational axis */
+  if (axis+i == 1 && jachq.size(0) > i)
+  {
+
+    jachq.setValue(i, 0, 0);
+    jachq.setValue(i, 1, 0);
+    jachq.setValue(i, 2, 0);
+    jachq.setValue(i, 3, 2*(-x51*x67 + x72*(-x17*x49 - x19*x53 - x21*x47 + x51*x66 + x55*x73 + x60*x74 + x65*x75))/(pow(x46, 2) + pow(x67, 2)));
+    jachq.setValue(i, 4, x77*(x49*x76 + x78*(x17*x51 + x19*x47 - x21*x53 + x49*x66 - x55*x79 - x60*x75 + x65*x74)));
+    jachq.setValue(i, 5, x77*(x47*x76 + x78*(x17*x53 - x19*x49 + x21*x51 + x47*x66 - x55*x74 + x60*x73 - x65*x79)));
+    jachq.setValue(i, 6, x77*(x53*x76 + x78*(-x17*x47 + x19*x51 + x21*x49 + x53*x66 + x55*x75 - x60*x79 - x65*x73)));
+
+    if (q0->numberOfBlocks()>=2)
+    {
+      /*
+       * sympy expression:
+       *
+       * for i in range(4): print('jachq.setValue(i, {}, {});'.format(i+10,e[i+4]))
+       */
+
+      jachq.setValue(i, 7, 0);
+      jachq.setValue(i, 8, 0);
+      jachq.setValue(i, 9, 0);
+      jachq.setValue(i, 10, x77*(x76*x80 - x78*(x17*x81 + x19*x83 + x21*x82 - x66*x80)));
+      jachq.setValue(i, 11, x77*(x76*x81 + x78*(x17*x80 - x19*x82 + x21*x83 + x66*x81)));
+      jachq.setValue(i, 12, x77*(x76*x82 + x78*(-x17*x83 + x19*x81 + x21*x80 + x66*x82)));
+      jachq.setValue(i, 13, x77*(x76*x83 + x78*(x17*x82 + x19*x80 - x21*x81 + x66*x83)));
+    }
+
+    i++;
+  }
 }

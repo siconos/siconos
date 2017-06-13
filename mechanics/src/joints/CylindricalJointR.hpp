@@ -72,6 +72,12 @@ public:
   /** _G2P0 is the vector from initial G1 to P */
   SP::SiconosVector _G2P0;
 
+  /** Cumulative number of twists around the joint relative to initial
+   * angular difference. */
+  int _twistCount;    // TODO: Should be in a graph work vector?
+  double _previousAngle; // Needed to track _twistCount, TODO: work vector?
+  double _initialAngle;
+
   /** constructor from two dynamical systems and an axis
    *  \param d1 first  DynamicalSystem link by the  joint
    *  \param d2 second  DynamicalSystem link by the joint
@@ -107,6 +113,15 @@ public:
   virtual void computeJachq(double time, Interaction& inter, SP::BlockVector q0 );
 
   virtual void computeh(double time, BlockVector& q0, SiconosVector& y);
+
+  /** Compute the vector of linear and angular positions of the free axes */
+  virtual void computehDoF(double time, BlockVector& q0, SiconosVector& y,
+                           unsigned int axis);
+
+  /** Compute the jacobian of linear and angular DoF with respect to some q */
+  virtual void computeJachqDoF(double time, Interaction& inter,
+                               SP::BlockVector q0, SimpleMatrix& jachq,
+                               unsigned int axis);
 
   void Jd1d2(
     double X1, double Y1, double Z1, double q10, double q11, double q12, double q13,
