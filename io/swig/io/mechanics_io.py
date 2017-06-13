@@ -1324,13 +1324,21 @@ class Hdf5():
                         link(stop_inter, ds1, ds2)
                     nsds.setName(stop_inter, '%s_stop%d'%(str(name),n))
 
+            # The per-axis friction NSL, can be ''
             if friction is not None:
-                nslaw = self._nslaws[friction]
-                fr = joints.JointFrictionR(joint, 0) #TODO axis list
-                fr_inter = Interaction(nslaw, fr)
-                self._model.nonSmoothDynamicalSystem().\
-                    link(fr_inter, ds1, ds2)
-                nsds.setName(fr_inter, str(name)+'_friction')
+                if isinstance(friction,basestring):
+                    friction = [friction]
+                else:
+                    assert hasattr(friction, '__iter__')
+                for ax,fr_nslaw in enumerate(friction):
+                    if fr_nslaw == '':  # no None in hdf5, use empty string
+                        continue        # instead for no NSL on an axis
+                    nslaw = self._nslaws[fr_nslaw]
+                    fr = joints.JointFrictionR(joint, ax)
+                    fr_inter = Interaction(nslaw, fr)
+                    self._model.nonSmoothDynamicalSystem().\
+                        link(fr_inter, ds1, ds2)
+                    nsds.setName(fr_inter, '%s_friction%d'%(str(name),ax))
 
     def importBoundaryConditions(self, name):
         if self._broadphase is not None:
@@ -2265,7 +2273,8 @@ class Hdf5():
             if stops is not None:
                 joint.attrs['stops'] = stops # must be a table of [[axis,pos,dir]..]
             if friction is not None:
-                joint.attrs['friction'] = friction # must be an NSL name (e.g. RelayNSL)
+                joint.attrs['friction'] = friction # must be an NSL name (e.g.
+                                                   # RelayNSL), or list of same
 
 
     def addBoundaryCondition(self, name, object1, indices=None, bc_class='HarmonicBC',
