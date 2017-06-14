@@ -25,55 +25,55 @@
 #include <iterator>
 
 /** Iterator for SiconosVector covering both possible types. */
-template< typename V, typename T >
-struct SiconosVectorIteratorType
+template< typename V, typename T, typename TRef >
+struct SiconosVectorIteratorTypeTpl
   : public std::iterator<std::forward_iterator_tag, T>
 {
   V* v;
   size_t p;
-  SiconosVectorIteratorType() : v(0), p(0) {};
-  SiconosVectorIteratorType(V& _v, size_t _p) : v(&_v), p(_p) {};
-  bool operator!=(const SiconosVectorIteratorType& it)
+  SiconosVectorIteratorTypeTpl() : v(0), p(0) {};
+  SiconosVectorIteratorTypeTpl(V& _v, size_t _p) : v(&_v), p(_p) {};
+  bool operator!=(const SiconosVectorIteratorTypeTpl& it)
     { return v != it.v || p != it.p; }
-  bool operator==(const SiconosVectorIteratorType& it)
+  bool operator==(const SiconosVectorIteratorTypeTpl& it)
     { return v == it.v && p == it.p; }
-  SiconosVectorIteratorType& operator=(const SiconosVectorIteratorType& it)
+  SiconosVectorIteratorTypeTpl& operator=(const SiconosVectorIteratorTypeTpl& it)
     { v=it.v; p=it.p; return *this; }
-  SiconosVectorIteratorType& operator++()
+  SiconosVectorIteratorTypeTpl& operator++()
     { if (p<v->size()) p++; return *this; }
-  SiconosVectorIteratorType operator++(int) {
-    SiconosVectorIteratorType tmp(*this);
+  SiconosVectorIteratorTypeTpl operator++(int) {
+    SiconosVectorIteratorTypeTpl tmp(*this);
     if (p < v->size()) p++;
     return tmp;
   }
-  T& operator*() { T &d((*v)(p)); return d; }
+  TRef operator*() { return (*v)(p); }
 };
 
 /* Note: Derived classes here instead of typedefs only because they
  *       are easier to deal with in SWIG */
 
 /** Specialization for non-const SiconosVector */
-struct SiconosVectorIterator
-  : public SiconosVectorIteratorType<SiconosVector, double>
+typedef SiconosVectorIteratorTypeTpl<SiconosVector, double, double&>
+  SiconosVectorIteratorType;
+struct SiconosVectorIterator : public SiconosVectorIteratorType
 {
-  SiconosVectorIterator() : SiconosVectorIteratorType<SiconosVector, double>() {}
-  SiconosVectorIterator(SiconosVectorIteratorType<SiconosVector, double>& it)
-    : SiconosVectorIteratorType<SiconosVector, double>(*it.v,it.p) {}
+  SiconosVectorIterator() : SiconosVectorIteratorType() {}
+  SiconosVectorIterator(SiconosVectorIteratorType& it)
+    : SiconosVectorIteratorType(*it.v,it.p) {}
   SiconosVectorIterator(SiconosVector& _v, size_t _p)
-    : SiconosVectorIteratorType<SiconosVector, double>(_v,_p) {}
+    : SiconosVectorIteratorType(_v,_p) {}
 };
 
 /** Specialization for const SiconosVector */
-struct SiconosVectorConstIterator
-  : public SiconosVectorIteratorType<const SiconosVector, const double>
+typedef SiconosVectorIteratorTypeTpl<const SiconosVector, const double, double>
+  SiconosVectorConstIteratorType;
+struct SiconosVectorConstIterator : public SiconosVectorConstIteratorType
 {
-  SiconosVectorConstIterator()
-    : SiconosVectorIteratorType<const SiconosVector, const double>() {}
-  SiconosVectorConstIterator(
-    SiconosVectorIteratorType<const SiconosVector, const double>& it)
-    : SiconosVectorIteratorType<const SiconosVector, const double>(*it.v,it.p) {}
+  SiconosVectorConstIterator() : SiconosVectorConstIteratorType() {}
+  SiconosVectorConstIterator(SiconosVectorConstIteratorType& it)
+    : SiconosVectorConstIteratorType(*it.v,it.p) {}
   SiconosVectorConstIterator(const SiconosVector& _v, size_t _p)
-    : SiconosVectorIteratorType<const SiconosVector, const double>(_v,_p) {}
+    : SiconosVectorConstIteratorType(_v,_p) {}
 };
 
 #endif
