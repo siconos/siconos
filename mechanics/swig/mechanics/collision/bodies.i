@@ -4,6 +4,8 @@
 
 %include MechanicsBase.i
 
+PY_FULL_REGISTER(CircularDS);
+PY_FULL_REGISTER(CircularR);
 PY_FULL_REGISTER(Disk);
 PY_FULL_REGISTER(Circle);
 PY_FULL_REGISTER(DiskDiskR);
