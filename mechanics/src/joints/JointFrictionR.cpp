@@ -53,13 +53,23 @@ JointFrictionR::JointFrictionR(SP::NewtonEulerJointR joint, SP::UnsignedIntVecto
   , _joint(joint)
   , _axis(axes)
 {
-  _axisMin = 100;
-  _axisMax = 0;
-  for (unsigned int i=0; i < _axis->size(); i++)
+  if (axes)
   {
-    if ((*_axis)[i] > _axisMax) _axisMax = (*_axis)[i];
-    if ((*_axis)[i] < _axisMin) _axisMin = (*_axis)[i];
+    _axisMin = 100;
+    _axisMax = 0;
+    for (unsigned int i=0; i < _axis->size(); i++)
+    {
+      if ((*_axis)[i] > _axisMax) _axisMax = (*_axis)[i];
+      if ((*_axis)[i] < _axisMin) _axisMin = (*_axis)[i];
+    }
   }
+  else
+  {
+    _axisMin = _axisMax = 0;
+    _axis = std11::make_shared< std::vector<unsigned int> >();
+    _axis->push_back(0);
+  }
+
   assert( (_axisMax - _axisMin + 1) <= _joint->numberOfDoF() );
 }
 

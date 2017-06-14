@@ -50,11 +50,12 @@ public:
   /** Initialize a joint friction for a common case: a single axis with a
    * single friction, either positive or negative. For use with
    * NewtonImpactNSL. */
-  JointFrictionR(SP::NewtonEulerJointR joint, unsigned int axis=0);
+  JointFrictionR(SP::NewtonEulerJointR joint, unsigned int axis);
 
   /** Initialize a multidimensional joint friction, e.g. the cone friction on
    * a ball joint. For use with NewtonImpactFrictionNSL size 2 or 3. */
-  JointFrictionR(SP::NewtonEulerJointR joint, SP::UnsignedIntVector axes);
+  JointFrictionR(SP::NewtonEulerJointR joint,
+                 SP::UnsignedIntVector axes=SP::UnsignedIntVector());
 
   virtual void computeh(double time, BlockVector& q0, SiconosVector& y);
 
