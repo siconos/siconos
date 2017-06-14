@@ -22,9 +22,14 @@
 %ignore operator<<(std::ostream& os, const SiconosVector& bv);
 %ignore operator<<(std::ostream& os, const BlockVector& bv);
 %ignore operator std::vector<double>();
-%ignore SiconosVectorIteratorType::operator=(const SiconosVectorIteratorType& it);
-%ignore SiconosVectorIteratorType::operator++();
-%ignore SiconosVectorIteratorType::operator++(int);
+
+%ignore SiconosVectorIteratorTypeTpl::operator=;
+%ignore SiconosVectorIteratorTypeTpl::operator++;
+%ignore SiconosVectorIteratorTypeTpl;
+%ignore SiconosVectorIteratorType;
+%ignore SiconosVectorConstIteratorType;
+%ignore SiconosVectorIterator;
+%ignore SiconosVectorConstIterator;
 %ignore SiconosVector::begin();
 %ignore SiconosVector::end();
 %ignore SiconosVector::begin() const;
