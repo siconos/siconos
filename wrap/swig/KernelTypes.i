@@ -1214,15 +1214,11 @@ struct IsDense : public Question<bool>
   }
 }
 
-
-
 // check on input : a python sequence
-%typecheck(SWIG_TYPECHECK_INTEGER)
-(std11::shared_ptr<std::vector<unsigned int> >)
-{
-  // %typecheck(std11::shared_ptr<std::vector<unsigned int> >, precedence=SWIG_TYPECHECK_INTEGER))
-  PySequence_Check($input);
-}
+%typecheck(SWIG_TYPECHECK_INTEGER) (std11::shared_ptr<std::vector<unsigned int> >)
+%{
+  $1 = PySequence_Check($input);
+%}
 
 // python int sequence => std::vector<unsigned int>
 %fragment("sequenceToUnsignedIntVector","header",fragment="SWIG_AsVal_int")

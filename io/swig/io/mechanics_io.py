@@ -1334,7 +1334,7 @@ class Hdf5():
                     if fr_nslaw == '':  # no None in hdf5, use empty string
                         continue        # instead for no NSL on an axis
                     nslaw = self._nslaws[fr_nslaw]
-                    fr = joints.JointFrictionR(joint, ax)
+                    fr = joints.JointFrictionR(joint, [ax])
                     fr_inter = Interaction(nslaw, fr)
                     self._model.nonSmoothDynamicalSystem().\
                         link(fr_inter, ds1, ds2)

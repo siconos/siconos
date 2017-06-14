@@ -28,8 +28,6 @@
 %ignore SiconosVectorIteratorTypeTpl;
 %ignore SiconosVectorIteratorType;
 %ignore SiconosVectorConstIteratorType;
-%ignore SiconosVectorIterator;
-%ignore SiconosVectorConstIterator;
 %ignore SiconosVector::begin();
 %ignore SiconosVector::end();
 %ignore SiconosVector::begin() const;
