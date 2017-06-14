@@ -95,11 +95,14 @@ macro(add_siconos_swig_sub_module fullname)
     set(${COMPONENT}_SWIG_DEFS "-I${_dir};${${COMPONENT}_SWIG_DEFS}")
   endforeach()
 
+  # extra per-module flags if any
+  set(${COMPONENT}_SWIG_DEFS_${_name} "${${COMPONENT}_SWIG_DEFS};${${COMPONENT}_SWIG_DEFS_${_name}}")
+
   IF(WITH_CXX AND (BUILD_AS_CPP OR NOT ${COMPONENT} MATCHES "numerics"))
     set_source_files_properties(${swig_file}
-      PROPERTIES SWIG_FLAGS "${${COMPONENT}_SWIG_DEFS}" CPLUSPLUS ON)
+      PROPERTIES SWIG_FLAGS "${${COMPONENT}_SWIG_DEFS_${_name}}" CPLUSPLUS ON)
   ENDIF(WITH_CXX AND (BUILD_AS_CPP OR NOT ${COMPONENT} MATCHES "numerics"))
-  
+
   # --- build swig module ---
   if(CMAKE_VERSION VERSION_LESS 3.8.0)
     swig_add_module(${_name} python ${swig_file})

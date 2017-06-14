@@ -37,9 +37,6 @@
 %ignore btVector3::m_floats;
 %ignore btFace::m_plane;
 
-
-
-
 #undef PY_REGISTER_BULLET_COLLISION_DETECTION
 %define PY_REGISTER_BULLET_COLLISION_DETECTION(X)
 %inline
