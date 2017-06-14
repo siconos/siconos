@@ -1354,13 +1354,22 @@ struct MoreauJeanOSI::_NSLEffectOnFreeOutput : public SiconosVisitor
 
   void visit(const NewtonImpactFrictionNSL& nslaw)
   {
-    double e;
-    e = nslaw.en();
-    // Only the normal part is multiplied by e
-    
     SiconosVector & osnsp_rhs = *(*_interProp.workVectors)[MoreauJeanOSI::OSNSP_RHS];
-    osnsp_rhs (0) +=  e * (*_inter.y_k(_osnsp->inputOutputLevel()))(0);
 
+    // The normal part is multiplied depends on en
+    if (nslaw.en() > 0.0)
+    {
+      osnsp_rhs (0) +=  nslaw.en() * (*_inter.y_k(_osnsp->inputOutputLevel()))(0);
+    }
+    // The tangential part is multiplied depends on et
+    if (nslaw.et() > 0.0)
+    {
+      osnsp_rhs (1) +=  nslaw.et()  * (*_inter.y_k(_osnsp->inputOutputLevel()))(1);
+      if (_inter.nonSmoothLaw()->size()>=2)
+      {
+        osnsp_rhs (2) +=  nslaw.et()  * (*_inter.y_k(_osnsp->inputOutputLevel()))(2);
+      }
+    }
   }
   void visit(const EqualityConditionNSL& nslaw)
   {
