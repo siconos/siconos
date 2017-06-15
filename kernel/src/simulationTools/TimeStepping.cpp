@@ -401,10 +401,9 @@ void TimeStepping::initializeNewtonLoop()
 
   if (_computeResiduY)
   {
-    double residu =0.0;
     for (OSIIterator itOSI = _allOSI->begin(); itOSI != _allOSI->end() ; ++itOSI)
     {
-      residu =  (*itOSI)->computeResiduOutput(tkp1, indexSet0);
+      (*itOSI)->computeResiduOutput(tkp1, indexSet0);
     }
   }
   DEBUG_END("TimeStepping::initializeNewtonLoop()\n");
