@@ -48,8 +48,6 @@ void KneeJointR::initComponents(Interaction& inter, VectorOfBlockVectors& DSlink
 
 void KneeJointR::checkInitPos( SP::SiconosVector x1 ,  SP::SiconosVector x2 )
 {
-
-  //x1->display();
   double X1 = x1->getValue(0);
   double Y1 = x1->getValue(1);
   double Z1 = x1->getValue(2);
@@ -66,8 +64,6 @@ void KneeJointR::checkInitPos( SP::SiconosVector x1 ,  SP::SiconosVector x2 )
   double q23 = 0;
   if(x2)
   {
-    //printf("checkInitPos x2:\n");
-    //x2->display();
     X2 = x2->getValue(0);
     Y2 = x2->getValue(1);
     Z2 = x2->getValue(2);
@@ -77,27 +73,12 @@ void KneeJointR::checkInitPos( SP::SiconosVector x1 ,  SP::SiconosVector x2 )
     q23 = x2->getValue(6);
   }
 
-  /*
-  if (Hx(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23) > DBL_EPSILON )
-  {
-    std::cout << "KneeJointR::checkInitPos( SP::SiconosVector x1 ,  SP::SiconosVector x2 )" << std::endl;
-    std::cout << " Hx is large :" << Hx(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23) << std::endl;
-  }
-  if (Hy(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23) > DBL_EPSILON )
-  {
-    std::cout << "KneeJointR::checkInitPos( SP::SiconosVector x1 ,  SP::SiconosVector x2 )" << std::endl;
-    std::cout << " Hy is large :" << Hy(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23) << std::endl;
-  }
-  if (Hz(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23) > DBL_EPSILON )
-  {
-    std::cout << "KneeJointR::checkInitPos( SP::SiconosVector x1 ,  SP::SiconosVector x2 )" << std::endl;
-    std::cout << " Hz is large :" << Hz(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23) << std::endl;
-  }
-  */
-
-  // printf("checkInitPos Hx : %e\n", Hx(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23));
-  // printf("checkInitPos Hy : %e\n", Hy(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23));
-  // printf("checkInitPos Hz : %e\n", Hz(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23));
+  assert(Hx(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23)
+         < DBL_EPSILON);
+  assert(Hy(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23)
+         < DBL_EPSILON);
+  assert(Hz(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23)
+         < DBL_EPSILON);
 }
 
 KneeJointR::KneeJointR(SP::NewtonEulerDS d1, SP::NewtonEulerDS d2, SP::SiconosVector P): NewtonEulerJointR()
