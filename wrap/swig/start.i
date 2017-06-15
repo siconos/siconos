@@ -1,7 +1,3 @@
-%pythoncode %{
-# -*- encoding: utf-8 -*-
-%}
-
 // signatures
 %feature("autodoc", 2);
 
