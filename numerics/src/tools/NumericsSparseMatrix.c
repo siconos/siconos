@@ -265,7 +265,7 @@ size_t NM_sparse_nnz(const CSparseMatrix* const A)
   }
   else
   {
-    fprintf(stderr, "NM_sparse_nnz :: unsupported nz number %d", A->nz);
+    fprintf(stderr, "NM_sparse_nnz :: unsupported nz number %ld", A->nz);
     exit(EXIT_FAILURE);
   }
 }
