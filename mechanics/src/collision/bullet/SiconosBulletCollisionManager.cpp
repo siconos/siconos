@@ -1368,14 +1368,7 @@ public:
   }
 };
 
-void SiconosBulletCollisionManager::updateInteractionsNewtonPrepare(
-  SP::Simulation simulation)
-{
-  updateInteractionsNewtonIteration();
-}
-
-void SiconosBulletCollisionManager::updateInteractionsNewtonIteration(
-  SP::Simulation simulation)
+void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation)
 {
   // -2. update collision objects from all BodyDS dynamical systems
   SP::SiconosVisitor updateVisitor(new CollisionUpdateVisitor(*impl));
