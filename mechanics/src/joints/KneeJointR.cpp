@@ -312,33 +312,12 @@ void KneeJointR::Jd1(double X1, double Y1, double Z1, double q10, double q11, do
   double t104;
   double t109;
   double t11;
-  double t119;
-  double t125;
-  double t129;
-  double t41;
   double t5;
   double t6;
   double t60;
   double t70;
-  double t79;
-  double t89;
   double t9;
   double t99;
-
-  double X2;
-  double Y2;
-  double Z2;
-  double q20;
-  double q21;
-  double q22;
-  double q23;
-  X2 = 0;
-  Y2 = 0;
-  Z2 = 0;
-  q20 = 0;
-  q21 = 0;
-  q22 = 0;
-  q23 = 0;
   {
     t5 = 2.0 * _G2P0z;
     df[15] = -t5;
@@ -387,14 +366,6 @@ void KneeJointR::Jd1(double X1, double Y1, double Z1, double q10, double q11, do
     _jachq->setValue(0, 4, dfr0[16]*q13 + dfr1[17]*q12 + 2.0 * q11 * _G1P0x);
     _jachq->setValue(0, 5, df[6]*q10 + dfr1[17]*q11 + 2.0 * df[2]*q12);
     _jachq->setValue(0, 6, dfr0[16]*q11 + t11 * q10 + 2.0 * df[2]*q13);
-    //      _jachq->setValue(0,7, -1.0);
-    //      _jachq->setValue(0,8, 0.0);
-    //      _jachq->setValue(0,9, 0.0);
-    t41 = df[13];
-    //      _jachq->setValue(0,10, df[14]*q22+t41*q23+2.0*df[8]*q20);
-    //      _jachq->setValue(0,11, dfr0[18]*q23+dfr1[19]*q22+2.0*df[8]*q21);
-    //      _jachq->setValue(0,12, df[14]*q20+dfr1[19]*q21+2.0*q22*_G2P0x);
-    //      _jachq->setValue(0,13, dfr0[18]*q21+t41*q20+2.0*q23*_G2P0x);
     _jachq->setValue(1, 0, 0.0);
     _jachq->setValue(1, 1, 1.0);
     _jachq->setValue(1, 2, 0.0);
@@ -404,15 +375,6 @@ void KneeJointR::Jd1(double X1, double Y1, double Z1, double q10, double q11, do
     t70 = dfr0[16];
     _jachq->setValue(1, 5, t70 * q13 + dfr1[6]*q11 + 2.0 * q12 * _G1P0y);
     _jachq->setValue(1, 6, t70 * q12 + dfr0[4]*q10 + 2.0 * dfr0[0]*q13);
-    //      _jachq->setValue(1,7, 0.0);
-    //      _jachq->setValue(1,8, -1.0);
-    //      _jachq->setValue(1,9, 0.0);
-    t79 = dfr0[19];
-    //      _jachq->setValue(1,10, t79*q21+dfr0[12]*q23+2.0*dfr0[9]*q20);
-    //      _jachq->setValue(1,11, t79*q20+dfr1[14]*q22+2.0*q21*_G2P0y);
-    t89 = dfr0[18];
-    //      _jachq->setValue(1,12, t89*q23+dfr1[14]*q21+2.0*dfr0[9]*q22);
-    //      _jachq->setValue(1,13, t89*q22+dfr0[12]*q20+2.0*q23*_G2P0y);
     _jachq->setValue(2, 0, 0.0);
     _jachq->setValue(2, 1, 0.0);
     _jachq->setValue(2, 2, 1.0);
@@ -423,16 +385,6 @@ void KneeJointR::Jd1(double X1, double Y1, double Z1, double q10, double q11, do
     t109 = dfr1[16];
     _jachq->setValue(2, 5, t109 * q13 + t99 * q10 + 2.0 * dfr1[0]*q12);
     _jachq->setValue(2, 6, t109 * q12 + t104 * q11 + 2.0 * q13 * _G1P0z);
-    //      _jachq->setValue(2,7, 0.0);
-    //      _jachq->setValue(2,8, 0.0);
-    //      _jachq->setValue(2,9, -1.0);
-    t119 = dfr1[15];
-    //      _jachq->setValue(2,10, dfr1[18]*q21+t119*q22+2.0*dfr1[9]*q20);
-    t125 = dfr1[14];
-    //      _jachq->setValue(2,11, dfr1[18]*q20+t125*q23+2.0*q21*_G2P0z);
-    t129 = dfr1[18];
-    //      _jachq->setValue(2,12, t129*q23+t119*q20+2.0*q22*_G2P0z);
-    //      _jachq->setValue(2,13, t129*q22+t125*q21+2.0*dfr1[9]*q23);
   }
 }
 

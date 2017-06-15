@@ -595,10 +595,6 @@ void PrismaticJointR::computehDoF(double time, BlockVector& q0, SiconosVector& y
   double X2 = 0;
   double Y2 = 0;
   double Z2 = 0;
-  double q20 = 1;
-  double q21 = 0;
-  double q22 = 0;
-  double q23 = 0;
 
   if (q0.numberOfBlocks()>1)
   {
@@ -606,10 +602,6 @@ void PrismaticJointR::computehDoF(double time, BlockVector& q0, SiconosVector& y
     X2 = q2->getValue(0);
     Y2 = q2->getValue(1);
     Z2 = q2->getValue(2);
-    q20 = q2->getValue(3);
-    q21 = q2->getValue(4);
-    q22 = q2->getValue(5);
-    q23 = q2->getValue(6);
   }
 
   y.setValue(0, -_G10G20d1x*_axis0->getValue(0)
@@ -654,10 +646,6 @@ void PrismaticJointR::computeJachqDoF(double time, Interaction& inter,
   double X2 = 0;
   double Y2 = 0;
   double Z2 = 0;
-  double q20 = 1;
-  double q21 = 0;
-  double q22 = 0;
-  double q23 = 0;
 
   if (q0->numberOfBlocks()>1)
   {
@@ -665,10 +653,6 @@ void PrismaticJointR::computeJachqDoF(double time, Interaction& inter,
     X2 = q2->getValue(0);
     Y2 = q2->getValue(1);
     Z2 = q2->getValue(2);
-    q20 = q2->getValue(3);
-    q21 = q2->getValue(4);
-    q22 = q2->getValue(5);
-    q23 = q2->getValue(6);
   }
 
   jachq.setValue(0, 0, _axis0->getValue(0)*(-pow(q10,2) - pow(q11,2)
