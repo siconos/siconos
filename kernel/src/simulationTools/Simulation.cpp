@@ -467,11 +467,28 @@ void Simulation::unlink(SP::Interaction inter)
 
 void Simulation::updateInteractions()
 {
-
   // Update interactions if a manager was provided
   if (_interman) {
     _linkOrUnlink = false;
     _interman->updateInteractions(shared_from_this());
+
+    if (_linkOrUnlink) {
+      initOSNS();
+
+      // Since initOSNS calls updateIndexSets() which resets the
+      // topology->hasChanged() flag, it must be specified explicitly.
+      // Otherwise OneStepNSProblem may fail to update its matrices.
+      _nsds->topology()->setHasChanged(true);
+    }
+  }
+}
+
+void Simulation::updateInteractionsNewtonIteration()
+{
+  // Update interactions if a manager was provided
+  if (_interman) {
+    _linkOrUnlink = false;
+    _interman->updateInteractionsNewtonIteration(shared_from_this());
 
     if (_linkOrUnlink) {
       initOSNS();

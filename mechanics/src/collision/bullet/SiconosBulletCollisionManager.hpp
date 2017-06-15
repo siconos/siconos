@@ -95,7 +95,9 @@ public:
 
   bool removeStaticContactorSet(StaticContactorSetID id);
 
-  void updateInteractions(SP::Simulation simulation);
+  void updateInteractionsNewtonPrepare(SP::Simulation simulation);
+
+  void updateInteractionsNewtonIteration(SP::Simulation simulation);
 
   void clearOverlappingPairCache();
 

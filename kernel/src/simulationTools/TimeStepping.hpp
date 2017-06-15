@@ -98,6 +98,11 @@ protected:
    */
   bool _isNewtonConverge;
 
+  /** boolean variable indicating whether interactions should be
+   * updated within the Newton loop.
+   */
+  bool _newtonUpdateInteractionsPerIteration;
+
   /** boolean variable to display Newton info
    */
   bool _displayNewtonConvergence;
@@ -311,6 +316,22 @@ public:
   double newtonMaxIteration()
   {
     return _newtonMaxIteration;
+  };
+
+  /** set whether updateInterations should be called on each Newton iteration
+   *  \param update a bool indiciating the Newton updateInterations behaviour
+   */
+  void setNewtonUpdateInteractionsPerIteration(bool update)
+  {
+    _newtonUpdateInteractionsPerIteration = update;
+  };
+
+  /** get the Newton updateInterations behaviour
+   *  \return a bool indicating the Newton updateInterations behaviour
+   */
+  bool newtonUpdateInteractionsPerIteration()
+  {
+    return _newtonUpdateInteractionsPerIteration;
   };
 
   /** set the NewtonOptions

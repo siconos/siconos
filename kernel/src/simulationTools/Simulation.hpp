@@ -145,6 +145,9 @@ protected:
   /** Call the interaction manager one if is registered, otherwise do nothing. */
   void updateInteractions();
 
+  /** Call the interaction manager one if is registered, otherwise do nothing. */
+  void updateInteractionsNewtonIteration();
+
   /*TS set the ds->q memory, the world (CAD model for example) must be updated.
     Overload this method to update user model.*/
   virtual void updateWorldFromDS()

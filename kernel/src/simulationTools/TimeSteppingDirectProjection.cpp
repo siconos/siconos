@@ -192,7 +192,8 @@ void TimeSteppingDirectProjection::advanceToEvent()
     _nbProjectionIteration++;
     DEBUG_PRINTF("TimeSteppingDirectProjection projection step = %d\n", _nbProjectionIteration);
 
-    updateInteractions();
+    if (_newtonUpdateInteractionsPerIteration)
+      updateInteractionsNewtonIteration();
 
     SP::InteractionsGraph indexSet = _nsds->topology()->indexSet(0);
     InteractionsGraph::VIterator ui, uiend;
@@ -610,7 +611,8 @@ void TimeSteppingDirectProjection::newtonSolve(double criterion, unsigned int ma
       isNewtonConverge = newtonCheckConvergence(criterion);
       if (!isNewtonConverge && !info)
       {
-        updateInteractions();
+        if (_newtonUpdateInteractionsPerIteration)
+          updateInteractionsNewtonIteration();
         updateOutput();
         if (!_allNSProblems->empty() &&  indexSet->size()>0)
           saveYandLambdaInOldVariables();
