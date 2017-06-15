@@ -455,16 +455,11 @@ void PivotJointR::computehDoF(double time, BlockVector& q0, SiconosVector& y,
     return;
 
   SP::SiconosVector q1 = (q0.getAllVect())[0];
-  double X1 = q1->getValue(0);
-  double Y1 = q1->getValue(1);
-  double Z1 = q1->getValue(2);
   double q10 = q1->getValue(3);
   double q11 = q1->getValue(4);
   double q12 = q1->getValue(5);
   double q13 = q1->getValue(6);
-  double X2 = 0;
-  double Y2 = 0;
-  double Z2 = 0;
+
   double q20 = 1;
   double q21 = 0;
   double q22 = 0;
@@ -473,9 +468,6 @@ void PivotJointR::computehDoF(double time, BlockVector& q0, SiconosVector& y,
   if (q0.numberOfBlocks()>1)
   {
     SP::SiconosVector q2 = (q0.getAllVect())[1];
-    X2 = q2->getValue(0);
-    Y2 = q2->getValue(1);
-    Z2 = q2->getValue(2);
     q20 = q2->getValue(3);
     q21 = q2->getValue(4);
     q22 = q2->getValue(5);
@@ -516,16 +508,11 @@ void PivotJointR::computeJachqDoF(double time, Interaction& inter,
     return;
 
   SP::SiconosVector q1 = (q0->getAllVect())[0];
-  double X1 = q1->getValue(0);
-  double Y1 = q1->getValue(1);
-  double Z1 = q1->getValue(2);
   double q10 = q1->getValue(3);
   double q11 = q1->getValue(4);
   double q12 = q1->getValue(5);
   double q13 = q1->getValue(6);
-  double X2 = 0;
-  double Y2 = 0;
-  double Z2 = 0;
+
   double q20 = 1;
   double q21 = 0;
   double q22 = 0;
@@ -534,9 +521,6 @@ void PivotJointR::computeJachqDoF(double time, Interaction& inter,
   if (q0->numberOfBlocks()>1)
   {
     SP::SiconosVector q2 = (q0->getAllVect())[1];
-    X2 = q2->getValue(0);
-    Y2 = q2->getValue(1);
-    Z2 = q2->getValue(2);
     q20 = q2->getValue(3);
     q21 = q2->getValue(4);
     q22 = q2->getValue(5);

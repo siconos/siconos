@@ -186,10 +186,6 @@ KneeJointR::KneeJointR(SP::NewtonEulerDS d1, SP::SiconosVector P0, bool absolutR
   checkInitPos(q1,q2);
 }
 
-// The rest of the code is generated
-// we can disable some warning
-#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
-
 void KneeJointR::Jd1d2(double X1, double Y1, double Z1, double q10, double q11, double q12, double q13, double X2, double Y2, double Z2, double q20, double q21, double q22, double q23)
 {
   double df[20];

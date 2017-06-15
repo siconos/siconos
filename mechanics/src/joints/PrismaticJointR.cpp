@@ -249,10 +249,6 @@ void PrismaticJointR::computeh(double time, BlockVector& q0, SiconosVector& y)
 
 }
 
-// The rest of the code is generated.
-// we can disable some warning
-#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
-
 /* sympy expression:
  *
  * G1G2d1 = unrot(G2-G1, q1)

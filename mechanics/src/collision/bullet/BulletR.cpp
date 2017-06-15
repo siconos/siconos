@@ -59,10 +59,10 @@ BulletR::BulletR(const btManifoldPoint &point,
                  double y_correction_B,
                  double scaling) :
   NewtonEulerFrom3DLocalFrameR(),
-  _flip(flip),
   _y_correction_A(y_correction_A),
   _y_correction_B(y_correction_B),
-  _scaling(scaling)
+  _scaling(scaling),
+  _flip(flip)
 {
   updateContactPoints(point);
 }

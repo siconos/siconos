@@ -1056,8 +1056,8 @@ void SiconosBulletCollisionManager_impl::createCollisionObject(
 
   heightfield->resize(data->size(0) * data->size(1));
 
-  for (int i=0; i < data->size(0); i++) {
-    for (int j=0; j < data->size(1); j++) {
+  for (unsigned int i=0; i < data->size(0); i++) {
+    for (unsigned int j=0; j < data->size(1); j++) {
       double v = data->getValue(i,j);
       (*heightfield)[j*data->size(0)+i] = v;
       if (v > vmax) vmax = v;
@@ -1402,8 +1402,7 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
   IterateContactPoints t(impl->_collisionWorld);
   IterateContactPoints::iterator it, itend=t.end();
   DEBUG_PRINT("iterating contact points:\n");
-  int n_points=0;
-  int late_interaction=0;
+
   for (it=t.begin(); it!=itend; ++it)
   {
     DEBUG_PRINTF("  -- %p, %p, %p\n", it->objectA, it->objectB, it->point);
@@ -1444,8 +1443,8 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
                           indexSet0->properties(*ui).source) );
         SP::BodyDS ds2( std11::dynamic_pointer_cast<BodyDS>(
                           indexSet0->properties(*ui).target) );
-        if (ds1 && ds2 && ((&*ds1==&*pairA->ds) && (&*ds2==&*pairB->ds)
-                           || (&*ds1==&*pairB->ds) && (&*ds2==&*pairA->ds)))
+        if (ds1 && ds2 && (((&*ds1==&*pairA->ds) && (&*ds2==&*pairB->ds))
+                           || ((&*ds1==&*pairB->ds) && (&*ds2==&*pairA->ds))))
         {
           // Only match on non-BulletR interactions, i.e. non-contact relations
           SP::BulletR br ( std11::dynamic_pointer_cast<BulletR>(inter->relation()) );
