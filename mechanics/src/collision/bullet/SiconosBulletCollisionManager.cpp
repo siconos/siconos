@@ -142,7 +142,8 @@ DEFINE_SPTR(UpdateShapeVisitor)
 #endif
 
 // We need a bit more space to hold mesh data
-struct btSiconosMeshData : public btBvhTriangleMeshShape {
+class btSiconosMeshData : public btBvhTriangleMeshShape {
+public:
   btSiconosMeshData(btStridingMeshInterface*i, bool b)
     : btBvhTriangleMeshShape(i,b), btScalarVertices(0) {}
   ~btSiconosMeshData() { if (btScalarVertices) delete[] btScalarVertices; }
@@ -152,7 +153,8 @@ struct btSiconosMeshData : public btBvhTriangleMeshShape {
 #define BTMESHSHAPE btSiconosMeshData
 
 // Similarly, place to store height matrix
-struct btSiconosHeightData : public btHeightfieldTerrainShape {
+class btSiconosHeightData : public btHeightfieldTerrainShape {
+public:
   btSiconosHeightData(int width, std11::shared_ptr< std::vector<btScalar> > data,
                       btScalar min_height, btScalar max_height)
     : btHeightfieldTerrainShape(width, data->size()/width, data->data(),
@@ -181,8 +183,9 @@ SiconosBulletOptions::SiconosBulletOptions()
 // contactor, and collision object for each shape type.  We also need
 // to access generic shape stuff (group, margin) by a pointer from the
 // collision callback, so we need a record base class.
-struct BodyShapeRecord
+class BodyShapeRecord
 {
+public:
   BodyShapeRecord(SP::SiconosVector b, SP::BodyDS d, SP::SiconosShape sh,
                   SP::btCollisionObject btobj, SP::SiconosContactor con)
     : base(b), ds(d), sshape(sh), btobject(btobj), contactor(con),
@@ -200,8 +203,9 @@ struct BodyShapeRecord
 };
 
 template <typename SICONOSSHAPE, typename BULLETSHAPE>
-struct BodyShapeRecordT : BodyShapeRecord
+class BodyShapeRecordT : BodyShapeRecord
 {
+public:
   BodyShapeRecordT(SP::SiconosVector base, SP::BodyDS ds,
                    SICONOSSHAPE sh, BULLETSHAPE btsh,
                    SP::btCollisionObject btobj, SP::SiconosContactor con)
@@ -211,7 +215,9 @@ struct BodyShapeRecordT : BodyShapeRecord
 };
 
 #define SHAPE_RECORD(X,SICONOSSHAPE,BULLETSHAPE)                        \
-  struct X : public BodyShapeRecord, std11::enable_shared_from_this<X> { \
+  class X : public BodyShapeRecord,                                     \
+            public std11::enable_shared_from_this<X> {                  \
+  public:                                                               \
     X(SP::SiconosVector base, SP::BodyDS ds,                            \
       SICONOSSHAPE sh, BULLETSHAPE btsh,                                \
       SP::btCollisionObject btobj, SP::SiconosContactor con)            \
@@ -236,8 +242,9 @@ typedef std::map<const BodyDS*, std::vector<std11::shared_ptr<BodyShapeRecord> >
 /** For associating static contactor sets and their offsets.
  * Pointer to this is what is returned as the opaque and unique
  * StaticContactorSetID so that they can be removed. */
-struct StaticContactorSetRecord
+class StaticContactorSetRecord
 {
+public:
   SP::SiconosContactorSet contactorSet;
   SP::SiconosVector base;
 };
@@ -430,8 +437,9 @@ SiconosBulletCollisionManager::~SiconosBulletCollisionManager()
   impl->_collisionWorld.reset();
 }
 
-struct UpdateShapeVisitor : public SiconosVisitor
+class UpdateShapeVisitor : public SiconosVisitor
 {
+public:
   using SiconosVisitor::visit;
   SiconosBulletCollisionManager_impl &impl;
 
@@ -531,7 +539,6 @@ btTransform SiconosBulletCollisionManager_impl::offsetTransform(const SiconosVec
 
   /* Calculate total orientation */
   btQuaternion roffset(offset(4), offset(5), offset(6), offset(3));
-  btQuaternion r(rbase * roffset);
 
   /* Set the absolute shape position */
   return btTransform( rbase * roffset,
@@ -946,7 +953,7 @@ make_bt_vertex_array(SP::SiconosMesh mesh, SCALAR1 _s1, SCALAR2 _s2)
   assert(mesh->vertices()->size(1) == 3);
   unsigned int num = mesh->vertices()->size(0);
   btScalar *vertices = new btScalar[num*3];
-  for (int i=0; i < num; i++)
+  for (unsigned int i=0; i < num; i++)
   {
     vertices[i*3+0] = (*mesh->vertices())(i,0);
     vertices[i*3+1] = (*mesh->vertices())(i,1);
@@ -1152,8 +1159,9 @@ void SiconosBulletCollisionManager_impl::updateShape(BodyHeightRecord &record)
   record.btobject->setWorldTransform( t );
 }
 
-struct CreateCollisionObjectShapeVisitor : public SiconosVisitor
+class CreateCollisionObjectShapeVisitor : public SiconosVisitor
 {
+public:
   using SiconosVisitor::visit;
   SiconosBulletCollisionManager_impl &impl;
   const SP::BodyDS ds;
@@ -1339,8 +1347,9 @@ SP::BulletR SiconosBulletCollisionManager::makeBulletR(SP::BodyDS ds1,
                                      y_correction_B, scaling);
 }
 
-struct CollisionUpdateVisitor : public SiconosVisitor
+class CollisionUpdateVisitor : public SiconosVisitor
 {
+public:
   using SiconosVisitor::visit;
   SiconosBulletCollisionManager_impl &impl;
 
