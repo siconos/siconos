@@ -1510,3 +1510,24 @@ still to do,
 *** Development of applications
     - AMTC.  Ensimag student. LHD
     -
+** <2017-06-15 jue>
+SS, MB, VA
+
+(things to be discussed with FP and OH)
+
+- continue supporting old GCC until at least 4.2 (aiming for december
+  release), after that consider exploiting C++11/14/17 features.
+
+- also wait until at least 4.2 for new SiconosVector features from
+  @bremond, maybe even later (could make use of C++14)
+
+- try to fix within-Newton-loop updateInteractions before 4.1 (SS)
+
+- discussed briefly need for teams to work on numeric (parallelisation
+  strategies), and format specifications for mechanical simulations.
+
+- regardless of a better, more generalized format, agreed that some
+  tweaks to our current HDF5 format are warranted.
+
+- improve VTK output for ParaView also a priority, if possible.  check
+  other possible VTK output formats.
