@@ -122,7 +122,7 @@ int main(int argc, char* argv[])
     s->setConstraintTolUnilateral(1e-08);
     s->setConstraintTol(1e-04);
     bouncingBall->setSimulation(s);
-        
+
     // =========================== End of model definition ===========================
 
     // ================================= Computation =================================
