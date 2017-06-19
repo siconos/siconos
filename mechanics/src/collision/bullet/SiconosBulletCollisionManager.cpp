@@ -1343,7 +1343,9 @@ SP::BulletR SiconosBulletCollisionManager::makeBulletR(SP::BodyDS ds1,
                                                        double y_correction_B,
                                                        double scaling)
 {
-  return std11::make_shared<BulletR>(p, flip, y_correction_A,
+  return std11::make_shared<BulletR>(p, ds1 ? ds1->q() : SP::SiconosVector(),
+                                     ds2 ? ds2->q() : SP::SiconosVector(),
+                                     flip, y_correction_A,
                                      y_correction_B, scaling);
 }
 
@@ -1485,7 +1487,8 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
 
       /* update the relation */
       SP::BulletR rel(std11::static_pointer_cast<BulletR>((*p_inter)->relation()));
-      rel->updateContactPoints(*it->point);
+      rel->updateContactPoints(*it->point, pairA->ds->q(),
+                               pairB->ds ? pairB->ds->q() : SP::SiconosVector());
 
       _stats.existing_interactions_processed ++;
     }

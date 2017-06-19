@@ -392,6 +392,7 @@ void BulletSpaceFilter::buildInteractions(double time)
                      });
 
 
+          bool flip = false;
           if (itc == contactPoints.end() || !cpoint->m_userPersistentData)
           {
             /* new interaction */
@@ -402,8 +403,12 @@ void BulletSpaceFilter::buildInteractions(double time)
               /* if objectB is the only DS, (A is static), then flip
                * the contact points and normal otherwise the relation
                * is to the wrong side */
-              bool flip = !dsa && dsb;
-              SP::BulletR rel(new BulletR(*cpoint, flip));
+              flip = !dsa && dsb;
+              SP::BulletR rel(new BulletR(*cpoint,
+                                          flip ? dsb->q() : dsa->q(),
+                                          (flip ? (dsa?dsa->q():SP::SiconosVector())
+                                                : (dsb?dsb->q():SP::SiconosVector())),
+                                          flip));
               rel->setContactPoint(cpoint);
               inter.reset(new Interaction(nslaw, rel));//, 4 * i + z));
             }
@@ -445,7 +450,10 @@ void BulletSpaceFilter::buildInteractions(double time)
             DEBUG_PRINTF("Interaction %p = true\n", static_cast<Interaction *>(cpoint->m_userPersistentData));
             DEBUG_PRINTF("cpoint %p  = true\n", &*cpoint);
             SP::BulletR rel(std11::static_pointer_cast<BulletR>(inter->relation()));
-            rel->updateContactPoints(*cpoint);
+            rel->updateContactPoints(*cpoint,
+                                     flip ? dsb->q() : dsa->q(),
+                                     flip ? (dsa ? dsa->q() : SP::SiconosVector())
+                                          : (dsb ? dsb->q() : SP::SiconosVector()));
           }
           else
           {

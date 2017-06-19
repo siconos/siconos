@@ -100,7 +100,7 @@ int main()
     SP::Model model(new Model(t0, T));
 
     // -- Moving object --
-    SP::BodyDS body(makeBox(1.0, position_init, velocity_init));
+    SP::BodyDS body(makeBox(g, position_init, velocity_init));
 
     // -- Add the dynamical system in the non smooth dynamical system
     model->nonSmoothDynamicalSystem()->insertDynamicalSystem(body);

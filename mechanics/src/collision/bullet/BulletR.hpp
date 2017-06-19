@@ -37,6 +37,7 @@ private:
 
 public:
   BulletR(const btManifoldPoint &,
+          SP::SiconosVector q1, SP::SiconosVector q2,
           bool flip=false,
           double y_correction_A=0,
           double y_correction_B=0,
@@ -70,7 +71,8 @@ public:
 
   virtual void computeh(double time, BlockVector& q0, SiconosVector& y);
 
-  virtual void updateContactPoints(const btManifoldPoint& point);
+  virtual void updateContactPoints(const btManifoldPoint& point,
+                                   SP::SiconosVector q1, SP::SiconosVector q2);
 
   virtual void preDelete() {}
 
