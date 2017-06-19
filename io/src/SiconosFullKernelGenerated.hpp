@@ -138,6 +138,8 @@ SICONOS_IO_REGISTER_WITH_BASES(NewtonEulerFrom1DLocalFrameR,(NewtonEulerR),
   (_Pc2)
   (_RotationAbsToContactFrame)
   (_isOnContact)
+  (_relPc1)
+  (_relPc2)
   (_rotationMatrixAbsToBody))
 SICONOS_IO_REGISTER_WITH_BASES(LagrangianLinearTIR,(LagrangianR),
   (_F)
@@ -484,7 +486,8 @@ SICONOS_IO_REGISTER_WITH_BASES(TimeStepping,(Simulation),
   (_newtonResiduDSMax)
   (_newtonResiduRMax)
   (_newtonResiduYMax)
-  (_newtonTolerance))
+  (_newtonTolerance)
+  (_newtonUpdateInteractionsPerIteration))
 SICONOS_IO_REGISTER(Simulation,
   (_T)
   (_allNSProblems)

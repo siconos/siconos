@@ -170,6 +170,8 @@ SICONOS_IO_REGISTER_WITH_BASES(NewtonEulerFrom1DLocalFrameR,(NewtonEulerR),
   (_Pc2)
   (_RotationAbsToContactFrame)
   (_isOnContact)
+  (_relPc1)
+  (_relPc2)
   (_rotationMatrixAbsToBody))
 SICONOS_IO_REGISTER_WITH_BASES(LagrangianLinearTIR,(LagrangianR),
   (_F)
@@ -516,7 +518,8 @@ SICONOS_IO_REGISTER_WITH_BASES(TimeStepping,(Simulation),
   (_newtonResiduDSMax)
   (_newtonResiduRMax)
   (_newtonResiduYMax)
-  (_newtonTolerance))
+  (_newtonTolerance)
+  (_newtonUpdateInteractionsPerIteration))
 SICONOS_IO_REGISTER(Simulation,
   (_T)
   (_allNSProblems)
@@ -653,7 +656,9 @@ SICONOS_IO_REGISTER_WITH_BASES(PivotJointR,(KneeJointR),
   (_cq2q104)
   (_initial_AscalA)
   (_initial_AscalA1)
-  (_initial_AscalA2))
+  (_initial_AscalA2)
+  (_previousAngle)
+  (_twistCount))
 SICONOS_IO_REGISTER_WITH_BASES(SphereLDSPlanR,(LagrangianScleronomousR),
   (A)
   (B)
@@ -805,7 +810,10 @@ SICONOS_IO_REGISTER_WITH_BASES(CylindricalJointR,(NewtonEulerJointR),
   (_cq2q101)
   (_cq2q102)
   (_cq2q103)
-  (_cq2q104))
+  (_cq2q104)
+  (_initialAngle)
+  (_previousAngle)
+  (_twistCount))
 SICONOS_IO_REGISTER(FMatrix,
 )
 SICONOS_IO_REGISTER_WITH_BASES(PrismaticJointR,(NewtonEulerJointR),
