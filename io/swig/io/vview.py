@@ -188,36 +188,6 @@ big_data_writer.SetInputConnection(big_data_source.GetOutputPort())
 contactors = dict()
 offsets = dict()
 
-def set_position(instance, q0, q1, q2, q3, q4, q5, q6):
-    if (numpy.any(numpy.isnan([q0, q1, q2, q3, q4, q5, q6]))
-            or numpy.any(numpy.isinf([q0, q1, q2, q3, q4, q5, q6]))):
-        print('Bad position for', instance, q0, q1, q2, q3, q4, q5, q6)
-        return
-
-    q = Quaternion((q3, q4, q5, q6))
-
-    for transform, offset in zip(transforms[instance], offsets[instance]):
-
-        p = q.rotate(offset[0])
-
-        r = q * Quaternion(offset[1])
-
-        transform.Identity()
-        transform.Translate(q0 + p[0], q1 + p[1], q2 + p[2])
-
-        axis, angle = r.axisAngle()
-
-        transform.RotateWXYZ(angle * 180. / pi,
-                             axis[0],
-                             axis[1],
-                             axis[2])
-
-
-def set_positionv(x):
-    for y in x.reshape(-1, 8):
-        set_position(*(y.reshape(8)))
-
-
 def step_reader(step_string):
 
     from OCC.StlAPI import StlAPI_Writer
@@ -361,7 +331,7 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
                 self._output[mu] = vtk.vtkPolyData()
                 self._output[mu].SetFieldData(self._contact_field[mu])
 
-        def method(self):
+        def xmethod(self):
 
             if self._data is not None:
 
@@ -386,18 +356,18 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
                             )[0]
 
                         self.cpa_at_time[mu] = self._data[
-                            id_f[imu], 2:5].copy()
+                            id_f[imu], 2:5]
                         self.cpb_at_time[mu] = self._data[
-                            id_f[imu], 5:8].copy()
+                            id_f[imu], 5:8]
                         self.cn_at_time[mu] = - self._data[
-                            id_f[imu], 8:11].copy()
+                            id_f[imu], 8:11]
                         self.cf_at_time[mu] = self._data[
-                            id_f[imu], 11:14].copy()
+                            id_f[imu], 11:14]
 
                         self.dom_at_time[mu] = None
                         if dom_imu is not None:
                             self.dom_at_time[mu] = self._dom_data[
-                                dom_id_f[imu], 1].copy()
+                                dom_id_f[imu], 1]
 
                         self.cpa[mu] = numpy_support.numpy_to_vtk(
                             self.cpa_at_time[mu])
@@ -485,14 +455,15 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
         for mu in cf_prov._mu_coefs:
             init_contact_pos(mu)
 
-    times = list(set(dpos_data[:, 0]))
-    times.sort()
-
-    ndyna = len(numpy.where(dpos_data[:, 0] == times[0]))
+    times = dpos_data[:, 0]
+    # every
+#    times.sort()
+    if (len(times) == 0):
+        print('No dynamic data found!  Empty simulation.')
 
     if cf_prov is not None:
         cf_prov._time = min(times[:])
-        cf_prov.method()
+        cf_prov.xmethod()
 
     cone = dict()
     cone_glyph = dict()
@@ -515,7 +486,8 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
     sactora = dict()
     sactorb = dict()
     clactor = dict()
-
+    times_of_birth = dict()
+    
     transform = vtk.vtkTransform()
     transform.Translate(-0.5, 0., 0.)
 
@@ -801,8 +773,8 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
             for x,d in enumerate(shape):
                 for y,v in enumerate(d):
                     points.InsertNextPoint(
-                        float(x) / shape.shape[0] * extents[0] - extents[0]/2,
-                        float(y) / shape.shape[1] * extents[1] - extents[1]/2,
+                        float(x) / (shape.shape[0]-1) * extents[0] - extents[0]/2,
+                        float(y) / (shape.shape[1]-1) * extents[1] - extents[1]/2,
                         v)
 
             polydata = vtk.vtkPolyData()
@@ -917,6 +889,8 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
         contactors[instance] = []
         transforms[instance] = []
         offsets[instance] = []
+        times_of_birth[instance] = io.instances()[instance_name].\
+                                   attrs['time_of_birth']
         for contactor_instance_name in io.instances()[instance_name]:
             contactor_name = io.instances()[instance_name][
                 contactor_instance_name].attrs['name']
@@ -975,16 +949,77 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
                     io.instances()[instance_name][contactor_instance_name].\
                  attrs['orientation'].astype(float)))
 
-    pos_data = dpos_data[:].copy()
-    spos_data = spos_data[:].copy()
+    pos_data = dpos_data[:]
+    spos_data = spos_data[:]
 
-    def set_actors_visibility(id_t):
+    def set_position_i(instance, q0, q1, q2, q3, q4, q5, q6):
+        #if (numpy.any(numpy.isnan([q0, q1, q2, q3, q4, q5, q6]))
+        #    or numpy.any(numpy.isinf([q0, q1, q2, q3, q4, q5, q6]))):
+        #print('Bad position for', instance, q0, q1, q2, q3, q4, q5, q6)
+        #return
+
+        q = Quaternion((q3, q4, q5, q6))
+
+        for transform, offset in zip(transforms[instance], offsets[instance]):
+
+            p = q.rotate(offset[0])
+
+            r = q * Quaternion(offset[1])
+
+            transform.Identity()
+            transform.Translate(q0 + p[0], q1 + p[1], q2 + p[2])
+
+            axis, angle = r.axisAngle()
+
+            transform.RotateWXYZ(angle * 180. / pi,
+                                 axis[0],
+                                 axis[1],
+                                 axis[2])
+
+    set_position_v = numpy.vectorize(set_position_i)
+
+    def set_position(data):
+        set_position_v(data[:, 1],
+                       data[:, 2],
+                       data[:, 3],
+                       data[:, 4],
+                       data[:, 5],
+                       data[:, 6],
+                       data[:, 7],
+                       data[:, 8])
+                            
+    def set_positionv_old(x):
+        for y in x.reshape(-1, 8):
+            set_position(*(y.reshape(8)))
+    
+    def set_actors_viz(instance, time):
+        actor = actors[instance]
+        if times_of_birth[instance] <= time:
+            actor.VisibilityOn()
+        else:
+            actor.VisibilityOff()
+
+    set_actors_vizzz = numpy.vectorize(set_actors_viz)
+
+    def set_actors_visibility(time):
+        set_actors_vizzz(actors.keys(), time)
+    
+    def set_actors_visibility_old(id_t=None):
         for instance, actor in actors.items():
-            if instance < 0 or instance in pos_data[id_t, 1]:
-                # actor.GetProperty().SetColor(0,0,1)
+            # Instance is a static object
+            visible = instance < 0
+            # Instance is in the current timestep
+            if id_t:
+                visible = visible or instance in pos_data[id_t, 1]
+            # Instance has time of birth <= 0
+            else:
+                tob = [io.instances()[k].attrs['time_of_birth']
+                       for k in io.instances()
+                       if io.instances()[k].attrs['id'] == instance][0]
+                visible = visible or tob <= 0
+            if visible:
                 actor.VisibilityOn()
             else:
-                # actor.GetProperty().SetColor(0,1,0)
                 actor.VisibilityOff()
 
     if cf_prov is not None:
@@ -1004,14 +1039,29 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
     except IOError as e:
         pass
 
-    id_t0 = numpy.where(dpos_data[:, 0] == min(dpos_data[:, 0]))
+    time0 = min(dpos_data[:, 0])
+    try:
+        # Positions at first time step
+        id_t0 = numpy.where(dpos_data[:, 0] == time0)
+        pos_t0 = pos_data[id_t0, 1:9]
+    except ValueError:
+        # Collect positions from init data
+        # but why ??
+        id_t0 = None
+        pos_t0 = numpy.array([
+            numpy.hstack(([time0,
+                           io.instances()[k].attrs['id']]
+                          ,io.instances()[k].attrs['translation']
+                          ,io.instances()[k].attrs['orientation']))
+            for k in io.instances()
+            if io.instances()[k].attrs['id'] >= 0])
 
     if numpy.shape(spos_data)[0] > 0:
-        set_positionv(spos_data[:, 1:9])
+        set_position(spos_data)
 
-    set_positionv(pos_data[id_t0, 1:9])
+    set_position(dpos_data[[time0], :])
 
-    set_actors_visibility(id_t0)
+    set_actors_visibility(time0)
 
     renderer_window.AddRenderer(renderer)
     interactor_renderer.SetRenderWindow(renderer_window)
@@ -1137,30 +1187,38 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
 
     class InputObserver():
 
-        def __init__(self, times, slider_repres):
-            self._stimes = set(times)
+        def __init__(self, times=None, slider_repres=None):
             self._opacity = 1.0
-            self._time_step = (max(self._stimes) - min(self._stimes)) \
-                / len(self._stimes)
-            self._time = min(times)
-            self._slider_repres = slider_repres
             self._current_id = vtk.vtkIdTypeArray()
             self._renderer = renderer
             self._renderer_window = renderer_window
-            self._times = times
             self._image_counter = 0
             self._view_cycle = -1
-
             self._recording = False
+            self._times = None
+
+            if times is None or len(times)==0:
+                return
+            self._times = times
+            self._stimes = set(times)
+            self._time_step = (max(self._stimes) - min(self._stimes)) \
+                / len(self._stimes)
+            self._time = min(times)
+            if slider_repres is None:
+                return
+            self._slider_repres = slider_repres
 
         def update(self):
             global cf_prov
+            if self._times is None:
+                renderer_window.Render()
+                return
             index = bisect.bisect_left(self._times, self._time)
             index = max(0, index)
             index = min(index, len(self._times) - 1)
             if cf_prov is not None:
                 cf_prov._time = self._times[index]
-                cf_prov.method()
+                cf_prov.xmethod()
 
     #        contact_posa.Update()
 
@@ -1172,11 +1230,10 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
 
             # set_positionv(spos_data[:, 1:9])
 
+            set_actors_visibility(self._times[index])
+            
             id_t = numpy.where(pos_data[:, 0] == self._times[index])
-
-            set_actors_visibility(id_t)
-
-            set_positionv(pos_data[id_t, 1:9])
+            set_position(*pos_data[id_t, :])
 
             self._slider_repres.SetValue(self._time)
 
@@ -1212,7 +1269,7 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
                     cf_prov = CFprov(cf_data, dom_data)
                 times = list(set(dpos_data[:, 0]))
                 times.sort()
-                ndyna = len(numpy.where(dpos_data[:, 0] == times[0]))
+
                 if len(spos_data) > 0:
                     instances = set(dpos_data[:, 1]).union(
                         set(spos_data[:, 1]))
@@ -1221,7 +1278,7 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
 
                 if cf_prov is not None:
                     cf_prov._time = min(times[:])
-                    cf_prov.method()
+                    cf_prov.xmethod()
                     for mu in cf_prov._mu_coefs:
                         contact_posa[mu].SetInputData(cf_prov._output)
                         contact_posa[mu].Update()
@@ -1231,11 +1288,11 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
                         contact_pos_norm[mu].Update()
 
                 id_t0 = numpy.where(
-                    dpos_data[:, 0] == min(dpos_data[:, 0]))
+                    dpos_data[:, 0] == time0)
 
-                pos_data = dpos_data[:].copy()
+                pos_data = dpos_data[:]
                 min_time = times[0]
-                set_actors_visibility(id_t0)
+                set_actors_visibility(time0)
 
                 max_time = times[len(times) - 1]
 
@@ -1316,6 +1373,7 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
                             self._renderer.GetActiveCamera().SetViewUp(
                                 -1, -1, 1)
                             self._view_cycle = -1
+                    self._renderer.ResetCameraClippingRange()
 
             if key == 's':
                 if not self._recording:
@@ -1377,45 +1435,45 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
                     self._recording = False
                     recorder.End()
 
-    slider_repres = vtk.vtkSliderRepresentation2D()
+    if len(times) > 0:
+        slider_repres = vtk.vtkSliderRepresentation2D()
 
-    if min_time is None:
-        min_time = times[0]
+        if min_time is None:
+            min_time = times[0]
+        if max_time is None:
+            max_time = times[len(times) - 1]
 
-    if max_time is None:
-        max_time = times[len(times) - 1]
+        slider_repres.SetMinimumValue(min_time)
+        slider_repres.SetMaximumValue(max_time)
+        slider_repres.SetValue(min_time)
+        slider_repres.SetTitleText("time")
+        slider_repres.GetPoint1Coordinate(
+        ).SetCoordinateSystemToNormalizedDisplay()
+        slider_repres.GetPoint1Coordinate().SetValue(0.4, 0.9)
+        slider_repres.GetPoint2Coordinate(
+        ).SetCoordinateSystemToNormalizedDisplay()
+        slider_repres.GetPoint2Coordinate().SetValue(0.9, 0.9)
 
-    slider_repres.SetMinimumValue(min_time)
-    slider_repres.SetMaximumValue(max_time)
-    slider_repres.SetValue(min_time)
-    slider_repres.SetTitleText("time")
-    slider_repres.GetPoint1Coordinate(
-    ).SetCoordinateSystemToNormalizedDisplay()
-    slider_repres.GetPoint1Coordinate().SetValue(0.4, 0.9)
-    slider_repres.GetPoint2Coordinate(
-    ).SetCoordinateSystemToNormalizedDisplay()
-    slider_repres.GetPoint2Coordinate().SetValue(0.9, 0.9)
+        slider_repres.SetSliderLength(0.02)
+        slider_repres.SetSliderWidth(0.03)
+        slider_repres.SetEndCapLength(0.01)
+        slider_repres.SetEndCapWidth(0.03)
+        slider_repres.SetTubeWidth(0.005)
+        slider_repres.SetLabelFormat("%3.4lf")
+        slider_repres.SetTitleHeight(0.02)
+        slider_repres.SetLabelHeight(0.02)
 
-    slider_repres.SetSliderLength(0.02)
-    slider_repres.SetSliderWidth(0.03)
-    slider_repres.SetEndCapLength(0.01)
-    slider_repres.SetEndCapWidth(0.03)
-    slider_repres.SetTubeWidth(0.005)
-    slider_repres.SetLabelFormat("%3.4lf")
-    slider_repres.SetTitleHeight(0.02)
-    slider_repres.SetLabelHeight(0.02)
+        slider_widget = vtk.vtkSliderWidget()
+        slider_widget.SetInteractor(interactor_renderer)
+        slider_widget.SetRepresentation(slider_repres)
+        slider_widget.KeyPressActivationOff()
+        slider_widget.SetAnimationModeToAnimate()
+        slider_widget.SetEnabled(True)
 
-    slider_widget = vtk.vtkSliderWidget()
-    slider_widget.SetInteractor(interactor_renderer)
-    slider_widget.SetRepresentation(slider_repres)
-    slider_widget.KeyPressActivationOff()
-    slider_widget.SetAnimationModeToAnimate()
-    slider_widget.SetEnabled(True)
-
-    input_observer = InputObserver(times, slider_repres)
-
-    slider_widget.AddObserver("InteractionEvent", input_observer.time)
-
+        input_observer = InputObserver(times, slider_repres)
+        slider_widget.AddObserver("InteractionEvent", input_observer.time)
+    else:
+        input_observer = InputObserver()
     interactor_renderer.AddObserver('KeyPressEvent', input_observer.key)
 
     # Create a vtkLight, and set the light parameters.
@@ -1433,9 +1491,9 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
 
     # Warning! numpy support offer a view on numpy array
     # the numpy array must not be garbage collected!
-    nxtime = solv_data[:, 0].copy()
-    nxiters = solv_data[:, 1].copy()
-    nprecs = solv_data[:, 2].copy()
+    nxtime = solv_data[:, 0]
+    nxiters = solv_data[:, 1]
+    nprecs = solv_data[:, 2]
     xtime = numpy_support.numpy_to_vtk(nxtime)
     xiters = numpy_support.numpy_to_vtk(nxiters)
     xprecs = numpy_support.numpy_to_vtk(nprecs)
@@ -1504,7 +1562,8 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
     tview_prec.GetRenderer().SetBackground(.9, .9, .9)
     tview_prec.GetRenderer().Render()
 
-    slwsc, slrepsc = make_slider('Scale',
+    if io.contact_forces_data().shape[0] > 0:
+        slwsc, slrepsc = make_slider('Scale',
                                  make_scale_observer([cone_glyph, cylinder_glyph, sphere_glypha, sphere_glyphb, arrow_glyph]
                                                      ),
                                  interactor_renderer,
@@ -1513,7 +1572,8 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
                                  cf_scale_factor + cf_scale_factor / 2,
                                  0.01, 0.01, 0.01, 0.7)
 
-    xslwsc, xslrepsc = make_slider('Time scale',
+    if len(times) > 0:
+        xslwsc, xslrepsc = make_slider('Time scale',
                                    make_time_scale_observer(
                                        slider_repres, input_observer),
                                    interactor_renderer,
