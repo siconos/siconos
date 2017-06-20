@@ -118,9 +118,14 @@ with Hdf5(mode='r+') as io:
            h=step,
            theta=0.50001,
            Newton_max_iter=1,
+           Newton_update_interactions=False,
            set_external_forces=None,
            solver=Numerics.SICONOS_FRICTION_3D_NSGS,
            itermax=100,
            tolerance=1e-4,
            numerics_verbose=False,
-           output_frequency=1)
+           output_frequency=1,
+           projection_itermax=5,
+           projection_tolerance=1e-8,
+           projection_tolerance_unilateral=1e-8,
+    )
