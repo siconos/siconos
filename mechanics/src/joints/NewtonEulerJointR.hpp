@@ -53,6 +53,10 @@ protected:
    * relative frame. */
   bool _absoluteRef;
 
+  /** Private version of normalDoF for subclasses to override. */
+  virtual void _normalDoF(const BlockVector& q0, SiconosVector& ans, int axis,
+                          bool absoluteRef=true) {}
+
 public:
 
   /** Set a point for this joint. The role of each point is specific
@@ -97,15 +101,42 @@ public:
                                SP::BlockVector q0, SimpleMatrix& jachq,
                                unsigned int axis=0) {}
 
-  /** Compute the vector of linear and angular velocities of the free axes */
-  virtual void computeVelDoF(double time, BlockVector& q0, SiconosVector& v) {}
+  /** Project a vector onto the given 0-indexed free axis. Useful for
+   * calculating velocities in the axis, or for calculating
+   * axis-aligned forces applied to connected bodies.  If axis is of
+   * angular type (see typeOfDoF), then the projection is onto the
+   * axis of rotation.
+   *
+   * \param v The vector to project
+   * \param q0 The state q of one or more NewtonEulerDS
+   * \param ans The vector to receive the projection.
+   * \param absoluteRef If true, v and ans are in the inertial frame,
+   *                    otherwise the q1 frame is assumed.
+   */
+  void projectVectorDoF(const SiconosVector& v, const BlockVector& q0,
+                        SiconosVector& ans, int axis,
+                        bool absoluteRef=true);
 
-  /** Project a vector (assumed to be in q1 frame) onto the given
-   * 0-indexed free axis. Useful for calculating velocities in the
-   * axis, or for calculating axis-aligned forces applied to connected
-   * bodies. */
-  virtual void projectOntoAxis(SP::SiconosVector v, SP::SiconosVector ans, int axis=0)
-    {}
+  SP::SiconosVector projectVectorDoF(const SiconosVector& v,
+                                     const BlockVector& q0, int axis,
+                                     bool absoluteRef=true);
+
+  /** Retrieve a normal in the direction of a 0-indexed free
+   * axis. Useful for calculating velocities in the axis, or for
+   * calculating axis-aligned forces applied to connected bodies.  If
+   * axis is of angular type (see typeOfDoF), then the returned normal
+   * is the axis of rotation.
+   *
+   * \param q0 The state q of one or more NewtonEulerDS
+   * \param ans The vector to receive the projection.
+   * \param absoluteRef If true, ans is in the inertial frame,
+   *                    otherwise the q1 frame is assumed.
+   */
+  void normalDoF(const BlockVector& q0, SiconosVector& ans, int axis,
+                 bool absoluteRef=true);
+
+  SP::SiconosVector normalDoF(const BlockVector& q0, int axis,
+                              bool absoluteRef=true);
 
   /** Return the value of the _allowSelfCollide flag. */
   bool allowSelfCollide() { return _allowSelfCollide; }

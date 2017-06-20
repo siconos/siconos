@@ -78,6 +78,10 @@ protected:
   double _cq2q103;
   double _cq2q104;
 
+  /** Return the normal of the linear DoF axis.  \param axis must be 0 */
+  virtual void _normalDoF(const BlockVector& q0, SiconosVector& ans, int axis,
+                          bool absoluteRef=true);
+
 public:
 
   /** Constructor based on one or two dynamical systems and an axis.
@@ -108,15 +112,6 @@ public:
   virtual void computeJachqDoF(double time, Interaction& inter,
                                SP::BlockVector q0, SimpleMatrix& jachq,
                                unsigned int axis);
-
-  /** Compute the vector of linear and angular velocities of the free axes */
-  virtual void computeVelDoF(double time, BlockVector& q0, SiconosVector& v);
-
-  /** Project a vector (assumed to be in q1 frame) onto the given
-   * 0-indexed free axis. Useful for calculating velocities in the
-   * axis, or for calculating axis-aligned forces applied to connected
-   * bodies. */
-  virtual void projectOntoAxis(SP::SiconosVector v, SP::SiconosVector ans, int axis=0);
 
   /** destructor
    */

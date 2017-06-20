@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-/*! \file NewtonEulerR.hpp
+/*! \file PrismaticJointR.hpp
 
 */
 
@@ -720,23 +720,27 @@ void PrismaticJointR::computeJachqDoF(double time, Interaction& inter,
   }
 }
 
-/** Compute the vector of linear and angular velocities of the free axes */
-void PrismaticJointR::computeVelDoF(double time, BlockVector& q0, SiconosVector& v)
+void PrismaticJointR::_normalDoF(const BlockVector& q0, SiconosVector& ans, int axis,
+                                 bool absoluteRef)
 {
-}
-
-/** Project a vector (assumed to be in q1 frame) onto the given
- * 0-indexed free axis. Useful for calculating velocities in the
- * axis, or for calculating axis-aligned forces applied to connected
- * bodies. */
-void PrismaticJointR::projectOntoAxis(SP::SiconosVector v, SP::SiconosVector ans,
-                                      int axis)
-{
+  assert(axis == 0);
   if (axis != 0) return;
 
-  // We assume that _axis0 is normalized
-  double L = (*v)(0)*(*_axis0)(0) + (*v)(1)*(*_axis0)(1) + (*v)(2)*(*_axis0)(2);
-  (*ans)(0) = (*_axis0)(0) * L;
-  (*ans)(1) = (*_axis0)(1) * L;
-  (*ans)(2) = (*_axis0)(2) * L;
+  // We assume that a is normalized.
+  ans = *_axis0;
+
+  if (absoluteRef)
+  {
+    ::boost::math::quaternion<double> q1(q0.getValue(3), q0.getValue(4),
+                                         q0.getValue(5), q0.getValue(6));
+
+    // _axis0 is in the q1 frame, so change it to the inertial frame.
+    ::boost::math::quaternion<double> aq(0, (*_axis0)(0), (*_axis0)(1), (*_axis0)(2));
+    //::boost::math::quaternion<double> tmp( (1.0/q1) * aq * q1 );
+    //TODO: why must I *apply* q1 instead of *unapply* q1?
+    ::boost::math::quaternion<double> tmp( q1 * aq / q1 );
+    ans(0) = tmp.R_component_2();
+    ans(1) = tmp.R_component_3();
+    ans(2) = tmp.R_component_4();
+  }
 }
