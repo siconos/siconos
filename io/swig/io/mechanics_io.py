@@ -1310,6 +1310,8 @@ class Hdf5():
                 assert np.shape(stops)[1] == 3, 'Joint stops shape must be (?,3)'
                 if nslaws is None:
                     nslaws = [Kernel.NewtonImpactNSL(0.0)]*np.shape(stops)[0]
+                elif isinstance(nslaws,bytes):
+                    nslaws = [self._nslaws[nslaws.decode('utf-8')]]*np.shape(stops)[0]
                 elif isinstance(nslaws,str):
                     nslaws = [self._nslaws[nslaws]]*np.shape(stops)[0]
                 else:
@@ -1326,10 +1328,13 @@ class Hdf5():
 
             # The per-axis friction NSL, can be ''
             if friction is not None:
-                if isinstance(friction,basestring):
+                if isinstance(friction,str):
                     friction = [friction]
+                elif isinstance(friction,bytes):
+                    friction = [friction.decode('utf-8')]
                 else:
-                    assert hasattr(friction, '__iter__')
+                    friction = [(f.decode('utf-8') if isinstance(f,bytes) else f)
+                                for f in friction]
                 for ax,fr_nslaw in enumerate(friction):
                     if fr_nslaw == '':  # no None in hdf5, use empty string
                         continue        # instead for no NSL on an axis
@@ -2268,14 +2273,13 @@ class Hdf5():
             if allow_self_collide in [True, False]:
                 joint.attrs['allow_self_collide']=allow_self_collide
             if nslaws is not None:
-                joint.attrs['nslaws'] = nslaws # either name of one nslaw, or a
-                                               # list of names same length as stops
+                # either name of one nslaw, or a list of names same length as stops
+                joint.attrs['nslaws'] = np.array(nslaws, dtype='S')
             if stops is not None:
                 joint.attrs['stops'] = stops # must be a table of [[axis,pos,dir]..]
             if friction is not None:
-                joint.attrs['friction'] = friction # must be an NSL name (e.g.
-                                                   # RelayNSL), or list of same
-
+                # must be an NSL name (e.g.  RelayNSL), or list of same
+                joint.attrs['friction'] = np.array(friction, dtype='S')
 
     def addBoundaryCondition(self, name, object1, indices=None, bc_class='HarmonicBC',
                              v=None, a=None, b=None, omega=None, phi=None):
