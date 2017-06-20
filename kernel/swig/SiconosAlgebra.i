@@ -85,4 +85,7 @@
     PyErr_SetNone(PyExc_StopIteration);
     return NULL;
   }
+%insert("python") %{
+    __next__ = next
+%}
 }
