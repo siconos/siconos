@@ -487,7 +487,7 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
     sactorb = dict()
     clactor = dict()
     times_of_birth = dict()
-    
+
     transform = vtk.vtkTransform()
     transform.Translate(-0.5, 0., 0.)
 
@@ -987,11 +987,11 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
                        data[:, 6],
                        data[:, 7],
                        data[:, 8])
-                            
+
     def set_positionv_old(x):
         for y in x.reshape(-1, 8):
             set_position(*(y.reshape(8)))
-    
+
     def set_actors_viz(instance, time):
         actor = actors[instance]
         if times_of_birth[instance] <= time:
@@ -1003,7 +1003,7 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
 
     def set_actors_visibility(time):
         set_actors_vizzz(actors.keys(), time)
-    
+
     def set_actors_visibility_old(id_t=None):
         for instance, actor in actors.items():
             # Instance is a static object
@@ -1231,7 +1231,7 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
             # set_positionv(spos_data[:, 1:9])
 
             set_actors_visibility(self._times[index])
-            
+
             id_t = numpy.where(pos_data[:, 0] == self._times[index])
             set_position(*pos_data[id_t, :])
 
