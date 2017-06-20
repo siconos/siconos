@@ -50,10 +50,10 @@ with Hdf5() as io:
     io.addObject('ground', [Contactor('Ground')], [0,0,-0.05])
 
     # Enable to smash the wall
-    io.addPrimitiveShape('Ball', 'Sphere', [1,])
-    io.addObject('WreckingBall', [Contactor('Ball')],
-                 translation=[30,0,3], velocity=[-30,0,2,0,0,0],
-                 mass=10)
+    # io.addPrimitiveShape('Ball', 'Sphere', [1,])
+    # io.addObject('WreckingBall', [Contactor('Ball')],
+    #              translation=[30,0,3], velocity=[-30,0,2,0,0,0],
+    #              mass=10)
 
     # Definition of a non smooth law. As no group ids are specified it
     # is between contactors of group id 0.
