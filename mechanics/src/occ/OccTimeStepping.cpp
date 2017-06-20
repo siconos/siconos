@@ -26,14 +26,13 @@ class OccBody;
 
 using namespace Experimental;
 
-struct UpdateShapes : public SiconosVisitor
+struct UpdateContactShapes : public SiconosVisitor
 {
   using SiconosVisitor::visit;
 
   template<typename T>
   void operator() (const T& ds)
   {
-    const_cast<T&>(ds).updateShapes();
     const_cast<T&>(ds).updateContactShapes();
   }
 };
@@ -45,7 +44,7 @@ void OccTimeStepping::updateWorldFromDS()
   DynamicalSystemsGraph::VIterator dsi, dsiend;
   std11::tie(dsi, dsiend) = dsg.vertices();
 
-  Visitor< Classes < OccBody >, UpdateShapes >::Make up;
+  Visitor< Classes < OccBody >, UpdateContactShapes >::Make up;
 
   for (; dsi != dsiend; ++dsi)
   {
