@@ -87,7 +87,7 @@ int main(int argc, char* argv[])
     unsigned int nslawSize = 2;
     SP::NonSmoothLaw myNslaw(new ComplementarityConditionNSL(nslawSize));
 
-    SP::Interaction myProcessInteraction(new Interaction(ninter, myNslaw, myProcessRelation));
+    SP::Interaction myProcessInteraction(new Interaction(myNslaw, myProcessRelation));
 
     // Model
     SP::Model ObserverLCS(new Model(t0, T));

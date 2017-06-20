@@ -112,7 +112,7 @@ public:
    *  \param i unsigned int(i=0, row, i=1 col)
    *  \return an unsigned int
    */
-  unsigned int getNumberOfBlocks(unsigned int i) const;
+  unsigned int numberOfBlocks(unsigned int i) const;
 
   /** get DenseMat matrix
    *  \param row an unsigned int, position of the block (row) - Useless for SimpleMatrix
@@ -259,6 +259,18 @@ public:
   /** display data on standard output
    */
   void display() const;
+
+  /** put data of the matrix into a std::string
+   * \return std::string
+   */
+  std::string toString() const;
+
+  /** send data of the matrix to an ostream
+   * \param os An output stream
+   * \param bm a BlockMatrix
+   * \return The same output stream
+   */
+  friend std::ostream& operator<<(std::ostream& os, const BlockMatrix& bm);
 
   /** get or set the element matrix[i,j]
    *  \param i an unsigned int 

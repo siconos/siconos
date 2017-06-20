@@ -59,14 +59,18 @@ More documentation on smart pointers and reference counting:
 
  */
 
-#include <boost/shared_array.hpp>
-
 #include <SiconosConfig.h>
+
+// Case 1 : ref == shared pointers from c++ (>=11) standard
+// SICONOS_STD_SHARED_PTR is automatically set by cmake (CXXCompilerSetup.cmake)
+// while SICONOS_USE_BOOST_FOR_CXX11 is a user option.
 #if defined(SICONOS_STD_SHARED_PTR) && !defined(SICONOS_USE_BOOST_FOR_CXX11)
-namespace std11 = std;
 #include <memory>
+namespace std11 = std;
 #else
+// Case 2 : ref == boost shared pointers
 #include <boost/shared_ptr.hpp>
+#include <boost/make_shared.hpp>
 #include <boost/enable_shared_from_this.hpp>
 namespace std11 = boost;
 #endif
@@ -136,11 +140,15 @@ struct nullDeleter
   } \
   NAME_SPACE_SPTR(X)
 
-#define TYPEDEF_SAPTR(X) \
-  typedef boost::shared_array<X> X##SAPtr ;\
+// boost shared_arrays : at the time required
+// only in HEM5 and LSodar
+#include <boost/shared_array.hpp>
+#define TYPEDEF_SAPTR(X)                        \
+  typedef boost::shared_array<X> X##SAPtr ;     \
   NAME_SPACE_SAPTR(X)
 
-#define DEFINE_SPTR(X) \
+
+#define DEFINE_SPTR(X)                          \
   class X; \
   TYPEDEF_SPTR(X)
 

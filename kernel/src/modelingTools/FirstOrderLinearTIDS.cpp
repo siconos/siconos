@@ -19,22 +19,6 @@
 
 #include <iostream>
 
-// --- Constructors ---
-
-// From a minimum set of data: A
-FirstOrderLinearTIDS::FirstOrderLinearTIDS(SP::SiconosVector x0, SP::SiconosMatrix A):
-  FirstOrderLinearDS(x0, A)
-{
-  checkDynamicalSystem();
-}
-
-// From a set of data: A and B
-FirstOrderLinearTIDS::FirstOrderLinearTIDS(SP::SiconosVector x0, SP::SiconosMatrix A, SP::SiconosVector b):
-  FirstOrderLinearDS(x0, A, b)
-{
-  checkDynamicalSystem();
-}
-
 void FirstOrderLinearTIDS::initRhs(double time)
 {
   if (_M && !_invM)
@@ -69,7 +53,12 @@ void FirstOrderLinearTIDS::computeRhs(double time, const bool isDSup)
     *_x[1] += *_b;
 
   if (_M)
-    _invM->PLUForwardBackwardInPlace(*_x[1]);
+    {
+      // allocate invM at the first call of the present function
+      if (! _invM)
+	_invM.reset(new SimpleMatrix(*_M));
+      _invM->PLUForwardBackwardInPlace(*_x[1]);
+    }
 }
 
 void FirstOrderLinearTIDS::computeJacobianRhsx(double time, const bool isDSup)

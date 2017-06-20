@@ -27,11 +27,13 @@
 #endif
 #include "debug.h"
 
-
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunreachable-code"
+// #pragma GCC diagnostic push
+// #pragma GCC diagnostic ignored "-Wunknown-pragmas"
+// #pragma clang diagnostic push
+// #pragma clang diagnostic ignored "-Wunreachable-code"
 #include <BulletCollision/CollisionDispatch/btCollisionObject.h>
-#pragma clang diagnostic pop
+// #pragma clang diagnostic pop
+// #pragma GCC diagnostic push
 
 BulletDS::BulletDS(SP::BulletWeightedShape weightedShape,
                    SP::SiconosVector position,

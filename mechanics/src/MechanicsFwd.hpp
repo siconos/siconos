@@ -24,6 +24,11 @@
   REGISTER(KneeJointR)                          \
   REGISTER(PivotJointR)                         \
   REGISTER(PrismaticJointR)                     \
+  REGISTER(CylindricalJointR)                   \
+  REGISTER(NewtonEulerJointR)                   \
+  REGISTER(FixedJointR)                         \
+  REGISTER(JointStopR)                          \
+  REGISTER(JointFrictionR)                      \
   REGISTER(FMatrix)                             \
   REGISTER(NSLawMatrix)                         \
   REGISTER(OccR)                                \

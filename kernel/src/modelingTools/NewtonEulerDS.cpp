@@ -365,18 +365,6 @@ void computeT(SP::SiconosVector q, SP::SimpleMatrix T)
 
 }
 
-
-
-// Private function to set linked with members of Dynamical top class
-void NewtonEulerDS::connectToDS()
-{
-  // dim
-  _n = 2 * 3;
-
-}
-
-
-
 // From a set of data; Mass filled-in directly from a siconosMatrix -
 // This constructor leads to the minimum NewtonEuler System form: \f$ M\ddot q = p \f$
 /*
@@ -398,7 +386,7 @@ NewtonEulerDS::NewtonEulerDS():
   /* common code for constructors
    * would be better to use delagation of constructors in c++11
    */
-  init();
+  _init();
 }
 
 
@@ -421,7 +409,7 @@ NewtonEulerDS::NewtonEulerDS(SP::SiconosVector Q0, SP::SiconosVector Twist0,
   /* common code for constructors
    * would be better to use delegation of constructors in c++11
    */
-  init();
+  _init();
 
   // Initial conditions
   _q0 = Q0;
@@ -442,13 +430,11 @@ NewtonEulerDS::NewtonEulerDS(SP::SiconosVector Q0, SP::SiconosVector Twist0,
   DEBUG_END("NewtonEulerDS::NewtonEulerDS(SP::SiconosVector Q0, SP::SiconosVector Twist0,double  mass, SP::SiconosMatrix inertialMatrix)\n");
 }
 
-void NewtonEulerDS::init()
+void NewtonEulerDS::_init()
 {
   _p.resize(3);
-  _p[0].reset(new SiconosVector());
   _p[1].reset(new SiconosVector(_n)); // Needed in NewtonEulerR
-  _p[2].reset(new SiconosVector());
-  zeroPlugin();
+  _zeroPlugin();
   //assert(0);
 
   // --- NEWTONEULER INHERITED CLASS MEMBERS ---
@@ -512,7 +498,7 @@ void NewtonEulerDS::updateMassMatrix()
 
 }
 
-void NewtonEulerDS::zeroPlugin()
+void NewtonEulerDS::_zeroPlugin()
 {
   _pluginFExt.reset(new PluggedObject());
   _pluginMExt.reset(new PluggedObject());
@@ -540,27 +526,19 @@ void NewtonEulerDS::setInertia(double ix, double iy, double iz)
   updateMassMatrix();
 }
 
-bool NewtonEulerDS::checkDynamicalSystem()
-{
-  return true;
-}
-
 void NewtonEulerDS::initializeNonSmoothInput(unsigned int level)
 {
   DEBUG_PRINTF("NewtonEulerDS::initializeNonSmoothInput(unsigned int level) for level = %i\n",level);
 
-  if(_p[level]->size() == 0)
+  if(!_p[level])
   {
     if(level == 0)
     {
-      _p[0]->resize(_qDim);
+      _p[level].reset(new SiconosVector(_qDim));
     }
     else
-    {
-      _p[level]->resize(_n);
-    }
+      _p[level].reset(new SiconosVector(_n));
   }
-
 
 #ifdef DEBUG_MESSAGES
   DEBUG_PRINT("display() after initialization");
@@ -572,6 +550,9 @@ void NewtonEulerDS::initializeNonSmoothInput(unsigned int level)
 
 void NewtonEulerDS::initRhs(double time)
 {
+  // dim
+  _n = 2 * 3;
+
   //  _workMatrix.resize(sizeWorkMat);
   // Solve Mq[2]=fL+p.
   //*_q = *(_p[2]); // Warning: r/p update is done in Interactions/Relations
@@ -580,11 +561,6 @@ void NewtonEulerDS::initRhs(double time)
     computeForces(time);
     //      *_q += *_forces;
   }
-}
-
-void NewtonEulerDS::initialize(double time, unsigned int sizeOfMemory)
-{
-
 }
 
 void NewtonEulerDS::resetToInitialState()
@@ -604,6 +580,24 @@ void NewtonEulerDS::resetToInitialState()
   }
   else
     RuntimeException::selfThrow("NewtonEulerDS::resetToInitialState - initial twist _twist0 is null");
+}
+
+void NewtonEulerDS::init_inverse_mass()
+{
+  if(_massMatrix && !_inverseMass)
+    {
+      updateMassMatrix();
+      _inverseMass.reset(new SimpleMatrix(*_massMatrix));
+    }
+}
+
+void NewtonEulerDS::update_inverse_mass()
+{
+  if(_massMatrix && _inverseMass)
+    {
+      updateMassMatrix();
+      *_inverseMass = *_massMatrix;
+    }
 }
 
 void NewtonEulerDS::computeFExt(double time)
@@ -1049,11 +1043,13 @@ void NewtonEulerDS::computeForces(double time, SP::SiconosVector q, SP::SiconosV
     if(_fExt)
     {
       computeFExt(time);
+      assert(!isnan(_fExt->vector_sum()));
       _wrench->setBlock(0, *_fExt);
     }
     if(_mExt)
     {
       computeMExt(time);
+      assert(!isnan(_mExt->vector_sum()));
       if(_isMextExpressedInInertialFrame)
         ::changeFrameAbsToBody(q,_mExt);
       _wrench->setBlock(3, *_mExt);
@@ -1064,6 +1060,7 @@ void NewtonEulerDS::computeForces(double time, SP::SiconosVector q, SP::SiconosV
     if(_fInt)
     {
       computeFInt(time, q, twist);
+      assert(!isnan(_fInt->vector_sum()));
       _wrench->setValue(0, _wrench->getValue(0) - _fInt->getValue(0));
       _wrench->setValue(1, _wrench->getValue(1) - _fInt->getValue(1));
       _wrench->setValue(2, _wrench->getValue(2) - _fInt->getValue(2));
@@ -1073,6 +1070,7 @@ void NewtonEulerDS::computeForces(double time, SP::SiconosVector q, SP::SiconosV
     if(_mInt)
     {
       computeMInt(time, q , twist);
+      assert(!isnan(_mInt->vector_sum()));
       _wrench->setValue(3, _wrench->getValue(3) - _mInt->getValue(0));
       _wrench->setValue(4, _wrench->getValue(4) - _mInt->getValue(1));
       _wrench->setValue(5, _wrench->getValue(5) - _mInt->getValue(2));
@@ -1082,6 +1080,7 @@ void NewtonEulerDS::computeForces(double time, SP::SiconosVector q, SP::SiconosV
     if(!_nullifyMGyr)
     {
       computeMGyr(twist);
+      assert(!isnan(_mGyr->vector_sum()));
       _wrench->setValue(3, _wrench->getValue(3) - _mGyr->getValue(0));
       _wrench->setValue(4, _wrench->getValue(4) - _mGyr->getValue(1));
       _wrench->setValue(5, _wrench->getValue(5) - _mGyr->getValue(2));
@@ -1248,7 +1247,7 @@ void NewtonEulerDS::initMemory(unsigned int steps)
     _twistMemory.reset(new SiconosMemory(steps, _n));
     _forcesMemory.reset(new SiconosMemory(steps, _n));
     _dotqMemory.reset(new SiconosMemory(steps, _qDim));
-    swapInMemory();
+    //    swapInMemory(); Useless, done in osi->initializeDynamicalSystem
   }
 }
 
@@ -1261,7 +1260,7 @@ void NewtonEulerDS::swapInMemory()
   _forcesMemory->swap(*_wrench);
 }
 
-void NewtonEulerDS::resetAllNonSmoothPart()
+void NewtonEulerDS::resetAllNonSmoothParts()
 {
   if(_p[1])
     _p[1]->zero();
@@ -1270,7 +1269,7 @@ void NewtonEulerDS::resetAllNonSmoothPart()
 }
 void NewtonEulerDS::resetNonSmoothPart(unsigned int level)
 {
-  if(_p[level]->size() > 0)
+  if(_p[level])
     _p[level]->zero();
 }
 

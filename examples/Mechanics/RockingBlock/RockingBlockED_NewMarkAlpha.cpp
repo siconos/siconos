@@ -103,11 +103,11 @@ int main(int argc, char* argv[])
     // Interaction at contact point 1
     //SP::Relation relation1(new LagrangianLinearTIR(H, E));
     SP::Relation relation1(new LagrangianScleronomousR("RockingBlockPlugin:h1", "RockingBlockPlugin:G1", "RockingBlockPlugin:G1dot"));
-    SP::Interaction inter1(new Interaction(1, nslaw, relation1));
+    SP::Interaction inter1(new Interaction(nslaw, relation1));
     // Interaction at contact point 2
     //SP::Relation relation2(new LagrangianLinearTIR(H, E));
     SP::Relation relation2(new LagrangianScleronomousR("RockingBlockPlugin:h2", "RockingBlockPlugin:G2", "RockingBlockPlugin:G2dot"));
-    SP::Interaction inter2(new Interaction(1, nslaw, relation2));
+    SP::Interaction inter2(new Interaction(nslaw, relation2));
     // Interactions for the whole dynamical system
     //================================================================================================================
     //            III. Create the "model" object
@@ -317,10 +317,12 @@ int main(int argc, char* argv[])
   catch (SiconosException e)
   {
     cout << e.report() << endl;
+    return 1;
   }
   catch (...)
   {
     cout << "Exception caught." << endl;
+    return 1;
   }
   cout << "Computation Time: " << time.elapsed()  << endl;
 }

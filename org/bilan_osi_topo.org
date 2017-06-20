@@ -1,0 +1,521 @@
+OSI buffers
+-----------
+
+
+* initialize(m), m==model
+** Common parts
+*** 1- loop over ds in _dynamicalSystemsGraph + initializeDynamicalSystem(m, m.t0(),  ds);
+*** 3- loop over inter in indexSet0 + initializeInteraction(m.t0(), inter, indexSet0->properties(*ui), *_dynamicalSystemsGraph);
+    
+** spec parts
+*** D1MinusLinearOSI
+**** 2-osnspb->setIndexSetLevel, osnspb->setIOLevel, osnspb->initialize()
+*** Hem5OSI
+**** 0- alloc of some spec. work vectors (-> move this to graphs!)
+*** Lsodar
+**** 0- alloc of some spec. work vectors (-> move this to graphs!)
+**** 4- computeRhs + alloc of some spec. work vectors (-> move this to graphs!) + updateData
+*** MoreauJeanGOSI, MoreauJeanOSI, and derived
+**** 2-osnspb->setIndexSetLevel, osnspb->setIOLevel
+*** ZeroOrderHoldOSI
+**** NO STAGE 3
+     
+
+
+
+
+* initializeDynamicalSystems(m,t,ds), m==model
+** Common parts
+*** 1 get work from graph
+*** 2 initMemory = f(osi)
+*** 3 resetToInitialState
+*** 4 work = f(dstype) --> f(ositype)
+*** 5 ds->swapInMemory
+    
+** spec
+*** D1MinusLinearOSI
+**** 6 - intializeNonSmoothInput
+*** EulerMoreau
+**** 3.b initializeIterationMatrix
+**** 4b computef
+     
+*** zeroOrderHoldOSI
+**** NO STAGE 3, 4, 5
+**** 2b : create MatrixIntegrator and integrate
+**** 2c some work on Interactions ...
+*** SchatzmannPaoli
+**** 6 - initializeIterationMatrix
+**** 7 - initializeNonSmoothInput
+*** NewMarkAlphaOSI
+**** 3.b initializeIterationMatrix
+*** MoreauJeanOSI, MJGOSI
+**** 3.b initializeIterationMatrix
+**** 4b computeforces
+*** LSodarOSI
+**** 3b ds->initRhs()
+
+
+     
+* initializeInteractions(double t0, Interaction &inter, InteractionProperties& interProp, DynamicalSystemsGraph & DSG)
+** Common parts
+*** 1 - get DSlink and check upper/lower levels from osi/inter consistency + inter.init() if required
+*** 2 - inter.initializeMemory = f(osi._steps)
+*** 3 - DSlink[LR::xfree].reset + DSlink[...] = dswork[OSI::free], depends on ds type
+*** 5 - inter.computeOutput(0) + relation.computeJach + inter.computeOutput for all levels + inter.swapInMemory
+
+
+** spec 
+*** D1MinusLinearOSI
+**** 4 - if multistep inter.computeOutput for all levels + inter.swapInMemory
+*** Hem5OSI, LSodar
+**** 1b : set levels
+*** SchatzmannPaoli
+**** 4 - if multistep inter.computeOutput for all levels + inter.swapInMemory
+*** NewmarkAlphaOSI
+**** 1b : set levels
+
+     
+* Summary
+** Pipeline
+*** For each ds
+**** work space initialisation in DSG
+**** ds.initMemory = f(osi.steps)
+**** ds.resetToInitialState
+**** TimeStepping only : initializeIterationMatrix
+**** ED only : initRhs
+**** workVector(ds).resize + reset components 
+     depends on : OSI type for workVector[keyname] and on ds type for memory size
+**** some update on the ds operators (computeForces, ...)
+**** ds.swapInMemory
+
+*** OSNSP set levels, updates ...
+
+*** for each interaction
+**** work space initialisation in IG0 (DSlink ...)
+**** check/set levels
+**** connect IG workspace with DSG workspaces, i.e. like initDSData in Interaction.cpp
+
+
+
+* Proposed pipeline
+** osi->initialize(m)
+*** loop over all ds, call initializeDS
+    Job == initialize memory for workDS in dsg (depends on osi/ds type), set values (mostly pointers link) of this works (vectors and matrices)
+**** osi->initializeDynamicalSystem(ds)
+***** work space initialisation in DSG (reset) + resize/reset of specific components == f(DS)
+***** ds.initMemory = f(osi.steps)
+***** ds.resetToInitialState
+***** sub_osi.initializeDynamicalSystem() for specific jobs
+      TimeStepping only : initializeIterationMatrix
+      ED only : initRhs
+      some update on the ds operators (computeForces, ...)
+      ds.swapInMemory
+*** osi->initializeOSNSPs() =>  add this routine, which depends on osi type
+    Is it the right place?
+*** loop over all inter, call osi->initializeInteractions()
+    Only common work? Check that
+**** work space initialisation in IG0 (DSlink ...)
+**** check/set levels
+**** connect IG workspace with DSG workspaces, i.e. like initDSData in Interaction.cpp
+
+     
+
+* initialize_osns --> should be part of the simulation, not of the osi?
+* check simulation->initialize_interactions : should rather call osi->initialize??? See with Steve.
+* check with Olivier if ZeroOrderHoldOSI is supposed to call initializeInteraction ... or not (it was not the case before I review osi)
+
+
+
+Levels
+------
+
+
+* Saved and set in OSI : range must include levels of interactions
+* Saved and set in Interactions : depends on nslaw and relations (visitors process)
+* Saved in OSNSPB, set by OSI and/or Simu
+
+
+|------------+--------+-------+------------------|
+|            | output | input | osnpb in/out     |
+|------------+--------+-------+------------------|
+| D1Minus    |    0-2 |   1-2 | velo : 1         |
+|            |        |       | acc : 2          |
+|------------+--------+-------+------------------|
+| ED         |        |       | impact: 1        |
+|            |        |       | acc: 2           |
+|            |        |       | pos (newmark): 2 |
+|------------+--------+-------+------------------|
+| MJGOSI     |    0-1 |   0-1 | velo: 1          |
+| MJOSI      |        |       |                  |
+|------------+--------+-------+------------------|
+| TSCombined |        |       | pos: 0           |
+| TSDirect   |        |       | velo: 1          |
+|------------+--------+-------+------------------|
+
+Should we save levels in Simu???
+
+
+
+
+Some notes concerning graph in siconos
+--------------------------------------
+
+
+* pipeline
+** insertDynamicalSystem(ds) (nsds then topo)
+*** add vertex into _DSG[0] and reset workVectors and workMatrices as empty VectorOfVectors/VectorOfMatrices
+** link(inter, ds1, [ds2]) (nsds then topo)
+*** __addInteractionInIndexSet0(inter, ds1, ds2)
+**** add inter/ds in graphs
+**** setDSLinkAndWorkspace(iprop, ds1, workds1, ds2, workds2)
+***** initData()--> initDataFO,Lag,NE 
+      (reset BlockVector vide)
+      | FO  | ::x                  | ::r      | ::z |
+      | Lag | ::q0,1,2             | ::p0,1,2 | ::z |
+      | NE  | ::q0, velocity, dotq | ::p0,1,2 | ::z |
+**** initDSData --> initDSDataFO,Lag,NE  FOR EACH ds (if ds2)
+     insert data des ds
+      | FO  | ::x                  | ::r      | ::z |
+      | Lag | ::q0,1,2             | ::p0,1,2 | ::z |
+      | NE  | ::q0, velocity, dotq | ::p0,1,2 | ::z |
+**** relation->initialize(...)  (see below) 
+**** if(computeResidu (FO only)
+     workVInter[FirstOrderR::g_alpha].reset(new SiconosVector(_sizeOfDS));
+     workVInter[FirstOrderR::vec_residuR].reset(new SiconosVector(_sizeOfDS));
+
+
+
+
+* A tester
+
+- removeInteractionFromIndexSet --> suppression de tous les graph0?
+
+
+
+About Interactions and Relations
+--------------------------------
+
+* all 'Old' vars must be moved to graph
+* residuY ? Must be in OSI
+* initializeMemory, called by OSI with computeResidu arg
+* what is this C() in Relation???
+* what are e() and f() in Relations???
+
+* FONLR
+
+
+| R (VA)       |            |                 |                 |                 |                                 |    |             |        |           |           |              |                 |                |                 |
+|--------------+------------+-----------------+-----------------+-----------------+---------------------------------+----+-------------+--------+-----------+-----------+--------------+-----------------+----------------+-----------------|
+| FOR (VA)     | _C         | _D              | _F              | _B              | _K                              |    |             |        |           |           |              |                 |                |                 |
+|--------------+------------+-----------------+-----------------+-----------------+---------------------------------+----+-------------+--------+-----------+-----------+--------------+-----------------+----------------+-----------------|
+| FONLR        | comp jachx | comp jachlambda |                 | comp jacglambda | comp jacgx                      |    |             |        |           |           |              |                 |                |                 |
+|--------------+------------+-----------------+-----------------+-----------------+---------------------------------+----+-------------+--------+-----------+-----------+--------------+-----------------+----------------+-----------------|
+| FOT1         |            |                 |                 |                 |                                 |    |             |        |           |           |              |                 |                |                 |
+|--------------+------------+-----------------+-----------------+-----------------+---------------------------------+----+-------------+--------+-----------+-----------+--------------+-----------------+----------------+-----------------|
+| FOT2         |            |                 |                 |                 |                                 |    |             |        |           |           |              |                 |                |                 |
+|--------------+------------+-----------------+-----------------+-----------------+---------------------------------+----+-------------+--------+-----------+-----------+--------------+-----------------+----------------+-----------------|
+| FOLR         |            |                 |                 |                 |                                 | _e |             |        |           |           |              |                 |                |                 |
+|--------------+------------+-----------------+-----------------+-----------------+---------------------------------+----+-------------+--------+-----------+-----------+--------------+-----------------+----------------+-----------------|
+| FOLTIR       |            |                 |                 |                 |                                 | _e |             |        |           |           |              |                 |                |                 |
+|--------------+------------+-----------------+-----------------+-----------------+---------------------------------+----+-------------+--------+-----------+-----------+--------------+-----------------+----------------+-----------------|
+| LR (AV)      |            |                 |                 |                 |                                 |    | _jachlambda | _jachq | jachqDot  | _dotjachq | _pluginJachq |                 |                |                 |
+|--------------+------------+-----------------+-----------------+-----------------+---------------------------------+----+-------------+--------+-----------+-----------+--------------+-----------------+----------------+-----------------|
+| LRheoR       | hDot       | O               | O(does nothing) | O               | O                               | X  | X           | X      | X         | X         | X            |                 |                |                 |
+|--------------+------------+-----------------+-----------------+-----------------+---------------------------------+----+-------------+--------+-----------+-----------+--------------+-----------------+----------------+-----------------|
+| LCR          | X          | O               | O(does nothing) | O               | O                               | X  | X           | X      | X         | X         | X            |                 |                |                 |
+|--------------+------------+-----------------+-----------------+-----------------+---------------------------------+----+-------------+--------+-----------+-----------+--------------+-----------------+----------------+-----------------|
+| LCLTIR       | X          | X               | _F              |                 |                                 | _e |             |        |           |           |              |                 |                |                 |
+|--------------+------------+-----------------+-----------------+-----------------+---------------------------------+----+-------------+--------+-----------+-----------+--------------+-----------------+----------------+-----------------|
+| LLTIR        |            |                 | _F              |                 |                                 | _e |             |        |           |           |              |                 |                |                 |
+|--------------+------------+-----------------+-----------------+-----------------+---------------------------------+----+-------------+--------+-----------+-----------+--------------+-----------------+----------------+-----------------|
+| LScleroR     |            |                 |                 |                 |                                 |    |             |        |           |           |              | _plugindothacqh | _dotjacqhXqdot |                 |
+|--------------+------------+-----------------+-----------------+-----------------+---------------------------------+----+-------------+--------+-----------+-----------+--------------+-----------------+----------------+-----------------|
+| NewtonEulerR |            |                 |                 |                 | _secondOrderTimeDerivativeTerms | _T | _jachlambda | _jachq | _jachqDot | _dotjachq | _jacglambda  | _contactForces  | _jachqT        | _plugindotjacqh |
+|              |            |                 |                 |                 |                                 |    |             |        |           |           |              |                 |                |                 |
+
+
+
+| R (VA)       | setComputeX | computeJach     | computeJacg     | computeOutput | computeInput | requireResidu | initialize | C()       | isLinear      | display | getPluginx | prepareNewtonIteration |                        |
+|              | V           | VA (all jac)    | VA (all jac)    | VA            | VA           | A (def=false) | VA         | VA        | A (def=false) | V       |            | V                      |                        |
+|--------------+-------------+-----------------+-----------------+---------------+--------------+---------------+------------+-----------+---------------+---------+------------+------------------------+------------------------|
+| FOR (VA)     | X           | X               | X               | X             | X            | X             | O          | O         | X             | X       | X          | X                      | initComponents(VA, ni) |
+|--------------+-------------+-----------------+-----------------+---------------+--------------+---------------+------------+-----------+---------------+---------+------------+------------------------+------------------------|
+| FONLR        | X           | O               | O               | O             | O            | O == true     | X          | X         | X             | X       | X          | O                      | O                      |
+|--------------+-------------+-----------------+-----------------+---------------+--------------+---------------+------------+-----------+---------------+---------+------------+------------------------+------------------------|
+| FOT1R        | X           | O               | O               | O             | O            | O == true     | X          | X         | X             | X       | X          | X                      | O                      |
+|--------------+-------------+-----------------+-----------------+---------------+--------------+---------------+------------+-----------+---------------+---------+------------+------------------------+------------------------|
+| FOT2R        | X           | O               | O               | O             | O            | O == true     | X          | X         | X             | X       | X          | O                      | O                      |
+|--------------+-------------+-----------------+-----------------+---------------+--------------+---------------+------------+-----------+---------------+---------+------------+------------------------+------------------------|
+| FOLR         | C,D,B       |                 |                 |               |              |               |            |           |               |         |            |                        |                        |
+|              | connected   |                 |                 |               |              |               | X          | X         | O, true       | O       | X          | X                      | O                      |
+|              | to corresp  |                 |                 |               |              | X             |            |           |               |         |            |                        |                        |
+|              | setCompJac  | O               | O               | O             | O            |               |            |           |               |         |            |                        |                        |
+|              |             |                 |                 |               |              |               |            |           |               |         |            |                        |                        |
+|--------------+-------------+-----------------+-----------------+---------------+--------------+---------------+------------+-----------+---------------+---------+------------+------------------------+------------------------|
+| FOLTIR       | X           | O               | O               | O             | O            | X             | X          | X         | O, true       | O       | O          | O                      | O                      |
+|--------------+-------------+-----------------+-----------------+---------------+--------------+---------------+------------+-----------+---------------+---------+------------+------------------------+------------------------|
+| LR           | X           | O               | O               | O   (VA)      | O (VA)       | X             | O          | O         | X             | O       | X          | X                      | O                      |
+|              |             |                 |                 |               |              |               |            | (jachq)   |               |         |            |                        |                        |
+|--------------+-------------+-----------------+-----------------+---------------+--------------+---------------+------------+-----------+---------------+---------+------------+------------------------+------------------------|
+| LRheoR       | hDot        | O               | O(does nothing) | O             | O            | X             | X          | X         | X             | X       | X          | X                      | O                      |
+|--------------+-------------+-----------------+-----------------+---------------+--------------+---------------+------------+-----------+---------------+---------+------------+------------------------+------------------------|
+| LCR          | X           | O               | O(does nothing) | O             | O            | X             | X          | X         | X             | X       | X          | X                      | O                      |
+|--------------+-------------+-----------------+-----------------+---------------+--------------+---------------+------------+-----------+---------------+---------+------------+------------------------+------------------------|
+| LCLTIR       | X           | O(does nothing) | O(does nothing) | O             | O            | X             | X          | O (jachq) | O, true       | O       | X          | X                      | O                      |
+|--------------+-------------+-----------------+-----------------+---------------+--------------+---------------+------------+-----------+---------------+---------+------------+------------------------+------------------------|
+| LLTIR        | X           | O(does nothing) | O(does nothing) | O             | O            | X             | X          | O (jachq) | 0, true       | O       | X          | X                      | O                      |
+|--------------+-------------+-----------------+-----------------+---------------+--------------+---------------+------------+-----------+---------------+---------+------------+------------------------+------------------------|
+| LScleroR     | X           | O               | O(does nothing) | O             | O            | X             | X          | X         | X             | X       | X          | X                      | X                      |
+|--------------+-------------+-----------------+-----------------+---------------+--------------+---------------+------------+-----------+---------------+---------+------------+------------------------+------------------------|
+| NewtonEulerR | X           | O               | O               | O             | O            | X             | O          | O (jachq) | X             | X       | X          | X                      | O                      |
+
+X : h, Jachx, Jachz, Jachlambda, g, F, E, Jacglambda, Jacgx
+
+| compute      | h | jachx          | jahz | jachlambda     | g | jacglambda     | jacgx |           |                 |            |          |                    |          |
+|--------------+---+----------------+------+----------------+---+----------------+-------+-----------+-----------------+------------+----------+--------------------+----------|
+| FONLR        | O | O              | X    | O              | O | O              | O     |           |                 |            |          |                    |          |
+|--------------+---+----------------+------+----------------+---+----------------+-------+-----------+-----------------+------------+----------+--------------------+----------|
+| FOT1R        | O | O              | O    | X              | O | O              | X     |           |                 |            |          |                    |          |
+|--------------+---+----------------+------+----------------+---+----------------+-------+-----------+-----------------+------------+----------+--------------------+----------|
+| FOT2R        | O | O RUNTIMEError | X    | O RUNTIMEError | O | O RUNTIMEERROR | X     |           |                 |            |          |                    |          |
+|--------------+---+----------------+------+----------------+---+----------------+-------+-----------+-----------------+------------+----------+--------------------+----------|
+| FOLR         | O |                |      |                | O |                |       | C,D,F,e,B |                 |            |          |                    |          |
+|--------------+---+----------------+------+----------------+---+----------------+-------+-----------+-----------------+------------+----------+--------------------+----------|
+| FOLTIR       | O | X              | X    | X              | O | X              | X     | X         |                 |            |          |                    |          |
+|--------------+---+----------------+------+----------------+---+----------------+-------+-----------+-----------------+------------+----------+--------------------+----------|
+| LRheoR       | O | X              | X    | X              | X | X              | X     | hdot      | jachq           |            |          |                    |          |
+|--------------+---+----------------+------+----------------+---+----------------+-------+-----------+-----------------+------------+----------+--------------------+----------|
+| LCR          | 0 | X              | X    | O              | X | X              | X     | X         | O               |            |          |                    |          |
+|--------------+---+----------------+------+----------------+---+----------------+-------+-----------+-----------------+------------+----------+--------------------+----------|
+| LCLTIR       | X | X              | X    | X              | X | X              | X     | X         | X               |            |          |                    |          |
+|--------------+---+----------------+------+----------------+---+----------------+-------+-----------+-----------------+------------+----------+--------------------+----------|
+| LLTIR        | X | X              | X    | X              | X | X              | X     | X         | X               |            |          |                    |          |
+|--------------+---+----------------+------+----------------+---+----------------+-------+-----------+-----------------+------------+----------+--------------------+----------|
+| LScleroR     | O | X              | X    | X              | X | X              | X     | X         | O               | jacqhXqdot | DotJachq |                    |          |
+|--------------+---+----------------+------+----------------+---+----------------+-------+-----------+-----------------+------------+----------+--------------------+----------|
+| NewtonEulerR | O | X              | X    | O              |   | O              | jacgq | jacgqdot  | O(does nothing) | jachqT     |          | jachqDot(assert 0) | DotJachq |
+|              |   |                |      |                |   |                |       |           |                 |            |          |                    |          |
+
+* FONLR : computex for x in { h, Jachx, Jachz, Jachlambda, g, Jacglambda, Jacgx}
+  computeOutput: if not _C or _D use old values??
+  no computeJachz 
+  constructor/init : just a set up workV/workM
+
+
+
+
+
+* relation->initialize(inter, DSlink, workV, workM)
+** FOR -> resize workV and workM => should probably be elsewhere ...
+   size = FirstOrderR::workVecSize and ::mat_workMatSize
+** LR -> allocate jachq matrix
+** NER --> allocate contactForce
+** all cases : call initComponents(inter, DSlink, workV, workM)
+   
+
+* initComponents
+| Base class == FOR (VA)                                               | FONLR | FOT1R | FOT2R | FOLR         | FOLTIR        |
+|----------------------------------------------------------------------+-------+-------+-------+--------------+---------------|
+| workV.resize(FirstOrderR::workVecSize);                              | O     | O     | X     | O            | X             |
+| workM.resize(FirstOrderR::mat_workMatSize);                          | O     | O     | X     | O            | X             |
+| workV[FirstOrderR::vec_r].reset(new SiconosVector(sizeDS));          | O     | O     | O     | X            | X             |
+| workV[FirstOrderR::vec_x].reset(new SiconosVector(sizeDS));          | O     | O     | O     | X            | X             |
+| workV[FirstOrderR::vec_z].reset(new SiconosVector(sizeZ));           | O     | O     | X     | O            | X             |
+| workV[FirstOrderR::g_alpha].reset(new SiconosVector(sizeDS));        | O     | X     | O     | X            | X             |
+| workM[FirstOrderR::mat_C].reset(new SimpleMatrix(sizeY, sizeDS));    | O     | O     | O     | O            | X             |
+| workM[FirstOrderR::mat_D].reset(new SimpleMatrix(sizeY, sizeY));     | O     | O     | O     | O            | X             |
+| workM[FirstOrderR::mat_B].reset(new SimpleMatrix(sizeDS, sizeY));    | O     | O     | O     | O            | X             |
+| workM[FirstOrderR::mat_K].reset(new SimpleMatrix(sizeDS, sizeDS));   | O     | X     | X     | X            | X             |
+| workM[FirstOrderR::mat_Khat].reset(new SimpleMatrix(sizeDS, sizeY)); | O     | X     | X     | X            | X             |
+| workM[FirstOrderR::mat_F].reset(new SimpleMatrix(sizeY, sizeZ));     | X     | O     | X     | O            | X             |
+| workV[FirstOrderR::e].reset(new SiconosVector(sizeY));               | X     | X     | X     | O            | X             |
+|----------------------------------------------------------------------+-------+-------+-------+--------------+---------------|
+| others                                                               |       |       |       | check matrix | check op      |
+|                                                                      |       |       |       | sizes        | exist. and    |
+|                                                                      |       |       |       | consistency  | size consist. |
+
+
+| Base class == LR (V) does nothing | LRheo  | LSclero   | Lcomp       | LcomplLTIR | LLTIR    |
+|-----------------------------------+--------+-----------+-------------+------------+----------|
+| memory for                        | _hDot  | _dotjachq | _jachlambda |            |          |
+|                                   | _jachq |           |             |            |          |
+|-----------------------------------+--------+-----------+-------------+------------+----------|
+| others                            |        |           |             | check op   | check op |
+|                                   |        |           |             | exist      | exist    |
+==> DSlink, work never used!
+
+|            | NewtonEuler |
+|------------+-------------|
+| memory for | _jachq      |
+|            | _jachqT     |
+|            | _T          |
+
+
+* DSlink definition and usage
+** where --> SimulationGraphs.hpp, property of Interaction Graph. Should probably be part of the modeling rather than of the simulingTools
+** what --> connection between Interactions and DS. Pointer links to ds variables, that are to be used in Interaction-related operations 
+   (like computeOutput, computeInput, or OSI computations). Read only most of the time (this has to be checked).
+   Exceptions: z, RW in OSIs. See table thereafter.
+** creation --> as soon as the interaction is inserted into the graph (i.e. link(inter, ds1, ds2))
+   We MUST be able to call properly computeOutput/input when inter and ds are linked, whatever the simulation is.
+** initialisation --> same place for the standard keys (q0, r ...).
+   Extra buffers (i.e. depending on the simulation side, OSI ...) has to be initialised during simu->initialize.
+   Example : acceleration when required by the OSI.
+** DSlink[key].reset : in Interaction.cpp, setDSLinkAndWorkSpaces
+   2 stages : 
+   1: reset(new BlockVector()) in initData
+   2: DSlink[key].insert(ds)>...) in initDSData
+** list of keys for DSlink: enum in Relation classes
+
+
+* workMatrices (DSGraph)
+** where 
+** what 
+** creation 
+** Used only in NewmarkAlphaOSI => should probably be replaced with interprop workMat
+
+
+* workVectors (DSGraph)
+** where  
+** what
+** creation 
+** modelingTools : never
+** simulationTools
+   
+|                   | OneStepIntegrator::residu_free  | OneStepIntegrator::free         | OneStepIntegrator::free_tdg     | OneStepIntegrator::residu      | OneStepIntegrator::x_partial_ns | OneStepIntegrator::delta_x_for_relation | OneStepIntegrator::local_buffer | OneStepIntegrator::qtmp | OneStepIntegrator::acce_like | OneStepIntegrator::acce_memory |
+|-------------------+---------------------------------+---------------------------------+---------------------------------+--------------------------------+---------------------------------+-----------------------------------------+---------------------------------+-------------------------+------------------------------+--------------------------------|
+| D1MinusLinearOSI  | resize/reset                    | resize/                         | resize/reset                    |                                |                                 |                                         |                                 |                         |                              |                                |
+|                   | used in computation as tmp buff | insert in DSLink                |                                 |                                |                                 |                                         |                                 |                         |                              |                                |
+|-------------------+---------------------------------+---------------------------------+---------------------------------+--------------------------------+---------------------------------+-----------------------------------------+---------------------------------+-------------------------+------------------------------+--------------------------------|
+| D1Minus...HalfAcc | used in computation as tmp buf  | used in computation as tmp buff | used in computation as tmp buff |                                |                                 |                                         |                                 |                         |                              |                                |
+|-------------------+---------------------------------+---------------------------------+---------------------------------+--------------------------------+---------------------------------+-----------------------------------------+---------------------------------+-------------------------+------------------------------+--------------------------------|
+| D1Minus...HalfVel | used in computation as tmp buf  | used in computation as tmp buff | used in computation as tmp buff |                                |                                 |                                         |                                 |                         |                              |                                |
+|-------------------+---------------------------------+---------------------------------+---------------------------------+--------------------------------+---------------------------------+-----------------------------------------+---------------------------------+-------------------------+------------------------------+--------------------------------|
+| EulerMoreauOSI    | resize/reset                    | resize/reset                    |                                 | resize/reset                   | resize/reset                    | resize/reset                            | resize/reset                    |                         |                              |                                |
+|                   |                                 | insert in DSLink                |                                 |                                | insert in DSLink                | insert in DSLink                        |                                 |                         |                              |                                |
+|                   | used in computation as tmp buf  | used in computation as tmp buf  |                                 | used in computation as tmp buf | used in computation as tmp buf  | used in computation as tmp buf          | used in computation as tmp buf  |                         |                              |                                |
+|-------------------+---------------------------------+---------------------------------+---------------------------------+--------------------------------+---------------------------------+-----------------------------------------+---------------------------------+-------------------------+------------------------------+--------------------------------|
+| GFC               |                                 | used as tmp buff                |                                 |                                |                                 |                                         |                                 |                         |                              |                                |
+|-------------------+---------------------------------+---------------------------------+---------------------------------+--------------------------------+---------------------------------+-----------------------------------------+---------------------------------+-------------------------+------------------------------+--------------------------------|
+| HEM5OSI           |                                 | resize/reset                    |                                 |                                |                                 |                                         |                                 |                         |                              |                                |
+|                   |                                 | insert in DSLink                |                                 |                                |                                 |                                         |                                 |                         |                              |                                |
+|-------------------+---------------------------------+---------------------------------+---------------------------------+--------------------------------+---------------------------------+-----------------------------------------+---------------------------------+-------------------------+------------------------------+--------------------------------|
+| LSodar            |                                 | resize/reset                    |                                 |                                |                                 |                                         |                                 |                         |                              |                                |
+|                   |                                 | insert in DSLink                |                                 |                                |                                 |                                         |                                 |                         |                              |                                |
+|                   |                                 | used as tmp buf                 |                                 |                                |                                 |                                         |                                 |                         |                              |                                |
+|-------------------+---------------------------------+---------------------------------+---------------------------------+--------------------------------+---------------------------------+-----------------------------------------+---------------------------------+-------------------------+------------------------------+--------------------------------|
+|                   | resize/reset                    | resize/reset                    |                                 |                                |                                 |                                         | resize/reset                    |                         |                              |                                |
+| MoreauJean        |                                 | insert in DSLink                |                                 |                                |                                 |                                         |                                 |                         |                              |                                |
+|                   | used as tmp buf                 | used as tmp buf                 |                                 |                                |                                 |                                         | used as tmp buf                 |                         |                              |                                |
+|-------------------+---------------------------------+---------------------------------+---------------------------------+--------------------------------+---------------------------------+-----------------------------------------+---------------------------------+-------------------------+------------------------------+--------------------------------|
+| MJCombined        |                                 |                                 |                                 |                                |                                 |                                         |                                 | resize/reset            |                              |                                |
+|-------------------+---------------------------------+---------------------------------+---------------------------------+--------------------------------+---------------------------------+-----------------------------------------+---------------------------------+-------------------------+------------------------------+--------------------------------|
+| MJDirect          |                                 |                                 |                                 |                                |                                 |                                         |                                 | resize/reset            |                              |                                |
+|-------------------+---------------------------------+---------------------------------+---------------------------------+--------------------------------+---------------------------------+-----------------------------------------+---------------------------------+-------------------------+------------------------------+--------------------------------|
+| MJGOSI            | resize/reset                    | resize/reset                    |                                 |                                |                                 |                                         | resize/reset                    |                         |                              |                                |
+|                   |                                 | insert in DSLink                |                                 |                                |                                 |                                         |                                 |                         |                              |                                |
+|                   | used as tmp buf                 | used as tmp buf                 |                                 |                                |                                 |                                         | used as tmp buf                 |                         |                              |                                |
+|-------------------+---------------------------------+---------------------------------+---------------------------------+--------------------------------+---------------------------------+-----------------------------------------+---------------------------------+-------------------------+------------------------------+--------------------------------|
+| NewmarkAlpha      | resize/reset                    | resize/reset                    |                                 |                                |                                 |                                         |                                 |                         | resize/reset                 | resize/reset                   |
+|                   |                                 | insert in DSLink                |                                 |                                |                                 |                                         |                                 |                         |                              |                                |
+|                   | used as tmp buf                 | used as tmp buf                 |                                 |                                |                                 |                                         |                                 |                         | used as tmp buf              | used as tmp buf                |
+|-------------------+---------------------------------+---------------------------------+---------------------------------+--------------------------------+---------------------------------+-----------------------------------------+---------------------------------+-------------------------+------------------------------+--------------------------------|
+|                   | resize/reset                    | resize/reset                    |                                 |                                |                                 |                                         | resize/reset                    |                         |                              |                                |
+|                   |                                 | insert in DSLink                |                                 |                                |                                 |                                         |                                 |                         |                              |                                |
+|                   | used as tmp buf                 | used as tmp buf                 |                                 |                                |                                 |                                         | used as tmp buf                 |                         |                              |                                |
+|-------------------+---------------------------------+---------------------------------+---------------------------------+--------------------------------+---------------------------------+-----------------------------------------+---------------------------------+-------------------------+------------------------------+--------------------------------|
+| TSCombinedProj    |                                 |                                 |                                 |                                |                                 |                                         |                                 | used as tmp buf         |                              |                                |
+|-------------------+---------------------------------+---------------------------------+---------------------------------+--------------------------------+---------------------------------+-----------------------------------------+---------------------------------+-------------------------+------------------------------+--------------------------------|
+| TSDirect          |                                 |                                 |                                 |                                |                                 |                                         |                                 | used as tmp buf         |                              |                                |
+|-------------------+---------------------------------+---------------------------------+---------------------------------+--------------------------------+---------------------------------+-----------------------------------------+---------------------------------+-------------------------+------------------------------+--------------------------------|
+| ZeroOrderHold     |                                 | resize/reset                    |                                 |                                |                                 |                                         |                                 |                         |                              |                                |
+|                   |                                 | insert in DSLink                |                                 |                                |                                 |                                         |                                 |                         |                              |                                |
+|                   |                                 | used as tmp buff                |                                 |                                |                                 |                                         |                                 |                         |                              |                                |
+|-------------------+---------------------------------+---------------------------------+---------------------------------+--------------------------------+---------------------------------+-----------------------------------------+---------------------------------+-------------------------+------------------------------+--------------------------------|
+| Topology          | reset global + arg initialize   |                                 |                                 |                                |                                 |                                         |                                 |                         |                              |                                |
+|                   | work space (func ds)            |                                 |                                 |                                |                                 |                                         |                                 |                         |                              |                                |
+|                   |                                 |                                 |                                 |                                |                                 |                                         |                                 |                         |                              |                                |
+
+
+* workVectors (InterGraph)
+** creation : link(...) in Topology.cpp, .reset only
+** modelingTools : only in FONLR, FOLR, FOT1R (see computeInput/output below) and Interaction.cpp as 
+   arg for relation->initialize (send to initComponents for reset of keys).
+** simulationTools :
+|                | FOR::e                              | ALL                   | FirstOrderR::vec_residuR |
+|----------------+-------------------------------------+-----------------------+--------------------------|
+| EulerMoreauOSI | CO                                  |                       |                          |
+|----------------+-------------------------------------+-----------------------+--------------------------|
+| TimeStepping   |                                     | arg of computeResiduR | used as tmp buf          |
+|----------------+-------------------------------------+-----------------------+--------------------------|
+| Topology       | reset global                        |                       |                          |
+|                | arg setDSLinkAndWorkSpacework space |                       |                          |
+|                |                                     |                       |                          |
+
+
+* workMatrices (InterGraph)
+** creation : link(...) in Topology.cpp, .reset only
+** modelingTools : OSNSPB à développer ...
+
+
+
+
+* computeInput/computeOutput usage of buffers
+| Base class == FOR (VA)          | FONLR            | FOT1R     | FOT2R   | FOLR   | FOLTIR |
+|---------------------------------+------------------+-----------+---------+--------+--------|
+| DSlink = *interProp.DSlink      | O                | O         | O       | O      | O      |
+| workV = *interProp.workVectors  | O                | O         | O       | O      | O      |
+| workM = *interProp.workMatrices | O                | X         | O       | O      | X      |
+| osnsM = *interProp.block        | O  (R)           | X         | O (R)   | X      | X      |
+| inter.lambdaOld                 | O  (R)           | X         | O (R)   | X      | X      |
+| inter.yOld(level)               | O    (R)         | X         | O (R)   | X      | X      |
+| inter.residuY()                 | O    (R)         | X         | O (R)   | X      | X      |
+| inter.Halpha()                  | O   (W)          | X         | O (W)   | X      | X      |
+| workM[FirstOrderR::mat_D]       | O (if !_D), (RW) | X (ini)   | O (RW)  | O (W)  | X      |
+| workM[FirstOrderR::mat_C]       | O (if !_C), (RW) | O (W)     | O (RW)  | O (W)  | X      |
+| workV[FirstOrderR::vec_x]       | O   (W)          | O (W)     | O (W)   | X      | X      |
+| workV[FirstOrderR::vec_z]       | O   (W)          | O (W)     | X       | O (W)  | X      |
+| workV[FirstOrderR::g_alpha]     | O   (W)          | X         | O (W)   | X      | X      |
+| workM[FirstOrderR::mat_B]       | O   (RW)         | O (W)     | (RW)    | O (W)  | X      |
+| workM[FirstOrderR::mat_K]       | O   (RW)         | X         | X       | X      | X      |
+| workM[FirstOrderR::mat_Khat]    | O   (R)          | X         | X       | X      | X      |
+| workV[FirstOrderR::vec_r]       | X   (ini)        | O (W)     | X (ini) | X      | X      |
+| workM[FirstOrderR::mat_F]       | X                | O (W)     | X       | O (W)  | X      |
+| workV[FirstOrderR::e]           | X                | X         | X       | O (W)  | X      |
+| DSlink[FirstOrderR::deltax]     | O    (R)         | X         | O (R)   | X      | X      |
+| DSlink[FirstOrderR::x]          | O   (R)          | O (R)     | O (R)   | O (R)  | O (R)  |
+| DSlink[FirstOrderR::z]          | O   (RW)         | O (RW)    | X       | O (RW) | O (RW) |
+| DSlink[FirstOrderR::r]          | O   (W)          | O (W, R?) | O (W)   | O (W)  | O (W)  |
+| DSlink[FirstOrderR::xPartialNS] | O   (RW)         | X         | O (W)   | X      | X      |
+|---------------------------------+------------------+-----------+---------+--------+--------|
+
+
+R : read only
+W : write only
+RW: read/write
+
+
+
+| Base class == LR (V) does nothing | LRheo  | LSclero | Lcomp  | LcomplLTIR | LLTIR  |
+|-----------------------------------+--------+---------+--------+------------+--------|
+| DSlink[LagrangianR::q0]           | O (R)  | O (R)   | O (R)  | O (R)      | O (R)  |
+| DSlink[LagrangianR::q1]           | O (R)  | O (R)   | O (R)  | O (R)      | O (R)  |
+| DSlink[LagrangianR::q2]           | O (R)  | O (R)   | O (R)  | O (R)      | O (R)  |
+| DSlink[LagrangianR::z]            | O (RW) | O (RW)  | O (RW) | O (RW)     | O (RW) |
+| DSlink[LagrangianR::p+level]      | O (W)  | O (W)   | O (W)  | O (W)      | O (W)  |
+|-----------------------------------+--------+---------+--------+------------+--------|
+
+|                                | NER    | NERFrom1DLocalFrame | NERFrom3DLocalFrame |
+|--------------------------------+--------+---------------------+---------------------|
+| DSlink[NewtonEulerR::q0]       | O (R)  |                     |                     |
+| DSlink[NewtonEulerR::velocity] | O (R)  |                     |                     |
+| DSlink[NewtonEulerR::dotq]     | O (R)  |                     |                     |
+| DSlink[NewtonEuler::p+level]   | O (W)  |                     |                     |
+| DSlink[NewtonEuler::z]         | O (RW) |                     |                     |
+
+
+
+
+* TODO LATER
+** initialize_ds_links: we should not alloc/init relations here.
+

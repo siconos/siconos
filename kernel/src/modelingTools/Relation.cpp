@@ -26,10 +26,10 @@ Relation::Relation(RELATION::TYPES type,
                    RELATION::SUBTYPES subtype):
   _relationType(type), _subType(subtype)
 {
-  zeroPlugin();
+  _zeroPlugin();
 }
 
-void Relation::zeroPlugin()
+void Relation::_zeroPlugin()
 {
   _pluginh.reset(new PluggedObject());
   _pluginJachx.reset(new PluggedObject());
@@ -42,39 +42,6 @@ void Relation::zeroPlugin()
   _plugine.reset(new PluggedObject());
 }
 
-Relation::~Relation()
-{
-}
-
-
-const std::string Relation::getJachxName() const
-{
-  if (_pluginJachx->fPtr)
-    return _pluginJachx->getPluginName();
-  return "unamed";
-}
-
-const std::string Relation::gethName() const
-{
-  if (_pluginh->fPtr)
-    return _pluginh->getPluginName();
-  return "unamed";
-
-}
-const std::string Relation::getgName() const
-{
-  if (_pluging->fPtr)
-    return _pluging->getPluginName();
-  return "unamed";
-
-}
-
-const std::string Relation::getJacgName(unsigned int) const
-{
-  return "unamed";
-}
-
-
 void Relation::display() const
 {
   std::cout << "=====> Relation of type "
@@ -83,45 +50,11 @@ void Relation::display() const
             << _subType <<std::endl;
 }
 
-bool Relation::ishPlugged() const
-{
-  return _pluginh->isPlugged();
-}
-
-bool Relation::isJachxPlugged() const
-{
-  return _pluginJachx->isPlugged();
-}
-
-bool Relation::isJachlambdaPlugged() const
-{
-  return _pluginJachlambda->isPlugged();
-}
-
-bool Relation::isgPlugged() const
-{
-  return _pluging->isPlugged();
-}
-
-bool Relation::isJacLgPlugged() const
-{
-  return _pluginJacglambda->isPlugged();
-}
-
-bool Relation::isfPlugged() const
-{
-  return _pluginf->isPlugged();
-}
-
-bool Relation::isePlugged() const
-{
-  return _plugine->isPlugged();
-}
-
 void Relation::setComputeJachlambdaFunction(const std::string& pluginPath, const std::string& functionName)
 {
   _pluginJachlambda->setComputeFunction(pluginPath, functionName);
 }
+
 void Relation::setComputeJachxFunction(const std::string& pluginPath, const std::string& functionName)
 {
   _pluginJachx->setComputeFunction(pluginPath, functionName);

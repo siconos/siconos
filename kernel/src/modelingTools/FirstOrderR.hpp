@@ -28,7 +28,6 @@
 
 /** FirstOrder Non Linear Relation.
  *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
  *  \date (Creation) Apr 27, 2004
  *
  *  Relation for First Order Dynamical Systems, with:
@@ -67,9 +66,9 @@ variables are required in g.
 class FirstOrderR : public Relation
 {
 public:
-  enum FirstOrderRDS {xfree, z, x, r, deltax, xPartialNS, DSlinkSize};
-  enum FirstOrderRVec {vec_xfree, vec_z, vec_x, vec_r, e, g_alpha, vec_residuR, workVecSize};
-  enum FirstOrderRMat  {mat_C, mat_D, mat_F, mat_B, mat_K, mat_Ktilde, mat_Khat, mat_workMatSize};
+  enum FirstOrderRDS  {xfree, z, x, r, deltax, xPartialNS, DSlinkSize};
+  enum FirstOrderRVec {osnsp_rhs,vec_z, vec_x, vec_r, e, h_alpha, g_alpha, vec_residuY, vec_residuR, workVecSize};
+  enum FirstOrderRMat {mat_C, mat_D, mat_F, mat_B, mat_K, mat_Ktilde, mat_Khat, mat_workMatSize};
 
 
 protected:

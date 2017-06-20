@@ -63,9 +63,6 @@ protected:
   /** the cell size */
   unsigned int _cellsize;
 
-  /** interaction counter */
-  unsigned int _interID;
-
   /** the siconos model */
   SP::Model _model;
 
@@ -212,14 +209,6 @@ public:
    * \return a pointer on a NonSmoothLaw object
    */
   SP::NonSmoothLaw nslaw(long unsigned int class1, long unsigned class2);
-
-  /** Get an interaction id.
-      \return an unsigned int
-   * */
-  unsigned int newInteractionId()
-  {
-    return _interID++;
-  };
 
   /** get the neighbours
    * */

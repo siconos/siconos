@@ -48,8 +48,6 @@ void KneeJointR::initComponents(Interaction& inter, VectorOfBlockVectors& DSlink
 
 void KneeJointR::checkInitPos( SP::SiconosVector x1 ,  SP::SiconosVector x2 )
 {
-
-  //x1->display();
   double X1 = x1->getValue(0);
   double Y1 = x1->getValue(1);
   double Z1 = x1->getValue(2);
@@ -66,8 +64,6 @@ void KneeJointR::checkInitPos( SP::SiconosVector x1 ,  SP::SiconosVector x2 )
   double q23 = 0;
   if(x2)
   {
-    //printf("checkInitPos x2:\n");
-    //x2->display();
     X2 = x2->getValue(0);
     Y2 = x2->getValue(1);
     Z2 = x2->getValue(2);
@@ -77,30 +73,15 @@ void KneeJointR::checkInitPos( SP::SiconosVector x1 ,  SP::SiconosVector x2 )
     q23 = x2->getValue(6);
   }
 
-  if (Hx(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23) > DBL_EPSILON )
-  {
-    std::cout << "KneeJointR::checkInitPos( SP::SiconosVector x1 ,  SP::SiconosVector x2 )" << std::endl;
-    std::cout << " Hx is large :" << Hx(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23) << std::endl;
-  }
-  if (Hy(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23) > DBL_EPSILON )
-  {
-    std::cout << "KneeJointR::checkInitPos( SP::SiconosVector x1 ,  SP::SiconosVector x2 )" << std::endl;
-    std::cout << " Hy is large :" << Hy(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23) << std::endl;
-  }
-  if (Hz(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23) > DBL_EPSILON )
-  {
-    std::cout << "KneeJointR::checkInitPos( SP::SiconosVector x1 ,  SP::SiconosVector x2 )" << std::endl;
-    std::cout << " Hz is large :" << Hz(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23) << std::endl;
-  }
-     
-  
-  // printf("checkInitPos Hx : %e\n", Hx(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23));
-  // printf("checkInitPos Hy : %e\n", Hy(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23));
-  // printf("checkInitPos Hz : %e\n", Hz(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23));
-
-
+  assert(Hx(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23)
+         < DBL_EPSILON);
+  assert(Hy(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23)
+         < DBL_EPSILON);
+  assert(Hz(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23)
+         < DBL_EPSILON);
 }
-KneeJointR::KneeJointR(SP::NewtonEulerDS d1, SP::NewtonEulerDS d2, SP::SiconosVector P): NewtonEulerR()
+
+KneeJointR::KneeJointR(SP::NewtonEulerDS d1, SP::NewtonEulerDS d2, SP::SiconosVector P): NewtonEulerJointR()
 {
   _P0.reset(new SiconosVector(3));
   *_P0 = *P;
@@ -148,13 +129,14 @@ KneeJointR::KneeJointR(SP::NewtonEulerDS d1, SP::NewtonEulerDS d2, SP::SiconosVe
 
 
 }
+
 /* constructor,
    \param a SP::NewtonEulerDS d1, a dynamical system containing the intial position
-   \param a SP::SiconosVector P0, if (absolutRef) P0 contains the coordinates of the Knee point, in the absolute frame, when d1 is located in the initial position.
-   else P0 contains the coordinates of the Knee point, in the frame of d1,
-   ie P0 in the frame of the object, ie G1P0 in the obsolut frame with d1->q=(x,y,z,1,0,0,0).
+   \param a SP::SiconosVector P, P contains the coordinates of the Knee point
+   \param bool indicating whether P is in the absolute frame (=true, default)
+   default) or the frame of the DS (=false) with orientation (1,0,0,0)
 */
-KneeJointR::KneeJointR(SP::NewtonEulerDS d1, SP::SiconosVector P0, bool absolutRef): NewtonEulerR()
+KneeJointR::KneeJointR(SP::NewtonEulerDS d1, SP::SiconosVector P0, bool absolutRef): NewtonEulerJointR()
 {
   _P0.reset(new SiconosVector(3));
   *_P0 = *P0;
@@ -203,10 +185,6 @@ KneeJointR::KneeJointR(SP::NewtonEulerDS d1, SP::SiconosVector P0, bool absolutR
   SP::SiconosVector q2;
   checkInitPos(q1,q2);
 }
-
-// The rest of the code is generated
-// we can disable some warning
-#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
 
 void KneeJointR::Jd1d2(double X1, double Y1, double Z1, double q10, double q11, double q12, double q13, double X2, double Y2, double Z2, double q20, double q21, double q22, double q23)
 {
@@ -334,33 +312,12 @@ void KneeJointR::Jd1(double X1, double Y1, double Z1, double q10, double q11, do
   double t104;
   double t109;
   double t11;
-  double t119;
-  double t125;
-  double t129;
-  double t41;
   double t5;
   double t6;
   double t60;
   double t70;
-  double t79;
-  double t89;
   double t9;
   double t99;
-
-  double X2;
-  double Y2;
-  double Z2;
-  double q20;
-  double q21;
-  double q22;
-  double q23;
-  X2 = 0;
-  Y2 = 0;
-  Z2 = 0;
-  q20 = 0;
-  q21 = 0;
-  q22 = 0;
-  q23 = 0;
   {
     t5 = 2.0 * _G2P0z;
     df[15] = -t5;
@@ -409,14 +366,6 @@ void KneeJointR::Jd1(double X1, double Y1, double Z1, double q10, double q11, do
     _jachq->setValue(0, 4, dfr0[16]*q13 + dfr1[17]*q12 + 2.0 * q11 * _G1P0x);
     _jachq->setValue(0, 5, df[6]*q10 + dfr1[17]*q11 + 2.0 * df[2]*q12);
     _jachq->setValue(0, 6, dfr0[16]*q11 + t11 * q10 + 2.0 * df[2]*q13);
-    //      _jachq->setValue(0,7, -1.0);
-    //      _jachq->setValue(0,8, 0.0);
-    //      _jachq->setValue(0,9, 0.0);
-    t41 = df[13];
-    //      _jachq->setValue(0,10, df[14]*q22+t41*q23+2.0*df[8]*q20);
-    //      _jachq->setValue(0,11, dfr0[18]*q23+dfr1[19]*q22+2.0*df[8]*q21);
-    //      _jachq->setValue(0,12, df[14]*q20+dfr1[19]*q21+2.0*q22*_G2P0x);
-    //      _jachq->setValue(0,13, dfr0[18]*q21+t41*q20+2.0*q23*_G2P0x);
     _jachq->setValue(1, 0, 0.0);
     _jachq->setValue(1, 1, 1.0);
     _jachq->setValue(1, 2, 0.0);
@@ -426,15 +375,6 @@ void KneeJointR::Jd1(double X1, double Y1, double Z1, double q10, double q11, do
     t70 = dfr0[16];
     _jachq->setValue(1, 5, t70 * q13 + dfr1[6]*q11 + 2.0 * q12 * _G1P0y);
     _jachq->setValue(1, 6, t70 * q12 + dfr0[4]*q10 + 2.0 * dfr0[0]*q13);
-    //      _jachq->setValue(1,7, 0.0);
-    //      _jachq->setValue(1,8, -1.0);
-    //      _jachq->setValue(1,9, 0.0);
-    t79 = dfr0[19];
-    //      _jachq->setValue(1,10, t79*q21+dfr0[12]*q23+2.0*dfr0[9]*q20);
-    //      _jachq->setValue(1,11, t79*q20+dfr1[14]*q22+2.0*q21*_G2P0y);
-    t89 = dfr0[18];
-    //      _jachq->setValue(1,12, t89*q23+dfr1[14]*q21+2.0*dfr0[9]*q22);
-    //      _jachq->setValue(1,13, t89*q22+dfr0[12]*q20+2.0*q23*_G2P0y);
     _jachq->setValue(2, 0, 0.0);
     _jachq->setValue(2, 1, 0.0);
     _jachq->setValue(2, 2, 1.0);
@@ -445,16 +385,6 @@ void KneeJointR::Jd1(double X1, double Y1, double Z1, double q10, double q11, do
     t109 = dfr1[16];
     _jachq->setValue(2, 5, t109 * q13 + t99 * q10 + 2.0 * dfr1[0]*q12);
     _jachq->setValue(2, 6, t109 * q12 + t104 * q11 + 2.0 * q13 * _G1P0z);
-    //      _jachq->setValue(2,7, 0.0);
-    //      _jachq->setValue(2,8, 0.0);
-    //      _jachq->setValue(2,9, -1.0);
-    t119 = dfr1[15];
-    //      _jachq->setValue(2,10, dfr1[18]*q21+t119*q22+2.0*dfr1[9]*q20);
-    t125 = dfr1[14];
-    //      _jachq->setValue(2,11, dfr1[18]*q20+t125*q23+2.0*q21*_G2P0z);
-    t129 = dfr1[18];
-    //      _jachq->setValue(2,12, t129*q23+t119*q20+2.0*q22*_G2P0z);
-    //      _jachq->setValue(2,13, t129*q22+t125*q21+2.0*dfr1[9]*q23);
   }
 }
 
@@ -481,7 +411,7 @@ void KneeJointR::computeJachq(double time, Interaction& inter, SP::BlockVector q
   double q21 = 0;
   double q22 = 0;
   double q23 = 0;
-  if(q0->getNumberOfBlocks()>1)
+  if(q0->numberOfBlocks()>1)
   {
     SP::SiconosVector q2 = (q0->getAllVect())[1];
     X2 = q2->getValue(0);
@@ -606,7 +536,7 @@ void KneeJointR::DotJd1d2(double Xdot1, double Ydot1, double Zdot1,
 void KneeJointR::computeDotJachq(double time, BlockVector& workQ, BlockVector& workZ, BlockVector& workQdot)
 {
   DEBUG_PRINT("KneeJointR::computeDotJachq(double time, Interaction& inter) starts \n");
-  if (workQdot.getNumberOfBlocks()>1)
+  if (workQdot.numberOfBlocks()>1)
   {
     computeDotJachq(time, (workQdot.getAllVect())[0], (workQdot.getAllVect())[1]);
   }
@@ -761,7 +691,7 @@ void KneeJointR::computeh(double time, BlockVector& q0, SiconosVector& y)
   double q21 = 0;
   double q22 = 0;
   double q23 = 0;
-  if(q0.getNumberOfBlocks()>1)
+  if(q0.numberOfBlocks()>1)
   {
     // SP::SiconosVector x2 = _d2->q();
     // DEBUG_EXPR( _d2->q()->display(););

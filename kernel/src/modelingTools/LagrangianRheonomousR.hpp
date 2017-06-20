@@ -23,77 +23,41 @@
 
 #include "LagrangianR.hpp"
 
-/** \class LagrangianRheonomousR
- *  \brief  Lagrangian (Non Linear) Relation, Rheonomous and Holonomic.
- *
- * \author SICONOS Development Team - copyright INRIA
- * \version 3.0.0.
- * \date February 28, 2007
- *
- *  This class provides tools to describe non linear relation of the type:
- *
- * \f[
- * y = h(q,t,z)
- * \f]
- *
- * \f[
- *  \dot y =  \nabla^\top_q(q,t,z)\dot q + \frac{\partial }{\partial t}h(q,t,z)
- * \f]
- * or more generally
- * \f[
- *  \dot y =  H(q,t,z)\dot q + \frac{\partial }{\partial t}h(q,t,z)
- * \f]
- * and by duality
- *
- * \f[
- * p = H^\top(q,t,z)\lambda
- * \f]
- *
- * with
- * \f[
- * G0(q,t,z) = \nabla_q h(q,t,z)
- * \f]
- *
- *  y (or its discrete approximation) is usually stored in y[0]
- *  \f$\dot y \f$(or its discrete approximation) is usually stored in y[1]
- *  higher level can used for storing higher levels of derivatives.
- *
- *
- *
- * h, H and hdot=\f$ \frac{\partial h}{\partial t}(q,t,z) \f$ are
- * connected to user-defined functions.\n G0 and h are connected to
- * plug-in functions.\n
- *
- * The plugin function to compute h(q,t,z) needs the following
- * parameters:\n
- *
- * --> sizeDS : sum of the sizes of all the DynamicalSystems involved in the interaction\n
- * --> q : pointer to the first element of q \n
- * --> time : current time \n
- * --> sizeY : size of vector y (ie of the interaction) \n
- * --> [in,out] y : pointer to the first element of y \n
- * --> sizeZ : size of vector z \n
- * --> [in,out] z: pointer to z vector(s) from DS. \n
- * Its signature must be "void userPluginH(unsigned int, double*, double, unsigned int, double*, unsigned int, double*)"\n\n
- * The plugin function to compute G0(q,t,z), gradient of h according to q, needs the following parameters: \n
- *--> sizeDS : sum of the sizes of all the DynamicalSystems involved in the interaction  \n
- *--> q : pointer to the first element of q  \n
- *--> time : current time \n
- *--> sizeY : size of vector y (ie of the intercation) \n
- *--> [in,out] H : pointer to the first element of G0 (sizeY X sizeDS matrix)\n
- * --> sizeZ : size of vector z \n
- * -->[in,out] z: pointer to z vector(s) from DS.\n
- * Its signature must be "void userPluginG0(unsigned int, double*, double, unsigned int, double*, unsigned int, double*)"\n\n
- * The plugin function to compute hdot(q,t,z), needs the following parameters: \n
- *--> sizeDS : sum of the sizes of all the DynamicalSystems involved in the interaction  \n
- *--> q : pointer to the first element of q  \n
- *--> time : current time \n
- *--> sizeY : size of vector y (ie of the intercation) \n
- *--> [in,out] hDot : pointer to the first element of hDot.\n
- * --> sizeZ : size of vector z \n
- * -->[in,out] z: pointer to z vector(s) from DS.\n
- * Its signature must be "void userPluginG0(unsigned int, double*, double, unsigned int, double*, unsigned int, double*)"\n\n
- *
+/** Lagrangian (Non Linear) Rheonomous Relation 
+    
+    \author SICONOS Development Team - copyright INRIA
+    \date February 28, 2007
+    
+    This class provides tools to describe non linear relation of the type:
+    
+    \f[
+    y &= h(q,t,z) \\
+    \dot y &=  \nabla^\top_q(q,t,z)\dot q + \frac{\partial }{\partial t}h(q,t,z) \\
+    \f]
+
+    or more generally
+    
+    \f[
+    \dot y =  H(q,t,z)\dot q + \frac{\partial }{\partial t}h(q,t,z)
+    \f]
+    
+    and by duality
+
+    \f[
+    p = H^\top(q,t,z)\lambda
+    \f]
+    
+    The following operators (and their jacobians) can be plugged, in the usual way (see User Guide, 'User-defined plugins')
+    
+    - \f$ h(q,t,z)\f$
+    - \f$ \nabla_q h(q,t,z)\f$
+    - \f$ \dot h(q,t,z)\f$
+
+    The plugin functions must fit with the following signature (FPtr4):
+    
+    void func(unsigned int qsize, double* q, double time, unsigned int ysize, double* buffer , unsigned int sizez, double* z)
+    
+    buffer being either \f$y\f$, \f$\dot h\f$ or \f$\nabla_qh\f$.
  */
 class LagrangianRheonomousR : public LagrangianR
 {
@@ -129,9 +93,9 @@ protected:
   */
   LagrangianRheonomousR(): LagrangianR(RELATION::RheonomousR)
   {
-    zeroPlugin();
+    _zeroPlugin();
   };
-  void zeroPlugin();
+  void _zeroPlugin();
 public:
 
   /** constructor from a set of data
@@ -163,17 +127,6 @@ public:
   {
     return _hDot;
   }
-
-  /** To get the name of hDot plugin
-  *  \return a std::string
-  */
-  const std::string gethDotName() const ;
-
-  const std::string getJachqName() const ;
-
-  /** true if hDot is plugged
-  *  \return a bool
-  */
 
   /** to set a specified function to compute function hDot
   *  \param pluginpath the complete path to the plugin

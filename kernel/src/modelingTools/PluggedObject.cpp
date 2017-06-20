@@ -19,7 +19,7 @@
 
 #include "SSLH.hpp"
 #include "PluggedObject.hpp"
-
+#include <assert.h>
 PluggedObject::PluggedObject(): _pluginName("unplugged")
 {
   fPtr = NULL;
@@ -31,7 +31,7 @@ PluggedObject::PluggedObject(const std::string& name): _pluginName(name)
   setComputeFunction();
 }
 
-PluggedObject::PluggedObject(const PluggedObject & PO):  _pluginName(PO.getPluginName())
+PluggedObject::PluggedObject(const PluggedObject & PO):  _pluginName(PO.pluginName())
 {
   // we don't copy the fPtr since we need to increment the number of times we opened the plugin file in the openedPlugins multimap
   fPtr = NULL;

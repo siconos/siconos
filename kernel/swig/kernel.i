@@ -88,7 +88,6 @@
 %ignore getWMap;
 %ignore getWBoundaryConditionsMap;
 %ignore getDSBlocks;
-%ignore getInvMSimple;
 %ignore getInvMBlock;
 
 %warnfilter(509) rotateAbsToBody;
@@ -264,6 +263,16 @@ typedef __mpz_struct mpz_t[1];
   SP::NewtonImpactFrictionNSL cast_NewtonImpactFrictionNSL(SP::NonSmoothLaw nslaw)
   {
     return std11::dynamic_pointer_cast<NewtonImpactFrictionNSL>(nslaw);
+  }
+
+  SP::RelayNSL cast_RelayNSL(SP::NonSmoothLaw nslaw)
+  {
+    return std11::dynamic_pointer_cast<RelayNSL>(nslaw);
+  }
+
+  SP::NewtonImpactNSL cast_NewtonImpactNSL(SP::NonSmoothLaw nslaw)
+  {
+    return std11::dynamic_pointer_cast<NewtonImpactNSL>(nslaw);
   }
 
 %}

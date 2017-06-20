@@ -35,10 +35,6 @@ extern unsigned int sTimerCmp;
 extern unsigned int sFreqGraphic;
 //!The output frequency.
 extern unsigned int sFreqOutput;
-//!Dynamical set for siconos.
-extern DynamicalSystemsSet sAllDS;
-//!Dynamical set for siconos.
-extern DynamicalSystemsSet sAllDSByInter[];
 //!The siconos joint interactions.
 extern SP::Interaction sInterJoints[];
 //!The siconos contact interactions.

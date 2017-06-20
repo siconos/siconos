@@ -148,7 +148,7 @@ int main(void)
 {
   int total_info = 0;
 
-//  setNumericsVerbose(1);
+//  numerics_set_verbose(1);
 
   double q[] = { -1, 1, 3, -1, 1, 3, -1, 1, 3};
   double mu[] = {0.1, 0.1, 0.1};

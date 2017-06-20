@@ -97,7 +97,7 @@ int main(int argc, char* argv[])
     myNslaw->display();
 
     // The Interaction which involves the first DS (the process)
-    SP::Interaction myProcessInteraction(new Interaction(ninter, myNslaw, myProcessRelation));
+    SP::Interaction myProcessInteraction(new Interaction(myNslaw, myProcessRelation));
 
     // -------------
     // --- Model ---

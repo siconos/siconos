@@ -36,7 +36,7 @@ h = 1.0e-3   # time step
 numInter = 2
 ninter = 2
 theta = 0.5
-N = ceil((T-t0)/h)
+N = (int)((T-t0)/h)
 mu1 = 2
 mu2 = 3
 
@@ -73,7 +73,7 @@ myNslaw = RelayNSL(2)
 myNslaw.display()
 
 nameInter = 'processInteraction'
-myProcessInteraction = Interaction(ninter, myNslaw,
+myProcessInteraction = Interaction(myNslaw,
         myProcessRelation)
 myNSDS = NonSmoothDynamicalSystem()
 myNSDS.insertDynamicalSystem(process)

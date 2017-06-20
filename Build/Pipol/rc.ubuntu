@@ -1,8 +1,10 @@
 #!/bin/sh
 
-# should support 12.04 to 16.10
+# should support 12.04 to 17.04
 
 apt-get update
+
+lsb_release -r || apt-get -y install lsb-release
 
 UBUNTU_VER=$(lsb_release -r | sed -n 's/.*\([0-9][0-9]\.[0-9][0-9]\).*/\1/p')
 LESS_THAN_1304=$(awk 'BEGIN{print '$UBUNTU_VER' < 13.04 ? 1 : 0}')

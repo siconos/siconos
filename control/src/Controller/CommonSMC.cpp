@@ -54,7 +54,7 @@ void CommonSMC::initialize(const Model& m)
     _DS_SMC.reset(new FirstOrderNonLinearDS(*(std11::static_pointer_cast<FirstOrderNonLinearDS>(DS))));
   // We have to reset the _pluginb
   SP::SiconosVector dummyb(new SiconosVector(_DS_SMC->n(), 0));
-  std11::static_pointer_cast<FirstOrderNonLinearDS>(_DS_SMC)->setb(dummyb);
+  std11::static_pointer_cast<FirstOrderNonLinearDS>(_DS_SMC)->setbPtr(dummyb);
   }
   else if (dsType == Type::FirstOrderLinearDS)
   {
@@ -62,14 +62,14 @@ void CommonSMC::initialize(const Model& m)
     std11::static_pointer_cast<FirstOrderLinearDS>(_DS_SMC)->setComputebFunction(NULL);
   // We have to reset the _pluginb
   SP::SiconosVector dummyb(new SiconosVector(_DS_SMC->n(), 0));
-  std11::static_pointer_cast<FirstOrderLinearDS>(_DS_SMC)->setb(dummyb);
+  std11::static_pointer_cast<FirstOrderLinearDS>(_DS_SMC)->setbPtr(dummyb);
   }
   else if (dsType == Type::FirstOrderLinearTIDS)
   {
     _DS_SMC.reset(new FirstOrderLinearTIDS(*(std11::static_pointer_cast<FirstOrderLinearTIDS>(DS))));
   // We have to reset the _pluginb
   SP::SiconosVector dummyb(new SiconosVector(_DS_SMC->n(), 0));
-  std11::static_pointer_cast<FirstOrderLinearDS>(_DS_SMC)->setb(dummyb);
+  std11::static_pointer_cast<FirstOrderLinearDS>(_DS_SMC)->setbPtr(dummyb);
   }
   else
   {
@@ -83,6 +83,7 @@ void CommonSMC::initialize(const Model& m)
   _SMC.reset(new Model(t0, T));
   // Set up the simulation
   _simulationSMC.reset(new TimeStepping(_td));
+  _simulationSMC->setNonSmoothDynamicalSystemPtr(_SMC->nonSmoothDynamicalSystem());
 
   unsigned int sDim = _u->size();
   // create the interaction
@@ -144,7 +145,7 @@ void CommonSMC::initialize(const Model& m)
   if (!_nsLawSMC)  _nsLawSMC.reset(new RelayNSL(sDim, -_alpha, _alpha));
   if (!_OSNSPB_SMC) _OSNSPB_SMC.reset(new Relay(_numericsSolverId));
 
-  _interactionSMC.reset(new Interaction(sDim, _nsLawSMC, _relationSMC));
+  _interactionSMC.reset(new Interaction(_nsLawSMC, _relationSMC));
 
   if (dsType == Type::FirstOrderNonLinearDS)
   {
@@ -156,13 +157,12 @@ void CommonSMC::initialize(const Model& m)
   }
 
   _SMC->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DS_SMC);
-  _SMC->nonSmoothDynamicalSystem()->topology()->setOSI(_DS_SMC, _integratorSMC);
   _SMC->nonSmoothDynamicalSystem()->setName(_DS_SMC, "plant_SMC");
   _SMC->nonSmoothDynamicalSystem()->link(_interactionSMC, _DS_SMC);
   _SMC->nonSmoothDynamicalSystem()->setControlProperty(_interactionSMC, true);
   _SMC->nonSmoothDynamicalSystem()->topology()->setName(_interactionSMC, "Sgn_SMC");
   _simulationSMC->setName("linear sliding mode controller simulation");
-  _simulationSMC->insertIntegrator(_integratorSMC);
+  _simulationSMC->prepareIntegratorForDS(_integratorSMC, _DS_SMC, _SMC, t0);
   // OneStepNsProblem
   _OSNSPB_SMC->numericsSolverOptions()->dparam[0] = _precision;
   //    std::cout << _OSNSPB_SMC->numericsSolverOptions()->dparam[0] <<std::endl;

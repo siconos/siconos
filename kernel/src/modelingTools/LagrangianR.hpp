@@ -116,7 +116,7 @@ protected:
    */
   virtual void initComponents(Interaction& inter, VectorOfBlockVectors& DSlink,
                               VectorOfVectors& workV, VectorOfSMatrices& workM);
-  virtual void zeroPlugin();
+  virtual void _zeroPlugin();
 
 public:
 
@@ -191,7 +191,7 @@ public:
    * \param interProp
    *  \param derivativeNumber number of the derivative to compute, optional, default = 0.
    */
-  virtual void computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int derivativeNumber = 0) = 0;
+  //virtual void computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int derivativeNumber = 0) = 0;
 
   /** to compute p
    *  \param time current time
@@ -199,7 +199,7 @@ public:
    * \param interProp
    *  \param level "derivative" order of lambda used to compute input
    */
-  virtual void computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level = 0) = 0;
+  //virtual void computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level = 0) = 0;
 
   /** main relation members display
   */

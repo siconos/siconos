@@ -39,18 +39,18 @@ function(set_python_install_path)
     # and on which python is used (virtualenv or not)
     # First, we need to check if '--user' option works in the current environment.
     execute_process(COMMAND ${PYTHON_EXECUTABLE} -c
-      "import site; print site.ENABLE_USER_SITE" OUTPUT_VARIABLE ENABLE_USER)
+      "import site; print(site.ENABLE_USER_SITE)" OUTPUT_VARIABLE ENABLE_USER)
     string(STRIP ${ENABLE_USER} ENABLE_USER)
     
     if(ENABLE_USER) # --user works ...
       # Find install path for --user (site.USER_SITE)
       execute_process(COMMAND ${PYTHON_EXECUTABLE} -c
-       "import site; print site.USER_BASE" OUTPUT_VARIABLE USER_BASE)
+       "import site; print(site.USER_BASE)" OUTPUT_VARIABLE USER_BASE)
       list(APPEND python_install_options --prefix=${USER_BASE})
       # Get python user site and install path = USER_SITE + project_name
       set(PYTHON_COMMAND_GET_INSTALL_DIR
-       "import site, os, sys ; print os.path.join(site.USER_BASE, os.path.join(\"lib\", os.path.join(\"python\" + str(sys.version_info.major) + '.' + str(sys.version_info.minor),
- \"site-packages\")))")
+       "import site, os, sys ; print(os.path.join(site.USER_BASE, os.path.join(\"lib\", os.path.join(\"python\" + str(sys.version_info.major) + '.' + str(sys.version_info.minor),
+ \"site-packages\"))))")
     execute_process(
       COMMAND ${PYTHON_EXECUTABLE} -c "${PYTHON_COMMAND_GET_INSTALL_DIR}"
       OUTPUT_VARIABLE PY_INSTALL_DIR)

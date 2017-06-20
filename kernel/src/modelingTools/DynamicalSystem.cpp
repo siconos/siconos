@@ -17,117 +17,77 @@
 */
 #include "DynamicalSystem.hpp"
 
+// #define DEBUG_MESSAGES
+// #define DEBUG_STDOUT
+#include "debug.h"
+
 #include <iostream>
 
 
-unsigned int DynamicalSystem::count = 0;
+unsigned int DynamicalSystem::__count = 0;
+
+void DynamicalSystem::_init()
+{
+  DEBUG_PRINT("internal _init from DynamicalSystem\n");
+
+  // No memory allocation, only resize for containers.
+  // Everything should be done in derived class init for required operators
+  // and variables and in 'set'-like methods for optional
+  // components.
+  
+  _stepsInMemory = 1;
+  _x.resize(2);
+  _z.reset(new SiconosVector(1));
+}
 
 // ===== CONSTRUCTORS =====
 
 // Default constructor (protected)
 DynamicalSystem::DynamicalSystem():
-  _number(count++), _n(0), _stepsInMemory(1)
+  _number(__count++), _n(0)
 {
-  zeroPlugin();
-  _normRef = 1;
-  _x.resize(2);
-  _workspace.resize(sizeWorkV);
-  _z.reset(new SiconosVector(1));
+  _init();
 }
 
 // From a minimum set of data
-DynamicalSystem::DynamicalSystem(unsigned int newN):
-  _number(count++), _n(newN), _stepsInMemory(1)
+DynamicalSystem::DynamicalSystem(unsigned int dimension):
+  _number(__count++), _n(dimension)
 {
-  zeroPlugin();
-  _normRef = 1;
-  _x.resize(2);
-  _workspace.resize(sizeWorkV);
-  _workspace[freeresidu].reset(new SiconosVector(dimension()));
-  _r.reset(new SiconosVector(dimension()));
-  _z.reset(new SiconosVector(1));
+  _init();
 }
 
 // Copy constructor
 DynamicalSystem::DynamicalSystem(const DynamicalSystem & ds):
-  _number(count++)
+  _number(__count++), _n(ds.n()), _stepsInMemory(ds.stepsInMemory())
 {
   // The following data should always be initialize
-  _n = ds.n();
-  _normRef = ds.normRef();
-  _x0.reset(new SiconosVector(*(ds.x0())));
-  _workspace.resize(sizeWorkV);
-  _workspace[freeresidu].reset(new SiconosVector(*(ds.workspace(freeresidu))));
-  _r.reset(new SiconosVector(*(ds.r())));
+  if(ds.x0())
+    _x0.reset(new SiconosVector(*(ds.x0())));
+  if(ds.r())
+    _r.reset(new SiconosVector(*(ds.r())));
   _x.resize(2);
-  _x[0].reset(new SiconosVector(*(ds.x())));
-  _x[1].reset(new SiconosVector(*(ds.rhs())));
-
-  // These  were not always initialised
+  if(ds.x())
+     _x[0].reset(new SiconosVector(*(ds.x())));
+  if(ds.rhs())
+    _x[1].reset(new SiconosVector(*(ds.rhs())));
   if (ds.jacobianRhsx())
     _jacxRhs.reset(new SimpleMatrix(*(ds.jacobianRhsx())));
-  //  if (ds.jacobianXG())
-  //    _jacgx.reset(new SimpleMatrix(*(ds.jacobianXG())));
-  //  if (ds.jacobianXDotG())
-  //    _jacxDotG.reset(new SimpleMatrix(*(ds.jacobianXDotG())));
-  if (ds.z())
-    _z.reset(new SiconosVector(*(ds.z())));
 
-  if (_pluging)
-    _pluging.reset(new PluggedObject(*(ds.getPluginG())));
-  if (_pluginJacgx)
-    _pluginJacgx.reset(new PluggedObject(*(ds.getPluginJacGX())));
-  if (_pluginJacxDotG)
-    _pluginJacxDotG.reset(new PluggedObject(*(ds.getPluginJacXDotG())));
+  _z.reset(new SiconosVector(*(ds.z())));
 
   if (ds.xMemory())
     _xMemory.reset(new SiconosMemory(*(ds.xMemory())));
   _stepsInMemory = ds.stepsInMemory();
-
-  _workspace.resize(sizeWorkV);
-
-  if (ds.workspace(local_buffer))
-    _workspace[local_buffer].reset(new SiconosVector(*(ds.workspace(local_buffer))));
-  if (ds.workspace(free))
-    _workspace[free].reset(new SiconosVector(*(ds.workspace(free))));
-  //  _workspace[sizeWorkV].reset(new SiconosVector(*(ds.workspace(sizeWorkV))));
-  // XXX See how to implement the copy of _workMatrix
-
-//  _workFree.reset(new SiconosVector(*(ds.workspace(DynamicalSystem::free))));
-}
-
-bool DynamicalSystem::checkDynamicalSystem()
-{
-  bool output = true;
-  // n
-  if (_n == 0)
-  {
-    RuntimeException::selfThrow("DynamicalSystem::checkDynamicalSystem - number of degrees of freedom is equal to 0.");
-    output = false;
-  }
-  if (!_x0)
-  {
-    RuntimeException::selfThrow("DynamicalSystem::checkDynamicalSystem - x0 not set.");
-    output = false;
-  }
-  return output;
-}
-void DynamicalSystem::zeroPlugin()
-{
-  _pluginJacgx.reset(new PluggedObject());
-  _pluginJacxDotG.reset(new PluggedObject());
-  _pluging.reset(new PluggedObject());
 }
 
 void DynamicalSystem::resetToInitialState()
 {
   if(_x0)
-  {
-    *(_x[0]) = *_x0;
-  }
+    {
+      *(_x[0]) = *_x0;
+    }
   else
     RuntimeException::selfThrow("DynamicalSystem::resetToInitialState() - initial state _x0 is null");
-  
 }
 
 
@@ -137,8 +97,7 @@ void DynamicalSystem::setX0(const SiconosVector& newValue)
 {
   // check dimensions ...
   if (newValue.size() != _n)
-    RuntimeException::selfThrow("DynamicalSystem::setX0 - inconsistent sizes between x0 input and n - Maybe you forget to set n?");
-
+    RuntimeException::selfThrow("DynamicalSystem::setX0 - inconsistent sizes between x0 input and system dimension.");
   if (_x0)
     *_x0 = newValue;
 
@@ -146,16 +105,14 @@ void DynamicalSystem::setX0(const SiconosVector& newValue)
   {
     _x0.reset(new SiconosVector(newValue));
   }
-  _normRef = _x0->norm2() + 1;
 }
 
 void DynamicalSystem::setX0Ptr(SP::SiconosVector newPtr)
 {
   // check dimensions ...
   if (newPtr->size() != _n)
-    RuntimeException::selfThrow("DynamicalSystem::setX0Ptr - inconsistent sizes between x0 input and n - Maybe you forget to set n?");
+    RuntimeException::selfThrow("DynamicalSystem::setX0Ptr - inconsistent sizes between x0 input and system dimension.");
   _x0 = newPtr;
-  _normRef = _x0->norm2() + 1;
 }
 
 void DynamicalSystem::setX(const SiconosVector& newValue)
@@ -165,7 +122,7 @@ void DynamicalSystem::setX(const SiconosVector& newValue)
 
   // check dimensions ...
   if (newValue.size() != _n)
-    RuntimeException::selfThrow("DynamicalSystem::setX - inconsistent sizes between x input and n - Maybe you forget to set n?");
+    RuntimeException::selfThrow("DynamicalSystem::setX - inconsistent sizes between x input and system dimension.");
 
   if (! _x[0])
     _x[0].reset(new SiconosVector(newValue));
@@ -179,7 +136,7 @@ void DynamicalSystem::setXPtr(SP::SiconosVector newPtr)
 
   // check dimensions ...
   if (newPtr->size() != _n)
-    RuntimeException::selfThrow("DynamicalSystem::setXPtr - inconsistent sizes between x input and n - Maybe you forget to set n?");
+    RuntimeException::selfThrow("DynamicalSystem::setXPtr - inconsistent sizes between x input and system dimension.");
 
   _x[0] = newPtr;
 }
@@ -190,7 +147,7 @@ void DynamicalSystem::setRhs(const SiconosVector& newValue)
 
   // check dimensions ...
   if (newValue.size() != _n)
-    RuntimeException::selfThrow("DynamicalSystem::setRhs - inconsistent sizes between x input and n - Maybe you forget to set n?");
+    RuntimeException::selfThrow("DynamicalSystem::setRhs - inconsistent sizes between rhs input and system dimension.");
 
   if (! _x[1])
     _x[1].reset(new SiconosVector(newValue));
@@ -204,7 +161,7 @@ void DynamicalSystem::setRhsPtr(SP::SiconosVector newPtr)
 
   // check dimensions ...
   if (newPtr->size() != _n)
-    RuntimeException::selfThrow("DynamicalSystem::setRhsPtr - inconsistent sizes between x input and n - Maybe you forget to set n?");
+    RuntimeException::selfThrow("DynamicalSystem::setRhsPtr - inconsistent sizes between rhs input and system dimension.");
 
   _x[1] = newPtr;
 }
@@ -212,7 +169,7 @@ void DynamicalSystem::setR(const SiconosVector& newValue)
 {
   // check dimensions ...
   if (newValue.size() != _n)
-    RuntimeException::selfThrow("DynamicalSystem::setR - inconsistent sizes between x0 input and n - Maybe you forget to set n?");
+    RuntimeException::selfThrow("DynamicalSystem::setR - inconsistent sizes between input and system dimension.");
 
   if (_r)
     *_r = newValue;
@@ -225,7 +182,7 @@ void DynamicalSystem::setRPtr(SP::SiconosVector newPtr)
 {
   // check dimensions ...
   if (newPtr->size() != _n)
-    RuntimeException::selfThrow("DynamicalSystem::setRPtr - inconsistent sizes between x0 input and n - Maybe you forget to set n?");
+    RuntimeException::selfThrow("DynamicalSystem::setRPtr - inconsistent sizes between input and system dimension.");
 
   _r = newPtr;
 
@@ -235,7 +192,7 @@ void DynamicalSystem::setJacobianRhsx(const SiconosMatrix& newValue)
 {
   // check dimensions ...
   if (newValue.size(0) != _n || newValue.size(1) != _n)
-    RuntimeException::selfThrow("DynamicalSystem::setJacobianRhsx - inconsistent sizes between jacobianRhsx input and n - Maybe you forget to set n?");
+    RuntimeException::selfThrow("DynamicalSystem::setJacobianRhsx - inconsistent sizes between and system dimension.");
 
   if (_jacxRhs)
     *_jacxRhs = newValue;
@@ -248,7 +205,7 @@ void DynamicalSystem::setJacobianRhsxPtr(SP::SiconosMatrix newPtr)
 {
   // check dimensions ...
   if (newPtr->size(0) != _n || newPtr->size(1) != _n)
-    RuntimeException::selfThrow("DynamicalSystem::setJacobianRhsxPtr - inconsistent sizes between _jacxRhs input and n - Maybe you forget to set n?");
+    RuntimeException::selfThrow("DynamicalSystem::setJacobianRhsxPtr - inconsistent sizes between and system dimension.");
 
   _jacxRhs = newPtr;
 }
@@ -291,55 +248,5 @@ void DynamicalSystem::initMemory(unsigned int steps)
     _xMemory.reset(new SiconosMemory(steps, _n));
   }
 
-}
-
-void DynamicalSystem::setComputegFunction(const std::string& pluginPath, const std::string& functionName)
-{
-  _pluging->setComputeFunction(pluginPath, functionName);
-}
-
-void DynamicalSystem::setComputegFunction(FPtr6 fct)
-{
-  _pluging->setComputeFunction((void *)fct);
-}
-
-void DynamicalSystem::setComputeJacobianXGFunction(const std::string& pluginPath, const std::string& functionName)
-{
-  _pluginJacgx->setComputeFunction(pluginPath, functionName);
-}
-void DynamicalSystem::setComputeJacobianDotXGFunction(const std::string& pluginPath, const std::string& functionName)
-{
-  _pluginJacxDotG->setComputeFunction(pluginPath, functionName);
-}
-// void DynamicalSystem::setComputeJacobianZGFunction( const std::string& pluginPath, const std::string& functionName){
-//   Plugin::setFunction(&pluginJacobianZGPtr, pluginPath,functionName);
-// }
-
-//void DynamicalSystem::computeg(double time)
-//{
-//  if (_pluging->fPtr)
-//    ((FPtr6)(_pluging->fPtr))(time, _n, &(*_x[0])(0), &(*_x[1])(0), &(*_g)(0), _z->size(), &(*_z)(0));
-//}
-
-//void DynamicalSystem::computeJacobianXG(double time){
-//  if (_pluginJacgx->fPtr)
-//    ((FPtr6) _pluginJacgx->fPtr)(time, _n, &(*_x[0])(0), &(*_x[1])(0), &(*_jacgx)(0,0), _z->size(), &(*_z)(0));
-//}
-//void DynamicalSystem::computeJacobianDotXG(double time){
-//  if (_pluginJacxDotG->fPtr)
-//    ((FPtr6) (_pluginJacxDotG->fPtr))(time, _n, &(*_x[0])(0), &(*_x[1])(0), &(*_jacxDotG)(0,0), _z->size(), &(*_z)(0));
-//}
-// void DynamicalSystem::computeJacobianZG(double time){
-//   if (pluginJacobianXGPtr)
-//     pluginJacobianZGPtr(time, n, &(*x[0])(0), &(*x[1])(0), &(*jacobianG[i])(0,0), z->size(), &(*z)(0));
-// }
-
-// ===== MISCELLANEOUS ====
-
-double DynamicalSystem::dsConvergenceIndicator()
-{
-  RuntimeException::selfThrow
-  ("DynamicalSystem:dsConvergenceIndicator - not yet implemented for this Dynamical system type");
-  return 1.0;
 }
 

@@ -19,6 +19,7 @@
 #include <cmath>
 #include "CircleCircleR.hpp"
 #include <BlockVector.hpp>
+#include "SimpleMatrix.hpp"
 
 CircleCircleR::CircleCircleR(double r, double rr): CircularR(r, rr)
 {

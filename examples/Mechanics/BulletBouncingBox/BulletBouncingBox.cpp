@@ -27,29 +27,8 @@
 #include <SiconosBodies.hpp>
 #include <SiconosKernel.hpp>
 
-#include <BulletSpaceFilter.hpp>
-#include <BulletTimeStepping.hpp>
-#include <BulletDS.hpp>
-#include <BulletWeightedShape.hpp>
-
-#if defined(__clang__)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunreachable-code"
-#pragma clang diagnostic ignored "-Woverloaded-virtual"
-#elif !(__INTEL_COMPILER || __APPLE__ )
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Woverloaded-virtual"
-#endif
-#include <BulletCollision/CollisionShapes/btConvexHullShape.h>
-#include <BulletCollision/CollisionDispatch/btCollisionObject.h>
-#include <BulletCollision/CollisionShapes/btBoxShape.h>
-#include <BulletCollision/CollisionDispatch/btCollisionWorld.h>
-#include <BulletCollision/CollisionDispatch/btDefaultCollisionConfiguration.h>
-#if defined(__clang__)
-#pragma clang diagnostic pop
-#elif !(__INTEL_COMPILER || __APPLE__ )
-#pragma GCC diagnostic pop
-#endif
+#include <SiconosBulletCollisionManager.hpp>
+#include <BodyDS.hpp>
 
 int main()
 {
@@ -85,30 +64,12 @@ int main()
     // -- Model --
     SP::Model model(new Model(t0, T));
 
-    std::vector<SP::BulletWeightedShape> shapes;
+    // -- Shape: cube with all dimensions=1.0
+    SP::SiconosBox box1(std11::make_shared<SiconosBox>(1.0, 1.0, 1.0));
 
-    // note: no rebound with a simple Bullet Box, why ?
-    // the distance after the broadphase contact detection is negative
-    // and then stay negative.
-    // SP::btCollisionShape box(new btBoxShape(btVector3(1,1,1)));
-    // SP::BulletWeightedShape box1(new BulletWeightedShape(box,1.0));
-    // This is ok if we build one with btConveHullShape
-    SP::btCollisionShape box(new btConvexHullShape());
-    {
-      std11::static_pointer_cast<btConvexHullShape>(box)->addPoint(btVector3(-1.0, 1.0, -1.0));
-      std11::static_pointer_cast<btConvexHullShape>(box)->addPoint(btVector3(-1.0, -1.0, -1.0));
-      std11::static_pointer_cast<btConvexHullShape>(box)->addPoint(btVector3(-1.0, -1.0, 1.0));
-      std11::static_pointer_cast<btConvexHullShape>(box)->addPoint(btVector3(-1.0, 1.0, 1.0));
-      std11::static_pointer_cast<btConvexHullShape>(box)->addPoint(btVector3(1.0, 1.0, 1.0));
-      std11::static_pointer_cast<btConvexHullShape>(box)->addPoint(btVector3(1.0, 1.0, -1.0));
-      std11::static_pointer_cast<btConvexHullShape>(box)->addPoint(btVector3(1.0, -1.0, -1.0));
-      std11::static_pointer_cast<btConvexHullShape>(box)->addPoint(btVector3(1.0, -1.0, 1.0));
-    }
-    SP::BulletWeightedShape box1(new BulletWeightedShape(box, 1.0));
-    shapes.push_back(box1);
-
-    SP::SiconosVector q0(new SiconosVector(7));
-    SP::SiconosVector v0(new SiconosVector(6));
+    // -- Initial position and velocity
+    SP::SiconosVector q0(std11::make_shared<SiconosVector>(7));
+    SP::SiconosVector v0(std11::make_shared<SiconosVector>(6));
     v0->zero();
     q0->zero();
 
@@ -117,28 +78,29 @@ int main()
     (*v0)(2) = velocity_init;
 
     // -- The dynamical system --
-    // -- the default contactor is the shape given in the constructor
-    // -- the contactor id is 0
-    SP::BulletDS body(new BulletDS(box1, q0, v0));
+    SP::BodyDS body(std11::make_shared<BodyDS>(q0, v0, 1.0));
+
+    // -- add the box to the body's set of contactactors
+    // -- by default, the contactor id is 0 with no position offset,
+    //    see SiconosContactor.hpp for how to change these.
+    body->contactors()->push_back(std11::make_shared<SiconosContactor>(box1));
 
     // -- Set external forces (weight) --
-    SP::SiconosVector FExt;
-    FExt.reset(new SiconosVector(3)); //
+    SP::SiconosVector FExt(std11::make_shared<SiconosVector>(3));
     FExt->zero();
-    FExt->setValue(2, - g * box1->mass());
+    FExt->setValue(2, - g * body->scalarMass());
     body->setFExtPtr(FExt);
 
     // -- Add the dynamical system in the non smooth dynamical system
     model->nonSmoothDynamicalSystem()->insertDynamicalSystem(body);
 
-    SP::btCollisionObject ground(new btCollisionObject());
-    ground->setCollisionFlags(btCollisionObject::CF_STATIC_OBJECT);
-    SP::btCollisionShape groundShape(new btBoxShape(btVector3(30, 30, .5)));
-    btMatrix3x3 basis;
-    basis.setIdentity();
-    ground->getWorldTransform().setBasis(basis);
-    ground->setCollisionShape(&*groundShape);
-    ground->getWorldTransform().getOrigin().setZ(-.50);
+    SP::SiconosPlane ground(std11::make_shared<SiconosPlane>());
+
+    // -- Create a Z-offset of -0.5 for the ground so that contact is
+    //    at zero.
+    SP::SiconosVector groundOffset(std11::make_shared<SiconosVector>(7));
+    (*groundOffset)(2) = -0.5;  // translation 0,0,-0.5
+    (*groundOffset)(3) = 1;     // orientation 1,0,0,0
 
     // ------------------
     // --- Simulation ---
@@ -175,27 +137,39 @@ int main()
 
     int N = ceil((T - t0) / h); // Number of time steps
 
-
     SP::NonSmoothLaw nslaw(new NewtonImpactFrictionNSL(0.8, 0., 0.0, 3));
 
-    // -- The space filter performs broadphase collision detection
-    SP::BulletSpaceFilter space_filter(new BulletSpaceFilter(model));
+    // some options for the Bullet collision manager:
+    // -- defaults are okay, see SiconosBulletCollisionManager.hpp
+    // -- in particular we want to leave multipoint iterations enabled
+    //    to allow Bullet to collect more points for plane-plane
+    //    collisions.
+    SiconosBulletOptions options;
+
+    // -- The collision manager performs broadphase collision
+    //    detection, we use the Bullet implementation here.
+    SP::SiconosBulletCollisionManager collision_manager(
+      std11::make_shared<SiconosBulletCollisionManager>(options));
 
     // -- insert a non smooth law for contactors id 0
-    space_filter->insert(nslaw, 0, 0);
+    collision_manager->insertNonSmoothLaw(nslaw, 0, 0);
 
-    // -- add multipoint iterations, this is needed to gather at least
-    // -- 3 contact points and avoid objects penetration, see Bullet
-    // -- documentation
-    space_filter->collisionConfiguration()->setConvexConvexMultipointIterations();
-    space_filter->collisionConfiguration()->setPlaneConvexMultipointIterations();
+    // -- The ground is a static object.  The collision manager
+    //    maintains a list of contact sets for static objects, so we
+    //    add one.
+    // -- We give it a group contactor id : 0
+    // -- We apply the groundOffset to the SiconosContactorSet, but
+    //    equivalently it could be applied to the SiconosContactor
+    //    inside the set, this is a design choice allowing for re-use
+    //    for more complex compound contactor sets.
+    SP::SiconosContactorSet staticCtrSet(std11::make_shared<SiconosContactorSet>());
+    staticCtrSet->push_back(std11::make_shared<SiconosContactor>(ground));
+    collision_manager->insertStaticContactorSet(staticCtrSet, groundOffset);
 
-    // -- The ground is a static object
-    // -- we give it a group contactor id : 0
-    space_filter->addStaticObject(ground, 0);
-
-    // -- MoreauJeanOSI Time Stepping with Bullet Dynamical Systems
-    SP::BulletTimeStepping simulation(new BulletTimeStepping(timedisc));
+    // -- MoreauJeanOSI Time Stepping with Bullet collision manager as
+    // -- the interaction manager.
+    SP::TimeStepping simulation(new TimeStepping(timedisc));
+    simulation->insertInteractionManager(collision_manager);
 
     simulation->insertIntegrator(osi);
     simulation->insertNonSmoothProblem(osnspb);
@@ -230,8 +204,7 @@ int main()
 
     while (simulation->hasNextEvent())
     {
-      space_filter->buildInteractions(model->currentTime());
-
+      collision_manager->resetStatistics();
       simulation->computeOneStep();
 
       // --- Get values to be plotted ---
@@ -241,9 +214,9 @@ int main()
 
       // If broadphase collision detection shows some contacts then we may
       // display contact forces.
-      if (space_filter->collisionWorld()->getDispatcher()->getNumManifolds() > 0)
+      if ((collision_manager->statistics().new_interactions_created
+           + collision_manager->statistics().existing_interactions_processed) > 0)
       {
-
         // we *must* have an indexSet0, filled by Bullet broadphase
         // collision detection and an indexSet1, filled by
         // TimeStepping::updateIndexSet with the help of Bullet
@@ -282,7 +255,6 @@ int main()
       k++;
     }
 
-
     std::cout << std::endl << "End of computation - Number of iterations done: " << k - 1 << std::endl;
     std::cout << "Computation Time " << time.elapsed()  << std::endl;
 
@@ -302,8 +274,6 @@ int main()
                 << (dataPlot - dataPlotRef).normInf() << std::endl;
       return 1;
     }
-
-
 
   }
 

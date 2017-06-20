@@ -17,7 +17,7 @@
 */
 
 /** \file SiconosNumerics_Solvers.h
-Define Macros used for solver name <---> id conversion.
+\brief Define Macros used for solver name <---> id conversion.
 See functions in SolverOptions.h
  */
 
@@ -29,6 +29,7 @@ See functions in SolverOptions.h
 #undef SICONOS_SOLVER_MACRO
 #define SICONOS_REGISTER_SOLVERS() \
 SICONOS_SOLVER_MACRO(SICONOS_AVI_CAOFERRIS); \
+SICONOS_SOLVER_MACRO(SICONOS_AVI_PATHAVI); \
 SICONOS_SOLVER_MACRO(SICONOS_LCP_LEMKE); \
 SICONOS_SOLVER_MACRO(SICONOS_LCP_NSGS_SBM); \
 SICONOS_SOLVER_MACRO(SICONOS_LCP_PGS); \

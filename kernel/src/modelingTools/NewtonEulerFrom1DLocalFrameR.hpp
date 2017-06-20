@@ -48,9 +48,15 @@ protected:
   */
   ACCEPT_SERIALIZATION(NewtonEulerFrom1DLocalFrameR);
 
-  /* Contact Points */
+  /* Current Contact Points, may be updated within Newton loop based
+   * on _relPc1, _relPc2. */
   SP::SiconosVector _Pc1;
   SP::SiconosVector _Pc2;
+
+  /* Contact Points in coordinates relative to attached DS->q.  Set
+   * these if _Pc1/_Pc2 are not calculated within the Newton loop. */
+  SP::SiconosVector _relPc1;
+  SP::SiconosVector _relPc2;
 
   /* Inward Normal at the contact.
    * \todo The meaning of "Inward" has to be explained carefully.
@@ -92,6 +98,7 @@ public:
   */
   NewtonEulerFrom1DLocalFrameR():
     NewtonEulerR(), _Pc1(new SiconosVector(3)), _Pc2(new SiconosVector(3)),
+    _relPc1(new SiconosVector(3)), _relPc2(new SiconosVector(3)),
     _Nc(new SiconosVector(3))
   {
     /*_ds1=NULL;_ds2=NULL;*/
@@ -110,6 +117,10 @@ public:
    *  \param q0  the block vector to the dynamical system position
    */
   virtual void computeJachqT(Interaction& inter, SP::BlockVector q0);
+
+  /* Default implementation of computeh updates contact points and
+   * distance for q if different than qold. */
+  virtual void computeh(double time, BlockVector& q0, SiconosVector &y);
 
   inline SP::SiconosVector pc1() const
   {

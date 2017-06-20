@@ -24,7 +24,11 @@
 
 CPPUNIT_TEST_SUITE_REGISTRATION(KernelTest);
 
-void KernelTest::setUp() {};
+void KernelTest::setUp()
+{
+  BBxml = "BouncingBall1.xml";
+}
+
 void KernelTest::tearDown() {};
 
 void KernelTest::t0()
@@ -153,44 +157,44 @@ void KernelTest::t3()
 
 }
 
-void KernelTest::t4()
-{
-  SP::SiconosMatrix m(new SimpleMatrix(3, 3));
-  SP::SiconosVector v(new SiconosVector(3));
-  SP::SiconosVector q(new SiconosVector(3));
+// void KernelTest::t4()
+// {
+//   SP::SiconosMatrix m(new SimpleMatrix(3, 3));
+//   SP::SiconosVector v(new SiconosVector(3));
+//   SP::SiconosVector q(new SiconosVector(3));
 
-  m->eye();
+//   m->eye();
 
 
-  SP::DynamicalSystem ds1(new LagrangianDS(q, v, m));
-  SP::DynamicalSystem ds2(new LagrangianDS(q, v, m));
+//   SP::DynamicalSystem ds1(new LagrangianDS(q, v, m));
+//   SP::DynamicalSystem ds2(new LagrangianDS(q, v, m));
 
-  SP::DynamicalSystemsSet dsset(new DynamicalSystemsSet());
+//   SP::DynamicalSystemsSet dsset(new DynamicalSystemsSet());
 
-  dsset->insert(ds1);
-  dsset->insert(ds2);
+//   dsset->insert(ds1);
+//   dsset->insert(ds2);
 
-  std::ofstream ofs("t4.xml");
-  {
-    boost::archive::xml_oarchive oa(ofs);
-    oa.register_type(static_cast<SimpleMatrix*>(NULL));
-    oa.register_type(static_cast<SiconosVector*>(NULL));
-    oa.register_type(static_cast<LagrangianDS*>(NULL));
-    oa << NVP(dsset);
-  }
+//   std::ofstream ofs("t4.xml");
+//   {
+//     boost::archive::xml_oarchive oa(ofs);
+//     oa.register_type(static_cast<SimpleMatrix*>(NULL));
+//     oa.register_type(static_cast<SiconosVector*>(NULL));
+//     oa.register_type(static_cast<LagrangianDS*>(NULL));
+//     oa << NVP(dsset);
+//   }
 
-  SP::DynamicalSystemsSet dssetfromfile(new DynamicalSystemsSet());
+//   SP::DynamicalSystemsSet dssetfromfile(new DynamicalSystemsSet());
 
-  std::ifstream ifs("t4.xml");
-  {
-    boost::archive::xml_iarchive ia(ifs);
-    ia.register_type(static_cast<SimpleMatrix*>(NULL));
-    ia.register_type(static_cast<SiconosVector*>(NULL));
-    ia.register_type(static_cast<LagrangianDS*>(NULL));
-    ia >> NVP(dssetfromfile);
-  }
+//   std::ifstream ifs("t4.xml");
+//   {
+//     boost::archive::xml_iarchive ia(ifs);
+//     ia.register_type(static_cast<SimpleMatrix*>(NULL));
+//     ia.register_type(static_cast<SiconosVector*>(NULL));
+//     ia.register_type(static_cast<LagrangianDS*>(NULL));
+//     ia >> NVP(dssetfromfile);
+//   }
 
-}
+// }
 
 
 #include "SiconosRestart.hpp"
@@ -252,7 +256,7 @@ void KernelTest::t5()
   SP::NonSmoothLaw nslaw(new NewtonImpactNSL(e));
   SP::Relation relation(new LagrangianLinearTIR(H));
 
-  SP::Interaction inter(new Interaction(1, nslaw, relation));
+  SP::Interaction inter(new Interaction(nslaw, relation));
 
   // -------------
   // --- Model ---
@@ -293,10 +297,9 @@ void KernelTest::t5()
   bouncingBall->setSimulation(s);
   bouncingBall->initialize();
 
+  Siconos::save(bouncingBall, BBxml);
 
-  Siconos::save(bouncingBall, "BouncingBall1.xml");
-
-  SP::Model bouncingBallFromFile = Siconos::load("BouncingBall1.xml");
+  SP::Model bouncingBallFromFile = Siconos::load(BBxml);
 
   CPPUNIT_ASSERT((bouncingBallFromFile->t0() == bouncingBall->t0()));
   // in depth comparison?
@@ -310,7 +313,7 @@ void KernelTest::t5()
 
 void KernelTest::t6()
 {
-  SP::Model bouncingBall = Siconos::load("BouncingBall1.xml");
+  SP::Model bouncingBall = Siconos::load(BBxml);
 
   try
   {
@@ -421,8 +424,9 @@ void KernelTest::t7()
 
   SP::DynamicalSystem ds1, ds2;
 
-  SP::SiconosVector q(new SiconosVector());
-  SP::SiconosVector v(new SiconosVector());
+  // Must be size=1, cannot deserialize a LagrangianDS with _ndof==0
+  SP::SiconosVector q(new SiconosVector(1));
+  SP::SiconosVector v(new SiconosVector(1));
 
   ds1.reset(new Disk(1, 1, q, v));
 

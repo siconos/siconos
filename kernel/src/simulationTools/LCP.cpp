@@ -56,7 +56,6 @@ int LCP::compute(double time)
   DEBUG_PRINTF("_indexSetLevel = %i\n", _indexSetLevel);
   DEBUG_EXPR(display(););
 
-
   if (_sizeOutput != 0)
   {
 
@@ -85,24 +84,10 @@ int LCP::compute(double time)
     // --- Recovering of the desired variables from LCP output ---
     postCompute();
 
-
     DEBUG_EXPR(display());
 
   }
-
   return info;
-}
-
-void LCP::display() const
-{
-  std::cout << "======= LCP of size " << _sizeOutput << " with: " <<std::endl;
-  LinearOSNS::display();
-}
-
-void LCP::initialize(SP::Simulation sim)
-{
-  // General initialize for LinearOSNS
-  LinearOSNS::initialize(sim);
 }
 
 LCP::~LCP()

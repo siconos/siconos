@@ -170,21 +170,15 @@ int main(int argc, char* argv[])
     relation0->jachq()->display();
 
 
-    // Interactions
-    // Building the prismatic joint for bouncingbeam
-    // input  - the first concerned DS : bouncingbeam
-    //        - an axis in the spatial frame (absolute frame)
-    // SP::SimpleMatrix H4(new SimpleMatrix(PrismaticJointR::numberOfConstraints(), qDim));
-    // H4->zero();
 
-    SP::NonSmoothLaw nslaw4(new EqualityConditionNSL(PrismaticJointR::numberOfConstraints()));
-    SP::SiconosVector axe1(new SiconosVector(3));
+     SP::SiconosVector axe1(new SiconosVector(3));
     axe1->zero();
     axe1->setValue(2, 1);
 
-    SP::NewtonEulerR relation4(new PrismaticJointR(bouncingbeam, axe1));
-    SP::Interaction inter4(new Interaction(PrismaticJointR::numberOfConstraints(), nslaw4, relation4));
-    SP::Interaction interFloor(new Interaction(1, nslaw0, relation0));
+    SP::PrismaticJointR relation4(new PrismaticJointR(bouncingbeam, axe1));
+    SP::NonSmoothLaw nslaw4(new EqualityConditionNSL(relation4->numberOfConstraints()));
+    SP::Interaction inter4(new Interaction(nslaw4, relation4));
+    SP::Interaction interFloor(new Interaction(nslaw0, relation0));
 
     // -------------
     // --- Model ---

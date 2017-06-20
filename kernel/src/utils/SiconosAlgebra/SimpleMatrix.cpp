@@ -31,6 +31,8 @@
 // Useful function (print ...) from boost bindings examples.
 #include "bindings_utils.hpp"
 
+#include "Tools.hpp"
+
 using namespace Siconos;
 
 #include <boost/numeric/bindings/blas.hpp>
@@ -695,8 +697,37 @@ void SimpleMatrix::display() const
     std::cout << *mat.Identity << std::endl;
 }
 
+//=====================
+// convert to a string
+//=====================
 
+std::string SimpleMatrix::toString() const
+{
+  return ::toString(*this);
+}
 
+//=====================
+// convert to an ostream
+//=====================
+
+std::ostream& operator<<(std::ostream& os, const SimpleMatrix& sm)
+{
+  if (sm._num == 1)
+    os << *sm.mat.Dense;
+  else if (sm._num == 2)
+    os << *sm.mat.Triang;
+  else if (sm._num == 3)
+    os << *sm.mat.Sym;
+  else if (sm._num == 4)
+    os << *sm.mat.Sparse;
+  else if (sm._num == 5)
+    os << *sm.mat.Banded;
+  else if (sm._num == 6)
+    os << *sm.mat.Zero;
+  else if (sm._num == 7)
+    os << *sm.mat.Identity;
+  return os;
+}
 
 void prod(const SiconosMatrix& A, const BlockVector& x, SiconosVector& y, bool init)
 {

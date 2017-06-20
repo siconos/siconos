@@ -2410,3 +2410,38 @@ int NM_check(const NumericsMatrix* const A)
   return info;
 }
 
+CSparseMatrix* NM_sparse_get_origin(const NumericsMatrix* M)
+{
+  assert(M);
+  if (!M->matrix2) { return NULL; }
+
+  switch (M->matrix2->origin)
+  {
+  case NS_CSC:
+    return M->matrix2->csc;
+  case NS_TRIPLET:
+    return M->matrix2->triplet;
+  case NS_CSR:
+    return M->matrix2->csr;
+  default:
+    numerics_error_nonfatal("NM_sparse_get_origin", "Unknown matrix origin %d", M->matrix2->origin);
+    return NULL;
+  }
+}
+
+size_t NM_nnz(const NumericsMatrix* M)
+{
+  switch (M->storageType)
+  {
+  case NM_DENSE:
+    return M->size0 * M->size1;
+  case NM_SPARSE:
+  {
+    assert(M->matrix2);
+    return NM_sparse_nnz(NM_sparse_get_origin(M));
+  }
+  default:
+    numerics_error("NM_nnz", "Unsupported matrix type %d in %s", M->storageType);
+    return SIZE_MAX;
+  }
+}

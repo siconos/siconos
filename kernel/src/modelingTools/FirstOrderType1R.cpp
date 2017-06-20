@@ -73,7 +73,7 @@ void FirstOrderType1R::initComponents(Interaction& inter, VectorOfBlockVectors& 
 void FirstOrderType1R::computeh(double time, SiconosVector& x, SiconosVector& z, SiconosVector& y)
 {
   assert(_pluginh && "FirstOrderType1R::computeOutput() is not linked to a plugin function");
-
+  
   ((Type1Ptr)(_pluginh->fPtr))(x.size(), &(x)(0), y.size(), &(y)(0), z.size(), &(z)(0));
 
 }
@@ -128,14 +128,14 @@ void FirstOrderType1R::computeJachx(double time, SiconosVector& x, SiconosVector
 {
   //
   assert(_pluginJachx && "FirstOrderType1R::computeJacobianH() failed; not linked to a plug-in function.");
-
-  ((Type1Ptr)(_pluginJachx->fPtr))(x.size(), &(x)(0), C.size(0), C.getArray(), z.size(), &(z)(0));
+  if(_C && _pluginJachx)
+    ((Type1Ptr)(_pluginJachx->fPtr))(x.size(), &(x)(0), C.size(0), C.getArray(), z.size(), &(z)(0));
 
 }
 
 void FirstOrderType1R::computeJachz(double time, SiconosVector& x, SiconosVector& z, SimpleMatrix& F)
 {
-  if (_pluginJachz && _pluginJachz->fPtr)
+  if (_F && _pluginJachz && _pluginJachz->fPtr)
     ((Type1Ptr)(_pluginJachz->fPtr))(x.size(), &(x)(0), F.size(0), F.getArray(), z.size(), &(z)(0));
 
 }
@@ -143,8 +143,8 @@ void FirstOrderType1R::computeJachz(double time, SiconosVector& x, SiconosVector
 void FirstOrderType1R::computeJacglambda(double time, SiconosVector& lambda, SiconosVector& z, SimpleMatrix& B)
 {
   assert(_pluginJacglambda && "FirstOrderType1R::computeJacobiang() failed; not linked to a plug-in function.");
-
-  ((Type1Ptr)(_pluginJacglambda->fPtr))(lambda.size(), &(lambda)(0), B.size(0), B.getArray(), z.size(), &(z)(0));
+  if(_B && _pluginJacglambda)
+    ((Type1Ptr)(_pluginJacglambda->fPtr))(lambda.size(), &(lambda)(0), B.size(0), B.getArray(), z.size(), &(z)(0));
 }
 
 void FirstOrderType1R::computeJach(double time, Interaction& inter, InteractionProperties& interProp)

@@ -35,6 +35,7 @@ IF(GAMSCAPI_FOUND)
 ENDIF(GAMSCAPI_FOUND)
 
 compile_with(PathFerris)
+compile_with(PathVI)
 compile_with(LpSolve)
 if(LpSolve_FOUND)
   set(HAS_ONE_LP_SOLVER TRUE)

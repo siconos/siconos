@@ -96,7 +96,7 @@ def test_fc3d():
     for d in data_files:
         full_path = data_dir + d
         if os.path.isfile(full_path):
-            sn.setNumericsVerbose(1)
+            sn.numerics_set_verbose(1)
             fcp = sn.frictionContact_fclib_read(full_path)
             for s in solvers_reduced3:
                 res = solve_reduced(fcp, s)

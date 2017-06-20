@@ -37,19 +37,19 @@ import sys
 import types
 import os.path
 import optparse
-
+import io
 
 def my_open_read(source):
     if hasattr(source, "read"):
         return source
     else:
-        return open(source)
+        return io.open(source, mode='r', encoding='utf-8')
 
 def my_open_write(dest):
     if hasattr(dest, "write"):
         return dest
     else:
-        return open(dest, 'wb')
+        return io.open(dest, mode='w', encoding='utf-8')
 
 
 class Doxy2SWIG:
@@ -69,11 +69,11 @@ class Doxy2SWIG:
         using %feature("autodoc", [0,1]).
 
         """
-        f = my_open_read(src)
-        self.src = src
-        self.my_dir = os.path.dirname(f.name)
-        self.xmldoc = minidom.parse(f).documentElement
-        f.close()
+        with my_open_read(src) as f:
+            self.src = src
+            self.my_dir = os.path.dirname(f.name)
+            contents = f.read().encode('utf-8')
+            self.xmldoc = minidom.parseString(contents).documentElement
 
         self.pieces = []
         self.pieces.append('\n// File: %s\n'%\
@@ -438,9 +438,9 @@ class Doxy2SWIG:
     def write(self, fname):
         o = my_open_write(fname)
         if self.multi:
-            o.write("".join(self.pieces).encode('ascii', 'ignore').strip())
+            o.write(u"".join(self.pieces).strip())
         else:
-            o.write("".join(self.clean_pieces(self.pieces)).encode('ascii', 'ignore').strip())
+            o.write(u"".join(self.clean_pieces(self.pieces)).strip())
         o.close()
 
     def clean_pieces(self, pieces):
@@ -491,12 +491,10 @@ def convert(input, output, include_function_definition=True, quiet=False):
         pass
     base_input = os.path.basename(input)
 
-    #    try:
-    with open(os.path.join(pdir,'{0}'.format(base_input)), 'wb') as pxml_file:
-                pxml_file.write(p.xmldoc.toxml().encode('ascii', 'ignore').strip())
-                p.write(output)
-                #except Exception as e:
-                #print ('doxy2swig.py: {0}'.format(e))
+    pxml_filename = os.path.join(pdir,'{0}'.format(base_input))
+    with io.open(pxml_filename, 'w', encoding='utf-8') as pxml_file:
+        pxml_file.write(p.xmldoc.toxml().strip())
+        p.write(output)
 
 
 def main():

@@ -44,7 +44,7 @@ ninter = 2
 #theta = 0.5
 theta = 1.0
 alpha = .01
-N = ceil((T-t0)/h)
+N = int((T-t0)/h)
 
 # matrices
 A = zeros((2,2))
@@ -64,7 +64,7 @@ myProcessRelation = MyR.MyR(C,B)
 myNslaw = RelayNSL(2)
 myNslaw.display()
 
-myProcessInteraction = Interaction(ninter, myNslaw,
+myProcessInteraction = Interaction(myNslaw,
         myProcessRelation)
 myNSDS = NonSmoothDynamicalSystem()
 myNSDS.insertDynamicalSystem(process)

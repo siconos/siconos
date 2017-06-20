@@ -19,6 +19,7 @@
 #include <cmath>
 #include "DiskMovingPlanR.hpp"
 #include <BlockVector.hpp>
+#include "SimpleMatrix.hpp"
 
 DiskMovingPlanR::DiskMovingPlanR(FTime FA, FTime FB, FTime FC,
                                  FTime FAD, FTime FBD, FTime FCD,

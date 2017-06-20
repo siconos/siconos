@@ -15,7 +15,7 @@ bodyTrans=array.array('d',[
         0.5])
 
 # contacts view parameters
-ContactArtefactLength=0.1
+ContactArtefactLength=20.0
 ArtefactThershold=1e-12
 ## To define if the fisrt surface of the contact is drew.
 contactDraw1=array.array('I',[
@@ -24,8 +24,8 @@ contactDraw1=array.array('I',[
         1])
 ## To define if the second surface of the contact is drew.
 contactDraw2=array.array('I',[
-        0,
-        0,
+        1,
+        1,
         1])
 
 
@@ -45,8 +45,8 @@ contactTrans2=array.array('d',[
 ## It must be set to 1 to run in a 3D view.
 with3D=1
 ## 3D viewer update frequency and output frequency.
-freqOutput=10
-freqUpdate=10
+freqOutput=20
+freqUpdate=20
 
 apple=0
 

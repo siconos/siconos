@@ -25,6 +25,7 @@
 #include "SiconosKernel.hpp"
 #include "KneeJointR.hpp"
 #include "PrismaticJointR.hpp"
+#include <boost/math/quaternion.hpp>
 #include <math.h>
 using namespace std;
 
@@ -43,15 +44,10 @@ int main(int argc, char* argv[])
     double t0 = 0;                   // initial computation time
     double h = 0.001;                // time step
     double T = 10;
-    double L1 = 1.0;
-    double L2 = 2.0;
-    double L3 = 1.0;
     double theta = 1.0;              // theta for MoreauJeanOSI integrator
     double g = 9.81; // Gravity
     double m = 1.;
-    double wx = 0.0;
-    double wz = 0.0;
-    double wy = 0.0;
+
     // -------------------------
     // --- Dynamical systems ---
     // -------------------------
@@ -72,18 +68,17 @@ int main(int argc, char* argv[])
     double angle = M_PI / 5;
     SiconosVector V1(3);
     V1.zero();
-    V1.setValue(2, 1);
     V1.setValue(0, 3);
     V1.setValue(1, 2);
+    V1.setValue(2, 1);
     double Vnorm = V1.norm2();
-    V1.setValue(1, V1.getValue(1) / Vnorm);
     V1.setValue(0, V1.getValue(0) / Vnorm);
+    V1.setValue(1, V1.getValue(1) / Vnorm);
     V1.setValue(2, V1.getValue(2) / Vnorm);
     q10->setValue(3, cos(angle));
     q10->setValue(4, V1.getValue(0)*sin(angle));
     q10->setValue(5, V1.getValue(1)*sin(angle));
     q10->setValue(6, V1.getValue(2)*sin(angle));
-
 
     // -- The dynamical system --
     SP::NewtonEulerDS beam1(new NewtonEulerDS(q10, v10, m, I1));
@@ -101,17 +96,21 @@ int main(int argc, char* argv[])
     // --------------------
 
     // Interaction ball-floor
-    //
-    SP::SimpleMatrix H1(new SimpleMatrix(PrismaticJointR::numberOfConstraints(), qDim));
-    H1->zero();
-    SP::NonSmoothLaw nslaw1(new EqualityConditionNSL(PrismaticJointR::numberOfConstraints()));
-    SP::SiconosVector axe1(new SiconosVector(3));
-    axe1->zero();
-    axe1->setValue(2, 1);
+    // -- prismatic axis 0,0,1 in absolute frame: ball can only move in Z
+    SP::SiconosVector axis1(new SiconosVector(3));
+    axis1->setValue(0, 0);
+    axis1->setValue(1, 0);
+    axis1->setValue(2, 1);
 
-    SP::NewtonEulerR relation1(new PrismaticJointR(beam1, axe1));
+    SP::PrismaticJointR relation1(new PrismaticJointR(beam1, axis1, true));
+
+    SP::SimpleMatrix H1(new SimpleMatrix(relation1->numberOfConstraints(), qDim));
+    H1->zero();
     relation1->setJachq(H1);
-    SP::Interaction inter1(new Interaction(PrismaticJointR::numberOfConstraints(), nslaw1, relation1));
+
+    SP::NonSmoothLaw nslaw1(new EqualityConditionNSL(relation1->numberOfConstraints()));
+
+    SP::Interaction inter1(new Interaction(nslaw1, relation1));
     // -------------
     // --- Model ---
     // -------------
@@ -163,7 +162,6 @@ int main(int argc, char* argv[])
 
     boost::timer time;
     time.restart();
-    int NewtonIt = 0;
     Index dimIndex(2);
     Index startIndex(4);
     int cmp = 0;

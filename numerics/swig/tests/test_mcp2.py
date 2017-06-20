@@ -6,7 +6,7 @@ import numpy as np
 # import siconos.numerics * fails with py.test!
 import siconos.numerics as SN
 
-def mcp_function(n1, n2, z, F):
+def mcp_function(n, z, F):
     M = np.array([[2., 1.],
                [1., 2.]])
 
@@ -14,7 +14,7 @@ def mcp_function(n1, n2, z, F):
     F[:] = np.dot(M,z) + q
     pass
 
-def mcp_Nablafunction (n1, n2, z, nabla_F):
+def mcp_Nablafunction (n, z, nabla_F):
     M = np.array([[2., 1.],
                [1., 2.]])
     nabla_F[:] = M

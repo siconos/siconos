@@ -1,4 +1,3 @@
-
 #include "SiconosKernel.hpp"
 #include "const.h"
 #include "NonlinearRelationReduced2.h"
@@ -59,9 +58,6 @@ int main(int argc, char *argv[])
   SP::MyDS aDS ;
   aDS.reset(new MyDS(xti));
 
-  DynamicalSystemsSet  Inter_DS ;
-  Inter_DS.insert(aDS);
-
 //******BUILD THE RELATION
   SP::NonlinearRelationReduced2 aR;
   aR.reset(new NonlinearRelationReduced2());
@@ -75,7 +71,7 @@ int main(int argc, char *argv[])
 // unsigned int sNSLawSize = 4;
 
 //****BUILD THE INTERACTION
-  SP::Interaction aI(new Interaction(sNSLawSize,aNSL,aR));
+  SP::Interaction aI(new Interaction(aNSL,aR));
 
 //****BUILD THE SYSTEM
   SP::Model  aM(new Model(0,sTf));

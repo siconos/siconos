@@ -120,9 +120,9 @@ int main(int argc, char* argv[])
 
     SP::NonSmoothLaw nslaw(new NewtonImpactNSL(e));
     SP::Relation relation1(new LagrangianScleronomousR("Two-linkFlexiblePlugin:h01", "Two-linkFlexiblePlugin:G01"));
-    SP::Interaction inter1(new Interaction(1, nslaw, relation1));
+    SP::Interaction inter1(new Interaction(nslaw, relation1));
     SP::Relation relation2(new LagrangianScleronomousR("Two-linkFlexiblePlugin:h02", "Two-linkFlexiblePlugin:G02"));
-    SP::Interaction inter2(new Interaction(1, nslaw, relation2));
+    SP::Interaction inter2(new Interaction(nslaw, relation2));
     //  Relation * relation0 = new LagrangianScleronomousR("Two-linkFlexiblePlugin:h3","Two-linkFlexiblePlugin:G3");
     //  Interaction * inter0 = new Interaction("wall-arm", allDS,1,2, nslaw, relation0);
   

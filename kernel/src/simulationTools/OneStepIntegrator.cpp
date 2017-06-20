@@ -22,7 +22,7 @@
 #include "DynamicalSystem.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
 #include "ExtraAdditionalTerms.hpp"
-
+#include "Relation.hpp"
 #include <SiconosConfig.h>
 #if defined(SICONOS_STD_FUNCTIONAL) && !defined(SICONOS_USE_BOOST_FOR_CXX11)
 #include <functional>
@@ -32,11 +32,26 @@ using namespace std::placeholders;
 #include <boost/weak_ptr.hpp>
 #endif
 
-
-
-OneStepIntegrator::OneStepIntegrator(const OSI::TYPES& id):
-  _integratorType(id), _sizeMem(1)
+SP::VectorOfVectors
+OneStepIntegrator::_initializeDSWorkVectors(SP::DynamicalSystem ds)
 {
+  const DynamicalSystemsGraph::VDescriptor& dsv =
+    _dynamicalSystemsGraph->descriptor(ds);
+
+  // Create new work buffers, store in the graph
+  SP::VectorOfVectors wv = std11::make_shared<VectorOfVectors>(
+    OneStepIntegrator::work_vector_of_vector_size);
+  SP::VectorOfMatrices wm = std11::make_shared<VectorOfMatrices>();
+  _dynamicalSystemsGraph->properties(dsv).workVectors = wv;
+  _dynamicalSystemsGraph->properties(dsv).workMatrices = wm;
+
+  // Initialize memory buffers
+  ds->initMemory(getSizeMem());
+
+  // Force dynamical system to its initial state
+  ds->resetToInitialState();
+
+  return wv;
 }
 
 void OneStepIntegrator::initialize( Model& m )
@@ -47,41 +62,129 @@ void OneStepIntegrator::initialize( Model& m )
   }
   // a subgraph has to be implemented.
   _dynamicalSystemsGraph = _simulation->nonSmoothDynamicalSystem()->topology()->dSG(0);
+
+  double t0 = _simulation->startingTime();
+
+  // 1 - Loop over all dynamical systems
+  //  For each ds, allocate/initialize the required buffers in the ds graph
+  // (workDS and workMatrices properties, that depend both on osi and ds types)
+  // Note FP : what if a DS is associated with more than one osi?
+  DynamicalSystemsGraph::VIterator dsi, dsend;
+  for(std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
+  {
+    if(!checkOSI(dsi)) continue;
+    SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
+    initializeDynamicalSystem(m, t0, ds);
+  }
+
+  // 2 - Nonsmooth problems : set levels and initialize. Depends on OSI type.
+  // Note FP : is it the right place for this initialization??
+  initialize_nonsmooth_problems();
+
+  // 3 - Loop over all interactions of index set 0.
+  // For each interaction, allocate/initialize buffers in the interaction graph
+  // (DSlink property) and connect/fill these buffers with DS buffers.
+  // This strongly depends on the DS and OSI types.
+  SP::InteractionsGraph indexSet0 = m.nonSmoothDynamicalSystem()->topology()->indexSet0();
+  InteractionsGraph::VIterator ui, uiend;
+  for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+  {
+    Interaction& inter = *indexSet0->bundle(*ui);
+    unsigned int nslawSize = inter.nonSmoothLaw()->size();
+    InteractionProperties& interaction_properties = indexSet0->properties(*ui);
+    // init block property. Note FP: this should probably be moved
+    // to OSNSPb init?
+    interaction_properties.block.reset(new SimpleMatrix(nslawSize, nslawSize));
+
+    // Update DSlink : this depends on OSI and relation types.
+    fillDSLinks(inter, interaction_properties, *_dynamicalSystemsGraph);
+
+    // Update interaction attributes (output)
+    update_interaction_output(inter, t0, interaction_properties);
+
+  }
 }
-void OneStepIntegrator::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds)
+
+void OneStepIntegrator::update_interaction_output(Interaction& inter, double time, InteractionProperties& interaction_properties)
 {
-  RuntimeException::selfThrow("OneStepIntegrator::initializeDynamicalSystem not implemented for integrator of type " + _integratorType);
+  // - compute interaction output (y) for all levels
+  // - swaps in memory
+
+  // This function:
+  // - is called during osi->initialize()
+  // - may be called by simulation when an interaction is inserted on the fly
+  //    for instance:
+  //      - contact detection
+  //      - inter = ew interaction + link with ds
+  //      - simu->osi->fillDSLinks(inter)
+  //      - simu->osi->update_interaction_output()
+
+  if (_steps > 1) // Multi--step methods
+    {
+      // Compute the old Values of Output with stored values in Memory
+      for (unsigned int k = 0; k < _steps - 1; k++)
+	{
+	  /** ComputeOutput to fill the Memory
+	   * We assume the state x is stored in xMemory except for the  initial
+	   * condition which has not been swap yet.
+	   */
+	  //        relation()->LinkDataFromMemory(k);
+	  for (unsigned int i = 0; i < inter.upperLevelForOutput() + 1; ++i)
+	    {
+	      inter.computeOutput(time, interaction_properties, i);
+	      //_yMemory[i]->swap(*_y[i]);
+	    }
+	}
+      inter.swapInMemory();
+	
+    }
+  // Compute a first value for the output
+  inter.computeOutput(time, interaction_properties, 0);
+    
+  // prepare the gradients
+  inter.relation()->computeJach(time, inter, interaction_properties);
+  for (unsigned int i = 0; i < inter.upperLevelForOutput() + 1; ++i)
+    {
+      inter.computeOutput(time, interaction_properties, i);
+    }
+  inter.swapInMemory();
 }
 
-
-void OneStepIntegrator::computeInitialNewtonState()
+void OneStepIntegrator::_check_and_update_interaction_levels(Interaction& inter)
 {
-  // Default behavior :  do nothing and used the current state as starting state of the Newton iteration
+  
+  bool isInitializationNeeded = false;
+  if (!(inter.lowerLevelForOutput() <= _levelMinForOutput && inter.upperLevelForOutput()  >= _levelMaxForOutput ))
+  {
+    inter.setLowerLevelForOutput(_levelMinForOutput);
+    inter.setUpperLevelForOutput(_levelMaxForOutput);
+    isInitializationNeeded = true;
+  }
+
+  if (!(inter.lowerLevelForInput() <= _levelMinForInput && inter.upperLevelForInput() >= _levelMaxForInput ))
+  {
+    inter.setLowerLevelForInput(_levelMinForInput);
+    inter.setUpperLevelForInput(_levelMaxForInput);
+    isInitializationNeeded = true;
+  }
+
+  if (isInitializationNeeded)
+    inter.reset();
 }
 
-double OneStepIntegrator::computeResidu()
-{
-  RuntimeException::selfThrow("OneStepIntegrator::computeResidu not implemented for integrator of type " + _integratorType);
-  return 0.0;
-}
+// void OneStepIntegrator::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds)
+// {
+//   RuntimeException::selfThrow("OneStepIntegrator::initializeDynamicalSystem not implemented for integrator of type " + _integratorType);
+// }
 
-void OneStepIntegrator::computeFreeState()
-{
-  RuntimeException::selfThrow("OneStepIntegrator::computeFreeState not implemented for integrator of type " + _integratorType);
-}
 
-void OneStepIntegrator::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, OneStepNSProblem* osnsp)
-{
-  RuntimeException::selfThrow("OneStepIntegrator::computeFreeOutput not implemented for integrator of type " + _integratorType);
-}
-
-void OneStepIntegrator::resetNonSmoothPart()
+void OneStepIntegrator::resetAllNonSmoothParts()
 {
  DynamicalSystemsGraph::VIterator dsi, dsend;
   for (std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
   {
     if (!checkOSI(dsi)) continue;
-    _dynamicalSystemsGraph->bundle(*dsi)->resetAllNonSmoothPart();
+    _dynamicalSystemsGraph->bundle(*dsi)->resetAllNonSmoothParts();
   }
 }
 
@@ -94,6 +197,7 @@ void OneStepIntegrator::resetNonSmoothPart(unsigned int level)
     _dynamicalSystemsGraph->bundle(*dsi)->resetNonSmoothPart(level);
   }
 }
+
 void OneStepIntegrator::updateOutput(double time)
 {
   /** VA. 16/02/2017 This should normally be done only for interaction managed by the osi */
@@ -111,6 +215,7 @@ void OneStepIntegrator::updateInput(double time)
        level++)
     _simulation->nonSmoothDynamicalSystem()->updateInput(time,level);
 }
+
 void OneStepIntegrator::updateOutput(double time, unsigned int level)
 {
   /** VA. 16/02/2017 This should normally be done only for interaction managed by the osi */
@@ -122,6 +227,22 @@ void OneStepIntegrator::updateInput(double time, unsigned int level)
   /** VA. 16/02/2017 This should normally be done only for interaction managed by the osi */
   _simulation->nonSmoothDynamicalSystem()->updateInput(time,level);
 }
+
+
+double OneStepIntegrator::computeResiduOutput(double time, SP::InteractionsGraph indexSet)
+{
+  double residu =0.0;
+  RuntimeException::selfThrow("OneStepIntegrator::computeResiduOutput not implemented for integrator of type " + _integratorType);
+  return residu;
+}
+
+double OneStepIntegrator::computeResiduInput(double time, SP::InteractionsGraph indexSet)
+{
+  double residu =0.0;
+  RuntimeException::selfThrow("OneStepIntegrator::computeResiduInput not implemented for integrator of type " + _integratorType);
+  return residu;
+}
+
 
 
 

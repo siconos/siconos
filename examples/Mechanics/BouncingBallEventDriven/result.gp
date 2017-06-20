@@ -1,6 +1,7 @@
 #set  term X11
 resultfile= 'result.dat'
 #resultfile= 'BouncingBallED.ref'
+#resultfile = 'BouncingBallEDwithRestingContact.ref'
 plot \
 resultfile every ::2  u 1:2 t "Ball position -- q " w l,\
 resultfile every ::2  u 1:3 t "Ball Velocity -- v" w l,\

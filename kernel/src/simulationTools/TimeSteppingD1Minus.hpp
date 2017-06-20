@@ -72,6 +72,11 @@ public:
   /** step from current event to next event of EventsManager */
   virtual void advanceToEvent();
 
+  /** update input
+   *  \param level lambda order used to compute input
+   */
+  void updateInput(unsigned int level);
+
   /** compute residu */
   void computeResidu();
 

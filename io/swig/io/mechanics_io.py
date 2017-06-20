@@ -776,7 +776,8 @@ class Hdf5():
         self._domain_data = None
         self._solv_data = None
         self._input = None
-        self._nslaws = None
+        self._nslaws_data = None
+        self._nslaws = dict()
         self._out = None
         self._data = None
         self._ref = None
@@ -834,7 +835,7 @@ class Hdf5():
         self._solv_data = data(self._data, 'solv', 4,
                                use_compression = self._use_compression)
         self._input = group(self._data, 'input')
-        self._nslaws = group(self._data, 'nslaws')
+        self._nslaws_data = group(self._data, 'nslaws')
 
         if self._shape_filename is None:
             if self._collision_margin:
@@ -921,7 +922,7 @@ class Hdf5():
         """
         Non smooth laws between group of contactors.
         """
-        return self._nslaws
+        return self._nslaws_data
 
     def joints(self):
         """
@@ -937,19 +938,25 @@ class Hdf5():
 
     def importNonSmoothLaw(self, name):
         if self._broadphase is not None:
-            nslawClass = getattr(Kernel, self._nslaws[name].attrs['type'])
-            # only this one at the moment
-            assert(nslawClass == Kernel.NewtonImpactFrictionNSL)
-            nslaw = nslawClass(float(self._nslaws[name].attrs['e']), 0.,
-                               float(self._nslaws[name].attrs['mu']), 3)
-            if use_proposed:
-                self._broadphase.insertNonSmoothLaw(nslaw,
-                                        int(self._nslaws[name].attrs['gid1']),
-                                        int(self._nslaws[name].attrs['gid2']));
-            elif use_original:
-                self._broadphase.insert(nslaw,
-                                        int(self._nslaws[name].attrs['gid1']),
-                                        int(self._nslaws[name].attrs['gid2']))
+            nslawClass = getattr(Kernel, self._nslaws_data[name].attrs['type'])
+            if nslawClass == Kernel.NewtonImpactFrictionNSL:
+                nslaw = nslawClass(float(self._nslaws_data[name].attrs['e']), 0.,
+                                   float(self._nslaws_data[name].attrs['mu']), 3)
+            elif nslawClass == Kernel.NewtonImpactNSL:
+                nslaw = nslawClass(float(self._nslaws_data[name].attrs['e']))
+            elif nslawClass == Kernel.RelayNSL:
+                nslaw = nslawClass(int(self._nslaws_data[name].attrs['size']),
+                                   float(self._nslaws_data[name].attrs['lb']),
+                                   float(self._nslaws_data[name].attrs['ub']))
+            assert(nslaw)
+            self._nslaws[name] = nslaw
+            gid1 = int(self._nslaws_data[name].attrs['gid1'])
+            gid2 = int(self._nslaws_data[name].attrs['gid2'])
+            if gid1 >= 0 and gid2 >= 0:
+                if use_proposed:
+                    self._broadphase.insertNonSmoothLaw(nslaw, gid1, gid2)
+                elif use_original:
+                    self._broadphase.insert(nslaw, gid1, gid2)
 
     def importOccObject(self, name, translation, orientation,
                         velocity, contactors, mass, given_inertia, body_class,
@@ -1034,7 +1041,6 @@ class Hdf5():
             # dynamical system
             nsds = self._model.nonSmoothDynamicalSystem()
             nsds.insertDynamicalSystem(body)
-            nsds.topology().setOSI(body, self._osi)
             nsds.setName(body, str(name))
 
     def importBulletObject(self, name, translation, orientation,
@@ -1138,6 +1144,10 @@ class Hdf5():
                 if have_inertia:
                     body.setUseContactorInertia(False)
 
+                self_collide = self._input[name].get('allow_self_collide',None)
+                if self_collide is not None:
+                    body.setAllowSelfCollide(not not self_collide)
+
                 cset = SiconosContactorSet()
                 for c in contactors:
                     shp = self._shape.get(c.data)
@@ -1190,13 +1200,10 @@ class Hdf5():
                     nsds = self._model.nonSmoothDynamicalSystem()
                     if use_proposed:
                         nsds.insertDynamicalSystem(body)
-                        nsds.topology().setOSI(body, self._osi)
-                        nsds.topology().initDS(self._model,
-                            self._model.simulation().nextTime(),
-                            body, self._osi)
-                        body.initialize(self._model.simulation().nextTime())
-                        self._model.simulation().initialize(
-                            self._model, False)
+                        self._model.simulation().prepareIntegratorForDS(
+                            self._osi, body, self._model,
+                            self._model.simulation().nextTime())
+                        self._model.simulation().initialize(self._model, False)
                     elif use_original:
                         self._broadphase.addDynamicObject(
                             body,
@@ -1206,16 +1213,22 @@ class Hdf5():
                 else:
                     nsds = self._model.nonSmoothDynamicalSystem()
                     nsds.insertDynamicalSystem(body)
-                    nsds.topology().setOSI(body, self._osi)
                     nsds.setName(body, str(name))
 
     def importJoint(self, name):
         if self._broadphase is not None:
-            topo = self._model.nonSmoothDynamicalSystem().\
-                topology()
+            nsds = self._model.nonSmoothDynamicalSystem()
+            topo = nsds.topology()
 
             joint_type = self.joints()[name].attrs['type']
             joint_class = getattr(joints, joint_type)
+            absolute = self.joints()[name].attrs.get('absolute', None)
+            absolute = [[True if absolute else False], []][absolute is None]
+            allow_self_collide = self.joints()[name].attrs.get(
+                'allow_self_collide',None)
+            stops = self.joints()[name].attrs.get('stops',None)
+            nslaws = self.joints()[name].attrs.get('nslaws',None)
+            friction = self.joints()[name].attrs.get('friction',None)
 
             ds1_name = self.joints()[name].attrs['object1']
             ds1 = topo.getDynamicalSystem(ds1_name)
@@ -1225,26 +1238,75 @@ class Hdf5():
                 ds2_name = self.joints()[name].attrs['object2']
                 ds2 = topo.getDynamicalSystem(ds2_name)
                 try:
-                    joint = joint_class(ds1,
-                                        ds2,
-                                        self.joints()[name].attrs['pivot_point'],
-                                        self.joints()[name].attrs['axis'])
-                except NotImplementedError:
                     joint = joint_class(ds1, ds2,
-                                        self.joints()[name].attrs['pivot_point'])
+                                        self.joints()[name].attrs['pivot_point'],
+                                        self.joints()[name].attrs['axis'],
+                                        *absolute)
+                except NotImplementedError:
+                    try:
+                        joint = joint_class(ds1, ds2,
+                                            self.joints()[name].attrs['pivot_point'],
+                                            *absolute)
+                    except NotImplementedError:
+                        joint = joint_class(ds1, ds2, *absolute)
 
             else:
                 try:
                     joint = joint_class(ds1,
                                         self.joints()[name].attrs['pivot_point'],
-                                        self.joints()[name].attrs['axis'])
+                                        self.joints()[name].attrs['axis'],
+                                        *absolute)
                 except NotImplementedError:
-                    joint = joint_class(ds1, self.joints()[name].attrs['pivot_point'])
+                    try:
+                        joint = joint_class(ds1,
+                                            self.joints()[name].attrs['pivot_point'],
+                                            *absolute)
+                    except NotImplementedError:
+                        joint = joint_class(ds1, *absolute)
 
+            if allow_self_collide is not None:
+                joint.setAllowSelfCollide(not not allow_self_collide)
             joint_nslaw = EqualityConditionNSL(joint.numberOfConstraints())
-            joint_inter = Interaction(joint.numberOfConstraints(), joint_nslaw, joint)
+            joint_inter = Interaction(joint_nslaw, joint)
             self._model.nonSmoothDynamicalSystem().\
                 link(joint_inter, ds1, ds2)
+            nsds.setName(joint_inter, str(name))
+
+            # Add a e=0 joint by default, otherwise user can specify
+            # the impact law by name or a list of names for each axis.
+            if stops is not None:
+                assert np.shape(stops)[1] == 3, 'Joint stops shape must be (?,3)'
+                if nslaws is None:
+                    nslaws = [Kernel.NewtonImpactNSL(0.0)]*np.shape(stops)[0]
+                elif isinstance(nslaws,str):
+                    nslaws = [self._nslaws[nslaws]]*np.shape(stops)[0]
+                else:
+                    assert(np.shape(nslaws)[0]==np.shape(stops)[0])
+                    nslaws = [self._nslaws[nsl] for nsl in nslaws]
+                for n, (nsl, (axis, pos, dir)) in enumerate(zip(nslaws,stops)):
+                    # "bool()" is needed because type of dir is
+                    # numpy.bool_, which SWIG doesn't handle well.
+                    stop = joints.JointStopR(joint, pos, bool(dir<0), int(axis))
+                    stop_inter = Interaction(nsl, stop)
+                    self._model.nonSmoothDynamicalSystem().\
+                        link(stop_inter, ds1, ds2)
+                    nsds.setName(stop_inter, '%s_stop%d'%(str(name),n))
+
+            # The per-axis friction NSL, can be ''
+            if friction is not None:
+                if isinstance(friction,basestring):
+                    friction = [friction]
+                else:
+                    assert hasattr(friction, '__iter__')
+                for ax,fr_nslaw in enumerate(friction):
+                    if fr_nslaw == '':  # no None in hdf5, use empty string
+                        continue        # instead for no NSL on an axis
+                    nslaw = self._nslaws[fr_nslaw]
+                    fr = joints.JointFrictionR(joint, [ax])
+                    fr_inter = Interaction(nslaw, fr)
+                    self._model.nonSmoothDynamicalSystem().\
+                        link(fr_inter, ds1, ds2)
+                    nsds.setName(fr_inter, '%s_friction%d'%(str(name),ax))
 
     def importBoundaryConditions(self, name):
         if self._broadphase is not None:
@@ -1279,7 +1341,7 @@ class Hdf5():
 
             ds1.setBoundaryConditions(bc);
 
-            #joint_inter = Interaction(5, joint_nslaw, joint)
+            #joint_inter = Interaction(joint_nslaw, joint)
             #    self._model.nonSmoothDynamicalSystem().\
             #        link(joint_inter, ds1)
 
@@ -1345,7 +1407,7 @@ class Hdf5():
 
             relation.setOffset(offset)
 
-            inter = Interaction(3, nslaw, relation)
+            inter = Interaction(nslaw, relation)
 
             if ds2 is not None:
                 self._model.nonSmoothDynamicalSystem().link(inter, ds1, ds2)
@@ -1511,7 +1573,7 @@ class Hdf5():
                             number = self.instances()[name].attrs['id'])
             # import nslaws
             # note: no time of birth for nslaws and joints
-            for name in self._nslaws:
+            for name in self._nslaws_data:
                 self.importNonSmoothLaw(name)
 
             for name in self.joints():
@@ -1819,8 +1881,8 @@ class Hdf5():
         """
         Add a heightmap represented as a SiconosMatrix
         """
-        assert(heightmap.shape[0] > 2)
-        assert(heightmap.shape[1] > 2)
+        assert(heightmap.shape[0] >= 2)
+        assert(heightmap.shape[1] >= 2)
         if name not in self._ref:
             shape = self._ref.create_dataset(name, data=heightmap)
             shape.attrs['id'] = self._number_of_shapes
@@ -1973,7 +2035,8 @@ class Hdf5():
                   orientation=[1, 0, 0, 0],
                   velocity=[0, 0, 0, 0, 0, 0],
                   mass=0, center_of_mass=[0, 0, 0],
-                  inertia=None, time_of_birth=-1):
+                  inertia=None, time_of_birth=-1,
+                  allow_self_collide=False):
         """Add an object with associated shapes as a list of Volume or
         Contactor objects. Contact detection and processing is
         defined by the Contactor objects. The Volume objects are used for
@@ -2105,6 +2168,8 @@ class Hdf5():
 
             if inertia is not None:
                 obj.attrs['inertia']=inertia
+            if allow_self_collide is not None:
+                obj.attrs['allow_self_collide']=allow_self_collide
 
             contactors = shapes
 
@@ -2161,17 +2226,65 @@ class Hdf5():
         gid1 and gid2 define the group identifiants.
 
         """
-        if name not in self._nslaws:
-            nslaw=self._nslaws.create_dataset(name, (0,))
+        if name not in self._nslaws_data:
+            nslaw=self._nslaws_data.create_dataset(name, (0,))
             nslaw.attrs['type']='NewtonImpactFrictionNSL'
             nslaw.attrs['mu']=mu
             nslaw.attrs['e']=e
             nslaw.attrs['gid1']=collision_group1
             nslaw.attrs['gid2']=collision_group2
 
+    # Note, default groups are -1 here, indicating not to add them to
+    # the nslaw lookup table for contacts, since 1D impacts are
+    # useless in this case.  They are however useful for joint stops.
+    def addNewtonImpactNSL(self, name, e=0, collision_group1=-1,
+                           collision_group2=-1):
+        """
+        Add a nonsmooth law for contact between 2 groups.
+        Only NewtonImpactNSL are supported.
+        name is a user identifier and must be unique,
+        e is the coefficient of restitution on the contact normal,
+        gid1 and gid2 define the group identifiers.
+
+        As opposed to addNewtonImpactFrictionNSL, the default groups are
+        -1, making the NSL unassociated with point contacts.  It can
+        by used for joint stops however.
+        """
+        if name not in self._nslaws_data:
+            nslaw=self._nslaws_data.create_dataset(name, (0,))
+            nslaw.attrs['type']='NewtonImpactNSL'
+            nslaw.attrs['e']=e
+            nslaw.attrs['gid1']=collision_group1
+            nslaw.attrs['gid2']=collision_group2
+
+    # Note, default groups are -1 here, indicating not to add them to
+    # the nslaw lookup table for contacts, since 1D impacts are
+    # useless in this case.  They are however useful for joint friction.
+    def addRelayNSL(self, name, lb, ub, size=1, collision_group1=-1,
+                    collision_group2=-1):
+        """
+        Add a nonsmooth law for contact between 2 groups.
+        Only NewtonImpactNSL are supported.
+        name is a user identifier and must be unique,
+        e is the coefficient of restitution on the contact normal,
+        gid1 and gid2 define the group identifiers.
+
+        As opposed to addNewtonImpactFrictionNSL, the default groups are
+        -1, making the NSL unassociated with point contacts.  It can
+        by used for joint stops however.
+        """
+        if name not in self._nslaws_data:
+            nslaw=self._nslaws_data.create_dataset(name, (0,))
+            nslaw.attrs['type']='RelayNSL'
+            nslaw.attrs['size']=size
+            nslaw.attrs['lb']=lb
+            nslaw.attrs['ub']=ub
+            nslaw.attrs['gid1']=collision_group1
+            nslaw.attrs['gid2']=collision_group2
+
     def addJoint(self, name, object1, object2=None, pivot_point=[0, 0, 0],
-                 axis=[0, 1, 0],
-                 joint_class='PivotJointR'):
+                 axis=[0, 1, 0], joint_class='PivotJointR', absolute=None,
+                 allow_self_collide=None, nslaws=None, stops=None, friction=None):
         """
         add a joint between two objects
         """
@@ -2183,6 +2296,19 @@ class Hdf5():
             joint.attrs['type']=joint_class
             joint.attrs['pivot_point']=pivot_point
             joint.attrs['axis']=axis
+            if absolute in [True, False]:
+                joint.attrs['absolute']=absolute
+            if allow_self_collide in [True, False]:
+                joint.attrs['allow_self_collide']=allow_self_collide
+            if nslaws is not None:
+                joint.attrs['nslaws'] = nslaws # either name of one nslaw, or a
+                                               # list of names same length as stops
+            if stops is not None:
+                joint.attrs['stops'] = stops # must be a table of [[axis,pos,dir]..]
+            if friction is not None:
+                joint.attrs['friction'] = friction # must be an NSL name (e.g.
+                                                   # RelayNSL), or list of same
+
 
     def addBoundaryCondition(self, name, object1, indices=None, bc_class='HarmonicBC',
                              v=None, a=None, b=None, omega=None, phi=None):
@@ -2230,6 +2356,9 @@ class Hdf5():
             solver=Numerics.SICONOS_FRICTION_3D_NSGS,
             itermax=100000,
             tolerance=1e-8,
+            projection_itermax=20,
+            projection_tolerance=1e-8,
+            projection_tolerance_unilateral=1e-8,
             numerics_verbose=False,
             violation_verbose=False,
             output_frequency=None,
@@ -2381,14 +2510,17 @@ class Hdf5():
         # (6) Simulation setup with (1) (2) (3) (4) (5)
         if time_stepping == Kernel.TimeSteppingDirectProjection:
             osnspb_pos=Kernel.MLCPProjectOnConstraints(Numerics.SICONOS_MLCP_ENUM, 1.0)
+            so_pos = osnspb.numericsSolverOptions()
+            so_pos.iparam[0]=itermax
+            so_pos.dparam[0]=tolerance
             osnspb_pos.setMaxSize(30000)
             osnspb_pos.setMStorageType(0) # "not yet implemented for sparse storage"
             osnspb_pos.setNumericsVerboseMode(numerics_verbose)
             osnspb_pos.setKeepLambdaAndYState(True)
             simulation=time_stepping(timedisc, self._osi, osnspb, osnspb_pos)
-            simulation.setProjectionMaxIteration(20)
-            simulation.setConstraintTolUnilateral(1e-08);
-            simulation.setConstraintTol(1e-08);
+            simulation.setProjectionMaxIteration(projection_itermax)
+            simulation.setConstraintTolUnilateral(projection_tolerance_unilateral);
+            simulation.setConstraintTol(projection_tolerance);
         else:
             simulation=time_stepping(timedisc)
             simulation.insertIntegrator(self._osi)

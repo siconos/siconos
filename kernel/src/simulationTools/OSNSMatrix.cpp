@@ -21,6 +21,7 @@
 #include "Tools.hpp"
 #include "BlockCSRMatrix.hpp"
 #include "SimulationGraphs.hpp"
+#include "SimpleMatrix.hpp"
 
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES 1

@@ -24,18 +24,15 @@
 #ifndef INTERACTION_H
 #define INTERACTION_H
 
-#include "DynamicalSystemsSet.hpp"
 #include "RelationNamespace.hpp"
-
 #include "SiconosPointers.hpp"
+#include "SiconosVector.hpp"
 #include "SiconosFwd.hpp"
 #include <vector>
 
-/**  An Interaction describes the non-smooth interactions
- *  several Dynamical Systems.
+/** Non-smooth interaction involving 1 or 2 Dynamical Systems.
  *
  *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
  *  \date (Creation) Apr 29, 2004
  *
  * An interaction represents the "link" between a set of Dynamical
@@ -70,11 +67,13 @@
 class Interaction : public std11::enable_shared_from_this<Interaction >
 {
 private:
-  /** serialization hooks
-  */
+  /* serialization hooks */
   ACCEPT_SERIALIZATION(Interaction);
 
-  /** number specific to each Interaction */
+  /** internal counter used to set interaction number */
+  static unsigned int __count;
+  
+  /** Interaction id */
   unsigned int _number;
 
   /** Minimum required 'level' for output y
@@ -159,15 +158,6 @@ private:
   /** the type of Relation of the interaction */
   SP::Relation _relation;
 
-  /** The residu y of the newton iterations*/
-  SP::SiconosVector _residuY;
-
-  /*value of h at the current newton iteration*/
-  SP::SiconosVector _h_alpha;
-
-  /* work vector to compute qblock, XXX maybe it shouldn't exist */
-  SP::SiconosVector _yForNSsolver;
-
   struct _setLevels;
   friend struct Interaction::_setLevels;
 
@@ -181,48 +171,105 @@ private:
    */
   Interaction(const Interaction& inter);
 
+  /** Initialisation common to all constructors */
+  void __init();
+
+  /*! @name DSlink graph property management */
+  //@{
+
+  /** update DSlink property content with dynamical systems members, FirstOrder relations case.
+      \param DSlink the container of the link to DynamicalSystem attributes
+      \param ds1 first ds linked to this Interaction
+      \param ds2 second ds linked to this Interaction. ds1 == ds2 is allowed.
+   */
+  void __initDataFirstOrder(VectorOfBlockVectors& DSlink, DynamicalSystem& ds1, DynamicalSystem& ds2);
+
+  /** Initialize the link with the DynamicalSystem, FirstOrderDS variant
+   * \param ds a DynamicalSystem concerned by this Interaction
+   * \param DSlink the container of the link to DynamicalSystem attributes
+   */
+  void __initDSDataFirstOrder(DynamicalSystem& ds, VectorOfBlockVectors& DSlink);
+
+  /** update DSlink property content with dynamical systems members, Lagrangian relations case.
+      \param DSlink the container of the link to DynamicalSystem attributes
+      \param ds1 first ds linked to this Interaction
+      \param ds2 second ds linked to this Interaction. ds1 == ds2 is allowed.
+   */
+  void __initDataLagrangian(VectorOfBlockVectors& DSlink, DynamicalSystem& ds1, DynamicalSystem& ds2);
+
+  /** Initialize the link with the DynamicalSystem, LagrangianDS variant
+   * \param ds a DynamicalSystem concerned by this Interaction
+   * \param DSlink the container of the link to DynamicalSystem attributes
+   */
+  void __initDSDataLagrangian(DynamicalSystem& ds, VectorOfBlockVectors& DSlink);
+
+  /** update DSlink property content with dynamical systems members, NewtonEuler relations case.
+      \param DSlink the container of the link to DynamicalSystem attributes
+      \param ds1 first ds linked to this Interaction
+      \param ds2 second ds linked to this Interaction. ds1 == ds2 is allowed.
+  */
+  void __initDataNewtonEuler(VectorOfBlockVectors& DSlink, DynamicalSystem& ds1, DynamicalSystem& ds2);
+
+  /** Initialize the link with the DynamicalSystem, NewtonEulerDS variant
+   * \param ds a DynamicalSystem concerned by this Interaction
+   * \param DSlink the container of the link to DynamicalSystem attributes
+   */
+  void __initDSDataNewtonEuler(DynamicalSystem& ds, VectorOfBlockVectors& DSlink);
+  ///@}
+
+protected:
+  
+  /** Default constructor. */
+  Interaction(): _number(__count++), _interactionSize(0), _sizeOfDS(0), _has2Bodies(false), _y(2){};
+
 public:
 
-  /** Default constructor. */
-  Interaction(): _number(0), _interactionSize(0), _sizeOfDS(0), _has2Bodies(false), _y(2)
-  {};
-
-   /** Constructor with interaction size, NonSmoothLaw and Relation.
+  /** Constructor with interaction size, NonSmoothLaw and Relation.
    *  \param interactionSize size of the interaction,
              i.e. the size of the input and output
    *  \param NSL pointer to the NonSmoothLaw
    *  \param rel a pointer to the Relation
-   *  \param number the number of this Interaction (default 0)
    */
-  Interaction(unsigned int interactionSize, SP::NonSmoothLaw NSL, SP::Relation rel, unsigned int number = 0);
+  //Interaction(unsigned int interactionSize, SP::NonSmoothLaw NSL, SP::Relation rel);
 
-  /** constructor with NonSmoothLaw and Relation.
+  /** constructor with NonSmoothLaw and Relation (i.e. inter size == nslaw size)
    *  \param NSL pointer to the NonSmoothLaw, the interaction size is
    *         infered from the size of the NonSmoothLaw
    *  \param rel a pointer to the Relation
-   *  \param number the number of this Interaction (default 0)
    */
-  Interaction(SP::NonSmoothLaw NSL, SP::Relation rel, unsigned int number = 0);
+  Interaction(SP::NonSmoothLaw NSL, SP::Relation rel);
 
-  /** destructor
-   */
+  /** destructor  */
   ~Interaction() {};
 
-  /** set the links to the DynamicalSystem(s) and allocate the workspace
+  /** Update interactions attributes.
+      Must be called when levels have been modified.
+  */
+  void reset();
+  
+  /** set the links to the DynamicalSystem(s) and allocate the required workspaces
    *  \param interProp the InteractionProperties of this Interaction
       \param ds1 first ds linked to this Interaction (i.e IG->vertex.source)
       \param workV1 work vectors of ds1
       \param ds2 second ds linked to this Interaction (i.e IG->vertex.target) ds1 == ds2 is allowed.
       \param workV2 work vectors of ds2
    */
-  void setDSLinkAndWorkspace(InteractionProperties& interProp, DynamicalSystem& ds1, VectorOfVectors& workV1, DynamicalSystem& ds2, VectorOfVectors& workV2);
+  //void setDSLinkAndWorkspace(InteractionProperties& interProp, DynamicalSystem& ds1, VectorOfVectors& workV1, DynamicalSystem& ds2, VectorOfVectors& workV2);
 
-  /** Common init  code for contructors.
-   */
-  void init();
+  /*! @name DSlink graph property management */
+  //@{
 
-  /** set all lambda to zero
-   */
+  /** set the links (DSlink graph property) between the interaction and the DynamicalSystem(s) members.
+   *  \param interaction_properties properties (inside the graph) of the current interaction
+      \param ds1 first ds linked to this Interaction (i.e IG->vertex.source)
+      \param ds2 second ds linked to this Interaction (i.e IG->vertex.target) ds1 == ds2 is allowed.
+  */
+  void initialize_ds_links(InteractionProperties& interaction_properties, DynamicalSystem& ds1,
+			   DynamicalSystem& ds2);
+
+  ///@}
+  
+  /** set all lambda to zero */
   void resetAllLambda() ;
 
   /** set lambda to zero for a given level
@@ -230,8 +277,8 @@ public:
    */
   void resetLambda(unsigned int level);
 
-  /** build y and \f$\lambda\f$ vectors
-   * \param computeResiduY if true the residu on y is computed and memory allocation is done for _residuY and _h_alpha
+  /** build memories vectors for y and \f$\lambda\f$
+   * \param steps number of required memories (depends on the OSI)
   */
   void initializeMemory(bool computeResiduY, unsigned int steps);
 
@@ -242,14 +289,6 @@ public:
   inline int number() const
   {
     return _number;
-  }
-
-  /** Set number of the Interaction.
-  *  \param newNumber : int number : the value to set number.
-  */
-  inline void setNumber(const int newNumber)
-  {
-    _number = newNumber;
   }
 
   /** Set the lower level for output y.
@@ -317,7 +356,7 @@ public:
     return _upperLevelForInput;
   };
 
-
+  
   /** Get the dimension of the interaction (y and _lambda size).
   *  \return an unsigned int.
   */
@@ -640,19 +679,14 @@ public:
   {
     return _nslaw;
   }
-  inline SP::NonSmoothLaw nslaw() const
-  {
-    return _nslaw;
-  }
-
+  
   // --- OTHER FUNCTIONS ---
 
   /** set interaction 'ds-dimension', i.e. sum of all sizes of the dynamical systems linked
    *  by the current interaction. This must be done by topology during call to link(inter, ds, ...).
    * \param s1 int sum of ds sizes
-   * \param s2 int sum of sizes of z components of the ds.
   */
-  inline void setDSSizes(unsigned int s1, unsigned int s2)
+  inline void setDSSizes(unsigned int s1)
   {
     _sizeOfDS = s1;
   }
@@ -669,6 +703,16 @@ public:
   */
   void display() const;
 
+  /** reset the global Interaction counter (for ids)
+   *  \return the previous value of count
+   */
+  static inline int resetCount(int new_count=0)
+  {
+    int old_count = __count;
+    __count = new_count;
+    return old_count;
+  };
+  
   /** Computes output y; depends on the relation type.
    *  \param time current time
    *  \param interProp
@@ -684,14 +728,6 @@ public:
    *  \param level order of _lambda used to compute input.
    */
   void computeInput(double time, InteractionProperties& interProp, unsigned int level = 0);
-
-  /** Get the _yForNssolver vector
-   * \return the y part used in the solver
-   */
-  inline SP::SiconosVector yForNSsolver() const
-  {
-    return _yForNSsolver;
-  }
 
   /** gets the matrix used in interactionBlock computation, (left * W * right), depends on the relation type (ex, LinearTIR, left = C, right = B).
    *  \param workM
@@ -730,101 +766,6 @@ public:
 
   void computeKhat(SiconosMatrix& m, VectorOfSMatrices& workM, double h) const;
 
-
-  /**  get the single value used to build indexSets Warning: the
-   * relativePosition depends on NsLawSize and/or type.  This means
-   * that at the time, for the interactionBlock of y that corresponds to
-   * the present relation, the first scalar value is used.  For
-   * example, for friction, normal part is in first position, followed
-   * by the tangential parts.
-   * \param i derivative number i of output
-   * \return double
-   */
-  inline double getYRef(unsigned int i) const
-  {
-
-    return (*_y[i])(0);
-  }
-
-  inline double getLambdaRef(unsigned int i) const
-  {
-    // get the single value used to build indexSets
-    return (*_lambda[i])(0);
-  }
-
-  // --- Residu functions
-
-  inline SP::SiconosVector residuY() const
-  {
-    return _residuY;
-  }
-
-  inline SP::SiconosVector Halpha() const
-  {
-    return _h_alpha;
-  }
-
-  /*  Compute the residuY.
-   * \param time
-   */
-  void computeResiduY(double time);
-
-  /* Compute the residuR.
-   * \param time
-   * \param DSlink the container of the link to DynamicalSystem attributes
-   * \param workV the work vectors of the DynamicalSystem
-   */
-  void computeResiduR(double time, VectorOfBlockVectors& DSlink, VectorOfVectors& workV) ;
-
-  
-
-  /** Instantiate the link with the DynamicalSystem
-   * \param DSlink the container of the link to DynamicalSystem attributes
-   */
-  void initData(VectorOfBlockVectors& DSlink);
-
-  /** Initialize the link with the DynamicalSystem
-   * \param ds a DynamicalSystem concerned by this Interaction
-   * \param workVDS the work vectors of the DynamicalSystem
-   * \param DSlink the container of the link to DynamicalSystem attributes
-   */
-  void initDSData(DynamicalSystem& ds, VectorOfVectors& workVDS, VectorOfBlockVectors& DSlink);
-  
-  /** Instantiate the link with the DynamicalSystem, FirstOrderDS variant
-   * \param DSlink the container of the link to DynamicalSystem attributes
-   */
-  void initDataFirstOrder(VectorOfBlockVectors& DSlink);
-
-  /** Initialize the link with the DynamicalSystem, FirstOrderDS variant
-   * \param ds a DynamicalSystem concerned by this Interaction
-   * \param workVDS the work vectors of the DynamicalSystem
-   * \param DSlink the container of the link to DynamicalSystem attributes
-   */
-  void initDSDataFirstOrder(DynamicalSystem& ds, VectorOfVectors& workVDS, VectorOfBlockVectors& DSlink);
-
-  /** Instantiate the link with the DynamicalSystem, LagrangianDS variant
-   * \param DSlink the container of the link to DynamicalSystem attributes
-   */
-  void initDataLagrangian(VectorOfBlockVectors& DSlink);
-
-  /** Initialize the link with the DynamicalSystem, LagrangianDS variant
-   * \param ds a DynamicalSystem concerned by this Interaction
-   * \param workVDS the work vectors of the DynamicalSystem
-   * \param DSlink the container of the link to DynamicalSystem attributes
-   */
-  void initDSDataLagrangian(DynamicalSystem& ds, VectorOfVectors& workVDS, VectorOfBlockVectors& DSlink);
-
-  /** Instantiate the link with the DynamicalSystem, NewtonEulerDS variant
-   * \param DSlink the container of the link to DynamicalSystem attributes
-   */
-  void initDataNewtonEuler(VectorOfBlockVectors& DSlink);
-
-  /** Initialize the link with the DynamicalSystem, NewtonEulerDS variant
-   * \param ds a DynamicalSystem concerned by this Interaction
-   * \param workVDS the work vectors of the DynamicalSystem
-   * \param DSlink the container of the link to DynamicalSystem attributes
-   */
-  void initDSDataNewtonEuler(DynamicalSystem& ds, VectorOfVectors& workVDS, VectorOfBlockVectors& DSlink);
 
 };
 

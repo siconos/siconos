@@ -28,7 +28,6 @@ CPPUNIT_TEST_SUITE_REGISTRATION(LagrangianLinearTIRTest);
 void LagrangianLinearTIRTest::setUp()
 {
   C.reset(new SimpleMatrix("matC.dat", true));
-  D.reset(new SimpleMatrix("matD.dat", true));
   F.reset(new SimpleMatrix("matF.dat", true));
   e.reset(new SiconosVector(1));
   (*e)(0) = 0.1;
@@ -52,7 +51,7 @@ void LagrangianLinearTIRTest::testBuildLagrangianLinearTIR1()
 void LagrangianLinearTIRTest::testBuildLagrangianLinearTIR2()
 {
   std::cout << "--> Test: constructor 2." <<std::endl;
-  SP::LagrangianLinearTIR folr(new LagrangianLinearTIR(C, D, F, e));
+  SP::LagrangianLinearTIR folr(new LagrangianLinearTIR(C, F, e));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIR2f : ", folr->getType() == RELATION::Lagrangian, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIR2g : ", folr->getSubType() == RELATION::LinearTIR, true);
   std::cout << "--> Constructor 2 test ended with success." <<std::endl;
@@ -94,20 +93,6 @@ void LagrangianLinearTIRTest::testSetCPtr()
   std::cout << "--> setCPtr test ended with success." <<std::endl;
 }
 
-// set D
-
-// setDPtr
-void LagrangianLinearTIRTest::testSetDPtr()
-{
-  std::cout << "--> Test: setDPtr." <<std::endl;
-  SP::LagrangianLinearTIR folr(new LagrangianLinearTIR(C));
-  folr->setDPtr(D);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetDPtr: ", folr->D() == D, true);
-  std::cout << "--> setDPtr test ended with success." <<std::endl;
-}
-
-// set F
-
 // setFPtr
 void LagrangianLinearTIRTest::testSetFPtr()
 {
@@ -136,16 +121,7 @@ void LagrangianLinearTIRTest::testGetJacPtr()
 {
   std::cout << "--> Test: jac." <<std::endl;
   SP::LagrangianLinearTIR folr(new LagrangianLinearTIR(C));
-  folr->setDPtr(D);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetJachq: ", folr->jachq() == C, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetJachlambda: ", folr->jachlambda() == D, true);
 
-  std::cout << "--> setBPtr test ended with success." <<std::endl;
-}
-
-void LagrangianLinearTIRTest::End()
-{
-  std::cout << "===========================================" <<std::endl;
-  std::cout << " ===== End of LagrangianLinearTIR Tests ===== " <<std::endl;
-  std::cout << "=========================================== " <<std::endl;
+  std::cout << "--> testGetJacPtr test ended with success." <<std::endl;
 }

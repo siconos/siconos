@@ -33,6 +33,9 @@
 #include "LCP_Solvers.h"
 #include "FrictionContactProblem.h"
 #include "Friction_cst.h"
+#include "Relay_Solvers.h"
+#include "RelayProblem.h"
+#include "relay_cst.h"
 #include "fc3d_onecontact_nonsmooth_Newton_solvers.h"
 #include "NumericsMatrix.h"
 /* #define GENERICMECHANICAL_DEBUG  */
@@ -151,6 +154,20 @@ int GenericMechanical_compute_error(GenericMechanicalProblem* pGMP, double *reac
       //LinearComplementarityProblem* lcpproblem = (LinearComplementarityProblem*) curProblem->problem;
 
       lcp_compute_error_only(curSize, reaction + posInX, velocity + posInX, &localError);
+      localError = localError / (1 + cblas_dnrm2(curSize , curProblem->q , 1));
+      if (localError > *err)
+        *err = localError ;
+#ifdef GENERICMECHANICAL_DEBUG_COMPUTE_ERROR
+      printf("GenericMechanical_driver, localerror of lcp: %e\n", localError);
+#endif
+      break;
+    }
+    case SICONOS_NUMERICS_PROBLEM_RELAY:
+    {
+      relay_compute_error((RelayProblem*) curProblem->problem,
+                          reaction + posInX, velocity + posInX,
+                          options->dparam[0], &localError);
+
       localError = localError / (1 + cblas_dnrm2(curSize , curProblem->q , 1));
       if (localError > *err)
         *err = localError ;
@@ -315,7 +332,17 @@ void genericMechanicalProblem_GS(GenericMechanicalProblem* pGMP, double * reacti
         memcpy(curProblem->q, &(pGMP->q[posInX]), curSize * sizeof(double));
         NM_row_prod_no_diag(pGMP->size, curSize, currentRowNumber, posInX, numMat, reaction, lcpProblem->q, NULL, 0);
         resLocalSolver = linearComplementarity_driver(lcpProblem, sol, w, options->internalSolvers);
-
+        break;
+      }
+      case SICONOS_NUMERICS_PROBLEM_RELAY:
+      {
+        /*Mz*/
+        RelayProblem* relayProblem = (RelayProblem*) curProblem->problem;
+        relayProblem->M->matrix0 = diagBlock;
+        /*about q.*/
+        memcpy(curProblem->q, &(pGMP->q[posInX]), curSize * sizeof(double));
+        NM_row_prod_no_diag(pGMP->size, curSize, currentRowNumber, posInX, numMat, reaction, relayProblem->q, NULL, 0);
+        resLocalSolver = relay_driver(relayProblem, sol, w, &options->internalSolvers[2]);
         break;
       }
       case SICONOS_NUMERICS_PROBLEM_FC3D:
@@ -507,7 +534,7 @@ void genericMechanicalProblem_setDefaultSolverOptions(SolverOptions* options, in
   options->solverId = SICONOS_GENERIC_MECHANICAL_NSGS;
   options->iSize = 15;
   options->dSize = 15;
-  options->numberOfInternalSolvers = 2;
+  options->numberOfInternalSolvers = 3;
   options->dWork = NULL;
   solver_options_nullify(options);
   options->iparam = (int *)calloc(options->iSize, sizeof(int));
@@ -522,9 +549,10 @@ void genericMechanicalProblem_setDefaultSolverOptions(SolverOptions* options, in
   options->dparam[2] = 1e-7;
   options->dparam[3] = 1e-7;
 
-  options->internalSolvers = (SolverOptions *)malloc(2 * sizeof(SolverOptions));;
+  options->internalSolvers = (SolverOptions *)malloc(3 * sizeof(SolverOptions));;
 
   linearComplementarity_setDefaultSolverOptions(0, options->internalSolvers, SICONOS_LCP_LEMKE);
+  relay_setDefaultSolverOptions(0, &options->internalSolvers[2], SICONOS_RELAY_LEMKE);
 
   switch (id)
   {

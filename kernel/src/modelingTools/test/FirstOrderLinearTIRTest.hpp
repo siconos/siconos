@@ -51,8 +51,6 @@ private:
   //  CPPUNIT_TEST(testGetJac);
   CPPUNIT_TEST(testGetJacPtr);
 
-  CPPUNIT_TEST(End);
-
   CPPUNIT_TEST_SUITE_END();
 
   // \todo exception test
@@ -72,7 +70,6 @@ private:
   void testSetBPtr();
   //  void testGetJac();
   void testGetJacPtr();
-  void End();
 
   // Members
 

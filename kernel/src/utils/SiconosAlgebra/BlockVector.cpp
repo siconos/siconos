@@ -25,6 +25,7 @@
 #include "SiconosVector.hpp"
 
 #include "SiconosAlgebra.hpp"
+#include "Tools.hpp"
 
 
 //#define DEBUG_STDOUT
@@ -44,7 +45,7 @@ BlockVector::BlockVector()
 BlockVector::BlockVector(const BlockVector &v)
 {
   _sizeV = 0;
-  unsigned int nbBlocks = v.getNumberOfBlocks();
+  unsigned int nbBlocks = v.numberOfBlocks();
   _tabIndex.reset(new Index());
   _tabIndex->reserve(nbBlocks);
   _vect.reserve(nbBlocks);
@@ -121,9 +122,46 @@ BlockVector::BlockVector(unsigned int numberOfBlocks, unsigned int dim)
   _sizeV = dim * numberOfBlocks;
 }
 
+BlockVector::BlockVector(unsigned int numberOfBlocks)
+{
+  _sizeV = 0;
+  _tabIndex.reset(new Index());
+  _tabIndex->resize(numberOfBlocks);
+  _vect.resize(numberOfBlocks);
+}
 
 BlockVector::~BlockVector()
 {}
+
+// ===========================
+//      private method
+// ===========================
+
+void BlockVector::updateSizeV()
+{
+  _sizeV=0;
+  VectorOfVectors::iterator it;
+  for(it = _vect.begin(); it != _vect.end(); ++it)
+  {
+    if (*it)
+      _sizeV += (*it)->size();
+  }
+}
+void BlockVector::updateTabIndex()
+{
+  unsigned int cumulated_size=0;
+  _tabIndex.reset(new Index());
+
+  VectorOfVectors::iterator it;
+  for(it = _vect.begin(); it != _vect.end(); ++it)
+  {
+    if (*it)
+    {
+      cumulated_size += (*it)->size();
+    }
+    _tabIndex->push_back(cumulated_size);
+  }
+}
 
 // ===========================
 //       fill vector
@@ -154,10 +192,37 @@ void BlockVector::display() const
   for(it = _vect.begin(); it != _vect.end(); ++it)
   {
     DEBUG_EXPR(std::cout <<"(*it)" << (*it) << std::endl;);
-    (*it)->display();
+    if (*it)
+      (*it)->display();
+    else
+      std::cout << "(*it)-> NULL" <<std::endl;
   }
 }
 
+//=====================
+// convert to a string
+//=====================
+
+std::string BlockVector::toString() const
+{
+  return ::toString(*this);
+}
+
+//=====================
+// convert to an ostream
+//=====================
+
+std::ostream& operator<<(std::ostream& os, const BlockVector& bv)
+{
+  VectorOfVectors::const_iterator it;
+  os << "[" << bv._vect.size() << "](";
+  for(it = bv._vect.begin(); it != bv._vect.end(); ++it) {
+    if (it != bv._vect.begin()) os << ",";
+    if (*it) os << **it; else os << "(nil)";
+  }
+  os << ")";
+  return os;
+}
 
 //=============================
 // Elements access (get or set)
@@ -229,21 +294,24 @@ double BlockVector::operator()(unsigned int pos) const
 
 void BlockVector::setVector(unsigned int pos, const SiconosVector& v)
 {
+  assert(pos < _vect.size() && "insertion out of vector size");
   if(! _vect[pos])
     SiconosVectorException::selfThrow("BlockVector::setVector(pos,v), this[pos] == NULL pointer.");
 
-  if(v.size() != (_vect[pos])->size())
-    SiconosVectorException::selfThrow("BlockVector::setVector(pos,v), this[pos] and v have unconsistent sizes.");
+  // if(v.size() != (_vect[pos])->size())
+  //   SiconosVectorException::selfThrow("BlockVector::setVector(pos,v), this[pos] and v have unconsistent sizes.");
 
   *_vect[pos] = v ;
 }
 
 void BlockVector::setVectorPtr(unsigned int pos, SP::SiconosVector v)
 {
-  if(v->size() != (_vect[pos])->size())
-    SiconosVectorException::selfThrow("BlockVector::setVectorPtr(pos,v), this[pos] and v have unconsistent sizes.");
-
+  assert(pos < _vect.size() && "insertion out of vector size");
+  // if(v->size() != (_vect[pos])->size())
+  //   SiconosVectorException::selfThrow("BlockVector::setVectorPtr(pos,v), this[pos] and v have unconsistent sizes.");
   _vect[pos] = v;
+  updateSizeV();
+  updateTabIndex();
 }
 
 SP::SiconosVector BlockVector::operator [](unsigned int pos)

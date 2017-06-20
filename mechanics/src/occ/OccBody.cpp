@@ -19,8 +19,18 @@ void OccBody::addContactShape(SP::OccContactShape shape,
                               SP::SiconosVector ori,
                               unsigned int group)
 {
-  OffSet offset = { {(*pos)(0), (*pos)(1), (*pos)(2),
-                     (*ori)(0), (*ori)(1), (*ori)(2), (*ori)(3)}};
+  OffSet offset = {0, 0, 0, 1, 0, 0 ,0};
+  if (pos) {
+    offset[0] = (*pos)(0);
+    offset[1] = (*pos)(1);
+    offset[2] = (*pos)(2);
+  }
+  if (ori) {
+    offset[3] = (*ori)(0);
+    offset[4] = (*ori)(1);
+    offset[5] = (*ori)(2);
+    offset[6] = (*ori)(3);
+  }
 
   this->_contactShapes->push_back(
     boost::tuple<SP::OccContactShape, OffSet, int>(shape, offset, group));
@@ -33,9 +43,18 @@ void OccBody::addShape(SP::TopoDS_Shape shape,
                        SP::SiconosVector pos,
                        SP::SiconosVector ori)
 {
-
-  OffSet offset = { {(*pos)(0), (*pos)(1), (*pos)(2),
-                     (*ori)(0), (*ori)(1), (*ori)(2), (*ori)(3)}};
+  OffSet offset = {0, 0, 0, 1, 0, 0 ,0};
+  if (pos) {
+    offset[0] = (*pos)(0);
+    offset[1] = (*pos)(1);
+    offset[2] = (*pos)(2);
+  }
+  if (ori) {
+    offset[3] = (*ori)(0);
+    offset[4] = (*ori)(1);
+    offset[5] = (*ori)(2);
+    offset[6] = (*ori)(3);
+  }
 
   this->_shapes->push_back(
     boost::tuple<SP::TopoDS_Shape, OffSet>(shape, offset));

@@ -19,6 +19,8 @@
 #include "SiconosConfig.h"
 
 #include "SiconosAlgebraTypeDef.hpp"
+#include "SiconosVectorIterator.hpp"
+#include "Tools.hpp"
 
 #include <boost/numeric/ublas/io.hpp>            // for >> 
 //#include <boost/numeric/ublas/vector_proxy.hpp>  // for project
@@ -36,6 +38,8 @@ namespace siconosBindings = boost::numeric::bindings::blas;
 #include "ioVector.hpp"
 #include "SiconosVector.hpp"
 #include "SiconosAlgebra.hpp"
+#include <cmath>        // std::exp(double)
+#include <algorithm>    // std::transform
 
 //#define DEBUG_MESSAGES
 #include "debug.h"
@@ -394,20 +398,22 @@ void SiconosVector::display()const
 // Convert vector to a std::string
 //============================
 
-const std::string SiconosVector::toString() const
+std::string SiconosVector::toString() const
 {
-  std::stringstream sstr;
-  std::string s;
-  if (_dense)
-    sstr << *vect.Dense;
+  return ::toString(*this);
+}
+
+//=====================
+// convert to an ostream
+//=====================
+
+std::ostream& operator<<(std::ostream& os, const SiconosVector& sv)
+{
+  if (sv._dense)
+    os << *sv.vect.Dense;
   else
-    sstr << *vect.Sparse;
-  sstr >> s;
-  s = s.substr(4, s.size() - 5); // Remove "[size](" at the beginning of the std::string
-  std::string::size_type pos;
-  while ((pos = s.find(",")) != std::string::npos) // Replace "," by " " in the std::string
-    s[pos] = ' ';
-  return s;
+    os << *sv.vect.Sparse;
+  return os;
 }
 
 //=============================
@@ -1370,6 +1376,23 @@ void getMin(const SiconosVector& V, double& minvalue, unsigned int& idmin)
   };
 }
 
+
+struct exp_op { double operator() (double d) const { return std::exp(d); } };
+
+void SiconosVector::exp_in_place()
+{
+  // struct exp_op { double operator() (double d) const { return std::exp(d); } };
+  // assert(num() == 1);
+  // std::transform(vect.Dense->begin(), vect.Dense->end(), vect.Dense->begin(), exp_op);
+}
+
+void SiconosVector::exp(SiconosVector& input)
+{
+  // assert(num() == 1 && input.num()==1);
+  // std::transform(input.dense()->begin(), input.dense()->end(), vect.Dense->begin(), exp_op);
+}
+
+
 //
 /*
 SiconosVector abs_wise(const SiconosVector& V){
@@ -1445,3 +1468,30 @@ SiconosVector& operator /= (SiconosVector& v, const double& s)
   return v;
 }
 
+SiconosVector::iterator SiconosVector::begin()
+{
+  return SiconosVector::iterator(*this, 0);
+}
+
+SiconosVector::const_iterator SiconosVector::begin() const
+{
+  return SiconosVector::const_iterator(*this, 0);
+}
+
+SiconosVector::iterator SiconosVector::end()
+{
+  return SiconosVector::iterator(*this, size());
+}
+
+SiconosVector::const_iterator SiconosVector::end() const
+{
+  return SiconosVector::const_iterator(*this, size());
+}
+
+SiconosVector::operator std::vector<double>()
+{
+  std::vector<double> v;
+  v.resize(size());
+  std::copy(begin(), end(), v.begin());
+  return v;
+}

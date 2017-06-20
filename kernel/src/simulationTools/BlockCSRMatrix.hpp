@@ -159,7 +159,7 @@ public:
   /** get size (in block-components) 
    * \return unsigned int NumberOfBlocksInARow
    */
-  inline unsigned int getNumberOfBlocksInARow() const
+  inline unsigned int numberOfBlocksInARow() const
   {
     return _nr;
   };
@@ -222,23 +222,6 @@ public:
    * \param indexSet of the active constraints
    */
   void fillH(SP::InteractionsGraph indexSet);
-
-  /** fill the current class using an index set and a map of DSblocks
-   *    \param DSSet DynamicalSystemsSet*, the set of DynamicalSystem
-   *    \param DSblocks MapOfDSMatrices, the list of matrices linked to a
-   *   DynamicalSystem
-   */
-  void fill(SP::DynamicalSystemsSet DSSet, MapOfDSMatrices& DSblocks);
-
-  /** fill the current class using an index set and a map of DSblocks
-       \param indexSet DynamicalSystemsSet*, the set of DynamicalSystem
-       \param DSSet InteractionsGraph*, the index set of the active
-       constraints
-       \param interactionDSBlocks MapOfInteractionMapOfDSMatrices, the list of matrices linked
-       to a DynamicalSystem
-   */
-  void fill(SP::InteractionsGraph indexSet, SP::DynamicalSystemsSet DSSet,
-            MapOfInteractionMapOfDSMatrices& interactionDSBlocks);
 
   /** fill the numerics structure _sparseBlockStructuredMatrix using _blockCSR */
   void convert();

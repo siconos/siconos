@@ -94,6 +94,7 @@ int main(int argc, char* argv[])
     prod(*Int_D, *Offset_lambda, *tmp);
     *tmp -= *Offset_y;
     Int_z->setBlock(0, *tmp);
+
     LSDiodeBridgePowSup->setzPtr(Int_z);
 
     SP::SimpleMatrix Int_B(new SimpleMatrix(1, 4));
@@ -106,7 +107,7 @@ int main(int argc, char* argv[])
 
     SP::ComplementarityConditionNSL nslaw(new ComplementarityConditionNSL(4));
 
-    SP::Interaction InterDiodeBridgePowSup(new Interaction(4, nslaw, LTIRDiodeBridgePowSup));
+    SP::Interaction InterDiodeBridgePowSup(new Interaction(nslaw, LTIRDiodeBridgePowSup));
 
     // --- Model creation ---
     SP::Model DiodeBridgePowSup(new Model(t0, T, Modeltitle));

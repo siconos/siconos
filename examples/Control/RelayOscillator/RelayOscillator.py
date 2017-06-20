@@ -63,7 +63,7 @@ LTIRRelayOscillator=FirstOrderLinearTIR(C,B)
 LTIRRelayOscillator.setDPtr(D)
 
 nslaw=RelayNSL(1)
-InterRelayOscillator=Interaction(1, nslaw,LTIRRelayOscillator,1)
+InterRelayOscillator=Interaction(nslaw,LTIRRelayOscillator)
 
 
 #
@@ -112,7 +112,7 @@ k = 0
 h = aTS.timeStep();
 print("Timestep : ",h)
 # Number of time steps
-N = (T-t0)/h
+N = (int)((T-t0)/h)
 print("Number of steps : ",N)
 
 # Get the values to be plotted

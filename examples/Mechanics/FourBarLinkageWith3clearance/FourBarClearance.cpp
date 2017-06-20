@@ -99,8 +99,6 @@ int main(int argc, char* argv[])
     // --- Dynamical systems ---
     // -------------------------
 
-    // unsigned int i;
-    DynamicalSystemsSet allDS; // the list of DS
 
     // --- DS: slidercrank ---
 
@@ -132,7 +130,6 @@ int main(int argc, char* argv[])
     fourbar->setComputeJacobianFIntqDotFunction("FourBarClearancePlugin.so", "jacobianFIntqDot");
     fourbar->setComputeJacobianFIntqFunction("FourBarClearancePlugin.so", "jacobianFIntq");
 
-    allDS.insert(fourbar);
 
     // -------------------
     // --- Interactions---
@@ -145,24 +142,24 @@ int main(int argc, char* argv[])
 
     SP::NonSmoothLaw nslaw(new NewtonImpactFrictionNSL(eN, eT, mu, 2)); //EqualityConditionNSL NewtonImpactNSL
     SP::Relation relation(new LagrangianScleronomousR("FourBarClearancePlugin:g1", "FourBarClearancePlugin:W1"));
-    SP::Interaction inter(new Interaction(2, nslaw, relation));
+    SP::Interaction inter(new Interaction(nslaw, relation));
 
     SP::NonSmoothLaw nslaw1(new NewtonImpactFrictionNSL(eN, eT, mu, 2)); //EqualityConditionNSL NewtonImpactNSL
     SP::Relation relation1(new LagrangianScleronomousR("FourBarClearancePlugin:g2", "FourBarClearancePlugin:W2"));
-    SP::Interaction inter1(new Interaction(2, nslaw1, relation1));
+    SP::Interaction inter1(new Interaction(nslaw1, relation1));
 
     SP::NonSmoothLaw nslaw2(new NewtonImpactFrictionNSL(eN, eT, mu, 2)); //EqualityConditionNSL NewtonImpactNSL
     SP::Relation relation2(new LagrangianScleronomousR("FourBarClearancePlugin:g3", "FourBarClearancePlugin:W3"));
-    SP::Interaction inter2(new Interaction(2, nslaw2, relation2));
+    SP::Interaction inter2(new Interaction(nslaw2, relation2));
 
 
     //SP::NonSmoothLaw nslaw2(new EqualityConditionNSL(e1)); //EqualityConditionNSL NewtonImpactNSL
     //SP::Relation relation2(new LagrangianScleronomousR("FourBarClearancePlugin:g3", "FourBarClearancePlugin:W3"));
-    //SP::Interaction inter2(new Interaction(1, nslaw2, relation2));
+    //SP::Interaction inter2(new Interaction(nslaw2, relation2));
 
     //SP::NonSmoothLaw nslaw3(new EqualityConditionNSL(e1)); //EqualityConditionNSL NewtonImpactNSL
     //SP::Relation relation3(new LagrangianScleronomousR("FourBarClearancePlugin:g4", "FourBarClearancePlugin:W4"));
-    //SP::Interaction inter3(new Interaction(1, nslaw3, relation3));
+    //SP::Interaction inter3(new Interaction(nslaw3, relation3));
 
     //allInteractions.insert(inter);
     //allInteractions.insert(inter1);

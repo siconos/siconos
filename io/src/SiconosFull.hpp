@@ -133,14 +133,6 @@ REGISTER_BOOST_SERIALIZATION(__mpf_struct);
 
 
 template <class Archive>
-void siconos_io(Archive& ar, DynamicalSystemsSet& v, unsigned int version)
-{
-  ar &  boost::serialization::make_nvp("ThisShouldNotBeASetAnyMore",
-                                       boost::serialization::base_object< std::vector<SP::DynamicalSystem> >(v));
-}
-REGISTER_BOOST_SERIALIZATION(DynamicalSystemsSet);
-
-template <class Archive>
 void siconos_io(Archive & ar, SiconosVector & v, unsigned int version)
 {
   ar & boost::serialization::make_nvp("_dense", v._dense);
@@ -377,7 +369,6 @@ void siconos_io_register_Kernel(Archive& ar)
 
   ar.register_type(static_cast<_DynamicalSystemsGraph*>(NULL));
   ar.register_type(static_cast<_InteractionsGraph*>(NULL));
-  ar.register_type(static_cast<DynamicalSystemsSet*>(NULL));
   ar.register_type(static_cast<std::basic_ofstream<char>*>(NULL));
 
   //  ar.register_type(static_cast<PluginHandle*>(NULL));

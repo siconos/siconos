@@ -144,7 +144,7 @@ bouncingBox.initialize()
 # Get the values to be plotted
 # ->saved in a matrix dataPlot
 
-N = (T - t0) / h
+N = int((T - t0) / h)
 dataPlot = zeros((N+1, 4))
 
 #

@@ -109,9 +109,9 @@ void EventDriven::updateIndexSet(unsigned int i)
   assert(indexSet1);
   assert(indexSet2);
 
-  // DEBUG_PRINTF("update indexSets start : indexSet0 size : %ld\n", indexSet0->size());
-  // DEBUG_PRINTF("update IndexSets start : indexSet1 size : %ld\n", indexSet1->size());
-  // DEBUG_PRINTF("update IndexSets start : indexSet2 size : %ld\n", indexSet2->size());
+  DEBUG_PRINTF("update indexSets start : indexSet0 size : %ld\n", _indexSet0->size());
+  DEBUG_PRINTF("update IndexSets start : indexSet1 size : %ld\n", indexSet1->size());
+  DEBUG_PRINTF("update IndexSets start : indexSet2 size : %ld\n", indexSet2->size());
 
   InteractionsGraph::VIterator uibegin, uipend, uip;
   std11::tie(uibegin, uipend) = _indexSet0->vertices();
@@ -123,7 +123,7 @@ void EventDriven::updateIndexSet(unsigned int i)
     {
       // if indexSet[1]=>getYRef(0): output y
       // if indexSet[2]=>getYRef(1): output ydot
-      double y = inter->getYRef(0); // output to define the IndexSets at this Interaction
+      double y = (*inter->y(0))(0) ; // output to define the IndexSets at this Interaction
       if (y < -_TOL_ED) // y[0] < 0
       {
         inter->display();
@@ -152,7 +152,7 @@ void EventDriven::updateIndexSet(unsigned int i)
     {
       if (indexSet1->is_vertex(inter)) // Interaction is in the indexSet[1]
       {
-        double y = inter->getYRef(1); // output of level 1 at this Interaction
+        double y = (*inter->y(1))(0); // output of level 1 at this Interaction
         if (!indexSet2->is_vertex(inter)) // Interaction is not yet in the indexSet[2]
         {
           if (fabs(y) <= _TOL_ED)
@@ -211,14 +211,20 @@ void EventDriven::updateIndexSetsWithDoubleCondition()
     ++vnext;
 
     SP::Interaction inter = indexSet2->bundle(*ui);
-    double gamma = inter->getYRef(2);
-    double F     = inter->getLambdaRef(2);
+    double gamma = (*inter->y(2))(0);
+    double F     = (*inter->lambda(2))(0);
+    DEBUG_PRINTF("ED 1 update with double condition%f\n", F);
+    DEBUG_PRINTF("ED 2 update with double condition %f\n", gamma);
+    DEBUG_PRINTF("ED 3 update with double condition%f\n", _TOL_ED);
+
+    
     if (fabs(F) < _TOL_ED)
       indexSet2->remove_vertex(inter);
     else if ((gamma < -_TOL_ED) || (F < -_TOL_ED))
-      RuntimeException::selfThrow("EventDriven::updateIndexSetsWithDoubleCondition(), output[2] and lambda[2] for Interactionof indexSet[2] must be higher or equal to zero.");
+      RuntimeException::selfThrow("EventDriven::updateIndexSetsWithDoubleCondition(), output[2] and lambda[2] for Interaction of indexSet[2] must be nonnegative.");
     else if (((fabs(gamma) > _TOL_ED) && (fabs(F) > _TOL_ED)))
       RuntimeException::selfThrow("EventDriven::updateIndexSetsWithDoubleCondition(), something is wrong for the LCP resolution.");
+    DEBUG_PRINTF("End update with double condition %f\n", _TOL_ED);
   }
 }
 
@@ -352,7 +358,7 @@ void EventDriven::computef(OneStepIntegrator& osi, integer * sizeOfX, doublereal
   // Update Jacobian matrices at all interactions
   InteractionsGraph::VIterator ui, uiend;
   for (std11::tie(ui, uiend) = _indexSet0->vertices(); ui != uiend; ++ui)
-  {
+    {
     Interaction& inter = *_indexSet0->bundle(*ui);
     inter.relation()->computeJach(t, inter, _indexSet0->properties(*ui));
   }
@@ -446,7 +452,7 @@ void EventDriven::computeJacobianfx(OneStepIntegrator& osi,
     if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
     {
       LagrangianDS& lds = static_cast<LagrangianDS&>(ds);
-      BlockMatrix& jacotmp = *lds.jacobianRhsx();
+      BlockMatrix& jacotmp = static_cast<BlockMatrix&>(*lds.jacobianRhsx());
       for (unsigned int j = 0; j < lds.n(); ++j)
       {
         for (unsigned int k = 0; k < lds.dimension(); ++k)
@@ -575,7 +581,7 @@ void EventDriven::updateImpactState()
 void EventDriven::updateSmoothState()
 {
   // Update input of level 2
-  _nsds->updateInput(nextTime(),2);
+  _nsds->updateInput(nextTime(),2); // Note FP : Probably already up to date? (previous call of updateInput in simu)
   OSIIterator itOSI;
   // Compute acceleration
   for (itOSI = _allOSI->begin(); itOSI != _allOSI->end() ; ++itOSI)
@@ -682,7 +688,7 @@ void EventDriven::advanceToEvent()
     OSIIterator it;
     for (it = _allOSI->begin(); it != _allOSI->end(); ++it)
     {
-      (*it)->resetNonSmoothPart();
+      (*it)->resetAllNonSmoothParts();
 
       //====================================================================================
       //     cout << " Start of LsodarOSI integration" << endl;

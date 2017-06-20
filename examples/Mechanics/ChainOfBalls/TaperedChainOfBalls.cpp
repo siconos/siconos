@@ -194,7 +194,7 @@ int main(int argc, char* argv[]){
 	      (*E)(0) = -1.0*((*RadiusBalls)(j) + (*RadiusBalls)(j+1));
 	      nslaw = SP::NonSmoothLaw(new MultipleImpactNSL(ResCoef,Stiff,ElasPow));
 	      relation = SP::Relation(new LagrangianLinearTIR(H,E));
-	      interaction = SP::Interaction(new Interaction(1, nslaw, relation));
+	      interaction = SP::Interaction(new Interaction(nslaw, relation));
         BallChain->nonSmoothDynamicalSystem()->link(interaction, VecOfallDS[j],VecOfallDS[j+1]);
 	    }
 

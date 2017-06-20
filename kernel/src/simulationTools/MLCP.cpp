@@ -28,6 +28,7 @@
 #include "MLCP_Solvers.h"
 
 using namespace RELATION;
+// #define DEBUG_NCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
 #include "debug.h"

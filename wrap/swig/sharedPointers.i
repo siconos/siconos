@@ -1,14 +1,14 @@
+//%include "SiconosConfig.h"
 %{
 #include <SiconosPointers.hpp>
 #include <SiconosFwd.hpp>
 %}
-#define SWIG_SHARED_PTR_NAMESPACE std11
-%include boost_shared_ptr.i
 
 #if defined(SICONOS_STD_SHARED_PTR) && !defined(SICONOS_USE_BOOST_FOR_CXX11)
 #define STD11 std
 #undef __cplusplus
 #define __cplusplus SICONOS_CXXVERSION
+%include <std_shared_ptr.i>
 
 // from g++-v4/bits/shared_ptr.h
 // not sure if this is needed, but we can't use '#include <memory>'
@@ -16,22 +16,23 @@
 namespace STD11 {
   template<typename _Tp>
     class enable_shared_from_this
-    {
-    protected:
-      constexpr enable_shared_from_this();
+  {
+  protected:
+    constexpr enable_shared_from_this();
 
-      ~enable_shared_from_this();
+    ~enable_shared_from_this();
 
-    public:
-      shared_ptr<_Tp>
+  public:
+    shared_ptr<_Tp>
       shared_from_this();
 
-      shared_ptr<const _Tp>
+    shared_ptr<const _Tp>
       shared_from_this() const;
-
-    };
-}
+  };
+ }
 #else
+#define SWIG_SHARED_PTR_NAMESPACE std11
+%include <boost_shared_ptr.i>
 #define STD11 boost
 %import "boost/version.hpp"
 //  boost >= 1.53
@@ -43,6 +44,10 @@ namespace STD11 {
 // boost >= 1.40
 #if (BOOST_VERSION >= 104000)
 %ignore std11::enable_shared_from_this::operator=;
+// boost >= 1.64
+#if (BOOST_VERSION >= 106400)
+%import "boost/smart_ptr/detail/sp_noexcept.hpp"
+#endif
 %import "boost/smart_ptr/enable_shared_from_this.hpp"
 #else
 %import "boost/enable_shared_from_this.hpp"

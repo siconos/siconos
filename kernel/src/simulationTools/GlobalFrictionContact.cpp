@@ -109,14 +109,14 @@ void GlobalFrictionContact::initialize(SP::Simulation sim)
   {
     if (_MStorageType == 0)
       _M.reset(new OSNSMatrix(_maxSize, 0));
-    else // if(MStorageType == 1) size = number of DSBlocks = number of DS in the largest considered DynamicalSystemsSet
+    else // if(MStorageType == 1) size = number of DSBlocks = number of DS in the largest considered graph of ds
       _M.reset(new OSNSMatrix(simulation()->nonSmoothDynamicalSystem()->dynamicalSystems()->size(), 1));
   }
   if (!_H)
   {
     if (_MStorageType == 0)
       _H.reset(new OSNSMatrix(_maxSize, 0));
-    else // if(_MStorageType == 1) size = number of DSBlocks = number of DS in the largest considered DynamicalSystemsSet
+    else // if(_MStorageType == 1) size = number of DSBlocks = number of DS in the largest considered graph of ds
       _H.reset(new OSNSMatrix(simulation()->nonSmoothDynamicalSystem()->dynamicalSystems()->size(), simulation()->indexSet(_indexSetLevel)->size()   , 1));
   }
 
@@ -177,22 +177,22 @@ bool GlobalFrictionContact::preCompute(double time)
     InteractionsGraph::VIterator ui, uiend;
     for (std11::tie(ui, uiend) = indexSet.vertices(); ui != uiend; ++ui)
     {
-      Interaction& inter = *indexSet.bundle(*ui);
+      SP::Interaction inter = indexSet.bundle(*ui);
       VectorOfSMatrices& workMInter = *indexSet.properties(*ui).workMatrices;
 
-      assert(Type::value(*(inter.nonSmoothLaw())) == Type::NewtonImpactFrictionNSL);
-      _mu->push_back(std11::static_pointer_cast<NewtonImpactFrictionNSL>(inter.nonSmoothLaw())->mu());
-      
+      assert(Type::value(*(inter->nonSmoothLaw())) == Type::NewtonImpactFrictionNSL);
+      _mu->push_back(std11::static_pointer_cast<NewtonImpactFrictionNSL>(inter->nonSmoothLaw())->mu());
+
       SP::DynamicalSystem ds1 = indexSet.properties(*ui).source;
       SP::DynamicalSystem ds2 = indexSet.properties(*ui).target;
       OneStepIntegrator& Osi1 = *DSG0.properties(DSG0.descriptor(ds1)).osi;
       OneStepIntegrator& Osi2 = *DSG0.properties(DSG0.descriptor(ds2)).osi;
-      
+
       //OneStepIntegrator& Osi = *indexSet.properties(*ui).osi;
 
       OSI::TYPES osi1Type = Osi1.getType();
       OSI::TYPES osi2Type = Osi2.getType();
-      if (osi1Type == OSI::MOREAUJEANOSI2  && osi2Type == OSI::MOREAUJEANOSI2)
+      if (osi1Type == OSI::MOREAUJEANGOSI  && osi2Type == OSI::MOREAUJEANGOSI)
       {
         static_cast<MoreauJeanGOSI&>(Osi1).NSLcontrib(inter, *this);
       }
@@ -200,8 +200,11 @@ bool GlobalFrictionContact::preCompute(double time)
       {
         RuntimeException::selfThrow("GlobalFrictionContact::computeq. Not yet implemented for Integrator type : " + osi1Type);
       }
-      setBlock(*inter.yForNSsolver(), _b, 3, 0, pos);
-      nnzH += inter.getLeftInteractionBlock(workMInter).nnz();
+
+
+      SiconosVector& osnsp_rhs = *(*indexSet.properties(*ui).workVectors)[MoreauJeanGOSI::OSNSP_RHS];
+      setBlock(osnsp_rhs, _b, 3, 0, pos);
+      nnzH += inter->getLeftInteractionBlock(workMInter).nnz();
       pos += 3;
 
 
@@ -264,10 +267,10 @@ bool GlobalFrictionContact::preCompute(double time)
       OSI::TYPES osiType = Osi.getType();
       Type::Siconos dsType ; // Type of the current DS.
       dsType = Type::value(*ds); // Its type
-      if (osiType == OSI::MOREAUJEANOSI2)
+      if (osiType == OSI::MOREAUJEANGOSI)
       {
         VectorOfVectors& workVectors = *DSG0.properties(DSG0.descriptor(ds)).workVectors;
-        
+
         if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
         {
           SiconosVector& vfree = *workVectors[OneStepIntegrator::free];
@@ -277,9 +280,9 @@ bool GlobalFrictionContact::preCompute(double time)
         {
           SiconosVector& vfree = *workVectors[OneStepIntegrator::free];
           setBlock(vfree, _q, dss, 0, offset);
- 
+
         }
-          
+
       }
       else
       {

@@ -58,8 +58,22 @@ void LinearSMCOT2::initialize(const Model& m)
   dsType = Type::value(*DS);
   if (dsType == Type::FirstOrderLinearDS)
   {
-    _DSPhi.reset(new FirstOrderLinearDS(*(std11::static_pointer_cast<FirstOrderLinearDS>(DS))));
-    _DSPred.reset(new FirstOrderLinearDS(*(std11::static_pointer_cast<FirstOrderLinearDS>(DS))));
+    FirstOrderLinearDS& fods = static_cast<FirstOrderLinearDS&>(*DS);
+    SP::SiconosVector x0(new SiconosVector(*fods.x0()));
+    _DSPhi.reset(new FirstOrderLinearDS(x0));//(std11::static_pointer_cast<FirstOrderLinearDS>(DS))));
+    _DSPred.reset(new FirstOrderLinearDS(x0));//(*(std11::static_pointer_cast<FirstOrderLinearDS>(DS))));
+    if(fods.A())
+    {
+      SP::SiconosMatrix A(new SimpleMatrix(*fods.A()));
+      _DSPhi->setA(*fods.A());
+      _DSPred->setA(*fods.A());
+    }
+    if(fods.b())
+    {
+      SP::SiconosVector b(new SiconosVector(*fods.b()));
+      _DSPhi->setb(*fods.b());
+      _DSPred->setb(*fods.b());
+    }
   }
   else if (dsType == Type::FirstOrderLinearTIDS)
   {
@@ -72,8 +86,8 @@ void LinearSMCOT2::initialize(const Model& m)
   }
 
   // We have to reset _pluginb
-  _DSPhi->setComputebFunction(NULL);
-  _DSPred->setComputebFunction(NULL);
+  // _DSPhi->setComputebFunction(NULL);
+  // _DSPred->setComputebFunction(NULL);
   // XXX What if there is more than one sensor ...
 
   _indx = 0;
@@ -94,7 +108,7 @@ void LinearSMCOT2::initialize(const Model& m)
   // _DSPred->setXPtr(_Xhat);
   _Xhat = _DSPred->x();
   SP::SiconosVector dummyb(new SiconosVector(_B->size(0), 0));
-  _DSPred->setb(dummyb);
+  _DSPred->setbPtr(dummyb);
   prod(*_B, *_u, *_DSPred->b());
 
   //  _Xhat.reset(new SiconosVector(_nDim, 0));
@@ -103,18 +117,18 @@ void LinearSMCOT2::initialize(const Model& m)
   _modelPhi.reset(new Model(_t0, _T));
   _PhiOSI.reset(new LsodarOSI());
   _modelPhi->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DSPhi);
-  _modelPhi->nonSmoothDynamicalSystem()->topology()->setOSI(_DSPhi, _PhiOSI);
   _simulPhi.reset(new EventDriven(_tdPhi, 0));
-  _simulPhi->insertIntegrator(_PhiOSI);
+  _simulPhi->setNonSmoothDynamicalSystemPtr(_modelPhi->nonSmoothDynamicalSystem());
+  _simulPhi->prepareIntegratorForDS(_PhiOSI, _DSPhi, _modelPhi, _t0);
   _modelPhi->setSimulation(_simulPhi);
   _modelPhi->initialize();
   // Integration for Gamma
   _modelPred.reset(new Model(_t0, _T));
   _PredOSI.reset(new LsodarOSI());
   _modelPred->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DSPred);
-  _modelPred->nonSmoothDynamicalSystem()->topology()->setOSI(_DSPred, _PredOSI);
   _simulPred.reset(new EventDriven(_tdPred, 0));
-  _simulPred->insertIntegrator(_PredOSI);
+  _simulPred->setNonSmoothDynamicalSystemPtr(_modelPred->nonSmoothDynamicalSystem());
+  _simulPred->prepareIntegratorForDS(_PredOSI, _DSPred, _modelPred, _t0);
   _modelPred->setSimulation(_simulPred);
   _modelPred->initialize();
 

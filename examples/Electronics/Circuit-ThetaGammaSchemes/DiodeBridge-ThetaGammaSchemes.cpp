@@ -96,7 +96,7 @@ int main(int argc, char* argv[])
 
     SP::NonSmoothLaw nslaw(new ComplementarityConditionNSL(4));
 
-    SP::Interaction InterDiodeBridge(new Interaction(4, nslaw, LTIRDiodeBridge, 1));
+    SP::Interaction InterDiodeBridge(new Interaction(nslaw, LTIRDiodeBridge));
 
     // --- Model creation ---
     SP::Model DiodeBridge(new Model(t0, T, Modeltitle));

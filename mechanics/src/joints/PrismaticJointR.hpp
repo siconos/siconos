@@ -23,7 +23,7 @@
 
 #include <MechanicsFwd.hpp>
 #include <SiconosFwd.hpp>
-#include <NewtonEulerR.hpp>
+#include <NewtonEulerJointR.hpp>
 
 /** \class PrismaticJointR
  *  \brief This class implements a prismatic joint between one or two Newton/Euler Dynamical system
@@ -34,16 +34,16 @@
  *
  *
  */
-class PrismaticJointR : public NewtonEulerR
+class PrismaticJointR : public NewtonEulerJointR
 {
 protected:
   /** serialization hooks
    */
   ACCEPT_SERIALIZATION(PrismaticJointR);
-  PrismaticJointR(): NewtonEulerR() {};
+  PrismaticJointR(): NewtonEulerJointR() {};
 
 public:
-  /** Axis of the prismatic point in the inertial frame of reference
+  /** Axis of the prismatic point in the q1 inertial frame of reference
    */
   SP::SiconosVector _axis0;
 
@@ -74,9 +74,10 @@ public:
   double _G10G20d1y;
   double _G10G20d1z;
 
-  double _q1cq202;
-  double _q1cq203;
-  double _q1cq204;
+  double _cq2q101;
+  double _cq2q102;
+  double _cq2q103;
+  double _cq2q104;
 
   /** constructor from two dynamical systems and an axis
    *  \param d1 first  DynamicalSystem link by the  joint
@@ -92,14 +93,34 @@ public:
    * \param axis SiconosVector of size 3 that defines the prismatic axis
    *  in the inertial frame of reference
    */
-  PrismaticJointR(SP::NewtonEulerDS d1, SP::SiconosVector axis);
+  PrismaticJointR(SP::NewtonEulerDS d1, SP::SiconosVector axis,
+                  bool absoluteRef=false);
 
-
-  void computeFromInitialPosition(SP::SiconosVector q2, SP::SiconosVector q1=SP::SiconosVector());
+  void computeFromInitialPosition(SP::SiconosVector q2,
+                                  SP::SiconosVector q1=SP::SiconosVector(),
+                                  bool absoluteRef=false);
 
   void displayInitialPosition();
 
   void computeV1V2FromAxis();
+
+  /** Compute the vector of linear and angular positions of the free axes */
+  virtual void computehDoF(double time, BlockVector& q0, SiconosVector& y,
+                           unsigned int axis);
+
+  /** Compute the jacobian of linear and angular DoF with respect to some q */
+  virtual void computeJachqDoF(double time, Interaction& inter,
+                               SP::BlockVector q0, SimpleMatrix& jachq,
+                               unsigned int axis);
+
+  /** Compute the vector of linear and angular velocities of the free axes */
+  virtual void computeVelDoF(double time, BlockVector& q0, SiconosVector& v);
+
+  /** Project a vector (assumed to be in q1 frame) onto the given
+   * 0-indexed free axis. Useful for calculating velocities in the
+   * axis, or for calculating axis-aligned forces applied to connected
+   * bodies. */
+  virtual void projectOntoAxis(SP::SiconosVector v, SP::SiconosVector ans, int axis=0);
 
   /** destructor
    */
@@ -133,8 +154,7 @@ public:
   void Jd1d2(double X1, double Y1, double Z1, double q10, double q11, double q12, double q13,
              double X2, double Y2, double Z2, double q20, double q21, double q22, double q23);
 
-  void Jd2(double X1, double Y1, double Z1, double q10, double q11, double q12, double q13,
-           double X2, double Y2, double Z2, double q20, double q21, double q22, double q23);
+  void Jd1(double X1, double Y1, double Z1, double q10, double q11, double q12, double q13);
 
   void DotJd1d2(double Xdot1, double Ydot1, double Zdot1, double qdot10, double qdot11, double qdot12, double qdot13,
                 double Xdot2, double Ydot2, double Zdot2, double qdot20, double qdot21, double qdot22, double qdot23);
@@ -146,7 +166,19 @@ public:
   /** Get the number of constraints defined in the joint
       \return the number of constraints
    */
-  static unsigned int numberOfConstraints() { return 5; }
+  virtual unsigned int numberOfConstraints() { return 5; }
 
+  /** Return the number of degrees of freedom of this joint.
+      \return the number of degrees of freedom (DoF)
+   */
+  virtual unsigned int numberOfDoF() { return 2; }
+
+  /** Return the type of a degree of freedom of this joint.
+      \return the type of the degree of freedom (DoF)
+  */
+  virtual DoF_Type typeOfDoF(unsigned int axis) {
+    if (axis==0) return DOF_TYPE_LINEAR;
+    else return DOF_TYPE_INVALID;
+  };
 };
 #endif  //PrismaticJointRELATION_H

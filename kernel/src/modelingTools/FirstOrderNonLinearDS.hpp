@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 /*! \file FirstOrderNonLinearDS.hpp
   \brief First Order Non Linear Dynamical Systems
@@ -26,67 +26,70 @@
 #include "DynamicalSystem.hpp"
 
 
-typedef void (*FNLDSPtrfct)(double, unsigned int, const double*, double*, unsigned int, double*);
+/**  General First Order Non Linear Dynamical Systems - \f$ M(t) \dot{x} = f(x,t,z) + r, \quad x(t_0) = x_0 \f$
+     
+     \author SICONOS Development Team - copyright INRIA
+     \date (Creation) April 29, 2004
+     
+     This class defines and computes a generic n-dimensional
+     dynamical system of the form :
+     
+     \f[
+     M \dot x = f(x,t,z) + r, \quad x(t_0) = x_0
+     \f]
 
-namespace FirstOrderDS {
-  enum WorkNames {residu, residuFree, xfree, xPartialNS, deltaxForRelation, xBuffer, sizeWorkV};
-}
+     where
 
-/**  General First Order Non Linear Dynamical Systems - \f$ M \dot{x} = f(x,t,z) + r, \quad x(t_0) = x_0 \f$
- *
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
- *  \date (Creation) April 29, 2004
- *
- * This class defines and computes a generic n-dimensional
- * dynamical system of the form :
- * \f{equation}
- * M \dot x = f(x,t,z) + r, \quad x(t_0) = x_0
- * \f{equation}
- * where
- *    - \f$ x \in R^{n} \f$ is the state.
- *    - \f$ M \in R^{n\times n} a "mass matrix"
- *    - \f$ r \in R^{n} \f$  the input due to the Non Smooth Interaction.
- *    - \f$ z \in R^{zSize}\f$ is a vector of arbitrary algebraic variables, some sort of discrete state.
- *      For example, z may be used to set some perturbation parameters, or anything else.
- *
- *  with \f$ f : R^{n} \times R  \mapsto  R^{n}   \f$ the vector field.
- *
- * By default, the DynamicalSystem is considered to be an Initial Value Problem (IVP)
- * and the initial conditions are given by
- *  \f[
- *  x(t_0)=x_0
- * \f]
- * To define a Boundary Value Problem, the pointer on  a BoundaryCondition must be set.
- *
- * \f$ f(x,t) \f$ is a plug-in function, and can be computed using computef(t).
- * Its Jacobian according to x is denoted jacobianfx, and computed thanks to computeJacobianfx(t).
- * f and jacobianfx can be plugged to external functions thanks to setComputeFFunction/setComputeJacobianfxFunction.
- *
- * Right-hand side of the equation is computed thanks to computeRhs(t).
- *
- * \f[
- *    \dot x =  M^{-1}(f(x,t,z)+ r)
- * \f]
- *
- * Its Jacobian according to x is jacobianRhsx:
- *
- *  \f[
- *   jacobianRhsx = \nabla_x rhs(x,t,z) = M^{-1}\nabla_x f(x,t,z)
- *  \f]
- *
- * At the time:
- *  - M is considered to be constant. (ie no plug-in, no jacobian ...)
- *  - M is not allocated by default. The only way to use M is setM or setMPtr.
- *
+     - \f$ x \in R^{n} \f$ is the state.
+     - \f$ M \in R^{n\times n}\f$ a "mass matrix"
+     - \f$ r \in R^{n} \f$  the input due to the Non Smooth Interaction.
+     - \f$ z \in R^{zSize}\f$ is a vector of arbitrary algebraic
+     variables, some sort of discret state.  For example, z may be used
+     to set some perturbation parameters, to control the system (z
+     set by actuators) and so on.
+
+     - \f$ f : R^{n} \times R  \mapsto  R^{n}\f$ the vector field.
+ 
+  By default, the DynamicalSystem is considered to be an Initial Value Problem (IVP)
+  and the initial conditions are given by
+   \f[
+   x(t_0)=x_0
+  \f]
+  To define a Boundary Value Problem, a pointer on a BoundaryCondition must be set.
+   
+  The right-hand side and its jacobian (from base classe) are defined as
+
+  \f[
+  rhs = \dot x =  M^{-1}(f(x,t,z)+ r) \\
+  jacobianRhsx = \nabla_x rhs(x,t,z) = M^{-1}\nabla_x f(x,t,z)
+  \f]
+
+
+  The following operators can be plugged, in the usual way (see User Guide)
+  
+  - \f$f(x,t,z)\f$
+  - \f$\nabla_x f(x,t,z)\f$
+  - \f$M(t)\f$
+  
+ 
  */
 class FirstOrderNonLinearDS : public DynamicalSystem
 {
+
+private:
+
+  /** plugin signature */
+  typedef void (*FNLDSPtrfct)(double, unsigned int, const double*, double*, unsigned int, double*);
+ 
 protected:
-  /** serialization hooks
-  */
+  /* serialization hooks */
   ACCEPT_SERIALIZATION(FirstOrderNonLinearDS);
 
+  /** Common code for constructors
+      should be replaced in C++11 by delegating constructors
+      \param intial_state vector of initial values for state
+  */
+  void _init(SP::SiconosVector initial_state);
 
   /** Matrix coefficient of \f$ \dot x \f$ */
   SP::SiconosMatrix _M;
@@ -94,6 +97,7 @@ protected:
   /** value of f(x,t,z) */
   SP::SiconosVector _f;
 
+  // Note FP: isn't it strange to define b in this class here rather than in Linear derived class?
   /** strength vector */
   SP::SiconosVector _b;
 
@@ -104,13 +108,13 @@ protected:
   SP::SiconosMatrix _jacobianfx;
 
   /** DynamicalSystem plug-in to compute f(x,t,z)
-    *  \param current time
-    *  \param size of the vector _x
-    *  \param[in,out] pointer to the first element of the vector _x
-    *  \param[in,out] the pointer to the first element of the vector _f
-    *  \param the size of the vector _z
-    *  \param a vector of parameters _z
-    */
+   *  \param current time
+   *  \param size of the vector _x
+   *  \param[in,out] pointer to the first element of the vector _x
+   *  \param[in,out] the pointer to the first element of the vector _f
+   *  \param the size of the vector _z
+   *  \param a vector of parameters _z
+   */
   SP::PluggedObject _pluginf;
 
   /** DynamicalSystem plug-in to compute the gradient of f(x,t,z) with respect to the state: \f$ \nabla_x f: (x,t,z) \in R^{n} \times R  \mapsto  R^{n \times n} \f$
@@ -128,48 +132,169 @@ protected:
   /**  the previous r vectors */
   SP::SiconosMemory _rMemory;
 
-  /** Copy of M Matrix, used to solve systems like Mx = b with LU-factorization.
+  /** Copy of M Matrix, LU-factorized, used to solve systems like Mx = b with LU-factorization.
       (Warning: may not exist, used if we need to avoid factorization in place of M) */
   SP::SiconosMatrix _invM;
 
-  /** default constructor
-   */
+  /** default constructor */
   FirstOrderNonLinearDS(): DynamicalSystem() {};
+
+  /** Reset the PluggedObjects */
+  virtual void _zeroPlugin();
 
 
 public:
 
   // ===== CONSTRUCTORS =====
 
-  /** constructor from a set of data
-      \param newX0 initial state of this DynamicalSystem
-      \warning you need to set yoursel the plugin for f and also for the
-      jacobian if you use a EventDriven scheme
+  /** constructor from initial state, leads to \f$ \dot x = r\f$
+      \param newX0 initial state
+      \warning you need to set explicitely the plugin for f and its jacobian if needed (e.g. if used with
+      an EventDriven scheme)
   */
   FirstOrderNonLinearDS(SP::SiconosVector newX0);
 
-  /** constructor from a set of data
-   *  \param newX0 initial state of this DynamicalSystem
-   *  \param fPlugin plugin name for f of this DynamicalSystem
-   *  \param jacobianfxPlugin plugin name for jacobianfx of this DynamicalSystem
+  /** constructor from initial state and f (plugins), \f$\dot x = f(x, t, z) + r\f$
+   *  \param newX0 initial state
+   *  \param fPlugin name of the plugin function to be used for f(x,t,z)
+   *  \param jacobianfxPlugin name of the plugin to be used for the jacobian of f(x,t,z)
    */
   FirstOrderNonLinearDS(SP::SiconosVector newX0, const std::string& fPlugin, const std::string& jacobianfxPlugin);
 
-  /** Copy consctructor
+  /** Copy constructor
    * \param FONLDS the FirstOrderNonLinearDS to copy
    */
   FirstOrderNonLinearDS(const FirstOrderNonLinearDS & FONLDS);
 
-  /** destructor
-   */
+  /** destructor */
   virtual ~FirstOrderNonLinearDS() {};
 
-  /** check that the system is complete (ie all required data are well set)
-   * \return a bool
-   */
-  bool checkDynamicalSystem();
+  /*! @name Right-hand side computation */
+  //@{
 
-  // rMemory
+  /** allocate (if needed)  and compute rhs and its jacobian.
+   * \param time of initialization
+   */
+  void initRhs(double time);
+
+  /** set nonsmooth input to zero
+   *  \param int input-level to be initialized.
+   */
+  void initializeNonSmoothInput(unsigned int level) ;
+
+  /** update right-hand side for the current state
+   *  \param double time of interest
+   *  \param bool isDSup flag to avoid recomputation of operators
+   */
+  void computeRhs(double time, bool isDSUp = false);
+
+  /** update \f$\nabla_x rhs\f$ for the current state
+   *  \param double time of interest
+   *  \param bool isDSup flag to avoid recomputation of operators
+   */
+  void computeJacobianRhsx(double time, bool isDSUp = false);
+
+  /** reset non-smooth part of the rhs (i.e. r), for all 'levels' */
+  virtual void resetAllNonSmoothParts();
+
+  /** set nonsmooth part of the rhs (i.e. r) to zero for a given level
+   * \param level
+   */
+  virtual void resetNonSmoothPart(unsigned int level);
+
+  ///@}
+
+  /*! @name Attributes access 
+    @{ */
+
+  /** returns a pointer to M, matrix coeff. on left-hand side
+  */
+  inline SP::SiconosMatrix M() const
+  {
+    return _M;
+  }
+
+  /** set M, matrix coeff of left-hand side (pointer link)
+   *  \param newM the new M matrix
+   */
+  inline void setMPtr(SP::SiconosMatrix newM)
+  {
+    _M = newM;
+  }
+
+  // --- invM ---
+  /** get a copy of the LU factorisation of M operator
+   *  \return SimpleMatrix
+   */
+  inline const SimpleMatrix getInvM() const
+  {
+    return *_invM;
+  }
+
+  /** get the inverse of LU fact. of M operator (pointer link)
+   *  \return pointer to a SiconosMatrix
+   */
+  inline SP::SiconosMatrix invM() const
+  {
+    return _invM;
+  }
+
+  /** returns f(x,t,z) (pointer link)
+   */
+  inline SP::SiconosVector f() const
+  {
+    return _f;
+  }
+
+  /** set f(x,t,z) (pointer link)
+   *  \param newPtr a SP::SiconosVector
+   */
+  inline void setFPtr(SP::SiconosVector newPtr)
+  {
+    _f = newPtr;
+  }
+
+  /** get jacobian of f(x,t,z) with respect to x (pointer link)
+   *  \return SP::SiconosMatrix
+   */
+  virtual SP::SiconosMatrix jacobianfx() const
+  {
+    return _jacobianfx;
+  }
+
+  /** set jacobian of f(x,t,z) with respect to x (pointer link)
+   *  \param newPtr the new value
+   */
+  inline void setJacobianfxPtr(SP::SiconosMatrix newPtr)
+  {
+    _jacobianfx = newPtr;
+  }
+
+  /** get b vector (pointer link)
+   *  \return a SP::SiconosVector
+   */
+  inline SP::SiconosVector b() const
+  {
+    return _b;
+  }
+
+  /** set b vector (pointer link)
+   *  \param b a SiconosVector
+   */
+  inline void setbPtr(SP::SiconosVector b)
+  {
+    _b = b;
+  }
+
+  /** set b vector (copy)
+   *  \param b a SiconosVector
+   */
+  void setb(const SiconosVector& b);
+
+  /** @} end of members access group. */
+
+  /*! @name Memory vectors management  */
+  //@{
 
   /** get all the values of the state vector r stored in memory
    *  \return a memory vector
@@ -179,132 +304,16 @@ public:
     return _rMemory;
   }
 
-  /** get M
-   *  \return pointer on a plugged-matrix
-   */
-  inline SP::SiconosMatrix M() const
-  {
-    return _M;
-  }
-
-  /** set M to a new value
-   *  \param newM the new M matrix
-   */
-  inline void setMPtr(SP::SiconosMatrix newM)
-  {
-    _M = newM;
-  }
-
-  // --- invM ---
-  /** get the value of invM
-   *  \return SimpleMatrix
-   */
-  inline const SimpleMatrix getInvMSimple() const
-  {
-    return *_invM;
-  }
-
-  /** get invM
-   *  \return pointer on a SiconosMatrix
-   */
-  inline SP::SiconosMatrix invM() const
-  {
-    return _invM;
-  }
-
-  /** set the value of invM to newValue
-   *  \param newValue the new value
-   */
-  void setInvM(const SiconosMatrix& newValue);
-
-  /** link invM with a new pointer
-   *  \param newPtr the new value
-   */
-  void setInvMPtr(SP::SiconosMatrix newPtr);
-
-  // --- f ---
-
-  /** get f
-   *  \return pointer on a plugged vector
-   */
-  inline SP::SiconosVector f() const
-  {
-    return _f;
-  }
+  /** returns previous value of rhs -->OSI Related!!*/
   inline SP::SiconosVector fold() const
   {
     return _fold;
   }
 
-  /** set f to pointer newPtr
-   *  \param newPtr a SP::SiconosVector
-   */
-  inline void setFPtr(SP::SiconosVector newPtr)
-  {
-    _f = newPtr;
-  }
-
-  /** get jacobianfx
-   *  \return SP::SiconosMatrix
-   */
-  virtual SP::SiconosMatrix jacobianfx() const
-  {
-    return _jacobianfx;
-  }
-
-  /** set jacobianfx to pointer newPtr
-   *  \param newPtr the new value
-   */
-  inline void setJacobianfxPtr(SP::SiconosMatrix newPtr)
-  {
-    _jacobianfx = newPtr;
-  }
-
-  /** get b
-   *  \return a SP::SiconosVector
-   */
-  inline SP::SiconosVector b() const
-  {
-    return _b;
-  }
-
-  /** set b
-   *  \param b a SiconosVector
-   */
-  inline void setb(SP::SiconosVector b)
-  {
-    _b = b;
-  }
-
-  /** Initialization function for the rhs and its jacobian.
-   *  \param time the time of initialization
-   */
-  void initRhs(double time);
-
-  /** Call all plugged-function to initialize plugged-object values
-      \param time the time used in the computations
-   */
-  virtual void updatePlugins(double time);
-
-  /** dynamical system initialization function except for _r :
-   *  mainly set memory and compute value for initial state values.
-   *  \param time time of initialisation, default value = 0
-   *  \param sizeOfMemory the size of the memory, default size = 1.
-   */
-  void initialize(double time = 0, unsigned int sizeOfMemory = 1);
-
-  /** dynamical system initialization function for NonSmoothInput _r
-   *  \param level for _r
-   */
-  void initializeNonSmoothInput(unsigned int level) ;
-
-
-  // ===== MEMORY MANAGEMENT FUNCTIONS =====
-
   /** initialize the SiconosMemory objects: reserve memory for i
       vectors in memory and reset all to zero.
-   *  \param steps the size of the SiconosMemory (i)
-   */
+      *  \param steps the size of the SiconosMemory (i)
+      */
   void initMemory(unsigned int steps);
 
   /** push the current values of x and r in memory (index 0 of memory is the last inserted vector)
@@ -312,7 +321,16 @@ public:
    */
   void swapInMemory();
 
-  // ===== COMPUTE PLUGINS FUNCTIONS =====
+  //@}
+
+  /*! @name Plugins management  */
+  
+  //@{
+  
+  /** Call all plugged-function to initialize plugged-object values
+      \param time value
+  */
+  virtual void updatePlugins(double time);
 
   // --- setters for functions to compute plugins ---
 
@@ -362,20 +380,13 @@ public:
   /** Default function to compute \f$ f: (x,t)\f$
    * \param time time instant used in the computations
    */
-  virtual void computef(double time);
+  //virtual void computef(double time);
 
-  /** function to compute \f$ f: (x,t)\f$ with x different from current saved state.
+  /** function to compute \f$ f: (x,t)\f$
    * \param time time instant used in the computations
-   * \param x2 the value of the state at which we want to compute f.
+   * \param state x value
    */
-  virtual void computef(double time, SiconosVector& x2);
-
-  /** Default function to compute \f$ \nabla_x f: (x,t) \in R^{n} \times R  \mapsto  R^{n \times n} \f$
-   *  \param time time instant used in the computations
-   *  \param isDSup flag to avoid recomputation of operators
-   *
-   */
-  virtual void computeJacobianfx(double time, bool isDSup = false);
+  virtual void computef(double time, SP::SiconosVector state);
 
   /** Default function to compute \f$ \nabla_x f: (x,t) \in R^{n}
    *   \times R \mapsto R^{n \times n} \f$ with x different from
@@ -383,37 +394,7 @@ public:
    *  \param time instant used in the computations
    *  \param x2 a SiconosVector to store the resuting value
    */
-  virtual void computeJacobianfx(double time, const SiconosVector& x2);
-
-  /** Default function to the right-hand side term
-   *  \param time time instant used in the computations
-   *  \param isDSUp flag to avoid recomputation of operators
-   *
-   */
-  void computeRhs(double time, bool isDSUp = false);
-
-  /** Default function to jacobian of the right-hand side term according to x.
-   *  Required when using an EventDriven Simulation.
-   *  \param time instant used in the computations
-   *  \param isDSUp flag to avoid recomputation of operators
-   *
-   */
-  void computeJacobianRhsx(double time, bool isDSUp = false);
-
-  // ===== MISCELLANEOUS ====
-
-  /** print the data of the dynamical system on the standard output
-   */
-  void display() const;
-
-  /** set R to zero
-   */
-  virtual void resetAllNonSmoothPart();
-
-  /** set R to zero fo a given level
-   * \param level the level to reset
-   */
-  virtual void resetNonSmoothPart(unsigned int level);
+  virtual void computeJacobianfx(double time, SP::SiconosVector state);
 
   /** Get _pluginf
    * \return a SP::PluggedObject
@@ -439,14 +420,16 @@ public:
     return _pluginM;
   };
 
-  /** Reset the PluggedObjects */
-  virtual void zeroPlugin();
+  ///@}
 
-  /** Initialize the workspace elements
-   * \param workVector the vectors needed for the integration
-   * \param workMatrices the matrices needed for the integration
+  /*! @name Miscellaneous public methods */
+  //@{
+
+  /** print the data of the dynamical system on the standard output
    */
-  virtual void initializeWorkSpace(VectorOfVectors& workVector, VectorOfMatrices& workMatrices);
+  void display() const;
+  ///@}
+
 
   ACCEPT_STD_VISITORS();
 

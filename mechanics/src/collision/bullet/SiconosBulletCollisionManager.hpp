@@ -25,6 +25,7 @@
 #define SiconosBulletCollisionManager_h
 
 #include <MechanicsFwd.hpp>
+#include <BulletSiconosFwd.hpp>
 
 #include <SiconosCollisionManager.hpp>
 #include <SiconosShape.hpp>
@@ -42,6 +43,7 @@ struct SiconosBulletOptions
   double contactProcessingThreshold;
   double worldScale;
   bool useAxisSweep3;
+  bool clearOverlappingPairCache;
   unsigned int perturbationIterations;
   unsigned int minimumPointsPerturbationThreshold;
 };
@@ -78,6 +80,15 @@ protected:
   SiconosBulletOptions _options;
   SiconosBulletStatistics _stats;
 
+  /*! Provided so that creation of collision points can be overridden. */
+  virtual SP::BulletR makeBulletR(SP::BodyDS ds1, SP::SiconosShape shape1,
+                                  SP::BodyDS ds2, SP::SiconosShape shape2,
+                                  const btManifoldPoint &,
+                                  bool flip=false,
+                                  double y_correction_A=0,
+                                  double y_correction_B=0,
+                                  double scaling=1);
+
 public:
   StaticContactorSetID insertStaticContactorSet(
     SP::SiconosContactorSet cs, SP::SiconosVector position = SP::SiconosVector());
@@ -85,6 +96,8 @@ public:
   bool removeStaticContactorSet(StaticContactorSetID id);
 
   void updateInteractions(SP::Simulation simulation);
+
+  void clearOverlappingPairCache();
 
   const SiconosBulletOptions &options() const { return _options; }
   const SiconosBulletStatistics &statistics() const { return _stats; }

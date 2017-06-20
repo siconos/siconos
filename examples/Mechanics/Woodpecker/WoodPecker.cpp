@@ -116,11 +116,11 @@ int main(int argc, char* argv[])
     SP::Relation relation2(new LagrangianLinearTIR(H2, b2));
     SP::Relation relation3(new LagrangianLinearTIR(H3, b3));
 
-    SP::Interaction I1(new Interaction(2, nslaw1, relation1));
+    SP::Interaction I1(new Interaction(nslaw1, relation1));
 
-    SP::Interaction I2(new Interaction(2, nslaw23, relation2));
+    SP::Interaction I2(new Interaction(nslaw23, relation2));
 
-    SP::Interaction I3(new Interaction(2, nslaw23, relation3));
+    SP::Interaction I3(new Interaction(nslaw23, relation3));
 
     // -------------
     // --- Model ---

@@ -158,7 +158,5 @@ public:
 };
 
 
-typedef std::vector<SP::SiconosMemory> VectorOfMemories;
-
 #endif
 

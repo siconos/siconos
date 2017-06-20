@@ -22,19 +22,19 @@
 
 #include <MechanicsFwd.hpp>
 #include <SiconosFwd.hpp>
-#include <NewtonEulerR.hpp>
+#include <NewtonEulerJointR.hpp>
 
 /** \class KneeJointR
  *  \brief This class implements a knee joint between one or two Newton/Euler Dynamical system
  *
  */
-class KneeJointR : public NewtonEulerR
+class KneeJointR : public NewtonEulerJointR
 {
 protected:
   /** serialization hooks
    */
   ACCEPT_SERIALIZATION(KneeJointR);
-  KneeJointR(): NewtonEulerR() {};
+  KneeJointR(): NewtonEulerJointR() {};
 
   /** Coordinate of the knee point in the body frame of the first dynamical system _d1
    */
@@ -65,11 +65,15 @@ public:
                                   ie P contains the coordinates of the Knee point, in the object frame G1.
   */
   KneeJointR(SP::NewtonEulerDS d1, SP::NewtonEulerDS d2, SP::SiconosVector P);
+
   /* constructor,
      \param a SP::NewtonEulerDS d1, a dynamical system containing the intial position
-     \param a SP::SiconosVector P, P contains the coordinates of the Knee point, in the absolute frame.
+     \param a SP::SiconosVector P, P contains the coordinates of the Knee point
+     \param bool indicating whether P is in the absolute frame (=true, default)
+            default) or the frame of the DS (=false)
   */
-  KneeJointR(SP::NewtonEulerDS d1, SP::SiconosVector P0, bool absolutRef = true);
+  KneeJointR(SP::NewtonEulerDS d1, SP::SiconosVector P, bool absoluteRef = true);
+
   /** destructor
    */
   void checkInitPos(SP::SiconosVector q1, SP::SiconosVector q2);
@@ -78,7 +82,20 @@ public:
   /** Get the number of constraints defined in the joint
       \return the number of constraints
    */
-  static unsigned int numberOfConstraints() { return 3; }
+  virtual unsigned int numberOfConstraints() { return 3; }
+
+  /** Get the number of degrees of freedom defined in the joint
+      \return the number of degrees of freedom (DoF)
+   */
+  virtual unsigned int numberOfDoF() { return 3; }
+
+  /** Return the type of a degree of freedom of this joint.
+      \return the type of the degree of freedom (DoF)
+  */
+  virtual DoF_Type typeOfDoF(unsigned int axis) {
+    if (axis<3) return DOF_TYPE_ANGULAR;
+    else return DOF_TYPE_INVALID;
+  };
 
   virtual void computeJachq(double time, Interaction& inter, SP::BlockVector q0);
 
@@ -88,6 +105,8 @@ public:
   virtual void computeDotJachq(double time, BlockVector& workQ, BlockVector& workZ, BlockVector& workQdot);
 
   virtual void computeDotJachq(double time, SP::SiconosVector qdot1, SP::SiconosVector qdot2=SP::SiconosVector());
+
+  SP::SiconosVector P() { return _P0; }
 
 protected:
 

@@ -12,7 +12,7 @@ class KernelTest : public CppUnit::TestFixture
   CPPUNIT_TEST(t1);
   CPPUNIT_TEST(t2);
   CPPUNIT_TEST(t3);
-  CPPUNIT_TEST(t4);
+//  CPPUNIT_TEST(t4);
   CPPUNIT_TEST(t5);
   CPPUNIT_TEST(t6);
 
@@ -27,7 +27,7 @@ class KernelTest : public CppUnit::TestFixture
   void t1();
   void t2();
   void t3();
-  void t4();
+  //void t4();
   void t5();
   void t6();
 
@@ -36,6 +36,7 @@ class KernelTest : public CppUnit::TestFixture
   void t8();
 #endif
 
+  std::string BBxml;
 public:
   void setUp();
   void tearDown();

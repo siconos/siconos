@@ -1,4 +1,5 @@
 
+
 * General/Publications 						:SICONOS:PUB:
 ** RR publication						 :VA:ALLTEAM:
   - update examples et texte, add Numerics part
@@ -843,6 +844,12 @@ candidates for integrating Siconos as a back-end/engine.
 | RoboCup       | https://sourceforge.net/projects/sserver/ | Robotics    | SimSpark            | C++      | LGPL 3     |
 | OpenSimulator | http://opensimulator.org/                 | "Cloud" sim | ODE / Bullet(expr.) | C#       | Permissive |
 
+** Materials modeling
+
+| Name | URL                      | Type | Language | Licence      |
+|------+--------------------------+------+----------+--------------|
+| Vega | http://run.usc.edu/vega/ | FEM  | C++      | 3-clause BSD |
+
 * Footnotes
 
 
@@ -1504,3 +1511,97 @@ still to do,
 *** Development of applications
     - AMTC.  Ensimag student. LHD
     -
+** <2017-06-15 jue>
+SS, MB, VA
+
+(things to be discussed with FP and OH)
+
+- continue supporting old GCC until at least 4.2 (aiming for december
+  release), after that consider exploiting C++11/14/17 features.
+
+- also wait until at least 4.2 for new SiconosVector features from
+  @bremond, maybe even later (could make use of C++14)
+
+- try to fix within-Newton-loop updateInteractions before 4.1 (SS)
+
+- discussed briefly need for teams to work on numeric (parallelisation
+  strategies), and format specifications for mechanical simulations.
+
+- regardless of a better, more generalized format, agreed that some
+  tweaks to our current HDF5 format are warranted.
+
+- improve VTK output for ParaView also a priority, if possible.  check
+  other possible VTK output formats.
+
+Discussion :
+
++ IRICE project
+  + Siconos, LMGC90, Yade
++ Hdf5 file format
+  + naming
+  + new entries
+  + change time by index of time step.
+  + disorder index in now allowed
+  + indicate the number of entries for each index
+  + branch for new format and filter
+  + common format with other software
+  + Improved structure:
+    + Streaming
+    + webGL application and Jupyter
+  + XDMF
+  + Gazebo format ?
+
+  Conclusion : small project and after
++ Improve paraview visualization stuff (MB)
+  + plugin paraview hdf5 or siconos_vexport
++ HPC
+  + Framework Machine learning
+  + GPU/CPU.
+
++ SiconosVector
+  + Matrix/Vector has to be implemented
+  + Mapping of boost quaterion onto the vector 7
+
++ UpdateWorldFromDS discussion
+
++ release 05 juillet
+
+
+
+*** TODO 3 DOF particles
+*** TODO Pop-corn effect
+  + sum=up previous discussion in the issue
+
+
+*** DONE InteractionManager
+  - factorize group management info and insertNonSmoothLaw
+  - naming convention : remove get, rename collisionUpdater -->   collisionUpdaterVisitor
+
+*** DONE SiconosContactor
+  - rename siconosContactorS or SiconosContactorSet
+  - why not visitor rather than a list of shapes ?  Why not a mixed solution :
+      - a list of standard shapes (sphere, planes, cubes, convex hulls,) and
+      - a generic shape with a visitor.
+  - study of memory management
+  - offset:
+      - name ?
+      - boost array of size 7 (3 translation, 1 quaternion) for saving space
+*** DONE BodyDS
+    - mass matrix set to eye by default --> possibility to set Inertia Mass matrix
+    - old API --> first shape gives the mass matrix.
+    - computation of mass matrix and inertia with Huygens theorem
+
+*** DONE Tests that bench memory and efficiency
+   - separate shape, mixed of shapes, contactors with multiple shapes, (mandatory)
+   - time_of_birth and restart  (mandatory)
+   - native ?  2D ? (optional)
+
+*** TODO Computation of inertia
+   + for composite objects
+     + review default case
+       + density
+       + volume, inertia come from a geometric
+
+*** TODO Dynamics creation of objects
+    + Solution with the controller of radarsat1 to be reviwed and discussed
+

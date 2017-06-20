@@ -456,8 +456,7 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
             init_contact_pos(mu)
 
     times = dpos_data[:, 0]
-    # every
-#    times.sort()
+
     if (len(times) == 0):
         print('No dynamic data found!  Empty simulation.')
 
@@ -964,6 +963,7 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
 
             p = q.rotate(offset[0])
 
+<<<<<<< HEAD
             r = q * Quaternion(offset[1])
 
             transform.Identity()
@@ -1005,6 +1005,9 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
         set_actors_vizzz(actors.keys(), time)
 
     def set_actors_visibility_old(id_t=None):
+=======
+    def set_actors_visibility(id_t=None):
+>>>>>>> origin/master
         for instance, actor in actors.items():
             # Instance is a static object
             visible = instance < 0
@@ -1039,6 +1042,7 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
     except IOError as e:
         pass
 
+<<<<<<< HEAD
     time0 = min(dpos_data[:, 0])
     try:
         # Positions at first time step
@@ -1051,6 +1055,17 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
         pos_t0 = numpy.array([
             numpy.hstack(([time0,
                            io.instances()[k].attrs['id']]
+=======
+    try:
+        # Positions at first time step
+        id_t0 = numpy.where(dpos_data[:, 0] == min(dpos_data[:, 0]))
+        pos_t0 = pos_data[id_t0, 1:9]
+    except ValueError:
+        # Collect positions from init data
+        id_t0 = None
+        pos_t0 = numpy.array([
+            numpy.hstack(([io.instances()[k].attrs['id']]
+>>>>>>> origin/master
                           ,io.instances()[k].attrs['translation']
                           ,io.instances()[k].attrs['orientation']))
             for k in io.instances()
@@ -1059,7 +1074,11 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
     if numpy.shape(spos_data)[0] > 0:
         set_position(spos_data)
 
+<<<<<<< HEAD
     set_position(dpos_data[[time0], :])
+=======
+    set_positionv(pos_t0)
+>>>>>>> origin/master
 
     set_actors_visibility(time0)
 

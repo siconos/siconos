@@ -81,7 +81,7 @@ void siconos_find_vertex(const polyhedron* P, unsigned size, lapack_int* basis)
   int info = solve(lp);
   if (info != 0)
   {
-    printf("find_vertex_lpsolve: failure in the LP solver\n");
+    printf("find_vertex_lpsolve: failure in the LP solver: info = %d\n", info);
     exit(EXIT_FAILURE);
   }
 

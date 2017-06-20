@@ -46,7 +46,7 @@
 }
 
 #define sn_check_array_type(X, FAILED_ACTION) if (!X) { SWIG_Error(SWIG_RuntimeError, "Could not create an array from C object. Please file a bug"); FAILED_ACTION; }
-#define sn_check_size_mat_vec(size, vec, FAILED_ACTION) if (array_numdims(vec) != 1 || size != array_size(vec, 0)) { SWIG_Error(SWIG_RuntimeError, "Matrix and vector given as arguments have different sizes"); FAILED_ACTION; }
+#define sn_check_size_mat_vec(size, vec, FAILED_ACTION) if ((array_numdims(vec) == 1 && size != array_size(vec, 0)) || (array_numdims(vec) == 2 && size != array_size(vec, 0)*array_size(vec, 1) && (array_size(vec, 0)==1 || array_size(vec, 1)==1))) { SWIG_Error(SWIG_RuntimeError, "Matrix and vector given as arguments have different sizes"); FAILED_ACTION; }
 #define sn_check_size_mat(dim0, dim1, mat, FAILED_ACTION) if (!CHECK_ARRAY_SIZE(dim0, mat, 0) || !CHECK_ARRAY_SIZE(dim1, mat, 1)) { SWIG_Error(SWIG_RuntimeError, "Matrix does not have the right size"); FAILED_ACTION; }
 
 #define set_vec_from_target(dest, src, CTRL_ACTION, FAILED_ACTION) \

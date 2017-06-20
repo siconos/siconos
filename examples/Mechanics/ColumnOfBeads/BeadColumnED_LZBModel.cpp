@@ -205,13 +205,11 @@ int main(int argc, char* argv[])
     SP::Relation relation;
     SP::Interaction interaction;
     double ResCoef, Stiff, ElasPow;
-    DynamicalSystemsSet DSSet_interaction;
     for (unsigned int j = 0; j < NumberContacts; ++j)
     {
       ResCoef = (*ResCofContacts)(j) ;
       Stiff = (*StiffContacts)(j);
       ElasPow = (*ElasCofContacts)(j);
-      DSSet_interaction.clear();
       if (j == 0) // for contact wall-ball
       {
         H = SP::SimpleMatrix(new SimpleMatrix(1, nDofBall));
@@ -230,7 +228,7 @@ int main(int argc, char* argv[])
       //
       nslaw = SP::NonSmoothLaw(new MultipleImpactNSL(ResCoef, Stiff, ElasPow));
       relation = SP::Relation(new LagrangianLinearTIR(H, E));
-      interaction = SP::Interaction(new Interaction(1, nslaw, relation));
+      interaction = SP::Interaction(new Interaction(nslaw, relation));
       if (j == 0) // for contact wall-ball
         BallChain->nonSmoothDynamicalSystem()->link(interaction, VecOfallDS[j]);
       else // For ball-ball contact

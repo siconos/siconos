@@ -95,14 +95,21 @@ macro(add_siconos_swig_sub_module fullname)
     set(${COMPONENT}_SWIG_DEFS "-I${_dir};${${COMPONENT}_SWIG_DEFS}")
   endforeach()
 
+  # extra per-module flags if any
+  set(${COMPONENT}_SWIG_DEFS_${_name} "${${COMPONENT}_SWIG_DEFS};${${COMPONENT}_SWIG_DEFS_${_name}}")
+
   IF(WITH_CXX AND (BUILD_AS_CPP OR NOT ${COMPONENT} MATCHES "numerics"))
     set_source_files_properties(${swig_file}
-      PROPERTIES SWIG_FLAGS "${${COMPONENT}_SWIG_DEFS}" CPLUSPLUS ON)
+      PROPERTIES SWIG_FLAGS "${${COMPONENT}_SWIG_DEFS_${_name}}" CPLUSPLUS ON)
   ENDIF(WITH_CXX AND (BUILD_AS_CPP OR NOT ${COMPONENT} MATCHES "numerics"))
 
   # --- build swig module ---
-  swig_add_module(${_name} python ${swig_file})
-
+  if(CMAKE_VERSION VERSION_LESS 3.8.0)
+    swig_add_module(${_name} python ${swig_file})
+  else()
+    set(ADDITIONAL_SWIG_DEFINES ${ADDITIONAL_SWIG_DEFINES} -DBOOST_NOEXCEPT)
+    swig_add_library(${_name} LANGUAGE python SOURCES ${swig_file})
+  endif()
   # WARNING ${swig_generated_file_fullname} is overriden 
   set(${_name}_generated_file_fullname ${swig_generated_file_fullname})
   set_source_files_properties( ${swig_generated_file_fullname}
@@ -114,7 +121,10 @@ macro(add_siconos_swig_sub_module fullname)
   IF(MSVC AND ${COMPONENT} MATCHES "kernel")
     set_source_files_properties(${${_name}_generated_file_fullname} PROPERTIES COMPILE_FLAGS "/bigobj")
   ENDIF()
- 
+
+  # Add a post-build step that prepends utf-8 coding indicator to .py files
+  add_custom_command(TARGET ${SWIG_MODULE_${_name}_REAL_NAME}
+    POST_BUILD COMMAND sh -c "(echo '# -*- coding: utf-8 -*-'; cat ${SICONOS_SWIG_ROOT_DIR}/${_path}/${_name}.py) > ${SICONOS_SWIG_ROOT_DIR}/${_path}/${_name}.tmp; mv ${SICONOS_SWIG_ROOT_DIR}/${_path}/${_name}.tmp ${SICONOS_SWIG_ROOT_DIR}/${_path}/${_name}.py" VERBATIM)
 
   # Check dependencies and then link ...
   add_dependencies(${SWIG_MODULE_${_name}_REAL_NAME} ${COMPONENT})

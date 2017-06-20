@@ -51,10 +51,10 @@ typedef struct
   double* ub; /**< upper bounds */
 } box_constraints;
 
-/** \struct Polyhedron SiconosSets.h
+/** \struct polyhedron SiconosSets.h
  * Definition of a polytope in terms of (H,K) representation
  */
-struct polyhedron
+typedef struct
 {
   int id; /**< id of the structure, usually solver specific */
   unsigned size_ineq; /**< number of inequalities */
@@ -63,9 +63,28 @@ struct polyhedron
   double* K; /**< K vector in an (H,K) representation of a polytope H x <= K */
   NumericsMatrix* Heq; /**< Heq matrix for the equality constraints Heq x = Keq */
   double* Keq; /**< Keq vector for the equality constraints Heq x = Keq */
-};
+} polyhedron;
 
-enum SICONOS_SET_ID { SICONOS_SET_POSITIVE_ORTHANT, SICONOS_SET_BOX, SICONOS_SET_POLYHEDRON };
+/** \struct polyhedron_unified SiconosSets.h
+ * Definition of a polytope in terms of (H,K) representation
+ */
+typedef struct
+{
+  int id; /**< id of the structure, usually solver specific */
+  NumericsMatrix* A; /**< A matrix in an (A,b) representation of a polytope \f$Ax (\leq,=,\geq) b\f$ */
+  double* b; /**< b vector in an (A,b) representation of a polytope \f$Ax (\leq,=,\geq) b\f$ */
+  char* type; /**< type of constraint of type SICONOS_RELATION_TYPES */
+} polyhedron_unified;
+
+typedef union {
+  generic_set* set;
+  polyhedron* split;
+  polyhedron_unified* unif;
+} polyhedron_set;
+
+enum SICONOS_SET_ID { SICONOS_SET_POSITIVE_ORTHANT, SICONOS_SET_BOX, SICONOS_SET_POLYHEDRON, SICONOS_SET_POLYHEDRON_UNIFIED };
+
+enum SICONOS_RELATION_TYPES { SICONOS_LE, SICONOS_EQ, SICONOS_GE };
 
 #include "SiconosConfig.h"
 
@@ -105,6 +124,10 @@ extern "C"
   */
   void free_polyhedron(polyhedron* poly);
 
+  /** free a Polyhedron struct
+  * \param poly the Polyhedron struct to free
+  */
+  void free_polyhedron_unified(polyhedron_unified* poly);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

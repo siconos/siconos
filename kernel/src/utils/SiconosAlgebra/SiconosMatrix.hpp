@@ -147,7 +147,7 @@ public:
    *  \param i unsigned int(i=0, row, i=1 col)
    *  \return an unsigned int. 1 as default for SimpleMatrix.
    */
-  inline virtual unsigned int getNumberOfBlocks(unsigned int i) const
+  inline virtual unsigned int numberOfBlocks(unsigned int i) const
   {
     return 1;
   };
@@ -302,6 +302,18 @@ public:
   /** display data on standard output
    */
   virtual void display() const = 0;
+
+  /** put data of the matrix into a std::string
+   * \return std::string
+   */
+  virtual std::string toString() const = 0;
+
+  /** send data of the matrix to an ostream
+   * \param os An output stream
+   * \param sm a SiconosMatrix
+   * \return The same output stream
+   */
+  friend std::ostream& operator<<(std::ostream& os, const SiconosMatrix& sm);
 
   // Note: in the following functions, row and col are general;
   // that means that for a SimpleMatrix m, m(i,j) is index (i,j) element but

@@ -59,7 +59,7 @@ set(${PACKAGE_NAME}_LIBRARIES ${installed_targets})
 # set list of include dirs for external libraries
 set(${PACKAGE_NAME}_INCLUDE_DIRECTORIES @SICONOS_INCLUDE_DIRECTORIES@)
 list(APPEND ${PACKAGE_NAME}_INCLUDE_DIRECTORIES @CMAKE_INSTALL_PREFIX@/include/@PROJECT_NAME@)
-
+set(CMAKE_CXX_STANDARD @CMAKE_CXX_STANDARD@)
 check_required_components(@PROJECT_NAME@)
 
 

@@ -54,26 +54,36 @@ static void copyBtVector3(const btVector3 &from, SiconosVector& to)
 
 // TODO: sppoint parameter used only by BulletSpaceFilter
 BulletR::BulletR(const btManifoldPoint &point,
+                 SP::SiconosVector q1, SP::SiconosVector q2,
                  bool flip,
                  double y_correction_A,
                  double y_correction_B,
                  double scaling) :
   NewtonEulerFrom3DLocalFrameR(),
-  _flip(flip),
   _y_correction_A(y_correction_A),
   _y_correction_B(y_correction_B),
-  _scaling(scaling)
+  _scaling(scaling),
+  _flip(flip)
 {
-  updateContactPoints(point);
+  updateContactPoints(point, q1, q2);
 }
 
+#include <BlockVector.hpp>
 void BulletR::computeh(double time, BlockVector& q0, SiconosVector& y)
 {
   DEBUG_BEGIN("BulletR::computeh(...)\n");
 
-  NewtonEulerR::computeh(time, q0, y);
+  // Update contact points and distance if necessary
+  NewtonEulerFrom3DLocalFrameR::computeh(time, q0, y);
 
-  DEBUG_PRINT("start of computeh\n");
+  // Since Pc1 and Pc2 may have changed, _contactDistance must be updated
+  btVector3 dpc((*_Pc2)(0) - (*_Pc1)(0),
+                (*_Pc2)(1) - (*_Pc1)(1),
+                (*_Pc2)(2) - (*_Pc1)(2));
+  btVector3 nc((*_Nc)(0), (*_Nc)(1), (*_Nc)(2));
+  double dist = dpc.length();
+
+  _contactDistance = dist * (nc.dot(dpc) >= 0 ? -1 : 1);
 
   // Due to margins we add, objects are reported as closer than they really
   // are, so we correct by a factor.
@@ -89,7 +99,8 @@ void BulletR::computeh(double time, BlockVector& q0, SiconosVector& y)
   DEBUG_END("BulletR::computeh(...)\n");
 }
 
-void BulletR::updateContactPoints(const btManifoldPoint& point)
+void BulletR::updateContactPoints(const btManifoldPoint& point,
+                                  SP::SiconosVector q1, SP::SiconosVector q2)
 {
   // Flip contact points if requested
   btVector3 posa = point.getPositionWorldOnA();
@@ -111,7 +122,32 @@ void BulletR::updateContactPoints(const btManifoldPoint& point)
   posa = posa * _scaling + n * _y_correction_A;
   posb = posb * _scaling - n * _y_correction_B;
 
-  // Update contact point locations
+  // Update relative contact point locations.
+  btQuaternion qq1((*q1)(4), (*q1)(5), (*q1)(6), (*q1)(3));
+  btQuaternion pq1(posa.x() - (*q1)(0), posa.y() - (*q1)(1), posa.z() - (*q1)(2), 0);
+
+  // Unrotate q1-posa vector
+  pq1 = qq1.inverse() * pq1 * qq1;
+  (*_relPc1)(0) = pq1.x();
+  (*_relPc1)(1) = pq1.y();
+  (*_relPc1)(2) = pq1.z();
+
+  if (q2)
+  {
+    btQuaternion qq2((*q2)(4), (*q2)(5), (*q2)(6), (*q2)(3));
+    btQuaternion pq2(posb.x() - (*q2)(0), posb.y() - (*q2)(1), posb.z() - (*q2)(2), 0);
+
+    // Unrotate q2-posb vector
+    pq2 = qq2.inverse() * pq2 * qq2;
+    (*_relPc2)(0) = pq2.x();
+    (*_relPc2)(1) = pq2.y();
+    (*_relPc2)(2) = pq2.z();
+  }
+  else
+    copyBtVector3(posb, *_relPc2);
+
+  // Update initial contact point locations which may be modified
+  // during Newton loop
   copyBtVector3(posa, *_Pc1);
   copyBtVector3(posb, *_Pc2);
 

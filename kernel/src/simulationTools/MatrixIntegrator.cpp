@@ -54,7 +54,7 @@ MatrixIntegrator::MatrixIntegrator(const DynamicalSystem& ds, const Model& m)
 
 void MatrixIntegrator::commonInit(const DynamicalSystem& ds, const Model& m)
 {
-  _TD.reset(new TimeDiscretisation(*m.simulation()->eventsManager()->timeDiscretisation()));
+  _TD.reset(new TimeDiscretisation(m.simulation()->eventsManager()->timeDiscretisation()));
   Type::Siconos dsType = Type::value(ds);
   if (dsType == Type::FirstOrderLinearTIDS)
   {
@@ -65,7 +65,7 @@ void MatrixIntegrator::commonInit(const DynamicalSystem& ds, const Model& m)
   {
      const FirstOrderLinearDS& cfolds = static_cast<const FirstOrderLinearDS&>(ds);
      _DS.reset(new FirstOrderLinearDS(cfolds));
-     std11::static_pointer_cast<FirstOrderLinearDS>(_DS)->zeroPlugin();
+     // std11::static_pointer_cast<FirstOrderLinearDS>(_DS)->zeroPlugin();
      if (cfolds.getPluginA()->isPlugged())
      {
        std11::static_pointer_cast<FirstOrderLinearDS>(_DS)->setPluginA(cfolds.getPluginA());
@@ -77,9 +77,9 @@ void MatrixIntegrator::commonInit(const DynamicalSystem& ds, const Model& m)
   _model.reset(new Model(m.t0(), m.finalT()));
   _OSI.reset(new LsodarOSI());
   _model->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DS);
-  _model->nonSmoothDynamicalSystem()->topology()->setOSI(_DS, _OSI);
   _sim.reset(new EventDriven(_TD, 0));
-  _sim->insertIntegrator(_OSI);
+  _sim->setNonSmoothDynamicalSystemPtr(_model->nonSmoothDynamicalSystem());
+  _sim->prepareIntegratorForDS(_OSI, _DS, _model, m.t0());
   _model->setSimulation(_sim);
   _model->initialize();
 
@@ -95,7 +95,7 @@ void MatrixIntegrator::integrate()
   if (!Ecol && _E)
   {
     Ecol.reset(new SiconosVector(_DS->n(), 0));
-    static_cast<FirstOrderLinearDS&>(*_DS).setb(Ecol);
+    static_cast<FirstOrderLinearDS&>(*_DS).setbPtr(Ecol);
   }
   unsigned int p = _mat->size(1);
   for (unsigned int i = 0; i < p; i++)

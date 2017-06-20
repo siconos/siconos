@@ -22,6 +22,7 @@
 #include "NewtonEulerDS.hpp"
 #include "Interaction.hpp"
 #include "BlockVector.hpp"
+#include <boost/math/quaternion.hpp>
 
 //#define NERI_DEBUG
 
@@ -195,7 +196,7 @@ void NewtonEulerFrom1DLocalFrameR::computeJachq(double time, Interaction& inter,
     _jachq->setValue(0, 9, -_Nc->getValue(2));
   }
 
-  for (unsigned int iDS =0 ; iDS < q0->getNumberOfBlocks()  ; iDS++)
+  for (unsigned int iDS =0 ; iDS < q0->numberOfBlocks()  ; iDS++)
   {
     SP::SiconosVector q = (q0->getAllVect())[iDS];
     double sign = 1.0;
@@ -254,7 +255,7 @@ void NewtonEulerFrom1DLocalFrameR::computeJachqT(Interaction& inter, SP::BlockVe
 {
   DEBUG_BEGIN("NewtonEulerFrom1DLocalFrameR::computeJachqT(Interaction& inter, SP::BlockVector q0 \n")
     
-  if (q0->getNumberOfBlocks()>1)
+  if (q0->numberOfBlocks()>1)
   {
     NIcomputeJachqTFromContacts((q0->getAllVect())[0], (q0->getAllVect())[1]);
   }
@@ -265,4 +266,35 @@ void NewtonEulerFrom1DLocalFrameR::computeJachqT(Interaction& inter, SP::BlockVe
 
   DEBUG_END("NewtonEulerFrom1DLocalFrameR::computeJachqT(Interaction& inter, SP::BlockVector q0) \n");
 
+}
+
+void NewtonEulerFrom1DLocalFrameR::computeh(double time, BlockVector& q0,
+                                            SiconosVector &y)
+{
+  // Update pc1 based on q0 and relPc1
+  SP::SiconosVector q1 = (q0.getAllVect())[0];
+  ::boost::math::quaternion<double> qq1((*q1)(3), (*q1)(4), (*q1)(5), (*q1)(6));
+  ::boost::math::quaternion<double> qpc1(0,(*_relPc1)(0),(*_relPc1)(1),(*_relPc1)(2));
+
+  // apply q1 rotation and add
+  qpc1 = qq1 * qpc1 / qq1;
+  (*_Pc1)(0) = qpc1.R_component_2() + (*q1)(0);
+  (*_Pc1)(1) = qpc1.R_component_3() + (*q1)(1);
+  (*_Pc1)(2) = qpc1.R_component_4() + (*q1)(2);
+
+  if (q0.numberOfBlocks() > 1)
+  {
+    // Update pc2 based on q0 and relPc2
+    SP::SiconosVector q2 = (q0.getAllVect())[1];
+    ::boost::math::quaternion<double> qq2((*q1)(3), (*q2)(4), (*q2)(5), (*q2)(6));
+    ::boost::math::quaternion<double> qpc2(0,(*_relPc2)(0),(*_relPc2)(1),(*_relPc2)(2));
+
+    // apply q2 rotation and add
+    qpc2 = qq1 * qpc2 / qq2;
+    (*_Pc2)(0) = qpc2.R_component_2() + (*q2)(0);
+    (*_Pc2)(1) = qpc2.R_component_3() + (*q2)(1);
+    (*_Pc2)(2) = qpc2.R_component_4() + (*q2)(2);
+  }
+
+  NewtonEulerR::computeh(time, q0, y);
 }

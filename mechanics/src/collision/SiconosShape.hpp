@@ -43,7 +43,7 @@ protected:
 
   SiconosShape()
     : _inside_margin(0.1)
-    , _outside_margin(0.1)
+    , _outside_margin(0.0)
     , _version(0)
     {}
 

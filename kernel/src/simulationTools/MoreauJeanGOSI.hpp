@@ -143,6 +143,8 @@ protected:
   friend struct _NSLEffectOnFreeOutput;
 
 public:
+  
+  enum {OSNSP_RHS,WORK_INTERACTION_LENGTH};
 
   /** constructor from theta value only
    *  \param theta value for all linked DS (default = 0.5).
@@ -295,11 +297,9 @@ public:
 
   // --- OTHER FUNCTIONS ---
 
-  /** initialization of the MoreauJeanGOSI integrator; for linear time
-      invariant systems, we compute time invariant operator (example :
-      W)
-   */
-  virtual void initialize(Model& m);
+  virtual void initialize_nonsmooth_problems();
+
+  
   /** initialization of the work vectors and matrices (properties) related to
    *  one dynamical system on the graph and needed by the osi
    * \param m the Model
@@ -310,14 +310,13 @@ public:
 
   /** initialization of the work vectors and matrices (properties) related to
    *  one interaction on the graph and needed by the osi
-   * \param t0 time of initialization
    * \param inter the interaction
    * \param interProp the properties on the graph
    * \param DSG the dynamical systems graph
    */
-  void initializeInteraction(double t0, Interaction &inter,
-			     InteractionProperties& interProp,
-			     DynamicalSystemsGraph & DSG);
+  void fillDSLinks(Interaction &inter,
+		     InteractionProperties& interProp,
+		     DynamicalSystemsGraph & DSG);
 
   /** get the number of index sets required for the simulation
    * \return unsigned int
@@ -329,7 +328,7 @@ public:
    *  \param time
    *  \param ds a pointer to DynamicalSystem
    */
-  void initializeIterationMatrixW(double time, SP::DynamicalSystem ds, const DynamicalSystemsGraph::VDescriptor& dsv);
+  void initializeIterationMatrixW(double time, SP::DynamicalSystem ds);
 
   /** compute W MoreauJeanGOSI matrix at time t
    *  \param time (double)
@@ -415,7 +414,7 @@ public:
    * \param inter the interaction (for y_k)
    * \param osnsp the non-smooth integrator
    */
-  void NSLcontrib(Interaction& inter, OneStepNSProblem& osnsp);
+  void NSLcontrib(SP::Interaction inter, OneStepNSProblem& osnsp);
 
   /** Displays the data of the MoreauJeanGOSI's integrator
    */

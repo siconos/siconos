@@ -239,16 +239,6 @@ int main(int argc, char* argv[])
     // Interactions
 
 
-    //
-    // SP::SimpleMatrix H1(new SimpleMatrix(KneeJointR::numberOfConstraints(), qDim));
-    // H1->zero();
-    // SP::SimpleMatrix H2(new SimpleMatrix(KneeJointR::numberOfConstraints(), 2 * qDim));
-    // SP::SimpleMatrix H3(new SimpleMatrix(KneeJointR::numberOfConstraints(), 2 * qDim));
-    // H2->zero();
-    // H3->zero();
-    SP::NonSmoothLaw nslaw1(new EqualityConditionNSL(KneeJointR::numberOfConstraints()));
-    SP::NonSmoothLaw nslaw2(new EqualityConditionNSL(KneeJointR::numberOfConstraints()));
-    SP::NonSmoothLaw nslaw3(new EqualityConditionNSL(KneeJointR::numberOfConstraints()));
 
     //SP::NonSmoothLaw nslaw3(new EqualityConditionNSLKneeJointR::numberOfConstraints()());
     SP::SiconosVector P(new SiconosVector(3));
@@ -256,60 +246,22 @@ int main(int argc, char* argv[])
     // Building the first knee joint for beam1
     // input  - the concerned DS : beam1
     //        - a point in the spatial frame (absolute frame) where the knee is defined P
-    SP::NewtonEulerR relation1(new KneeJointR(beam1, P));
+    SP::KneeJointR relation1(new KneeJointR(beam1, P));
 
-
-
-    // Building the second knee joint for beam1 and beam2
-    // input  - the first concerned DS : beam1
-    // input  - the second concerned DS : beam2
-    //        - a point in the spatial frame (absolute frame) where the knee is defined P
-    // P->zero();
-    // P->setValue(0, L1 / 2);
-    // SP::NewtonEulerR relation2(new KneeJointR(beam1, beam2, P));
-
-    // // Building the third knee joint for beam2 and beam3
-    // // input  - the first concerned DS : beam2
-    // // input  - the second concerned DS : beam3
-    // //        - a point in the spatial frame (absolute frame) where the knee is defined P
-    // P->zero();
-    // P->setValue(0, -L1 / 2);
-    // SP::NewtonEulerR relation3(new KneeJointR(beam2, beam3, P));
-
-    // // Building the prismatic joint for beam3
-    // // input  - the first concerned DS : beam3
-    // //        - an axis in the spatial frame (absolute frame)
-    // // SP::SimpleMatrix H4(new SimpleMatrix(PrismaticJointR::numberOfConstraints(), qDim));
-    // // H4->zero();
-    // SP::NonSmoothLaw nslaw4(new EqualityConditionNSL(PrismaticJointR::numberOfConstraints()));
-    // SP::SiconosVector axe1(new SiconosVector(3));
-    // axe1->zero();
-    // axe1->setValue(2, 1);
-    // SP::NewtonEulerR relation4(new PrismaticJointR(beam3, axe1));
-    // // relation1->setJachq(H1); // Remark V.A. Why do we need to set the Jacobian outside
-    // // relation2->setJachq(H2);
-    // // relation3->setJachq(H3);
     // // relation4->setJachq(H4);
+    SP::NonSmoothLaw nslaw1(new EqualityConditionNSL(relation1->numberOfConstraints()));
 
-    SP::Interaction inter1(new Interaction(KneeJointR::numberOfConstraints(), nslaw1, relation1));
-    //SP::Interaction inter2(new Interaction(KneeJointR::numberOfConstraints(), nslaw2, relation2));
-    // SP::Interaction inter3(new Interaction(KneeJointR::numberOfConstraints(), nslaw3, relation3));
-    // SP::Interaction inter4(new Interaction(PrismaticJointR::numberOfConstraints(), nslaw4, relation4));
-    // SP::Interaction interFloor(new Interaction(1, nslaw0, relation0));
+    SP::Interaction inter1(new Interaction(nslaw1, relation1));
+
     // -------------
     // --- Model ---
     // -------------
     SP::Model myModel(new Model(t0, T));
     // add the dynamical system in the non smooth dynamical system
     myModel->nonSmoothDynamicalSystem()->insertDynamicalSystem(beam1);
-//    myModel->nonSmoothDynamicalSystem()->insertDynamicalSystem(beam2);
-    // myModel->nonSmoothDynamicalSystem()->insertDynamicalSystem(beam3);
     // link the interaction and the dynamical system
     myModel->nonSmoothDynamicalSystem()->link(inter1, beam1);
-    // myModel->nonSmoothDynamicalSystem()->link(inter2, beam1, beam2);
-    //myModel->nonSmoothDynamicalSystem()->link(inter3, beam2, beam3);
-    //myModel->nonSmoothDynamicalSystem()->link(inter4, beam3);
-    //myModel->nonSmoothDynamicalSystem()->link(interFloor, beam3);
+
     // ------------------
     // --- Simulation ---
     // ------------------
@@ -414,21 +366,6 @@ int main(int argc, char* argv[])
       beam1Plot(1,3*k+1) = beamTipTrajectories[4];
       beam1Plot(1,3*k+2) = beamTipTrajectories[5];
 
-      tipTrajectories(q2,beamTipTrajectories,L2);
-      beam2Plot(0,3*k) = beamTipTrajectories[0];
-      beam2Plot(0,3*k+1) = beamTipTrajectories[1];
-      beam2Plot(0,3*k+2) = beamTipTrajectories[2];
-      beam2Plot(1,3*k) = beamTipTrajectories[3];
-      beam2Plot(1,3*k+1) = beamTipTrajectories[4];
-      beam2Plot(1,3*k+2) = beamTipTrajectories[5];
-
-      tipTrajectories(q3,beamTipTrajectories,L3);
-      beam3Plot(0,3*k) = beamTipTrajectories[0];
-      beam3Plot(0,3*k+1) = beamTipTrajectories[1];
-      beam3Plot(0,3*k+2) = beamTipTrajectories[2];
-      beam3Plot(1,3*k) = beamTipTrajectories[3];
-      beam3Plot(1,3*k+1) = beamTipTrajectories[4];
-      beam3Plot(1,3*k+2) = beamTipTrajectories[5];
 
       //printf("reaction1:%lf \n", interFloor->lambda(1)->getValue(0));
 
@@ -448,23 +385,21 @@ int main(int argc, char* argv[])
 
     // --- Output files ---
     cout << "====> Output file writing ..." << endl;
-    ioMatrix::write("NE_3DS_3Knee_1Prism_MLCP.dat", "ascii", dataPlot, "noDim");
-    ioMatrix::write("NE_3DS_3Knee_1Prism_MLCP_beam1.dat", "ascii", beam1Plot, "noDim");
-    ioMatrix::write("NE_3DS_3Knee_1Prism_MLCP_beam2.dat", "ascii", beam2Plot, "noDim");
-    ioMatrix::write("NE_3DS_3Knee_1Prism_MLCP_beam3.dat", "ascii", beam3Plot, "noDim");
-
+    ioMatrix::write("NE_1DS_1Knee_MLCP.dat", "ascii", dataPlot, "noDim");
+    ioMatrix::write("NE_1DS_1Knee_MLCP_beam1.dat", "ascii", beam1Plot, "noDim");
+    
     std::cout << "====> Comparison with reference file ..." << std::endl;
 
-    // SimpleMatrix dataPlotRef(dataPlot);
-    // dataPlotRef.zero();
-    // ioMatrix::read("NE_3DS_3Knee_1Prism_MLCP.ref", "ascii", dataPlotRef);
-    // std::cout << "Error w.r.t. reference file : " << (dataPlot - dataPlotRef).normInf() << std::endl;
-    // if ((dataPlot - dataPlotRef).normInf() > 1e-7)
-    // {
-    //   (dataPlot - dataPlotRef).display();
-    //   std::cout << "Warning. The results is rather different from the reference file." << std::endl;
-    //   return 1;
-    // }
+    SimpleMatrix dataPlotRef(dataPlot);
+    dataPlotRef.zero();
+    ioMatrix::read("NE_1DS_1Knee_MLCP.ref", "ascii", dataPlotRef);
+    std::cout << "Error w.r.t. reference file : " << (dataPlot - dataPlotRef).normInf() << std::endl;
+    if ((dataPlot - dataPlotRef).normInf() > 1e-7)
+    {
+      (dataPlot - dataPlotRef).display();
+      std::cout << "Warning. The results is rather different from the reference file." << std::endl;
+      return 1;
+    }
 
     fclose(pFile);
   }

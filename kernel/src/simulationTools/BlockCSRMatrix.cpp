@@ -274,23 +274,6 @@ void BlockCSRMatrix::fillH(SP::InteractionsGraph indexSet)
 }
 
 
-// Fill the SparseMat
-void BlockCSRMatrix::fill(SP::DynamicalSystemsSet DSSet,
-                          MapOfDSMatrices& DSblocks)
-{
-  RuntimeException::selfThrow
-  (" BlockCSRMatrix::fill(DynamicalSystemsSet* DSSet, MapOfDSMatrices& DSblocks), Not Yet Implemented");
-}
-// Fill the SparseMat
-void BlockCSRMatrix::fill(SP::InteractionsGraph indexSet,
-                          SP::DynamicalSystemsSet DSSet,
-                          MapOfInteractionMapOfDSMatrices& interactionDSBlocks)
-{
-  RuntimeException::selfThrow
-  (" BlockCSRMatrix::fill(DynamicalSystemsSet* DSSet, MapOfDSMatrices& DSblocks), Not Yet Implemented");
-}
-
-
 // convert _blockCSR to numerics structure
 void BlockCSRMatrix::convert()
 {

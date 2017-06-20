@@ -24,9 +24,11 @@
 #include "NumericsMatrix.h"
 
 const char* const SICONOS_AVI_CAOFERRIS_STR = "AVI from Cao & Ferris";
+const char* const SICONOS_AVI_PATHAVI_STR = "PATHVI";
 
 int avi_driver(AffineVariationalInequalities* problem, double *z , double *w, SolverOptions* options)
 {
+
   assert(options && "avi_driver : null input for solver options");
   /* Checks inputs */
   assert(problem && z && w &&
@@ -36,6 +38,12 @@ int avi_driver(AffineVariationalInequalities* problem, double *z , double *w, So
       "avi_driver_DenseMatrix : forbidden type of storage for the matrix M of the AVI");
 
   assert(options->isSet);
+
+  if (!problem || !problem->M || !problem->q || !options)
+  {
+    numerics_error_nonfatal("avi_driver", "Problem data is incomplete: you need to set at least M, q and poly");
+    return -1;
+  }
 
   if (verbose > 0)
   {
@@ -52,8 +60,15 @@ int avi_driver(AffineVariationalInequalities* problem, double *z , double *w, So
   switch (id)
   {
   case SICONOS_AVI_CAOFERRIS:
+  {
     info = avi_caoferris(problem, z, w, options);
     break;
+  }
+  case SICONOS_AVI_PATHAVI:
+  {
+    info = avi_pathavi(problem, z, w, options);
+    break;
+  }
   /*error */
   default:
   {

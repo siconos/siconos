@@ -5,8 +5,6 @@ import os
 from socket import gethostname
 
 from tasks import default, known_tasks, database
-from subprocess import check_output, check_call
-
 from getopt import gnu_getopt, GetoptError
 
 
@@ -17,7 +15,9 @@ def usage():
         [--root-dir=...] \
         [--targets=...] \
         [--run]\
-    [--brutal-docker-clean]
+        [--brutal-docker-clean\
+        [--print='script'|'docker'|'vagrant']\
+        [--dry-run]
     """.format(sys.argv[0]))
 
 
@@ -25,7 +25,7 @@ try:
     opts, args = gnu_getopt(sys.argv[1:], 'v',
                             ['run', 'tasks=', 'list-tasks', 'targets=',
                              'root-dir=',
-                             'print=', 'brutal-docker-clean'])
+                             'print=', 'brutal-docker-clean', 'dry-run'])
 
 except GetoptError as err:
     sys.stderr.write(str(err))
@@ -33,12 +33,12 @@ except GetoptError as err:
     exit(2)
 
 tasks = None
-brutal_clean = False
 targets_override = None
 verbose = False
 run = False
 return_code = 0
 print_mode = False
+dry_run = False
 
 for o, a in opts:
     if o in ('--run',):
@@ -71,8 +71,9 @@ for o, a in opts:
     if o in ('--targets',):
         targets_override = a.split(',')
 
-    if o in ('--brutal-docker-clean',):
-        brutal_clean = True
+    if o in ('--dry-run',):
+        dry_run = True
+
 
 hostname = gethostname().split('.')[0]
 
@@ -85,9 +86,11 @@ if tasks is None:
 
 if print_mode:
 
-    from machinery.mksenv import print_commands, OutputMode, output_mode_spec
+    from machinery.mksenv import print_commands, output_mode_spec
 
     for task in tasks:
+        # For each task, print the 'command' file (dockerfile, script ...)
+        # for the given configuration
         distrib, distrib_version = task._distrib.split(':')
         print_commands(specfilename=database,
                        distrib=distrib,
@@ -95,39 +98,23 @@ if print_mode:
                        pkgs=task._pkgs,
                        output_mode=output_mode_spec[output_mode_str],
                        split=False)
+
 if run:
 
     for task in tasks:
         try:
 
             return_code += task.run(root_dir,
-                                    targets_override=targets_override)
+                                    targets_override=targets_override,
+                                    dry_run=dry_run)
 
         except Exception as e:
             sys.stderr.write(str(e))
 
-    for task in tasks:
+    if not dry_run:
+        for task in tasks:
+            try:
+                task.clean()
 
-        task.clean()
-
-# docker specific, to be moved elsewhere
-if brutal_clean:
-
-    # clean everything (-> maybe once a week?)
-    def mklist(sstr):
-        return filter(lambda s: s != '', sstr.strip().split('\n'))
-
-    running_containers = mklist(check_output(['docker', 'ps', '-q']))
-
-    if len(running_containers) > 0:
-        check_call(['docker', 'kill'] + running_containers)
-
-    containers = mklist(check_output(['docker', 'ps', '-a', '-q']))
-    if len(containers) > 0:
-        check_call(['docker', 'rm'] + containers)
-
-    images = mklist(check_output(['docker', 'images', '-q']))[1:]
-    if len(images) > 0:
-        check_call(['docker', 'rmi'] + images)
-
-    exit(return_code)
+            except Exception as e:
+                sys.stderr.write(str(e))

@@ -47,10 +47,13 @@ set(${COMPONENT}_HDRS_EXCLUDE_DIR)
 
 # --- Serialization setup ---
 set(GENERATED_HEADER ${CMAKE_CURRENT_SOURCE_DIR}/src/SiconosFullGenerated.hpp)
+set(GENERATED_HEADER_KERNEL ${CMAKE_CURRENT_SOURCE_DIR}/src/SiconosFullKernelGenerated.hpp)
+
 
 if(WITH_SERIALIZATION)
   if(WITH_GENERATION)
     FILE(REMOVE ${CMAKE_CURRENT_SOURCE_DIR}/src/SiconosFullGenerated.hpp)
+    FILE(REMOVE ${CMAKE_CURRENT_SOURCE_DIR}/src/SiconosFullKernelGenerated.hpp)
 
     set(io_targets ${COMPONENTS})
 
@@ -71,12 +74,12 @@ if(WITH_SERIALIZATION)
     if(HAVE_SICONOS_CONTROL)
       set(GENERATED_DEPENDENCIES ${GENERATED_DEPENDENCIES} ../control/src/SiconosControl.hpp)
     endif()
-    
+
     # append local headers directories to GENERATED_INCLUDES)
     foreach(_DIR ${${PROJECT_NAME}_LOCAL_INCLUDE_DIRECTORIES})
       list(APPEND GENERATED_INCLUDES -I${_DIR})
     endforeach()
-    
+
     if(MPI_FOUND)
       FOREACH(_DIR ${MPI_CXX_INCLUDE_PATH})
         SET(GENERATED_INCLUDES ${GENERATED_INCLUDES} -I${_DIR})
@@ -89,8 +92,18 @@ if(WITH_SERIALIZATION)
 
     ADD_CUSTOM_COMMAND(
       OUTPUT ${GENERATED_HEADER}
-      DEPENDS ${GENERATED_DEPENDENCIES}
+      DEPENDS doxygen ${GENERATED_DEPENDENCIES}
       ${GENERATED_COMMAND})
+
+    SET(GENERATED_COMMAND_KERNEL COMMAND ${CMAKE_SOURCE_DIR}/io/tools/build_from_doxygen.py
+      --targets=kernel ${GENERATED_INCLUDES}
+      --output=${GENERATED_HEADER_KERNEL}
+      --source="${CMAKE_CURRENT_SOURCE_DIR}/../" --build="${CMAKE_BINARY_DIR}")
+
+    ADD_CUSTOM_COMMAND(
+      OUTPUT ${GENERATED_HEADER_KERNEL}
+      DEPENDS doxygen ${GENERATED_DEPENDENCIES}
+      ${GENERATED_COMMAND_KERNEL})
   endif()
 endif()
 
@@ -128,7 +141,7 @@ set(${COMPONENT}_LINK_LIBRARIES ${_LL})
 
 # add dependencies for header generation
 add_custom_target(SerializersGeneration ALL
-  DEPENDS ${GENERATED_HEADER})
+  DEPENDS ${GENERATED_HEADER} ${GENERATED_HEADER_KERNEL})
 
 include(LibraryProjectSetup)
 

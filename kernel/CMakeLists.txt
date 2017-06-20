@@ -28,7 +28,6 @@ set(${COMPONENT}_DIRS
 # Unstable sources. Will be included only
 # if WITH_${COMPONENT}_UNSTABLE is true.
 set(${COMPONENT}_Unstable_SRCS
-  src/simulationTools/MLCP2.cpp
   )
 
 compile_with(GMP REQUIRED)

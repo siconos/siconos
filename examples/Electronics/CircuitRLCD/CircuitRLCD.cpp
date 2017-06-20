@@ -86,7 +86,7 @@ int main(int argc, char* argv[])
 
     LTIRCircuitRLCD->setDPtr(Int_D);
 
-    SP::Interaction InterCircuitRLCD(new Interaction(1, NSLaw, LTIRCircuitRLCD));
+    SP::Interaction InterCircuitRLCD(new Interaction(NSLaw, LTIRCircuitRLCD));
 
     // --- Model creation ---
     SP::Model CircuitRLCD(new Model(t0, T, Modeltitle));
@@ -96,7 +96,7 @@ int main(int argc, char* argv[])
 
     // link the interaction and the dynamical system
     CircuitRLCD->nonSmoothDynamicalSystem()->link(InterCircuitRLCD, LSCircuitRLCD);
-
+    CircuitRLCD->nonSmoothDynamicalSystem()->display();
 
     // ------------------
     // --- Simulation ---

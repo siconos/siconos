@@ -41,7 +41,6 @@ void SpheresViewer::draw()
   char qs[6];
 
   DSIterator itDS;
-  SP::DynamicalSystemsSet involvedDS;
   SP::Interaction interaction;
   SP::Relation relation;
 

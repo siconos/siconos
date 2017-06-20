@@ -23,6 +23,7 @@
 #include "numerics_verbose.h"
 #include "FrictionContactProblem.h"
 #include "LinearComplementarityProblem.h"
+#include "RelayProblem.h"
 #include "GenericMechanical_Solvers.h"
 #include "NumericsMatrix.h"
 #include "SparseBlockMatrix.h"
@@ -61,6 +62,11 @@ void freeGenericMechanicalProblem(GenericMechanicalProblem * pGMP, unsigned int 
     {
       free(((LinearComplementarityProblem *)(pElem->problem))->M);
       //  free(((LinearComplementarityProblem *)(pElem->problem))->q);
+      break;
+    }
+    case SICONOS_NUMERICS_PROBLEM_RELAY:
+    {
+      free(((RelayProblem *)(pElem->problem))->M);
       break;
     }
     case SICONOS_NUMERICS_PROBLEM_FC3D:
@@ -127,6 +133,22 @@ void * addProblem(GenericMechanicalProblem * pGMP, int problemType, int size)
     pLCP->M->size0 = size;
     pLCP->M->size1 = size;
     pLCP->size = size;
+
+    break;
+  }
+  case (SICONOS_NUMERICS_PROBLEM_RELAY):
+  {
+    newProblem->problem = (void *) malloc(sizeof(RelayProblem));
+    RelayProblem * pRelay = (RelayProblem*)newProblem->problem;
+    pRelay->M = newNumericsMatrix();
+    pRelay->q = (double*) malloc(size * sizeof(double));
+    newProblem->q = pRelay->q;
+    pRelay->M->storageType = 0; /*local prb is dense*/
+    pRelay->M->size0 = size;
+    pRelay->M->size1 = size;
+    pRelay->size = size;
+    pRelay->lb = (double*)malloc(size * sizeof(double));
+    pRelay->ub = (double*)malloc(size * sizeof(double));
 
     break;
   }

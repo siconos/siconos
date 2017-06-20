@@ -13,6 +13,7 @@ BodyDS::BodyDS(SP::SiconosVector position,
   : NewtonEulerDS(position, velocity, mass, inertia)
   , _contactors(std11::make_shared<SiconosContactorSet>())
   , _useContactorInertia(true)
+  , _allowSelfCollide(true)
 {
 }
 

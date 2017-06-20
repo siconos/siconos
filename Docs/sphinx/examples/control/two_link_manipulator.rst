@@ -54,8 +54,8 @@ Let us choose :math:`\theta=(\theta_{1},\theta_{2})^{T}` as the generalized coor
 
 .. math::
    
-   P&=&\frac{1}{2} m_{1}gl_{1}\sin{\theta_{1}}+m_{2}g\left(l_{1}\sin\theta_{1}+\frac{l_{2}}{2}\sin(\theta_{1}+\theta_{2})\right),\\ 
-   T&=&\frac{ m_{1}l_{1}^{2}\dot{\theta_{1}}^{2}}{8}+\frac{m_{2}}{2}\left(l_{1}^{2}\dot{\theta}_{1}^{2}+\frac{l_{2}^{2}}{4}(\dot{\theta}_{1}+\dot{\theta}_{2})^{2}+l_{1}l_{2}(\dot{\theta}_{1}^{2}+\dot{\theta}_{1}\dot{\theta}_{2})\cos\theta_{2}\right)+\frac{I_{1}\dot{\theta_{1}}^{2}+I_{2}(\dot{\theta_{1}}+\dot{\theta_{2}})^{2}}{2}. 
+   P&=\frac{1}{2} m_{1}gl_{1}\sin{\theta_{1}}+m_{2}g\left(l_{1}\sin\theta_{1}+\frac{l_{2}}{2}\sin(\theta_{1}+\theta_{2})\right),\\ 
+   T&=\frac{ m_{1}l_{1}^{2}\dot{\theta_{1}}^{2}}{8}+\frac{m_{2}}{2}\left(l_{1}^{2}\dot{\theta}_{1}^{2}+\frac{l_{2}^{2}}{4}(\dot{\theta}_{1}+\dot{\theta}_{2})^{2}+l_{1}l_{2}(\dot{\theta}_{1}^{2}+\dot{\theta}_{1}\dot{\theta}_{2})\cos\theta_{2}\right)+\frac{I_{1}\dot{\theta_{1}}^{2}+I_{2}(\dot{\theta_{1}}+\dot{\theta_{2}})^{2}}{2}. 
 
 Substituting :math:`P` and :math:`T` in the formula of :math:`L` the dynamics equation of the two-links manipulator: 
 
@@ -74,19 +74,20 @@ have the same meaning as in (general dynamics) and they are explicitly given by:
 
 .. math::
 
-   & M=\left[\begin {array}{cc}
+   \begin{array}{ccc}
+   & M=\left[\begin{array}{cc}
    M_{11} & M_{12}\\ 
    M_{21} & M_{22}\\ 
    \end{array}\right],\quad & 
    \left\{ \begin{array}{ccc}
    M_{11} & = & \displaystyle\frac{m_{1}l_{1}^{2}}{4}+m_{2}\left(l_{1}^{2}+\frac{l_{2}^{2}}{4}l_{1}l_{2}\cos\theta_{2}\right)+I_{1}+I_{2}\hspace{0.5cm}\\
    M_{12} & = & M_{21} =\displaystyle\frac{m_{2}l_{2}^{2}}{4}+\frac{m_{2}l_{1}l_{2}}{2}\cos{\theta_{2}}+I_{2}\hspace{2cm}\\
-   M_{22} & = & \displaystyle\frac{m_{2}l_{2}^{2}}{4}+I_{2}\hspace{5.8cm}\\ \end{array}\right.,\\ &C=\left[\begin{array}{cc} C_{11} & C_{12}\\ C_{21} & C_{22}\\ \end{array}\right],\quad &\left\{\begin{array}{ccc} C_{11} & = & -m_{2}l_{1}l_{2}\dot{\theta}_{2}\sin\theta_{2}\\\
+   M_{22} & = & \displaystyle\frac{m_{2}l_{2}^{2}}{4}+I_{2}\hspace{5.8cm}\\\end{array}\right.,\\ &C=\left[\begin{array}{cc} C_{11} & C_{12}\\ C_{21} & C_{22}\\ \end{array}\right],\quad &\left\{\begin{array}{ccc} C_{11} & = & -m_{2}l_{1}l_{2}\dot{\theta}_{2}\sin\theta_{2}\\\
    C_{12} & = & -\displaystyle\frac{m_{2}l_{1}l_{2}}{2}\dot{\theta}_{2}\sin\theta_{2}\\
    C_{21} & = & \displaystyle\frac{m_{2}l_{1}l_{2}}{2}\dot{\theta}_{1}\sin\theta_{2}\\
    C_{22} & = & 0\hspace{2.5cm}\\ \end{array}\right.,\\ &G=\left[\begin{array}{c} G_{1} \\ G_{1} \\ \end{array}\right],\hspace{1cm}\quad &\left\{\begin{array}{ccc} G_{1} & = & \displaystyle\frac{g}{2}[l_{1}(2m_{1}+m_{2})\cos\theta_{1}+m_{2}l_{2}\cos(\theta_{1}+\theta_{2})]\\
    G_{2} & = & \displaystyle\frac{m_{2}gl_{2}}{2}\cos(\theta_{1}+\theta_{2})\hspace{4.5cm}\\ \end{array}\right..
-   
+  \end{array}
 
 Constrained problem formulation
 -------------------------------
@@ -144,8 +145,8 @@ The controller law used in the following is based on the fixed-parameter scheme 
 
    \label{Slotine scheme}
    T(q)U=\left\{ \begin{array}{ccc} 
-   U_{nc} & = & M(q)\ddot{q}_{r}+C(q,\dot{q})\dot{q}_{r}+g(q)-\gamma_{1}s \hspace{3.4cm}\\ 
-   U_{t} & = & U_{nc} \mbox{ before the first impact}\hspace{4.2cm}\\ U_{t} & = & M(q)\ddot{q}_{r}+C(q,\dot{q})\dot{q}_{r}+g(q)-\gamma_{1}\bar{s} \mbox{ after the first impact}\\ U_{c} & = & U_{nc}-P_{d}+K_{f}(P_{q}-P_{d})\hspace{4.4cm} \end{array}\right.
+   U_{nc} & =  M(q)\ddot{q}_{r}+C(q,\dot{q})\dot{q}_{r}+g(q)-\gamma_{1}s \hspace{3.4cm}\\ 
+   U_{t} & =  U_{nc} \mbox{ before the first impact}\hspace{4.2cm}\\ U_{t} & = & M(q)\ddot{q}_{r}+C(q,\dot{q})\dot{q}_{r}+g(q)-\gamma_{1}\bar{s} \mbox{ after the first impact}\\ U_{c} & =  U_{nc}-P_{d}+K_{f}(P_{q}-P_{d})\hspace{4.4cm} \end{array}\right.
 
 where :math:`\gamma_{1}>0` is a scalar gain, :math:`K_{f}>0,\,P_{q}=D^{T}\lambda` and :math:`P_{d}=D^{T}\lambda_{d}` is the desired contact force during constraint motion.
 
@@ -172,7 +173,7 @@ It is noteworthy that :math:`t_0^k,\,t_\infty^k,t\,_d^k` are state dependent whe
 .. math::
 
    \label{desired trajectory} 
-   \begin{array}{ccc} q^{*}_{1d}&=& a_{3}t^{3}+a_{2}t^{2}+a_{1}t+a_{0}\\ \dot{q}^{*}_{1d}&=&3a_{3}t^{2}+2a_{2}t+a_{1}\hspace{1cm} \end{array} 
+   \begin{array}{ccc} q^{*}_{1d}&= a_{3}t^{3}+a_{2}t^{2}+a_{1}t+a_{0}\\ \dot{q}^{*}_{1d}&=3a_{3}t^{2}+2a_{2}t+a_{1}\hspace{1cm} \end{array} 
 
 with the coefficients given by: 
 

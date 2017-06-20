@@ -44,46 +44,41 @@ MyDS::~MyDS()
 }
 
 
-void MyDS::computef(double t)
-{
-
+void  MyDS::computef(double t, SP::SiconosVector state) {
 
   SP::SiconosVector QX(new SiconosVector(2));
   SP::SiconosVector X(new SiconosVector(2));
-
-  X->setValue(0, (_x[0]->getValue(0) - 2.0));
-  X->setValue(1, (_x[0]->getValue(1) + 1.0));
+  
+  X->setValue(0, (state->getValue(0) - 2.0));
+  X->setValue(1, (state->getValue(1) + 1.0));
 
   prod(*Q, *X, *QX, true);
 
   SP::SiconosVector K1P(new SiconosVector(2));
   SP::SiconosVector P(new SiconosVector(2));
-  P->setValue(0, _x[0]->getValue(2));
-  P->setValue(1, _x[0]->getValue(3));
+  P->setValue(0, state->getValue(2));
+  P->setValue(1, state->getValue(3));
   prod(*K1, *P, *K1P, true);
 
 
   SP::SiconosVector alphatmp(new SiconosVector(2));
 
-  alpha(t, _x[0], alphatmp);
+  alpha(t, state, alphatmp);
 
 
   _f->setValue(0, alphatmp->getValue(0));
   _f->setValue(1, alphatmp->getValue(1));
   _f->setValue(2, -QX->getValue(0) + K1P->getValue(0));
   _f->setValue(3, -QX->getValue(1) + K1P->getValue(1));
+
 }
-void  MyDS::computef(double t, SiconosVector& xvalue) {}
 
-void MyDS::computeJacobianfx(double t, bool  b)
-{
-
-
+void MyDS::computeJacobianfx(double t, SP::SiconosVector state) {
 
 
   SP::SiconosMatrix jacXalpha(new SimpleMatrix(2, 2));
 
-  JacobianXalpha(t, _x[0], jacXalpha);
+  JacobianXalpha(t, state, jacXalpha);
 
   _jacobianfx->setValue(0, 0, jacXalpha->getValue(0, 0));
   _jacobianfx->setValue(0, 1, jacXalpha->getValue(0, 1));
@@ -102,22 +97,18 @@ void MyDS::computeJacobianfx(double t, bool  b)
   _jacobianfx->setValue(3, 2, K1->getValue(1, 0));
   _jacobianfx->setValue(3, 3, K1->getValue(1, 1));
 
-
-
 }
 
-void MyDS::computeJacobianfx(double t, const SiconosVector& v) {}
-
-void MyDS::alpha(double t, SP::SiconosVector _xvalue, SP::SiconosVector _alpha)
+void MyDS::alpha(double t, SP::SiconosVector state, SP::SiconosVector _alpha)
 {
-  _alpha->setValue(0, 1.0 / 2.0 * _xvalue->getValue(1) + 1.0 / 2.0) ;
-  _alpha->setValue(1,  -1.0 / 2.0 * _xvalue->getValue(0) - _xvalue->getValue(1)) ;
+  _alpha->setValue(0, 1.0 / 2.0 * state->getValue(1) + 1.0 / 2.0) ;
+  _alpha->setValue(1,  -1.0 / 2.0 * state->getValue(0) - state->getValue(1)) ;
 
 }
 
 
 
-void MyDS::JacobianXalpha(double t, SP::SiconosVector _xvalue, SP::SiconosMatrix JacXalpha)
+void MyDS::JacobianXalpha(double t, SP::SiconosVector state, SP::SiconosMatrix JacXalpha)
 {
 
   JacXalpha->setValue(0, 0, 0.0) ;

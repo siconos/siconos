@@ -10,6 +10,7 @@ include(OutOfSourcesBuild)
 include(SiconosTools)
 
 include(WindowsSiconosSetup)
+set(tests_timeout 35 CACHE INTERNAL "Limit time for tests (in seconds)")
 
 if(WITH_DOCKER)
   find_program(HAVE_DOCKER docker)
@@ -40,29 +41,8 @@ else()
   include(CXXCompilerSetup)
   include(CCompilerSetup)
   
-  set(EXAMPLES_DIRECTORIES
-    Numerics
-    Biology
-    Control
-    Electronics
-    Mechanics
-    Robotics/HuMAns_pa10
-    Spheres/Lagrangian
-    Spheres/NewtonEuler
-    )
-  
   set(NO_TEST_FILES QGL tools)
 
-  # FIND_PACKAGE(Siconos)
-  # STRING(FIND "${installed_targets}" "mechanics" mechanics_installed )
-  # IF (${mechanics_installed} LESS 0)
-  #   list(APPEND NO_TEST_FILES
-  #     JointsTests)
-  #   list(APPEND NO_TEST_FILES
-  #     NewtonEuler)
-  #  endif()
-  
-  
   # sharing a double between an executable and a library is hackisch
   IF(MSVC)
     SET(NO_TEST_FILES ${NO_TEST_FILES} RockingBlock Pendulum)
@@ -87,11 +67,70 @@ else()
   message("============================================================================================")
   
   list(APPEND CMAKE_MODULE_PATH ${SICONOS_INSTALL_DIR}/share/siconos/cmake)
-  
-  # include siconos config
+  # find_package: look for siconosConfig.cmake file in CMAKE_MODULE_PATH
+  # --> this set siconos_ROOT_DIR to the directory where siconos is installed
+  # Remark : we may also use the package registry magic to find siconos:
+  # see https://cmake.org/cmake/help/git-master/manual/cmake-packages.7.html#creating-packages
   include(SiconosVersion)
   find_package(siconos ${SICONOS_VERSION} REQUIRED)
+
+  # Minimal set of examples (i.e. assume at least numerics component)
+  set(EXAMPLES_DIRECTORIES
+    Numerics
+    )
   
+  string(FIND "${installed_targets}" "kernel" kernel_installed )
+  string(FIND "${installed_targets}" "control" control_installed )
+  string(FIND "${installed_targets}" "mechanics" mechanics_installed )
+  string(FIND "${installed_targets}" "io" io_installed )
+
+  # Kernel component examples
+  if(${kernel_installed} GREATER -1)
+    set(EXAMPLES_DIRECTORIES
+      ${EXAMPLES_DIRECTORIES}
+      Biology
+      Electronics
+      Mechanics
+      Robotics/HuMAns_pa10
+      Spheres/Lagrangian
+      Spheres/NewtonEuler
+      )
+  endif()
+
+  # Control component examples
+  if(${control_installed} GREATER -1)
+    set(EXAMPLES_DIRECTORIES
+      ${EXAMPLES_DIRECTORIES}
+      Control
+      )
+  endif()
+
+  
+  # Some examples need mechanics component. Do not include
+  # them if mechanics not found.
+  # Note FP : we should move all examples that require mechanics component in a specific directory
+  string(FIND "${installed_targets}" "mechanics" mechanics_installed )
+
+  # set the list of directories of examples based on mechanics component.
+  set(mechanics_examples
+    JointsTests
+    NewtonEuler
+    RockFall
+    RigidBodiesCollection
+    OCC_Examples
+    InterestingDynamics
+    GranularMaterial
+    GeometricPrimitives
+    DirectProjection
+    )
+
+  if (${mechanics_installed} LESS 0)
+    foreach(_dir ${mechanics_examples})
+      list(APPEND NO_TEST_FILES ${_dir})
+    endforeach()
+  endif()
+
+   
   include(CTest)
 
   # python specific part
@@ -113,19 +152,23 @@ else()
     set(NO_TEST_FILES ${NO_TEST_FILES} SMCElectroPneumaticItw Twisting)
   endif()
 
-  IF(HAS_BULLET)
-    LIST(APPEND EXAMPLES_DIRECTORIES Mechanics/ContactDetection)
+  # Bullet examples
 
+  if(HAS_BULLET)
+    list(APPEND EXAMPLES_DIRECTORIES Mechanics/ContactDetection)
+    
     if(HAS_PYTHON_WRAPPER)
       find_python_module(h5py)
       if(NOT h5py_FOUND)
-        LIST(APPEND NO_TEST_FILES "BulletIO")
+        list(APPEND NO_TEST_FILES "BulletIO")
       endif(NOT h5py_FOUND)
     else(HAS_PYTHON_WRAPPER)
-      LIST(APPEND NO_TEST_FILES "BulletIO")
+      list(APPEND NO_TEST_FILES "BulletIO")
     endif(HAS_PYTHON_WRAPPER)
-ENDIF(HAS_BULLET)
-
+  else()
+    list(APPEND NO_TEST_FILES BulletBouncingBox)
+  endif()
+  
   # Scan each dir in examples_directories and collect source files
   foreach(_D ${EXAMPLES_DIRECTORIES})
     message("Scan example directory ${_D}")
@@ -133,7 +176,11 @@ ENDIF(HAS_BULLET)
     get_subdirectories(dirlist ${CMAKE_CURRENT_SOURCE_DIR}/${_D})
     foreach(_dir ${dirlist})
       set(src_dir ${CMAKE_CURRENT_SOURCE_DIR}/${_D}/${_dir})
-      file(GLOB EXAMPLES_P ${src_dir}/*.cpp ${src_dir}/*.py)
+	  if(WITH_PYTHON_WRAPPER)
+		file(GLOB EXAMPLES_P ${src_dir}/*.cpp ${src_dir}/*.py)
+	  else()
+		file(GLOB EXAMPLES_P ${src_dir}/*.cpp)
+	  endif()
       file(GLOB EXAMPLES_DATA ${src_dir}/*.ref)
       if(EXAMPLES_P)
         foreach(_P ${EXAMPLES_P})
@@ -165,6 +212,8 @@ ENDIF(HAS_BULLET)
 		  WORKING_DIRECTORY ${bin_dir})
 	      endif()
  	      add_test(${target_name} ${CMAKE_COMMAND} -E chdir ${bin_dir} ${SICONOS_SCRIPT} ${_P})
+	      set_tests_properties(${target_name} PROPERTIES TIMEOUT ${tests_timeout})
+
  	    endif()
 	  endif()
         endforeach()

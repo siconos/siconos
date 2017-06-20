@@ -199,7 +199,7 @@ void OccTest::distance()
   std::cout << translat2.X() << "," << translat2.Y() << "," << translat2.Z()
             << std::endl;
 
-  SP::Geometer geometer = ask<WhichGeometer<CadmbtbType> >(body1->contactShape(0));
+  SP::Geometer geometer = ask<WhichGeometer<CadmbtbDistanceType> >(body1->contactShape(0));
 
   body2->contactShape(0).accept(*geometer);
 

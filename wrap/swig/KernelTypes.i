@@ -47,6 +47,93 @@
 %rename  (__eq__) operator==;
 %rename  (__ne__) operator!=;
 
+// Default swig typemap checks only for shared_ptr, but in some cases
+// it is a normal pointer.  We insert a normal pointer check before
+// the usual shared_ptr check.
+%define REF_PTR(TYPE)
+%typemap(in) TYPE&
+%{
+  {
+    int newmem = 0;
+    void *argp$argnum;
+    int res$argnum = SWIG_ConvertPtrAndOwn($input, &argp$argnum, $descriptor(TYPE *),  0 , &newmem);
+    if (SWIG_IsOK(res$argnum)) {
+      $1 = static_cast<TYPE*>(argp$argnum);
+    }
+    else
+    {
+      res$argnum = SWIG_ConvertPtrAndOwn($input, &argp$argnum, $descriptor(std11::shared_ptr< TYPE >*),  0 , &newmem);
+      if (!SWIG_IsOK(res$argnum)) {
+        %argument_fail(SWIG_ValueError, "$type", $symname, $argnum);
+      }
+      if (!argp$argnum) {
+        %argument_fail(SWIG_ValueError, "$type", $symname, $argnum);
+      }
+      if (newmem & SWIG_CAST_NEW_MEMORY) {
+        std11::shared_ptr< TYPE > tempshared$argnum
+          (*reinterpret_cast< std11::shared_ptr<  TYPE > * >(argp$argnum));
+        delete reinterpret_cast< std11::shared_ptr<  TYPE > * >(argp$argnum);
+        $1 = const_cast< TYPE * >(tempshared$argnum.get());
+      } else {
+        $1 = const_cast< TYPE * >(reinterpret_cast< std11::shared_ptr<  TYPE > * >(argp$argnum)->get());
+      }
+    }
+  }
+%}
+%typemap(in) (const TYPE&)
+%{
+  {
+    int newmem = 0;
+    void *argp$argnum;
+    int res$argnum = SWIG_ConvertPtrAndOwn($input, &argp$argnum, $descriptor(TYPE *),  0 , &newmem);
+    if (SWIG_IsOK(res$argnum)) {
+      $1 = static_cast<TYPE*>(argp$argnum);
+    }
+    else
+    {
+      res$argnum = SWIG_ConvertPtrAndOwn($input, &argp$argnum, $descriptor(std11::shared_ptr< TYPE >*),  0 , &newmem);
+      if (!SWIG_IsOK(res$argnum)) {
+        %argument_fail(SWIG_ValueError, "$type", $symname, $argnum);
+      }
+      if (!argp$argnum) {
+        %argument_fail(SWIG_ValueError, "$type", $symname, $argnum);
+      }
+      if (newmem & SWIG_CAST_NEW_MEMORY) {
+        std11::shared_ptr< TYPE > tempshared$argnum
+          (*reinterpret_cast< std11::shared_ptr< TYPE > * >(argp$argnum));
+        delete reinterpret_cast< std11::shared_ptr< TYPE > * >(argp$argnum);
+        $1 = const_cast< TYPE * >(tempshared$argnum.get());
+      } else {
+        $1 = const_cast< TYPE * >(reinterpret_cast< std11::shared_ptr< TYPE > * >(argp$argnum)->get());
+      }
+    }
+  }
+%}
+%typecheck(SWIG_TYPECHECK_POINTER) (TYPE&)
+%{
+  {
+    void *ptr;
+    int res = SWIG_ConvertPtr($input, &ptr, $descriptor(TYPE *), 0);
+    $1 = SWIG_CheckState(res);
+    if (!$1) {
+      res = SWIG_ConvertPtr($input, &ptr, $descriptor(std11::shared_ptr< TYPE > *), 0);
+      $1 = SWIG_CheckState(res);
+    }
+  }
+%}
+%typecheck(SWIG_TYPECHECK_POINTER) (const TYPE&)
+%{
+  {
+    void *ptr;
+    int res = SWIG_ConvertPtr($input, &ptr, $descriptor(TYPE *), 0);
+    $1 = SWIG_CheckState(res);
+    if (!$1) {
+      res = SWIG_ConvertPtr($input, &ptr, $descriptor(std11::shared_ptr< TYPE > *), 0);
+      $1 = SWIG_CheckState(res);
+    }
+  }
+%}
+%enddef
 
 #undef PY_REGISTER_WITHOUT_DIRECTOR
 
@@ -70,6 +157,7 @@
 %template (shared ## TYPE) STD11::enable_shared_from_this<TYPE>;
 %shared_ptr(TYPE);
 %make_picklable(TYPE, Kernel);
+REF_PTR(TYPE);
 %enddef
 
 
@@ -401,16 +489,30 @@ struct IsDense : public Question<bool>
   SiconosVector* SiconosVector_in(PyObject* vec, PyArrayObject** array_p, int* is_new_object, std::vector<SP::SiconosVector>& keeper)
   {
     void *argp1=0;
+    int res0=0;
     int res1=0;
-    SiconosVector* smartarg1 = NULL;
+    int newmem = 0;
+    std11::shared_ptr<SiconosVector> tempshared1 ;
+    std11::shared_ptr<SiconosVector> *smartarg1 = NULL;
+    SiconosVector* smartarg2 = NULL;
+
+    // try a conversion from std11::shared_ptr<SiconosVector>
+    res0 = SWIG_ConvertPtr(vec, &argp1, $descriptor(std11::shared_ptr<SiconosVector> *), 0 |  0);
+    if (SWIG_IsOK(res0) && argp1)
+    {
+      // return the raw pointer -- assuming it will be used
+      // temporarily, therefore no ownership or keeper needed.
+      smartarg1 = reinterpret_cast< std11::shared_ptr<SiconosVector> * >(argp1);
+      return smartarg1->get();
+    }
 
     // try a conversion from SiconosVector
     res1 = SWIG_ConvertPtr(vec, &argp1, $descriptor(SiconosVector *), 0 |  0);
     if (SWIG_IsOK(res1) && argp1)
     {
-    // no newmem & SWIG_CAST_NEW_MEMORY + tempshared for non SP
-      smartarg1 = reinterpret_cast< SiconosVector * >(argp1);
-      return  smartarg1;
+      // no newmem & SWIG_CAST_NEW_MEMORY + tempshared for non SP
+      smartarg2 = reinterpret_cast< SiconosVector * >(argp1);
+      return  smartarg2;
     }
     else
     {
@@ -688,10 +790,20 @@ struct IsDense : public Question<bool>
 
     if (!SWIG_IsOK(swig_res))
     {
-      SP::SiconosMatrix tmp = SimpleMatrix_from_numpy(obj, array_p, is_new_object);
-      if (!tmp) { return false; }
-      keeper.push_back(tmp);
-      *c_result = tmp.get();
+      swig_res = SWIG_ConvertPtr(obj, &swig_argp, $descriptor(SP::SiconosMatrix *),  0  | 0);
+
+      if (!SWIG_IsOK(swig_res))
+      {
+        SP::SiconosMatrix tmp = SimpleMatrix_from_numpy(obj, array_p, is_new_object);
+        if (!tmp) { return false; }
+        keeper.push_back(tmp);
+        *c_result = tmp.get();
+      }
+      else if (swig_argp)
+      {
+        *c_result = (reinterpret_cast< SP::SiconosMatrix * >(swig_argp))->get();
+        if (SWIG_IsNewObj(swig_res)) delete reinterpret_cast< SP::SiconosMatrix * >(swig_argp);
+      }
     }
     else if (swig_argp)
     {
@@ -708,10 +820,20 @@ struct IsDense : public Question<bool>
 
     if (!SWIG_IsOK(swig_res))
     {
-      SP::SimpleMatrix tmp = SimpleMatrix_from_numpy(obj, array_p, is_new_object);
-      if (!tmp) { return false; }
-      keeper.push_back(tmp);
-      *c_result = tmp.get();
+      swig_res = SWIG_ConvertPtr(obj, &swig_argp, $descriptor(SP::SimpleMatrix *),  0  | 0);
+
+      if (!SWIG_IsOK(swig_res))
+      {
+        SP::SimpleMatrix tmp = SimpleMatrix_from_numpy(obj, array_p, is_new_object);
+        if (!tmp) { return false; }
+        keeper.push_back(tmp);
+        *c_result = tmp.get();
+      }
+      else if (swig_argp)
+      {
+        *c_result = (reinterpret_cast< SP::SimpleMatrix * >(swig_argp))->get();
+        if (SWIG_IsNewObj(swig_res)) delete reinterpret_cast< SP::SimpleMatrix * >(swig_argp);
+      }
     }
     else if (swig_argp)
     {
@@ -723,7 +845,7 @@ struct IsDense : public Question<bool>
 }
 
 //////////////////////////////////////////////////////////////////////////////
-%typemap(in,fragment="SiconosVector") (std11::shared_ptr<SiconosVector>) (PyArrayObject* array=NULL, int is_new_object)
+%typemap(in,fragment="SiconosVector") (std11::shared_ptr<SiconosVector>) (PyArrayObject* array = NULL, int is_new_object = 0)
 {
   // %typemap(in,fragment="SiconosVector") (std11::shared_ptr<SiconosVector>)
   $1 = SP_SiconosVector_in($input, &array, &is_new_object);
@@ -731,7 +853,7 @@ struct IsDense : public Question<bool>
 
 %typemap(in,fragment="SiconosVector")
   const SiconosVector &
-  (PyArrayObject* array=NULL, int is_new_object, std::vector<SP::SiconosVector> keeper)
+  (PyArrayObject* array=NULL, int is_new_object = 0, std::vector<SP::SiconosVector> keeper)
 {
   // %typemap(in,fragment="NumPy_Fragments")
   // %TYPE (PyArrayObject* array=NULL, int
@@ -751,7 +873,7 @@ struct IsDense : public Question<bool>
 }
 
 %typemap(in,fragment="SiconosVector") SiconosVector &
-(PyArrayObject* array=NULL, int is_new_object, std::vector<SP::SiconosVector> keeper)
+(PyArrayObject* array=NULL, int is_new_object = 0, std::vector<SP::SiconosVector> keeper)
 {
   // %typemap(in,fragment="NumPy_Fragments")
   // %TYPE (PyArrayObject* array=NULL, int
@@ -885,7 +1007,7 @@ struct IsDense : public Question<bool>
 //////////////////////////////////////////////////////////////////////////////
 %define TYPEMAP_MATRIX(TYPE)
 // numpy or TYPE on input -> TYPE
-%typemap(in, fragment="SiconosMatrix") (std11::shared_ptr<TYPE>) (PyArrayObject* array=NULL, int is_new_object)
+%typemap(in, fragment="SiconosMatrix") (std11::shared_ptr<TYPE>) (PyArrayObject* array=NULL, int is_new_object = 0)
 {
 
   void *argp1=0;
@@ -919,7 +1041,7 @@ struct IsDense : public Question<bool>
 
 %typemap(in, fragment="SiconosMatrix")
   const TYPE &
-  (PyArrayObject* array = NULL, int is_new_object, std::vector<SP::TYPE> keeper)
+  (PyArrayObject* array = NULL, int is_new_object = 0, std::vector<SP::TYPE> keeper)
 {
    bool ok = SiconosMatrix_from_python($input, &array, &is_new_object, &$1, keeper);
    if (!ok)
@@ -937,7 +1059,7 @@ struct IsDense : public Question<bool>
 
 %typemap(in, fragment="SiconosMatrix")
   TYPE&
-  (PyArrayObject* array = NULL, int is_new_object, std::vector<SP::TYPE> keeper)
+  (PyArrayObject* array = NULL, int is_new_object = 0, std::vector<SP::TYPE> keeper)
 {
    bool ok = SiconosMatrix_from_python($input, &array, &is_new_object, &$1, keeper);
    if (!ok)
@@ -1092,15 +1214,11 @@ struct IsDense : public Question<bool>
   }
 }
 
-
-
 // check on input : a python sequence
-%typecheck(SWIG_TYPECHECK_INTEGER)
-(std11::shared_ptr<std::vector<unsigned int> >)
-{
-  // %typecheck(std11::shared_ptr<std::vector<unsigned int> >, precedence=SWIG_TYPECHECK_INTEGER))
-  PySequence_Check($input);
-}
+%typecheck(SWIG_TYPECHECK_INTEGER) (std11::shared_ptr<std::vector<unsigned int> >)
+%{
+  $1 = PySequence_Check($input);
+%}
 
 // python int sequence => std::vector<unsigned int>
 %fragment("sequenceToUnsignedIntVector","header",fragment="SWIG_AsVal_int")

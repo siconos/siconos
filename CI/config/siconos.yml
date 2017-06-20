@@ -8,7 +8,9 @@ wildcard: any
 
 match:
   ubuntu: debian
+  
 ##############################################################################
+# Set commands used to install and update packages
 installer:
   any:
     fedora: dnf --setopt=deltarpm=false install -y
@@ -23,7 +25,26 @@ updater:
     fedora:  dnf --setopt=deltarpm=false install -y dnf-plugins-core && dnf -y copr enable xhub/siconos-git
 
 ##############################################################################
+# set specific extra definitions for some packages/distrib
+# (read using get_entry function from mksenv.py)
+# example:
+# to add -DOPT=VALUE when using package clang-3.9 on ubuntu-17
+# use
+# env:
+#   clang-3.9:
+#      ubuntu-17:
+#         - OPT=VALUE
 env:
+  clang-3.9:
+    any:
+      - CC=/usr/bin/clang-3.9
+      - CXX=/usr/bin/clang++-3.9
+      - OMPI_CC=/usr/bin/clang-3.9
+      - OMPI_CXX=/usr/bin/clang++-3.9
+      - LLVM_SYMBOLIZER=/usr/lib/llvm-3.9/bin/llvm-symbolizer
+      - ASAN_SYMBOLIZER_PATH=/usr/lib/llvm-3.9/bin/llvm-symbolizer
+      - MSAN_SYMBOLIZER_PATH=/usr/lib/llvm-3.9/bin/llvm-symbolizer
+
   clang-3.8:
     any:
       - CC=/usr/bin/clang-3.8
@@ -62,6 +83,18 @@ env:
       - PATH_LICENSE_STRING="3413119131&Courtesy&&&USR&54784&12_1_2016&1000&PATH&GEN&31_12_2017&0_0_0&5000&0_0"
 
 ##############################################################################
+# set dependencies list for some packages/distrib
+# (read using pkg_entries function from mksenv.py)
+# example:
+# to set python-dev and scipy as dependencies of python-env on debian
+# use
+# pkgs:
+#   python-env:
+#      debian:
+#         - python-dev
+#         - python-scipy
+# 
+# 
 pkgs:
 
   build-base:
@@ -313,11 +346,11 @@ pkgs:
       - clang-3.8
   # Don't worry, this is a hack to get cppunit to work with clang on ubuntu 15.10, because the system cppunit
   # has been compiled with a different string impl ...
-  cppunit_clang:
+  cppunit_clang-3.9:
     ubuntu-16.10:
-      command:  wget http://siconos.gforge.inria.fr/build-42/cppunit-clang-ubuntu-16.10.tar.xz &&
-                tar xJf cppunit-clang-ubuntu-16.10.tar.xz --strip-components=1 -C /usr/lib/x86_64-linux-gnu/ lib &&
-                tar xJf cppunit-clang-ubuntu-16.10.tar.xz --strip-components=1 -C /usr/include/cppunit/ include
+      command:  wget http://siconos.gforge.inria.fr/build-42/cppunit-clang-3.9-ubuntu-16.10.tar.xz &&
+                tar xJf cppunit-clang-3.9-ubuntu-16.10.tar.xz --strip-components=1 -C /usr/lib/x86_64-linux-gnu/ lib &&
+                tar xJf cppunit-clang-3.9-ubuntu-16.10.tar.xz --strip-components=1 -C /usr/include/cppunit/ include
 
   # this is for msan. It also contains the so files for cppunit compiled with msan
   libcxx_msan:
@@ -351,9 +384,14 @@ pkgs:
     any:
       command: wget https://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh &&
                bash ./Miniconda-latest-Linux-x86_64.sh -b -p /opt/conda &&
-               /opt/conda/bin/conda install numpy scipy lxml pytest matplotlib &&
+               /opt/conda/bin/conda install numpy scipy lxml pytest matplotlib vtk &&
                /opt/conda/bin/conda install -c https://conda.anaconda.org/dlr-sc pythonocc-core &&
-               rm /opt/conda/lib/libgfortran.so*
+               rm /opt/conda/lib/libgfortran.so* &&
+               rm /opt/conda/pkgs/*.tar.bz2 -f &&
+               for i in $(ls /opt/conda/lib/libvtk*.so); do ii=$(echo $i | sed s/-.*/.so/); ln -s $i $ii ; done
+
+               # conda is borken as of 10/03/2017: we need to install vtk by hand and the lib provided by conda ahave their name sufficex by -MV.mv.
+               # So we have to create the right symlink :( --xhub
 
                #echo 'export PATH=/opt/conda/bin:$PATH' > /etc/profile.d/conda.sh &&
                #echo 'export PATH=/opt/conda/bin:$PATH' >> $HOME/.profile &&
@@ -364,6 +402,7 @@ pkgs:
       - libglu1-mesa
       - libsm6
       - libice6
+      - libxt6
 
 
   # deps required for oce/pythonocc install, when oce/occ sources = git repos, last version.
@@ -407,3 +446,4 @@ pkgs:
         touch Werror.mli &&
         make &&
         make install
+
