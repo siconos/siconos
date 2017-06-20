@@ -917,6 +917,7 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
         contactors[instance] = []
         transforms[instance] = []
         offsets[instance] = []
+        actors[instance] = []
         for contactor_instance_name in io.instances()[instance_name]:
             contactor_name = io.instances()[instance_name][
                 contactor_instance_name].attrs['name']
@@ -932,7 +933,7 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
 
             actor.GetProperty().SetColor(random_color())
             actor.SetMapper(fixed_mappers[contactor_name])
-            actors[instance] = actor
+            actors[instance].append(actor)
             renderer.AddActor(actor)
 
             transform = vtk.vtkTransform()
@@ -979,7 +980,7 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
     spos_data = spos_data[:].copy()
 
     def set_actors_visibility(id_t=None):
-        for instance, actor in actors.items():
+        for instance, actorlist in actors.items():
             # Instance is a static object
             visible = instance < 0
             # Instance is in the current timestep
@@ -992,9 +993,9 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
                        if io.instances()[k].attrs['id'] == instance][0]
                 visible = visible or tob <= 0
             if visible:
-                actor.VisibilityOn()
+                [actor.VisibilityOn() for actor in actorlist]
             else:
-                actor.VisibilityOff()
+                [actor.VisibilityOff() for actor in actorlist]
 
     if cf_prov is not None:
         for mu in cf_prov._mu_coefs:
@@ -1226,9 +1227,10 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
             return (pos_data[id_t[0][id_], 2], pos_data[id_t[0][id_], 3], pos_data[id_t[0][id_], 4])
 
         def set_opacity(self):
-            for instance, actor in actors.items():
+            for instance, actorlist in actors.items():
                 if instance >= 0:
-                    actor.GetProperty().SetOpacity(self._opacity)
+                    [actor.GetProperty().SetOpacity(self._opacity)
+                     for actor in actorlist]
 
         def key(self, obj, event):
             global cf_prov
