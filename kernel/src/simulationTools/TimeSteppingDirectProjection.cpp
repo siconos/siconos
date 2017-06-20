@@ -285,6 +285,8 @@ void TimeSteppingDirectProjection::advanceToEvent()
 
     }
 
+    if (_newtonUpdateInteractionsPerIteration)
+      updateInteractionsNewtonIteration();
     updateWorldFromDS();
 
     computeCriteria(&runningProjection);
