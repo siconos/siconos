@@ -69,7 +69,7 @@ function(set_python_install_path)
       # note: the '.replace()' is to work around the following Debian/Ubuntu bug:
       #   https://bugs.launchpad.net/ubuntu/+source/python3-defaults/+bug/1408092
       set(GET_SITE_PACKAGE
-       "from distutils.sysconfig import get_python_lib; print(get_python_lib().replace('/python3/','/python${PY_VERSION}/'))")
+       "from distutils.sysconfig import get_python_lib; print(get_python_lib().replace('/python3/dist-packages','/python${PY_VERSION}/dist-packages'))")
       execute_process(COMMAND ${PYTHON_EXECUTABLE} -c
        "${GET_SITE_PACKAGE}" OUTPUT_VARIABLE PY_INSTALL_DIR)
     endif()
@@ -82,7 +82,7 @@ function(set_python_install_path)
       #   https://bugs.launchpad.net/ubuntu/+source/python3-defaults/+bug/1408092
     list(APPEND python_install_options --prefix=${CMAKE_INSTALL_PREFIX})
       set(GET_SITE_PACKAGE
-       "from distutils.sysconfig import get_python_lib; print(get_python_lib(prefix='${CMAKE_INSTALL_PREFIX}').replace('/python3/','/python${PY_VERSION}/'))")
+       "from distutils.sysconfig import get_python_lib; print(get_python_lib(prefix='${CMAKE_INSTALL_PREFIX}').replace('/python3/dist-packages','/python${PY_VERSION}/dist-packages'))")
       execute_process(COMMAND ${PYTHON_EXECUTABLE} -c
        "${GET_SITE_PACKAGE}" OUTPUT_VARIABLE PY_INSTALL_DIR)
   else()
