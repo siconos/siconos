@@ -451,13 +451,27 @@ void GlobalFrictionContact::display() const
   std::cout << "size (_sizeOutput) " << _sizeOutput <<std::endl;
   std::cout << "and  size (_sizeGlobalOutput) " << _sizeGlobalOutput << "(ie " << _sizeGlobalOutput / _contactProblemDim << " contacts)." <<std::endl;
   std::cout << " - Matrix M  : " <<std::endl;
-  if (_M) _M->display();
-  else std::cout << "-> NULL" <<std::endl;
+  // if (_M) _M->display();
+  // else std::cout << "-> NULL" <<std::endl;
+  NumericsMatrix* M_NM = _M->getNumericsMatrix().get();
+  if (M_NM)
+  {
+    NM_display(M_NM);
+  }
   std::cout << " - Matrix H : " <<std::endl;
-  if (_H) _H->display();
-  else std::cout << "-> NULL" <<std::endl;
+  // if (_H) _H->display();
+  // else std::cout << "-> NULL" <<std::endl;
+  NumericsMatrix* H_NM = _H->getNumericsMatrix().get();
+  if (H_NM)
+  {
+    NM_display(H_NM);
+  }
+
   std::cout << " - Vector q : " <<std::endl;
   if (_q) _q->display();
+  else std::cout << "-> NULL" <<std::endl;
+  std::cout << " - Vector b : " <<std::endl;
+  if (_b) _b->display();
   else std::cout << "-> NULL" <<std::endl;
   std::cout << "============================================================" <<std::endl;
 }
