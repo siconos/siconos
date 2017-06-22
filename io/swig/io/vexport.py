@@ -285,7 +285,7 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
 
     class DataConnector():
 
-        def __init__(self, instance, data_name='velocity', data_size=6):
+        def __init__(self, instance, data_name, data_size):
 
             self._instance = instance
             self._data_name = data_name
@@ -311,6 +311,9 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
             data_t = tuple(data[0:self._data_size])
             output.GetFieldData().GetArray(self._data_name).SetTuple(
                 0, data_t)
+
+#            it is possible to set the time step like this
+#            output.GetInformation().Set(vtk.vtkDataObject.DATA_TIME_STEP(), 1.0)
 
     # contact forces provider
     class ContactInfoSource():
@@ -540,20 +543,29 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
             transformer.SetTransform(transform)
             transformers[contactor_name] = transformer
 
-            data_connectors_v[instance] = DataConnector(instance)
+            # velocities
+            data_connectors_v[instance] = DataConnector(instance,
+                                                        data_name='velocity',
+                                                        data_size=6)
             data_connectors_v[instance]._connector.SetInputConnection(
                 transformer.GetOutputPort())
             data_connectors_v[instance]._connector.Update()
             big_data_source.AddInputConnection(
                 data_connectors_v[instance]._connector.GetOutputPort())
 
-            data_connectors_t[instance] = DataConnector(instance, data_name='translation', data_size=3)
+            # translations
+            data_connectors_t[instance] = \
+                DataConnector(instance,
+                              data_name='translation',
+                              data_size=3)
+            
             data_connectors_t[instance]._connector.SetInputConnection(
                 transformer.GetOutputPort())
             data_connectors_t[instance]._connector.Update()
             big_data_source.AddInputConnection(
                 data_connectors_t[instance]._connector.GetOutputPort())
 
+            # displacement
             data_connectors_d[instance] = DataConnector(instance, data_name='displacement', data_size=3)
             data_connectors_d[instance]._connector.SetInputConnection(
                 transformer.GetOutputPort())
@@ -581,8 +593,8 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
 
     contact_info_source = ContactInfoSource(cf_data)
 
-    pveloa = DataConnector(0)
-    pvelob = DataConnector(0)
+    pveloa = DataConnector(0, data_name='velocity', data_size=6)
+    pvelob = DataConnector(0, data_name='velocity', data_size=6)
 
     pveloa._connector.SetInputConnection(
         contact_info_source._contact_source_a.GetOutputPort())
