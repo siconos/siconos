@@ -891,6 +891,11 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
         offsets[instance] = []
         times_of_birth[instance] = io.instances()[instance_name].\
                                    attrs['time_of_birth']
+        if instance > 0:
+            dynamic_actors[instance] = list()
+        else:
+            static_actors[instance] = list()
+
         for contactor_instance_name in io.instances()[instance_name]:
             contactor_name = io.instances()[instance_name][
                 contactor_instance_name].attrs['name']
@@ -898,21 +903,21 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
 
             actor = vtk.vtkActor()
             if io.instances()[instance_name].attrs['mass'] > 0:
+                # objects that may move
+                dynamic_actors[instance].append(actor)
+
                 actor.GetProperty().SetOpacity(
-                    config.get('dynamic_opacity',0.7))
+                    config.get('dynamic_opacity', 0.7))
             else:
+                # objects that are not supposed to move
+                static_actors[instance].append(actor)
+
                 actor.GetProperty().SetOpacity(
-                    config.get('static_opacity',1.0))
+                    config.get('static_opacity', 1.0))
 
             actor.GetProperty().SetColor(random_color())
             actor.SetMapper(fixed_mappers[contactor_name])
-            if instance >= 0:
-                # objects that may move
-                dynamic_actors[instance] = actor
-            else:
-                # objects that are not supposed to move
-                static_actors[instance] = actor
-                
+
             renderer.AddActor(actor)
 
             transform = vtk.vtkTransform()
@@ -1001,11 +1006,11 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
         for y in x.reshape(-1, 8):
             set_position(*(y.reshape(8)))
 
-    # set visibility for all actors associated to a dynamic instance        
+    # set visibility for all actors associated to a dynamic instance
     def set_actors_viz(instance, time):
         if times_of_birth[instance] <= time:
             for actor in dynamic_actors[instance]:
-                actor.VisibilityOn() 
+                actor.VisibilityOn()
         else:
             for actor in dynamic_actors[instance]:
                 actor.VisibilityOff()
@@ -1015,7 +1020,7 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
     set_actors_vizzz = numpy.vectorize(set_actors_viz)
 
     def set_dynamic_actors_visibility(time):
-        set_actors_vizzz(actors.keys(), time)
+        set_actors_vizzz(dynamic_actors.keys(), time)
 
     # to be removed if ok
     def set_dynamic_actors_visibility_old(id_t=None):
@@ -1053,18 +1058,20 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
     except IOError as e:
         pass
 
-    time0 = min(dpos_data[:, 0])
+    time0 = None
     try:
         # Positions at first time step
+        time0 = min(dpos_data[:, 0])
         id_t0 = numpy.where(dpos_data[:, 0] == time0)
-        pos_t0 = pos_data[id_t0, 1:9]
+        pos_t0 = pos_data[id_t0, 0:9]
     except ValueError:
         # Collect positions from init data
         # this is for the case simulation hass not been ran and
         # time does not exists
+        time0 = 0
         id_t0 = None
         pos_t0 = numpy.array([
-            numpy.hstack(([time0,
+            numpy.hstack(([0.,
                            io.instances()[k].attrs['id']]
                           ,io.instances()[k].attrs['translation']
                           ,io.instances()[k].attrs['orientation']))
@@ -1073,18 +1080,17 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
 
     if numpy.shape(spos_data)[0] > 0:
         set_position(spos_data)
+        print spos_data.shape
+        # static objects are always visible
+        for instance, actors in static_actors.items():
+            for actor in actors:
+                 actor.VisibilityOn()
 
-    set_position(dpos_data[[time0], :])
-    set_positionv(pos_t0)
+    print pos_t0.shape
+    set_position(*pos_t0)
 
     set_dynamic_actors_visibility(time0)
 
-    # static objects are always visible
-    for actor in static_actors:
-        actor.VisibilityOn()
-        
-
-    
     renderer_window.AddRenderer(renderer)
     interactor_renderer.SetRenderWindow(renderer_window)
     interactor_renderer.GetInteractorStyle(
@@ -1276,8 +1282,8 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
             return (pos_data[id_t[0][id_], 2], pos_data[id_t[0][id_], 3], pos_data[id_t[0][id_], 4])
 
         def set_opacity(self):
-            for instance, actor in actors.items():
-                if instance >= 0:
+            for instance, actors in dynamic_actors.items():
+                for actor in actors:
                     actor.GetProperty().SetOpacity(self._opacity)
 
         def key(self, obj, event):
