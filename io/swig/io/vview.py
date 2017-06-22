@@ -684,7 +684,8 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
     readers = dict()
     datasets = dict()
     mappers = dict()
-    actors = dict()
+    dynamic_actors = dict()
+    static_actors = dict()
     vtk_reader = {'vtp': vtk.vtkXMLPolyDataReader,
                   'stl': vtk.vtkSTLReader}
 
@@ -905,7 +906,13 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
 
             actor.GetProperty().SetColor(random_color())
             actor.SetMapper(fixed_mappers[contactor_name])
-            actors[instance] = actor
+            if instance >= 0:
+                # objects that may move
+                dynamic_actors[instance] = actor
+            else:
+                # objects that are not supposed to move
+                static_actors[instance] = actor
+                
             renderer.AddActor(actor)
 
             transform = vtk.vtkTransform()
@@ -951,6 +958,7 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
     pos_data = dpos_data[:]
     spos_data = spos_data[:]
 
+    # this sets the position for all transforms associated to an instance
     def set_position_i(instance, q0, q1, q2, q3, q4, q5, q6):
         #if (numpy.any(numpy.isnan([q0, q1, q2, q3, q4, q5, q6]))
         #    or numpy.any(numpy.isinf([q0, q1, q2, q3, q4, q5, q6]))):
@@ -963,7 +971,6 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
 
             p = q.rotate(offset[0])
 
-<<<<<<< HEAD
             r = q * Quaternion(offset[1])
 
             transform.Identity()
@@ -976,6 +983,7 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
                                  axis[1],
                                  axis[2])
 
+    # the numpy vectorization is ok on column vectors for each args
     set_position_v = numpy.vectorize(set_position_i)
 
     def set_position(data):
@@ -988,27 +996,30 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
                        data[:, 7],
                        data[:, 8])
 
+    # to be removed if ok
     def set_positionv_old(x):
         for y in x.reshape(-1, 8):
             set_position(*(y.reshape(8)))
 
+    # set visibility for all actors associated to a dynamic instance        
     def set_actors_viz(instance, time):
-        actor = actors[instance]
         if times_of_birth[instance] <= time:
-            actor.VisibilityOn()
+            for actor in dynamic_actors[instance]:
+                actor.VisibilityOn() 
         else:
-            actor.VisibilityOff()
+            for actor in dynamic_actors[instance]:
+                actor.VisibilityOff()
 
+    # here the numpy vectorization is used with a column vector and a
+    # scalar for the time arg
     set_actors_vizzz = numpy.vectorize(set_actors_viz)
 
-    def set_actors_visibility(time):
+    def set_dynamic_actors_visibility(time):
         set_actors_vizzz(actors.keys(), time)
 
-    def set_actors_visibility_old(id_t=None):
-=======
-    def set_actors_visibility(id_t=None):
->>>>>>> origin/master
-        for instance, actor in actors.items():
+    # to be removed if ok
+    def set_dynamic_actors_visibility_old(id_t=None):
+        for instance, actor in dynamic.actors.items() + static_actors.items():
             # Instance is a static object
             visible = instance < 0
             # Instance is in the current timestep
@@ -1042,7 +1053,6 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
     except IOError as e:
         pass
 
-<<<<<<< HEAD
     time0 = min(dpos_data[:, 0])
     try:
         # Positions at first time step
@@ -1050,22 +1060,12 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
         pos_t0 = pos_data[id_t0, 1:9]
     except ValueError:
         # Collect positions from init data
-        # but why ??
+        # this is for the case simulation hass not been ran and
+        # time does not exists
         id_t0 = None
         pos_t0 = numpy.array([
             numpy.hstack(([time0,
                            io.instances()[k].attrs['id']]
-=======
-    try:
-        # Positions at first time step
-        id_t0 = numpy.where(dpos_data[:, 0] == min(dpos_data[:, 0]))
-        pos_t0 = pos_data[id_t0, 1:9]
-    except ValueError:
-        # Collect positions from init data
-        id_t0 = None
-        pos_t0 = numpy.array([
-            numpy.hstack(([io.instances()[k].attrs['id']]
->>>>>>> origin/master
                           ,io.instances()[k].attrs['translation']
                           ,io.instances()[k].attrs['orientation']))
             for k in io.instances()
@@ -1074,14 +1074,17 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
     if numpy.shape(spos_data)[0] > 0:
         set_position(spos_data)
 
-<<<<<<< HEAD
     set_position(dpos_data[[time0], :])
-=======
     set_positionv(pos_t0)
->>>>>>> origin/master
 
-    set_actors_visibility(time0)
+    set_dynamic_actors_visibility(time0)
 
+    # static objects are always visible
+    for actor in static_actors:
+        actor.VisibilityOn()
+        
+
+    
     renderer_window.AddRenderer(renderer)
     interactor_renderer.SetRenderWindow(renderer_window)
     interactor_renderer.GetInteractorStyle(
@@ -1249,7 +1252,7 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
 
             # set_positionv(spos_data[:, 1:9])
 
-            set_actors_visibility(self._times[index])
+            set_dynamic_actors_visibility(self._times[index])
 
             id_t = numpy.where(pos_data[:, 0] == self._times[index])
             set_position(*pos_data[id_t, :])
@@ -1311,7 +1314,7 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
 
                 pos_data = dpos_data[:]
                 min_time = times[0]
-                set_actors_visibility(time0)
+                set_dynamic_actors_visibility(time0)
 
                 max_time = times[len(times) - 1]
 
