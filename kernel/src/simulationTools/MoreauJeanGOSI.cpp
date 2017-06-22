@@ -126,7 +126,7 @@ void MoreauJeanGOSI::fillDSLinks(Interaction &inter,
   bool computeResidu = relation.requireResidu();
   inter.initializeMemory(computeResidu,_steps);
 
-  if (checkOSI(DSG.descriptor(ds1)) || checkOSI(DSG.descriptor(ds2)))
+  if (!(checkOSI(DSG.descriptor(ds1)) && checkOSI(DSG.descriptor(ds2))))
   {
     RuntimeException::selfThrow("MoreauJeanGOSI::fillDSLinks. The implementation is not correct for two different OSI for one interaction");
   }
