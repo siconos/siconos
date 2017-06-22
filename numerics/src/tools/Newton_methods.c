@@ -486,7 +486,7 @@ newton_LSA_free:
   if (log_hdf5)
   {
     SN_logh5_scalar_uinteger(iter, "nb_iter", logger_s->file);
-    SN_logh5_scalar_uinteger(err, "residual", logger_s->file);
+    SN_logh5_scalar_double(err, "residual", logger_s->file);
     if (logger_s->group) SN_logh5_end_iter(logger_s);
     SN_logh5_end(logger_s);
   }

@@ -89,14 +89,14 @@ void FirstOrderLinearDSTest::testBuildFirstOrderLinearDS1()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS1 : ", ds->invM() == NULL, true);
 
   SP::SiconosVector x01(new SiconosVector(3));
-  (*x01)(0) = 0;
-  (*x01)(1) = 1;
-  (*x01)(2) = 2;
+  (*x01)(0) = 0.;
+  (*x01)(1) = 1.;
+  (*x01)(2) = 2.;
   double time = 1.5;
   ds->computeA(time);
   ds->computeb(time);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS1 : ", *(ds->b()) == time* *x01, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS1 : ", *(ds->A()) == 2 * *A0, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS1 : ", *(ds->A()) == 2. * *A0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS1 : ", ds->f() == NULL, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS1 : ", *(ds->jacobianfx()) == *(ds->A()), true);
   ds->setComputeMFunction("TestPlugin", "computeM");
@@ -108,9 +108,10 @@ void FirstOrderLinearDSTest::testBuildFirstOrderLinearDS1()
   SimpleMatrix invM(3,3);
   invM(0,0) = 1. / time; invM(1,1) = 1./ (2. * time); invM(2,2) = 1./(3. * time);
   SiconosVector tmp(3);
-  tmp = (time* *x01 + 2 * prod(*A0, *x0));
+  tmp = (time* *x01 + 2. * prod(*A0, *x0));
   prod(invM, tmp, tmp);
   prod(invM, 2* *A0, Mref);
+  
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS1 : ", *(ds->rhs()) == tmp , true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS1 : ", *(ds->jacobianRhsx()) == Mref, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS1 : ", *(ds->b()) == time* *x01, true);
