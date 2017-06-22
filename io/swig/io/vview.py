@@ -889,11 +889,10 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
         contactors[instance] = []
         transforms[instance] = []
         offsets[instance] = []
-        actors[instance] = []
         times_of_birth[instance] = io.instances()[instance_name].\
                                    attrs['time_of_birth']
 
-        if instance > 0:
+        if instance >= 0:
             dynamic_actors[instance] = list()
         else:
             static_actors[instance] = list()
