@@ -163,7 +163,7 @@ int main(int argc, char* argv[])
     // Building the first knee joint for beam1
     // input  - the concerned DS : beam1
     //        - a point in the spatial frame (absolute frame) where the knee is defined P
-    SP::KneeJointR relation1(new KneeJointR(beam1, P));
+    SP::KneeJointR relation1(new KneeJointR(P, true, beam1));
     SP::NonSmoothLaw nslaw1(new EqualityConditionNSL(relation1->numberOfConstraints()));
 
     SP::Interaction inter1(new Interaction(nslaw1, relation1));

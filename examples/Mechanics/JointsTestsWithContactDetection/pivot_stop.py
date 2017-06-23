@@ -59,7 +59,7 @@ with Hdf5() as io:
     # Connect the two bodies by a pivot joint
     io.addJoint('joint1', 'bar', 'post', [-0.45,0,0], [0,1,0], 'PivotJointR',
                 allow_self_collide = self_collide,
-                nslaws='stop', stops=stops)
+                nslaws='stop', stops=stops, absolute=False)
 
     # Joint from "bar" to the world reference frame, to keep things from falling.
     io.addJoint('joint2', 'post', None, [0,0,0], [0,1,0],

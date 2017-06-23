@@ -22,48 +22,54 @@
 
 #include <MechanicsFwd.hpp>
 #include <SiconosFwd.hpp>
-#include <NewtonEulerR.hpp>
+#include <NewtonEulerJointR.hpp>
 
 /** \class FixedJointR
  *  \brief This class implements a fixed joint between one or two Newton/Euler Dynamical system
  *
  */
-class FixedJointR : public NewtonEulerR
+class FixedJointR : public NewtonEulerJointR
 {
 protected:
   /** serialization hooks
    */
   ACCEPT_SERIALIZATION(FixedJointR);
-  FixedJointR(): NewtonEulerR() {};
 
   /*Initial conditions*/
   double _G10G20d1x, _G10G20d1y, _G10G20d1z;
   double _cq2q101, _cq2q102, _cq2q103, _cq2q104;
 
 public:
+  /** Empty constructor. The relation may be initialized later by
+   * setInitialConditions. */
+  FixedJointR() : NewtonEulerJointR() {};
+
   /* constructor,
      \param a SP::NewtonEulerDS d1, a dynamical system containing the initial position
      \param a SP::NewtonEulerDS d2, a dynamical system containing the initial position
   */
-  FixedJointR(SP::NewtonEulerDS d1, SP::NewtonEulerDS d2);
-
-  /* constructor,
-     \param a SP::NewtonEulerDS d1, a dynamical system containing the initial position
-  */
-  FixedJointR(SP::NewtonEulerDS d1);
+  FixedJointR(SP::NewtonEulerDS d1, SP::NewtonEulerDS d2 = SP::NewtonEulerDS());
 
   /** destructor
    */
   virtual ~FixedJointR() {};
 
+  /** Initialize the joint constants based on the provided initial positions. */
+  virtual void setInitialConditions(SP::SiconosVector q1,
+                                    SP::SiconosVector q2 = SP::SiconosVector());
+
   /** Get the number of constraints defined in the joint
       \return the number of constraints
    */
-  static unsigned int numberOfConstraints() { return 6; }
+  virtual unsigned int numberOfConstraints() { return 6; }
 
   virtual void computeJachq(double time, Interaction& inter, SP::BlockVector q0);
 
   virtual void computeh(double time, BlockVector& q0, SiconosVector& y);
+
+  virtual unsigned int numberOfDoF() { return 0; }
+
+  virtual DoF_Type typeOfDoF(unsigned int axis) { return DOF_TYPE_INVALID; }
 
 protected:
 

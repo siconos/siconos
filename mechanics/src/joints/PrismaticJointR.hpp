@@ -42,7 +42,6 @@ protected:
   ACCEPT_SERIALIZATION(PrismaticJointR);
   PrismaticJointR(): NewtonEulerJointR() {};
 
-public:
   /** Axis of the prismatic point in the q1 inertial frame of reference
    */
   SP::SiconosVector _axis0;
@@ -79,26 +78,23 @@ public:
   double _cq2q103;
   double _cq2q104;
 
-  /** constructor from two dynamical systems and an axis
-   *  \param d1 first  DynamicalSystem link by the  joint
-   *  \param d2 second  DynamicalSystem link by the joint
-   * \param axis SiconosVector of size 3 that defines the prismatic axis
-   *  in the body  frame of d1 ?
+public:
+
+  /** Constructor based on one or two dynamical systems and an axis.
+   *  \param d1 first DynamicalSystem linked by the joint.
+   *  \param d2 second DynamicalSystem linked by the joint, or NULL
+   *            for absolute frame.
+   *  \param A SiconosVector of size 3 that defines the prismatic axis.
+   *  \param absoluteRef if true, A is in the absolute frame,
+   *                     otherwise A is in d1 frame.
    */
-  PrismaticJointR(SP::NewtonEulerDS d1, SP::NewtonEulerDS d2, SP::SiconosVector axis);
+  PrismaticJointR(SP::SiconosVector axis, bool absoluteRef,
+                  SP::NewtonEulerDS d1 = SP::NewtonEulerDS(),
+                  SP::NewtonEulerDS d2 = SP::NewtonEulerDS());
 
-
-  /** constructor from one dynamical systems and an axis
-   *  \param d1 the  DynamicalSystem link by the  joint
-   * \param axis SiconosVector of size 3 that defines the prismatic axis
-   *  in the inertial frame of reference
-   */
-  PrismaticJointR(SP::NewtonEulerDS d1, SP::SiconosVector axis,
-                  bool absoluteRef=false);
-
-  void computeFromInitialPosition(SP::SiconosVector q2,
-                                  SP::SiconosVector q1=SP::SiconosVector(),
-                                  bool absoluteRef=false);
+  /** Initialize the joint constants based on the provided initial positions. */
+  virtual void setInitialConditions(SP::SiconosVector q1,
+                                    SP::SiconosVector q2 = SP::SiconosVector());
 
   void displayInitialPosition();
 

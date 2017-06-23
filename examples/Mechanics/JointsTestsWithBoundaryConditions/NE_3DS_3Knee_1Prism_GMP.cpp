@@ -249,15 +249,15 @@ int main(int argc, char* argv[])
     SP::SiconosVector P(new SiconosVector(3));
     P->zero();
 
-    SP::KneeJointR relation1(new KneeJointR(beam1, P));
+    SP::KneeJointR relation1(new KneeJointR(P, true, beam1));
 
     SP::SiconosVector G20(new SiconosVector(3));
     P->zero();
     P->setValue(0, L1 / 2);
-    SP::KneeJointR relation2(new KneeJointR(beam1, beam2, P));
+    SP::KneeJointR relation2(new KneeJointR(P, false, beam1, beam2));
     P->zero();
     P->setValue(0, -L1 / 2);
-    SP::KneeJointR relation3(new KneeJointR(beam2, beam3, P));
+    SP::KneeJointR relation3(new KneeJointR(P, false, beam2, beam3));
 
     SP::NonSmoothLaw nslaw1(new EqualityConditionNSL(relation1->numberOfConstraints()));
     SP::NonSmoothLaw nslaw2(new EqualityConditionNSL(relation2->numberOfConstraints()));
@@ -269,7 +269,7 @@ int main(int argc, char* argv[])
     SP::SiconosVector axe1(new SiconosVector(3));
     axe1->zero();
     axe1->setValue(0, 1);
-    SP::PrismaticJointR relation4(new PrismaticJointR(beam3, axe1));
+    SP::PrismaticJointR relation4(new PrismaticJointR(axe1, false, beam3));
 
     SP::NonSmoothLaw nslaw4(new EqualityConditionNSL(relation4->numberOfConstraints()));
 

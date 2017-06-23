@@ -32,7 +32,6 @@ protected:
   /** serialization hooks
   */
   ACCEPT_SERIALIZATION(PivotJointR);
-  PivotJointR() : KneeJointR() {};
 
   /*Axis coordonates*/
   SP::SiconosVector _A;
@@ -59,8 +58,13 @@ protected:
                                SP::BlockVector q0, SimpleMatrix& jachq,
                                unsigned int axis);
 
-  virtual void Jd1d2(double X1, double Y1, double Z1, double q10, double q11, double q12, double q13, double X2, double Y2, double Z2, double q20, double q21, double q22, double q23);
-  virtual void Jd1(double X1, double Y1, double Z1, double q10, double q11, double q12, double q13);
+  virtual void Jd1d2(double X1, double Y1, double Z1,
+                     double q10, double q11, double q12, double q13,
+                     double X2, double Y2, double Z2,
+                     double q20, double q21, double q22, double q23);
+
+  virtual void Jd1(double X1, double Y1, double Z1,
+                   double q10, double q11, double q12, double q13);
 
   void rot2to1(double q10, double q11, double q12, double q13,
                double q20, double q21, double q22, double q23,
@@ -71,24 +75,28 @@ protected:
   double AscalA2(double q2to1x, double q2to1y, double q2to1z);
   double AscalA(double q2to1x, double q2to1y, double q2to1z);
 
-  virtual void initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& work);
-
 public:
-  /* constructor,
-     \param a SP::NewtonEulerDS d1, a dynamical system containing the intial position
-     \param a SP::NewtonEulerDS d2, a dynamical system containing the intial position
-     \param a SP::SiconosVector P, see KneeJointR documentation.
-     \param a SP::SiconosVector A, Axis of the pivot in the frame of d1.
-  */
-  PivotJointR(SP::NewtonEulerDS d1, SP::NewtonEulerDS d2, SP::SiconosVector P, SP::SiconosVector A);
+  /** Empty constructor. The relation may be initialized later by
+   * setPoint, setAxis, setAbsolute, and setInitialConditions. */
+  PivotJointR() : KneeJointR() {};
 
-  /* constructor,
-     \param a SP::NewtonEulerDS d1, a dynamical system containing the intial position
-     \param a SP::SiconosVector P, see KneeJointR documentation.
-     \param a SP::SiconosVector A, axis in the frame of the object.
-     \param a bool, used only by the KneeJointR constructor see KneeJointR documentation.
-  */
-  PivotJointR(SP::NewtonEulerDS d1, SP::SiconosVector P, SP::SiconosVector A, bool absoluteRef = true);
+  /** Constructor based on one or two dynamical systems, a point and an axis.
+   *  \param d1 first DynamicalSystem linked by the joint.
+   *  \param d2 second DynamicalSystem linked by the joint, or NULL
+   *            for absolute frame.
+   *  \param P SiconosVector of size 3 that defines the point around
+   *           which rotation is allowed.
+   *  \param A SiconosVector of size 3 that defines the cylindrical axis.
+   *  \param absoluteRef if true, P and A are in the absolute frame,
+   *                     otherwise P and A are in d1 frame.
+   */
+  PivotJointR(SP::SiconosVector P, SP::SiconosVector A, bool absoluteRef,
+              SP::NewtonEulerDS d1 = SP::NewtonEulerDS(),
+              SP::NewtonEulerDS d2 = SP::NewtonEulerDS());
+
+  /** Initialize the joint constants based on the provided initial positions. */
+  virtual void setInitialConditions(SP::SiconosVector q1,
+                                    SP::SiconosVector q2 = SP::SiconosVector());
 
   /** destructor
    */

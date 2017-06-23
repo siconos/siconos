@@ -175,7 +175,7 @@ int main(int argc, char* argv[])
     axe1->zero();
     axe1->setValue(2, 1);
 
-    SP::PrismaticJointR relation4(new PrismaticJointR(bouncingbeam, axe1));
+    SP::PrismaticJointR relation4(new PrismaticJointR(axe1, false, bouncingbeam));
     SP::NonSmoothLaw nslaw4(new EqualityConditionNSL(relation4->numberOfConstraints()));
     SP::Interaction inter4(new Interaction(nslaw4, relation4));
     SP::Interaction interFloor(new Interaction(nslaw0, relation0));

@@ -694,7 +694,7 @@ SICONOS_IO_REGISTER_WITH_BASES(ExternalBody,(LagrangianDS),
 )
 SICONOS_IO_REGISTER_WITH_BASES(Circle,(CircularDS),
 )
-SICONOS_IO_REGISTER_WITH_BASES(FixedJointR,(NewtonEulerR),
+SICONOS_IO_REGISTER_WITH_BASES(FixedJointR,(NewtonEulerJointR),
   (_G10G20d1x)
   (_G10G20d1y)
   (_G10G20d1z)
@@ -711,7 +711,10 @@ SICONOS_IO_REGISTER_WITH_BASES(KneeJointR,(NewtonEulerJointR),
   (_G2P0z)
   (_P0))
 SICONOS_IO_REGISTER_WITH_BASES(NewtonEulerJointR,(NewtonEulerR),
-  (_allowSelfCollide))
+  (_absoluteRef)
+  (_allowSelfCollide)
+  (_axes)
+  (_points))
 SICONOS_IO_REGISTER_WITH_BASES(SphereLDS,(LagrangianDS),
   (I)
   (massValue)

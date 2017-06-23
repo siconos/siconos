@@ -59,40 +59,17 @@
  */
 
 FixedJointR::FixedJointR(SP::NewtonEulerDS d1, SP::NewtonEulerDS d2)
-  : NewtonEulerR()
+  : NewtonEulerJointR()
 {
-  ::boost::math::quaternion<double> q1((*d1->q())(3), (*d1->q())(4),
-                                       (*d1->q())(5), (*d1->q())(6));
-  ::boost::math::quaternion<double> q2((*d2->q())(3), (*d2->q())(4),
-                                       (*d2->q())(5), (*d2->q())(6));
-  ::boost::math::quaternion<double> cq2q10(1.0 / q2 * q1);
-
-  _cq2q101 = cq2q10.R_component_1();
-  _cq2q102 = cq2q10.R_component_2();
-  _cq2q103 = cq2q10.R_component_3();
-  _cq2q104 = cq2q10.R_component_4();
-
-  ::boost::math::quaternion<double>    quatG10G20_abs(
-    0, d2->q()->getValue(0) - d1->q()->getValue(0),
-    d2->q()->getValue(1) - d1->q()->getValue(1),
-    d2->q()->getValue(2) - d1->q()->getValue(2));
-  ::boost::math::quaternion<double>    quatBuff(0, 0, 0, 0);
-
-  quatBuff = 1.0/q1 * quatG10G20_abs * q1;
-  _G10G20d1x = quatBuff.R_component_2();
-  _G10G20d1y = quatBuff.R_component_3();
-  _G10G20d1z = quatBuff.R_component_4();
+  setInitialConditions(d1->q(), d2 ? d2->q() : SP::SiconosVector());
 }
 
-/* constructor,
-   \param a SP::NewtonEulerDS d1, a dynamical system containing the intial position
-*/
-FixedJointR::FixedJointR(SP::NewtonEulerDS d1)
-  : NewtonEulerR()
+void FixedJointR::setInitialConditions(SP::SiconosVector q1, SP::SiconosVector q2)
 {
-  ::boost::math::quaternion<double> q1((*d1->q())(3), (*d1->q())(4),
-                                       (*d1->q())(5), (*d1->q())(6));
-  ::boost::math::quaternion<double> cq2q10(q1);
+  ::boost::math::quaternion<double> quat1((*q1)(3), (*q1)(4), (*q1)(5), (*q1)(6));
+  ::boost::math::quaternion<double> quat2(q2 ? (*q2)(3) : 1, q2 ? (*q2)(4) : 0,
+                                          q2 ? (*q2)(5) : 0, q2 ? (*q2)(6) : 0);
+  ::boost::math::quaternion<double> cq2q10(1.0 / quat2 * quat1);
 
   _cq2q101 = cq2q10.R_component_1();
   _cq2q102 = cq2q10.R_component_2();
@@ -100,10 +77,12 @@ FixedJointR::FixedJointR(SP::NewtonEulerDS d1)
   _cq2q104 = cq2q10.R_component_4();
 
   ::boost::math::quaternion<double>    quatG10G20_abs(
-    0, - d1->q()->getValue(0), - d1->q()->getValue(1), - d1->q()->getValue(2));
+    0, (q2 ? q2->getValue(0) : 0) - q1->getValue(0),
+    (q2 ? q2->getValue(1) : 0) - q1->getValue(1),
+    (q2 ? q2->getValue(2) : 0) - q1->getValue(2));
   ::boost::math::quaternion<double>    quatBuff(0, 0, 0, 0);
 
-  quatBuff = 1.0/q1 * quatG10G20_abs * q1;
+  quatBuff = 1.0/quat1 * quatG10G20_abs * quat1;
   _G10G20d1x = quatBuff.R_component_2();
   _G10G20d1y = quatBuff.R_component_3();
   _G10G20d1z = quatBuff.R_component_4();

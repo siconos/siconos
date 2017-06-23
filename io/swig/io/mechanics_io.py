@@ -1254,8 +1254,7 @@ class Hdf5():
 
             joint_type = self.joints()[name].attrs['type']
             joint_class = getattr(joints, joint_type)
-            absolute = self.joints()[name].attrs.get('absolute', None)
-            absolute = [[True if absolute else False], []][absolute is None]
+            absolute = not not self.joints()[name].attrs.get('absolute', True)
             allow_self_collide = self.joints()[name].attrs.get(
                 'allow_self_collide',None)
             stops = self.joints()[name].attrs.get('stops',None)
@@ -1270,31 +1269,30 @@ class Hdf5():
                 ds2_name = self.joints()[name].attrs['object2']
                 ds2 = topo.getDynamicalSystem(ds2_name)
                 try:
-                    joint = joint_class(ds1, ds2,
-                                        self.joints()[name].attrs['pivot_point'],
+                    joint = joint_class(self.joints()[name].attrs['pivot_point'],
                                         self.joints()[name].attrs['axis'],
-                                        *absolute)
+                                        absolute, ds1, ds2)
                 except NotImplementedError:
                     try:
-                        joint = joint_class(ds1, ds2,
-                                            self.joints()[name].attrs['pivot_point'],
-                                            *absolute)
+                        joint = joint_class(self.joints()[name].attrs['pivot_point'],
+                                            absolute, ds1, ds2)
                     except NotImplementedError:
-                        joint = joint_class(ds1, ds2, *absolute)
+                        joint = joint_class(absolute, ds1, ds2)
 
             else:
                 try:
-                    joint = joint_class(ds1,
-                                        self.joints()[name].attrs['pivot_point'],
+                    joint = joint_class(self.joints()[name].attrs['pivot_point'],
                                         self.joints()[name].attrs['axis'],
-                                        *absolute)
+                                        absolute, ds1)
                 except NotImplementedError:
                     try:
-                        joint = joint_class(ds1,
-                                            self.joints()[name].attrs['pivot_point'],
-                                            *absolute)
+                        joint = joint_class(self.joints()[name].attrs['pivot_point'],
+                                            absolute, ds1)
                     except NotImplementedError:
-                        joint = joint_class(ds1, *absolute)
+                        try:
+                            joint = joint_class(absolute, ds1)
+                        except NotImplementedError:
+                            joint = joint_class(ds1)
 
             if allow_self_collide is not None:
                 joint.setAllowSelfCollide(not not allow_self_collide)

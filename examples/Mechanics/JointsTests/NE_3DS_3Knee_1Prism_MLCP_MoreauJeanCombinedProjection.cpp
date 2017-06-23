@@ -243,7 +243,7 @@ int main(int argc, char* argv[])
     // Building the first knee joint for beam1
     // input  - the concerned DS : beam1
     //        - a point in the spatial frame (absolute frame) where the knee is defined P
-    SP::KneeJointR relation1(new KneeJointR(beam1, P));
+    SP::KneeJointR relation1(new KneeJointR(P, true, beam1));
 
 
 
@@ -253,7 +253,7 @@ int main(int argc, char* argv[])
     //        - a point in the spatial frame (absolute frame) where the knee is defined P
     P->zero();
     P->setValue(0, L1 / 2);
-    SP::KneeJointR relation2(new KneeJointR(beam1, beam2, P));
+    SP::KneeJointR relation2(new KneeJointR(P, false, beam1, beam2));
 
     // Building the third knee joint for beam2 and beam3
     // input  - the first concerned DS : beam2
@@ -261,7 +261,7 @@ int main(int argc, char* argv[])
     //        - a point in the spatial frame (absolute frame) where the knee is defined P
     P->zero();
     P->setValue(0, -L1 / 2);
-    SP::KneeJointR relation3(new KneeJointR(beam2, beam3, P));
+    SP::KneeJointR relation3(new KneeJointR(P, false, beam2, beam3));
 
 
     SP::NonSmoothLaw nslaw1(new EqualityConditionNSL(relation1->numberOfConstraints()));
@@ -277,7 +277,7 @@ int main(int argc, char* argv[])
     SP::SiconosVector axe1(new SiconosVector(3));
     axe1->zero();
     axe1->setValue(0, 1);
-    SP::PrismaticJointR relation4(new PrismaticJointR(beam3, axe1));
+    SP::PrismaticJointR relation4(new PrismaticJointR(axe1, false, beam3));
     // relation1->setJachq(H1); // Remark V.A. Why do we need to set the Jacobian outside
     // relation2->setJachq(H2);
     // relation3->setJachq(H3);
