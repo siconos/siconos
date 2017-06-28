@@ -154,12 +154,6 @@ set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 # https://cmake.org/Wiki/CMake_RPATH_handling
 # to avoid the rpath issue that appears on OS X El Capitan
 
-# the RPATH to be used when installing, but only if it's not a system directory
-list(FIND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES "${CMAKE_INSTALL_PREFIX}/lib" isSystemDir)
-if("${isSystemDir}" STREQUAL "-1")
-  set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/${_install_lib}")
-endif()
-
 # Set prefix path for libraries installation
 # --> means that any library target will be installed
 # in CMAKE_INSTALL_PREFIX/_install_lib
@@ -169,6 +163,12 @@ else()
   ASSERT(CMAKE_INSTALL_LIBDIR)
   set(_install_lib ${CMAKE_INSTALL_LIBDIR})
   set(${PROJECT_NAME}_INSTALL_LIB_DIR ${_install_lib})
+endif()
+
+# the RPATH to be used when installing, but only if it's not a system directory
+list(FIND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES "${CMAKE_INSTALL_PREFIX}/lib" isSystemDir)
+if("${isSystemDir}" STREQUAL "-1")
+  set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/${_install_lib}")
 endif()
 
 # install cmake macros
