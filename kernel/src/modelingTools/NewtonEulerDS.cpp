@@ -1050,9 +1050,13 @@ void NewtonEulerDS::computeForces(double time, SP::SiconosVector q, SP::SiconosV
     {
       computeMExt(time);
       assert(!isnan(_mExt->vector_sum()));
-      if(_isMextExpressedInInertialFrame)
-        ::changeFrameAbsToBody(q,_mExt);
-      _wrench->setBlock(3, *_mExt);
+      if(_isMextExpressedInInertialFrame) {
+        SP::SiconosVector mExt(std11::make_shared<SiconosVector>(*_mExt));
+        ::changeFrameAbsToBody(q,mExt);
+        _wrench->setBlock(3, *mExt);
+      }
+      else
+        _wrench->setBlock(3, *_mExt);
     }
 
     // Internal wrench
