@@ -99,36 +99,36 @@ void computeJacobianConvectedVectorInBodyFrame(double q0, double q1, double q2, 
 }
 
 
-void rotateAbsToBody(double q0, double q1, double q2, double q3, SP::SiconosVector v)
+void rotateAbsToBody(double q0, double q1, double q2, double q3, SiconosVector& v)
 {
-  DEBUG_BEGIN("::rotateAbsToBody(double q0, double q1, double q2, double q3, SP::SiconosVector v )\n");
-  DEBUG_EXPR(v->display(););
+  DEBUG_BEGIN("::rotateAbsToBody(double q0, double q1, double q2, double q3, SiconosVector& v )\n");
+  DEBUG_EXPR(v.display(););
   DEBUG_PRINTF("( q0 = %16.12e,  q1 = %16.12e,  q2= %16.12e,  q3= %16.12e )\n", q0,q1,q2,q3);
-  assert(v);
-  assert(v->size()==3);
+  assert(v.size()==3);
 
   // First way. Using the rotation matrix
   // SP::SimpleMatrix rotationMatrix(new SimpleMatrix(3,3));
   // SiconosVector tmp(3);
   // ::computeRotationMatrix(q0,q1,q2,q3, rotationMatrix);
-  // prod(*rotationMatrix, *v,  tmp);
-  // *v =tmp;
+  // prod(*rotationMatrix, v, tmp);
+  // v = tmp;
+  // return;
 
   // Second way. Using the transpose of the rotation matrix
   // SP::SimpleMatrix rotationMatrix(new SimpleMatrix(3,3));
   // SiconosVector tmp(3);
   // ::computeRotationMatrix(q0,-q1,-q2,-q3, rotationMatrix);
-  // prod(*v, *rotationMatrix,  tmp);
-  // *v =tmp;
+  // prod(v, *rotationMatrix, tmp);
+  // v = tmp;
 
   // Third way. cross product and axis angle
   // see http://www.geometrictools.com/Documentation/RotationIssues.pdf
   // SP::SiconosVector axis(new SiconosVector(3));
-  // double angle = ::getAxisAngle(q0,q1,q2,q3, axis);
+  // double angle = ::axisAngleFromQuaternion(q0,q1,q2,q3, axis);
   // SiconosVector t(3), tmp(3);
-  // cross_product(*axis,*v,t);
+  // cross_product(*axis,v,t);
   // cross_product(*axis,t,tmp);
-  // *v += sin(angle)*t + (1.0-cos(angle))*tmp;
+  // v += sin(angle)*t + (1.0-cos(angle))*tmp;
 
   // Direct computation with cross product
   // Works only with unit quaternion
@@ -137,13 +137,18 @@ void rotateAbsToBody(double q0, double q1, double q2, double q3, SP::SiconosVect
   qvect(0)=q1;
   qvect(1)=q2;
   qvect(2)=q3;
-  cross_product(qvect,*v,t);
+  cross_product(qvect,v,t);
   t *= 2.0;
   cross_product(qvect,t,tmp);
-  *v += tmp;
-  *v += q0*t;
-  DEBUG_EXPR(v->display(););
+  v += tmp;
+  v += q0*t;
+  DEBUG_EXPR(v.display(););
   DEBUG_END("::rotateAbsToBody(double q0, double q1, double q2, double q3, SP::SiconosVector v )\n");
+}
+
+void rotateAbsToBody(double q0, double q1, double q2, double q3, SP::SiconosVector v)
+{
+  ::rotateAbsToBody(q0, q1, q2, q3, *v);
 }
 
 void rotateAbsToBody(double q0, double q1, double q2, double q3, SP::SimpleMatrix m)
@@ -193,6 +198,12 @@ void rotateAbsToBody(SP::SiconosVector q, SP::SimpleMatrix m)
   DEBUG_END("::rotateAbsToBody(SP::SiconosVector q, SP::SimpleMatrix m)\n");
 }
 
+void changeFrameAbsToBody(const SiconosVector& q, SiconosVector& v)
+{
+  DEBUG_BEGIN("::changeFrameAbsToBody(const SiconosVector& q, SiconosVector& v )\n");
+  ::rotateAbsToBody(q.getValue(3),-q.getValue(4),-q.getValue(5),-q.getValue(6), v);
+  DEBUG_END("::changeFrameAbsToBody(const SiconosVector& q, SiconosVector& v )\n");
+}
 void changeFrameAbsToBody(SP::SiconosVector q, SP::SiconosVector v)
 {
   DEBUG_BEGIN("::changeFrameAbsToBody(SP::SiconosVector q, SP::SiconosVector v )\n");
@@ -206,10 +217,16 @@ void changeFrameAbsToBody(SP::SiconosVector q, SP::SimpleMatrix m)
   DEBUG_END("::changeFrameAbsToBody(SP::SiconosVector q, SP::SimpleMatrix m )\n");
 }
 
+void changeFrameBodyToAbs(const SiconosVector& q, SiconosVector& v)
+{
+  DEBUG_BEGIN("::changeFrameBodyToAbs(const SiconosVector& q, SiconosVector& v )\n");
+  ::rotateAbsToBody(q.getValue(3),q.getValue(4),q.getValue(5),q.getValue(6), v);
+  DEBUG_END("::changeFrameBodyToAbs(const SiconosVector& q, SiconosVector& v )\n");
+}
 void changeFrameBodyToAbs(SP::SiconosVector q, SP::SiconosVector v)
 {
   DEBUG_BEGIN("::changeFrameBodyToAbs(SP::SiconosVector q, SP::SiconosVector v )\n");
-  ::rotateAbsToBody(q->getValue(3),q->getValue(4),q->getValue(5),q->getValue(6), v);
+  ::rotateAbsToBody(q->getValue(3),q->getValue(4),q->getValue(5),q->getValue(6), *v);
   DEBUG_END("::changeFrameBodyToAbs(SP::SiconosVector q, SP::SiconosVector v )\n");
 }
 void changeFrameBodyToAbs(SP::SiconosVector q, SP::SimpleMatrix m)
@@ -1397,3 +1414,44 @@ void NewtonEulerDS::setBoundaryConditions(SP::BoundaryCondition newbd)
   _reactionToBoundaryConditions.reset(new SiconosVector(_boundaryConditions->velocityIndices()->size()));
 
 };
+
+SP::SiconosVector NewtonEulerDS::linearVelocity(bool absoluteRef) const
+{
+  // Short-cut: return the _twist 6-vector without modification, first
+  // 3 components are the expected linear velocity.
+  if (absoluteRef)
+    return _twist;
+
+  SP::SiconosVector v(std11::make_shared<SiconosVector>(3));
+  linearVelocity(absoluteRef, *v);
+  return v;
+}
+
+void NewtonEulerDS::linearVelocity(bool absoluteRef, SiconosVector &v) const
+{
+  v(0) = (*_twist)(0);
+  v(1) = (*_twist)(1);
+  v(2) = (*_twist)(2);
+
+  /* See _twist: linear velocity is in absolute frame */
+  if (!absoluteRef)
+    changeFrameAbsToBody(*_q, v);
+}
+
+SP::SiconosVector NewtonEulerDS::angularVelocity(bool absoluteRef) const
+{
+  SP::SiconosVector w(std11::make_shared<SiconosVector>(3));
+  angularVelocity(absoluteRef, *w);
+  return w;
+}
+
+void NewtonEulerDS::angularVelocity(bool absoluteRef, SiconosVector &w) const
+{
+  w(0) = (*_twist)(3);
+  w(1) = (*_twist)(4);
+  w(2) = (*_twist)(5);
+
+  /* See _twist: angular velocity is in relative frame */
+  if (absoluteRef)
+    changeFrameBodyToAbs(*_q, w);
+}

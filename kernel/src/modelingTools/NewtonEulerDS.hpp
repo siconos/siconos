@@ -42,6 +42,7 @@ void computeRotationMatrixTransposed(SP::SiconosVector q, SP::SimpleMatrix rotat
  * \param[in,out] v the vector to be rotated
  */
 void rotateAbsToBody(SP::SiconosVector q, SP::SiconosVector v);
+
 /* For a given position vector q, performs the rotation of the matrix m
  * w.r.t the quaternion that parametrize the rotation in q, that is the
  * rotation of the body fixed frame with respect to the inertial frame.
@@ -49,6 +50,7 @@ void rotateAbsToBody(SP::SiconosVector q, SP::SiconosVector v);
  * \param[in,out] m the vector to be rotated
  */
 void rotateAbsToBody(SP::SiconosVector q, SP::SimpleMatrix m);
+void rotateAbsToBody(double q0, double q1, double q2, double q3, SiconosVector& v);
 void rotateAbsToBody(double q0, double q1, double q2, double q3, SP::SiconosVector v);
 void rotateAbsToBody(double q0, double q1, double q2, double q3, SP::SimpleMatrix m);
 
@@ -61,9 +63,11 @@ void rotateAbsToBody(double q0, double q1, double q2, double q3, SP::SimpleMatri
  * \param[in] q the position vector
  * \param[in,out] v the vector to be reexpressed
  */
+void changeFrameAbsToBody(const SiconosVector& q, SiconosVector& v);
 void changeFrameAbsToBody(SP::SiconosVector q, SP::SiconosVector v);
 void changeFrameAbsToBody(SP::SiconosVector q, SP::SimpleMatrix m);
 
+void changeFrameAbsToBody(const SiconosVector& q, SiconosVector& v);
 void changeFrameBodyToAbs(SP::SiconosVector q, SP::SiconosVector v);
 void changeFrameBodyToAbs(SP::SiconosVector q, SP::SimpleMatrix m);
 
@@ -475,6 +479,44 @@ public:
   {
     return _twist0;
   }
+
+  /** Get the linear velocity in the absolute (inertial) or relative
+   * (body) frame of reference.
+   * \param absoluteRef If true, velocity is returned in the inertial
+   *                    frame, otherwise velocity is returned in the
+   *                    body frame.
+   * \return A SiconosVector of size 3 containing the linear velocity
+   *         of this dynamical system.
+   */
+  SP::SiconosVector linearVelocity(bool absoluteRef) const;
+
+  /** Fill a SiconosVector with the linear velocity in the absolute
+   * (inertial) or relative (body) frame of reference.
+   * \param absoluteRef If true, velocity is returned in the inertial
+   *                    frame, otherwise velocity is returned in the
+   *                    body frame.
+   * \param v A SiconosVector of size 3 to receive the linear velocity.
+   */
+  void linearVelocity(bool absoluteRef, SiconosVector &v) const;
+
+  /** Get the angular velocity in the absolute (inertial) or relative
+   * (body) frame of reference.
+   * \param absoluteRef If true, velocity is returned in the inertial
+   *                    frame, otherwise velocity is returned in the
+   *                    body frame.
+   * \return A SiconosVector of size 3 containing the angular velocity
+   *         of this dynamical system.
+   */
+  SP::SiconosVector angularVelocity(bool absoluteRef) const;
+
+  /** Fill a SiconosVector with the angular velocity in the absolute
+   * (inertial) or relative (body) frame of reference.
+   * \param absoluteRef If true, velocity is returned in the inertial
+   *                    frame, otherwise velocity is returned in the
+   *                    body frame.
+   * \param v A SiconosVector of size 3 to receive the angular velocity.
+   */
+  void angularVelocity(bool absoluteRef, SiconosVector &w) const;
 
     // -- p --
 
