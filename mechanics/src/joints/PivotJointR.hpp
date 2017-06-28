@@ -49,15 +49,6 @@ protected:
 
   void buildA1A2();
 
-  /** Compute the vector of linear and angular positions of the free axes */
-  virtual void computehDoF(double time, BlockVector& q0, SiconosVector& y,
-                           unsigned int axis);
-
-  /** Compute the jacobian of linear and angular DoF with respect to some q */
-  virtual void computeJachqDoF(double time, Interaction& inter,
-                               SP::BlockVector q0, SimpleMatrix& jachq,
-                               unsigned int axis);
-
   virtual void Jd1d2(double X1, double Y1, double Z1,
                      double q10, double q11, double q12, double q13,
                      double X2, double Y2, double Z2,
@@ -74,6 +65,11 @@ protected:
   double AscalA1(double q2to1x, double q2to1y, double q2to1z);
   double AscalA2(double q2to1x, double q2to1y, double q2to1z);
   double AscalA(double q2to1x, double q2to1y, double q2to1z);
+
+  /** Return the normal of the angular DoF axis of rotation.
+   * \param axis must be 0 */
+  virtual void _normalDoF(const BlockVector& q0, SiconosVector& ans, int axis,
+                          bool absoluteRef=true);
 
 public:
   /** Empty constructor. The relation may be initialized later by
@@ -105,6 +101,15 @@ public:
   SP::SiconosVector A() { return _A; }
 
   virtual void computeh(double time, BlockVector& q0, SiconosVector& y);
+
+  /** Compute the vector of linear and angular positions of the free axes */
+  virtual void computehDoF(double time, BlockVector& q0, SiconosVector& y,
+                           unsigned int axis);
+
+  /** Compute the jacobian of linear and angular DoF with respect to some q */
+  virtual void computeJachqDoF(double time, Interaction& inter,
+                               SP::BlockVector q0, SimpleMatrix& jachq,
+                               unsigned int axis);
 
   /** Get the number of constraints defined in the joint
       \return the number of constraints

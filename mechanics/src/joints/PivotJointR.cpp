@@ -84,6 +84,7 @@ void PivotJointR::setInitialConditions(SP::SiconosVector q1,
                                        SP::SiconosVector q2)
 {
   *_A = *_axes[0];
+  // TODO: add support for absolute frame here
 
   ::boost::math::quaternion<double> quat1(quat(q1));
   ::boost::math::quaternion<double> quat2(quat(q2));
@@ -606,4 +607,39 @@ void PivotJointR::computeJachqDoF(double time, Interaction& inter,
   jachq.setValue(0, 11, x22*(_A->getValue(0)*(-x49 + x52 + x53) + _A->getValue(1)*(x44 + x46 + x54) + _A->getValue(2)*(-x34 + x40 + x55)) + x23*(x30 + x32 + x56));
   jachq.setValue(0, 12, x22*(_A->getValue(0)*(-x41 + x43 + x59) + _A->getValue(1)*(-x50 + x51 + x57) + _A->getValue(2)*(x27 + x28 + x58)) + x23*(x37 + x38 + x60));
   jachq.setValue(0, 13, x22*(_A->getValue(0)*(x36 + x39 + x60) + _A->getValue(1)*(-x27 + x29 + x58) + _A->getValue(2)*(x50 - x51 + x57)) + x23*(x41 + x42 + x59));
+}
+
+
+/** Return the normal of the angular DoF axis of rotation.
+ * \param axis must be 0 */
+void PivotJointR::_normalDoF(const BlockVector& q0, SiconosVector& ans, int axis,
+                             bool absoluteRef)
+{
+  assert(axis == 0);
+  if (axis != 0) return;
+
+  // We assume that A is normalized.
+  ans = *_A;
+
+  if (absoluteRef)
+  {
+    SP::SiconosVector tmp2(std11::make_shared<SiconosVector>(ans));
+    changeFrameAbsToBody(q0.getAllVect()[0], tmp2);
+    ans = *tmp2;
+    return;
+    ::boost::math::quaternion<double> q1(q0.getValue(3), q0.getValue(4),
+                                         q0.getValue(5), q0.getValue(6));
+
+    // _A is in the q1 frame, so change it to the inertial frame.
+    ::boost::math::quaternion<double> aq(0, (*_A)(0), (*_A)(1), (*_A)(2));
+    //::boost::math::quaternion<double> tmp( (1.0/q1) * aq * q1 );
+    ::boost::math::quaternion<double> tmp( q1 * aq / q1 );
+    ans(0) = tmp.R_component_2();
+    ans(1) = tmp.R_component_3();
+    ans(2) = tmp.R_component_4();
+    printf("PivotJointR::_normalDoF: _A = (%0.02f, %0.02f, %0.02f)\n",
+           (*_A)(0), (*_A)(1), (*_A)(2));
+    printf("PivotJointR::_normalDoF: ans = (%0.02f, %0.02f, %0.02f)\n",
+           ans(0), ans(1), ans(2));
+  }
 }
