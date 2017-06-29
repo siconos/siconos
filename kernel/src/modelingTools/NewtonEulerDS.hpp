@@ -67,7 +67,7 @@ void changeFrameAbsToBody(const SiconosVector& q, SiconosVector& v);
 void changeFrameAbsToBody(SP::SiconosVector q, SP::SiconosVector v);
 void changeFrameAbsToBody(SP::SiconosVector q, SP::SimpleMatrix m);
 
-void changeFrameAbsToBody(const SiconosVector& q, SiconosVector& v);
+void changeFrameBodyToAbs(const SiconosVector& q, SiconosVector& v);
 void changeFrameBodyToAbs(SP::SiconosVector q, SP::SiconosVector v);
 void changeFrameBodyToAbs(SP::SiconosVector q, SP::SimpleMatrix m);
 

@@ -67,9 +67,9 @@ void computeRotationMatrix(double q0, double q1, double q2, double q3,
   rotationMatrix->setValue(2, 2,     q0*q0 -q1*q1 -q2*q2 +q3*q3);
 }
 
-
+static
 void computeJacobianConvectedVectorInBodyFrame(double q0, double q1, double q2, double q3,
-                                               SP::SimpleMatrix jacobian, SP:: SiconosVector v)
+                                               SP::SimpleMatrix jacobian, SP::SiconosVector v)
 {
 
   /* This routine compute the jacobian with respect to p of R^T(p)v */
@@ -315,6 +315,7 @@ void quaternionFromAxisAngle(SP::SiconosVector axis, double angle, SP::SiconosVe
   q->setValue(6,axis->getValue(2)* sin(angle *0.5));
 }
 
+static
 double sin_x(double x)
 {
   if(std::abs(x) <= 1e-3)
@@ -650,6 +651,7 @@ void NewtonEulerDS::computeFExt(double time, SP::SiconosVector fExt)
  * when we call  NewtonEulerDS::computeMExt(double time, SP::SiconosVector q, SP::SiconosVector mExt)
  *  that calls in turn computeMExt(time, q, _mExt);
  */
+static
 void computeMExt_internal(double time, bool hasConstantMExt,
                           unsigned int qDim, SP::SiconosVector q0,
                           SP::PluggedObject pluginMExt, SP::SiconosVector mExt_attributes,
@@ -1011,7 +1013,7 @@ void NewtonEulerDS::computeForces(double time)
  * when we call  NewtonEulerDS::computeMGyr(SP::SiconosVector twist) that calls in turn
  * computeMGyr(twist, _mGyr)
  */
-
+static
 void computeMGyr_internal(SP::SiconosMatrix I ,SP::SiconosVector twist, SP::SiconosVector mGyr)
 {
   if(I)

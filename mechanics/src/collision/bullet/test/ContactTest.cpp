@@ -72,6 +72,7 @@ struct BounceResult
   double displacement_on_first_contact;
 };
 
+static
 BounceResult bounceTest(std::string moving,
                         std::string ground,
                         const BounceParams &params)
