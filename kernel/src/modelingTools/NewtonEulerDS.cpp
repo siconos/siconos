@@ -1455,3 +1455,66 @@ void NewtonEulerDS::angularVelocity(bool absoluteRef, SiconosVector &w) const
   if (absoluteRef)
     changeFrameBodyToAbs(*_q, w);
 }
+
+void computeExtForceAtPos(SP::SiconosVector q, bool isMextExpressedInInertialFrame,
+                          SP::SiconosVector force, bool forceAbsRef,
+                          SP::SiconosVector pos, bool posAbsRef,
+                          SP::SiconosVector fExt, SP::SiconosVector mExt,
+                          bool accumulate)
+{
+  assert(!!fExt && fExt->size() == 3);
+  assert(!!force && force->size() == 3);
+  if (pos)
+    assert(!!mExt && mExt->size() == 3);
+
+  SiconosVector abs_frc(*force), local_frc(*force);
+
+  if (forceAbsRef) {
+    if (pos)
+      changeFrameAbsToBody(*q, local_frc);
+  } else
+    changeFrameBodyToAbs(*q, abs_frc);
+
+  if (pos) {
+    assert(!!mExt && mExt->size() >= 3);
+    SiconosVector moment(3);
+    if (posAbsRef) {
+      SiconosVector local_pos(*pos);
+      local_pos(0) -= (*q)(0);
+      local_pos(1) -= (*q)(1);
+      local_pos(2) -= (*q)(2);
+      changeFrameAbsToBody(*q, local_pos);
+      cross_product(local_pos, local_frc, moment);
+    }
+    else {
+      cross_product(*pos, local_frc, moment);
+    }
+
+    if (isMextExpressedInInertialFrame)
+      changeFrameBodyToAbs(*q, moment);
+
+    if (accumulate)
+      *mExt = *mExt + moment;
+    else
+      *mExt = moment;
+  }
+
+  if (accumulate)
+    *fExt += *fExt + abs_frc;
+  else
+    *fExt = abs_frc;
+}
+
+void NewtonEulerDS::addExtForceAtPos(SP::SiconosVector force, bool forceAbsRef,
+                                     SP::SiconosVector pos, bool posAbsRef)
+{
+  assert(!!_fExt && _fExt->size() == 3);
+  assert(!!force && force->size() == 3);
+  if (pos)
+    assert(!!_mExt && _mExt->size() == 3);
+
+  computeExtForceAtPos(_q, _isMextExpressedInInertialFrame,
+                       force, forceAbsRef,
+                       pos, posAbsRef,
+                       _fExt, _mExt, true);
+}

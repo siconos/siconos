@@ -82,7 +82,13 @@ void quaternionFromRotationVector(SP::SiconosVector rotationVector, SP::SiconosV
 
 void computeT(SP::SiconosVector q, SP::SimpleMatrix T);
 
-
+/** Compute the force and moment vectors applied to a body with state
+ * q from a force vector at a given position. */
+void computeExtForceAtPos(SP::SiconosVector q, bool isMextExpressedInInertialFrame,
+                          SP::SiconosVector force, bool forceAbsRef,
+                          SP::SiconosVector pos, bool posAbsRef,
+                          SP::SiconosVector fExt, SP::SiconosVector mExt,
+                          bool accumulate);
 
 /** NewtonEuler non linear dynamical systems
  
@@ -928,6 +934,24 @@ public:
    */
   virtual void computeMExt(double time, SP::SiconosVector mExt);
   virtual void computeMExt(double time);
+
+  /** Adds a force/torque impulse to a body's FExt and MExt vectors in
+   * either absolute (inertial) or relative (body) frame.  Modifies
+   * contents of _fExt and _mExt! Therefore these must have been set
+   * as constant vectors using setFExtPtr and setMExtPtr prior to
+   * calling this function.  Adjustments to _mExt will take into
+   * account the value of _isMextExpressedInInertialFrame.
+   * \param force A force vector to be added.
+   * \param forceAbsRef If true, force is in inertial frame, otherwise
+   *                    it is in body frame.
+   * \param pos A position at which force should be applied.  If NULL,
+   *            the center of mass is assumed.
+   * \param posAbsRef If true, pos is in inertial frame, otherwise it
+   *                  is in body frame.
+   */
+  void addExtForceAtPos(SP::SiconosVector force, bool forceAbsRef,
+                        SP::SiconosVector pos = SP::SiconosVector(),
+                        bool posAbsRef = false);
 
   void computeJacobianMExtqExpressedInInertialFrameByFD(double time, SP::SiconosVector q);
   void computeJacobianMExtqExpressedInInertialFrame(double time, SP::SiconosVector q);
