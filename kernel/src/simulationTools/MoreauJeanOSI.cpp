@@ -110,8 +110,10 @@ void MoreauJeanOSI::initializeDynamicalSystem(Model&, double t, SP::DynamicalSys
 
   // Check dynamical system type
   Type::Siconos dsType = Type::value(*ds);
-  assert(dsType == Type::LagrangianLinearTIDS || dsType == Type::LagrangianDS || Type::NewtonEulerDS
-     || dsType == Type::LagrangianLinearDiagonalDS);
+  assert(dsType == Type::LagrangianLinearTIDS
+         || dsType == Type::LagrangianDS
+         || dsType == Type::NewtonEulerDS
+         || dsType == Type::LagrangianLinearDiagonalDS);
 
   // Compute W (iteration matrix)
   initializeIterationMatrixW(t, ds);
