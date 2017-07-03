@@ -69,7 +69,7 @@ int reformulationIntoLocalProblem(GlobalFrictionContactProblem* problem, Frictio
     return info;
   }
 
-  if (M->storageType == 0)
+  if (M->storageType == NM_DENSE)
   {
 
 
@@ -145,7 +145,7 @@ int reformulationIntoLocalProblem(GlobalFrictionContactProblem* problem, Frictio
 
   }
 
-  else
+  else if (M->storageType == NM_SPARSE_BLOCK)
   {
     int n = M->size0;
     int m = H->size1;
@@ -313,8 +313,16 @@ int reformulationIntoLocalProblem(GlobalFrictionContactProblem* problem, Frictio
     free(Htrans);
     free(qtmp);
   }
-
-
+  else if (M->storageType == NM_SPARSE)
+  {
+    printf("reformulationIntoLocalProblem :: sparse  matrix storage is not implemented\n");
+    exit(EXIT_FAILURE);
+  }
+  else
+  {
+    printf("reformulationIntoLocalProblem :: unknown matrix storage");
+    exit(EXIT_FAILURE);
+  }
   return info;
 }
 int computeGlobalVelocity(GlobalFrictionContactProblem* problem, double * reaction, double * globalVelocity)
@@ -406,9 +414,15 @@ void  gfc3d_nsgs_wr(GlobalFrictionContactProblem* problem, double *reaction , do
 
   // Reformulation
   FrictionContactProblem* localproblem = (FrictionContactProblem *) malloc(sizeof(FrictionContactProblem));
-
+  if (verbose)
+  {
+    printf("Reformulation info a reduced problem onto local variables ...\n");
+  }
   reformulationIntoLocalProblem(problem, localproblem);
-
+  if (verbose)
+  {
+    printf("Call to the fc3d solver ...\n");
+  }
   fc3d_nsgs(localproblem, reaction , velocity , info , options->internalSolvers);
 
   computeGlobalVelocity(problem, reaction, globalVelocity);
