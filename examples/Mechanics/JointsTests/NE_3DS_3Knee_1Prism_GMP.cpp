@@ -18,7 +18,7 @@
 
 /*!\file NE....cpp
   \brief \ref EMNE_MULTIBIDY - C++ input file, Time-Stepping version - O.B.
-  
+
   A multibody example.
   Direct description of the model.
   Simulation with a Time-Stepping scheme.
@@ -30,33 +30,37 @@
 #include <boost/math/quaternion.hpp>
 using namespace std;
 
-/* Given a position of a point in the Inertial Frame and the configuration vector q of a solid
- * returns a position in the spatial frame.
+/* Given a position of a point in the Inertial Frame and the
+ * configuration vector q of a solid returns a position in the spatial
+ * frame.
  */
-void fromInertialToSpatialFrame(double *positionInInertialFrame, double *positionInSpatialFrame, SP::SiconosVector  q  )
+void fromInertialToSpatialFrame(double *positionInInertialFrame,
+                                double *positionInSpatialFrame,
+                                SP::SiconosVector q)
 {
-double q0 = q->getValue(3);
-double q1 = q->getValue(4);
-double q2 = q->getValue(5);
-double q3 = q->getValue(6);
+  double q0 = q->getValue(3);
+  double q1 = q->getValue(4);
+  double q2 = q->getValue(5);
+  double q3 = q->getValue(6);
 
-::boost::math::quaternion<double>    quatQ(q0, q1, q2, q3);
-::boost::math::quaternion<double>    quatcQ(q0, -q1, -q2, -q3);
-::boost::math::quaternion<double>    quatpos(0, positionInInertialFrame[0], positionInInertialFrame[1], positionInInertialFrame[2]);
-::boost::math::quaternion<double>    quatBuff;
+  ::boost::math::quaternion<double>    quatQ(q0, q1, q2, q3);
+  ::boost::math::quaternion<double>    quatcQ(q0, -q1, -q2, -q3);
+  ::boost::math::quaternion<double>    quatpos(0, positionInInertialFrame[0], positionInInertialFrame[1], positionInInertialFrame[2]);
+  ::boost::math::quaternion<double>    quatBuff;
 
-//perform the rotation
-quatBuff = quatQ * quatpos * quatcQ;
+  //perform the rotation
+  quatBuff = quatQ * quatpos * quatcQ;
 
-positionInSpatialFrame[0] = quatBuff.R_component_2()+q->getValue(0);
-positionInSpatialFrame[1] = quatBuff.R_component_3()+q->getValue(1);
-positionInSpatialFrame[2] = quatBuff.R_component_4()+q->getValue(2);
-
+  positionInSpatialFrame[0] = quatBuff.R_component_2()+q->getValue(0);
+  positionInSpatialFrame[1] = quatBuff.R_component_3()+q->getValue(1);
+  positionInSpatialFrame[2] = quatBuff.R_component_4()+q->getValue(2);
 }
+
 void tipTrajectories(SP::SiconosVector  q, double * traj, double length)
 {
   double positionInInertialFrame[3];
   double positionInSpatialFrame[3];
+
   // Output the position of the tip of beam1
   positionInInertialFrame[0]=length/2;
   positionInInertialFrame[1]=0.0;
@@ -66,11 +70,6 @@ void tipTrajectories(SP::SiconosVector  q, double * traj, double length)
   traj[0] = positionInSpatialFrame[0];
   traj[1] = positionInSpatialFrame[1];
   traj[2] = positionInSpatialFrame[2];
-
-
-  // std::cout <<  "positionInSpatialFrame[0]" <<  positionInSpatialFrame[0]<<std::endl;
-  // std::cout <<  "positionInSpatialFrame[1]" <<  positionInSpatialFrame[1]<<std::endl;
-  // std::cout <<  "positionInSpatialFrame[2]" <<  positionInSpatialFrame[2]<<std::endl;
 
   positionInInertialFrame[0]=-length/2;
   fromInertialToSpatialFrame(positionInInertialFrame, positionInSpatialFrame, q  );
@@ -103,21 +102,10 @@ int main(int argc, char* argv[])
     double theta = 1.0;              // theta for MoreauJeanOSI integrator
     double g = 9.81; // Gravity
     double m = 1.;
-    // double wx = 0.0;
-    // double wz = 0.0;
-    // double wy = 0.0;
+
     // -------------------------
     // --- Dynamical systems ---
     // -------------------------
-
-    FILE * pFile;
-    pFile = fopen("data.h", "w");
-    if (pFile == NULL)
-    {
-      printf("fopen exampleopen filed!\n");
-      fclose(pFile);
-    }
-
 
     cout << "====> Model loading ..." << endl << endl;
     // -- Initial positions and velocities --
@@ -223,14 +211,11 @@ int main(int argc, char* argv[])
     // --- Interactions ---
     // --------------------
 
-    //
+    // Knee relations (point equality, i.e. ball joint)
 
-    //SP::NonSmoothLaw nslaw3(new EqualityConditionNSLKneeJointR::numberOfConstraints()());
     SP::SiconosVector P(new SiconosVector(3));
     P->zero();
-
     SP::KneeJointR relation1(new KneeJointR(P, true, beam1));
-
 
     P->zero();
     P->setValue(0, L1 / 2);
@@ -239,51 +224,42 @@ int main(int argc, char* argv[])
     P->setValue(0, -L1 / 2);
     SP::KneeJointR relation3(new KneeJointR(P, false, beam2, beam3));
 
-    SP::SimpleMatrix H1(new SimpleMatrix(relation1->numberOfConstraints(), qDim));
-    H1->zero();
-    SP::SimpleMatrix H2(new SimpleMatrix(relation2->numberOfConstraints(), 2 * qDim));
-    SP::SimpleMatrix H3(new SimpleMatrix(relation3->numberOfConstraints(), 2 * qDim));
-    H2->zero();
-    H3->zero();
     SP::NonSmoothLaw nslaw1(new EqualityConditionNSL(relation1->numberOfConstraints()));
     SP::NonSmoothLaw nslaw2(new EqualityConditionNSL(relation2->numberOfConstraints()));
     SP::NonSmoothLaw nslaw3(new EqualityConditionNSL(relation3->numberOfConstraints()));
 
+    // Prismatic relation
 
-    //relation Prismatic
-
-     SP::SiconosVector axe1(new SiconosVector(3));
+    SP::SiconosVector axe1(new SiconosVector(3));
     axe1->zero();
     axe1->setValue(0, 1);
     SP::PrismaticJointR relation4(new PrismaticJointR(axe1, false, beam3));
-    SP::SimpleMatrix H4(new SimpleMatrix(relation4->numberOfConstraints(), qDim));
-    H4->zero();
     SP::NonSmoothLaw nslaw4(new EqualityConditionNSL(relation4->numberOfConstraints()));
 
-    relation1->setJachq(H1);
-    relation2->setJachq(H2);
-    relation3->setJachq(H3);
-    relation4->setJachq(H4);
-
+    // Create interations to bind relations and NSLaws.
     SP::Interaction inter1(new Interaction(nslaw1, relation1));
     SP::Interaction inter2(new Interaction(nslaw2, relation2));
     SP::Interaction inter3(new Interaction(nslaw3, relation3));
     SP::Interaction inter4(new Interaction(nslaw4, relation4));
     SP::Interaction interFloor(new Interaction(nslaw0, relation0));
+
     // -------------
     // --- Model ---
     // -------------
     SP::Model myModel(new Model(t0, T));
+
     // add the dynamical system in the non smooth dynamical system
     myModel->nonSmoothDynamicalSystem()->insertDynamicalSystem(beam1);
     myModel->nonSmoothDynamicalSystem()->insertDynamicalSystem(beam2);
     myModel->nonSmoothDynamicalSystem()->insertDynamicalSystem(beam3);
+
     // link the interaction and the dynamical system
     myModel->nonSmoothDynamicalSystem()->link(inter1, beam1);
     myModel->nonSmoothDynamicalSystem()->link(inter2, beam1, beam2);
     myModel->nonSmoothDynamicalSystem()->link(inter3, beam2, beam3);
     myModel->nonSmoothDynamicalSystem()->link(inter4, beam3);
     myModel->nonSmoothDynamicalSystem()->link(interFloor, beam3);
+
     // ------------------
     // --- Simulation ---
     // ------------------
@@ -306,11 +282,7 @@ int main(int argc, char* argv[])
     SP::TimeStepping s(new TimeStepping(t, OSI1, osnspb));
     s->insertIntegrator(OSI2);
     s->insertIntegrator(OSI3);
-    //    s->setComputeResiduY(true);
-    //  s->setUseRelativeConvergenceCriteron(false);
     myModel->setSimulation(s);
-
-
 
     // =========================== End of model definition ===========================
 
@@ -345,22 +317,12 @@ int main(int argc, char* argv[])
 
     boost::timer time;
     time.restart();
-    SP::SiconosVector yAux(new SiconosVector(3));
-    yAux->setValue(0, 1);
-    SP::SimpleMatrix Jaux(new SimpleMatrix(3, 3));
-    Index dimIndex(2);
-    Index startIndex(4);
-    fprintf(pFile, "double T[%d*%d]={", N + 1, outputSize);
     double beamTipTrajectories[6];
 
-
-    //N=100;
     for (k = 0; k < N; k++)
     {
-      // solve ...
+      // solve non-smooth problems
       s->newtonSolve(1e-4, 50);
-
-
 
       // --- Get values to be plotted ---
       dataPlot(k, 0) =  s->nextTime();
@@ -417,19 +379,10 @@ int main(int argc, char* argv[])
       beam3Plot(1,3*k+1) = beamTipTrajectories[4];
       beam3Plot(1,3*k+2) = beamTipTrajectories[5];
 
-//      printf("reaction1:%lf \n", interFloor->lambda(1)->getValue(0));
-
-      for (unsigned int jj = 0; jj < outputSize; jj++)
-      {
-        if ((k || jj))
-          fprintf(pFile, ",");
-        fprintf(pFile, "%f", dataPlot(k, jj));
-      }
-      fprintf(pFile, "\n");
       s->nextStep();
       ++show_progress;
     }
-    fprintf(pFile, "};");
+
     cout << endl << "End of computation - Number of iterations done: " << k - 1 << endl;
     cout << "Computation Time " << time.elapsed()  << endl;
 
@@ -446,7 +399,7 @@ int main(int argc, char* argv[])
     dataPlotRef.zero();
     ioMatrix::read("NE_3DS_3Knee_1Prism_GMP.ref", "ascii", dataPlotRef);
     std::cout << (dataPlot - dataPlotRef).normInf() << std::endl;
-    fclose(pFile);
+
     if ((dataPlot - dataPlotRef).normInf() > 1e-7)
     {
 //      (dataPlot - dataPlotRef).display();
