@@ -68,8 +68,16 @@ void gfc3d_nsgs(GlobalFrictionContactProblem* restrict problem, double* restrict
   double* b = problem->b;
   double* mu = problem->mu;
 
+  assert((int)H->size1 == problem->numberOfContacts * problem->dimension);
+  assert((int)M->size0 == M->size1);
+
+  assert((int)M->size0 == H->size0); /* size(velocity) ==
+                                      * Htrans*globalVelocity */
+
+
+
   /* Maximum number of iterations */
-  int itermax = iparam[0];
+  int itermax = iparam[SICONOS_IPARAM_MAX_ITER];
   unsigned int erritermax = options->iparam[7];
   if (erritermax == 0)
   {
@@ -110,7 +118,7 @@ void gfc3d_nsgs(GlobalFrictionContactProblem* restrict problem, double* restrict
     exit(EXIT_FAILURE);
   }
 
-  dparam[0] = dparam[2]; // set the tolerance for the local solver
+  dparam[SICONOS_DPARAM_TOL] = dparam[2]; // set the tolerance for the local solver
   /* verbose=1; */
   while ((iter < itermax) && (hasNotConverged > 0))
   {
@@ -176,8 +184,8 @@ void gfc3d_nsgs(GlobalFrictionContactProblem* restrict problem, double* restrict
     (*computeError)(problem, reaction , velocity, globalVelocity, tolerance, &error);
   }
 
-  dparam[0] = tolerance;
-  dparam[1] = error;
+  dparam[SICONOS_DPARAM_TOL] = tolerance;
+  dparam[SICONOS_DPARAM_RESIDU] = error;
 
 
   /***** Free memory *****/
