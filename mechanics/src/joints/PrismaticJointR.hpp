@@ -42,7 +42,7 @@ protected:
   ACCEPT_SERIALIZATION(PrismaticJointR);
   PrismaticJointR(): NewtonEulerJointR() {};
 
-  /** Axis of the prismatic point in the q1 inertial frame of reference
+  /** Axis of the prismatic point in the q1 frame of reference
    */
   SP::SiconosVector _axis0;
 

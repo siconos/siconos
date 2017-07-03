@@ -42,7 +42,7 @@ protected:
   ACCEPT_SERIALIZATION(CylindricalJointR);
   CylindricalJointR(): NewtonEulerJointR() {};
 
-  /** Axis of the cylindrical point in the inertial frame of reference
+  /** Axis of the cylindrical point in the q1 frame of reference
    */
   SP::SiconosVector _axis0;
 

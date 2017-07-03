@@ -56,7 +56,7 @@ void rotateAbsToBody(double q0, double q1, double q2, double q3, SP::SimpleMatri
 
 
 /* For a given position vector q, express the vector v given in
- * the inertial frame into to the bdy frame
+ * the inertial frame into to the body frame
  * w.r.t the quaternion that parametrize the rotation in q.
  * The operation amounts to multiplying by the transposed rotation matrix.
  * the result is return in v
@@ -107,7 +107,7 @@ void computeExtForceAtPos(SP::SiconosVector q, bool isMextExpressedInInertialFra
   <li> \f$x_G,v_G\f$ position and velocity of the center of mass expressed in a inertial frame of
   reference (world frame) </li>
   <li> \f$\Omega\f$ angular velocity vector expressed in the body-fixed frame (frame attached to the object) </li>
-  <li> \f$R\f$ rotation matrix form the inertial frame to the bosy-fixed frame \f$R^{-1}=R^T, \det(R)=1\f$, i.e \f$ R\in SO^+(3)\f$  </li>
+  <li> \f$R\f$ rotation matrix form the inertial frame to the body-fixed frame \f$R^{-1}=R^T, \det(R)=1\f$, i.e \f$ R\in SO^+(3)\f$  </li>
   <li> \f$M=m\,I_{3\times 3}\f$ diagonal mass matrix with  \f$m \in \mathbb{R}\f$ the scalar mass  </li>
   <li> \f$I\f$ constant inertia matrix </li>
   <li> \f$F_{ext}\f$ and \f$ M_{ext}\f$ are the external applied forces and moment  </li>
@@ -212,7 +212,7 @@ protected:
    * false by default */
   bool _hasConstantMExt;
 
-  /** if true, we assume that mExt is given in inertialFrameset (default false)  */
+  /** if true, we assume that mExt is given in inertial frame (default false)  */
   bool _isMextExpressedInInertialFrame;
 
   /** external moment expressed in the body-fixed frame  */
