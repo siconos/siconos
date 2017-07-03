@@ -443,8 +443,9 @@ void NM_display(const NumericsMatrix* const m)
     fprintf(stderr, "Numerics, NumericsMatrix display failed, NULL input.\n");
     exit(EXIT_FAILURE);
   }
-  printf("\n ========== Numerics Matrix\n");
-  printf("\n ========== storageType = %i\n", m->storageType);
+  printf("========== Numerics Matrix\n");
+  printf("========== storageType = %i\n", m->storageType);
+  printf("========== size0 = %i, size1 = %i\n", m->size0, m->size1);
 
   switch (m->storageType)
   {
@@ -465,20 +466,23 @@ void NM_display(const NumericsMatrix* const m)
     assert(m->matrix2);
     if (m->matrix2->triplet)
     {
+      printf("========== a matrix in format triplet is stored\n" );
       cs_print(m->matrix2->triplet, 0);
     }
-    else if (m->matrix2->csc)
+    if (m->matrix2->csc)
     {
+      printf("========== a matrix in format csc is stored\n" );
       cs_print(m->matrix2->csc, 0);
     }
-    else if (m->matrix2->trans_csc)
+    if (m->matrix2->trans_csc)
     {
+      printf("========== a matrix in format trans_csc is stored\n" );
       cs_print(m->matrix2->trans_csc, 0);
     }
-    else
-    {
-      fprintf(stderr, "display for sparse matrix: no matrix found!\n");
-    }
+    /* else */
+    /* { */
+    /*   fprintf(stderr, "display for sparse matrix: no matrix found!\n"); */
+    /* } */
     break;
   }
   default:
