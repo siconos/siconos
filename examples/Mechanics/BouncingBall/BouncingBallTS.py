@@ -19,9 +19,12 @@
 #
 #
 
+from numpy.linalg import norm
 from siconos.kernel import LagrangianLinearTIDS, NewtonImpactNSL,\
     LagrangianLinearTIR, Interaction, Model, MoreauJeanOSI,\
     TimeDiscretisation, LCP, TimeStepping
+from siconos.kernel import SimpleMatrix, getMatrix
+
 
 from numpy import eye, empty, float64, zeros
 
@@ -144,9 +147,6 @@ while s.hasNextEvent():
 #
 # comparison with the reference file
 #
-from siconos.kernel import SimpleMatrix, getMatrix
-from numpy.linalg import norm
-
 ref = getMatrix(SimpleMatrix("result.ref"))
 
 if (norm(dataPlot - ref) > 1e-12):
