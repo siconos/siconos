@@ -39,13 +39,14 @@ int main(int argc, char* argv[])
     // User-defined main parameters
     unsigned int nDof = 3;           // degrees of freedom for the ball
     double t0 = 0;                   // initial computation time
-    double T = 10;                  // final computation time
-    double h = 0.005;                // time step
+    double T = 3.0;                  // final computation time
+    double h = 0.0001;               // time step
     double position_init = 1.0;      // initial position for lowest bead.
     double velocity_init = 0.0;      // initial velocity for lowest bead.
     double theta = 0.5;              // theta for MoreauJeanOSI integrator
     double R = 0.1; // Ball radius
-    double m = 1; // Ball mass
+    double m1 = 1; // Ball mass
+    double m2 = 1; // Ball mass
     double g = 9.81; // Gravity
     // -------------------------
     // --- Dynamical systems ---
@@ -54,9 +55,14 @@ int main(int argc, char* argv[])
     cout << "====> Model loading ..." <<  endl;
 
     SP::SiconosMatrix Mass(new SimpleMatrix(nDof, nDof));
-    (*Mass)(0, 0) = m;
-    (*Mass)(1, 1) = m;
-    (*Mass)(2, 2) = 2. / 5 * m * R * R;
+    (*Mass)(0, 0) = m1;
+    (*Mass)(1, 1) = m1;
+    (*Mass)(2, 2) = 2. / 5 * m1 * R * R;
+
+    SP::SiconosMatrix Mass2(new SimpleMatrix(nDof, nDof));
+    (*Mass2)(0, 0) = m2;
+    (*Mass2)(1, 1) = m2;
+    (*Mass2)(2, 2) = 2. / 5 * m2 * R * R;
 
     // -- Initial positions and velocities --
     SP::SiconosVector q0(new SiconosVector(nDof));
@@ -66,7 +72,7 @@ int main(int argc, char* argv[])
     
     SP::SiconosVector q0_2(new SiconosVector(nDof));
     SP::SiconosVector v0_2(new SiconosVector(nDof));
-    (*q0_2)(0) = position_init  +0.1;
+    (*q0_2)(0) = position_init  + 2*R +0.1;
     (*v0_2)(0) = velocity_init;
 
 
@@ -74,20 +80,23 @@ int main(int argc, char* argv[])
     
     // -- The dynamical system --
     SP::LagrangianLinearTIDS ball1(new LagrangianLinearTIDS(q0, v0, Mass));
-    SP::LagrangianLinearTIDS ball2(new LagrangianLinearTIDS(q0_2, v0_2, Mass));
+    SP::LagrangianLinearTIDS ball2(new LagrangianLinearTIDS(q0_2, v0_2, Mass2));
 
     // -- Set external forces (weight) --
     SP::SiconosVector weight(new SiconosVector(nDof));
-    (*weight)(0) = -m * g;
+    (*weight)(0) = -m1 * g;
     ball1->setFExtPtr(weight);
-    ball2->setFExtPtr(weight);
+
+    SP::SiconosVector weight2(new SiconosVector(nDof));
+    (*weight2)(0) = -m2 * g;
+    ball2->setFExtPtr(weight2);
 
     // --------------------
     // --- Interactions ---
     // --------------------
 
     // -- nslaw --
-    double e = 0.9;
+    double e = 0.5;
 
     // Interaction ball-floor
     //
@@ -145,6 +154,7 @@ int main(int argc, char* argv[])
     SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
 
     // -- (3) one step non smooth problem
+    //SP::OneStepNSProblem osnspb(new GlobalFrictionContact(3,SICONOS_GLOBAL_FRICTION_3D_NSN_AC));
     SP::OneStepNSProblem osnspb(new GlobalFrictionContact(3));
 
     // -- (4) Simulation setup with (1) (2) (3)
@@ -201,6 +211,8 @@ int main(int argc, char* argv[])
 
     while (s->hasNextEvent())
     {
+      osnspb->setNumericsVerboseMode(0);
+      //std::cout << "############################  time step = " << k <<std::endl;
       s->computeOneStep();
       // --- Get values to be plotted ---
       dataPlot(k, 0) =  s->nextTime();
@@ -211,7 +223,7 @@ int main(int argc, char* argv[])
       dataPlot(k, 5) = (*q2)(0);
       dataPlot(k, 6) = (*v2)(0);
       dataPlot(k, 7) = (*p2)(0);
-      osnspb->display();
+      //osnspb->display();
       s->nextStep();
       ++show_progress;
       k++;
@@ -226,7 +238,7 @@ int main(int argc, char* argv[])
     std::cout << "Comparison with a reference file" << std::endl;
     SimpleMatrix dataPlotRef(dataPlot);
     dataPlotRef.zero();
-    ioMatrix::read("result.ref", "ascii", dataPlotRef);
+    ioMatrix::read("TwoBouncingBallTS-MoreauJeanGOSI.ref", "ascii", dataPlotRef);
     double error = (dataPlot - dataPlotRef).normInf();
     std::cout << "error =" << error << std::endl;
 
