@@ -34,9 +34,9 @@
 #include "BlockVector.hpp"
 
 
-//#define DEBUG_STDOUT
-//#define DEBUG_NOCOLOR
-//#define DEBUG_MESSAGES
+// #define DEBUG_STDOUT
+// #define DEBUG_NOCOLOR
+// #define DEBUG_MESSAGES
 //#define DEBUG_WHERE_MESSAGES
 #include <debug.h>
 
@@ -1021,7 +1021,7 @@ void MoreauJeanGOSI::computeFreeState()
       vfree *= -1.0;
       vfree += *vold;
 
-      DEBUG_EXPR(vfree->display());
+      DEBUG_EXPR(vfree.display());
 
 
     }
@@ -1459,8 +1459,8 @@ void MoreauJeanGOSI::updateState(const unsigned int )
       else
         *v =  vfree;
 
-      DEBUG_PRINT("MoreauJeanGOSI::updatestate work free\n");
-      DEBUG_EXPR(free->display());
+      DEBUG_PRINT("MoreauJeanGOSI::updatestate vfree\n");
+      DEBUG_EXPR(vfree.display());
       DEBUG_PRINT("MoreauJeanGOSI::updatestate new v\n");
       DEBUG_EXPR(v->display());
 
@@ -1511,13 +1511,21 @@ bool MoreauJeanGOSI::addInteractionInIndexSet(SP::Interaction inter, unsigned in
   {
     gamma = _gamma;
   }
-  DEBUG_PRINTF("MoreauJeanGOSI::addInteractionInIndexSet of level = %i yref=%e, yDot=%e, y_estimated=%e.\n", i,  y, yDot, y + gamma * h * yDot);
+  DEBUG_PRINTF("MoreauJeanGOSI::addInteractionInIndexSet of level = %i y=%e, yDot=%e, y_estimated=%e.\n", i,  y, yDot, y + gamma * h * yDot);
   y += gamma * h * yDot;
+
+  DEBUG_PRINTF("y = %e\n", y);
   assert(!isnan(y));
-  DEBUG_EXPR(
+  DEBUG_EXPR_WE(
     if(y <= 0)
-    DEBUG_PRINT("MoreauJeanGOSI::addInteractionInIndexSet ACTIVATE.\n");
-  );
+    {
+      DEBUG_PRINT("MoreauJeanGOSI::addInteractionInIndexSet ACTIVATED.\n");
+    }
+    else
+    {
+      DEBUG_PRINT("MoreauJeanGOSI::addInteractionInIndexSet NOT ACTIVATED.\n");
+    }
+    );
   return (y <= 0.0);
 }
 
