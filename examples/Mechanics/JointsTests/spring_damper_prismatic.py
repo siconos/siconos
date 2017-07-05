@@ -32,7 +32,7 @@ with Hdf5() as io:
                  orientation=[(0,0,1),np.pi/2], mass=1.0, velocity=[0,0,0,0,0,1])
     io.addObject('bar2', [Contactor('Bar')], [-0.05,0,2],
                  orientation=[(0,0,1),np.pi/2], mass=1.0)
-    io.addJoint('joint1', 'bar1', 'bar2', [1,0,0], [], 'PrismaticJointR')
+    io.addJoint('joint1', 'bar1', 'bar2', [0,1,0], [], 'PrismaticJointR', True)
 
     # Definition of the ground
     io.addPrimitiveShape('Ground', 'Box', (5, 5, 0.1))
@@ -70,23 +70,21 @@ class Ctrl(object):
         # onto the DoF (spring force)
         pos = SiconosVector(1)
         self.joint1.computehDoF(0, bv, pos, 0)
-        dist = np.linalg.norm(np.array(self.ds1.q())[:3]
-                          - np.array(self.ds2.q())[:3])
 
         setpoint = 1.0
         pos_diff = setpoint - pos.getValue(0)
-        spring_force = self.joint1.normalDoF(bv, 0) * pos_diff * 100.0
+        spring_force = np.array(self.joint1.normalDoF(bv, 0)) * pos_diff * 100.0
 
         # Get the velocity of each body projected onto the DoF and
         # calculate their difference (damping force)
-        vel1 = self.joint1.projectVectorDoF(self.ds1.velocity(), bv, 0)
-        vel2 = self.joint1.projectVectorDoF(self.ds2.velocity(), bv, 0)
-        vel_diff = vel2 - vel1
-        damping_force = vel_diff * 2.0
+        vel1 = self.joint1.projectVectorDoF(self.ds1.linearVelocity(True), bv, 0)
+        vel2 = self.joint1.projectVectorDoF(self.ds2.linearVelocity(True), bv, 0)
+        vel_diff = vel1 - vel2
+        damping_force = vel_diff * 10.0
 
         # Calculate total forces for each body
-        force1 += - spring_force/2 - damping_force/2
-        force2 += + spring_force/2 + damping_force/2
+        force1 += - (spring_force + damping_force)/2
+        force2 += + (spring_force + damping_force)/2
 
         print('applying spring-damper forces', force1, force2)
 

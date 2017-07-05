@@ -79,12 +79,12 @@ class Ctrl(object):
         # calculate their difference (damping torque)
         vel1 = self.joint1.projectVectorDoF(self.ds1.angularVelocity(True), bv, 0)
         vel2 = self.joint1.projectVectorDoF(self.ds2.angularVelocity(True), bv, 0)
-        vel_diff = vel2 - vel1
+        vel_diff = vel1 - vel2
         damping_torque = vel_diff * 5.0
 
         # Calculate total torques for each body
-        torque1 += + spring_torque/2 + damping_torque/2
-        torque2 += - spring_torque/2 - damping_torque/2
+        torque1 += - (spring_torque + damping_torque)/2
+        torque2 += + (spring_torque + damping_torque)/2
 
         print('applying spring-damper torques', torque1, torque2)
 
