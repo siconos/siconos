@@ -627,18 +627,18 @@ void PivotJointR::_normalDoF(const BlockVector& q0, SiconosVector& ans, int axis
     changeFrameAbsToBody(q0.getAllVect()[0], tmp2);
     ans = *tmp2;
     return;
-    ::boost::math::quaternion<double> q1(q0.getValue(3), q0.getValue(4),
-                                         q0.getValue(5), q0.getValue(6));
+    // ::boost::math::quaternion<double> q1(q0.getValue(3), q0.getValue(4),
+    //                                      q0.getValue(5), q0.getValue(6));
 
-    // _A is in the q1 frame, so change it to the inertial frame.
-    ::boost::math::quaternion<double> aq(0, (*_A)(0), (*_A)(1), (*_A)(2));
-    ::boost::math::quaternion<double> tmp( q1 * aq / q1 );
-    ans(0) = tmp.R_component_2();
-    ans(1) = tmp.R_component_3();
-    ans(2) = tmp.R_component_4();
-    printf("PivotJointR::_normalDoF: _A = (%0.02f, %0.02f, %0.02f)\n",
-           (*_A)(0), (*_A)(1), (*_A)(2));
-    printf("PivotJointR::_normalDoF: ans = (%0.02f, %0.02f, %0.02f)\n",
-           ans(0), ans(1), ans(2));
+    // // _A is in the q1 frame, so change it to the inertial frame.
+    // ::boost::math::quaternion<double> aq(0, (*_A)(0), (*_A)(1), (*_A)(2));
+    // ::boost::math::quaternion<double> tmp( q1 * aq / q1 );
+    // ans(0) = tmp.R_component_2();
+    // ans(1) = tmp.R_component_3();
+    // ans(2) = tmp.R_component_4();
+    // printf("PivotJointR::_normalDoF: _A = (%0.02f, %0.02f, %0.02f)\n",
+    //        (*_A)(0), (*_A)(1), (*_A)(2));
+    // printf("PivotJointR::_normalDoF: ans = (%0.02f, %0.02f, %0.02f)\n",
+    //        ans(0), ans(1), ans(2));
   }
 }
