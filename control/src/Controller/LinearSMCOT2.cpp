@@ -118,7 +118,6 @@ void LinearSMCOT2::initialize(const Model& m)
   _PhiOSI.reset(new LsodarOSI());
   _modelPhi->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DSPhi);
   _simulPhi.reset(new EventDriven(_tdPhi, 0));
-  _simulPhi->setNonSmoothDynamicalSystemPtr(_modelPhi->nonSmoothDynamicalSystem());
   _simulPhi->prepareIntegratorForDS(_PhiOSI, _DSPhi, _modelPhi, _t0);
   _modelPhi->setSimulation(_simulPhi);
   _modelPhi->initialize();
@@ -127,7 +126,6 @@ void LinearSMCOT2::initialize(const Model& m)
   _PredOSI.reset(new LsodarOSI());
   _modelPred->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DSPred);
   _simulPred.reset(new EventDriven(_tdPred, 0));
-  _simulPred->setNonSmoothDynamicalSystemPtr(_modelPred->nonSmoothDynamicalSystem());
   _simulPred->prepareIntegratorForDS(_PredOSI, _DSPred, _modelPred, _t0);
   _modelPred->setSimulation(_simulPred);
   _modelPred->initialize();

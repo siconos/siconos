@@ -83,7 +83,6 @@ void CommonSMC::initialize(const Model& m)
   _SMC.reset(new Model(t0, T));
   // Set up the simulation
   _simulationSMC.reset(new TimeStepping(_td));
-  _simulationSMC->setNonSmoothDynamicalSystemPtr(_SMC->nonSmoothDynamicalSystem());
 
   unsigned int sDim = _u->size();
   // create the interaction

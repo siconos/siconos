@@ -38,7 +38,6 @@ void ZOHTest::init()
   _TD.reset(new TimeDiscretisation(_t0, _h));
   _model.reset(new Model(_t0, _T));
   _sim.reset(new TimeStepping(_TD, 0));
-  _sim->setNonSmoothDynamicalSystemPtr(_model->nonSmoothDynamicalSystem());
   _ZOH.reset(new ZeroOrderHoldOSI());
   _model->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DS);
   _sim->prepareIntegratorForDS(_ZOH, _DS, _model, _t0);
@@ -162,7 +161,6 @@ void ZOHTest::testMatrixIntegration2()
   _model->nonSmoothDynamicalSystem()->link(inter, _DS);
   _model->nonSmoothDynamicalSystem()->setControlProperty(inter, true);
   _sim.reset(new TimeStepping(_TD, 1));
-  _sim->setNonSmoothDynamicalSystemPtr(_model->nonSmoothDynamicalSystem());
   _sim->prepareIntegratorForDS(_ZOH, _DS, _model, _t0);
   SP::Relay osnspb(new Relay());
   _sim->insertNonSmoothProblem(osnspb);
@@ -230,7 +228,6 @@ void ZOHTest::testMatrixIntegration3()
   _model->nonSmoothDynamicalSystem()->link(inter, _DS);
   _model->nonSmoothDynamicalSystem()->setControlProperty(inter, true);
   _sim.reset(new TimeStepping(_TD, 1));
-  _sim->setNonSmoothDynamicalSystemPtr(_model->nonSmoothDynamicalSystem());
   _sim->prepareIntegratorForDS(_ZOH, _DS, _model, _t0);
   SP::Relay osnspb(new Relay());
   _sim->insertNonSmoothProblem(osnspb);
@@ -304,7 +301,6 @@ void ZOHTest::testMatrixIntegration4()
   _model->nonSmoothDynamicalSystem()->link(inter, _DS);
   _model->nonSmoothDynamicalSystem()->setControlProperty(inter, true);
   _sim.reset(new TimeStepping(_TD, 1));
-  _sim->setNonSmoothDynamicalSystemPtr(_model->nonSmoothDynamicalSystem());
   _sim->prepareIntegratorForDS(_ZOH, _DS, _model, _t0);
   SP::Relay osnspb(new Relay());
   _sim->insertNonSmoothProblem(osnspb);

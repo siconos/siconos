@@ -273,9 +273,8 @@ class Guitar(sk.Model):
         # (4) Simulation setup with (1) (2) (3)
         self.simu = sk.TimeStepping(t, default_integrator, osnspb)
         if integrators is not None:
-            self.simu.insertIntegrator(integrators[ds])
             for ds in integrators:
-                nsds.setOSI(ds, integrators[ds])
+                self.simu.prepareIntegratorForDS(integrators[ds], ds, self, t0)
         # simulation initialization
         self.setSimulation(self.simu)
         self.initialize()

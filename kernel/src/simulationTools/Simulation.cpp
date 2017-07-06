@@ -544,16 +544,37 @@ void Simulation::prepareIntegratorForDS(SP::OneStepIntegrator osi,
                                         SP::DynamicalSystem ds,
                                         SP::Model m, double time)
 {
+  assert(m && m->nonSmoothDynamicalSystem() && "Simulation::prepareIntegratorForDS requires a Model with an NSDS.");
+
+  /*
+   * Steps to be accomplished when adding a DS to a Model and
+   * Simulation:
+   *
+   * 1. Add the DS to model->_nsds (Model::insertDynamicalSystem(ds))
+   *    (assumed done before this function is called, everything else
+   *    done in this function)
+   *
+   * 2. Add the OSI to simulation->_allOSI (Simulation::insertIntegrator)
+   *
+   * 3. Assign the OSI to the DS via the pointer in
+   *   _nsds->_topology->_DSG properties for the DS (setOSI).  Since
+   *   _nsds is not necessarily available yet, so take it from Model.
+   *
+   * 4. If Simulation already initialized, then DS work vectors in
+   *    _dynamicalSystemsGraph properties for the DS must be
+   *    initialized (OSI::initializeDynamicalSystem), otherwise it will
+   *    be called later during Simulation::initialize().
+  */
+
   // Keep OSI in the set, no effect if already present.
   insertIntegrator(osi);
 
   // Associate the OSI to the DS in the topology.
-  assert(_nsds && "Simulation::prepareIntegratorForDS requires an NSDS.");
-  _nsds->topology()->setOSI(ds, osi);
+  m->nonSmoothDynamicalSystem()->topology()->setOSI(ds, osi);
 
   // Prepare work vectors, etc.
-  // If no Model, or OSI has no DSG yet, assume DS will be initialized
-  // later.  (Typically, during Simulation::initialize())
-  if (m && osi->dynamicalSystemsGraph())
+  // If OSI has no DSG yet, assume DS will be initialized later.
+  // (Typically, during Simulation::initialize())
+  if (osi->dynamicalSystemsGraph())
     osi->initializeDynamicalSystem(*m, time, ds);
 }

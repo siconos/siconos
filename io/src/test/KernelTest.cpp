@@ -276,7 +276,6 @@ void KernelTest::t5()
 
   // -- (1) OneStepIntegrators --
   SP::MoreauJeanOSI OSI(new MoreauJeanOSI(theta));
-  bouncingBall->nonSmoothDynamicalSystem()->topology()->setOSI(ball, OSI);
 
   // -- (2) Time discretisation --
   SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
@@ -286,6 +285,7 @@ void KernelTest::t5()
 
   // -- (4) Simulation setup with (1) (2) (3)
   SP::TimeStepping s(new TimeStepping(t, OSI, osnspb));
+  s->prepareIntegratorForDS(OSI, ball, bouncingBall, t0);
 
   // =========================== End of model definition ===========================
 

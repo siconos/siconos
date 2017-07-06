@@ -41,18 +41,12 @@ give the value of the :math:`\theta` parameter:
 
    osi = MoreauJeanOSI(0.5)
 
-Then, we attach the previously defined dynamical system to the integrator:
+Then, we attach the previously defined dynamical system to the integrator, which also adds the integrator to the simulation and prepares required work vectors:
 
 .. testcode::
 
-   bouncingBall.nonSmoothDynamicalSystem().setOSI(ball, osi)
+   simulation.prepareIntegratorForDS(osi, ball, bouncingBall, 0)
 
-And we attach this one step integrator to the simulation:
-
-.. testcode::
-
-   simulation.insertIntegrator(osi)
-   
 In the Moreau-Jean time-stepping scheme, the unilateral constraints, after
 being reformulated at the velocity level, lead at each timestep to nonsmooth
 optimization problems. In our case, it is a linear complementarity problem
@@ -130,8 +124,7 @@ attached to the integrator which is attached to the simulation:
 
 .. testcode::
 
-   diodesBridge.nonSmoothDynamicalSystem().setOSI(diodesBridge, osi)
-   simulation.insertIntegrator(osi)
+   simulation.prepareIntegratorForDS(osi, diodesBridge, DiodesBridgeModel, 0)
 
 At each time step, the Moreau-Jean time stepping scheme needs a linear
 complementarity problem to be solved. The `LCP` object is attached to
