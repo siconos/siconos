@@ -102,7 +102,7 @@ int main(int argc, char* argv[])
     axis1->setValue(1, 0);
     axis1->setValue(2, 1);
 
-    SP::PrismaticJointR relation1(new PrismaticJointR(beam1, axis1, true));
+    SP::PrismaticJointR relation1(new PrismaticJointR(axis1, true, beam1));
 
     SP::SimpleMatrix H1(new SimpleMatrix(relation1->numberOfConstraints(), qDim));
     H1->zero();
