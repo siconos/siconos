@@ -403,7 +403,7 @@ public:
   /** update the state of the dynamical systems
       \param ds the dynamical to update
    */
-  virtual void updatePosition(SP::DynamicalSystem ds);
+  virtual void updatePosition(DynamicalSystem &ds);
 
   /** update the state of the dynamical systems
    *  \param level the level of interest for the dynamics: not used at the time
