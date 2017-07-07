@@ -56,7 +56,8 @@ ZeroOrderHoldOSI::ZeroOrderHoldOSI():
   _levelMaxForInput =0;
 }
 
-void ZeroOrderHoldOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds)
+void ZeroOrderHoldOSI::initializeDynamicalSystem(const Model& m, double t,
+                                                 SP::DynamicalSystem ds)
 {
   // Get work buffers from the graph
   VectorOfVectors& workVectors = *_initializeDSWorkVectors(ds);

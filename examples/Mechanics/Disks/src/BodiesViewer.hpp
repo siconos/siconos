@@ -127,7 +127,7 @@ struct ForMassValue : public Question<double>
   ANSWER(Disk, mass()->getValue(0, 0));
   ANSWER(Circle, mass()->getValue(0, 0));
   ANSWER(SphereLDS, mass()->getValue(0, 0));
-  ANSWER(SphereNEDS, massValue());
+  ANSWER(SphereNEDS, scalarMass());
   IFBULLET(ANSWER(BulletDS, massValue()));
 };
 

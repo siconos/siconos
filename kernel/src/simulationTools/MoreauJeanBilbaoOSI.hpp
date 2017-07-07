@@ -53,7 +53,8 @@ public:
    * \param t time of initialization
    * \param ds the dynamical system
    */
-  virtual void initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds);
+  virtual void initializeDynamicalSystem(const Model& m, double t,
+                                         SP::DynamicalSystem ds);
 
   /** initialization of the work vectors and matrices (properties) related to
    *  one interaction on the graph and needed by the osi

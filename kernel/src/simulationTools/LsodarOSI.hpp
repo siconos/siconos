@@ -245,7 +245,7 @@ public:
 
   /** initialization of the integrator
    */
-  void initialize(Model& m);
+  void initialize(const Model& m);
 
   /** initialization of the work vectors and matrices (properties) related to
    *  one dynamical system on the graph and needed by the osi
@@ -253,7 +253,7 @@ public:
    * \param t time of initialization
    * \param ds the dynamical system
    */
-  void initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds);
+  void initializeDynamicalSystem(const Model& m, double t, SP::DynamicalSystem ds);
 
   /** initialization of the work vectors and matrices (properties) related to
    *  one interaction on the graph and needed by the osi

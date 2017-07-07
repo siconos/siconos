@@ -18,6 +18,7 @@
 #include "NonSmoothDynamicalSystem.hpp"
 #include "Interaction.hpp"
 #include "Relation.hpp"
+#include "OneStepIntegrator.hpp"
 
 #include <SiconosConfig.h>
 #if defined(SICONOS_STD_FUNCTIONAL) && !defined(SICONOS_USE_BOOST_FOR_CXX11)
@@ -191,4 +192,52 @@ void NonSmoothDynamicalSystem::visitDynamicalSystems(SP::SiconosVisitor visitor)
   {
     dsg.bundle(*dsi)->acceptSP(visitor);
   }
+}
+
+void NonSmoothDynamicalSystem::insertDynamicalSystem(SP::DynamicalSystem ds,
+                                                     SP::OneStepIntegrator osi,
+                                                     SP::Model model, double time)
+{
+  _topology->insertDynamicalSystem(ds);
+  _mIsLinear = ((ds)->isLinear() && _mIsLinear);
+  if (osi) {
+    if (time < 0 || !model)
+      RuntimeException::selfThrow("NonSmoothDynamicalSystem::insertDynamicalSystem() "
+                                  "requires Model and time if OSI is provided.");
+    setOSI(ds, osi, *model, time);
+  }
+}
+
+void NonSmoothDynamicalSystem::setOSI(SP::DynamicalSystem ds,
+                                      SP::OneStepIntegrator osi,
+                                      Model &model, double time)
+{
+  /*
+   * Steps to be accomplished when adding a DS to a Model and
+   * Simulation:
+   *
+   * 1. Add the DS to model->_nsds (Model::insertDynamicalSystem(ds))
+   *    (assumed done before this function is called, everything else
+   *    done in this function)
+   *
+   * 2. Add the OSI to simulation->_allOSI (Simulation::insertIntegrator)
+   *    (not done here, must be done separately)
+   *
+   * 3. Assign the OSI to the DS via the pointer in
+   *   _topology->_DSG properties for the DS (setOSI).
+   *
+   * 4. If Simulation already initialized, then DS work vectors in
+   *    _dynamicalSystemsGraph properties for the DS must be
+   *    initialized (OSI::initializeDynamicalSystem), otherwise it will
+   *    be called later during Simulation::initialize().
+   */
+
+  // Associate the OSI to the DS in the topology.
+  _topology->setOSI(ds, osi);
+
+  // Prepare work vectors, etc.
+  // If OSI has no DSG yet, assume DS will be initialized later.
+  // (Typically, during Simulation::initialize())
+  if (osi->dynamicalSystemsGraph())
+    osi->initializeDynamicalSystem(model, time, ds);
 }

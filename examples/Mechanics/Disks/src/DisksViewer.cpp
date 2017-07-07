@@ -61,7 +61,6 @@ void DisksViewer::draw()
 
   float lbdmax = 0.;
 
-  DSIterator itDS;
   SP::InteractionsGraph I1;
   SP::Interaction interaction;
   SP::Relation relation;

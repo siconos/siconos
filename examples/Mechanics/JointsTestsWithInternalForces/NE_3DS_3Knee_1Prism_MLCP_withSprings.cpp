@@ -302,11 +302,11 @@ int main(int argc, char* argv[])
 
     // -- (1) OneStepIntegrators --
     SP::MoreauJeanOSI OSI1(new MoreauJeanOSI(theta));
-    myModel->nonSmoothDynamicalSystem()->topology()->setOSI(beam1,OSI1);
+    myModel->nonSmoothDynamicalSystem()->setOSI(beam1, OSI1, *myModel, t0);
     SP::MoreauJeanOSI OSI2(new MoreauJeanOSI(theta));
-    myModel->nonSmoothDynamicalSystem()->topology()->setOSI(beam2,OSI2);
+    myModel->nonSmoothDynamicalSystem()->setOSI(beam2, OSI2, *myModel, t0);
     SP::MoreauJeanOSI OSI3(new MoreauJeanOSI(theta));
-    myModel->nonSmoothDynamicalSystem()->topology()->setOSI(beam3,OSI3);
+    myModel->nonSmoothDynamicalSystem()->setOSI(beam3, OSI3, *myModel, t0);
 
     // -- (2) Time discretisation --
     SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));

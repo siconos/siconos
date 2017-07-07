@@ -38,10 +38,9 @@ void OSNSPTest::init()
   _TD.reset(new TimeDiscretisation(_t0, _h));
   _model.reset(new Model(_t0, _T));
   _osi.reset(new EulerMoreauOSI(_theta));
-  _model->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DS);
+  _model->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DS, _osi, _model, _t0);
   _sim.reset(new TimeStepping(_TD, 0));
-  _sim->setNonSmoothDynamicalSystemPtr(_model->nonSmoothDynamicalSystem());
-  _sim->prepareIntegratorForDS(_osi, _DS, _model, _t0);
+  _sim->insertIntegrator(_osi);
   _model->setSimulation(_sim);
   _model->initialize();
 }
@@ -88,11 +87,10 @@ void OSNSPTest::testAVI()
   _model.reset(new Model(_t0, _T));
   SP::Interaction inter(new Interaction(nslaw, rel));
   _osi.reset(new EulerMoreauOSI(_theta));
-  _model->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DS);
+  _model->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DS, _osi, _model, _t0);
   _model->nonSmoothDynamicalSystem()->link(inter, _DS);
   _sim.reset(new TimeStepping(_TD));
-  _sim->setNonSmoothDynamicalSystemPtr(_model->nonSmoothDynamicalSystem());
-  _sim->prepareIntegratorForDS(_osi, _DS, _model, _t0);
+  _sim->insertIntegrator(_osi);
   SP::AVI osnspb(new AVI());
   _sim->insertNonSmoothProblem(osnspb);
   _model->setSimulation(_sim);

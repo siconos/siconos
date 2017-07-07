@@ -43,7 +43,9 @@ MoreauJeanCombinedProjectionOSI::MoreauJeanCombinedProjectionOSI(double theta) :
 }
 
 
-void MoreauJeanCombinedProjectionOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds)
+void MoreauJeanCombinedProjectionOSI::initializeDynamicalSystem(const Model& m,
+                                                                double t,
+                                                                SP::DynamicalSystem ds)
 {
   DEBUG_BEGIN("MoreauJeanCombinedProjectionOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds) \n");
  

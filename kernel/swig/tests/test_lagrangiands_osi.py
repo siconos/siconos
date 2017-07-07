@@ -92,9 +92,9 @@ def test_lagrangian_and_osis():
     # -- (4) Simulation setup with (1) (2) (3)
     simu = sk.TimeStepping(td, standard, lcp)
     # extra osi must be explicitely inserted into simu and linked to ds
-    simu.setNonSmoothDynamicalSystemPtr(model.nonSmoothDynamicalSystem())
-    simu.prepareIntegratorForDS(bilbao, ds_list['LLDDS+MJB'], model, tinit)
-    simu.prepareIntegratorForDS(bilbao, ds_list['LLDDS+MJB2'], model, tinit)
+    simu.insertIntegrator(bilbao)
+    nsds.setOSI(ds_list['LLDDS+MJB'], bilbao, model, tinit)
+    nsds.setOSI(ds_list['LLDDS+MJB2'], bilbao, model, tinit)
 
     # link simu and model, initialize
     model.setSimulation(simu)

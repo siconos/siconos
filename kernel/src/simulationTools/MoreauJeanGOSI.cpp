@@ -64,7 +64,8 @@ MoreauJeanGOSI::MoreauJeanGOSI(double theta, double gamma):
     _useGamma = false;
   }
 }
-void MoreauJeanGOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds)
+void MoreauJeanGOSI::initializeDynamicalSystem(const Model& m, double t,
+                                               SP::DynamicalSystem ds)
 {
   // Get work buffers from the graph
   VectorOfVectors& workVectors = *_initializeDSWorkVectors(ds);

@@ -1231,11 +1231,8 @@ class Hdf5():
                 if birth:
                     nsds = self._model.nonSmoothDynamicalSystem()
                     if use_proposed:
-                        nsds.insertDynamicalSystem(body)
-                        self._model.simulation().prepareIntegratorForDS(
-                            self._osi, body, self._model,
-                            self._model.simulation().nextTime())
-                        self._model.simulation().initialize(self._model, False)
+                        nsds.insertDynamicalSystem(body, self._osi, self._model,
+                                                   self._model.simulation().nextTime())
                     elif use_original:
                         self._broadphase.addDynamicObject(
                             body,
@@ -1244,7 +1241,8 @@ class Hdf5():
                     nsds.setName(body, str(name))
                 else:
                     nsds = self._model.nonSmoothDynamicalSystem()
-                    nsds.insertDynamicalSystem(body)
+                    nsds.insertDynamicalSystem(body, self._osi, self._model,
+                                               self._model.simulation().nextTime())
                     nsds.setName(body, str(name))
 
     def importJoint(self, name):

@@ -42,9 +42,6 @@ ControlZOHSimulation::ControlZOHSimulation(double t0, double T, double h):
   _processSimulation->setName("plant simulation");
   _processSimulation->insertIntegrator(_processIntegrator);
 
-  _processSimulation->setNonSmoothDynamicalSystemPtr(
-    _model->nonSmoothDynamicalSystem());
-
   _DSG0 = _model->nonSmoothDynamicalSystem()->topology()->dSG(0);
   _IG0 = _model->nonSmoothDynamicalSystem()->topology()->indexSet0();
 

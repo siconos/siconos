@@ -103,7 +103,7 @@ int main()
     SP::BodyDS body(makeBox(g, position_init, velocity_init));
 
     // -- Add the dynamical system in the non smooth dynamical system
-    model->nonSmoothDynamicalSystem()->insertDynamicalSystem(body);
+    model->nonSmoothDynamicalSystem()->insertDynamicalSystem(body, osi, model, t0);
 
     SP::SiconosPlane ground(std11::make_shared<SiconosPlane>());
 
@@ -219,8 +219,8 @@ int main()
       if (k==100)
       {
         SP::BodyDS ds(makeBox(g, 3.0, 0));
-        simulation->nonSmoothDynamicalSystem()->insertDynamicalSystem(ds);
-        simulation->prepareIntegratorForDS(osi, ds, model, simulation->nextTime());
+        model->nonSmoothDynamicalSystem()->insertDynamicalSystem(
+          ds, osi, model, simulation->nextTime());
       }
 
       collision_manager->resetStatistics();

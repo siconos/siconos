@@ -96,7 +96,8 @@ SP::SiconosMatrix SchatzmanPaoliOSI::WBoundaryConditions(SP::DynamicalSystem ds)
   return _dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).WBoundaryConditions;
 }
 
-void SchatzmanPaoliOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds)
+void SchatzmanPaoliOSI::initializeDynamicalSystem(const Model& m, double t,
+                                                  SP::DynamicalSystem ds)
 {
   DEBUG_BEGIN("SchatzmanPaoliOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds)\n");
 

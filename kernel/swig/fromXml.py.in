@@ -415,7 +415,6 @@ def buildModelXML(xmlFile):
         exit(1)
 
     # OSI
-    sim.setNonSmoothDynamicalSystemPtr(nsds)
     allOSI = []
     for osiType in dataOSI.keys():
         for osixml in simxml.OneStepIntegrator_Definition.__dict__[osiType]:
@@ -423,7 +422,9 @@ def buildModelXML(xmlFile):
             _additionalInputsOSI(osixml, osi, dataOSI[osiType])
             print(osixml.DS_Concerned)
             for dsN in osixml.DS_Concerned:
-                sim.prepareIntegratorForDS(osi, allDS[dsN], model, sim.nextTime())
+                model.nonSmoothDynamicalSystem().setOSI(allDS[dsN], osi,
+                                                        model, sim.nextTime())
+            sim.insertIntegrator(osi)
             allOSI.append(osi)
 
     # OSNSPB

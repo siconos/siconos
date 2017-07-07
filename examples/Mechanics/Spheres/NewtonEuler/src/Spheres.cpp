@@ -136,7 +136,9 @@ void Spheres::init()
       body->setFExtPtr(FExt);
 
       // add the dynamical system in the non smooth dynamical system
-      _model->nonSmoothDynamicalSystem()->insertDynamicalSystem(body);
+      // and link it to the OSI
+      _model->nonSmoothDynamicalSystem()->insertDynamicalSystem(body, osi, _model, t0);
+
     }
 
     // ------------------

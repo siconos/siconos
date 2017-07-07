@@ -323,9 +323,6 @@ int main(int argc, char* argv[])
 
     SP::TimeSteppingCombinedProjection s(new TimeSteppingCombinedProjection(t, OSI, osnspb, osnspb_pos));
     s->setNonSmoothDynamicalSystemPtr(myModel->nonSmoothDynamicalSystem());
-    s->prepareIntegratorForDS(OSI, beam1, myModel, t0);
-    s->prepareIntegratorForDS(OSI, beam2, myModel, t0);
-    s->prepareIntegratorForDS(OSI, beam3, myModel, t0);
     s->setProjectionMaxIteration(1000);
     s->setConstraintTol(1e-08);
     s->setConstraintTolUnilateral(1e-08);

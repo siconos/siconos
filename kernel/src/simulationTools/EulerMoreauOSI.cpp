@@ -93,7 +93,8 @@ SP::SiconosMatrix EulerMoreauOSI::WBoundaryConditions(SP::DynamicalSystem ds)
   return _dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).WBoundaryConditions;
 }
 
-void EulerMoreauOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds)
+void EulerMoreauOSI::initializeDynamicalSystem(const Model& m, double t,
+                                               SP::DynamicalSystem ds)
 {
   VectorOfVectors& workVectors = *_initializeDSWorkVectors(ds);
 

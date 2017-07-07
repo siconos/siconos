@@ -131,11 +131,9 @@ void Spheres::init()
       FExt->setValue(2, -m * g);
       body->setFExtPtr(FExt);
 
-      // add the dynamical system to the one step integrator
-      osi->insertDynamicalSystem(body);
-
       // add the dynamical system in the non smooth dynamical system
-      _model->nonSmoothDynamicalSystem()->insertDynamicalSystem(body);
+      // and link it to the OSI
+      _model->nonSmoothDynamicalSystem()->insertDynamicalSystem(body, osi, _model, t0);
 
     }
 
