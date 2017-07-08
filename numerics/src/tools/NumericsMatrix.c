@@ -33,13 +33,24 @@
 #include "SiconosLapack.h"
 #include "numerics_verbose.h"
 #include "sanitizer.h"
-//#define DEBUG_MESSAGES
+/* #define DEBUG_NOCOLOR */
+/* #define DEBUG_STDOUT */
+/* #define DEBUG_MESSAGES */
 #include "debug.h"
 
 #ifdef WITH_MKL_SPBLAS
 #include "MKL_common.h"
 #include "NM_MKL_spblas.h"
 #endif
+
+
+
+
+
+
+
+
+
 
 void prodNumericsMatrix3x3(int sizeX, int sizeY, NumericsMatrix* A,
                            double* const x, double* y)
@@ -120,8 +131,8 @@ void NM_row_prod_no_diag(size_t sizeX, size_t sizeY, int block_start, size_t row
   assert(A);
   assert(x);
   assert(y);
-  assert(A->size0 >= sizeY);
-  assert(A->size1 == sizeX);
+  assert((size_t) A->size0 >= sizeY);
+  assert((size_t)A->size1 == sizeX);
 
   switch(A->storageType)
   {
@@ -219,8 +230,8 @@ void NM_row_prod_no_diag3(size_t sizeX, int block_start, size_t row_start, Numer
   assert(A);
   assert(x);
   assert(y);
-  assert(A->size0 >= 3);
-  assert(A->size1 == sizeX);
+  assert((size_t)A->size0 >= 3);
+  assert((size_t)A->size1 == sizeX);
 
   switch(A->storageType)
   {
@@ -417,6 +428,130 @@ void NM_dense_display(double * m, int nRow, int nCol, int lDim)
     printf("Matrix : NULL\n");
 
 }
+
+void NM_zentry(NumericsMatrix* M, int i, int j, double val)
+{
+  switch (M->storageType)
+  {
+  case NM_SPARSE:
+  {
+    assert(M->matrix2);
+    switch (M->matrix2->origin)
+    {
+    case NS_TRIPLET:
+    {
+      assert(M->matrix2->triplet);
+      CHECK_RETURN(cs_zentry(M->matrix2->triplet, i, j, val));
+      break;
+    }
+    case NS_CSC:
+    {
+      assert(M->matrix2->csc);
+      CHECK_RETURN(cs_zentry(NM_triplet(M), i, j, val));
+      M->matrix2->origin= NS_TRIPLET;
+      NM_clearCSC(M);
+      //NM_display(M);
+      //NM_csc_alloc(M,M->matrix2->triplet->nz);
+      //M->matrix2->origin= NS_CSC;
+      NM_csc(M);
+
+      M->matrix2->origin= NS_CSC;
+      NM_clearTriplet(M);
+
+      //NM_display(M);
+      break;
+    }
+    default:
+    {
+      fprintf(stderr, "NM_zentry ::  unknown origin %d for sparse matrix\n", M->matrix2->origin);
+    }
+    }
+  }
+  }
+
+}
+
+
+double NM_get_value(NumericsMatrix* M, int i, int j)
+{
+  assert(M);
+switch (M->storageType)
+  {
+  case NM_SPARSE:
+  {
+    assert(M->matrix2);
+    switch (M->matrix2->origin)
+    {
+    case NS_TRIPLET:
+    {
+      assert(M->matrix2->triplet);
+      assert(i <M->matrix2->triplet->m );
+      assert(j <M->matrix2->triplet->n );
+      csi * Mi =   M->matrix2->triplet->i;
+      csi * Mp =   M->matrix2->triplet->p;
+      double * Mx =   M->matrix2->triplet->x;
+
+      for (int idx = 0 ; idx < M->matrix2->triplet->nz  ; idx++ )
+      {
+        if (Mi[idx] ==i && Mp[idx] == j)
+        {
+          return Mx[idx];
+        }
+      }
+      return 0.0;
+      break;
+    }
+    case NS_CSC:
+    {
+      assert(M->matrix2->csc);
+      csi * Mi =   M->matrix2->csc->i;
+      csi * Mp =   M->matrix2->csc->p;
+      double * Mx =   M->matrix2->csc->x;
+
+      for (int row = Mp[j]; row < Mp[j+1] ; row++)
+      {
+        if (i == Mi[row])
+          return  Mx[row];
+      }
+      return 0.0;
+      break;
+    }
+    default:
+    {
+      fprintf(stderr, "NM_get_value ::  unknown origin %d for sparse matrix\n", M->matrix2->origin);
+    }
+    }
+  }
+  default:
+    fprintf(stderr, "NM_get_value ::  unknown matrix storage = %d\n", M->storageType);
+  }
+return 0.0;
+
+}
+
+bool NM_equal(NumericsMatrix* A, NumericsMatrix* B)
+{
+  assert(A);
+  assert(B);
+  if (A->size0 != B->size0)
+  {
+    return false;
+  }
+  if (A->size1 != B->size1)
+  {
+    return false;
+  }
+  for (int i =0; i< A->size0 ; i++)
+  {
+    for (int j =0; j< A->size1 ; j++)
+    {
+      //printf("error = %e\n", fabs(NM_get_value(A, i, j) - NM_get_value(B, i, j)));
+      if (fabs(NM_get_value(A, i, j) - NM_get_value(B, i, j)) >= DBL_EPSILON) return false;
+    }
+  }
+  return true;
+};
+
 void NM_vector_display(double * m, int nRow)
 {
   int lin;
@@ -444,26 +579,52 @@ void NM_display(const NumericsMatrix* const m)
     exit(EXIT_FAILURE);
   }
   printf("========== Numerics Matrix\n");
-  printf("========== storageType = %i\n", m->storageType);
+
   printf("========== size0 = %i, size1 = %i\n", m->size0, m->size1);
 
   switch (m->storageType)
   {
   case NM_DENSE:
   {
-
+    printf("========== storageType = NM_DENSE\n");
     NM_dense_display(m->matrix0, m->size0, m->size1, m->size0);
     break;
   }
   case NM_SPARSE_BLOCK:
   {
     assert(m->matrix1);
+    printf("========== storageType =  NM_SPARSE_BLOCK\n");
     printSBM(m->matrix1);
     break;
   }
   case NM_SPARSE:
   {
     assert(m->matrix2);
+    printf("========== storageType = NM_SPARSE\n");
+    switch (m->matrix2->origin)
+    {
+    case NS_TRIPLET:
+    {
+      printf("========== origin =  NS_TRIPLET\n");
+      break;
+    }
+    case NS_CSC:
+    {
+      printf("========== origin =  NS_CSC\n");
+      break;
+    }
+    case NS_CSR:
+    {
+      printf("========== origin =  NS_CSR\n");
+      break;
+    }
+    default:
+    {
+      fprintf(stderr, "NM_display ::  unknown origin %d for sparse matrix\n", m->matrix2->origin);
+    }
+    }
+
+    printf("========== size0 = %i, size1 = %i\n", m->size0, m->size1);
     if (m->matrix2->triplet)
     {
       printf("========== a matrix in format triplet is stored\n" );
@@ -733,7 +894,7 @@ void NM_extract_diag_block(NumericsMatrix* M, int block_row_nb, size_t start_row
     double* Mptr = M->matrix0 + (M->size0 + 1)*start_row;
     double* Bmat = *Block;
     /* The part of MM which corresponds to the current block is copied into MLocal */
-    for (size_t i = 0; i < size; ++i)
+    for (size_t i = 0; i < (size_t) size; ++i)
     {
       memcpy(Bmat, Mptr, size*sizeof(double));
       Mptr += M->size0;
@@ -1118,10 +1279,10 @@ void NM_sparse_extract_block(NumericsMatrix* M, double* blockM, size_t pos_row, 
   assert(M);
   assert(M->storageType == NM_SPARSE);
   assert(blockM);
-  assert(pos_row < M->size0);
-  assert(pos_col < M->size1);
-  assert(block_row_size > 0 && block_row_size + pos_row <= M->size0);
-  assert(block_col_size > 0 && block_col_size + pos_col <= M->size1);
+  assert(pos_row < (size_t)M->size0);
+  assert(pos_col < (size_t)M->size1);
+  assert(block_row_size > 0 && block_row_size + pos_row <= (unsigned long int)M->size0);
+  assert(block_col_size > 0 && block_col_size + pos_col <= (unsigned long int)M->size1);
 
   NumericsSparseMatrix* Msparse = M->matrix2;
   assert(Msparse);
@@ -1878,7 +2039,8 @@ double* NM_dWork(NumericsMatrix* A, int size)
   {
     assert(A->internalData);
 
-    if (size > A->internalData->dWorkSize)
+    if ( (size_t)
+         size > A->internalData->dWorkSize)
     {
       A->internalData->dWork = (double *) realloc(A->internalData->dWork, size * sizeof(double));
       A->internalData->dWorkSize = size;
@@ -1886,7 +2048,7 @@ double* NM_dWork(NumericsMatrix* A, int size)
   }
 
   assert(A->internalData->dWork);
-  assert(A->internalData->dWorkSize >= size);
+  assert(A->internalData->dWorkSize >= (size_t)size);
 
   return A->internalData->dWork;
 }
@@ -2228,6 +2390,70 @@ int NM_gesv_expert(NumericsMatrix* A, double *b, unsigned keep)
   return (int)info;
 }
 
+int NM_inv(NumericsMatrix* A, NumericsMatrix* Ainv)
+{
+
+  DEBUG_BEGIN("NM_inv(NumericsMatrix* A, double *b, unsigned keep)\n");
+  assert(A->size0 == A->size1);
+  double * b = (double *) malloc(A->size0*sizeof(double));
+   for (int i = 0; i < A->size0; ++i)
+   {
+     b[i]=0.0;
+   }
+  int info =-1;
+
+  // get internal data (allocation of needed)
+  NM_internalData(A);
+
+  switch (A->storageType)
+  {
+  case NM_DENSE:
+  {
+    assert (0 && "NM_inv :  not implemented");
+    break;
+  }
+  case NM_SPARSE_BLOCK: /* sparse block -> triplet -> csc */
+  case NM_SPARSE:
+  {
+    // We clear Ainv
+    NM_clearSparse(Ainv);
+    Ainv->storageType = NM_SPARSE;
+    Ainv->size0 = A->size0;
+    Ainv->size1 = A->size1;
+    NM_triplet_alloc(Ainv,  A->size0);
+    Ainv->matrix2->origin = NS_TRIPLET;
+
+
+    for( int col_rhs =0; col_rhs < A->size1; col_rhs++ )
+    {
+      if (col_rhs >0) b[col_rhs-1] = 0.0;
+      b[col_rhs] = 1.0;
+      info = NM_gesv_expert(A, b, 0);
+
+      DEBUG_EXPR(NM_dense_display(b,A->size1,1,1););
+
+      for (int i = 0; i < A->size0; ++i)
+      {
+        CHECK_RETURN(cs_zentry(Ainv->matrix2->triplet, i, col_rhs, b[i]));
+      }
+    }
+    NM_display(Ainv);
+    break;
+  }
+  default:
+    assert (0 && "NM_inv :  unknown storageType");
+  }
+
+
+  free(b);
+  DEBUG_END("NM_inv(NumericsMatrix* A, double *b, unsigned keep)\n");
+  return (int)info;
+
+}
+
+
+
+
 void NM_update_size(NumericsMatrix* A)
 {
   switch (A->storageType)
@@ -2325,7 +2551,7 @@ csi* NM_sparse_diag_indices(NumericsMatrix* M)
     }
 
     /* Could optimize further and copy everything using memcpy */
-    for (size_t j = 1; j < M->size0; ++j)
+    for (size_t j = 1; j < (size_t)M->size0; ++j)
     {
       csi rem = 0;
       for (csi p = Ap[j]; (rem == 0) && (p < Ap[j+1]); ++p)
@@ -2377,6 +2603,15 @@ void NM_csc_alloc(NumericsMatrix* A, csi nzmax)
 {
   NM_sparse(A)->csc = cs_spalloc(A->size0, A->size1, nzmax, 1, 0);
 }
+void NM_csc_empty_alloc(NumericsMatrix* A, csi nzmax)
+{
+  NM_csc_alloc(A, nzmax);
+  csi* Ap = NM_sparse(A)->csc->p;
+  for (int i =0 ; i < A->size1+1 ; i++)  Ap[i]= 0;
+  //csi* Ai = NM_sparse(A)->csc->i;
+  //for (int i =0 ; i < nzmax ; i++)  Ai[i]= 0;
+}
+
 
 void NM_csr_alloc(NumericsMatrix* A, csi nzmax)
 {

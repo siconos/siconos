@@ -21,7 +21,7 @@
 
 /*! \page NumericsMatrixPage Matrix Storage in numerics component
 
-Numerics component proposes different ways to store 'matrix-like' objects, 
+Numerics component proposes different ways to store 'matrix-like' objects,
 all handled through a C structure, NumericsMatrix.
 
 
@@ -125,7 +125,7 @@ The following linear algebra operation are supported:
 #include "csparse.h" // For csi
 #include "SparseMatrix.h"
 
-/** \struct NumericsMatrixInternalData NumericsMatrix.h 
+/** \struct NumericsMatrixInternalData NumericsMatrix.h
  * Structure for simple workspaces
  */
 typedef struct
@@ -135,6 +135,7 @@ typedef struct
   size_t dWorkSize; /**< size of dWork */
   double *dWork; /**< double workspace */
   bool isLUfactorized; /**<  true if the matrix has already been LU-factorized */
+  bool isInverse; /**<  true if the matrix containes its inverse (in place inversion) */
 } NumericsMatrixInternalData;
 
 /** \struct NumericsMatrix NumericsMatrix.h
@@ -176,6 +177,250 @@ typedef enum {
 extern "C"
 {
 #endif
+  /**************************************************/
+  /** Constructors and destructors   ****************/
+  /**************************************************/
+
+  /** Creation of an empty NumericsMatrix.
+   * \return a pointer to allocated space
+   */
+  NumericsMatrix* newNumericsMatrix(void);
+
+  /** create a NumericsMatrix and allocate the memory according to the matrix type
+   * \param storageType the type of storage
+   * \param size0 number of rows
+   * \param size1 number of columns
+   * \return a pointer to a NumericsMatrix
+   */
+  NumericsMatrix* NM_create(int storageType, int size0, int size1);
+
+  /** create a NumericsMatrix and possibly set the data
+   * \param storageType the type of storage
+   * \param size0 number of rows
+   * \param size1 number of columns
+   * \param data pointer to the matrix data. If NULL, all matrixX fields are
+   * set to NULL
+   * \return a pointer to a NumericsMatrix
+   */
+  NumericsMatrix* NM_create_from_data(int storageType, int size0, int size1, void* data);
+
+ /** Copy a CSparseMatrix inside another CSparseMatrix.
+   *  Reallocations are performed if B cannot hold a copy of A
+   * \param[in] A a CSparseMatrix
+   * \param[in,out] B a CSparseMatrix
+   */
+  void NM_copy_sparse(const CSparseMatrix* const A, CSparseMatrix* B);
+
+  /** Copy a NumericsMatrix inside another NumericsMatrix (deep).
+   *  Reallocations are performed if B cannot hold a copy of A
+   * \param[in] A a NumericsMatrix
+   * \param[in,out] B a NumericsMatrix
+   */
+  void NM_copy(const NumericsMatrix* const A, NumericsMatrix* B);
+
+  /** Copy a NumericsMatrix to s sparse one.
+   *  Allocation or reallocation are performed on B
+   *  \warning It is assumed that B has been properly initialized: its storageType must
+   *  be set to NM_SPARSE.
+   * \param[in] A a NumericsMatrix
+   * \param[in,out] B a NumericsMatrix
+   */
+  void NM_copy_to_sparse(const NumericsMatrix* const A, NumericsMatrix* B);
+
+  /** create a NumericsMatrix similar to the another one. The structure is the same
+   * \param mat the model matrix
+   * \return a pointer to a NumericsMatrix
+   */
+  NumericsMatrix* duplicateNumericsMatrix(NumericsMatrix* mat);
+
+
+  /** Creation, if needed, of sparse matrix storage.
+   * \param[in,out] A a NumericsMatrix
+   * \return a pointer on the sparse matrix storage
+   */
+  NumericsSparseMatrix* NM_sparse(NumericsMatrix* A);
+
+  /** Creation, if needed, of triplet storage from sparse block storage.
+   * \param[in,out] A a NumericsMatrix initialized with sparsed block storage.
+   * \return the triplet sparse Matrix created in A.
+   */
+  CSparseMatrix* NM_triplet(NumericsMatrix* A);
+
+  /** Creation, if needed, of compress column storage of a NumericsMatrix.
+   * \param[in,out] A a NumericsMatrix with sparse block storage initialized
+   * \return the compressed column CSparseMatrix created in A.
+   */
+  CSparseMatrix* NM_csc(NumericsMatrix *A);
+
+  /** Creation, if needed, of the transposed compress column storage
+   * from compress column storage.
+   * \param[in,out] A a NumericsMatrix with sparse block storage.
+   * \return the transposed compressed column matrix created in A.
+   */
+  CSparseMatrix* NM_csc_trans(NumericsMatrix* A);
+
+  /** Creation, if needed, of compress row storage of a NumericsMatrix
+   * \warning This rely on the MKL
+   * \param[in,out] A a NumericsMatrix with sparse block storage initialized
+   * \return the compressed row CSparseMatrix created in A.
+   */
+  CSparseMatrix* NM_csr(NumericsMatrix *A);
+
+  /** fill an existing NumericsMatrix struct
+   * \param[in,out] M the struct to fill
+   * \param storageType the type of storage
+   * \param size0 number of rows
+   * \param size1 number of columns
+   * \param data pointer to the matrix data. If NULL, all matrixX fields are
+   * set to NULL
+   */
+  void fillNumericsMatrix(NumericsMatrix* M, int storageType, int size0, int size1, void* data);
+
+  /** new NumericsMatrix with sparse storage from minimal set of data
+   * \param[in] size0 number of rows
+   * \param[in] size1 number of columns
+   * \param[in] m1 the SparseBlockStructuredMatrix
+   * \return  a pointer to a NumericsMatrix
+   */
+  NumericsMatrix* newSparseNumericsMatrix(int size0, int size1, SparseBlockStructuredMatrix* m1);
+
+  /** Allocate the internalData structure (but not its content!)
+   * \param M the matrix to modify
+   */
+  static inline void NM_alloc_internalData(NumericsMatrix* M)
+  {
+    M->internalData = (NumericsMatrixInternalData *)malloc(sizeof(NumericsMatrixInternalData));
+    M->internalData->iWorkSize = 0;
+    M->internalData->iWork = NULL;
+  }
+ /** set NumericsMatrix fields to NULL
+   * \param A a matrix
+   */
+  static inline void NM_null(NumericsMatrix* A)
+  {
+    A->matrix0 = NULL;
+    A->matrix1 = NULL;
+    A->matrix2 = NULL;
+    A->internalData = NULL;
+  }
+
+  /** update the size of the matrix based on the matrix data
+   * \param[in,out] A the matrix which size is updated*/
+  void NM_update_size(NumericsMatrix* A);
+
+  /** Allocate a csc matrix in A
+   * \param A the matrix
+   * \param nzmax number of non-zero elements
+   */
+  void NM_csc_alloc(NumericsMatrix* A, csi nzmax);
+
+  /** Allocate a csc matrix in A and set the vector of
+   * column pointers to 0 such that the matrix is empty.
+   * \param A the matrix
+   * \param nzmax number of non-zero elements
+   */
+  void NM_csc_empty_alloc(NumericsMatrix* A, csi nzmax);
+
+  /** Allocate a triplet matrix in A
+   * \param A the matrix
+   * \param nzmax maximum number of non-zero elements
+   */
+  void NM_triplet_alloc(NumericsMatrix* A, csi nzmax);
+
+  /** Allocate a csr matrix in A
+   * \param A the matrix
+   * \param nzmax number of non-zero elements
+   */
+  void NM_csr_alloc(NumericsMatrix* A, csi nzmax);
+
+  /** Free memory for a NumericsMatrix. Warning: call this function only if you are sure that
+      memory has been allocated for the structure in Numerics. This function is assumed that the memory is "owned" by this structure.
+      Note that this function does not free m.
+      \param m the matrix to be deleted.
+   */
+  void freeNumericsMatrix(NumericsMatrix* m);
+
+
+  /**************************************************/
+  /** setters and getters               *************/
+  /**************************************************/
+
+  /** insert an non zero entry into a NumericsMatrix.
+   * for storageType = NM_SPARSE, a conversion to triplet is done for performing the entry in the
+   * matrix. This method is expensice in terms of memory management. For a lot of entries, use
+   * preferably a triplet matrix.
+   * \param M the NumericsMatrix
+   * \param i row index
+   * \param i column index
+   * \param val the value to be inserted.
+   */
+  void NM_zentry(NumericsMatrix* M, int i, int j, double val);
+
+  /** get the value of a NumericsMatrix.
+   * \param M the NumericsMatrix
+   * \param i row index
+   * \param i column index
+   * \return  the value to be inserted.
+   */
+  double NM_get_value(NumericsMatrix* M, int i, int j);
+
+  /** compare to NumericsMatrix up to a given tolerance
+   * \param A the NumericsMatrix
+   * \param B the NumericsMatrix
+   * \param tol tolerance
+   */
+  bool NM_equal(NumericsMatrix* A, NumericsMatrix* B);
+
+  /** return the origin of a sparse part of a matrix
+   * \param M the matrix
+   * \return -1 if the matrix has no sparse representation, the origin
+   * otherwise*/
+  unsigned NM_sparse_origin(NumericsMatrix* M);
+
+  /** return the number of non-zero element. For a dense matrix, it is the
+   * product of the dimensions (e.g. an upper bound). For a sparse matrix, it is the true number
+   * \param M the matrix
+   * \return the number (or an upper bound) of non-zero elements in the matrix
+   */
+  size_t NM_nnz(const NumericsMatrix* M);
+
+  /** return the sparse matrix that has the original label
+   * \param M the matrix
+   * \return the sparse matrix that is at the origin, or NULL if an error occur
+   **/
+  CSparseMatrix* NM_sparse_get_origin(const NumericsMatrix* M);
+
+  /** get the (square) diagonal block of a NumericsMatrix. No allocation is done.
+   * \param[in] M a NumericsMatrix
+   * \param[in] block_row_nb the number of the block Row. Useful only in sparse case
+   * \param[in] start_row the starting row. Useful only in dense case.
+   * \param[in] size of the diag block. Only useful in dense case.
+   * \param[out] Block the target. In the dense and sparse case (*Block) must be allocated by caller.
+   *   In case of SBM case **Bout contains the resulting block (from the SBM).
+   */
+  void NM_extract_diag_block(NumericsMatrix* M, int block_row_nb, size_t start_row,
+                             int size, double **Block);
+
+  /** get a 3x3 diagonal block of a NumericsMatrix. No allocation is done.
+   * \param[in] M a NumericsMatrix
+   * \param[in] block_row_nb the number of the block row
+   * \param[out] Block the target. In the dense and sparse case (*Block) must be allocated by caller.
+   *   In case of SBM case **Bout contains the resulting block (from the SBM).
+   */
+  void NM_extract_diag_block3(NumericsMatrix* M, int block_row_nb, double **Block);
+
+  /** return the set of indices corresponding to the diagonal elements of the
+   * matrix
+   * \warning should be better tested
+   * \param M the matrix
+   * \return the list of indices for the diagonal elements
+   */
+  csi* NM_sparse_diag_indices(NumericsMatrix* M);
+
+  /**************************************************/
+  /** Matrix - vector product           *************/
+  /**************************************************/
+
   /** Matrix - vector product y = A*x + y
       \param[in] sizeX dim of the vector x
       \param[in] sizeY dim of the vector y
@@ -221,12 +466,43 @@ extern "C"
   */
   void NM_row_prod_no_diag3(size_t sizeX, int block_start, size_t row_start, NumericsMatrix* A, double* x, double* y, bool init);
 
-  /** Free memory for a NumericsMatrix. Warning: call this function only if you are sure that
-      memory has been allocated for the structure in Numerics. This function is assumed that the memory is "owned" by this structure.
-      Note that this function does not free m.
-      \param m the matrix to be deleted.
+  /** Matrix vector multiplication : y = alpha A x + beta y
+   * \param[in] alpha scalar
+   * \param[in] A a NumericsMatrix
+   * \param[in] x pointer on a dense vector of size A->size1
+   * \param[in] beta scalar
+   * \param[in,out] y pointer on a dense vector of size A->size1
    */
-  void freeNumericsMatrix(NumericsMatrix* m);
+  void NM_gemv(const double alpha, NumericsMatrix* A, const double *x,
+               const double beta,
+               double *y);
+
+  /** Matrix matrix multiplication : C = alpha A B + beta C
+   * \param[in] alpha scalar
+   * \param[in] A a NumericsMatrix
+   * \param[in] B a NumericsMatrix
+   * \param[in] beta scalar
+   * \param[in,out] C a NumericsMatrix
+   */
+  void NM_gemm(const double alpha, NumericsMatrix* A, NumericsMatrix* B,
+               const double beta, NumericsMatrix *C);
+
+  /** Transposed matrix multiplication : y += alpha transpose(A) x + y
+   * \param[in] alpha scalar
+   * \param[in] A a NumericsMatrix
+   * \param[in] x pointer on a dense vector of size A->size1
+   * \param[in] beta scalar
+   * \param[in,out] y pointer on a dense vector of size A->size1
+   */
+  void NM_tgemv(const double alpha, NumericsMatrix* A, const double *x,
+                const double beta,
+                double *y);
+
+
+  /**************************************************/
+  /** matrix and vector display *********************/
+  /**************************************************/
+
 
   /** Screen display of the matrix content stored as a double * array in Fortran style
       \param m the matrix to be displayed
@@ -244,7 +520,7 @@ extern "C"
    */
   void NM_dense_display(double * m, int nRow, int nCol, int lDim);
 
-  /** Screen display of the vector content stored as a double * array 
+  /** Screen display of the vector content stored as a double * array
       \param m the vector to be displayed
       \param nRow the number of rows
    */
@@ -255,6 +531,16 @@ extern "C"
       \param M the matrix to be displayed
    */
   void NM_display(const NumericsMatrix* const M);
+
+
+  /** Screen display raw by raw of the matrix content
+      \param m the matrix to be displayed
+  */
+  void displayRowbyRow(const NumericsMatrix* const m);
+
+  /**************************************************/
+  /** matrix I/O                *********************/
+  /**************************************************/
 
   /** PrintInFile  of the matrix content
      \param M the matrix to be printed
@@ -300,78 +586,9 @@ extern "C"
   */
   void readInFileForScilab(NumericsMatrix* const M, FILE *file);
 
-  /** Screen display raw by raw of the matrix content
-      \param m the matrix to be displayed
-  */
-  void displayRowbyRow(const NumericsMatrix* const m);
-
-  /** get the (square) diagonal block of a NumericsMatrix. No allocation is done.
-   * \param[in] M a NumericsMatrix
-   * \param[in] block_row_nb the number of the block Row. Useful only in sparse case
-   * \param[in] start_row the starting row. Useful only in dense case.
-   * \param[in] size of the diag block. Only useful in dense case.
-   * \param[out] Block the target. In the dense and sparse case (*Block) must be allocated by caller.
-   *   In case of SBM case **Bout contains the resulting block (from the SBM).
-   */
-  void NM_extract_diag_block(NumericsMatrix* M, int block_row_nb, size_t start_row,
-                             int size, double **Block);
-
-  /** get a 3x3 diagonal block of a NumericsMatrix. No allocation is done.
-   * \param[in] M a NumericsMatrix
-   * \param[in] block_row_nb the number of the block row
-   * \param[out] Block the target. In the dense and sparse case (*Block) must be allocated by caller.
-   *   In case of SBM case **Bout contains the resulting block (from the SBM).
-   */
-  void NM_extract_diag_block3(NumericsMatrix* M, int block_row_nb, double **Block);
-
-  /** create a NumericsMatrix similar to the another one. The structure is the same
-   * \param mat the model matrix
-   * \return a pointer to a NumericsMatrix
-   */
-  NumericsMatrix* duplicateNumericsMatrix(NumericsMatrix* mat);
 
 
-  /** Creation of an empty NumericsMatrix.
-   * \return a pointer to allocated space
-   */
-  NumericsMatrix* newNumericsMatrix(void);
 
-
-  /** create a NumericsMatrix and allocate the memory according to the matrix type
-   * \param storageType the type of storage
-   * \param size0 number of rows
-   * \param size1 number of columns
-   * \return a pointer to a NumericsMatrix
-   */
-  NumericsMatrix* NM_create(int storageType, int size0, int size1);
-
-  /** create a NumericsMatrix and possibly set the data
-   * \param storageType the type of storage
-   * \param size0 number of rows
-   * \param size1 number of columns
-   * \param data pointer to the matrix data. If NULL, all matrixX fields are
-   * set to NULL
-   * \return a pointer to a NumericsMatrix
-   */
-  NumericsMatrix* NM_create_from_data(int storageType, int size0, int size1, void* data);
-
-  /** fill an existing NumericsMatrix struct
-   * \param[in,out] M the struct to fill
-   * \param storageType the type of storage
-   * \param size0 number of rows
-   * \param size1 number of columns
-   * \param data pointer to the matrix data. If NULL, all matrixX fields are
-   * set to NULL
-   */
-  void fillNumericsMatrix(NumericsMatrix* M, int storageType, int size0, int size1, void* data);
-
-  /** new NumericsMatrix with sparse storage from minimal set of data
-   * \param[in] size0 number of rows
-   * \param[in] size1 number of columns
-   * \param[in] m1 the SparseBlockStructuredMatrix
-   * \return  a pointer to a NumericsMatrix
-   */
-  NumericsMatrix* newSparseNumericsMatrix(int size0, int size1, SparseBlockStructuredMatrix* m1);
 
 
   /** Clear dense storage, if it is existent.
@@ -426,92 +643,9 @@ extern "C"
    */
   void NM_sparse_extract_block(NumericsMatrix* M, double* blockM, size_t pos_row, size_t pos_col, size_t block_row_size, size_t block_col_size);
 
-  /** Copy a CSparseMatrix inside another CSparseMatrix.
-   *  Reallocations are performed if B cannot hold a copy of A
-   * \param[in] A a CSparseMatrix
-   * \param[in,out] B a CSparseMatrix
-   */
-  void NM_copy_sparse(const CSparseMatrix* const A, CSparseMatrix* B);
 
-  /** Copy a NumericsMatrix inside another NumericsMatrix (deep).
-   *  Reallocations are performed if B cannot hold a copy of A
-   * \param[in] A a NumericsMatrix
-   * \param[in,out] B a NumericsMatrix
-   */
-  void NM_copy(const NumericsMatrix* const A, NumericsMatrix* B);
 
-  /** Copy a NumericsMatrix to s sparse one.
-   *  Allocation or reallocation are performed on B
-   *  \warning It is assumed that B has been properly initialized: its storageType must
-   *  be set to NM_SPARSE.
-   * \param[in] A a NumericsMatrix
-   * \param[in,out] B a NumericsMatrix
-   */
-  void NM_copy_to_sparse(const NumericsMatrix* const A, NumericsMatrix* B);
 
-  /** Creation, if needed, of sparse matrix storage.
-   * \param[in,out] A a NumericsMatrix
-   * \return a pointer on the sparse matrix storage
-   */
-  NumericsSparseMatrix* NM_sparse(NumericsMatrix* A);
-
-  /** Creation, if needed, of triplet storage from sparse block storage.
-   * \param[in,out] A a NumericsMatrix initialized with sparsed block storage.
-   * \return the triplet sparse Matrix created in A.
-   */
-  CSparseMatrix* NM_triplet(NumericsMatrix* A);
-
-  /** Creation, if needed, of compress column storage of a NumericsMatrix.
-   * \param[in,out] A a NumericsMatrix with sparse block storage initialized
-   * \return the compressed column CSparseMatrix created in A.
-   */
-  CSparseMatrix* NM_csc(NumericsMatrix *A);
-
-  /** Creation, if needed, of the transposed compress column storage
-   * from compress column storage.
-   * \param[in,out] A a NumericsMatrix with sparse block storage.
-   * \return the transposed compressed column matrix created in A.
-   */
-  CSparseMatrix* NM_csc_trans(NumericsMatrix* A);
-
-  /** Creation, if needed, of compress row storage of a NumericsMatrix
-   * \warning This rely on the MKL
-   * \param[in,out] A a NumericsMatrix with sparse block storage initialized
-   * \return the compressed row CSparseMatrix created in A.
-   */
-  CSparseMatrix* NM_csr(NumericsMatrix *A);
-
-  /** Matrix vector multiplication : y = alpha A x + beta y
-   * \param[in] alpha scalar
-   * \param[in] A a NumericsMatrix
-   * \param[in] x pointer on a dense vector of size A->size1
-   * \param[in] beta scalar
-   * \param[in,out] y pointer on a dense vector of size A->size1
-   */
-  void NM_gemv(const double alpha, NumericsMatrix* A, const double *x,
-               const double beta,
-               double *y);
-
-  /** Matrix matrix multiplication : C = alpha A B + beta C
-   * \param[in] alpha scalar
-   * \param[in] A a NumericsMatrix
-   * \param[in] B a NumericsMatrix
-   * \param[in] beta scalar
-   * \param[in,out] C a NumericsMatrix
-   */
-  void NM_gemm(const double alpha, NumericsMatrix* A, NumericsMatrix* B,
-               const double beta, NumericsMatrix *C);
-
-  /** Transposed matrix multiplication : y += alpha transpose(A) x + y
-   * \param[in] alpha scalar
-   * \param[in] A a NumericsMatrix
-   * \param[in] x pointer on a dense vector of size A->size1
-   * \param[in] beta scalar
-   * \param[in,out] y pointer on a dense vector of size A->size1
-   */
-  void NM_tgemv(const double alpha, NumericsMatrix* A, const double *x,
-                const double beta,
-                double *y);
 
   /** Direct computation of the solution of a real system of linear
    * equations: A x = b. The factorized matrix A is kept for future solve.
@@ -523,11 +657,19 @@ extern "C"
    * \param keep if set to NM_KEEP_FACTORS, keep all the info related to the factorization to
    * allow for future solves. If A is already factorized, just solve the linear
    * system. If set to NM_PRESERVE, preserve the original matrix (just used in
-   * the dense case). if NM_NONE, discard eveerything.
+   * the dense case). if NM_NONE, discard everything.
    * \return 0 if successful, else the error is specific to the backend solver
    * used
    */
   int NM_gesv_expert(NumericsMatrix* A, double *b, unsigned keep);
+
+
+  /**  Computation of the inverse of a NumericsMatrix A usinf NM_gesv_expert
+   * \param[in,out] A a NumericsMatrix.
+   * \param[out] Ainv the matrix inverse.
+   */
+  int NM_inv(NumericsMatrix* A, NumericsMatrix* Ainv);
+
 
   /** Direct computation of the solution of a real system of linear
    * equations: A x = b.
@@ -584,49 +726,11 @@ extern "C"
    */
   void NM_add_to_diag3(NumericsMatrix* M, double alpha);
 
-  /** return the set of indices corresponding to the diagonal elements of the
-   * matrix
-   * \warning should be better tested
-   * \param M the matrix
-   * \return the list of indices for the diagonal elements
-   */
-  csi* NM_sparse_diag_indices(NumericsMatrix* M);
 
-  /** set NumericsMatrix fields to NULL
-   * \param A a matrix
-   */
-  static inline void NM_null(NumericsMatrix* A)
-  {
-    A->matrix0 = NULL;
-    A->matrix1 = NULL;
-    A->matrix2 = NULL;
-    A->internalData = NULL;
-  }
 
-  /** update the size of the matrix based on the matrix data
-   * \param[in,out] A the matrix which size is updated*/
-  void NM_update_size(NumericsMatrix* A);
-
-  /** Allocate a csc matrix in A
-   * \param A the matrix
-   * \param nzmax number of non-zero elements
-   */
-  void NM_csc_alloc(NumericsMatrix* A, csi nzmax);
-
-  /** Allocate a triplet matrix in A
-   * \param A the matrix
-   * \param nzmax maximum number of non-zero elements
-   */
-  void NM_triplet_alloc(NumericsMatrix* A, csi nzmax);
-
-  /** Allocate a csr matrix in A
-   * \param A the matrix
-   * \param nzmax number of non-zero elements
-   */
-  void NM_csr_alloc(NumericsMatrix* A, csi nzmax);
 
   /** assert that a NumericsMatrix has the right structure given its type
-   * \param type expected type 
+   * \param type expected type
    * \param M the matrix to check
    */
   static inline void NM_assert(const int type, NumericsMatrix* M)
@@ -656,34 +760,8 @@ extern "C"
    * \return 0 if the matrix storage is fine, 1 if not*/
   int NM_check(const NumericsMatrix* const A);
 
-  /** Allocate the internalData structure (but not its content!)
-   * \param M the matrix to modify
-   */
-  static inline void NM_alloc_internalData(NumericsMatrix* M)
-  {
-    M->internalData = (NumericsMatrixInternalData *)malloc(sizeof(NumericsMatrixInternalData));
-    M->internalData->iWorkSize = 0;
-    M->internalData->iWork = NULL;
-  }
 
-  /** return the origin of a sparse part of a matrix
-   * \param M the matrix
-   * \return -1 if the matrix has no sparse representation, the origin
-   * otherwise*/
-  unsigned NM_sparse_origin(NumericsMatrix* M);
 
-  /** return the number of non-zero element. For a dense matrix, it is the
-   * product of the dimensions (e.g. an upper bound). For a sparse matrix, it is the true number
-   * \param M the matrix
-   * \return the number (or an upper bound) of non-zero elements in the matrix
-   */
-  size_t NM_nnz(const NumericsMatrix* M);
-
-  /** return the sparse matrix that has the original label
-   * \param M the matrix
-   * \return the sparse matrix that is at the origin, or NULL if an error occur
-   **/
-  CSparseMatrix* NM_sparse_get_origin(const NumericsMatrix* M);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
