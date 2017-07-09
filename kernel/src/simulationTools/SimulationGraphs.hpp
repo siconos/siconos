@@ -94,6 +94,7 @@ struct DynamicalSystemProperties
   SP::OneStepIntegrator osi;              /**< Integrator used for the given DynamicalSystem */
   SP::SimpleMatrix W;                    /**< Matrix for integration */
   SP::SimpleMatrix WBoundaryConditions;  /**< Matrix for integration of boundary conditions*/
+  unsigned int pos;
 //  SP::SiconosMemory _xMemory            /**< old value of x, TBD */
 
   ACCEPT_SERIALIZATION(DynamicalSystemProperties);
