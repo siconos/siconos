@@ -29,6 +29,11 @@
 #include "sanitizer.h"
 #include "numerics_verbose.h"
 
+/* #define DEBUG_STDOUT */
+/* #define DEBUG_NOCOLOR */
+/* #define DEBUG_MESSAGES */
+#include "debug.h"
+
 static void Globalfc3d_projection_free(GlobalFrictionContactProblem* problem)
 {
   assert(problem->M);
@@ -124,7 +129,7 @@ void gfc3d_nsgs(GlobalFrictionContactProblem* restrict problem, double* restrict
   {
     ++iter;
     /* Solve the first part with the current reaction */
-
+    DEBUG_PRINTF("iter = %i\n", iter);
     /* qtmp <--q */
     cblas_dcopy_msan(n, q, 1, qtmp, 1);
 
@@ -135,13 +140,26 @@ void gfc3d_nsgs(GlobalFrictionContactProblem* restrict problem, double* restrict
 
     CHECK_RETURN(!NM_gesv_expert(factorized_M, globalVelocity, NM_KEEP_FACTORS));
 
+    DEBUG_PRINT("global velocity");
+    DEBUG_EXPR_WE(
+      for (int k =0 ; k< n ; k++ )
+      {
+        printf("V[%i] = %e\t", k, globalVelocity[k]);
+      }
+      printf("\n");
+      );
+
+
     /* Compute current local velocity */
     /*      velocity <--b */
     cblas_dcopy(m, b, 1, velocity, 1);
 
     /* velocity <-- H^T globalVelocity + velocity*/
     NM_tgemv(1., H, globalVelocity, 1., velocity);
-
+    DEBUG_PRINT("local velocity\n");
+    DEBUG_EXPR_WE( for (int k =0 ; k< m ; k++ )
+                   {printf("v[%i]=%e\t", k, velocity[k]);}printf("\n");
+      );
     /* Loop through the contact points */
 
     for (contact = 0 ; contact < nc ; ++contact)
@@ -156,6 +174,11 @@ void gfc3d_nsgs(GlobalFrictionContactProblem* restrict problem, double* restrict
       reaction[pos + 2] -= an * velocity[pos + 2];
       projectionOnCone(&reaction[pos], mu[contact]);
     }
+    DEBUG_PRINT("reaction\n");
+    DEBUG_EXPR_WE( for (int k =0 ; k< m ; k++ )
+                   {printf("r[%i]=%e\t", k, reaction[k]);}printf("\n");
+      );
+
     /*       int k; */
     /*       printf("\n"); */
     /*       for (k = 0 ; k < m; k++) printf("velocity[%i] = %12.8e \t \t reaction[%i] = %12.8e \n ", k, velocity[k], k , reaction[k]); */
@@ -191,4 +214,3 @@ void gfc3d_nsgs(GlobalFrictionContactProblem* restrict problem, double* restrict
   /***** Free memory *****/
   (*freeSolver)(problem);
 }
-
