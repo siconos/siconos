@@ -29,6 +29,8 @@
 #include "NewtonImpactNSL.hpp"
 #include "OSNSMatrix.hpp"
 
+#include "TypeName.hpp"
+
 // --- Numerics headers ---
 #include "NonSmoothDrivers.h"
 #include "gfc3d_Solvers.h"
@@ -149,10 +151,10 @@ bool GlobalFrictionContact::preCompute(double time)
 
     _sizeOutput = 3*indexSet.size();
     DEBUG_PRINTF( "_sizeOutput = %i\n ", _sizeOutput );
-    if (_sizeOutput == 0)
-    {
-      DEBUG_END("GlobalFrictionContact::preCompute(double time)\n");
-      return false; }
+    // if (_sizeOutput == 0)
+    // {
+    //   DEBUG_END("GlobalFrictionContact::preCompute(double time)\n");
+    //   return false; }
 
     _mu->clear();
 //    _mu.reserve(indexSet.size())
@@ -180,6 +182,92 @@ bool GlobalFrictionContact::preCompute(double time)
     if (_b->size() != _sizeOutput)
       _b->resize(_sizeOutput);
 
+
+    // Loop over the DS for filling M
+
+
+    DynamicalSystemsGraph::VIterator dsi, dsend;
+
+    // first loop to compute sizeM and nnz
+    for(std11::tie(dsi, dsend) = DSG0.vertices(); dsi != dsend; ++dsi)
+    {
+      SP::DynamicalSystem ds = DSG0.bundle(*dsi);
+      SiconosMatrix* W = DSG0.properties(*dsi).W.get();
+      assert(W);
+      absPosDS.insert(std::make_pair(ds, sizeM));
+      dsMat.insert(std::make_pair(ds, W)).second;
+
+      sizeM += W->size(0);
+      nnzM += W->nnz();
+      ++nbDS;
+    }
+
+
+    DEBUG_PRINTF("sizeM = %lu \n", sizeM);
+    DEBUG_PRINTF("nnzM = %lu \n", nnzM);
+    DEBUG_PRINTF("nbDS = %lu \n", nbDS);
+    // fill M and _q
+    _sizeGlobalOutput = sizeM;
+    if (_q->size() != _sizeGlobalOutput)
+      _q->resize(_sizeGlobalOutput);
+
+    NumericsMatrix& M_NM = *_M->getNumericsMatrix();
+
+    NM_clearSparse(&M_NM);
+    M_NM.storageType = NM_SPARSE;
+    M_NM.size0 = sizeM;
+    M_NM.size1 = sizeM;
+    NM_csc_alloc(&M_NM, nnzM);
+    M_NM.matrix2->origin = NS_CSC;
+    CSparseMatrix* Mcsc = NM_csc(&M_NM);
+
+    Mcsc->p[0] = 0.;
+
+    size_t offset = 0;
+
+    for(std11::tie(dsi, dsend) = DSG0.vertices(); dsi != dsend; ++dsi)
+    {
+      SP::DynamicalSystem ds = DSG0.bundle(*dsi);
+      Type::Siconos dsType = Type::value(*ds);
+      size_t dss = ds->dimension();
+      SiconosMatrix* W = DSG0.properties(*dsi).W.get();
+      W->fillCSC(Mcsc, offset, offset);
+      DEBUG_PRINTF("offset = %lu \n", offset);
+
+      OneStepIntegrator& Osi = *DSG0.properties(DSG0.descriptor(ds)).osi;
+      OSI::TYPES osiType = Osi.getType();
+      if (osiType == OSI::MOREAUJEANGOSI)
+      {
+        VectorOfVectors& workVectors = *DSG0.properties(DSG0.descriptor(ds)).workVectors;
+
+        if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
+        {
+          SiconosVector& vfree = *workVectors[OneStepIntegrator::free];
+          setBlock(vfree, _q, dss, 0, offset);
+        }
+        else  if (dsType == Type::NewtonEulerDS)
+        {
+          SiconosVector& vfree = *workVectors[OneStepIntegrator::free];
+          setBlock(vfree, _q, dss, 0, offset);
+        }
+      }
+      else
+      {
+        RuntimeException::selfThrow("GlobalFrictionContact::computeq. Not yet implemented for Integrator type : " + osiType);
+      }
+      offset += dss;
+
+    }
+
+    DEBUG_EXPR(_q->display(););
+
+
+    DEBUG_EXPR(NM_display(_M->getNumericsMatrix().get() ););
+
+
+    /************************************/
+
+
     size_t pos = 0;
     InteractionsGraph::VIterator ui, uiend;
     for (std11::tie(ui, uiend) = indexSet.vertices(); ui != uiend; ++ui)
@@ -187,7 +275,6 @@ bool GlobalFrictionContact::preCompute(double time)
 
 
       SP::Interaction inter = indexSet.bundle(*ui);
-      VectorOfSMatrices& workMInter = *indexSet.properties(*ui).workMatrices;
 
       assert(Type::value(*(inter->nonSmoothLaw())) == Type::NewtonImpactFrictionNSL);
       _mu->push_back(std11::static_pointer_cast<NewtonImpactFrictionNSL>(inter->nonSmoothLaw())->mu());
@@ -210,112 +297,16 @@ bool GlobalFrictionContact::preCompute(double time)
         RuntimeException::selfThrow("GlobalFrictionContact::computeq. Not yet implemented for Integrator type : " + osi1Type);
       }
 
+      VectorOfSMatrices& workMInter = *indexSet.properties(*ui).workMatrices;
+      nnzH += inter->getLeftInteractionBlock(workMInter).nnz();
 
       SiconosVector& osnsp_rhs = *(*indexSet.properties(*ui).workVectors)[MoreauJeanGOSI::OSNSP_RHS];
       setBlock(osnsp_rhs, _b, 3, 0, pos);
-      nnzH += inter->getLeftInteractionBlock(workMInter).nnz();
+
       pos += 3;
-
-
-      SiconosMatrix* W = DSG0.properties(DSG0.descriptor(ds1)).W.get();
-      assert(W);
-      bool inserted = dsMat.insert(std::make_pair(ds1, W)).second;
-
-      if (inserted) // first time we see this DS
-      {
-        absPosDS.insert(std::make_pair(ds1, sizeM));
-
-        // update sizes
-        sizeM += W->size(0);
-        nnzM += W->nnz();
-        ++nbDS;
-      }
-
-
-      if (ds1 != ds2)
-      {
-        SiconosMatrix* W = DSG0.properties(DSG0.descriptor(ds2)).W.get();
-        assert(W);
-        bool inserted = dsMat.insert(std::make_pair(ds2, W)).second;
-
-        if (inserted) // first time we see this DS
-        {
-          absPosDS.insert(std::make_pair(ds2, sizeM));
-
-          // update sizes
-          sizeM += W->size(0);
-          nnzM += W->nnz();
-          ++nbDS;
-        }
-      }
     }
-    DEBUG_PRINTF("sizeM = %lu \n", sizeM);
-    DEBUG_PRINTF("nnzM = %lu \n", nnzM);
-    // fill M and _q
-    _sizeGlobalOutput = sizeM;
-    if (_q->size() != _sizeGlobalOutput)
-      _q->resize(_sizeGlobalOutput);
 
-    NumericsMatrix& M_NM = *_M->getNumericsMatrix();
-
-    NM_clearSparse(&M_NM);
-    M_NM.storageType = NM_SPARSE;
-    M_NM.size0 = sizeM;
-    M_NM.size1 = sizeM;
-    NM_csc_alloc(&M_NM, nnzM);
-    M_NM.matrix2->origin = NS_CSC;
-    CSparseMatrix* Mcsc = NM_csc(&M_NM);
-
-    Mcsc->p[0] = 0.;
-
-    size_t offset = 0;
-    for (dsMatMap::iterator it = dsMat.begin(); it != dsMat.end(); ++it)
-    {
-      SP::DynamicalSystem ds = (*it).first;
-      DEBUG_PRINTF("fill with ds number = %i\n",ds->number());
-      SiconosMatrix& mat = *(*it).second;
-      DEBUG_EXPR(mat.display(););
-      size_t dss = ds->dimension();
-      // fill matrix
-      mat.fillCSC(Mcsc, offset, offset);
-      DEBUG_PRINTF("offset = %lu \n", offset);
-
-
-      // compute q (aka free velocity) = v^k + contribution from forces
-      OneStepIntegrator& Osi = *DSG0.properties(DSG0.descriptor(ds)).osi;
-      OSI::TYPES osiType = Osi.getType();
-      Type::Siconos dsType ; // Type of the current DS.
-      dsType = Type::value(*ds); // Its type
-      if (osiType == OSI::MOREAUJEANGOSI)
-      {
-        VectorOfVectors& workVectors = *DSG0.properties(DSG0.descriptor(ds)).workVectors;
-
-        if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
-        {
-          SiconosVector& vfree = *workVectors[OneStepIntegrator::free];
-          setBlock(vfree, _q, dss, 0, offset);
-        }
-        else  if (dsType == Type::NewtonEulerDS)
-        {
-          SiconosVector& vfree = *workVectors[OneStepIntegrator::free];
-          setBlock(vfree, _q, dss, 0, offset);
-
-        }
-
-      }
-      else
-      {
-          RuntimeException::selfThrow("GlobalFrictionContact::computeq. Not yet implemented for Integrator type : " + osiType);
-      }
-
-
-
-      offset += dss;
-
-    }
-    DEBUG_EXPR(NM_display(_M->getNumericsMatrix().get() ););
-
-    DEBUG_PRINTF("sizeOutput = %lu \n", _sizeOutput);
+    DEBUG_PRINTF("sizeOutput = %i \n", _sizeOutput);
     DEBUG_PRINTF("nnzH = %lu \n", nnzH);
 
     // fill H
@@ -324,10 +315,10 @@ bool GlobalFrictionContact::preCompute(double time)
     H_NM.storageType = NM_SPARSE;
     H_NM.size0 = sizeM;
     H_NM.size1 = _sizeOutput;
-    NM_csc_alloc(&H_NM, nnzH);
-    H_NM.matrix2->origin = NS_CSC;
-    CSparseMatrix* Hcsc = NM_csc(&H_NM);
-    Hcsc->p[0] = 0;
+    NM_triplet_alloc(&H_NM, nnzH);
+    H_NM.matrix2->origin = NS_TRIPLET;
+    CSparseMatrix* Htriplet= NM_triplet(&H_NM);
+    Htriplet->p[0] = 0;
 
     pos = 0;
     offset = 0;
@@ -354,11 +345,67 @@ bool GlobalFrictionContact::preCompute(double time)
         leftInteractionBlock.reset(new SimpleMatrix(3, sizeDS));
         inter.getLeftInteractionBlockForDS(posBlock, leftInteractionBlock, workMInter);
         leftInteractionBlock->trans();
-        leftInteractionBlock->fillCSC(Hcsc, absPosDS[ds], pos);
+        leftInteractionBlock->fillTriplet(Htriplet, absPosDS[ds], pos);
       }
       pos += 3;
 
     }
+    // // fill H
+    // NumericsMatrix& H_NM = *_H->getNumericsMatrix();
+    // NM_clearSparse(&H_NM);
+    // H_NM.storageType = NM_SPARSE;
+    // H_NM.size0 = sizeM;
+    // H_NM.size1 = _sizeOutput;
+    // NM_csc_alloc(&H_NM, nnzH);
+    // H_NM.matrix2->origin = NS_CSC;
+    // CSparseMatrix* Hcsc = NM_csc(&H_NM);
+    // Hcsc->p[0] = 0;
+
+    // pos = 0;
+    // offset = 0;
+
+
+    // SP::SiconosMatrix leftInteractionBlock;
+    // for (std11::tie(ui, uiend) = indexSet.vertices(); ui != uiend; ++ui)
+    // {
+    //   Interaction& inter = *indexSet.bundle(*ui);
+    //   VectorOfSMatrices& workMInter = *indexSet.properties(*ui).workMatrices;
+
+    //   SP::DynamicalSystem ds1 = indexSet.properties(*ui).source;
+    //   SP::DynamicalSystem ds2 = indexSet.properties(*ui).target;
+
+    //   bool endl = false;
+    //   size_t posBlock = indexSet.properties(*ui).source_pos;
+    //   size_t pos2 = indexSet.properties(*ui).target_pos;
+
+    //   for (SP::DynamicalSystem ds = ds1; !endl; ds = ds2, posBlock = pos2)
+    //   {
+    //     endl = (ds == ds2);
+    //     DEBUG_PRINTF("ds->number() = %i \n",ds->number()  );
+    //     size_t sizeDS = ds->dimension();
+    //     // this whole part is a hack. Just should just get the rightblock
+    //     leftInteractionBlock.reset(new SimpleMatrix(3, sizeDS));
+    //     inter.getLeftInteractionBlockForDS(posBlock, leftInteractionBlock, workMInter);
+    //     DEBUG_EXPR(leftInteractionBlock->display(););
+    //     DEBUG_PRINTF("posBlock = %i \n",  posBlock);
+    //     leftInteractionBlock->trans();
+    //     leftInteractionBlock->fillCSC(Hcsc, absPosDS[ds], pos);
+    //     DEBUG_PRINTF("absPosDS[ds] = %i \n",  absPosDS[ds]);
+    //     DEBUG_PRINTF("pos = %i \n",  pos);
+    //   }
+    //   pos += 3;
+
+    // }
+
+
+
+
+
+
+    DEBUG_EXPR(NM_display(_H->getNumericsMatrix().get() ););
+
+
+
     // Checks z and w sizes and reset if necessary
     if (_z->size() != _sizeOutput)
     {
@@ -393,7 +440,7 @@ int GlobalFrictionContact::compute(double time)
 
 
   // --- Call Numerics solver ---
-  if (_sizeOutput != 0)
+  //if (_sizeOutput != 0)
   {
     // The GlobalFrictionContact Problem in Numerics format
     GlobalFrictionContactProblem numerics_problem;
@@ -403,7 +450,7 @@ int GlobalFrictionContact::compute(double time)
     numerics_problem.q = _q->getArray();
     numerics_problem.b = _b->getArray();
     numerics_problem.numberOfContacts = _sizeOutput / _contactProblemDim;
-    numerics_problem.mu = &(_mu->at(0));
+    numerics_problem.mu = _mu->data();
     numerics_problem.dimension = 3;
     DEBUG_EXPR(display(););
     info = (*_gfc_driver)(&numerics_problem,
@@ -421,6 +468,8 @@ int GlobalFrictionContact::compute(double time)
 
 void GlobalFrictionContact::postCompute()
 {
+  DEBUG_BEGIN("GlobalFrictionContact::postCompute(double time)\n");
+
   // This function is used to set y/lambda values using output from primalfrictioncontact_driver
   // Only Interactions (ie Interactions) of indexSet(leveMin) are concerned.
 
@@ -447,26 +496,38 @@ void GlobalFrictionContact::postCompute()
     setBlock(*_z, lambda, lambda->size(), pos, 0);
     DEBUG_EXPR(lambda->display(););
   }
+  DynamicalSystemsGraph& DSG0 = *simulation()->nonSmoothDynamicalSystem()->dynamicalSystems();
 
-//  SP::DynamicalSystemsGraph DSG = simulation()->model()->nonSmoothDynamicalSystem()->dynamicalSystems();
-//  DSIterator itDS;
-//  unsigned int sizeDS;
-//  SP::OneStepIntegrator  Osi;
-//  std::string osiType; // type of the current one step integrator
-//  std::string dsType; // type of the current Dynamical System
-  //   for(itDS = allDS->begin(); itDS!=  allDS->end(); ++itDS)
-  //     {
-  //       dsType = (*itDS) -> getType();
-  //       if(dsType!=Type::LagrangianDS && dsType!=Type::LagrangianLinearTIDS)
-  //      RuntimeException::selfThrow("GlobalFrictionContact::postCompute not yet implemented for dynamical system of types "+dsType);
+  unsigned int sizeDS;
+  SP::OneStepIntegrator  Osi;
+  DynamicalSystemsGraph::VIterator dsi, dsend;
+  pos=0;
+  for(std11::tie(dsi, dsend) = DSG0.vertices(); dsi != dsend; ++dsi)
+  {
+    DynamicalSystem& ds = *DSG0.bundle(*dsi);
+    Type::Siconos dsType = Type::value(ds);
+    // if(dsType!=Type::LagrangianDS && dsType!=Type::LagrangianLinearTIDS)
+    //   RuntimeException::selfThrow("GlobalFrictionContact::postCompute not yet implemented for dynamical system of types "+dsType);
 
-  //       pos = M->getPositionOfDSBlock(*itDS);
-  //       sizeDS = (*itDS)->dimension();
-  //       setBlock((static_cast<LagrangianDS*>(*itDS))->velocity(),velocity,sizeDS, pos, 0 );
+    if(dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS || dsType == Type::LagrangianLinearDiagonalDS)
+    {
+      LagrangianDS& d = static_cast<LagrangianDS&> (ds);
+      sizeDS = d.dimension();
+      SP::SiconosVector velocity = d.velocity();
+      DEBUG_PRINTF("ds.number() : %i \n",ds.number());
+      DEBUG_EXPR(velocity->display(););
+      DEBUG_EXPR(_globalVelocities->display(););
 
-  //     }
+      setBlock(*_globalVelocities, velocity, sizeDS, pos, 0 );
+      DEBUG_EXPR(velocity->display(););
+      pos+=sizeDS;
+    }
 
+    else RuntimeException::selfThrow("GlobalFrictionContact::postCompute() - not yet implemented for Dynamical system of type: " +  Type::name(ds));
 
+  }
+
+  DEBUG_END("GlobalFrictionContact::postCompute(double time)\n");
 
 }
 
@@ -498,5 +559,18 @@ void GlobalFrictionContact::display() const
   std::cout << " - Vector b : " <<std::endl;
   if (_b) _b->display();
   else std::cout << "-> NULL" <<std::endl;
+
+  std::cout << " - Vector z (reaction) : " <<std::endl;
+  if (_z) _z->display();
+  else std::cout << "-> NULL" <<std::endl;
+
+  std::cout << " - Vector w (local velocities): " <<std::endl;
+  if (_w) _w->display();
+  else std::cout << "-> NULL" <<std::endl;
+
+  std::cout << " - Vector globalVelocities : " <<std::endl;
+  if (_globalVelocities) _globalVelocities->display();
+  else std::cout << "-> NULL" <<std::endl;
+
   std::cout << "============================================================" <<std::endl;
 }
