@@ -429,9 +429,9 @@ void genericMechanicalProblem_GS(GenericMechanicalProblem* pGMP, double * reacti
   FILE * titi  = fopen("GMP_FAILED_scilab.txt", "w");
   FILE * tata  = fopen("SBM.txt", "w");
   printf("GMP_drivers, print file SBM\n");
-  NM_write_in_fileSBM(pGMP->M->matrix1,tata);
+  SBM_write_in_file(pGMP->M->matrix1,tata);
   fclose(tata);
-  NM_write_in_fileSBMForScilab(pGMP->M->matrix1,titi);
+  SBM_write_in_fileForScilab(pGMP->M->matrix1,titi);
   fclose(titi);
   */
   options->iparam[3] = it;

@@ -167,7 +167,7 @@ int reformulationIntoLocalProblem(GlobalFrictionContactProblem* problem, Frictio
     // compute W = H^T M^-1 H
     //Copy Htmp <- H
     SparseBlockStructuredMatrix *HtmpSBM = (SparseBlockStructuredMatrix*)malloc(sizeof(SparseBlockStructuredMatrix));
-    /* copySBM(H->matrix1 , HtmpSBM); */
+    /* SBM_copy(H->matrix1 , HtmpSBM); */
 
 #ifdef OUTPUT_DEBUG
     FILE* fileout;
@@ -175,13 +175,13 @@ int reformulationIntoLocalProblem(GlobalFrictionContactProblem* problem, Frictio
     NM_write_in_file_scilab(M, fileout);
     fclose(fileout);
     printf("Display M\n");
-    printSBM(M->matrix1);
+    SBM_print(M->matrix1);
 #endif
 
 
     //Compute Htmp   <- M^-1 HtmpSBM
     /* DGESV(n, m, M->matrix0, n, ipiv, Htmp, n, infoDGESV); */
-    assert(!inverseDiagSBM(M->matrix1));
+    assert(!SBM_inverse_diagonal_block_matrix(M->matrix1));
     //Global_MisInverse = 1;
     NM_internalData(M)->isLUfactorized = true;
 
@@ -190,24 +190,24 @@ int reformulationIntoLocalProblem(GlobalFrictionContactProblem* problem, Frictio
     NM_write_in_file_scilab(M, fileout);
     fclose(fileout);
     printf("Display Minv\n");
-    printSBM(M->matrix1);
+    SBM_print(M->matrix1);
 #endif
-    allocateMemoryForProdSBMSBM(M->matrix1, H->matrix1, HtmpSBM);
+    SBM_alloc_for_gemm(M->matrix1, H->matrix1, HtmpSBM);
     double alpha = 1.0, beta = 1.0;
 
-    prodSBMSBM(alpha, M->matrix1, H->matrix1, beta, HtmpSBM);
+    SBM_gemm(alpha, M->matrix1, H->matrix1, beta, HtmpSBM);
 #ifdef OUTPUT_DEBUG
     fileout = fopen("dataH.sci", "w");
     NM_write_in_file_scilab(H, fileout);
     fclose(fileout);
     printf("Display H\n");
-    printSBM(H->matrix1);
+    SBM_print(H->matrix1);
 
     fileout = fopen("dataHtmpSBM.sci", "w");
-    NM_write_in_fileSBMForScilab(HtmpSBM, fileout);
+    SBM_write_in_fileForScilab(HtmpSBM, fileout);
     fclose(fileout);
     printf("Display HtmpSBM\n");
-    printSBM(HtmpSBM);
+    SBM_print(HtmpSBM);
 #endif
 
 
@@ -215,13 +215,13 @@ int reformulationIntoLocalProblem(GlobalFrictionContactProblem* problem, Frictio
 
 
     SparseBlockStructuredMatrix *Htrans = (SparseBlockStructuredMatrix*)malloc(sizeof(SparseBlockStructuredMatrix));
-    transposeSBM(H->matrix1, Htrans);
+    SBM_transpose(H->matrix1, Htrans);
 #ifdef OUTPUT_DEBUG
     fileout = fopen("dataHtrans.sci", "w");
-    NM_write_in_fileSBMForScilab(Htrans, fileout);
+    SBM_write_in_fileForScilab(Htrans, fileout);
     fclose(fileout);
     printf("Display Htrans\n");
-    printSBM(Htrans);
+    SBM_print(Htrans);
 #endif
     localproblem->M = NM_new();
     NumericsMatrix *Wnum = localproblem->M;
@@ -232,14 +232,14 @@ int reformulationIntoLocalProblem(GlobalFrictionContactProblem* problem, Frictio
     Wnum->matrix0 = NULL;
     SparseBlockStructuredMatrix *W =  Wnum->matrix1;
 
-    allocateMemoryForProdSBMSBM(Htrans, HtmpSBM, W);
-    prodSBMSBM(alpha, Htrans, HtmpSBM, beta, W);
+    SBM_alloc_for_gemm(Htrans, HtmpSBM, W);
+    SBM_gemm(alpha, Htrans, HtmpSBM, beta, W);
 #ifdef OUTPUT_DEBUG
     fileout = fopen("dataW.sci", "w");
     NM_write_in_file_scilab(Wnum, fileout);
     fclose(fileout);
     printf("Display W\n");
-    printSBM(W);
+    SBM_print(W);
 #endif
 
 #ifdef TEST_COND
@@ -252,7 +252,7 @@ int reformulationIntoLocalProblem(GlobalFrictionContactProblem* problem, Frictio
     WnumInverse->internalData = NULL;
     WnumInverse->matrix0 = (double*)malloc(m * m * sizeof(double));
     double * WInverse = WnumInverse->matrix0;
-    SBMtoDense(W, WnumInverse->matrix0);
+    SBM_to_dense(W, WnumInverse->matrix0);
 
     FILE * file1 = fopen("dataW.dat", "w");
     NM_write_in_file_scilab(WnumInverse, file1);
@@ -313,8 +313,8 @@ int reformulationIntoLocalProblem(GlobalFrictionContactProblem* problem, Frictio
     double* qtmp = (double*)malloc(n * sizeof(double));
     for (int i = 0; i < n; i++) qtmp[i] = 0.0;
     double beta2 = 0.0;
-    prodSBM(n, n, alpha, M->matrix1, problem->q, beta2, qtmp);
-    prodSBM(n, m, alpha, Htrans, qtmp, beta, localproblem->q);
+    SBM_gemv(n, n, alpha, M->matrix1, problem->q, beta2, qtmp);
+    SBM_gemv(n, m, alpha, Htrans, qtmp, beta, localproblem->q);
 
     localproblem->mu = problem->mu;
 
@@ -322,8 +322,8 @@ int reformulationIntoLocalProblem(GlobalFrictionContactProblem* problem, Frictio
     /*     frictionContact_printInFile(localproblem,filecheck); */
     /*     fclose(filecheck); */
 
-    freeSBM(HtmpSBM);
-    freeSBM(Htrans);
+    SBM_free(HtmpSBM);
+    SBM_free(Htrans);
     free(HtmpSBM);
     free(Htrans);
     free(qtmp);
@@ -451,15 +451,15 @@ int computeGlobalVelocity(GlobalFrictionContactProblem* problem, double * reacti
     double beta = 1.0;
 
     cblas_dcopy_msan(n,  problem->q , 1, qtmp, 1);
-    prodSBM(m, n, alpha, problem->H->matrix1, reaction, beta, qtmp);
+    SBM_gemv(m, n, alpha, problem->H->matrix1, reaction, beta, qtmp);
     /* Compute global velocity = M^(-1) qtmp*/
 
 
-    /*      inverseDiagSBM(M->matrix1); We assume that M->matrix1 is already inverse*/
+    /*      SBM_inverse_diagonal_block_matrix(M->matrix1); We assume that M->matrix1 is already inverse*/
     assert(Global_MisInverse);
 
     double beta2 = 0.0;
-    prodSBM(n, n, alpha,  problem->M->matrix1, qtmp, beta2, globalVelocity);
+    SBM_gemv(n, n, alpha,  problem->M->matrix1, qtmp, beta2, globalVelocity);
 
     free(qtmp);
 
@@ -517,7 +517,7 @@ int freeLocalProblem(FrictionContactProblem* localproblem)
   /*  { */
   if (localproblem->M->matrix1)
   {
-    freeSBM(localproblem->M->matrix1);
+    SBM_free(localproblem->M->matrix1);
     free(localproblem->M->matrix1);
   }
   /*  } */
@@ -610,11 +610,11 @@ void  gfc3d_nonsmooth_Newton_AlartCurnier_wr(GlobalFrictionContactProblem* probl
 
     localproblem->M->matrix0 = (double*)malloc(localproblem->M->size0 * localproblem->M->size1 * sizeof(double));
 
-    SBMtoDense(localproblem->M->matrix1, localproblem->M->matrix0);
+    SBM_to_dense(localproblem->M->matrix1, localproblem->M->matrix0);
 
     DEBUG_EXPR( NM_dense_display(localproblem->M->matrix0,localproblem->M->size0, localproblem->M->size1, 0 ););
 
-    freeSBM(localproblem->M->matrix1);
+    SBM_free(localproblem->M->matrix1);
     free(localproblem->M->matrix1);
     localproblem->M->matrix1 = NULL;
     localproblem->M->matrix2 = NULL;
@@ -672,8 +672,8 @@ void  gfc3d_nsgs_velocity_wr(GlobalFrictionContactProblem* problem, double *reac
   {
 
     localproblem->M->matrix0 = (double*)malloc(m * m * sizeof(double));
-    SBMtoDense(localproblem->M->matrix1, localproblem->M->matrix0);
-    freeSBM(localproblem->M->matrix1);
+    SBM_to_dense(localproblem->M->matrix1, localproblem->M->matrix0);
+    SBM_free(localproblem->M->matrix1);
     free(localproblem->M->matrix1);
     localproblem->M->storageType = 0;
     localproblem->M->matrix1 = NULL;

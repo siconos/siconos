@@ -32,9 +32,9 @@ extern "C"
   int test_NM_row_prod_no_diag(NumericsMatrix* M1, NumericsMatrix* M2);
   int test_NM_row_prod_non_square(NumericsMatrix* M3, NumericsMatrix* M4);
   int test_NM_row_prod_no_diag_non_square(NumericsMatrix* M3, NumericsMatrix* M4);
-  int test_SBMRowToDense(SparseBlockStructuredMatrix *M);
-  int test_RowPermutationSBM(SparseBlockStructuredMatrix *M);
-  int test_ColPermutationSBM(SparseBlockStructuredMatrix *M);
+  int test_SBM_row_to_dense(SparseBlockStructuredMatrix *M);
+  int test_SBM_row_permutation(SparseBlockStructuredMatrix *M);
+  int test_SBM_column_permutation(SparseBlockStructuredMatrix *M);
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif

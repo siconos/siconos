@@ -162,7 +162,7 @@ int main(int argc, char* argv[])
   MM->size1 = Ndof;
 
 
-  MM->matrix1 = newSBM();
+  MM->matrix1 = SBM_new();
   SparseBlockStructuredMatrix *MBlockMatrix = MM->matrix1;
   MBlockMatrix->nbblocks = 3;
   double * block[3] = {M11, M22, M33};
@@ -241,8 +241,8 @@ int main(int argc, char* argv[])
   free(velocity);
   free(globalVelocity);
 
-  //     freeSBM(MM->matrix1);
-  //     freeSBM(HH->matrix1);
+  //     SBM_free(MM->matrix1);
+  //     SBM_free(HH->matrix1);
   free(MM->matrix1);
   MM->matrix1 = NULL;
   free(HH->matrix1);

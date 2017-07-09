@@ -180,7 +180,7 @@ void NCPGlocker_fillMLocal(FrictionContactProblem * problem, FrictionContactProb
   }
   else if (storageType == 1)
   {
-    int diagPos = getDiagonalBlockPos(MGlobal->matrix1, contact);
+    int diagPos = SBM_get_position_diagonal_block(MGlobal->matrix1, contact);
     localproblem->M->matrix0 = MGlobal->matrix1->block[diagPos];
     /*     cblas_dcopy(9, MGlobal->matrix1->block[diagPos], 1,localproblem->M->matrix0 , 1); */
   }

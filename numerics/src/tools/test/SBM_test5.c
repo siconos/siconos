@@ -56,14 +56,14 @@ int main(void)
 
   mc.block = block;
 
-  SparseBlockStructuredMatrix* m = SBCMToSBM(&mc);
+  SparseBlockStructuredMatrix* m = SBCM_to_SBM(&mc);
 
-  printSBM(m);
+  SBM_print(m);
 
-  int info1 = getValueSBM(m, 0, 0) == 2.;
-  int info2 = getValueSBM(m, 8, 8) == 9.;
+  int info1 = SBM_get_value(m, 0, 0) == 2.;
+  int info2 = SBM_get_value(m, 8, 8) == 9.;
 
-  freeSBMFromSBCM(m);
+  SBM_free_from_SBCM(m);
 
   return 1-info1 + 1-info2;
 

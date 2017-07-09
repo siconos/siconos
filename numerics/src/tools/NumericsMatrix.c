@@ -74,7 +74,7 @@ void NM_prod_mv_3x3(int sizeX, int sizeY, NumericsMatrix* A,
     break;
   /* SparseBlock storage */
     case NM_SPARSE_BLOCK:
-      prodSBM3x3(sizeX, sizeY, A->matrix1, x, y);
+      SBM_gemv_3x3(sizeX, sizeY, A->matrix1, x, y);
     break;
   /* coordinate */
     case NM_SPARSE:
@@ -599,7 +599,7 @@ void NM_display(const NumericsMatrix* const m)
   {
     assert(m->matrix1);
     printf("========== storageType =  NM_SPARSE_BLOCK\n");
-    printSBM(m->matrix1);
+    SBM_print(m->matrix1);
     break;
   }
   case NM_SPARSE:
@@ -676,7 +676,7 @@ void NM_display_row_by_row(const NumericsMatrix* const m)
     }
   }
   else if (storageType == NM_SPARSE_BLOCK)
-    printSBM(m->matrix1);
+    SBM_print(m->matrix1);
   else
   {
     fprintf(stderr, "NM_display_row_by_row :: unknown matrix storage");
@@ -715,7 +715,7 @@ void NM_write_in_file(const NumericsMatrix* const m, FILE* file)
   case NM_SPARSE_BLOCK:
   {
     assert(m->matrix1);
-    NM_write_in_fileSBM(m->matrix1, file);
+    SBM_write_in_file(m->matrix1, file);
     break;
   }
   case NM_SPARSE:
@@ -777,7 +777,7 @@ void NM_write_in_file_scilab(const NumericsMatrix* const m, FILE* file)
   }
   else if (storageType == NM_SPARSE_BLOCK)
   {
-    NM_write_in_fileSBMForScilab(m->matrix1, file);
+    SBM_write_in_fileForScilab(m->matrix1, file);
     /*       fprintf(stderr,"Numerics, NumericsMatrix NM_write_in_file_scilab. Not yet implemented fo storageType = %i.\n", storageType); */
     /*       exit(EXIT_FAILURE); */
 
@@ -821,7 +821,7 @@ void NM_read_in_file(NumericsMatrix* const m, FILE *file)
   }
   else if (storageType == NM_SPARSE_BLOCK)
   {
-    NM_read_in_fileSBM(m->matrix1, file);
+    SBM_read_in_file(m->matrix1, file);
   }
 }
 
@@ -863,8 +863,8 @@ int NM_new_from_file(NumericsMatrix* const m, FILE *file)
   }
   else if (storageType == NM_SPARSE_BLOCK)
   {
-    data = newSBM();
-    NM_new_from_fileSBM((SparseBlockStructuredMatrix*)data, file);
+    data = SBM_new();
+    SBM_new_from_file((SparseBlockStructuredMatrix*)data, file);
   }
   else
   {
@@ -909,7 +909,7 @@ void NM_extract_diag_block(NumericsMatrix* M, int block_row_nb, size_t start_row
   }
   case NM_SPARSE_BLOCK:
   {
-    int diagPos = getDiagonalBlockPos(M->matrix1, block_row_nb);
+    int diagPos = SBM_get_position_diagonal_block(M->matrix1, block_row_nb);
     (*Block) = M->matrix1->block[diagPos];
     break;
   }
@@ -951,7 +951,7 @@ void NM_extract_diag_block3(NumericsMatrix* M, int block_row_nb, double ** Block
   }
   case NM_SPARSE_BLOCK:
   {
-    int diagPos = getDiagonalBlockPos(M->matrix1, block_row_nb);
+    int diagPos = SBM_get_position_diagonal_block(M->matrix1, block_row_nb);
     (*Block) = M->matrix1->block[diagPos];
     break;
   }
@@ -983,7 +983,7 @@ void NM_add_to_diag3(NumericsMatrix* M, double alpha)
   {
     for (size_t ic = 0; ic < n/3; ++ic)
     {
-      int diagPos = getDiagonalBlockPos(M->matrix1, ic);
+      int diagPos = SBM_get_position_diagonal_block(M->matrix1, ic);
       M->matrix1->block[diagPos][0] += alpha;
       M->matrix1->block[diagPos][4] += alpha;
       M->matrix1->block[diagPos][8] += alpha;
@@ -1028,7 +1028,7 @@ NumericsMatrix* NM_duplicate(NumericsMatrix* mat)
       data = malloc(size0*size1*sizeof(double));
       break;
     case NM_SPARSE_BLOCK:
-      data = newSBM();
+      data = SBM_new();
       break;
     case NM_SPARSE:
       data = newNumericsSparseMatrix();
@@ -1068,7 +1068,7 @@ NumericsMatrix* NM_create(int storageType, int size0, int size1)
       data = malloc(size0*size1*sizeof(double));
       break;
     case NM_SPARSE_BLOCK:
-      data = newSBM();
+      data = SBM_new();
       break;
     case NM_SPARSE:
       data = newNumericsSparseMatrix();
@@ -1145,7 +1145,7 @@ void NM_clearSparseBlock(NumericsMatrix* A)
 {
   if (A->matrix1)
   {
-    freeSBM(A->matrix1);
+    SBM_free(A->matrix1);
     free(A->matrix1);
     A->matrix1 = NULL;
   }
@@ -1460,7 +1460,7 @@ void NM_copy(const NumericsMatrix* const A, NumericsMatrix* B)
     }
     else
     {
-      B->matrix1 = newSBM();
+      B->matrix1 = SBM_new();
       B_ = B->matrix1;
 
       B_->block = (double **) malloc(A_->nbblocks * sizeof(double *));
@@ -1484,7 +1484,7 @@ void NM_copy(const NumericsMatrix* const A, NumericsMatrix* B)
     memcpy(B_->index1_data, A_->index1_data, A_->filled1 * sizeof(size_t));
     memcpy(B_->index2_data, A_->index2_data, A_->filled2 * sizeof(size_t));
 
-    /* cf copySBM */
+    /* cf SBM_copy */
     unsigned int currentRowNumber ;
     size_t colNumber;
     unsigned int nbRows, nbColumns;
@@ -1830,7 +1830,7 @@ void NM_gemv(const double alpha, NumericsMatrix* A, const double *x,
 
   case NM_SPARSE_BLOCK:
   {
-    prodSBM(A->size1, A->size0, alpha, A->matrix1, x, beta, y);
+    SBM_gemv(A->size1, A->size0, alpha, A->matrix1, x, beta, y);
 
      break;
   }
@@ -1936,7 +1936,7 @@ void NM_gemm(const double alpha, NumericsMatrix* A, NumericsMatrix* B,
     assert(A->matrix1);
     assert(B->matrix1);
     assert(C->matrix1);
-    prodSBMSBM(alpha, A->matrix1, B->matrix1, beta, C->matrix1);
+    SBM_gemm(alpha, A->matrix1, B->matrix1, beta, C->matrix1);
 
     NM_clearDense(C);
     NM_clearSparseStorage(C);

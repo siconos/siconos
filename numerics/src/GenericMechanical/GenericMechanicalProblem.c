@@ -198,7 +198,7 @@ void displayGMP(GenericMechanicalProblem * pGMP)
   for (ii = 0; ii < pGMP->size; ii++)
     printf("%e ", pGMP->q[ii]);
 
-  //printSBM(pGMP->M->matrix1);
+  //SBM_print(pGMP->M->matrix1);
   printf("\nEND Display a GenericMechanicalProblem:\n");
 }
 

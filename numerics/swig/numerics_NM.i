@@ -202,7 +202,7 @@ fail:
 {
  ~SparseBlockStructuredMatrix()
  {
-   freeSBM($self);
+   SBM_free($self);
    free($self);
  }
 }
