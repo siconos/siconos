@@ -150,7 +150,7 @@ int main(int argc, char* argv[])
   NumericsProblem.q = q;
   NumericsProblem.b = b;
 
-  NumericsProblem.M = newNumericsMatrix();
+  NumericsProblem.M = NM_new();
   NumericsMatrix *MM =  NumericsProblem.M;
   MM->storageType = 1;
   MM->size0 = Ndof;

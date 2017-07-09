@@ -82,8 +82,8 @@ For the second way of storage, SparseBlockStructuredMatrix we have:
 
 - NM_create(): allocation without initial values
 - NM_create_from_data(): allocation and set default values from external data
-- fillNumericsMatrix(): needs a pre-defined NumericsMatrix, set default values from external data
-- freeNumericsMatrix(): free a NumericsMatrix
+- NM_fill(): needs a pre-defined NumericsMatrix, set default values from external data
+- NM_free(): free a NumericsMatrix
 
 These last two functions accept a <i>data</i> parameter, which if non-NULL contains the matrix data.
 
@@ -102,10 +102,10 @@ The following linear algebra operation are supported:
 \subsection NM_IO Input / Output
 
   - NM_display(): display a NumericsMatrix
-  - displayRowbyRow(): display a NumericsMatrix row by row
-  - printInFileName(), printInFile(): save to filesystem
-  - readInFileName(), readInFile(): fill a NumericsMatrix from a file
-  - newFromFile(): create new NumericsMatrix from a file
+  - NM_display_row_by_row(): display a NumericsMatrix row by row
+  - NM_write_in_filename(), NM_write_in_file(): save to filesystem
+  - NM_read_in_filename(), NM_read_in_file(): fill a NumericsMatrix from a file
+  - NM_new_from_file(): create new NumericsMatrix from a file
 
 */
 
@@ -184,7 +184,7 @@ extern "C"
   /** Creation of an empty NumericsMatrix.
    * \return a pointer to allocated space
    */
-  NumericsMatrix* newNumericsMatrix(void);
+  NumericsMatrix* NM_new(void);
 
   /** create a NumericsMatrix and allocate the memory according to the matrix type
    * \param storageType the type of storage
@@ -231,7 +231,7 @@ extern "C"
    * \param mat the model matrix
    * \return a pointer to a NumericsMatrix
    */
-  NumericsMatrix* duplicateNumericsMatrix(NumericsMatrix* mat);
+  NumericsMatrix* NM_duplicate(NumericsMatrix* mat);
 
 
   /** Creation, if needed, of sparse matrix storage.
@@ -274,7 +274,7 @@ extern "C"
    * \param data pointer to the matrix data. If NULL, all matrixX fields are
    * set to NULL
    */
-  void fillNumericsMatrix(NumericsMatrix* M, int storageType, int size0, int size1, void* data);
+  void NM_fill(NumericsMatrix* M, int storageType, int size0, int size1, void* data);
 
   /** new NumericsMatrix with sparse storage from minimal set of data
    * \param[in] size0 number of rows
@@ -282,7 +282,7 @@ extern "C"
    * \param[in] m1 the SparseBlockStructuredMatrix
    * \return  a pointer to a NumericsMatrix
    */
-  NumericsMatrix* newSparseNumericsMatrix(int size0, int size1, SparseBlockStructuredMatrix* m1);
+  NumericsMatrix* NM_new_SBM(int size0, int size1, SparseBlockStructuredMatrix* m1);
 
   /** Allocate the internalData structure (but not its content!)
    * \param M the matrix to modify
@@ -338,7 +338,7 @@ extern "C"
       Note that this function does not free m.
       \param m the matrix to be deleted.
    */
-  void freeNumericsMatrix(NumericsMatrix* m);
+  void NM_free(NumericsMatrix* m);
 
 
   /**************************************************/
@@ -428,7 +428,7 @@ extern "C"
       \param[in] x the vector to be multiplied
       \param[in,out] y the resulting vector
   */
-  void prodNumericsMatrix3x3(int sizeX, int sizeY,  NumericsMatrix* A,
+  void NM_prod_mv_3x3(int sizeX, int sizeY,  NumericsMatrix* A,
                              double* const x, double* y);
 
   /** Row of a Matrix - vector product y = rowA*x or y += rowA*x, rowA being a submatrix of A (sizeY rows and sizeX columns)
@@ -536,7 +536,7 @@ extern "C"
   /** Screen display raw by raw of the matrix content
       \param m the matrix to be displayed
   */
-  void displayRowbyRow(const NumericsMatrix* const m);
+  void NM_display_row_by_row(const NumericsMatrix* const m);
 
   /**************************************************/
   /** matrix I/O                *********************/
@@ -546,45 +546,45 @@ extern "C"
      \param M the matrix to be printed
      \param filename the corresponding name of the file
   */
-  void printInFileName(const NumericsMatrix* const M, const char *filename);
+  void NM_write_in_filename(const NumericsMatrix* const M, const char *filename);
 
   /** Read in file  of the matrix content
      \param M the matrix to be read
      \param filename the corresponding name of the file
   */
-  void readInFileName(NumericsMatrix* const M, const char *filename);
+  void NM_read_in_filename(NumericsMatrix* const M, const char *filename);
 
   /** PrintInFile  of the matrix content
      \param M the matrix to be printed
      \param file filename the corresponding file
   */
 
-  void printInFile(const NumericsMatrix* const M, FILE* file);
+  void NM_write_in_file(const NumericsMatrix* const M, FILE* file);
 
   /** Read in file  of the matrix content without performing memory allocation
      \param M the matrix to be read
      \param file the corresponding  file
   */
-  void readInFile(NumericsMatrix* const M, FILE *file);
+  void NM_read_in_file(NumericsMatrix* const M, FILE *file);
 
   /** Create from file a NumericsMatrix with  memory allocation
      \param M the matrix to be read
      \param file the corresponding  file
      \return 0 if ok
   */
-  int  newFromFile(NumericsMatrix* const M, FILE *file);
+  int  NM_new_from_file(NumericsMatrix* const M, FILE *file);
 
   /** PrintInFileForScilab  of the matrix content
    \param M the matrix to be printed
    \param file the corresponding file
   */
-  void printInFileForScilab(const NumericsMatrix* const M, FILE* file);
+  void NM_write_in_file_scilab(const NumericsMatrix* const M, FILE* file);
 
   /** Read in file for scilab  of the matrix content
      \param M the matrix to be read
      \param file the corresponding  file
   */
-  void readInFileForScilab(NumericsMatrix* const M, FILE *file);
+  void NM_read_in_file_scilab(NumericsMatrix* const M, FILE *file);
 
 
 

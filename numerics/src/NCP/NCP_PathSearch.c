@@ -381,7 +381,7 @@ void ncp_pathsearch(NonlinearComplementarityProblem* problem, double* z, double*
 
   if (!preAlloc)
   {
-    freeNumericsMatrix(problem->nabla_F);
+    NM_free(problem->nabla_F);
     free(problem->nabla_F);
     problem->nabla_F = NULL;
     free(options->dWork);

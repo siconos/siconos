@@ -1101,9 +1101,9 @@ TERMINATE:
 
   optFree(&Optr);
   optFree(&solverOptPtr);
-  freeNumericsMatrix(&Wtmat);
-  freeNumericsMatrix(&Emat);
-  freeNumericsMatrix(&Akmat);
+  NM_free(&Wtmat);
+  NM_free(&Emat);
+  NM_free(&Akmat);
 
   free(reaction_old);
   free(velocity_old);

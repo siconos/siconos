@@ -155,7 +155,7 @@ int main(int argc, char* argv[])
   numericsProblem.q = q;
   numericsProblem.b = b;
 
-  numericsProblem.M = newNumericsMatrix();
+  numericsProblem.M = NM_new();
   NumericsMatrix *MM =  numericsProblem.M;
   MM->storageType = NM_SPARSE_BLOCK;
   MM->size0 = Ndof;
@@ -180,7 +180,7 @@ int main(int argc, char* argv[])
   MBlockMatrix->index2_data =  index2_data;
 
 
-  numericsProblem.H = newNumericsMatrix();
+  numericsProblem.H = NM_new();
   NumericsMatrix *HH =  numericsProblem.H;
   HH->storageType = 1;
   HH->size0 = Ndof;
@@ -247,8 +247,8 @@ int main(int argc, char* argv[])
   MM->matrix1 = NULL;
   free(HH->matrix1);
   HH->matrix1 = NULL;
-  freeNumericsMatrix(MM);
-  freeNumericsMatrix(HH);
+  NM_free(MM);
+  NM_free(HH);
   free(MM);
   free(HH);
   gfc3d_free_workspace(&numericsProblem);

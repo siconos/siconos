@@ -106,7 +106,7 @@ int reformulationIntoLocalProblem(GlobalFrictionContactProblem* problem, Frictio
     assert(!infoDGETRS);
     /*      DGESV(n, m, M->matrix0, n, ipiv, Htmp, n, infoDGESV); */
 
-    localproblem->M = newNumericsMatrix();
+    localproblem->M = NM_new();
     NumericsMatrix *Wnum = localproblem->M;
     Wnum->storageType = 0;
     Wnum-> size0 = m;
@@ -172,7 +172,7 @@ int reformulationIntoLocalProblem(GlobalFrictionContactProblem* problem, Frictio
 #ifdef OUTPUT_DEBUG
     FILE* fileout;
     fileout = fopen("dataM.sci", "w");
-    printInFileForScilab(M, fileout);
+    NM_write_in_file_scilab(M, fileout);
     fclose(fileout);
     printf("Display M\n");
     printSBM(M->matrix1);
@@ -187,7 +187,7 @@ int reformulationIntoLocalProblem(GlobalFrictionContactProblem* problem, Frictio
 
 #ifdef OUTPUT_DEBUG
     fileout = fopen("dataMinv.sci", "w");
-    printInFileForScilab(M, fileout);
+    NM_write_in_file_scilab(M, fileout);
     fclose(fileout);
     printf("Display Minv\n");
     printSBM(M->matrix1);
@@ -198,13 +198,13 @@ int reformulationIntoLocalProblem(GlobalFrictionContactProblem* problem, Frictio
     prodSBMSBM(alpha, M->matrix1, H->matrix1, beta, HtmpSBM);
 #ifdef OUTPUT_DEBUG
     fileout = fopen("dataH.sci", "w");
-    printInFileForScilab(H, fileout);
+    NM_write_in_file_scilab(H, fileout);
     fclose(fileout);
     printf("Display H\n");
     printSBM(H->matrix1);
 
     fileout = fopen("dataHtmpSBM.sci", "w");
-    printInFileSBMForScilab(HtmpSBM, fileout);
+    NM_write_in_fileSBMForScilab(HtmpSBM, fileout);
     fclose(fileout);
     printf("Display HtmpSBM\n");
     printSBM(HtmpSBM);
@@ -218,12 +218,12 @@ int reformulationIntoLocalProblem(GlobalFrictionContactProblem* problem, Frictio
     transposeSBM(H->matrix1, Htrans);
 #ifdef OUTPUT_DEBUG
     fileout = fopen("dataHtrans.sci", "w");
-    printInFileSBMForScilab(Htrans, fileout);
+    NM_write_in_fileSBMForScilab(Htrans, fileout);
     fclose(fileout);
     printf("Display Htrans\n");
     printSBM(Htrans);
 #endif
-    localproblem->M = newNumericsMatrix();
+    localproblem->M = NM_new();
     NumericsMatrix *Wnum = localproblem->M;
     Wnum->storageType = 1;
     Wnum-> size0 = m;
@@ -236,14 +236,14 @@ int reformulationIntoLocalProblem(GlobalFrictionContactProblem* problem, Frictio
     prodSBMSBM(alpha, Htrans, HtmpSBM, beta, W);
 #ifdef OUTPUT_DEBUG
     fileout = fopen("dataW.sci", "w");
-    printInFileForScilab(Wnum, fileout);
+    NM_write_in_file_scilab(Wnum, fileout);
     fclose(fileout);
     printf("Display W\n");
     printSBM(W);
 #endif
 
 #ifdef TEST_COND
-    NumericsMatrix *WnumInverse = newNumericsMatrix();
+    NumericsMatrix *WnumInverse = NM_new();
     WnumInverse->storageType = 0;
     WnumInverse-> size0 = m;
     WnumInverse-> size1 = m;
@@ -255,7 +255,7 @@ int reformulationIntoLocalProblem(GlobalFrictionContactProblem* problem, Frictio
     SBMtoDense(W, WnumInverse->matrix0);
 
     FILE * file1 = fopen("dataW.dat", "w");
-    printInFileForScilab(WnumInverse, file1);
+    NM_write_in_file_scilab(WnumInverse, file1);
     fclose(file1);
 
     double * WInversetmp = (double*)malloc(m * m * sizeof(double));
@@ -282,12 +282,12 @@ int reformulationIntoLocalProblem(GlobalFrictionContactProblem* problem, Frictio
 
 
     FILE * file2 = fopen("dataWInverse.dat", "w");
-    printInFileForScilab(WnumInverse, file2);
+    NM_write_in_file_scilab(WnumInverse, file2);
     fclose(file2);
 
     double tol = 1e-24;
     pinv(WInversetmp, m, m, tol);
-    NumericsMatrix *WnumInversetmp = newNumericsMatrix();
+    NumericsMatrix *WnumInversetmp = NM_new();
     WnumInversetmp->storageType = 0;
     WnumInversetmp-> size0 = m;
     WnumInversetmp-> size1 = m;
@@ -297,7 +297,7 @@ int reformulationIntoLocalProblem(GlobalFrictionContactProblem* problem, Frictio
     WnumInversetmp->matrix0 = WInversetmp ;
 
     FILE * file3 = fopen("dataWPseudoInverse.dat", "w");
-    printInFileForScilab(WnumInversetmp, file3);
+    NM_write_in_file_scilab(WnumInversetmp, file3);
     fclose(file3);
 
 
@@ -332,7 +332,7 @@ int reformulationIntoLocalProblem(GlobalFrictionContactProblem* problem, Frictio
   {
     // Product M^-1 H
 
-    NumericsMatrix * Minv  = newNumericsMatrix();
+    NumericsMatrix * Minv  = NM_new();
     Minv->size0 = n;
     Minv->size1 = n;
     Minv->storageType = NM_SPARSE;
@@ -343,7 +343,7 @@ int reformulationIntoLocalProblem(GlobalFrictionContactProblem* problem, Frictio
     DEBUG_EXPR(NM_display(Minv););
 
 
-    NumericsMatrix* MinvH = newNumericsMatrix();
+    NumericsMatrix* MinvH = NM_new();
     NM_copy(H,MinvH);
     DEBUG_EXPR(NM_display(MinvH););
 
@@ -353,7 +353,7 @@ int reformulationIntoLocalProblem(GlobalFrictionContactProblem* problem, Frictio
 
     // Product H^T M^-1 H
     NM_csc_trans(H);
-    NumericsMatrix* Htrans = newNumericsMatrix();
+    NumericsMatrix* Htrans = NM_new();
     Htrans->storageType = NM_SPARSE;
     Htrans-> size0 = m;
     Htrans-> size1 = n;

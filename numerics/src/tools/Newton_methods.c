@@ -523,7 +523,7 @@ void set_lsa_params_data(SolverOptions* options, NumericsMatrix* mat)
   {
     options->solverData = malloc(sizeof(newton_LSA_data));
     newton_LSA_data* sd = (newton_LSA_data*) options->solverData;
-    sd->H = duplicateNumericsMatrix(mat);
+    sd->H = NM_duplicate(mat);
   }
 }
 
@@ -558,7 +558,7 @@ void newton_LSA_free_solverOptions(SolverOptions* options)
   {
     newton_LSA_data* sd = (newton_LSA_data*) options->solverData;
     assert(sd->H);
-    freeNumericsMatrix(sd->H);
+    NM_free(sd->H);
     free(sd->H);
     free(sd);
     options->solverData = NULL;

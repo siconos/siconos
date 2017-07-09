@@ -972,7 +972,7 @@ void printSBM(const SparseBlockStructuredMatrix* const m)
   }
 
 }
-void printInFileSBM(const SparseBlockStructuredMatrix* const m, FILE * file)
+void NM_write_in_fileSBM(const SparseBlockStructuredMatrix* const m, FILE * file)
 {
   DEBUG_PRINT("printInFileSBM\n");
   if (! m)
@@ -1052,11 +1052,11 @@ void printInFileSBM(const SparseBlockStructuredMatrix* const m, FILE * file)
   }
 
 }
-void printInFileSBMForScilab(const SparseBlockStructuredMatrix* const m, FILE * file)
+void NM_write_in_fileSBMForScilab(const SparseBlockStructuredMatrix* const m, FILE * file)
 {
   if (! m)
   {
-    fprintf(stderr, "Numerics, SparseBlockStructuredMatrix printInFileSBM failed, NULL input.\n");
+    fprintf(stderr, "Numerics, SparseBlockStructuredMatrix NM_write_in_fileSBM failed, NULL input.\n");
     exit(EXIT_FAILURE);
   }
   assert(file);
@@ -1162,15 +1162,15 @@ void printInFileSBMForScilab(const SparseBlockStructuredMatrix* const m, FILE * 
 }
 
 
-void printInFileNameSBM(const SparseBlockStructuredMatrix* const m, const char *filename)
+void NM_write_in_filenameSBM(const SparseBlockStructuredMatrix* const m, const char *filename)
 {
 
 }
-void newFromFileSBM(SparseBlockStructuredMatrix* const m, FILE *file)
+void NM_new_from_fileSBM(SparseBlockStructuredMatrix* const m, FILE *file)
 {
   if (! m)
   {
-    fprintf(stderr, "Numerics, SparseBlockStructuredMatrix readInFileSBM failed, NULL input.\n");
+    fprintf(stderr, "Numerics, SparseBlockStructuredMatrix NM_read_in_fileSBM failed, NULL input.\n");
     exit(EXIT_FAILURE);
   }
   assert(file);
@@ -1240,7 +1240,7 @@ void newFromFileSBM(SparseBlockStructuredMatrix* const m, FILE *file)
       CHECK_IO(fscanf(file, "%d", &(blockk)));
       if (blockk != blockNum)
       {
-        printf("Numerics, SparseBlockStructuredMatrix readInFileSBM failed, problem in block numbering. \n");
+        printf("Numerics, SparseBlockStructuredMatrix NM_read_in_fileSBM failed, problem in block numbering. \n");
       }
       m->block[blockNum] = (double*)malloc(nbRows * nbColumns * sizeof(double));
       for (unsigned int i = 0; i < nbRows * nbColumns; i++)
@@ -1252,11 +1252,11 @@ void newFromFileSBM(SparseBlockStructuredMatrix* const m, FILE *file)
   }
 }
 
-void readInFileSBM(SparseBlockStructuredMatrix* const m, FILE *file)
+void NM_read_in_fileSBM(SparseBlockStructuredMatrix* const m, FILE *file)
 {
   if (! m)
   {
-    fprintf(stderr, "Numerics, SparseBlockStructuredMatrix readInFileSBM failed, NULL input.\n");
+    fprintf(stderr, "Numerics, SparseBlockStructuredMatrix NM_read_in_fileSBM failed, NULL input.\n");
     exit(EXIT_FAILURE);
   }
   assert(file);
@@ -1319,7 +1319,7 @@ void readInFileSBM(SparseBlockStructuredMatrix* const m, FILE *file)
       CHECK_IO(fscanf(file, "%d", &(blockk)));
       if (blockk != blockNum)
       {
-        printf("Numerics, SparseBlockStructuredMatrix readInFileSBM failed, problem in block numbering. \n");
+        printf("Numerics, SparseBlockStructuredMatrix NM_read_in_fileSBM failed, problem in block numbering. \n");
       }
 
       for (unsigned int i = 0; i < nbRows * nbColumns; i++)
@@ -1330,7 +1330,7 @@ void readInFileSBM(SparseBlockStructuredMatrix* const m, FILE *file)
     }
   }
 }
-void readInFileNameSBM(SparseBlockStructuredMatrix* const m, const char *filename)
+void NM_read_in_filenameSBM(SparseBlockStructuredMatrix* const m, const char *filename)
 {
 
 }
@@ -2414,7 +2414,7 @@ void SBMRowToDense(const SparseBlockStructuredMatrix* const A, int row, double *
 #ifdef SBM_DEBUG_SBMRowToDense
   printf("SBMRowToDense : res in file SBMRowToDense.txt.");
   FILE * titi  = fopen("SBMRowToDense.txt", "w");
-  printInFileSBMForScilab(A, titi);
+  NM_write_in_fileSBMForScilab(A, titi);
   fprintf(titi, "\n//Dense matrix of row block %i:\n", row);
   fprintf(titi, "denseRow = [ \t");
   for (int i = 0; i < BlockRowNb; i++)
@@ -2435,7 +2435,7 @@ void RowPermutationSBM(unsigned int *rowIndex, SparseBlockStructuredMatrix* A, S
 {
 #ifdef SBM_DEBUG_SBM_ROW_PERM
   FILE * titi  = fopen("RowPermutationSBM_input.txt", "w");
-  printInFileSBMForScilab(A, titi);
+  NM_write_in_fileSBMForScilab(A, titi);
   fclose(titi);
 #endif
   int nbRow = A->blocknumber0;
@@ -2484,7 +2484,7 @@ void RowPermutationSBM(unsigned int *rowIndex, SparseBlockStructuredMatrix* A, S
   }
 #ifdef SBM_DEBUG_SBM_ROW_PERM
   titi  = fopen("RowPermutationSBM_output.txt", "w");
-  printInFileSBMForScilab(C, titi);
+  NM_write_in_fileSBMForScilab(C, titi);
   fclose(titi);
 #endif
 }
@@ -2493,7 +2493,7 @@ void ColPermutationSBM(unsigned int *colIndex, SparseBlockStructuredMatrix* A, S
 {
 #ifdef SBM_DEBUG_SBM_COL_PERM
   FILE * titi  = fopen("ColPermutationSBM_input.txt", "w");
-  printInFileSBMForScilab(A, titi);
+  NM_write_in_fileSBMForScilab(A, titi);
   fclose(titi);
 #endif
   copySBM(A, C, 0);
@@ -2519,7 +2519,7 @@ void ColPermutationSBM(unsigned int *colIndex, SparseBlockStructuredMatrix* A, S
   }
 #ifdef SBM_DEBUG_SBM_COL_PERM
   titi  = fopen("ColPermutationSBM_output.txt", "w");
-  printInFileSBMForScilab(C, titi);
+  NM_write_in_fileSBMForScilab(C, titi);
   fclose(titi);
 #endif
 }

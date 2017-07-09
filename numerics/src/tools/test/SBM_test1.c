@@ -35,7 +35,7 @@ int main(void)
   printf("========= Starts SBM tests 1 for SBM ========= \n");
   SparseBlockStructuredMatrix M;
   FILE *file = fopen("data/SBM1.dat", "r");
-  newFromFileSBM(&M, file);
+  NM_new_from_fileSBM(&M, file);
   fclose(file);
   /*alloc enough memory */
   int res = test_SBMRowToDense(&M);
@@ -50,7 +50,7 @@ int main(void)
 
   SparseBlockStructuredMatrix M2;
   file = fopen("data/SBM2.dat", "r");
-  newFromFileSBM(&M2, file);
+  NM_new_from_fileSBM(&M2, file);
   fclose(file);
   res = test_SBMRowToDense(&M2);
   if (res)

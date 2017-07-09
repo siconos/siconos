@@ -61,7 +61,7 @@ int linearComplementarity_printInFile(LinearComplementarityProblem*  problem, FI
   int i;
   int n = problem->size;
   fprintf(file, "%d\n", n);
-  printInFile(problem->M, file);
+  NM_write_in_file(problem->M, file);
   for (i = 0; i < problem->M->size1; i++)
   {
     fprintf(file, "%32.24e ", problem->q[i]);
@@ -76,9 +76,9 @@ int linearComplementarity_newFromFile(LinearComplementarityProblem* problem, FIL
 
   CHECK_IO(fscanf(file, "%d\n", &n));
   problem->size = n;
-  problem->M = newNumericsMatrix();
+  problem->M = NM_new();
 
-  newFromFile(problem->M, file);
+  NM_new_from_file(problem->M, file);
 
   problem->q = (double *) malloc(problem->M->size1 * sizeof(double));
   for (i = 0; i < problem->M->size1; i++)
@@ -102,7 +102,7 @@ void freeLinearComplementarityProblem(LinearComplementarityProblem* problem)
 {
   if (problem->M)
   {
-    freeNumericsMatrix(problem->M);
+    NM_free(problem->M);
     free(problem->M);
     problem->M = NULL;
   }

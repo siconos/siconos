@@ -140,7 +140,7 @@ void buildReducedGMP(GenericMechanicalProblem* pInProblem, double * Me, double *
   SparseBlockStructuredMatrix* m = pInProblem->M->matrix1;
 #ifdef GMP_DEBUG_REDUCED
   FILE * titi  = fopen("buildReducedGMP_input.txt", "w");
-  printInFileSBMForScilab(m, titi);
+  NM_write_in_fileSBMForScilab(m, titi);
   fclose(titi);
 #endif
   int curSize = 0;
@@ -732,10 +732,10 @@ void GMPasMLCP(GenericMechanicalProblem* pInProblem, double *reaction , double *
     assert(Me_size >= 0);
     for (size_t i = 0; i < (size_t)Me_size; ++i) reaction[i] = -Qreduced[i];
     NumericsMatrix M;
-    fillNumericsMatrix(&M, NM_DENSE, Me_size, Me_size, reducedProb);
+    NM_fill(&M, NM_DENSE, Me_size, Me_size, reducedProb);
     *info = NM_gesv(&M, reaction, true);
     M.matrix0 = NULL;
-    freeNumericsMatrix(&M);
+    NM_free(&M);
     goto END_GMP3;
   }
   /*it is a MLCP*/

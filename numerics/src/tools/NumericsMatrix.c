@@ -52,7 +52,7 @@
 
 
 
-void prodNumericsMatrix3x3(int sizeX, int sizeY, NumericsMatrix* A,
+void NM_prod_mv_3x3(int sizeX, int sizeY, NumericsMatrix* A,
                            double* const x, double* y)
 {
 
@@ -345,9 +345,9 @@ void NM_internalData_free(NumericsMatrix* m)
   }
 }
 
-void freeNumericsMatrix(NumericsMatrix* m)
+void NM_free(NumericsMatrix* m)
 {
-  assert(m && "freeNumericsMatrix, m == NULL");
+  assert(m && "NM_free, m == NULL");
 
   NM_clearDense(m);
   NM_clearSparseBlock(m);
@@ -657,7 +657,7 @@ void NM_display(const NumericsMatrix* const m)
   }
   }
 }
-void displayRowbyRow(const NumericsMatrix* const m)
+void NM_display_row_by_row(const NumericsMatrix* const m)
 {
   if (! m)
   {
@@ -679,12 +679,12 @@ void displayRowbyRow(const NumericsMatrix* const m)
     printSBM(m->matrix1);
   else
   {
-    fprintf(stderr, "displayRowbyRow :: unknown matrix storage");
+    fprintf(stderr, "NM_display_row_by_row :: unknown matrix storage");
     exit(EXIT_FAILURE);
   }
 }
 
-void printInFile(const NumericsMatrix* const m, FILE* file)
+void NM_write_in_file(const NumericsMatrix* const m, FILE* file)
 {
   DEBUG_PRINT("\n  ========== printInFile(const NumericsMatrix* const m, FILE* file) start\n");
 
@@ -715,7 +715,7 @@ void printInFile(const NumericsMatrix* const m, FILE* file)
   case NM_SPARSE_BLOCK:
   {
     assert(m->matrix1);
-    printInFileSBM(m->matrix1, file);
+    NM_write_in_fileSBM(m->matrix1, file);
     break;
   }
   case NM_SPARSE:
@@ -749,7 +749,7 @@ void printInFile(const NumericsMatrix* const m, FILE* file)
 
 }
 
-void printInFileForScilab(const NumericsMatrix* const m, FILE* file)
+void NM_write_in_file_scilab(const NumericsMatrix* const m, FILE* file)
 {
   if (! m)
   {
@@ -777,8 +777,8 @@ void printInFileForScilab(const NumericsMatrix* const m, FILE* file)
   }
   else if (storageType == NM_SPARSE_BLOCK)
   {
-    printInFileSBMForScilab(m->matrix1, file);
-    /*       fprintf(stderr,"Numerics, NumericsMatrix printInFileForScilab. Not yet implemented fo storageType = %i.\n", storageType); */
+    NM_write_in_fileSBMForScilab(m->matrix1, file);
+    /*       fprintf(stderr,"Numerics, NumericsMatrix NM_write_in_file_scilab. Not yet implemented fo storageType = %i.\n", storageType); */
     /*       exit(EXIT_FAILURE); */
 
   }
@@ -789,18 +789,18 @@ void printInFileForScilab(const NumericsMatrix* const m, FILE* file)
   }
 }
 
-void printInFileName(const NumericsMatrix* const m, const char *filename)
+void NM_write_in_filename(const NumericsMatrix* const m, const char *filename)
 {
   FILE* foutput = fopen(filename, "w");
-  printInFile(m, foutput);
+  NM_write_in_file(m, foutput);
   fclose(foutput);
 }
 
-void readInFile(NumericsMatrix* const m, FILE *file)
+void NM_read_in_file(NumericsMatrix* const m, FILE *file)
 {
   if (! m)
   {
-    fprintf(stderr, "Numerics, NumericsMatrix readInFile failed, NULL input.\n");
+    fprintf(stderr, "Numerics, NumericsMatrix NM_read_in_file failed, NULL input.\n");
     exit(EXIT_FAILURE);
   }
   CHECK_IO(fscanf(file, "%d", &(m->storageType)));
@@ -821,22 +821,22 @@ void readInFile(NumericsMatrix* const m, FILE *file)
   }
   else if (storageType == NM_SPARSE_BLOCK)
   {
-    readInFileSBM(m->matrix1, file);
+    NM_read_in_fileSBM(m->matrix1, file);
   }
 }
 
 
-int newFromFile(NumericsMatrix* const m, FILE *file)
+int NM_new_from_file(NumericsMatrix* const m, FILE *file)
 {
   if (! m)
   {
-    fprintf(stderr, "Numerics, NumericsMatrix newFromFile failed, NULL input.\n");
+    fprintf(stderr, "Numerics, NumericsMatrix NM_new_from_file failed, NULL input.\n");
     exit(EXIT_FAILURE);
   }
 
   if (m->storageType >= 0)
   {
-    freeNumericsMatrix(m);
+    NM_free(m);
   }
 
   int storageType;
@@ -864,28 +864,28 @@ int newFromFile(NumericsMatrix* const m, FILE *file)
   else if (storageType == NM_SPARSE_BLOCK)
   {
     data = newSBM();
-    newFromFileSBM((SparseBlockStructuredMatrix*)data, file);
+    NM_new_from_fileSBM((SparseBlockStructuredMatrix*)data, file);
   }
   else
   {
     fprintf(stderr, "newFromFile :: storageType %d not supported yet", storageType);
   }
 
-  fillNumericsMatrix(m, storageType, (int)size0, (int)size1, data);
+  NM_fill(m, storageType, (int)size0, (int)size1, data);
 
   return info;
 }
 
-void readInFileName(NumericsMatrix* const m, const char *filename)
+void NM_read_in_filename(NumericsMatrix* const m, const char *filename)
 {
   FILE* finput = fopen(filename, "r");
-  newFromFile(m, finput);
+  NM_new_from_file(m, finput);
   fclose(finput);
 }
 
-void readInFileForScilab(NumericsMatrix* const M, FILE *file)
+void NM_read_in_file_scilab(NumericsMatrix* const M, FILE *file)
 {
-  fprintf(stderr, "Numerics, NumericsMatrix,readInFileForScilab");
+  fprintf(stderr, "Numerics, NumericsMatrix,NM_read_in_file_scilab");
   exit(EXIT_FAILURE);
 }
 
@@ -1006,16 +1006,16 @@ void NM_add_to_diag3(NumericsMatrix* M, double alpha)
 
 NumericsMatrix* NM_create_from_data(int storageType, int size0, int size1, void* data)
 {
-  NumericsMatrix* M = newNumericsMatrix();
+  NumericsMatrix* M = NM_new();
 
-  fillNumericsMatrix(M, storageType, size0, size1, data);
+  NM_fill(M, storageType, size0, size1, data);
 
   return M;
 }
 
-NumericsMatrix* duplicateNumericsMatrix(NumericsMatrix* mat)
+NumericsMatrix* NM_duplicate(NumericsMatrix* mat)
 {
-  NumericsMatrix* M = newNumericsMatrix();
+  NumericsMatrix* M = NM_new();
 
   void* data;
   int size0 = mat->size0;
@@ -1034,16 +1034,16 @@ NumericsMatrix* duplicateNumericsMatrix(NumericsMatrix* mat)
       data = newNumericsSparseMatrix();
       break;
     default:
-      fprintf(stderr, "duplicateNumericsMatrix :: storageType value %d not implemented yet !", mat->storageType);
+      fprintf(stderr, "NM_duplicate :: storageType value %d not implemented yet !", mat->storageType);
       exit(EXIT_FAILURE);
   }
 
-  fillNumericsMatrix(M, mat->storageType, size0, size1, data);
+  NM_fill(M, mat->storageType, size0, size1, data);
 
   return M;
 }
 
-NumericsMatrix* newNumericsMatrix(void)
+NumericsMatrix* NM_new(void)
 {
   NumericsMatrix* M = (NumericsMatrix*) malloc(sizeof(NumericsMatrix));
   M->storageType = -1;
@@ -1058,7 +1058,7 @@ NumericsMatrix* NM_create(int storageType, int size0, int size1)
 {
   assert(size0 > 0);
   assert(size1 > 0);
-  NumericsMatrix* M = newNumericsMatrix();
+  NumericsMatrix* M = NM_new();
 
   void* data;
 
@@ -1078,13 +1078,13 @@ NumericsMatrix* NM_create(int storageType, int size0, int size1)
       exit(EXIT_FAILURE);
   }
 
-  fillNumericsMatrix(M, storageType, size0, size1, data);
+  NM_fill(M, storageType, size0, size1, data);
 
   return M;
 }
 
 
-void fillNumericsMatrix(NumericsMatrix* M, int storageType, int size0, int size1, void* data)
+void NM_fill(NumericsMatrix* M, int storageType, int size0, int size1, void* data)
 {
 
   assert(M);
@@ -1120,13 +1120,13 @@ void fillNumericsMatrix(NumericsMatrix* M, int storageType, int size0, int size1
         break;
 
       default:
-        printf("fillNumericsMatrix :: storageType value %d not implemented yet !", storageType);
+        printf("NM_fill :: storageType value %d not implemented yet !", storageType);
         exit(EXIT_FAILURE);
     }
   }
 }
 
-NumericsMatrix* newSparseNumericsMatrix(int size0, int size1, SparseBlockStructuredMatrix* m1)
+NumericsMatrix* NM_new_SBM(int size0, int size1, SparseBlockStructuredMatrix* m1)
 {
   return NM_create_from_data(NM_SPARSE_BLOCK, size0, size1, (void*)m1);
 }
@@ -1956,9 +1956,9 @@ void NM_gemm(const double alpha, NumericsMatrix* A, NumericsMatrix* B,
       NumericsSparseMatrix* result = NM_MKL_spblas_add(0, alpha, tmp_matrix, C->matrix2);
       int size0 = C->size0;
       int size1 = C->size1;
-      freeNumericsMatrix(C);
+      NM_free(C);
       NM_null(C);
-      fillNumericsMatrix(C, NM_SPARSE, size0, size1, result);
+      NM_fill(C, NM_SPARSE, size0, size1, result);
       NM_MKL_to_sparse_matrix(C);
       return;
     }

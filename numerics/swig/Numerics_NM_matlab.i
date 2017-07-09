@@ -112,7 +112,7 @@
   }
   else
   {
-    *tmpmat = newNumericsMatrix();
+    *tmpmat = NM_new();
     out = *tmpmat;
     if (!mxIsNumeric(obj) || array_numdims(obj) != 2)
     {

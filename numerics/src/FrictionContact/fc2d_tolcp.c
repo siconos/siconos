@@ -36,7 +36,7 @@ int fc2d_tolcp(FrictionContactProblem* problem, LinearComplementarityProblem * l
   }
   int nc = problem->numberOfContacts;
   lcp_problem->size = 3 * nc ;
-  lcp_problem->M = newNumericsMatrix();
+  lcp_problem->M = NM_new();
   lcp_problem->M->size0 = 3 * nc ;
   lcp_problem->M->size1 = 3 * nc ;
 

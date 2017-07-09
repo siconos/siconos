@@ -49,7 +49,7 @@ void freeVariationalInequalityProblem(VariationalInequality* vi)
 {
   if (vi->nabla_F)
   {
-    freeNumericsMatrix(vi->nabla_F);
+    NM_free(vi->nabla_F);
     free(vi->nabla_F);
     vi->nabla_F = NULL;
   }

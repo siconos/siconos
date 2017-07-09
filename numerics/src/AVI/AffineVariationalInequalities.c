@@ -75,7 +75,7 @@ int AVI_printInFile(AffineVariationalInequalities*  avi, FILE* file)
   int i;
   int n = avi->size;
   fprintf(file, "%d\n", n);
-  printInFile(avi->M, file);
+  NM_write_in_file(avi->M, file);
   for (i = 0; i < avi->M->size1; i++)
   {
     fprintf(file, "%32.24e ", avi->q[i]);
@@ -90,9 +90,9 @@ int AVI_newFromFile(AffineVariationalInequalities* avi, FILE* file)
 
   CHECK_IO(fscanf(file, "%d\n", &n));
   avi->size = n;
-  avi->M = newNumericsMatrix();
+  avi->M = NM_new();
 
-  newFromFile(avi->M, file);
+  NM_new_from_file(avi->M, file);
 
   avi->q = (double *) malloc(avi->M->size1 * sizeof(double));
   for (i = 0; i < avi->M->size1; i++)
@@ -117,7 +117,7 @@ void freeAVI(AffineVariationalInequalities* avi)
   assert(avi);
   if (avi->M)
   {
-    freeNumericsMatrix(avi->M);
+    NM_free(avi->M);
     free(avi->M);
     avi->M = NULL;
   }

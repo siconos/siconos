@@ -551,9 +551,9 @@ int test_prodNumericsMatrixNumericsMatrix(NumericsMatrix** MM)
     printf("Step 3 ( C = alpha*A*B + beta*C, sparse storage) failed ...\n");
   }
 
-  freeNumericsMatrix(&C4);
+  NM_free(&C4);
 exit_3:
-  freeNumericsMatrix(&C3);
+  NM_free(&C3);
 exit_2:
   free(C2.matrix0);
   free(C2ref);

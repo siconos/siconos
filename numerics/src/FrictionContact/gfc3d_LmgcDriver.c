@@ -68,13 +68,13 @@ int gfc3d_LmgcDriver(double *reaction,
 {
 
   /* NumericsMatrix M, H; */
-  NumericsMatrix * M =newNumericsMatrix();
+  NumericsMatrix * M =NM_new();
   M->storageType = 2; /* sparse */
   M->size0 = n;
   M->size1 = n;
 
 
-  NumericsMatrix * H =newNumericsMatrix();
+  NumericsMatrix * H =NM_new();
   H->storageType = 2;
   H->size0 = M->size0;
   H->size1 = 3 * nc;
@@ -217,8 +217,8 @@ int gfc3d_LmgcDriver(double *reaction,
   }
 
 
-  freeNumericsMatrix(M);
-  freeNumericsMatrix(H);
+  NM_free(M);
+  NM_free(H);
   free(M);
   free(H);
   free(problem);
@@ -395,8 +395,8 @@ int gfc3d_LmgcDriver(double *reaction,
 /*   } */
 
 
-/*   freeNumericsMatrix(&M); */
-/*   freeNumericsMatrix(&H); */
+/*   NM_free(&M); */
+/*   NM_free(&H); */
 
 /*   free(_colM); */
 /*   free(_colH); */

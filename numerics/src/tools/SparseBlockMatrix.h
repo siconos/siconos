@@ -269,38 +269,38 @@ extern "C"
   \param m the matrix to be displayed
   \param file the corresponding  file
   */
-  void printInFileSBM(const SparseBlockStructuredMatrix* const m, FILE* file);
+  void NM_write_in_fileSBM(const SparseBlockStructuredMatrix* const m, FILE* file);
 
   /** read in file  of the matrix content without performing memory allocation
   \param M the matrix to be displayed
   \param file the corresponding name of the file
   */
-  void readInFileSBM(SparseBlockStructuredMatrix* const M, FILE *file);
+  void NM_read_in_fileSBM(SparseBlockStructuredMatrix* const M, FILE *file);
 
   /** Create from file a SparseBlockStructuredMatrix with  memory allocation
       \param outSBM the matrix to be displayed
       \param file the corresponding name of the file
    */
-  void newFromFileSBM(SparseBlockStructuredMatrix* const outSBM, FILE *file);
+  void NM_new_from_fileSBM(SparseBlockStructuredMatrix* const outSBM, FILE *file);
 
   /** print in file  of the matrix content in Scilab format for each block
       \param M the matrix to be displayed
       \param file the corresponding  file
   */
-  void printInFileSBMForScilab(const SparseBlockStructuredMatrix* const M, FILE* file);
+  void NM_write_in_fileSBMForScilab(const SparseBlockStructuredMatrix* const M, FILE* file);
 
 
   /** print in file  of the matrix content
    \param M the matrix to be displayed
    \param filename the corresponding file
      */
-  void printInFileNameSBM(const SparseBlockStructuredMatrix* const M, const char *filename);
+  void NM_write_in_filenameSBM(const SparseBlockStructuredMatrix* const M, const char *filename);
 
   /** read in file  of the matrix content
   \param M the matrix to be displayed
   \param filename the corresponding name of the file
   */
-  void readInFileNameSBM(SparseBlockStructuredMatrix* const M, const char *filename);
+  void NM_read_in_filenameSBM(SparseBlockStructuredMatrix* const M, const char *filename);
 
   /** Destructor for SparseBlockStructuredMatrixPred objects
    *   \param blmatpred SparseBlockStructuredMatrix, the matrix to be destroyed.
@@ -413,7 +413,7 @@ extern "C"
   void SBMRowToDense(const SparseBlockStructuredMatrix* const A, int row, double *denseMat, int rowPos, int rowNb);
 
 
-  /** To free a SBM matrix (for example allocated by newFromFile).
+  /** To free a SBM matrix (for example allocated by NM_new_from_file).
    * \param[in] A the SparseBlockStructuredMatrix that mus be de-allocated.
    * \param[in] level use NUMERICS_SBM_FREE_BLOCK | NUMERICS_SBM_FREE_SBM
    */

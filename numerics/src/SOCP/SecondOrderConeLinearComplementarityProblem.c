@@ -79,7 +79,7 @@ int secondOrderConeLinearComplementarityProblem_printInFile(SecondOrderConeLinea
 {
   if(! problem)
   {
-    fprintf(stderr, "Numerics, SecondOrderConeLinearComplementarityProblem printInFile failed, NULL input.\n");
+    fprintf(stderr, "Numerics, SecondOrderConeLinearComplementarityProblem_printInFile failed, NULL input.\n");
     exit(EXIT_FAILURE);
   }
   int i;
@@ -87,7 +87,7 @@ int secondOrderConeLinearComplementarityProblem_printInFile(SecondOrderConeLinea
   fprintf(file, "%d\n", n);
   int nc = problem->nc;
   fprintf(file, "%d\n", nc);
-  printInFile(problem->M, file);
+  NM_write_in_file(problem->M, file);
   for(i = 0; i < problem->M->size1; i++)
   {
     fprintf(file, "%32.24e ", problem->q[i]);
@@ -134,11 +134,11 @@ int secondOrderConeLinearComplementarityProblem_newFromFile(SecondOrderConeLinea
   problem->n = n;
   CHECK_IO(fscanf(file, "%d\n", &nc));
   problem->nc = nc;
-  problem->M = newNumericsMatrix();
+  problem->M = NM_new();
 
   /* fix: problem->M->storageType unitialized ! */
 
-  newFromFile(problem->M, file);
+  NM_new_from_file(problem->M, file);
 
   problem->q = (double *) malloc(problem->M->size1 * sizeof(double));
   for(i = 0; i < problem->M->size1; i++)
@@ -182,7 +182,7 @@ void freeSecondOrderConeLinearComplementarityProblem(SecondOrderConeLinearComple
 
   if (problem->M)
   {
-    freeNumericsMatrix(problem->M);
+    NM_free(problem->M);
     free(problem->M);
     problem->M = NULL;
   }

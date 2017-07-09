@@ -129,7 +129,7 @@
 
   ~NumericsMatrix()
   {
-    freeNumericsMatrix($self);
+    NM_free($self);
     free($self);
   }
 

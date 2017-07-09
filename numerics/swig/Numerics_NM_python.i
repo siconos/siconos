@@ -500,7 +500,7 @@ static inline bool is_Pyobject_scipy_sparse_matrix(PyObject* o, PyObject* scipy_
   }
   else
   {
-    *tmpmat = newNumericsMatrix();
+    *tmpmat = NM_new();
     out = *tmpmat;
     if (is_array(obj) || sane_pyseq_check(obj))
     {

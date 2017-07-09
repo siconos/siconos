@@ -292,7 +292,7 @@ void soclcp_nsgs(SecondOrderConeLinearComplementarityProblem* problem, double *r
     }
     else
     {
-      localproblem->M = newNumericsMatrix();
+      localproblem->M = NM_new();
     }
   }
   else

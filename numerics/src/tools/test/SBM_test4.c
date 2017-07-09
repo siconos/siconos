@@ -36,7 +36,7 @@ int main(void)
   printf("========= Starts SBM tests 4 for SBM ========= \n");
   SparseBlockStructuredMatrix M;
   FILE *file = fopen("data/SBM2.dat", "r");
-  newFromFileSBM(&M, file);
+  NM_new_from_fileSBM(&M, file);
   printSBM(&M);
   fclose(file);
   /*alloc enough memory */

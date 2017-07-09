@@ -40,7 +40,7 @@ int main(void)
 
   SparseBlockStructuredMatrix* M = SBCMToSBM(MC);
 
-  NumericsMatrix* NM = newSparseNumericsMatrix(m * 3, n * 3, M);
+  NumericsMatrix* NM = NM_new_SBM(m * 3, n * 3, M);
 
   FrictionContactProblem* FC = frictionContactProblem_new(3, 3, NM, q, mu);
 

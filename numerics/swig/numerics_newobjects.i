@@ -35,11 +35,11 @@
 // NumericsMatrix
 %newobject newNumericsSparseLinearSolverParams;
 %newobject newNumericsSparseMatrix;
-%newobject duplicateNumericsMatrix;
-%newobject newNumericsMatrix;
+%newobject NM_duplicate;
+%newobject NM_new;
 %newobject NM_create;
 %newobject NM_create_from_data;
-%newobject newSparseNumericsMatrix;
+%newobject NM_new_SBM;
 %newobject newSBM;
 %newobject SBCMToSBM;
 %newobject newSparseBlockCoordinateMatrix3x3fortran;

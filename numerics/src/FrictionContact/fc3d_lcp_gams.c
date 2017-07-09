@@ -923,7 +923,7 @@ static int fc3d_lcp_gams_base(FrictionContactProblem* problem, double *reaction,
     NumericsMatrix* NM_AbT = NM_create(NM_SPARSE, AbT->m,  AbT->n);
     NM_sparse(NM_AbT)->csc = AbT;
     SN_logh5_NM(NM_AbT, "AbT", logger_s);
-    freeNumericsMatrix(NM_AbT);
+    NM_free(NM_AbT);
 #else
     cs_spfree(AbT);
 #endif
@@ -1317,10 +1317,10 @@ TERMINATE:
 
   optFree(&Optr);
   optFree(&solverOptPtr);
-  freeNumericsMatrix(&Wtmat);
-  freeNumericsMatrix(&Emat);
-  freeNumericsMatrix(&Akmat);
-  freeNumericsMatrix(tmpWmat);
+  NM_free(&Wtmat);
+  NM_free(&Emat);
+  NM_free(&Akmat);
+  NM_free(tmpWmat);
 
   free(reaction_old);
   free(velocity_old);

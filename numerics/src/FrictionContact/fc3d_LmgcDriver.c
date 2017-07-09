@@ -34,7 +34,7 @@ int fc3d_LmgcDriver(double *reaction,
 
   SparseBlockStructuredMatrix* M = SBCMToSBM(MC);
 
-  NumericsMatrix* NM = newSparseNumericsMatrix(nc * 3, nc * 3, M);
+  NumericsMatrix* NM = NM_new_SBM(nc * 3, nc * 3, M);
 
   FrictionContactProblem* FC = frictionContactProblem_new(3, nc, NM, q, mu);
 
