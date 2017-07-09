@@ -30,17 +30,19 @@
 #include "pinv.h"
 #include <string.h>
 
+#include "NumericsSparseMatrix.h"
+
 #include "sanitizer.h"
 #include "numerics_verbose.h"
 //#define TEST_COND
 //#define OUTPUT_DEBUG
-extern lapack_int *Global_ipiv;
+
 extern int  Global_MisInverse;
-extern int  Global_MisLU;
 
 
-/* #define DEBUG_MESSAGES */
-/* #define DEBUG_STDOUT */
+#define DEBUG_NOCOLOR
+#define DEBUG_MESSAGES
+#define DEBUG_STDOUT
 #include "debug.h"
 
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
@@ -54,6 +56,8 @@ int reformulationIntoLocalProblem(GlobalFrictionContactProblem* problem, Frictio
   NumericsMatrix *M = problem->M;
   NumericsMatrix *H = problem->H;
 
+  int n = M->size0;
+  int m = H->size1;
 
   localproblem->numberOfContacts = problem->numberOfContacts;
   localproblem->dimension =  problem->dimension;
@@ -73,24 +77,31 @@ int reformulationIntoLocalProblem(GlobalFrictionContactProblem* problem, Frictio
   {
 
 
-    int n = M->size0;
-    int m = H->size1;
     int nm = n * m;
     lapack_int infoDGETRF = 0;
     lapack_int infoDGETRS = 0;
-    Global_ipiv = (lapack_int *)malloc(n * sizeof(lapack_int));
+    //Global_ipiv = (lapack_int *)malloc(n * sizeof(lapack_int));
 
 
     double *Htmp = (double*)malloc(nm * sizeof(double));
     // compute W = H^T M^-1 H
     //Copy Htmp <- H
     cblas_dcopy_msan(nm,  H->matrix0 , 1, Htmp, 1);
+
+    // get internal data (allocation of needed)
+    NumericsMatrixInternalData* internalData = NM_internalData(M);
+
     //Compute Htmp   <- M^-1 Htmp
-    Global_MisLU = 0; /*  Assume that M is not already LU */
-    DGETRF(n, n, M->matrix0, n, Global_ipiv, &infoDGETRF);
+    //Global_MisLU = 0; /*  Assume that M is not already LU */
+    NM_internalData(M)->isLUfactorized = false;
+    lapack_int* ipiv = (lapack_int*)NM_iWork(M, M->size0, sizeof(lapack_int));
+
+    DGETRF(n, n, M->matrix0, n, ipiv, &infoDGETRF);
     assert(!infoDGETRF);
-    Global_MisLU = 1;
-    DGETRS(LA_NOTRANS, n, m,  M->matrix0, n, Global_ipiv, Htmp, n, &infoDGETRS);
+    //Global_MisLU = 1;
+
+    NM_internalData(M)->isLUfactorized = true;
+    DGETRS(LA_NOTRANS, n, m,  M->matrix0, n, ipiv, Htmp, n, &infoDGETRS);
 
     assert(!infoDGETRS);
     /*      DGESV(n, m, M->matrix0, n, ipiv, Htmp, n, infoDGESV); */
@@ -112,8 +123,6 @@ int reformulationIntoLocalProblem(GlobalFrictionContactProblem* problem, Frictio
     assert(Htmp);
     assert(Wnum->matrix0);
 
-
-
     cblas_dgemm(CblasColMajor,CblasTrans, CblasNoTrans, m, m, n, 1.0, H->matrix0, n, Htmp, n, 0.0, Wnum->matrix0, m);
     /*     DGEMM(CblasTrans,CblasNoTrans,m,m,n,1.0,H->matrix0,n,Htmp,n,0.0,Wnum->matrix0,m); */
 
@@ -128,8 +137,8 @@ int reformulationIntoLocalProblem(GlobalFrictionContactProblem* problem, Frictio
 
     // compute H^T M^(-1) q + b
 
-    assert(Global_MisLU);
-    DGETRS(LA_NOTRANS, n, 1,  M->matrix0, n, Global_ipiv, qtmp , n, &infoDGETRS);
+    assert(NM_internalData(M)->isLUfactorized);
+    DGETRS(LA_NOTRANS, n, 1,  M->matrix0, n, ipiv, qtmp , n, &infoDGETRS);
 
     /*      DGESV(n, m, M->matrix0, n, ipiv, problem->q , n, infoDGESV); */
 
@@ -149,9 +158,11 @@ int reformulationIntoLocalProblem(GlobalFrictionContactProblem* problem, Frictio
   {
     int n = M->size0;
     int m = H->size1;
+    // get internal data (allocation of needed)
+    NumericsMatrixInternalData* internalData = NM_internalData(M);
 
-    assert(!Global_ipiv);
-    Global_ipiv = (lapack_int *)malloc(n * sizeof(lapack_int));
+    //assert(!Global_ipiv);
+    //Global_ipiv = (lapack_int *)malloc(n * sizeof(lapack_int));
 
     // compute W = H^T M^-1 H
     //Copy Htmp <- H
@@ -166,10 +177,14 @@ int reformulationIntoLocalProblem(GlobalFrictionContactProblem* problem, Frictio
     printf("Display M\n");
     printSBM(M->matrix1);
 #endif
+
+
     //Compute Htmp   <- M^-1 HtmpSBM
     /* DGESV(n, m, M->matrix0, n, ipiv, Htmp, n, infoDGESV); */
     assert(!inverseDiagSBM(M->matrix1));
-    Global_MisInverse = 1;
+    //Global_MisInverse = 1;
+    NM_internalData(M)->isLUfactorized = true;
+
 #ifdef OUTPUT_DEBUG
     fileout = fopen("dataMinv.sci", "w");
     printInFileForScilab(M, fileout);
@@ -315,8 +330,71 @@ int reformulationIntoLocalProblem(GlobalFrictionContactProblem* problem, Frictio
   }
   else if (M->storageType == NM_SPARSE)
   {
-    printf("reformulationIntoLocalProblem :: sparse  matrix storage is not implemented\n");
-    exit(EXIT_FAILURE);
+    // Product M^-1 H
+
+    NumericsMatrix * Minv  = newNumericsMatrix();
+    Minv->size0 = n;
+    Minv->size1 = n;
+    Minv->storageType = NM_SPARSE;
+
+    DEBUG_EXPR(NM_display(M););
+    DEBUG_EXPR(NM_display(H););
+    NM_inv(M, Minv);
+    DEBUG_EXPR(NM_display(Minv););
+
+
+    NumericsMatrix* MinvH = newNumericsMatrix();
+    NM_copy(H,MinvH);
+    DEBUG_EXPR(NM_display(MinvH););
+
+    NM_gemm(1.0, M, H, 0.0, MinvH);
+    DEBUG_EXPR(NM_display(MinvH););
+
+
+    // Product H^T M^-1 H
+    NM_csc_trans(H);
+    NumericsMatrix* Htrans = newNumericsMatrix();
+    Htrans->storageType = NM_SPARSE;
+    Htrans-> size0 = m;
+    Htrans-> size1 = n;
+    NM_csc_alloc(Htrans, 0);
+    Htrans->matrix2->origin = NS_CSC;
+    Htrans->matrix2->csc = NM_csc_trans(H);
+    DEBUG_EXPR(NM_display(Htrans););
+
+
+
+    localproblem->M = NM_create(NM_SPARSE, m, m);
+
+    NumericsMatrix *W = localproblem->M;
+    int nzmax= m*m;
+    NM_csc_empty_alloc(W, nzmax);
+    W->matrix2->origin = NS_CSC;
+    DEBUG_EXPR(NM_display(W););
+
+    NM_gemm(1.0, Htrans, MinvH, 0.0, W);
+    DEBUG_EXPR(NM_display(W););
+
+    // compute localq = H^T M^(-1) q +b
+
+    //Copy localq <- b
+    localproblem->q = (double*)malloc(m * sizeof(double));
+    cblas_dcopy_msan(m, problem->b , 1, localproblem->q, 1);
+
+    double* qtmp = (double*)malloc(n * sizeof(double));
+    cblas_dcopy_msan(n,  problem->q, 1, qtmp, 1);
+
+    // compute H^T M^(-1) q + b
+
+    //NM_gesv_expert(Minv, qtmp, 0);
+    NM_gemv(1.0, Minv, problem->q, 1.0, qtmp);
+    NM_gemv(1.0, Htrans, qtmp, 1.0, localproblem->q);
+
+    // Copy mu
+    localproblem->mu = problem->mu;
+
+    //printf("reformulationIntoLocalProblem :: sparse  matrix storage is not implemented\n");
+    //exit(EXIT_FAILURE);
   }
   else
   {
@@ -329,7 +407,7 @@ int computeGlobalVelocity(GlobalFrictionContactProblem* problem, double * reacti
 {
   int info = -1;
 
-  if (problem->M->storageType == 0)
+  if (problem->M->storageType == NM_DENSE)
   {
     int n = problem->M->size0;
     int m = problem->H->size1;
@@ -339,22 +417,29 @@ int computeGlobalVelocity(GlobalFrictionContactProblem* problem, double * reacti
 
     /* globalVelocity <- problem->q */
     cblas_dcopy(n,  problem->q , 1, globalVelocity, 1);
-    /* globalVelocity <-  H*reaction + globalVelocity*/
-    cblas_dgemv(CblasColMajor,CblasNoTrans, n, m, 1.0, problem->H->matrix0 , n, reaction , 1, 1.0, globalVelocity, 1);
-    /* Compute globalVelocity <- M^(-1) globalVelocity*/
-    assert(Global_ipiv);
-    assert(Global_MisLU);
-    lapack_int infoDGETRS = 0;
-    DGETRS(LA_NOTRANS, n, 1,   problem->M->matrix0, n, Global_ipiv, globalVelocity , n, &infoDGETRS);
 
+    // We compute only if the local problem has contacts
+    if (m>0)
+    {
+      /* globalVelocity <-  H*reaction + globalVelocity*/
+      cblas_dgemv(CblasColMajor,CblasNoTrans, n, m, 1.0, problem->H->matrix0 , n, reaction , 1, 1.0, globalVelocity, 1);
+    }
+
+    /* Compute globalVelocity <- M^(-1) globalVelocity*/
+
+    assert(NM_internalData(problem->M)->isLUfactorized);
+    lapack_int infoDGETRS = 0;
+    lapack_int* ipiv = (lapack_int*)NM_iWork(problem->M, problem->M->size0, sizeof(lapack_int));
+    DGETRS(LA_NOTRANS, n, 1,   problem->M->matrix0, n, ipiv, globalVelocity , n, &infoDGETRS);
     assert(!infoDGETRS);
 
-    free(Global_ipiv);
-    Global_ipiv = NULL;
+
+    //free(Global_ipiv);
+    //Global_ipiv = NULL;
 
 
   }
-  else
+  else if (problem->M->storageType == NM_SPARSE_BLOCK)
   {
     int n = problem->M->size0;
     int m = problem->H->size1;
@@ -377,8 +462,43 @@ int computeGlobalVelocity(GlobalFrictionContactProblem* problem, double * reacti
     prodSBM(n, n, alpha,  problem->M->matrix1, qtmp, beta2, globalVelocity);
 
     free(qtmp);
-    free(Global_ipiv);
-    Global_ipiv = NULL;
+
+  }
+  else if (problem->M->storageType == NM_SPARSE)
+  {
+    int n = problem->M->size0;
+    int m = problem->H->size1;
+
+
+    /* Compute globalVelocity   <- H reaction + q*/
+
+    /* globalVelocity <- problem->q */
+    cblas_dcopy(n,  problem->q , 1, globalVelocity, 1);
+
+    // We compute only if the local problem has contacts
+    if (m>0)
+    {
+      /* globalVelocity <-  H*reaction + globalVelocity*/
+      NM_gemv(1.0, problem->H, reaction, 1.0, globalVelocity);
+
+    }
+
+    /* Compute globalVelocity <- M^(-1) globalVelocity*/
+
+
+    //assert(NM_internalData(problem->M)->isLUfactorized);
+
+    info = NM_gesv_expert(problem->M, globalVelocity, 0);
+
+    //free(Global_ipiv);
+    //Global_ipiv = NULL;
+    //printf("computeGlobalVelocity :: sparse  matrix storage is not implemented\n");
+    //exit(EXIT_FAILURE);
+  }
+  else
+  {
+    printf("reformulationIntoLocalProblem :: unknown matrix storage");
+    exit(EXIT_FAILURE);
   }
 
   return info;
@@ -412,21 +532,37 @@ int freeLocalProblem(FrictionContactProblem* localproblem)
 void  gfc3d_nsgs_wr(GlobalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, int *info, SolverOptions* options)
 {
 
-  // Reformulation
-  FrictionContactProblem* localproblem = (FrictionContactProblem *) malloc(sizeof(FrictionContactProblem));
-  if (verbose)
+  NumericsMatrix *H = problem->H;
+  FrictionContactProblem* localproblem =NULL;
+  // We compute only if the local problem has contacts
+  DEBUG_PRINTF("Number of contacts = %i \n", H->size1);
+  if (H->size1 > 0)
   {
-    printf("Reformulation info a reduced problem onto local variables ...\n");
-  }
-  reformulationIntoLocalProblem(problem, localproblem);
-  if (verbose)
-  {
-    printf("Call to the fc3d solver ...\n");
-  }
-  fc3d_nsgs(localproblem, reaction , velocity , info , options->internalSolvers);
+    // Reformulation
+    FrictionContactProblem* localproblem = (FrictionContactProblem *) malloc(sizeof(FrictionContactProblem));
+    if (verbose)
+    {
+      printf("Reformulation info a reduced problem onto local variables ...\n");
+    }
+    reformulationIntoLocalProblem(problem, localproblem);
+    DEBUG_EXPR(frictionContact_display(localproblem););
+    if (verbose)
+    {
+      printf("Call to the fc3d solver ...\n");
+    }
+    fc3d_nsgs(localproblem, reaction , velocity , info , options->internalSolvers);
 
-  computeGlobalVelocity(problem, reaction, globalVelocity);
-  freeLocalProblem(localproblem);
+    computeGlobalVelocity(problem, reaction, globalVelocity);
+
+    freeLocalProblem(localproblem);
+  }
+  else
+  {
+    computeGlobalVelocity(problem, reaction, globalVelocity);
+    *info = 0 ;
+  }
+
+
 
 
 }
