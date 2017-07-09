@@ -433,6 +433,11 @@ void NM_zentry(NumericsMatrix* M, int i, int j, double val)
 {
   switch (M->storageType)
   {
+  case NM_DENSE:
+  {
+    // column major
+    M->matrix0[i+j*M->size0] = val;
+  }
   case NM_SPARSE:
   {
     assert(M->matrix2);
