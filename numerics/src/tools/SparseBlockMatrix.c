@@ -1604,15 +1604,14 @@ int SBM_transpose(const SparseBlockStructuredMatrix* const A, SparseBlockStructu
 
   return 0;
 }
-int SBM_inverse_diagonal_block_matrix(const SparseBlockStructuredMatrix*  M)
-{
-
+int SBM_inverse_diagonal_block_matrix_in_place(const SparseBlockStructuredMatrix*  M,  int* ipiv)
+{ 
   for (unsigned int i = 0; i < M->filled1 - 1; i++)
   {
     size_t numberofblockperrow = M->index1_data[i + 1] - M->index1_data[i];
     if (numberofblockperrow != 1)
     {
-      fprintf(stderr, "SparseBlockMatrix : SBM_inverse_diagonal_block_matrix: Not a diagonal blocks matrix\n");
+      fprintf(stderr, "SparseBlockMatrix : SBM_inverse_diagonal_block_matrix: Not a diagonal block matrix\n");
       exit(EXIT_FAILURE);
     }
   }
@@ -1620,7 +1619,7 @@ int SBM_inverse_diagonal_block_matrix(const SparseBlockStructuredMatrix*  M)
   {
     if (M->index2_data[i] != i)
     {
-      fprintf(stderr, "SparseBlockMatrix : SBM_inverse_diagonal_block_matrix: Not a diagonal blocks matrix\n");
+      fprintf(stderr, "SparseBlockMatrix : SBM_inverse_diagonal_block_matrix: Not a diagonal block matrix\n");
       exit(EXIT_FAILURE);
     }
   }
@@ -1631,6 +1630,10 @@ int SBM_inverse_diagonal_block_matrix(const SparseBlockStructuredMatrix*  M)
   lapack_int infoDGETRF = 0;
   lapack_int infoDGETRI = 0;
   int info = 0;
+  
+  lapack_int* lapack_ipiv = (lapack_int *) ipiv;
+
+  
   for (currentRowNumber = 0 ; currentRowNumber < M->filled1 - 1; ++currentRowNumber)
   {
     for (size_t blockNum = M->index1_data[currentRowNumber];
@@ -1648,21 +1651,16 @@ int SBM_inverse_diagonal_block_matrix(const SparseBlockStructuredMatrix*  M)
 
       assert(nbRows == nbColumns);
 
-
-      lapack_int* ipiv = (lapack_int *)malloc(nbRows * sizeof(lapack_int));
-
-      DGETRF(nbRows, nbColumns, M->block[blockNum], nbRows, ipiv, &infoDGETRF);
+      DGETRF(nbRows, nbColumns, M->block[blockNum], nbRows, lapack_ipiv, &infoDGETRF);
       assert(!infoDGETRF);
 
-      DGETRI(nbRows, M->block[blockNum], nbRows, ipiv, &infoDGETRI);
+      DGETRI(nbRows, M->block[blockNum], nbRows, lapack_ipiv, &infoDGETRI);
       assert(!infoDGETRI);
-      free(ipiv);
-
-
+      
     }
   }
   if ((!infoDGETRF) || (!infoDGETRI)) info = 0;
-
+  
   return info;
 
 

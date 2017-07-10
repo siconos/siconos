@@ -672,6 +672,18 @@ void NM_display(const NumericsMatrix* const m)
     fprintf(stderr, "display for NumericsMatrix: matrix type %d not supported!\n", m->storageType);
   }
   }
+
+  if (m->internalData)
+  {
+    printf("========== internalData->iWorkSize = %lu\n", m->internalData->iWorkSize );
+    printf("========== internalData->iWork = %p\n", m->internalData->iWork );
+  }
+  else
+  {
+    printf("========== internalData = NULL\n" );
+  }
+
+  
 }
 void NM_display_row_by_row(const NumericsMatrix* const m)
 {
@@ -2472,7 +2484,36 @@ int NM_inv(NumericsMatrix* A, NumericsMatrix* Ainv)
 
 }
 
+int NM_inverse_diagonal_block_matrix_in_place(NumericsMatrix* A)
+{
+  
+  DEBUG_BEGIN("NM_inverse_diagonal_block_matrix_in_place(NumericsMatrix* A)\n");
+  assert(A->size0 == A->size1);
+  int info =-1;
 
+  // get internal data (allocation of needed)
+  NM_internalData(A);
+
+  switch (A->storageType)
+  {
+  case NM_SPARSE_BLOCK: 
+  {
+    // get internal data (allocation of needed)
+    NumericsMatrixInternalData* internalData = NM_internalData(A);
+    lapack_int* ipiv = (lapack_int*)NM_iWork(A, A->size0, sizeof(lapack_int));
+    assert(A->matrix1);
+    info = SBM_inverse_diagonal_block_matrix_in_place(A->matrix1, ipiv);
+    NM_internalData(A)->isInversed = true;
+    break;
+  }
+  default:
+    assert (0 && "NM_inverse_diagonal_block_matrix_in_place :  unknown storageType");
+  }
+
+
+  DEBUG_BEGIN("NM_inverse_diagonal_block_matrix_in_place(NumericsMatrix* A)\n");
+  return (int)info;
+}
 
 
 void NM_update_size(NumericsMatrix* A)

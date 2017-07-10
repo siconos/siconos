@@ -135,7 +135,7 @@ typedef struct
   size_t dWorkSize; /**< size of dWork */
   double *dWork; /**< double workspace */
   bool isLUfactorized; /**<  true if the matrix has already been LU-factorized */
-  bool isInverse; /**<  true if the matrix containes its inverse (in place inversion) */
+  bool isInversed; /**<  true if the matrix containes its inverse (in place inversion) */
 } NumericsMatrixInternalData;
 
 /** \struct NumericsMatrix NumericsMatrix.h
@@ -670,6 +670,7 @@ extern "C"
    */
   int NM_inv(NumericsMatrix* A, NumericsMatrix* Ainv);
 
+  int NM_inverse_diagonal_block_matrix_in_place(NumericsMatrix* A);
 
   /** Direct computation of the solution of a real system of linear
    * equations: A x = b.

@@ -347,9 +347,10 @@ extern "C"
 
   /** Inverse (in place) a square diagonal block matrix
   \param[in,out] M the SparseBlockStructuredMatrix matrix to be inversed
+  \param ipiv worksapce for storign ipiv
   \return 0 ik ok
   */
-  int SBM_inverse_diagonal_block_matrix(const SparseBlockStructuredMatrix*  M);
+  int SBM_inverse_diagonal_block_matrix_in_place(const SparseBlockStructuredMatrix*  M, int* ipiv);
 
 
 
