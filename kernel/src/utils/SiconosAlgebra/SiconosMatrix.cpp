@@ -218,12 +218,9 @@ bool SiconosMatrix::fillCSC(CSparseMatrix* csc, size_t row_off, size_t col_off, 
 bool SiconosMatrix::fillTriplet(CSparseMatrix* triplet, size_t row_off, size_t col_off, double tol)
 {
   assert(triplet);
-  double* Mx = triplet->x; // data
-
   size_t nrow = size(0);
   size_t ncol = size(1);
 
-  std::cout << "triplet-nz" <<triplet->nz<<  std::endl;
   if (_num == 1) //dense
   {
     double* arr = getArray();
@@ -232,21 +229,7 @@ bool SiconosMatrix::fillTriplet(CSparseMatrix* triplet, size_t row_off, size_t c
       for (size_t i = 0; i < nrow; ++i)
       {
         // col-major
-        double elt_val = arr[i + j*nrow];
-
-        cs_zentry(triplet, i + row_off, j + col_off, elt_val );
-
-        // // std::cout << " a(i=" << i << ",j=" << j << ") = "<< elt_val << std::endl;
-        // if (fabs(elt_val) > tol)
-        // {
-        //   Mx[triplet->nz] = elt_val;
-        //   Mi[triplet->nz] = i + row_off;
-        //   Mp[triplet->nz] = j + col_off;
-        //   // std::cout << "Mx[" <<triplet->nz <<"] = " << Mx[triplet->nz]<<   std::endl;
-        //   // std::cout << "Mp[" <<triplet->nz <<"] = " << Mi[triplet->nz]<<   std::endl;
-        //   // std::cout << "Mp[" <<triplet->nz <<"] = " << Mp[triplet->nz]<<   std::endl;
-        //   ++triplet->nz;
-        // }
+        cs_zentry(triplet, i + row_off, j + col_off, arr[i + j*nrow]; );
       }
     }
   }
