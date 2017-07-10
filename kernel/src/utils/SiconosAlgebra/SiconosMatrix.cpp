@@ -229,7 +229,8 @@ bool SiconosMatrix::fillTriplet(CSparseMatrix* triplet, size_t row_off, size_t c
       for (size_t i = 0; i < nrow; ++i)
       {
         // col-major
-        cs_zentry(triplet, i + row_off, j + col_off, arr[i + j*nrow]; );
+
+        cs_zentry(triplet, i + row_off, j + col_off, arr[i + j*nrow] );
       }
     }
   }
