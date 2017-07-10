@@ -480,8 +480,24 @@ void NM_zentry(NumericsMatrix* M, int i, int j, double val)
 double NM_get_value(NumericsMatrix* M, int i, int j)
 {
   assert(M);
-switch (M->storageType)
+
+  if ((i + 1 > M->size0) || (j + 1 > M->size1) )
   {
+    fprintf(stderr, "NM_get_value :: out of range \n");
+    exit(EXIT_FAILURE);
+  }
+  switch (M->storageType)
+  {
+  case NM_DENSE:
+  {
+    assert(M->matrix0);
+    return M->matrix0[i+j*M->size0];
+  }
+  case NM_SPARSE_BLOCK:
+  {
+    assert(M->matrix1);
+    return SBM_get_value(M->matrix1,i,j);
+  }
   case NM_SPARSE:
   {
     assert(M->matrix2);
