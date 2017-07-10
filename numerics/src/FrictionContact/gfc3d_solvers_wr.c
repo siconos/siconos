@@ -37,8 +37,6 @@
 //#define TEST_COND
 //#define OUTPUT_DEBUG
 
-extern int  Global_MisInverse;
-
 
 #define DEBUG_NOCOLOR
 #define DEBUG_MESSAGES
@@ -49,7 +47,7 @@ extern int  Global_MisInverse;
 
 /* Global Variable for the reformulation of the problem */
 
-int reformulationIntoLocalProblem(GlobalFrictionContactProblem* problem, FrictionContactProblem* localproblem)
+int gfc3d_reformulation_local_problem(GlobalFrictionContactProblem* problem, FrictionContactProblem* localproblem)
 {
   int info = -1;
 
@@ -158,11 +156,7 @@ int reformulationIntoLocalProblem(GlobalFrictionContactProblem* problem, Frictio
   {
     int n = M->size0;
     int m = H->size1;
-    // get internal data (allocation of needed)
-    NumericsMatrixInternalData* internalData = NM_internalData(M);
-
-    //assert(!Global_ipiv);
-    //Global_ipiv = (lapack_int *)malloc(n * sizeof(lapack_int));
+ 
 
     // compute W = H^T M^-1 H
     //Copy Htmp <- H
@@ -181,10 +175,12 @@ int reformulationIntoLocalProblem(GlobalFrictionContactProblem* problem, Frictio
 
     //Compute Htmp   <- M^-1 HtmpSBM
     /* DGESV(n, m, M->matrix0, n, ipiv, Htmp, n, infoDGESV); */
-    assert(!SBM_inverse_diagonal_block_matrix(M->matrix1));
-    //Global_MisInverse = 1;
-    NM_internalData(M)->isLUfactorized = true;
-
+    DEBUG_EXPR(NM_display(M));
+    int infoMInv = NM_inverse_diagonal_block_matrix_in_place(M);
+    assert(!infoMInv);
+    DEBUG_PRINT("M inverse :");
+    DEBUG_EXPR(NM_display(M));
+    
 #ifdef OUTPUT_DEBUG
     fileout = fopen("dataMinv.sci", "w");
     NM_write_in_file_scilab(M, fileout);
@@ -192,10 +188,17 @@ int reformulationIntoLocalProblem(GlobalFrictionContactProblem* problem, Frictio
     printf("Display Minv\n");
     SBM_print(M->matrix1);
 #endif
+
+
+    
     SBM_alloc_for_gemm(M->matrix1, H->matrix1, HtmpSBM);
     double alpha = 1.0, beta = 1.0;
 
     SBM_gemm(alpha, M->matrix1, H->matrix1, beta, HtmpSBM);
+
+
+
+    
 #ifdef OUTPUT_DEBUG
     fileout = fopen("dataH.sci", "w");
     NM_write_in_file_scilab(H, fileout);
@@ -393,12 +396,12 @@ int reformulationIntoLocalProblem(GlobalFrictionContactProblem* problem, Frictio
     // Copy mu
     localproblem->mu = problem->mu;
 
-    //printf("reformulationIntoLocalProblem :: sparse  matrix storage is not implemented\n");
+    //printf("gfc3d_reformulation_local_problem :: sparse  matrix storage is not implemented\n");
     //exit(EXIT_FAILURE);
   }
   else
   {
-    printf("reformulationIntoLocalProblem :: unknown matrix storage");
+    printf("gfc3d_reformulation_local_problem :: unknown matrix storage");
     exit(EXIT_FAILURE);
   }
   return info;
@@ -456,7 +459,7 @@ int computeGlobalVelocity(GlobalFrictionContactProblem* problem, double * reacti
 
 
     /*      SBM_inverse_diagonal_block_matrix(M->matrix1); We assume that M->matrix1 is already inverse*/
-    assert(Global_MisInverse);
+    assert(NM_internalData(problem->M)->isInversed);
 
     double beta2 = 0.0;
     SBM_gemv(n, n, alpha,  problem->M->matrix1, qtmp, beta2, globalVelocity);
@@ -497,7 +500,7 @@ int computeGlobalVelocity(GlobalFrictionContactProblem* problem, double * reacti
   }
   else
   {
-    printf("reformulationIntoLocalProblem :: unknown matrix storage");
+    printf("gfc3d_reformulation_local_problem :: unknown matrix storage");
     exit(EXIT_FAILURE);
   }
 
@@ -544,7 +547,7 @@ void  gfc3d_nsgs_wr(GlobalFrictionContactProblem* problem, double *reaction , do
     {
       printf("Reformulation info a reduced problem onto local variables ...\n");
     }
-    reformulationIntoLocalProblem(problem, localproblem);
+    gfc3d_reformulation_local_problem(problem, localproblem);
     DEBUG_EXPR(frictionContact_display(localproblem););
     if (verbose)
     {
@@ -599,7 +602,7 @@ void  gfc3d_nonsmooth_Newton_AlartCurnier_wr(GlobalFrictionContactProblem* probl
   // Reformulation
   FrictionContactProblem* localproblem = (FrictionContactProblem *) malloc(sizeof(FrictionContactProblem));
 
-  reformulationIntoLocalProblem(problem, localproblem);
+  gfc3d_reformulation_local_problem(problem, localproblem);
 
 
   // From StorageType==1 to Storage==0
@@ -661,7 +664,7 @@ void  gfc3d_nsgs_velocity_wr(GlobalFrictionContactProblem* problem, double *reac
   // Reformulation
   FrictionContactProblem* localproblem = (FrictionContactProblem *) malloc(sizeof(FrictionContactProblem));
 
-  reformulationIntoLocalProblem(problem, localproblem);
+  gfc3d_reformulation_local_problem(problem, localproblem);
 
   /* Change into dense if neccessary*/
 
@@ -721,7 +724,7 @@ void  gfc3d_proximal_wr(GlobalFrictionContactProblem* problem, double *reaction 
   // Reformulation
   FrictionContactProblem* localproblem = (FrictionContactProblem *) malloc(sizeof(FrictionContactProblem));
 
-  reformulationIntoLocalProblem(problem, localproblem);
+  gfc3d_reformulation_local_problem(problem, localproblem);
 
   fc3d_proximal(localproblem, reaction , velocity , info , options->internalSolvers);
 
@@ -760,7 +763,7 @@ void  gfc3d_DeSaxceFixedPoint_wr(GlobalFrictionContactProblem* problem, double *
   // Reformulation
   FrictionContactProblem* localproblem = (FrictionContactProblem *) malloc(sizeof(FrictionContactProblem));
 
-  reformulationIntoLocalProblem(problem, localproblem);
+  gfc3d_reformulation_local_problem(problem, localproblem);
 
   fc3d_DeSaxceFixedPoint(localproblem, reaction , velocity , info , options->internalSolvers);
 
@@ -800,7 +803,7 @@ void  gfc3d_TrescaFixedPoint_wr(GlobalFrictionContactProblem* problem, double *r
   // Reformulation
   FrictionContactProblem* localproblem = (FrictionContactProblem *) malloc(sizeof(FrictionContactProblem));
 
-  reformulationIntoLocalProblem(problem, localproblem);
+  gfc3d_reformulation_local_problem(problem, localproblem);
 
   fc3d_TrescaFixedPoint(localproblem, reaction , velocity , info , options->internalSolvers);
 

@@ -75,7 +75,7 @@ extern "C"
        \param options the pointer to the array of options to set
        \return int =0 if a trivial solution has been found, else = -1
    */
-  int checkTrivialCaseGlobal(int dim, double* q, double* velocity, double*reaction, double* globalVelocity, SolverOptions* options);
+  int gfc3d_checkTrivialCaseGlobal(int dim, double* q, double* velocity, double*reaction, double* globalVelocity, SolverOptions* options);
 
   /** Non-Smooth Gauss Seidel solver with reformulation for friction-contact 3D problem
       \param problem the friction-contact 3D problem to solve

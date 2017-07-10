@@ -168,7 +168,7 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction , doubl
 
 }
 
-int checkTrivialCaseGlobal(int n, double* q, double* velocity, double* reaction, double * globalVelocity, SolverOptions* options)
+int gfc3d_checkTrivialCaseGlobal(int n, double* q, double* velocity, double* reaction, double * globalVelocity, SolverOptions* options)
 {
   /* norm of vector q */
   /*   double qs = cblas_dnrm2( n , q , 1 ); */

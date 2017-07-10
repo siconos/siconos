@@ -92,7 +92,7 @@ void gfc3d_nsgs(GlobalFrictionContactProblem* restrict problem, double* restrict
   double tolerance = dparam[0];
 
   /* Check for trivial case */
-  *info = checkTrivialCaseGlobal(n, q, velocity, reaction, globalVelocity, options);
+  *info = gfc3d_checkTrivialCaseGlobal(n, q, velocity, reaction, globalVelocity, options);
 
   if (*info == 0)
     return;
