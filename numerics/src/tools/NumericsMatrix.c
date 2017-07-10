@@ -683,7 +683,7 @@ void NM_display(const NumericsMatrix* const m)
     printf("========== internalData = NULL\n" );
   }
 
-  
+
 }
 void NM_display_row_by_row(const NumericsMatrix* const m)
 {
@@ -1964,6 +1964,8 @@ void NM_gemm(const double alpha, NumericsMatrix* A, NumericsMatrix* B,
     assert(A->matrix1);
     assert(B->matrix1);
     assert(C->matrix1);
+
+    SBM_alloc_for_gemm(A->matrix1, B->matrix1, C->matrix1);
     SBM_gemm(alpha, A->matrix1, B->matrix1, beta, C->matrix1);
 
     NM_clearDense(C);
@@ -2429,14 +2431,16 @@ int NM_inv(NumericsMatrix* A, NumericsMatrix* Ainv)
   DEBUG_BEGIN("NM_inv(NumericsMatrix* A, double *b, unsigned keep)\n");
   assert(A->size0 == A->size1);
   double * b = (double *) malloc(A->size0*sizeof(double));
-   for (int i = 0; i < A->size0; ++i)
-   {
-     b[i]=0.0;
-   }
-  int info =-1;
+  for (int i = 0; i < A->size0; ++i)
+  {
+    b[i]=0.0;
+  }
 
-  // get internal data (allocation of needed)
-  NM_internalData(A);
+
+  NumericsMatrix* Atmp = NM_new();
+  NM_copy(A,Atmp);
+
+   int info =-1;
 
   switch (A->storageType)
   {
@@ -2456,28 +2460,26 @@ int NM_inv(NumericsMatrix* A, NumericsMatrix* Ainv)
     NM_triplet_alloc(Ainv,  A->size0);
     Ainv->matrix2->origin = NS_TRIPLET;
 
-
     for( int col_rhs =0; col_rhs < A->size1; col_rhs++ )
     {
       if (col_rhs >0) b[col_rhs-1] = 0.0;
       b[col_rhs] = 1.0;
-      info = NM_gesv_expert(A, b, 0);
-
-      DEBUG_EXPR(NM_dense_display(b,A->size1,1,1););
+      //info = NM_gesv_expert(Atmp, b, NM_PRESERVE);
+      info = NM_gesv_expert(Atmp, b, NM_KEEP_FACTORS);
 
       for (int i = 0; i < A->size0; ++i)
       {
         CHECK_RETURN(cs_zentry(Ainv->matrix2->triplet, i, col_rhs, b[i]));
       }
     }
-    NM_display(Ainv);
     break;
   }
   default:
     assert (0 && "NM_inv :  unknown storageType");
   }
 
-
+  NM_free(Atmp);
+  free(Atmp);
   free(b);
   DEBUG_END("NM_inv(NumericsMatrix* A, double *b, unsigned keep)\n");
   return (int)info;
@@ -2486,7 +2488,7 @@ int NM_inv(NumericsMatrix* A, NumericsMatrix* Ainv)
 
 int NM_inverse_diagonal_block_matrix_in_place(NumericsMatrix* A)
 {
-  
+
   DEBUG_BEGIN("NM_inverse_diagonal_block_matrix_in_place(NumericsMatrix* A)\n");
   assert(A->size0 == A->size1);
   int info =-1;
@@ -2496,7 +2498,7 @@ int NM_inverse_diagonal_block_matrix_in_place(NumericsMatrix* A)
 
   switch (A->storageType)
   {
-  case NM_SPARSE_BLOCK: 
+  case NM_SPARSE_BLOCK:
   {
     // get internal data (allocation of needed)
     NumericsMatrixInternalData* internalData = NM_internalData(A);
