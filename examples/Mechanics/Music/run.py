@@ -3,10 +3,12 @@ in JSV paper (Issanchou 2017) and using Siconos for contact
 simulation.
 """
 from guitar import StringDS, Fret, Guitar
-import siconos.kernel as sk
+#import siconos.kernel as sk
 import time
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 import numpy as np
+import scipy.io
+import sys
 
 
 # ======== Description of the string(s) ==========
@@ -43,25 +45,20 @@ guitar_string = StringDS(number_of_modes, geometry_and_material=G_string,
 # -- The interaction(s) between strings and frets --
 # One Interaction is needed for each contact point.
 
-# contact in the middle of the string (defined by imiddle)
-
-
-nb_frets = 4
-#frets_pos = np.linspace(0.05, 0.6, nb_frets)
-frets_pos = np.asarray([0.2, 0.3, 0.5, 0.6])
+frets_file = './donnees_siconos/pb2_h.mat'
+frets_positions = scipy.io.loadmat(frets_file)['h'][:600, 0]
+nb_frets = frets_positions.size
 dx = guitar_string.space_step
-frets_ind = np.asarray(np.round(frets_pos / dx), np.int32)
-frets_y = np.asarray([0., -1.e-5, -1.3e-5, -2.e-5])
-nb_frets = 20
-frets_pos = np.linspace(0.05, 0.6, 20)
-dx = guitar_string.space_step
-frets_ind = np.asarray(np.round(frets_pos / dx), np.int32)
-frets_y = np.linspace(-0.5e-4, -1e-4, 20)
+frets_indices = np.arange(1, nb_frets + 1)
+#array(np.round(frets_positions / dx), np.int32)
+#frets_y = np.linspace(-0.5e-4, -1e-4, 20)
+
 frets = []
 interactions = {}
 for i in range(nb_frets):
     frets.append(Fret(guitar_string,
-                      contact_positions=(frets_ind[i], frets_y[i]),
+                      contact_positions=(frets_indices[i],
+                                         frets_positions[i]),
                       restitution_coeff=0.))
     interactions[frets[-1]] = guitar_string
 # contact at a point close to left boundary.
@@ -72,7 +69,12 @@ for i in range(nb_frets):
 
 
 # sample freq and time-discretisation
-fe = 51200
+
+# if freq is set as input arg ...
+if len(sys.argv) > 0:
+    fe = sys.argv[0]
+else:
+    fe = 51200
 initial_time = 0.
 final_time = 0.2
 
@@ -114,13 +116,8 @@ while simu.hasNextEvent():
     simu.computeOneStep()
     guitar_model.time[k] = simu.nextTime()
     guitar_model.save_ds_state(k, guitar_string)
-    count = 0
     for i in range(len(frets)):
         guitar_model.save_interaction_state(k, frets[i])
-    #   guitar_model.save_interaction_state(k, guitar_fret_middle)
-        if len(np.where(frets[i].lambda_(1)[0] > 1e-5)[0])>0:
-            count += 1
-    print("time %s, %s", str(guitar_model.time[k]), str(count))
     k += 1
     simu.nextStep()
 print('End of simulation process. Duration: ', time.clock() - start_time)
