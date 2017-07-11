@@ -62,6 +62,7 @@ SICONOS_IO_REGISTER(DynamicalSystemProperties,
   (WBoundaryConditions)
   (lower_block)
   (osi)
+  (pos)
   (upper_block)
   (workMatrices)
   (workVectors))
@@ -487,7 +488,6 @@ SICONOS_IO_REGISTER_WITH_BASES(TimeSteppingDirectProjection,(TimeStepping),
   (_projectionMaxIteration))
 SICONOS_IO_REGISTER_WITH_BASES(LinearOSNS,(OneStepNSProblem),
   (_M)
-  (_numericsMatrixStorageType)
   (_keepLambdaAndYState)
   (_q)
   (_w)
