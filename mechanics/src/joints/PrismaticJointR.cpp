@@ -720,7 +720,7 @@ void PrismaticJointR::computeJachqDoF(double time, Interaction& inter,
   }
 }
 
-void PrismaticJointR::_normalDoF(const BlockVector& q0, SiconosVector& ans, int axis,
+void PrismaticJointR::_normalDoF(SiconosVector& ans, const BlockVector& q0, int axis,
                                  bool absoluteRef)
 {
   assert(axis == 0);

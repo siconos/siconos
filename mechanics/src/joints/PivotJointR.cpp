@@ -612,7 +612,7 @@ void PivotJointR::computeJachqDoF(double time, Interaction& inter,
 
 /** Return the normal of the angular DoF axis of rotation.
  * \param axis must be 0 */
-void PivotJointR::_normalDoF(const BlockVector& q0, SiconosVector& ans, int axis,
+void PivotJointR::_normalDoF(SiconosVector& ans, const BlockVector& q0, int axis,
                              bool absoluteRef)
 {
   assert(axis == 0);

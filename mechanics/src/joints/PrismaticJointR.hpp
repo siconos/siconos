@@ -79,7 +79,7 @@ protected:
   double _cq2q104;
 
   /** Return the normal of the linear DoF axis.  \param axis must be 0 */
-  virtual void _normalDoF(const BlockVector& q0, SiconosVector& ans, int axis,
+  virtual void _normalDoF(SiconosVector& ans, const BlockVector& q0, int axis,
                           bool absoluteRef=true);
 
 public:

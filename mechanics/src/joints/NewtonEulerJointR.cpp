@@ -29,7 +29,7 @@ void NewtonEulerJointR::projectVectorDoF(const SiconosVector& v,
                                          bool absoluteRef)
 {
   SiconosVector ax(3);
-  normalDoF(q0, ax, axis, absoluteRef);
+  normalDoF(ax, q0, axis, absoluteRef);
 
   double L = v(0)*ax(0) + v(1)*ax(1) + v(2)*ax(2);
   ans(0) = ax(0) * L;
@@ -47,17 +47,17 @@ SP::SiconosVector NewtonEulerJointR::projectVectorDoF(const SiconosVector& v,
   return ans;
 }
 
-void NewtonEulerJointR::normalDoF(const BlockVector& q0,
-                                  SiconosVector& ans, int axis,
+void NewtonEulerJointR::normalDoF(SiconosVector& ans,
+                                  const BlockVector& q0, int axis,
                                   bool absoluteRef)
 {
-  _normalDoF(q0, ans, axis, absoluteRef);
+  _normalDoF(ans, q0, axis, absoluteRef);
 }
 
 SP::SiconosVector NewtonEulerJointR::normalDoF(const BlockVector& q0, int axis,
                                                bool absoluteRef)
 {
   SP::SiconosVector ans(std11::make_shared<SiconosVector>(3));
-  _normalDoF(q0, *ans, axis, absoluteRef);
+  _normalDoF(*ans, q0, axis, absoluteRef);
   return ans;
 }

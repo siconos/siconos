@@ -54,7 +54,7 @@ protected:
   bool _absoluteRef;
 
   /** Private version of normalDoF for subclasses to override. */
-  virtual void _normalDoF(const BlockVector& q0, SiconosVector& ans, int axis,
+  virtual void _normalDoF(SiconosVector& ans, const BlockVector& q0, int axis,
                           bool absoluteRef=true) {}
 
 public:
@@ -127,12 +127,12 @@ public:
    * axis is of angular type (see typeOfDoF), then the returned normal
    * is the axis of rotation.
    *
-   * \param q0 The state q of one or more NewtonEulerDS
    * \param ans The vector to receive the projection.
+   * \param q0 The state q of one or more NewtonEulerDS
    * \param absoluteRef If true, ans is in the inertial frame,
    *                    otherwise the q1 frame is assumed.
    */
-  void normalDoF(const BlockVector& q0, SiconosVector& ans, int axis,
+  void normalDoF(SiconosVector& ans, const BlockVector& q0, int axis,
                  bool absoluteRef=true);
 
   SP::SiconosVector normalDoF(const BlockVector& q0, int axis,
