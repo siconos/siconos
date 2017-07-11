@@ -50,13 +50,13 @@ using namespace RELATION;
 // #define DEBUG_MESSAGES
 #include "debug.h"
 
-LinearOSNS::LinearOSNS(): OneStepNSProblem(), _MStorageType(0), _keepLambdaAndYState(true)
+LinearOSNS::LinearOSNS(): OneStepNSProblem(), _numericsMatrixStorageType(NM_DENSE), _keepLambdaAndYState(true)
 {
 }
 
 // Constructor from a set of data
 LinearOSNS::LinearOSNS(const int numericsSolverId):
-  OneStepNSProblem(numericsSolverId), _MStorageType(0), _keepLambdaAndYState(true)
+  OneStepNSProblem(numericsSolverId), _numericsMatrixStorageType(0), _keepLambdaAndYState(true)
 {}
 
 void LinearOSNS::initVectorsMemory()
@@ -93,12 +93,12 @@ void LinearOSNS::initOSNSMatrix()
   // Default size for M = maxSize()
   if (! _M)
   {
-    switch (_MStorageType)
+    switch (_numericsMatrixStorageType)
     {
     case NM_DENSE:
     case NM_SPARSE:
     {
-      _M.reset(new OSNSMatrix(maxSize(), _MStorageType));
+      _M.reset(new OSNSMatrix(maxSize(), _numericsMatrixStorageType));
       break;
     }
     case NM_SPARSE_BLOCK:
@@ -106,11 +106,11 @@ void LinearOSNS::initOSNSMatrix()
       // = number of Interactionin the largest considered indexSet
       if (indexSetLevel() != LEVELMAX && simulation()->nonSmoothDynamicalSystem()->topology()->indexSetsSize() > indexSetLevel())
       {
-        _M.reset(new OSNSMatrix(simulation()->indexSet(indexSetLevel())->size(), _MStorageType));
+        _M.reset(new OSNSMatrix(simulation()->indexSet(indexSetLevel())->size(), _numericsMatrixStorageType));
       }
       else
       {
-        _M.reset(new OSNSMatrix(1, _MStorageType));
+        _M.reset(new OSNSMatrix(1, _numericsMatrixStorageType));
       }
       break;
     }

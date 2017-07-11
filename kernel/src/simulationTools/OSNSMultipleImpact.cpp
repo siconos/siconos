@@ -476,10 +476,10 @@ void OSNSMultipleImpact::initialize(SP::Simulation sim)
 
   if (! _M)
   {
-    if (_MStorageType == 0)
+    if (_numericsMatrixStorageType == 0)
       _M.reset(new OSNSMatrix(maxSize(), 0));
 
-    else // if(_MStorageType == 1) size = number of _interactionBlocks
+    else // if(_numericsMatrixStorageType == 1) size = number of _interactionBlocks
       // = number of Interactionin the largest considered indexSet
       _M.reset(new OSNSMatrix(simulation()->indexSet(indexSetLevel())->size(), 1));
   }

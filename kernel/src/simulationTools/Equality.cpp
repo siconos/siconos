@@ -57,7 +57,7 @@ void Equality::initialize(SP::Simulation sim)
   // General initialize for LinearOSNS
   LinearOSNS::initialize(sim);
   //SP::InteractionsGraph indexSet = simulation()->indexSet(levelMin());
-  //_M.reset(new OSNSMatrix(indexSet,_MStorageType));
+  //_M.reset(new OSNSMatrix(indexSet,_numericsMatrixStorageType));
 }
 
 void Equality::updateM()
@@ -69,11 +69,11 @@ void Equality::updateM()
   if (!_M)
   {
     // Creates and fills M using Interactionof indexSet
-    _M.reset(new OSNSMatrix(indexSet, _MStorageType));
+    _M.reset(new OSNSMatrix(indexSet, _numericsMatrixStorageType));
   }
   else
   {
-    _M->setStorageType(_MStorageType);
+    _M->setStorageType(_numericsMatrixStorageType);
     _M->fill(indexSet);
 
   }

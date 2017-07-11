@@ -37,7 +37,7 @@ using namespace Siconos;
 //#define MLCPPROJ_WITH_CT
 void MLCPProjectOnConstraints::initOSNSMatrix()
 {
-  _M.reset(new OSNSMatrixProjectOnConstraints(0, 0, _MStorageType));
+  _M.reset(new OSNSMatrixProjectOnConstraints(0, 0, _numericsMatrixStorageType));
   _n = 0;
   _m = 0;
   _curBlock = 0;

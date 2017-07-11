@@ -455,7 +455,7 @@ SICONOS_IO_REGISTER_WITH_BASES(TimeSteppingDirectProjection,(TimeStepping),
   (_projectionMaxIteration))
 SICONOS_IO_REGISTER_WITH_BASES(LinearOSNS,(OneStepNSProblem),
   (_M)
-  (_MStorageType)
+  (_numericsMatrixStorageType)
   (_keepLambdaAndYState)
   (_q)
   (_w)
