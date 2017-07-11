@@ -506,7 +506,9 @@ class Guitar(sk.Model):
             contact_indices = np.where(
                 self.data_interactions[inter][:, 0] < 1e-9)
             nbcontacts = len(contact_indices[0])
-            plt.plot(self.time[contact_indices[0]], [ic, ] * nbcontacts, 'o')
-        plt.yticks(np.arange(0, nb_inter, 1))
+            #plt.plot(self.time[contact_indices[0]], [ic, ] * nbcontacts, 'o')
+            pos = inter.contact_pos
+            plt.plot(self.time[contact_indices[0]], [pos, ] * nbcontacts, 'o')
+        #plt.yticks(np.arange(0, nb_inter, ))
         plt.xlabel('time')
         plt.ylabel('fret number')
