@@ -22,7 +22,7 @@ class StringDS(sk.LagrangianLinearDiagonalDS):
     CLAMPED = 1
 
     def __init__(self, ndof, geometry_and_material,
-                 umax, imax, damping_parameters):
+                 max_coords, damping_parameters):
         """Build string
 
         Parameters
@@ -32,12 +32,10 @@ class StringDS(sk.LagrangianLinearDiagonalDS):
         geometry_and_material : dictionnary
             description of the string, keys must be:
             ['length', 'diameter', 'B', 'tension', 'density']
-        umax : double
-            initial value of string maximum position
-            (assuming triangular shape)
-        imax : int
-            index of maximum initial position
-            (i.e. u[imax, t=0] = umax)
+        max_coords : tuple of double
+            (umax, vmax), coordinates of the string maximum position
+            at initial time (assuming triangular shape).
+            vmax: along the neck, umax, vertical, displacement
         damping_parameters: dictionnary
             constant parameters related to damping.
             keys must be ['nu_air', 'rho_air', 'delta_ve', '1/qte']
@@ -60,34 +58,38 @@ class StringDS(sk.LagrangianLinearDiagonalDS):
         self.diameter = geometry_and_material['diameter']
         self.tension = geometry_and_material['tension']
         self.c0 = math.sqrt(self.tension / self.density)
+        self.space_step = self.length / (self.n_modes + 1)
         self.damping_parameters = damping_parameters
         msg = 'StringDS : missing parameter value for damping.'
         for name in self.__damping_parameters_names:
             assert name in self.damping_parameters.keys(), msg
         self.s_mat = self.compute_s_mat()
         stiffness_mat, damping_mat = self.compute_linear_coeff()
-        q0 = self.compute_initial_state_modal(imax, umax)
+        q0 = self.compute_initial_state_modal(max_coords)
         v0 = npw.zeros_like(q0)
         super(StringDS, self).__init__(q0, v0, stiffness_mat, damping_mat)
 
-    def _compute_initial_state_std(self, imax, umax):
+    def _compute_initial_state_std(self, max_coords):
         """Set initial positions of the string,
         assuming a triangular shape, with u[imax] = umax.
         """
-        dx = self.length / (self.n_modes + 1)
+        umax = max_coords[0]
+        # index of the max
+        dx = self.space_step
+        imax = int(round(max_coords[1] / dx))
         slope = umax / (imax * dx)
-        u0 = [slope * i * dx for i in xrange(imax)]
+        u0 = [slope * i * dx for i in range(imax)]
         slope = umax / (imax * dx - self.length)
         u0 += [slope * (i * dx - self.length)
-               for i in xrange(imax, self.n_modes + 2)]
+               for i in range(imax, self.n_modes + 2)]
         return npw.asrealarray(u0[1:-1])
 
-    def compute_initial_state_modal(self, imax, umax):
+    def compute_initial_state_modal(self, max_coords):
         """Set initial positions of the string,
         assuming a triangular shape, with u[imax] = umax
         and modal form.
         """
-        q0 = self._compute_initial_state_std(imax, umax)
+        q0 = self._compute_initial_state_std(max_coords)
         q0[...] = np.dot(self.s_mat.T, q0)
         coeff = self.length / (self.n_modes + 1)
         q0 *= coeff
@@ -108,7 +110,7 @@ class StringDS(sk.LagrangianLinearDiagonalDS):
         #mass = np.ones(self.n_modes, dtype=np.float64)
         # --- Omega^2 vector ---
         omega2 = npw.asrealarray([1. + self.stiffness_coeff * (j ** 2)
-                                  for j in xrange(1, self.n_modes + 1)])
+                                  for j in range(1, self.n_modes + 1)])
         indices = np.arange(1, self.n_modes + 1)
         coeff = (indices * math.pi * self.c0 / self.length) ** 2
         omega2 *= coeff
@@ -183,7 +185,7 @@ class Fret(sk.Interaction):
         """
         # vertical positions of the contact points
         hmat = npw.zeros((1, string.n_modes))
-        dx = string.length / (string.n_modes + 1)
+        dx = string.space_step
         hmat[0, :] = string.s_mat[contact_positions[0] - 1, :]
         # compute contact point horizontal position
         self.contact_pos = dx * contact_positions[0]
@@ -290,7 +292,7 @@ class Guitar(sk.Model):
         for interaction in self.strings_and_frets:
             nbc = interaction.getSizeOfY()
             self.data_interactions[interaction] = \
-                npw.zeros((self.nb_time_steps + 1, 2 * nbc))
+                npw.zeros((self.nb_time_steps + 1, 3 * nbc))
         # time instants
         self.time = npw.zeros(self.nb_time_steps + 1)
 
@@ -306,8 +308,9 @@ class Guitar(sk.Model):
             interaction of interest
         """
         nbc = interaction.getSizeOfY()
-        self.data_interactions[interaction][k, 1:1 + nbc] = interaction.y(0)
-        self.data_interactions[interaction][k, 1 + nbc:] = \
+        self.data_interactions[interaction][k, :nbc] = interaction.y(0)
+        self.data_interactions[interaction][k, nbc:2 * nbc] = interaction.y(1)
+        self.data_interactions[interaction][k, 2 * nbc:] = \
             interaction.lambda_(1)
 
     def save_ds_state(self, k, ds):
@@ -323,8 +326,7 @@ class Guitar(sk.Model):
         """
         self.data_ds[ds][k, :] = np.dot(ds.s_mat, ds.q())
 
-    def plot_ds_state(self, ds, indices=None,
-                      nfig=1, pdffile=None):
+    def plot_ds_state(self, ds, indices=None, pdffile=None):
         """Plot collected data (positions ...) of a dynamical system
 
         Parameters
@@ -334,8 +336,6 @@ class Guitar(sk.Model):
         indices : list of int, optional
             indices (dof) to be plotted. If None
             plot all dof.
-        nfig : int
-            figure number
         pdffile : string, optional
             output file name, if needed. Default=None
         """
@@ -346,25 +346,36 @@ class Guitar(sk.Model):
         ndof = ds.dimension()
         x = np.linspace(0, ds.length, ndof + 2)
         x = x[1:-1]
-        plt.figure(nfig, figsize=(17, 8))
+        iplot = 0
         # Plot string displacements, at contact points, according to time
-        plt.subplot(341)
         if indices is None:
+            plt.figure(iplot, figsize=(17, 8))
+            plt.subplot(341)
             indices = np.arange(ndof)
             for ind in indices:
                 plt.plot(self.time, data[:, ind])
             plt.title('displacements')
         else:
-            iplot = 1
             for ind in indices:
-                plt.subplot(3, 4, iplot)
-                if iplot < 5:
-                    iplot += 1
+                plt.figure(iplot, figsize=(17, 8))
+                plt.figure(iplot)
+                plt.subplot(2, 1, 1)
+                iplot += 1
                 # plot ind - 1 because boundaries points
                 # are not included in the ds
                 plt.plot(self.time, data[:, ind - 1])
-                plt.title('displacements at dof ' + str(ind))
+                plt.title('displacements at x = ' + str(x[ind - 1]))
+                plt.subplot(2, 3, 4)
+                plt.plot(self.time, data[:, ind - 1])
+                plt.xlim(0, 0.02)
+                plt.subplot(2, 3, 5)
+                plt.plot(self.time, data[:, ind - 1])
+                plt.xlim(0.05, 0.07)
+                plt.subplot(2, 3, 6)
+                plt.plot(self.time, data[:, ind - 1])
+                plt.xlim(0.75, 0.77)
 
+        plt.figure(iplot, figsize=(17, 8))
         # plt.subplot(342)
         # #f, t, Sxx = signal.spectrogram(pos[0], self.fs)
         # #plt.pcolormesh(t, f, Sxx)
@@ -374,19 +385,25 @@ class Guitar(sk.Model):
         # plt.subplot(343)
         # output frequency, for modes
         nb_points = 8
-        time_ind = np.arange(nb_points) * self.nb_time_steps / nb_points
+        freq = self.nb_time_steps // nb_points
+        time_ind = np.arange(0, self.nb_time_steps, freq)
         time_ind[-1] = -1
         interactions = self.interactions_linked_to_ds(ds)
         nbc = len(interactions)
+        ylimits = (data.min() - 0.2 * abs(data.min()),
+                   1.1 * data.max())
         for k in range(nb_points):
-            plt.subplot(3, 4, 5 + k)
+            plt.subplot(2, 4, k + 1)
             plt.plot(x, data[time_ind[k], :])
             plt.title('mode, t=' + str(self.time[time_ind[k]]))
             for ic in range(nbc):
+                vpos = -interactions[ic].relation().e()[0]
                 plt.plot((interactions[ic].contact_pos,
                           interactions[ic].contact_pos),
-                         (-1.e-4, -interactions[ic].relation().e()[0]),
+                         (2. * vpos, vpos),
                          'o-')
+                plt.ylim(ylimits)
+
         plt.subplots_adjust(hspace=0.8)
         return plt
 
@@ -413,14 +430,18 @@ class Guitar(sk.Model):
         nbc = interaction.getSizeOfY()
         # distance(s) string/fret
         dist = data[:, :nbc]
+        vel = data[:, nbc:2 * nbc]
         # reaction(s) (impulse) at contact(s)
-        lam = data[:, nbc:2 * nbc]
+        lam = data[:, 2 * nbc:]
         plt.figure(nfig, figsize=(17, 8))
-        plt.subplot(121)
+        plt.subplot(131)
         plt.plot(self.time, dist)
         plt.axhline(0, color='b', linewidth=3)
         plt.title('distance')
-        plt.subplot(122)
+        plt.subplot(132)
+        plt.plot(self.time, vel)
+        plt.title('velo')
+        plt.subplot(133)
         plt.plot(self.time, lam)
         plt.title('percussion')
         return plt
@@ -429,19 +450,22 @@ class Guitar(sk.Model):
         """Create animation from simulation results,
         for a given ds.
         """
+        data = self.data_ds[ds]
+        ylimits = (data.min() - 0.2 * abs(data.min()),
+                   1.1 * data.max())
+
         interactions = self.interactions_linked_to_ds(ds)
         nbc = len(interactions)
-  
         fig = plt.figure()
         ndof = ds.dimension()
         length = ds.length
-        ax = plt.axes(xlim=(0, length), ylim=(-2.e-3, 2e-3))
+        ax = plt.axes(xlim=(0, length), ylim=ylimits)
         line, = ax.plot([], [], lw=2)
         for ic in range(nbc):
+            vpos = -interactions[ic].relation().e()[0]
             plt.plot((interactions[ic].contact_pos,
                       interactions[ic].contact_pos),
-                     (-1.e-4,
-                      -interactions[ic].relation().e()[0]),
+                     (2. * vpos, vpos),
                      'o-')
 
         # initialization function: plot the background of each frame
@@ -461,3 +485,28 @@ class Guitar(sk.Model):
                                        frames=int(self.nb_time_steps / 20.),
                                        interval=20, blit=True)
         anim.save(movie_name, fps=30, extra_args=['-vcodec', 'libx264'])
+
+    def contactogram(self, ds, nfig=12):
+        """Plot contact times on each fret
+           for a given string
+
+        Parameters
+        ----------
+        ds : StringDS
+            dynamical system of interest
+
+        """
+        interactions = self.interactions_linked_to_ds(ds)
+        nb_inter = len(interactions)
+        plt.figure(nfig, figsize=(17, 8))
+        for ic in range(nb_inter):
+            inter = interactions[ic]
+            #nbc = inter.getSizeOfY()
+            # find lambda > 0 to identify contact times
+            contact_indices = np.where(
+                self.data_interactions[inter][:, 0] < 1e-9)
+            nbcontacts = len(contact_indices[0])
+            plt.plot(self.time[contact_indices[0]], [ic, ] * nbcontacts, 'o')
+        plt.yticks(np.arange(0, nb_inter, 1))
+        plt.xlabel('time')
+        plt.ylabel('fret number')
