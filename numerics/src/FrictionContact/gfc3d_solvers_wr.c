@@ -281,6 +281,7 @@ int gfc3d_reformulation_local_problem(GlobalFrictionContactProblem* problem, Fri
 
     NumericsMatrix* MinvH = NM_create(NM_SPARSE,n,m);
     NM_triplet_alloc(MinvH, n);
+    MinvH->matrix2->origin = NS_TRIPLET;
     NM_gemm(1.0, Minv, H, 0.0, MinvH);
     DEBUG_EXPR(NM_display(MinvH););
 
@@ -302,7 +303,6 @@ int gfc3d_reformulation_local_problem(GlobalFrictionContactProblem* problem, Fri
     int nzmax= m*m;
     NM_csc_empty_alloc(W, nzmax);
     W->matrix2->origin = NS_CSC;
-    DEBUG_EXPR(NM_display(W););
 
     NM_gemm(1.0, Htrans, MinvH, 0.0, W);
     DEBUG_EXPR(NM_display(W););
@@ -315,7 +315,7 @@ int gfc3d_reformulation_local_problem(GlobalFrictionContactProblem* problem, Fri
     cblas_dcopy_msan(m, problem->b , 1, localproblem->q, 1);
 
     double* qtmp = (double*)malloc(n * sizeof(double));
-    cblas_dcopy_msan(n,  problem->q, 1, qtmp, 1);
+    //cblas_dcopy_msan(n,  problem->q, 1, qtmp, 1);
 
     // compute H^T M^(-1) q + b
     NM_gemv(1.0, Minv, problem->q, 0.0, qtmp);
