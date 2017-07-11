@@ -5,7 +5,7 @@ simulation.
 from guitar import StringDS, Fret, Guitar
 #import siconos.kernel as sk
 import time
-#import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 import numpy as np
 import scipy.io
 import sys
@@ -71,12 +71,12 @@ for i in range(nb_frets):
 # sample freq and time-discretisation
 
 # if freq is set as input arg ...
-if len(sys.argv) > 0:
-    fe = sys.argv[0]
+if len(sys.argv) > 1:
+    fe = float(sys.argv[1])
 else:
     fe = 51200
 initial_time = 0.
-final_time = 0.2
+final_time = 0.03
 
 guitar_model = Guitar(interactions,
                       #{guitar_fret_middle: guitar_string,
@@ -104,7 +104,6 @@ guitar_model.save_ds_state(0, guitar_string)
 for i in range(len(frets)):
     guitar_model.save_interaction_state(0, frets[i])
 
-i0 = frets[0]
 k = 1
 print("Start simulation ...")
 start_time = time.clock()

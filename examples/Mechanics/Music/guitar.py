@@ -506,9 +506,42 @@ class Guitar(sk.Model):
             contact_indices = np.where(
                 self.data_interactions[inter][:, 0] < 1e-9)
             nbcontacts = len(contact_indices[0])
-            #plt.plot(self.time[contact_indices[0]], [ic, ] * nbcontacts, 'o')
             pos = inter.contact_pos
             plt.plot(self.time[contact_indices[0]], [pos, ] * nbcontacts, 'o')
         #plt.yticks(np.arange(0, nb_inter, ))
         plt.xlabel('time')
-        plt.ylabel('fret number')
+        plt.ylabel('frets positions')
+
+    def save_all(self, ds, filename):
+        """Save ds and interactions states for post-processing
+        """
+
+        # Temp method : numpy file
+        # Later : pickle or hdf5
+
+        nbtime_steps = self.time.size
+        output = np.concatenate((self.time.reshape(nbtime_steps, 1),
+                                 self.data_ds[ds]), axis=1)
+        interactions = self.interactions_linked_to_ds(ds)
+        nb_inter = len(interactions)
+        for ic in range(nb_inter):
+            output = np.concatenate((output,
+                                     self.data_interactions[interactions[ic]]),
+                                    axis=1)
+        np.save(filename, output)
+
+    def load(self, ds, filename):
+        """Load previous results into current model
+        """
+        input_tab = np.load(filename)
+        self.time = input_tab[:, 0]
+        self.data_ds[ds][...] = input_tab[:, 1:ds.dimension() + 1]
+        interactions = self.interactions_linked_to_ds(ds)
+        nb_inter = len(interactions)
+        pos = ds.dimension()
+        for ic in range(nb_inter):
+            interaction = interactions[ic]
+            nbc = interaction.getSizeOfY()
+            self.data_interactions[interaction] = input_tab[:,
+                                                            pos:pos + 3 * nbc]
+            pos += 3 * nbc
