@@ -46,23 +46,6 @@
 GlobalFrictionContact::GlobalFrictionContact(int dimPb, const int numericsSolverId):
   LinearOSNS(numericsSolverId), _contactProblemDim(dimPb)
 {
-}
-
-GlobalFrictionContact::~GlobalFrictionContact()
-{
-  solver_options_delete(&*_numerics_solver_options);
-}
-
-void GlobalFrictionContact::initialize(SP::Simulation sim)
-{
-  // - Checks memory allocation for main variables (M,q,w,z)
-  // - Formalizes the problem if the topology is time-invariant
-
-  // This function performs all steps that are time-invariant
-
-  // General initialize for OneStepNSProblem
-  OneStepNSProblem::initialize(sim);
-
   // Connect to the right function according to dim. of the problem
   if (_contactProblemDim == 2)
   {
@@ -77,9 +60,16 @@ void GlobalFrictionContact::initialize(SP::Simulation sim)
   {
      RuntimeException::selfThrow("GlobalFrictionContact size not supported");
   }
+}
+GlobalFrictionContact::~GlobalFrictionContact()
+{
+  solver_options_delete(&*_numerics_solver_options);
+}
 
+void GlobalFrictionContact::initVectorsMemory()
+{
   // Memory allocation for reaction, and velocity
-  initVectorsMemory();
+  LinearOSNS::initVectorsMemory();
 
   if (!_globalVelocities)
     _globalVelocities.reset(new SiconosVector(_maxSize));
@@ -96,6 +86,84 @@ void GlobalFrictionContact::initialize(SP::Simulation sim)
     if (_b->size() != _maxSize)
       _b->resize(_maxSize);
   }
+}
+
+
+void GlobalFrictionContact::initOSNSMatrix()
+{
+  // Default size for M = _maxSize
+  if (!_M)
+  {
+    if (_numericsMatrixStorageType == NM_DENSE)
+      _M.reset(new OSNSMatrix(_maxSize, NM_DENSE));
+    else // if(MStorageType == 1) size = number of DSBlocks = number of DS in the largest considered graph of ds
+      _M.reset(new OSNSMatrix(simulation()->nonSmoothDynamicalSystem()->dynamicalSystems()->size(), 1));
+
+    switch (_numericsMatrixStorageType)
+    {
+    case NM_DENSE:
+    {
+      _M.reset(new OSNSMatrix(_maxSize, NM_DENSE));
+      break;
+    }
+    case NM_SPARSE:
+    {
+      _M.reset(new OSNSMatrix(simulation()->nonSmoothDynamicalSystem()->dynamicalSystems()->size(), NM_SPARSE));
+      break;
+    }
+    case NM_SPARSE_BLOCK:
+    {
+      _M.reset(new OSNSMatrix(simulation()->nonSmoothDynamicalSystem()->dynamicalSystems()->size(), NM_SPARSE_BLOCK));
+      break;
+    }
+    {
+    default:
+      RuntimeException::selfThrow("GlobalFrictionContact::initOSNSMatrix unknown _storageType");
+    }
+    }
+  }
+
+
+  if (!_H)
+  {
+
+    switch (_numericsMatrixStorageType)
+    {
+    case NM_DENSE:
+    {
+      _H.reset(new OSNSMatrix(_maxSize, NM_DENSE));
+      break;
+    }
+    case NM_SPARSE:
+    {
+      _H.reset(new OSNSMatrix(simulation()->nonSmoothDynamicalSystem()->dynamicalSystems()->size(), simulation()->indexSet(_indexSetLevel)->size()   , NM_SPARSE));
+      break;
+    }
+    case NM_SPARSE_BLOCK:
+    {
+      _H.reset(new OSNSMatrix(simulation()->nonSmoothDynamicalSystem()->dynamicalSystems()->size(), simulation()->indexSet(_indexSetLevel)->size()   , NM_SPARSE_BLOCK));
+      break;
+    }
+    {
+    default:
+      RuntimeException::selfThrow("GlobalFrictionContact::initOSNSMatrix unknown _storageType");
+    }
+    }
+  }
+
+}
+
+void GlobalFrictionContact::initialize(SP::Simulation sim)
+{
+  // - Checks memory allocation for main variables (M,q,w,z)
+  // - Formalizes the problem if the topology is time-invariant
+
+  // This function performs all steps that are time-invariant
+
+  // General initialize for OneStepNSProblem
+  OneStepNSProblem::initialize(sim);
+
+  initVectorsMemory();
 
   // get topology
   SP::Topology topology = simulation()->nonSmoothDynamicalSystem()->topology();
@@ -107,21 +175,8 @@ void GlobalFrictionContact::initialize(SP::Simulation sim)
   _mu.reset(new MuStorage());
   _mu->reserve(I0->size());
 
-  // Default size for M = _maxSize
-  if (!_M)
-  {
-    if (_numericsMatrixStorageType == 0)
-      _M.reset(new OSNSMatrix(_maxSize, 0));
-    else // if(MStorageType == 1) size = number of DSBlocks = number of DS in the largest considered graph of ds
-      _M.reset(new OSNSMatrix(simulation()->nonSmoothDynamicalSystem()->dynamicalSystems()->size(), 1));
-  }
-  if (!_H)
-  {
-    if (_numericsMatrixStorageType == 0)
-      _H.reset(new OSNSMatrix(_maxSize, 0));
-    else // if(_numericsMatrixStorageType == 1) size = number of DSBlocks = number of DS in the largest considered graph of ds
-      _H.reset(new OSNSMatrix(simulation()->nonSmoothDynamicalSystem()->dynamicalSystems()->size(), simulation()->indexSet(_indexSetLevel)->size()   , 1));
-  }
+
+  initOSNSMatrix();
 
 
 }
