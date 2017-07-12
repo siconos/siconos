@@ -133,58 +133,43 @@ void gfc3d_nsgs(GlobalFrictionContactProblem* restrict problem, double* restrict
     /* qtmp <--q */
     cblas_dcopy_msan(n, q, 1, qtmp, 1);
 
-    /*qtmp = H reaction +qtmp */
-    NM_gemv(1., H, reaction, 1., qtmp);
-
+    if (nc > 0)
+    {
+      /*qtmp = H reaction +qtmp */
+      NM_gemv(1., H, reaction, 1., qtmp);
+    }
     cblas_dcopy(n, qtmp, 1, globalVelocity, 1);
 
     CHECK_RETURN(!NM_gesv_expert(factorized_M, globalVelocity, NM_KEEP_FACTORS));
 
     DEBUG_PRINT("global velocity");
-    DEBUG_EXPR_WE(
-      for (int k =0 ; k< n ; k++ )
-      {
-        printf("V[%i] = %e\t", k, globalVelocity[k]);
-      }
-      printf("\n");
-      );
+    DEBUG_EXPR_WE(NM_vector_display(globalVelocity,n));
 
-
-    /* Compute current local velocity */
-    /*      velocity <--b */
-    cblas_dcopy(m, b, 1, velocity, 1);
-
-    /* velocity <-- H^T globalVelocity + velocity*/
-    NM_tgemv(1., H, globalVelocity, 1., velocity);
-    DEBUG_PRINT("local velocity\n");
-    DEBUG_EXPR_WE( for (int k =0 ; k< m ; k++ )
-                   {printf("v[%i]=%e\t", k, velocity[k]);}printf("\n");
-      );
-    /* Loop through the contact points */
-
-    for (contact = 0 ; contact < nc ; ++contact)
+    if (nc > 0)
     {
-      /*    (*local_solver)(contact,n,reaction,iparam,dparam); */
-      int pos = contact * 3;
-      double normUT = sqrt(velocity[pos + 1] * velocity[pos + 1] + velocity[pos + 2] * velocity[pos + 2]);
-      double an = 1.0;
-      reaction[pos] -= an * (velocity[pos] + mu[contact] * normUT);
+      /* Compute current local velocity */
+      /*      velocity <--b */
+      cblas_dcopy(m, b, 1, velocity, 1);
+      
+      /* velocity <-- H^T globalVelocity + velocity*/
+      NM_tgemv(1., H, globalVelocity, 1., velocity);
+      DEBUG_EXPR_WE(NM_vector_display(velocity,m););
+
+      /* Loop through the contact points */
+      for (contact = 0 ; contact < nc ; ++contact)
+      {
+        /*    (*local_solver)(contact,n,reaction,iparam,dparam); */
+        int pos = contact * 3;
+        double normUT = sqrt(velocity[pos + 1] * velocity[pos + 1] + velocity[pos + 2] * velocity[pos + 2]);
+        double an = 1.0;
+        reaction[pos] -= an * (velocity[pos] + mu[contact] * normUT);
 //      reaction[pos] -= an * mu[contact] * normUT;
-      reaction[pos + 1] -= an * velocity[pos + 1];
-      reaction[pos + 2] -= an * velocity[pos + 2];
-      projectionOnCone(&reaction[pos], mu[contact]);
-    }
-    DEBUG_PRINT("reaction\n");
-    DEBUG_EXPR_WE( for (int k =0 ; k< m ; k++ )
-                   {printf("r[%i]=%e\t", k, reaction[k]);}printf("\n");
-      );
-
-    /*       int k; */
-    /*       printf("\n"); */
-    /*       for (k = 0 ; k < m; k++) printf("velocity[%i] = %12.8e \t \t reaction[%i] = %12.8e \n ", k, velocity[k], k , reaction[k]); */
-    /*       for (k = 0 ; k < n; k++) printf("globalVelocity[%i] = %12.8e \t \n ", k, globalVelocity[k]); */
-    /*       printf("\n"); */
-
+        reaction[pos + 1] -= an * velocity[pos + 1];
+        reaction[pos + 2] -= an * velocity[pos + 2];
+        projectionOnCone(&reaction[pos], mu[contact]);
+      }
+      DEBUG_EXPR_WE(NM_vector_display(reaction,m););
+  }
 
 
     /* **** Criterium convergence **** */
@@ -192,7 +177,7 @@ void gfc3d_nsgs(GlobalFrictionContactProblem* restrict problem, double* restrict
     if (!(iter % erritermax))
     {
       (*computeError)(problem, reaction , velocity, globalVelocity, tolerance, &error);
-
+      
       if (verbose > 0)
         printf("----------------------------------- FC3D - NSGS - Iteration %i Residual = %14.7e; Tol = %g\n", iter, error, tolerance);
     }

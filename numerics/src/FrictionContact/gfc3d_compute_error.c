@@ -32,7 +32,7 @@ int gfc3d_compute_error(GlobalFrictionContactProblem* problem, double* restrict 
 {
 
   /* Checks inputs */
-  if (problem == NULL || reaction == NULL || velocity == NULL || globalVelocity == NULL)
+  if (problem == NULL || globalVelocity == NULL)
     numerics_error("gfc3d_compute_error", "null input");
 
   gfc3d_init_workspace(problem);
@@ -48,9 +48,10 @@ int gfc3d_compute_error(GlobalFrictionContactProblem* problem, double* restrict 
   NumericsMatrix *H = problem->H;
 
   cblas_dcopy_msan(n, q, 1, globalVelocitytmp, 1);
-
-  NM_gemv(1.0, H, reaction, 1.0, globalVelocitytmp);
-
+  if (nc >0)
+  {
+    NM_gemv(1.0, H, reaction, 1.0, globalVelocitytmp);
+  }
   CHECK_RETURN(!NM_gesv_expert(factorized_M, globalVelocitytmp, NM_KEEP_FACTORS));
 
   cblas_daxpy(n , -1.0 , globalVelocity , 1 , globalVelocitytmp, 1);
@@ -59,26 +60,33 @@ int gfc3d_compute_error(GlobalFrictionContactProblem* problem, double* restrict 
    * root */
   *error = cblas_ddot(n, globalVelocitytmp, 1, globalVelocitytmp, 1);
 
-  cblas_dcopy(m, problem->b, 1, velocity, 1);
-  NM_tgemv(1, H, globalVelocity, 1, velocity);
-
-  double worktmp[3];
-  double normUT;
-  double rho = 1.0;
-  for (int ic = 0 ; ic < nc ; ic++)
+  if (nc >0)
   {
-    /* Compute the modified local velocity */
-    normUT = sqrt(velocity[ic * 3 + 1] * velocity[ic * 3 + 1] + velocity[ic * 3 + 2] * velocity[ic * 3 + 2]);
-    worktmp[0] = reaction[ic * 3] - rho * (velocity[ic * 3] + mu[ic] * normUT);
-    worktmp[1] = reaction[ic * 3 + 1] - rho * velocity[ic * 3 + 1] ;
-    worktmp[2] = reaction[ic * 3 + 2] - rho * velocity[ic * 3 + 2] ;
-    projectionOnCone(worktmp, mu[ic]);
-    worktmp[0] = reaction[ic * 3] -  worktmp[0];
-    worktmp[1] = reaction[ic * 3 + 1] -  worktmp[1];
-    worktmp[2] = reaction[ic * 3 + 2] -  worktmp[2];
-    *error +=  worktmp[0] * worktmp[0] + worktmp[1] * worktmp[1] + worktmp[2] * worktmp[2];
-  }
+    /* Checks inputs */
+    if (reaction == NULL || velocity == NULL)
+      numerics_error("gfc3d_compute_error", "null input");
 
+    
+    cblas_dcopy(m, problem->b, 1, velocity, 1);
+    NM_tgemv(1, H, globalVelocity, 1, velocity);
+
+    double worktmp[3];
+    double normUT;
+    double rho = 1.0;
+    for (int ic = 0 ; ic < nc ; ic++)
+    {
+      /* Compute the modified local velocity */
+      normUT = sqrt(velocity[ic * 3 + 1] * velocity[ic * 3 + 1] + velocity[ic * 3 + 2] * velocity[ic * 3 + 2]);
+      worktmp[0] = reaction[ic * 3] - rho * (velocity[ic * 3] + mu[ic] * normUT);
+      worktmp[1] = reaction[ic * 3 + 1] - rho * velocity[ic * 3 + 1] ;
+      worktmp[2] = reaction[ic * 3 + 2] - rho * velocity[ic * 3 + 2] ;
+      projectionOnCone(worktmp, mu[ic]);
+      worktmp[0] = reaction[ic * 3] -  worktmp[0];
+      worktmp[1] = reaction[ic * 3 + 1] -  worktmp[1];
+      worktmp[2] = reaction[ic * 3 + 2] -  worktmp[2];
+      *error +=  worktmp[0] * worktmp[0] + worktmp[1] * worktmp[1] + worktmp[2] * worktmp[2];
+    }
+  }
   /* Done, taking the square root */
   *error = sqrt(*error);
 
