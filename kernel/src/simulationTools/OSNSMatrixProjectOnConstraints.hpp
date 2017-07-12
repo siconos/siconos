@@ -98,7 +98,7 @@ protected:
    */
   OSNSMatrixProjectOnConstraints() {};
 
-  virtual unsigned updateSizeAndPositions(SP::InteractionsGraph indexSet);
+  virtual unsigned updateSizeAndPositions(InteractionsGraph& indexSet);
 public:
 
 
@@ -125,9 +125,8 @@ public:
       \param indexSet the index set of the active constraints
       \param update if true update the size and position
   */
-  virtual void fill(SP::InteractionsGraph indexSet, bool update = true);
+  virtual void fill(InteractionsGraph& indexSet, bool update = true);
 
-  virtual unsigned int getPositionOfInteractionBlock(Interaction& inter) const;
 };
 
 DEFINE_SPTR(OSNSMatrixProjectOnConstraints)

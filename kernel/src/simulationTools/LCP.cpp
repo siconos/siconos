@@ -60,7 +60,7 @@ int LCP::compute(double time)
   {
 
     // The LCP in Numerics format
-    _numerics_problem->M = &*_M->getNumericsMatrix();
+    _numerics_problem->M = &*_M->numericsMatrix();
     _numerics_problem->q = _q->getArray();
     _numerics_problem->size = _sizeOutput;
 

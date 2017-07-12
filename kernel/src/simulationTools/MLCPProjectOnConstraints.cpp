@@ -1050,7 +1050,7 @@ void MLCPProjectOnConstraints::postCompute()
     SP::Interaction inter = indexSet->bundle(*ui);
     // Get the relative position of inter-interactionBlock in the vector w
     // or z
-    pos = _M->getPositionOfInteractionBlock(*inter);
+    pos = indexSet->properties(*ui).absolute_position;
     RELATION::TYPES relationType = inter->relation()->getType();
     if (relationType == NewtonEuler)
     {

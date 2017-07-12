@@ -160,7 +160,7 @@ int GenericMechanical::compute(double time)
   {
     // The GenericMechanical Problem in Numerics format
 
-    _pnumerics_GMP->M = &*_M->getNumericsMatrix();
+    _pnumerics_GMP->M = &*_M->numericsMatrix();
     _pnumerics_GMP->q = &*_q->getArray();
     DEBUG_EXPR(display(););
     // Call Numerics Driver for GenericMechanical

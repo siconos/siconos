@@ -147,7 +147,7 @@ int AVI::compute(double time)
   if (_sizeOutput != 0)
   {
     // The AVI in Numerics format
-    _numerics_problem->M = _M->getNumericsMatrix().get();
+    _numerics_problem->M = _M->numericsMatrix().get();
     _numerics_problem->q = _q->getArray();
 
     info = avi_driver(_numerics_problem.get(), _z->getArray() , _w->getArray() ,

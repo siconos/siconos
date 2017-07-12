@@ -691,11 +691,9 @@ void LinearOSNS::computeq(double time)
   InteractionsGraph::VIterator ui, uiend;
   for (std11::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
   {
-    Interaction& inter = *indexSet->bundle(*ui);
-
     // Compute q, this depends on the type of non smooth problem, on
     // the relation type and on the non smooth law
-    pos = _M->getPositionOfInteractionBlock(inter);
+    pos = indexSet->properties(*ui).absolute_position;
     computeqBlock(*ui, pos); // free output is saved in y
   }
 }
@@ -725,9 +723,9 @@ bool LinearOSNS::preCompute(double time)
   if (indexSetLevel() == LEVELMAX)
     return false;
 
-  SP::InteractionsGraph indexSet = simulation()->indexSet(indexSetLevel());
-  assert(indexSet);
-  if (indexSet->size() == 0)
+  InteractionsGraph& indexSet = *simulation()->indexSet(indexSetLevel());
+
+  if (indexSet.size() == 0)
     return false;
 
   if (!_hasBeenUpdated || !isLinear)
@@ -736,7 +734,7 @@ bool LinearOSNS::preCompute(double time)
     updateInteractionBlocks();
 
     //    _M->fill(indexSet);
-    _M->fill(indexSet, !_hasBeenUpdated);
+    _M->fillW(indexSet, !_hasBeenUpdated);
     DEBUG_EXPR(_M->display(););
 
     //      updateOSNSMatrix();
@@ -762,13 +760,12 @@ bool LinearOSNS::preCompute(double time)
     if (_keepLambdaAndYState)
     {
       InteractionsGraph::VIterator ui, uiend;
-      for (std11::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
+      for (std11::tie(ui, uiend) = indexSet.vertices(); ui != uiend; ++ui)
       {
-        Interaction& inter = *indexSet->bundle(*ui);
-        // Get the relative position of inter-interactionBlock in the vector w
+        Interaction& inter = *indexSet.bundle(*ui);
+        // Get the position of inter-interactionBlock in the vector w
         // or z
-        unsigned int pos = _M->getPositionOfInteractionBlock(inter);
-
+        unsigned int pos = indexSet.properties(*ui).absolute_position;
         SiconosVector& yOutputOld = *inter.yOld(inputOutputLevel());
         SiconosVector& lambdaOld = *inter.lambdaOld(inputOutputLevel());
 
@@ -797,7 +794,7 @@ void LinearOSNS::postCompute()
   // indexSet(leveMin) are concerned.
 
   // === Get index set from Topology ===
-  SP::InteractionsGraph indexSet = simulation()->indexSet(indexSetLevel());
+  InteractionsGraph& indexSet = *simulation()->indexSet(indexSetLevel());
 
   // y and lambda vectors
   SP::SiconosVector lambda;
@@ -809,12 +806,12 @@ void LinearOSNS::postCompute()
   unsigned int pos = 0;
 
   InteractionsGraph::VIterator ui, uiend;
-  for (std11::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
+  for (std11::tie(ui, uiend) = indexSet.vertices(); ui != uiend; ++ui)
   {
-    Interaction& inter = *indexSet->bundle(*ui);
-    // Get the relative position of inter-interactionBlock in the vector w
+    Interaction& inter = *indexSet.bundle(*ui);
+    // Get the  position of inter-interactionBlock in the vector w
     // or z
-    pos = _M->getPositionOfInteractionBlock(inter);
+    pos = indexSet.properties(*ui).absolute_position;
 
     // Get Y and Lambda for the current Interaction
     y = inter.y(inputOutputLevel());

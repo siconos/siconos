@@ -105,7 +105,7 @@ protected:
   int _storageType;
 
   /** Numerics structure to be filled  */
-  SP::NumericsMatrix _numericsMat;
+  SP::NumericsMatrix _numericsMatrix;
 
   /** Matrix used for default storage type (_storageType = 0) */
   SP::SiconosMatrix _M1;
@@ -115,10 +115,19 @@ protected:
   SP::BlockCSRMatrix _M2;
 
   /** For each Interaction in the graph, compute its absolute position
-     \param indexSet the index set of the active constraints
-   * \return the dimension of the problem (or size of the matrix), computed as the sum of the nslaw of all the Interaction in indexSet
-  */
-  virtual unsigned updateSizeAndPositions(SP::InteractionsGraph indexSet);
+   *  \param indexSet the index set ot the concerned interactios.
+   * \return the dimension of the problem (or size of the matrix),
+   * computed as the sum of the nslaw of all the Interaction in indexSet
+   */
+  virtual unsigned updateSizeAndPositions(InteractionsGraph & indexSet);
+
+  /** For each DynamicalSystem in the graph, compute its absolute position
+   * \param indexSet the index set of the dynamical systems
+   * \return the dimension of the problem (or size of the matrix),
+   * computed as the sum of the nslaw of all the Interaction in indexSet
+   */
+
+  virtual unsigned updateSizeAndPositions(DynamicalSystemsGraph & DSG);
 
 private:
   /** Private copy constructor => no copy nor pass by value */
@@ -152,7 +161,7 @@ public:
    * \param indexSet InteractionsGraph* the index set of the active constraints
    * \param stor storage type
    */
-  OSNSMatrix(SP::InteractionsGraph indexSet, int stor);
+  OSNSMatrix(InteractionsGraph& indexSet, int stor);
 
   /** Constructor with copy of a SiconosMatrix => _storageType = 0
    * \param MSource matrix to be copied
@@ -163,15 +172,15 @@ public:
    */
   virtual ~OSNSMatrix();
 
-  /** get dimension of the square matrix 
+  /** get dimension of the square matrix
    * \return unsigned int
-   */  
+   */
   inline unsigned int size() const
   {
     return _dimRow;
   };
 
-  /** get dimension of the square matrix 
+  /** get dimension of the square matrix
    * \return unsigned int
    */
   inline unsigned int sizeColumn() const
@@ -179,10 +188,10 @@ public:
     return _dimColumn;
   };
 
-  /** get the type of storage for current matrix 
+  /** get the type of storage for current matrix
    * \return unsigned int
    */
-  inline int getStorageType() const
+  inline int storagetype() const
   {
     return _storageType;
   };
@@ -195,33 +204,39 @@ public:
     _storageType = i;
   };
 
-  /** get the absolute position of the interaction 
-   * \param inter the Interaction from which position is required
-   * \return unsigned int
-   */
-  virtual unsigned int getPositionOfInteractionBlock(Interaction& inter) const;
-
   /** get the numerics-readable structure
    * \return SP::NumericsMatrix
    */
-  inline SP::NumericsMatrix getNumericsMatrix()
+  inline SP::NumericsMatrix numericsMatrix()
   {
-    return _numericsMat;
+    return _numericsMatrix;
   };
 
   /** get the matrix used for default storage
-   * \return SP::NumericsMatrix 
+   * \return SP::NumericsMatrix
    */
   inline SP::SiconosMatrix defaultMatrix()
   {
     return _M1;
   };
 
-  /** fill the current class using an index set and a map of interactionBlocks
+  /** fill the current class using an index set
    * \param indexSet the index set of the active constraints
    * \param update if true update the size of the Matrix (default true)
    */
-  virtual void fill(SP::InteractionsGraph indexSet, bool update = true);
+  virtual void fillW(InteractionsGraph&indexSet, bool update = true);
+
+  /** fill the current class using an index set
+   * \param indexSet the index set of the dynamicalSystems
+   * \param update if true update the size of the Matrix (default true)
+   */
+  virtual void fillM(DynamicalSystemsGraph& DSG, bool update = true);
+
+  /** fill the current class using an index set
+   * \param indexSet the index set of the dynamicalSystems
+   * \param update if true update the size of the Matrix (default true)
+   */
+  virtual void fillH(DynamicalSystemsGraph& DSG, InteractionsGraph& indexSet,  bool update = true);
 
   /** fill the numerics structure _numericsMatSparse using MBlockCSR */
   void convert();
