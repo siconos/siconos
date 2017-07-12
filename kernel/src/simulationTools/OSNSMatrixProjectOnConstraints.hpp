@@ -98,7 +98,9 @@ protected:
    */
   OSNSMatrixProjectOnConstraints() {};
 
+  using OSNSMatrix::updateSizeAndPositions;
   virtual unsigned updateSizeAndPositions(InteractionsGraph& indexSet);
+
 public:
 
 
