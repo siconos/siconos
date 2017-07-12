@@ -407,8 +407,16 @@ extern "C"
    * \param[out] Block the target. In the dense and sparse case (*Block) must be allocated by caller.
    *   In case of SBM case **Bout contains the resulting block (from the SBM).
    */
+  
   void NM_extract_diag_block3(NumericsMatrix* M, int block_row_nb, double **Block);
-
+  /** get a 3x3 diagonal block of a NumericsMatrix. No allocation is done.
+   * \param[in] M a NumericsMatrix
+   * \param[in] block_row_nb the number of the block row
+   * \param[out] Block the target. 
+   * In all cases (dense, sbm, and sparse) (*Block) must be allocated by caller.
+   *  A copy is always performed
+   */
+  void NM_copy_diag_block3(NumericsMatrix* M, int block_row_nb, double **Block);
   /** return the set of indices corresponding to the diagonal elements of the
    * matrix
    * \warning should be better tested
