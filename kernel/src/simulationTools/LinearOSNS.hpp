@@ -234,7 +234,7 @@ public:
   /** compute vector q
    *  \param time the current time
    */
-  void computeq(double time);
+  virtual void computeq(double time);
 
   /** build problem coefficients (if required)
       \param time the current time
