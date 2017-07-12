@@ -39,14 +39,14 @@ int main(int argc, char* argv[])
     // User-defined main parameters
     unsigned int nDof = 3;           // degrees of freedom for the ball
     double t0 = 0;                   // initial computation time
-    double T = 3.0;                  // final computation time
-    double h = 0.0001;               // time step
-    double position_init = 1.0;      // initial position for lowest bead.
+    double T = 3.0;
+    double h = 0.001;               // time step
+    double position_init = 0.1;      // initial position for lowest bead.
     double velocity_init = 0.0;      // initial velocity for lowest bead.
     double theta = 0.5;              // theta for MoreauJeanOSI integrator
     double R = 0.1; // Ball radius
     double m1 = 1; // Ball mass
-    double m2 = 1; // Ball mass
+    double m2 = 2.0; // Ball mass
     double g = 9.81; // Gravity
     // -------------------------
     // --- Dynamical systems ---
@@ -72,12 +72,9 @@ int main(int argc, char* argv[])
     
     SP::SiconosVector q0_2(new SiconosVector(nDof));
     SP::SiconosVector v0_2(new SiconosVector(nDof));
-    (*q0_2)(0) = position_init  + 2*R +0.1;
+    (*q0_2)(0) = position_init  + 2*R + 0.001;
     (*v0_2)(0) = velocity_init;
 
-
-    
-    
     // -- The dynamical system --
     SP::LagrangianLinearTIDS ball1(new LagrangianLinearTIDS(q0, v0, Mass));
     SP::LagrangianLinearTIDS ball2(new LagrangianLinearTIDS(q0_2, v0_2, Mass2));
@@ -96,7 +93,7 @@ int main(int argc, char* argv[])
     // --------------------
 
     // -- nslaw --
-    double e = 0.5;
+    double e = 0.95;
 
     // Interaction ball-floor
     //
@@ -154,9 +151,13 @@ int main(int argc, char* argv[])
     SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
 
     // -- (3) one step non smooth problem
+    SP::OneStepNSProblem osnspb(new GlobalFrictionContact(3,SICONOS_GLOBAL_FRICTION_3D_NSGS_WR));
     //SP::OneStepNSProblem osnspb(new GlobalFrictionContact(3,SICONOS_GLOBAL_FRICTION_3D_NSN_AC));
-    SP::OneStepNSProblem osnspb(new GlobalFrictionContact(3));
-
+    //SP::OneStepNSProblem osnspb(new GlobalFrictionContact(3));
+    assert(osnspb->numericsSolverOptions());
+    SolverOptions * options = osnspb->numericsSolverOptions().get();
+    //solver_options_print(options);
+    options->internalSolvers->dparam[0] = 1e-10;
     // -- (4) Simulation setup with (1) (2) (3)
     SP::TimeStepping s(new TimeStepping(t, OSI, osnspb));
     bouncingBall->setSimulation(s);
@@ -170,6 +171,7 @@ int main(int argc, char* argv[])
     cout << "====> Initialisation ..." << endl;
     bouncingBall->initialize();
     cout << "====> Initialisation END ..." << endl;
+
 
     // -- set the integrator for the ball --
 
@@ -212,6 +214,7 @@ int main(int argc, char* argv[])
     while (s->hasNextEvent())
     {
       osnspb->setNumericsVerboseMode(0);
+
       //std::cout << "############################  time step = " << k <<std::endl;
       s->computeOneStep();
       // --- Get values to be plotted ---
