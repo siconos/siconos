@@ -170,7 +170,8 @@ int withLevel(unsigned int mylevel)
     SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
 
     // -- (3) one step non smooth problem
-    SP::OneStepNSProblem osnspb(new GlobalFrictionContact(3));
+    SP::OneStepNSProblem osnspb(new GlobalFrictionContact(3,SICONOS_GLOBAL_FRICTION_3D_NSGS_WR));
+    //SP::OneStepNSProblem osnspb(new GlobalFrictionContact(3));
 
     // -- (4) Simulation setup with (1) (2) (3)
 
@@ -220,7 +221,6 @@ int withLevel(unsigned int mylevel)
     time.restart();
     int ncontact = 0 ;
     bool isOSNSinitialized = false;
-    InteractionsGraph& indexSet0 = *columnOfBeads->nonSmoothDynamicalSystem()->topology()->indexSet0();
     while (s->hasNextEvent())
     {
       // Rough contact detection
@@ -281,7 +281,7 @@ int withLevel(unsigned int mylevel)
       }
 
       s->computeOneStep();
-      osnspb->display();
+      //osnspb->display();
       // --- Get values to be plotted ---
       dataPlot(k, 0) =  s->nextTime();
       for (unsigned int i = 0; i < nBeads; i++)
@@ -310,11 +310,11 @@ int withLevel(unsigned int mylevel)
     dataPlot.resize(k, outputSize);
 
     // This is the power of c++
-    ioMatrix::write("result-MoreauJeanGOSI.dat", "ascii", dataPlot, "noDim");
+    ioMatrix::write("result-MoreauJeanGOSI.dat", "ascii", dataPlot);
     // Comparison with a reference file
     SimpleMatrix dataPlotRef(dataPlot);
     dataPlotRef.zero();
-    ioMatrix::read("result-WITHPROJ.ref", "ascii", dataPlotRef);
+    ioMatrix::read("result-MoreauJeanGOSI.ref", "ascii", dataPlotRef);
 
     cout << "====> Comparison with reference file ..." << endl;
     std::cout << "Error w.r.t. reference file : " << (dataPlot - dataPlotRef).normInf() << std::endl;
@@ -344,7 +344,5 @@ int main(int argc, char* argv[])
 {
   int info ;
   info = withLevel(0);
-  if (info == 1) return info;
-  info = withLevel(1);
   return info;
 }
