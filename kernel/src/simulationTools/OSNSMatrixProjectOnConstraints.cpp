@@ -75,12 +75,11 @@ unsigned OSNSMatrixProjectOnConstraints::updateSizeAndPositions(InteractionsGrap
 
 #endif
     assert(indexSet.blockProj[*vd]);
-
-    indexSet.properties(*vd).absolute_position = dim;
+    indexSet.properties(*vd).absolute_position_proj = dim;
     SP::Interaction inter = indexSet.bundle(*vd);
     unsigned int nslawSize = computeSizeForProjection(inter);
     dim += nslawSize;
-    assert(indexSet.properties(*vd).absolute_position = dim < dim);
+    assert(indexSet.properties(*vd).absolute_position_proj  < dim);
   }
 
   return dim;
@@ -127,7 +126,7 @@ void OSNSMatrixProjectOnConstraints::fill(InteractionsGraph& indexSet, bool upda
          vi != viend; ++vi)
     {
       SP::Interaction inter = indexSet.bundle(*vi);
-      pos = indexSet.properties(*vi).absolute_position;
+      pos = indexSet.properties(*vi).absolute_position_proj;
       assert(indexSet.blockProj[*vi]);
       std11::static_pointer_cast<SimpleMatrix>(_M1)
       ->setBlock(pos, pos, *(indexSet.blockProj[*vi]));
@@ -144,9 +143,9 @@ void OSNSMatrixProjectOnConstraints::fill(InteractionsGraph& indexSet, bool upda
       SP::Interaction inter1 = indexSet.bundle(vd1);
       SP::Interaction inter2 = indexSet.bundle(vd2);
 
-      pos = indexSet.properties(vd1).absolute_position;
+      pos = indexSet.properties(vd1).absolute_position_proj;
       assert(indexSet.is_vertex(inter2));
-      col = indexSet.properties(vd2).absolute_position;
+      col = indexSet.properties(vd2).absolute_position_proj;
 
 
       assert(pos < _dimRow);
