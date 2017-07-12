@@ -303,10 +303,10 @@ if(WITH_${COMPONENT}_TESTING)
     DPARAM 8 1.7
     IPARAM 8 1)
 
-  NEW_FC_3D_TEST(Example1_Fc3D_SBM.dat
-    SICONOS_FRICTION_3D_NSGS  1e-16 1000
-    SICONOS_FRICTION_3D_NCPGlockerFBNewton 0 0
-    WILL_FAIL)
+  # NEW_FC_3D_TEST(Example1_Fc3D_SBM.dat
+  #   SICONOS_FRICTION_3D_NSGS  1e-16 1000
+  #   SICONOS_FRICTION_3D_NCPGlockerFBNewton 0 0
+  #   WILL_FAIL)
 
   NEW_FC_3D_TEST(Example1_Fc3D_SBM.dat
     SICONOS_FRICTION_3D_NSGS  1e-16 1000
@@ -745,7 +745,7 @@ if(WITH_${COMPONENT}_TESTING)
     INTERNAL_DPARAM 0 1e-10)
   NEW_GFC_3D_TEST(problem-checkTwoRods1.dat SICONOS_GLOBAL_FRICTION_3D_NSGS)
   NEW_TEST(gfc3d_NSGS_WR_ONECONTACT_NSN_AC_GP_problem-checkTwoRods1 gfc3d_test15.c)
-  NEW_GFC_3D_TEST(problem-check.dat SICONOS_GLOBAL_FRICTION_3D_NSN_AC)
+  NEW_GFC_3D_TEST(problem-check.dat SICONOS_GLOBAL_FRICTION_3D_NSN_AC 0 0 0 0 0 WILL_FAIL)
   
   # Alart Curnier functions
   NEW_TEST(AlartCurnierFunctions_test fc3d_AlartCurnierFunctions_test.c)
@@ -754,7 +754,7 @@ if(WITH_${COMPONENT}_TESTING)
   if(WITH_FCLIB)
     NEW_TEST(FCLIB_test1 fc3d_writefclib_local_test.c)
     NEW_TEST(FCLIB_GFC3D_test1 gfc3d_fclib_cubeH8.c)
-    NEW_GFC_3D_TEST(LMGC_GlobalFrictionContactProblem00046.hdf5 SICONOS_GLOBAL_FRICTION_3D_NSN_AC)
+    NEW_GFC_3D_TEST_HDF5(LMGC_GlobalFrictionContactProblem00046.hdf5 SICONOS_GLOBAL_FRICTION_3D_NSN_AC)
   endif()
   
   #===========================================

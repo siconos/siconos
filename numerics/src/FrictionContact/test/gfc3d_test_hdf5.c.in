@@ -1,0 +1,113 @@
+/* Siconos is a program dedicated to modeling, simulation and control
+ * of non smooth dynamical systems.
+ *
+ * Copyright 2016 INRIA.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include <stdio.h>
+#include <stdlib.h>
+#include "globalFrictionContact_test_function.h"
+#include "Friction_cst.h"
+#include "SolverOptions.h"
+#include "Friction_cst.h"
+#include "gfc3d_Solvers.h"
+
+
+int main(void)
+{
+  int info =0 ;
+
+  char filename[] = "./data/@TEST_DATA@";
+  printf("GFC 3D test on %s\n",filename);
+
+  FILE * finput  =  fopen(filename,"r");
+  SolverOptions * options = (SolverOptions *) malloc(sizeof(SolverOptions));
+  double testTolerance = @TEST_TOLERANCE@;
+  int test_maxiter = @TEST_MAXITER@;
+  int testInternalSolver = @TEST_INTERNAL_SOLVER@;
+  double test_internal_tol = @TEST_INTERNAL_SOLVER_TOLERANCE@;
+  int test_internal_maxit = @TEST_INTERNAL_SOLVER_MAXITER@;
+ 
+  info=gfc3d_setDefaultSolverOptions(options,@TEST_SOLVER@);
+  if (testTolerance > 0.)
+  {
+    options->dparam[0]=@TEST_TOLERANCE@;
+  }
+  if (test_maxiter > 0)
+    options->iparam[0]=@TEST_MAXITER@;
+
+
+  if (testInternalSolver)
+  {
+    options->internalSolvers->solverId=@TEST_INTERNAL_SOLVER@;
+    if(test_internal_tol > 0.)
+      options->internalSolvers->dparam[0]=@TEST_INTERNAL_SOLVER_TOLERANCE@;
+    if(test_internal_maxit > 0)
+      options->internalSolvers->iparam[0]=@TEST_INTERNAL_SOLVER_MAXITER@;
+  }
+
+  int iparam_idx_size = @IPARAM_IDX_SIZE@;
+  if (iparam_idx_size)
+  {
+    int iparam_idx[@IPARAM_IDX_SIZE@] = {@IPARAM_IDX_STR@};
+    int iparam_val[@IPARAM_IDX_SIZE@] = {@IPARAM_VAL_STR@};
+
+    for (int kk = 0 ; kk <iparam_idx_size; kk++)
+    {
+      options->iparam[iparam_idx[kk]] = iparam_val[kk];
+    }
+  }
+  int dparam_idx_size = @DPARAM_IDX_SIZE@;
+  if (dparam_idx_size)
+  {
+    int dparam_idx[@DPARAM_IDX_SIZE@] = {@DPARAM_IDX_STR@};
+    double dparam_val[@DPARAM_IDX_SIZE@] = {@DPARAM_VAL_STR@};
+
+    for (int kk = 0 ; kk <dparam_idx_size; kk++)
+    {
+      options->dparam[dparam_idx[kk]] = dparam_val[kk];
+    }
+  }
+  
+ int internal_iparam_idx_size = @INTERNAL_IPARAM_IDX_SIZE@;
+  if (internal_iparam_idx_size)
+  {
+    int internal_iparam_idx[@INTERNAL_IPARAM_IDX_SIZE@] = {@INTERNAL_IPARAM_IDX_STR@};
+    int internal_iparam_val[@INTERNAL_IPARAM_IDX_SIZE@] = {@INTERNAL_IPARAM_VAL_STR@};
+
+    for (int kk = 0 ; kk <internal_iparam_idx_size; kk++)
+    {
+      options->internalSolvers->iparam[internal_iparam_idx[kk]] = internal_iparam_val[kk];
+    }
+  }
+  int internal_dparam_idx_size = @INTERNAL_DPARAM_IDX_SIZE@;
+  if (internal_dparam_idx_size)
+  {
+    int internal_dparam_idx[@INTERNAL_DPARAM_IDX_SIZE@] = {@INTERNAL_DPARAM_IDX_STR@};
+    double internal_dparam_val[@INTERNAL_DPARAM_IDX_SIZE@] = {@INTERNAL_DPARAM_VAL_STR@};
+
+    for (int kk = 0 ; kk <internal_dparam_idx_size; kk++)
+    {
+      options->internalSolvers->dparam[internal_dparam_idx[kk]] = internal_dparam_val[kk];
+    }
+  }
+
+  info = gfc3d_test_function_hdf5(filename,options);
+  solver_options_delete(options);
+  free(options);
+  fclose(finput);
+  printf("\nEnd of GFC3D test on %s\n", filename);
+  return info;
+}
