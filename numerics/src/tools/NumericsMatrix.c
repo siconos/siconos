@@ -1307,7 +1307,8 @@ void NM_copy_sparse(const CSparseMatrix* const A, CSparseMatrix* B)
   memcpy(B->p, A->p, size_cpy * sizeof(csi));
 }
 
-void NM_sparse_extract_block(NumericsMatrix* M, double* blockM, size_t pos_row, size_t pos_col, size_t block_row_size, size_t block_col_size)
+void NM_sparse_extract_block(NumericsMatrix* M, double* blockM, size_t pos_row, size_t pos_col,
+                             size_t block_row_size, size_t block_col_size)
 {
   assert(M);
   assert(M->storageType == NM_SPARSE);
@@ -1337,9 +1338,9 @@ void NM_sparse_extract_block(NumericsMatrix* M, double* blockM, size_t pos_row, 
       for (csi p = Mp[j]; p < Mp[j+1]; ++p)
       {
         csi row_nb = Mi[p];
-        if (row_nb >= pos_row)
+        if (row_nb >= (csi) pos_row)
         {
-          if (row_nb >= pos_row + block_row_size)
+          if (row_nb >= (csi)(pos_row + block_row_size))
           {
             break;
           }
@@ -1993,9 +1994,16 @@ void NM_gemm(const double alpha, NumericsMatrix* A, NumericsMatrix* B,
       return;
     }
 #endif
+    DEBUG_EXPR(NM_display(A));
+    DEBUG_EXPR(NM_display(B));
+    DEBUG_EXPR(cs_print((const cs * ) NM_csc(A),0););
+    DEBUG_EXPR(cs_print((const cs * ) NM_csc(B),0););
+
     CSparseMatrix* tmp_matrix = cs_multiply(NM_csc(A), NM_csc(B));
+    DEBUG_EXPR(cs_print((const cs * ) tmp_matrix,0););
     assert(tmp_matrix && "NM_gemm :: cs_multiply failed");
     NM_sparse_fix_csc(tmp_matrix);
+
     CSparseMatrix* result = cs_add(tmp_matrix, NM_csc(C), alpha, beta);
     assert(result && "NM_gemm :: cs_add failed");
     NM_sparse_fix_csc(result);
@@ -2501,7 +2509,6 @@ int NM_inverse_diagonal_block_matrix_in_place(NumericsMatrix* A)
   case NM_SPARSE_BLOCK:
   {
     // get internal data (allocation of needed)
-    NumericsMatrixInternalData* internalData = NM_internalData(A);
     lapack_int* ipiv = (lapack_int*)NM_iWork(A, A->size0, sizeof(lapack_int));
     assert(A->matrix1);
     info = SBM_inverse_diagonal_block_matrix_in_place(A->matrix1, ipiv);
@@ -2620,14 +2627,14 @@ csi* NM_sparse_diag_indices(NumericsMatrix* M)
       csi rem = 0;
       for (csi p = Ap[j]; (rem == 0) && (p < Ap[j+1]); ++p)
       {
-        if (Ai[p] < j)
+        if (Ai[p] < (csi) j)
         {
           Ni[p+inc] = Ai[p];
           Nx[p+inc] = Ax[p];
         }
         else
         {
-          if (Ai[p] > j)
+          if (Ai[p] > (csi) j)
           {
             Ni[p+inc] = j;
             Nx[p+inc] = 0.;
