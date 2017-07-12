@@ -69,9 +69,9 @@ TimeStepping::TimeStepping(SP::TimeDiscretisation td,
     _newtonCumulativeNbIterations(0), _newtonOptions(SICONOS_TS_NONLINEAR),
     _newtonResiduDSMax(0.0), _newtonResiduYMax(0.0), _newtonResiduRMax(0.0),
     _computeResiduY(false),_computeResiduR(false),
-    _isNewtonConverge(false),_displayNewtonConvergence(false),
-    _explicitJacobiansOfRelation(false),
-    _newtonUpdateInteractionsPerIteration(false)
+    _isNewtonConverge(false),
+    _newtonUpdateInteractionsPerIteration(false),_displayNewtonConvergence(false),
+    _explicitJacobiansOfRelation(false)
 {
 
   if (osi) insertIntegrator(osi);
@@ -85,9 +85,9 @@ TimeStepping::TimeStepping(SP::TimeDiscretisation td, int nb)
     _newtonCumulativeNbIterations(0), _newtonOptions(SICONOS_TS_NONLINEAR),
     _newtonResiduDSMax(0.0), _newtonResiduYMax(0.0), _newtonResiduRMax(0.0), _computeResiduY(false),
     _computeResiduR(false),
-    _isNewtonConverge(false),_displayNewtonConvergence(false),
-    _explicitJacobiansOfRelation(false),
-    _newtonUpdateInteractionsPerIteration(false)
+    _isNewtonConverge(false),
+    _newtonUpdateInteractionsPerIteration(false),_displayNewtonConvergence(false),
+    _explicitJacobiansOfRelation(false)
 {
   (*_allNSProblems).resize(nb);
 }
