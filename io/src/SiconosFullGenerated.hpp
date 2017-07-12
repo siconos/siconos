@@ -60,14 +60,16 @@ SICONOS_IO_REGISTER(GraphProperties,
 SICONOS_IO_REGISTER(DynamicalSystemProperties,
   (W)
   (WBoundaryConditions)
+  (absolute_position)
   (lower_block)
   (osi)
-  (pos)
   (upper_block)
   (workMatrices)
   (workVectors))
 SICONOS_IO_REGISTER(InteractionProperties,
   (DSlink)
+  (absolute_position)
+  (absolute_position_proj)
   (block)
   (forControl)
   (source)
@@ -239,8 +241,6 @@ SICONOS_IO_REGISTER_WITH_BASES(FirstOrderR,(Relation),
   (_K))
 SICONOS_IO_REGISTER(Interaction,
   (__count)
-  (_absolutePosition)
-  (_absolutePositionProj)
   (_has2Bodies)
   (_interactionSize)
   (_lambda)
