@@ -267,14 +267,12 @@ int gfc3d_reformulation_local_problem(GlobalFrictionContactProblem* problem, Fri
   else if (M->storageType == NM_SPARSE)
   {
     // Product M^-1 H
+    DEBUG_EXPR(NM_display(H););
 
     NumericsMatrix * Minv  = NM_new();
     Minv->size0 = n;
     Minv->size1 = n;
     Minv->storageType = NM_SPARSE;
-
-    DEBUG_EXPR(NM_display(M););
-    DEBUG_EXPR(NM_display(H););
     NM_inv(M, Minv);
     DEBUG_EXPR(NM_display(Minv););
 
@@ -282,9 +280,9 @@ int gfc3d_reformulation_local_problem(GlobalFrictionContactProblem* problem, Fri
     NumericsMatrix* MinvH = NM_create(NM_SPARSE,n,m);
     NM_triplet_alloc(MinvH, n);
     MinvH->matrix2->origin = NS_TRIPLET;
+    DEBUG_EXPR(NM_display(MinvH););
     NM_gemm(1.0, Minv, H, 0.0, MinvH);
     DEBUG_EXPR(NM_display(MinvH););
-
 
     // Product H^T M^-1 H
     NM_csc_trans(H);
