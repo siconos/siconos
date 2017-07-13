@@ -60,6 +60,7 @@ SICONOS_IO_REGISTER(GraphProperties,
 SICONOS_IO_REGISTER(DynamicalSystemProperties,
   (W)
   (WBoundaryConditions)
+  (absolute_position)
   (lower_block)
   (osi)
   (upper_block)
@@ -67,6 +68,8 @@ SICONOS_IO_REGISTER(DynamicalSystemProperties,
   (workVectors))
 SICONOS_IO_REGISTER(InteractionProperties,
   (DSlink)
+  (absolute_position)
+  (absolute_position_proj)
   (block)
   (forControl)
   (source)
@@ -238,8 +241,6 @@ SICONOS_IO_REGISTER_WITH_BASES(FirstOrderR,(Relation),
   (_K))
 SICONOS_IO_REGISTER(Interaction,
   (__count)
-  (_absolutePosition)
-  (_absolutePositionProj)
   (_has2Bodies)
   (_interactionSize)
   (_lambda)
@@ -487,7 +488,6 @@ SICONOS_IO_REGISTER_WITH_BASES(TimeSteppingDirectProjection,(TimeStepping),
   (_projectionMaxIteration))
 SICONOS_IO_REGISTER_WITH_BASES(LinearOSNS,(OneStepNSProblem),
   (_M)
-  (_MStorageType)
   (_keepLambdaAndYState)
   (_q)
   (_w)
@@ -694,7 +694,7 @@ SICONOS_IO_REGISTER_WITH_BASES(ExternalBody,(LagrangianDS),
 )
 SICONOS_IO_REGISTER_WITH_BASES(Circle,(CircularDS),
 )
-SICONOS_IO_REGISTER_WITH_BASES(FixedJointR,(NewtonEulerR),
+SICONOS_IO_REGISTER_WITH_BASES(FixedJointR,(NewtonEulerJointR),
   (_G10G20d1x)
   (_G10G20d1y)
   (_G10G20d1z)
@@ -711,7 +711,10 @@ SICONOS_IO_REGISTER_WITH_BASES(KneeJointR,(NewtonEulerJointR),
   (_G2P0z)
   (_P0))
 SICONOS_IO_REGISTER_WITH_BASES(NewtonEulerJointR,(NewtonEulerR),
-  (_allowSelfCollide))
+  (_absoluteRef)
+  (_allowSelfCollide)
+  (_axes)
+  (_points))
 SICONOS_IO_REGISTER_WITH_BASES(SphereLDS,(LagrangianDS),
   (I)
   (massValue)

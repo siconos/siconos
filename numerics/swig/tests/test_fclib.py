@@ -30,7 +30,7 @@ def condensed_from_global(fcp):
 
     # this is a hack to deal with the inability of fc3d solvers to work with
     # sparse matrices
-    _, Wsbm = sn.sparseToSBM(3, WW)
+    _, Wsbm = sn.SBM_from_csparse(3, WW)
     fcp_reduced.M = Wsbm
     fcp_reduced.mu = fcp.mu
     fcp_reduced.q = fcp.b + qprime

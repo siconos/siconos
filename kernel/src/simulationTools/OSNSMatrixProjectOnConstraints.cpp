@@ -43,7 +43,7 @@ OSNSMatrixProjectOnConstraints::~OSNSMatrixProjectOnConstraints()
 {
 }
 
-unsigned OSNSMatrixProjectOnConstraints::updateSizeAndPositions(SP::InteractionsGraph indexSet)
+unsigned OSNSMatrixProjectOnConstraints::updateSizeAndPositions(InteractionsGraph& indexSet)
 {
   // === Description ===
 
@@ -62,35 +62,31 @@ unsigned OSNSMatrixProjectOnConstraints::updateSizeAndPositions(SP::Interactions
   InteractionsGraph::VIterator vd, vdend;
 #ifdef OSNSMPROJ_DEBUG
   std::cout << "indexSet :" << indexSet << std::endl;
-  indexSet->display();
+  indexSet.display();
 #endif
-  for (std11::tie(vd, vdend) = indexSet->vertices(); vd != vdend; ++vd)
+  for (std11::tie(vd, vdend) = indexSet.vertices(); vd != vdend; ++vd)
   {
-    assert(indexSet->descriptor(indexSet->bundle(*vd)) == *vd);
+    assert(indexSet.descriptor(indexSet.bundle(*vd)) == *vd);
 
-    //    (*interactionBlocksPositions)[indexSet->bundle(*vd)] = dim;
+    //    (*interactionBlocksPositions)[indexSet.bundle(*vd)] = dim;
 #ifdef OSNSMPROJ_DEBUG
     std::cout << " dim :" << dim << std::endl;
     std::cout << "vd :" << *vd << std::endl;
 
 #endif
-    assert(indexSet->blockProj[*vd]);
-
-    indexSet->bundle(*vd)->setAbsolutePositionProj(dim);
-    SP::Interaction inter = indexSet->bundle(*vd);
-
+    assert(indexSet.blockProj[*vd]);
+    indexSet.properties(*vd).absolute_position_proj = dim;
+    SP::Interaction inter = indexSet.bundle(*vd);
     unsigned int nslawSize = computeSizeForProjection(inter);
-
     dim += nslawSize;
-    assert(indexSet->bundle(*vd)->absolutePositionProj() < dim);
+    assert(indexSet.properties(*vd).absolute_position_proj  < dim);
   }
 
   return dim;
 }
 
-void OSNSMatrixProjectOnConstraints::fill(SP::InteractionsGraph indexSet, bool update)
+void OSNSMatrixProjectOnConstraints::fillW(InteractionsGraph& indexSet, bool update)
 {
-  assert(indexSet);
 
   if (update)
   {
@@ -126,40 +122,30 @@ void OSNSMatrixProjectOnConstraints::fill(SP::InteractionsGraph indexSet, bool u
     // === Loop through "active" Interactions (ie present in
     // indexSets[level]) ===
     InteractionsGraph::VIterator vi, viend;
-#ifdef OSNSMPROJ_DEBUG
-    std::cout << "indexSet :" << indexSet << std::endl;
-    indexSet->display();
-#endif
-    for (std11::tie(vi, viend) = indexSet->vertices();
+    for (std11::tie(vi, viend) = indexSet.vertices();
          vi != viend; ++vi)
     {
-      SP::Interaction inter = indexSet->bundle(*vi);
-      pos = inter->absolutePositionProj();
-      assert(indexSet->blockProj[*vi]);
+      SP::Interaction inter = indexSet.bundle(*vi);
+      pos = indexSet.properties(*vi).absolute_position_proj;
+      assert(indexSet.blockProj[*vi]);
       std11::static_pointer_cast<SimpleMatrix>(_M1)
-      ->setBlock(pos, pos, *(indexSet->blockProj[*vi]));
-#ifdef OSNSMPROJ_DEBUG
-      printf("OSNSMatrix _M1: %i %i\n", _M1->size(0), _M1->size(1));
-      printf("OSNSMatrix block: %i %i\n", indexSet->blockProj[*vi]->size(0), indexSet->blockProj[*vi]->size(1));
-#endif
+      ->setBlock(pos, pos, *(indexSet.blockProj[*vi]));
     }
 
 
     InteractionsGraph::EIterator ei, eiend;
-    for (std11::tie(ei, eiend) = indexSet->edges();
+    for (std11::tie(ei, eiend) = indexSet.edges();
          ei != eiend; ++ei)
     {
-      InteractionsGraph::VDescriptor vd1 = indexSet->source(*ei);
-      InteractionsGraph::VDescriptor vd2 = indexSet->target(*ei);
+      InteractionsGraph::VDescriptor vd1 = indexSet.source(*ei);
+      InteractionsGraph::VDescriptor vd2 = indexSet.target(*ei);
 
-      SP::Interaction inter1 = indexSet->bundle(vd1);
-      SP::Interaction inter2 = indexSet->bundle(vd2);
+      SP::Interaction inter1 = indexSet.bundle(vd1);
+      SP::Interaction inter2 = indexSet.bundle(vd2);
 
-      pos =  inter1->absolutePositionProj();//(*interactionBlocksPositions)[inter1];
-
-      assert(indexSet->is_vertex(inter2));
-
-      col =  inter2->absolutePositionProj();//(*interactionBlocksPositions)[inter2];
+      pos = indexSet.properties(vd1).absolute_position_proj;
+      assert(indexSet.is_vertex(inter2));
+      col = indexSet.properties(vd2).absolute_position_proj;
 
 
       assert(pos < _dimRow);
@@ -167,17 +153,17 @@ void OSNSMatrixProjectOnConstraints::fill(SP::InteractionsGraph indexSet, bool u
 
 #ifdef OSNSMPROJ_DEBUG
       printf("OSNSMatrix _M1: %i %i\n", _M1->size(0), _M1->size(1));
-      printf("OSNSMatrix upper: %i %i\n", (indexSet->upper_blockProj[*ei])->size(0), (indexSet->upper_blockProj[*ei])->size(1));
-      printf("OSNSMatrix lower: %i %i\n", (indexSet->lower_blockProj[*ei])->size(0), (indexSet->upper_blockProj[*ei])->size(1));
+      printf("OSNSMatrix upper: %i %i\n", (indexSet.upper_blockProj[*ei])->size(0), (indexSet.upper_blockProj[*ei])->size(1));
+      printf("OSNSMatrix lower: %i %i\n", (indexSet.lower_blockProj[*ei])->size(0), (indexSet.upper_blockProj[*ei])->size(1));
 #endif
 
       std11::static_pointer_cast<SimpleMatrix>(_M1)
       ->setBlock(std::min(pos, col), std::max(pos, col),
-                 *(indexSet->upper_blockProj[*ei]));
+                 *(indexSet.upper_blockProj[*ei]));
 
       std11::static_pointer_cast<SimpleMatrix>(_M1)
       ->setBlock(std::max(pos, col), std::min(pos, col),
-                 *(indexSet->lower_blockProj[*ei]));
+                 *(indexSet.lower_blockProj[*ei]));
     }
 
   }
@@ -191,10 +177,7 @@ void OSNSMatrixProjectOnConstraints::fill(SP::InteractionsGraph indexSet, bool u
   if (update)
     convert();
 }
-unsigned int OSNSMatrixProjectOnConstraints::getPositionOfInteractionBlock(Interaction& inter) const
-{
-  return inter.absolutePositionProj();
-}
+
 
 unsigned int OSNSMatrixProjectOnConstraints::computeSizeForProjection(SP::Interaction inter)
 {

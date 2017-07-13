@@ -29,7 +29,7 @@
 namespace Siconos
 {
 
-  void save(SP::Model model, std::string& filename)
+  void save(SP::Model model, const std::string& filename)
   {
     boost::filesystem::path tempf =
       boost::filesystem::path(filename + ".tmp");
@@ -57,7 +57,7 @@ namespace Siconos
 /** load Siconos model from file
  * \param filename
  */
-  SP::Model load(std::string& filename)
+  SP::Model load(const std::string& filename)
   {
     SP::Model model(new Model());
 
@@ -81,12 +81,12 @@ namespace Siconos
 namespace Siconos
 {
 
-  void save(SP::Model model, std::string& filename)
+  void save(SP::Model model, const std::string& filename)
   {
     RuntimeException::selfThrow("Siconos/IO must be compiled with serialization support for this service.");
   }
 
-  SP::Model load(std::string& filename)
+  SP::Model load(const std::string& filename)
   {
     RuntimeException::selfThrow("Siconos/IO must be compiled with serialization support for this service.");
     /* Dummy return to make every compiler happy  */

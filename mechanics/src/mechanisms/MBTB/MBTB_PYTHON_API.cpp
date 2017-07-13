@@ -398,20 +398,20 @@ void MBTB_JointBuild(unsigned int numJ,const std::string& JointName,
   sJointRelations[numJ]= new MBTB_JointR();
   if(jointType == PIVOT_1)
   {
-    sJointRelations[numJ]->_jointR.reset(new PivotJointR(sDS[ indexDS1],sDS[indexDS2],P,A));
+    sJointRelations[numJ]->_jointR.reset(new PivotJointR(P,A,false,sDS[ indexDS1],sDS[indexDS2]));
     sJointRelations[numJ]->_ds1 = sDS[indexDS1];
     //sAllDSByInter[numJ].insert(sDS[indexDS1]);
     //sAllDSByInter[numJ].insert(sDS[indexDS2]);
   }
   else if(jointType == PIVOT_0)
   {
-    sJointRelations[numJ]->_jointR.reset(new PivotJointR(sDS[indexDS1],P,A,false));
+    sJointRelations[numJ]->_jointR.reset(new PivotJointR(P,A,false,sDS[indexDS1]));
     sJointRelations[numJ]->_ds1 = sDS[indexDS1];
     // sAllDSByInter[numJ].insert(sDS[indexDS1]);
   }
   else if(jointType == PRISMATIC_0)
   {
-    sJointRelations[numJ]->_jointR.reset(new PrismaticJointR(sDS[indexDS1],A));
+    sJointRelations[numJ]->_jointR.reset(new PrismaticJointR(A,false,sDS[indexDS1]));
     sJointRelations[numJ]->_ds1 = sDS[indexDS1];
     // sAllDSByInter[numJ].insert(sDS[indexDS1]);
   }

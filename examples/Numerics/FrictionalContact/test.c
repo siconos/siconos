@@ -150,14 +150,14 @@ int main(int argc, char* argv[])
   NumericsProblem.q = q;
   NumericsProblem.b = b;
 
-  NumericsProblem.M = newNumericsMatrix();
+  NumericsProblem.M = NM_new();
   NumericsMatrix *MM =  NumericsProblem.M;
   MM->storageType = 1;
   MM->size0 = Ndof;
   MM->size1 = Ndof;
 
 
-  MM->matrix1 = newSBM();
+  MM->matrix1 = SBM_new();
   MM->matrix0 = NULL;
   SparseBlockStructuredMatrix *MBlockMatrix = MM->matrix1;
   MBlockMatrix->nbblocks = 4;
@@ -176,7 +176,7 @@ int main(int argc, char* argv[])
   MBlockMatrix->index2_data =  index2_data;
 
 
-  NumericsProblem.H = newSBM();
+  NumericsProblem.H = SBM_new();
   NumericsMatrix *HH =  NumericsProblem.H;
   HH->storageType = 1;
   HH->size0 = Ndof;
@@ -200,7 +200,7 @@ int main(int argc, char* argv[])
   size_t hindex2_data[4] = {0, 1, 0, 1} ;
   HBlockMatrix->index1_data =  hindex1_data;
   HBlockMatrix->index2_data =  hindex2_data;
-  printSBM(HBlockMatrix);
+  SBM_print(HBlockMatrix);
 
 
   // Unknown Declaration
@@ -265,8 +265,8 @@ int main(int argc, char* argv[])
   free(velocity);
   free(globalVelocity);
 
-  //     freeSBM(MM->matrix1);
-  //     freeSBM(HH->matrix1);
+  //     SBM_free(MM->matrix1);
+  //     SBM_free(HH->matrix1);
   free(MM->matrix1);
   free(HH->matrix1);
   free(MM);

@@ -58,7 +58,7 @@ int avi_caoferris(AffineVariationalInequalities* problem, double *z, double *w, 
   LinearComplementarityProblem lcplike_pb;
   lcplike_pb.size = nrows;
   NumericsMatrix num_mat;
-  fillNumericsMatrix(&num_mat, NM_DENSE, nrows, nrows, calloc(nrows*nrows, sizeof(double)));
+  NM_fill(&num_mat, NM_DENSE, nrows, nrows, calloc(nrows*nrows, sizeof(double)));
 
   lcplike_pb.M = &num_mat;
 
@@ -235,7 +235,7 @@ int avi_caoferris(AffineVariationalInequalities* problem, double *z, double *w, 
   free(B_I_T);
   free(copyA);
   free(B_A_T);
-  freeNumericsMatrix(lcplike_pb.M);
+  NM_free(lcplike_pb.M);
   free(lcplike_pb.q);
   free(a_bar);
 

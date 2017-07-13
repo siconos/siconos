@@ -39,7 +39,7 @@ using namespace RELATION;
 GenericMechanical::GenericMechanical(int FC3D_Solver_Id):
   LinearOSNS()
 {
-  _MStorageType = NM_SPARSE_BLOCK;
+  _numericsMatrixStorageType = NM_SPARSE_BLOCK;
   _pnumerics_GMP = buildEmptyGenericMechanicalProblem();
   genericMechanicalProblem_setDefaultSolverOptions(&*_numerics_solver_options, FC3D_Solver_Id);
 }
@@ -160,7 +160,7 @@ int GenericMechanical::compute(double time)
   {
     // The GenericMechanical Problem in Numerics format
 
-    _pnumerics_GMP->M = &*_M->getNumericsMatrix();
+    _pnumerics_GMP->M = &*_M->numericsMatrix();
     _pnumerics_GMP->q = &*_q->getArray();
     DEBUG_EXPR(display(););
     // Call Numerics Driver for GenericMechanical

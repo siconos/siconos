@@ -55,7 +55,7 @@ void fc3d_AlartCurnierFunction(
   assert(rho);
   assert(mu);
 
-  assert(problemSize / 3 > 0);
+  //assert(problemSize / 3 > 0);
   assert(problemSize % 3 == 0);
 
   unsigned int i;

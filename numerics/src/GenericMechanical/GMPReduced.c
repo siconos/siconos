@@ -140,7 +140,7 @@ void buildReducedGMP(GenericMechanicalProblem* pInProblem, double * Me, double *
   SparseBlockStructuredMatrix* m = pInProblem->M->matrix1;
 #ifdef GMP_DEBUG_REDUCED
   FILE * titi  = fopen("buildReducedGMP_input.txt", "w");
-  printInFileSBMForScilab(m, titi);
+  SBM_write_in_fileForScilab(m, titi);
   fclose(titi);
 #endif
   int curSize = 0;
@@ -204,9 +204,9 @@ void buildReducedGMP(GenericMechanicalProblem* pInProblem, double * Me, double *
 #endif
   /*building of the permutation matrices*/
   SparseBlockStructuredMatrix Maux;
-  ColPermutationSBM(newIndexOfCol, m, &Maux);
+  SBM_column_permutation(newIndexOfCol, m, &Maux);
   SparseBlockStructuredMatrix Morder;
-  RowPermutationSBM(newIndexOfCol, &Maux, &Morder);
+  SBM_row_permutation(newIndexOfCol, &Maux, &Morder);
   SBMfree(&Maux, 0);
   /*
     get the permutation indices of col (and row).
@@ -229,7 +229,7 @@ void buildReducedGMP(GenericMechanicalProblem* pInProblem, double * Me, double *
   int curPos = 0;
   for (int numBlockRow = 0; numBlockRow < nbBlockRowE; numBlockRow++)
   {
-    SBMRowToDense(&Morder, numBlockRow, Me, curPos, MeRow);
+    SBM_row_to_dense(&Morder, numBlockRow, Me, curPos, MeRow);
     curPos = Morder.blocksize1[numBlockRow];
   }
   curPos = 0;
@@ -240,7 +240,7 @@ void buildReducedGMP(GenericMechanicalProblem* pInProblem, double * Me, double *
   for (int numBlockRow = nbBlockRowE; numBlockRow < nbBlockRowE + nbBlockRowI; numBlockRow++)
   {
     curPos = Morder.blocksize1[numBlockRow] - firtMiLine;
-    SBMRowToDense(&Morder, numBlockRow, Mi, curPos, MiRow);
+    SBM_row_to_dense(&Morder, numBlockRow, Mi, curPos, MiRow);
   }
   SBMfree(&Morder, 0);
 
@@ -633,7 +633,7 @@ void _GMPReducedEquality(GenericMechanicalProblem* pInProblem, double * reducedP
   if (*Me_size == 0)
   {
     memcpy(Qreduced, pInProblem->q, (*Mi_size)*sizeof(double));
-    SBMtoDense(m, reducedProb);
+    SBM_to_dense(m, reducedProb);
     return;
   }
 
@@ -732,10 +732,10 @@ void GMPasMLCP(GenericMechanicalProblem* pInProblem, double *reaction , double *
     assert(Me_size >= 0);
     for (size_t i = 0; i < (size_t)Me_size; ++i) reaction[i] = -Qreduced[i];
     NumericsMatrix M;
-    fillNumericsMatrix(&M, NM_DENSE, Me_size, Me_size, reducedProb);
+    NM_fill(&M, NM_DENSE, Me_size, Me_size, reducedProb);
     *info = NM_gesv(&M, reaction, true);
     M.matrix0 = NULL;
-    freeNumericsMatrix(&M);
+    NM_free(&M);
     goto END_GMP3;
   }
   /*it is a MLCP*/

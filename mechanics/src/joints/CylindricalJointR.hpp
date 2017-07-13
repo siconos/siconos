@@ -42,8 +42,7 @@ protected:
   ACCEPT_SERIALIZATION(CylindricalJointR);
   CylindricalJointR(): NewtonEulerJointR() {};
 
-public:
-  /** Axis of the cylindrical point in the inertial frame of reference
+  /** Axis of the cylindrical point in the q1 frame of reference
    */
   SP::SiconosVector _axis0;
 
@@ -78,31 +77,25 @@ public:
   double _previousAngle; // Needed to track _twistCount, TODO: work vector?
   double _initialAngle;
 
-  /** constructor from two dynamical systems and an axis
-   *  \param d1 first  DynamicalSystem link by the  joint
-   *  \param d2 second  DynamicalSystem link by the joint
-   *  \param A SiconosVector of size 3 that defines the cylindrical axis
-   *           in the body frame of d1
-   */
-  CylindricalJointR(SP::NewtonEulerDS d1, SP::NewtonEulerDS d2,
-                    SP::SiconosVector P, SP::SiconosVector A,
-                    bool absoluteRef = false);
+public:
 
-  /** constructor from one dynamical systems and an axis
-   *  \param d1 the  DynamicalSystem link by the  joint
+  /** Constructor based on one or two dynamical systems, a point and an axis.
+   *  \param d1 first DynamicalSystem linked by the joint.
+   *  \param d2 second DynamicalSystem linked by the joint, or NULL
+   *            for absolute frame.
    *  \param P SiconosVector of size 3 that defines the point around
-   *           which rotation is allowed
-   *  \param A SiconosVector of size 3 that defines the cylindrical axis
-   *           in the inertial frame of reference
-   *  \param absoluteRef if true, P is in the absolute frame,
-   *                     otherwise P is in d1 frame
+   *           which rotation is allowed.
+   *  \param A SiconosVector of size 3 that defines the cylindrical axis.
+   *  \param absoluteRef if true, P and A are in the absolute frame,
+   *                     otherwise P and A are in d1 frame.
    */
-  CylindricalJointR(SP::NewtonEulerDS d1,
-                    SP::SiconosVector P, SP::SiconosVector A,
-                    bool absoluteRef = false);
+  CylindricalJointR(SP::SiconosVector P, SP::SiconosVector A, bool absoluteRef,
+                    SP::NewtonEulerDS d1 = SP::NewtonEulerDS(),
+                    SP::NewtonEulerDS d2 = SP::NewtonEulerDS());
 
-  void computeFromInitialPosition(SP::SiconosVector q2,
-                                  SP::SiconosVector q1=SP::SiconosVector());
+  /** Initialize the joint constants based on the provided initial positions. */
+  virtual void setInitialConditions(SP::SiconosVector q1,
+                                    SP::SiconosVector q2 = SP::SiconosVector());
 
   void computeV1V2FromAxis();
 

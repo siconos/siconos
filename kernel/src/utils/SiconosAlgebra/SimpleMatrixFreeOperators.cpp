@@ -461,7 +461,9 @@ bool operator == (const SiconosMatrix &m, const SiconosMatrix &x)
   DEBUG_PRINTF("norm = %12.8e \n", norm );
   DEBUG_PRINTF("std::numeric_limits<double>::epsilon() = %12.8e \n", std::numeric_limits<double>::epsilon() );
   DEBUG_EXPR(std::cout << std::boolalpha << (norm <= std::numeric_limits<double>::epsilon()) <<std::endl;);
-  return (norm <= std::numeric_limits<double>::epsilon());
+  double atol = 1e-14;
+  double rtol = std::numeric_limits<double>::epsilon();
+  return (norm <= atol + rtol * x.normInf()) ;
 }
 
 bool operator != (const SiconosMatrix &m, const SiconosMatrix &x)

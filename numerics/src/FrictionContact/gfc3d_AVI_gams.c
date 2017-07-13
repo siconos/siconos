@@ -96,7 +96,7 @@ static int gfc3d_AVI_gams_base(GlobalFrictionContactProblem* problem, double *re
   int size = problem->dimension*problem->numberOfContacts;
 
   NumericsMatrix Htmat;
-  fillNumericsMatrix(&Htmat, NM_SPARSE, problem->H->size0, problem->H->size1, NULL);
+  NM_fill(&Htmat, NM_SPARSE, problem->H->size0, problem->H->size1, NULL);
   NumericsMatrix Emat;
   NM_null(&Emat);
   Emat.storageType = NM_SPARSE;
@@ -223,9 +223,9 @@ static int gfc3d_AVI_gams_base(GlobalFrictionContactProblem* problem, double *re
 
   SN_free_SN_GAMS_gdx(gdx_data);
   free(gdx_data);
-  freeNumericsMatrix(&Htmat);
-  freeNumericsMatrix(&Emat);
-  freeNumericsMatrix(&Akmat);
+  NM_free(&Htmat);
+  NM_free(&Emat);
+  NM_free(&Akmat);
   optFree(&Optr);
   optFree(&solverOptPtr);
   return status;

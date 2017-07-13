@@ -65,7 +65,7 @@ protected:
 
   /** Storage type for M - 0: SiconosMatrix (dense), 1: Sparse Storage
       (embedded into OSNSMatrix) */
-  int _MStorageType;
+  int _numericsMatrixStorageType;
 
   /** a boolean to decide if _w and _z vectors are initialized with
       previous values of Y and Lambda when a change occurs in problem
@@ -191,7 +191,7 @@ public:
    */
   inline int getMStorageType() const
   {
-    return _MStorageType;
+    return _numericsMatrixStorageType;
   };
 
   /** set which type of storage will be used for M
@@ -201,7 +201,7 @@ public:
    */
   inline void setMStorageType(int i)
   {
-    _MStorageType = i;
+    _numericsMatrixStorageType = i;
   };
 
   /** Memory allocation or resizing for z,w,q */
@@ -234,7 +234,7 @@ public:
   /** compute vector q
    *  \param time the current time
    */
-  void computeq(double time);
+  virtual void computeq(double time);
 
   /** build problem coefficients (if required)
       \param time the current time

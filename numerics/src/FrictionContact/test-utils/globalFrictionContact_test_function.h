@@ -24,7 +24,10 @@ extern "C"
 #endif
 
   int globalFrictionContact_test_function(FILE * f, SolverOptions *);
-
+  
+#if defined(WITH_FCLIB)
+  int gfc3d_test_function_hdf5(const char* path, SolverOptions* options);
+#endif
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

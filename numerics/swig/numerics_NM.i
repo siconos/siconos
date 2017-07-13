@@ -129,7 +129,7 @@
 
   ~NumericsMatrix()
   {
-    freeNumericsMatrix($self);
+    NM_free($self);
     free($self);
   }
 
@@ -202,7 +202,7 @@ fail:
 {
  ~SparseBlockStructuredMatrix()
  {
-   freeSBM($self);
+   SBM_free($self);
    free($self);
  }
 }

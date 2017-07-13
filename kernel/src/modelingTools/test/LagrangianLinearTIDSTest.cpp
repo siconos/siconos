@@ -44,10 +44,10 @@ void LagrangianLinearTIDSTest::setUp()
   K.reset(new SimpleMatrix("K.dat", true));
   C.reset(new SimpleMatrix("C.dat", true));
 
-  rhsK.reset(new SimpleMatrix(*K));
+  rhsK.reset(new SimpleMatrix(3,3));
   rhsC.reset(new SimpleMatrix(*C));
   minus_inv_M.reset(new SimpleMatrix(3,3));
-  (*minus_inv_M)(0,0) = -1.; (*minus_inv_M)(1,1) = -0.5; (*minus_inv_M)(2,2) = -1./3;
+  (*minus_inv_M)(0,0) = -1.; (*minus_inv_M)(1,1) = -0.5; (*minus_inv_M)(2,2) = -1./3.;
   prod(*minus_inv_M, *K, *rhsK, true);
   prod(*minus_inv_M, *C, *rhsC, true);
 }

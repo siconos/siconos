@@ -137,7 +137,7 @@ int test_BuildNumericsMatrix(NumericsMatrix** MM)
     SBM->block[4][i] = block4[i];
   for (i = 0; i < 4; i++)
     SBM->block[5][i] = block5[i];
-  /* printSBM(SBM); */
+  /* SBM_print(SBM); */
 
   /* M1 and M2 must have the same values.*/
   double tol = 1e-12;
@@ -146,12 +146,12 @@ int test_BuildNumericsMatrix(NumericsMatrix** MM)
   {
     for (j = 0; j < M1->size1; j++)
     {
-      if (fabs(M1->matrix0[i + j * M1->size0] - getValueSBM(M2->matrix1, i, j)) > tol) info = 1;
+      if (fabs(M1->matrix0[i + j * M1->size0] - SBM_get_value(M2->matrix1, i, j)) > tol) info = 1;
 
       /*    printf("%i\t%i\n",i,j); */
-      /*    printf("%lf\n",M1->matrix0[i+j*M1->size0]-getValueSBM(M2->matrix1,i,j));  */
+      /*    printf("%lf\n",M1->matrix0[i+j*M1->size0]-SBM_get_value(M2->matrix1,i,j));  */
       /*    printf("%lf\n",M1->matrix0[i+j*M1->size0]); */
-      /*    printf("%lf\n",getValueSBM(M2->matrix1,i,j));   */
+      /*    printf("%lf\n",SBM_get_value(M2->matrix1,i,j));   */
 
       if (info == 1) break;
     }
@@ -204,19 +204,19 @@ int test_BuildNumericsMatrix(NumericsMatrix** MM)
     SBM2->block[1][i] = block40[i];
 
 
-  /*   printSBM(SBM2); */
+  /*   SBM_print(SBM2); */
   /* M3 and M4 must have the same values.*/
 
   for (i = 0; i < M3->size0; i++)
   {
     for (j = 0; j < M3->size1; j++)
     {
-      if (fabs(M3->matrix0[i + j * M3->size0] - getValueSBM(M4->matrix1, i, j)) > tol) info = 1;
+      if (fabs(M3->matrix0[i + j * M3->size0] - SBM_get_value(M4->matrix1, i, j)) > tol) info = 1;
 
       /*    printf("%i\t%i\n",i,j); */
-      /*    printf("%lf\n",M3->matrix0[i+j*M3->size0]-getValueSBM(M4->matrix1,i,j)); */
+      /*    printf("%lf\n",M3->matrix0[i+j*M3->size0]-SBM_get_value(M4->matrix1,i,j)); */
       /*    printf("%lf\n",M3->matrix0[i+j*M3->size0]); */
-      /*    printf("%lf\n",getValueSBM(M4->matrix1,i,j)); */
+      /*    printf("%lf\n",SBM_get_value(M4->matrix1,i,j)); */
 
       if (info == 1) break;
     }
@@ -470,12 +470,12 @@ int test_prodNumericsMatrixNumericsMatrix(NumericsMatrix** MM)
   i = 1;
   // while (i > 0)
 
-  allocateMemoryForProdSBMSBM(M2->matrix1, M2->matrix1, SBM3);
-  /* printSBM(SBM3); */
+  SBM_alloc_for_gemm(M2->matrix1, M2->matrix1, SBM3);
+  /* SBM_print(SBM3); */
 
 
   NM_gemm(alpha, M2, M2, beta,  &C3);
-  //freeSBM(SBM3);
+  //SBM_free(SBM3);
   printf("i= %i\n", i++);
 
 
@@ -487,12 +487,12 @@ int test_prodNumericsMatrixNumericsMatrix(NumericsMatrix** MM)
   {
     for (j = 0; j < C3.size1; j++)
     {
-      if (fabs(Cref[i + j * C3.size0] - getValueSBM(C3.matrix1, i, j)) > tol) info = 1;
+      if (fabs(Cref[i + j * C3.size0] - SBM_get_value(C3.matrix1, i, j)) > tol) info = 1;
 
       /*    printf("%i\t%i\n",i,j); */
-      /*    printf("%lf\n",fabs(Cref[i+j*C3.size0]-getValueSBM(C3.matrix1,i,j) )); */
+      /*    printf("%lf\n",fabs(Cref[i+j*C3.size0]-SBM_get_value(C3.matrix1,i,j) )); */
       /*     printf("%lf\n",Cref[i+j*C3.size0]);  */
-      /*     printf("%lf\n",getValueSBM(C3.matrix1,i,j));  */
+      /*     printf("%lf\n",SBM_get_value(C3.matrix1,i,j));  */
 
       if (info == 1) break;
     }
@@ -517,8 +517,8 @@ int test_prodNumericsMatrixNumericsMatrix(NumericsMatrix** MM)
   SparseBlockStructuredMatrix * SBM4 = (SparseBlockStructuredMatrix *)malloc(sizeof(SparseBlockStructuredMatrix));
   C4.matrix1 = SBM4;
 
-  allocateMemoryForProdSBMSBM(M2->matrix1, M4->matrix1, SBM4);
-  /* printSBM(SBM4); */
+  SBM_alloc_for_gemm(M2->matrix1, M4->matrix1, SBM4);
+  /* SBM_print(SBM4); */
 
   NM_gemm(alpha, M2, M4, beta,  &C4);
 
@@ -531,12 +531,12 @@ int test_prodNumericsMatrixNumericsMatrix(NumericsMatrix** MM)
   {
     for (j = 0; j < C4.size1; j++)
     {
-      if (fabs(C2ref[i + j * C4.size0] - getValueSBM(C4.matrix1, i, j)) > tol) info = 1;
+      if (fabs(C2ref[i + j * C4.size0] - SBM_get_value(C4.matrix1, i, j)) > tol) info = 1;
 
       /*    printf("%i\t%i\n",i,j); */
-      /*    printf("%lf\n",fabs(C2ref[i+j*C4.size0]-getValueSBM(C4.matrix1,i,j) )); */
+      /*    printf("%lf\n",fabs(C2ref[i+j*C4.size0]-SBM_get_value(C4.matrix1,i,j) )); */
       /*     printf("%lf\n",C2ref[i+j*C4.size0]); */
-      /*     printf("%lf\n",getValueSBM(C4.matrix1,i,j)); */
+      /*     printf("%lf\n",SBM_get_value(C4.matrix1,i,j)); */
 
       if (info == 1) break;
     }
@@ -551,9 +551,9 @@ int test_prodNumericsMatrixNumericsMatrix(NumericsMatrix** MM)
     printf("Step 3 ( C = alpha*A*B + beta*C, sparse storage) failed ...\n");
   }
 
-  freeNumericsMatrix(&C4);
+  NM_free(&C4);
 exit_3:
-  freeNumericsMatrix(&C3);
+  NM_free(&C3);
 exit_2:
   free(C2.matrix0);
   free(C2ref);
@@ -981,7 +981,7 @@ int test_NM_row_prod_no_diag_non_square(NumericsMatrix* M3, NumericsMatrix* M4)
 
   return info;
 }
-int test_SBMRowToDense(SparseBlockStructuredMatrix *M)
+int test_SBM_row_to_dense(SparseBlockStructuredMatrix *M)
 {
   double * denseRes = (double*) malloc(M->blocksize0[M->blocknumber0 - 1] * M->blocksize1[M->blocknumber1 - 1] * sizeof(double));
   unsigned int curRow = 0;
@@ -990,13 +990,13 @@ int test_SBMRowToDense(SparseBlockStructuredMatrix *M)
   {
     unsigned int lLin = 0;
     unsigned int nbBlockRow = M->blocksize0[i] - curRow;
-    SBMRowToDense(M, i, denseRes, 0, nbBlockRow);
+    SBM_row_to_dense(M, i, denseRes, 0, nbBlockRow);
     for (unsigned int lin = curRow; lin < M->blocksize0[i]; lin++)
     {
       unsigned int lCol = 0;
       for (unsigned int col = 0; col < nbCol; col++)
       {
-        if (fabs(getValueSBM(M, lin, col) - denseRes[lLin + lCol * (nbBlockRow)]) > 10e-12)
+        if (fabs(SBM_get_value(M, lin, col) - denseRes[lLin + lCol * (nbBlockRow)]) > 10e-12)
         {
           free(denseRes);
           return 1;
@@ -1013,13 +1013,13 @@ int test_SBMRowToDense(SparseBlockStructuredMatrix *M)
 
     //    int lLin=0;
     //    int nbBlockRow=M->blocksize0[i]-curRow;
-    SBMRowToDense(M, i, denseRes, curRow, M->blocksize0[M->blocknumber0 - 1]);
+    SBM_row_to_dense(M, i, denseRes, curRow, M->blocksize0[M->blocknumber0 - 1]);
     curRow = M->blocksize0[i];
   }
 
   double * denseRes2 = (double*) malloc(M->blocksize0[M->blocknumber0 - 1] * M->blocksize1[M->blocknumber1 - 1] * sizeof(double));
 
-  SBMtoDense(M, denseRes2);
+  SBM_to_dense(M, denseRes2);
   for (unsigned int n = 0; n < M->blocksize0[M->blocknumber0 - 1]*M->blocksize1[M->blocknumber1 - 1]; n++)
     if (fabs(denseRes2[n] - denseRes[n]) > 10e-12)
     {
@@ -1032,7 +1032,7 @@ int test_SBMRowToDense(SparseBlockStructuredMatrix *M)
   free(denseRes2);
   return 0;
 }
-int test_RowPermutationSBM(SparseBlockStructuredMatrix *M)
+int test_SBM_row_permutation(SparseBlockStructuredMatrix *M)
 {
   SparseBlockStructuredMatrix MRes;
   unsigned int nbRow = M->blocknumber0;
@@ -1050,9 +1050,9 @@ int test_RowPermutationSBM(SparseBlockStructuredMatrix *M)
     rowBlockIndex[i] = candidate;
     mark[candidate] = 1;
   }
-  RowPermutationSBM(rowBlockIndex, M, &MRes);
+  SBM_row_permutation(rowBlockIndex, M, &MRes);
   double * denseMRes = (double*) malloc(M->blocksize0[M->blocknumber0 - 1] * M->blocksize1[M->blocknumber1 - 1] * sizeof(double));
-  SBMtoDense(&MRes, denseMRes);
+  SBM_to_dense(&MRes, denseMRes);
   double * denseM = (double*) malloc(M->blocksize0[M->blocknumber0 - 1] * M->blocksize1[M->blocknumber1 - 1] * sizeof(double));
   unsigned int curRow = 0;
   unsigned int nbRowInM = M->blocksize0[M->blocknumber0 - 1];
@@ -1064,7 +1064,7 @@ int test_RowPermutationSBM(SparseBlockStructuredMatrix *M)
       nbRow = M->blocksize0[rowInM] - M->blocksize0[rowInM - 1];
     else
       nbRow = M->blocksize0[rowInM];
-    SBMRowToDense(M, rowInM, denseM, curRow, nbRowInM);
+    SBM_row_to_dense(M, rowInM, denseM, curRow, nbRowInM);
     curRow += nbRow;
   }
   for (unsigned int n = 0; n < M->blocksize0[M->blocknumber0 - 1]*M->blocksize1[M->blocknumber1 - 1]; n++)
@@ -1084,7 +1084,7 @@ int test_RowPermutationSBM(SparseBlockStructuredMatrix *M)
   SBMfree(&MRes, 0);
   return 0;
 }
-int test_ColPermutationSBM(SparseBlockStructuredMatrix *M)
+int test_SBM_column_permutation(SparseBlockStructuredMatrix *M)
 {
   SparseBlockStructuredMatrix MRes;
   int nbCol = M->blocknumber1;
@@ -1100,7 +1100,7 @@ int test_ColPermutationSBM(SparseBlockStructuredMatrix *M)
     colBlockIndex[i] = candidate;
     mark[candidate] = 1;
   }
-  ColPermutationSBM(colBlockIndex, M, &MRes);
+  SBM_column_permutation(colBlockIndex, M, &MRes);
   free(colBlockIndex);
   free(mark);
   SBMfree(&MRes, 0);

@@ -93,12 +93,13 @@ SP::CollisionObjects BulletDS::collisionObjects() const
   return _collisionObjects;
 }
 
-
+static
 void display_btQuaternion(btQuaternion q)
 {
   printf("q0 (w)= %e,q1(x)= %e,q2(y)= %e,q3(z)= %e\n ", q.w(), q.x(), q.y(), q.z());
 }
 
+static
 void display_btVector3(btVector3 v)
 {
   printf("v0 (x)= %e, v1(y)= %e, q2(z)= %e\n ", v.x(), v.y(), v.z());

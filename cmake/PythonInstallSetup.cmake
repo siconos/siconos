@@ -33,6 +33,12 @@ option(INSTALL_PYTHON_SYMLINKS "Install Python .py files as symlinks" OFF)
 #
 function(set_python_install_path)
   set(python_install_options "--record;${CMAKE_BINARY_DIR}/python_install_manifest.txt")
+
+  execute_process(COMMAND ${PYTHON_EXECUTABLE} -c
+    "import sys; print('%d.%d'%(sys.version_info.major,sys.version_info.minor))"
+    OUTPUT_VARIABLE PY_VERSION)
+  string(STRIP ${PY_VERSION} PY_VERSION)
+
   if(siconos_python_install STREQUAL "user")
     # --- Case 1 : siconos_python_install=user ---
     # In that case, we need to find the user path. It depends on the operation system
@@ -41,7 +47,7 @@ function(set_python_install_path)
     execute_process(COMMAND ${PYTHON_EXECUTABLE} -c
       "import site; print(site.ENABLE_USER_SITE)" OUTPUT_VARIABLE ENABLE_USER)
     string(STRIP ${ENABLE_USER} ENABLE_USER)
-    
+
     if(ENABLE_USER) # --user works ...
       # Find install path for --user (site.USER_SITE)
       execute_process(COMMAND ${PYTHON_EXECUTABLE} -c
@@ -60,8 +66,10 @@ function(set_python_install_path)
       # which probably means that python is run using virtualenv
       # Command to find 'global' site-packages
       # default path will probably be ok --> no options
+      # note: the '.replace()' is to work around the following Debian/Ubuntu bug:
+      #   https://bugs.launchpad.net/ubuntu/+source/python3-defaults/+bug/1408092
       set(GET_SITE_PACKAGE
-       "from distutils.sysconfig import get_python_lib; print(get_python_lib())")
+       "from distutils.sysconfig import get_python_lib; print(get_python_lib().replace('/python3/dist-packages','/python${PY_VERSION}/dist-packages'))")
       execute_process(COMMAND ${PYTHON_EXECUTABLE} -c
        "${GET_SITE_PACKAGE}" OUTPUT_VARIABLE PY_INSTALL_DIR)
     endif()
@@ -70,9 +78,11 @@ function(set_python_install_path)
   elseif(siconos_python_install STREQUAL prefix)
     # Case 2 : siconos_python_install=prefix
     # we use CMAKE_INSTALL_PREFIX as the path for python install
+      # note: the '.replace()' is to work around the following Debian/Ubuntu bug:
+      #   https://bugs.launchpad.net/ubuntu/+source/python3-defaults/+bug/1408092
     list(APPEND python_install_options --prefix=${CMAKE_INSTALL_PREFIX})
       set(GET_SITE_PACKAGE
-       "from distutils.sysconfig import get_python_lib; print(get_python_lib(prefix='${CMAKE_INSTALL_PREFIX}'))")
+       "from distutils.sysconfig import get_python_lib; print(get_python_lib(prefix='${CMAKE_INSTALL_PREFIX}').replace('/python3/dist-packages','/python${PY_VERSION}/dist-packages'))")
       execute_process(COMMAND ${PYTHON_EXECUTABLE} -c
        "${GET_SITE_PACKAGE}" OUTPUT_VARIABLE PY_INSTALL_DIR)
   else()

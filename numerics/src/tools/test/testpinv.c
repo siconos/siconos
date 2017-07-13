@@ -44,7 +44,7 @@ int main(void)
     printf("\n");
   }
 
-  NumericsMatrix *Wnum = newNumericsMatrix();
+  NumericsMatrix *Wnum = NM_new();
   Wnum->storageType = 0;
   Wnum-> size0 = n;
   Wnum-> size1 = m;
@@ -54,10 +54,10 @@ int main(void)
   Wnum->matrix0 = W;
 
   FILE * file1 = fopen("dataW.dat", "w");
-  printInFileForScilab(Wnum, file1);
+  NM_write_in_file_scilab(Wnum, file1);
   fclose(file1);
 
-  NumericsMatrix *WnumpInv = newNumericsMatrix();
+  NumericsMatrix *WnumpInv = NM_new();
   WnumpInv->storageType = 0;
   WnumpInv-> size0 = n;
   WnumpInv-> size1 = m;
@@ -162,7 +162,7 @@ int main(void)
 
 
   FILE * file2 = fopen("dataWPseudoInverse.dat", "w");
-  printInFileForScilab(WnumpInv, file2);
+  NM_write_in_file_scilab(WnumpInv, file2);
   fclose(file2);
 
 
@@ -170,8 +170,8 @@ int main(void)
 
 
   free(Wpinvtest);
-  freeNumericsMatrix(Wnum);
-  freeNumericsMatrix(WnumpInv);
+  NM_free(Wnum);
+  NM_free(WnumpInv);
   free(Wnum);
   free(WnumpInv);
 

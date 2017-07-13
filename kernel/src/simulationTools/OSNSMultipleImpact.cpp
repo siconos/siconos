@@ -309,8 +309,9 @@ void OSNSMultipleImpact::BuildParaContact()
     SP::NonSmoothLaw nslaw = inter->nonSmoothLaw();
     SP::MultipleImpactNSL Mulnslaw = std11::dynamic_pointer_cast<MultipleImpactNSL>(nslaw);
     assert(Mulnslaw && "In OSNSMultipleImpact::BuildStiffResCofVec, non-smooth law used must be MultipleImpactNSL!!!");
-    // Get the relative position of inter-interactionBlock in the vector _velocityContact
-    unsigned int pos = _M->getPositionOfInteractionBlock(*inter);
+    // Get the position of inter-interactionBlock in the vector _velocityContact
+    unsigned int pos = indexSet->properties(*ui).absolute_position;
+
     (*_restitutionContact)(pos) = Mulnslaw->ResCof();
     (*_Kcontact)(pos) = Mulnslaw->Stiff();
     (*_elasticyCoefficientcontact)(pos) = Mulnslaw->ElasCof();
@@ -331,8 +332,8 @@ void OSNSMultipleImpact::PreComputeImpact()
   //1. Get the number of contacts and bodies involved in the impact
   if (indexSetLevel() != 1)
     RuntimeException::selfThrow("OSNSMultipleImpact::PreComputeImpact==> the levelMin must be equal to 1 in the multiple impact model !!");
-  SP::InteractionsGraph indexSet = simulation()->indexSet(indexSetLevel()); // get indexSet[1]
-  _nContact = indexSet->size();
+  InteractionsGraph& indexSet = *simulation()->indexSet(indexSetLevel()); // get indexSet[1]
+  _nContact = indexSet.size();
   //2. Compute matrix _M
   SP::Topology topology = simulation()->nonSmoothDynamicalSystem()->topology();
   bool isLinear = simulation()->nonSmoothDynamicalSystem()->isLinear();
@@ -341,7 +342,7 @@ void OSNSMultipleImpact::PreComputeImpact()
     // Computes new _unitaryBlocks if required
     updateInteractionBlocks();
     // Updates matrix M
-    _M->fill(indexSet, !_hasBeenUpdated);
+    _M->fillW(indexSet, !_hasBeenUpdated);
     _sizeOutput = _M->size();
   }
   if (_nContact != _sizeOutput)
@@ -432,14 +433,16 @@ void OSNSMultipleImpact::PreComputeImpact()
 void OSNSMultipleImpact::InitializeInput()
 {
   //Loop over alls Interactioninvolved in the indexSet[1]
-  SP::InteractionsGraph indexSet = simulation()->indexSet(indexSetLevel()); // get indexSet[1]
+  InteractionsGraph& indexSet = *simulation()->indexSet(indexSetLevel()); // get indexSet[1]
   InteractionsGraph::VIterator ui, uiend;
-  for (std11::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
+  for (std11::tie(ui, uiend) = indexSet.vertices(); ui != uiend; ++ui)
   {
-    SP::Interaction inter = indexSet->bundle(*ui);
+    SP::Interaction inter = indexSet.bundle(*ui);
     //SP::SiconosVector Vc0 = inter->y(1); // Relative velocity at beginning of impact
     SP::SiconosVector Vc0 = inter->yOld(1); // Relative velocity at beginning of impact
-    unsigned int pos_inter = _M->getPositionOfInteractionBlock(*inter);
+
+    unsigned int pos_inter = indexSet.properties(*ui).absolute_position;
+
     setBlock(*Vc0, _velocityContact, Vc0->size(), 0, pos_inter);
     SP::SiconosVector ener0(new SiconosVector(Vc0->size()));
     ener0->zero(); // We suppose that the initial potential energy before impact is equal to zero at any contact
@@ -476,10 +479,10 @@ void OSNSMultipleImpact::initialize(SP::Simulation sim)
 
   if (! _M)
   {
-    if (_MStorageType == 0)
+    if (_numericsMatrixStorageType == 0)
       _M.reset(new OSNSMatrix(maxSize(), 0));
 
-    else // if(_MStorageType == 1) size = number of _interactionBlocks
+    else // if(_numericsMatrixStorageType == 1) size = number of _interactionBlocks
       // = number of Interactionin the largest considered indexSet
       _M.reset(new OSNSMatrix(simulation()->indexSet(indexSetLevel())->size(), 1));
   }
@@ -800,18 +803,18 @@ void OSNSMultipleImpact::Compute_energyContact()
 void OSNSMultipleImpact::UpdateDuringImpact()
 {
   //1. Copy _velocityContact/_deltaImpulseContact into the vector y/lambda for Interactions
-  SP::InteractionsGraph indexSet = simulation()->indexSet(indexSetLevel());
+  InteractionsGraph& indexSet = *simulation()->indexSet(indexSetLevel());
   // y and lambda vectors
   SP::SiconosVector lambda;
   SP::SiconosVector y;
   // === Loop through "active" Interactions (ie present in indexSets[1]) ===
   unsigned int pos;
   InteractionsGraph::VIterator ui, uiend;
-  for (std11::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
+  for (std11::tie(ui, uiend) = indexSet.vertices(); ui != uiend; ++ui)
   {
-    Interaction& inter = *indexSet->bundle(*ui);
+    Interaction& inter = *indexSet.bundle(*ui);
     // Get the relative position of inter-interactionBlock in the vector _velocityContact/_tolImpulseContact
-    pos = _M->getPositionOfInteractionBlock(inter);
+    pos = indexSet.properties(*ui).absolute_position;
     // Get Y and Lambda for the current Interaction
     y = inter.y(inputOutputLevel());
     lambda = inter.lambda(inputOutputLevel());
@@ -849,7 +852,7 @@ void OSNSMultipleImpact::SaveDataOneStep(unsigned int _ithPoint)
     SP::SiconosVector E_inter(new SiconosVector(1));
     if (indexSet1->is_vertex(inter)) // if Interaction belongs to the IndexSet[1]
     {
-      pos = _M->getPositionOfInteractionBlock(*inter);
+      pos = indexSet0->properties(*ui).absolute_position;
       setBlock(*_tolImpulseContact, P_inter, P_inter->size(), pos, 0);
       setBlock(*_forceContact, F_inter, F_inter->size(), pos, 0);
       setBlock(*_energyContact, E_inter, E_inter->size(), pos, 0);
@@ -989,18 +992,18 @@ void OSNSMultipleImpact::ComputeImpact()
 void OSNSMultipleImpact::PostComputeImpact()
 {
   // === Get index set from Topology ===
-  SP::InteractionsGraph indexSet = simulation()->indexSet(indexSetLevel());
+  InteractionsGraph& indexSet = *simulation()->indexSet(indexSetLevel());
   // y and lambda vectors
   SP::SiconosVector lambda;
   SP::SiconosVector y;
   // === Loop through "active" Interactions (ie present in indexSets[1]) ===
   unsigned int pos;
   InteractionsGraph::VIterator ui, uiend;
-  for (std11::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
+  for (std11::tie(ui, uiend) = indexSet.vertices(); ui != uiend; ++ui)
   {
-    Interaction& inter = *indexSet->bundle(*ui);
+    Interaction& inter = *indexSet.bundle(*ui);
     // Get the relative position of inter-interactionBlock in the vector _velocityContact/_tolImpulseContact
-    pos = _M->getPositionOfInteractionBlock(inter);
+    pos = indexSet.properties(*ui).absolute_position;
     // Get Y and Lambda for the current Interaction
     y = inter.y(inputOutputLevel());
     lambda = inter.lambda(inputOutputLevel());

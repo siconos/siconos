@@ -780,7 +780,9 @@ bool operator == (const SiconosVector &m, const SiconosVector &x)
   DEBUG_PRINTF("norm = %12.8e \n", (m - x).normInf() );
   DEBUG_PRINTF("std::numeric_limits<double>::epsilon() = %12.8e \n", std::numeric_limits<double>::epsilon() );
   DEBUG_EXPR(std::cout << std::boolalpha << ( (m - x).normInf() <= std::numeric_limits<double>::epsilon()) <<std::endl;);
-  return ((m - x).normInf() <= std::numeric_limits<double>::epsilon());
+  double atol = 1e-14;
+  double rtol = std::numeric_limits<double>::epsilon();
+  return ((m - x).normInf() <= atol + rtol * x.normInf()) ;
 }
 
 //==================

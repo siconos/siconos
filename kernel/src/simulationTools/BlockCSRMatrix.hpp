@@ -150,7 +150,7 @@ public:
   /** Constructor from index set
       \param indexSet the index set of the active constraints
   */
-  BlockCSRMatrix(SP::InteractionsGraph indexSet);
+  BlockCSRMatrix(InteractionsGraph& indexSet);
 
   /** destructor
    */
@@ -208,20 +208,20 @@ public:
   /** fill the current class using an index set
    *  \param indexSet set of the active constraints
    */
-  void fill(SP::InteractionsGraph indexSet);
+  void fill(InteractionsGraph& indexSet);
 
 
   /** fill the matrix with the Mass matrix 
    * \warning only for NewtonEulerDS
    * \param indexSet of the active constraints
    */
-  void fillM(SP::InteractionsGraph indexSet);
+  void fillM(InteractionsGraph& indexSet);
 
   /** fill the matrix with the H matrix 
    * \warning only for NewtonEulerFrom3DLocalFrameR
    * \param indexSet of the active constraints
    */
-  void fillH(SP::InteractionsGraph indexSet);
+  void fillH(InteractionsGraph& indexSet);
 
   /** fill the numerics structure _sparseBlockStructuredMatrix using _blockCSR */
   void convert();

@@ -78,7 +78,7 @@ if(DEV_MODE)
   if((NOT WITH_MECHANISMS) AND (NOT WITH_PYTHON_WRAPPER))
     add_cxx_options("-Werror=missing-declarations")
   endif()
-  if(NOT WITH_OCC AND NOT WITH_MECHANISMS)
+  if(NOT WITH_OCC AND NOT WITH_MECHANISMS AND NOT WITH_SERIALIZATION)
     add_cxx_options("-Werror=overloaded-virtual")
   endif()
 

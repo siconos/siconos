@@ -47,7 +47,7 @@ int main(void)
 
   NumericsMatrix H;
   NM_null(&H);
-  fillNumericsMatrix(&H, NM_DENSE, 4, 2, Hdat);
+  NM_fill(&H, NM_DENSE, 4, 2, Hdat);
 
   double v1[] = {-1.0, -1.0 -TS/2.0};
   double v2[] = {-1.0, 1.0 -TS/2.0};
@@ -62,7 +62,7 @@ int main(void)
   NumericsMatrix num_mat;
   double M[4] = { G*TS*TS/2.0, G*TS, beta*G*TS*TS/2.0, beta*G*TS };
   NM_null(&num_mat);
-  fillNumericsMatrix(&num_mat, NM_DENSE, 2, 2, M);
+  NM_fill(&num_mat, NM_DENSE, 2, 2, M);
 
   double q[2] = { x[0] + TS*x[1], x[1] };
 

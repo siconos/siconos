@@ -128,7 +128,7 @@
   if (nummat$argnum)
   {
     if (!NM_clean(nummat$argnum, alloc_ctrl_$argnum)) { return SN_SWIG_ERROR_CODE; }
-    freeNumericsMatrix(nummat$argnum);
+    NM_free(nummat$argnum);
     free(nummat$argnum);
   }
 
@@ -193,7 +193,7 @@
 }
 
 // FIX: do not work
-%newobject SBMtoDense(const SparseBlockStructuredMatrix* const A, double *denseMat);
+%newobject SBM_to_dense(const SparseBlockStructuredMatrix* const A, double *denseMat);
 %typemap(newfree) (double *denseMat)
 {
   // %typemap(newfree) (double *denseMat)
@@ -279,7 +279,7 @@
     $2 = (CSparseMatrix*) malloc(sizeof(CSparseMatrix));
     if(!$2) SWIG_fail;
 
-    SBMtoSparseInitMemory($1,$2);
+    SBM_to_sparse_init_memory($1,$2);
   }
   else
     SWIG_fail;
@@ -382,4 +382,4 @@
 
 // issue with typemap out and is useless for now
 // convert matrix to scipy.sparse.csc and do the job there
-%ignore SBMRowToDense;
+%ignore SBM_row_to_dense;

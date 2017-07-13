@@ -34,7 +34,7 @@ def test_ds_interface():
         class_name = args
         attr = ds_classes[args]
         ds = class_name(*attr)
-        print class_name, attr[0]
+        print(class_name, attr[0])
         ds.initializeNonSmoothInput(1)
         ds.resetAllNonSmoothParts()
         ds.resetNonSmoothPart(1)

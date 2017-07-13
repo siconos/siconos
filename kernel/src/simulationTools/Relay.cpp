@@ -133,7 +133,7 @@ int Relay::compute(double time)
 
     // Compute q, this depends on the type of non smooth problem, on
     // the relation type and on the non smooth law
-    unsigned int pos = _M->getPositionOfInteractionBlock(*inter);
+    unsigned int pos = indexSet.properties(*ui).absolute_position;
     SP::SiconosVisitor NSLEffect(new _BoundsNSLEffect(this, inter, pos));
     inter->nonSmoothLaw()->accept(*NSLEffect);
   }
@@ -149,7 +149,7 @@ int Relay::compute(double time)
   {
     // The Relay in Numerics format
     RelayProblem numerics_problem;
-    numerics_problem.M = &*_M->getNumericsMatrix();
+    numerics_problem.M = &*_M->numericsMatrix();
     numerics_problem.q = _q->getArray();
     numerics_problem.lb = _lb->getArray();
     numerics_problem.ub = _ub->getArray();

@@ -24,14 +24,14 @@ def compare_with_SBM(sbmat, mat):
 
     for i in range(m):
         for j in range(n):
-            assert sn.getValueSBM(sbmat, i, j) == mdense[i, j]
+            assert sn.SBM_get_value(sbmat, i, j) == mdense[i, j]
 
 
 def SBM_tests(sbm):
     print('in SBM_tests')
-    # SBMtoDense
-    # SBMtoSparse
-    # sparseToSBM
+    # SBM_to_dense
+    # SBM_to_sparse
+    # SBM_from_csparse
     nm = sn.NumericsMatrix(sbm)
     assert nm is not None
     mcoo = sn.NM_triplet(nm)

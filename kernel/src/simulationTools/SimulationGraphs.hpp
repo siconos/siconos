@@ -76,6 +76,9 @@ struct InteractionProperties
   unsigned int source_pos;
   SP::DynamicalSystem target;
   unsigned int target_pos;
+  unsigned int absolute_position;      /**< Absolute position of the interaction variables in the unknown vector in osnsp*/
+  unsigned int absolute_position_proj; /**< Absolute position of the interaction variables in the unknown vector in osnsp
+                                          for projection*/
   bool forControl;                     /**< true if the relation is used to add a control input to a DS */
   SP::VectorOfBlockVectors DSlink;     /**< pointer links to DS variables needed for computation, mostly used in Relations (computeOutput and computeInput) and OneStepIntegrator classes. */
   SP::VectorOfVectors workVectors;     /**< set of SiconosVector, useful to ensure contiguous memory vectors, used as buffers in OneStepIntegrator classes. */
@@ -92,8 +95,9 @@ struct DynamicalSystemProperties
   SP::VectorOfVectors workVectors;        /**< Used for instance in Newton iteration */
   SP::VectorOfMatrices workMatrices;      /**< Mostly for Lagrangian system.*/
   SP::OneStepIntegrator osi;              /**< Integrator used for the given DynamicalSystem */
-  SP::SimpleMatrix W;                    /**< Matrix for integration */
-  SP::SimpleMatrix WBoundaryConditions;  /**< Matrix for integration of boundary conditions*/
+  SP::SimpleMatrix W;                     /**< Matrix for integration */
+  SP::SimpleMatrix WBoundaryConditions;   /**< Matrix for integration of boundary conditions*/
+  unsigned int absolute_position;         /**< Absolute position of the ds variables in the unknown vector in osnsp*/
 //  SP::SiconosMemory _xMemory            /**< old value of x, TBD */
 
   ACCEPT_SERIALIZATION(DynamicalSystemProperties);

@@ -38,7 +38,7 @@ int main(void)
 
   for (i = 0 ; i < nmm; i++)
   {
-    NMM[i] = newNumericsMatrix();
+    NMM[i] = NM_new();
   }
 
 
@@ -57,11 +57,11 @@ int main(void)
 
   for (i = 0 ; i < nmm; i++)
   {
-    freeNumericsMatrix(NMM[i]);
+    NM_free(NMM[i]);
     /*    if (NMM[i]->matrix0) */
     /*        free(NMM[i]->matrix0); */
     /*    if (NMM[i]->matrix1) */
-    /*        freeSBM(NMM[i]->matrix1); */
+    /*        SBM_free(NMM[i]->matrix1); */
     free(NMM[i]);
   }
 

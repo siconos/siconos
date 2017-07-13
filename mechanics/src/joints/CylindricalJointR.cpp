@@ -84,52 +84,37 @@ static double piwrap(double x)
   return fmod(x + 3*M_PI, 2*M_PI) - M_PI;
 }
 
-/**axe is the axis of the cylindrical joint, in the frame of the first DS, d1.*/
-CylindricalJointR::CylindricalJointR(SP::NewtonEulerDS d1, SP::NewtonEulerDS d2,
-                                     SP::SiconosVector P, SP::SiconosVector A,
-                                     bool absoluteRef)
+CylindricalJointR::CylindricalJointR(SP::SiconosVector P, SP::SiconosVector A,
+                                     bool absoluteRef,
+                                     SP::NewtonEulerDS d1, SP::NewtonEulerDS d2)
   : NewtonEulerJointR()
+  , _axis0(std11::make_shared<SiconosVector>(3))
   , _G1P0(std11::make_shared<SiconosVector>(3))
+{
+  _points.resize(1);
+  _axes.resize(1);
+  setAbsolute(absoluteRef);
+  setPoint(0, P);
+  setAxis(0, A);
+  if (d1)
+    setInitialConditions(d1->q(), d2 ? d2->q() : SP::SiconosVector());
+}
+
+void CylindricalJointR::setInitialConditions(SP::SiconosVector q1,
+                                             SP::SiconosVector q2)
 {
   // in the two-DS case, _P is unused.
   _G1P0->zero();
-  *_G1P0 = *P;
-  if (absoluteRef) {
-    // add d1's frame
-    _G1P0->setValue(0, _G1P0->getValue(0) - d1->q()->getValue(0));
-    _G1P0->setValue(1, _G1P0->getValue(1) - d1->q()->getValue(1));
-    _G1P0->setValue(2, _G1P0->getValue(2) - d1->q()->getValue(2));
+  *_G1P0 = *_points[0];
+  _axis0->zero();
+  *_axis0 = *_axes[0];
+
+  if (_absoluteRef) {
+    _G1P0->setValue(0, _G1P0->getValue(0) - q1->getValue(0));
+    _G1P0->setValue(1, _G1P0->getValue(1) - q1->getValue(1));
+    _G1P0->setValue(2, _G1P0->getValue(2) - q1->getValue(2));
   }
 
-  _axis0 = A;
-  computeFromInitialPosition(d1->q(),d2->q());
-  _twistCount = 0;
-  _previousAngle = 0;
-}
-
-/*axis is the axis of the cylindrical joint, in the absolute frame.*/
-CylindricalJointR::CylindricalJointR(SP::NewtonEulerDS d1,
-                                     SP::SiconosVector P, SP::SiconosVector A,
-                                     bool absoluteRef)
-  : NewtonEulerJointR()
-  , _G1P0(std11::make_shared<SiconosVector>(3))
-{
-  if (P) *_G1P0 = *P; else _G1P0->zero();
-  if (absoluteRef) {
-    // add d1's frame
-    _G1P0->setValue(0, _G1P0->getValue(0) - d1->q()->getValue(0));
-    _G1P0->setValue(1, _G1P0->getValue(1) - d1->q()->getValue(1));
-    _G1P0->setValue(2, _G1P0->getValue(2) - d1->q()->getValue(2));
-  }
-
-  _axis0 = A;
-  computeFromInitialPosition(d1->q());
-  _twistCount = 0;
-  _previousAngle = 0;
-}
-
-void CylindricalJointR::computeFromInitialPosition(SP::SiconosVector q1, SP::SiconosVector q2)
-{
   computeV1V2FromAxis();
   SP::SiconosVector q2i(new SiconosVector(7));
   q2i->zero();
@@ -184,6 +169,9 @@ void CylindricalJointR::computeFromInitialPosition(SP::SiconosVector q1, SP::Sic
   SiconosVector tmpy(1);
   this->computehDoF(0, q0, tmpy, 1);
   _initialAngle = tmpy(0);
+
+  _twistCount = 0;
+  _previousAngle = 0;
 }
 
 void CylindricalJointR::computeV1V2FromAxis()

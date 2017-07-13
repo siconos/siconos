@@ -218,7 +218,7 @@ void MLCP::initialize(SP::Simulation sim)
   // General initialize for LinearOSNS
   LinearOSNS::initialize(sim);
 
-  _numerics_problem.M = &*_M->getNumericsMatrix();
+  _numerics_problem.M = &*_M->numericsMatrix();
 }
 void  MLCP::updateInteractionBlocks()
 {

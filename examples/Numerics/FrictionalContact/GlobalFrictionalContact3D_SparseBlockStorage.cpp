@@ -155,14 +155,14 @@ int main(int argc, char* argv[])
   numericsProblem.q = q;
   numericsProblem.b = b;
 
-  numericsProblem.M = newNumericsMatrix();
+  numericsProblem.M = NM_new();
   NumericsMatrix *MM =  numericsProblem.M;
   MM->storageType = NM_SPARSE_BLOCK;
   MM->size0 = Ndof;
   MM->size1 = Ndof;
 
 
-  MM->matrix1 = newSBM();
+  MM->matrix1 = SBM_new();
   SparseBlockStructuredMatrix *MBlockMatrix = MM->matrix1;
   MBlockMatrix->nbblocks = 3;
   double * block[3] = {M11, M22, M33};
@@ -180,7 +180,7 @@ int main(int argc, char* argv[])
   MBlockMatrix->index2_data =  index2_data;
 
 
-  numericsProblem.H = newNumericsMatrix();
+  numericsProblem.H = NM_new();
   NumericsMatrix *HH =  numericsProblem.H;
   HH->storageType = 1;
   HH->size0 = Ndof;
@@ -241,14 +241,14 @@ int main(int argc, char* argv[])
   free(velocity);
   free(globalVelocity);
 
-  //     freeSBM(MM->matrix1);
-  //     freeSBM(HH->matrix1);
+  //     SBM_free(MM->matrix1);
+  //     SBM_free(HH->matrix1);
   free(MM->matrix1);
   MM->matrix1 = NULL;
   free(HH->matrix1);
   HH->matrix1 = NULL;
-  freeNumericsMatrix(MM);
-  freeNumericsMatrix(HH);
+  NM_free(MM);
+  NM_free(HH);
   free(MM);
   free(HH);
   gfc3d_free_workspace(&numericsProblem);

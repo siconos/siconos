@@ -58,15 +58,37 @@ static double piwrap(double x)
   return fmod(x + 3*M_PI, 2*M_PI) - M_PI;
 }
 
-PivotJointR::PivotJointR(SP::NewtonEulerDS d1, SP::NewtonEulerDS d2, SP::SiconosVector P, SP::SiconosVector A): KneeJointR(d1, d2, P)
+PivotJointR::PivotJointR(SP::SiconosVector P, SP::SiconosVector A, bool absoluteRef,
+                         SP::NewtonEulerDS d1, SP::NewtonEulerDS d2)
+  : KneeJointR(P, absoluteRef, d1, d2)
+  , _A(std11::make_shared<SiconosVector>(3))
 {
-  _A.reset( new SiconosVector(*A) );
+  _axes.resize(1);
 
-  ::boost::math::quaternion<double> q1((*d1->q())(3), (*d1->q())(4),
-                                       (*d1->q())(5), (*d1->q())(6));
-  ::boost::math::quaternion<double> q2((*d2->q())(3), (*d2->q())(4),
-                                       (*d2->q())(5), (*d2->q())(6));
-  ::boost::math::quaternion<double> cq2q10(1.0 / q2 * q1);
+  setAxis(0, A);
+  if (d1)
+    setInitialConditions(d1->q(), d2 ? d2->q() : SP::SiconosVector());
+}
+
+static ::boost::math::quaternion<double> quat(const SP::SiconosVector& v)
+{
+  if (v && v->size()==7)
+    return ::boost::math::quaternion<double>((*v)(3),(*v)(4),(*v)(5),(*v)(6));
+  else if (v && v->size()==3)
+    return ::boost::math::quaternion<double>(0, (*v)(0),(*v)(1),(*v)(2));
+  else
+    return ::boost::math::quaternion<double>(1, 0, 0, 0);
+}
+
+void PivotJointR::setInitialConditions(SP::SiconosVector q1,
+                                       SP::SiconosVector q2)
+{
+  *_A = *_axes[0];
+  // TODO: add support for absolute frame here
+
+  ::boost::math::quaternion<double> quat1(quat(q1));
+  ::boost::math::quaternion<double> quat2(quat(q2));
+  ::boost::math::quaternion<double> cq2q10(1.0 / quat2 * quat1);
 
   _cq2q101 = cq2q10.R_component_1();
   _cq2q102 = cq2q10.R_component_2();
@@ -76,9 +98,14 @@ PivotJointR::PivotJointR(SP::NewtonEulerDS d1, SP::NewtonEulerDS d2, SP::Siconos
   buildA1A2();
 
   double rot2to1w, rot2to1x, rot2to1y, rot2to1z;
-  rot2to1((*d1->q())(3), (*d1->q())(4), (*d1->q())(5), (*d1->q())(6),
-          (*d2->q())(3), (*d2->q())(4), (*d2->q())(5), (*d2->q())(6),
-          &rot2to1w, &rot2to1x, &rot2to1y, &rot2to1z);
+  if (q2)
+    rot2to1((*q1)(3), (*q1)(4), (*q1)(5), (*q1)(6),
+            (*q2)(3), (*q2)(4), (*q2)(5), (*q2)(6),
+            &rot2to1w, &rot2to1x, &rot2to1y, &rot2to1z);
+  else
+    rot2to1((*q1)(3), (*q1)(4), (*q1)(5), (*q1)(6),
+            1, 0, 0, 0,
+            &rot2to1w, &rot2to1x, &rot2to1y, &rot2to1z);
 
   _initial_AscalA1 = AscalA1(rot2to1x, rot2to1y, rot2to1z);
   _initial_AscalA2 = AscalA2(rot2to1x, rot2to1y, rot2to1z);
@@ -88,61 +115,11 @@ PivotJointR::PivotJointR(SP::NewtonEulerDS d1, SP::NewtonEulerDS d2, SP::Siconos
   // using atan2 so that stops can be placed correctly.
   double Adot2to1 = AscalA(rot2to1x, rot2to1y, rot2to1z);
   _initial_AscalA = 2*atan2(rot2to1w, Adot2to1);
+
   _twistCount = 0;
   _previousAngle = 0;
 }
 
-/* constructor,
-   \param a SP::NewtonEulerDS d1, a dynamical system containing the intial position
-   \param a SP::SiconosVector P0, see KneeJointR documentation.
-   \param a SP::SiconosVector A, axis in the frame of the object.
-   \param a bool, used only by the KneeJointR constructor see KneeJointR documentation.
-*/
-PivotJointR::PivotJointR(SP::NewtonEulerDS d1, SP::SiconosVector P0, SP::SiconosVector A, bool absolutRef): KneeJointR(d1, P0, absolutRef)
-{
-  ::boost::math::quaternion<double> q1((*d1->q())(3), (*d1->q())(4),
-                                       (*d1->q())(5), (*d1->q())(6));
-  ::boost::math::quaternion<double> cq2q10(q1);
-
-  _cq2q101 = cq2q10.R_component_1();
-  _cq2q102 = cq2q10.R_component_2();
-  _cq2q103 = cq2q10.R_component_3();
-  _cq2q104 = cq2q10.R_component_4();
-
-  _A.reset( new SiconosVector(*A) );
-  buildA1A2();
-
-  double rot2to1w, rot2to1x, rot2to1y, rot2to1z;
-  rot2to1((*d1->q())(3), (*d1->q())(4), (*d1->q())(5), (*d1->q())(6),
-          1, 0, 0, 0, &rot2to1w, &rot2to1x, &rot2to1y, &rot2to1z);
-
-  _initial_AscalA1 = AscalA1(rot2to1x, rot2to1y, rot2to1z);
-  _initial_AscalA2 = AscalA2(rot2to1x, rot2to1y, rot2to1z);
-
-  // In case of joint constraints, it's okay to use dot product=0, but
-  // in the case of the free axis we must measure the actual angle
-  // using atan2 so that stops can be placed correctly.
-  double Adot2to1 = AscalA(rot2to1x, rot2to1y, rot2to1z);
-  _initial_AscalA = 2*atan2(rot2to1w, Adot2to1);
-  _twistCount = 0;
-  _previousAngle = 0;
-}
-
-void PivotJointR::initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
-{
-  KneeJointR::initComponents(inter,DSlink,workV,workM);
-  //if (_d2){
-  //proj_with_q  _jachqProj.reset(new SimpleMatrix(7,14));
-  //proj_with_q    _yProj.reset(new SiconosVector(7));
-  //_yProj.reset(new SiconosVector(5));
-  // }else{
-  //proj_with_q  _jachqProj.reset(new SimpleMatrix(6,7));
-  //proj_with_q    _yProj.reset(new SiconosVector(6));
-  //_yProj.reset(new SiconosVector(5));
-  // }
-  //proj_with_q  _jachqProj->zero();
-  //_yProj->zero();
-}
 void PivotJointR::buildA1A2()
 {
   double Ax = (*_A)(0);
@@ -630,4 +607,20 @@ void PivotJointR::computeJachqDoF(double time, Interaction& inter,
   jachq.setValue(0, 11, x22*(_A->getValue(0)*(-x49 + x52 + x53) + _A->getValue(1)*(x44 + x46 + x54) + _A->getValue(2)*(-x34 + x40 + x55)) + x23*(x30 + x32 + x56));
   jachq.setValue(0, 12, x22*(_A->getValue(0)*(-x41 + x43 + x59) + _A->getValue(1)*(-x50 + x51 + x57) + _A->getValue(2)*(x27 + x28 + x58)) + x23*(x37 + x38 + x60));
   jachq.setValue(0, 13, x22*(_A->getValue(0)*(x36 + x39 + x60) + _A->getValue(1)*(-x27 + x29 + x58) + _A->getValue(2)*(x50 - x51 + x57)) + x23*(x41 + x42 + x59));
+}
+
+
+/** Return the normal of the angular DoF axis of rotation.
+ * \param axis must be 0 */
+void PivotJointR::_normalDoF(SiconosVector& ans, const BlockVector& q0, int axis,
+                             bool absoluteRef)
+{
+  assert(axis == 0);
+  if (axis != 0) return;
+
+  // We assume that A is normalized.
+  ans = *_A;
+
+  if (absoluteRef)
+    changeFrameBodyToAbs(*q0.getAllVect()[0], ans);
 }

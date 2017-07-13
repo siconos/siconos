@@ -42,6 +42,7 @@ void computeRotationMatrixTransposed(SP::SiconosVector q, SP::SimpleMatrix rotat
  * \param[in,out] v the vector to be rotated
  */
 void rotateAbsToBody(SP::SiconosVector q, SP::SiconosVector v);
+
 /* For a given position vector q, performs the rotation of the matrix m
  * w.r.t the quaternion that parametrize the rotation in q, that is the
  * rotation of the body fixed frame with respect to the inertial frame.
@@ -49,21 +50,24 @@ void rotateAbsToBody(SP::SiconosVector q, SP::SiconosVector v);
  * \param[in,out] m the vector to be rotated
  */
 void rotateAbsToBody(SP::SiconosVector q, SP::SimpleMatrix m);
+void rotateAbsToBody(double q0, double q1, double q2, double q3, SiconosVector& v);
 void rotateAbsToBody(double q0, double q1, double q2, double q3, SP::SiconosVector v);
 void rotateAbsToBody(double q0, double q1, double q2, double q3, SP::SimpleMatrix m);
 
 
 /* For a given position vector q, express the vector v given in
- * the inertial frame into to the bdy frame
+ * the inertial frame into to the body frame
  * w.r.t the quaternion that parametrize the rotation in q.
  * The operation amounts to multiplying by the transposed rotation matrix.
  * the result is return in v
  * \param[in] q the position vector
  * \param[in,out] v the vector to be reexpressed
  */
+void changeFrameAbsToBody(const SiconosVector& q, SiconosVector& v);
 void changeFrameAbsToBody(SP::SiconosVector q, SP::SiconosVector v);
 void changeFrameAbsToBody(SP::SiconosVector q, SP::SimpleMatrix m);
 
+void changeFrameBodyToAbs(const SiconosVector& q, SiconosVector& v);
 void changeFrameBodyToAbs(SP::SiconosVector q, SP::SiconosVector v);
 void changeFrameBodyToAbs(SP::SiconosVector q, SP::SimpleMatrix m);
 
@@ -78,7 +82,13 @@ void quaternionFromRotationVector(SP::SiconosVector rotationVector, SP::SiconosV
 
 void computeT(SP::SiconosVector q, SP::SimpleMatrix T);
 
-
+/** Compute the force and moment vectors applied to a body with state
+ * q from a force vector at a given position. */
+void computeExtForceAtPos(SP::SiconosVector q, bool isMextExpressedInInertialFrame,
+                          SP::SiconosVector force, bool forceAbsRef,
+                          SP::SiconosVector pos, bool posAbsRef,
+                          SP::SiconosVector fExt, SP::SiconosVector mExt,
+                          bool accumulate);
 
 /** NewtonEuler non linear dynamical systems
  
@@ -97,7 +107,7 @@ void computeT(SP::SiconosVector q, SP::SimpleMatrix T);
   <li> \f$x_G,v_G\f$ position and velocity of the center of mass expressed in a inertial frame of
   reference (world frame) </li>
   <li> \f$\Omega\f$ angular velocity vector expressed in the body-fixed frame (frame attached to the object) </li>
-  <li> \f$R\f$ rotation matrix form the inertial frame to the bosy-fixed frame \f$R^{-1}=R^T, \det(R)=1\f$, i.e \f$ R\in SO^+(3)\f$  </li>
+  <li> \f$R\f$ rotation matrix form the inertial frame to the body-fixed frame \f$R^{-1}=R^T, \det(R)=1\f$, i.e \f$ R\in SO^+(3)\f$  </li>
   <li> \f$M=m\,I_{3\times 3}\f$ diagonal mass matrix with  \f$m \in \mathbb{R}\f$ the scalar mass  </li>
   <li> \f$I\f$ constant inertia matrix </li>
   <li> \f$F_{ext}\f$ and \f$ M_{ext}\f$ are the external applied forces and moment  </li>
@@ -202,7 +212,7 @@ protected:
    * false by default */
   bool _hasConstantMExt;
 
-  /** if true, we assume that mExt is given in inertialFrameset (default false)  */
+  /** if true, we assume that mExt is given in inertial frame (default false)  */
   bool _isMextExpressedInInertialFrame;
 
   /** external moment expressed in the body-fixed frame  */
@@ -475,6 +485,44 @@ public:
   {
     return _twist0;
   }
+
+  /** Get the linear velocity in the absolute (inertial) or relative
+   * (body) frame of reference.
+   * \param absoluteRef If true, velocity is returned in the inertial
+   *                    frame, otherwise velocity is returned in the
+   *                    body frame.
+   * \return A SiconosVector of size 3 containing the linear velocity
+   *         of this dynamical system.
+   */
+  SP::SiconosVector linearVelocity(bool absoluteRef) const;
+
+  /** Fill a SiconosVector with the linear velocity in the absolute
+   * (inertial) or relative (body) frame of reference.
+   * \param absoluteRef If true, velocity is returned in the inertial
+   *                    frame, otherwise velocity is returned in the
+   *                    body frame.
+   * \param v A SiconosVector of size 3 to receive the linear velocity.
+   */
+  void linearVelocity(bool absoluteRef, SiconosVector &v) const;
+
+  /** Get the angular velocity in the absolute (inertial) or relative
+   * (body) frame of reference.
+   * \param absoluteRef If true, velocity is returned in the inertial
+   *                    frame, otherwise velocity is returned in the
+   *                    body frame.
+   * \return A SiconosVector of size 3 containing the angular velocity
+   *         of this dynamical system.
+   */
+  SP::SiconosVector angularVelocity(bool absoluteRef) const;
+
+  /** Fill a SiconosVector with the angular velocity in the absolute
+   * (inertial) or relative (body) frame of reference.
+   * \param absoluteRef If true, velocity is returned in the inertial
+   *                    frame, otherwise velocity is returned in the
+   *                    body frame.
+   * \param v A SiconosVector of size 3 to receive the angular velocity.
+   */
+  void angularVelocity(bool absoluteRef, SiconosVector &w) const;
 
     // -- p --
 
@@ -886,6 +934,24 @@ public:
    */
   virtual void computeMExt(double time, SP::SiconosVector mExt);
   virtual void computeMExt(double time);
+
+  /** Adds a force/torque impulse to a body's FExt and MExt vectors in
+   * either absolute (inertial) or relative (body) frame.  Modifies
+   * contents of _fExt and _mExt! Therefore these must have been set
+   * as constant vectors using setFExtPtr and setMExtPtr prior to
+   * calling this function.  Adjustments to _mExt will take into
+   * account the value of _isMextExpressedInInertialFrame.
+   * \param force A force vector to be added.
+   * \param forceAbsRef If true, force is in inertial frame, otherwise
+   *                    it is in body frame.
+   * \param pos A position at which force should be applied.  If NULL,
+   *            the center of mass is assumed.
+   * \param posAbsRef If true, pos is in inertial frame, otherwise it
+   *                  is in body frame.
+   */
+  void addExtForceAtPos(SP::SiconosVector force, bool forceAbsRef,
+                        SP::SiconosVector pos = SP::SiconosVector(),
+                        bool posAbsRef = false);
 
   void computeJacobianMExtqExpressedInInertialFrameByFD(double time, SP::SiconosVector q);
   void computeJacobianMExtqExpressedInInertialFrame(double time, SP::SiconosVector q);

@@ -68,6 +68,11 @@
   SiconosVectorIterator __iter__() {
     return SiconosVectorIterator($self->begin());
   }
+%insert("python") %{
+    def __array__(self):
+        import numpy
+        return numpy.fromiter(self, dtype=float)
+%}
 }
 %extend BlockVector{
   std::string __str__() { return $self->toString(); }
@@ -85,4 +90,7 @@
     PyErr_SetNone(PyExc_StopIteration);
     return NULL;
   }
+%insert("python") %{
+    __next__ = next
+%}
 }

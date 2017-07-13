@@ -113,13 +113,6 @@ private:
   */
   bool _has2Bodies;
 
-  /** Absolute position in the "global" vector of constraints (for
-      example, the one handled by lsodar) */
-  unsigned int _absolutePosition;
-
-  /** Absolute position in the "global" vector of constraints for the proj formulation. */
-  unsigned int _absolutePositionProj;
-
   /** relation between constrained variables and states variables
    * vector of output derivatives
    * y[0] is y, y[1] is yDot and so on
@@ -398,26 +391,6 @@ public:
       \return bool : true if two ds, else false
    */
   bool has2Bodies() const {return _has2Bodies;}
-
-  unsigned int absolutePosition()
-  {
-    return _absolutePosition;
-  };
-
-  void setAbsolutePosition(unsigned int v)
-  {
-    _absolutePosition = v;
-  };
-
-  unsigned int absolutePositionProj()
-  {
-    return _absolutePositionProj;
-  };
-
-  void setAbsolutePositionProj(unsigned int v)
-  {
-    _absolutePositionProj = v;
-  };
 
   // -- y --
 

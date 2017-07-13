@@ -179,8 +179,8 @@ static void computeSparseAWpB(
   /*  AWpB += AW */
   NM_gemm(1., Amat, W, 1., AWpB);
 
-  freeNumericsMatrix(Amat);
-  freeNumericsMatrix(Bmat);
+  NM_free(Amat);
+  NM_free(Bmat);
   free(Amat);
   free(Bmat);
 }
@@ -819,7 +819,7 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers* equation
 
   if (!options->dWork)
   {
-    freeNumericsMatrix(AWpB);
+    NM_free(AWpB);
 
     free(AWpB);
   }

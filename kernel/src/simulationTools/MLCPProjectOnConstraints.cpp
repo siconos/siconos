@@ -28,6 +28,9 @@
 #include "Model.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
 
+// #define DEBUG_NOCOLOR
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
 #include "debug.h"
 #include <mlcp_cst.h>
 
@@ -37,7 +40,7 @@ using namespace Siconos;
 //#define MLCPPROJ_WITH_CT
 void MLCPProjectOnConstraints::initOSNSMatrix()
 {
-  _M.reset(new OSNSMatrixProjectOnConstraints(0, 0, _MStorageType));
+  _M.reset(new OSNSMatrixProjectOnConstraints(0, 0, _numericsMatrixStorageType));
   _n = 0;
   _m = 0;
   _curBlock = 0;
@@ -86,13 +89,7 @@ void MLCPProjectOnConstraints::updateInteractionBlocks()
   //    computed if 3==true.
   //
 
-#ifdef MLCPPROJ_DEBUG
-  std::cout <<  " " << std::endl;
-  std::cout <<  "===================================================" << std::endl;
-  std::cout <<  "MLCPProjectOnConstraints::updateInteractionBlocks()" << std::endl;
-#endif
-
-
+  DEBUG_BEGIN(" MLCPProjectOnConstraints::updateInteractionBlocks()\n");
 
   // Get index set from Simulation
   SP::InteractionsGraph indexSet = simulation()->indexSet(indexSetLevel());
@@ -140,15 +137,11 @@ void MLCPProjectOnConstraints::updateInteractionBlocks()
       SP::Interaction inter = indexSet->bundle(*vi);
       unsigned int nslawSize = std11::static_pointer_cast<OSNSMatrixProjectOnConstraints>
         (_M)->computeSizeForProjection(inter);
-#ifdef MLCPPROJ_DEBUG
-      std::cout << " " << std::endl;
-      std::cout <<  "Start to work on Interaction " << inter->number() << "of vertex" << *vi <<  std::endl;
-#endif
+
+      DEBUG_PRINTF("Start to work on Interaction %i of vertex %p\n", inter->number(), *vi);
       if (! indexSet->blockProj[*vi])
       {
-#ifdef MLCPPROJ_DEBUG
-        std::cout <<  "Allocation of blockProj of size " << nslawSize << " x " << nslawSize << " for interaction " << inter->number() <<  std::endl;
-#endif
+        DEBUG_PRINTF("Allocation of blockProj of size %i x %i for interaction %i \n",nslawSize, nslawSize,inter->number());
         indexSet->blockProj[*vi].reset(new SimpleMatrix(nslawSize, nslawSize));
       }
 
@@ -156,11 +149,6 @@ void MLCPProjectOnConstraints::updateInteractionBlocks()
       {
         computeDiagonalInteractionBlock(*vi);
       }
-
-
-
-
-
 
       /* on a undirected graph, out_edges gives all incident edges */
       InteractionsGraph::OEIterator oei, oeiend;
@@ -224,6 +212,7 @@ void MLCPProjectOnConstraints::updateInteractionBlocks()
           {
             indexSet->upper_blockProj[ed1].reset(new SimpleMatrix(nslawSize1, nslawSize2));
             initialized[indexSet->upper_blockProj[ed1]] = false;
+            
 #ifdef MLCPPROJ_DEBUG
             std::cout <<  "Allocation of upper_blockProj " <<  indexSet->upper_blockProj[ed1].get() << " of edge " << ed1 << " of size " << nslawSize1 << " x " << nslawSize2 << " for interaction " << inter1->number() << " and interaction " <<  inter2->number() <<  std::endl;
 #endif
@@ -300,10 +289,8 @@ void MLCPProjectOnConstraints::updateInteractionBlocks()
       }
     }
   }
-#ifdef MLCPPROJ_DEBUG
-  displayBlocks(indexSet);
-#endif
-
+  DEBUG_EXPR(displayBlocks(indexSet););
+  DEBUG_END(" MLCPProjectOnConstraints::updateInteractionBlocks()\n");
 }
 void MLCPProjectOnConstraints::displayBlocks(SP::InteractionsGraph indexSet)
 {
@@ -1000,17 +987,44 @@ void MLCPProjectOnConstraints::computeInteractionBlock(const InteractionsGraph::
 
 void MLCPProjectOnConstraints::computeqBlock(InteractionsGraph::VDescriptor& vertex_inter, unsigned int pos)
 {
+  DEBUG_BEGIN("MLCPProjectOnConstraints::computeqBlock(InteractionsGraph::VDescriptor& vertex_inter, unsigned int pos)\n");
+  
   SP::InteractionsGraph indexSet = simulation()->indexSet(indexSetLevel());
   SP::Interaction inter = indexSet->bundle(vertex_inter);
   unsigned int sizeY = std11::static_pointer_cast<OSNSMatrixProjectOnConstraints>
     (_M)->computeSizeForProjection(inter);
+  DEBUG_PRINTF("pos = %i",pos);
   for (unsigned int i = 0; i < sizeY; i++)
     _q->setValue(pos + i, inter->y(0)->getValue(0 + i));
-#ifdef MLCPPROJ_DEBUG
-  printf("MLCPProjectOnConstraints::computeqBlock, _q from y(0)\n");
-  _q->display();
-#endif
+
+  DEBUG_EXPR(_q->display(););
+  DEBUG_END("MLCPProjectOnConstraints::computeqBlock(InteractionsGraph::VDescriptor& vertex_inter, unsigned int pos)\n");
+ 
 }
+
+void MLCPProjectOnConstraints::computeq(double time)
+{
+  if (_q->size() != _sizeOutput)
+    _q->resize(_sizeOutput);
+  _q->zero();
+
+  // === Get index set from Simulation ===
+  SP::InteractionsGraph indexSet = simulation()->indexSet(indexSetLevel());
+  // === Loop through "active" Interactions (ie present in
+  // indexSets[level]) ===
+
+  unsigned int pos = 0;
+  InteractionsGraph::VIterator ui, uiend;
+  for (std11::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
+  {
+    // Compute q, this depends on the type of non smooth problem, on
+    // the relation type and on the non smooth law
+    pos = indexSet->properties(*ui).absolute_position_proj;
+    computeqBlock(*ui, pos); // free output is saved in y
+  }
+}
+
+
 
 void MLCPProjectOnConstraints::postCompute()
 {
@@ -1050,7 +1064,7 @@ void MLCPProjectOnConstraints::postCompute()
     SP::Interaction inter = indexSet->bundle(*ui);
     // Get the relative position of inter-interactionBlock in the vector w
     // or z
-    pos = _M->getPositionOfInteractionBlock(*inter);
+    pos = indexSet->properties(*ui).absolute_position_proj;
     RELATION::TYPES relationType = inter->relation()->getType();
     if (relationType == NewtonEuler)
     {

@@ -43,7 +43,7 @@ void mlcp_pgs_sbm_buildLocalProblem(int rowNumber, const SparseBlockStructuredMa
   assert(blmat->blocksize0[rowNumber] > 0);
 
   /* Position in vector blmat->block of the required diagonal block */
-  int diagPos = getDiagonalBlockPos(blmat, rowNumber);
+  int diagPos = SBM_get_position_diagonal_block(blmat, rowNumber);
   /* Gets diagonal block = MLocal  */
   local_problem->M->matrix0 = blmat->block[diagPos];
   local_problem->size = blmat->blocksize0[rowNumber];

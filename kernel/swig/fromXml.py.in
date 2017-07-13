@@ -90,7 +90,7 @@ def _createDS(dsType, dsxml, cArgsDS, dsOpt):
     _additionalInputsDS(dsxml, newDS, dsOpt)
     return newDS
 
-def _createRelation(relType, relxml, cArgsR, relOpt):
+def _create_relation(relType, relxml, cArgsR, relOpt):
     '''
     Construct a Relation based on the xml representation.
     For now we support only one constructor which is specified in the schema
@@ -374,15 +374,16 @@ def buildModelXML(xmlFile):
 
     # now the Interactions
     for interxml in nsdsxml.Interaction_Definition.Interaction:
-        interContent = interxml.Interaction_Content.__dict__
+        inter_content = interxml.Interaction_Content.__dict__
         for relName in pluginsR.keys():
-            if interContent[relName] is not None:
-                relxml = interContent[relName]
-                relation = _createRelation(relName, relxml, constructorArgsR[relName], pluginsR[relName])
+            if inter_content[relName] is not None:
+                relxml = inter_content[relName]
+                relation =_create_relation(relName, relxml,
+                                           constructorArgsR[relName],
+                                           pluginsR[relName])
         for nslawName in dataNSL.keys():
-            print(interContent[nslawName])
-            if interContent[nslawName] is not None:
-                nslxml = interContent[nslawName]
+            if inter_content[nslawName] is not None:
+                nslxml = inter_content[nslawName]
                 nslaw = getattr(SK, nslawName)(nslxml.size)
                 _additionalInputsNSLaw(nslxml, nslaw, dataNSL[nslawName])
 
@@ -414,6 +415,7 @@ def buildModelXML(xmlFile):
         exit(1)
 
     # OSI
+    sim.setNonSmoothDynamicalSystemPtr(nsds)
     allOSI = []
     for osiType in dataOSI.keys():
         for osixml in simxml.OneStepIntegrator_Definition.__dict__[osiType]:

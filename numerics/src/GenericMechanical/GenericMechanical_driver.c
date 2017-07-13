@@ -311,7 +311,7 @@ void genericMechanicalProblem_GS(GenericMechanicalProblem* pGMP, double * reacti
       case SICONOS_NUMERICS_PROBLEM_EQUALITY:
       {
         NumericsMatrix M;
-        fillNumericsMatrix(&M, NM_DENSE, curSize, curSize, diagBlock);
+        NM_fill(&M, NM_DENSE, curSize, curSize, diagBlock);
 
         memcpy(curProblem->q, &(pGMP->q[posInX]), curSize * sizeof(double));
         NM_row_prod_no_diag(pGMP->size, curSize, currentRowNumber, posInX, numMat, reaction, curProblem->q, NULL, 0);
@@ -320,7 +320,7 @@ void genericMechanicalProblem_GS(GenericMechanicalProblem* pGMP, double * reacti
         resLocalSolver = NM_gesv(&M, sol, true);
 
         M.matrix0 = NULL;
-        freeNumericsMatrix(&M);
+        NM_free(&M);
         break;
       }
       case SICONOS_NUMERICS_PROBLEM_LCP:
@@ -429,9 +429,9 @@ void genericMechanicalProblem_GS(GenericMechanicalProblem* pGMP, double * reacti
   FILE * titi  = fopen("GMP_FAILED_scilab.txt", "w");
   FILE * tata  = fopen("SBM.txt", "w");
   printf("GMP_drivers, print file SBM\n");
-  printInFileSBM(pGMP->M->matrix1,tata);
+  SBM_write_in_file(pGMP->M->matrix1,tata);
   fclose(tata);
-  printInFileSBMForScilab(pGMP->M->matrix1,titi);
+  SBM_write_in_fileForScilab(pGMP->M->matrix1,titi);
   fclose(titi);
   */
   options->iparam[3] = it;

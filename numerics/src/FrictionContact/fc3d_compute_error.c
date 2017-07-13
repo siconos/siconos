@@ -67,7 +67,7 @@ int fc3d_compute_error(
 
   cblas_dcopy(n , problem->q , incx , w , incy); // w <-q
   // Compute the current velocity
-  prodNumericsMatrix3x3(n, n, problem->M, z, w);
+  NM_prod_mv_3x3(n, n, problem->M, z, w);
 
   *error = 0.;
   int ic, ic3;
@@ -174,7 +174,7 @@ int fc3d_Tresca_compute_error(FrictionContactProblem* problem,
   cblas_dcopy(n , problem->q , incx , w , incy); // w <-q
   // Compute the current velocity
   /* NM_gemv(1.0, problem->M, z, 1.0, w); */
-  prodNumericsMatrix3x3(n, n, problem->M, z, w);
+  NM_prod_mv_3x3(n, n, problem->M, z, w);
   *error = 0.;
   int ic, ic3;
   double worktmp[3];

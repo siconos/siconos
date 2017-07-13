@@ -41,8 +41,8 @@ int globalFrictionContact_printInFile(GlobalFrictionContactProblem*  problem, FI
   fprintf(file, "%d\n", d);
   int nc = problem->numberOfContacts;
   fprintf(file, "%d\n", nc);
-  printInFile(problem->M, file);
-  printInFile(problem->H, file);
+  NM_write_in_file(problem->M, file);
+  NM_write_in_file(problem->H, file);
   for (i = 0; i < problem->M->size1; i++)
   {
     fprintf(file, "%32.24e ", problem->q[i]);
@@ -69,13 +69,13 @@ int globalFrictionContact_newFromFile(GlobalFrictionContactProblem* problem, FIL
   problem->dimension = d;
   CHECK_IO(fscanf(file, "%d\n", &nc), &info);
   problem->numberOfContacts = nc;
-  problem->M = newNumericsMatrix();
+  problem->M = NM_new();
 
-  info = newFromFile(problem->M, file);
+  info = NM_new_from_file(problem->M, file);
   if (info) goto fail;
 
-  problem->H = newNumericsMatrix();
-  info = newFromFile(problem->H, file);
+  problem->H = NM_new();
+  info = NM_new_from_file(problem->H, file);
   if (info) goto fail;
 
   problem->q = (double *) malloc(problem->M->size1 * sizeof(double));
@@ -106,14 +106,14 @@ void freeGlobalFrictionContactProblem(GlobalFrictionContactProblem* problem)
 
   if (problem->M)
   {
-    freeNumericsMatrix(problem->M);
+    NM_free(problem->M);
     free(problem->M);
     problem->M = NULL;
   }
 
   if (problem->H)
   {
-    freeNumericsMatrix(problem->H);
+    NM_free(problem->H);
     free(problem->H);
     problem->H = NULL;
   }
@@ -228,7 +228,7 @@ void gfc3d_free_workspace(GlobalFrictionContactProblem* problem)
   {
     if (problem->workspace->factorized_M)
     {
-      freeNumericsMatrix(problem->workspace->factorized_M);
+      NM_free(problem->workspace->factorized_M);
       free(problem->workspace->factorized_M);
       problem->workspace->factorized_M = NULL;
     }

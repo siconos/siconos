@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-/*! \file NewtonEulerR.hpp
+/*! \file PrismaticJointR.hpp
 
 */
 
@@ -60,22 +60,18 @@
  * rot = lambda V,q: qmul(q, qmul(V, qinv(q)))
  */
 
-/**axe is the axis of the prismatic joint, in the frame of the first DS, d1.*/
-PrismaticJointR::PrismaticJointR(SP::NewtonEulerDS d1, SP::NewtonEulerDS d2, SP::SiconosVector axis)
+PrismaticJointR::PrismaticJointR(SP::SiconosVector axis, bool absoluteRef,
+                                 SP::NewtonEulerDS d1, SP::NewtonEulerDS d2)
   : NewtonEulerJointR()
+  , _axis0(std11::make_shared<SiconosVector>(3))
 {
-  _axis0 = axis;
-  computeFromInitialPosition(d1->q(), d2->q(), false);
+  _axes.resize(1);
+  setAbsolute(absoluteRef);
+  setAxis(0, axis);
+  if (d1)
+    setInitialConditions(d1->q(), d2 ? d2->q() : SP::SiconosVector());
 }
-/*axis is the axis of the prismatic joint, in the absolute frame.*/
-PrismaticJointR::PrismaticJointR(SP::NewtonEulerDS d1, SP::SiconosVector axis,
-                                 bool absoluteRef)
-  : NewtonEulerJointR()
-{
-  //    _d1=NULL;
-  _axis0 = axis;
-  computeFromInitialPosition(d1->q(), SP::SiconosVector(), absoluteRef);
-}
+
 void PrismaticJointR::displayInitialPosition()
 {
   std::cout << "Prismatic axis :\n";
@@ -87,10 +83,23 @@ void PrismaticJointR::displayInitialPosition()
             << " " << _cq2q103 << " " << _cq2q104 << "\n";
 }
 
-void PrismaticJointR::computeFromInitialPosition(SP::SiconosVector q1,
-                                                 SP::SiconosVector q2,
-                                                 bool absoluteRef)
+void PrismaticJointR::setInitialConditions(SP::SiconosVector q1,
+                                           SP::SiconosVector q2)
 {
+  *_axis0 = *_axes[0];
+
+  if (_absoluteRef)
+  {
+    // Adjust axis to be in q1 frame
+    boost::math::quaternion<double> quat1((*q1)(3), (*q1)(4), (*q1)(5), (*q1)(6));
+    boost::math::quaternion<double> quatA(0, _axis0->getValue(0),
+                                       _axis0->getValue(1), _axis0->getValue(2));
+    boost::math::quaternion<double> tmp = (1.0/quat1) * quatA * quat1;
+    _axis0->setValue(0, tmp.R_component_2());
+    _axis0->setValue(1, tmp.R_component_3());
+    _axis0->setValue(2, tmp.R_component_4());
+  }
+
   SP::SiconosVector q2i(new SiconosVector(7));
   q2i->zero();
   q2i->setValue(3, 1);
@@ -100,17 +109,6 @@ void PrismaticJointR::computeFromInitialPosition(SP::SiconosVector q1,
 
   ::boost::math::quaternion<double>    quat1(q1->getValue(3), q1->getValue(4), q1->getValue(5), q1->getValue(6));
   ::boost::math::quaternion<double>    quat2(q2i->getValue(3), q2i->getValue(4), q2i->getValue(5), q2i->getValue(6));
-
-  if (absoluteRef)
-  {
-    // Adjust axis to be in q1 frame
-    boost::math::quaternion<double> quatA(0, _axis0->getValue(0),
-                                          _axis0->getValue(1), _axis0->getValue(2));
-    boost::math::quaternion<double> tmp = 1.0/quat1 * quatA * quat1;
-    _axis0->setValue(0, tmp.R_component_2());
-    _axis0->setValue(1, tmp.R_component_3());
-    _axis0->setValue(2, tmp.R_component_4());
-  }
 
   computeV1V2FromAxis();
 
@@ -722,23 +720,15 @@ void PrismaticJointR::computeJachqDoF(double time, Interaction& inter,
   }
 }
 
-/** Compute the vector of linear and angular velocities of the free axes */
-void PrismaticJointR::computeVelDoF(double time, BlockVector& q0, SiconosVector& v)
+void PrismaticJointR::_normalDoF(SiconosVector& ans, const BlockVector& q0, int axis,
+                                 bool absoluteRef)
 {
-}
-
-/** Project a vector (assumed to be in q1 frame) onto the given
- * 0-indexed free axis. Useful for calculating velocities in the
- * axis, or for calculating axis-aligned forces applied to connected
- * bodies. */
-void PrismaticJointR::projectOntoAxis(SP::SiconosVector v, SP::SiconosVector ans,
-                                      int axis)
-{
+  assert(axis == 0);
   if (axis != 0) return;
 
-  // We assume that _axis0 is normalized
-  double L = (*v)(0)*(*_axis0)(0) + (*v)(1)*(*_axis0)(1) + (*v)(2)*(*_axis0)(2);
-  (*ans)(0) = (*_axis0)(0) * L;
-  (*ans)(1) = (*_axis0)(1) * L;
-  (*ans)(2) = (*_axis0)(2) * L;
+  // We assume that a is normalized.
+  ans = *_axis0;
+
+  if (absoluteRef)
+    changeFrameBodyToAbs(*q0.getAllVect()[0], ans);
 }

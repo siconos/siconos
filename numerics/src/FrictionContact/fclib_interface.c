@@ -101,7 +101,7 @@ FrictionContactProblem* from_fclib_local(const struct fclib_local* fclib_problem
 
   W.nz = fclib_problem->W->nz;
 
-  sparseToSBM(problem->dimension, &W, problem->M->matrix1);
+  SBM_from_csparse(problem->dimension, &W, problem->M->matrix1);
 
   free(W.p);
   free(W.i);
@@ -179,8 +179,8 @@ int frictionContact_fclib_write(FrictionContactProblem* problem, char * title, c
   else if (problem ->M->storageType == NM_SPARSE_BLOCK) /* Sparse block storage */
   {
     spmat = (CSparseMatrix*)malloc(sizeof(CSparseMatrix));
-    int MAYBE_UNUSED res = SBMtoSparseInitMemory(problem ->M->matrix1, spmat);
-    res = SBMtoSparse(problem->M->matrix1, spmat);
+    int MAYBE_UNUSED res = SBM_to_sparse_init_memory(problem ->M->matrix1, spmat);
+    res = SBM_to_sparse(problem->M->matrix1, spmat);
     fclib_problem->W->nzmax = (int) spmat->nzmax;
     fclib_problem->W->m = (int) spmat->m;
     fclib_problem->W->n = (int) spmat->n;

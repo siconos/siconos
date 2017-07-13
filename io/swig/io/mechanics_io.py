@@ -1254,8 +1254,7 @@ class Hdf5():
 
             joint_type = self.joints()[name].attrs['type']
             joint_class = getattr(joints, joint_type)
-            absolute = self.joints()[name].attrs.get('absolute', None)
-            absolute = [[True if absolute else False], []][absolute is None]
+            absolute = not not self.joints()[name].attrs.get('absolute', True)
             allow_self_collide = self.joints()[name].attrs.get(
                 'allow_self_collide',None)
             stops = self.joints()[name].attrs.get('stops',None)
@@ -1270,31 +1269,30 @@ class Hdf5():
                 ds2_name = self.joints()[name].attrs['object2']
                 ds2 = topo.getDynamicalSystem(ds2_name)
                 try:
-                    joint = joint_class(ds1, ds2,
-                                        self.joints()[name].attrs['pivot_point'],
+                    joint = joint_class(self.joints()[name].attrs['pivot_point'],
                                         self.joints()[name].attrs['axis'],
-                                        *absolute)
+                                        absolute, ds1, ds2)
                 except NotImplementedError:
                     try:
-                        joint = joint_class(ds1, ds2,
-                                            self.joints()[name].attrs['pivot_point'],
-                                            *absolute)
+                        joint = joint_class(self.joints()[name].attrs['pivot_point'],
+                                            absolute, ds1, ds2)
                     except NotImplementedError:
-                        joint = joint_class(ds1, ds2, *absolute)
+                        joint = joint_class(absolute, ds1, ds2)
 
             else:
                 try:
-                    joint = joint_class(ds1,
-                                        self.joints()[name].attrs['pivot_point'],
+                    joint = joint_class(self.joints()[name].attrs['pivot_point'],
                                         self.joints()[name].attrs['axis'],
-                                        *absolute)
+                                        absolute, ds1)
                 except NotImplementedError:
                     try:
-                        joint = joint_class(ds1,
-                                            self.joints()[name].attrs['pivot_point'],
-                                            *absolute)
+                        joint = joint_class(self.joints()[name].attrs['pivot_point'],
+                                            absolute, ds1)
                     except NotImplementedError:
-                        joint = joint_class(ds1, *absolute)
+                        try:
+                            joint = joint_class(absolute, ds1)
+                        except NotImplementedError:
+                            joint = joint_class(ds1)
 
             if allow_self_collide is not None:
                 joint.setAllowSelfCollide(not not allow_self_collide)
@@ -1310,6 +1308,8 @@ class Hdf5():
                 assert np.shape(stops)[1] == 3, 'Joint stops shape must be (?,3)'
                 if nslaws is None:
                     nslaws = [Kernel.NewtonImpactNSL(0.0)]*np.shape(stops)[0]
+                elif isinstance(nslaws,bytes):
+                    nslaws = [self._nslaws[nslaws.decode('utf-8')]]*np.shape(stops)[0]
                 elif isinstance(nslaws,str):
                     nslaws = [self._nslaws[nslaws]]*np.shape(stops)[0]
                 else:
@@ -1326,10 +1326,13 @@ class Hdf5():
 
             # The per-axis friction NSL, can be ''
             if friction is not None:
-                if isinstance(friction,basestring):
+                if isinstance(friction,str):
                     friction = [friction]
+                elif isinstance(friction,bytes):
+                    friction = [friction.decode('utf-8')]
                 else:
-                    assert hasattr(friction, '__iter__')
+                    friction = [(f.decode('utf-8') if isinstance(f,bytes) else f)
+                                for f in friction]
                 for ax,fr_nslaw in enumerate(friction):
                     if fr_nslaw == '':  # no None in hdf5, use empty string
                         continue        # instead for no NSL on an axis
@@ -2268,14 +2271,13 @@ class Hdf5():
             if allow_self_collide in [True, False]:
                 joint.attrs['allow_self_collide']=allow_self_collide
             if nslaws is not None:
-                joint.attrs['nslaws'] = nslaws # either name of one nslaw, or a
-                                               # list of names same length as stops
+                # either name of one nslaw, or a list of names same length as stops
+                joint.attrs['nslaws'] = np.array(nslaws, dtype='S')
             if stops is not None:
                 joint.attrs['stops'] = stops # must be a table of [[axis,pos,dir]..]
             if friction is not None:
-                joint.attrs['friction'] = friction # must be an NSL name (e.g.
-                                                   # RelayNSL), or list of same
-
+                # must be an NSL name (e.g.  RelayNSL), or list of same
+                joint.attrs['friction'] = np.array(friction, dtype='S')
 
     def addBoundaryCondition(self, name, object1, indices=None, bc_class='HarmonicBC',
                              v=None, a=None, b=None, omega=None, phi=None):
@@ -2319,6 +2321,7 @@ class Hdf5():
             theta=0.50001,
             Newton_options=Kernel.SICONOS_TS_NONLINEAR,
             Newton_max_iter=20,
+            Newton_update_interactions=False,
             set_external_forces=None,
             solver=Numerics.SICONOS_FRICTION_3D_NSGS,
             itermax=100000,
@@ -2498,6 +2501,7 @@ class Hdf5():
         simulation.setNewtonOptions(Newton_options)
         simulation.setNewtonMaxIteration(Newton_max_iter)
         simulation.setNewtonTolerance(1e-10)
+        simulation.setNewtonUpdateInteractionsPerIteration(Newton_update_interactions)
 
         print ('import scene ...')
         self.importScene(t0, body_class, shape_class, face_class, edge_class)
