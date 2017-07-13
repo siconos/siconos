@@ -29,7 +29,7 @@
 #include "NumericsSparseMatrix.h"
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
-// #define DEBUG_MESSAGES 1
+// #define DEBUG_MESSAGES
 #include "debug.h"
 
 // Default constructor: empty matrix, default storage
@@ -154,6 +154,7 @@ unsigned OSNSMatrix::updateSizeAndPositions(InteractionsGraph& indexSet)
     assert(indexSet.descriptor(indexSet.bundle(*vd)) == *vd);
     indexSet.properties(*vd).absolute_position = dim;
     dim += (indexSet.bundle(*vd)->nonSmoothLaw()->size());
+    DEBUG_PRINTF("Position = %i for interaction %i\n",dim, indexSet.bundle(*vd)->number()  );
     assert(indexSet.properties(*vd).absolute_position < dim);
   }
 
@@ -248,7 +249,7 @@ void OSNSMatrix::fillW(InteractionsGraph& indexSet, bool update)
 
       SP::Interaction inter1 = indexSet.bundle(vd1);
       SP::Interaction inter2 = indexSet.bundle(vd2);
-      //pos1 = indexSet.properties(vd1).absolute_position;
+      pos = indexSet.properties(vd1).absolute_position;
 
       assert(indexSet.is_vertex(inter2));
 
