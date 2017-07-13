@@ -98,7 +98,6 @@ void MoreauJeanCombinedProjectionOSI::fillDSLinks(Interaction &inter, Interactio
   {
     p0 = NewtonEulerR::p0;
   }
-  DSlink[p0]->display();
   if (ds1 != ds2)
   {
     DEBUG_PRINT("ds1 != ds2\n");
@@ -118,7 +117,6 @@ void MoreauJeanCombinedProjectionOSI::fillDSLinks(Interaction &inter, Interactio
     if (relationType == Lagrangian)
     {
       LagrangianDS& lds = *std11::static_pointer_cast<LagrangianDS> (ds1);
-      DSlink[p0]->display();
       DSlink[p0]->setVectorPtr(0,lds.p(0));
     }
     else if (relationType == NewtonEuler)
