@@ -39,7 +39,8 @@ MoreauJeanBilbaoOSI::MoreauJeanBilbaoOSI():
   _steps=1;
 }
 
-void MoreauJeanBilbaoOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds)
+void MoreauJeanBilbaoOSI::initializeDynamicalSystem(const Model& m, double t,
+                                                    SP::DynamicalSystem ds)
 {
   // Get work buffers from the graph
   // const DynamicalSystemsGraph::VDescriptor& dsv = _dynamicalSystemsGraph->descriptor(ds);

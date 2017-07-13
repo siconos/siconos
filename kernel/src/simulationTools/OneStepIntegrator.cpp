@@ -54,7 +54,7 @@ OneStepIntegrator::_initializeDSWorkVectors(SP::DynamicalSystem ds)
   return wv;
 }
 
-void OneStepIntegrator::initialize( Model& m )
+void OneStepIntegrator::initialize( const Model& m )
 {
   if (_extraAdditionalTerms)
   {

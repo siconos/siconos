@@ -73,7 +73,9 @@ MoreauJeanDirectProjectionOSI::MoreauJeanDirectProjectionOSI(double theta, doubl
   _activateYVelThreshold =   SICONOS_MPC_DEFAULT_ACTIVATION_VEL_THRESHOLD;
 }
 
-void MoreauJeanDirectProjectionOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds)
+void MoreauJeanDirectProjectionOSI::initializeDynamicalSystem(const Model& m,
+                                                              double t,
+                                                              SP::DynamicalSystem ds)
 {
   DEBUG_BEGIN("MoreauJeanDirectProjectionOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds) \n");
   MoreauJeanOSI::initializeDynamicalSystem(m, t, ds);

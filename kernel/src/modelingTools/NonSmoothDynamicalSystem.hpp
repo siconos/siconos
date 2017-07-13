@@ -109,13 +109,24 @@ public:
   }
 
   /** add a dynamical system into the DS graph (as a vertex)
-   * \param ds a pointer to the system to add
+   * \param ds a pointer to the system to add.
+   * \param osi Optionally specify an OSI to associate with the DS.
+   * \param time If osi is specified, time should be specified as well.
    */
-  inline void insertDynamicalSystem(SP::DynamicalSystem ds)
-  {
-    _topology->insertDynamicalSystem(ds);
-    _mIsLinear = ((ds)->isLinear() && _mIsLinear);
-  };
+  void insertDynamicalSystem(SP::DynamicalSystem ds,
+                             SP::OneStepIntegrator osi = SP::OneStepIntegrator(),
+                             SP::Model model = SP::Model(),
+                             double time = -1.0);
+
+  /** set and initialize the OSI to be used to integrate a DS
+   * \param ds The DS to link to an OSI.
+   * \param osi The OSI to link to a DS.
+   * \param time The time to use for initializing the DS work vectors
+   *             for the OSI, usually either t0 of the Model, or the
+   *             current Simulation time.
+   */
+  void setOSI(SP::DynamicalSystem ds, SP::OneStepIntegrator osi,
+              Model& model, double time);
 
   /** get Dynamical system number I
    * \param nb the identifier of the DynamicalSystem to get

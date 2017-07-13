@@ -235,7 +235,8 @@ void LsodarOSI::jacobianfx(integer* sizeOfX, doublereal* time, doublereal* x, in
 }
 
 
-void LsodarOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds)
+void LsodarOSI::initializeDynamicalSystem(const Model& m, double t,
+                                          SP::DynamicalSystem ds)
 {
   DEBUG_BEGIN("LsodarOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds)\n");
   // Get work buffers from the graph
@@ -353,7 +354,7 @@ void LsodarOSI::fillDSLinks(Interaction &inter,
   }
 }
 
-void LsodarOSI::initialize(Model& m)
+void LsodarOSI::initialize(const Model& m)
 {
   DEBUG_BEGIN("LsodarOSI::initialize(Model& m)\n");
   _xWork.reset(new BlockVector());

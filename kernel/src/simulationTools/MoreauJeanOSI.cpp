@@ -102,7 +102,8 @@ SP::SiconosMatrix MoreauJeanOSI::WBoundaryConditions(SP::DynamicalSystem ds)
 }
 
 
-void MoreauJeanOSI::initializeDynamicalSystem(Model&, double t, SP::DynamicalSystem ds)
+void MoreauJeanOSI::initializeDynamicalSystem(const Model&, double t,
+                                              SP::DynamicalSystem ds)
 {
   DEBUG_BEGIN("MoreauJeanOSI::initializeDynamicalSystem(Model&, double t, SP::DynamicalSystem ds)\n");
   VectorOfVectors& workVectors = *_initializeDSWorkVectors(ds);

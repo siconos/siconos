@@ -87,7 +87,8 @@ void SlidingReducedOrderObserver::initialize(const Model& m)
   _integrator.reset(new ZeroOrderHoldOSI());
   std11::static_pointer_cast<ZeroOrderHoldOSI>(_integrator)->setExtraAdditionalTerms(
       std11::shared_ptr<ControlZOHAdditionalTerms>(new ControlZOHAdditionalTerms()));
-  _model->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DS);
+  _model->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DS, _integrator,
+                                                            _model, t0);
 
   // Add the necessary properties
   DynamicalSystemsGraph& DSG0 = *_model->nonSmoothDynamicalSystem()->topology()->dSG(0);
@@ -106,8 +107,7 @@ void SlidingReducedOrderObserver::initialize(const Model& m)
 
   // all necessary things for simulation
   _simulation.reset(new TimeStepping(_td, 0));
-  _simulation->setNonSmoothDynamicalSystemPtr(_model->nonSmoothDynamicalSystem());
-  _simulation->prepareIntegratorForDS(_integrator, _DS, _model, t0);
+  _simulation->insertIntegrator(_integrator);
   _model->setSimulation(_simulation);
   _model->initialize();
 
