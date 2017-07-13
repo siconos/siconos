@@ -39,8 +39,8 @@ set("CXXVERSION_LAST" "${CXXVERSION_CUR}"
 # Check compiler version.
 if(CMAKE_COMPILER_IS_GNUCXX)
   detect_cxx_compiler_version(compiler_version)
-  if(compiler_version VERSION_LESS "4.4")
-    message(FATAL_ERROR "gcc greater than 4.4 needed")
+  if(compiler_version VERSION_LESS "4.5")
+    message(FATAL_ERROR "gcc greater than 4.5 needed")
   endif()  
 endif()
 
