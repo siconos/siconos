@@ -507,8 +507,9 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
     DEBUG_PRINTF("TimeStepping::newtonSolve(). _newtonNbIterations = %i\n", _newtonNbIterations);
     prepareNewtonIteration();
     computeFreeState();
-    // bool hasNSProblems = (!_allNSProblems->empty() &&   indexSet0.size() > 0) ? true : false;
-    // if (hasNSProblems)
+    //bool hasNSProblems = (!_allNSProblems->empty() &&   indexSet0.size() > 0) ? true : false;
+    bool hasNSProblems = (!_allNSProblems->empty()) ? true : false;
+    if (hasNSProblems)
       info = computeOneStepNSProblem(SICONOS_OSNSP_TS_VELOCITY);
     // Check output from solver (convergence or not ...)
     if (!checkSolverOutput)
@@ -519,8 +520,8 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
 
     update();
 
-    // hasNSProblems = (!_allNSProblems->empty() &&   indexSet0.size() > 0) ? true : false;
-    // if (hasNSProblems)
+    hasNSProblems = (!_allNSProblems->empty()) ? true : false;
+    if (hasNSProblems)
       saveYandLambdaInOldVariables();
   }
 
@@ -547,11 +548,12 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
       // if((*_allNSProblems)[SICONOS_OSNSP_TS_VELOCITY]->simulation())
       // is also relevant here.
       //InteractionsGraph& indexSet0 = *_nsds->topology()->indexSet0();
-      // bool hasNSProblems = (!_allNSProblems->empty() &&   indexSet0.size() > 0) ? true : false;
-      // if (hasNSProblems)
-      // {
+      //bool hasNSProblems = (!_allNSProblems->empty() &&   indexSet0.size() > 0) ? true : false;
+      bool hasNSProblems = (!_allNSProblems->empty()) ? true : false;
+      if (hasNSProblems)
+      {
       info = computeOneStepNSProblem(SICONOS_OSNSP_TS_VELOCITY);
-      // }
+      }
       // Check output from solver (convergence or not ...)
       if (!checkSolverOutput)
         DefaultCheckSolverOutput(info);
@@ -566,16 +568,17 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
           updateInteractionsNewtonIteration();
         updateWorldFromDS();
         //hasNSProblems = (!_allNSProblems->empty() &&   indexSet0.size() > 0) ? true : false;
+        hasNSProblems = (!_allNSProblems->empty()) ? true : false;
         updateOutput();
       }
       _isNewtonConverge = newtonCheckConvergence(criterion);
 
       if (!_isNewtonConverge && !info)
       {
-        //hasNSProblems = (!_allNSProblems->empty() &&   indexSet0.size() > 0) ? true : false;
+        hasNSProblems = (!_allNSProblems->empty()) ? true : false;
 
-        //if (hasNSProblems)
-        saveYandLambdaInOldVariables();
+        if (hasNSProblems)
+          saveYandLambdaInOldVariables();
       }
 
       if (_displayNewtonConvergence)
