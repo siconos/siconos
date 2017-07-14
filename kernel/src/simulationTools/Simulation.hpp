@@ -405,7 +405,7 @@ public:
    *  \param m The Model for initializing the OSI.
    *  \param time The current time for initializing the OSI. */
   void prepareIntegratorForDS(SP::OneStepIntegrator osi, SP::DynamicalSystem ds,
-                              SP::Model m=SP::Model(), double time=0);
+                              SP::Model m, double time);
 
   /** Set an object to automatically manage interactions during the simulation */
   void insertInteractionManager(SP::InteractionManager manager)

@@ -151,7 +151,7 @@ int main(int argc, char* argv[])
     // --- Simulation initialization ---
 
     cout << "====> Initialisation ..." << endl;
-    //bouncingBall->nonSmoothDynamicalSystem()->topology()->setOSI(ball, OSI);
+    s->prepareIntegratorForDS(OSI, ball, bouncingBall, t0)
     bouncingBall->initialize();
 
     // -- set the integrator for the ball --
