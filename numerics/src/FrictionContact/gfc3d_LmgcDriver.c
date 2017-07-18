@@ -10,7 +10,9 @@
 #include "GlobalFrictionContactProblem.h"
 #include "gfc3d_Solvers.h"
 #include "NumericsSparseMatrix.h"
-/* #define DEBUG_MESSAGES 1 */
+#include "numerics_verbose.h"
+/* #define DEBUG_NOCOLOR */
+/* #define DEBUG_MESSAGES */
 /* #define DEBUG_STDOUT */
 #include "debug.h"
 
@@ -42,31 +44,34 @@ int globalFrictionContact_fclib_write(
   const char *path);
 
 int gfc3d_LmgcDriver(double *reaction,
-                                       double *velocity,
-                                       double *globalVelocity,
-                                       double *q,
-                                       double *b,
-                                       double *mu,
-                                       double *Mdata,
-                                       unsigned int nzM,
-                                       unsigned int *rowM,
-                                       unsigned int *colM,
-                                       double* Hdata,
-                                       unsigned int nzH,
-                                       unsigned int *rowH,
-                                       unsigned int *colH,
-                                       unsigned int n,
-                                       unsigned int nc,
-                                       int solver_id,
-                                       int isize,
-                                       int *iparam,
-                                       int dsize,
-                                       double *dparam,
-                                       int verbose,
-                                       int outputFile,
-                                       int freq_output)
+                     double *velocity,
+                     double *globalVelocity,
+                     double *q,
+                     double *b,
+                     double *mu,
+                     double *Mdata,
+                     unsigned int nzM,
+                     unsigned int *rowM,
+                     unsigned int *colM,
+                     double* Hdata,
+                     unsigned int nzH,
+                     unsigned int *rowH,
+                     unsigned int *colH,
+                     unsigned int n,
+                     unsigned int nc,
+                     int solver_id,
+                     int isize,
+                     int *iparam,
+                     int dsize,
+                     double *dparam,
+                     int verbose_in,
+                     int outputFile,
+                     int freq_output)
 {
 
+
+  verbose = verbose_in;
+  
   /* NumericsMatrix M, H; */
   NumericsMatrix * M =NM_new();
   M->storageType = 2; /* sparse */
@@ -97,8 +102,8 @@ int gfc3d_LmgcDriver(double *reaction,
   double * _Mdata = alloc_memory_double(nzM, Mdata);
   _M->x = _Mdata;
 
-  DEBUG_PRINTF("_M->n=%li\t",_M->n);
-  DEBUG_PRINTF("_M->m=%li\n",_M->m);
+  DEBUG_PRINTF("_M->n=%lli\t",_M->n);
+  DEBUG_PRINTF("_M->m=%lli\n",_M->m);
 
   NumericsSparseMatrix * SH =newNumericsSparseMatrix();
   H->matrix2 = SH;
@@ -148,10 +153,11 @@ int gfc3d_LmgcDriver(double *reaction,
   problem->mu = mu;
 
   SolverOptions numerics_solver_options;
-
-  gfc3d_setDefaultSolverOptions(&numerics_solver_options, solver_id);
-
+  
+  int infi = gfc3d_setDefaultSolverOptions(&numerics_solver_options, solver_id);
+  assert(!infi);
   int iSize_min = isize < numerics_solver_options.iSize ? isize : numerics_solver_options.iSize;
+  DEBUG_PRINTF("iSize_min = %i", iSize_min);
   for (int i = 0; i < iSize_min; ++i) 
     numerics_solver_options.iparam[i] = iparam[i];
 
