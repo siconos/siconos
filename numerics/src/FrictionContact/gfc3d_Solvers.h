@@ -217,7 +217,9 @@ extern "C"
 
   void gfc3d_nonsmooth_Newton_AlartCurnier(GlobalFrictionContactProblem* problem, double *reaction, double *velocity, double *globalVelocity, int *info, SolverOptions* options);
 
-
+  void gfc3d_VI_ExtraGradient(GlobalFrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options);
+  
+  int gfc3d_VI_ExtraGradient_setDefaultSolverOptions(SolverOptions* options);
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif

@@ -293,7 +293,7 @@ int _globalLineSearchSparseGP(
   unsigned int maxiter_ls)
 {
   double inf = 1e10;
-  double alphamin = 0.0;
+  double alphamin = 1e-3;
   double alphamax = inf;
 
   double m1 = 0.01, m2 = 0.99;
@@ -681,8 +681,13 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(
     }
 
     /* line search */
-    double alpha = 1;
+    
+    double alpha = 0.1;
 
+   
+
+
+    
     /* set current solution */
     for(unsigned int i = 0; i < globalProblemSize; ++i)
     {
@@ -706,16 +711,41 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(
       }
       );
 
+    int info_ls = 0;
 
-    int info_ls = _globalLineSearchSparseGP(problem,
-                                            computeACFun3x3,
-                                            solution,
-                                            rhs,
-                                            globalVelocity,
-                                            reaction, velocity,
-                                            problem->mu, rho, F, psi, Jcsc,
-                                            tmp2, &alpha, 100);
 
+
+
+    
+    switch (options->iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH])
+    {
+    case SICONOS_FRICTION_3D_NSN_LINESEARCH_NO:
+      /* without line search */
+      info_ls = 1;
+      break;
+
+    case SICONOS_FRICTION_3D_NSN_LINESEARCH_GOLDSTEINPRICE:
+      /* Goldstein Price */
+      info_ls = _globalLineSearchSparseGP(problem,
+                                          computeACFun3x3,
+                                          solution,
+                                          rhs,
+                                          globalVelocity,
+                                          reaction, velocity,
+                                          problem->mu, rho, F, psi, Jcsc,
+                                          tmp2, &alpha, options->iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH_MAXITER]);
+      break;
+    /* case SICONOS_FRICTION_3D_NSN_LINESEARCH_ARMIJO: */
+    /*   /\* FBLSA *\/ */
+    /*   info_ls = frictionContactFBLSA(equation, reaction, velocity, problem->mu, rho, F, Ax, Bx, */
+    /*                                  problem->M, problem->q, AWpB, tmp1, tmp2, &alpha, options->iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH_MAXITER]); */
+    /*   break; */
+    default:
+    {
+      numerics_error("gfc3d_nonsmooth_Newton_AlartCurnier",
+                     "Unknown line search option.\n");
+    }
+    }
 
     cs_spfree(Jcsc);
     if(!info_ls)
