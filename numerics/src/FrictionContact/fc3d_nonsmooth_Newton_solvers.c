@@ -707,27 +707,27 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers* equation
 
     cblas_dcopy_msan(problemSize, tmp1, 1, tmp3, 1);
 
-    switch (options->iparam[11])
+    switch (options->iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH])
     {
-    case -1:
+    case SICONOS_FRICTION_3D_NSN_LINESEARCH_NO:
       /* without line search */
       info_ls = 1;
       break;
 
-    case 0:
+    case SICONOS_FRICTION_3D_NSN_LINESEARCH_GOLDSTEINPRICE:
       /* Goldstein Price */
       info_ls = globalLineSearchGP(equation, reaction, velocity, problem->mu, rho, F, Ax, Bx, problem->M, problem->q, AWpB, tmp1, tmp2, &alpha, options->iparam[12]);
       break;
-    case 1:
+    case SICONOS_FRICTION_3D_NSN_LINESEARCH_ARMIJO:
       /* FBLSA */
       info_ls = frictionContactFBLSA(equation, reaction, velocity, problem->mu, rho, F, Ax, Bx,
                                      problem->M, problem->q, AWpB, tmp1, tmp2, &alpha, options->iparam[12]);
       break;
     default:
-      {
-        numerics_error("fc3d_nonsmooth_Newton_solvers_solve",
-                       "Unknown line search option.\n");
-      }
+    {
+      numerics_error("fc3d_nonsmooth_Newton_solvers_solve",
+                     "Unknown line search option.\n");
+    }
     }
 
     if (!info_ls)
