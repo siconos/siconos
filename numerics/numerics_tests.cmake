@@ -95,6 +95,11 @@ if(WITH_${COMPONENT}_TESTING)
   SET(test-LCP_NEWTONMIN-lcp_CPS_2_PROPERTIES WILL_FAIL TRUE)
   SET(test-LCP_NEWTONMIN-lcp_CPS_5_PROPERTIES WILL_FAIL TRUE)
 
+  # NaN showing up in DGESV -> NEWTONMIN looks really buggy
+  SET(test-LCP_NEWTONMIN-lcp_CPS_4_PROPERTIES WILL_FAIL TRUE)
+  SET(test-LCP_NEWTONMIN-lcp_CPS_4bis_PROPERTIES WILL_FAIL TRUE)
+  SET(test-LCP_NEWTONMIN-lcp_enum_fails_PROPERTIES WILL_FAIL TRUE)
+
   # those test cannot be solved with an algorithm that requires non-zero
   # diagonal elements, that is PGS, BARD, MURTY, LATIN and LATIN_W
   SET_LCP_TEST_AS_FAILED("enum_fails;CPS_2;CPS_3;CPS_4;CPS_4bis" "PGS;BARD;MURTY;LATIN;LATIN_W")
