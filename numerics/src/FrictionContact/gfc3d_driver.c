@@ -26,6 +26,16 @@
 #include "NonSmoothDrivers.h"
 #include "numerics_verbose.h"
 
+
+/* #define DEBUG_NOCOLOR */
+/* #define DEBUG_MESSAGES */
+/* #define DEBUG_STDOUT */
+#include "debug.h"
+
+#ifdef  DEBUG_MESSAGES
+#include "NumericsVector.h"
+#include "NumericsMatrix.h"
+#endif
 int * Global_ipiv = NULL;
 int  Global_MisInverse = 0;
 int  Global_MisLU = 0;
@@ -43,10 +53,11 @@ const char* const  SICONOS_GLOBAL_FRICTION_3D_GAMS_PATHVI_STR = "GFC3D_GAMS_PATH
 const char* const  SICONOS_GLOBAL_FRICTION_3D_VI_EG_STR = "GFC3D_VI_EG";
 
 
-int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity,  SolverOptions* options)
+int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction , double *velocity,
+                 double* globalVelocity,  SolverOptions* options)
 {
   assert(options->isSet);
-
+  DEBUG_EXPR(NV_display(globalVelocity,problem->M->size0););
   if (verbose > 0)
     solver_options_print(options);
 
@@ -156,6 +167,13 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction , doubl
     printf(" ========================== Call PATHVI solver via GAMS for an AVI Friction-Contact 3D problem ==========================\n");
     gfc3d_AVI_gams_pathvi(problem, reaction , globalVelocity, &info, options);
     break;
+  }
+  case SICONOS_GLOBAL_FRICTION_3D_VI_EG:
+  {
+    gfc3d_VI_ExtraGradient(problem, reaction , velocity,
+                           globalVelocity, &info , options);
+    break;
+
   }
   default:
   {

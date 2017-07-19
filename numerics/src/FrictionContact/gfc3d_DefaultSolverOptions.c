@@ -73,6 +73,11 @@ int gfc3d_setDefaultSolverOptions(SolverOptions* options, int solverId)
     info =    gfc3d_nonsmooth_Newton_AlartCurnier_setDefaultSolverOptions(options);
     break;
   }
+  case SICONOS_GLOBAL_FRICTION_3D_VI_EG:
+  {
+    info = gfc3d_VI_ExtraGradient_setDefaultSolverOptions(options);
+    break;
+  }
   default:
   {
     numerics_error("gfc3d_setDefaultSolverOptions", "Unknown Solver");

@@ -203,7 +203,8 @@ extern "C"
       \param info return 0 if the solution is found
       \param options the solver options
   */
-  void gfc3d_AVI_gams_path(GlobalFrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options);
+  void gfc3d_AVI_gams_path(GlobalFrictionContactProblem* problem, double *reaction,
+                           double *velocity, int* info, SolverOptions* options);
 
   /** solver using PATHVI (via GAMS) for friction-contact 3D problem based on an AVI reformulation
       \param problem the friction-contact 3D problem to solve
@@ -212,12 +213,13 @@ extern "C"
       \param info return 0 if the solution is found
       \param options the solver options
   */
-  void gfc3d_AVI_gams_pathvi(GlobalFrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options);
+  void gfc3d_AVI_gams_pathvi(GlobalFrictionContactProblem* problem, double *reaction,
+                             double *velocity, int* info, SolverOptions* options);
 
 
   void gfc3d_nonsmooth_Newton_AlartCurnier(GlobalFrictionContactProblem* problem, double *reaction, double *velocity, double *globalVelocity, int *info, SolverOptions* options);
 
-  void gfc3d_VI_ExtraGradient(GlobalFrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options);
+  void gfc3d_VI_ExtraGradient(GlobalFrictionContactProblem* problem, double *reaction, double *velocity, double* globalVelocity, int* info, SolverOptions* options);
   
   int gfc3d_VI_ExtraGradient_setDefaultSolverOptions(SolverOptions* options);
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)

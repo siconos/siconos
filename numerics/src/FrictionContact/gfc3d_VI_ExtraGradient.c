@@ -27,18 +27,35 @@
 #include "VariationalInequality_Solvers.h"
 #include "gfc3d_Solvers.h"
 #include "gfc3d_compute_error.h"
+#include "NumericsMatrix.h"
 
 #include "SolverOptions.h"
 #include "numerics_verbose.h"
 
+/* #define DEBUG_MESSAGES */
+/* #define DEBUG_STDOUT */
+#include "debug.h"
 
-void gfc3d_VI_ExtraGradient(GlobalFrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options)
+#ifdef  DEBUG_MESSAGES
+#include "NumericsVector.h"
+#include "NumericsMatrix.h"
+#endif
+
+void gfc3d_VI_ExtraGradient(GlobalFrictionContactProblem* problem,
+                            double *reaction, double *velocity,
+                            double *globalVelocity,  int* info, SolverOptions* options)
 {
+  DEBUG_BEGIN("gfc3d_VI_ExtraGradient(GlobalFrictionContactProblem* problem, ... \n");
+  DEBUG_EXPR(verbose=1;);
   /* Number of contacts */
   int nc = problem->numberOfContacts;
   /* Dimension of the problem */
-  int n = 3 * nc;
+  int m = 3 * nc;
+  int n = problem->M->size0;
 
+  DEBUG_EXPR(NM_vector_display(reaction, m););
+  DEBUG_EXPR(NM_vector_display(velocity, m););
+  DEBUG_EXPR(NM_vector_display(globalVelocity, n););
 
   VariationalInequality *vi = (VariationalInequality *)malloc(sizeof(VariationalInequality));
 
@@ -50,8 +67,8 @@ void gfc3d_VI_ExtraGradient(GlobalFrictionContactProblem* problem, double *react
   double error=1e24;
 
   GlobalFrictionContactProblem_as_VI *gfc3d_as_vi= (GlobalFrictionContactProblem_as_VI*)malloc(sizeof(GlobalFrictionContactProblem_as_VI));
-  vi->env =gfc3d_as_vi ;
-  vi->size =  n;
+  vi->env =  gfc3d_as_vi ;
+  vi->size = n+m;
 
 
   /*Set the norm of the VI to the norm of problem->q  */
@@ -65,7 +82,8 @@ void gfc3d_VI_ExtraGradient(GlobalFrictionContactProblem* problem, double *react
   SolverOptions * visolver_options = (SolverOptions *) malloc(sizeof(SolverOptions));
   variationalInequality_setDefaultSolverOptions(visolver_options,
                                                 SICONOS_VI_EG);
-
+  DEBUG_EXPR(NV_display(reaction,m););
+  DEBUG_EXPR(NV_display(globalVelocity,n););
   int isize = options->iSize;
   int dsize = options->dSize;
   int vi_isize = visolver_options->iSize;
@@ -79,33 +97,52 @@ void gfc3d_VI_ExtraGradient(GlobalFrictionContactProblem* problem, double *react
   {
     printf("size prolem in gfc3d_VI_ExtraGradient\n");
   }
-  /* int i; */
-  /* for (i = 0; i < isize; i++) */
-  /* { */
-  /*   visolver_options->iparam[i] = options->iparam[i] ; */
-  /* } */
-  /* for (i = 0; i < dsize; i++) */
-  /* { */
-  /*   visolver_options->dparam[i] = options->dparam[i] ; */
-  /* } */
   int i;
   for (i = 0; i < isize; i++)
   {
-    if (options->iparam[i] != 0 )
-      visolver_options->iparam[i] = options->iparam[i] ;
+    visolver_options->iparam[i] = options->iparam[i] ;
   }
   for (i = 0; i < dsize; i++)
   {
-    if (fabs(options->dparam[i]) >= 1e-24 )
-      visolver_options->dparam[i] = options->dparam[i] ;
+    visolver_options->dparam[i] = options->dparam[i] ;
   }
 
-  variationalInequality_ExtraGradient(vi, reaction, velocity , info , visolver_options);
 
+  double * z = (double*)malloc((n+m)*sizeof(double));
+  double * Fz = (double*)calloc((n+m),sizeof(double));
+
+  memcpy(z, globalVelocity, n * sizeof(double));
+  memcpy(&z[n], reaction, m * sizeof(double));
+  DEBUG_EXPR(NV_display(z,m+n););
+  DEBUG_EXPR(NV_display(Fz,m+n););
+  variationalInequality_ExtraGradient(vi, z, Fz , info , visolver_options);
+
+  memcpy(globalVelocity, z,  n * sizeof(double)  );
+  memcpy(reaction, &z[n], m * sizeof(double)  );
+  memcpy(velocity, &Fz[m],  m * sizeof(double)  )  ;
+  
+  /* for (int k =0 ;  k< n; k++) */
+  /* { */
+  /*   globalVelocity[k] = z[k]; */
+  /* } */
+  /* for (int k =0 ;  k< m; k++) */
+  /* { */
+  /*   reaction[k] = z[k+n]; */
+  /* } */
+  /* for (int k =0 ;  k< m; k++) */
+  /* { */
+  /*   velocity[k] = Fz[k+n]; */
+  /* } */
+
+  free(z);
+  free(Fz);
 
   /* **** Criterium convergence **** */
-  double norm_q = cblas_dnrm2(nc*3 , problem->q , 1);
-  /* gfc3d_compute_error(problem, reaction , velocity, options->dparam[0], options, norm_q, &error); */
+  gfc3d_compute_error(problem, reaction , velocity, globalVelocity, options->dparam[0],&error);
+
+  DEBUG_EXPR(NM_vector_display(reaction,m));
+  DEBUG_EXPR(NM_vector_display(velocity,m));
+  DEBUG_EXPR(NM_vector_display(globalVelocity,n));
 
   /* for (i =0; i< n ; i++) */
   /* { */
@@ -130,6 +167,7 @@ void gfc3d_VI_ExtraGradient(GlobalFrictionContactProblem* problem, double *react
   visolver_options=NULL;
   free(gfc3d_as_vi);
 
+  DEBUG_END("gfc3d_VI_ExtraGradient(GlobalFrictionContactProblem* problem, ... \n")
 
 
 }
@@ -142,22 +180,8 @@ int gfc3d_VI_ExtraGradient_setDefaultSolverOptions(SolverOptions* options)
     printf("Set the Default SolverOptions for the ExtraGradient Solver\n");
   }
 
-  /*strcpy(options->solverName,"DSFP");*/
-  options->solverId = SICONOS_FRICTION_3D_VI_EG;
-  options->numberOfInternalSolvers = 0;
-  options->isSet = 1;
-  options->filterOn = 1;
-  options->iSize = 8;
-  options->dSize = 8;
-  options->iparam = (int *)calloc(options->iSize, sizeof(int));
-  options->dparam = (double *)calloc(options->dSize, sizeof(double));
-  options->dWork = NULL;
-  solver_options_nullify(options);
-  options->iparam[0] = 20000;
-  options->dparam[0] = 1e-3;
-  options->dparam[3] = 1e-3;
-  options->dparam[3] = -1.0; // rho is variable by default
-  options->internalSolvers = NULL;
-
+  variationalInequality_ExtraGradient_setDefaultSolverOptions(options);
+  options->solverId = SICONOS_GLOBAL_FRICTION_3D_VI_EG;
+  options->iparam[0] = 10000000;
   return 0;
 }

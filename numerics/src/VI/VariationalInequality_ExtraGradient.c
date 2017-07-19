@@ -28,10 +28,16 @@
 
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
-#include "debug.h"
+#include "debug.h" */
+
+#ifdef DEBUG_MESSAGES
+#include "NumericsVector.h"
+#endif
 
 void variationalInequality_ExtraGradient(VariationalInequality* problem, double *x, double *w, int* info, SolverOptions* options)
 {
+
+  DEBUG_BEGIN("variationalInequality_ExtraGradient(VariationalInequality* problem, ...)\n")
   /* /\* int and double parameters *\/ */
   int* iparam = options->iparam;
   double* dparam = options->dparam;
@@ -42,7 +48,8 @@ void variationalInequality_ExtraGradient(VariationalInequality* problem, double 
   /* Tolerance */
   double tolerance = dparam[0];
 
-
+  DEBUG_EXPR(NV_display(x,n););
+  DEBUG_EXPR(NV_display(w,n););
   /*****  Fixed point iterations *****/
   int iter = 0; /* Current iteration number */
   double error = 1.; /* Current error */
@@ -91,7 +98,8 @@ void variationalInequality_ExtraGradient(VariationalInequality* problem, double 
     x_k = (double *)malloc(n * sizeof(double));
     w_k = (double *)malloc(n * sizeof(double));
   }
-
+  /* memcpy(x,x_k,n * sizeof(double)); */
+  /* memcpy(w,w_k,n * sizeof(double)); */
   //isVariable=0;
   if (!isVariable)
   {
@@ -102,10 +110,11 @@ void variationalInequality_ExtraGradient(VariationalInequality* problem, double 
 
       /* xtmp <- x  */
       cblas_dcopy(n , x , 1 , xtmp, 1);
-
+      
+     
       /* wtmp <- F(xtmp) */
       problem->F(problem, n, xtmp,wtmp);
-
+      
       /* xtmp <- xtmp - F(xtmp) */
       cblas_daxpy(n, -1.0, wtmp , 1, xtmp , 1) ;
 
@@ -172,7 +181,7 @@ void variationalInequality_ExtraGradient(VariationalInequality* problem, double 
 
         /* x_k <-- x store the x at the beginning of the iteration */
         cblas_dcopy(n , x , 1 , x_k, 1);
-
+        DEBUG_EXPR(NV_display(x_k,n););
         problem->F(problem, n, x, w_k);
 
         ls_iter = 0 ;
@@ -240,12 +249,9 @@ void variationalInequality_ExtraGradient(VariationalInequality* problem, double 
         /* wtmp <-  ProjectionOnX(xtmp) */
         cblas_dcopy(n , x , 1 , xtmp, 1);
         problem->ProjectionOnX(problem,xtmp,x);
-        DEBUG_EXPR_WE( for (int i =0; i< 5 ; i++)
-                       {
-                         printf("x[%i]=%12.8e\t",i,x[i]);    printf("w[%i]=F[%i]=%12.8e\n",i,i,w[i]);
-                       }
-          );
 
+        DEBUG_EXPR(NV_display(x,n););
+        DEBUG_EXPR(NV_display(w,n););
 
 
         /* **** Criterium convergence **** */
@@ -422,7 +428,7 @@ void variationalInequality_ExtraGradient(VariationalInequality* problem, double 
   iparam[7] = iter;
   free(xtmp);
   free(wtmp);
-
+  DEBUG_END("variationalInequality_ExtraGradient(VariationalInequality* problem, ...)\n")
 
 }
 
@@ -450,7 +456,7 @@ int variationalInequality_ExtraGradient_setDefaultSolverOptions(SolverOptions* o
     options->iparam[i] = 0;
     options->dparam[i] = 0.0;
   }
-  options->iparam[0] = 20000;
+  options->iparam[0] = 2000000;
   options->dparam[0] = 1e-3;
   options->dparam[3] = 1e-3;
   options->dparam[3] = -1.0; // rho is variable by default

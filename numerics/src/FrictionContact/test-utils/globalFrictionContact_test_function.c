@@ -23,6 +23,7 @@
 #include "GlobalFrictionContactProblem.h"
 #include "NumericsMatrix.h"
 #include "numerics_verbose.h"
+#include "NumericsVector.h"
 #if defined(WITH_FCLIB)
 #include <fclib.h>
 #include <fclib_interface.h>
@@ -58,7 +59,7 @@ int globalFrictionContact_test_function(FILE * f, SolverOptions * options)
   {
     globalvelocity[k] = 0.0;
   }
-
+  NV_display(globalvelocity,n);
   if (dim == 2)
   {
     info = 1;
