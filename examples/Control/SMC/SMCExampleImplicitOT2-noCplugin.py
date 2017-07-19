@@ -46,7 +46,7 @@ h = 1.0e-4  # time step for simulation
 hControl = 1.0e-2 # time step for control
 Xinit = 1.0 # initial position
 theta = 0.5
-N = 2*ceil((T-t0)/h) # number of time steps
+N = 2*int(ceil((T-t0)/h)) # number of time steps
 outputSize = 5 # number of variable to store at each time step
 
 # Matrix declaration

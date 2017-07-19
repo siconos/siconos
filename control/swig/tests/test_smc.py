@@ -28,7 +28,7 @@ def test_smc1():
     h = 1.0e-4  # time step for simulation
     hControl = 1.0e-2  # time step for control
     Xinit = 1.0  # initial position
-    N = ceil((T-t0)/h + 10)  # number of time steps
+    N = int(ceil((T-t0)/h + 10))  # number of time steps
     outputSize = 4  # number of variable to store at each time step
 
     # Matrix declaration
