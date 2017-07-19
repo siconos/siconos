@@ -67,7 +67,7 @@ def timeout(seconds, force_kill=True):
         return wrapper
 
 
-@timeout(3000)
+@timeout(7200)
 def call(*args, **kwargs):
     return check_call(*args, **kwargs)
 
@@ -87,7 +87,7 @@ class CiTask():
                  directories=[]):
         """Create a task, see examples in tasks.py.
         """
-                 
+
         self._fast = fast
         self._distrib = distrib
         self._mode = mode

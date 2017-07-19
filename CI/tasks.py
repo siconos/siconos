@@ -251,10 +251,10 @@ known_tasks = {'siconos---vm0':
                'siconos---vm3':
                (siconos_debian_latest,
                 siconos_openblas_lapacke,
-                siconos_serialization,
                 siconos_with_mumps,
                 siconos_light_examples,
                 siconos_all_examples,
                 siconos_profiling,
                 siconos_ubuntu_17_04,
-                siconos_cxx_11_ubuntu_17_04)}
+                siconos_cxx_11_ubuntu_17_04,
+                siconos_serialization)}
