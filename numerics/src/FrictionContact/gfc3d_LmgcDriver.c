@@ -22,11 +22,11 @@ static int fccounter =-1;
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
-
-
-
-
 #endif
+
+//#define USE_NM_DENSE
+
+
 static double * alloc_memory_double(unsigned int size, double *p)
 {
   double * r = (double *) malloc (size * sizeof(double));
@@ -147,6 +147,34 @@ int gfc3d_LmgcDriver(double *reaction,
     /* DEBUG_PRINTF("%d -> %d,%d\n", i, _H->p[i], _H->i[i]); */
   }
 
+
+
+#ifdef USE_NM_DENSE
+  assert(M);
+  assert(H);
+
+  NumericsMatrix *MMtmp = NM_new();
+  NumericsMatrix *HHtmp = NM_new();
+  
+  NM_copy(M,MMtmp);
+  NM_copy(H,HHtmp);
+
+  NM_clearSparse(M);
+  NM_clearSparse(H);
+
+  M = NM_create(NM_DENSE, H->size0, H->size0);
+  H = NM_create(NM_DENSE, H->size0, H->size1);
+ 
+  NM_to_dense(MMtmp,M);
+  NM_to_dense(HHtmp,H);
+
+  /* NM_display(M); */
+  /* NM_display(H); */
+
+#endif
+
+
+  
   GlobalFrictionContactProblem * problem =(GlobalFrictionContactProblem*)malloc(sizeof(GlobalFrictionContactProblem));
 
   problem->dimension = 3;
