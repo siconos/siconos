@@ -182,6 +182,6 @@ int gfc3d_VI_ExtraGradient_setDefaultSolverOptions(SolverOptions* options)
 
   variationalInequality_ExtraGradient_setDefaultSolverOptions(options);
   options->solverId = SICONOS_GLOBAL_FRICTION_3D_VI_EG;
-  options->iparam[0] = 10000000;
+
   return 0;
 }

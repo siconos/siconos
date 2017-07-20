@@ -182,6 +182,5 @@ int gfc3d_VI_FixedPointProjection_setDefaultSolverOptions(SolverOptions* options
 
   variationalInequality_FixedPointProjection_setDefaultSolverOptions(options);
   options->solverId = SICONOS_GLOBAL_FRICTION_3D_VI_FPP;
-  options->iparam[0] = 10000000;
   return 0;
 }

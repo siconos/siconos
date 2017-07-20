@@ -456,7 +456,7 @@ int variationalInequality_ExtraGradient_setDefaultSolverOptions(SolverOptions* o
     options->iparam[i] = 0;
     options->dparam[i] = 0.0;
   }
-  options->iparam[0] = 2000000;
+  options->iparam[0] = 20000;
   options->dparam[0] = 1e-3;
   options->dparam[3] = 1e-3;
   options->dparam[3] = -1.0; // rho is variable by default
