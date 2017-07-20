@@ -43,6 +43,8 @@
 /* #define DEBUG_STDOUT */
 #include "debug.h"
 
+//#define USE_NM_GESV
+
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 
 /* Global Variable for the reformulation of the problem */
@@ -61,9 +63,28 @@ int gfc3d_reformulation_local_problem(GlobalFrictionContactProblem* problem, Fri
   localproblem->dimension =  problem->dimension;
   localproblem->mu =  problem->mu;
 
-  assert(M);
-  assert(H);
+  /* assert(M); */
+  /* assert(H); */
+  /* NM_display(M); */
+  /* NM_display(H); */
+  /* NumericsMatrix *MMtmp = NM_new(); */
+  /* NumericsMatrix *HHtmp = NM_new(); */
+  
+  /* NM_copy(M,MMtmp); */
+  /* NM_copy(H,HHtmp); */
 
+  /* NM_clearSparse(M); */
+  /* NM_clearSparse(H); */
+
+  /* M = NM_create(NM_DENSE, n, n); */
+  /* H = NM_create(NM_DENSE, n, m); */
+ 
+  /* NM_to_dense(MMtmp,M); */
+  /* NM_to_dense(HHtmp,H); */
+
+  /* NM_display(M); */
+  /* NM_display(H); */
+  
   if (H->storageType != M->storageType)
   {
     //     if(verbose==1)
@@ -74,7 +95,8 @@ int gfc3d_reformulation_local_problem(GlobalFrictionContactProblem* problem, Fri
   if (M->storageType == NM_DENSE)
   {
 
-
+    
+    
     int nm = n * m;
 
     double *Htmp = (double*)malloc(nm * sizeof(double));
@@ -83,19 +105,20 @@ int gfc3d_reformulation_local_problem(GlobalFrictionContactProblem* problem, Fri
     cblas_dcopy_msan(nm,  H->matrix0 , 1, Htmp, 1);
 
     //Compute Htmp   <- M^-1 Htmp
+#ifdef USE_NM_GESV    
+    NM_gesv_expert_multiple_rhs(M,Htmp,m,NM_KEEP_FACTORS); 
+#else
+    lapack_int* ipiv = (lapack_int*)NM_iWork(M, M->size0, sizeof(lapack_int));
+    lapack_int infoDGETRF;
+    lapack_int infoDGETRS;
+    DGETRF(n, n, M->matrix0, n, ipiv, &infoDGETRF);
+    assert(!infoDGETRF);
 
-    NM_gesv_expert(M,Htmp,NM_KEEP_FACTORS);
-
-    /* lapack_int* ipiv = (lapack_int*)NM_iWork(M, M->size0, sizeof(lapack_int)); */
-
-    /* DGETRF(n, n, M->matrix0, n, ipiv, &infoDGETRF); */
-    /* assert(!infoDGETRF); */
-
-    /* NM_internalData(M)->isLUfactorized = true; */
-    /* DGETRS(LA_NOTRANS, n, m,  M->matrix0, n, ipiv, Htmp, n, &infoDGETRS); */
-
+    NM_internalData(M)->isLUfactorized = true;
+    DGETRS(LA_NOTRANS, n, m,  M->matrix0, n, ipiv, Htmp, n, &infoDGETRS);
+#endif
     /* assert(!infoDGETRS); */
-    /* /\*      DGESV(n, m, M->matrix0, n, ipiv, Htmp, n, infoDGESV); *\/ */
+    /*      DGESV(n, m, M->matrix0, n, ipiv, Htmp, n, infoDGESV); */
 
     localproblem->M = NM_new();
     NumericsMatrix *Wnum = localproblem->M;
@@ -125,14 +148,19 @@ int gfc3d_reformulation_local_problem(GlobalFrictionContactProblem* problem, Fri
     cblas_dcopy_msan(n,  problem->q, 1, qtmp, 1);
 
     // compute H^T M^(-1) q + b
+#ifdef USE_NM_GESV  
     NM_gesv_expert(M,qtmp,NM_KEEP_FACTORS);
+#else
+     DGETRS(LA_NOTRANS, n, m,  M->matrix0, n, ipiv, qtmp, 1, &infoDGETRS); 
+#endif
 
+    
 
     cblas_dgemv(CblasColMajor,CblasTrans, n, m, 1.0, H->matrix0 , n, qtmp, 1, 1.0, localproblem->q, 1);
     // Copy mu
     localproblem->mu = problem->mu;
 
-
+    frictionContact_display(localproblem);
 
     free(Htmp);
     free(qtmp);
@@ -357,11 +385,14 @@ int computeGlobalVelocity(GlobalFrictionContactProblem* problem, double * reacti
     /* Compute globalVelocity <- M^(-1) globalVelocity*/
 
     assert(NM_internalData(problem->M)->isLUfactorized);
+#ifdef USE_NM_GESV  
+    NM_gesv_expert(problem->M,globalVelocity,NM_KEEP_FACTORS);
+#else
     lapack_int infoDGETRS = 0;
     lapack_int* ipiv = (lapack_int*)NM_iWork(problem->M, problem->M->size0, sizeof(lapack_int));
     DGETRS(LA_NOTRANS, n, 1,   problem->M->matrix0, n, ipiv, globalVelocity , n, &infoDGETRS);
     assert(!infoDGETRS);
-
+#endif
 
     //free(Global_ipiv);
     //Global_ipiv = NULL;
@@ -532,6 +563,7 @@ void  gfc3d_nonsmooth_Newton_AlartCurnier_wr(GlobalFrictionContactProblem* probl
     computeGlobalVelocity(problem, reaction, globalVelocity);
     *info = 0 ;
   }
+
   DEBUG_END("gfc3d_nonsmooth_Newton_AlartCurnier_wr(...)\n")
 
 

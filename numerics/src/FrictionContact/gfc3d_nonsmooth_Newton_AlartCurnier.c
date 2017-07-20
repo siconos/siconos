@@ -776,10 +776,11 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(
 
     if(!(iter % erritermax))
     {
-
+      double norm_q = cblas_dnrm2(problem->M->size0 , problem->q , 1);
       gfc3d_compute_error(problem,
                           reaction, velocity, globalVelocity,
                           tolerance,
+                          norm_q,
                           &(options->dparam[1]));
     }
 

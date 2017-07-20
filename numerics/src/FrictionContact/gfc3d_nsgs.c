@@ -123,6 +123,8 @@ void gfc3d_nsgs(GlobalFrictionContactProblem* restrict problem, double* restrict
     exit(EXIT_FAILURE);
   }
 
+  double norm_q = cblas_dnrm2(n , problem->q , 1);
+
   dparam[SICONOS_DPARAM_TOL] = dparam[2]; // set the tolerance for the local solver
   /* verbose=1; */
   while ((iter < itermax) && (hasNotConverged > 0))
@@ -140,7 +142,7 @@ void gfc3d_nsgs(GlobalFrictionContactProblem* restrict problem, double* restrict
     }
     cblas_dcopy(n, qtmp, 1, globalVelocity, 1);
 
-    CHECK_RETURN(!NM_gesv_expert(factorized_M, globalVelocity, NM_KEEP_FACTORS));
+    CHECK_RETURN(!NM_gesv_expert(problem->M, globalVelocity, NM_KEEP_FACTORS));
 
     DEBUG_PRINT("global velocity");
     DEBUG_EXPR_WE(NM_vector_display(globalVelocity,n));
@@ -176,10 +178,14 @@ void gfc3d_nsgs(GlobalFrictionContactProblem* restrict problem, double* restrict
     /* this is very expensive to check, you better do it only once in a while  */
     if (!(iter % erritermax))
     {
-      (*computeError)(problem, reaction , velocity, globalVelocity, tolerance, &error);
+      /* computeGlobalVelocity(problem, reaction, globalVelocity); */
+      (*computeError)(problem, reaction , velocity, globalVelocity, tolerance, norm_q, &error);
+      DEBUG_EXPR_WE(NM_vector_display(velocity,m););
+      DEBUG_EXPR_WE(NM_vector_display(reaction,m););
+      DEBUG_EXPR_WE(NM_vector_display(globalVelocity,n););
       
       if (verbose > 0)
-        printf("----------------------------------- FC3D - NSGS - Iteration %i Residual = %14.7e; Tol = %g\n", iter, error, tolerance);
+        printf("----------------------------------- GFC3D - NSGS - Iteration %i Residual = %14.7e; Tol = %g\n", iter, error, tolerance);
     }
 
     if (error < tolerance) hasNotConverged = 0;
@@ -189,7 +195,7 @@ void gfc3d_nsgs(GlobalFrictionContactProblem* restrict problem, double* restrict
   /*  One last error computation in case where are at the very end */
   if (iter == itermax)
   {
-    (*computeError)(problem, reaction , velocity, globalVelocity, tolerance, &error);
+    (*computeError)(problem, reaction , velocity, globalVelocity, tolerance, norm_q, &error);
   }
 
   dparam[SICONOS_DPARAM_TOL] = tolerance;

@@ -111,11 +111,11 @@ siconos_ubuntu_latest_mechanisms = siconos_default.copy()(
               'oce-pythonocc'],
     distrib='ubuntu:latest')
 
-siconos_numerics_only = siconos_ubuntu_16_10.copy()(
+siconos_numerics_only = siconos_ubuntu_17_04.copy()(
     ci_config='no_cxx',
     remove_pkgs=['gnu-c++'])
 
-siconos_profiling = siconos_ubuntu_16_10.copy()(
+siconos_profiling = siconos_ubuntu_17_04.copy()(
     build_configuration='Profiling',
     add_pkgs=['profiling'])
 
@@ -131,7 +131,7 @@ siconos_openblas_lapacke = siconos_default.copy()(
     remove_pkgs=['atlas-lapack'],
     add_pkgs=['openblas-lapacke', 'umfpack', 'path', 'wget'],)  # wget for path
 
-siconos_clang = siconos_ubuntu_16_10.copy()(
+siconos_clang = siconos_ubuntu_17_04.copy()(
     ci_config=('with_bullet', 'with_py3'),
     remove_pkgs=['python-env'],
     add_pkgs=['clang-3.9', 'bullet', 'cppunit_clang-3.9', 'wget', 'xz', 'python3-env', 'path', 'h5py3'])  # h5py-3 for mechanics.io
@@ -171,7 +171,7 @@ siconos_gcc_asan_latest = siconos_fedora_latest.copy()(
 
 # There is a bug in boost 1.58 distributed with Xenial (Ubuntu LTS 16.04).
 # As long as it is not patched, we have to build on a newer ubuntu
-siconos_serialization = siconos_ubuntu_16_10.copy()(
+siconos_serialization = siconos_ubuntu_17_04.copy()(
     ci_config='with_serialization',
     add_pkgs=['serialization'])
 
@@ -251,10 +251,10 @@ known_tasks = {'siconos---vm0':
                'siconos---vm3':
                (siconos_debian_latest,
                 siconos_openblas_lapacke,
-                siconos_serialization,
                 siconos_with_mumps,
                 siconos_light_examples,
                 siconos_all_examples,
                 siconos_profiling,
                 siconos_ubuntu_17_04,
-                siconos_cxx_11_ubuntu_17_04)}
+                siconos_cxx_11_ubuntu_17_04,
+                siconos_serialization)}

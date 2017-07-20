@@ -17,6 +17,7 @@
 */
 
 #include "gfc3d_compute_error.h"
+#include "fc3d_compute_error.h"
 
 #include "GlobalFrictionContactProblem.h"
 #include "gfc3d_Solvers.h"
@@ -28,8 +29,16 @@
 #include "sanitizer.h"
 #include "numerics_verbose.h"
 #include "NumericsMatrix.h"
-int gfc3d_compute_error(GlobalFrictionContactProblem* problem, double* restrict reaction , double* restrict velocity,
-                        double* restrict globalVelocity, double tolerance, double* restrict error)
+
+
+/* #define DEBUG_STDOUT */
+/* #define DEBUG_NOCOLOR */
+/* #define DEBUG_MESSAGES */
+#include "debug.h"
+int gfc3d_compute_error(GlobalFrictionContactProblem* problem,
+                        double*  reaction , double*  velocity, double*  globalVelocity,
+                        double tolerance,  double norm, double* restrict error)
+
 {
 
   /* Checks inputs */
@@ -48,18 +57,14 @@ int gfc3d_compute_error(GlobalFrictionContactProblem* problem, double* restrict 
   double *q = problem->q;
   NumericsMatrix *H = problem->H;
 
-  cblas_dcopy_msan(n, q, 1, globalVelocitytmp, 1);
+  cblas_dcopy_msan(n, q, 1, globalVelocity, 1);
   if (nc >0)
   {
-    NM_gemv(1.0, H, reaction, 1.0, globalVelocitytmp);
+    NM_gemv(1.0, H, reaction, 1.0, globalVelocity);
   }
-  CHECK_RETURN(!NM_gesv_expert(factorized_M, globalVelocitytmp, NM_KEEP_FACTORS));
 
-  cblas_daxpy(n , -1.0 , globalVelocity , 1 , globalVelocitytmp, 1);
-
-  /* We first accumulate the square terms and at the end we take the square
-   * root */
-  *error = cblas_ddot(n, globalVelocitytmp, 1, globalVelocitytmp, 1);
+  CHECK_RETURN(!NM_gesv_expert(problem->M, globalVelocity, NM_KEEP_FACTORS));
+  *error = 0.0;
 
   if (nc >0)
   {
@@ -67,33 +72,35 @@ int gfc3d_compute_error(GlobalFrictionContactProblem* problem, double* restrict 
     if (reaction == NULL || velocity == NULL)
       numerics_error("gfc3d_compute_error", "null input");
 
-    
+
     cblas_dcopy(m, problem->b, 1, velocity, 1);
     NM_tgemv(1, H, globalVelocity, 1, velocity);
 
     double worktmp[3];
-    double normUT;
-    double rho = 1.0;
     for (int ic = 0 ; ic < nc ; ic++)
     {
-      /* Compute the modified local velocity */
-      normUT = sqrt(velocity[ic * 3 + 1] * velocity[ic * 3 + 1] + velocity[ic * 3 + 2] * velocity[ic * 3 + 2]);
-      worktmp[0] = reaction[ic * 3] - rho * (velocity[ic * 3] + mu[ic] * normUT);
-      worktmp[1] = reaction[ic * 3 + 1] - rho * velocity[ic * 3 + 1] ;
-      worktmp[2] = reaction[ic * 3 + 2] - rho * velocity[ic * 3 + 2] ;
-      projectionOnCone(worktmp, mu[ic]);
-      worktmp[0] = reaction[ic * 3] -  worktmp[0];
-      worktmp[1] = reaction[ic * 3 + 1] -  worktmp[1];
-      worktmp[2] = reaction[ic * 3 + 2] -  worktmp[2];
-      *error +=  worktmp[0] * worktmp[0] + worktmp[1] * worktmp[1] + worktmp[2] * worktmp[2];
+      fc3d_unitary_compute_and_add_error(&reaction[ic * 3], &velocity[ic * 3], mu[ic],
+                                         error,  worktmp);
+
+
+      /* /\* Compute the modified local velocity *\/ */
+      /* normUT = sqrt(velocity[ic * 3 + 1] * velocity[ic * 3 + 1] + velocity[ic * 3 + 2] * velocity[ic * 3 + 2]); */
+      /* worktmp[0] = reaction[ic * 3] - rho * (velocity[ic * 3] + mu[ic] * normUT); */
+      /* worktmp[1] = reaction[ic * 3 + 1] - rho * velocity[ic * 3 + 1] ; */
+      /* worktmp[2] = reaction[ic * 3 + 2] - rho * velocity[ic * 3 + 2] ; */
+      /* projectionOnCone(worktmp, mu[ic]); */
+      /* worktmp[0] = reaction[ic * 3] -  worktmp[0]; */
+      /* worktmp[1] = reaction[ic * 3 + 1] -  worktmp[1]; */
+      /* worktmp[2] = reaction[ic * 3 + 2] -  worktmp[2]; */
+      /* *error +=  worktmp[0] * worktmp[0] + worktmp[1] * worktmp[1] + worktmp[2] * worktmp[2]; */
     }
   }
   /* Done, taking the square root */
   *error = sqrt(*error);
 
-  /* Computes error */
-  double norm_q = cblas_dnrm2(n , problem->q , 1);
-  *error = *error / (norm_q + 1.0);
+  DEBUG_PRINTF("norm = %12.8e\n", norm);
+  if (fabs(norm) > DBL_EPSILON)
+    *error /= norm;
 
   if (*error > tolerance)
   {
