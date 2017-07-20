@@ -88,11 +88,11 @@ endif()
 
 # --- Fclib ---
 IF(WITH_FCLIB)
-  COMPILE_WITH(FCLIB REQUIRED)   
+  COMPILE_WITH(FCLib REQUIRED)   
   IF(FCLIB_NOTFOUND)
     # try the package stuff
     # need FCLib_DIR !!
-    COMPILE_WITH(FCLib 1.0 REQUIRED)
+    COMPILE_WITH(FCLib 1.1 REQUIRED)
   ENDIF()
 ENDIF()
 

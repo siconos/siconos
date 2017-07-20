@@ -84,4 +84,4 @@ extern "C"
   $2 = &temp[0];
  }
 
-%include fclib.h
+%include fclib_priv.h
