@@ -49,7 +49,7 @@ For each solver, the input argument are:
 
 typedef void (*SolverGlobalPtr)(int, int, double*, int*, double*);
 typedef void (*PostSolverGlobalPtr)(int, double*);
-typedef void (*ComputeErrorGlobalPtr)(GlobalFrictionContactProblem*, double*, double*, double *, double, double*);
+typedef void (*ComputeErrorGlobalPtr)(GlobalFrictionContactProblem*, double*, double*, double *, double, double, double*);
 typedef void (*FreeSolverGlobalPtr)(GlobalFrictionContactProblem*);
 
 
