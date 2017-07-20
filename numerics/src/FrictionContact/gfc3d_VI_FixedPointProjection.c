@@ -41,11 +41,11 @@
 #include "NumericsMatrix.h"
 #endif
 
-void gfc3d_VI_ExtraGradient(GlobalFrictionContactProblem* problem,
+void gfc3d_VI_FixedPointProjection(GlobalFrictionContactProblem* problem,
                             double *reaction, double *velocity,
                             double *globalVelocity,  int* info, SolverOptions* options)
 {
-  DEBUG_BEGIN("gfc3d_VI_ExtraGradient(GlobalFrictionContactProblem* problem, ... \n");
+  DEBUG_BEGIN("gfc3d_VI_FixedPointProjection(GlobalFrictionContactProblem* problem, ... \n");
   DEBUG_EXPR(verbose=1;);
   /* Number of contacts */
   int nc = problem->numberOfContacts;
@@ -91,11 +91,11 @@ void gfc3d_VI_ExtraGradient(GlobalFrictionContactProblem* problem,
 
   if (isize != vi_isize )
   {
-    printf("size prolem in gfc3d_VI_ExtraGradient\n");
+    printf("size prolem in gfc3d_VI_FixedPointProjection\n");
   }
   if (dsize != vi_dsize )
   {
-    printf("size prolem in gfc3d_VI_ExtraGradient\n");
+    printf("size prolem in gfc3d_VI_FixedPointProjection\n");
   }
   int i;
   for (i = 0; i < isize; i++)
@@ -115,7 +115,7 @@ void gfc3d_VI_ExtraGradient(GlobalFrictionContactProblem* problem,
   memcpy(&z[n], reaction, m * sizeof(double));
   DEBUG_EXPR(NV_display(z,m+n););
   DEBUG_EXPR(NV_display(Fz,m+n););
-  variationalInequality_ExtraGradient(vi, z, Fz , info , visolver_options);
+  variationalInequality_FixedPointProjection(vi, z, Fz , info , visolver_options);
 
   memcpy(globalVelocity, z,  n * sizeof(double)  );
   memcpy(reaction, &z[n], m * sizeof(double)  );
@@ -167,21 +167,21 @@ void gfc3d_VI_ExtraGradient(GlobalFrictionContactProblem* problem,
   visolver_options=NULL;
   free(gfc3d_as_vi);
 
-  DEBUG_END("gfc3d_VI_ExtraGradient(GlobalFrictionContactProblem* problem, ... \n")
+  DEBUG_END("gfc3d_VI_FixedPointProjection(GlobalFrictionContactProblem* problem, ... \n")
 
 
 }
 
 
-int gfc3d_VI_ExtraGradient_setDefaultSolverOptions(SolverOptions* options)
+int gfc3d_VI_FixedPointProjection_setDefaultSolverOptions(SolverOptions* options)
 {
   if (verbose > 0)
   {
-    printf("Set the Default SolverOptions for the ExtraGradient Solver\n");
+    printf("Set the Default SolverOptions for the FixedPointProjection Solver\n");
   }
 
-  variationalInequality_ExtraGradient_setDefaultSolverOptions(options);
-  options->solverId = SICONOS_GLOBAL_FRICTION_3D_VI_EG;
+  variationalInequality_FixedPointProjection_setDefaultSolverOptions(options);
+  options->solverId = SICONOS_GLOBAL_FRICTION_3D_VI_FPP;
   options->iparam[0] = 10000000;
   return 0;
 }

@@ -51,6 +51,7 @@ const char* const SICONOS_GLOBAL_FRICTION_3D_NSN_AC_STR = "GFC3D_NSN_AC";
 const char* const  SICONOS_GLOBAL_FRICTION_3D_GAMS_PATH_STR = "GFC3D_GAMS_PATH";
 const char* const  SICONOS_GLOBAL_FRICTION_3D_GAMS_PATHVI_STR = "GFC3D_GAMS_PATHVI";
 const char* const  SICONOS_GLOBAL_FRICTION_3D_VI_EG_STR = "GFC3D_VI_EG";
+const char* const  SICONOS_GLOBAL_FRICTION_3D_VI_FPP_STR = "GFC3D_VI_FPP";
 
 
 int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction , double *velocity,
@@ -167,6 +168,13 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction , doubl
     printf(" ========================== Call PATHVI solver via GAMS for an AVI Friction-Contact 3D problem ==========================\n");
     gfc3d_AVI_gams_pathvi(problem, reaction , globalVelocity, &info, options);
     break;
+  }
+  case SICONOS_GLOBAL_FRICTION_3D_VI_FPP:
+  {
+    gfc3d_VI_FixedPointProjection(problem, reaction , velocity,
+                                  globalVelocity, &info , options);
+    break;
+
   }
   case SICONOS_GLOBAL_FRICTION_3D_VI_EG:
   {

@@ -92,7 +92,8 @@ int fc3d_compute_error(
 
 
 
-int fc3d_compute_error_velocity(FrictionContactProblem* problem, double *z , double *w, double tolerance, SolverOptions *options, double * error)
+int fc3d_compute_error_velocity(FrictionContactProblem* problem, double *z , double *w, double tolerance,
+                                SolverOptions *options, double * error)
 {
   /* Checks inputs */
   if (problem == NULL || z == NULL || w == NULL)

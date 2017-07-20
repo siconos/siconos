@@ -95,8 +95,10 @@ enum FRICTION_SOLVER
   SICONOS_GLOBAL_FRICTION_3D_NSN_AC = 607,
   SICONOS_GLOBAL_FRICTION_3D_GAMS_PATH = 608,
   SICONOS_GLOBAL_FRICTION_3D_GAMS_PATHVI = 609,
+  /** VI formulation, Fixed Point Projection, local formulation */
+  SICONOS_GLOBAL_FRICTION_3D_VI_FPP = 610,
   /** VI formulation, Extra-gradient, local formulation */
-  SICONOS_GLOBAL_FRICTION_3D_VI_EG = 610
+  SICONOS_GLOBAL_FRICTION_3D_VI_EG = 611
 };
 
 
@@ -150,6 +152,7 @@ extern const char* const   SICONOS_GLOBAL_FRICTION_3D_NSN_AC_WR_STR ;
 extern const char* const   SICONOS_GLOBAL_FRICTION_3D_NSN_AC_STR;
 extern const char* const   SICONOS_GLOBAL_FRICTION_3D_GAMS_PATH_STR;
 extern const char* const   SICONOS_GLOBAL_FRICTION_3D_GAMS_PATHVI_STR;
+extern const char* const   SICONOS_GLOBAL_FRICTION_3D_VI_FPP_STR;
 extern const char* const   SICONOS_GLOBAL_FRICTION_3D_VI_EG_STR;
 extern const char* const   SICONOS_FRICTION_3D_ONECONTACT_QUARTIC_STR ;
 extern const char* const   SICONOS_GLOBAL_FRICTION_3D_GAMS_PATHVI_STR;
