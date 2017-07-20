@@ -407,12 +407,12 @@ extern "C"
    * \param[out] Block the target. In the dense and sparse case (*Block) must be allocated by caller.
    *   In case of SBM case **Bout contains the resulting block (from the SBM).
    */
-  
+
   void NM_extract_diag_block3(NumericsMatrix* M, int block_row_nb, double **Block);
   /** get a 3x3 diagonal block of a NumericsMatrix. No allocation is done.
    * \param[in] M a NumericsMatrix
    * \param[in] block_row_nb the number of the block row
-   * \param[out] Block the target. 
+   * \param[out] Block the target.
    * In all cases (dense, sbm, and sparse) (*Block) must be allocated by caller.
    *  A copy is always performed
    */
@@ -511,16 +511,16 @@ extern "C"
   /** matrix conversion display *********************/
   /**************************************************/
 
-  
+
   /**************************************************/
   /** matrix and vector display *********************/
   /**************************************************/
 
   void NM_dense_to_sparse(const NumericsMatrix* const A, NumericsMatrix* B);
-  
+
   void NM_to_dense(const NumericsMatrix* const A, NumericsMatrix* B);
 
-  
+
 
 
   /** Screen display of the matrix content stored as a double * array in Fortran style
@@ -663,9 +663,6 @@ extern "C"
   void NM_sparse_extract_block(NumericsMatrix* M, double* blockM, size_t pos_row, size_t pos_col, size_t block_row_size, size_t block_col_size);
 
 
-
-
-
   /** Direct computation of the solution of a real system of linear
    * equations: A x = b. The factorized matrix A is kept for future solve.
    * If A is already factorized, the solve the linear system from it
@@ -682,6 +679,7 @@ extern "C"
    */
   int NM_gesv_expert(NumericsMatrix* A, double *b, unsigned keep);
 
+  int NM_gesv_expert_multiple_rhs(NumericsMatrix* A, double *b, unsigned int n_rhs, unsigned keep);
 
   /**  Computation of the inverse of a NumericsMatrix A usinf NM_gesv_expert
    * \param[in,out] A a NumericsMatrix.

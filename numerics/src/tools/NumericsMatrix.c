@@ -2180,15 +2180,15 @@ int NM_gesv_expert(NumericsMatrix* A, double *b, unsigned keep)
     if (keep == NM_KEEP_FACTORS)
     {
 
-      double* wkspace = NM_dWork(A, A->size0*A->size1);
+      //double* wkspace = NM_dWork(A, A->size0*A->size1);
       lapack_int* ipiv = (lapack_int*)NM_iWork(A, A->size0, sizeof(lapack_int));
       DEBUG_PRINTF("iwork and dwork are intialized with size %i and %i\n",A->size0*A->size1,A->size0 );
 
       if (!NM_internalData(A)->isLUfactorized)
       {
         DEBUG_PRINT("Start to call DGETRF for NM_DENSE storage\n");
-        cblas_dcopy_msan(A->size0*A->size1, A->matrix0, 1, wkspace, 1);
-        DGETRF(A->size0, A->size1, wkspace, A->size0, ipiv, &info);
+        //cblas_dcopy_msan(A->size0*A->size1, A->matrix0, 1, wkspace, 1);
+        DGETRF(A->size0, A->size1, A->matrix0, A->size0, ipiv, &info);
         DEBUG_PRINT("end of call DGETRF for NM_DENSE storage\n");
         if (info > 0)
         {
@@ -2207,7 +2207,7 @@ int NM_gesv_expert(NumericsMatrix* A, double *b, unsigned keep)
         NM_internalData(A)->isLUfactorized = true;
       }
       DEBUG_PRINT("Start to call DGETRS for NM_DENSE storage\n");
-      DGETRS(LA_NOTRANS, A->size0, 1, wkspace, A->size0, ipiv, b, A->size0, &info);
+      DGETRS(LA_NOTRANS, A->size0, 1, A->matrix0, A->size0, ipiv, b, A->size0, &info);
       DEBUG_PRINT("End of call DGETRS for NM_DENSE storage\n");
       if (info < 0)
       {
@@ -2500,6 +2500,16 @@ int NM_gesv_expert(NumericsMatrix* A, double *b, unsigned keep)
   return (int)info;
 }
 
+int NM_gesv_expert_multiple_rhs(NumericsMatrix* A, double *b, unsigned int n_rhs, unsigned keep)
+{
+  assert(A->size0 == A->size1);
+  int info = 0;
+  for (unsigned int i = 0; i < n_rhs; ++i)
+  {
+    info = NM_gesv_expert(A, &b[A->size0*i],  keep);
+  }
+  return info;
+}
 int NM_inv(NumericsMatrix* A, NumericsMatrix* Ainv)
 {
 
