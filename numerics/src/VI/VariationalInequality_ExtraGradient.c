@@ -28,7 +28,7 @@
 
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
-#include "debug.h" */
+#include "debug.h"
 
 #ifdef DEBUG_MESSAGES
 #include "NumericsVector.h"
