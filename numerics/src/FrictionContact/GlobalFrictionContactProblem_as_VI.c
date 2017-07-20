@@ -48,16 +48,16 @@ void Function_VI_GFC3D(void * self, int n_notused, double *x, double *F)
   double * globalVelocity = &x[0];
   double * reaction = &x[n];
 
-  /* cblas_dcopy(n , gfc3d->q , 1 , F, 1); */
-  /* for (int i  = 0; i < n; i++) F[i] *= -1.0; /\* F= -q*\/ */
-
-  /* NM_gemv(1.0, gfc3d->M, globalVelocity, 1.0, F); /\* F= M v -q *\/ */
-  /* NM_gemv(-1.0, gfc3d->H, reaction, 1.0, F); /\* F= M v -q - Hr  *\/ */
-
   cblas_dcopy(n , gfc3d->q , 1 , F, 1);
+  for (int i  = 0; i < n; i++) F[i] *= -1.0; /* F= -q*/
 
-  NM_gemv(-1.0, gfc3d->M, globalVelocity, 1.0, F); /* F= M v -q */
-  NM_gemv(1.0, gfc3d->H, reaction, 1.0, F); /* F= M v -q - Hr  */
+  NM_gemv(1.0, gfc3d->M, globalVelocity, 1.0, F); /* F= M v -q */
+  NM_gemv(-1.0, gfc3d->H, reaction, 1.0, F); /* F= M v -q - Hr  */
+
+  /* cblas_dcopy(n , gfc3d->q , 1 , F, 1); */
+
+  /* NM_gemv(-1.0, gfc3d->M, globalVelocity, 1.0, F); /\* F= M v -q *\/ */
+  /* NM_gemv(1.0, gfc3d->H, reaction, 1.0, F); /\* F= M v -q - Hr  *\/ */
 
   
   double * localvelocity = &F[n];

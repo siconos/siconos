@@ -116,6 +116,7 @@ void gfc3d_VI_ExtraGradient(GlobalFrictionContactProblem* problem,
   DEBUG_EXPR(NV_display(z,m+n););
   DEBUG_EXPR(NV_display(Fz,m+n););
   variationalInequality_ExtraGradient(vi, z, Fz , info , visolver_options);
+  /* variationalInequality_FixedPointProjection(vi, z, Fz , info , visolver_options); */
 
   memcpy(globalVelocity, z,  n * sizeof(double)  );
   memcpy(reaction, &z[n], m * sizeof(double)  );
@@ -181,6 +182,7 @@ int gfc3d_VI_ExtraGradient_setDefaultSolverOptions(SolverOptions* options)
   }
 
   variationalInequality_ExtraGradient_setDefaultSolverOptions(options);
+  /* variationalInequality_FixedPointProjection_setDefaultSolverOptions(options); */
   options->solverId = SICONOS_GLOBAL_FRICTION_3D_VI_EG;
   options->iparam[0] = 10000000;
   return 0;

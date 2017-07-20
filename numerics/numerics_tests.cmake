@@ -721,6 +721,8 @@ if(WITH_${COMPONENT}_TESTING)
   NEW_FC_3D_TEST(FrictionContact3D_RR_1c.dat SICONOS_FRICTION_3D_ONECONTACT_QUARTIC)
 
   # --- Global friction contact problem formulation ---
+
+
   NEW_GFC_3D_TEST(Example_GlobalFrictionContact.dat SICONOS_GLOBAL_FRICTION_3D_NSGS)
   NEW_GFC_3D_TEST(Example_GlobalFrictionContact.dat SICONOS_GLOBAL_FRICTION_3D_NSGS 0 0
     SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone 0 0
@@ -733,20 +735,27 @@ if(WITH_${COMPONENT}_TESTING)
     0 0 0
     WILL_FAIL)
   NEW_GFC_3D_TEST(Example_GlobalFrictionContact.dat SICONOS_GLOBAL_FRICTION_3D_TFP_WR)
+
+
   NEW_GFC_3D_TEST(problem-check.dat SICONOS_GLOBAL_FRICTION_3D_NSGS_WR 0 0
     0 0 0
     INTERNAL_IPARAM 0 2000)
+  NEW_GFC_3D_TEST(problem-check.dat SICONOS_GLOBAL_FRICTION_3D_NSN_AC 0 0 0 0 0 WILL_FAIL)
+  NEW_GFC_3D_TEST(problem-check.dat SICONOS_GLOBAL_FRICTION_3D_VI_EG 0 0 0 0 0 WILL_FAIL)
+  NEW_GFC_3D_TEST(problem-check.dat SICONOS_GLOBAL_FRICTION_3D_NSGS 0 0 0 0 0 WILL_FAIL)
+
+
   NEW_GFC_3D_TEST(check-NewtonAC-1contact.dat SICONOS_GLOBAL_FRICTION_3D_NSGS_WR)
   NEW_GFC_3D_TEST(problem-check2.dat SICONOS_GLOBAL_FRICTION_3D_NSGS_WR)
+
   NEW_TEST(gfc3d_NSGS_WR_ONECONTACT_NSN_AC_GP_problem-check2 gfc3d_test13.c)
+
   NEW_GFC_3D_TEST(problem-checkTwoRods1.dat SICONOS_GLOBAL_FRICTION_3D_NSN_AC_WR 0 0
     0 0 0
     INTERNAL_IPARAM 0 1000
     INTERNAL_DPARAM 0 1e-10)
   NEW_GFC_3D_TEST(problem-checkTwoRods1.dat SICONOS_GLOBAL_FRICTION_3D_NSGS)
   NEW_TEST(gfc3d_NSGS_WR_ONECONTACT_NSN_AC_GP_problem-checkTwoRods1 gfc3d_test15.c)
-  NEW_GFC_3D_TEST(problem-check.dat SICONOS_GLOBAL_FRICTION_3D_NSN_AC 0 0 0 0 0 WILL_FAIL)
-  NEW_GFC_3D_TEST(problem-check.dat SICONOS_GLOBAL_FRICTION_3D_VI_EG 0 0 0 0 0 WILL_FAIL)
   
   # Alart Curnier functions
   NEW_TEST(AlartCurnierFunctions_test fc3d_AlartCurnierFunctions_test.c)
@@ -757,6 +766,7 @@ if(WITH_${COMPONENT}_TESTING)
     NEW_TEST(FCLIB_GFC3D_test1 gfc3d_fclib_cubeH8.c)
     NEW_GFC_3D_TEST_HDF5(LMGC_GlobalFrictionContactProblem00046.hdf5 SICONOS_GLOBAL_FRICTION_3D_NSN_AC)
     NEW_GFC_3D_TEST_HDF5(LMGC_GlobalFrictionContactProblem00046.hdf5 SICONOS_GLOBAL_FRICTION_3D_VI_EG)
+    NEW_GFC_3D_TEST_HDF5(LMGC_GlobalFrictionContactProblem00046.hdf5 SICONOS_GLOBAL_FRICTION_3D_NSGS_WR)
   endif()
   
   #===========================================

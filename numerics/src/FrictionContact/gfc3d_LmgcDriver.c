@@ -18,6 +18,14 @@
 
 #ifdef WITH_FCLIB
 static int fccounter =-1;
+
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+
+
+
+
 #endif
 static double * alloc_memory_double(unsigned int size, double *p)
 {
@@ -190,11 +198,18 @@ int gfc3d_LmgcDriver(double *reaction,
   {
 #ifdef WITH_FCLIB
     fccounter++;
+    struct stat st = {};
+    
+    if (stat("./fclib-hdf5/", &st) == -1) {
+      mkdir("./fclib-hdf5/", 0700);
+    }
+
+    
     if (fccounter % freq_output == 0)
     {
       char fname[256];
-      snprintf(fname, sizeof(fname), "LMGC_GFC3D-i%.5d-%i-%.5d.hdf5", numerics_solver_options.iparam[7], nc, fccounter);
-      printf("Dump LMGC_GFC3D-i%.5d-%i-%.5d.hdf5.\n", numerics_solver_options.iparam[7], nc, fccounter);
+      snprintf(fname, sizeof(fname), "./fclib-hdf5/LMGC_GFC3D-i%.5d-%i-%.5d.hdf5", numerics_solver_options.iparam[7], nc, fccounter);
+      printf("Dump ./fclib-hdf5/LMGC_GFC3D-i%.5d-%i-%.5d.hdf5.\n", numerics_solver_options.iparam[7], nc, fccounter);
       /* printf("ndof = %i.\n", ndof); */
 
       FILE * foutput  =  fopen(fname, "w");

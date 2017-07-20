@@ -470,6 +470,8 @@ void  gfc3d_nsgs_wr(GlobalFrictionContactProblem* problem, double *reaction , do
     }
     fc3d_nsgs(localproblem, reaction , velocity , info , options->internalSolvers);
 
+    options->iparam[1] =  options->internalSolvers->iparam[1];
+    options->dparam[1] =  options->internalSolvers->dparam[1];
     computeGlobalVelocity(problem, reaction, globalVelocity);
 
     freeLocalProblem(localproblem);
@@ -492,18 +494,9 @@ int gfc3d_nsgs_wr_setDefaultSolverOptions(SolverOptions* options)
   {
     printf("Set the Default SolverOptions for the NSGS_WR Solver\n");
   }
-
+  fc3d_nsgs_setDefaultSolverOptions(options);
   options->solverId = SICONOS_GLOBAL_FRICTION_3D_NSGS_WR;
-
   options->numberOfInternalSolvers = 1;
-  options->isSet = 1;
-  options->filterOn = 1;
-  options->iSize = 0;
-  options->dSize = 0;
-  options->iparam = NULL;
-  options->dparam = NULL;
-  options->dWork = NULL;
-  solver_options_nullify(options);
   options->internalSolvers = (SolverOptions *)malloc(sizeof(SolverOptions));
   fc3d_nsgs_setDefaultSolverOptions(options->internalSolvers);
   return 0;
