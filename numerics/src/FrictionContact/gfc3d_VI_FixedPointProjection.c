@@ -21,6 +21,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <string.h>
 
 #include "GlobalFrictionContactProblem_as_VI.h"
 #include "GlobalFrictionContactProblem.h"
