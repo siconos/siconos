@@ -1300,7 +1300,8 @@ void NM_clearSparseStorage(NumericsMatrix *A)
   NM_clearCSR(A);
 }
 
-static inline void NM_dense_to_sparse(const NumericsMatrix* const A, NumericsMatrix* B)
+
+void NM_dense_to_sparse(const NumericsMatrix* const A, NumericsMatrix* B)
 {
   assert(A->matrix0);
   assert(B->matrix2->triplet);
@@ -1312,6 +1313,18 @@ static inline void NM_dense_to_sparse(const NumericsMatrix* const A, NumericsMat
     }
   }
 }
+void NM_to_dense(const NumericsMatrix* const A, NumericsMatrix* B)
+{
+  assert(B->matrix0);
+  for (int i = 0; i < A->size0; ++i)
+  {
+    for (int j = 0; j < A->size1; ++j)
+    {
+      B->matrix0[i+ j*A->size0] = NM_get_value((NumericsMatrix*) A,i,j);
+    }
+  }
+}
+
 
 void NM_copy_sparse(const CSparseMatrix* const A, CSparseMatrix* B)
 {

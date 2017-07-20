@@ -508,8 +508,19 @@ extern "C"
 
 
   /**************************************************/
+  /** matrix conversion display *********************/
+  /**************************************************/
+
+  
+  /**************************************************/
   /** matrix and vector display *********************/
   /**************************************************/
+
+  void NM_dense_to_sparse(const NumericsMatrix* const A, NumericsMatrix* B);
+  
+  void NM_to_dense(const NumericsMatrix* const A, NumericsMatrix* B);
+
+  
 
 
   /** Screen display of the matrix content stored as a double * array in Fortran style
