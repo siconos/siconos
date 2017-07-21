@@ -5,11 +5,14 @@ simulation.
 from guitar import StringDS, Fret, Guitar
 #import siconos.kernel as sk
 import time
-import matplotlib.pyplot as plt
+
 import numpy as np
 import scipy.io
 import sys
 
+visu=False
+if visu:
+    import matplotlib.pyplot as plt    
 
 # ======== Description of the string(s) ==========
 # -- Geometry and material --
@@ -77,6 +80,7 @@ else:
     fe = 51200
 initial_time = 0.
 final_time = 0.03
+final_time = 3.00
 
 guitar_model = Guitar(interactions,
                       #{guitar_fret_middle: guitar_string,
