@@ -365,9 +365,13 @@ pkgs:
 
   path:
     debian:
-      command: wget -O - https://github.com/ampl/pathlib/raw/master/lib/linux64/libpath47.so > /usr/lib/x86_64-linux-gnu/libpath47.so
+      command: wget -O - https://github.com/ampl/pathlib/raw/master/lib/linux64/libpath47.so > /usr/lib/x86_64-linux-gnu/libpath47.so &&
+               apt-get install -y --force-yes patchelf &&
+               patchelf --replace-needed libgfortran.so.3 libm.so.6
     fedora:
-      command: wget -O - https://github.com/ampl/pathlib/raw/master/lib/linux64/libpath47.so > /usr/lib64/libpath47.so
+      command: wget -O - https://github.com/ampl/pathlib/raw/master/lib/linux64/libpath47.so > /usr/lib64/libpath47.so &&
+               dnf --setopt=deltarpm=false install -y patchelf &&
+               patchelf --replace-needed libgfortran.so.3 libm.so.6
 
   pythonocc:
     any:
