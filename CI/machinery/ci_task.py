@@ -66,8 +66,8 @@ def timeout(seconds, force_kill=True):
             return inner
         return wrapper
 
-
-@timeout(7200)
+#Some builds take really a long time
+@timeout(10000)
 def call(*args, **kwargs):
     return check_call(*args, **kwargs)
 

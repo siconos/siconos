@@ -347,7 +347,7 @@ pkgs:
   # Don't worry, this is a hack to get cppunit to work with clang on ubuntu 15.10, because the system cppunit
   # has been compiled with a different string impl ...
   cppunit_clang-3.9:
-    ubuntu-16.10:
+    ubuntu-17.04:
       command:  wget http://siconos.gforge.inria.fr/build-42/cppunit-clang-3.9-ubuntu-16.10.tar.xz &&
                 tar xJf cppunit-clang-3.9-ubuntu-16.10.tar.xz --strip-components=1 -C /usr/lib/x86_64-linux-gnu/ lib &&
                 tar xJf cppunit-clang-3.9-ubuntu-16.10.tar.xz --strip-components=1 -C /usr/include/cppunit/ include
@@ -392,7 +392,9 @@ pkgs:
                /opt/conda/bin/conda install -c https://conda.anaconda.org/dlr-sc pythonocc-core &&
                rm /opt/conda/lib/libgfortran.so* &&
                rm /opt/conda/pkgs/*.tar.bz2 -f &&
-               for i in $(ls /opt/conda/lib/libvtk*.so); do ii=$(echo $i | sed s/-.*/.so/); ln -s $i $ii ; done
+               find /opt/conda/lib/ -maxdepth 1 -name libvtk*.so | xargs -n 1 -I{} sh -c 'ln -s {} $(echo {} | sed s/-.*/.so/)'
+
+               # for i in $(ls /opt/conda/lib/libvtk*.so); do ii=$(echo $i | sed s/-.*/.so/); ln -s $i $ii ; done
 
                # conda is borken as of 10/03/2017: we need to install vtk by hand and the lib provided by conda ahave their name sufficex by -MV.mv.
                # So we have to create the right symlink :( --xhub
