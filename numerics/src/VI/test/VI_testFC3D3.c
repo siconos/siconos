@@ -81,7 +81,7 @@ int main(void)
   int info = variationalInequality_setDefaultSolverOptions(options, SICONOS_VI_HP);
   options->dparam[0]=1e-8;
   //char filename[50] = "./data/Confeti-ex13-Fc3D-SBM.dat";
-  char filename[50] = "./data/Example1_Fc3D_SBM.dat";
+  char filename[50] = "./data/FC3D_Example1_SBM.dat";
   
   FILE * finput  =  fopen(filename, "r");
   FrictionContactProblem* problem = (FrictionContactProblem *)malloc(sizeof(FrictionContactProblem));

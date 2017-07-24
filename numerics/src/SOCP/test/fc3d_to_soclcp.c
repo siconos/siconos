@@ -29,7 +29,7 @@
 int main(void)
 {
   int info = 0 ;
-  printf("Test on ./data/Example1_Fc3D_SBM.dat\n");
+  printf("Test on ./data/FC3D_Example1_SBM.dat\n");
   FILE * finput  =  fopen("../../FrictionContact/test/data/Capsules-i122-1617.dat", "r");
 
   FrictionContactProblem* problem = (FrictionContactProblem *)malloc(sizeof(FrictionContactProblem));
@@ -65,6 +65,6 @@ int main(void)
 
 
   fclose(finput);
-  printf("\nEnd of test on ./data/Example1_Fc3D_SBM.dat\n");
+  printf("\nEnd of test on ./data/FC3D_Example1_SBM.dat\n");
   return info;
 }

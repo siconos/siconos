@@ -34,9 +34,10 @@ static inline char* strdup(char* src)
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <errno.h>
+
 #include "NonSmoothDrivers.h"
 #include "GAMSlink.h"
-
 #include "frictionContact_test_function.h"
 #include "SolverOptions.h"
 #include "Friction_cst.h"
@@ -52,6 +53,12 @@ int main(void)
 
   setenv("SICONOS_HDF5_NAME", "log-@TEST_DATA@-tol-@TEST_TOLERANCE@-imax-@TEST_MAXITER@.hdf5", 1);
   FILE * finput  =  fopen(filename,"r");
+  if (!finput)
+  {
+    int _errno = errno;
+    fprintf(stderr, "%s :: unable to open file %s\n", __func__, filename);
+    return _errno;
+  }
   SolverOptions * options = (SolverOptions *) malloc(sizeof(SolverOptions));
   double testTolerance = @TEST_TOLERANCE@;
   int test_maxiter = @TEST_MAXITER@;

@@ -143,7 +143,7 @@ def test_convert():
     mat = []
 
     fcp = sn.GlobalFrictionContactProblem()
-    sn.globalFrictionContact_newFromFile(fcp, data_dir + 'problem-checkTwoRods1.dat')
+    sn.globalFrictionContact_newFromFile(fcp, data_dir + 'GFC3D_TwoRods1.dat')
 
     mat.append(fcp.M)
     mat.append(fcp.H)
@@ -152,7 +152,7 @@ def test_convert():
 
     try:
         # cheap test ...
-        data_fclib = ('CubeH8.hdf5', 'LMGC_GlobalFrictionContactProblem00046.hdf5')
+        data_fclib = ('LMGC_GFC3D_CubeH8.hdf5', 'LMGC_GlobalFrictionContactProblem00046.hdf5')
 
         for d in data_fclib:
             fcp = sn.globalFrictionContact_fclib_read(data_dir + d)

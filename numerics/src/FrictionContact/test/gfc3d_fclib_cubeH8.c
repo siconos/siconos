@@ -25,7 +25,7 @@
 int main(void)
 {
   int info = 0 ;
-  char filename[50] = "./data/CubeH8.hdf5";
+  char filename[50] = "./data/LMGC_GFC3D_CubeH8.hdf5";
   printf("Test on %s\n", filename);
 
   SolverOptions * options = (SolverOptions *) malloc(sizeof(SolverOptions));

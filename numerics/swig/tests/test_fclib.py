@@ -61,7 +61,7 @@ def solve_global(fcp, solver):
 
 
 def test_gfc3d():
-    data_files = ('CubeH8.hdf5', 'LMGC_GlobalFrictionContactProblem00046.hdf5')
+    data_files = ('LMGC_GFC3D_CubeH8.hdf5', 'LMGC_GlobalFrictionContactProblem00046.hdf5')
     mark_as_failed = False
 
     for d in data_files:

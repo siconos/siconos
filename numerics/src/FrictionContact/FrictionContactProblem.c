@@ -110,6 +110,7 @@ int frictionContact_printInFilename(FrictionContactProblem* problem, char* filen
 
 int frictionContact_newFromFile(FrictionContactProblem* problem, FILE* file)
 {
+  assert(file);
   DEBUG_PRINT("Start -- int frictionContact_newFromFile(FrictionContactProblem* problem, FILE* file)\n");
   int nc = 0, d = 0;
   int i;

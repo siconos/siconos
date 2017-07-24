@@ -83,7 +83,7 @@ int main(void)
   int info = variationalInequality_setDefaultSolverOptions(options, SICONOS_VI_EG);
   options->dparam[0]=1e-8;
 
-  FILE * finput  =  fopen("./data/Example1_Fc3D_SBM.dat", "r");
+  FILE * finput  =  fopen("./data/FC3D_Example1_SBM.dat", "r");
   FrictionContactProblem* problem = (FrictionContactProblem *)malloc(sizeof(FrictionContactProblem));
   info = frictionContact_newFromFile(problem, finput);
   // frictionContact_display(problem);

@@ -238,7 +238,7 @@ if(WITH_${COMPONENT}_TESTING)
   NEW_TEST(FC3D_sparse_test fc3d_sparse_test.c)
 
   STRING(CONCAT FC3D_DATA_SET "Capsules-i100-1090.dat;Capsules-i100-889.dat;Capsules-i101-404.dat;Capsules-i103-990.dat;Capsules-i122-1617.dat;")
-  STRING(CONCAT FC3D_DATA_SET "FC3D_Example1.dat;Example1_Fc3D_SBM.dat;FrictionContact3D_1c.dat;FrictionContact3D_RR_1c.dat;")
+  STRING(CONCAT FC3D_DATA_SET "FC3D_Example1.dat;FC3D_Example1_SBM.dat;FrictionContact3D_1c.dat;FrictionContact3D_RR_1c.dat;")
   STRING(CONCAT FC3D_DATA_SET "NESpheres_10_1.dat;NESpheres_30_1.dat;")
   STRING(CONCAT FC3D_DATA_SET "Rover1039.dat;Rover1040.dat;Rover1041.dat;Rover11035.dat;Rover11211.dat;Rover3865.dat;Rover4144.dat;")
   STRING(CONCAT FC3D_DATA_SET "Rover4493.dat;Rover4516.dat;Rover4609.dat;Rover4613.dat;Rover4622.dat;Rover9770.dat;")
@@ -285,35 +285,35 @@ if(WITH_${COMPONENT}_TESTING)
 
   
   # --- NSGS with different local solvers and parameters ---
-  NEW_FC_3D_TEST(Example1_Fc3D_SBM.dat
+  NEW_FC_3D_TEST(FC3D_Example1_SBM.dat
     SICONOS_FRICTION_3D_NSGS 1e-16 ${NSGS_NB_IT} 
     SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone)
   
-  NEW_FC_3D_TEST(Example1_Fc3D_SBM.dat
+  NEW_FC_3D_TEST(FC3D_Example1_SBM.dat
     SICONOS_FRICTION_3D_NSGS  1e-16 ${NSGS_NB_IT} 
     SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithDiagonalization)
  
-  NEW_FC_3D_TEST(Example1_Fc3D_SBM.dat
+  NEW_FC_3D_TEST(FC3D_Example1_SBM.dat
     SICONOS_FRICTION_3D_NSGS 1e-16 ${NSGS_NB_IT} 
     SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration  1e-3 10)
 
-  NEW_FC_3D_TEST(Example1_Fc3D_SBM.dat
+  NEW_FC_3D_TEST(FC3D_Example1_SBM.dat
     SICONOS_FRICTION_3D_NSGS  1e-16 ${NSGS_NB_IT} 
     SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithRegularization 0 0
     DPARAM 3 0.1)
     
-  NEW_FC_3D_TEST(Example1_Fc3D_SBM.dat
+  NEW_FC_3D_TEST(FC3D_Example1_SBM.dat
     SICONOS_FRICTION_3D_NSGS  1e-16 ${NSGS_NB_IT}
     SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration 1e-3 10
     DPARAM 8 1.7
     IPARAM 8 1)
 
-  # NEW_FC_3D_TEST(Example1_Fc3D_SBM.dat
+  # NEW_FC_3D_TEST(FC3D_Example1_SBM.dat
   #   SICONOS_FRICTION_3D_NSGS  1e-16 1000
   #   SICONOS_FRICTION_3D_NCPGlockerFBNewton 0 0
   #   WILL_FAIL)
 
-  NEW_FC_3D_TEST(Example1_Fc3D_SBM.dat
+  NEW_FC_3D_TEST(FC3D_Example1_SBM.dat
     SICONOS_FRICTION_3D_NSGS  1e-16 1000
     SICONOS_FRICTION_3D_NCPGlockerFBFixedPoint 0.0 10
     WILL_FAIL)
@@ -348,7 +348,7 @@ if(WITH_${COMPONENT}_TESTING)
     SICONOS_FRICTION_3D_NSGS  1e-12 10000
     SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithRegularization 0.0 0)
 
-  NEW_FC_3D_TEST(problem-checkTwoRods1-condensed.dat
+  NEW_FC_3D_TEST(GFC3D_TwoRods1-condensed.dat
     SICONOS_FRICTION_3D_NSGS  1e-05 10000
     SICONOS_FRICTION_3D_ONECONTACT_NSN 0.0 0
     INTERNAL_IPARAM 1 1)
