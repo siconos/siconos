@@ -151,7 +151,7 @@ int gfc3d_reformulation_local_problem(GlobalFrictionContactProblem* problem, Fri
 #ifdef USE_NM_GESV  
     NM_gesv_expert(M,qtmp,NM_KEEP_FACTORS);
 #else
-     DGETRS(LA_NOTRANS, n, m,  M->matrix0, n, ipiv, qtmp, 1, &infoDGETRS); 
+     DGETRS(LA_NOTRANS, n, 1,  M->matrix0, n, ipiv, qtmp, n, &infoDGETRS); 
 #endif
 
     
