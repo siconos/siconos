@@ -193,17 +193,17 @@ siconos_light_examples = minimal_with_python.copy()(
     ci_config='examples_light',
     targets={'.': ['docker-build', 'docker-cmake', 'docker-make',
                    'docker-make-install', 'docker-make-clean'],
-             'examples': ['docker-build', 'docker-ctest']},
+             'examples': ['docker-build', 'docker-ctest', 'docker-make-clean']},
     add_srcs=['examples'])
 
 # Case2 : siconos with mechanics components and bullet + related examples
 siconos_all_examples = minimal_with_python.copy()(
     ci_config='examples_all',
+    add_pkgs=['bullet', 'h5py'],
     targets={'.': ['docker-build', 'docker-cmake', 'docker-make',
-                   'docker-make-install'],
-             'examples': ['docker-build', 'docker-ctest']},
-    add_srcs=['examples'],
-    fast=True)
+                   'docker-make-install', 'docker-make-clean'],
+             'examples': ['docker-build', 'docker-ctest', 'docker-make-clean']},
+    add_srcs=['examples'])
 
 siconos_test_deb = CiTask(
     ci_config='examples',

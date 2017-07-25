@@ -81,13 +81,13 @@ else()
   
   string(FIND "${installed_targets}" "kernel" kernel_installed )
   string(FIND "${installed_targets}" "control" control_installed )
-  string(FIND "${installed_targets}" "mechanics" mechanics_installed )
   string(FIND "${installed_targets}" "io" io_installed )
 
   # Kernel component examples
   if(${kernel_installed} GREATER -1)
+    MESSAGE(STATUS "kernel component found")
     set(EXAMPLES_DIRECTORIES
-      ${EXAMPLES_DIRECTORIES}
+      "${EXAMPLES_DIRECTORIES}"
       Biology
       Electronics
       Mechanics
@@ -99,8 +99,9 @@ else()
 
   # Control component examples
   if(${control_installed} GREATER -1)
+    MESSAGE(STATUS "control component found")
     set(EXAMPLES_DIRECTORIES
-      ${EXAMPLES_DIRECTORIES}
+      "${EXAMPLES_DIRECTORIES}"
       Control
       )
   endif()
