@@ -45,7 +45,7 @@ static char* format_msg_concat(const char* msg1, const char* msg2)
 {
   strncpy(error_msg, msg1, strlen(msg1)+1);
   strncat(error_msg, "\n", 2);
-  strncat(error_msg, msg2, strlen(msg2) - 1);
+  strncat(error_msg, msg2, strlen(msg2));
   return error_msg;
 }
 
