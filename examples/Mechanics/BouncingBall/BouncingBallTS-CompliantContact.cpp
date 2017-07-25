@@ -151,7 +151,7 @@ int main(int argc, char* argv[])
     // --- Simulation initialization ---
 
     cout << "====> Initialisation ..." << endl;
-    s->prepareIntegratorForDS(OSI, ball, bouncingBall, t0)
+    s->prepareIntegratorForDS(OSI, ball, bouncingBall, t0);
     bouncingBall->initialize();
 
     // -- set the integrator for the ball --
