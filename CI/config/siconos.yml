@@ -388,7 +388,7 @@ pkgs:
     any:
       command: wget https://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh &&
                bash ./Miniconda-latest-Linux-x86_64.sh -b -p /opt/conda &&
-               /opt/conda/bin/conda install numpy scipy lxml pytest matplotlib vtk &&
+               /opt/conda/bin/conda install numpy scipy h5py lxml pytest matplotlib vtk &&
                /opt/conda/bin/conda install -c https://conda.anaconda.org/dlr-sc pythonocc-core &&
                rm /opt/conda/lib/libgfortran.so* &&
                rm /opt/conda/pkgs/*.tar.bz2 -f &&
