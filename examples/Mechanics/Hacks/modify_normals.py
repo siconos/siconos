@@ -42,9 +42,9 @@ with Hdf5() as io:
 relations_keeper = {}
 
 class MyBulletR(Mechanics.collision.bullet.BulletR):
-    def updateContactPoints(self, point):
+    def updateContactPoints(self, point, q1, q2):
         # Call usual updateContactPoints
-        super(self.__class__,self).updateContactPoints(point)
+        super(self.__class__,self).updateContactPoints(point, q1, q2)
 
         # Add some noise to the normal's direction
         n = self.nc() + np.random.normal(0, 0.1, 3)
@@ -71,7 +71,8 @@ class MyBulletManager(Mechanics.collision.bullet.SiconosBulletCollisionManager):
     # BulletR-derived class.
     def makeBulletR(self, ds1, shape1, ds2, shape2, manifoldpoint,
                     flip=False, y_correction_A=0, y_correction_B=0, scaling=1):
-        r = MyBulletR(manifoldpoint, flip, y_correction_A, y_correction_B, scaling)
+        r = MyBulletR(manifoldpoint, ds1.q(), None,
+                      flip, y_correction_A, y_correction_B, scaling)
         relations_keeper[r] = True
         return r
 
