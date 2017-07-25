@@ -130,7 +130,13 @@ FOREACH(_EXE ${_EXE_LIST_${_CURRENT_TEST_DIRECTORY}})
     IF(${_TEST_NAME}_PROPERTIES)
       SET_TESTS_PROPERTIES(${_TEST_NAME} PROPERTIES ${${_TEST_NAME}_PROPERTIES})
     ENDIF(${_TEST_NAME}_PROPERTIES)
-    set_tests_properties(${_TEST_NAME} PROPERTIES TIMEOUT ${tests_timeout})
+
+    if(${_EXE}_TIMEOUT)
+      set_tests_properties(${_TEST_NAME} PROPERTIES TIMEOUT ${${_EXE}_TIMEOUT})
+    else()
+      set_tests_properties(${_TEST_NAME} PROPERTIES TIMEOUT ${tests_timeout})
+    endif()
+
 
   ENDFOREACH(i RANGE ${count})
 

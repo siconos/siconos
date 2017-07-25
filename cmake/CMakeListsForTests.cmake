@@ -27,6 +27,10 @@ if(CMAKE_SYSTEM_NAME MATCHES Windows)
   SET(COMPONENT_PATH "${COMPONENT_BIN_DIR}\;@ENV_PATH@")
 endif()
 
+# For some environment variables (LD_LIBRARY_PATH, DYLD_LIBRARY_PATH, Path)
+# Needed for plugins --xhub
+set(LIBFORTests @CMAKE_CURRENT_BINARY_DIR@)
+
 FOREACH(_EXE ${_EXE_LIST_${_CURRENT_TEST_DIRECTORY}})
   
   file(APPEND ${TESTS_LOGFILE} "Adding test suite ${_CURRENT_TEST_DIRECTORY}/${_EXE} \n")
@@ -105,7 +109,8 @@ FOREACH(_EXE ${_EXE_LIST_${_CURRENT_TEST_DIRECTORY}})
 
   IF(CPPUNIT_FOUND)
     # each test in the test suite becomes a cmake test
-    
+
+
     IF(CROSSCOMPILING_LINUX_TO_WINDOWS)
       SET(EMULATOR "wine")
     ELSE()
@@ -137,6 +142,9 @@ FOREACH(_EXE ${_EXE_LIST_${_CURRENT_TEST_DIRECTORY}})
     FILE(APPEND ${CMAKE_CURRENT_BINARY_DIR}/SiconosTestConfig.cmake "  SET(_EXE \${ARGV0})\n")
 
     IF(CMAKE_SYSTEM_NAME MATCHES Windows)
+      SET(ENV_PPTY "Path=${COMPONENT_PATH}")
+    ELSEIF(NOT CMAKE_SYSTEM_NAME MATCHES APPLE)
+      SET(ENV_PPTY "LD_LIBRARY_PATH=$ENV{LD_LIBRARY_PATH}:${LIBFORTests}")
     ENDIF()
 
     IF(USE_SANITIZER MATCHES "asan")
@@ -180,6 +188,8 @@ FOREACH(_EXE ${_EXE_LIST_${_CURRENT_TEST_DIRECTORY}})
 
     if(CMAKE_SYSTEM_NAME MATCHES Windows)
       set_tests_properties(${_EXE} PROPERTIES ENVIRONMENT "Path=${COMPONENT_PATH}")
+    ELSEIF(NOT CMAKE_SYSTEM_NAME MATCHES APPLE)
+      SET(ENV_PPTY "LD_LIBRARY_PATH=$ENV{LD_LIBRARY_PATH}:${LIBFORTests}")
     endif()
 
     IF(USE_SANITIZER MATCHES "asan")
@@ -191,8 +201,12 @@ FOREACH(_EXE ${_EXE_LIST_${_CURRENT_TEST_DIRECTORY}})
       SET_TESTS_PROPERTIES(${_EXE} PROPERTIES ${${_EXE}_PROPERTIES})
     ENDIF(${_EXE}_PROPERTIES)
 
-    set_tests_properties(${_EXE} PROPERTIES TIMEOUT ${tests_timeout})
- 
+    if(${_EXE}_TIMEOUT)
+      set_tests_properties(${_EXE} PROPERTIES TIMEOUT ${${_EXE}_TIMEOUT})
+    else()
+      set_tests_properties(${_EXE} PROPERTIES TIMEOUT ${tests_timeout})
+    endif()
+
   ENDIF()
 
 ENDFOREACH()
