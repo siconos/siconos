@@ -71,7 +71,10 @@ class MyBulletManager(Mechanics.collision.bullet.SiconosBulletCollisionManager):
     # BulletR-derived class.
     def makeBulletR(self, ds1, shape1, ds2, shape2, manifoldpoint,
                     flip=False, y_correction_A=0, y_correction_B=0, scaling=1):
-        r = MyBulletR(manifoldpoint, ds1.q(), None,
+        q1, q2 = None, None
+        if ds1: q1 = ds1.q()
+        if ds2: q2 = ds2.q()
+        r = MyBulletR(manifoldpoint, q1, q2,
                       flip, y_correction_A, y_correction_B, scaling)
         relations_keeper[r] = True
         return r
