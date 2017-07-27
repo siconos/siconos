@@ -72,7 +72,7 @@ public:
   virtual void computeh(double time, BlockVector& q0, SiconosVector& y);
 
   virtual void updateContactPoints(const btManifoldPoint& point,
-                                   SP::SiconosVector q1, SP::SiconosVector q2);
+                                   SP::NewtonEulerDS ds1, SP::NewtonEulerDS ds2);
 
   virtual void preDelete() {}
 

@@ -22,6 +22,8 @@
 #include <debug.h>
 
 #include "BulletR.hpp"
+#include <BodyDS.hpp>
+#include <Interaction.hpp>
 
 #if defined(__clang__)
 #pragma clang diagnostic push
@@ -43,8 +45,6 @@
 #pragma GCC diagnostic pop
 #endif
 
-#include <Interaction.hpp>
-
 static void copyBtVector3(const btVector3 &from, SiconosVector& to)
 {
   to(0) = from.x();
@@ -65,7 +65,6 @@ BulletR::BulletR(const btManifoldPoint &point,
   _scaling(scaling),
   _flip(flip)
 {
-  updateContactPoints(point, q1, q2);
 }
 
 #include <BlockVector.hpp>
@@ -100,7 +99,7 @@ void BulletR::computeh(double time, BlockVector& q0, SiconosVector& y)
 }
 
 void BulletR::updateContactPoints(const btManifoldPoint& point,
-                                  SP::SiconosVector q1, SP::SiconosVector q2)
+                                  SP::NewtonEulerDS ds1, SP::NewtonEulerDS ds2)
 {
   // Flip contact points if requested
   btVector3 posa = point.getPositionWorldOnA();
@@ -123,8 +122,11 @@ void BulletR::updateContactPoints(const btManifoldPoint& point,
   posb = posb * _scaling - n * _y_correction_B;
 
   // Update relative contact point locations.
-  btQuaternion qq1((*q1)(4), (*q1)(5), (*q1)(6), (*q1)(3));
-  btQuaternion pq1(posa.x() - (*q1)(0), posa.y() - (*q1)(1), posa.z() - (*q1)(2), 0);
+  btQuaternion qq1((*ds1->q())(4), (*ds1->q())(5),
+                   (*ds1->q())(6), (*ds1->q())(3));
+  btQuaternion pq1(posa.x() - (*ds1->q())(0),
+                   posa.y() - (*ds1->q())(1),
+                   posa.z() - (*ds1->q())(2), 0);
 
   // Unrotate q1-posa vector
   pq1 = qq1.inverse() * pq1 * qq1;
@@ -132,10 +134,10 @@ void BulletR::updateContactPoints(const btManifoldPoint& point,
   (*_relPc1)(1) = pq1.y();
   (*_relPc1)(2) = pq1.z();
 
-  if (q2)
+  if (ds2)
   {
-    btQuaternion qq2((*q2)(4), (*q2)(5), (*q2)(6), (*q2)(3));
-    btQuaternion pq2(posb.x() - (*q2)(0), posb.y() - (*q2)(1), posb.z() - (*q2)(2), 0);
+    btQuaternion qq2((*ds2->q())(4), (*ds2->q())(5), (*ds2->q())(6), (*ds2->q())(3));
+    btQuaternion pq2(posb.x() - (*ds2->q())(0), posb.y() - (*ds2->q())(1), posb.z() - (*ds2->q())(2), 0);
 
     // Unrotate q2-posb vector
     pq2 = qq2.inverse() * pq2 * qq2;

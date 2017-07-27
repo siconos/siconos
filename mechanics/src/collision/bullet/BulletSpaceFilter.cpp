@@ -451,9 +451,9 @@ void BulletSpaceFilter::buildInteractions(double time)
             DEBUG_PRINTF("cpoint %p  = true\n", &*cpoint);
             SP::BulletR rel(std11::static_pointer_cast<BulletR>(inter->relation()));
             rel->updateContactPoints(*cpoint,
-                                     flip ? dsb->q() : dsa->q(),
-                                     flip ? (dsa ? dsa->q() : SP::SiconosVector())
-                                          : (dsb ? dsb->q() : SP::SiconosVector()));
+                                     flip ? dsb : dsa,
+                                     flip ? (dsa ? dsa : SP::NewtonEulerDS())
+                                          : (dsb ? dsb : SP::NewtonEulerDS()));
           }
           else
           {

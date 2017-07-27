@@ -3,6 +3,15 @@
 #
 # Example of overriding BulletR to modify the contact normals.
 #
+# The idea here is to add some random noise to the contact normals,
+# simulating an object bounding on rough ground without having to
+# incur the cost of actually simulating the geometry of rough ground.
+#
+# We override the BulletR class's updateContactPoints method to
+# achieve this.  In order to instantiate our own BulletR class, we
+# also have to provide a makeBulletR function for our override of the
+# SiconosBulletCollisionManager.
+#
 
 from siconos.mechanics.collision.tools import Contactor
 from siconos.io.mechanics_io import Hdf5
@@ -17,18 +26,17 @@ with Hdf5() as io:
     io.addPrimitiveShape('Cube', 'Box', (1,1,1))
 
     # Definition of the ground shape
-    io.addPrimitiveShape('Ground', 'Box', (100, 100, .5))
+    io.addPrimitiveShape('Ground', 'Box', (10, 10, .5))
 
     # Definition of a non smooth law. As no group ids are specified it
     # is between contactors of group id 0.
-    io.addNewtonImpactFrictionNSL('contact', mu=0.3)
+    io.addNewtonImpactFrictionNSL('contact', mu=0.3, e=0.8)
 
     # The cube object made with an unique Contactor : the cube shape.
     # As a mass is given, it is a dynamic system involved in contact
     # detection and in the simulation.  With no group id specified the
     # Contactor belongs to group 0
     io.addObject('cube', [Contactor('Cube')], translation=[0, 0, 2],
-                 velocity=[10, 0, 0, 1, 1, 1],
                  mass=1)
 
     # the ground object made with the ground shape. As the mass is
@@ -42,12 +50,16 @@ with Hdf5() as io:
 relations_keeper = {}
 
 class MyBulletR(Mechanics.collision.bullet.BulletR):
-    def updateContactPoints(self, point, q1, q2):
+    def updateContactPoints(self, point, ds1, ds2):
         # Call usual updateContactPoints
-        super(self.__class__,self).updateContactPoints(point, q1, q2)
+        super(self.__class__,self).updateContactPoints(point, ds1, ds2)
 
-        # Add some noise to the normal's direction
-        n = self.nc() + np.random.normal(0, 0.1, 3)
+        # Don't do anything weird if we have low velocity
+        if np.linalg.norm(ds1.velocity()) < 0.1:
+            return
+
+        # Otherwise, add some noise to the normal's direction
+        n = self.nc() + np.random.normal(0, 0.3, 3)
         n = n / np.linalg.norm(n)
         self.setnc(n)
 
@@ -74,8 +86,10 @@ class MyBulletManager(Mechanics.collision.bullet.SiconosBulletCollisionManager):
         q1, q2 = None, None
         if ds1: q1 = ds1.q()
         if ds2: q2 = ds2.q()
+
         r = MyBulletR(manifoldpoint, q1, q2,
                       flip, y_correction_A, y_correction_B, scaling)
+
         relations_keeper[r] = True
         return r
 

@@ -1487,8 +1487,8 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
 
       /* update the relation */
       SP::BulletR rel(std11::static_pointer_cast<BulletR>((*p_inter)->relation()));
-      rel->updateContactPoints(*it->point, pairA->ds->q(),
-                               pairB->ds ? pairB->ds->q() : SP::SiconosVector());
+      rel->updateContactPoints(*it->point, pairA->ds,
+                               pairB->ds ? pairB->ds : SP::NewtonEulerDS());
 
       _stats.existing_interactions_processed ++;
     }
@@ -1514,6 +1514,11 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
                                     pairA->sshape->outsideMargin(),
                                     pairB->sshape->outsideMargin(),
                                     1.0 / _options.worldScale));
+
+        if (!rel) continue;
+        rel->updateContactPoints(*it->point,
+                                 pairA->ds ? pairA->ds : SP::NewtonEulerDS(),
+                                 pairB->ds ? pairB->ds : SP::NewtonEulerDS());
 
         // We wish to be sure that no Interactions are created without
         // sufficient warning before contact.  TODO: Replace with exception or
