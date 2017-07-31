@@ -56,6 +56,17 @@ namespace STD11 {
 
 // fix some problems passing ref and null shared_ptr to directors
 %define FIX_DIRECTOR_SHARED_PTR_TYPEMAPS(SP,TYPE)
+%typemap(directorout) (SP::TYPE) (void * swig_argp, int swig_res = 0) %{
+  if ($input==Py_None) {
+    $result = $ltype();
+  } else {
+    swig_res = SWIG_ConvertPtr($input, &swig_argp, $descriptor(SP::TYPE*), %convertptr_flags);
+    if (!SWIG_IsOK(swig_res)) {
+      %dirout_fail(swig_res,"$type");
+    }
+    $result = *(%reinterpret_cast(swig_argp, $&ltype));
+  }
+%}
 %typemap(directorin) (SP::TYPE) () %{
   $input = $1 ? SWIG_NewPointerObj(%as_voidptr(&$1), $descriptor(SP::TYPE *), 0) : SWIG_Py_Void();
 %}
