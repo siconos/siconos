@@ -932,17 +932,17 @@ std::pair<SP::btTriangleIndexVertexArray, SCALAR*>
 make_bt_vertex_array(SP::SiconosMesh mesh,
                      SCALAR _s1, SCALAR _s2)
 {
-  assert(mesh->vertices()->size(1) == 3);
+  assert(mesh->vertices()->size(0) == 3);
   SP::btTriangleIndexVertexArray bttris(
     std11::make_shared<btTriangleIndexVertexArray>(
       mesh->indexes()->size()/3,
       (int*)mesh->indexes()->data(),
       sizeof(int)*3,
-      mesh->vertices()->size(0),
+      mesh->vertices()->size(1),
       mesh->vertices()->getArray(),
       sizeof(btScalar)*3));
 
-  return std::make_pair(bttris, mesh->vertices()->getArray());
+  return std::make_pair(bttris, (btScalar*)NULL);
 }
 
 // If type of SiconosMatrix is not the same as btScalar, we must copy
@@ -950,21 +950,22 @@ template<typename SCALAR1, typename SCALAR2>
 std::pair<SP::btTriangleIndexVertexArray, btScalar*>
 make_bt_vertex_array(SP::SiconosMesh mesh, SCALAR1 _s1, SCALAR2 _s2)
 {
-  assert(mesh->vertices()->size(1) == 3);
-  unsigned int num = mesh->vertices()->size(0);
-  btScalar *vertices = new btScalar[num*3];
-  for (unsigned int i=0; i < num; i++)
+  assert(mesh->vertices()->size(0) == 3);
+  unsigned int numIndices = mesh->indexes()->size();
+  unsigned int numVertices = mesh->vertices()->size(1);
+  btScalar *vertices = new btScalar[numVertices*3];
+  for (unsigned int i=0; i < numVertices; i++)
   {
-    vertices[i*3+0] = (*mesh->vertices())(i,0);
-    vertices[i*3+1] = (*mesh->vertices())(i,1);
-    vertices[i*3+2] = (*mesh->vertices())(i,2);
+    vertices[i*3+0] = (*mesh->vertices())(0,i);
+    vertices[i*3+1] = (*mesh->vertices())(1,i);
+    vertices[i*3+2] = (*mesh->vertices())(2,i);
   }
   SP::btTriangleIndexVertexArray bttris(
     std11::make_shared<btTriangleIndexVertexArray>(
-      num,
+      numIndices/3,
       (int*)mesh->indexes()->data(),
       sizeof(int)*3,
-      mesh->vertices()->size(0),
+      numVertices,
       vertices,
       sizeof(btScalar)*3));
   return std::make_pair(bttris, vertices);
@@ -985,7 +986,7 @@ void SiconosBulletCollisionManager_impl::createCollisionObject(
   if (!mesh->vertices())
     throw SiconosException("No vertices matrix specified for mesh.");
 
-  if (mesh->vertices()->size(1) != 3)
+  if (mesh->vertices()->size(0) != 3)
     throw SiconosException("Convex hull vertices matrix must have 3 columns.");
 
   // Create Bullet triangle list, either by copying on non-copying method

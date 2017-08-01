@@ -420,12 +420,12 @@ def loadSiconosMesh(shape_filename, scale=None):
     shape = None
 
     if polydata.GetCellType(0) == 5:
-        apoints = np.empty((num_points, 3), dtype={4:'f4',8:'f8'}[btScalarSize()])
+        apoints = np.empty((3, num_points), dtype={4:'f4',8:'f8'}[btScalarSize()])
         for i in range(0, points.GetNumberOfTuples()):
             p = points.GetTuple(i)
-            apoints[i, 0] = p[0]
-            apoints[i, 1] = p[1]
-            apoints[i, 2] = p[2]
+            apoints[0, i] = p[0]
+            apoints[1, i] = p[1]
+            apoints[2, i] = p[2]
 
         if scale is not None:
             apoints *= scale
