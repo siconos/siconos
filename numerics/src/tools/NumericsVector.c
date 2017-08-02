@@ -48,3 +48,18 @@ void NV_display(double * m, int nRow)
   }
 
 }
+void NV_write_in_file_python(double * m,  int nRow, FILE* file)
+{
+  if (! m)
+  {
+    fprintf(stderr, "Numerics, NV_write_in_file_python  failed, NULL input.\n");
+    exit(EXIT_FAILURE);
+  }
+  fprintf(file, "size = %d; \n", nRow);
+  fprintf(file, "data= [");
+  for (int i = 0; i < nRow; i++)
+  {
+    fprintf(file, "%32.24e,\t ", m[i]);
+  }
+  fprintf(file, "]");
+}

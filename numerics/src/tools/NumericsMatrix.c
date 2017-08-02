@@ -776,6 +776,28 @@ void NM_write_in_file(const NumericsMatrix* const m, FILE* file)
   DEBUG_PRINT("\n  ========== printInFile(const NumericsMatrix* const m, FILE* file) end\n");
 
 }
+void NM_write_in_file_python(const NumericsMatrix* const m, FILE* file)
+{
+  if (! m)
+  {
+    fprintf(stderr, "Numerics, NumericsMatrix_write_in_file_python  failed, NULL input.\n");
+    exit(EXIT_FAILURE);
+  }
+  fprintf(file, "storageType = %d ; \n", m->storageType);
+  fprintf(file, "size0 = %d; \n", m->size0);
+  fprintf(file, "size1 = %d; \n", m->size1);
+  fprintf(file, "data= [");
+  for (int i = 0; i < m->size0; i++)
+  {
+    fprintf(file, "[");
+    for (int j = 0; j < m->size1; j++)
+    {
+      fprintf(file, "%32.24e,\t ", NM_get_value((NumericsMatrix*) m,i,j));
+    }
+    fprintf(file, "],\n");
+  }
+  fprintf(file, "]");
+}
 
 void NM_write_in_file_scilab(const NumericsMatrix* const m, FILE* file)
 {
@@ -788,33 +810,17 @@ void NM_write_in_file_scilab(const NumericsMatrix* const m, FILE* file)
   fprintf(file, "storageType = %d ; \n", m->storageType);
   fprintf(file, "size0 = %d; \n", m->size0);
   fprintf(file, "size1 = %d; \n", m->size1);
-
-  if (storageType == NM_DENSE)
+  fprintf(file, "data= [");
+  for (int i = 0; i < m->size0; i++)
   {
-    fprintf(file, "data= [");
-    for (int i = 0; i < m->size0; i++)
+    fprintf(file, "[");
+    for (int j = 0; j < m->size1; j++)
     {
-      fprintf(file, "[");
-      for (int j = 0; j < m->size1; j++)
-      {
-        fprintf(file, "%32.24e,\t ", m->matrix0[i + j * m->size0]);
-      }
-      fprintf(file, "];\n");
+      fprintf(file, "%32.24e,\t ", NM_get_value((NumericsMatrix*) m,i,j));
     }
-    fprintf(file, "]");
+    fprintf(file, "];\n");
   }
-  else if (storageType == NM_SPARSE_BLOCK)
-  {
-    SBM_write_in_fileForScilab(m->matrix1, file);
-    /*       fprintf(stderr,"Numerics, NumericsMatrix NM_write_in_file_scilab. Not yet implemented fo storageType = %i.\n", storageType); */
-    /*       exit(EXIT_FAILURE); */
-
-  }
-  else
-  {
-    fprintf(stderr, "printInFileForScilab. :: unknown matrix storage");
-    exit(EXIT_FAILURE);
-  }
+  fprintf(file, "]");
 }
 
 void NM_write_in_filename(const NumericsMatrix* const m, const char *filename)

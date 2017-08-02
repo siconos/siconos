@@ -48,6 +48,7 @@ extern "C"
    */
   void NV_display(double * m, int nRow);
 
+  void NV_write_in_file_python(double * m,  int nRow, FILE* file);
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif

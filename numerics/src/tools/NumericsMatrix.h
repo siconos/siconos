@@ -593,11 +593,17 @@ extern "C"
   */
   int  NM_new_from_file(NumericsMatrix* const M, FILE *file);
 
-  /** PrintInFileForScilab  of the matrix content
+  /**  NM_write_in_file_scilab of the matrix content
    \param M the matrix to be printed
    \param file the corresponding file
   */
   void NM_write_in_file_scilab(const NumericsMatrix* const M, FILE* file);
+
+ /**   NM_write_in_file_python of the matrix content
+   \param M the matrix to be printed
+   \param file the corresponding file
+  */
+  void NM_write_in_file_python(const NumericsMatrix* const M, FILE* file);
 
   /** Read in file for scilab  of the matrix content
      \param M the matrix to be read
