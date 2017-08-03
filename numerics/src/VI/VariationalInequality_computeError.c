@@ -25,6 +25,7 @@
 
 #include <math.h>
 #include <assert.h>
+#include <float.h>
 
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
