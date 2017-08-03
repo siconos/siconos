@@ -227,10 +227,28 @@ void Topology::setName(SP::DynamicalSystem ds, const std::string& name)
   _DSG[0]->name.insert(dsgv, name);
 }
 
+std::string Topology::name(SP::DynamicalSystem ds)
+{
+  DynamicalSystemsGraph::VDescriptor dsgv = _DSG[0]->descriptor(ds);
+  if (dsgv)
+    return _DSG[0]->name.at(dsgv);
+  else
+    return "";
+}
+
 void Topology::setName(SP::Interaction inter, const std::string& name)
 {
   InteractionsGraph::VDescriptor igv = _IG[0]->descriptor(inter);
   _IG[0]->name.insert(igv, name);
+}
+
+std::string Topology::name(SP::Interaction inter)
+{
+  InteractionsGraph::VDescriptor igv = _IG[0]->descriptor(inter);
+  if (igv)
+    return _IG[0]->name.at(igv);
+  else
+    return "";
 }
 
 void Topology::setOSI(SP::DynamicalSystem ds, SP::OneStepIntegrator OSI)

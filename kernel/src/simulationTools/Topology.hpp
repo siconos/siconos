@@ -147,11 +147,23 @@ public:
    */
   void setName(SP::DynamicalSystem ds, const std::string& name);
 
+  /** get the name for this Dynamical System
+   * \param ds a pointer to the system
+   * \return name the name of the DynamicalSystem, or empty string if not found.
+   */
+  std::string name(SP::DynamicalSystem ds);
+
   /** set the name for an Interaction
    * \param inter a pointer to the Interaction
    * \param name the name of the Interaction
    */
   void setName(SP::Interaction inter, const std::string& name);
+
+  /** get the name for this Interaction
+   * \param ds a pointer to the system
+   * \return name the name of the Interaction, or empty string if not found.
+   */
+  std::string name(SP::Interaction inter);
 
   /** set the OSI for this DynamicalSystem
    * \param ds the DynamicalSystem
