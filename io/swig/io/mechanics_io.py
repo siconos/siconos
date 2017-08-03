@@ -27,7 +27,6 @@ import siconos.kernel as Kernel
 from siconos.mechanics.collision.tools import Contactor, Volume
 from siconos.mechanics import joints
 from siconos.io.io_base import MechanicsIO
-from siconos.io.FrictionContactTrace import FrictionContactTrace
 
 # Currently we must choose between two implementations
 use_original = False
@@ -753,7 +752,7 @@ class Hdf5():
     def __init__(self, io_filename=None, mode='w',
                  broadphase=None, model=None, osi=None, shape_filename=None,
                  set_external_forces=None, gravity_scale=None, collision_margin=None,
-                 use_compression=False, output_domains=False):
+                 use_compression=False, output_domains=False, verbose=True):
 
         if io_filename is None:
             self._io_filename = '{0}.hdf5'.format(
@@ -801,6 +800,7 @@ class Hdf5():
         self._use_compression = use_compression
         self._should_output_domains = output_domains
         self._contact_index_set = 1
+        self.verbose = verbose
 
     def __enter__(self):
         if self._set_external_forces is None:
@@ -1095,7 +1095,8 @@ class Hdf5():
                     shp = self._shape.get(c.data)
                     pos = list(c.translation) + list(c.orientation)
                     cset.append(SiconosContactor(shp, pos, c.group))
-                    print('Adding shape %s to static contactor'%c.data, pos)
+                    if self.verbose:
+                        print('Adding shape %s to static contactor'%c.data, pos)
                 self._broadphase.insertStaticContactorSet(cset, csetpos)
 
                 self._static[name] = {
@@ -1351,9 +1352,6 @@ class Hdf5():
             bc_type = self.boundary_conditions()[name].attrs['type']
             bc_class = getattr(Kernel,bc_type)
 
-            print('name = ', name)
-            print('object1')
-
             ds1_name = self.boundary_conditions()[name].attrs['object1']
             ds1 = topo.getDynamicalSystem(ds1_name)
 
@@ -1414,8 +1412,8 @@ class Hdf5():
             cg2 = int(ctr2.attrs['group'])
             nslaw = self._broadphase.nslaw(cg1, cg2)
 
-
-            print (body1_name, self._occ_contactors[body1_name])
+            if self.verbose:
+                print (body1_name, self._occ_contactors[body1_name])
             cocs1_rank = self._occ_contactors[body1_name][contactor1_name]
             cocs1 = ds1.contactShape(cocs1_rank)
 
@@ -1513,8 +1511,10 @@ class Hdf5():
                     #
                     # cold restart if output previously done
                     if mass > 0 and dpos_data is not None and len(dpos_data) > 0:
-                        print ('Import  dynamic object name ', name, 'from current state')
-                        print ('  number of imported object ', obj.attrs['id'])
+                        if self.verbose:
+                            print ('Import  dynamic object name ', name,
+                                   'from current state')
+                            print ('  number of imported object ', obj.attrs['id'])
 
                         id_last_inst = np.where(
                             dpos_data[id_last, 1] ==
@@ -1535,8 +1535,10 @@ class Hdf5():
 
                     # start from initial conditions
                     else:
-                        print ('Import  dynamic or static object number ', obj.attrs['id'], 'from initial state')
-                        print ('                object name   ', name)
+                        if self.verbose:
+                            print ('Import  dynamic or static object number ',
+                                   obj.attrs['id'], 'from initial state')
+                            print ('                object name   ', name)
                         translation = obj.attrs['translation']
                         orientation = obj.attrs['orientation']
                         velocity = obj.attrs['velocity']
@@ -1687,7 +1689,8 @@ class Hdf5():
         self._static_data.resize(len(self._static), 0)
 
         for static in self._static.values():
-            print('output static object', static['number'])
+            if self.verbose:
+                print('output static object', static['number'])
             translation = static['transform'].getOrigin()
             rotation = static['transform'].getRotation()
             self._static_data[p, :] = \
@@ -2331,6 +2334,8 @@ class Hdf5():
             projection_tolerance_unilateral=1e-8,
             numerics_verbose=False,
             violation_verbose=False,
+            verbose=True,
+            verbose_progress=True,
             output_frequency=None,
             friction_contact_trace=False,
             friction_contact_trace_params=None,
@@ -2363,7 +2368,12 @@ class Hdf5():
           output_frequency :
           contact_index_set : index set from which contact points informations are retrieved.
         """
-        print ('load siconos module ...')
+        self.verbose = verbose
+        def print_verbose(*args):
+            if verbose:
+                print(*args)
+
+        print_verbose ('load siconos module ...')
         from siconos.kernel import \
             Model, NonSmoothDynamicalSystem, OneStepNSProblem,\
             TimeDiscretisation, GenericMechanical, FrictionContact,\
@@ -2371,7 +2381,7 @@ class Hdf5():
 
         from siconos.numerics import SICONOS_FRICTION_3D_ONECONTACT_NSN
 
-        print ('setup model simulation ...')
+        print_verbose ('setup model simulation ...')
         if set_external_forces is not None:
             self._set_external_forces=set_external_forces
 
@@ -2396,15 +2406,15 @@ class Hdf5():
         k=k0
         kT=k0+int((T-t0)/h)
         if T > t0:
-            print('')
-            print('Simulation will run from {0:.4f} to {1:.4f}s, step {2} to step {3} (h={4}, times=[{5},{6}])'
+            print_verbose('')
+            print_verbose('Simulation will run from {0:.4f} to {1:.4f}s, step {2} to step {3} (h={4}, times=[{5},{6}])'
                   .format(t0, T, k0, kT, h,
                           min(times) if len(times)>0 else '?',
                           max(times) if len(times)>0 else '?'))
-            print('')
+            print_verbose('')
         else:
-            print('Simulation time {0} >= T={1}, exiting.'.format(t0,T))
-            exit()
+            print_verbose('Simulation time {0} >= T={1}, exiting.'.format(t0,T))
+            return
 
         # Model
         #
@@ -2427,6 +2437,7 @@ class Hdf5():
             else:
                 osnspb=FrictionContact(3, solver)
         else:
+            from siconos.io.FrictionContactTrace import FrictionContactTrace
             osnspb=FrictionContactTrace(3, solver,friction_contact_trace_params,model)
 
         self._contact_index_set = contact_index_set
@@ -2473,7 +2484,7 @@ class Hdf5():
                     self._broadphase.collisionConfiguration().\
                         setPlaneConvexMultipointIterations()
             else:
-                print("""
+                print_verbose("""
             ConvexConvexMultipointIterations and PlaneConvexMultipointIterations are unset
             """)
 
@@ -2503,7 +2514,7 @@ class Hdf5():
         simulation.setNewtonTolerance(1e-10)
         simulation.setNewtonUpdateInteractionsPerIteration(Newton_update_interactions)
 
-        print ('import scene ...')
+        print_verbose ('import scene ...')
         self.importScene(t0, body_class, shape_class, face_class, edge_class)
 
         if controller is not None:
@@ -2511,7 +2522,7 @@ class Hdf5():
 
         model.setSimulation(simulation)
         model.initialize()
-        print ('first output static and dynamic objects ...')
+        print_verbose ('first output static and dynamic objects ...')
         self.outputStaticObjects()
         self.outputDynamicObjects()
 
@@ -2524,11 +2535,12 @@ class Hdf5():
         #     ds=nsds.dynamicalSystem(i)
         #     ds.display()
         # raw_input()
-        print ('start simulation ...')
+        print_verbose ('start simulation ...')
         self._initializing=False
         while simulation.hasNextEvent():
 
-            print ('step', k, '<', k0 + int((T - t0) / h))
+            if verbose_progress:
+                print ('step', k, 'of', k0 + int((T - t0) / h)-1)
 
             log(self.importBirths(body_class=body_class,
                                   shape_class=shape_class,
@@ -2547,8 +2559,8 @@ class Hdf5():
 
             log(simulation.computeOneStep, with_timer)()
 
-            if (k % self._output_frequency == 0) or (k == 1):
-                print ('output in hdf5 file at step ', k)
+            if verbose and (k % self._output_frequency == 0) or (k == 1):
+                print_verbose ('output in hdf5 file at step ', k)
 
                 log(self.outputDynamicObjects, with_timer)()
 
@@ -2572,23 +2584,24 @@ class Hdf5():
                 number_of_contacts = (self._model.simulation()
                                    .oneStepNSProblem(0).getSizeOutput()//3)
 
-            if number_of_contacts > 0 :
-                print('number of contacts',self._model.simulation().oneStepNSProblem(0).getSizeOutput()//3)
+            if verbose and number_of_contacts > 0 :
+                print_verbose('number of contacts',
+                    self._model.simulation().oneStepNSProblem(0).getSizeOutput()//3)
                 self.printSolverInfos()
 
             if violation_verbose and number_of_contacts > 0 :
                 if len(simulation.y(0,0)) >0 :
-                    print('violation info')
+                    print_verbose('violation info')
                     y=simulation.y(0,0)
                     yplus=  np.zeros((2,len(y)))
                     yplus[0,:]=y
                     y=np.min(yplus,axis=1)
                     violation_max=np.max(-y)
-                    print('  violation max :',violation_max)
+                    print_verbose('  violation max :',violation_max)
                     if  (violation_max >= self._collision_margin):
-                        print('  violation max is larger than the collision_margin')
+                        print_verbose('  violation max is larger than the collision_margin')
                     lam=simulation.lambda_(1,0)
-                    print('  lambda max :',np.max(lam))
+                    print_verbose('  lambda max :',np.max(lam))
                     #print(' lambda : ',lam)
                     #raw_input()
 
@@ -2598,12 +2611,12 @@ class Hdf5():
                     vplus=  np.zeros((2,len(v)))
                     vplus[0,:]=v
                     v=np.max(vplus,axis=1)
-                    print('  velocity max :',np.max(v))
-                    print('  velocity min :',np.min(v))
+                    print_verbose('  velocity max :',np.max(v))
+                    print_verbose('  velocity min :',np.min(v))
                 #     #print(simulation.output(1,0))
 
 
             log(simulation.nextStep, with_timer)()
 
-            print ('')
+            print_verbose ('')
             k += 1
