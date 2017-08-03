@@ -464,7 +464,7 @@ int variationalInequality_ExtraGradient_setDefaultSolverOptions(SolverOptions* o
 
 
   options->dparam[SICONOS_DPARAM_TOL] = 1e-3;
-  options->dparam[SICONOS_VI_EG_DPARAM_LS_RHO] = -1.0; // rho is variable by default
+  options->dparam[SICONOS_VI_EG_DPARAM_RHO] = -1.0; // rho is variable by default
   options->dparam[SICONOS_VI_EG_DPARAM_LS_TAU] = 2/3.0;  /* tau */
   options->dparam[SICONOS_VI_EG_DPARAM_LS_TAUINV] = 3.0/2.0;  /*tauinv */
   options->dparam[SICONOS_VI_EG_DPARAM_LS_L] = 0.9;  /* L */
