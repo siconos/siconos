@@ -80,7 +80,10 @@ int variationalInequality_computeError(
   *error = cblas_dnrm2(n , wtmp , incx);
 
   /* Computes error */
-  *error = *error / (norm_q + 1.0);
+  if (fabs(norm_q) > DBL_EPSILON)
+    *error /= norm_q;
+
+  DEBUG_PRINTF("error = %e\n",*error);
   if (*error > tolerance)
   {
     if (verbose > 1)
