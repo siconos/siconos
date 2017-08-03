@@ -38,9 +38,9 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
   /* Number of contacts */
   int n = problem->size;
   /* Maximum number of iterations */
-  int itermax = iparam[0];
+  int itermax = iparam[SICONOS_IPARAM_MAX_ITER];
   /* Tolerance */
-  double tolerance = dparam[0];
+  double tolerance = dparam[SICONOS_DPARAM_TOL];
 
   /*****  Fixed point iterations *****/
   int iter = 0; /* Current iteration number */
@@ -53,9 +53,9 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
   double rho = 0.0, rho_k =0.0;
   int isVariable = 0;
 
-  if (dparam[3] > 0.0)
+  if (dparam[SICONOS_VI_EG_DPARAM_RHO] > 0.0)
   {
-    rho = dparam[3];
+    rho = dparam[SICONOS_VI_EG_DPARAM_RHO];
     if (verbose > 0)
     {
       printf("----------------------------------- VI - Fixed Point Projection (FPP) - Fixed stepsize with  rho = %14.7e \n", rho);
@@ -65,7 +65,7 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
   {
     /* Variable step in iterations*/
     isVariable = 1;
-    rho = -dparam[3];
+    rho = -dparam[SICONOS_VI_EG_DPARAM_RHO];
     if (verbose > 0)
     {
       printf("----------------------------------- VI - Fixed Point Projection (FPP) - Variable stepsize with starting rho = %14.7e \n", rho);
@@ -78,7 +78,10 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
   double error_k;
   int ls_iter = 0;
   int ls_itermax = 10;
-  double tau=dparam[4], tauinv=dparam[5], L= dparam[6], Lmin = dparam[7];
+  double tau=dparam[SICONOS_VI_EG_DPARAM_LS_TAU],
+    tauinv=dparam[SICONOS_VI_EG_DPARAM_LS_TAUINV],
+    L= dparam[SICONOS_VI_EG_DPARAM_LS_L], Lmin = dparam[SICONOS_VI_EG_DPARAM_LS_LMIN];
+
   DEBUG_PRINTF("tau=%g, tauinv=%g, L= %g, Lmin = %g",dparam[4], dparam[5],  dparam[6], dparam[7] ) ;
   double a1=0.0, a2=0.0;
   double * x_k = NULL;
@@ -123,7 +126,7 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
   }
   else if (isVariable)
   {
-    if (iparam[1]==0) /* Armijo rule with Khotbotov ratio (default)   */
+    if (iparam[SICONOS_VI_IPARAM_LINESEARCH_METHOD]==0) /* Armijo rule with Khotbotov ratio (default)   */
     {
       DEBUG_PRINT("Variable step size method with Armijo rule with Khotbotov ratio (default) \n");
       while ((iter < itermax) && (hasNotConverged > 0))
@@ -226,7 +229,7 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
       }
     }
 
-    if (iparam[1] == 1) /* Armijo rule with Solodov.Tseng ratio */
+    if (iparam[SICONOS_VI_IPARAM_LINESEARCH_METHOD] == 1) /* Armijo rule with Solodov.Tseng ratio */
     {
       DEBUG_PRINT("Variable step size method with Armijo rule with Solodov.Tseng ratio \n");
       while ((iter < itermax) && (hasNotConverged > 0))
@@ -328,7 +331,7 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
       }
     }
 
-    if (iparam[1] == 2) /* Armijo rule with Han.Sun ratio */
+    if (iparam[SICONOS_VI_IPARAM_LINESEARCH_METHOD] == 2) /* Armijo rule with Han.Sun ratio */
     {
       DEBUG_PRINT("Variable step size method with Armijo rule with Han.Sun ratio \n");
       while ((iter < itermax) && (hasNotConverged > 0))
@@ -428,9 +431,9 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
         *info = hasNotConverged;
       }
     }
-    if (iparam[1] > 2)
+    if (iparam[SICONOS_VI_IPARAM_LINESEARCH_METHOD] > 2)
     {
-      fprintf(stderr, "Numerics, VariationalInequality_FixedPointProjection failed. iparam[1] > 2 .\n");
+      fprintf(stderr, "Numerics, VariationalInequality_FixedPointProjection failed. iparam[SICONOS_VI_IPARAM_LINESEARCH_METHOD] > 2 .\n");
       exit(EXIT_FAILURE);
     }
   }// end isvariable=1
@@ -447,10 +450,10 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
     free(w_k);
   }
 
-  dparam[0] = tolerance;
-  dparam[1] = error;
-  dparam[3] = rho;
-  iparam[7] = iter;
+  dparam[SICONOS_DPARAM_TOL] = tolerance;
+  dparam[SICONOS_DPARAM_RESIDU] = error;
+  dparam[SICONOS_VI_EG_DPARAM_RHO] = rho;
+  iparam[SICONOS_IPARAM_ITER_DONE] = iter;
   free(xtmp);
   free(wtmp);
 
@@ -459,7 +462,6 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
 
 int variationalInequality_FixedPointProjection_setDefaultSolverOptions(SolverOptions* options)
 {
-  int i;
   if (verbose > 0)
   {
     printf("Set the Default SolverOptions for the FixedPointProjection Solver\n");
@@ -469,27 +471,26 @@ int variationalInequality_FixedPointProjection_setDefaultSolverOptions(SolverOpt
   options->numberOfInternalSolvers = 0;
   options->isSet = 1;
   options->filterOn = 1;
-  options->iSize = 8;
-  options->dSize = 8;
-  options->iparam = (int *)malloc(options->iSize * sizeof(int));
-  options->dparam = (double *)malloc(options->dSize * sizeof(double));
+  options->iSize = 10;
+  options->dSize = 10;
+  options->iparam = (int *)calloc(options->iSize, sizeof(int));
+  options->dparam = (double *)calloc(options->dSize, sizeof(double));
   options->dWork = NULL;
-  solver_options_nullify(options);
-  for (i = 0; i < 8; i++)
-  {
-    options->iparam[i] = 0;
-    options->dparam[i] = 0.0;
-  }
-  options->iparam[0] = 20000;
 
-  options->dparam[0] = 1e-3;
-  options->dparam[3] = 1e-3;
-  options->dparam[3] = -1.0;  /* rho is variable by default */
-  options->dparam[4] = 2.0/3.0;  /* tau */
-  options->dparam[5] = 3.0/2.0;  /* tauinv */
-  options->dparam[6] = 0.9;  /* L */
-  options->dparam[7] = 0.3;  /* Lmin */
+  options->iparam[SICONOS_IPARAM_MAX_ITER] = 20000;
 
+  options->iparam[SICONOS_VI_IPARAM_LINESEARCH_METHOD] = 0;
+
+  options->iparam[SICONOS_VI_IPARAM_ERROR_EVALUATION]=SICONOS_VI_ERROR_EVALUATION_FULL;
+  options->iparam[SICONOS_VI_IPARAM_ERROR_EVALUATION_FREQUENCY]=0;
+
+  options->dparam[SICONOS_DPARAM_TOL] = 1e-3;
+
+  options->dparam[SICONOS_VI_EG_DPARAM_LS_RHO] = -1.0; // rho is variable by default
+  options->dparam[SICONOS_VI_EG_DPARAM_LS_TAU] = 2/3.0;  /* tau */
+  options->dparam[SICONOS_VI_EG_DPARAM_LS_TAUINV] = 3.0/2.0;  /*tauinv */
+  options->dparam[SICONOS_VI_EG_DPARAM_LS_L] = 0.9;  /* L */
+  options->dparam[SICONOS_VI_EG_DPARAM_LS_LMIN] = 0.3;  /* Lmin */
 
   options->internalSolvers = NULL;
 
