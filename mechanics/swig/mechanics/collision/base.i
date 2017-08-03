@@ -9,6 +9,11 @@ class SiconosContactor;
 %shared_ptr(std::vector< std11::shared_ptr< SiconosContactor > >);
 %template(VectorOfSPSiconosContactor) std::vector< std11::shared_ptr< SiconosContactor > >;
 
+// Result of queries against the collision world is a vector
+class SiconosCollisionQueryResult;
+%shared_ptr(std::vector< std11::shared_ptr< SiconosCollisionQueryResult > >);
+%template(VectorOfSPSiconosCollisionQueryResult) std::vector< std11::shared_ptr<SiconosCollisionQueryResult> >;
+
 // Ignore some shadowed (redundant for Python) functions
 %ignore SiconosShape::setDimensions(SP::SiconosVector dim);
 
@@ -23,4 +28,5 @@ PY_FULL_REGISTER(SiconosShape);
 PY_REGISTER_WITHOUT_HEADER(SiconosContactorSet);
 PY_FULL_REGISTER(SiconosContactor);
 PY_FULL_REGISTER(BodyDS);
+PY_FULL_REGISTER(SiconosCollisionQueryResult);
 PY_FULL_REGISTER(SiconosCollisionManager);

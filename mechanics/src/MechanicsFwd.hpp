@@ -69,6 +69,7 @@
   REGISTER(SiconosPlane)                        \
   REGISTER(SiconosMesh)                         \
   REGISTER(SiconosHeightMap)                    \
+  REGISTER(SiconosCollisionQueryResult)         \
   REGISTER(SiconosCollisionManager)             \
   REGISTER(SiconosBulletCollisionManager)
 

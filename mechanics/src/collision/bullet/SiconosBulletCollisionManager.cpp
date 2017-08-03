@@ -21,9 +21,9 @@
   detection.
 */
 
+#include <algorithm>
 #include <MechanicsFwd.hpp>
-
-#include "BulletSiconosFwd.hpp"
+#include <BulletSiconosFwd.hpp>
 
 #undef SICONOS_VISITABLES
 #define SICONOS_VISITABLES()                    \
@@ -1575,4 +1575,94 @@ void SiconosBulletCollisionManager::clearOverlappingPairCache()
       }
     }
   }
+}
+
+/** Implement comparison for std::sort(). */
+static
+bool cmpQueryResult(const SP::SiconosCollisionQueryResult &a,
+                    const SP::SiconosCollisionQueryResult &b)
+{
+  return a->distance < b->distance;
+}
+
+std::vector<SP::SiconosCollisionQueryResult>
+SiconosBulletCollisionManager::lineIntersectionQuery(const SiconosVector& start,
+                                                     const SiconosVector& end,
+                                                     bool closest)
+{
+  std::vector<SP::SiconosCollisionQueryResult> result_list;
+
+  btVector3 btstart(start(0), start(1), start(2));
+  btVector3 btend(end(0), end(1), end(2));
+
+  // Return at most one object
+  if (closest)
+  {
+    btCollisionWorld::ClosestRayResultCallback rayResult(btstart, btend);
+    impl->_collisionWorld->rayTest(btstart, btend, rayResult);
+
+    if (rayResult.hasHit())
+    {
+      const BodyShapeRecord *rec =
+        reinterpret_cast<const BodyShapeRecord*>(
+          rayResult.m_collisionObject->getUserPointer());
+
+      if (rec) {
+        SP::SiconosCollisionQueryResult result(
+          std11::make_shared<SiconosCollisionQueryResult>());
+        result->point.resize(3);
+        result->point.setValue(0, rayResult.m_hitPointWorld.getX());
+        result->point.setValue(1, rayResult.m_hitPointWorld.getY());
+        result->point.setValue(2, rayResult.m_hitPointWorld.getZ());
+        result->distance = (result->point - start).norm2();
+        result->body = rec->ds; // note: may be null for static contactors
+        result->shape = rec->sshape;
+        result->contactor = rec->contactor;
+        result_list.push_back(result);
+      }
+      else {
+        DEBUG_PRINTF("Siconos warning: BodyShapeRecord found by intersection was null.");
+      }
+    }
+  }
+
+  // Return more than one object, Bullet provides a different
+  // interface
+  else
+  {
+    btCollisionWorld::AllHitsRayResultCallback rayResult(btstart, btend);
+    impl->_collisionWorld->rayTest(btstart, btend, rayResult);
+
+    if (rayResult.hasHit())
+    {
+      for (int i=0; i < rayResult.m_collisionObjects.size(); i++)
+      {
+        const BodyShapeRecord *rec =
+          reinterpret_cast<const BodyShapeRecord*>(
+            rayResult.m_collisionObjects[i]->getUserPointer());
+
+        if (rec) {
+          SP::SiconosCollisionQueryResult result(
+            std11::make_shared<SiconosCollisionQueryResult>());
+          result->point.resize(3);
+          result->point.setValue(0, rayResult.m_hitPointWorld[i].getX());
+          result->point.setValue(1, rayResult.m_hitPointWorld[i].getY());
+          result->point.setValue(2, rayResult.m_hitPointWorld[i].getZ());
+          result->distance = (result->point - start).norm2();
+          result->body = rec->ds; // note: null for static contactors
+          result->shape = rec->sshape;
+          result->contactor = rec->contactor;
+          result_list.push_back(result);
+        }
+        else {
+          DEBUG_PRINTF("Siconos warning: BodyShapeRecord found by intersection was null.");
+        }
+      }
+    }
+  }
+
+  if (result_list.size() > 1)
+    std::sort(result_list.begin(), result_list.end(), cmpQueryResult);
+
+  return result_list;
 }

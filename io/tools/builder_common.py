@@ -33,6 +33,8 @@ input_headers = {
                   "JointStopR.hpp",
                   "JointFrictionR.hpp",
                   "BodyDS.hpp", "SiconosShape.hpp",
+                  "SiconosCollisionQueryResult.hpp",
+                  "SiconosContactor.hpp",
                   "SiconosCollisionManager.hpp"],
 
     # fix missing forwards for Control

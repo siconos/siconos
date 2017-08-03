@@ -97,6 +97,10 @@ public:
 
   void updateInteractions(SP::Simulation simulation);
 
+  std::vector<SP::SiconosCollisionQueryResult>
+  lineIntersectionQuery(const SiconosVector& start, const SiconosVector& end,
+                        bool closest=false);
+
   void clearOverlappingPairCache();
 
   const SiconosBulletOptions &options() const { return _options; }
