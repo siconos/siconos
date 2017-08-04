@@ -32,13 +32,12 @@
 class BodyDS : public NewtonEulerDS,
                public std11::enable_shared_from_this<BodyDS>
 {
-private:
-  BodyDS() : NewtonEulerDS() {};
-
 protected:
   /** serialization hooks
   */
   ACCEPT_SERIALIZATION(BodyDS);
+
+  BodyDS() : NewtonEulerDS() {};
 
   SP::SiconosContactorSet _contactors;
   bool _useContactorInertia;
