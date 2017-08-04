@@ -1588,7 +1588,8 @@ bool cmpQueryResult(const SP::SiconosCollisionQueryResult &a,
 std::vector<SP::SiconosCollisionQueryResult>
 SiconosBulletCollisionManager::lineIntersectionQuery(const SiconosVector& start,
                                                      const SiconosVector& end,
-                                                     bool closest)
+                                                     bool closestOnly,
+                                                     bool sorted)
 {
   std::vector<SP::SiconosCollisionQueryResult> result_list;
 
@@ -1596,7 +1597,7 @@ SiconosBulletCollisionManager::lineIntersectionQuery(const SiconosVector& start,
   btVector3 btend(end(0), end(1), end(2));
 
   // Return at most one object
-  if (closest)
+  if (closestOnly)
   {
     btCollisionWorld::ClosestRayResultCallback rayResult(btstart, btend);
     impl->_collisionWorld->rayTest(btstart, btend, rayResult);
@@ -1661,7 +1662,7 @@ SiconosBulletCollisionManager::lineIntersectionQuery(const SiconosVector& start,
     }
   }
 
-  if (result_list.size() > 1)
+  if (sorted && result_list.size() > 1)
     std::sort(result_list.begin(), result_list.end(), cmpQueryResult);
 
   return result_list;

@@ -99,7 +99,7 @@ public:
 
   std::vector<SP::SiconosCollisionQueryResult>
   lineIntersectionQuery(const SiconosVector& start, const SiconosVector& end,
-                        bool closest=false);
+                        bool closestOnly=false, bool sorted=true);
 
   void clearOverlappingPairCache();
 
