@@ -10,6 +10,12 @@
 #include "numerics_verbose.h"
 static int fccounter = -1;
 
+/* #define DEBUG_NOCOLOR */
+/* #define DEBUG_MESSAGES */
+/* #define DEBUG_STDOUT */
+#include "debug.h"
+
+
 int fc3d_LmgcDriver(double *reaction,
                     double *velocity,
                     double *q,
@@ -71,6 +77,7 @@ int fc3d_LmgcDriver(double *reaction,
 
   }
 
+  DEBUG_EXPR(frictionContact_display(FC););
 
   int info = fc3d_driver(FC, reaction , velocity, &numerics_solver_options);
 
