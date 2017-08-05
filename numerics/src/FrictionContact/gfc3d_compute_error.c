@@ -72,7 +72,6 @@ int gfc3d_compute_error(GlobalFrictionContactProblem* problem,
     if (reaction == NULL || velocity == NULL)
       numerics_error("gfc3d_compute_error", "null input");
 
-
     cblas_dcopy(m, problem->b, 1, velocity, 1);
     NM_tgemv(1, H, globalVelocity, 1, velocity);
 
@@ -81,18 +80,6 @@ int gfc3d_compute_error(GlobalFrictionContactProblem* problem,
     {
       fc3d_unitary_compute_and_add_error(&reaction[ic * 3], &velocity[ic * 3], mu[ic],
                                          error,  worktmp);
-
-
-      /* /\* Compute the modified local velocity *\/ */
-      /* normUT = sqrt(velocity[ic * 3 + 1] * velocity[ic * 3 + 1] + velocity[ic * 3 + 2] * velocity[ic * 3 + 2]); */
-      /* worktmp[0] = reaction[ic * 3] - rho * (velocity[ic * 3] + mu[ic] * normUT); */
-      /* worktmp[1] = reaction[ic * 3 + 1] - rho * velocity[ic * 3 + 1] ; */
-      /* worktmp[2] = reaction[ic * 3 + 2] - rho * velocity[ic * 3 + 2] ; */
-      /* projectionOnCone(worktmp, mu[ic]); */
-      /* worktmp[0] = reaction[ic * 3] -  worktmp[0]; */
-      /* worktmp[1] = reaction[ic * 3 + 1] -  worktmp[1]; */
-      /* worktmp[2] = reaction[ic * 3 + 2] -  worktmp[2]; */
-      /* *error +=  worktmp[0] * worktmp[0] + worktmp[1] * worktmp[1] + worktmp[2] * worktmp[2]; */
     }
   }
   /* Done, taking the square root */
