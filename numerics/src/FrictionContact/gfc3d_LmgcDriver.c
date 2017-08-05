@@ -17,7 +17,7 @@
 #include "debug.h"
 
 #ifdef WITH_FCLIB
-static int fccounter =-1;
+static int gfccounter =-1;
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -212,6 +212,10 @@ int gfc3d_LmgcDriver(double *reaction,
 			    globalVelocity,
 			    &numerics_solver_options);
 
+
+  iparam[SICONOS_IPARAM_ITER_DONE] = numerics_solver_options.iparam[SICONOS_IPARAM_ITER_DONE];
+  dparam[SICONOS_DPARAM_TOL] = numerics_solver_options.dparam[SICONOS_DPARAM_TOL];
+
   /* FILE * file1  =  fopen("tutu.dat", "w"); */
   /* globalFrictionContact_printInFile(problem, file1); */
   /* fclose(file1); */
@@ -226,17 +230,17 @@ int gfc3d_LmgcDriver(double *reaction,
   else if (outputFile == 3)
   {
 #ifdef WITH_FCLIB
-    fccounter++;
+    gfccounter++;
     struct stat st = {};
     if (stat("./fclib-hdf5/", &st) == -1) {
       mkdir("./fclib-hdf5/", 0700);
     }
-
-    if (fccounter % freq_output == 0)
+    printf("################################## gfcccounter = %i\n", gfccounter);
+    if (gfccounter % freq_output == 0)
     {
       char fname[256];
-      snprintf(fname, sizeof(fname), "./fclib-hdf5/LMGC_GFC3D-i%.5d-%i-%.5d.hdf5", numerics_solver_options.iparam[7], nc, fccounter);
-      printf("Dump ./fclib-hdf5/LMGC_GFC3D-i%.5d-%i-%.5d.hdf5.\n", numerics_solver_options.iparam[7], nc, fccounter);
+      snprintf(fname, sizeof(fname), "./fclib-hdf5/LMGC_GFC3D-i%.5d-%i-%.5d.hdf5", numerics_solver_options.iparam[SICONOS_IPARAM_ITER_DONE], nc, gfccounter);
+      printf("Dump ./fclib-hdf5/LMGC_GFC3D-i%.5d-%i-%.5d.hdf5.\n", numerics_solver_options.iparam[SICONOS_IPARAM_ITER_DONE], nc, gfccounter);
       /* printf("ndof = %i.\n", ndof); */
 
       FILE * foutput  =  fopen(fname, "w");
@@ -413,8 +417,8 @@ int gfc3d_LmgcDriver(double *reaction,
 /*   { */
 /* #ifdef WITH_FCLIB */
 /*     char fname[256]; */
-/*     sprintf(fname, "LMGC_GlobalFrictionContactProblem%.5d.hdf5", fccounter++); */
-/*     printf("Dump of LMGC_GlobalFrictionContactProblem%.5d.hdf5", fccounter); */
+/*     sprintf(fname, "LMGC_GlobalFrictionContactProblem%.5d.hdf5", gfccounter++); */
+/*     printf("Dump of LMGC_GlobalFrictionContactProblem%.5d.hdf5", gfccounter); */
 
 /*     FILE * foutput  =  fopen(fname, "w"); */
 /*     int n = 100; */

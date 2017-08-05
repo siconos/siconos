@@ -808,7 +808,7 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(
     }
   }
 
-  options->iparam[1] = iter;
+  options->iparam[SICONOS_IPARAM_ITER_DONE] = iter;
 
 #ifdef DUMP_PROBLEM
   if(info[0])
