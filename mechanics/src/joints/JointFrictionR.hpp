@@ -63,6 +63,15 @@ public:
 
   virtual unsigned int numberOfConstraints();
 
+  /* Return the joint axis number assigned to a friction axis. */
+  unsigned int axis(unsigned int _index) { return _axis->at(_index); }
+
+  /* Return the joint assigned to this friction relation. */
+  SP::NewtonEulerJointR joint() { return _joint; }
+
+  /* Return the number of joint axes indexed by this relation. */
+  unsigned int numberOfAxes() { return _axis->size(); }
+
   /** destructor
    */
   virtual ~JointFrictionR() {};

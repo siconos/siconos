@@ -26,6 +26,7 @@
 #include <NewtonEulerR.hpp>
 #include <NewtonEulerJointR.hpp>
 #include <Tools.hpp>
+#include <SiconosVector.hpp>
 
 /** \class JointStopR
  *  \brief This class implements a stop on a DoF for any NewtonEulerJointR.
@@ -78,6 +79,21 @@ public:
   virtual void computeJachq(double time, Interaction& inter, SP::BlockVector q0);
 
   virtual unsigned int numberOfConstraints();
+
+  /* Return the joint axis number assigned to a stop index. */
+  unsigned int axis(unsigned int _index) { return _axis->at(_index); }
+
+  /* Return the joint position assigned to a stop index. */
+  double position(unsigned int _index) { return _pos->getValue(_index); }
+
+  /* Return the direction (1 or -1) assigned to a stop index. */
+  double direction(unsigned int _index) { return _dir->getValue(_index); }
+
+  /* Return the joint assigned to this joint stop relation. */
+  SP::NewtonEulerJointR joint() { return _joint; }
+
+  /* Return the number of joint axes indexed by this relation. */
+  unsigned int numberOfAxes() { return _axis->size(); }
 
   /** destructor
    */
