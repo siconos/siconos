@@ -31,11 +31,12 @@
 #include <string.h>
 
 #include "NumericsSparseMatrix.h"
+#include "NumericsVector.h"
 
 #include "sanitizer.h"
 #include "numerics_verbose.h"
 //#define TEST_COND
-//#define OUTPUT_DEBUG
+/* #define OUTPUT_DEBUG */
 
 
 /* #define DEBUG_NOCOLOR */
@@ -43,7 +44,7 @@
 /* #define DEBUG_STDOUT */
 #include "debug.h"
 
-//#define USE_NM_GESV
+//#define USE_LAPACK_DGETRS
 
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 
@@ -69,7 +70,7 @@ int gfc3d_reformulation_local_problem(GlobalFrictionContactProblem* problem, Fri
   /* NM_display(H); */
   /* NumericsMatrix *MMtmp = NM_new(); */
   /* NumericsMatrix *HHtmp = NM_new(); */
-  
+
   /* NM_copy(M,MMtmp); */
   /* NM_copy(H,HHtmp); */
 
@@ -78,25 +79,27 @@ int gfc3d_reformulation_local_problem(GlobalFrictionContactProblem* problem, Fri
 
   /* M = NM_create(NM_DENSE, n, n); */
   /* H = NM_create(NM_DENSE, n, m); */
- 
+
   /* NM_to_dense(MMtmp,M); */
   /* NM_to_dense(HHtmp,H); */
 
   /* NM_display(M); */
   /* NM_display(H); */
-  
+
   if (H->storageType != M->storageType)
   {
     //     if(verbose==1)
     printf(" ->storageType != M->storageType :This case is not taken into account\n");
     return info;
   }
-
+#ifdef OUTPUT_DEBUG
+  FILE * fileout;
+#endif
   if (M->storageType == NM_DENSE)
   {
 
-    
-    
+
+
     int nm = n * m;
 
     double *Htmp = (double*)malloc(nm * sizeof(double));
@@ -105,18 +108,18 @@ int gfc3d_reformulation_local_problem(GlobalFrictionContactProblem* problem, Fri
     cblas_dcopy_msan(nm,  H->matrix0 , 1, Htmp, 1);
 
     //Compute Htmp   <- M^-1 Htmp
-#ifdef USE_NM_GESV    
-    NM_gesv_expert_multiple_rhs(M,Htmp,m,NM_KEEP_FACTORS); 
-#else
+#ifdef USE_LAPACK_DGETRS
     lapack_int* ipiv = (lapack_int*)NM_iWork(M, M->size0, sizeof(lapack_int));
     lapack_int infoDGETRF;
     lapack_int infoDGETRS;
     DGETRF(n, n, M->matrix0, n, ipiv, &infoDGETRF);
     assert(!infoDGETRF);
-
     NM_internalData(M)->isLUfactorized = true;
     DGETRS(LA_NOTRANS, n, m,  M->matrix0, n, ipiv, Htmp, n, &infoDGETRS);
+#else
+    NM_gesv_expert_multiple_rhs(M,Htmp,m,NM_KEEP_FACTORS);
 #endif
+
     /* assert(!infoDGETRS); */
     /*      DGESV(n, m, M->matrix0, n, ipiv, Htmp, n, infoDGESV); */
 
@@ -148,13 +151,11 @@ int gfc3d_reformulation_local_problem(GlobalFrictionContactProblem* problem, Fri
     cblas_dcopy_msan(n,  problem->q, 1, qtmp, 1);
 
     // compute H^T M^(-1) q + b
-#ifdef USE_NM_GESV  
-    NM_gesv_expert(M,qtmp,NM_KEEP_FACTORS);
+#ifdef USE_LAPACK_DGETRS
+    DGETRS(LA_NOTRANS, n, 1,  M->matrix0, n, ipiv, qtmp, n, &infoDGETRS);
 #else
-     DGETRS(LA_NOTRANS, n, 1,  M->matrix0, n, ipiv, qtmp, n, &infoDGETRS); 
+    NM_gesv_expert(M,qtmp,NM_KEEP_FACTORS);
 #endif
-
-    
 
     cblas_dgemv(CblasColMajor,CblasTrans, n, m, 1.0, H->matrix0 , n, qtmp, 1, 1.0, localproblem->q, 1);
     // Copy mu
@@ -199,12 +200,13 @@ int gfc3d_reformulation_local_problem(GlobalFrictionContactProblem* problem, Fri
     NumericsMatrix *W = localproblem->M;
     NM_gemm(alpha, Htrans, MinvH, beta, W);
 
+
+
 #ifdef OUTPUT_DEBUG
+    FILE * fileout;
     fileout = fopen("dataW.sci", "w");
-    NM_write_in_file_scilab(Wnum, fileout);
+    NM_write_in_file_scilab(W, fileout);
     fclose(fileout);
-    printf("Display W\n");
-    SBM_print(W);
 #endif
 
 #ifdef TEST_COND
@@ -294,6 +296,23 @@ int gfc3d_reformulation_local_problem(GlobalFrictionContactProblem* problem, Fri
   }
   else if (M->storageType == NM_SPARSE)
   {
+
+#ifdef OUTPUT_DEBUG
+    fileout = fopen("dataM.py", "w");
+    NM_write_in_file_python(M, fileout);
+    fclose(fileout);
+    fileout = fopen("dataH.py", "w");
+    NM_write_in_file_python(H, fileout);
+    fclose(fileout);
+    fileout = fopen("dataq.py", "w");
+    NV_write_in_file_python(problem->q, M->size0  , fileout);
+    fclose(fileout);
+
+#endif
+
+
+
+
     // Product M^-1 H
     DEBUG_EXPR(NM_display(H););
 
@@ -349,9 +368,7 @@ int gfc3d_reformulation_local_problem(GlobalFrictionContactProblem* problem, Fri
 
     // Copy mu
     localproblem->mu = problem->mu;
-
-    //printf("gfc3d_reformulation_local_problem :: sparse  matrix storage is not implemented\n");
-    //exit(EXIT_FAILURE);
+    DEBUG_EXPR(frictionContact_display(localproblem););
   }
   else
   {
@@ -385,18 +402,14 @@ int computeGlobalVelocity(GlobalFrictionContactProblem* problem, double * reacti
     /* Compute globalVelocity <- M^(-1) globalVelocity*/
 
     assert(NM_internalData(problem->M)->isLUfactorized);
-#ifdef USE_NM_GESV  
-    NM_gesv_expert(problem->M,globalVelocity,NM_KEEP_FACTORS);
-#else
+#ifdef USE_LAPACK_DGETRS
     lapack_int infoDGETRS = 0;
     lapack_int* ipiv = (lapack_int*)NM_iWork(problem->M, problem->M->size0, sizeof(lapack_int));
     DGETRS(LA_NOTRANS, n, 1,   problem->M->matrix0, n, ipiv, globalVelocity , n, &infoDGETRS);
     assert(!infoDGETRS);
+#else
+    NM_gesv_expert(problem->M,globalVelocity,NM_KEEP_FACTORS);
 #endif
-
-    //free(Global_ipiv);
-    //Global_ipiv = NULL;
-
 
   }
   else if (problem->M->storageType == NM_SPARSE_BLOCK)
