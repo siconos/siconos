@@ -230,7 +230,6 @@ known_tasks = {'siconos---vm0':
                (siconos_fedora_latest,
                 siconos_gcc_asan,
                 siconos_gcc_asan_latest,
-                siconos_ubuntu_15_10_with_mechanisms,
                 siconos_debian_mechanisms,
                 siconos_ubuntu_15_10),
 
@@ -238,23 +237,25 @@ known_tasks = {'siconos---vm0':
                (minimal,
                 minimal_with_python,
                 siconos_documentation,
-                siconos_numerics_only,
                 siconos_clang,
-                siconos_clang_asan,
-                siconos_clang_msan,
-                siconos_ubuntu_15_04,
-                siconos_ubuntu_14_04),
+                siconos_clang_asan),
 
                'siconos---vm2':
-               (),
+               (siconos_clang_msan,
+                siconos_ubuntu_15_10_with_mechanisms,
+                siconos_ubuntu_15_04,
+                siconos_ubuntu_14_04),
 
                'siconos---vm3':
                (siconos_debian_latest,
                 siconos_openblas_lapacke,
                 siconos_with_mumps,
                 siconos_light_examples,
-                siconos_all_examples,
-                siconos_profiling,
+                siconos_all_examples),
+
+               'siconos---vm4':
+               (siconos_profiling,
                 siconos_ubuntu_17_04,
+                siconos_numerics_only,
                 siconos_cxx_11_ubuntu_17_04,
                 siconos_serialization)}
