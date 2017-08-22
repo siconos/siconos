@@ -81,7 +81,7 @@ inline double nrm2( const int n, const double* x, const int incx ) {
 //
 inline float nrm2( const int n, const std::complex<float>* x,
         const int incx ) {
-    return cblas_scnrm2( n, x, incx );
+  return cblas_scnrm2( n, OPENBLAS_CONST_FLOAT_CAST(x), incx );
 }
 
 //
@@ -91,7 +91,7 @@ inline float nrm2( const int n, const std::complex<float>* x,
 //
 inline double nrm2( const int n, const std::complex<double>* x,
         const int incx ) {
-    return cblas_dznrm2( n, x, incx );
+  return cblas_dznrm2( n, OPENBLAS_CONST_DOUBLE_CAST(x), incx );
 }
 
 #elif defined BOOST_NUMERIC_BINDINGS_BLAS_CUBLAS

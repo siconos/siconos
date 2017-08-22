@@ -81,7 +81,7 @@ inline void scal( const int n, const double a, double* x, const int incx ) {
 //
 inline void scal( const int n, const float a, std::complex<float>* x,
         const int incx ) {
-    cblas_csscal( n, a, x, incx );
+  cblas_csscal( n, a, OPENBLAS_FLOAT_CAST(x), incx );
 }
 
 //
@@ -91,7 +91,7 @@ inline void scal( const int n, const float a, std::complex<float>* x,
 //
 inline void scal( const int n, const double a, std::complex<double>* x,
         const int incx ) {
-    cblas_zdscal( n, a, x, incx );
+  cblas_zdscal( n, a, OPENBLAS_DOUBLE_CAST(x), incx );
 }
 
 //
@@ -101,7 +101,7 @@ inline void scal( const int n, const double a, std::complex<double>* x,
 //
 inline void scal( const int n, const std::complex<float> a,
         std::complex<float>* x, const int incx ) {
-    cblas_cscal( n, &a, x, incx );
+  cblas_cscal( n, OPENBLAS_CONST_FLOAT_CAST(&a), OPENBLAS_FLOAT_CAST(x), incx );
 }
 
 //
@@ -111,7 +111,7 @@ inline void scal( const int n, const std::complex<float> a,
 //
 inline void scal( const int n, const std::complex<double> a,
         std::complex<double>* x, const int incx ) {
-    cblas_zscal( n, &a, x, incx );
+  cblas_zscal( n, OPENBLAS_CONST_DOUBLE_CAST(&a), OPENBLAS_DOUBLE_CAST(x), incx );
 }
 
 #elif defined BOOST_NUMERIC_BINDINGS_BLAS_CUBLAS

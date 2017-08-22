@@ -84,7 +84,7 @@ inline double dot( const int n, const double* x, const int incx,
 inline std::complex<float> dot( const int n, const std::complex<float>* x,
         const int incx, const std::complex<float>* y, const int incy ) {
     std::complex<float> result;
-    cblas_cdotu_sub( n, x, incx, y, incy, &result );
+    cblas_cdotu_sub( n, OPENBLAS_CONST_FLOAT_CAST(x), incx, OPENBLAS_CONST_FLOAT_CAST(y), incy, OPENBLAS_OPENBLAS_COMPLEX_FLOAT_CAST(&result) );
     return result;
 }
 
@@ -96,7 +96,7 @@ inline std::complex<float> dot( const int n, const std::complex<float>* x,
 inline std::complex<double> dot( const int n, const std::complex<double>* x,
         const int incx, const std::complex<double>* y, const int incy ) {
     std::complex<double> result;
-    cblas_zdotu_sub( n, x, incx, y, incy, &result );
+    cblas_zdotu_sub( n, OPENBLAS_CONST_DOUBLE_CAST(x), incx, OPENBLAS_CONST_DOUBLE_CAST(y), incy, OPENBLAS_OPENBLAS_COMPLEX_DOUBLE_CAST(&result) );
     return result;
 }
 
