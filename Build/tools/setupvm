@@ -33,7 +33,7 @@ p
 
 w
 EOF
-
+ssh root@$1 apt-get remove -y docker.io
 ssh root@$1 apt-get remove -y docker-ce
 ssh root@$1 apt-get remove -y docker-engine
 ssh root@$1 umount /dev/vda1
