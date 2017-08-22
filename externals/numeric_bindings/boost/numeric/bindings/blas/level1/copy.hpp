@@ -83,7 +83,7 @@ inline void copy( const int n, const double* x, const int incx, double* y,
 //
 inline void copy( const int n, const std::complex<float>* x, const int incx,
         std::complex<float>* y, const int incy ) {
-    cblas_ccopy( n, x, incx, y, incy );
+  cblas_ccopy( n, OPENBLAS_CONST_FLOAT_CAST(x), incx, OPENBLAS_FLOAT_CAST(y), incy );
 }
 
 //
@@ -93,7 +93,7 @@ inline void copy( const int n, const std::complex<float>* x, const int incx,
 //
 inline void copy( const int n, const std::complex<double>* x, const int incx,
         std::complex<double>* y, const int incy ) {
-    cblas_zcopy( n, x, incx, y, incy );
+  cblas_zcopy( n, OPENBLAS_CONST_DOUBLE_CAST(x), incx, OPENBLAS_DOUBLE_CAST(y), incy );
 }
 
 #elif defined BOOST_NUMERIC_BINDINGS_BLAS_CUBLAS
