@@ -107,7 +107,7 @@ class CiTask():
             ci_config_name = self._ci_config
         else:
             ci_config_name = '-'.join(self._ci_config)
-        return (src.replace('.', '-') + self._distrib.replace(':', '-') + '-' +
+        return ('build-' + src.replace('.', '-') + self._distrib.replace(':', '-') + '-' +
                 ci_config_name).replace('/', '-')
 
     def templates(self):

@@ -39,7 +39,6 @@ macro(add_docker_targets)
     string(REPLACE "+" "x" DOCKER_IMAGE_AS_DIR ${DOCKER_IMAGE_AS_DIR})
     string(REPLACE "/" "-" DOCKER_IMAGE_AS_DIR ${DOCKER_IMAGE_AS_DIR})
   endif()
-  set(DOCKER_IMAGE_AS_DIR "build-${DOCKER_IMAGE_AS_DIR}")
   
   if(NOT DOCKER_IMAGE_DIR)
     set(DOCKER_IMAGE_DIR .)
