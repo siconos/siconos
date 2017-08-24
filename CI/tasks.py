@@ -49,6 +49,13 @@ minimal_with_python = CiTask(
 
 siconos_default = default
 
+siconos_default_nix = default.copy()(
+    ci_config='nix',
+    pkgs=['build-base', 'gcc', 'gfortran', 'gnu-c++', 'atlas-lapack',
+          'python-env'],
+    distrib='nixos/nix:latest',
+    targets={'.': ['docker-build', 'docker-ctest']})
+
 siconos_debian_latest = siconos_default.copy()(
     ci_config='with_bullet',
     add_pkgs=['bullet', 'h5py'],  # for mechanics.io
@@ -242,6 +249,7 @@ known_tasks = {'siconos---vm0':
 
                'siconos---vm2':
                (siconos_clang_msan,
+                siconos_default_nix,
                 siconos_ubuntu_15_10_with_mechanisms,
                 siconos_ubuntu_15_04,
                 siconos_ubuntu_14_04),

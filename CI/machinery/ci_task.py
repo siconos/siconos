@@ -107,8 +107,8 @@ class CiTask():
             ci_config_name = self._ci_config
         else:
             ci_config_name = '-'.join(self._ci_config)
-        return src.replace('.', '_') + self._distrib.replace(':', '-') + '_' +\
-            ci_config_name
+        return (src.replace('.', '-') + self._distrib.replace(':', '-') + '-' +
+                ci_config_name).replace('/', '-')
 
     def templates(self):
         # remove build-base, gnu-c++, gfortran, it is redundant

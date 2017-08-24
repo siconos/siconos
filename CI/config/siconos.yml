@@ -8,6 +8,7 @@ wildcard: any
 
 match:
   ubuntu: debian
+  nixos/nix: nix
   
 ##############################################################################
 # Set commands used to install and update packages
@@ -15,6 +16,7 @@ installer:
   any:
     fedora: dnf --setopt=deltarpm=false install -y
     debian: apt-get install -y --force-yes
+    nixos/nix: nix-env -i
 
 updater:
   any:
@@ -23,6 +25,7 @@ updater:
     debian: apt-get update -y
     ubuntu-16.04: printf "deb http://ppa.launchpad.net/siconos/siconos-daily/ubuntu xenial main\ndeb-src http://ppa.launchpad.net/siconos/siconos-daily/ubuntu xenial main\ndeb http://ppa.launchpad.net/siconos/fclib-daily/ubuntu xenial main\ndeb-src http://ppa.launchpad.net/siconos/fclib-daily/ubuntu xenial main " >> /etc/apt/sources.list && apt-get update -y
     fedora:  dnf --setopt=deltarpm=false install -y dnf-plugins-core && dnf -y copr enable xhub/siconos-git
+    nixos/nix: nix-env -qa > /tmp/nix-packages # ?
 
 ##############################################################################
 # set specific extra definitions for some packages/distrib
@@ -108,7 +111,15 @@ pkgs:
       - swig
       - cppunit
 
+  python-minimal:
+    nix:
+      - python-2.7.13
+
   python-env:
+    nix:
+      - python-2.7.13
+      - python-modules
+
     debian:
       - python
       - python-dev
@@ -124,7 +135,12 @@ pkgs:
       - scipy
       - python-matplotlib
 
+  python-modules:
+    nix:
+      command: 'printf "with import <nixpkgs> {}\;" > /tmp/python-env.nix && echo "" >> /tmp/python-env.nix && printf "pkgs.python27.withPackages (ps: with ps\; [lxml pytest scipy matplotlib])" >> /tmp/python-env.nix && echo "" >> /tmp/python-env.nix >> /tmp/python-env.nix && cat /tmp/python-env.nix >&2 && nix-env -if /tmp/python-env.nix'
+      
   python3-env:
+    nix:
     debian:
       - python3
       - python3-dev
@@ -144,6 +160,7 @@ pkgs:
 
   # bullet & serialization for full doc
   documentation:
+    nix:
     debian:
       - doxygen
       - graphviz
@@ -159,6 +176,8 @@ pkgs:
       - serialization
 
   pip-command:
+    nix:
+      - python2.7-pip-9.0.1
     debian:
       - python-pip
       - pip-upgrade
@@ -169,12 +188,14 @@ pkgs:
         pip install --upgrade pip
       
   siconos-doc-pip-pkgs:
-    ubuntu:
+    any:
       command:
         pip install sphinxcontrib-bibtex &&
         pip install sphinxcontrib-doxylink
       
   profiling:
+    nix:
+      - valgrind-3.12.0
     debian:
       - valgrind
       - python-dbg
@@ -183,18 +204,33 @@ pkgs:
       - python-debuginfo
 
   lpsolve:
+    nix:
     debian:
       - lp-solve
       - liblpsolve55-dev
     fedora:
       - lpsolve-devel
 
-  cmake:
-    ubuntu-12.04:
-       - python-software-properties
-       - cmake-3.0.2
-       - python-matplotlib
+  git-core:
+    nix:
+      - git-2.12.0
 
+  wget:
+    nix:
+      - wget-1.19.1
+
+  make:
+    nix:
+      - gnumake-4.2.1
+      
+  cmake:
+    nix:
+      - cmake-3.7.2
+    ubuntu-12.04:
+      - python-software-properties
+      - cmake-3.0.2
+      - python-matplotlib
+      
     ubuntu-14.04:
        - cmake-3.0.2
 
@@ -216,18 +252,29 @@ pkgs:
         ./configure&&
         make install
 
+  swig:
+    nix:
+      - swig-3.0.10
+        
   gfortran:
+    nix: gfortran-wrapper-6.3.0
     fedora: gcc-gfortran
 
+  gcc:
+    nix: gcc-wrapper-6.3.0
+
   gnu-c++:
+    nix: gcc
     debian: g++
     fedora: gcc-c++
 
   boost:
+    nix: boost-1.63.0
     debian: libboost-dev
     fedora: boost-devel
 
   serialization:
+    nix:
     debian:
       libboost-filesystem-dev
       libboost-serialization-dev
@@ -236,11 +283,14 @@ pkgs:
       boost-serialization
 
   gmp:
+    nix: gmp-with-cxx-6.1.1
     debian: libgmp-dev
     fedora: gmp-devel
 
 
   cppunit:
+    nix:
+      - cppunit-1.13.2
     debian:
       - libcppunit-dev
 
@@ -249,17 +299,23 @@ pkgs:
       - cppunit-devel
 
   hdf5:
+    nix: hdf5-1.8.18
     fedora: hdf5-devel
     debian: libhdf5-dev
 
   h5py:
+    nix: python2.7-h5py-2.6.0
     fedora: h5py
     debian: python-h5py
 
   h5py3:
+    nix: python3.5-h5py-2.6.0
     any: python3-h5py
 
   openblas-lapacke:
+    nix:
+      - openblas-0.2.19
+      - pfff_lapacke_is_missing
     debian:
       - libopenblas-dev
       - liblapacke-dev
@@ -268,6 +324,9 @@ pkgs:
       - lapack-devel
 
   atlas-lapack:
+    nix:
+      - blas-3.5.0
+      - atlas-with-lapack-3.10.2
     debian:
       - libblas-dev
       - liblapack-dev
@@ -280,6 +339,7 @@ pkgs:
       - atlas-devel
 
   oce:
+    nix: opencascade-oce-0.17.2
     debian:
       - liboce-foundation-dev
       - liboce-modeling-dev
@@ -291,6 +351,8 @@ pkgs:
       - OCE-devel
 
   mumps:
+    nix:
+      - pfff_mumps_is_missing
     debian-7.8:
       - libopenmpi-dev
       - openssh-client
@@ -315,21 +377,27 @@ pkgs:
       - environment-modules
 
   bullet:
+    nix:
+      - bullet-2.83.7
     debian:
       - libbullet-dev
 
   umfpack:
+    nix: pfff_umfpack_is_missing
     debian:
       - libsuitesparse-dev
     fedora:
       - suitesparse-devel
 
   asan:
+    nix: pfff_asan_is_missing
     fedora:
       - libasan
       - libubsan
 
   xz:
+    nix:
+      - xz-5.2.2
     debian:
       - xz-utils
 
@@ -342,6 +410,8 @@ pkgs:
                make install
 
   clang:
+    nix:
+      - clang-4.9.1
     debian-jessie:
       - clang-3.8
   # Don't worry, this is a hack to get cppunit to work with clang on ubuntu 15.10, because the system cppunit
@@ -354,12 +424,14 @@ pkgs:
 
   # this is for msan. It also contains the so files for cppunit compiled with msan
   libcxx_msan:
+    nix:
     any:
       command: wget http://siconos.gforge.inria.fr/build-42/libcxx_msan-clang-3.6.tar.xz &&
                tar xJf libcxx_msan-clang-3.6.tar.xz -C /
 
   # dummy target
   cfi:
+    nix:
     any:
       command: mkdir /tmp/clang && ln -s /usr/bin/ld.gold /tmp/clang/ld
 
@@ -440,7 +512,6 @@ pkgs:
                python -c 'import OCC'
 
   # ocaml package manager
-
   frama-c:
     any:
       command:

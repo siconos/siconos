@@ -92,7 +92,7 @@ if print_mode:
         # For each task, print the 'command' file (dockerfile, script ...)
         # for the given configuration
         distrib, distrib_version = task._distrib.split(':')
-        print_commands(specfilename=database,
+        print_commands(specfilename=os.path.join(os.path.dirname(os.path.realpath(__file__)), database),
                        distrib=distrib,
                        distrib_version=distrib_version,
                        pkgs=task._pkgs,
