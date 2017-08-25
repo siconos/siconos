@@ -63,7 +63,14 @@ if(DEV_MODE)
   # -- warnings to errors --
   add_cxx_options("-Werror=implicit-function-declaration")
   # should be supported only by Clang. The last statement is important, otherwise nothing compiles ...
-  add_cxx_options("-Werror=conversion -Wno-sign-conversion -Wno-error=sign-conversion -Wno-shorten-64-to-32 -Wno-error=shorten-64-to-32")
+  # MB: yes, nothing compiles
+  if(DEV_MODE_STRICT)
+    add_cxx_options("-Werror=conversion")
+  endif()
+  add_cxx_options("-Wno-sign-conversion")
+  add_cxx_options("-Wno-error=sign-conversion")
+  add_cxx_options("-Wno-shorten-64-to-32")
+  add_cxx_options("-Wno-error=shorten-64-to-32")
   # ADD_C_OPTIONS("-Wno-error=shorten-64-to-32") # for clang
   add_cxx_options("-Werror=switch-bool")
   add_cxx_options("-Werror=logical-not-parentheses")
