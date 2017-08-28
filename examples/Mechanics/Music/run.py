@@ -8,7 +8,7 @@ import time
 
 import numpy as np
 import scipy.io
-import sys
+import sys,os
 
 visu=False
 if visu:
@@ -77,10 +77,10 @@ for i in range(nb_frets):
 if len(sys.argv) > 1:
     fe = float(sys.argv[1])
 else:
-    fe = 51200
+    fe = 1960
 initial_time = 0.
-final_time = 0.03
-final_time = 3.00
+final_time = 0.3
+#final_time = 3.00
 
 guitar_model = Guitar(interactions,
                       #{guitar_fret_middle: guitar_string,
@@ -125,11 +125,21 @@ while simu.hasNextEvent():
     simu.nextStep()
 print('End of simulation process. Duration: ', time.clock() - start_time)
 
-# -- Save results for ds in numpy file --
-#output = guitar_model.data_ds[guitar_string]
-#np.save('data1001', output)
+# -- Save results for ds in numpy file +--
 
+result_dir = 'results'
+if not os.path.exists(result_dir):
+        os.makedir(result_dir)
 
+output = guitar_model.data_ds[guitar_string]
+filename = os.path.join(result_dir,'data_ds_'+str(number_of_modes)+'_'+str(fe))
+np.save(filename, output)
+
+# -- Save results for interaction in numpy file --
+for i in range(len(frets)):
+    output = guitar_model.data_interactions[frets[i]]
+    filename = os.path.join(result_dir,'data_interactions_'+str(i)+'_'+str(number_of_modes)+'_'+str(fe))
+    np.save(filename, output)
 # to plot results, call:
 #guitar_model.plot_ds_state(some_ds, indices, fig_number)
 # --> plot some_ds attributes (position/time ...)

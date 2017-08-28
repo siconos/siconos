@@ -269,7 +269,7 @@ class Guitar(sk.Model):
         self.fs = fs
         self.time_step = 1. / fs
         t = sk.TimeDiscretisation(t0, self.time_step)
-        self.nb_time_steps = (int)((tend - t0) / self.time_step)
+        self.nb_time_steps = (int)((tend - t0) / self.time_step)+1
         # (3) one step non smooth problem
         osnspb = sk.LCP()
         # (4) Simulation setup with (1) (2) (3)
