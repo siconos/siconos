@@ -80,7 +80,7 @@ else:
     fe = 1960
 initial_time = 0.
 final_time = 0.3
-#final_time = 3.00
+final_time = 3.00
 
 guitar_model = Guitar(interactions,
                       #{guitar_fret_middle: guitar_string,
@@ -125,11 +125,11 @@ while simu.hasNextEvent():
     simu.nextStep()
 print('End of simulation process. Duration: ', time.clock() - start_time)
 
-# -- Save results for ds in numpy file +--
 
+# -- Save results for ds in numpy file +--
 result_dir = 'results'
 if not os.path.exists(result_dir):
-        os.makedir(result_dir)
+        os.mkdir(result_dir)
 
 output = guitar_model.data_ds[guitar_string]
 filename = os.path.join(result_dir,'data_ds_'+str(number_of_modes)+'_'+str(fe))

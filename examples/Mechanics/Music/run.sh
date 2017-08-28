@@ -1,10 +1,11 @@
-#!/bin/sh -fx
+#!/bin/bash -fx
+source /applis/site/nix.sh
 
 # specific variables to the test bench set
 frequency=$1
 
 #OAR --project siconos
-#OAR --name Guitar_51200
+#OAR --name Guitar_Bass
 #OAR -p cpumarch != 'haswell'
 #OAR -l /nodes=1,walltime=48:00:00
 
