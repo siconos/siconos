@@ -27,6 +27,9 @@ ENDIF(NOT WITH_CXX)
 
 if(WITH_FCLIB)
   list(APPEND ${COMPONENT}_PYTHON_MODULES "./fclib")
+  IF(NOT FCLib_FCLIB_HEADER_ONLY)
+  list(APPEND CMAKE_SWIG_FLAGS "-DFCLIB_NOT_HEADER_ONLY")
+  ENDIF()
 else()
    list(APPEND ${COMPONENT}_python_excluded_tests
      ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_fclib.py)
