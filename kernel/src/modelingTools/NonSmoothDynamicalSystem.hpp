@@ -126,6 +126,16 @@ public:
     return _topology->getDynamicalSystem(nb);
   }
 
+  /** remove a dynamical system
+   * \param ds a pointer to the dynamical system to remove
+   * \param removeInterations if true, all interactions connected to the ds will also be removed
+   */
+  inline void removeDynamicalSystem(SP::DynamicalSystem ds,
+                                    bool removeInteractions=true)
+  {
+    _topology->removeDynamicalSystem(ds, removeInteractions);
+  };
+
 
 
   // === Interactions management ===

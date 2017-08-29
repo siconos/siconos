@@ -109,6 +109,12 @@ private:
    */
   void __removeInteractionFromIndexSet(SP::Interaction inter);
 
+  /** remove a DynamicalSystem from _IG and _DSG
+   * \param ds a pointer to the Dynamical System to be removed
+   */
+  void __removeDynamicalSystemFromIndexSet(SP::DynamicalSystem ds,
+                                           bool removeInterations);
+
 public:
 
   // --- CONSTRUCTORS/DESTRUCTOR ---
@@ -140,6 +146,15 @@ public:
    * \param ds the DynamicalSystem to add
    */
   void insertDynamicalSystem(SP::DynamicalSystem ds);
+
+  /** remove a Dynamical System from the topology. The dynamical
+   *  system is removed from Dynamical Systems graph and Interactions
+   *  Graph.  The dynamical system is not removed from actives
+   *  subgraphs : see updateIndexSet
+   *  \param ds the dynamical system to remove
+   *  \param removeInteractions if true, also remove all interactions with this ds
+   */
+  void removeDynamicalSystem(SP::DynamicalSystem ds, bool removeInteractions=true);
 
   /** set the name for this Dynamical System
    * \param ds a pointer to the system

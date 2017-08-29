@@ -60,7 +60,8 @@ if(WITH_${COMPONENT}_TESTING)
     LagrangianCompliantLinearTIRTest.cpp
     LagrangianDSTest.cpp
     LagrangianLinearTIDSTest.cpp
-    NewtonEulerDSTest.cpp)
+    NewtonEulerDSTest.cpp
+    NonSmoothDynamicalSystemTest.cpp)
   END_TEST()
   #FirstOrderNonLinearDSTest.cpp FirstOrderLinearDSTest.cpp 
   #LagrangianDSTest.cpp LagrangianLinearTIDSTest.cpp TestMain.cpp)

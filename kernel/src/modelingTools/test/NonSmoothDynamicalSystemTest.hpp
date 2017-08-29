@@ -37,18 +37,18 @@ private:
   // tests to be done ...
 
   //CPPUNIT_TEST(testBuildNonSmoothDynamicalSystem);
-  CPPUNIT_TEST(testBuildNonSmoothDynamicalSystem1);
-  CPPUNIT_TEST(testBuildNonSmoothDynamicalSystem2);
   CPPUNIT_TEST(testinsertDynamicalSystem);
   CPPUNIT_TEST(testinsertInteraction);
+  CPPUNIT_TEST(testremoveDynamicalSystem);
+  CPPUNIT_TEST(testremoveInteraction);
   CPPUNIT_TEST_SUITE_END();
 
   // \todo exception test
 
-  void testBuildNonSmoothDynamicalSystem1();
-  void testBuildNonSmoothDynamicalSystem2();
   void testinsertDynamicalSystem();
   void testinsertInteraction();
+  void testremoveDynamicalSystem();
+  void testremoveInteraction();
 
 public:
   void setUp();
