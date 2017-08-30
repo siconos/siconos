@@ -249,7 +249,7 @@ if(NOT BLAS_FOUND)
       # Right now openblas ships with a cblas.h header which uses double* as type for pointer to double complex, which makes ublas cry since it
       # want to pass std::complex<double>*
       set(BLAS_INCLUDE_SUFFIXES cblas_header)
-      set(INCLUDE_DIR_HINTS ${CMAKE_SOURCE_DIR}/externals/blas_lapack)
+      set(BLAS_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/externals/blas_lapack)
     endif(BLAS_LIBRARIES)
   endif()
   
@@ -405,11 +405,13 @@ if(NOT BLAS_FOUND)
       unset(_dir CACHE)
       set(BLAS_INCLUDE_DIRS ${BLAS_INCLUDE_DIRS} CACHE STRING "Blas headers location." FORCE)
     else() # The case which is supposed to always work
-      find_path(BLAS_INCLUDE_DIRS 
-	NAMES ${BLAS_HEADER}
-	PATH_SUFFIXES ${BLAS_INCLUDE_SUFFIXES}
-        HINTS ${INCLUDE_DIR_HINTS}  ${BLAS_INC_DIR}
-	)
+      if(NOT BLAS_INCLUDE_DIRS)
+        find_path(BLAS_INCLUDE_DIRS 
+	  NAMES ${BLAS_HEADER}
+	  PATH_SUFFIXES ${BLAS_INCLUDE_SUFFIXES}
+          HINTS ${INCLUDE_DIR_HINTS}  ${BLAS_INC_DIR}
+	  )
+      endif()
     endif()
     if(BLAS_INCLUDE_DIRS)
       set(BLAS_FOUND 1 CACHE BOOL "Blas lib and headers have been found.")
