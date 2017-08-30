@@ -11,6 +11,9 @@ A task, see :class:`machinery.ci_tasks.CiTask` must be defined with at least:
 from machinery.ci_task import CiTask
 import os
 
+# PLEASE KEEP CONFIG AS WHAT THEY MEAN.
+# DO NOT ADD PACKAGES IF THEY ARE NOT NECESSARY.
+
 #
 # 1. where the packages configurations are defined
 # Used in driver.py.
@@ -23,7 +26,7 @@ default = CiTask(
     ci_config='default',
     distrib='ubuntu:16.04',
     pkgs=['build-base', 'gcc', 'gfortran', 'gnu-c++', 'atlas-lapack',
-          'lpsolve', 'python-env'],
+          'python-env'],
     srcs=['.'],
     targets={'.': ['docker-build', 'docker-ctest']})
 
@@ -51,10 +54,11 @@ siconos_default = default
 
 siconos_default_nix = default.copy()(
     ci_config='nix',
-    pkgs=['build-base', 'gcc', 'gfortran', 'gnu-c++', 'atlas-lapack',
-          'python-env'],
     distrib='nixos/nix:latest',
     targets={'.': ['docker-build', 'docker-ctest']})
+
+siconos_with_lpsolve = siconos_default.copy()(
+    add_pkgs=['lpsolve'])
 
 siconos_debian_latest = siconos_default.copy()(
     ci_config='with_bullet',
@@ -71,13 +75,9 @@ siconos_ubuntu_16_10 = siconos_default.copy()(
     distrib='ubuntu:16.10')
 
 siconos_ubuntu_17_04 = siconos_default.copy()(
-    distrib='ubuntu:17.04',
-    ci_config='with_mumps',
-    add_pkgs=['mumps'])
+    distrib='ubuntu:17.04')
 
 siconos_ubuntu_15_10 = siconos_default.copy()(
-    ci_config='with_umfpack',
-    add_pkgs=['umfpack'],
     distrib='ubuntu:15.10')
 
 siconos_cxx_11_ubuntu_17_04 = siconos_default.copy()(
@@ -134,9 +134,8 @@ siconos_fedora_latest = siconos_default.copy()(
     add_pkgs=['openblas-lapacke', 'python3-env', 'umfpack'])
 
 siconos_openblas_lapacke = siconos_default.copy()(
-    ci_config='with_umfpack',
     remove_pkgs=['atlas-lapack'],
-    add_pkgs=['openblas-lapacke', 'umfpack', 'path', 'wget'],)  # wget for path
+    add_pkgs=['openblas-lapacke'])
 
 siconos_clang = siconos_ubuntu_17_04.copy()(
     ci_config=('with_bullet', 'with_py3'),
@@ -185,6 +184,10 @@ siconos_serialization = siconos_ubuntu_17_04.copy()(
 siconos_with_mumps = siconos_default.copy()(
     ci_config='with_mumps',
     add_pkgs=['mumps'])
+
+siconos_with_umfpack = siconos_default.copy()(
+    ci_config='with_umfpack',
+    add_pkgs=['umfpack'])
 
 
 # --- Config to run siconos examples ---
@@ -243,6 +246,7 @@ known_tasks = {'siconos---vm0':
                'siconos---vm1':
                (minimal,
                 minimal_with_python,
+                siconos_with_lpsolve,
                 siconos_documentation,
                 siconos_clang,
                 siconos_clang_asan),
@@ -258,6 +262,7 @@ known_tasks = {'siconos---vm0':
                (siconos_debian_latest,
                 siconos_openblas_lapacke,
                 siconos_with_mumps,
+                siconos_with_umfpack,
                 siconos_light_examples,
                 siconos_all_examples),
 
