@@ -338,8 +338,9 @@ void Topology::removeDynamicalSystem(SP::DynamicalSystem ds,
 {
   DEBUG_PRINTF("removeDynamicalSystem : %p\n", &*ds);
 
+  assert(_DSG[0]->edges_number() == _IG[0]->size());
   __removeDynamicalSystemFromIndexSet(ds, removeInteractions);
-  assert(_DSG[0]->size() == _IG[0]->edges_number());
+  assert(_DSG[0]->edges_number() == _IG[0]->size());
 }
 
 
