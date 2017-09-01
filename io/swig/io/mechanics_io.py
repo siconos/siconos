@@ -1456,6 +1456,85 @@ class Hdf5():
             self._keep.append([cocs1, cocs2, cp1,
                                cp2, relation])
 
+    def importObject(self, name, body_class=None, shape_class=None,
+                     face_class=None, edge_class=None, birth=False,
+                     translation=None, orientation=None, velocity=None):
+        """
+        Import an object by name, possibly overriding initial position and velocity.
+        """
+        obj = self._input[name]
+        if self.verbose:
+            print ('Import  dynamic or static object number ',
+                   obj.attrs['id'], 'from initial state')
+            print ('                object name   ', name)
+
+        if translation is None:
+            translation = obj.attrs['translation']
+        if orientation is None:
+            orientation = obj.attrs['orientation']
+        if velocity is None:
+            velocity = obj.attrs['velocity']
+
+        # bodyframe center of mass
+        center_of_mass = floatv(obj.attrs.get('center_of_mass', [0,0,0]))
+
+        mass = obj.attrs.get('mass', 0)
+        inertia = obj.attrs.get('inertia', None)
+
+        input_ctrs = [ctr for _n_, ctr in obj.items()]
+
+        contactors = []
+        occ_type = False
+        for ctr in input_ctrs:
+            if 'type' in ctr.attrs:
+                # occ contact
+                occ_type = True
+                contactors.append(
+                    Contactor(
+                        instance_name=ctr.attrs['instance_name'],
+                        shape_data=ctr.attrs['name'],
+                        collision_group=ctr.attrs['group'].astype(int),
+                        contact_type=ctr.attrs['type'],
+                        contact_index=ctr.attrs['contact_index'].astype(int),
+                        relative_translation=np.subtract(ctr.attrs['translation'].astype(float), center_of_mass),
+                        relative_orientation=ctr.attrs['orientation'].astype(float)))
+            elif 'group' in ctr.attrs:
+                # bullet contact
+                assert not occ_type
+                contactors.append(
+                    Contactor(
+                        instance_name=ctr.attrs['instance_name'],
+                        shape_data=ctr.attrs['name'],
+                        collision_group=ctr.attrs['group'].astype(int),
+                        relative_translation=np.subtract(ctr.attrs['translation'].astype(float), center_of_mass),
+                        relative_orientation=ctr.attrs['orientation'].astype(float)))
+            else:
+                # occ shape
+                occ_type = True
+                # fix: not only contactors here
+                contactors.append(
+                    Shape(
+                        instance_name=ctr.attrs['instance_name'],
+                        shape_data=ctr.attrs['name'],
+                        relative_translation=np.subtract(ctr.attrs['translation'].astype(float), center_of_mass),
+                        relative_orientation=ctr.attrs['orientation'].astype(float)))
+
+        if occ_type:
+            # Occ object
+            self.importOccObject(
+                name, floatv(translation), floatv(orientation),
+                floatv(velocity), contactors, float(mass),
+                inertia, body_class, shape_class, face_class,
+                edge_class, birth=birth,
+                number = self.instances()[name].attrs['id'])
+        else:
+            # Bullet object
+            self.importBulletObject(
+                name, floatv(translation), floatv(orientation),
+                floatv(velocity), contactors, float(mass),
+                inertia, body_class, shape_class, birth=birth,
+                number = self.instances()[name].attrs['id'])
+
     def importScene(self, time, body_class, shape_class, face_class,
                     edge_class):
         """
@@ -1533,79 +1612,16 @@ class Hdf5():
                             velocities[id_vlast, 1] ==
                             self.instances()[name].attrs['id'])[0]
                         xvel = velocities[id_vlast[id_vlast_inst[0]], :]
-                        velocity = (xvel[2], xvel[3], xvel[4], xvel[5], xvel[6], xvel[7])
-
-                    # start from initial conditions
+                        velocity = (xvel[2], xvel[3], xvel[4],
+                                    xvel[5], xvel[6], xvel[7])
+                        self.importObject(name, body_class, shape_class,
+                                          face_class, edge_class,
+                                          translation, orientation, velocities)
                     else:
-                        if self.verbose:
-                            print ('Import  dynamic or static object number ',
-                                   obj.attrs['id'], 'from initial state')
-                            print ('                object name   ', name)
-                        translation = obj.attrs['translation']
-                        orientation = obj.attrs['orientation']
-                        velocity = obj.attrs['velocity']
+                        # start from initial conditions
+                        self.importObject(name, body_class, shape_class,
+                                          face_class, edge_class)
 
-                    # bodyframe center of mass
-                    center_of_mass = floatv(obj.attrs.get('center_of_mass', [0,0,0]))
-
-                    input_ctrs = [ctr for _n_, ctr in obj.items()]
-
-                    contactors = []
-                    occ_type = False
-                    for ctr in input_ctrs:
-                        if 'type' in ctr.attrs:
-                            # occ contact
-                            occ_type = True
-                            contactors.append(
-                                Contactor(
-                                    instance_name=ctr.attrs['instance_name'],
-                                    shape_data=ctr.attrs['name'],
-                                    collision_group=ctr.attrs['group'].astype(int),
-                                    contact_type=ctr.attrs['type'],
-                                    contact_index=ctr.attrs['contact_index'].astype(int),
-                                    relative_translation=np.subtract(ctr.attrs['translation'].astype(float), center_of_mass),
-                                    relative_orientation=ctr.attrs['orientation'].astype(float)))
-                        elif 'group' in ctr.attrs:
-                            # bullet contact
-                            assert not occ_type
-                            contactors.append(
-                                Contactor(
-                                    instance_name=ctr.attrs['instance_name'],
-                                    shape_data=ctr.attrs['name'],
-                                    collision_group=ctr.attrs['group'].astype(int),
-                                    relative_translation=np.subtract(ctr.attrs['translation'].astype(float), center_of_mass),
-                                    relative_orientation=ctr.attrs['orientation'].astype(float)))
-                        else:
-                            # occ shape
-                            occ_type = True
-                            # fix: not only contactors here
-                            contactors.append(
-                                Shape(
-                                    instance_name=ctr.attrs['instance_name'],
-                                    shape_data=ctr.attrs['name'],
-                                    relative_translation=np.subtract(ctr.attrs['translation'].astype(float), center_of_mass),
-                                    relative_orientation=ctr.attrs['orientation'].astype(float)))
-
-                    if 'inertia' in obj.attrs:
-                        inertia = obj.attrs['inertia']
-                    else:
-                        inertia = None
-
-                    if occ_type:
-                        # Occ object
-                        self.importOccObject(
-                            name, floatv(translation), floatv(orientation),
-                            floatv(velocity), contactors, mass,
-                            inertia, body_class, shape_class, face_class,
-                            edge_class,
-                            number = self.instances()[name].attrs['id'])
-                    else:
-                        # Bullet object
-                        self.importBulletObject(
-                            name, floatv(translation), floatv(orientation),
-                            floatv(velocity), contactors, mass,
-                            inertia, body_class, shape_class,
-                            number = self.instances()[name].attrs['id'])
             # import nslaws
             # note: no time of birth for nslaws and joints
             for name in self._nslaws_data:
@@ -1638,49 +1654,10 @@ class Hdf5():
         current_times_of_births = set(self._scheduled_births[:ind_time])
         self._scheduled_births = self._scheduled_births[ind_time:]
 
-        #print (time, current_times_of_births)
         for time_of_birth in current_times_of_births:
-            #print( "time_of_birth", time_of_birth)
             for (name, obj) in self._births[time_of_birth]:
-                #print(name,obj)
-                translation = obj.attrs['translation']
-                orientation = obj.attrs['orientation']
-                velocity = obj.attrs['velocity']
-
-                input_ctrs = [ctr for _n_, ctr in obj.items()]
-                mass = obj.attrs.get('mass', None)
-
-                contactors = [Contactor(
-                    instance_name=ctr.attrs['instance_name'],
-                    shape_data=ctr.attrs['name'],
-                    collision_group=int(ctr.attrs['group']),
-                    relative_translation=floatv(ctr.attrs['translation']),
-                    relative_orientation=floatv(ctr.attrs['orientation']))
-                              for ctr in input_ctrs]
-
-                if 'inertia' in obj.attrs:
-                    inertia = obj.attrs['inertia']
-                else:
-                    inertia = None
-
-                if True in ('type' in self.shapes()[ctr.attrs['name']].attrs
-                            and self.shapes()[ctr.attrs['name']].attrs['type']
-                            in ['brep', 'step']
-                            for ctr in input_ctrs):
-                    # Occ object
-                    self.importOccObject(
-                        name, floatv(translation), floatv(orientation),
-                        floatv(
-                            velocity), contactors, mass,
-                        inertia, body_class, shape_class, face_class,
-                        edge_class, number = self.instances()[name].attrs['id'])
-                else:
-                    # Bullet object
-                    self.importBulletObject(
-                        name, floatv(translation), floatv(orientation),
-                        floatv(velocity), contactors, mass,
-                        inertia, body_class, shape_class, birth=True,
-                        number = self.instances()[name].attrs['id'])
+                self.importObject(name, body_class, shape_class,
+                                  face_class, edge_class, birth=True)
 
     def outputStaticObjects(self):
         """
