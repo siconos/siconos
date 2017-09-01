@@ -1631,7 +1631,7 @@ class Hdf5():
         """
         time = self.currentTime()
 
-        ind_time = bisect.bisect_left(self._scheduled_births, time)
+        ind_time = bisect.bisect_right(self._scheduled_births, time)
 
         current_times_of_births = set(self._scheduled_births[:ind_time])
         self._scheduled_births = self._scheduled_births[ind_time:]
