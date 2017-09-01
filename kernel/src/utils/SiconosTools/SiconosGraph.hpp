@@ -54,6 +54,8 @@ using std::size_t;
 
 #include <boost/graph/graph_utility.hpp>
 #include <boost/graph/adjacency_list.hpp>
+#include <boost/graph/graph_concepts.hpp>
+#include <boost/graph/directed_graph.hpp>
 
 #if (BOOST_VERSION >= 104000)
 #include <boost/property_map/property_map.hpp>
@@ -626,6 +628,7 @@ public:
 #endif
   }
 
+
   EDescriptor add_edge(const VDescriptor& vd1,
                        const VDescriptor& vd2,
                        const E& e_bundle)
@@ -810,6 +813,47 @@ public:
           }
         }
     */
+    /*  debug */
+#ifndef NDEBUG
+    assert(state_assert());
+#endif
+  }
+
+
+  /** Remove all the in-edges of vertex u for which the predicate p
+   * returns true. This expression is only required when the graph
+   * also models IncidenceGraph.
+   */
+  template<class Predicate>
+  void remove_in_edge_if(const VDescriptor& vd,
+                          const Predicate& pred)
+  //                      Predicate pred)
+  {
+
+    BOOST_CONCEPT_ASSERT((boost::IncidenceGraphConcept<graph_t>));
+    BOOST_CONCEPT_ASSERT((boost::MutableGraphConcept<graph_t>));
+
+    boost::remove_in_edge_if(vd, pred, g);
+    /*  debug */
+#ifndef NDEBUG
+    assert(state_assert());
+#endif
+  }
+
+  /** Remove all the in-edges of vertex u for which the predicate p
+   * returns true. This expression is only required when the graph
+   * also models IncidenceGraph.
+   */
+  template<class Predicate>
+  void remove_edge_if(const VDescriptor& vd,
+                      const Predicate& pred)
+  //                  Predicate pred)
+  {
+
+    BOOST_CONCEPT_ASSERT((boost::IncidenceGraphConcept<graph_t>));
+    BOOST_CONCEPT_ASSERT((boost::MutableGraphConcept<graph_t>));
+
+    boost::remove_edge_if(pred, g);
     /*  debug */
 #ifndef NDEBUG
     assert(state_assert());

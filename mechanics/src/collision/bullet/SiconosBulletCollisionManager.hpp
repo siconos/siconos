@@ -95,6 +95,8 @@ public:
 
   bool removeStaticContactorSet(StaticContactorSetID id);
 
+  void removeBody(const SP::BodyDS& body);
+
   void updateInteractions(SP::Simulation simulation);
 
   std::vector<SP::SiconosCollisionQueryResult>

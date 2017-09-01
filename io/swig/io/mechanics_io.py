@@ -795,7 +795,9 @@ class Hdf5():
         self._output_frequency = 1
         self._keep = []
         self._scheduled_births = []
+        self._scheduled_deaths = []
         self._births = dict()
+        self._deaths = dict()
         self._initializing = True
         self._use_compression = use_compression
         self._should_output_domains = output_domains
@@ -963,7 +965,7 @@ class Hdf5():
 
         if mass is None or mass == 0.:
             # a static object
-            pass
+            body = None
 
         else:
 
@@ -1074,6 +1076,8 @@ class Hdf5():
             nsds = self._model.nonSmoothDynamicalSystem()
             nsds.insertDynamicalSystem(body)
             nsds.setName(body, str(name))
+
+        return body
 
     def importBulletObject(self, name, translation, orientation,
                            velocity, contactors, mass, inertia,
@@ -1247,6 +1251,8 @@ class Hdf5():
                     nsds = self._model.nonSmoothDynamicalSystem()
                     nsds.insertDynamicalSystem(body)
                     nsds.setName(body, str(name))
+
+        return body
 
     def importJoint(self, name):
         if self._broadphase is not None:
@@ -1521,7 +1527,7 @@ class Hdf5():
 
         if occ_type:
             # Occ object
-            self.importOccObject(
+            body = self.importOccObject(
                 name, floatv(translation), floatv(orientation),
                 floatv(velocity), contactors, float(mass),
                 inertia, body_class, shape_class, face_class,
@@ -1529,11 +1535,20 @@ class Hdf5():
                 number = self.instances()[name].attrs['id'])
         else:
             # Bullet object
-            self.importBulletObject(
+            body = self.importBulletObject(
                 name, floatv(translation), floatv(orientation),
                 floatv(velocity), contactors, float(mass),
                 inertia, body_class, shape_class, birth=birth,
                 number = self.instances()[name].attrs['id'])
+
+        # schedule its death immediately
+        time_of_death = obj.attrs.get('time_of_death', None)
+        if None not in (time_of_death, body):
+            bisect.insort_left(self._scheduled_deaths, time_of_death)
+            if time_of_death in self._deaths:
+                self._deaths[time_of_death].append((name, obj, body))
+            else:
+                self._deaths[time_of_death] = [(name, obj, body)]
 
     def importScene(self, time, body_class, shape_class, face_class,
                     edge_class):
@@ -1658,6 +1673,23 @@ class Hdf5():
             for (name, obj) in self._births[time_of_birth]:
                 self.importObject(name, body_class, shape_class,
                                   face_class, edge_class, birth=True)
+
+    def executeDeaths(self):
+        """
+        Remove objects from the broadphase.
+        """
+        time = self.currentTime()
+
+        ind_time = bisect.bisect_right(self._scheduled_deaths, time)
+
+        current_times_of_deaths = set(self._scheduled_deaths[:ind_time])
+        self._scheduled_deaths = self._scheduled_deaths[ind_time:]
+
+        for time_of_death in current_times_of_deaths:
+            for (name, obj, body) in self._deaths[time_of_death]:
+                self._broadphase.removeBody(body)
+                nsds = self._model.nonSmoothDynamicalSystem()
+                nsds.removeDynamicalSystem(body)
 
     def outputStaticObjects(self):
         """
@@ -2048,7 +2080,7 @@ class Hdf5():
                   orientation=[1, 0, 0, 0],
                   velocity=[0, 0, 0, 0, 0, 0],
                   mass=None, center_of_mass=[0, 0, 0],
-                  inertia=None, time_of_birth=-1,
+                  inertia=None, time_of_birth=-1, time_of_death=-1,
                   allow_self_collide=False):
         """Add an object with associated shapes as a list of Volume or
         Contactor objects. Contact detection and processing is
@@ -2113,6 +2145,8 @@ class Hdf5():
 
             if time_of_birth >= 0:
                 obj.attrs['time_of_birth']=time_of_birth
+            if time_of_death >= 0:
+                obj.attrs['time_of_death']=time_of_death
 
             if mass is not None: obj.attrs['mass']=mass
             obj.attrs['translation']=translation
@@ -2526,6 +2560,8 @@ class Hdf5():
                                   shape_class=shape_class,
                                   face_class=face_class,
                                   edge_class=edge_class))
+
+            log(self.executeDeaths())
 
             if controller is not None:
                 controller.step()
