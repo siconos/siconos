@@ -903,7 +903,7 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
             contactors[instance].append(contactor_name)
 
             actor = vtk.vtkActor()
-            if io.instances()[instance_name].attrs['mass'] > 0:
+            if io.instances()[instance_name].attrs.get('mass',0) > 0:
                 # objects that may move
                 dynamic_actors[instance].append(actor)
 

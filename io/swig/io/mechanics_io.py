@@ -961,7 +961,7 @@ class Hdf5():
                         velocity, contactors, mass, given_inertia, body_class,
                         shape_class, face_class, edge_class, number=None):
 
-        if mass == 0.:
+        if mass is None or mass == 0.:
             # a static object
             pass
 
@@ -1086,7 +1086,7 @@ class Hdf5():
 
         if self._broadphase is not None and 'input' in self._data:
             body = None
-            if use_proposed and mass == 0:
+            if use_proposed and (mass is None or mass == 0):
                 # a static object
 
                 cset = SiconosContactorSet()
@@ -1113,7 +1113,7 @@ class Hdf5():
                     'shape': shp,
                 }
 
-            elif use_original and mass == 0. and use_bullet:
+            elif use_original and (mass is None or mass == 0) and use_bullet:
                 # a static object
                 rbase = btQuaternion(orientation[1],
                                      orientation[2],
@@ -1493,7 +1493,7 @@ class Hdf5():
             for (name, obj) in sorted(self._input.items(),
                                       key=lambda x: x[0]):
 
-                mass = obj.attrs['mass']
+                mass = obj.attrs.get('mass', None)
                 time_of_birth = obj.attrs.get('time_of_birth',-1)
 
                 if time_of_birth >= time:
@@ -1510,7 +1510,9 @@ class Hdf5():
                     # this is for now
                     #
                     # cold restart if output previously done
-                    if mass > 0 and dpos_data is not None and len(dpos_data) > 0:
+                    if (mass is not None and mass > 0
+                        and dpos_data is not None and len(dpos_data) > 0):
+
                         if self.verbose:
                             print ('Import  dynamic object name ', name,
                                    'from current state')
@@ -1593,7 +1595,7 @@ class Hdf5():
                         # Occ object
                         self.importOccObject(
                             name, floatv(translation), floatv(orientation),
-                            floatv(velocity), contactors, float(mass),
+                            floatv(velocity), contactors, mass,
                             inertia, body_class, shape_class, face_class,
                             edge_class,
                             number = self.instances()[name].attrs['id'])
@@ -1601,7 +1603,7 @@ class Hdf5():
                         # Bullet object
                         self.importBulletObject(
                             name, floatv(translation), floatv(orientation),
-                            floatv(velocity), contactors, float(mass),
+                            floatv(velocity), contactors, mass,
                             inertia, body_class, shape_class,
                             number = self.instances()[name].attrs['id'])
             # import nslaws
@@ -1646,7 +1648,7 @@ class Hdf5():
                 velocity = obj.attrs['velocity']
 
                 input_ctrs = [ctr for _n_, ctr in obj.items()]
-                mass = obj.attrs['mass']
+                mass = obj.attrs.get('mass', None)
 
                 contactors = [Contactor(
                     instance_name=ctr.attrs['instance_name'],
@@ -1669,14 +1671,14 @@ class Hdf5():
                     self.importOccObject(
                         name, floatv(translation), floatv(orientation),
                         floatv(
-                            velocity), contactors, float(mass),
+                            velocity), contactors, mass,
                         inertia, body_class, shape_class, face_class,
                         edge_class, number = self.instances()[name].attrs['id'])
                 else:
                     # Bullet object
                     self.importBulletObject(
                         name, floatv(translation), floatv(orientation),
-                        floatv(velocity), contactors, float(mass),
+                        floatv(velocity), contactors, mass,
                         inertia, body_class, shape_class, birth=True,
                         number = self.instances()[name].attrs['id'])
 
@@ -2068,7 +2070,7 @@ class Hdf5():
                   translation,
                   orientation=[1, 0, 0, 0],
                   velocity=[0, 0, 0, 0, 0, 0],
-                  mass=0, center_of_mass=[0, 0, 0],
+                  mass=None, center_of_mass=[0, 0, 0],
                   inertia=None, time_of_birth=-1,
                   allow_self_collide=False):
         """Add an object with associated shapes as a list of Volume or
@@ -2135,7 +2137,7 @@ class Hdf5():
             if time_of_birth >= 0:
                 obj.attrs['time_of_birth']=time_of_birth
 
-            obj.attrs['mass']=mass
+            if mass is not None: obj.attrs['mass']=mass
             obj.attrs['translation']=translation
             obj.attrs['orientation']=ori
             obj.attrs['velocity']=velocity
@@ -2179,7 +2181,7 @@ class Hdf5():
                 dat.attrs['translation'] = ctor.translation
                 dat.attrs['orientation'] = ctor.orientation
 
-            if mass == 0:
+            if mass is None or mass == 0:
                 obj.attrs['id']=- (self._number_of_static_objects + 1)
                 self._number_of_static_objects += 1
 
