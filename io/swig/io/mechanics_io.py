@@ -1494,7 +1494,7 @@ class Hdf5():
                                       key=lambda x: x[0]):
 
                 mass = obj.attrs['mass']
-                time_of_birth = obj.attrs['time_of_birth']
+                time_of_birth = obj.attrs.get('time_of_birth',-1)
 
                 if time_of_birth >= time:
                     #
@@ -2132,7 +2132,8 @@ class Hdf5():
 
             obj=group(self._input, name)
 
-            obj.attrs['time_of_birth']=time_of_birth
+            if time_of_birth >= 0:
+                obj.attrs['time_of_birth']=time_of_birth
 
             obj.attrs['mass']=mass
             obj.attrs['translation']=translation
