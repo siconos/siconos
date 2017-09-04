@@ -6,8 +6,9 @@ frequency=$1
 
 #OAR --project siconos
 #OAR --name Guitar_Bass
-#OAR -p cpumarch != 'haswell'
-#OAR -l /nodes=1,walltime=48:00:00
+#OAR -p network_address='luke42'
+#OAR -l /nodes=1,walltime=240:00:00
+#OAR -t timesharing=acary,*
 
 siconos_dir=$HOME/siconos/
 
