@@ -460,9 +460,6 @@ int variationalInequality_ExtraGradient_setDefaultSolverOptions(SolverOptions* o
   options->iparam[SICONOS_VI_IPARAM_ERROR_EVALUATION]=SICONOS_VI_ERROR_EVALUATION_FULL;
   options->iparam[SICONOS_VI_IPARAM_ERROR_EVALUATION_FREQUENCY]=0;
 
-
-
-
   options->dparam[SICONOS_DPARAM_TOL] = 1e-3;
   options->dparam[SICONOS_VI_EG_DPARAM_RHO] = -1.0; // rho is variable by default
   options->dparam[SICONOS_VI_EG_DPARAM_LS_TAU] = 2/3.0;  /* tau */
