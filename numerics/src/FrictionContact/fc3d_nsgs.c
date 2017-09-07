@@ -497,12 +497,23 @@ double calculateFullErrorFinal(FrictionContactProblem *problem, SolverOptions *o
   (*computeError)(problem, reaction , velocity, tolerance,
                   options, norm_q, &absolute_error);
 
-  if (verbose > 0 && absolute_error > options->dparam[SICONOS_DPARAM_TOL])
+
+  
+  if (verbose > 0)
   {
-    printf("--------------------------- FC3D - NSGS - Warning absolute "
-           "Residual = %14.7e is larger than required precision = %14.7e\n",
-           absolute_error, options->dparam[SICONOS_DPARAM_TOL]);
-  }
+    if (absolute_error > options->dparam[SICONOS_DPARAM_TOL])
+    {
+      printf("--------------------------- FC3D - NSGS - Warning absolute "
+             "Residual = %14.7e is larger than required precision = %14.7e\n",
+             absolute_error, options->dparam[SICONOS_DPARAM_TOL]);
+    }
+    else
+    {
+      printf("--------------------------- FC3D - NSGS - absolute "
+             "Residual = %14.7e is smaller than required precision = %14.7e\n",
+             absolute_error, options->dparam[SICONOS_DPARAM_TOL]);
+    }
+}
   return absolute_error;
 }
 
@@ -553,6 +564,11 @@ int determine_convergence_with_full_final(FrictionContactProblem *problem, Solve
       if (verbose > 0)
         printf("--------------------------- FC3D - NSGS - We modify the required incremental precision to reach accuracy to %e\n", *tolerance);
       hasNotConverged = 1;
+    }
+    else
+    {
+      if (verbose > 0)
+        printf("--------------------------- FC3D - NSGS - The incremental precision is sufficient to reach accuracy to %e\n", *tolerance);
     }
 
 
