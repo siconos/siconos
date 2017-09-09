@@ -176,7 +176,7 @@ void fc3d_onecontact_nonsmooth_Newton_solvers_initialize(FrictionContactProblem*
     /*     updateSolver = &NCPGlocker_update; */
     postSolver = &NCPGlocker_post;
     freeSolver = (FreeSolverNSGSPtr)&NCPGlocker_free;
-  }
+ }
   else
   {
     fprintf(stderr, "Numerics, fc3d_onecontact_nonsmooth_Newton_solvers failed. Unknown formulation type.\n");
@@ -226,6 +226,7 @@ int fc3d_onecontact_nonsmooth_Newton_solvers_solve(FrictionContactProblem* local
       }
       else
       {
+        printf("Numerics, fc3d_onecontact_nonsmooth_Newton_solvers_solve, warning. reached max. number of iterations (%i) without convergence for contact %i. Residual = %12.8e\n", options->iparam[1], options->iparam[4],  options->dparam[1]);
         printf("Numerics, fc3d_onecontact_nonsmooth_Newton_solvers_solve, no convergence for contact %i with error %e\n",options->iparam[SICONOS_FRICTION_3D_NSGS_LOCALSOLVER_CONTACTNUMBER], options->dparam[SICONOS_DPARAM_RESIDU]);
         /* frictionContact_display(localproblem) */;
       }
@@ -454,7 +455,7 @@ int fc3d_onecontact_nonsmooth_Newton_solvers_solve_direct(FrictionContactProblem
 /* #endif */
 
     // Solve the linear system
-    if ( solv3x3(AWplusB, dR, F) ) // naive 3x3 solver
+    //if ( solv3x3(AWplusB, dR, F) ) // naive 3x3 solver
     {
       dR[0] = F[0];
       dR[1] = F[1];
@@ -785,7 +786,7 @@ int fc3d_onecontact_nonsmooth_Newton_solvers_solve_damped(FrictionContactProblem
       }
     }
 
-    if ( solv3x3(AWplusB, dR, F) ) // naive 3x3 solver
+    //if ( solv3x3(AWplusB, dR, F) ) // naive 3x3 solver
     {
       dR[0] = F[0];
       dR[1] = F[1];
@@ -806,40 +807,36 @@ int fc3d_onecontact_nonsmooth_Newton_solvers_solve_damped(FrictionContactProblem
                                   + MLocal[i + 2 * 3] * R[2] ;
         Function(R, velocity, mu, rho, F, NULL, NULL);
         dparam[1] = 0.5 * (F[0] * F[0] + F[1] * F[1] + F[2] * F[2]) / (1.0 + sqrt(R[0] * R[0] + R[1] * R[1] + R[2] * R[2])) ; // improve with relative tolerance
-        if (verbose > 1) printf("-----------------------------------    fc3d_onecontact_nonsmooth_Newton_solvers_solve_direct  -- contact %i 3x3 linear system is irregular # iteration = %i  error = %.10e \n", iparam[SICONOS_FRICTION_3D_NSGS_LOCALSOLVER_CONTACTNUMBER], inew, dparam[1]);
+        if (verbose > 0) printf("-----------------------------------    fc3d_onecontact_nonsmooth_Newton_solvers_solve_direct  -- contact %i 3x3 linear system is irregular # iteration = %i  error = %.10e \n", iparam[SICONOS_FRICTION_3D_NSGS_LOCALSOLVER_CONTACTNUMBER], inew, dparam[1]);
         break;
       }
     }
 
-
-
-    
-    else
     {
       // Perform Line Search
 
       t_opt = t_init;
       int infoLS = LineSearchGP(localproblem, Function, &t_opt, R, dR,
                                 rho, LSitermax, F, A, B, velocity);
-
-      if (infoLS == 0)
-        t = t_opt;
-      else
-      {
-        NumberofLSfailed++;
-        if (NumberofLSfailed > 5)
-        {
-          t = 100.0;
-          if (verbose > 1)
-            printf("-----------------------------------------  "
-                   "Max Number of LineSearchGP failed =%i Tilt point\n ",
-                   NumberofLSfailed);
-          NumberofLSfailed = 0;
-        }
-      }
+      t = t_opt;
+      /* if (infoLS == 0) */
+      /*   t = t_opt; */
+      /* else */
+      /* { */
+      /*   NumberofLSfailed++; */
+      /*   if (NumberofLSfailed > 5) */
+      /*   { */
+      /*     t = 100.0; */
+      /*     if (verbose > 1) */
+      /*       printf("-----------------------------------------  " */
+      /*              "Max Number of LineSearchGP failed =%i Tilt point\n ", */
+      /*              NumberofLSfailed); */
+      /*     NumberofLSfailed = 0; */
+      /*   } */
+      /* } */
     }
 
-    // upate iterates
+    // update iterates
     R[0] = R[0] + t * dR[0];
     R[1] = R[1] + t * dR[1];
     R[2] = R[2] + t * dR[2];
@@ -858,7 +855,7 @@ int fc3d_onecontact_nonsmooth_Newton_solvers_solve_damped(FrictionContactProblem
 
   }// End of the Newton iteration
 
-
+  iparam[1]=inew;
   return 1;
 
 }
