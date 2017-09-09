@@ -432,7 +432,7 @@ void acceptLocalReactionFiltered(FrictionContactProblem *localproblem,
 
 #endif
 
-    if (verbose > 1)
+    if (verbose > 0)
       printf("Discard local reaction for contact %i at iteration %i "
              "with local_error = %e\n",
              contact, iter, localsolver_options->dparam[SICONOS_DPARAM_RESIDU]);
