@@ -46,83 +46,77 @@ void fc3d_ProjectedGradientOnCylinder(FrictionContactProblem* problem, double *r
   /* Tolerance */
   double tolerance = dparam[0];
 
-
-
-
   /*****  Projected Gradient iterations *****/
-  int j, iter = 0; /* Current iteration number */
+  int iter = 0; /* Current iteration number */
   double error = 1.; /* Current error */
   int hasNotConverged = 1;
   int contact; /* Number of the current row of blocks in M */
   int nLocal = 3;
-  dparam[0] = dparam[2]; // set the tolerance for the local solver
-  double * velocitytmp = (double *)malloc(n * sizeof(double));
-
+  
   double rho = 0.0;
+  double rhomin = 0.0;
   int isVariable = 0;
-  double rhoinit, rhomin;
-  if (dparam[3] > 0.0)
+
+  if (dparam[SICONOS_FRICTION_3D_PGOC_RHO] > 0.0)
   {
-    rho = dparam[3];
+    rho = dparam[SICONOS_FRICTION_3D_PGOC_RHO];
   }
   else
   {
     /* Variable step in fixed*/
     isVariable = 1;
-    printf("Variable step (line search) in Projected Gradient iterations\n");
-    rhoinit = dparam[3];
-    rhomin = dparam[4];
+    if (verbose > 0)
+       printf("Variable step (line search) in Projected Gradient iterations\n");
+    rho = -dparam[SICONOS_FRICTION_3D_PGOC_RHO];
+    rhomin = dparam[SICONOS_FRICTION_3D_PGOC_RHOMIN];
   }
 
-  double * reactionold;
+  if (rho == 0.0)
+    numerics_error("fc3d_ProjectedGradientOnCylinder", "dparam[SICONOS_FRICTION_3D_PGOC_RHO] must be nonzero");
+ 
+
+  
+  double * reaction_k;
   double * direction;
+  double * velocity_k;
   if (isVariable)
   {
-    reactionold = (double *)malloc(n * sizeof(double));
+    reaction_k = (double *)malloc(n * sizeof(double));
     direction = (double *)malloc(n * sizeof(double));
+    velocity_k = (double *)malloc(n * sizeof(double));
   }
   double alpha = 1.0;
   double beta = 1.0;
 
-  /*   double minusrho  = -1.0*rho; */
+
 
   if (!isVariable)
   {
+    double minusrho  = -1.0*rho;
+
     while ((iter < itermax) && (hasNotConverged > 0))
     {
       ++iter;
-      cblas_dcopy(n , q , 1 , velocitytmp, 1);
-      NM_gemv(alpha, M, reaction, beta, velocitytmp);
-      // projection for each contact
-      cblas_daxpy(n, -1.0, velocitytmp, 1, reaction , 1);
+
+      /* q --> velocity */
+      cblas_dcopy(n , q , 1 , velocity, 1);
+
+      /* M r + q --> velocity */
+      NM_gemv(alpha, M, reaction, beta, velocity);
+
+      /* projection for each contact of reaction - rho * velocity  */
+      cblas_daxpy(n, minusrho, velocity, 1, reaction , 1);
       for (contact = 0 ; contact < nc ; ++contact)
         projectionOnCylinder(&reaction[ contact * nLocal],
                              options->dWork[contact]);
 
-#ifdef VERBOSE_DEBUG
-
-      printf("reaction before LS\n");
-      for (contact = 0 ; contact < nc ; ++contact)
-      {
-        for (j = 0; j < 3; j++)
-          printf("reaction[%i] = %le\t", 3 * contact + j, reaction[3 * contact + j]);
-        printf("\n");
-      }
-      printf("velocitytmp before LS\n");
-      for (contact = 0 ; contact < nc ; ++contact)
-      {
-        for (j = 0; j < 3; j++)
-          printf("velocitytmp[%i] = %le\t", 3 * contact + j, velocitytmp[3 * contact + j]);
-        printf("\n");
-      }
-#endif
       /* **** Criterium convergence **** */
       fc3d_Tresca_compute_error(problem, reaction , velocity, tolerance, options, &error);
 
       if (options->callback)
       {
-        options->callback->collectStatsIteration(options->callback->env, nc * 3, 
-                                        reaction, velocity, 
+        options->callback->collectStatsIteration(options->callback->env, nc * 3,
+                                        reaction, velocity,
                                         error, NULL);
       }
 
@@ -135,112 +129,91 @@ void fc3d_ProjectedGradientOnCylinder(FrictionContactProblem* problem, double *r
   }
   else
   {
-    rho =  rhoinit;
+    
+    double tau = dparam[SICONOS_FRICTION_3D_PGOC_LINESEARCH_TAU] ;
+    if ((tau <= 0.0 ) || ( tau >= 1.0))
+      numerics_error("fc3d_ProjectedGradientOnCylinder", "dparam[SICONOS_FRICTION_3D_PGOC_LINESEARCH_TAU] must in (0,1)");
+    
 
+    double mu = dparam[SICONOS_FRICTION_3D_PGOC_LINESEARCH_MU];
+    if ((mu <= 0.0 ) || ( mu >= 1.0))
+      numerics_error("fc3d_ProjectedGradientOnCylinder", "dparam[SICONOS_FRICTION_3D_PGOC_LINESEARCH_MU] must in (0,1)");
 
-    cblas_dcopy(n , q , 1 , velocitytmp, 1);
-    NM_gemv(1.0, M, reaction, 1.0, velocitytmp);
+    int ls_iter_max = iparam[SICONOS_FRICTION_3D_PGOC_LINESEARCH_MAXITER];
 
-    cblas_daxpy(n, rho, velocitytmp, 1, reaction, 1);
+    double theta = 0.0;
+    double theta_old = 0.0;
+    double criterion =1.0;
 
-    for (contact = 0 ; contact < nc ; ++contact)
-      projectionOnCylinder(&reaction[contact * nLocal],
-                           options->dWork[contact]);
-    cblas_dcopy(n , q , 1 , velocitytmp, 1);
-    NM_gemv(1.0, M, reaction, 1.0, velocitytmp);
-
-    double oldcriterion = cblas_ddot(n, reaction, 1, velocitytmp, 1);
-#ifdef VERBOSE_DEBUG
-    printf("oldcriterion =%le \n", oldcriterion);
-#endif
-
+    int ls_iter =0;
 
     while ((iter < itermax) && (hasNotConverged > 0))
     {
+      //rho =  rhoinit;
       ++iter;
+
       // store the old reaction
-      cblas_dcopy(n , reaction , 1 , reactionold , 1);
-      // compute the direction
-      cblas_dcopy(n , q , 1 , velocitytmp, 1);
-      NM_gemv(1.0, M, reaction, 1.0, velocitytmp);
-      cblas_dcopy(n, velocitytmp, 1, direction, 1);
+      cblas_dcopy(n , reaction , 1 , reaction_k , 1);
 
-      // start line search
-      j = 0;
+      /* q --> velocity_k */
+      cblas_dcopy(n , q , 1 , velocity_k, 1);
+      /* M r + q --> velocity_k */
+      NM_gemv(1.0, M, reaction_k, 1.0, velocity_k);
 
-      if (rho <= 100 * rhoinit) rho = 10.0 * rho;
+      /* Armijo line-search */
+      /* Compute the new criterion (we use velocity as tmp) */
+      /* velocity_k --> velocity */
+      cblas_dcopy(n , velocity_k , 1 , velocity, 1);
+      /* M r + 2* q --> velocity */
+      cblas_daxpy(n, 1.0, q, 1, velocity, 1);
+      theta_old = 0.5*cblas_ddot(n, reaction, 1, velocity, 1);
 
-      double newcriterion = 1e24;
-      do
+      criterion =1.0;
+      ls_iter=0;
+      while ((criterion > 0.0) && (ls_iter < ls_iter_max))
       {
+        if (verbose > 1 ) printf("ls_iter = %i\t rho = %e ", ls_iter, rho);
 
-
-
-
-
-        cblas_dcopy(n , reactionold , 1 , reaction , 1);
-        cblas_daxpy(n, rho, direction, 1, reaction , 1) ;
-#ifdef VERBOSE_DEBUG
-        printf("LS iteration %i step 0 \n", j);
-        printf("rho = %le \n", rho);
+        // Compute the new trial reaction
+        // r = P_D(r_k - rho v_k)
+        cblas_dcopy(n , reaction_k , 1 , reaction , 1);
+        cblas_daxpy(n, -1.0*rho, velocity_k, 1, reaction, 1);
         for (contact = 0 ; contact < nc ; ++contact)
-        {
-          for (int k = 0; k < 3; k++)
-            printf("reaction[%i] = %le\t",
-                   3 * contact + k, reaction[3 * contact + k]);
-          printf("\n");
-        }
-#endif
-        for (contact = 0 ; contact < nc ; ++contact)
-          projectionOnCylinder(&reaction[contact * nLocal],
-                               options->dWork[contact]);
-        /*          printf("options->dWork[%i] = %le\n",contact, options->dWork[contact]  );} */
-#ifdef VERBOSE_DEBUG
-        printf("LS iteration %i step 1 after projection\n", j);
-        for (contact = 0 ; contact < nc ; ++contact)
-        {
-          for (int k = 0; k < 3; k++)
-            printf("reaction[%i] = %le\t",
-                   3 * contact + k, reaction[3 * contact + k]);
-          printf("\n");
-        }
-#endif
-        cblas_dcopy(n , q , 1 , velocitytmp, 1);
-        NM_gemv(1.0, M, reaction, 1.0, velocitytmp);
+          projectionOnCylinder(&reaction[contact * nLocal], options->dWork[contact]);
 
-#ifdef VERBOSE_DEBUG
-        printf("LS iteration %i step 3 \n", j);
-        for (contact = 0 ; contact < nc ; ++contact)
-        {
-          for (int k = 0; k < 3; k++)
-            printf("velocitytmp[%i] = %le\t", 3 * contact + k, velocitytmp[3 * contact + k]);
-          printf("\n");
-        }
-#endif
+        //  Compute the new criterion (we use velocity as tmp)
+        /* q --> velocity */
+        cblas_dcopy(n , q , 1 , velocity, 1);
+        /* M r + q --> velocity */
+        NM_gemv(1.0, M, reaction, 1.0, velocity);
+        /* M r + 2*q --> velocity */
+        cblas_daxpy(n, 1.0, q, 1, velocity, 1);
+        /* theta = 0.5 R^T M r + r^T q --> velocity */
+        theta = 0.5*  cblas_ddot(n, velocity, 1, reaction, 1);
 
+        // Compute direction d _k = r - r_k
+        cblas_dcopy(n , reaction , 1 , direction , 1);
+        cblas_daxpy(n, -1, reaction_k, 1, direction, 1);
 
-        newcriterion = cblas_ddot(n, reaction, 1, velocitytmp, 1);
-
-#ifdef VERBOSE_DEBUG
-        printf("LS iteration %i newcriterion =%le\n", j, newcriterion);
-#endif
-        if (rho > rhomin)
-        {
-          rho = rhomin;
+        criterion =    theta - theta_old - mu * cblas_ddot(n, velocity_k, 1, direction, 1);
+        if (verbose > 1 ) printf("theta = %e\t criterion = %e\n  ", theta, criterion);
+        rho = rho*tau;
+        ls_iter++;
+        if (rho < rhomin)
           break;
-        }
-
-        rho = 0.5 * rho;
       }
-      while (newcriterion > oldcriterion &&
-             ++j <= options->iparam[2]);
-      oldcriterion = newcriterion;
-
+      rho  = rho/tau;
+      
       /* **** Criterium convergence **** */
       fc3d_Tresca_compute_error(problem, reaction , velocity, tolerance, options, &error);
 
       if (verbose > 0)
         printf("----------------------------------- FC3D - Projected Gradient On Cylinder (PGoC) - Iteration %i rho = %14.7e \tError = %14.7e\n", iter, rho, error);
+
+
+      /* Try to increase rho is the ls_iter succeeds in one iteration */
+      if (ls_iter == 1)
+        rho  = rho/tau;
 
       if (error < tolerance) hasNotConverged = 0;
       *info = hasNotConverged;
@@ -250,15 +223,15 @@ void fc3d_ProjectedGradientOnCylinder(FrictionContactProblem* problem, double *r
 
 
 
-
+  if (verbose > 0)
   printf("----------------------------------- FC3D - Projected Gradient On Cylinder (PGoC)- #Iteration %i Final Residual = %14.7e\n", iter, error);
-  dparam[0] = tolerance;
-  dparam[1] = error;
-  free(velocitytmp);
+  dparam[SICONOS_DPARAM_RESIDU] = error;
+  iparam[SICONOS_IPARAM_ITER_DONE] = iter;
   if (isVariable)
   {
-    free(reactionold);
+    free(reaction_k);
     free(direction);
+    free(velocity_k);
   }
 }
 
@@ -283,9 +256,16 @@ int fc3d_ProjectedGradientOnCylinder_setDefaultSolverOptions(SolverOptions* opti
   solver_options_nullify(options);
   memset(options->iparam, 0, options->iSize*sizeof(int));
   memset(options->dparam, 0, options->dSize*sizeof(int));
-  options->iparam[0] = 20000;
-  options->dparam[0] = 1e-6;
-  options->dparam[3] = 1e-3;
+  options->iparam[SICONOS_IPARAM_MAX_ITER] = 20000;
+  options->iparam[SICONOS_FRICTION_3D_PGOC_LINESEARCH_MAXITER] =10;
+  
+  
+  options->dparam[SICONOS_DPARAM_TOL] = 1e-6;
+  options->dparam[SICONOS_FRICTION_3D_PGOC_RHO] = -1e-3; /* rho is variable by default */
+  options->dparam[SICONOS_FRICTION_3D_PGOC_RHOMIN] = 1e-9; 
+  options->dparam[SICONOS_FRICTION_3D_PGOC_LINESEARCH_MU] =0.9;
+  options->dparam[SICONOS_FRICTION_3D_PGOC_LINESEARCH_TAU]  = 2.0/3.0;
+
 
   if (options->internalSolvers != NULL)
   {

@@ -236,7 +236,7 @@ enum SICONOS_FRICTION_3D_NSN_IPARAM
 
 enum SICONOS_FRICTION_3D_NSN_DPARAM
 {
-  /** index in dparam to store the rho value for porjection formulation */
+  /** index in dparam to store the rho value for projection formulation */
   SICONOS_FRICTION_3D_NSN_RHO = 3,
 
 };
@@ -270,7 +270,22 @@ enum SICONOS_FRICTION_3D_NSN_HYBRID_ENUM
   SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_VI_EG_NSN =4,
 };
 
-
+enum SICONOS_FRICTION_3D_PGOC_IPARAM
+{
+  /** index in iparam to store the maximum number of iterations */
+  SICONOS_FRICTION_3D_PGOC_LINESEARCH_MAXITER = 2
+};
+enum SICONOS_FRICTION_3D_PGOC_DPARAM
+{
+  /** index in dparam to store the rho value for projection formulation */
+  SICONOS_FRICTION_3D_PGOC_RHO = 3,
+  /** index in dparam to store the minrho value for projection formulation */
+  SICONOS_FRICTION_3D_PGOC_RHOMIN = 4,
+  /** index in dparam to store the mu value for line search algo */
+  SICONOS_FRICTION_3D_PGOC_LINESEARCH_MU = 5,
+  /** index in dparam to store the tau value for line search algo */
+  SICONOS_FRICTION_3D_PGOC_LINESEARCH_TAU  = 6 
+};
 
 
 
