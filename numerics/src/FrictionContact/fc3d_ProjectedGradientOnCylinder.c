@@ -208,7 +208,7 @@ void fc3d_ProjectedGradientOnCylinder(FrictionContactProblem* problem, double *r
       fc3d_Tresca_compute_error(problem, reaction , velocity, tolerance, options, &error);
 
       if (verbose > 0)
-        printf("----------------------------------- FC3D - Projected Gradient On Cylinder (PGoC) - Iteration %i rho = %14.7e \tError = %14.7e\n", iter, rho, error);
+        printf("----------------------------------- FC3D - Projected Gradient On Cylinder (PGoC) - Iteration %i rho =%10.5e error = %10.5e < %10.5e\n", iter, rho, error, tolerance);
 
 
       /* Try to increase rho is the ls_iter succeeds in one iteration */
