@@ -88,7 +88,7 @@ void fc3d_ProjectedGradientOnCylinder(FrictionContactProblem* problem, double *r
   double alpha = 1.0;
   double beta = 1.0;
 
-
+  double norm_q = cblas_dnrm2(nc*3 , problem->q , 1);
 
   if (!isVariable)
   {
@@ -111,7 +111,7 @@ void fc3d_ProjectedGradientOnCylinder(FrictionContactProblem* problem, double *r
                              options->dWork[contact]);
 
       /* **** Criterium convergence **** */
-      fc3d_Tresca_compute_error(problem, reaction , velocity, tolerance, options, &error);
+      fc3d_Tresca_compute_error(problem, reaction , velocity, tolerance, options, norm_q, &error);
 
       if (options->callback)
       {
@@ -203,9 +203,8 @@ void fc3d_ProjectedGradientOnCylinder(FrictionContactProblem* problem, double *r
           break;
       }
       rho  = rho/tau;
-      
       /* **** Criterium convergence **** */
-      fc3d_Tresca_compute_error(problem, reaction , velocity, tolerance, options, &error);
+      fc3d_Tresca_compute_error(problem, reaction , velocity, tolerance, options,  norm_q, &error);
 
       if (verbose > 0)
         printf("----------------------------------- FC3D - Projected Gradient On Cylinder (PGoC) - Iteration %i rho =%10.5e error = %10.5e < %10.5e\n", iter, rho, error, tolerance);
@@ -250,28 +249,21 @@ int fc3d_ProjectedGradientOnCylinder_setDefaultSolverOptions(SolverOptions* opti
   options->filterOn = 1;
   options->iSize = 10;
   options->dSize = 10;
-  options->iparam = (int *)realloc(options->iparam, options->iSize*sizeof(int));
-  options->dparam = (double *)realloc(options->dparam, options->dSize*sizeof(double));
+
+  options->iparam = (int *)calloc(options->iSize, sizeof(int));
+  options->dparam = (double *)calloc(options->dSize, sizeof(double));
   options->dWork = NULL;
   solver_options_nullify(options);
-  memset(options->iparam, 0, options->iSize*sizeof(int));
-  memset(options->dparam, 0, options->dSize*sizeof(int));
-  options->iparam[SICONOS_IPARAM_MAX_ITER] = 20000;
-  options->iparam[SICONOS_FRICTION_3D_PGOC_LINESEARCH_MAXITER] =10;
   
+  options->iparam[SICONOS_IPARAM_MAX_ITER] = 20000;
+  
+  options->iparam[SICONOS_FRICTION_3D_PGOC_LINESEARCH_MAXITER] =10;
   
   options->dparam[SICONOS_DPARAM_TOL] = 1e-6;
   options->dparam[SICONOS_FRICTION_3D_PGOC_RHO] = -1e-3; /* rho is variable by default */
   options->dparam[SICONOS_FRICTION_3D_PGOC_RHOMIN] = 1e-9; 
   options->dparam[SICONOS_FRICTION_3D_PGOC_LINESEARCH_MU] =0.9;
   options->dparam[SICONOS_FRICTION_3D_PGOC_LINESEARCH_TAU]  = 2.0/3.0;
-
-
-  if (options->internalSolvers != NULL)
-  {
-    solver_options_delete(options->internalSolvers);
-    free(options->internalSolvers);
-  }
 
   options->internalSolvers = NULL;
 

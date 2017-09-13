@@ -133,6 +133,18 @@ int fc3d_setDefaultSolverOptions(SolverOptions* options, int solverId)
     options->solverId = SICONOS_FRICTION_3D_ONECONTACT_QUARTIC_NU;
     break;
   }
+  case SICONOS_FRICTION_3D_PGoC:
+  {
+    info =    fc3d_ProjectedGradientOnCylinder_setDefaultSolverOptions(options);
+    options->solverId = SICONOS_FRICTION_3D_PGoC;
+    break;
+  }
+  case SICONOS_FRICTION_3D_VI_FPP_Cylinder:
+  {
+    info =    fc3d_VI_FixedPointProjection_Cylinder_setDefaultSolverOptions(options);
+    options->solverId = SICONOS_FRICTION_3D_VI_FPP_Cylinder;
+    break;
+  }
   default:
   {
     solver_options_set(options, solverId);

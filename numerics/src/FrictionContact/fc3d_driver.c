@@ -46,6 +46,8 @@ const char* const  SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCylinder_STR = "FC
 const char* const  SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCylinderWithLocalIteration_STR =  "FC3D_projectionOnCylinderWithLocalIteration";
 const char* const  SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone_velocity_STR = "FC3D_ProjectionOnCone_velocity";
 const char* const  SICONOS_FRICTION_3D_PGoC_STR = "FC3D_PGoC";
+const char* const  SICONOS_FRICTION_3D_VI_FPP_Cylinder_STR = "FC3D_VI_FPP_Cylinder";
+
 const char* const  SICONOS_FRICTION_3D_DeSaxceFixedPoint_STR = "FC3D_DeSaxceFixedPoint";
 const char* const  SICONOS_FRICTION_3D_EG_STR = "FC3D_ExtraGradient";
 const char* const  SICONOS_FRICTION_3D_FPP_STR = "FC3D_FixedPointProjection";

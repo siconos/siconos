@@ -265,11 +265,13 @@ extern "C"
       dparam[3] : rho . if dparam[3] >0 then rho=dparam[3] otherwise a computataion of rho is assumed.
   */
   void fc3d_VI_FixedPointProjection(FrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options);
+  void fc3d_VI_FixedPointProjection_Cylinder(FrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options);
 
   /** set the default solver parameters and perform memory allocation for DSFP
     \param options the pointer to the array of options to set
   */
   int fc3d_VI_FixedPointProjection_setDefaultSolverOptions(SolverOptions* options);
+  int fc3d_VI_FixedPointProjection_Cylinder_setDefaultSolverOptions(SolverOptions* options);
 
   /**Extra Gradient solver for friction-contact 3D problem based on the De Saxce Formulation
       \param problem the friction-contact 3D problem to solve
