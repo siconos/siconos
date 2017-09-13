@@ -116,12 +116,19 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
                                         error, NULL);
       }
 
-      if (verbose > 0)
-      {
-        printf("----------------------------------- VI - Fixed Point Projection (FPP) - Iteration %i rho = %14.7e \tError = %14.7e\n", iter, rho, error);
-      }
       if (error < tolerance) hasNotConverged = 0;
       *info = hasNotConverged;
+      if (verbose > 0)
+      {
+        if (hasNotConverged)
+        {
+          printf("----------------------------------- VI - Fixed Point Projection (FPP) - Iteration %i rho = %14.7e error = %14.7e > %10.5e\n", iter, rho, error, tolerance);
+        }
+        else
+        {
+          printf("----------------------------------- VI - Fixed Point Projection (FPP) - Iteration %i rho = %14.7e error = %14.7e < %10.5e\n", iter, rho, error, tolerance);
+        }
+      }
     }
   }
   else if (isVariable)
@@ -220,12 +227,19 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
           rho =rho_k;
 
 
-        if (verbose > 0)
-        {
-          printf("----------------------------------- VI - Fixed Point Projection (FPP) - Iteration %i rho = %14.7e \tError = %14.7e\n", iter, rho, error);
-        }
         if (error < tolerance) hasNotConverged = 0;
         *info = hasNotConverged;
+       if (verbose > 0)
+        {
+          if (hasNotConverged)
+          {
+            printf("----------------------------------- VI - Fixed Point Projection (FPP) - Iteration %i rho = %14.7e error = %14.7e > %10.5e\n", iter, rho, error, tolerance);
+          }
+          else
+          {
+            printf("----------------------------------- VI - Fixed Point Projection (FPP) - Iteration %i rho = %14.7e error = %14.7e < %10.5e\n", iter, rho, error, tolerance);
+          }
+        }
       }
     }
 
@@ -322,12 +336,19 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
           rho = rho_k;
 
 
-        if (verbose > 0)
-        {
-          printf("----------------------------------- VI - Fixed Point Projection (FPP) - Iteration %i rho = %14.7e \tError = %14.7e\n", iter, rho, error);
-        }
         if (error < tolerance) hasNotConverged = 0;
         *info = hasNotConverged;
+        if (verbose > 0)
+        {
+          if (hasNotConverged)
+          {
+            printf("----------------------------------- VI - Fixed Point Projection (FPP) - Iteration %i rho = %14.7e error = %14.7e > %10.5e\n", iter, rho, error, tolerance);
+          }
+          else
+          {
+            printf("----------------------------------- VI - Fixed Point Projection (FPP) - Iteration %i rho = %14.7e error = %14.7e < %10.5e\n", iter, rho, error, tolerance);
+          }
+        }
       }
     }
 
@@ -423,12 +444,20 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
           rho = rho_k;
 
 
-        if (verbose > 0)
-        {
-          printf("----------------------------------- VI - Fixed Point Projection (FPP) - Iteration %i rho = %14.7e \tError = %14.7e\n", iter, rho, error);
-        }
+
         if (error < tolerance) hasNotConverged = 0;
         *info = hasNotConverged;
+        if (verbose > 0)
+        {
+          if (hasNotConverged)
+          {
+            printf("----------------------------------- VI - Fixed Point Projection (FPP) - Iteration %i rho = %14.7e error = %14.7e > %10.5e\n", iter, rho, error, tolerance);
+          }
+          else
+          {
+            printf("----------------------------------- VI - Fixed Point Projection (FPP) - Iteration %i rho = %14.7e error = %14.7e < %10.5e\n", iter, rho, error, tolerance);
+          }
+        }
       }
     }
     if (iparam[SICONOS_VI_IPARAM_LINESEARCH_METHOD] > 2)
@@ -438,11 +467,6 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
     }
   }// end isvariable=1
 
-
-  if (verbose > 0)
-  {
-    printf("----------------------------------- VI - Fixed Point Projection (FPP) - #Iteration %i Final Residual = %14.7e\n", iter, error);
-  }
 
   if (isVariable)
   {
