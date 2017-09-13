@@ -159,9 +159,10 @@ void fc3d_Tresca_unitary_compute_and_add_error(double *z , double *w, double R, 
 
 }
 int fc3d_Tresca_compute_error(FrictionContactProblem* problem,
-                                           double *z, double * w,
-                                           double tolerance, SolverOptions * options,
-                                           double* error)
+                              double *z, double * w,
+                              double tolerance, SolverOptions * options,
+                              double norm, 
+                              double* error)
 {
   /* Checks inputs */
   if (problem == NULL || z == NULL || w == NULL)
@@ -187,8 +188,10 @@ int fc3d_Tresca_compute_error(FrictionContactProblem* problem,
   *error = sqrt(*error);
 
   /* Computes error */
-  double norm_q = cblas_dnrm2(n , problem->q , incx);
-  *error = *error / (norm_q + 1.0);
+  DEBUG_PRINTF("norm = %12.8e\n", norm);
+  if (fabs(norm) > DBL_EPSILON)
+    *error /= norm;
+  
   if (*error > tolerance)
   {
     /* if (verbose > 0) printf(" Numerics - fc3d_Tresca_compute_error failed: error = %g > tolerance = %g.\n",*error, tolerance);  */
