@@ -22,6 +22,7 @@
 #include "SparseBlockMatrix.h"
 #include "SiconosLapack.h"
 #include <math.h>
+#include <string.h>
 #include "numerics_verbose.h"
 #include "op3x3.h"
 //#define DEBUG_MESSAGES 1
