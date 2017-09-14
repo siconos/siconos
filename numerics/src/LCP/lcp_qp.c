@@ -50,7 +50,7 @@ void lcp_qp(LinearComplementarityProblem* problem, double *z, double *w, int *in
   int *iwar;
   double *war;
 
-  double tol = options->dparam[0];
+  double tol = options->dparam[0]/10.0;
 
   /*/ m :        total number of constraints.*/
   m = 0;

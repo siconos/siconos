@@ -75,11 +75,11 @@ if(WITH_${COMPONENT}_TESTING)
   ENDFOREACH()
 
   # CPG does not work everywhere
-  SET(test-LCP_CPG-lcp_deudeu_PROPERTIES WILL_FAIL TRUE)
   SET(test-LCP_CPG-lcp_exp_murty_PROPERTIES WILL_FAIL TRUE)
   SET(test-LCP_CPG-lcp_CPS_2_PROPERTIES WILL_FAIL TRUE)
   SET(test-LCP_CPG-lcp_CPS_4_PROPERTIES WILL_FAIL TRUE)
   SET(test-LCP_CPG-lcp_CPS_4bis_PROPERTIES WILL_FAIL TRUE)
+  SET(test-LCP_CPG-lcp_enum_fails_PROPERTIES WILL_FAIL TRUE)
 
   # problem with Cholesky here
   SET_LCP_TEST_AS_FAILED("exp_murty;exp_murty2" "LATIN;LATIN_W")
@@ -471,7 +471,6 @@ if(WITH_${COMPONENT}_TESTING)
   NEW_FC_3D_TEST(FC3D_Example1_SBM.dat
     SICONOS_FRICTION_3D_TFP 1e-16 100)
 
-
   
   NEW_FC_3D_TEST(Confeti-ex03-Fc3D-SBM.dat
     SICONOS_FRICTION_3D_TFP 10e-8 2000)
@@ -491,6 +490,7 @@ if(WITH_${COMPONENT}_TESTING)
     INTERNAL_IPARAM 2 20
     INTERNAL_DPARAM 3 -1.
     INTERNAL_DPARAM 4 -1.e-6)
+
 
   # ---- Hyperplane Projection ----
   # HP is not converging
