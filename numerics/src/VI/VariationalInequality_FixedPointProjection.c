@@ -499,7 +499,8 @@ int variationalInequality_FixedPointProjection_setDefaultSolverOptions(SolverOpt
   options->dSize = 10;
   options->iparam = (int *)calloc(options->iSize, sizeof(int));
   options->dparam = (double *)calloc(options->dSize, sizeof(double));
-  options->dWork = NULL;
+  solver_options_nullify(options);
+
 
   options->iparam[SICONOS_IPARAM_MAX_ITER] = 20000;
 
