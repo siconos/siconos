@@ -321,6 +321,40 @@ int fc3d_onecontact_nonsmooth_Newton_setDefaultSolverOptions(SolverOptions* opti
     SICONOS_FRICTION_3D_NSN_FORMULATION_ALARTCURNIER_STD ;
   /* Choice of line -search method */
   options->iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH] =
+    SICONOS_FRICTION_3D_NSN_LINESEARCH_NO;
+
+  /* parameters for hybrid solvers */
+  options->iparam[SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY] =
+    SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_PLI_NSN_LOOP;
+  options->iparam[SICONOS_FRICTION_3D_NSN_HYBRID_MAX_LOOP] = 1;
+  options->iparam[SICONOS_FRICTION_3D_NSN_HYBRID_MAX_ITER] = 10;
+  return 0;
+}
+int fc3d_onecontact_nonsmooth_Newton_gp_setDefaultSolverOptions(SolverOptions* options)
+{
+  if (verbose > 0)
+  {
+    printf("Set the Default SolverOptions for the  ONECONTACT_NSN Solver\n");
+  }
+
+  options->solverId = SICONOS_FRICTION_3D_ONECONTACT_NSN_GP;
+  options->numberOfInternalSolvers = 0;
+  options->isSet = 1;
+  options->filterOn = 1;
+  options->iSize = 20;
+  options->dSize = 20;
+  options->iparam = (int *)calloc(options->iSize, sizeof(int));
+  options->dparam = (double *)calloc(options->dSize, sizeof(double));
+  solver_options_nullify(options);
+
+  options->iparam[SICONOS_IPARAM_MAX_ITER] = 10;
+  options->dparam[SICONOS_DPARAM_TOL] = 1e-14;
+
+  /* Choice of formulation */
+  options->iparam[SICONOS_FRICTION_3D_NSN_FORMULATION] =
+    SICONOS_FRICTION_3D_NSN_FORMULATION_ALARTCURNIER_STD ;
+  /* Choice of line -search method */
+  options->iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH] =
     SICONOS_FRICTION_3D_NSN_LINESEARCH_GOLDSTEINPRICE;
   options->iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH_MAXITER] = 10;
 
@@ -331,7 +365,6 @@ int fc3d_onecontact_nonsmooth_Newton_setDefaultSolverOptions(SolverOptions* opti
   options->iparam[SICONOS_FRICTION_3D_NSN_HYBRID_MAX_ITER] = 10;
   return 0;
 }
-
 
 int fc3d_onecontact_nonsmooth_Newton_solvers_solve_direct(FrictionContactProblem* localproblem, double * R, int *iparam, double *dparam)
 {

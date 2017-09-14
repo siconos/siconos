@@ -77,7 +77,7 @@ int main(void)
 
   if (testInternalSolver)
   {
-    options->internalSolvers->solverId=@TEST_INTERNAL_SOLVER@;
+    info=@TEST_NAME_PREFIX@_setDefaultSolverOptions(options->internalSolvers,@TEST_INTERNAL_SOLVER@);
     if(test_internal_tol > 0.)
       options->internalSolvers->dparam[0]=@TEST_INTERNAL_SOLVER_TOLERANCE@;
     if(test_internal_maxit > 0)

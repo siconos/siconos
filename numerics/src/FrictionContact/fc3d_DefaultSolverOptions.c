@@ -22,6 +22,7 @@
 #include <float.h>
 
 #include "fc3d_Solvers.h"
+
 #include "NonSmoothDrivers.h"
 #include "Newton_methods.h"
 
@@ -122,17 +123,7 @@ int fc3d_setDefaultSolverOptions(SolverOptions* options, int solverId)
     info =    fc3d_nonsmooth_Newton_NaturalMap_setDefaultSolverOptions(options);
     break;
   }
-  case SICONOS_FRICTION_3D_ONECONTACT_QUARTIC:
-  {
-    info =    fc3d_unitary_enumerative_setDefaultSolverOptions(options);
-    break;
-  }
-  case SICONOS_FRICTION_3D_ONECONTACT_QUARTIC_NU:
-  {
-    info =    fc3d_unitary_enumerative_setDefaultSolverOptions(options);
-    options->solverId = SICONOS_FRICTION_3D_ONECONTACT_QUARTIC_NU;
-    break;
-  }
+
   case SICONOS_FRICTION_3D_PGoC:
   {
     info =    fc3d_ProjectedGradientOnCylinder_setDefaultSolverOptions(options);
@@ -145,6 +136,63 @@ int fc3d_setDefaultSolverOptions(SolverOptions* options, int solverId)
     options->solverId = SICONOS_FRICTION_3D_VI_FPP_Cylinder;
     break;
   }
+  case SICONOS_FRICTION_3D_ONECONTACT_QUARTIC:
+  {
+    info =    fc3d_unitary_enumerative_setDefaultSolverOptions(options);
+    break;
+  }
+  case SICONOS_FRICTION_3D_ONECONTACT_QUARTIC_NU:
+  {
+    info =    fc3d_unitary_enumerative_setDefaultSolverOptions(options);
+    options->solverId = SICONOS_FRICTION_3D_ONECONTACT_QUARTIC_NU;
+    break;
+  }
+  case SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithDiagonalization:
+  {
+    info =    fc3d_projectionOnConeWithDiagonalization_setDefaultSolverOptions(options);
+    break;
+  }
+  case SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithRegularization:
+  {
+    info =    fc3d_projectionOnConeWithRegularization_setDefaultSolverOptions(options);
+    break;
+  }
+  case SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone:
+  {
+    info =    fc3d_projectionOnCone_setDefaultSolverOptions(options);
+    break;
+  }
+  case SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration:
+  {
+    info =    fc3d_projectionOnConeWithLocalIteration_setDefaultSolverOptions(options);
+    break;
+  }
+  case SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone_velocity:
+  {
+    info =    fc3d_projectionOnCone_velocity_setDefaultSolverOptions(options);
+    break;
+  }
+  case SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCylinder:
+  {
+    info =    fc3d_projectionOnCylinder_setDefaultSolverOptions(options);
+    break;
+  }
+  case SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCylinderWithLocalIteration:
+  {
+    info =    fc3d_projectionOnCylinderWithLocalIteration_setDefaultSolverOptions(options);
+    break;
+  }
+  case SICONOS_FRICTION_3D_ONECONTACT_NSN:
+  {
+    info =  fc3d_onecontact_nonsmooth_Newton_setDefaultSolverOptions(options);
+    break;
+  }
+  case SICONOS_FRICTION_3D_ONECONTACT_NSN_GP:
+  {
+    info =  fc3d_onecontact_nonsmooth_Newton_gp_setDefaultSolverOptions(options);
+    break;
+  }
+
   default:
   {
     solver_options_set(options, solverId);

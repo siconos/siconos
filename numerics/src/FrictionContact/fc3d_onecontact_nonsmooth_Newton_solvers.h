@@ -101,6 +101,7 @@ typedef void (*computeNonsmoothFunction)(double *, double * , double , double * 
    * \param options  the solver options
    */
   int fc3d_onecontact_nonsmooth_Newton_setDefaultSolverOptions(SolverOptions* options);
+  int fc3d_onecontact_nonsmooth_Newton_gp_setDefaultSolverOptions(SolverOptions* options);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

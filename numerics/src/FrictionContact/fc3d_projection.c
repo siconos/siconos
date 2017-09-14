@@ -822,3 +822,144 @@ int fc3d_projectionOnCylinderWithLocalIteration_solve(FrictionContactProblem* lo
   return 0;
 
 }
+int fc3d_projectionOnConeWithDiagonalization_setDefaultSolverOptions(SolverOptions* options)
+{
+
+  numerics_printf("Set the Default SolverOptions for the ONECONTACT_ProjectionOnConeWithDiagonalization  Solver\n");
+  
+
+  options->solverId = SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithDiagonalization;
+  options->numberOfInternalSolvers = 0;
+  options->isSet = 1;
+  options->filterOn = 1;
+  options->iSize = 0;
+  options->dSize = 0;
+  options->iSize = 10;
+  options->dSize = 10;
+  options->iparam = (int *)calloc(options->iSize, sizeof(int));
+  options->dparam = (double *)calloc(options->dSize, sizeof(double));
+  solver_options_nullify(options);
+
+
+  return 0;
+}
+int fc3d_projectionOnConeWithRegularization_setDefaultSolverOptions(SolverOptions* options)
+{
+
+  numerics_printf("Set the Default SolverOptions for the ONECONTACT_ProjectionOnConeWithRegularization Solver\n");
+  
+
+  options->solverId = SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithRegularization;
+  options->numberOfInternalSolvers = 0;
+  options->isSet = 1;
+  options->filterOn = 1;
+  options->iSize = 0;
+  options->dSize = 0;
+  options->iSize = 10;
+  options->dSize = 10;
+  options->iparam = (int *)calloc(options->iSize, sizeof(int));
+  options->dparam = (double *)calloc(options->dSize, sizeof(double));
+  solver_options_nullify(options);
+
+
+  return 0;
+}
+
+int fc3d_projectionOnCone_setDefaultSolverOptions(SolverOptions* options)
+{
+
+  numerics_printf("Set the Default SolverOptions for the ONECONTACT_ProjectionOnCone  Solver\n");
+  
+
+  options->solverId = SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone;
+  options->numberOfInternalSolvers = 0;
+  options->isSet = 1;
+  options->filterOn = 1;
+  options->iSize = 10;
+  options->dSize = 10;
+  options->iparam = (int *)calloc(options->iSize, sizeof(int));
+  options->dparam = (double *)calloc(options->dSize, sizeof(double));
+  solver_options_nullify(options);
+
+  return 0;
+}
+int fc3d_projectionOnCone_velocity_setDefaultSolverOptions(SolverOptions* options)
+{
+
+  numerics_printf("Set the Default SolverOptions for the ONECONTACT_ProjectionOnCone_velocity  Solver\n");
+  
+
+  options->solverId = SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone_velocity;
+  options->numberOfInternalSolvers = 0;
+  options->isSet = 1;
+  options->filterOn = 1;
+  options->iSize = 10;
+  options->dSize = 10;
+  options->iparam = (int *)calloc(options->iSize, sizeof(int));
+  options->dparam = (double *)calloc(options->dSize, sizeof(double));
+  solver_options_nullify(options);
+
+
+  return 0;
+}
+int fc3d_projectionOnConeWithLocalIteration_setDefaultSolverOptions(SolverOptions* options)
+{
+
+  numerics_printf("Set the Default SolverOptions for the ONECONTACT_ProjectionOnConeWithLocalIteration  Solver\n");
+  
+
+  options->solverId = SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration;
+  options->numberOfInternalSolvers = 0;
+  options->isSet = 1;
+  options->filterOn = 1;
+  options->iSize = 20;
+  options->dSize = 20;
+  options->iparam = (int *)calloc(options->iSize, sizeof(int));
+  options->dparam = (double *)calloc(options->dSize, sizeof(double));
+  solver_options_nullify(options);
+
+  options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
+  options->dparam[SICONOS_DPARAM_TOL] = 1e-14;
+
+  return 0;
+}
+int fc3d_projectionOnCylinder_setDefaultSolverOptions(SolverOptions* options)
+{
+
+  numerics_printf("Set the Default SolverOptions for the ONECONTACT_projectionOnCylinder  Solver\n");
+  
+
+  options->solverId = SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCylinder;
+  options->numberOfInternalSolvers = 0;
+  options->isSet = 1;
+  options->filterOn = 1;
+  options->iSize = 10;
+  options->dSize = 10;
+  options->iparam = (int *)calloc(options->iSize, sizeof(int));
+  options->dparam = (double *)calloc(options->dSize, sizeof(double));
+  solver_options_nullify(options);
+
+
+  return 0;
+}
+int fc3d_projectionOnCylinderWithLocalIteration_setDefaultSolverOptions(SolverOptions* options)
+{
+
+  numerics_printf("Set the Default SolverOptions for the ONECONTACT_ProjectionOnCylinderWithLocalIteration  Solver\n");
+  
+
+  options->solverId = SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCylinderWithLocalIteration;
+  options->numberOfInternalSolvers = 0;
+  options->isSet = 1;
+  options->filterOn = 1;
+  options->iSize = 20;
+  options->dSize = 20;
+  options->iparam = (int *)calloc(options->iSize, sizeof(int));
+  options->dparam = (double *)calloc(options->dSize, sizeof(double));
+  solver_options_nullify(options);
+
+  options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
+  options->dparam[SICONOS_DPARAM_TOL] = 1e-14;
+
+  return 0;
+}
