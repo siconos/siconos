@@ -24,8 +24,8 @@
 
 
 #include "LinearComplementarityProblem.h"
-#include "LCP_solvers.h"
-#include "LCP_cst.h"
+#include "LCP_Solvers.h"
+#include "lcp_cst.h"
 
 #include "VariationalInequality.h"
 #include "VariationalInequality_Solvers.h"
@@ -35,7 +35,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <math.h>
-
+#include <string.h>
 #define DEBUG_MESSAGES
 #define DEBUG_STDOUT
 #ifdef DEBUG_MESSAGES
