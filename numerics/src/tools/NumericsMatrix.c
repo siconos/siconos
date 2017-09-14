@@ -322,7 +322,79 @@ void NM_row_prod_no_diag3(size_t sizeX, int block_start, size_t row_start, Numer
   }
   }
 }
+void NM_row_prod_no_diag1x1(size_t sizeX, int block_start, size_t row_start, NumericsMatrix* A, double* x, double* y, bool init)
+{
+  assert(A);
+  assert(x);
+  assert(y);
+  assert((size_t)A->size0 >= 1);
+  assert((size_t)A->size1 == sizeX);
 
+  switch(A->storageType)
+  {
+  case NM_DENSE:
+  {
+    if (init)
+    {
+      y[0] = 0.;
+    }
+    double* M = A->matrix0;
+    assert(M);
+    int incx = sizeX, incy = 1;
+    double xin = x[row_start] ;
+
+    x[row_start] = 0.;
+    y[0] += cblas_ddot(sizeX, &M[row_start], incx, x, incy);
+    x[row_start] = xin;
+    break;
+  }
+  case NM_SPARSE_BLOCK:
+  {
+    /* qLocal += rowMB * x
+     * with rowMB the row of blocks of MGlobal which corresponds
+     * to the current contact
+     */
+    SBM_row_prod_no_diag_1x1(sizeX, 1, block_start, A->matrix1, x, y);
+    break;
+  }
+  case NM_SPARSE:
+  {
+    if (init)
+    {
+      y[0] = 0.;
+    }
+
+    double rin = x[row_start] ;
+    x[row_start] = 0.;
+
+    CSparseMatrix* M;
+    if (A->matrix2->origin == NS_CSR)
+    {
+      M = NM_csr(A);
+    }
+    else
+    {
+      M = NM_csc_trans(A);
+    }
+
+    csi* Mp = M->p;
+    csi* Mi = M->i;
+    double* Mx = M->x;
+
+    for (csi p = Mp[row_start]; p < Mp[row_start+1]; ++p)
+    {
+      y[0] += Mx[p] * x[Mi[p]];
+    }
+    x[row_start] = rin;
+    break;
+  }
+  default:
+  {
+    fprintf(stderr, "NM_row_prod_no_diag3 :: unknown matrix storage %d", A->storageType);
+    exit(EXIT_FAILURE);
+  }
+  }
+}
 void NM_internalData_free(NumericsMatrix* m)
 {
   assert(m && "NM_internalData_free, m == NULL");
@@ -437,6 +509,7 @@ void NM_zentry(NumericsMatrix* M, int i, int j, double val)
   {
     // column major
     M->matrix0[i+j*M->size0] = val;
+    break;
   }
   case NM_SPARSE:
   {
@@ -468,10 +541,14 @@ void NM_zentry(NumericsMatrix* M, int i, int j, double val)
     }
     default:
     {
-      fprintf(stderr, "NM_zentry ::  unknown origin %d for sparse matrix\n", M->matrix2->origin);
+      numerics_error("NM_zentry","unknown origin %d for sparse matrix\n", M->matrix2->origin);
+      break;
     }
     }
+    break;
   }
+  default:
+    numerics_error("NM_zentry  ","unknown storageType %d for matrix\n", M->storageType);
   }
 
 }
@@ -806,7 +883,6 @@ void NM_write_in_file_scilab(const NumericsMatrix* const m, FILE* file)
     fprintf(stderr, "Numerics, NumericsMatrix printInFile failed, NULL input.\n");
     exit(EXIT_FAILURE);
   }
-  int storageType = m->storageType;
   fprintf(file, "storageType = %d ; \n", m->storageType);
   fprintf(file, "size0 = %d; \n", m->size0);
   fprintf(file, "size1 = %d; \n", m->size1);
@@ -1162,8 +1238,8 @@ NumericsMatrix* NM_create(int storageType, int size0, int size1)
       data = newNumericsSparseMatrix();
       break;
     default:
-      fprintf(stderr, "NM_create :: storageType value %d not implemented yet !", storageType);
-      exit(EXIT_FAILURE);
+      data=NULL;
+      numerics_error("NM_create", "storageType value %d not implemented yet !", storageType);
   }
 
   NM_fill(M, storageType, size0, size1, data);
@@ -1391,8 +1467,7 @@ void NM_sparse_extract_block(NumericsMatrix* M, double* blockM, size_t pos_row, 
   assert(block_row_size > 0 && block_row_size + pos_row <= (unsigned long int)M->size0);
   assert(block_col_size > 0 && block_col_size + pos_col <= (unsigned long int)M->size1);
 
-  NumericsSparseMatrix* Msparse = M->matrix2;
-  assert(Msparse);
+  assert(M->matrix2);
 
   /* Clear memory */
   memset(blockM, 0, block_row_size*block_col_size * sizeof(double));

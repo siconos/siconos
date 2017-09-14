@@ -110,19 +110,27 @@
 
 struct SparseBlockStructuredMatrix
 {
+  /* the number of non null blocks */
   unsigned int nbblocks;
   double **block;
+  /* the number of rows of blocks */
   unsigned int blocknumber0;
+  /* the number of columns of blocks */
   unsigned int blocknumber1;
+  /* the vector of cumulated row sizes of blocks */
   unsigned int *blocksize0;
+  /* the vector of cumulated column sizes of blocks */
   unsigned int *blocksize1;
+  /* the index of the last non empty line + 1 */
   size_t filled1;
+  /* the size of index2_data that corresponds of the number of non null blocks*/
   size_t filled2;
+  
   size_t *index1_data;
   size_t *index2_data;
 
 };
-
+ 
 struct SparseBlockCoordinateMatrix
 {
   /** number of blocks */
@@ -254,8 +262,14 @@ extern "C"
       \param[in,out] y the resulting vector
   */
   void SBM_row_prod_no_diag_3x3(unsigned int sizeX, unsigned int sizeY, unsigned int currentRowNumber, const SparseBlockStructuredMatrix* const A, double* const x, double* y);
+  void SBM_row_prod_no_diag_1x1(unsigned int sizeX, unsigned int sizeY, unsigned int currentRowNumber, const SparseBlockStructuredMatrix* const A, double* const x, double* y);
   
 
+  void SBM_extract_component_3x3(const SparseBlockStructuredMatrix* const A,
+                                 SparseBlockStructuredMatrix*  B,
+                                 unsigned int *row_components, unsigned int row_components_size,
+                                 unsigned int *col_components, unsigned int col_components_size);
+  
   /** Destructor for SparseBlockStructuredMatrix objects
       \param blmat SparseBlockStructuredMatrix the matrix to be destroyed.
    */

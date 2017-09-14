@@ -228,6 +228,90 @@ void SBM_gemv_3x3(unsigned int sizeX, unsigned int sizeY, const SparseBlockStruc
     }
   }
 }
+void SBM_extract_component_3x3(const SparseBlockStructuredMatrix* const restrict A, SparseBlockStructuredMatrix*  B,
+                               unsigned int *row_components, unsigned int row_components_size,
+                               unsigned int *col_components, unsigned int col_components_size)
+{
+
+
+  assert(A);
+  assert(B);
+  assert(A->blocksize0);
+  assert(A->blocksize1);
+  assert(A->index1_data);
+  assert(A->index2_data);
+
+  /* allocation of data */
+  B->nbblocks= A->nbblocks;
+  B->blocknumber0= A->blocknumber0;
+  B->blocknumber1= A->blocknumber1;
+  B->filled1= A->filled1;
+  B->filled2= A->filled2;
+
+  B->index1_data = (size_t *) malloc(B->filled1*sizeof(size_t));
+  memcpy(B->index1_data, A->index1_data , B->filled1*sizeof(size_t));
+  B->index2_data = (size_t *) malloc(B->filled2*sizeof(size_t));
+  memcpy(B->index2_data, A->index2_data , B->filled2*sizeof(size_t));
+
+  B->blocksize0  = (unsigned int *)malloc(B->blocknumber0*sizeof(unsigned int));
+  B->blocksize1  = (unsigned int *)malloc(B->blocknumber1*sizeof(unsigned int));
+
+
+  int sum =0;
+
+  for (unsigned int row =0; row < B->blocknumber0; row++)
+  {
+    sum +=row_components_size;
+    B->blocksize0[row] = sum ;
+  }
+  sum =0;
+  for (unsigned int col =0; col < B->blocknumber1; col++)
+  {
+    sum +=col_components_size;
+    B->blocksize1[col] = sum ;
+  }
+
+
+  B->block= (double **)malloc(B->nbblocks*sizeof(double*));
+
+
+
+  /* Column (block) position of the current block*/
+  size_t colNumber;
+  /* Number of rows/columns of the current block */
+  unsigned int nbRows, nbColumns;
+
+  /* Loop over all non-null blocks
+     Works whatever the ordering order of the block is, in A->block
+  */
+
+  for (unsigned int currentRowNumber = 0 ; currentRowNumber < A->filled1 - 1; ++currentRowNumber)
+  {
+
+    for (size_t blockNum = A->index1_data[currentRowNumber];
+         blockNum < A->index1_data[currentRowNumber + 1]; ++blockNum)
+    {
+      assert(blockNum < A->filled2);
+      /* Get dim. of the current block */
+      nbRows = A->blocksize0[currentRowNumber];
+      if (currentRowNumber != 0)
+        nbRows -= A->blocksize0[currentRowNumber - 1];
+
+
+      B->block[blockNum] = (double*) malloc(row_components_size*col_components_size*sizeof(double));
+
+      for (unsigned int i = 0; i < row_components_size; i++ )
+      {
+        for (unsigned int j = 0; j < col_components_size; j++ )
+        {
+        B->block[blockNum][i +  row_components_size*j] = A->block[blockNum][row_components[i] + col_components[j] * nbRows];
+        }
+      }
+    }
+  }
+
+  DEBUG_EXPR(SBM_print(B));
+}
 
 
 
@@ -812,6 +896,71 @@ void SBM_row_prod_no_diag_3x3(unsigned int sizeX, unsigned int sizeY, unsigned i
       /* cblas_dgemv(CblasColMajor,CblasNoTrans, nbRows, nbColumns, 1.0, A->block[blockNum], nbRows, &x[posInX], 1, 1.0, y, 1); */
       assert((nbColumns == 3));
       mvp3x3(A->block[blockNum], &x[posInX], y);
+    }
+  }
+}
+void SBM_row_prod_no_diag_1x1(unsigned int sizeX, unsigned int sizeY, unsigned int currentRowNumber, const SparseBlockStructuredMatrix* const A, double* const x, double* y)
+{
+  /*
+     If: A is a SparseBlockStructuredMatrix matrix, Aij a block at row
+     i and column j (Warning: i and j are indices of block position,
+     not scalar component positions)
+
+     Then SBM_row_prod_no_diag computes y = sum for i not equal to j of
+     Aij.xj over a row of blocks (or += if init = false)
+
+     currentRowNumber represents the position (block number) of the
+     required line of blocks in the matrix A.
+
+  */
+
+
+  /* Column (block) position of the current block*/
+  size_t colNumber = 0;
+
+  /* Number of columns of the current block */
+  unsigned int nbColumns;
+
+  /* Position of the sub-block of x multiplied by the sub-block of
+   * A */
+  unsigned int posInX = 0;
+
+  /* Look for the first element of the wanted row */
+
+  /* Assertions */
+  assert(A);
+  assert(x);
+  assert(y);
+  assert(sizeX == A->blocksize1[A->blocknumber1 - 1]);
+  assert(currentRowNumber <= A->blocknumber0);
+
+  /* Loop over all non-null blocks. Works whatever the ordering order
+     of the block is, in A->block, but it requires a set to 0 of all y
+     components
+  */
+  for (size_t blockNum = A->index1_data[currentRowNumber];
+       blockNum < A->index1_data[currentRowNumber + 1];
+       ++blockNum)
+  {
+    /* Get row/column position of the current block */
+    colNumber = A->index2_data[blockNum];
+
+    /* Computes product only for extra diagonal blocks */
+    if (colNumber != currentRowNumber)
+    {
+      /* Get dim(columns) of the current block */
+      nbColumns = A->blocksize1[colNumber];
+      if (colNumber != 0)
+        nbColumns -= A->blocksize1[colNumber - 1];
+
+      /* Get position in x of the sub-block multiplied by A sub-block */
+      posInX = 0;
+      if (colNumber != 0)
+        posInX += A->blocksize0[colNumber - 1];
+      /* Computes y[] += currentBlock*x[] */
+      /* cblas_dgemv(CblasColMajor,CblasNoTrans, nbRows, nbColumns, 1.0, A->block[blockNum], nbRows, &x[posInX], 1, 1.0, y, 1); */
+      assert((nbColumns == 1));
+      y[0] += A->block[blockNum][0] * x[posInX] ;
     }
   }
 }
@@ -1605,7 +1754,7 @@ int SBM_transpose(const SparseBlockStructuredMatrix* const A, SparseBlockStructu
   return 0;
 }
 int SBM_inverse_diagonal_block_matrix_in_place(const SparseBlockStructuredMatrix*  M,  int* ipiv)
-{ 
+{
   for (unsigned int i = 0; i < M->filled1 - 1; i++)
   {
     size_t numberofblockperrow = M->index1_data[i + 1] - M->index1_data[i];
@@ -1630,10 +1779,10 @@ int SBM_inverse_diagonal_block_matrix_in_place(const SparseBlockStructuredMatrix
   lapack_int infoDGETRF = 0;
   lapack_int infoDGETRI = 0;
   int info = 0;
-  
+
   lapack_int* lapack_ipiv = (lapack_int *) ipiv;
 
-  
+
   for (currentRowNumber = 0 ; currentRowNumber < M->filled1 - 1; ++currentRowNumber)
   {
     for (size_t blockNum = M->index1_data[currentRowNumber];
@@ -1656,11 +1805,11 @@ int SBM_inverse_diagonal_block_matrix_in_place(const SparseBlockStructuredMatrix
 
       DGETRI(nbRows, M->block[blockNum], nbRows, lapack_ipiv, &infoDGETRI);
       assert(!infoDGETRI);
-      
+
     }
   }
   if ((!infoDGETRF) || (!infoDGETRI)) info = 0;
-  
+
   return info;
 
 

@@ -473,6 +473,7 @@ extern "C"
       \param[in] init if True y = Ax, else y += Ax
   */
   void NM_row_prod_no_diag3(size_t sizeX, int block_start, size_t row_start, NumericsMatrix* A, double* x, double* y, bool init);
+  void NM_row_prod_no_diag1x1(size_t sizeX, int block_start, size_t row_start, NumericsMatrix* A, double* x, double* y, bool init);
 
   /** Matrix vector multiplication : y = alpha A x + beta y
    * \param[in] alpha scalar
