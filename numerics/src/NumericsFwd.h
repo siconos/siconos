@@ -51,6 +51,7 @@ TYPEDEF_STRUCT(listNumericsProblem)
 TYPEDEF_STRUCT(FrictionContactProblem_as_VI)
 TYPEDEF_STRUCT(GlobalFrictionContactProblem_as_VI)
 TYPEDEF_STRUCT(FrictionContactProblem)
+TYPEDEF_STRUCT(SplittedFrictionContactProblem)
 TYPEDEF_STRUCT(VariationalInequality)
 TYPEDEF_STRUCT(AffineVariationalInequalities)
 

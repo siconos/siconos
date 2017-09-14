@@ -159,8 +159,8 @@ void fc3d_VI_FixedPointProjection_Cylinder(FrictionContactProblem* problem, doub
   double error=1e24;
 
   FrictionContactProblem_as_VI *fc3d_as_vi= (FrictionContactProblem_as_VI*)malloc(sizeof(FrictionContactProblem_as_VI));
-  vi->env =fc3d_as_vi ;
-  vi->size =  n;
+  vi->env = fc3d_as_vi ;
+  vi->size = n;
 
   /*set the norm of the VI to the norm of problem->q  */
   double norm_q = cblas_dnrm2(nc*3 , problem->q , 1);

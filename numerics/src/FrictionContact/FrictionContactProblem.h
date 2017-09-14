@@ -161,6 +161,19 @@ struct FrictionContactProblem
   double* mu;
 };
 
+struct SplittedFrictionContactProblem
+{
+  FrictionContactProblem * fc3d;
+  NumericsMatrix * M_nn;
+  NumericsMatrix * M_tn;
+  NumericsMatrix * M_nt;
+  NumericsMatrix * M_tt;
+  double * q_n;
+  double * q_t;
+};
+
+
+
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
@@ -220,6 +233,10 @@ extern "C"
   /* create an empty FrictionContactProblem
    * \return an empty fcp */
   FrictionContactProblem* newFCP(void);
+
+  
+  void createSplittedFrictionContactProblem(FrictionContactProblem* problem, SplittedFrictionContactProblem * splitted_problem);
+  
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

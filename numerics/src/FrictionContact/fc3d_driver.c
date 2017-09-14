@@ -28,6 +28,7 @@
 const char* const   SICONOS_FRICTION_3D_NSGS_STR = "FC3D_NSGS";
 const char* const   SICONOS_FRICTION_3D_NSGSV_STR = "FC3D_NSGSV";
 const char* const   SICONOS_FRICTION_3D_TFP_STR = "FC3D_TFP";
+const char* const   SICONOS_FRICTION_3D_PFP_STR = "FC3D_PFP";
 const char* const   SICONOS_FRICTION_3D_NSN_AC_STR = "FC3D_NSN_AC";
 const char* const   SICONOS_FRICTION_3D_NSN_FB_STR = "FC3D_NSN_FB";
 const char* const   SICONOS_FRICTION_3D_NSN_NM_STR = "FC3D_NSN_NM";
@@ -125,6 +126,13 @@ int fc3d_driver(FrictionContactProblem* problem,
   {
     numerics_printf(" ========================== Call TFP (Tresca Fixed Point) solver for Friction-Contact 3D problem ==========================\n");
     fc3d_TrescaFixedPoint(problem, reaction , velocity , &info , options);
+    break;
+  }
+  /* Panagiotopoulos Fixed point algorithm */
+  case SICONOS_FRICTION_3D_PFP:
+  {
+    numerics_printf(" ========================== Call PFP (Panagiotopoulos Fixed Point) solver for Friction-Contact 3D problem ==========================\n");
+    fc3d_Panagiotopoulos_FixedPoint(problem, reaction , velocity , &info , options);
     break;
   }
   /* ACLM Fixed point algorithm */

@@ -57,6 +57,8 @@ enum FRICTION_SOLVER
   /** Non-smooth Newton, natural map, local formulation */
   SICONOS_FRICTION_3D_NSN_NM = 520,
   SICONOS_FRICTION_3D_NSN_AC_TEST = 521,
+  /** Panagiotopoulos, fixed point, local formulation */
+  SICONOS_FRICTION_3D_PFP = 522,
 
   /* 3D Frictional Contact solvers for one contact (used mainly inside NSGS solvers) */
   
@@ -114,6 +116,7 @@ extern const char* const   SICONOS_FRICTION_3D_NSGS_STR ;
 extern const char* const   SICONOS_FRICTION_3D_NSGSV_STR ;
 extern const char* const   SICONOS_FRICTION_3D_PROX_STR;
 extern const char* const   SICONOS_FRICTION_3D_TFP_STR ;
+extern const char* const   SICONOS_FRICTION_3D_PFP_STR ;
 extern const char* const   SICONOS_FRICTION_3D_NSN_AC_STR ;
 extern const char* const   SICONOS_FRICTION_3D_NSN_FB_STR ;
 extern const char* const   SICONOS_FRICTION_3D_NSN_NM_STR ;

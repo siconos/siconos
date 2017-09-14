@@ -53,6 +53,11 @@ int fc3d_setDefaultSolverOptions(SolverOptions* options, int solverId)
     info =    fc3d_TrescaFixedPoint_setDefaultSolverOptions(options);
     break;
   }
+  case SICONOS_FRICTION_3D_PFP:
+  {
+    info =    fc3d_Panagiotopoulos_FixedPoint_setDefaultSolverOptions(options);
+    break;
+  }
   case SICONOS_FRICTION_3D_ACLMFP:
   {
     info =    fc3d_ACLMFixedPoint_setDefaultSolverOptions(options);

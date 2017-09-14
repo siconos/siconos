@@ -21,6 +21,7 @@
 #include "NumericsMatrix.h"
 #include <stdio.h>
 #include "numerics_verbose.h"
+#include "SparseBlockMatrix.h"
 
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
@@ -96,7 +97,7 @@ int frictionContact_printInFilename(FrictionContactProblem* problem, char* filen
 {
   int info = 0;
   FILE * file = fopen(filename, "w");
-  
+
   if (!file)
   {
     return errno;
@@ -145,7 +146,7 @@ int frictionContact_newFromFilename(FrictionContactProblem* problem, char* filen
 {
   int info = 0;
   FILE * file = fopen(filename, "r");
-  
+
   if (!file)
   {
     return errno;
@@ -206,4 +207,83 @@ FrictionContactProblem* frictionContactProblem_new(int dim, int nc, NumericsMatr
   fcp->mu = mu;
 
   return fcp;
+}
+
+void createSplittedFrictionContactProblem(FrictionContactProblem* problem,  SplittedFrictionContactProblem * splitted_problem)
+{
+  /* Number of contacts */
+  int nc = problem->numberOfContacts;
+
+  splitted_problem->fc3d = problem;
+
+  /* Splitting vector q */
+
+  splitted_problem->q_n = (double *) malloc(nc * sizeof(double));
+  splitted_problem->q_t = (double *) malloc(2* nc * sizeof(double));
+
+  for (int contact = 0 ; contact < nc; contact ++)
+  {
+    splitted_problem->q_n[contact] = problem->q[contact*3];
+    splitted_problem->q_t[2*contact] = problem->q[contact*3+1];
+    splitted_problem->q_t[2*contact+1] = problem->q[contact*3+2];
+  }
+
+  /* Splitting matrix M */
+
+  int storageType = problem->M->storageType;
+  NumericsMatrix * M =  problem->M;
+
+  splitted_problem->M_nn =  NM_create(problem->M->storageType, nc, nc);
+  splitted_problem->M_nt =  NM_create(problem->M->storageType, nc, 2*nc);
+  splitted_problem->M_tn =  NM_create(problem->M->storageType, 2*nc, nc);
+  splitted_problem->M_tt =  NM_create(problem->M->storageType, 2*nc, 2*nc);
+
+  NumericsMatrix * M_nn =  splitted_problem->M_nn;
+  NumericsMatrix * M_tn =  splitted_problem->M_tn;
+  NumericsMatrix * M_nt =  splitted_problem->M_nt;
+  NumericsMatrix * M_tt =  splitted_problem->M_tt;
+
+  switch (storageType)
+  {
+  case NM_SPARSE_BLOCK:
+  {
+    DEBUG_PRINT("NM_SPARSE_BLOCK case\n");
+    unsigned int row_components_nn[1] = {0};
+    unsigned int row_components_size_nn =1;
+    unsigned int col_components_nn[1] = {0};
+    unsigned int col_components_size_nn =1;
+    SBM_extract_component_3x3(M->matrix1, M_nn->matrix1,
+                              row_components_nn, row_components_size_nn, col_components_nn, col_components_size_nn   );
+
+    unsigned int row_components_nt[1] = {0};
+    unsigned int row_components_size_nt =1;
+    unsigned int col_components_nt[2] = {1,2};
+    unsigned int col_components_size_nt =2;
+    SBM_extract_component_3x3(M->matrix1, M_nt->matrix1,
+                              row_components_nt, row_components_size_nt, col_components_nt, col_components_size_nt   );
+
+
+    unsigned int row_components_tn[2] = {1,2};
+    unsigned int row_components_size_tn =2;
+    unsigned int col_components_tn[1] = {0};
+    unsigned int col_components_size_tn =1;
+    SBM_extract_component_3x3(M->matrix1, M_tn->matrix1,
+                              row_components_tn, row_components_size_tn, col_components_tn, col_components_size_tn   );
+
+
+    unsigned int row_components_tt[2] = {1,2};
+    unsigned int row_components_size_tt =2;
+    unsigned int col_components_tt[2] = {1,2};
+    unsigned int col_components_size_tt =2;
+    SBM_extract_component_3x3(M->matrix1, M_tt->matrix1,
+                              row_components_tt, row_components_size_tt, col_components_tt, col_components_size_tt   );
+
+    break;
+  }
+  default:
+    numerics_error("fc3d_Panagiotopoulos_FixedPoint_split_normal_tangent_problem", "storageType value %d not implemented yet !", storageType);
+  }
+
+
+
 }

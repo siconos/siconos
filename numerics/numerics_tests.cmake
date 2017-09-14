@@ -33,6 +33,7 @@ if(WITH_${COMPONENT}_TESTING)
   NEW_TEST(SBMTest3 SBM_test3.c)
   NEW_TEST(SBMTest4 SBM_test4.c)
   NEW_TEST(SBMTest5 SBM_test5.c)
+  NEW_TEST(SBMTest7 SBM_test7.c)
   NEW_TEST(SparseMatrix0 SparseMatrix_test0.c)
   NEW_TEST(SparseMatrix_NM_gemm SparseMatrix_NM_gemm.c)
   IF(HAS_ONE_LP_SOLVER)
@@ -491,7 +492,15 @@ if(WITH_${COMPONENT}_TESTING)
     INTERNAL_DPARAM 3 -1.
     INTERNAL_DPARAM 4 -1.e-6)
 
+  # --- Panagiotopoulos Fixed Point ---
+  NEW_FC_3D_TEST(Confeti-ex13-Fc3D-SBM.dat
+    SICONOS_FRICTION_3D_PFP)
+    
+  NEW_FC_3D_TEST(FC3D_Example1_SBM.dat
+    SICONOS_FRICTION_3D_PFP 1e-16 100)
 
+  NEW_FC_3D_TEST(Confeti-ex03-Fc3D-SBM.dat
+    SICONOS_FRICTION_3D_PFP 10e-8 2000)
   # ---- Hyperplane Projection ----
   # HP is not converging
   NEW_FC_3D_TEST(Confeti-ex13-Fc3D-SBM.dat

@@ -181,6 +181,24 @@ extern "C"
    */
   int fc3d_TrescaFixedPoint_setDefaultSolverOptions(SolverOptions* options);
 
+  /** Fixed point solver for friction-contact 3D problem based on the Panagiotopoulos
+  method based on an alternative technique between the normal problem and the tangential one.
+    \param problem the friction-contact 3D problem to solve
+    \param velocity global vector (n), in-out parameter
+    \param reaction global vector (n), in-out parameters
+    \param info return 0 if the solution is found
+    \param options the solver options :
+    iparam[0] : Maximum iteration number
+    The internal (local) solver must set by the SolverOptions options[1] : possible internal solvers is NSGS.
+  */
+  void fc3d_Panagiotopoulos_FixedPoint(FrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options);
+
+
+  /** set the default solver parameters and perform memory allocation for PFP
+   *  \param options the pointer to the array of options to set
+   */
+  int fc3d_Panagiotopoulos_FixedPoint_setDefaultSolverOptions(SolverOptions* options);
+
   /** set the default solver parameters and perform memory allocation for SOCLCP
    *  \param options the pointer to the array of options to set
    */

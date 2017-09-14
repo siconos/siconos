@@ -175,11 +175,8 @@ void fc3d_TrescaFixedPoint(FrictionContactProblem* problem, double *reaction, do
 
 int fc3d_TrescaFixedPoint_setDefaultSolverOptions(SolverOptions* options)
 {
-  if (verbose > 0)
-  {
-    printf("Set the Default SolverOptions for the TFP Solver\n");
-  }
-  /* numerics_verbose("fc3d_TrescaFixedPoint_setDefaultSolverOptions", "set default options"); */
+
+  numerics_printf("fc3d_TrescaFixedPoint_setDefaultSolverOptions", "set default options"); 
 
   options->solverId = SICONOS_FRICTION_3D_TFP;
   options->numberOfInternalSolvers = 1;
