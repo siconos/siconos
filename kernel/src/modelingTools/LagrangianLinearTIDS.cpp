@@ -46,11 +46,9 @@ void LagrangianLinearTIDS::initRhs(double time)
 
   // // compute x[1] (and thus _fExt if required)
   // computeRhs(time);
-  // _rhsMatrices[zeroMatrix].reset(new SimpleMatrix(_ndof, _ndof, Siconos::ZERO));
-  // _rhsMatrices[idMatrix].reset(new SimpleMatrix(_ndof, _ndof, Siconos::IDENTITY));
 
   LagrangianDS::initRhs(time);
-  
+
   // jacobianRhsx
   if (_K)
   {
@@ -58,10 +56,9 @@ void LagrangianLinearTIDS::initRhs(double time)
     if(!_rhsMatrices[jacobianXBloc10])
       _rhsMatrices[jacobianXBloc10].reset(new SimpleMatrix(-1 * *_K));
     _inverseMass->PLUForwardBackwardInPlace(*_rhsMatrices[jacobianXBloc10]);
-    _jacxRhs->block(1,0) = _rhsMatrices[jacobianXBloc10];
   }
-  // else
-  //   _rhsMatrices[jacobianXBloc10] = _rhsMatrices[zeroMatrix] ;
+  else
+    _rhsMatrices[jacobianXBloc10] = _rhsMatrices[zeroMatrix] ;
 
   if (_C)
   {
@@ -69,15 +66,14 @@ void LagrangianLinearTIDS::initRhs(double time)
     if(!_rhsMatrices[jacobianXBloc11])
       _rhsMatrices[jacobianXBloc11].reset(new SimpleMatrix(-1 * *_C));
     _inverseMass->PLUForwardBackwardInPlace(*_rhsMatrices[jacobianXBloc11]);
-    _jacxRhs->block(1,1) = _rhsMatrices[jacobianXBloc11];
   }
-  
-  // else
-  //   _rhsMatrices[jacobianXBloc11] = _rhsMatrices[zeroMatrix] ;
+  else
+    _rhsMatrices[jacobianXBloc11] = _rhsMatrices[zeroMatrix] ;
 
   if(_C || _K)
-      _jacxRhs.reset(new BlockMatrix(_rhsMatrices[zeroMatrix], _rhsMatrices[idMatrix],
-				     _rhsMatrices[jacobianXBloc10], _rhsMatrices[jacobianXBloc11]));
+    _jacxRhs.reset(new BlockMatrix(_rhsMatrices[zeroMatrix], _rhsMatrices[idMatrix],
+                                   _rhsMatrices[jacobianXBloc10], _rhsMatrices[jacobianXBloc11]));
+
 }
 
 void LagrangianLinearTIDS::setK(const SiconosMatrix& newValue)
