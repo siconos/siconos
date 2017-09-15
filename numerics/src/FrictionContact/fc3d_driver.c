@@ -46,7 +46,7 @@ const char* const  SICONOS_FRICTION_3D_NCPGlockerFBPATH_STR = "FC3D_NCPGlockerFB
 const char* const  SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCylinder_STR = "FC3D_projectionOnCylinder";
 const char* const  SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCylinderWithLocalIteration_STR =  "FC3D_projectionOnCylinderWithLocalIteration";
 const char* const  SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone_velocity_STR = "FC3D_ProjectionOnCone_velocity";
-const char* const  SICONOS_FRICTION_3D_PGoC_STR = "FC3D_PGoC";
+const char* const  SICONOS_FRICTION_3D_ConvexQP_PG_Cylinder_STR = "FC3D ConvexQP PG solver";
 const char* const  SICONOS_FRICTION_3D_VI_FPP_Cylinder_STR = "FC3D_VI_FPP_Cylinder";
 
 const char* const  SICONOS_FRICTION_3D_DeSaxceFixedPoint_STR = "FC3D_DeSaxceFixedPoint";

@@ -63,8 +63,7 @@ void fc3d_VI_FixedPointProjection(FrictionContactProblem* problem, double *react
   /* frictionContact_display(fc3d_as_vi->fc3d); */
 
   SolverOptions * visolver_options = (SolverOptions *) malloc(sizeof(SolverOptions));
-  variationalInequality_setDefaultSolverOptions(visolver_options,
-                                                SICONOS_VI_FPP);
+  variationalInequality_setDefaultSolverOptions(visolver_options, SICONOS_VI_FPP);
 
   int isize = options->iSize;
   int dsize = options->dSize;

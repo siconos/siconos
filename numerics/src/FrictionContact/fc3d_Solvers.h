@@ -234,13 +234,13 @@ extern "C"
    *   if dparam[3] <= 0 then  a line-search is performed. iparam[2] is the maximum number of iteration is the line--search.
    *   The internal (local) solver must set by the SolverOptions options->internalsolvers.
   */
-  void fc3d_ProjectedGradientOnCylinder(FrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options);
+  void fc3d_ConvexQP_ProjectedGradient_Cylinder(FrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options);
 
   /** set the default solver parameters and perform memory allocation for NSGS
       \param options the pointer to the array of options to set
   */
-  int fc3d_ProjectedGradientOnCylinder_setDefaultSolverOptions(SolverOptions* options);
-
+  int fc3d_ConvexQP_ProjectedGradient_Cylinder_setDefaultSolverOptions(SolverOptions* options);
+  
   /**Fixed Point solver for friction-contact 3D problem based on the De Saxce Formulation
       \param problem : the friction-contact 3D problem to solve
       \param velocity global vector (n), in-out parameter

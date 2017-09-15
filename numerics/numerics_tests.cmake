@@ -464,10 +464,10 @@ if(WITH_${COMPONENT}_TESTING)
   NEW_FC_3D_TEST(Confeti-ex13-Fc3D-SBM.dat
     SICONOS_FRICTION_3D_TFP)
  
-  #TFP with ProjectedGradientOnCylinder is not working ...
+
   NEW_FC_3D_TEST(Confeti-ex13-Fc3D-SBM.dat
     SICONOS_FRICTION_3D_TFP 1e-4 100
-    SICONOS_FRICTION_3D_PGoC 1e-6 200)
+    SICONOS_FRICTION_3D_ConvexQP_PG_Cylinder 1e-6 200)
 
   NEW_FC_3D_TEST(FC3D_Example1_SBM.dat
     SICONOS_FRICTION_3D_TFP 1e-16 100)
@@ -483,11 +483,12 @@ if(WITH_${COMPONENT}_TESTING)
 
   NEW_FC_3D_TEST(FC3D_Example1_SBM.dat
     SICONOS_FRICTION_3D_TFP 0 0
-    SICONOS_FRICTION_3D_PGoC 0 0)
+    SICONOS_FRICTION_3D_ConvexQP_PG_Cylinder 0 0)
   
+    
   NEW_FC_3D_TEST(FC3D_Example1_SBM.dat
     SICONOS_FRICTION_3D_TFP 0 0
-    SICONOS_FRICTION_3D_PGoC 0 0
+    SICONOS_FRICTION_3D_ConvexQP_PG_Cylinder 0 0
     INTERNAL_IPARAM 2 20
     INTERNAL_DPARAM 3 -1.
     INTERNAL_DPARAM 4 -1.e-6)
@@ -541,13 +542,16 @@ if(WITH_${COMPONENT}_TESTING)
   # --- Test from rock pile simulations using "time of birth" feature --- 
   # failure in local solver with line search
   NEW_FC_3D_TEST(RockPile_tob1.dat SICONOS_FRICTION_3D_NSGS 1e-3 10000
-    SICONOS_FRICTION_3D_ONECONTACT_NSN_GP 1e-16 100)
+    SICONOS_FRICTION_3D_ONECONTACT_NSN_GP 1e-16 100 WILL_FAIL)
   #  an increasing number of newton iterations implies a failure
   NEW_FC_3D_TEST(RockPile_tob1.dat SICONOS_FRICTION_3D_NSGS 1e-3 10000
     SICONOS_FRICTION_3D_ONECONTACT_NSN_GP 1e-16 1000 WILL_FAIL )
-  # removinf the line --search is worth
+  # removing the line --search is worth
   NEW_FC_3D_TEST(RockPile_tob1.dat SICONOS_FRICTION_3D_NSGS 1e-3 2000
     SICONOS_FRICTION_3D_ONECONTACT_NSN 1e-16 100 WILL_FAIL)
+  # removing the line --search is worth
+  NEW_FC_3D_TEST(RockPile_tob1.dat SICONOS_FRICTION_3D_NSGS 1e-3 2000
+    SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration 1e-06 100 )
 
   # ---- PROX ---
   

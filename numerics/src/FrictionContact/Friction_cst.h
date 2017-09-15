@@ -73,7 +73,7 @@ enum FRICTION_SOLVER
   SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithRegularization = 554,
   SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithDiagonalization = 555,
   SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone_velocity = 558,
-  SICONOS_FRICTION_3D_PGoC = 559,
+
   /** De Saxce fixed point, one contact solver */
   SICONOS_FRICTION_3D_DeSaxceFixedPoint = 560,
   /** Fischer Burmeister/Path, Glocker formulation, one contact solver */
@@ -86,7 +86,8 @@ enum FRICTION_SOLVER
   SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCylinderWithLocalIteration = 564,
   SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID = 565,
   SICONOS_FRICTION_3D_VI_FPP_Cylinder = 566,
-
+  SICONOS_FRICTION_3D_ConvexQP_PG_Cylinder = 567,
+  
   /** 3D Frictional contact local solvers on global formulation */
   SICONOS_GLOBAL_FRICTION_3D_NSGS_WR = 600,
   SICONOS_GLOBAL_FRICTION_3D_NSGSV_WR = 601,
@@ -138,7 +139,7 @@ extern const char* const   SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithRe
 extern const char* const   SICONOS_FRICTION_3D_NCPGlockerFBPATH_STR;
 extern const char* const   SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCylinder_STR;
 extern const char* const   SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone_velocity_STR;
-extern const char* const   SICONOS_FRICTION_3D_PGoC_STR;
+extern const char* const   SICONOS_FRICTION_3D_ConvexQP_PG_Cylinder_STR;
 extern const char* const   SICONOS_FRICTION_3D_VI_FPP_Cylinder_STR;
 extern const char* const   SICONOS_FRICTION_3D_DeSaxceFixedPoint_STR;
 extern const char* const   SICONOS_FRICTION_3D_GAMS_PATH_STR;
@@ -286,24 +287,6 @@ enum SICONOS_FRICTION_3D_ERROR_STRATEGY
   SICONOS_FRICTION_3D_TFP_ERROR_STRATEGY_ADAPTIVE =0,
   SICONOS_FRICTION_3D_TFP_ERROR_STRATEGY_FRACTION =1,
   SICONOS_FRICTION_3D_TFP_ERROR_STRATEGY_GIVEN_VALUE =2
-};
-
-
-enum SICONOS_FRICTION_3D_PGOC_IPARAM
-{
-  /** index in iparam to store the maximum number of iterations */
-  SICONOS_FRICTION_3D_PGOC_LINESEARCH_MAXITER = 2
-};
-enum SICONOS_FRICTION_3D_PGOC_DPARAM
-{
-  /** index in dparam to store the rho value for projection formulation */
-  SICONOS_FRICTION_3D_PGOC_RHO = 3,
-  /** index in dparam to store the minrho value for projection formulation */
-  SICONOS_FRICTION_3D_PGOC_RHOMIN = 4,
-  /** index in dparam to store the mu value for line search algo */
-  SICONOS_FRICTION_3D_PGOC_LINESEARCH_MU = 5,
-  /** index in dparam to store the tau value for line search algo */
-  SICONOS_FRICTION_3D_PGOC_LINESEARCH_TAU  = 6 
 };
 
 

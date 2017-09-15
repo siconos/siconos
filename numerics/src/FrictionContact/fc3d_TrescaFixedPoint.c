@@ -97,16 +97,16 @@ void fc3d_TrescaFixedPoint(FrictionContactProblem* problem, double *reaction, do
       printf(" ========================== Call NSGS solver for Friction-Contact 3D problem ==========================\n");
     internalsolver = &fc3d_nsgs;
   }
-  else if (internalsolver_options->solverId == SICONOS_FRICTION_3D_PGoC)
+  else if (internalsolver_options->solverId == SICONOS_FRICTION_3D_ConvexQP_PG_Cylinder)
   {
     if (verbose > 0)
-      printf(" ========================== Call PGoC solver for Friction-Contact 3D problem ==========================\n");
-    internalsolver = &fc3d_ProjectedGradientOnCylinder;
+      printf(" ========================== Call ConvexQP PG solver for Friction-Contact 3D problem ==========================\n");
+    internalsolver = &fc3d_ConvexQP_ProjectedGradient_Cylinder;
   }
  else if (internalsolver_options->solverId == SICONOS_FRICTION_3D_VI_FPP_Cylinder)
   {
     if (verbose > 0)
-      printf(" ========================== Call PGoC solver for Friction-Contact 3D problem ==========================\n");
+      printf(" ========================== Call VI FPP solver for Friction-Contact 3D problem ==========================\n");
     internalsolver = &fc3d_VI_FixedPointProjection_Cylinder;
   }
   else

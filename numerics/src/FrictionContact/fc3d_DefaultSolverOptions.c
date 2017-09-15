@@ -128,14 +128,13 @@ int fc3d_setDefaultSolverOptions(SolverOptions* options, int solverId)
     info =    fc3d_nonsmooth_Newton_NaturalMap_setDefaultSolverOptions(options);
     break;
   }
-
-  case SICONOS_FRICTION_3D_PGoC:
+  case SICONOS_FRICTION_3D_ConvexQP_PG_Cylinder:
   {
-    info =    fc3d_ProjectedGradientOnCylinder_setDefaultSolverOptions(options);
-    options->solverId = SICONOS_FRICTION_3D_PGoC;
+    info =    fc3d_ConvexQP_ProjectedGradient_Cylinder_setDefaultSolverOptions(options);
+    options->solverId = SICONOS_FRICTION_3D_ConvexQP_PG_Cylinder;
     break;
   }
-  case SICONOS_FRICTION_3D_VI_FPP_Cylinder:
+   case SICONOS_FRICTION_3D_VI_FPP_Cylinder:
   {
     info =    fc3d_VI_FixedPointProjection_Cylinder_setDefaultSolverOptions(options);
     options->solverId = SICONOS_FRICTION_3D_VI_FPP_Cylinder;

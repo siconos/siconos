@@ -209,6 +209,9 @@ FrictionContactProblem* frictionContactProblem_new(int dim, int nc, NumericsMatr
   return fcp;
 }
 
+//#define SN_SBM_TO_DENSE
+
+
 void createSplittedFrictionContactProblem(FrictionContactProblem* problem,  SplittedFrictionContactProblem * splitted_problem)
 {
   /* Number of contacts */
@@ -278,6 +281,21 @@ void createSplittedFrictionContactProblem(FrictionContactProblem* problem,  Spli
     SBM_extract_component_3x3(M->matrix1, M_tt->matrix1,
                               row_components_tt, row_components_size_tt, col_components_tt, col_components_size_tt   );
 
+#ifdef SN_SBM_TO_DENSE
+    M_nn->matrix0 =(double *)malloc(M_nn->size0*M_nn->size1*sizeof(double));
+    SBM_to_dense(M_nn->matrix1, M_nn->matrix0);
+    M_nn->storageType=NM_DENSE;
+    M_nt->matrix0 =(double *)malloc(M_nt->size0*M_nt->size1*sizeof(double));
+    SBM_to_dense(M_nt->matrix1, M_nt->matrix0);
+    M_nt->storageType=NM_DENSE;
+    M_tn->matrix0 =(double *)malloc(M_tn->size0*M_tn->size1*sizeof(double));
+    SBM_to_dense(M_tn->matrix1, M_tn->matrix0);
+    M_tn->storageType=NM_DENSE;
+    M_tt->matrix0 =(double *)malloc(M_tt->size0*M_tt->size1*sizeof(double));
+    SBM_to_dense(M_tt->matrix1, M_tt->matrix0);
+    M_tt->storageType=NM_DENSE;
+#endif
+    
     break;
   }
   default:
