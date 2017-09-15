@@ -134,8 +134,11 @@ void lcp_pgs(LinearComplementarityProblem* problem, double *z, double *w, int *i
 
   if (err > tol)
   {
-    printf("Siconos/Numerics: lcp_pgs: No convergence of PGS after %d iterations\n" , iter);
-    printf("The residue is : %g \n", err);
+    if (verbose > 0)
+    {
+      printf("Siconos/Numerics: lcp_pgs: No convergence of PGS after %d iterations\n" , iter);
+      printf("The residue is : %g \n", err);
+    }
     *info = 1;
   }
   else
