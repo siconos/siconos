@@ -155,10 +155,11 @@ void fc3d_Panagiotopoulos_FixedPoint(FrictionContactProblem* problem, double *re
   {
     numerics_error("fc3d_TrescaFixedpoint", "Unknown internal solver for the normal part.");
   }
- if (internalsolver_options[1].solverId == SICONOS_CONVEXQP_PG)
+ if (internalsolver_options[1].solverId == SICONOS_CONVEXQP_PG ||
+     internalsolver_options[1].solverId == SICONOS_CONVEXQP_VI_FPP||
+     internalsolver_options[1].solverId == SICONOS_CONVEXQP_VI_EG)
   {
-    if (verbose > 0)
-      printf(" ========================== Call SICONOS_CONVEX_QP solver for Friction-Contact 3D problem ==========================\n");
+  
     
     tangent_cqp = (ConvexQP *)malloc(sizeof(ConvexQP));
     tangent_cqp->M = splitted_problem->M_tt;
@@ -177,15 +178,26 @@ void fc3d_Panagiotopoulos_FixedPoint(FrictionContactProblem* problem, double *re
     fc3d_as_cqp->cqp = tangent_cqp;
     fc3d_as_cqp->fc3d = problem;
     fc3d_as_cqp->options = options;
-
-    internalsolver_tangent = &convexQP_ProjectedGradient;
+    
 
   }
   else
   {
     numerics_error("fc3d_TrescaFixedpoint", "Unknown internal solver for the tangent part.");
   }
-
+ if (internalsolver_options[1].solverId == SICONOS_CONVEXQP_PG)
+ {
+   if (verbose > 0)
+     printf(" ========================== Call SICONOS_CONVEX_QP solver for Friction-Contact 3D problem ==========================\n");
+   internalsolver_tangent = &convexQP_ProjectedGradient;
+ }
+ else if  (internalsolver_options[1].solverId == SICONOS_CONVEXQP_VI_FPP ||
+           internalsolver_options[1].solverId == SICONOS_CONVEXQP_VI_EG )
+ {
+   if (verbose > 0)
+     printf(" ========================== Call SICONOS_CONVEX_VI_FPP solver for Friction-Contact 3D problem ==========================\n");
+   internalsolver_tangent = &convexQP_VI_solver;
+ }
 
   int cumul_internal=0;
   verbose=1;
@@ -303,7 +315,7 @@ int fc3d_Panagiotopoulos_FixedPoint_setDefaultSolverOptions(SolverOptions* optio
   linearComplementarity_pgs_setDefaultSolverOptions(&options->internalSolvers[0]);
   options->internalSolvers[0].iparam[SICONOS_IPARAM_MAX_ITER] =1000;
 
-  convexQP_ProjectedGradient_setDefaultSolverOptions(&options->internalSolvers[1]);
+  convexQP_VI_solver_setDefaultSolverOptions(&options->internalSolvers[1]);
   options->internalSolvers[1].iparam[SICONOS_IPARAM_MAX_ITER] =1000;
   return 0;
 }

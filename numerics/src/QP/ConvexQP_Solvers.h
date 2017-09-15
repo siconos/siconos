@@ -15,8 +15,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#ifndef VISOLVERS_H
-#define VISOLVERS_H
+#ifndef CONVEXQP_SOLVERS_H
+#define CONVEXQP_SOLVERS_H
 
 /*!\file ConvexQP_Solvers.h
   \brief Subroutines for the resolution of Variational Inequalites (VI) problems
@@ -73,6 +73,13 @@ extern "C"
   */
   int convexQP_ProjectedGradient_setDefaultSolverOptions(SolverOptions* options);
 
+  
+  void convexQP_VI_solver(ConvexQP* problem, double *z, double *w, int* info, SolverOptions* options);
+  
+  int convexQP_VI_solver_setDefaultSolverOptions(SolverOptions* options);
+
+
+  
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif

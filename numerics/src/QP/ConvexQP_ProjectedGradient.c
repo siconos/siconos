@@ -18,7 +18,7 @@
 
 
 #include "ConvexQP_Solvers.h"
-#include "ConvexQP_ComputeError.h"
+#include "ConvexQP_computeError.h"
 #include "NumericsMatrix.h"
 
 

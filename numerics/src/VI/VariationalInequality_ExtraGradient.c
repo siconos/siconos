@@ -410,10 +410,10 @@ void variationalInequality_ExtraGradient(VariationalInequality* problem, double 
         if (error < tolerance) hasNotConverged = 0;
         *info = hasNotConverged;
       }
-      /* we return the negative value of rho for multiple call to the solver */
-      dparam[SICONOS_VI_EG_DPARAM_RHO] = -rho; 
-    }// end iparam[SICONOS_VI_IPARAM_LINESEARCH_METHOD]==1
 
+    }// end iparam[SICONOS_VI_IPARAM_LINESEARCH_METHOD]==1
+    /* we return the negative value of rho for multiple call to the solver */
+    dparam[SICONOS_VI_EG_DPARAM_RHO] = -rho; 
 
 
     free(x_k);
