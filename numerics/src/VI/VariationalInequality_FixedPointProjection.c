@@ -465,6 +465,8 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
       fprintf(stderr, "Numerics, VariationalInequality_FixedPointProjection failed. iparam[SICONOS_VI_IPARAM_LINESEARCH_METHOD] > 2 .\n");
       exit(EXIT_FAILURE);
     }
+    /* we return the negative value of rho for multiple call to the solver */
+    dparam[SICONOS_VI_EG_DPARAM_RHO] = -rho;
   }// end isvariable=1
 
 
@@ -476,7 +478,6 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
 
   dparam[SICONOS_DPARAM_TOL] = tolerance;
   dparam[SICONOS_DPARAM_RESIDU] = error;
-  dparam[SICONOS_VI_EG_DPARAM_RHO] = rho;
   iparam[SICONOS_IPARAM_ITER_DONE] = iter;
   free(xtmp);
   free(wtmp);
