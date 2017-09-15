@@ -200,7 +200,7 @@ void fc3d_Panagiotopoulos_FixedPoint(FrictionContactProblem* problem, double *re
  }
 
   int cumul_internal=0;
-  verbose=1;
+  //verbose=1;
   while ((iter < itermax) && (hasNotConverged > 0))
   {
     ++iter;
@@ -317,5 +317,7 @@ int fc3d_Panagiotopoulos_FixedPoint_setDefaultSolverOptions(SolverOptions* optio
 
   convexQP_VI_solver_setDefaultSolverOptions(&options->internalSolvers[1]);
   options->internalSolvers[1].iparam[SICONOS_IPARAM_MAX_ITER] =1000;
-  return 0;
+  /* convexQP_ProjectedGradient_setDefaultSolverOptions(&options->internalSolvers[1]); */
+  /* options->internalSolvers[1].iparam[SICONOS_IPARAM_MAX_ITER] =1000; */
+ return 0;
 }

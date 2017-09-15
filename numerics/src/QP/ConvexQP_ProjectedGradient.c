@@ -77,7 +77,7 @@ void convexQP_ProjectedGradient(ConvexQP* problem, double *z, double *w, int* in
   if (rho == 0.0)
     numerics_error("fc3d_ProjectedGradientOnCylinder", "dparam[SICONOS_CONVEXQP_PGOC_RHO] must be nonzero");
 
-
+  //double rhoinit =rho;
   double * z_tmp= (double *)malloc(n * sizeof(double));
   double * z_k;
   double * direction;
@@ -140,7 +140,7 @@ void convexQP_ProjectedGradient(ConvexQP* problem, double *z, double *w, int* in
     double criterion =1.0;
 
     int ls_iter =0;
-
+    //verbose=2;
     while ((iter < itermax) && (hasNotConverged > 0))
     {
       //rho =  rhoinit;
@@ -166,7 +166,7 @@ void convexQP_ProjectedGradient(ConvexQP* problem, double *z, double *w, int* in
       ls_iter=0;
       while ((criterion > 0.0) && (ls_iter < ls_iter_max))
       {
-        if (verbose > 1 ) printf("ls_iter = %i\t rho = %e ", ls_iter, rho);
+        if (verbose > 1 ) printf("ls_iter = %i\t rho = %e\t", ls_iter, rho);
 
         // Compute the new trial reaction
         // r = P_D(r_k - rho v_k)
@@ -192,7 +192,7 @@ void convexQP_ProjectedGradient(ConvexQP* problem, double *z, double *w, int* in
         cblas_daxpy(n, -1, z_k, 1, direction, 1);
 
         criterion =    theta - theta_old - mu * cblas_ddot(n, w_k, 1, direction, 1);
-        if (verbose > 1 ) printf("theta = %e\t criterion = %e\n  ", theta, criterion);
+        if (verbose > 1 ) printf("theta = %e\t criterion = %e\n", theta, criterion);
         rho = rho*tau;
         ls_iter++;
         if (rho < rhomin)
