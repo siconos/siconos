@@ -32,6 +32,8 @@
 #include "numerics_verbose.h"
 
 //#define VERBOSE_DEBUG
+const char* const   SICONOS_CONVEXQP_PG_STR = "CONVEXQP PG";
+
 
 void convexQP_ProjectedGradient(ConvexQP* problem, double *z, double *w, int* info, SolverOptions* options)
 {

@@ -214,7 +214,7 @@ void fc3d_VI_FixedPointProjection_Cylinder(FrictionContactProblem* problem, doub
   iter = visolver_options->iparam[7];
 
   options->dparam[SICONOS_DPARAM_RESIDU] = error;
-  options->dparam[3] = - visolver_options->dparam[SICONOS_VI_EG_DPARAM_RHO];
+  options->dparam[3] =  visolver_options->dparam[SICONOS_VI_EG_DPARAM_RHO];
   options->iparam[SICONOS_IPARAM_ITER_DONE] = iter;
 
 

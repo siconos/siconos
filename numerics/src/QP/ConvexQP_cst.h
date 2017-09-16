@@ -13,7 +13,7 @@ enum CONVEXQP_SOLVER
   SICONOS_CONVEXQP_VI_EG= 1202
 };
 
-extern const char* const   SICONOS_CONVEXQP_PGoC_STR;
+extern const char* const   SICONOS_CONVEXQP_PG_STR;
 extern const char* const   SICONOS_CONVEXQP_VI_FPP_STR;
 extern const char* const   SICONOS_CONVEXQP_VI_EG_STR;
 

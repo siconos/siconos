@@ -46,7 +46,7 @@ extern "C"
       \param options the pointer to the options to set
       \param solverId the identifier of the solver
   */
-  int convexQP_setDefaultSolverOptions(SolverOptions* options, int solverId);
+  /* int convexQP_setDefaultSolverOptions(SolverOptions* options, int solverId); */
 
   /** Projected Gradient solver for Convex QP problem
       \param problem the variational inequality problem to solve

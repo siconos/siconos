@@ -290,6 +290,7 @@ namespace std11 = boost;
 #include "NCP_cst.h"
 #include "mlcp_cst.h"
 #include "VI_cst.h"
+#include "ConvexQP_cst.h"
 #include "GenericMechanical_cst.h"
 #include "fc2d_Solvers.h"
 #include "fc3d_Solvers.h"
@@ -297,6 +298,7 @@ namespace std11 = boost;
 #include "MCP_Solvers.h"
 #include "NCP_Solvers.h"
 #include "MLCP_Solvers.h"
+#include "ConvexQP_Solvers.h"
 #include "NonSmoothDrivers.h"
   %}
 
@@ -428,6 +430,7 @@ namespace std11 = boost;
 %include Numerics_MCP2.i
 %include Numerics_NCP.i
 %include Numerics_VI.i
+%include Numerics_ConvexQP.i
 
 
 

@@ -105,6 +105,8 @@ void fc3d_VI_ExtraGradient(FrictionContactProblem* problem, double *reaction, do
   /* } */
 
   error = visolver_options->dparam[1];
+  options->dparam[3] =  visolver_options->dparam[SICONOS_VI_EG_DPARAM_RHO];
+
   iter = visolver_options->iparam[7];
 
   options->dparam[1] = error;

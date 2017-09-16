@@ -218,6 +218,9 @@ extern "C"
    */
   void solver_options_copy(SolverOptions* options_ori, SolverOptions* options);
 
+  SolverOptions * solver_options_get_internal_solver(SolverOptions * options, int n);
+  
+  
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif

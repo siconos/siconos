@@ -160,12 +160,20 @@ void variationalInequality_ExtraGradient(VariationalInequality* problem, double 
                                         error, NULL);
       }
 
-      if (verbose > 0)
-      {
-        printf("----------------------------------- VI - Extra Gradient (EG) - Iteration %i rho = %14.7e \tError = %14.7e\n", iter, rho, error);
-      }
+  
       if (error < tolerance) hasNotConverged = 0;
       *info = hasNotConverged;
+      if (verbose > 0)
+      {
+        if (hasNotConverged)
+        {
+          printf("----------------------------------- VI - Extra Gradient (EG) - Iteration %i rho = %14.7e error = %14.7e > %10.5e\n", iter, rho, error, tolerance);
+        }
+        else
+        {
+          printf("----------------------------------- VI - Extra Gradient (EG) - Iteration %i rho = %14.7e error = %14.7e < %10.5e\n", iter, rho, error, tolerance);
+        }
+      }
     }
   }
 
@@ -280,13 +288,20 @@ void variationalInequality_ExtraGradient(VariationalInequality* problem, double 
         else
           rho =rho_k;
 
-
-        if (verbose > 0)
-        {
-          printf("----------------------------------- VI - Extra Gradient (EG) - Iteration %i rho = %14.7e \tError = %14.7e\n", iter, rho, error);
-        }
         if (error < tolerance) hasNotConverged = 0;
         *info = hasNotConverged;
+        if (verbose > 0)
+        {
+          if (hasNotConverged)
+          {
+            printf("----------------------------------- VI - Extra Gradient (EG) - Iteration %i rho = %14.7e error = %14.7e > %10.5e\n", iter, rho, error, tolerance);
+          }
+          else
+          {
+            printf("----------------------------------- VI - Extra Gradient (EG) - Iteration %i rho = %14.7e error = %14.7e < %10.5e\n", iter, rho, error, tolerance);
+          }
+        }
+
       }
     }// end iparam[SICONOS_VI_IPARAM_LINESEARCH_METHOD]==0
 
@@ -403,12 +418,21 @@ void variationalInequality_ExtraGradient(VariationalInequality* problem, double 
           rho =rho_k;
 
 
-        if (verbose > 0)
-        {
-          printf("----------------------------------- VI - Extra Gradient (EG) - Iteration %i rho = %14.7e \tError = %14.7e\n", iter, rho, error);
-        }
+ 
         if (error < tolerance) hasNotConverged = 0;
         *info = hasNotConverged;
+        if (verbose > 0)
+        {
+          if (hasNotConverged)
+          {
+            printf("----------------------------------- VI - Extra Gradient (EG) - Iteration %i rho = %14.7e error = %14.7e > %10.5e\n", iter, rho, error, tolerance);
+          }
+          else
+          {
+            printf("----------------------------------- VI - Extra Gradient (EG) - Iteration %i rho = %14.7e error = %14.7e < %10.5e\n", iter, rho, error, tolerance);
+          }
+        }
+        
       }
 
     }// end iparam[SICONOS_VI_IPARAM_LINESEARCH_METHOD]==1

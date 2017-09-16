@@ -32,6 +32,11 @@
 #include <stdlib.h>
 #include <math.h>
 
+const char* const   SICONOS_CONVEXQP_VI_FPP_STR = "CONVEXQP VI FPP";
+const char* const   SICONOS_CONVEXQP_VI_EG_STR = "CONVEXQP VI EG";
+
+
+
 void convexQP_VI_solver(ConvexQP* problem, double *z, double *w, int* info, SolverOptions* options);
 
 
@@ -120,7 +125,7 @@ void convexQP_VI_solver(ConvexQP* problem, double *z, double *w, int* info, Solv
   iter = visolver_options->iparam[SICONOS_IPARAM_ITER_DONE];
 
   options->dparam[SICONOS_DPARAM_RESIDU] = error;
-  options->dparam[3] = -visolver_options->dparam[SICONOS_VI_EG_DPARAM_RHO];
+  options->dparam[3] = visolver_options->dparam[SICONOS_VI_EG_DPARAM_RHO];
   options->iparam[SICONOS_IPARAM_ITER_DONE] = iter;
 
 
