@@ -81,7 +81,7 @@ void fc3d_ACLMFixedPoint(FrictionContactProblem* problem, double *reaction, doub
   soclcp->nc= problem->numberOfContacts;
   soclcp->M = problem-> M;
   soclcp->q = (double *) malloc(soclcp->n * sizeof(double));
-  soclcp->mu = problem->mu;
+  soclcp->tau = problem->mu;
   soclcp->coneIndex = (unsigned int *) malloc((soclcp->nc+1) * sizeof(unsigned int));
 
   for (int i=0; i < soclcp->n; i++)
@@ -98,7 +98,18 @@ void fc3d_ACLMFixedPoint(FrictionContactProblem* problem, double *reaction, doub
     if (verbose == 1)
       printf(" ========================== Call NSGS solver SOCLCP problem ==========================\n");
     internalsolver = &soclcp_nsgs;
-    //internalsolver_options->internalSolvers->dWork = options->dWork;
+  }
+  else if (internalsolver_options->solverId == SICONOS_SOCLCP_VI_FPP)
+  {
+    if (verbose == 1)
+      printf(" ========================== Call VI_FPP solver SOCLCP problem ==========================\n");
+    internalsolver = &soclcp_VI_FixedPointProjection;
+  }
+    else if (internalsolver_options->solverId == SICONOS_SOCLCP_VI_EG)
+  {
+    if (verbose == 1)
+      printf(" ========================== Call VI_EG solver SOCLCP problem ==========================\n");
+    internalsolver = &soclcp_VI_ExtraGradient;
   }
   else
   {
@@ -119,22 +130,9 @@ void fc3d_ACLMFixedPoint(FrictionContactProblem* problem, double *reaction, doub
       normUT = sqrt(velocity[ic*3+1] * velocity[ic*3+1] + velocity[ic*3+2] * velocity[ic*3+2]);
       soclcp->q[3*ic] = problem->q[3*ic] + problem->mu[ic]*normUT;
     }
-    //secondOrderConeLinearComplementarityProblem_printInFilename(soclcp,"output.dat");
-    // DEBUG_EXPR(for (int ic = 0 ; ic < nc ; ic++) printf("problem->q[%i] = %le\n", 3*ic, problem->q[3*ic]);
-    //  for (int ic = 0 ; ic < nc ; ic++) printf("q[%i] = %le\n", 3*ic, soclcp->q[3*ic]); );
-    if (iparam[1] == 0 )
-    {
-      internalsolver_options->dparam[0] = max(error/10.0, options->dparam[0]/problem->numberOfContacts);
-    }
-    else if (iparam[1] ==1)
-    {
-      internalsolver_options->dparam[0] = options->dparam[0]/2.0;
-    }
-    else
-    {
-      fprintf(stderr, "Numerics, fc3d_ACLMFixedPoint failed. Unknown startegy for driving tolerence of internal.\n");
-      exit(EXIT_FAILURE);
-    }
+
+    fc3d_FixedPoint_set_internalsolver_tolerance(problem,options,internalsolver_options, error);
+
 
     (*internalsolver)(soclcp, reaction , velocity , info , internalsolver_options);
     cumul_iter +=  internalsolver_options->iparam[7];
@@ -189,14 +187,14 @@ int fc3d_ACLMFixedPoint_setDefaultSolverOptions(SolverOptions* options)
   options->dSize = 8;
   options->iparam = (int *)calloc(options->iSize, sizeof(int));
   options->dparam = (double *)calloc(options->dSize, sizeof(double));
-  options->dWork = NULL;
   solver_options_nullify(options);
-  options->iparam[0] = 1000;
-  options->iparam[1] = 0;
-  options->dparam[0] = 1e-4;
+
+  options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
+  options->iparam[SICONOS_FRICTION_3D_FP_ERROR_STRATEGY] =  SICONOS_FRICTION_3D_FP_ERROR_STRATEGY_ADAPTIVE;
+  options->dparam[SICONOS_DPARAM_TOL] = 1e-4;
   options->internalSolvers = (SolverOptions *)malloc(sizeof(SolverOptions));
 
   soclcp_nsgs_setDefaultSolverOptions(options->internalSolvers);
-  options->internalSolvers->iparam[0] =10000;
+  options->internalSolvers->iparam[SICONOS_IPARAM_MAX_ITER] =10000;
   return 0;
 }

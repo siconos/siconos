@@ -28,6 +28,7 @@
 #include "Friction_cst.h"
 #include "AVI_cst.h"
 #include "VI_cst.h"
+#include "SOCLCP_cst.h"
 #include "ConvexQP_cst.h"
 #include "numerics_verbose.h"
 

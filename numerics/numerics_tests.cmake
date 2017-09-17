@@ -718,13 +718,25 @@ if(WITH_${COMPONENT}_TESTING)
     0 0 0
     DPARAM 3 2.0)
   
-  # --- AC Fixed Point ---
+  # --- ACLM Fixed Point ---
   NEW_FC_3D_TEST(Confeti-ex03-Fc3D-SBM.dat
     SICONOS_FRICTION_3D_ACLMFP 1e-8 200)
+    
   NEW_FC_3D_TEST(Confeti-ex03-Fc3D-SBM.dat
     SICONOS_FRICTION_3D_ACLMFP 1e-8 200
     0 0 0
     IPARAM 1 1)
+    
+  NEW_FC_3D_TEST(Confeti-ex03-Fc3D-SBM.dat
+    SICONOS_FRICTION_3D_ACLMFP 1e-8 200
+    SICONOS_SOCLCP_VI_FPP)
+    
+  NEW_FC_3D_TEST(Confeti-ex03-Fc3D-SBM.dat
+    SICONOS_FRICTION_3D_ACLMFP 1e-8 200
+    SICONOS_SOCLCP_VI_EG)
+
+
+
 
   # --- Second Order Cone formulation ---
   NEW_FC_3D_TEST(Confeti-ex03-Fc3D-SBM.dat

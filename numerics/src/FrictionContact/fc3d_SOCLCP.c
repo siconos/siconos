@@ -79,7 +79,7 @@ void fc3d_SOCLCP(FrictionContactProblem* problem, double *reaction, double *velo
   soclcp->nc= problem->numberOfContacts;
   soclcp->M = problem->M;
   soclcp->q = (double *) malloc(soclcp->n * sizeof(double));
-  soclcp->mu = problem->mu;
+  soclcp->tau = problem->mu;
   soclcp->coneIndex = (unsigned int *) malloc((soclcp->nc+1) * sizeof(unsigned int));
 
   memcpy(soclcp->q, problem->q, (soclcp->n) * sizeof(double));

@@ -92,12 +92,12 @@ struct SecondOrderConeLinearComplementarityProblem
   NumericsMatrix* M;
   /** \f${q} \in {{\mathrm{I\!R}}}^{n} \f$ */
   double* q;
-  /** \f${\mu} \in {{\mathrm{I\!R}}}^{n_c} \f$, vector of indices of the cones
+  /** \f${coneIndex} \in {{\mathrm{I\!R}}}^{n_c} \f$, vector of indices of the cones
       (\f$ n_c =\f$ nc) */
   unsigned int* coneIndex;
-  /** \f${\mu} \in {{\mathrm{I\!R}}}^{n_c} \f$, vector of coefficients
+  /** \f${\tau} \in {{\mathrm{I\!R}}}^{n_c} \f$, vector of coefficients
       (\f$ n_c =\f$ nc) */
-  double* mu;
+  double* tau;
 };
 
 

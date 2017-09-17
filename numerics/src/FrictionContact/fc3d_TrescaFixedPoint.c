@@ -29,27 +29,27 @@
 
 
 
-static void fc3d_TrescaFixedPoint_set_internalsolver_tolerance(FrictionContactProblem* problem,
-                                                        SolverOptions* options,
-                                                        SolverOptions* internalsolver_options,
-                                                        double error)
+void fc3d_FixedPoint_set_internalsolver_tolerance(FrictionContactProblem* problem,
+                                                  SolverOptions* options,
+                                                  SolverOptions* internalsolver_options,
+                                                  double error)
 {
   int* iparam = options->iparam;
-  if (iparam[SICONOS_FRICTION_3D_TFP_ERROR_STRATEGY] == SICONOS_FRICTION_3D_TFP_ERROR_STRATEGY_ADAPTIVE )
+  if (iparam[SICONOS_FRICTION_3D_FP_ERROR_STRATEGY] == SICONOS_FRICTION_3D_FP_ERROR_STRATEGY_ADAPTIVE )
   {
     internalsolver_options->dparam[0] = fmax(error/10.0, options->dparam[0]/problem->numberOfContacts);
   }
-  else if (iparam[SICONOS_FRICTION_3D_TFP_ERROR_STRATEGY] == SICONOS_FRICTION_3D_TFP_ERROR_STRATEGY_FRACTION)
+  else if (iparam[SICONOS_FRICTION_3D_FP_ERROR_STRATEGY] == SICONOS_FRICTION_3D_FP_ERROR_STRATEGY_FRACTION)
   {
     internalsolver_options->dparam[0] = options->dparam[0]/2.0;
   }
-  else if (iparam[SICONOS_FRICTION_3D_TFP_ERROR_STRATEGY] == SICONOS_FRICTION_3D_TFP_ERROR_STRATEGY_GIVEN_VALUE)
+  else if (iparam[SICONOS_FRICTION_3D_FP_ERROR_STRATEGY] == SICONOS_FRICTION_3D_FP_ERROR_STRATEGY_GIVEN_VALUE)
   {
     // We use the user value for the error of the local solver
   }
   else
   {
-    numerics_error("fc3d_TrescaFixedPoint_set_internalsolver_tolerance", "Unknown startegy for driving the tolerance");
+    numerics_error("fc3d_FixedPoint_set_internalsolver_tolerance", "Unknown strategy for driving the tolerance");
   }
 
 }
@@ -126,7 +126,7 @@ void fc3d_TrescaFixedPoint(FrictionContactProblem* problem, double *reaction, do
     if (verbose>0)
       printf("norm of mu = %10.5e \n", cblas_dnrm2(nc , mu , 1));
 
-    fc3d_TrescaFixedPoint_set_internalsolver_tolerance(problem,options,internalsolver_options, error);
+    fc3d_FixedPoint_set_internalsolver_tolerance(problem,options,internalsolver_options, error);
 
     (*internalsolver)(problem, reaction , velocity , info , internalsolver_options);
 
@@ -190,7 +190,7 @@ int fc3d_TrescaFixedPoint_setDefaultSolverOptions(SolverOptions* options)
   solver_options_nullify(options);
 
   options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
-  options->iparam[SICONOS_FRICTION_3D_TFP_ERROR_STRATEGY ] =  SICONOS_FRICTION_3D_TFP_ERROR_STRATEGY_ADAPTIVE;
+  options->iparam[SICONOS_FRICTION_3D_FP_ERROR_STRATEGY] =  SICONOS_FRICTION_3D_FP_ERROR_STRATEGY_ADAPTIVE;
   options->dparam[SICONOS_DPARAM_TOL] = 1e-4;
 
   options->internalSolvers = (SolverOptions *)malloc(sizeof(SolverOptions));

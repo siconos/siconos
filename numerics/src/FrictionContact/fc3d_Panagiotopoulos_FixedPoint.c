@@ -47,32 +47,6 @@
 typedef void (*normalInternalSolverPtr)(LinearComplementarityProblem*, double*, double*, int *, SolverOptions *);
 typedef void (*tangentInternalSolverPtr)(ConvexQP*, double*, double*, int *, SolverOptions *);
 
-static void fc3d_Panagiotopoulos_FixedPoint_set_internalsolver_tolerance(FrictionContactProblem* problem,
-                                                                         SolverOptions* options,
-                                                                         SolverOptions* internalsolver_options,
-                                                                         double error)
-{
-  int* iparam = options->iparam;
-  if (iparam[SICONOS_FRICTION_3D_TFP_ERROR_STRATEGY] == SICONOS_FRICTION_3D_TFP_ERROR_STRATEGY_ADAPTIVE )
-  {
-    internalsolver_options[0].dparam[0] = fmax(error/10.0, options->dparam[0]/problem->numberOfContacts);
-    internalsolver_options[1].dparam[0] = fmax(error/10.0, options->dparam[0]/problem->numberOfContacts);
-  }
-  else if (iparam[SICONOS_FRICTION_3D_TFP_ERROR_STRATEGY] == SICONOS_FRICTION_3D_TFP_ERROR_STRATEGY_FRACTION)
-  {
-    internalsolver_options[0].dparam[0] = options->dparam[0]/2.0;
-    internalsolver_options[1].dparam[0] = options->dparam[0]/2.0;
-  }
-  else if (iparam[SICONOS_FRICTION_3D_TFP_ERROR_STRATEGY] == SICONOS_FRICTION_3D_TFP_ERROR_STRATEGY_GIVEN_VALUE)
-  {
-    // We use the user value for the error of the local solver
-  }
-  else
-  {
-    numerics_error("fc3d_Panagiotopoulos_FixedPoint_set_internalsolver_tolerance", "Unknown startegy for driving the tolerance");
-  }
-
-}
 
 void fc3d_Panagiotopoulos_FixedPoint(FrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options)
 {
@@ -206,7 +180,7 @@ void fc3d_Panagiotopoulos_FixedPoint(FrictionContactProblem* problem, double *re
     ++iter;
 
 
-    fc3d_Panagiotopoulos_FixedPoint_set_internalsolver_tolerance(problem,options,internalsolver_options, error);
+    fc3d_FixedPoint_set_internalsolver_tolerance(problem,options,internalsolver_options, error);
 
     /* ----------------- */
     /* normal resolution */
@@ -307,7 +281,7 @@ int fc3d_Panagiotopoulos_FixedPoint_setDefaultSolverOptions(SolverOptions* optio
   solver_options_nullify(options);
 
   options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
-  options->iparam[SICONOS_FRICTION_3D_TFP_ERROR_STRATEGY ] =  SICONOS_FRICTION_3D_TFP_ERROR_STRATEGY_ADAPTIVE;
+  options->iparam[SICONOS_FRICTION_3D_FP_ERROR_STRATEGY ] =  SICONOS_FRICTION_3D_FP_ERROR_STRATEGY_ADAPTIVE;
   options->dparam[SICONOS_DPARAM_TOL] = 1e-4;
   options->numberOfInternalSolvers=2;
   options->internalSolvers = (SolverOptions *)malloc(options->numberOfInternalSolvers*sizeof(SolverOptions));

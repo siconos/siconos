@@ -43,6 +43,11 @@ static inline char* strdup(char* src)
 #include "Friction_cst.h"
 #include "@TEST_NAME_PREFIX@_Solvers.h"
 
+/* For internal solvers based on other formulation */
+#include "SOCLCP_Solvers.h"
+#include "SOCLCP_cst.h"
+#include "ConvexQP_cst.h"
+#include "VI_cst.h"
 
 int main(void)
 {
@@ -74,16 +79,27 @@ int main(void)
   if (test_maxiter > 0)
     options->iparam[0]=@TEST_MAXITER@;
 
-
   if (testInternalSolver)
   {
-    info=@TEST_NAME_PREFIX@_setDefaultSolverOptions(options->internalSolvers,@TEST_INTERNAL_SOLVER@);
+    if (testInternalSolver >= 400 && testInternalSolver < 700)
+    {
+      info=@TEST_NAME_PREFIX@_setDefaultSolverOptions(options->internalSolvers,@TEST_INTERNAL_SOLVER@);
+    }
+    else if (testInternalSolver >= 1100 && testInternalSolver < 1200)
+    {
+      info=soclcp_setDefaultSolverOptions(options->internalSolvers,@TEST_INTERNAL_SOLVER@);
+    }
+    else
+    {
+      fprintf(stderr, "unknown internal solver\n");
+      exit(EXIT_FAILURE);
+    }
+    
     if(test_internal_tol > 0.)
       options->internalSolvers->dparam[0]=@TEST_INTERNAL_SOLVER_TOLERANCE@;
     if(test_internal_maxit > 0)
       options->internalSolvers->iparam[0]=@TEST_INTERNAL_SOLVER_MAXITER@;
   }
-
   int iparam_idx_size = @IPARAM_IDX_SIZE@;
   if (iparam_idx_size)
   {
