@@ -66,25 +66,26 @@ void soclcp_VI_FixedPointProjection(SecondOrderConeLinearComplementarityProblem*
   int vi_dsize = visolver_options->dSize;
   if (isize != vi_isize )
   {
-    printf("size prolem in soclcp_VI_FixedPointProjection\n");
+    printf("size problem in soclcp_VI_FixedPointProjection\n");
   }
   if (dsize != vi_dsize )
   {
-    printf("size prolem in soclcp_VI_FixedPointProjection\n");
+    printf("size problem in soclcp_VI_FixedPointProjection\n");
   }
   int i;
 
-  for (i = 0; i < isize; i++)
+  for (i = 0; i < min(isize,vi_isize); i++)
   {
     if (options->iparam[i] != 0 )
       visolver_options->iparam[i] = options->iparam[i] ;
   }
-  for (i = 0; i < dsize; i++)
+  for (i = 0; i < min(dsize,vi_dsize); i++)
   {
     if (fabs(options->dparam[i]) >= 1e-24 )
       visolver_options->dparam[i] = options->dparam[i] ;
   }
 
+  
   variationalInequality_FixedPointProjection(vi, reaction, velocity , info , visolver_options);
 
 
@@ -97,12 +98,12 @@ void soclcp_VI_FixedPointProjection(SecondOrderConeLinearComplementarityProblem*
   /*   printf("reaction[%i]=%f\t",i,reaction[i]);    printf("velocity[%i]=F[%i]=%f\n",i,i,velocity[i]); */
   /* } */
 
-  error = visolver_options->dparam[1];
-  iter = visolver_options->iparam[7];
+  error = visolver_options->dparam[SICONOS_DPARAM_RESIDU];
+  iter = visolver_options->iparam[SICONOS_IPARAM_ITER_DONE];
 
-  options->dparam[1] = error;
-  options->dparam[3] = visolver_options->dparam[3];
-  options->iparam[7] = iter;
+  options->dparam[SICONOS_DPARAM_RESIDU] = error;
+  options->dparam[SICONOS_VI_EG_DPARAM_RHO] = visolver_options->dparam[SICONOS_VI_EG_DPARAM_RHO];
+  options->iparam[SICONOS_IPARAM_ITER_DONE] = iter;
 
 
   if (verbose > 0)
@@ -122,34 +123,12 @@ void soclcp_VI_FixedPointProjection(SecondOrderConeLinearComplementarityProblem*
 
 int soclcp_VI_FixedPointProjection_setDefaultSolverOptions(SolverOptions* options)
 {
-  int i;
   if (verbose > 0)
   {
     printf("Set the Default SolverOptions for the FixedPointProjection Solver\n");
   }
-
-  /*strcpy(options->solverName,"DSFP");*/
+  variationalInequality_FixedPointProjection_setDefaultSolverOptions(options);
   options->solverId = SICONOS_SOCLCP_VI_FPP;
-  options->numberOfInternalSolvers = 0;
-  options->isSet = 1;
-  options->filterOn = 1;
-  options->iSize = 8;
-  options->dSize = 8;
-  options->iparam = (int *)malloc(options->iSize * sizeof(int));
-  options->dparam = (double *)malloc(options->dSize * sizeof(double));
-  options->dWork = NULL;
-  solver_options_nullify(options);
-  for (i = 0; i < 8; i++)
-  {
-    options->iparam[i] = 0;
-    options->dparam[i] = 0.0;
-  }
-  options->iparam[0] = 20000;
-  options->dparam[0] = 1e-3;
-  options->dparam[3] = 1e-3;
-  options->dparam[3] = -1.0; // rho is variable by default
-
-  options->internalSolvers = NULL;
-
+  options->iparam[SICONOS_IPARAM_MAX_ITER] =2000;
   return 0;
 }

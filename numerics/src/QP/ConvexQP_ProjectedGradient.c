@@ -256,7 +256,7 @@ int convexQP_ProjectedGradient_setDefaultSolverOptions(SolverOptions* options)
   solver_options_nullify(options);
 
   options->iparam[SICONOS_IPARAM_MAX_ITER] = 20000;
-
+  
   options->iparam[SICONOS_CONVEXQP_PGOC_LINESEARCH_MAXITER] =10;
 
   options->dparam[SICONOS_DPARAM_TOL] = 1e-6;

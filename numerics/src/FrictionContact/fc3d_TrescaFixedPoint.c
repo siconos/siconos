@@ -38,18 +38,21 @@ void fc3d_FixedPoint_set_internalsolver_tolerance(FrictionContactProblem* proble
   if (iparam[SICONOS_FRICTION_3D_FP_ERROR_STRATEGY] == SICONOS_FRICTION_3D_FP_ERROR_STRATEGY_ADAPTIVE )
   {
     internalsolver_options->dparam[0] = fmax(error/10.0, options->dparam[0]/problem->numberOfContacts);
+    numerics_printf("fc3d_FixedPoint_set_internalsolver_tolerance - Internal solver tolerance is set to %e\n", internalsolver_options->dparam[0] );
   }
   else if (iparam[SICONOS_FRICTION_3D_FP_ERROR_STRATEGY] == SICONOS_FRICTION_3D_FP_ERROR_STRATEGY_FRACTION)
   {
     internalsolver_options->dparam[0] = options->dparam[0]/2.0;
+    numerics_printf("fc3d_FixedPoint_set_internalsolver_tolerance - Internal solver tolerance is set to %e\n", internalsolver_options->dparam[0] );
   }
   else if (iparam[SICONOS_FRICTION_3D_FP_ERROR_STRATEGY] == SICONOS_FRICTION_3D_FP_ERROR_STRATEGY_GIVEN_VALUE)
   {
     // We use the user value for the error of the local solver
+    numerics_printf("fc3d_FixedPoint_set_internalsolver_tolerance - Internal solver tolerance is set to %e\n", internalsolver_options->dparam[0] );
   }
   else
   {
-    numerics_error("fc3d_FixedPoint_set_internalsolver_tolerance", "Unknown strategy for driving the tolerance");
+    numerics_error("fc3d_FixedPoint_set_internalsolver_tolerance","Unknown strategy for driving the tolerance");
   }
 
 }

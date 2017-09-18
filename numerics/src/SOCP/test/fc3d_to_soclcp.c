@@ -59,7 +59,7 @@ int main(void)
   /* XXX should look for a better fix --xhub */
   soclcp->M = NULL;
   soclcp->q = NULL;
-  soclcp->mu = NULL;
+  soclcp->tau = NULL;
   freeSecondOrderConeLinearComplementarityProblem(soclcp);
   freeFrictionContactProblem(problem);
 

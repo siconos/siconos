@@ -20,6 +20,7 @@
 #include "fc3d_Solvers.h"
 #include "fc3d_compute_error.h"
 #include "SOCLCP_Solvers.h"
+#include "VI_cst.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -164,9 +165,9 @@ void fc3d_ACLMFixedPoint(FrictionContactProblem* problem, double *reaction, doub
 
   if (internalsolver_options->internalSolvers != NULL)
     internalsolver_options->internalSolvers->dWork = NULL;
-  dparam[0] = tolerance;
-  dparam[1] = error;
-  iparam[7] = iter;
+  dparam[SICONOS_VI_EG_DPARAM_RHO] = internalsolver_options->dparam[SICONOS_VI_EG_DPARAM_RHO];
+  dparam[SICONOS_DPARAM_RESIDU] = error;
+  iparam[SICONOS_IPARAM_ITER_DONE] = iter;
 
 }
 
