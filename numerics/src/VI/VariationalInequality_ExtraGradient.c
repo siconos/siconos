@@ -34,9 +34,88 @@
 #include "NumericsVector.h"
 #endif
 
-void variationalInequality_ExtraGradient(VariationalInequality* problem, double *x, double *w, int* info, SolverOptions* options)
+static
+int determine_convergence(double error, double *tolerance, int iter,
+                          SolverOptions *options,
+                          VariationalInequality* problem,
+                          double *z , double *w, double rho)
+
+{
+  int hasNotConverged = 1;
+  if (error < *tolerance)
+  {
+    if (verbose > 0)
+      printf("----------------------------------- VI - Extra Gradient (EG) - Iteration %i "
+             "Residual = %14.7e < %7.3e\n", iter, error, *tolerance);
+    double absolute_error =0.0;
+    variationalInequality_computeError(problem, z , w, *tolerance, options, &absolute_error);
+    if (verbose > 0)
+      printf("----------------------------------  VI - Extra Gradient (EG)- Full error criterion =  %e\n", absolute_error);
+
+
+    hasNotConverged = 0;
+
+
+    if (options->iparam[SICONOS_VI_IPARAM_ERROR_EVALUATION]==SICONOS_VI_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL)
+    {
+      if (absolute_error > options->dparam[SICONOS_DPARAM_TOL])
+      {
+
+        printf("error = %e ", error);
+        printf("absolute_error = %e ", absolute_error);
+        printf("options->dparam[SICONOS_DPARAM_TOL]= %e\n", options->dparam[SICONOS_DPARAM_TOL]);
+
+        *tolerance = error/absolute_error*options->dparam[SICONOS_DPARAM_TOL];
+        if (verbose > 0)
+          printf("----------------------------------  VI - Extra Gradient (EG)- We modify the required incremental precision to reach accuracy to %e\n", *tolerance);
+        hasNotConverged = 1;
+      }
+      else
+      {
+        if (verbose > 0)
+          printf("---------------------------------- VI - Extra Gradient (EG) - The incremental precision is sufficient to reach accuracy to %e\n", *tolerance);
+      }
+    }
+  }
+  else
+  {
+    if (verbose > 0)
+      printf("----------------------------------- VI - Extra Gradient (EG) - Iteration %i rho = %14.7e error = %14.7e > %10.5e \n", iter, rho, error, *tolerance);
+  }
+  return hasNotConverged;
+}
+
+static
+double compute_error(VariationalInequality* problem,
+                     double *z , double *w, double norm_z_z_k,
+                     double tolerance,
+                     SolverOptions * options)
 {
 
+  double error;
+  if (options->iparam[SICONOS_VI_IPARAM_ERROR_EVALUATION]==SICONOS_VI_ERROR_EVALUATION_FULL)
+    variationalInequality_computeError(problem, z , w, tolerance, options, &error);
+  else if (options->iparam[SICONOS_VI_IPARAM_ERROR_EVALUATION]==SICONOS_VI_ERROR_EVALUATION_LIGHT ||
+           options->iparam[SICONOS_VI_IPARAM_ERROR_EVALUATION]==SICONOS_VI_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL)
+  {
+    /* cblas_dcopy(n , x , 1 , xtmp, 1); */
+    /* cblas_daxpy(n, -1.0, x_k , 1, xtmp , 1) ; */
+    /* error = cblas_dnorm2(n,xtmp,1); */
+    double norm_z = cblas_dnrm2(problem->size , z , 1);
+    error = norm_z_z_k;
+    if (fabs(norm_z) > DBL_EPSILON)
+      error /= norm_z;
+  }
+  else
+  {
+    return NAN;
+    numerics_error("compute_error(VariationalInequality* problem, ...)", "unknown error evaluation strategy");
+  }
+  return error;
+}
+void variationalInequality_ExtraGradient(VariationalInequality* problem, double *x, double *w, int* info, SolverOptions* options)
+{
+  //verbose=1;
   DEBUG_BEGIN("variationalInequality_ExtraGradient(VariationalInequality* problem, ...)\n")
   /* /\* int and double parameters *\/ */
   int* iparam = options->iparam;
@@ -54,7 +133,6 @@ void variationalInequality_ExtraGradient(VariationalInequality* problem, double 
   int iter = 0; /* Current iteration number */
   double error = 1.; /* Current error */
   int hasNotConverged = 1;
-  dparam[0] = dparam[2]; // set the tolerance for the local solver
 
 
   double * xtmp = (double *)calloc(n,sizeof(double));
@@ -138,20 +216,17 @@ void variationalInequality_ExtraGradient(VariationalInequality* problem, double 
       /* problem->ProjectionOnX(problem,xtmp,x); */
 
       /* **** Criterium convergence **** */
-      if (options->iparam[SICONOS_VI_IPARAM_ERROR_EVALUATION] == SICONOS_VI_ERROR_EVALUATION_FULL )
-      {
-        variationalInequality_computeError(problem, x , w, tolerance, options, &error);
-      }
-      else if (options->iparam[SICONOS_VI_IPARAM_ERROR_EVALUATION] == SICONOS_VI_ERROR_EVALUATION_LIGHT )
+      if (options->iparam[SICONOS_VI_IPARAM_ERROR_EVALUATION] == SICONOS_VI_ERROR_EVALUATION_LIGHT||
+          options->iparam[SICONOS_VI_IPARAM_ERROR_EVALUATION] == SICONOS_VI_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL)
       {
         cblas_dcopy(n, xtmp, 1,x , 1) ;
         cblas_daxpy(n, -1.0, x_k , 1, xtmp , 1) ;
         light_error_sum = cblas_dnrm2(n,xtmp,1);
-        double norm_x= cblas_dnrm2(n,x,1);
-        if (fabs(norm_x) > DBL_EPSILON)
-          light_error_sum /= norm_x;
-        error=light_error_sum;
       }
+      error = compute_error(problem, x , w, light_error_sum,  tolerance, options);
+      hasNotConverged = determine_convergence(error, &tolerance, iter, options,
+                                              problem, x, w, rho);
+
 
       if (options->callback)
       {
@@ -160,20 +235,9 @@ void variationalInequality_ExtraGradient(VariationalInequality* problem, double 
                                         error, NULL);
       }
 
-  
-      if (error < tolerance) hasNotConverged = 0;
-      *info = hasNotConverged;
-      if (verbose > 0)
-      {
-        if (hasNotConverged)
-        {
-          printf("----------------------------------- VI - Extra Gradient (EG) - Iteration %i rho = %14.7e error = %14.7e > %10.5e\n", iter, rho, error, tolerance);
-        }
-        else
-        {
-          printf("----------------------------------- VI - Extra Gradient (EG) - Iteration %i rho = %14.7e error = %14.7e < %10.5e\n", iter, rho, error, tolerance);
-        }
-      }
+
+
+
     }
   }
 
@@ -264,44 +328,18 @@ void variationalInequality_ExtraGradient(VariationalInequality* problem, double 
         DEBUG_EXPR(NV_display(w,n););
 
         /* **** Criterium convergence **** */
-        if (options->iparam[SICONOS_VI_IPARAM_ERROR_EVALUATION] == SICONOS_VI_ERROR_EVALUATION_FULL )
-        {
-          variationalInequality_computeError(problem, x , w, tolerance, options, &error);
-        }
-        else if (options->iparam[SICONOS_VI_IPARAM_ERROR_EVALUATION] == SICONOS_VI_ERROR_EVALUATION_LIGHT )
-        {
-          cblas_dcopy(n, xtmp, 1,x , 1) ;
-          cblas_daxpy(n, -1.0, x_k , 1, xtmp , 1) ;
-          light_error_sum = cblas_dnrm2(n,xtmp,1);
-          double norm_x= cblas_dnrm2(n,x,1);
-          if (fabs(norm_x) > DBL_EPSILON)
-            light_error_sum /= norm_x;
-          error=light_error_sum;
-        }
+        error = compute_error(problem, x , w, a1,  tolerance, options);
+        hasNotConverged = determine_convergence(error, &tolerance, iter, options,
+                                                problem, x, w, rho);
 
         DEBUG_PRINTF("error = %12.8e\t error_k = %12.8e\n",error,error_k);
         /*Update rho*/
-        if ((rho_k*a1 < Lmin * a2) && (error < error_k))
+        if ((rho_k*a1 < Lmin * a2))
         {
           rho =rho_k*tauinv;
         }
         else
           rho =rho_k;
-
-        if (error < tolerance) hasNotConverged = 0;
-        *info = hasNotConverged;
-        if (verbose > 0)
-        {
-          if (hasNotConverged)
-          {
-            printf("----------------------------------- VI - Extra Gradient (EG) - Iteration %i rho = %14.7e error = %14.7e > %10.5e\n", iter, rho, error, tolerance);
-          }
-          else
-          {
-            printf("----------------------------------- VI - Extra Gradient (EG) - Iteration %i rho = %14.7e error = %14.7e < %10.5e\n", iter, rho, error, tolerance);
-          }
-        }
-
       }
     }// end iparam[SICONOS_VI_IPARAM_LINESEARCH_METHOD]==0
 
@@ -394,57 +432,34 @@ void variationalInequality_ExtraGradient(VariationalInequality* problem, double 
 
 
         /* **** Criterium convergence **** */
-        if (options->iparam[SICONOS_VI_IPARAM_ERROR_EVALUATION] == SICONOS_VI_ERROR_EVALUATION_FULL )
-        {
-          variationalInequality_computeError(problem, x , w, tolerance, options, &error);
-        }
-        else if (options->iparam[SICONOS_VI_IPARAM_ERROR_EVALUATION] == SICONOS_VI_ERROR_EVALUATION_LIGHT )
-        {
-          cblas_dcopy(n, xtmp, 1,x , 1) ;
-          cblas_daxpy(n, -1.0, x_k , 1, xtmp , 1) ;
-          light_error_sum = cblas_dnrm2(n,xtmp,1);
-          double norm_x= cblas_dnrm2(n,x,1);
-          if (fabs(norm_x) > DBL_EPSILON)
-            light_error_sum /= norm_x;
-          error=light_error_sum;
-        }
+        error = compute_error(problem, x , w, a1,  tolerance, options);
+        hasNotConverged = determine_convergence(error, &tolerance, iter, options,
+                                                problem, x, w, rho);
+
+
+
+
+
         DEBUG_PRINTF("error = %12.8e\t error_k = %12.8e\n",error,error_k);
         /*Update rho*/
-        if ((rho_k*a1 < Lmin * a2*a2) && (error < error_k))
+        if ((rho_k*a1 < Lmin * a2*a2))
         {
           rho =rho_k*tauinv;
         }
         else
           rho =rho_k;
 
-
- 
-        if (error < tolerance) hasNotConverged = 0;
-        *info = hasNotConverged;
-        if (verbose > 0)
-        {
-          if (hasNotConverged)
-          {
-            printf("----------------------------------- VI - Extra Gradient (EG) - Iteration %i rho = %14.7e error = %14.7e > %10.5e\n", iter, rho, error, tolerance);
-          }
-          else
-          {
-            printf("----------------------------------- VI - Extra Gradient (EG) - Iteration %i rho = %14.7e error = %14.7e < %10.5e\n", iter, rho, error, tolerance);
-          }
-        }
-        
       }
 
     }// end iparam[SICONOS_VI_IPARAM_LINESEARCH_METHOD]==1
     /* we return the negative value of rho for multiple call to the solver */
-    dparam[SICONOS_VI_EG_DPARAM_RHO] = -rho; 
-
+    dparam[SICONOS_VI_EG_DPARAM_RHO] = -rho;
 
     free(x_k);
     free(w_k);
   }
 
-
+  *info = hasNotConverged;
   if (verbose > 0)
   {
     printf("----------------------------------- VI - Extra Gradient (EG) - #Iteration %i Final Residual = %14.7e\n", iter, error);
@@ -483,7 +498,8 @@ int variationalInequality_ExtraGradient_setDefaultSolverOptions(SolverOptions* o
 
   options->iparam[SICONOS_VI_IPARAM_LINESEARCH_METHOD] = 0;
 
-  options->iparam[SICONOS_VI_IPARAM_ERROR_EVALUATION]=SICONOS_VI_ERROR_EVALUATION_FULL;
+  /* options->iparam[SICONOS_VI_IPARAM_ERROR_EVALUATION]=SICONOS_VI_ERROR_EVALUATION_FULL; */
+  options->iparam[SICONOS_VI_IPARAM_ERROR_EVALUATION]=SICONOS_VI_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL;
   options->iparam[SICONOS_VI_IPARAM_ERROR_EVALUATION_FREQUENCY]=0;
 
   options->dparam[SICONOS_DPARAM_TOL] = 1e-3;
