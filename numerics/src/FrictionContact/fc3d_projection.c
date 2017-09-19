@@ -403,7 +403,7 @@ int fc3d_projectionOnConeWithLocalIteration_solve(FrictionContactProblem* localp
       ls_iter++;
     }
 
-    /* printf("----------------------  localiter = %i\t, rho= %.10e\t, error = %.10e \n", localiter, rho, localerror); */
+    /* printf("--  localiter = %i\t, rho= %.10e\t, error = %.10e \n", localiter, rho, localerror); */
 
     /* compute local error */
     localerror =0.0;
@@ -419,7 +419,7 @@ int fc3d_projectionOnConeWithLocalIteration_solve(FrictionContactProblem* localp
         rho =rho_k;
     if (verbose > 1)
     {
-      printf("----------------------  fc3d_projectionOnConeWithLocalIteration_solve localiter = %i\t, rho= %.10e\t, error = %.10e \n", localiter, rho, localerror);
+      printf("--  fc3d_projectionOnConeWithLocalIteration_solve localiter = %i\t, rho= %.10e\t, error = %.10e \n", localiter, rho, localerror);
 
     }
 
@@ -786,7 +786,7 @@ int fc3d_projectionOnCylinderWithLocalIteration_solve(FrictionContactProblem* lo
       ls_iter++;
     }
     /* if (verbose>2) */
-    /*   printf("----------------------  localiter = %i\t, rho= %.10e\t, error = %.10e \n", localiter, rho, localerror);  */
+    /*   printf("--  localiter = %i\t, rho= %.10e\t, error = %.10e \n", localiter, rho, localerror);  */
 
     /* compute local error */
     localerror =0.0;
@@ -803,7 +803,7 @@ int fc3d_projectionOnCylinderWithLocalIteration_solve(FrictionContactProblem* lo
 
     if (verbose > 1)
     {
-      printf("----------------------  localiter = %i\t, rho= %.10e\t, error = %.10e \n", localiter, rho, localerror);
+      printf("--  localiter = %i\t, rho= %.10e\t, error = %.10e \n", localiter, rho, localerror);
 
     }
 
@@ -813,7 +813,7 @@ int fc3d_projectionOnCylinderWithLocalIteration_solve(FrictionContactProblem* lo
  
  if (verbose > 1)
     {
-      printf("----------------------  localiter = %i\t, rho= %.10e\t, error = %.10e \n", localiter, rho, localerror);
+      printf("--  localiter = %i\t, rho= %.10e\t, error = %.10e \n", localiter, rho, localerror);
 
     }
 

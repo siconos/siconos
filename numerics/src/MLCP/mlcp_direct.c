@@ -196,7 +196,7 @@ int internalAddConfig(MixedLinearComplementarityProblem* problem, int * zw, int 
   if (verbose)
   {
     printf("mlcp_direct internalAddConfig\n");
-    printf("-----------------------------\n");
+    printf("---------\n");
     for (i = 0; i < problem->m; i++)
       printf("zw[%d]=%d\t", i, zw[i]);
     printf("\n");

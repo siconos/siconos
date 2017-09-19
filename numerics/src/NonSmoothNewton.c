@@ -167,7 +167,7 @@ int nonSmoothNewton(int n, double* z, NewtonFunctionPtr* phi, NewtonFunctionPtr*
     if (verbose > 0)
     {
       printf("Non Smooth Newton, iteration number %i, error equal to %14.7e .\n", niter, terminationCriterion);
-      printf(" -----------------------------------------------------------------------\n");
+      printf(" -----------\n");
     }
   }
 
@@ -281,7 +281,7 @@ int nonSmoothDirectNewton(int n, double* z, NewtonFunctionPtr* phi, NewtonFuncti
     if (verbose > 0)
     {
       printf("Non Smooth Newton, iteration number %i, error equal to %14.7e .\n", niter, terminationCriterion);
-      printf(" -----------------------------------------------------------------------\n");
+      printf(" -----------\n");
     }
   }
 

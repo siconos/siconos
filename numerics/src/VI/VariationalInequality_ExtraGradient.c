@@ -45,12 +45,12 @@ int determine_convergence(double error, double *tolerance, int iter,
   if (error < *tolerance)
   {
     if (verbose > 0)
-      printf("----------------------------------- VI - Extra Gradient (EG) - Iteration %i "
+      printf("--------------- VI - Extra Gradient (EG) - Iteration %i "
              "Residual = %14.7e < %7.3e\n", iter, error, *tolerance);
     double absolute_error =0.0;
     variationalInequality_computeError(problem, z , w, *tolerance, options, &absolute_error);
     if (verbose > 0)
-      printf("----------------------------------  VI - Extra Gradient (EG)- Full error criterion =  %e\n", absolute_error);
+      printf("--------------  VI - Extra Gradient (EG)- Full error criterion =  %e\n", absolute_error);
 
 
     hasNotConverged = 0;
@@ -67,20 +67,20 @@ int determine_convergence(double error, double *tolerance, int iter,
 
         *tolerance = error/absolute_error*options->dparam[SICONOS_DPARAM_TOL];
         if (verbose > 0)
-          printf("----------------------------------  VI - Extra Gradient (EG)- We modify the required incremental precision to reach accuracy to %e\n", *tolerance);
+          printf("--------------  VI - Extra Gradient (EG)- We modify the required incremental precision to reach accuracy to %e\n", *tolerance);
         hasNotConverged = 1;
       }
       else
       {
         if (verbose > 0)
-          printf("---------------------------------- VI - Extra Gradient (EG) - The incremental precision is sufficient to reach accuracy to %e\n", *tolerance);
+          printf("-------------- VI - Extra Gradient (EG) - The incremental precision is sufficient to reach accuracy to %e\n", *tolerance);
       }
     }
   }
   else
   {
     if (verbose > 0)
-      printf("----------------------------------- VI - Extra Gradient (EG) - Iteration %i rho = %14.7e error = %14.7e > %10.5e \n", iter, rho, error, *tolerance);
+      printf("--------------- VI - Extra Gradient (EG) - Iteration %i rho = %14.7e error = %14.7e > %10.5e \n", iter, rho, error, *tolerance);
   }
   return hasNotConverged;
 }
@@ -146,7 +146,7 @@ void variationalInequality_ExtraGradient(VariationalInequality* problem, double 
     rho = dparam[SICONOS_VI_EG_DPARAM_RHO];
     if (verbose > 0)
     {
-      printf("----------------------------------- VI - Extra Gradient (EG) - Fixed stepsize with  rho = %14.7e \n", rho);
+      printf("--------------- VI - Extra Gradient (EG) - Fixed stepsize with  rho = %14.7e \n", rho);
     }
   }
   else
@@ -156,7 +156,7 @@ void variationalInequality_ExtraGradient(VariationalInequality* problem, double 
     rho = -dparam[3];
     if (verbose > 0)
     {
-      printf("----------------------------------- VI - Extra Gradient (EG) - Variable stepsize with starting rho = %14.7e \n", rho);
+      printf("--------------- VI - Extra Gradient (EG) - Variable stepsize with starting rho = %14.7e \n", rho);
     }
 
   }
@@ -462,7 +462,7 @@ void variationalInequality_ExtraGradient(VariationalInequality* problem, double 
   *info = hasNotConverged;
   if (verbose > 0)
   {
-    printf("----------------------------------- VI - Extra Gradient (EG) - #Iteration %i Final Residual = %14.7e\n", iter, error);
+    printf("--------------- VI - Extra Gradient (EG) - #Iteration %i Final Residual = %14.7e\n", iter, error);
   }
   dparam[SICONOS_DPARAM_TOL] = tolerance;
   dparam[SICONOS_DPARAM_RESIDU] = error;

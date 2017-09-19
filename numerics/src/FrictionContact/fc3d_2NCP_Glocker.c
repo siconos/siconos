@@ -365,7 +365,7 @@ void computeJacobianFGlocker(double** jacobianFOut, int up2Date)
 
 double Compute_NCP_error1(int i, double error)
 {
-  printf("----------------------------------contact =  %i\n", i);
+  printf("--------------contact =  %i\n", i);
 
   double Fz;
   printf(" z[%i] = %14.7e\n", i, reactionGlocker[i]);

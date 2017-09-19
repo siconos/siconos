@@ -63,7 +63,7 @@ void fc3d_DeSaxceFixedPoint(FrictionContactProblem* problem, double *reaction, d
     rho = dparam[3];
     if (verbose > 0)
     {
-      printf("----------------------------------- FC3D - DeSaxce Fixed Point (DSFP) - Fixed stepsize with  rho = %14.7e \n", rho);
+      printf("--------------- FC3D - DeSaxce Fixed Point (DSFP) - Fixed stepsize with  rho = %14.7e \n", rho);
     }
 
   }
@@ -107,7 +107,7 @@ void fc3d_DeSaxceFixedPoint(FrictionContactProblem* problem, double *reaction, d
     }
 
       if (verbose > 0)
-        printf("----------------------------------- FC3D - DeSaxce Fixed Point (DSFP) - Iteration %i rho = %14.7e \tError = %14.7e\n", iter, rho, error);
+        printf("--------------- FC3D - DeSaxce Fixed Point (DSFP) - Iteration %i rho = %14.7e \tError = %14.7e\n", iter, rho, error);
 
       if (error < tolerance) hasNotConverged = 0;
       *info = hasNotConverged;
@@ -116,7 +116,7 @@ void fc3d_DeSaxceFixedPoint(FrictionContactProblem* problem, double *reaction, d
 
 
   if (verbose > 0)
-    printf("----------------------------------- FC3D - DeSaxce Fixed point (DSFP) - #Iteration %i Final Residual = %14.7e\n", iter, error);
+    printf("--------------- FC3D - DeSaxce Fixed point (DSFP) - #Iteration %i Final Residual = %14.7e\n", iter, error);
   iparam[7] = iter;
   dparam[0] = tolerance;
   dparam[1] = error;

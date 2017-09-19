@@ -475,7 +475,7 @@ double calculateFullErrorAdaptiveInterval(FrictionContactProblem *problem,
         options->iparam[SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_FREQUENCY] *= 2;
     }
     if (verbose > 0)
-      printf("----------------------------------- FC3D - NSGS - Iteration %i "
+      printf("--------------- FC3D - NSGS - Iteration %i "
              "options->iparam[SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_FREQUENCY] = %i, options->iparam[SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION] = % i \n",
              iter, options->iparam[SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_FREQUENCY], options->iparam[SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION]);
   }
@@ -503,13 +503,13 @@ double calculateFullErrorFinal(FrictionContactProblem *problem, SolverOptions *o
   {
     if (absolute_error > options->dparam[SICONOS_DPARAM_TOL])
     {
-      printf("--------------------------- FC3D - NSGS - Warning absolute "
+      printf("------- FC3D - NSGS - Warning absolute "
              "Residual = %14.7e is larger than required precision = %14.7e\n",
              absolute_error, options->dparam[SICONOS_DPARAM_TOL]);
     }
     else
     {
-      printf("--------------------------- FC3D - NSGS - absolute "
+      printf("------- FC3D - NSGS - absolute "
              "Residual = %14.7e is smaller than required precision = %14.7e\n",
              absolute_error, options->dparam[SICONOS_DPARAM_TOL]);
     }
@@ -527,13 +527,13 @@ int determine_convergence(double error, double tolerance, int iter,
   {
     hasNotConverged = 0;
     if (verbose > 0)
-      printf("----------------------------------- FC3D - NSGS - Iteration %i "
+      printf("--------------- FC3D - NSGS - Iteration %i "
              "Residual = %14.7e < %7.3e\n", iter, error, tolerance);
   }
   else
   {
     if (verbose > 0)
-      printf("----------------------------------- FC3D - NSGS - Iteration %i "
+      printf("--------------- FC3D - NSGS - Iteration %i "
              "Residual = %14.7e > %7.3e\n", iter, error, tolerance);
   }
   return hasNotConverged;
@@ -551,7 +551,7 @@ int determine_convergence_with_full_final(FrictionContactProblem *problem, Solve
   {
     hasNotConverged = 0;
     if (verbose > 0)
-      printf("----------------------------------- FC3D - NSGS - Iteration %i "
+      printf("--------------- FC3D - NSGS - Iteration %i "
              "Residual = %14.7e < %7.3e\n", iter, error, *tolerance);
 
     double absolute_error = calculateFullErrorFinal(problem, options,
@@ -562,13 +562,13 @@ int determine_convergence_with_full_final(FrictionContactProblem *problem, Solve
     {
       *tolerance = error/absolute_error*options->dparam[SICONOS_DPARAM_TOL];
       if (verbose > 0)
-        printf("--------------------------- FC3D - NSGS - We modify the required incremental precision to reach accuracy to %e\n", *tolerance);
+        printf("------- FC3D - NSGS - We modify the required incremental precision to reach accuracy to %e\n", *tolerance);
       hasNotConverged = 1;
     }
     else
     {
       if (verbose > 0)
-        printf("--------------------------- FC3D - NSGS - The incremental precision is sufficient to reach accuracy to %e\n", *tolerance);
+        printf("------- FC3D - NSGS - The incremental precision is sufficient to reach accuracy to %e\n", *tolerance);
     }
 
 
@@ -578,7 +578,7 @@ int determine_convergence_with_full_final(FrictionContactProblem *problem, Solve
   else
   {
     if (verbose > 0)
-      printf("----------------------------------- FC3D - NSGS - Iteration %i "
+      printf("--------------- FC3D - NSGS - Iteration %i "
              "Residual = %14.7e > %7.3e\n", iter, error, *tolerance);
   }
   return hasNotConverged;

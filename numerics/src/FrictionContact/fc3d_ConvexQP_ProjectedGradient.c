@@ -114,7 +114,7 @@ void fc3d_ConvexQP_ProjectedGradient_Cylinder(FrictionContactProblem* problem, d
 
   if (verbose > 0)
   {
-    printf("----------------------------------- FC3D - ConvexQP Fixed Point Projection (ConvexQP_FPP) - #Iteration %i Final Residual = %14.7e\n", iter, error);
+    printf("--------------- FC3D - ConvexQP Fixed Point Projection (ConvexQP_FPP) - #Iteration %i Final Residual = %14.7e\n", iter, error);
   }
   free(cqp);
 

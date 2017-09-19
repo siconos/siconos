@@ -254,12 +254,12 @@ void fc3d_Panagiotopoulos_FixedPoint(FrictionContactProblem* problem, double *re
     {
       if (hasNotConverged)
       {
-        printf("----------------------------------- FC3D - PFP - Iteration %i error = %14.7e > %10.5e\n", iter, error, tolerance);
+        printf("--------------- FC3D - PFP - Iteration %i error = %14.7e > %10.5e\n", iter, error, tolerance);
       }
       else
       {
-        printf("----------------------------------- FC3D - PFP - Iteration %i error = %14.7e < %10.5e\n", iter, error, tolerance);
-        printf("----------------------------------- FC3D - PFP - #              Internal iteration = %i\n", cumul_internal);
+        printf("--------------- FC3D - PFP - Iteration %i error = %14.7e < %10.5e\n", iter, error, tolerance);
+        printf("--------------- FC3D - PFP - #              Internal iteration = %i\n", cumul_internal);
       }
     }
   }

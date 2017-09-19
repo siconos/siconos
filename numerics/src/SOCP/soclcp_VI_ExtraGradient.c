@@ -112,7 +112,7 @@ void soclcp_VI_ExtraGradient(SecondOrderConeLinearComplementarityProblem* proble
 
   if (verbose > 0)
   {
-    printf("----------------------------------- SOCLCP - VI Extra Gradient (VI_EG) - #Iteration %i Final Residual = %14.7e\n", iter, error);
+    printf("--------------- SOCLCP - VI Extra Gradient (VI_EG) - #Iteration %i Final Residual = %14.7e\n", iter, error);
   }
   free(vi);
 

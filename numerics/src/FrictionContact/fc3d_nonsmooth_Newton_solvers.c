@@ -573,7 +573,7 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers* equation
   assert(tolerance > 0);
 
   if (verbose > 0)
-    printf("------------------------ FC3D - _nonsmooth_Newton_solversSolve - Start with tolerance = %g\n", tolerance);
+    printf("---- FC3D - _nonsmooth_Newton_solversSolve - Start with tolerance = %g\n", tolerance);
 
   unsigned int _3problemSize = 3 * problemSize;
   double norm_q = cblas_dnrm2(problemSize , problem->q , 1);
@@ -797,10 +797,10 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers* equation
   if (verbose > 0)
   {
     if (!info[0])
-      printf("------------------------ FC3D - NSN - convergence after %d iterations, residual : %g < %g \n",  iter, options->dparam[1],tolerance);
+      printf("---- FC3D - NSN - convergence after %d iterations, residual : %g < %g \n",  iter, options->dparam[1],tolerance);
     else
     {
-      printf("------------------------ FC3D - NSN - no convergence after %d iterations, residual : %g  < %g \n",  iter, options->dparam[1], tolerance);
+      printf("---- FC3D - NSN - no convergence after %d iterations, residual : %g  < %g \n",  iter, options->dparam[1], tolerance);
     }
   }
 
@@ -824,6 +824,6 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers* equation
     free(AWpB);
   }
   if (verbose > 0)
-    printf("------------------------ FC3D - NSN - End\n");
+    printf("---- FC3D - NSN - End\n");
 
 }

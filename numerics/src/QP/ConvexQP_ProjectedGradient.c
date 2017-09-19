@@ -79,7 +79,7 @@ void convexQP_ProjectedGradient(ConvexQP* problem, double *z, double *w, int* in
   if (rho == 0.0)
     numerics_error("fc3d_ProjectedGradientOnCylinder", "dparam[SICONOS_CONVEXQP_PGOC_RHO] must be nonzero");
 
-  //double rhoinit =rho;
+  double rhoinit =rho;
   double * z_tmp= (double *)malloc(n * sizeof(double));
   double * z_k;
   double * direction;
@@ -117,7 +117,7 @@ void convexQP_ProjectedGradient(ConvexQP* problem, double *z, double *w, int* in
       convexQP_computeError(problem, z , w, tolerance, options, &error);
 
       if (verbose > 0)
-        printf("----------------------------------- ConvexQP - Projected Gradient (PG) - Iteration %i rho = %14.7e \tError = %14.7e\n", iter, rho, error);
+        printf("--------------- ConvexQP - Projected Gradient (PG) - Iteration %i rho = %14.7e \tError = %14.7e\n", iter, rho, error);
 
       if (error < tolerance) hasNotConverged = 0;
       *info = hasNotConverged;
@@ -142,15 +142,17 @@ void convexQP_ProjectedGradient(ConvexQP* problem, double *z, double *w, int* in
     double criterion =1.0;
 
     int ls_iter =0;
-    //verbose=2;
+    verbose=2;
     while ((iter < itermax) && (hasNotConverged > 0))
     {
-      //rho =  rhoinit;
+      /* rho =  rhoinit; */
       ++iter;
 
       // store the old z
       cblas_dcopy(n , z , 1 , z_k , 1);
 
+      
+      
       /* q --> velocity_k */
       cblas_dcopy(n , q , 1 , w_k, 1);
       /* M r + q --> velocity_k */
@@ -205,7 +207,7 @@ void convexQP_ProjectedGradient(ConvexQP* problem, double *z, double *w, int* in
       convexQP_computeError(problem, z , w, tolerance, options,  &error);
 
       if (verbose > 0)
-        printf("----------------------------------- ConvexQP - Projected Gradient (PG) - Iteration %i rho =%10.5e error = %10.5e < %10.5e\n", iter, rho, error, tolerance);
+        printf("--------------- ConvexQP - Projected Gradient (PG) - Iteration %i rho =%10.5e error = %10.5e < %10.5e\n", iter, rho, error, tolerance);
 
 
       /* Try to increase rho is the ls_iter succeeds in one iteration */
@@ -218,10 +220,10 @@ void convexQP_ProjectedGradient(ConvexQP* problem, double *z, double *w, int* in
   }
 
 
-
+  verbose=1;
 
   if (verbose > 0)
-  printf("----------------------------------- FC3D - Projected Gradient On Cylinder (PGoC)- #Iteration %i Final Residual = %14.7e\n", iter, error);
+  printf("--------------- FC3D - Projected Gradient On Cylinder (PGoC)- #Iteration %i Final Residual = %14.7e\n", iter, error);
   dparam[SICONOS_DPARAM_RESIDU] = error;
   iparam[SICONOS_IPARAM_ITER_DONE] = iter;
 

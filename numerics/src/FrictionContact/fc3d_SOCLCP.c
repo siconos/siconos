@@ -121,9 +121,9 @@ void fc3d_SOCLCP(FrictionContactProblem* problem, double *reaction, double *velo
 
   if (verbose > 0)
   {
-    printf("----------------------------------- FC3D - SOCLCP - # Iteration %i Final Residual = %14.7e\n", internalsolver_options->iparam[7], error);
-    printf("----------------------------------- FC3D - SOCLCP - #              error of the real problem = %14.7e\n", real_error );
-    printf("----------------------------------- FC3D - SOCLCP - #              gap with the real problem = %14.7e\n", fabs(real_error-error) );
+    printf("--------------- FC3D - SOCLCP - # Iteration %i Final Residual = %14.7e\n", internalsolver_options->iparam[7], error);
+    printf("--------------- FC3D - SOCLCP - #              error of the real problem = %14.7e\n", real_error );
+    printf("--------------- FC3D - SOCLCP - #              gap with the real problem = %14.7e\n", fabs(real_error-error) );
   }
 
   free(soclcp->q);

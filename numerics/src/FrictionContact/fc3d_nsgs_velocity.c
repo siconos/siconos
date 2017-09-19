@@ -151,12 +151,12 @@ void fc3d_nsgs_velocity(FrictionContactProblem* problem, double *reaction, doubl
     (*computeError)(problem, reaction , velocity, tolerance, options, norm_q,  &error);
 
     if (verbose > 0)
-      printf("----------------------------------- FC3D - NSGS_VELOCITY - Iteration %i Residual = %14.7e\n", iter, error);
+      printf("--------------- FC3D - NSGS_VELOCITY - Iteration %i Residual = %14.7e\n", iter, error);
 
     if (error < tolerance) hasNotConverged = 0;
     *info = hasNotConverged;
   }
-  printf("----------------------------------- FC3D - NSGS_VELOCITY - # Iteration %i Final Residual = %14.7e\n", iter, error);
+  printf("--------------- FC3D - NSGS_VELOCITY - # Iteration %i Final Residual = %14.7e\n", iter, error);
   dparam[0] = tolerance;
   dparam[1] = error;
   iparam[7] = iter;

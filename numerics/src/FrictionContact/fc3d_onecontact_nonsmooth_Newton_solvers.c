@@ -369,7 +369,7 @@ int fc3d_onecontact_nonsmooth_Newton_gp_setDefaultSolverOptions(SolverOptions* o
 int fc3d_onecontact_nonsmooth_Newton_solvers_solve_direct(FrictionContactProblem* localproblem, double * R, int *iparam, double *dparam)
 {
   if (verbose > 1)
-    printf("-----------------------------------    fc3d_onecontact_nonsmooth_Newton_solvers_solve_direct  -- start iteration for contact %i \n", iparam[SICONOS_FRICTION_3D_NSGS_LOCALSOLVER_CONTACTNUMBER]);
+    printf("---------------    fc3d_onecontact_nonsmooth_Newton_solvers_solve_direct  -- start iteration for contact %i \n", iparam[SICONOS_FRICTION_3D_NSGS_LOCALSOLVER_CONTACTNUMBER]);
   double mu = localproblem->mu[0];
   double * qLocal = localproblem->q;
 
@@ -510,7 +510,7 @@ int fc3d_onecontact_nonsmooth_Newton_solvers_solve_direct(FrictionContactProblem
                                   + MLocal[i + 2 * 3] * R[2] ;
         Function(R, velocity, mu, rho, F, NULL, NULL);
         dparam[1] = 0.5 * (F[0] * F[0] + F[1] * F[1] + F[2] * F[2]) / (1.0 + sqrt(R[0] * R[0] + R[1] * R[1] + R[2] * R[2])) ; // improve with relative tolerance
-        if (verbose > 1) printf("-----------------------------------    fc3d_onecontact_nonsmooth_Newton_solvers_solve_direct  -- contact %i 3x3 linear system is irregular # iteration = %i  error = %.10e \n", iparam[SICONOS_FRICTION_3D_NSGS_LOCALSOLVER_CONTACTNUMBER], inew, dparam[1]);
+        if (verbose > 1) printf("---------------    fc3d_onecontact_nonsmooth_Newton_solvers_solve_direct  -- contact %i 3x3 linear system is irregular # iteration = %i  error = %.10e \n", iparam[SICONOS_FRICTION_3D_NSGS_LOCALSOLVER_CONTACTNUMBER], inew, dparam[1]);
         break;
       }
     }
@@ -529,18 +529,18 @@ int fc3d_onecontact_nonsmooth_Newton_solvers_solve_direct(FrictionContactProblem
             fc3d_unitary_compute_and_add_error( R , velocity,mu, &(dparam[2]));*/
     
 
-    if (verbose > 1) printf("-----------------------------------    fc3d_onecontact_nonsmooth_Newton_solvers_solve_direct  -- contact %i # iteration = %i  error = %.10e \n", iparam[SICONOS_FRICTION_3D_NSGS_LOCALSOLVER_CONTACTNUMBER], inew, dparam[1]);
+    if (verbose > 1) printf("---------------    fc3d_onecontact_nonsmooth_Newton_solvers_solve_direct  -- contact %i # iteration = %i  error = %.10e \n", iparam[SICONOS_FRICTION_3D_NSGS_LOCALSOLVER_CONTACTNUMBER], inew, dparam[1]);
 
     if (dparam[1] < Tol)
     {
-      /*    printf("-----------------------------------    fc3d_onecontact_nonsmooth_Newton_solvers_solve_direct number of iteration = %i  error = %.10e \t error2 = %.10e \n",inew,dparam[1], dparam[2]); */
+      /*    printf("---------------    fc3d_onecontact_nonsmooth_Newton_solvers_solve_direct number of iteration = %i  error = %.10e \t error2 = %.10e \n",inew,dparam[1], dparam[2]); */
       iparam[1]=inew;
       return 0;
     }
 
   }// End of the Newton iteration
 
-  /*  printf("-----------------------------------    LocalNewtonSolver number of iteration = %i  error = %.10e \t error2 = %.10e \n",inew,dparam[1], dparam[2]); */
+  /*  printf("---------------    LocalNewtonSolver number of iteration = %i  error = %.10e \t error2 = %.10e \n",inew,dparam[1], dparam[2]); */
   iparam[1]=inew;
   return 1;
 
@@ -688,7 +688,7 @@ static int LineSearchGP(FrictionContactProblem* localproblem,
       *t_opt = alpha;
       if (verbose > 1)
       {
-        printf("-----------------------------------------    LineSearchGP success number of iteration = %i  alpha = %.10e \n", iter, alpha);
+        printf("-    LineSearchGP success number of iteration = %i  alpha = %.10e \n", iter, alpha);
       }
       return 0;
 
@@ -724,7 +724,7 @@ static int LineSearchGP(FrictionContactProblem* localproblem,
   }
   if (verbose > 1)
   {
-    printf("-----------------------------------------    LineSearchGP not succeed max number of iteration reached  = %i  with alpha = %.10e \n", LSitermax, alpha);
+    printf("-    LineSearchGP not succeed max number of iteration reached  = %i  with alpha = %.10e \n", LSitermax, alpha);
   }
   *t_opt = alpha;
   return -1;
@@ -840,7 +840,7 @@ int fc3d_onecontact_nonsmooth_Newton_solvers_solve_damped(FrictionContactProblem
                                   + MLocal[i + 2 * 3] * R[2] ;
         Function(R, velocity, mu, rho, F, NULL, NULL);
         dparam[1] = 0.5 * (F[0] * F[0] + F[1] * F[1] + F[2] * F[2]) / (1.0 + sqrt(R[0] * R[0] + R[1] * R[1] + R[2] * R[2])) ; // improve with relative tolerance
-        if (verbose > 0) printf("-----------------------------------    fc3d_onecontact_nonsmooth_Newton_solvers_solve_direct  -- contact %i 3x3 linear system is irregular # iteration = %i  error = %.10e \n", iparam[SICONOS_FRICTION_3D_NSGS_LOCALSOLVER_CONTACTNUMBER], inew, dparam[1]);
+        if (verbose > 0) printf("---------------    fc3d_onecontact_nonsmooth_Newton_solvers_solve_direct  -- contact %i 3x3 linear system is irregular # iteration = %i  error = %.10e \n", iparam[SICONOS_FRICTION_3D_NSGS_LOCALSOLVER_CONTACTNUMBER], inew, dparam[1]);
         break;
       }
     }
@@ -861,7 +861,7 @@ int fc3d_onecontact_nonsmooth_Newton_solvers_solve_damped(FrictionContactProblem
       /*   { */
       /*     t = 100.0; */
       /*     if (verbose > 1) */
-      /*       printf("-----------------------------------------  " */
+      /*       printf("-  " */
       /*              "Max Number of LineSearchGP failed =%i Tilt point\n ", */
       /*              NumberofLSfailed); */
       /*     NumberofLSfailed = 0; */
@@ -882,7 +882,7 @@ int fc3d_onecontact_nonsmooth_Newton_solvers_solve_damped(FrictionContactProblem
     Function(R, velocity, mu, rho, F, NULL, NULL);
     dparam[1] = 0.5 * (F[0] * F[0] + F[1] * F[1] + F[2] * F[2]) / (1.0 + sqrt(R[0] * R[0] + R[1] * R[1] + R[2] * R[2])) ; // improve with relative tolerance
 
-    if (verbose > 1) printf("-----------------------------------  fc3d_onecontact_nonsmooth_Newton_solvers_solve_damped.  number of iteration = %i  error = %.10e \n", inew, dparam[1]);
+    if (verbose > 1) printf("---------------  fc3d_onecontact_nonsmooth_Newton_solvers_solve_damped.  number of iteration = %i  error = %.10e \n", inew, dparam[1]);
     if (dparam[1] < Tol) return 0;
 
 

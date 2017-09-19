@@ -189,13 +189,13 @@ void fc3d_HyperplaneProjection(FrictionContactProblem* problem, double *reaction
     }
 
     if (verbose > 0)
-      printf("----------------------------------- FC3D - Hyperplane Projection (HP) - Iteration %i rho = %14.7e \t rhoequiv = %14.7e \tError = %14.7e\n", iter, rho, rhoequiv, error);
+      printf("--------------- FC3D - Hyperplane Projection (HP) - Iteration %i rho = %14.7e \t rhoequiv = %14.7e \tError = %14.7e\n", iter, rho, rhoequiv, error);
 
     if (error < tolerance) hasNotConverged = 0;
     *info = hasNotConverged;
   }
   if (verbose > 0)
-    printf("----------------------------------- FC3D - Hyperplane Projection (HP) - #Iteration %i Final Residual = %14.7e\n", iter, error);
+    printf("--------------- FC3D - Hyperplane Projection (HP) - #Iteration %i Final Residual = %14.7e\n", iter, error);
   dparam[0] = tolerance;
   dparam[1] = error;
   iparam[7] = iter;

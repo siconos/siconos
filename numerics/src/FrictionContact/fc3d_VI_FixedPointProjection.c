@@ -114,7 +114,7 @@ void fc3d_VI_FixedPointProjection(FrictionContactProblem* problem, double *react
 
   if (verbose > 0)
   {
-    printf("----------------------------------- FC3D - VI Fixed Point Projection (VI_FPP) - #Iteration %i Final Residual = %14.7e\n", iter, error);
+    printf("--------------- FC3D - VI Fixed Point Projection (VI_FPP) - #Iteration %i Final Residual = %14.7e\n", iter, error);
   }
   free(vi);
 
@@ -220,7 +220,7 @@ void fc3d_VI_FixedPointProjection_Cylinder(FrictionContactProblem* problem, doub
 
   if (verbose > 0)
   {
-    printf("----------------------------------- FC3D - VI Fixed Point Projection (VI_FPP) - #Iteration %i Final Residual = %14.7e\n", iter, error);
+    printf("--------------- FC3D - VI Fixed Point Projection (VI_FPP) - #Iteration %i Final Residual = %14.7e\n", iter, error);
   }
   free(vi);
 

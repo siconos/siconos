@@ -134,11 +134,11 @@ void convexQP_VI_solver(ConvexQP* problem, double *z, double *w, int* info, Solv
 
     if (options->solverId==SICONOS_CONVEXQP_VI_FPP)
     {
-      printf("----------------------------------- CONVEXQP - VI solver (VI_FPP) - #Iteration %i Final Residual = %14.7e\n", iter, error);
+      printf("--------------- CONVEXQP - VI solver (VI_FPP) - #Iteration %i Final Residual = %14.7e\n", iter, error);
     }
     else if (options->solverId==SICONOS_CONVEXQP_VI_EG)
     {
-      printf("----------------------------------- CONVEXQP - VI solver (VI_EG) - #Iteration %i Final Residual = %14.7e\n", iter, error);
+      printf("--------------- CONVEXQP - VI solver (VI_EG) - #Iteration %i Final Residual = %14.7e\n", iter, error);
     }
     
   }

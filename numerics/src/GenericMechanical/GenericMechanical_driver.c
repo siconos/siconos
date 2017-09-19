@@ -418,7 +418,7 @@ void genericMechanicalProblem_GS(GenericMechanicalProblem* pGMP, double * reacti
       tolViolate = GenericMechanical_compute_error(pGMP, reaction, velocity, tol, options, err);
     }
     if (verbose > 0)
-      printf("----------------------------------- GMP - GS - Iteration %i Residual = %14.7e <= %7.3e\n", it, *err, options->dparam[0]);
+      printf("--------------- GMP - GS - Iteration %i Residual = %14.7e <= %7.3e\n", it, *err, options->dparam[0]);
 
     //tolViolate=GenericMechanical_compute_error(pGMP,reaction,velocity,tol,options,&err);
     /*next GS it*/

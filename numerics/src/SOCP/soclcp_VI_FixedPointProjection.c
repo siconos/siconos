@@ -108,7 +108,7 @@ void soclcp_VI_FixedPointProjection(SecondOrderConeLinearComplementarityProblem*
 
   if (verbose > 0)
   {
-    printf("-----------------------------------SOCLCP - VI Fixed Point Projection (VI_FPP) - #Iteration %i Final Residual = %14.7e\n", iter, error);
+    printf("---------------SOCLCP - VI Fixed Point Projection (VI_FPP) - #Iteration %i Final Residual = %14.7e\n", iter, error);
   }
   free(vi);
 

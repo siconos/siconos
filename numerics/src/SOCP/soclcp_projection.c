@@ -279,7 +279,7 @@ int soclcp_projectionOnConeWithLocalIteration_solve(SecondOrderConeLinearComplem
     localerror =0.0;
     soclcp_unitary_compute_and_add_error(r , v, nLocal, mu_i, &localerror, r_k);
 
-    /* printf("----------------------  localiter = %i\t, rho= %.10e\t, error = %.10e \n", localiter, rho, localerror);  */
+    /* printf("--  localiter = %i\t, rho= %.10e\t, error = %.10e \n", localiter, rho, localerror);  */
 
     /*Update rho*/
     if((rho_k*a1 < Lmin * a2) && (localerror < localerror_k))
@@ -291,7 +291,7 @@ int soclcp_projectionOnConeWithLocalIteration_solve(SecondOrderConeLinearComplem
 
     if(verbose > 1)
     {
-      printf("----------------------  localiter = %i\t, rho= %.10e\t, error = %.10e \n", localiter, rho, localerror);
+      printf("--  localiter = %i\t, rho= %.10e\t, error = %.10e \n", localiter, rho, localerror);
     }
 
     options->dWork[options->iparam[4]+options->iWork[0]] =rho;

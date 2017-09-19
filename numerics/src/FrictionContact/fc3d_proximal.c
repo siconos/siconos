@@ -23,8 +23,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
-#define DEBUG_STDOUT
-#define DEBUG_MESSAGES
+/* #define DEBUG_STDOUT */
+/* #define DEBUG_MESSAGES */
 #include "debug.h"
 #include <math.h>
 #include "numerics_verbose.h"
@@ -164,15 +164,15 @@ void fc3d_proximal(FrictionContactProblem* problem, double *reaction, double *ve
   DEBUG_PRINTF("options->iparam[SICONOS_FRICTION_3D_PROXIMAL_IPARAM_STRATEGY] = %i\n",options->iparam[SICONOS_FRICTION_3D_PROXIMAL_IPARAM_STRATEGY]);
 
   if (verbose > 0){
-    printf("------------------------ FC3D - PROXIMAL - Start with alpha = %12.8e\n", alpha);
+    printf("---- FC3D - PROXIMAL - Start with alpha = %12.8e\n", alpha);
 
     if (isVariable)
-      printf("------------------------ FC3D - PROXIMAL - Variable alpha strategy\n");
+      printf("---- FC3D - PROXIMAL - Variable alpha strategy\n");
     else
-      printf("------------------------ FC3D - PROXIMAL - Fixed alpha strategy\n");
+      printf("---- FC3D - PROXIMAL - Fixed alpha strategy\n");
 
     if (options->iparam[SICONOS_FRICTION_3D_PROXIMAL_IPARAM_STRATEGY]==SICONOS_FRICTION_3D_PROXIMAL_REGULARIZATION)
-      printf("------------------------ FC3D - PROXIMAL - Only regularization \n");
+      printf("---- FC3D - PROXIMAL - Only regularization \n");
   }
 
   if (iparam[SICONOS_FRICTION_3D_PROXIMAL_IPARAM_STRATEGY] ==
@@ -215,7 +215,7 @@ void fc3d_proximal(FrictionContactProblem* problem, double *reaction, double *ve
       }
 
       if (verbose > 0)
-        printf("------------------------ FC3D - PROXIMAL - Iteration %i Residual = %14.7e with alpha = %12.8e\n\n", iter, error, alpha);
+        printf("---- FC3D - PROXIMAL - Iteration %i Residual = %14.7e with alpha = %12.8e\n\n", iter, error, alpha);
       if (isVariable)
       {
         alpha_old =alpha;
@@ -248,7 +248,7 @@ void fc3d_proximal(FrictionContactProblem* problem, double *reaction, double *ve
       (*internalsolver)(problem, reaction , velocity , info , internalsolver_options);
 
       if (verbose >0 && *info)
-        printf("------------------------ FC3D - PROXIMAL - internalsolver no convergence\n");
+        printf("---- FC3D - PROXIMAL - internalsolver no convergence\n");
 
       int iter_internalsolver = internalsolver_options->iparam[SICONOS_IPARAM_ITER_DONE];
       options->iparam[SICONOS_FRICTION_3D_PROXIMAL_IPARAM_CUMULATIVE_ITER_DONE ] +=iter_internalsolver;
@@ -287,7 +287,7 @@ void fc3d_proximal(FrictionContactProblem* problem, double *reaction, double *ve
       }
 
       if (verbose > 0)
-        printf("------------------------ FC3D - PROXIMAL - Iteration %i Residual = %14.7e with alpha = %12.8e\n\n", iter, error, alpha);
+        printf("---- FC3D - PROXIMAL - Iteration %i Residual = %14.7e with alpha = %12.8e\n\n", iter, error, alpha);
 
       if (error < tolerance) hasNotConverged = 0;
       *info = hasNotConverged;
@@ -299,8 +299,8 @@ void fc3d_proximal(FrictionContactProblem* problem, double *reaction, double *ve
 
   if (verbose > 0)
   {
-    printf("------------------------ FC3D - PROXIMAL - # Iteration %i Final Residual = %14.7e  \n", iter, error);
-    printf("------------------------ FC3D - PROXIMAL - # Iteration of internal solver %i \n", options->iparam[SICONOS_FRICTION_3D_PROXIMAL_IPARAM_CUMULATIVE_ITER_DONE]);
+    printf("---- FC3D - PROXIMAL - # Iteration %i Final Residual = %14.7e  \n", iter, error);
+    printf("---- FC3D - PROXIMAL - # Iteration of internal solver %i \n", options->iparam[SICONOS_FRICTION_3D_PROXIMAL_IPARAM_CUMULATIVE_ITER_DONE]);
   }
 
   iparam[SICONOS_IPARAM_ITER_DONE] = iter;
