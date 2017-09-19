@@ -23,6 +23,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <float.h>
 /* #define DEBUG_STDOUT   */
 /* #define DEBUG_MESSAGES   */
 #include "debug.h"
