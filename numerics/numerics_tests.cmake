@@ -502,6 +502,8 @@ if(WITH_${COMPONENT}_TESTING)
 
   NEW_FC_3D_TEST(Confeti-ex03-Fc3D-SBM.dat
     SICONOS_FRICTION_3D_PFP 10e-8 2000)
+
+
   # ---- Hyperplane Projection ----
   # HP is not converging
   NEW_FC_3D_TEST(Confeti-ex13-Fc3D-SBM.dat
@@ -591,6 +593,11 @@ if(WITH_${COMPONENT}_TESTING)
     0 0 0
     DPARAM 3 1e4
     IPARAM 1 1)
+
+ NEW_FC_3D_TEST(KaplasTower-i1061-4.hdf5.dat
+    SICONOS_FRICTION_3D_PROX  1e-3 10
+    0 0 0
+    DPARAM 3 1e4)
 
   # OneObject-i100000-499.hdf5.dat
   NEW_FC_3D_TEST(OneObject-i100000-499.hdf5.dat

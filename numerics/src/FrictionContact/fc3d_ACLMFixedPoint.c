@@ -132,7 +132,7 @@ void fc3d_ACLMFixedPoint(FrictionContactProblem* problem, double *reaction, doub
       soclcp->q[3*ic] = problem->q[3*ic] + problem->mu[ic]*normUT;
     }
 
-    fc3d_FixedPoint_set_internalsolver_tolerance(problem,options,internalsolver_options, error);
+    fc3d_set_internalsolver_tolerance(problem,options,internalsolver_options, error);
 
 
     (*internalsolver)(soclcp, reaction , velocity , info , internalsolver_options);
@@ -191,8 +191,10 @@ int fc3d_ACLMFixedPoint_setDefaultSolverOptions(SolverOptions* options)
   solver_options_nullify(options);
 
   options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
-  options->iparam[SICONOS_FRICTION_3D_FP_ERROR_STRATEGY] =  SICONOS_FRICTION_3D_FP_ERROR_STRATEGY_ADAPTIVE;
+  options->iparam[SICONOS_FRICTION_3D_IPARAM_INTERNAL_ERROR_STRATEGY] =  SICONOS_FRICTION_3D_INTERNAL_ERROR_STRATEGY_ADAPTIVE;
   options->dparam[SICONOS_DPARAM_TOL] = 1e-4;
+  options->dparam[SICONOS_FRICTION_3D_DPARAM_INTERNAL_ERROR_RATIO] =10.0;
+
   options->internalSolvers = (SolverOptions *)malloc(sizeof(SolverOptions));
 
   soclcp_nsgs_setDefaultSolverOptions(options->internalSolvers);

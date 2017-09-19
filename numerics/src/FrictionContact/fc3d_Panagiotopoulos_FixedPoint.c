@@ -180,7 +180,7 @@ void fc3d_Panagiotopoulos_FixedPoint(FrictionContactProblem* problem, double *re
     ++iter;
 
 
-    fc3d_FixedPoint_set_internalsolver_tolerance(problem,options,&internalsolver_options[0], error);
+    fc3d_set_internalsolver_tolerance(problem,options,&internalsolver_options[0], error);
 
     /* ----------------- */
     /* normal resolution */
@@ -211,7 +211,7 @@ void fc3d_Panagiotopoulos_FixedPoint(FrictionContactProblem* problem, double *re
       /* tangent resolution */
       /* ------------------ */
 
-      fc3d_FixedPoint_set_internalsolver_tolerance(problem,options,&internalsolver_options[1], error);
+      fc3d_set_internalsolver_tolerance(problem,options,&internalsolver_options[1], error);
       /* compute the rhs of the tangent problem */
       cblas_dcopy(2*nc , splitted_problem->q_t, 1 , tangent_cqp->q, 1);
       NM_gemv(1.0, splitted_problem->M_tn, r_n, 1.0, tangent_cqp->q);
@@ -294,8 +294,12 @@ int fc3d_Panagiotopoulos_FixedPoint_setDefaultSolverOptions(SolverOptions* optio
   solver_options_nullify(options);
 
   options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
-  options->iparam[SICONOS_FRICTION_3D_FP_ERROR_STRATEGY] =  SICONOS_FRICTION_3D_FP_ERROR_STRATEGY_ADAPTIVE;
+  options->iparam[SICONOS_FRICTION_3D_INTERNAL_ERROR_STRATEGY_ADAPTIVE] =  SICONOS_FRICTION_3D_INTERNAL_ERROR_STRATEGY_ADAPTIVE;
   options->dparam[SICONOS_DPARAM_TOL] = 1e-4;
+  options->dparam[SICONOS_FRICTION_3D_DPARAM_INTERNAL_ERROR_RATIO] =10.0;
+
+
+
   options->numberOfInternalSolvers=2;
   options->internalSolvers = (SolverOptions *)malloc(options->numberOfInternalSolvers*sizeof(SolverOptions));
 

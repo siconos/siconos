@@ -164,10 +164,10 @@ extern "C"
   int fc3d_proximal_setDefaultSolverOptions(SolverOptions* options);
 
 
-  void fc3d_FixedPoint_set_internalsolver_tolerance(FrictionContactProblem* problem,
-                                                    SolverOptions* options,
-                                                    SolverOptions* internalsolver_options,
-                                                    double error);
+  void fc3d_set_internalsolver_tolerance(FrictionContactProblem* problem,
+                                         SolverOptions* options,
+                                         SolverOptions* internalsolver_options,
+                                         double error);
 
   
   /** Fixed point solver for friction-contact 3D problem based on the Tresca

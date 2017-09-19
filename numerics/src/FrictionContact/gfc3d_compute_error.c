@@ -46,8 +46,6 @@ int gfc3d_compute_error(GlobalFrictionContactProblem* problem,
     numerics_error("gfc3d_compute_error", "null input");
 
   gfc3d_init_workspace(problem);
-  NumericsMatrix* factorized_M = problem->workspace->factorized_M;
-  double* globalVelocitytmp = problem->workspace->globalVelocity;
 
   /* Computes error = dnorm2( GlobalVelocity -M^-1( q + H reaction)*/
   int nc = problem->numberOfContacts;
