@@ -1232,7 +1232,6 @@ void SiconosBulletCollisionManager::removeBody(const SP::BodyDS& body)
   std::vector<std11::shared_ptr<BodyShapeRecord> >::iterator it2;
   for (it2 = it->second.begin(); it2 != it->second.end(); it2++)
   {
-    printf("removing a collision object\n");
     impl->_collisionWorld->removeCollisionObject( &* (*it2)->btobject );
   }
 
