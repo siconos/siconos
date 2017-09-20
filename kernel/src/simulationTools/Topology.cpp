@@ -261,17 +261,10 @@ void Topology::insertDynamicalSystem(SP::DynamicalSystem ds)
 
 /* remove a dynamical system : remove edges (DynamicalSystem) from _IG if
    corresponding vertices are removed from _DSG */
-void Topology::__removeDynamicalSystemFromIndexSet(SP::DynamicalSystem ds,
-                                                   bool removeInteractions)
+void Topology::__removeDynamicalSystemFromIndexSet(SP::DynamicalSystem ds)
 {
-  if (removeInteractions) {
-    // _DSG[0]->remove_out_edge_if(_DSG[0]->descriptor(ds),
-    //                             VertexIsRemovedDS(ds, _DSG[0], _IG[0]));
-    // _DSG[0]->remove_in_edge_if(_DSG[0]->descriptor(ds),
-    //                            VertexIsRemovedDS(ds, _DSG[0], _IG[0]));
-    _DSG[0]->remove_edge_if(_DSG[0]->descriptor(ds),
-                               VertexIsRemovedDS(ds, _DSG[0], _IG[0]));
-  }
+  _DSG[0]->remove_edge_if(_DSG[0]->descriptor(ds),
+                          VertexIsRemovedDS(ds, _DSG[0], _IG[0]));
 
   // note: remove_vertex also calls clear_vertex and removes all in/out edges
   _DSG[0]->remove_vertex(ds);
@@ -342,13 +335,12 @@ void Topology::removeInteraction(SP::Interaction inter)
   setHasChanged(true);
 }
 
-void Topology::removeDynamicalSystem(SP::DynamicalSystem ds,
-                                     bool removeInteractions)
+void Topology::removeDynamicalSystem(SP::DynamicalSystem ds)
 {
   DEBUG_PRINTF("removeDynamicalSystem : %p\n", &*ds);
 
   assert(_DSG[0]->edges_number() == _IG[0]->size() && "1");
-  __removeDynamicalSystemFromIndexSet(ds, removeInteractions);
+  __removeDynamicalSystemFromIndexSet(ds);
   assert(_DSG[0]->edges_number() == _IG[0]->size() && "2");
   setHasChanged(true);
 }

@@ -112,8 +112,7 @@ private:
   /** remove a DynamicalSystem from _IG and _DSG
    * \param ds a pointer to the Dynamical System to be removed
    */
-  void __removeDynamicalSystemFromIndexSet(SP::DynamicalSystem ds,
-                                           bool removeInterations);
+  void __removeDynamicalSystemFromIndexSet(SP::DynamicalSystem ds);
 
 public:
 
@@ -154,7 +153,7 @@ public:
    *  \param ds the dynamical system to remove
    *  \param removeInteractions if true, also remove all interactions with this ds
    */
-  void removeDynamicalSystem(SP::DynamicalSystem ds, bool removeInteractions=true);
+  void removeDynamicalSystem(SP::DynamicalSystem ds);
 
   /** set the name for this Dynamical System
    * \param ds a pointer to the system
