@@ -277,10 +277,8 @@ void SBM_extract_component_3x3(const SparseBlockStructuredMatrix* const restrict
 
 
 
-  /* Column (block) position of the current block*/
-  size_t colNumber;
-  /* Number of rows/columns of the current block */
-  unsigned int nbRows, nbColumns;
+  /* Number of rows of the current block */
+  unsigned int nbRows;
 
   /* Loop over all non-null blocks
      Works whatever the ordering order of the block is, in A->block
