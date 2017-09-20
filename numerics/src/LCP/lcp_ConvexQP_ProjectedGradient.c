@@ -25,7 +25,7 @@
 #include "LinearComplementarityProblem.h"
 #include "LinearComplementarityProblem_as_ConvexQP.h"
 #include "ConvexQP_Solvers.h"
-#include "lcp_Solvers.h"
+#include "LCP_Solvers.h"
 #include "lcp_cst.h"
 
 #include "SolverOptions.h"
