@@ -53,6 +53,7 @@ const char* const   SICONOS_LCP_MURTY_STR = "Murty's least index pivoting method
 const char* const   SICONOS_LCP_PATHSEARCH_STR = "For testing only: solver used in the Pathsearch algorithm";
 const char* const   SICONOS_LCP_PIVOT_LUMOD_STR = "Pivot based method with BLU updates using LUMOD";
 const char* const   SICONOS_LCP_GAMS_STR = "Using GAMS solvers";
+const char* const   SICONOS_LCP_CONVEXQP_PG_STR = "Convex QP Projected Gradient";
 
 static int lcp_driver_SparseBlockMatrix(LinearComplementarityProblem* problem, double *z , double *w, SolverOptions* options);
 
@@ -317,7 +318,10 @@ int lcp_driver_DenseMatrix(LinearComplementarityProblem* problem, double *z , do
     case SICONOS_LCP_GAMS:
       lcp_gams(problem, z, w, &info, options);
       break;
-    default:
+    case SICONOS_LCP_CONVEXQP_PG:
+      lcp_ConvexQP_ProjectedGradient(problem, z, w, &info, options);
+      break;
+   default:
       {
 	fprintf(stderr, "lcp_driver_DenseMatrix error: unknown solver name: %s\n", solver_options_id_to_name(options->solverId));
 	exit(EXIT_FAILURE);

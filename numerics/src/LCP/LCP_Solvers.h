@@ -508,6 +508,11 @@ extern "C"
   */
   int lcp_driver_DenseMatrix(LinearComplementarityProblem* problem, double *z , double *w, SolverOptions* options);
 
+  void lcp_ConvexQP_ProjectedGradient(LinearComplementarityProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options);
+  int linearComplementarity_ConvexQP_ProjectedGradient_setDefaultSolverOptions(SolverOptions* options);
+  
+
+  
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif

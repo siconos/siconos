@@ -23,24 +23,35 @@
 #include <math.h>
 #include <assert.h>
 #include <float.h>
+/* void lcp_compute_error_only(unsigned int n, double* restrict z , double* restrict w, double* restrict error) */
+/* { */
+/*   /\* Checks complementarity *\/ */
+
+/*   *error = 0.; */
+/*   double zi, wi; */
+/*   for (unsigned int i = 0 ; i < n ; i++) */
+/*   { */
+/*     zi = z[i]; */
+/*     wi = w[i]; */
+/*     if (zi < 0.0) */
+/*     { */
+/*       *error += -zi; */
+/*       if (wi < 0.0) *error += zi * wi; */
+/*     } */
+/*     if (wi < 0.0) *error += -wi; */
+/*     if ((zi > 0.0) && (wi > 0.0)) *error += zi * wi; */
+/*   } */
+/* } */
+
 void lcp_compute_error_only(unsigned int n, double* restrict z , double* restrict w, double* restrict error)
 {
-  /* Checks complementarity */
-
   *error = 0.;
   double zi, wi;
   for (unsigned int i = 0 ; i < n ; i++)
   {
-    zi = z[i];
-    wi = w[i];
-    if (zi < 0.0)
-    {
-      *error += -zi;
-      if (wi < 0.0) *error += zi * wi;
-    }
-    if (wi < 0.0) *error += -wi;
-    if ((zi > 0.0) && (wi > 0.0)) *error += zi * wi;
+    *error += pow(z[i] - max(0,(z[i] - w[i])),2);
   }
+  *error =sqrt(*error);
 }
 
 int lcp_compute_error(LinearComplementarityProblem* problem, double *z , double *w, double tolerance, double * error)

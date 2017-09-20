@@ -57,7 +57,7 @@ if(WITH_${COMPONENT}_TESTING)
   SET(DATASET_BLOCK_LCP "lcp_deudeu_block.dat")
   # PSOR is not working :(
   SET(SICONOS_LCP_SOLVERS
-   "ENUM;LEMKE;CPG;PGS;RPGS;LATIN;LATIN_W;QP;NSQP;AVI_CAOFERRIS;NEWTONMIN;NEWTON_FBLSA;NEWTON_MINFBLSA;BARD;MURTY;PIVOT;PIVOT_LUMOD;PATHSEARCH")
+   "ENUM;LEMKE;CPG;PGS;RPGS;LATIN;LATIN_W;QP;NSQP;AVI_CAOFERRIS;NEWTONMIN;NEWTON_FBLSA;NEWTON_MINFBLSA;BARD;MURTY;PIVOT;PIVOT_LUMOD;PATHSEARCH;CONVEXQP_PG")
   IF(HAVE_PATHFERRIS)
    LIST(APPEND SICONOS_LCP_SOLVERS "PATH")
   ENDIF()
@@ -90,6 +90,7 @@ if(WITH_${COMPONENT}_TESTING)
   # QP reformulation does not always work when the matrix is not symmetric
   # Use NSQP
   SET_LCP_TEST_AS_FAILED("exp_murty;exp_murty2;ortiz;enum_fails;CPS_2;CPS_3;CPS_4;CPS_4bis" "QP")
+  SET_LCP_TEST_AS_FAILED("exp_murty;exp_murty2;" "CONVEXQP_PG")
 
   # NEWTONMIN has no backup descent dir -> problem in DGESV -> GAME OVER !
   SET(test-LCP_NEWTONMIN-lcp_CPS_1_PROPERTIES WILL_FAIL TRUE)
@@ -103,7 +104,7 @@ if(WITH_${COMPONENT}_TESTING)
 
   # those test cannot be solved with an algorithm that requires non-zero
   # diagonal elements, that is PGS, BARD, MURTY, LATIN and LATIN_W
-  SET_LCP_TEST_AS_FAILED("enum_fails;CPS_2;CPS_3;CPS_4;CPS_4bis" "PGS;BARD;MURTY;LATIN;LATIN_W")
+  SET_LCP_TEST_AS_FAILED("enum_fails;CPS_2;CPS_3;CPS_4;CPS_4bis" "PGS;BARD;MURTY;LATIN;LATIN_W;CONVEXQP_PG")
   # suprinsingly this works ...
   SET(test-LCP_MURTY-lcp_enum_fails_PROPERTIES WILL_FAIL FALSE)
 

@@ -105,11 +105,10 @@ void fc3d_Panagiotopoulos_FixedPoint(FrictionContactProblem* problem, double *re
   if (options->numberOfInternalSolvers !=2)
     numerics_error("fc3d_Panagiotopoulos_FixedPoint", " the solver requires 2 internal solver");
 
-  if (internalsolver_options[0].solverId == SICONOS_LCP_PGS)
+  if (internalsolver_options[0].solverId == SICONOS_LCP_PGS||
+      internalsolver_options[0].solverId == SICONOS_LCP_CONVEXQP_PG)
   {
-    if (verbose > 0)
-      printf(" ========================== Call LCP_PGS solver for Friction-Contact 3D problem ==========================\n");
-
+ 
     normal_lcp_problem = (LinearComplementarityProblem*)malloc(sizeof(LinearComplementarityProblem));
     normal_lcp_problem->size = nc;
     normal_lcp_problem->M = splitted_problem->M_nn;
@@ -123,18 +122,16 @@ void fc3d_Panagiotopoulos_FixedPoint(FrictionContactProblem* problem, double *re
     /* splitted_problem->M_nn->storageType=NM_DENSE; */
 
     normal_lcp_problem->q = (double *)malloc(nc*sizeof(double));
-    internalsolver_normal = &lcp_pgs;
+    
   }
   else
   {
-    numerics_error("fc3d_TrescaFixedpoint", "Unknown internal solver for the normal part.");
+    numerics_error("fc3d_Panagiotopoulos_FixedPoint", "Unknown internal solver for the normal part.");
   }
  if (internalsolver_options[1].solverId == SICONOS_CONVEXQP_PG ||
      internalsolver_options[1].solverId == SICONOS_CONVEXQP_VI_FPP||
      internalsolver_options[1].solverId == SICONOS_CONVEXQP_VI_EG)
   {
-
-
     tangent_cqp = (ConvexQP *)malloc(sizeof(ConvexQP));
     tangent_cqp->M = splitted_problem->M_tt;
     tangent_cqp->q = (double *) malloc(2* nc * sizeof(double));
@@ -152,13 +149,31 @@ void fc3d_Panagiotopoulos_FixedPoint(FrictionContactProblem* problem, double *re
     fc3d_as_cqp->cqp = tangent_cqp;
     fc3d_as_cqp->fc3d = problem;
     fc3d_as_cqp->options = options;
-
-
   }
   else
   {
-    numerics_error("fc3d_TrescaFixedpoint", "Unknown internal solver for the tangent part.");
+    numerics_error("fc3d_Panagiotopoulos_FixedPoint", "Unknown internal solver for the tangent part.");
   }
+
+ if (internalsolver_options[0].solverId == SICONOS_LCP_PGS)
+ {
+   if (verbose > 0)
+     printf(" ========================== Call LCP_PGS solver for Friction-Contact 3D problem ==========================\n");
+   internalsolver_normal = &lcp_pgs;
+ }  
+ else if (internalsolver_options[0].solverId == SICONOS_LCP_CONVEXQP_PG)
+ {
+   if (verbose > 0)
+     printf(" ========================== Call LCP_CONVEX_QP solver for Friction-Contact 3D problem ==========================\n");
+   internalsolver_normal = &lcp_ConvexQP_ProjectedGradient;
+ }
+ else
+  {
+    numerics_error("fc3d_Panagiotopoulos_FixedPoint", "Unknown internal solver for the normal part.");
+  }
+   
+
+ 
  if (internalsolver_options[1].solverId == SICONOS_CONVEXQP_PG)
  {
    if (verbose > 0)

@@ -376,6 +376,7 @@ void solver_options_set(SolverOptions* options, int solverId)
   case SICONOS_LCP_NEWTONMIN:
   case SICONOS_LCP_QP:
   case SICONOS_LCP_NSQP:
+  case SICONOS_LCP_CONVEXQP_PG:
   {
     iSize = 2;
     dSize = 2;

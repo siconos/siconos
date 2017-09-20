@@ -238,7 +238,7 @@ void convexQP_ProjectedGradient(ConvexQP* problem, double *z, double *w, int* in
   //verbose=1;
 
   if (verbose > 0)
-  printf("--------------- FC3D - Projected Gradient On Cylinder (PGoC)- #Iteration %i Final Residual = %14.7e\n", iter, error);
+  printf("---------------  ConvexQP - Projected Gradient (PG) - #Iteration %i Final Residual = %14.7e\n", iter, error);
   dparam[SICONOS_DPARAM_RESIDU] = error;
   iparam[SICONOS_IPARAM_ITER_DONE] = iter;
 
