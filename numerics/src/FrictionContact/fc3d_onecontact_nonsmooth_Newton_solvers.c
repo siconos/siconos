@@ -28,14 +28,16 @@
 #include "op3x3.h"
 
 
-#define DEBUG_CHECK
+//#define DEBUG_CHECK
 
 
-//#define OPTI_RHO
-/* #define DEBUG_MESSAGES *\/ */
-/* #define DEBUG_STDOUT *\/ */
+#define OPTI_RHO
+/* #define DEBUG_MESSAGES  */
+/* #define DEBUG_STDOUT */
 #include "debug.h"
 #include <string.h>
+#include <float.h>
+
 static computeNonsmoothFunction  Function = NULL;
 static NewtonFunctionPtr F = NULL;
 static NewtonFunctionPtr jacobianF = NULL;
@@ -222,13 +224,15 @@ int fc3d_onecontact_nonsmooth_Newton_solvers_solve(FrictionContactProblem* local
     {
       if (options->iparam[0] == options->iparam[1])
       {
-        printf("Numerics, fc3d_onecontact_nonsmooth_Newton_solvers_solve, warning. reached max. number of iterations (%i) without convergence for contact %i. Residual = %12.8e\n", options->iparam[0], options->iparam[4],  options->dparam[1]);
+        numerics_warning("fc3d_onecontact_nonsmooth_Newton_solvers_solve",
+                         "reached max. number of iterations (%i) for contact %i. Residual = %12.8e",
+                         options->iparam[0], options->iparam[4],  options->dparam[1]);
       }
       else
       {
-        printf("Numerics, fc3d_onecontact_nonsmooth_Newton_solvers_solve, warning. reached max. number of iterations (%i) without convergence for contact %i. Residual = %12.8e\n", options->iparam[1], options->iparam[4],  options->dparam[1]);
-        printf("Numerics, fc3d_onecontact_nonsmooth_Newton_solvers_solve, no convergence for contact %i with error %e\n",options->iparam[SICONOS_FRICTION_3D_NSGS_LOCALSOLVER_CONTACTNUMBER], options->dparam[SICONOS_DPARAM_RESIDU]);
-        /* frictionContact_display(localproblem) */;
+        numerics_warning("fc3d_onecontact_nonsmooth_Newton_solvers_solve",
+                         "no convergence for contact %i with error = %12.8e",
+                         options->iparam[0], options->iparam[4],  options->dparam[1]);
       }
       /* note : exit on failure should be done in DefaultCheckSolverOutput */
     }
@@ -373,6 +377,13 @@ int fc3d_onecontact_nonsmooth_Newton_solvers_solve_direct(FrictionContactProblem
   double mu = localproblem->mu[0];
   double * qLocal = localproblem->q;
 
+  double norm_qLocal  = sqrt(qLocal[0]*qLocal[0]+qLocal[1]*qLocal[1]+qLocal[2]*qLocal[2]);
+  double norm_relative = 1.0;
+  if (norm_qLocal> DBL_EPSILON)
+  {
+    norm_relative  /= norm_qLocal;
+  }
+
   double * MLocal = localproblem->M->matrix0;
 
   double Tol = dparam[SICONOS_DPARAM_TOL];
@@ -390,7 +401,6 @@ int fc3d_onecontact_nonsmooth_Newton_solvers_solve_direct(FrictionContactProblem
   // Store the (sub)-gradient of the function
   double A[9] = {0., 0., 0., 0., 0., 0., 0., 0., 0.};
   double B[9] = {0., 0., 0., 0., 0., 0., 0., 0., 0.};
-
   // Value of AW+B
   double AWplusB[9] = {0., 0., 0., 0., 0., 0., 0., 0., 0.};
 
@@ -403,11 +413,11 @@ int fc3d_onecontact_nonsmooth_Newton_solvers_solve_direct(FrictionContactProblem
 
   // compute the velocity
   double velocity[3] = {0., 0., 0.};
+  cpy3(qLocal,velocity);
+  mvp3x3(MLocal,R,velocity);
 
-  for (i = 0; i < 3; i++) velocity[i] = MLocal[i + 0 * 3] * R[0] + qLocal[i]
-                                          + MLocal[i + 1 * 3] * R[1] +
-                                          + MLocal[i + 2 * 3] * R[2] ;
-  for (inew = 0 ; inew < itermax ; ++inew) // Newton iteration
+  /* Newton iteration */
+  for (inew = 0 ; inew < itermax ; ++inew)
   {
     //Update function and gradient
     Function(R, velocity, mu, rho, F, A, B);
@@ -459,24 +469,24 @@ int fc3d_onecontact_nonsmooth_Newton_solvers_solve_direct(FrictionContactProblem
     }
 #endif
 /* #endif */
-
-
-    // compute -(A MLocal +B)
-    for (i = 0; i < 3; i++)
-    {
-      for (j = 0; j < 3; j++)
-      {
-        AWplusB[i + 3 * j] = 0.0;
-        for (k = 0; k < 3; k++)
-        {
-          AWplusB[i + 3 * j] -= A[i + 3 * k] * MLocal[k + j * 3];
-        }
-        AWplusB[i + 3 * j] -= B[i + 3 * j];
-      }
-    }
+    mm3x3(A, MLocal, AWplusB);
+    add3x3(B, AWplusB);
+    scal3x3(-1., AWplusB);
+    /* // compute -(A MLocal +B) */
+    /* for (i = 0; i < 3; i++) */
+    /* { */
+    /*   for (j = 0; j < 3; j++) */
+    /*   { */
+    /*     AWplusB[i + 3 * j] = 0.0; */
+    /*     for (k = 0; k < 3; k++) */
+    /*     { */
+    /*       AWplusB[i + 3 * j] -= A[i + 3 * k] * MLocal[k + j * 3]; */
+    /*     } */
+    /*     AWplusB[i + 3 * j] -= B[i + 3 * j]; */
+    /*   } */
+    /* } */
 
 /* #ifdef AC_STD */
-
 #ifndef DEBUG_CHECK
     if (iparam[10]==0)
     {
@@ -488,42 +498,33 @@ int fc3d_onecontact_nonsmooth_Newton_solvers_solve_direct(FrictionContactProblem
 /* #endif */
 
     // Solve the linear system
-    //if ( solv3x3(AWplusB, dR, F) ) // naive 3x3 solver
+    cpy3(F,dR);
+    if (solve_3x3_gepp(AWplusB, dR) )
     {
-      dR[0] = F[0];
-      dR[1] = F[1];
-      dR[2] = F[2];
-      if ( solve_3x3_gepp(AWplusB, dR) )
-      {
-        //NM_dense_display(AWplusB, 3, 3, 3);
-        // if determinant is zero, replace dR=NaN with zero (i.e. don't
-        // modify R) and return early
-        dR[0] = 0; dR[1] = 0; dR[2] = 0;
-        DEBUG_EXPR(
-          assert(0 && "solv3x3 returned error, bad determinant found."));
-        R[0] += dR[0];
-        R[1] += dR[1];
-        R[2] += dR[2];
-        // compute new residue
-        for (i = 0; i < 3; i++) velocity[i] = MLocal[i + 0 * 3] * R[0] + qLocal[i]
-                                  + MLocal[i + 1 * 3] * R[1] +
-                                  + MLocal[i + 2 * 3] * R[2] ;
-        Function(R, velocity, mu, rho, F, NULL, NULL);
-        dparam[1] = 0.5 * (F[0] * F[0] + F[1] * F[1] + F[2] * F[2]) / (1.0 + sqrt(R[0] * R[0] + R[1] * R[1] + R[2] * R[2])) ; // improve with relative tolerance
-        if (verbose > 1) printf("---------------    fc3d_onecontact_nonsmooth_Newton_solvers_solve_direct  -- contact %i 3x3 linear system is irregular # iteration = %i  error = %.10e \n", iparam[SICONOS_FRICTION_3D_NSGS_LOCALSOLVER_CONTACTNUMBER], inew, dparam[1]);
-        break;
-      }
+      //NM_dense_display(AWplusB, 3, 3, 3);
+      // if determinant is zero, replace dR=NaN with zero (i.e. don't
+      // modify R) and return early
+      dR[0] = 0; dR[1] = 0; dR[2] = 0;
+      DEBUG_EXPR(
+        assert(0 && "solv3x3 returned error, bad determinant found."));
+      add3(dR, R);
+      // compute new residue
+      cpy3(qLocal,velocity);
+      mvp3x3(MLocal,R,velocity);
+      Function(R, velocity, mu, rho, F, NULL, NULL);
+      dparam[1] = 0.5 * (F[0] * F[0] + F[1] * F[1] + F[2] * F[2]) * norm_relative ; // improve with relative tolerance
+      if (verbose > 0)
+        numerics_warning("fc3d_onecontact_nonsmooth_Newton_solvers_solve_direct" "contact %i 3x3 linear system is irregular # iteration = %i  error = %.10e \n", iparam[SICONOS_FRICTION_3D_NSGS_LOCALSOLVER_CONTACTNUMBER], inew, dparam[1]);
+      break;
     }
-    // upate iterates
-    R[0] += dR[0];
-    R[1] += dR[1];
-    R[2] += dR[2];
+
+    // update iterates
+    add3(dR, R);
     // compute new residue
-    for (i = 0; i < 3; i++) velocity[i] = MLocal[i + 0 * 3] * R[0] + qLocal[i]
-                                            + MLocal[i + 1 * 3] * R[1] +
-                                            + MLocal[i + 2 * 3] * R[2] ;
+    cpy3(qLocal,velocity);
+    mvp3x3(MLocal,R,velocity);
     Function(R, velocity, mu, rho, F, NULL, NULL);
-    dparam[1] = 0.5 * (F[0] * F[0] + F[1] * F[1] + F[2] * F[2]) / (1.0 + sqrt(R[0] * R[0] + R[1] * R[1] + R[2] * R[2])) ; // improve with relative tolerance
+    dparam[1] = 0.5 * (F[0] * F[0] + F[1] * F[1] + F[2] * F[2])* norm_relative  ; // improve with relative tolerance
 
     /*      dparam[2] =0.0;
             fc3d_unitary_compute_and_add_error( R , velocity,mu, &(dparam[2]));*/
@@ -744,7 +745,12 @@ int fc3d_onecontact_nonsmooth_Newton_solvers_solve_damped(FrictionContactProblem
   double mu = localproblem->mu[0];
   double * qLocal = localproblem->q;
   double * MLocal = localproblem->M->matrix0;
-
+  double norm_qLocal  = sqrt(qLocal[0]*qLocal[0]+qLocal[1]*qLocal[1]+qLocal[2]*qLocal[2]);
+  double norm_relative = 1.0;
+  if (norm_qLocal> DBL_EPSILON)
+  {
+    norm_relative  /= norm_qLocal;
+  }
 
   double Tol = dparam[SICONOS_DPARAM_TOL];
   int itermax = iparam[SICONOS_IPARAM_MAX_ITER];
@@ -787,12 +793,8 @@ int fc3d_onecontact_nonsmooth_Newton_solvers_solve_damped(FrictionContactProblem
 
   // compute the velocity
   double velocity[3] = {0., 0., 0.};
-  //cpy3(qLocal,velocity);
-  //mvp3x3(MLocal,velocity)
-
-  for (i = 0; i < 3; i++) velocity[i] = MLocal[i + 0 * 3] * R[0] + qLocal[i]
-                                          + MLocal[i + 1 * 3] * R[1] +
-                                          + MLocal[i + 2 * 3] * R[2] ;
+  cpy3(qLocal,velocity);
+  mvp3x3(MLocal,R,velocity);
 
   DEBUG_EXPR_WE(for (int i =0 ; i < 3; i++) printf("R[%i]= %12.8e,\t velocity[%i]= %12.8e,\n",i,R[i],i,velocity[i]););
   DEBUG_PRINT("fc3d_onecontact_nonsmooth_Newton_solvers_solve_damped -- Start Newton iteration\n");
@@ -806,44 +808,40 @@ int fc3d_onecontact_nonsmooth_Newton_solvers_solve_damped(FrictionContactProblem
     DEBUG_EXPR_WE(for ( int i =0 ; i < 3; i++) printf("F[%i]=%12.8e\t",i,F[i]); printf("\n"););
 
     // compute -(A MLocal +B)
-    for (i = 0; i < 3; i++)
+    mm3x3(A, MLocal, AWplusB);
+    add3x3(B, AWplusB);
+    scal3x3(-1., AWplusB);
+    /* for (i = 0; i < 3; i++) */
+    /* { */
+    /*   for (j = 0; j < 3; j++) */
+    /*   { */
+    /*     AWplusB[i + 3 * j] = 0.0; */
+    /*     for (k = 0; k < 3; k++) */
+    /*     { */
+    /*       AWplusB[i + 3 * j] -= A[i + 3 * k] * MLocal[k + j * 3]; */
+    /*     } */
+    /*     AWplusB[i + 3 * j] -= B[i + 3 * j]; */
+    /*   } */
+    /* } */
+
+    cpy3(F,dR);
+    if ( solve_3x3_gepp(AWplusB, dR) )
     {
-      for (j = 0; j < 3; j++)
-      {
-        AWplusB[i + 3 * j] = 0.0;
-        for (k = 0; k < 3; k++)
-        {
-          AWplusB[i + 3 * j] -= A[i + 3 * k] * MLocal[k + j * 3];
-        }
-        AWplusB[i + 3 * j] -= B[i + 3 * j];
-      }
+      // if determinant is zero, replace dR=NaN with zero (i.e. don't
+      // modify R) and return early
+      dR[0] = 0; dR[1] = 0; dR[2] = 0;
+      DEBUG_EXPR(
+        assert(0 && "solv3x3 returned error, bad determinant found."));
+      add3(dR, R);
+      // compute new residue
+      cpy3(qLocal,velocity);
+      mvp3x3(MLocal,R,velocity);
+      Function(R, velocity, mu, rho, F, NULL, NULL);
+      dparam[1] = 0.5 * (F[0] * F[0] + F[1] * F[1] + F[2] * F[2])* norm_relative ; // improve with relative tolerance
+      if (verbose > 0) printf("---------------    fc3d_onecontact_nonsmooth_Newton_solvers_solve_direct  -- contact %i 3x3 linear system is irregular # iteration = %i  error = %.10e \n", iparam[SICONOS_FRICTION_3D_NSGS_LOCALSOLVER_CONTACTNUMBER], inew, dparam[1]);
+        break;
     }
 
-    //if ( solv3x3(AWplusB, dR, F) ) // naive 3x3 solver
-    {
-      dR[0] = F[0];
-      dR[1] = F[1];
-      dR[2] = F[2];
-      if ( solve_3x3_gepp(AWplusB, dR) )
-      {
-        // if determinant is zero, replace dR=NaN with zero (i.e. don't
-        // modify R) and return early
-        dR[0] = 0; dR[1] = 0; dR[2] = 0;
-        DEBUG_EXPR(
-          assert(0 && "solv3x3 returned error, bad determinant found."));
-        R[0] += dR[0];
-        R[1] += dR[1];
-        R[2] += dR[2];
-        // compute new residue
-        for (i = 0; i < 3; i++) velocity[i] = MLocal[i + 0 * 3] * R[0] + qLocal[i]
-                                  + MLocal[i + 1 * 3] * R[1] +
-                                  + MLocal[i + 2 * 3] * R[2] ;
-        Function(R, velocity, mu, rho, F, NULL, NULL);
-        dparam[1] = 0.5 * (F[0] * F[0] + F[1] * F[1] + F[2] * F[2]) / (1.0 + sqrt(R[0] * R[0] + R[1] * R[1] + R[2] * R[2])) ; // improve with relative tolerance
-        if (verbose > 0) printf("---------------    fc3d_onecontact_nonsmooth_Newton_solvers_solve_direct  -- contact %i 3x3 linear system is irregular # iteration = %i  error = %.10e \n", iparam[SICONOS_FRICTION_3D_NSGS_LOCALSOLVER_CONTACTNUMBER], inew, dparam[1]);
-        break;
-      }
-    }
 
     {
       // Perform Line Search
@@ -875,12 +873,11 @@ int fc3d_onecontact_nonsmooth_Newton_solvers_solve_damped(FrictionContactProblem
     R[2] = R[2] + t * dR[2];
 
     // compute new residue
-    for (i = 0; i < 3; i++) velocity[i] = MLocal[i + 0 * 3] * R[0] + qLocal[i]
-                                            + MLocal[i + 1 * 3] * R[1] +
-                                            + MLocal[i + 2 * 3] * R[2] ;
+    cpy3(qLocal,velocity);
+    mvp3x3(MLocal,R,velocity);
 
     Function(R, velocity, mu, rho, F, NULL, NULL);
-    dparam[1] = 0.5 * (F[0] * F[0] + F[1] * F[1] + F[2] * F[2]) / (1.0 + sqrt(R[0] * R[0] + R[1] * R[1] + R[2] * R[2])) ; // improve with relative tolerance
+    dparam[1] = 0.5 * (F[0] * F[0] + F[1] * F[1] + F[2] * F[2])* norm_relative ; // improve with relative tolerance
 
     if (verbose > 1) printf("---------------  fc3d_onecontact_nonsmooth_Newton_solvers_solve_damped.  number of iteration = %i  error = %.10e \n", inew, dparam[1]);
     if (dparam[1] < Tol) return 0;
