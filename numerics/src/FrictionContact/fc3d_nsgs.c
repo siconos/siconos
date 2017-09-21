@@ -498,7 +498,7 @@ double calculateFullErrorFinal(FrictionContactProblem *problem, SolverOptions *o
                   options, norm_q, &absolute_error);
 
 
-  
+
   if (verbose > 0)
   {
     if (absolute_error > options->dparam[SICONOS_DPARAM_TOL])
@@ -696,9 +696,14 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction,
     {
       ++iter;
       double light_error_sum = 0.0;
+
+      fc3d_set_internalsolver_tolerance(problem, options, &localsolver_options[0], error);
+
       for (unsigned int i = 0 ; i < nc ; ++i)
       {
         contact = i;
+
+
         solveLocalReaction(update_localproblem, local_solver, contact,
                            problem, localproblem, reaction, localsolver_options,
                            localreaction);
@@ -728,6 +733,8 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction,
     {
       ++iter;
       double light_error_sum = 0.0;
+      fc3d_set_internalsolver_tolerance(problem, options, &localsolver_options[0], error);
+
       for (unsigned int i = 0 ; i < nc ; ++i)
       {
         if (iparam[SICONOS_FRICTION_3D_NSGS_SHUFFLE] == SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE
@@ -739,6 +746,7 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction,
         }
         else
           contact = i;
+
 
         solveLocalReaction(update_localproblem, local_solver, contact,
                            problem, localproblem, reaction, localsolver_options,
@@ -840,8 +848,14 @@ int fc3d_nsgs_setDefaultSolverOptions(SolverOptions* options)
 
   options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
   options->iparam[SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION] = SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL;
+  options->iparam[SICONOS_FRICTION_3D_IPARAM_INTERNAL_ERROR_STRATEGY] = SICONOS_FRICTION_3D_INTERNAL_ERROR_STRATEGY_GIVEN_VALUE;
+  /* options->iparam[SICONOS_FRICTION_3D_IPARAM_INTERNAL_ERROR_STRATEGY] = SICONOS_FRICTION_3D_INTERNAL_ERROR_STRATEGY_ADAPTIVE; */
+  /* options->iparam[SICONOS_FRICTION_3D_IPARAM_INTERNAL_ERROR_STRATEGY] = SICONOS_FRICTION_3D_INTERNAL_ERROR_STRATEGY_ADAPTIVE_N_CONTACT; */
 
   options->dparam[SICONOS_DPARAM_TOL] = 1e-4;
+  options->dparam[SICONOS_FRICTION_3D_DPARAM_INTERNAL_ERROR_RATIO] = 10.0;
+
+
   options->internalSolvers = (SolverOptions *)malloc(sizeof(SolverOptions));
   fc3d_onecontact_nonsmooth_Newton_gp_setDefaultSolverOptions(options->internalSolvers);
 

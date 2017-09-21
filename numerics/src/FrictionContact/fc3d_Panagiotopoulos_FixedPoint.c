@@ -50,6 +50,8 @@ typedef void (*tangentInternalSolverPtr)(ConvexQP*, double*, double*, int *, Sol
 
 void fc3d_Panagiotopoulos_FixedPoint(FrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options)
 {
+
+  /* verbose=1; */
   /* int and double parameters */
   int* iparam = options->iparam;
   double* dparam = options->dparam;
@@ -58,9 +60,9 @@ void fc3d_Panagiotopoulos_FixedPoint(FrictionContactProblem* problem, double *re
   int nc = problem->numberOfContacts;
 
   /* Maximum number of iterations */
-  int itermax = iparam[0];
+  int itermax = iparam[SICONOS_IPARAM_MAX_ITER];
   /* Tolerance */
-  double tolerance = dparam[0];
+  double tolerance = dparam[SICONOS_DPARAM_TOL];
   double norm_q = cblas_dnrm2(nc*3 , problem->q , 1);
 
 
@@ -168,9 +170,9 @@ void fc3d_Panagiotopoulos_FixedPoint(FrictionContactProblem* problem, double *re
    internalsolver_normal = &lcp_ConvexQP_ProjectedGradient;
  }
  else
-  {
-    numerics_error("fc3d_Panagiotopoulos_FixedPoint", "Unknown internal solver for the normal part.");
-  }
+ {
+   numerics_error("fc3d_Panagiotopoulos_FixedPoint", "Unknown internal solver for the normal part.");
+ }
    
 
  
@@ -309,7 +311,7 @@ int fc3d_Panagiotopoulos_FixedPoint_setDefaultSolverOptions(SolverOptions* optio
   solver_options_nullify(options);
 
   options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
-  options->iparam[SICONOS_FRICTION_3D_INTERNAL_ERROR_STRATEGY_ADAPTIVE] =  SICONOS_FRICTION_3D_INTERNAL_ERROR_STRATEGY_ADAPTIVE;
+  options->iparam[SICONOS_FRICTION_3D_IPARAM_INTERNAL_ERROR_STRATEGY] =  SICONOS_FRICTION_3D_INTERNAL_ERROR_STRATEGY_ADAPTIVE;
   options->dparam[SICONOS_DPARAM_TOL] = 1e-4;
   options->dparam[SICONOS_FRICTION_3D_DPARAM_INTERNAL_ERROR_RATIO] =10.0;
 

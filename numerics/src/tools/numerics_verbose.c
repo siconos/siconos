@@ -63,12 +63,12 @@ static void numerics_printf_internal(int level, const char* fmt, const char* ext
   case NUMERICS_LOG_TO_SCREEN:
   default:
   {
-    puts("[Numerics]");
+    printf("[Numerics]");
 //    printf("[%d]", level);
-    if (extra_qual) puts(extra_qual);
-    puts(" ");
+    if (extra_qual) printf("%s",extra_qual);
+    printf(" ");
     vprintf(fmt, argp);
-    puts("\n");
+    printf("\n");
   }
   }
 }
