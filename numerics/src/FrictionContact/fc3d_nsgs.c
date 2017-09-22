@@ -605,6 +605,7 @@ void statsIterationCallback(FrictionContactProblem *problem,
 void fc3d_nsgs(FrictionContactProblem* problem, double *reaction,
                double *velocity, int* info, SolverOptions* options)
 {
+  /* verbose=1; */
   /* int and double parameters */
   int* iparam = options->iparam;
   double* dparam = options->dparam;
@@ -801,24 +802,22 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction,
     }
   }
 
-  *info = hasNotConverged;
 
   /* Full criterium */
   if (iparam[SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL)
   {
     error = calculateFullErrorFinal(problem, options, computeError, reaction, velocity,
                                     tolerance, norm_q);
-    /* printf("error = %8.4e,\t with  norm_q = %8.4e \n", error,norm_q); */
 
-    /* double norm_r = cblas_dnrm2(nc*3 , reaction , 1); */
+    hasNotConverged = determine_convergence(error,  dparam[SICONOS_DPARAM_TOL] , iter, options);
 
-    /* error = calculateFullErrorFinal(problem, options, computeError, reaction, velocity, */
-    /*                                 tolerance, norm_r); */
-    /* printf("error = %8.4e,\t  with norm_r = %8.4e \n", error,norm_r); */
-    /* error = calculateFullErrorFinal(problem, options, computeError, reaction, velocity, */
-    /*                                 tolerance, 1.0); */
-    /* printf("error = %8.4e,\t  with norm = %8.4e \n", error,1.0); */
+
   }
+
+  *info = hasNotConverged;
+
+
+
   /** return parameter values */
   /* dparam[SICONOS_DPARAM_TOL] = tolerance; */
   dparam[SICONOS_DPARAM_RESIDU] = error;
