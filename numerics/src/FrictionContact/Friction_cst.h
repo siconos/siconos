@@ -247,6 +247,8 @@ enum SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION_ENUM
 
 enum SICONOS_FRICTION_3D_NSN_IPARAM
 {
+  /** index in iparam to store the strategy for computing rho */
+  SICONOS_FRICTION_3D_NSN_RHO_STRATEGY = 9,
   /** index in iparam to store the formulation */
   SICONOS_FRICTION_3D_NSN_FORMULATION = 10,
   /** index in iparam to store the line-search */
@@ -265,8 +267,21 @@ enum SICONOS_FRICTION_3D_NSN_DPARAM
 {
   /** index in dparam to store the rho value for projection formulation */
   SICONOS_FRICTION_3D_NSN_RHO = 3,
-
 };
+
+enum SICONOS_FRICTION_3D_NSN_RHO_STRATEGY_ENUM
+{
+  /** A constant value given in dparam[SICONOS_FRICTION_3D_NSN_RHO] is used */
+  SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_CONSTANT = 0,
+  /** A computed value stored in dparam[SICONOS_FRICTION_3D_NSN_RHO] is used */
+  SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_OPTI = 1,
+  /** An adaptive strategy for rho is used */
+  SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_ADAPTIVE =2,
+  /** An adaptive strategy for rho is used */
+  SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_EIGEN =3
+};
+
+
 enum SICONOS_FRICTION_3D_NSN_FORMULATION_ENUM
 {
   SICONOS_FRICTION_3D_NSN_FORMULATION_ALARTCURNIER_STD =0,
