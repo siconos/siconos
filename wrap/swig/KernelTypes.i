@@ -491,7 +491,6 @@ struct IsDense : public Question<bool>
     void *argp1=0;
     int res0=0;
     int res1=0;
-    int newmem = 0;
     std11::shared_ptr<SiconosVector> tempshared1 ;
     std11::shared_ptr<SiconosVector> *smartarg1 = NULL;
     SiconosVector* smartarg2 = NULL;
