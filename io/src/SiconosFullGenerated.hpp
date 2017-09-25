@@ -31,6 +31,7 @@
 #include "JointFrictionR.hpp"
 #include "BodyDS.hpp"
 #include "SiconosShape.hpp"
+#include "ContactR.hpp"
 #include "SiconosCollisionQueryResult.hpp"
 #include "SiconosContactor.hpp"
 #include "SiconosCollisionManager.hpp"
@@ -644,6 +645,16 @@ SICONOS_IO_REGISTER(Model,
   (_t)
   (_t0)
   (_title))
+SICONOS_IO_REGISTER_WITH_BASES(ContactR,(NewtonEulerFrom3DLocalFrameR),
+  (_contactDistance)
+  (_flip)
+  (_scaling)
+  (_y_correction_A)
+  (_y_correction_B)
+  (base)
+  (contactor)
+  (ds)
+  (shape))
 SICONOS_IO_REGISTER_WITH_BASES(PivotJointR,(KneeJointR),
   (_A)
   (_A1x)
@@ -1124,6 +1135,7 @@ void siconos_io_register_generated(Archive& ar)
   ar.register_type(static_cast<MoreauJeanOSI*>(NULL));
   ar.register_type(static_cast<EulerMoreauOSI*>(NULL));
   ar.register_type(static_cast<Model*>(NULL));
+  ar.register_type(static_cast<ContactR*>(NULL));
   ar.register_type(static_cast<PivotJointR*>(NULL));
   ar.register_type(static_cast<SphereLDSPlanR*>(NULL));
   ar.register_type(static_cast<SphereLDSSphereLDSR*>(NULL));

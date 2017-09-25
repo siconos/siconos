@@ -55,9 +55,8 @@
   REGISTER(BulletTimeStepping)                  \
   REGISTER(MBTB_FC3DContactRelation)            \
   REGISTER(MBTB_ContactRelation)                \
-                                                \
-  /* Proposed new Mechanics API */              \
   REGISTER(BodyDS)                              \
+  REGISTER(ContactR)                            \
   REGISTER(SiconosContactor)                    \
   REGISTER(SiconosContactorSet)                 \
   REGISTER(SiconosContactorBase)                \

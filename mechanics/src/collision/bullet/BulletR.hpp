@@ -20,9 +20,9 @@
 #define BulletR_hpp
 
 #include "BulletSiconosFwd.hpp"
-#include "NewtonEulerFrom3DLocalFrameR.hpp"
+#include "ContactR.hpp"
 
-class BulletR : public NewtonEulerFrom3DLocalFrameR
+class BulletR : public ContactR
 {
 private:
   /** serialization hooks
@@ -30,10 +30,6 @@ private:
   ACCEPT_SERIALIZATION(BulletR);
 
   SP::btManifoldPoint _contactPoints;
-
-  const double _y_correction_A;
-  const double _y_correction_B;
-  const double _scaling;
 
 public:
   BulletR(const btManifoldPoint &,
@@ -43,10 +39,9 @@ public:
           double y_correction_B=0,
           double scaling=1);
 
-  bool _flip; /* if true, points A and B are swapped from the point
-               * view of the Relation. */
-
-  double _contactDistance;
+  /* For users that may require extra information about contacts. */
+  SP::btCollisionObject btObject[2];
+  SP::btCollisionShape btShape[2];
 
   // TODO used by BulletSpaceFilter
   SP::btManifoldPoint contactPoint() const
@@ -60,21 +55,8 @@ public:
     _contactPoints = p;
   };
 
-  double distance() const
-  {
-    return _contactDistance;
-  };
-
-  double y_correction_A() { return _y_correction_A; }
-  double y_correction_B() { return _y_correction_A; }
-  double y_correction() { return _y_correction_A + _y_correction_B; }
-
-  virtual void computeh(double time, BlockVector& q0, SiconosVector& y);
-
   virtual void updateContactPoints(const btManifoldPoint& point,
                                    SP::NewtonEulerDS ds1, SP::NewtonEulerDS ds2);
-
-  virtual void preDelete() {}
 
   ACCEPT_STD_VISITORS();
 };

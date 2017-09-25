@@ -32,7 +32,7 @@ input_headers = {
                   "NewtonEulerJointR.hpp",
                   "JointStopR.hpp",
                   "JointFrictionR.hpp",
-                  "BodyDS.hpp", "SiconosShape.hpp",
+                  "BodyDS.hpp", "SiconosShape.hpp", "ContactR.hpp",
                   "SiconosCollisionQueryResult.hpp",
                   "SiconosContactor.hpp",
                   "SiconosCollisionManager.hpp"],

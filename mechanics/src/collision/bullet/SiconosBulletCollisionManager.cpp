@@ -1532,6 +1532,23 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
                                     1.0 / _options.worldScale));
 
         if (!rel) continue;
+
+        // Fill in extra contact information
+        rel->base[0] = pairA->base;
+        rel->base[1] = pairB->base;
+        rel->shape[0] = pairA->sshape;
+        rel->shape[1] = pairB->sshape;
+        rel->contactor[0] = pairA->contactor;
+        rel->contactor[1] = pairA->contactor;
+        rel->ds[0] = pairA->ds;
+        rel->ds[1] = pairB->ds;
+        rel->btObject[0] = pairA->btobject;
+        rel->btObject[1] = pairA->btobject;
+
+        // TODO cast down btshape from BodyShapeRecord-derived classes
+        // rel->btShape[0] = pairA->btshape;
+        // rel->btShape[1] = pairA->btshape;
+
         rel->updateContactPoints(*it->point,
                                  pairA->ds ? pairA->ds : SP::NewtonEulerDS(),
                                  pairB->ds ? pairB->ds : SP::NewtonEulerDS());
