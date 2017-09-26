@@ -86,8 +86,7 @@ static void fc3d_AC_initialize(FrictionContactProblem* problem,
   int nc = problem->numberOfContacts;
 
   double avg_rho[3] = {0.0, 0.0, 0.0};
-  double worktmp[9] = {0.0, 0.0, 0.0,0.0, 0.0, 0.0,0.0, 0.0, 0.0};
-  double eig[3]= {0.0, 0.0, 0.0};
+
   if (options->solverId == SICONOS_FRICTION_3D_ONECONTACT_NSN ||
       options->solverId == SICONOS_FRICTION_3D_ONECONTACT_NSN_GP)
   {
@@ -98,69 +97,6 @@ static void fc3d_AC_initialize(FrictionContactProblem* problem,
                                          3*nc * sizeof(double));
       options->dWorkSize = 3*nc ;
     }
-
-    for (int contact =0; contact <nc ; contact++)
-    {
-      double * rho = &options->dWork[3*contact];
-      if (options->iparam[SICONOS_FRICTION_3D_NSN_RHO_STRATEGY] == SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_OPTI)
-      {
-        fc3d_nsgs_fillMLocal(problem, localproblem, contact);
-        computerho(localproblem, rho);
-      }
-      else if (options->iparam[SICONOS_FRICTION_3D_NSN_RHO_STRATEGY] == SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_EIGEN)
-      {
-        fc3d_nsgs_fillMLocal(problem, localproblem, contact);
-        int info_eig = eig_3x3(localproblem->M->matrix0, worktmp, eig);
-        numerics_printf("fc3d_AC_initialize ""contact = %i, eig[0] = %4.2e, eig[1] = %4.2e, eig[2] = %4.2e", contact, eig[0], eig[1], eig[2]);
-        numerics_printf("fc3d_AC_initialize ""contact = %i, 1/eig[0] = %4.2e, 1/eig[1] = %4.2e, 1/eig[2] = %4.2e", contact, 1.0/eig[0], 1.0/eig[1], 1.0/eig[2]);
-        rho[0]=1.0/eig[0];
-        rho[1]=1.0/eig[0];
-        rho[2]=1.0/eig[0];
-        
-      }
-      else if (options->iparam[SICONOS_FRICTION_3D_NSN_RHO_STRATEGY] == SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_CONSTANT)
-      {
-      rho[0]=options->dparam[SICONOS_FRICTION_3D_NSN_RHO];
-      rho[1]=options->dparam[SICONOS_FRICTION_3D_NSN_RHO];
-      rho[2]=options->dparam[SICONOS_FRICTION_3D_NSN_RHO];
-      }
-      else if (options->iparam[SICONOS_FRICTION_3D_NSN_RHO_STRATEGY] == SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_ADAPTIVE)
-      {
-        numerics_error("fc3d_AC_initialize", "Adaptive strategy for computing rho not yet implemented");
-      }
-      else
-        numerics_error("fc3d_AC_initialize", "unknown strategy for computing rho");
-      if (verbose >0)
-      {
-        avg_rho[0] += rho[0];
-        avg_rho[1] += rho[1];
-        avg_rho[2] += rho[2];
-      }
-      DEBUG_PRINTF("rho[0] = %4.2e, rho[1] = %4.2e, rho[2] = %4.2e \n", rho[0], rho[1], rho[2]);
-      numerics_printf("fc3d_AC_initialize""contact = %i, rho[0] = %4.2e, rho[1] = %4.2e, rho[2] = %4.2e", contact, rho[0], rho[1], rho[2]);
-
-      fc3d_nsgs_fillMLocal(problem, localproblem, contact);
-      double m_row_norm = 0.0, sum;
-      for (int i =0; i<3; i++ )
-      {
-        sum =0.0;
-        for (int j =0; j<3; j++ )
-        {
-          sum += fabs(localproblem->M->matrix0[i+j*3]);
-        }
-        m_row_norm = max(sum, m_row_norm);
-      }
-      numerics_printf("fc3d_AC_initialize" " inverse of norm of M = %e", 1.0/hypot9(localproblem->M->matrix0) );
-      numerics_printf("fc3d_AC_initialize" " inverse of row norm of M = %e", 1.0/m_row_norm );
-
-      if (verbose >0) NM_display(localproblem->M);
-
-    }
-
-
-    numerics_printf("fc3d_AC_initialize" " Avg. rho value = %e\t%e\t%e\t",avg_rho[0]/nc,avg_rho[1]/nc,avg_rho[2]/nc );
-
-    
   }
   else if (options->solverId == SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID)
   {
@@ -171,28 +107,79 @@ static void fc3d_AC_initialize(FrictionContactProblem* problem,
                                          4*nc * sizeof(double));
       options->dWorkSize = 4*nc ;
     }
-    for (int contact =0; contact <nc ; contact++)
+
+  }
+
+
+  double  * rho;
+  for (int contact =0; contact <nc ; contact++)
+  {
+    if (options->solverId == SICONOS_FRICTION_3D_ONECONTACT_NSN ||
+        options->solverId == SICONOS_FRICTION_3D_ONECONTACT_NSN_GP)
     {
-      double * rho = &options->dWork[3*contact+nc];
-      if (options->iparam[SICONOS_FRICTION_3D_NSN_RHO_STRATEGY] == SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_OPTI)
-      {
-        fc3d_nsgs_fillMLocal(problem, localproblem, contact);
-        computerho(localproblem, rho);
-      }
-      else if (options->iparam[SICONOS_FRICTION_3D_NSN_RHO_STRATEGY] == SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_CONSTANT)
-      {
+      rho = &options->dWork[3*contact];
+    }
+    else if (options->solverId == SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID)
+    {
+      rho = &options->dWork[3*contact+nc];
+    }
+    numerics_printf("fc3d_AC_initialize "" compute rho for contact = %i",contact);
+
+    if (options->iparam[SICONOS_FRICTION_3D_NSN_RHO_STRATEGY] == SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_SPLIT_SPECTRAL_NORM_COND)
+    {
+      fc3d_nsgs_fillMLocal(problem, localproblem, contact);
+      compute_rho_split_spectral_norm_cond(localproblem, rho);
+    }
+    else if (options->iparam[SICONOS_FRICTION_3D_NSN_RHO_STRATEGY] == SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_SPLIT_SPECTRAL_NORM)
+    {
+      fc3d_nsgs_fillMLocal(problem, localproblem, contact);
+      compute_rho_split_spectral_norm(localproblem, rho);
+    }
+    else if (options->iparam[SICONOS_FRICTION_3D_NSN_RHO_STRATEGY] == SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_SPECTRAL_NORM)
+    {
+      fc3d_nsgs_fillMLocal(problem, localproblem, contact);
+      compute_rho_spectral_norm(localproblem, rho);
+    }
+    else if (options->iparam[SICONOS_FRICTION_3D_NSN_RHO_STRATEGY] == SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_CONSTANT)
+    {
       rho[0]=options->dparam[SICONOS_FRICTION_3D_NSN_RHO];
       rho[1]=options->dparam[SICONOS_FRICTION_3D_NSN_RHO];
       rho[2]=options->dparam[SICONOS_FRICTION_3D_NSN_RHO];
-      }
-      else if (options->iparam[SICONOS_FRICTION_3D_NSN_RHO_STRATEGY] == SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_ADAPTIVE)
-      {
-        numerics_error("fc3d_AC_initialize", "Adaptive strategy for computing rho not yet implemented");
-      }
-      else
-        numerics_error("fc3d_AC_initialize", "unknown strategy for computing rho");
     }
+    else if (options->iparam[SICONOS_FRICTION_3D_NSN_RHO_STRATEGY] == SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_ADAPTIVE)
+    {
+      numerics_error("fc3d_AC_initialize", "Adaptive strategy for computing rho not yet implemented");
+    }
+    else
+      numerics_error("fc3d_AC_initialize", "unknown strategy for computing rho");
+
+
+    if (verbose >0)
+    {
+      avg_rho[0] += rho[0];
+      avg_rho[1] += rho[1];
+      avg_rho[2] += rho[2];
+    }
+    numerics_printf("fc3d_AC_initialize""contact = %i, rho[0] = %4.2e, rho[1] = %4.2e, rho[2] = %4.2e", contact, rho[0], rho[1], rho[2]);
+
+    fc3d_nsgs_fillMLocal(problem, localproblem, contact);
+    double m_row_norm = 0.0, sum;
+    for (int i =0; i<3; i++ )
+    {
+      sum =0.0;
+      for (int j =0; j<3; j++ )
+      {
+        sum += fabs(localproblem->M->matrix0[i+j*3]);
+      }
+      m_row_norm = max(sum, m_row_norm);
+    }
+    numerics_printf("fc3d_AC_initialize" " inverse of norm of M = %e", 1.0/hypot9(localproblem->M->matrix0) );
+    numerics_printf("fc3d_AC_initialize" " inverse of row norm of M = %e", 1.0/m_row_norm );
+
+    DEBUG_EXPR(NM_display(localproblem->M););
+
   }
+  numerics_printf("fc3d_AC_initialize" " Avg. rho value = %e\t%e\t%e\t",avg_rho[0]/nc,avg_rho[1]/nc,avg_rho[2]/nc );
 
 }
 
@@ -1039,7 +1026,7 @@ int fc3d_onecontact_nonsmooth_Newton_gp_setDefaultSolverOptions(SolverOptions* o
   /* Value of rho parameter */
   /* options->iparam[SICONOS_FRICTION_3D_NSN_RHO_STRATEGY] = SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_CONSTANT; */
   /* options->iparam[SICONOS_FRICTION_3D_NSN_RHO_STRATEGY] = SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_ADAPTIVE; */
-  options->iparam[SICONOS_FRICTION_3D_NSN_RHO_STRATEGY] = SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_OPTI;
+  options->iparam[SICONOS_FRICTION_3D_NSN_RHO_STRATEGY] = SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_SPLIT_SPECTRAL_NORM_COND;
   /* options->iparam[SICONOS_FRICTION_3D_NSN_RHO_STRATEGY] = SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_EIGEN; */
   options->dparam[SICONOS_FRICTION_3D_NSN_RHO] =1.0;
 

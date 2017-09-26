@@ -930,7 +930,7 @@ void computeAlartCurnierJeanMoreau(double R[3], double velocity[3], double mu, d
 }
 
 
-void computerho(FrictionContactProblem* localproblem, double * rho)
+void compute_rho_split_spectral_norm_cond(FrictionContactProblem* localproblem, double * rho)
 {
   double * MLocal = localproblem->M->matrix0;
   assert(MLocal[0 + 0 * 3] > 0);
@@ -938,14 +938,14 @@ void computerho(FrictionContactProblem* localproblem, double * rho)
   DEBUG_EXPR(NM_dense_display(MLocal,3,3,3););
   double sw = MLocal[1 + 1 * 3] + MLocal[2 + 2 * 3];
 
-  double dw = sw * sw - 4.0 * (MLocal[1 + 1 * 3] + MLocal[2 + 2 * 3] -  MLocal[2 + 1 * 3] + MLocal[1 + 2 * 3]);
+  double dw = sw * sw - 4.0 * (sw -  MLocal[2 + 1 * 3] + MLocal[1 + 2 * 3]);
   DEBUG_PRINTF("dw = %e\n",dw);
   if (dw > 0.0) dw = sqrt(dw);
   else dw = 0.0;
 
   rho[0] = 1.0 / MLocal[0 + 0 * 3];
   rho[1] = 2.0 * (sw - dw) / ((sw + dw) * (sw + dw));
-  rho[2] = 2.0 * (sw - dw) / ((sw + dw) * (sw + dw));
+  rho[2] = rho[1];
 
   assert(rho[0] > 0);
   assert(rho[1] > 0);
@@ -957,6 +957,55 @@ void computerho(FrictionContactProblem* localproblem, double * rho)
   DEBUG_PRINTF("rho[1]=%le\t", rho[1]);
   DEBUG_PRINTF("rho[2]=%le\n", rho[2]);
 
+}
+
+void compute_rho_split_spectral_norm(FrictionContactProblem* localproblem, double * rho)
+{
+  double * MLocal = localproblem->M->matrix0;
+  assert(MLocal[0 + 0 * 3] > 0);
+
+  DEBUG_EXPR(NM_dense_display(MLocal,3,3,3););
+  double sw = MLocal[1 + 1 * 3] + MLocal[2 + 2 * 3];
+
+  double dw = sw * sw - 4.0 * (sw -  MLocal[2 + 1 * 3] + MLocal[1 + 2 * 3]);
+  DEBUG_PRINTF("dw = %e\n",dw);
+  if (dw > 0.0) dw = sqrt(dw);
+  else dw = 0.0;
+
+  rho[0] = 1.0 / MLocal[0 + 0 * 3];
+
+
+  rho[1] = 2.0/(sw + dw);
+  rho[2] = rho[1];
+
+  assert(rho[0] > 0);
+  assert(rho[1] > 0);
+  assert(rho[2] > 0);
+
+  DEBUG_PRINTF("sw=%le\t  ", sw);
+  DEBUG_PRINTF("dw=%le\n ", dw);
+  DEBUG_PRINTF("rho[0]=%le\t", rho[0]);
+  DEBUG_PRINTF("rho[1]=%le\t", rho[1]);
+  DEBUG_PRINTF("rho[2]=%le\n", rho[2]);
+
+}
+
+void compute_rho_spectral_norm(FrictionContactProblem* localproblem, double * rho)
+{
+  double * MLocal = localproblem->M->matrix0;
+  double worktmp[9] = {0.0, 0.0, 0.0,0.0, 0.0, 0.0,0.0, 0.0, 0.0};
+  double eig[3]= {0.0, 0.0, 0.0};
+  int info_eig;
+  info_eig = eig_3x3(MLocal, worktmp, eig);
+  DEBUG_PRINTF("eig[0] = %4.2e, eig[1] = %4.2e, eig[2] = %4.2e", eig[0], eig[1], eig[2]);
+  DEBUG_PRINTF("1/eig[0] = %4.2e, 1/eig[1] = %4.2e, 1/eig[2] = %4.2e", 1.0/eig[0], 1.0/eig[1], 1.0/eig[2]);
+  rho[0]=1.0/eig[0];
+  rho[1]=rho[0];
+  rho[2]=rho[0];
+
+  DEBUG_PRINTF("rho[0]=%le\t", rho[0]);
+  DEBUG_PRINTF("rho[1]=%le\t", rho[1]);
+  DEBUG_PRINTF("rho[2]=%le\n", rho[2]);
 
 }
 

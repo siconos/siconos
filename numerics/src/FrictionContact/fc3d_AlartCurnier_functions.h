@@ -55,7 +55,11 @@ extern "C"
 {
 #endif
 
-  void computerho(FrictionContactProblem* localproblem, double * rho);
+  void compute_rho_split_spectral_norm_cond(FrictionContactProblem* localproblem, double * rho);
+
+  void compute_rho_split_spectral_norm(FrictionContactProblem* localproblem, double * rho);
+
+  void compute_rho_spectral_norm(FrictionContactProblem* localproblem, double * rho);
 
   void computeAlartCurnierSTD(double reaction[3], double velocity[3],
                               double mu, double rho[3],
