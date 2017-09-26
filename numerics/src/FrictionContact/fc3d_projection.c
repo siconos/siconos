@@ -67,11 +67,11 @@ void fc3d_projection_update(int contact, FrictionContactProblem* problem, Fricti
   */
 
   /* The part of MGlobal which corresponds to the current block is copied into MLocal */
-  fc3d_nsgs_fillMLocal(problem, localproblem, contact);
+  fc3d_local_problem_fill_M(problem, localproblem, contact);
 
   /****  Computation of qLocal = qBlock + sum over a row of blocks in MGlobal of the products MLocal.reactionBlock,
      excluding the block corresponding to the current contact. ****/
-  fc3d_nsgs_computeqLocal(problem, localproblem, reaction, contact);
+  fc3d_local_problem_compute_q(problem, localproblem, reaction, contact);
 
   /* Friction coefficient for current block*/
   localproblem->mu[0] = problem->mu[contact];
@@ -90,7 +90,7 @@ void fc3d_projectionWithDiagonalization_update(int contact, FrictionContactProbl
   */
 
   /* The part of MGlobal which corresponds to the current block is copied into MLocal */
-  fc3d_nsgs_fillMLocal(problem, localproblem, contact);
+  fc3d_local_problem_fill_M(problem, localproblem, contact);
 
   /****  Computation of qLocal = qBlock + sum over a row of blocks in MGlobal of the products MLocal.reactionBlock,
      excluding the block corresponding to the current contact. ****/
@@ -173,7 +173,7 @@ void fc3d_projection_update_with_regularization(int contact, FrictionContactProb
 
   /****  Computation of qLocal = qBlock + sum over a row of blocks in MGlobal of the products MLocal.reactionBlock,
      excluding the block corresponding to the current contact. ****/
-  fc3d_nsgs_computeqLocal(problem, localproblem, reaction, contact);
+  fc3d_local_problem_compute_q(problem, localproblem, reaction, contact);
 
   double rho = options->dparam[3];
   for (int i = 0 ; i < 3 ; i++) localproblem->M->matrix0[i + 3 * i] += rho ;
@@ -453,11 +453,11 @@ void fc3d_projectionOnCylinder_update(int contact, FrictionContactProblem* probl
   */
 
   /* The part of MGlobal which corresponds to the current block is copied into MLocal */
-  fc3d_nsgs_fillMLocal(problem, localproblem, contact);
+  fc3d_local_problem_fill_M(problem, localproblem, contact);
 
   /****  Computation of qLocal = qBlock + sum over a row of blocks in MGlobal of the products MLocal.reactionBlock,
      excluding the block corresponding to the current contact. ****/
-  fc3d_nsgs_computeqLocal(problem, localproblem, reaction, contact);
+  fc3d_local_problem_compute_q(problem, localproblem, reaction, contact);
 
 }
 

@@ -21,6 +21,7 @@
 #include "fc3d_projection.h"
 #include "fc3d_unitary_enumerative.h"
 #include "fc3d_compute_error.h"
+#include "fc3d_local_problem_tools.h"
 #include "NCP_Solvers.h"
 #include "SiconosBlas.h"
 #include <stdio.h>
@@ -70,11 +71,11 @@ void fc3d_nsgs_update(int contact, FrictionContactProblem* problem, FrictionCont
   */
 
   /* The part of MGlobal which corresponds to the current block is copied into MLocal */
-  fc3d_nsgs_fillMLocal(problem, localproblem, contact);
+  fc3d_local_problem_fill_M(problem, localproblem, contact);
 
   /****  Computation of qLocal = qBlock + sum over a row of blocks in MGlobal of the products MLocal.reactionBlock,
      excluding the block corresponding to the current contact. ****/
-  fc3d_nsgs_computeqLocal(problem, localproblem, reaction, contact);
+  fc3d_local_problem_compute_q(problem, localproblem, reaction, contact);
 
   /* Friction coefficient for current block*/
   localproblem->mu[0] = problem->mu[contact];
@@ -235,28 +236,6 @@ void fc3d_nsgs_initialize_local_solver(SolverPtr* solve, UpdatePtr* update,
   }
   }
 }
-void fc3d_nsgs_computeqLocal(FrictionContactProblem * problem, FrictionContactProblem * localproblem, double *reaction, int contact)
-{
-
-  double *qLocal = localproblem->q;
-  int n = 3 * problem->numberOfContacts;
-
-
-  int in = 3 * contact, it = in + 1, is = it + 1;
-
-  /* qLocal computation*/
-  qLocal[0] = problem->q[in];
-  qLocal[1] =  problem->q[it];
-  qLocal[2] =  problem->q[is];
-
-  NM_row_prod_no_diag3(n, contact, 3*contact, problem->M, reaction, qLocal, false);
-
-}
-
-void fc3d_nsgs_fillMLocal(FrictionContactProblem * problem, FrictionContactProblem * localproblem, int contact)
-{
-  NM_extract_diag_block3(problem->M, contact, &localproblem->M->matrix0);
-}
 
 
 /* swap two indices */
@@ -276,39 +255,7 @@ void uint_shuffle (unsigned int *a, unsigned int n) {
   }
 }
 
-FrictionContactProblem* allocLocalProblem(FrictionContactProblem* problem)
-{
-  /* Connect local solver and local problem*/
-  FrictionContactProblem* localproblem =
-    (FrictionContactProblem*)malloc(sizeof(FrictionContactProblem));
-  localproblem->numberOfContacts = 1;
-  localproblem->dimension = 3;
-  localproblem->q = (double*)malloc(3 * sizeof(double));
-  localproblem->mu = (double*)malloc(sizeof(double));
 
-  if (problem->M->storageType != NM_SPARSE_BLOCK)
-  {
-    localproblem->M = NM_create_from_data(NM_DENSE, 3, 3,
-                                           malloc(9 * sizeof(double)));
-  }
-  else /* NM_SPARSE_BLOCK */
-  {
-    localproblem->M = NM_create_from_data(NM_DENSE, 3, 3, NULL); /* V.A. 14/11/2016 What is the interest of this line */
-  }
-  return localproblem;
-}
-
-static
-void freeLocalProblem(FrictionContactProblem* localproblem,
-                      FrictionContactProblem* problem)
-{
-  if (problem->M->storageType == NM_SPARSE_BLOCK)
-  {
-    /* we release the pointer to avoid deallocation of the diagonal blocks of the original matrix of the problem*/
-    localproblem->M->matrix0 = NULL;
-  }
-  freeFrictionContactProblem(localproblem);
-}
 
 static
 unsigned int* allocShuffledContacts(FrictionContactProblem *problem,
@@ -649,7 +596,7 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction,
   assert(options->internalSolvers);
 
   /*****  Initialize various solver options *****/
-  localproblem = allocLocalProblem(problem);
+  localproblem = fc3d_local_problem_allocate(problem);
 
   fc3d_nsgs_initialize_local_solver(&local_solver, &update_localproblem,
                              (FreeSolverNSGSPtr *)&freeSolver, &computeError,
@@ -825,7 +772,7 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction,
 
   /** Free memory **/
   (*freeSolver)(problem,localproblem,localsolver_options);
-  freeLocalProblem(localproblem, problem);
+  fc3d_local_problem_free(localproblem, problem);
   if (scontacts) free(scontacts);
 }
 

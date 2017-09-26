@@ -127,17 +127,17 @@ static void fc3d_AC_initialize(FrictionContactProblem* problem,
 
     if (options->iparam[SICONOS_FRICTION_3D_NSN_RHO_STRATEGY] == SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_SPLIT_SPECTRAL_NORM_COND)
     {
-      fc3d_nsgs_fillMLocal(problem, localproblem, contact);
+      fc3d_local_problem_fill_M(problem, localproblem, contact);
       compute_rho_split_spectral_norm_cond(localproblem, rho);
     }
     else if (options->iparam[SICONOS_FRICTION_3D_NSN_RHO_STRATEGY] == SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_SPLIT_SPECTRAL_NORM)
     {
-      fc3d_nsgs_fillMLocal(problem, localproblem, contact);
+      fc3d_local_problem_fill_M(problem, localproblem, contact);
       compute_rho_split_spectral_norm(localproblem, rho);
     }
     else if (options->iparam[SICONOS_FRICTION_3D_NSN_RHO_STRATEGY] == SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_SPECTRAL_NORM)
     {
-      fc3d_nsgs_fillMLocal(problem, localproblem, contact);
+      fc3d_local_problem_fill_M(problem, localproblem, contact);
       compute_rho_spectral_norm(localproblem, rho);
     }
     else if (options->iparam[SICONOS_FRICTION_3D_NSN_RHO_STRATEGY] == SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_CONSTANT)
@@ -162,7 +162,7 @@ static void fc3d_AC_initialize(FrictionContactProblem* problem,
     }
     numerics_printf("fc3d_AC_initialize""contact = %i, rho[0] = %4.2e, rho[1] = %4.2e, rho[2] = %4.2e", contact, rho[0], rho[1], rho[2]);
 
-    fc3d_nsgs_fillMLocal(problem, localproblem, contact);
+    fc3d_local_problem_fill_M(problem, localproblem, contact);
     double m_row_norm = 0.0, sum;
     for (int i =0; i<3; i++ )
     {
@@ -390,11 +390,11 @@ void fc3d_onecontact_nonsmooth_Newton_AC_update(int contact, FrictionContactProb
   */
 
   /* The part of MGlobal which corresponds to the current block is copied into MLocal */
-  fc3d_nsgs_fillMLocal(problem, localproblem, contact);
+  fc3d_local_problem_fill_M(problem, localproblem, contact);
 
   /****  Computation of qLocal = qBlock + sum over a row of blocks in MGlobal of the products MLocal.reactionBlock,
      excluding the block corresponding to the current contact. ****/
-  fc3d_nsgs_computeqLocal(problem, localproblem, reaction, contact);
+  fc3d_local_problem_compute_q(problem, localproblem, reaction, contact);
 
   /* Friction coefficient for current block*/
   localproblem->mu[0] = problem->mu[contact];
@@ -987,6 +987,13 @@ int fc3d_onecontact_nonsmooth_Newton_setDefaultSolverOptions(SolverOptions* opti
 
   options->iparam[SICONOS_IPARAM_MAX_ITER] = 10;
   options->dparam[SICONOS_DPARAM_TOL] = 1e-14;
+  
+  /* Value of rho parameter */
+  /* options->iparam[SICONOS_FRICTION_3D_NSN_RHO_STRATEGY] = SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_CONSTANT; */
+  /* options->iparam[SICONOS_FRICTION_3D_NSN_RHO_STRATEGY] = SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_ADAPTIVE; */
+  options->iparam[SICONOS_FRICTION_3D_NSN_RHO_STRATEGY] = SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_SPLIT_SPECTRAL_NORM_COND;
+  /* options->iparam[SICONOS_FRICTION_3D_NSN_RHO_STRATEGY] = SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_EIGEN; */
+  options->dparam[SICONOS_FRICTION_3D_NSN_RHO] =1.0;
 
   /* Choice of formulation */
   options->iparam[SICONOS_FRICTION_3D_NSN_FORMULATION] =

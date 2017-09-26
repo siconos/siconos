@@ -36,6 +36,7 @@
 #include "Friction_cst.h"
 #include "SiconosCompat.h"
 #include "fc3d_nonsmooth_Newton_natural_map.h"
+#include "fc3d_local_problem_tools.h"
 
 /** pointer to function used to call local solver */
 typedef int (*SolverPtr)(FrictionContactProblem*, double*, SolverOptions *);
@@ -113,10 +114,6 @@ extern "C"
 
   */
   void fc3d_nsgs(FrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options);
-
-  void fc3d_nsgs_fillMLocal(FrictionContactProblem * problem, FrictionContactProblem * localproblem, int contact);
-
-  void fc3d_nsgs_computeqLocal(FrictionContactProblem * problem, FrictionContactProblem * localproblem, double * reaction, int contact);
 
   void fc3d_nsgs_initialize_local_solver(SolverPtr* solve, UpdatePtr* update, FreeSolverNSGSPtr* freeSolver, ComputeErrorPtr* computeError,
                                 FrictionContactProblem* problem, FrictionContactProblem* localproblem,

@@ -251,7 +251,7 @@ void NCPGlocker_update(int contact, FrictionContactProblem* problem, FrictionCon
   //  - step 1: computes qLocal = qGlobal[in] + sum over a row of blocks in MGlobal of the products MLocal.reaction,
   //            excluding the block corresponding to the current contact.
   //  - step 2: computes qGlocker using qLocal values
-  fc3d_nsgs_computeqLocal(problem, localproblem, reaction, contact);
+  fc3d_local_problem_compute_q(problem, localproblem, reaction, contact);
 
   double * qLocal = localproblem->q;
 
