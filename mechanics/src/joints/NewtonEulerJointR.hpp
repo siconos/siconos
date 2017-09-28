@@ -69,6 +69,20 @@ public:
   void setPoint(unsigned int index, SP::SiconosVector point)
     { _points[index] = point; }
 
+  /** Get a point for this joint.
+   *
+   * \param index The index of the point.
+   * \return The requested point.
+   */
+  SP::SiconosVector point(unsigned int index)
+    { return _points[index]; }
+
+  /** Get the vector of points for this joint.
+   * \return The vector of points.
+   */
+  VectorOfVectors& points()
+    { return _points; }
+
   /** Set an axis for this joint. The role of each axis is specific to
    * the joint subclass. Won't take effect until setInitialConditions
    * is called.
@@ -79,6 +93,20 @@ public:
   void setAxis(unsigned int index, SP::SiconosVector axis)
     { _axes[index] = axis; }
 
+  /** Get an axis for this joint.
+   *
+   * \param index The index of the point.
+   * \return The requested axis.
+   */
+  SP::SiconosVector axis(unsigned int index)
+    { return _axes[index]; }
+
+  /** Get the vector of axes for this joint.
+   * \return The vector of axes.
+   */
+  VectorOfVectors& axes()
+    { return _axes; }
+
   /** Set whether points and axes should be interpreted in absolute or
    * relative frame. Won't take effect until setInitialConditions is
    * called.
@@ -87,6 +115,14 @@ public:
    */
   void setAbsolute(bool absoluteRef)
     { _absoluteRef = absoluteRef; }
+
+  /** Get whether points and axes are interpreted in absolute or
+   * relative frame.
+   *
+   * \return True for absolute frame, false for relative frame.
+   */
+  bool absolute()
+    { return _absoluteRef; }
 
   /** Initialize the joint constants based on the provided initial positions. */
   virtual void setInitialConditions(SP::SiconosVector q1,
