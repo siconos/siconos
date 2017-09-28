@@ -1268,6 +1268,17 @@ class Hdf5():
             nslaws = self.joints()[name].attrs.get('nslaws',None)
             friction = self.joints()[name].attrs.get('friction',None)
 
+            points = self.joints()[name].attrs.get('points',None)
+            axes = self.joints()[name].attrs.get('axes',None)
+            # backwards compatibility
+            if points is None:
+                points = [self.joints()[name].attrs['pivot_point']]
+            if axes is None:
+                axes = [self.joints()[name].attrs['axis']]
+            # end backwards compatibility
+            if len(points)==0 or len(points[0])==0: points = []
+            if len(axes)==0 or len(axes[0])==0: axes = []
+
             ds1_name = self.joints()[name].attrs['object1']
             ds1 = topo.getDynamicalSystem(ds1_name)
             ds2 = None
@@ -1275,31 +1286,31 @@ class Hdf5():
             if 'object2' in self.joints()[name].attrs:
                 ds2_name = self.joints()[name].attrs['object2']
                 ds2 = topo.getDynamicalSystem(ds2_name)
-                try:
-                    joint = joint_class(self.joints()[name].attrs['pivot_point'],
-                                        self.joints()[name].attrs['axis'],
-                                        absolute, ds1, ds2)
-                except NotImplementedError:
-                    try:
-                        joint = joint_class(self.joints()[name].attrs['pivot_point'],
-                                            absolute, ds1, ds2)
-                    except NotImplementedError:
-                        joint = joint_class(absolute, ds1, ds2)
 
-            else:
-                try:
-                    joint = joint_class(self.joints()[name].attrs['pivot_point'],
-                                        self.joints()[name].attrs['axis'],
-                                        absolute, ds1)
-                except NotImplementedError:
-                    try:
-                        joint = joint_class(self.joints()[name].attrs['pivot_point'],
-                                            absolute, ds1)
-                    except NotImplementedError:
-                        try:
-                            joint = joint_class(absolute, ds1)
-                        except NotImplementedError:
-                            joint = joint_class(ds1)
+            # Every joint has a slightly different interface
+            if joint_class == joints.KneeJointR:
+                assert(len(points)==1 and len(axes)==0)
+            elif joint_class == joints.PivotJointR:
+                assert(len(points)==1 and len(axes)==1)
+            elif joint_class == joints.PrismaticJointR:
+                # backwards compatibility note: previously the
+                # "pivot_point" was used as the "axis" here!
+                assert(len(points)==0 and len(axes)==1)
+            elif joint_class == joints.CylindricalJointR:
+                assert(len(points)==1 and len(axes)==1)
+            elif joint_class == joints.FixedJointR:
+                assert(len(points)==0 and len(axes)==0)
+
+            # Generic NewtonEulerJointR interface
+            joint = joint_class()
+            for n,p in enumerate(points):
+                joint.setPoint(n, p)
+            for n,a in enumerate(axes):
+                joint.setAxis(n, a)
+            joint.setAbsolute(absolute)
+            q1 = ds1.q()
+            q2 = None if ds2 is None else ds2.q()
+            joint.setInitialConditions(q1, q2)
 
             if allow_self_collide is not None:
                 joint.setAllowSelfCollide(not not allow_self_collide)
@@ -2269,8 +2280,9 @@ class Hdf5():
             nslaw.attrs['gid1']=collision_group1
             nslaw.attrs['gid2']=collision_group2
 
-    def addJoint(self, name, object1, object2=None, pivot_point=[0, 0, 0],
-                 axis=[0, 1, 0], joint_class='PivotJointR', absolute=None,
+    def addJoint(self, name, object1, object2=None,
+                 points=[[0, 0, 0]], axes=[[0, 1, 0]],
+                 joint_class='PivotJointR', absolute=None,
                  allow_self_collide=None, nslaws=None, stops=None, friction=None):
         """
         add a joint between two objects
@@ -2281,8 +2293,18 @@ class Hdf5():
             if object2 is not None:
                 joint.attrs['object2']=object2
             joint.attrs['type']=joint_class
-            joint.attrs['pivot_point']=pivot_point
-            joint.attrs['axis']=axis
+            if points is not None:
+                if len(np.shape(points))==1: points = [points]
+                if len(points)!=0:
+                    joint.attrs['points']=points
+            if axes is not None:
+                if len(np.shape(axes))==1: axes = [axes]
+                if len(axes)!=0:
+                    joint.attrs['axes']=axes
+            # backwards compatibility
+            joint.attrs['pivot_point']=points[0] if points is not None and len(points)>0 else []
+            joint.attrs['axis']=axes[0] if axes is not None and len(axes)>0 else []
+            # end backwards compatibility
             if absolute in [True, False]:
                 joint.attrs['absolute']=absolute
             if allow_self_collide in [True, False]:
