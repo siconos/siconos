@@ -72,9 +72,10 @@ protected:
                           bool absoluteRef=true);
 
 public:
+
   /** Empty constructor. The relation may be initialized later by
    * setPoint, setAxis, setAbsolute, and setInitialConditions. */
-  PivotJointR() : KneeJointR() {};
+  PivotJointR();
 
   /** Constructor based on one or two dynamical systems, a point and an axis.
    *  \param d1 first DynamicalSystem linked by the joint.

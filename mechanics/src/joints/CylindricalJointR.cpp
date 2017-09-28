@@ -84,6 +84,15 @@ static double piwrap(double x)
   return fmod(x + 3*M_PI, 2*M_PI) - M_PI;
 }
 
+CylindricalJointR::CylindricalJointR()
+  : NewtonEulerJointR()
+  , _axis0(std11::make_shared<SiconosVector>(3))
+  , _G1P0(std11::make_shared<SiconosVector>(3))
+{
+  _points.resize(1);
+  _axes.resize(1);
+}
+
 CylindricalJointR::CylindricalJointR(SP::SiconosVector P, SP::SiconosVector A,
                                      bool absoluteRef,
                                      SP::NewtonEulerDS d1, SP::NewtonEulerDS d2)

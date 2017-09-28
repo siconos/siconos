@@ -58,6 +58,13 @@ static double piwrap(double x)
   return fmod(x + 3*M_PI, 2*M_PI) - M_PI;
 }
 
+PivotJointR::PivotJointR()
+  : KneeJointR()
+  , _A(std11::make_shared<SiconosVector>(3))
+{
+  _axes.resize(1);
+}
+
 PivotJointR::PivotJointR(SP::SiconosVector P, SP::SiconosVector A, bool absoluteRef,
                          SP::NewtonEulerDS d1, SP::NewtonEulerDS d2)
   : KneeJointR(P, absoluteRef, d1, d2)
@@ -83,6 +90,8 @@ static ::boost::math::quaternion<double> quat(const SP::SiconosVector& v)
 void PivotJointR::setInitialConditions(SP::SiconosVector q1,
                                        SP::SiconosVector q2)
 {
+  KneeJointR::setInitialConditions(q1, q2);
+
   *_A = *_axes[0];
   // TODO: add support for absolute frame here
 

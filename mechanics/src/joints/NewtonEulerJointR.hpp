@@ -34,9 +34,6 @@ protected:
   /** serialization hooks
    */
   ACCEPT_SERIALIZATION(NewtonEulerJointR);
-  NewtonEulerJointR(): NewtonEulerR()
-                     , _allowSelfCollide(false)
-                     , _absoluteRef(true) {};
 
   /** A flag determining whether this joint should block
    * "self-collision", i.e., if true, bodies connected by this joint
@@ -58,6 +55,12 @@ protected:
                           bool absoluteRef=true) {}
 
 public:
+
+  /** Empty constructor. The relation may be initialized later by
+   * setPoint, setAbsolute, and setInitialConditions. */
+  NewtonEulerJointR(): NewtonEulerR()
+                     , _allowSelfCollide(false)
+                     , _absoluteRef(true) {};
 
   /** Set a point for this joint. The role of each point is specific
    * to the joint subclass. Won't take effect until
