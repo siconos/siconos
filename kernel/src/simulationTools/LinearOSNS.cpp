@@ -155,7 +155,9 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
 
   // Get dimension of the NonSmoothLaw (ie dim of the interactionBlock)
   SP::InteractionsGraph indexSet = simulation()->indexSet(indexSetLevel());
+  SP::InteractionsGraph parentSet = simulation()->indexSet(0);
   SP::Interaction inter = indexSet->bundle(vd);
+  InteractionsGraph::VDescriptor vd0 = parentSet->descriptor(inter);
   // Get osi property from interaction
 
   // At most 2 DS are linked by an Interaction
@@ -197,13 +199,13 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
   DynamicalSystemsGraph& DSG0 = *simulation()->nonSmoothDynamicalSystem()->dynamicalSystems();
 
   // --- Check block size ---
-  assert(indexSet->properties(vd).block->size(0) == inter->nonSmoothLaw()->size());
-  assert(indexSet->properties(vd).block->size(1) == inter->nonSmoothLaw()->size());
+  assert(parentSet->properties(vd0).block->size(0) == inter->nonSmoothLaw()->size());
+  assert(parentSet->properties(vd0).block->size(1) == inter->nonSmoothLaw()->size());
 
   // --- Compute diagonal block ---
   // Block to be set in OSNS Matrix, corresponding to
   // the current interaction
-  SP::SiconosMatrix currentInteractionBlock = indexSet->properties(vd).block;
+  SP::SiconosMatrix currentInteractionBlock = parentSet->properties(vd0).block;
   SP::SiconosMatrix leftInteractionBlock, rightInteractionBlock;
 
   RELATION::TYPES relationType = inter->relation()->getType();
@@ -329,6 +331,7 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
       {
         DEBUG_PRINT("leftInteractionBlock after application of boundary conditions\n");
         DEBUG_EXPR(leftInteractionBlock->display(););
+	std::cout << " COMPUTE INTER BLOCK " << std::endl;
         // (inter1 == inter2)
         SP::SiconosMatrix work(new SimpleMatrix(*leftInteractionBlock));
         work->trans();
@@ -699,6 +702,55 @@ void LinearOSNS::computeq(double time)
 }
 
 
+void LinearOSNS::updateOperators()
+{
+   InteractionsGraph& indexSet = *simulation()->indexSet(indexSetLevel());
+   InteractionsGraph& parentSet = *simulation()->indexSet(0);
+
+  // Update OSNSpb matrix, according to indexSet current state
+   _M->fillW(indexSet, parentSet, !_hasBeenUpdated);
+  DEBUG_EXPR(_M->display(););
+
+  //      updateOSNSMatrix();
+  _sizeOutput = _M->size();
+
+  // Checks z and _w sizes and reset if necessary
+
+  if (_z->size() != _sizeOutput)
+    {
+      _z->resize(_sizeOutput, false);
+      _z->zero();
+    }
+
+  if (_w->size() != _sizeOutput)
+    {
+      _w->resize(_sizeOutput);
+      _w->zero();
+    }
+
+  // Reset _w and _z with previous values of y and lambda
+  // (i.e. val saved in yOutputOld and lambdaOld of the interaction).
+  // Note : sizeOuput can be unchanged, but positions may have changed. (??)
+  if (_keepLambdaAndYState)
+    {
+      InteractionsGraph::VIterator ui, uiend;
+      for (std11::tie(ui, uiend) = indexSet.vertices(); ui != uiend; ++ui)
+	{
+	  Interaction& inter = *indexSet.bundle(*ui);
+	  // Get the position of inter-interactionBlock in the vector w
+	  // or z
+	  unsigned int pos = indexSet.properties(*ui).absolute_position;
+	  SiconosVector& yOutputOld = *inter.yOld(inputOutputLevel());
+	  SiconosVector& lambdaOld = *inter.lambdaOld(inputOutputLevel());
+
+	  if (_sizeOutput >= yOutputOld.size() + pos)
+	    {
+	      setBlock(yOutputOld, _w, yOutputOld.size(), 0, pos);
+	      setBlock(lambdaOld, _z, lambdaOld.size(), 0, pos);
+	    }
+	}
+    }
+}
 
 bool LinearOSNS::preCompute(double time)
 {
@@ -728,55 +780,15 @@ bool LinearOSNS::preCompute(double time)
   if (indexSet.size() == 0)
     return false;
 
-  if (!_hasBeenUpdated || !isLinear)
-  {
-    // Computes new _interactionBlocks if required
-    updateInteractionBlocks();
-
-    //    _M->fill(indexSet);
-    _M->fillW(indexSet, !_hasBeenUpdated);
-    DEBUG_EXPR(_M->display(););
-
-    //      updateOSNSMatrix();
-    _sizeOutput = _M->size();
-
-    // Checks z and _w sizes and reset if necessary
-
-    if (_z->size() != _sizeOutput)
+  // 
+  if(!_hasBeenUpdated) 
     {
-      _z->resize(_sizeOutput, false);
-      _z->zero();
+      // Should be called even for linear nsds.
+      // It's up to updateInteractionBlocks to switch between linear/non linear
+      // cases.
+      updateInteractionBlocks();
+      updateOperators();
     }
-
-    if (_w->size() != _sizeOutput)
-    {
-      _w->resize(_sizeOutput);
-      _w->zero();
-    }
-
-    // Reset _w and _z with previous values of y and lambda
-    // (i.e. val saved in yOutputOld and lambdaOld of the interaction).
-    // Note : sizeOuput can be unchanged, but positions may have changed. (??)
-    if (_keepLambdaAndYState)
-    {
-      InteractionsGraph::VIterator ui, uiend;
-      for (std11::tie(ui, uiend) = indexSet.vertices(); ui != uiend; ++ui)
-      {
-        Interaction& inter = *indexSet.bundle(*ui);
-        // Get the position of inter-interactionBlock in the vector w
-        // or z
-        unsigned int pos = indexSet.properties(*ui).absolute_position;
-        SiconosVector& yOutputOld = *inter.yOld(inputOutputLevel());
-        SiconosVector& lambdaOld = *inter.lambdaOld(inputOutputLevel());
-
-        if (_sizeOutput >= yOutputOld.size() + pos)
-        {
-          setBlock(yOutputOld, _w, yOutputOld.size(), 0, pos);
-          setBlock(lambdaOld, _z, lambdaOld.size(), 0, pos);
-        }
-      }
-    }
-  }
   // else
   // nothing to do (IsLinear and not changed)
 

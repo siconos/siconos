@@ -236,6 +236,11 @@ public:
    */
   virtual void computeq(double time);
 
+  /** Update M, z, and w, according
+      to current index set state
+   */
+  void updateOperators();
+  
   /** build problem coefficients (if required)
       \param time the current time
       \return true if succeeded

@@ -94,7 +94,7 @@ void OneStepIntegrator::initialize( Model& m )
     InteractionProperties& interaction_properties = indexSet0->properties(*ui);
     // init block property. Note FP: this should probably be moved
     // to OSNSPb init?
-    interaction_properties.block.reset(new SimpleMatrix(nslawSize, nslawSize));
+    // interaction_properties.block.reset(new SimpleMatrix(nslawSize, nslawSize));
 
     // Update DSlink : this depends on OSI and relation types.
     fillDSLinks(inter, interaction_properties, *_dynamicalSystemsGraph);

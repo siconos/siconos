@@ -333,6 +333,7 @@ void OSNSMultipleImpact::PreComputeImpact()
   if (indexSetLevel() != 1)
     RuntimeException::selfThrow("OSNSMultipleImpact::PreComputeImpact==> the levelMin must be equal to 1 in the multiple impact model !!");
   InteractionsGraph& indexSet = *simulation()->indexSet(indexSetLevel()); // get indexSet[1]
+  InteractionsGraph& parentSet = *simulation()->indexSet(0); // get indexSet[0]
   _nContact = indexSet.size();
   //2. Compute matrix _M
   SP::Topology topology = simulation()->nonSmoothDynamicalSystem()->topology();
@@ -342,7 +343,7 @@ void OSNSMultipleImpact::PreComputeImpact()
     // Computes new _unitaryBlocks if required
     updateInteractionBlocks();
     // Updates matrix M
-    _M->fillW(indexSet, !_hasBeenUpdated);
+    _M->fillW(indexSet, parentSet, !_hasBeenUpdated);
     _sizeOutput = _M->size();
   }
   if (_nContact != _sizeOutput)

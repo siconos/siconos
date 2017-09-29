@@ -112,7 +112,7 @@ OSNSMatrix::OSNSMatrix(InteractionsGraph& indexSet, int stor):
 {
   _numericsMatrix.reset(new NumericsMatrix);
   NM_null(_numericsMatrix.get());
-  fillW(indexSet);
+  //fillW(indexSet, parentSet);
 }
 
 
@@ -190,7 +190,7 @@ unsigned OSNSMatrix::updateSizeAndPositions(DynamicalSystemsGraph & DSG)
 }
 
 // Fill the matrix W
-void OSNSMatrix::fillW(InteractionsGraph& indexSet, bool update)
+void OSNSMatrix::fillW(InteractionsGraph& indexSet, InteractionsGraph& parentSet, bool update)
 {
   DEBUG_BEGIN("void OSNSMatrix::fillW(SP::InteractionsGraph indexSet, bool update)\n");
 
@@ -233,9 +233,8 @@ void OSNSMatrix::fillW(InteractionsGraph& indexSet, bool update)
     {
       SP::Interaction inter = indexSet.bundle(*vi);
       pos = indexSet.properties(*vi).absolute_position;
-
-      std11::static_pointer_cast<SimpleMatrix>(_M1)
-      ->setBlock(pos, pos, *indexSet.properties(*vi).block);
+      InteractionsGraph::VDescriptor vd0 = parentSet.descriptor(inter);
+      std11::static_pointer_cast<SimpleMatrix>(_M1)->setBlock(pos, pos, *parentSet.properties(vd0).block);
       DEBUG_PRINTF("OSNSMatrix _M1: %i %i\n", _M1->size(0), _M1->size(1));
       DEBUG_PRINTF("OSNSMatrix block: %i %i\n", indexSet.properties(*vi).block->size(0), indexSet.properties(*vi).block->size(1));
     }

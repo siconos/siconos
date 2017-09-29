@@ -222,9 +222,10 @@ public:
 
   /** fill the current class using an index set
    * \param indexSet the index set of the active constraints
+   * \param parentSet the index set of reference (I0)
    * \param update if true update the size of the Matrix (default true)
    */
-  virtual void fillW(InteractionsGraph&indexSet, bool update = true);
+  virtual void fillW(InteractionsGraph& indexSet,InteractionsGraph& parentSet, bool update = true);
 
   /** fill the current class using an index set
    * \param indexSet the index set of the dynamicalSystems

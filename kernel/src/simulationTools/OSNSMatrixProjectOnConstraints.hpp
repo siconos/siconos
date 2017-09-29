@@ -125,9 +125,10 @@ public:
 
   /** fill the current class using an index set and a map of interactionBlocks
       \param indexSet the index set of the active constraints
+      \param parentSet the index set of reference (I0)
       \param update if true update the size and position
   */
-  void fillW(InteractionsGraph& indexSet, bool update = true);
+  void fillW(InteractionsGraph& indexSet,InteractionsGraph& parentSet, bool update = true);
 
 };
 

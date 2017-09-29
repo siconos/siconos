@@ -65,6 +65,7 @@ void Equality::updateM()
   assert(0);
   // Get index set from Simulation
   InteractionsGraph& indexSet = *simulation()->indexSet(indexSetLevel());
+  InteractionsGraph& parentSet = *simulation()->indexSet(0);
 
   if (!_M)
   {
@@ -74,7 +75,7 @@ void Equality::updateM()
   else
   {
     _M->setStorageType(_numericsMatrixStorageType);
-    _M->fillW(indexSet);
+    _M->fillW(indexSet, parentSet);
 
   }
   _sizeOutput = _M->size();
