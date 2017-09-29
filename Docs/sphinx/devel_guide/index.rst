@@ -10,7 +10,7 @@ Developer guide
    modal_moreau_jean
    about_ci
    plugins
-   
+   nonsmooth_problems_formulation
 
 To do.
 
