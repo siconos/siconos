@@ -1310,7 +1310,7 @@ class Hdf5():
             joint.setAbsolute(absolute)
             q1 = ds1.q()
             q2 = None if ds2 is None else ds2.q()
-            joint.setInitialConditions(q1, q2)
+            joint.setBasePositions(q1, q2)
 
             if allow_self_collide is not None:
                 joint.setAllowSelfCollide(not not allow_self_collide)

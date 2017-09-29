@@ -57,14 +57,14 @@ protected:
 public:
 
   /** Empty constructor. The relation may be initialized later by
-   * setPoint, setAbsolute, and setInitialConditions. */
+   * setPoint, setAbsolute, and setBasePositions. */
   NewtonEulerJointR(): NewtonEulerR()
                      , _allowSelfCollide(false)
                      , _absoluteRef(true) {};
 
   /** Set a point for this joint. The role of each point is specific
    * to the joint subclass. Won't take effect until
-   * setInitialConditions is called.
+   * setBasePositions is called.
    *
    * \param index The index of the points.
    * \param point A SiconosVector of size 3.
@@ -87,7 +87,7 @@ public:
     { return _points; }
 
   /** Set an axis for this joint. The role of each axis is specific to
-   * the joint subclass. Won't take effect until setInitialConditions
+   * the joint subclass. Won't take effect until setBasePositions
    * is called.
    *
    * \param index The index of the points.
@@ -111,7 +111,7 @@ public:
     { return _axes; }
 
   /** Set whether points and axes should be interpreted in absolute or
-   * relative frame. Won't take effect until setInitialConditions is
+   * relative frame. Won't take effect until setBasePositions is
    * called.
    *
    * \param absoluteRef true for absolute frame, false for relative frame.
@@ -127,9 +127,14 @@ public:
   bool absolute()
     { return _absoluteRef; }
 
-  /** Initialize the joint constants based on the provided initial positions. */
-  virtual void setInitialConditions(SP::SiconosVector q1,
-                                    SP::SiconosVector q2=SP::SiconosVector()) = 0;
+  /** Initialize the joint constants based on the provided base positions.
+   * \param q1 A SiconosVector of size 7 indicating translation and
+   *           orientation in inertial coordinates.
+   * \param q2 An optional SiconosVector of size 7 indicating
+   *           translation and orientation; if null, the inertial
+   *           frame will be considered as the second base. */
+  virtual void setBasePositions(SP::SiconosVector q1,
+                                SP::SiconosVector q2=SP::SiconosVector()) = 0;
 
   /** Compute the vector of linear and angular positions of the free axes */
   virtual void computehDoF(double time, BlockVector& q0, SiconosVector& y,

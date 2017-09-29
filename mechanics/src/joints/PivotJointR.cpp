@@ -74,7 +74,7 @@ PivotJointR::PivotJointR(SP::SiconosVector P, SP::SiconosVector A, bool absolute
 
   setAxis(0, A);
   if (d1)
-    setInitialConditions(d1->q(), d2 ? d2->q() : SP::SiconosVector());
+    setBasePositions(d1->q(), d2 ? d2->q() : SP::SiconosVector());
 }
 
 static ::boost::math::quaternion<double> quat(const SP::SiconosVector& v)
@@ -87,10 +87,9 @@ static ::boost::math::quaternion<double> quat(const SP::SiconosVector& v)
     return ::boost::math::quaternion<double>(1, 0, 0, 0);
 }
 
-void PivotJointR::setInitialConditions(SP::SiconosVector q1,
-                                       SP::SiconosVector q2)
+void PivotJointR::setBasePositions(SP::SiconosVector q1, SP::SiconosVector q2)
 {
-  KneeJointR::setInitialConditions(q1, q2);
+  KneeJointR::setBasePositions(q1, q2);
 
   *_A = *_axes[0];
   // TODO: add support for absolute frame here

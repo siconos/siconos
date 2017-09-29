@@ -61,7 +61,7 @@ protected:
 public:
 
   /** Empty constructor. The relation may be initialized later by
-   * setPoint, setAbsolute, and setInitialConditions. */
+   * setPoint, setAbsolute, and setBasePositions. */
   KneeJointR();
 
   /** Constructor based on one or two dynamical systems and a point.
@@ -81,9 +81,14 @@ public:
    */
   virtual ~KneeJointR() {};
 
-  /** Initialize the joint constants based on the provided initial positions. */
-  virtual void setInitialConditions(SP::SiconosVector q1,
-                                    SP::SiconosVector q2 = SP::SiconosVector());
+  /** Initialize the joint constants based on the provided base positions.
+   * \param q1 A SiconosVector of size 7 indicating translation and
+   *           orientation in inertial coordinates.
+   * \param q2 An optional SiconosVector of size 7 indicating
+   *           translation and orientation; if null, the inertial
+   *           frame will be considered as the second base. */
+  virtual void setBasePositions(SP::SiconosVector q1,
+                                SP::SiconosVector q2 = SP::SiconosVector());
 
   /* Perform some checks on the initial conditions. */
   void checkInitPos(SP::SiconosVector q1, SP::SiconosVector q2);

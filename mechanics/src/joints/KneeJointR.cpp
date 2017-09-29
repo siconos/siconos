@@ -97,7 +97,7 @@ KneeJointR::KneeJointR(SP::SiconosVector P, bool absoluteRef,
   setAbsolute(absoluteRef);
   setPoint(0, P);
   if (d1) {
-    setInitialConditions(d1->q(), d2 ? d2->q() : SP::SiconosVector());
+    setBasePositions(d1->q(), d2 ? d2->q() : SP::SiconosVector());
     checkInitPos(d1->q(), d2 ? d2->q() : SP::SiconosVector());
   }
 }
@@ -125,8 +125,7 @@ static ::boost::math::quaternion<double> posquat(const SiconosVector& v)
   return ::boost::math::quaternion<double>(0, v(0),v(1),v(2));
 }
 
-void KneeJointR::setInitialConditions(SP::SiconosVector q1,
-                                      SP::SiconosVector q2)
+void KneeJointR::setBasePositions(SP::SiconosVector q1, SP::SiconosVector q2)
 {
   *_P0 = *_points[0];
   boost::math::quaternion<double> rot1(rotquat(q1));
