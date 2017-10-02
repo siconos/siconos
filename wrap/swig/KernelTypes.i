@@ -1276,6 +1276,113 @@ struct IsDense : public Question<bool>
   }
 }
 
+//////////////////////////
+// VectorOfVectors
+%typemap(out,fragment="SiconosVector") VectorOfVectors
+{
+  VectorOfVectors::size_type i = $1.size();
+  $result = PyList_New(i);
+  for (; i > 0;) {
+    if ($1.at(--i)) {
+      PyList_SET_ITEM($result, i, SP_SiconosVector_to_numpy($1.at(i)));
+    }
+    else
+      PyList_SET_ITEM($result, i, Py_None);
+  }
+}
+
+%typemap(out,fragment="SiconosVector") VectorOfVectors&
+{
+  VectorOfVectors::size_type i = $1->size();
+  $result = PyList_New(i);
+  for (; i > 0;) {
+    if ($1->at(--i)) {
+      PyList_SET_ITEM($result, i, SP_SiconosVector_to_numpy($1->at(i)));
+    }
+    else
+      PyList_SET_ITEM($result, i, Py_None);
+  }
+}
+
+%typemap(in,fragment="SiconosVector") VectorOfVectors (VectorOfVectors v)
+{
+  v.resize(PySequence_Size($input));
+  $1 = v;
+  for (VectorOfVectors::size_type i=0; i < $1.size(); i++)
+  {
+    PyObject *o = PySequence_GetItem($input, i);
+    PyArrayObject* array = NULL;
+    int is_new_object = 0;
+    $1.at(i) = SP_SiconosVector_in(o, &array, &is_new_object);
+    if (array && is_new_object) { Py_DECREF(array); }
+    Py_XDECREF(o);
+  }
+}
+
+%typemap(in,fragment="SiconosVector") VectorOfVectors& (VectorOfVectors v)
+{
+  v.resize(PySequence_Size($input));
+  $1 = &v;
+  for (VectorOfVectors::size_type i=0; i < v.size(); i++)
+  {
+    PyObject *o = PySequence_GetItem($input, i);
+    PyArrayObject* array = NULL;
+    int is_new_object = 0;
+    v[i] = SP_SiconosVector_in(o, &array, &is_new_object);
+    if (array && is_new_object) { Py_DECREF(array); }
+    Py_XDECREF(o);
+  }
+}
+
+%typemap(in,fragment="SiconosVector") std11::shared_ptr<VectorOfVectors> (std11::shared_ptr<VectorOfVectors> v)
+{
+  v.reset( new VectorOfVectors(PySequence_Size($input), SP::SiconosVector()) );
+  $1 = v;
+  for (VectorOfVectors::size_type i=0; i < v->size(); i++)
+  {
+    PyObject *o = PySequence_GetItem($input, i);
+    PyArrayObject* array = NULL;
+    int is_new_object = 0;
+    v->at(i) = SP_SiconosVector_in(o, &array, &is_new_object);
+    if (array && is_new_object) { Py_DECREF(array); }
+    Py_XDECREF(o);
+  }
+}
+
+%typemap(in,fragment="SiconosVector") std11::shared_ptr<VectorOfVectors>& (std11::shared_ptr<VectorOfVectors> v)
+{
+  v.reset( new VectorOfVectors(PySequence_Size($input), SP::SiconosVector()) );
+  $1 = &v;
+  for (VectorOfVectors::size_type i=0; i < v->size(); i++)
+  {
+    PyObject *o = PySequence_GetItem($input, i);
+    PyArrayObject* array = NULL;
+    int is_new_object = 0;
+    v->at(i) = SP_SiconosVector_in(o, &array, &is_new_object);
+    if (array && is_new_object) { Py_DECREF(array); }
+    Py_XDECREF(o);
+  }
+}
+
+%typecheck(SWIG_TYPECHECK_INTEGER) VectorOfVectors
+%{
+  $1 = PySequence_Check($input);
+%}
+
+%typecheck(SWIG_TYPECHECK_INTEGER) VectorOfVectors&
+%{
+  $1 = PySequence_Check($input);
+%}
+
+%typecheck(SWIG_TYPECHECK_INTEGER) std11::shared_ptr<VectorOfVectors>
+%{
+  $1 = PySequence_Check($input);
+%}
+
+%typecheck(SWIG_TYPECHECK_INTEGER) std11::shared_ptr<VectorOfVectors>&
+%{
+  $1 = PySequence_Check($input);
+%}
 
 TYPECHECK(std11::shared_ptr<SiconosVector>);
 TYPECHECK(std11::shared_ptr<SiconosMatrix>);
