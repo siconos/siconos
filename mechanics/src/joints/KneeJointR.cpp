@@ -128,78 +128,50 @@ static ::boost::math::quaternion<double> posquat(const SiconosVector& v)
 void KneeJointR::setBasePositions(SP::SiconosVector q1, SP::SiconosVector q2)
 {
   *_P0 = *_points[0];
-  boost::math::quaternion<double> rot1(rotquat(q1));
-  boost::math::quaternion<double> quatBuff;
+  boost::math::quaternion<double> rot1(rotquat(q1)), quatBuff, quatP0_abs;
 
-  if (q2)
+  /** Computation of _G1P0 and _G2P0 */
+
+  /* Calculate G1P0 and P0_abs */
+  if (_absoluteRef)
   {
-    boost::math::quaternion<double> rot2(rotquat(q2));
+    quatP0_abs = posquat(_P0);
 
-    if (_absoluteRef)
-    {
-      (*_P0)(0) -= (*q1)(0);
-      (*_P0)(1) -= (*q1)(1);
-      (*_P0)(2) -= (*q1)(2);
-    }
-
-    /** Computation of _G1P0 and _G2P0 */
+    /* Move to q1 frame by unapplying q1 frame translation/rotation */
+    quatBuff = (1.0/rot1) * (quatP0_abs - posquat(q1)) * rot1;
+    _G1P0x = quatBuff.R_component_2();
+    _G1P0y = quatBuff.R_component_3();
+    _G1P0z = quatBuff.R_component_4();
+  }
+  else
+  {
     _G1P0x = _P0->getValue(0);
     _G1P0y = _P0->getValue(1);
     _G1P0z = _P0->getValue(2);
 
-    boost::math::quaternion<double> quatG1P0(0, _G1P0x, _G1P0y, _G1P0z);
-    quatBuff = rot1 * quatG1P0 / rot1;
+    /* Move to abs frame by applying q1 frame rotation/translation */
+    quatP0_abs = (rot1 * posquat(_P0) / rot1) + posquat(q1);
+  }
 
-    SiconosVector P0_abs(3);
-    P0_abs.setValue(0, quatBuff.R_component_2() + q1->getValue(0));
-    P0_abs.setValue(1, quatBuff.R_component_3() + q1->getValue(1));
-    P0_abs.setValue(2, quatBuff.R_component_4() + q1->getValue(2));
+  /* Calculate G2P0, or set it to P0_abs (i.e. G2=absolute frame) */
+  if (q2)
+  {
+    boost::math::quaternion<double> rot2(rotquat(q2));
 
-    boost::math::quaternion<double> quatG2P0_abs(posquat(P0_abs) - posquat(q2));
-    quatBuff = (1.0/rot2) * quatG2P0_abs * rot2;
+    /* Move to q2 frame by unapplying q2 frame translation/rotation */
+    quatBuff = (1.0/rot2) * (quatP0_abs - posquat(q2)) * rot2;
+
     _G2P0x = quatBuff.R_component_2();
     _G2P0y = quatBuff.R_component_3();
     _G2P0z = quatBuff.R_component_4();
   }
   else
   {
-    if (_absoluteRef)
-    {
-      /*quadG1P0_abs contains the vector _G1P0 if the object has no orientation.*/
-      boost::math::quaternion<double> quatG1P0_abs(posquat(_P0) - posquat(q1));
-      quatBuff = (1.0/rot1) * quatG1P0_abs * rot1;
-
-      _G1P0x = quatBuff.R_component_2();
-      _G1P0y = quatBuff.R_component_3();
-      _G1P0z = quatBuff.R_component_4();
-
-      _G2P0x = _P0->getValue(0);
-      _G2P0y = _P0->getValue(1);
-      _G2P0z = _P0->getValue(2);
-    }
-    else
-    {
-      _G1P0x = _P0->getValue(0);
-      _G1P0y = _P0->getValue(1);
-      _G1P0z = _P0->getValue(2);
-
-      /*d2 is look as the ref frame. G2 is the origine, and d2 has no orientation.
-        Where is P0 in the frame of d2 ?:*/
-      /*Use initial value of q1 to place P0 in the absolute frame.*/
-      /*quatG1P0_abs_ without any orientation*/
-      ::boost::math::quaternion<double> quatG1P0_abs(posquat(_P0));
-
-      /*quatBuff contains the vector G1P at the initial position*/
-      quatBuff = rot1 * quatG1P0_abs / rot1;
-
-      _G2P0x = q1->getValue(0) + quatBuff.R_component_2();
-      _G2P0y = q1->getValue(1) + quatBuff.R_component_3();
-      _G2P0z = q1->getValue(2) + quatBuff.R_component_4();
-    }
+    /* q2 frame = absolute frame */
+    _G2P0x = quatP0_abs.R_component_2();
+    _G2P0y = quatP0_abs.R_component_3();
+    _G2P0z = quatP0_abs.R_component_4();
   }
-
-  // std::cout << "KneeJoint G1P0 :" << _G1P0x << " " << _G1P0y << " " << _G1P0z << std::endl;
-  // std::cout << "KneeJoint G2P0 :" << _G2P0x << " " << _G2P0y << " " << _G2P0z << std::endl;
 }
 
 void KneeJointR::Jd1d2(double X1, double Y1, double Z1, double q10, double q11, double q12, double q13, double X2, double Y2, double Z2, double q20, double q21, double q22, double q23)
