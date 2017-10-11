@@ -60,6 +60,13 @@
  * rot = lambda V,q: qmul(q, qmul(V, qinv(q)))
  */
 
+PrismaticJointR::PrismaticJointR()
+  : NewtonEulerJointR()
+  , _axis0(std11::make_shared<SiconosVector>(3))
+{
+  _axes.resize(1);
+}
+
 PrismaticJointR::PrismaticJointR(SP::SiconosVector axis, bool absoluteRef,
                                  SP::NewtonEulerDS d1, SP::NewtonEulerDS d2)
   : NewtonEulerJointR()
