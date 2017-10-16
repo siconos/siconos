@@ -174,13 +174,21 @@ void CylindricalJointR::setBasePositions(SP::SiconosVector q1,
   _previousAngle = 0.0;
   _twistCount = 0;
   _initialAngle = 0.0;
-  BlockVector q0(q1, q2);
   SiconosVector tmpy(1);
-  this->computehDoF(0, q0, tmpy, 1);
+  if (q2)
+  {
+    BlockVector q0(q1, q2);
+    this->computehDoF(0, q0, tmpy, 1);
+  }
+  else
+  {
+    BlockVector q0(1); q0.setVectorPtr(0, q1);
+    this->computehDoF(0, q0, tmpy, 1);
+  }
   _initialAngle = tmpy(0);
 
   _twistCount = 0;
-  _previousAngle = 0;
+  _previousAngle = _initialAngle;
 }
 
 void CylindricalJointR::computeV1V2FromAxis()
