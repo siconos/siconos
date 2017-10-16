@@ -1267,6 +1267,7 @@ class Hdf5():
             stops = self.joints()[name].attrs.get('stops',None)
             nslaws = self.joints()[name].attrs.get('nslaws',None)
             friction = self.joints()[name].attrs.get('friction',None)
+            coupled = self.joints()[name].attrs.get('coupled',None)
 
             points = self.joints()[name].attrs.get('points',None)
             axes = self.joints()[name].attrs.get('axes',None)
@@ -1360,6 +1361,20 @@ class Hdf5():
                     self._model.nonSmoothDynamicalSystem().\
                         link(fr_inter, ds1, ds2)
                     nsds.setName(fr_inter, '%s_friction%d'%(str(name),ax))
+
+            # An array of tuples (dof1, dof2, ratio) specifies
+            # coupling between a joint's DoFs (e.g., to turn a
+            # cylindrical joint into a screw joint)
+            if coupled is not None:
+                if len(coupled.shape)==1: coupled = numpy.array([coupled])
+                assert(coupled.shape[1]==3)
+                for n, (dof1, dof2, ratio) in enumerate(coupled):
+                    cpl = joints.CouplerJointR(joint, int(dof1), int(dof2), ratio)
+                    cpl.setBasePositions(q1, q2)
+                    cpl_inter = Interaction(EqualityConditionNSL(1), cpl)
+                    self._model.nonSmoothDynamicalSystem().\
+                        link(cpl_inter, ds1, ds2)
+                    nsds.setName(cpl_inter, '%s_coupler%d'%(str(name),n))
 
     def importBoundaryConditions(self, name):
         if self._broadphase is not None:
@@ -2283,7 +2298,8 @@ class Hdf5():
     def addJoint(self, name, object1, object2=None,
                  points=[[0, 0, 0]], axes=[[0, 1, 0]],
                  joint_class='PivotJointR', absolute=None,
-                 allow_self_collide=None, nslaws=None, stops=None, friction=None):
+                 allow_self_collide=None, nslaws=None, stops=None,
+                 friction=None,coupled=None):
         """
         add a joint between two objects
         """
@@ -2317,6 +2333,9 @@ class Hdf5():
             if friction is not None:
                 # must be an NSL name (e.g.  RelayNSL), or list of same
                 joint.attrs['friction'] = np.array(friction, dtype='S')
+            if coupled is not None:
+                # must be an NSL name (e.g.  RelayNSL), or list of same
+                joint.attrs['coupled'] = np.array(coupled)
 
     def addBoundaryCondition(self, name, object1, indices=None, bc_class='HarmonicBC',
                              v=None, a=None, b=None, omega=None, phi=None):

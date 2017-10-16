@@ -713,9 +713,9 @@ void CylindricalJointR::computehDoF(double time, BlockVector& q0, SiconosVector&
 
     // Count the number of twists around the angle, and report the
     // unwrapped angle.  Needed to implement joint stops near pi.
-    if (wrappedAngle < -M_PI*3/4 && _previousAngle > M_PI*3/4)
+    if (wrappedAngle < -M_PI*3/4 && _previousAngle >= 0)
       _twistCount ++;
-    else if (wrappedAngle > M_PI*3/4 && _previousAngle < -M_PI*3/4)
+    else if (wrappedAngle > M_PI*3/4 && _previousAngle <= 0)
       _twistCount --;
     _previousAngle = wrappedAngle;
     double unwrappedAngle = wrappedAngle + 2*M_PI*_twistCount;
