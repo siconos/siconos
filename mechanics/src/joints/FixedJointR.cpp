@@ -61,10 +61,10 @@
 FixedJointR::FixedJointR(SP::NewtonEulerDS d1, SP::NewtonEulerDS d2)
   : NewtonEulerJointR()
 {
-  setInitialConditions(d1->q(), d2 ? d2->q() : SP::SiconosVector());
+  setBasePositions(d1->q(), d2 ? d2->q() : SP::SiconosVector());
 }
 
-void FixedJointR::setInitialConditions(SP::SiconosVector q1, SP::SiconosVector q2)
+void FixedJointR::setBasePositions(SP::SiconosVector q1, SP::SiconosVector q2)
 {
   ::boost::math::quaternion<double> quat1((*q1)(3), (*q1)(4), (*q1)(5), (*q1)(6));
   ::boost::math::quaternion<double> quat2(q2 ? (*q2)(3) : 1, q2 ? (*q2)(4) : 0,

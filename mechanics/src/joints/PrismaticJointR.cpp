@@ -60,6 +60,13 @@
  * rot = lambda V,q: qmul(q, qmul(V, qinv(q)))
  */
 
+PrismaticJointR::PrismaticJointR()
+  : NewtonEulerJointR()
+  , _axis0(std11::make_shared<SiconosVector>(3))
+{
+  _axes.resize(1);
+}
+
 PrismaticJointR::PrismaticJointR(SP::SiconosVector axis, bool absoluteRef,
                                  SP::NewtonEulerDS d1, SP::NewtonEulerDS d2)
   : NewtonEulerJointR()
@@ -69,7 +76,7 @@ PrismaticJointR::PrismaticJointR(SP::SiconosVector axis, bool absoluteRef,
   setAbsolute(absoluteRef);
   setAxis(0, axis);
   if (d1)
-    setInitialConditions(d1->q(), d2 ? d2->q() : SP::SiconosVector());
+    setBasePositions(d1->q(), d2 ? d2->q() : SP::SiconosVector());
 }
 
 void PrismaticJointR::displayInitialPosition()
@@ -83,8 +90,7 @@ void PrismaticJointR::displayInitialPosition()
             << " " << _cq2q103 << " " << _cq2q104 << "\n";
 }
 
-void PrismaticJointR::setInitialConditions(SP::SiconosVector q1,
-                                           SP::SiconosVector q2)
+void PrismaticJointR::setBasePositions(SP::SiconosVector q1, SP::SiconosVector q2)
 {
   *_axis0 = *_axes[0];
 

@@ -40,7 +40,6 @@ protected:
   /** serialization hooks
    */
   ACCEPT_SERIALIZATION(PrismaticJointR);
-  PrismaticJointR(): NewtonEulerJointR() {};
 
   /** Axis of the prismatic point in the q1 frame of reference
    */
@@ -84,6 +83,10 @@ protected:
 
 public:
 
+  /** Empty constructor. The relation may be initialized later by
+   * setPoint, setAbsolute, and setBasePositions. */
+  PrismaticJointR();
+
   /** Constructor based on one or two dynamical systems and an axis.
    *  \param d1 first DynamicalSystem linked by the joint.
    *  \param d2 second DynamicalSystem linked by the joint, or NULL
@@ -96,9 +99,14 @@ public:
                   SP::NewtonEulerDS d1 = SP::NewtonEulerDS(),
                   SP::NewtonEulerDS d2 = SP::NewtonEulerDS());
 
-  /** Initialize the joint constants based on the provided initial positions. */
-  virtual void setInitialConditions(SP::SiconosVector q1,
-                                    SP::SiconosVector q2 = SP::SiconosVector());
+  /** Initialize the joint constants based on the provided base positions.
+   * \param q1 A SiconosVector of size 7 indicating translation and
+   *           orientation in inertial coordinates.
+   * \param q2 An optional SiconosVector of size 7 indicating
+   *           translation and orientation; if null, the inertial
+   *           frame will be considered as the second base. */
+  virtual void setBasePositions(SP::SiconosVector q1,
+                                SP::SiconosVector q2 = SP::SiconosVector());
 
   void displayInitialPosition();
 

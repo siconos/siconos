@@ -84,6 +84,15 @@ static double piwrap(double x)
   return fmod(x + 3*M_PI, 2*M_PI) - M_PI;
 }
 
+CylindricalJointR::CylindricalJointR()
+  : NewtonEulerJointR()
+  , _axis0(std11::make_shared<SiconosVector>(3))
+  , _G1P0(std11::make_shared<SiconosVector>(3))
+{
+  _points.resize(1);
+  _axes.resize(1);
+}
+
 CylindricalJointR::CylindricalJointR(SP::SiconosVector P, SP::SiconosVector A,
                                      bool absoluteRef,
                                      SP::NewtonEulerDS d1, SP::NewtonEulerDS d2)
@@ -97,11 +106,11 @@ CylindricalJointR::CylindricalJointR(SP::SiconosVector P, SP::SiconosVector A,
   setPoint(0, P);
   setAxis(0, A);
   if (d1)
-    setInitialConditions(d1->q(), d2 ? d2->q() : SP::SiconosVector());
+    setBasePositions(d1->q(), d2 ? d2->q() : SP::SiconosVector());
 }
 
-void CylindricalJointR::setInitialConditions(SP::SiconosVector q1,
-                                             SP::SiconosVector q2)
+void CylindricalJointR::setBasePositions(SP::SiconosVector q1,
+                                         SP::SiconosVector q2)
 {
   // in the two-DS case, _P is unused.
   _G1P0->zero();
@@ -165,13 +174,21 @@ void CylindricalJointR::setInitialConditions(SP::SiconosVector q1,
   _previousAngle = 0.0;
   _twistCount = 0;
   _initialAngle = 0.0;
-  BlockVector q0(q1, q2);
   SiconosVector tmpy(1);
-  this->computehDoF(0, q0, tmpy, 1);
+  if (q2)
+  {
+    BlockVector q0(q1, q2);
+    this->computehDoF(0, q0, tmpy, 1);
+  }
+  else
+  {
+    BlockVector q0(1); q0.setVectorPtr(0, q1);
+    this->computehDoF(0, q0, tmpy, 1);
+  }
   _initialAngle = tmpy(0);
 
   _twistCount = 0;
-  _previousAngle = 0;
+  _previousAngle = _initialAngle;
 }
 
 void CylindricalJointR::computeV1V2FromAxis()
@@ -696,9 +713,9 @@ void CylindricalJointR::computehDoF(double time, BlockVector& q0, SiconosVector&
 
     // Count the number of twists around the angle, and report the
     // unwrapped angle.  Needed to implement joint stops near pi.
-    if (wrappedAngle < -M_PI*3/4 && _previousAngle > M_PI*3/4)
+    if (wrappedAngle < -M_PI*3/4 && _previousAngle >= 0)
       _twistCount ++;
-    else if (wrappedAngle > M_PI*3/4 && _previousAngle < -M_PI*3/4)
+    else if (wrappedAngle > M_PI*3/4 && _previousAngle <= 0)
       _twistCount --;
     _previousAngle = wrappedAngle;
     double unwrappedAngle = wrappedAngle + 2*M_PI*_twistCount;

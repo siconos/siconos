@@ -39,6 +39,8 @@ public:
           double y_correction_B=0,
           double scaling=1);
 
+  virtual ~BulletR() {}
+
   /* For users that may require extra information about contacts. */
   SP::btCollisionObject btObject[2];
   SP::btCollisionShape btShape[2];

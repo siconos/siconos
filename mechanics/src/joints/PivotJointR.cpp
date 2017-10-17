@@ -58,6 +58,13 @@ static double piwrap(double x)
   return fmod(x + 3*M_PI, 2*M_PI) - M_PI;
 }
 
+PivotJointR::PivotJointR()
+  : KneeJointR()
+  , _A(std11::make_shared<SiconosVector>(3))
+{
+  _axes.resize(1);
+}
+
 PivotJointR::PivotJointR(SP::SiconosVector P, SP::SiconosVector A, bool absoluteRef,
                          SP::NewtonEulerDS d1, SP::NewtonEulerDS d2)
   : KneeJointR(P, absoluteRef, d1, d2)
@@ -67,36 +74,64 @@ PivotJointR::PivotJointR(SP::SiconosVector P, SP::SiconosVector A, bool absolute
 
   setAxis(0, A);
   if (d1)
-    setInitialConditions(d1->q(), d2 ? d2->q() : SP::SiconosVector());
+    setBasePositions(d1->q(), d2 ? d2->q() : SP::SiconosVector());
 }
 
-static ::boost::math::quaternion<double> quat(const SP::SiconosVector& v)
+static ::boost::math::quaternion<double> rotquat(const SP::SiconosVector& v)
 {
-  if (v && v->size()==7)
+  if (v)
     return ::boost::math::quaternion<double>((*v)(3),(*v)(4),(*v)(5),(*v)(6));
-  else if (v && v->size()==3)
-    return ::boost::math::quaternion<double>(0, (*v)(0),(*v)(1),(*v)(2));
   else
     return ::boost::math::quaternion<double>(1, 0, 0, 0);
 }
 
-void PivotJointR::setInitialConditions(SP::SiconosVector q1,
-                                       SP::SiconosVector q2)
+static ::boost::math::quaternion<double> rotquat(const SiconosVector& v)
 {
-  *_A = *_axes[0];
-  // TODO: add support for absolute frame here
+  return ::boost::math::quaternion<double>(v(3),v(4),v(5),v(6));
+}
 
-  ::boost::math::quaternion<double> quat1(quat(q1));
-  ::boost::math::quaternion<double> quat2(quat(q2));
-  ::boost::math::quaternion<double> cq2q10(1.0 / quat2 * quat1);
+static ::boost::math::quaternion<double> posquat(const SP::SiconosVector& v)
+{
+  return ::boost::math::quaternion<double>(0, (*v)(0),(*v)(1),(*v)(2));
+}
+
+static ::boost::math::quaternion<double> posquat(const SiconosVector& v)
+{
+  return ::boost::math::quaternion<double>(0, v(0),v(1),v(2));
+}
+
+void PivotJointR::setBasePositions(SP::SiconosVector q1, SP::SiconosVector q2)
+{
+  KneeJointR::setBasePositions(q1, q2);
+
+  // The provided axis is the basis for the orthogonal plane
+  // constraint relative to q1.
+  *_A = *_axes[0];
+
+  // If provided in absolute coordinates, must be rotated to q1 frame.
+  if (_absoluteRef)
+  {
+    boost::math::quaternion<double> rot1(rotquat(q1)), quatBuff;
+
+    // Move to q1 frame by unapplying q1 frame rotation
+    quatBuff = (1.0/rot1) * posquat(_A) * rot1;
+    _A->setValue(0, quatBuff.R_component_2());
+    _A->setValue(1, quatBuff.R_component_3());
+    _A->setValue(2, quatBuff.R_component_4());
+  }
+
+  // Initial orientation offset between q2 and q1.
+  ::boost::math::quaternion<double> cq2q10(1.0 / rotquat(q2) * rotquat(q1));
 
   _cq2q101 = cq2q10.R_component_1();
   _cq2q102 = cq2q10.R_component_2();
   _cq2q103 = cq2q10.R_component_3();
   _cq2q104 = cq2q10.R_component_4();
 
+  // Initialize the two orthogonal vectors that define the constraint plane.
   buildA1A2();
 
+  // Get initial offsets relative to plane constraints.
   double rot2to1w, rot2to1x, rot2to1y, rot2to1z;
   if (q2)
     rot2to1((*q1)(3), (*q1)(4), (*q1)(5), (*q1)(6),

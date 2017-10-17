@@ -34,9 +34,6 @@ protected:
   /** serialization hooks
    */
   ACCEPT_SERIALIZATION(NewtonEulerJointR);
-  NewtonEulerJointR(): NewtonEulerR()
-                     , _allowSelfCollide(false)
-                     , _absoluteRef(true) {};
 
   /** A flag determining whether this joint should block
    * "self-collision", i.e., if true, bodies connected by this joint
@@ -59,9 +56,15 @@ protected:
 
 public:
 
+  /** Empty constructor. The relation may be initialized later by
+   * setPoint, setAbsolute, and setBasePositions. */
+  NewtonEulerJointR(): NewtonEulerR()
+                     , _allowSelfCollide(false)
+                     , _absoluteRef(true) {};
+
   /** Set a point for this joint. The role of each point is specific
    * to the joint subclass. Won't take effect until
-   * setInitialConditions is called.
+   * setBasePositions is called.
    *
    * \param index The index of the points.
    * \param point A SiconosVector of size 3.
@@ -69,8 +72,22 @@ public:
   void setPoint(unsigned int index, SP::SiconosVector point)
     { _points[index] = point; }
 
+  /** Get a point for this joint.
+   *
+   * \param index The index of the point.
+   * \return The requested point.
+   */
+  SP::SiconosVector point(unsigned int index)
+    { return _points[index]; }
+
+  /** Get the vector of points for this joint.
+   * \return The vector of points.
+   */
+  VectorOfVectors& points()
+    { return _points; }
+
   /** Set an axis for this joint. The role of each axis is specific to
-   * the joint subclass. Won't take effect until setInitialConditions
+   * the joint subclass. Won't take effect until setBasePositions
    * is called.
    *
    * \param index The index of the points.
@@ -79,8 +96,22 @@ public:
   void setAxis(unsigned int index, SP::SiconosVector axis)
     { _axes[index] = axis; }
 
+  /** Get an axis for this joint.
+   *
+   * \param index The index of the point.
+   * \return The requested axis.
+   */
+  SP::SiconosVector axis(unsigned int index)
+    { return _axes[index]; }
+
+  /** Get the vector of axes for this joint.
+   * \return The vector of axes.
+   */
+  VectorOfVectors& axes()
+    { return _axes; }
+
   /** Set whether points and axes should be interpreted in absolute or
-   * relative frame. Won't take effect until setInitialConditions is
+   * relative frame. Won't take effect until setBasePositions is
    * called.
    *
    * \param absoluteRef true for absolute frame, false for relative frame.
@@ -88,9 +119,22 @@ public:
   void setAbsolute(bool absoluteRef)
     { _absoluteRef = absoluteRef; }
 
-  /** Initialize the joint constants based on the provided initial positions. */
-  virtual void setInitialConditions(SP::SiconosVector q1,
-                                    SP::SiconosVector q2=SP::SiconosVector()) = 0;
+  /** Get whether points and axes are interpreted in absolute or
+   * relative frame.
+   *
+   * \return True for absolute frame, false for relative frame.
+   */
+  bool absolute()
+    { return _absoluteRef; }
+
+  /** Initialize the joint constants based on the provided base positions.
+   * \param q1 A SiconosVector of size 7 indicating translation and
+   *           orientation in inertial coordinates.
+   * \param q2 An optional SiconosVector of size 7 indicating
+   *           translation and orientation; if null, the inertial
+   *           frame will be considered as the second base. */
+  virtual void setBasePositions(SP::SiconosVector q1,
+                                SP::SiconosVector q2=SP::SiconosVector()) = 0;
 
   /** Compute the vector of linear and angular positions of the free axes */
   virtual void computehDoF(double time, BlockVector& q0, SiconosVector& y,
