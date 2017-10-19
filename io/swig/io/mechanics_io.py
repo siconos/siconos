@@ -1254,6 +1254,67 @@ class Hdf5():
 
         return body
 
+    def make_CouplerJointR(self, ds1_name, ds2_name, coupled, references):
+        topo = self._model.nonSmoothDynamicalSystem().topology()
+        dof1, dof2, ratio = coupled[0,:]
+        refds_name = None
+        if len(references)>0:
+            joint1_name = references[0]
+            joint1 = joints.cast_NewtonEulerJointR(
+                topo.getInteraction(joint1_name).relation())
+            joint2 = joint1
+            joint1_ds1 = self.joints()[joint1_name].attrs['object1']
+            joint1_ds2 = self.joints()[joint1_name].attrs.get('object2',None)
+        if len(references)>1:
+            joint2_name = references[1]
+            joint2 = joints.cast_NewtonEulerJointR(
+                topo.getInteraction(joint2_name).relation())
+            joint2_ds1 = self.joints()[joint2_name].attrs['object1']
+            joint2_ds2 = self.joints()[joint2_name].attrs.get('object2',None)
+
+            if len(references)>2:
+                refds_name = references[2]
+            else:
+                # if second joint provided but no reference, then
+                # infer refds_name from the reference joints
+                dss = set([joint1_ds1, joint1_ds2, joint2_ds1, joint2_ds2])
+                diff = list(dss.difference(set([ds1_name, ds2_name])))
+                # there must be exactly one reference in common that
+                # is not either of the DSs
+                assert(len(diff)==1)
+                refds_name = diff[0]
+
+        if refds_name:
+            refds = topo.getDynamicalSystem(refds_name)
+
+            # Determine reference indexes:
+            # Assert if neither ds in reference joints is the
+            # ref ds and that the other ds is ds1/ds2 as
+            # appropriate.
+            refidx1, refidx2 = 0, 0
+            if joint1_ds1 == ds1_name:
+                refidx1 = 1
+                assert(joint1_ds2 == refds_name)
+            else:
+                assert(joint1_ds1 == refds_name)
+                assert(joint1_ds2 == ds1_name)
+            if joint2_ds1 == ds2_name:
+                refidx2 = 1
+                assert(joint2_ds2 == refds_name)
+            else:
+                assert(joint2_ds1 == refds_name)
+                assert(joint2_ds2 == ds2_name)
+
+            joint = joints.CouplerJointR(joint1, int(dof1),
+                                         joint2, int(dof2), ratio,
+                                         refds, refidx1, refds, refidx2)
+        else:
+            # otherwise we assume no reference, coupler is directly
+            # between ds1 and ds2
+            joint = joints.CouplerJointR(joint1, int(dof1),
+                                         joint2, int(dof2), ratio)
+        return joint
+
     def importJoint(self, name):
         if self._broadphase is not None:
             nsds = self._model.nonSmoothDynamicalSystem()
@@ -1268,6 +1329,7 @@ class Hdf5():
             nslaws = self.joints()[name].attrs.get('nslaws',None)
             friction = self.joints()[name].attrs.get('friction',None)
             coupled = self.joints()[name].attrs.get('coupled',None)
+            references = self.joints()[name].attrs.get('references',None)
 
             points = self.joints()[name].attrs.get('points',None)
             axes = self.joints()[name].attrs.get('axes',None)
@@ -1302,15 +1364,27 @@ class Hdf5():
             elif joint_class == joints.FixedJointR:
                 assert(len(points)==0 and len(axes)==0)
 
-            # Generic NewtonEulerJointR interface
-            joint = joint_class()
-            for n,p in enumerate(points):
-                joint.setPoint(n, p)
-            for n,a in enumerate(axes):
-                joint.setAxis(n, a)
-            joint.setAbsolute(absolute)
+            if joint_class == joints.CouplerJointR:
+                # This case is a little different, handle it specially
+                assert(references is not None)
+                assert(np.shape(coupled)==(1,3))
+                joint = self.make_CouplerJointR(ds1_name, ds2_name,
+                                                coupled, references)
+                coupled = None # Skip the use for "coupled" below, to
+                               # install joint-local couplings
+
+            else:
+                # Generic NewtonEulerJointR interface
+                joint = joint_class()
+                for n,p in enumerate(points):
+                    joint.setPoint(n, p)
+                for n,a in enumerate(axes):
+                    joint.setAxis(n, a)
+                joint.setAbsolute(absolute)
+
             q1 = ds1.q()
             q2 = None if ds2 is None else ds2.q()
+
             joint.setBasePositions(q1, q2)
 
             if allow_self_collide is not None:
@@ -1369,7 +1443,8 @@ class Hdf5():
                 if len(coupled.shape)==1: coupled = numpy.array([coupled])
                 assert(coupled.shape[1]==3)
                 for n, (dof1, dof2, ratio) in enumerate(coupled):
-                    cpl = joints.CouplerJointR(joint, int(dof1), int(dof2), ratio)
+                    cpl = joints.CouplerJointR(joint, int(dof1),
+                                               joint, int(dof2), ratio)
                     cpl.setBasePositions(q1, q2)
                     cpl_inter = Interaction(EqualityConditionNSL(1), cpl)
                     self._model.nonSmoothDynamicalSystem().\
@@ -2299,7 +2374,7 @@ class Hdf5():
                  points=[[0, 0, 0]], axes=[[0, 1, 0]],
                  joint_class='PivotJointR', absolute=None,
                  allow_self_collide=None, nslaws=None, stops=None,
-                 friction=None,coupled=None):
+                 friction=None,coupled=None,references=None):
         """
         add a joint between two objects
         """
@@ -2334,8 +2409,15 @@ class Hdf5():
                 # must be an NSL name (e.g.  RelayNSL), or list of same
                 joint.attrs['friction'] = np.array(friction, dtype='S')
             if coupled is not None:
-                # must be an NSL name (e.g.  RelayNSL), or list of same
+                # must be a list of tuples of two integers (DoF
+                # indexes) and a float (ratio)
+                for c in coupled:
+                    assert(len(c)==3)
                 joint.attrs['coupled'] = np.array(coupled)
+            if references is not None:
+                # must be a list of two joint names and one DS name
+                assert(len(references)==2 or len(references)==3)
+                joint.attrs['references'] = references
 
     def addBoundaryCondition(self, name, object1, indices=None, bc_class='HarmonicBC',
                              v=None, a=None, b=None, omega=None, phi=None):
