@@ -61,7 +61,7 @@ def test_SBM_to_sparse1():
     from siconos.numerics import SBM_get_value, SBM_new_from_file, SBM_print, SBM_to_sparse
     from scipy.sparse.csr import csr_matrix
 
-    SBM=newFromFileSBM(os.path.join(working_dir, 'data/SBM1.dat'))
+    SBM=SBM_new_from_file(os.path.join(working_dir, 'data/SBM1.dat'))
 
     r,A = SBM_to_sparse(SBM)
 
@@ -92,7 +92,7 @@ def test_SBM_to_SBM_from_csparse():
     from siconos.numerics import SBM_get_value, SBM_new_from_file, SBM_print, SBM_to_sparse, SBM_from_csparse
     from scipy.sparse.csr import csr_matrix
 
-    SBM1=newFromFileSBM(os.path.join(working_dir, 'data/SBM1.dat'))
+    SBM1=SBM_new_from_file(os.path.join(working_dir, 'data/SBM1.dat'))
 
     r,SPARSE = SBM_to_sparse(SBM1)
 
