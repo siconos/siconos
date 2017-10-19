@@ -240,6 +240,11 @@ public:
    */
   void setVectorPtr(unsigned int pos, SP::SiconosVector v);
 
+  /** set the vector array of _vect
+   * \param v a VectorOfVectors
+   */
+  void setAllVect(VectorOfVectors& v);
+
   /** get the vector at position i(ie this for Simple and block i for BlockVector)
    *  \param pos block number
    *  \return a SP::SiconosVector
