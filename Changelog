@@ -25,8 +25,21 @@ before it.
   v4.1.0
 --------------------------------------------------------------------------------
 Main changes:
-        * ...
-	* ...
+	* [kernel]
+
+	* [numerics] optimization of existing frictional contact solvers.
+	Especially, the semismooth Newton solvers are optimized with respect to the rho
+	parameter. The iterative solvers are also  optimized with respect to the error computation
+	that is now adaptive for VI_FP and VI_EG solvers
+
+	* [numerics] ConvexQP is a new class of problem for solving QP over convex set giving
+	the projection onto the set. New solvers for frictional contact problems have been
+	added based on a succesive approximations by convexification.
+
+	* [numerics] new solvers for frictional contact problems based on the Panagiotopoulos
+	approach (alternating normal and tangent problems)
+
+
 --------------------------------------------------------------------------------
   v4.0.0
 --------------------------------------------------------------------------------
