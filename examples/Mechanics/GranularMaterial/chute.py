@@ -66,7 +66,7 @@ with Hdf5(use_compression=True) as io:
   v3_extruded = v3 + numpy.dot(plan_thickness,left_up_normal)
 
   left_up_vertices=numpy.array([v1,v2,v3,v1_extruded,v2_extruded,v3_extruded])
-  print left_up_vertices
+  print('left_up_vertices',left_up_vertices)
 
   v1 = numpy.array([0, 0 , box_height])
   v2 = numpy.array([4.370-4.370*1.200/box_height,0.0, 1.200])
@@ -76,7 +76,7 @@ with Hdf5(use_compression=True) as io:
   v3_extruded = v3 + numpy.dot(plan_thickness,left_up_normal)
 
   left_up_vertices=numpy.array([v1,v2,v3,v1_extruded,v2_extruded,v3_extruded])
-  print left_up_vertices
+  print('left_up_vertices', left_up_vertices)
 
   io.addConvexShape('Left_up',left_up_vertices )
   io.addObject('left_up', [Contactor('Left_up')],
@@ -97,7 +97,7 @@ with Hdf5(use_compression=True) as io:
   v5_extruded = v5 + numpy.dot(plan_thickness,left_middle_normal)
 
   left_middle_vertices=numpy.array([v2,v3,v4,v5,v2_extruded,v3_extruded,v4_extruded,v5_extruded])
-  print left_middle_vertices
+  print('left_middle_vertices',left_middle_vertices)
 
   io.addConvexShape('Left_middle',left_middle_vertices )
   io.addObject('left_middle', [Contactor('Left_middle')],
@@ -120,7 +120,7 @@ with Hdf5(use_compression=True) as io:
                                   v6-[plan_thickness, 0.0 ,0.],v7+[plan_thickness, 0.0 ,0.],
                                   v4_extruded-[plan_thickness, 0.0 ,0.],v5_extruded+[plan_thickness, 0.0 ,0.],
                                   v6_extruded,v7_extruded])
-  print left_down_vertices
+  print('left_down_vertices',left_down_vertices)
 
   io.addConvexShape('Left_down',left_down_vertices )
   io.addObject('left_udown', [Contactor('Left_down')],
@@ -146,7 +146,7 @@ with Hdf5(use_compression=True) as io:
   v11_extruded = v11 + numpy.dot(plan_thickness,right_up_normal)
 
   right_up_vertices=numpy.array([v8,v9,v10,v11,v8_extruded,v9_extruded,v10_extruded,v11_extruded])
-  print right_up_vertices
+  print('right_up_vertices',right_up_vertices)
 
   io.addConvexShape('Right_up',right_up_vertices )
   io.addObject('right_up', [Contactor('Right_up')],
@@ -171,7 +171,7 @@ with Hdf5(use_compression=True) as io:
                                 v1_extruded-[0.0,plan_thickness,0.0],v2_extruded-[0.0,plan_thickness,0.0],
                                 v8_extruded+[0.0,plan_thickness,0.0],v4_extruded-[0.0,plan_thickness,0.0],
                                 v11_extruded+[0.0,plan_thickness,0.0]])
-  print rear_up_vertices
+  print('rear_up_vertices',rear_up_vertices)
 
   io.addConvexShape('Rear_up',rear_up_vertices )
   io.addObject('rear_up', [Contactor('Rear_up')],
@@ -193,7 +193,7 @@ with Hdf5(use_compression=True) as io:
   v6_extruded = v6 + numpy.dot(plan_thickness,rear_down_normal)
 
   rear_down_vertices=numpy.array([v4,v11,v6,v4_extruded,v11_extruded,v6_extruded])
-  print rear_down_vertices
+  print('rear_down_vertices',rear_down_vertices)
 
 
   io.addConvexShape('Rear_down',rear_down_vertices )
@@ -217,7 +217,7 @@ with Hdf5(use_compression=True) as io:
                                  v9+[0.0,plan_thickness,0.0],v10+[0.0,plan_thickness,0.0],
                                  v3_extruded-[0.0,plan_thickness,0.0],v5_extruded-[0.0,plan_thickness,0.0],
                                  v9_extruded+[0.0,plan_thickness,0.0],v10_extruded+[0.0,plan_thickness,0.0]])
-  print front_up_vertices
+  print('front_up_vertices',front_up_vertices)
 
 
   io.addConvexShape('Front_up',front_up_vertices )
@@ -237,7 +237,7 @@ with Hdf5(use_compression=True) as io:
   v10_extruded = v10 + numpy.dot(plan_thickness,front_down_normal)
 
   front_down_vertices=numpy.array([v5,v7,v10,v5_extruded,v7_extruded,v10_extruded])
-  print front_down_vertices
+  print('front_down_vertices',front_down_vertices)
 
   io.addConvexShape('Front_down',front_down_vertices )
   io.addObject('front_down', [Contactor('Front_down')],
@@ -273,8 +273,8 @@ with Hdf5(use_compression=True) as io:
   # is between contactors of group id 0.
   io.addNewtonImpactFrictionNSL('contact', mu=0.3)
 
-  print body_collection
-  f = open('body_collection.dict', 'w')
+  print(body_collection)
+  f = open('body_collection.dict', 'wb')
   pickle.dump(body_collection,f)
   f.close()
 
