@@ -25,7 +25,9 @@ before it.
   v4.1.0 (in development branch siconos/master)
 --------------------------------------------------------------------------------
 Main changes:
-	* [kernel]
+	* [kernel] refactoring the initialization of classes
+	lazy initialization driven by the simulation classes.
+	move of buffer and work vectors and matrices towards the graph
 
 	* [numerics] optimization of existing frictional contact solvers.
 	Especially, the semismooth Newton solvers are optimized with respect to the rho
@@ -38,6 +40,14 @@ Main changes:
 
 	* [numerics] new solvers for frictional contact problems based on the Panagiotopoulos
 	approach (alternating normal and tangent problems)
+
+	* [numerics] update and correct global friction contact solvers.
+	new gfc3d_VI_* solvers. Update lmgc_driver for gfc3d
+
+	* [kernel] new implementation of MoreauJeanGOSI.
+
+	* [numerics] add functionalities and test in NumericsMatrix for sparse storage
+
 	
 
 
