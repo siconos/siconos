@@ -24,7 +24,10 @@ if(HAVE_SICONOS_MECHANICS)
     execute_process(COMMAND sh -c "mkdir -p '${SICONOS_SWIG_ROOT_DIR}/io'")
     execute_process(COMMAND sh -c "test -e '${SICONOS_SWIG_ROOT_DIR}/io/mechanics_io.py' || ln -vs '${CMAKE_CURRENT_SOURCE_DIR}/io/mechanics_io.py' '${SICONOS_SWIG_ROOT_DIR}/io/mechanics_io.py'")
     execute_process(COMMAND sh -c "test -e '${SICONOS_SWIG_ROOT_DIR}/io/FrictionContactTrace.py' || ln -vs '${CMAKE_CURRENT_SOURCE_DIR}/io/FrictionContactTrace.py' ${SICONOS_SWIG_ROOT_DIR}/io/FrictionContactTrace.py")
+    execute_process(COMMAND sh -c "test -e '${SICONOS_SWIG_ROOT_DIR}/io/vview.py' || ln -vs '${CMAKE_CURRENT_SOURCE_DIR}/io/vview.py' ${SICONOS_SWIG_ROOT_DIR}/io/vview.py")
+    
 
+    
     message("Setting up symlink install targets for io Python executables")
     install(CODE "execute_process(COMMAND sh -c \"test -e '${CMAKE_INSTALL_PREFIX}/bin/siconos_vview' || ln -vs '${CMAKE_CURRENT_SOURCE_DIR}/io/vview.py' '${CMAKE_INSTALL_PREFIX}/bin/siconos_vview' \")")
     install(CODE "execute_process(COMMAND sh -c \"test -e '${CMAKE_INSTALL_PREFIX}/bin/siconos_vexport' || ln -vs '${CMAKE_CURRENT_SOURCE_DIR}/io/vexport.py' '${CMAKE_INSTALL_PREFIX}/bin/siconos_vexport'\")")
@@ -33,9 +36,14 @@ if(HAVE_SICONOS_MECHANICS)
     install(CODE "execute_process(COMMAND sh -c \"test -e '${CMAKE_INSTALL_PREFIX}/bin/siconos_filter' || ln -vs '${CMAKE_CURRENT_SOURCE_DIR}/io/filter.py' '${CMAKE_INSTALL_PREFIX}/bin/siconos_filter'\")")
     install(CODE "execute_process(COMMAND sh -c \"test -e '${CMAKE_INSTALL_PREFIX}/bin/siconos_run' || ln -vs '${CMAKE_CURRENT_SOURCE_DIR}/io/run.py' '${CMAKE_INSTALL_PREFIX}/bin/siconos_run'\")")
   else()
+
+    
     configure_file(io/mechanics_io.py ${SICONOS_SWIG_ROOT_DIR}/io/mechanics_io.py @ONLY)
     configure_file(io/FrictionContactTrace.py ${SICONOS_SWIG_ROOT_DIR}/io/FrictionContactTrace.py @ONLY)
-    install(PROGRAMS io/vview.py    DESTINATION bin RENAME siconos_vview)
+
+    configure_file(io/vview.py ${SICONOS_SWIG_ROOT_DIR}/io/vview.py @ONLY)
+    
+    install(PROGRAMS ${SICONOS_SWIG_ROOT_DIR}/io/vview.py    DESTINATION bin RENAME siconos_vview)
     install(PROGRAMS io/vexport.py  DESTINATION bin RENAME siconos_vexport)
     install(PROGRAMS io/pprocess.py DESTINATION bin RENAME siconos_pprocess)
     install(PROGRAMS io/info.py     DESTINATION bin RENAME siconos_info)
