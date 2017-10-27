@@ -28,14 +28,18 @@ const SPC::TopoDS_Edge OccContactEdge::contact() const
 
 void OccContactEdge::computeUVBounds()
 {
-  TopExp_Explorer Ex1;
-  Ex1.Init(*this->contact(),TopAbs_EDGE);
-  const TopoDS_Edge& edge = TopoDS::Edge(Ex1.Current());
-  BRepAdaptor_Curve SC(edge);
-  this->binf1[0]=SC.FirstParameter();
-  this->bsup1[0]=SC.LastParameter();
-  this->binf1[1]=0.;
-  this->bsup1[1]=0.;
+  TopExp_Explorer exp;
+  exp.Init(this->data(),TopAbs_EDGE);
+  for (unsigned int i=0; i<_index; ++i, exp.Next());
+  if (exp.More())
+  {
+    const TopoDS_Edge& edge = TopoDS::Edge(exp.Current());
+    BRepAdaptor_Curve SC(edge);
+    this->binf1[0]=SC.FirstParameter();
+    this->bsup1[0]=SC.LastParameter();
+    this->binf1[1]=0.;
+    this->bsup1[1]=0.;
+  }
 }
 
 

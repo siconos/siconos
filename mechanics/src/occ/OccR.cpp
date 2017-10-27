@@ -15,8 +15,8 @@ OccR::OccR(const ContactPoint& contact1,
   _contact1(contact1),
   _contact2(contact2),
   _geometer(),
-  _normalFromFace1(true),
-  _offsetp1(true),
+  _normalFromFace1(false),
+  _offsetp1(false),
   _offset(0.1)
 {
   switch (Type::value(distance_calculator))
@@ -40,10 +40,10 @@ void OccR::computeh(double time, BlockVector& q0, SiconosVector& y)
 
   ContactShapeDistance& dist = this->_geometer->answer;
 
-  // printf("---->%g P1=(%g, %g, %g) P2=(%g,%g,%g) N=(%g, %g, %g)\n", dist.value,
-  //        dist.x1, dist.y1, dist.z1,
-  //        dist.x2, dist.y2, dist.z2,
-  //        dist.nx, dist.ny, dist.nz);
+  printf("---->%g P1=(%g, %g, %g) P2=(%g,%g,%g) N=(%g, %g, %g)\n", dist.value,
+          dist.x1, dist.y1, dist.z1,
+          dist.x2, dist.y2, dist.z2,
+          dist.nx, dist.ny, dist.nz);
 
   double& X1 = dist.x1;
   double& Y1 = dist.y1;
