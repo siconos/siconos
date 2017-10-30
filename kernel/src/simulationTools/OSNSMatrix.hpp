@@ -94,7 +94,6 @@ protected:
   */
   ACCEPT_SERIALIZATION(OSNSMatrix);
 
-
   /** number of rows */
   unsigned int _dimRow;
 
@@ -113,13 +112,6 @@ protected:
   /** Matrix which corresponds to Numerics SparseBlockStructuredMatrix
       (_storageType = 1) */
   SP::BlockCSRMatrix _M2;
-
-  /** For each Interaction in the graph, compute its absolute position
-   *  \param indexSet the index set ot the concerned interactios.
-   * \return the dimension of the problem (or size of the matrix),
-   * computed as the sum of the nslaw of all the Interaction in indexSet
-   */
-  virtual unsigned updateSizeAndPositions(InteractionsGraph & indexSet);
 
   /** For each DynamicalSystem in the graph, compute its absolute position
    * \param indexSet the index set of the dynamical systems
@@ -170,7 +162,7 @@ public:
 
   /** destructor
    */
-  virtual ~OSNSMatrix();
+  virtual ~OSNSMatrix(){};
 
   /** get dimension of the square matrix
    * \return unsigned int

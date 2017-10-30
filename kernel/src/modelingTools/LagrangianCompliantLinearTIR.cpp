@@ -55,7 +55,7 @@ LagrangianCompliantLinearTIR::LagrangianCompliantLinearTIR(SP::SimpleMatrix C, S
 
 void LagrangianCompliantLinearTIR::initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
 {
-  unsigned int sizeY = inter.getSizeOfY();
+  unsigned int sizeY = inter.dimension();
 
   if (!(_jachq) || _jachq->size(1) !=  inter.getSizeOfDS() ||  _jachq->size(0) != sizeY)
     RuntimeException::selfThrow("LagrangianCompliantLinearTIR::initComponents inconsistent sizes between H matrix and the interaction.");

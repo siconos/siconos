@@ -35,6 +35,31 @@ LCP::LCP(int numericsSolverId):
   linearComplementarity_setDefaultSolverOptions(NULL, &*_numerics_solver_options, _numerics_solver_id);
 }
 
+int LCP::numericsCompute()
+{
+  // The LCP in Numerics format
+  _numerics_problem->M = &*_M->numericsMatrix();
+  _numerics_problem->q = _q->getArray();
+  _numerics_problem->size = _sizeOutput;
+  int info  = 0;
+  //const char * name = &*_numerics_solver_options->solverName;
+  if (_numerics_solver_options->solverId == SICONOS_LCP_ENUM)
+    {
+      lcp_enum_init(&*_numerics_problem, &*_numerics_solver_options, 1);
+      
+      
+    }
+  info = linearComplementarity_driver(&*_numerics_problem, _z->getArray() , _w->getArray() ,
+				      &*_numerics_solver_options);
+  
+  if (_numerics_solver_options->solverId == SICONOS_LCP_ENUM)
+    {
+      lcp_enum_reset(&*_numerics_problem, &*_numerics_solver_options, 1);    
+    }
+  return info;
+  
+  }
+
 int LCP::compute(double time)
 {
 
@@ -59,28 +84,7 @@ int LCP::compute(double time)
   if (_sizeOutput != 0)
   {
 
-    // The LCP in Numerics format
-    _numerics_problem->M = &*_M->numericsMatrix();
-    _numerics_problem->q = _q->getArray();
-    _numerics_problem->size = _sizeOutput;
-
-    //const char * name = &*_numerics_solver_options->solverName;
-    if (_numerics_solver_options->solverId == SICONOS_LCP_ENUM)
-    {
-      lcp_enum_init(&*_numerics_problem, &*_numerics_solver_options, 1);
-
-
-    }
-    info = linearComplementarity_driver(&*_numerics_problem, _z->getArray() , _w->getArray() ,
-                                        &*_numerics_solver_options);
-
-    if (_numerics_solver_options->solverId == SICONOS_LCP_ENUM)
-    {
-      lcp_enum_reset(&*_numerics_problem, &*_numerics_solver_options, 1);
-
-
-    }
-
+    info = numericsCompute();
     // --- Recovering of the desired variables from LCP output ---
     postCompute();
 

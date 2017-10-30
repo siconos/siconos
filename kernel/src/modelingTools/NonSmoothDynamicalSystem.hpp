@@ -293,6 +293,7 @@ public:
    *  \param level y min order to be computed
    */
   void updateOutput(double time, unsigned int level = 0);
+  void updateOutput(double time, unsigned int level_min, unsigned int level_max);
 
 
   /** visit all dynamical systems in this system.

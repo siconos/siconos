@@ -641,31 +641,6 @@ void BlockMatrix::setValue(unsigned int row, unsigned int col, double value)
 // Access (get or set) to blocks of elements
 //============================================
 
-// void BlockMatrix::getBlock (unsigned int row, unsigned int col, SiconosMatrix * m) const
-// {
-//   SiconosMatrixException::selfThrow("BlockMatrix::getBlock, not yet implemented or useless for BlockMatrices.");
-// }
-
-// void BlockMatrix::setBlock(unsigned int row, unsigned int col, const SiconosMatrix *m)
-// {
-//   // Set current matrix elements, starting from row row_min and column col_min, with the values of the matrix m.
-//   // m may be a BlockMatrix.
-
-//   if(m == this)
-//     SiconosMatrixException::selfThrow("BlockMatrix::setBlock(pos,..., m): m = this.");
-
-//   if(m->isBlock ())
-//     SiconosMatrixException::selfThrow("BlockMatrix::setBlock of a block into an other block is forbidden.");
-
-//   if(row > _dimRow || col > _dimCol )
-//     SiconosMatrixException::selfThrow("BlockMatrix::setBlock(i,j,m), i or j is out of range.");
-
-//   // Check dim
-//   if( tmp->size(0)!=m->size(0) || tmp->size(1) != m->size(1) )
-//     SiconosMatrixException::selfThrow("BlockMatrix::setBlock(x,y,m), block(x,y) of current matrix and m have inconsistent sizes.");
-//   *((*_mat)(row,col)) = *m; // copy
-// }
-
 void BlockMatrix::getRow(unsigned int r, SiconosVector &v) const
 {
   unsigned int numRow = 0, posRow = r, start = 0, stop = 0;

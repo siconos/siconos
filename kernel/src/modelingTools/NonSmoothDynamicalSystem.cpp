@@ -182,6 +182,31 @@ void NonSmoothDynamicalSystem::updateOutput(double time, unsigned int level)
 }
 
 
+void NonSmoothDynamicalSystem::updateOutput(double time, unsigned int level_min, unsigned int level_max)
+{
+
+  // To compute output(level) (ie with y[level]) for all Interactions.
+  //  assert(level>=0);
+  
+  DEBUG_BEGIN("NonSmoothDynamicalSystem::updateOutput(unsigned int level)\n");
+  DEBUG_PRINTF("with level = %i\n", level);
+  InteractionsGraph::VIterator ui, uiend;
+  SP::Interaction inter;
+  SP::InteractionsGraph indexSet0 = _topology->indexSet0();
+  for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+  {
+    inter = indexSet0->bundle(*ui);
+    assert(inter->lowerLevelForOutput() <= level_max);
+    assert(inter->upperLevelForOutput() >= level_min);
+    for(unsigned int level = level_min; level<=level_max; ++level)
+      inter->computeOutput(time, indexSet0->properties(*ui), level);
+  }
+  DEBUG_END("NonSmoothDynamicalSystem::updateOutput(unsigned int level)\n");
+
+}
+
+
+
 void NonSmoothDynamicalSystem::visitDynamicalSystems(SP::SiconosVisitor visitor)
 {
   DynamicalSystemsGraph &dsg = *dynamicalSystems();

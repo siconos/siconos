@@ -88,32 +88,14 @@ Topology::__addInteractionInIndexSet0(SP::Interaction inter, SP::DynamicalSystem
   DynamicalSystemsGraph::VDescriptor dsgv1, dsgv2;
   dsgv1 = _DSG[0]->add_vertex(ds1);
 
-  // SP::VectorOfVectors workVds1 = _DSG[0]->properties(dsgv1).workVectors;
-  // // Note FP: all the work below must have been done during insertDynamicalSystem
-  // or even later, during simulation init
-  // SP::VectorOfVectors workVds2;
-  // if (!workVds1)
-  //   {
-  //   // V.A. 210/06/2017 Could we defer  this initialization ?
-  //     workVds1.reset(new VectorOfVectors());
-  //   _DSG[0]->properties(dsgv1).workMatrices.reset(new VectorOfMatrices());
-  //   }
   if(ds2)
     {
       dsgv2 = _DSG[0]->add_vertex(ds2);
-      // workVds2 = _DSG[0]->properties(dsgv2).workVectors;
-      // if (!workVds2)
-      // 	{
-      // 	  // V.A. 210/06/2017 Could we defer  this initialization ?
-      // 	  workVds2.reset(new VectorOfVectors());
-      // 	  _DSG[0]->properties(dsgv2).workMatrices.reset(new VectorOfMatrices());
-      // 	}
     }
   else
     {
       dsgv2 = dsgv1;
       ds2_ = ds1;
-      //workVds2 = workVds1;
     }
   // this may be a multi edges graph
   assert(!_DSG[0]->is_edge(dsgv1, dsgv2, inter));
@@ -142,7 +124,7 @@ Topology::__addInteractionInIndexSet0(SP::Interaction inter, SP::DynamicalSystem
   _IG[0]->properties(ig_new_ve).source = ds1;
   _IG[0]->properties(ig_new_ve).source_pos = 0;
 
-  if(!ds2)
+  if(!ds2) // self loop in ds graph, source=target in interaction graph
   {
     _IG[0]->properties(ig_new_ve).target = ds1;
     _IG[0]->properties(ig_new_ve).target_pos = 0;

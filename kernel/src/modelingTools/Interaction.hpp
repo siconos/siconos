@@ -349,23 +349,12 @@ public:
     return _upperLevelForInput;
   };
 
-  
-  /** Get the dimension of the interaction (y and _lambda size).
-  *  \return an unsigned int.
-  */
-  inline unsigned int getSizeOfY() const
+  /** returns dimension (i.e. nslaw size == y and lambda size) */
+  inline unsigned int dimension() const
   {
     return _interactionSize;
   }
-
-  /** Set the dimension of the Interaction.
-  *  \param newVal : an unsigned int.
-  */
-  inline void setInteractionSize(const unsigned int newVal)
-  {
-    _interactionSize = newVal;
-  }
-
+  
   //  /** get the number of relations in the interaction
   //  *  \return an unsigned int
   //  */
@@ -703,11 +692,6 @@ public:
   void computeInput(double time, InteractionProperties& interProp, unsigned int level = 0);
 
   /** gets the matrix used in interactionBlock computation, (left * W * right), depends on the relation type (ex, LinearTIR, left = C, right = B).
-   *  \param workM
-   */
-  SiconosMatrix& getLeftInteractionBlock(VectorOfSMatrices& workM) const;
-
-  /** gets the matrix used in interactionBlock computation, (left * W * right), depends on the relation type (ex, LinearTIR, left = C, right = B).
    *         We get only the part corresponding to one ds.
    *  \param pos int, relative position of the beginning of the required block in relation matrix.
    *  \param InteractionBlock a pointer to SiconosMatrix (in-out parameter): the resulting interactionBlock matrix
@@ -735,7 +719,7 @@ public:
    * \param[in,out] InteractionBlock SP::SiconosMatrix
    * \param workM
    */
-  void getExtraInteractionBlock(SP::SiconosMatrix InteractionBlock, VectorOfSMatrices& workM) const;
+  void getExtraInteractionBlock(SiconosMatrix& InteractionBlock, VectorOfSMatrices& workM) const;
 
   void computeKhat(SiconosMatrix& m, VectorOfSMatrices& workM, double h) const;
 

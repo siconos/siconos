@@ -193,13 +193,17 @@ public:
 
 #if defined(SICONOS_STD_UNORDERED_MAP) && !defined(SICONOS_USE_MAP_FOR_HASH)
   typedef typename std::unordered_map<V, VDescriptor> VMap;
+  typedef typename std::unordered_map<EDescriptor, EDescriptor> EdgesMap;
 #else
   typedef typename std::map<V, VDescriptor> VMap;
+  typedef typename std::map<EDescriptor, EDescriptor> EdgesMap;
 #endif
 
 
   int _stamp;
   VMap vertex_descriptor;
+  /** A map to save connection between an edge and the corresponding edge in parent graph (if any) */
+  EdgesMap edges_connectivity;
 
 protected:
   /** serialization hooks
@@ -550,51 +554,73 @@ public:
     assert(false) ;
   }
 
-  template<class G> void copy_vertex(const V& vertex_bundle, G& og)
+  template<class G> void copy_vertex(const V& vertex_bundle, G& source_graph)
   {
 
-    // is G similar ?
+    // -- Ensure current graph and source graph are complient --
     BOOST_STATIC_ASSERT((boost::is_same
                          <typename G::vertex_t, vertex_t>::value));
     BOOST_STATIC_ASSERT((boost::is_same
                          <typename G::edge_t, edge_t>::value));
 
-    assert(og.is_vertex(vertex_bundle));
+    assert(source_graph.is_vertex(vertex_bundle));
 
-    VDescriptor descr = add_vertex(vertex_bundle);
-    properties(descr) = og.properties(og.descriptor(vertex_bundle));
-    //    descriptor0(descr) = og.descriptor(vertex_bundle);
+    // -- Add new vertex in current graph and get descriptor --
+    VDescriptor new_vertex_descriptor = add_vertex(vertex_bundle);
 
-    assert(bundle(descr) == vertex_bundle);
+    // -- Copy (seems to be a link?) properties of source_graph vertex into current graph.
+    properties(new_vertex_descriptor) = source_graph.properties(source_graph.descriptor(vertex_bundle));
+
+    assert(bundle(new_vertex_descriptor) == vertex_bundle);
+
+    // -- Loop over out edges (in source_graph) of copied vertex --
 
     // edges copy as in boost::subgraph
-    typename G::OEIterator ogoei, ogoeiend;
-    for (std11::tie(ogoei, ogoeiend) =
-           og.out_edges(og.descriptor(vertex_bundle));
-         ogoei != ogoeiend; ++ogoei)
+    typename G::OEIterator oei, oeiend;
+    for (std11::tie(oei, oeiend) = source_graph.out_edges(source_graph.descriptor(vertex_bundle));
+         oei != oeiend; ++oei)
     {
-      typename G::VDescriptor ognext_descr = og.target(*ogoei);
-
-      assert(og.is_vertex(og.bundle(ognext_descr)));
-
-      // target in graph ?
-      if (is_vertex(og.bundle(ognext_descr)))
+      // Get target vertex (in source_graph) of the current edge
+      V target_vertex = source_graph.bundle(source_graph.target(*oei));
+      
+      // target in current graph ?
+      // If so, add an edge!
+      if (is_vertex(target_vertex))
       {
-        assert(bundle(descriptor(og.bundle(ognext_descr)))
-               == og.bundle(ognext_descr));
+	// Are we talking about the same object ...?
+        assert(bundle(descriptor(target_vertex)) == target_vertex);
 
+	// Add edge in current graph, between current vertex and target_vertex
         EDescriptor edescr =
-          add_edge(descr, descriptor(og.bundle(ognext_descr)),
-                   og.bundle(*ogoei));
+          add_edge(new_vertex_descriptor, descriptor(target_vertex), source_graph.bundle(*oei));
 
-        properties(edescr) = og.properties(*ogoei);
-        //        descriptor0(edescr) = *ogoei;
+	// Save connection between edge in source graph and current (just added) edge.
+	edges_connectivity[edescr] = *oei;
+	// Copy (link?) edge properties from source_graph into current
+        properties(edescr) = source_graph.properties(*oei);
 
-        assert(bundle(edescr) == og.bundle(*ogoei));
+        assert(bundle(edescr) == source_graph.bundle(*oei));
       }
     }
   }
 
+  // Set connection between edge and the corresponding edge in parent graph (if any)
+  // Call it when copying a vertex from another graph
+  EDescriptor parent_edge(const EDescriptor& current_edge)
+  {
+    //if(edges_connectivity.find(current_edge) != edges_connectivity.end())
+    return (*edges_connectivity.find(current_edge)).second;
+  }
+
+  // Remove out edges of a vertex from edges_connectivity map
+  // Call it when removing a vertex
+  void clear_connectivity(VDescriptor& vertex)
+  {
+    OEIterator oei, oeiend;
+    for (std11::tie(oei, oeiend) = out_edges(vertex); oei != oeiend; ++oei)
+      edges_connectivity.erase(*oei);
+  }
+  
   void remove_vertex(const V& vertex_bundle)
   {
     assert(is_vertex(vertex_bundle));
@@ -607,6 +633,7 @@ public:
 #ifndef NDEBUG
     assert(adjacent_vertices_ok());
 #endif
+    clear_connectivity(vd);
     boost::clear_vertex(vd, g);
     /*   debug */
 #ifndef NDEBUG

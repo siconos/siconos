@@ -519,7 +519,7 @@ void Hem5OSI::fillDSLinks(Interaction &inter,
 
   VectorOfVectors& workV = *interProp.workVectors;
   workV.resize(Hem5OSI::WORK_INTERACTION_LENGTH);
-  workV[Hem5OSI::OSNSP_RHS].reset(new SiconosVector(inter.getSizeOfY()));
+  workV[Hem5OSI::OSNSP_RHS].reset(new SiconosVector(inter.dimension()));
   
   VectorOfBlockVectors& DSlink = *interProp.DSlink;
   // VectorOfVectors& workVInter = *interProp.workVectors;

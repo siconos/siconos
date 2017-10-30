@@ -170,7 +170,7 @@ void SchatzmanPaoliOSI::fillDSLinks(Interaction &inter,
 
   VectorOfVectors& workV = *interProp.workVectors;
   workV.resize(SchatzmanPaoliOSI::WORK_INTERACTION_LENGTH);
-  workV[SchatzmanPaoliOSI::OSNSP_RHS].reset(new SiconosVector(inter.getSizeOfY()));
+  workV[SchatzmanPaoliOSI::OSNSP_RHS].reset(new SiconosVector(inter.dimension()));
 
   VectorOfBlockVectors& DSlink = *interProp.DSlink;
   // Note FP: call (again) initalize to update DSlinks, since some new fields

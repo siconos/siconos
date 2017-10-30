@@ -22,7 +22,7 @@ void FirstOrderR::initialize(Interaction& inter, VectorOfBlockVectors& DSlink, V
   workVInter.resize(FirstOrderR::workVecSize);
   workMInter.resize(FirstOrderR::mat_workMatSize);
   initComponents(inter, DSlink, workVInter, workMInter);
-  unsigned int sizeY = inter.getSizeOfY();
+  unsigned int sizeY = inter.dimension();
   
   if (!workVInter[FirstOrderR::h_alpha])
         workVInter[FirstOrderR::h_alpha].reset(new SiconosVector(sizeY));

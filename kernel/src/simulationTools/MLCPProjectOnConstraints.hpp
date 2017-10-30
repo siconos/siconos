@@ -97,7 +97,7 @@ public:
   /** Display the set of blocks for  a given indexSet
       \param indexSet the graph of interactions
    */
-  void displayBlocks(SP::InteractionsGraph indexSet);
+  void displayBlocks(InteractionsGraph& indexSet);
 
   /** print the data to the screen
   */

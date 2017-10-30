@@ -70,37 +70,16 @@ bool OneStepNSProblem::hasInteractions() const
 void OneStepNSProblem::updateInteractionBlocks()
 {
   DEBUG_PRINT("OneStepNSProblem::updateInteractionBlocks() starts\n");
-  // The present functions checks various conditions and possibly
-  // compute interactionBlocks matrices.
-  //
-  // Let interi and interj be two Interactions.
-  //
-  // Things to be checked are:
-  //  1 - is the topology time invariant?
-  //  2 - does interactionBlocks[interi][interj] already exists (ie has been
-  //  computed in a previous time step)?
-  //  3 - do we need to compute this interactionBlock? An interactionBlock has
-  //  to be computed if interi and interj are in IndexSet1 AND if interi and
-  //  interj have common DynamicalSystems.
-  //
-
-  //
-  //  - If 1 and 2 are true then it does nothing. 3 is not checked.
-  //  - If 1 == true, 2 == false, 3 == false, it does nothing.
-  //  - If 1 == true, 2 == false, 3 == true, it computes the interactionBlock.
-  //  - If 1==false, 2 is not checked, and the interactionBlock is computed if 3==true.
-  //
-
   // -- Get index sets from simulation --
   // Active interactions
   InteractionsGraph& indexSet = *simulation()->indexSet(indexSetLevel());
-  // All declared interactions
+  // All declared interactions, where properties are saved.
   InteractionsGraph& parentSet = *simulation()->indexSet(0);
 
   bool isLinear = simulation()->nonSmoothDynamicalSystem()->isLinear();
 
   // -- Compute diagonal blocks (vertices property) --
-  //   Linear case:
+  //  Linear case:
   //   - Loop over all vertices
   //       if block exists (isallocated) : nothing
   //       else allocate and compute
@@ -112,23 +91,27 @@ void OneStepNSProblem::updateInteractionBlocks()
 
   InteractionsGraph::VIterator vi, viend;
   SP::Interaction inter;
-  // Get corresponding descriptor in parent graph
   InteractionsGraph::VDescriptor vd_parent;
   unsigned int nslawSize;
+
+  // Loop over all active interactions (I(level) vertices)
   for (std11::tie(vi, viend) = indexSet.vertices(); vi != viend; ++vi)
     {
       inter = indexSet.bundle(*vi);
+      //std::cout << "START INTER LOOP, inter number : " << inter->number() <<std::endl;
       nslawSize = inter->nonSmoothLaw()->size();
       // Get corresponding descriptor in parent graph
       vd_parent = parentSet.descriptor(inter);
-      // Allocate and compute only if block is null in parent set
+      // Allocate and compute only if inter->block is null in parent set
       if(isLinear)
 	{
 	  if(! parentSet.properties(vd_parent).block)
 	    {
-	      std::cout << "Allocate diagonal block " << std::endl;
+	      // Allocate ...
+	      // std::cout << "Allocate diagonal block " << parentSet.index(vd_parent) << std::endl;
 	      parentSet.properties(vd_parent).block.reset(new SimpleMatrix(nslawSize, nslawSize));
-	      std::cout << "compute diagonal block " << std::endl;
+	      // std::cout << "compute diagonal block " << std::endl;
+	      // Compute ...
 	      computeDiagonalInteractionBlock(*vi);
 	    }
 	}
@@ -136,56 +119,77 @@ void OneStepNSProblem::updateInteractionBlocks()
 	{
 	  if(! parentSet.properties(vd_parent).block)
 	    {
-	      std::cout << "Allocate diagonal block " << std::endl;
+	      // Allocate (at first touch)
+	      // std::cout << "Allocate diagonal block " << std::endl;
 	      parentSet.properties(vd_parent).block.reset(new SimpleMatrix(nslawSize, nslawSize));
 	    }
-	  std::cout << "compute diagonal block " << std::endl;
+	  // Reset and compute : every time
+	  // std::cout << "compute diagonal block " << std::endl;
+	  parentSet.properties(vd_parent).block->zero(); // check if this is really required.
 	  computeDiagonalInteractionBlock(*vi);
 	}
     }
-
-  
+    
   // -- Compute extra-diagonal blocks (edges property) --
   //
   InteractionsGraph::VDescriptor vd_source, vd_target;
+  InteractionsGraph::EDescriptor ed_parent;
   SP::Interaction source, target;
   InteractionsGraph::EIterator ei, eiend;
   unsigned int isource, itarget;
   unsigned int source_size, target_size;
   bool compute_upper;
+  // Loop over all edges (dynamical systems!) in active interactions set
   for (std11::tie(ei, eiend) = indexSet.edges(); ei != eiend; ++ei)
     {
+      // Get edge in parent set corresponding to current edge in active set
+      ed_parent = indexSet.parent_edge(*ei);
+      //std::cout << "START EDGES LOOP " << std::endl;
+      // For each edge (ds) get connected interactions (2 exactly, there can't be self loops in IG)
       vd_source = indexSet.source(*ei);
       vd_target = indexSet.target(*ei);
       source = indexSet.bundle(vd_source);
       target = indexSet.bundle(vd_target);
+      // their sizes, 
       source_size = source->nonSmoothLaw()->size();
       target_size = source->nonSmoothLaw()->size();
+      // and their indices.
       isource = indexSet.index(vd_source);
       itarget = indexSet.index(vd_target);
+      // Set case (position in OSNSMatrix, upper or lower, depending on indices).
       compute_upper = (itarget > isource);
+      //std::cout << "DEAL WITH EDGE " << indexSet.index(*ei) << ", ds number : " << indexSet.bundle(*ei)->number()<< std::endl;
+      //std::cout << "BEtween (index/inter number)" << isource << "/" << source->number() << " and " << itarget << "/" << target->number() << std::endl;
       if(isLinear)
 	{
 	  if (compute_upper) // upper block
 	    {
-	      if (! indexSet.properties(*ei).upper_block)
+	      if (! parentSet.properties(ed_parent).upper_block)
 		{
-		  indexSet.properties(*ei).upper_block.reset(new SimpleMatrix(source_size, target_size));
+		  // Allocate and compute at first touch
+		  // std::cout << "UPPER, DEAL WITH EDGE " << indexSet.index(*ei) << ", ds number : " << indexSet.bundle(*ei)->number()<< std::endl;
+		  // std::cout << "BEtween (index/inter number)" << isource << "/" << source->number() << " and " << itarget << "/" << target->number() << std::endl;
+		  //std::cout << "ED lin upper block allocation " << isource << " " << itarget << " " << indexSet.bundle(*ei)->number() << std::endl;
+		  parentSet.properties(ed_parent).upper_block.reset(new SimpleMatrix(source_size, target_size));
 		  computeInteractionBlock(*ei);
 		  // TEMP to deal with non-sym case
-		  indexSet.properties(*ei).lower_block.reset(new SimpleMatrix(*indexSet.properties(*ei).upper_block));
-		  indexSet.properties(*ei).lower_block->trans();	     
+		  // Allocate lower block and transpose in place.
+		  parentSet.properties(ed_parent).lower_block.reset(new SimpleMatrix(*parentSet.properties(ed_parent).upper_block));
+		  parentSet.properties(ed_parent).lower_block->trans();	     
 		}
 	    }
 	  else // lower block
 	    {
-	      if (! indexSet.properties(*ei).lower_block)
+	      if (! parentSet.properties(ed_parent).lower_block)
 		{
-		  indexSet.properties(*ei).lower_block.reset(new SimpleMatrix(source_size, target_size));
+		  // Allocate and compute at first touch
+		  // std::cout << "LOWER, DEAL WITH EDGE " << indexSet.index(*ei) << ", ds number : " << indexSet.bundle(*ei)->number()<< std::endl;
+		  // std::cout << "BEtween (index/inter number)" << isource << "/" << source->number() << " and " << itarget << "/" << target->number() << std::endl;
+		  parentSet.properties(ed_parent).lower_block.reset(new SimpleMatrix(source_size, target_size));
 		  computeInteractionBlock(*ei);
 		  // TEMP to deal with non-sym case
-		  indexSet.properties(*ei).upper_block.reset(new SimpleMatrix(*indexSet.properties(*ei).lower_block));
-		  indexSet.properties(*ei).upper_block->trans();	     
+		  parentSet.properties(ed_parent).upper_block.reset(new SimpleMatrix(*parentSet.properties(ed_parent).lower_block));
+		  parentSet.properties(ed_parent).upper_block->trans();	     
 		}
 	    }
 	}
@@ -193,55 +197,70 @@ void OneStepNSProblem::updateInteractionBlocks()
 	{
 	  if (compute_upper) // upper block
 	    {
-	      if (! indexSet.properties(*ei).upper_block)
-		indexSet.properties(*ei).upper_block.reset(new SimpleMatrix(source_size, target_size));
+	      // Allocate at first touch
+	      if (! parentSet.properties(ed_parent).upper_block)
+		{
+		  // std::cout << "ED nonlin upper block allocation " <<  isource << " " << itarget<< std::endl;	       
+		  parentSet.properties(ed_parent).upper_block.reset(new SimpleMatrix(source_size, target_size));
+		}
+	      assert(parentSet.properties(ed_parent).upper_block->size(0) == source_size);
+	      assert(parentSet.properties(ed_parent).upper_block->size(1) == target_size);
 	    }
 	  else // lower block
 	    {
-	      if (! indexSet.properties(*ei).lower_block)
-		indexSet.properties(*ei).lower_block.reset(new SimpleMatrix(source_size, target_size));
+	      // Allocate at first touch
+	      if (! parentSet.properties(ed_parent).lower_block)
+		{
+		  // std::cout << "ED nonlin lower block allocation " <<  isource << " " << itarget<< std::endl;	       
+		  parentSet.properties(ed_parent).lower_block.reset(new SimpleMatrix(source_size, target_size));
+		}
+	      assert(parentSet.properties(ed_parent).lower_block->size(0) == source_size);
+	      assert(parentSet.properties(ed_parent).lower_block->size(1) == target_size);
 	    }
+	  // Compute every time
+	  // std::cout << "ED nonlin  block comp "<< std::endl;	       
 	  computeInteractionBlock(*ei);
 	}
     }
 }
 
-void OneStepNSProblem::displayBlocks(SP::InteractionsGraph indexSet)
+void OneStepNSProblem::displayBlocks(InteractionsGraph& indexSet)
 {
 
-  std::cout <<  "OneStepNSProblem::displayBlocks(SP::InteractionsGraph indexSet) " << std::endl;
+  std::cout <<  "OneStepNSProblem::displayBlocks(InteractionsGraph& indexSet) " << std::endl;
   InteractionsGraph::VIterator vi, viend;
-  for (std11::tie(vi, viend) = indexSet->vertices();
+  for (std11::tie(vi, viend) = indexSet.vertices();
        vi != viend; ++vi)
   {
-    SP::Interaction inter = indexSet->bundle(*vi);
-    if (indexSet->properties(*vi).block)
+    std::cout << " vertex ..." << indexSet.index(*vi) << std::endl;
+    if (indexSet.properties(*vi).block)
     {
-      indexSet->properties(*vi).block->display();
+      indexSet.properties(*vi).block->display();
     }
 
     InteractionsGraph::OEIterator oei, oeiend;
-    for (std11::tie(oei, oeiend) = indexSet->out_edges(*vi);
+    for (std11::tie(oei, oeiend) = indexSet.out_edges(*vi);
          oei != oeiend; ++oei)
     {
       InteractionsGraph::EDescriptor ed1, ed2;
-      std11::tie(ed1, ed2) = indexSet->edges(indexSet->source(*oei), indexSet->target(*oei));
+      std11::tie(ed1, ed2) = indexSet.edges(indexSet.source(*oei), indexSet.target(*oei));
+      std::cout << " edge ..." << indexSet.index(ed1) << std::endl;
 
-      if (indexSet->properties(ed1).upper_block)
+      if (indexSet.properties(ed1).upper_block)
       {
-        indexSet->properties(ed1).upper_block->display();
+        indexSet.properties(ed1).upper_block->display();
       }
-      if (indexSet->properties(ed1).lower_block)
+      if (indexSet.properties(ed1).lower_block)
       {
-        indexSet->properties(ed1).lower_block->display();
+        indexSet.properties(ed1).lower_block->display();
       }
-      if (indexSet->properties(ed2).upper_block)
+      if (indexSet.properties(ed2).upper_block)
       {
-        indexSet->properties(ed2).upper_block->display();
+        indexSet.properties(ed2).upper_block->display();
       }
-      if (indexSet->properties(ed2).lower_block)
+      if (indexSet.properties(ed2).lower_block)
       {
-        indexSet->properties(ed2).lower_block->display();
+        indexSet.properties(ed2).lower_block->display();
       }
     }
 
@@ -256,21 +275,17 @@ void OneStepNSProblem::initialize(SP::Simulation sim)
 
   _simulation = sim;
 
-  // === Adds this in the simulation set of OneStepNSProblem === First
-  // checks the id if required.  An id is required if there is more
-  // than one OneStepNSProblem in the simulation
-
   // The maximum size of the problem (for example, the dim. of M in
   // LCP or Friction problems).  Set to the number of possible scalar
   // constraints declared in the topology.
   if (_maxSize == 0) // if maxSize not set explicitely by user before
-    // initialize
     _maxSize = simulation()->nonSmoothDynamicalSystem()->topology()->numberOfConstraints();
 }
 
 SP::SimpleMatrix OneStepNSProblem::getOSIMatrix(OneStepIntegrator& Osi, SP::DynamicalSystem ds)
 {
-  // Connect block to the OSI matrix of a dynamical system for the current simulation.
+  // Returns the integration matrix from one-step integrator and dynamical system.
+
   // Matrix depends on OSI type.
   SP::SimpleMatrix block;
   OSI::TYPES osiType; // type of the current one step integrator

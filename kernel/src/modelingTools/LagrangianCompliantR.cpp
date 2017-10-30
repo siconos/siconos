@@ -45,7 +45,7 @@ void LagrangianCompliantR::_zeroPlugin()
 void LagrangianCompliantR::initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
 {
   LagrangianR::initComponents(inter, DSlink, workV, workM);
-  unsigned int sizeY = inter.getSizeOfY();
+  unsigned int sizeY = inter.dimension();
 
   if (! _jachlambda)
     _jachlambda.reset(new SimpleMatrix(sizeY, sizeY));

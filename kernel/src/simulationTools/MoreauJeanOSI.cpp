@@ -164,7 +164,7 @@ void MoreauJeanOSI::fillDSLinks(Interaction &inter, InteractionProperties& inter
   
   VectorOfVectors& workV = *interProp.workVectors;
   workV.resize(MoreauJeanOSI::WORK_INTERACTION_LENGTH);
-  workV[MoreauJeanOSI::OSNSP_RHS].reset(new SiconosVector(inter.getSizeOfY()));
+  workV[MoreauJeanOSI::OSNSP_RHS].reset(new SiconosVector(inter.dimension()));
 
   VectorOfBlockVectors& DSlink = *interProp.DSlink;
   Relation &relation =  *inter.relation();
@@ -1938,24 +1938,7 @@ bool MoreauJeanOSI::addInteractionInIndexSet(SP::Interaction inter, unsigned int
 
 bool MoreauJeanOSI::removeInteractionInIndexSet(SP::Interaction inter, unsigned int i)
 {
-  assert(i == 1);
-  double h = _simulation->timeStep();
-  double y = (inter->y(i - 1))->getValue(0); // for i=1 y(i-1) is the position
-  double yDot = (inter->y(i))->getValue(0); // for i=1 y(i) is the velocity
-  double gamma = 1.0 / 2.0;
-  if(_useGamma)
-  {
-    gamma = _gamma;
-  }
-  DEBUG_PRINTF("MoreauJeanOSI::addInteractionInIndexSet yref=%e, yDot=%e, y_estimated=%e.\n", y, yDot, y + gamma * h * yDot);
-  y += gamma * h * yDot;
-  assert(!isnan(y));
-
-  DEBUG_EXPR(
-    if(y > 0)
-      DEBUG_PRINT("MoreauJeanOSI::removeInteractionInIndexSet DEACTIVATE.\n");
-    );
-  return (y > 0.0);
+  return !(addInteractionInIndexSet(inter, i));
 }
 
 

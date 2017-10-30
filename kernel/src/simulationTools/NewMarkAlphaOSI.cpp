@@ -473,7 +473,7 @@ void NewMarkAlphaOSI::fillDSLinks(Interaction &inter,
   
   VectorOfVectors& workV = *interProp.workVectors;
   workV.resize(NewMarkAlphaOSI::WORK_INTERACTION_LENGTH);
-  workV[NewMarkAlphaOSI::OSNSP_RHS].reset(new SiconosVector(inter.getSizeOfY()));
+  workV[NewMarkAlphaOSI::OSNSP_RHS].reset(new SiconosVector(inter.dimension()));
 
   VectorOfBlockVectors& DSlink = *interProp.DSlink;
 

@@ -75,7 +75,7 @@ void MoreauJeanBilbaoOSI::fillDSLinks(Interaction &inter, InteractionProperties&
 
   VectorOfVectors& workV = *interaction_properties.workVectors;
   workV.resize(MoreauJeanBilbaoOSI::WORK_INTERACTION_LENGTH);
-  workV[MoreauJeanBilbaoOSI::OSNSP_RHS].reset(new SiconosVector(inter.getSizeOfY()));
+  workV[MoreauJeanBilbaoOSI::OSNSP_RHS].reset(new SiconosVector(inter.dimension()));
 
   // work vector of the interaction (from interaction_properties)
   VectorOfBlockVectors& DSlink = *interaction_properties.DSlink;
@@ -623,20 +623,7 @@ bool MoreauJeanBilbaoOSI::addInteractionInIndexSet(SP::Interaction inter, unsign
 
 bool MoreauJeanBilbaoOSI::removeInteractionInIndexSet(SP::Interaction inter, unsigned int i)
 {
-  assert(i == 1);
-  double h = _simulation->timeStep();
-  double y = (inter->y(i - 1))->getValue(0); // for i=1 y(i-1) is the position
-  double yDot = (inter->y(i))->getValue(0); // for i=1 y(i) is the velocity
-  double gamma = 1.0 / 2.0;
-  DEBUG_PRINTF("MoreauJeanBilbaoOSI::addInteractionInIndexSet yref=%e, yDot=%e, y_estimated=%e.\n", y, yDot, y + gamma * h * yDot);
-  y += gamma * h * yDot;
-  assert(!isnan(y));
-
-  DEBUG_EXPR(
-    if(y > 0)
-      DEBUG_PRINT("MoreauJeanOSI::removeInteractionInIndexSet DEACTIVATE.\n");
-    );
-  return (y > 0.0);
+  return !(addInteractionInIndexSet(inter, i));
 }
 
 

@@ -119,7 +119,7 @@ void ZeroOrderHoldOSI::initializeDynamicalSystem(Model& m, double t, SP::Dynamic
         }
         else
         {
-          DSG0.Bd[dsgVD].reset(new MatrixIntegrator(*ds, m, relR.getPluging(), inter.getSizeOfY()));
+          DSG0.Bd[dsgVD].reset(new MatrixIntegrator(*ds, m, relR.getPluging(), inter.dimension()));
         }
       }
       else
@@ -146,7 +146,7 @@ void ZeroOrderHoldOSI::fillDSLinks(Interaction &inter,
   assert(ds2);
 
   VectorOfVectors& workV = *interProp.workVectors;
-  workV[FirstOrderR::osnsp_rhs].reset(new SiconosVector(inter.getSizeOfY()));
+  workV[FirstOrderR::osnsp_rhs].reset(new SiconosVector(inter.dimension()));
 
   VectorOfBlockVectors& DSlink = *interProp.DSlink;
 
@@ -560,19 +560,7 @@ bool ZeroOrderHoldOSI::addInteractionInIndexSet(SP::Interaction inter, unsigned 
 
 bool ZeroOrderHoldOSI::removeInteractionInIndexSet(SP::Interaction inter, unsigned int i)
 {
-  assert(i == 1);
-  double h = _simulation->timeStep();
-  double y = (inter->y(i - 1))->getValue(0); // for i=1 y(i-1) is the position
-  double yDot = (inter->y(i))->getValue(0); // for i=1 y(i) is the velocity
-  double gamma = .5;
-  DEBUG_PRINTF("ZeroOrderHoldOSI::removeInteractionInIndexSet yref=%e, yDot=%e, y_estimated=%e.\n", y, yDot, y + gamma * h * yDot);
-  y += gamma * h * yDot;
-  assert(!isnan(y));
-  if(y > 0)
-  {
-    DEBUG_PRINT("ZeroOrderHoldOSI::removeInteractionInIndexSet DEACTIVATE.\n");
-  }
-  return (y > 0);
+  return !(addInteractionInIndexSet(inter,i));
 }
 
 const SiconosMatrix& ZeroOrderHoldOSI::Ad(SP::DynamicalSystem ds)

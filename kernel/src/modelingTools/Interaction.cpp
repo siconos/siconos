@@ -931,37 +931,6 @@ void Interaction::getLeftInteractionBlockForDS(unsigned int pos, SP::SiconosMatr
   setBlock(originalMatrix, InteractionBlock, subDim, subPos);
 }
 
-SiconosMatrix& Interaction::getLeftInteractionBlock(VectorOfSMatrices& workM) const
-{
-  RELATION::TYPES relationType = relation()->getType();
-  RELATION::SUBTYPES relationSubType = relation()->getSubType();
-
-  if (relationType == FirstOrder)
-  {
-    SP::SiconosMatrix CMat = std11::static_pointer_cast<FirstOrderR> (relation())->C();
-    if (CMat)
-      return *CMat;
-    else if (relationSubType != LinearTIR)
-      return *workM[FirstOrderR::mat_C];
-  }
-  else if (relationType == Lagrangian)
-  {
-    SP::LagrangianR r = std11::static_pointer_cast<LagrangianR> (relation());
-    return *r->jachq();
-  }
-  else if (relationType == NewtonEuler)
-  {
-    SP::NewtonEulerR r = std11::static_pointer_cast<NewtonEulerR> (relation());
-    return *r->jachqT();
-  }
-  else
-  {
-    RuntimeException::selfThrow("Interaction::getLeftInteractionBlockForDS, not yet implemented for relations of type " + relationType);
-  }
-  // stupid compiler check
-  return *workM[FirstOrderR::mat_C];
-
-}
 void Interaction::getLeftInteractionBlockForDSProjectOnConstraints(unsigned int pos, SP::SiconosMatrix InteractionBlock) const
 {
   DEBUG_PRINT("Interaction::getLeftInteractionBlockForDSProjectOnConstraints(unsigned int pos, SP::SiconosMatrix InteractionBlock) \n");
@@ -1040,7 +1009,7 @@ void Interaction::getRightInteractionBlockForDS(unsigned int pos, SP::SiconosMat
   setBlock(originalMatrix, InteractionBlock, subDim, subPos);
 }
 
-void Interaction::getExtraInteractionBlock(SP::SiconosMatrix InteractionBlock, VectorOfSMatrices& workM) const
+void Interaction::getExtraInteractionBlock(SiconosMatrix& InteractionBlock, VectorOfSMatrices& workM) const
 {
   // !!! Warning: we suppose that D is interactionBlock diagonal, ie that
   // there is no coupling between Interaction through D !!!  Any
@@ -1072,23 +1041,25 @@ void Interaction::getExtraInteractionBlock(SP::SiconosMatrix InteractionBlock, V
 
   if (!D)
   {
-    InteractionBlock->zero();
+    InteractionBlock.zero();
     return; //ie no extra interactionBlock
   }
 
-  // copy sub-interactionBlock of originalMatrix into InteractionBlock
-  // dim of the sub-interactionBlock
-  Index subDim(2);
-  subDim[0] = InteractionBlock->size(0);
-  subDim[1] = InteractionBlock->size(1);
-  // Position (row,col) of first element to be read in originalMatrix
-  // and of first element to be set in InteractionBlock
-  Index subPos(4);
-  subPos[0] = 0;//_relativePosition;
-  subPos[1] = 0;//_relativePosition;
-  subPos[2] = 0;
-  subPos[3] = 0;
-  setBlock(D, InteractionBlock, subDim, subPos);
+
+  InteractionBlock = *D;
+  // // copy sub-interactionBlock of originalMatrix into InteractionBlock
+  // // dim of the sub-interactionBlock
+  // Index subDim(2);
+  // subDim[0] = InteractionBlock.size(0);
+  // subDim[1] = InteractionBlock.size(1);
+  // // Position (row,col) of first element to be read in originalMatrix
+  // // and of first element to be set in InteractionBlock
+  // Index subPos(4);
+  // subPos[0] = 0;//_relativePosition;
+  // subPos[1] = 0;//_relativePosition;
+  // subPos[2] = 0;
+  // subPos[3] = 0;
+  // setBlock(D, InteractionBlock, subDim, subPos);
 }
 
 void Interaction::computeKhat(SiconosMatrix& m, VectorOfSMatrices& workM, double h) const

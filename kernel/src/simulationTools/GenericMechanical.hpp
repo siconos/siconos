@@ -71,12 +71,6 @@ public:
 
 
   // --- Others functions ---
-
-  /** initialize the GenericMechanical problem(compute topology ...)
-   *   \param sim the simulation, owner of this OSNSPB
-   */
-  void initialize(SP::Simulation sim);
-
   /** Compute the unknown reaction and velocity and update the Interaction (y and lambda )
    *  \param time double current time
    *  \return int information about the solver convergence (0: ok, >0 problem, see Numerics documentation)

@@ -45,29 +45,28 @@ OSNSMatrix::OSNSMatrix(unsigned int n, int stor):
   _dimRow(n),  _dimColumn(n), _storageType(stor)
 {
   // Note:
-
-  // for _storageType = NM_DENSE (dense) n represents the real _dimRowension of
-  // the matrix and for sparse storage (_storageType == 1) the number
-  // of interactionBlocks in a row or column.
+  // * Dense matrix (_storageType = NM_DENSE), n represents the real dimension of
+  // the matrix
+  // * Sparse matrix (_storageType == 1) n represents the number of blocks in a row or column.
+  
   DEBUG_BEGIN("OSNSMatrix::OSNSMatrix(unsigned int n, int stor) \n");
   switch(_storageType)
-  {
-  case NM_DENSE:
-  {
-    // A zero matrix M of size nXn is built.  interactionBlocksPositions
-    // remains empty (=NULL) since we have no information concerning
-    // the Interaction.
-    _M1.reset(new SimpleMatrix(n, n));
-    break;
-  }
-  case NM_SPARSE_BLOCK:
-  {
-    DEBUG_PRINTF(" _M2 is reset with a matrix of size = %i\n", n);
-    _M2.reset(new BlockCSRMatrix(n));
-    break;
-  }
-  default: {} // do nothing here
-  }
+    {
+    case NM_DENSE:
+      {
+	// A zero matrix M of size nXn is built.
+	_M1.reset(new SimpleMatrix(n, n));
+	break;
+      }
+    case NM_SPARSE_BLOCK:
+      {
+	DEBUG_PRINTF(" _M2 is reset with a matrix of size = %i\n", n);
+	_M2.reset(new BlockCSRMatrix(n));
+	break;
+      }
+    default: {} // do nothing here
+    }
+
   _numericsMatrix.reset(new NumericsMatrix);
   NM_null(_numericsMatrix.get());
   DEBUG_END("OSNSMatrix::OSNSMatrix(unsigned int n, int stor) \n");
@@ -106,7 +105,7 @@ OSNSMatrix::OSNSMatrix(unsigned int n, unsigned int m, int stor):
 
 }
 
-// Basic constructor
+// Build from index set (i.e. get size from number of interactions in the set)
 OSNSMatrix::OSNSMatrix(InteractionsGraph& indexSet, int stor):
   _dimRow(0), _dimColumn(0), _storageType(stor)
 {
@@ -125,41 +124,6 @@ OSNSMatrix::OSNSMatrix(const SiconosMatrix& MSource):
   _M1.reset(new SimpleMatrix(MSource));
 }
 
-
-// Destructor : pointers are smart
-OSNSMatrix::~OSNSMatrix()
-{
-}
-
-unsigned OSNSMatrix::updateSizeAndPositions(InteractionsGraph& indexSet)
-{
-  // === Description ===
-
-  // For an interactionBlock (diagonal or extra diagonal) corresponding to
-  // an Interaction, we need to know the position of its first
-  // element in the full-matrix M. This position depends on the
-  // previous interactionBlocks sizes.
-  //
-  // Note FP: at the time positions are saved in the Interaction
-  // but this is wrong (I think) since it prevents the inter
-  // to be present in several different osns.
-  //
-
-  // Computes real size of the current matrix = sum of the dim. of all
-  // Interactionin indexSet
-  unsigned dim = 0;
-  InteractionsGraph::VIterator vd, vdend;
-  for (std11::tie(vd, vdend) = indexSet.vertices(); vd != vdend; ++vd)
-  {
-    assert(indexSet.descriptor(indexSet.bundle(*vd)) == *vd);
-    indexSet.properties(*vd).absolute_position = dim;
-    dim += (indexSet.bundle(*vd)->nonSmoothLaw()->size());
-    DEBUG_PRINTF("Position = %i for interaction %i\n",dim, indexSet.bundle(*vd)->number()  );
-    assert(indexSet.properties(*vd).absolute_position < dim);
-  }
-
-  return dim;
-}
 unsigned OSNSMatrix::updateSizeAndPositions(DynamicalSystemsGraph & DSG)
 {
   // === Description ===
@@ -168,11 +132,6 @@ unsigned OSNSMatrix::updateSizeAndPositions(DynamicalSystemsGraph & DSG)
   // an Interaction, we need to know the position of its first
   // element in the full-matrix M. This position depends on the
   // previous interactionBlocks sizes.
-  //
-  // Note FP: at the time positions are saved in the Interaction
-  // but this is wrong (I think) since it prevents the inter
-  // to be present in several different osns.
-  //
 
   // Computes real size of the current matrix = sum of the dim. of all
   // Interactionin indexSet
@@ -194,10 +153,9 @@ void OSNSMatrix::fillW(InteractionsGraph& indexSet, InteractionsGraph& parentSet
 {
   DEBUG_BEGIN("void OSNSMatrix::fillW(SP::InteractionsGraph indexSet, bool update)\n");
 
-  if (update)
+  if (update) // If index set vertices list has changed
   {
-    // Computes _dimRow and interactionBlocksPositions according to indexSet
-    _dimColumn = updateSizeAndPositions(indexSet);
+    _dimColumn = indexSet.update_positions();
     _dimRow = _dimColumn;
   }
 
@@ -216,60 +174,58 @@ void OSNSMatrix::fillW(InteractionsGraph& indexSet, InteractionsGraph& parentSet
           _M1->resize(_dimRow, _dimColumn);
         _M1->zero();
       }
+      
+      // update --> M1->zero()
     }
 
-    // ======> Aim: find inter1 and inter2 both in indexSet and which have
-    // common DynamicalSystems.  Then get the corresponding matrix
-    // from map interactionBlocks, and copy it into M
-
     unsigned int pos = 0, col = 0; // index position used for
-    // interactionBlock copy into M, see
-    // below.
-    // === Loop through "active" Interactions (ie present in
-    // indexSets[level]) ===
+    
+    // === Loop through "active" Interactions (ie vertices present in indexSets[level]) ===
     InteractionsGraph::VIterator vi, viend;
-    for (std11::tie(vi, viend) = indexSet.vertices();
-         vi != viend; ++vi)
+    InteractionsGraph::VDescriptor vertex_in_parent;
+    for (std11::tie(vi, viend) = indexSet.vertices(); vi != viend; ++vi)
     {
       SP::Interaction inter = indexSet.bundle(*vi);
       pos = indexSet.properties(*vi).absolute_position;
-      InteractionsGraph::VDescriptor vd0 = parentSet.descriptor(inter);
-      std11::static_pointer_cast<SimpleMatrix>(_M1)->setBlock(pos, pos, *parentSet.properties(vd0).block);
+      vertex_in_parent = parentSet.descriptor(inter);
+      // Copy block (vertex property) at the proper position (pos) into M1
+      // i.e. set diagonal block corresponding to current interaction
+      std11::static_pointer_cast<SimpleMatrix>(_M1)->setBlock(pos, pos, *parentSet.properties(vertex_in_parent).block);
+
       DEBUG_PRINTF("OSNSMatrix _M1: %i %i\n", _M1->size(0), _M1->size(1));
       DEBUG_PRINTF("OSNSMatrix block: %i %i\n", indexSet.properties(*vi).block->size(0), indexSet.properties(*vi).block->size(1));
     }
 
+    // == Loop through all edges (ds) in active index set ==
+    // Computation of extra-diagonal blocks.
     InteractionsGraph::EIterator ei, eiend;
-    for (std11::tie(ei, eiend) = indexSet.edges();
-         ei != eiend; ++ei)
+    InteractionsGraph::EDescriptor ed_parent;
+
+    for (std11::tie(ei, eiend) = indexSet.edges(); ei != eiend; ++ei)
     {
+      // For current edge (ds) get source and target vertices (interactions)
       InteractionsGraph::VDescriptor vd1 = indexSet.source(*ei);
       InteractionsGraph::VDescriptor vd2 = indexSet.target(*ei);
-
       SP::Interaction inter1 = indexSet.bundle(vd1);
       SP::Interaction inter2 = indexSet.bundle(vd2);
+
+      // coordinates of the targeted extra-diag block
       pos = indexSet.properties(vd1).absolute_position;
-
-      assert(indexSet.is_vertex(inter2));
-
       col = indexSet.properties(vd2).absolute_position;
 
       assert(pos < _dimRow);
       assert(col < _dimColumn);
 
+      ed_parent = indexSet.parent_edge(*ei);
+
       DEBUG_PRINTF("OSNSMatrix _M1: %i %i\n", _M1->size(0), _M1->size(1));
-      DEBUG_PRINTF("OSNSMatrix upper: %i %i\n", indexSet.properties(*ei).upper_block->size(0), indexSet.properties(*ei).upper_block->size(1));
-      DEBUG_PRINTF("OSNSMatrix lower: %i %i\n", indexSet.properties(*ei).lower_block->size(0), indexSet.properties(*ei).lower_block->size(1));
+      DEBUG_PRINTF("OSNSMatrix upper: %i %i\n", parentSet.properties(ed_parent).upper_block->size(0), parentSet.properties(ed_parent).upper_block->size(1));
+      DEBUG_PRINTF("OSNSMatrix lower: %i %i\n", parentSet.properties(ed_parent).lower_block->size(0), parentSet.properties(ed_parent).lower_block->size(1));
+      assert(parentSet.properties(ed_parent).lower_block);
+      assert(parentSet.properties(ed_parent).upper_block);
 
-      assert(indexSet.properties(*ei).lower_block);
-      assert(indexSet.properties(*ei).upper_block);
-      std11::static_pointer_cast<SimpleMatrix>(_M1)
-      ->setBlock(std::min(pos, col), std::max(pos, col),
-                 *indexSet.properties(*ei).upper_block);
-
-      std11::static_pointer_cast<SimpleMatrix>(_M1)
-      ->setBlock(std::max(pos, col), std::min(pos, col),
-                 *indexSet.properties(*ei).lower_block);
+      std11::static_pointer_cast<SimpleMatrix>(_M1)->setBlock(std::min(pos, col), std::max(pos, col), *parentSet.properties(ed_parent).upper_block);
+      std11::static_pointer_cast<SimpleMatrix>(_M1)->setBlock(std::max(pos, col), std::min(pos, col), *parentSet.properties(ed_parent).lower_block);
     }
 
   }
@@ -331,6 +287,8 @@ void OSNSMatrix::convert()
 }
 
 // Fill the matrix M
+// NOTE FP : outdated function? Should be removed?
+// Used only in GlobalFrictionContact which is outofdate, is it?
 void OSNSMatrix::fillM(DynamicalSystemsGraph & DSG, bool update)
 {
   DEBUG_BEGIN("void OSNSMatrix::fillM(SP::DynamicalSystemsGraph DSG, bool update)\n");
@@ -393,7 +351,7 @@ void OSNSMatrix::fillH(DynamicalSystemsGraph & DSG, InteractionsGraph& indexSet,
   if (update)
     {
 
-      _dimColumn = updateSizeAndPositions(indexSet);
+      _dimColumn = indexSet.update_positions();
       _dimRow = updateSizeAndPositions(DSG);
     }
 

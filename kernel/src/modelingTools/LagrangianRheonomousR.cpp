@@ -48,7 +48,7 @@ void LagrangianRheonomousR::initComponents(Interaction& inter, VectorOfBlockVect
 {
   LagrangianR::initComponents(inter, DSlink, workV, workM);
 
-  unsigned int sizeY = inter.getSizeOfY();
+  unsigned int sizeY = inter.dimension();
   // hDot
   if (!_hDot)
     _hDot.reset(new SiconosVector(sizeY));
@@ -56,7 +56,7 @@ void LagrangianRheonomousR::initComponents(Interaction& inter, VectorOfBlockVect
     _hDot->resize(sizeY);
   if (_pluginJachq->fPtr && !_jachq)
   {
-    unsigned int sizeY = inter.getSizeOfY();
+    unsigned int sizeY = inter.dimension();
     unsigned int sizeQ = DSlink[LagrangianR::q0]->size();
     _jachq.reset(new SimpleMatrix(sizeY, sizeQ));
   }

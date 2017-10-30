@@ -204,8 +204,6 @@ void TimeStepping::updateIndexSet(unsigned int i)
               indexSet1->eraseProperties(ed1);
             }
           }
-
-
           indexSet1->remove_vertex(inter1);
           /* \warning V.A. 25/05/2012 : Multiplier lambda are only set to zero if they are removed from the IndexSet*/
           inter1->lambda(1)->zero();
@@ -293,7 +291,6 @@ void TimeStepping::updateIndexSet(unsigned int i)
   }
 
   assert(indexSet1->size() <= indexSet0->size());
-
   DEBUG_PRINTF("TimeStepping::updateIndexSet(unsigned int i). update indexSets end : indexSet0 size : %ld\n", indexSet0->size());
   DEBUG_PRINTF("TimeStepping::updateIndexSet(unsigned int i). update IndexSets end : indexSet1 size : %ld\n", indexSet1->size());
 }
@@ -427,10 +424,9 @@ void TimeStepping::run()
   std::cout << "===== End of " << Type::name(*this) << "simulation. " << count << " events have been processed. ==== " <<std::endl;
 }
 
-void TimeStepping::advanceToEvent()
-{
-  DEBUG_PRINTF("TimeStepping::advanceToEvent(). Time =%f\n",getTkp1());
 
+void TimeStepping::resetLambdas()
+{
   // Initialize lambdas of all interactions.
   SP::InteractionsGraph indexSet0 = _nsds->topology()->indexSet(0);
   InteractionsGraph::VIterator ui, uiend, vnext;
@@ -440,6 +436,12 @@ void TimeStepping::advanceToEvent()
     ++vnext;
     indexSet0->bundle(*ui)->resetAllLambda();
   }
+}
+
+void TimeStepping::advanceToEvent()
+{
+  DEBUG_PRINTF("TimeStepping::advanceToEvent(). Time =%f\n",getTkp1());
+  resetLambdas();
   newtonSolve(_newtonTolerance, _newtonMaxIteration);
 }
 

@@ -77,7 +77,7 @@ void FirstOrderLinearR::initComponents(Interaction& inter, VectorOfBlockVectors&
   // Note: do not call FirstOrderR::initialize to avoid jacobianH and jacobianG allocation.
 
   // get interesting size
-  unsigned int sizeY = inter.getSizeOfY();
+  unsigned int sizeY = inter.dimension();
   unsigned int sizeX = inter.getSizeOfDS();
   unsigned int sizeZ = DSlink[FirstOrderR::z]->size();
 

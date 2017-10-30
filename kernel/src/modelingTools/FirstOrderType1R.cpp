@@ -48,7 +48,7 @@ void FirstOrderType1R::initComponents(Interaction& inter, VectorOfBlockVectors& 
 {
 
   // Check if an Interaction is connected to the Relation.
-  unsigned int sizeY = inter.getSizeOfY();
+  unsigned int sizeY = inter.dimension();
   unsigned int sizeDS = inter.getSizeOfDS();
   unsigned int sizeZ = DSlink[FirstOrderR::z]->size();
 

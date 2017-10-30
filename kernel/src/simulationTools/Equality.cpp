@@ -52,14 +52,6 @@ int Equality::compute(double time)
   return info;
 }
 
-void Equality::initialize(SP::Simulation sim)
-{
-  // General initialize for LinearOSNS
-  LinearOSNS::initialize(sim);
-  //SP::InteractionsGraph indexSet = simulation()->indexSet(levelMin());
-  //_M.reset(new OSNSMatrix(indexSet,_numericsMatrixStorageType));
-}
-
 void Equality::updateM()
 {
   assert(0);

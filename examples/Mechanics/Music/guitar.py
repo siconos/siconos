@@ -10,6 +10,7 @@ import numpywrappers as npw
 import matplotlib.pyplot as plt
 #from scipy import signal
 from matplotlib import animation
+import h5py
 
 
 class StringDS(sk.LagrangianLinearDiagonalDS):
@@ -65,6 +66,7 @@ class StringDS(sk.LagrangianLinearDiagonalDS):
             assert name in self.damping_parameters.keys(), msg
         self.s_mat = self.compute_s_mat()
         stiffness_mat, damping_mat = self.compute_linear_coeff()
+        self.max_coords = max_coords
         q0 = self.compute_initial_state_modal(max_coords)
         v0 = npw.zeros_like(q0)
         super(StringDS, self).__init__(q0, v0, stiffness_mat, damping_mat)
@@ -204,7 +206,8 @@ class Guitar(sk.Model):
     'assembly' to build a NSDS
     """
 
-    def __init__(self, strings_and_frets, time_range, fs,
+    def __init__(self, strings_and_frets, time_range, fs, output_freq=1,
+                 enable_interactions_output=False,
                  integrators=None, default_integrator=None):
         """
         Parameters
@@ -224,6 +227,11 @@ class Guitar(sk.Model):
             default osi type (if integrators is not set
             or for ds not present in integrators).
             Default = Bilbao.
+        output_freq: int, optional
+            output frequency for times steps
+        enable_interactions_output: bool, optional
+            if true, save interactions data every output_freq time step
+            default = false
 
         Notes
         -----
@@ -260,7 +268,7 @@ class Guitar(sk.Model):
         moreau_bilbao = sk.MoreauJeanBilbaoOSI()
         moreau_jean = sk.MoreauJeanOSI(0.500001)
         default_integrator = moreau_bilbao
-        if default_integrator is 'MoreauJean':
+        if default_integrator == 'MoreauJean':
             default_integrator = moreau_jean
 
         # (2) Time discretisation --
@@ -269,11 +277,14 @@ class Guitar(sk.Model):
         self.fs = fs
         self.time_step = 1. / fs
         t = sk.TimeDiscretisation(t0, self.time_step)
-        self.nb_time_steps = (int)((tend - t0) / self.time_step)+1
+        self.nb_time_steps = (int)((tend - t0) * fs)
+        self.output_freq = output_freq
+        self.nb_time_steps_output = (int)(self.nb_time_steps / output_freq)
         # (3) one step non smooth problem
-        osnspb = sk.LCP()
+        self.osnspb = sk.LCP()
         # (4) Simulation setup with (1) (2) (3)
-        self.simu = sk.TimeStepping(t, default_integrator, osnspb)
+        self.default_integrator = default_integrator
+        self.simu = sk.TimeStepping(t, default_integrator, self.osnspb)
         if integrators is not None:
             for ds in integrators:
                 self.simu.prepareIntegratorForDS(integrators[ds], ds, self, t0)
@@ -285,15 +296,21 @@ class Guitar(sk.Model):
         self.data_ds = {}
         for ds in self.strings_and_frets.values():
             ndof = ds.dimension()
-            self.data_ds[ds] = npw.zeros((self.nb_time_steps + 1, ndof))
+            self.data_ds[ds] = npw.zeros((ndof, self.nb_time_steps_output + 1))
         # A dict of buffers to save interactions variables for all time steps
         self.data_interactions = {}
-        for interaction in self.strings_and_frets:
-            nbc = interaction.getSizeOfY()
-            self.data_interactions[interaction] = \
-                npw.zeros((self.nb_time_steps + 1, 3 * nbc))
+        self.save_interactions = enable_interactions_output
+        if enable_interactions_output:
+            for interaction in self.strings_and_frets:
+                nbc = interaction.dimension()
+                self.data_interactions[interaction] = \
+                    npw.zeros((self.nb_time_steps_output + 1, nbc))
+#                    npw.zeros((self.nb_time_steps_output + 1, 3 * nbc))
         # time instants
-        self.time = npw.zeros(self.nb_time_steps + 1)
+        self.time = npw.zeros(self.nb_time_steps_output + 1)
+        self._convert = np.ones(
+            self.nb_time_steps_output + 1, dtype=np.bool)
+        self.first_call = True
 
     def save_interaction_state(self, k, interaction):
         """Save ds positions, velocity,
@@ -306,13 +323,14 @@ class Guitar(sk.Model):
         interaction : Fret
             interaction of interest
         """
-        nbc = interaction.getSizeOfY()
+        assert self.save_interactions, 'Interactions output is not enabled.'
+        nbc = interaction.dimension()
         self.data_interactions[interaction][k, :nbc] = interaction.y(0)
-        self.data_interactions[interaction][k, nbc:2 * nbc] = interaction.y(1)
-        self.data_interactions[interaction][k, 2 * nbc:] = \
-            interaction.lambda_(1)
+        #self.data_interactions[interaction][k, nbc:2 * nbc] = interaction.y(1)
+        #self.data_interactions[interaction][k, 2 * nbc:] = \
+        #    interaction.lambda_(1)
 
-    def save_ds_state(self, k, ds):
+    def save_ds_state_real(self, k, ds):
         """Save ds positions, velocity,
         and contact points local variables.
 
@@ -324,20 +342,60 @@ class Guitar(sk.Model):
             dynamical system of interest
         """
         self.data_ds[ds][k, :] = np.dot(ds.s_mat, ds.q())
+        self._convert[k] = False
 
-    def plot_ds_state(self, ds, indices=None, pdffile=None):
+    def save_ds_state_modal(self, k, ds):
+        """Save ds positions, velocity,
+        and contact points local variables.
+
+        Parameters
+        ----------
+        k : int
+            current iteration number
+        ds : StringDS
+            dynamical system of interest
+        """
+        self.data_ds[ds][:, k] = ds.q()
+        self._convert[k] = True
+
+    def convert_modal_output(self, ds, indices=None):
+        """Post-processing.
+        Recover nodal values from modal output at nodes.
+
+        Parameters
+        ----------
+        ds : StringDS
+            dynamical system of interest
+        indices : list or range, optional
+            list of time instant where modal
+            pos should be converted. Default = all
+        """
+        # if self.first_call:
+        #     self.data_ds[ds] = self.data_ds[ds].transpose()
+        #     self.first_call = False
+        if indices is None:
+            indices = range(self.data_ds[ds].shape[0])
+        indices = [i for i in indices if self._convert[i]]
+        self._convert[indices] = False
+        self.data_ds[ds][:, indices] = \
+            np.dot(ds.s_mat, self.data_ds[ds][:, indices])
+
+    def plot_traj(self, ds, dof=None, filename=None, iplot=0):
         """Plot collected data (positions ...) of a dynamical system
 
         Parameters
         ----------
         ds : StringDS
             dynamical system of interest
-        indices : list of int, optional
+        dof : list of int, optional
             indices (dof) to be plotted. If None
             plot all dof.
-        pdffile : string, optional
-            output file name, if needed. Default=None
+        filename : string, optional
+            name of the output file
+        iplot : int
+            parent figure number
         """
+        self.convert_modal_output(ds)
         data = self.data_ds[ds]
         # current interaction
         # number of contact points
@@ -345,35 +403,76 @@ class Guitar(sk.Model):
         ndof = ds.dimension()
         x = np.linspace(0, ds.length, ndof + 2)
         x = x[1:-1]
-        iplot = 0
         # Plot string displacements, at contact points, according to time
-        if indices is None:
-            plt.figure(iplot, figsize=(17, 8))
-            plt.subplot(341)
-            indices = np.arange(ndof)
-            for ind in indices:
-                plt.plot(self.time, data[:, ind])
+        plt.figure(iplot, figsize=(17, 8))
+        if dof is None:
+            dof = np.arange(ndof)
+            for ind in dof:
+                plt.plot(self.time, data[ind, :])
+
+            plt.xlabel('time')
             plt.title('displacements')
         else:
-            for ind in indices:
-                plt.figure(iplot, figsize=(17, 8))
-                plt.figure(iplot)
-                plt.subplot(2, 1, 1)
-                iplot += 1
+            leg = []
+            for ind in dof:
+                plt.subplot(2, 2, 1)
                 # plot ind - 1 because boundaries points
                 # are not included in the ds
-                plt.plot(self.time, data[:, ind - 1])
-                plt.title('displacements at x = ' + str(x[ind - 1]))
-                plt.subplot(2, 3, 4)
-                plt.plot(self.time, data[:, ind - 1])
+                plt.plot(self.time, data[ind - 1, :])
+                plt.subplot(2, 2, 2)
+                plt.plot(self.time, data[ind - 1, :])
                 plt.xlim(0, 0.02)
-                plt.subplot(2, 3, 5)
-                plt.plot(self.time, data[:, ind - 1])
+                plt.subplot(2, 2, 3)
+                plt.plot(self.time, data[ind - 1, :])
                 plt.xlim(0.05, 0.07)
-                plt.subplot(2, 3, 6)
-                plt.plot(self.time, data[:, ind - 1])
+                plt.subplot(2, 2, 4)
+                plt.plot(self.time, data[ind - 1, :])
                 plt.xlim(0.75, 0.77)
+                leg.append('x = ' + str(x[ind - 1]))
+            plt.legend(leg)
+            plt.suptitle('displacements = f(time)')
+        if filename is not None:
+            plt.savefig(filename)
 
+    def plot_modes(self, ds, times=None,
+                   plot_shape=None, filename=None, iplot=1):
+        """Plot collected data (positions ...) of a dynamical system
+
+        Parameters
+        ----------
+        ds : StringDS
+            dynamical system of interest
+        plot_shape : tuple
+            subplot (i.e. grid of figures) shape
+        filename : string, optional
+            name of the output file
+        iplot : int
+            parent figure number
+        """
+        if times is None:
+            if plot_shape is None:
+                plot_shape = [2, 4]
+
+            # Split time range using the number of required figures
+            nb_points = plot_shape[0] * plot_shape[1]
+            plot_x = plot_shape[0]
+            plot_y = plot_shape[1]
+            nb_points = plot_x * plot_y
+            freq = self.nb_time_steps // nb_points
+            time_ind = np.arange(0, self.nb_time_steps, freq)
+            time_ind[-1] = -1
+
+        else:
+            time_ind = times
+            nb_points = len(times)
+            if plot_shape is None:
+                plot_shape = (nb_points // 2 + nb_points % 2, 2)
+            plot_x = plot_shape[0]
+            plot_y = plot_shape[1]
+
+        ndof = ds.dimension()
+        x = np.linspace(0, ds.length, ndof + 2)
+        x = x[1:-1]
         plt.figure(iplot, figsize=(17, 8))
         # plt.subplot(342)
         # #f, t, Sxx = signal.spectrogram(pos[0], self.fs)
@@ -383,28 +482,29 @@ class Guitar(sk.Model):
         # plt.title('dsp')
         # plt.subplot(343)
         # output frequency, for modes
-        nb_points = 8
-        freq = self.nb_time_steps // nb_points
-        time_ind = np.arange(0, self.nb_time_steps, freq)
-        time_ind[-1] = -1
+        self.convert_modal_output(ds, time_ind)
+        data = self.data_ds[ds]
         interactions = self.interactions_linked_to_ds(ds)
         nbc = len(interactions)
-        ylimits = (data.min() - 0.2 * abs(data.min()),
-                   1.1 * data.max())
+        pos = 1
+        ymin = data[:, time_ind].min()
         for k in range(nb_points):
-            plt.subplot(2, 4, k + 1)
-            plt.plot(x, data[time_ind[k], :])
+            plt.subplot(plot_x, plot_y, pos)
+            plt.plot(x, data[:, time_ind[k]])
             plt.title('mode, t=' + str(self.time[time_ind[k]]))
+            ylimits = (ymin - 0.2 * abs(ymin),
+                       1.1 * data[:, time_ind[k]].max())
             for ic in range(nbc):
                 vpos = -interactions[ic].relation().e()[0]
                 plt.plot((interactions[ic].contact_pos,
                           interactions[ic].contact_pos),
                          (2. * vpos, vpos),
                          'o-')
-                plt.ylim(ylimits)
-
+            plt.ylim(ylimits)
+            pos += 1
         plt.subplots_adjust(hspace=0.8)
-        return plt
+        if filename is not None:
+            plt.savefig(filename)
 
     def interactions_linked_to_ds(self, ds):
         """Return a list of all interactions linked to a given
@@ -423,10 +523,11 @@ class Guitar(sk.Model):
         nfig : int
             figure number
         """
+        assert self.save_interactions, 'Interactions output is not enabled.'
         data = self.data_interactions[interaction]
         # current interaction
         # number of contact points
-        nbc = interaction.getSizeOfY()
+        nbc = interaction.dimension()
         # distance(s) string/fret
         dist = data[:, :nbc]
         vel = data[:, nbc:2 * nbc]
@@ -445,10 +546,11 @@ class Guitar(sk.Model):
         plt.title('percussion')
         return plt
 
-    def plot_modes(self, ds, movie_name):
+    def make_movie(self, ds, movie_name, sampling=20):
         """Create animation from simulation results,
         for a given ds.
         """
+        self.convert_modal_output(ds)
         data = self.data_ds[ds]
         ylimits = (data.min() - 0.2 * abs(data.min()),
                    1.1 * data.max())
@@ -474,15 +576,16 @@ class Guitar(sk.Model):
 
         def animate(i):
             x = np.linspace(0., length, ndof)
-            y = self.data_ds[ds][i, :]
+            y = self.data_ds[ds][:, i]
             line.set_data(x, y)
             return line,
 
         #call the animator.
         # blit=True means only re-draw the parts that have changed.
-        anim = animation.FuncAnimation(fig, animate, init_func=init,
-                                       frames=int(self.nb_time_steps / 20.),
-                                       interval=20, blit=True)
+        anim = animation.FuncAnimation(
+            fig, animate, init_func=init,
+            frames=int(self.nb_time_steps / sampling),
+            interval=20, blit=True)
         anim.save(movie_name, fps=30, extra_args=['-vcodec', 'libx264'])
 
     def contactogram(self, ds, nfig=12):
@@ -495,12 +598,13 @@ class Guitar(sk.Model):
             dynamical system of interest
 
         """
+        assert self.save_interactions, 'Interactions output is not enabled.'
         interactions = self.interactions_linked_to_ds(ds)
         nb_inter = len(interactions)
         plt.figure(nfig, figsize=(17, 8))
         for ic in range(nb_inter):
             inter = interactions[ic]
-            #nbc = inter.getSizeOfY()
+            #nbc = inter.dimension()
             # find lambda > 0 to identify contact times
             contact_indices = np.where(
                 self.data_interactions[inter][:, 0] < 1e-9)
@@ -510,37 +614,3 @@ class Guitar(sk.Model):
         #plt.yticks(np.arange(0, nb_inter, ))
         plt.xlabel('time')
         plt.ylabel('frets positions')
-
-    def save_all(self, ds, filename):
-        """Save ds and interactions states for post-processing
-        """
-
-        # Temp method : numpy file
-        # Later : pickle or hdf5
-
-        nbtime_steps = self.time.size
-        output = np.concatenate((self.time.reshape(nbtime_steps, 1),
-                                 self.data_ds[ds]), axis=1)
-        interactions = self.interactions_linked_to_ds(ds)
-        nb_inter = len(interactions)
-        for ic in range(nb_inter):
-            output = np.concatenate((output,
-                                     self.data_interactions[interactions[ic]]),
-                                    axis=1)
-        np.save(filename, output)
-
-    def load(self, ds, filename):
-        """Load previous results into current model
-        """
-        input_tab = np.load(filename)
-        self.time = input_tab[:, 0]
-        self.data_ds[ds][...] = input_tab[:, 1:ds.dimension() + 1]
-        interactions = self.interactions_linked_to_ds(ds)
-        nb_inter = len(interactions)
-        pos = ds.dimension()
-        for ic in range(nb_inter):
-            interaction = interactions[ic]
-            nbc = interaction.getSizeOfY()
-            self.data_interactions[interaction] = input_tab[:,
-                                                            pos:pos + 3 * nbc]
-            pos += 3 * nbc

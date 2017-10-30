@@ -130,7 +130,7 @@ void EulerMoreauOSI::fillDSLinks(Interaction &inter,
   assert(ds2);
   
   VectorOfVectors& workV = *interProp.workVectors;
-  workV[FirstOrderR::osnsp_rhs].reset(new SiconosVector(inter.getSizeOfY()));
+  workV[FirstOrderR::osnsp_rhs].reset(new SiconosVector(inter.dimension()));
   VectorOfBlockVectors& DSlink = *interProp.DSlink;
 
   Relation &relation =  *inter.relation();  

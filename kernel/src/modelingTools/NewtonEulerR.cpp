@@ -42,7 +42,7 @@ void NewtonEulerR::initComponents(Interaction& inter, VectorOfBlockVectors& DSli
 
   DEBUG_BEGIN("NewtonEulerR::initComponents(Interaction& inter, ...)\n");
 
-  unsigned int ySize = inter.getSizeOfY();
+  unsigned int ySize = inter.dimension();
   unsigned int xSize = inter.getSizeOfDS();
   unsigned int qSize = 7 * (xSize / 6);
 
@@ -232,7 +232,7 @@ void NewtonEulerR::computeJachqT(Interaction& inter, SP::BlockVector q0)
   DEBUG_EXPR(inter.display());
 
   unsigned int k = 0;
-  unsigned int ySize = inter.getSizeOfY();
+  unsigned int ySize = inter.dimension();
   SP::SimpleMatrix auxBloc(new SimpleMatrix(ySize, 7));
   SP::SimpleMatrix auxBloc2(new SimpleMatrix(ySize, 6));
   Index dimIndex(2);
@@ -304,7 +304,7 @@ void  NewtonEulerR::computeSecondOrderTimeDerivativeTerms(double time, Interacti
   // Compute the time derivative of the Jacobian
     if (!_dotjachq) // lazy initialization
   {
-    unsigned int sizeY = inter.getSizeOfY();
+    unsigned int sizeY = inter.dimension();
     unsigned int xSize = inter.getSizeOfDS();
     unsigned int qSize = 7 * (xSize / 6);
 
@@ -329,7 +329,7 @@ void  NewtonEulerR::computeSecondOrderTimeDerivativeTerms(double time, Interacti
   // Compute the product of jachq and Tdot --> jachqTdot
 
   unsigned int k = 0;
-  unsigned int ySize = inter.getSizeOfY();
+  unsigned int ySize = inter.dimension();
   unsigned int xSize = inter.getSizeOfDS();
   SP::SimpleMatrix auxBloc(new SimpleMatrix(ySize, 7));
   SP::SimpleMatrix auxBloc2(new SimpleMatrix(ySize, 6));

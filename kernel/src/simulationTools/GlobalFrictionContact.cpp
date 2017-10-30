@@ -98,11 +98,6 @@ void GlobalFrictionContact::initOSNSMatrix()
   // Default size for M = _maxSize
   if (!_M)
   {
-    // if (_numericsMatrixStorageType == NM_DENSE)
-    //   _M.reset(new OSNSMatrix(_maxSize, NM_DENSE));
-    // else // if(MStorageType == 1) size = number of DSBlocks = number of DS in the largest considered graph of ds
-    //   _M.reset(new OSNSMatrix(simulation()->nonSmoothDynamicalSystem()->dynamicalSystems()->size(), 1));
-
     switch (_numericsMatrixStorageType)
     {
     case NM_DENSE:

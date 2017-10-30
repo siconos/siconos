@@ -292,76 +292,74 @@ void MLCPProjectOnConstraints::updateInteractionBlocks()
   DEBUG_EXPR(displayBlocks(indexSet););
   DEBUG_END(" MLCPProjectOnConstraints::updateInteractionBlocks()\n");
 }
-void MLCPProjectOnConstraints::displayBlocks(SP::InteractionsGraph indexSet)
+void MLCPProjectOnConstraints::displayBlocks(InteractionsGraph& indexSet)
 {
 
   std::cout <<  "MLCPProjectOnConstraints::displayBlocks(SP::InteractionsGraph indexSet) " << std::endl;
-  std::cout << "                          indexSet :" << indexSet << std::endl;
-
 
   InteractionsGraph::VIterator vi, viend;
-  for (std11::tie(vi, viend) = indexSet->vertices();
+  for (std11::tie(vi, viend) = indexSet.vertices();
        vi != viend; ++vi)
   {
-    SP::Interaction inter = indexSet->bundle(*vi);
+    SP::Interaction inter = indexSet.bundle(*vi);
     std::cout << "                          vertex :" << *vi << std::endl;
-    std::cout << "                          bundle :" << indexSet->bundle(*vi) << std::endl;
+    std::cout << "                          bundle :" << indexSet.bundle(*vi) << std::endl;
 
-    if (indexSet->blockProj[*vi])
+    if (indexSet.blockProj[*vi])
     {
       std::cout << "                          blockProj ";
-      indexSet->blockProj[*vi]->display();
+      indexSet.blockProj[*vi]->display();
     }
 
     InteractionsGraph::OEIterator oei, oeiend;
 
 
 
-    for (std11::tie(oei, oeiend) = indexSet->out_edges(*vi);
+    for (std11::tie(oei, oeiend) = indexSet.out_edges(*vi);
          oei != oeiend; ++oei)
     {
-      unsigned int isrc = indexSet->index(indexSet->source(*oei));
-      unsigned int itar = indexSet->index(indexSet->target(*oei));
+      unsigned int isrc = indexSet.index(indexSet.source(*oei));
+      unsigned int itar = indexSet.index(indexSet.target(*oei));
       std::cout << "                          isrc :" << isrc << std::endl;
       std::cout << "                          itar :" << itar << std::endl;
 
 
       InteractionsGraph::EDescriptor ed1, ed2;
       std::cout << "                          outedges :" << *oei << std::endl;
-      std11::tie(ed1, ed2) = indexSet->edges(indexSet->source(*oei), indexSet->target(*oei));
+      std11::tie(ed1, ed2) = indexSet.edges(indexSet.source(*oei), indexSet.target(*oei));
       std::cout << "                          edges(ed1,ed2) :" << ed1 << " " << ed2  << std::endl;
       std::cout << "                          (ed1)->upper_blockProj : ";
-      if (indexSet->upper_blockProj[ed1])
+      if (indexSet.upper_blockProj[ed1])
       {
-        std::cout << indexSet->upper_blockProj[ed1] << "   :" ;
-        indexSet->upper_blockProj[ed1]->display();
+        std::cout << indexSet.upper_blockProj[ed1] << "   :" ;
+        indexSet.upper_blockProj[ed1]->display();
       }
       else
         std::cout << "NULL " << std::endl;
 
       std::cout << "                          (ed1)->lower_blockProj : ";
-      if (indexSet->lower_blockProj[ed1])
+      if (indexSet.lower_blockProj[ed1])
       {
-        std::cout << indexSet->lower_blockProj[ed1] << "   :" ;
-        indexSet->lower_blockProj[ed1]->display();
+        std::cout << indexSet.lower_blockProj[ed1] << "   :" ;
+        indexSet.lower_blockProj[ed1]->display();
       }
       else
         std::cout << "NULL " << std::endl;
 
       std::cout << "                          (ed2)->upper_blockProj : ";
-      if (indexSet->upper_blockProj[ed2])
+      if (indexSet.upper_blockProj[ed2])
       {
-        std::cout << indexSet->upper_blockProj[ed2] << "   :" ;
-        indexSet->upper_blockProj[ed2]->display();
+        std::cout << indexSet.upper_blockProj[ed2] << "   :" ;
+        indexSet.upper_blockProj[ed2]->display();
       }
       else
         std::cout << "NULL" << std::endl;
 
       std::cout << "                          (ed2)->lower_blockProj : ";
-      if (indexSet->lower_blockProj[ed2])
+      if (indexSet.lower_blockProj[ed2])
       {
-        std::cout << indexSet->lower_blockProj[ed2] << "   :" ;
-        indexSet->lower_blockProj[ed2]->display();
+        std::cout << indexSet.lower_blockProj[ed2] << "   :" ;
+        indexSet.lower_blockProj[ed2]->display();
       }
       else
         std::cout << "NULL" << std::endl;

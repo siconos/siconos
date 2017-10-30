@@ -32,7 +32,7 @@ void LagrangianR::initComponents(Interaction& inter, VectorOfBlockVectors& DSlin
 void LagrangianR::initialize(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
 {
   // Memory allocation for G[i], if required (depends on the chosen constructor).
-  unsigned int sizeY = inter.getSizeOfY();
+  unsigned int sizeY = inter.dimension();
   unsigned int sizeDS = inter.getSizeOfDS();
 
   if (! _jachq)

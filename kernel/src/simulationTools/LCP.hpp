@@ -72,6 +72,8 @@ public:
   /** destructor */
   ~LCP();
 
+  int numericsCompute();
+  
   /** Compute the unknowns z and w and update the corresponding Interactions (y and lambda )
       \param time : current time
       \return int, information about the solver convergence

@@ -27,7 +27,6 @@
 #include "SiconosProperties.hpp"
 #include "SiconosPointers.hpp"
 #include "SimulationTypeDef.hpp"
-
 /** the graph structure :
  *
  * InteractionsGraph = L(DynamicalSystemsGraph)
@@ -205,8 +204,19 @@ struct InteractionsGraph : public _InteractionsGraph
     lower_blockProj._store->erase(ed);
   }
 
+  /** Update absolute_position property (vertex) and return sum of dimensions of all
+      interactions in the graph.
+  */
+  unsigned int update_positions();
+
+  
+  /** print blocks (edges properties) */
+  void display_edges_blocks();
+  
   /** serialization hooks */
   ACCEPT_SERIALIZATION(InteractionsGraph);
+
+
 };
 
 

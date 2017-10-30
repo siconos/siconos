@@ -272,7 +272,7 @@ void LsodarOSI::fillDSLinks(Interaction &inter,
 
   VectorOfVectors& workV = *interProp.workVectors;
   workV.resize(LsodarOSI::WORK_INTERACTION_LENGTH);
-  workV[LsodarOSI::OSNSP_RHS].reset(new SiconosVector(inter.getSizeOfY()));
+  workV[LsodarOSI::OSNSP_RHS].reset(new SiconosVector(inter.dimension()));
 
   assert(interProp.DSlink);
   VectorOfBlockVectors& DSlink = *interProp.DSlink;

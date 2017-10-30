@@ -37,7 +37,7 @@ void KneeJointR::initComponents(Interaction& inter, VectorOfBlockVectors& DSlink
   NewtonEulerR::initComponents(inter, DSlink, workV, workM);
   if (!_dotjachq)
   {
-    unsigned int sizeY = inter.getSizeOfY();
+    unsigned int sizeY = inter.dimension();
     unsigned int xSize = inter.getSizeOfDS();
     unsigned int qSize = 7 * (xSize / 6);
 

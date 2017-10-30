@@ -213,7 +213,7 @@ void D1MinusLinearOSI::fillDSLinks(Interaction &inter,
 
   VectorOfVectors& workV = *interProp.workVectors;
   workV.resize(D1MinusLinearOSI::WORK_INTERACTION_LENGTH);
-  workV[D1MinusLinearOSI::OSNSP_RHS].reset(new SiconosVector(inter.getSizeOfY()));
+  workV[D1MinusLinearOSI::OSNSP_RHS].reset(new SiconosVector(inter.dimension()));
 
   VectorOfBlockVectors& DSlink = *interProp.DSlink;
   assert(interProp.DSlink);
@@ -503,17 +503,7 @@ bool D1MinusLinearOSI::addInteractionInIndexSet(SP::Interaction inter, unsigned 
 
 bool D1MinusLinearOSI::removeInteractionInIndexSet(SP::Interaction inter, unsigned int i)
 {
-  DEBUG_BEGIN("D1MinusLinearOSI::removeInteractionInIndexSet.\n");
-  DEBUG_END("D1MinusLinearOSI::removeInteractionInIndexSet.\n");
-  switch(_typeOfD1MinusLinearOSI)
-  {
-  case halfexplicit_acceleration_level:
-    return removeInteractionInIndexSetHalfExplicitAccelerationLevel(inter,i);
-  case halfexplicit_velocity_level:
-    return removeInteractionInIndexSetHalfExplicitVelocityLevel(inter,i);
-  }
-  RuntimeException::selfThrow("D1MinusLinearOSI::removeInteractionInIndexSet() - not implemented for type of D1MinusLinearOSI: " + _typeOfD1MinusLinearOSI);
-  return 0;
+  return !(addInteractionInIndexSet(inter, i));
 }
 
 

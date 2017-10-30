@@ -74,7 +74,7 @@ void LagrangianScleronomousR::initComponents(Interaction& inter, VectorOfBlockVe
   {
     if (!_dotjachq)
     {
-      unsigned int sizeY = inter.getSizeOfY();
+      unsigned int sizeY = inter.dimension();
       unsigned int sizeDS = inter.getSizeOfDS();
       _dotjachq.reset(new SimpleMatrix(sizeY, sizeDS));
     }

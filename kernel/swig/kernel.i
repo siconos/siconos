@@ -276,6 +276,12 @@ typedef __mpz_struct mpz_t[1];
     return std11::dynamic_pointer_cast<NewtonImpactNSL>(nslaw);
   }
 
+  size_t size_graph(const InteractionsGraph& index_set)
+  {
+    return index_set.size();
+  }
+
+
 %}
 
 //namespace std {

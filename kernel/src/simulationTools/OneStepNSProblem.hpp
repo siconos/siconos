@@ -231,7 +231,7 @@ public:
   /** Display the set of blocks for  a given indexSet
    * \param  indexSet  the concerned index set
    */
-  virtual void displayBlocks(SP::InteractionsGraph indexSet);
+  virtual void displayBlocks(InteractionsGraph& indexSet);
 
   /** compute interactionBlocks if necessary (this depends on the type of
    * OSNS, on the indexSets ...)

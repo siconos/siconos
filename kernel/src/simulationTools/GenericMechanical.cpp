@@ -45,17 +45,6 @@ GenericMechanical::GenericMechanical(int FC3D_Solver_Id):
 }
 
 
-void GenericMechanical::initialize(SP::Simulation sim)
-{
-  // - Checks memory allocation for main variables (M,q,w,z)
-  // - Formalizes the problem if the topology is time-invariant
-
-  // This function performs all steps that are time-invariant
-
-  // General initialize for OneStepNSProblem
-  LinearOSNS::initialize(sim);
-}
-
 void GenericMechanical::computeDiagonalInteractionBlock(const InteractionsGraph::VDescriptor& vd)
 {
   SP::InteractionsGraph indexSet = simulation()->indexSet(indexSetLevel());
