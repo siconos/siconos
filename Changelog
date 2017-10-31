@@ -36,7 +36,7 @@ Main changes:
 
 	* [numerics] ConvexQP is a new class of problem for solving QP over convex set giving
 	the projection onto the set. New solvers for frictional contact problems have been
-	added based on a succesive approximations by convexification.
+	added based on a successive approximations by convexification.
 
 	* [numerics] new solvers for frictional contact problems based on the Panagiotopoulos
 	approach (alternating normal and tangent problems)
@@ -48,8 +48,15 @@ Main changes:
 
 	* [numerics] add functionalities and test in NumericsMatrix for sparse storage
 
-	
+	* [numerics] make more solvers storage-agnostic.
 
+	* [numerics] remove LinearSystem (superseded by NM_gesv)
+
+	* [numerics] add better error management: see the example in numerics/swig/numerics.i
+	Instead of exiting, the library can now handle fatal error and return
+	more gracefully
+
+	* [numerics] PATHVI is now supported
 
 
 
