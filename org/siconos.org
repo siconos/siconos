@@ -1605,3 +1605,43 @@ Discussion :
 *** TODO Dynamics creation of objects
     + Solution with the controller of radarsat1 to be reviwed and discussed
 
+** <2017-11-02 Thu> INRIA Chile
+
+Steve, Vincent.
+
+*** Missing devel for Siconos/Gazebo
+ + SDF, siconos configuration
+   profile in SDF for siconos ?
+ + debian packages
+ + docker file.
+ + Evaluation of the devel w.r.t examples
+   + siconos examples woodpecker, tippe top
+   + robot examples of gazebo
+   + LHD model with granular.
+
+*** Efficiency of GMP
+    + Think about a mixedfixedFrictionalContact for enabling a single GS loop
+    + Implementatation of specific local solver
+    + Thinking to a global Newton loop
+    + Augmented Lagragian activation and active sets techniques (BrulsAcaryCardona)
+
+*** Advantages of Siconos (selling work)
+    + complicated model of joint with friction and stops (spehrical joints or pivot with friction and stops)
+    + robustness and efficiency.
+      - time step ? number of iterations in GMP/NSGS find lower bounds for this parameter
+      - Projection onto the constraints with Augmented Lagragian activation and active sets techniques
+
+*** Future plans
+    + Extensions
+      + Blender plug-ins? Blendyn
+      or
+      + https://www.youtube.com/watch?v=BGAwRKPlpCw
+      + VREP plug-in
+      + Paraview output online
+      + Jupyter output
+
+    + Publications:
+      - IROS 2018 paper
+      - RT INRIA on Siconos and then paper (IJNME CMAME)
+
+    + Prepare a general presentation with links and movie
