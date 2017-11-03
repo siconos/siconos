@@ -61,10 +61,10 @@ protected:
   /** Default maximum number of Newton iteration*/
   unsigned int _newtonMaxIteration;
 
-  /** Number of steps perfomed in the Newton Loop */
+  /** Number of steps performed in the Newton Loop */
   unsigned int _newtonNbIterations;
 
-  /** Cumulative number of steps perfomed in the Newton Loops */
+  /** Cumulative number of steps performed in the Newton Loops */
   unsigned int _newtonCumulativeNbIterations;
 
   /** unsigned int  _newtonOptions

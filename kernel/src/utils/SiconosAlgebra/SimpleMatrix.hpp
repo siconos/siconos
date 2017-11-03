@@ -379,7 +379,7 @@ public:
    */
   IdentityMat* identity(unsigned int row = 0, unsigned int col = 0) const;
 
-  /** return the adress of the array of double values of the matrix
+  /** return the address of the array of double values of the matrix
    *  \param row position for the required block ->useless for SimpleMatrix
    *  \param col position for the required block ->useless for SimpleMatrix
    *  \return double* : the pointer on the double array

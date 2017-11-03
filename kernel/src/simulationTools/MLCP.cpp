@@ -185,7 +185,7 @@ int MLCP::compute(double time)
     }
     catch (...)
     {
-      std::cout << "exception catched" <<std::endl;
+      std::cout << "exception caught" <<std::endl;
       info = 1;
     }
 

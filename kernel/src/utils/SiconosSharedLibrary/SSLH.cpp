@@ -47,12 +47,12 @@ const std::string getPluginName(const std::string& s)
   if ((s.find("\n", 0) != std::string::npos) || (s.find("\t", 0) != std::string::npos) || (s.find(" ", 0) != std::string::npos))
   {
     //raise an exception
-    throw SiconosSharedLibraryException("% SharedLibrary managment - getPluginName - The 'string' which contains the plugin name contains '\\n' or '\\t' or ' '");
+    throw SiconosSharedLibraryException("% SharedLibrary management - getPluginName - The 'string' which contains the plugin name contains '\\n' or '\\t' or ' '");
   }
   else if ((s.find(":", 0) == std::string::npos) && (s.rfind(":", 0) != s.rfind(":", 0)))
   {
     //raise an exception
-    throw SiconosSharedLibraryException("% SharedLibrary managment - getPluginName - The 'string' which contains the plugin name is not well formed. It must be like : plugin_name:plugin_function_name");
+    throw SiconosSharedLibraryException("% SharedLibrary management - getPluginName - The 'string' which contains the plugin name is not well formed. It must be like : plugin_name:plugin_function_name");
   }
   else
   {
@@ -70,12 +70,12 @@ const std::string getPluginFunctionName(const std::string& s)
   if ((s.find("\n", 0) != std::string::npos) || (s.find("\t", 0) != std::string::npos) || (s.find(" ", 0) != std::string::npos))
   {
     //raise an exception
-    throw SiconosSharedLibraryException("% SharedLibrary managment - getPluginFunctionName - The 'string' which contains the plugin function name contains '\\n' or '\\t' or ' '");
+    throw SiconosSharedLibraryException("% SharedLibrary management - getPluginFunctionName - The 'string' which contains the plugin function name contains '\\n' or '\\t' or ' '");
   }
   else if ((s.find(":", 0) == std::string::npos) && (s.rfind(":", 0) != s.rfind(":", 0)))
   {
     //raise an exception
-    throw SiconosSharedLibraryException("% SharedLibrary managment - getPluginFunctionName - The 'string' which contains the plugin name is not well formed. It must be like : plugin_name:plugin_function_name");
+    throw SiconosSharedLibraryException("% SharedLibrary management - getPluginFunctionName - The 'string' which contains the plugin name is not well formed. It must be like : plugin_name:plugin_function_name");
   }
   else
   {
