@@ -1613,11 +1613,12 @@ Steve, Vincent.
  + SDF, siconos configuration
    profile in SDF for siconos ?
  + debian packages
- + docker file.
- + Evaluation of the devel w.r.t examples
+ + docker file. [[http://siconos.github.io/gazebo-siconos/]]
+ + Evaluation of the devel with examples
    + siconos examples woodpecker, tippe top
    + robot examples of gazebo
    + LHD model with granular.
+ + Mail to Steven Peters.
 
 *** Efficiency of GMP
     + Think about a mixedfixedFrictionalContact for enabling a single GS loop
@@ -1633,9 +1634,8 @@ Steve, Vincent.
 
 *** Future plans
     + Extensions
-      + Blender plug-ins? Blendyn
-      or
-      + https://www.youtube.com/watch?v=BGAwRKPlpCw
+      + Blender plug-ins? https://www.youtube.com/watch?v=BGAwRKPlpCw
+      + Blendyn
       + VREP plug-in
       + Paraview output online
       + Jupyter output
