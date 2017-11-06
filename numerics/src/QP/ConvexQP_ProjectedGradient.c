@@ -46,6 +46,13 @@ void convexQP_ProjectedGradient(ConvexQP* problem, double *z, double *w, int* in
 
   double* q = problem->q;
   NumericsMatrix* M = problem->M;
+
+  NumericsMatrix* A = problem->A;
+  if (A)
+  {
+    numerics_error("ConvexQP_ProjectedGradient", "This solver does not support a specific matrix A different from the identity");
+  }
+
   /* Dimension of the problem */
   int n =  problem->size;
 
@@ -78,7 +85,7 @@ void convexQP_ProjectedGradient(ConvexQP* problem, double *z, double *w, int* in
   }
 
   if (rho == 0.0)
-    numerics_error("fc3d_ProjectedGradientOnCylinder", "dparam[SICONOS_CONVEXQP_PGOC_RHO] must be nonzero");
+    numerics_error("ConvexQP_ProjectedGradient", "dparam[SICONOS_CONVEXQP_PGOC_RHO] must be nonzero");
 
   double rho_k =rho;
   double * z_tmp= (double *)malloc(n * sizeof(double));

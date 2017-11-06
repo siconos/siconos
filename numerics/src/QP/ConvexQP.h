@@ -17,25 +17,35 @@
 */
 
 /*!\file ConvexQP.h
-  \brief Definition of a structure to handle Convex Quadratic Programming.
+  \brief Definition of a structure to handle Convex Quadratic Problem.
 */
 
 /** \page convexqpProblem ConvexQP
  *
  * \section convexQPintro Problem statement
- *  Given
+ * Given
  * <ul>
  *   <li> an integer \f$n\f$, the dimension of the ambient space,</li>
- *   <li> a SDP matrix \f$ M \in  \mathrm{I\!R}^n \times \mathrm{I\!R}^n\f$</li>
- *   <li> a  vector \f$ q \in  \mathrm{I\!R}^n\f$</li>
- *   <li> a convex set  \f$ {C} \in {{\mathrm{I\!R}}}^n\f$</li>
+ *   <li> a SDP matrix \f$ M \in  \mathrm{I\!R}^{n \times n}\f$</li>
+ *   <li> a vector \f$ q \in  \mathrm{I\!R}^n\f$</li>
+ *   <li> a matrix \f$ A \in  \mathrm{I\!R}^{m times n}\f$ of constraints</li>
+ *   <li> a vector \f$ b \in  \mathrm{I\!R}^m\f$</li>
+ *   <li> a convex set \f$ {C} \in {{\mathrm{I\!R}}}^m\f$</li>
  * </ul>
  * the convex QP problem is to find a vector \f$z\in{{\mathrm{I\!R}}}^n\f$,
  * \f{equation*}{
- *  \min_{z \in C} \frac{1}{2} z^T M z + Z^T q
+ *   \begin{array}{lcl}
+ *     \min & & \frac{1}{2} z^T M z + Z^T q \\
+ *      s.t  & & A z + b  \in C \\
+ *   \end{array}
  * \f}
- *
-
+ * and is most simple example is when \f$ b= 0 A =I\f$ and we obtain
+ *    \f{equation*}{
+ *  \begin{array}{lcl}
+ *    \min & & \frac{1}{2} z^T M z + Z^T q \\
+ *    s.t  & &  z  \in C \\
+ *  \end{array}
+ * \f}
  */
 
 #ifndef CONVEXQP_H
@@ -47,14 +57,17 @@
 
 
 /** \struct ConvexQP ConvexQP.h
- * 
+ *
  */
 struct ConvexQP
 {
   int size; /**< size  \f$ n \f$ */
+  int m; /**< m \f$ m \f$ */
   void *env; /**< pointer onto env object (which is self is the simplest case)*/
-  NumericsMatrix *M ;
-  double *q ;
+  NumericsMatrix *M; /**< Matrix M that defines the quadratic term in the cost function. **/
+  double *q; /**< vector q that defines the linear term in the cost function. **/
+  NumericsMatrix *A; /**< Matrix A that defines the constraints. If it is NULL, we assume that A is the identity matrix **/
+  double *b;  /**< vector b that defines the constant term in the constraints. **/
   void (*ProjectionOnC)(void *self, double *x, double * PX); /**< Projection on C  */
   double normConvexQP; /**< Norm of the  problem to compute relative solution */
   int istheNormConvexQPset; /**< Boolean to know if the norm is set 

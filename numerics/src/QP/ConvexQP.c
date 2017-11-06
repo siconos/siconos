@@ -20,12 +20,21 @@
 #include "ConvexQP.h"
 #include "numerics_verbose.h"
 #include "NumericsMatrix.h"
+#include "NumericsVector.h"
 
 
 void convexQP_display(ConvexQP* cqp)
 {
 
   assert(cqp);
+
+  NM_display(cqp->M);
+  NV_display(cqp->q, cqp->size);
+  if (cqp->A)
+    NM_display(cqp->A);
+  if (cqp->b)
+    NV_display(cqp->b, cqp->m);
+
 
 }
 
