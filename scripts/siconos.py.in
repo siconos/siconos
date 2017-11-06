@@ -128,11 +128,11 @@ Options are:
 
  -D key | -D key=value : to define a 'cmake' and a 'cpp' variable.
 
- -g : to compile with debug informations.
+ -g : to compile with debug information.
 
  -h | --help : to print this help.
 
- -j<n>   : parrallel compilation with n jobs
+ -j<n>   : parallel compilation with n jobs
 
  -I<dir> : add directory <dir> to the list of paths to include headers.
 

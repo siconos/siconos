@@ -97,7 +97,7 @@ class Volume(Shape):
 
     parameters
         The parameters associated to the volume.
-        This may be informations about the material and its density.
+        This may be information about the material and its density.
 
     relative_translation: array_like of length 3
         translation in the bodyframe coordinates.
@@ -124,7 +124,7 @@ class Volume(Shape):
 class Contactor(Shape):
     """A Contactor is a Shape that belongs to a collision group and may
     have associated parameters. Depending on the geometrical engine
-    used, some informations may be added to the contactor, such as the
+    used, some information may be added to the contactor, such as the
     kind of contact and the concerned part of the shape.  Note that
     contact laws must then be defined between collision groups.
 

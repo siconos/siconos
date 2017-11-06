@@ -120,7 +120,7 @@ The following command-line options are recognized by
  Define a 'cmake' and a 'cpp' variable.
 .TP
 .BI \-g
- Compile with debug informations.
+ Compile with debug information.
 .TP
 .BI \-h 
 |
@@ -129,7 +129,7 @@ The following command-line options are recognized by
 .TP
 .BI \-j
 .I JOBS NUMBER
- Do parrallel compilation with JOBS NUMBER jobs
+ Do parallel compilation with JOBS NUMBER jobs
 .TP
 .BI \-L
 .I DIRECTORY

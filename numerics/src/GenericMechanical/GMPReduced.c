@@ -441,7 +441,7 @@ void GMPReducedEqualitySolve(GenericMechanicalProblem* pInProblem, double *react
     int tolViolate = GenericMechanical_compute_error(pInProblem, reaction, velocity, options->dparam[0], options, &err);
     if (tolViolate)
     {
-      printf("GMPReduced2, warnning, reduced problem solved, but error of intial probleme violated tol = %e, err= %e\n", options->dparam[0], err);
+      printf("GMPReduced2, warnning, reduced problem solved, but error of initial probleme violated tol = %e, err= %e\n", options->dparam[0], err);
     }
   }
 
@@ -598,7 +598,7 @@ void GMPReducedSolve(GenericMechanicalProblem* pInProblem, double *reaction , do
     int tolViolate = GenericMechanical_compute_error(pInProblem, reaction, velocity, options->dparam[0], options, &err);
     if (tolViolate)
     {
-      printf("GMPReduced, warnning, reduced problem solved, but error of intial probleme violated tol = %e, err= %e\n", options->dparam[0], err);
+      printf("GMPReduced, warnning, reduced problem solved, but error of initial probleme violated tol = %e, err= %e\n", options->dparam[0], err);
     }
     free(Re);
     free(Rbuf);

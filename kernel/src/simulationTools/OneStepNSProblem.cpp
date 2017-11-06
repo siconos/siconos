@@ -95,7 +95,7 @@ void OneStepNSProblem::updateInteractionBlocks()
 
   bool isLinear = simulation()->nonSmoothDynamicalSystem()->isLinear();
 
-  // we put diagonal informations on vertices
+  // we put diagonal information on vertices
   // self loops with bgl are a *nightmare* at the moment
   // (patch 65198 on standard boost install)
   if (indexSet->properties().symmetric)
