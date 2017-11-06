@@ -17,16 +17,14 @@ with Hdf5() as io:
     # Try velocity=[0,0,5,0,0,0]) = correct behaviour
     # Try velocity=[0,5,0,0,0,0]) = incorrect behaviour
 
-    io.addJoint('joint1', 'cube1', 'cube2', [0,0,1], [], 'PrismaticJointR')
+    io.addJoint('joint1', 'cube1', 'cube2', [], [0,0,1], 'PrismaticJointR')
 
 with Hdf5(mode='r+') as io:
     io.run(t0=0,
            T=3,
            h=0.001,
            theta=0.50001,
-           Newton_max_iter=20,
+           Newton_max_iter=1,
            solver=Numerics.SICONOS_FRICTION_3D_NSGS,
            itermax=10000,
            tolerance=1e-14)
-
-    

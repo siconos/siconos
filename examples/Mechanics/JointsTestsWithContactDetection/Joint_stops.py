@@ -32,11 +32,11 @@ with Hdf5() as io:
     # diagonal for joint1, and vertical for joint2, to demonstrate the
     # joint dynamics.
 
-    io.addJoint('joint1', 'cube1', None, [0,0.707,0.707], [], 'PrismaticJointR',
-                nslaws='stop', stops=[[0, 2.0, 1], [0, -2.0, -1]])
+    io.addJoint('joint1', 'cube1', None, [], [0,0.707,0.707], 'PrismaticJointR',
+                nslaws='stop', stops=[[0, 2.0, -1], [0, -2.0, 1]])
 
-    io.addJoint('joint2', 'cube1', 'cube2', [0,0,1], [], 'PrismaticJointR',
-                nslaws='stop', stops=[[0, 2.0, 1], [0, -2.0, -1]],
+    io.addJoint('joint2', 'cube1', 'cube2', [], [0,0,1], 'PrismaticJointR',
+                nslaws='stop', stops=[[0, 2.0, -1], [0, -2.0, 1]],
                 allow_self_collide=True)
 
 with Hdf5(mode='r+') as io:
