@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from siconos.mechanics.collision.tools import Volume, Contactor
+from siconos.mechanics.collision.tools import Volume, Contactor, Shape
 from siconos.io.mechanics_io import Hdf5
 import siconos.io.mechanics_io
 
@@ -47,6 +47,13 @@ with Hdf5() as io:
     io.addShapeDataFromFile('AxisBody',
                             '../Mechanisms/SliderCrank/CAD/AxisBody2.stp')
 
+    io.addShapeDataFromFile('Artefact',
+                            '../Mechanisms/SliderCrank/CAD/artefact2.step')
+
+#    io.addObject('Artefact', [Shape(shape_data='Artefact',
+#                                    instance_name='artefact')],
+#                 translation=[0., 0., 0.])
+    
     io.addObject('part1', [Volume(shape_data='body1',
                                   instance_name='Body1',
                                   relative_translation=[-0.5*l1, 0., 0.],
@@ -65,36 +72,77 @@ with Hdf5() as io:
                  mass=0.038,
                  inertia=[5.9e-4, 1., 1.])
 
-    io.addObject('slider', [Contactor(shape_data='Sphere',
-                                      instance_name='cslid',
-                                      contact_type='Face',
-                                      contact_index=0,
-                                      relative_translation=[-a, 0., 0.])],
-                            # Contactor(
-                            #     instance_name='Contact_b',
-                            #     shape_data='Contact_b_cyl',
-                            #     contact_type='Edge',
-                            #     contact_index=0,
-                            #     relative_translation=[-a, 0., 0.]),
-                            # Contactor(
-                            #     instance_name='Contact_h',
-                            #     shape_data='Contact_h_cyl',
-                            #     contact_type='Edge',
-                            #     contact_index=0,
-                            #     relative_translation=[-a, 0., 0.])],
+    io.addObject('slider', [
+        Shape(shape_data='Slider',
+              instance_name='cslid',
+              relative_translation=[-a, 0., 0.]),
+        Contactor(
+            instance_name='Contact_b_f1',
+            shape_data='Contact_b_cyl',
+            contact_type='Face',
+            contact_index=1,
+            relative_translation=[-a, 0., 0.]),
+        Contactor(
+            instance_name='Contact_h_f1',
+            shape_data='Contact_h_cyl',
+            contact_type='Face',
+            contact_index=1,
+            relative_translation=[-a, 0., 0.]),
+        Contactor(
+            instance_name='Contact_b_f0',
+            shape_data='Contact_b_cyl',
+            contact_type='Face',
+            contact_index=0,
+            relative_translation=[-a, 0., 0.]),
+        Contactor(
+            instance_name='Contact_h_f0',
+            shape_data='Contact_h_cyl',
+            contact_type='Face',
+            contact_index=0,
+            relative_translation=[-a, 0., 0.]),
+        Contactor(
+            instance_name='Contact_b_e1',
+            shape_data='Contact_b_cyl',
+            contact_type='Edge',
+            contact_index=1,
+            relative_translation=[-a, 0., 0.]),
+        Contactor(
+            instance_name='Contact_h_e1',
+            shape_data='Contact_h_cyl',
+            contact_type='Edge',
+            contact_index=1,
+            relative_translation=[-a, 0., 0.]),
+        Contactor(
+            instance_name='Contact_b_e0',
+            shape_data='Contact_b_cyl',
+            contact_type='Edge',
+            contact_index=0,
+            relative_translation=[-a, 0., 0.]),
+        Contactor(
+            instance_name='Contact_h_e0',
+            shape_data='Contact_h_cyl',
+            contact_type='Edge',
+            contact_index=0,
+            relative_translation=[-a, 0., 0.])],
                  translation=[l1 + l2 + a, 0., 0.],
-                 velocity=[0., 0., 0., 0., w30, 0.],
+                 velocity=[-0., 0., 0., 0., w30, 0.],
                  mass=0.076,
                  inertia=[2.7e-6, 1., 1.])
 
     # a static object (mass=0)
     io.addObject('chamber', [Contactor(
-        instance_name='Chamber_contact',
+        instance_name='Chamber_contact0',
         shape_data='Chamber',
         contact_type='Face',
         contact_index=0,
+        relative_translation=[0, 0, 0]),
+                            Contactor(
+        instance_name='Chamber_contact1',
+        shape_data='Chamber',
+        contact_type='Face',
+        contact_index=1,
         relative_translation=[0, 0, 0])],
-                 translation=[0, 0, 0])
+                translation=[0, 0, 0])
 
     io.addJoint('joint1',  'part1',
                 points=[[0., 0., 0.]],
@@ -102,28 +150,118 @@ with Hdf5() as io:
                 joint_class='PivotJointR')
 
     io.addJoint('joint2', 'part2', 'slider',
-                points=[[-0.5*l2, 0., 0.]],
-                axes=[[0., 1., 0]],
+                pivot_point=[0.5*l2, 0., 0.],
+                axis=[0., 1., 0],
                 joint_class='PivotJointR')
 
     io.addJoint('joint3', 'part1', 'part2',
-                points=[[0.5*l1, 0., 0.]],
-                axes=[[0., 1., 0.]],
+                pivot_point=[l1, 0., 0.],
+                axis=[0., 1., 0.],
                 joint_class='PivotJointR')
 
-    io.addInteraction('contact1',
-                      body1_name='slider', contactor1_name='cslid',
-                      body2_name='chamber', contactor2_name='Chamber_contact',
+    io.addInteraction('contact10',
+                      body1_name='slider', contactor1_name='Contact_b_f0',
+                      body2_name='chamber', contactor2_name='Chamber_contact0',
                       distance_calculator='cadmbtb',
-                      offset=0.0024)
-
-    io.addNewtonImpactFrictionNSL('contact', mu=0.3, e=0.9)
+                      offset=0.024)
     
+    io.addInteraction('contact11',
+                      body1_name='slider', contactor1_name='Contact_b_f0',
+                      body2_name='chamber', contactor2_name='Chamber_contact1',
+                      distance_calculator='cadmbtb',
+                      offset=0.024)
+
+    io.addInteraction('contact20',
+                      body1_name='slider', contactor1_name='Contact_h_f0',
+                      body2_name='chamber', contactor2_name='Chamber_contact0',
+                      distance_calculator='cadmbtb',
+                      offset=0.024)
+
+    io.addInteraction('contact21',
+                      body1_name='slider', contactor1_name='Contact_h_f0',
+                      body2_name='chamber', contactor2_name='Chamber_contact1',
+                      distance_calculator='cadmbtb',
+                      offset=0.024)
+
+    io.addInteraction('contact30',
+                      body1_name='slider', contactor1_name='Contact_b_f1',
+                      body2_name='chamber', contactor2_name='Chamber_contact0',
+                      distance_calculator='cadmbtb',
+                      offset=0.024)
+
+    io.addInteraction('contact31',
+                      body1_name='slider', contactor1_name='Contact_b_f1',
+                      body2_name='chamber', contactor2_name='Chamber_contact1',
+                      distance_calculator='cadmbtb',
+                      offset=0.024)
+
+    io.addInteraction('contact40',
+                      body1_name='slider', contactor1_name='Contact_h_f1',
+                      body2_name='chamber', contactor2_name='Chamber_contact0',
+                      distance_calculator='cadmbtb',
+                      offset=0.024)
+
+    io.addInteraction('contact41',
+                      body1_name='slider', contactor1_name='Contact_h_f1',
+                      body2_name='chamber', contactor2_name='Chamber_contact1',
+                      distance_calculator='cadmbtb',
+                      offset=0.024)
+
+    io.addInteraction('contact50',
+                      body1_name='slider', contactor1_name='Contact_b_e0',
+                      body2_name='chamber', contactor2_name='Chamber_contact0',
+                      distance_calculator='cadmbtb',
+                      offset=0.024)
+
+    io.addInteraction('contact51',
+                      body1_name='slider', contactor1_name='Contact_b_e0',
+                      body2_name='chamber', contactor2_name='Chamber_contact1',
+                      distance_calculator='cadmbtb',
+                      offset=0.024)
+
+    io.addInteraction('contact60',
+                      body1_name='slider', contactor1_name='Contact_h_e0',
+                      body2_name='chamber', contactor2_name='Chamber_contact0',
+                      distance_calculator='cadmbtb',
+                      offset=0.024)
+
+    io.addInteraction('contact61',
+                      body1_name='slider', contactor1_name='Contact_h_e0',
+                      body2_name='chamber', contactor2_name='Chamber_contact1',
+                      distance_calculator='cadmbtb',
+                      offset=0.024)
+
+    io.addInteraction('contact70',
+                      body1_name='slider', contactor1_name='Contact_b_e1',
+                      body2_name='chamber', contactor2_name='Chamber_contact0',
+                      distance_calculator='cadmbtb',
+                      offset=0.024)
+
+    io.addInteraction('contact71',
+                      body1_name='slider', contactor1_name='Contact_b_e1',
+                      body2_name='chamber', contactor2_name='Chamber_contact1',
+                      distance_calculator='cadmbtb',
+                      offset=0.024)
+
+    io.addInteraction('contact80',
+                      body1_name='slider', contactor1_name='Contact_h_e1',
+                      body2_name='chamber', contactor2_name='Chamber_contact0',
+                      distance_calculator='cadmbtb',
+                      offset=0.024)
+
+    io.addInteraction('contact81',
+                      body1_name='slider', contactor1_name='Contact_h_e1',
+                      body2_name='chamber', contactor2_name='Chamber_contact1',
+                      distance_calculator='cadmbtb',
+                      offset=0.024)
+
+    
+    io.addNewtonImpactFrictionNSL('contact', mu=0.3, e=0.4)
+
 with Hdf5(mode='r+') as io:
 
     io.run(with_timer=True,
            t0=0,
            T=1,
            h=0.0005,
-           Newton_max_iter=1,
-           set_external_forces=lambda x: None)
+           Newton_max_iter=5)
