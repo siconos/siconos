@@ -314,6 +314,13 @@ void BlockVector::setVectorPtr(unsigned int pos, SP::SiconosVector v)
   updateTabIndex();
 }
 
+void BlockVector::setAllVect(VectorOfVectors& v)
+{
+  _vect = v;
+  updateSizeV();
+  updateTabIndex();
+}
+
 SP::SiconosVector BlockVector::operator [](unsigned int pos)
 {
   return  _vect[pos];

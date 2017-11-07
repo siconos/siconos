@@ -1,0 +1,10 @@
+{
+    "name": "siconos-renderer",
+    "version": "4.1.0",
+    "dependencies": {
+        "jquery": ">=1.11.3",
+        "three": ">=0.71.0",
+        "stats.js": ">=0.17.0",
+        "dat.gui": ">=0.6.1"
+    }
+}

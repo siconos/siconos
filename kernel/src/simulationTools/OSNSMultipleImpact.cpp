@@ -957,7 +957,7 @@ void OSNSMultipleImpact::ComputeImpact()
     //
     if (number_step > _nStepMax)
     {
-      RuntimeException::selfThrow("In OSNSMultipleImpact::ComputeImpact, number of integration steps perfomed exceeds the maximal number of steps allowed!!!");
+      RuntimeException::selfThrow("In OSNSMultipleImpact::ComputeImpact, number of integration steps performed exceeds the maximal number of steps allowed!!!");
       //cout << "Causion: so long computation, the computation is stopped even when the impact is not yet terminated!!! " <<std::endl;
       break;
     }

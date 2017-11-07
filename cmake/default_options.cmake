@@ -35,6 +35,7 @@ option(WITH_SUPERLU_MT "Compilation with the SuperLU solver, multithreaded versi
 option(WITH_FCLIB "link with fclib when this mode is enable. Default = OFF" OFF)
 option(WITH_FREECAD "Use FreeCAD. Default = OFF" OFF)
 option(WITH_MECHANISMS "Generation of bindings for Mechanisms toolbox (required OCE). Default = OFF" OFF)
+option(WITH_RENDERER "Install OCC renderer. Default = OFF" OFF)
 option(WITH_XML "Enable xml files i/o. Default = ON" ON)
 option(WITH_DOCKER "Build inside a docker container. Default = OFF" OFF)
 option(FORCE_SKIP_RPATH "Do not build shared libraries with rpath. Useful only for packaging. Default = OFF" OFF)

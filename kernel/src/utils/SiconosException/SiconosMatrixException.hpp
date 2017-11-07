@@ -34,7 +34,7 @@
  *
  *
  * SiconosMatrixException must be throws when an error is find in a SiconosMatrix
- * This exception can be catched by "catch(SiconosMatrixException)" or "catch(SiconosException)"
+ * This exception can be caught by "catch(SiconosMatrixException)" or "catch(SiconosException)"
  *
  */
 class SiconosMatrixException : public SiconosException

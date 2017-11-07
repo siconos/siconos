@@ -69,7 +69,7 @@ protected:
   /** Default maximum number of Newton iteration*/
   unsigned int _newtonMaxIteration;
 
-  /** Number of steps perfomed is the Newton Loop */
+  /** Number of steps performed is the Newton Loop */
   unsigned int _newtonNbIterations;
 
   /** Maximum Residual for the Dynamical system */

@@ -134,7 +134,7 @@ void printCurrentSystem()
   int npm = sNn + sMm;
   printf("printCurrentSystemM:\n");
   NM_dense_display(sM, sMl, npm, 0);
-  printf("printCurrentSystemQ (ie -Q from mlcp beause of linear system MZ=Q):\n");
+  printf("printCurrentSystemQ (ie -Q from mlcp because of linear system MZ=Q):\n");
   NM_dense_display(sQ, sMl, 1, 0);
 }
 void printRefSystem()
@@ -142,7 +142,7 @@ void printRefSystem()
   int npm = sNn + sMm;
   printf("ref M NbLines %d n %d  m %d :\n", sMl, sNn, sMm);
   NM_dense_display(sMref, sMl, npm, 0);
-  printf("ref Q (ie -Q from mlcp beause of linear system MZ=Q):\n");
+  printf("ref Q (ie -Q from mlcp because of linear system MZ=Q):\n");
   NM_dense_display(sQref, sMl, 1, 0);
 }
 int mlcp_enum_getNbIWork(MixedLinearComplementarityProblem* problem, SolverOptions* options)

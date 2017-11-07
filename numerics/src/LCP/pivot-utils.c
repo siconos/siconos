@@ -895,7 +895,7 @@ void do_pivot_lumod(SN_lumod_dense_data* restrict lumod_data, NumericsMatrix* re
       lumod_data->row_col_indx[entering_var_indx] = 0;
       break;
     default:
-      printf("do_pivot_lumod :: unkown update type occuring\n");
+      printf("do_pivot_lumod :: unknown update type occuring\n");
       exit(EXIT_FAILURE);
   }
 

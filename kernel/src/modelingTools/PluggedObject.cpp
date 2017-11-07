@@ -68,6 +68,6 @@ void PluggedObject::setComputeFunction(const std::string& plugin)
 
 void PluggedObject::setComputeFunction(void)
 {
-  assert(_pluginName != "unplugged" && "PluggedObject::setComputeFunction error, try to plug an unamed function.");
+  assert(_pluginName != "unplugged" && "PluggedObject::setComputeFunction error, try to plug an unnamed function.");
   SSLH::setFunction(&fPtr, SSLH::getPluginName(_pluginName), SSLH::getPluginFunctionName(_pluginName));
 }

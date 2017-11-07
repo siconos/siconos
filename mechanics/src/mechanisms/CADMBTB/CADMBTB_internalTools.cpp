@@ -395,7 +395,7 @@ void _CADMBTB_getMinDistanceFaceFace_using_n2qn1(unsigned int idContact, unsigne
 	   }else if(st1 == TopAbs_OUT){
 	     printf("point1 est exterieur\n");
 	    }else {
-	     printf("unkown 4\n");
+	     printf("unknown 4\n");
 	   } 
 	 //check status of point of face2
 	   if (st2 == TopAbs_ON) {
@@ -405,7 +405,7 @@ void _CADMBTB_getMinDistanceFaceFace_using_n2qn1(unsigned int idContact, unsigne
 	   }else if(st2 == TopAbs_OUT){
 	    printf("point2 est exterieur\n");
 	   }else {
-	    printf("unkown 4\n");
+	    printf("unknown 4\n");
 	   }*/
         }
         gp_Pnt aPaux1 = _CADMBTB_FacePoint(face1,x[0],x[1]);

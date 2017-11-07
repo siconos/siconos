@@ -37,3 +37,13 @@ to re-generate it.  It will call a script in io/src/tools called build_from_doxy
 
 Information on how to manage and update the Debian package can be
 found in Build/debian/README-debian-packaging.org.
+* Testing
+
+You can test all examples by running cmake in the examples directory:
+
+#+BEGIN_SRC shell
+mkdir build_examples
+cd build_examples
+cmake <path to siconos>/examples
+make
+#+END_SRC

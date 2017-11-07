@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env @PYTHON_EXECUTABLE@
 import sys, os, json
 import vtk
 from vtk.util import numpy_support
@@ -41,15 +41,15 @@ load_configuration()
 
 ## Print usage information
 def usage():
-    print '{0}: Usage'.format(sys.argv[0])
-    print """
+    print('{0}: Usage'.format(sys.argv[0]))
+    print("""
     {0} [--help] [tmin=<float value>] [tmax=<float value>]
         [--cf-scale=<float value>] [--no-cf]
         [--advance=<'fps' or float value>] [--fps=float value]
         [--camera=x,y,z] [--lookat=x,y,z] [--up=x,y,z] [--ortho=scale]
         <hdf5 file>
-    """
-    print """
+    """)
+    print("""
     Options :
       --help
         display this message
@@ -78,7 +78,7 @@ def usage():
        initial up direction of the camera (default=y-axis)
      --ortho=scale
        start in ortho mode with given parallel scale (default=perspective)
-    """
+    """)
 
 
 def add_compatiblity_methods(obj):
@@ -99,7 +99,7 @@ try:
                                     'cf-scale=', 'normalcone-ratio=',
                                     'advance=', 'fps=', 'camera=', 'lookat=',
                                     'up=', 'ortho='])
-except getopt.GetoptError, err:
+except getopt.GetoptError as err:
         sys.stderr.write('{0}\n'.format(str(err)))
         usage()
         exit(2)
@@ -1081,7 +1081,7 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
 
     if numpy.shape(spos_data)[0] > 0:
         set_position(spos_data)
-        print spos_data.shape
+        print(spos_data.shape)
         # static objects are always visible
         for instance, actors in static_actors.items():
             for actor in actors:
@@ -1289,7 +1289,7 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
         def key(self, obj, event):
             global cf_prov
             key = obj.GetKeySym()
-            print 'key', key
+            print('key', key)
 
             if key == 'r':
                 spos_data, dpos_data, dom_data, cf_data, solv_data = load()
@@ -1358,12 +1358,12 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
                     self.set_opacity()
 
             if key == 'c':
-                    print 'camera position:', self._renderer.GetActiveCamera().GetPosition()
-                    print 'camera focal point', self._renderer.GetActiveCamera().GetFocalPoint()
-                    print 'camera clipping plane', self._renderer.GetActiveCamera().GetClippingRange()
-                    print 'camera up vector', self._renderer.GetActiveCamera().GetViewUp()
+                    print('camera position:', self._renderer.GetActiveCamera().GetPosition())
+                    print('camera focal point', self._renderer.GetActiveCamera().GetFocalPoint())
+                    print('camera clipping plane', self._renderer.GetActiveCamera().GetClippingRange())
+                    print('camera up vector', self._renderer.GetActiveCamera().GetViewUp())
                     if self._renderer.GetActiveCamera().GetParallelProjection() != 0:
-                        print 'camera parallel scale', self._renderer.GetActiveCamera().GetParallelScale()
+                        print('camera parallel scale', self._renderer.GetActiveCamera().GetParallelScale())
 
             if key == 'o':
                     self._renderer.GetActiveCamera().SetParallelProjection(

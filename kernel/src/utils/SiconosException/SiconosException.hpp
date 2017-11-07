@@ -33,7 +33,7 @@
  *
  *
  * SiconosException should not be throws directly; prefer to use an inherit class
- * This exception can be catched by "catch(SiconosException)"
+ * This exception can be caught by "catch(SiconosException)"
  *
  */
 class SiconosException

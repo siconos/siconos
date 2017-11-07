@@ -2263,7 +2263,7 @@ int NM_gesv_expert(NumericsMatrix* A, double *b, unsigned keep)
 
       //double* wkspace = NM_dWork(A, A->size0*A->size1);
       lapack_int* ipiv = (lapack_int*)NM_iWork(A, A->size0, sizeof(lapack_int));
-      DEBUG_PRINTF("iwork and dwork are intialized with size %i and %i\n",A->size0*A->size1,A->size0 );
+      DEBUG_PRINTF("iwork and dwork are initialized with size %i and %i\n",A->size0*A->size1,A->size0 );
 
       if (!NM_internalData(A)->isLUfactorized)
       {

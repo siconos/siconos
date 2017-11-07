@@ -7,7 +7,7 @@
 /*                                                                           */
 /*   There are four step to solving a problem:                               */
 /*     1.  Create and initialize the options                                 */
-/*     2.  Create an MCP structure and intialize the MCP_Interface           */
+/*     2.  Create an MCP structure and initialize the MCP_Interface          */
 /*     3.  Call Path_Solve to solve the problem.                             */
 /*     4.  Delete the MCP_Structure.                                         */
 /*                                                                           */
@@ -17,7 +17,7 @@
 /*   a bunch of memory for each call.  The steps in this case are:           */
 /*     1.  Create and initialize the options                                 */
 /*     2.  Use Path_Create to create a workspace                             */
-/*     3.  Create an MCP structure and intialize the MCP_Interface           */
+/*     3.  Create an MCP structure and initialize the MCP_Interface          */
 /*     4.  Repeatedly call Path_Solve                                        */
 /*     5.  Delete the MCP_Structure                                          */
 /*     6.  Use Path_Delete to destroy the workspace                          */

@@ -260,7 +260,7 @@ public:
    */
   virtual IdentityMat* identity(unsigned int row = 0, unsigned int col = 0) const = 0;
 
-  /** return the adress of the array of double values of the matrix 
+  /** return the address of the array of double values of the matrix 
    *   ( for block(i,j) if this is a block matrix)
    *  \param row position for the required block
    *  \param col position for the required block

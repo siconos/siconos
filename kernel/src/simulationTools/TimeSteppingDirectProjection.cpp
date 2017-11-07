@@ -628,5 +628,5 @@ void TimeSteppingDirectProjection::newtonSolve(double criterion, unsigned int ma
     //      std::cout << "TimeStepping::newtonSolve succed nbit="<<_newtonNbIterations<<"maxStep="<<maxStep<<endl;
   }
   else
-    RuntimeException::selfThrow("TimeStepping::NewtonSolve failed. Unknow newtonOptions: " + _newtonOptions);
+    RuntimeException::selfThrow("TimeStepping::NewtonSolve failed. Unknown newtonOptions: " + _newtonOptions);
 }

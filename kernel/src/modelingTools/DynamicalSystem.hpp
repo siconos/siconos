@@ -155,7 +155,6 @@ protected:
 
   /** Common code for constructors
       should be replaced in C++11 by delegating constructors
-      \param intial_state vector of initial values for state
    */
   void _init();
 

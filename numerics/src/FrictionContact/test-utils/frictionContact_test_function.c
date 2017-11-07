@@ -62,7 +62,7 @@ void frictionContact_test_gams_opts(SN_GAMSparams* GP, int solverId)
   }
   else
   {
-    fprintf(stderr, "frictionContact_test_gams_opts :: ERROR unkown solverId = %d e.g. solver named %s", solverId, solver_options_id_to_name(solverId));
+    fprintf(stderr, "frictionContact_test_gams_opts :: ERROR unknown solverId = %d e.g. solver named %s", solverId, solver_options_id_to_name(solverId));
   }
   add_GAMS_opt_int(GP, "minor_iteration_limit", 100000, GAMS_OPT_SOLVER);
   add_GAMS_opt_int(GP, "major_iteration_limit", 20, GAMS_OPT_SOLVER);

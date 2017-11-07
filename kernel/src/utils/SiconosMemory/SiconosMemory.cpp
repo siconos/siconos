@@ -135,7 +135,7 @@ void SiconosMemory::display() const
   std::cout << "| vectorMemory size : " << _vectorMemory->size() <<std::endl;
   for (unsigned int i = 0; i < _nbVectorsInMemory; i++)
   {
-    std::cout << "vector number " << i << ": adress = " << (*_vectorMemory)[i] << " | " <<std::endl; ;
+    std::cout << "vector number " << i << ": address = " << (*_vectorMemory)[i] << " | " <<std::endl; ;
     (*_vectorMemory)[i]->display();
   }
   std::cout << " ===================================== " <<std::endl;

@@ -95,7 +95,7 @@ library_project_setup()
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/FCMangle.h DESTINATION include/${PROJECT_NAME})
 
 
-if(HAVE_SICONOS_MECHANICS)
+if(HAVE_SICONOS_MECHANICS AND WITH_RENDERER)
   # This files is not installed as a program, even though it is one.
   # Remove the comment if you know how it should be installed --xhub
   #  configure_file(io/SimpleGui.py ${SICONOS_SWIG_ROOT_DIR}/io/SimpleGui.py @ONLY) 

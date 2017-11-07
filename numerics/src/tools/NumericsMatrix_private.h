@@ -102,7 +102,7 @@ typedef struct {
   void* symbolic; /**< for the symbolic analysis */
   void* numeric;  /**< for the numerical factorization */
   double control[UMFPACK_CONTROL]; /**< control parameters */
-  double info[UMFPACK_INFO]; /**< informations from UMFPACK */
+  double info[UMFPACK_INFO]; /**< information from UMFPACK */
   csi* wi; /**< integer workspace, size n */
   double* wd; /**< double workspace, size: with iterative refinement: 5n, without: n */
   double* x; /**< solution of the problem, size n */

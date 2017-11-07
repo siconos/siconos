@@ -66,7 +66,6 @@ bool OneStepNSProblem::hasInteractions() const
   return _simulation->nonSmoothDynamicalSystem()->topology()->indexSet(_indexSetLevel)->size() > 0 ;
 }
 
-
 void OneStepNSProblem::updateInteractionBlocks()
 {
   DEBUG_PRINT("OneStepNSProblem::updateInteractionBlocks() starts\n");

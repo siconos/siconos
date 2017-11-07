@@ -272,7 +272,7 @@ public:
     return ret;
   }
 
-  /* parrallel edges : edge_range needs multisetS as
+  /* parallel edges : edge_range needs multisetS as
      OutEdgesList and with multisetS remove_out_edges_if cannot
      compile as with listS.
      This is only needed for AdjointGraph where only 2 edges may be in

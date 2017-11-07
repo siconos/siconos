@@ -27,6 +27,16 @@ PY_REGISTER_WITHOUT_HEADER(SiconosHeightMap);
 PY_FULL_REGISTER(SiconosShape);
 PY_REGISTER_WITHOUT_HEADER(SiconosContactorSet);
 PY_FULL_REGISTER(SiconosContactor);
+PY_FULL_REGISTER(ContactR);
 PY_FULL_REGISTER(BodyDS);
 PY_FULL_REGISTER(SiconosCollisionQueryResult);
 PY_FULL_REGISTER(SiconosCollisionManager);
+
+%inline
+{
+  SP::ContactR cast_ContactR(SP::Relation rel)
+  {
+    return std11::dynamic_pointer_cast<ContactR>(rel);
+  };
+
+}

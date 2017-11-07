@@ -32,7 +32,7 @@
  *
  *
  * RuntimeException can be throws for example when a pointer is used but not allocated
- * This exception can be catched by "catch(RuntimeException)" or "catch(SiconosException)"
+ * This exception can be caught by "catch(RuntimeException)" or "catch(SiconosException)"
  *
  */
 class RuntimeException: public SiconosException

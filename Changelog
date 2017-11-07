@@ -22,6 +22,89 @@ of the file were added first, and each subsequent addition is placed on a line
 before it.
 
 --------------------------------------------------------------------------------
+  v4.1.0 (in development branch siconos/master)
+--------------------------------------------------------------------------------
+Main changes:
+	* [kernel] refactoring the initialization of classes
+	lazy initialization driven by the simulation classes.
+	move of buffer and work vectors and matrices towards the graph
+
+	* [kernel] add Simulation::prepareIntegratorForDS to link the OSI
+	and DS and initialize dynamically-added DSs without requiring to
+	access Topology.
+
+	* [kernel] Addition of std::string casting and std:iostream
+	compatibility for SiconosAlgebra classes ("std::cout << myvector;")
+
+	* [kernel] Addition of InteractionManager class used to manage
+	Interactions that exist sporadically (e.g. collisions; inherited
+	from in [mechanics] as SiconosCollisionManager)
+
+	* [kernel] new implementation of MoreauJeanGOSI.
+
+	* [numerics] optimization of existing frictional contact solvers.
+	Especially, the semismooth Newton solvers are optimized with respect to the rho
+	parameter. The iterative solvers are also  optimized with respect to the error computation
+	that is now adaptive for VI_FP and VI_EG solvers
+
+	* [numerics] ConvexQP is a new class of problem for solving QP over convex set giving
+	the projection onto the set. New solvers for frictional contact problems have been
+	added based on a successive approximations by convexification.
+
+	* [numerics] new solvers for frictional contact problems based on the Panagiotopoulos
+	approach (alternating normal and tangent problems)
+
+	* [numerics] update and correct global friction contact solvers.
+	new gfc3d_VI_* solvers. Update lmgc_driver for gfc3d
+
+	* [numerics] add functionalities and test in NumericsMatrix for sparse storage
+
+	* [numerics] make more solvers storage-agnostic.
+
+	* [numerics] remove LinearSystem (superseded by NM_gesv)
+
+	* [numerics] add better error management: see the example in numerics/swig/numerics.i
+	Instead of exiting, the library can now handle fatal error and return
+	more gracefully
+
+	* [numerics] PATHVI is now supported
+
+	* [io] siconos_vview: advance time automatically during video recording
+
+	* [io] siconos_vview: optionally disable rendering of contact forces
+
+	* [io] mechanics_io: time_of_birth and time_of_death properties
+	added for dynamically adding/removing objects from the scene
+
+	* [io] mechanics_io: added support for joint friction, joint
+	stops, joint coupling.
+
+	* [io] mechanics_io: added support for position-level
+	DirectProjection constraint resolution method, see
+	examples/Mechanics/DirectProjection.
+
+	* [io] added siconos_filter: tool to manipulate mechanics_io hdf5 files.
+
+	* [io] added siconos_run: tool to execute empty hdf5 files.
+
+	* [mechanics] new system for collision handling that hides
+	engine-specific implementation (Bullet), see BodyDS and ContactR
+	classes along with SiconosShape derivatives and SiconosContactor;
+	plane, sphere, prism, cylinder, mesh, heightmap supported.
+
+	* [mechanics] fixed handling of initial orientation offsets in all joints
+
+	* [mechanics] abstract NewtonEulerJointR introduced, supporting
+	measurement and calculation of forces in the degrees of freedom;
+	some PID examples given in examples/Mechanics/JointsTests.
+
+	* [mechanics] new joint relations supported: CylindricalJointR, FixedJointR
+
+	* [mechanics] relations between degrees of freedom added, allowing
+	for joint friction, joint stops, and coupled DoFs: JointFrictionR,
+	JointStopR, CouplerJointR.
+
+--------------------------------------------------------------------------------
   v4.0.0 (in development branch siconos/master)
 --------------------------------------------------------------------------------
 Main changes:
