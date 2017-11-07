@@ -23,15 +23,19 @@ if __name__ == "__main__":
     assert fs > 14000.
     # lower frequencies require quadruple prec for exp computation.
 
-    final_time = 1.00
-    number_of_modes = 864
+    final_time = 3.00
+    number_of_modes = 862
     filt_frets = True
-    matlab_input_file = './donnees_siconos/pb2_h.mat'
+    #matlab_input_file = './donnees_siconos/pb2_h.mat'
+    # Data (from_matlab parameter), choose between:
+    # - bass_guitar/pb2 : bass with frets
+    # - fretless_bass_guitar/bsf
+    matlab_input = './bass_guitar/pb2'
     guitar_model, guitar_string, frets = create_model(
         n_modes=number_of_modes, max_coords=(7.8e-3, .64),
         fe=fs, final_time=final_time,
         output_freq=output_freq,
-        frets_file=matlab_input_file,
+        from_matlab=matlab_input,
         filt_frets=filt_frets,
         enable_frets_output=True, visu=False)
 
@@ -71,6 +75,6 @@ if __name__ == "__main__":
     filename = os.path.join(result_dir, filename)
     start = time.clock()
     save_model_to_hdf5(guitar_model, guitar_string,
-                       matlab_data=matlab_input_file,
+                       matlab_data=matlab_input,
                        filename=filename, filt_frets=filt_frets)
     print('write (hdf5)', time.clock() - start)

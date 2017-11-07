@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 #from scipy import signal
 from matplotlib import animation
 import h5py
+import scipy.io
 
 
 class StringDS(sk.LagrangianLinearDiagonalDS):
@@ -19,11 +20,11 @@ class StringDS(sk.LagrangianLinearDiagonalDS):
 
     Operators formulas from JSV Issanchou paper.
     """
-    __damping_parameters_names = ['nu_air', 'rho_air', 'delta_ve', '1/qte']
+    __damping_parameters_names = ['eta_air', 'rho_air', 'delta_ve', '1/qte']
     CLAMPED = 1
 
     def __init__(self, ndof, geometry_and_material,
-                 max_coords, damping_parameters):
+                 max_coords, damping_parameters, from_matlab=None):
         """Build string
 
         Parameters
@@ -39,8 +40,10 @@ class StringDS(sk.LagrangianLinearDiagonalDS):
             vmax: along the neck, umax, vertical, displacement
         damping_parameters: dictionnary
             constant parameters related to damping.
-            keys must be ['nu_air', 'rho_air', 'delta_ve', '1/qte']
-
+            keys must be ['eta_air', 'rho_air', 'delta_ve', '1/qte']
+        from_matlab: string
+            matlab file radix, used to read freq and damping values
+            read from radix_frequs.mat and radix_amortissements.mat
 
         Notes
         -----
@@ -65,7 +68,10 @@ class StringDS(sk.LagrangianLinearDiagonalDS):
         for name in self.__damping_parameters_names:
             assert name in self.damping_parameters.keys(), msg
         self.s_mat = self.compute_s_mat()
-        stiffness_mat, damping_mat = self.compute_linear_coeff()
+        if from_matlab is not None:
+            stiffness_mat, damping_mat = self.read_linear_coeff(from_matlab)
+        else:
+            stiffness_mat, damping_mat = self.compute_linear_coeff()
         self.max_coords = max_coords
         q0 = self.compute_initial_state_modal(max_coords)
         v0 = npw.zeros_like(q0)
@@ -101,7 +107,24 @@ class StringDS(sk.LagrangianLinearDiagonalDS):
         """Compute eigenfrequency number j
         """
         return 0.5 * j * self.c0 / self.length * \
-            math.sqrt(1 + self.stiffness_coeff * j)
+            np.sqrt(1 + self.stiffness_coeff * j)
+
+    def read_linear_coeff(self, radix):
+        """Read K and C operators of the Lagrangian DS
+        K = Omega^2
+        C = 2.Gamma
+        from matlab files
+        """
+        freq_file = radix + '_frequs.mat'
+        damp_file = radix + '_amortissements.mat'
+        nuj = scipy.io.loadmat(freq_file)['frequs'][:, 0]
+        sigmas = scipy.io.loadmat(damp_file)['sig0'][:, 0]
+        assert sigmas.size == self.n_modes
+        assert nuj.size == self.n_modes
+        omega2 = (2. * np.pi) ** 2 * nuj
+        stiffness_mat = npw.asrealarray(omega2)
+        damping_mat = 2. * npw.asrealarray(sigmas)
+        return stiffness_mat, damping_mat
 
     def compute_linear_coeff(self):
         """Compute M, K and C operators of the Lagrangian DS
@@ -111,6 +134,7 @@ class StringDS(sk.LagrangianLinearDiagonalDS):
         """
         #mass = np.ones(self.n_modes, dtype=np.float64)
         # --- Omega^2 vector ---
+        # Ref : Clara's phd manuscript, eq 2.4
         omega2 = npw.asrealarray([1. + self.stiffness_coeff * (j ** 2)
                                   for j in range(1, self.n_modes + 1)])
         indices = np.arange(1, self.n_modes + 1)
@@ -147,19 +171,25 @@ class StringDS(sk.LagrangianLinearDiagonalDS):
         -------
         vector of sigma_j values (i.e. diagonal of gamma in (11))
         """
-        # Compute quality factor as defined in
-        # eq (12)
-        nu_air = self.damping_parameters['nu_air']
+        # Compute quality factor as defined in eq 2.20 from Clara's manuscript.
+        #
+        eta_air = self.damping_parameters['eta_air']
         rho_air = self.damping_parameters['rho_air']
         delta_ve = self.damping_parameters['delta_ve']
-        r = np.sqrt(math.pi * nu_air * rho_air * nu)
+        r = np.sqrt(math.pi * eta_air * rho_air * nu)
         r *= self.diameter
-        r += nu_air
+        r += eta_air
         r *= 2. * math.pi
+        indices = np.arange(1, self.n_modes + 1)
         q_air_inv = r / (2. * math.pi * self.density * nu)
+        coeff = 0.5 * indices * self.c0 / self.length
+        q_air_inv *= coeff
+        q_air_inv /= nu
         q_ve_inv = 4 * self.length ** 2 * self.stiffness_coeff * self.density
         q_ve_inv *= delta_ve
-        q_ve_inv *= nu ** 2
+        nu_0 = 0.5 * indices * self.c0 / self.length
+        q_ve_inv *= nu_0 ** 3
+        q_ve_inv /= nu
         q_ve_inv /= self.tension
         quality_factor_inv = q_ve_inv + q_air_inv
         quality_factor_inv += self.damping_parameters['1/qte']

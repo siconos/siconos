@@ -9,11 +9,12 @@ import matplotlib.pyplot as plt
 import h5py
 
 
-def create_model(n_modes=864, max_coords=(7.8e-3, .64),
+def create_model(n_modes, max_coords=(7.8e-3, .64),
                  fe=15680, initial_time=0., final_time=0.1,
-                 output_freq=1, frets_file='./donnees_siconos/pb2_h.mat',
+                 output_freq=1, from_matlab=None,
+                 frets_file='./donnees_siconos/pb2_h.mat',
                  filt_frets=True, enable_frets_output=False,
-                 visu=False):
+                 visu=False, restitution_coeff=0.9):
     """Build string and model
 
     Parameters
@@ -26,6 +27,9 @@ def create_model(n_modes=864, max_coords=(7.8e-3, .64),
     fe : double
         sampling freq
     final_time : double
+    from_matlab : string, optional
+        radix of input files (matlab) to set frets positions, freq and damping.
+        If set, frets_file is ignored.
     frets_file : string
         input file (matlab) to set frets positions on the neck
     filt_frets : bool
@@ -40,7 +44,8 @@ def create_model(n_modes=864, max_coords=(7.8e-3, .64),
     # -- Geometry and material --
     G_string = {
         'length': 0.863,
-        'diameter': 0.43e-3,
+        # diameter = equivalent diameter (A5)
+        'diameter': 1.14e-3,
         'density': 6.69e-3,
         'B': 3.5e-5,
         'tension': 191.6,
@@ -48,9 +53,9 @@ def create_model(n_modes=864, max_coords=(7.8e-3, .64),
 
     # A dictionnary with parameters required to compute quality factor
     damping_parameters = {
-        'nu_air': 1.8e-5,
+        'eta_air': 1.8e-5,
         'rho_air': 1.2,
-        'delta_ve': 0.01,
+        'delta_ve': 0.01,  # if fretless : 0.014
         '1/qte': 6e-6}
 
     # -- Spatial discretisation (modal proj) and initial conditions --
@@ -59,18 +64,27 @@ def create_model(n_modes=864, max_coords=(7.8e-3, .64),
     #imiddle = int((n_modes + 2) / 2)
 
     # -- The dynamical system(s) --
-
     # Warning: 'real dofs' numbers start from 0 to number_of_modes + 1
     # but DS size is number_of_modes, boundary points are ignored.
     string = StringDS(n_modes, geometry_and_material=G_string,
                       damping_parameters=damping_parameters,
-                      max_coords=max_coords)
+                      max_coords=max_coords,
+                      from_matlab=from_matlab)
 
     # -- The interaction(s) between strings and frets --
     # One Interaction is needed for each contact point.
 
+    if from_matlab is not None:
+        frets_file = from_matlab + '_h.mat'
+        msg = 'Read data from files :\n'
+        msg += '- neck profile:' + frets_file
+        msg += '\n- eigenfrequencies: ' + from_matlab + '_frequs.mat\n'
+        msg += '- damping: ' + from_matlab + '_amortissements.mat\n'
+    else:
+        msg = 'Read data from file ' + frets_file + ' for neck profile.'
+    print(msg)
     all_frets_positions = scipy.io.loadmat(frets_file)['h'][:, 0]
-    x = np.linspace(0, string.length, n_modes)
+    x = np.linspace(0, string.length, n_modes + 2)
     x = x[1:-1]
 
     if filt_frets:
@@ -98,7 +112,7 @@ def create_model(n_modes=864, max_coords=(7.8e-3, .64),
         frets.append(Fret(string,
                           contact_positions=(frets_indices[ifret],
                                              frets_positions[ifret]),
-                          restitution_coeff=0.))
+                          restitution_coeff=restitution_coeff))
         interactions[frets[-1]] = string
     nb_frets = len(frets)
     # contact at a point close to left boundary.
@@ -200,7 +214,7 @@ def load_model(filename):
     initial_time = h5file.attrs['initial_time']
     final_time = h5file.attrs['final_time']
     output_freq = h5file.attrs['output_freq']
-    frets_file = h5file.attrs['matlab_data']
+    from_matlab = h5file.attrs['matlab_data']
     filt_frets = h5file.attrs['filter frets']
     enable_frets_output = h5file.attrs['frets output']
     # Create model
@@ -209,7 +223,7 @@ def load_model(filename):
         fe=fe, initial_time=initial_time,
         final_time=final_time,
         output_freq=output_freq,
-        frets_file=frets_file,
+        from_matlab=from_matlab,
         filt_frets=filt_frets,
         enable_frets_output=enable_frets_output,
         visu=True)
