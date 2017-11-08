@@ -207,7 +207,9 @@ void CouplerJointR::computeh(double time, BlockVector& q0, SiconosVector& y)
 
   // Get current positions of the implicated degrees of freedom
   BlockVector q01, q02;
-  makeBlockVectors(q0.vector(0), q0.vector(1), q01, q02);
+  makeBlockVectors(q0.vector(0),
+                   q0.getAllVect().size()>1 ? q0.vector(1) : SP::SiconosVector(),
+                   q01, q02);
   _joint1->computehDoF(time, q01, y1, _dof1);
   _joint2->computehDoF(time, q02, y2, _dof2);
 
@@ -224,7 +226,9 @@ void CouplerJointR::computeJachq(double time, Interaction& inter, SP::BlockVecto
   // Compute the jacobian for the required range of axes
   SP::BlockVector q01 = std11::make_shared<BlockVector>();
   SP::BlockVector q02 = std11::make_shared<BlockVector>();
-  makeBlockVectors(q0->vector(0), q0->vector(1), *q01, *q02);
+  makeBlockVectors(q0->vector(0),
+                   q0->getAllVect().size()>1 ? q0->vector(1) : SP::SiconosVector(),
+                   *q01, *q02);
   _joint1->computeJachqDoF(time, inter, q01, *jachq1, _dof1);
   _joint2->computeJachqDoF(time, inter, q02, *jachq2, _dof2);
 
@@ -283,7 +287,9 @@ void CouplerJointR::computeJachqDoF(double time, Interaction& inter,
   // Compute the jacobian for the required range of axes
   SP::BlockVector q01 = std11::make_shared<BlockVector>();
   SP::BlockVector q02 = std11::make_shared<BlockVector>();
-  makeBlockVectors(q0->vector(0), q0->vector(1), *q01, *q02);
+  makeBlockVectors(q0->vector(0),
+                   q0->getAllVect().size()>1 ? q0->vector(1) : SP::SiconosVector(),
+                   *q01, *q02);
   _joint1->computeJachqDoF(time, inter, q01, *jachq1, _dof1);
   _joint2->computeJachqDoF(time, inter, q02, *jachq2, _dof2);
 
