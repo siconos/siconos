@@ -27,7 +27,7 @@ with Hdf5() as io:
 
     io.addRelayNSL('friction', lb=-0.1, ub=0.1)
 
-    io.addJoint('joint1', 'big', None, [], [0,0,1], 'PrismaticJointR',
+    io.addJoint('joint1', 'big', None, None, [[0,0,1]], 'PrismaticJointR',
                 friction='friction')
 
 with Hdf5(mode='r+') as io:

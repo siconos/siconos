@@ -24,7 +24,7 @@ with Hdf5() as io:
     # Add a cylindrical joint with a coupling between its two degrees
     # of freedom with a ratio of 5.0 (rotation of 5 radians for every
     # translation of 1.0 units)
-    io.addJoint('joint1', 'bar', None, [0,0,0], [0,0,1], 'CylindricalJointR',
+    io.addJoint('joint1', 'bar', None, [[0,0,0]], [[0,0,1]], 'CylindricalJointR',
                 coupled=[(0,1,5.0)], absolute=True)
 
 # Load and run the simulation

@@ -35,17 +35,17 @@ with Hdf5() as io:
     io.addObject('ground', [Contactor('Ground')], [0,0,-0.05])
 
     # Fix bar1 in place
-    io.addJoint('joint1', 'bar1', None, None, None, 'FixedJointR')
+    io.addJoint('jnt1', 'bar1', None, None, None, 'FixedJointR')
 
     # Add a pivot joint from bar2 to bar1 and another from bar1 to bar3.
-    io.addJoint('joint2','bar2','bar1',[0,0,0.9],[0,1,0],'PivotJointR',absolute=True)
-    io.addJoint('joint3','bar1','bar3',[0,0,0.9],[0,1,0],'PivotJointR',absolute=True)
+    io.addJoint('jnt2','bar2','bar1',[[0,0,0.9]],[[0,1,0]],'PivotJointR',absolute=True)
+    io.addJoint('jnt3','bar1','bar3',[[0,0,0.9]],[[0,1,0]],'PivotJointR',absolute=True)
 
-    # We specified a gear ratio of 2.0 between dof 0 of joint2 and dof
-    # 0 of joint3.  The short bar must maintain an angle
+    # We specified a gear ratio of 2.0 between dof 0 of jnt2 and dof
+    # 0 of jnt3.  The short bar must maintain an angle
     # theta3=2.0*theta2, and it therefore spins twice as fast.
-    io.addJoint('joint4','bar2','bar3',None,None,'CouplerJointR',
-                coupled=[[0, 0, 2.0]], references=['joint2','joint3','bar1'])
+    io.addJoint('jnt4','bar2','bar3',None,None,'CouplerJointR',
+                coupled=[[0, 0, 2.0]], references=['jnt2','jnt3','bar1'])
 
     ## Rotation-prismatic gear ratio demonstration
 
@@ -56,19 +56,19 @@ with Hdf5() as io:
                  , velocity=[0,0,0,10,10,10])
 
     # Fix bar1 in place
-    io.addJoint('joint5', 'bar4', None, None, None, 'FixedJointR')
+    io.addJoint('jnt5', 'bar4', None, None, None, 'FixedJointR')
 
     # Add a slider joint from bar5 to bar4
-    io.addJoint('joint6','bar4','bar5',None,[0,0,1],'PrismaticJointR',absolute=True)
+    io.addJoint('jnt6','bar4','bar5',None,[[0,0,1]],'PrismaticJointR',absolute=True)
 
     # Add a pivot joint from bar6 to bar5
-    io.addJoint('joint7','bar5','bar6',[0,0.6,1],[0,1,0],'PivotJointR',absolute=True)
+    io.addJoint('jnt7','bar5','bar6',[[0,0.6,1]],[[0,1,0]],'PivotJointR',absolute=True)
 
-    # We specified a gear ratio of 0.2 between dof 0 of joint6 and dof
-    # 0 of joint7.  Since joint6 must maintain an angle
+    # We specified a gear ratio of 0.2 between dof 0 of jnt6 and dof
+    # 0 of jnt7.  Since jnt6 must maintain an angle
     # theta6=2.0*dist7, bar6 therefore spins as bar5 drops.
-    io.addJoint('joint8','bar4','bar6',None,None,'CouplerJointR',
-                coupled=[[0, 0, 3.0]], references=['joint6','joint7','bar5'])
+    io.addJoint('jnt8','bar4','bar6',None,None,'CouplerJointR',
+                coupled=[[0, 0, 3.0]], references=['jnt6','jnt7','bar5'])
 
 # Load and run the simulation
 with Hdf5(mode='r+') as io:

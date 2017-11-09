@@ -92,13 +92,14 @@ with Hdf5() as io:
                     velocity=[0, 20, 0, 0, 0, 0],
                     mass=m2)
 
-    io.addJoint('joint1', 'arm1', 'arm2', [0, -r1, 0],
-                [1, 0, 0],
+    io.addJoint('joint1', 'arm1', 'arm2',
+                points=[[0, -r1, 0]],
+                axes=[[1, 0, 0]],
                 'PivotJointR')
 
     io.addJoint('joint2', 'arm1',
-                pivot_point=[0, 0, r2 + gap + r2 + l2 + r1 + hgap + l1],
-                axis=[1, 0, 0],
+                points=[[0, 0, r2 + gap + r2 + l2 + r1 + hgap + l1]],
+                axes=[[1, 0, 0]],
                 joint_class='PivotJointR')
 
 

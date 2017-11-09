@@ -151,6 +151,16 @@ def setup_default_classes():
 
 setup_default_classes()
 
+### Constants
+
+joint_points_axes = {
+    'KneeJointR': (1, 0),
+    'PivotJointR': (1, 1),
+    'PrismaticJointR': (0, 1),
+    'CylindricalJointR': (1, 1),
+    'FixedJointR': (0, 0),
+}
+
 ### Utility functions
 
 def floatv(v):
@@ -168,6 +178,24 @@ def arguments():
     args.update(args.pop(kwname, []))
     return args, posargs
 
+
+def check_points_axes(name, joint_class, points, axes):
+    def check(x, idx):
+        def er():
+            n = joint_points_axes[joint_class][idx]
+            raise ValueError('{} ({}) expects {} {} (got {})'
+                             .format(joint_class, name, n,
+                                     ['point','points','axis','axes'][idx*2+1*(n!=1)],
+                                     x))
+        if np.shape(x)==(0,) or np.shape(x)==():
+            num = 0
+        else:
+            if len(np.shape(x))!=2 or np.shape(x)[1]!=3: er()
+            num = np.shape(x)[0]
+        if (joint_class in joint_points_axes
+            and joint_points_axes[joint_class][idx] != num): er()
+    check(points, 0)
+    check(axes, 1)
 
 @contextmanager
 def tmpfile(suffix='', prefix='siconos_io', contents=None):
@@ -1331,16 +1359,9 @@ class Hdf5():
             coupled = self.joints()[name].attrs.get('coupled',None)
             references = self.joints()[name].attrs.get('references',None)
 
-            points = self.joints()[name].attrs.get('points',None)
-            axes = self.joints()[name].attrs.get('axes',None)
-            # backwards compatibility
-            if points is None:
-                points = [self.joints()[name].attrs['pivot_point']]
-            if axes is None:
-                axes = [self.joints()[name].attrs['axis']]
-            # end backwards compatibility
-            if len(points)==0 or len(points[0])==0: points = []
-            if len(axes)==0 or len(axes[0])==0: axes = []
+            points = self.joints()[name].attrs.get('points',[])
+            axes = self.joints()[name].attrs.get('axes',[])
+            check_points_axes(name, joint_class, points, axes)
 
             ds1_name = self.joints()[name].attrs['object1']
             ds1 = topo.getDynamicalSystem(ds1_name)
@@ -1349,20 +1370,6 @@ class Hdf5():
             if 'object2' in self.joints()[name].attrs:
                 ds2_name = self.joints()[name].attrs['object2']
                 ds2 = topo.getDynamicalSystem(ds2_name)
-
-            # Every joint has a slightly different interface
-            if joint_class == joints.KneeJointR:
-                assert(len(points)==1 and len(axes)==0)
-            elif joint_class == joints.PivotJointR:
-                assert(len(points)==1 and len(axes)==1)
-            elif joint_class == joints.PrismaticJointR:
-                # backwards compatibility note: previously the
-                # "pivot_point" was used as the "axis" here!
-                assert(len(points)==0 and len(axes)==1)
-            elif joint_class == joints.CylindricalJointR:
-                assert(len(points)==1 and len(axes)==1)
-            elif joint_class == joints.FixedJointR:
-                assert(len(points)==0 and len(axes)==0)
 
             if joint_class == joints.CouplerJointR:
                 # This case is a little different, handle it specially
@@ -2378,26 +2385,22 @@ class Hdf5():
         """
         add a joint between two objects
         """
-        if name not in self.joints():
+        if name in self.joints():
+            raise ValueError('Joint {} already in simulation!'.format(name))
+        else:
             joint=self.joints().create_dataset(name, (0,))
             joint.attrs['object1']=object1
             if object2 is not None:
                 joint.attrs['object2']=object2
             joint.attrs['type']=joint_class
+            check_points_axes(name, joint_class, points, axes)
             if points is not None:
-                if len(np.shape(points))==1: points = [points]
-                if len(points)!=0:
-                    joint.attrs['points']=points
+                joint.attrs['points']=points
             if axes is not None:
-                if len(np.shape(axes))==1: axes = [axes]
-                if len(axes)!=0:
-                    joint.attrs['axes']=axes
-            # backwards compatibility
-            joint.attrs['pivot_point']=points[0] if points is not None and len(points)>0 else []
-            joint.attrs['axis']=axes[0] if axes is not None and len(axes)>0 else []
-            # end backwards compatibility
+                joint.attrs['axes']=axes
             if absolute in [True, False]:
                 joint.attrs['absolute']=absolute
+
             if allow_self_collide in [True, False]:
                 joint.attrs['allow_self_collide']=allow_self_collide
             if nslaws is not None:

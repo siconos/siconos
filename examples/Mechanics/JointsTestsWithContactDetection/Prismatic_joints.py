@@ -17,7 +17,7 @@ with Hdf5() as io:
     # Try velocity=[0,0,5,0,0,0]) = correct behaviour
     # Try velocity=[0,5,0,0,0,0]) = incorrect behaviour
 
-    io.addJoint('joint1', 'cube1', 'cube2', [], [0,0,1], 'PrismaticJointR')
+    io.addJoint('joint1', 'cube1', 'cube2', None, [[0,0,1]], 'PrismaticJointR')
 
 with Hdf5(mode='r+') as io:
     io.run(t0=0,

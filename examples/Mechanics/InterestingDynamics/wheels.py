@@ -55,10 +55,10 @@ with Hdf5() as io:
     io.addObject('wheel4', [Contactor('Wheel')], translation=[ 3,-3, h], mass=1)
     io.addObject('body',   [Contactor('Body')],  translation=[ 0, 0, h], mass=1)
 
-    io.addJoint('joint1', 'wheel1', 'body', [0, 0, 0], [0, 1, 0], 'PivotJointR')
-    io.addJoint('joint2', 'wheel2', 'body', [0, 0, 0], [0, 1, 0], 'PivotJointR')
-    io.addJoint('joint3', 'wheel3', 'body', [0, 0, 0], [0, 1, 0], 'PivotJointR')
-    io.addJoint('joint4', 'wheel4', 'body', [0, 0, 0], [0, 1, 0], 'PivotJointR')
+    io.addJoint('joint1', 'wheel1', 'body', [[0, 0, 0]], [[0, 1, 0]], 'PivotJointR')
+    io.addJoint('joint2', 'wheel2', 'body', [[0, 0, 0]], [[0, 1, 0]], 'PivotJointR')
+    io.addJoint('joint3', 'wheel3', 'body', [[0, 0, 0]], [[0, 1, 0]], 'PivotJointR')
+    io.addJoint('joint4', 'wheel4', 'body', [[0, 0, 0]], [[0, 1, 0]], 'PivotJointR')
 
     # Constant value on Y-axis angular velocity (index 4) to make the wheels spin
     if not use_torque:

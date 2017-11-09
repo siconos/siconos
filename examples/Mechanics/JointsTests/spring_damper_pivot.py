@@ -34,7 +34,7 @@ with Hdf5() as io:
                           Contactor('Bar',relative_translation=[0,-0.1,0])],
                  [0,0,2],
                  orientation=[(0,0,1),np.pi/2], mass=1.0)
-    io.addJoint('joint1', 'bar1', 'bar2', [0,0,0], [0,1,0], 'PivotJointR',
+    io.addJoint('joint1', 'bar1', 'bar2', [[0,0,0]], [[0,1,0]], 'PivotJointR',
                 absolute=False)
 
     # Definition of the ground

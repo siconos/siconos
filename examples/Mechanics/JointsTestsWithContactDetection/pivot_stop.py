@@ -57,17 +57,17 @@ with Hdf5() as io:
                  allow_self_collide = self_collide)
 
     # Connect the two bodies by a pivot joint
-    io.addJoint('joint1', 'bar', 'post', [-0.45,0,0], [0,1,0], 'PivotJointR',
+    io.addJoint('joint1', 'bar', 'post', [[-0.45,0,0]], [[0,1,0]], 'PivotJointR',
                 allow_self_collide = self_collide,
                 nslaws='stop', stops=stops, absolute=False)
 
     # Joint from "bar" to the world reference frame, to keep things from falling.
-    io.addJoint('joint2', 'post', None, [0,0,0], [0,1,0],
+    io.addJoint('joint2', 'post', None, [[0,0,0]], [[0,1,0]],
                 'PivotJointR', absolute=False,
                 friction = 'friction')
 
     # For fully fixed behaviour replace with a FixedJointR.
-    # io.addJoint('joint2', 'post', None, [0,0,0], [], 'FixedJointR')
+    # io.addJoint('joint2', 'post', None, None, None, 'FixedJointR')
 
 # We define a "controller" here to show how to measure the angle of
 # the joint using computehDoF.
