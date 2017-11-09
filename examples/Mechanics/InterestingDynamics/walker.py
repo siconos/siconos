@@ -56,10 +56,10 @@ with Hdf5() as io:
     io.addObject('bar5', [Contactor('Bar1')], translation=[-5.5, -5.5, 6],
                  orientation=[(0,1,0), -pi/2], mass=1)
 
-    io.addJoint('joint1', 'bar2', 'bar1', [[4.5, 0, 0]], [[0, 1, 0]], 'PivotJointR')
-    io.addJoint('joint2', 'bar3', 'bar1', [[4.5, 0, 0]], [[0, 1, 0]], 'PivotJointR')
-    io.addJoint('joint3', 'bar4', 'bar1', [[4.5, 0, 0]], [[0, 1, 0]], 'PivotJointR')
-    io.addJoint('joint4', 'bar5', 'bar1', [[4.5, 0, 0]], [[0, 1, 0]], 'PivotJointR')
+    io.addJoint('joint1', 'bar2', 'bar1', [[4.5, 0, 0]], [[0, 1, 0]], 'PivotJointR', absolute=False)
+    io.addJoint('joint2', 'bar3', 'bar1', [[4.5, 0, 0]], [[0, 1, 0]], 'PivotJointR', absolute=False)
+    io.addJoint('joint3', 'bar4', 'bar1', [[4.5, 0, 0]], [[0, 1, 0]], 'PivotJointR', absolute=False)
+    io.addJoint('joint4', 'bar5', 'bar1', [[4.5, 0, 0]], [[0, 1, 0]], 'PivotJointR', absolute=False)
 
     ## Stabilizing leg links to body
 
@@ -74,16 +74,16 @@ with Hdf5() as io:
                  orientation=[(0,1,0), -pi/8], mass=1)
     io.addObject('bar9', [Contactor('Bar2')], translation=[0, -6.5, 7],
                  orientation=[(0,1,0), -pi/8], mass=1)
-    io.addJoint('joint5', 'bar6', 'bar2', [[ 4.5,  0, 0]], [[0, 1, 0]], 'PivotJointR')
-    io.addJoint('joint6', 'bar7', 'bar3', [[ 4.5,  0, 0]], [[0, 1, 0]], 'PivotJointR')
-    io.addJoint('joint7', 'bar8', 'bar4', [[-4.5,  0, 0]], [[0, 1, 0]], 'PivotJointR')
-    io.addJoint('joint8', 'bar9', 'bar5', [[-4.5,  0, 0]], [[0, 1, 0]], 'PivotJointR')
+    io.addJoint('joint5', 'bar6', 'bar2', [[ 4.5,  0, 0]], [[0, 1, 0]], 'PivotJointR', absolute=False)
+    io.addJoint('joint6', 'bar7', 'bar3', [[ 4.5,  0, 0]], [[0, 1, 0]], 'PivotJointR', absolute=False)
+    io.addJoint('joint7', 'bar8', 'bar4', [[-4.5,  0, 0]], [[0, 1, 0]], 'PivotJointR', absolute=False)
+    io.addJoint('joint8', 'bar9', 'bar5', [[-4.5,  0, 0]], [[0, 1, 0]], 'PivotJointR', absolute=False)
 
-    io.addJoint('joint9', 'bar6', 'bar8', None, [[1, 0, 0]], 'PrismaticJointR')
-    io.addJoint('joint10','bar7', 'bar9', None, [[1, 0, 0]], 'PrismaticJointR')
+    io.addJoint('joint9', 'bar6', 'bar8', None, [[1, 0, 0]], 'PrismaticJointR', absolute=False)
+    io.addJoint('joint10','bar7', 'bar9', None, [[1, 0, 0]], 'PrismaticJointR', absolute=False)
 
-    io.addJoint('joint11','bar2', 'bar3', [[0, 0, 0]], [[0, 1, 0]], 'PivotJointR')
-    io.addJoint('joint12','bar4', 'bar5', [[0, 0, 0]], [[0, 1, 0]], 'PivotJointR')
+    io.addJoint('joint11','bar2', 'bar3', [[0, 0, 0]], [[0, 1, 0]], 'PivotJointR', absolute=False)
+    io.addJoint('joint12','bar4', 'bar5', [[0, 0, 0]], [[0, 1, 0]], 'PivotJointR', absolute=False)
 
     # Harmonic oscillator on Y-axis angular velocity = a+b*cos(omega*time+phi))
     freq = 2

@@ -76,17 +76,17 @@ with Hdf5() as io:
                     mass=m2)
 
     io.addJoint('joint1', 'arm1', 'arm2',
-                points=[[0, -r1, 0]],
+                points=[[0, 0, -r1]],
                 axes=[[1, 0, 0]],
-                'PivotJointR', absolute=False)
+                joint_class='PivotJointR', absolute=False)
 
     io.addJoint('joint2', 'arm1',
-                points=[[0, 0, r2 + gap + r2 + l2 + r1 + hgap + l1]],
+                points=[[0, r2 + gap + r2 + l2 + r1 + hgap + l1, 0]],
                 axes=[[1, 0, 0]],
                 joint_class='PivotJointR', absolute=False)
 
     # a brick wall
-    H = 3   # heigh
+    H = 3   # height
     L = 2   # length
     for k in range(0, H-1):
         for n in range(0, L):
