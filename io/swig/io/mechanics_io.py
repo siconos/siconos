@@ -1289,14 +1289,14 @@ class Hdf5():
         if len(references)>0:
             joint1_name = references[0]
             joint1 = joints.cast_NewtonEulerJointR(
-                topo.getInteraction(joint1_name).relation())
+                topo.getInteraction(str(joint1_name)).relation())
             joint2 = joint1
             joint1_ds1 = self.joints()[joint1_name].attrs['object1']
             joint1_ds2 = self.joints()[joint1_name].attrs.get('object2',None)
         if len(references)>1:
             joint2_name = references[1]
             joint2 = joints.cast_NewtonEulerJointR(
-                topo.getInteraction(joint2_name).relation())
+                topo.getInteraction(str(joint2_name)).relation())
             joint2_ds1 = self.joints()[joint2_name].attrs['object1']
             joint2_ds2 = self.joints()[joint2_name].attrs.get('object2',None)
 
@@ -1313,7 +1313,7 @@ class Hdf5():
                 refds_name = diff[0]
 
         if refds_name:
-            refds = topo.getDynamicalSystem(refds_name)
+            refds = topo.getDynamicalSystem(str(refds_name))
 
             # Determine reference indexes:
             # Assert if neither ds in reference joints is the
@@ -1358,6 +1358,12 @@ class Hdf5():
             friction = self.joints()[name].attrs.get('friction',None)
             coupled = self.joints()[name].attrs.get('coupled',None)
             references = self.joints()[name].attrs.get('references',None)
+
+            # work-around h5py unicode bug
+            # https://github.com/h5py/h5py/issues/379
+            if references is not None:
+                references = [r.decode('utf-8') if isinstance(r,bytes) else r
+                              for r in references]
 
             points = self.joints()[name].attrs.get('points',[])
             axes = self.joints()[name].attrs.get('axes',[])
@@ -2420,7 +2426,7 @@ class Hdf5():
             if references is not None:
                 # must be a list of two joint names and one DS name
                 assert(len(references)==2 or len(references)==3)
-                joint.attrs['references'] = references
+                joint.attrs['references'] = np.array(references, dtype='S')
 
     def addBoundaryCondition(self, name, object1, indices=None, bc_class='HarmonicBC',
                              v=None, a=None, b=None, omega=None, phi=None):
