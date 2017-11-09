@@ -235,32 +235,10 @@ int main(int argc, char* argv[])
     ioMatrix::write("DiodeBridgeCapFilter.dat", "ascii", dataPlot, "noDim");
 
     // Comparison with a reference file
-    std::cout << "Comparison with a reference file" << std::endl;
-    SimpleMatrix dataPlotRef(dataPlot);
-    dataPlotRef.zero();
-    ioMatrix::read("DiodeBridgeCapFilter.ref", "ascii", dataPlotRef);
-    SP::SiconosVector err(new SiconosVector(dataPlot.size(1)));
-    (dataPlot - dataPlotRef).normInfByColumn(err);
-    err->display();
-    double error = 0.0;
-    for (unsigned int i = 0; i < 3; ++i)
-    {
-      if (error < (*err)(i))
-        error = (*err)(i);
-    }
-
-    std::cout << "Error = "<< error << std::endl;
-    if (error > 1e-12)
-    {
-      (dataPlot - dataPlotRef).display();
-      std::cout << "Warning. The results is rather different from the reference file." << std::endl;
-      std::cout << "Error = "<< error << std::endl;
+    double error=0.0, eps=1e-12;
+    if (ioMatrix::compareRefFile(dataPlot, "DiodeBridgeCapFilter.ref", eps, error)
+        && error > eps)
       return 1;
-    }
-
-
-
-
   }
 
   // --- Exceptions handling ---
