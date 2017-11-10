@@ -23,6 +23,8 @@ w30 = 0.      # initial angular speed for the slider
 
 with Hdf5() as io:
 
+    io.addPluginSource('plugin', 'SliderCrankPlugin/SliderCrankPlugin.cpp')
+    
     io.addOccShape('Sphere', sphere)
     
     io.addShapeDataFromFile('body1',
@@ -255,6 +257,16 @@ with Hdf5() as io:
                       distance_calculator='cadmbtb',
                       offset=0.024)
 
+    io.addExternalFunction('f1', 'part1', 'setComputeFExtFunction',
+                           'SliderCrankPlugin', 'externalForcesB1')
+
+    io.addExternalFunction('f2', 'part2', 'setComputeFExtFunction',
+                           'SliderCrankPlugin', 'externalForcesB2')
+
+    io.addExternalFunction('f3', 'slider', 'setComputeFExtFunction',
+                           'SliderCrankPlugin', 'externalForcesS')
+
+    
     
     io.addNewtonImpactFrictionNSL('contact', mu=0.3, e=0.4)
 
@@ -262,6 +274,6 @@ with Hdf5(mode='r+') as io:
 
     io.run(with_timer=True,
            t0=0,
-           T=1,
+           T=10,
            h=0.0005,
            Newton_max_iter=5)

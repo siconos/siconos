@@ -309,6 +309,18 @@ def str_of_file(filename):
         return str(f.read())
 
 
+def file_of_str(filename, string):
+    if not os.path.exists(os.path.dirname(filename)):
+        try:
+            os.makedirs(os.path.dirname(filename))
+        except OSError as exc:
+            if exc.errno != errno.EEXIST:
+                raise
+
+    with open(filename, "w") as f:
+        f.write(string)
+
+
 class Quaternion():
 
     def __init__(self, *args):
@@ -812,6 +824,8 @@ class Hdf5():
         self._occ_contactors = dict()
         self._joints = None
         self._boundary_conditions = None
+        self._plugins = None
+        self._external_functions = None
         self._io = MechanicsIO()
         self._set_external_forces = set_external_forces
         self._shape_filename = shape_filename
@@ -846,6 +860,8 @@ class Hdf5():
         self._permanent_interactions = group(self._data, 'permanent_interactions',
                                              must_exist=False)
         self._joints = group(self._data, 'joints')
+        self._plugins = group(self._data, 'plugins')
+        self._external_functions = group(self._data, 'external_functions')
         try:
             self._boundary_conditions = group(self._data, 'boundary_conditions',
                                               must_exist=(self._mode=='w'))
@@ -1480,9 +1496,10 @@ class Hdf5():
             body1_name = pinter.attrs['body1_name']
             body2_name = pinter.attrs['body2_name']
 
-            ds1 = occ.cast_OccBody(topo.getDynamicalSystem(body1_name))
+            ds1 = occ.cast_NewtonEulerDS(topo.getDynamicalSystem(body1_name))
             try:
-                ds2 = occ.cast_OccBody(topo.getDynamicalSystem(body2_name))
+                ds2 = \
+                    occ.cast_NewtonEulerDS(topo.getDynamicalSystem(body2_name))
             except:
                 ds2 = None
 
@@ -1509,6 +1526,8 @@ class Hdf5():
             #     topods2 = self._shape.get(ctr2.attrs['name'])
             #     self._keep.append(topods2)
             #     ocs2 = occ.OccContactShape(topods2)
+            #if self.verbose:
+            #    print (body1_name, self._occ_contactors[body1_name])
 
             #     index2 = int(ctr2.attrs['contact_index'])
 
@@ -2021,6 +2040,63 @@ class Hdf5():
               'precision=', precision,
               'local_precision=', )
 
+    def addPluginSource(self, name, filename):
+        """
+        Add C source plugin
+        """
+
+        if name not in self._plugins:
+            plugin_src = self._plugins.create_dataset(name, (1,),
+                                                      dtype=h5py.new_vlen(str))
+            plugin_src[:] = str_of_file(filename)
+            plugin_src.attrs['filename'] = filename
+
+    def importPlugins(self):
+        """
+        Plugins extraction and compilation.
+        """
+        import subprocess
+
+        for name in self._plugins:
+            
+            plugin_src = self._plugins[name][:]
+            plugin_fname = self._plugins[name].attrs['filename']
+
+            if os.path.isfile(plugin_fname):
+                if str_of_file(plugin_fname) != plugin_src:
+                    warn('plugin {0}: file {1} differs from the one stored hdf5'.format(name, plugin_fname))
+            else:
+                file_of_str(plugin_fname, plugin_src)
+
+        # build
+        subprocess.check_call(['siconos','--noexec','.'])
+
+    def addExternalFunction(self, name, body_name, function_name,
+                            plugin_name, plugin_function_name):
+
+        if name not in self._external_functions:
+            ext_fun = group(self._external_functions, name)
+            ext_fun.attrs['body_name'] = body_name
+            ext_fun.attrs['function_name'] = function_name
+            ext_fun.attrs['plugin_name'] = plugin_name
+            ext_fun.attrs['plugin_function_name'] = plugin_function_name
+
+    def importExternalFunctions(self):
+        topo = self._model.nonSmoothDynamicalSystem().\
+                topology()
+        for name in self._external_functions:
+
+            ext_fun = self._external_functions[name]
+            body_name = ext_fun.attrs['body_name']
+            function_name = ext_fun.attrs['function_name']
+            plugin_name = ext_fun.attrs['plugin_name']
+            plugin_function_name = ext_fun.attrs['plugin_function_name']
+
+            ds = occ.cast_NewtonEulerDS(topo.getDynamicalSystem(body_name))
+            getattr(ds, function_name)(plugin_name,
+                                       plugin_function_name)
+
+            
     def addMeshFromString(self, name, shape_data, scale=None,
                           insideMargin=None, outsideMargin=None):
         """
@@ -2771,9 +2847,18 @@ class Hdf5():
         simulation.setNewtonTolerance(1e-10)
         simulation.setNewtonUpdateInteractionsPerIteration(Newton_update_interactions)
 
+        if len(self._plugins) > 0:
+            print_verbose ('import plugins ...')
+            self.importPlugins()
+        
         print_verbose ('import scene ...')
         self.importScene(t0, body_class, shape_class, face_class, edge_class)
 
+        if len(self._external_functions) > 0:
+            print_verbose ('import external functions ...')
+            self.importExternalFunctions()
+
+        
         if controller is not None:
             controller.initialize(self)
 

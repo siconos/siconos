@@ -276,6 +276,16 @@ typedef __mpz_struct mpz_t[1];
     return std11::dynamic_pointer_cast<NewtonImpactNSL>(nslaw);
   }
 
+  SP::NewtonEulerDS cast_NewtonEulerDS(SP::DynamicalSystem ds)
+  {
+    return std11::dynamic_pointer_cast<NewtonEulerDS>(ds);
+  }
+
+  SP::LagrangianDS cast_LagrangianDS(SP::DynamicalSystem ds)
+  {
+    return std11::dynamic_pointer_cast<LagrangianDS>(ds);
+  }
+
 %}
 
 //namespace std {
