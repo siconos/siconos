@@ -93,6 +93,17 @@ FOREACH(_EXE ${_EXE_LIST_${_CURRENT_TEST_DIRECTORY}})
   target_link_libraries(${_EXE} ${PRIVATE} @COMPONENT@)
   target_link_libraries(${_EXE} ${PRIVATE} ${@COMPONENT@_LINK_LIBRARIES})
 
+  # if no rpath, tests cannot find the libraries and build fails, so
+  # we add the LD_LIBRARY_PATH variable
+  if (CMAKE_SKIP_RPATH)
+    SET(LDLIBPATH "")
+    FOREACH(_C ${COMPONENTS})
+      LIST(APPEND LDLIBPATH "${CMAKE_BINARY_DIR}/${_C}")
+    ENDFOREACH()
+    STRING(REPLACE ";" ":" LDLIBPATH "${LDLIBPATH}")
+    SET(LDLIBPATH "LD_LIBRARY_PATH=${LDLIBPATH}")
+  endif()
+
   set(COMPONENT_TEST_LIB_ @COMPONENT_TEST_LIB@)
   if(COMPONENT_TEST_LIB_)
     add_dependencies(${_EXE} @COMPONENT_TEST_LIB@)
@@ -130,6 +141,7 @@ FOREACH(_EXE ${_EXE_LIST_${_CURRENT_TEST_DIRECTORY}})
         COMMAND env 
         ARGS "LSAN_OPTIONS=suppressions=${CMAKE_SOURCE_DIR}/Build/ci-scripts/asan-supp.txt:$ENV{LSAN_OPTIONS}"
         "ASAN_OPTIONS=detect_stack_use_after_return=1:detect_leaks=1:$ENV{ASAN_OPTIONS}"
+        ${LDLIBPATH}
         ${CMAKE_CURRENT_BINARY_DIR}/${_EXE}${EXE_EXT}
         --cdash-prepare ${CMAKE_CURRENT_BINARY_DIR}/${_EXE}${EXE_EXT} > ${CMAKE_CURRENT_BINARY_DIR}/${_EXE}.cmake
         COMMENT "Generating ${_EXE}.cmake")

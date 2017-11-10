@@ -121,6 +121,10 @@ set(${COMPONENT}_LINKER_LANGUAGE CXX)
 set(${COMPONENT}_LINK_LIBRARIES ${SICONOS_LINK_LIBRARIES})
 list(APPEND ${COMPONENT}_LINK_LIBRARIES kernel)
 list(APPEND ${COMPONENT}_LINK_LIBRARIES numerics)
+if (CMAKE_SKIP_RPATH)
+  # if no RPATH, then linking does not work for tests without specifying externals
+  set(${COMPONENT}_LINK_LIBRARIES ${${COMPONENT}_LINK_LIBRARIES} externals)
+endif()
 
 if(HAVE_SICONOS_CONTROL)
   list(APPEND ${COMPONENT}_LINK_LIBRARIES control)
