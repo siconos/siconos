@@ -27,9 +27,9 @@
 #cmakedefine BUILD_AS_CPP
 #cmakedefine WITH_LPSOLVE
 #cmakedefine HAS_EXTREME_POINT_ALGO
-#cmakedefine HAVE_VTK
-#cmakedefine HAVE_BULLET
-#cmakedefine HAVE_OCC
+#cmakedefine SICONOS_HAVE_VTK
+#cmakedefine SICONOS_HAVE_BULLET
+#cmakedefine SICONOS_HAVE_OCC
 #cmakedefine HAVE_SERIALIZATION
 #cmakedefine WITH_SERIALIZATION
 #cmakedefine HAVE_GENERATION

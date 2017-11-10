@@ -20,7 +20,7 @@
   REGISTER(BulletR) \
   REGISTER(BulletSpaceFilter)
 
-#ifdef HAVE_BULLET
+#ifdef SICONOS_HAVE_BULLET
 #include <BulletDS.hpp>
 #include <BulletR.hpp>
 #include <BulletSpaceFilter.hpp>
@@ -36,7 +36,7 @@ DUMMY(BulletSpaceFilter, SpaceFilter);
 #define OCC_CLASSES() \
   REGISTER(OccBody) \
   REGISTER(OccR)
-#ifdef HAVE_OCC
+#ifdef SICONOS_HAVE_OCC
 #include <OccBody.hpp>
 #include <OccR.hpp>
 #else
