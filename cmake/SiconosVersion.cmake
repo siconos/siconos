@@ -37,7 +37,11 @@ set(SO_current 5)
 set(SO_revision 0)
 set(SO_age 0)
 
-# Aggregate variables, to be passed to linker
+# Aggregate variables, to be passed to linker.
+# libraries will be named e.g.,
+#   libsiconos_kernel.so -> libsiconos_kernel.so.5 -> libsiconos_kernel.so.5.0.0
+# Again: this is *not* the software release number!
 set(SO_version_info "${SO_current}:${SO_revision}:${SO_age}")
 math(EXPR SO_current_minus_age "(${SO_current}) - (${SO_age})")
-set(SICONOS_SOVERSION "${SO_current_minus_age}.${SO_revision}.${SO_age}")
+set(SICONOS_SOVERSION "${SO_current_minus_age}.${SO_revision}.${SO_age}" CACHE STRING "Siconos SONAME")
+set(SICONOS_SOVERSION_MAJOR "${SO_current_minus_age}" CACHE STRING "Siconos SONAME current-minus-age")

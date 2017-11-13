@@ -121,7 +121,8 @@ macro(add_siconos_swig_sub_module fullname)
   # Set the SONAME for the SWIG module to the Siconos SONAME
   set_target_properties(${SWIG_MODULE_${name}_REAL_NAME} PROPERTIES
     NO_SONAME OFF
-    SOVERSION "${SICONOS_SOVERSION}")
+    VERSION "${SICONOS_SOVERSION}"
+    SOVERSION "${SICONOS_SOVERSION_MAJOR}")
 
   IF(MSVC AND ${COMPONENT} MATCHES "kernel")
     set_source_files_properties(${${_name}_generated_file_fullname} PROPERTIES COMPILE_FLAGS "/bigobj")
