@@ -339,11 +339,6 @@ public:
   /** compute inner_prod(current, x) */
   double inner_prod(const SiconosVector& x);
 
-  /** compute inner_prod(current, A.row(0)) 
-   assuming A.shape(0) = 1 
-  */
-  double inner_prod(const SiconosMatrix& A);
-  
   /** Insert a subvector in this vector: allocation and copy
   *  \param v SiconosVector& v : the vector to be inserted
   */
