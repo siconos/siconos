@@ -450,7 +450,7 @@ void BulletSpaceFilter::buildInteractions(double time)
             DEBUG_PRINTF("Interaction %p = true\n", static_cast<Interaction *>(cpoint->m_userPersistentData));
             DEBUG_PRINTF("cpoint %p  = true\n", &*cpoint);
             SP::BulletR rel(std11::static_pointer_cast<BulletR>(inter->relation()));
-            rel->updateContactPoints(*cpoint,
+            rel->updateContactPointsFromManifoldPoint(*cpoint,
                                      flip ? dsb : dsa,
                                      flip ? (dsa ? dsa : SP::NewtonEulerDS())
                                           : (dsb ? dsb : SP::NewtonEulerDS()));

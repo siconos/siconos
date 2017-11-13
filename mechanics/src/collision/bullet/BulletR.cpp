@@ -63,8 +63,9 @@ BulletR::BulletR(const btManifoldPoint &point,
 {
 }
 
-void BulletR::updateContactPoints(const btManifoldPoint& point,
-                                  SP::NewtonEulerDS ds1, SP::NewtonEulerDS ds2)
+void BulletR::updateContactPointsFromManifoldPoint(const btManifoldPoint& point,
+                                                   SP::NewtonEulerDS ds1,
+                                                   SP::NewtonEulerDS ds2)
 {
   // Get new positions
   btVector3 posa = point.getPositionWorldOnA();

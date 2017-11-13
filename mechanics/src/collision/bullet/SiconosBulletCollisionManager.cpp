@@ -1503,8 +1503,9 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
 
       /* update the relation */
       SP::BulletR rel(std11::static_pointer_cast<BulletR>((*p_inter)->relation()));
-      rel->updateContactPoints(*it->point, pairA->ds,
-                               pairB->ds ? pairB->ds : SP::NewtonEulerDS());
+      rel->updateContactPointsFromManifoldPoint(*it->point, pairA->ds,
+                                                pairB->ds ? pairB->ds
+                                                          : SP::NewtonEulerDS());
 
       _stats.existing_interactions_processed ++;
     }
@@ -1549,7 +1550,7 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
         // rel->btShape[0] = pairA->btshape;
         // rel->btShape[1] = pairA->btshape;
 
-        rel->updateContactPoints(*it->point,
+        rel->updateContactPointsFromManifoldPoint(*it->point,
                                  pairA->ds ? pairA->ds : SP::NewtonEulerDS(),
                                  pairB->ds ? pairB->ds : SP::NewtonEulerDS());
 
