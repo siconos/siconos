@@ -168,11 +168,6 @@ public:
     return _nsds;
   }
 
-  /** set the NonSmoothDynamicalSystem of the Model
-   *  \param newPtr a pointer on NonSmoothDynamicalSystem
-   */
-  void setNonSmoothDynamicalSystemPtr(SP::NonSmoothDynamicalSystem newPtr);
-
   /** get the title of the simulation
    *  \return std::string : the title
    */

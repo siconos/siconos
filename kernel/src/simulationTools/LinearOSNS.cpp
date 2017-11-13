@@ -688,10 +688,6 @@ bool LinearOSNS::preCompute(double time)
 
   // Get topology
   SP::Topology topology = simulation()->nonSmoothDynamicalSystem()->topology();
-  bool isLinear = simulation()->nonSmoothDynamicalSystem()->isLinear();
-
-  //   std::cout << "!b || !isLinear :"  << boolalpha <<  (!b || !isLinear) <<  std::endl;
-
   // nothing to do
   if (indexSetLevel() == LEVELMAX)
     return false;

@@ -287,8 +287,7 @@ void OSNSMatrix::convert()
 }
 
 // Fill the matrix M
-// NOTE FP : outdated function? Should be removed?
-// Used only in GlobalFrictionContact which is outofdate, is it?
+// Used only in GlobalFrictionContact
 void OSNSMatrix::fillM(DynamicalSystemsGraph & DSG, bool update)
 {
   DEBUG_BEGIN("void OSNSMatrix::fillM(SP::DynamicalSystemsGraph DSG, bool update)\n");

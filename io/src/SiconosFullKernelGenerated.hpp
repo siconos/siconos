@@ -501,7 +501,6 @@ SICONOS_IO_REGISTER(Simulation,
   (_printStat)
   (_relativeConvergenceCriterionHeld)
   (_relativeConvergenceTol)
-  (_staticLevels)
   (_tend)
   (_tinit)
   (_tolerance)

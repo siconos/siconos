@@ -99,8 +99,9 @@ void EulerMoreauOSI::initializeDynamicalSystem(Model& m, double t, SP::Dynamical
 
   // Check dynamical system type
   SP::FirstOrderNonLinearDS fods = std11::static_pointer_cast<FirstOrderNonLinearDS> (ds);
-  Type::Siconos dsType = Type::value(*ds);
-  assert (dsType == Type::FirstOrderNonLinearDS || dsType == Type::FirstOrderLinearDS || dsType == Type::FirstOrderLinearTIDS);
+  assert (Type::value(*ds) == Type::FirstOrderNonLinearDS ||
+	  Type::value(*ds) == Type::FirstOrderLinearDS ||
+	  Type::value(*ds) == Type::FirstOrderLinearTIDS);
   // Compute W (iteration matrix)
   initializeIterationMatrixW(t, ds);
 

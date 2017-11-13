@@ -32,18 +32,12 @@
 #include "Interaction.hpp"
 
 /** double precision machine */
-/*  eq dlmach('e'),  DBL_EPSILON,  fabs(a-b) <  */
 #define MACHINE_PREC std::numeric_limits<double>::epsilon()
 
 // ================== Objects to handle DS ==================
 
-/** Map of SP::SimpleMatrix; key = the number of the related DS*/
+/** Map of SP::SimpleMatrix; used only in MoreauJeanGOSI. key = the number(id) of the related DS*/
 typedef std::map<unsigned int, SP::SimpleMatrix> MapOfDSMatrices;
-
-// ================== Objects to handle Interactions ==================
-
-/** Map of MapOfInteractionMapOfDSMatrices with a DynamicalSystem as a key - Used for interactionBlock-terms indexed by a DynamicalSystem and an Interaction in assembled matrices of LCP etc ..*/
-typedef std::map< SP::Interaction , MapOfDSMatrices >  MapOfInteractionMapOfDSMatrices;
 
 /** list of indices */
 typedef std::vector<unsigned int> IndexInt;

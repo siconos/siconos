@@ -32,7 +32,7 @@
  *  \version 3.0.0.
  *  \date (Creation) 05/02/2010
  *
- * This class is used to define an interface for various storage used
+ * This class is used to define an interface for various storage methods used
  * for matrices in OneStepNSProblem. Its aim is to fill the
  * Numerics structure NumericsMatrix, required in many XXX_problem
  * structures of Numerics as input argument for drivers. \n

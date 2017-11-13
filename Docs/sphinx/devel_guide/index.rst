@@ -11,7 +11,8 @@ Developer guide
    about_ci
    plugins
    nonsmooth_problems_formulation
-
+   one_step_nonsmooth_problems
+   
 To do.
 
 `Unpolished developement notes`_.

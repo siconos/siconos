@@ -90,12 +90,7 @@ void OneStepIntegrator::initialize( Model& m )
   for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
   {
     Interaction& inter = *indexSet0->bundle(*ui);
-    unsigned int nslawSize = inter.nonSmoothLaw()->size();
     InteractionProperties& interaction_properties = indexSet0->properties(*ui);
-    // init block property. Note FP: this should probably be moved
-    // to OSNSPb init?
-    // interaction_properties.block.reset(new SimpleMatrix(nslawSize, nslawSize));
-
     // Update DSlink : this depends on OSI and relation types.
     fillDSLinks(inter, interaction_properties, *_dynamicalSystemsGraph);
 

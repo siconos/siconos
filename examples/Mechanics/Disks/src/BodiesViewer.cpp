@@ -44,8 +44,6 @@ void BodiesViewer::init()
   assert(Siconos_);
   Siconos_->init();
 
-  //  Siconos_->model()->simulation()->setStaticLevels(true);
-
   stepSimulation_ = false;
   stepNow_ = false;
   //  setAnimationPeriod(0.);

@@ -23,6 +23,8 @@
 #include <vector>
 
 #include "SiconosVector.hpp"
+#include "SiconosMatrix.hpp"
+#include <boost/numeric/ublas/matrix_proxy.hpp>
 
 #include "SiconosAlgebra.hpp"
 #include "Tools.hpp"
@@ -617,4 +619,34 @@ BlockVector& BlockVector::operator /= (double s)
   for(it = begin(); it != end(); ++it)
     (**it) /= s;
   return *this;
+}
+
+
+double BlockVector::inner_prod(const SiconosVector& x)
+{
+  double res = 0;
+  unsigned int subsize, start = 0;
+  VectorOfVectors::iterator it;
+  for(it = begin(); it != end(); ++it)
+    {
+      subsize = (*it)->size();
+      res += ublas::inner_prod(ublas::subrange(*x.dense(), start, start + subsize), *(*it)->dense());
+      start += subsize;
+    }
+  return res;
+}
+
+double BlockVector::inner_prod(const SiconosMatrix& A)
+{
+  assert(A.size(0) == 1);
+  double res = 0;
+  unsigned int subsize, start = 0;
+  VectorOfVectors::iterator it;
+  for(it = begin(); it != end(); ++it)
+    {
+      subsize = (*it)->size();
+      res += ublas::inner_prod(ublas::subrange(ublas::row(*A.dense(), 0), start, start + subsize), *(*it)->dense());
+      start += subsize;
+    }
+  return res;
 }
