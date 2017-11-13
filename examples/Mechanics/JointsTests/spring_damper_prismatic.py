@@ -32,7 +32,7 @@ with Hdf5() as io:
                  orientation=[(0,0,1),np.pi/2], mass=1.0, velocity=[0,0,0,0,0,1])
     io.addObject('bar2', [Contactor('Bar')], [-0.05,0,2],
                  orientation=[(0,0,1),np.pi/2], mass=1.0)
-    io.addJoint('joint1', 'bar1', 'bar2', None, [0,1,0], 'PrismaticJointR', True)
+    io.addJoint('joint1', 'bar1', 'bar2', None, [[0,1,0]], 'PrismaticJointR', True)
 
     # Definition of the ground
     io.addPrimitiveShape('Ground', 'Box', (5, 5, 0.1))

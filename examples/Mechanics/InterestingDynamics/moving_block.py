@@ -60,8 +60,8 @@ with Hdf5() as io:
         mass=m1)
 
     io.addJoint('joint2', 'arm1',
-                pivot_point=[ppos[0], ppos[1], ppos[2] + l1],
-                axis=[1, 0, 0],
+                points=[[ppos[0], ppos[1], ppos[2] + l1]],
+                axes=[[1, 0, 0]],
                 joint_class='PivotJointR')
 
     # the ground object made with the ground shape. As the mass is

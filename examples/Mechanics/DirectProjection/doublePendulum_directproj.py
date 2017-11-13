@@ -76,13 +76,14 @@ with Hdf5() as io:
                     velocity=[0, 20, 0, 0, 0, 0],
                     mass=m2)
 
-    io.addJoint('joint1', 'arm1', 'arm2', [0, -r1, 0],
-                [1, 0, 0],
-                'PivotJointR', absolute=False)
+    io.addJoint('joint1', 'arm1', 'arm2',
+                points=[[0, 0, -r1]],
+                axes=[[1, 0, 0]],
+                joint_class='PivotJointR', absolute=False)
 
     io.addJoint('joint2', 'arm1',
-                pivot_point=[0, 0, r2 + gap + r2 + l2 + r1 + hgap + l1],
-                axis=[1, 0, 0],
+                points=[[0, r2 + gap + r2 + l2 + r1 + hgap + l1, 0]],
+                axes=[[1, 0, 0]],
                 joint_class='PivotJointR', absolute=False)
 
     # a brick wall
@@ -121,4 +122,8 @@ with Hdf5(mode='r+') as io:
            tolerance=1e-8,
            itermax=1000,
            time_stepping=Kernel.TimeSteppingDirectProjection,
-           osi=Kernel.MoreauJeanDirectProjectionOSI)
+           osi=Kernel.MoreauJeanDirectProjectionOSI,
+           projection_itermax=3,
+           projection_tolerance=1e-5,
+           projection_tolerance_unilateral=1e-5,
+    )
