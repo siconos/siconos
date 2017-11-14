@@ -1,29 +1,18 @@
-#!/bin/bash -fx
+#!/bin/bash
 source /applis/site/nix.sh
 
-# specific variables to the test bench set
 frequency=$1
-
+output_freq=$2
 #OAR --project siconos
 #OAR --name Guitar_Bass
-#OAR -p network_address='luke42'
 #OAR -l /nodes=1,walltime=240:00:00
-#OAR -t timesharing=acary,*
+#OAR -t timesharing=$USER,*
 
-siconos_dir=$HOME/siconos/
+siconos_dir=$HOME/Softs/myfork/siconos/examples/Mechanics/Music
+rundir=/nfs_scratch/$USER/Music/F_${frequency}_id_${OAR_JOB_ID}
 
-
-rundir=/nfs_scratch/acary/Music/F=${frequency}_${OAR_JOB_ID}
 mkdir -p $rundir
 cd $rundir
-. $rundir
-
 # 
-
-#rsync -av $siconos_dir/examples/Mechanics/Music/ .
-cp $siconos_dir/examples/Mechanics/Music/run.py .
-cp $siconos_dir/examples/Mechanics/Music/guitar.py .
-cp $siconos_dir/examples/Mechanics/Music/numpywrappers.py .
-cp -r $siconos_dir/examples/Mechanics/Music/donnees_siconos .
-python run.py $frequency
+siconos $siconos_dir/run.py $frequency $output_freq
 

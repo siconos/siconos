@@ -12,6 +12,7 @@ visu = False
 if __name__ == "__main__":
     # sample freq and time-discretisation
 
+    current_path = os.path.dirname(os.path.realpath(__file__))
     # if freq is set as input arg ...
     if len(sys.argv) > 1:
         fs = float(sys.argv[1])
@@ -30,7 +31,7 @@ if __name__ == "__main__":
     # Data (from_matlab parameter), choose between:
     # - bass_guitar/pb2 : bass with frets
     # - fretless_bass_guitar/bsf
-    matlab_input = './bass_guitar/pb2'
+    matlab_input = os.path.join(current_path, 'bass_guitar/pb2')
     guitar_model, guitar_string, frets = create_model(
         n_modes=number_of_modes, max_coords=(7.8e-3, .64),
         fe=fs, final_time=final_time,
@@ -68,7 +69,7 @@ if __name__ == "__main__":
     print('End of simulation process. Duration: ', time.clock() - start_time)
 
     # --- Output dir for results ---
-    result_dir = 'results'
+    result_dir = os.getcwd()
     if not os.path.exists(result_dir):
         os.mkdir(result_dir)
     filename = 'g_' + str(number_of_modes) + '_' + str(int(fs)) + '.h5'
