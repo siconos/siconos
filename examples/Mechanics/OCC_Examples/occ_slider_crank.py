@@ -266,7 +266,8 @@ with Hdf5() as io:
     io.addExternalFunction('f3', 'slider', 'setComputeFExtFunction',
                            'SliderCrankPlugin', 'externalForcesS')
 
-    
+    io.addExternalBCFunction('fbc', 'part1', [4],
+                             'SliderCrankPlugin','prescribedvelocityB1')
     
     io.addNewtonImpactFrictionNSL('contact', mu=0.3, e=0.4)
 

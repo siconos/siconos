@@ -1496,10 +1496,11 @@ class Hdf5():
             body1_name = pinter.attrs['body1_name']
             body2_name = pinter.attrs['body2_name']
 
-            ds1 = occ.cast_NewtonEulerDS(topo.getDynamicalSystem(body1_name))
+            ds1 = \
+                  Kernel.cast_NewtonEulerDS(topo.getDynamicalSystem(body1_name))
             try:
                 ds2 = \
-                    occ.cast_NewtonEulerDS(topo.getDynamicalSystem(body2_name))
+                    Kernel.cast_NewtonEulerDS(topo.getDynamicalSystem(body2_name))
             except:
                 ds2 = None
 
@@ -2058,7 +2059,7 @@ class Hdf5():
         import subprocess
 
         for name in self._plugins:
-            
+
             plugin_src = self._plugins[name][:]
             plugin_fname = self._plugins[name].attrs['filename']
 
@@ -2081,22 +2082,42 @@ class Hdf5():
             ext_fun.attrs['plugin_name'] = plugin_name
             ext_fun.attrs['plugin_function_name'] = plugin_function_name
 
+    def addExternalBCFunction(self, name, body_name, bc_indices,
+                              plugin_name, plugin_function_name):
+
+        if name not in self._external_functions:
+            ext_fun = group(self._external_functions, name)
+            ext_fun.attrs['body_name'] = body_name
+            ext_fun.attrs['plugin_name'] = plugin_name
+            ext_fun.attrs['plugin_function_name'] = plugin_function_name
+            ext_fun.attrs['bc_indices'] = bc_indices
+
     def importExternalFunctions(self):
         topo = self._model.nonSmoothDynamicalSystem().\
                 topology()
+
         for name in self._external_functions:
 
             ext_fun = self._external_functions[name]
-            body_name = ext_fun.attrs['body_name']
-            function_name = ext_fun.attrs['function_name']
             plugin_name = ext_fun.attrs['plugin_name']
             plugin_function_name = ext_fun.attrs['plugin_function_name']
+            body_name = ext_fun.attrs['body_name']
+            ds = Kernel.cast_NewtonEulerDS(topo.getDynamicalSystem(body_name))
 
-            ds = occ.cast_NewtonEulerDS(topo.getDynamicalSystem(body_name))
-            getattr(ds, function_name)(plugin_name,
-                                       plugin_function_name)
+            if 'function_name' in ext_fun.attrs:
+                function_name = ext_fun.attrs['function_name']
 
-            
+                getattr(ds, function_name)(plugin_name,
+                                           plugin_function_name)
+            else:
+                bc_indices = ext_fun.attrs['bc_indices']
+                # a boundary condition
+                bc = Kernel.BoundaryCondition(bc_indices)
+                bc.setComputePrescribedVelocityFunction(plugin_name,
+                                                        plugin_function_name)
+                ds.setBoundaryConditions(bc)
+
+
     def addMeshFromString(self, name, shape_data, scale=None,
                           insideMargin=None, outsideMargin=None):
         """
@@ -2850,7 +2871,7 @@ class Hdf5():
         if len(self._plugins) > 0:
             print_verbose ('import plugins ...')
             self.importPlugins()
-        
+
         print_verbose ('import scene ...')
         self.importScene(t0, body_class, shape_class, face_class, edge_class)
 
@@ -2858,7 +2879,7 @@ class Hdf5():
             print_verbose ('import external functions ...')
             self.importExternalFunctions()
 
-        
+
         if controller is not None:
             controller.initialize(self)
 
