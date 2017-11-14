@@ -223,7 +223,6 @@ int main()
         simulation->prepareIntegratorForDS(osi, ds, model, simulation->nextTime());
       }
 
-      collision_manager->resetStatistics();
       simulation->computeOneStep();
 
       // --- Get values to be plotted ---
