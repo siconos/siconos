@@ -238,6 +238,55 @@ typedef __mpz_struct mpz_t[1];
 
 
 
+
+
+//namespace std {
+
+  %template (dspv) std::vector<std::pair<std11::shared_ptr<DynamicalSystem>,
+                                         std11::shared_ptr<DynamicalSystem> > >;
+
+  %template (dsiv) std::vector<std::pair<unsigned int, unsigned int > >;
+
+
+  %template (dsi) std::pair<unsigned int, unsigned int >;
+
+  %template (dsp) std::pair<std11::shared_ptr<DynamicalSystem>,
+                            std11::shared_ptr<DynamicalSystem> >;
+
+//BouncingBallNETS.py, attempt to reach DSlink as a vector...
+//swig failure.
+//%shared_ptr(VectorOfBlockVectors);
+//%template (vectorOfBlockVectors) std::vector<std11::shared_ptr<BlockVector> >;
+///
+//}
+
+
+%template(unsignedintv) std11::shared_ptr<std::vector<unsigned int> >;
+
+// not sufficient
+%ignore Question<bool>;
+%template (qbool) Question<bool>;
+
+%ignore Question<unsigned int>;
+%template (quint) Question<unsigned int>;
+
+
+%ignore OSNSMatrix::updateSizeAndPositions;
+
+// registered classes in KernelRegistration.i
+
+%include KernelRegistration.i
+%include pyRegister.i
+KERNEL_REGISTRATION();
+
+%include pyInclude.i
+
+KERNEL_REGISTRATION()
+
+%fragment("StdSequenceTraits");
+
+%fragment("StdMapTraits");
+
 %inline
 %{
 
@@ -287,52 +336,3 @@ typedef __mpz_struct mpz_t[1];
   }
 
 %}
-
-//namespace std {
-
-  %template (dspv) std::vector<std::pair<std11::shared_ptr<DynamicalSystem>,
-                                         std11::shared_ptr<DynamicalSystem> > >;
-
-  %template (dsiv) std::vector<std::pair<unsigned int, unsigned int > >;
-
-
-  %template (dsi) std::pair<unsigned int, unsigned int >;
-
-  %template (dsp) std::pair<std11::shared_ptr<DynamicalSystem>,
-                            std11::shared_ptr<DynamicalSystem> >;
-
-//BouncingBallNETS.py, attempt to reach DSlink as a vector...
-//swig failure.
-//%shared_ptr(VectorOfBlockVectors);
-//%template (vectorOfBlockVectors) std::vector<std11::shared_ptr<BlockVector> >;
-///
-//}
-
-
-%template(unsignedintv) std11::shared_ptr<std::vector<unsigned int> >;
-
-// not sufficient
-%ignore Question<bool>;
-%template (qbool) Question<bool>;
-
-%ignore Question<unsigned int>;
-%template (quint) Question<unsigned int>;
-
-
-%ignore OSNSMatrix::updateSizeAndPositions;
-
-// registered classes in KernelRegistration.i
-
-%include KernelRegistration.i
-%include pyRegister.i
-KERNEL_REGISTRATION();
-
-%include pyInclude.i
-
-KERNEL_REGISTRATION()
-
-%fragment("StdSequenceTraits");
-
-%fragment("StdMapTraits");
-
-
