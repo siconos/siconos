@@ -4,13 +4,8 @@ from siconos.mechanics.collision.tools import Volume, Contactor, Shape
 from siconos.io.mechanics_io import Hdf5
 import siconos.io.mechanics_io
 
-from OCC.BRepPrimAPI import BRepPrimAPI_MakeBox, BRepPrimAPI_MakeSphere
-from OCC.gp import gp_Pnt
-
 siconos.io.mechanics_io.set_implementation('original')
 siconos.io.mechanics_io.set_backend('occ')
-
-sphere = BRepPrimAPI_MakeSphere(0.025).Shape()
 
 l1 = 0.153    # crank length
 l2 = 0.306    # connecting rod length
@@ -24,9 +19,7 @@ w30 = 0.      # initial angular speed for the slider
 with Hdf5() as io:
 
     io.addPluginSource('plugin', 'SliderCrankPlugin/SliderCrankPlugin.cpp')
-    
-    io.addOccShape('Sphere', sphere)
-    
+
     io.addShapeDataFromFile('body1',
                             '../Mechanisms/SliderCrank/CAD/body1.step')
     io.addShapeDataFromFile('body2',
@@ -55,7 +48,7 @@ with Hdf5() as io:
 #    io.addObject('Artefact', [Shape(shape_data='Artefact',
 #                                    instance_name='artefact')],
 #                 translation=[0., 0., 0.])
-    
+
     io.addObject('part1', [Volume(shape_data='body1',
                                   instance_name='Body1',
                                   relative_translation=[-0.5*l1, 0., 0.],
@@ -166,7 +159,7 @@ with Hdf5() as io:
                       body2_name='chamber', contactor2_name='Chamber_contact0',
                       distance_calculator='cadmbtb',
                       offset=0.024)
-    
+
     io.addInteraction('contact11',
                       body1_name='slider', contactor1_name='Contact_b_f0',
                       body2_name='chamber', contactor2_name='Chamber_contact1',
@@ -267,8 +260,8 @@ with Hdf5() as io:
                            'SliderCrankPlugin', 'externalForcesS')
 
     io.addExternalBCFunction('fbc', 'part1', [4],
-                             'SliderCrankPlugin','prescribedvelocityB1')
-    
+                             'SliderCrankPlugin', 'prescribedvelocityB1')
+
     io.addNewtonImpactFrictionNSL('contact', mu=0.3, e=0.4)
 
 with Hdf5(mode='r+') as io:

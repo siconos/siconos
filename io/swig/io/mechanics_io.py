@@ -574,7 +574,7 @@ class ShapeCollection():
                                      tmpf[1], self._collision_margin, scale=scale)
                     else:
                         assert False
-                elif self.attributes(shape_name)['type'] in['step', 'stp']:
+                elif self.attributes(shape_name)['type'] in ['step', 'stp']:
                     from OCC.STEPControl import STEPControl_Reader
                     from OCC.BRep import BRep_Builder
                     from OCC.TopoDS import TopoDS_Compound
@@ -1484,7 +1484,7 @@ class Hdf5():
             #    self._model.nonSmoothDynamicalSystem().\
             #        link(joint_inter, ds1)
 
-    def importPermanentInteraction(self, name):
+    def importPermanentInteractions(self, name):
         """
         """
         if (self._broadphase is not None and 'input' in self._data
@@ -1504,8 +1504,18 @@ class Hdf5():
             except:
                 ds2 = None
 
-            contactor1_name = pinter.attrs['contactor1_name']
-            contactor2_name = pinter.attrs['contactor2_name']
+            contactor1_name = pinter.attrs.get('contactor1_name', None)
+            contactor2_name = pinter.attrs.get('contactor2_name', None)
+
+            if contactor1_name is None:
+                contactor1_names = self._occ_contactors[body1_name].keys()
+            else:
+                contactor1_names = [contactor1_name]
+
+            if contactor2_name is None:
+                contactor2_names = self._occ_contactors[body2_name].keys()
+            else:
+                contactor2_names = [contactor2_name]
 
             distance_calculator = pinter.attrs['distance_calculator']
             offset = pinter.attrs['offset']
@@ -1513,53 +1523,40 @@ class Hdf5():
             body1 = self._input[body1_name]
             body2 = self._input[body2_name]
 
-            ctr1 = body1[contactor1_name]
-            ctr2 = body2[contactor2_name]
-
-            cg1 = int(ctr1.attrs['group'])
-            cg2 = int(ctr2.attrs['group'])
-            nslaw = self._broadphase.nslaw(cg1, cg2)
-
-            cocs1 = self._occ_contactors[body1_name][contactor1_name]
-            cocs2 = self._occ_contactors[body2_name][contactor2_name]
-
-            # else:
-            #     topods2 = self._shape.get(ctr2.attrs['name'])
-            #     self._keep.append(topods2)
-            #     ocs2 = occ.OccContactShape(topods2)
-            #if self.verbose:
-            #    print (body1_name, self._occ_contactors[body1_name])
-
-            #     index2 = int(ctr2.attrs['contact_index'])
-
-            #     ctact_t2 = ctr2.attrs['type']
-
-            #     ctactbuild = {'Face': occ.OccContactFace,
-            #                   'Edge': occ.OccContactEdge}
-
-            #     cocs2 = ctactbuild[ctact_t2](ocs2, index2)
-
-            cp1 = occ.ContactPoint(cocs1)
-            cp2 = occ.ContactPoint(cocs2)
-
             real_dist_calc = {'cadmbtb': occ.CadmbtbDistanceType,
                               'occ': occ.OccDistanceType}
 
-            relation = occ.OccR(cp1, cp2,
-                                real_dist_calc[distance_calculator]())
+            for contactor1_name in contactor1_names:
+                for contactor2_name in contactor2_names:
+                    ctr1 = body1[contactor1_name]
+                    ctr2 = body2[contactor2_name]
 
-            relation.setOffset(offset)
+                    cg1 = int(ctr1.attrs['group'])
+                    cg2 = int(ctr2.attrs['group'])
+                    nslaw = self._broadphase.nslaw(cg1, cg2)
 
-            inter = Interaction(nslaw, relation)
+                    cocs1 = self._occ_contactors[body1_name][contactor1_name]
+                    cocs2 = self._occ_contactors[body2_name][contactor2_name]
 
-            if ds2 is not None:
-                self._model.nonSmoothDynamicalSystem().link(inter, ds1, ds2)
-            else:
-                self._model.nonSmoothDynamicalSystem().link(inter, ds1)
+                    cp1 = occ.ContactPoint(cocs1)
+                    cp2 = occ.ContactPoint(cocs2)
 
-            # keep pointers
-            self._keep.append([cocs1, cocs2, cp1,
-                               cp2, relation])
+                    relation = occ.OccR(cp1, cp2,
+                                        real_dist_calc[distance_calculator]())
+
+                    relation.setOffset(offset)
+
+                    inter = Interaction(nslaw, relation)
+
+                    if ds2 is not None:
+                        self._model.nonSmoothDynamicalSystem().link(inter, ds1,
+                                                                    ds2)
+                    else:
+                        self._model.nonSmoothDynamicalSystem().link(inter, ds1)
+
+                    # keep pointers
+                    self._keep.append([cocs1, cocs2, cp1,
+                                       cp2, relation])
 
     def importObject(self, name, body_class=None, shape_class=None,
                      face_class=None, edge_class=None, birth=False,
@@ -1833,7 +1830,7 @@ class Hdf5():
                 self.importBoundaryConditions(name)
 
             for name in self.permanent_interactions():
-                self.importPermanentInteraction(name)
+                self.importPermanentInteractions(name)
 
     def currentTime(self):
         if self._initializing:
@@ -2276,8 +2273,8 @@ class Hdf5():
             self._shapeid[name] = shape.attrs['id']
             self._number_of_shapes += 1
 
-    def addInteraction(self, name, body1_name, contactor1_name,
-                       body2_name, contactor2_name,
+    def addInteraction(self, name, body1_name, contactor1_name=None,
+                       body2_name=None, contactor2_name=None,
                        distance_calculator='cadmbtb',
                        offset=0.0001):
         """
@@ -2291,8 +2288,10 @@ class Hdf5():
             pinter.attrs['type'] = 'permanent_interaction'
             pinter.attrs['body1_name'] = body1_name
             pinter.attrs['body2_name'] = body2_name
-            pinter.attrs['contactor1_name'] = contactor1_name
-            pinter.attrs['contactor2_name'] = contactor2_name
+            if contactor1_name is not None:
+                pinter.attrs['contactor1_name'] = contactor1_name
+            if contactor2_name is not None:
+                pinter.attrs['contactor2_name'] = contactor2_name
             pinter.attrs['distance_calculator'] = distance_calculator
             pinter.attrs['offset'] = offset
 
