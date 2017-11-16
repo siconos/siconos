@@ -2,7 +2,9 @@
 |  **`ubuntu-14-04-gcc-atlas-lapack`**   |
 |----------------------------------------|
 |[![Build Status](https://travis-ci.org/siconos/siconos.svg?branch=master)](https://travis-ci.org/siconos/siconos)|
-
+|----------------------------------------|
+|[![Version](https://img.shields.io/github/release/siconos/siconos.svg)](https://github.com/siconos/siconos/releases/latest)|
+ 
 A software package for the modeling and simulation of nonsmooth dynamical systems in C++ and in Python.
 
 Siconos is an open-source scientific software primarily targeted at modeling and simulating nonsmooth dynamical systems:
