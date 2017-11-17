@@ -48,8 +48,6 @@
   \author Franck Perignon
 */
 
-#include "SiconosFortran.h"
-
 #ifdef __cplusplus
 extern "C"
 {
@@ -138,8 +136,8 @@ extern "C"
     y version:    1.5  (june, 1991)
 
   */
-  //  void F77NAME(ql0001)(integer m, integer me, integer mmax, integer n, integer nmax, integer mnn, double *c, double *d, double *a, double *b, double *xl, double *xu, double *x, double *u, integer iout, integer ifail, integer iprint, double* war, integer lwar, integer* iwar, integer liwar, double eps);
-  void CNAME(ql0001)(int *m , int *me , int *mmax , int *n , int *nmax , int *mnn ,
+
+  void ql0001_(int *m , int *me , int *mmax , int *n , int *nmax , int *mnn ,
                        double *c , double *d , double *a , double *b , double *xl , double *xu ,
                        double *x , double *u , int *iout , int *ifail , int *iprint , double *war ,
                        int *lwar , int *iwar , int *liwar , double *eps);

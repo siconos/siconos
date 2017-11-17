@@ -29,6 +29,7 @@
 #include "fc3d_Solvers.h"
 #include "fc3d_compute_error.h"
 #include "projectionOnCone.h"
+#include "SiconosCompat.h"
 
 #ifdef HAVE_GAMS_C_API
 

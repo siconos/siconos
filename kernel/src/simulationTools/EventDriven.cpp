@@ -41,6 +41,7 @@
 using namespace std;
 using namespace RELATION;
 
+#define DEFAULT_TOL_ED 1000 * DEFAULT_TOLERANCE
 
 /** defaut constructor
  *  \param a pointer to a timeDiscretisation (linked to the model that owns this simulation)

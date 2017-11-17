@@ -53,6 +53,9 @@ ELSE(UNIX)
   set(siconos_python_install "standard" CACHE STRING "Install mode for siconos python package")
 ENDIF(UNIX)
 
+# If OFF, headers from libraries in externals will not be installed.
+option(INSTALL_EXTERNALS_HEADERS
+  "Whether or not headers for external libraries should be installed. Default=ON" ON)
 
 # List of components to build and installed
 # List of siconos component to be installed

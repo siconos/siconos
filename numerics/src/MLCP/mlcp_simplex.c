@@ -31,6 +31,7 @@ dim(v)=nn
 #include <string.h>
 #include "SiconosConfig.h"
 #include "MLCP_Solvers.h"
+#include "SiconosCompat.h"
 #include <math.h>
 
 #ifdef HAVE_MLCPSIMPLEX

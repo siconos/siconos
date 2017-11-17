@@ -299,6 +299,7 @@ namespace std11 = boost;
 #include "NCP_Solvers.h"
 #include "MLCP_Solvers.h"
 #include "ConvexQP_Solvers.h"
+#include "SiconosCompat.h"
 #include "SOCLCP_Solvers.h"
 #include "NonSmoothDrivers.h"
   %}

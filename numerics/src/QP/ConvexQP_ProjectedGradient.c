@@ -20,6 +20,7 @@
 #include "ConvexQP_Solvers.h"
 #include "ConvexQP_computeError.h"
 #include "NumericsMatrix.h"
+#include "SiconosCompat.h"
 
 
 #include "SiconosBlas.h"

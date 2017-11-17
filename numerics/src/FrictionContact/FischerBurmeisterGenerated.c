@@ -3,6 +3,7 @@
 #include <op3x3.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include "SiconosCompat.h"
 
 //#define DEBUG_MESSAGES 1
 //#define DEBUG_WHERE_MESSAGES 1

@@ -21,10 +21,10 @@
 #ifndef LsodarOSI_H
 #define LsodarOSI_H
 
-#include"OneStepIntegrator.hpp"
-#include "f2c.h"                        // for doublereal, integer
+#include "OneStepIntegrator.hpp"
 
-#include<vector>
+#include <vector>
+
 #define ATOL_DEFAULT 100 * MACHINE_PREC;
 #define RTOL_DEFAULT 10 * MACHINE_PREC;
 

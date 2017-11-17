@@ -26,6 +26,7 @@
 // --- Numerics headers ---
 #include "NonSmoothDrivers.h"
 #include "MLCP_Solvers.h"
+#include "SiconosCompat.h"
 
 using namespace RELATION;
 // #define DEBUG_NCOLOR
