@@ -48,6 +48,9 @@ set(${COMPONENT}_Unstable_SRCS)
 # List of directories of headers not to be installed
 set(${COMPONENT}_HDRS_EXCLUDE_DIR)
 
+# List of specific headers not to be installed
+set(${COMPONENT}_HDRS_EXCLUDE SiconosCompat.h)
+
 # List of directories for which no doxygen doc will be generated
 # By default all directories matching "test" are excluded.
 set(${COMPONENT}_EXCLUDE_DOXY

@@ -119,6 +119,7 @@ The following linear algebra operation are supported:
 #include <stdlib.h>
 #include <assert.h>
 #include <stdbool.h>
+#include <stdio.h>
 
 #include "NumericsFwd.h"
 #include "SiconosConfig.h"

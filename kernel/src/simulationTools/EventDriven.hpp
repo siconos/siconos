@@ -23,9 +23,6 @@
 
 #include "Simulation.hpp"
 #include "SiconosFwd.hpp"               // for OneStepIntegrator, etc
-#include "f2c.h"                        // for doublereal, integer
-
-#define DEFAULT_TOL_ED 1000 * DEFAULT_TOLERANCE
 
 /** Simulation based on event driven method, ie events detection (see theoretical manual for more details).
  *

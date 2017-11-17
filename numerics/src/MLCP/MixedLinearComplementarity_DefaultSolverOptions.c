@@ -21,6 +21,7 @@
 #include <time.h>
 #include <float.h>
 #include "MLCP_Solvers.h"
+#include "SiconosCompat.h"
 #include "NonSmoothDrivers.h"
 #include "numerics_verbose.h"
 

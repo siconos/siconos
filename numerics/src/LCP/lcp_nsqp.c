@@ -25,9 +25,10 @@
 #include "lcp_cst.h"
 #include "SolverOptions.h"
 #include "NumericsMatrix.h"
-
 #include "QP_Solvers.h"
+#include "SiconosFortran.h"
 #include "numerics_verbose.h"
+
 void lcp_nsqp(LinearComplementarityProblem* problem, double *z, double *w, int *info , SolverOptions* options)
 {
   /* matrix M/vector q of the lcp */

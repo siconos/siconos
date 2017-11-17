@@ -24,6 +24,7 @@
 
 #include "FrictionContactProblem_as_VI.h"
 #include "VariationalInequality_Solvers.h"
+#include "SiconosCompat.h"
 #include "fc3d_Solvers.h"
 #include "fc3d_compute_error.h"
 

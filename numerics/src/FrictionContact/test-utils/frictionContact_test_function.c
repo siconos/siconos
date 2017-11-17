@@ -17,6 +17,7 @@
 */
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 #include "NonSmoothDrivers.h"
 #include "frictionContact_test_function.h"
 #include "fc3d_Solvers.h"
@@ -27,6 +28,7 @@
 #include <fclib_interface.h>
 #endif
 #include "numerics_verbose.h"
+#include "SiconosCompat.h"
 
 void frictionContact_test_gams_opts(SN_GAMSparams* GP, int solverId)
 {

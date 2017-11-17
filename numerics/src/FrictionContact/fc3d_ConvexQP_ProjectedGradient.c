@@ -24,6 +24,7 @@
 
 #include "FrictionContactProblem_as_ConvexQP.h"
 #include "ConvexQP_Solvers.h"
+#include "SiconosCompat.h"
 #include "fc3d_Solvers.h"
 #include "fc3d_compute_error.h"
 

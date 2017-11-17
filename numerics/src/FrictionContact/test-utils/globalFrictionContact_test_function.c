@@ -17,6 +17,7 @@
 */
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 #include "NonSmoothDrivers.h"
 #include "globalFrictionContact_test_function.h"
 #include "gfc3d_Solvers.h"
@@ -24,6 +25,7 @@
 #include "NumericsMatrix.h"
 #include "numerics_verbose.h"
 #include "NumericsVector.h"
+#include "SiconosCompat.h"
 #if defined(WITH_FCLIB)
 #include <fclib.h>
 #include <fclib_interface.h>

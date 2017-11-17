@@ -19,8 +19,6 @@
 #ifndef SparseBlockMatrix_H
 #define SparseBlockMatrix_H
 
-/* #include <stddef.h> */
-/* #include <stdio.h> */
 #include "NumericsFwd.h"
 #include "SiconosConfig.h"
 #include <stdio.h>

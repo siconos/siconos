@@ -27,6 +27,7 @@
 #include "NumericsMatrix.h"
 
 #include "QP_Solvers.h"
+#include "SiconosFortran.h"
 #include "numerics_verbose.h"
 #include "sanitizer.h"
 

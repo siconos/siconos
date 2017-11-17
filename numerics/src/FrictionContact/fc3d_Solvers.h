@@ -34,7 +34,6 @@
 #include "fc3d_nonsmooth_Newton_FischerBurmeister.h"
 #include "fc3d_unitary_enumerative.h"
 #include "Friction_cst.h"
-#include "SiconosCompat.h"
 #include "fc3d_nonsmooth_Newton_natural_map.h"
 #include "fc3d_local_problem_tools.h"
 
