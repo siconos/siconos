@@ -24,6 +24,7 @@
 #include <float.h>
 #include <assert.h>
 
+#include "csparse.h"
 #include "SiconosBlas.h"
 #include "GoldsteinSearch.h"
 #include "SiconosSets.h"

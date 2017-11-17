@@ -22,6 +22,7 @@
 
 #include "NM_conversions.h"
 #include "SiconosConfig.h"
+#include "csparse.h"
 
 #ifdef WITH_MKL_SPBLAS
 #include "tlsdef.h"

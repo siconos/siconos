@@ -25,7 +25,7 @@
 #include "SparseMatrix.h"
 #include "SiconosCompat.h"
 #include "NumericsSparseMatrix.h"
-
+#include "csparse.h"
 
 #if defined(__clang__)
 #pragma clang diagnostic push

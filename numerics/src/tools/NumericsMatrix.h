@@ -123,8 +123,27 @@ The following linear algebra operation are supported:
 
 #include "NumericsFwd.h"
 #include "SiconosConfig.h"
-#include "csparse.h" // For csi
-#include "SparseMatrix.h"
+
+#ifdef MATLAB_MEX_FILE
+#undef csi
+#define csi mwSignedIndex
+#endif
+#ifndef csi
+#include "SiconosConfig.h"
+#include <stdint.h>
+
+#ifdef SICONOS_INT64
+#define csi int64_t
+#else
+#define csi int32_t
+#endif
+//#define csi ptrdiff_t
+#endif
+
+/* Private definitions -- must #include csparse.h, not installed, to
+ * use internally. */
+struct cs_sparse;
+typedef struct cs_sparse CSparseMatrix;
 
 /** \struct NumericsMatrixInternalData NumericsMatrix.h
  * Structure for simple workspaces

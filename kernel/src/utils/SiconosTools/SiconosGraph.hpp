@@ -46,6 +46,9 @@
 #include <map>
 #endif
 
+#ifdef max
+#undef max
+#endif
 #include <limits>
 
 /* gccxml 0.9 complains about ambiguous usage of size_t or std::size_t

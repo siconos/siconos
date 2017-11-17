@@ -302,6 +302,8 @@ namespace std11 = boost;
 #include "SiconosCompat.h"
 #include "SOCLCP_Solvers.h"
 #include "NonSmoothDrivers.h"
+#include "SparseMatrix.h"
+#include "csparse.h"
   %}
 
 %include numerics_NM.i

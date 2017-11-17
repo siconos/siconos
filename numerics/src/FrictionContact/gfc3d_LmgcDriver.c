@@ -4,6 +4,7 @@
 #include <time.h>
 #include <float.h>
 
+#include "csparse.h"
 #include "fc3d_Solvers.h"
 #include "NonSmoothDrivers.h"
 #include "fclib_interface.h"
