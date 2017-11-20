@@ -189,90 +189,99 @@ contactors = dict()
 offsets = dict()
 
 
-def step_reader(step_string):
+def occ_topo_list(shape):
+    """ return the edges & faces from `shape`
 
-    from OCC.StlAPI import StlAPI_Writer
+    :param shape: a TopoDS_Shape
+    :return: a list of edges and faces
+    """
+
+    from OCC.TopAbs import TopAbs_FACE
+    from OCC.TopAbs import TopAbs_EDGE
+    from OCC.TopExp import TopExp_Explorer
+    from OCC.TopoDS import topods_Face, topods_Edge
+    
+
+    topExp = TopExp_Explorer()
+    topExp.Init(shape, TopAbs_FACE)
+    faces = []
+    edges = []
+    
+    while topExp.More():
+        face = topods_Face(topExp.Current())
+        faces.append(face)
+        topExp.Next()
+
+    topExp.Init(shape, TopAbs_EDGE)
+
+    while topExp.More():
+        edge = topods_Edge(topExp.Current())
+        edges.append(edge)
+        topExp.Next()
+
+    return faces, edges
+
+
+def occ_load_file(filename):
+    """
+    load in pythonocc a igs or step file
+
+    :param filename: a filename with extension
+    :return: a topods_shape
+    """
+
     from OCC.STEPControl import STEPControl_Reader
-    from OCC.BRep import BRep_Builder
-    from OCC.TopoDS import TopoDS_Compound
-    from OCC.IFSelect import IFSelect_RetDone, IFSelect_ItemsByEntity
-
-    builder = BRep_Builder()
-    comp = TopoDS_Compound()
-    builder.MakeCompound(comp)
-
-    stl_writer = StlAPI_Writer()
-    stl_writer.SetASCIIMode(True)
-
-    with io_tmpfile(contents=io.shapes()[shape_name][:][0]) as tmpfile:
-        step_reader = STEPControl_Reader()
-
-        status = step_reader.ReadFile(tmpfile[1])
-
-        if status == IFSelect_RetDone:  # check status
-            failsonly = False
-            step_reader.PrintCheckLoad(failsonly, IFSelect_ItemsByEntity)
-            step_reader.PrintCheckTransfer(failsonly, IFSelect_ItemsByEntity)
-            ok = step_reader.TransferRoot(1)
-            nbs = step_reader.NbShapes()
-
-            for i in range(1, nbs + 1):
-                shape = step_reader.Shape(i)
-
-                builder.Add(comp, shape)
-
-            with io_tmpfile(suffix='.stl') as tmpf:
-                    stl_writer.Write(comp, tmpf[1])
-                    tmpf[0].flush()
-
-                    reader = vtk.vtkSTLReader()
-                    reader.SetFileName(tmpf[1])
-                    reader.Update()
-
-                    return reader
-
-
-def iges_reader(iges_string):
-
-    from OCC.StlAPI import StlAPI_Writer
     from OCC.IGESControl import IGESControl_Reader
     from OCC.BRep import BRep_Builder
     from OCC.TopoDS import TopoDS_Compound
-    from OCC.IFSelect import IFSelect_RetDone, IFSelect_ItemsByEntity
+    from OCC.IFSelect import IFSelect_RetDone,\
+    IFSelect_ItemsByEntity
 
+    reader_switch = {'stp': STEPControl_Reader,
+                     'step': STEPControl_Reader,
+                     'igs': IGESControl_Reader,
+                     'iges': IGESControl_Reader}
+    
     builder = BRep_Builder()
     comp = TopoDS_Compound()
     builder.MakeCompound(comp)
 
+    reader = reader_switch[os.path.splitext(filename)[1][1:].lower()]()
+        
+    status = reader.ReadFile(filename)
+        
+    if status == IFSelect_RetDone:  # check status
+        failsonly = False
+        reader.PrintCheckLoad(
+            failsonly, IFSelect_ItemsByEntity)
+        reader.PrintCheckTransfer(
+            failsonly, IFSelect_ItemsByEntity)
+        
+        ok = reader.TransferRoots()
+        nbs = reader.NbShapes()
+
+        for i in range(1, nbs + 1):
+            shape = reader.Shape(i)
+            builder.Add(comp, shape)
+
+    return comp
+
+
+def topods_shape_reader(shape):
+
+    from OCC.StlAPI import StlAPI_Writer
+
     stl_writer = StlAPI_Writer()
-    stl_writer.SetASCIIMode(True)
 
-    with io_tmpfile(contents=io.shapes()[shape_name][:][0]) as tmpfile:
-        iges_reader = IGESControl_Reader()
+    with io_tmpfile(debug=True, suffix='.stl') as tmpf:
+        stl_writer.Write(shape, tmpf[1])
+        tmpf[0].flush()
 
-        status = iges_reader.ReadFile(tmpfile[1])
+        reader = vtk.vtkSTLReader()
+        reader.SetFileName(tmpf[1])
+        reader.Update()
 
-        if status == IFSelect_RetDone:  # check status
-            failsonly = False
-            iges_reader.PrintCheckLoad(failsonly, IFSelect_ItemsByEntity)
-            iges_reader.PrintCheckTransfer(failsonly, IFSelect_ItemsByEntity)
-            ok = iges_reader.TransferRoots()
-            nbs = iges_reader.NbShapes()
-
-            for i in range(1, nbs + 1):
-                shape = iges_reader.Shape(i)
-
-                builder.Add(comp, shape)
-
-            with io_tmpfile(suffix='.stl') as tmpf:
-                    stl_writer.Write(comp, tmpf[1])
-                    tmpf[0].flush()
-
-                    reader = vtk.vtkSTLReader()
-                    reader.SetFileName(tmpf[1])
-                    reader.Update()
-
-                    return reader
+        return reader
 
 
 def brep_reader(brep_string, indx):
@@ -796,24 +805,40 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
                 mappers[shape_name] = (
                     x for x in [mappers[associated_shape]()])
 
-            elif shape_type in ['stp', 'step']:
-                reader = step_reader(str(io.shapes()[shape_name][:]))
+            elif shape_type in ['stp', 'step', 'igs', 'iges']:
+                with io_tmpfile(
+                        debug=True,
+                        suffix='.{0}'.format(shape_type),
+                        contents=str(io.shapes()[shape_name][:][0])) as tmpf:
+                    shape = occ_load_file(tmpf[1])
 
-                readers[shape_name] = reader
-                mapper = vtk.vtkDataSetMapper()
-                add_compatiblity_methods(mapper)
-                mapper.SetInputConnection(reader.GetOutputPort())
-                mappers[shape_name] = (x for x in [mapper])
-            else:
-                assert shape_type in ['igs', 'iges']
+                    # whole shape
+                    reader = topods_shape_reader(shape)
+                    readers[shape_name] = reader
+                    mapper = vtk.vtkDataSetMapper()
+                    add_compatiblity_methods(mapper)
+                    mapper.SetInputConnection(reader.GetOutputPort())
+                    mappers[shape_name] = (x for x in [mapper])
 
-                reader = iges_reader(str(io.shapes()[shape_name][:]))
+                    # subparts
+                    faces, edges = occ_topo_list(shape)
+                    for i, f in enumerate(faces):
+                        shape_indx = ('Face', shape_name, i)
+                        reader = topods_shape_reader(f)
+                        readers[shape_indx] = reader
+                        mapper = vtk.vtkDataSetMapper()
+                        add_compatiblity_methods(mapper)
+                        mapper.SetInputConnection(reader.GetOutputPort())
+                        mappers[shape_indx] = (x for x in [mapper])
 
-                readers[shape_name] = reader
-                mapper = vtk.vtkDataSetMapper()
-                add_compatiblity_methods(mapper)
-                mapper.SetInputConnection(reader.GetOutputPort())
-                mappers[shape_name] = (x for x in [mapper])
+                    for i, e in enumerate(edges):
+                        shape_indx = ('Edge', shape_name, i)
+                        reader = topods_shape_reader(e)
+                        readers[shape_indx] = reader
+                        mapper = vtk.vtkDataSetMapper()
+                        add_compatiblity_methods(mapper)
+                        mapper.SetInputConnection(reader.GetOutputPort())
+                        mappers[shape_indx] = (x for x in [mapper])
 
         elif shape_type == 'heightmap':
             points = vtk.vtkPoints()
@@ -933,10 +958,12 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
             mapper.SetInputConnection(source.GetOutputPort())
             mappers[shape_name] = (x for x in [mapper])
 
-    fixed_mappers = dict()
-    for shape_name in io.shapes():
-        if shape_name not in fixed_mappers:
-            fixed_mappers[shape_name] = mappers[shape_name].next()
+    unfrozen_mappers = dict()
+
+    for shape_name in mappers.keys():
+        if shape_name not in unfrozen_mappers:
+            print (shape_name)
+            unfrozen_mappers[shape_name] = mappers[shape_name].next()
 
     for instance_name in io.instances():
 
@@ -953,9 +980,18 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
             static_actors[instance] = list()
 
         for contactor_instance_name in io.instances()[instance_name]:
-            contactor_shape_name = io.instances()[instance_name][
-                contactor_instance_name].attrs['name']
-            contactors[instance].append(contactor_shape_name)
+            contactor = io.instances()[instance_name][contactor_instance_name]
+            contact_shape_indx = None
+            print instance_name, (contactor.attrs.keys())
+            if 'type' in contactor.attrs:
+                contact_type = contactor.attrs['type']
+                contact_index = contactor.attrs['contact_index']
+                contact_shape_indx = (contact_type, contactor.attrs['name'],
+                                      contact_index)
+            else:
+                contact_shape_indx = contactor.attrs['name']
+
+            contactors[instance].append(contact_shape_indx)
 
             actor = vtk.vtkActor()
             if io.instances()[instance_name].attrs.get('mass', 0) > 0:
@@ -972,21 +1008,26 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
                     config.get('static_opacity', 1.0))
 
             actor.GetProperty().SetColor(random_color())
-            actor.SetMapper(fixed_mappers[contactor_shape_name])
+            actor.SetMapper(unfrozen_mappers[contact_shape_indx])
 
             renderer.AddActor(actor)
 
             transform = vtk.vtkTransform()
             transformer = vtk.vtkTransformFilter()
 
-            if contactor_shape_name in readers:
+            if contact_shape_indx in readers:
                 transformer.SetInputConnection(
-                    readers[contactor_shape_name].GetOutputPort())
+                    readers[contact_shape_indx].GetOutputPort())
             else:
-                transformer.SetInputData(datasets[contactor_shape_name])
+                transformer.SetInputData(datasets[contact_shape_indx])
 
-            if 'scale' in io.shapes()[contactor_shape_name].attrs:
-                scale = io.shapes()[contactor_shape_name].attrs['scale']
+            if isinstance(contact_shape_indx, tuple):
+                contact_shape_name = contact_shape_indx[1]
+            else:
+                contact_shape_name = contact_shape_indx
+                
+            if 'scale' in io.shapes()[contact_shape_name].attrs:
+                scale = io.shapes()[contact_shape_name].attrs['scale']
                 scale_transform = vtk.vtkTransform()
                 scale_transform.Scale(scale, scale, scale)
                 scale_transform.SetInput(transform)
@@ -996,7 +1037,7 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
                 transformer.SetTransform(transform)
                 actor.SetUserTransform(transform)
 
-            transformers[contactor_shape_name] = transformer
+            transformers[contact_shape_indx] = transformer
 
             big_data_source.AddInputConnection(transformer.GetOutputPort())
 

@@ -199,7 +199,8 @@ def check_points_axes(name, joint_class, points, axes):
     check(axes, 1)
 
 @contextmanager
-def tmpfile(suffix='', prefix='siconos_io', contents=None):
+def tmpfile(suffix='', prefix='siconos_io', contents=None,
+            debug=False):
     """
     A context manager for a named temporary file.
     """
@@ -227,7 +228,8 @@ def tmpfile(suffix='', prefix='siconos_io', contents=None):
 
     yield r
     fid.close()
-    os.remove(tfilename)
+    if not debug:
+        os.remove(tfilename)
 
 
 class Timer():
@@ -609,6 +611,41 @@ class ShapeCollection():
                             self._shapes[shape_name] = comp
                             self._io._keep.append(self._shapes[shape_name])
 
+                elif self.attributes(shape_name)['type'] in ['iges', 'igs']:
+                    from OCC.IGESControl import IGESControl_Reader
+                    from OCC.BRep import BRep_Builder
+                    from OCC.TopoDS import TopoDS_Compound
+                    from OCC.IFSelect import IFSelect_RetDone,\
+                        IFSelect_ItemsByEntity
+
+                    builder = BRep_Builder()
+                    comp = TopoDS_Compound()
+                    builder.MakeCompound(comp)
+
+                    assert self.shape(shape_name).dtype == h5py.new_vlen(str)
+
+                    with tmpfile(contents=self.shape(shape_name)[:][0]) as tmpf:
+                        iges_reader = IGESControl_Reader()
+
+                        status = iges_reader.ReadFile(tmpf[1])
+
+                        if status == IFSelect_RetDone:  # check status
+                            failsonly = False
+                            iges_reader.PrintCheckLoad(
+                                failsonly, IFSelect_ItemsByEntity)
+                            iges_reader.PrintCheckTransfer(
+                                failsonly, IFSelect_ItemsByEntity)
+
+                            ok = iges_reader.TransferRoots()
+                            nbs = iges_reader.NbShapes()
+
+                            for i in range(1, nbs + 1):
+                                shape = iges_reader.Shape(i)
+                                builder.Add(comp, shape)
+
+                            self._shapes[shape_name] = comp
+                            self._io._keep.append(self._shapes[shape_name])
+                            
                 elif self.attributes(shape_name)['type'] in['brep']:
                     if not 'contact' in self.attributes(shape_name):
 
