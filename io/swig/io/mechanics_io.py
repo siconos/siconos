@@ -1533,13 +1533,23 @@ class Hdf5():
             body1_name = pinter.attrs['body1_name']
             body2_name = pinter.attrs['body2_name']
 
-            ds1 = \
-                  Kernel.cast_NewtonEulerDS(topo.getDynamicalSystem(body1_name))
+            try:
+                ds1 = \
+                      Kernel.cast_NewtonEulerDS(
+                          topo.getDynamicalSystem(body1_name))
+            except:
+                ds1 = None
+
             try:
                 ds2 = \
-                    Kernel.cast_NewtonEulerDS(topo.getDynamicalSystem(body2_name))
+                      Kernel.cast_NewtonEulerDS(
+                          topo.getDynamicalSystem(body2_name))
             except:
                 ds2 = None
+
+            # static object in second
+            if ds1 is None:
+                ds2, ds1 = ds1, ds2
 
             contactor1_name = pinter.attrs.get('contactor1_name', None)
             contactor2_name = pinter.attrs.get('contactor2_name', None)
