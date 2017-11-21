@@ -306,6 +306,29 @@ def add_line(dataset, line):
     dataset[dataset.shape[0] - 1, :] = line
 
 
+
+#
+# misc fixes
+#
+# fix ctr.'name' in old hdf5 files
+#
+
+def upgrade_io_format(filename):
+
+    with Hdf5(filename, mode='a') as io:
+    
+        for instance_name in io.instances():
+            for contactor_instance_name in io.instances()[instance_name]:
+                contactor = io.instances()[instance_name][
+                    contactor_instance_name]
+                if 'name' in contactor.attrs:
+                    warn("""
+contactor {0} attribute 'name': renamed in 'shape_name'
+                    """)
+                    contactor.attrs['shape_name'] = contactor['name']
+                    del contactor['name']
+
+    
 def str_of_file(filename):
     with open(filename, 'r') as f:
         return str(f.read())
@@ -918,6 +941,7 @@ class Hdf5():
         self._solv_data = data(self._data, 'solv', 4,
                                use_compression = self._use_compression)
         self._input = group(self._data, 'input')
+
         self._nslaws_data = group(self._data, 'nslaws')
 
         if self._shape_filename is None:
@@ -1065,7 +1089,7 @@ class Hdf5():
             # a static object
             body = None
 
-        ctors_data = set([contactor.data for contactor in contactors])
+        ctors_data = set([contactor.shape_name for contactor in contactors])
 
         ref_shape = {ctor_data: occ.OccContactShape(
             self._shape.get(ctor_data,
@@ -1077,7 +1101,7 @@ class Hdf5():
         for contactor in contactors:
 
             contact_shape = None
-            reference_shape = ref_shape[contactor.data]
+            reference_shape = ref_shape[contactor.shape_name]
 
             self._keep.append(reference_shape)
 
@@ -1147,11 +1171,11 @@ class Hdf5():
                 cset = SiconosContactorSet()
                 csetpos = (translation + orientation)
                 for c in contactors:
-                    shp = self._shape.get(c.data)
+                    shp = self._shape.get(c.shape_name)
                     pos = list(c.translation) + list(c.orientation)
                     cset.append(SiconosContactor(shp, pos, c.group))
                     if self.verbose:
-                        print('Adding shape %s to static contactor'%c.data, pos)
+                        print('Adding shape %s to static contactor'%c.shape_name, pos)
                 self._broadphase.insertStaticContactorSet(cset, csetpos)
 
                 self._static[name] = {
@@ -1202,7 +1226,7 @@ class Hdf5():
                         btCollisionObject.CF_STATIC_OBJECT)
 
                     static_cobj.setCollisionShape(
-                        self._shape.get(c.data))
+                        self._shape.get(c.shape_name))
 
                     self._static[name] = {
                         'number': number,
@@ -1238,7 +1262,7 @@ class Hdf5():
 
                 cset = SiconosContactorSet()
                 for c in contactors:
-                    shp = self._shape.get(c.data)
+                    shp = self._shape.get(c.shape_name)
                     pos = list(c.translation) + list(c.orientation)
                     cset.append(SiconosContactor(shp, pos, c.group))
 
@@ -1247,7 +1271,7 @@ class Hdf5():
             elif use_original and use_bullet:
                 # a Bullet moving object
                 bws = BulletWeightedShape(
-                    self._shape.get(contactors[0].data), mass)
+                    self._shape.get(contactors[0].shape_name), mass)
 
                 if inertia is not None:
 
@@ -1267,9 +1291,9 @@ class Hdf5():
 
                 #body.setNullifyFGyr(True)
                 for contactor in contactors[1:]:
-                    shape_id = self._shapeid[contactor.data]
+                    shape_id = self._shapeid[contactor.shape_name]
 
-                    body.addCollisionShape(self._shape.get(contactor.data),
+                    body.addCollisionShape(self._shape.get(contactor.shape_name),
                                            contactor.translation,
                                            contactor.orientation,
                                            contactor.group)
@@ -1635,13 +1659,14 @@ class Hdf5():
         contactors = []
         occ_type = False
         for ctr in input_ctrs:
+
             if 'type' in ctr.attrs:
                 # occ contact
                 occ_type = True
                 contactors.append(
                     Contactor(
                         instance_name=ctr.attrs['instance_name'],
-                        shape_data=ctr.attrs['name'],
+                        shape_name=ctr.attrs['shape_name'],
                         collision_group=ctr.attrs['group'].astype(int),
                         contact_type=ctr.attrs['type'],
                         contact_index=ctr.attrs['contact_index'].astype(int),
@@ -1653,7 +1678,7 @@ class Hdf5():
                 contactors.append(
                     Contactor(
                         instance_name=ctr.attrs['instance_name'],
-                        shape_data=ctr.attrs['name'],
+                        shape_name=ctr.attrs['shape_name'],
                         collision_group=ctr.attrs['group'].astype(int),
                         relative_translation=np.subtract(ctr.attrs['translation'].astype(float), center_of_mass),
                         relative_orientation=ctr.attrs['orientation'].astype(float)))
@@ -1664,7 +1689,7 @@ class Hdf5():
                 contactors.append(
                     Shape(
                         instance_name=ctr.attrs['instance_name'],
-                        shape_data=ctr.attrs['name'],
+                        shape_name=ctr.attrs['shape_name'],
                         relative_translation=np.subtract(ctr.attrs['translation'].astype(float), center_of_mass),
                         relative_orientation=ctr.attrs['orientation'].astype(float)))
 
@@ -1802,7 +1827,7 @@ class Hdf5():
                             contactors.append(
                                 Contactor(
                                     instance_name=ctr.attrs['instance_name'],
-                                    shape_data=ctr.attrs['name'],
+                                    shape_name=ctr.attrs['shape_name'],
                                     collision_group=ctr.attrs['group'].astype(int),
                                     contact_type=ctr.attrs['type'],
                                     contact_index=ctr.attrs['contact_index'].astype(int),
@@ -1814,7 +1839,7 @@ class Hdf5():
                             contactors.append(
                                 Contactor(
                                     instance_name=ctr.attrs['instance_name'],
-                                    shape_data=ctr.attrs['name'],
+                                    shape_name=ctr.attrs['shape_name'],
                                     collision_group=ctr.attrs['group'].astype(int),
                                     relative_translation=np.subtract(ctr.attrs['translation'].astype(float), center_of_mass),
                                     relative_orientation=ctr.attrs['orientation'].astype(float)))
@@ -1826,7 +1851,7 @@ class Hdf5():
                                 contactors.append(
                                     Volume(
                                         instance_name=ctr.attrs['instance_name'],
-                                        shape_data=ctr.attrs['name'],
+                                        shape_name=ctr.attrs['shape_name'],
                                         parameters=pickle.loads(ctr.attrs['parameters']),
                                         relative_translation=np.subtract(ctr.attrs['translation'].astype(float), center_of_mass),
                                         relative_orientation=ctr.attrs['orientation'].astype(float)))
@@ -1834,7 +1859,7 @@ class Hdf5():
                                 contactors.append(
                                     Shape(
                                         instance_name=ctr.attrs['instance_name'],
-                                        shape_data=ctr.attrs['name'],
+                                        shape_name=ctr.attrs['shape_name'],
                                         relative_translation=np.subtract(ctr.attrs['translation'].astype(float), center_of_mass),
                                         relative_orientation=ctr.attrs['orientation'].astype(float)))
 
@@ -1855,7 +1880,7 @@ class Hdf5():
                         # Bullet object
                         self.importBulletObject(
                             name, floatv(translation), floatv(orientation),
-                            floatv(velocity), contactors, float(mass),
+                            floatv(velocity), contactors, mass,
                             inertia, body_class, shape_class,
                             number = self.instances()[name].attrs['id'])
 
@@ -2467,7 +2492,7 @@ class Hdf5():
                     for volume in volumes:
 
                         iprops = GProp_GProps()
-                        iishape = self._shape.get(volume.data,
+                        iishape = self._shape.get(volume.shape_name,
                                                   shape_class=None, face_class=None,
                                                   edge_class=None, new_instance=True)
                         ishape = occ.OccContactShape(iishape).data()
@@ -2535,13 +2560,13 @@ class Hdf5():
                     instance_name = ctor.instance_name
                 else:
                     # the default name for contactor
-                    instance_name = '{0}-{1}'.format(ctor.data, num)
+                    instance_name = '{0}-{1}'.format(ctor.shape_name, num)
 
                 dat = data(obj, instance_name, 0,
                            use_compression=self._use_compression)
 
                 dat.attrs['instance_name'] = instance_name
-                dat.attrs['name'] = ctor.data
+                dat.attrs['shape_name'] = ctor.shape_name
                 if hasattr(ctor, 'group'):
                     dat.attrs['group'] = ctor.group
 

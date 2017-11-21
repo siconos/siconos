@@ -986,10 +986,10 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
             if 'type' in contactor.attrs:
                 contact_type = contactor.attrs['type']
                 contact_index = contactor.attrs['contact_index']
-                contact_shape_indx = (contact_type, contactor.attrs['name'],
+                contact_shape_indx = (contact_type, contactor.attrs['shape_name'],
                                       contact_index)
             else:
-                contact_shape_indx = contactor.attrs['name']
+                contact_shape_indx = contactor.attrs['shape_name']
 
             contactors[instance].append(contact_shape_indx)
 
