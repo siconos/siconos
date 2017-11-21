@@ -196,10 +196,18 @@ def save_model_to_hdf5(model, ds, filename, matlab_data, filt_frets):
     h5file.close()
 
 
-def load_model(filename):
+def load_model(filename, from_matlab=None):
     """Read hdf file to:
     * load parameters and create model
     * load simulation results
+
+    Parameters
+    ----------
+    filename : string
+         hdf5 file (relative or full path)
+    from_matlab : string, optional
+         matlab config path + radix (neck shape, frets positions ...)
+         if the one in h5file is wrong (e.g. simulation done on another cluster)
 
     Remark: the hdf file should have been created at the
     end of a simulation using "save_hdf5" method.
@@ -214,7 +222,8 @@ def load_model(filename):
     initial_time = h5file.attrs['initial_time']
     final_time = h5file.attrs['final_time']
     output_freq = h5file.attrs['output_freq']
-    from_matlab = h5file.attrs['matlab_data']
+    if from_matlab is None:
+        from_matlab = h5file.attrs['matlab_data']
     filt_frets = h5file.attrs['filter frets']
     enable_frets_output = h5file.attrs['frets output']
     # Create model

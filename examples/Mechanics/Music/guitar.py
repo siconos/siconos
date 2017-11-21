@@ -488,8 +488,8 @@ class Guitar(sk.Model):
             plot_x = plot_shape[0]
             plot_y = plot_shape[1]
             nb_points = plot_x * plot_y
-            freq = self.nb_time_steps // nb_points
-            time_ind = np.arange(0, self.nb_time_steps, freq)
+            freq = self.nb_time_steps_output // nb_points
+            time_ind = np.arange(0, self.nb_time_steps_output, freq)
             time_ind[-1] = -1
 
         else:
@@ -512,6 +512,7 @@ class Guitar(sk.Model):
         # plt.title('dsp')
         # plt.subplot(343)
         # output frequency, for modes
+        
         self.convert_modal_output(ds, time_ind)
         data = self.data_ds[ds]
         interactions = self.interactions_linked_to_ds(ds)
@@ -614,7 +615,7 @@ class Guitar(sk.Model):
         # blit=True means only re-draw the parts that have changed.
         anim = animation.FuncAnimation(
             fig, animate, init_func=init,
-            frames=int(self.nb_time_steps / sampling),
+            frames=int(self.nb_time_steps_output / sampling),
             interval=20, blit=True)
         anim.save(movie_name, fps=30, extra_args=['-vcodec', 'libx264'])
 
