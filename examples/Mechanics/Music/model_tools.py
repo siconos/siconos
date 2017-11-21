@@ -14,7 +14,7 @@ def create_model(n_modes, max_coords=(7.8e-3, .64),
                  output_freq=1, from_matlab=None,
                  frets_file='./donnees_siconos/pb2_h.mat',
                  filt_frets=True, enable_frets_output=False,
-                    visu=False, restitution_coeff=0.9):
+                 visu=False, restitution_coeff=0.9):
     """Build string and model
 
     Parameters
