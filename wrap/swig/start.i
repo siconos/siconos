@@ -90,4 +90,6 @@ SWIG_init(void);
 
 %include ignored_functions.i
 
+%include stl.i
+
 #endif
