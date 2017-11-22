@@ -6,7 +6,7 @@
   {
   case NM_DENSE:
   {
-    set_existing_dense_mat_from_target(mat->matrix0, target_mat, mat->size0, mat->size1, TARGET_ERROR_VERBOSE);
+    set_existing_dense_mat_from_target(mat->matrix0, (SN_ARRAY_TYPE*)target_mat, mat->size0, mat->size1, TARGET_ERROR_VERBOSE);
     break;
   }
   case NM_SPARSE_BLOCK:
@@ -47,7 +47,7 @@ static void call_compute_F (void *problem, int n, double* z, double* F) \
  \
     TARGET_CALL(env, "compute_F", env_compute_function, target_F, target_n, target_z); \
  \
-    TARGET_VECTOR_FROM_CALL(F, target_F, n); \
+    TARGET_VECTOR_FROM_CALL(F, (SN_ARRAY_TYPE*)target_F, n); \
  \
     target_mem_mgmt_instr(target_z); \
     target_mem_mgmt_instr(target_F); \

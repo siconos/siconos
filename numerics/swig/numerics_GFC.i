@@ -27,9 +27,9 @@
   }
 
   int size = arg1->H->size1;
-  if (size !=  array_size(array2, 0))
+  if (size !=  array_size((SN_ARRAY_TYPE*)array2, 0))
   {
-    snprintf(msg, sizeof(msg), "Size of b is %ld, but the size of H is %d! Both should be equal!\n", array_size(array2, 0), size);
+    snprintf(msg, sizeof(msg), "Size of b is %ld, but the size of H is %d! Both should be equal!\n", array_size((SN_ARRAY_TYPE*)array2, 0), size);
     SWIG_exception_fail(SWIG_RuntimeError, msg);
   }
 
@@ -91,8 +91,8 @@
       GlobalFrictionContactProblem * FC = (GlobalFrictionContactProblem *) malloc(sizeof(GlobalFrictionContactProblem));
       globalFrictionContact_null(FC);
 
-      size_t size0 = array_size(array,0);
-      size_t size1 = array_size(array,1);
+      size_t size0 = array_size((SN_ARRAY_TYPE*)array,0);
+      size_t size1 = array_size((SN_ARRAY_TYPE*)array,1);
       FC->M = NM_create(NM_DENSE, size0, size1);
 
       memcpy(FC->M->matrix0,array_data(array),size0*size1*sizeof(double));
