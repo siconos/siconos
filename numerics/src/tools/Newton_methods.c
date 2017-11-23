@@ -17,6 +17,7 @@
 */
 
 #include "SiconosConfig.h"
+#include "SiconosCompat.h"
 
 #include "Newton_methods.h"
 

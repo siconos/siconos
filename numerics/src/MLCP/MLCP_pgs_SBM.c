@@ -32,6 +32,7 @@
 #include "SiconosBlas.h"
 #include "LCP_Solvers.h"
 #include "MLCP_Solvers.h"
+#include "SiconosCompat.h"
 #include <assert.h>
 #include "numerics_verbose.h"
 

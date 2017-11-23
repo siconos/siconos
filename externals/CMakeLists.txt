@@ -46,6 +46,22 @@ set(${COMPONENT}_Unstable_SRCS)
 
 # List of directories of headers not to be installed
 set(${COMPONENT}_HDRS_EXCLUDE_DIR PATH_SDK/include SOL/lumod-c)
+if(NOT INSTALL_EXTERNALS_HEADERS)
+  list(APPEND ${COMPONENT}_HDRS_EXCLUDE_DIR
+    blas_lapack
+    hairer
+    netlib/dftemplates
+    netlib/odepack
+    optim_misc
+    optim_misc/ql0001
+    sort
+    tools)
+endif()
+if(NOT INSTALL_EXTERNALS_HEADERS_CSPARSE)
+  list(APPEND ${COMPONENT}_HDRS_EXCLUDE_DIR
+    SuiteSparse/CSparse
+    SuiteSparse/CSparse_extensions)
+endif()
 
 # List of directories for which no doxygen doc will be generated
 # By default all directories matching "test" are excluded.
@@ -92,8 +108,7 @@ library_project_setup()
 
 
 # --- specific install ----
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/FCMangle.h DESTINATION include/${PROJECT_NAME})
-
+#install(FILES ${CMAKE_CURRENT_BINARY_DIR}/FCMangle.h DESTINATION include/${PROJECT_NAME})
 
 if(HAVE_SICONOS_MECHANICS AND WITH_RENDERER)
   # This files is not installed as a program, even though it is one.

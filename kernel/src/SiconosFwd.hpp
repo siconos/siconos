@@ -114,12 +114,14 @@ DEFINE_SPTR_STRUCT(GraphProperties)
 DEFINE_SPTR_STRUCT(DynamicalSystemsGraph)
 DEFINE_SPTR_STRUCT(InteractionsGraph)
 
-// Fortran
-#include <f2c.h>
+#ifndef _F2C_INCLUDE_H
+typedef int integer;
+typedef double doublereal;
+#endif
 
 TYPEDEF_SAPTR(integer)
-TYPEDEF_SPTR(integer)
 TYPEDEF_SAPTR(doublereal)
+TYPEDEF_SPTR(integer)
 TYPEDEF_SPTR(doublereal)
 
 #endif

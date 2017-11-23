@@ -30,6 +30,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <stddef.h>
 
 #include "NumericsMatrix.h"
 #include "sn_logger.h"

@@ -36,7 +36,6 @@ For each solver, the input argument are:
 #include "ConvexQP.h"
 #include "SolverOptions.h"
 #include "ConvexQP_cst.h"
-#include "SiconosCompat.h"
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"

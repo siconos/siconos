@@ -20,6 +20,7 @@
 #include <stdio.h>
 #include <math.h>
 #include "MLCP_Solvers.h"
+#include "SiconosCompat.h"
 #include "SiconosLapack.h"
 #include "Newton_methods.h"
 #include "FischerBurmeister.h"

@@ -27,8 +27,13 @@
 
 #include "SiconosConfig.h"
 #include "NumericsFwd.h"
-#include "SparseMatrix.h" // for freeNSLSP
 
+/* Private definitions -- must #include csparse.h, not installed, to
+ * use internally. */
+struct cs_sparse;
+typedef struct cs_sparse CSparseMatrix;
+
+typedef void (*freeNSLSP)(void* p);
 
 /**\struct linalg_data_t NumericsSparseMatrix.h
  * generic data struct for linear algebra operations

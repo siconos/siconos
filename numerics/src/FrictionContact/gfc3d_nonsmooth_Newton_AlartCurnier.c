@@ -43,6 +43,7 @@
 
 #include "gfc3d_compute_error.h"
 #include "SiconosBlas.h"
+#include "csparse.h"
 #include "NumericsMatrix.h"
 #include "NumericsSparseMatrix.h"
 /* #define DEBUG_MESSAGES 1 */

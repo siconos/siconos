@@ -29,6 +29,7 @@
 
 #include "ConvexQP.h"
 #include "ConvexQP_Solvers.h"
+#include "SiconosCompat.h"
 #include "FrictionContactProblem_as_ConvexQP.h"
 
 #include <stdio.h>

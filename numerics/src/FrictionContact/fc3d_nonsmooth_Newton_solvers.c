@@ -27,6 +27,7 @@
 #include "debug.h"
 #include "op3x3.h"
 #include "SparseBlockMatrix.h"
+#include "SparseMatrix.h"
 #include "fc3d_Solvers.h"
 #include "FrictionContactProblem.h"
 #include "fc3d_compute_error.h"

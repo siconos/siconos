@@ -19,14 +19,14 @@
 #ifndef SparseBlockMatrix_H
 #define SparseBlockMatrix_H
 
-/* #include <stddef.h> */
-/* #include <stdio.h> */
 #include "NumericsFwd.h"
 #include "SiconosConfig.h"
 #include <stdio.h>
-/* #include "SiconosCompat.h" */
 
-#include "SparseMatrix.h"
+/* Private definitions -- must #include csparse.h, not installed, to
+ * use internally. */
+struct cs_sparse;
+typedef struct cs_sparse CSparseMatrix;
 
 /*!\file SparseBlockMatrix.h
   \brief Structure definition and functions related to

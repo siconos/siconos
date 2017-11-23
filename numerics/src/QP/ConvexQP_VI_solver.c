@@ -21,6 +21,7 @@
 #include "VariationalInequality_Solvers.h"
 #include "ConvexQP_Solvers.h"
 #include "ConvexQP_computeError.h"
+#include "SiconosCompat.h"
 
 #include "SolverOptions.h"
 #include "numerics_verbose.h"

@@ -17,6 +17,7 @@
 */
 
 #include "MLCP_Solvers.h"
+#include "SiconosCompat.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

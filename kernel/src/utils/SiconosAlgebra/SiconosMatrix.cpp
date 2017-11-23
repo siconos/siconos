@@ -20,6 +20,7 @@
 #include "SiconosAlgebra.hpp"
 #include <boost/numeric/ublas/matrix_sparse.hpp>
 #include "BlockMatrix.hpp"
+#include "SparseMatrix.h"
 
 // Constructor with the type-number
 SiconosMatrix::SiconosMatrix(unsigned int type): _num(type)

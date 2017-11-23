@@ -69,7 +69,7 @@ csi nz ;      : # of entries in triplet matrix;
 csi is either int64_t or int32_t and this is controlled at compile time*/
 
 
-#define CSparseMatrix struct cs_sparse
+typedef struct cs_sparse CSparseMatrix;
 
 #define NS_UNKNOWN_ERR(func, orig) \
 fprintf(stderr, #func ": unknown origin %d for sparse matrix\n", orig);
@@ -90,8 +90,6 @@ extern "C"
     css* S;      /**< symbolic analysis */
     csn* N;      /**< numerics factorization */
   } cs_lu_factors;
-
-  typedef void (*freeNSLSP)(void* p);
 
 
   /** Add an entry to a triplet matrix only if the absolute value is

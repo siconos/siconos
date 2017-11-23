@@ -30,6 +30,7 @@ dim(v)=nn
 #include <stdlib.h>
 #include <string.h>
 #include "MLCP_Solvers.h"
+#include "SiconosCompat.h"
 #include <math.h>
 #include "mlcp_path_enum.h"
 #include "mlcp_enum.h"

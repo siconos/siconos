@@ -18,6 +18,8 @@
 
 #include <assert.h>
 #include "line_search.h"
+#include <math.h>
+#include "SiconosCompat.h"
 
 #ifdef __cplusplus
 #undef restrict
