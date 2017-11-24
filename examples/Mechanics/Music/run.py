@@ -43,7 +43,7 @@ if __name__ == "__main__":
         output_freq=output_freq,
         from_matlab=matlab_input,
         filt_frets=filt_frets,
-        enable_frets_output=True, visu=False,
+        enable_frets_output='light', visu=False,
         restitution_coeff=0.9)
 
     simu = guitar_model.simulation()
@@ -75,7 +75,7 @@ if __name__ == "__main__":
     print('End of simulation process. Duration: ', time.clock() - start_time)
     print("nb steps", k)
     # --- Output dir for results ---
-    result_dir = os.getcwd() + '/temp'
+    result_dir = os.getcwd()# + '/temp'
     if not os.path.exists(result_dir):
         os.mkdir(result_dir)
     filename = 'g_' + str(number_of_modes) + '_' + str(int(fs)) + '.h5'

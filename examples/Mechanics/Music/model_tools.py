@@ -99,11 +99,11 @@ def create_model(n_modes, max_coords=(7.8e-3, .64),
     else:
         frets_positions = all_frets_positions
         nb_frets = frets_positions.size
-        frets_indices = np.arange(1, nb_frets + 1)
+        frets_indices = np.arange(nb_frets)
         xp = x
-
+        
     #dx = string.space_step
-
+    
     #array(np.round(frets_positions / dx), np.int32)
     #frets_y = np.linspace(-0.5e-4, -1e-4, 20)
 

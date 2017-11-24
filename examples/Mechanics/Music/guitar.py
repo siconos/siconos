@@ -223,7 +223,7 @@ class Fret(sk.Interaction):
         self.contact_pos = dx * contact_positions[0]
         # set contact index (mind that boundary points
         # are not included in fret/ds)
-        self.contact_index = contact_positions[0] - 1
+        self.contact_index = contact_positions[0]# - 1
         # Build nslaw, relation and interaction
         e = restitution_coeff
         nslaw = sk.NewtonImpactNSL(e)
