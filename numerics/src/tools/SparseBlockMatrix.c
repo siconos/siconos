@@ -29,7 +29,7 @@
 //#define DEBUG_STDOUT 1
 //#define DEBUG_NOCOLOR 1
 #include "debug.h"
-#include "csparse.h"
+#include "SparseMatrix.h"
 
 //#define VERBOSE_DEBUG
 

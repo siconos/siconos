@@ -33,12 +33,37 @@ Documentation to be done
 
 #include "SiconosConfig.h"
 
+#ifdef SICONOS_USE_CXSPARSE
+
+/* Compile-time assertion: users of SparseMatrix.h must have CS_LONG
+ * set if and only if SICONOS_INT64 is also set. If it is unset, it is
+ * set here. */
+#ifdef SICONOS_INT64
+#ifndef CS_LONG
+#define CS_LONG
+#endif
+#else
+#ifdef CS_LONG
+#error "CS_LONG (set) does not correspond with SICONOS_INT64 (unset)"
+#endif
+#endif
+
+#include "cs.h"
+#ifdef CS_LONG // SWIG gives syntax error for CS_NAME(_sparse)
+typedef struct cs_dl_sparse CSparseMatrix;
+#else
+typedef struct cs_di_sparse CSparseMatrix;
+#endif
+
+#else
+#include "csparse.h"
+typedef struct cs_sparse CSparseMatrix;
+#endif
+
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {
 #endif
-
-#include "csparse.h"
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
@@ -68,8 +93,6 @@ csi nz ;      : # of entries in triplet matrix;
 
 csi is either int64_t or int32_t and this is controlled at compile time*/
 
-
-#define CSparseMatrix struct cs_sparse
 
 #define NS_UNKNOWN_ERR(func, orig) \
 fprintf(stderr, #func ": unknown origin %d for sparse matrix\n", orig);

@@ -46,6 +46,9 @@
 #cmakedefine HAS_OpenBLAS // it *MAY* also includes lapacke or lapack from netlib
 #cmakedefine HAS_GenericCBLAS
 
+// Which CSparse/CXSparse?
+#cmakedefine SICONOS_USE_CXSPARSE
+
 // Which Lapack? 
 #cmakedefine HAS_MKL_LAPACKE
 #cmakedefine HAS_ATLAS_LAPACK

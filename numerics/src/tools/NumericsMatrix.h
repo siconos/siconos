@@ -123,8 +123,7 @@ The following linear algebra operation are supported:
 
 #include "NumericsFwd.h"
 #include "SiconosConfig.h"
-#include "csparse.h" // For csi
-#include "SparseMatrix.h"
+#include "SparseMatrix.h" // for csi
 
 /** \struct NumericsMatrixInternalData NumericsMatrix.h
  * Structure for simple workspaces

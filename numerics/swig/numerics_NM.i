@@ -135,17 +135,9 @@
 
 };
 
-/* I'm not sure it's a good idea to duplicate thise here ... it is already defined in csparse.h */
-typedef struct cs_sparse    /* matrix in compressed-column or triplet form */
-{
-  csi nzmax ;	    /* maximum number of entries */
-  csi m ;	    /* number of rows */
-  csi n ;	    /* number of columns */
-  csi *p ;	    /* column pointers (size n+1) or col indices (size nzmax) */
-  csi *i ;	    /* row indices, size nzmax */
-  double *x ;	    /* numerical values, size nzmax */
-  csi nz ;	    /* # of entries in triplet matrix, -1 for compressed-col */
-} cs ;
+#ifdef SICONOS_USE_CXSPARSE
+%rename (cs_sparse) cs_di_sparse;
+#endif
 
 %extend cs_sparse
 {

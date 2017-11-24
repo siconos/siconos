@@ -23,7 +23,7 @@
 
 %inline %{
 
-#include "csparse.h"
+#include "SparseMatrix.h"
 
 static inline bool sane_pyseq_check(PyObject *o)
 {
