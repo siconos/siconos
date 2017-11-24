@@ -6,23 +6,22 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-def compute_errors(filelist, indices=None):
+def compute_errors(filelist, indices=None, from_matlab=None):
     """Compute relative error defined in 3.36 from Clara's manuscript.
     """
 
-    # Load reference and current simulations
+    # Load reference and current simulations,
     reference_file = filelist[-1]
-    ref_model, ref_string, ref_frets = load_model(reference_file)
-    ref_model.convert_modal_output(ref_string, indices)
+    ref_model, ref_string, ref_frets = load_model(reference_file, from_matlab)
+    if indices is None:
+        indices = [i for i in range(ref_string.dimension())]
     sref = ref_model.data_ds[ref_string][:, indices]
     sum_ref = sref.sum(0) ** 2
-
     nbfiles = len(filelist) - 1
     nbpoints = len(indices)    
     error = np.zeros((nbfiles, nbpoints), dtype=np.float64)
     for i in range(nbfiles):
-        current_model, current_string, current_frets = load_model(filelist[i])
-        current_model.convert_modal_output(current_string, indices)
+        current_model, current_string, current_frets = load_model(filelist[i], from_matlab)
         scurrent = current_model.data_ds[current_string][:, indices]
         for j in range(nbpoints):
             buff = (sref[:, j] - scurrent[:, j] ) ** 2
@@ -31,7 +30,23 @@ def compute_errors(filelist, indices=None):
     return error
 
 
-
+def plot_campaign(campaign, indices, from_matlab=None, fig=39):
+    freqs = campaign['freqs']
+    filelist = campaign['files_converted']
+    myticks = ['o-', 'x-', '^-', '*-', '+-'] * 200 
+    errors = compute_errors(filelist, indices, from_matlab)
+    print(errors)
+    print(freqs)
+    plt.figure(fig)
+    nbpoints = errors.shape[1]
+    nbfreqs = errors.shape[0]
+    for j in range(nbpoints):
+        plt.loglog(freqs[:nbfreqs], errors[:, j], myticks[j])
+    plt.xlabel("$F_e$(Hz)")
+    plt.ylabel("$L^2$ error")
+    plt.savefig("convergence_study.pdf")
+ 
+   
 if __name__ == "__main__":
 
     # Get results files names from a campaign

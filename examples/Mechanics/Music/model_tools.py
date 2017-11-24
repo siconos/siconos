@@ -7,6 +7,7 @@ import scipy.io
 import numpy as np
 import matplotlib.pyplot as plt
 import h5py
+import os
 
 
 def create_model(n_modes, max_coords=(7.8e-3, .64),
@@ -160,8 +161,27 @@ def create_model(n_modes, max_coords=(7.8e-3, .64),
 
 def save_model_to_hdf5(model, ds, filename, matlab_data, filt_frets):
     """Save ds states and time instants in hdf5 file
+
+    Parameters
+    ----------
+    model : Guitar
+        the complete model (nsds + simu)
+    ds : StringDS
+        the string to be saved
+    filename : string
+        output file name
+    matlab_data : string
+        path to matlab files used to build the model
+    filt_frets: bool
+        use all points (if false) or only 'real' frets (if true) to
+        create interactions
     """
+    # Before saving, ensure all saved displacements are in the same 'state'
+    assert ((model._convert == True).all() or (model._convert == False).all())
     mode = 'w'
+    filedir = os.path.dirname(filename)
+    if not os.path.exists(filedir):
+        os.makedirs(filedir)
     h5file = h5py.File(filename, mode)
     # First, save all attributes required to create the current model
     h5file.attrs['number_of_modes'] = ds.n_modes
@@ -176,6 +196,8 @@ def save_model_to_hdf5(model, ds, filename, matlab_data, filt_frets):
     interactions = model.interactions_linked_to_ds(ds)
     nb_inter = len(interactions)
     h5file.attrs['number of frets'] = nb_inter
+    if (model._convert == False).all():
+        h5file.attrs['converted'] = True
     time_shape = (model.time.size, )
     time_steps = h5file.create_dataset('times', time_shape,
                                        dtype=np.float64)
@@ -249,3 +271,20 @@ def load_model(filename, from_matlab=None):
             guitar_model.data_interactions[inter][...] = h5file[ref]
     h5file.close()
     return guitar_model, guitar_string, frets
+
+
+def load_convert_and_save(filename, from_matlab):
+    # Load hdf5 file to set model and string
+    ref_model, ref_string, ref_frets = load_model(filename, from_matlab)
+    # Convert (modal to real) displacements
+    ref_model.convert_modal_output(ref_string)
+    mode = 'w'
+    outputfilename = 'converted_' + os.path.basename(filename)
+    dirname = os.path.dirname(filename)
+    outputfilename = os.path.join(dirname, outputfilename)
+    h5source = h5py.File(filename, 'r')
+    filt_frets = h5source.attrs['filter frets']
+    h5source.close()
+    save_model_to_hdf5(ref_model, ref_string, outputfilename, from_matlab, filt_frets)
+
+    

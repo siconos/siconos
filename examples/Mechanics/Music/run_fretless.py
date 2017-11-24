@@ -1,6 +1,10 @@
 """Implementation of vibrating string model, described
 in JSV paper (Issanchou 2017) and using Siconos for contact
 simulation.
+
+Fretless bass guitar
+Restitution coeff = 0.9
+
 """
 import sys
 import time
@@ -27,11 +31,6 @@ if __name__ == "__main__":
     final_time = 1.
     number_of_modes = 862
     filt_frets = False
-    #matlab_input_file = './donnees_siconos/pb2_h.mat'
-    # Data (from_matlab parameter), choose between:
-    # - bass_guitar/pb2 : bass with frets
-    # - fretless_bass_guitar/bsf
-    #matlab_input = os.path.join(current_path, 'bass_guitar/pb2')
     matlab_input = os.path.join(current_path, 'fretless_bass_guitar/bsf')
     guitar_model, guitar_string, frets = create_model(
         n_modes=number_of_modes, max_coords=(7.8e-3, .64),
@@ -39,7 +38,7 @@ if __name__ == "__main__":
         output_freq=output_freq,
         from_matlab=matlab_input,
         filt_frets=filt_frets,
-        enable_frets_output=True, visu=False,
+        enable_frets_output='light', visu=False,
         restitution_coeff=0.9)
 
     simu = guitar_model.simulation()

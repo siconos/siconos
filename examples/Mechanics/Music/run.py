@@ -1,6 +1,11 @@
 """Implementation of vibrating string model, described
 in JSV paper (Issanchou 2017) and using Siconos for contact
 simulation.
+
+
+Bass guitar with frets.
+Restitution coeff = 0.9
+
 """
 import sys
 import time
@@ -70,7 +75,7 @@ if __name__ == "__main__":
     print('End of simulation process. Duration: ', time.clock() - start_time)
     print("nb steps", k)
     # --- Output dir for results ---
-    result_dir = os.getcwd()
+    result_dir = os.getcwd() + '/temp'
     if not os.path.exists(result_dir):
         os.mkdir(result_dir)
     filename = 'g_' + str(number_of_modes) + '_' + str(int(fs)) + '.h5'

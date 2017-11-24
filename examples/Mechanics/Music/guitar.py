@@ -218,7 +218,7 @@ class Fret(sk.Interaction):
         # vertical positions of the contact points
         hmat = npw.zeros((1, string.n_modes))
         dx = string.space_step
-        hmat[0, :] = string.s_mat[contact_positions[0] - 1, :]
+        hmat[0, :] = string.s_mat[contact_positions[0], :]
         # compute contact point horizontal position
         self.contact_pos = dx * contact_positions[0]
         # set contact index (mind that boundary points
@@ -330,19 +330,24 @@ class Guitar(sk.Model):
         # A dict of buffers to save interactions variables for all time steps
         self.data_interactions = {}
         self.save_interactions = enable_interactions_output
-        if enable_interactions_output:
+        if enable_interactions_output == 'light':
             for interaction in self.strings_and_frets:
                 nbc = interaction.dimension()
                 self.data_interactions[interaction] = \
                     npw.zeros((self.nb_time_steps_output + 1, nbc))
-#                    npw.zeros((self.nb_time_steps_output + 1, 3 * nbc))
+            self.save_interaction_state = self._save_light_inter
+        elif enable_interactions_output == 'all':
+            for interaction in self.strings_and_frets:
+                nbc = interaction.dimension()
+                self.data_interactions[interaction] = \
+                    npw.zeros((self.nb_time_steps_output + 1, 3 * nbc))
+            self.save_interaction_state = self._save_all_inter
         # time instants
         self.time = npw.zeros(self.nb_time_steps_output + 1)
         self._convert = np.ones(
             self.nb_time_steps_output + 1, dtype=np.bool)
-        self.first_call = True
 
-    def save_interaction_state(self, k, interaction):
+    def _save_light_inter(self, k, interaction):
         """Save ds positions, velocity,
         and contact points local variables.
 
@@ -356,10 +361,25 @@ class Guitar(sk.Model):
         assert self.save_interactions, 'Interactions output is not enabled.'
         nbc = interaction.dimension()
         self.data_interactions[interaction][k, :nbc] = interaction.y(0)
-        #self.data_interactions[interaction][k, nbc:2 * nbc] = interaction.y(1)
-        #self.data_interactions[interaction][k, 2 * nbc:] = \
-        #    interaction.lambda_(1)
 
+    def _save_all_inter(self, k, interaction):
+        """Save ds positions, velocity,
+        and contact points local variables.
+
+        Parameters
+        ----------
+        k : int
+            current iteration number
+        interaction : Fret
+            interaction of interest
+        """
+        assert self.save_interactions, 'Interactions output is not enabled.'
+        nbc = interaction.dimension()
+        self.data_interactions[interaction][k, :nbc] = interaction.y(0)
+        self.data_interactions[interaction][k, nbc:2 * nbc] = interaction.y(1)
+        self.data_interactions[interaction][k, 2 * nbc:] = interaction.lambda_(1)
+
+        
     def save_ds_state_real(self, k, ds):
         """Save ds positions, velocity,
         and contact points local variables.
@@ -371,7 +391,7 @@ class Guitar(sk.Model):
         ds : StringDS
             dynamical system of interest
         """
-        self.data_ds[ds][k, :] = np.dot(ds.s_mat, ds.q())
+        self.data_ds[ds][:, k] = np.dot(ds.s_mat, ds.q())
         self._convert[k] = False
 
     def save_ds_state_modal(self, k, ds):
@@ -400,26 +420,22 @@ class Guitar(sk.Model):
             list of time instant where modal
             pos should be converted. Default = all
         """
-        # if self.first_call:
-        #     self.data_ds[ds] = self.data_ds[ds].transpose()
-        #     self.first_call = False
         if indices is None:
-            indices = range(self.data_ds[ds].shape[0])
+            indices = range(self.data_ds[ds].shape[1])
         indices = [i for i in indices if self._convert[i]]
         self._convert[indices] = False
         self.data_ds[ds][:, indices] = \
             np.dot(ds.s_mat, self.data_ds[ds][:, indices])
 
-    def plot_traj(self, ds, dof=None, filename=None, iplot=0):
+    def plot_traj(self, ds, dof=None, filename=None, iplot=0, ground=None):
         """Plot collected data (positions ...) of a dynamical system
 
         Parameters
         ----------
         ds : StringDS
             dynamical system of interest
-        dof : list of int, optional
-            indices (dof) to be plotted. If None
-            plot all dof.
+        dof : int
+            index of dof to be plotted.
         filename : string, optional
             name of the output file
         iplot : int
@@ -435,32 +451,25 @@ class Guitar(sk.Model):
         x = x[1:-1]
         # Plot string displacements, at contact points, according to time
         plt.figure(iplot, figsize=(17, 8))
-        if dof is None:
-            dof = np.arange(ndof)
-            for ind in dof:
-                plt.plot(self.time, data[ind, :])
-
-            plt.xlabel('time')
-            plt.title('displacements')
-        else:
-            leg = []
-            for ind in dof:
-                plt.subplot(2, 2, 1)
-                # plot ind - 1 because boundaries points
-                # are not included in the ds
-                plt.plot(self.time, data[ind - 1, :])
-                plt.subplot(2, 2, 2)
-                plt.plot(self.time, data[ind - 1, :])
-                plt.xlim(0, 0.02)
-                plt.subplot(2, 2, 3)
-                plt.plot(self.time, data[ind - 1, :])
-                plt.xlim(0.05, 0.07)
-                plt.subplot(2, 2, 4)
-                plt.plot(self.time, data[ind - 1, :])
-                plt.xlim(0.75, 0.77)
-                leg.append('x = ' + str(x[ind - 1]))
-            plt.legend(leg)
-            plt.suptitle('displacements = f(time)')
+        leg = []
+        plt.subplot(2, 2, 1)
+        # plot dof - 1 because boundaries points
+        # are not included in the ds
+        plt.plot(self.time, data[dof, :])
+        if ground is not None:
+            plt.plot((self.time[0], self.time[-1]),(ground, ground), '-')
+        plt.subplot(2, 2, 2)
+        plt.plot(self.time, data[dof - 1, :])
+        plt.xlim(0, 0.02)
+        plt.subplot(2, 2, 3)
+        plt.plot(self.time, data[dof - 1, :])
+        plt.xlim(0.05, 0.07)
+        plt.subplot(2, 2, 4)
+        plt.plot(self.time, data[dof - 1, :])
+        plt.xlim(0.75, 0.77)
+        leg.append('x = ' + str(x[dof]))
+        plt.legend(leg)
+        plt.suptitle('displacements = f(time)')
         if filename is not None:
             plt.savefig(filename)
 
@@ -577,7 +586,7 @@ class Guitar(sk.Model):
         plt.title('percussion')
         return plt
 
-    def make_movie(self, ds, movie_name, sampling=20):
+    def make_movie(self, ds, movie_name, sampling=1):
         """Create animation from simulation results,
         for a given ds.
         """
@@ -616,8 +625,8 @@ class Guitar(sk.Model):
         anim = animation.FuncAnimation(
             fig, animate, init_func=init,
             frames=int(self.nb_time_steps_output / sampling),
-            interval=20, blit=True)
-        anim.save(movie_name, fps=30, extra_args=['-vcodec', 'libx264'])
+            blit=True)
+        anim.save(movie_name, fps=100, extra_args=['-vcodec', 'libx264'])
 
     def contactogram(self, ds, nfig=12):
         """Plot contact times on each fret
