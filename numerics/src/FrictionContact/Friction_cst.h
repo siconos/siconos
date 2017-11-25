@@ -161,8 +161,6 @@ extern const char* const   SICONOS_GLOBAL_FRICTION_3D_GAMS_PATHVI_STR;
 extern const char* const   SICONOS_GLOBAL_FRICTION_3D_VI_FPP_STR;
 extern const char* const   SICONOS_GLOBAL_FRICTION_3D_VI_EG_STR;
 extern const char* const   SICONOS_FRICTION_3D_ONECONTACT_QUARTIC_STR ;
-extern const char* const   SICONOS_GLOBAL_FRICTION_3D_GAMS_PATHVI_STR;
-extern const char* const   SICONOS_FRICTION_3D_ONECONTACT_QUARTIC_STR ;
 extern const char* const   SICONOS_FRICTION_3D_ONECONTACT_QUARTIC_NU_STR ;
 
 
