@@ -458,7 +458,7 @@ bool SN_logh5_check_gzip(void)
 SN_logh5* SN_logh5_init(const char* filename, const unsigned iter_max)
 {
   fprintf(stderr, "SN_logh5 :: Siconos/Numerics has been compiled with no HDF5 support!\n");
-  return false;
+  return NULL;
 }
 
 bool SN_logh5_end(SN_logh5* logger)

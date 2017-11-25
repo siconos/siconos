@@ -24,6 +24,7 @@
 #ifdef __cplusplus
 #undef restrict
 #define restrict __restrict
+using namespace std;
 #endif
 
 double line_search_generic(int n, double theta, double preRHS, search_data* ls_data, unsigned searchtype, sn_ls_fn ls_fn)

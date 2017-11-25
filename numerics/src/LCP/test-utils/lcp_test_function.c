@@ -44,6 +44,10 @@ static inline char* strdup(char* src)
 #include "SolverOptions.h"
 #include "SiconosCompat.h"
 
+#ifdef __cplusplus
+using namespace std;
+#endif
+
 int lcp_test_function(FILE * f, int solverId, char* filename)
 {
 

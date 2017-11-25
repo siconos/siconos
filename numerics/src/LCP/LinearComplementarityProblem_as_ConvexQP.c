@@ -45,7 +45,7 @@ void Projection_ConvexQP_LCP(void *cqpIn, double *x, double *PX)
   int n = lcp->size;
   for (int i = 0 ; i <n ; ++i)
   {
-    PX[i] = max(0, x[i]);
+    PX[i] = fmax(0, x[i]);
   }
 }
 

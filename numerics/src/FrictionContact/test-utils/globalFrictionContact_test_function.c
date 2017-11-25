@@ -30,6 +30,11 @@
 #include <fclib.h>
 #include <fclib_interface.h>
 #endif
+
+#ifdef __cplusplus
+using namespace std;
+#endif
+
 int globalFrictionContact_test_function(FILE * f, SolverOptions * options)
 {
 
