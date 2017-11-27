@@ -14,5 +14,5 @@ rundir=/nfs_scratch/$USER/Music/F_${frequency}_id_${OAR_JOB_ID}
 mkdir -p $rundir
 cd $rundir
 # 
-siconos $siconos_dir/run.py $frequency $output_freq
+siconos $siconos_dir/run2.py $frequency $output_freq
 
