@@ -36,8 +36,10 @@ def create_model(n_modes, max_coords=(7.8e-3, .64),
     filt_frets : bool
         true set interactions only on frets.
         If false, set contact at each dof on the neck.
-    enable_frets_output : bool
-        if true, save interactions data at each time step.
+    enable_frets_output : string
+        if 'light' saves interactions data at each time step (only y[0])
+        if 'all' saves all interactions data at each time step
+        else saves nothing
     visu: bool
         if true plot frets positions on the neck.
     """
@@ -153,7 +155,7 @@ def create_model(n_modes, max_coords=(7.8e-3, .64),
     # This is done during post-processing to reduce simulation time.
     model.time[0] = initial_time
     model.save_ds_state_modal(0, string)
-    if enable_frets_output:
+    if enable_frets_output is 'all' or 'light':
         for j in range(nb_frets):
             model.save_interaction_state(0, frets[j])
     return model, string, frets
@@ -236,6 +238,7 @@ def load_model(filename, from_matlab=None):
     """
 
     # Load hdf attributes, to create the model
+    print('Load model from file ' + filename)
     mode = 'r'
     h5file = h5py.File(filename, mode)
     n_modes = h5file.attrs['number_of_modes']
@@ -248,7 +251,7 @@ def load_model(filename, from_matlab=None):
         from_matlab = h5file.attrs['matlab_data']
     filt_frets = h5file.attrs['filter frets']
     enable_frets_output = h5file.attrs['frets output']
-    # Create model
+    # Create a new model object from file content
     guitar_model, guitar_string, frets = create_model(
         n_modes=n_modes, max_coords=max_coords,
         fe=fe, initial_time=initial_time,
@@ -257,7 +260,7 @@ def load_model(filename, from_matlab=None):
         from_matlab=from_matlab,
         filt_frets=filt_frets,
         enable_frets_output=enable_frets_output,
-        visu=True)
+        visu=False)
     # load hdf data (simulation results) to fill model variables
     # for post-processing
     guitar_model.time[...] = h5file['times']

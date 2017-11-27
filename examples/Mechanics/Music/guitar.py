@@ -342,6 +342,8 @@ class Guitar(sk.Model):
                 self.data_interactions[interaction] = \
                     npw.zeros((self.nb_time_steps_output + 1, 3 * nbc))
             self.save_interaction_state = self._save_all_inter
+        else:
+            self.save_interaction_state = lambda k, inter: None
         # time instants
         self.time = npw.zeros(self.nb_time_steps_output + 1)
         self._convert = np.ones(

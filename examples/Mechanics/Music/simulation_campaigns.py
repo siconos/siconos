@@ -22,13 +22,13 @@ def create_campaign(freq2job, frequencies, filepath, hosts):
     campaign['freqs'] = frequencies
     campaign['files'] = filelist
     campaign['files_converted'] = newfilelist
-    campaigns['durations'] = durations
-    campaigns['hosts'] = hosts
+    campaign['durations'] = durations
+    campaign['hosts'] = hosts
     return campaign
 
 
 #filepath = '/nfs_scratch/perignon/Music'
-filepath = './results'
+filepath = './results_bass/2017_11_14'
 indices = np.arange(3, 16)
 freqs = 2 ** indices * 1960
 # Simu on Luke, bass guitar with frets, coeff restit=0.9, 14/11/2017
@@ -52,6 +52,7 @@ campaign_14112017 = create_campaign(freq2job, freqs, filepath, hosts)
 
 
 # Simu on Luke, bass guitar with frets, coeff restit=0., 16/11/2017
+filepath = './results_bass/2017_11_14'
 freq2job = {}
 hosts = [42, 42, 43, 43, 43, 42, 42, 44, 39, 39, 38, 42, 44]
 
@@ -74,7 +75,8 @@ campaign_16112017 = create_campaign(freq2job, freqs, filepath, hosts)
 # Simu on Luke, fretless bass guitar, coeff restit=0.9, 17/11/2017
 
 #filepath = os.path.join(filepath, 'Fretless')
-filepath = 'results_fretless'
+filepath = './results_fretless/2017_11_17/'
+
 freq2job = {}
 hosts = [42, 42, 42, 42, 42, 43, 43, 43, 43, 43, 43, 43, 42]
 
@@ -95,6 +97,7 @@ campaign_17112017 = create_campaign(freq2job, freqs, filepath, hosts)
 
 
 # Simu on Luke, fretless bass guitar, coeff restit=0., 17/11/2017
+filepath = './results_fretless/2017_11_17/'
 freq2job = {}
 hosts = [42, 42, 42, 42, 42, 38, 43, 43, 43, 39, 38, 43, 42]
 
@@ -117,6 +120,7 @@ campaign_17112017_2 = create_campaign(freq2job, freqs, filepath, hosts)
 
 
 # Simu on Luke, bass guitar, coeff restit=0.9, 24/11/2017
+filepath = './results_bass/2017_11_24/'
 freq2job = {}
 hosts = [43, ] * 13
 
@@ -136,6 +140,7 @@ freq2job[freqs[12]] = (3847215, 12785.688522)
 campaign_24112017 = create_campaign(freq2job, freqs, filepath, hosts)
 
 # Simu on Luke, bass guitar, coeff restit=0., 24/11/2017
+filepath = './results_bass/2017_11_24/'
 freq2job = {}
 hosts = [42, ] * 13
 
@@ -155,6 +160,7 @@ freq2job[freqs[12]] = (3847200, 15380.9608)
 campaign_24112017_2 = create_campaign(freq2job, freqs, filepath, hosts)
 
 # Simu on Luke, fretless bass guitar, coeff restit=0.9 , 27/11/2017
+filepath = './results_fretless/2017_11_27'
 freq2job = {}
 hosts = [42, ] * 13
 
@@ -175,6 +181,7 @@ campaign_27112017 = create_campaign(freq2job, freqs, filepath, hosts)
 
 
 # Simu on Luke, fretless bass guitar, coeff restit=0. , 27/11/2017
+filepath = './results_fretless/2017_11_27'
 freq2job = {}
 hosts = [44, ] * 13
 
