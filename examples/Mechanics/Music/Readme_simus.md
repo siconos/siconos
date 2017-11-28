@@ -177,7 +177,7 @@ sh ./list_f.sh
 oarsub -S "./run_fretless.sh 64225280 4096" -p "network_address='luke42'"
 OAR_JOB_ID=3847153
 oarsub -S "./run_fretless.sh 32112640 2048" -p "network_address='luke42'"
-OAR_JOB_ID=3847154
+OK OAR_JOB_ID=3847154
 oarsub -S "./run_fretless.sh 16056320 1024" -p "network_address='luke42'"
 OK OAR_JOB_ID=3847155
 oarsub -S "./run_fretless.sh 8028160 512" -p "network_address='luke42'"
@@ -272,7 +272,7 @@ OAR_JOB_ID=3847240
 oarsub -S "./run_fretless_bis.sh 32112640 2048" -p "network_address='luke44'"
 OAR_JOB_ID=3847241
 oarsub -S "./run_fretless_bis.sh 16056320 1024" -p "network_address='luke44'"
-OAR_JOB_ID=3847242
+OK OAR_JOB_ID=3847242
 oarsub -S "./run_fretless_bis.sh 8028160 512" -p "network_address='luke44'"
 OK OAR_JOB_ID=3847243
 oarsub -S "./run_fretless_bis.sh 4014080 256" -p "network_address='luke44'"
@@ -293,3 +293,237 @@ oarsub -S "./run_fretless_bis.sh 31360 2" -p "network_address='luke44'"
 OK OAR_JOB_ID=3847251
 oarsub -S "./run_fretless_bis.sh 15680 1" -p "network_address='luke44'"
 OK OAR_JOB_ID=3847252
+
+
+## Bass guitar, coeff = 0.9, no filter on time outputs
+
+oarsub -S "./run.sh 8028160 1" -p "network_address='luke43'" 
+DIED OAR_JOB_ID=3869339
+oarsub -S "./run.sh 4014080 1" -p "network_address='luke43'"
+DIED OAR_JOB_ID=3869340
+oarsub -S "./run.sh 2007040 1" -p "network_address='luke43'"
+DIED OAR_JOB_ID=3869341
+oarsub -S "./run.sh 1003520 1" -p "network_address='luke43'"
+DIED OAR_JOB_ID=3869342
+oarsub -S "./run.sh 501760 1" -p "network_address='luke43'"
+DIED OAR_JOB_ID=3869343
+oarsub -S "./run.sh 250880 1" -p "network_address='luke43'"
+OK OAR_JOB_ID=3869344
+oarsub -S "./run.sh 125440 1" -p "network_address='luke43'"
+OK OAR_JOB_ID=3869345
+oarsub -S "./run.sh 62720 1" -p "network_address='luke43'"
+OK OAR_JOB_ID=3869346
+oarsub -S "./run.sh 31360 1" -p "network_address='luke43'"
+OK OAR_JOB_ID=3869347
+
+
+
+oarsub -S "./run.sh 16056320 1" -p "network_address='luke43'"
+DIED OAR_JOB_ID=3869413
+
+oarsub -S "./run.sh 16056320 2" -p "network_address='luke43'"
+DIED OAR_JOB_ID=3869414
+
+oarsub -S "./run.sh 501760 1" -p "network_address='luke43'"
+DIED OAR_JOB_ID=3869415
+
+
+oarsub -S "./run.sh 501760 2" -p "network_address='luke43'"
+OK OAR_JOB_ID=3869516
+
+ oarsub -S "./run.sh 1003520 4" -p "network_address='luke43'"
+OAR_JOB_ID=3869868
+
+
+
+28/11/2017
+----------
+
+# Bass guitar, e=0.9
+sh ./list.sh
+oarsub -S "./run.sh 64225280 4096" -p "network_address='luke42'"
+OAR_JOB_ID=3875402
+oarsub -S "./run.sh  32112640 2048" -p "network_address='luke42'"
+OAR_JOB_ID=3875403
+oarsub -S "./run.sh 16056320 1024" -p "network_address='luke42'"
+OAR_JOB_ID=3875404
+oarsub -S "./run.sh 8028160 512" -p "network_address='luke42'" 
+OAR_JOB_ID=3875405
+oarsub -S "./run.sh 4014080 256" -p "network_address='luke42'"
+OAR_JOB_ID=3875406
+oarsub -S "./run.sh 2007040 128" -p "network_address='luke42'"
+OAR_JOB_ID=3875407
+oarsub -S "./run.sh 1003520 64" -p "network_address='luke42'"
+OAR_JOB_ID=3875408
+oarsub -S "./run.sh 501760 32" -p "network_address='luke42'"
+OAR_JOB_ID=3875409
+oarsub -S "./run.sh 250880 16" -p "network_address='luke42'"
+OAR_JOB_ID=3875410
+oarsub -S "./run.sh 125440 8" -p "network_address='luke42'"
+OAR_JOB_ID=3875411
+oarsub -S "./run.sh 62720 4" -p "network_address='luke42'"
+OAR_JOB_ID=3875412
+oarsub -S "./run.sh 31360 2" -p "network_address='luke42'"
+OAR_JOB_ID=3875413
+oarsub -S "./run.sh 15680 1" -p "network_address='luke42'"
+OAR_JOB_ID=3875414
+
+
+
+# coef =0
+oarsub -S "./run2.sh 64225280 4096" -p "network_address='luke44'"
+OAR_JOB_ID=3875417
+oarsub -S "./run2.sh 32112640 2048" -p "network_address='luke44'"
+OAR_JOB_ID=3875418
+oarsub -S "./run2.sh 16056320 1024" -p "network_address='luke44'"
+OAR_JOB_ID=3875419
+oarsub -S "./run2.sh 8028160 512" -p "network_address='luke44'"
+OAR_JOB_ID=3875420
+oarsub -S "./run2.sh 4014080 256" -p "network_address='luke44'"
+OAR_JOB_ID=3875421
+oarsub -S "./run2.sh 2007040 128" -p "network_address='luke44'"
+OAR_JOB_ID=3875422
+oarsub -S "./run2.sh 1003520 64" -p "network_address='luke44'"
+OAR_JOB_ID=3875423
+oarsub -S "./run2.sh 501760 32" -p "network_address='luke44'"
+OAR_JOB_ID=3875424
+oarsub -S "./run2.sh 250880 16" -p "network_address='luke44'"
+OAR_JOB_ID=3875425
+oarsub -S "./run2.sh 125440 8" -p "network_address='luke44'"
+OAR_JOB_ID=3875426
+oarsub -S "./run2.sh 62720 4" -p "network_address='luke44'"
+OAR_JOB_ID=3875427
+oarsub -S "./run2.sh 31360 2" -p "network_address='luke44'"
+OAR_JOB_ID=3875428
+oarsub -S "./run2.sh 15680 1" -p "network_address='luke44'"
+OAR_JOB_ID=3875429
+
+# Bass coeff : 1.
+sh ./list3.sh
+oarsub -S "./run3.sh 64225280 4096" -p "network_address='luke43'"
+OAR_JOB_ID=3875484
+oarsub -S "./run3.sh 32112640 2048" -p "network_address='luke43'"
+OAR_JOB_ID=3875485
+oarsub -S "./run3.sh 16056320 1024" -p "network_address='luke43'"
+OAR_JOB_ID=3875486
+oarsub -S "./run3.sh 8028160 512" -p "network_address='luke43'"
+OAR_JOB_ID=3875487
+oarsub -S "./run3.sh 4014080 256" -p "network_address='luke43'"
+OAR_JOB_ID=3875488
+oarsub -S "./run3.sh 2007040 128" -p "network_address='luke43'"
+OAR_JOB_ID=3875489
+oarsub -S "./run3.sh 1003520 64" -p "network_address='luke43'"
+OAR_JOB_ID=3875490
+oarsub -S "./run3.sh 501760 32" -p "network_address='luke43'"
+OAR_JOB_ID=3875491
+oarsub -S "./run3.sh 250880 16" -p "network_address='luke43'"
+OAR_JOB_ID=3875492
+oarsub -S "./run3.sh 125440 8" -p "network_address='luke43'"
+OAR_JOB_ID=3875493
+oarsub -S "./run3.sh 62720 4" -p "network_address='luke43'"
+OAR_JOB_ID=3875494
+oarsub -S "./run3.sh 31360 2" -p "network_address='luke43'"
+OAR_JOB_ID=3875495
+oarsub -S "./run3.sh 15680 1" -p "network_address='luke43'"
+OAR_JOB_ID=3875496
+
+# fretless, coeff = 0.9
+oarsub -S "./run_fretless.sh 64225280 4096" -p "network_address='luke42'"
+OAR_JOB_ID=3875430
+oarsub -S "./run_fretless.sh 32112640 2048" -p "network_address='luke42'"
+OAR_JOB_ID=3875431
+oarsub -S "./run_fretless.sh 16056320 1024" -p "network_address='luke42'"
+OAR_JOB_ID=3875432
+oarsub -S "./run_fretless.sh 8028160 512" -p "network_address='luke42'"
+OAR_JOB_ID=3875433
+oarsub -S "./run_fretless.sh 4014080 256" -p "network_address='luke42'"
+OAR_JOB_ID=3875434
+oarsub -S "./run_fretless.sh 2007040 128" -p "network_address='luke42'"
+OAR_JOB_ID=3875435
+oarsub -S "./run_fretless.sh 1003520 64" -p "network_address='luke42'"
+OAR_JOB_ID=3875436
+oarsub -S "./run_fretless.sh 501760 32" -p "network_address='luke42'"
+OAR_JOB_ID=3875437
+oarsub -S "./run_fretless.sh 250880 16" -p "network_address='luke42'"
+OAR_JOB_ID=3875438
+oarsub -S "./run_fretless.sh 125440 8" -p "network_address='luke42'"
+OAR_JOB_ID=3875439
+oarsub -S "./run_fretless.sh 62720 4" -p "network_address='luke42'"
+OAR_JOB_ID=3875440
+oarsub -S "./run_fretless.sh 31360 2" -p "network_address='luke42'"
+OAR_JOB_ID=3875441
+oarsub -S "./run_fretless.sh 15680 1" -p "network_address='luke42'"
+OAR_JOB_ID=3875442
+
+	
+
+# fretless, coeff = 0.
+oarsub -S "./run_fretless_bis.sh 64225280 4096" -p "network_address='luke44'"
+OAR_JOB_ID=3875458
+oarsub -S "./run_fretless_bis.sh 32112640 2048" -p "network_address='luke44'"
+OAR_JOB_ID=3875459
+oarsub -S "./run_fretless_bis.sh 16056320 1024" -p "network_address='luke44'"
+OAR_JOB_ID=3875460
+oarsub -S "./run_fretless_bis.sh 8028160 512" -p "network_address='luke44'"
+OAR_JOB_ID=3875461
+oarsub -S "./run_fretless_bis.sh 4014080 256" -p "network_address='luke44'"
+OAR_JOB_ID=3875462
+oarsub -S "./run_fretless_bis.sh 2007040 128" -p "network_address='luke44'"
+OAR_JOB_ID=3875463
+oarsub -S "./run_fretless_bis.sh 1003520 64" -p "network_address='luke44'"
+OAR_JOB_ID=3875464
+oarsub -S "./run_fretless_bis.sh 501760 32" -p "network_address='luke44'"
+OAR_JOB_ID=3875465
+oarsub -S "./run_fretless_bis.sh 250880 16" -p "network_address='luke44'"
+OAR_JOB_ID=3875466
+oarsub -S "./run_fretless_bis.sh 125440 8" -p "network_address='luke44'"
+OAR_JOB_ID=3875467
+oarsub -S "./run_fretless_bis.sh 62720 4" -p "network_address='luke44'"
+OAR_JOB_ID=3875468
+oarsub -S "./run_fretless_bis.sh 31360 2" -p "network_address='luke44'"
+OAR_JOB_ID=3875469
+oarsub -S "./run_fretless_bis.sh 15680 1" -p "network_address='luke44'"
+OAR_JOB_ID=3875470
+
+sh ./list_f2.sh
+[ADMISSION RULE] Modify resource description with type constraints
+[PROJECT] Adding project constraints: (team='ljk' or team='ciment' or team='visu')
+OAR_JOB_ID=3875458
+[ADMISSION RULE] Modify resource description with type constraints
+[PROJECT] Adding project constraints: (team='ljk' or team='ciment' or team='visu')
+OAR_JOB_ID=3875459
+[ADMISSION RULE] Modify resource description with type constraints
+[PROJECT] Adding project constraints: (team='ljk' or team='ciment' or team='visu')
+OAR_JOB_ID=3875460
+[ADMISSION RULE] Modify resource description with type constraints
+[PROJECT] Adding project constraints: (team='ljk' or team='ciment' or team='visu')
+OAR_JOB_ID=3875461
+[ADMISSION RULE] Modify resource description with type constraints
+[PROJECT] Adding project constraints: (team='ljk' or team='ciment' or team='visu')
+OAR_JOB_ID=3875462
+[ADMISSION RULE] Modify resource description with type constraints
+[PROJECT] Adding project constraints: (team='ljk' or team='ciment' or team='visu')
+OAR_JOB_ID=3875463
+[ADMISSION RULE] Modify resource description with type constraints
+[PROJECT] Adding project constraints: (team='ljk' or team='ciment' or team='visu')
+OAR_JOB_ID=3875464
+[ADMISSION RULE] Modify resource description with type constraints
+[PROJECT] Adding project constraints: (team='ljk' or team='ciment' or team='visu')
+OAR_JOB_ID=3875465
+[ADMISSION RULE] Modify resource description with type constraints
+[PROJECT] Adding project constraints: (team='ljk' or team='ciment' or team='visu')
+OAR_JOB_ID=3875466
+[ADMISSION RULE] Modify resource description with type constraints
+[PROJECT] Adding project constraints: (team='ljk' or team='ciment' or team='visu')
+OAR_JOB_ID=3875467
+[ADMISSION RULE] Modify resource description with type constraints
+[PROJECT] Adding project constraints: (team='ljk' or team='ciment' or team='visu')
+OAR_JOB_ID=3875468
+[ADMISSION RULE] Modify resource description with type constraints
+[PROJECT] Adding project constraints: (team='ljk' or team='ciment' or team='visu')
+OAR_JOB_ID=3875469
+[ADMISSION RULE] Modify resource description with type constraints
+[PROJECT] Adding project constraints: (team='ljk' or team='ciment' or team='visu')
+OAR_JOB_ID=3875470
+
+
