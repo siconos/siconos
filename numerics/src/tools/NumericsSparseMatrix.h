@@ -87,7 +87,7 @@ extern "C"
     CSparseMatrix* csc;        /**< csc matrix */
     CSparseMatrix* trans_csc;  /**< transpose of a csc matrix (used by CSparse) */
     CSparseMatrix* csr;        /**< csr matrix, only supported with mkl */
-    csi*           diag_indx;  /**< indices for the diagonal terms.
+    CS_INT*           diag_indx;  /**< indices for the diagonal terms.
                                     Very useful for the proximal perturbation */
     unsigned       origin;     /**< original format of the matrix */
   };

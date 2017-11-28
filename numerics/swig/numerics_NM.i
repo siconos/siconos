@@ -136,8 +136,28 @@
 };
 
 #ifdef SICONOS_USE_CXSPARSE
-%rename (cs_sparse) cs_di_sparse;
+#ifdef SICONOS_INT64
+#define cs_sparse cs_dl_sparse
+#else
+#define cs_sparse cs_di_sparse
 #endif
+#endif
+
+/* xhub: I'm not sure it's a good idea to duplicate this here ... it
+ * is already defined in csparse.h.  Steve: Only alternative is to
+ * include csparse.h/cs.h, but then we wrap all of csparse/cxsparse,
+ * and the di/dl naming conflicts cause issues. */
+
+typedef struct cs_sparse    /* matrix in compressed-column or triplet form */
+{
+  CS_INT nzmax ;	    /* maximum number of entries */
+  CS_INT m ;	    /* number of rows */
+  CS_INT n ;	    /* number of columns */
+  CS_INT *p ;	    /* column pointers (size n+1) or col indices (size nzmax) */
+  CS_INT *i ;	    /* row indices, size nzmax */
+  double *x ;	    /* numerical values, size nzmax */
+  CS_INT nz ;	    /* # of entries in triplet matrix, -1 for compressed-col */
+} cs;
 
 %extend cs_sparse
 {

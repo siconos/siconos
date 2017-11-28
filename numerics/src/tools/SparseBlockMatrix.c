@@ -66,10 +66,10 @@ SparseBlockStructuredMatrix* SBM_new(void)
  * matrices (csc, csr, triplet) */
 typedef struct sparse_matrix_iterator
 {
-  csi counter1;
-  csi counter2;
-  csi first;
-  csi second;
+  CS_INT counter1;
+  CS_INT counter2;
+  CS_INT first;
+  CS_INT second;
   double third;
   const CSparseMatrix* mat;
 } sparse_matrix_iterator;
@@ -1845,7 +1845,7 @@ int SBM_to_sparse_init_memory(const SparseBlockStructuredMatrix* const A, CSpars
 
   sparseMat->nz = -2; /* csr */
   sparseMat->nzmax = 0;
-  sparseMat->p = (csi*)malloc((sparseMat->m + 1) * sizeof(csi));
+  sparseMat->p = (CS_INT*)malloc((sparseMat->m + 1) * sizeof(CS_INT));
 
   /* Row (block) position of the current block */
   unsigned int currentRowNumber ;
@@ -1876,7 +1876,7 @@ int SBM_to_sparse_init_memory(const SparseBlockStructuredMatrix* const A, CSpars
       sparseMat->nzmax += nbColumns * nbRows;
     }
   }
-  sparseMat->i = (csi*)malloc((sparseMat->nzmax) * sizeof(csi));
+  sparseMat->i = (CS_INT*)malloc((sparseMat->nzmax) * sizeof(CS_INT));
   sparseMat->x = (double*)malloc((sparseMat->nzmax) * sizeof(double));
 
   return 0;
@@ -2152,8 +2152,8 @@ int SBM_from_csparse(int blocksize, const CSparseMatrix* const sparseMat, Sparse
   assert(sparseMat->m % blocksize == 0);
   assert(sparseMat->n % blocksize == 0);
 
-  csi bnrow = sparseMat->m / blocksize;
-  csi bncol = sparseMat->n / blocksize;
+  CS_INT bnrow = sparseMat->m / blocksize;
+  CS_INT bncol = sparseMat->n / blocksize;
   DEBUG_PRINTF("SBM_from_csparse. bnrow =%li\n", bnrow);
   DEBUG_PRINTF("SBM_from_csparse. bncol =%li\n", bncol);
   A->blocknumber0 = (int) bnrow;
@@ -2177,8 +2177,8 @@ int SBM_from_csparse(int blocksize, const CSparseMatrix* const sparseMat, Sparse
 
   /* we have to find non empty blocks */
 
-  csi blockindexmax = -1;
-  csi blocklinemax = -1;
+  CS_INT blockindexmax = -1;
+  CS_INT blocklinemax = -1;
   int* blockline;
   int* blocknum;
 
@@ -2187,15 +2187,15 @@ int SBM_from_csparse(int blocksize, const CSparseMatrix* const sparseMat, Sparse
        sparseMatrixNext(&it);)
   {
 
-    csi row = it.first;
-    csi col = it.second;
+    CS_INT row = it.first;
+    CS_INT col = it.second;
 
     DEBUG_PRINTF("it.first = %i, it.second = %i \n", row, col );
     DEBUG_PRINTF("it.third = %g,  \n", it.third );
 
-    csi brow = row / blocksize;
-    csi bcol = col / blocksize;
-    csi blockindex = brow * bncol + bcol;
+    CS_INT brow = row / blocksize;
+    CS_INT bcol = col / blocksize;
+    CS_INT blockindex = brow * bncol + bcol;
 
     if ((fabs(it.third) > 0.0) && (blockindex > blockindexmax - 1))
     {
@@ -2230,13 +2230,13 @@ int SBM_from_csparse(int blocksize, const CSparseMatrix* const sparseMat, Sparse
   for (sparse_matrix_iterator it = sparseMatrixBegin(sparseMat);
        sparseMatrixNext(&it);)
   {
-    csi row = it.first;
-    csi col = it.second;
+    CS_INT row = it.first;
+    CS_INT col = it.second;
 
-    csi brow = row / blocksize;
-    csi bcol = col / blocksize;
+    CS_INT brow = row / blocksize;
+    CS_INT bcol = col / blocksize;
 
-    csi blockindex = brow * bncol + bcol;
+    CS_INT blockindex = brow * bncol + bcol;
 
     if (fabs(it.third) > 0.)
     {
@@ -2320,22 +2320,22 @@ int SBM_from_csparse(int blocksize, const CSparseMatrix* const sparseMat, Sparse
        sparseMatrixNext(&it);)
   {
 
-    csi row = it.first;
-    csi col = it.second;
+    CS_INT row = it.first;
+    CS_INT col = it.second;
 
     assert(row < sparseMat->m);
     assert(col < sparseMat->n);
 
-    csi brow = row / blocksize;
-    csi bcol = col / blocksize;
+    CS_INT brow = row / blocksize;
+    CS_INT bcol = col / blocksize;
 
     assert(brow < bnrow);
     assert(bcol < bncol);
 
-    csi blockindex = brow * bncol + bcol;
+    CS_INT blockindex = brow * bncol + bcol;
 
-    csi birow = row % blocksize; /* block inside row */
-    csi bicol = col % blocksize; /* block inside column */
+    CS_INT birow = row % blocksize; /* block inside row */
+    CS_INT bicol = col % blocksize; /* block inside column */
 
     A->index1_data[A->filled1 - 1] = A->filled2;
 
@@ -2346,7 +2346,7 @@ int SBM_from_csparse(int blocksize, const CSparseMatrix* const sparseMat, Sparse
 
       /* index1_data[rowNumber]<= blockNumber */
 
-      assert(brow < (csi)A->filled1);
+      assert(brow < (CS_INT)A->filled1);
       if (A->index1_data[brow] > (size_t)blocknum[blockindex])
       {
         A->index1_data[brow] = blocknum[blockindex];
@@ -2357,8 +2357,8 @@ int SBM_from_csparse(int blocksize, const CSparseMatrix* const sparseMat, Sparse
       assert(birow + bicol * blocksize <= blocksize * blocksize);
 
       assert(blockindex < blockindexmax);
-      assert(blocknum[blockindex] < (csi)A->nbblocks);
-      assert(blocknum[blockindex] < (csi)A->filled2);
+      assert(blocknum[blockindex] < (CS_INT)A->nbblocks);
+      assert(blocknum[blockindex] < (CS_INT)A->filled2);
 
       DEBUG_PRINTF("A->block[blocknum[blockindex=%d]=%d][birow=%d + bicol=%d * blocksize=%d] = it.third=%g\n", blockindex, blocknum[blockindex], birow, bicol, blocksize, it.third);
       A->block[blocknum[blockindex]][birow + bicol * blocksize] = it.third;

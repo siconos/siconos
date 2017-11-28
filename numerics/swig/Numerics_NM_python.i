@@ -56,7 +56,7 @@ static inline void _sn_check_nnz(PyObject** mat, CSparseMatrix *M)
 {
   if (!*mat) { return; }
   PyObject *auto_nnz = PyObject_GetAttrString(*mat, "nnz");
-  csi nz;
+  CS_INT nz;
   if (M->nz >= 0) { nz = M->nz; } else { nz = M->nzmax; }
   if(PyInt_AsLong(auto_nnz) != nz) {  PyErr_SetString(PyExc_RuntimeError, "number of nnz is inconsistent"); *mat = NULL; }
   Py_XDECREF(auto_nnz);
@@ -104,11 +104,11 @@ static inline void _sn_check_shape(PyObject** mat, CSparseMatrix *M) {};
 
 #define INT_TO_NPY_INT(dim, intp, out, copy) \
   { \
-  csi * int_p; \
+  CS_INT * int_p; \
   if (copy) \
   { \
-    int_p = (csi*)malloc(dim[0] * sizeof(csi)); \
-    memcpy(int_p, intp, dim[0] * sizeof(csi)); \
+    int_p = (CS_INT*)malloc(dim[0] * sizeof(CS_INT)); \
+    memcpy(int_p, intp, dim[0] * sizeof(CS_INT)); \
   } \
   else \
   { \

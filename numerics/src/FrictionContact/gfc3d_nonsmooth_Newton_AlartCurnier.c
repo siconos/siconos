@@ -113,7 +113,7 @@ void ACPsi(
 
 
 /* init memory for jacobian */
-csi initACPsiJacobian(
+CS_INT initACPsiJacobian(
   CSparseMatrix* M,
   CSparseMatrix* H,
   CSparseMatrix *A,
@@ -164,7 +164,7 @@ csi initACPsiJacobian(
   }
 
   /* keep A start indice for update */
-  csi Astart = J->nz;
+  CS_INT Astart = J->nz;
 
   /* A */
   for(int e = 0; e < A->nz; ++e)
@@ -188,7 +188,7 @@ void updateACPsiJacobian(
   CSparseMatrix *A,
   CSparseMatrix *B,
   CSparseMatrix *J,
-  csi Astart)
+  CS_INT Astart)
 {
   /* only triplet matrix */
   assert(M->nz>=0);
@@ -543,7 +543,7 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(
                         3 * localProblemSize + /* iB */
                         3 * localProblemSize + /* pA */
                         3 * localProblemSize)  /* pB */
-                       * sizeof(csi));
+                       * sizeof(CS_INT));
 
     options->iparam[9] = 1;
 
@@ -564,10 +564,10 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(
   double * solution = tmp3 + ACProblemSize;
 
   /* XXX big hack --xhub*/
-  csi * iA = (csi *)options->iWork;
-  csi * iB = iA + 3 * localProblemSize;
-  csi * pA = iB + 3 * localProblemSize;
-  csi * pB = pA + 3 * localProblemSize;
+  CS_INT * iA = (CS_INT *)options->iWork;
+  CS_INT * iB = iA + 3 * localProblemSize;
+  CS_INT * pA = iB + 3 * localProblemSize;
+  CS_INT * pB = pA + 3 * localProblemSize;
 
   CSparseMatrix A_;
   CSparseMatrix B_;
@@ -598,7 +598,7 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(
     problem->mu, rho,
     F, A, B);
 
-  csi Astart = initACPsiJacobian(NM_triplet(problem->M),
+  CS_INT Astart = initACPsiJacobian(NM_triplet(problem->M),
                                  NM_triplet(problem->H),
                                  &A_, &B_, J);
 

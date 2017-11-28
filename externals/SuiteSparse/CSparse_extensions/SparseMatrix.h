@@ -33,6 +33,10 @@ Documentation to be done
 
 #include "SiconosConfig.h"
 
+#ifdef SICONOS_INT64
+#define CS_LONG
+#endif
+
 #ifdef SICONOS_USE_CXSPARSE
 
 /* Compile-time assertion: users of SparseMatrix.h must have CS_LONG
@@ -109,7 +113,7 @@ extern "C"
   /** \struct cs_lu_factors SparseMatrix.h
    * Information used and produced by CSparse for an LU factorization*/
   typedef struct {
-    csi n;       /**< size of linear system */
+    CS_INT n;       /**< size of linear system */
     css* S;      /**< symbolic analysis */
     csn* N;      /**< numerics factorization */
   } cs_lu_factors;
@@ -126,7 +130,7 @@ extern "C"
    * \return integer value : 1 if the absolute value is less than
    * DBL_EPSILON, otherwise the return value of cs_entry.
    */
-  csi cs_zentry(CSparseMatrix *T, csi i, csi j, double x);
+  CS_INT cs_zentry(CSparseMatrix *T, CS_INT i, CS_INT j, double x);
 
   /** Check if the given triplet matrix is properly constructed (col and row indices are correct)
    * \param T the sparse matrix to check
@@ -176,7 +180,7 @@ extern "C"
    * \param x workspace
    * \param[in,out] b on input RHS of the linear system; on output the solution
    * \return 0 if failed, 1 otherwise*/
-  csi cs_solve (cs_lu_factors* cs_lu_A, double* x, double *b);
+  CS_INT cs_solve (cs_lu_factors* cs_lu_A, double* x, double *b);
 
   /** compute a LU factorization of A and store it in a workspace
    * \param order control if ordering is used
@@ -185,7 +189,7 @@ extern "C"
    * \param cs_lu_A the parameter structure that eventually holds the factors
    * \return 1 if the factorization was successful, 1 otherwise
    */
-  int cs_lu_factorization(csi order, const cs *A, double tol, cs_lu_factors * cs_lu_A);
+  int cs_lu_factorization(CS_INT order, const cs *A, double tol, cs_lu_factors * cs_lu_A);
 
   /** Free a workspace related to a LU factorization
    * \param cs_lu_A the structure to free
