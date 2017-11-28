@@ -12,7 +12,7 @@ class Material(object):
     """
 
     def __init__(self,
-                 density):
+                 density=None):
         self.density = density
 
 
@@ -116,6 +116,9 @@ class Volume(Shape):
     :instance_name: string, optional
         The name of the instance for further reference.
 
+    :mass:
+        The volume mass
+
     :parameters:
         The parameters associated to the volume.
         This may be information about the material and its density.
@@ -133,10 +136,12 @@ class Volume(Shape):
                  shape_name,
                  shape_data=None,
                  instance_name=None,
+                 mass=None,
                  parameters=Material(density=1),
                  relative_translation=[0, 0, 0],
                  relative_orientation=[1, 0, 0, 0]):
         self.instance_name = instance_name
+        self.mass = mass
         self.parameters = parameters
         super(Shape, self).__init__(shape_name,
                                     shape_data,
