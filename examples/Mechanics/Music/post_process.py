@@ -30,6 +30,24 @@ def compute_errors(filelist, indices=None, from_matlab=None):
     return error
 
 
+
+def check_time_vectors(filelist, from_matlab=None):
+    """Compute relative error defined in 3.36 from Clara's manuscript.
+    """
+
+    # Load reference and current simulations,
+    reference_file = filelist[-1]
+    ref_model, ref_string, ref_frets = load_model(reference_file, from_matlab)
+    tref = ref_model.time
+    nbfiles = len(filelist) - 1
+    for i in range(nbfiles):
+        current_model, current_string, current_frets = load_model(filelist[i], from_matlab)
+        tcurrent = current_model.time
+        print("check i ... ", i)
+        assert np.allclose(tcurrent, tref)
+
+
+
 def plot_campaign(campaign, indices, from_matlab=None, fig=39):
     freqs = campaign['freqs']
     filelist = campaign['files_converted']

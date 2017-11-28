@@ -24,7 +24,7 @@ class StringDS(sk.LagrangianLinearDiagonalDS):
     CLAMPED = 1
 
     def __init__(self, ndof, geometry_and_material,
-                 max_coords, damping_parameters, from_matlab=None):
+                 max_coords, damping_parameters=None, from_matlab=None):
         """Build string
 
         Parameters
@@ -38,7 +38,7 @@ class StringDS(sk.LagrangianLinearDiagonalDS):
             (umax, vmax), coordinates of the string maximum position
             at initial time (assuming triangular shape).
             vmax: along the neck, umax, vertical, displacement
-        damping_parameters: dictionnary
+        damping_parameters: dictionnary, optional
             constant parameters related to damping.
             keys must be ['eta_air', 'rho_air', 'delta_ve', '1/qte']
         from_matlab: string
@@ -63,10 +63,13 @@ class StringDS(sk.LagrangianLinearDiagonalDS):
         self.tension = geometry_and_material['tension']
         self.c0 = math.sqrt(self.tension / self.density)
         self.space_step = self.length / (self.n_modes + 1)
-        self.damping_parameters = damping_parameters
-        msg = 'StringDS : missing parameter value for damping.'
-        for name in self.__damping_parameters_names:
-            assert name in self.damping_parameters.keys(), msg
+        if damping_parameters is not None:
+            self.damping_parameters = damping_parameters
+            msg = 'StringDS : missing parameter value for damping.'
+            for name in self.__damping_parameters_names:
+                assert name in self.damping_parameters.keys(), msg
+        else:
+            assert from_matlab is not None
         self.s_mat = self.compute_s_mat()
         if from_matlab is not None:
             stiffness_mat, damping_mat = self.read_linear_coeff(from_matlab)
@@ -121,7 +124,7 @@ class StringDS(sk.LagrangianLinearDiagonalDS):
         sigmas = scipy.io.loadmat(damp_file)['sig0'][:, 0]
         assert sigmas.size == self.n_modes
         assert nuj.size == self.n_modes
-        omega2 = (2. * np.pi) ** 2 * nuj
+        omega2 = (2. * np.pi * nuj) ** 2
         stiffness_mat = npw.asrealarray(omega2)
         damping_mat = 2. * npw.asrealarray(sigmas)
         return stiffness_mat, damping_mat
@@ -462,7 +465,7 @@ class Guitar(sk.Model):
             plt.plot((self.time[0], self.time[-1]),(ground, ground), '-')
         plt.subplot(2, 2, 2)
         plt.plot(self.time, data[dof - 1, :])
-        plt.xlim(0, 0.02)
+        plt.xlim(0, 0.008)
         plt.subplot(2, 2, 3)
         plt.plot(self.time, data[dof - 1, :])
         plt.xlim(0.05, 0.07)
