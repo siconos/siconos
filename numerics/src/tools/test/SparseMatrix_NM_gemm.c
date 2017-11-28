@@ -26,8 +26,6 @@ int gemm_square_triplet()
   NM_display(A);
 
 
-
-
   NumericsMatrix * B  = NM_create(NM_SPARSE, size0, size1);
   NM_triplet_alloc(B,0);
   B->matrix2->origin= NS_TRIPLET;

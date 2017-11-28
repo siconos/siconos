@@ -57,9 +57,9 @@ void convexQP_ProjectedGradient(ConvexQP* problem, double *z, double *w, int* in
   int n =  problem->size;
 
   /* Maximum number of iterations */
-  int itermax = iparam[0];
+  int itermax = iparam[SICONOS_IPARAM_MAX_ITER];
   /* Tolerance */
-  double tolerance = dparam[0];
+  double tolerance = dparam[SICONOS_DPARAM_TOL];
 
   /*****  Projected Gradient iterations *****/
   int iter = 0; /* Current iteration number */

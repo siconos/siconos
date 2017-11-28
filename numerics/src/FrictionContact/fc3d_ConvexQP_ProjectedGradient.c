@@ -44,10 +44,12 @@ void fc3d_ConvexQP_ProjectedGradient_Cylinder(FrictionContactProblem* problem, d
 
 
   ConvexQP *cqp = (ConvexQP *)malloc(sizeof(ConvexQP));
-
+  cqp->size=n;
   cqp->M = problem->M;
   cqp->q = problem->q;
-
+  cqp->A = NULL; /* The A matrix is the identity and b is equal to zero */
+  cqp->b = NULL;
+  
   cqp->ProjectionOnC = &Projection_ConvexQP_FC3D_Cylinder;
 
   int iter=0;
