@@ -12,6 +12,8 @@ import getopt
 
 from siconos.io.mechanics_io import Quaternion, Hdf5
 from siconos.io.mechanics_io import tmpfile as io_tmpfile
+from siconos.io.mechanics_io import occ_topo_list, occ_load_file,\
+    topods_shape_reader, brep_reader
 
 ## Persistent configuration
 config = {'window_size': [600,600]}
@@ -188,124 +190,6 @@ big_data_writer.SetInputConnection(big_data_source.GetOutputPort())
 contactors = dict()
 offsets = dict()
 
-
-def occ_topo_list(shape):
-    """ return the edges & faces from `shape`
-
-    :param shape: a TopoDS_Shape
-    :return: a list of edges and faces
-    """
-
-    from OCC.TopAbs import TopAbs_FACE
-    from OCC.TopAbs import TopAbs_EDGE
-    from OCC.TopExp import TopExp_Explorer
-    from OCC.TopoDS import topods_Face, topods_Edge
-    
-
-    topExp = TopExp_Explorer()
-    topExp.Init(shape, TopAbs_FACE)
-    faces = []
-    edges = []
-    
-    while topExp.More():
-        face = topods_Face(topExp.Current())
-        faces.append(face)
-        topExp.Next()
-
-    topExp.Init(shape, TopAbs_EDGE)
-
-    while topExp.More():
-        edge = topods_Edge(topExp.Current())
-        edges.append(edge)
-        topExp.Next()
-
-    return faces, edges
-
-
-def occ_load_file(filename):
-    """
-    load in pythonocc a igs or step file
-
-    :param filename: a filename with extension
-    :return: a topods_shape
-    """
-
-    from OCC.STEPControl import STEPControl_Reader
-    from OCC.IGESControl import IGESControl_Reader
-    from OCC.BRep import BRep_Builder
-    from OCC.TopoDS import TopoDS_Compound
-    from OCC.IFSelect import IFSelect_RetDone,\
-    IFSelect_ItemsByEntity
-
-    reader_switch = {'stp': STEPControl_Reader,
-                     'step': STEPControl_Reader,
-                     'igs': IGESControl_Reader,
-                     'iges': IGESControl_Reader}
-    
-    builder = BRep_Builder()
-    comp = TopoDS_Compound()
-    builder.MakeCompound(comp)
-
-    reader = reader_switch[os.path.splitext(filename)[1][1:].lower()]()
-        
-    status = reader.ReadFile(filename)
-        
-    if status == IFSelect_RetDone:  # check status
-        failsonly = False
-        reader.PrintCheckLoad(
-            failsonly, IFSelect_ItemsByEntity)
-        reader.PrintCheckTransfer(
-            failsonly, IFSelect_ItemsByEntity)
-        
-        ok = reader.TransferRoots()
-        nbs = reader.NbShapes()
-
-        for i in range(1, nbs + 1):
-            shape = reader.Shape(i)
-            builder.Add(comp, shape)
-
-    return comp
-
-
-def topods_shape_reader(shape):
-
-    from OCC.StlAPI import StlAPI_Writer
-
-    stl_writer = StlAPI_Writer()
-
-    with io_tmpfile(debug=True, suffix='.stl') as tmpf:
-        stl_writer.Write(shape, tmpf[1])
-        tmpf[0].flush()
-
-        reader = vtk.vtkSTLReader()
-        reader.SetFileName(tmpf[1])
-        reader.Update()
-
-        return reader
-
-
-def brep_reader(brep_string, indx):
-
-    from OCC.StlAPI import StlAPI_Writer
-
-    from OCC.BRepTools import BRepTools_ShapeSet
-    shape_set = BRepTools_ShapeSet()
-    shape_set.ReadFromString(brep_string)
-    shape = shape_set.Shape(shape_set.NbShapes())
-    location = shape_set.Locations().Location(indx)
-    shape.Location(location)
-
-    stl_writer = StlAPI_Writer()
-
-    with io_tmpfile(suffix='.stl') as tmpf:
-        stl_writer.Write(shape, tmpf[1])
-        tmpf[0].flush()
-
-        reader = vtk.vtkSTLReader()
-        reader.SetFileName(tmpf[1])
-        reader.Update()
-
-        return reader
 
 
 ## Program starts
@@ -982,14 +866,20 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
         for contactor_instance_name in io.instances()[instance_name]:
             contactor = io.instances()[instance_name][contactor_instance_name]
             contact_shape_indx = None
-            print instance_name, (contactor.attrs.keys())
+
+            if 'shape_name' not in contactor.attrs:
+                print("Warning: old format: ctr.name must be ctr.shape_name for body {0}, contact {1}".format(instance_name, contactor_instance_name))
+                shape_attr_name='name'
+            else:
+                shape_attr_name='shape_name'
+
             if 'type' in contactor.attrs:
                 contact_type = contactor.attrs['type']
                 contact_index = contactor.attrs['contact_index']
-                contact_shape_indx = (contact_type, contactor.attrs['shape_name'],
+                contact_shape_indx = (contact_type, contactor.attrs[shape_attr_name],
                                       contact_index)
             else:
-                contact_shape_indx = contactor.attrs['shape_name']
+                contact_shape_indx = contactor.attrs[shape_attr_name]
 
             contactors[instance].append(contact_shape_indx)
 
@@ -1025,7 +915,7 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
                 contact_shape_name = contact_shape_indx[1]
             else:
                 contact_shape_name = contact_shape_indx
-                
+
             if 'scale' in io.shapes()[contact_shape_name].attrs:
                 scale = io.shapes()[contact_shape_name].attrs['scale']
                 scale_transform = vtk.vtkTransform()

@@ -316,7 +316,7 @@ def add_line(dataset, line):
 def upgrade_io_format(filename):
 
     with Hdf5(filename, mode='a') as io:
-    
+
         for instance_name in io.instances():
             for contactor_instance_name in io.instances()[instance_name]:
                 contactor = io.instances()[instance_name][
@@ -328,7 +328,7 @@ contactor {0} attribute 'name': renamed in 'shape_name'
                     contactor.attrs['shape_name'] = contactor['name']
                     del contactor['name']
 
-    
+
 def str_of_file(filename):
     with open(filename, 'r') as f:
         return str(f.read())
@@ -377,6 +377,37 @@ class Quaternion():
         a = self._data.GetRotationAngleAndAxis(r)
         return r, a
 
+#
+# fix orientation -> rotation ?
+#
+def quaternion_get(orientation):
+    """
+    Get quaternion from orientation
+    """
+    if len(orientation) == 2:
+            # axis + angle
+            axis=orientation[0]
+            assert len(axis) == 3
+            angle=orientation[1]
+            assert type(angle) is float
+            n=sin(angle / 2.) / np.linalg.norm(axis)
+
+            ori=[cos(angle / 2.), axis[0] * n, axis[1] * n, axis[2] * n]
+    else:
+        assert(len(orientation)==4)
+        # a given quaternion
+        ori=orientation
+    return ori
+
+def quaternion_multiply(q1, q0):
+    w0, x0, y0, z0 = q0
+    w1, x1, y1, z1 = q1
+    return np.array([-x1 * x0 - y1 * y0 - z1 * z0 + w1 * w0,
+                     x1 * w0 + y1 * z0 - z1 * y0 + w1 * x0,
+                     -x1 * z0 + y1 * w0 + z1 * x0 + w1 * y0,
+                     x1 * y0 - y1 * x0 + z1 * w0 + w1 * z0], dtype=np.float64)
+
+
 
 def phi(q0, q1, q2, q3):
     """
@@ -404,6 +435,193 @@ thetav = np.vectorize(theta)
 psiv = np.vectorize(psi)
 
 
+
+def occ_topo_list(shape):
+    """ return the edges & faces from `shape`
+
+    :param shape: a TopoDS_Shape
+    :return: a list of edges and faces
+    """
+
+    from OCC.TopAbs import TopAbs_FACE
+    from OCC.TopAbs import TopAbs_EDGE
+    from OCC.TopExp import TopExp_Explorer
+    from OCC.TopoDS import topods_Face, topods_Edge
+
+
+    topExp = TopExp_Explorer()
+    topExp.Init(shape, TopAbs_FACE)
+    faces = []
+    edges = []
+
+    while topExp.More():
+        face = topods_Face(topExp.Current())
+        faces.append(face)
+        topExp.Next()
+
+    topExp.Init(shape, TopAbs_EDGE)
+
+    while topExp.More():
+        edge = topods_Edge(topExp.Current())
+        edges.append(edge)
+        topExp.Next()
+
+    return faces, edges
+
+
+def occ_load_file(filename):
+    """
+    load in pythonocc a igs or step file
+
+    :param filename: a filename with extension
+    :return: a topods_shape
+    """
+
+    from OCC.STEPControl import STEPControl_Reader
+    from OCC.IGESControl import IGESControl_Reader
+    from OCC.BRep import BRep_Builder
+    from OCC.TopoDS import TopoDS_Compound
+    from OCC.IFSelect import IFSelect_RetDone,\
+    IFSelect_ItemsByEntity
+
+    reader_switch = {'stp': STEPControl_Reader,
+                     'step': STEPControl_Reader,
+                     'igs': IGESControl_Reader,
+                     'iges': IGESControl_Reader}
+
+    builder = BRep_Builder()
+    comp = TopoDS_Compound()
+    builder.MakeCompound(comp)
+
+    reader = reader_switch[os.path.splitext(filename)[1][1:].lower()]()
+
+    status = reader.ReadFile(filename)
+
+    if status == IFSelect_RetDone:  # check status
+        failsonly = False
+        reader.PrintCheckLoad(
+            failsonly, IFSelect_ItemsByEntity)
+        reader.PrintCheckTransfer(
+            failsonly, IFSelect_ItemsByEntity)
+
+        ok = reader.TransferRoots()
+        nbs = reader.NbShapes()
+
+        for i in range(1, nbs + 1):
+            shape = reader.Shape(i)
+            builder.Add(comp, shape)
+
+    return comp
+
+
+def topods_shape_reader(shape):
+
+    from OCC.StlAPI import StlAPI_Writer
+    import vtk
+
+    stl_writer = StlAPI_Writer()
+
+    with tmpfile(debug=True, suffix='.stl') as tmpf:
+        stl_writer.Write(shape, tmpf[1])
+        tmpf[0].flush()
+
+        reader = vtk.vtkSTLReader()
+        reader.SetFileName(tmpf[1])
+        reader.Update()
+
+        return reader
+
+
+def brep_reader(brep_string, indx):
+
+    from OCC.StlAPI import StlAPI_Writer
+    from OCC.BRepTools import BRepTools_ShapeSet
+    import vtk
+
+    shape_set = BRepTools_ShapeSet()
+    shape_set.ReadFromString(brep_string)
+    shape = shape_set.Shape(shape_set.NbShapes())
+    location = shape_set.Locations().Location(indx)
+    shape.Location(location)
+
+    stl_writer = StlAPI_Writer()
+
+    with tmpfile(suffix='.stl') as tmpf:
+        stl_writer.Write(shape, tmpf[1])
+        tmpf[0].flush()
+
+        reader = vtk.vtkSTLReader()
+        reader.SetFileName(tmpf[1])
+        reader.Update()
+
+        return reader
+
+
+#
+# inertia
+#
+def compute_inertia_and_center_of_mass(shapes, mass, io=None):
+    """
+    compute inertia from a list of Shape
+    """
+    from OCC.GProp import GProp_GProps
+    from OCC.BRepGProp import brepgprop_VolumeProperties
+    from OCC.gp import gp_Ax1, gp_Dir
+
+    props = GProp_GProps()
+
+    for shape in shapes:
+
+        iprops = GProp_GProps()
+        iiprops = GProp_GProps()
+
+        if shape.data is None:
+            if io is not None:
+                shape.data = io._shape.get(shape.shape_name, new_instance=True)
+            else:
+                warn('cannot get shape {0}'.format(shape.shape_name))
+                return None
+
+        iishape = shape.data
+
+        ishape = occ.OccContactShape(iishape).data()
+        # the shape relative displacement
+        occ.occ_move(ishape, list(shape.translation) +\
+                     list(shape.orientation))
+
+        brepgprop_VolumeProperties(iishape, iprops)
+
+        density = None
+
+        if hasattr(shape, 'mass') and shape.mass is not None:
+            density = shape.mass / iprops.Mass()
+
+        elif shape.parameters is not None and \
+           hasattr(shape.parameters, 'density'):
+            density = shape.parameters.density
+        else:
+            density = 1.
+
+        assert density is not None
+        props.Add(iprops, density)
+
+    assert (props.Mass() > 0.)
+
+    global_density = mass / props.Mass()
+    computed_com = props.CentreOfMass()
+    I1 = global_density * props.MomentOfInertia(
+        gp_Ax1(computed_com, gp_Dir(1, 0, 0)))
+    I2 = global_density * props.MomentOfInertia(
+        gp_Ax1(computed_com, gp_Dir(0, 1, 0)))
+    I3 = global_density * props.MomentOfInertia(
+        gp_Ax1(computed_com, gp_Dir(0, 0, 1)))
+
+    inertia = [I1, I2, I3]
+    center_of_mass = np.array([computed_com.Coord(1),
+                               computed_com.Coord(2),
+                               computed_com.Coord(3)])
+
+    return inertia, center_of_mass
 #
 # load .vtp file
 #
@@ -668,7 +886,7 @@ class ShapeCollection():
 
                             self._shapes[shape_name] = comp
                             self._io._keep.append(self._shapes[shape_name])
-                            
+
                 elif self.attributes(shape_name)['type'] in['brep']:
                     if not 'contact' in self.attributes(shape_name):
 
@@ -919,9 +1137,9 @@ class Hdf5():
         self._ref = group(self._data, 'ref')
         self._permanent_interactions = group(self._data, 'permanent_interactions',
                                              must_exist=False)
-        self._joints = group(self._data, 'joints')
-        self._plugins = group(self._data, 'plugins')
-        self._external_functions = group(self._data, 'external_functions')
+        self._joints = group(self._data, 'joints', must_exist=False)
+        self._plugins = group(self._data, 'plugins', must_exist=False)
+        self._external_functions = group(self._data, 'external_functions', must_exist=False)
         try:
             self._boundary_conditions = group(self._data, 'boundary_conditions',
                                               must_exist=(self._mode=='w'))
@@ -1067,12 +1285,16 @@ class Hdf5():
 
     def importOccObject(self, name, translation, orientation,
                         velocity, contactors, mass, given_inertia, body_class,
-                        shape_class, face_class, edge_class, number=None):
+                        shape_class, face_class, edge_class, birth=False, number=None):
 
         if mass is None or mass <= 0.:
             # a static object
             body = None
 
+            self._static[name] = {
+                    'number': number,
+                    'origin': translation,
+                    'orientation': orientation}
         else:
             if body_class is None:
                 body_class = occ.OccBody
@@ -1089,19 +1311,17 @@ class Hdf5():
             # a static object
             body = None
 
-        ctors_data = set([contactor.shape_name for contactor in contactors])
-
-        ref_shape = {ctor_data: occ.OccContactShape(
-            self._shape.get(ctor_data,
+        ref_shape = {ctor.instance_name: occ.OccContactShape(
+            self._shape.get(ctor.shape_name,
                             shape_class, face_class,
                             edge_class, new_instance=True))
-                     for ctor_data in ctors_data}
+                     for ctor in contactors}
 
         ref_added = dict()
         for contactor in contactors:
 
             contact_shape = None
-            reference_shape = ref_shape[contactor.shape_name]
+            reference_shape = ref_shape[contactor.instance_name]
 
             self._keep.append(reference_shape)
 
@@ -1148,9 +1368,12 @@ class Hdf5():
 
             # add the dynamical system to the non smooth
             # dynamical system
-            nsds = self._model.nonSmoothDynamicalSystem()
-            nsds.insertDynamicalSystem(body)
-            nsds.setName(body, str(name))
+            if birth:
+                if self.verbose:
+                    print ('birth of body named {0}, translation {1}, orientation {2}'.format(name, translation, orientation))
+                nsds = self._model.nonSmoothDynamicalSystem()
+                nsds.insertDynamicalSystem(body)
+                nsds.setName(body, str(name))
 
         return body
 
@@ -1609,6 +1832,18 @@ class Hdf5():
                     cocs1 = self._occ_contactors[body1_name][contactor1_name]
                     cocs2 = self._occ_contactors[body2_name][contactor2_name]
 
+                    if ds2 is None:
+                        if self.verbose:
+                            print('moving contactor {0} of static object {1} to {2}'.format(contactor2_name, body2_name, list(np.array(body2.attrs['translation']) +\
+                                        np.array(ctr2.attrs['translation'])) +\
+                                     list(quaternion_multiply(ctr2.attrs['orientation'],
+                                          body2.attrs['orientation']))))
+                        occ.occ_move(cocs2.data(),
+                                     list(np.array(body2.attrs['translation']) +\
+                                        np.array(ctr2.attrs['translation'])) +\
+                                     list(quaternion_multiply(ctr2.attrs['orientation'],
+                                          body2.attrs['orientation'])))
+
                     cp1 = occ.ContactPoint(cocs1)
                     cp2 = occ.ContactPoint(cocs2)
 
@@ -1641,6 +1876,7 @@ class Hdf5():
                    obj.attrs['id'], 'from initial state')
             print ('                object name   ', name)
 
+
         if translation is None:
             translation = obj.attrs['translation']
         if orientation is None:
@@ -1658,6 +1894,8 @@ class Hdf5():
 
         contactors = []
         occ_type = False
+
+
         for ctr in input_ctrs:
 
             if 'type' in ctr.attrs:
@@ -1778,7 +2016,7 @@ class Hdf5():
                         if self.verbose:
                             print ('Import  dynamic object name ', name,
                                    'from current state')
-                            print ('  number of imported object ', obj.attrs['id'])
+                            print ('imported object has id: {0}'.format(obj.attrs['id']))
 
                         id_last_inst = np.where(
                             dpos_data[id_last, 1] ==
@@ -1795,100 +2033,31 @@ class Hdf5():
                             velocities[id_vlast, 1] ==
                             self.instances()[name].attrs['id'])[0]
                         xvel = velocities[id_vlast[id_vlast_inst[0]], :]
-                        velocity = (xvel[2], xvel[3], xvel[4], xvel[5], xvel[6], xvel[7])
+                        velocity = (xvel[2], xvel[3], xvel[4],
+                                    xvel[5], xvel[6], xvel[7])
 
-                    # start from initial conditions
+                        if self.verbose:
+                            print ('position:', list(translation)+list(orientation))
+                            print ('velocity:',  velocity)
+
+
                     else:
+                        # start from initial conditions
                         print ('Import  dynamic or static object number ', obj.attrs['id'], 'from initial state')
                         print ('                object name   ', name)
                         translation = obj.attrs['translation']
                         orientation = obj.attrs['orientation']
                         velocity = obj.attrs['velocity']
 
-                    # bodyframe center of mass
-                    center_of_mass = None
 
-                    # bodyframe center of mass
-                    # check for compatibility
-                    if 'center_of_mass' in obj.attrs:
-                        center_of_mass = \
-                                obj.attrs['center_of_mass'].astype(float)
-                    else:
-                        center_of_mass = [0, 0, 0]
-
-                    input_ctrs = [ctr for _n_, ctr in obj.items()]
-
-                    contactors = []
-                    occ_type = False
-                    for ctr in input_ctrs:
-                        if 'type' in ctr.attrs:
-                            # occ contact
-                            occ_type = True
-                            contactors.append(
-                                Contactor(
-                                    instance_name=ctr.attrs['instance_name'],
-                                    shape_name=ctr.attrs['shape_name'],
-                                    collision_group=ctr.attrs['group'].astype(int),
-                                    contact_type=ctr.attrs['type'],
-                                    contact_index=ctr.attrs['contact_index'].astype(int),
-                                    relative_translation=np.subtract(ctr.attrs['translation'].astype(float), center_of_mass),
-                                    relative_orientation=ctr.attrs['orientation'].astype(float)))
-                        elif 'group' in ctr.attrs:
-                            # bullet contact
-                            assert not occ_type
-                            contactors.append(
-                                Contactor(
-                                    instance_name=ctr.attrs['instance_name'],
-                                    shape_name=ctr.attrs['shape_name'],
-                                    collision_group=ctr.attrs['group'].astype(int),
-                                    relative_translation=np.subtract(ctr.attrs['translation'].astype(float), center_of_mass),
-                                    relative_orientation=ctr.attrs['orientation'].astype(float)))
-                        else:
-                            # occ shape
-                            occ_type = True
-                            # fix: not only contactors here
-                            if 'parameters' in ctr.attrs:
-                                contactors.append(
-                                    Volume(
-                                        instance_name=ctr.attrs['instance_name'],
-                                        shape_name=ctr.attrs['shape_name'],
-                                        parameters=pickle.loads(ctr.attrs['parameters']),
-                                        relative_translation=np.subtract(ctr.attrs['translation'].astype(float), center_of_mass),
-                                        relative_orientation=ctr.attrs['orientation'].astype(float)))
-                            else:
-                                contactors.append(
-                                    Shape(
-                                        instance_name=ctr.attrs['instance_name'],
-                                        shape_name=ctr.attrs['shape_name'],
-                                        relative_translation=np.subtract(ctr.attrs['translation'].astype(float), center_of_mass),
-                                        relative_orientation=ctr.attrs['orientation'].astype(float)))
-
-                    if 'inertia' in obj.attrs:
-                        inertia = obj.attrs['inertia']
-                    else:
-                        inertia = None
-
-                    if occ_type:
-                        # Occ object
-                        self.importOccObject(
-                            name, floatv(translation), floatv(orientation),
-                            floatv(velocity), contactors, mass,
-                            inertia, body_class, shape_class, face_class,
-                            edge_class,
-                            number = self.instances()[name].attrs['id'])
-                    else:
-                        # Bullet object
-                        self.importBulletObject(
-                            name, floatv(translation), floatv(orientation),
-                            floatv(velocity), contactors, mass,
-                            inertia, body_class, shape_class,
-                            number = self.instances()[name].attrs['id'])
-
-# FIX : why direct import here ?
-#                        # start from initial conditions
-#                        self.importObject(name, body_class, shape_class,
-#                                          face_class, edge_class)
-
+                    self.importObject(name=name, body_class=body_class,
+                                      shape_class=shape_class,
+                                      face_class=face_class,
+                                      edge_class=edge_class,
+                                      translation=translation,
+                                      orientation=orientation,
+                                      velocity=velocity,
+                                      birth=True)
 
             # import nslaws
             # note: no time of birth for nslaws and joints
@@ -1955,18 +2124,28 @@ class Hdf5():
         for static in self._static.values():
             if self.verbose:
                 print('output static object', static['number'])
-            translation = static['transform'].getOrigin()
-            rotation = static['transform'].getRotation()
+
+            # fix why do we need bullet here ?
+            if 'transform' in static.keys():
+                tr = static['transform'].getOrigin()
+                rt = static['transform'].getRotation()
+                translation = [ tr.x(), tr.y(), tr.z() ]
+                rotation = [ rt.w(), rt.x(), rt.y(), rt.z() ]
+            else:
+                print (static.keys())
+                translation = static['origin']
+                rotation = static['orientation']
+
             self._static_data[p, :] = \
                 [time,
                  static['number'],
-                 translation.x(),
-                 translation.y(),
-                 translation.z(),
-                 rotation.w(),
-                 rotation.x(),
-                 rotation.y(),
-                 rotation.z()]
+                 translation[0],
+                 translation[1],
+                 translation[2],
+                 rotation[0],
+                 rotation[1],
+                 rotation[2],
+                 rotation[3]]
             p += 1
 
     def outputDynamicObjects(self, initial=False):
@@ -2455,21 +2634,10 @@ class Hdf5():
 
         """
         # print(arguments())
-        if len(orientation) == 2:
-            # axis + angle
-            axis=orientation[0]
-            assert len(axis) == 3
-            angle=orientation[1]
-            assert type(angle) is float
-            n=sin(angle / 2.) / np.linalg.norm(axis)
+        ori=quaternion_get(orientation)
 
-            ori=[cos(angle / 2.), axis[0] * n, axis[1] * n, axis[2] * n]
-        else:
-            assert(len(orientation)==4)
-            # a given quaternion
-            ori=orientation
-
-        assert(len(translation)==3)
+        assert (len(translation)==3)
+        assert (len(ori)==4)
 
         if name not in self._input:
 
@@ -2481,56 +2649,17 @@ class Hdf5():
                 if len(volumes) > 0:
                     # a computed inertia and center of mass
                     # occ only
-                    from OCC.GProp import GProp_GProps
-                    from OCC.BRepGProp import brepgprop_VolumeProperties
-                    from OCC.gp import gp_Ax1, gp_Dir
                     volumes = filter(lambda s: isinstance(s, Volume),
                                      shapes)
 
-                    props = GProp_GProps()
+                    inertia, com = compute_inertia_and_center_of_mass(volumes, mass, self)
 
-                    for volume in volumes:
-
-                        iprops = GProp_GProps()
-                        iishape = self._shape.get(volume.shape_name,
-                                                  shape_class=None, face_class=None,
-                                                  edge_class=None, new_instance=True)
-                        ishape = occ.OccContactShape(iishape).data()
-
-                        # the shape relative displacement
-                        occ.occ_move(ishape, list(volume.translation) +\
-                                     list(volume.orientation))
-
-                        brepgprop_VolumeProperties(iishape, iprops)
-
-                        if volume.parameters is not None and \
-                           hasattr(volume.parameters, 'density'):
-                            density = volume.parameters.density
-                        else:
-                            density = 1
-
-                        props.Add(iprops, density)
-
-                    assert (props.Mass() > 0.)
-                    global_density = mass / props.Mass()
-                    computed_com = props.CentreOfMass()
-                    I1 = global_density * props.MomentOfInertia(
-                        gp_Ax1(computed_com, gp_Dir(1, 0, 0)))
-                    I2 = global_density * props.MomentOfInertia(
-                        gp_Ax1(computed_com, gp_Dir(0, 1, 0)))
-                    I3 = global_density * props.MomentOfInertia(
-                        gp_Ax1(computed_com, gp_Dir(0, 0, 1)))
-
-                    inertia = [I1, I2, I3]
-                    center_of_mass = np.array([computed_com.Coord(1),
-                                               computed_com.Coord(2),
-                                               computed_com.Coord(3)])
-
-                    print('computed inertia:', I1, I2, I3)
-                    print('computed center of mass:',
-                          computed_com.Coord(1),
-                          computed_com.Coord(2),
-                          computed_com.Coord(3))
+                    print('{0}: computed inertia:'.format(name),
+                          inertia[0], inertia[1], inertia[2])
+                    print('{0}: computed center of mass:'.format(name),
+                          com[0],
+                          com[1],
+                          com[2])
 
 
             obj=group(self._input, name)
@@ -2583,7 +2712,7 @@ class Hdf5():
                     dat.attrs['contact_index'] = ctor.contact_index
 
                 dat.attrs['translation'] = ctor.translation
-                dat.attrs['orientation'] = ctor.orientation
+                dat.attrs['orientation'] = quaternion_get(ctor.orientation)
 
             if mass is None or mass == 0:
                 obj.attrs['id']=- (self._number_of_static_objects + 1)
