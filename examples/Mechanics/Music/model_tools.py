@@ -155,7 +155,7 @@ def create_model(n_modes, max_coords=(7.8e-3, .64),
     # This is done during post-processing to reduce simulation time.
     model.time[0] = initial_time
     model.save_ds_state_modal(0, string)
-    if enable_frets_output is 'all' or 'light':
+    if enable_frets_output is not None:#'all' or 'light':
         for j in range(nb_frets):
             model.save_interaction_state(0, frets[j])
     return model, string, frets
@@ -265,7 +265,7 @@ def load_model(filename, from_matlab=None):
     # for post-processing
     guitar_model.time[...] = h5file['times']
     guitar_model.data_ds[guitar_string][...] = h5file['dof']
-    if guitar_model.save_interactions:
+    if guitar_model.save_interactions is not None:
         interactions = guitar_model.interactions_linked_to_ds(guitar_string)
         nb_inter = len(interactions)
         for ic in range(nb_inter):

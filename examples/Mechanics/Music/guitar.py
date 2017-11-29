@@ -240,7 +240,7 @@ class Guitar(sk.Model):
     """
 
     def __init__(self, strings_and_frets, time_range, fs, output_freq=1,
-                 enable_interactions_output=False,
+                 enable_interactions_output=None,
                  integrators=None, default_integrator=None):
         """
         Parameters
@@ -332,7 +332,7 @@ class Guitar(sk.Model):
             self.data_ds[ds] = npw.zeros((ndof, self.nb_time_steps_output + 1))
         # A dict of buffers to save interactions variables for all time steps
         self.data_interactions = {}
-        self.save_interactions = enable_interactions_output
+        self.save_interactions = (enable_interactions_output is not None)
         if enable_interactions_output == 'light':
             for interaction in self.strings_and_frets:
                 nbc = interaction.dimension()
@@ -345,8 +345,8 @@ class Guitar(sk.Model):
                 self.data_interactions[interaction] = \
                     npw.zeros((self.nb_time_steps_output + 1, 3 * nbc))
             self.save_interaction_state = self._save_all_inter
-        else:
-            self.save_interaction_state = lambda k, inter: None
+        # else:
+        #     self.save_interaction_state = lambda k, inter: None
         # time instants
         self.time = npw.zeros(self.nb_time_steps_output + 1)
         self._convert = np.ones(
