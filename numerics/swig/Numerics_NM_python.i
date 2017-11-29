@@ -18,9 +18,6 @@
   VAR = PyInt_AsLong(_TEMP##VAR);                                   \
   Py_DECREF(_TEMP##VAR)
 
-// XXX this is a hack --xhub
-#undef SICONOS_INT64
-
 %inline %{
 
 #include "SparseMatrix.h"
@@ -81,6 +78,12 @@ static inline void _sn_check_shape(PyObject** mat, CSparseMatrix *M) {};
 #endif
 
 #include "SiconosConfig.h"
+
+// Work-around for "disappearing" SICONOS_INT64 problem in use of
+// %#ifdef below
+#ifdef SICONOS_INT64
+#define _SICONOS_INT64
+#endif
 
 #if defined(SICONOS_INT64) && !defined(SICONOS_FORCE_NPY_INT32)
 #define NPY_INT_TYPE NPY_INT64
@@ -219,7 +222,7 @@ static inline bool is_Pyobject_scipy_sparse_matrix(PyObject* o, PyObject* scipy_
         array_pyvar = obj_to_array_allow_conversion(pyvar, NPY_INT32, indvar);
         if (!array_pyvar) { PyErr_SetString(PyExc_RuntimeError, "Could not get array for variable" #pyvar); PyObject_Print(pyvar, stderr, 0); return 0; }
 
-%#ifdef SICONOS_INT64
+%#ifdef _SICONOS_INT64
         PyErr_Warn(PyExc_UserWarning, "Performance warning: the vector of indices or pointers is in int32, but siconos has 64-bits integers: we have to perform a conversion. Consider given sparse matrix in the right format");
         dest_array = (int64_t*) malloc(len * sizeof(int64_t));
         if(!dest_array) { PyErr_SetString(PyExc_RuntimeError, "Allocation of i or p failed (triggered by conversion to int32)"); return 0; }
@@ -240,7 +243,7 @@ static inline bool is_Pyobject_scipy_sparse_matrix(PyObject* o, PyObject* scipy_
         array_pyvar = obj_to_array_allow_conversion(pyvar, NPY_INT64, indvar);
         if (!array_pyvar) { PyErr_SetString(PyExc_RuntimeError, "Could not get array for variable " #pyvar);  PyObject_Print(pyvar, stderr, 0); return 0; }
 
-%#ifdef SICONOS_INT64
+%#ifdef _SICONOS_INT64
         dest_array = (int64_t *) array_data(array_pyvar);
 %#else
         PyErr_Warn(PyExc_UserWarning, "Performance warning: the vector of indices or pointers is in int64, but siconos has 32-bits integers: we have to perform a conversion. Consider given sparse matrix in the right format");
