@@ -4,6 +4,7 @@
 from model_tools import load_model
 import matplotlib.pyplot as plt
 import numpy as np
+import os
 
 
 def compute_errors(filelist, indices=None, from_matlab=None):
@@ -16,7 +17,7 @@ def compute_errors(filelist, indices=None, from_matlab=None):
     if indices is None:
         indices = [i for i in range(ref_string.dimension())]
     sref = ref_model.data_ds[ref_string][:, indices]
-    sum_ref = sref.sum(0) ** 2
+    sum_ref = (sref ** 2).sum(0)
     nbfiles = len(filelist) - 1
     nbpoints = len(indices)    
     error = np.zeros((nbfiles, nbpoints), dtype=np.float64)
@@ -41,11 +42,13 @@ def check_time_vectors(filelist, from_matlab=None):
     tref = ref_model.time
     nbfiles = len(filelist) - 1
     for i in range(nbfiles):
-        current_model, current_string, current_frets = load_model(filelist[i], from_matlab)
-        tcurrent = current_model.time
-        print("check i ... ", i)
-        assert np.allclose(tcurrent, tref)
-
+        if os.path.exists(filelist[i]):
+            current_model, current_string, current_frets = load_model(filelist[i], from_matlab)
+            tcurrent = current_model.time
+            print("check i ... ", i)
+            assert np.allclose(tcurrent, tref)
+        else:
+            print('Missing file ' + filelist[i] + ' - Skip')
 
 
 def plot_campaign(campaign, indices, from_matlab=None, fig=39):

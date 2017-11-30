@@ -14,7 +14,7 @@ def create_model(n_modes, max_coords=(7.8e-3, .64),
                  fe=15680, initial_time=0., final_time=0.1,
                  output_freq=1, from_matlab=None,
                  frets_file='./donnees_siconos/pb2_h.mat',
-                 filt_frets=True, enable_frets_output=False,
+                 filt_frets=True, enable_frets_output=None,
                  visu=False, restitution_coeff=0.9):
     """Build string and model
 
@@ -194,7 +194,7 @@ def save_model_to_hdf5(model, ds, filename, matlab_data, filt_frets):
     h5file.attrs['output_freq'] = model.output_freq
     h5file.attrs['matlab_data'] = matlab_data
     h5file.attrs['filter frets'] = filt_frets
-    h5file.attrs['frets output'] = model.save_interactions
+    h5file.attrs['frets output'] = model.enable_interactions_output
     interactions = model.interactions_linked_to_ds(ds)
     nb_inter = len(interactions)
     h5file.attrs['number of frets'] = nb_inter
@@ -251,6 +251,10 @@ def load_model(filename, from_matlab=None):
         from_matlab = h5file.attrs['matlab_data']
     filt_frets = h5file.attrs['filter frets']
     enable_frets_output = h5file.attrs['frets output']
+    print("okokoko", enable_frets_output)
+    if enable_frets_output is not 'light' or not 'all':
+        enable_frets_output = None
+        print("okokok zzzz o", enable_frets_output)
     # Create a new model object from file content
     guitar_model, guitar_string, frets = create_model(
         n_modes=n_modes, max_coords=max_coords,
@@ -265,7 +269,8 @@ def load_model(filename, from_matlab=None):
     # for post-processing
     guitar_model.time[...] = h5file['times']
     guitar_model.data_ds[guitar_string][...] = h5file['dof']
-    if guitar_model.save_interactions is not None:
+    print("ooooooo ppp ", guitar_model.save_interactions)
+    if guitar_model.save_interactions:
         interactions = guitar_model.interactions_linked_to_ds(guitar_string)
         nb_inter = len(interactions)
         for ic in range(nb_inter):
@@ -281,7 +286,6 @@ def load_convert_and_save(filename, from_matlab):
     ref_model, ref_string, ref_frets = load_model(filename, from_matlab)
     # Convert (modal to real) displacements
     ref_model.convert_modal_output(ref_string)
-    mode = 'w'
     outputfilename = 'converted_' + os.path.basename(filename)
     dirname = os.path.dirname(filename)
     outputfilename = os.path.join(dirname, outputfilename)

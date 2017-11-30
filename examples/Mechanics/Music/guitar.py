@@ -333,7 +333,9 @@ class Guitar(sk.Model):
             self.data_ds[ds] = npw.zeros((ndof, self.nb_time_steps_output + 1))
         # A dict of buffers to save interactions variables for all time steps
         self.data_interactions = {}
-        self.save_interactions = (enable_interactions_output is not None)
+        self.save_interactions = enable_interactions_output is not None
+        print("iiiiii ", self.save_interactions)
+        self.enable_interactions_output = enable_interactions_output
         if enable_interactions_output == 'light':
             for interaction in self.strings_and_frets:
                 nbc = interaction.dimension()
@@ -467,12 +469,20 @@ class Guitar(sk.Model):
         plt.subplot(2, 2, 2)
         plt.plot(self.time, data[dof - 1, :])
         plt.xlim(0, 0.008)
+        if ground is not None:
+            plt.plot((self.time[0], self.time[-1]),(ground, ground), '-')
+
         plt.subplot(2, 2, 3)
         plt.plot(self.time, data[dof - 1, :])
         plt.xlim(0.05, 0.07)
+        if ground is not None:
+            plt.plot((self.time[0], self.time[-1]),(ground, ground), '-')
+
         plt.subplot(2, 2, 4)
         plt.plot(self.time, data[dof - 1, :])
         plt.xlim(0.75, 0.77)
+        if ground is not None:
+            plt.plot((self.time[0], self.time[-1]),(ground, ground), '-')
         leg.append('x = ' + str(x[dof]))
         plt.legend(leg)
         plt.suptitle('displacements = f(time)')

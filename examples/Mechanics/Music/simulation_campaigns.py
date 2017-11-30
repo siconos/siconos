@@ -22,8 +22,8 @@ def create_campaign(freq2job, frequencies, filepath, hosts):
     campaign['freqs'] = frequencies
     campaign['files'] = filelist
     campaign['files_converted'] = newfilelist
-    campaigns['durations'] = durations
-    campaigns['hosts'] = hosts
+    campaign['durations'] = durations
+    campaign['hosts'] = hosts
     return campaign
 
 
@@ -198,6 +198,7 @@ filepath = './results'
 
 
 # Luke, bass guitar, coeff restit = 0.9, start on 28/11/2017
+filepath = './results_bass/2017_11_28'
 freq2job = {}
 hosts = [42, ] * 13
 
@@ -218,6 +219,7 @@ freq2job[freqs[0]] = (3875414, 12.0917)
 g2017_11_28_e09 = create_campaign(freq2job, freqs, filepath, hosts)
 
 # Luke, bass guitar, coeff restit = 0., start on 28/11/2017
+filepath = './results_bass/2017_11_28'
 freq2job = {}
 hosts = [44, ] * 13
 
@@ -238,6 +240,7 @@ freq2job[freqs[0]] = (3875429, 10.4868)
 g2017_11_28_e0 = create_campaign(freq2job, freqs, filepath, hosts)
 
 # Luke, bass guitar, coeff restit = 1., start on 28/11/2017
+filepath = './results_bass/2017_11_28'
 freq2job = {}
 hosts = [43, ] * 13
 
@@ -259,6 +262,7 @@ g2017_11_28_e1 = create_campaign(freq2job, freqs, filepath, hosts)
 
                       
 # Luke, fretless bass guitar, coeff restit = 0.9, start on 28/11/2017
+filepath = './results_fretless/2017_11_28'
 freq2job = {}
 hosts = [42, ] * 13
 freq2job[freqs[12]] = (3876050, 0)
@@ -279,6 +283,7 @@ freq2job[freqs[0]] = (3876062, 933.8776)
 f2017_11_28_e09 = create_campaign(freq2job, freqs, filepath, hosts)
 
 # Luke, fretless bass guitar, coeff restit = 0.9, start on 28/11/2017
+filepath = './results_fretless/2017_11_28'
 freq2job = {}
 hosts = [44, ] * 13
 freq2job[freqs[12]] = (3876063, 0)
