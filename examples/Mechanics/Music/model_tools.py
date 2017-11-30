@@ -251,10 +251,8 @@ def load_model(filename, from_matlab=None):
         from_matlab = h5file.attrs['matlab_data']
     filt_frets = h5file.attrs['filter frets']
     enable_frets_output = h5file.attrs['frets output']
-    print("okokoko", enable_frets_output)
-    if enable_frets_output is not 'light' or not 'all':
+    if enable_frets_output != 'light' and enable_frets_output != 'all':
         enable_frets_output = None
-        print("okokok zzzz o", enable_frets_output)
     # Create a new model object from file content
     guitar_model, guitar_string, frets = create_model(
         n_modes=n_modes, max_coords=max_coords,

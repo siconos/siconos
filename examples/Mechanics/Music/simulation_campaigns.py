@@ -302,6 +302,7 @@ freq2job[freqs[0]] = (3876075, 507.502916)
 f2017_11_28_e0 = create_campaign(freq2job, freqs, filepath, hosts)
 
 # Luke, bass guitar, coeff restit = 0.9, start on 30/11/2017
+filepath = './results_bass/2017_11_30'
 freq2job = {}
 hosts = [38, ] * 13
 
@@ -322,6 +323,7 @@ freq2job[freqs[0]] = (3877931, 12.0917)
 g2017_11_30_e09 = create_campaign(freq2job, freqs, filepath, hosts)
 
 # Luke, bass guitar, coeff restit = 0., start on 30/11/2017
+filepath = './results_bass/2017_11_30'
 freq2job = {}
 hosts = [44, ] * 13
 
