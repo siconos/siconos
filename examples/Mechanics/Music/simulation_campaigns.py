@@ -201,7 +201,7 @@ filepath = './results'
 freq2job = {}
 hosts = [42, ] * 13
 
-freq2job[freqs[12]] = (3875402, 0)
+freq2job[freqs[12]] = (3875402, 123919.2328)
 freq2job[freqs[11]] = (3875403, 69255.26833)
 freq2job[freqs[10]] = (3875404, 37453.121375)
 freq2job[freqs[9]] = (3875405, 19193.3257)
@@ -221,7 +221,7 @@ g2017_11_28_e09 = create_campaign(freq2job, freqs, filepath, hosts)
 freq2job = {}
 hosts = [44, ] * 13
 
-freq2job[freqs[12]] = (3875417, 0)
+freq2job[freqs[12]] = (3875417, 120588.15553)
 freq2job[freqs[11]] = (3875418, 67350.76821)
 freq2job[freqs[10]] = (3875419, 35742.55494)
 freq2job[freqs[9]] = (3875420, 18155.32000)
@@ -241,7 +241,7 @@ g2017_11_28_e0 = create_campaign(freq2job, freqs, filepath, hosts)
 freq2job = {}
 hosts = [43, ] * 13
 
-freq2job[freqs[12]] = (3875484, 0)
+freq2job[freqs[12]] = (3875484, 105420.163)
 freq2job[freqs[11]] = (3875485, 60064.23483)
 freq2job[freqs[10]] = (3875486, 33331.73031999)
 freq2job[freqs[9]] = (3875487, 17431.2319)
@@ -296,3 +296,42 @@ freq2job[freqs[1]] = (3876074, 810.9298)
 freq2job[freqs[0]] = (3876075, 507.502916)
 f2017_11_28_e0 = create_campaign(freq2job, freqs, filepath, hosts)
 
+# Luke, bass guitar, coeff restit = 0.9, start on 30/11/2017
+freq2job = {}
+hosts = [38, ] * 13
+
+freq2job[freqs[12]] = (3877919, 123919.2328)
+freq2job[freqs[11]] = (3877920, 69255.26833)
+freq2job[freqs[10]] = (3877921, 37453.121375)
+freq2job[freqs[9]] = (3877922, 19193.3257)
+freq2job[freqs[8]] = (3877923, 9366.6517)
+freq2job[freqs[7]] = (3877924, 4675.471347)
+freq2job[freqs[6]] = (3877925, 2279.230298)
+freq2job[freqs[5]] = (3877926, 1079.76208)
+freq2job[freqs[4]] = (3877927, 559.481385)
+freq2job[freqs[3]] = (3877928, 235.766678)
+freq2job[freqs[2]] = (3877929, 83.5007)
+freq2job[freqs[1]] = (3877930, 34.7391)
+freq2job[freqs[0]] = (3877931, 12.0917)
+
+g2017_11_30_e09 = create_campaign(freq2job, freqs, filepath, hosts)
+
+# Luke, bass guitar, coeff restit = 0., start on 30/11/2017
+freq2job = {}
+hosts = [44, ] * 13
+
+freq2job[freqs[12]] = (3877938, 123919.2328)
+freq2job[freqs[11]] = (3877939, 69255.26833)
+freq2job[freqs[10]] = (3877940, 37453.121375)
+freq2job[freqs[9]] = (3877941, 19193.3257)
+freq2job[freqs[8]] = (3877942, 9366.6517)
+freq2job[freqs[7]] = (3877943, 4675.471347)
+freq2job[freqs[6]] = (3877944, 2279.230298)
+freq2job[freqs[5]] = (3877945, 1079.76208)
+freq2job[freqs[4]] = (3877946, 559.481385)
+freq2job[freqs[3]] = (3877947, 235.766678)
+freq2job[freqs[2]] = (3877948, 83.5007)
+freq2job[freqs[1]] = (3877949, 34.7391)
+freq2job[freqs[0]] = (3877950, 12.0917)
+
+g2017_11_30_e0 = create_campaign(freq2job, freqs, filepath, hosts)

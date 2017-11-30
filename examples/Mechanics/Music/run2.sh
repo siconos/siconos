@@ -4,7 +4,7 @@ source /applis/site/nix.sh
 frequency=$1
 output_freq=$2
 #OAR --project siconos
-#OAR --name Guitar_Bass
+#OAR --name Guitar_Bass_0
 #OAR -l /nodes=1/core=1,walltime=240:00:00
 ### #OAR -t timesharing=perignon,*
 

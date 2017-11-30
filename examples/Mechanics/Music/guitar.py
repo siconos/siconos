@@ -230,7 +230,8 @@ class Fret(sk.Interaction):
         # Build nslaw, relation and interaction
         e = restitution_coeff
         nslaw = sk.NewtonImpactNSL(e)
-        relation = sk.LagrangianLinearTIR(hmat, [-contact_positions[1]])
+        dist = -contact_positions[1] - string.diameter * 0.5
+        relation = sk.LagrangianLinearTIR(hmat, [dist])
         super(Fret, self).__init__(nslaw, relation)
 
 
