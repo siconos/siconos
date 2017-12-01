@@ -315,7 +315,7 @@
 
   if (!csrm) { SWIG_fail; }
   $result = SWIG_AppendOutput($result, csrm);
-  free($1);
+  cs_spfree($1);
 }
 
 %typemap(out) (CSparseMatrix *)
