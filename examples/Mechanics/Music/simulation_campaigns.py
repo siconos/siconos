@@ -301,6 +301,8 @@ freq2job[freqs[1]] = (3876074, 810.9298)
 freq2job[freqs[0]] = (3876075, 507.502916)
 f2017_11_28_e0 = create_campaign(freq2job, freqs, filepath, hosts)
 
+
+
 # Luke, bass guitar, coeff restit = 0.9, start on 30/11/2017
 filepath = './results_bass/2017_11_30'
 freq2job = {}
@@ -342,3 +344,68 @@ freq2job[freqs[1]] = (3877949, 34.7391)
 freq2job[freqs[0]] = (3877950, 12.0917)
 
 g2017_11_30_e0 = create_campaign(freq2job, freqs, filepath, hosts)
+
+# Luke, bass guitar, coeff restit = 1., start on 30/11/2017
+filepath = './results_bass/2017_11_30'
+freq2job = {}
+hosts = [44, ] * 13
+
+freq2job[freqs[12]] = (3878147, 123919.2328)
+freq2job[freqs[11]] = (3878148, 69255.26833)
+freq2job[freqs[10]] = (3878149, 37453.121375)
+freq2job[freqs[9]] = (3878150, 19193.3257)
+freq2job[freqs[8]] = (3878151, 9366.6517)
+freq2job[freqs[7]] = (3878152, 4675.471347)
+freq2job[freqs[6]] = (3878153, 2279.230298)
+freq2job[freqs[5]] = (3878154, 1079.76208)
+freq2job[freqs[4]] = (3878158, 559.481385)
+freq2job[freqs[3]] = (3878159, 235.766678)
+freq2job[freqs[2]] = (3878160, 83.5007)
+freq2job[freqs[1]] = (3878161, 34.7391)
+freq2job[freqs[0]] = (3878162, 12.0917)
+
+g2017_11_30_e1 = create_campaign(freq2job, freqs, filepath, hosts)
+
+
+# Luke, fretless bass guitar, coeff restit = 0.9, start on 30/11/2017
+filepath = './results_fretless/2017_01_12'
+freq2job = {}
+hosts = [42, ] * 13
+
+freq2job[freqs[12]] = (3878240, 123919.2328)
+freq2job[freqs[11]] = (3878241, 69255.26833)
+freq2job[freqs[10]] = (3878242, 37453.121375)
+freq2job[freqs[9]] = (3878243, 19193.3257)
+freq2job[freqs[8]] = (3878244, 9366.6517)
+freq2job[freqs[7]] = (3878245, 4675.471347)
+freq2job[freqs[6]] = (3878246, 2279.230298)
+freq2job[freqs[5]] = (3878247, 1079.76208)
+freq2job[freqs[4]] = (3878248, 559.481385)
+freq2job[freqs[3]] = (3878249, 235.766678)
+freq2job[freqs[2]] = (3878250, 83.5007)
+freq2job[freqs[1]] = (3878251, 34.7391)
+freq2job[freqs[0]] = (3878252, 12.0917)
+
+f2017_12_01_e09 = create_campaign(freq2job, freqs, filepath, hosts)
+
+
+# Luke, fretless bass guitar, coeff restit = 0.9, start on 30/11/2017
+filepath = './results_fretless/2017_01_12'
+freq2job = {}
+hosts = [43, ] * 13
+
+freq2job[freqs[12]] = (3878260, 123919.2328)
+freq2job[freqs[11]] = (3878261, 69255.26833)
+freq2job[freqs[10]] = (3878262, 37453.121375)
+freq2job[freqs[9]] = (3878263, 19193.3257)
+freq2job[freqs[8]] = (3878264, 9366.6517)
+freq2job[freqs[7]] = (3878265, 4675.471347)
+freq2job[freqs[6]] = (3878266, 2279.230298)
+freq2job[freqs[5]] = (3878267, 1079.76208)
+freq2job[freqs[4]] = (3878268, 559.481385)
+freq2job[freqs[3]] = (3878269, 235.766678)
+freq2job[freqs[2]] = (3878270, 83.5007)
+freq2job[freqs[1]] = (3878271, 34.7391)
+freq2job[freqs[0]] = (3878272, 12.0917)
+
+f2017_12_01_e0 = create_campaign(freq2job, freqs, filepath, hosts)
