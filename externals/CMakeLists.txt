@@ -35,7 +35,7 @@ set(${COMPONENT}_DIRS
 )
 
 if (NOT USE_SYSTEM_SUITESPARSE)
-  LIST(APPEND ${COMPONENT}_DIRS SuiteSparse/CSparse)
+  LIST(APPEND ${COMPONENT}_DIRS SuiteSparse/CXSparse)
 endif()
 
 if(WITH_CXX)
@@ -62,7 +62,7 @@ endif()
 
 if (USE_SYSTEM_SUITESPARSE)
   list(APPEND ${COMPONENT}_HDRS_EXCLUDE_DIR
-    SuiteSparse/CSparse)
+    SuiteSparse/CXSparse)
 endif()
 
 # List of directories for which no doxygen doc will be generated
@@ -102,7 +102,10 @@ include(WindowsExternalsSetup)
 
 if(BUILD_AS_CPP)
   file(GLOB_RECURSE C_FILES ${CMAKE_CURRENT_SOURCE_DIR} *.c)
-  set_source_files_properties(${C_FILES} PROPERTIES LANGUAGE CXX)
+  set_source_files_properties(${C_FILES} PROPERTIES LANGUAGE CXX
+    COMPILE_FLAGS -fpermissive)
+  set_source_files_properties(SuiteSparse/CXSparse/cxsparse.c
+    PROPERTIES COMPILE_FLAGS -fpermissive)
   set(${COMPONENT}_LINKER_LANGUAGE CXX)
 endif()
 

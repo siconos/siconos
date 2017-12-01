@@ -1,0 +1,11 @@
+
+//// Siconos: This little preamble is needed for cs_convert.c to
+//// compile when BUILD_AS_CPP=TRUE.
+#include "SiconosConfig.h"
+#ifdef BUILD_AS_CPP
+#define creal std::real
+#define cimag std::imag
+using namespace std::complex_literals;
+#define I 1i
+#endif
+//// End preamble

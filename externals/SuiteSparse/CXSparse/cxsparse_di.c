@@ -1,23 +1,21 @@
-# include "csparse.h"
-
-#if defined(__cplusplus)
-#undef restrict
-#define restrict __restrict
-#endif
-
+// Siconos: This file contains a copy of the CXSparse library by Tim Davis,
+// part of SuiteSparse available at,
+// http://faculty.cse.tamu.edu/davis/SuiteSparse/SuiteSparse-5.0.0.tar.gz
+// See LICENSE.txt for license information, also copied from that  archive.
+#include "cs.h"
 /* C = alpha*A + beta*B */
-cs *cs_add (const cs *A, const cs *B, double alpha, double beta)
+cs *cs_add (const cs *A, const cs *B, CS_ENTRY alpha, CS_ENTRY beta)
 {
     CS_INT p, j, nz = 0, anz, *Cp, *Ci, *Bp, m, n, bnz, *w, values ;
-    double *x, *Bx, *Cx ;
+    CS_ENTRY *x, *Bx, *Cx ;
     cs *C ;
     if (!CS_CSC (A) || !CS_CSC (B)) return (NULL) ;         /* check inputs */
     if (A->m != B->m || A->n != B->n) return (NULL) ;
     m = A->m ; anz = A->p [A->n] ;
     n = B->n ; Bp = B->p ; Bx = B->x ; bnz = Bp [n] ;
-    w = (CS_INT*) cs_calloc (m, sizeof (CS_INT)) ;                       /* get workspace */
+    w = cs_calloc (m, sizeof (CS_INT)) ;                       /* get workspace */
     values = (A->x != NULL) && (Bx != NULL) ;
-    x = values ? (double*) cs_malloc (m, sizeof (double)) : NULL ;    /* get workspace */
+    x = values ? cs_malloc (m, sizeof (CS_ENTRY)) : NULL ;    /* get workspace */
     C = cs_spalloc (m, n, anz + bnz, values, 0) ;           /* allocate result*/
     if (!C || !w || (values && !x)) return (cs_done (C, w, x, 0)) ;
     Cp = C->p ; Ci = C->i ; Cx = C->x ;
@@ -32,6 +30,7 @@ cs *cs_add (const cs *A, const cs *B, double alpha, double beta)
     cs_sprealloc (C, 0) ;               /* remove extra space from C */
     return (cs_done (C, w, x, 1)) ;     /* success; free workspace, return C */
 }
+#include "cs.h"
 /* clear w */
 static CS_INT cs_wclear (CS_INT mark, CS_INT lemax, CS_INT *w, CS_INT n)
 {
@@ -45,7 +44,7 @@ static CS_INT cs_wclear (CS_INT mark, CS_INT lemax, CS_INT *w, CS_INT n)
 }
 
 /* keep off-diagonal entries; drop diagonal entries */
-static CS_INT cs_diag (CS_INT i, CS_INT j, double aij, void *other) { return (i != j) ; }
+static CS_INT cs_diag (CS_INT i, CS_INT j, CS_ENTRY aij, void *other) { return (i != j) ; }
 
 /* p = amd(A+A') if symmetric is true, or amd(A'A) otherwise */
 CS_INT *cs_amd (CS_INT order, const cs *A)  /* order 0:natural, 1:Chol, 2:LU, 3:QR */
@@ -61,7 +60,7 @@ CS_INT *cs_amd (CS_INT order, const cs *A)  /* order 0:natural, 1:Chol, 2:LU, 3:
     AT = cs_transpose (A, 0) ;              /* compute A' */
     if (!AT) return (NULL) ;
     m = A->m ; n = A->n ;
-    dense = (CS_INT)CS_MAX (16, 10 * sqrt ((double) n)) ;   /* find dense threshold */
+    dense = CS_MAX (16, 10 * sqrt ((double) n)) ;   /* find dense threshold */
     dense = CS_MIN (n-2, dense) ;
     if (order == 1 && n == m)
     {
@@ -92,8 +91,8 @@ CS_INT *cs_amd (CS_INT order, const cs *A)  /* order 0:natural, 1:Chol, 2:LU, 3:
     cs_fkeep (C, &cs_diag, NULL) ;          /* drop diagonal entries */
     Cp = C->p ;
     cnz = Cp [n] ;
-    P = (CS_INT*) cs_malloc (n+1, sizeof (CS_INT)) ;     /* allocate result */
-    W = (CS_INT*) cs_malloc (8*(n+1), sizeof (CS_INT)) ; /* get workspace */
+    P = cs_malloc (n+1, sizeof (CS_INT)) ;     /* allocate result */
+    W = cs_malloc (8*(n+1), sizeof (CS_INT)) ; /* get workspace */
     t = cnz + cnz/5 + 2*n ;                 /* add elbow room to C */
     if (!P || !W || !cs_sprealloc (C, t)) return (cs_idone (P, C, W, 0)) ;
     len  = W           ; nv     = W +   (n+1) ; next   = W + 2*(n+1) ;
@@ -395,18 +394,19 @@ CS_INT *cs_amd (CS_INT order, const cs *A)  /* order 0:natural, 1:Chol, 2:LU, 3:
     }
     return (cs_idone (P, C, W, 1)) ;
 }
+#include "cs.h"
 /* L = chol (A, [pinv parent cp]), pinv is optional */
 csn *cs_chol (const cs *A, const css *S)
 {
-    double d, lki, *Lx, *x, *Cx ;
+    CS_ENTRY d, lki, *Lx, *x, *Cx ;
     CS_INT top, i, p, k, n, *Li, *Lp, *cp, *pinv, *s, *c, *parent, *Cp, *Ci ;
     cs *L, *C, *E ;
     csn *N ;
     if (!CS_CSC (A) || !S || !S->cp || !S->parent) return (NULL) ;
     n = A->n ;
-    N = (csn*) cs_calloc (1, sizeof (csn)) ;       /* allocate result */
-    c = (CS_INT*) cs_malloc (2*n, sizeof (CS_INT)) ;     /* get CS_INT workspace */
-    x = (double*) cs_malloc (n, sizeof (double)) ;    /* get double workspace */
+    N = cs_calloc (1, sizeof (csn)) ;       /* allocate result */
+    c = cs_malloc (2*n, sizeof (CS_INT)) ;     /* get CS_INT workspace */
+    x = cs_malloc (n, sizeof (CS_ENTRY)) ;    /* get CS_ENTRY workspace */
     cp = S->cp ; pinv = S->pinv ; parent = S->parent ;
     C = pinv ? cs_symperm (A, pinv, 1) : ((cs *) A) ;
     E = pinv ? C : NULL ;           /* E is alias for A, or a copy E=A(p,p) */
@@ -438,13 +438,14 @@ csn *cs_chol (const cs *A, const css *S)
             {
                 x [Li [p]] -= Lx [p] * lki ;
             }
-            d -= lki * lki ;            /* d = d - L(k,i)*L(k,i) */
+            d -= lki * CS_CONJ (lki) ;            /* d = d - L(k,i)*L(k,i) */
             p = c [i]++ ;
             Li [p] = k ;                /* store L(k,i) in column i */
-            Lx [p] = lki ;
+            Lx [p] = CS_CONJ (lki) ;
         }
         /* --- Compute L(k,k) ----------------------------------------------- */
-        if (d <= 0) return (cs_ndone (N, E, c, x, 0)) ; /* not pos def */
+        if (CS_REAL (d) <= 0 || CS_IMAG (d) != 0)
+	    return (cs_ndone (N, E, c, x, 0)) ; /* not pos def */
         p = c [k]++ ;
         Li [p] = k ;                /* store L(k,k) = sqrt (d) in column k */
         Lx [p] = sqrt (d) ;
@@ -452,10 +453,11 @@ csn *cs_chol (const cs *A, const css *S)
     Lp [n] = cp [n] ;               /* finalize L */
     return (cs_ndone (N, E, c, x, 1)) ; /* success: free E,s,x; return N */
 }
+#include "cs.h"
 /* x=A\b where A is symmetric positive definite; b overwritten with solution */
-CS_INT cs_cholsol (CS_INT order, const cs *A, double *b)
+CS_INT cs_cholsol (CS_INT order, const cs *A, CS_ENTRY *b)
 {
-    double *x ;
+    CS_ENTRY *x ;
     css *S ;
     csn *N ;
     CS_INT n, ok ;
@@ -463,7 +465,7 @@ CS_INT cs_cholsol (CS_INT order, const cs *A, double *b)
     n = A->n ;
     S = cs_schol (order, A) ;               /* ordering and symbolic analysis */
     N = cs_chol (A, S) ;                    /* numeric Cholesky factorization */
-    x = (double*) cs_malloc (n, sizeof (double)) ;    /* get workspace */
+    x = cs_malloc (n, sizeof (CS_ENTRY)) ;    /* get workspace */
     ok = (S && N && x) ;
     if (ok)
     {
@@ -477,16 +479,17 @@ CS_INT cs_cholsol (CS_INT order, const cs *A, double *b)
     cs_nfree (N) ;
     return (ok) ;
 }
+#include "cs.h"
 /* C = compressed-column form of a triplet matrix T */
 cs *cs_compress (const cs *T)
 {
     CS_INT m, n, nz, p, k, *Cp, *Ci, *w, *Ti, *Tj ;
-    double *Cx, *Tx ;
+    CS_ENTRY *Cx, *Tx ;
     cs *C ;
     if (!CS_TRIPLET (T)) return (NULL) ;                /* check inputs */
     m = T->m ; n = T->n ; Ti = T->i ; Tj = T->p ; Tx = T->x ; nz = T->nz ;
     C = cs_spalloc (m, n, nz, Tx != NULL, 0) ;          /* allocate result */
-    w = (CS_INT*) cs_calloc (n, sizeof (CS_INT)) ;                   /* get workspace */
+    w = cs_calloc (n, sizeof (CS_INT)) ;                   /* get workspace */
     if (!C || !w) return (cs_done (C, w, NULL, 0)) ;    /* out of memory */
     Cp = C->p ; Ci = C->i ; Cx = C->x ;
     for (k = 0 ; k < nz ; k++) w [Tj [k]]++ ;           /* column counts */
@@ -498,6 +501,7 @@ cs *cs_compress (const cs *T)
     }
     return (cs_done (C, w, NULL, 1)) ;      /* success; free w and return C */
 }
+#include "cs.h"
 /* column counts of LL'=A or LL'=A'A, given parent & post ordering */
 #define HEAD(k,j) (ata ? head [k] : j)
 #define NEXT(J)   (ata ? next [J] : -1)
@@ -521,8 +525,8 @@ CS_INT *cs_counts (const cs *A, const CS_INT *parent, const CS_INT *post, CS_INT
     if (!CS_CSC (A) || !parent || !post) return (NULL) ;    /* check inputs */
     m = A->m ; n = A->n ;
     s = 4*n + (ata ? (n+m+1) : 0) ;
-    delta = colcount = (CS_INT*) cs_malloc (n, sizeof (CS_INT)) ;    /* allocate result */
-    w = (CS_INT*) cs_malloc (s, sizeof (CS_INT)) ;                   /* get workspace */
+    delta = colcount = cs_malloc (n, sizeof (CS_INT)) ;    /* allocate result */
+    w = cs_malloc (s, sizeof (CS_INT)) ;                   /* get workspace */
     AT = cs_transpose (A, 0) ;                          /* AT = A' */
     if (!AT || !colcount || !w) return (cs_idone (colcount, AT, w, 0)) ;
     ancestor = w ; maxfirst = w+n ; prevleaf = w+2*n ; first = w+3*n ;
@@ -558,6 +562,7 @@ CS_INT *cs_counts (const cs *A, const CS_INT *parent, const CS_INT *post, CS_INT
     }
     return (cs_idone (colcount, AT, w, 1)) ;    /* success: free workspace */
 } 
+#include "cs.h"
 /* p [0..n] = cumulative sum of c [0..n-1], and then copy p [0..n-1] into c */
 double cs_cumsum (CS_INT *p, CS_INT *c, CS_INT n)
 {
@@ -568,12 +573,13 @@ double cs_cumsum (CS_INT *p, CS_INT *c, CS_INT n)
     {
         p [i] = nz ;
         nz += c [i] ;
-        nz2 += (double)c [i] ;              /* also in double to avoid CS_INT overflow */
+        nz2 += c [i] ;              /* also in double to avoid CS_INT overflow */
         c [i] = p [i] ;             /* also copy p[0..n-1] back into c[0..n-1]*/
     }
     p [n] = nz ;
     return (nz2) ;                  /* return sum (c [0..n-1]) */
 }
+#include "cs.h"
 /* depth-first-search of the graph of a matrix, starting at node j */
 CS_INT cs_dfs (CS_INT j, cs *G, CS_INT top, CS_INT *xi, CS_INT *pstack, const CS_INT *pinv)
 {
@@ -609,6 +615,7 @@ CS_INT cs_dfs (CS_INT j, cs *G, CS_INT top, CS_INT *xi, CS_INT *pstack, const CS
     }
     return (top) ;
 }
+#include "cs.h"
 /* breadth-first search for coarse decomposition (C0,C1,R1 or R0,R3,C3) */
 static CS_INT cs_bfs (const cs *A, CS_INT n, CS_INT *wi, CS_INT *wj, CS_INT *queue,
     const CS_INT *imatch, const CS_INT *jmatch, CS_INT mark)
@@ -668,7 +675,7 @@ static void cs_unmatched (CS_INT m, const CS_INT *wi, CS_INT *p, CS_INT *rr, CS_
 }
 
 /* return 1 if row i is in R2 */
-static CS_INT cs_rprune (CS_INT i, CS_INT j, double aij, void *other)
+static CS_INT cs_rprune (CS_INT i, CS_INT j, CS_ENTRY aij, void *other)
 {
     CS_INT *rr = (CS_INT *) other ;
     return (i >= rr [1] && i < rr [2]) ;
@@ -752,15 +759,17 @@ csd *cs_dmperm (const cs *A, CS_INT seed)
     cs_dfree (scc) ;
     return (cs_ddone (D, C, NULL, 1)) ;
 }
-static CS_INT cs_tol (CS_INT i, CS_INT j, double aij, void *tol)
+#include "cs.h"
+static CS_INT cs_tol (CS_INT i, CS_INT j, CS_ENTRY aij, void *tol)
 {
-    return (fabs (aij) > *((double *) tol)) ;
+    return (CS_ABS (aij) > *((double *) tol)) ;
 }
 CS_INT cs_droptol (cs *A, double tol)
 {
     return (cs_fkeep (A, &cs_tol, &tol)) ;    /* keep all large entries */
 }
-static CS_INT cs_nonzero (CS_INT i, CS_INT j, double aij, void *other)
+#include "cs.h"
+static CS_INT cs_nonzero (CS_INT i, CS_INT j, CS_ENTRY aij, void *other)
 {
     return (aij != 0) ;
 }
@@ -768,14 +777,15 @@ CS_INT cs_dropzeros (cs *A)
 {
     return (cs_fkeep (A, &cs_nonzero, NULL)) ;  /* keep all nonzero entries */
 } 
+#include "cs.h"
 /* remove duplicate entries from A */
 CS_INT cs_dupl (cs *A)
 {
     CS_INT i, j, p, q, nz = 0, n, m, *Ap, *Ai, *w ;
-    double *Ax ;
+    CS_ENTRY *Ax ;
     if (!CS_CSC (A)) return (0) ;               /* check inputs */
     m = A->m ; n = A->n ; Ap = A->p ; Ai = A->i ; Ax = A->x ;
-    w = (CS_INT*) cs_malloc (m, sizeof (CS_INT)) ;           /* get workspace */
+    w = cs_malloc (m, sizeof (CS_INT)) ;           /* get workspace */
     if (!w) return (0) ;                        /* out of memory */
     for (i = 0 ; i < m ; i++) w [i] = -1 ;      /* row i not yet seen */
     for (j = 0 ; j < n ; j++)
@@ -801,8 +811,9 @@ CS_INT cs_dupl (cs *A)
     cs_free (w) ;                               /* free workspace */
     return (cs_sprealloc (A, 0)) ;              /* remove extra space from A */
 }
+#include "cs.h"
 /* add an entry to a triplet matrix; return 1 if ok, 0 otherwise */
-CS_INT cs_entry (cs *T, CS_INT i, CS_INT j, double x)
+CS_INT cs_entry (cs *T, CS_INT i, CS_INT j, CS_ENTRY x)
 {
     if (!CS_TRIPLET (T) || i < 0 || j < 0) return (0) ;     /* check inputs */
     if (T->nz >= T->nzmax && !cs_sprealloc (T,2*(T->nzmax))) return (0) ;
@@ -813,6 +824,7 @@ CS_INT cs_entry (cs *T, CS_INT i, CS_INT j, double x)
     T->n = CS_MAX (T->n, j+1) ;
     return (1) ;
 }
+#include "cs.h"
 /* find nonzero pattern of Cholesky L(k,1:k-1) using etree and triu(A(:,k)) */
 CS_INT cs_ereach (const cs *A, CS_INT k, const CS_INT *parent, CS_INT *s, CS_INT *w)
 {
@@ -835,14 +847,15 @@ CS_INT cs_ereach (const cs *A, CS_INT k, const CS_INT *parent, CS_INT *s, CS_INT
     CS_MARK (w, k) ;                /* unmark node k */
     return (top) ;                  /* s [top..n-1] contains pattern of L(k,:)*/
 }
+#include "cs.h"
 /* compute the etree of A (using triu(A), or A'A without forming A'A */
 CS_INT *cs_etree (const cs *A, CS_INT ata)
 {
     CS_INT i, k, p, m, n, inext, *Ap, *Ai, *w, *parent, *ancestor, *prev ;
     if (!CS_CSC (A)) return (NULL) ;        /* check inputs */
     m = A->m ; n = A->n ; Ap = A->p ; Ai = A->i ;
-    parent = (CS_INT*) cs_malloc (n, sizeof (CS_INT)) ;              /* allocate result */
-    w = (CS_INT*) cs_malloc (n + (ata ? m : 0), sizeof (CS_INT)) ;   /* get workspace */
+    parent = cs_malloc (n, sizeof (CS_INT)) ;              /* allocate result */
+    w = cs_malloc (n + (ata ? m : 0), sizeof (CS_INT)) ;   /* get workspace */
     if (!w || !parent) return (cs_idone (parent, NULL, w, 0)) ;
     ancestor = w ; prev = w + n ;
     if (ata) for (i = 0 ; i < m ; i++) prev [i] = -1 ;
@@ -864,11 +877,12 @@ CS_INT *cs_etree (const cs *A, CS_INT ata)
     }
     return (cs_idone (parent, NULL, w, 1)) ;
 }
+#include "cs.h"
 /* drop entries for which fkeep(A(i,j)) is false; return nz if OK, else -1 */
-CS_INT cs_fkeep (cs *A, CS_INT (*fkeep) (CS_INT, CS_INT, double, void *), void *other)
+CS_INT cs_fkeep (cs *A, CS_INT (*fkeep) (CS_INT, CS_INT, CS_ENTRY, void *), void *other)
 {
     CS_INT j, p, nz = 0, n, *Ap, *Ai ;
-    double *Ax ;
+    CS_ENTRY *Ax ;
     if (!CS_CSC (A) || !fkeep) return (-1) ;    /* check inputs */
     n = A->n ; Ap = A->p ; Ai = A->i ; Ax = A->x ;
     for (j = 0 ; j < n ; j++)
@@ -888,11 +902,12 @@ CS_INT cs_fkeep (cs *A, CS_INT (*fkeep) (CS_INT, CS_INT, double, void *), void *
     cs_sprealloc (A, 0) ;                   /* remove extra space from A */
     return (nz) ;
 }
+#include "cs.h"
 /* y = A*x+y */
-CS_INT cs_gaxpy (const cs *A, const double * restrict x, double * restrict y)
+CS_INT cs_gaxpy (const cs *A, const CS_ENTRY *x, CS_ENTRY *y)
 {
     CS_INT p, j, n, *Ap, *Ai ;
-    double *Ax ;
+    CS_ENTRY *Ax ;
     if (!CS_CSC (A) || !x || !y) return (0) ;       /* check inputs */
     n = A->n ; Ap = A->p ; Ai = A->i ; Ax = A->x ;
     for (j = 0 ; j < n ; j++)
@@ -904,16 +919,17 @@ CS_INT cs_gaxpy (const cs *A, const double * restrict x, double * restrict y)
     }
     return (1) ;
 }
+#include "cs.h"
 /* apply the ith Householder vector to x */
-CS_INT cs_happly (const cs *V, CS_INT i, double beta, double *x)
+CS_INT cs_happly (const cs *V, CS_INT i, double beta, CS_ENTRY *x)
 {
     CS_INT p, *Vp, *Vi ;
-    double *Vx, tau = 0 ;
+    CS_ENTRY *Vx, tau = 0 ;
     if (!CS_CSC (V) || !x) return (0) ;     /* check inputs */
     Vp = V->p ; Vi = V->i ; Vx = V->x ;
     for (p = Vp [i] ; p < Vp [i+1] ; p++)   /* tau = v'*x */
     {
-        tau += Vx [p] * x [Vi [p]] ;
+        tau += CS_CONJ (Vx [p]) * x [Vi [p]] ;
     }
     tau *= beta ;                           /* tau = beta*(v'*x) */
     for (p = Vp [i] ; p < Vp [i+1] ; p++)   /* x = x - v*tau */
@@ -922,36 +938,46 @@ CS_INT cs_happly (const cs *V, CS_INT i, double beta, double *x)
     }
     return (1) ;
 }
+#include "cs.h"
 /* create a Householder reflection [v,beta,s]=house(x), overwrite x with v,
- * where (I-beta*v*v')*x = s*e1.  See Algo 5.1.1, Golub & Van Loan, 3rd ed. */
-double cs_house (double * restrict x, double * restrict beta, CS_INT n)
+ * where (I-beta*v*v')*x = s*e1 and e1 = [1 0 ... 0]'.
+ * Note that this CXSparse version is different than CSparse.  See Higham,
+ * Accuracy & Stability of Num Algorithms, 2nd ed, 2002, page 357. */
+CS_ENTRY cs_house (CS_ENTRY *x, double *beta, CS_INT n)
 {
-    double s, sigma = 0 ;
+    CS_ENTRY s = 0 ;
     CS_INT i ;
     if (!x || !beta) return (-1) ;          /* check inputs */
-    for (i = 1 ; i < n ; i++) sigma += x [i] * x [i] ;
-    if (sigma == 0)
+    /* s = norm(x) */
+    for (i = 0 ; i < n ; i++) s += x [i] * CS_CONJ (x [i]) ;
+    s = sqrt (s) ;
+    if (s == 0)
     {
-        s = fabs (x [0]) ;                  /* s = |x(0)| */
-        (*beta) = (x [0] <= 0) ? 2 : 0 ;
+        (*beta) = 0 ;
         x [0] = 1 ;
     }
     else
     {
-        s = sqrt (x [0] * x [0] + sigma) ;  /* s = norm (x) */
-        x [0] = (x [0] <= 0) ? (x [0] - s) : (-sigma / (x [0] + s)) ;
-        (*beta) = -1. / (s * x [0]) ;
+        /* s = sign(x[0]) * norm (x) ; */
+        if (x [0] != 0)
+        {
+            s *= x [0] / CS_ABS (x [0]) ;
+        }
+        x [0] += s ;
+        (*beta) = 1. / CS_REAL (CS_CONJ (s) * x [0]) ;
     }
-    return (s) ;
+    return (-s) ;
 }
+#include "cs.h"
 /* x(p) = b, for dense vectors x and b; p=NULL denotes identity */
-CS_INT cs_ipvec (const CS_INT * restrict p, const double * restrict b, double * restrict x, CS_INT n)
+CS_INT cs_ipvec (const CS_INT *p, const CS_ENTRY *b, CS_ENTRY *x, CS_INT n)
 {
     CS_INT k ;
     if (!x || !b) return (0) ;                              /* check inputs */
     for (k = 0 ; k < n ; k++) x [p ? p [k] : k] = b [k] ;
     return (1) ;
 }
+#include "cs.h"
 /* consider A(i,j), node j in ith row subtree and return lca(jprev,j) */
 CS_INT cs_leaf (CS_INT i, CS_INT j, const CS_INT *first, CS_INT *maxfirst, CS_INT *prevleaf,
     CS_INT *ancestor, CS_INT *jleaf)
@@ -973,25 +999,38 @@ CS_INT cs_leaf (CS_INT i, CS_INT j, const CS_INT *first, CS_INT *maxfirst, CS_IN
     }
     return (q) ;                    /* q = least common ancester (jprev,j) */
 }
+#include "cs.h"
 /* load a triplet matrix from a file */
 cs *cs_load (FILE *f)
 {
-    double i, j ;   /* use double for integers to avoid CS_INT conflicts */
+    double i, j ;   /* use double for integers to avoid csi conflicts */
     double x ;
+#ifdef CS_COMPLEX
+    double xi ;
+#endif
     cs *T ;
     if (!f) return (NULL) ;                             /* check inputs */
     T = cs_spalloc (0, 0, 1, 1, 1) ;                    /* allocate result */
+#ifdef CS_COMPLEX
+    while (fscanf (f, "%lg %lg %lg %lg\n", &i, &j, &x, &xi) == 4)
+#else
     while (fscanf (f, "%lg %lg %lg\n", &i, &j, &x) == 3)
+#endif
     {
+#ifdef CS_COMPLEX
+        if (!cs_entry (T, (CS_INT) i, (CS_INT) j, x + xi*I)) return (cs_spfree (T)) ;
+#else
         if (!cs_entry (T, (CS_INT) i, (CS_INT) j, x)) return (cs_spfree (T)) ;
+#endif
     }
     return (T) ;
 }
+#include "cs.h"
 /* solve Lx=b where x and b are dense.  x=b on input, solution on output. */
-CS_INT cs_lsolve (const cs *L, double *x)
+CS_INT cs_lsolve (const cs *L, CS_ENTRY *x)
 {
     CS_INT p, j, n, *Lp, *Li ;
-    double *Lx ;
+    CS_ENTRY *Lx ;
     if (!CS_CSC (L) || !x) return (0) ;                     /* check inputs */
     n = L->n ; Lp = L->p ; Li = L->i ; Lx = L->x ;
     for (j = 0 ; j < n ; j++)
@@ -1004,40 +1043,43 @@ CS_INT cs_lsolve (const cs *L, double *x)
     }
     return (1) ;
 }
+#include "cs.h"
 /* solve L'x=b where x and b are dense.  x=b on input, solution on output. */
-CS_INT cs_ltsolve (const cs *L, double *x)
+CS_INT cs_ltsolve (const cs *L, CS_ENTRY *x)
 {
     CS_INT p, j, n, *Lp, *Li ;
-    double *Lx ;
+    CS_ENTRY *Lx ;
     if (!CS_CSC (L) || !x) return (0) ;                     /* check inputs */
     n = L->n ; Lp = L->p ; Li = L->i ; Lx = L->x ;
     for (j = n-1 ; j >= 0 ; j--)
     {
         for (p = Lp [j]+1 ; p < Lp [j+1] ; p++)
         {
-            x [j] -= Lx [p] * x [Li [p]] ;
+            x [j] -= CS_CONJ (Lx [p]) * x [Li [p]] ;
         }
-        x [j] /= Lx [Lp [j]] ;
+        x [j] /= CS_CONJ (Lx [Lp [j]]) ;
     }
     return (1) ;
 }
+#include "cs.h"
 /* [L,U,pinv]=lu(A, [q lnz unz]). lnz and unz can be guess */
 csn *cs_lu (const cs *A, const css *S, double tol)
 {
     cs *L, *U ;
     csn *N ;
-    double pivot, *Lx, *Ux, *x,  a, t ;
+    CS_ENTRY pivot, *Lx, *Ux, *x ;
+    double a, t ;
     CS_INT *Lp, *Li, *Up, *Ui, *pinv, *xi, *q, n, ipiv, k, top, p, i, col, lnz,unz;
     if (!CS_CSC (A) || !S) return (NULL) ;          /* check inputs */
     n = A->n ;
     q = S->q ; lnz = S->lnz ; unz = S->unz ;
-    x = (double*) cs_malloc (n, sizeof (double)) ;            /* get double workspace */
-    xi = (CS_INT*) cs_malloc (2*n, sizeof (CS_INT)) ;            /* get CS_INT workspace */
-    N = (csn*) cs_calloc (1, sizeof (csn)) ;               /* allocate result */
+    x = cs_malloc (n, sizeof (CS_ENTRY)) ;            /* get CS_ENTRY workspace */
+    xi = cs_malloc (2*n, sizeof (CS_INT)) ;            /* get CS_INT workspace */
+    N = cs_calloc (1, sizeof (csn)) ;               /* allocate result */
     if (!x || !xi || !N) return (cs_ndone (N, NULL, xi, x, 0)) ;
     N->L = L = cs_spalloc (n, n, lnz, 1, 0) ;       /* allocate result L */
     N->U = U = cs_spalloc (n, n, unz, 1, 0) ;       /* allocate result U */
-    N->pinv = pinv = (CS_INT*) cs_malloc (n, sizeof (CS_INT)) ;  /* allocate result pinv */
+    N->pinv = pinv = cs_malloc (n, sizeof (CS_INT)) ;  /* allocate result pinv */
     if (!L || !U || !pinv) return (cs_ndone (N, NULL, xi, x, 0)) ;
     Lp = L->p ; Up = U->p ;
     for (i = 0 ; i < n ; i++) x [i] = 0 ;           /* clear workspace */
@@ -1065,7 +1107,7 @@ csn *cs_lu (const cs *A, const css *S, double tol)
             i = xi [p] ;            /* x(i) is nonzero */
             if (pinv [i] < 0)       /* row i is not yet pivotal */
             {
-                if ((t = fabs (x [i])) > a)
+                if ((t = CS_ABS (x [i])) > a)
                 {
                     a = t ;         /* largest pivot candidate so far */
                     ipiv = i ;
@@ -1078,7 +1120,8 @@ csn *cs_lu (const cs *A, const css *S, double tol)
             }
         }
         if (ipiv == -1 || a <= 0) return (cs_ndone (N, NULL, xi, x, 0)) ;
-        if (pinv [col] < 0 && fabs (x [col]) >= a*tol) ipiv = col ;
+        /* tol=1 for  partial pivoting; tol<1 gives preference to diagonal */
+        if (pinv [col] < 0 && CS_ABS (x [col]) >= a*tol) ipiv = col ;
         /* --- Divide by pivot ---------------------------------------------- */
         pivot = x [ipiv] ;          /* the chosen pivot */
         Ui [unz] = k ;              /* last entry in U(:,k) is U(k,k) */
@@ -1106,10 +1149,11 @@ csn *cs_lu (const cs *A, const css *S, double tol)
     cs_sprealloc (U, 0) ;
     return (cs_ndone (N, NULL, xi, x, 1)) ;     /* success */
 }
+#include "cs.h"
 /* x=A\b where A is unsymmetric; b overwritten with solution */
-CS_INT cs_lusol (CS_INT order, const cs *A, double *b, double tol)
+CS_INT cs_lusol (CS_INT order, const cs *A, CS_ENTRY *b, double tol)
 {
-    double *x ;
+    CS_ENTRY *x ;
     css *S ;
     csn *N ;
     CS_INT n, ok ;
@@ -1117,7 +1161,7 @@ CS_INT cs_lusol (CS_INT order, const cs *A, double *b, double tol)
     n = A->n ;
     S = cs_sqr (order, A, 0) ;              /* ordering and symbolic analysis */
     N = cs_lu (A, S, tol) ;                 /* numeric LU factorization */
-    x = (double*) cs_malloc (n, sizeof (double)) ;    /* get workspace */
+    x = cs_malloc (n, sizeof (CS_ENTRY)) ;    /* get workspace */
     ok = (S && N && x) ;
     if (ok)
     {
@@ -1131,6 +1175,7 @@ CS_INT cs_lusol (CS_INT order, const cs *A, double *b, double tol)
     cs_nfree (N) ;
     return (ok) ;
 }
+#include "cs.h"
 #ifdef MATLAB_MEX_FILE
 #define malloc mxMalloc
 #define free mxFree
@@ -1165,6 +1210,7 @@ void *cs_realloc (void *p, CS_INT n, size_t size, CS_INT *ok)
     *ok = (pnew != NULL) ;                  /* realloc fails if pnew is NULL */
     return ((*ok) ? pnew : p) ;             /* return original p if failure */
 }
+#include "cs.h"
 /* find an augmenting path starting at column k and extend the match if found */
 static void cs_augment (CS_INT k, const cs *A, CS_INT *jmatch, CS_INT *cheap, CS_INT *w,
         CS_INT *js, CS_INT *is, CS_INT *ps)
@@ -1214,7 +1260,7 @@ CS_INT *cs_maxtrans (const cs *A, CS_INT seed)  /*[jmatch [0..m-1]; imatch [0..n
     cs *C ;
     if (!CS_CSC (A)) return (NULL) ;                /* check inputs */
     n = A->n ; m = A->m ; Ap = A->p ; Ai = A->i ;
-    w = jimatch = (CS_INT*) cs_calloc (m+n, sizeof (CS_INT)) ;   /* allocate result */
+    w = jimatch = cs_calloc (m+n, sizeof (CS_INT)) ;   /* allocate result */
     if (!jimatch) return (NULL) ;
     for (k = 0, j = 0 ; j < n ; j++)    /* count nonempty rows and columns */
     {
@@ -1240,7 +1286,7 @@ CS_INT *cs_maxtrans (const cs *A, CS_INT seed)  /*[jmatch [0..m-1]; imatch [0..n
     n = C->n ; m = C->m ; Cp = C->p ;
     jmatch = (m2 < n2) ? jimatch + n : jimatch ;
     imatch = (m2 < n2) ? jimatch : jimatch + m ;
-    w = (CS_INT*) cs_malloc (5*n, sizeof (CS_INT)) ;             /* get workspace */
+    w = cs_malloc (5*n, sizeof (CS_INT)) ;             /* get workspace */
     if (!w) return (cs_idone (jimatch, (m2 < n2) ? C : NULL, w, 0)) ;
     cheap = w + n ; js = w + 2*n ; is = w + 3*n ; ps = w + 4*n ;
     for (j = 0 ; j < n ; j++) cheap [j] = Cp [j] ;  /* for cheap assignment */
@@ -1256,19 +1302,20 @@ CS_INT *cs_maxtrans (const cs *A, CS_INT seed)  /*[jmatch [0..m-1]; imatch [0..n
     for (i = 0 ; i < m ; i++) if (jmatch [i] >= 0) imatch [jmatch [i]] = i ;
     return (cs_idone (jimatch, (m2 < n2) ? C : NULL, w, 1)) ;
 }
+#include "cs.h"
 /* C = A*B */
 cs *cs_multiply (const cs *A, const cs *B)
 {
     CS_INT p, j, nz = 0, anz, *Cp, *Ci, *Bp, m, n, bnz, *w, values, *Bi ;
-    double *x, *Bx, *Cx ;
+    CS_ENTRY *x, *Bx, *Cx ;
     cs *C ;
     if (!CS_CSC (A) || !CS_CSC (B)) return (NULL) ;      /* check inputs */
     if (A->n != B->m) return (NULL) ;
     m = A->m ; anz = A->p [A->n] ;
     n = B->n ; Bp = B->p ; Bi = B->i ; Bx = B->x ; bnz = Bp [n] ;
-    w = (CS_INT*) cs_calloc (m, sizeof (CS_INT)) ;                    /* get workspace */
+    w = cs_calloc (m, sizeof (CS_INT)) ;                    /* get workspace */
     values = (A->x != NULL) && (Bx != NULL) ;
-    x = values ? (double*) cs_malloc (m, sizeof (double)) : NULL ; /* get workspace */
+    x = values ? cs_malloc (m, sizeof (CS_ENTRY)) : NULL ; /* get workspace */
     C = cs_spalloc (m, n, anz + bnz, values, 0) ;        /* allocate result */
     if (!C || !w || (values && !x)) return (cs_done (C, w, x, 0)) ;
     Cp = C->p ;
@@ -1290,25 +1337,28 @@ cs *cs_multiply (const cs *A, const cs *B)
     cs_sprealloc (C, 0) ;               /* remove extra space from C */
     return (cs_done (C, w, x, 1)) ;     /* success; free workspace, return C */
 }
+#include "cs.h"
 /* 1-norm of a sparse matrix = max (sum (abs (A))), largest column sum */
 double cs_norm (const cs *A)
 {
     CS_INT p, j, n, *Ap ;
-    double *Ax,  norm = 0, s ;
+    CS_ENTRY *Ax ;
+    double norm = 0, s ;
     if (!CS_CSC (A) || !A->x) return (-1) ;             /* check inputs */
     n = A->n ; Ap = A->p ; Ax = A->x ;
     for (j = 0 ; j < n ; j++)
     {
-        for (s = 0, p = Ap [j] ; p < Ap [j+1] ; p++) s += fabs (Ax [p]) ;
+        for (s = 0, p = Ap [j] ; p < Ap [j+1] ; p++) s += CS_ABS (Ax [p]) ;
         norm = CS_MAX (norm, s) ;
     }
     return (norm) ;
 }
+#include "cs.h"
 /* C = A(p,q) where p and q are permutations of 0..m-1 and 0..n-1. */
 cs *cs_permute (const cs *A, const CS_INT *pinv, const CS_INT *q, CS_INT values)
 {
     CS_INT t, j, k, nz = 0, m, n, *Ap, *Ai, *Cp, *Ci ;
-    double *Cx, *Ax ;
+    CS_ENTRY *Cx, *Ax ;
     cs *C ;
     if (!CS_CSC (A)) return (NULL) ;    /* check inputs */
     m = A->m ; n = A->n ; Ap = A->p ; Ai = A->i ; Ax = A->x ;
@@ -1328,23 +1378,25 @@ cs *cs_permute (const cs *A, const CS_INT *pinv, const CS_INT *q, CS_INT values)
     Cp [n] = nz ;                       /* finalize the last column of C */
     return (cs_done (C, NULL, NULL, 1)) ;
 }
+#include "cs.h"
 /* pinv = p', or p = pinv' */
 CS_INT *cs_pinv (CS_INT const *p, CS_INT n)
 {
     CS_INT k, *pinv ;
     if (!p) return (NULL) ;                     /* p = NULL denotes identity */
-    pinv = (CS_INT*) cs_malloc (n, sizeof (CS_INT)) ;        /* allocate result */
+    pinv = cs_malloc (n, sizeof (CS_INT)) ;        /* allocate result */
     if (!pinv) return (NULL) ;                  /* out of memory */
     for (k = 0 ; k < n ; k++) pinv [p [k]] = k ;/* invert the permutation */
     return (pinv) ;                             /* return result */
 }
+#include "cs.h"
 /* post order a forest */
 CS_INT *cs_post (const CS_INT *parent, CS_INT n)
 {
     CS_INT j, k = 0, *post, *w, *head, *next, *stack ;
     if (!parent) return (NULL) ;                        /* check inputs */
-    post = (CS_INT*) cs_malloc (n, sizeof (CS_INT)) ;                /* allocate result */
-    w = (CS_INT*) cs_malloc (3*n, sizeof (CS_INT)) ;                 /* get workspace */
+    post = cs_malloc (n, sizeof (CS_INT)) ;                /* allocate result */
+    w = cs_malloc (3*n, sizeof (CS_INT)) ;                 /* get workspace */
     if (!w || !post) return (cs_idone (post, NULL, w, 0)) ;
     head = w ; next = w + n ; stack = w + 2*n ;
     for (j = 0 ; j < n ; j++) head [j] = -1 ;           /* empty linked lists */
@@ -1361,15 +1413,16 @@ CS_INT *cs_post (const CS_INT *parent, CS_INT n)
     }
     return (cs_idone (post, NULL, w, 1)) ;  /* success; free w, return post */
 }
+#include "cs.h"
 /* print a sparse matrix; use %g for integers to avoid differences with CS_INT */
 CS_INT cs_print (const cs *A, CS_INT brief)
 {
     CS_INT p, j, m, n, nzmax, nz, *Ap, *Ai ;
-    double *Ax ;
+    CS_ENTRY *Ax ;
     if (!A) { printf ("(null)\n") ; return (0) ; }
     m = A->m ; n = A->n ; Ap = A->p ; Ai = A->i ; Ax = A->x ;
     nzmax = A->nzmax ; nz = A->nz ;
-    printf ("CSparse Version %d.%d.%d, %s.  %s\n", CS_VER, CS_SUBVER,
+    printf ("CXSparse Version %d.%d.%d, %s.  %s\n", CS_VER, CS_SUBVER,
         CS_SUBSUB, CS_DATE, CS_COPYRIGHT) ;
     if (nz < 0)
     {
@@ -1381,7 +1434,13 @@ CS_INT cs_print (const cs *A, CS_INT brief)
                 (double) (Ap [j]), (double) (Ap [j+1]-1)) ;
             for (p = Ap [j] ; p < Ap [j+1] ; p++)
             {
-                printf ("      %g : %g\n", (double) (Ai [p]), Ax ? Ax [p] : 1) ;
+                printf ("      %g : ", (double) (Ai [p])) ;
+#ifdef CS_COMPLEX
+                printf ("(%g, %g)\n",
+                    Ax ? CS_REAL (Ax [p]) : 1, Ax ? CS_IMAG (Ax [p]) : 0) ;
+#else
+                printf ("%g\n", Ax ? Ax [p] : 1) ;
+#endif
                 if (brief && p > 20) { printf ("  ...\n") ; return (1) ; }
             }
         }
@@ -1392,25 +1451,34 @@ CS_INT cs_print (const cs *A, CS_INT brief)
             (double) n, (double) nzmax, (double) nz) ;
         for (p = 0 ; p < nz ; p++)
         {
-            printf ("    %g %g : %g\n", (double) (Ai [p]), (double) (Ap [p]),
-                Ax ? Ax [p] : 1) ;
+
+            printf ("    %g %g : ", (double) (Ai [p]), (double) (Ap [p])) ;
+#ifdef CS_COMPLEX
+            printf ("(%g, %g)\n",
+                Ax ? CS_REAL (Ax [p]) : 1, Ax ? CS_IMAG (Ax [p]) : 0) ;
+#else
+            printf ("%g\n", Ax ? Ax [p] : 1) ;
+#endif
             if (brief && p > 20) { printf ("  ...\n") ; return (1) ; }
         }
     }
     return (1) ;
 }
+#include "cs.h"
 /* x = b(p), for dense vectors x and b; p=NULL denotes identity */
-CS_INT cs_pvec (const CS_INT * restrict p, const double *b, double * restrict x, CS_INT n)
+CS_INT cs_pvec (const CS_INT *p, const CS_ENTRY *b, CS_ENTRY *x, CS_INT n)
 {
     CS_INT k ;
     if (!x || !b) return (0) ;                              /* check inputs */
     for (k = 0 ; k < n ; k++) x [k] = b [p ? p [k] : k] ;
     return (1) ;
 }
+#include "cs.h"
 /* sparse QR factorization [V,beta,pinv,R] = qr (A) */
 csn *cs_qr (const cs *A, const css *S)
 {
-    double *Rx, *Vx, *Ax, *x,  *Beta ;
+    CS_ENTRY *Rx, *Vx, *Ax, *x ;
+    double *Beta ;
     CS_INT i, k, p, m, n, vnz, p1, top, m2, len, col, rnz, *s, *leftmost, *Ap, *Ai,
         *parent, *Rp, *Ri, *Vp, *Vi, *w, *pinv, *q ;
     cs *R, *V ;
@@ -1419,15 +1487,15 @@ csn *cs_qr (const cs *A, const css *S)
     m = A->m ; n = A->n ; Ap = A->p ; Ai = A->i ; Ax = A->x ;
     q = S->q ; parent = S->parent ; pinv = S->pinv ; m2 = S->m2 ;
     vnz = S->lnz ; rnz = S->unz ; leftmost = S->leftmost ;
-    w = (CS_INT*) cs_malloc (m2+n, sizeof (CS_INT)) ;            /* get CS_INT workspace */
-    x = (double*) cs_malloc (m2, sizeof (double)) ;           /* get double workspace */
-    N = (csn*) cs_calloc (1, sizeof (csn)) ;               /* allocate result */
+    w = cs_malloc (m2+n, sizeof (CS_INT)) ;            /* get CS_INT workspace */
+    x = cs_malloc (m2, sizeof (CS_ENTRY)) ;           /* get CS_ENTRY workspace */
+    N = cs_calloc (1, sizeof (csn)) ;               /* allocate result */
     if (!w || !x || !N) return (cs_ndone (N, NULL, w, x, 0)) ;
     s = w + m2 ;                                    /* s is size n */
     for (k = 0 ; k < m2 ; k++) x [k] = 0 ;          /* clear workspace x */
     N->L = V = cs_spalloc (m2, n, vnz, 1, 0) ;      /* allocate result V */
     N->U = R = cs_spalloc (m2, n, rnz, 1, 0) ;      /* allocate result R */
-    N->B = Beta = (double*) cs_malloc (n, sizeof (double)) ;  /* allocate result Beta */
+    N->B = Beta = cs_malloc (n, sizeof (double)) ;  /* allocate result Beta */
     if (!R || !V || !Beta) return (cs_ndone (N, NULL, w, x, 0)) ;
     Rp = R->p ; Ri = R->i ; Rx = R->x ;
     Vp = V->p ; Vi = V->i ; Vx = V->x ;
@@ -1479,10 +1547,11 @@ csn *cs_qr (const cs *A, const css *S)
     Vp [n] = vnz ;                          /* finalize V */
     return (cs_ndone (N, NULL, w, x, 1)) ;  /* success */
 }
+#include "cs.h"
 /* x=A\b where A can be rectangular; b overwritten with solution */
-CS_INT cs_qrsol (CS_INT order, const cs *A, double *b)
+CS_INT cs_qrsol (CS_INT order, const cs *A, CS_ENTRY *b)
 {
-    double *x ;
+    CS_ENTRY *x ;
     css *S ;
     csn *N ;
     cs *AT = NULL ;
@@ -1494,7 +1563,7 @@ CS_INT cs_qrsol (CS_INT order, const cs *A, double *b)
     {
         S = cs_sqr (order, A, 1) ;          /* ordering and symbolic analysis */
         N = cs_qr (A, S) ;                  /* numeric QR factorization */
-        x = (double*) cs_calloc (S ? S->m2 : 1, sizeof (double)) ;    /* get workspace */
+        x = cs_calloc (S ? S->m2 : 1, sizeof (CS_ENTRY)) ;    /* get workspace */
         ok = (S && N && x) ;
         if (ok)
         {
@@ -1512,7 +1581,7 @@ CS_INT cs_qrsol (CS_INT order, const cs *A, double *b)
         AT = cs_transpose (A, 1) ;          /* Ax=b is underdetermined */
         S = cs_sqr (order, AT, 1) ;         /* ordering and symbolic analysis */
         N = cs_qr (AT, S) ;                 /* numeric QR factorization of A' */
-        x = (double*) cs_calloc (S ? S->m2 : 1, sizeof (double)) ;    /* get workspace */
+        x = cs_calloc (S ? S->m2 : 1, sizeof (CS_ENTRY)) ;    /* get workspace */
         ok = (AT && S && N && x) ;
         if (ok)
         {
@@ -1531,6 +1600,7 @@ CS_INT cs_qrsol (CS_INT order, const cs *A, double *b)
     cs_spfree (AT) ;
     return (ok) ;
 }
+#include "cs.h"
 /* return a random permutation vector, the identity perm, or p = n-1:-1:0.
  * seed = -1 means p = n-1:-1:0.  seed = 0 means p = identity.  otherwise
  * p = random permutation.  */
@@ -1538,11 +1608,11 @@ CS_INT *cs_randperm (CS_INT n, CS_INT seed)
 {
     CS_INT *p, k, j, t ;
     if (seed == 0) return (NULL) ;      /* return p = NULL (identity) */
-    p = (CS_INT*) cs_malloc (n, sizeof (CS_INT)) ;   /* allocate result */
+    p = cs_malloc (n, sizeof (CS_INT)) ;   /* allocate result */
     if (!p) return (NULL) ;             /* out of memory */
     for (k = 0 ; k < n ; k++) p [k] = n-k-1 ;
     if (seed == -1) return (p) ;        /* return reverse permutation */
-    srand ((unsigned)seed) ;                      /* get new random number seed */
+    srand (seed) ;                      /* get new random number seed */
     for (k = 0 ; k < n ; k++)
     {
         j = k + (rand ( ) % (n-k)) ;    /* j = rand integer in range k to n-1 */
@@ -1552,6 +1622,7 @@ CS_INT *cs_randperm (CS_INT n, CS_INT seed)
     }
     return (p) ;
 }
+#include "cs.h"
 /* xi [top...n-1] = nodes reachable from graph of G*P' via nodes in B(:,k).
  * xi [n...2n-1] used as workspace */
 CS_INT cs_reach (cs *G, const cs *B, CS_INT k, CS_INT *xi, const CS_INT *pinv)
@@ -1570,12 +1641,13 @@ CS_INT cs_reach (cs *G, const cs *B, CS_INT k, CS_INT *xi, const CS_INT *pinv)
     for (p = top ; p < n ; p++) CS_MARK (Gp, xi [p]) ;  /* restore G */
     return (top) ;
 }
+#include "cs.h"
 /* x = x + beta * A(:,j), where x is a dense vector and A(:,j) is sparse */
-CS_INT cs_scatter (const cs *A, CS_INT j, double beta, CS_INT * restrict w, double * restrict x, CS_INT mark,
+CS_INT cs_scatter (const cs *A, CS_INT j, CS_ENTRY beta, CS_INT *w, CS_ENTRY *x, CS_INT mark,
     cs *C, CS_INT nz)
 {
     CS_INT i, p, *Ap, *Ai, *Ci ;
-    double *Ax ;
+    CS_ENTRY *Ax ;
     if (!CS_CSC (A) || !w || !CS_CSC (C)) return (-1) ;     /* check inputs */
     Ap = A->p ; Ai = A->i ; Ax = A->x ; Ci = C->i ;
     for (p = Ap [j] ; p < Ap [j+1] ; p++)
@@ -1591,6 +1663,7 @@ CS_INT cs_scatter (const cs *A, CS_INT j, double beta, CS_INT * restrict w, doub
     }
     return (nz) ;
 }
+#include "cs.h"
 /* find the strongly connected components of a square matrix */
 csd *cs_scc (cs *A)     /* matrix A temporarily modified, then restored */
 {
@@ -1601,7 +1674,7 @@ csd *cs_scc (cs *A)     /* matrix A temporarily modified, then restored */
     n = A->n ; Ap = A->p ;
     D = cs_dalloc (n, 0) ;                          /* allocate result */
     AT = cs_transpose (A, 0) ;                      /* AT = A' */
-    xi = (CS_INT*) cs_malloc (2*n+1, sizeof (CS_INT)) ;          /* get workspace */
+    xi = cs_malloc (2*n+1, sizeof (CS_INT)) ;          /* get workspace */
     if (!D || !AT || !xi) return (cs_ddone (D, AT, xi, 0)) ;
     Blk = xi ; rcopy = pstack = xi + n ;
     p = D->p ; r = D->r ; ATp = AT->p ;
@@ -1631,6 +1704,7 @@ csd *cs_scc (cs *A)     /* matrix A temporarily modified, then restored */
     for (i = 0 ; i < n ; i++) p [rcopy [Blk [i]]++] = i ;
     return (cs_ddone (D, AT, xi, 1)) ;
 }
+#include "cs.h"
 /* ordering and symbolic analysis for a Cholesky factorization */
 css *cs_schol (CS_INT order, const cs *A)
 {
@@ -1639,7 +1713,7 @@ css *cs_schol (CS_INT order, const cs *A)
     css *S ;
     if (!CS_CSC (A)) return (NULL) ;        /* check inputs */
     n = A->n ;
-    S = (css*) cs_calloc (1, sizeof (css)) ;       /* allocate result S */
+    S = cs_calloc (1, sizeof (css)) ;       /* allocate result S */
     if (!S) return (NULL) ;                 /* out of memory */
     P = cs_amd (order, A) ;                 /* P = amd(A+A'), or natural */
     S->pinv = cs_pinv (P, n) ;              /* find inverse permutation */
@@ -1651,17 +1725,18 @@ css *cs_schol (CS_INT order, const cs *A)
     c = cs_counts (C, S->parent, post, 0) ; /* find column counts of chol(C) */
     cs_free (post) ;
     cs_spfree (C) ;
-    S->cp = (CS_INT*) cs_malloc (n+1, sizeof (CS_INT)) ; /* allocate result S->cp */
-    S->unz = S->lnz = (CS_INT)cs_cumsum (S->cp, c, n) ; /* find column pointers for L */
+    S->cp = cs_malloc (n+1, sizeof (CS_INT)) ; /* allocate result S->cp */
+    S->unz = S->lnz = cs_cumsum (S->cp, c, n) ; /* find column pointers for L */
     cs_free (c) ;
     return ((S->lnz >= 0) ? S : cs_sfree (S)) ;
 }
+#include "cs.h"
 /* solve Gx=b(:,k), where G is either upper (lo=0) or lower (lo=1) triangular */
-CS_INT cs_spsolve (cs *G, const cs *B, CS_INT k, CS_INT * restrict xi, double * restrict x, const CS_INT * restrict pinv,
+CS_INT cs_spsolve (cs *G, const cs *B, CS_INT k, CS_INT *xi, CS_ENTRY *x, const CS_INT *pinv,
     CS_INT lo)
 {
     CS_INT j, J, p, q, px, top, n, *Gp, *Gi, *Bp, *Bi ;
-    double *Gx, *Bx ;
+    CS_ENTRY *Gx, *Bx ;
     if (!CS_CSC (G) || !CS_CSC (B) || !xi || !x) return (-1) ;
     Gp = G->p ; Gi = G->i ; Gx = G->x ; n = G->n ;
     Bp = B->p ; Bi = B->i ; Bx = B->x ;
@@ -1683,14 +1758,15 @@ CS_INT cs_spsolve (cs *G, const cs *B, CS_INT k, CS_INT * restrict xi, double * 
     }
     return (top) ;                                  /* return top of stack */
 }
+#include "cs.h"
 /* compute nnz(V) = S->lnz, S->pinv, S->leftmost, S->m2 from A and S->parent */
 static CS_INT cs_vcount (const cs *A, css *S)
 {
     CS_INT i, k, p, pa, n = A->n, m = A->m, *Ap = A->p, *Ai = A->i, *next, *head,
         *tail, *nque, *pinv, *leftmost, *w, *parent = S->parent ;
-    S->pinv = pinv = (CS_INT*) cs_malloc (m+n, sizeof (CS_INT)) ;        /* allocate pinv, */
-    S->leftmost = leftmost = (CS_INT*) cs_malloc (m, sizeof (CS_INT)) ;  /* and leftmost */
-    w = (CS_INT*) cs_malloc (m+3*n, sizeof (CS_INT)) ;   /* get workspace */
+    S->pinv = pinv = cs_malloc (m+n, sizeof (CS_INT)) ;        /* allocate pinv, */
+    S->leftmost = leftmost = cs_malloc (m, sizeof (CS_INT)) ;  /* and leftmost */
+    w = cs_malloc (m+3*n, sizeof (CS_INT)) ;   /* get workspace */
     if (!pinv || !w || !leftmost)
     {
         cs_free (w) ;                       /* pinv and leftmost freed later */
@@ -1747,7 +1823,7 @@ css *cs_sqr (CS_INT order, const cs *A, CS_INT qr)
     css *S ;
     if (!CS_CSC (A)) return (NULL) ;        /* check inputs */
     n = A->n ;
-    S = (css*) cs_calloc (1, sizeof (css)) ;       /* allocate result S */
+    S = cs_calloc (1, sizeof (css)) ;       /* allocate result S */
     if (!S) return (NULL) ;                 /* out of memory */
     S->q = cs_amd (order, A) ;              /* fill-reducing ordering */
     if (order && !S->q) return (cs_sfree (S)) ;
@@ -1769,16 +1845,17 @@ css *cs_sqr (CS_INT order, const cs *A, CS_INT qr)
     }
     return (ok ? S : cs_sfree (S)) ;        /* return result S */
 }
+#include "cs.h"
 /* C = A(p,p) where A and C are symmetric the upper part stored; pinv not p */
 cs *cs_symperm (const cs *A, const CS_INT *pinv, CS_INT values)
 {
     CS_INT i, j, p, q, i2, j2, n, *Ap, *Ai, *Cp, *Ci, *w ;
-    double *Cx, *Ax ;
+    CS_ENTRY *Cx, *Ax ;
     cs *C ;
     if (!CS_CSC (A)) return (NULL) ;                    /* check inputs */
     n = A->n ; Ap = A->p ; Ai = A->i ; Ax = A->x ;
     C = cs_spalloc (n, n, Ap [n], values && (Ax != NULL), 0) ; /* alloc result*/
-    w = (CS_INT*) cs_calloc (n, sizeof (CS_INT)) ;                   /* get workspace */
+    w = cs_calloc (n, sizeof (CS_INT)) ;                   /* get workspace */
     if (!C || !w) return (cs_done (C, w, NULL, 0)) ;    /* out of memory */
     Cp = C->p ; Ci = C->i ; Cx = C->x ;
     for (j = 0 ; j < n ; j++)           /* count entries in each column of C */
@@ -1802,11 +1879,12 @@ cs *cs_symperm (const cs *A, const CS_INT *pinv, CS_INT values)
             if (i > j) continue ;       /* skip lower triangular part of A*/
             i2 = pinv ? pinv [i] : i ;  /* row i of A is row i2 of C */
             Ci [q = w [CS_MAX (i2, j2)]++] = CS_MIN (i2, j2) ;
-            if (Cx) Cx [q] = Ax [p] ;
+            if (Cx) Cx [q] = (i2 <= j2) ? Ax [p] : CS_CONJ (Ax [p]) ;
         }
     }
     return (cs_done (C, w, NULL, 1)) ;  /* success; free workspace, return C */
 }
+#include "cs.h"
 /* depth-first search and postorder of a tree rooted at node j */
 CS_INT cs_tdfs (CS_INT j, CS_INT k, CS_INT *head, const CS_INT *next, CS_INT *post, CS_INT *stack)
 {
@@ -1830,16 +1908,17 @@ CS_INT cs_tdfs (CS_INT j, CS_INT k, CS_INT *head, const CS_INT *next, CS_INT *po
     }
     return (k) ;
 }
+#include "cs.h"
 /* C = A' */
 cs *cs_transpose (const cs *A, CS_INT values)
 {
     CS_INT p, q, j, *Cp, *Ci, n, m, *Ap, *Ai, *w ;
-    double *Cx, *Ax ;
+    CS_ENTRY *Cx, *Ax ;
     cs *C ;
     if (!CS_CSC (A)) return (NULL) ;    /* check inputs */
     m = A->m ; n = A->n ; Ap = A->p ; Ai = A->i ; Ax = A->x ;
     C = cs_spalloc (n, m, Ap [n], values && Ax, 0) ;       /* allocate result */
-    w = (CS_INT*) cs_calloc (m, sizeof (CS_INT)) ;                      /* get workspace */
+    w = cs_calloc (m, sizeof (CS_INT)) ;                      /* get workspace */
     if (!C || !w) return (cs_done (C, w, NULL, 0)) ;       /* out of memory */
     Cp = C->p ; Ci = C->i ; Cx = C->x ;
     for (p = 0 ; p < Ap [n] ; p++) w [Ai [p]]++ ;          /* row counts */
@@ -1849,21 +1928,26 @@ cs *cs_transpose (const cs *A, CS_INT values)
         for (p = Ap [j] ; p < Ap [j+1] ; p++)
         {
             Ci [q = w [Ai [p]]++] = j ; /* place A(i,j) as entry C(j,i) */
-            if (Cx) Cx [q] = Ax [p] ;
+            if (Cx) Cx [q] = (values > 0) ? CS_CONJ (Ax [p]) : Ax [p] ;
         }
     }
     return (cs_done (C, w, NULL, 1)) ;  /* success; free w and return C */
 }
+#include "cs.h"
 /* sparse Cholesky update/downdate, L*L' + sigma*w*w' (sigma = +1 or -1) */
 CS_INT cs_updown (cs *L, CS_INT sigma, const cs *C, const CS_INT *parent)
 {
     CS_INT n, p, f, j, *Lp, *Li, *Cp, *Ci ;
-    double *Lx, *Cx, alpha, beta = 1, delta, gamma, w1, w2, *w, beta2 = 1 ;
+    CS_ENTRY *Lx, *Cx, alpha, gamma, w1, w2, *w ;
+    double beta = 1, beta2 = 1, delta ;
+#ifdef CS_COMPLEX
+    cs_complex_t phase ;
+#endif
     if (!CS_CSC (L) || !CS_CSC (C) || !parent) return (0) ;  /* check inputs */
     Lp = L->p ; Li = L->i ; Lx = L->x ; n = L->n ;
     Cp = C->p ; Ci = C->i ; Cx = C->x ;
     if ((p = Cp [0]) >= Cp [1]) return (1) ;        /* return if C empty */
-    w = (double*) cs_malloc (n, sizeof (double)) ;            /* get workspace */
+    w = cs_malloc (n, sizeof (CS_ENTRY)) ;          /* get workspace */
     if (!w) return (0) ;                            /* out of memory */
     f = Ci [p] ;
     for ( ; p < Cp [1] ; p++) f = CS_MIN (f, Ci [p]) ;  /* f = min (find (C)) */
@@ -1873,28 +1957,36 @@ CS_INT cs_updown (cs *L, CS_INT sigma, const cs *C, const CS_INT *parent)
     {
         p = Lp [j] ;
         alpha = w [j] / Lx [p] ;                    /* alpha = w(j) / L(j,j) */
-        beta2 = beta*beta + ((double) sigma)*alpha*alpha ;
+        beta2 = beta*beta + sigma*alpha*CS_CONJ(alpha) ;
         if (beta2 <= 0) break ;                     /* not positive definite */
         beta2 = sqrt (beta2) ;
         delta = (sigma > 0) ? (beta / beta2) : (beta2 / beta) ;
-        gamma = ((double) sigma) * alpha / (beta2 * beta) ;
+        gamma = sigma * CS_CONJ(alpha) / (beta2 * beta) ;
         Lx [p] = delta * Lx [p] + ((sigma > 0) ? (gamma * w [j]) : 0) ;
         beta = beta2 ;
+#ifdef CS_COMPLEX
+        phase = CS_ABS (Lx [p]) / Lx [p] ;  /* phase = abs(L(j,j))/L(j,j)*/
+        Lx [p] *= phase ;                   /* L(j,j) = L(j,j) * phase */
+#endif
         for (p++ ; p < Lp [j+1] ; p++)
         {
             w1 = w [Li [p]] ;
             w [Li [p]] = w2 = w1 - alpha * Lx [p] ;
             Lx [p] = delta * Lx [p] + gamma * ((sigma > 0) ? w1 : w2) ;
+#ifdef CS_COMPLEX
+            Lx [p] *= phase ;               /* L(i,j) = L(i,j) * phase */
+#endif
         }
     }
     cs_free (w) ;
     return (beta2 > 0) ;
 }
+#include "cs.h"
 /* solve Ux=b where x and b are dense.  x=b on input, solution on output. */
-CS_INT cs_usolve (const cs *U, double *x)
+CS_INT cs_usolve (const cs *U, CS_ENTRY *x)
 {
     CS_INT p, j, n, *Up, *Ui ;
-    double *Ux ;
+    CS_ENTRY *Ux ;
     if (!CS_CSC (U) || !x) return (0) ;                     /* check inputs */
     n = U->n ; Up = U->p ; Ui = U->i ; Ux = U->x ;
     for (j = n-1 ; j >= 0 ; j--)
@@ -1907,18 +1999,19 @@ CS_INT cs_usolve (const cs *U, double *x)
     }
     return (1) ;
 }
+#include "cs.h"
 /* allocate a sparse matrix (triplet form or compressed-column form) */
 cs *cs_spalloc (CS_INT m, CS_INT n, CS_INT nzmax, CS_INT values, CS_INT triplet)
 {
-    cs *A = (cs*) cs_calloc (1, sizeof (cs)) ;    /* allocate the cs struct */
+    cs *A = cs_calloc (1, sizeof (cs)) ;    /* allocate the cs struct */
     if (!A) return (NULL) ;                 /* out of memory */
     A->m = m ;                              /* define dimensions and nzmax */
     A->n = n ;
     A->nzmax = nzmax = CS_MAX (nzmax, 1) ;
     A->nz = triplet ? 0 : -1 ;              /* allocate triplet or comp.col */
-    A->p = (CS_INT*) cs_malloc (triplet ? nzmax : n+1, sizeof (CS_INT)) ;
-    A->i = (CS_INT*) cs_malloc (nzmax, sizeof (CS_INT)) ;
-    A->x = values ? (double*) cs_malloc (nzmax, sizeof (double)) : NULL ;
+    A->p = cs_malloc (triplet ? nzmax : n+1, sizeof (CS_INT)) ;
+    A->i = cs_malloc (nzmax, sizeof (CS_INT)) ;
+    A->x = values ? cs_malloc (nzmax, sizeof (CS_ENTRY)) : NULL ;
     return ((!A->p || !A->i || (values && !A->x)) ? cs_spfree (A) : A) ;
 }
 
@@ -1928,9 +2021,10 @@ CS_INT cs_sprealloc (cs *A, CS_INT nzmax)
     CS_INT ok, oki, okj = 1, okx = 1 ;
     if (!A) return (0) ;
     if (nzmax <= 0) nzmax = (CS_CSC (A)) ? (A->p [A->n]) : A->nz ;
-    A->i = (CS_INT*) cs_realloc (A->i, nzmax, sizeof (CS_INT), &oki) ;
-    if (CS_TRIPLET (A)) A->p = (CS_INT*) cs_realloc (A->p, nzmax, sizeof (CS_INT), &okj) ;
-    if (A->x) A->x = (double*) cs_realloc (A->x, nzmax, sizeof (double), &okx) ;
+    nzmax = CS_MAX (nzmax, 1) ;
+    A->i = cs_realloc (A->i, nzmax, sizeof (CS_INT), &oki) ;
+    if (CS_TRIPLET (A)) A->p = cs_realloc (A->p, nzmax, sizeof (CS_INT), &okj) ;
+    if (A->x) A->x = cs_realloc (A->x, nzmax, sizeof (CS_ENTRY), &okx) ;
     ok = (oki && okj && okx) ;
     if (ok) A->nzmax = nzmax ;
     return (ok) ;
@@ -1973,12 +2067,12 @@ css *cs_sfree (css *S)
 csd *cs_dalloc (CS_INT m, CS_INT n)
 {
     csd *D ;
-    D = (csd*) cs_calloc (1, sizeof (csd)) ;
+    D = cs_calloc (1, sizeof (csd)) ;
     if (!D) return (NULL) ;
-    D->p = (CS_INT*) cs_malloc (m, sizeof (CS_INT)) ;
-    D->r = (CS_INT*) cs_malloc (m+6, sizeof (CS_INT)) ;
-    D->q = (CS_INT*) cs_malloc (n, sizeof (CS_INT)) ;
-    D->s = (CS_INT*) cs_malloc (n+6, sizeof (CS_INT)) ;
+    D->p = cs_malloc (m, sizeof (CS_INT)) ;
+    D->r = cs_malloc (m+6, sizeof (CS_INT)) ;
+    D->q = cs_malloc (n, sizeof (CS_INT)) ;
+    D->s = cs_malloc (n+6, sizeof (CS_INT)) ;
     return ((!D->p || !D->r || !D->q || !D->s) ? cs_dfree (D) : D) ;
 }
 
@@ -2025,20 +2119,21 @@ csd *cs_ddone (csd *D, cs *C, void *w, CS_INT ok)
     cs_free (w) ;                       /* free workspace */
     return (ok ? D : cs_dfree (D)) ;    /* return result if OK, else free it */
 }
+#include "cs.h"
 /* solve U'x=b where x and b are dense.  x=b on input, solution on output. */
-CS_INT cs_utsolve (const cs *U, double *x)
+CS_INT cs_utsolve (const cs *U, CS_ENTRY *x)
 {
     CS_INT p, j, n, *Up, *Ui ;
-    double *Ux ;
+    CS_ENTRY *Ux ;
     if (!CS_CSC (U) || !x) return (0) ;                     /* check inputs */
     n = U->n ; Up = U->p ; Ui = U->i ; Ux = U->x ;
     for (j = 0 ; j < n ; j++)
     {
         for (p = Up [j] ; p < Up [j+1]-1 ; p++)
         {
-            x [j] -= Ux [p] * x [Ui [p]] ;
+            x [j] -= CS_CONJ (Ux [p]) * x [Ui [p]] ;
         }
-        x [j] /= Ux [Up [j+1]-1] ;
+        x [j] /= CS_CONJ (Ux [Up [j+1]-1]) ;
     }
     return (1) ;
 }

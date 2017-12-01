@@ -37,8 +37,6 @@ Documentation to be done
 #define CS_LONG
 #endif
 
-#ifdef SICONOS_USE_CXSPARSE
-
 /* Compile-time assertion: users of SparseMatrix.h must have CS_LONG
  * set if and only if SICONOS_INT64 is also set. If it is unset, it is
  * set here. */
@@ -53,15 +51,11 @@ Documentation to be done
 #endif
 
 #include "cs.h"
+
 #ifdef CS_LONG // SWIG gives syntax error for CS_NAME(_sparse)
 typedef struct cs_dl_sparse CSparseMatrix;
 #else
 typedef struct cs_di_sparse CSparseMatrix;
-#endif
-
-#else
-#include "csparse.h"
-typedef struct cs_sparse CSparseMatrix;
 #endif
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)

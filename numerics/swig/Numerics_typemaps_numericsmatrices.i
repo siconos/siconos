@@ -261,7 +261,6 @@
 }
 
 #ifdef __cplusplus
-#ifdef SICONOS_USE_CXSPARSE
 // SWIG gives syntax error for CS_NAME(_sparse)
 #ifdef SICONOS_INT64
 #define CSparseMatrix cs_dl_sparse
@@ -269,18 +268,11 @@
 #define CSparseMatrix cs_di_sparse
 #endif
 #else
-#define CSparseMatrix cs_sparse;
-#endif
-#else
-#ifdef SICONOS_USE_CXSPARSE
 // SWIG gives syntax error for CS_NAME(_sparse)
 #ifdef SICONOS_INT64
 #define CSparseMatrix struct cs_dl_sparse
 #else
 #define CSparseMatrix struct cs_di_sparse
-#endif
-#else
-#define CSparseMatrix struct cs_sparse
 #endif
 #endif
 
