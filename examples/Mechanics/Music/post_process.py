@@ -19,16 +19,25 @@ def compute_errors(filelist, indices=None, from_matlab=None):
     sref = ref_model.data_ds[ref_string][:, indices]
     sum_ref = (sref ** 2).sum(0)
     nbfiles = len(filelist) - 1
-    nbpoints = len(indices)    
+    nbpoints = len(indices)
+    nbtimes = sref.shape[0]
+    nbfrets = len(ref_frets)
     error = np.zeros((nbfiles, nbpoints), dtype=np.float64)
+    ymin = np.zeros((nbfiles + 1, nbfrets), dtype=np.float64)
+    for j in range(nbfrets):
+        ymin[-1, j] = ref_model.data_interactions[ref_frets[j]][:, 0].min()
+    ymin
     for i in range(nbfiles):
         current_model, current_string, current_frets = load_model(filelist[i], from_matlab)
         scurrent = current_model.data_ds[current_string][:, indices]
+        time_step = current_model.time_step
         for j in range(nbpoints):
             buff = (sref[:, j] - scurrent[:, j] ) ** 2
             error[i, j] = buff.sum(0) / sum_ref[j]
             error[i, j] = error[i, j] ** 0.5
-    return error
+        for j in range(nbfrets):
+            ymin[i, j] = current_model.data_interactions[current_frets[j]][:, 0].min()
+    return error, ymin
 
 
 
@@ -44,7 +53,7 @@ def check_time_vectors(filelist, from_matlab=None):
     for i in range(nbfiles):
         if os.path.exists(filelist[i]):
             current_model, current_string, current_frets = load_model(filelist[i], from_matlab)
-            tcurrent = current_model.time
+            tcurrent = current_model.time[:]
             print("check i ... ", i)
             assert np.allclose(tcurrent, tref)
         else:

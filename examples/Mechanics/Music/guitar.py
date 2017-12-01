@@ -230,7 +230,7 @@ class Fret(sk.Interaction):
         # Build nslaw, relation and interaction
         e = restitution_coeff
         nslaw = sk.NewtonImpactNSL(e)
-        dist = -contact_positions[1] - string.diameter * 0.5
+        dist = -contact_positions[1] # - string.diameter * 0.5
         relation = sk.LagrangianLinearTIR(hmat, [dist])
         super(Fret, self).__init__(nslaw, relation)
 
@@ -334,7 +334,6 @@ class Guitar(sk.Model):
         # A dict of buffers to save interactions variables for all time steps
         self.data_interactions = {}
         self.save_interactions = enable_interactions_output is not None
-        print("iiiiii ", self.save_interactions)
         self.enable_interactions_output = enable_interactions_output
         if enable_interactions_output == 'light':
             for interaction in self.strings_and_frets:
@@ -467,22 +466,22 @@ class Guitar(sk.Model):
         if ground is not None:
             plt.plot((self.time[0], self.time[-1]),(ground, ground), '-')
         plt.subplot(2, 2, 2)
-        plt.plot(self.time, data[dof - 1, :])
+        plt.plot(self.time, data[dof - 1, :], 'x-')
         plt.xlim(0, 0.008)
         if ground is not None:
-            plt.plot((self.time[0], self.time[-1]),(ground, ground), '-')
+            plt.plot((self.time[0], self.time[-1]),(ground, ground), '-x')
 
         plt.subplot(2, 2, 3)
         plt.plot(self.time, data[dof - 1, :])
         plt.xlim(0.05, 0.07)
         if ground is not None:
-            plt.plot((self.time[0], self.time[-1]),(ground, ground), '-')
+            plt.plot((self.time[0], self.time[-1]),(ground, ground), '-x')
 
         plt.subplot(2, 2, 4)
         plt.plot(self.time, data[dof - 1, :])
         plt.xlim(0.75, 0.77)
         if ground is not None:
-            plt.plot((self.time[0], self.time[-1]),(ground, ground), '-')
+            plt.plot((self.time[0], self.time[-1]),(ground, ground), '-x')
         leg.append('x = ' + str(x[dof]))
         plt.legend(leg)
         plt.suptitle('displacements = f(time)')

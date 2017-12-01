@@ -44,7 +44,7 @@ if __name__ == "__main__":
         from_matlab=matlab_input,
         filt_frets=filt_frets,
         enable_frets_output='all', visu=True,
-        restitution_coeff=0.9)
+        restitution_coeff=0.)
 
     simu = guitar_model.simulation()
 

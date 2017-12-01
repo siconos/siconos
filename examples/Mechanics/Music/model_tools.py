@@ -267,7 +267,6 @@ def load_model(filename, from_matlab=None):
     # for post-processing
     guitar_model.time[...] = h5file['times']
     guitar_model.data_ds[guitar_string][...] = h5file['dof']
-    print("ooooooo ppp ", guitar_model.save_interactions)
     if guitar_model.save_interactions:
         interactions = guitar_model.interactions_linked_to_ds(guitar_string)
         nb_inter = len(interactions)
