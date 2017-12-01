@@ -1,5 +1,5 @@
 #!/bin/bash
-oarsub -S "./run.sh 63825280 4096" -p "network_address='luke38'"
+oarsub -S "./run.sh 64225280 4096" -p "network_address='luke38'"
 oarsub -S "./run.sh  32112640 2048" -p "network_address='luke38'"
 oarsub -S "./run.sh 16056320 1024" -p "network_address='luke38'"
 oarsub -S "./run.sh 8028160 512" -p "network_address='luke38'" 

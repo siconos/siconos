@@ -207,7 +207,7 @@ OAR_JOB_ID=3877903
 
 oarsub -S "./run.sh 63825280 4096" -p "network_address='luke38'"
 OAR_JOB_ID=3877919
-oarsub -S "./run.sh  32112640 2048" -p "network_address='luke38'"
+oarsub -S "./run.sh 32112640 2048" -p "network_address='luke38'"
 OAR_JOB_ID=3877920
 oarsub -S "./run.sh 16056320 1024" -p "network_address='luke38'"
 OAR_JOB_ID=3877921
@@ -231,6 +231,12 @@ oarsub -S "./run.sh 31360 2" -p "network_address='luke38'"
 OAR_JOB_ID=3877930
 oarsub -S "./run.sh 15680 1" -p "network_address='luke38'"
 OAR_JOB_ID=3877931
+
+Rattrapage
+
+oarsub -S "./run.sh  64225280 4096" -p "network_address='luke42'"
+OAR_JOB_ID=3878785
+
 
 
 oarsub -S "./run2.sh 64225280 4096" -p "network_address='luke44'"
