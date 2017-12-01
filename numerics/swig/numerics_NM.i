@@ -175,7 +175,7 @@ typedef struct cs_sparse    /* matrix in compressed-column or triplet form */
    if (!res) { goto fail; }
    else if (res < 0) { SWIG_Error(SWIG_RuntimeError, "Error the matrix is not sparse!"); goto fail; }
 
-   M = (CSparseMatrix *) malloc(sizeof(CSparseMatrix));
+   M = (CSparseMatrix *) calloc(sizeof(CSparseMatrix), 1);
    if(!M) { SWIG_Error(SWIG_RuntimeError, "Failed to allocate a cs_sparse"); goto fail; }
 
    // perform a deep copy since we do not have any mechanism to record the fact we use data from the python object
