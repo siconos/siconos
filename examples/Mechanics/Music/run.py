@@ -22,9 +22,11 @@ if __name__ == "__main__":
     if len(sys.argv) > 1:
         fs = float(sys.argv[1])
         output_freq = int(sys.argv[2])
+        restit = float(sys.argv[3])
     else:
         fs = 51200.
         output_freq = 1
+        restit = 1.
 
     assert fs > 14000.
     # lower frequencies require quadruple prec for exp computation.
@@ -32,6 +34,7 @@ if __name__ == "__main__":
     final_time = 1.
     number_of_modes = 862
     filt_frets = True
+    print("OKOKOK restit", restit)
     # Data (from_matlab parameter), choose between:
     # - bass_guitar/pb2 : bass with frets
     # - fretless_bass_guitar/bsf
@@ -43,8 +46,8 @@ if __name__ == "__main__":
         output_freq=output_freq,
         from_matlab=matlab_input,
         filt_frets=filt_frets,
-        enable_frets_output='all', visu=True,
-        restitution_coeff=0.)
+        enable_frets_output='light', visu=True,
+        restitution_coeff=restit)
 
     simu = guitar_model.simulation()
 

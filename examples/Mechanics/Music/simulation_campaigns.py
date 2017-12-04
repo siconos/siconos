@@ -3,6 +3,37 @@
 import numpy as np
 import os
 
+
+# Create oar file ...
+def create_jobs(outputfile, runner, restit_node, job_name, freqs=None):
+    """
+    Usage :
+
+    create_jobs('list.sh', './run.sh', {0.: 38, 0.9:42, 1.:44}, 'bass_guitar')
+    """
+    if freqs is None:
+        indices = np.arange(3, 16)   
+        freqs = 2 ** indices * 1960
+    outputs = 2 ** np.arange(13)
+    command = 'oarsub -S \"' + runner
+    endcommand = ' -p \"network_address=\'luke'
+    file = open(outputfile, 'w')
+    file.write('#!/bin/bash\n')
+    for e in restit_node.keys():
+        file.write('# e = ' + str(e) + '\n')
+        node = restit_node[e]
+        for i in range(len(freqs)):
+            oarline = command + ' ' + str(freqs[i]) + ' ' + str(outputs[i])
+            oarline += ' ' + str(e) + '\"'
+            oarline += endcommand
+            oarline += str(node) + '\'\" --name=' + job_name + str(e) + '\n'  
+            print(oarline)
+            file.write(oarline)
+        
+    file.close()
+
+
+    
 def create_campaign(freq2job, frequencies, filepath, hosts):
     campaign = {}
     nbfiles = len(freq2job)

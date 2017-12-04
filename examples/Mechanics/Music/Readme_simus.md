@@ -348,3 +348,125 @@ oarsub -S "./run_fretless_bis.sh 31360 2" -p "network_address='luke43'"
 OAR_JOB_ID=3878271
 oarsub -S "./run_fretless_bis.sh 15680 1" -p "network_address='luke43'"
 OAR_JOB_ID=3878272
+
+
+
+
+# Version without radius in dist. computation
+[ADMISSION RULE] Modify resource description with type constraints
+[PROJECT] Adding project constraints: (team='ljk' or team='ciment' or team='visu')
+OAR_JOB_ID=3878972
+[ADMISSION RULE] Modify resource description with type constraints
+[PROJECT] Adding project constraints: (team='ljk' or team='ciment' or team='visu')
+OAR_JOB_ID=3878973
+[ADMISSION RULE] Modify resource description with type constraints
+[PROJECT] Adding project constraints: (team='ljk' or team='ciment' or team='visu')
+OAR_JOB_ID=3878974
+[ADMISSION RULE] Modify resource description with type constraints
+[PROJECT] Adding project constraints: (team='ljk' or team='ciment' or team='visu')
+OAR_JOB_ID=3878975
+[ADMISSION RULE] Modify resource description with type constraints
+[PROJECT] Adding project constraints: (team='ljk' or team='ciment' or team='visu')
+OAR_JOB_ID=3878976
+[ADMISSION RULE] Modify resource description with type constraints
+[PROJECT] Adding project constraints: (team='ljk' or team='ciment' or team='visu')
+OAR_JOB_ID=3878977
+[ADMISSION RULE] Modify resource description with type constraints
+[PROJECT] Adding project constraints: (team='ljk' or team='ciment' or team='visu')
+OAR_JOB_ID=3878978
+[ADMISSION RULE] Modify resource description with type constraints
+[PROJECT] Adding project constraints: (team='ljk' or team='ciment' or team='visu')
+OAR_JOB_ID=3878979
+[ADMISSION RULE] Modify resource description with type constraints
+[PROJECT] Adding project constraints: (team='ljk' or team='ciment' or team='visu')
+OAR_JOB_ID=3878980
+[ADMISSION RULE] Modify resource description with type constraints
+[PROJECT] Adding project constraints: (team='ljk' or team='ciment' or team='visu')
+OAR_JOB_ID=3878981
+[ADMISSION RULE] Modify resource description with type constraints
+[PROJECT] Adding project constraints: (team='ljk' or team='ciment' or team='visu')
+OAR_JOB_ID=3878982
+[ADMISSION RULE] Modify resource description with type constraints
+[PROJECT] Adding project constraints: (team='ljk' or team='ciment' or team='visu')
+OAR_JOB_ID=3878983
+[ADMISSION RULE] Modify resource description with type constraints
+[PROJECT] Adding project constraints: (team='ljk' or team='ciment' or team='visu')
+OAR_JOB_ID=3878984
+[ADMISSION RULE] Modify resource description with type constraints
+[PROJECT] Adding project constraints: (team='ljk' or team='ciment' or team='visu')
+OAR_JOB_ID=3878985
+[ADMISSION RULE] Modify resource description with type constraints
+[PROJECT] Adding project constraints: (team='ljk' or team='ciment' or team='visu')
+OAR_JOB_ID=3878986
+[ADMISSION RULE] Modify resource description with type constraints
+[PROJECT] Adding project constraints: (team='ljk' or team='ciment' or team='visu')
+OAR_JOB_ID=3878987
+[ADMISSION RULE] Modify resource description with type constraints
+[PROJECT] Adding project constraints: (team='ljk' or team='ciment' or team='visu')
+OAR_JOB_ID=3878988
+[ADMISSION RULE] Modify resource description with type constraints
+[PROJECT] Adding project constraints: (team='ljk' or team='ciment' or team='visu')
+OAR_JOB_ID=3878989
+[ADMISSION RULE] Modify resource description with type constraints
+[PROJECT] Adding project constraints: (team='ljk' or team='ciment' or team='visu')
+OAR_JOB_ID=3878990
+[ADMISSION RULE] Modify resource description with type constraints
+[PROJECT] Adding project constraints: (team='ljk' or team='ciment' or team='visu')
+OAR_JOB_ID=3878991
+[ADMISSION RULE] Modify resource description with type constraints
+[PROJECT] Adding project constraints: (team='ljk' or team='ciment' or team='visu')
+OAR_JOB_ID=3878992
+[ADMISSION RULE] Modify resource description with type constraints
+[PROJECT] Adding project constraints: (team='ljk' or team='ciment' or team='visu')
+OAR_JOB_ID=3878993
+[ADMISSION RULE] Modify resource description with type constraints
+[PROJECT] Adding project constraints: (team='ljk' or team='ciment' or team='visu')
+OAR_JOB_ID=3878994
+[ADMISSION RULE] Modify resource description with type constraints
+[PROJECT] Adding project constraints: (team='ljk' or team='ciment' or team='visu')
+OAR_JOB_ID=3878995
+[ADMISSION RULE] Modify resource description with type constraints
+[PROJECT] Adding project constraints: (team='ljk' or team='ciment' or team='visu')
+OAR_JOB_ID=3878996
+[ADMISSION RULE] Modify resource description with type constraints
+[PROJECT] Adding project constraints: (team='ljk' or team='ciment' or team='visu')
+OAR_JOB_ID=3878997
+[ADMISSION RULE] Modify resource description with type constraints
+[PROJECT] Adding project constraints: (team='ljk' or team='ciment' or team='visu')
+OAR_JOB_ID=3878998
+[ADMISSION RULE] Modify resource description with type constraints
+[PROJECT] Adding project constraints: (team='ljk' or team='ciment' or team='visu')
+OAR_JOB_ID=3878999
+[ADMISSION RULE] Modify resource description with type constraints
+[PROJECT] Adding project constraints: (team='ljk' or team='ciment' or team='visu')
+OAR_JOB_ID=3879000
+[ADMISSION RULE] Modify resource description with type constraints
+[PROJECT] Adding project constraints: (team='ljk' or team='ciment' or team='visu')
+OAR_JOB_ID=3879001
+[ADMISSION RULE] Modify resource description with type constraints
+[PROJECT] Adding project constraints: (team='ljk' or team='ciment' or team='visu')
+OAR_JOB_ID=3879002
+[ADMISSION RULE] Modify resource description with type constraints
+[PROJECT] Adding project constraints: (team='ljk' or team='ciment' or team='visu')
+OAR_JOB_ID=3879003
+[ADMISSION RULE] Modify resource description with type constraints
+[PROJECT] Adding project constraints: (team='ljk' or team='ciment' or team='visu')
+OAR_JOB_ID=3879004
+[ADMISSION RULE] Modify resource description with type constraints
+[PROJECT] Adding project constraints: (team='ljk' or team='ciment' or team='visu')
+OAR_JOB_ID=3879005
+[ADMISSION RULE] Modify resource description with type constraints
+[PROJECT] Adding project constraints: (team='ljk' or team='ciment' or team='visu')
+OAR_JOB_ID=3879006
+[ADMISSION RULE] Modify resource description with type constraints
+[PROJECT] Adding project constraints: (team='ljk' or team='ciment' or team='visu')
+OAR_JOB_ID=3879007
+[ADMISSION RULE] Modify resource description with type constraints
+[PROJECT] Adding project constraints: (team='ljk' or team='ciment' or team='visu')
+OAR_JOB_ID=3879008
+[ADMISSION RULE] Modify resource description with type constraints
+[PROJECT] Adding project constraints: (team='ljk' or team='ciment' or team='visu')
+OAR_JOB_ID=3879009
+[ADMISSION RULE] Modify resource description with type constraints
+[PROJECT] Adding project constraints: (team='ljk' or team='ciment' or team='visu')
+OAR_JOB_ID=3879010
