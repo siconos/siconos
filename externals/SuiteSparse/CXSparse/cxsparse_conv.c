@@ -2,17 +2,8 @@
 // part of SuiteSparse available at,
 // http://faculty.cse.tamu.edu/davis/SuiteSparse/SuiteSparse-5.0.0.tar.gz
 // See LICENSE.txt for license information, also copied from that  archive.
-
-//// Siconos: This little preamble is needed for cs_convert.c to
-//// compile when BUILD_AS_CPP=TRUE.
 #include "SiconosConfig.h"
-#ifdef BUILD_AS_CPP
-#define creal std::real
-#define cimag std::imag
-using namespace std::complex_literals;
-#define I 1i
-#endif
-//// End preamble
+#ifndef BUILD_AS_CPP
 #include "cs.h"
 
 /* convert from complex to real (int version) */
@@ -106,3 +97,4 @@ cs_cl *cs_l_complex (cs_dl *A, cs_long_t real)
     if (triplet) C->nz = nz ;
     return (C) ;
 }
+#endif
