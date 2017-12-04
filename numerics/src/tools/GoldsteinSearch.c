@@ -22,6 +22,7 @@
 #include "debug.h"
 #include "numerics_verbose.h"
 #include <float.h>
+#include <math.h>
 #include <assert.h>
 
 #include "SiconosBlas.h"
