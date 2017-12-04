@@ -20,8 +20,13 @@
 #include <assert.h>
 #include <stdio.h>
 
-#include "NM_conversions.h"
 #include "SiconosConfig.h"
+#ifdef SICONOS_INT64
+#define CS_LONG
+#endif
+#include "cs.h"
+
+#include "NM_conversions.h"
 
 #ifdef WITH_MKL_SPBLAS
 #include "tlsdef.h"

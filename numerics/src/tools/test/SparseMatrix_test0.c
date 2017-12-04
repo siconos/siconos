@@ -1,3 +1,10 @@
+
+#include "SiconosConfig.h"
+#ifdef SICONOS_INT64
+#define CS_LONG
+#endif
+#include "cs.h"
+
 #include "SparseMatrix.h"
 
 

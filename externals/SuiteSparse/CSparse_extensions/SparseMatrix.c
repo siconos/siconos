@@ -20,10 +20,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
-#include "SparseMatrix.h"
 #include <math.h>
 #include <float.h>
 
+#include "SiconosConfig.h"
+#ifdef SICONOS_INT64
+#define CS_LONG
+#endif
+#include "cs.h"
+
+#include "SparseMatrix.h"
 #include "SiconosCompat.h"
 
 #if defined(__cplusplus)

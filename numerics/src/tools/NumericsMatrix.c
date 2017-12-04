@@ -23,6 +23,12 @@
 #include <stdint.h>
 #include <string.h>
 
+#include "SiconosConfig.h"
+#ifdef SICONOS_INT64
+#define CS_LONG
+#endif
+#include "cs.h"
+
 #include "NumericsMatrix.h"
 #include "NumericsSparseMatrix.h"
 #include "SiconosCompat.h"
