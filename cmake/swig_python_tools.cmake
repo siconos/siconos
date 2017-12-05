@@ -38,25 +38,26 @@ macro(doxy2swig_docstrings COMP)
       endforeach()
     endforeach()
 
-    # If this variable is empty, cat will hang, so error out instead.
-    if (NOT DOCSTRINGS_FILES)
-      message(FATAL_ERROR "DOCSTRINGS_FILES=${DOCSTRINGS_FILES}")
+    if (DOCSTRINGS_FILES)
+      add_custom_command(OUTPUT ${SICONOS_SWIG_ROOT_DIR}/${COMP}-docstrings.i
+        DEPENDS ${DOCSTRINGS_FILES}
+        COMMAND cat
+        ARGS ${DOCSTRINGS_FILES} > ${SICONOS_SWIG_ROOT_DIR}/${COMP}-docstrings.i
+        COMMENT "${COMP} docstrings concatenation")
+    else()
+      add_custom_command(OUTPUT ${SICONOS_SWIG_ROOT_DIR}/${COMP}-docstrings.i
+        DEPENDS ${DOCSTRINGS_FILES}
+        COMMAND touch
+        ARGS ${SICONOS_SWIG_ROOT_DIR}/${COMP}-docstrings.i)
     endif()
-
-    add_custom_command(OUTPUT ${SICONOS_SWIG_ROOT_DIR}/${COMP}-docstrings.i
-      DEPENDS ${DOCSTRINGS_FILES}
-      COMMAND cat
-      ARGS ${DOCSTRINGS_FILES} > ${SICONOS_SWIG_ROOT_DIR}/${COMP}-docstrings.i
-      COMMENT "${COMP} docstrings concatenation")
-    add_custom_target(${COMP}_docstrings DEPENDS ${SICONOS_SWIG_ROOT_DIR}/${COMP}-docstrings.i)
   else()
     add_custom_command(OUTPUT ${SICONOS_SWIG_ROOT_DIR}/${COMP}-docstrings.i
       DEPENDS ${DOCSTRINGS_FILES}
-      COMMAND printf \"\" > ${COMP}-docstrings.i
+      COMMAND touch
+      ARGS ${SICONOS_SWIG_ROOT_DIR}/${COMP}-docstrings.i
       )
-    
-    add_custom_target(${COMP}_docstrings DEPENDS ${SICONOS_SWIG_ROOT_DIR}/${COMP}-docstrings.i)
   endif()
+  add_custom_target(${COMP}_docstrings DEPENDS ${SICONOS_SWIG_ROOT_DIR}/${COMP}-docstrings.i)
 endmacro()
 
 # ----------------------------------------------------------------------
