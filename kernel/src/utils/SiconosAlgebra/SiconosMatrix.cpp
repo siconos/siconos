@@ -20,6 +20,7 @@
 #ifdef SICONOS_INT64
 #define CS_LONG
 #endif
+#define NCOMPLEX
 #include "cs.h"
 
 #include "SiconosMatrix.hpp"
