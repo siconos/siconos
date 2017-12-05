@@ -141,6 +141,3 @@ add_cxx_options("-Wno-string-plus-int" "Clang")
 if(WITH_SERIALIZATION)
   add_cxx_options("-ftemplate-depth=1024" Clang)
 endif(WITH_SERIALIZATION)
-
-# Do we still need this?
-append_cxx_flags("-D_NUMERICS_INTERNAL_CXX_")
