@@ -37,7 +37,12 @@ macro(doxy2swig_docstrings COMP)
 	list(APPEND DOCSTRINGS_FILES ${outfile_name})
       endforeach()
     endforeach()
-    
+
+    # If this variable is empty, cat will hang, so error out instead.
+    if (NOT DOCSTRINGS_FILES)
+      message(FATAL_ERROR "DOCSTRINGS_FILES=${DOCSTRINGS_FILES}")
+    endif()
+
     add_custom_command(OUTPUT ${SICONOS_SWIG_ROOT_DIR}/${COMP}-docstrings.i
       DEPENDS ${DOCSTRINGS_FILES}
       COMMAND cat
