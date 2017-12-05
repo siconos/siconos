@@ -1307,9 +1307,6 @@ class Hdf5():
 
             if number is not None:
                 body.setNumber(number)
-        else:
-            # a static object
-            body = None
 
         ref_shape = {ctor.instance_name: occ.OccContactShape(
             self._shape.get(ctor.shape_name,
