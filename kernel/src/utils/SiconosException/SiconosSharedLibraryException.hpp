@@ -19,7 +19,6 @@
 #define SICONOSSHAREDLIBRARYEXCEPTION_H
 
 #include "SiconosException.hpp"
-#include <numerics_verbose.h>
 
 /*! \file SiconosSharedLibraryException.hpp
 

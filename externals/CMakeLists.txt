@@ -57,8 +57,12 @@ if(NOT INSTALL_EXTERNALS_HEADERS)
     optim_misc
     optim_misc/ql0001
     sort
+    boost_contribs
     tools)
 endif()
+
+# List of specific headers not to be installed
+set(${COMPONENT}_HDRS_EXCLUDE tools/SiconosCompat.h)
 
 if (USE_SYSTEM_SUITESPARSE)
   list(APPEND ${COMPONENT}_HDRS_EXCLUDE_DIR

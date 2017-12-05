@@ -49,7 +49,16 @@ set(${COMPONENT}_Unstable_SRCS)
 set(${COMPONENT}_HDRS_EXCLUDE_DIR)
 
 # List of specific headers not to be installed
-set(${COMPONENT}_HDRS_EXCLUDE SiconosCompat.h)
+set(${COMPONENT}_HDRS_EXCLUDE
+  src/tools/open_lib.h
+  src/tools/sanitizer.h
+  src/tools/timers_interf.h
+  src/tools/test_utils.h
+  src/tools/fftw_cycle.h
+  src/tools/tlsdef.h
+  src/tools/numerics_verbose.h
+  src/FrictionContact/Generated/funcodegen.h
+  )
 
 # List of directories for which no doxygen doc will be generated
 # By default all directories matching "test" are excluded.
