@@ -612,6 +612,10 @@ if (CMAKE_SKIP_RPATH)
   FOREACH(_C ${COMPONENTS})
     LIST(APPEND LDLIBPATH "${CMAKE_BINARY_DIR}/${_C}")
   ENDFOREACH()
+else()
+  # Otherwise, still need the path to current component dir for tests
+  # that load plugins.
+  LIST(APPEND LDLIBPATH "${CMAKE_BINARY_DIR}/${COMPONENT}")
 endif()
 LIST(APPEND LDLIBPATH "${CMAKE_BINARY_DIR}/wrap/siconos/tests")
 if (NOT CMAKE_SYSTEM_NAME MATCHES WINDOWS)
