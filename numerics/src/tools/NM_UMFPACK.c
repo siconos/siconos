@@ -16,6 +16,12 @@
  * limitations under the License.
 */
 
+#include "SiconosConfig.h"
+#ifdef SICONOS_INT64
+#define CS_LONG
+#endif
+#include "cs.h"
+
 #include "NumericsMatrix_private.h"
 #include "NumericsMatrix.h"
 #include "NumericsSparseMatrix.h"
@@ -44,7 +50,7 @@ NM_UMFPACK_WS* NM_UMFPACK_factorize(NumericsMatrix* A)
 
   CSparseMatrix* C = NM_csc(A);
 
-  csi status;
+  CS_INT status;
 
   status = UMFPACK_FN(symbolic) (C->m, C->n, C->p, C->i, C->x, &(umfpack_ws->symbolic), umfpack_ws->control, umfpack_ws->info);
 
@@ -64,9 +70,9 @@ NM_UMFPACK_WS* NM_UMFPACK_factorize(NumericsMatrix* A)
     return NULL;
   }
 
-  umfpack_ws->wi = (csi*)malloc(C->n * sizeof(csi));
+  umfpack_ws->wi = (CS_INT*)malloc(C->n * sizeof(CS_INT));
 
-  csi size_wd;
+  CS_INT size_wd;
   if (umfpack_ws->control[UMFPACK_IRSTEP] > 0)
   {
     size_wd = 5 * C->n;
