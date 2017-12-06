@@ -25,6 +25,9 @@
 #include "soclcp_test_function.h"
 #include "SiconosCompat.h"
 
+#ifdef __cplusplus
+using namespace std;
+#endif
 
 int soclcp_test_function(FILE * f, SolverOptions * options)
 {

@@ -123,8 +123,7 @@ The following linear algebra operation are supported:
 
 #include "NumericsFwd.h"
 #include "SiconosConfig.h"
-#include "csparse.h" // For csi
-#include "SparseMatrix.h"
+#include "SparseMatrix.h" // for csi
 
 /** \struct NumericsMatrixInternalData NumericsMatrix.h
  * Structure for simple workspaces
@@ -313,26 +312,26 @@ extern "C"
    * \param A the matrix
    * \param nzmax number of non-zero elements
    */
-  void NM_csc_alloc(NumericsMatrix* A, csi nzmax);
+  void NM_csc_alloc(NumericsMatrix* A, CS_INT nzmax);
 
   /** Allocate a csc matrix in A and set the vector of
    * column pointers to 0 such that the matrix is empty.
    * \param A the matrix
    * \param nzmax number of non-zero elements
    */
-  void NM_csc_empty_alloc(NumericsMatrix* A, csi nzmax);
+  void NM_csc_empty_alloc(NumericsMatrix* A, CS_INT nzmax);
 
   /** Allocate a triplet matrix in A
    * \param A the matrix
    * \param nzmax maximum number of non-zero elements
    */
-  void NM_triplet_alloc(NumericsMatrix* A, csi nzmax);
+  void NM_triplet_alloc(NumericsMatrix* A, CS_INT nzmax);
 
   /** Allocate a csr matrix in A
    * \param A the matrix
    * \param nzmax number of non-zero elements
    */
-  void NM_csr_alloc(NumericsMatrix* A, csi nzmax);
+  void NM_csr_alloc(NumericsMatrix* A, CS_INT nzmax);
 
   /** Free memory for a NumericsMatrix. Warning: call this function only if you are sure that
       memory has been allocated for the structure in Numerics. This function is assumed that the memory is "owned" by this structure.
@@ -424,7 +423,7 @@ extern "C"
    * \param M the matrix
    * \return the list of indices for the diagonal elements
    */
-  csi* NM_sparse_diag_indices(NumericsMatrix* M);
+  CS_INT* NM_sparse_diag_indices(NumericsMatrix* M);
 
   /**************************************************/
   /** Matrix - vector product           *************/

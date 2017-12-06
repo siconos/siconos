@@ -106,12 +106,17 @@ if(WITH_PYTHON_WRAPPER OR WITH_DOCUMENTATION)
 
 endif()
 
-IF(NOT SIZE_OF_CSI)
-  INCLUDE(CheckTypeSize)
-  CHECK_TYPE_SIZE("size_t" SIZE_OF_CSI)
-ENDIF(NOT SIZE_OF_CSI)
-
+# Choice of CSparse/CXSparse integer size
 IF(NOT DEFINED SICONOS_INT64)
+  IF(NOT SIZE_OF_CSI)
+    INCLUDE(CheckTypeSize)
+    CHECK_TYPE_SIZE("size_t" SIZE_OF_CSI)
+    IF(NOT SIZE_OF_CSI)
+      message(FATAL_ERROR
+        "Could not get size of size_t, please specify SICONOS_INT64.")
+    ENDIF(NOT SIZE_OF_CSI)
+  ENDIF(NOT SIZE_OF_CSI)
+
   IF ("${SIZE_OF_CSI}" EQUAL 8)
     SET(SICONOS_INT64 TRUE)
   ELSE ("${SIZE_OF_CSI}" EQUAL 8)

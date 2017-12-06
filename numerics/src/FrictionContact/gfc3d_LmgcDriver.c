@@ -4,6 +4,12 @@
 #include <time.h>
 #include <float.h>
 
+#include "SiconosConfig.h"
+#ifdef SICONOS_INT64
+#define CS_LONG
+#endif
+#include "cs.h"
+
 #include "fc3d_Solvers.h"
 #include "NonSmoothDrivers.h"
 #include "fclib_interface.h"
@@ -35,12 +41,12 @@ static double * alloc_memory_double(unsigned int size, double *p)
   return r;
 }
 
-static csi * alloc_memory_csi(unsigned int size, unsigned int *p)
+static CS_INT * alloc_memory_csi(unsigned int size, unsigned int *p)
 {
-  csi * r = (csi *) malloc (size * sizeof(csi));
+  CS_INT * r = (CS_INT *) malloc (size * sizeof(CS_INT));
   for(unsigned int i=0; i<size; ++i)
   {
-    r[i] = (csi) p[i];
+    r[i] = (CS_INT) p[i];
   }
   return r;
 }
@@ -99,15 +105,15 @@ int gfc3d_LmgcDriver(double *reaction,
   CSparseMatrix * _M = SM->triplet;
   SM->origin = NS_TRIPLET;
 
-  csi * _colM = alloc_memory_csi(nzM, colM);
-  csi * _rowM = alloc_memory_csi(nzM, rowM);
+  CS_INT * _colM = alloc_memory_csi(nzM, colM);
+  CS_INT * _rowM = alloc_memory_csi(nzM, rowM);
 
   _M->nzmax = nzM;
   _M->nz = nzM;
   _M->m = M->size0;
   _M->n = M->size1;
-  _M->p = (csi *) _colM;
-  _M->i = (csi *) _rowM;
+  _M->p = (CS_INT *) _colM;
+  _M->i = (CS_INT *) _rowM;
   double * _Mdata = alloc_memory_double(nzM, Mdata);
   _M->x = _Mdata;
 
@@ -120,8 +126,8 @@ int gfc3d_LmgcDriver(double *reaction,
   CSparseMatrix * _H = SH->triplet;
   SH->origin = NS_TRIPLET;
 
-  csi * _colH = alloc_memory_csi(nzH, colH);
-  csi * _rowH = alloc_memory_csi(nzH, rowH);
+  CS_INT * _colH = alloc_memory_csi(nzH, colH);
+  CS_INT * _rowH = alloc_memory_csi(nzH, rowH);
 
   _H->nzmax = nzH;
   _H->nz = nzH;

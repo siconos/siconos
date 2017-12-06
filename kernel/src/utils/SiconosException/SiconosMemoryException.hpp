@@ -23,7 +23,6 @@
 #define SICONOSMEMORYEXCEPTION_H
 
 #include "SiconosException.hpp"
-#include <numerics_verbose.h>
 
 /** Exceptions for SiconosMemory
  *

@@ -45,6 +45,10 @@
 
 typedef double (*linesearch_fptr)(int n, double theta, double preRHS, search_data*);
 
+#ifdef __cplusplus
+using namespace std;
+#endif
+
 void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverOptions* options, functions_LSA* functions)
 {
   /* size of the problem */
@@ -214,7 +218,7 @@ void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverO
 
   unsigned log_hdf5 = SN_logh5_loglevel(SN_LOGLEVEL_NO);
 
-  char* hdf5_filename = getenv("SICONOS_HDF5_NAME");
+  const char* hdf5_filename = getenv("SICONOS_HDF5_NAME");
   if (!hdf5_filename) hdf5_filename = "test.hdf5";
   SN_logh5* logger_s = NULL;
   if (log_hdf5)

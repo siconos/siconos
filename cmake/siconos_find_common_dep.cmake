@@ -34,6 +34,17 @@ IF(GAMSCAPI_FOUND)
   #  ENDIF(UNIX AND NOT APPLE)
 ENDIF(GAMSCAPI_FOUND)
 
+# --- SuiteSparse ---
+# Look for system-installed SuiteSparse/CSparse
+option(USE_SYSTEM_SUITESPARSE TRUE
+  "Try to use SuiteSparse installed on the system instead of built-in CSparse library.")
+if (USE_SYSTEM_SUITESPARSE)
+  compile_with(SuiteSparse COMPONENTS CXSparse)
+  if (NOT SuiteSparse_FOUND OR NOT SuiteSparse_CXSparse_FOUND)
+    message(FATAL_ERROR "System SuiteSparse was requested (USE_SYSTEM_SUITESPARSE=${USE_SYSTEM_SUITESPARSE}) but not found!")
+  endif()
+endif()
+
 compile_with(PathFerris)
 compile_with(PathVI)
 compile_with(LpSolve)
@@ -111,7 +122,7 @@ ENDIF()
 # --- Bullet ---
 SET(BULLET_PATHS "")
 IF(WITH_BULLET)
-  COMPILE_WITH(Bullet REQUIRED)
+  COMPILE_WITH(Bullet REQUIRED ONLY mechanics)
   IF(BULLET_FOUND)
     SET(SICONOS_HAVE_BULLET TRUE)
     MESSAGE( STATUS " Bullet include dirs : ${BULLET_INCLUDE_DIRS}" )

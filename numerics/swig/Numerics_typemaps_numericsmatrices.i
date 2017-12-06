@@ -260,11 +260,20 @@
                                      SWIG_NewPointerObj(SWIG_as_voidptr($1), $1_descriptor, SWIG_POINTER_OWN));
 }
 
-
 #ifdef __cplusplus
-#define CSparseMatrix cs_sparse
+// SWIG gives syntax error for CS_NAME(_sparse)
+#ifdef SICONOS_INT64
+#define CSparseMatrix cs_dl_sparse
 #else
-#define CSparseMatrix struct cs_sparse
+#define CSparseMatrix cs_di_sparse
+#endif
+#else
+// SWIG gives syntax error for CS_NAME(_sparse)
+#ifdef SICONOS_INT64
+#define CSparseMatrix struct cs_dl_sparse
+#else
+#define CSparseMatrix struct cs_di_sparse
+#endif
 #endif
 
 
@@ -298,7 +307,7 @@
 
   if (!csrm) { SWIG_fail; }
   $result = SWIG_AppendOutput($result, csrm);
-  free($1);
+  cs_spfree($1);
 }
 
 %typemap(out) (CSparseMatrix *)

@@ -23,6 +23,12 @@
 #include <stdint.h>
 #include <string.h>
 
+#include "SiconosConfig.h"
+#ifdef SICONOS_INT64
+#define CS_LONG
+#endif
+#include "cs.h"
+
 #include "NumericsMatrix.h"
 #include "NumericsSparseMatrix.h"
 #include "SiconosCompat.h"
@@ -196,13 +202,13 @@ void NM_row_prod_no_diag(size_t sizeX, size_t sizeY, int block_start, size_t row
       M = NM_csc_trans(A);
     }
 
-    csi* Mp = M->p;
-    csi* Mi = M->i;
+    CS_INT* Mp = M->p;
+    CS_INT* Mi = M->i;
     double* Mx = M->x;
 
     for (size_t i = 0, j = row_start; i < sizeY; ++i, ++j)
     {
-      for (csi p = Mp[j]; p < Mp[j+1]; ++p)
+      for (CS_INT p = Mp[j]; p < Mp[j+1]; ++p)
       {
         y[i] += Mx[p] * x[Mi[p]];
       }
@@ -297,13 +303,13 @@ void NM_row_prod_no_diag3(size_t sizeX, int block_start, size_t row_start, Numer
       M = NM_csc_trans(A);
     }
 
-    csi* Mp = M->p;
-    csi* Mi = M->i;
+    CS_INT* Mp = M->p;
+    CS_INT* Mi = M->i;
     double* Mx = M->x;
 
     for (size_t i = 0, j = row_start; i < 3; ++i, ++j)
     {
-      for (csi p = Mp[j]; p < Mp[j+1]; ++p)
+      for (CS_INT p = Mp[j]; p < Mp[j+1]; ++p)
       {
         y[i] += Mx[p] * x[Mi[p]];
       }
@@ -377,11 +383,11 @@ void NM_row_prod_no_diag1x1(size_t sizeX, int block_start, size_t row_start, Num
       M = NM_csc_trans(A);
     }
 
-    csi* Mp = M->p;
-    csi* Mi = M->i;
+    CS_INT* Mp = M->p;
+    CS_INT* Mi = M->i;
     double* Mx = M->x;
 
-    for (csi p = Mp[row_start]; p < Mp[row_start+1]; ++p)
+    for (CS_INT p = Mp[row_start]; p < Mp[row_start+1]; ++p)
     {
       y[0] += Mx[p] * x[Mi[p]];
     }
@@ -585,8 +591,8 @@ double NM_get_value(NumericsMatrix* M, int i, int j)
       assert(M->matrix2->triplet);
       assert(i <M->matrix2->triplet->m );
       assert(j <M->matrix2->triplet->n );
-      csi * Mi =   M->matrix2->triplet->i;
-      csi * Mp =   M->matrix2->triplet->p;
+      CS_INT * Mi =   M->matrix2->triplet->i;
+      CS_INT * Mp =   M->matrix2->triplet->p;
       double * Mx =   M->matrix2->triplet->x;
 
       for (int idx = 0 ; idx < M->matrix2->triplet->nz  ; idx++ )
@@ -602,8 +608,8 @@ double NM_get_value(NumericsMatrix* M, int i, int j)
     case NS_CSC:
     {
       assert(M->matrix2->csc);
-      csi * Mi =   M->matrix2->csc->i;
-      csi * Mp =   M->matrix2->csc->p;
+      CS_INT * Mi =   M->matrix2->csc->i;
+      CS_INT * Mp =   M->matrix2->csc->p;
       double * Mx =   M->matrix2->csc->x;
 
       for (int row = Mp[j]; row < Mp[j+1] ; row++)
@@ -1156,7 +1162,7 @@ void NM_add_to_diag3(NumericsMatrix* M, double alpha)
   }
   case NM_SPARSE:
   {
-    csi* diag_indices = NM_sparse_diag_indices(M);
+    CS_INT* diag_indices = NM_sparse_diag_indices(M);
     double* Mx = NM_sparse_data(M->matrix2);
     for (size_t i = 0; i < n; ++i) Mx[diag_indices[i]] += alpha;
 
@@ -1416,7 +1422,7 @@ void NM_copy_sparse(const CSparseMatrix* const A, CSparseMatrix* B)
   if (B->nzmax < A->nzmax)
   {
     B->x = (double *) realloc(B->x, A->nzmax * sizeof(double));
-    B->i = (csi *) realloc(B->i, A->nzmax * sizeof(csi));
+    B->i = (CS_INT *) realloc(B->i, A->nzmax * sizeof(CS_INT));
   }
   else if (!(B->x))
   {
@@ -1426,17 +1432,17 @@ void NM_copy_sparse(const CSparseMatrix* const A, CSparseMatrix* B)
   if (A->nz >= 0)
   {
     /* triplet */
-    B->p = (csi *) realloc(B->p, A->nzmax * sizeof(csi));
+    B->p = (CS_INT *) realloc(B->p, A->nzmax * sizeof(CS_INT));
   }
   else if ((A->nz == -1) && (B->n < A->n))
   {
     /* csc */
-    B->p = (csi *) realloc(B->p, (A->n + 1) * sizeof(csi));
+    B->p = (CS_INT *) realloc(B->p, (A->n + 1) * sizeof(CS_INT));
   }
   else if ((A->nz == -2) && (B->m < A->m))
   {
     /* csr */
-    B->p = (csi *) realloc(B->p, (A->m + 1) * sizeof(csi));
+    B->p = (CS_INT *) realloc(B->p, (A->m + 1) * sizeof(CS_INT));
   }
 
 
@@ -1446,14 +1452,14 @@ void NM_copy_sparse(const CSparseMatrix* const A, CSparseMatrix* B)
   B->n = A->n;
 
   memcpy(B->x, A->x, A->nzmax * sizeof(double));
-  memcpy(B->i, A->i, A->nzmax * sizeof(csi));
+  memcpy(B->i, A->i, A->nzmax * sizeof(CS_INT));
 
   size_t size_cpy = -1;
   if (A->nz >= 0) { size_cpy = A->nzmax; }
   else if (A->nz == -1) { size_cpy = A->n + 1; }
   else if (A->nz == -2) { size_cpy = A->m + 1; }
 
-  memcpy(B->p, A->p, size_cpy * sizeof(csi));
+  memcpy(B->p, A->p, size_cpy * sizeof(CS_INT));
 }
 
 void NM_sparse_extract_block(NumericsMatrix* M, double* blockM, size_t pos_row, size_t pos_col,
@@ -1478,17 +1484,17 @@ void NM_sparse_extract_block(NumericsMatrix* M, double* blockM, size_t pos_row, 
   {
     CSparseMatrix* Mcsc = NM_csc(M);
     assert(Mcsc);
-    csi* Mp = Mcsc->p;
-    csi* Mi = Mcsc->i;
+    CS_INT* Mp = Mcsc->p;
+    CS_INT* Mi = Mcsc->i;
     double* Mx = Mcsc->x;
     for (size_t j = pos_col; j < pos_col + block_col_size; ++j)
     {
-      for (csi p = Mp[j]; p < Mp[j+1]; ++p)
+      for (CS_INT p = Mp[j]; p < Mp[j+1]; ++p)
       {
-        csi row_nb = Mi[p];
-        if (row_nb >= (csi) pos_row)
+        CS_INT row_nb = Mi[p];
+        if (row_nb >= (CS_INT) pos_row)
         {
-          if (row_nb >= (csi)(pos_row + block_row_size))
+          if (row_nb >= (CS_INT)(pos_row + block_row_size))
           {
             break;
           }
@@ -2423,7 +2429,7 @@ int NM_gesv_expert(NumericsMatrix* A, double *b, unsigned keep)
 
       if (info)
       {
-        UMFPACK_FN(report_status) (umfpack_ws->control, (csi)info);
+        UMFPACK_FN(report_status) (umfpack_ws->control, (CS_INT)info);
       }
       else
       {
@@ -2468,7 +2474,7 @@ int NM_gesv_expert(NumericsMatrix* A, double *b, unsigned keep)
       if (info)
       {
         fprintf(stderr, "NM_gesv: cannot solve the system with SuperLU\n");
-//        SuperLU_FN(report_status) (superlu_ws->control, (csi)info);
+//        SuperLU_FN(report_status) (superlu_ws->control, (CS_INT)info);
       }
 
       if (keep != NM_KEEP_FACTORS)
@@ -2509,7 +2515,7 @@ int NM_gesv_expert(NumericsMatrix* A, double *b, unsigned keep)
       if (info)
       {
         fprintf(stderr, "NM_gesv: cannot solve the system with SuperLU_MT\n");
-//        SuperLU_MT_FN(report_status) (superlu_ws->control, (csi)info);
+//        SuperLU_MT_FN(report_status) (superlu_ws->control, (CS_INT)info);
       }
 
       if (keep != NM_KEEP_FACTORS)
@@ -2737,13 +2743,13 @@ void NM_update_size(NumericsMatrix* A)
   }
 }
 
-csi* NM_sparse_diag_indices(NumericsMatrix* M)
+CS_INT* NM_sparse_diag_indices(NumericsMatrix* M)
 {
   NumericsSparseMatrix* A = M->matrix2;
   assert(A);
   if (A->diag_indx) return A->diag_indx;
 
-  csi* indices = (csi*) malloc(M->size0 * sizeof(csi));
+  CS_INT* indices = (CS_INT*) malloc(M->size0 * sizeof(CS_INT));
   A->diag_indx = indices;
   /* XXX hack --xhub  */
   if (A->origin == NS_TRIPLET) { NM_csc(M); A->origin = NS_CSC; }
@@ -2754,18 +2760,18 @@ csi* NM_sparse_diag_indices(NumericsMatrix* M)
     assert(A->csc);
     indices[0] = 0;
     CSparseMatrix* newMat = cs_spalloc(M->size0, M->size1, A->csc->p[M->size0]+M->size0, 1, 0);
-    csi* Ai = A->csc->i;
-    csi* Ap = A->csc->p;
+    CS_INT* Ai = A->csc->i;
+    CS_INT* Ap = A->csc->p;
     double* Ax = A->csc->x;
-    csi* Ni = newMat->i;
-    csi* Np = newMat->p;
+    CS_INT* Ni = newMat->i;
+    CS_INT* Np = newMat->p;
     double* Nx = newMat->x;
-    csi end = Ap[1];
-    csi inc = 0;
+    CS_INT end = Ap[1];
+    CS_INT inc = 0;
     Np[0] = 0;
     if (Ai[0] == 0)
     {
-      memcpy(Ni, Ai, end*sizeof(csi));
+      memcpy(Ni, Ai, end*sizeof(CS_INT));
       Np[1] = Ap[1];
       memcpy(Nx, Ax, end*sizeof(double));
     }
@@ -2774,7 +2780,7 @@ csi* NM_sparse_diag_indices(NumericsMatrix* M)
       Ni[0] = 0;
       Np[1] = Ap[1] + 1;
       Nx[0] = 0.;
-      memcpy(&Ni[1], Ai, end*sizeof(csi));
+      memcpy(&Ni[1], Ai, end*sizeof(CS_INT));
       memcpy(&Nx[1], Ax, end*sizeof(double));
       ++inc;
     }
@@ -2782,17 +2788,17 @@ csi* NM_sparse_diag_indices(NumericsMatrix* M)
     /* Could optimize further and copy everything using memcpy */
     for (size_t j = 1; j < (size_t)M->size0; ++j)
     {
-      csi rem = 0;
-      for (csi p = Ap[j]; (rem == 0) && (p < Ap[j+1]); ++p)
+      CS_INT rem = 0;
+      for (CS_INT p = Ap[j]; (rem == 0) && (p < Ap[j+1]); ++p)
       {
-        if (Ai[p] < (csi) j)
+        if (Ai[p] < (CS_INT) j)
         {
           Ni[p+inc] = Ai[p];
           Nx[p+inc] = Ax[p];
         }
         else
         {
-          if (Ai[p] > (csi) j)
+          if (Ai[p] > (CS_INT) j)
           {
             Ni[p+inc] = j;
             Nx[p+inc] = 0.;
@@ -2807,7 +2813,7 @@ csi* NM_sparse_diag_indices(NumericsMatrix* M)
           Np[j] = Ap[j] + inc;
         }
         end = Ap[j+1] - rem;
-        memcpy(&Ni[rem+inc], &Ai[rem], end*sizeof(csi));
+        memcpy(&Ni[rem+inc], &Ai[rem], end*sizeof(CS_INT));
         memcpy(&Nx[rem+inc], &Ax[rem], end*sizeof(double));
         assert(inc <= M->size0);
       }
@@ -2828,21 +2834,21 @@ csi* NM_sparse_diag_indices(NumericsMatrix* M)
   return indices;
 }
 
-void NM_csc_alloc(NumericsMatrix* A, csi nzmax)
+void NM_csc_alloc(NumericsMatrix* A, CS_INT nzmax)
 {
   NM_sparse(A)->csc = cs_spalloc(A->size0, A->size1, nzmax, 1, 0);
 }
-void NM_csc_empty_alloc(NumericsMatrix* A, csi nzmax)
+void NM_csc_empty_alloc(NumericsMatrix* A, CS_INT nzmax)
 {
   NM_csc_alloc(A, nzmax);
-  csi* Ap = NM_sparse(A)->csc->p;
+  CS_INT* Ap = NM_sparse(A)->csc->p;
   for (int i =0 ; i < A->size1+1 ; i++)  Ap[i]= 0;
-  //csi* Ai = NM_sparse(A)->csc->i;
+  //CS_INT* Ai = NM_sparse(A)->csc->i;
   //for (int i =0 ; i < nzmax ; i++)  Ai[i]= 0;
 }
 
 
-void NM_csr_alloc(NumericsMatrix* A, csi nzmax)
+void NM_csr_alloc(NumericsMatrix* A, CS_INT nzmax)
 {
   NM_sparse(A)->csr = cs_spalloc(A->size1, A->size0, nzmax, 1, 0);
   NM_sparse(A)->csr->nz = -2;
@@ -2850,7 +2856,7 @@ void NM_csr_alloc(NumericsMatrix* A, csi nzmax)
   NM_sparse(A)->csr->n = A->size1;
 }
 
-void NM_triplet_alloc(NumericsMatrix* A, csi nzmax)
+void NM_triplet_alloc(NumericsMatrix* A, CS_INT nzmax)
 {
   NM_sparse(A)->triplet = cs_spalloc(A->size0, A->size1, nzmax, 1, 1);
 }

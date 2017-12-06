@@ -18,12 +18,9 @@
   VAR = PyInt_AsLong(_TEMP##VAR);                                   \
   Py_DECREF(_TEMP##VAR)
 
-// XXX this is a hack --xhub
-#undef SICONOS_INT64
-
 %inline %{
 
-#include "csparse.h"
+#include "SparseMatrix.h"
 
 static inline bool sane_pyseq_check(PyObject *o)
 {
@@ -56,7 +53,7 @@ static inline void _sn_check_nnz(PyObject** mat, CSparseMatrix *M)
 {
   if (!*mat) { return; }
   PyObject *auto_nnz = PyObject_GetAttrString(*mat, "nnz");
-  csi nz;
+  CS_INT nz;
   if (M->nz >= 0) { nz = M->nz; } else { nz = M->nzmax; }
   if(PyInt_AsLong(auto_nnz) != nz) {  PyErr_SetString(PyExc_RuntimeError, "number of nnz is inconsistent"); *mat = NULL; }
   Py_XDECREF(auto_nnz);
@@ -82,6 +79,12 @@ static inline void _sn_check_shape(PyObject** mat, CSparseMatrix *M) {};
 
 #include "SiconosConfig.h"
 
+// Work-around for "disappearing" SICONOS_INT64 problem in use of
+// %#ifdef below
+#ifdef SICONOS_INT64
+#define _SICONOS_INT64
+#endif
+
 #if defined(SICONOS_INT64) && !defined(SICONOS_FORCE_NPY_INT32)
 #define NPY_INT_TYPE NPY_INT64
 #else
@@ -104,11 +107,11 @@ static inline void _sn_check_shape(PyObject** mat, CSparseMatrix *M) {};
 
 #define INT_TO_NPY_INT(dim, intp, out, copy) \
   { \
-  csi * int_p; \
+  CS_INT * int_p; \
   if (copy) \
   { \
-    int_p = (csi*)malloc(dim[0] * sizeof(csi)); \
-    memcpy(int_p, intp, dim[0] * sizeof(csi)); \
+    int_p = (CS_INT*)malloc(dim[0] * sizeof(CS_INT)); \
+    memcpy(int_p, intp, dim[0] * sizeof(CS_INT)); \
   } \
   else \
   { \
@@ -219,7 +222,7 @@ static inline bool is_Pyobject_scipy_sparse_matrix(PyObject* o, PyObject* scipy_
         array_pyvar = obj_to_array_allow_conversion(pyvar, NPY_INT32, indvar);
         if (!array_pyvar) { PyErr_SetString(PyExc_RuntimeError, "Could not get array for variable" #pyvar); PyObject_Print(pyvar, stderr, 0); return 0; }
 
-%#ifdef SICONOS_INT64
+%#ifdef _SICONOS_INT64
         PyErr_Warn(PyExc_UserWarning, "Performance warning: the vector of indices or pointers is in int32, but siconos has 64-bits integers: we have to perform a conversion. Consider given sparse matrix in the right format");
         dest_array = (int64_t*) malloc(len * sizeof(int64_t));
         if(!dest_array) { PyErr_SetString(PyExc_RuntimeError, "Allocation of i or p failed (triggered by conversion to int32)"); return 0; }
@@ -240,7 +243,7 @@ static inline bool is_Pyobject_scipy_sparse_matrix(PyObject* o, PyObject* scipy_
         array_pyvar = obj_to_array_allow_conversion(pyvar, NPY_INT64, indvar);
         if (!array_pyvar) { PyErr_SetString(PyExc_RuntimeError, "Could not get array for variable " #pyvar);  PyObject_Print(pyvar, stderr, 0); return 0; }
 
-%#ifdef SICONOS_INT64
+%#ifdef _SICONOS_INT64
         dest_array = (int64_t *) array_data(array_pyvar);
 %#else
         PyErr_Warn(PyExc_UserWarning, "Performance warning: the vector of indices or pointers is in int64, but siconos has 32-bits integers: we have to perform a conversion. Consider given sparse matrix in the right format");

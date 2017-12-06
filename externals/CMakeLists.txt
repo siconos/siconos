@@ -19,7 +19,7 @@ else()
 endif()
 
 # --- Sources and headers ---
-# source directories for numerics
+# source directories for externals
 set(${COMPONENT}_DIRS
   .
   blas_lapack
@@ -30,15 +30,17 @@ set(${COMPONENT}_DIRS
   optim_misc/ql0001
   SOL/lumod-c
   sort
-  SuiteSparse/CSparse
   SuiteSparse/CSparse_extensions
   tools
 )
 
+if (NOT USE_SYSTEM_SUITESPARSE)
+  LIST(APPEND ${COMPONENT}_DIRS SuiteSparse/CXSparse)
+endif()
+
 if(WITH_CXX)
   list(APPEND ${COMPONENT}_DIRS numeric_bindings boost_contribs)
 endif()
-
 
 # Unstable sources. Will be included only
 # if WITH_${COMPONENT}_UNSTABLE is true.
@@ -55,7 +57,16 @@ if(NOT INSTALL_EXTERNALS_HEADERS)
     optim_misc
     optim_misc/ql0001
     sort
+    boost_contribs
     tools)
+endif()
+
+# List of specific headers not to be installed
+set(${COMPONENT}_HDRS_EXCLUDE tools/SiconosCompat.h)
+
+if (USE_SYSTEM_SUITESPARSE)
+  list(APPEND ${COMPONENT}_HDRS_EXCLUDE_DIR
+    SuiteSparse/CXSparse)
 endif()
 
 # List of directories for which no doxygen doc will be generated
@@ -71,7 +82,9 @@ SET(${COMPONENT}_EXCLUDE_SRCS "SOL/lumod-c/sparselib.c" "SOL/lumod-c/lumod_spars
 
 set_source_files_properties(SOL/lumod-c/lumod_dense.c PROPERTIES COMPILE_FLAGS -Wno-unused-variable)
 set_source_files_properties(SOL/lumod-c/commonlib.c PROPERTIES COMPILE_FLAGS -Wno-unused-variable)
-set_source_files_properties(SuiteSparse/CSparse/csparse.c PROPERTIES COMPILE_FLAGS -Wno-unused)
+if (NOT USE_SYSTEM_SUITESPARSE)
+  set_source_files_properties(SuiteSparse/CSparse/csparse.c PROPERTIES COMPILE_FLAGS -Wno-unused)
+endif()
 
 
 
@@ -86,14 +99,17 @@ set(${COMPONENT}_LINKER_LANGUAGE C)
 if(MLCPSIMPLEX_FOUND) 
   set(${COMPONENT}_LINKER_LANGUAGE CXX)
 endif()
-set(${COMPONENT}_LINK_LIBRARIES ${SICONOS_LINK_LIBRARIES})
+set(${COMPONENT}_LINK_LIBRARIES ${SICONOS_LINK_LIBRARIES} ${CXSparse_LIBRARY})
 
 # Windows stuff
 include(WindowsExternalsSetup)
 
 if(BUILD_AS_CPP)
   file(GLOB_RECURSE C_FILES ${CMAKE_CURRENT_SOURCE_DIR} *.c)
-  set_source_files_properties(${C_FILES} PROPERTIES LANGUAGE CXX)
+  set_source_files_properties(${C_FILES} PROPERTIES LANGUAGE CXX
+    COMPILE_FLAGS -fpermissive)
+  set_source_files_properties(SuiteSparse/CXSparse/cxsparse.c
+    PROPERTIES COMPILE_FLAGS -fpermissive)
   set(${COMPONENT}_LINKER_LANGUAGE CXX)
 endif()
 

@@ -23,6 +23,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <string.h>
 #include <math.h>
 
@@ -362,6 +363,10 @@ int test_prodNumericsMatrixNumericsMatrix(NumericsMatrix** MM)
   double alpha = 1.0, beta = 0.0;
   double tol = 1e-12;
 
+  double * C2ref = 0;
+
+  SparseBlockStructuredMatrix * SBM3 = 0;
+  SparseBlockStructuredMatrix * SBM4 = 0;
 
   NumericsMatrix C;
   NM_null(&C);
@@ -423,7 +428,7 @@ int test_prodNumericsMatrixNumericsMatrix(NumericsMatrix** MM)
   MSAN_INIT_VAR(C2.matrix0, C2.size0 * C2.size1);
   NM_gemm(alpha, M1, M3, beta,  &C2);
 
-  double * C2ref = (double *)malloc(C2.size0 * C2.size1 * sizeof(double));
+  C2ref = (double *)malloc(C2.size0 * C2.size1 * sizeof(double));
   for (i = 0; i < C2.size0; i++)
   {
     for (j = 0; j < C2.size1; j++)
@@ -464,7 +469,7 @@ int test_prodNumericsMatrixNumericsMatrix(NumericsMatrix** MM)
   C3.storageType = 1;
   C3.size0 = M2->size0;
   C3.size1 = M2->size1;
-  SparseBlockStructuredMatrix * SBM3 = (SparseBlockStructuredMatrix *)malloc(sizeof(SparseBlockStructuredMatrix));
+  SBM3 = (SparseBlockStructuredMatrix *)malloc(sizeof(SparseBlockStructuredMatrix));
   C3.matrix1 = SBM3;
   beta = 1.0;
   i = 1;
@@ -514,7 +519,7 @@ int test_prodNumericsMatrixNumericsMatrix(NumericsMatrix** MM)
   C4.storageType = 1;
   C4.size0 = M2->size0;
   C4.size1 = M4->size1;
-  SparseBlockStructuredMatrix * SBM4 = (SparseBlockStructuredMatrix *)malloc(sizeof(SparseBlockStructuredMatrix));
+  SBM4 = (SparseBlockStructuredMatrix *)malloc(sizeof(SparseBlockStructuredMatrix));
   C4.matrix1 = SBM4;
 
   SBM_alloc_for_gemm(M2->matrix1, M4->matrix1, SBM4);

@@ -26,6 +26,7 @@ Documentation to be done
 
 */
 
+#include <stdio.h>
 
 /*!\file SparseMatrix.h
   \brief Structure definition and functions related to sparse matrix storage in Numerics
@@ -33,12 +34,63 @@ Documentation to be done
 
 #include "SiconosConfig.h"
 
+/* Compile-time assertion: users of SparseMatrix.h must have CS_LONG
+ * set if and only if SICONOS_INT64 is also set. If it is unset, it is
+ * set here. */
+#ifdef SICONOS_INT64
+#ifndef CS_LONG
+#define CS_LONG
+#endif
+#else
+#ifdef CS_LONG
+#error "CS_LONG (set) does not correspond with SICONOS_INT64 (unset)"
+#endif
+#endif
+
+/* From cs.h */
+#ifndef CS_INT
+#ifdef CS_LONG
+#define CS_INT long
+#else
+#define CS_INT int
+#endif
+#endif
+
+/* Treat CXSparse structs as opaque types.  Users may #include "cs.h"
+ * to use them outside Siconos. */
+struct cs_dl_sparse;
+struct cs_di_sparse;
+struct cs_dl_symbolic;
+struct cs_di_symbolic;
+struct cs_dl_numeric;
+struct cs_di_numeric;
+typedef struct cs_dl_symbolic cs_dls;
+typedef struct cs_di_symbolic cs_dis;
+typedef struct cs_dl_numeric cs_dln;
+typedef struct cs_di_numeric cs_din;
+
+#ifdef SICONOS_INT64 // SWIG gives syntax error for CS_NAME(_sparse)
+typedef struct cs_dl_sparse CSparseMatrix;
+#ifndef css
+#define css cs_dls
+#endif
+#ifndef csn
+#define csn cs_dln
+#endif
+#else
+typedef struct cs_di_sparse CSparseMatrix;
+#ifndef css
+#define css cs_dis
+#endif
+#ifndef csn
+#define csn cs_din
+#endif
+#endif
+
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {
 #endif
-
-#include "csparse.h"
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
@@ -69,8 +121,6 @@ csi nz ;      : # of entries in triplet matrix;
 csi is either int64_t or int32_t and this is controlled at compile time*/
 
 
-#define CSparseMatrix struct cs_sparse
-
 #define NS_UNKNOWN_ERR(func, orig) \
 fprintf(stderr, #func ": unknown origin %d for sparse matrix\n", orig);
 
@@ -86,7 +136,7 @@ extern "C"
   /** \struct cs_lu_factors SparseMatrix.h
    * Information used and produced by CSparse for an LU factorization*/
   typedef struct {
-    csi n;       /**< size of linear system */
+    CS_INT n;       /**< size of linear system */
     css* S;      /**< symbolic analysis */
     csn* N;      /**< numerics factorization */
   } cs_lu_factors;
@@ -103,7 +153,7 @@ extern "C"
    * \return integer value : 1 if the absolute value is less than
    * DBL_EPSILON, otherwise the return value of cs_entry.
    */
-  csi cs_zentry(CSparseMatrix *T, csi i, csi j, double x);
+  CS_INT cs_zentry(CSparseMatrix *T, CS_INT i, CS_INT j, double x);
 
   /** Check if the given triplet matrix is properly constructed (col and row indices are correct)
    * \param T the sparse matrix to check
@@ -131,7 +181,7 @@ extern "C"
    * \param[in, out] y pointer on a dense vector of size A->n
    * \return 0 if A x or y is NULL else 1
    */
-  int cs_aaxpy(const double alpha, const cs *A, const double *x,
+  int cs_aaxpy(const double alpha, const CSparseMatrix *A, const double *x,
                const double beta, double *y);
 
   /** Free space allocated for a SparseMatrix. note : cs_spfree also
@@ -153,7 +203,7 @@ extern "C"
    * \param x workspace
    * \param[in,out] b on input RHS of the linear system; on output the solution
    * \return 0 if failed, 1 otherwise*/
-  csi cs_solve (cs_lu_factors* cs_lu_A, double* x, double *b);
+  CS_INT cs_solve (cs_lu_factors* cs_lu_A, double* x, double *b);
 
   /** compute a LU factorization of A and store it in a workspace
    * \param order control if ordering is used
@@ -162,7 +212,7 @@ extern "C"
    * \param cs_lu_A the parameter structure that eventually holds the factors
    * \return 1 if the factorization was successful, 1 otherwise
    */
-  int cs_lu_factorization(csi order, const cs *A, double tol, cs_lu_factors * cs_lu_A);
+  int cs_lu_factorization(CS_INT order, const CSparseMatrix *A, double tol, cs_lu_factors * cs_lu_A);
 
   /** Free a workspace related to a LU factorization
    * \param cs_lu_A the structure to free
@@ -173,7 +223,7 @@ extern "C"
    * \param A matrix to print
    * \param brief if positive, print only a portion of the matrix
    * \param file file descriptor*/
-  int cs_printInFile(const cs *A, int brief, FILE* file);
+  int cs_printInFile(const CSparseMatrix *A, int brief, FILE* file);
 
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)

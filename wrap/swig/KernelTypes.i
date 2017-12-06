@@ -483,7 +483,6 @@ struct IsDense : public Question<bool>
     {
       return SP_SiconosVector_from_numpy(vec, array_p, is_new_object);
     }
-    return SP::SiconosVector();
   }
 
   SiconosVector* SiconosVector_in(PyObject* vec, PyArrayObject** array_p, int* is_new_object, std::vector<SP::SiconosVector>& keeper)
