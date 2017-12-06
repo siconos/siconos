@@ -514,14 +514,20 @@ def occ_load_file(filename):
     return comp
 
 
-def topods_shape_reader(shape):
+def topods_shape_reader(shape, deflection=0.001):
 
     from OCC.StlAPI import StlAPI_Writer
+    from OCC.BRepMesh import BRepMesh_IncrementalMesh
+
     import vtk
 
     stl_writer = StlAPI_Writer()
 
-    with tmpfile(debug=True, suffix='.stl') as tmpf:
+    with tmpfile(suffix='.stl') as tmpf:
+        mesh = BRepMesh_IncrementalMesh(shape, deflection)
+        mesh.Perform()
+        assert mesh.IsDone()
+        stl_writer.SetASCIIMode(False)
         stl_writer.Write(shape, tmpf[1])
         tmpf[0].flush()
 
