@@ -27,14 +27,30 @@ void convexQP_display(ConvexQP* cqp)
 {
 
   assert(cqp);
-
+  if (cqp->M)
+  {
   NM_display(cqp->M);
-  NV_display(cqp->q, cqp->size);
+  }
+  else
+  {
+    printf("cqp->M is NULL\n");
+  }
+  if (cqp->q)
+  {
+    NV_display(cqp->q, cqp->size);
+  }
+  else
+  {
+    printf("cqp->q is NULL\n");
+  }
   if (cqp->A)
     NM_display(cqp->A);
+  else
+    printf("cqp->A is NULL\n");
   if (cqp->b)
     NV_display(cqp->b, cqp->m);
-
+  else
+    printf("cqp->b is NULL\n");
 
 }
 

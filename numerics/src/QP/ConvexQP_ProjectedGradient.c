@@ -194,8 +194,14 @@ void convexQP_ProjectedGradient(ConvexQP* problem, double *z, double *w, int* in
         //  Compute the new value of the cost function (we use velocity as tmp)
         /* q --> w */
         cblas_dcopy(n , q , 1 , w, 1);
+
+        cblas_daxpy(n, 1.0, q, 1, w, 1);
+        NM_gemv(1.0, M, z, 1.0, w);
+
         /* M r + 2*q --> w */
-        NM_gemv(1.0, M, z, 2.0, w);
+        //NM_gemv(1.0, M, z, 2.0, w);
+
+
         /* theta = 0.5 R^T M r + r^T q */
         theta = 0.5*  cblas_ddot(n, w, 1, z, 1);
 

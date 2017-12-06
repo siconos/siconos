@@ -22,6 +22,7 @@
 #include "NumericsMatrix.h"
 #include "SparseBlockMatrix.h"
 #include "NumericsMatrix.h"
+#include "NumericsVector.h"
 #include "NumericsSparseMatrix.h"
 #include "SiconosBlas.h"
 
@@ -32,7 +33,11 @@
 #include "ConvexQP_cst.h"
 #include "numerics_verbose.h"
 
-//#define VERBOSE_DEBUG
+#define DEBUG_NOCOLOR
+#define DEBUG_MESSAGES
+#define DEBUG_STDOUT
+#include "debug.h"
+
 const char* const   SICONOS_CONVEXQP_ADMM_STR = "CONVEXQP ADMM";
 
 
@@ -52,14 +57,33 @@ void convexQP_ADMM(ConvexQP* problem, double *z, double *w, int* info, SolverOpt
 
   /* Dimension of the problem */
   int n =  problem->size;
-  if (A) /* A is considered to be the identity and b =0 */
+  int AisIdentity = 1;
+
+  if (!A) /* A is considered to be the identity and b =0 */
   {
+    printf("A is not given\n");
     problem->m = n;
-    if (b)
+    problem->A= NM_create(NM_SPARSE,n,n);
+    NM_triplet_alloc(problem->A,0);
+    problem->A->matrix2->origin= NS_TRIPLET;
+
+    for (int k =0; k< n; k++)
     {
-
+      NM_zentry(problem->A, k, k, 1);
     }
+DEBUG_EXPR(NM_display(problem->A));
 
+    if (!b)
+    {
+      problem->b = (double * ) calloc(n,sizeof(double));
+    }
+    A = problem->A;
+    b = problem->b;
+    AisIdentity = 0;
+  }
+  else
+  {
+    printf("A is given\n");
   }
 
   int m =  problem->m;
@@ -77,7 +101,7 @@ void convexQP_ADMM(ConvexQP* problem, double *z, double *w, int* info, SolverOpt
   double rho = 0.0;
  
   rho = dparam[SICONOS_CONVEXQP_PGOC_RHO];
-
+  //rho=1.0;
   if (rho == 0.0)
     numerics_error("ConvexQP_ADMM", "dparam[SICONOS_CONVEXQP_PGOC_RHO] must be nonzero");
 
@@ -109,7 +133,7 @@ void convexQP_ADMM(ConvexQP* problem, double *z, double *w, int* info, SolverOpt
       numerics_error("ConvexQP_ADMM", "M and A must have the same storage");
     }
   }
-  if (A)
+  if (AisIdentity)
   {
     NM_add_to_diag3(M, rho);
   }
@@ -124,6 +148,7 @@ void convexQP_ADMM(ConvexQP* problem, double *z, double *w, int* info, SolverOpt
     else if (A->storageType == NM_SPARSE)
     {
       NM_csc_trans(A);
+
       Atrans = NM_new();
       Atrans->storageType = NM_SPARSE;
       Atrans-> size0 = m;
@@ -131,6 +156,7 @@ void convexQP_ADMM(ConvexQP* problem, double *z, double *w, int* info, SolverOpt
       NM_csc_alloc(Atrans, 0);
       Atrans->matrix2->origin = NS_CSC;
       Atrans->matrix2->csc = NM_csc_trans(A);
+      DEBUG_EXPR(NM_display(Atrans));
     }
     else
     {
@@ -149,44 +175,74 @@ void convexQP_ADMM(ConvexQP* problem, double *z, double *w, int* info, SolverOpt
     /* compute the rhs */
     /* q --> w_k */
     cblas_dcopy(n , q , 1 , w_k, 1);
-    /* b+ xsi_k - u_k --> u_k */
+    DEBUG_EXPR(NV_display(w_k,n));
+
+    /* b + xsi_k - u_k --> u_k */
     cblas_daxpy(m, alpha, b, -1, u_k , 1);
     cblas_daxpy(m, 1, xsi_k, 1, u_k , 1);
-    /* rho A^T (b+ xsi_k - u_k ) + q --> w_k */
+    DEBUG_EXPR(NV_display(u_k,m));
+
+    /* rho A^T (b+ xsi_k - u_k ) - q --> w_k */
+    for (int k =0; k< n; k++) w_k[k] = -w_k[k];
     NM_gemv(rho, Atrans, u_k, beta, w_k);
+
+    DEBUG_EXPR(NV_display(w_k,n));
 
     /* Linear system solver */
     cblas_dcopy(n , w_k , 1 , z_k, 1);
     NM_gesv_expert(M,z_k,NM_KEEP_FACTORS);
+    DEBUG_EXPR(NV_display(z_k,n));
 
     /* A z_k + xsi_k + b */
     cblas_dcopy(m , b , 1 , u_tmp, 1);
     cblas_daxpy(m, 1, xsi_k, 1, u_tmp , 1);
-    NM_gemv(rho, A, z_k, beta, u_tmp);
+    if (AisIdentity)
+    {
+      cblas_daxpy(m, rho, z_k, 1, u_tmp , 1);
+    }
+    else
+    {
+      NM_gemv(rho, A, z_k, beta, u_tmp);
+    }
+    DEBUG_EXPR(NV_display(u_tmp,m));
     problem->ProjectionOnC(problem,u_tmp,u_k);
+    DEBUG_EXPR(NV_display(u_k,m));
+
 
     /* */
     cblas_dcopy(m , b , 1 , xsi_k, 1);
-    NM_gemv(rho, A, z_k, beta, xsi_k);
-    cblas_daxpy(m, -1, u_k, 1, xsi_k , 1);
     
-    cblas_daxpy(m,rho, u_k, 0 , w_k, 1);
+    if (AisIdentity)
+    {
+      cblas_daxpy(m, rho, z_k, 1, xsi_k , 1);
+    }
+    else
+    {
+      NM_gemv(rho, A, z_k, beta, xsi_k);
+    }
+
+    cblas_daxpy(m, -1, u_k, 1, xsi_k , 1);
+    DEBUG_EXPR(NV_display(xsi_k,m));
+
+    //cblas_daxpy(m,rho, u_k, 0 , w_k, 1);
+    DEBUG_EXPR(NV_display(w_k,n));
 
     /* **** Criterium convergence **** */
-    convexQP_computeError(problem, z_k , w_k, tolerance, options, &error);
+    convexQP_computeError(problem, z_k , w, tolerance, options, &error);
 
     if (verbose > 0)
-      printf("--------------- ConvexQP - Projected Gradient (PG) - Iteration %i rho = %14.7e \tError = %14.7e\n", iter, rho, error);
+      printf("--------------- ConvexQP - ADMM  - Iteration %i rho = %14.7e \tError = %14.7e\n", iter, rho, error);
 
     if (error < tolerance) hasNotConverged = 0;
     *info = hasNotConverged;
   }
 
+  cblas_dcopy(n , z_k , 1 , z, 1);
 
   //verbose=1;
 
   if (verbose > 0)
-  printf("---------------  ConvexQP - Projected Gradient (PG) - #Iteration %i Final Residual = %14.7e\n", iter, error);
+  printf("---------------  ConvexQP - ADMM - #Iteration %i Final Residual = %14.7e\n", iter, error);
   dparam[SICONOS_DPARAM_RESIDU] = error;
   iparam[SICONOS_IPARAM_ITER_DONE] = iter;
 
