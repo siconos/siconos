@@ -19,6 +19,12 @@
 
 #include <string.h>
 
+#include "SiconosConfig.h"
+#ifdef SICONOS_INT64
+#define CS_LONG
+#endif
+#include "cs.h"
+
 #include "AffineVariationalInequalities.h"
 #include "AVI_Solvers.h"
 #include "NumericsMatrix.h"
@@ -43,7 +49,7 @@ static void pathvi_csc_transfert(struct csc_matrix *primjac, CSparseMatrix* M)
   memcpy(primjac->x, M->x, nnz * sizeof(double));
 
   /*  we may have to change the behavior based on the type used for integers */
-  if (sizeof(primjac->i) != sizeof(csi))
+  if (sizeof(primjac->i) != sizeof(CS_INT))
   {
     for (size_t i = 0; i < nnz; ++i)
     {
@@ -57,8 +63,8 @@ static void pathvi_csc_transfert(struct csc_matrix *primjac, CSparseMatrix* M)
   }
   else
   {
-    memcpy(primjac->i, M->i, nnz * sizeof(csi));
-    memcpy(primjac->j, M->p, n+1 * sizeof(csi));
+    memcpy(primjac->i, M->i, nnz * sizeof(CS_INT));
+    memcpy(primjac->j, M->p, n+1 * sizeof(CS_INT));
   }
 
 }
@@ -93,7 +99,7 @@ static int pathvi_evaluate_jacobian(struct vi_desc *desc, double *primvar, doubl
   case NM_SPARSE:
   {
     CSparseMatrix* M = NM_csc(AVI->M);
-    csi nnz = M->p[n];
+    CS_INT nnz = M->p[n];
 
     /* check dimenstions */
     if (M->n > primjac->max_n) { primjac->max_n = M->n; primjac->j = (PATHVI_INDX_TYPE*)realloc(primjac->j, (M->n+1) * sizeof(primjac->j)); }

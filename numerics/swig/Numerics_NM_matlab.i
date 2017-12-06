@@ -173,8 +173,8 @@ static mxArray* cs_sparse_to_matlab(CSparseMatrix *M, bool copy)
       mwIndex* outp = mxGetJc(out_mat);
 
       double* Mx = M->x;
-      csi* Mi = M->i;
-      csi* Mp = M->p;
+      CS_INT* Mi = M->i;
+      CS_INT* Mp = M->p;
 
       size_t nnz = Mp[M->n];
       memcpy(outx, Mx, nnz * sizeof(double));
