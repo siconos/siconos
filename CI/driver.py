@@ -118,3 +118,6 @@ if run:
 
             except Exception as e:
                 sys.stderr.write(str(e))
+
+
+    exit(return_code)
