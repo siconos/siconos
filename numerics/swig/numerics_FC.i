@@ -4,6 +4,8 @@
 #include "FrictionContactProblem.h"
 #include "fc3d_compute_error.h"
 #ifdef WITH_FCLIB
+// avoid a conflict with old csparse.h in case fclib.h includes it
+#define _CS_H
 #include "fclib_interface.h"
 #endif
 #include "fc2d_Solvers.h"
@@ -16,6 +18,8 @@
 
 %include "FrictionContactProblem.h"
 #ifdef WITH_FCLIB
+// avoid a conflict with old csparse.h in case fclib.h includes it
+#define _CS_H
 %include fclib_interface.h
 #endif
 

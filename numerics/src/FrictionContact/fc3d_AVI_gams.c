@@ -22,6 +22,12 @@
 #include <stdbool.h>
 #include <float.h>
 
+#include "SiconosConfig.h"
+#ifdef SICONOS_INT64
+#define CS_LONG
+#endif
+#include "cs.h"
+
 #include "NumericsMatrix.h"
 #include "NumericsSparseMatrix.h"
 #include "SolverOptions.h"
@@ -144,7 +150,7 @@ static void setDashedOptions(const char* optName, const char* optValue, const ch
   }
 }
 
-static csi SN_rm_normal_part(csi i, csi j, double val, void* env)
+static CS_INT SN_rm_normal_part(CS_INT i, CS_INT j, double val, void* env)
 {
   if (i%3 == 0)
   {

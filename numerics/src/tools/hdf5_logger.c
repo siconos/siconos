@@ -17,6 +17,14 @@
 */
 
 #include <stdio.h>
+#include <math.h>
+
+#include "SiconosConfig.h"
+#ifdef SICONOS_INT64
+#define CS_LONG
+#endif
+#include "cs.h"
+
 #include "hdf5_logger.h"
 #include "NumericsSparseMatrix.h"
 
@@ -297,19 +305,19 @@ bool SN_logh5_csparse(CSparseMatrix* cs, const char* name, hid_t loc_id)
   result = SN_logh5_scalar_integer(cs->n, "n", mat_group);
   result = SN_logh5_scalar_integer(cs->nz, "nz", mat_group);
 
-  if (sizeof(csi) == sizeof(int64_t))
+  if (sizeof(CS_INT) == sizeof(int64_t))
   {
     result = SN_logh5_vec_int64(cs->n+1, cs->p, "p", mat_group);
     result = SN_logh5_vec_int64(cs->p[cs->n], cs->i, "i", mat_group);
   }
-/*   else if (sizeof(csi) == sizeof(int32_t))
+/*   else if (sizeof(CS_INT) == sizeof(int32_t))
   {
     result = SN_logh5_vec_int32(cs->n+1, cs->p, "p", mat_group);
     result = SN_logh5_vec_int32(cs->nzmax, cs->i, "i", mat_group);
   }*/
   else
   {
-    fprintf(stderr, "SN_logh5_NM :: unknown pointer size %lu\n", sizeof(csi));
+    fprintf(stderr, "SN_logh5_NM :: unknown pointer size %lu\n", sizeof(CS_INT));
     result = false;
   }
   result = SN_logh5_vec_double(cs->p[cs->n], cs->x, "x", mat_group);

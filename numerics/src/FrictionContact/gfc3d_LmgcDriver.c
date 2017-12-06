@@ -10,6 +10,9 @@
 #endif
 #include "cs.h"
 
+// avoid a conflict with old csparse.h
+#define _CS_H
+
 #include "fc3d_Solvers.h"
 #include "NonSmoothDrivers.h"
 #include "fclib_interface.h"

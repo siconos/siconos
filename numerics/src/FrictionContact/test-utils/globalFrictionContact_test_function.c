@@ -18,6 +18,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+
+#include "SiconosConfig.h"
+#ifdef SICONOS_INT64
+#define CS_LONG
+#endif
+#include "cs.h"
+
+// avoid a conflict with old csparse.h in case fclib includes it
+#define _CS_H
+
 #include "NonSmoothDrivers.h"
 #include "globalFrictionContact_test_function.h"
 #include "gfc3d_Solvers.h"

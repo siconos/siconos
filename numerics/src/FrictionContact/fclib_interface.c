@@ -22,6 +22,15 @@
 
 #define DEBUG_MESSAGES
 
+#include "SiconosConfig.h"
+#ifdef SICONOS_INT64
+#define CS_LONG
+#endif
+#include "cs.h"
+
+// avoid a conflict with old csparse.h in case fclib includes it
+#define _CS_H
+
 #include "debug.h"
 #ifdef WITH_FCLIB
 #include "SparseMatrix.h"
@@ -33,15 +42,15 @@
 #include "timers_interf.h"
 #include "GlobalFrictionContactProblem.h"
 
-static void int_to_csi(int* o, csi* d, unsigned int n)
+static void int_to_csi(int* o, CS_INT* d, unsigned int n)
 {
   for(unsigned int i=0; i<n; ++i)
   {
-    d[i] = (csi) o[i];
+    d[i] = (CS_INT) o[i];
   }
 }
 
-static void csi_to_int(csi* o, int* d, unsigned int n)
+static void csi_to_int(CS_INT* o, int* d, unsigned int n)
 {
   for(unsigned int i=0; i<n; ++i)
   {
@@ -71,30 +80,30 @@ FrictionContactProblem* from_fclib_local(const struct fclib_local* fclib_problem
 
   CSparseMatrix W;
 
-  W.nzmax = (csi) fclib_problem->W->nzmax;
-  W.m = (csi) fclib_problem->W->m;
-  W.n = (csi) fclib_problem->W->n;
+  W.nzmax = (CS_INT) fclib_problem->W->nzmax;
+  W.m = (CS_INT) fclib_problem->W->m;
+  W.n = (CS_INT) fclib_problem->W->n;
 
   if (fclib_problem->W->nz == -1)
   {
     /* compressed colums */
-    W.p = (csi*) malloc(sizeof(csi)*(W.n+1));
+    W.p = (CS_INT*) malloc(sizeof(CS_INT)*(W.n+1));
     int_to_csi(fclib_problem->W->p, W.p, (unsigned) (W.n+1));
   }
   else if (fclib_problem->W->nz == -2)
   {
     /* compressed rows */
-    W.p = (csi*) malloc(sizeof(csi)*(W.m+1));
+    W.p = (CS_INT*) malloc(sizeof(CS_INT)*(W.m+1));
     int_to_csi(fclib_problem->W->p, W.p, (unsigned) (W.m+1));
   }
   else
   {
     /* triplet */
-    W.p = (csi*) malloc(sizeof(csi)*W.nzmax);
+    W.p = (CS_INT*) malloc(sizeof(CS_INT)*W.nzmax);
     int_to_csi(fclib_problem->W->p, W.p, (unsigned) W.nzmax);
   }
 
-  W.i = (csi*) malloc(sizeof(csi)*W.nzmax);
+  W.i = (CS_INT*) malloc(sizeof(CS_INT)*W.nzmax);
   int_to_csi(fclib_problem->W->i, W.i, (unsigned) W.nzmax);
 
   W.x = fclib_problem->W->x;
@@ -275,9 +284,9 @@ GlobalFrictionContactProblem* from_fclib_global(const struct fclib_global* fclib
   problem->M = NM_create(NM_SPARSE, fclib_problem->M->m, fclib_problem->M->n);
 
   CSparseMatrix * M = (CSparseMatrix*)malloc(sizeof(CSparseMatrix));
-  M->nzmax = (csi) fclib_problem->M->nzmax;
-  M->m = (csi) fclib_problem->M->m;
-  M->n = (csi) fclib_problem->M->n;
+  M->nzmax = (CS_INT) fclib_problem->M->nzmax;
+  M->m = (CS_INT) fclib_problem->M->m;
+  M->n = (CS_INT) fclib_problem->M->n;
 
   M->x =  fclib_problem->M->x;
 
@@ -286,15 +295,15 @@ GlobalFrictionContactProblem* from_fclib_global(const struct fclib_global* fclib
     /* compressed colums */
     problem->M->matrix2->csc= M;
     problem->M->matrix2->origin = NS_CSC;
-    M->nz = (csi) fclib_problem->M->nz;
-    M->p = (csi*) malloc(sizeof(csi)*(M->n+1));
+    M->nz = (CS_INT) fclib_problem->M->nz;
+    M->p = (CS_INT*) malloc(sizeof(CS_INT)*(M->n+1));
     int_to_csi(fclib_problem->M->p, M->p, (unsigned) (M->n+1));
   }
   else if (fclib_problem->M->nz == -2)
   {
     /* compressed rows */
-    M->nz = (csi) fclib_problem->M->nz;
-    M->p = (csi*) malloc(sizeof(csi)*(M->m+1));
+    M->nz = (CS_INT) fclib_problem->M->nz;
+    M->p = (CS_INT*) malloc(sizeof(CS_INT)*(M->m+1));
     int_to_csi(fclib_problem->M->p, M->p, (unsigned) (M->m+1));
     /* since  problem->M->matrix2->csr does not exist, we need
        to fill transform M into a triplet or csc before returning
@@ -308,11 +317,11 @@ GlobalFrictionContactProblem* from_fclib_global(const struct fclib_global* fclib
     /* triplet */
     problem->M->matrix2->triplet=M;
     problem->M->matrix2->origin = NS_TRIPLET;
-    M->nz = (csi) fclib_problem->M->nz;
-    M->p = (csi*) malloc(sizeof(csi)*M->nzmax);
+    M->nz = (CS_INT) fclib_problem->M->nz;
+    M->p = (CS_INT*) malloc(sizeof(CS_INT)*M->nzmax);
     int_to_csi(fclib_problem->M->p, M->p, (unsigned) M->nzmax);
   }
-  M->i = (csi*) malloc(sizeof(csi)*M->nzmax);
+  M->i = (CS_INT*) malloc(sizeof(CS_INT)*M->nzmax);
   int_to_csi(fclib_problem->M->i, M->i, (unsigned) M->nzmax);
 
 
@@ -320,10 +329,10 @@ GlobalFrictionContactProblem* from_fclib_global(const struct fclib_global* fclib
 
   CSparseMatrix * H = (CSparseMatrix*)malloc(sizeof(CSparseMatrix));
 
-  H->nzmax = (csi) fclib_problem->H->nzmax;
-  H->m = (csi) fclib_problem->H->m;
-  H->n = (csi) fclib_problem->H->n;
-  H->nz = (csi) fclib_problem->H->nz;
+  H->nzmax = (CS_INT) fclib_problem->H->nzmax;
+  H->m = (CS_INT) fclib_problem->H->m;
+  H->n = (CS_INT) fclib_problem->H->n;
+  H->nz = (CS_INT) fclib_problem->H->nz;
   H->x =  fclib_problem->H->x;
 
   if (fclib_problem->H->nz == -1)
@@ -331,7 +340,7 @@ GlobalFrictionContactProblem* from_fclib_global(const struct fclib_global* fclib
     /* compressed colums */
     problem->H->matrix2->csc= H;
     problem->H->matrix2->origin = NS_CSC;
-    H->p = (csi*) malloc(sizeof(csi)*(H->n+1));
+    H->p = (CS_INT*) malloc(sizeof(CS_INT)*(H->n+1));
     int_to_csi(fclib_problem->H->p, H->p, (unsigned) (H->n+1));
   }
   else if (fclib_problem->H->nz == -2)
@@ -345,11 +354,11 @@ GlobalFrictionContactProblem* from_fclib_global(const struct fclib_global* fclib
     /* triplet */
     problem->H->matrix2->triplet=H;
     problem->H->matrix2->origin = NS_TRIPLET;
-    H->p = (csi*) malloc(sizeof(csi)*H->nzmax);
+    H->p = (CS_INT*) malloc(sizeof(CS_INT)*H->nzmax);
     int_to_csi(fclib_problem->H->p, H->p, (unsigned) H->nzmax);
   }
 
-  H->i = (csi*) malloc(sizeof(csi)*H->nzmax);
+  H->i = (CS_INT*) malloc(sizeof(CS_INT)*H->nzmax);
   int_to_csi(fclib_problem->H->i, H->i, (unsigned) H->nzmax);
 
   return problem;

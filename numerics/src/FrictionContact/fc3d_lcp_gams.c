@@ -22,6 +22,12 @@
 #include <stdbool.h>
 #include <float.h>
 
+#include "SiconosConfig.h"
+#ifdef SICONOS_INT64
+#define CS_LONG
+#endif
+#include "cs.h"
+
 #include "NumericsMatrix.h"
 #include "FrictionContactProblem.h"
 #include "fc3d_Solvers.h"
@@ -128,7 +134,7 @@ static int cp(const char *to, const char *from)
 
 static inline double rad2deg(double rad) { return rad*180/M_PI; }
 
-static csi SN_rm_normal_part(csi i, csi j, double val, void* env)
+static CS_INT SN_rm_normal_part(CS_INT i, CS_INT j, double val, void* env)
 {
   if (i%3 == 0)
   {
@@ -811,8 +817,8 @@ static int fc3d_lcp_gams_base(FrictionContactProblem* problem, double *reaction,
   NM_csc_alloc(&Ab, 3*Ab.size0);
 
   /* Let the dark magic begin: we create the indices and colptr  */
-  csi* Ab_rowindx = NM_sparse(&Ab)->csc->i;
-  csi* Ab_colptr = NM_sparse(&Ab)->csc->p;
+  CS_INT* Ab_rowindx = NM_sparse(&Ab)->csc->i;
+  CS_INT* Ab_colptr = NM_sparse(&Ab)->csc->p;
 
   for (unsigned i = 0, i3 = 0, data_indx = 0; i3 < 3*problem->numberOfContacts; i3 += 3, i += 9)
   {
