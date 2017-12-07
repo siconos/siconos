@@ -41,6 +41,9 @@
 #include "SparseBlockMatrix.h"
 #include "timers_interf.h"
 #include "GlobalFrictionContactProblem.h"
+#include "cs.h"
+#include "SparseMatrix.h"
+
 
 static void int_to_csi(int* o, CS_INT* d, unsigned int n)
 {
