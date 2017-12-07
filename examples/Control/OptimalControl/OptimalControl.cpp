@@ -1,4 +1,5 @@
 
+#include "numerics_verbose.h"
 #include "SiconosKernel.hpp"
 #include "adjointInput.hpp"
 #include "myDS.h"
