@@ -12,6 +12,11 @@
 #include "numerics_verbose.h"
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 
+//#define DEBUG_NOCOLOR
+#define DEBUG_MESSAGES
+#define DEBUG_STDOUT
+#include "debug.h"
+
 
 void PXtest(void *cqpIn, double *x, double *PX)
 {
@@ -20,7 +25,7 @@ void PXtest(void *cqpIn, double *x, double *PX)
   for (i =0; i< cqp->size ; i++)
   {
     PX[i] = x[i];
-    if (PX[i] < 3.0) PX[i]=3.0;
+    if (PX[i] < 4.0) PX[i]=4.0;
   }
 }
 
@@ -35,7 +40,7 @@ int main(void)
 
   cqp.env = &cqp;
 
-   NumericsMatrix * M  = NM_create(NM_SPARSE,cqp.size, cqp.size);
+  NumericsMatrix * M  = NM_create(NM_SPARSE,cqp.size, cqp.size);
   NM_triplet_alloc(M,0);
   M->matrix2->origin= NS_TRIPLET;
 
@@ -43,7 +48,7 @@ int main(void)
   {
     NM_zentry(M, k, k, 1);
   }
-  NM_display(M);
+  DEBUG_EXPR(NM_display(M));
 
 
   double * q = (double *) malloc(cqp.size*sizeof(double));
@@ -53,41 +58,74 @@ int main(void)
   }
 
 
+  cqp.m=5;
+  NumericsMatrix * A  = NM_create(NM_SPARSE,cqp.m, cqp.size);
+  NM_triplet_alloc(A,0);
+  A->matrix2->origin= NS_TRIPLET;
+
+  for (int k =0; k< cqp.m; k++)
+  {
+    NM_zentry(A, k, k, 1);
+  }
+  DEBUG_EXPR(NM_display(A));
+
+
+  double * b = (double *) malloc(cqp.size*sizeof(double));
+  for (int k =0; k< cqp.m; k++)
+  {
+    b[k]=1.0;
+  }
+
   printf("test step 1\n");
   cqp.M = M;
   cqp.ProjectionOnC = &PXtest ;
   cqp.q = q;
+  cqp.A = A;
+  cqp.b = b;
   convexQP_display(&cqp);
 
 
   /* Call the callback */
-  double x[10], w[10], PX[10];
-  int i, n=10;
+  double x[10], u[10], xsi[10], PX[10];
+  int i, n=cqp.size;
   for (i =0; i< n ; i++)
   {
     x[i] = i-5;
+    u[i] = 0.0;
+    xsi[i] =0.0;
   }
 
 
   cqp.ProjectionOnC(&cqp,x,PX);
+
   for (i =0; i< n ; i++)
   {
     printf("x[%i]=%f\t",i,x[i]);     printf("PX[%i]=%f\n",i,PX[i]);
   }
+  for (i =0; i< n ; i++)
+  {
+    printf("q[%i]=%f\t",i,q[i]);
+  }
   SolverOptions * options = (SolverOptions *) malloc(sizeof(SolverOptions));
 
   verbose=1;
-  int info = convexQP_ProjectedGradient_setDefaultSolverOptions(options);
+  int info = convexQP_ADMM_setDefaultSolverOptions(options);
 
-  options->dparam[0]=1e-12;
-  options->dparam[3]=1.0;
-
-  convexQP_ProjectedGradient(&cqp, x, w, &info, options);
+  options->dparam[SICONOS_DPARAM_TOL]=1e-14;
+  //options->iparam[0]=30;
+  options->dparam[SICONOS_CONVEXQP_ADMM_RHO]=1.0;
+  printf("test step 1\n");
+  convexQP_ADMM(&cqp, x, u, xsi, &info, options);
+  //convexQP_ProjectedGradient(&cqp, x, w, &info, options);
 
 
   for (i =0; i< n ; i++)
   {
-    printf("x[%i]=%f\t",i,x[i]);    printf("w[%i]=w[%i]=%f\n",i,i,w[i]);
+    printf("x[%i]=%f\n",i,x[i]);
+  }
+  for (i =0; i< cqp.m ; i++)
+  {
+    printf("u[%i]=%f\t",i,u[i]); printf("xsi[%i]=%f\n",i,xsi[i]);
   }
 
   solver_options_delete(options);

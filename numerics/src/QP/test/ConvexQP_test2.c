@@ -30,7 +30,7 @@ int main(void)
   ConvexQP cqp;
 
   convexQP_clear(&cqp);
-  cqp.size=1;
+  cqp.size=10;
   //cqp.Callback = (CallbackCQP *)malloc(sizeof(CallbackCQP));
 
   cqp.env = &cqp;
@@ -61,11 +61,13 @@ int main(void)
 
 
   /* Call the callback */
-  double x[10], w[10], PX[10];
+  double x[10], u[10], xsi[10], PX[10];
   int i, n=cqp.size;
   for (i =0; i< n ; i++)
   {
     x[i] = i-5;
+    u[i] = 0.0;
+    xsi[i] =0.0;
   }
 
 
@@ -75,21 +77,26 @@ int main(void)
   {
     printf("x[%i]=%f\t",i,x[i]);     printf("PX[%i]=%f\n",i,PX[i]);
   }
+  for (i =0; i< n ; i++)
+  {
+    printf("q[%i]=%f\t",i,q[i]);
+  }
   SolverOptions * options = (SolverOptions *) malloc(sizeof(SolverOptions));
 
   verbose=1;
   int info = convexQP_ADMM_setDefaultSolverOptions(options);
 
-  options->dparam[0]=1e-14;
-  options->iparam[0]=20;
+  options->dparam[SICONOS_DPARAM_TOL]=1e-14;
+  //options->iparam[0]=30;
+  options->dparam[SICONOS_CONVEXQP_ADMM_RHO]=1.0;
   printf("test step 1\n");
-  convexQP_ADMM(&cqp, x, w, &info, options);
+  convexQP_ADMM(&cqp, x, u, xsi, &info, options);
   //convexQP_ProjectedGradient(&cqp, x, w, &info, options);
 
 
   for (i =0; i< n ; i++)
   {
-    printf("x[%i]=%f\t",i,x[i]);    printf("w[%i]=%f\n",i,w[i]);
+    printf("x[%i]=%f\t",i,x[i]);    printf("u[%i]=%f\t",i,u[i]); printf("xsi[%i]=%f\n",i,xsi[i]);
   }
 
   solver_options_delete(options);

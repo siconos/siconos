@@ -45,6 +45,8 @@ extern "C"
    */
   int convexQP_computeError(ConvexQP* problem, double *z , double *w, double tolerance, SolverOptions * options, double * error);
 
+  int convexQP_computeError_full(ConvexQP* problem, double *z , double *u, double * xsi, double tolerance, SolverOptions * options, double * error);
+
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif

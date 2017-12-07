@@ -23,7 +23,7 @@
 #include "NumericsMatrix.h"
 #include "SiconosLapack.h"
 #include "SiconosSets.h"
-
+#include "NumericsVector.h"
 #include <math.h>
 #include <assert.h>
 #include <float.h>
@@ -71,10 +71,11 @@ int convexQP_computeError(
 
   /* M z + q --> w */
   NM_gemv(1.0, problem->M, z, 1.0, w);
-  
+  DEBUG_EXPR(NV_display(w,n));
+  DEBUG_EXPR(NM_display(problem->M));
   cblas_dcopy(n , z , 1 , ztmp, 1);
   cblas_daxpy(n, -1.0, w , 1, ztmp , 1) ;
-
+  DEBUG_EXPR(NV_display(w,n));
   problem->ProjectionOnC(problem,ztmp,wtmp);
 
   cblas_daxpy(n, -1.0, z , 1, wtmp , 1) ;
@@ -97,3 +98,81 @@ int convexQP_computeError(
 }
 
 
+
+int convexQP_computeError_full(
+  ConvexQP* problem,
+  double *z , double *u, double * xsi,
+  double tolerance,
+  SolverOptions * options, double * error)
+{
+
+  assert(problem);
+  assert(z);
+  assert(u);
+  assert(xsi);
+  assert(error);
+
+  int incx = 1;
+  int n = problem->size;
+  int m = problem->m;
+
+  *error = 0.;
+  if (!options->dWork)
+  {
+    options->dWork = (double*)calloc(2*m+n,sizeof(double));
+  }
+  double *utmp =  options->dWork;
+  double *utmp1 = &(options->dWork[m]) ;
+  double *wtmp =  &(options->dWork[m+m]);
+
+
+  if (!problem->istheNormConvexQPset)
+  {
+    problem->normConvexQP= cblas_dnrm2(n , problem->q , 1);
+    DEBUG_PRINTF("problem->norm ConvexQP= %12.8e\n", problem->normConvexQP);
+    problem->istheNormConvexQPset=1;
+  }
+
+  double norm_q =problem->normConvexQP;
+  DEBUG_PRINTF("norm_q = %12.8e\n", norm_q);
+
+  /* b --> u */
+  cblas_dcopy(m , problem->b , 1 , u, 1);
+
+  /* A z + b --> u */
+  NM_gemv(1.0, problem->A, z, 1.0, u);
+
+  /* q --> w */
+  cblas_dcopy(n , problem->q , 1 , wtmp, 1);
+
+  /* M z + q --> w */
+  NM_gemv(1.0, problem->M, z, 1.0, wtmp);
+
+  DEBUG_EXPR(NV_display(wtmp,n));
+
+  cblas_dcopy(m , u , 1 , utmp, 1);
+  cblas_daxpy(m, -1.0, xsi , 1, utmp , 1) ;
+
+  problem->ProjectionOnC(problem,utmp,utmp1);
+
+  DEBUG_EXPR(NV_display(utmp,m));
+
+  cblas_daxpy(m, -1.0, u , 1, utmp1 , 1) ;
+  DEBUG_EXPR(NV_display(utmp1,m));
+  *error = cblas_dnrm2(m , utmp1 , incx);
+
+  /* Computes error */
+  /* if (fabs(norm_q) > DBL_EPSILON) */
+  /*   *error /= norm_q; */
+
+  DEBUG_PRINTF("error = %e\n",*error);
+  if (*error > tolerance)
+  {
+    if (verbose > 1)
+      printf(" Numerics - convexQP_compute_error: error = %g > tolerance = %g.\n",
+             *error, tolerance);
+    return 1;
+  }
+  else
+    return 0;
+}

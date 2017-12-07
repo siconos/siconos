@@ -72,7 +72,7 @@ extern "C"
   */
   int convexQP_ProjectedGradient_setDefaultSolverOptions(SolverOptions* options);
 
-  void convexQP_ADMM(ConvexQP* problem, double *x, double *w, int* info, SolverOptions* options);
+  void convexQP_ADMM(ConvexQP* problem, double *x, double *u, double * xsi, int* info, SolverOptions* options);
 
   /** set the default solver parameters and perform memory allocation for PG
     \param options the pointer to the array of options to set

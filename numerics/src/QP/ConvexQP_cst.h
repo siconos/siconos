@@ -36,7 +36,11 @@ enum SICONOS_CONVEXQP_PGOC_DPARAM
   SICONOS_CONVEXQP_PGOC_LINESEARCH_TAU  = 6 
 };
 
-
+enum SICONOS_CONVEXQP_ADMM_DPARAM
+{
+  /** index in dparam to store the rho value for projection formulation */
+  SICONOS_CONVEXQP_ADMM_RHO = 3,
+};
 
 
 #endif

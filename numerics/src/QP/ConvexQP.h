@@ -35,7 +35,7 @@
  * the convex QP problem is to find a vector \f$z\in{{\mathrm{I\!R}}}^n\f$,
  * \f{equation*}{
  *   \begin{array}{lcl}
- *     \min & & \frac{1}{2} z^T M z + Z^T q \\
+ *     \min & & \frac{1}{2} z^T M z + z^T q \\
  *      s.t  & & A z + b  \in C \\
  *   \end{array}
  * \f}
