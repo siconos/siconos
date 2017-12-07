@@ -16,10 +16,11 @@
  * limitations under the License.
 */
 
+#include "debug.h"
 #include "NumericsMatrix_internal.h"
 #include "NumericsSparseMatrix.h"
-#include "debug.h"
 #include "numerics_verbose.h"
+#include "SparseMatrix_internal.h"
 
 #ifdef WITH_SUPERLU
 

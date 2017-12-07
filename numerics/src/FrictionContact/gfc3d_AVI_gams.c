@@ -22,16 +22,15 @@
 
 #ifdef HAVE_GAMS_C_API
 
-#include "GAMSlink.h"
-
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
 #include <stdlib.h>
 #include <math.h>
 
-
+#include "GAMSlink.h"
 #include "sanitizer.h"
+#include "SparseMatrix_internal.h"
 
 #define DEBUG_STDOUT
 #define DEBUG_MESSAGES
