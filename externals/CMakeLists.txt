@@ -48,7 +48,7 @@ set(${COMPONENT}_Unstable_SRCS)
 
 # List of directories of headers not to be installed
 set(${COMPONENT}_HDRS_EXCLUDE_DIR PATH_SDK/include SOL/lumod-c)
-if(NOT INSTALL_EXTERNALS_HEADERS)
+if(NOT INSTALL_EXTERNAL_HEADERS)
   list(APPEND ${COMPONENT}_HDRS_EXCLUDE_DIR
     blas_lapack
     hairer
