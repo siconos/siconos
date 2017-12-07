@@ -40,7 +40,7 @@ if (WITH_SYSTEM_SUITESPARSE)
   compile_with(SuiteSparse COMPONENTS CXSparse)
   if (NOT SuiteSparse_FOUND OR NOT SuiteSparse_CXSparse_FOUND)
     set(_sys_CXSparse FALSE)
-    message(MESSAGE "System SuiteSparse was requested (WITH_SYSTEM_SUITESPARSE=${WITH_SYSTEM_SUITESPARSE})\ 
+    message(STATUS "System SuiteSparse was requested (WITH_SYSTEM_SUITESPARSE=${WITH_SYSTEM_SUITESPARSE})\ 
     but not found! Using the internal copy of suitesparse")
   else()
     set(_sys_CXSparse TRUE)
