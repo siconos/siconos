@@ -36,13 +36,16 @@ ENDIF(GAMSCAPI_FOUND)
 
 # --- SuiteSparse ---
 # Look for system-installed SuiteSparse/CSparse
-option(USE_SYSTEM_SUITESPARSE TRUE
-  "Try to use SuiteSparse installed on the system instead of built-in CSparse library.")
-if (USE_SYSTEM_SUITESPARSE)
+if (WITH_SYSTEM_SUITESPARSE)
   compile_with(SuiteSparse COMPONENTS CXSparse)
   if (NOT SuiteSparse_FOUND OR NOT SuiteSparse_CXSparse_FOUND)
-    message(FATAL_ERROR "System SuiteSparse was requested (USE_SYSTEM_SUITESPARSE=${USE_SYSTEM_SUITESPARSE}) but not found!")
+    set(_sys_CXSparse FALSE)
+    message(MESSAGE "System SuiteSparse was requested (WITH_SYSTEM_SUITESPARSE=${WITH_SYSTEM_SUITESPARSE})\ 
+    but not found! Using the internal copy of suitesparse")
+  else()
+    set(_sys_CXSparse TRUE)
   endif()
+  set(USE_SYSTEM_SUITESPARSE ${_sys_CXSparse} CACHE INTERNAL "flag to check to systemwide SuiteSparse install")
 endif()
 
 compile_with(PathFerris)
