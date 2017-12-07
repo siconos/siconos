@@ -108,9 +108,18 @@ if(BUILD_AS_CPP)
   file(GLOB_RECURSE C_FILES ${CMAKE_CURRENT_SOURCE_DIR} *.c)
   set_source_files_properties(${C_FILES} PROPERTIES LANGUAGE CXX
     COMPILE_FLAGS -fpermissive)
-  set_source_files_properties(SuiteSparse/CXSparse/cxsparse.c
-    PROPERTIES COMPILE_FLAGS -fpermissive)
   set(${COMPONENT}_LINKER_LANGUAGE CXX)
+endif()
+
+if(NOT USE_SYSTEM_SUITESPARSE)
+  file(GLOB_RECURSE CXSPARSE_FILES ${CMAKE_CURRENT_SOURCE_DIR}  cxsparse_*.c)
+  if(BUILD_AS_CPP)
+    set_source_files_properties(${CXSPARSE_FILES} PROPERTIES COMPILE_FLAGS
+      "-Wno-error=float-conversion -Wno-error=conversion -Wno-conversion -fpermissive")
+  else()
+    set_source_files_properties(${CXSPARSE_FILES} PROPERTIES COMPILE_FLAGS
+      "-Wno-error=conversion -Wno-error=float-conversion -Wno-conversion")
+  endif()
 endif()
 
 include(LibraryProjectSetup)
