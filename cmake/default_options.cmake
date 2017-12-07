@@ -58,6 +58,10 @@ ENDIF(UNIX)
 option(INSTALL_EXTERNAL_HEADERS
   "Whether or not headers for external libraries should be installed. Default=OFF" OFF)
 
+# If ON, internal headers will not be installed.
+option(INSTALL_INTERNAL_HEADERS
+  "Whether or not headers for internal definitions should be installed. Default=OFF" OFF)
+
 # List of components to build and installed
 # List of siconos component to be installed
 # complete list = externals numerics kernel control mechanics io
