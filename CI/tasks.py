@@ -227,6 +227,9 @@ siconos_test_rpm = CiTask(
     pkgs=['siconos'],
     srcs=['examples'])
 
+siconos_dev_mode_strict = siconos_default.copy()(
+    ci_config='with_dev_mode_strict')
+
 siconos_frama_c = siconos_default.copy()(
     ci_config='with_frama_c',
     add_pkgs=['opam', 'frama-c', 'libgtksourceview2.0-dev',
@@ -248,6 +251,7 @@ known_tasks = {'siconos---vm0':
                 minimal_with_python,
                 siconos_with_lpsolve,
                 siconos_documentation,
+                siconos_dev_mode_strict,
                 siconos_clang,
                 siconos_clang_asan),
 
