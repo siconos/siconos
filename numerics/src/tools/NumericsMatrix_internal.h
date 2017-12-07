@@ -16,10 +16,10 @@
  * limitations under the License.
 */
 
-#ifndef NumericsMatrix_private_H
-#define NumericsMatrix_private_H
+#ifndef NumericsMatrix_internal_H
+#define NumericsMatrix_internal_H
 
-/*!\file NumericsMatrix_private.h
+/*!\file NumericsMatrix_internal.h
  * \brief non-public functions and data structures
  */
 
@@ -95,7 +95,7 @@ extern "C"
 
 #define UMFPACK_FN(X) UMFPACKPREFIX(_ ## X)
 
-/** \struct NM_UMFPACK_WS NumericsMatrix_private.h
+/** \struct NM_UMFPACK_WS NumericsMatrix_internal.h
  * Structure for holding the data UMFPACK needs
  */
 typedef struct {

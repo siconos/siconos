@@ -22,7 +22,7 @@
 #endif
 #include "cs.h"
 
-#include "NumericsMatrix_private.h"
+#include "NumericsMatrix_internal.h"
 #include "NumericsMatrix.h"
 #include "NumericsSparseMatrix.h"
 #include "debug.h"

@@ -29,12 +29,10 @@
 #endif
 #include "cs.h"
 
-#include "NumericsMatrix.h"
+#include "NumericsMatrix_internal.h"
 #include "NumericsSparseMatrix.h"
 #include "SiconosCompat.h"
 #include "SparseBlockMatrix.h"
-#include "NumericsMatrix_private.h"
-#include "NumericsMatrix.h"
 #include "NM_conversions.h"
 #include "SiconosLapack.h"
 #include "numerics_verbose.h"

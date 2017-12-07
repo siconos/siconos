@@ -20,7 +20,7 @@
 
 #include "fc3d_nonsmooth_Newton_solvers.h"
 
-#include "NumericsMatrix_private.h"
+#include "NumericsMatrix_internal.h"
 
 /* #define DEBUG_MESSAGES */
 /* #define DEBUG_STDOUT */

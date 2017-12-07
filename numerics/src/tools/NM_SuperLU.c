@@ -16,8 +16,7 @@
  * limitations under the License.
 */
 
-#include "NumericsMatrix_private.h"
-#include "NumericsMatrix.h"
+#include "NumericsMatrix_internal.h"
 #include "NumericsSparseMatrix.h"
 #include "debug.h"
 #include "numerics_verbose.h"
@@ -26,7 +25,7 @@
 
 #include <slu_ddefs.h>
 
-/** \struct NM_SuperLU_WS NumericsMatrix_private.h
+/** \struct NM_SuperLU_WS NumericsMatrix_internal.h
  * Structure for holding the data SuperLU needs
  */
 struct NM_SuperLU_WS {

@@ -57,7 +57,6 @@ set(${COMPONENT}_HDRS_EXCLUDE
   src/tools/fftw_cycle.h
   src/tools/tlsdef.h
   src/tools/numerics_verbose.h
-  src/tools/NumericsMatrix_private.h
   src/FrictionContact/Generated/funcodegen.h
   )
 
