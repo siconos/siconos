@@ -16,12 +16,7 @@
  * limitations under the License.
 */
 
-#include "SiconosConfig.h"
-#ifdef SICONOS_INT64
-#define CS_LONG
-#endif
-#include "cs.h"
-
+#include "SparseMatrix_internal.h"
 #include "NumericsMatrix_internal.h"
 #include "NumericsMatrix.h"
 #include "NumericsSparseMatrix.h"

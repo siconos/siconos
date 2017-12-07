@@ -6,12 +6,7 @@
 #include "SiconosBlas.h"
 #include "fc3d_Solvers.h"
 #include "NonSmoothDrivers.h"
-
-#include "SiconosConfig.h"
-#ifdef SICONOS_INT64
-#define CS_LONG
-#endif
-#include "cs.h"
+#include "SparseMatrix_internal.h"
 
 // avoid a conflict with old csparse.h in case fclib includes it
 #define _CS_H

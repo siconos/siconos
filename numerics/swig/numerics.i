@@ -104,9 +104,10 @@ static char* format_msg_concat(const char* msg1, const char* msg2)
 %enddef
 
 %{
+#include "SiconosConfig.h"
 #include "SiconosNumerics.h"
 #include "SolverOptions.h"
-#include "SparseMatrix.h"
+#include "SparseMatrix_internal.h"
 #include "NumericsMatrix.h"
 #include "SparseBlockMatrix.h"
 #include "NumericsSparseMatrix.h"
@@ -280,11 +281,6 @@ namespace std11 = boost;
 // solverOptions.i, numerics_common and fwd decl
 // all this because of SolverOptions extend.
 %begin %{
-#include "SiconosConfig.h"
-#ifdef SICONOS_INT64
-#define CS_LONG
-#endif
-#include "cs.h"
 #include "relay_cst.h"
 #include "AVI_cst.h"
 #include "SOCLCP_cst.h"

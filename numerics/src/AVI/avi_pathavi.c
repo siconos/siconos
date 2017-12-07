@@ -19,12 +19,7 @@
 
 #include <string.h>
 
-#include "SiconosConfig.h"
-#ifdef SICONOS_INT64
-#define CS_LONG
-#endif
-#include "cs.h"
-
+#include "SparseMatrix_internal.h"
 #include "AffineVariationalInequalities.h"
 #include "AVI_Solvers.h"
 #include "NumericsMatrix.h"

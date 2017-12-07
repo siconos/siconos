@@ -22,12 +22,7 @@
 #include <stdbool.h>
 #include <float.h>
 
-#include "SiconosConfig.h"
-#ifdef SICONOS_INT64
-#define CS_LONG
-#endif
-#include "cs.h"
-
+#include "SparseMatrix_internal.h"
 #include "NumericsMatrix.h"
 #include "NumericsSparseMatrix.h"
 #include "SolverOptions.h"

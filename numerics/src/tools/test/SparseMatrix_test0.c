@@ -1,12 +1,5 @@
 
-#include "SiconosConfig.h"
-#ifdef SICONOS_INT64
-#define CS_LONG
-#endif
-#include "cs.h"
-
-#include "SparseMatrix.h"
-
+#include "SparseMatrix_internal.h"
 
 /* create an empty triplet matrix, insert 2 elements, print and free */
 int main()

@@ -4,11 +4,7 @@
 #include <time.h>
 #include <float.h>
 
-#include "SiconosConfig.h"
-#ifdef SICONOS_INT64
-#define CS_LONG
-#endif
-#include "cs.h"
+#include "SparseMatrix_internal.h"
 
 // avoid a conflict with old csparse.h
 #define _CS_H

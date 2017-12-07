@@ -22,11 +22,7 @@
 
 #define DEBUG_MESSAGES
 
-#include "SiconosConfig.h"
-#ifdef SICONOS_INT64
-#define CS_LONG
-#endif
-#include "cs.h"
+#include "SparseMatrix_internal.h"
 
 // avoid a conflict with old csparse.h in case fclib includes it
 #define _CS_H
@@ -41,8 +37,6 @@
 #include "SparseBlockMatrix.h"
 #include "timers_interf.h"
 #include "GlobalFrictionContactProblem.h"
-#include "cs.h"
-#include "SparseMatrix.h"
 
 
 static void int_to_csi(int* o, CS_INT* d, unsigned int n)

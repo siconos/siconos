@@ -19,11 +19,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
-#include "SiconosConfig.h"
-#ifdef SICONOS_INT64
-#define CS_LONG
-#endif
-#include "cs.h"
+#include "SparseMatrix_internal.h"
 #include "SparseBlockMatrix.h"
 #include "SiconosLapack.h"
 #include <math.h>

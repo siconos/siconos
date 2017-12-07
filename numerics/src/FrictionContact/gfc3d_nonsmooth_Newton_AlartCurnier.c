@@ -22,12 +22,7 @@
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 
 #include "SiconosConfig.h"
-
-#ifdef SICONOS_INT64
-#define CS_LONG
-#endif
-#include "cs.h"
-
+#include "SparseMatrix_internal.h"
 #include "gfc3d_nonsmooth_Newton_AlartCurnier.h"
 #include "gfc3d_Solvers.h"
 #include "gfc3d_compute_error.h"

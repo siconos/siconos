@@ -16,13 +16,7 @@
  * limitations under the License.
 */
 
-#include "SiconosConfig.h"
-#ifdef SICONOS_INT64
-#define CS_LONG
-#endif
-#define NCOMPLEX
-#include "cs.h"
-
+#include "SparseMatrix_internal.h"
 #include "SiconosMatrix.hpp"
 #include "SiconosAlgebra.hpp"
 #include <boost/numeric/ublas/matrix_sparse.hpp>

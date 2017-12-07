@@ -19,12 +19,7 @@
 #include <stdio.h>
 #include <math.h>
 
-#include "SiconosConfig.h"
-#ifdef SICONOS_INT64
-#define CS_LONG
-#endif
-#include "cs.h"
-
+#include "SparseMatrix_internal.h"
 #include "hdf5_logger.h"
 #include "NumericsSparseMatrix.h"
 
