@@ -62,7 +62,7 @@ void convexQP_ADMM(ConvexQP* problem, double *z, double *u, double * xsi,
 
   if (!A) /* A is considered to be the identity and b =0 */
   {
-    printf("A is not given\n");
+    DEBUG_PRINTF("A is not given and then considered as Identity and b =0\n");
     problem->m = n;
     problem->A= NM_create(NM_SPARSE,n,n);
     NM_triplet_alloc(problem->A,0);
@@ -82,10 +82,7 @@ void convexQP_ADMM(ConvexQP* problem, double *z, double *u, double * xsi,
     b = problem->b;
     AisIdentity = 1;
   }
-  else
-  {
-    printf("A is given\n");
-  }
+
 
   int m =  problem->m;
 
@@ -102,7 +99,7 @@ void convexQP_ADMM(ConvexQP* problem, double *z, double *u, double * xsi,
   double rho = 0.0;
  
   rho = dparam[SICONOS_CONVEXQP_ADMM_RHO];
-  //rho=1.0;
+
   if (rho == 0.0)
     numerics_error("ConvexQP_ADMM", "dparam[SICONOS_CONVEXQP_PGOC_RHO] must be nonzero");
 
@@ -119,9 +116,6 @@ void convexQP_ADMM(ConvexQP* problem, double *z, double *u, double * xsi,
   u_tmp = (double *)calloc(m,sizeof(double));
   /* xsi_k = (double *)calloc(m,sizeof(double)); */
   /* xsi_tmp = (double *)calloc(m,sizeof(double)); */
-
-  double alpha = 1.0;
-  double beta = 1.0;
 
 
   /* Compute M + rho A^T A (storage in M)*/
@@ -169,7 +163,7 @@ void convexQP_ADMM(ConvexQP* problem, double *z, double *u, double * xsi,
       printf("gfc3d_reformulation_local_problem :: unknown matrix storage");
       exit(EXIT_FAILURE);
     }
-    NM_gemm(rho, Atrans, A, beta, W);
+    NM_gemm(rho, Atrans, A, 1.0, W);
   }
 
 
@@ -178,7 +172,6 @@ void convexQP_ADMM(ConvexQP* problem, double *z, double *u, double * xsi,
   while ((iter < itermax) && (hasNotConverged > 0))
   {
     ++iter;
-
 
     /********************/
     /*  1 - Compute z */
@@ -194,9 +187,16 @@ void convexQP_ADMM(ConvexQP* problem, double *z, double *u, double * xsi,
     cblas_daxpy(m, 1.0, xsi, 1, u , 1);
 
     /* rho A^T (u_k +xsi_k -b  ) - q --> w_k */
-//    for (int k =0; k< n; k++) w_k[k] = -w_k[k];
-    cblas_dscal(n, -1, w_k, 1);
-    NM_gemv(rho, Atrans, u, beta, w_k);
+    /* for (int k =0; k< n; k++) w_k[k] = -w_k[k]; */
+    cblas_dscal(n, -1, w_k,1);
+    if (AisIdentity)
+    {
+      cblas_daxpy(m, rho, u, 1, w_k, 1);
+    }
+    else
+    {
+      NM_gemv(rho, Atrans, u, 1.0, w_k);
+    }
     DEBUG_EXPR(NV_display(w_k,n));
 
     /* Linear system solver */
@@ -217,7 +217,7 @@ void convexQP_ADMM(ConvexQP* problem, double *z, double *u, double * xsi,
     }
     else
     {
-      NM_gemv(1.0, A, z, beta, u_tmp);
+      NM_gemv(1.0, A, z, 1.0, u_tmp);
     }
     problem->ProjectionOnC(problem,u_tmp,u);
     DEBUG_EXPR(NV_display(u,m));
@@ -237,7 +237,7 @@ void convexQP_ADMM(ConvexQP* problem, double *z, double *u, double * xsi,
     }
     else
     {
-      NM_gemv(-1.0, A, z, beta, xsi);
+      NM_gemv(-1.0, A, z, 1.0, xsi);
     }
 
     cblas_daxpy(m, 1, u, 1, xsi , 1);
