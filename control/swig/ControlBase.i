@@ -14,8 +14,6 @@
 %}
 #endif
 
-%include path.i
-
 %include picklable.i
 
 %include handleException.i

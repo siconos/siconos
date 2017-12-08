@@ -1,5 +1,5 @@
 // -*- c++ -*-
-%module(package="control", directors="1", allprotected="1") sensor
+%module(package="siconos.control", directors="1", allprotected="1") sensor
 
 %include ControlBase.i
 

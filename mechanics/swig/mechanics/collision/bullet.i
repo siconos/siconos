@@ -1,6 +1,6 @@
 // -*- c++ -*-
 // SWIG interface for Siconos Mechanics/ContactDetection/Bullet
-%module(package="collision", directors="1", allprotected="1") bullet
+%module(package="siconos.mechanics.collision", directors="1", allprotected="1") bullet
 
  // serialization not yet implemented for bullet
 #undef WITH_IO

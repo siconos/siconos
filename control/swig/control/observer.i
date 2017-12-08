@@ -1,5 +1,5 @@
 // -*- c++ -*-
-%module(package="control", directors="1", allprotected="1") observer
+%module(package="siconos.control", directors="1", allprotected="1") observer
 
 %include ControlBase.i
 

@@ -19,7 +19,7 @@
 //
 
 // SWIG interface for Siconos Kernel
-%module(directors="1", allprotected="1") kernel
+%module(package="siconos", directors="1", allprotected="1") kernel
 
 %include start.i
 

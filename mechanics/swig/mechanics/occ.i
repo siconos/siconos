@@ -1,6 +1,6 @@
 // -*- c++ -*-
 // SWIG interface for Siconos Mechanics/Occ
-%module(package="mechanics", directors="1", allprotected="1") occ
+%module(package="siconos.mechanics", directors="1", allprotected="1") occ
 
 %include collision/base.i
 %include collision/native.i

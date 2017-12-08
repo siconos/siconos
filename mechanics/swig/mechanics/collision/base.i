@@ -1,6 +1,6 @@
 // -*- c++ -*-
 // SWIG interface for Siconos Mechanics/collision
-%module(package="collision", directors="1", allprotected="1") base
+%module(package="siconos.mechanics.collision", directors="1", allprotected="1") base
 
 %include MechanicsBase.i
 

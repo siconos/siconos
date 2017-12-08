@@ -1,6 +1,6 @@
 // -*- c++ -*-
 // SWIG interface for Siconos Mechanics/joints
-%module(package="mechanics", directors="1", allprotected="1") joints
+%module(package="siconos.mechanics", directors="1", allprotected="1") joints
 
 // Ignore some shadowed (redundant for Python) functions
 %ignore JointFrictionR(SP::NewtonEulerJointR, unsigned int);

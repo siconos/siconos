@@ -1,5 +1,5 @@
 // -*- c++ -*-
-%module(package="collision", directors="1", allprotected="1") native
+%module(package="siconos.mechanics.collision", directors="1", allprotected="1") native
 
 %include MechanicsBase.i
 
