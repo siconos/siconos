@@ -46,11 +46,11 @@ void convexQP_ProjectedGradient(ConvexQP* problem, double *z, double *w, int* in
 
   double* q = problem->q;
   NumericsMatrix* M = problem->M;
-
   NumericsMatrix* A = problem->A;
-  if (A)
+  
+  if (!A)
   {
-    numerics_error("ConvexQP_ProjectedGradient", "This solver does not support a specific matrix A different from the identity");
+    numerics_warning("ConvexQP_ProjectedGradient", "This solver does not support a specific matrix A different from the identity and b=0");
   }
 
   /* Dimension of the problem */

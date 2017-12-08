@@ -101,7 +101,8 @@ int convexQP_computeError(
 
 int convexQP_computeError_full(
   ConvexQP* problem,
-  double *z , double *u, double * xsi,
+  double *z , double * xi,
+  double *w , double * u,
   double tolerance,
   SolverOptions * options, double * error)
 {
@@ -109,7 +110,7 @@ int convexQP_computeError_full(
   assert(problem);
   assert(z);
   assert(u);
-  assert(xsi);
+  assert(xi);
   assert(error);
 
   int incx = 1;
@@ -136,22 +137,34 @@ int convexQP_computeError_full(
   double norm_q =problem->normConvexQP;
   DEBUG_PRINTF("norm_q = %12.8e\n", norm_q);
 
-  /* b --> u */
-  cblas_dcopy(m , problem->b , 1 , u, 1);
-
-  /* A z + b --> u */
-  NM_gemv(1.0, problem->A, z, 1.0, u);
-
   /* q --> w */
-  cblas_dcopy(n , problem->q , 1 , wtmp, 1);
+  cblas_dcopy(n , problem->q , 1 , w, 1);
 
   /* M z + q --> w */
-  NM_gemv(1.0, problem->M, z, 1.0, wtmp);
+  NM_gemv(1.0, problem->M, z, 1.0, w);
 
-  DEBUG_EXPR(NV_display(wtmp,n));
+  DEBUG_EXPR(NV_display(w,n));
 
+  /* Check that w= A^T xi */
+  /* to do  */
+  
+  if (!problem->A)
+  {
+    cblas_dcopy(n,z,1,u,1);
+  }
+  else
+  {
+    /* b --> u */
+    cblas_dcopy(m , problem->b , 1 , u, 1);
+    /* A z + b --> u */
+    NM_gemv(1.0, problem->A, z, 1.0, u);
+  }
+
+
+  /* Check that - xi \in \partial \Psi_C(u) */
+  
   cblas_dcopy(m , u , 1 , utmp, 1);
-  cblas_daxpy(m, -1.0, xsi , 1, utmp , 1) ;
+  cblas_daxpy(m, -1.0, xi , 1, utmp , 1) ;
 
   problem->ProjectionOnC(problem,utmp,utmp1);
 

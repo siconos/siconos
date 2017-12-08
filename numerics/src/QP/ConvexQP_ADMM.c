@@ -41,7 +41,9 @@
 const char* const   SICONOS_CONVEXQP_ADMM_STR = "CONVEXQP ADMM";
 
 
-void convexQP_ADMM(ConvexQP* problem, double *z, double *u, double * xsi,
+void convexQP_ADMM(ConvexQP* problem,
+                   double *z, double * w,
+                   double * xi, double *u,
                    int* info, SolverOptions* options)
 {
   /* int and double parameters */
@@ -107,15 +109,15 @@ void convexQP_ADMM(ConvexQP* problem, double *z, double *u, double * xsi,
   double * w_k;
   /* double * u_k; */
   double * u_tmp;
-  /* double * xsi_k; */
-  /* double * xsi_tmp; */
+  /* double * xi_k; */
+  /* double * xi_tmp; */
 
   /* z_k = (double *)malloc(n * sizeof(double)); */
   w_k = (double *)malloc(n * sizeof(double));
   /* u_k = (double *)calloc(m,sizeof(double)); */
   u_tmp = (double *)calloc(m,sizeof(double));
-  /* xsi_k = (double *)calloc(m,sizeof(double)); */
-  /* xsi_tmp = (double *)calloc(m,sizeof(double)); */
+  /* xi_k = (double *)calloc(m,sizeof(double)); */
+  /* xi_tmp = (double *)calloc(m,sizeof(double)); */
 
 
   /* Compute M + rho A^T A (storage in M)*/
@@ -182,11 +184,11 @@ void convexQP_ADMM(ConvexQP* problem, double *z, double *u, double * xsi,
     cblas_dcopy(n , q , 1 , w_k, 1);
 
 
-    /*  u -b + xsi_k --> u */
+    /*  u -b + xi_k --> u */
     cblas_daxpy(m, -1.0, b, 1, u , 1);
-    cblas_daxpy(m, 1.0, xsi, 1, u , 1);
+    cblas_daxpy(m, 1.0, xi, 1, u , 1);
 
-    /* rho A^T (u_k +xsi_k -b  ) - q --> w_k */
+    /* rho A^T (u_k +xi_k -b  ) - q --> w_k */
     /* for (int k =0; k< n; k++) w_k[k] = -w_k[k]; */
     cblas_dscal(n, -1, w_k,1);
     if (AisIdentity)
@@ -208,9 +210,9 @@ void convexQP_ADMM(ConvexQP* problem, double *z, double *u, double * xsi,
     /*  2 - Compute u */
     /********************/
 
-    /* A z_k - xsi_k + b */
+    /* A z_k - xi_k + b */
     cblas_dcopy(m , b , 1 , u_tmp, 1);
-    cblas_daxpy(m, -1, xsi, 1, u_tmp , 1);
+    cblas_daxpy(m, -1, xi, 1, u_tmp , 1);
     if (AisIdentity)
     {
       cblas_daxpy(m, 1.0, z, 1, u_tmp , 1);
@@ -225,30 +227,30 @@ void convexQP_ADMM(ConvexQP* problem, double *z, double *u, double * xsi,
 
 
     /**********************/
-    /*  3 - Compute xsi */
+    /*  3 - Compute xi */
     /**********************/
 
-    /* xsi_k + A z_k -u_k +b -> xsi_k */
-    cblas_daxpy(m, -1, b, 1, xsi , 1);
+    /* xi_k + A z_k -u_k +b -> xi_k */
+    cblas_daxpy(m, -1, b, 1, xi , 1);
     
     if (AisIdentity)
     {
-      cblas_daxpy(m, -1.0, z, 1, xsi , 1);
+      cblas_daxpy(m, -1.0, z, 1, xi , 1);
     }
     else
     {
-      NM_gemv(-1.0, A, z, 1.0, xsi);
+      NM_gemv(-1.0, A, z, 1.0, xi);
     }
 
-    cblas_daxpy(m, 1, u, 1, xsi , 1);
-    DEBUG_EXPR(NV_display(xsi,m));
+    cblas_daxpy(m, 1, u, 1, xi , 1);
+    DEBUG_EXPR(NV_display(xi,m));
 
     //cblas_daxpy(m,rho, u_k, 0 , w_k, 1);
     //DEBUG_EXPR(NV_display(w_k,n));
 
     /* **** Criterium convergence **** */
     //convexQP_computeError(problem, z , w_k, tolerance, options, &error);
-    convexQP_computeError_full(problem, z , u, xsi, tolerance, options, &error);
+    convexQP_computeError_full(problem, z , xi, w, u, tolerance, options, &error);
     DEBUG_EXPR(NV_display(w_k,n));
     DEBUG_EXPR(NV_display(q,n));
     if (verbose > 0)
@@ -258,7 +260,7 @@ void convexQP_ADMM(ConvexQP* problem, double *z, double *u, double * xsi,
     *info = hasNotConverged;
   }
 
-  //cblas_dscal(m, -1, xsi, 1);
+  //cblas_dscal(m, -1, xi, 1);
 
 
   //verbose=1;
@@ -271,7 +273,7 @@ void convexQP_ADMM(ConvexQP* problem, double *z, double *u, double * xsi,
   /* free(z_k); */
   free(w_k);
   /* free(u_k); */
-  /* free(xsi_k); */
+  /* free(xi_k); */
 
 }
 

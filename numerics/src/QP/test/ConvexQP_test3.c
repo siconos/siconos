@@ -86,21 +86,21 @@ int main(void)
 
 
   /* Call the callback */
-  double x[10], u[10], xsi[10], PX[10];
+  double z[10], u[10], xi[10], w[10], PX[10];
   int i, n=cqp.size;
   for (i =0; i< n ; i++)
   {
-    x[i] = i-5;
+    z[i] = i-5;
     u[i] = 0.0;
-    xsi[i] =0.0;
+    xi[i] =0.0;
   }
 
 
-  cqp.ProjectionOnC(&cqp,x,PX);
+  cqp.ProjectionOnC(&cqp,z,PX);
 
   for (i =0; i< n ; i++)
   {
-    printf("x[%i]=%f\t",i,x[i]);     printf("PX[%i]=%f\n",i,PX[i]);
+    printf("z[%i]=%f\t",i,z[i]);     printf("PX[%i]=%f\n",i,PX[i]);
   }
   for (i =0; i< n ; i++)
   {
@@ -115,17 +115,17 @@ int main(void)
   //options->iparam[0]=30;
   options->dparam[SICONOS_CONVEXQP_ADMM_RHO]=1.0;
   printf("test step 1\n");
-  convexQP_ADMM(&cqp, x, u, xsi, &info, options);
+  convexQP_ADMM(&cqp, z, w, xi, u, &info, options);
   //convexQP_ProjectedGradient(&cqp, x, w, &info, options);
 
 
   for (i =0; i< n ; i++)
   {
-    printf("x[%i]=%f\n",i,x[i]);
+    printf("z[%i]=%f\t",i,z[i]);printf("w[%i]=%f\n",i,w[i]);
   }
   for (i =0; i< cqp.m ; i++)
   {
-    printf("u[%i]=%f\t",i,u[i]); printf("xsi[%i]=%f\n",i,xsi[i]);
+    printf("u[%i]=%f\t",i,u[i]); printf("xi[%i]=%f\n",i,xi[i]);
   }
 
   solver_options_delete(options);
