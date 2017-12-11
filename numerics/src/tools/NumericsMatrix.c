@@ -1653,6 +1653,8 @@ void NM_copy(const NumericsMatrix* const A, NumericsMatrix* B)
 
       B_->index2_data = (size_t*) malloc(A_->filled2 * sizeof(size_t));
       B_->filled2 = A_->filled2;
+
+      need_blocks = 1;
     }
 
     memcpy(B_->blocksize0, A_->blocksize0, A_->blocknumber0 * sizeof(unsigned int));
