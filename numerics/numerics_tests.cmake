@@ -946,6 +946,8 @@ if(WITH_${COMPONENT}_TESTING)
  NEW_TEST(ConvexQP_test1 ConvexQP_test1.c)
  NEW_TEST(ConvexQP_test2 ConvexQP_test2.c)
  NEW_TEST(ConvexQP_test3 ConvexQP_test3.c)
+ NEW_TEST(ConvexQP_test5 ConvexQP_testFC3D2.c)
+ NEW_TEST(ConvexQP_test4 ConvexQP_testFC3D3.c)
  END_TEST()
   BEGIN_TEST(src/AVI/test)
 

@@ -122,7 +122,7 @@ void convexQP_ADMM(ConvexQP* problem,
 
   /* Compute M + rho A^T A (storage in M)*/
   NumericsMatrix *Atrans;
-  if (A)
+  if (!A)
   {
     if (M->storageType != A->storageType)
     {
@@ -302,10 +302,7 @@ int convexQP_ADMM_setDefaultSolverOptions(SolverOptions* options)
 
   options->dparam[SICONOS_DPARAM_TOL] = 1e-6;
 
-  options->dparam[SICONOS_CONVEXQP_PGOC_RHO] = -1.e-3; /* rho is variable by default */
-  options->dparam[SICONOS_CONVEXQP_PGOC_RHOMIN] = 1e-9;
-  options->dparam[SICONOS_CONVEXQP_PGOC_LINESEARCH_MU] =0.9;
-  options->dparam[SICONOS_CONVEXQP_PGOC_LINESEARCH_TAU]  = 2.0/3.0;
+  options->dparam[SICONOS_CONVEXQP_ADMM_RHO] = 1.e+2; 
 
   options->internalSolvers = NULL;
 
