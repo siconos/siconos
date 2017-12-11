@@ -69,7 +69,13 @@ def timeout(seconds, force_kill=True):
 #Some builds take really a long time
 @timeout(10000)
 def call(*args, **kwargs):
-    return check_call(*args, **kwargs)
+    try:
+        return_code = check_call(*args, **kwargs)
+    except Exception as error:
+        print(error)
+        return_code = 1
+
+    return return_code
 
 
 class CiTask():
@@ -233,9 +239,10 @@ class CiTask():
                     full_cmd = ['cmake'] + cmake_args + [full_src]
                 if not dry_run:
                     print("cmake command is: {:}".format(' '.join(full_cmd)))
-                    call(full_cmd, cwd=bdir)
+                    return_code += call(full_cmd, cwd=bdir)
                     for target in self._targets[src]:
-                        call(['make'] + ['-ki'] + [target], cwd=bdir)
+                        return_code += call(['make'] + [target], cwd=bdir)
+                        print ('return code {0}'.format(return_code))
                 else:
                     msg = 'Would call: \n  - {:}'.format(' '.join(full_cmd))
                     msg += '\n  - make - ki target, \n for target in '
@@ -245,26 +252,30 @@ class CiTask():
 
             except CalledProcessError as error:
                 return_code = 1
+                print ('CALL return code {0}'.format(return_code))
                 print(error)
 
         return return_code
 
     def clean(self):
 
+        return_code = 0
+
         for src in self._srcs:
 
             bdir = self.build_dir(src)
 
             try:
-                call(['make'] + ['docker-clean-usr-local'], cwd=bdir)
+                return_code += call(['make'] + ['docker-clean-usr-local'], cwd=bdir)
 
                 if not self._fast:
 
-                    call(['make'] + ['docker-clean'],
-                         cwd=bdir)
+                    return_code += call(['make'] + ['docker-clean'],
+                                        cwd=bdir)
 
             except CalledProcessError as error:
                     print(error)
+        return return_code
 
     def display(self):
         for attr, value in self.__dict__.items():

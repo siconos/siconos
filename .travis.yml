@@ -1,14 +1,19 @@
+#
+# this travis config is also used in Jenkins
+#
+
+
 sudo: required
 
 services:
   - docker
 
 env:
-  - TASK=siconos_fedora_latest
-  - TASK=siconos_gcc_asan
-  - TASK=siconos_gcc_asan_latest
-  - TASK=siconos_debian_mechanisms
-  - TASK=siconos_ubuntu_15_10
+  - TRAVIS_TASK=siconos_fedora_latest
+  - TRAVIS_TASK=siconos_gcc_asan
+  - TRAVIS_TASK=siconos_gcc_asan_latest
+  - TRAVIS_TASK=siconos_debian_mechanisms
+  - TRAVIS_TASK=siconos_ubuntu_15_10
   
 before_install:
   - CI/before_install.sh
@@ -18,4 +23,5 @@ before_script:
   - cd build
 
 script:
-  - ../CI/driver.py --run --root-dir=.. --task=$TASK
+  - ["$TRAVIS" = true] && ../CI/driver.py --run --root-dir=.. --task=$TRAVIS_TASK || \
+    ../CI/driver.py --run --root-dir=..

@@ -108,6 +108,8 @@ if run:
                                     targets_override=targets_override,
                                     dry_run=dry_run)
 
+            print ('return code {0}'.format(return_code))
+
         except Exception as e:
             return_code += 1
             sys.stderr.write(str(e))
@@ -115,7 +117,8 @@ if run:
     if not dry_run:
         for task in tasks:
             try:
-                task.clean()
+                return_code += task.clean()
+                print ('return code {0}'.format(return_code))
 
             except Exception as e:
                 return_code += 1
