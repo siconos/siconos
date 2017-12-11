@@ -66,12 +66,16 @@ def timeout(seconds, force_kill=True):
             return inner
         return wrapper
 
-#Some builds take really a long time
+
+# Some builds take really a long time
 @timeout(10000)
 def call(*args, **kwargs):
     try:
+
         return_code = check_call(*args, **kwargs)
-    except Exception as error:
+
+    except CalledProcessError as error:
+
         print(error)
         return_code = 1
 
@@ -242,7 +246,6 @@ class CiTask():
                     return_code += call(full_cmd, cwd=bdir)
                     for target in self._targets[src]:
                         return_code += call(['make'] + [target], cwd=bdir)
-                        print ('return code {0}'.format(return_code))
                 else:
                     msg = 'Would call: \n  - {:}'.format(' '.join(full_cmd))
                     msg += '\n  - make - ki target, \n for target in '
@@ -250,9 +253,8 @@ class CiTask():
                     msg += '\n both from path ' + bdir
                     print msg
 
-            except CalledProcessError as error:
+            except Exception as error:
                 return_code = 1
-                print ('CALL return code {0}'.format(return_code))
                 print(error)
 
         return return_code
@@ -273,8 +275,9 @@ class CiTask():
                     return_code += call(['make'] + ['docker-clean'],
                                         cwd=bdir)
 
-            except CalledProcessError as error:
+            except Exception as error:
                     print(error)
+                    
         return return_code
 
     def display(self):

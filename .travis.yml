@@ -1,19 +1,18 @@
 #
-# this travis config is also used in Jenkins
+# this travis config is also used with jenkins
 #
-
-
 sudo: required
 
-services:
-  - docker
-
 env:
-  - TRAVIS_TASK=siconos_fedora_latest
-  - TRAVIS_TASK=siconos_gcc_asan
-  - TRAVIS_TASK=siconos_gcc_asan_latest
-  - TRAVIS_TASK=siconos_debian_mechanisms
-  - TRAVIS_TASK=siconos_ubuntu_15_10
+  
+
+matrix:
+  include:
+    - service: docker
+      env: TASK=ubuntu_14_04
+    - service: docker
+      env: TASK=openblas_lapacke
+
   
 before_install:
   - CI/before_install.sh
@@ -24,7 +23,7 @@ before_script:
 
 script:
   - if test "$TRAVIS" = true; then
-      ../CI/driver.py --run --root-dir=.. --task=$TRAVIS_TASK;
+      ../CI/driver.py --run --root-dir=.. --task=siconos_$TASK;
     else
       ../CI/driver.py --run --root-dir=..;
     fi

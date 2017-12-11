@@ -54,22 +54,19 @@ siconos_default = default
 
 siconos_default_nix = default.copy()(
     ci_config='nix',
-    distrib='nixos/nix:latest',
-    targets={'.': ['docker-build', 'docker-ctest']})
-
-siconos_with_lpsolve = siconos_default.copy()(
-    add_pkgs=['lpsolve'])
+    distrib='nixos/nix:latest')
 
 siconos_debian_latest = siconos_default.copy()(
-    ci_config='with_bullet',
-    add_pkgs=['bullet', 'h5py'],  # for mechanics.io
     distrib='debian:latest')
+
+siconos_ubuntu_14_04 = siconos_default.copy()(
+    distrib='ubuntu:14.04')
 
 siconos_ubuntu_15_04 = siconos_default.copy()(
     distrib='ubuntu:15.04')
 
-siconos_ubuntu_14_04 = siconos_default.copy()(
-    distrib='ubuntu:14.04')
+siconos_ubuntu_15_10 = siconos_default.copy()(
+    distrib='ubuntu:15.10')
 
 siconos_ubuntu_16_10 = siconos_default.copy()(
     distrib='ubuntu:16.10')
@@ -77,13 +74,19 @@ siconos_ubuntu_16_10 = siconos_default.copy()(
 siconos_ubuntu_17_04 = siconos_default.copy()(
     distrib='ubuntu:17.04')
 
-siconos_ubuntu_15_10 = siconos_default.copy()(
-    distrib='ubuntu:15.10')
+siconos_ubuntu_17_10 = siconos_default.copy()(
+    distrib='ubuntu:17.10')
+
+siconos_fedora_latest = siconos_default.copy()(
+    distrib='fedora:latest')
 
 siconos_cxx_11_ubuntu_17_04 = siconos_default.copy()(
     distrib='ubuntu:17.04',
     ci_config='with_cxx11')
 
+
+siconos_with_lpsolve = siconos_default.copy()(
+    add_pkgs=['lpsolve'])
 
 import os
 from os.path import expanduser
@@ -127,7 +130,7 @@ siconos_profiling = siconos_ubuntu_17_04.copy()(
     add_pkgs=['profiling'])
 
 # note fedora/atlas-lapack in siconos.yml -> cmake does not detect blas
-siconos_fedora_latest = siconos_default.copy()(
+siconos_fedora_latest_with_umfpack = siconos_default.copy()(
     distrib='fedora:latest',
     ci_config=('with_umfpack',),
     remove_pkgs=['atlas-lapack', 'python-env'],
