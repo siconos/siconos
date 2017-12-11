@@ -3,6 +3,13 @@ sudo: required
 services:
   - docker
 
+env:
+  - TASK=siconos_fedora_latest
+  - TASK=siconos_gcc_asan
+  - TASK=siconos_gcc_asan_latest
+  - TASK=siconos_debian_mechanisms
+  - TASK=siconos_ubuntu_15_10
+  
 before_install:
   - CI/before_install.sh
 
@@ -11,4 +18,4 @@ before_script:
   - cd build
 
 script:
-  - ../CI/driver.py --run --root-dir=..
+  - ../CI/driver.py --run --root-dir=.. --task=$TASK
