@@ -109,6 +109,7 @@ if run:
                                     dry_run=dry_run)
 
         except Exception as e:
+            return_code += 1
             sys.stderr.write(str(e))
 
     if not dry_run:
@@ -117,6 +118,7 @@ if run:
                 task.clean()
 
             except Exception as e:
+                return_code += 1
                 sys.stderr.write(str(e))
 
 
