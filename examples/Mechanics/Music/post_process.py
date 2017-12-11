@@ -7,18 +7,24 @@ import numpy as np
 import os
 
 
-def compute_errors(filelist, indices=None, from_matlab=None):
+
+def compute_errors(fileslist, indices=None, from_matlab=None):
     """Compute relative error defined in 3.36 from Clara's manuscript.
     """
+    fref = max(fileslist.keys())
 
     # Load reference and current simulations,
-    reference_file = filelist[-1]
+    reference_file = fileslist[fref]
     ref_model, ref_string, ref_frets = load_model(reference_file, from_matlab)
     if indices is None:
         indices = [i for i in range(ref_string.dimension())]
     sref = ref_model.data_ds[ref_string][:, indices]
     sum_ref = (sref ** 2).sum(0)
-    nbfiles = len(filelist) - 1
+    freqs = []
+
+    files = list(fileslist.values())
+    files = [f for f in files if f != reference_file]
+    nbfiles = len(files)
     nbpoints = len(indices)
     nbtimes = sref.shape[0]
     nbfrets = len(ref_frets)
@@ -28,7 +34,7 @@ def compute_errors(filelist, indices=None, from_matlab=None):
         ymin[-1, j] = ref_model.data_interactions[ref_frets[j]][:, 0].min()
     ymin
     for i in range(nbfiles):
-        current_model, current_string, current_frets = load_model(filelist[i], from_matlab)
+        current_model, current_string, current_frets = load_model(files[i], from_matlab)
         scurrent = current_model.data_ds[current_string][:, indices]
         time_step = current_model.time_step
         for j in range(nbpoints):
@@ -37,7 +43,8 @@ def compute_errors(filelist, indices=None, from_matlab=None):
             error[i, j] = error[i, j] ** 0.5
         for j in range(nbfrets):
             ymin[i, j] = current_model.data_interactions[current_frets[j]][:, 0].min()
-    return error, ymin
+        freqs.append(current_model.fs)
+    return error, ymin, freqs
 
 
 
