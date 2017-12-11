@@ -40,6 +40,9 @@ endif()
 
 if(WITH_CXX)
   list(APPEND ${COMPONENT}_DIRS numeric_bindings boost_contribs)
+  if(NOT WITH_SYSTEM_BOOST_SERIALIZATION)
+    list(APPEND ${COMPONENT}_DIRS boost_serialization)
+  endif()
 endif()
 
 # Unstable sources. Will be included only
@@ -162,12 +165,12 @@ if(HAVE_SICONOS_MECHANICS AND WITH_RENDERER)
 
 endif()
 
-if(WITH_SERIALIZATION)
+if(WITH_SERIALIZATION AND INSTALL_EXTERNAL_HEADERS AND NOT WITH_SYSTEM_BOOST_SERIALIZATION)
   install(FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/boost_contribs/boost/serialization/unordered_collections_load_imp.hpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/boost_contribs/boost/serialization/unordered_collections_save_imp.hpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/boost_contribs/boost/serialization/unordered_map.hpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/boost_contribs/boost/serialization/unordered_set.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/boost_serialization/boost/serialization/unordered_collections_load_imp.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/boost_serialization/boost/serialization/unordered_collections_save_imp.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/boost_serialization/boost/serialization/unordered_map.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/boost_serialization/boost/serialization/unordered_set.hpp
     DESTINATION include/${PROJECT_NAME}/boost/serialization)
 endif()
 

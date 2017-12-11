@@ -247,6 +247,11 @@ ENDIF(WITH_HDF5)
 include(serialization_vector_test)
 if(WITH_SERIALIZATION)
   COMPILE_WITH(Boost 1.47 COMPONENTS serialization filesystem REQUIRED)
+  if (Boost_VERSION GREATER 106100)
+    # If boost is recent enough, prefer system boost serialization to
+    # the one included in "externals/boost_serialization".
+    set(WITH_SYSTEM_BOOST_SERIALIZATION ON)
+  endif()
   TEST_SERIALIZATION_VECTOR_BUG()
 endif()
 
