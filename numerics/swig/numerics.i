@@ -220,6 +220,7 @@ namespace std11 = boost;
 %include NonSmoothDrivers.h
 %include solverOptions.i
 %import tlsdef.h
+%include NumericsVerbose.h
 %include numerics_verbose.h
 
 // this has to die --xhub
