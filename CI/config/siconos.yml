@@ -19,12 +19,15 @@ installer:
     nixos/nix: nix-env -i
 
 updater:
-  any:
+  launchpad:
+    ubuntu-16.04: printf "deb http://ppa.launchpad.net/siconos/siconos-daily/ubuntu xenial main\ndeb-src http://ppa.launchpad.net/siconos/siconos-daily/ubuntu xenial main\ndeb http://ppa.launchpad.net/siconos/fclib-daily/ubuntu xenial main\ndeb-src http://ppa.launchpad.net/siconos/fclib-daily/ubuntu xenial main " >> /etc/apt/sources.list && apt-get update -y
+  llvm-toolchain:
     debian-sid: printf "deb http://llvm.org/apt/unstable/ llvm-toolchain-3.8 main\ndeb-src http://llvm.org/apt/unstable/ llvm-toolchain-3.8 main" >> /etc/apt/sources.list && apt-get update -y
     debian-jessie: printf "deb http://llvm.org/apt/jessie/ llvm-toolchain-jessie-3.8 main\ndeb-src http://llvm.org/apt/jessie/ llvm-toolchain-jessie-3.8 main" >> /etc/apt/sources.list && apt-get update -y
-    debian: apt-get update -y
-    ubuntu-16.04: printf "deb http://ppa.launchpad.net/siconos/siconos-daily/ubuntu xenial main\ndeb-src http://ppa.launchpad.net/siconos/siconos-daily/ubuntu xenial main\ndeb http://ppa.launchpad.net/siconos/fclib-daily/ubuntu xenial main\ndeb-src http://ppa.launchpad.net/siconos/fclib-daily/ubuntu xenial main " >> /etc/apt/sources.list && apt-get update -y
+  xhub:
     fedora:  dnf --setopt=deltarpm=false install -y dnf-plugins-core && dnf -y copr enable xhub/siconos-git
+  any:
+    debian: apt-get update -y
     nixos/nix: nix-env -qa > /tmp/nix-packages # ?
 
 ##############################################################################
@@ -79,6 +82,9 @@ env:
       - OCAML_TOPLEVEL_PATH="/root/.opam/system/lib/toplevel"
       - PATH="/root/.opam/system/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 
+  launchpad:
+    any:
+      - LAUNCHPAD=1
 
   # see http://pages.cs.wisc.edu/~ferris/path/LICENSE
   path:
