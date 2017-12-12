@@ -245,6 +245,7 @@ enum SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION_ENUM
 
 enum SICONOS_FRICTION_3D_NSN_IPARAM
 {
+
   /** index in iparam to store the strategy for computing rho */
   SICONOS_FRICTION_3D_NSN_RHO_STRATEGY = 9,
   /** index in iparam to store the formulation */
@@ -258,7 +259,12 @@ enum SICONOS_FRICTION_3D_NSN_IPARAM
   /** index in iparam to store the maximum number of loop for the hybrid solver */
   SICONOS_FRICTION_3D_NSN_HYBRID_MAX_LOOP = 15,
   /** index in iparam to store the maximum number of iterations for the projection solver */
-  SICONOS_FRICTION_3D_NSN_HYBRID_MAX_ITER = 16
+  SICONOS_FRICTION_3D_NSN_HYBRID_MAX_ITER = 16,
+  /** index in iparam to store the boolean to know if allocation of dwork is needed */
+  SICONOS_FRICTION_3D_NSN_MEMORY_ALLOCATION= 17,
+  /** index in iparam to store the boolean to know if allocation of dwork is needed */
+  SICONOS_FRICTION_3D_NSN_MPI_COM= 18
+
 };
 
 enum SICONOS_FRICTION_3D_NSN_DPARAM
