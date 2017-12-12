@@ -9,8 +9,8 @@
 %ignore  STD11::enable_shared_from_this< Hashed >;
 %template (sharedHashed) STD11::enable_shared_from_this< Hashed >;
 
-PY_FULL_REGISTER(SpaceFilter);
-PY_FULL_REGISTER(SiconosBodies);
+PY_FULL_REGISTER(SpaceFilter, Mechanics);
+PY_FULL_REGISTER(SiconosBodies, Mechanics);
 
 // ExternalBody is an astract class and serializers are not generated
 // by builder.py

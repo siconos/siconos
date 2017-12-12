@@ -3,8 +3,8 @@
 
 %include ControlBase.i
 
-PY_REGISTER_WITHOUT_DIRECTOR(Observer);
+PY_REGISTER_WITHOUT_DIRECTOR(Observer, Control);
 %include Observer.hpp
-PY_FULL_REGISTER(LuenbergerObserver);
-PY_FULL_REGISTER(SlidingReducedOrderObserver);
+PY_FULL_REGISTER(LuenbergerObserver, Control);
+PY_FULL_REGISTER(SlidingReducedOrderObserver, Control);
 

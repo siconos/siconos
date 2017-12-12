@@ -612,7 +612,7 @@ SICONOS_IO_REGISTER(Model,
   (_title))
 
 template <class Archive>
-void siconos_io_register_generated(Archive& ar)
+void siconos_io_register_generated_Kernel(Archive& ar)
 {
   ar.register_type(static_cast<SiconosException*>(NULL));
   ar.register_type(static_cast<BlockVector*>(NULL));

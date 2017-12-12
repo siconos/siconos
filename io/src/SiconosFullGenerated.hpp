@@ -1067,7 +1067,7 @@ SICONOS_IO_REGISTER(Sensor,
   (_type))
 
 template <class Archive>
-void siconos_io_register_generated(Archive& ar)
+void siconos_io_register_generated_Kernel(Archive& ar)
 {
   ar.register_type(static_cast<SiconosException*>(NULL));
   ar.register_type(static_cast<BlockVector*>(NULL));
@@ -1147,6 +1147,17 @@ void siconos_io_register_generated(Archive& ar)
   ar.register_type(static_cast<MoreauJeanOSI*>(NULL));
   ar.register_type(static_cast<EulerMoreauOSI*>(NULL));
   ar.register_type(static_cast<Model*>(NULL));
+  ar.register_type(static_cast<SphereLDSPlanR*>(NULL));
+  ar.register_type(static_cast<SphereLDSSphereLDSR*>(NULL));
+  ar.register_type(static_cast<SphereNEDSSphereNEDSR*>(NULL));
+  ar.register_type(static_cast<SphereLDS*>(NULL));
+  ar.register_type(static_cast<SphereNEDSPlanR*>(NULL));
+  ar.register_type(static_cast<FMatrix*>(NULL));
+}
+
+template <class Archive>
+void siconos_io_register_generated_Mechanics(Archive& ar)
+{
   ar.register_type(static_cast<ContactR*>(NULL));
   ar.register_type(static_cast<PivotJointR*>(NULL));
   ar.register_type(static_cast<SphereLDSPlanR*>(NULL));
@@ -1189,6 +1200,11 @@ void siconos_io_register_generated(Archive& ar)
   ar.register_type(static_cast<SiconosConvexHull*>(NULL));
   ar.register_type(static_cast<SiconosMesh*>(NULL));
   ar.register_type(static_cast<SiconosHeightMap*>(NULL));
+}
+
+template <class Archive>
+void siconos_io_register_generated_Control(Archive& ar)
+{
   ar.register_type(static_cast<ExplicitLinearSMC*>(NULL));
   ar.register_type(static_cast<LinearSMC*>(NULL));
   ar.register_type(static_cast<LuenbergerObserver*>(NULL));

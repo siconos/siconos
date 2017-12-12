@@ -3,8 +3,8 @@
 
 %include ControlBase.i
 
-PY_REGISTER_WITHOUT_DIRECTOR(Sensor);
+PY_REGISTER_WITHOUT_DIRECTOR(Sensor, Control);
 %include Sensor.hpp
-PY_FULL_REGISTER(ControlSensor);
-PY_FULL_REGISTER(LinearSensor);
+PY_FULL_REGISTER(ControlSensor, Control);
+PY_FULL_REGISTER(LinearSensor, Control);
 

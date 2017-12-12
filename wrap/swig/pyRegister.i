@@ -7,7 +7,7 @@
 
 
 // without include
-%define PY_REGISTER_WITHOUT_HEADER(TYPE)
+%define PY_REGISTER_WITHOUT_HEADER(TYPE, COMPONENT)
 %rename  (__getitem__) TYPE ## ::operator[];
 %rename  (__add__) TYPE ## ::operator+;
 %rename  (__mul__) TYPE ## ::operator*;
@@ -24,19 +24,19 @@
 %template (shared ## TYPE) STD11::enable_shared_from_this<TYPE>;
 %shared_ptr(TYPE);
 FIX_DIRECTOR_TYPEMAPS(TYPE)
-%make_picklable(TYPE, Kernel);
+%make_picklable(TYPE, COMPONENT);
 REF_PTR(TYPE)
 %enddef
 
-%define PY_REGISTER(TYPE)
+%define PY_REGISTER(TYPE, COMPONENT)
 %inline
 %{
 #include <TYPE.hpp>
 %}
-PY_REGISTER_WITHOUT_HEADER(TYPE)
+PY_REGISTER_WITHOUT_HEADER(TYPE, COMPONENT)
 %enddef
 
-%define PY_FULL_REGISTER(TYPE)
+%define PY_FULL_REGISTER(TYPE, COMPONENT)
 %inline
 %{
 #include <TYPE.hpp>
@@ -58,11 +58,11 @@ PY_REGISTER_WITHOUT_HEADER(TYPE)
 %shared_ptr(TYPE);
 FIX_DIRECTOR_TYPEMAPS(TYPE)
 %include TYPE.hpp
-%make_picklable(TYPE, Kernel);
+%make_picklable(TYPE, COMPONENT);
 REF_PTR(TYPE)
 %enddef
 
-%define PY_REGISTER_WITHOUT_DIRECTOR(TYPE)
+%define PY_REGISTER_WITHOUT_DIRECTOR(TYPE, COMPONENT)
 %inline
 %{
 #include <TYPE.hpp>
@@ -81,6 +81,6 @@ REF_PTR(TYPE)
 %shared_ptr(STD11::enable_shared_from_this<TYPE>); // warning 520 suppression
 %template (shared ## TYPE) STD11::enable_shared_from_this<TYPE>;
 %shared_ptr(TYPE);
-%make_picklable(TYPE, Kernel);
+%make_picklable(TYPE, COMPONENT);
 REF_PTR(TYPE)
 %enddef

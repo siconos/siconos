@@ -34,6 +34,8 @@ void RegisterModelObin(std::ofstream& ofs, SP::Model& model)
   boost::archive::binary_oarchive ar(ofs);
   siconos_io_register_Numerics(ar);
   siconos_io_register_Kernel(ar);
+  siconos_io_register_Mechanics(ar);
+  siconos_io_register_Control(ar);
   ar << NVP(model);
 }
 #endif

@@ -4,16 +4,16 @@
 
 %include MechanicsBase.i
 
-PY_FULL_REGISTER(CircularDS);
-PY_FULL_REGISTER(CircularR);
-PY_FULL_REGISTER(Disk);
-PY_FULL_REGISTER(Circle);
-PY_FULL_REGISTER(DiskDiskR);
-PY_FULL_REGISTER(DiskPlanR);
-PY_FULL_REGISTER(DiskMovingPlanR);
-PY_FULL_REGISTER(SphereLDS);
-PY_FULL_REGISTER(SphereNEDS);
-PY_FULL_REGISTER(SphereLDSPlanR);
-PY_FULL_REGISTER(SphereNEDSPlanR);
-PY_FULL_REGISTER(SphereLDSSphereLDSR);
-PY_FULL_REGISTER(SphereNEDSSphereNEDSR);
+PY_FULL_REGISTER(CircularDS, Mechanics);
+PY_FULL_REGISTER(CircularR, Mechanics);
+PY_FULL_REGISTER(Disk, Mechanics);
+PY_FULL_REGISTER(Circle, Mechanics);
+PY_FULL_REGISTER(DiskDiskR, Mechanics);
+PY_FULL_REGISTER(DiskPlanR, Mechanics);
+PY_FULL_REGISTER(DiskMovingPlanR, Mechanics);
+PY_FULL_REGISTER(SphereLDS, Mechanics);
+PY_FULL_REGISTER(SphereNEDS, Mechanics);
+PY_FULL_REGISTER(SphereLDSPlanR, Mechanics);
+PY_FULL_REGISTER(SphereNEDSPlanR, Mechanics);
+PY_FULL_REGISTER(SphereLDSSphereLDSR, Mechanics);
+PY_FULL_REGISTER(SphereNEDSSphereNEDSR, Mechanics);

@@ -7,15 +7,15 @@
 
 %include MechanicsBase.i
 
-PY_FULL_REGISTER(NewtonEulerJointR); // Abstract
-PY_FULL_REGISTER(KneeJointR);
-PY_FULL_REGISTER(PivotJointR);
-PY_FULL_REGISTER(PrismaticJointR);
-PY_FULL_REGISTER(FixedJointR);
-PY_FULL_REGISTER(CylindricalJointR);
-PY_FULL_REGISTER(CouplerJointR);
-PY_FULL_REGISTER(JointStopR);
-PY_FULL_REGISTER(JointFrictionR);
+PY_FULL_REGISTER(NewtonEulerJointR, Mechanics); // Abstract
+PY_FULL_REGISTER(KneeJointR, Mechanics);
+PY_FULL_REGISTER(PivotJointR, Mechanics);
+PY_FULL_REGISTER(PrismaticJointR, Mechanics);
+PY_FULL_REGISTER(FixedJointR, Mechanics);
+PY_FULL_REGISTER(CylindricalJointR, Mechanics);
+PY_FULL_REGISTER(CouplerJointR, Mechanics);
+PY_FULL_REGISTER(JointStopR, Mechanics);
+PY_FULL_REGISTER(JointFrictionR, Mechanics);
 
 %inline
 %{

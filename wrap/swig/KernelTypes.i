@@ -137,7 +137,7 @@
 
 #undef PY_REGISTER_WITHOUT_DIRECTOR
 
-%define PY_REGISTER_WITHOUT_DIRECTOR(TYPE)
+%define PY_REGISTER_WITHOUT_DIRECTOR(TYPE, COMPONENT)
 %inline
 %{
 #include "TYPE.hpp"
@@ -156,7 +156,7 @@
 %shared_ptr(STD11::enable_shared_from_this<TYPE>); // warning 520 suppression
 %template (shared ## TYPE) STD11::enable_shared_from_this<TYPE>;
 %shared_ptr(TYPE);
-%make_picklable(TYPE, Kernel);
+%make_picklable(TYPE, COMPONENT);
 REF_PTR(TYPE);
 %enddef
 
@@ -185,10 +185,10 @@ REF_PTR(TYPE);
 //
 
 
-PY_REGISTER_WITHOUT_DIRECTOR(SiconosMatrix);
-PY_REGISTER_WITHOUT_DIRECTOR(SimpleMatrix);
-PY_REGISTER_WITHOUT_DIRECTOR(SiconosVector);
-PY_REGISTER_WITHOUT_DIRECTOR(BlockVector);
+PY_REGISTER_WITHOUT_DIRECTOR(SiconosMatrix, Kernel);
+PY_REGISTER_WITHOUT_DIRECTOR(SimpleMatrix, Kernel);
+PY_REGISTER_WITHOUT_DIRECTOR(SiconosVector, Kernel);
+PY_REGISTER_WITHOUT_DIRECTOR(BlockVector, Kernel);
 
 // set the base of the pyarray to a PyCapsule or PyCObject created from the shared_ptr
 %{
