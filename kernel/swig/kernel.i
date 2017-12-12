@@ -238,45 +238,7 @@ typedef __mpz_struct mpz_t[1];
 
 
 
-%inline
-%{
 
-  /* Note: without the PyCObject stuff the python
-   * wrapper fail on this, the numpy vector points on a deleted
-   * memory!*/
-
-  const SP::SiconosVector getVector(SP::SiconosVector v)
-  {
-    return v;
-  };
-
-  const SP::SiconosMatrix getMatrix(SP::SiconosMatrix v)
-  {
-    return v;
-  };
-
-  /* to make swig define SWIGTYPE_p_PyArrayObject */
-  const PyArrayObject* getVector(PyArrayObject* v)
-  {
-    return v;
-  };
-
-  SP::NewtonImpactFrictionNSL cast_NewtonImpactFrictionNSL(SP::NonSmoothLaw nslaw)
-  {
-    return std11::dynamic_pointer_cast<NewtonImpactFrictionNSL>(nslaw);
-  }
-
-  SP::RelayNSL cast_RelayNSL(SP::NonSmoothLaw nslaw)
-  {
-    return std11::dynamic_pointer_cast<RelayNSL>(nslaw);
-  }
-
-  SP::NewtonImpactNSL cast_NewtonImpactNSL(SP::NonSmoothLaw nslaw)
-  {
-    return std11::dynamic_pointer_cast<NewtonImpactNSL>(nslaw);
-  }
-
-%}
 
 //namespace std {
 
@@ -325,4 +287,52 @@ KERNEL_REGISTRATION()
 
 %fragment("StdMapTraits");
 
+%inline
+%{
 
+  /* Note: without the PyCObject stuff the python
+   * wrapper fail on this, the numpy vector points on a deleted
+   * memory!*/
+
+  const SP::SiconosVector getVector(SP::SiconosVector v)
+  {
+    return v;
+  };
+
+  const SP::SiconosMatrix getMatrix(SP::SiconosMatrix v)
+  {
+    return v;
+  };
+
+  /* to make swig define SWIGTYPE_p_PyArrayObject */
+  const PyArrayObject* getVector(PyArrayObject* v)
+  {
+    return v;
+  };
+
+  SP::NewtonImpactFrictionNSL cast_NewtonImpactFrictionNSL(SP::NonSmoothLaw nslaw)
+  {
+    return std11::dynamic_pointer_cast<NewtonImpactFrictionNSL>(nslaw);
+  }
+
+  SP::RelayNSL cast_RelayNSL(SP::NonSmoothLaw nslaw)
+  {
+    return std11::dynamic_pointer_cast<RelayNSL>(nslaw);
+  }
+
+  SP::NewtonImpactNSL cast_NewtonImpactNSL(SP::NonSmoothLaw nslaw)
+  {
+    return std11::dynamic_pointer_cast<NewtonImpactNSL>(nslaw);
+  }
+
+  SP::NewtonEulerDS cast_NewtonEulerDS(SP::DynamicalSystem ds)
+  {
+    return std11::dynamic_pointer_cast<NewtonEulerDS>(ds);
+  }
+
+  SP::LagrangianDS cast_LagrangianDS(SP::DynamicalSystem ds)
+  {
+    return std11::dynamic_pointer_cast<LagrangianDS>(ds);
+  }
+
+%}
