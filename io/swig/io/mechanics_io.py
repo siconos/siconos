@@ -2060,7 +2060,7 @@ class Hdf5():
                                       translation=translation,
                                       orientation=orientation,
                                       velocity=velocity,
-                                      birth=True)
+                                      birth=False)
 
             # import nslaws
             # note: no time of birth for nslaws and joints
