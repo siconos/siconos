@@ -148,7 +148,7 @@ siconos_clang = siconos_ubuntu_17_04.copy()(
 siconos_clang_asan = siconos_clang.copy()(
     ci_config=('with_asan_clang', 'with_mumps', 'with_hdf5', 'with_serialization', 'with_py3'),
     add_pkgs=['mumps', 'hdf5', 'serialization'],
-    build_configuration='Debug',)
+    build_configuration='Debug')
 
 # <clang-3.7.1 does not support linux 4.2
 # This will likely hurt you

@@ -87,17 +87,21 @@ class CiTask():
     def __init__(self,
                  mode='Continuous',
                  build_configuration='Release',
+                 docker=True,
                  distrib=None,
                  ci_config=None,
                  fast=True,
                  pkgs=None,
                  srcs=None,
                  targets=None,
-                 cmake_cmd=None,
+                 cmake_cmd='cmake',
+                 make_cmd='make',
+                 cmake_args=[],
                  directories=[]):
         """Create a task, see examples in tasks.py.
         """
 
+        self._docker = docker
         self._fast = fast
         self._distrib = distrib
         self._mode = mode
@@ -107,6 +111,8 @@ class CiTask():
         self._srcs = srcs
         self._targets = targets
         self._cmake_cmd = cmake_cmd
+        self._make_cmd = make_cmd
+        self._cmake_args = cmake_args
         self._directories = directories
 
     def build_dir(self, src):
@@ -129,11 +135,14 @@ class CiTask():
          duplicate a task and possibly extend configuration of the result.
         """
         def init(mode=self._mode,
+                 docker=self._docker,
                  build_configuration=self._build_configuration,
                  distrib=self._distrib,
                  ci_config=self._ci_config, fast=self._fast, pkgs=self._pkgs,
                  srcs=self._srcs, targets=self._targets,
                  cmake_cmd=self._cmake_cmd,
+                 make_cmd=self._make_cmd,
+                 cmake_args=self._cmake_args,
                  add_directories=None,
                  add_pkgs=None, remove_pkgs=None, add_srcs=None,
                  remove_srcs=None, add_targets=None, remove_targets=None):
@@ -165,8 +174,13 @@ class CiTask():
             else:
                 directories = self._directories
 
-            return CiTask(mode, build_configuration, distrib, ci_config, fast,
-                          pkgs, srcs, targets, cmake_cmd, directories)
+            return CiTask(mode=mode, build_configuration=build_configuration,
+                          docker=docker,
+                          distrib=distrib, ci_config=ci_config, fast=fast,
+                          pkgs=pkgs, srcs=srcs, targets=targets, cmake_cmd=cmake_cmd,
+                          cmake_args=cmake_args,
+                          make_cmd=make_cmd,
+                          directories=directories)
         return init
 
     def run(self, root_dir, targets_override=None, dry_run=False):
@@ -205,22 +219,25 @@ class CiTask():
                 ci_config_args = ','.join(self._ci_config)
 
             # --- List of arguments for cmake command ---
-            cmake_args = ['-DMODE={0}'.format(self._mode),
-                          '-DCI_CONFIG={0}'.format(ci_config_args),
-                          '-DWITH_DOCKER=1',
-                          '-DBUILD_CONFIGURATION={0}'.format(
-                              self._build_configuration),
-                          '-DDOCKER_DISTRIB={0}'.format(self._distrib),
-                          '-DDOCKER_TEMPLATES={0}'.format(self.templates()),
-                          '-DDOCKER_TEMPLATE={0}'.format('-'.join(templ_list)),
-                          '-DDOCKER_PROJECT_SOURCE_DIR={0}'.format(full_src)]
+            cmake_args = self._cmake_args
+            if self._docker:
+                cmake_args += ['-DMODE={0}'.format(self._mode),
+                               '-DCI_CONFIG={0}'.format(ci_config_args),
+                               '-DWITH_DOCKER=1',
+                               '-DBUILD_CONFIGURATION={0}'.format(
+                                   self._build_configuration),
+                               '-DDOCKER_DISTRIB={0}'.format(self._distrib),
+                               '-DDOCKER_TEMPLATES={0}'.format(self.templates()),
+                               '-DDOCKER_TEMPLATE={0}'.format('-'.join(templ_list)),
+                               '-DDOCKER_PROJECT_SOURCE_DIR={0}'.format(full_src)]
 
-            if self._directories is not None:
+
+            if self._docker and self._directories is not None:
                 cmake_args.append('-DDOCKER_SHARED_DIRECTORIES={0}'.format(
                     ';'.join(self._directories)))
 
             # for examples ..
-            if not os.path.samefile(root_dir, full_src):
+            if self._docker and not os.path.samefile(root_dir, full_src):
                 cmake_args.append('-DDOCKER_SHARED_DIRECTORIES={:}'.format(
                     root_dir))
 
@@ -228,24 +245,20 @@ class CiTask():
             # not generic, to be moved somewhere else
             #
             # probably broken
-            if self._cmake_cmd:
-                src_absolute_dir = os.path.normpath(
-                    os.path.abspath(__file__) + '../../../..')
-                cmake_args += [
-                    '-DDOCKER_CMAKE_WRAPPER={:}/{:}'.format(src_absolute_dir,
-                                                            self._cmake_cmd)]
-
             try:
                 if os.path.exists(os.path.join(full_src, 'CI')):
-                    full_cmd = ['cmake'] + cmake_args + [os.path.join(full_src,
-                                                                      'CI')]
+                    if self._docker:
+                        full_cmd = [self._cmake_cmd] + cmake_args + [os.path.join(full_src,
+                                                                          'CI')]
+                    else:
+                        full_cmd = [self._cmake_cmd] + cmake_args + [full_src] 
                 else:
-                    full_cmd = ['cmake'] + cmake_args + [full_src]
+                    full_cmd = [self._cmake_cmd] + cmake_args + [full_src]
                 if not dry_run:
                     print("cmake command is: {:}".format(' '.join(full_cmd)))
                     return_code += call(full_cmd, cwd=bdir)
                     for target in self._targets[src]:
-                        return_code += call(['make'] + [target], cwd=bdir)
+                        return_code += call([self._make_cmd] + [target], cwd=bdir)
                 else:
                     msg = 'Would call: \n  - {:}'.format(' '.join(full_cmd))
                     msg += '\n  - make - ki target, \n for target in '
@@ -268,11 +281,11 @@ class CiTask():
             bdir = self.build_dir(src)
 
             try:
-                return_code += call(['make'] + ['docker-clean-usr-local'], cwd=bdir)
+                return_code += call([self._make_cmd] + ['docker-clean-usr-local'], cwd=bdir)
 
                 if not self._fast:
 
-                    return_code += call(['make'] + ['docker-clean'],
+                    return_code += call([self._make_cmd] + ['docker-clean'],
                                         cwd=bdir)
 
             except Exception as error:
