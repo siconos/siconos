@@ -22,7 +22,16 @@ database = os.path.join('config', 'siconos.yml')
 #
 # 2. the default task
 #
+base = CiTask(
+    ci_config='default',
+    pkgs=['build-base', 'gcc', 'gfortran', 'gnu-c++', 'atlas-lapack',
+          'python-env'],
+    srcs=['.'],
+    targets={'.': ['all', 'test']})
+
+
 default = CiTask(
+    docker=True,
     ci_config='default',
     distrib='ubuntu:16.04',
     pkgs=['build-base', 'gcc', 'gfortran', 'gnu-c++', 'atlas-lapack',
@@ -31,6 +40,7 @@ default = CiTask(
     targets={'.': ['docker-build', 'docker-ctest']})
 
 minimal = CiTask(
+    docker=True,
     ci_config='minimal',
     distrib='ubuntu:16.10',
     pkgs=['build-base', 'gcc', 'gfortran', 'gnu-c++',
@@ -39,6 +49,7 @@ minimal = CiTask(
     targets={'.': ['docker-build', 'docker-ctest']})
 
 minimal_with_python = CiTask(
+    docker=True,
     ci_config='minimal_with_python',
     distrib='ubuntu:16.10',
     pkgs=['build-base', 'gcc', 'gfortran', 'gnu-c++',
@@ -148,7 +159,7 @@ siconos_clang = siconos_ubuntu_17_04.copy()(
 siconos_clang_asan = siconos_clang.copy()(
     ci_config=('with_asan_clang', 'with_mumps', 'with_hdf5', 'with_serialization', 'with_py3'),
     add_pkgs=['mumps', 'hdf5', 'serialization'],
-    build_configuration='Debug')
+    build_configuration='Debug',)
 
 # <clang-3.7.1 does not support linux 4.2
 # This will likely hurt you
@@ -219,12 +230,14 @@ siconos_all_examples = minimal_with_python.copy()(
     add_srcs=['examples'])
 
 siconos_test_deb = CiTask(
+    docker=True,
     ci_config='examples',
     distrib='ubuntu:16.04',
     pkgs=['siconos'],
     srcs=['examples'])
 
 siconos_test_rpm = CiTask(
+    docker=True,
     ci_config='examples',
     distrib='fedora:latest',
     pkgs=['siconos'],

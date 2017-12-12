@@ -87,7 +87,7 @@ class CiTask():
     def __init__(self,
                  mode='Continuous',
                  build_configuration='Release',
-                 docker=True,
+                 docker=False,
                  distrib=None,
                  ci_config=None,
                  fast=True,
@@ -119,11 +119,18 @@ class CiTask():
         """Return a name
         depending on src, distrib and task name
         """
+        if self._distrib is None:
+            assert self._docker is False
+            import platform
+            distrib = platform.platform()
+        else:
+            distrib = self._distrib
+            
         if isinstance(self._ci_config, str):
             ci_config_name = self._ci_config
         else:
             ci_config_name = '-'.join(self._ci_config)
-        return ('build-' + src.replace('.', '-') + self._distrib.replace(':', '-') + '-' +
+        return ('build-' + src.replace('.', '-') + distrib.replace(':', '-') + '-' +
                 ci_config_name).replace('/', '-')
 
     def templates(self):
@@ -150,6 +157,16 @@ class CiTask():
             # WARNING: remember that default arg are mutable in python
             # http://docs.python-guide.org/en/latest/writing/gotchas/
 
+            new_targets = dict()
+            
+            if type(targets) == list:
+                for src in self._targets.keys():
+                    new_targets[src] = targets
+
+            else:
+                assert type(targets) == dict
+                new_targets = targets
+                    
             if add_pkgs is not None:
                 pkgs = self._pkgs + add_pkgs
 
@@ -163,11 +180,13 @@ class CiTask():
                 srcs = list(filter(lambda p: p not in remove_srcs, srcs))
 
             if add_targets is not None:
-                targets = self._targets + add_targets
+                for src in self._targets.keys():
+                    new_targets[src] += add_targets
 
             if remove_targets is not None:
-                targets = list(
-                    filter(lambda p: p not in remove_targets, targets))
+                for src in self._targets.keys():
+                    new_targets[src] = list(
+                        filter(lambda p: p not in remove_targets, self._targets[src]))
 
             if add_directories is not None:
                 directories = self._directories + add_directories
@@ -177,21 +196,19 @@ class CiTask():
             return CiTask(mode=mode, build_configuration=build_configuration,
                           docker=docker,
                           distrib=distrib, ci_config=ci_config, fast=fast,
-                          pkgs=pkgs, srcs=srcs, targets=targets, cmake_cmd=cmake_cmd,
+                          pkgs=pkgs, srcs=srcs, targets=new_targets, cmake_cmd=cmake_cmd,
                           cmake_args=cmake_args,
                           make_cmd=make_cmd,
                           directories=directories)
         return init
 
-    def run(self, root_dir, targets_override=None, dry_run=False):
+    def run(self, root_dir, dry_run=False):
 
         return_code = 0
 
         for src in self._srcs:
             # --- Path to CMakeLists.txt ---
             full_src = os.path.join(root_dir, src)
-            if targets_override is not None:
-                self._targets[src] = targets_override
 
             # --- Create build dir for src config ---
             bdir = self.build_dir(src)
@@ -241,10 +258,6 @@ class CiTask():
                 cmake_args.append('-DDOCKER_SHARED_DIRECTORIES={:}'.format(
                     root_dir))
 
-            #
-            # not generic, to be moved somewhere else
-            #
-            # probably broken
             try:
                 if os.path.exists(os.path.join(full_src, 'CI')):
                     if self._docker:
@@ -261,7 +274,7 @@ class CiTask():
                         return_code += call([self._make_cmd] + [target], cwd=bdir)
                 else:
                     msg = 'Would call: \n  - {:}'.format(' '.join(full_cmd))
-                    msg += '\n  - make - ki target, \n for target in '
+                    msg += '\n  - make target, \n for target in '
                     msg += '{:}'.format(' '.join(self._targets[src]))
                     msg += '\n both from path ' + bdir
                     print msg
@@ -281,12 +294,13 @@ class CiTask():
             bdir = self.build_dir(src)
 
             try:
-                return_code += call([self._make_cmd] + ['docker-clean-usr-local'], cwd=bdir)
+                if self._docker:
+                    return_code += call([self._make_cmd] + ['docker-clean-usr-local'], cwd=bdir)
 
-                if not self._fast:
+                    if not self._fast:
 
-                    return_code += call([self._make_cmd] + ['docker-clean'],
-                                        cwd=bdir)
+                        return_code += call([self._make_cmd] + ['docker-clean'],
+                                            cwd=bdir)
 
             except Exception as error:
                     print(error)

@@ -23,7 +23,7 @@ def usage():
 
 try:
     opts, args = gnu_getopt(sys.argv[1:], 'v',
-                            ['run', 'tasks=', 'list-tasks', 'targets=',
+                            ['run', 'task=', 'list-tasks', 'targets=',
                              'root-dir=',
                              'print=', 'brutal-docker-clean', 'dry-run'])
 
@@ -32,8 +32,7 @@ except GetoptError as err:
     usage()
     exit(2)
 
-tasks = None
-targets_override = None
+task = None
 verbose = False
 run = False
 return_code = 0
@@ -50,9 +49,30 @@ for o, a in opts:
     if o in ('--root-dir',):
         root_dir = os.path.abspath(a)
 
-    if o in ('--tasks',):
+    if o in ('--task',):
         import tasks
-        tasks = [getattr(tasks, s) for s in a.split(',')]
+        def arg_check(kv):
+            k=kv[0]
+            v=kv[1]
+            if k[-1] == '+':
+                k = 'add_{0}'.format(str(k[:-1]))
+
+            elif k[-1] == '-':
+                k = 'remove_{0}'.format(str(k[:-1]))
+
+            if v.lower() in ['false','off']:
+                return k,False
+            elif v.lower() in ['true','on']:
+                return k,True
+            elif ',' in v:
+                l = list(filter(lambda s: s != '', v.split(',')))
+                return k,l
+            else:
+                return k,v
+        task_arg = a.split(':')
+        task_name = task_arg[0]
+        task_parameters = {k:v for k,v in [arg_check(x.split('=')) for x in task_arg[1:]]}
+        task = getattr(tasks, task_name).copy()(**task_parameters)
 
     if o in ('--list-tasks',):
         import tasks
@@ -68,21 +88,21 @@ for o, a in opts:
         print_mode = True
         output_mode_str = a
 
-    if o in ('--targets',):
-        targets_override = a.split(',')
-
     if o in ('--dry-run',):
         dry_run = True
 
 
 hostname = gethostname().split('.')[0]
 
-if tasks is None:
+if task is None:
 
     if hostname in known_tasks:
         tasks = known_tasks[hostname]
     else:
         tasks = [default]
+else:
+    tasks = [task]
+
 
 if print_mode:
 
@@ -102,23 +122,18 @@ if print_mode:
 if run:
 
     for task in tasks:
-        try:
 
-            return_code += task.run(root_dir,
-                                    targets_override=targets_override,
-                                    dry_run=dry_run)
+        return_code += task.run(root_dir,
+                                dry_run=dry_run)
 
-            print ('return code {0}'.format(return_code))
+        print('return code {0}'.format(return_code))
 
-        except Exception as e:
-            return_code += 1
-            sys.stderr.write(str(e))
 
     if not dry_run:
         for task in tasks:
             try:
                 return_code += task.clean()
-                print ('return code {0}'.format(return_code))
+                print('return code {0}'.format(return_code))
 
             except Exception as e:
                 return_code += 1
