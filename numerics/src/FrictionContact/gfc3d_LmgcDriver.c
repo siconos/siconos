@@ -200,11 +200,13 @@ int gfc3d_LmgcDriver(double *reaction,
   assert(!infi);
   int iSize_min = isize < numerics_solver_options.iSize ? isize : numerics_solver_options.iSize;
   DEBUG_PRINTF("iSize_min = %i", iSize_min);
-  for (int i = 0; i < iSize_min; ++i) 
-    numerics_solver_options.iparam[i] = iparam[i];
+  for (int i = 0; i < iSize_min; ++i)
+    if (abs(iparam[i])>0)
+      numerics_solver_options.iparam[i] = iparam[i];
 
   int dSize_min = dsize <  numerics_solver_options.dSize ? dsize : numerics_solver_options.dSize;
   for (int i=0; i < dSize_min; ++i)
+    if (fabs(dparam[i]) > 0)
     numerics_solver_options.dparam[i] = dparam[i];
 
   /* solver_options_print(&numerics_solver_options); */
