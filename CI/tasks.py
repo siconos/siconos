@@ -19,16 +19,17 @@ import os
 # Used in driver.py.
 database = os.path.join('config', 'siconos.yml')
 
-#
-# 2. the default task
-#
-base = CiTask(
+empty = CiTask()
+
+base = empty.copy()(
     ci_config='default',
     pkgs=['build-base', 'gcc', 'gfortran', 'gnu-c++', 'atlas-lapack',
           'python-env'],
     srcs=['.'],
     targets={'.': ['all', 'test']})
-
+#
+# 2. the default task
+#
 
 default = CiTask(
     docker=True,

@@ -125,7 +125,7 @@ class CiTask():
             distrib = platform.platform()
         else:
             distrib = self._distrib
-            
+
         if isinstance(self._ci_config, str):
             ci_config_name = self._ci_config
         else:
@@ -161,12 +161,13 @@ class CiTask():
             new_targets = dict()
 
             new_distrib = None
-            
+
             if type(distrib) == list:
                 new_distrib = ':'.join(distrib)
             else:
-                assert type(distrib) == str
-                new_distrib = distrib
+                if distrib is not None:
+                    assert type(distrib) == str
+                    new_distrib = distrib
 
             if type(targets) == list:
                 for src in self._targets.keys():
@@ -175,7 +176,7 @@ class CiTask():
             else:
                 assert type(targets) == dict
                 new_targets = targets
-                    
+
             if add_pkgs is not None:
                 pkgs = self._pkgs + add_pkgs
 
@@ -273,7 +274,7 @@ class CiTask():
                         full_cmd = [self._cmake_cmd] + cmake_args + [os.path.join(full_src,
                                                                           'CI')]
                     else:
-                        full_cmd = [self._cmake_cmd] + cmake_args + [full_src] 
+                        full_cmd = [self._cmake_cmd] + cmake_args + [full_src]
                 else:
                     full_cmd = [self._cmake_cmd] + cmake_args + [full_src]
                 if not dry_run:
@@ -286,7 +287,7 @@ class CiTask():
                     msg += '\n  - make target, \n for target in '
                     msg += '{:}'.format(' '.join(self._targets[src]))
                     msg += '\n both from path ' + bdir
-                    print msg
+                    print (msg)
 
             except Exception as error:
                 return_code = 1
@@ -313,7 +314,7 @@ class CiTask():
 
             except Exception as error:
                     print(error)
-                    
+
         return return_code
 
     def display(self):

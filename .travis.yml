@@ -7,16 +7,25 @@ service: docker
 
 language: python
 
+python: 3.6
+
 matrix:
   include:
+    - env: TASK=base:docker=true:distrib=ubuntu,14.04:targets=all,test
+    - env: TASK=siconos_ubuntu_15_04
+    - env: TASK=siconos_ubuntu_16_04
+    - env: TASK=siconos_ubuntu_17_04
+    - env: TASK=siconos_ubuntu_17_10
+    - env: TASK=siconos_debian_latest
+    - env: TASK=siconos_fedora_latest
     - env:
-        - TASK=siconos_default:docker=false:distrib=ubuntu,14.04:targets=all,
+        - TASK=siconos_default:docker=false:distrib=ubuntu,14.04:targets=all,test
         - CXX=g++-4.9
         - CC=gcc-4.9
         - FC=gfortran-4.9
         
       os: linux
-      python: "3.6"
+      python: "2.7"
       addons:
         apt:
           sources:
@@ -33,11 +42,18 @@ matrix:
             - libatlas-dev
             - g++-4.9
             - gfortran-4.9
-    - env:
-      - TASK=siconos_openblas_lapacke
-
+    
       
 before_script:
+  - case $TASK in
+      *docker=false*)
+        pip install lxml;
+        pip install scipy
+        ;;
+      *)
+        pip install pyyaml
+        ;;
+    esac
   - mkdir -p build
   - cd build
 
@@ -47,3 +63,6 @@ script:
     else
       ../CI/driver.py --run --root-dir=..;
     fi
+
+
+myentry: hello

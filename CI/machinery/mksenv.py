@@ -40,6 +40,8 @@ def is_list(a):
 def is_dict(a):
     return isinstance(a, dict)
 
+def is_str(a):
+    return isinstance(a, str)
 
 def is_atom(a):
     return not (hasattr(a, '__iter__'))
@@ -123,7 +125,7 @@ def pkg_entries(spec=None, distrib=None, distrib_version=None, pkg=None):
         return [result]
     else:
 
-        if is_atom(result):
+        if is_str(result):
             result = [result]
         r = list()
 
