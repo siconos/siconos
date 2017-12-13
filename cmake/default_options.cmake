@@ -21,7 +21,7 @@ option(WITH_SYSTEM_INFO "Verbose mode to get some system/arch details. Default =
 option(WITH_TESTING "Enable 'make test' target" OFF)
 option(WITH_GIT "Consider sources are under GIT" OFF)
 option(WITH_SERIALIZATION "Compilation of serialization functions. Default = OFF" OFF)
-option(WITH_GENERATION "Generation of serialization functions with gccxml. Default = OFF" OFF)
+option(WITH_GENERATION "Generation of serialization functions with doxygen XML. Default = OFF" OFF)
 option(WITH_CXX "Enable CXX compiler for numerics. Default = ON" ON)
 option(WITH_UNSTABLE "Enable this to include all 'unstable' sources. Default=OFF" OFF)
 option(BUILD_SHARED_LIBS "Building of shared libraries. Default = ON" ON)
