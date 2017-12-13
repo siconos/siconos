@@ -160,7 +160,7 @@ void gfc3d_VI_FixedPointProjection(GlobalFrictionContactProblem* problem,
 
   if (verbose > 0)
   {
-    printf("--------------- FC3D - VI Extra Gradient (VI_EG) - #Iteration %i Final Residual = %14.7e\n", iter, error);
+    printf("--------------- GFC3D - VI Extra Gradient (VI_EG) - #Iteration %i Final Residual = %14.7e\n", iter, error);
   }
   free(vi);
 
