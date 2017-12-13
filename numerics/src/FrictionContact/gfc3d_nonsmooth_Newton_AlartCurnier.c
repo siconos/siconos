@@ -442,6 +442,10 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(
     printf("---- GFC3D - _nonsmooth_Newton_AlartCurnier - Start with tolerance = %g\n", tolerance);
 
 
+
+  DEBUG_PRINTF("norm of M = %e\n", NM_norm(problem->M));
+  DEBUG_PRINTF("norm of H = %e\n", NM_norm(problem->H));
+
   /* sparse triplet storage */
   NM_triplet(problem->M);
   NM_triplet(problem->H);
@@ -687,8 +691,6 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(
     /* line search */
 
     double alpha = 1.0;
-    /* double alpha = 1.0-1e-13; */
-    
     int info_ls = 0;
 
     switch (options->iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH])
