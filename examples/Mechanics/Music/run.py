@@ -31,10 +31,9 @@ if __name__ == "__main__":
     assert fs > 14000.
     # lower frequencies require quadruple prec for exp computation.
 
-    final_time = 1.
+    final_time = 0.4
     number_of_modes = 862
     filt_frets = True
-    print("OKOKOK restit", restit)
     # Data (from_matlab parameter), choose between:
     # - bass_guitar/pb2 : bass with frets
     # - fretless_bass_guitar/bsf
