@@ -6,18 +6,30 @@ sudo: required
 service: docker
 
 before_install:
-  - CI/before_install.sh
+    - CI/before_install.sh
 
-env:
-  - TASK=siconos_default:docker=false:distrib=ubuntu,14.04
-  - TASK=siconos_openblas_lapacke
+matrix:
+  include:
+    - env:
+      - TASK=siconos_default:docker=false:distrib=ubuntu,14.04:targets=all,
+      os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+
+          packages:
+            - g++-4.9
+            - gfortran-4.9
+    - env:
+      - TASK=siconos_openblas_lapacke
 
 before_script:
   - mkdir -p build
   - cd build
   - case $TASK in
        *docker=false*)
-         ../CI/driver.py --run --root-dir=.. --task=$TASK --print=script > /tmp/install_pkgs;
+         ../CI/driver.py --root-dir=.. --task=$TASK --print=script > /tmp/install_pkgs;
          chmod 755 /tmp/install_pkgs;
          cat /tmp/install_pkgs;
          /tmp/install_pkgs;;
