@@ -17,11 +17,10 @@ before_script:
   - cd build
   - case $TASK in
        *docker=false*)
-         ../CI/driver.py --run --root-dir=.. --task=$TASK --print=script > /tmp/install_pkgs
-         chmod 755 /tmp/install_pkgs
-         cat /tmp/install_pkgs
-         /tmp/install_pkgs
-         ;;
+         ../CI/driver.py --run --root-dir=.. --task=$TASK --print=script > /tmp/install_pkgs;
+         chmod 755 /tmp/install_pkgs;
+         cat /tmp/install_pkgs;
+         /tmp/install_pkgs;;
     esac
        
 
