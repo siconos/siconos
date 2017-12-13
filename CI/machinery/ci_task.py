@@ -154,11 +154,20 @@ class CiTask():
                  add_pkgs=None, remove_pkgs=None, add_srcs=None,
                  remove_srcs=None, add_targets=None, remove_targets=None):
 
+
             # WARNING: remember that default arg are mutable in python
             # http://docs.python-guide.org/en/latest/writing/gotchas/
 
             new_targets = dict()
+
+            new_distrib = None
             
+            if type(distrib) == list:
+                new_distrib = ':'.join(distrib)
+            else:
+                assert type(distrib) == str
+                new_distrib = distrib
+
             if type(targets) == list:
                 for src in self._targets.keys():
                     new_targets[src] = targets
@@ -195,7 +204,7 @@ class CiTask():
 
             return CiTask(mode=mode, build_configuration=build_configuration,
                           docker=docker,
-                          distrib=distrib, ci_config=ci_config, fast=fast,
+                          distrib=new_distrib, ci_config=ci_config, fast=fast,
                           pkgs=pkgs, srcs=srcs, targets=new_targets, cmake_cmd=cmake_cmd,
                           cmake_args=cmake_args,
                           make_cmd=make_cmd,
