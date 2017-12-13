@@ -2914,3 +2914,26 @@ size_t NM_nnz(const NumericsMatrix* M)
     return SIZE_MAX;
   }
 }
+
+
+
+double NM_norm(NumericsMatrix* A)
+{
+  assert(A);
+
+
+  switch (A->storageType)
+  {
+
+  case NM_SPARSE:
+  {
+    assert(A->storageType == NM_SPARSE);
+
+    return cs_norm(NM_csc(A));
+  }
+  default:
+    {
+      assert(0 && "NM_norm unknown storageType");
+    }
+  }
+}

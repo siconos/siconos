@@ -785,6 +785,11 @@ extern "C"
    * \return 0 if the matrix storage is fine, 1 if not*/
   int NM_check(const NumericsMatrix* const A);
 
+ /** Compute the  1-norm of a sparse matrix = max (sum (abs (A))), largest column sum of a matrix (the sparse format for now)
+   * \param A the matrix 
+   * \return the norm*/
+  double NM_norm(NumericsMatrix* const A);
+
 
 
 
