@@ -9,7 +9,7 @@ before_install:
   - CI/before_install.sh
 
 env:
-  - TASK=siconos_default:docker=false
+  - TASK=siconos_default:docker=false:distrib=ubuntu,14.04
   - TASK=siconos_openblas_lapacke
 
 before_script:
@@ -17,7 +17,7 @@ before_script:
   - cd build
   - case $TASK in
        *docker=false*)
-         ../CI/driver.py --run --root-dir=.. --task=$TASK --distrib=ubuntu:14.04 --print=script > /tmp/install_pkgs
+         ../CI/driver.py --run --root-dir=.. --task=$TASK --print=script > /tmp/install_pkgs
          chmod 755 /tmp/install_pkgs
          cat /tmp/install_pkgs
          /tmp/install_pkgs
