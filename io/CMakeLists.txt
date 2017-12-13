@@ -93,6 +93,8 @@ if(WITH_SERIALIZATION)
     ADD_CUSTOM_COMMAND(
       OUTPUT ${GENERATED_HEADER}
       DEPENDS doxygen ${GENERATED_DEPENDENCIES}
+      ${CMAKE_SOURCE_DIR}/io/tools/build_from_doxygen.py
+      ${CMAKE_SOURCE_DIR}/io/tools/builder_common.py
       ${GENERATED_COMMAND})
 
     SET(GENERATED_COMMAND_KERNEL COMMAND ${CMAKE_SOURCE_DIR}/io/tools/build_from_doxygen.py
