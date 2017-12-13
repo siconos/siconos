@@ -264,6 +264,41 @@ SICONOS_IO_REGISTER_WITH_BASES(LagrangianScleronomousR,(LagrangianR),
 SICONOS_IO_REGISTER_WITH_BASES(LagrangianLinearTIDS,(LagrangianDS),
   (_C)
   (_K))
+SICONOS_IO_REGISTER_WITH_BASES(LagrangianDS,(DynamicalSystem),
+  (_boundaryConditions)
+  (_fExt)
+  (_fGyr)
+  (_fInt)
+  (_forces)
+  (_forcesMemory)
+  (_hasConstantFExt)
+  (_hasConstantMass)
+  (_inverseMass)
+  (_jacobianFGyrq)
+  (_jacobianFGyrqDot)
+  (_jacobianFIntq)
+  (_jacobianFIntqDot)
+  (_jacobianqDotForces)
+  (_jacobianqForces)
+  (_mass)
+  (_ndof)
+  (_p)
+  (_pMemory)
+  (_pluginFExt)
+  (_pluginFGyr)
+  (_pluginFInt)
+  (_pluginJacqDotFGyr)
+  (_pluginJacqDotFInt)
+  (_pluginJacqFGyr)
+  (_pluginJacqFInt)
+  (_pluginMass)
+  (_q)
+  (_q0)
+  (_qMemory)
+  (_reactionToBoundaryConditions)
+  (_rhsMatrices)
+  (_velocity0)
+  (_velocityMemory))
 SICONOS_IO_REGISTER_WITH_BASES(NewtonEulerDS,(DynamicalSystem),
   (_I)
   (_T)
@@ -315,41 +350,6 @@ SICONOS_IO_REGISTER_WITH_BASES(NewtonEulerDS,(DynamicalSystem),
   (_twist0)
   (_twistMemory)
   (_wrench))
-SICONOS_IO_REGISTER_WITH_BASES(LagrangianDS,(DynamicalSystem),
-  (_boundaryConditions)
-  (_fExt)
-  (_fGyr)
-  (_fInt)
-  (_forces)
-  (_forcesMemory)
-  (_hasConstantFExt)
-  (_hasConstantMass)
-  (_inverseMass)
-  (_jacobianFGyrq)
-  (_jacobianFGyrqDot)
-  (_jacobianFIntq)
-  (_jacobianFIntqDot)
-  (_jacobianqDotForces)
-  (_jacobianqForces)
-  (_mass)
-  (_ndof)
-  (_p)
-  (_pMemory)
-  (_pluginFExt)
-  (_pluginFGyr)
-  (_pluginFInt)
-  (_pluginJacqDotFGyr)
-  (_pluginJacqDotFInt)
-  (_pluginJacqFGyr)
-  (_pluginJacqFInt)
-  (_pluginMass)
-  (_q)
-  (_q0)
-  (_qMemory)
-  (_reactionToBoundaryConditions)
-  (_rhsMatrices)
-  (_velocity0)
-  (_velocityMemory))
 SICONOS_IO_REGISTER(ExtraAdditionalTerms,
 )
 SICONOS_IO_REGISTER_WITH_BASES(MoreauJeanBilbaoOSI,(OneStepIntegrator),
@@ -373,6 +373,19 @@ SICONOS_IO_REGISTER_WITH_BASES(TimeSteppingCombinedProjection,(TimeStepping),
   (_nbIndexSetsIteration)
   (_nbProjectionIteration)
   (_projectionMaxIteration))
+SICONOS_IO_REGISTER_WITH_BASES(EventDriven,(Simulation),
+  (_DSG0)
+  (_TOL_ED)
+  (_indexSet0)
+  (_isNewtonConverge)
+  (_istate)
+  (_localizeEventMaxIter)
+  (_newtonMaxIteration)
+  (_newtonNbIterations)
+  (_newtonResiduDSMax)
+  (_newtonResiduYMax)
+  (_newtonTolerance)
+  (_numberOfOneStepNSproblems))
 SICONOS_IO_REGISTER_WITH_BASES(NonSmoothEvent,(Event),
 )
 SICONOS_IO_REGISTER_WITH_BASES(QP,(OneStepNSProblem),
@@ -422,19 +435,6 @@ SICONOS_IO_REGISTER_WITH_BASES(OSNSMultipleImpact,(LinearOSNS),
   (_tolImpulseContact)
   (_typeCompLaw)
   (_velocityContact))
-SICONOS_IO_REGISTER_WITH_BASES(EventDriven,(Simulation),
-  (_DSG0)
-  (_TOL_ED)
-  (_indexSet0)
-  (_isNewtonConverge)
-  (_istate)
-  (_localizeEventMaxIter)
-  (_newtonMaxIteration)
-  (_newtonNbIterations)
-  (_newtonResiduDSMax)
-  (_newtonResiduYMax)
-  (_newtonTolerance)
-  (_numberOfOneStepNSproblems))
 SICONOS_IO_REGISTER_WITH_BASES(NewMarkAlphaOSI,(OneStepIntegrator),
   (_IsVelocityLevel)
   (_alpha_f)
@@ -658,18 +658,18 @@ void siconos_io_register_generated_Kernel(Archive& ar)
   ar.register_type(static_cast<FirstOrderNonLinearDS*>(NULL));
   ar.register_type(static_cast<LagrangianScleronomousR*>(NULL));
   ar.register_type(static_cast<LagrangianLinearTIDS*>(NULL));
-  ar.register_type(static_cast<NewtonEulerDS*>(NULL));
   ar.register_type(static_cast<LagrangianDS*>(NULL));
+  ar.register_type(static_cast<NewtonEulerDS*>(NULL));
   ar.register_type(static_cast<MoreauJeanBilbaoOSI*>(NULL));
   ar.register_type(static_cast<InteractionManager*>(NULL));
   ar.register_type(static_cast<TimeDiscretisationEvent*>(NULL));
   ar.register_type(static_cast<TimeSteppingCombinedProjection*>(NULL));
+  ar.register_type(static_cast<EventDriven*>(NULL));
   ar.register_type(static_cast<NonSmoothEvent*>(NULL));
   ar.register_type(static_cast<QP*>(NULL));
   ar.register_type(static_cast<TimeSteppingD1Minus*>(NULL));
   ar.register_type(static_cast<MLCPProjectOnConstraints*>(NULL));
   ar.register_type(static_cast<OSNSMultipleImpact*>(NULL));
-  ar.register_type(static_cast<EventDriven*>(NULL));
   ar.register_type(static_cast<NewMarkAlphaOSI*>(NULL));
   ar.register_type(static_cast<AVI*>(NULL));
   ar.register_type(static_cast<TimeSteppingDirectProjection*>(NULL));
