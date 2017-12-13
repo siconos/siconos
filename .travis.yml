@@ -5,25 +5,24 @@ sudo: required
 
 service: docker
 
-before_install:
-    - CI/before_install.sh
+language: python
 
 matrix:
   include:
-
-    - env: TYPE=travis
+    - env:
+        - TASK=siconos_default:docker=false:distrib=ubuntu,14.04:targets=all,
+        - CXX=g++-4.9
+        - CC=gcc-4.9
+        - FC=gfortran-4.9
+        
       os: linux
+      python: "3.6"
       addons:
         apt:
           sources:
             - ubuntu-toolchain-r-test
-            - george-edison55-precise-backports # cmake 3.2.3 / doxygen 1.8.3
 
           packages:
-            - blas
-            - lapack
-            - cmake
-            - cmake-data
             - libboost-dev
             - libgmp-dev
             - swig
@@ -32,33 +31,16 @@ matrix:
             - liblapack-dev
             - libatlas-base-dev
             - libatlas-dev
-            - python
-            - python-dev
-            - python-lxml
-            - python-pytest
-            - python-scipy
-            - python-matplotlib
-    - env:
-        TASK=siconos_default:docker=false:distrib=ubuntu,14.04:targets=all,
-      addons:
-        apt:
-          packages:
             - g++-4.9
             - gfortran-4.9
     - env:
-      - TYPE=docker
       - TASK=siconos_openblas_lapacke
 
-matrix:
-  exclude:
-    env:
-      - TYPE=travis
-      - TYPE=docker
       
 before_script:
   - mkdir -p build
   - cd build
-  
+
 script:
   - if test "$TRAVIS" = true; then
       ../CI/driver.py --run --root-dir=.. --task=$TASK;
