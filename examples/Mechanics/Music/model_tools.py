@@ -278,7 +278,7 @@ def load_model(filename, from_matlab=None):
     return guitar_model, guitar_string, frets
 
 
-def load_convert_and_save(filename, from_matlab):
+def load_convert_and_save(filename, from_matlab, restit):
     # Load hdf5 file to set model and string
     ref_model, ref_string, ref_frets = load_model(filename, from_matlab)
     # Convert (modal to real) displacements
@@ -290,5 +290,8 @@ def load_convert_and_save(filename, from_matlab):
     filt_frets = h5source.attrs['filter frets']
     h5source.close()
     save_model_to_hdf5(ref_model, ref_string, outputfilename, from_matlab, filt_frets)
+    h5target = h5py.File(outputfilename, 'r+')
+    h5target.attrs['restit'] = restit
+    h5target.close()
 
     

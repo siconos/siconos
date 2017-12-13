@@ -434,7 +434,7 @@ class Guitar(sk.Model):
         self.data_ds[ds][:, indices] = \
             np.dot(ds.s_mat, self.data_ds[ds][:, indices])
 
-    def plot_traj(self, ds, dof=None, filename=None, iplot=0, ground=None):
+    def plot_traj(self, ds, dof=None, filename=None, iplot=0, ground=None, buff=False):
         """Plot collected data (positions ...) of a dynamical system
 
         Parameters
@@ -466,27 +466,34 @@ class Guitar(sk.Model):
         if ground is not None:
             plt.plot((self.time[0], self.time[-1]),(ground, ground), '-')
         plt.subplot(2, 2, 2)
-        plt.plot(self.time, data[dof - 1, :], 'x-')
+        plt.plot(self.time, data[dof, :], 'x-')
         plt.xlim(0, 0.008)
         if ground is not None:
             plt.plot((self.time[0], self.time[-1]),(ground, ground), '-x')
 
         plt.subplot(2, 2, 3)
-        plt.plot(self.time, data[dof - 1, :])
+        plt.plot(self.time, data[dof, :])
         plt.xlim(0.05, 0.07)
         if ground is not None:
             plt.plot((self.time[0], self.time[-1]),(ground, ground), '-x')
 
         plt.subplot(2, 2, 4)
-        plt.plot(self.time, data[dof - 1, :])
+        plt.plot(self.time, data[dof, :])
         plt.xlim(0.75, 0.77)
         if ground is not None:
             plt.plot((self.time[0], self.time[-1]),(ground, ground), '-x')
         leg.append('x = ' + str(x[dof]))
         plt.legend(leg)
-        plt.suptitle('displacements = f(time)')
+        plt.suptitle('displacements = f(time) at x='+str(x[dof]))
         if filename is not None:
             plt.savefig(filename)
+        if buff:
+            tab= np.zeros((self.time.shape[0], 2))
+            tab[:, 0] = self.time
+            tab[:, 1] = data[dof, :]
+            return plt, tab
+        else:
+            return plt
 
     def plot_modes(self, ds, times=None,
                    plot_shape=None, filename=None, iplot=1):

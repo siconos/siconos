@@ -28,7 +28,7 @@ if __name__ == "__main__":
     assert fs > 14000.
     # lower frequencies require quadruple prec for exp computation.
 
-    final_time = 1.
+    final_time = 0.4
     number_of_modes = 862
     filt_frets = False
     matlab_input = os.path.join(current_path, 'fretless_bass_guitar/bsf')
