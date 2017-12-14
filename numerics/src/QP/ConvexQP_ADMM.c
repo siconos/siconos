@@ -99,21 +99,29 @@ void convexQP_ADMM(ConvexQP* problem,
   int hasNotConverged = 1;
 
   double rho = 0.0;
- 
   rho = dparam[SICONOS_CONVEXQP_ADMM_RHO];
-
   if (rho == 0.0)
     numerics_error("ConvexQP_ADMM", "dparam[SICONOS_CONVEXQP_PGOC_RHO] must be nonzero");
 
+  double tau=1;
+
+
   /* double * z_k; */
-  double * w_k;
+  /* double * w_k; */
   /* double * u_k; */
   double * u_tmp;
   /* double * xi_k; */
   /* double * xi_tmp; */
 
+  int accelerated = iparam[SICONOS_CONVEXQP_ADMM_IPARAM_ACCELERATION];
+  if (accelerated == iparam[SICONOS_CONVEXQP_ADMM_NO_ACCELERATION])
+  {
+
+  }
+
+
   /* z_k = (double *)malloc(n * sizeof(double)); */
-  w_k = (double *)malloc(n * sizeof(double));
+  /* w_k = (double *)malloc(n * sizeof(double)); */
   /* u_k = (double *)calloc(m,sizeof(double)); */
   u_tmp = (double *)calloc(m,sizeof(double));
   /* xi_k = (double *)calloc(m,sizeof(double)); */
@@ -180,9 +188,9 @@ void convexQP_ADMM(ConvexQP* problem,
     /********************/
 
     /* compute the rhs */
-    /* q --> w_k */
-    cblas_dcopy(n , q , 1 , w_k, 1);
-
+    /* q --> z */
+    cblas_dcopy(n , q , 1 , z, 1);
+    cblas_dscal(n, -1, z,1);
 
     /*  u -b + xi_k --> u */
     cblas_daxpy(m, -1.0, b, 1, u , 1);
@@ -190,19 +198,19 @@ void convexQP_ADMM(ConvexQP* problem,
 
     /* rho A^T (u_k +xi_k -b  ) - q --> w_k */
     /* for (int k =0; k< n; k++) w_k[k] = -w_k[k]; */
-    cblas_dscal(n, -1, w_k,1);
+
     if (AisIdentity)
     {
-      cblas_daxpy(m, rho, u, 1, w_k, 1);
+      cblas_daxpy(m, rho, u, 1, z, 1);
     }
     else
     {
-      NM_gemv(rho, Atrans, u, 1.0, w_k);
+      NM_gemv(rho, Atrans, u, 1.0, z);
     }
-    DEBUG_EXPR(NV_display(w_k,n));
+    DEBUG_EXPR(NV_display(z,n));
 
     /* Linear system solver */
-    cblas_dcopy(n , w_k , 1 , z, 1);
+    /* cblas_dcopy(n , w_k , 1 , z, 1); */
     NM_gesv_expert(W,z,NM_KEEP_FACTORS);
     DEBUG_EXPR(NV_display(z,n));
 
@@ -223,8 +231,6 @@ void convexQP_ADMM(ConvexQP* problem,
     }
     problem->ProjectionOnC(problem,u_tmp,u);
     DEBUG_EXPR(NV_display(u,m));
-
-
 
     /**********************/
     /*  3 - Compute xi */
@@ -271,8 +277,8 @@ void convexQP_ADMM(ConvexQP* problem,
   iparam[SICONOS_IPARAM_ITER_DONE] = iter;
 
   /* free(z_k); */
-  free(w_k);
-  /* free(u_k); */
+  /* free(w_k); */
+  free(u_tmp);
   /* free(xi_k); */
 
 }
@@ -299,6 +305,8 @@ int convexQP_ADMM_setDefaultSolverOptions(SolverOptions* options)
   solver_options_nullify(options);
 
   options->iparam[SICONOS_IPARAM_MAX_ITER] = 20000;
+  options->iparam[SICONOS_CONVEXQP_ADMM_ACCELERATION] = 0; /* 0 Acceleration */
+
 
   options->dparam[SICONOS_DPARAM_TOL] = 1e-6;
 
