@@ -559,10 +559,8 @@ void  gfc3d_nonsmooth_Newton_AlartCurnier_wr(GlobalFrictionContactProblem* probl
     }
     gfc3d_reformulation_local_problem(problem, localproblem);
     DEBUG_EXPR(frictionContact_display(localproblem););
-    if (verbose)
-    {
-      printf("Call to the fc3d solver ...\n");
-    }
+    numerics_printf("gfc3d_nonsmooth_Newton_AlartCurnier_wr - Call to the fc3d solver ...\n");
+
     fc3d_nonsmooth_Newton_AlartCurnier(localproblem, reaction , velocity , info , options->internalSolvers);
 
     options->iparam[1] =  options->internalSolvers->iparam[1];
@@ -591,7 +589,7 @@ int gfc3d_nonsmooth_Newton_AlartCurnier_wr_setDefaultSolverOptions(SolverOptions
   options->solverId = SICONOS_GLOBAL_FRICTION_3D_NSN_AC_WR;
   options->numberOfInternalSolvers = 1;
   options->internalSolvers = (SolverOptions *)malloc(sizeof(SolverOptions));
-  gfc3d_nonsmooth_Newton_AlartCurnier_setDefaultSolverOptions(options->internalSolvers);
+  fc3d_nonsmooth_Newton_AlartCurnier_setDefaultSolverOptions(options->internalSolvers);
   return 0;
 }
 
