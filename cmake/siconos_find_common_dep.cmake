@@ -275,6 +275,8 @@ if(WITH_PYTHON_WRAPPER)
   ENDIF(NOT NO_RUNTIME_BUILD_DEP)
 endif()
 
+# See if help2man is available
+find_program(HELP2MAN help2man)
 
 #
 # Fedora13 https://fedoraproject.org/wiki/UnderstandingDSOLinkChange

@@ -1,11 +1,11 @@
 #!/usr/bin/env @PYTHON_EXECUTABLE@
+"""Filter the contents of a Siconos mechanics-IO HDF5 simulation file."""
 
-import numpy as np
-import h5py
+# Lighter imports before command line parsing
 import os, sys, argparse, re
 
 parser = argparse.ArgumentParser(
-    description = 'Copy a Siconos HDF5 simulation file, filtering the contents.')
+    description = __doc__)
 parser.add_argument('fns_in', metavar='input', type=str, nargs='+',
                     help = 'input file(s) (HDF5)')
 parser.add_argument('fn_out', metavar='output', type=str, nargs=1,
@@ -24,6 +24,15 @@ parser.add_argument('--exclude', type=str,
                     help = 'specify objects to exclude from copy (comma-separated)')
 parser.add_argument('--attr', type=str, action='append',
                     help = 'specify attributes to change during copy (obj.name=value)')
+parser.add_argument('-V','--version', action='version',
+                    version='@SICONOS_VERSION@')
+
+if __name__ == '__main__':
+    args = parser.parse_args()
+
+# Heavier imports after command line parsing
+import numpy as np
+import h5py
 
 class CopyVisitor(object):
     """The CopyVisitor is called for each group and dataset in the HDF5
@@ -154,7 +163,6 @@ class CopyVisitor(object):
             print('Unknown type "{0}": {1}'.format(path, str(obj.__class__)))
 
 if __name__ == '__main__':
-    args = parser.parse_args()
     if os.path.exists(args.fn_out[0]):
         print('Output file "{0}" already exists!'.format(args.fn_out[0]))
         sys.exit(1)

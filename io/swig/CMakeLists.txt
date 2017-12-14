@@ -57,6 +57,34 @@ if(HAVE_SICONOS_MECHANICS)
     if (WITH_MECHANISMS)
       install(PROGRAMS ${SICONOS_SWIG_ROOT_DIR}/io/pprocess.py DESTINATION bin RENAME siconos_pprocess)
     endif()
+
+    # automatic manpages using help2man
+    if (HELP2MAN)
+      set(MANPAGES_FOR_TOOLS)
+      macro (GEN_MANPAGE_FROM_HELP TOOL SRC)
+        add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/man/${TOOL}.1
+          COMMAND ${HELP2MAN}
+            -s1 -N -o  ${CMAKE_BINARY_DIR}/man/${TOOL}.1
+            ${SICONOS_SWIG_ROOT_DIR}/${SRC}
+          DEPENDS ${SRC}
+          WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+          COMMENT "Generating man/${TOOL}.1 using help2man"
+          )
+        install(FILES ${CMAKE_BINARY_DIR}/man/${TOOL}.1 DESTINATION share/man/man1)
+        list(APPEND MANPAGES_FOR_TOOLS ${CMAKE_BINARY_DIR}/man/${TOOL}.1)
+      endmacro()
+      GEN_MANPAGE_FROM_HELP(siconos_vview      io/vview.py)
+      GEN_MANPAGE_FROM_HELP(siconos_vexport    io/vexport.py)
+      GEN_MANPAGE_FROM_HELP(siconos_info       io/info.py)
+      GEN_MANPAGE_FROM_HELP(siconos_run        io/run.py)
+      GEN_MANPAGE_FROM_HELP(siconos_filter     io/filter.py)
+      if (WITH_MECHANISMS)
+        # needs --help
+        # GEN_MANPAGE_FROM_HELP(siconos_pprocess   io/pprocess.py)
+      endif()
+
+      add_custom_target(manpages ALL DEPENDS ${MANPAGES_FOR_TOOLS})
+    endif()
   endif()
 
 endif()

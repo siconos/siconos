@@ -1,60 +1,28 @@
 #!/usr/bin/env @PYTHON_EXECUTABLE@
-import sys, os, json
-import vtk
-from vtk.util import numpy_support
-from math import pi
-import bisect
-from numpy.linalg import norm
-import numpy
-import random
+"""Viewer for Siconos mechanics-IO HDF5 files based on VTK."""
 
+# Lighter imports before command line parsing
+import sys, os, json
 import getopt
 
-from siconos.io.mechanics_io import Quaternion, Hdf5
-from siconos.io.mechanics_io import tmpfile as io_tmpfile
-from siconos.io.mechanics_io import occ_topo_list, occ_load_file,\
-    topods_shape_reader, brep_reader
-
-## Persistent configuration
-config = {'window_size': [600,600]}
-config_fn = os.path.join(os.environ['HOME'], '.config', 'siconos_vview.json')
-should_save_config = True
-
-def load_configuration():
-    global should_save_config
-    if os.path.exists(config_fn):
-        try:
-            config.update(json.load(open(config_fn)))
-            should_save_config = True
-        except:
-            should_save_config = False
-            print("Warning: Error loading configuration `{}'".format(config_fn))
-
-def save_configuration():
-    try:
-        if not os.path.exists(os.path.join(os.environ['HOME'], '.config')):
-            os.mkdir(os.path.join(os.environ['HOME'], '.config'))
-        json.dump(config, open(config_fn,'w'))
-    except:
-        print("Error saving configuration `{}'".format(config_fn))
-
-# Load it immediately
-load_configuration()
-
 ## Print usage information
-def usage():
-    print('{0}: Usage'.format(sys.argv[0]))
-    print("""
-    {0} [--help] [tmin=<float value>] [tmax=<float value>]
+def usage(long=False):
+    print(__doc__); print()
+    print('Usage: {0} [OPTION]... <HDF5>'
+          .format(os.path.split(sys.argv[0])[1]))
+    print()
+    if not long:
+        print("""[--help] [tmin=<float value>] [tmax=<float value>]
         [--cf-scale=<float value>] [--no-cf]
         [--advance=<'fps' or float value>] [--fps=float value]
         [--camera=x,y,z] [--lookat=x,y,z] [--up=x,y,z] [--ortho=scale]
-        <hdf5 file>
-    """)
-    print("""
-    Options :
-      --help
-        display this message
+        """)
+    else:
+        print("""Options:
+     --help
+       display this message
+     --version
+       display version information
      --tmin= value
        set the time lower bound for visualization
      --tmax= value
@@ -83,28 +51,44 @@ def usage():
     """)
 
 
-def add_compatiblity_methods(obj):
-    """
-    Add missing methods in previous VTK versions.
-    """
-
-    if hasattr(obj, 'SetInput'):
-        obj.SetInputData = obj.SetInput
-
-    if hasattr(obj, 'AddInput'):
-        obj.AddInputData = obj.AddInput
-
 ## Parse command line
 try:
     opts, args = getopt.gnu_getopt(sys.argv[1:], '',
-                                   ['help', 'dat', 'tmin=', 'tmax=', 'no-cf',
+                                   ['help', 'version',
+                                    'dat', 'tmin=', 'tmax=', 'no-cf',
                                     'cf-scale=', 'normalcone-ratio=',
                                     'advance=', 'fps=', 'camera=', 'lookat=',
                                     'up=', 'ortho='])
 except getopt.GetoptError as err:
-        sys.stderr.write('{0}\n'.format(str(err)))
-        usage()
-        exit(2)
+    sys.stderr.write('{0}\n'.format(str(err)))
+    usage()
+    exit(2)
+
+## Persistent configuration
+config = {'window_size': [600,600]}
+config_fn = os.path.join(os.environ['HOME'], '.config', 'siconos_vview.json')
+should_save_config = True
+
+def load_configuration():
+    global should_save_config
+    if os.path.exists(config_fn):
+        try:
+            config.update(json.load(open(config_fn)))
+            should_save_config = True
+        except:
+            should_save_config = False
+            print("Warning: Error loading configuration `{}'".format(config_fn))
+
+def save_configuration():
+    try:
+        if not os.path.exists(os.path.join(os.environ['HOME'], '.config')):
+            os.mkdir(os.path.join(os.environ['HOME'], '.config'))
+        json.dump(config, open(config_fn,'w'))
+    except:
+        print("Error saving configuration `{}'".format(config_fn))
+
+# Load it immediately
+load_configuration()
 
 min_time = None
 max_time = None
@@ -120,7 +104,11 @@ initial_camera = [None] * 4
 for o, a in opts:
 
     if o == '--help':
-        usage()
+        usage(long=True)
+        exit(0)
+
+    elif o == '--version':
+        print('{0} @SICONOS_VERSION@'.format(os.path.split(sys.argv[0])[1]))
         exit(0)
 
     elif o == '--tmin':
@@ -169,7 +157,32 @@ else:
     usage()
     exit(1)
 
+# Heavier imports after command line parsing
+import vtk
+from vtk.util import numpy_support
+from math import pi
+import bisect
+from numpy.linalg import norm
+import numpy
+import random
+
+from siconos.io.mechanics_io import Quaternion, Hdf5
+from siconos.io.mechanics_io import tmpfile as io_tmpfile
+from siconos.io.mechanics_io import occ_topo_list, occ_load_file,\
+    topods_shape_reader, brep_reader
+
 ## Utilities
+
+def add_compatiblity_methods(obj):
+    """
+    Add missing methods in previous VTK versions.
+    """
+
+    if hasattr(obj, 'SetInput'):
+        obj.SetInputData = obj.SetInput
+
+    if hasattr(obj, 'AddInput'):
+        obj.AddInputData = obj.AddInput
 
 def random_color():
     r = random.uniform(0.1, 0.9)
@@ -189,7 +202,6 @@ big_data_writer.SetInputConnection(big_data_source.GetOutputPort())
 
 contactors = dict()
 offsets = dict()
-
 
 
 ## Program starts

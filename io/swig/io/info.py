@@ -1,19 +1,26 @@
 #!/usr/bin/env @PYTHON_EXECUTABLE@
+"""Show information about a Siconos mechanics-IO HDF5 file."""
 
-from siconos.io.mechanics_io import Hdf5
+# Lighter imports before command line parsing
 import sys, argparse
-import numpy as np
 
 parser = argparse.ArgumentParser(
-    description = 'Show information about a Siconos HDF5 file.')
+    description = __doc__)
 parser.add_argument('file', metavar='input', type=str, nargs='+',
                     help = 'input file(s) (HDF5)')
 parser.add_argument('-O','--list-objects', action = 'store_true',
                     help = 'List object names in the file')
 parser.add_argument('-C','--list-contactors', action = 'store_true',
                     help = 'List contactor names in the file')
+parser.add_argument('-V','--version', action='version',
+                    version='@SICONOS_VERSION@')
 
-args = parser.parse_args()
+if __name__=='__main__':
+    args = parser.parse_args()
+
+# Heavier imports after command line parsing
+from siconos.io.mechanics_io import Hdf5
+import numpy as np
 
 def summarize(io):
     spos_data = io.static_data()
