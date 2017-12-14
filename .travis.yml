@@ -11,7 +11,7 @@ python: 3.6
 
 matrix:
   include:
-    - env: TASK=base:docker=true:distrib=ubuntu,14.04:targets=docker-build,docker-cmake,docker-make,docker-make-test
+    - env: TASK=default:docker=true:distrib=ubuntu,16.04:targets=docker-build,docker-ctest:make_args=-j,
     - env: TASK=siconos_ubuntu_15_04
     - env: TASK=siconos_ubuntu_16_04
     - env: TASK=siconos_ubuntu_17_04
@@ -20,9 +20,9 @@ matrix:
     - env: TASK=siconos_fedora_latest
     - env:
         - TASK=siconos_default:docker=false:distrib=ubuntu,14.04:targets=all,test
-        - CXX=g++-4.9
-        - CC=gcc-4.9
-        - FC=gfortran-4.9
+        - CXX=g++-7.2
+        - CC=gcc-7.2
+        - FC=gfortran-7.2
         
       os: linux
       python: "2.7"
@@ -43,7 +43,6 @@ matrix:
             - g++-4.9
             - gfortran-4.9
     
-      
 before_script:
   - case $TASK in
       *docker=false*)
@@ -65,4 +64,4 @@ script:
     fi
 
 
-myentry: hello
+mksenv: hello

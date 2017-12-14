@@ -82,7 +82,7 @@ def call(*args, **kwargs):
     return return_code
 
 
-class CiTask():
+class CiTask(object):
 
     def __init__(self,
                  mode='Continuous',
@@ -93,10 +93,11 @@ class CiTask():
                  fast=True,
                  pkgs=None,
                  srcs=None,
-                 targets=None,
+                 targets=dict(),
                  cmake_cmd='cmake',
-                 make_cmd='make',
                  cmake_args=[],
+                 make_cmd='make',
+                 make_args=[],
                  directories=[]):
 
         """Create a task, see examples in tasks.py.
@@ -114,6 +115,7 @@ class CiTask():
         self._cmake_cmd = cmake_cmd
         self._make_cmd = make_cmd
         self._cmake_args = cmake_args
+        self._make_args = make_args
         self._directories = directories
 
     def template_maker(self):
@@ -154,6 +156,7 @@ class CiTask():
                  cmake_cmd=self._cmake_cmd,
                  make_cmd=self._make_cmd,
                  cmake_args=self._cmake_args,
+                 make_args=self._make_args,
                  add_directories=None,
                  add_pkgs=None, remove_pkgs=None, add_srcs=None,
                  remove_srcs=None, add_targets=None, remove_targets=None):
@@ -166,20 +169,14 @@ class CiTask():
 
             new_distrib = None
 
+            new_srcs = srcs
+
             if type(distrib) == list:
                 new_distrib = ':'.join(distrib)
             else:
                 if distrib is not None:
                     assert type(distrib) == str
                     new_distrib = distrib
-
-            if type(targets) == list:
-                for src in self._targets.keys():
-                    new_targets[src] = targets
-
-            else:
-                assert type(targets) == dict
-                new_targets = targets
 
             if add_pkgs is not None:
                 pkgs = self._pkgs + add_pkgs
@@ -188,17 +185,17 @@ class CiTask():
                 pkgs = list(filter(lambda p: p not in remove_pkgs, pkgs))
 
             if add_srcs is not None:
-                srcs = self._srcs + add_srcs
+                new_srcs = self._srcs + add_srcs
 
             if remove_srcs is not None:
-                srcs = list(filter(lambda p: p not in remove_srcs, srcs))
+                new_srcs = list(filter(lambda p: p not in remove_srcs, srcs))
 
             if add_targets is not None:
-                for src in self._targets.keys():
+                for src in new_srcs:
                     new_targets[src] += add_targets
 
             if remove_targets is not None:
-                for src in self._targets.keys():
+                for src in new_srcs:
                     new_targets[src] = list(
                         filter(lambda p: p not in remove_targets, self._targets[src]))
 
@@ -207,6 +204,13 @@ class CiTask():
             else:
                 directories = self._directories
 
+            if type(targets) == list:
+                for src in new_srcs:
+                    new_targets[src] = targets
+            else:
+                assert type(targets) == dict
+                new_targets = targets
+                
             from copy import deepcopy
 
             new_task = deepcopy(self)
@@ -214,9 +218,10 @@ class CiTask():
             new_task.__init__(mode=mode, build_configuration=build_configuration,
                               docker=docker,
                               distrib=new_distrib, ci_config=ci_config, fast=fast,
-                              pkgs=pkgs, srcs=srcs, targets=new_targets, cmake_cmd=cmake_cmd,
+                              pkgs=pkgs, srcs=new_srcs, targets=new_targets, cmake_cmd=cmake_cmd,
                               cmake_args=cmake_args,
                               make_cmd=make_cmd,
+                              make_args=make_args,
                               directories=directories)
             return new_task
             
@@ -247,6 +252,7 @@ class CiTask():
 
             # --- List of arguments for cmake command ---
             cmake_args = self._cmake_args
+            make_args = self._make_args
             if self._docker:
                 cmake_args += ['-DMODE={0}'.format(self._mode),
                                '-DCI_CONFIG={0}'.format(ci_config_args),
@@ -281,7 +287,7 @@ class CiTask():
                     print("cmake command is: {:}".format(' '.join(full_cmd)))
                     return_code += call(full_cmd, cwd=bdir)
                     for target in self._targets[src]:
-                        return_code += call([self._make_cmd] + [target], cwd=bdir)
+                        return_code += call([self._make_cmd] + make_args + [target], cwd=bdir)
                 else:
                     msg = 'Would call: \n  - {:}'.format(' '.join(full_cmd))
                     msg += '\n  - make target, \n for target in '
@@ -291,7 +297,7 @@ class CiTask():
 
             except Exception as error:
                 return_code = 1
-                print(error)
+                raise error
 
         return return_code
 
@@ -305,11 +311,11 @@ class CiTask():
 
             try:
                 if self._docker:
-                    return_code += call([self._make_cmd] + ['docker-clean-usr-local'], cwd=bdir)
+                    return_code += call([self._make_cmd] + make_args + ['docker-clean-usr-local'], cwd=bdir)
 
                     if not self._fast:
 
-                        return_code += call([self._make_cmd] + ['docker-clean'],
+                        return_code += call([self._make_cmd] + make_args + ['docker-clean'],
                                             cwd=bdir)
 
             except Exception as error:
