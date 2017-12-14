@@ -79,7 +79,7 @@ if __name__=='__main__':
     try:
         with Hdf5(mode='r', io_filename=args.file[0]) as io:
             if io.dynamic_data() is None or len(io.dynamic_data()) == 0:
-                print 'Empty simulation found.'
+                print ('Empty simulation found.')
             else:
                 print ('')
                 print ('Filename: "{0}"'.format(args.file[0]))
@@ -88,6 +88,6 @@ if __name__=='__main__':
                     list_objects(io)
                 if args.list_contactors:
                     list_contactors(io)
-    except IOError, e:
+    except IOError as e:
         print ('Error reading "{0}"'.format(args.file[0]))
         print (e)

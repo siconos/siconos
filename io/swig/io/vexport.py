@@ -1,4 +1,5 @@
 #!/usr/bin/env @PYTHON_EXECUTABLE@
+from __future__ import print_function
 import sys
 import os
 import vtk
@@ -60,7 +61,7 @@ def add_compatiblity_methods(obj):
 try:
     opts, args = getopt.gnu_getopt(sys.argv[1:], '',
                                    ['ascii'])
-except getopt.GetoptError, err:
+except getopt.GetoptError as err:
         sys.stderr.write('{0}\n'.format(str(err)))
         usage()
         exit(2)
@@ -534,8 +535,8 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
                 transformer.SetInputConnection(
                     readers[contactor_name].GetOutputPort())
             else:
-                print 'WARNING: cannot find a shape source for instance:',
-                instance
+                print ('WARNING: cannot find a shape source for instance:',
+                       instance)
 
             transformer.SetTransform(transform)
             transformers[contactor_name] = transformer
