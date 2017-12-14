@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env @PYTHON_EXECUTABLE@
 import sys
 import os
 import vtk

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env @PYTHON_EXECUTABLE@
 
 import numpy as np
 import h5py

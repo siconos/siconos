@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env @PYTHON_EXECUTABLE@
 
 from siconos.io.mechanics_io import Hdf5
 import sys, argparse

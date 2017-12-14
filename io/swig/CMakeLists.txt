@@ -37,18 +37,22 @@ if(HAVE_SICONOS_MECHANICS)
     install(CODE "execute_process(COMMAND sh -c \"test -e '${CMAKE_INSTALL_PREFIX}/bin/siconos_run' || ln -vs '${CMAKE_CURRENT_SOURCE_DIR}/io/run.py' '${CMAKE_INSTALL_PREFIX}/bin/siconos_run'\")")
   else()
 
-    
     configure_file(io/mechanics_io.py ${SICONOS_SWIG_ROOT_DIR}/io/mechanics_io.py @ONLY)
     configure_file(io/FrictionContactTrace.py ${SICONOS_SWIG_ROOT_DIR}/io/FrictionContactTrace.py @ONLY)
 
-    configure_file(io/vview.py ${SICONOS_SWIG_ROOT_DIR}/io/vview.py @ONLY)
-    
+    configure_file(io/vview.py      ${SICONOS_SWIG_ROOT_DIR}/io/vview.py @ONLY)
+    configure_file(io/vexport.py    ${SICONOS_SWIG_ROOT_DIR}/io/vexport.py @ONLY)
+    configure_file(io/pprocess.py   ${SICONOS_SWIG_ROOT_DIR}/io/pprocess.py @ONLY)
+    configure_file(io/info.py       ${SICONOS_SWIG_ROOT_DIR}/io/info.py @ONLY)
+    configure_file(io/filter.py     ${SICONOS_SWIG_ROOT_DIR}/io/filter.py @ONLY)
+    configure_file(io/run.py        ${SICONOS_SWIG_ROOT_DIR}/io/run.py @ONLY)
+
     install(PROGRAMS ${SICONOS_SWIG_ROOT_DIR}/io/vview.py    DESTINATION bin RENAME siconos_vview)
-    install(PROGRAMS io/vexport.py  DESTINATION bin RENAME siconos_vexport)
-    install(PROGRAMS io/pprocess.py DESTINATION bin RENAME siconos_pprocess)
-    install(PROGRAMS io/info.py     DESTINATION bin RENAME siconos_info)
-    install(PROGRAMS io/filter.py   DESTINATION bin RENAME siconos_filter)
-    install(PROGRAMS io/run.py      DESTINATION bin RENAME siconos_run)
+    install(PROGRAMS ${SICONOS_SWIG_ROOT_DIR}/io/vexport.py  DESTINATION bin RENAME siconos_vexport)
+    install(PROGRAMS ${SICONOS_SWIG_ROOT_DIR}/io/pprocess.py DESTINATION bin RENAME siconos_pprocess)
+    install(PROGRAMS ${SICONOS_SWIG_ROOT_DIR}/io/info.py     DESTINATION bin RENAME siconos_info)
+    install(PROGRAMS ${SICONOS_SWIG_ROOT_DIR}/io/filter.py   DESTINATION bin RENAME siconos_filter)
+    install(PROGRAMS ${SICONOS_SWIG_ROOT_DIR}/io/run.py      DESTINATION bin RENAME siconos_run)
   endif()
 
 endif()
