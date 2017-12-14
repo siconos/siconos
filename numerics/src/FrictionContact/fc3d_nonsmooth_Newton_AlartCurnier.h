@@ -106,7 +106,7 @@ extern "C"
       \param rho3D the rho parameters (size : 3 x problemSize)
       \param output_blocklist3 the computed Alart & Curnier function (size : 3 x problemSize)
       \param output_blocklist3x3_1 the computed A part of gradient (size : 9 x problemSize)
-      \param output_blocklist3x3_2 the computed B param of gradient (size : 9 x problemSize)
+      \param output_blocklist3x3_2 the computed B part of gradient (size : 9 x problemSize)
   */
   void fc3d_AlartCurnierFunction(
     unsigned int problemSize,
