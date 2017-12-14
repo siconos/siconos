@@ -98,6 +98,7 @@ class CiTask():
                  make_cmd='make',
                  cmake_args=[],
                  directories=[]):
+
         """Create a task, see examples in tasks.py.
         """
 
@@ -114,6 +115,10 @@ class CiTask():
         self._make_cmd = make_cmd
         self._cmake_args = cmake_args
         self._directories = directories
+
+    def template_maker(self):
+        assert False
+        return '-'.join(self._pkgs)
 
     def build_dir(self, src):
         """Return a name
@@ -134,11 +139,10 @@ class CiTask():
                 ci_config_name).replace('/', '-')
 
     def templates(self):
-        # remove build-base, gnu-c++, gfortran, it is redundant
         return ','.join(self._pkgs)
 
     def copy(self):
-        """Copy constructor :
+        """
          duplicate a task and possibly extend configuration of the result.
         """
         def init(mode=self._mode,
@@ -203,13 +207,19 @@ class CiTask():
             else:
                 directories = self._directories
 
-            return CiTask(mode=mode, build_configuration=build_configuration,
-                          docker=docker,
-                          distrib=new_distrib, ci_config=ci_config, fast=fast,
-                          pkgs=pkgs, srcs=srcs, targets=new_targets, cmake_cmd=cmake_cmd,
-                          cmake_args=cmake_args,
-                          make_cmd=make_cmd,
-                          directories=directories)
+            from copy import deepcopy
+
+            new_task = deepcopy(self)
+            
+            new_task.__init__(mode=mode, build_configuration=build_configuration,
+                              docker=docker,
+                              distrib=new_distrib, ci_config=ci_config, fast=fast,
+                              pkgs=pkgs, srcs=srcs, targets=new_targets, cmake_cmd=cmake_cmd,
+                              cmake_args=cmake_args,
+                              make_cmd=make_cmd,
+                              directories=directories)
+            return new_task
+            
         return init
 
     def run(self, root_dir, dry_run=False):
@@ -229,16 +239,6 @@ class CiTask():
                 os.makedirs(bdir)
 
 
-            #
-            # not generic, to be moved somewhere else
-            #
-            redundants = [
-                'build-base', 'gfortran', 'gnu-c++', 'lpsolve', 'wget', 'xz',
-                'asan', 'cppunit_clang', 'python-env', 'profiling',
-                'python3-env', 'path', 'h5py3']
-            templ_list = [p.replace('+', 'x')
-                          for p in self._pkgs if p not in redundants]
-
             # hm python is so lovely
             if isinstance(self._ci_config, str):
                 ci_config_args = self._ci_config
@@ -255,7 +255,7 @@ class CiTask():
                                    self._build_configuration),
                                '-DDOCKER_DISTRIB={0}'.format(self._distrib),
                                '-DDOCKER_TEMPLATES={0}'.format(self.templates()),
-                               '-DDOCKER_TEMPLATE={0}'.format('-'.join(templ_list)),
+                               '-DDOCKER_TEMPLATE={0}'.format(self.template_maker()),
                                '-DDOCKER_PROJECT_SOURCE_DIR={0}'.format(full_src)]
 
 

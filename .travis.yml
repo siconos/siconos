@@ -11,7 +11,7 @@ python: 3.6
 
 matrix:
   include:
-    - env: TASK=base:docker=true:distrib=ubuntu,14.04:targets=all,test
+    - env: TASK=base:docker=true:distrib=ubuntu,14.04:targets=docker-build,docker-cmake,docker-make,docker-make-test
     - env: TASK=siconos_ubuntu_15_04
     - env: TASK=siconos_ubuntu_16_04
     - env: TASK=siconos_ubuntu_17_04

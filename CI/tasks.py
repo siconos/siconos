@@ -11,7 +11,23 @@ A task, see :class:`machinery.ci_tasks.CiTask` must be defined with at least:
 from machinery.ci_task import CiTask
 import os
 
-# PLEASE KEEP CONFIG AS WHAT THEY MEAN.
+# not generic, to be moved somewhere else
+#
+
+class SiconosCiTask(CiTask):
+
+    def __init__(self, *args, **kwargs):
+        return super(SiconosCiTask, self).__init__(*args, **kwargs)
+    
+    def template_maker(self):
+        redundants = [
+            'build-base', 'gfortran', 'gnu-c++', 'lpsolve', 'wget', 'xz',
+            'asan', 'cppunit_clang', 'python-env', 'profiling',
+            'python3-env', 'path', 'h5py3']
+        return '-'.join([p.replace('+', 'x')
+                         for p in self._pkgs if p not in redundants])
+
+# PLEASE KEEP CONFIGS AS WHAT THEY MEAN.
 # DO NOT ADD PACKAGES IF THEY ARE NOT NECESSARY.
 
 #
@@ -19,7 +35,7 @@ import os
 # Used in driver.py.
 database = os.path.join('config', 'siconos.yml')
 
-empty = CiTask()
+empty = SiconosCiTask()
 
 base = empty.copy()(
     ci_config='default',
@@ -31,7 +47,7 @@ base = empty.copy()(
 # 2. the default task
 #
 
-default = CiTask(
+default = SiconosCiTask(
     docker=True,
     ci_config='default',
     distrib='ubuntu:16.04',
@@ -40,7 +56,7 @@ default = CiTask(
     srcs=['.'],
     targets={'.': ['docker-build', 'docker-ctest']})
 
-minimal = CiTask(
+minimal = SiconosCiTask(
     docker=True,
     ci_config='minimal',
     distrib='ubuntu:16.10',
@@ -49,7 +65,7 @@ minimal = CiTask(
     srcs=['.'],
     targets={'.': ['docker-build', 'docker-ctest']})
 
-minimal_with_python = CiTask(
+minimal_with_python = SiconosCiTask(
     docker=True,
     ci_config='minimal_with_python',
     distrib='ubuntu:16.10',
@@ -63,6 +79,9 @@ minimal_with_python = CiTask(
 #
 
 siconos_default = default
+
+print (default.template_maker())
+
 
 siconos_default_nix = default.copy()(
     ci_config='nix',
@@ -230,14 +249,14 @@ siconos_all_examples = minimal_with_python.copy()(
              'examples': ['docker-build', 'docker-ctest', 'docker-make-clean']},
     add_srcs=['examples'])
 
-siconos_test_deb = CiTask(
+siconos_test_deb = SiconosCiTask(
     docker=True,
     ci_config='examples',
     distrib='ubuntu:16.04',
     pkgs=['siconos'],
     srcs=['examples'])
 
-siconos_test_rpm = CiTask(
+siconos_test_rpm = SiconosCiTask(
     docker=True,
     ci_config='examples',
     distrib='fedora:latest',

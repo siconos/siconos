@@ -346,7 +346,7 @@ def print_commands(*args, **kwargs):
 
             for entry in entries:
                 if entry is not None:
-                    if hasattr(entry, 'has_key'):
+                    if is_dict(entry):
                         if 'command' in entry:
                             by_command.append(entry['command'])
                     elif hasattr(entry, 'sort'):
