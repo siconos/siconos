@@ -2646,10 +2646,8 @@ class Hdf5():
 
             com_translation = [0., 0., 0.]
 
-            if inertia is None and mass > 0.:
-                volumes = filter(lambda s: isinstance(s, Volume),
-                                 shapes)
-                if len(volumes) > 0:
+            if inertia is None and mass is not None and mass > 0.:
+                if any(map(lambda s: isinstance(s,Volume), shapes)):
                     # a computed inertia and center of mass
                     # occ only
                     volumes = filter(lambda s: isinstance(s, Volume),
