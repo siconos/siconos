@@ -2936,4 +2936,5 @@ double NM_norm(NumericsMatrix* A)
       assert(0 && "NM_norm unknown storageType");
     }
   }
+  return NAN;
 }
