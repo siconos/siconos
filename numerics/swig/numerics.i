@@ -282,6 +282,7 @@ namespace std11 = boost;
 // solverOptions.i, numerics_common and fwd decl
 // all this because of SolverOptions extend.
 %begin %{
+#include "SparseMatrix_internal.h" // must be before NumericsMatrix.h
 #include "relay_cst.h"
 #include "AVI_cst.h"
 #include "SOCLCP_cst.h"

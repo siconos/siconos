@@ -17,10 +17,10 @@
 */
 
 #include "debug.h"
+#include "SparseMatrix_internal.h"
 #include "NumericsMatrix_internal.h"
 #include "NumericsSparseMatrix.h"
 #include "numerics_verbose.h"
-#include "SparseMatrix_internal.h"
 
 #ifdef WITH_SUPERLU
 
