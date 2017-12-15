@@ -50,7 +50,7 @@ max_coords = (3.6e-3, 0.64)
 
 #max_coords = (7.8e-3, 0.64)
 
-if matlab_input.find('fretless') > 0:
+if matlab_input.find('fretless') >= 0:
     filt_frets = False # To select only 'real' frets
     output_name = 'fretless_e'
 else:
