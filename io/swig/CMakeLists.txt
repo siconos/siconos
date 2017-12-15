@@ -24,7 +24,7 @@ if(HAVE_SICONOS_MECHANICS)
     execute_process(COMMAND sh -c "mkdir -p '${SICONOS_SWIG_ROOT_DIR}/io'")
     execute_process(COMMAND sh -c "test -e '${SICONOS_SWIG_ROOT_DIR}/io/mechanics_io.py' || ln -vs '${CMAKE_CURRENT_SOURCE_DIR}/io/mechanics_io.py' '${SICONOS_SWIG_ROOT_DIR}/io/mechanics_io.py'")
     execute_process(COMMAND sh -c "test -e '${SICONOS_SWIG_ROOT_DIR}/io/FrictionContactTrace.py' || ln -vs '${CMAKE_CURRENT_SOURCE_DIR}/io/FrictionContactTrace.py' ${SICONOS_SWIG_ROOT_DIR}/io/FrictionContactTrace.py")
-    execute_process(COMMAND sh -c "test -e '${SICONOS_SWIG_ROOT_DIR}/io/vview.py' || ln -vs '${CMAKE_CURRENT_SOURCE_DIR}/io/vview.py' ${SICONOS_SWIG_ROOT_DIR}/io/vview.py")
+    execute_process(COMMAND sh -c "test -e '${SICONOS_SWIG_ROOT_DIR}/io/sicoons_vview' || ln -vs '${CMAKE_CURRENT_SOURCE_DIR}/io/vview.py' ${SICONOS_SWIG_ROOT_DIR}/io/siconos_vview")
 
     message("Setting up symlink install targets for io Python executables")
     install(CODE "execute_process(COMMAND sh -c \"test -e '${CMAKE_INSTALL_PREFIX}/bin/siconos_vview' || ln -vs '${CMAKE_CURRENT_SOURCE_DIR}/io/vview.py' '${CMAKE_INSTALL_PREFIX}/bin/siconos_vview' \")")
@@ -40,20 +40,20 @@ if(HAVE_SICONOS_MECHANICS)
     configure_file(io/mechanics_io.py ${SICONOS_SWIG_ROOT_DIR}/io/mechanics_io.py @ONLY)
     configure_file(io/FrictionContactTrace.py ${SICONOS_SWIG_ROOT_DIR}/io/FrictionContactTrace.py @ONLY)
 
-    configure_file(io/vview.py      ${SICONOS_SWIG_ROOT_DIR}/io/vview.py @ONLY)
-    configure_file(io/vexport.py    ${SICONOS_SWIG_ROOT_DIR}/io/vexport.py @ONLY)
-    configure_file(io/info.py       ${SICONOS_SWIG_ROOT_DIR}/io/info.py @ONLY)
-    configure_file(io/filter.py     ${SICONOS_SWIG_ROOT_DIR}/io/filter.py @ONLY)
-    configure_file(io/run.py        ${SICONOS_SWIG_ROOT_DIR}/io/run.py @ONLY)
+    configure_file(io/vview.py      ${SICONOS_SWIG_ROOT_DIR}/io/siconos_vview @ONLY)
+    configure_file(io/vexport.py    ${SICONOS_SWIG_ROOT_DIR}/io/siconos_vexport @ONLY)
+    configure_file(io/info.py       ${SICONOS_SWIG_ROOT_DIR}/io/siconos_info @ONLY)
+    configure_file(io/filter.py     ${SICONOS_SWIG_ROOT_DIR}/io/siconos_filter @ONLY)
+    configure_file(io/run.py        ${SICONOS_SWIG_ROOT_DIR}/io/siconos_run @ONLY)
     if (WITH_MECHANISMS)
-      configure_file(io/pprocess.py   ${SICONOS_SWIG_ROOT_DIR}/io/pprocess.py @ONLY)
+      configure_file(io/pprocess.py   ${SICONOS_SWIG_ROOT_DIR}/io/siconos_pprocess @ONLY)
     endif()
 
-    install(PROGRAMS ${SICONOS_SWIG_ROOT_DIR}/io/vview.py    DESTINATION bin RENAME siconos_vview)
-    install(PROGRAMS ${SICONOS_SWIG_ROOT_DIR}/io/vexport.py  DESTINATION bin RENAME siconos_vexport)
-    install(PROGRAMS ${SICONOS_SWIG_ROOT_DIR}/io/info.py     DESTINATION bin RENAME siconos_info)
-    install(PROGRAMS ${SICONOS_SWIG_ROOT_DIR}/io/filter.py   DESTINATION bin RENAME siconos_filter)
-    install(PROGRAMS ${SICONOS_SWIG_ROOT_DIR}/io/run.py      DESTINATION bin RENAME siconos_run)
+    install(PROGRAMS ${SICONOS_SWIG_ROOT_DIR}/io/siconos_vview    DESTINATION bin)
+    install(PROGRAMS ${SICONOS_SWIG_ROOT_DIR}/io/siconos_vexport  DESTINATION bin)
+    install(PROGRAMS ${SICONOS_SWIG_ROOT_DIR}/io/siconos_info     DESTINATION bin)
+    install(PROGRAMS ${SICONOS_SWIG_ROOT_DIR}/io/siconos_filter   DESTINATION bin)
+    install(PROGRAMS ${SICONOS_SWIG_ROOT_DIR}/io/siconos_run      DESTINATION bin)
     if (WITH_MECHANISMS)
       install(PROGRAMS ${SICONOS_SWIG_ROOT_DIR}/io/pprocess.py DESTINATION bin RENAME siconos_pprocess)
     endif()
@@ -61,26 +61,26 @@ if(HAVE_SICONOS_MECHANICS)
     # automatic manpages using help2man
     if (HELP2MAN)
       set(MANPAGES_FOR_TOOLS)
-      macro (GEN_MANPAGE_FROM_HELP TOOL SRC)
+      macro (GEN_MANPAGE_FROM_HELP TOOL)
         add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/man/${TOOL}.1
           COMMAND ${HELP2MAN}
             -s1 -N -o  ${CMAKE_BINARY_DIR}/man/${TOOL}.1
-            ${SICONOS_SWIG_ROOT_DIR}/${SRC}
-          DEPENDS ${SRC}
+            ${SICONOS_SWIG_ROOT_DIR}/io/${TOOL}
+          DEPENDS ${SICONOS_SWIG_ROOT_DIR}/io/${TOOL}
           WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
           COMMENT "Generating man/${TOOL}.1 using help2man"
           )
         install(FILES ${CMAKE_BINARY_DIR}/man/${TOOL}.1 DESTINATION share/man/man1)
         list(APPEND MANPAGES_FOR_TOOLS ${CMAKE_BINARY_DIR}/man/${TOOL}.1)
       endmacro()
-      GEN_MANPAGE_FROM_HELP(siconos_vview      io/vview.py)
-      GEN_MANPAGE_FROM_HELP(siconos_vexport    io/vexport.py)
-      GEN_MANPAGE_FROM_HELP(siconos_info       io/info.py)
-      GEN_MANPAGE_FROM_HELP(siconos_run        io/run.py)
-      GEN_MANPAGE_FROM_HELP(siconos_filter     io/filter.py)
+      GEN_MANPAGE_FROM_HELP(siconos_vview)
+      GEN_MANPAGE_FROM_HELP(siconos_vexport)
+      GEN_MANPAGE_FROM_HELP(siconos_info)
+      GEN_MANPAGE_FROM_HELP(siconos_run)
+      GEN_MANPAGE_FROM_HELP(siconos_filter)
       if (WITH_MECHANISMS)
         # needs --help
-        # GEN_MANPAGE_FROM_HELP(siconos_pprocess   io/pprocess.py)
+        # GEN_MANPAGE_FROM_HELP(siconos_pprocess)
       endif()
 
       add_custom_target(manpages ALL DEPENDS ${MANPAGES_FOR_TOOLS})
