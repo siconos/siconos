@@ -47,13 +47,13 @@ Documentation to be done
 #endif
 #endif
 
-/* From cs.h */
 #ifndef CS_INT
+
+/* From cs.h */
 #ifdef CS_LONG
 #define CS_INT long
 #else
 #define CS_INT int
-#endif
 #endif
 
 /* Treat CXSparse structs as opaque types.  Users may #include "cs.h"
@@ -70,7 +70,6 @@ typedef struct cs_dl_numeric cs_dln;
 typedef struct cs_di_numeric cs_din;
 
 #ifdef SICONOS_INT64 // SWIG gives syntax error for CS_NAME(_sparse)
-typedef struct cs_dl_sparse CSparseMatrix;
 #ifndef css
 #define css cs_dls
 #endif
@@ -78,7 +77,6 @@ typedef struct cs_dl_sparse CSparseMatrix;
 #define csn cs_dln
 #endif
 #else
-typedef struct cs_di_sparse CSparseMatrix;
 #ifndef css
 #define css cs_dis
 #endif
@@ -87,14 +85,14 @@ typedef struct cs_di_sparse CSparseMatrix;
 #endif
 #endif
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
-extern "C"
-{
 #endif
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
-}
+#ifdef SICONOS_INT64 // SWIG gives syntax error for CS_NAME(_sparse)
+typedef struct cs_dl_sparse CSparseMatrix;
+#else
+typedef struct cs_di_sparse CSparseMatrix;
 #endif
+
 
 /*  we use csparse from Timothy Davis
 
