@@ -65,6 +65,8 @@ if(HAVE_SICONOS_MECHANICS)
         add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/man/${TOOL}.1
           COMMAND ${HELP2MAN}
             -s1 -N -o  ${CMAKE_BINARY_DIR}/man/${TOOL}.1
+            --opt-include=${CMAKE_SOURCE_DIR}/man/${TOOL}.help2man
+            --include=${CMAKE_SOURCE_DIR}/man/footer.help2man
             ${SICONOS_SWIG_ROOT_DIR}/io/${TOOL}
           DEPENDS ${SICONOS_SWIG_ROOT_DIR}/io/${TOOL}
           WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
