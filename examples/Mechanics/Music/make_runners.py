@@ -23,7 +23,7 @@ def create_jobs(outputfile, runner, restit_node, job_name, freqs,
         for i in range(len(freqs)):
             oarline = command + ' ' + str(freqs[i]) + ' ' + str(outputs[i])
             oarline += ' ' + str(e) + ' ' + str(final_time) + ' ' + matlab_input
-            oarline + '\"'
+            oarline += '\"'
             oarline += endcommand
             oarline += str(node) + '\'\" --name=' + job_name + str(e) + '\n'  
             print(oarline)
@@ -40,7 +40,7 @@ def create_jobs(outputfile, runner, restit_node, job_name, freqs,
 final_time = 4.
 freqs = [5000, 10000]
 matlab_input = "donnees_siconos/pb1"
-create_jobs('all_one_contact.sh', 'run_one_contact.sh', {0. : 42, 0.5: 42, 1.: 42}, 'one_contact', freqs, final_time, matlab_input)
+create_jobs('all_one_contact.sh', './run_one_contact.sh', {0. : 42, 0.5: 42, 1.: 42}, 'one_contact', freqs, final_time, matlab_input)
 
 # bass and fretless campaigns
 
@@ -48,11 +48,11 @@ indices = np.arange(3, 18)
 freqs_bass = 2 ** indices * 1960
 final_time = 0.4
 matlab_input = "bass_guitar/pb2"
-create_jobs('all_bass.sh', 'run.sh', {0. : 42, 0.9: 42, 1.: 42}, 'bass', freqs_bass, final_time, matlab_input)
+create_jobs('all_bass.sh', './run.sh', {0. : 42, 0.9: 42, 1.: 42}, 'bass', freqs_bass, final_time, matlab_input)
 
 indices = np.arange(3, 16)   
 freqs_fretless = 2 ** indices * 1960
 matlab_input = "fretless_bass_guitar/bsf"
-create_jobs('all_fretless.sh', 'run.sh', {0. : 42, 0.9: 42, 1.: 42}, 'fretless', freqs_fretless, final_time, matlab_input)
+create_jobs('all_fretless.sh', './run.sh', {0. : 42, 0.9: 42, 1.: 42}, 'fretless', freqs_fretless, final_time, matlab_input)
 
 

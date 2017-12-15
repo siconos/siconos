@@ -12,7 +12,7 @@ matlab_input=$5
 ### #OAR -t timesharing=perignon,*
 
 siconos_dir=$HOME/Softs/myfork/siconos/examples/Mechanics/Music
-rundir=/nfs_scratch/$USER/Music/F_${frequency}_id_${OAR_JOB_ID}
+rundir=/nfs_scratch/$USER/Music/Single/F_${frequency}_id_${OAR_JOB_ID}
 echo $frequency ${OAR_JOB_ID} ${HOSTNAME} $output_freq $restit ${OAR_JOB_NAME}>> jobs_params
 
 mkdir -p $rundir
