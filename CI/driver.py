@@ -72,7 +72,6 @@ for o, a in opts:
         task_arg = a.split(':')
         task_name = task_arg[0]
         task_parameters = {k:v for k,v in [arg_check(x.split('=')) for x in task_arg[1:]]}
-        print (task_parameters)
         task = getattr(tasks, task_name).copy()(**task_parameters)
 
     if o in ('--list-tasks',):
@@ -80,7 +79,6 @@ for o, a in opts:
         from machinery.ci_task import CiTask
         for s in dir(tasks):
             if isinstance(getattr(tasks, s), CiTask):
-                print(s)
                 if verbose:
                     t = getattr(tasks, s)
                     t.display()

@@ -35,6 +35,7 @@ class SiconosCiTask(CiTask):
 # Used in driver.py.
 database = os.path.join('config', 'siconos.yml')
 
+
 empty = SiconosCiTask()
 
 base = empty.copy()(
