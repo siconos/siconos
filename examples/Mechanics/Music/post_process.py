@@ -9,6 +9,34 @@ import os
 
 
 
+def save_dof(fileslist, dof, from_matlab=None):
+    """Compute relative error defined in 3.36 from Clara's manuscript.
+    """
+
+    files = list(fileslist.values())
+    current_model, current_string, current_frets = load_model(files[0], from_matlab)
+    #files = [f for f in files if f != reference_file]
+    # Number of freqs taken into account
+    nbfiles = len(files)
+    # Number of dofs where errors are computed
+    nbpoints = 1
+    # Number of time instants taken into account
+    nbtimes = current_model.data_ds[current_string].shape[1]
+    # Number of contact points
+    nbfrets = len(current_frets)
+
+    # Results buffers:
+    # errors[i, j] = error for freq number i at dof j
+    dof_val= np.zeros((nbfiles, nbtimes), dtype=np.float64)
+
+    # Compute errors for all freqs
+    for i in range(nbfiles):
+        current_model, current_string, current_frets = load_model(files[i], from_matlab)
+        dof_val[i, :] = current_model.data_ds[current_string][dof, :]
+    return dof_val
+
+
+
 def compute_errors(fileslist, indices=None, from_matlab=None, shift=1):
     """Compute relative error defined in 3.36 from Clara's manuscript.
     """
@@ -31,8 +59,6 @@ def compute_errors(fileslist, indices=None, from_matlab=None, shift=1):
     nbfiles = len(files)
     # Number of dofs where errors are computed
     nbpoints = len(indices)
-    # Number of time instants taken into account
-    nbtimes = sref.shape[0]
     # Number of contact points
     nbfrets = len(ref_frets)
 
@@ -57,6 +83,59 @@ def compute_errors(fileslist, indices=None, from_matlab=None, shift=1):
         
         #errors[i, :] = np.sqrt(time_step * (((sref - scurrent) ** 2).sum(1)) / sum_ref)
         errors[i, :] = np.sqrt((((sref - scurrent) ** 2).sum(1)) / sum_ref)
+        for j in range(nbfrets):
+            ymin[i, j] = (current_model.data_interactions[current_frets[j]][:, 0]).min()
+        freqs.append(current_model.fs)
+    return errors, ymin, freqs
+
+def compute_errors_rel(fileslist, indices=None, from_matlab=None, shift=1):
+    """Compute relative error defined in 3.36 from Clara's manuscript.
+    """
+    fref = max(fileslist.keys())
+
+    # Load reference and current simulations,
+    reference_file = fileslist[fref]
+    ref_model, ref_string, ref_frets = load_model(reference_file, from_matlab)
+    # if indices is none, errors are computed for all degrees of freedom.
+    if indices is None:
+        indices = [i for i in range(ref_string.dimension())]
+
+    sref = ref_model.data_ds[ref_string][indices, ::shift]
+    #sum_ref = (sref ** 2).sum(1)
+    freqs = []
+    tref = ref_model.time[::shift]
+    files = list(fileslist.values())
+    files = [f for f in files if f != reference_file]
+    # Number of freqs taken into account
+    nbfiles = len(files)
+    # Number of dofs where errors are computed
+    nbpoints = len(indices)
+    # Number of contact points
+    nbfrets = len(ref_frets)
+
+    # Results buffers:
+    # errors[i, j] = error for freq number i at dof j
+    errors = np.zeros((nbfiles, nbpoints), dtype=np.float64)
+    # ymin[i, j] = minimal value (through time instants) of distance at contact j for freq i
+    ymin = np.zeros((nbfiles + 1, nbfrets), dtype=np.float64)
+
+    # Compute ymin for reference model
+    for j in range(nbfrets):
+        ymin[-1, j] = (ref_model.data_interactions[ref_frets[j]][:, 0]).min()
+
+    # Compute errors for all freqs
+    for i in range(nbfiles):
+        current_model, current_string, current_frets = load_model(files[i], from_matlab)
+        scurrent = current_model.data_ds[current_string][indices, :]
+        # Ensure time instants are the same for both models (ref an current)
+        time_step = current_model.time_step
+        tcurrent = current_model.time
+        assert np.allclose(tref, tcurrent), 'Error: time instants are different.'
+        
+        #errors[i, :] = np.sqrt(time_step * (((sref - scurrent) ** 2).sum(1)) / sum_ref)
+        errors[i, :] = ((((sref - scurrent) / sref ) ** 2).sum(1)) ** 0.5
+
+        
         for j in range(nbfrets):
             ymin[i, j] = (current_model.data_interactions[current_frets[j]][:, 0]).min()
         freqs.append(current_model.fs)
@@ -135,7 +214,7 @@ def plot_y(ymin, freqs, iplot=0):
     for name in ymin:        
         for j in range(ymin[name].shape[1]):
             #plt.plot(freqs[name], ymin[name][:,j])
-            plt.semilogx(freqs[name], ymin[name][:-1,j],'x:')
+            plt.loglog(freqs[name], ymin[name][:-1,j],'x:')
 
     plt.grid('on')
     plt.xlabel('Fe(Hz)')

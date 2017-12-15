@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 from matplotlib import animation
 import h5py
 import scipy.io
-
+import os
 
 class StringDS(sk.LagrangianLinearDiagonalDS):
     """Formulation for string-like structures,
@@ -24,7 +24,8 @@ class StringDS(sk.LagrangianLinearDiagonalDS):
     CLAMPED = 1
 
     def __init__(self, ndof, geometry_and_material,
-                 max_coords, damping_parameters=None, from_matlab=None):
+                 max_coords=None, damping_parameters=None,
+                 matlab_input=None):
         """Build string
 
         Parameters
@@ -41,7 +42,7 @@ class StringDS(sk.LagrangianLinearDiagonalDS):
         damping_parameters: dictionnary, optional
             constant parameters related to damping.
             keys must be ['eta_air', 'rho_air', 'delta_ve', '1/qte']
-        from_matlab: string
+        matlab_input: string
             matlab file radix, used to read freq and damping values
             read from radix_frequs.mat and radix_amortissements.mat
 
@@ -53,33 +54,67 @@ class StringDS(sk.LagrangianLinearDiagonalDS):
 
         """
         self.n_modes = ndof
-        self.density = geometry_and_material['density']
-        self.stiffness_coeff = geometry_and_material['B']
         # B is a function of Young Modulus (E),
         # moment of inertia ...
         # B = pi^2EI / (TL^2)
         self.length = geometry_and_material['length']
-        self.diameter = geometry_and_material['diameter']
-        self.tension = geometry_and_material['tension']
-        self.c0 = math.sqrt(self.tension / self.density)
         self.space_step = self.length / (self.n_modes + 1)
+        self.x = np.linspace(0, self.length, ndof + 2)
+        self.x = self.x[1:-1]
+        self.s_mat = self.compute_s_mat()
+
+
+        # - Compute operators (K, C, M)
+
+        assert damping_parameters is not None or matlab_input is not None
+        
+        # -- First case : read material/geom parameters and compute operators of the DS --
         if damping_parameters is not None:
+            assert matlab_input is None
             self.damping_parameters = damping_parameters
             msg = 'StringDS : missing parameter value for damping.'
             for name in self.__damping_parameters_names:
                 assert name in self.damping_parameters.keys(), msg
-        else:
-            assert from_matlab is not None
-        self.s_mat = self.compute_s_mat()
-        if from_matlab is not None:
-            stiffness_mat, damping_mat = self.read_linear_coeff(from_matlab)
-        else:
+
+            self.c0 = math.sqrt(self.tension / self.density)
+            self.diameter = geometry_and_material['diameter']
+            self.density = geometry_and_material['density']
+            self.stiffness_coeff = geometry_and_material['B']
+            self.tension = geometry_and_material['tension']
+
             stiffness_mat, damping_mat = self.compute_linear_coeff()
+        
+        # -- Second case : read material/geom parameters and compute operators of the DS --
+        else:
+            assert matlab_input is not None
+            current_path = os.path.dirname(os.path.realpath(__file__))
+            matlab_input = os.path.join(current_path, matlab_input)
+            stiffness_mat, damping_mat = self.read_linear_coeff(matlab_input)
         self.max_coords = max_coords
+        self.matlab_input = matlab_input
+        # - Build siconos dynamical system -
+        # -- initial conditions --
         q0 = self.compute_initial_state_modal(max_coords)
         v0 = npw.zeros_like(q0)
         super(StringDS, self).__init__(q0, v0, stiffness_mat, damping_mat)
+        self.ic_status = self.check_initial_conditions()
 
+    def check_initial_conditions(self):
+        """Compare ds initial conditions with those
+           read from matlab file.
+        """
+        # index and value of maximum of u0
+        (val, ind) = (self.u0.max(), self.u0.argmax())
+        assert np.allclose(self.x[ind], self.max_coords[1])
+        assert np.allclose(val, self.max_coords[0])
+        
+        ic_filename = self.matlab_input + '_q2.mat'
+        if os.path.exists(ic_filename):
+            q0 = scipy.io.loadmat(ic_filename)['q2'][:, 0]
+            return np.allclose(q0, self.q0(), atol=1e-6)
+        else:
+            return True
+        
     def _compute_initial_state_std(self, max_coords):
         """Set initial positions of the string,
         assuming a triangular shape, with u[imax] = umax.
@@ -100,11 +135,19 @@ class StringDS(sk.LagrangianLinearDiagonalDS):
         assuming a triangular shape, with u[imax] = umax
         and modal form.
         """
-        q0 = self._compute_initial_state_std(max_coords)
-        q0[...] = np.dot(self.s_mat.T, q0)
-        coeff = self.length / (self.n_modes + 1)
-        q0 *= coeff
-        return npw.asrealarray(q0)
+        if max_coords is None:
+            assert self.matlab_input is not None
+            inputfile = self.matlab_input + '_q2.mat'
+            q0 = scipy.io.loadmat(inputfile)['q2'][:, 0].copy()
+            self.u0 = np.dot(self.s_mat, q0)
+            self.max_coords = (self.u0.max(), self.x[self.u0.argmax()])
+            return q0
+        else:
+            self.u0 = self._compute_initial_state_std(max_coords)
+            q0 = np.dot(self.s_mat.T, self.u0)
+            coeff = self.length / (self.n_modes + 1)
+            q0 *= coeff
+            return npw.asrealarray(q0)
 
     def eigenfreq(self, j):
         """Compute eigenfrequency number j
@@ -118,15 +161,20 @@ class StringDS(sk.LagrangianLinearDiagonalDS):
         C = 2.Gamma
         from matlab files
         """
+       
         freq_file = radix + '_frequs.mat'
         damp_file = radix + '_amortissements.mat'
         nuj = scipy.io.loadmat(freq_file)['frequs'][:, 0]
-        sigmas = scipy.io.loadmat(damp_file)['sig0'][:, 0]
-        assert sigmas.size == self.n_modes
         assert nuj.size == self.n_modes
         omega2 = (2. * np.pi * nuj) ** 2
         stiffness_mat = npw.asrealarray(omega2)
-        damping_mat = 2. * npw.asrealarray(sigmas)
+        if os.path.exists(damp_file):
+            sigmas = scipy.io.loadmat(damp_file)['sig0'][:, 0]
+            assert sigmas.size == self.n_modes
+            damping_mat = 2. * npw.asrealarray(sigmas)
+        else:
+            print("Warning: no input for damping. Set damping matrix to zero.")
+            damping_mat = None
         return stiffness_mat, damping_mat
 
     def compute_linear_coeff(self):
@@ -205,7 +253,7 @@ class Fret(sk.Interaction):
     * Newton impact nonsmooth law
     * Lagrangian Linear Time-invariant relation
     """
-    def __init__(self, string, contact_positions, restitution_coeff=1.):
+    def __init__(self, string, contact_positions, restitution_coeff):
         """
         Parameters
         ----------
@@ -215,8 +263,8 @@ class Fret(sk.Interaction):
             contact_positions[0] = horizontal index position
              of the contact point
             contact_positions[1] = vertical position of the fret
-        restitution_coeff : double, optional
-            coefficient of restitution, default=1.
+        restitution_coeff : double
+            coefficient of restitution
         """
         # vertical positions of the contact points
         hmat = npw.zeros((1, string.n_modes))
@@ -226,11 +274,11 @@ class Fret(sk.Interaction):
         self.contact_pos = dx * contact_positions[0]
         # set contact index (mind that boundary points
         # are not included in fret/ds)
-        self.contact_index = contact_positions[0]# - 1
+        self.contact_index = contact_positions[0]
         # Build nslaw, relation and interaction
         e = restitution_coeff
         nslaw = sk.NewtonImpactNSL(e)
-        dist = -contact_positions[1] # - string.diameter * 0.5
+        dist = -contact_positions[1]
         relation = sk.LagrangianLinearTIR(hmat, [dist])
         super(Fret, self).__init__(nslaw, relation)
 
@@ -240,8 +288,11 @@ class Guitar(sk.Model):
     'assembly' to build a NSDS
     """
 
+    # Available settings for interactions outputs
+    __authorized_outputs__ = [1, 2, 3]
+    
     def __init__(self, strings_and_frets, time_range, fs, output_freq=1,
-                 enable_interactions_output=None,
+                 interactions_output=0,
                  integrators=None, default_integrator=None):
         """
         Parameters
@@ -263,10 +314,9 @@ class Guitar(sk.Model):
             Default = Bilbao.
         output_freq: int, optional
             output frequency for times steps
-        enable_interactions_output: bool, optional
-            if true, save interactions data every output_freq time step
-            default = false
-
+        interactions_output: int, optional
+            0: save nothing, 1: only y, 2: y + lambda(vel) 3: y + ydot + lambda
+            default = 0
         Notes
         -----
         * strings_and_frets.keys() : interactions
@@ -333,77 +383,22 @@ class Guitar(sk.Model):
             self.data_ds[ds] = npw.zeros((ndof, self.nb_time_steps_output + 1))
         # A dict of buffers to save interactions variables for all time steps
         self.data_interactions = {}
-        self.save_interactions = enable_interactions_output is not None
-        self.enable_interactions_output = enable_interactions_output
-        if enable_interactions_output == 'light':
+        self.save_interactions = interactions_output > 0
+        self.interactions_output = interactions_output
+        if self.save_interactions:
             for interaction in self.strings_and_frets:
-                nbc = interaction.dimension()
-                self.data_interactions[interaction] = \
-                    npw.zeros((self.nb_time_steps_output + 1, nbc))
-            self.save_interaction_state = self._save_light_inter
-        elif enable_interactions_output == 'all':
-            for interaction in self.strings_and_frets:
-                nbc = interaction.dimension()
-                self.data_interactions[interaction] = \
-                    npw.zeros((self.nb_time_steps_output + 1, 3 * nbc))
-            self.save_interaction_state = self._save_all_inter
-        # else:
-        #     self.save_interaction_state = lambda k, inter: None
+                self.data_interactions[interaction] = []
+                for i in range(interactions_output):
+                    self.data_interactions[interaction].append(
+                        npw.zeros(self.nb_time_steps_output + 1))
         # time instants
         self.time = npw.zeros(self.nb_time_steps_output + 1)
-        self._convert = np.ones(
-            self.nb_time_steps_output + 1, dtype=np.bool)
 
-    def _save_light_inter(self, k, interaction):
-        """Save ds positions, velocity,
-        and contact points local variables.
-
-        Parameters
-        ----------
-        k : int
-            current iteration number
-        interaction : Fret
-            interaction of interest
-        """
-        assert self.save_interactions, 'Interactions output is not enabled.'
-        nbc = interaction.dimension()
-        self.data_interactions[interaction][k, :nbc] = interaction.y(0)
-
-    def _save_all_inter(self, k, interaction):
-        """Save ds positions, velocity,
-        and contact points local variables.
-
-        Parameters
-        ----------
-        k : int
-            current iteration number
-        interaction : Fret
-            interaction of interest
-        """
-        assert self.save_interactions, 'Interactions output is not enabled.'
-        nbc = interaction.dimension()
-        self.data_interactions[interaction][k, :nbc] = interaction.y(0)
-        self.data_interactions[interaction][k, nbc:2 * nbc] = interaction.y(1)
-        self.data_interactions[interaction][k, 2 * nbc:] = interaction.lambda_(1)
-
+        # saved data state (modal or nodal)
+        self.modal_values = True
         
-    def save_ds_state_real(self, k, ds):
-        """Save ds positions, velocity,
-        and contact points local variables.
-
-        Parameters
-        ----------
-        k : int
-            current iteration number
-        ds : StringDS
-            dynamical system of interest
-        """
-        self.data_ds[ds][:, k] = np.dot(ds.s_mat, ds.q())
-        self._convert[k] = False
-
     def save_ds_state_modal(self, k, ds):
-        """Save ds positions, velocity,
-        and contact points local variables.
+        """Save ds modal positions, at iteration k
 
         Parameters
         ----------
@@ -413,28 +408,21 @@ class Guitar(sk.Model):
             dynamical system of interest
         """
         self.data_ds[ds][:, k] = ds.q()
-        self._convert[k] = True
 
-    def convert_modal_output(self, ds, indices=None):
+    def convert_modal_output(self, ds):
         """Post-processing.
-        Recover nodal values from modal output at nodes.
+        Recover nodal values from modal outputs.
 
         Parameters
         ----------
         ds : StringDS
             dynamical system of interest
-        indices : list or range, optional
-            list of time instant where modal
-            pos should be converted. Default = all
         """
-        if indices is None:
-            indices = range(self.data_ds[ds].shape[1])
-        indices = [i for i in indices if self._convert[i]]
-        self._convert[indices] = False
-        self.data_ds[ds][:, indices] = \
-            np.dot(ds.s_mat, self.data_ds[ds][:, indices])
+        self.data_ds[ds][:, :] = np.dot(ds.s_mat, self.data_ds[ds])
+        self.modal_values = False
 
-    def plot_traj(self, ds, dof=None, filename=None, iplot=0, ground=None, buff=False):
+
+    def plot_traj(self, ds, dof, filename=None, iplot=0, ground=None):
         """Plot collected data (positions ...) of a dynamical system
 
         Parameters
@@ -460,8 +448,6 @@ class Guitar(sk.Model):
         plt.figure(iplot, figsize=(17, 8))
         leg = []
         plt.subplot(2, 2, 1)
-        # plot dof - 1 because boundaries points
-        # are not included in the ds
         plt.plot(self.time, data[dof, :])
         if ground is not None:
             plt.plot((self.time[0], self.time[-1]),(ground, ground), '-')
@@ -487,13 +473,7 @@ class Guitar(sk.Model):
         plt.suptitle('displacements = f(time) at x='+str(x[dof]))
         if filename is not None:
             plt.savefig(filename)
-        if buff:
-            tab= np.zeros((self.time.shape[0], 2))
-            tab[:, 0] = self.time
-            tab[:, 1] = data[dof, :]
-            return plt, tab
-        else:
-            return plt
+        return plt
 
     def plot_modes(self, ds, times=None,
                    plot_shape=None, filename=None, iplot=1):
@@ -532,8 +512,6 @@ class Guitar(sk.Model):
             plot_y = plot_shape[1]
 
         ndof = ds.dimension()
-        x = np.linspace(0, ds.length, ndof + 2)
-        x = x[1:-1]
         plt.figure(iplot, figsize=(17, 8))
         # plt.subplot(342)
         # #f, t, Sxx = signal.spectrogram(pos[0], self.fs)
@@ -552,7 +530,7 @@ class Guitar(sk.Model):
         ymin = data[:, time_ind].min()
         for k in range(nb_points):
             plt.subplot(plot_x, plot_y, pos)
-            plt.plot(x, data[:, time_ind[k]])
+            plt.plot(ds.x, data[:, time_ind[k]])
             plt.title('mode, t=' + str(self.time[time_ind[k]]))
             ylimits = (ymin - 0.2 * abs(ymin),
                        1.1 * data[:, time_ind[k]].max())
@@ -637,8 +615,8 @@ class Guitar(sk.Model):
             return line,
 
         def animate(i):
-            x = np.linspace(0., length, ndof)
             y = self.data_ds[ds][:, i]
+            x = ds.x
             line.set_data(x, y)
             return line,
 
@@ -663,16 +641,18 @@ class Guitar(sk.Model):
         assert self.save_interactions, 'Interactions output is not enabled.'
         interactions = self.interactions_linked_to_ds(ds)
         nb_inter = len(interactions)
+        print('nb contacts : ', nb_inter)
         plt.figure(nfig, figsize=(17, 8))
         for ic in range(nb_inter):
             inter = interactions[ic]
             #nbc = inter.dimension()
             # find lambda > 0 to identify contact times
             contact_indices = np.where(
-                self.data_interactions[inter][:, 0] < 1e-9)
+                self.data_interactions[inter][:, 0] < 1e-8)
             nbcontacts = len(contact_indices[0])
             pos = inter.contact_pos
             plt.plot(self.time[contact_indices[0]], [pos, ] * nbcontacts, 'o')
         #plt.yticks(np.arange(0, nb_inter, ))
+        #    plt.xlim(0, self.time[-1])
         plt.xlabel('time')
         plt.ylabel('frets positions')
