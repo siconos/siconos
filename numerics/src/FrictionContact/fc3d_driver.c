@@ -20,6 +20,7 @@
 #include <string.h>
 #include <time.h>
 #include <float.h>
+#include <assert.h>
 
 #include "fc3d_Solvers.h"
 #include "NonSmoothDrivers.h"

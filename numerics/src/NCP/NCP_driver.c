@@ -19,6 +19,7 @@
 #include "SolverOptions.h"
 #include <assert.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 #include "NonSmoothDrivers.h"
 #include "NCP_Solvers.h"
