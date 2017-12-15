@@ -27,6 +27,7 @@ int main(void)
   convexQP_clear(&cqp);
 
   cqp.size=10;
+  cqp.m=10;
   //cqp.Callback = (CallbackCQP *)malloc(sizeof(CallbackCQP));
 
   cqp.env = &cqp;
@@ -54,11 +55,12 @@ int main(void)
   cqp.M = M;
   cqp.ProjectionOnC = &PXtest ;
   cqp.q = q;
+
   convexQP_display(&cqp);
 
   /* Call the callback */
   double x[10],  PX[10];
-  int i, n=10;
+  int i, n=cqp.size;
   for (i =0; i< n ; i++)
   {
     x[i] = i-5;
@@ -68,7 +70,6 @@ int main(void)
   {
     printf("x[%i]=%f\t",i,x[i]);   printf("PX[%i]=%f\n",i,PX[i]);
   }
-
 
 
 }

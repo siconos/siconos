@@ -17,7 +17,7 @@ void PXtest(void *cqpIn, double *x, double *PX)
 {
   ConvexQP * cqp = (ConvexQP* ) cqpIn;
   int i;
-  for (i =0; i< cqp->size ; i++)
+  for (i =0; i< cqp->m ; i++)
   {
     PX[i] = x[i];
     if (PX[i] < 3.0) PX[i]=3.0;
@@ -31,6 +31,7 @@ int main(void)
 
   convexQP_clear(&cqp);
   cqp.size=10;
+  cqp.m=10;
   //cqp.Callback = (CallbackCQP *)malloc(sizeof(CallbackCQP));
 
   cqp.env = &cqp;
@@ -43,7 +44,7 @@ int main(void)
   {
     NM_zentry(M, k, k, 1);
   }
-  NM_display(M);
+  /* NM_display(M); */
 
 
   double * q = (double *) malloc(cqp.size*sizeof(double));

@@ -103,7 +103,7 @@ extern "C"
   /** free a ConvexQPProblem
    * \param cqp the problem to free
    */
-  void freeConvexQPProblem(ConvexQP* cqp);
+  void convexQP_free(ConvexQP* cqp);
 
   /** Clear ConvexQP structure: set all pointeurs to NULL, double and int to 0.
    * \param cqp the problem to clear
@@ -115,11 +115,6 @@ extern "C"
     * \return a initialized ConvexQP struct
     */
   ConvexQP* convexQP_new(int size);
-
-  /** new ConvexQP problem
-    * \return an empty CQP
-    */
-  ConvexQP* newCQP(void);
 
   /** get the environment from the struct
    * \param cqp a ConvexQP problem

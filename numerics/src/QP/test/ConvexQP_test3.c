@@ -22,7 +22,7 @@ void PXtest(void *cqpIn, double *x, double *PX)
 {
   ConvexQP * cqp = (ConvexQP* ) cqpIn;
   int i;
-  for (i =0; i< cqp->size ; i++)
+  for (i =0; i< cqp->m ; i++)
   {
     PX[i] = x[i];
     if (PX[i] < 4.0) PX[i]=4.0;
