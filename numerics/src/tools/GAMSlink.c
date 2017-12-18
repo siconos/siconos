@@ -23,10 +23,10 @@ static inline char* strdup(const char* src)
 #include <stdbool.h>
 #include <float.h>
 
+#include "SparseMatrix_internal.h"
 #include "NumericsMatrix.h"
 #include "FrictionContactProblem.h"
 #include "SolverOptions.h"
-#include "SparseMatrix_internal.h"
 
 #ifdef HAVE_GAMS_C_API
 
