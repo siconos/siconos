@@ -649,7 +649,7 @@ class Guitar(sk.Model):
             #nbc = inter.dimension()
             # find lambda > 0 to identify contact times
             contact_indices = np.where(
-                self.data_interactions[inter][:, 0] < 1e-8)
+                self.data_interactions[inter][1][:] > 0.)# 1e-8)
             nbcontacts = len(contact_indices[0])
             pos = inter.contact_pos
             plt.plot(self.time[contact_indices[0]], [pos, ] * nbcontacts, 'o')

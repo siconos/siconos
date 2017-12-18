@@ -6,15 +6,21 @@ import matplotlib.pyplot as plt
 import matplotlib
 import numpy as np
 import os
+import scipy.io as sio
 
 
-
-def save_dof(fileslist, dof, from_matlab=None):
+def save_dof(fileslist, dof, outputfile):
     """Compute relative error defined in 3.36 from Clara's manuscript.
     """
 
     files = list(fileslist.values())
-    current_model, current_string, current_frets = load_model(files[0], from_matlab)
+    freqs = list(fileslist.keys())
+    nbfiles = len(files)
+    current_model, current_string, current_frets, e = load_model(files[0])
+    # Number of time instants taken into account
+    nbtimes = current_model.data_ds[current_string].shape[1]
+    print(nbtimes)
+        
     #files = [f for f in files if f != reference_file]
     # Number of freqs taken into account
     nbfiles = len(files)
@@ -26,30 +32,33 @@ def save_dof(fileslist, dof, from_matlab=None):
     nbfrets = len(current_frets)
 
     # Results buffers:
-    # errors[i, j] = error for freq number i at dof j
     dof_val= np.zeros((nbfiles, nbtimes), dtype=np.float64)
 
     # Compute errors for all freqs
     for i in range(nbfiles):
-        current_model, current_string, current_frets = load_model(files[i], from_matlab)
+        current_model, current_string, current_frets, e = load_model(files[i])
         dof_val[i, :] = current_model.data_ds[current_string][dof, :]
+
+    dofname = 'dof_' + str(dof)
+    matdict = {'freqs': freqs, dofname : dof_val}
+    sio.savemat(outputfile, matdict)
     return dof_val
 
 
 
-def compute_errors(fileslist, indices=None, from_matlab=None, shift=1):
+def compute_errors(fileslist, dofs=None, shift=1, savedofs=None):
     """Compute relative error defined in 3.36 from Clara's manuscript.
     """
     fref = max(fileslist.keys())
 
     # Load reference and current simulations,
     reference_file = fileslist[fref]
-    ref_model, ref_string, ref_frets = load_model(reference_file, from_matlab)
+    ref_model, ref_string, ref_frets, e = load_model(reference_file)
     # if indices is none, errors are computed for all degrees of freedom.
-    if indices is None:
-        indices = [i for i in range(ref_string.dimension())]
+    if dofs is None:
+        dofs = [i for i in range(ref_string.dimension())]
 
-    sref = ref_model.data_ds[ref_string][indices, ::shift]
+    sref = ref_model.data_ds[ref_string][dofs, ::shift]
     sum_ref = (sref ** 2).sum(1)
     freqs = []
     tref = ref_model.time[::shift]
@@ -58,49 +67,71 @@ def compute_errors(fileslist, indices=None, from_matlab=None, shift=1):
     # Number of freqs taken into account
     nbfiles = len(files)
     # Number of dofs where errors are computed
-    nbpoints = len(indices)
+    nbpoints = len(dofs)
     # Number of contact points
     nbfrets = len(ref_frets)
-
+    # Number of time instants taken into account
+    nbtimes = ref_model.data_ds[ref_string].shape[1]
+    xref = ref_string.x[dofs]
+    if savedofs is not None:
+        dofs_val = {}
+        for dof in dofs:
+            dofs_val[dof]= np.zeros((nbfiles, nbtimes), dtype=np.float64)
+            dofs_val[dof][-1, :] = ref_model.data_ds[ref_string][dof, :]
+        
     # Results buffers:
     # errors[i, j] = error for freq number i at dof j
     errors = np.zeros((nbfiles, nbpoints), dtype=np.float64)
     # ymin[i, j] = minimal value (through time instants) of distance at contact j for freq i
     ymin = np.zeros((nbfiles + 1, nbfrets), dtype=np.float64)
-
     # Compute ymin for reference model
     for j in range(nbfrets):
-        ymin[-1, j] = (ref_model.data_interactions[ref_frets[j]][:, 0]).min()
+        ymin[-1, j] = (ref_model.data_interactions[ref_frets[j]][0][:]).min()
 
     # Compute errors for all freqs
     for i in range(nbfiles):
-        current_model, current_string, current_frets = load_model(files[i], from_matlab)
-        scurrent = current_model.data_ds[current_string][indices, :]
+        current_model, current_string, current_frets,e = load_model(files[i])
+        scurrent = current_model.data_ds[current_string][dofs, :]
         # Ensure time instants are the same for both models (ref an current)
         time_step = current_model.time_step
         tcurrent = current_model.time
         assert np.allclose(tref, tcurrent), 'Error: time instants are different.'
-        
+        xcurrent = current_string.x[dofs]
+        assert np.allclose(xref, xcurrent)
         #errors[i, :] = np.sqrt(time_step * (((sref - scurrent) ** 2).sum(1)) / sum_ref)
         errors[i, :] = np.sqrt((((sref - scurrent) ** 2).sum(1)) / sum_ref)
-        for j in range(nbfrets):
-            ymin[i, j] = (current_model.data_interactions[current_frets[j]][:, 0]).min()
-        freqs.append(current_model.fs)
-    return errors, ymin, freqs
+        if savedofs is not None:
+            for dof in dofs:
+                dofs_val[dof][i, :] = current_model.data_ds[current_string][dof, :]
 
-def compute_errors_rel(fileslist, indices=None, from_matlab=None, shift=1):
+        for j in range(nbfrets):
+            ymin[i, j] = (current_model.data_interactions[current_frets[j]][0][:]).min()
+        freqs.append(current_model.fs)
+
+    if savedofs is not None:
+        frs = list(fileslist.keys())
+        matdict = {'freqs': frs}
+        outputfile = savedofs
+        for dof in dofs:
+            dofname = 'dof_' + str(dof)
+            matdict[dofname] = dofs_val[dof]
+            
+        sio.savemat(outputfile, matdict)
+    return errors, ymin, freqs, xref
+
+def compute_errors_rel(fileslist, dofs=None, shift=1):
     """Compute relative error defined in 3.36 from Clara's manuscript.
     """
     fref = max(fileslist.keys())
 
     # Load reference and current simulations,
     reference_file = fileslist[fref]
-    ref_model, ref_string, ref_frets = load_model(reference_file, from_matlab)
-    # if indices is none, errors are computed for all degrees of freedom.
-    if indices is None:
-        indices = [i for i in range(ref_string.dimension())]
+    ref_model, ref_string, ref_frets,e = load_model(reference_file)
+    # if dofs is none, errors are computed for all degrees of freedom.
+    if dofs is None:
+        dofs = [i for i in range(ref_string.dimension())]
 
-    sref = ref_model.data_ds[ref_string][indices, ::shift]
+    sref = ref_model.data_ds[ref_string][dofs, ::shift]
     #sum_ref = (sref ** 2).sum(1)
     freqs = []
     tref = ref_model.time[::shift]
@@ -109,7 +140,7 @@ def compute_errors_rel(fileslist, indices=None, from_matlab=None, shift=1):
     # Number of freqs taken into account
     nbfiles = len(files)
     # Number of dofs where errors are computed
-    nbpoints = len(indices)
+    nbpoints = len(dofs)
     # Number of contact points
     nbfrets = len(ref_frets)
 
@@ -121,12 +152,12 @@ def compute_errors_rel(fileslist, indices=None, from_matlab=None, shift=1):
 
     # Compute ymin for reference model
     for j in range(nbfrets):
-        ymin[-1, j] = (ref_model.data_interactions[ref_frets[j]][:, 0]).min()
+        ymin[-1, j] = (ref_model.data_interactions[ref_frets[j]][0][:]).min()
 
     # Compute errors for all freqs
     for i in range(nbfiles):
-        current_model, current_string, current_frets = load_model(files[i], from_matlab)
-        scurrent = current_model.data_ds[current_string][indices, :]
+        current_model, current_string, current_frets,e = load_model(files[i])
+        scurrent = current_model.data_ds[current_string][dofs, :]
         # Ensure time instants are the same for both models (ref an current)
         time_step = current_model.time_step
         tcurrent = current_model.time
@@ -137,24 +168,24 @@ def compute_errors_rel(fileslist, indices=None, from_matlab=None, shift=1):
 
         
         for j in range(nbfrets):
-            ymin[i, j] = (current_model.data_interactions[current_frets[j]][:, 0]).min()
+            ymin[i, j] = (current_model.data_interactions[current_frets[j]][0][:]).min()
         freqs.append(current_model.fs)
     return errors, ymin, freqs
 
 
 
-def check_time_vectors(filelist, from_matlab=None):
+def check_time_vectors(filelist):
     """Compute relative error defined in 3.36 from Clara's manuscript.
     """
 
     # Load reference and current simulations,
     reference_file = filelist[-1]
-    ref_model, ref_string, ref_frets = load_model(reference_file, from_matlab)
+    ref_model, ref_string, ref_frets,e = load_model(reference_file)
     tref = ref_model.time
     nbfiles = len(filelist) - 1
     for i in range(nbfiles):
         if os.path.exists(filelist[i]):
-            current_model, current_string, current_frets = load_model(filelist[i], from_matlab)
+            current_model, current_string, current_frets,e = load_model(filelist[i])
             tcurrent = current_model.time[:]
             print("check i ... ", i)
             assert np.allclose(tcurrent, tref)
@@ -162,11 +193,11 @@ def check_time_vectors(filelist, from_matlab=None):
             print('Missing file ' + filelist[i] + ' - Skip')
 
 
-def plot_campaign(campaign, indices, from_matlab=None, fig=39):
+def plot_campaign(campaign, dofs, fig=39):
     freqs = campaign['freqs']
     filelist = campaign['files_converted']
     myticks = ['o-', 'x-', '^-', '*-', '+-'] * 200 
-    errors = compute_errors(filelist, indices, from_matlab)
+    errors = compute_errors(filelist, dofs)
     print(errors)
     print(freqs)
     plt.figure(fig)
@@ -180,19 +211,18 @@ def plot_campaign(campaign, indices, from_matlab=None, fig=39):
  
 
 
-def plot_errors(errors, freqs, dof, iplot=0):
-    plt.figure(iplot, figsize=(17, 8))
+def plot_errors(errors, freqs, dof, xref, iplot=0, figures_path=None):
+    plt.figure(iplot, figsize=(17, 17))
     tickslabels = ['o:', '^:', '*:'] * 3
     i=0
     leg = []
     for name in errors:
-        
         ref_error = errors[name]
         ref_freqs = freqs[name]
-        plt.loglog(ref_freqs, ref_error[:,dof], tickslabels[i])
-        i += 1
+        plt.loglog(ref_freqs, ref_error[:, dof], tickslabels[i])
         leg.append(name)
         plt.grid(True,which="both",ls="-")
+    plt.title("Convergence, x=" + str(xref[name][dof])) # ...
     #ax.yaxis.set_major_locator(matplotlib.ticker.MultipleLocator(0.1))
     #ax.yaxis.set_ticks(np.arange(-2, 2, 0.025))
     #    major_ticks = np.arange(0, 1, 0.2)                                              
@@ -205,16 +235,19 @@ def plot_errors(errors, freqs, dof, iplot=0):
     #plt.grid('on')
     plt.xlabel('Fe(Hz)')
     plt.ylabel('error')
+    if figures_path is not None:
+        plt.savefig(os.path.join(figures_path, 'cvg_x='  + str(xref[name][dof]) + '.pdf'))
     return plt
 
 def plot_y(ymin, freqs, iplot=0):
 
     plt.figure(iplot, figsize=(17, 8))
     #leg = []
-    for name in ymin:        
+    for name in ymin:
+        print(ymin[name].shape)
         for j in range(ymin[name].shape[1]):
             #plt.plot(freqs[name], ymin[name][:,j])
-            plt.loglog(freqs[name], ymin[name][:-1,j],'x:')
+            plt.semilogx(freqs[name][:], ymin[name][:-1,j],'x:')
 
     plt.grid('on')
     plt.xlabel('Fe(Hz)')
@@ -250,17 +283,17 @@ if __name__ == "__main__":
     from simulation_campaigns import campaign_14112017 as campaign09, campaign_16112017 as campaign0
     freqs = campaign09['freqs']
     filelist = campaign09['files']
-    indices = [i for i in range(3, 820)]
-    errors09 = compute_errors(filelist, indices)
+    dofs = [i for i in range(3, 820)]
+    errors09 = compute_errors(filelist, dofs)
 
     freqs0 = campaign09['freqs']
     assert (freqs0 == freqs).all()
     filelist = campaign0['files']
-    errors0 = compute_errors(filelist, indices)
+    errors0 = compute_errors(filelist, dofs)
 
     plt.figure()
     #plt.plot(np.log10(freqs[:-1]), np.log10(errors), 'o-')
-    for j in range(len(indices)):
+    for j in range(len(dofs)):
         plt.loglog(freqs[:-1], errors09[:, j], 'o-')
         plt.loglog(freqs[:-1], errors0[:, j], 'x-')
     plt.xlabel("$F_e$(Hz)")

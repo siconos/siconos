@@ -159,6 +159,7 @@ def load_model(filename, visu=True):
                           interactions_output=interactions_output)
     guitar_model.time[...] = h5file['times']
     guitar_model.data_ds[string][...] = h5file['dof']
+    guitar_model.modal_values = h5file.attrs['modal']
     if guitar_model.save_interactions:
         for ic in range(nb_frets):
             interaction = frets[ic]
@@ -166,7 +167,7 @@ def load_model(filename, visu=True):
             for i in range(guitar_model.interactions_output):
                 guitar_model.data_interactions[interaction][i][...] = h5file[ref][:, i]
     h5file.close()
-    return guitar_model, string, frets
+    return guitar_model, string, frets, restit
 
 
 def load_convert_and_save(filename):
