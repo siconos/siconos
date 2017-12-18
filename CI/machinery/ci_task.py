@@ -165,7 +165,7 @@ class CiTask(object):
             # WARNING: remember that default arg are mutable in python
             # http://docs.python-guide.org/en/latest/writing/gotchas/
 
-            new_targets = dict()
+            new_targets = self._targets
 
             new_distrib = None
 
@@ -191,13 +191,11 @@ class CiTask(object):
                 new_srcs = list(filter(lambda p: p not in remove_srcs, srcs))
 
             if add_targets is not None:
-                for src in new_srcs:
-                    new_targets[src] += add_targets
+                new_targets[add_targets[0]] += add_targets[1:]
 
             if remove_targets is not None:
-                for src in new_srcs:
-                    new_targets[src] = list(
-                        filter(lambda p: p not in remove_targets, self._targets[src]))
+                new_targets[remove_targets[0]] = list(
+                    filter(lambda p: p not in remove_targets[1:], new_targets[remove_targets[0]]))
 
             if add_directories is not None:
                 directories = self._directories + add_directories
@@ -205,8 +203,7 @@ class CiTask(object):
                 directories = self._directories
 
             if type(targets) == list:
-                for src in new_srcs:
-                    new_targets[src] = targets
+                new_targets[targets[0]] = targets[1:]
             else:
                 assert type(targets) == dict
                 new_targets = targets
@@ -232,6 +229,7 @@ class CiTask(object):
         return_code = 0
 
         for src in self._srcs:
+
             # --- Path to CMakeLists.txt ---
             full_src = os.path.join(root_dir, src)
 
@@ -269,7 +267,7 @@ class CiTask(object):
                 cmake_args.append('-DDOCKER_SHARED_DIRECTORIES={0}'.format(
                     ';'.join(self._directories)))
 
-            # for examples ..
+            # for other source directories
             if self._docker and not os.path.samefile(root_dir, full_src):
                 cmake_args.append('-DDOCKER_SHARED_DIRECTORIES={:}'.format(
                     root_dir))
@@ -296,7 +294,7 @@ class CiTask(object):
                     print (msg)
 
             except Exception as error:
-                return_code = 1
+                print src, self._targets
                 raise error
 
         return return_code

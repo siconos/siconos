@@ -51,27 +51,42 @@ for o, a in opts:
 
     if o in ('--task',):
         import tasks
-        def arg_check(kv):
-            k=kv[0]
-            v=kv[1]
+        
+        def arg_check(acc, kv):
+            k, v = kv.split('=')
+            return_val = None
+            
             if k[-1] == '+':
                 k = 'add_{0}'.format(str(k[:-1]))
 
             elif k[-1] == '-':
                 k = 'remove_{0}'.format(str(k[:-1]))
 
-            if v.lower() in ['false','off']:
-                return k,False
-            elif v.lower() in ['true','on']:
-                return k,True
+            if v.lower() in ['false', 'off']:
+                return_val = False
+            
+            elif v.lower() in ['true', 'on']:
+                return_val = True
+
             elif ',' in v:
-                l = list(filter(lambda s: s != '', v.split(',')))
-                return k,l
+                return_val = list(filter(lambda s: s != '', v.split(',')))
+                
             else:
-                return k,v
+                return_val = v
+
+            if k in acc:
+                if type(acc[k]) == list:
+                    l = acc[k]
+                    acc[k] = {l[0]:l[1:]}
+                acc[k][return_val[0]] = return_val[1:]
+            else:
+                acc[k] = return_val
+
+            return acc
+                
         task_arg = a.split(':')
         task_name = task_arg[0]
-        task_parameters = {k:v for k,v in [arg_check(x.split('=')) for x in task_arg[1:]]}
+        task_parameters = reduce(arg_check, task_arg[1:], dict())
         task = getattr(tasks, task_name).copy()(**task_parameters)
 
     if o in ('--list-tasks',):
@@ -127,7 +142,6 @@ if run:
 
         print('return code {0}'.format(return_code))
 
-
     if not dry_run:
         for task in tasks:
             try:
@@ -137,6 +151,5 @@ if run:
             except Exception as e:
                 return_code += 1
                 sys.stderr.write(str(e))
-
 
     exit(return_code)

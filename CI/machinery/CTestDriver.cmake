@@ -141,7 +141,10 @@ set( dashboard_cache "
 include(ProcessorCount)
 ProcessorCount(NP)
 set(CTEST_PARALLEL_LEVEL ${NP})
-
+if(NOT NP EQUAL 0)
+  set(CTEST_BUILD_FLAGS -j${NP})
+  set(ctest_test_args ${ctest_test_args} PARALLEL_LEVEL ${NP})
+endif()
 ctest_start("${MODE}")
 if(FROM_REPO)
   ctest_update()

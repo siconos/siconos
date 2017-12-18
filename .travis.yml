@@ -8,9 +8,25 @@ service: docker
 language: python
 python: 3.6
 
+# TASK line is of the form <config>:<parameters>
+# where <config> is a known config in tasks.py
 #
-# tasks
+# each parameter is of the form of <kwd>=<value>
+# where:
+#   - <kwd> is a named keyword accepted by ci_task.copy function
+#   - <value> can be:
+#       - a string
+#       - a list if ',' is present (i.e. "value," is the list [value] of one element)
 #
+# If kwd is present several times, associated values must be lists. In
+# this case a dictionay is incrementally built with the first element of the list as
+# the key, and the remaining as the associated internal value. This
+# concerns the targets keyword.
+#
+# Distributions are passed as lists of two elements the name and the version 
+
+
+
 env:
   - TASK=default:distrib=ubuntu,14.04
   - TASK=default:distrib=ubuntu,15.04
@@ -19,18 +35,21 @@ env:
   - TASK=default:distrib=ubuntu,17.10
   - TASK=default:distrib=debian,latest
   - TASK=default:distrib=fedora,latest
-  - TASK=default:distrib=ubuntu_17_04:ci_config=with_cxx11
+  
+  - TASK=default:distrib=ubuntu,17.04:ci_config=with_cxx11
   - TASK=default:pkgs+=lpsolve,
   - TASK=default:ci_config=nix:distrib=nixos/nix,latest
+  
   - TASK=default:distrib=ubuntu,17.04:ci_config=no_cxx:pkgs-=gnu-c++,
   - TASK=default:distrib=ubuntu,17.04:build_configuration=Profiling:pkgs+=profiling
   - TASK=default:distrib=fedora,latest:ci_config=with_umfpack:pkgs-=atlas-lapack,python-env:pkgs+=openblas-lapacke,python3-env,umfpack
+
   - TASK=default:pkgs-=atlas-lapack:pkgs+=openblas-lapacke
   - TASK=default:ci_config=with_serialization:pkgs+=serialization
   - TASK=default:ci_config=with_mumps:pkgs+=mumps
   - TASK=default:ci_config=with_umfpack:pkgs+=umfpack
   - TASK=default:ci_config=with_dev_mode_strict
-  
+
   - TASK=default:distrib=ubuntu,17.04:ci_config=with_bullet,with_py3:pkgs-=python-env:pkgs+=clang-3.9,bullet,cppunit_clang-3.9,wget,xz,python3-env,path,h5py3
   - TASK=default:distrib=ubuntu,17.04:ci_config=with_asan_clang,with_mumps,with_hdf5,with_serialization,with_py3:pkgs+=mumps,hdf5,serialization:build_configuration=Debug
   - TASK=default:distrib=debian,jessie:ci_config=with_msan:pkgs+=clang-3.8,libcxx_msan,wget,xz,path:build_configuration=Debug
@@ -38,6 +57,12 @@ env:
   - TASK=default:distrib=fedora,latest:ci_config=with_asan,with_mumps,with_hdf5,with_serialization:cmake_cmd=Build/ci-scripts/fedora-mpi.sh:pkgs+=mumps,hdf5,asan,serialization,path,wget:build_configuration=Debug
 
   # examples...
+  - TASK=minimal_with_python:ci_config=examples_all:pkgs+=bullet,:srcs+=examples,:targets=.,docker-build,docker-cmake,docker-make,docker-make-install,docker-make-clean:targets=examples,docker-build,docker-ctest,docker-make-clean
+  - TASK=minimal_with_python:ci_config=examples_all:pkgs+=bullet,h5py:srcs+=examples,:targets=.,docker-build,docker-cmake,docker-make,docker-make-install,docker-make-clean:targets=examples,docker-build,docker-ctest,docker-make-clean
+
+  # siconos package
+  - TASK=empty:ci_config=examples:distrib=ubuntu,16.04:pkgs=siconos,:srcs=examples,
+  - TASK=empty:ci_config=examples:distrib=fedora,latest:pkgs=siconos,:srcs=examples,
   
 before_script:
   - case $TASK in
@@ -54,7 +79,7 @@ before_script:
 
 script:
   - if test "$TRAVIS" = true; then
-      ../CI/driver.py --run --root-dir=.. --task=$TASK;
+      ../CI/driver.py --run --root-dir=.. --task="$TASK";
     else
       ../CI/driver.py --run --root-dir=..;
     fi

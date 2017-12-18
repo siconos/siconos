@@ -251,14 +251,12 @@ siconos_all_examples = minimal_with_python.copy()(
     add_srcs=['examples'])
 
 siconos_test_deb = SiconosCiTask(
-    docker=True,
     ci_config='examples',
     distrib='ubuntu:16.04',
     pkgs=['siconos'],
     srcs=['examples'])
 
 siconos_test_rpm = SiconosCiTask(
-    docker=True,
     ci_config='examples',
     distrib='fedora:latest',
     pkgs=['siconos'],
