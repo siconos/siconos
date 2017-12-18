@@ -38,8 +38,8 @@ def create_jobs(outputfile, runner, restit_node, job_name, freqs,
 # single contact
 
 final_time = 4.
-freqs = [5000, 10000]
-matlab_input = "donnees_siconos/pb1"
+freqs = [5000, 10000, 100000, 1000000, 10000000, 100000000]
+matlab_input = "one_contact/pb1"
 create_jobs('all_one_contact.sh', './run_one_contact.sh', {0. : 42, 0.5: 42, 1.: 42}, 'one_contact', freqs, final_time, matlab_input)
 
 # bass and fretless campaigns
