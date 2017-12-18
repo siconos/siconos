@@ -21,6 +21,7 @@ def build_frets_from_file(string, restitution_coeff, matlab_frets_file, filt, vi
         i_frets = np.where(diff > 1e-4)[0][1::2]
     else:
         i_frets = np.arange(all_frets_positions.size)
+
     x_frets = string.x[i_frets]
     y_frets = all_frets_positions[i_frets]
     nb_frets = y_frets.size
@@ -139,7 +140,6 @@ def load_model(filename, visu=True):
     G_string = {
         'length': length,
         }
-        
     # -- The dynamical system --
     string = StringDS(n_modes, geometry_and_material=G_string,
                       max_coords=max_coords,
@@ -147,6 +147,7 @@ def load_model(filename, visu=True):
 
     # -- The interactions --
     frets_file = matlab_input + '_h.mat'
+    filt_frets=True
     interactions = build_frets_from_file(string, restit, frets_file, filt_frets, visu)
 
     frets = list(interactions.keys())

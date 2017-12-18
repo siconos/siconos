@@ -35,8 +35,8 @@ else:
     fs = 5000.
     output_freq = 1
     restit = 1.
-    final_time = 1.
-    matlab_input = 'donnees_siconos/pb1'
+    final_time = 3.
+    matlab_input = 'one_contact/pb1'
 
 
 number_of_modes = 999
@@ -48,7 +48,7 @@ initial_time = 0.
 
 max_coords = None#(1., 0.5)
 
-filt_frets = False
+filt_frets = True
 output_name = 'single_e'
 output_name += str(restit)
 
@@ -72,13 +72,13 @@ string = StringDS(number_of_modes, geometry_and_material=G_string,
                   matlab_input=matlab_input)
 
 # -- The interactions --
-#frets_file = os.path.join(current_path, matlab_input) + '_h.mat'
-#interactions = build_frets_from_file(string, restit, frets_file, filt_frets, visu)
+frets_file = os.path.join(current_path, matlab_input) + '_h.mat'
+interactions = build_frets_from_file(string, restit, frets_file, filt_frets, visu)
 
-interactions = {}
-frets = []
-frets = [Fret(string, contact_positions=(499, 1.), restitution_coeff=restit)]
-interactions[frets[0]] = string
+#interactions = {}
+#frets = []
+#frets = [Fret(string, contact_positions=(499, 0.), restitution_coeff=restit)]
+#interactions[frets[0]] = string
 
 
 frets = list(interactions.keys())
@@ -91,7 +91,7 @@ guitar_model = Guitar(interactions, [initial_time, final_time],
 
 # Save initial state
 guitar_model.time[0] = initial_time
-#guitar_model.save_ds_state_modal(0, string)
+guitar_model.save_ds_state_modal(0, string)
 
 buff = guitar_model.data_interactions
 for i in range(nb_frets):
@@ -101,7 +101,7 @@ for i in range(nb_frets):
 print('Ready to start simulation for frequency {0}.'.format(fs))
 print('Save output every {0} time steps.'.format(output_freq))
 msg = 'Read data from files :\n'
-#msg += '- neck profile:' + frets_file
+msg += '- neck profile:' + frets_file
 msg += '\n- eigenfrequencies: ' + matlab_input + '_frequs.mat\n'
 msg += '- damping: ' + matlab_input + '_amortissements.mat\n'
 print(msg)

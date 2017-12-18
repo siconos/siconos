@@ -418,8 +418,9 @@ class Guitar(sk.Model):
         ds : StringDS
             dynamical system of interest
         """
-        self.data_ds[ds][:, :] = np.dot(ds.s_mat, self.data_ds[ds])
-        self.modal_values = False
+        if self.modal_values:
+            self.data_ds[ds][:, :] = np.dot(ds.s_mat, self.data_ds[ds])
+            self.modal_values = False
 
 
     def plot_traj(self, ds, dof, filename=None, iplot=0, ground=None):
@@ -522,7 +523,7 @@ class Guitar(sk.Model):
         # plt.subplot(343)
         # output frequency, for modes
         
-        self.convert_modal_output(ds, time_ind)
+        self.convert_modal_output(ds)
         data = self.data_ds[ds]
         interactions = self.interactions_linked_to_ds(ds)
         nbc = len(interactions)
