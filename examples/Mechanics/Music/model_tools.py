@@ -172,14 +172,14 @@ def load_model(filename, visu=True):
 
 def load_convert_and_save(filename):
     # Load hdf5 file to set model and string
-    ref_model, ref_string, ref_frets = load_model(filename)
+    ref_model, ref_string, ref_frets, restit = load_model(filename)
     # Convert (modal to real) displacements
     ref_model.convert_modal_output(ref_string)
     outputfilename = 'converted_' + os.path.basename(filename)
     dirname = os.path.dirname(filename)
     outputfilename = os.path.join(dirname, outputfilename)
     source = h5py.File(filename,'r')
-    restit = source.attrs['restit']
+    #restit = source.attrs['restit']
     filt_frets = source.attrs['filter frets']
     matlab_data = source.attrs['matlab_data']
     print("Write new 'converted' file " + outputfilename)

@@ -454,7 +454,8 @@ class Guitar(sk.Model):
             plt.plot((self.time[0], self.time[-1]),(ground, ground), '-')
         plt.subplot(2, 2, 2)
         plt.plot(self.time, data[dof, :], 'x-')
-        plt.xlim(0, 0.008)
+        #plt.xlim(0, 0.008)
+        plt.xlim(0.47, 0.52)
         if ground is not None:
             plt.plot((self.time[0], self.time[-1]),(ground, ground), '-x')
 
