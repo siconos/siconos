@@ -77,8 +77,9 @@ def post_process_simus(filepath, remote_results_path, local_results_path, output
         node = current[2].strip('luke')
         coeff = current[4]
         name = current[5]
+        prefix = name[:-3] + '_e' + name[-3:] + '_862_'
         resultsfile = os.path.join('F_' + freq + '_id_' + jobid)
-        fname = 'g_862_' + freq + '.h5'
+        fname = prefix + freq + '.h5'
         fullname  = os.path.join(resultsfile, fname)
         conv_fullname = os.path.join(resultsfile, 'converted_' + fname)
         if name not in campaigns.keys():
