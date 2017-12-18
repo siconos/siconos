@@ -7,8 +7,21 @@ On remote server (i.e. where simulations have been run, probably Luke):
 * first, create pkl file, e.g.
 
 from simulation_campaigns import post_process_simus
-camp, running = post_process_simus('./Simus_results_short/', '/nfs_scratch/perignon/Music', './Results_short_bass_1312', 'campaign_short_1312.pkl')
+camp, running = post_process_simus('./', '/nfs_scratch/perignon/Music', './Results_short_bass_1312', 'campaign_short_1312.pkl')
 
+==> write a pkl file which contains all informations concerning finished jobs. Running contains the list of job ids which are not finished.
+
+Args:
+1 : path to stdout/stderr files
+2 : path (remote) to h5 files (results)
+3 : path (local) where results (h5 files) should transfered
+4 : name of pkl
+
+2 and 3 will be used to produce 'transfert.sh' which contains commands like 'scp remote_path:...h5 local_path'
+
+* transfert (or commit) pkl file on local server (where post-proc routines will be executed)
+
+* use prepare_post_processing notebook on pkl file.
 
 
 """
