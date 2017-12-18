@@ -1,4 +1,16 @@
 """Save campaigns parameters : map oar job ids, dates, frequencies ...
+
+Usage:
+
+On remote server (i.e. where simulations have been run, probably Luke):
+
+* first, create pkl file, e.g.
+
+from simulation_campaigns import post_process_simus
+camp, running = post_process_simus('./Simus_results_short/', '/nfs_scratch/perignon/Music', './Results_short_bass_1312', 'campaign_short_1312.pkl')
+
+
+
 """
 import numpy as np
 import os
@@ -14,7 +26,7 @@ def get_job_duration(filename):
         if res[i].find("Duration") > -1:
             duration = res[i].split('Duration:  ')[-1]
             return jobid, duration.split('\n')[0]
-
+    return jobid, -1
 
 def post_process_simus(filepath, remote_results_path, local_results_path, outputfile):
     """
@@ -33,9 +45,13 @@ def post_process_simus(filepath, remote_results_path, local_results_path, output
     # All 'stdout' files in filepath
     files = glob.glob(os.path.join(filepath, '*.stdout'))
     durations = {}
+    running_jobs = []
     for file in files:
         jobid, duration = get_job_duration(file)
-        durations[jobid] = duration
+        if float(duration) > -1: # only finished jobs are taken into account
+            durations[jobid] = duration
+        else:
+            running_jobs.append(jobid)
 
     parameters_file_name = os.path.join(filepath, 'jobs_params')
     parameters_file = open(parameters_file_name, 'r')
@@ -60,7 +76,7 @@ def post_process_simus(filepath, remote_results_path, local_results_path, output
     output = open(outputfile, 'wb')
     pickle.dump(campaigns, output)
     output.close()
-    return campaigns
+    return campaigns, running_jobs
 
 
 def get_finished_jobs(campaign, filename):
