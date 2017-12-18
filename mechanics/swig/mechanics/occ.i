@@ -1,9 +1,8 @@
 // -*- c++ -*-
 // SWIG interface for Siconos Mechanics/Occ
-%module(package="siconos.mechanics", directors="1", allprotected="1") occ
+%module(package="mechanics", directors="1", allprotected="1") occ
 
-%include collision/base.i
-%include collision/native.i
+%include contact_detection/base.i
 
 // do not wrap visitor visit : this leads to a huge amount of wrapper
 // code generation and this fails at compile time on shared_ptr freearg
@@ -126,50 +125,47 @@ typedef Interaction Interaction;
   }
 %}
 
+<<<<<<< Updated upstream
+=======
 %feature("nodirector") Geometer;
-PY_FULL_REGISTER(Geometer);
+PY_FULL_REGISTER(Geometer, Mechanics);
 
+>>>>>>> Stashed changes
 %feature("nodirector") ContactShapeDistance;
-PY_FULL_REGISTER(ContactShapeDistance);
+PY_FULL_REGISTER(ContactShapeDistance, Mechanics);
 
 %feature("nodirector") OccContactShape;
-PY_FULL_REGISTER(OccContactShape);
+PY_FULL_REGISTER(OccContactShape, Mechanics);
 
 %feature("nodirector") OccContactFace;
-PY_FULL_REGISTER(OccContactFace);
+PY_FULL_REGISTER(OccContactFace, Mechanics);
 
 %feature("nodirector") OccContactEdge;
-PY_FULL_REGISTER(OccContactEdge);
+PY_FULL_REGISTER(OccContactEdge, Mechanics);
 
 %feature("nodirector") Geometer::visit;
-PY_FULL_REGISTER(Geometer);
+PY_FULL_REGISTER(Geometer, Mechanics);
 
 %feature("nodirector") ContactPoint;
-PY_FULL_REGISTER(ContactPoint);
+PY_FULL_REGISTER(ContactPoint, Mechanics);
 
 %feature("nodirector") OccBody;
-PY_FULL_REGISTER(OccBody);
+PY_FULL_REGISTER(OccBody, Mechanics);
 
 %feature("nodirector") OccR;
-PY_FULL_REGISTER(OccR);
+PY_FULL_REGISTER(OccR, Mechanics);
 
 %feature("nodirector") OccTimeStepping;
-PY_FULL_REGISTER(OccTimeStepping);
+PY_FULL_REGISTER(OccTimeStepping, Mechanics);
 
 %feature("nodirector") OccSpaceFilter;
-PY_FULL_REGISTER(OccSpaceFilter);
+PY_FULL_REGISTER(OccSpaceFilter, Mechanics);
 
 %{
 #include <cadmbtb.hpp>
 %}
 
 %include <cadmbtb.hpp>
-
-%{
-#include <OccUtils.hpp>
-%}
-
-%include <OccUtils.hpp>
 
 %inline
 %{
