@@ -126,7 +126,7 @@ int main(int argc, char* argv[])
     SP::NonSmoothLaw nslaw(new NewtonImpactNSL(e));
     SP::Relation relation(new LagrangianLinearTIR(H));
 
-    SP::Interaction inter(new Interaction(1, nslaw, relation));
+    SP::Interaction inter(new Interaction(nslaw, relation));
 
     // -------------
     // --- Model ---
@@ -189,7 +189,7 @@ int main(int argc, char* argv[])
     SP::SiconosVector p = bar->p(1);
     SP::SiconosVector Lambda = inter->lambda(1);
     SP::SiconosVector lambdaminus = inter->lambda(2);
-    SP::SiconosVector lambdaplus = ((inter->lambdaMemory(2))->getSiconosVector(0) );
+    const SiconosVector& lambdaplus = inter->lambdaMemory(2).getSiconosVector(0);
     SP::SiconosVector y = inter->y(0);
     int k = 0;
     dataPlot(k,0) = impactingBar->t0();
@@ -198,7 +198,7 @@ int main(int argc, char* argv[])
     dataPlot(k,3) = (*p)(0);
     dataPlot(k,4) = (*Lambda)(0);
     dataPlot(k,11) = (*lambdaminus)(0); // lambda1_{k+1}^-
-    dataPlot(k,12) = (*lambdaplus)(0);;
+    dataPlot(k,12) = (lambdaplus)(0);
 
     dataPlot(k,7) = (*q)(nDof-1);
     dataPlot(k,8) = (*v)(nDof-1);
@@ -251,7 +251,7 @@ int main(int argc, char* argv[])
       dataPlot(k,4) = (*Lambda)(0);
 
       dataPlot(k,11) = (*lambdaminus)(0); // lambda1_{k+1}^-
-      dataPlot(k,12) = (*lambdaplus)(0);;
+      dataPlot(k,12) = lambdaplus(0);;
 
       dataPlot(k,7) = (*q)(nDof-1);
       dataPlot(k,8) = (*v)(nDof-1);

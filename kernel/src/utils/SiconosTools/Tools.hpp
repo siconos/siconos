@@ -28,6 +28,11 @@
 #include <vector>
 #include <deque>
 
+#include "SiconosPointers.hpp"
+
+/** A vector of unsigned integers used in some cases in kernel */
+TYPEDEF_TPL1_SPTR(UnsignedIntVector, std::vector, unsigned int)
+
 /** Type used for inside-class allocation checking */
 typedef std::deque<bool> AllocationFlags;
 

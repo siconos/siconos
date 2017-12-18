@@ -15,11 +15,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
+#include "SimpleMatrix.hpp"
 #include "FirstOrderLinearTIR.hpp"
 #include "Interaction.hpp"
 #include "BlockVector.hpp"
 #include "SimulationGraphs.hpp"
-
 #include <iostream>
 
 //#define DEBUG_STDOUT

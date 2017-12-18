@@ -151,12 +151,12 @@ void fc3d_nsgs_velocity(FrictionContactProblem* problem, double *reaction, doubl
     (*computeError)(problem, reaction , velocity, tolerance, options, norm_q,  &error);
 
     if (verbose > 0)
-      printf("----------------------------------- FC3D - NSGS_VELOCITY - Iteration %i Residual = %14.7e\n", iter, error);
+      printf("--------------- FC3D - NSGS_VELOCITY - Iteration %i Residual = %14.7e\n", iter, error);
 
     if (error < tolerance) hasNotConverged = 0;
     *info = hasNotConverged;
   }
-  printf("----------------------------------- FC3D - NSGS_VELOCITY - # Iteration %i Final Residual = %14.7e\n", iter, error);
+  printf("--------------- FC3D - NSGS_VELOCITY - # Iteration %i Final Residual = %14.7e\n", iter, error);
   dparam[0] = tolerance;
   dparam[1] = error;
   iparam[7] = iter;
@@ -185,7 +185,7 @@ int fc3d_nsgs_velocity_setDefaultSolverOptions(SolverOptions* options)
   options->iparam[0] = 1000;
   options->dparam[0] = 1e-4;
   options->internalSolvers = (SolverOptions *)malloc(sizeof(SolverOptions));
-  fc3d_onecontact_nonsmooth_Newtow_setDefaultSolverOptions(options->internalSolvers);
+  fc3d_onecontact_nonsmooth_Newton_setDefaultSolverOptions(options->internalSolvers);
 
   return 0;
 }

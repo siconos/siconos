@@ -48,6 +48,7 @@ if(WITH_${COMPONENT}_TESTING)
   BEGIN_TEST(src/modelingTools/test)
   
   NEW_TEST(testModelingTools
+    FirstOrderNonLinearDSTest.cpp
     FirstOrderLinearDSTest.cpp
     FirstOrderLinearTIRTest.cpp
     FirstOrderLinearRTest.cpp
@@ -56,8 +57,11 @@ if(WITH_${COMPONENT}_TESTING)
     LagrangianScleronomousRTest.cpp
     LagrangianRheonomousRTest.cpp
     LagrangianCompliantRTest.cpp
+    LagrangianCompliantLinearTIRTest.cpp
     LagrangianDSTest.cpp
-    NewtonEulerDSTest.cpp)
+    LagrangianLinearTIDSTest.cpp
+    NewtonEulerDSTest.cpp
+    NonSmoothDynamicalSystemTest.cpp)
   END_TEST()
   #FirstOrderNonLinearDSTest.cpp FirstOrderLinearDSTest.cpp 
   #LagrangianDSTest.cpp LagrangianLinearTIDSTest.cpp TestMain.cpp)

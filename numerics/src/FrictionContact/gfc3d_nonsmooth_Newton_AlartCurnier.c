@@ -22,7 +22,7 @@
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 
 #include "SiconosConfig.h"
-
+#include "SparseMatrix_internal.h"
 #include "gfc3d_nonsmooth_Newton_AlartCurnier.h"
 #include "gfc3d_Solvers.h"
 #include "gfc3d_compute_error.h"
@@ -35,6 +35,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <math.h>
+#include <string.h>
 
 #include "sanitizer.h"
 
@@ -45,18 +46,11 @@
 #include "SiconosBlas.h"
 #include "NumericsMatrix.h"
 #include "NumericsSparseMatrix.h"
+#include "NumericsVector.h"
+
 /* #define DEBUG_MESSAGES 1 */
 /* #define DEBUG_STDOUT */
 #include <debug.h>
-
-/* size of whole problem */
-unsigned int sizeOfPsi(
-  CSparseMatrix* M,
-  CSparseMatrix* H)
-{
-  assert(M->n + H->n + H->m >= 0);
-  return (unsigned)(M->n + H->n + H->m);
-}
 
 /* compute psi function */
 void ACPsi(
@@ -70,50 +64,37 @@ void ACPsi(
 {
 
   assert(problem->H->size1 == problem->dimension * problem->numberOfContacts);
+  unsigned int m = problem->H->size1;
+  unsigned int n = problem->M->size0;
+  unsigned int problem_size = n +  2*m ;
 
-  unsigned int localProblemSize = problem->H->size1;
+  cblas_dscal(problem_size, 0., psi, 1);
 
-  unsigned int ACProblemSize = sizeOfPsi(NM_triplet(problem->M),
-                                         NM_triplet(problem->H));
+  /* -problem->M * globalVelocity + problem->H * reaction + problem->q ==> psi  */
+  cblas_dscal(problem_size, 0., psi, 1);
 
-  unsigned int globalProblemSize = problem->M->size0;
-
-
-  /* psi <-
-       compute -problem->M * globalVelocity + problem->H * reaction + problem->q
-     ... */
-  cblas_dscal(ACProblemSize, 0., psi, 1);
-  cblas_dcopy(globalProblemSize, problem->q, 1, psi, 1);
+  cblas_dcopy(n, problem->q, 1, psi, 1);
   NM_gemv(1., problem->H, reaction, 1, psi);
   NM_gemv(-1., problem->M, globalVelocity, 1, psi);
 
-
-  /* psi + globalProblemSize <-
-     compute -velocity + trans(problem->H) * globalVelocity + problem->b
-   ... */
-  cblas_daxpy(localProblemSize, -1., velocity, 1, psi + globalProblemSize, 1);
-  cblas_daxpy(localProblemSize, 1, problem->b, 1, psi + globalProblemSize, 1);
-  NM_tgemv(1., problem->H, globalVelocity, 1, psi + globalProblemSize);
-
-
+  /* -velocity + trans(problem->H) * globalVelocity + problem->b ==> psi + n */
+  cblas_daxpy(m, -1., velocity, 1, psi + n, 1);
+  cblas_daxpy(m, 1, problem->b, 1, psi + n, 1);
+  NM_tgemv(1., problem->H, globalVelocity, 1, psi + n);
 
   /* compute AC function */
-  fc3d_AlartCurnierFunction(localProblemSize,
-                                         computeACFun3x3,
-                                         reaction,
-                                         velocity, problem->mu, rho,
-                                         psi+globalProblemSize+
-                                         problem->H->size1,
-                                         NULL, NULL);
+  fc3d_AlartCurnierFunction(m,
+                            computeACFun3x3,
+                            reaction,
+                            velocity, problem->mu, rho,
+                            psi+n+m,
+                            NULL, NULL);
 
 }
 
 
-
-
-
 /* init memory for jacobian */
-csi initACPsiJacobian(
+CS_INT initACPsiJacobian(
   CSparseMatrix* M,
   CSparseMatrix* H,
   CSparseMatrix *A,
@@ -138,7 +119,7 @@ csi initACPsiJacobian(
   /* - M */
   for(int e = 0; e < M->nz; ++e)
   {
-    DEBUG_PRINTF("e=%d, M->i[e]=%td, M->p[e]=%td, M->x[e]=%g\n", e, M->i[e], M->p[e], M->x[e]);
+    /* DEBUG_PRINTF("e=%d, M->i[e]=%td, M->p[e]=%td, M->x[e]=%g\n", e, M->i[e], M->p[e], M->x[e]); */
     CHECK_RETURN(cs_zentry(J, M->i[e], M->p[e], - M->x[e]));
   }
 
@@ -146,8 +127,8 @@ csi initACPsiJacobian(
   assert(M->n == H->m);
   for(int e = 0; e < H->nz; ++e)
   {
-    DEBUG_PRINTF("e=%d, H->i[e]=%td, H->p[e] + M->n + A->n=%td, H->x[e]=%g\n",
-                 e, H->i[e], H->p[e] + M->n + A->n , H->x[e]);
+    /* DEBUG_PRINTF("e=%d, H->i[e]=%td, H->p[e] + M->n + A->n=%td, H->x[e]=%g\n", */
+    /*              e, H->i[e], H->p[e] + M->n + A->n , H->x[e]); */
     CHECK_RETURN(cs_zentry(J, H->i[e], H->p[e] + M->n + A->n, H->x[e]));
   }
 
@@ -164,7 +145,7 @@ csi initACPsiJacobian(
   }
 
   /* keep A start indice for update */
-  csi Astart = J->nz;
+  CS_INT Astart = J->nz;
 
   /* A */
   for(int e = 0; e < A->nz; ++e)
@@ -188,7 +169,7 @@ void updateACPsiJacobian(
   CSparseMatrix *A,
   CSparseMatrix *B,
   CSparseMatrix *J,
-  csi Astart)
+  CS_INT Astart)
 {
   /* only triplet matrix */
   assert(M->nz>=0);
@@ -280,9 +261,6 @@ int _globalLineSearchSparseGP(
   AlartCurnierFun3x3Ptr computeACFun3x3,
   double *solution,
   double *direction,
-  double *globalVelocity,
-  double *reaction,
-  double *velocity,
   double *mu,
   double *rho,
   double *F,
@@ -293,30 +271,35 @@ int _globalLineSearchSparseGP(
   unsigned int maxiter_ls)
 {
   double inf = 1e10;
-  double alphamin = 0.0;
+  double alphamin = 1e-3;
   double alphamax = inf;
 
   double m1 = 0.01, m2 = 0.99;
 
-  unsigned int ACProblemSize = sizeOfPsi(NM_triplet(problem->M),
-                                         NM_triplet(problem->H));
+  unsigned int n = (unsigned)NM_triplet(problem->M)->m;
+
+  unsigned int m = problem->H->size1;
+
+  unsigned int problem_size = n+2*m;
 
   // Computation of q(t) and q'(t) for t =0
 
-  double q0 = 0.5 * cblas_ddot(ACProblemSize, psi, 1, psi, 1);
+  double q0 = 0.5 * cblas_ddot(problem_size, psi, 1, psi, 1);
 
   //  tmp <- J * direction
-  cblas_dscal(ACProblemSize, 0., tmp, 1);
+  cblas_dscal(problem_size, 0., tmp, 1);
   cs_gaxpy(J, direction, tmp);
 
-  double dqdt0 = cblas_ddot(ACProblemSize, psi, 1, tmp, 1);
+  double dqdt0 = cblas_ddot(problem_size, psi, 1, tmp, 1);
+  DEBUG_PRINTF("dqdt0=%e\n",dqdt0);
+  DEBUG_PRINTF("q0=%e\n",q0);
 
   for(unsigned int iter = 0; iter < maxiter_ls; ++iter)
   {
 
     // tmp <- alpha*direction+solution
-    cblas_dcopy(ACProblemSize, solution, 1, tmp, 1);
-    cblas_daxpy(ACProblemSize, alpha[0], direction, 1, tmp, 1);
+    cblas_dcopy(problem_size, solution, 1, tmp, 1);
+    cblas_daxpy(problem_size, alpha[0], direction, 1, tmp, 1);
 
     ACPsi(
       problem,
@@ -326,7 +309,7 @@ int _globalLineSearchSparseGP(
       tmp+problem->M->size0, /* U */
       rho, psi);
 
-    double q  = 0.5 * cblas_ddot(ACProblemSize, psi, 1, psi, 1);
+    double q  = 0.5 * cblas_ddot(problem_size, psi, 1, psi, 1);
 
     assert(q >= 0);
 
@@ -335,11 +318,12 @@ int _globalLineSearchSparseGP(
     int C1 = (slope >= m2 * dqdt0);
     int C2 = (slope <= m1 * dqdt0);
 
+    DEBUG_PRINTF("C1=%i\t C2=%i\n",C1,C2);
     if(C1 && C2)
     {
       if(verbose > 0)
       {
-        printf("------------------------ GFC3D - NSN_AC - global line search success. Number of ls iteration = %i  alpha = %.10e, q = %.10e\n",
+        printf("---- GFC3D - NSN_AC - global line search success. Number of ls iteration = %i  alpha = %.10e, q = %.10e\n",
                iter,
                alpha[0], q);
       }
@@ -369,51 +353,11 @@ int _globalLineSearchSparseGP(
   }
   if(verbose > 0)
   {
-    printf("------------------------ GFC3D - NSN_AC - global line search unsuccessful. Max number of ls iteration reached  = %i  with alpha = %.10e \n",
+    printf("---- GFC3D - NSN_AC - global line search unsuccessful. Max number of ls iteration reached  = %i  with alpha = %.10e \n",
            maxiter_ls, alpha[0]);
   }
 
   return -1;
-}
-
-int gfc3d_nonsmooth_Newton_AlartCurnier_setDefaultSolverOptions(
-  SolverOptions* options)
-{
-  if(verbose > 0)
-  {
-    printf("Set the default solver options for the GLOBAL_AC Solver\n");
-  }
-
-  options->solverId = SICONOS_GLOBAL_FRICTION_3D_NSN_AC;
-  options->numberOfInternalSolvers = 0;
-  options->isSet = 1;
-  options->filterOn = 1;
-  options->iSize = 20;
-  options->dSize = 20;
-  options->iparam = (int *) calloc(options->iSize, sizeof(int));
-  options->dparam = (double *) calloc(options->dSize,  sizeof(double));
-  options->dWork = NULL;
-  solver_options_nullify(options);
-  options->iparam[SICONOS_IPARAM_MAX_ITER] = 200;    /* input :  itermax */
-  options->iparam[SICONOS_IPARAM_ITER_DONE] = 1;      /* output : #iter */
-  options->iparam[2] = 0;      /* unused */
-  options->iparam[3] = 100000; /* nzmax*/
-  options->iparam[4] = 0;      /* unused */
-  options->iparam[5] = 1;      /* unused */
-  options->iparam[7] = 1;      /* erritermax */
-  options->iparam[8] = -1;     /* mpi com fortran */
-
-  options->iparam[9] = 0;      /* > 0 memory is allocated */
-
-  options->iparam[10] = 1;     /* 0 STD AlartCurnier, 1 JeanMoreau, 2 STD generated, 3 JeanMoreau generated */
-
-  options->dparam[SICONOS_DPARAM_TOL] = 1e-10;
-  options->dparam[SICONOS_FRICTION_3D_NSN_RHO] = 1.0;      /* default rho */
-
-
-  options->internalSolvers = NULL;
-
-  return 0;
 }
 
 void gfc3d_sparseGlobalAlartCurnierInit(
@@ -447,19 +391,16 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(
   assert(problem->M);
   assert(problem->H);
 
-  assert(!problem->M->matrix0);
-//  assert(problem->M->matrix1);
-
-  assert(!options->iparam[4]); // only host
 
   /* M is square */
   assert(problem->M->size0 == problem->M->size1);
-
   assert(problem->M->size0 == problem->H->size0);
 
+
+
   unsigned int iter = 0;
-  unsigned int itermax = options->iparam[0];
-  unsigned int erritermax = options->iparam[7];
+  unsigned int itermax = options->iparam[SICONOS_IPARAM_MAX_ITER];
+  unsigned int erritermax = options->iparam[SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION];
 
   if (erritermax == 0)
   {
@@ -468,84 +409,91 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(
   }
 
   assert(itermax > 0);
-  assert(options->iparam[3] > 0);
 
-  double tolerance = options->dparam[0];
+
+  double tolerance = options->dparam[SICONOS_DPARAM_TOL];
   assert(tolerance > 0);
 
   if (verbose > 0)
-    printf("------------------------ GFC3D - _nonsmooth_Newton_AlartCurnier - Start with tolerance = %g\n", tolerance);
+    printf("---- GFC3D - _nonsmooth_Newton_AlartCurnier - Start with tolerance = %g\n", tolerance);
 
+
+
+  DEBUG_PRINTF("norm of M = %e\n", NM_norm(problem->M));
+  DEBUG_PRINTF("norm of H = %e\n", NM_norm(problem->H));
 
   /* sparse triplet storage */
   NM_triplet(problem->M);
   NM_triplet(problem->H);
 
-  unsigned int ACProblemSize = sizeOfPsi(NM_triplet(problem->M),
-                                         NM_triplet(problem->H));
 
-  unsigned int globalProblemSize = (unsigned)NM_triplet(problem->M)->m;
+  unsigned int n = (unsigned)NM_triplet(problem->M)->m;
 
-  unsigned int localProblemSize = problem->H->size1;
+  unsigned int m = problem->H->size1;
 
-  assert((int)localProblemSize == problem->numberOfContacts * problem->dimension);
+  unsigned int problem_size = n+2*m;
 
-  assert((int)globalProblemSize == problem->H->size0); /* size(velocity) ==
+
+
+
+  assert((int)m == problem->numberOfContacts * problem->dimension);
+
+  assert((int)n == problem->H->size0); /* size(velocity) ==
                                                    * Htrans*globalVelocity */
 
 
   AlartCurnierFun3x3Ptr computeACFun3x3 = NULL;
 
-  switch (options->iparam[10])
+  switch (options->iparam[SICONOS_FRICTION_3D_NSN_FORMULATION])
   {
-  case 0:
+  case SICONOS_FRICTION_3D_NSN_FORMULATION_ALARTCURNIER_STD:
   {
     computeACFun3x3 = &computeAlartCurnierSTD;
     break;
   }
-  case 1:
+  case SICONOS_FRICTION_3D_NSN_FORMULATION_JEANMOREAU_STD:
   {
     computeACFun3x3 = &computeAlartCurnierJeanMoreau;
     break;
   };
-  case 2:
+  case SICONOS_FRICTION_3D_NSN_FORMULATION_ALARTCURNIER_GENERATED:
   {
     computeACFun3x3 = &fc3d_AlartCurnierFunctionGenerated;
     break;
   }
-  case 3:
+  case SICONOS_FRICTION_3D_NSN_FORMULATION_JEANMOREAU_GENERATED:
   {
     computeACFun3x3 = &fc3d_AlartCurnierJeanMoreauFunctionGenerated;
     break;
   }
   }
 
-  if(options->iparam[9] == 0)
+  if(options->iparam[SICONOS_FRICTION_3D_NSN_MEMORY_ALLOCATION] == 0)
   {
     /* allocate memory */
     assert(options->dWork == NULL);
     assert(options->iWork == NULL);
     options->dWork = (double *) calloc(
-                       (localProblemSize + /* F */
-                        3 * localProblemSize + /* A */
-                        3 * localProblemSize + /* B */
-                        localProblemSize + /* rho */
-                        ACProblemSize + /* psi */
-                        ACProblemSize + /* rhs */
-                        ACProblemSize + /* tmp2 */
-                        ACProblemSize + /* tmp3 */
-                        ACProblemSize   /* solution */) ,
+                       (m + /* F */
+                        3 * m + /* A */
+                        3 * m + /* B */
+                        m + /* rho */
+                        problem_size + /* psi */
+                        problem_size + /* rhs */
+                        problem_size + /* tmp2 */
+                        problem_size + /* tmp3 */
+                        problem_size   /* solution */) ,
                        sizeof(double));
 
     /* XXX big hack here */
     options->iWork = (int *) malloc(
-                       (3 * localProblemSize + /* iA */
-                        3 * localProblemSize + /* iB */
-                        3 * localProblemSize + /* pA */
-                        3 * localProblemSize)  /* pB */
-                       * sizeof(csi));
+                       (3 * m + /* iA */
+                        3 * m + /* iB */
+                        3 * m + /* pA */
+                        3 * m)  /* pB */
+                       * sizeof(CS_INT));
 
-    options->iparam[9] = 1;
+    options->iparam[SICONOS_FRICTION_3D_NSN_MEMORY_ALLOCATION] = 1;
 
   }
 
@@ -553,21 +501,21 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(
   assert(options->iWork != NULL);
 
   double *F = options->dWork;
-  double *A = F +   localProblemSize;
-  double *B = A +   3 * localProblemSize;
-  double *rho = B + 3 * localProblemSize;
+  double *A = F +  m;
+  double *B = A +  3 * m;
+  double *rho = B + 3 * m;
 
-  double * psi = rho + localProblemSize;
-  double * rhs = psi + ACProblemSize;
-  double * tmp2 = rhs + ACProblemSize;
-  double * tmp3 = tmp2 + ACProblemSize;
-  double * solution = tmp3 + ACProblemSize;
+  double * psi = rho + m;
+  double * rhs = psi + problem_size;
+  double * tmp2 = rhs + problem_size;
+  double * tmp3 = tmp2 + problem_size;
+  double * solution = tmp3 + problem_size;
 
   /* XXX big hack --xhub*/
-  csi * iA = (csi *)options->iWork;
-  csi * iB = iA + 3 * localProblemSize;
-  csi * pA = iB + 3 * localProblemSize;
-  csi * pB = pA + 3 * localProblemSize;
+  CS_INT * iA = (CS_INT *)options->iWork;
+  CS_INT * iB = iA + 3 * m;
+  CS_INT * pA = iB + 3 * m;
+  CS_INT * pB = pA + 3 * m;
 
   CSparseMatrix A_;
   CSparseMatrix B_;
@@ -592,13 +540,13 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(
   assert(B_.nz == problem->numberOfContacts * 9);
 
   fc3d_AlartCurnierFunction(
-    localProblemSize,
+    m,
     computeACFun3x3,
     reaction, velocity,
     problem->mu, rho,
     F, A, B);
 
-  csi Astart = initACPsiJacobian(NM_triplet(problem->M),
+  CS_INT Astart = initACPsiJacobian(NM_triplet(problem->M),
                                  NM_triplet(problem->H),
                                  &A_, &B_, J);
 
@@ -610,10 +558,12 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(
   assert(A_.m == problem->H->size1);
 
   // compute rho here
-  for(unsigned int i = 0; i < localProblemSize; ++i) rho[i] = 1.;
+  for(unsigned int i = 0; i < m; ++i) rho[i] = options->dparam[SICONOS_FRICTION_3D_NSN_RHO];
+
+  DEBUG_EXPR(for(unsigned int i = 0; i < m; ++i) printf("rho[%i]=%e\t",i,rho[i]); printf("\n"););
 
   // direction
-  for(unsigned int i = 0; i < ACProblemSize; ++i) rhs[i] = 0.;
+  for(unsigned int i = 0; i < problem_size; ++i) rhs[i] = 0.;
 
 
 
@@ -629,19 +579,63 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(
 
   /* update local velocity from global velocity */
   /* an assertion ? */
-  cblas_dcopy(localProblemSize, problem->b, 1, velocity, 1);
+  /* double norm_globalVelocity = cblas_dnrm2(n,globalVelocity,1); */
+  /* double norm_reaction = cblas_dnrm2(m,reaction,1); */
+  /* DEBUG_PRINTF("norm of globalVelocity = %e\n", norm_globalVelocity); */
+  /* DEBUG_PRINTF("norm of reaction = %e\n", norm_reaction); */
+  /* if ((fabs(norm_globalVelocity) < DBL_EPSILON) && (fabs(norm_reaction) < DBL_EPSILON) ) */
+  /* { */
+  /*   cblas_dcopy(n, problem->q, 1, globalVelocity, 1); */
+  /*   int info_solver = NM_gesv(problem->M, globalVelocity, true); */
+  /* } */
+
+  cblas_dcopy(m, problem->b, 1, velocity, 1);
   NM_tgemv(1., problem->H, globalVelocity, 1, velocity);
+
+  double norm_velocity = cblas_dnrm2(m,velocity,1);
+  if (fabs(norm_velocity) < DBL_EPSILON)
+  {
+    for (unsigned int k =0; k < m; k++) velocity[k]=0.0;
+  }
+
+  DEBUG_PRINTF("norm of velocity = %e\n", cblas_dnrm2(m,velocity,1));
   double linear_solver_residual=0.0;
+
+  DEBUG_EXPR(NV_display(globalVelocity,n););
+  DEBUG_EXPR(NV_display(velocity,m););
+  DEBUG_EXPR(NV_display(reaction,m););
+
+
+  /* store the current solution */
+
+  double* globalVelocity_k = solution;
+  double* velocity_k = &(solution[n]);
+  double* reaction_k = &(solution[n+m]);
+
+  memcpy(globalVelocity_k, globalVelocity,  n * sizeof(double));
+  memcpy(velocity_k, velocity,  m * sizeof(double));
+  memcpy(reaction_k, reaction, m * sizeof(double));
+
   while(iter++ < itermax)
   {
+    /* /\* store the current solution *\/ */
+    /* for(unsigned int i = 0; i < n; ++i) */
+    /* { */
+    /*   solution[i] = globalVelocity[i]; */
+    /* } */
+    /* for(unsigned int i = 0; i < m; ++i) */
+    /* { */
+    /*   solution[i+n] = velocity[i]; */
+    /*   solution[i+n+m] = reaction[i]; */
+    /* } */
 
     /* compute psi */
-    ACPsi(problem, computeACFun3x3, globalVelocity, reaction, velocity, rho, psi);
+    ACPsi(problem, computeACFun3x3, globalVelocity_k, reaction_k, velocity_k, rho, psi);
 
     /* compute A & B */
-    fc3d_AlartCurnierFunction(localProblemSize,
+    fc3d_AlartCurnierFunction(m,
                               computeACFun3x3,
-                              reaction, velocity,
+                              reaction_k, velocity_k,
                               problem->mu, rho,
                               F, A, B);
     /* update J */
@@ -650,8 +644,8 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(
                         &A_, &B_, J, Astart);
 
     /* rhs = -psi */
-    cblas_dcopy(ACProblemSize, psi, 1, rhs, 1);
-    cblas_dscal(ACProblemSize, -1., rhs, 1);
+    cblas_dcopy(problem_size, psi, 1, rhs, 1);
+    cblas_dscal(problem_size, -1., rhs, 1);
 
     /* get compress column storage for linear ops */
     CSparseMatrix* Jcsc = cs_compress(J);
@@ -662,7 +656,7 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(
     int info_solver = NM_gesv(AA, rhs, true);
     if (info_solver > 0)
     {
-      fprintf(stderr, "------------------------ GFC3D - NSN_AC - solver failed info = %d\n", info_solver);
+      fprintf(stderr, "---- GFC3D - NSN_AC - solver failed info = %d\n", info_solver);
       break;
       info[0] = 2;
       CHECK_RETURN(!cs_check_triplet(NM_triplet(AA)));
@@ -671,92 +665,85 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(
     /* Check the quality of the solution */
     if (verbose > 0)
     {
-      cblas_dcopy_msan(ACProblemSize, psi, 1, tmp3, 1);
+      cblas_dcopy_msan(problem_size, psi, 1, tmp3, 1);
       NM_gemv(1., AA, rhs, 1., tmp3);
-      linear_solver_residual = cblas_dnrm2(ACProblemSize, tmp3, 1);
-      /* fprintf(stderr, "fc3d esolve: linear equation residual = %g\n", */
-      /*         cblas_dnrm2(problemSize, tmp3, 1)); */
+      linear_solver_residual = cblas_dnrm2(problem_size, tmp3, 1);
+
+      DEBUG_PRINTF("fc3d esolve: linear equation residual = %g\n",
+              cblas_dnrm2(problem_size, tmp3, 1));
       /* for the component wise scaled residual: cf mumps &
        * http://www.netlib.org/lapack/lug/node81.html */
     }
 
+    DEBUG_EXPR(NV_display(rhs,problem_size););
+
+
     /* line search */
-    double alpha = 1;
 
-    /* set current solution */
-    for(unsigned int i = 0; i < globalProblemSize; ++i)
+    double alpha = 1.0;
+    int info_ls = 0;
+
+    switch (options->iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH])
     {
-      solution[i] = globalVelocity[i];
-    }
-    for(unsigned int i = 0; i < localProblemSize; ++i)
+    case SICONOS_FRICTION_3D_NSN_LINESEARCH_NO:
+      /* without line search */
+      info_ls = 1;
+      break;
+
+    case SICONOS_FRICTION_3D_NSN_LINESEARCH_GOLDSTEINPRICE:
+      /* Goldstein Price */
+      info_ls = _globalLineSearchSparseGP(problem,
+                                          computeACFun3x3,
+                                          solution,
+                                          rhs,
+                                          problem->mu, rho, F, psi, Jcsc,
+                                          tmp2, &alpha, options->iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH_MAXITER]);
+      break;
+    /* case SICONOS_FRICTION_3D_NSN_LINESEARCH_ARMIJO: */
+    /*   /\* FBLSA *\/ */
+    /*   info_ls = frictionContactFBLSA(equation, reaction, velocity, problem->mu, rho, F, Ax, Bx, */
+    /*                                  problem->M, problem->q, AWpB, tmp1, tmp2, &alpha, options->iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH_MAXITER]); */
+    /*   break; */
+    default:
     {
-      solution[i+globalProblemSize] = velocity[i];
-      solution[i+globalProblemSize+localProblemSize] = reaction[i];
+      numerics_error("gfc3d_nonsmooth_Newton_AlartCurnier",
+                     "Unknown line search option.\n");
     }
-
-    DEBUG_EXPR_WE(
-      for(unsigned int i = 0; i < globalProblemSize; ++i)
-      {
-        printf("globalVelocity[%i] = %6.4e\n",i,globalVelocity[i]);
-      }
-      for(unsigned int i = 0; i < localProblemSize; ++i)
-      {
-        printf("velocity[%i] = %6.4e\t",i,velocity[i]);
-        printf("reaction[%i] = %6.4e\n",i,reaction[i]);
-      }
-      );
-
-
-    int info_ls = _globalLineSearchSparseGP(problem,
-                                            computeACFun3x3,
-                                            solution,
-                                            rhs,
-                                            globalVelocity,
-                                            reaction, velocity,
-                                            problem->mu, rho, F, psi, Jcsc,
-                                            tmp2, &alpha, 100);
-
+    }
 
     cs_spfree(Jcsc);
-    if(!info_ls)
-    {
-      cblas_daxpy(ACProblemSize, alpha, rhs, 1, solution, 1);
-    }
-    else
-    {
-      cblas_daxpy(ACProblemSize, 1, rhs, 1., solution, 1);
-    }
+    /* if(!info_ls) */
+    /* { */
+    /*   cblas_daxpy(problem_size, alpha, rhs, 1, solution, 1); */
+    /* } */
+    /* else */
+    /* { */
+    /*   cblas_daxpy(problem_size, 1, rhs, 1., solution, 1); */
+    /* } */
+    cblas_daxpy(problem_size, alpha, rhs, 1, solution, 1);
 
-    for(unsigned int e = 0 ; e < globalProblemSize; ++e)
-    {
-      globalVelocity[e] = solution[e];
-    }
 
-    for(unsigned int e = 0 ; e < localProblemSize; ++e)
-    {
-      velocity[e] = solution[e+globalProblemSize];
-    }
+    DEBUG_EXPR(NV_display(globalVelocity_k,n););
+    DEBUG_EXPR(NV_display(velocity_k,m););
+    DEBUG_EXPR(NV_display(reaction_k,m););
 
-    for(unsigned int e = 0; e < localProblemSize; ++e)
-    {
-      reaction[e] = solution[e+globalProblemSize+localProblemSize];
-    }
 
-    options->dparam[1] = INFINITY;
+    options->dparam[SICONOS_DPARAM_RESIDU] = INFINITY;
 
     if(!(iter % erritermax))
     {
-
+      double norm_q = cblas_dnrm2(problem->M->size0 , problem->q , 1);
       gfc3d_compute_error(problem,
-                          reaction, velocity, globalVelocity,
+                          reaction_k, velocity_k, globalVelocity_k,
                           tolerance,
-                          &(options->dparam[1]));
+                          norm_q,
+                          &(options->dparam[SICONOS_DPARAM_RESIDU]));
     }
 
     if(verbose > 0)
-      printf("------------------------ GFC3D - NSN_AC - iteration %d, residual = %g, linear solver residual = %g, tolerance = %g \n", iter, options->dparam[1],linear_solver_residual, tolerance);
+      printf("---- GFC3D - NSN_AC - iteration %d, residual = %g, linear solver residual = %g, tolerance = %g \n", iter, options->dparam[1],linear_solver_residual, tolerance);
 
-    if(options->dparam[1] < tolerance)
+    if(options->dparam[SICONOS_DPARAM_RESIDU] < tolerance)
     {
       info[0] = 0;
       break;
@@ -765,19 +752,23 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(
 
   }
 
+  memcpy(globalVelocity, solution,  n * sizeof(double));
+  memcpy(velocity, &solution[n],  m * sizeof(double));
+  memcpy(reaction, &solution[n+m], m * sizeof(double));
+
   if(verbose > 0)
   {
     if(!info[0])
-      printf("------------------------ GFC3D - NSN_AC - convergence after %d iterations, residual = %g\n",
+      printf("---- GFC3D - NSN_AC - convergence after %d iterations, residual = %g\n",
              iter, options->dparam[1]);
     else
     {
-      printf("------------------------ GFC3D - NSN_AC - no convergence after %d iterations, residual = %g\n",
+      printf("---- GFC3D - NSN_AC - no convergence after %d iterations, residual = %g\n",
              iter, options->dparam[1]);
     }
   }
 
-  options->iparam[1] = iter;
+  options->iparam[SICONOS_IPARAM_ITER_DONE] = iter;
 
 #ifdef DUMP_PROBLEM
   if(info[0])
@@ -792,6 +783,57 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(
   }
 #endif
 
-  freeNumericsMatrix(AA);
+  NM_free(AA);
   free(AA);
+}
+
+int gfc3d_nonsmooth_Newton_AlartCurnier_setDefaultSolverOptions(
+  SolverOptions* options)
+{
+  if(verbose > 0)
+  {
+    printf("Set the default solver options for the GLOBAL_AC Solver\n");
+  }
+
+  options->solverId = SICONOS_GLOBAL_FRICTION_3D_NSN_AC;
+  options->numberOfInternalSolvers = 0;
+  options->isSet = 1;
+  options->filterOn = 1;
+  options->iSize = 20;
+  options->dSize = 20;
+  options->iparam = (int *) calloc(options->iSize, sizeof(int));
+  options->dparam = (double *) calloc(options->dSize,  sizeof(double));
+  options->dWork = NULL;
+  solver_options_nullify(options);
+
+
+  options->iparam[SICONOS_IPARAM_MAX_ITER] = 200;    /* input :  itermax */
+  options->iparam[SICONOS_IPARAM_ITER_DONE] = 1;      /* output : #iter */
+
+  options->iparam[SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION] = 1;      /* erritermax */
+
+  options->iparam[SICONOS_FRICTION_3D_NSN_MPI_COM] = -1;     /* mpi com fortran */
+
+  options->iparam[SICONOS_FRICTION_3D_NSN_MEMORY_ALLOCATION] = 0;      /* > 0 memory is allocated */
+
+  options->iparam[SICONOS_FRICTION_3D_NSN_FORMULATION] = SICONOS_FRICTION_3D_NSN_FORMULATION_ALARTCURNIER_STD;     /* 0 STD AlartCurnier, 1 JeanMoreau, 2 STD generated, 3 JeanMoreau generated */
+  options->iparam[SICONOS_FRICTION_3D_NSN_FORMULATION] = SICONOS_FRICTION_3D_NSN_FORMULATION_JEANMOREAU_STD;     /* 0 STD AlartCurnier, 1 JeanMoreau, 2 STD generated, 3 JeanMoreau generated */
+  options->iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH] = SICONOS_FRICTION_3D_NSN_LINESEARCH_GOLDSTEINPRICE;
+  options->iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH_MAXITER]=10;
+
+
+
+  options->dparam[SICONOS_DPARAM_TOL] = 1e-10;
+  options->dparam[SICONOS_FRICTION_3D_NSN_RHO] = 1e-3;      /* default rho */
+
+
+  options->internalSolvers = NULL;
+
+  if(verbose > 0)
+  {
+    solver_options_print(options);
+  }
+
+
+  return 0;
 }

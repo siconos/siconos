@@ -67,6 +67,12 @@ def classes_from_build_path(build_path):
 
     return get_classes_conditional(doxy_xml_files, pred)
 
+def assign_targets(classes, source_dir):
+    """For each class, figure out which target it is associated with based
+       on the file path."""
+    for cl in classes.values():
+        cl['target'] = get_target(source_dir, cl['filepath'])
+
 def assign_priorities(classes, source_dir):
     """For each class, get its priority to help in ordering the
        declarations in the generated file."""
@@ -151,6 +157,8 @@ if __name__=='__main__':
         print('%s: Error, not enough classes found.'%sys.argv[0])
         sys.exit(1)
 
+    assign_targets(classes, source_dir)
+
     assign_priorities(classes, source_dir)
 
     resolve_base_classes(classes)
@@ -172,7 +180,8 @@ if __name__=='__main__':
         write_classes(dest_file, class_list)
 
         with_base = [(cl['name'],
-                      cl['priority'])
+                      cl['priority'],
+                      cl['target'])
                      for cl in classes.values()
                      if not cl['abstract']]
 

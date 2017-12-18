@@ -92,9 +92,6 @@ int main(int argc, char* argv[])
     SimpleMatrix H(1, nDof);
     H(0, 0) = 1.0;
     SP::NonSmoothLaw nslaw0(new NewtonImpactNSL(e));
-    DynamicalSystemsSet dsConcerned;
-    dsConcerned.insert(lds);
-
     vector<string> listofG2(1);
     listofG2[0] = "FollowerPlugin:FollowerComputeG0";
     SP::Relation relation0(new LagrangianRheonomousR("FollowerPlugin:FollowerComputeH1", "FollowerPlugin:FollowerComputeG10", "FollowerPlugin:FollowerComputeG11"));
@@ -102,7 +99,7 @@ int main(int argc, char* argv[])
     SP::SiconosVector param2(new SiconosVector(1)); // Here we only set one parameter, the DS number.
     (*param2)(0) = rpm;
 
-    SP::Interaction inter(new Interaction(1, nslaw0, relation0));
+    SP::Interaction inter(new Interaction(nslaw0, relation0));
     // -------------
     // --- Model ---
     // -------------

@@ -238,7 +238,7 @@ void NewtonEulerR::computeJachqT(Interaction& inter, SP::BlockVector q0)
   Index dimIndex(2);
   Index startIndex(4);
 
-  for (unsigned int i =0 ; i < q0->getNumberOfBlocks()  ; i++)
+  for (unsigned int i =0 ; i < q0->numberOfBlocks()  ; i++)
   {
     SP::SiconosVector q = (q0->getAllVect())[i];
     startIndex[0] = 0;
@@ -291,14 +291,10 @@ void NewtonEulerR::computeJach(double time, Interaction& inter, InteractionPrope
 
 void NewtonEulerR::computeDotJachq(double time, BlockVector& workQ, BlockVector& workZ, BlockVector& workQdot)
 {
-  if (_plugindotjacqh)
-  {
-    if (_plugindotjacqh->fPtr)
+  if (_dotjachq && _plugindotjacqh->fPtr)
     {
       ((FPtr2)(_plugindotjacqh->fPtr))(workQ.size(), &(workQ)(0), workQdot.size(), &(workQdot)(0), &(*_dotjachq)(0, 0), workZ.size(), &(workZ)(0));
-      // Copy data that might have been changed in the plug-in call.
     }
-  }
 }
 
 void  NewtonEulerR::computeSecondOrderTimeDerivativeTerms(double time, Interaction& inter, VectorOfBlockVectors& DSlink, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2)
@@ -333,7 +329,6 @@ void  NewtonEulerR::computeSecondOrderTimeDerivativeTerms(double time, Interacti
   // Compute the product of jachq and Tdot --> jachqTdot
 
   unsigned int k = 0;
-  DSIterator itDS;
   unsigned int ySize = inter.getSizeOfY();
   unsigned int xSize = inter.getSizeOfDS();
   SP::SimpleMatrix auxBloc(new SimpleMatrix(ySize, 7));

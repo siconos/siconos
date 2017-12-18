@@ -42,6 +42,7 @@ void computeRotationMatrixTransposed(SP::SiconosVector q, SP::SimpleMatrix rotat
  * \param[in,out] v the vector to be rotated
  */
 void rotateAbsToBody(SP::SiconosVector q, SP::SiconosVector v);
+
 /* For a given position vector q, performs the rotation of the matrix m
  * w.r.t the quaternion that parametrize the rotation in q, that is the
  * rotation of the body fixed frame with respect to the inertial frame.
@@ -49,21 +50,24 @@ void rotateAbsToBody(SP::SiconosVector q, SP::SiconosVector v);
  * \param[in,out] m the vector to be rotated
  */
 void rotateAbsToBody(SP::SiconosVector q, SP::SimpleMatrix m);
+void rotateAbsToBody(double q0, double q1, double q2, double q3, SiconosVector& v);
 void rotateAbsToBody(double q0, double q1, double q2, double q3, SP::SiconosVector v);
 void rotateAbsToBody(double q0, double q1, double q2, double q3, SP::SimpleMatrix m);
 
 
 /* For a given position vector q, express the vector v given in
- * the inertial frame into to the bdy frame
+ * the inertial frame into to the body frame
  * w.r.t the quaternion that parametrize the rotation in q.
  * The operation amounts to multiplying by the transposed rotation matrix.
  * the result is return in v
  * \param[in] q the position vector
  * \param[in,out] v the vector to be reexpressed
  */
+void changeFrameAbsToBody(const SiconosVector& q, SiconosVector& v);
 void changeFrameAbsToBody(SP::SiconosVector q, SP::SiconosVector v);
 void changeFrameAbsToBody(SP::SiconosVector q, SP::SimpleMatrix m);
 
+void changeFrameBodyToAbs(const SiconosVector& q, SiconosVector& v);
 void changeFrameBodyToAbs(SP::SiconosVector q, SP::SiconosVector v);
 void changeFrameBodyToAbs(SP::SiconosVector q, SP::SimpleMatrix m);
 
@@ -78,51 +82,51 @@ void quaternionFromRotationVector(SP::SiconosVector rotationVector, SP::SiconosV
 
 void computeT(SP::SiconosVector q, SP::SimpleMatrix T);
 
+/** Compute the force and moment vectors applied to a body with state
+ * q from a force vector at a given position. */
+void computeExtForceAtPos(SP::SiconosVector q, bool isMextExpressedInInertialFrame,
+                          SP::SiconosVector force, bool forceAbsRef,
+                          SP::SiconosVector pos, bool posAbsRef,
+                          SP::SiconosVector fExt, SP::SiconosVector mExt,
+                          bool accumulate);
 
-
-/** \class NewtonEulerDS
- *  \brief NewtonEuler non linear dynamical systems - Second Order Non Linear Dynamical Systems.
- *   NewtonEuler non linear dynamical systems - Derived from DynamicalSystem -
- *
- * The equations of motion in the Newton-Euler formalism can be stated as
- * \f{equation}
- * \label{eq:NewtonEuler}
- * \left\{\begin{array}{rcl}
- *   M \dot v +  F_{int}(q,v, \Omega, t)&=& F_{ext}(t), \\
- *   I \dot \Omega + \Omega \wedge I\Omega  + M_{int}(q,v, \Omega, t) &=&  M_{ext}(t), \\
- *   \dot q &=& T(q) [ v, \Omega] \\
- *   \dot R &=& R \tilde \Omega,\quad R^{-1}=R^T,\quad  \det(R)=1 .
- * \end{array}\right.
- * \f}
- * with
- * <ul>
- * <li> \f$x_G,v_G\f$ position and velocity of the center of mass expressed in a inertial frame of
- * reference (world frame) </li>
- * <li> \f$\Omega\f$ angular velocity vector expressed in the body-fixed frame (frame attached to the object) </li>
- * <li> \f$R\f$ rotation matrix form the inertial frame to the bosy-fixed frame \f$R^{-1}=R^T, \det(R)=1\f$, i.e \f$ R\in SO^+(3)\f$  </li>
- * <li> \f$M=m\,I_{3\times 3}\f$ diagonal mass matrix with  \f$m \in \mathbb{R}\f$ the scalar mass  </li>
- * <li> \f$I\f$ constant inertia matrix </li>
- * <li> \f$F_{ext}\f$ and \f$ M_{ext}\f$ are the external applied forces and moment  </li>
- * </ul>
- *
- *
- * In the current implementation, \f$R\f$ is parametrized by a unit quaternion.
- *
- */
+/** NewtonEuler non linear dynamical systems
+ 
+  The equations of motion in the Newton-Euler formalism can be stated as
+  \f{equation}
+  \label{eq:NewtonEuler}
+  \left\{\begin{array}{rcl}
+    M \dot v +  F_{int}(q,v, \Omega, t)&=& F_{ext}(t), \\
+    I \dot \Omega + \Omega \wedge I\Omega  + M_{int}(q,v, \Omega, t) &=&  M_{ext}(t), \\
+    \dot q &=& T(q) [ v, \Omega] \\
+    \dot R &=& R \tilde \Omega,\quad R^{-1}=R^T,\quad  \det(R)=1 .
+  \end{array}\right.
+  \f}
+  with
+  <ul>
+  <li> \f$x_G,v_G\f$ position and velocity of the center of mass expressed in a inertial frame of
+  reference (world frame) </li>
+  <li> \f$\Omega\f$ angular velocity vector expressed in the body-fixed frame (frame attached to the object) </li>
+  <li> \f$R\f$ rotation matrix form the inertial frame to the body-fixed frame \f$R^{-1}=R^T, \det(R)=1\f$, i.e \f$ R\in SO^+(3)\f$  </li>
+  <li> \f$M=m\,I_{3\times 3}\f$ diagonal mass matrix with  \f$m \in \mathbb{R}\f$ the scalar mass  </li>
+  <li> \f$I\f$ constant inertia matrix </li>
+  <li> \f$F_{ext}\f$ and \f$ M_{ext}\f$ are the external applied forces and moment  </li>
+  </ul>
+ 
+ 
+  In the current implementation, \f$R\f$ is parametrized by a unit quaternion.
+ 
+*/
 class NewtonEulerDS : public DynamicalSystem
 {
-public:
-  enum WorkNames {xfree, sizeWorkVec};
 protected:
-  /** serialization hooks
-  */
+  /* serialization hooks */
   ACCEPT_SERIALIZATION(NewtonEulerDS);
 
   /** Common code for constructors
    * should be replaced in C++11 by delegating constructors 
    */
-  void init();
-
+  void _init();
 
   // -- MEMBERS --
 
@@ -174,9 +178,8 @@ protected:
   /** used for concatenate _I and _scalarMass.I_3 */
   SP::SimpleMatrix _massMatrix;
 
-  /** Contains the LU factorization of the Mass (or the iteration matrix.).
-   */
-  SP::SimpleMatrix _luW;
+  /** inverse or factorization of the mass of the system */
+  SP::SimpleMatrix _inverseMass;
 
   /** Matrix depending on the parametrization of the orientation
    * \f$v = T(q) \dot q\f$
@@ -209,7 +212,7 @@ protected:
    * false by default */
   bool _hasConstantMExt;
 
-  /** if true, we assume that mExt is given in inertialFrameset (default false)  */
+  /** if true, we assume that mExt is given in inertial frame (default false)  */
   bool _isMextExpressedInInertialFrame;
 
   /** external moment expressed in the body-fixed frame  */
@@ -334,30 +337,22 @@ protected:
    */
   SP::PluggedObject _pluginJactwistMInt;
 
-
-
   /** Boundary condition applied to a dynamical system*/
   SP::BoundaryCondition _boundaryConditions;
 
   /** Reaction to an applied  boundary condition */
   SP::SiconosVector _reactionToBoundaryConditions;
 
-
-
-  /** set links with DS members
-   */
-  void connectToDS();
-  bool checkDynamicalSystem();
   /** Default constructor
    */
   NewtonEulerDS();
 
-  void zeroPlugin();
+  /** build all _plugin... PluggedObject */
+  void _zeroPlugin();
 
 public:
 
   // === CONSTRUCTORS - DESTRUCTOR ===
-
 
   /** constructor from a minimum set of data
    *  \param position initial coordinates of this DynamicalSystem
@@ -370,43 +365,79 @@ public:
                 double mass,
                 SP::SiconosMatrix inertia);
 
-
-
-
   /** destructor */
   virtual ~NewtonEulerDS();
 
+  /*! @name Right-hand side computation */
+  //@{
+  
   /** reset the state to the initial state */
   void resetToInitialState();
 
-  /** Initialization function for the rhs and its jacobian.
-   *  \param time the time of initialization
+  /** allocate (if needed)  and compute rhs and its jacobian.
+   * \param time of initialization
    */
   void initRhs(double time) ;
 
-  /** dynamical system initialization function except for _p:
-   *  mainly set memory and compute plug-in for initial state values.
-   *  \param time the time of initialization, default value = 0
-   *  \param size the size of the memory, default size = 1.
-   */
-  void initialize(double time = 0, unsigned int size = 1) ;
-
-  /** dynamical system initialization function for _p
-   *  \param level for _p
+  /** set nonsmooth input to zero
+   *  \param int input-level to be initialized.
    */
   void initializeNonSmoothInput(unsigned int level) ;
 
-  // === GETTERS AND SETTERS ===
-
-  /** return the dim. of the system (n for first order).
-   * Useful to avoid if(typeOfDS) when size is required.
-   * \return an unsigned int.
+  /** update right-hand side for the current state
+   *  \param double time of interest
+   *  \param bool isDSup flag to avoid recomputation of operators
    */
-  virtual inline unsigned int dimension() const
+  virtual void computeRhs(double time, bool isDSup = false);
+
+  /** update \f$\nabla_x rhs\f$ for the current state
+   *  \param double time of interest
+   *  \param bool isDSup flag to avoid recomputation of operators
+   */
+  virtual void computeJacobianRhsx(double time, bool isDup = false);
+
+  /** reset non-smooth part of the rhs (i.e. p), for all 'levels' */
+  void resetAllNonSmoothParts();
+
+  /** set nonsmooth part of the rhs (i.e. p) to zero for a given level
+   * \param level
+   */
+  void resetNonSmoothPart(unsigned int level);
+
+  // -- forces --
+  /** get forces
+   *  \return pointer on a SiconosVector
+   */
+  inline SP::SiconosVector forces() const
   {
-    return _n;
+    return _wrench;
   }
 
+  // -- Jacobian Forces w.r.t q --
+
+
+  /** get JacobianqForces
+   *  \return pointer on a SiconosMatrix
+   */
+  inline SP::SimpleMatrix jacobianqForces() const
+  {
+    return _jacobianWrenchq;
+  }
+
+  /** get JacobianvForces
+   *  \return pointer on a SiconosMatrix
+   */
+  inline SP::SimpleMatrix jacobianvForces() const
+  {
+    return _jacobianWrenchTwist;
+  }
+
+  ///@}
+
+  /*! @name Attributes access 
+    @{ */
+
+  /** Returns dimension of vector q */
   virtual inline unsigned int getqDim() const
   {
     return _qDim;
@@ -414,22 +445,15 @@ public:
 
   // -- q --
 
-  /** get q
+  /** get q (pointer link)
    *  \return pointer on a SiconosVector
    */
   inline SP::SiconosVector q() const
   {
     return _q;
   }
-  // inline SP::SiconosVector deltaq() const
-  // {
-  //   return _deltaq;
-  // }
 
-
-  // -- q0 --
-
-  /** get q0
+  /** get initial state (pointer link)
    *  \return pointer on a SiconosVector
    */
   inline SP::SiconosVector q0() const
@@ -437,18 +461,7 @@ public:
     return _q0;
   }
 
-  // Q memory
-
-  /** get all the values of the state vector q stored in memory
-   *  \return a memory
-   */
-  inline SiconosMemory& qMemory()
-  {
-    return _qMemory;
-  }
-
-
-  // -- twist --
+   // -- twist --
 
   /** get twist
    *  \return pointer on a SiconosVector
@@ -473,18 +486,45 @@ public:
     return _twist0;
   }
 
-
-  // Twist memory
-
-  /** get all the values of the state vector twist stored in memory
-   *  \return a memory
+  /** Get the linear velocity in the absolute (inertial) or relative
+   * (body) frame of reference.
+   * \param absoluteRef If true, velocity is returned in the inertial
+   *                    frame, otherwise velocity is returned in the
+   *                    body frame.
+   * \return A SiconosVector of size 3 containing the linear velocity
+   *         of this dynamical system.
    */
-  inline SiconosMemory& twistMemory()
-  {
-    return _twistMemory;
-  }
+  SP::SiconosVector linearVelocity(bool absoluteRef) const;
 
-  // -- p --
+  /** Fill a SiconosVector with the linear velocity in the absolute
+   * (inertial) or relative (body) frame of reference.
+   * \param absoluteRef If true, velocity is returned in the inertial
+   *                    frame, otherwise velocity is returned in the
+   *                    body frame.
+   * \param v A SiconosVector of size 3 to receive the linear velocity.
+   */
+  void linearVelocity(bool absoluteRef, SiconosVector &v) const;
+
+  /** Get the angular velocity in the absolute (inertial) or relative
+   * (body) frame of reference.
+   * \param absoluteRef If true, velocity is returned in the inertial
+   *                    frame, otherwise velocity is returned in the
+   *                    body frame.
+   * \return A SiconosVector of size 3 containing the angular velocity
+   *         of this dynamical system.
+   */
+  SP::SiconosVector angularVelocity(bool absoluteRef) const;
+
+  /** Fill a SiconosVector with the angular velocity in the absolute
+   * (inertial) or relative (body) frame of reference.
+   * \param absoluteRef If true, velocity is returned in the inertial
+   *                    frame, otherwise velocity is returned in the
+   *                    body frame.
+   * \param v A SiconosVector of size 3 to receive the angular velocity.
+   */
+  void angularVelocity(bool absoluteRef, SiconosVector &w) const;
+
+    // -- p --
 
   /** get p
    *  \param level unsigned int, required level for p, default = 2
@@ -522,7 +562,7 @@ public:
     return _I;
   };
 
-  /* Modify the inertia matrix.
+  /* Modify the inertia matrix (pointer link)
      \param newInertia the new inertia matrix
   */
   void setInertia(SP::SiconosMatrix newInertia)
@@ -576,34 +616,122 @@ public:
     return _mGyr;
   }
 
-
-  // -- forces --
-  /** get forces
-   *  \return pointer on a SiconosVector
-   */
-  inline SP::SiconosVector forces() const
+  inline SP::SimpleMatrix mass()
   {
-    return _wrench;
+    return _massMatrix;
   }
 
-  // -- Jacobian Forces w.r.t q --
-
-
-  /** get JacobianqForces
-   *  \return pointer on a SiconosMatrix
+  /** get (pointer) LU-factorization of the mass, used for LU-forward-backward computation
+   *  \return pointer SP::SimpleMatrix
    */
-  inline SP::SimpleMatrix jacobianqForces() const
+  inline SP::SimpleMatrix inverseMass() const
   {
-    return _jacobianWrenchq;
+    return _inverseMass;
   }
 
-  /** get JacobianvForces
-   *  \return pointer on a SiconosMatrix
-   */
-  inline SP::SimpleMatrix jacobianvForces() const
+  inline SP::SimpleMatrix T()
   {
-    return _jacobianWrenchTwist;
+    return _T;
   }
+  inline SP::SimpleMatrix Tdot()
+  {
+    assert(_Tdot);
+    return _Tdot;
+  }
+
+  inline SP::SiconosVector dotq()
+  {
+    return _dotq;
+  }
+
+  /** set Boundary Conditions
+   *  \param newbd BoundaryConditions
+   */
+  void setBoundaryConditions(SP::BoundaryCondition newbd);
+
+  /** get Boundary Conditions
+   *  \return SP::BoundaryCondition pointer on a BoundaryConditions
+   */
+  inline SP::BoundaryCondition boundaryConditions()
+  {
+    return _boundaryConditions;
+  };
+
+  /** set Reaction to Boundary Conditions
+   *  \param newrbd BoundaryConditions pointer
+   */
+  inline void setReactionToBoundaryConditions(SP::SiconosVector newrbd)
+  {
+    _reactionToBoundaryConditions = newrbd;
+  };
+
+  /** get Reaction to  Boundary Conditions
+   *  \return pointer on a BoundaryConditions
+   */
+  inline SP::SiconosVector reactionToBoundaryConditions()
+  {
+    return _reactionToBoundaryConditions;
+  };
+
+  /** @} end of members access group. */
+
+  /*! @name Memory vectors management  */
+  //@{
+
+  /** get all the values of the state vector q stored in memory
+   *  \return a memory
+   */
+  inline const SiconosMemory& qMemory()
+  {
+    return _qMemory;
+  }
+
+
+  /** get all the values of the state vector twist stored in memory
+   *  \return a memory
+   */
+  inline const SiconosMemory& twistMemory()
+  {
+    return _twistMemory;
+  }
+
+    /** initialize the SiconosMemory objects with a positive size.
+   * \param steps the size of the SiconosMemory (i)
+   */
+  void initMemory(unsigned int steps);
+
+  /** push the current values of x, q and r in the stored previous values
+   *  xMemory, qMemory, rMemory,
+   * \todo Modify the function swapIn Memory with the new Object Memory
+   */
+  void swapInMemory();
+
+  inline const SiconosMemory& forcesMemory()
+  {
+    return _forcesMemory;
+  }
+
+  inline const SiconosMemory& dotqMemory()
+  {
+    return _dotqMemory;
+  }
+
+
+  /** @} end of memory group. */
+
+  /*! @name Miscellaneous public methods */
+  //@{
+
+  /** To compute the kinetic energy
+   */
+  double computeKineticEnergy();
+
+  // --- miscellaneous ---
+
+  /** print the data to the screen
+   */
+  void display() const;
+
   //  inline SP::SiconosMatrix jacobianZFL() const { return jacobianZFL; }
 
   inline void setIsMextExpressedInInertialFrame(bool value)
@@ -619,6 +747,26 @@ public:
   {
     _nullifyMGyr = value;
   }
+
+  virtual void normalizeq();
+
+  /** Allocate memory for the lu factorization of the mass of the system.
+      Useful for some integrators with system inversion involving the mass
+  */
+  void init_inverse_mass();
+
+  /** Update the content of the lu factorization of the mass of the system,
+      if required.
+  */
+  void update_inverse_mass();
+
+  //@}
+
+
+  /*! @name Plugins management  */
+
+  //@{
+  
   inline void setComputeJacobianFIntqByFD(bool value)
   {
     _computeJacobianFIntqByFD=value;
@@ -636,10 +784,6 @@ public:
     _computeJacobianMInttwistByFD=value;
   }
 
-
-
-
-  // --- PLUGINS RELATED FUNCTIONS ---
 
   /** allow to set a specified function to compute _fExt
    *  \param pluginPath the complete path to the plugin
@@ -792,6 +936,24 @@ public:
   virtual void computeMExt(double time, SP::SiconosVector mExt);
   virtual void computeMExt(double time);
 
+  /** Adds a force/torque impulse to a body's FExt and MExt vectors in
+   * either absolute (inertial) or relative (body) frame.  Modifies
+   * contents of _fExt and _mExt! Therefore these must have been set
+   * as constant vectors using setFExtPtr and setMExtPtr prior to
+   * calling this function.  Adjustments to _mExt will take into
+   * account the value of _isMextExpressedInInertialFrame.
+   * \param force A force vector to be added.
+   * \param forceAbsRef If true, force is in inertial frame, otherwise
+   *                    it is in body frame.
+   * \param pos A position at which force should be applied.  If NULL,
+   *            the center of mass is assumed.
+   * \param posAbsRef If true, pos is in inertial frame, otherwise it
+   *                  is in body frame.
+   */
+  void addExtForceAtPos(SP::SiconosVector force, bool forceAbsRef,
+                        SP::SiconosVector pos = SP::SiconosVector(),
+                        bool posAbsRef = false);
+
   void computeJacobianMExtqExpressedInInertialFrameByFD(double time, SP::SiconosVector q);
   void computeJacobianMExtqExpressedInInertialFrame(double time, SP::SiconosVector q);
 
@@ -830,18 +992,10 @@ public:
    */
   virtual void computeMInt(double time, SP::SiconosVector q, SP::SiconosVector v, SP::SiconosVector mInt);
 
-  /** Default function to compute the right-hand side term
-   *  \param time current time
-   *  \param isDSup flag to avoid recomputation of operators
+  /**default function to update the plugins functions using a new time:
+   * \param time  the current time
    */
-
-  virtual void computeRhs(double time, bool isDSup = false);
-
-  /** Default function to compute jacobian of the right-hand side term according to x
-   *  \param time current time
-   *  \param isDup flag to avoid recomputation of operators
-   */
-  virtual void computeJacobianRhsx(double time, bool isDup = false);
+  virtual void updatePlugins(double time) {};
 
   /** Default function to compute forces
    *  \param time double, the current time
@@ -996,98 +1150,12 @@ public:
                                 SP::SiconosVector position,
                                 SP::SiconosVector twist);
 
-  /** To compute the kinetic energy
-   */
-  double computeKineticEnergy();
-
-  // --- miscellaneous ---
-
-  /** print the data to the screen
-   */
-  void display() const;
-
-  /** initialize the SiconosMemory objects with a positive size.
-   * \param steps the size of the SiconosMemory (i)
-   */
-  void initMemory(unsigned int steps);
-
-  /** push the current values of x, q and r in the stored previous values
-   *  xMemory, qMemory, rMemory,
-   * \todo Modify the function swapIn Memory with the new Object Memory
-   */
-  void swapInMemory();
-
-  /** set p[...] to zero
-   */
-  void resetAllNonSmoothPart();
-
-  /** set p[...] to zero for a given level
-   * \param level
-   */
-  void resetNonSmoothPart(unsigned int level);
-
-
-  virtual void computeT();
+   virtual void computeT();
 
   virtual void computeTdot();
 
-  virtual void normalizeq();
+ //@}
 
-  inline SP::SimpleMatrix mass()
-  {
-    return _massMatrix;
-  }
-
-  inline SP::SimpleMatrix T()
-  {
-    return _T;
-  }
-  inline SP::SimpleMatrix Tdot()
-  {
-    assert(_Tdot);
-    return _Tdot;
-  }
-  inline SiconosMemory& forcesMemory()
-  {
-    return _forcesMemory;
-  }
-  inline SiconosMemory& dotqMemory()
-  {
-    return _dotqMemory;
-  }
-  inline SP::SiconosVector dotq()
-  {
-    return _dotq;
-  }
-
-  /** set Boundary Conditions
-   *  \param newbd BoundaryConditions
-   */
-  void setBoundaryConditions(SP::BoundaryCondition newbd);
-
-  /** get Boundary Conditions
-   *  \return SP::BoundaryCondition pointer on a BoundaryConditions
-   */
-  inline SP::BoundaryCondition boundaryConditions()
-  {
-    return _boundaryConditions;
-  };
-
-  /** set Reaction to Boundary Conditions
-   *  \param newrbd BoundaryConditions pointer
-   */
-  inline void setReactionToBoundaryConditions(SP::SiconosVector newrbd)
-  {
-    _reactionToBoundaryConditions = newrbd;
-  };
-
-  /** get Reaction to  Boundary Conditions
-   *  \return pointer on a BoundaryConditions
-   */
-  inline SP::SiconosVector reactionToBoundaryConditions()
-  {
-    return _reactionToBoundaryConditions;
-  };
 
   ACCEPT_STD_VISITORS();
 

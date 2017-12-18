@@ -36,7 +36,7 @@ class MyFOLDS(FirstOrderLinearDS):
     def computeb(self, time):
         t = sin(50*time)
         u = [t, -t]
-        self.setb(u)
+        self.setbPtr(u)
 
 # variable declaration
 ndof = 2   # Number of degrees of freedom of your system
@@ -46,7 +46,7 @@ h = 1.0e-4  # time step for simulation
 hControl = 1.0e-2 # time step for control
 Xinit = 1.0 # initial position
 theta = 0.5
-N = 2*ceil((T-t0)/h) # number of time steps
+N = 2*int(ceil((T-t0)/h)) # number of time steps
 outputSize = 5 # number of variable to store at each time step
 
 # Matrix declaration
@@ -64,7 +64,7 @@ if h > hControl:
 # Declaration of the Dynamical System
 processDS = MyFOLDS(x0, A)
 # XXX b is not automatically created ...
-processDS.setb([0, 0])
+processDS.setbPtr([0, 0])
 # Control simulation
 sim = ControlZOHSimulation(t0, T, h)
 sim.setSaveOnlyMainSimulation(True)

@@ -57,13 +57,12 @@ void SiconosMemoryTest::setUp()
   V2.reset(new MemoryContainer);
   V3.reset(new MemoryContainer);
 
-  V1->push_back(q1);
-  V1->push_back(q2);
-  //  V2->push_back(c1);
-  //  V2->push_back(c2);
-  V3->push_back(q2);
-  V3->push_back(q1);
-
+  V1->push_back(*q1);
+  V1->push_back(*q2);
+  //  V2->push_back(*c1);
+  //  V2->push_back(*c2);
+  V3->push_back(*q2);
+  V3->push_back(*q1);
 }
 
 void SiconosMemoryTest::tearDown()
@@ -80,7 +79,7 @@ void SiconosMemoryTest::testBuildMemory1()
   SP::SiconosMemory tmp1(new SiconosMemory(4, sizeVect));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildMemory1 : memorysize OK", tmp1->getMemorySize() == 4, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildMemory1 : nbVectorsInMemory OK", tmp1->nbVectorsInMemory() == 0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildMemory1 : size vector OK", tmp1->vectorMemory()->size() == 4, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildMemory1 : size vector OK", tmp1->size() == 4, true);
   std::cout << "-->  testBuildMemory1 ended with success." <<std::endl;
 }
 
@@ -91,7 +90,7 @@ void SiconosMemoryTest::testBuildMemory2()
   SP::SiconosMemory tmp1(new SiconosMemory(*V1));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildMemory2 : memorysize OK", tmp1->getMemorySize() == 2, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildMemory2 : nbVectorsInMemory OK", tmp1->nbVectorsInMemory() == 2, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildMemory2 : size vector OK", tmp1->vectorMemory()->size() == 2, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildMemory2 : size vector OK", tmp1->size() == 2, true);
 
   //  SP::SiconosMemory tmp2(new SiconosMemory(*V2));
   //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildMemory2 : memorysize OK", tmp2->getMemorySize() == 2, true);
@@ -108,7 +107,7 @@ void SiconosMemoryTest::testBuildMemory3()
   SP::SiconosMemory tmp1(new SiconosMemory(2, *V1));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildMemory3 : memorysize OK", tmp1->getMemorySize() == 2, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildMemory3 : nbVectorsInMemory OK", tmp1->nbVectorsInMemory() == 2, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildMemory3 : size vector OK", tmp1->vectorMemory()->size() == 2, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildMemory3 : size vector OK", tmp1->size() == 2, true);
 
   //  SP::SiconosMemory tmp2(new SiconosMemory(2,*V2));
   //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildMemory3 : memorysize OK", tmp2->getMemorySize() == 2, true);
@@ -137,10 +136,10 @@ void SiconosMemoryTest::testGetSiconosVector()
 {
   std::cout << "--> Test: getSiconosVector." <<std::endl;
   SP::SiconosMemory tmp1(new SiconosMemory(*V1));
-  SP::SiconosVector tmp = tmp1->getSiconosVector(0);
+  const SiconosVector& tmp = tmp1->getSiconosVector(0);
 
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetSiconosVector : *v1 size OK", tmp->size() == (*V1)[0]->size(), true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetSiconosVector : v1 values OK", *tmp == *((*V1)[0]), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetSiconosVector : *v1 size OK", tmp.size() == (*V1)[0].size(), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetSiconosVector : v1 values OK", tmp == ((*V1)[0]), true);
   std::cout << "-->  getSiconosVector test ended with success." <<std::endl;
 }
 
@@ -150,16 +149,16 @@ void SiconosMemoryTest::testSwap()
 {
   std::cout << "--> Test: swap." <<std::endl;
   SP::SiconosMemory tmp1(new SiconosMemory(2, sizeVect));
-  tmp1->swap((*(*V1)[0]));
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSwap : vector OK", *(tmp1->getSiconosVector(0)) == *((*V1)[0]), true);
+  tmp1->swap(((*V1)[0]));
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSwap : vector OK", tmp1->getSiconosVector(0) == ((*V1)[0]), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSwap : _nbVectorsInMemory OK", tmp1->nbVectorsInMemory() == 1, true);
-  tmp1->swap((*(*V1)[1]));
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSwap : vector OK", *(tmp1->getSiconosVector(0)) == *((*V1)[1]), true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSwap : vector OK", *(tmp1->getSiconosVector(1)) == *((*V1)[0]), true);
+  tmp1->swap(((*V1)[1]));
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSwap : vector OK", tmp1->getSiconosVector(0) == ((*V1)[1]), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSwap : vector OK", tmp1->getSiconosVector(1) == ((*V1)[0]), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSwap : _nbVectorsInMemory OK", tmp1->nbVectorsInMemory() == 2, true);
-  tmp1->swap((*(*V1)[0]));
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSwap : vector OK", *(tmp1->getSiconosVector(0)) == *((*V1)[0]), true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSwap : vector OK", *(tmp1->getSiconosVector(1)) == *((*V1)[1]), true);
+  tmp1->swap(((*V1)[0]));
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSwap : vector OK", tmp1->getSiconosVector(0) == ((*V1)[0]), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSwap : vector OK", tmp1->getSiconosVector(1) == ((*V1)[1]), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSwap : _nbVectorsInMemory OK", tmp1->nbVectorsInMemory() == 2, true);
   std::cout << "-->  swap test ended with success." <<std::endl;
 }

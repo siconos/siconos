@@ -133,14 +133,6 @@ REGISTER_BOOST_SERIALIZATION(__mpf_struct);
 
 
 template <class Archive>
-void siconos_io(Archive& ar, DynamicalSystemsSet& v, unsigned int version)
-{
-  ar &  boost::serialization::make_nvp("ThisShouldNotBeASetAnyMore",
-                                       boost::serialization::base_object< std::vector<SP::DynamicalSystem> >(v));
-}
-REGISTER_BOOST_SERIALIZATION(DynamicalSystemsSet);
-
-template <class Archive>
 void siconos_io(Archive & ar, SiconosVector & v, unsigned int version)
 {
   ar & boost::serialization::make_nvp("_dense", v._dense);
@@ -373,11 +365,10 @@ void siconos_io_register_Kernel(Archive& ar)
   ar.register_type(static_cast<SimpleMatrix*>(NULL));
   ar.register_type(static_cast<SiconosVector*>(NULL));
 
-  siconos_io_register_generated(ar);
+  siconos_io_register_generated_Kernel(ar);
 
   ar.register_type(static_cast<_DynamicalSystemsGraph*>(NULL));
   ar.register_type(static_cast<_InteractionsGraph*>(NULL));
-  ar.register_type(static_cast<DynamicalSystemsSet*>(NULL));
   ar.register_type(static_cast<std::basic_ofstream<char>*>(NULL));
 
   //  ar.register_type(static_cast<PluginHandle*>(NULL));
@@ -387,5 +378,20 @@ void siconos_io_register_Kernel(Archive& ar)
 
 
 }
+
+template <class Archive>
+void siconos_io_register_Mechanics(Archive& ar)
+{
+  siconos_io_register_Kernel(ar);
+  siconos_io_register_generated_Mechanics(ar);
+}
+
+template <class Archive>
+void siconos_io_register_Control(Archive& ar)
+{
+  siconos_io_register_Kernel(ar);
+  siconos_io_register_generated_Control(ar);
+}
+
 #endif
 #endif

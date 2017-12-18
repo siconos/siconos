@@ -43,7 +43,7 @@ protected:
 
   SiconosShape()
     : _inside_margin(0.1)
-    , _outside_margin(0.1)
+    , _outside_margin(0.0)
     , _version(0)
     {}
 
@@ -273,7 +273,7 @@ public:
   {
     if (!_indexes || (_indexes->size() % 3) != 0)
       throw SiconosException("Mesh indexes size must be divisible by 3.");
-    if (!_vertices || _vertices->size(1) != 3)
+    if (!_vertices || _vertices->size(0) != 3)
       throw SiconosException("Mesh vertices matrix must have 3 columns.");
   }
 

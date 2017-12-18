@@ -1,0 +1,73 @@
+#!/bin/sh
+
+#
+# full setup for some cloudstack vm
+#
+
+
+# arg1 : remote ubuntu (16.04) vm (ex: siconos---vm0.ci)
+# arg2 : account                  (ex: ci)    
+# arg3 : account passwd
+
+ssh-keygen -f "$HOME/.ssh/known_hosts" -R $1
+
+# 1 setup root ssh
+cat $HOME/.ssh/id_rsa.pub | sshpass -p $3 ssh -oStrictHostKeyChecking=no $2@$1 cat - \> /tmp/l 
+echo $3 | sshpass -p $3 ssh -oStrictHostKeyChecking=no $2@$1 sudo -S mkdir -p /root/.ssh
+echo $3 | sshpass -p $3 ssh -oStrictHostKeyChecking=no $2@$1 sudo -S mv /tmp/l /root/.ssh/authorized_keys
+echo $3 | sshpass -p $3 ssh -oStrictHostKeyChecking=no $2@$1 sudo -S chown root.root /root/.ssh/authorized_keys
+echo
+ssh root@$1 /bin/echo ssh root ok
+
+# packages
+ssh root@$1 apt-get update
+ssh root@$1 apt-get install -y python-yaml curl
+
+# external disk
+ssh root@$1 fdisk /dev/vda <<EOF
+d
+n
+p
+1
+
+
+w
+EOF
+ssh root@$1 apt-get remove -y docker.io
+ssh root@$1 apt-get remove -y docker-ce
+ssh root@$1 apt-get remove -y docker-engine
+ssh root@$1 umount /dev/vda1
+ssh root@$1 mkfs.ext4 /dev/vda1
+ssh root@$1 /bin/rm -rf /var/lib/docker 
+ssh root@$1 mkdir -p /var/lib/docker
+ssh root@$1 cp /etc/fstab /etc/fstab.\$\$
+ssh root@$1 echo /dev/vda1                                 /var/lib/docker       ext4    errors=remount-ro       0     1    \>\> /etc/fstab
+ssh root@$1 mount -av
+
+# docker
+ssh root@$1 curl -sSL https://get.docker.com/ \| sh
+
+# dns
+ssh root@$1 \
+    cat \> /etc/docker/daemon.json <<EOF
+{
+    "dns": ["172.21.8.87", "193.51.196.130", "193.51.196.131", "8.8.8.8"]
+}
+EOF
+
+ssh root@$1 service docker restart
+ssh root@$1 usermod -aG docker $2
+
+# jenkins
+cat $HOME/Downloads/slave.jar | sshpass -p $3 ssh -oStrictHostKeyChecking=no $2@$1 cat - \> slave.jar
+sshpass -p $3 ssh -oStrictHostKeyChecking=no $2@$1 mkdir -p .ssh
+cat $HOME/Downloads/siconos--.key | sshpass -p $3 ssh -oStrictHostKeyChecking=no $2@$1 cat - \> .ssh/authorized_keys
+
+# hostname
+ssh root@$1 hostname $1
+ssh root@$1 echo $1 \> /etc/hostname
+
+# ci ssh
+echo $3 | sshpass -p $3 ssh -oStrictHostKeyChecking=no $2@$1 /bin/rm -f \$HOME/.ssh/id_rsa*
+echo $3 | sshpass -p $3 ssh -oStrictHostKeyChecking=no $2@$1 /bin/mkdir -p \$HOME/.ssh
+echo $3 | sshpass -p $3 ssh -oStrictHostKeyChecking=no $2@$1 ssh-keygen -b 2048 -t rsa -f \$HOME/.ssh/id_rsa -q -N \"\"

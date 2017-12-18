@@ -150,7 +150,7 @@ public:
   /** Constructor from index set
       \param indexSet the index set of the active constraints
   */
-  BlockCSRMatrix(SP::InteractionsGraph indexSet);
+  BlockCSRMatrix(InteractionsGraph& indexSet);
 
   /** destructor
    */
@@ -159,7 +159,7 @@ public:
   /** get size (in block-components) 
    * \return unsigned int NumberOfBlocksInARow
    */
-  inline unsigned int getNumberOfBlocksInARow() const
+  inline unsigned int numberOfBlocksInARow() const
   {
     return _nr;
   };
@@ -208,37 +208,20 @@ public:
   /** fill the current class using an index set
    *  \param indexSet set of the active constraints
    */
-  void fill(SP::InteractionsGraph indexSet);
+  void fill(InteractionsGraph& indexSet);
 
 
   /** fill the matrix with the Mass matrix 
    * \warning only for NewtonEulerDS
    * \param indexSet of the active constraints
    */
-  void fillM(SP::InteractionsGraph indexSet);
+  void fillM(InteractionsGraph& indexSet);
 
   /** fill the matrix with the H matrix 
    * \warning only for NewtonEulerFrom3DLocalFrameR
    * \param indexSet of the active constraints
    */
-  void fillH(SP::InteractionsGraph indexSet);
-
-  /** fill the current class using an index set and a map of DSblocks
-   *    \param DSSet DynamicalSystemsSet*, the set of DynamicalSystem
-   *    \param DSblocks MapOfDSMatrices, the list of matrices linked to a
-   *   DynamicalSystem
-   */
-  void fill(SP::DynamicalSystemsSet DSSet, MapOfDSMatrices& DSblocks);
-
-  /** fill the current class using an index set and a map of DSblocks
-       \param indexSet DynamicalSystemsSet*, the set of DynamicalSystem
-       \param DSSet InteractionsGraph*, the index set of the active
-       constraints
-       \param interactionDSBlocks MapOfInteractionMapOfDSMatrices, the list of matrices linked
-       to a DynamicalSystem
-   */
-  void fill(SP::InteractionsGraph indexSet, SP::DynamicalSystemsSet DSSet,
-            MapOfInteractionMapOfDSMatrices& interactionDSBlocks);
+  void fillH(InteractionsGraph& indexSet);
 
   /** fill the numerics structure _sparseBlockStructuredMatrix using _blockCSR */
   void convert();

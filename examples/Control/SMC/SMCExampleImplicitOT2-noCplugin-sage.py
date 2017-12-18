@@ -64,7 +64,7 @@ class MyFOLDS(FirstOrderLinearDS):
         # XXX we need to find a smarter way to do things here
         # we need to convert from vector (sage) to arrayish
         u = array(f(x=time).list(), dtype = float) + tmpz
-        self.setb(u)
+        self.setbPtr(u)
 
 # variable declaration
 ndof = 2   # Number of degrees of freedom of your system
@@ -91,7 +91,7 @@ if h > hControl:
 # Declaration of the Dynamical System
 processDS = MyFOLDS(x0, A)
 # XXX b is not automatically created ...
-processDS.setb([0, 0])
+processDS.setbPtr([0, 0])
 
 # Control Simulation
 sim = ControlZOHSimulation(t0, T, h)

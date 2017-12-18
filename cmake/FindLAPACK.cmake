@@ -47,7 +47,7 @@ if(NOT LAPACK_FOUND)
     endif()
   endif()
   
-  macro(check_lapack_Libraries LIBRARIES _prefix _name _flags _list _blas _threads)
+  macro(check_lapack_libraries LIBRARIES _prefix _name _flags _list _blas _threads)
     # This macro checks for the existence of the combination of fortran libraries
     # given by _list.  If the combination is found, this macro checks (using the
     # Check_Fortran_Function_Exists macro) whether can link against that library
@@ -132,7 +132,7 @@ if(NOT LAPACK_FOUND)
       #   set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} ${GFORTRAN_LIB})
       #  endif()
       ## First we check c interface
-      if(${_prefix} STREQUAL "LAPACKE")
+      if("${_prefix}" STREQUAL "LAPACKE")
         check_function_exists("LAPACKE_${_name}" ${_prefix}${_combined_name}_WORKS)
       else()
 	check_function_exists("${_name}_" ${_prefix}${_combined_name}_WORKS)
@@ -251,6 +251,26 @@ if(NOT LAPACK_FOUND)
 	set(LAPACK_INCLUDE_SUFFIXES "openblas;openblas/lapacke")
       else()
 	set(WITH_LAPACK "" CACHE STRING "lapack implementation type [mkl/openblas/atlas/accelerate/generic]" FORCE)
+      endif(LAPACK_LIBRARIES)
+    endif()
+
+    if((NOT LAPACK_LIBRARIES)
+	AND ((NOT WITH_LAPACK) OR (WITH_LAPACK STREQUAL "MATLAB")))
+      message(STATUS "Try to find lapack in MATLAB ...")
+      check_lapack_libraries(
+	LAPACK_LIBRARIES
+	""
+	cheev
+	""
+	"mwlapack"
+	"${BLAS_LIBRARIES}"
+	"")
+      if(LAPACK_LIBRARIES)
+	set(WITH_LAPACK "MATLAB" CACHE STRING "lapack implementation type [mkl/MATLAB/atlas/accelerate/generic]" FORCE)
+	set(CLAPACK_HEADER "lapack.h")
+	set(LAPACK_INCLUDE_SUFFIXES "extern/include")
+      else()
+	set(WITH_LAPACK "" CACHE STRING "lapack implementation type [mkl/MATLAB/atlas/accelerate/generic]" FORCE)
       endif(LAPACK_LIBRARIES)
     endif()
 
@@ -456,6 +476,13 @@ if(NOT LAPACK_FOUND)
       set(LAPACK_SUFFIX "_")
       set(LAPACK_PREFIX)
 
+    elseif(WITH_LAPACK STREQUAL "MATLAB")
+      set(HAS_MATLAB_LAPACK 1 CACHE BOOL "Blas/Lapack come from MATLAB ")
+      set(LAPACK_SUFFIX "_")
+      set(LAPACK_PREFIX)
+      set(HAS_LAPACKE FALSE)
+      set(HAS_CLAPACK FALSE)
+
     elseif(WITH_LAPACK STREQUAL "atlas")
       set(HAS_ATLAS_LAPACK 1 CACHE BOOL "Blas  comes from Atlas framework ")
       set(LAPACK_SUFFIX)
@@ -519,6 +546,10 @@ if(NOT LAPACK_FOUND)
     SET(CMAKE_REQUIRED_FLAGS ${CMAKE_REQUIRED_FLAGS} "-DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE")
     SET(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} ${EXTRA_LAPACK_LIB})
   endif(MSVC AND HAS_LAPACKE)
+
+  if(HAS_MATLAB_LAPACK)
+    SET(CMAKE_REQUIRED_FLAGS ${CMAKE_REQUIRED_FLAGS} "-Dptrdiff_t=long")
+  endif(HAS_MATLAB_LAPACK)
 
   ## dgesvd ##
   unset(HAS_LAPACK_DGESVD)

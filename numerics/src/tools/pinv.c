@@ -38,7 +38,7 @@ double pinv(double * A, int n, int m, double tolerance)
   double *U = (double*)malloc(LDU * n * sizeof(double));
   int LDVT = m;
   double *VT = (double*)malloc(LDVT * m * sizeof(double));
-  int InfoDGSVD = -1;
+  lapack_int InfoDGSVD = -1;
   double * superb = (double*)malloc((min(m, n) - 1)*sizeof(double));
   char JOBU = 'A', JOBVT = 'A'; 
   DGESVD(JOBU, JOBVT, n, m, A, n, S, U, LDU, VT, LDVT, superb, &InfoDGSVD);

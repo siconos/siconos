@@ -23,6 +23,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <float.h>
 /* #define DEBUG_STDOUT   */
 /* #define DEBUG_MESSAGES   */
 #include "debug.h"
@@ -30,17 +31,97 @@
 
 /* #define min(a,b) (a<=b?a:b) */
 
+
+static
+int determine_convergence(double error, double *tolerance, int iter,
+                          SolverOptions *options,
+                          VariationalInequality* problem,
+                          double *z , double *w, double rho)
+
+{
+  int hasNotConverged = 1;
+  if (error < *tolerance)
+  {
+    if (verbose > 0)
+      printf("--------------- VI - Fixed Point Projection (FPP) - Iteration %i "
+             "Residual = %14.7e < %7.3e\n", iter, error, *tolerance);
+    double absolute_error =0.0;
+    variationalInequality_computeError(problem, z , w, *tolerance, options, &absolute_error);
+    if (verbose > 0)
+      printf("--------------  VI - Fixed Point Projection (FPP)- Full error criterion =  %e\n", absolute_error);
+
+
+    hasNotConverged = 0;
+
+
+    if (options->iparam[SICONOS_VI_IPARAM_ERROR_EVALUATION]==SICONOS_VI_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL)
+    {
+      if (absolute_error > options->dparam[SICONOS_DPARAM_TOL])
+      {
+        *tolerance = error/absolute_error*options->dparam[SICONOS_DPARAM_TOL];
+        if (verbose > 0)
+          printf("--------------  VI - Fixed Point Projection (FPP)- We modify the required incremental precision to reach accuracy to %e\n", *tolerance);
+        hasNotConverged = 1;
+      }
+      else
+      {
+        if (verbose > 0)
+          printf("-------------- VI - Fixed Point Projection (FPP) - The incremental precision is sufficient to reach accuracy to %e\n", *tolerance);
+      }
+    }
+  }
+  else
+  {
+    if (verbose > 0)
+      printf("--------------- VI - Fixed Point Projection (FPP) - Iteration %i rho = %14.7e error = %14.7e > %10.5e \n", iter, rho, error, *tolerance);
+  }
+  return hasNotConverged;
+}
+
+static
+double compute_error(VariationalInequality* problem,
+                     double *z , double *w, double norm_z_z_k,
+                     double tolerance,
+                     SolverOptions * options)
+{
+
+  double error;
+  if (options->iparam[SICONOS_VI_IPARAM_ERROR_EVALUATION]==SICONOS_VI_ERROR_EVALUATION_FULL)
+    variationalInequality_computeError(problem, z , w, tolerance, options, &error);
+  else if (options->iparam[SICONOS_VI_IPARAM_ERROR_EVALUATION]==SICONOS_VI_ERROR_EVALUATION_LIGHT ||
+           options->iparam[SICONOS_VI_IPARAM_ERROR_EVALUATION]==SICONOS_VI_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL)
+  {
+    /* cblas_dcopy(n , x , 1 , xtmp, 1); */
+    /* cblas_daxpy(n, -1.0, x_k , 1, xtmp , 1) ; */
+    /* error = cblas_dnorm2(n,xtmp,1); */
+    double norm_z = cblas_dnrm2(problem->size , z , 1);
+    error = norm_z_z_k;
+    if (fabs(norm_z) > DBL_EPSILON)
+      error /= norm_z;
+  }
+  else
+  {
+    return NAN;
+    numerics_error("compute_error(VariationalInequality* problem, ...)", "unknown error evaluation strategy");
+  }
+  return error;
+}
+
+
+
 void variationalInequality_FixedPointProjection(VariationalInequality* problem, double *x, double *w, int* info, SolverOptions* options)
 {
+
+  //verbose=1;
   /* /\* int and double parameters *\/ */
   int* iparam = options->iparam;
   double* dparam = options->dparam;
   /* Number of contacts */
   int n = problem->size;
   /* Maximum number of iterations */
-  int itermax = iparam[0];
+  int itermax = iparam[SICONOS_IPARAM_MAX_ITER];
   /* Tolerance */
-  double tolerance = dparam[0];
+  double tolerance = dparam[SICONOS_DPARAM_TOL];
 
   /*****  Fixed point iterations *****/
   int iter = 0; /* Current iteration number */
@@ -53,22 +134,22 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
   double rho = 0.0, rho_k =0.0;
   int isVariable = 0;
 
-  if (dparam[3] > 0.0)
+  if (dparam[SICONOS_VI_EG_DPARAM_RHO] > 0.0)
   {
-    rho = dparam[3];
+    rho = dparam[SICONOS_VI_EG_DPARAM_RHO];
     if (verbose > 0)
     {
-      printf("----------------------------------- VI - Fixed Point Projection (FPP) - Fixed stepsize with  rho = %14.7e \n", rho);
+      printf("--------------- VI - Fixed Point Projection (FPP) - Fixed stepsize with  rho = %14.7e \n", rho);
     }
   }
   else
   {
     /* Variable step in iterations*/
     isVariable = 1;
-    rho = -dparam[3];
+    rho = -dparam[SICONOS_VI_EG_DPARAM_RHO];
     if (verbose > 0)
     {
-      printf("----------------------------------- VI - Fixed Point Projection (FPP) - Variable stepsize with starting rho = %14.7e \n", rho);
+      printf("--------------- VI - Fixed Point Projection (FPP) - Variable stepsize with starting rho = %14.7e \n", rho);
     }
   }
 
@@ -78,7 +159,10 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
   double error_k;
   int ls_iter = 0;
   int ls_itermax = 10;
-  double tau=dparam[4], tauinv=dparam[5], L= dparam[6], Lmin = dparam[7];
+  double tau=dparam[SICONOS_VI_EG_DPARAM_LS_TAU],
+    tauinv=dparam[SICONOS_VI_EG_DPARAM_LS_TAUINV],
+    L= dparam[SICONOS_VI_EG_DPARAM_LS_L], Lmin = dparam[SICONOS_VI_EG_DPARAM_LS_LMIN];
+
   DEBUG_PRINTF("tau=%g, tauinv=%g, L= %g, Lmin = %g",dparam[4], dparam[5],  dparam[6], dparam[7] ) ;
   double a1=0.0, a2=0.0;
   double * x_k = NULL;
@@ -104,7 +188,11 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
       problem->ProjectionOnX(problem,xtmp,x);
 
       /* **** Criterium convergence **** */
+
       variationalInequality_computeError(problem, x , w, tolerance, options, &error);
+
+      hasNotConverged = determine_convergence(error, &tolerance, iter, options,
+                                              problem, x, w, rho);
 
       if (options->callback)
       {
@@ -113,17 +201,11 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
                                         error, NULL);
       }
 
-      if (verbose > 0)
-      {
-        printf("----------------------------------- VI - Fixed Point Projection (FPP) - Iteration %i rho = %14.7e \tError = %14.7e\n", iter, rho, error);
-      }
-      if (error < tolerance) hasNotConverged = 0;
-      *info = hasNotConverged;
     }
   }
   else if (isVariable)
   {
-    if (iparam[1]==0) /* Armijo rule with Khotbotov ratio (default)   */
+    if (iparam[SICONOS_VI_IPARAM_LINESEARCH_METHOD]==0) /* Armijo rule with Khotbotov ratio (default)   */
     {
       DEBUG_PRINT("Variable step size method with Armijo rule with Khotbotov ratio (default) \n");
       while ((iter < itermax) && (hasNotConverged > 0))
@@ -196,7 +278,12 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
             printf("w[%i]=F[%i]=%12.8e\n",i,i,w[i]);});
 
         /* **** Criterium convergence **** */
-        variationalInequality_computeError(problem, x , w, tolerance, options, &error);
+        /* variationalInequality_computeError(problem, x , w, tolerance, options, &error); */
+
+        error = compute_error(problem, x , w, a2,  tolerance, options);
+
+        hasNotConverged = determine_convergence(error, &tolerance, iter, options,
+                                                problem, x, w, rho);
 
         DEBUG_EXPR_WE(
           if ((error < error_k))
@@ -207,7 +294,7 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
 
 
         /*Update rho*/
-        if ((rho_k*a1 < Lmin * a2) && (error < error_k))
+        if ((rho_k*a1 < Lmin * a2))
         {
           rho =rho_k*tauinv;
           DEBUG_PRINTF("We compute a new rho_k = %e\n", rho_k);
@@ -217,16 +304,11 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
           rho =rho_k;
 
 
-        if (verbose > 0)
-        {
-          printf("----------------------------------- VI - Fixed Point Projection (FPP) - Iteration %i rho = %14.7e \tError = %14.7e\n", iter, rho, error);
-        }
-        if (error < tolerance) hasNotConverged = 0;
-        *info = hasNotConverged;
+
       }
     }
 
-    if (iparam[1] == 1) /* Armijo rule with Solodov.Tseng ratio */
+    if (iparam[SICONOS_VI_IPARAM_LINESEARCH_METHOD] == 1) /* Armijo rule with Solodov.Tseng ratio */
     {
       DEBUG_PRINT("Variable step size method with Armijo rule with Solodov.Tseng ratio \n");
       while ((iter < itermax) && (hasNotConverged > 0))
@@ -298,8 +380,11 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
             printf("w[%i]=F[%i]=%12.8e\n",i,i,w[i]);});
 
         /* **** Criterium convergence **** */
-        variationalInequality_computeError(problem, x , w, tolerance, options, &error);
 
+        error = compute_error(problem, x , w, a2,  tolerance, options);
+
+        hasNotConverged = determine_convergence(error, &tolerance, iter, options,
+                                                problem, x, w, rho);
         DEBUG_EXPR_WE(
           if ((error < error_k))
           {
@@ -309,7 +394,7 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
 
 
         /*Update rho*/
-        if ((rho_k*a1 < Lmin * a2*a2) && (error < error_k))
+        if ((rho_k*a1 < Lmin * a2*a2))
         {
           rho =rho_k*tauinv;
           DEBUG_PRINTF("We compute a new rho_k = %e \n", rho_k);
@@ -319,16 +404,11 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
           rho = rho_k;
 
 
-        if (verbose > 0)
-        {
-          printf("----------------------------------- VI - Fixed Point Projection (FPP) - Iteration %i rho = %14.7e \tError = %14.7e\n", iter, rho, error);
-        }
-        if (error < tolerance) hasNotConverged = 0;
-        *info = hasNotConverged;
+
       }
     }
 
-    if (iparam[1] == 2) /* Armijo rule with Han.Sun ratio */
+    if (iparam[SICONOS_VI_IPARAM_LINESEARCH_METHOD] == 2) /* Armijo rule with Han.Sun ratio */
     {
       DEBUG_PRINT("Variable step size method with Armijo rule with Han.Sun ratio \n");
       while ((iter < itermax) && (hasNotConverged > 0))
@@ -399,7 +479,10 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
             printf("w[%i]=F[%i]=%12.8e\n",i,i,w[i]);});
 
         /* **** Criterium convergence **** */
-        variationalInequality_computeError(problem, x , w, tolerance, options, &error);
+
+        error = compute_error(problem, x , w, a1,  tolerance, options);
+        hasNotConverged = determine_convergence(error, &tolerance, iter, options,
+                                                problem, x, w, rho);
 
         DEBUG_EXPR_WE(
           if ((error < error_k))
@@ -420,37 +503,28 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
           rho = rho_k;
 
 
-        if (verbose > 0)
-        {
-          printf("----------------------------------- VI - Fixed Point Projection (FPP) - Iteration %i rho = %14.7e \tError = %14.7e\n", iter, rho, error);
-        }
-        if (error < tolerance) hasNotConverged = 0;
-        *info = hasNotConverged;
+
       }
     }
-    if (iparam[1] > 2)
+    if (iparam[SICONOS_VI_IPARAM_LINESEARCH_METHOD] > 2)
     {
-      fprintf(stderr, "Numerics, VariationalInequality_FixedPointProjection failed. iparam[1] > 2 .\n");
+      fprintf(stderr, "Numerics, VariationalInequality_FixedPointProjection failed. iparam[SICONOS_VI_IPARAM_LINESEARCH_METHOD] > 2 .\n");
       exit(EXIT_FAILURE);
     }
+    /* we return the negative value of rho for multiple call to the solver */
+    dparam[SICONOS_VI_EG_DPARAM_RHO] = -rho;
   }// end isvariable=1
 
-
-  if (verbose > 0)
-  {
-    printf("----------------------------------- VI - Fixed Point Projection (FPP) - #Iteration %i Final Residual = %14.7e\n", iter, error);
-  }
-
+  *info = hasNotConverged;
   if (isVariable)
   {
     free(x_k);
     free(w_k);
   }
 
-  dparam[0] = tolerance;
-  dparam[1] = error;
-  dparam[3] = rho;
-  iparam[7] = iter;
+  dparam[SICONOS_DPARAM_TOL] = tolerance;
+  dparam[SICONOS_DPARAM_RESIDU] = error;
+  iparam[SICONOS_IPARAM_ITER_DONE] = iter;
   free(xtmp);
   free(wtmp);
 
@@ -459,7 +533,6 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
 
 int variationalInequality_FixedPointProjection_setDefaultSolverOptions(SolverOptions* options)
 {
-  int i;
   if (verbose > 0)
   {
     printf("Set the Default SolverOptions for the FixedPointProjection Solver\n");
@@ -469,27 +542,28 @@ int variationalInequality_FixedPointProjection_setDefaultSolverOptions(SolverOpt
   options->numberOfInternalSolvers = 0;
   options->isSet = 1;
   options->filterOn = 1;
-  options->iSize = 8;
-  options->dSize = 8;
-  options->iparam = (int *)malloc(options->iSize * sizeof(int));
-  options->dparam = (double *)malloc(options->dSize * sizeof(double));
-  options->dWork = NULL;
+  options->iSize = 10;
+  options->dSize = 10;
+  options->iparam = (int *)calloc(options->iSize, sizeof(int));
+  options->dparam = (double *)calloc(options->dSize, sizeof(double));
   solver_options_nullify(options);
-  for (i = 0; i < 8; i++)
-  {
-    options->iparam[i] = 0;
-    options->dparam[i] = 0.0;
-  }
-  options->iparam[0] = 20000;
 
-  options->dparam[0] = 1e-3;
-  options->dparam[3] = 1e-3;
-  options->dparam[3] = -1.0;  /* rho is variable by default */
-  options->dparam[4] = 2.0/3.0;  /* tau */
-  options->dparam[5] = 3.0/2.0;  /* tauinv */
-  options->dparam[6] = 0.9;  /* L */
-  options->dparam[7] = 0.3;  /* Lmin */
 
+  options->iparam[SICONOS_IPARAM_MAX_ITER] = 20000;
+
+  options->iparam[SICONOS_VI_IPARAM_LINESEARCH_METHOD] = 0;
+
+  /* options->iparam[SICONOS_VI_IPARAM_ERROR_EVALUATION]=SICONOS_VI_ERROR_EVALUATION_FULL; */
+  options->iparam[SICONOS_VI_IPARAM_ERROR_EVALUATION]=SICONOS_VI_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL;
+  options->iparam[SICONOS_VI_IPARAM_ERROR_EVALUATION_FREQUENCY]=0;
+
+  options->dparam[SICONOS_DPARAM_TOL] = 1e-3;
+
+  options->dparam[SICONOS_VI_EG_DPARAM_RHO] = -1.0; // rho is variable by default
+  options->dparam[SICONOS_VI_EG_DPARAM_LS_TAU] = 2/3.0;  /* tau */
+  options->dparam[SICONOS_VI_EG_DPARAM_LS_TAUINV] = 3.0/2.0;  /*tauinv */
+  options->dparam[SICONOS_VI_EG_DPARAM_LS_L] = 0.9;  /* L */
+  options->dparam[SICONOS_VI_EG_DPARAM_LS_LMIN] = 0.3;  /* Lmin */
 
   options->internalSolvers = NULL;
 

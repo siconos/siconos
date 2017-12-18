@@ -64,7 +64,7 @@ int Fixe(int n, double* z, int* iparam, double* dparam)
     if (verbose > 0)
     {
       printf("Non Smooth Newton, iteration number %i, error equal to %14.7e .\n", niter, terminationCriterion);
-      printf(" -----------------------------------------------------------------------");
+      printf(" -----------");
     }
   }
 

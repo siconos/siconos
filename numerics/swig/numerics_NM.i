@@ -4,39 +4,51 @@
 %include "NumericsMatrix.h"
 %include "NumericsSparseMatrix.h"
 
+%define %NM_convert_from_target(input, output, ACTION)
+{
+ SN_ARRAY_TYPE* array_ = NULL;
+ int array_ctrl_ = 0;
+ SN_ARRAY_TYPE* array_i_ = NULL;
+ int array_i_ctrl_ = 0;
+ SN_ARRAY_TYPE* array_p_ = NULL;
+ int array_p_ctrl_ = 0;
+ int alloc_ctrl_ = 0;
+ NumericsMatrix *nummat = NULL;
+
+#if defined(SWIGPYTHON)
+   NumericsMatrix* Mtmp = NM_convert_from_python(input, &nummat, &array_, &array_ctrl_, &array_i_, &array_i_ctrl_, &array_p_, &array_p_ctrl_, &alloc_ctrl_);
+#endif /* SWIGPYTHON */
+
+#if defined(SWIGMATLAB)
+  NumericsMatrix* Mtmp = NM_convert_from_matlab(input, &nummat, &array_, &array_ctrl_, &array_i_, &array_i_ctrl_, &array_p_, &array_p_ctrl_, &alloc_ctrl_);
+#endif /* SWIGMATLAB */
+
+   if (!Mtmp) { ACTION; }
+
+  *(output) = NM_create(Mtmp->storageType, Mtmp->size0, Mtmp->size1);
+  NM_copy(Mtmp, *(output));
+
+  target_mem_mgmt(array_ctrl_,  array_);
+  target_mem_mgmt(array_i_ctrl_,  array_i_);
+  target_mem_mgmt(array_p_ctrl_,  array_p_);
+
+  if (nummat)
+  {
+    if (!NM_clean(nummat, alloc_ctrl_)) { ACTION; }
+    free(nummat);
+  }
+
+}
+%enddef
 // some extensions but numpy arrays should be used instead
 %extend NumericsMatrix
 {
 %fragment("NumericsMatrix");
 
-  NumericsMatrix(PyObject* o)
+  NumericsMatrix(SN_OBJ_TYPE* o)
   {
-    PyArrayObject* array_ = NULL;
-    int array_ctrl_ = 0;
-    PyArrayObject* array_i_ = NULL;
-    int array_i_ctrl_ = 0;
-    PyArrayObject* array_p_ = NULL;
-    int array_p_ctrl_ = 0;
-    int alloc_ctrl_ = 0;
-
-    NumericsMatrix *tmpmat = NULL;
-    NumericsMatrix *Mtmp = NM_convert_from_python(o, &tmpmat, &array_, &array_ctrl_, &array_i_, &array_i_ctrl_, &array_p_, &array_p_ctrl_, &alloc_ctrl_);
-
-    if (!Mtmp) { return NULL; }
-
-    NumericsMatrix *M = NM_create(Mtmp->storageType, Mtmp->size0, Mtmp->size1);
-    NM_copy(Mtmp, M);
-
-    if (array_ctrl_ && array_) { Py_DECREF(array_); }
-    if (array_i_ctrl_ && array_i_) { Py_DECREF(array_i_); }
-    if (array_p_ctrl_ && array_p_) { Py_DECREF(array_p_); }
-
-    if (tmpmat)
-    {
-      if (!NM_clean(tmpmat, alloc_ctrl_)) { return NULL; }
-      free(tmpmat);
-    }
-
+    NumericsMatrix *M;
+    %NM_convert_from_target(o, &M, return NULL)
     return M;
   }
 
@@ -52,8 +64,8 @@
     return self->matrix0[i+j*self->size1];
   }
 
-
-  PyObject * __setitem__(PyObject* index, double v)
+#ifdef SWIGPYTHON
+  SN_OBJ_TYPE * __setitem__(SN_OBJ_TYPE* index, double v)
   {
     int i, j;
     if (!self->matrix0)
@@ -66,7 +78,7 @@
     return Py_BuildValue("");
   }
 
-  PyObject * __getitem__(PyObject * index)
+  SN_OBJ_TYPE * __getitem__(SN_OBJ_TYPE * index)
   {
     int i, j;
     if (!self->matrix0)
@@ -84,7 +96,7 @@
   }
 
 // useful? -- xhub
-//  PyObject * __str__()
+//  SN_OBJ_TYPE * __str__()
 //  {
 //    if (!self->matrix0)
 //    {
@@ -113,85 +125,23 @@
 //    %#endif
 //  }
 //
+#endif /* SWIGPYTHON */
 
   ~NumericsMatrix()
   {
-    freeNumericsMatrix($self);
+    NM_free($self);
     free($self);
   }
 
 };
 
-
-#define GET_ATTR(OBJ,ATTR)                                              \
-  ATTR = PyObject_GetAttrString(OBJ,#ATTR);          \
-  if(!ATTR)                                                             \
-  {                                                                     \
-    throw(std::invalid_argument("need a " #ATTR "attr")); \
-  }
-
-/* I'm not sure it's a good idea to duplicate thise here ... it is already defined in csparse.h */
-typedef struct cs_sparse    /* matrix in compressed-column or triplet form */
-{
-  csi nzmax ;	    /* maximum number of entries */
-  csi m ;	    /* number of rows */
-  csi n ;	    /* number of columns */
-  csi *p ;	    /* column pointers (size n+1) or col indices (size nzmax) */
-  csi *i ;	    /* row indices, size nzmax */
-  double *x ;	    /* numerical values, size nzmax */
-  csi nz ;	    /* # of entries in triplet matrix, -1 for compressed-col */
-} cs ;
-
-%extend cs_sparse
-{
-%fragment("NumericsMatrix");
-
- // from a scipy.sparse matrix
- cs_sparse(PyObject *obj)
- {
-   int array_data_ctrl_ = 0;
-   int array_i_ctrl_ = 0;
-   int array_p_ctrl_ = 0;
-   int alloc_ctrl_ = 0;
-   PyArrayObject *array_data_ = NULL, *array_i_ = NULL, *array_p_ = NULL;
-   CSparseMatrix* M = NULL;
-
-   CSparseMatrix Mtmp;
-   CSparseMatrix* Mtmp_p = &Mtmp;
-
-   int res = cs_convert_from_scipy_sparse(obj, &Mtmp_p, &array_data_, &array_data_ctrl_, &array_i_, &array_i_ctrl_, &array_p_, &array_p_ctrl_, &alloc_ctrl_);
-
-   if (!res) { SWIG_fail; }
-   else if (res < 0) { PyErr_SetString(PyExc_RuntimeError, "Error the matrix is not sparse!"); goto fail; }
-
-   M = (CSparseMatrix *) malloc(sizeof(CSparseMatrix));
-   if(!M) { PyErr_SetString(PyExc_RuntimeError, "Failed to allocate a cs_sparse"); goto fail; }
-
-   // perform a deep copy since we do not have any mechanism to record the fact we use data from the python object
-   NM_copy_sparse(Mtmp_p, M);
-
-fail:
-   if (array_data_ && array_data_ctrl_) { Py_DECREF(array_data_); }
-   if (array_i_ && array_i_ctrl_) { Py_DECREF(array_i_); }
-   if (array_p_ && array_p_ctrl_) { Py_DECREF(array_p_); }
-
-   NM_clean_cs(Mtmp_p, alloc_ctrl_);
-
-   return M;
-
- }
-
- ~cs_sparse()
- {
-  cs_spfree($self);
- }
-}
-
 %extend SparseBlockStructuredMatrix
 {
  ~SparseBlockStructuredMatrix()
  {
-   freeSBM($self);
+   SBM_free($self);
    free($self);
  }
 }
+
+

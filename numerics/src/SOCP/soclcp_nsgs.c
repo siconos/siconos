@@ -57,7 +57,7 @@ void soclcp_nsgs_update(int cone, SecondOrderConeLinearComplementarityProblem* p
   soclcp_nsgs_computeqLocal(problem, localproblem, r, cone, options);
 
   /* coefficient for current block*/
-  localproblem->mu[0] = problem->mu[cone];
+  localproblem->tau[0] = problem->tau[cone];
 
   /* index for current block*/
   localproblem->coneIndex[0] = 0;
@@ -280,7 +280,7 @@ void soclcp_nsgs(SecondOrderConeLinearComplementarityProblem* problem, double *r
     localproblem->nc = 1;
     localproblem->n = dim_max;
     localproblem->q = (double*)malloc(dim_max * sizeof(double));
-    localproblem->mu = (double*)malloc(sizeof(double));
+    localproblem->tau = (double*)malloc(sizeof(double));
     localproblem->coneIndex = (unsigned int*)malloc(2*sizeof(unsigned int));
     localproblem->coneIndex[0]=0;
     localproblem->coneIndex[1]=dim_max;
@@ -292,7 +292,7 @@ void soclcp_nsgs(SecondOrderConeLinearComplementarityProblem* problem, double *r
     }
     else
     {
-      localproblem->M = newNumericsMatrix();
+      localproblem->M = NM_new();
     }
   }
   else
@@ -347,7 +347,7 @@ void soclcp_nsgs(SecondOrderConeLinearComplementarityProblem* problem, double *r
           cone = i;
         }
 
-        if(verbose > 1) printf("----------------------------------- Cone Number %i\n", cone);
+        if(verbose > 1) printf("--------------- Cone Number %i\n", cone);
         (*update_localproblem)(cone, problem, localproblem, r, localsolver_options);
         
         localsolver_options->iparam[4] = cone;
@@ -362,7 +362,7 @@ void soclcp_nsgs(SecondOrderConeLinearComplementarityProblem* problem, double *r
       /* **** Criterium convergence **** */
       error = sqrt(error);
       if(verbose > 0)
-        printf("----------------------------------- SOCLP - NSGS - Iteration %i Residual = %14.7e >= %7.4e\n", iter, error, options->dparam[0]);
+        printf("--------------- SOCLP - NSGS - Iteration %i Residual = %14.7e >= %7.4e\n", iter, error, options->dparam[0]);
      if(error < tolerance) hasNotConverged = 0;
       *info = hasNotConverged;
     }
@@ -375,7 +375,7 @@ void soclcp_nsgs(SecondOrderConeLinearComplementarityProblem* problem, double *r
       {
         if(absolute_error > error)
         {
-          printf("----------------------------------- SOCLCP - NSGS - Warning absolute Residual = %14.7e is larger than incremental error = %14.7e\n", absolute_error, error);
+          printf("--------------- SOCLCP - NSGS - Warning absolute Residual = %14.7e is larger than incremental error = %14.7e\n", absolute_error, error);
         }
       }
     }
@@ -403,7 +403,7 @@ void soclcp_nsgs(SecondOrderConeLinearComplementarityProblem* problem, double *r
           {
             cone = scones[i];
 
-            if(verbose > 1) printf("----------------------------------- Cone Number %i\n", cone);
+            if(verbose > 1) printf("--------------- Cone Number %i\n", cone);
             (*update_localproblem)(cone, problem, localproblem, r, localsolver_options);
             localsolver_options->iparam[4] = cone;
             (*local_solver)(localproblem, &(r[problem->coneIndex[cone]]), localsolver_options);
@@ -420,7 +420,7 @@ void soclcp_nsgs(SecondOrderConeLinearComplementarityProblem* problem, double *r
           (*computeError)(problem, r , v, tolerance, options, &error);
 
           if(verbose > 0)
-            printf("----------------------------------- SOCLP - NSGS - Iteration %i Residual = %14.7e >= %7.4e\n", iter, error, options->dparam[0]);
+            printf("--------------- SOCLP - NSGS - Iteration %i Residual = %14.7e >= %7.4e\n", iter, error, options->dparam[0]);
 
           if(error < tolerance) hasNotConverged = 0;
           *info = hasNotConverged;
@@ -447,7 +447,7 @@ void soclcp_nsgs(SecondOrderConeLinearComplementarityProblem* problem, double *r
             cone = scones[i];
 
 
-            if(verbose > 1) printf("----------------------------------- Cone Number %i\n", cone);
+            if(verbose > 1) printf("--------------- Cone Number %i\n", cone);
             (*update_localproblem)(cone, problem, localproblem, r, localsolver_options);
             localsolver_options->iparam[4] = cone;
             (*local_solver)(localproblem, &(r[problem->coneIndex[cone]]), localsolver_options);
@@ -458,7 +458,7 @@ void soclcp_nsgs(SecondOrderConeLinearComplementarityProblem* problem, double *r
           (*computeError)(problem, r , v, tolerance, options, &error);
 
           if(verbose > 0)
-            printf("----------------------------------- SOCLP - NSGS - Iteration %i Residual = %14.7e >= %7.4e\n", iter, error, options->dparam[0]);
+            printf("--------------- SOCLP - NSGS - Iteration %i Residual = %14.7e >= %7.4e\n", iter, error, options->dparam[0]);
 
           if(error < tolerance) hasNotConverged = 0;
           *info = hasNotConverged;
@@ -494,7 +494,7 @@ void soclcp_nsgs(SecondOrderConeLinearComplementarityProblem* problem, double *r
           for(cone= 0 ; cone< nc ; ++cone)
           {
 
-            if(verbose > 1) printf("----------------------------------- Cone Number %i\n", cone);
+            if(verbose > 1) printf("--------------- Cone Number %i\n", cone);
             (*update_localproblem)(cone, problem, localproblem, r, localsolver_options);
             localsolver_options->iparam[4] = cone;
             (*local_solver)(localproblem, &(r[problem->coneIndex[cone]]), localsolver_options);
@@ -511,7 +511,7 @@ void soclcp_nsgs(SecondOrderConeLinearComplementarityProblem* problem, double *r
           (*computeError)(problem, r , v, tolerance, options, &error);
 
           if(verbose > 0)
-            printf("----------------------------------- SOCLP - NSGS - Iteration %i Residual = %14.7e >= %7.4e\n", iter, error, options->dparam[0]);
+            printf("--------------- SOCLP - NSGS - Iteration %i Residual = %14.7e >= %7.4e\n", iter, error, options->dparam[0]);
 
           if(error < tolerance) hasNotConverged = 0;
           *info = hasNotConverged;
@@ -536,7 +536,7 @@ void soclcp_nsgs(SecondOrderConeLinearComplementarityProblem* problem, double *r
           for(cone= 0 ; cone < nc ; ++cone)
           {
 
-            if(verbose > 1) printf("----------------------------------- Cone Number %i\n", cone);
+            if(verbose > 1) printf("--------------- Cone Number %i\n", cone);
             (*update_localproblem)(cone, problem, localproblem, r, localsolver_options);
             localsolver_options->iparam[4] = cone;
             (*local_solver)(localproblem, &(r[problem->coneIndex[cone]]), localsolver_options);
@@ -547,7 +547,7 @@ void soclcp_nsgs(SecondOrderConeLinearComplementarityProblem* problem, double *r
           (*computeError)(problem, r , v, tolerance, options, &error);
 
           if(verbose > 0)
-            printf("----------------------------------- SOCLP - NSGS - Iteration %i Residual = %14.7e >= %7.4e\n", iter, error, options->dparam[0]);
+            printf("--------------- SOCLP - NSGS - Iteration %i Residual = %14.7e >= %7.4e\n", iter, error, options->dparam[0]);
 
           if(error < tolerance) hasNotConverged = 0;
           *info = hasNotConverged;

@@ -44,6 +44,8 @@ void FirstOrderNonLinearR::initComponents(Interaction& inter, VectorOfBlockVecto
   workV[FirstOrderR::vec_r].reset(new SiconosVector(sizeDS));
   workV[FirstOrderR::vec_x].reset(new SiconosVector(sizeDS));
   workV[FirstOrderR::vec_z].reset(new SiconosVector(sizeZ));
+  
+  workV[FirstOrderR::h_alpha].reset(new SiconosVector(sizeY));
   workV[FirstOrderR::g_alpha].reset(new SiconosVector(sizeDS));
 
   workM[FirstOrderR::mat_C].reset(new SimpleMatrix(sizeY, sizeDS));
@@ -154,9 +156,11 @@ void FirstOrderNonLinearR::computeOutput(double time, Interaction& inter, Intera
   y += *inter.yOld(level);
 
   DEBUG_PRINT("FirstOrderNonLinearR::computeOutput : ResiduY() \n");
-  DEBUG_EXPR(inter.residuY()->display());
+  SiconosVector& residuY = *workV[FirstOrderR::vec_residuY];
+  DEBUG_EXPR(residuY().display());
 
-  y -= *inter.residuY();
+  y -= residuY;
+  
   DEBUG_PRINT("FirstOrderNonLinearR::computeOutput : y(level) \n");
   DEBUG_EXPR(y.display());
 
@@ -179,7 +183,8 @@ void FirstOrderNonLinearR::computeOutput(double time, Interaction& inter, Intera
   SiconosVector& z = *workV[FirstOrderR::vec_z];
   z = *DSlink[FirstOrderR::z];
 
-  computeh(time, x, *inter.lambda(level), z, *inter.Halpha());
+  SiconosVector hAlpha =  *workV[FirstOrderR::h_alpha];
+  computeh(time, x, *inter.lambda(level), z, hAlpha);
 
   *DSlink[FirstOrderR::z] = z;
 }

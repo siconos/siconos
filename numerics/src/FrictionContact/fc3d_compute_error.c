@@ -67,7 +67,7 @@ int fc3d_compute_error(
 
   cblas_dcopy(n , problem->q , incx , w , incy); // w <-q
   // Compute the current velocity
-  prodNumericsMatrix3x3(n, n, problem->M, z, w);
+  NM_prod_mv_3x3(n, n, problem->M, z, w);
 
   *error = 0.;
   int ic, ic3;
@@ -92,7 +92,8 @@ int fc3d_compute_error(
 
 
 
-int fc3d_compute_error_velocity(FrictionContactProblem* problem, double *z , double *w, double tolerance, SolverOptions *options, double * error)
+int fc3d_compute_error_velocity(FrictionContactProblem* problem, double *z , double *w, double tolerance,
+                                SolverOptions *options, double * error)
 {
   /* Checks inputs */
   if (problem == NULL || z == NULL || w == NULL)
@@ -158,9 +159,10 @@ void fc3d_Tresca_unitary_compute_and_add_error(double *z , double *w, double R, 
 
 }
 int fc3d_Tresca_compute_error(FrictionContactProblem* problem,
-                                           double *z, double * w,
-                                           double tolerance, SolverOptions * options,
-                                           double* error)
+                              double *z, double * w,
+                              double tolerance, SolverOptions * options,
+                              double norm, 
+                              double* error)
 {
   /* Checks inputs */
   if (problem == NULL || z == NULL || w == NULL)
@@ -174,7 +176,7 @@ int fc3d_Tresca_compute_error(FrictionContactProblem* problem,
   cblas_dcopy(n , problem->q , incx , w , incy); // w <-q
   // Compute the current velocity
   /* NM_gemv(1.0, problem->M, z, 1.0, w); */
-  prodNumericsMatrix3x3(n, n, problem->M, z, w);
+  NM_prod_mv_3x3(n, n, problem->M, z, w);
   *error = 0.;
   int ic, ic3;
   double worktmp[3];
@@ -186,8 +188,10 @@ int fc3d_Tresca_compute_error(FrictionContactProblem* problem,
   *error = sqrt(*error);
 
   /* Computes error */
-  double norm_q = cblas_dnrm2(n , problem->q , incx);
-  *error = *error / (norm_q + 1.0);
+  DEBUG_PRINTF("norm = %12.8e\n", norm);
+  if (fabs(norm) > DBL_EPSILON)
+    *error /= norm;
+  
   if (*error > tolerance)
   {
     /* if (verbose > 0) printf(" Numerics - fc3d_Tresca_compute_error failed: error = %g > tolerance = %g.\n",*error, tolerance);  */

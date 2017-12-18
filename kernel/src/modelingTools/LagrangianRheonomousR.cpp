@@ -16,8 +16,6 @@
  * limitations under the License.
 */
 
-// \todo : create a work vector for all tmp vectors used in computeg, computeh ...
-
 #include "LagrangianRheonomousR.hpp"
 #include "Interaction.hpp"
 #include "LagrangianDS.hpp"
@@ -36,7 +34,7 @@ using namespace RELATION;
 LagrangianRheonomousR::LagrangianRheonomousR(const std::string& pluginh, const std::string& pluginJacobianhq, const std::string& pluginDoth):
   LagrangianR(RheonomousR)
 {
-  zeroPlugin();
+  _zeroPlugin();
   // h
   setComputehFunction(SSLH::getPluginName(pluginh), SSLH::getPluginFunctionName(pluginh));
 
@@ -63,51 +61,32 @@ void LagrangianRheonomousR::initComponents(Interaction& inter, VectorOfBlockVect
     _jachq.reset(new SimpleMatrix(sizeY, sizeQ));
   }
 }
-// void LagrangianRheonomousR::setComputehFunction(const std::string& pluginPath, const std::string& functionName){
-//   Plugin::setFunction(&hPtr, pluginPath, functionName);
-// }
 
 void LagrangianRheonomousR::setComputehDotFunction(const std::string& pluginPath, const std::string& functionName)
 {
   _pluginhDot->setComputeFunction(pluginPath, functionName);
 }
-void LagrangianRheonomousR::zeroPlugin()
-{
-  LagrangianR::zeroPlugin();
-  _pluginhDot.reset(new PluggedObject());
-}
-const std::string LagrangianRheonomousR::getJachqName() const
-{
-  if (_pluginJachq->fPtr)
-    return _pluginJachq->getPluginName();
-  return "unamed";
-}
-const std::string LagrangianRheonomousR::gethDotName() const
-{
 
-  if (_pluginhDot->fPtr)
-    return _pluginhDot->getPluginName();
-  return "unamed";
+void LagrangianRheonomousR::_zeroPlugin()
+{
+  LagrangianR::_zeroPlugin();
+  _pluginhDot.reset(new PluggedObject());
 }
 
 void LagrangianRheonomousR::computeh(double time, SiconosVector& q, SiconosVector& z, SiconosVector& y)
 {
   DEBUG_PRINT(" LagrangianRheonomousR::computeh(double time,Interaction& inter, SP::BlockVector q, SP::BlockVector z)");
-  if (_pluginh)
-  {
-    // arg= time. Unused in this function but required for interface.
-    if (_pluginh->fPtr)
+  // arg= time. Unused in this function but required for interface.
+  if (_pluginh->fPtr)
     {
       ((FPtr4)(_pluginh->fPtr))(q.size(), &(q)(0), time, y.size(),  &(y)(0), z.size(), &(z)(0));
-
+      
     }
-  }
 }
-
 
 void LagrangianRheonomousR::computehDot(double time, SiconosVector& q, SiconosVector& z)
 {
-  if (_pluginhDot && _pluginhDot->fPtr)
+  if (_hDot && _pluginhDot->fPtr)
   {
     ((FPtr4)(_pluginhDot->fPtr))(q.size(), &(q)(0), time, _hDot->size(),  &(*_hDot)(0), z.size(), &(z)(0));
   }
@@ -115,15 +94,10 @@ void LagrangianRheonomousR::computehDot(double time, SiconosVector& q, SiconosVe
 
 void LagrangianRheonomousR::computeJachq(double time,  SiconosVector& q, SiconosVector& z)
 {
-  // Note that second input arg is useless.
-  if (_pluginJachq->fPtr)
-  {
-    // Warning: temporary method to have contiguous values in
-    // memory, copy of block to simple.
-    ((FPtr4)(_pluginJachq->fPtr))(q.size(), &(q)(0), time, _jachq->size(0), &(*_jachq)(0, 0), z.size(), &(z)(0));
-    // Copy data that might have been changed in the plug-in call.
-  }
-  // else nothing.
+  if (_jachq && _pluginJachq->fPtr)
+    {
+      ((FPtr4)(_pluginJachq->fPtr))(q.size(), &(q)(0), time, _jachq->size(0), &(*_jachq)(0, 0), z.size(), &(z)(0));
+    }
 }
 
 void LagrangianRheonomousR::computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int derivativeNumber)
@@ -170,6 +144,7 @@ void LagrangianRheonomousR::computeInput(double time, Interaction& inter, Intera
   prod(lambda, *_jachq, *DSlink[LagrangianR::p0 + level], false);
   *DSlink[LagrangianR::z] = z;
 }
+
 void LagrangianRheonomousR::computeJach(double time, Interaction& inter, InteractionProperties& interProp)
 {
   VectorOfBlockVectors& DSlink = *interProp.DSlink;

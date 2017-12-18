@@ -21,6 +21,7 @@
 
 #include "Topology.hpp"
 #include "MatrixIntegrator.hpp"
+#include "SimpleMatrix.hpp"
 
 void ControlZOHAdditionalTerms::init(DynamicalSystemsGraph& DSG0, const Model& model)
 {

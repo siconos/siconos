@@ -17,6 +17,7 @@
  * limitations under the License.
 */
 #include "MLCP_Solvers.h"
+#include "SiconosCompat.h"
 #include "NumericsMatrix.h"
 #include <stdio.h>
 #include <stdlib.h>

@@ -19,6 +19,7 @@
 #include <cmath>
 #include "SphereLDSSphereLDSR.hpp"
 #include <BlockVector.hpp>
+#include "SimpleMatrix.hpp"
 
 #include <op3x3.h>
 

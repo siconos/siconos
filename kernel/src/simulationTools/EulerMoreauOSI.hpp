@@ -93,7 +93,7 @@ const unsigned int EULERMOREAUSTEPSINMEMORY = 1;
  * concerned dynamical systems.
  *
  * Each DynamicalSystem is associated to a SiconosMatrix, named "W", which is the "iteration" matrix.
- * W matrices are initialized and computed in initW and computeW. Depending on the DS type, they may
+ * W matrices are initialized and computed in initializeIterationMatrixW and computeW. Depending on the DS type, they may
  * depend on time t and DS state x.
  *
  * For first order systems, the implementation uses _r for storing the
@@ -264,7 +264,7 @@ public:
   inline void setUseGammaForRelation(bool newUseGammaForRelation)
   {
     _useGammaForRelation = newUseGammaForRelation;
-    if (_useGammaForRelation) _useGamma = false;
+    if(_useGammaForRelation) _useGamma = false;
   };
 
 
@@ -274,14 +274,35 @@ public:
       invariant systems, we compute time invariant operator (example :
       W)
    */
-  virtual void initialize(Model& m);
+  //virtual void initialize(Model& m);
+  /** initialization of the work vectors and matrices (properties) related to
+   *  one dynamical system on the graph and needed by the osi
+   * \param m the Model
+   * \param t time of initialization
+   * \param ds the dynamical system
+   */
+  void initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds);
 
-  /** init W EulerMoreauOSI matrix at time t
+  /** initialization of the work vectors and matrices (properties) related to
+   *  one interaction on the graph and needed by the osi
+   * \param inter the interaction
+   * \param interProp the properties on the graph
+   * \param DSG the dynamical systems graph
+   */
+  void fillDSLinks(Interaction &inter,
+		     InteractionProperties& interProp,
+		     DynamicalSystemsGraph & DSG);
+
+  /** get the number of index sets required for the simulation
+   * \return unsigned int
+   */
+  unsigned int numberOfIndexSets() const {return 1;};
+
+  /** initialize iteration matrix W EulerMoreauOSI matrix at time t
    *  \param time the time (double)
    *  \param ds a pointer to DynamicalSystem
-   *  \param dsv a descriptor of the ds on the graph (redundant to avoid invocation)
    */
-  void initW(double time, SP::DynamicalSystem ds, DynamicalSystemsGraph::VDescriptor& dsv);
+  void initializeIterationMatrixW(double time, SP::DynamicalSystem ds);
 
   /** compute W EulerMoreauOSI matrix at time t
    *  \param time the current time
@@ -296,10 +317,10 @@ public:
    */
   void computeWBoundaryConditions(SP::DynamicalSystem ds);
 
-  /** init WBoundaryConditionsMap[ds] EulerMoreauOSI
+  /** initialize iteration matrix WBoundaryConditionsMap[ds] EulerMoreauOSI
    *  \param ds a pointer to DynamicalSystem
    */
-  void initWBoundaryConditions(SP::DynamicalSystem ds);
+  void initializeIterationMatrixWBoundaryConditions(SP::DynamicalSystem ds);
 
   /** Computes the residuFree and residu of all the DynamicalSystems
    *  \return the maximum of the 2-norm over all the residu
@@ -310,6 +331,11 @@ public:
    *  without taking into account the nonsmooth input r
    */
   virtual void computeFreeState();
+
+  
+  double computeResiduOutput(double time, SP::InteractionsGraph indexSet);
+  
+  double computeResiduInput(double time, SP::InteractionsGraph indexSet);
 
   /** integrates the Interaction linked to this integrator, without taking non-smooth effects into account
    * \param vertex_inter of the interaction graph

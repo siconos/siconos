@@ -88,10 +88,10 @@ int main(int argc, char* argv[])
     SP::NonSmoothLaw nslaw(new NewtonImpactNSL(e));
     // Interaction at contact point 1
     SP::Relation relation1(new LagrangianScleronomousR("RockingBlockPlugin:h1", "RockingBlockPlugin:G1"));
-    SP::Interaction inter1(new Interaction(1, nslaw, relation1));
+    SP::Interaction inter1(new Interaction(nslaw, relation1));
     // Interaction at contact point 2
     SP::Relation relation2(new LagrangianScleronomousR("RockingBlockPlugin:h2", "RockingBlockPlugin:G2"));
-    SP::Interaction inter2(new Interaction(1, nslaw, relation2));
+    SP::Interaction inter2(new Interaction(nslaw, relation2));
     // Interactions for the whole dynamical system
     //================================================================================================================
     //            III. Create the "model" object

@@ -6,6 +6,9 @@
 #include "SiconosKernel.hpp"
 SICONOS_IO_REGISTER(SiconosException,
   (_reportMsg))
+SICONOS_IO_REGISTER(SiconosMemory,
+  (_indx)
+  (_nbVectorsInMemory))
 SICONOS_IO_REGISTER(BlockVector,
   (_sizeV)
   (_tabIndex)
@@ -18,16 +21,12 @@ SICONOS_IO_REGISTER_WITH_BASES(BlockMatrix,(SiconosMatrix),
   (_tabRow))
 SICONOS_IO_REGISTER(SiconosMatrix,
   (_num))
-SICONOS_IO_REGISTER(SiconosMemory,
-  (_indx)
-  (_nbVectorsInMemory)
-  (_size)
-  (_vectorMemory))
 SICONOS_IO_REGISTER(GraphProperties,
   (symmetric))
 SICONOS_IO_REGISTER(DynamicalSystemProperties,
   (W)
   (WBoundaryConditions)
+  (absolute_position)
   (lower_block)
   (osi)
   (upper_block)
@@ -35,9 +34,10 @@ SICONOS_IO_REGISTER(DynamicalSystemProperties,
   (workVectors))
 SICONOS_IO_REGISTER(InteractionProperties,
   (DSlink)
+  (absolute_position)
+  (absolute_position_proj)
   (block)
   (forControl)
-  (osi)
   (source)
   (source_pos)
   (target)
@@ -89,8 +89,6 @@ SICONOS_IO_REGISTER_WITH_BASES(MultipleImpactNSL,(NonSmoothLaw),
   (_ElasCof)
   (_ResCof)
   (_Stiff))
-SICONOS_IO_REGISTER(PluggedObject,
-  (_pluginName))
 SICONOS_IO_REGISTER_WITH_BASES(ComplementarityConditionNSL,(NonSmoothLaw),
 )
 SICONOS_IO_REGISTER_WITH_BASES(FixedBC,(BoundaryCondition),
@@ -118,6 +116,8 @@ SICONOS_IO_REGISTER(NonSmoothDynamicalSystem,
   (_BVP)
   (_mIsLinear)
   (_topology))
+SICONOS_IO_REGISTER(PluggedObject,
+  (_pluginName))
 SICONOS_IO_REGISTER_WITH_BASES(NewtonEulerFrom3DLocalFrameR,(NewtonEulerFrom1DLocalFrameR),
 )
 SICONOS_IO_REGISTER_WITH_BASES(FirstOrderLinearTIR,(FirstOrderR),
@@ -139,7 +139,12 @@ SICONOS_IO_REGISTER_WITH_BASES(NewtonEulerFrom1DLocalFrameR,(NewtonEulerR),
   (_Pc2)
   (_RotationAbsToContactFrame)
   (_isOnContact)
+  (_relPc1)
+  (_relPc2)
   (_rotationMatrixAbsToBody))
+SICONOS_IO_REGISTER_WITH_BASES(LagrangianLinearTIR,(LagrangianR),
+  (_F)
+  (_e))
 SICONOS_IO_REGISTER_WITH_BASES(NormalConeNSL,(NonSmoothLaw),
   (_H)
   (_K))
@@ -155,15 +160,21 @@ SICONOS_IO_REGISTER_WITH_BASES(NewtonEulerR,(Relation),
   (_jachqT)
   (_plugindotjacqh)
   (_secondOrderTimeDerivativeTerms))
-SICONOS_IO_REGISTER_WITH_BASES(LagrangianLinearTIR,(LagrangianR),
+SICONOS_IO_REGISTER_WITH_BASES(LagrangianCompliantLinearTIR,(LagrangianR),
   (_F)
   (_e))
+SICONOS_IO_REGISTER_WITH_BASES(FirstOrderLinearR,(FirstOrderR),
+  (_e))
+SICONOS_IO_REGISTER_WITH_BASES(FirstOrderLinearTIDS,(FirstOrderLinearDS),
+)
 SICONOS_IO_REGISTER_WITH_BASES(FirstOrderType2R,(FirstOrderR),
 )
 SICONOS_IO_REGISTER_WITH_BASES(FirstOrderType1R,(FirstOrderR),
 )
-SICONOS_IO_REGISTER_WITH_BASES(FirstOrderLinearR,(FirstOrderR),
-  (_e))
+SICONOS_IO_REGISTER_WITH_BASES(FirstOrderLinearDS,(FirstOrderNonLinearDS),
+  (_A)
+  (_pluginA)
+  (_pluginb))
 SICONOS_IO_REGISTER_WITH_BASES(LagrangianCompliantR,(LagrangianR),
   (_pluginJachlambda))
 SICONOS_IO_REGISTER(NonSmoothLaw,
@@ -171,8 +182,6 @@ SICONOS_IO_REGISTER(NonSmoothLaw,
 SICONOS_IO_REGISTER_WITH_BASES(RelayNSL,(NonSmoothLaw),
   (_lb)
   (_ub))
-SICONOS_IO_REGISTER_WITH_BASES(FirstOrderLinearTIDS,(FirstOrderLinearDS),
-)
 SICONOS_IO_REGISTER(Relation,
   (_pluginJacglambda)
   (_pluginJacgx)
@@ -185,6 +194,9 @@ SICONOS_IO_REGISTER(Relation,
   (_pluginh)
   (_relationType)
   (_subType))
+SICONOS_IO_REGISTER_WITH_BASES(LagrangianRheonomousR,(LagrangianR),
+  (_hDot)
+  (_pluginhDot))
 SICONOS_IO_REGISTER_WITH_BASES(FirstOrderNonLinearR,(FirstOrderR),
 )
 SICONOS_IO_REGISTER_WITH_BASES(FirstOrderR,(Relation),
@@ -193,18 +205,9 @@ SICONOS_IO_REGISTER_WITH_BASES(FirstOrderR,(Relation),
   (_D)
   (_F)
   (_K))
-SICONOS_IO_REGISTER_WITH_BASES(LagrangianR,(Relation),
-  (_dotjachq)
-  (_jachlambda)
-  (_jachq)
-  (_jachqDot)
-  (_pluginJachq))
 SICONOS_IO_REGISTER(Interaction,
-  (_absolutePosition)
-  (_absolutePositionProj)
-  (_h_alpha)
+  (__count)
   (_has2Bodies)
-  (_initialized)
   (_interactionSize)
   (_lambda)
   (_lambdaMemory)
@@ -214,23 +217,23 @@ SICONOS_IO_REGISTER(Interaction,
   (_nslaw)
   (_number)
   (_relation)
-  (_residuY)
   (_sizeOfDS)
-  (_steps)
   (_upperLevelForInput)
   (_upperLevelForOutput)
   (_y)
-  (_yForNSsolver)
   (_yMemory)
   (_yOld)
   (_y_k))
-SICONOS_IO_REGISTER_WITH_BASES(FirstOrderLinearDS,(FirstOrderNonLinearDS),
-  (_A)
-  (_pluginA)
-  (_pluginb))
-SICONOS_IO_REGISTER_WITH_BASES(LagrangianLinearTIDS,(LagrangianDS),
-  (_C)
-  (_K))
+SICONOS_IO_REGISTER_WITH_BASES(LagrangianR,(Relation),
+  (_dotjachq)
+  (_jachlambda)
+  (_jachq)
+  (_jachqDot)
+  (_pluginJachq))
+SICONOS_IO_REGISTER_WITH_BASES(LagrangianLinearDiagonalDS,(LagrangianDS),
+  (_damping)
+  (_mu)
+  (_stiffness))
 SICONOS_IO_REGISTER_WITH_BASES(FirstOrderNonLinearDS,(DynamicalSystem),
   (_M)
   (_b)
@@ -242,61 +245,23 @@ SICONOS_IO_REGISTER_WITH_BASES(FirstOrderNonLinearDS,(DynamicalSystem),
   (_pluginM)
   (_pluginf)
   (_rMemory))
+SICONOS_IO_REGISTER(DynamicalSystem,
+  (__count)
+  (_jacxRhs)
+  (_n)
+  (_number)
+  (_r)
+  (_stepsInMemory)
+  (_x)
+  (_x0)
+  (_xMemory)
+  (_z))
 SICONOS_IO_REGISTER_WITH_BASES(LagrangianScleronomousR,(LagrangianR),
   (_dotjacqhXqdot)
   (_plugindotjacqh))
-SICONOS_IO_REGISTER_WITH_BASES(LagrangianRheonomousR,(LagrangianR),
-  (_hDot)
-  (_pluginhDot))
-SICONOS_IO_REGISTER_WITH_BASES(NewtonEulerDS,(DynamicalSystem),
-  (_I)
-  (_T)
-  (_Tdot)
-  (_boundaryConditions)
-  (_computeJacobianFIntqByFD)
-  (_computeJacobianFIntvByFD)
-  (_computeJacobianMIntqByFD)
-  (_computeJacobianMIntvByFD)
-  (_dotq)
-  (_dotqMemory)
-  (_epsilonFD)
-  (_fExt)
-  (_fGyr)
-  (_fInt)
-  (_forces)
-  (_forcesMemory)
-  (_jacobianFGyrv)
-  (_jacobianFIntq)
-  (_jacobianFIntv)
-  (_jacobianMExtObjq)
-  (_jacobianMIntq)
-  (_jacobianMIntv)
-  (_jacobianqForces)
-  (_jacobianvForces)
-  (_luW)
-  (_mExt)
-  (_mExtObj)
-  (_mInt)
-  (_massMatrix)
-  (_p)
-  (_pluginFExt)
-  (_pluginFInt)
-  (_pluginJacqFInt)
-  (_pluginJacqMInt)
-  (_pluginJacvFInt)
-  (_pluginJacvMInt)
-  (_pluginMExt)
-  (_pluginMInt)
-  (_q)
-  (_q0)
-  (_qDim)
-  (_qMemory)
-  (_reactionToBoundaryConditions)
-  (_scalarMass)
-  (_v)
-  (_v0)
-  (_vMemory)
-  (nullifyFGyr))
+SICONOS_IO_REGISTER_WITH_BASES(LagrangianLinearTIDS,(LagrangianDS),
+  (_C)
+  (_K))
 SICONOS_IO_REGISTER_WITH_BASES(LagrangianDS,(DynamicalSystem),
   (_boundaryConditions)
   (_fExt)
@@ -304,13 +269,15 @@ SICONOS_IO_REGISTER_WITH_BASES(LagrangianDS,(DynamicalSystem),
   (_fInt)
   (_forces)
   (_forcesMemory)
+  (_hasConstantFExt)
+  (_hasConstantMass)
+  (_inverseMass)
   (_jacobianFGyrq)
   (_jacobianFGyrqDot)
   (_jacobianFIntq)
   (_jacobianFIntqDot)
   (_jacobianqDotForces)
   (_jacobianqForces)
-  (_jacxRhs)
   (_mass)
   (_ndof)
   (_p)
@@ -327,26 +294,63 @@ SICONOS_IO_REGISTER_WITH_BASES(LagrangianDS,(DynamicalSystem),
   (_q0)
   (_qMemory)
   (_reactionToBoundaryConditions)
+  (_rhsMatrices)
   (_velocity0)
   (_velocityMemory))
-SICONOS_IO_REGISTER(DynamicalSystem,
-  (_jacxRhs)
-  (_n)
-  (_normRef)
-  (_number)
-  (_pluginJacgx)
-  (_pluginJacxDotG)
-  (_pluging)
-  (_r)
-  (_stepsInMemory)
-  (_workMatrix)
-  (_workspace)
-  (_x)
-  (_x0)
-  (_xMemory)
-  (_z)
-  (count))
+SICONOS_IO_REGISTER_WITH_BASES(NewtonEulerDS,(DynamicalSystem),
+  (_I)
+  (_T)
+  (_Tdot)
+  (_boundaryConditions)
+  (_computeJacobianFIntqByFD)
+  (_computeJacobianFInttwistByFD)
+  (_computeJacobianMIntqByFD)
+  (_computeJacobianMInttwistByFD)
+  (_dotq)
+  (_dotqMemory)
+  (_epsilonFD)
+  (_fExt)
+  (_fInt)
+  (_forcesMemory)
+  (_hasConstantFExt)
+  (_hasConstantMExt)
+  (_inverseMass)
+  (_isMextExpressedInInertialFrame)
+  (_jacobianFIntq)
+  (_jacobianFInttwist)
+  (_jacobianMExtq)
+  (_jacobianMGyrtwist)
+  (_jacobianMIntq)
+  (_jacobianMInttwist)
+  (_jacobianWrenchTwist)
+  (_jacobianWrenchq)
+  (_mExt)
+  (_mGyr)
+  (_mInt)
+  (_massMatrix)
+  (_nullifyMGyr)
+  (_p)
+  (_pluginFExt)
+  (_pluginFInt)
+  (_pluginJacqFInt)
+  (_pluginJacqMInt)
+  (_pluginJactwistFInt)
+  (_pluginJactwistMInt)
+  (_pluginMExt)
+  (_pluginMInt)
+  (_q)
+  (_q0)
+  (_qDim)
+  (_qMemory)
+  (_reactionToBoundaryConditions)
+  (_scalarMass)
+  (_twist)
+  (_twist0)
+  (_twistMemory)
+  (_wrench))
 SICONOS_IO_REGISTER(ExtraAdditionalTerms,
+)
+SICONOS_IO_REGISTER_WITH_BASES(MoreauJeanBilbaoOSI,(OneStepIntegrator),
 )
 SICONOS_IO_REGISTER(InteractionManager,
   (_nslaws))
@@ -367,6 +371,19 @@ SICONOS_IO_REGISTER_WITH_BASES(TimeSteppingCombinedProjection,(TimeStepping),
   (_nbIndexSetsIteration)
   (_nbProjectionIteration)
   (_projectionMaxIteration))
+SICONOS_IO_REGISTER_WITH_BASES(EventDriven,(Simulation),
+  (_DSG0)
+  (_TOL_ED)
+  (_indexSet0)
+  (_isNewtonConverge)
+  (_istate)
+  (_localizeEventMaxIter)
+  (_newtonMaxIteration)
+  (_newtonNbIterations)
+  (_newtonResiduDSMax)
+  (_newtonResiduYMax)
+  (_newtonTolerance)
+  (_numberOfOneStepNSproblems))
 SICONOS_IO_REGISTER_WITH_BASES(NonSmoothEvent,(Event),
 )
 SICONOS_IO_REGISTER_WITH_BASES(QP,(OneStepNSProblem),
@@ -416,19 +433,6 @@ SICONOS_IO_REGISTER_WITH_BASES(OSNSMultipleImpact,(LinearOSNS),
   (_tolImpulseContact)
   (_typeCompLaw)
   (_velocityContact))
-SICONOS_IO_REGISTER_WITH_BASES(EventDriven,(Simulation),
-  (_DSG0)
-  (_TOL_ED)
-  (_indexSet0)
-  (_isNewtonConverge)
-  (_istate)
-  (_localizeEventMaxIter)
-  (_newtonMaxIteration)
-  (_newtonNbIterations)
-  (_newtonResiduDSMax)
-  (_newtonResiduYMax)
-  (_newtonTolerance)
-  (_numberOfOneStepNSproblems))
 SICONOS_IO_REGISTER_WITH_BASES(NewMarkAlphaOSI,(OneStepIntegrator),
   (_IsVelocityLevel)
   (_alpha_f)
@@ -448,19 +452,18 @@ SICONOS_IO_REGISTER_WITH_BASES(TimeSteppingDirectProjection,(TimeStepping),
   (_maxViolationUnilateral)
   (_nbProjectionIteration)
   (_projectionMaxIteration))
+SICONOS_IO_REGISTER_WITH_BASES(LinearOSNS,(OneStepNSProblem),
+  (_M)
+  (_keepLambdaAndYState)
+  (_q)
+  (_w)
+  (_z))
 SICONOS_IO_REGISTER_WITH_BASES(ZeroOrderHoldOSI,(OneStepIntegrator),
   (_useGammaForRelation))
 SICONOS_IO_REGISTER_WITH_BASES(Equality,(LinearOSNS),
 )
 SICONOS_IO_REGISTER_WITH_BASES(GenericMechanical,(LinearOSNS),
 )
-SICONOS_IO_REGISTER_WITH_BASES(LinearOSNS,(OneStepNSProblem),
-  (_M)
-  (_MStorageType)
-  (_keepLambdaAndYState)
-  (_q)
-  (_w)
-  (_z))
 SICONOS_IO_REGISTER_WITH_BASES(MoreauJeanCombinedProjectionOSI,(MoreauJeanOSI),
 )
 SICONOS_IO_REGISTER_WITH_BASES(MoreauJeanDirectProjectionOSI,(MoreauJeanOSI),
@@ -471,6 +474,7 @@ SICONOS_IO_REGISTER_WITH_BASES(MoreauJeanDirectProjectionOSI,(MoreauJeanOSI),
 SICONOS_IO_REGISTER_WITH_BASES(TimeStepping,(Simulation),
   (_computeResiduR)
   (_computeResiduY)
+  (_displayNewtonConvergence)
   (_explicitJacobiansOfRelation)
   (_isNewtonConverge)
   (_newtonCumulativeNbIterations)
@@ -480,22 +484,14 @@ SICONOS_IO_REGISTER_WITH_BASES(TimeStepping,(Simulation),
   (_newtonResiduDSMax)
   (_newtonResiduRMax)
   (_newtonResiduYMax)
-  (_newtonTolerance))
-SICONOS_IO_REGISTER_WITH_BASES(MoreauJeanOSI2,(MoreauJeanOSI),
-)
-SICONOS_IO_REGISTER_WITH_BASES(Relay,(LinearOSNS),
-  (_lb)
-  (_ub))
+  (_newtonTolerance)
+  (_newtonUpdateInteractionsPerIteration))
 SICONOS_IO_REGISTER(Simulation,
   (_T)
   (_allNSProblems)
   (_allOSI)
   (_eventsManager)
   (_interman)
-  (_levelMaxForInput)
-  (_levelMaxForOutput)
-  (_levelMinForInput)
-  (_levelMinForOutput)
   (_linkOrUnlink)
   (_name)
   (_nsds)
@@ -510,6 +506,20 @@ SICONOS_IO_REGISTER(Simulation,
   (_tout)
   (_useRelativeConvergenceCriterion)
   (statOut))
+SICONOS_IO_REGISTER(OneStepIntegrator,
+  (_dynamicalSystemsGraph)
+  (_extraAdditionalTerms)
+  (_integratorType)
+  (_levelMaxForInput)
+  (_levelMaxForOutput)
+  (_levelMinForInput)
+  (_levelMinForOutput)
+  (_simulation)
+  (_sizeMem)
+  (_steps))
+SICONOS_IO_REGISTER_WITH_BASES(Relay,(LinearOSNS),
+  (_lb)
+  (_ub))
 SICONOS_IO_REGISTER_WITH_BASES(LCP,(LinearOSNS),
 )
 SICONOS_IO_REGISTER_WITH_BASES(MLCP,(LinearOSNS),
@@ -547,18 +557,11 @@ SICONOS_IO_REGISTER(EventsManager,
   (_events)
   (_k)
   (_td))
-SICONOS_IO_REGISTER(OneStepIntegrator,
-  (_dynamicalSystemsGraph)
-  (_extraAdditionalTerms)
-  (_integratorType)
-  (_simulation)
-  (_sizeMem))
 SICONOS_IO_REGISTER(OneStepNSProblem,
   (_hasBeenUpdated)
   (_indexSetLevel)
   (_inputOutputLevel)
   (_maxSize)
-  (_nbIter)
   (_simulation)
   (_sizeOutput))
 SICONOS_IO_REGISTER(OSNSMatrix,
@@ -607,12 +610,12 @@ SICONOS_IO_REGISTER(Model,
   (_title))
 
 template <class Archive>
-void siconos_io_register_generated(Archive& ar)
+void siconos_io_register_generated_Kernel(Archive& ar)
 {
   ar.register_type(static_cast<SiconosException*>(NULL));
+  ar.register_type(static_cast<SiconosMemory*>(NULL));
   ar.register_type(static_cast<BlockVector*>(NULL));
   ar.register_type(static_cast<BlockMatrix*>(NULL));
-  ar.register_type(static_cast<SiconosMemory*>(NULL));
   ar.register_type(static_cast<GraphProperties*>(NULL));
   ar.register_type(static_cast<DynamicalSystemProperties*>(NULL));
   ar.register_type(static_cast<InteractionProperties*>(NULL));
@@ -621,7 +624,6 @@ void siconos_io_register_generated(Archive& ar)
   ar.register_type(static_cast<InteractionsGraph*>(NULL));
   ar.register_type(static_cast<Topology*>(NULL));
   ar.register_type(static_cast<MultipleImpactNSL*>(NULL));
-  ar.register_type(static_cast<PluggedObject*>(NULL));
   ar.register_type(static_cast<ComplementarityConditionNSL*>(NULL));
   ar.register_type(static_cast<FixedBC*>(NULL));
   ar.register_type(static_cast<HarmonicBC*>(NULL));
@@ -630,38 +632,42 @@ void siconos_io_register_generated(Archive& ar)
   ar.register_type(static_cast<NewtonImpactFrictionNSL*>(NULL));
   ar.register_type(static_cast<MixedComplementarityConditionNSL*>(NULL));
   ar.register_type(static_cast<NonSmoothDynamicalSystem*>(NULL));
+  ar.register_type(static_cast<PluggedObject*>(NULL));
   ar.register_type(static_cast<NewtonEulerFrom3DLocalFrameR*>(NULL));
   ar.register_type(static_cast<FirstOrderLinearTIR*>(NULL));
   ar.register_type(static_cast<BoundaryCondition*>(NULL));
   ar.register_type(static_cast<NewtonImpactNSL*>(NULL));
   ar.register_type(static_cast<NewtonEulerFrom1DLocalFrameR*>(NULL));
+  ar.register_type(static_cast<LagrangianLinearTIR*>(NULL));
   ar.register_type(static_cast<NormalConeNSL*>(NULL));
   ar.register_type(static_cast<NewtonEulerR*>(NULL));
-  ar.register_type(static_cast<LagrangianLinearTIR*>(NULL));
+  ar.register_type(static_cast<LagrangianCompliantLinearTIR*>(NULL));
+  ar.register_type(static_cast<FirstOrderLinearR*>(NULL));
+  ar.register_type(static_cast<FirstOrderLinearTIDS*>(NULL));
   ar.register_type(static_cast<FirstOrderType2R*>(NULL));
   ar.register_type(static_cast<FirstOrderType1R*>(NULL));
-  ar.register_type(static_cast<FirstOrderLinearR*>(NULL));
+  ar.register_type(static_cast<FirstOrderLinearDS*>(NULL));
   ar.register_type(static_cast<LagrangianCompliantR*>(NULL));
   ar.register_type(static_cast<RelayNSL*>(NULL));
-  ar.register_type(static_cast<FirstOrderLinearTIDS*>(NULL));
+  ar.register_type(static_cast<LagrangianRheonomousR*>(NULL));
   ar.register_type(static_cast<FirstOrderNonLinearR*>(NULL));
   ar.register_type(static_cast<Interaction*>(NULL));
-  ar.register_type(static_cast<FirstOrderLinearDS*>(NULL));
-  ar.register_type(static_cast<LagrangianLinearTIDS*>(NULL));
+  ar.register_type(static_cast<LagrangianLinearDiagonalDS*>(NULL));
   ar.register_type(static_cast<FirstOrderNonLinearDS*>(NULL));
   ar.register_type(static_cast<LagrangianScleronomousR*>(NULL));
-  ar.register_type(static_cast<LagrangianRheonomousR*>(NULL));
-  ar.register_type(static_cast<NewtonEulerDS*>(NULL));
+  ar.register_type(static_cast<LagrangianLinearTIDS*>(NULL));
   ar.register_type(static_cast<LagrangianDS*>(NULL));
+  ar.register_type(static_cast<NewtonEulerDS*>(NULL));
+  ar.register_type(static_cast<MoreauJeanBilbaoOSI*>(NULL));
   ar.register_type(static_cast<InteractionManager*>(NULL));
   ar.register_type(static_cast<TimeDiscretisationEvent*>(NULL));
   ar.register_type(static_cast<TimeSteppingCombinedProjection*>(NULL));
+  ar.register_type(static_cast<EventDriven*>(NULL));
   ar.register_type(static_cast<NonSmoothEvent*>(NULL));
   ar.register_type(static_cast<QP*>(NULL));
   ar.register_type(static_cast<TimeSteppingD1Minus*>(NULL));
   ar.register_type(static_cast<MLCPProjectOnConstraints*>(NULL));
   ar.register_type(static_cast<OSNSMultipleImpact*>(NULL));
-  ar.register_type(static_cast<EventDriven*>(NULL));
   ar.register_type(static_cast<NewMarkAlphaOSI*>(NULL));
   ar.register_type(static_cast<AVI*>(NULL));
   ar.register_type(static_cast<TimeSteppingDirectProjection*>(NULL));
@@ -671,7 +677,6 @@ void siconos_io_register_generated(Archive& ar)
   ar.register_type(static_cast<MoreauJeanCombinedProjectionOSI*>(NULL));
   ar.register_type(static_cast<MoreauJeanDirectProjectionOSI*>(NULL));
   ar.register_type(static_cast<TimeStepping*>(NULL));
-  ar.register_type(static_cast<MoreauJeanOSI2*>(NULL));
   ar.register_type(static_cast<Relay*>(NULL));
   ar.register_type(static_cast<LCP*>(NULL));
   ar.register_type(static_cast<MLCP*>(NULL));

@@ -28,6 +28,8 @@
 #include "Friction_cst.h"
 #include "AVI_cst.h"
 #include "VI_cst.h"
+#include "SOCLCP_cst.h"
+#include "ConvexQP_cst.h"
 #include "numerics_verbose.h"
 
 #include "Newton_methods.h"
@@ -52,6 +54,7 @@ const char* const SICONOS_NUMERICS_PROBLEM_FC2D_STR = "FC2D";
 const char* const SICONOS_NUMERICS_PROBLEM_FC3D_STR = "FC3D";
 const char* const SICONOS_NUMERICS_PROBLEM_VI_STR = "VI";
 const char* const SICONOS_NUMERICS_PROBLEM_AVI_STR = "AVI";
+const char* const SICONOS_NUMERICS_PROBLEM_RELAY_STR = "RELAY";
 
 static void recursive_solver_options_print(SolverOptions* options, int level);
 
@@ -111,27 +114,32 @@ void recursive_solver_options_print(SolverOptions* options, int level)
     marge[i] = ' ';
   marge[level] = '\0';
 
-  printf("%s\n ========== Numerics Non Smooth Solver parameters: \n", marge);
+  printf("%s\n========== Numerics Non Smooth Solver parameters: \n", marge);
   if (options->isSet == 0)
     printf("%sThe solver parameters have not been set. \t options->isSet = %i \n", marge, options->isSet);
   else
   {
     printf("%sThe solver parameters below have  been set \t options->isSet = %i\n", marge, options->isSet);
     printf("%sId of the solver\t\t\t\t options->solverId = %d \n", marge, options->solverId);
-    printf("%sName of the solver\t\t\t\t  %s \n", marge, solver_options_id_to_name(options->solverId));
+    printf("%sName of the solver\t\t\t\t %s \n", marge, solver_options_id_to_name(options->solverId));
     if (options->iparam != NULL)
     {
-      printf("%sint parameters \t\t\t\t\t options->iparam\n", marge);
       printf("%ssize of the int parameters\t\t\t options->iSize = %i\n", marge, options->iSize);
+      printf("%snon zero int parameters in options->iparam:\n", marge);
       for (int i = 0; i < options->iSize; ++i)
-        printf("%s\t\t\t\t\t\t options->iparam[%i] = %d\n", marge, i, options->iparam[i]);
+      {
+        if(options->iparam[i]) printf("%s\t\t\t\t\t\t options->iparam[%i] = %d\n", marge, i, options->iparam[i]);
+      }
     }
     if (options->dparam != NULL)
     {
       printf("%sdouble parameters \t\t\t\t options->dparam\n", marge);
       printf("%ssize of the double parameters\t\t\t options->dSize = %i\n", marge, options->dSize);
+      printf("%snon zero double parameters in options->dparam:\n", marge);
       for (int i = 0; i < options->dSize; ++i)
-        printf("%s\t\t\t\t\t\t options->dparam[%i] = %.6le\n", marge, i, options->dparam[i]);
+      {
+        if(options->dparam[i]) printf("%s\t\t\t\t\t\t options->dparam[%i] = %.6le\n", marge, i, options->dparam[i]);
+      }
     }
   }
   if (options->iWork == NULL)
@@ -325,7 +333,7 @@ void solver_options_copy(SolverOptions* options_ori, SolverOptions* options)
 
   options->numberOfInternalSolvers =  options_ori->numberOfInternalSolvers;
   if (options->numberOfInternalSolvers)
-    options->internalSolvers = (SolverOptions *)malloc(options->numberOfInternalSolvers*sizeof(SolverOptions));
+    options->internalSolvers = (SolverOptions *)calloc(options->numberOfInternalSolvers, sizeof(SolverOptions));
   for (int i = 0  ; i < options->numberOfInternalSolvers; i++ )
   {
     SolverOptions * internal_options_ori = options_ori->internalSolvers + i;
@@ -368,6 +376,7 @@ void solver_options_set(SolverOptions* options, int solverId)
   case SICONOS_LCP_NEWTONMIN:
   case SICONOS_LCP_QP:
   case SICONOS_LCP_NSQP:
+  case SICONOS_LCP_CONVEXQP_PG:
   {
     iSize = 2;
     dSize = 2;
@@ -540,3 +549,15 @@ int solver_options_name_to_id(char * pName)
 SICONOS_REGISTER_SOLVERS()
   return 0;
 }
+
+SolverOptions * solver_options_get_internal_solver(SolverOptions * options, int n)
+{
+  if (n+1 > options->numberOfInternalSolvers || n < 0)
+  {
+    printf("solver_options_get_internal_solver : the index must be between 0 and  options->numberOfInternalSolvers -1 ");
+    return NULL;
+  }
+  else
+    return &options->internalSolvers[n];
+}
+

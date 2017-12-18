@@ -53,7 +53,7 @@ particle_relation = sk.FirstOrderLinearR(C, B)
 
 nslaw = sk.RelayNSL(ninter)
 
-particle_interaction = sk.Interaction(ninter, nslaw, particle_relation)
+particle_interaction = sk.Interaction(nslaw, particle_relation)
 
 # -- The Model --
 filippov = sk.Model(t0, T)
@@ -78,7 +78,7 @@ filippov.initialize()
 
 # -- Get the values to be plotted --
 output_size = 1 + ndof + 2 * ninter
-nb_time_steps = ceil((T - t0) / h) + 1
+nb_time_steps = int((T - t0) / h) + 1
 data_plot = np.empty((nb_time_steps, output_size))
 data_plot[0, 0] = filippov.t0()
 data_plot[0, 1:4] = particle.x()

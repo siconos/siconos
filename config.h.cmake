@@ -7,6 +7,7 @@
 #cmakedefine HAVE_SICONOS_MECHANICS
 #cmakedefine HAVE_SICONOS_CONTROL
 #cmakedefine HAVE_PATHFERRIS
+#cmakedefine HAVE_PATHVI
 #cmakedefine HAVE_MLCPSIMPLEX
 #cmakedefine HAVE_TIME_H
 #cmakedefine HAVE_SYSTIMES_H
@@ -26,9 +27,9 @@
 #cmakedefine BUILD_AS_CPP
 #cmakedefine WITH_LPSOLVE
 #cmakedefine HAS_EXTREME_POINT_ALGO
-#cmakedefine HAVE_VTK
-#cmakedefine HAVE_BULLET
-#cmakedefine HAVE_OCC
+#cmakedefine SICONOS_HAVE_VTK
+#cmakedefine SICONOS_HAVE_BULLET
+#cmakedefine SICONOS_HAVE_OCC
 #cmakedefine HAVE_SERIALIZATION
 #cmakedefine WITH_SERIALIZATION
 #cmakedefine HAVE_GENERATION
@@ -48,6 +49,7 @@
 // Which Lapack? 
 #cmakedefine HAS_MKL_LAPACKE
 #cmakedefine HAS_ATLAS_LAPACK
+#cmakedefine HAS_MATLAB_LAPACK
 #cmakedefine HAS_LAPACKE // lapacke.h has been found
 #cmakedefine HAS_CLAPACK  // clapack.h has been found
 #cmakedefine HAS_OpenBLAS_LAPACK

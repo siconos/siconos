@@ -343,7 +343,7 @@ public:
    * \param col position starting to write
    */
 
-  void WriteVectorIntoMatrix(const SiconosVector v, const unsigned int row, const unsigned int col);
+  void WriteVectorIntoMatrix(const SiconosVector& v, const unsigned int row, const unsigned int col);
 
   /** Save data for each step
    * \param i pointer to be save */

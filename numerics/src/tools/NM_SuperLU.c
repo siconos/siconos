@@ -16,17 +16,17 @@
  * limitations under the License.
 */
 
-#include "NumericsMatrix_private.h"
-#include "NumericsMatrix.h"
-#include "NumericsSparseMatrix.h"
 #include "debug.h"
+#include "SparseMatrix_internal.h"
+#include "NumericsMatrix_internal.h"
+#include "NumericsSparseMatrix.h"
 #include "numerics_verbose.h"
 
 #ifdef WITH_SUPERLU
 
 #include <slu_ddefs.h>
 
-/** \struct NM_SuperLU_WS NumericsMatrix_private.h
+/** \struct NM_SuperLU_WS NumericsMatrix_internal.h
  * Structure for holding the data SuperLU needs
  */
 struct NM_SuperLU_WS {

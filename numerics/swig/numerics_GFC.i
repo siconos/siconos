@@ -3,16 +3,13 @@
 
 // for b in GlobalFrictionContact
 %typemap(out) (double* b) {
-  npy_intp dims[1];
 
-  if (!arg1->H) { PyErr_SetString(PyExc_TypeError, "H is not present, don't known the size"); SWIG_fail; }
+  if (!arg1->H) { SWIG_exception_fail(SWIG_RuntimeError, "H is not present, don't known the size"); }
 
-  dims[0] = arg1->H->size1;
   if ($1)
   {
-    PyObject *obj = PyArray_SimpleNewFromData(1, dims, NPY_DOUBLE, $1);
-    PyArrayObject *array = (PyArrayObject*) obj;
-    if (!array || !require_fortran(array)) SWIG_fail;
+    SN_OBJ_TYPE *obj;
+    C_to_target_lang1(obj, arg1->H->size1, $1, SWIG_fail);
     $result = obj;
   }
   else
@@ -26,16 +23,14 @@
   assert(arg1);
   if (!arg1->H)
   {
-    PyErr_SetString(PyExc_RuntimeError, "H is not initialized, it sould be done first!");
-    SWIG_fail;
+    SWIG_exception_fail(SWIG_RuntimeError, "H is not initialized, it sould be done first!");
   }
 
   int size = arg1->H->size1;
-  if (size !=  array_size(array2, 0))
+  if (size !=  array_size((SN_ARRAY_TYPE*)array2, 0))
   {
-    snprintf(msg, sizeof(msg), "Size of b is %ld, but the size of H is %d! Both should be equal!\n", array_size(array2, 0), size);
-    PyErr_SetString(PyExc_RuntimeError, msg);
-    SWIG_fail;
+    snprintf(msg, sizeof(msg), "Size of b is %ld, but the size of H is %d! Both should be equal!\n", array_size((SN_ARRAY_TYPE*)array2, 0), size);
+    SWIG_exception_fail(SWIG_RuntimeError, msg);
   }
 
   if (!$1) { $1 = (double*)malloc(size * sizeof(double)); }
@@ -70,7 +65,7 @@
       return FC;
     }
 
-  GlobalFrictionContactProblem(PyObject *dim)
+  GlobalFrictionContactProblem(SN_OBJ_TYPE *dim)
     {
 
       GlobalFrictionContactProblem *FC;
@@ -78,30 +73,30 @@
       FC = (GlobalFrictionContactProblem *) malloc(sizeof(GlobalFrictionContactProblem));
 
       globalFrictionContact_null(FC);
-      FC->dimension = (int) PyInt_AsLong(dim);
+      SWIG_AsVal_int(dim, &FC->dimension);
 
       return FC;
     }
 
-  GlobalFrictionContactProblem(PyObject *dim, PyObject *o1, PyObject *o2, PyObject *o3)
+  GlobalFrictionContactProblem(SN_OBJ_TYPE *dim, SN_OBJ_TYPE *o1, SN_OBJ_TYPE *o2, SN_OBJ_TYPE *o3)
     {
 
       int is_new_object1=0;
       int is_new_object2=0;
       int is_new_object3=0;
 
-      PyArrayObject* array = obj_to_array_fortran_allow_conversion(o1, NPY_DOUBLE,&is_new_object1);
-      PyArrayObject* vector = obj_to_array_contiguous_allow_conversion(o2, NPY_DOUBLE, &is_new_object2);
-      PyArrayObject* mu_vector = obj_to_array_contiguous_allow_conversion(o3, NPY_DOUBLE, &is_new_object3);
+      SN_ARRAY_TYPE* array = obj_to_sn_array(o1, &is_new_object1);
+      SN_ARRAY_TYPE* vector = obj_to_sn_vector(o2, &is_new_object2);
+      SN_ARRAY_TYPE* mu_vector = obj_to_sn_vector(o3, &is_new_object3);
       GlobalFrictionContactProblem * FC = (GlobalFrictionContactProblem *) malloc(sizeof(GlobalFrictionContactProblem));
       globalFrictionContact_null(FC);
 
-      size_t size0 = array_size(array,0);
-      size_t size1 = array_size(array,1);
+      size_t size0 = array_size((SN_ARRAY_TYPE*)array,0);
+      size_t size1 = array_size((SN_ARRAY_TYPE*)array,1);
       FC->M = NM_create(NM_DENSE, size0, size1);
 
       memcpy(FC->M->matrix0,array_data(array),size0*size1*sizeof(double));
-      FC->dimension = (int) PyInt_AsLong(dim);
+      SWIG_AsVal_int(dim, &FC->dimension);
       FC->numberOfContacts = size0 / FC->dimension;
       FC->q = (double *) malloc(size0*sizeof(double));
       memcpy(FC->q,array_data(vector),size0*sizeof(double));
@@ -109,20 +104,9 @@
       memcpy(FC->mu,array_data(mu_vector),FC->numberOfContacts*sizeof(double));
 
       // python mem management
-      if(is_new_object1 && array)
-      {
-        Py_DECREF(array);
-      }
-
-      if(is_new_object2 && vector)
-      {
-        Py_DECREF(vector);
-      }
-
-      if(is_new_object3 && mu_vector)
-      {
-        Py_DECREF(mu_vector);
-      }
+      target_mem_mgmt(is_new_object1, array)
+      target_mem_mgmt(is_new_object2, vector)
+      target_mem_mgmt(is_new_object3, mu_vector)
 
       return FC;
     }

@@ -23,9 +23,6 @@
 
 #include "Simulation.hpp"
 #include "SiconosFwd.hpp"               // for OneStepIntegrator, etc
-#include "f2c.h"                        // for doublereal, integer
-
-#define DEFAULT_TOL_ED 1000 * DEFAULT_TOLERANCE
 
 /** Simulation based on event driven method, ie events detection (see theoretical manual for more details).
  *
@@ -69,7 +66,7 @@ protected:
   /** Default maximum number of Newton iteration*/
   unsigned int _newtonMaxIteration;
 
-  /** Number of steps perfomed is the Newton Loop */
+  /** Number of steps performed is the Newton Loop */
   unsigned int _newtonNbIterations;
 
   /** Maximum Residual for the Dynamical system */
@@ -288,10 +285,20 @@ public:
 
   void updateSmoothState();
 
-  /** update input, output and indexSets.
+  /** update input
    *  \param level of lambda  used to compute input
    */
-  void update(unsigned int level);
+  void updateInput(unsigned int level) {}
+
+  /** update state.
+   *  \param level of lambda  used to compute input
+   */
+  void updateState(unsigned int level);
+
+  /** update output and indexSets.
+   *  \param level of lambda  used to compute input
+   */
+  void updateOutput(unsigned int level);
 
   /** Initialize EventDriven **/
 

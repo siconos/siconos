@@ -33,6 +33,8 @@
 #include "NMS.h"
 #include "NSSTools.h"
 
+#include "sanitizer.h"
+
 #include "NCP_PathSearch.h"
 
 #include "ncp_newton_FBLSA.h"
@@ -153,9 +155,9 @@ void ncp_pathsearch(NonlinearComplementarityProblem* problem, double* z, double*
 
   data_NMS->ref_merit = .5 * cblas_ddot(n, data_NMS->ls_data->F_merit, 1, data_NMS->ls_data->F_merit, 1);
   data_NMS->merit_bestpoint = data_NMS->ref_merit;
-  cblas_dcopy(n, z, 1, NMS_checkpoint_0(data_NMS, n), 1);
-  cblas_dcopy(n, z, 1, NMS_checkpoint_T(data_NMS, n), 1);
-  cblas_dcopy(n, z, 1, NMS_bestpoint(data_NMS, n), 1);
+  cblas_dcopy_msan(n, z, 1, NMS_checkpoint_0(data_NMS, n), 1);
+  cblas_dcopy_msan(n, z, 1, NMS_checkpoint_T(data_NMS, n), 1);
+  cblas_dcopy_msan(n, z, 1, NMS_bestpoint(data_NMS, n), 1);
   /* -------------------- end init ---------------------------*/
 
   int nms_failed = 0;
@@ -381,7 +383,7 @@ void ncp_pathsearch(NonlinearComplementarityProblem* problem, double* z, double*
 
   if (!preAlloc)
   {
-    freeNumericsMatrix(problem->nabla_F);
+    NM_free(problem->nabla_F);
     free(problem->nabla_F);
     problem->nabla_F = NULL;
     free(options->dWork);

@@ -38,24 +38,17 @@ private:
 
   CPPUNIT_TEST(testBuildLagrangianLinearTIDS1);
   CPPUNIT_TEST(testBuildLagrangianLinearTIDS2);
-  CPPUNIT_TEST(testBuildLagrangianLinearTIDS3);
-  CPPUNIT_TEST(testcomputeDS);
-  CPPUNIT_TEST(End);
-
   CPPUNIT_TEST_SUITE_END();
 
   // \todo exception test
 
   void testBuildLagrangianLinearTIDS1();
   void testBuildLagrangianLinearTIDS2();
-  void testBuildLagrangianLinearTIDS3();
-  void testcomputeDS();
-  void End();
 
   // Members
 
   SP::SiconosVector q0, velocity0;
-  SP::SiconosMatrix mass, K, C;
+  SP::SiconosMatrix mass, K, C, rhsK, rhsC, minus_inv_M;
 
 public:
   void setUp();

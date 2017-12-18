@@ -23,13 +23,18 @@
 #include "FrictionContactProblem.h"
 #include "VariationalInequality.h"
 #include "projectionOnCone.h"
+#include "projectionOnCylinder.h"
+#include "projectionOnDisk.h"
 #include "numerics_verbose.h"
 #include "SiconosBlas.h"
 #include "NumericsMatrix.h"
-
+#include "SolverOptions.h"
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
 #include "debug.h"
+
+
+
 
 void Function_VI_FC3D(void * self, int n_notused, double *x, double *F)
 {
@@ -73,5 +78,77 @@ void Projection_VI_FC3D(void *viIn, double *x, double *PX)
   for (contact = 0 ; contact < fc3d->numberOfContacts  ; ++contact)
   {
     projectionOnCone(&PX[ contact * nLocal ], fc3d->mu[contact]);
+  }
+}
+
+void Function_VI_FC3D_Cylinder(void * self, int n_notused, double *x, double *F)
+{
+  DEBUG_PRINT("Function_VI_FC3D(void * self, double *x, double *F)\n")
+  VariationalInequality * vi = (VariationalInequality *) self;
+  FrictionContactProblem_as_VI* pb = (FrictionContactProblem_as_VI*)vi->env;
+  FrictionContactProblem * fc3d = pb->fc3d;
+  //frictionContact_display(fc3d);
+
+  int n = fc3d->numberOfContacts *  fc3d->dimension;
+
+  cblas_dcopy(n , fc3d->q , 1 , F, 1);
+  NM_gemv(1.0, fc3d->M, x, 1.0, F);
+}
+
+void Projection_VI_FC3D_Cylinder(void *viIn, double *x, double *PX)
+{
+  DEBUG_PRINT("Projection_VI_FC3D_Cylinder(void *viIn, double *x, double *PX)\n")
+
+  VariationalInequality * vi = (VariationalInequality *) viIn;
+  FrictionContactProblem_as_VI* pb = (FrictionContactProblem_as_VI*)vi->env;
+  FrictionContactProblem * fc3d = pb->fc3d;
+  SolverOptions * options = pb->options;
+  //frictionContact_display(fc3d);
+
+  int contact =0;
+  int nLocal =  fc3d->dimension;
+  int n = fc3d->numberOfContacts* nLocal;
+  cblas_dcopy(n , x , 1 , PX, 1);
+  for (contact = 0 ; contact < fc3d->numberOfContacts  ; ++contact)
+  {
+    projectionOnCylinder(&PX[ contact * nLocal ], options->dWork[contact]);
+  }
+}
+
+
+
+void Function_VI_FC3D_Disk(void * self, int n_notused, double *x, double *F)
+{
+  DEBUG_PRINT("Function_VI_FC3D(void * self, double *x, double *F)\n")
+  VariationalInequality * vi = (VariationalInequality *) self;
+  FrictionContactProblem_as_VI* pb = (FrictionContactProblem_as_VI*)vi->env;
+  FrictionContactProblem * fc3d = pb->fc3d;
+  SolverOptions * options = pb->options;
+  SplittedFrictionContactProblem * splitted_problem = (SplittedFrictionContactProblem *)options->solverData;
+
+  int n = 2 * fc3d->numberOfContacts ;
+
+  cblas_dcopy(n , splitted_problem->q_t , 1 , F, 1);
+  NM_gemv(1.0, splitted_problem->M_tt, x, 1.0, F);
+}
+
+void Projection_VI_FC3D_Disk(void *viIn, double *x, double *PX)
+{
+  DEBUG_PRINT("Projection_VI_FC3D_Cylinder(void *viIn, double *x, double *PX)\n")
+
+  VariationalInequality * vi = (VariationalInequality *) viIn;
+  FrictionContactProblem_as_VI* pb = (FrictionContactProblem_as_VI*)vi->env;
+  FrictionContactProblem * fc3d = pb->fc3d;
+  SolverOptions * options = pb->options;
+  //frictionContact_display(fc3d);
+
+  int nLocal  =  2;
+  int n = fc3d->numberOfContacts* nLocal;
+
+  cblas_dcopy(n , x , 1 , PX, 1);
+
+  for (int contact = 0 ; contact < fc3d->numberOfContacts  ; ++contact)
+  {
+    projectionOnDisk(&PX[ contact * nLocal ], options->dWork[contact]);
   }
 }

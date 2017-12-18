@@ -1,6 +1,63 @@
-#!/usr/bin/env python
+#!/usr/bin/env @PYTHON_EXECUTABLE@
+"""Export a Siconos mechanics-IO HDF5 file in VTK format."""
+
+# Lighter imports before command line parsing
+from __future__ import print_function
 import sys
 import os
+import getopt
+
+#
+# a replacement for vview --vtk-export
+#
+
+def usage(long=False):
+    print(__doc__); print()
+    print('Usage:  {0} [--help] [--version] [--ascii] <HDF5>'
+          .format(os.path.split(sys.argv[0])[1]))
+    if long:
+        print()
+        print("""Options:
+        --help     display this message
+        --version  display version information
+        --ascii    export file in ascii format
+        """)
+try:
+    opts, args = getopt.gnu_getopt(sys.argv[1:], '',
+                                   ['help','version','ascii'])
+except getopt.GetoptError as err:
+        sys.stderr.write('{0}\n'.format(str(err)))
+        usage()
+        exit(2)
+
+ascii_mode = False
+
+for o, a in opts:
+    if o == '--help':
+        usage(long=True)
+        exit(0)
+    if o == '--version':
+        print('{0} @SICONOS_VERSION@'.format(os.path.split(sys.argv[0])[1]))
+        exit(0)
+    if o in ('--ascii'):
+        ascii_mode = True
+
+min_time = None
+max_time = None
+cf_scale_factor = 1
+normalcone_ratio = 1
+time_scale_factor = 1
+vtk_export_mode = True
+view_cycle = -1
+
+if len(args) > 0:
+    io_filename = args[0]
+
+else:
+    usage()
+    exit(1)
+
+# Heavier imports after command line parsing
 import vtk
 from vtk.util import numpy_support
 from math import atan2, pi
@@ -8,17 +65,10 @@ import bisect
 from numpy.linalg import norm
 import numpy
 import random
-
-import getopt
-
 from siconos.io.mechanics_io import Hdf5
 
-#
-# a replacement for vview --vtk-export
-#
 # attach velocity
 # contact points and associated forces are embedded in on a PolyData source
-
 
 class UnstructuredGridSource(vtk.vtkProgrammableSource):
 
@@ -41,11 +91,6 @@ class ConvexSource(UnstructuredGridSource):
             convex.GetCellType(), self._convex.GetPointIds())
         output.SetPoints(self._points)
 
-
-def usage():
-    pass
-
-
 def add_compatiblity_methods(obj):
     """
     Add missing methods in previous VTK versions.
@@ -56,36 +101,6 @@ def add_compatiblity_methods(obj):
 
     if hasattr(obj, 'AddInput'):
         obj.AddInputData = obj.AddInput
-
-try:
-    opts, args = getopt.gnu_getopt(sys.argv[1:], '',
-                                   ['ascii'])
-except getopt.GetoptError, err:
-        sys.stderr.write('{0}\n'.format(str(err)))
-        usage()
-        exit(2)
-
-ascii_mode = False
-
-for o, a in opts:
-    if o in ('--ascii'):
-        ascii_mode = True
-
-min_time = None
-max_time = None
-cf_scale_factor = 1
-normalcone_ratio = 1
-time_scale_factor = 1
-vtk_export_mode = True
-view_cycle = -1
-
-if len(args) > 0:
-    io_filename = args[0]
-
-else:
-    usage()
-    exit(1)
-
 
 transforms = dict()
 transformers = dict()
@@ -534,8 +549,8 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
                 transformer.SetInputConnection(
                     readers[contactor_name].GetOutputPort())
             else:
-                print 'WARNING: cannot find a shape source for instance:',
-                instance
+                print ('WARNING: cannot find a shape source for instance:',
+                       instance)
 
             transformer.SetTransform(transform)
             transformers[contactor_name] = transformer

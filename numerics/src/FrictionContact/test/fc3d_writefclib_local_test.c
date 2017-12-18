@@ -84,7 +84,7 @@ static int write_test_fclib(char * filename)
   /*...*/
 
   /* an attempt : we write the problem in the file and read it again
-     this does not work because sparseToSBM eliminates some zeros
+     this does not work because SBM_from_csparse eliminates some zeros
   FrictionContactProblem* problem_from_file = frictionContact_fclib_read(basename);
 
   frictionContact_fclib_write(problem1,
@@ -94,9 +94,9 @@ static int write_test_fclib(char * filename)
                               basename);
 
 
-  printSBM(problem1->M->matrix1);
+  SBM_print(problem1->M->matrix1);
 
-  printSBM(problem_from_file->M->matrix1);
+  SBM_print(problem_from_file->M->matrix1);
 
   info += !(problem_from_file->M->matrix1->filled1 == problem1->M->matrix1->filled1);
   info += !(problem_from_file->M->matrix1->filled2 == problem1->M->matrix1->filled2);

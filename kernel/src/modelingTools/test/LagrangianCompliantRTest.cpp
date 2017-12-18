@@ -38,16 +38,6 @@ void LagrangianCompliantRTest::testBuildLagrangianCompliantR0()
   SP::LagrangianCompliantR R1(new LagrangianCompliantR("TestPlugin:hCompl", "TestPlugin:G0Compl", "TestPlugin:G1Compl"));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianCompliantR3a : ", R1->getType() == RELATION::Lagrangian, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianCompliantR3b : ", R1->getSubType() == RELATION::CompliantR, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianCompliantR3c : ", R1->gethName() == "TestPlugin:hCompl", true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianCompliantR3d : ", R1->getJachqName() == "TestPlugin:G0Compl", true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianCompliantR3e : ", R1->getJachlambdaName() == "TestPlugin:G1Compl", true);
   std::cout << " data Constructor LagrangianCompliantR ok" <<std::endl;
 }
 
-
-void LagrangianCompliantRTest::End()
-{
-  std::cout << "==============================================" <<std::endl;
-  std::cout << " ===== End of LagrangianCompliantR tests ===== " <<std::endl;
-  std::cout << "==============================================" <<std::endl;
-}

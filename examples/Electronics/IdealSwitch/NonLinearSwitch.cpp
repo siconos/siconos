@@ -94,7 +94,7 @@ int main()
   */
 
   //****BUILD THE INTERACTION
-  SP::Interaction aI(new Interaction(sNSLawSize, aNSL, aR));
+  SP::Interaction aI(new Interaction(aNSL, aR));
   //  aI->insert(LSDiodeBridge);
   //****BUILD THE SYSTEM
 
@@ -154,7 +154,7 @@ int main()
 
   //**** BUILD THE STEP NS PROBLEM
 
-  //      setNumericsVerbose(1);
+  //      numerics_set_verbose(1);
 
 
   SP::SiconosVector  x = aDS->x();
@@ -175,9 +175,9 @@ int main()
   for (int k = 0 ; k < NBStep ; k++)
   {
     //      if (cmp==150)
-    //        setNumericsVerbose(1);
+    //        numerics_set_verbose(1);
     //      else if (cmp==151)
-    //        setNumericsVerbose(0);
+    //        numerics_set_verbose(0);
     cout << "..." << cmp << endl;
     cmp++;
     // solve ...

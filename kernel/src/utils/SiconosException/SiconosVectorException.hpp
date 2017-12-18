@@ -23,7 +23,6 @@
 #define __SiconosVectorException__
 
 #include "SiconosException.hpp"
-#include "numerics_verbose.h"
 
 /** Exception caused by a SiconosVector
  *
@@ -34,7 +33,7 @@
  *
  *
  * SiconosVectorException must be throws when an error is find in a SiconosVector
- * This exception can be catched by "catch(SiconosVectorException)" or "catch(SiconosException)"
+ * This exception can be caught by "catch(SiconosVectorException)" or "catch(SiconosException)"
  *
  */
 class SiconosVectorException : public SiconosException

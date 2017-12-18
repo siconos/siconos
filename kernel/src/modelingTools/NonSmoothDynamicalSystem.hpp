@@ -22,8 +22,8 @@
 #define NSDS_H
 
 #include "SiconosPointers.hpp"
-#include "DynamicalSystemsSet.hpp"
 #include "Topology.hpp"
+#include "DynamicalSystem.hpp"
 
 /** the Non Smooth Dynamical System consists of DynamicalSystem
  *  and Interaction regrouped together in a Topology object,
@@ -108,7 +108,7 @@ public:
     return _topology->dSG(0);
   }
 
-  /** add a dynamical system
+  /** add a dynamical system into the DS graph (as a vertex)
    * \param ds a pointer to the system to add
    */
   inline void insertDynamicalSystem(SP::DynamicalSystem ds)
@@ -125,6 +125,15 @@ public:
   {
     return _topology->getDynamicalSystem(nb);
   }
+
+  /** remove a dynamical system
+   * \param ds a pointer to the dynamical system to remove
+   * \param removeInterations if true, all interactions connected to the ds will also be removed
+   */
+  inline void removeDynamicalSystem(SP::DynamicalSystem ds)
+  {
+    _topology->removeDynamicalSystem(ds);
+  };
 
 
 
@@ -157,13 +166,21 @@ public:
 
   /** get Interaction number I
    * \param nb the identifier of the Interaction to get
-   * \return a pointer on Interaction
+   * \return a pointer to an Interaction
    */
   inline SP::Interaction interaction(int nb) const
   {
     return _topology->getInteraction(nb);
   }
 
+  /** get Interaction named name
+   * \param nb the name of the Interaction to get
+   * \return a pointer to an Interaction
+   */
+  inline SP::Interaction interaction(std::string name) const
+  {
+    return _topology->getInteraction(name);
+  }
 
   /** link an interaction to two dynamical systems
    * \param inter the interaction
@@ -171,12 +188,6 @@ public:
    * \param ds2 a DynamicalSystem (optional)
    */
   void link(SP::Interaction inter, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2 = SP::DynamicalSystem());
-
-  // inline void setOSI(SP::DynamicalSystem ds, SP::OneStepIntegrator OSI)
-  // {
-  //   _topology->setOSI(ds, OSI);
-  //   _mIsLinear = ((ds)->isLinear() && _mIsLinear);
-  // };
 
   /** set the name for this Dynamical System
    * \param ds a pointer to the system
@@ -187,6 +198,32 @@ public:
     _topology->setName(ds, name);
   };
 
+  /** get the name for this Dynamical System
+   * \param ds a pointer to the system
+   * \return name the name of the DynamicalSystem, or empty string if not found.
+   */
+  std::string name(SP::DynamicalSystem ds)
+  {
+    return _topology->name(ds);
+  }
+
+  /** set the name for this Interaction
+   * \param interaction a pointer to the Interaction
+   * \param name the name of the Interaction
+   */
+  inline void setName(SP::Interaction interaction, const std::string& name)
+  {
+    _topology->setName(interaction, name);
+  };
+
+  /** get the name for this Interaction
+   * \param ds a pointer to the system
+   * \return name the name of the Interaction, or empty string if not found.
+   */
+  std::string name(SP::Interaction inter)
+  {
+    return _topology->name(inter);
+  }
 
     /** specify id the given Interaction is for controlling the DS
    * \param inter the Interaction
@@ -210,12 +247,6 @@ public:
   /** display the data of the Non Smooth Dynamical System
    */
   void display() const;
-
-  /** calculate an indicator that gives convergence information for
-   *  the DSs
-   *  \return a double
-   */
-  double nsdsConvergenceIndicator();
 
   /** return false is one of the interations is not linear.  else
    *  return true.
@@ -253,7 +284,7 @@ public:
 
   /** compute r thanks to lambda[level] for all Interactions
     * \param time
-    *   \param level lambda level
+    * \param level lambda level
    */
   void updateInput(double time, unsigned int level);
 

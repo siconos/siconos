@@ -26,6 +26,10 @@ NewtonImpactNSL::NewtonImpactNSL(double e):
   NonSmoothLaw(1), _e(e)
 {}
 
+NewtonImpactNSL::NewtonImpactNSL(unsigned int size, double e):
+  NonSmoothLaw(size), _e(e)
+{}
+
 NewtonImpactNSL::~NewtonImpactNSL()
 {}
 

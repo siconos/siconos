@@ -26,6 +26,7 @@
 #include <SimulationTypeDef.hpp>
 #include <NonSmoothLaw.hpp>
 #include <OneStepIntegrator.hpp>
+#include <Topology.hpp>
 
 #include <BulletCollision/Gimpact/btGImpactCollisionAlgorithm.h>
 #include <BulletCollision/CollisionDispatch/btDefaultCollisionConfiguration.h>
@@ -101,31 +102,58 @@ struct ForPosition : public Question<SP::SiconosVector>
   ANSWER(BulletDS, q());
 };
 
-/* initW is not a member of OneStepIntegrator (should it be ?),
+// /* initializeIterationMatrixW is not a member of OneStepIntegrator (should it be ?),
+//    so we visit some integrators which provide this initialization.
+// */
+
+// /* first, a generic visitor is defined. */
+// struct CallInitW : public SiconosVisitor
+// {
+//   double time;
+//   SP::DynamicalSystem ds;
+//   DynamicalSystemsGraph::VDescriptor dsv;
+
+//   template<typename T>
+//   void operator()(const T& osi)
+//   {
+//     const_cast<T*>(&osi)->initializeIterationMatrixW(this->time, this->ds, this->dsv);
+//   }
+// };
+
+// /* the visit is made on classes which provide the function initializeIterationMatrixW */
+// typedef Visitor < Classes < MoreauJeanOSI,
+//                             MoreauJeanGOSI,
+//                             EulerMoreauOSI,
+//                             SchatzmanPaoliOSI >,
+//                   CallInitW >::Make InitW;
+
+
+/* initializeIterationMatrixW is not a member of OneStepIntegrator (should it be ?),
    so we visit some integrators which provide this initialization.
 */
 
 /* first, a generic visitor is defined. */
-struct CallInitW : public SiconosVisitor
+struct CallInitDS : public SiconosVisitor
 {
   double time;
   SP::DynamicalSystem ds;
-  DynamicalSystemsGraph::VDescriptor dsv;
-
+  SP::Model m ; 
   template<typename T>
   void operator()(const T& osi)
   {
-    const_cast<T*>(&osi)->initW(this->time, this->ds, this->dsv);
+    const_cast<T*>(&osi)->initializeDynamicalSystem(*(this->m), this->time, this->ds);
   }
 };
 
-/* the visit is made on classes which provide the function initW */
+/* the visit is made on classes which provide the function initializeIterationMatrixW */
+// typedef Visitor < Classes < MoreauJeanOSI >,
+//                   CallInitDS >::Make InitDynamicalSystem;
+
 typedef Visitor < Classes < MoreauJeanOSI,
                             MoreauJeanGOSI,
                             EulerMoreauOSI,
                             SchatzmanPaoliOSI >,
-                  CallInitW >::Make InitW;
-
+                  CallInitDS >::Make InitDynamicalSystem;
 
 BulletSpaceFilter::BulletSpaceFilter(SP::Model model) :
   SpaceFilter(),
@@ -344,8 +372,8 @@ void BulletSpaceFilter::buildInteractions(double time)
         try {
           nslaw = (*_nslaws)(gid1, gid2);
         } catch (ublas::bad_index &e) {
-          printf("Warning: NonSmoothLaw for groups %d and %d not found!\n",
-                 gid1, gid2);
+          DEBUG_PRINTF("Warning: NonSmoothLaw for groups %u and %u not found!\n",
+                       gid1, gid2);
         }
 
         if (nslaw)
@@ -364,6 +392,7 @@ void BulletSpaceFilter::buildInteractions(double time)
                      });
 
 
+          bool flip = false;
           if (itc == contactPoints.end() || !cpoint->m_userPersistentData)
           {
             /* new interaction */
@@ -374,16 +403,21 @@ void BulletSpaceFilter::buildInteractions(double time)
               /* if objectB is the only DS, (A is static), then flip
                * the contact points and normal otherwise the relation
                * is to the wrong side */
-              bool flip = !dsa && dsb;
-              SP::BulletR rel(new BulletR(cpoint, flip));
-              inter.reset(new Interaction(3, nslaw, rel, 4 * i + z));
+              flip = !dsa && dsb;
+              SP::BulletR rel(new BulletR(*cpoint,
+                                          flip ? dsb->q() : dsa->q(),
+                                          (flip ? (dsa?dsa->q():SP::SiconosVector())
+                                                : (dsb?dsb->q():SP::SiconosVector())),
+                                          flip));
+              rel->setContactPoint(cpoint);
+              inter.reset(new Interaction(nslaw, rel));//, 4 * i + z));
             }
             else
             {
               if (nslaw->size() == 1)
               {
               SP::BulletFrom1DLocalFrameR rel(new BulletFrom1DLocalFrameR(cpoint));
-              inter.reset(new Interaction(1, nslaw, rel, 4 * i + z));
+              inter.reset(new Interaction(nslaw, rel));//, 4 * i + z));
               }
             }
 
@@ -395,25 +429,31 @@ void BulletSpaceFilter::buildInteractions(double time)
             if (dsa && !dsb)
             {
                 cpoint->m_userPersistentData = &*inter;
-                link(inter, dsa);
+                model()->simulation()->link(inter, dsa);
             }
             else if (!dsa && dsb)
             {
                 cpoint->m_userPersistentData = &*inter;
-                link(inter, dsb);
+                model()->simulation()->link(inter, dsb);
             }
             else if (dsa && dsb && (dsa != dsb))
             {
                 cpoint->m_userPersistentData = &*inter;
-                link(inter, dsa, dsb);
+                model()->simulation()->link(inter, dsa, dsb);
             }
           }
 
           if (cpoint->m_userPersistentData)
           {
-            activeInteractions[static_cast<Interaction *>(cpoint->m_userPersistentData)] = true;
+            Interaction *inter = static_cast<Interaction *>(cpoint->m_userPersistentData);
+            activeInteractions[inter] = true;
             DEBUG_PRINTF("Interaction %p = true\n", static_cast<Interaction *>(cpoint->m_userPersistentData));
             DEBUG_PRINTF("cpoint %p  = true\n", &*cpoint);
+            SP::BulletR rel(std11::static_pointer_cast<BulletR>(inter->relation()));
+            rel->updateContactPointsFromManifoldPoint(*cpoint,
+                                     flip ? dsb : dsa,
+                                     flip ? (dsa ? dsa : SP::NewtonEulerDS())
+                                          : (dsb ? dsb : SP::NewtonEulerDS()));
           }
           else
           {
@@ -477,18 +517,9 @@ void BulletSpaceFilter::addDynamicObject(SP::BulletDS ds,
 
   /* Insert the new DS into the OSI, model, and simulation. */
   this->model()->nonSmoothDynamicalSystem()->insertDynamicalSystem(ds);
-  this->model()->nonSmoothDynamicalSystem()->topology()->setOSI(ds, osi);
 
-  DynamicalSystemsGraph& dsg = *(this->model()->nonSmoothDynamicalSystem()->dynamicalSystems());
-  DynamicalSystemsGraph::VDescriptor dsv = dsg.descriptor(ds);
-  InitW initW;
-  initW.time = simulation->nextTime();
-  initW.ds = ds;
-  initW.dsv = dsv;
-  osi->accept(initW);
-
-  /* Initialize the DS at the current time */
-  ds->initialize(simulation->nextTime(), osi->getSizeMem());
+  /* Associate/initialize the OSI */
+  simulation->prepareIntegratorForDS(osi, ds, this->model(), simulation->nextTime());
 
   /* Partially re-initialize the simulation. */
   simulation->initialize(this->model(), false);

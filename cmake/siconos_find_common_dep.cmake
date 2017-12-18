@@ -34,16 +34,28 @@ IF(GAMSCAPI_FOUND)
   #  ENDIF(UNIX AND NOT APPLE)
 ENDIF(GAMSCAPI_FOUND)
 
+# --- SuiteSparse ---
+# Look for system-installed SuiteSparse/CSparse
+if (WITH_SYSTEM_SUITESPARSE)
+  compile_with(SuiteSparse COMPONENTS CXSparse)
+  if (NOT SuiteSparse_FOUND OR NOT SuiteSparse_CXSparse_FOUND)
+    set(_sys_CXSparse FALSE)
+    message(STATUS "System SuiteSparse was requested (WITH_SYSTEM_SUITESPARSE=${WITH_SYSTEM_SUITESPARSE})\ 
+    but not found! Using the internal copy of suitesparse")
+  else()
+    set(_sys_CXSparse TRUE)
+    list(APPEND SICONOS_LINK_LIBRARIES ${CXSparse_LIBRARY})
+  endif()
+  set(USE_SYSTEM_SUITESPARSE ${_sys_CXSparse} CACHE INTERNAL "flag to check to systemwide SuiteSparse install")
+endif()
+
 compile_with(PathFerris)
+compile_with(PathVI)
 compile_with(LpSolve)
 if(LpSolve_FOUND)
   set(HAS_ONE_LP_SOLVER TRUE)
   set(HAS_EXTREME_POINT_ALGO TRUE)
   set(WITH_LPSOLVE TRUE)
-  if(WITH_CXX)
-    string(REPLACE "-Werror=conversion" "" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
-  endif()
-  string(REPLACE "-Werror=conversion" "" CMAKE_C_FLAGS ${CMAKE_C_FLAGS})
 endif(LpSolve_FOUND)
 
 # --- Mumps ---
@@ -87,7 +99,12 @@ endif()
 
 # --- Fclib ---
 IF(WITH_FCLIB)
-  COMPILE_WITH(FCLIB REQUIRED)   
+  COMPILE_WITH(FCLIB REQUIRED)
+  IF(FCLib_FCLIB_HEADER_ONLY)
+    COMPILE_WITH(HDF5 REQUIRED COMPONENTS C HL)
+  ELSE()
+    APPEND_C_FLAGS("-DFCLIB_NOT_HEADER_ONLY")
+ENDIF()
   IF(FCLIB_NOTFOUND)
     # try the package stuff
     # need FCLib_DIR !!
@@ -107,14 +124,35 @@ IF(WITH_BOOST_LOG)
 ENDIF()
 
 # --- Bullet ---
+SET(BULLET_PATHS "")
 IF(WITH_BULLET)
-  COMPILE_WITH(Bullet REQUIRED)
+  COMPILE_WITH(Bullet REQUIRED ONLY mechanics)
   IF(BULLET_FOUND)
-    SET(HAVE_BULLET TRUE)
+    SET(SICONOS_HAVE_BULLET TRUE)
     MESSAGE( STATUS " Bullet include dirs : ${BULLET_INCLUDE_DIRS}" )
     IF(BULLET_USE_DOUBLE_PRECISION)
       APPEND_CXX_FLAGS("-DBT_USE_DOUBLE_PRECISION")
     ENDIF(BULLET_USE_DOUBLE_PRECISION)
+
+    # If a custom bullet was set, provide it for user programs.
+    IF(BULLET_INCLUDE_DIR)
+      SET(BULLET_PATHS "${BULLET_PATHS}\nset(BULLET_INCLUDE_DIR \"${BULLET_INCLUDE_DIR}\")")
+    ENDIF()
+    IF(BULLET_COLLISION_LIBRARY)
+      SET(BULLET_PATHS "${BULLET_PATHS}\nset(BULLET_COLLISION_LIBRARY \"${BULLET_COLLISION_LIBRARY}\")")
+    ENDIF()
+    IF(BULLET_DYNAMICS_LIBRARY)
+      SET(BULLET_PATHS "${BULLET_PATHS}\nset(BULLET_DYNAMICS_LIBRARY \"${BULLET_DYNAMICS_LIBRARY}\")")
+    ENDIF()
+    IF(BULLET_MATH_LIBRARY)
+      SET(BULLET_PATHS "${BULLET_PATHS}\nset(BULLET_MATH_LIBRARY \"${BULLET_MATH_LIBRARY}\")")
+    ENDIF()
+    IF(BULLET_SOFTBODY_LIBRARY)
+      SET(BULLET_PATHS "${BULLET_PATHS}\nset(BULLET_SOFTBODY_LIBRARY \"${BULLET_SOFTBODY_LIBRARY}\")")
+    ENDIF()
+    IF(BULLET_USE_DOUBLE_PRECISION)
+      SET(BULLET_PATHS "${BULLET_PATHS}\nset(BULLET_USE_DOUBLE_PRECISION \"${BULLET_USE_DOUBLE_PRECISION}\")")
+    ENDIF()
   ENDIF(BULLET_FOUND)
 ENDIF(WITH_BULLET)
 
@@ -122,7 +160,7 @@ ENDIF(WITH_BULLET)
 IF(WITH_OCC)
   if(NOT WITH_MECHANISMS)
     COMPILE_WITH(OCE 0.15 REQUIRED ONLY mechanics)
-    SET(HAVE_OCC TRUE)
+    SET(SICONOS_HAVE_OCC TRUE)
     LIST(REMOVE_ITEM SICONOS_LINK_LIBRARIES DRAWEXE)
     LIST(REMOVE_ITEM mechanics_LINK_LIBRARIES DRAWEXE)
   endif()
@@ -175,7 +213,7 @@ IF(WITH_MECHANISMS)
   endif(OCE_FOUND)
   SET(HAVE_MECHANISMS TRUE)
   if(WITH_OCC)
-    SET(HAVE_OCC TRUE)
+    SET(SICONOS_HAVE_OCC TRUE)
   endif()
 endif()
 
@@ -184,7 +222,7 @@ IF(WITH_VTK)
   COMPILE_WITH(VTK)
   IF(VTK_FOUND)
     MESSAGE(STATUS "Found vtk-${VTK_MAJOR_VERSION}.${VTK_MINOR_VERSION}")
-    SET(HAVE_VTK TRUE)
+    SET(SICONOS_HAVE_VTK TRUE)
     IF(VTK_USE_FILE)
       INCLUDE(${VTK_USE_FILE})
     ENDIF()
@@ -201,7 +239,7 @@ endif()
 # -- HDF5 --
 # For logging in Numerics
 IF(WITH_HDF5)
-  COMPILE_WITH(HDF5 REQUIRED)
+  COMPILE_WITH(HDF5 REQUIRED COMPONENTS C HL)
 ENDIF(WITH_HDF5)
 
 #
@@ -210,6 +248,11 @@ ENDIF(WITH_HDF5)
 include(serialization_vector_test)
 if(WITH_SERIALIZATION)
   COMPILE_WITH(Boost 1.47 COMPONENTS serialization filesystem REQUIRED)
+  if (Boost_VERSION GREATER 106100)
+    # If boost is recent enough, prefer system boost serialization to
+    # the one included in "externals/boost_serialization".
+    set(WITH_SYSTEM_BOOST_SERIALIZATION ON)
+  endif()
   TEST_SERIALIZATION_VECTOR_BUG()
 endif()
 
@@ -232,6 +275,8 @@ if(WITH_PYTHON_WRAPPER)
   ENDIF(NOT NO_RUNTIME_BUILD_DEP)
 endif()
 
+# See if help2man is available
+find_program(HELP2MAN help2man)
 
 #
 # Fedora13 https://fedoraproject.org/wiki/UnderstandingDSOLinkChange
@@ -243,12 +288,17 @@ if(UNIX)
   endif()
 endif()
 
-
 # SiconosConfig.h generation and include
 if(EXISTS ${CMAKE_SOURCE_DIR}/config.h.cmake)
   configure_file(${CMAKE_SOURCE_DIR}/config.h.cmake
     ${CMAKE_BINARY_DIR}/SiconosConfig.h)
 endif()
+
+# man pages
+IF(IS_DIRECTORY ${CMAKE_SOURCE_DIR}/man)
+  CONFIGURE_FILE(man/siconos.1.in man/siconos.1)
+  INSTALL(FILES ${CMAKE_BINARY_DIR}/man/siconos.1 DESTINATION share/man/man1)
+ENDIF(IS_DIRECTORY ${CMAKE_SOURCE_DIR}/man)
 
 set(${PROJECT_NAME}_LOCAL_INCLUDE_DIRECTORIES
   ${${PROJECT_NAME}_LOCAL_INCLUDE_DIRECTORIES}

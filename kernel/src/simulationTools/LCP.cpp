@@ -18,7 +18,8 @@
 #include "LCP.hpp"
 #include "OSNSMatrix.hpp"
 // #define DEBUG_STDOUT
-// #define DEBUG_MESSAGES 1
+// #define DEBUG_MESSAGES
+// #define DEBUG_NOCOLOR
 #include "debug.h"
 
 // --- numerics headers ---
@@ -55,12 +56,11 @@ int LCP::compute(double time)
   DEBUG_PRINTF("_indexSetLevel = %i\n", _indexSetLevel);
   DEBUG_EXPR(display(););
 
-
   if (_sizeOutput != 0)
   {
 
     // The LCP in Numerics format
-    _numerics_problem->M = &*_M->getNumericsMatrix();
+    _numerics_problem->M = &*_M->numericsMatrix();
     _numerics_problem->q = _q->getArray();
     _numerics_problem->size = _sizeOutput;
 
@@ -84,24 +84,10 @@ int LCP::compute(double time)
     // --- Recovering of the desired variables from LCP output ---
     postCompute();
 
-
     DEBUG_EXPR(display());
 
   }
-
   return info;
-}
-
-void LCP::display() const
-{
-  std::cout << "======= LCP of size " << _sizeOutput << " with: " <<std::endl;
-  LinearOSNS::display();
-}
-
-void LCP::initialize(SP::Simulation sim)
-{
-  // General initialize for LinearOSNS
-  LinearOSNS::initialize(sim);
 }
 
 LCP::~LCP()

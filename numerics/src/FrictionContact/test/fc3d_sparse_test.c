@@ -18,6 +18,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <float.h>
+#include <errno.h>
+
+
 #include "NonSmoothDrivers.h"
 #include "frictionContact_test_function.h"
 #include "SolverOptions.h"
@@ -25,7 +29,6 @@
 #include "Friction_cst.h"
 #include "fc3d_Solvers.h"
 #include "numerics_verbose.h"
-#include <float.h>
 
 #define GET_ITER(X) X.iparam[1] ? X.iparam[1] : X.iparam[7]
 
@@ -65,7 +68,13 @@ static int solve_sparse(int solver_id, FrictionContactProblem* FC, double* r, do
     info = fc3d_driver(FC, r, u, &SO);
   else
   {
-    FILE * finput = fopen(problem, "r");
+    FILE *finput = fopen(problem, "r");
+    if (!finput)
+    {
+      int _errno = errno;
+      fprintf(stderr, "%s :: unable to open file %s\n", __func__, problem);
+      return _errno;
+    }
     FrictionContactProblem* problem = (FrictionContactProblem*)malloc(sizeof(FrictionContactProblem));
     frictionContact_newFromFile(problem, finput);
     fclose(finput);
@@ -77,7 +86,7 @@ static int solve_sparse(int solver_id, FrictionContactProblem* FC, double* r, do
 
     NumericsMatrix* W = NM_create(NM_SPARSE, n, n);
     NM_copy_to_sparse(problem->M, W);
-    freeNumericsMatrix(problem->M);
+    NM_free(problem->M);
     free(problem->M);
     problem->M = W;
 
@@ -114,7 +123,13 @@ static int solve_dense(int solver_id, FrictionContactProblem* FC, double* r, dou
     info = fc3d_driver(FC, r, u, &SO);
   else
   {
-    FILE * finput = fopen(problem, "r");
+    FILE *finput = fopen(problem, "r");
+    if (!finput)
+    {
+      int _errno = errno;
+      fprintf(stderr, "%s :: unable to open file %s\n", __func__, problem);
+      return _errno;
+    }
     FrictionContactProblem* problem = (FrictionContactProblem*)malloc(sizeof(FrictionContactProblem));
     frictionContact_newFromFile(problem, finput);
     fclose(finput);
@@ -148,7 +163,7 @@ int main(void)
 {
   int total_info = 0;
 
-//  setNumericsVerbose(1);
+//  numerics_set_verbose(1);
 
   double q[] = { -1, 1, 3, -1, 1, 3, -1, 1, 3};
   double mu[] = {0.1, 0.1, 0.1};
@@ -188,7 +203,7 @@ int main(void)
                        "data/Rover4622.dat",
                        "data/Rover9770.dat",
                        "data/NESpheres_10_1.dat",
-                       "data/check-NewtonAC-1contact.dat",
+                       "data/GFC3D_OneContact.dat",
                        "data/NESpheres_30_1.dat"};
 
   for (size_t s = 0; s < sizeof(solvers_to_test)/sizeof(int); ++s)
@@ -238,9 +253,9 @@ int main(void)
 
   }
 
-  freeNumericsMatrix(W);
+  NM_free(W);
   tmpM->matrix0 = NULL;
-  freeNumericsMatrix(tmpM);
+  NM_free(tmpM);
   free(W);
   free(tmpM);
 

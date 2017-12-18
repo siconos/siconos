@@ -106,7 +106,7 @@ void SimpleMatrix::addBlock(unsigned int row_min, unsigned int col_min, const Si
       }
     }
     else
-      SiconosMatrixException::selfThrow("SimpleMatrix::addBlock(...): implemeted only for dense matrices.");
+      SiconosMatrixException::selfThrow("SimpleMatrix::addBlock(...): implemented only for dense matrices.");
     resetLU();
   }
 }
@@ -193,7 +193,7 @@ void SimpleMatrix::subBlock(unsigned int row_min, unsigned int col_min, const Si
       }
     }
     else
-      SiconosMatrixException::selfThrow("SimpleMatrix::subBlock(...): implemeted only for dense matrices.");
+      SiconosMatrixException::selfThrow("SimpleMatrix::subBlock(...): implemented only for dense matrices.");
     resetLU();
   }
 }

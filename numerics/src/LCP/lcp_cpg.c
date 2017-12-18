@@ -235,7 +235,7 @@ void lcp_cpg(LinearComplementarityProblem* problem, double *z, double *w, int *i
     qs   = -1.0;
     cblas_dscal(n, qs, w, incx);
 
-    lcp_compute_error_only(n, z, w, &err);
+    lcp_compute_error(problem, z, w, tol,  &err);
 
   }
 

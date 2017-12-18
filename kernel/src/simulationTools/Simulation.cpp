@@ -26,14 +26,8 @@
 #include "LagrangianDS.hpp"
 
 // One Step Integrators
-#include "EulerMoreauOSI.hpp"
-#include "MoreauJeanOSI.hpp"
-#include "LsodarOSI.hpp"
-#include "Hem5OSI.hpp"
-#include "NewMarkAlphaOSI.hpp"
-#include "D1MinusLinearOSI.hpp"
-#include "SchatzmanPaoliOSI.hpp"
-#include "ZeroOrderHoldOSI.hpp"
+#include "OneStepIntegrator.hpp"
+
 // One Step Non Smooth Problems
 #include "LCP.hpp"
 #include "QP.hpp"
@@ -79,11 +73,6 @@ Simulation::~Simulation()
   clear();
   // -> see shared ressources for this
   if (statOut.is_open()) statOut.close();
-}
-
-void Simulation::setTimeDiscretisationPtr(SP::TimeDiscretisation td)
-{
-  _eventsManager->setTimeDiscretisationPtr(td);
 }
 
 double Simulation::getTk() const
@@ -201,27 +190,27 @@ void Simulation::initialize(SP::Model m, bool withOSI)
 
   if (withOSI)
   {
-
-
     if (numberOfOSI() == 0)
       RuntimeException::selfThrow("Simulation::initialize No OSI !");
-
 
     DynamicalSystemsGraph::VIterator dsi, dsend;
     SP::DynamicalSystemsGraph DSG = _nsds->topology()->dSG(0);
     for (std11::tie(dsi, dsend) = DSG->vertices(); dsi != dsend; ++dsi)
     {
-      SP::OneStepIntegrator osi = DSG->properties(*dsi).osi;
-      SP::DynamicalSystem ds = DSG->bundle(*dsi);
-      if (!osi)
+      // By default, if the user has not set the OSI, we assign the first OSI to all DS
+      // that has no defined osi.
+      if (!DSG->properties(*dsi).osi)
       {
-        // By default, if the user has not set the OSI, we assign the first OSI to all DS
-        _nsds->topology()->setOSI(ds,*_allOSI->begin());
-        //std::cout << "By default, if the user has not set the OSI, we assign the first OSI to all DS"<<std::endl;
-      }
+        _nsds->topology()->setOSI(DSG->bundle(*dsi), *_allOSI->begin());
+        if (_allOSI->size() > 1)
+        {
+          std::cout <<"Warning. The simulation has multiple OSIs but the DS number "
+                    << DSG->bundle(*dsi)->number()
+                    << " is not assigned to an OSI. We assign the first OSI to this DS."
+                    << std::endl;
 
-      osi = DSG->properties(*dsi).osi;
-      ds->initialize(m->t0(), osi->getSizeMem());
+        }
+      }
     }
 
 
@@ -229,50 +218,22 @@ void Simulation::initialize(SP::Model m, bool withOSI)
     for (OSIIterator itosi = _allOSI->begin();
          itosi != _allOSI->end(); ++itosi)
     {
-      // for (DSIterator itds = (*itosi)->dynamicalSystems()->begin();
-      //      itds != (*itosi)->dynamicalSystems()->end();
-      //      ++itds)
-      // {
-      //   (*itds)->initialize(startingTime(),
-      //                       (*itosi)->getSizeMem());
-      //   addInOSIMap(*itds, *itosi);
-      // }
-
       (*itosi)->setSimulationPtr(shared_from_this());
       (*itosi)->initialize(*m);
-
+      _numberOfIndexSets = std::max<int>((*itosi)->numberOfIndexSets(), _numberOfIndexSets);
     }
   }
-
-  // This is the default
-  _levelMinForInput = LEVELMAX;
-  _levelMaxForInput = 0;
-  _levelMinForOutput = LEVELMAX;
-  _levelMaxForOutput = 0;
-
-  computeLevelsForInputAndOutput();
-
-  // Loop over all DS in the graph, to reset NS part of each DS.
-  // Note FP : this was formerly done in inter->initialize call with local levels values
-  // but I think it's ok (better?) to do it with the simulation levels values.
-  DynamicalSystemsGraph::VIterator dsi, dsend;
-  SP::DynamicalSystemsGraph DSG = _nsds->topology()->dSG(0);
-  for (std11::tie(dsi, dsend) = DSG->vertices(); dsi != dsend; ++dsi)
+  SP::Topology topo = _nsds->topology();
+  unsigned int indxSize = topo->indexSetsSize();
+  assert (_numberOfIndexSets >0);
+  if ((indxSize == LEVELMAX) || (indxSize < _numberOfIndexSets ))
   {
-    //assert(_levelMinForInput <= _levelMaxForInput);
-    for (unsigned int k = _levelMinForInput ; k < _levelMaxForInput + 1; k++)
-    {
-      DSG->bundle(*dsi)->initializeNonSmoothInput(k);
-    }
+    topo->indexSetsResize(_numberOfIndexSets);
+    // Init if the size has changed
+    for (unsigned int i = indxSize; i < topo->indexSetsSize(); i++) // ++i ???
+      topo->resetIndexSetPtr(i);
   }
 
-  InteractionsGraph::VIterator ui, uiend;
-  SP::InteractionsGraph indexSet0 = _nsds->topology()->indexSet0();
-  for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
-  {
-    Interaction& inter = *indexSet0->bundle(*ui);
-    inter.initialize(_tinit, indexSet0->properties(*ui));
-  }
 
   // Initialize OneStepNSProblem(s). Depends on the type of simulation.
   // Warning FP : must be done in any case, even if the interactions set
@@ -313,16 +274,62 @@ void Simulation::initialize(SP::Model m, bool withOSI)
 
 void Simulation::initializeInteraction(double time, SP::Interaction inter)
 {
-  // determine which (lower and upper) levels are required for this Interaction
-  // in this Simulation.
-  computeLevelsForInputAndOutput(inter);
-
   // Get the interaction properties from the topology for initialization.
   SP::InteractionsGraph indexSet0 = _nsds->topology()->indexSet0();
   InteractionsGraph::VDescriptor ui = indexSet0->descriptor(inter);
 
   // This calls computeOutput() and initializes qMemory and q_k.
-  inter->initialize(time, indexSet0->properties(ui));
+  DynamicalSystemsGraph &DSG = *_nsds->topology()->dSG(0);
+
+  //SP::OneStepIntegrator osi = indexSet0->properties(ui).osi;
+  SP::DynamicalSystem ds1;
+  SP::DynamicalSystem ds2;
+  // --- Get the dynamical system(s) (edge(s)) connected to the current interaction (vertex) ---
+  if (indexSet0->properties(ui).source != indexSet0->properties(ui).target)
+  {
+    DEBUG_PRINT("a two DS Interaction\n");
+    ds1 = indexSet0->properties(ui).source;
+    ds2 = indexSet0->properties(ui).target;
+  }
+  else
+  {
+    DEBUG_PRINT("a single DS Interaction\n");
+    ds1 = indexSet0->properties(ui).source;
+    ds2 = ds1;
+    // \warning this looks like some debug code, but it gets executed even with NDEBUG.
+    // may be compiler does something smarter, but still it should be rewritten. --xhub
+    InteractionsGraph::OEIterator oei, oeiend;
+    for (std11::tie(oei, oeiend) = indexSet0->out_edges(ui);
+         oei != oeiend; ++oei)
+    {
+      // note : at most 4 edges
+      ds2 = indexSet0->bundle(*oei);
+      if (ds2 != ds1)
+      {
+        assert(false);
+        break;
+      }
+    }
+  }
+  assert(ds1);
+  assert(ds2);
+
+  OneStepIntegrator& osi1 = *DSG.properties(DSG.descriptor(ds1)).osi;
+  OneStepIntegrator& osi2 = *DSG.properties(DSG.descriptor(ds2)).osi;
+
+  InteractionProperties& i_prop = indexSet0->properties(ui);
+  if (&osi1 == &osi2 )
+    {
+      osi1.fillDSLinks(*inter, i_prop,  DSG);
+      osi1.update_interaction_output(*inter, time, i_prop);
+    }
+  else
+    {
+      osi1.fillDSLinks(*inter, i_prop,  DSG);
+      osi1.update_interaction_output(*inter, time, i_prop);
+      osi2.fillDSLinks(*inter, i_prop,  DSG);
+      osi2.update_interaction_output(*inter, time, i_prop);
+    }
 }
 
 
@@ -335,10 +342,18 @@ int Simulation::computeOneStepNSProblem(int Id)
   if (!(*_allNSProblems)[Id])
     RuntimeException::selfThrow("Simulation - computeOneStepNSProblem, OneStepNSProblem == NULL, Id: " + Id);
 
+  // Before compute, inform all OSNSs if topology has changed
+  if (_nsds->topology()->hasChanged())
+  {
+    for (OSNSIterator itOsns = _allNSProblems->begin();
+         itOsns != _allNSProblems->end(); ++itOsns)
+    {
+      (*itOsns)->setHasBeenUpdated(false);
+    }
+  }
+
   DEBUG_END("Simulation::computeOneStepNSProblem(int Id)\n");
   return (*_allNSProblems)[Id]->compute(nextTime());
-
-
 }
 
 
@@ -421,641 +436,8 @@ void Simulation::processEvents()
       updateIndexSets();
     }
   }
-
-  /* should be evaluated only if needed */
-  SP::DynamicalSystemsGraph dsGraph = _nsds->dynamicalSystems();
-  for (DynamicalSystemsGraph::VIterator vi = dsGraph->begin(); vi != dsGraph->end(); ++vi)
-  {
-    dsGraph->bundle(*vi)->endStep();
-  }
-
 }
 
-
-
-/** a visitor to set the level(s) parameter in Interaction
- *  and to compute the levelMin and levelMax
- */
-// class NonSmoothLaw;
-// class DynamicalSystem;
-// class OneStepIntegrator;
-// class MoreauJeanOSI;
-struct Simulation::SetupLevels : public SiconosVisitor
-{
-  using SiconosVisitor::visit;
-
-  SP::Simulation _parent;
-  SP::Interaction _interaction;
-  SP::NonSmoothLaw _nonSmoothLaw;
-  SP::DynamicalSystem _ds;
-  SetupLevels(SP::Simulation s, SP::Interaction inter,
-              SP::DynamicalSystem ds) :
-    _parent(s), _interaction(inter), _ds(ds)
-  {
-    _nonSmoothLaw = inter->nonSmoothLaw();
-  };
-
-  void visit(const MoreauJeanOSI&)
-  {
-    unsigned int lowerLevelForOutput = LEVELMAX;
-    unsigned int upperLevelForOutput = 0;
-    unsigned int lowerLevelForInput = LEVELMAX;
-    unsigned int upperLevelForInput = 0;
-
-    Type::Siconos dsType = Type::value(*_ds);
-
-    if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS || dsType == Type::NewtonEulerDS)
-    {
-
-      if (Type::value(*_parent) == Type::TimeStepping)
-      {
-        lowerLevelForOutput = 0;
-        upperLevelForOutput = 1 ;
-        lowerLevelForInput = 1;
-        upperLevelForInput = 1;
-      }
-      else if (Type::value(*_parent) == Type::TimeSteppingDirectProjection)
-      {
-        // Warning : we never enter this case !!!
-        lowerLevelForOutput = 0;
-        upperLevelForOutput = 1 ;
-        lowerLevelForInput = 0;
-        upperLevelForInput = 1;
-      }
-      else
-        RuntimeException::selfThrow("Simulation::SetupLevels::visit - unknown simulation type: " + Type::name(*_parent));
-    }
-    else RuntimeException::selfThrow("Simulation::SetupLevels::visit - not yet implemented for Dynamical system type :" + dsType);
-
-    _parent->_levelMinForInput = std::min<int>(lowerLevelForInput, _parent->_levelMinForInput);
-    _parent->_levelMaxForInput = std::max<int>(upperLevelForInput, _parent->_levelMaxForInput);
-    _parent->_levelMinForOutput = std::min<int>(lowerLevelForOutput, _parent->_levelMinForInput);
-    _parent->_levelMaxForOutput = std::max<int>(upperLevelForOutput, _parent->_levelMaxForInput);
-
-    _parent->_numberOfIndexSets = std::max<int>(_parent->_levelMaxForOutput + 1, _parent->_numberOfIndexSets);
-
-    _interaction->setLowerLevelForOutput(lowerLevelForOutput);
-    _interaction->setUpperLevelForOutput(upperLevelForOutput);
-
-    _interaction->setLowerLevelForInput(lowerLevelForInput);
-    _interaction->setUpperLevelForInput(upperLevelForInput);
-
-    _interaction->setSteps(1);
-  };
-
-  void visit(const MoreauJeanGOSI&)
-  {
-    unsigned int lowerLevelForOutput = LEVELMAX;
-    unsigned int upperLevelForOutput = 0;
-    unsigned int lowerLevelForInput = LEVELMAX;
-    unsigned int upperLevelForInput = 0;
-
-    Type::Siconos dsType = Type::value(*_ds);
-
-    if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS || dsType == Type::NewtonEulerDS)
-    {
-
-      if (Type::value(*_parent) == Type::TimeStepping)
-      {
-        lowerLevelForOutput = 0;
-        upperLevelForOutput = 1 ;
-        lowerLevelForInput = 1;
-        upperLevelForInput = 1;
-      }
-      else if (Type::value(*_parent) == Type::TimeSteppingDirectProjection)
-      {
-        // Warning : we never enter this case !!!
-        lowerLevelForOutput = 0;
-        upperLevelForOutput = 1 ;
-        lowerLevelForInput = 0;
-        upperLevelForInput = 1;
-      }
-      else
-        RuntimeException::selfThrow("Simulation::SetupLevels::visit - unknown simulation type: " + Type::name(*_parent));
-    }
-    else RuntimeException::selfThrow("Simulation::SetupLevels::visit - not yet implemented for Dynamical system type :" + dsType);
-
-    _parent->_levelMinForInput = std::min<int>(lowerLevelForInput, _parent->_levelMinForInput);
-    _parent->_levelMaxForInput = std::max<int>(upperLevelForInput, _parent->_levelMaxForInput);
-    _parent->_levelMinForOutput = std::min<int>(lowerLevelForOutput, _parent->_levelMinForInput);
-    _parent->_levelMaxForOutput = std::max<int>(upperLevelForOutput, _parent->_levelMaxForInput);
-
-    _parent->_numberOfIndexSets = std::max<int>(_parent->_levelMaxForOutput + 1, _parent->_numberOfIndexSets);
-
-    _interaction->setLowerLevelForOutput(lowerLevelForOutput);
-    _interaction->setUpperLevelForOutput(upperLevelForOutput);
-
-    _interaction->setLowerLevelForInput(lowerLevelForInput);
-    _interaction->setUpperLevelForInput(upperLevelForInput);
-
-    _interaction->setSteps(1);
-  };
-
-  void visit(const EulerMoreauOSI&)
-  {
-    unsigned int lowerLevelForOutput = LEVELMAX;
-    unsigned int upperLevelForOutput = 0;
-    unsigned int lowerLevelForInput = LEVELMAX;
-    unsigned int upperLevelForInput = 0;
-
-    Type::Siconos dsType = Type::value(*_ds);
-
-    if (dsType == Type::FirstOrderNonLinearDS || dsType == Type::FirstOrderLinearDS || dsType == Type::FirstOrderLinearTIDS)
-    {
-
-
-      if (Type::value(*_parent) == Type::TimeStepping)
-      {
-        lowerLevelForOutput = 0;
-        upperLevelForOutput = 0;
-        lowerLevelForInput = 0;
-        upperLevelForInput = 0;
-      }
-      else
-        RuntimeException::selfThrow("Simulation::SetupLevels::visit - unknown simulation type: " + Type::name(*_parent));
-    }
-    else RuntimeException::selfThrow("Simulation::SetupLevels::visit - not yet implemented for Dynamical system type :" + dsType);
-
-    _parent->_levelMinForInput = std::min<int>(lowerLevelForInput, _parent->_levelMinForInput);
-    _parent->_levelMaxForInput = std::max<int>(upperLevelForInput, _parent->_levelMaxForInput);
-    _parent->_levelMinForOutput = std::min<int>(lowerLevelForOutput, _parent->_levelMinForInput);
-    _parent->_levelMaxForOutput = std::max<int>(upperLevelForOutput, _parent->_levelMaxForInput);
-    _parent->_numberOfIndexSets = std::max<int>(_parent->_levelMaxForOutput + 1, _parent->_numberOfIndexSets);
-    _interaction->setLowerLevelForOutput(lowerLevelForOutput);
-    _interaction->setUpperLevelForOutput(upperLevelForOutput);
-
-    _interaction->setLowerLevelForInput(lowerLevelForInput);
-    _interaction->setUpperLevelForInput(upperLevelForInput);
-
-    _interaction->setSteps(1);
-  };
-
-
-
-
-  void visit(const MoreauJeanDirectProjectionOSI& moreauCPOSI)
-  {
-    unsigned int lowerLevelForOutput = LEVELMAX;
-    unsigned int upperLevelForOutput = 0;
-    unsigned int lowerLevelForInput = LEVELMAX;
-    unsigned int upperLevelForInput = 0;
-
-    Type::Siconos dsType = Type::value(*_ds);
-
-    if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS || dsType == Type::NewtonEulerDS)
-    {
-      if (Type::value(*_parent) == Type::TimeSteppingDirectProjection)
-      {
-        // Warning : we never enter this case !!!
-        lowerLevelForOutput = 0;
-        upperLevelForOutput = 1 ;
-        lowerLevelForInput = 0;
-        upperLevelForInput = 1;
-      }
-      else
-      {
-        RuntimeException::selfThrow("Simulation::SetupLevels::visit(const MoreauJeanCombinedProjectionOSI) - unknown simulation type: " + Type::name(*_parent));
-      }
-    }
-    else RuntimeException::selfThrow("Simulation::SetupLevels::visit(const MoreauJeanCombinedProjectionOSI) - not yet implemented for Dynamical system type :" + dsType);
-
-    _parent->_levelMinForInput = std::min<int>(lowerLevelForInput, _parent->_levelMinForInput);
-    _parent->_levelMaxForInput = std::max<int>(upperLevelForInput, _parent->_levelMaxForInput);
-    _parent->_levelMinForOutput = std::min<int>(lowerLevelForOutput, _parent->_levelMinForInput);
-    _parent->_levelMaxForOutput = std::max<int>(upperLevelForOutput, _parent->_levelMaxForInput);
-    _parent->_numberOfIndexSets = std::max<int>(_parent->_levelMaxForOutput + 1, _parent->_numberOfIndexSets);
-    _interaction->setLowerLevelForOutput(lowerLevelForOutput);
-    _interaction->setUpperLevelForOutput(upperLevelForOutput);
-
-    _interaction->setLowerLevelForInput(lowerLevelForInput);
-    _interaction->setUpperLevelForInput(upperLevelForInput);
-
-    _interaction->setSteps(1);
-
-  };
-
-
-  void visit(const MoreauJeanCombinedProjectionOSI& moreauCPOSI)
-  {
-    unsigned int lowerLevelForOutput = LEVELMAX;
-    unsigned int upperLevelForOutput = 0;
-    unsigned int lowerLevelForInput = LEVELMAX;
-    unsigned int upperLevelForInput = 0;
-
-    Type::Siconos dsType = Type::value(*_ds);
-
-    if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS || dsType == Type::NewtonEulerDS)
-    {
-      if (Type::value(*_parent) == Type::TimeStepping)
-      {
-        lowerLevelForOutput = 0;
-        upperLevelForOutput = 1;
-        lowerLevelForInput = 1;
-        upperLevelForInput = 1;
-      }
-      else if (Type::value(*_parent) == Type::TimeSteppingCombinedProjection)
-      {
-        // Warning : we never enter this case !!!
-        lowerLevelForOutput = 0;
-        upperLevelForOutput = 1 ;
-        lowerLevelForInput = 0;
-        upperLevelForInput = 1;
-      }
-      else
-      {
-        RuntimeException::selfThrow("Simulation::SetupLevels::visit(const MoreauJeanCombinedProjectionOSI) - unknown simulation type: " + Type::name(*_parent));
-      }
-    }
-    else RuntimeException::selfThrow("Simulation::SetupLevels::visit(const MoreauJeanCombinedProjectionOSI) - not yet implemented for Dynamical system type :" + dsType);
-
-    _parent->_levelMinForInput = std::min<int>(lowerLevelForInput, _parent->_levelMinForInput);
-    _parent->_levelMaxForInput = std::max<int>(upperLevelForInput, _parent->_levelMaxForInput);
-    _parent->_levelMinForOutput = std::min<int>(lowerLevelForOutput, _parent->_levelMinForInput);
-    _parent->_levelMaxForOutput = std::max<int>(upperLevelForOutput, _parent->_levelMaxForInput);
-    _parent->_numberOfIndexSets = std::max<int>(_parent->_levelMaxForOutput + 1, _parent->_numberOfIndexSets);
-
-
-    _interaction->setLowerLevelForOutput(lowerLevelForOutput);
-    _interaction->setUpperLevelForOutput(upperLevelForOutput);
-
-    _interaction->setLowerLevelForInput(lowerLevelForInput);
-    _interaction->setUpperLevelForInput(upperLevelForInput);
-
-    _interaction->setSteps(1);
-
-  };
-
-
-
-  void visit(const SchatzmanPaoliOSI&)
-  {
-    unsigned int lowerLevelForOutput = LEVELMAX;
-    unsigned int upperLevelForOutput = 0;
-    unsigned int lowerLevelForInput = LEVELMAX;
-    unsigned int upperLevelForInput = 0;
-
-    Type::Siconos dsType = Type::value(*_ds);
-
-    if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS || dsType == Type::NewtonEulerDS)
-    {
-
-      if (Type::value(*_parent) == Type::TimeStepping)
-      {
-        lowerLevelForOutput = 0;
-        upperLevelForOutput = 0;
-        lowerLevelForInput = 0;
-        upperLevelForInput = 0;
-      }
-      else
-        RuntimeException::selfThrow("Simulation::SetupLevels::visit - unknown simulation type: " + Type::name(*_parent));
-    }
-    else RuntimeException::selfThrow("Simulation::SetupLevels::visit - not yet implemented for Dynamical system type :" + dsType);
-
-    _parent->_levelMinForInput = std::min<int>(lowerLevelForInput, _parent->_levelMinForInput);
-    _parent->_levelMaxForInput = std::max<int>(upperLevelForInput, _parent->_levelMaxForInput);
-    _parent->_levelMinForOutput = std::min<int>(lowerLevelForOutput, _parent->_levelMinForInput);
-    _parent->_levelMaxForOutput = std::max<int>(upperLevelForOutput, _parent->_levelMaxForInput);
-    _parent->_numberOfIndexSets = std::max<int>(_parent->_levelMaxForOutput + 1, _parent->_numberOfIndexSets);
-
-    _interaction->setLowerLevelForOutput(lowerLevelForOutput);
-    _interaction->setUpperLevelForOutput(upperLevelForOutput);
-
-    _interaction->setLowerLevelForInput(lowerLevelForInput);
-    _interaction->setUpperLevelForInput(upperLevelForInput);
-
-    _interaction->setSteps(2);
-  };
-  void visit(const D1MinusLinearOSI& d1OSI)
-  {
-    unsigned int lowerLevelForOutput = LEVELMAX;
-    unsigned int upperLevelForOutput = 0;
-    unsigned int lowerLevelForInput = LEVELMAX;
-    unsigned int upperLevelForInput = 0;
-
-    Type::Siconos dsType = Type::value(*_ds);
-
-    /** there is only a test on the dstype and simulation since  we assume that
-     * we implicitely the nonsmooth law when a DS type is chosen
-     */
-
-    if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS || dsType == Type::NewtonEulerDS)
-    {
-
-
-      if (Type::value(*_parent) == Type::TimeSteppingD1Minus)
-      {
-        lowerLevelForOutput = 0;
-        upperLevelForOutput = 2 ;
-        lowerLevelForInput = 1;
-        upperLevelForInput = 2;
-      }
-      else
-        RuntimeException::selfThrow("Simulation::SetupLevels::visit(const D1MinusLinearOSI&) - unknown simulation type: " + Type::name(*_parent));
-    }
-    else RuntimeException::selfThrow("Simulation::SetupLevels::visit(const D1MinusLinearOSI&) - not yet implemented for Dynamical system type :" + dsType);
-
-    _parent->_levelMinForInput = std::min<int>(lowerLevelForInput, _parent->_levelMinForInput);
-    _parent->_levelMaxForInput = std::max<int>(upperLevelForInput, _parent->_levelMaxForInput);
-    _parent->_levelMinForOutput = std::min<int>(lowerLevelForOutput, _parent->_levelMinForInput);
-    _parent->_levelMaxForOutput = std::max<int>(upperLevelForOutput, _parent->_levelMaxForInput);
-
-    /* Get the number of required index sets. */
-
-    unsigned int nbIndexSets =  d1OSI.numberOfIndexSets();
-
-    _parent->_numberOfIndexSets = std::max<int>(nbIndexSets, _parent->_numberOfIndexSets);
-
-    _interaction->setLowerLevelForOutput(lowerLevelForOutput);
-    _interaction->setUpperLevelForOutput(upperLevelForOutput);
-
-    _interaction->setLowerLevelForInput(lowerLevelForInput);
-    _interaction->setUpperLevelForInput(upperLevelForInput);
-
-    _interaction->setSteps(2); // Two evaluations of lambda(2) are made for each time--step
-  };
-
-
-
-  void visit(const LsodarOSI&)
-  {
-    unsigned int lowerLevelForOutput = LEVELMAX;
-    unsigned int upperLevelForOutput = 0;
-    unsigned int lowerLevelForInput = LEVELMAX;
-    unsigned int upperLevelForInput = 0;
-
-    Type::Siconos dsType = Type::value(*_ds);
-
-    /** there is only a test on the dstype and simulation since  we assume that
-     * we implicitely the nonsmooth law when a DS type is chosen
-     */
-
-    if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS || dsType == Type::NewtonEulerDS)
-    {
-      if (Type::value(*_parent) == Type::EventDriven)
-      {
-        Type::Siconos nslType = Type::value(*_nonSmoothLaw);
-
-        if (nslType == Type::NewtonImpactNSL || nslType == Type::MultipleImpactNSL)
-        {
-          lowerLevelForOutput = 0;
-          upperLevelForOutput = 2 ;
-          lowerLevelForInput = 1;
-          upperLevelForInput = 2;
-        }
-        else if (nslType ==  Type::NewtonImpactFrictionNSL)
-        {
-          lowerLevelForOutput = 0;
-          upperLevelForOutput = 4;
-          lowerLevelForInput = 1;
-          upperLevelForInput = 2;
-          RuntimeException::selfThrow("Simulation::SetupLevels::visit - simulation of type: " + Type::name(*_parent) + " not yet implemented for nonsmooth law of type NewtonImpactFrictionNSL");
-        }
-        else
-        {
-          RuntimeException::selfThrow("Simulation::SetupLevels::visit - simulation of type: " + Type::name(*_parent) + "not yet implemented  for nonsmooth of type");
-        }
-      }
-      else
-        RuntimeException::selfThrow("Simulation::SetupLevels::visit - unknown simulation type: " + Type::name(*_parent));
-    }
-    else RuntimeException::selfThrow("Simulation::SetupLevels::visit - not yet implemented for Dynamical system type :" + dsType);
-
-    _parent->_levelMinForInput = std::min<int>(lowerLevelForInput, _parent->_levelMinForInput);
-    _parent->_levelMaxForInput = std::max<int>(upperLevelForInput, _parent->_levelMaxForInput);
-    _parent->_levelMinForOutput = std::min<int>(lowerLevelForOutput, _parent->_levelMinForInput);
-    _parent->_levelMaxForOutput = std::max<int>(upperLevelForOutput, _parent->_levelMaxForInput);
-    _parent->_numberOfIndexSets = std::max<int>(_parent->_levelMaxForOutput + 1, _parent->_numberOfIndexSets);
-    _interaction->setLowerLevelForOutput(lowerLevelForOutput);
-    _interaction->setUpperLevelForOutput(upperLevelForOutput);
-
-    _interaction->setLowerLevelForInput(lowerLevelForInput);
-    _interaction->setUpperLevelForInput(upperLevelForInput);
-
-    _interaction->setSteps(1);
-  };
-
-
-
-  void visit(const Hem5OSI&)
-  {
-    unsigned int lowerLevelForOutput = LEVELMAX;
-    unsigned int upperLevelForOutput = 0;
-    unsigned int lowerLevelForInput = LEVELMAX;
-    unsigned int upperLevelForInput = 0;
-
-    Type::Siconos dsType = Type::value(*_ds);
-
-    /** there is only a test on the dstype and simulation since  we assume that
-     * we implicitely the nonsmooth law when a DS type is chosen
-     */
-
-    if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS || dsType == Type::NewtonEulerDS)
-    {
-      if (Type::value(*_parent) == Type::EventDriven)
-      {
-        Type::Siconos nslType = Type::value(*_nonSmoothLaw);
-
-        if (nslType == Type::NewtonImpactNSL || nslType == Type::MultipleImpactNSL)
-        {
-          lowerLevelForOutput = 0;
-          upperLevelForOutput = 2 ;
-          lowerLevelForInput = 1;
-          upperLevelForInput = 2;
-        }
-        else if (nslType ==  Type::NewtonImpactFrictionNSL)
-        {
-          lowerLevelForOutput = 0;
-          upperLevelForOutput = 4;
-          lowerLevelForInput = 1;
-          upperLevelForInput = 2;
-          RuntimeException::selfThrow("Simulation::SetupLevels::visit - simulation of type: " + Type::name(*_parent) + " not yet implemented for nonsmooth law of type NewtonImpactFrictionNSL");
-        }
-        else
-        {
-          RuntimeException::selfThrow("Simulation::SetupLevels::visit - simulation of type: " + Type::name(*_parent) + "not yet implemented  for nonsmooth of type");
-        }
-      }
-      else
-        RuntimeException::selfThrow("Simulation::SetupLevels::visit - unknown simulation type: " + Type::name(*_parent));
-    }
-    else RuntimeException::selfThrow("Simulation::SetupLevels::visit - not yet implemented for Dynamical system type :" + dsType);
-
-    _parent->_levelMinForInput = std::min<int>(lowerLevelForInput, _parent->_levelMinForInput);
-    _parent->_levelMaxForInput = std::max<int>(upperLevelForInput, _parent->_levelMaxForInput);
-    _parent->_levelMinForOutput = std::min<int>(lowerLevelForOutput, _parent->_levelMinForInput);
-    _parent->_levelMaxForOutput = std::max<int>(upperLevelForOutput, _parent->_levelMaxForInput);
-    _parent->_numberOfIndexSets = std::max<int>(_parent->_levelMaxForOutput + 1, _parent->_numberOfIndexSets);
-    _interaction->setLowerLevelForOutput(lowerLevelForOutput);
-    _interaction->setUpperLevelForOutput(upperLevelForOutput);
-
-    _interaction->setLowerLevelForInput(lowerLevelForInput);
-    _interaction->setUpperLevelForInput(upperLevelForInput);
-
-    _interaction->setSteps(1);
-  };
-
-  void visit(const NewMarkAlphaOSI&)
-  {
-    unsigned int lowerLevelForOutput = LEVELMAX;
-    unsigned int upperLevelForOutput = 0;
-    unsigned int lowerLevelForInput = LEVELMAX;
-    unsigned int upperLevelForInput = 0;
-
-    Type::Siconos dsType = Type::value(*_ds);
-
-    /** there is only a test on the dstype and simulation since  we assume that
-     * we implicitely the nonsmooth law when a DS type is chosen
-     */
-
-    if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
-    {
-      if (Type::value(*_parent) == Type::EventDriven)
-      {
-        Type::Siconos nslType = Type::value(*_nonSmoothLaw);
-        if (nslType == Type::NewtonImpactNSL || nslType == Type::MultipleImpactNSL)
-        {
-          lowerLevelForOutput = 0;
-          upperLevelForOutput = 2 ;
-          lowerLevelForInput = 1;
-          upperLevelForInput = 2;
-        }
-        else if (nslType ==  Type::NewtonImpactFrictionNSL)
-        {
-          lowerLevelForOutput = 0;
-          upperLevelForOutput = 4;
-          lowerLevelForInput = 1;
-          upperLevelForInput = 2;
-          RuntimeException::selfThrow("Simulation::SetupLevels::visit - simulation of type: " + Type::name(*_parent) + " not yet implemented for nonsmooth law of type NewtonImpactFrictionNSL");
-        }
-        else
-        {
-          RuntimeException::selfThrow("Simulation::SetupLevels::visit - simulation of type: " + Type::name(*_parent) + "not yet implemented  for nonsmooth of type");
-        }
-      }
-      else
-        RuntimeException::selfThrow("Simulation::SetupLevels::visit - unknown simulation type: " + Type::name(*_parent));
-    }
-    else RuntimeException::selfThrow("Simulation::SetupLevels::visit - not yet implemented for Dynamical system type :" + dsType);
-
-    _parent->_levelMinForInput = std::min<int>(lowerLevelForInput, _parent->_levelMinForInput);
-    _parent->_levelMaxForInput = std::max<int>(upperLevelForInput, _parent->_levelMaxForInput);
-    _parent->_levelMinForOutput = std::min<int>(lowerLevelForOutput, _parent->_levelMinForInput);
-    _parent->_levelMaxForOutput = std::max<int>(upperLevelForOutput, _parent->_levelMaxForInput);
-    _parent->_numberOfIndexSets = std::max<int>(_parent->_levelMaxForOutput + 1, _parent->_numberOfIndexSets);
-    _interaction->setLowerLevelForOutput(lowerLevelForOutput);
-    _interaction->setUpperLevelForOutput(upperLevelForOutput);
-
-    _interaction->setLowerLevelForInput(lowerLevelForInput);
-    _interaction->setUpperLevelForInput(upperLevelForInput);
-
-    _interaction->setSteps(1);
-  };
-
-
-
-
-  void visit(const ZeroOrderHoldOSI&)
-  {
-    unsigned int lowerLevelForOutput = LEVELMAX;
-    unsigned int upperLevelForOutput = 0;
-    unsigned int lowerLevelForInput = LEVELMAX;
-    unsigned int upperLevelForInput = 0;
-
-    Type::Siconos dsType = Type::value(*_ds);
-
-    if (dsType == Type::FirstOrderNonLinearDS || dsType == Type::FirstOrderLinearDS || dsType == Type::FirstOrderLinearTIDS)
-    {
-      if (Type::name(*_parent) == "TimeStepping")
-      {
-        lowerLevelForOutput = 0;
-        upperLevelForOutput = 0;
-        lowerLevelForInput = 0;
-        upperLevelForInput = 0;
-      }
-      else
-        RuntimeException::selfThrow("Simulation::SetupLevels::visit - unknown simulation type: " + Type::name(*_parent));
-    }
-    else
-      RuntimeException::selfThrow("Simulation::SetupLevels::visit - not yet implemented for Dynamical system type :" + dsType);
-
-    _parent->_levelMinForInput = std::min<int>(lowerLevelForInput, _parent->_levelMinForInput);
-    _parent->_levelMaxForInput = std::max<int>(upperLevelForInput, _parent->_levelMaxForInput);
-    _parent->_levelMinForOutput = std::min<int>(lowerLevelForOutput, _parent->_levelMinForInput);
-    _parent->_levelMaxForOutput = std::max<int>(upperLevelForOutput, _parent->_levelMaxForInput);
-    _parent->_numberOfIndexSets = std::max<int>(_parent->_levelMaxForOutput + 1, _parent->_numberOfIndexSets);
-    _interaction->setLowerLevelForOutput(lowerLevelForOutput);
-    _interaction->setUpperLevelForOutput(upperLevelForOutput);
-
-    _interaction->setLowerLevelForInput(lowerLevelForInput);
-    _interaction->setUpperLevelForInput(upperLevelForInput);
-
-    _interaction->setSteps(1);
-  };
-
-
-};
-
-void Simulation::computeLevelsForInputAndOutput(SP::Interaction inter, bool init)
-{
-  DEBUG_PRINT("Simulation::computeLevelsForInputAndOutput(SP::Interaction inter, bool init)\n");
-
- /** \warning. We test only for the first Dynamical of the interaction.
-   * we assume that the osi(s) are consistent for one interaction
-   */
-  SP::InteractionsGraph indexSet0 = _nsds->topology()->indexSet(0);
-  SP::DynamicalSystem ds = indexSet0->properties(indexSet0->descriptor(inter)).source;
-
-  SP::DynamicalSystemsGraph DSG0 = _nsds->topology()->dSG(0);
-  SP::OneStepIntegrator osi = DSG0->properties(DSG0->descriptor(ds)).osi;
-
-  if (!osi)
-    RuntimeException::selfThrow("Simulation::computeLevelsForInputAndOutput osi does not exists");
-  indexSet0->properties(indexSet0->descriptor(inter)).osi = osi;
-  std11::shared_ptr<SetupLevels> setupLevels;
-  setupLevels.reset(new SetupLevels(shared_from_this(), inter, ds));
-  osi->accept(*(setupLevels.get()));
-  if (!init) // We are not computing the levels at the initialization
-  {
-    SP::Topology topo = _nsds->topology();
-    unsigned int indxSize = topo->indexSetsSize();
-    assert (_numberOfIndexSets >0);
-    if ((indxSize == LEVELMAX) || (indxSize < _numberOfIndexSets ))
-    {
-      topo->indexSetsResize(_numberOfIndexSets);
-      // Init if the size has changed
-      for (unsigned int i = indxSize; i < topo->indexSetsSize(); i++) // ++i ???
-        topo->resetIndexSetPtr(i);
-    }
-  }
-}
-
-void Simulation::computeLevelsForInputAndOutput()
-{
-  DEBUG_PRINT("Simulation::computeLevelsForInputAndOutput()\n");
-
-  SP::Topology topo = _nsds->topology();
-
-  InteractionsGraph::VIterator ui, uiend;
-  SP::InteractionsGraph indexSet0 = topo->indexSet0();
-  for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
-  {
-    computeLevelsForInputAndOutput(indexSet0->bundle(*ui), true);
-  }
-
-  unsigned int indxSize = topo->indexSetsSize();
-  if ((indxSize == LEVELMAX) || (indxSize < _numberOfIndexSets ))
-  {
-    topo->indexSetsResize(_numberOfIndexSets );
-    // Init if the size has changed
-    for (unsigned int i = indxSize; i < topo->indexSetsSize(); i++) // ++i ???
-      topo->resetIndexSetPtr(i);
-  }
-  DEBUG_PRINTF("_numberOfIndexSets =%d\n", _numberOfIndexSets);
-  DEBUG_PRINTF("_levelMinForInput =%d\n", _levelMinForInput);
-  DEBUG_PRINTF("_levelMaxForInput =%d\n", _levelMaxForInput);
-  DEBUG_PRINTF("_levelMinForOutput =%d\n", _levelMinForInput);
-  DEBUG_PRINTF("_levelMaxForOutput =%d\n", _levelMaxForInput);
-}
 
 void Simulation::updateT(double T)
 {
@@ -1074,19 +456,6 @@ void Simulation::link(SP::Interaction inter,
 
   initializeInteraction(nextTime(), inter);
 
-  // Note FP : ds init should probably be done once and only once for
-  // all ds (like in simulation->initialize()) but where/when?
-  // Note SS : in InteractionManager::buildGraph()?
-  unsigned int levelMinForInput = inter->lowerLevelForInput();
-  unsigned int levelMaxForInput = inter->upperLevelForInput();
-  bool has2DS = inter->has2Bodies();
-  for (unsigned int k = levelMinForInput ; k < levelMaxForInput + 1; k++)
-  {
-    ds1->initializeNonSmoothInput(k);
-    if(has2DS)
-      ds2->initializeNonSmoothInput(k);
-  }
-
   _linkOrUnlink = true;
 }
 
@@ -1099,11 +468,111 @@ void Simulation::unlink(SP::Interaction inter)
 void Simulation::updateInteractions()
 {
   // Update interactions if a manager was provided
-  if (_interman) {
-    _linkOrUnlink = false;
+  if (_interman)
     _interman->updateInteractions(shared_from_this());
 
-    if (_linkOrUnlink)
-      initOSNS();
+  if (_linkOrUnlink) {
+    initOSNS();
+
+    // Since initOSNS calls updateIndexSets() which resets the
+    // topology->hasChanged() flag, it must be specified explicitly.
+    // Otherwise OneStepNSProblem may fail to update its matrices.
+    _nsds->topology()->setHasChanged(true);
+    _linkOrUnlink = false;
   }
+}
+
+void Simulation::updateInteractionsNewtonIteration()
+{
+  // Update interactions if a manager was provided
+  if (_interman)
+    _interman->updateInteractionsNewtonIteration(shared_from_this());
+
+  if (_linkOrUnlink) {
+    initOSNS();
+
+    // Since initOSNS calls updateIndexSets() which resets the
+    // topology->hasChanged() flag, it must be specified explicitly.
+    // Otherwise OneStepNSProblem may fail to update its matrices.
+    _nsds->topology()->setHasChanged(true);
+    _linkOrUnlink = false;
+  }
+}
+
+void Simulation::updateInput(unsigned int)
+{
+  DEBUG_BEGIN("Simulation::updateInput()\n");
+  OSIIterator itOSI;
+  // 1 - compute input (lambda -> r)
+  if (!_allNSProblems->empty())
+  {
+    for (itOSI = _allOSI->begin(); itOSI != _allOSI->end() ; ++itOSI)
+      (*itOSI)->updateInput(nextTime());
+    //_nsds->updateInput(nextTime(),levelInput);
+  }
+  DEBUG_END("Simulation::updateInput()\n");
+}
+
+void Simulation::updateState(unsigned int)
+{
+  DEBUG_BEGIN("Simulation::updateState()\n");
+  OSIIterator itOSI;
+  // 2 - compute state for each dynamical system
+  for (itOSI = _allOSI->begin(); itOSI != _allOSI->end() ; ++itOSI)
+    (*itOSI)->updateState();
+
+  DEBUG_END("Simulation::updateState()\n");
+}
+
+void Simulation::updateOutput(unsigned int)
+{
+  DEBUG_BEGIN("Simulation::updateOutput()\n");
+
+  // 3 - compute output ( x ... -> y)
+  if (!_allNSProblems->empty())
+  {
+    OSIIterator itOSI;
+    for (itOSI = _allOSI->begin(); itOSI != _allOSI->end() ; ++itOSI)
+      (*itOSI)->updateOutput(nextTime());
+  }
+  DEBUG_END("Simulation::updateOutput()\n");
+}
+
+void Simulation::prepareIntegratorForDS(SP::OneStepIntegrator osi,
+                                        SP::DynamicalSystem ds,
+                                        SP::Model m, double time)
+{
+  assert(m && m->nonSmoothDynamicalSystem() && "Simulation::prepareIntegratorForDS requires a Model with an NSDS.");
+
+  /*
+   * Steps to be accomplished when adding a DS to a Model and
+   * Simulation:
+   *
+   * 1. Add the DS to model->_nsds (Model::insertDynamicalSystem(ds))
+   *    (assumed done before this function is called, everything else
+   *    done in this function)
+   *
+   * 2. Add the OSI to simulation->_allOSI (Simulation::insertIntegrator)
+   *
+   * 3. Assign the OSI to the DS via the pointer in
+   *   _nsds->_topology->_DSG properties for the DS (setOSI).  Since
+   *   _nsds is not necessarily available yet, so take it from Model.
+   *
+   * 4. If Simulation already initialized, then DS work vectors in
+   *    _dynamicalSystemsGraph properties for the DS must be
+   *    initialized (OSI::initializeDynamicalSystem), otherwise it will
+   *    be called later during Simulation::initialize().
+  */
+
+  // Keep OSI in the set, no effect if already present.
+  insertIntegrator(osi);
+
+  // Associate the OSI to the DS in the topology.
+  m->nonSmoothDynamicalSystem()->topology()->setOSI(ds, osi);
+
+  // Prepare work vectors, etc.
+  // If OSI has no DSG yet, assume DS will be initialized later.
+  // (Typically, during Simulation::initialize())
+  if (osi->dynamicalSystemsGraph())
+    osi->initializeDynamicalSystem(*m, time, ds);
 }

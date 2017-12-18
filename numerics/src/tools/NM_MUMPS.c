@@ -16,8 +16,8 @@
  * limitations under the License.
 */
 
-
-#include "NumericsMatrix_private.h"
+#include "SparseMatrix_internal.h"
+#include "NumericsMatrix_internal.h"
 #include "NumericsMatrix.h"
 #include "NumericsSparseMatrix.h"
 
@@ -96,10 +96,10 @@ MUMPS_INT* NM_MUMPS_irn(NumericsMatrix* A)
   if (NM_sparse(A)->triplet)
   {
     CSparseMatrix* triplet = NM_sparse(A)->triplet;
-    csi nz = triplet->nz;
+    CS_INT nz = triplet->nz;
     assert(nz > 0);
 
-    /* TODO: do not allocate when sizeof(MUMPS_INT) == sizeof(csi),
+    /* TODO: do not allocate when sizeof(MUMPS_INT) == sizeof(CS_INT),
      * just do triplet->p[k]++*/
     MUMPS_INT* iWork = (MUMPS_INT*)NM_iWork(A, (size_t)(2*nz) + 1, sizeof(MUMPS_INT));
 
@@ -118,18 +118,18 @@ MUMPS_INT* NM_MUMPS_irn(NumericsMatrix* A)
 
 #if 0
     CSparseMatrix* csc = NM_sparse(A)->csc;
-    csi nzmax = csc->nzmax ;
+    CS_INT nzmax = csc->nzmax ;
 
     MUMPS_INT* iWork = NM_iWork(A, (int) (2*nzmax) + 1);
 
-    csi n = csc->n ;
-    csi nz = 0;
-    csi* csci = csc->i ;
-    csi* cscp = csc->p ;
+    CS_INT n = csc->n ;
+    CS_INT nz = 0;
+    CS_INT* csci = csc->i ;
+    CS_INT* cscp = csc->p ;
 
-    for (csi j=0; j<n; ++j)
+    for (CS_INT j=0; j<n; ++j)
     {
-      for (csi p = cscp [j]; p < cscp [j+1]; ++p)
+      for (CS_INT p = cscp [j]; p < cscp [j+1]; ++p)
       {
         assert (csc->x [p] != 0.);
         nz++;
@@ -157,7 +157,7 @@ MUMPS_INT* NM_MUMPS_jcn(NumericsMatrix* A)
     fprintf(stderr, "NM_MUMPS_irn :: xhub doubt this code is correct");
     exit(EXIT_FAILURE);
 #if 0
-    csi nzmax = NM_csc(A)->nzmax;
+    CS_INT nzmax = NM_csc(A)->nzmax;
     return NM_iWork(A, 0, 0) + nzmax;
 #endif
   }

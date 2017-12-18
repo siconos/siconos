@@ -106,10 +106,10 @@ int main(int argc, char* argv[])
     SP::NonSmoothLaw myNslaw(new ComplementarityConditionNSL(nslawSize));
 
     // The Interaction which involves the first DS (the process)
-    SP::Interaction myProcessInteraction(new Interaction(ninter, myNslaw, myProcessRelation));
+    SP::Interaction myProcessInteraction(new Interaction(myNslaw, myProcessRelation));
 
     // The Interaction which involves the second DS (the observer)
-    SP::Interaction myObserverInteraction(new Interaction(ninter, myNslaw, myObserverRelation));
+    SP::Interaction myObserverInteraction(new Interaction(myNslaw, myObserverRelation));
 
     // -------------
     // --- Model ---

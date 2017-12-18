@@ -1,0 +1,51 @@
+
+*********************************************************
+*** Probleme 1 : obstacle plan, probleme adimensionne ***
+*********************************************************
+
+
+longueur : L = 1
+tension : T = 1
+masse lineique : mu = 1
+nombre de points spatiaux interieurs : N-1 = 999
+
+coefficient de restitution : 0, 0.5, 1
+
+frequence d'echantillonnage : Fe = 5000 et 10000
+pertes : sigma_i = 0 pour tout i (pas de pertes)
+facteur d'inharmonicite : B = 0 (pas de raideur) mais peu importe, toutes les frequences sont donnees par : 
+frequences propres : vecteur frequs ('pb1_frequs.mat')
+
+conditions initiales : 
+au temps 0 : vecteur des coefficients modaux q2 ('pb1_q2.mat')
+au temps dt : vecteur des coefficients modaux q1 ('pb1_q1.mat')
+
+obstacle : vecteur h ('pb1_h.mat')
+
+duree de simulation : 4 (unites de temps adimensionne)
+
+
+******************************************************************************
+*** Probleme 2 : obstacle constitue de frettes, manche de basse electrique ***
+******************************************************************************
+
+
+longueur : L = 0.863
+tension : T = 191.6
+masse lineique : mu = 0.0067
+nombre de points spatiaux interieurs : N-1 = 862
+
+coefficient de restitution : 0, 0.5, 1
+
+frequence d'echantillonnage : Fe = 2^(i-1)*1960 pour i de 1 à 15
+pertes : vecteur sig0 ('pb2_amortissements.mat') (peu importent les valeurs du modele delta_ve et Q_te, ce vecteur donne les amortissements in fine)
+facteur d'inharmonicite : 3.5e-5 mais peu importe, toutes les frequences sont donnees par : 
+frequences propres : vecteur frequs ('pb2_frequs.mat')
+
+conditions initiales : 
+au temps 0 : vecteur des coefficients modaux q2 ('pb2_q2.mat')
+au temps dt : vecteur des coefficients modaux q1 ('pb2_q1.mat')
+
+obstacle : vecteur h ('pb2_h.mat')
+
+duree de simulation : 3 secondes

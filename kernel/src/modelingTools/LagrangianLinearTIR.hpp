@@ -33,7 +33,7 @@
 Lagrangian Relation with:
 
 \f[
-y= Cq + e + D\lambda + Fz
+y= Cq + e + Fz
 \f]
 
 \f[
@@ -41,27 +41,14 @@ p = C^t \lambda
 \f]
 
 C is the only required input to built a LagrangianLinearTIR.
-D is optional and may represent a stiffness in the relation
-
-
-
 
  */
 class LagrangianLinearTIR : public LagrangianR
 {
 
 protected:
-  /** serialization hooks
-  */
+  /* serialization hooks */
   ACCEPT_SERIALIZATION(LagrangianLinearTIR);
-
-
-
-  /** C*/
-  //SP::SimpleMatrix C;
-
-  /** D matrix, coefficient of lambda in y */
-  //SP::SimpleMatrix D;
 
   /** F matrix, coefficient of z */
   SP::SimpleMatrix _F;
@@ -82,11 +69,10 @@ public:
 
   /** create the Relation from a set of data
   *  \param C the matrix C
-  *  \param D the matrix D
   *  \param F the matrix F
   *  \param e the vector e
   */
-  LagrangianLinearTIR(SP::SimpleMatrix C, SP::SimpleMatrix D, SP::SimpleMatrix F, SP::SiconosVector e);
+  LagrangianLinearTIR(SP::SimpleMatrix C,  SP::SimpleMatrix F, SP::SiconosVector e);
 
   /** create the Relation from a set of data
   *  \param C the matrix C

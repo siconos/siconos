@@ -95,6 +95,12 @@ int linearComplementarity_setDefaultSolverOptions(LinearComplementarityProblem* 
     info =    linearComplementarity_newton_min_setDefaultSolverOptions(options);
     break;
   }
+  case SICONOS_LCP_CONVEXQP_PG:
+  {
+    info =    linearComplementarity_ConvexQP_ProjectedGradient_setDefaultSolverOptions(options);
+    break;
+  }
+  
   case SICONOS_LCP_PATH:
   case SICONOS_LCP_AVI_CAOFERRIS:
   case SICONOS_LCP_BARD:

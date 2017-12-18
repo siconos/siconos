@@ -1,8 +1,0 @@
-// insert path of Siconos module for the importation of main modules
-// in submodules
-
-%pythoncode %{
-import sys
-import os
-sys.path.append(os.path.join('@SICONOS_PYTHON_INSTALL_DIR@','siconos'))
-%}

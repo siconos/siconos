@@ -4,8 +4,6 @@
 User-defined plugins
 --------------------
 
-*Work in progress ...*
-
 
 Siconos proposes a 'plugin' system that allows users to provide their own function(s) to describe some specific behavior for
 some classes components.

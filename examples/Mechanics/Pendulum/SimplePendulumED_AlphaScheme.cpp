@@ -90,7 +90,7 @@ int main(int argc, char* argv[])
 
     SP::NonSmoothLaw nslaw(new NewtonImpactNSL(e));
     SP::Relation relation(new LagrangianScleronomousR("SimplePendulumBilateralConstraintPlugin:h0", "SimplePendulumBilateralConstraintPlugin:G0", "SimplePendulumBilateralConstraintPlugin:G0dot"));
-    SP::Interaction inter(new Interaction(1, nslaw, relation));
+    SP::Interaction inter(new Interaction(nslaw, relation));
 
     // -------------
     // --- Model ---
@@ -174,12 +174,12 @@ int main(int argc, char* argv[])
       if (NSEvent)
       {
         DataPlot(k, 0) = EDscheme->startingTime(); // instant at non-smooth event
-        SP::SiconosVector _qMemory = simplependulum->qMemory()->getSiconosVector(1);
-        SP::SiconosVector _qdotMemory = simplependulum->velocityMemory()->getSiconosVector(1);
-        DataPlot(k, 1) = (*_qMemory)(0);
-        DataPlot(k, 2) = (*_qMemory)(1);
-        DataPlot(k, 3) = (*_qdotMemory)(0);
-        DataPlot(k, 4) = (*_qdotMemory)(1);
+        const SiconosVector& _qMemory = simplependulum->qMemory().getSiconosVector(1);
+        const SiconosVector& _qdotMemory = simplependulum->velocityMemory().getSiconosVector(1);
+        DataPlot(k, 1) = _qMemory(0);
+        DataPlot(k, 2) = _qMemory(1);
+        DataPlot(k, 3) = _qdotMemory(0);
+        DataPlot(k, 4) = _qdotMemory(1);
         k++;
         ++NumberNSEvent;
         ++show_progress;

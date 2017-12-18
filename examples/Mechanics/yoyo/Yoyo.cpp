@@ -107,7 +107,7 @@ int main(int argc, char* argv[])
 
       ////////////////  loi d'impact et relations /////////////////////////////////
 
-      SP::Interaction inter(new Interaction(1, loi0, relation0));
+      SP::Interaction inter(new Interaction(loi0, relation0));
 
       /////////////////////////  MODEL //////////////////////////////////////////////////
       SP::Model jeu(new Model(t0, T));
@@ -195,7 +195,7 @@ int main(int argc, char* argv[])
         yoyo->setComputeJacobianFIntqDotFunction("YoyoPlugin", "jacobianVFIntf");
         yoyo->setComputeJacobianFIntqFunction("YoyoPlugin", "jacobianFIntqf");
 
-        inter.reset(new Interaction(1, loi, relation));
+        inter.reset(new Interaction(loi, relation));
 
         jeu.reset(new Model(t0, T));
         jeu->nonSmoothDynamicalSystem()->insertDynamicalSystem(yoyo);

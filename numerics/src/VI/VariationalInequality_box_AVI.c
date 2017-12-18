@@ -77,7 +77,7 @@ void vi_box_AVI_LSA(VariationalInequality* problem, double* z, double* F, int* i
     relay_pb->lb = box->lb;
     relay_pb->ub = box->ub;
     vi_box_AVI_LSA_data* sData = (vi_box_AVI_LSA_data*)malloc(sizeof(vi_box_AVI_LSA_data));
-    sData->mat = (NumericsMatrix*)duplicateNumericsMatrix(problem->nabla_F);
+    sData->mat = (NumericsMatrix*)NM_duplicate(problem->nabla_F);
     sData->relay_pb = relay_pb;
     options->solverData = sData;
   }
@@ -108,7 +108,7 @@ void vi_box_AVI_free_solverData(SolverOptions* options)
   assert(options->solverData);
 
   vi_box_AVI_LSA_data* sData = (vi_box_AVI_LSA_data*)options->solverData;
-  freeNumericsMatrix(sData->mat);
+  NM_free(sData->mat);
   free(sData->mat);
   sData->mat = NULL;
   sData->relay_pb->lb = NULL;

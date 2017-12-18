@@ -26,6 +26,16 @@
 #include "NonSmoothDrivers.h"
 #include "numerics_verbose.h"
 
+
+/* #define DEBUG_NOCOLOR */
+/* #define DEBUG_MESSAGES */
+/* #define DEBUG_STDOUT */
+#include "debug.h"
+
+#ifdef  DEBUG_MESSAGES
+#include "NumericsVector.h"
+#include "NumericsMatrix.h"
+#endif
 int * Global_ipiv = NULL;
 int  Global_MisInverse = 0;
 int  Global_MisLU = 0;
@@ -40,12 +50,15 @@ const char* const SICONOS_GLOBAL_FRICTION_3D_NSGS_STR = "GFC3D_NSGS";
 const char* const SICONOS_GLOBAL_FRICTION_3D_NSN_AC_STR = "GFC3D_NSN_AC";
 const char* const  SICONOS_GLOBAL_FRICTION_3D_GAMS_PATH_STR = "GFC3D_GAMS_PATH";
 const char* const  SICONOS_GLOBAL_FRICTION_3D_GAMS_PATHVI_STR = "GFC3D_GAMS_PATHVI";
+const char* const  SICONOS_GLOBAL_FRICTION_3D_VI_EG_STR = "GFC3D_VI_EG";
+const char* const  SICONOS_GLOBAL_FRICTION_3D_VI_FPP_STR = "GFC3D_VI_FPP";
 
 
-int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity,  SolverOptions* options)
+int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction , double *velocity,
+                 double* globalVelocity,  SolverOptions* options)
 {
   assert(options->isSet);
-
+  DEBUG_EXPR(NV_display(globalVelocity,problem->M->size0););
   if (verbose > 0)
     solver_options_print(options);
 
@@ -156,6 +169,20 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction , doubl
     gfc3d_AVI_gams_pathvi(problem, reaction , globalVelocity, &info, options);
     break;
   }
+  case SICONOS_GLOBAL_FRICTION_3D_VI_FPP:
+  {
+    gfc3d_VI_FixedPointProjection(problem, reaction , velocity,
+                                  globalVelocity, &info , options);
+    break;
+
+  }
+  case SICONOS_GLOBAL_FRICTION_3D_VI_EG:
+  {
+    gfc3d_VI_ExtraGradient(problem, reaction , velocity,
+                           globalVelocity, &info , options);
+    break;
+
+  }
   default:
   {
     fprintf(stderr, "Numerics, gfc3d_driver failed. Unknown solver %d.\n", options->solverId);
@@ -168,7 +195,7 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction , doubl
 
 }
 
-int checkTrivialCaseGlobal(int n, double* q, double* velocity, double* reaction, double * globalVelocity, SolverOptions* options)
+int gfc3d_checkTrivialCaseGlobal(int n, double* q, double* velocity, double* reaction, double * globalVelocity, SolverOptions* options)
 {
   /* norm of vector q */
   /*   double qs = cblas_dnrm2( n , q , 1 ); */

@@ -120,7 +120,7 @@ int main(int argc, char* argv[])
 
 
   //Driver call
-  FILE * ff =  fopen("Example1_Fc3D_SBM.dat", "w");
+  FILE * ff =  fopen("FC3D_Example1_SBM.dat", "w");
   frictionContact_printInFile(&NumericsProblem, ff);
   fclose(ff);
 

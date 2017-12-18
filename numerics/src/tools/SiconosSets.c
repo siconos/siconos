@@ -18,6 +18,7 @@
 
 
 #include "SiconosSets.h"
+#include "NumericsMatrix.h"
 #include <stdlib.h>
 #include <assert.h>
 #include <stdio.h>
@@ -74,6 +75,9 @@ void free_siconos_set(void* set)
     case SICONOS_SET_POLYHEDRON:
       free_polyhedron((polyhedron*) set);
       break;
+    case SICONOS_SET_POLYHEDRON_UNIFIED:
+      free_polyhedron_unified((polyhedron_unified*) set);
+      break;
     default:
       printf("free_siconos_set :: not implemented for set of type %d\n", set_id);
       exit(EXIT_FAILURE);
@@ -83,16 +87,8 @@ void free_siconos_set(void* set)
 void free_box(box_constraints* b)
 {
   assert(b);
-  if (b->lb)
-  {
-    free(b->lb);
-    b->lb = NULL;
-  }
-  if (b->ub)
-  {
-    free(b->ub);
-    b->ub = NULL;
-  }
+  if (b->lb) { free(b->lb); b->lb = NULL; }
+  if (b->ub) { free(b->ub); b->ub = NULL; }
 }
 
 void free_polyhedron(polyhedron* poly)
@@ -100,6 +96,7 @@ void free_polyhedron(polyhedron* poly)
   assert(poly);
   if (poly->H)
   {
+    NM_free(poly->H);
     free(poly->H);
     poly->H = NULL;
   }
@@ -110,6 +107,7 @@ void free_polyhedron(polyhedron* poly)
   }
   if (poly->Heq)
   {
+    NM_free(poly->Heq);
     free(poly->Heq);
     poly->Heq = NULL;
   }
@@ -118,4 +116,18 @@ void free_polyhedron(polyhedron* poly)
     free(poly->Keq);
     poly->Keq = NULL;
   }
+}
+
+void free_polyhedron_unified(polyhedron_unified* poly)
+{
+  assert(poly);
+  if (poly->A)
+  {
+    NM_free(poly->A);
+    free(poly->A);
+    poly->A = NULL;
+  }
+  if (poly->b) { free(poly->b); poly->b = NULL; }
+  if (poly->type) { free(poly->type); poly->type = NULL; }
+
 }

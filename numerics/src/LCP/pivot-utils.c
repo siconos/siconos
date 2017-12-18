@@ -677,8 +677,8 @@ int init_M_lemke_warm_start(int n, double* restrict u, double* restrict mat, dou
   }
 
   /* data for LAPACKE */
-  int *ipiv = (int*)malloc((n+1)*sizeof(int));
-  int info = 0;
+  lapack_int *ipiv = (lapack_int*)malloc((n+1)*sizeof(lapack_int));
+  lapack_int info = 0;
 
   /* Compute LU factorisation of basis */
   DGETRF(n, n, mat_basic, n, ipiv, &info);
@@ -895,7 +895,7 @@ void do_pivot_lumod(SN_lumod_dense_data* restrict lumod_data, NumericsMatrix* re
       lumod_data->row_col_indx[entering_var_indx] = 0;
       break;
     default:
-      printf("do_pivot_lumod :: unkown update type occuring\n");
+      printf("do_pivot_lumod :: unknown update type occuring\n");
       exit(EXIT_FAILURE);
   }
 

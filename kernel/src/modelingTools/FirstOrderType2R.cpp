@@ -65,6 +65,7 @@ void FirstOrderType2R::initComponents(Interaction& inter, VectorOfBlockVectors& 
 //  workV[FirstOrderR::vec_z].reset(new SiconosVector(sizeZ));
   workV[FirstOrderR::vec_x].reset(new SiconosVector(sizeDS));
   workV[FirstOrderR::vec_r].reset(new SiconosVector(sizeDS));
+  workV[FirstOrderR::h_alpha].reset(new SiconosVector(sizeY));
   workV[FirstOrderR::g_alpha].reset(new SiconosVector(sizeDS));
 
   if (!_C)
@@ -124,9 +125,10 @@ void FirstOrderType2R::computeOutput(double time, Interaction& inter, Interactio
   y += *inter.yOld(level);
 
   DEBUG_PRINT("FirstOrderType2R::computeOutput : ResiduY() \n");
-  DEBUG_EXPR(inter.residuY()->display());
+  SiconosVector& residuY = *workV[FirstOrderR::vec_residuY];
+  DEBUG_EXPR(residuY().display());
 
-  y -= *inter.residuY();
+  y -= residuY;
   DEBUG_PRINT("FirstOrderType2R::computeOutput : y(level) \n");
   DEBUG_EXPR(y.display());
 
@@ -150,9 +152,10 @@ void FirstOrderType2R::computeOutput(double time, Interaction& inter, Interactio
   SiconosVector& x = *workV[FirstOrderR::vec_x];
   x = *DSlink[FirstOrderR::x];
 
-  computeh(time, x, *inter.lambda(level), *inter.Halpha());
+  SiconosVector& hAlpha= *workV[FirstOrderR::h_alpha];
+  computeh(time, x, *inter.lambda(level), hAlpha);
   DEBUG_PRINT("FirstOrderType2R::computeOutput : new Halpha \n");
-  DEBUG_EXPR(inter.Halpha()->display());
+  DEBUG_EXPR(hAlpha()->display());
 
 }
 

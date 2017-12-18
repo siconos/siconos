@@ -34,14 +34,20 @@ static inline char* strdup(char* src)
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <errno.h>
+
 #include "NonSmoothDrivers.h"
 #include "GAMSlink.h"
-
 #include "frictionContact_test_function.h"
 #include "SolverOptions.h"
 #include "Friction_cst.h"
 #include "@TEST_NAME_PREFIX@_Solvers.h"
 
+/* For internal solvers based on other formulation */
+#include "SOCLCP_Solvers.h"
+#include "SOCLCP_cst.h"
+#include "ConvexQP_cst.h"
+#include "VI_cst.h"
 
 int main(void)
 {
@@ -52,6 +58,12 @@ int main(void)
 
   setenv("SICONOS_HDF5_NAME", "log-@TEST_DATA@-tol-@TEST_TOLERANCE@-imax-@TEST_MAXITER@.hdf5", 1);
   FILE * finput  =  fopen(filename,"r");
+  if (!finput)
+  {
+    int _errno = errno;
+    fprintf(stderr, "%s :: unable to open file %s\n", __func__, filename);
+    return _errno;
+  }
   SolverOptions * options = (SolverOptions *) malloc(sizeof(SolverOptions));
   double testTolerance = @TEST_TOLERANCE@;
   int test_maxiter = @TEST_MAXITER@;
@@ -67,16 +79,27 @@ int main(void)
   if (test_maxiter > 0)
     options->iparam[0]=@TEST_MAXITER@;
 
-
   if (testInternalSolver)
   {
-    options->internalSolvers->solverId=@TEST_INTERNAL_SOLVER@;
+    if (testInternalSolver >= 400 && testInternalSolver < 700)
+    {
+      info=@TEST_NAME_PREFIX@_setDefaultSolverOptions(options->internalSolvers,@TEST_INTERNAL_SOLVER@);
+    }
+    else if (testInternalSolver >= 1100 && testInternalSolver < 1200)
+    {
+      info=soclcp_setDefaultSolverOptions(options->internalSolvers,@TEST_INTERNAL_SOLVER@);
+    }
+    else
+    {
+      fprintf(stderr, "unknown internal solver\n");
+      exit(EXIT_FAILURE);
+    }
+    
     if(test_internal_tol > 0.)
       options->internalSolvers->dparam[0]=@TEST_INTERNAL_SOLVER_TOLERANCE@;
     if(test_internal_maxit > 0)
       options->internalSolvers->iparam[0]=@TEST_INTERNAL_SOLVER_MAXITER@;
   }
-
   int iparam_idx_size = @IPARAM_IDX_SIZE@;
   if (iparam_idx_size)
   {

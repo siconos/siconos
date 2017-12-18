@@ -71,7 +71,7 @@ int soclcp_compute_error(
   /* Computes w = Mz + q */
   int incx = 1, incy = 1;
   int nc = problem->nc;
-  double *mu = problem->mu;
+  double *mu = problem->tau;
   int n = problem->n;
   
   cblas_dcopy(n , problem->q , incx , w , incy); // w <-q
@@ -139,7 +139,7 @@ int soclcp_compute_error_v(SecondOrderConeLinearComplementarityProblem* problem,
   int incx = 1, incy = 1;
   int nc = problem->nc;
   int n = problem->n;
-  double *mu = problem->mu;
+  double *mu = problem->tau;
 
   double invmu = 0.0;
   cblas_dcopy(n , problem->q , incx , z , incy); // z <-q

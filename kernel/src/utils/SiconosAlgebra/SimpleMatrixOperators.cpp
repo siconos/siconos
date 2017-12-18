@@ -170,7 +170,7 @@ SimpleMatrix& SimpleMatrix::operator = (const SiconosMatrix& m)
       if (numM == 3)
         noalias(*(mat.Sym)) = *m.sym();
       else
-        SiconosMatrixException::selfThrow("SimpleMatrix::bad assignment of matrix (symetric one = dense or ...)");
+        SiconosMatrixException::selfThrow("SimpleMatrix::bad assignment of matrix (symmetric one = dense or ...)");
       break;
     case 4:
       switch (numM)
@@ -275,7 +275,7 @@ SimpleMatrix& SimpleMatrix::operator = (const SimpleMatrix& m)
     if (numM == 3)
       noalias(*(mat.Sym)) = *m.sym();
     else
-      SiconosMatrixException::selfThrow("SimpleMatrix::bad assignment of matrix (symetric one = dense or ...)");
+      SiconosMatrixException::selfThrow("SimpleMatrix::bad assignment of matrix (symmetric one = dense or ...)");
     break;
   case 4:
     switch (numM)
@@ -441,7 +441,7 @@ SimpleMatrix& SimpleMatrix::operator +=(const SiconosMatrix& m)
       else if (numM == 7)
         noalias(*(mat.Sym)) += *m.identity();
       else
-        SiconosMatrixException::selfThrow("SimpleMatrix::op+= bad assignment of matrix (symetric one = dense or ...)");
+        SiconosMatrixException::selfThrow("SimpleMatrix::op+= bad assignment of matrix (symmetric one = dense or ...)");
       break;
     case 4:
       switch (numM)
@@ -593,7 +593,7 @@ SimpleMatrix& SimpleMatrix::operator -= (const SiconosMatrix& m)
       else if (numM == 7)
         noalias(*(mat.Sym)) -= *m.identity();
       else
-        SiconosMatrixException::selfThrow("SimpleMatrix::op-= bad assignment of matrix (symetric one = dense or ...)");
+        SiconosMatrixException::selfThrow("SimpleMatrix::op-= bad assignment of matrix (symmetric one = dense or ...)");
       break;
     case 4:
       switch (numM)

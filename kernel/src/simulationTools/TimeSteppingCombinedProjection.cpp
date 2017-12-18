@@ -77,35 +77,6 @@ TimeSteppingCombinedProjection::~TimeSteppingCombinedProjection()
 }
 
 
-void TimeSteppingCombinedProjection::computeLevelsForInputAndOutput(SP::Interaction inter, bool init)
-{
-  Simulation::computeLevelsForInputAndOutput(inter, init);
-  // Add the  specific indexSets
-  if (!init) // We are not computing the levels at the initialization
-  {
-    SP::Topology topo = _nsds->topology();
-    unsigned int indxSize = topo->indexSetsSize();
-    if (indxSize == _indexSetLevelForProjection)
-    {
-      topo->indexSetsResize(indxSize + 1);
-      topo->resetIndexSetPtr(indxSize);
-    }
-  }
-}
-
-void TimeSteppingCombinedProjection::computeLevelsForInputAndOutput()
-{
-  Simulation::computeLevelsForInputAndOutput();
-  // Add the  specific indexSets
-  SP::Topology topo = _nsds->topology();
-  unsigned int indxSize = topo->indexSetsSize();
-  if (indxSize == _indexSetLevelForProjection)
-  {
-    topo->indexSetsResize(indxSize + 1);
-    topo->resetIndexSetPtr(indxSize);
-  }
-}
-
 
 struct TimeSteppingCombinedProjection::_SimulationEffectOnOSNSP : public SiconosVisitor
 {
@@ -148,8 +119,8 @@ void TimeSteppingCombinedProjection::initOSNS()
   osnspb_pos->setIndexSetLevel(_indexSetLevelForProjection);
   osnspb_pos->setInputOutputLevel(0);
 
-  (*_allNSProblems)[SICONOS_OSNSP_TS_VELOCITY]->setIndexSetLevel(_levelMaxForInput);
-  (*_allNSProblems)[SICONOS_OSNSP_TS_VELOCITY]->setInputOutputLevel(_levelMaxForInput);
+  (*_allNSProblems)[SICONOS_OSNSP_TS_VELOCITY]->setIndexSetLevel(1);
+  (*_allNSProblems)[SICONOS_OSNSP_TS_VELOCITY]->setInputOutputLevel(1);
 
 
   // better with visitor but I am not able to fix it.
@@ -432,15 +403,17 @@ void TimeSteppingCombinedProjection::advanceToEvent()
     {
       SP::DynamicalSystem ds = dsGraph->bundle(*aVi2);
       Type::Siconos dsType = Type::value(*ds);
+      VectorOfVectors& workVectors = *dsGraph->properties(*aVi2).workVectors;
+
       if (dsType == Type::NewtonEulerDS)
       {
         SP::NewtonEulerDS neds = std11::static_pointer_cast<NewtonEulerDS>(ds);
-        neds->addWorkVector(neds->q(), DynamicalSystem::qtmp);
+        *workVectors[OneStepIntegrator::qtmp] = *neds->q();
       }
       else if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
       {
         SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
-        d->addWorkVector(d->q(), DynamicalSystem::qtmp);
+        *workVectors[OneStepIntegrator::qtmp] = * d->q();
       }
       else
         RuntimeException::selfThrow("TimeSteppingCombinedProjection::advanceToEvent() :: - Ds is not from NewtonEulerDS neither from LagrangianDS.");
@@ -494,11 +467,15 @@ void TimeSteppingCombinedProjection::advanceToEvent()
       {
         SP::DynamicalSystem ds = dsGraph->bundle(*aVi2);
         Type::Siconos dsType = Type::value(*ds);
+        VectorOfVectors& workVectors = *dsGraph->properties(*aVi2).workVectors;
+           
         if (dsType == Type::NewtonEulerDS)
         {
           SP::NewtonEulerDS neds = std11::static_pointer_cast<NewtonEulerDS>(ds);
           SP::SiconosVector q = neds->q();
-          SP::SiconosVector qtmp = neds->workspace(DynamicalSystem::qtmp);
+          
+          
+          SP::SiconosVector qtmp = workVectors[OneStepIntegrator::qtmp];
           if (neds->p(0))
           {
             //*q = * qtmp +  *neds->p(0);
@@ -517,7 +494,7 @@ void TimeSteppingCombinedProjection::advanceToEvent()
         {
           SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
           SP::SiconosVector q = d->q();
-          SP::SiconosVector qtmp = d->workspace(DynamicalSystem::qtmp);
+          SP::SiconosVector qtmp = workVectors[OneStepIntegrator::qtmp];
           if (d->p(0))
           {
             //*q = * qtmp +  *d->p(0);
@@ -598,13 +575,13 @@ void TimeSteppingCombinedProjection::advanceToEvent()
         {
           SP::NewtonEulerDS neds = std11::static_pointer_cast<NewtonEulerDS>(ds);
           double time = nextTime();
-          neds->computeForces(time);
+          neds->computeForces(time, neds->q(), neds->twist());
         }
         else if (dsType == Type::LagrangianDS)
         {
           SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
           double time = nextTime();
-          d->computeForces(time);
+          d->computeForces(time, d->q(),d->velocity());
         }
         else if (dsType == Type::LagrangianLinearTIDS)
         {
@@ -792,6 +769,7 @@ void TimeSteppingCombinedProjection::updateIndexSet(unsigned int i)
   SP::InteractionsGraph indexSet0 = topo->indexSet(0);
   SP::InteractionsGraph indexSet1 = topo->indexSet(1);
   SP::InteractionsGraph indexSet2 = topo->indexSet(2);
+  DynamicalSystemsGraph& DSG0= *nonSmoothDynamicalSystem()->dynamicalSystems();
   assert(indexSet0);
   assert(indexSet1);
   assert(indexSet2);
@@ -864,8 +842,12 @@ void TimeSteppingCombinedProjection::updateIndexSet(unsigned int i)
           bool activate = true;
           if (Type::value(*(inter0->nonSmoothLaw())) != Type::EqualityConditionNSL)
           {
-            SP::OneStepIntegrator Osi = indexSet0->properties(*ui0).osi;
-            activate = Osi->addInteractionInIndexSet(inter0, i);
+            //SP::OneStepIntegrator Osi = indexSet0->properties(*ui0).osi;
+            // We assume that the integrator of the ds1 drive the update of the index set
+            SP::DynamicalSystem ds1 = indexSet1->properties(*ui0).source;
+            OneStepIntegrator& osi = *DSG0.properties(DSG0.descriptor(ds1)).osi;
+            
+            activate = osi.addInteractionInIndexSet(inter0, i);
           }
           if (activate)
           {
@@ -929,8 +911,12 @@ void TimeSteppingCombinedProjection::updateIndexSet(unsigned int i)
       bool activate = true;
       if (Type::value(*(inter1->nonSmoothLaw())) != Type::EqualityConditionNSL)
       {
-        SP::OneStepIntegrator Osi = indexSet1->properties(*ui1).osi;
-        activate = Osi->addInteractionInIndexSet(inter1, i);
+        //SP::OneStepIntegrator Osi = indexSet1->properties(*ui1).osi;
+        // We assume that the integrator of the ds1 drive the update of the index set
+        SP::DynamicalSystem ds1 = indexSet1->properties(*ui1).source;
+        OneStepIntegrator& osi = *DSG0.properties(DSG0.descriptor(ds1)).osi;
+
+        activate = osi.addInteractionInIndexSet(inter1, i);
       }
       if (activate)
       {

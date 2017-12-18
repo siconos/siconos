@@ -48,8 +48,6 @@ void KneeJointR::initComponents(Interaction& inter, VectorOfBlockVectors& DSlink
 
 void KneeJointR::checkInitPos( SP::SiconosVector x1 ,  SP::SiconosVector x2 )
 {
-
-  //x1->display();
   double X1 = x1->getValue(0);
   double Y1 = x1->getValue(1);
   double Z1 = x1->getValue(2);
@@ -66,8 +64,6 @@ void KneeJointR::checkInitPos( SP::SiconosVector x1 ,  SP::SiconosVector x2 )
   double q23 = 0;
   if(x2)
   {
-    //printf("checkInitPos x2:\n");
-    //x2->display();
     X2 = x2->getValue(0);
     Y2 = x2->getValue(1);
     Z2 = x2->getValue(2);
@@ -77,136 +73,106 @@ void KneeJointR::checkInitPos( SP::SiconosVector x1 ,  SP::SiconosVector x2 )
     q23 = x2->getValue(6);
   }
 
-  if (Hx(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23) > DBL_EPSILON )
-  {
-    std::cout << "KneeJointR::checkInitPos( SP::SiconosVector x1 ,  SP::SiconosVector x2 )" << std::endl;
-    std::cout << " Hx is large :" << Hx(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23) << std::endl;
-  }
-  if (Hy(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23) > DBL_EPSILON )
-  {
-    std::cout << "KneeJointR::checkInitPos( SP::SiconosVector x1 ,  SP::SiconosVector x2 )" << std::endl;
-    std::cout << " Hy is large :" << Hy(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23) << std::endl;
-  }
-  if (Hz(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23) > DBL_EPSILON )
-  {
-    std::cout << "KneeJointR::checkInitPos( SP::SiconosVector x1 ,  SP::SiconosVector x2 )" << std::endl;
-    std::cout << " Hz is large :" << Hz(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23) << std::endl;
-  }
-     
-  
-  // printf("checkInitPos Hx : %e\n", Hx(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23));
-  // printf("checkInitPos Hy : %e\n", Hy(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23));
-  // printf("checkInitPos Hz : %e\n", Hz(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23));
-
-
+  assert(Hx(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23)
+         < DBL_EPSILON);
+  assert(Hy(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23)
+         < DBL_EPSILON);
+  assert(Hz(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23)
+         < DBL_EPSILON);
 }
-KneeJointR::KneeJointR(SP::NewtonEulerDS d1, SP::NewtonEulerDS d2, SP::SiconosVector P): NewtonEulerR()
+
+KneeJointR::KneeJointR()
+  : NewtonEulerJointR()
+  , _P0(std11::make_shared<SiconosVector>(3))
 {
-  _P0.reset(new SiconosVector(3));
-  *_P0 = *P;
+  _points.resize(1);
+}
+
+KneeJointR::KneeJointR(SP::SiconosVector P, bool absoluteRef,
+                       SP::NewtonEulerDS d1, SP::NewtonEulerDS d2)
+  : NewtonEulerJointR()
+  , _P0(std11::make_shared<SiconosVector>(3))
+{
+  _points.resize(1);
+  setAbsolute(absoluteRef);
+  setPoint(0, P);
+  if (d1) {
+    setBasePositions(d1->q(), d2 ? d2->q() : SP::SiconosVector());
+    checkInitPos(d1->q(), d2 ? d2->q() : SP::SiconosVector());
+  }
+}
+
+static ::boost::math::quaternion<double> rotquat(const SP::SiconosVector& v)
+{
+  if (v)
+    return ::boost::math::quaternion<double>((*v)(3),(*v)(4),(*v)(5),(*v)(6));
+  else
+    return ::boost::math::quaternion<double>(1, 0, 0, 0);
+}
+
+static ::boost::math::quaternion<double> rotquat(const SiconosVector& v)
+{
+  return ::boost::math::quaternion<double>(v(3),v(4),v(5),v(6));
+}
+
+static ::boost::math::quaternion<double> posquat(const SP::SiconosVector& v)
+{
+  return ::boost::math::quaternion<double>(0, (*v)(0),(*v)(1),(*v)(2));
+}
+
+static ::boost::math::quaternion<double> posquat(const SiconosVector& v)
+{
+  return ::boost::math::quaternion<double>(0, v(0),v(1),v(2));
+}
+
+void KneeJointR::setBasePositions(SP::SiconosVector q1, SP::SiconosVector q2)
+{
+  *_P0 = *_points[0];
+  boost::math::quaternion<double> rot1(rotquat(q1)), quatBuff, quatP0_abs;
 
   /** Computation of _G1P0 and _G2P0 */
-  SP::SiconosVector q1 = d1->q0();
-  _G1P0x = _P0->getValue(0);
-  _G1P0y = _P0->getValue(1);
-  _G1P0z = _P0->getValue(2);
 
-  ::boost::math::quaternion<double>    quat1(q1->getValue(3), q1->getValue(4), q1->getValue(5), q1->getValue(6));
-  ::boost::math::quaternion<double>    quatG1P0(0, _G1P0x, _G1P0y, _G1P0z);
-  ::boost::math::quaternion<double>    quatBuff(0, 0, 0, 0);
-  quatBuff = quat1 * quatG1P0 / quat1;
-
-  SiconosVector P0_abs(3);
-  P0_abs.setValue(0, quatBuff.R_component_2() + q1->getValue(0));
-  P0_abs.setValue(1, quatBuff.R_component_3() + q1->getValue(1));
-  P0_abs.setValue(2, quatBuff.R_component_4() + q1->getValue(2));
-  // std::cout << "KneeJoint: P0_abs in the initial position.\n";
-  // P0_abs.display();
-
-  SP::SiconosVector q2 = d2->q0();
-  SiconosVector G2_abs(3);
-  G2_abs.setValue(0, q2->getValue(0));
-  G2_abs.setValue(1, q2->getValue(1));
-  G2_abs.setValue(2, q2->getValue(2));
-
-  ::boost::math::quaternion<double>    quat2_inv(q2->getValue(3), -q2->getValue(4), -q2->getValue(5), -q2->getValue(6));
-
-
-
-  SiconosVector G2P0_abs(3);
-  G2P0_abs = P0_abs - G2_abs;
-  ::boost::math::quaternion<double>    quatG2P0_abs(0, G2P0_abs.getValue(0), G2P0_abs.getValue(1), G2P0_abs.getValue(2));
-  quatBuff = quat2_inv * quatG2P0_abs / quat2_inv;
-  _G2P0x = quatBuff.R_component_2();
-  _G2P0y = quatBuff.R_component_3();
-  _G2P0z = quatBuff.R_component_4();
-
-  // std::cout << "KneeJoint G1P0 :" << _G1P0x << " " << _G1P0y << " " << _G1P0z << std::endl;
-  // std::cout << "KneeJoint G2P0 :" << _G2P0x << " " << _G2P0y << " " << _G2P0z << std::endl;
-
-  checkInitPos(q1,q2);
-
-
-}
-/* constructor,
-   \param a SP::NewtonEulerDS d1, a dynamical system containing the intial position
-   \param a SP::SiconosVector P0, if (absolutRef) P0 contains the coordinates of the Knee point, in the absolute frame, when d1 is located in the initial position.
-   else P0 contains the coordinates of the Knee point, in the frame of d1,
-   ie P0 in the frame of the object, ie G1P0 in the obsolut frame with d1->q=(x,y,z,1,0,0,0).
-*/
-KneeJointR::KneeJointR(SP::NewtonEulerDS d1, SP::SiconosVector P0, bool absolutRef): NewtonEulerR()
-{
-  _P0.reset(new SiconosVector(3));
-  *_P0 = *P0;
-  SP::SiconosVector q1 = d1->q0();
-  ::boost::math::quaternion<double>    quat1(q1->getValue(3), q1->getValue(4), q1->getValue(5), q1->getValue(6));
-  ::boost::math::quaternion<double>    quat1_inv(q1->getValue(3), -q1->getValue(4), -q1->getValue(5), -q1->getValue(6));
-
-  ::boost::math::quaternion<double>    quatBuff(0, 0, 0, 0);
-
-  if(absolutRef)
+  /* Calculate G1P0 and P0_abs */
+  if (_absoluteRef)
   {
-    /*quadBuff contains the vector _G1P0 if the object has no orientation.*/
-    ::boost::math::quaternion<double>    quatG1P0_abs_init_position(0, _P0->getValue(0) - q1->getValue(0), _P0->getValue(1) - q1->getValue(1), _P0->getValue(2) - q1->getValue(2));
-    quatBuff = quat1_inv * quatG1P0_abs_init_position * quat1;
+    quatP0_abs = posquat(_P0);
 
-
+    /* Move to q1 frame by unapplying q1 frame translation/rotation */
+    quatBuff = (1.0/rot1) * (quatP0_abs - posquat(q1)) * rot1;
     _G1P0x = quatBuff.R_component_2();
     _G1P0y = quatBuff.R_component_3();
     _G1P0z = quatBuff.R_component_4();
-
-    _G2P0x = _P0->getValue(0);
-    _G2P0y = _P0->getValue(1);
-    _G2P0z = _P0->getValue(2);
   }
   else
   {
-
     _G1P0x = _P0->getValue(0);
     _G1P0y = _P0->getValue(1);
     _G1P0z = _P0->getValue(2);
 
-    /*d2 is look as the ref frame. G2 is the origine, and d2 has no orientation.
-     Where is P0 in the frame of d2 ?:*/
-    /*Use initial value of q1 to place P0 in the absolute frame.*/
-    /*quatG1P0_abs_ without any orientation*/
-    ::boost::math::quaternion<double>    quatG1P0_abs_(0, _P0->getValue(0) , _P0->getValue(1) , _P0->getValue(2));
-    /*quatBuff contains the vector G1P at the initial position*/
-    quatBuff = quat1 * quatG1P0_abs_ * quat1_inv;
-
-    _G2P0x = q1->getValue(0) + quatBuff.R_component_2();
-    _G2P0y = q1->getValue(1) + quatBuff.R_component_3();
-    _G2P0z = q1->getValue(2) + quatBuff.R_component_4();
+    /* Move to abs frame by applying q1 frame rotation/translation */
+    quatP0_abs = (rot1 * posquat(_P0) / rot1) + posquat(q1);
   }
-  // std::cout << "KneeJoint G1P0 :" << _G1P0x << " " << _G1P0y << " " << _G1P0z << std::endl;
-  // std::cout << "KneeJoint G2P0 :" << _G2P0x << " " << _G2P0y << " " << _G2P0z << std::endl;
-  SP::SiconosVector q2;
-  checkInitPos(q1,q2);
-}
 
-// The rest of the code is generated
-// we can disable some warning
-#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
+  /* Calculate G2P0, or set it to P0_abs (i.e. G2=absolute frame) */
+  if (q2)
+  {
+    boost::math::quaternion<double> rot2(rotquat(q2));
+
+    /* Move to q2 frame by unapplying q2 frame translation/rotation */
+    quatBuff = (1.0/rot2) * (quatP0_abs - posquat(q2)) * rot2;
+
+    _G2P0x = quatBuff.R_component_2();
+    _G2P0y = quatBuff.R_component_3();
+    _G2P0z = quatBuff.R_component_4();
+  }
+  else
+  {
+    /* q2 frame = absolute frame */
+    _G2P0x = quatP0_abs.R_component_2();
+    _G2P0y = quatP0_abs.R_component_3();
+    _G2P0z = quatP0_abs.R_component_4();
+  }
+}
 
 void KneeJointR::Jd1d2(double X1, double Y1, double Z1, double q10, double q11, double q12, double q13, double X2, double Y2, double Z2, double q20, double q21, double q22, double q23)
 {
@@ -334,33 +300,12 @@ void KneeJointR::Jd1(double X1, double Y1, double Z1, double q10, double q11, do
   double t104;
   double t109;
   double t11;
-  double t119;
-  double t125;
-  double t129;
-  double t41;
   double t5;
   double t6;
   double t60;
   double t70;
-  double t79;
-  double t89;
   double t9;
   double t99;
-
-  double X2;
-  double Y2;
-  double Z2;
-  double q20;
-  double q21;
-  double q22;
-  double q23;
-  X2 = 0;
-  Y2 = 0;
-  Z2 = 0;
-  q20 = 0;
-  q21 = 0;
-  q22 = 0;
-  q23 = 0;
   {
     t5 = 2.0 * _G2P0z;
     df[15] = -t5;
@@ -409,14 +354,6 @@ void KneeJointR::Jd1(double X1, double Y1, double Z1, double q10, double q11, do
     _jachq->setValue(0, 4, dfr0[16]*q13 + dfr1[17]*q12 + 2.0 * q11 * _G1P0x);
     _jachq->setValue(0, 5, df[6]*q10 + dfr1[17]*q11 + 2.0 * df[2]*q12);
     _jachq->setValue(0, 6, dfr0[16]*q11 + t11 * q10 + 2.0 * df[2]*q13);
-    //      _jachq->setValue(0,7, -1.0);
-    //      _jachq->setValue(0,8, 0.0);
-    //      _jachq->setValue(0,9, 0.0);
-    t41 = df[13];
-    //      _jachq->setValue(0,10, df[14]*q22+t41*q23+2.0*df[8]*q20);
-    //      _jachq->setValue(0,11, dfr0[18]*q23+dfr1[19]*q22+2.0*df[8]*q21);
-    //      _jachq->setValue(0,12, df[14]*q20+dfr1[19]*q21+2.0*q22*_G2P0x);
-    //      _jachq->setValue(0,13, dfr0[18]*q21+t41*q20+2.0*q23*_G2P0x);
     _jachq->setValue(1, 0, 0.0);
     _jachq->setValue(1, 1, 1.0);
     _jachq->setValue(1, 2, 0.0);
@@ -426,15 +363,6 @@ void KneeJointR::Jd1(double X1, double Y1, double Z1, double q10, double q11, do
     t70 = dfr0[16];
     _jachq->setValue(1, 5, t70 * q13 + dfr1[6]*q11 + 2.0 * q12 * _G1P0y);
     _jachq->setValue(1, 6, t70 * q12 + dfr0[4]*q10 + 2.0 * dfr0[0]*q13);
-    //      _jachq->setValue(1,7, 0.0);
-    //      _jachq->setValue(1,8, -1.0);
-    //      _jachq->setValue(1,9, 0.0);
-    t79 = dfr0[19];
-    //      _jachq->setValue(1,10, t79*q21+dfr0[12]*q23+2.0*dfr0[9]*q20);
-    //      _jachq->setValue(1,11, t79*q20+dfr1[14]*q22+2.0*q21*_G2P0y);
-    t89 = dfr0[18];
-    //      _jachq->setValue(1,12, t89*q23+dfr1[14]*q21+2.0*dfr0[9]*q22);
-    //      _jachq->setValue(1,13, t89*q22+dfr0[12]*q20+2.0*q23*_G2P0y);
     _jachq->setValue(2, 0, 0.0);
     _jachq->setValue(2, 1, 0.0);
     _jachq->setValue(2, 2, 1.0);
@@ -445,16 +373,6 @@ void KneeJointR::Jd1(double X1, double Y1, double Z1, double q10, double q11, do
     t109 = dfr1[16];
     _jachq->setValue(2, 5, t109 * q13 + t99 * q10 + 2.0 * dfr1[0]*q12);
     _jachq->setValue(2, 6, t109 * q12 + t104 * q11 + 2.0 * q13 * _G1P0z);
-    //      _jachq->setValue(2,7, 0.0);
-    //      _jachq->setValue(2,8, 0.0);
-    //      _jachq->setValue(2,9, -1.0);
-    t119 = dfr1[15];
-    //      _jachq->setValue(2,10, dfr1[18]*q21+t119*q22+2.0*dfr1[9]*q20);
-    t125 = dfr1[14];
-    //      _jachq->setValue(2,11, dfr1[18]*q20+t125*q23+2.0*q21*_G2P0z);
-    t129 = dfr1[18];
-    //      _jachq->setValue(2,12, t129*q23+t119*q20+2.0*q22*_G2P0z);
-    //      _jachq->setValue(2,13, t129*q22+t125*q21+2.0*dfr1[9]*q23);
   }
 }
 
@@ -481,7 +399,7 @@ void KneeJointR::computeJachq(double time, Interaction& inter, SP::BlockVector q
   double q21 = 0;
   double q22 = 0;
   double q23 = 0;
-  if(q0->getNumberOfBlocks()>1)
+  if(q0->numberOfBlocks()>1)
   {
     SP::SiconosVector q2 = (q0->getAllVect())[1];
     X2 = q2->getValue(0);
@@ -606,7 +524,7 @@ void KneeJointR::DotJd1d2(double Xdot1, double Ydot1, double Zdot1,
 void KneeJointR::computeDotJachq(double time, BlockVector& workQ, BlockVector& workZ, BlockVector& workQdot)
 {
   DEBUG_PRINT("KneeJointR::computeDotJachq(double time, Interaction& inter) starts \n");
-  if (workQdot.getNumberOfBlocks()>1)
+  if (workQdot.numberOfBlocks()>1)
   {
     computeDotJachq(time, (workQdot.getAllVect())[0], (workQdot.getAllVect())[1]);
   }
@@ -761,7 +679,7 @@ void KneeJointR::computeh(double time, BlockVector& q0, SiconosVector& y)
   double q21 = 0;
   double q22 = 0;
   double q23 = 0;
-  if(q0.getNumberOfBlocks()>1)
+  if(q0.numberOfBlocks()>1)
   {
     // SP::SiconosVector x2 = _d2->q();
     // DEBUG_EXPR( _d2->q()->display(););

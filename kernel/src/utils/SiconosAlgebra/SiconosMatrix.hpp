@@ -147,7 +147,7 @@ public:
    *  \param i unsigned int(i=0, row, i=1 col)
    *  \return an unsigned int. 1 as default for SimpleMatrix.
    */
-  inline virtual unsigned int getNumberOfBlocks(unsigned int i) const
+  inline virtual unsigned int numberOfBlocks(unsigned int i) const
   {
     return 1;
   };
@@ -260,7 +260,7 @@ public:
    */
   virtual IdentityMat* identity(unsigned int row = 0, unsigned int col = 0) const = 0;
 
-  /** return the adress of the array of double values of the matrix 
+  /** return the address of the array of double values of the matrix 
    *   ( for block(i,j) if this is a block matrix)
    *  \param row position for the required block
    *  \param col position for the required block
@@ -302,6 +302,18 @@ public:
   /** display data on standard output
    */
   virtual void display() const = 0;
+
+  /** put data of the matrix into a std::string
+   * \return std::string
+   */
+  virtual std::string toString() const = 0;
+
+  /** send data of the matrix to an ostream
+   * \param os An output stream
+   * \param sm a SiconosMatrix
+   * \return The same output stream
+   */
+  friend std::ostream& operator<<(std::ostream& os, const SiconosMatrix& sm);
 
   // Note: in the following functions, row and col are general;
   // that means that for a SimpleMatrix m, m(i,j) is index (i,j) element but
@@ -470,6 +482,13 @@ public:
    * \return the number of non-zeros
    */
   bool fillCSC(CSparseMatrix* csc, size_t row_off, size_t col_off, double tol = 1e-14);
+
+  /** return the number of non-zero in the matrix
+   * \param triplet the triplet sparse matrix
+   * \param tol the tolerance to consider a number zero (not used if the matrix is sparse)
+   * \return the number of non-zeros
+   */
+  bool fillTriplet(CSparseMatrix* csc, size_t row_off, size_t col_off, double tol = 1e-14);
 
   /** Visitors hook
    */

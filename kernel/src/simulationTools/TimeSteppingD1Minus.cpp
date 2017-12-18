@@ -28,12 +28,15 @@
 #include "NewtonEulerR.hpp"
 #include "TypeName.hpp"
 #include "NonSmoothLaw.hpp"
-//#define DEBUG_STDOUT
-//#define DEBUG_MESSAGES
+
+// #define DEBUG_NOCOLOR
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
 #include "debug.h"
 #include "Model.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
 #include "EventsManager.hpp"
+#include "OneStepNSProblem.hpp"
 
 #include <ciso646>
 
@@ -64,10 +67,8 @@ void TimeSteppingD1Minus::initOSNS()
     //update all index sets
     updateIndexSets();
 
-
     // update output
-    for (unsigned int level = _levelMinForOutput; level < _levelMaxForOutput; level++)
-      _nsds->updateOutput(nextTime(),level);
+    updateOutput();
   }
 }
 
@@ -103,6 +104,7 @@ void TimeSteppingD1Minus::updateIndexSet(unsigned int i)
   SP::InteractionsGraph indexSetCurrent = topo->indexSet(i); // ACTIVE Interactions for IMPACTS
   assert(indexSet0);
   assert(indexSetCurrent);
+  DynamicalSystemsGraph& DSG0= *nonSmoothDynamicalSystem()->dynamicalSystems();
   topo->setHasChanged(false); // only with changed topology, OSNS will be forced to update themselves
 
 
@@ -116,19 +118,24 @@ void TimeSteppingD1Minus::updateIndexSet(unsigned int i)
   {
 
     SP::Interaction inter = indexSet0->bundle(*uip);
-    SP::OneStepIntegrator Osi = indexSetCurrent->properties(*uip).osi;
+
+    // We assume that the integrator of the ds1 drive the update of the index set
+    //SP::OneStepIntegrator Osi = indexSetCurrent->properties(*uip).osi;
+    SP::DynamicalSystem ds1 = indexSetCurrent->properties(*uip).source;
+    OneStepIntegrator& osi = *DSG0.properties(DSG0.descriptor(ds1)).osi;
+    unsigned int levelMaxForInput = osi.levelMaxForInput();
     if ((!indexSetCurrent->is_vertex(inter))
-        and (Osi->addInteractionInIndexSet(inter, i)))
+        and (osi.addInteractionInIndexSet(inter, i)))
     {
       indexSetCurrent->copy_vertex(inter, *indexSet0);
       topo->setHasChanged(true);
     }
     else if ((indexSetCurrent->is_vertex(inter))
-             and !(Osi->addInteractionInIndexSet(inter, i)))
+             and !(osi.addInteractionInIndexSet(inter, i)))
     {
       indexSetCurrent->remove_vertex(inter);
       topo->setHasChanged(true);
-      if (i <= _levelMaxForInput)
+      if (i <= levelMaxForInput)
       {
         DEBUG_PRINTF("Reset to zero inter->lambda(%i)", i);
         inter->lambda(i)->zero();
@@ -138,7 +145,7 @@ void TimeSteppingD1Minus::updateIndexSet(unsigned int i)
     if (!indexSetCurrent->is_vertex(inter))
     {
       DEBUG_PRINTF("The current interaction is not in the indexSet(%i)\n",(int)i);
-      if (i <= _levelMaxForInput)
+      if (i <= levelMaxForInput)
       {
         DEBUG_EXPR(inter->lambda(i)->display());
         inter->lambda(i)->zero();
@@ -147,7 +154,7 @@ void TimeSteppingD1Minus::updateIndexSet(unsigned int i)
     else
     {
       DEBUG_PRINTF("The current interaction is in the indexSet(%i)\n",(int)i);
-      DEBUG_EXPR(if (i <= _levelMaxForInput) inter->lambda(i)->display());
+      DEBUG_EXPR(if (i <= levelMaxForInput) inter->lambda(i)->display());
     }
 
 
@@ -157,24 +164,6 @@ void TimeSteppingD1Minus::updateIndexSet(unsigned int i)
   DEBUG_PRINTF("\nINDEXSETS AFTER UPDATE for level i = %i\n", i);
   DEBUG_PRINTF(" indexSet0 size : %ld\n", indexSet0->size());
   DEBUG_PRINTF(" indexSet(%i) size : %ld\n", i, topo->indexSet(i)->size());
-}
-
-void TimeSteppingD1Minus::update(unsigned int levelInput)
-{
-  // compute input (lambda -> r)
-  if (!_allNSProblems->empty())
-    _nsds->updateInput(nextTime(),levelInput);
-
-  // compute state for each dynamical system
-  for (OSIIterator itOSI = _allOSI->begin(); itOSI != _allOSI->end(); ++itOSI)
-    (*itOSI)->updateState(levelInput);
-
-  // compute output (x -> y)
-  if (!_allNSProblems->empty())
-  {
-    for (unsigned int level = _levelMinForOutput; level < _levelMaxForOutput; level++)
-      _nsds->updateOutput(nextTime(),level);
-  }
 }
 
 void TimeSteppingD1Minus::run()
@@ -266,6 +255,25 @@ void TimeSteppingD1Minus::advanceToEvent()
 
   // indexset (I_{k+1}^+) is calculated in Simulation::processEvent
 }
+
+
+void TimeSteppingD1Minus::updateInput(unsigned int level)
+{
+  DEBUG_BEGIN("TimeSteppingD1Minus::updateInput(unsigned int level)\n");
+  OSIIterator itOSI;
+  // 1 - compute input (lambda -> r)
+  if (!_allNSProblems->empty())
+  {
+    for (itOSI = _allOSI->begin(); itOSI != _allOSI->end() ; ++itOSI)
+      (*itOSI)->updateInput(nextTime(),level);
+    //_nsds->updateInput(nextTime(),levelInput);
+  }
+  DEBUG_END("TimeSteppingD1Minus::updateInput(unsigned int level)\n");
+
+}
+
+
+
 
 // void TimeSteppingD1Minus::updateInput(unsigned int level)
 // {

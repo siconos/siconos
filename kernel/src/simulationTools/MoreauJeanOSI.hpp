@@ -87,7 +87,7 @@ const unsigned int MOREAUSTEPSINMEMORY = 1;
  * of theta and the list of concerned dynamical systems.
  *
  * Each DynamicalSystem is associated to a SiconosMatrix, named "W", the "iteration" matrix"
- * W matrices are initialized and computed in initW and computeW. Depending on the DS type,
+ * W matrices are initialized and computed in initializeIterationMatrixW and computeW. Depending on the DS type,
  * they may depend on time t and DS state x.
  *
  * For mechanical systems, the implementation uses _p for storing the
@@ -114,8 +114,7 @@ protected:
   */
   ACCEPT_SERIALIZATION(MoreauJeanOSI);
 
-  /** Stl map that associates a theta parameter for the integration
-  *  scheme to each DynamicalSystem of the OSI */
+  /** theta-scheme parameter */
   double _theta;
 
   /** A gamma parameter for the integration scheme to each DynamicalSystem of the OSI
@@ -123,7 +122,7 @@ protected:
    */
   double _gamma;
 
-  /** a boolean to know if the parameter must be used or not
+  /** a boolean to know if the gamma-parameter must be used or not
    */
   bool _useGamma;
 
@@ -142,6 +141,11 @@ protected:
 
 public:
 
+  enum {RESIDU_FREE, VFREE, BUFFER, WORK_LENGTH};
+
+  enum {OSNSP_RHS,WORK_INTERACTION_LENGTH};
+
+  
   /** constructor from theta value only
    *  \param theta value for all linked DS (default = 0.5).
    *  \param gamma value for all linked DS (default = NaN and gamma is not used).
@@ -254,7 +258,7 @@ public:
   inline void setUseGammaForRelation(bool newUseGammaForRelation)
   {
     _useGammaForRelation = newUseGammaForRelation;
-    if (_useGammaForRelation) _useGamma = false;
+    if(_useGammaForRelation) _useGamma = false;
   };
 
   /** get boolean _explicitNewtonEulerDSOperators for the relation
@@ -279,33 +283,59 @@ public:
       invariant systems, we compute time invariant operator (example :
       W)
    */
-  virtual void initialize(Model& m);
+  //virtual void initialize(Model& m);
 
-  /** init W MoreauJeanOSI matrix at time t
+  /** Initialization process of the nonsmooth problems
+      linked to this OSI*/
+  virtual void initialize_nonsmooth_problems();
+
+  /** initialization of the work vectors and matrices (properties) related to 
+   *  one dynamical system on the graph and needed by the osi 
+   * \param m the Model
+   * \param t time of initialization
+   * \param ds the dynamical system   
+   */
+  void initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds);
+
+  /** initialization of the work vectors and matrices (properties) related to 
+   *  one interaction on the graph and needed by the osi 
+   * \param inter the interaction
+   * \param interProp the properties on the graph
+   * \param DSG the dynamical systems graph
+   */
+  virtual void fillDSLinks(Interaction &inter,
+                             InteractionProperties& interProp,
+                             DynamicalSystemsGraph & DSG);
+
+  /** get the number of index sets required for the simulation
+   * \return unsigned int
+   */
+  unsigned int numberOfIndexSets() const {return 2;};
+  
+  /** initialize iteration matrix W MoreauJeanOSI matrix at time t
    *  \param time
    *  \param ds a pointer to DynamicalSystem
-   *  \param dsv a descriptor of the ds on the graph (redundant to avoid invocation)
    */
-  void initW(double time, SP::DynamicalSystem ds, DynamicalSystemsGraph::VDescriptor& dsv);
+  void initializeIterationMatrixW(double time, SP::DynamicalSystem ds);
 
   /** compute W MoreauJeanOSI matrix at time t
    *  \param time (double)
-   *  \param ds a pointer to DynamicalSystem
+   *  \param ds a  DynamicalSystem
    *  \param W the result in W
    */
-  void computeW(double time , SP::DynamicalSystem ds, SiconosMatrix& W);
+  void computeW(double time , DynamicalSystem& ds, SiconosMatrix& W);
 
   /** compute WBoundaryConditionsMap[ds] MoreauJeanOSI matrix at time t
    *  \param ds a pointer to DynamicalSystem
    *  \param WBoundaryConditions write the result in WBoundaryConditions
    */
-  void computeWBoundaryConditions(SP::DynamicalSystem ds, SiconosMatrix& WBoundaryConditions);
+  void _computeWBoundaryConditions(DynamicalSystem& ds, SiconosMatrix& WBoundaryConditions, SiconosMatrix& iteration_matrix);
 
-  /** init WBoundaryConditionsMap[ds] MoreauJeanOSI
+  /** initialize iteration matrix WBoundaryConditionsMap[ds] MoreauJeanOSI
    *  \param ds a pointer to DynamicalSystem
    *  \param dsv a descriptor of the ds on the graph (redundant)
    */
-  void initWBoundaryConditions(SP::DynamicalSystem ds, DynamicalSystemsGraph::VDescriptor& dsv);
+  void _initializeIterationMatrixWBoundaryConditions(DynamicalSystem& ds, const DynamicalSystemsGraph::VDescriptor& dsv);
 
 
   /** compute the initial state of the Newton loop.
@@ -329,16 +359,14 @@ public:
    */
   virtual void computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, OneStepNSProblem* osnsp);
 
-  /** Apply the rule to one Interaction to known if is it should be included
-   * in the IndexSet of level i
+  /** Apply the rule to one Interaction to know if it should be included in the IndexSet of level i
    * \param inter the Interaction to test
    * \param i level of the IndexSet
    * \return Boolean
    */
   virtual bool addInteractionInIndexSet(SP::Interaction inter, unsigned int i);
 
-  /** Apply the rule to one Interaction to known if is it should be removed
-   * in the IndexSet of level i
+  /** Apply the rule to one Interaction to know if it should be removed from the IndexSet of level i
    * \param inter the Interaction to test
    * \param i level of the IndexSet
    * \return Boolean
@@ -363,7 +391,7 @@ public:
   /** update the state of the dynamical systems
       \param ds the dynamical to update
    */
-  virtual void updatePosition(SP::DynamicalSystem ds);
+  virtual void updatePosition(DynamicalSystem& ds);
 
   /** update the state of the dynamical systems
    *  \param level the level of interest for the dynamics: not used at the time

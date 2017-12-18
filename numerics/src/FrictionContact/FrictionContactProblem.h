@@ -161,6 +161,19 @@ struct FrictionContactProblem
   double* mu;
 };
 
+struct SplittedFrictionContactProblem
+{
+  FrictionContactProblem * fc3d;
+  NumericsMatrix * M_nn;
+  NumericsMatrix * M_tn;
+  NumericsMatrix * M_nt;
+  NumericsMatrix * M_tt;
+  double * q_n;
+  double * q_t;
+};
+
+
+
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
@@ -191,7 +204,7 @@ extern "C"
    * \return 0 if successfull
    */
   int frictionContact_newFromFile(FrictionContactProblem*  problem, FILE* file);
-  
+
   /** read a FrictionContactProblem in a file (numerics .dat format) from its filename
    * \param problem the problem to read
    * \param filename the name of the target file
@@ -217,6 +230,13 @@ extern "C"
       NumericsMatrix* M, double* q, double* mu);
 
 
+  /* create an empty FrictionContactProblem
+   * \return an empty fcp */
+  FrictionContactProblem* newFCP(void);
+
+  
+  void createSplittedFrictionContactProblem(FrictionContactProblem* problem, SplittedFrictionContactProblem * splitted_problem);
+  
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

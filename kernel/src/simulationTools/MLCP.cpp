@@ -26,8 +26,10 @@
 // --- Numerics headers ---
 #include "NonSmoothDrivers.h"
 #include "MLCP_Solvers.h"
+#include "SiconosCompat.h"
 
 using namespace RELATION;
+// #define DEBUG_NCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
 #include "debug.h"
@@ -184,7 +186,7 @@ int MLCP::compute(double time)
     }
     catch (...)
     {
-      std::cout << "exception catched" <<std::endl;
+      std::cout << "exception caught" <<std::endl;
       info = 1;
     }
 
@@ -217,7 +219,7 @@ void MLCP::initialize(SP::Simulation sim)
   // General initialize for LinearOSNS
   LinearOSNS::initialize(sim);
 
-  _numerics_problem.M = &*_M->getNumericsMatrix();
+  _numerics_problem.M = &*_M->numericsMatrix();
 }
 void  MLCP::updateInteractionBlocks()
 {

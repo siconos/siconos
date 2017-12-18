@@ -82,7 +82,7 @@ inline std::ptrdiff_t iamax( const int n, const double* x,
 //
 inline std::ptrdiff_t iamax( const int n, const std::complex<float>* x,
         const int incx ) {
-    return cblas_icamax( n, x, incx );
+  return cblas_icamax( n, OPENBLAS_CONST_FLOAT_CAST(x), incx );
 }
 
 //
@@ -92,7 +92,7 @@ inline std::ptrdiff_t iamax( const int n, const std::complex<float>* x,
 //
 inline std::ptrdiff_t iamax( const int n, const std::complex<double>* x,
         const int incx ) {
-    return cblas_izamax( n, x, incx );
+  return cblas_izamax( n, OPENBLAS_CONST_DOUBLE_CAST(x), incx );
 }
 
 #elif defined BOOST_NUMERIC_BINDINGS_BLAS_CUBLAS

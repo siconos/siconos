@@ -384,7 +384,7 @@ void free_NMS_data(NMS_data* data)
   free(data->checkpoint);
   free(data->bestpoint);
   free(data->workspace);
-  freeNumericsMatrix(data->H);
+  NM_free(data->H);
   free(data->H);
   free_siconos_set(data->set);
   free(data->set);

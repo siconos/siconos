@@ -22,7 +22,7 @@
 #include <math.h>
 #include <float.h>
 #include <stdbool.h>
-#include "SparseMatrix.h"
+#include "SparseMatrix_internal.h"
 #include "SiconosCompat.h"
 #include "NumericsSparseMatrix.h"
 
@@ -37,7 +37,7 @@
 
 typedef struct
 {
-  csi i;
+  CS_INT i;
   size_t indx;
 } sort_indices_struct;
 
@@ -231,7 +231,8 @@ CSparseMatrix* NM_csparse_alloc_for_copy(const CSparseMatrix* const m)
   }
   else
   {
-    fprintf(stderr, "NM_copy :: error unknown type %lld for CSparse matrix\n",  (long long int)m->nz);
+    fprintf(stderr, "NM_copy :: error unknown type " CS_ID
+            " for CSparse matrix\n", m->nz);
     exit(EXIT_FAILURE);
   }
 
@@ -265,22 +266,22 @@ size_t NM_sparse_nnz(const CSparseMatrix* const A)
   }
   else
   {
-    fprintf(stderr, "NM_sparse_nnz :: unsupported nz number %d", A->nz);
+    fprintf(stderr, "NM_sparse_nnz :: unsupported nz number " CS_ID, A->nz);
     exit(EXIT_FAILURE);
   }
 }
 
 void NM_sparse_fix_csc(CSparseMatrix* A)
 {
-  csi* Ap = A->p;
-  csi* Ai = A->i;
+  CS_INT* Ap = A->p;
+  CS_INT* Ai = A->i;
   double* xbck = NULL;
   sort_indices_struct* s = NULL;
   for (size_t j = 0; j < (size_t) A->n; ++j)
   {
     bool need_sorting = false;
-    csi max_indx = -1;
-    csi p = Ap[j];
+    CS_INT max_indx = -1;
+    CS_INT p = Ap[j];
     for ( ; p < Ap[j+1]; ++p)
     {
       if (Ai[p] <= max_indx)
@@ -296,8 +297,8 @@ void NM_sparse_fix_csc(CSparseMatrix* A)
     if (need_sorting)
     {
       double* Ax = A->x;
-      csi min_indx = Ai[p];
-      csi ps = p-1;
+      CS_INT min_indx = Ai[p];
+      CS_INT ps = p-1;
       for ( ; ps > Ap[j]; --ps)
       {
         if (Ai[ps] < min_indx)

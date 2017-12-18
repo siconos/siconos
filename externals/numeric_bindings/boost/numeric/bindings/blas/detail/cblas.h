@@ -14,6 +14,25 @@
 #ifndef BOOST_NUMERIC_BINDINGS_BLAS_DETAIL_CBLAS_H
 #define BOOST_NUMERIC_BINDINGS_BLAS_DETAIL_CBLAS_H
 
+
+
+#ifdef HAS_OpenBLAS
+#define OPENBLAS_CONST_FLOAT_CAST(x) reinterpret_cast<const float*>(x)
+#define OPENBLAS_CONST_DOUBLE_CAST(x) reinterpret_cast<const double*>(x)
+#define OPENBLAS_FLOAT_CAST(x) reinterpret_cast<float*>(x)
+#define OPENBLAS_DOUBLE_CAST(x) reinterpret_cast<double*>(x)
+#define OPENBLAS_OPENBLAS_COMPLEX_FLOAT_CAST(x) reinterpret_cast<openblas_complex_float*>(x)
+#define OPENBLAS_OPENBLAS_COMPLEX_DOUBLE_CAST(x) reinterpret_cast<openblas_complex_double*>(x)
+
+#else
+#define OPENBLAS_CONST_FLOAT_CAST(x) x
+#define OPENBLAS_CONST_DOUBLE_CAST(x) x
+#define OPENBLAS_FLOAT_CAST(x) x
+#define OPENBLAS_DOUBLE_CAST(x) x
+#define OPENBLAS_OPENBLAS_COMPLEX_FLOAT_CAST(x) x
+#define OPENBLAS_OPENBLAS_COMPLEX_DOUBLE_CAST(x) x
+#endif
+
 //
 // MKL-specific CBLAS include
 //

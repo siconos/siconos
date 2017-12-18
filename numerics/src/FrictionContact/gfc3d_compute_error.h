@@ -39,7 +39,8 @@ extern "C"
    * \param[in,out] error value
    * \return 0 if successfull
    */
-  int gfc3d_compute_error(GlobalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, double tolerance, double * error);
+  int gfc3d_compute_error(GlobalFrictionContactProblem* problem, double *reaction , double *velocity,
+                          double* globalVelocity, double tolerance, double norm, double * error);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

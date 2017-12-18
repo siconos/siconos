@@ -30,7 +30,7 @@
 #include <assert.h>
 #include <stdio.h>
 
-#if defined(__cplusplus) && !defined (_NUMERICS_INTERNAL_CXX_)
+#if defined(__cplusplus)
 extern "C"
 {
 #endif
@@ -70,6 +70,10 @@ extern "C"
 // ---  Apple Accelerate framework ---
 #if defined(HAS_ACCELERATE)
 #include "SiconosAppleLapack.h"
+
+ // --- MATLAB ---
+#elif defined(HAS_MATLAB_LAPACK)
+#include "SiconosMATLABLapack.h"
 
 // --- Atlas ---
 #elif defined(HAS_ATLAS_LAPACK) || !defined(HAS_LAPACKE)
@@ -285,7 +289,7 @@ extern "C"
 #endif // No atlas
 
 
-#if defined(__cplusplus) && !defined (_NUMERICS_INTERNAL_CXX_)
+#if defined(__cplusplus)
 }
 #endif
 

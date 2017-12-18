@@ -180,7 +180,7 @@ void NCPGlocker_fillMLocal(FrictionContactProblem * problem, FrictionContactProb
   }
   else if (storageType == 1)
   {
-    int diagPos = getDiagonalBlockPos(MGlobal->matrix1, contact);
+    int diagPos = SBM_get_position_diagonal_block(MGlobal->matrix1, contact);
     localproblem->M->matrix0 = MGlobal->matrix1->block[diagPos];
     /*     cblas_dcopy(9, MGlobal->matrix1->block[diagPos], 1,localproblem->M->matrix0 , 1); */
   }
@@ -251,7 +251,7 @@ void NCPGlocker_update(int contact, FrictionContactProblem* problem, FrictionCon
   //  - step 1: computes qLocal = qGlobal[in] + sum over a row of blocks in MGlobal of the products MLocal.reaction,
   //            excluding the block corresponding to the current contact.
   //  - step 2: computes qGlocker using qLocal values
-  fc3d_nsgs_computeqLocal(problem, localproblem, reaction, contact);
+  fc3d_local_problem_compute_q(problem, localproblem, reaction, contact);
 
   double * qLocal = localproblem->q;
 
@@ -365,7 +365,7 @@ void computeJacobianFGlocker(double** jacobianFOut, int up2Date)
 
 double Compute_NCP_error1(int i, double error)
 {
-  printf("----------------------------------contact =  %i\n", i);
+  printf("--------------contact =  %i\n", i);
 
   double Fz;
   printf(" z[%i] = %14.7e\n", i, reactionGlocker[i]);

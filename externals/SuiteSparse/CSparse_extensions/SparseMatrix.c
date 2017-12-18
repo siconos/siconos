@@ -20,10 +20,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
-#include "SparseMatrix.h"
 #include <math.h>
 #include <float.h>
 
+#include "SparseMatrix_internal.h"
 #include "SiconosCompat.h"
 
 #if defined(__cplusplus)
@@ -33,7 +33,7 @@
 //#define VERBOSE_DEBUG
 
 /* add an entry to triplet matrix only if value is not (nearly) null */
-csi cs_zentry(CSparseMatrix *T, csi i, csi j, double x)
+CS_INT cs_zentry(CSparseMatrix *T, CS_INT i, CS_INT j, double x)
 {
   if(fabs(x) >= DBL_EPSILON)
   {
@@ -45,7 +45,7 @@ csi cs_zentry(CSparseMatrix *T, csi i, csi j, double x)
   }
 }
 
-int cs_lu_factorization(csi order, const cs *A, double tol, cs_lu_factors * cs_lu_A )
+int cs_lu_factorization(CS_INT order, const cs *A, double tol, cs_lu_factors * cs_lu_A )
 {
   assert(A);
   cs_lu_A->n = A->n;
@@ -75,12 +75,12 @@ void cs_sparse_free(cs_lu_factors* cs_lu_A)
 
 /* Solve Ax = b with the factorization of A stored in the cs_lu_A
  * This is extracted from cs_lusol, you need to synchronize any changes! */
-csi cs_solve (cs_lu_factors* cs_lu_A, double* x, double *b)
+CS_INT cs_solve (cs_lu_factors* cs_lu_A, double* x, double *b)
 {
   assert(cs_lu_A);
 
-  csi ok;
-  csi n = cs_lu_A->n;
+  CS_INT ok;
+  CS_INT n = cs_lu_A->n;
   css* S = cs_lu_A->S;
   csn* N = cs_lu_A->N;
   ok = (S && N && x) ;
@@ -98,39 +98,39 @@ int cs_check_triplet(CSparseMatrix *T)
 {
   if (T->nz < 0)
   {
-    fprintf(stderr, "cs_check_triplet :: given CSparseMatrix is not in a triplet form: nz = " SN_PTRDIFF_T_F, T->nz);
+    fprintf(stderr, "cs_check_triplet :: given CSparseMatrix is not in a triplet form: nz = " CS_ID, T->nz);
     return 1;
   }
-  csi nb_row = T->m;
-  csi nb_col = T->n;
-  csi* Ti = T->i;
-  csi* Tp = T->p;
+  CS_INT nb_row = T->m;
+  CS_INT nb_col = T->n;
+  CS_INT* Ti = T->i;
+  CS_INT* Tp = T->p;
   int info = 0;
-  csi cc = 0;
-  csi max_row = -1;
-  csi max_col = -1;
+  CS_INT cc = 0;
+  CS_INT max_row = -1;
+  CS_INT max_col = -1;
 
-  for (csi indx = 0; indx < T->nz; ++indx)
+  for (CS_INT indx = 0; indx < T->nz; ++indx)
   {
     if (Ti[indx] >= nb_row)
     {
-      printf("cs_check_triplet :: matrix element " SN_PTRDIFF_T_F " has a row number " SN_PTRDIFF_T_F "  > " SN_PTRDIFF_T_F " the number of rows\n", indx, Ti[indx], nb_row);
+      printf("cs_check_triplet :: matrix element " CS_ID " has a row number " CS_ID "  > " CS_ID " the number of rows\n", indx, Ti[indx], nb_row);
       info = 1;
     }
     if (Tp[indx] >= nb_col)
     {
-      printf("cs_check_triplet :: matrix element " SN_PTRDIFF_T_F " has a row number " SN_PTRDIFF_T_F " > " SN_PTRDIFF_T_F " the number of rows\n", indx, Tp[indx], nb_col);
+      printf("cs_check_triplet :: matrix element " CS_ID " has a row number " CS_ID " > " CS_ID " the number of rows\n", indx, Tp[indx], nb_col);
       info = 1;
     }
     if (Tp[indx] < max_col)
     {
-       printf("cs_check_csc :: " SN_PTRDIFF_T_F " at index " SN_PTRDIFF_T_F " > " SN_PTRDIFF_T_F "\n", Tp[indx], indx, max_col);
+       printf("cs_check_csc :: " CS_ID " at index " CS_ID " > " CS_ID "\n", Tp[indx], indx, max_col);
     }
     if (Tp[indx] == cc)
     {
       if (Ti[indx] <= max_row)
       {
-        printf("cs_check_triplet :: matrix element at column " SN_PTRDIFF_T_F " has a row number " SN_PTRDIFF_T_F "  > " SN_PTRDIFF_T_F " the max on that column\n", cc, Ti[indx], max_row);
+        printf("cs_check_triplet :: matrix element at column " CS_ID " has a row number " CS_ID "  > " CS_ID " the max on that column\n", cc, Ti[indx], max_row);
       }
       else
       {
@@ -154,15 +154,15 @@ int cs_check_csc(CSparseMatrix *T)
     return 1;
   }
 
-  csi nb_row = T->m;
-  csi nb_col = T->n;
-  csi* Ti = T->i;
-  csi* Tp = T->p;
+  CS_INT nb_row = T->m;
+  CS_INT nb_col = T->n;
+  CS_INT* Ti = T->i;
+  CS_INT* Tp = T->p;
   int info = 0;
 
   for (size_t j = 0; j < nb_col; ++j)
   {
-    csi max_indx = -1;
+    CS_INT max_indx = -1;
     if (Tp[j] > Tp[j+1])
     {
        printf("cs_check_csc :: " SN_PTRDIFF_T_F " at index " SN_PTRDIFF_T_F " smaller than " SN_PTRDIFF_T_F "\n", Tp[j+1], j, Tp[j]);
@@ -191,13 +191,13 @@ int cs_check_csc(CSparseMatrix *T)
 /* from sparse to dense */
 double* cs_dense(CSparseMatrix *A)
 {
-  csi m = A->m;
-  csi n = A->n;
-  csi *Ap = A->p;
-  csi *Ai = A->i;
+  CS_INT m = A->m;
+  CS_INT n = A->n;
+  CS_INT *Ap = A->p;
+  CS_INT *Ai = A->i;
   double *Ax = A->x;
-  csi nzmax = A->nzmax;
-  csi nz = A->nz;
+  CS_INT nzmax = A->nzmax;
+  CS_INT nz = A->nz;
   double *r = (double*) malloc(A->m * A->n * sizeof(double));
   for(int i = 0; i<m*n; ++i)
   {
@@ -207,21 +207,22 @@ double* cs_dense(CSparseMatrix *A)
   {
     for(int j = 0 ; j < n ; j++)
     {
-      printf("    col %d : locations " SN_PTRDIFF_T_F " to " SN_PTRDIFF_T_F "\n", j, Ap [j], Ap [j+1]-1);
-      for(csi p = Ap [j] ; p < Ap [j+1] ; p++)
+      printf("    col %d : locations " CS_ID " to " CS_ID "\n",
+             j, Ap [j], Ap [j+1]-1);
+      for(CS_INT p = Ap [j] ; p < Ap [j+1] ; p++)
       {
-        printf("      " SN_PTRDIFF_T_F " : %g\n", Ai [p], Ax ? Ax [p] : 1) ;
+        printf("      " CS_ID " : %g\n", Ai [p], Ax ? Ax [p] : 1) ;
         r[Ai[p] + j*m] = Ax ? Ax [p] : 1;
       }
     }
   }
   else
   {
-    printf("triplet: " SN_PTRDIFF_T_F "-by-" SN_PTRDIFF_T_F ", nzmax: " \
-        SN_PTRDIFF_T_F " nnz: " SN_PTRDIFF_T_F "\n", m, n, nzmax, nz) ;
+    printf("triplet: " CS_ID "-by-" CS_ID ", nzmax: " \
+        CS_ID " nnz: " CS_ID "\n", m, n, nzmax, nz) ;
     for(int p = 0 ; p < nz ; p++)
     {
-      printf("    " SN_PTRDIFF_T_F " " SN_PTRDIFF_T_F " : %g\n", Ai [p], Ap [p], Ax ? Ax [p] : 1) ;
+      printf("    " CS_ID " " CS_ID " : %g\n", Ai [p], Ap [p], Ax ? Ax [p] : 1) ;
       r[Ai[p] + Ap[p] * m] = Ax ? Ax[p] : 1;
     }
   }
@@ -232,7 +233,7 @@ double* cs_dense(CSparseMatrix *A)
 int cs_aaxpy(const double alpha, const cs *A, const double * restrict x,
              const double beta, double * restrict y)
 {
-  csi p, n, *Ap, *Ai ;
+  CS_INT p, n, *Ap, *Ai ;
   int j;
   double *Ax ;
   if(!A || !x || !y) return (0) ;	     /* check inputs */
@@ -266,7 +267,7 @@ CSparseMatrix* cs_spfree_on_stack(CSparseMatrix* A)
 
 int cs_printInFile(const cs *A, int brief, FILE* file)
 {
-  csi m, n, nzmax, nz, p, j, *Ap, *Ai ;
+  CS_INT m, n, nzmax, nz, p, j, *Ap, *Ai ;
   double *Ax ;
   if(!A)
   {

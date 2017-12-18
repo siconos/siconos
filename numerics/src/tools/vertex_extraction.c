@@ -32,8 +32,6 @@
 #define restrict __restrict
 #endif
 
-#include "SiconosSets.h"
-
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
 #include "debug.h"
@@ -43,12 +41,14 @@
 #pragma GCC diagnostic ignored "-Wunused-function"
 #include "lp_lib.h"
 
+#include "NumericsMatrix.h"
 
 
-void siconos_find_vertex(const polyhedron* P, unsigned size, int* basis)
+void siconos_find_vertex(const polyhedron* P, unsigned size, lapack_int* basis)
 {
   unsigned nrows = P->size_ineq;
-  double* restrict H = P->H;
+  assert(P->H->matrix0);
+  double* restrict H = P->H->matrix0;
   double* restrict K = P->K;
   lprec *lp;
   lp = make_lp(nrows, nrows+size);
@@ -81,11 +81,30 @@ void siconos_find_vertex(const polyhedron* P, unsigned size, int* basis)
   int info = solve(lp);
   if (info != 0)
   {
-    printf("find_vertex_lpsolve: failure in the LP solver\n");
+    printf("find_vertex_lpsolve: failure in the LP solver: info = %d\n", info);
     exit(EXIT_FAILURE);
   }
 
-  get_basis(lp, basis, FALSE);
+  int* lp_basis = NULL;
+  if (sizeof(lapack_int) != sizeof(int))
+  {
+    lp_basis = (int*)malloc((nrows + 1)*sizeof(int));
+  }
+  else
+  {
+    lp_basis = (int*)basis;
+  }
+
+  get_basis(lp, lp_basis, FALSE);
+
+  if (sizeof(lapack_int) != sizeof(int))
+  {
+    for (size_t i = 0; i < (nrows + 1); ++i)
+    {
+      basis[i] = (lapack_int)lp_basis[i];
+    }
+  }
+
 #ifdef DEBUG_STDOUT
   print_solution(lp, 3);
 #endif

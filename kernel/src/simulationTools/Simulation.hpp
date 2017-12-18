@@ -27,7 +27,6 @@
 #include "SiconosFwd.hpp"
 // #include "EventsManager.hpp"
 // #include "SiconosPointers.hpp"
-// #include "DynamicalSystemsSet.hpp"
 #include <fstream>
 // #include "Model.hpp"
 // #include "NonSmoothDynamicalSystem.hpp"
@@ -94,26 +93,6 @@ protected:
    */
   SP::InteractionManager _interman;
 
-  /** _levelMinForOutput is the minimum level for the output
-   * (Interaction::_lowerlevelForOutput) for all the interactions
-   */
-  unsigned int _levelMinForOutput;
-
-  /** _levelMaxForOutput is the maximunm level for the output
-   * (Interaction::_upperlevelForOutput) for all the interactions
-   */
-  unsigned int _levelMaxForOutput;
-
-  /** _levelMinForInput is the minimum level for the input
-   * (Interaction::_lowerlevelForInput) for all the interactions
-   */
-  unsigned int _levelMinForInput;
-
-  /** _levelMaxForInput is the maximum level for the input
-   * (Interaction::_upperlevelForInput) for all the interactions
-   */
-  unsigned int _levelMaxForInput;
-
   /** _numberOfIndexSets is the number of index sets that we need for
    * simulation. It corresponds for most of the simulation to
    * _numberOfIndexSets = _levelMaxForOutput + 1
@@ -159,19 +138,22 @@ protected:
    */
   bool _linkOrUnlink;
 
-  /** initializations of levels
-   *
-   */
-  struct SetupLevels;
-  friend struct Simulation::SetupLevels;
-
-
   /** default constructor.
    */
   Simulation() {};
 
   /** Call the interaction manager one if is registered, otherwise do nothing. */
   void updateInteractions();
+
+  /** Call the interaction manager one if is registered, otherwise do nothing. */
+  void updateInteractionsNewtonIteration();
+
+  /*TS set the ds->q memory, the world (CAD model for example) must be updated.
+    Overload this method to update user model.*/
+  virtual void updateWorldFromDS()
+  {
+    ;
+  };
 
 private:
 
@@ -224,11 +206,6 @@ public:
   {
     _name = newName;
   }
-
-  /** set the TimeDiscretisation of the Simulation
-   *  \param[in] td the new TimeDiscretisation
-   */
-  void setTimeDiscretisationPtr(SP::TimeDiscretisation td);
 
   /** get time instant k of the time discretisation
    *  \return the time instant t_k
@@ -332,36 +309,7 @@ public:
     return _allNSProblems->size();
   }
 
-  /* get a OSNSP by number.
-   * \param unsigned int number of OSNSP
-   * \return SP::Onestepnsproblem
-   */
-  inline SP::OneStepNSProblem oneStepNSProblem(unsigned int number) const
-  {
-    return (*_allNSProblems)[number];
-  }
-
-
-  inline unsigned int levelMinForOutput() const
-  {
-    return _levelMinForOutput;
-  };
-
-  inline unsigned int levelMaxForOutput() const
-  {
-    return _levelMaxForOutput;
-  };
-  inline unsigned int levelMinForInput() const
-  {
-    return _levelMinForInput;
-  };
-
-  inline unsigned int levelMaxForInput() const
-  {
-    return _levelMaxForInput;
-  };
-
-  /** get allNSProblems[name], a specific OneStepNSProblem
+  /** get a OneStep nonsmooth problem of the simulation, identify with its number.
       \param id number of the required osnspb
       \return a pointer to OneStepNSProblem
    */
@@ -382,6 +330,14 @@ public:
   inline SP::NonSmoothDynamicalSystem nonSmoothDynamicalSystem() const
   {
     return _nsds;
+  }
+
+  /** set the NonSmoothDynamicalSystem of the Simulation
+   *  \param newPtr a pointer on NonSmoothDynamicalSystem
+   */
+  void setNonSmoothDynamicalSystemPtr(SP::NonSmoothDynamicalSystem newPtr)
+  {
+    _nsds = newPtr;
   }
 
   /** get tolerance
@@ -439,6 +395,18 @@ public:
    *  topology updates. */
   virtual void initializeInteraction(double time, SP::Interaction inter);
 
+  /** Associate an OSI with a DynamicalSystem in the graph and
+   *  initialize any necessary graph properties (e.g. work vectors).
+   *  Inserts the integrator into the set if not already present.
+   *
+   *  \param osi The OneStepIntegrator to associate with the DynamicalSystem.
+   *  \param ds The DynamicalSystem, which must be already inserted
+   *            into the NonSmoothDynamicalSystem.
+   *  \param m The Model for initializing the OSI.
+   *  \param time The current time for initializing the OSI. */
+  void prepareIntegratorForDS(SP::OneStepIntegrator osi, SP::DynamicalSystem ds,
+                              SP::Model m, double time);
+
   /** Set an object to automatically manage interactions during the simulation */
   void insertInteractionManager(SP::InteractionManager manager)
     { _interman = manager; }
@@ -449,10 +417,28 @@ public:
    */
   int computeOneStepNSProblem(int nb);
 
-  /** update input, state of each dynamical system and output
+  /** update input
    *  \param level lambda order used to compute input
+   * level is set to 0 by default since in all time-stepping schemes we update all the state
    */
-  virtual void update(unsigned int level) = 0;
+  virtual void updateInput(unsigned int level=0);
+
+  /** update state of each dynamical system
+   */
+  virtual void updateState(unsigned int level=0);
+
+  /** update output
+   *  \param level lambda order used to compute output
+   * level is set to 0 by default since in all time-stepping schemes we update all the state
+   */
+  virtual void updateOutput(unsigned int level=0);
+
+  /** update output, state, and input
+   *  \param level lambda order used to compute input
+   * level is set to 0 by default since in all time-stepping schemes we update all the state
+   */
+  void update(unsigned int level=0)
+    { updateInput(level); updateState(level); updateOutput(level); }
 
   /** run the simulation, from t0 to T
    * with default parameters if any particular settings has been done
@@ -536,18 +522,6 @@ public:
   /** call eventsManager processEvents.
    */
   void processEvents();
-
-  /** compute for the first time the _level* variables
-   * \warning it should only be called during initialize, if there are Interactions.
-   * Otherwise, call the overloaded method when addind a Relation
-   */
-  virtual void computeLevelsForInputAndOutput();
-
-  /** Update the _level* attributes
-   * \param inter a new SP::Interaction
-   * \param init bool to determine if we are in the initialisation phase
-   */
-  virtual void computeLevelsForInputAndOutput(SP::Interaction inter, bool init = false);
 
 
   /** set staticLevels

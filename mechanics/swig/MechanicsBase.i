@@ -5,8 +5,6 @@
 // generated docstrings from doxygen xml output
 %include mechanics-docstrings.i
 
-%include path.i
-
 %include sharedPointers.i
 
 %{

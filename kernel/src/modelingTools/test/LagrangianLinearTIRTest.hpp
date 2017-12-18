@@ -43,12 +43,9 @@ private:
   //  CPPUNIT_TEST(testBuildLagrangianLinearTIR5);
   //  CPPUNIT_TEST(testBuildLagrangianLinearTIR6);
   CPPUNIT_TEST(testSetCPtr);
-  CPPUNIT_TEST(testSetDPtr);
   CPPUNIT_TEST(testSetFPtr);
   CPPUNIT_TEST(testSetEPtr);
   CPPUNIT_TEST(testGetJacPtr);
-  CPPUNIT_TEST(End);
-
   CPPUNIT_TEST_SUITE_END();
 
   // \todo exception test
@@ -60,15 +57,13 @@ private:
   void testBuildLagrangianLinearTIR4();
 
   void testSetCPtr();
-  void testSetDPtr();
   void testSetFPtr();
   void testSetEPtr();
   void testGetJacPtr();
-  void End();
 
   // Members
 
-  SP::SimpleMatrix C, B, F, D;
+  SP::SimpleMatrix C, B, F;
   SP::SiconosVector e;
   SP::NonSmoothDynamicalSystem nsds;
 

@@ -19,6 +19,7 @@
 #include <cmath>
 #include "DiskDiskR.hpp"
 #include "BlockVector.hpp"
+#include "SimpleMatrix.hpp"
 
 DiskDiskR::DiskDiskR(double r, double rr) : CircularR(r, rr)
 {

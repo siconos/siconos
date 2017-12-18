@@ -97,7 +97,7 @@ protected:
   SP::PluggedObject _plugine;
   /** To initialize all the plugin functions with NULL.
    */
-  virtual void zeroPlugin();
+  virtual void _zeroPlugin();
 
   /** type of the Relation: FirstOrder or Lagrangian */
   RELATION::TYPES _relationType;
@@ -130,7 +130,7 @@ public:
 
   /** destructor
    */
-  virtual ~Relation();
+  virtual ~Relation(){};
 
   /** To get the type of the Relation (FirstOrder or Lagrangian)
    *  \return the type of the Relation
@@ -147,27 +147,6 @@ public:
   {
     return _subType;
   }
-
-  /** To get the name of h plugin
-   *  \return a std::string
-   */
-  const std::string gethName() const ;
-
-  /** To get the name of g plugin
-   *  \return a std::string
-   */
-  const std::string getgName() const;
-
-  /** To get the name of Jach[i] plugin
-   *  \return a std::string
-   */
-  virtual const std::string getJachxName() const ;
-
-  /** To get the name of Jacg[i] plugin
-      \param i index number of the required plugin
-      \return : a std::string
-  */
-  virtual const std::string getJacgName(unsigned int i) const;
 
   /** To set a plug-in function to compute output function h
    *  \param pluginPath the complete path to the plugin
@@ -282,41 +261,6 @@ public:
   /** main relation members display 
    */
   virtual void display() const;
-
-  /** Check if _pluginh is correctly set 
-      \return a bool
-   */
-  bool ishPlugged() const;
-
-  /** Check if _pluginJachx is correctly set
-      \return a bool
-  */
-  bool isJachxPlugged() const;
-
-  /** Check if _pluginJachlambda is correctly set
-      \return a bool
-  */
-  bool isJachlambdaPlugged() const;
-
-  /** Check if _pluging is correctly set
-      \return a bool
-   */
-  bool isgPlugged() const;
-
-  /** Check if _pluginJacglambda is correctly set
-      \return a bool
-  */
-  bool isJacLgPlugged() const;
-
-  /** Check if _pluginf is correctly set
-      \return a bool
-  */
-  bool isfPlugged() const;
-
-  /** Check if _plugine is correctly set
-      \return a bool
-  */
-  bool isePlugged() const;
 
   /** Get _pluginh 
       \return a shared pointer to the plugin

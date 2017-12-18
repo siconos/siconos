@@ -49,18 +49,13 @@
 #
 # -----------------------------------------------------------------------
 
-with_plot = True
+import siconos.kernel as sk
+import numpy as np
+with_plot = False
 if with_plot:
     import matplotlib
     matplotlib.use('Agg')
     import matplotlib.pyplot as plt
-
-from siconos.kernel import FirstOrderLinearDS, FirstOrderLinearTIR, \
-    ComplementarityConditionNSL, Interaction,\
-    Model, EulerMoreauOSI, TimeDiscretisation, LCP,  \
-    TimeStepping
-
-
 
 t0 = 0.0
 T = 5.0e-3       # Total simulation time
@@ -75,11 +70,10 @@ Modeltitle = "DiodeBridge"
 # dynamical system
 #
 init_state = [Vinit, 0]
+A = np.zeros((2, 2), dtype=np.float64)
+A.flat[...] = [0., -1.0 / Cvalue, 1.0 / Lvalue, 0.]
 
-A = [[0,          -1.0/Cvalue],
-     [1.0/Lvalue, 0          ]]
-
-LSDiodeBridge = FirstOrderLinearDS(init_state, A)
+LSDiodeBridge = sk.FirstOrderLinearDS(init_state, A)
 
 #
 # Interactions
@@ -98,17 +92,17 @@ D = [[1./Rvalue, 1./Rvalue, -1.,  0.],
 B = [[0.,        0., -1./Cvalue, 1./Cvalue],
      [0.,        0.,  0.,        0.       ]]
 
-LTIRDiodeBridge = FirstOrderLinearTIR(C, B)
+LTIRDiodeBridge = sk.FirstOrderLinearTIR(C, B)
 LTIRDiodeBridge.setDPtr(D)
 
-nslaw = ComplementarityConditionNSL(4)
-InterDiodeBridge = Interaction(nslaw, LTIRDiodeBridge)
+nslaw = sk.ComplementarityConditionNSL(4)
+InterDiodeBridge = sk.Interaction(nslaw, LTIRDiodeBridge)
 
 
 #
 # Model
 #
-DiodeBridge = Model(t0, T, Modeltitle)
+DiodeBridge = sk.Model(t0, T, Modeltitle)
 
 #   add the dynamical system in the non smooth dynamical system
 DiodeBridge.nonSmoothDynamicalSystem().insertDynamicalSystem(LSDiodeBridge)
@@ -122,15 +116,15 @@ DiodeBridge.nonSmoothDynamicalSystem().link(InterDiodeBridge, LSDiodeBridge)
 
 # (1) OneStepIntegrators
 theta = 0.5
-aOSI = EulerMoreauOSI(theta)
+aOSI = sk.EulerMoreauOSI(theta)
 # (2) Time discretisation
-aTiDisc = TimeDiscretisation(t0, h_step)
+aTiDisc = sk.TimeDiscretisation(t0, h_step)
 
 # (3) Non smooth problem
-aLCP = LCP()
+aLCP = sk.LCP()
 
 # (4) Simulation setup with (1) (2) (3)
-aTS = TimeStepping(aTiDisc, aOSI, aLCP)
+aTS = sk.TimeStepping(aTiDisc, aOSI, aLCP)
 
 # end of model definition
 
@@ -146,7 +140,7 @@ k = 0
 h = aTS.timeStep()
 print("Timestep : ", h)
 # Number of time steps
-N = (T - t0) / h
+N = int((T - t0) / h)
 print("Number of steps : ", N)
 
 # Get the values to be plotted

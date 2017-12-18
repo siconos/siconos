@@ -22,19 +22,18 @@
 
 #include <MechanicsFwd.hpp>
 #include <SiconosFwd.hpp>
-#include <NewtonEulerR.hpp>
+#include <NewtonEulerJointR.hpp>
 
 /** \class KneeJointR
  *  \brief This class implements a knee joint between one or two Newton/Euler Dynamical system
  *
  */
-class KneeJointR : public NewtonEulerR
+class KneeJointR : public NewtonEulerJointR
 {
 protected:
   /** serialization hooks
    */
   ACCEPT_SERIALIZATION(KneeJointR);
-  KneeJointR(): NewtonEulerR() {};
 
   /** Coordinate of the knee point in the body frame of the first dynamical system _d1
    */
@@ -55,30 +54,62 @@ protected:
   double _G2P0x;
   double _G2P0y;
   double _G2P0z;
-  virtual void initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
+
+  virtual void initComponents(Interaction& inter, VectorOfBlockVectors& DSlink,
+                              VectorOfVectors& workV, VectorOfSMatrices& workM);
 
 public:
-  /* constructor,
-     \param a SP::NewtonEulerDS d1, a dynamical system containing the intial position
-     \param a SP::NewtonEulerDS d2, a dynamical system containing the intial position
-     \param a SP::SiconosVector P, P contains the coordinates of the Knee point, in the frame of d1 where the origin is G1.
-                                  ie P contains the coordinates of the Knee point, in the object frame G1.
-  */
-  KneeJointR(SP::NewtonEulerDS d1, SP::NewtonEulerDS d2, SP::SiconosVector P);
-  /* constructor,
-     \param a SP::NewtonEulerDS d1, a dynamical system containing the intial position
-     \param a SP::SiconosVector P, P contains the coordinates of the Knee point, in the absolute frame.
-  */
-  KneeJointR(SP::NewtonEulerDS d1, SP::SiconosVector P0, bool absolutRef = true);
+
+  /** Empty constructor. The relation may be initialized later by
+   * setPoint, setAbsolute, and setBasePositions. */
+  KneeJointR();
+
+  /** Constructor based on one or two dynamical systems and a point.
+   *  \param d1 first DynamicalSystem linked by the joint.
+   *  \param d2 second DynamicalSystem linked by the joint, or NULL
+   *            for absolute frame.
+   *  \param P SiconosVector of size 3 that defines the point around
+   *           which rotation is allowed.
+   *  \param absoluteRef if true, P is in the absolute frame,
+   *                     otherwise P is in d1 frame.
+   */
+  KneeJointR(SP::SiconosVector P, bool absoluteRef,
+             SP::NewtonEulerDS d1 = SP::NewtonEulerDS(),
+             SP::NewtonEulerDS d2 = SP::NewtonEulerDS());
+
   /** destructor
    */
-  void checkInitPos(SP::SiconosVector q1, SP::SiconosVector q2);
   virtual ~KneeJointR() {};
+
+  /** Initialize the joint constants based on the provided base positions.
+   * \param q1 A SiconosVector of size 7 indicating translation and
+   *           orientation in inertial coordinates.
+   * \param q2 An optional SiconosVector of size 7 indicating
+   *           translation and orientation; if null, the inertial
+   *           frame will be considered as the second base. */
+  virtual void setBasePositions(SP::SiconosVector q1,
+                                SP::SiconosVector q2 = SP::SiconosVector());
+
+  /* Perform some checks on the initial conditions. */
+  void checkInitPos(SP::SiconosVector q1, SP::SiconosVector q2);
 
   /** Get the number of constraints defined in the joint
       \return the number of constraints
    */
-  static unsigned int numberOfConstraints() { return 3; }
+  virtual unsigned int numberOfConstraints() { return 3; }
+
+  /** Get the number of degrees of freedom defined in the joint
+      \return the number of degrees of freedom (DoF)
+   */
+  virtual unsigned int numberOfDoF() { return 3; }
+
+  /** Return the type of a degree of freedom of this joint.
+      \return the type of the degree of freedom (DoF)
+  */
+  virtual DoF_Type typeOfDoF(unsigned int axis) {
+    if (axis<3) return DOF_TYPE_ANGULAR;
+    else return DOF_TYPE_INVALID;
+  };
 
   virtual void computeJachq(double time, Interaction& inter, SP::BlockVector q0);
 
@@ -88,6 +119,8 @@ public:
   virtual void computeDotJachq(double time, BlockVector& workQ, BlockVector& workZ, BlockVector& workQdot);
 
   virtual void computeDotJachq(double time, SP::SiconosVector qdot1, SP::SiconosVector qdot2=SP::SiconosVector());
+
+  SP::SiconosVector P() { return _P0; }
 
 protected:
 

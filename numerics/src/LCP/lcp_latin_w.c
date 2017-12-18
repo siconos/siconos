@@ -47,7 +47,7 @@ void lcp_latin_w(LinearComplementarityProblem* problem, double *z, double *w, in
   double omega = options->dparam[3];
 
   int i, j,  iter1, nrhs;
-  int info2 = 0;
+  lapack_int info2 = 0;
   int      itt, it_end;
   int incx, incy;
 

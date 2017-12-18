@@ -81,7 +81,7 @@ def test_xml2():
     T = bouncingBall.finalT()
     t0 = bouncingBall.t0()
     h = s.timeStep()
-    N = np.ceil((T - t0) / h)
+    N = int((T - t0) / h)
 
     # --- Get the values to be plotted ---
     # . saved in a matrix dataPlot
@@ -150,7 +150,7 @@ def test_xml3():
     T = oscillator.finalT()
     t0 = oscillator.t0()
     h = s.timeStep()
-    N = np.ceil((T - t0) / h)
+    N = int((T - t0) / h)
     # --- Get the values to be plotted ---
     # . saved in a matrix dataPlot
     dataPlot = np.zeros((N + 1, 5))
@@ -212,7 +212,7 @@ def test_xml4():
     T = CamFollower.finalT()
     t0 = CamFollower.t0()
     h = S.timeStep()
-    N = np.ceil((T - t0) / h)
+    N = int((T - t0) / h)
 
     # --- Get the values to be plotted ---
     # . saved in a matrix dataPlot
@@ -361,7 +361,7 @@ def test_xml6():
     t0 = oscillator.t0()
     T = oscillator.finalT()
     h = s.timeStep()
-    N = np.ceil((T - t0) / h)  # Number of time steps
+    N = int((T - t0) / h)  # Number of time steps
 
     # --- Get the values to be plotted ---
     # . saved in a matrix dataPlot

@@ -92,10 +92,10 @@ int main(int argc, char* argv[])
     SP::NonSmoothLaw  nslaw(new NewtonImpactNSL(e));
     // Interaction at contact 1 (ball-floor)
     SP::Relation relation1(new LagrangianLinearTIR(H1, E1));
-    SP::Interaction inter1(new Interaction(1, nslaw, relation1));
+    SP::Interaction inter1(new Interaction(nslaw, relation1));
     // Interaction at contact 2 (ball-ceiling)
     SP::Relation relation2(new LagrangianLinearTIR(H2, E2));
-    SP::Interaction inter2(new Interaction(1, nslaw, relation2));
+    SP::Interaction inter2(new Interaction(nslaw, relation2));
     // --------------------------------
     // --- NonSmoothDynamicalSystem ---
     // --------------------------------
@@ -195,8 +195,8 @@ int main(int argc, char* argv[])
       if (nonSmooth) // if the event is nonsmooth
       {
         dataPlot(k,0) = s->startingTime(); // get the time at nonsmooth event
-        dataPlot(k,1) = (*ball->qMemory()->getSiconosVector(1))(0);
-        dataPlot(k,2) = (*ball->velocityMemory()->getSiconosVector(1))(0);
+        dataPlot(k,1) = ball->qMemory().getSiconosVector(1)(0);
+        dataPlot(k,2) = ball->velocityMemory().getSiconosVector(1)(0);
         k++;
         nonSmooth = false;
         ++show_progress;
@@ -241,7 +241,7 @@ int main(int argc, char* argv[])
     // Comparison with a reference file
     SimpleMatrix dataPlotRef(dataPlot);
     dataPlotRef.zero();
-    ioMatrix::read("BouncingBallTwoContactsED.cpp", "ascii", dataPlotRef);
+    ioMatrix::read("BouncingBallTwoContactsED.ref", "ascii", dataPlotRef);
 
     std:: cout << " Error ="<< (dataPlot - dataPlotRef).normInf() << std::endl;
 
@@ -256,10 +256,12 @@ int main(int argc, char* argv[])
   catch (SiconosException e)
   {
     cout << e.report() << endl;
+    return 1;
   }
   catch (...)
   {
     cout << "Exception caught." << endl;
+    return 1;
   }
   cout << "Computation Time: " << time.elapsed()  << endl;
 }

@@ -1,31 +1,26 @@
 %extend MixedComplementarityProblem2
 {
+  CALL_COMPUTE_F(mcp, (void*))
+
+  CALL_COMPUTE_NABLA_F(mcp, (void*))
+
   MixedComplementarityProblem2()
    {
-     MixedComplementarityProblem2* MCP;
-     MCP = (MixedComplementarityProblem2 *) malloc(sizeof(MixedComplementarityProblem2));
-     MCP->nabla_Fmcp = NULL;
-     MCP->compute_Fmcp = &call_py_compute_Fmcp;
-     MCP->compute_nabla_Fmcp = &call_py_compute_nabla_Fmcp;
-     MCP->env = NULL;
-
+     MixedComplementarityProblem2* MCP = newMCP();
      return MCP;
    }
 
-  MixedComplementarityProblem2(PyObject* n1, PyObject* n2)
+  MixedComplementarityProblem2(SN_OBJ_TYPE* n1, SN_OBJ_TYPE* n2)
   {
-     MixedComplementarityProblem2* MCP;
-     MCP =  (MixedComplementarityProblem2 *) malloc(sizeof(MixedComplementarityProblem2));
+     MixedComplementarityProblem2* MCP = newMCP();
 
-     MCP->compute_Fmcp = &call_py_compute_Fmcp;
-     MCP->compute_nabla_Fmcp = &call_py_compute_nabla_Fmcp;
-     MCP->n1 = (int) PyInt_AsLong(n1);
-     MCP->n2 = (int) PyInt_AsLong(n2);
+     SWIG_AsVal_int(n1, &MCP->n1);
+     SWIG_AsVal_int(n2, &MCP->n2);
      int size =  MCP->n1 +  MCP->n2;
 
      if (size<1)
      {
-       PyErr_SetString(PyExc_RuntimeError, "sizeEqualities + sizeInequalities has to be positive");
+       SWIG_Error(SWIG_RuntimeError, "sizeEqualities + sizeInequalities has to be positive");
        free(MCP);
        return NULL;
      }
@@ -38,20 +33,20 @@
   }
 
 
-  MixedComplementarityProblem2(PyObject* n1, PyObject* n2, PyObject* py_compute_class)
+#ifdef SWIGPYTHON
+  MixedComplementarityProblem2(SN_OBJ_TYPE* n1, SN_OBJ_TYPE* n2, SN_OBJ_TYPE* py_compute)
   {
-     MixedComplementarityProblem2* MCP;
-     MCP =  (MixedComplementarityProblem2 *) malloc(sizeof(MixedComplementarityProblem2));
+     MixedComplementarityProblem2* MCP = newMCP();
 
      MCP->compute_Fmcp = &call_py_compute_Fmcp;
      MCP->compute_nabla_Fmcp = &call_py_compute_nabla_Fmcp;
-     MCP->n1 = (int) PyInt_AsLong(n1);
-     MCP->n2 = (int) PyInt_AsLong(n2);
+     SWIG_AsVal_int(n1, &MCP->n1);
+     SWIG_AsVal_int(n2, &MCP->n2);
      int size =  MCP->n1 +  MCP->n2;
 
      if (size<1)
      {
-       PyErr_SetString(PyExc_RuntimeError, "sizeEqualities + sizeInequalities has to be positive");
+       SWIG_Error(SWIG_RuntimeError, "sizeEqualities + sizeInequalities has to be positive");
        free(MCP);
        return NULL;
      }
@@ -60,46 +55,45 @@
        MCP->nabla_Fmcp = NM_create(NM_DENSE, size, size);
      }
 
-     PyObject* method_compute_Fmcp = PyObject_GetAttrString(py_compute_class, "compute_Fmcp");
-     PyObject* method_compute_nabla_Fmcp = PyObject_GetAttrString(py_compute_class, "compute_nabla_Fmcp");
-     if (PyCallable_Check(method_compute_Fmcp) && PyCallable_Check(method_compute_nabla_Fmcp))
+     SN_OBJ_TYPE* method_compute_F = NULL;
+     if (PyObject_HasAttrString(py_compute, "compute_F")) method_compute_F = PyObject_GetAttrString(py_compute, "compute_F");
+     SN_OBJ_TYPE* method_compute_nabla_F = NULL;
+     if (PyObject_HasAttrString(py_compute, "compute_nabla_F")) method_compute_nabla_F = PyObject_GetAttrString(py_compute, "compute_nabla_F");
+     if (PyCallable_Check(method_compute_F) && PyCallable_Check(method_compute_nabla_F))
      {
        MCP->env = (void*) malloc(sizeof(class_env_python));
        class_env_python* mcp_env_python = (class_env_python*) MCP->env;
        mcp_env_python->id = ENV_IS_PYTHON_CLASS;
-       mcp_env_python->class_object = py_compute_class;
-       Py_DECREF(method_compute_Fmcp);
-       Py_DECREF(method_compute_nabla_Fmcp);
+       mcp_env_python->class_object = py_compute;
+       target_mem_mgmt_instr(method_compute_F);
+       target_mem_mgmt_instr(method_compute_nabla_F);
      }
      else
      {
-       Py_XDECREF(method_compute_Fmcp);
-       Py_XDECREF(method_compute_nabla_Fmcp);
-       PyErr_SetString(PyExc_TypeError, "argument 2 must be have a method compute_Fmcp and a method compute_nabla_Fmcp");
-       freeNumericsMatrix(MCP->nabla_Fmcp);
+       target_mem_mgmtX_instr(method_compute_F);
+       target_mem_mgmtX_instr(method_compute_nabla_F);
+       SWIG_Error(SWIG_TypeError, "argument 2 must be have a method compute_F and a method compute_nabla_F");
+       NM_free(MCP->nabla_Fmcp);
        free(MCP->nabla_Fmcp);
        free(MCP);
-       PyErr_PrintEx(0);
-       exit(1);
+       return NULL;
      }
 
      return MCP;
    }
+#endif /* SWIGPYTHON */
 
-  MixedComplementarityProblem2(PyObject* n1, PyObject* n2, PyObject* py_compute_Fmcp, PyObject* py_compute_nabla_Fmcp)
+  MixedComplementarityProblem2(SN_OBJ_TYPE* n1, SN_OBJ_TYPE* n2, SN_OBJ_TYPE* compute_F, SN_OBJ_TYPE* compute_nabla_F)
   {
-     MixedComplementarityProblem2* MCP;
-     MCP =  (MixedComplementarityProblem2 *) malloc(sizeof(MixedComplementarityProblem2));
+     MixedComplementarityProblem2* MCP = newMCP();
 
-     MCP->compute_Fmcp = &call_py_compute_Fmcp;
-     MCP->compute_nabla_Fmcp = &call_py_compute_nabla_Fmcp;
-     MCP->n1 = (int) PyInt_AsLong(n1);
-     MCP->n2 = (int) PyInt_AsLong(n2);
+     SWIG_AsVal_int(n1, &MCP->n1);
+     SWIG_AsVal_int(n2, &MCP->n2);
      int size =  MCP->n1 +  MCP->n2;
 
      if (size<1)
      {
-       PyErr_SetString(PyExc_RuntimeError, "sizeEqualities + sizeInequalities has to be positive");
+       SWIG_Error(SWIG_RuntimeError, "sizeEqualities + sizeInequalities has to be positive");
        free(MCP);
        return NULL;
      }
@@ -108,45 +102,14 @@
        MCP->nabla_Fmcp = NM_create(NM_DENSE, size, size);
      }
 
-     MCP->env = (void*) malloc(sizeof(functions_env_python));
-     functions_env_python* mcp_env_python = (functions_env_python*) MCP->env;
-     mcp_env_python->id = ENV_IS_PYTHON_FUNCTIONS;
-
-     if (PyCallable_Check(py_compute_Fmcp)) 
-     {
-       mcp_env_python->env_compute_function = py_compute_Fmcp;
-     }
-     else
-     {
-       PyErr_SetString(PyExc_TypeError, "argument 3 must be callable");
-       freeNumericsMatrix(MCP->nabla_Fmcp);
-       free(MCP->nabla_Fmcp);
-       free(MCP->env);
-       free(MCP);
-       PyErr_PrintEx(0);
-       exit(1);
-     }
-
-
-     if (PyCallable_Check(py_compute_nabla_Fmcp))
-     {
-       mcp_env_python->env_compute_jacobian = py_compute_nabla_Fmcp;
-     }
-     else
-     {
-       PyErr_SetString(PyExc_TypeError, "argument 4 must be callable");
-       freeNumericsMatrix(MCP->nabla_Fmcp);
-       free(MCP->nabla_Fmcp);
-       free(MCP->env);
-       free(MCP);
-       PyErr_PrintEx(0);
-       exit(1);
-     }
+     check_save_target_fn(compute_F, MCP->env, env_compute_function, MixedComplementarityProblem2_call_compute_F, MCP->compute_Fmcp, 2);
+     check_save_target_fn(compute_nabla_F, MCP->env, env_compute_jacobian, MixedComplementarityProblem2_call_compute_nabla_F, MCP->compute_nabla_Fmcp, 3);
 
      return MCP;
    }
 
-  void set_compute_F_and_nabla_F_as_C_functions(PyObject* lib_name, PyObject* compute_F_name, PyObject* compute_nabla_F_name)
+#ifdef SWIGPYTHON
+  void set_compute_F_and_nabla_F_as_C_functions(SN_OBJ_TYPE* lib_name, SN_OBJ_TYPE* compute_F_name, SN_OBJ_TYPE* compute_nabla_F_name)
   {
 %#if PY_MAJOR_VERSION < 3
     if(PyString_Check(lib_name) && PyString_Check(compute_F_name) && PyString_Check(compute_nabla_F_name))
@@ -166,30 +129,27 @@
     }
     else
     {
-      PyErr_SetString(PyExc_TypeError, "All arguments should be strings");
+      SWIG_Error(SWIG_TypeError, "All arguments should be strings");
     }
   }
+#endif /* SWIGPYTHON */
 
-    PyObject* get_env_as_long(void)
+    SN_OBJ_TYPE* get_env_as_long(void)
     {
-      return PyInt_FromLong((uintptr_t)&$self->env);
+      return SWIG_From_long((uintptr_t)&$self->env);
     }
 
   ~MixedComplementarityProblem2()
   {
-    if ($self->nabla_Fmcp)
-    {
-      freeNumericsMatrix($self->nabla_Fmcp);
-      free($self->nabla_Fmcp);
-    }
     if ($self->env)
     {
-      if(((env_python*)$self->env)->id > 0)
+      if(((env_target_lang*)$self->env)->id > 0)
       {
         free($self->env);
+        $self->env = NULL;
       }
     }
-    free($self);
+    freeMCP($self);
   }
 };
 

@@ -21,6 +21,7 @@
 #include <math.h>
 #include <float.h>
 
+#include "debug.h"
 #include "NonSmoothDrivers.h"
 #include "NCP_cst.h"
 #include "NonlinearComplementarityProblem.h"

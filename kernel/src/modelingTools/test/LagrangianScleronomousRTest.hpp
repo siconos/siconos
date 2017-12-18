@@ -37,15 +37,12 @@ private:
   // tests to be done ...
 
   CPPUNIT_TEST(testBuildLagrangianScleronomousR2);
-  CPPUNIT_TEST(End);
-
   CPPUNIT_TEST_SUITE_END();
 
   // \todo exception test
 
   void testBuildLagrangianScleronomousR0();
   void testBuildLagrangianScleronomousR2();
-  void End();
 
 public:
   void setUp();

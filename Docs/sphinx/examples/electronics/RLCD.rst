@@ -330,14 +330,15 @@ and simplified relations as for the electrical oscillator with
 half-wave rectifier.
 
 .. math::
-   \begin{eqnarray*}
+   
+   \begin{array}{ccc}
    W & = & (I - h \theta A)^{-1} \\
    x_{free} & = & W(I + h (1-\theta) A) \cdot x_{i} \\
    x_{i+1} & = & x_{free} + h W r_{i+1} \\
    r_{i+1} & = & B \cdot \lambda_{i+1}  \\
    y_{i+1} & = & C \cdot x_{i+1} + D \cdot \lambda_{i+1}  \\
    & 0 \leq y_{i+1} \, \perp \, \lambda_{i+1} \geq 0 &
-   \end{eqnarray*}
+   \end{array}
 
 Numerical simulation
 ''''''''''''''''''''

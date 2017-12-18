@@ -52,7 +52,7 @@ void OSNSMatrixTest::testBuildOSNSMatrix0()
   std::cout << "------- Default constructor test -------" <<std::endl;
   SP::OSNSMatrix  M = new OSNSMatrix();
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildOSNSMatrix0 : ", M->size() == 0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildOSNSMatrix0 : ", M->getStorageType() == 0, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildOSNSMatrix0 : ", M->storagetype() == 0, true);
   std::cout << "------- Default constructor OSNSMatrix ok -------" <<std::endl;
   std::cout <<std::endl <<std::endl;
 }
@@ -63,7 +63,7 @@ void OSNSMatrixTest::testBuildOSNSMatrix1()
   std::cout << "------- Constructor with dim. test -------" <<std::endl;
   SP::OSNSMatrix  M(new OSNSMatrix(n));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildOSNSMatrix1 : ", M->size() == n, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildOSNSMatrix1 : ", M->getStorageType() == 0, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildOSNSMatrix1 : ", M->storagetype() == 0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildOSNSMatrix1 : ", M->defaultMatrix(), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildOSNSMatrix1 : ", M->defaultMatrix()->size(0) == n, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildOSNSMatrix1 : ", M->defaultMatrix()->size(1) == n, true);
@@ -97,7 +97,7 @@ void OSNSMatrixTest::testBuildOSNSMatrix2()
     row += (*itRow)->nonSmoothLaw()->size();
   }
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildOSNSMatrix2 : ", M->size() == dim, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildOSNSMatrix2 : ", M->getStorageType() == 0, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildOSNSMatrix2 : ", M->storagetype() == 0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildOSNSMatrix2 : ", M->defaultMatrix(), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildOSNSMatrix2 : ", M->defaultMatrix()->size(0) == dim, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildOSNSMatrix2 : ", M->defaultMatrix()->size(1) == dim, true);
@@ -141,7 +141,7 @@ void OSNSMatrixTest::testFill()
     row += (*itRow)->nonSmoothLaw()->size();
   }
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill : ", M->size() == dim, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill : ", M->getStorageType() == 0, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill : ", M->storagetype() == 0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill : ", M->defaultMatrix(), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill : ", M->defaultMatrix()->size(0) == dim, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill : ", M->defaultMatrix()->size(1) == dim, true);
@@ -158,7 +158,7 @@ void OSNSMatrixTest::testFill()
   M.reset(new OSNSMatrix(30));
   M->fill(indexSet, blocks);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill : ", M->size() == dim, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill : ", M->getStorageType() == 0, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill : ", M->storagetype() == 0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill : ", M->defaultMatrix(), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill : ", M->defaultMatrix()->size(0) == dim, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill : ", M->defaultMatrix()->size(1) == dim, true);
@@ -184,7 +184,7 @@ void OSNSMatrixTest::testConvert()
   M->fill(indexSet, blocks);
 
   M->convert();
-  SP::NumericsMatrix NumMat = M->getNumericsMatrix();
+  SP::NumericsMatrix NumMat = M->numericsMatrix();
   unsigned int dim = 0;
   for (InteractionsIterator it = indexSet->begin(); it != indexSet->end(); ++it)
     dim += (*it)->nonSmoothLaw()->size();
@@ -242,7 +242,7 @@ void OSNSMatrixTest::testFill2()
     row += (*itRow)->nonSmoothLaw()->size();
   }
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill2 : ", M->size() == dim, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill2 : ", M->getStorageType() == 0, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill2 : ", M->storagetype() == 0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill2 : ", M->defaultMatrix(), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill2 : ", M->defaultMatrix()->size(0) == dim, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill2 : ", M->defaultMatrix()->size(1) == dim, true);
@@ -260,7 +260,7 @@ void OSNSMatrixTest::testFill2()
   M.reset(new OSNSMatrix(30));
   M->fill(indexSet, blocks);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill2 : ", M->size() == dim, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill2 : ", M->getStorageType() == 0, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill2 : ", M->storagetype() == 0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill2 : ", M->defaultMatrix(), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill2 : ", M->defaultMatrix()->size(0) == dim, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill2 : ", M->defaultMatrix()->size(1) == dim, true);
@@ -287,7 +287,7 @@ void OSNSMatrixTest::testConvert2()
   M->fill(indexSet, blocks);
 
   M->convert();
-  SP::NumericsMatrix NumMat = M->getNumericsMatrix();
+  SP::NumericsMatrix NumMat = M->numericsMatrix();
   unsigned int dim = 0;
   for (InteractionsIterator it = indexSet->begin(); it != indexSet->end(); ++it)
     dim += (*it)->nonSmoothLaw()->size();

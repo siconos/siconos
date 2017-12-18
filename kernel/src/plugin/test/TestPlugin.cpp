@@ -39,6 +39,17 @@ extern "C" DLLEXPORT void computeJacobianfx(double time, unsigned int sizeOfX, d
     jacob[i] = i + 1;
 }
 
+extern "C" DLLEXPORT void computeM(double time, unsigned int sizeOfX, double* x, double* M, unsigned int sizeZ, double* z);
+extern "C" DLLEXPORT void computeM(double time, unsigned int sizeOfX, double* x, double* M, unsigned int sizeZ, double* z)
+{
+  for (unsigned int i = 0; i < sizeOfX * sizeOfX; ++i)
+    M[i] = 0;
+  M[0] = 1 * time;
+  M[4] = 2 * time;
+  M[8] = 3 * time;
+}
+
+
 // ===== Lagrangian DS  =====
 
 extern "C" DLLEXPORT void computeMass(unsigned int sizeOfq, double *q, double *mass, unsigned int sizeZ, double* z);

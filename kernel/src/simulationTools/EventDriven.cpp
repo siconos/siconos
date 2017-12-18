@@ -32,12 +32,16 @@
 #include "Relation.hpp"
 #include "NonSmoothLaw.hpp"
 #include "NewtonEulerR.hpp"
-//#define DEBUG_MESSAGES
 
+// #define DEBUG_NOCOLOR
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
 #include <debug.h>
 
 using namespace std;
 using namespace RELATION;
+
+#define DEFAULT_TOL_ED 1000 * DEFAULT_TOLERANCE
 
 /** defaut constructor
  *  \param a pointer to a timeDiscretisation (linked to the model that owns this simulation)
@@ -106,9 +110,9 @@ void EventDriven::updateIndexSet(unsigned int i)
   assert(indexSet1);
   assert(indexSet2);
 
-  // DEBUG_PRINTF("update indexSets start : indexSet0 size : %ld\n", indexSet0->size());
-  // DEBUG_PRINTF("update IndexSets start : indexSet1 size : %ld\n", indexSet1->size());
-  // DEBUG_PRINTF("update IndexSets start : indexSet2 size : %ld\n", indexSet2->size());
+  DEBUG_PRINTF("update indexSets start : indexSet0 size : %ld\n", _indexSet0->size());
+  DEBUG_PRINTF("update IndexSets start : indexSet1 size : %ld\n", indexSet1->size());
+  DEBUG_PRINTF("update IndexSets start : indexSet2 size : %ld\n", indexSet2->size());
 
   InteractionsGraph::VIterator uibegin, uipend, uip;
   std11::tie(uibegin, uipend) = _indexSet0->vertices();
@@ -120,7 +124,7 @@ void EventDriven::updateIndexSet(unsigned int i)
     {
       // if indexSet[1]=>getYRef(0): output y
       // if indexSet[2]=>getYRef(1): output ydot
-      double y = inter->getYRef(0); // output to define the IndexSets at this Interaction
+      double y = (*inter->y(0))(0) ; // output to define the IndexSets at this Interaction
       if (y < -_TOL_ED) // y[0] < 0
       {
         inter->display();
@@ -149,7 +153,7 @@ void EventDriven::updateIndexSet(unsigned int i)
     {
       if (indexSet1->is_vertex(inter)) // Interaction is in the indexSet[1]
       {
-        double y = inter->getYRef(1); // output of level 1 at this Interaction
+        double y = (*inter->y(1))(0); // output of level 1 at this Interaction
         if (!indexSet2->is_vertex(inter)) // Interaction is not yet in the indexSet[2]
         {
           if (fabs(y) <= _TOL_ED)
@@ -208,14 +212,20 @@ void EventDriven::updateIndexSetsWithDoubleCondition()
     ++vnext;
 
     SP::Interaction inter = indexSet2->bundle(*ui);
-    double gamma = inter->getYRef(2);
-    double F     = inter->getLambdaRef(2);
+    double gamma = (*inter->y(2))(0);
+    double F     = (*inter->lambda(2))(0);
+    DEBUG_PRINTF("ED 1 update with double condition%f\n", F);
+    DEBUG_PRINTF("ED 2 update with double condition %f\n", gamma);
+    DEBUG_PRINTF("ED 3 update with double condition%f\n", _TOL_ED);
+
+    
     if (fabs(F) < _TOL_ED)
       indexSet2->remove_vertex(inter);
     else if ((gamma < -_TOL_ED) || (F < -_TOL_ED))
-      RuntimeException::selfThrow("EventDriven::updateIndexSetsWithDoubleCondition(), output[2] and lambda[2] for Interactionof indexSet[2] must be higher or equal to zero.");
+      RuntimeException::selfThrow("EventDriven::updateIndexSetsWithDoubleCondition(), output[2] and lambda[2] for Interaction of indexSet[2] must be nonnegative.");
     else if (((fabs(gamma) > _TOL_ED) && (fabs(F) > _TOL_ED)))
       RuntimeException::selfThrow("EventDriven::updateIndexSetsWithDoubleCondition(), something is wrong for the LCP resolution.");
+    DEBUG_PRINTF("End update with double condition %f\n", _TOL_ED);
   }
 }
 
@@ -259,7 +269,7 @@ void EventDriven::initOSNS()
                                                         *  exist */
       RuntimeException::selfThrow
       ("EventDriven::initialize, an EventDriven simulation must have an 'impact' non smooth problem.");
-    
+
     if (!((*_allNSProblems)[SICONOS_OSNSP_ED_SMOOTH_ACC])) /* ie if the acceleration-level problem
                                                             * does not exist */
       RuntimeException::selfThrow
@@ -290,25 +300,7 @@ void EventDriven::initOSIs()
 {
   for (OSIIterator itosi = _allOSI->begin();  itosi != _allOSI->end(); ++itosi)
   {
-    // Initialize the acceleration like for NewMarkAlphaScheme
-    if ((*itosi)->getType() == OSI::NEWMARKALPHAOSI)
-    {
-      SP::NewMarkAlphaOSI osi_NewMark =  std11::static_pointer_cast<NewMarkAlphaOSI>(*itosi);
-      DynamicalSystemsGraph::VIterator dsi, dsend;
-      SP::DynamicalSystemsGraph osiDSGraph = (*itosi)->dynamicalSystemsGraph();
-      for (std11::tie(dsi, dsend) = osiDSGraph->vertices(); dsi != dsend; ++dsi)
-      {
-        if (!(*itosi)->checkOSI(dsi)) continue;
-        SP::DynamicalSystem ds = osiDSGraph->bundle(*dsi);
-        if ((Type::value(*ds) == Type::LagrangianDS) || (Type::value(*ds) == Type::LagrangianLinearTIDS))
-        {
-          SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS>(ds);
-          *(d->workspace(DynamicalSystem::acce_like)) = *(d->acceleration()); // set a0 = ddotq0
-          // Allocate the memory to stock coefficients of the polynomial for the dense output
-          d->allocateWorkMatrix(LagrangianDS::coeffs_denseoutput, ds->dimension(), (osi_NewMark->getOrderDenseOutput() + 1));
-        }
-      }
-    }
+
   }
 }
 
@@ -344,12 +336,15 @@ void EventDriven::initialize(SP::Model m, bool withOSI)
 
   Simulation::initialize(m, withOSI);
   // Initialization for all OneStepIntegrators
-  initOSIs();
+  //initOSIs();
   initOSIRhs();
 }
 
 void EventDriven::computef(OneStepIntegrator& osi, integer * sizeOfX, doublereal * time, doublereal * x, doublereal * xdot)
 {
+
+
+  DEBUG_BEGIN("EventDriven::computef(OneStepIntegrator& osi, integer * sizeOfX, doublereal * time, doublereal * x, doublereal * xdot)\n");
   // computeF is supposed to fill xdot in, using the definition of the
   // dynamical systems belonging to the osi
 
@@ -364,7 +359,7 @@ void EventDriven::computef(OneStepIntegrator& osi, integer * sizeOfX, doublereal
   // Update Jacobian matrices at all interactions
   InteractionsGraph::VIterator ui, uiend;
   for (std11::tie(ui, uiend) = _indexSet0->vertices(); ui != uiend; ++ui)
-  {
+    {
     Interaction& inter = *_indexSet0->bundle(*ui);
     inter.relation()->computeJach(t, inter, _indexSet0->properties(*ui));
   }
@@ -409,9 +404,12 @@ void EventDriven::computef(OneStepIntegrator& osi, integer * sizeOfX, doublereal
     else
     {
       SiconosVector& xtmp2 = ds.getRhs(); // Pointer link !
+      DEBUG_EXPR(xtmp2.display(););
       pos += xtmp2.copyData(&xdot[pos]);
     }
   }
+  DEBUG_END("EventDriven::computef(OneStepIntegrator& osi, integer * sizeOfX, doublereal * time, doublereal * x, doublereal * xdot)\n");
+    
 }
 
 void EventDriven::computeJacobianfx(OneStepIntegrator& osi,
@@ -455,7 +453,7 @@ void EventDriven::computeJacobianfx(OneStepIntegrator& osi,
     if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
     {
       LagrangianDS& lds = static_cast<LagrangianDS&>(ds);
-      BlockMatrix& jacotmp = *lds.jacobianRhsx();
+      BlockMatrix& jacotmp = static_cast<BlockMatrix&>(*lds.jacobianRhsx());
       for (unsigned int j = 0; j < lds.n(); ++j)
       {
         for (unsigned int k = 0; k < lds.dimension(); ++k)
@@ -584,15 +582,14 @@ void EventDriven::updateImpactState()
 void EventDriven::updateSmoothState()
 {
   // Update input of level 2
-  _nsds->updateInput(nextTime(),2);
+  _nsds->updateInput(nextTime(),2); // Note FP : Probably already up to date? (previous call of updateInput in simu)
   OSIIterator itOSI;
   // Compute acceleration
   for (itOSI = _allOSI->begin(); itOSI != _allOSI->end() ; ++itOSI)
     (*itOSI)->updateState(2);
 }
 
-
-void EventDriven::update(unsigned int levelInput)
+void EventDriven::updateState(unsigned int levelInput)
 {
   assert(levelInput <= 2);
   if (levelInput == 1)
@@ -603,6 +600,10 @@ void EventDriven::update(unsigned int levelInput)
   {
     updateSmoothState();
   }
+}
+
+void EventDriven::updateOutput(unsigned int levelInput)
+{
   // Update output (y)
   _nsds->updateOutput(nextTime(),levelInput);
   // Warning: index sets are not updated in this function !!
@@ -636,9 +637,9 @@ void EventDriven::advanceToEvent()
     // Update input of level 2 >>> has already been done in newtonSolve
     // Update state of all Dynamicall Systems >>>  has already been done in newtonSolve
     // Update outputs of levels 0, 1, 2
-    _nsds->updateOutput(nextTime(),0);
-    _nsds->updateOutput(nextTime(),1);
-    _nsds->updateOutput(nextTime(),2);
+    updateOutput(0);
+    updateOutput(1);
+    updateOutput(2);
     // Detect whether or not some events occur during the integration step
     _minConstraint = detectEvents();
     //
@@ -688,8 +689,8 @@ void EventDriven::advanceToEvent()
     OSIIterator it;
     for (it = _allOSI->begin(); it != _allOSI->end(); ++it)
     {
-      (*it)->resetNonSmoothPart();
-      
+      (*it)->resetAllNonSmoothParts();
+
       //====================================================================================
       //     cout << " Start of LsodarOSI integration" << endl;
       (*it)->integrate(_tinit, _tend, _tout, _istate); // integrate must
@@ -729,9 +730,9 @@ void EventDriven::advanceToEvent()
     }
     // Set model time to _tout
     //update output[0], output[1], output[2]
-    _nsds->updateOutput(nextTime(),0);
-    _nsds->updateOutput(nextTime(),1);
-    _nsds->updateOutput(nextTime(),2);
+    updateOutput(0);
+    updateOutput(1);
+    updateOutput(2);
     //update lambda[2], input[2] and indexSet[2] with double consitions for the case there is no new event added during time integration, otherwise, this
     // update is done when the new event is processed
     if (!isNewEventOccur)
@@ -794,11 +795,7 @@ double EventDriven::computeResiduConstraints()
         {
           _maxResiduGap = abs(_y);
         }
-        //
-#ifdef DEBUG_MESSAGES
-        cout << "Contraint residu: " << _y <<endl;
-#endif
-        //
+        DEBUG_PRINTF("Constraint residu: =  %e \n", _y);
       }
     }
     else
@@ -806,11 +803,8 @@ double EventDriven::computeResiduConstraints()
       RuntimeException::selfThrow("In EventDriven::predictionNewtonIteration, the current OSI must be NewMarkAlpha scheme!!!");
     }
   }
-  //
-#ifdef DEBUG_MESSAGES
-  cout << "Maximum constraint residu: " << _maxResiduGap <<endl;
-#endif
-  //
+
+  DEBUG_PRINTF("Maximum constraint residu = %e \n", _maxResiduGap);
   return _maxResiduGap;
 }
 
@@ -915,6 +909,7 @@ void EventDriven::correctionNewtonIteration()
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 void EventDriven::newtonSolve(double criterion, unsigned int maxStep)
 {
+  DEBUG_BEGIN("EventDriven::newtonSolve(double criterion, unsigned int maxStep)\n");
   _isNewtonConverge = false;
   _newtonNbIterations = 0; // number of Newton iterations
   int info = 0;
@@ -929,10 +924,10 @@ void EventDriven::newtonSolve(double criterion, unsigned int maxStep)
     // Check convergence
     _isNewtonConverge = newtonCheckConvergence(_newtonTolerance);
     //
-#ifdef DEBUG_MESSAGES
-    cout << "Iteration: " << _newtonNbIterations <<endl;
-    cout << "Convergence: " << _isNewtonConverge <<endl;
-#endif
+
+    DEBUG_PRINTF("Iteration:  %i \n",_newtonNbIterations );
+    DEBUG_PRINTF("Convergence:  %s \n",(_isNewtonConverge)?"true":"false");
+
     //
     if (_isNewtonConverge)
     {
@@ -955,6 +950,7 @@ void EventDriven::newtonSolve(double criterion, unsigned int maxStep)
     // Correction of the state of all Dynamical Systems
     correctionNewtonIteration();
   }
+  DEBUG_END("EventDriven::newtonSolve(double criterion, unsigned int maxStep)\n");
 }
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

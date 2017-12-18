@@ -85,7 +85,7 @@ int main(int argc, char* argv[])
     SP::NonSmoothLaw nslaw(new NewtonImpactNSL(e));
 
     SP::Relation relation(new LagrangianScleronomousR("BouncingBallPlugin:h0", "BouncingBallPlugin:G0"));
-    SP::Interaction inter(new Interaction(1, nslaw, relation));
+    SP::Interaction inter(new Interaction(nslaw, relation));
 
     // -------------
     // --- Model ---

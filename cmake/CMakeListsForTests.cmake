@@ -27,6 +27,34 @@ if(CMAKE_SYSTEM_NAME MATCHES Windows)
   SET(COMPONENT_PATH "${COMPONENT_BIN_DIR}\;@ENV_PATH@")
 endif()
 
+# In certain cases, ex. no rpath, or running tests with plugins,
+# libraries cannot be found at link or test time, so we add the
+# LD_LIBRARY_PATH variable.
+if (CMAKE_SKIP_RPATH)
+  SET(LDLIBPATH "")
+  FOREACH(_C ${COMPONENTS})
+    LIST(APPEND LDLIBPATH "${CMAKE_BINARY_DIR}/${_C}")
+  ENDFOREACH()
+  if (NOT CMAKE_SYSTEM_NAME MATCHES WINDOWS)
+    STRING(REPLACE ";" ":" LDLIBPATH "${LDLIBPATH}")
+  endif()
+  if (CMAKE_SYSTEM_NAME MATCHES APPLE)
+    if ($ENV{DYLD_LIBRARY_PATH})
+      set(LDLIBPATH "${LDLIBPATH}:$ENV{DYLD_LIBRARY_PATH}")
+    endif()
+    SET(LDLIBPATH "DYLD_LIBRARY_PATH=${LDLIBPATH}")
+  else()
+    if (CMAKE_SYSTEM_NAME MATCHES WINDOWS)
+      SET(LDLIBPATH "Path=${LDLIBPATH};$ENV{Path}")
+    else()
+      if ($ENV{LD_LIBRARY_PATH})
+        set(LDLIBPATH "${LDLIBPATH}:$ENV{LD_LIBRARY_PATH}")
+      endif()
+      SET(LDLIBPATH "LD_LIBRARY_PATH=${LDLIBPATH}")
+    endif()
+  endif()
+endif()
+
 FOREACH(_EXE ${_EXE_LIST_${_CURRENT_TEST_DIRECTORY}})
   
   file(APPEND ${TESTS_LOGFILE} "Adding test suite ${_CURRENT_TEST_DIRECTORY}/${_EXE} \n")
@@ -89,6 +117,17 @@ FOREACH(_EXE ${_EXE_LIST_${_CURRENT_TEST_DIRECTORY}})
   target_link_libraries(${_EXE} ${PRIVATE} @COMPONENT@)
   target_link_libraries(${_EXE} ${PRIVATE} ${@COMPONENT@_LINK_LIBRARIES})
 
+  # if no rpath, tests cannot find the libraries and build fails, so
+  # we add the LD_LIBRARY_PATH variable
+  if (CMAKE_SKIP_RPATH)
+    SET(LDLIBPATH "")
+    FOREACH(_C ${COMPONENTS})
+      LIST(APPEND LDLIBPATH "${CMAKE_BINARY_DIR}/${_C}")
+    ENDFOREACH()
+    STRING(REPLACE ";" ":" LDLIBPATH "${LDLIBPATH}")
+    SET(LDLIBPATH "LD_LIBRARY_PATH=${LDLIBPATH}")
+  endif()
+
   set(COMPONENT_TEST_LIB_ @COMPONENT_TEST_LIB@)
   if(COMPONENT_TEST_LIB_)
     add_dependencies(${_EXE} @COMPONENT_TEST_LIB@)
@@ -105,7 +144,8 @@ FOREACH(_EXE ${_EXE_LIST_${_CURRENT_TEST_DIRECTORY}})
 
   IF(CPPUNIT_FOUND)
     # each test in the test suite becomes a cmake test
-    
+
+
     IF(CROSSCOMPILING_LINUX_TO_WINDOWS)
       SET(EMULATOR "wine")
     ELSE()
@@ -125,6 +165,7 @@ FOREACH(_EXE ${_EXE_LIST_${_CURRENT_TEST_DIRECTORY}})
         COMMAND env 
         ARGS "LSAN_OPTIONS=suppressions=${CMAKE_SOURCE_DIR}/Build/ci-scripts/asan-supp.txt:$ENV{LSAN_OPTIONS}"
         "ASAN_OPTIONS=detect_stack_use_after_return=1:detect_leaks=1:$ENV{ASAN_OPTIONS}"
+        ${LDLIBPATH}
         ${CMAKE_CURRENT_BINARY_DIR}/${_EXE}${EXE_EXT}
         --cdash-prepare ${CMAKE_CURRENT_BINARY_DIR}/${_EXE}${EXE_EXT} > ${CMAKE_CURRENT_BINARY_DIR}/${_EXE}.cmake
         COMMENT "Generating ${_EXE}.cmake")
@@ -136,8 +177,7 @@ FOREACH(_EXE ${_EXE_LIST_${_CURRENT_TEST_DIRECTORY}})
     FILE(APPEND ${CMAKE_CURRENT_BINARY_DIR}/SiconosTestConfig.cmake "  ADD_TEST(\${ARGV})\n")
     FILE(APPEND ${CMAKE_CURRENT_BINARY_DIR}/SiconosTestConfig.cmake "  SET(_EXE \${ARGV0})\n")
 
-    IF(CMAKE_SYSTEM_NAME MATCHES Windows)
-    ENDIF()
+    SET(ENV_PPTY "${LDLIBPATH}")
 
     IF(USE_SANITIZER MATCHES "asan")
       SET(ENV_PPTY "${ENV_PPTY};ASAN_OPTIONS=detect_stack_use_after_return=1:detect_leaks=1:$ENV{ASAN_OPTIONS}")
@@ -178,8 +218,9 @@ FOREACH(_EXE ${_EXE_LIST_${_CURRENT_TEST_DIRECTORY}})
       SET_TARGET_PROPERTIES(${_EXE} PROPERTIES LINKER_LANGUAGE CXX)
     ENDIF(WITH_CXX_)
 
-    if(CMAKE_SYSTEM_NAME MATCHES Windows)
-      set_tests_properties(${_EXE} PROPERTIES ENVIRONMENT "Path=${COMPONENT_PATH}")
+    if (LDLIBPATH)
+      SET_TARGET_PROPERTIES(${_EXE} PROPERTIES ENVIRONMENT "${LDLIBPATH}")
+      set_tests_properties(${_EXE} PROPERTIES ENVIRONMENT "${ENV_PPTY}")
     endif()
 
     IF(USE_SANITIZER MATCHES "asan")
@@ -191,8 +232,12 @@ FOREACH(_EXE ${_EXE_LIST_${_CURRENT_TEST_DIRECTORY}})
       SET_TESTS_PROPERTIES(${_EXE} PROPERTIES ${${_EXE}_PROPERTIES})
     ENDIF(${_EXE}_PROPERTIES)
 
-    set_tests_properties(${_EXE} PROPERTIES TIMEOUT ${tests_timeout})
- 
+    if(${_EXE}_TIMEOUT)
+      set_tests_properties(${_EXE} PROPERTIES TIMEOUT ${${_EXE}_TIMEOUT})
+    else()
+      set_tests_properties(${_EXE} PROPERTIES TIMEOUT ${tests_timeout})
+    endif()
+
   ENDIF()
 
 ENDFOREACH()

@@ -62,6 +62,9 @@ public:
   */
   NewtonImpactNSL(double e);
 
+  /** Apply multiple-axis impact */
+  NewtonImpactNSL(unsigned int size, double e);
+
   /** destructor
    */
   ~NewtonImpactNSL();

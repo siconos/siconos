@@ -20,25 +20,38 @@
 #include "LCP_Solvers.h"
 #include "NumericsMatrix.h"
 #include "numerics_verbose.h"
+#include <math.h>
+#include <assert.h>
+#include <float.h>
+/* void lcp_compute_error_only(unsigned int n, double* restrict z , double* restrict w, double* restrict error) */
+/* { */
+/*   /\* Checks complementarity *\/ */
+
+/*   *error = 0.; */
+/*   double zi, wi; */
+/*   for (unsigned int i = 0 ; i < n ; i++) */
+/*   { */
+/*     zi = z[i]; */
+/*     wi = w[i]; */
+/*     if (zi < 0.0) */
+/*     { */
+/*       *error += -zi; */
+/*       if (wi < 0.0) *error += zi * wi; */
+/*     } */
+/*     if (wi < 0.0) *error += -wi; */
+/*     if ((zi > 0.0) && (wi > 0.0)) *error += zi * wi; */
+/*   } */
+/* } */
 
 void lcp_compute_error_only(unsigned int n, double* restrict z , double* restrict w, double* restrict error)
 {
-  /* Checks complementarity */
-
   *error = 0.;
   double zi, wi;
   for (unsigned int i = 0 ; i < n ; i++)
   {
-    zi = z[i];
-    wi = w[i];
-    if (zi < 0.0)
-    {
-      *error += -zi;
-      if (wi < 0.0) *error += zi * wi;
-    }
-    if (wi < 0.0) *error += -wi;
-    if ((zi > 0.0) && (wi > 0.0)) *error += zi * wi;
+    *error += pow(z[i] - fmax(0,(z[i] - w[i])),2);
   }
+  *error =sqrt(*error);
 }
 
 int lcp_compute_error(LinearComplementarityProblem* problem, double *z , double *w, double tolerance, double * error)
@@ -54,7 +67,11 @@ int lcp_compute_error(LinearComplementarityProblem* problem, double *z , double 
   NM_gemv(1.0, problem->M, z, 1.0, w);
   double norm_q = cblas_dnrm2(n , problem->q , incx);
   lcp_compute_error_only(n, z, w, error);
-  *error = *error / (norm_q + 1.0); /* Need some comments on why this is needed */
+  if (fabs(norm_q) > DBL_EPSILON)
+    *error /= norm_q;
+
+  
+  //*error = *error / (norm_q + 1.0); /* Need some comments on why this is needed */
   if (*error > tolerance)
   {
     if (verbose > 0) printf(" Numerics - lcp_compute_error : error = %g > tolerance = %g.\n", *error, tolerance);

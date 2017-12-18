@@ -30,10 +30,16 @@
 #include <assert.h>
 #include "SiconosBlas.h"
 #include "numerics_verbose.h"
+
+
+
+/* #define DEBUG_MESSAGES */
+/* #define DEBUG_STDOUT */
+#include "debug.h"
 void lcp_pgs(LinearComplementarityProblem* problem, double *z, double *w, int *info , SolverOptions* options)
 {
   /* matrix M/vector q of the lcp */
-  double * M = problem->M->matrix0;
+  NumericsMatrix * M = problem->M;
   double * q = problem->q;
 
   assert(M);
@@ -65,9 +71,11 @@ void lcp_pgs(LinearComplementarityProblem* problem, double *z, double *w, int *i
 
   /* Preparation of the diagonal of the inverse matrix */
   double * diag = (double*)malloc(n * sizeof(double));
+  double diag_i = 0.0;
   for (i = 0 ; i < n ; ++i)
   {
-    if (fabs(M[i * n + i]) < DBL_EPSILON)
+    diag_i = NM_get_value(M,i,i);
+    if (fabs(diag_i) < DBL_EPSILON)
     {
       if (verbose > 0)
       {
@@ -79,7 +87,7 @@ void lcp_pgs(LinearComplementarityProblem* problem, double *z, double *w, int *i
       free(diag);
       return;
     }
-    else diag[i] = 1.0 / M[i * n + i];
+    else diag[i] = 1.0 / diag_i;
   }
 
   /* Iterations*/
@@ -96,8 +104,15 @@ void lcp_pgs(LinearComplementarityProblem* problem, double *z, double *w, int *i
 
     for (i = 0 ; i < n ; ++i)
     {
-      z[i] = 0.0;
-      zi = -(q[i] + cblas_ddot(n , &M[i] , n , z , 1)) * diag[i];
+      //z[i] = 0.0;
+
+      zi =q[i];
+      DEBUG_PRINTF("zi = %e\n", zi);
+      NM_row_prod_no_diag1x1(n, i, i, M, z, &zi, false);
+      DEBUG_PRINTF("diag[i] = %e\t zi = %e\n",diag[i], zi);
+      zi = -(zi) * diag[i];
+
+      
       if (zi < 0) z[i] = 0.0;
       else z[i] = zi;
       /* z[i]=fmax(0.0,-( q[i] + ddot_( (integer *)&n , &M[i] , (integer *)&incxn , z , (integer *)&incy ))*diag[i]);*/
@@ -119,8 +134,11 @@ void lcp_pgs(LinearComplementarityProblem* problem, double *z, double *w, int *i
 
   if (err > tol)
   {
-    printf("Siconos/Numerics: lcp_pgs: No convergence of PGS after %d iterations\n" , iter);
-    printf("The residue is : %g \n", err);
+    if (verbose > 0)
+    {
+      printf("Siconos/Numerics: lcp_pgs: No convergence of PGS after %d iterations\n" , iter);
+      printf("The residue is : %g \n", err);
+    }
     *info = 1;
   }
   else

@@ -379,7 +379,7 @@ public:
    */
   IdentityMat* identity(unsigned int row = 0, unsigned int col = 0) const;
 
-  /** return the adress of the array of double values of the matrix
+  /** return the address of the array of double values of the matrix
    *  \param row position for the required block ->useless for SimpleMatrix
    *  \param col position for the required block ->useless for SimpleMatrix
    *  \return double* : the pointer on the double array
@@ -443,6 +443,17 @@ public:
    */
   void display() const;
 
+  /** put data of the matrix into a std::string
+   * \return std::string
+   */
+  std::string toString() const;
+
+  /** send data of the matrix to an ostream
+   * \param os An output stream
+   * \param sm a SimpleMatrix
+   * \return The same output stream
+   */
+  friend std::ostream& operator<<(std::ostream& os, const SimpleMatrix& sm);
 
   /** get or set the element matrix[i,j]
    *  \param i an unsigned int 

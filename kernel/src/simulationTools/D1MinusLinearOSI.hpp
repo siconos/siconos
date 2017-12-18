@@ -118,6 +118,8 @@ const double DEFAULT_TOL_D1MINUS  = 1e-8;
 
 class D1MinusLinearOSI : public OneStepIntegrator
 {
+public :
+
 protected:
 
   /** nslaw effects */
@@ -128,9 +130,9 @@ protected:
 
     OneStepNSProblem* _osnsp;
     SP::Interaction _inter;
-
-    _NSLEffectOnFreeOutput(OneStepNSProblem *p, SP::Interaction inter) :
-      _osnsp(p), _inter(inter) {};
+    InteractionProperties& _interProp;
+    _NSLEffectOnFreeOutput(OneStepNSProblem *p, SP::Interaction inter, InteractionProperties& interProp) :
+      _osnsp(p), _inter(inter), _interProp(interProp) {};
 
     void visit(const NewtonImpactNSL& nslaw);
     void visit(const EqualityConditionNSL& nslaw)
@@ -152,7 +154,10 @@ public:
                                      halfexplicit_acceleration_level_full,
                                      explicit_velocity_level,
                                      halfexplicit_velocity_level,
-                                     numberOfTypeOfD1MinusLinearOSI };
+                                     numberOfTypeOfD1MinusLinearOSI
+                                    };
+
+  enum {OSNSP_RHS,WORK_INTERACTION_LENGTH};
 
   /** basic constructor
    */
@@ -189,7 +194,10 @@ public:
    * D1MinusLinearOSI::halfexplicit_velocity_level,
    * D1MinusLinearOSI::numberOfTypeOfD1MinusLinearOSI
    */
-  unsigned int typeOfD1MinusLinearOSI(){return _typeOfD1MinusLinearOSI;};
+  unsigned int typeOfD1MinusLinearOSI()
+  {
+    return _typeOfD1MinusLinearOSI;
+  };
 
   /** get the number of index sets required for the simulation
    * \return unsigned int
@@ -199,8 +207,26 @@ public:
   /** initialization of the D1MinusLinearOSI integrator; for linear time
    *  invariant systems, we compute time invariant operator
    */
-  virtual void initialize(Model& m);
+  // virtual void initialize(Model& m);
+  virtual void initialize_nonsmooth_problems();
 
+  /** initialization of the work vectors and matrices (properties) related to
+   *  one dynamical system on the graph and needed by the osi
+   * \param m the Model
+   * \param t time of initialization
+   * \param ds the dynamical system
+   */
+  void initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds);
+
+  /** initialization of the work vectors and matrices (properties) related to
+   *  one interaction on the graph and needed by the osi
+   * \param inter the interaction
+   * \param interProp the properties on the graph
+   * \param DSG the dynamical systems graph
+   */
+  void fillDSLinks(Interaction &inter, InteractionProperties& interProp,
+			     DynamicalSystemsGraph & DSG);
+  
   /** return the maximum of all norms for the residus of DS
    *  \post{ds->residuFree will be calculated, ds->q() contains new position, ds->velocity contains predicted velocity}
    *  \return double
@@ -301,12 +327,12 @@ public:
   */
   virtual bool removeInteractionInIndexSetHalfExplicitAccelerationLevel(SP::Interaction inter, unsigned int i);
 
- /** Apply the rule to one Interaction to known if is it should be included
-   * in the IndexSet of level i
-   * \param inter the involved interaction
-   * \param i the index set level
-   * \return a boolean if it needs to be added or not
-   */
+  /** Apply the rule to one Interaction to known if is it should be included
+    * in the IndexSet of level i
+    * \param inter the involved interaction
+    * \param i the index set level
+    * \return a boolean if it needs to be added or not
+    */
   virtual bool addInteractionInIndexSetHalfExplicitVelocityLevel(SP::Interaction inter, unsigned int i);
 
   /** Apply the rule to one Interaction to known if is it should be removed

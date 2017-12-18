@@ -42,7 +42,7 @@ const unsigned int SCHATZMANPAOLISTEPSINMEMORY = 2;
  * concerned dynamical systems.  Each DynamicalSystem is associated to
  * a SiconosMatrix, named "W"
  *
- * W matrices are initialized and computed in initW and
+ * W matrices are initialized and computed in initializeIterationMatrixW and
  * computeW. Depending on the DS type, they may depend on time and DS
  * state (x).
  *
@@ -61,11 +61,15 @@ const unsigned int SCHATZMANPAOLISTEPSINMEMORY = 2;
  */
 class SchatzmanPaoliOSI : public OneStepIntegrator
 {
+public:
+   enum {OSNSP_RHS,WORK_INTERACTION_LENGTH};
+
 protected:
   /** serialization hooks
   */
   ACCEPT_SERIALIZATION(SchatzmanPaoliOSI);
 
+ 
 
   /** Stl map that associates a theta parameter for the integration
   *  scheme to each DynamicalSystem of the OSI */
@@ -226,7 +230,7 @@ public:
   inline void setUseGammaForRelation(bool newUseGammaForRelation)
   {
     _useGammaForRelation = newUseGammaForRelation;
-    if (_useGammaForRelation) _useGamma = false;
+    if(_useGammaForRelation) _useGamma = false;
   };
 
 
@@ -236,14 +240,35 @@ public:
       invariant systems, we compute time invariant operator (example :
       W)
    */
-  void initialize(Model& m );
+  //void initialize(Model& m);
 
-  /** init W SchatzmanPaoliOSI matrix at time t
+  /** initialization of the work vectors and matrices (properties) related to
+   *  one dynamical system on the graph and needed by the osi
+   * \param m the Model
+   * \param t time of initialization
+   * \param ds the dynamical system
+   */
+  void initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds);
+
+  /** initialization of the work vectors and matrices (properties) related to
+   *  one interaction on the graph and needed by the osi
+   * \param inter the interaction
+   * \param interProp the properties on the graph
+   * \param DSG the dynamical systems graph
+   */
+  void fillDSLinks(Interaction &inter,
+		     InteractionProperties& interProp,
+		     DynamicalSystemsGraph & DSG);
+
+  /** get the number of index sets required for the simulation
+   * \return unsigned int
+   */
+  unsigned int numberOfIndexSets() const {return 1;};
+  /** initialize iteration matrix W SchatzmanPaoliOSI matrix at time t
    *  \param time (double)
    *  \param ds a pointer to DynamicalSystem
-   *  \param dsv a descriptor of the ds on the graph (redundant)
    */
-  void initW(double time, SP::DynamicalSystem ds, DynamicalSystemsGraph::VDescriptor& dsv);
+  void initializeIterationMatrixW(double time, SP::DynamicalSystem ds);
 
   /** compute W SchatzmanPaoliOSI matrix at time t
    *  \param time the time (double)
@@ -258,11 +283,11 @@ public:
    */
   void computeWBoundaryConditions(SP::DynamicalSystem ds, SiconosMatrix& WBoundaryConditions);
 
-  /** init WBoundaryConditionsMap[ds] SchatzmanPaoliOSI
+  /** initialize iteration matrix WBoundaryConditionsMap[ds] SchatzmanPaoliOSI
    *  \param ds a pointer to DynamicalSystem
    *  \param dsv a descriptor of the ds on the graph (redundant to avoid invocation)
    */
-  void initWBoundaryConditions(SP::DynamicalSystem ds, DynamicalSystemsGraph::VDescriptor& dsv);
+  void initializeIterationMatrixWBoundaryConditions(SP::DynamicalSystem ds, const DynamicalSystemsGraph::VDescriptor& dsv);
 
   /** return the maximum of all norms for the "SchatzmanPaoliOSI-discretized" residus of DS
    *  \return a double

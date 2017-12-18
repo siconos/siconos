@@ -10,7 +10,7 @@
 if(NOT CMAKE_CXX_COMPILER OR NOT CMAKE_CXX_COMPILER_WORKS)
   message(ABORT "no cxx compiler")
 endif()
-
+#add_definitions(-DBOOST_NOEXCEPT)
 # For SiconosConfig.h
 option(SICONOS_USE_BOOST_FOR_CXX11 "Prefer BOOST features over C++ standard features even if C++xy is enabled" ON)
 option(SICONOS_USE_MAP_FOR_HASH "Prefer std::map to std::unordered_map even if C++xy is enabled" ON)
@@ -25,6 +25,7 @@ set("CXXVERSION_CUR" "${CXXVERSION}:${CMAKE_CXX_STANDARD}")
 
 # For SiconosConfig.h
 detect_cxx_std_shared_ptr(SICONOS_STD_SHARED_PTR)
+
 detect_cxx_std_array(SICONOS_STD_ARRAY)
 detect_cxx_std_unordered_map(SICONOS_STD_UNORDERED_MAP)
 detect_cxx_std_tuple(SICONOS_STD_TUPLE)
@@ -38,8 +39,8 @@ set("CXXVERSION_LAST" "${CXXVERSION_CUR}"
 # Check compiler version.
 if(CMAKE_COMPILER_IS_GNUCXX)
   detect_cxx_compiler_version(compiler_version)
-  if(compiler_version VERSION_LESS "4.4")
-    message(FATAL_ERROR "gcc greater than 4.4 needed")
+  if(compiler_version VERSION_LESS "4.5")
+    message(FATAL_ERROR "gcc greater than 4.5 needed")
   endif()  
 endif()
 
@@ -49,21 +50,32 @@ endif()
 if(DEV_MODE)
   # --- Clang ----
   #add_cxx_options("-Weverything" Clang) # like Wall and more
-  add_cxx_options("-Werror=unreachable-code" "Clang")
-  #add_cxx_options("-std=c++11" "Clang")
+  if (WITH_BULLET)
+    # some unreachable code errors come from the Bullet headers
+    add_cxx_options("-Wunreachable-code" "Clang")
+  else()
+    add_cxx_options("-Werror=unreachable-code" "Clang")
+  endif()
   # --- All compilers but MSVC (Microsoft Visual C) ---
   if(NOT MSVC)
     add_cxx_options("-Wall")
   endif()
   add_cxx_options("-Wuninitialized")
   add_cxx_options("-Werror=unknown-warning-option" Clang)
-
+  add_cxx_options("-Wno-unused-local-typedef")
   # --- Options for any compiler ----
   add_cxx_options("-Wextra -Wno-unused-parameter")
   # -- warnings to errors --
   add_cxx_options("-Werror=implicit-function-declaration")
   # should be supported only by Clang. The last statement is important, otherwise nothing compiles ...
-  add_cxx_options("-Werror=conversion -Wno-sign-conversion -Wno-error=sign-conversion Wno-shorten-64-to-32 -Wno-error=shorten-64-to-32")
+  # MB: yes, nothing compiles
+  if(DEV_MODE_STRICT)
+    add_cxx_options("-Werror=conversion")
+  endif()
+  add_cxx_options("-Wno-sign-conversion")
+  add_cxx_options("-Wno-error=sign-conversion")
+  add_cxx_options("-Wno-shorten-64-to-32")
+  add_cxx_options("-Wno-error=shorten-64-to-32")
   # ADD_C_OPTIONS("-Wno-error=shorten-64-to-32") # for clang
   add_cxx_options("-Werror=switch-bool")
   add_cxx_options("-Werror=logical-not-parentheses")
@@ -78,7 +90,7 @@ if(DEV_MODE)
   if((NOT WITH_MECHANISMS) AND (NOT WITH_PYTHON_WRAPPER))
     add_cxx_options("-Werror=missing-declarations")
   endif()
-  if(NOT WITH_OCC AND NOT WITH_MECHANISMS)
+  if(NOT WITH_OCC AND NOT WITH_MECHANISMS AND NOT WITH_SERIALIZATION)
     add_cxx_options("-Werror=overloaded-virtual")
   endif()
 
@@ -134,6 +146,3 @@ add_cxx_options("-Wno-string-plus-int" "Clang")
 if(WITH_SERIALIZATION)
   add_cxx_options("-ftemplate-depth=1024" Clang)
 endif(WITH_SERIALIZATION)
-
-# Do we still need this?
-append_cxx_flags("-D_NUMERICS_INTERNAL_CXX_")

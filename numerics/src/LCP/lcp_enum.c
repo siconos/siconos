@@ -196,9 +196,9 @@ void lcp_enum(LinearComplementarityProblem* problem, double *z, double *w, int *
   int lin;
   sSize = (problem->size);
   int NRHS = 1;
-  int * ipiv;
+  lapack_int * ipiv;
   int check;
-  int LAinfo = 0;
+  lapack_int LAinfo = 0;
   int useDGELS = options->iparam[4];
 
   /*OUTPUT param*/

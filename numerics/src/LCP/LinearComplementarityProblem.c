@@ -18,7 +18,6 @@
 #ifndef LCP_PROBLEM_C
 #define LCP_PROBLEM_C
 
-
 #include <stdio.h>
 #include <math.h>
 #include <stdlib.h>
@@ -62,7 +61,7 @@ int linearComplementarity_printInFile(LinearComplementarityProblem*  problem, FI
   int i;
   int n = problem->size;
   fprintf(file, "%d\n", n);
-  printInFile(problem->M, file);
+  NM_write_in_file(problem->M, file);
   for (i = 0; i < problem->M->size1; i++)
   {
     fprintf(file, "%32.24e ", problem->q[i]);
@@ -77,9 +76,9 @@ int linearComplementarity_newFromFile(LinearComplementarityProblem* problem, FIL
 
   CHECK_IO(fscanf(file, "%d\n", &n));
   problem->size = n;
-  problem->M = newNumericsMatrix();
+  problem->M = NM_new();
 
-  newFromFile(problem->M, file);
+  NM_new_from_file(problem->M, file);
 
   problem->q = (double *) malloc(problem->M->size1 * sizeof(double));
   for (i = 0; i < problem->M->size1; i++)
@@ -101,14 +100,29 @@ int linearComplementarity_newFromFilename(LinearComplementarityProblem* problem,
 
 void freeLinearComplementarityProblem(LinearComplementarityProblem* problem)
 {
-  freeNumericsMatrix(problem->M);
-  free(problem->M);
-  free(problem->q);
+  if (problem->M)
+  {
+    NM_free(problem->M);
+    free(problem->M);
+    problem->M = NULL;
+  }
+  if (problem->q)
+  {
+    free(problem->q);
+    problem->q = NULL;
+  }
+
   free(problem);
-  problem = NULL;
 }
 
+LinearComplementarityProblem*  newLCP(void)
+{
+  LinearComplementarityProblem * LCP = (LinearComplementarityProblem *) malloc(sizeof(LinearComplementarityProblem));
+  LCP->size = 0;
+  LCP->M = NULL;
+  LCP->q = NULL;
 
+  return LCP;
+}
 
 #endif
-

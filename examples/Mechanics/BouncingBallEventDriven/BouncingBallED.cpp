@@ -83,7 +83,7 @@ int main(int argc, char* argv[])
     SP::NonSmoothLaw  nslaw0(new NewtonImpactNSL(e));
     SP::Relation relation0(new LagrangianLinearTIR(H));
 
-    SP::Interaction inter(new Interaction(1, nslaw0, relation0));
+    SP::Interaction inter(new Interaction(nslaw0, relation0));
 
     // --------------------------------
     // --- NonSmoothDynamicalSystem ---
@@ -172,8 +172,8 @@ int main(int argc, char* argv[])
       if (nonSmooth)
       {
         dataPlot(k, 0) = s->startingTime();
-        dataPlot(k, 1) = (*ball->qMemory()->getSiconosVector(1))(0);
-        dataPlot(k, 2) = (*ball->velocityMemory()->getSiconosVector(1))(0);
+        dataPlot(k, 1) = ball->qMemory().getSiconosVector(1)(0);
+        dataPlot(k, 2) = ball->velocityMemory().getSiconosVector(1)(0);
         dataPlot(k, 3) = (*p)(0);
         dataPlot(k, 4) = (*f)(0);
         k++;
@@ -223,6 +223,7 @@ int main(int argc, char* argv[])
   catch (SiconosException e)
   {
     cout << e.report() << endl;
+    return 1;
   }
   catch (...)
   {

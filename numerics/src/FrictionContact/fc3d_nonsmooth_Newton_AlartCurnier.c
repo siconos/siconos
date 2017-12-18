@@ -55,7 +55,7 @@ void fc3d_AlartCurnierFunction(
   assert(rho);
   assert(mu);
 
-  assert(problemSize / 3 > 0);
+  //assert(problemSize / 3 > 0);
   assert(problemSize % 3 == 0);
 
   unsigned int i;
@@ -81,53 +81,6 @@ void fc3d_AlartCurnierFunction(
   }
 }
 
-int fc3d_nonsmooth_Newton_AlartCurnier_setDefaultSolverOptions(
-  SolverOptions* options)
-{
-  if (verbose > 0)
-  {
-    printf("Set the default solver options for the NSN_AC Solver\n");
-  }
-
-  options->solverId = SICONOS_FRICTION_3D_NSN_AC;
-  options->numberOfInternalSolvers = 0;
-  options->isSet = 1;
-  options->filterOn = 1;
-  options->iSize = 20;
-  options->dSize = 20;
-  options->iparam = (int *)calloc(options->iSize, sizeof(int));
-  options->dparam = (double *)calloc(options->dSize, sizeof(double));
-  options->dWork = NULL;
-  solver_options_nullify(options);
-  options->iparam[SICONOS_IPARAM_MAX_ITER] = 200;
-  options->iparam[3] = 100000; /* nzmax*/
-  options->iparam[5] = 1;
-  options->iparam[7] = 1;      /* erritermax */
-
-
-  options->dparam[SICONOS_DPARAM_TOL] = 1e-3;
-  options->dparam[SICONOS_FRICTION_3D_NSN_RHO] = 1;      /* default rho */
-
-  options->iparam[8] = -1;     /* mpi com fortran */
-  options->iparam[SICONOS_FRICTION_3D_NSN_FORMULATION] = SICONOS_FRICTION_3D_NSN_FORMULATION_ALARTCURNIER_GENERATED;
-  /* 0 STD AlartCurnier, 1 JeanMoreau, 2 STD generated, 3 JeanMoreau generated */
-  options->iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH] = SICONOS_FRICTION_3D_NSN_LINESEARCH_GOLDSTEINPRICE;     /* 0 GoldsteinPrice line search, 1 FBLSA */
-  options->iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH_MAXITER] = 100;   /* max iter line search */
-
-#ifdef WITH_MUMPS
-  options->iparam[13] = 1;
-#else
-  options->iparam[13] = 0;     /* Linear solver used at each Newton iteration. 0: cs_lusol, 1 mumps */
-#endif
-
-  options->internalSolvers = NULL;
-
-#ifdef HAVE_MPI
-  options->solverData = MPI_COMM_NULL;
-#endif
-
-  return 0;
-}
 
 void nonsmoothEqnAlartCurnierFun(void* arg,
                                  unsigned int problemSize,
@@ -162,6 +115,7 @@ void fc3d_nonsmooth_Newton_AlartCurnier(
   int *info,
   SolverOptions *options)
 {
+  /* verbose=1; */
   assert(problem);
   assert(reaction);
   assert(velocity);
@@ -217,7 +171,7 @@ void fc3d_nonsmooth_Newton_AlartCurnier(
     fc3d_VI_ExtraGradient_setDefaultSolverOptions(options_vi_eg);
     options_vi_eg->iparam[0] = 50;
     options_vi_eg->dparam[0] = sqrt(options->dparam[0]);
-    options_vi_eg->iparam[SICONOS_VI_ERROR_EVALUATION] = SICONOS_VI_ERROR_EVALUATION_LIGHT;
+    options_vi_eg->iparam[SICONOS_VI_IPARAM_ERROR_EVALUATION] = SICONOS_VI_ERROR_EVALUATION_LIGHT;
     fc3d_VI_ExtraGradient(problem, reaction , velocity , info , options_vi_eg);
 
     fc3d_nonsmooth_Newton_solvers_solve(&equation, reaction, velocity, info, options);
@@ -239,4 +193,51 @@ void fc3d_nonsmooth_Newton_AlartCurnier(
 
 
 
+}
+int fc3d_nonsmooth_Newton_AlartCurnier_setDefaultSolverOptions(
+  SolverOptions* options)
+{
+  if (verbose > 0)
+  {
+    printf("Set the default solver options for the NSN_AC Solver\n");
+  }
+
+  options->solverId = SICONOS_FRICTION_3D_NSN_AC;
+  options->numberOfInternalSolvers = 0;
+  options->isSet = 1;
+  options->filterOn = 1;
+  options->iSize = 20;
+  options->dSize = 20;
+  options->iparam = (int *)calloc(options->iSize, sizeof(int));
+  options->dparam = (double *)calloc(options->dSize, sizeof(double));
+  options->dWork = NULL;
+  solver_options_nullify(options);
+  options->iparam[SICONOS_IPARAM_MAX_ITER] = 200;
+  options->iparam[3] = 100000; /* nzmax*/
+  options->iparam[5] = 1;
+  options->iparam[7] = 1;      /* erritermax */
+
+  options->dparam[SICONOS_DPARAM_TOL] = 1e-3;
+  options->iparam[SICONOS_FRICTION_3D_NSN_RHO_STRATEGY] = SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_SPECTRAL_NORM;
+  options->dparam[SICONOS_FRICTION_3D_NSN_RHO] = 1;      /* default rho */
+
+  options->iparam[8] = -1;     /* mpi com fortran */
+  options->iparam[SICONOS_FRICTION_3D_NSN_FORMULATION] = SICONOS_FRICTION_3D_NSN_FORMULATION_ALARTCURNIER_GENERATED;
+  /* 0 STD AlartCurnier, 1 JeanMoreau, 2 STD generated, 3 JeanMoreau generated */
+  options->iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH] = SICONOS_FRICTION_3D_NSN_LINESEARCH_GOLDSTEINPRICE;     /* 0 GoldsteinPrice line search, 1 FBLSA */
+  options->iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH_MAXITER] = 100;   /* max iter line search */
+
+#ifdef WITH_MUMPS
+  options->iparam[13] = 1;
+#else
+  options->iparam[13] = 0;     /* Linear solver used at each Newton iteration. 0: cs_lusol, 1 mumps */
+#endif
+
+  options->internalSolvers = NULL;
+
+#ifdef HAVE_MPI
+  options->solverData = MPI_COMM_NULL;
+#endif
+
+  return 0;
 }

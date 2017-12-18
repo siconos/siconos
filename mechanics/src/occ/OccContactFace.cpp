@@ -27,10 +27,18 @@ SPC::TopoDS_Face OccContactFace::contact() const
 
 void OccContactFace::computeUVBounds()
 {
-  BRepTools::UVBounds(*this->_face,
-                      this->binf1[0],
-                      this->bsup1[0],
-                      this->binf1[1],
-                      this->bsup1[1]);
+
+  TopExp_Explorer exp;
+  exp.Init(this->data(), TopAbs_FACE);
+  for (unsigned int i=0; i<_index; ++i, exp.Next());
+  if (exp.More())
+  {
+    const TopoDS_Face& face = TopoDS::Face(exp.Current());
+    BRepTools::UVBounds(face,
+                        this->binf1[0],
+                        this->bsup1[0],
+                        this->binf1[1],
+                        this->bsup1[1]);
+  }
 }
 

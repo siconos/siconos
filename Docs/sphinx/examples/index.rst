@@ -79,10 +79,11 @@ Table of contents
 
    control/index
 
-.. toctree::
-   :maxdepth: 2
+..
+   .. toctree::
+      :maxdepth: 2
 
-   robotics/index
+      robotics/index
 
 .. toctree::
    :maxdepth: 2

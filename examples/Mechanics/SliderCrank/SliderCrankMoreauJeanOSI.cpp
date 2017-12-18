@@ -98,42 +98,42 @@ int main(int argc, char* argv[])
 #ifdef WITH_FRICTION
     SP::NonSmoothLaw nslaw1(new NewtonImpactFrictionNSL(eN1, eT1, mu1, 2));
     SP::Relation relation1(new LagrangianScleronomousR("SliderCrankPlugin:g1", "SliderCrankPlugin:W1"));
-    SP::Interaction inter1(new Interaction(2, nslaw1, relation1, 1));
+    SP::Interaction inter1(new Interaction(nslaw1, relation1));
 
     // -- corner 2 --
     SP::NonSmoothLaw nslaw2(new NewtonImpactFrictionNSL(eN2, eT2, mu2, 2));
     SP::Relation relation2(new LagrangianScleronomousR("SliderCrankPlugin:g2", "SliderCrankPlugin:W2"));
-    SP::Interaction inter2(new Interaction(2, nslaw2, relation2, 2));
+    SP::Interaction inter2(new Interaction(nslaw2, relation2));
 
     // -- corner 3 --
     SP::NonSmoothLaw nslaw3(new NewtonImpactFrictionNSL(eN3, eT3, mu3, 2));
     SP::Relation relation3(new LagrangianScleronomousR("SliderCrankPlugin:g3", "SliderCrankPlugin:W3"));
-    SP::Interaction inter3(new Interaction(2, nslaw3, relation3, 3));
+    SP::Interaction inter3(new Interaction(nslaw3, relation3));
 
     // -- corner 4 --
     SP::NonSmoothLaw nslaw4(new NewtonImpactFrictionNSL(eN4, eT4, mu4, 2));
     SP::Relation relation4(new LagrangianScleronomousR("SliderCrankPlugin:g4", "SliderCrankPlugin:W4"));
-    SP::Interaction inter4(new Interaction(2, nslaw4, relation4, 4));
+    SP::Interaction inter4(new Interaction(nslaw4, relation4));
 #else
     // -- corner 1 --
     SP::NonSmoothLaw nslaw1(new NewtonImpactNSL(eN1));
     SP::Relation relation1(new LagrangianScleronomousR("SliderCrankPlugin:g1", "SliderCrankPlugin:W1"));
-    SP::Interaction inter1(new Interaction(1, nslaw1, relation1, 1));
+    SP::Interaction inter1(new Interaction(nslaw1, relation1));
 
     // -- corner 2 --
     SP::NonSmoothLaw nslaw2(new NewtonImpactNSL(eN2));
     SP::Relation relation2(new LagrangianScleronomousR("SliderCrankPlugin:g2", "SliderCrankPlugin:W2"));
-    SP::Interaction inter2(new Interaction(1, nslaw2, relation2, 2));
+    SP::Interaction inter2(new Interaction(nslaw2, relation2));
 
     // -- corner 3 --
     SP::NonSmoothLaw nslaw3(new NewtonImpactNSL(eN3));
     SP::Relation relation3(new LagrangianScleronomousR("SliderCrankPlugin:g3", "SliderCrankPlugin:W3"));
-    SP::Interaction inter3(new Interaction(1, nslaw3, relation3, 3));
+    SP::Interaction inter3(new Interaction(nslaw3, relation3));
 
     // -- corner 4 --
     SP::NonSmoothLaw nslaw4(new NewtonImpactNSL(eN4));
     SP::Relation relation4(new LagrangianScleronomousR("SliderCrankPlugin:g4", "SliderCrankPlugin:W4"));
-    SP::Interaction inter4(new Interaction(1, nslaw4, relation4, 4));
+    SP::Interaction inter4(new Interaction(nslaw4, relation4));
 #endif
 
     // -------------

@@ -31,6 +31,7 @@
 #include "ExtraAdditionalTerms.hpp"
 #include "CxxStd.hpp"
 #include "OneStepNSProblem.hpp"
+#include "BlockVector.hpp"
 
 //#define DEBUG_MESSAGES
 //#define DEBUG_WHERE_MESSAGES
@@ -46,91 +47,148 @@ using namespace RELATION;
 
 // --- constructor from a minimum set of data ---
 ZeroOrderHoldOSI::ZeroOrderHoldOSI():
-  OneStepIntegrator(OSI::ZOHOSI), _useGammaForRelation(false) {}
-
-void ZeroOrderHoldOSI::initialize(Model& m)
+  OneStepIntegrator(OSI::ZOHOSI), _useGammaForRelation(false)
 {
-  OneStepIntegrator::initialize(m);
+  _steps = 0;
+  _levelMinForOutput= 0;
+  _levelMaxForOutput =0;
+  _levelMinForInput =0;
+  _levelMaxForInput =0;
+}
+
+void ZeroOrderHoldOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds)
+{
+  // Get work buffers from the graph
+  VectorOfVectors& workVectors = *_initializeDSWorkVectors(ds);
+
   DynamicalSystemsGraph& DSG0 = *_dynamicalSystemsGraph;
   InteractionsGraph& IG0 = *_simulation->nonSmoothDynamicalSystem()->topology()->indexSet0();
-  DynamicalSystemsGraph::OEIterator oei, oeiend;
-  Type::Siconos dsType;
 
+  Type::Siconos dsType = Type::value(*ds);
 
-  DynamicalSystemsGraph::VIterator dsi, dsend;
+  if((dsType != Type::FirstOrderLinearDS) && (dsType != Type::FirstOrderLinearTIDS))
+    RuntimeException::selfThrow("ZeroOrderHoldOSI::initialize - the DynamicalSystem does not have the right type");
+  unsigned int indxIter = 0;
+  DynamicalSystemsGraph::AVIterator avi, aviend;
+  DynamicalSystemsGraph::VDescriptor dsgVD = DSG0.descriptor(ds);
+  if(!DSG0.Ad.hasKey(dsgVD))
+  {
+    DSG0.Ad[dsgVD].reset(new MatrixIntegrator(*ds, m));
+    if(DSG0.Ad.at(dsgVD)->isConst())
+      DSG0.Ad.at(dsgVD)->integrate();
+  }
+  else
+    RuntimeException::selfThrow("ZeroOrderHoldOSI::initialize - Ad MatrixIntegrator is already initialized for ds the DS");
 
-  for (std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
-   {
-    if (!checkOSI(dsi)) continue;
-    SP::DynamicalSystem  ds = _dynamicalSystemsGraph->bundle(*dsi);
-    dsType = Type::value(*ds);
-    if ((dsType != Type::FirstOrderLinearDS) && (dsType != Type::FirstOrderLinearTIDS))
-      RuntimeException::selfThrow("ZeroOrderHoldOSI::initialize - the DynamicalSystem does not have the right type");
-    unsigned int indxIter = 0;
-    DynamicalSystemsGraph::AVIterator avi, aviend;
-    DynamicalSystemsGraph::VDescriptor dsgVD = DSG0.descriptor(ds);
-    if (!DSG0.Ad.hasKey(dsgVD))
+  if((static_cast<const FirstOrderLinearDS&>(*ds)).b())
+  {
+    SP::SiconosMatrix E(new SimpleMatrix(ds->n(), ds->n(), 0));
+    E->eye();
+    DSG0.AdInt.insert(dsgVD, SP::MatrixIntegrator(new MatrixIntegrator(*ds, m, E)));
+    if(DSG0.AdInt.at(dsgVD)->isConst())
+      DSG0.AdInt.at(dsgVD)->integrate();
+  }
+
+  // init extra term, usually to add control terms
+  if(_extraAdditionalTerms)
+    _extraAdditionalTerms->init(DSG0, m);
+
+  // Now we search for an Interaction dedicated to control
+  for(std11::tie(avi, aviend) = DSG0.adjacent_vertices(dsgVD);
+      avi != aviend; ++avi)
+  {
+    DynamicalSystemsGraph::EDescriptor ed1, ed2;
+    std11::tie(ed1, ed2) = DSG0.edges(dsgVD, *avi);
+
+    if(IG0.properties(IG0.descriptor(DSG0.bundle(ed1))).forControl)
     {
-      DSG0.Ad[dsgVD].reset(new MatrixIntegrator(*ds, m));
-      if (DSG0.Ad.at(dsgVD)->isConst())
-        DSG0.Ad.at(dsgVD)->integrate();
-    }
-    else
-      RuntimeException::selfThrow("ZeroOrderHoldOSI::initialize - Ad MatrixIntegrator is already initialized for ds the DS");
+      Interaction& inter = *DSG0.bundle(ed1);
+      Relation& rel = *inter.relation();
+      if(rel.getType() != RELATION::FirstOrder)
+        RuntimeException::selfThrow("ZeroOrderHoldOSI::initialize - the Integrator can only deal with FirstOrder Relation");
+      FirstOrderR& relR = static_cast<FirstOrderR&>(rel);
 
-    if ((static_cast<const FirstOrderLinearDS&>(*ds)).b())
-    {
-      SP::SiconosMatrix E(new SimpleMatrix(ds->n(), ds->n(), 0));
-      E->eye();
-      DSG0.AdInt.insert(dsgVD, SP::MatrixIntegrator(new MatrixIntegrator(*ds, m, E)));
-      if (DSG0.AdInt.at(dsgVD)->isConst())
-        DSG0.AdInt.at(dsgVD)->integrate();
-    }
-
-    // init extra term, usually to add control terms
-    if (_extraAdditionalTerms)
-      _extraAdditionalTerms->init(DSG0, m);
-
-    // Now we search for an Interaction dedicated to control
-    for (std11::tie(avi, aviend) = DSG0.adjacent_vertices(dsgVD);
-        avi != aviend; ++avi)
-    {
-      DynamicalSystemsGraph::EDescriptor ed1, ed2;
-      std11::tie(ed1, ed2) = DSG0.edges(dsgVD, *avi);
-
-      if (IG0.properties(IG0.descriptor(DSG0.bundle(ed1))).forControl)
+      if(indxIter == 0)
       {
-        Interaction& inter = *DSG0.bundle(ed1);
-        Relation& rel = *inter.relation();
-        if (rel.getType() != RELATION::FirstOrder)
-          RuntimeException::selfThrow("ZeroOrderHoldOSI::initialize - the Integrator can only deal with FirstOrder Relation");
-        FirstOrderR& relR = static_cast<FirstOrderR&>(rel);
-
-        if (indxIter == 0)
+        indxIter++;
+        if(!relR.getPluginJacLg()->isPlugged())
         {
-          indxIter++;
-          if (!relR.isJacLgPlugged())
-          {
-            DSG0.Bd[dsgVD].reset(new MatrixIntegrator(*ds, m, relR.B()));
-            if (DSG0.Bd.at(dsgVD)->isConst())
-              DSG0.Bd.at(dsgVD)->integrate();
-          }
-          else
-          {
-            DSG0.Bd[dsgVD].reset(new MatrixIntegrator(*ds, m, relR.getPluging(), inter.getSizeOfY()));
-          }
+          DSG0.Bd[dsgVD].reset(new MatrixIntegrator(*ds, m, relR.B()));
+          if(DSG0.Bd.at(dsgVD)->isConst())
+            DSG0.Bd.at(dsgVD)->integrate();
         }
         else
         {
-          //        RuntimeException::selfThrow("ZeroOrderHoldOSI::initialize - DS linked with more that one iteraction");
-          DEBUG_PRINTF("number of iteraction attached to the process : %d\n", indxIter);
+          DSG0.Bd[dsgVD].reset(new MatrixIntegrator(*ds, m, relR.getPluging(), inter.getSizeOfY()));
         }
+      }
+      else
+      {
+        //        RuntimeException::selfThrow("ZeroOrderHoldOSI::initialize - DS linked with more that one iteraction");
+        DEBUG_PRINTF("number of iteraction attached to the process : %d\n", indxIter);
+      }
+    }
+  }
+
+  // Get work buffers from the graph
+  workVectors.resize(OneStepIntegrator::work_vector_of_vector_size);
+  workVectors[OneStepIntegrator::free].reset(new SiconosVector(ds->dimension()));
+  workVectors[OneStepIntegrator::delta_x_for_relation].reset(new SiconosVector(ds->dimension()));
+}
+
+void ZeroOrderHoldOSI::fillDSLinks(Interaction &inter,
+				     InteractionProperties& interProp,
+				     DynamicalSystemsGraph & DSG)
+{
+  SP::DynamicalSystem ds1= interProp.source;
+  SP::DynamicalSystem ds2= interProp.target;
+  assert(ds1);
+  assert(ds2);
+
+  VectorOfVectors& workV = *interProp.workVectors;
+  workV[FirstOrderR::osnsp_rhs].reset(new SiconosVector(inter.getSizeOfY()));
+
+  VectorOfBlockVectors& DSlink = *interProp.DSlink;
+
+  Relation &relation =  *inter.relation();
+  RELATION::TYPES relationType = relation.getType();
+
+  // Check if interations levels (i.e. y and lambda sizes) are compliant with the current osi.
+  _check_and_update_interaction_levels(inter);
+  // Initialize/allocate memory buffers in interaction.
+  bool computeResidu = relation.requireResidu();
+  inter.initializeMemory(computeResidu,_steps);
+
+  /* allocate and set work vectors for the osi */
+  if (!(checkOSI(DSG.descriptor(ds1)) && checkOSI(DSG.descriptor(ds2))))
+  {
+    RuntimeException::selfThrow("ZeroOrderHoldOSI::fillDSLinks. The implementation is not correct for two different OSI for one interaction");
+  }
+
+  VectorOfVectors &workVds1 = *DSG.properties(DSG.descriptor(ds1)).workVectors;
+  if (relationType == FirstOrder)
+    {
+      DSlink[FirstOrderR::xfree].reset(new BlockVector());
+      DSlink[FirstOrderR::xfree]->insertPtr(workVds1[OneStepIntegrator::free]);
+    }
+
+
+  if (ds1 != ds2)
+    {
+      VectorOfVectors &workVds2 = *DSG.properties(DSG.descriptor(ds2)).workVectors;
+      if (relationType == Lagrangian)
+      {
+        DSlink[FirstOrderR::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
       }
     }
 
-    ds->allocateWorkVector(DynamicalSystem::local_buffer, ds->dimension());
-
+  if (!DSlink[FirstOrderR::deltax])
+  {
+    DSlink[FirstOrderR::deltax].reset(new BlockVector());
+    DSlink[FirstOrderR::deltax]->insertPtr(workVds1[OneStepIntegrator::delta_x_for_relation]);
   }
+  else
+    DSlink[FirstOrderR::deltax]->setVectorPtr(0,workVds1[OneStepIntegrator::delta_x_for_relation]);
 }
 
 double ZeroOrderHoldOSI::computeResidu()
@@ -153,19 +211,19 @@ double ZeroOrderHoldOSI::computeResidu()
   double maxResidu = 0;
   DynamicalSystemsGraph::VIterator dsi, dsend;
 
-  for (std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
-   {
-    if (!checkOSI(dsi)) continue;
+  for(std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
+  {
+    if(!checkOSI(dsi)) continue;
     SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
 
     dsType = Type::value(*ds); // Its type
     // 1 - First Order Linear Systems
-    if (dsType == Type::FirstOrderLinearDS)
+    if(dsType == Type::FirstOrderLinearDS)
     {
       // No residu with ZOH ...
     }
     // 2 - First Order Linear Systems with Time Invariant coefficients
-    else if (dsType == Type::FirstOrderLinearTIDS)
+    else if(dsType == Type::FirstOrderLinearTIDS)
     {
       // No residu with ZOH ...
     }
@@ -191,34 +249,34 @@ void ZeroOrderHoldOSI::computeFreeState()
 
   DynamicalSystemsGraph::VIterator dsi, dsend;
 
-  for (std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
-   {
-    if (!checkOSI(dsi)) continue;
+  for(std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
+  {
+    if(!checkOSI(dsi)) continue;
     SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
     dsType = Type::value(*ds); // Its type
 
     DynamicalSystemsGraph::VDescriptor dsgVD = DSG0.descriptor(ds);
     VectorOfVectors& workVectors = *DSG0.properties(dsgVD).workVectors;
 //    updateMatrices(dsDescr);
-    if (dsType == Type::FirstOrderLinearTIDS || dsType == Type::FirstOrderLinearDS)
+    if(dsType == Type::FirstOrderLinearTIDS || dsType == Type::FirstOrderLinearDS)
     {
       FirstOrderLinearDS& d = static_cast<FirstOrderLinearDS&>(*ds);
       // Check whether we have to recompute things
-      if (!DSG0.Ad.at(dsgVD)->isConst())
+      if(!DSG0.Ad.at(dsgVD)->isConst())
         DSG0.Ad.at(dsgVD)->integrate();
-      if (d.b() && !DSG0.AdInt.at(dsgVD)->isConst())
+      if(d.b() && !DSG0.AdInt.at(dsgVD)->isConst())
         DSG0.AdInt.at(dsgVD)->integrate();
 
-      SiconosVector& xfree = *workVectors[FirstOrderDS::xfree];
+      SiconosVector& xfree = *workVectors[OneStepIntegrator::free];
       prod(DSG0.Ad.at(dsgVD)->mat(), *d.x(), xfree); // xfree = Ad*xold
-      if (d.b())
+      if(d.b())
       {
         assert(DSG0.AdInt.hasKey(dsgVD));
         prod(DSG0.AdInt.at(dsgVD)->mat(), *d.b(), xfree, false); // xfree += AdInt*b
       }
 
       // add extra term, possible control terms
-      if (_extraAdditionalTerms)
+      if(_extraAdditionalTerms)
         _extraAdditionalTerms->addSmoothTerms(DSG0, dsgVD, h, xfree);
     }
     else
@@ -247,9 +305,9 @@ struct ZeroOrderHoldOSI::_NSLEffectOnFreeOutput : public SiconosVisitor
 
   OneStepNSProblem * _osnsp;
   SP::Interaction _inter;
-
-  _NSLEffectOnFreeOutput(OneStepNSProblem *p, SP::Interaction inter) :
-    _osnsp(p), _inter(inter) {};
+  InteractionProperties& _interProp;
+  _NSLEffectOnFreeOutput(OneStepNSProblem *p, SP::Interaction inter, InteractionProperties& interProp) :
+    _osnsp(p), _inter(inter), _interProp(interProp) {};
 
   void visit(const NewtonImpactNSL& nslaw)
   {
@@ -260,7 +318,8 @@ struct ZeroOrderHoldOSI::_NSLEffectOnFreeOutput : public SiconosVisitor
     subCoord[1] = _inter->nonSmoothLaw()->size();
     subCoord[2] = 0;
     subCoord[3] = subCoord[1];
-    subscal(e, *_inter->y_k(_osnsp->inputOutputLevel()), *(_inter->yForNSsolver()), subCoord, false);
+    SiconosVector & osnsp_rhs = *(*_interProp.workVectors)[FirstOrderR::osnsp_rhs];
+    subscal(e, *_inter->y_k(_osnsp->inputOutputLevel()), osnsp_rhs, subCoord, false);
   }
 
   void visit(const NewtonImpactFrictionNSL& nslaw)
@@ -268,7 +327,8 @@ struct ZeroOrderHoldOSI::_NSLEffectOnFreeOutput : public SiconosVisitor
     double e;
     e = nslaw.en();
     // Only the normal part is multiplied by e
-    (*_inter->yForNSsolver())(0) +=  e * (*_inter->y_k(_osnsp->inputOutputLevel()))(0);
+    SiconosVector & osnsp_rhs = *(*_interProp.workVectors)[FirstOrderR::osnsp_rhs];
+    osnsp_rhs(0) +=  e * (*_inter->y_k(_osnsp->inputOutputLevel()))(0);
 
   }
   void visit(const EqualityConditionNSL& nslaw)
@@ -290,6 +350,7 @@ void ZeroOrderHoldOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_
   SP::Interaction inter = indexSet->bundle(vertex_inter);
 
   VectorOfBlockVectors& DSlink = *indexSet->properties(vertex_inter).DSlink;
+  VectorOfVectors& workV = *indexSet->properties(vertex_inter).workVectors;
   // Get relation and non smooth law types
   RELATION::TYPES relationType = inter->relation()->getType();
   RELATION::SUBTYPES relationSubType = inter->relation()->getSubType();
@@ -309,13 +370,13 @@ void ZeroOrderHoldOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_
   coord[7] = sizeY;
 
 
-  // All of these values should be stored in the node corrseponding to the UR when a MoreauJeanOSI scheme is used.
   SP::BlockVector deltax;
   deltax = DSlink[FirstOrderR::deltax];
-  SiconosVector& yForNSsolver = *inter->yForNSsolver();
+
+  SiconosVector& osnsp_rhs = *(*indexSet->properties(vertex_inter).workVectors)[FirstOrderR::osnsp_rhs];
 
   SP::BlockVector Xfree;
-  if (relationType == FirstOrder)
+  if(relationType == FirstOrder)
   {
     Xfree = DSlink[FirstOrderR::xfree];
   }
@@ -327,43 +388,43 @@ void ZeroOrderHoldOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_
 
   //  if (!IG0.properties(IG0.descriptor(inter)).forControl) // the integration is not for control
   {
-    if (relationType == FirstOrder && relationSubType == Type2R)
+    if(relationType == FirstOrder && relationSubType == Type2R)
     {
       SP::SiconosVector lambda = inter->lambda(0);
       SP::SiconosMatrix C = rel->C();
       SP::SiconosMatrix D = std11::static_pointer_cast<FirstOrderType2R>(rel)->D();
       assert(lambda);
 
-      if (D)
+      if(D)
       {
         coord[3] = D->size(1);
         coord[5] = D->size(1);
-        subprod(*D, *lambda, yForNSsolver, coord, true);
+        subprod(*D, *lambda, osnsp_rhs, coord, true);
 
-        yForNSsolver *= -1.0;
+        osnsp_rhs *= -1.0;
       }
-      if (C)
+      if(C)
       {
         coord[3] = C->size(1);
         coord[5] = C->size(1);
-        subprod(*C, *deltax, yForNSsolver, coord, false);
+        subprod(*C, *deltax, osnsp_rhs, coord, false);
 
       }
 
-      if (_useGammaForRelation)
+      if(_useGammaForRelation)
       {
         RuntimeException::selfThrow("ZeroOrderHoldOSI::ComputeFreeOutput not yet implemented with useGammaForRelation() for FirstorderR and Typ2R and H_alpha->getValue() should return the mid-point value");
       }
-      SP::SiconosVector H_alpha = inter->Halpha();
-      assert(H_alpha);
-      yForNSsolver += *H_alpha;
+
+      SiconosVector& hAlpha= *workV[FirstOrderR::h_alpha];
+      osnsp_rhs += hAlpha;
     }
 
     else
     {
       SP::SiconosMatrix C = rel->C();
 
-      if (C)
+      if(C)
       {
 
         assert(Xfree);
@@ -375,23 +436,23 @@ void ZeroOrderHoldOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_
         // corresponding interactionBlock in each Interactionfor each ds of the
         // current Interaction.
 
-        if (_useGammaForRelation)
+        if(_useGammaForRelation)
         {
-          subprod(*C, *deltax, yForNSsolver, coord, true);
+          subprod(*C, *deltax, osnsp_rhs, coord, true);
         }
         else
         {
-          subprod(*C, *Xfree, yForNSsolver, coord, true);
+          subprod(*C, *Xfree, osnsp_rhs, coord, true);
         }
       }
 
-      if (relationType == FirstOrder && (relationSubType == LinearTIR || relationSubType == LinearR))
+      if(relationType == FirstOrder && (relationSubType == LinearTIR || relationSubType == LinearR))
       {
         // In the first order linear case it may be required to add e + FZ to q.
         // q = HXfree + e + FZ
         SP::SiconosVector e;
         SP::SiconosMatrix F;
-        if (relationSubType == LinearTIR)
+        if(relationSubType == LinearTIR)
         {
           e = std11::static_pointer_cast<FirstOrderLinearTIR>(rel)->e();
           F = std11::static_pointer_cast<FirstOrderLinearTIR>(rel)->F();
@@ -402,14 +463,14 @@ void ZeroOrderHoldOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_
           F = std11::static_pointer_cast<FirstOrderLinearR>(rel)->F();
         }
 
-        if (e)
-          yForNSsolver += *e;
+        if(e)
+          osnsp_rhs += *e;
 
-        if (F)
+        if(F)
         {
           coord[3] = F->size(1);
           coord[5] = F->size(1);
-          subprod(*F, *DSlink[FirstOrderR::z], yForNSsolver, coord, false);
+          subprod(*F, *DSlink[FirstOrderR::z], osnsp_rhs, coord, false);
         }
       }
 
@@ -427,45 +488,45 @@ void ZeroOrderHoldOSI::integrate(double& tinit, double& tend, double& tout, int&
 void ZeroOrderHoldOSI::updateState(const unsigned int level)
 {
   bool useRCC = _simulation->useRelativeConvergenceCriteron();
-  if (useRCC)
+  if(useRCC)
     _simulation->setRelativeConvergenceCriterionHeld(true);
 
   DynamicalSystemsGraph& DSG0 = *_dynamicalSystemsGraph;
   DynamicalSystemsGraph::OEIterator oei, oeiend;
   DynamicalSystemsGraph::VIterator dsi, dsend;
-  for (std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
+  for(std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
   {
-    if (!checkOSI(dsi)) continue;
+    if(!checkOSI(dsi)) continue;
     SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
- 
+
     Type::Siconos dsType = Type::value(*ds);
-    
+
     DynamicalSystemsGraph::VDescriptor dsgVD = DSG0.descriptor(ds);
     VectorOfVectors& workVectors = *DSG0.properties(dsgVD).workVectors;
     // 1 - First Order Linear Systems
-    if (dsType == Type::FirstOrderLinearDS || dsType == Type::FirstOrderLinearTIDS)
+    if(dsType == Type::FirstOrderLinearDS || dsType == Type::FirstOrderLinearTIDS)
     {
       FirstOrderLinearDS& d = static_cast<FirstOrderLinearDS&>(*ds);
       SiconosVector& x = *d.x();
       // 1 - First Order Linear Time Invariant Systems
       // \Phi is already computed
-      x = *workVectors[FirstOrderDS::xfree]; // x = xfree = Phi*xold (+ Bd*u ) (+  Ld*e)
-      if (level != LEVELMAX)
+      x = *workVectors[OneStepIntegrator::free]; // x = xfree = Phi*xold (+ Bd*u ) (+  Ld*e)
+      if(level != LEVELMAX)
       {
         SP::Interaction interC;
         // we have to find the control interaction
-        for (std11::tie(oei, oeiend) = DSG0.out_edges(dsgVD); oei != oeiend; ++oei)
+        for(std11::tie(oei, oeiend) = DSG0.out_edges(dsgVD); oei != oeiend; ++oei)
         {
-          if (DSG0.properties(*oei).forControl)
+          if(DSG0.properties(*oei).forControl)
           {
             interC = DSG0.bundle(*oei);
             break;
           }
         }
-        if (interC)
+        if(interC)
         {
           MatrixIntegrator& Bd = *DSG0.Bd[dsgVD];
-          if (!Bd.isConst())
+          if(!Bd.isConst())
           {
             Bd.integrate();
           }
@@ -489,7 +550,7 @@ bool ZeroOrderHoldOSI::addInteractionInIndexSet(SP::Interaction inter, unsigned 
   DEBUG_PRINTF("ZeroOrderHoldOSI::addInteractionInIndexSet yref=%e, yDot=%e, y_estimated=%e.\n", y, yDot, y + gamma * h * yDot);
   y += gamma * h * yDot;
   assert(!isnan(y));
-  if (y <= 0)
+  if(y <= 0)
   {
     DEBUG_PRINT("ZeroOrderHoldOSI::addInteractionInIndexSet ACTIVATE.\n");
   }
@@ -507,7 +568,7 @@ bool ZeroOrderHoldOSI::removeInteractionInIndexSet(SP::Interaction inter, unsign
   DEBUG_PRINTF("ZeroOrderHoldOSI::removeInteractionInIndexSet yref=%e, yDot=%e, y_estimated=%e.\n", y, yDot, y + gamma * h * yDot);
   y += gamma * h * yDot;
   assert(!isnan(y));
-  if (y > 0)
+  if(y > 0)
   {
     DEBUG_PRINT("ZeroOrderHoldOSI::removeInteractionInIndexSet DEACTIVATE.\n");
   }
@@ -536,9 +597,9 @@ void ZeroOrderHoldOSI::display()
   std::cout << "====== ZOH OSI display ======" <<std::endl;
   std::cout << "--------------------------------" << std::endl;
   DynamicalSystemsGraph::VIterator dsi, dsend;
-  for (std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
+  for(std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
   {
-    if (!checkOSI(dsi)) continue;
+    if(!checkOSI(dsi)) continue;
     SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
 //    cout << "--> Phi of dynamical system number " << itN << ": " << endl;
 //    if (Ad(ds)) Ad(ds)->display();

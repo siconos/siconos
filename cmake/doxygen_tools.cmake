@@ -73,10 +73,13 @@ macro(finalize_doxygen)
     set(DOXY_QUIET "YES")
     set(DOXY_WARNINGS "NO")
     set(GENERATE_HTML YES)
+    set(GENERATE_XML YES)
     foreach(_dir ${DOXY_INPUTS})
       set(DOXYGEN_INPUTS "${DOXYGEN_INPUTS} ${_dir}")
     endforeach()
     configure_file(${CMAKE_SOURCE_DIR}/Docs/config/doxy.config.in ${DOXY_CONFIG} @ONLY)
+    configure_file(${CMAKE_SOURCE_DIR}/Docs/doxygen_layout/header.html.in
+      Docs/doxygen_layout/header.html)
     add_custom_target(doxygen ${DOXYGEN_EXECUTABLE} ${DOXY_CONFIG})
     add_dependencies(html doxygen)
 

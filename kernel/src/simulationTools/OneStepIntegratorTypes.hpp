@@ -23,35 +23,38 @@
 #ifndef OSITYPES_HPP
 #define OSITYPES_HPP
 #include "SiconosFwd.hpp"
-/** Namespace for user-defined types related to relations */
+
+/** Namespace for one-step integrators. */
 namespace OSI
 {
 
-/** List of possible OneStepIntegrator types*/
+/** List of OneStepIntegrator types/ids */
 enum TYPES
 {
-  /** */
+  /** Euler-Moreau scheme*/
   EULERMOREAUOSI,
-  /** */
+  /** Moreau-Jean scheme */
   MOREAUJEANOSI,
-  /** */
+  /** ?? */
+  MOREAUJEANGOSI,
+  /** LSodar (ode solver with rootfinding process) */
   LSODAROSI,
-  /** */
+  /** odepack HEM5 (Hairer) solver */
   HEM5OSI,
-  /** */
-  MOREAUJEANOSI2,
-  /** */
+  /** Moreau-Jean with direct projection */
   MOREAUDIRECTPROJECTIONOSI,
-  /** */
+  /** Moreau-Jean with combined projection */
   MOREAUCOMBINEDPROJECTIONOSI,
-  /** */
+  /** Intregrator based on discontinuous Galerkin methods*/
   D1MINUSLINEAROSI,
-  /** */
+  /** Schatzman-Paoli scheme */
   SCHATZMANPAOLIOSI,
-  /**  */
+  /** Zero-order osi (?) */
   ZOHOSI,
-  /** */
-  NEWMARKALPHAOSI
+  /** Newmark-like scheme*/
+  NEWMARKALPHAOSI,
+  /** Moreau-Jean-Bilbao */
+  MOREAUJEANBILBAOOSI
 };
 
 }

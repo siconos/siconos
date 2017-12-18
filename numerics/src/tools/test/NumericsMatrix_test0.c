@@ -39,8 +39,8 @@ int main(void)
 
   for (i = 0 ; i < nmm; i++)
   {
-    NMM[i] = newNumericsMatrix();
-    Mread[i] = newNumericsMatrix();
+    NMM[i] = NM_new();
+    Mread[i] = NM_new();
   }
 
 
@@ -61,26 +61,26 @@ int main(void)
     printf("test on NMM[%i]\n", i);
 
     NM_display(NMM[i]);
-    displayRowbyRow(NMM[i]);
+    NM_display_row_by_row(NMM[i]);
     FILE * foutput = fopen("testprintInfile.dat", "w");
-    printInFile(NMM[i], foutput);
+    NM_write_in_file(NMM[i], foutput);
     fclose(foutput);
     FILE * finput = fopen("testprintInfile.dat", "r");
-    readInFile(NMM[i], finput);
+    NM_read_in_file(NMM[i], finput);
     fclose(finput);
     FILE * finput2 = fopen("testprintInfile.dat", "r");
-    newFromFile(Mread[i], finput2);
+    NM_new_from_file(Mread[i], finput2);
     fclose(finput2);
     char  filename[50] = "testprintInfileName.dat";
-    printInFileName(NMM[i], filename);
-    readInFileName(NMM[i], filename);
+    NM_write_in_filename(NMM[i], filename);
+    NM_read_in_filename(NMM[i], filename);
     printf("end of test on NMM[%i]\n", i);
 
   }
   for (i = 0 ; i < nmm; i++, i++)
   {
     FILE * foutput2 = fopen("testprintInfileForScilab.dat", "w");
-    printInFileForScilab(NMM[i], foutput2);
+    NM_write_in_file_scilab(NMM[i], foutput2);
     fclose(foutput2);
   }
 
@@ -90,9 +90,9 @@ int main(void)
 
   for (i = 0 ; i < nmm; i++)
   {
-    freeNumericsMatrix(NMM[i]);
+    NM_free(NMM[i]);
     free(NMM[i]);
-    freeNumericsMatrix(Mread[i]);
+    NM_free(Mread[i]);
     free(Mread[i]);
   }
 

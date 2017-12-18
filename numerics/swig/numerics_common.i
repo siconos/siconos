@@ -32,7 +32,27 @@
     }
     else
     {
-      PyErr_SetString(PyExc_RuntimeError, "Unknown friction contact problem solver");
+      SWIG_Error(SWIG_RuntimeError, "Unknown friction contact problem solver");
+      free(SO);
+      return NULL;
+    }
+
+
+    return SO;
+  }
+  
+  SolverOptions(SecondOrderConeLinearComplementarityProblem* soclcp, enum SOCLCP_SOLVER id)
+  {
+    SolverOptions *SO;
+    SO = (SolverOptions *) malloc(sizeof(SolverOptions));
+
+    if (id >= 1100 && id < 1200)
+    {
+      soclcp_setDefaultSolverOptions(SO, id);
+    }
+    else
+    {
+      SWIG_Error(SWIG_RuntimeError, "Unknown SOCLCP solver");
       free(SO);
       return NULL;
     }

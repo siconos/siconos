@@ -23,8 +23,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
-//#define DEBUG_STDOUT */
-//#define DEBUG_MESSAGES */
+/* #define DEBUG_STDOUT */
+/* #define DEBUG_MESSAGES */
 #include "debug.h"
 #include <math.h>
 #include "numerics_verbose.h"
@@ -43,9 +43,9 @@ void fc3d_proximal(FrictionContactProblem* problem, double *reaction, double *ve
   int n = 3 * nc;
 
   /* Maximum number of iterations */
-  int itermax = iparam[0];
+  int itermax = iparam[SICONOS_IPARAM_MAX_ITER];
   /* Tolerance */
-  double tolerance = dparam[0];
+  double tolerance = dparam[SICONOS_DPARAM_TOL];
   double norm_q = cblas_dnrm2(nc*3 , problem->q , 1);
   if (verbose > 0){
     solver_options_print(options);
@@ -62,22 +62,23 @@ void fc3d_proximal(FrictionContactProblem* problem, double *reaction, double *ve
   int iter = 0; /* Current iteration number */
   double error = 1.; /* Current error */
   int hasNotConverged = 1;
-  
+
   int isVariable = 1;
   double alpha = dparam[3];
   double sigma= 0.0;
   double nu =0.0;
 
-  
 
-  if (iparam[9]) /* Only regularization */
+
+  if (iparam[SICONOS_FRICTION_3D_PROXIMAL_IPARAM_STRATEGY] ==
+      SICONOS_FRICTION_3D_PROXIMAL_REGULARIZATION) /* Only regularization */
   {
-    if (fabs(dparam[3]) < 1e-12)
+    if (fabs(dparam[SICONOS_FRICTION_3D_PROXIMAL_DPARAM_ALPHA]) < 1e-12)
     {
       fprintf(stderr, "Numerics,  fc3d_proximal. Initial alpha parameters equal 0 \n");
       exit(EXIT_FAILURE);
     }
-    else if (dparam[3] < -1e-12)
+    else if (dparam[SICONOS_FRICTION_3D_PROXIMAL_DPARAM_ALPHA] < -1e-12)
     {
       internalsolver_options->dparam[0]=options->dparam[0];
       alpha = - dparam[3];
@@ -87,53 +88,47 @@ void fc3d_proximal(FrictionContactProblem* problem, double *reaction, double *ve
     {
       internalsolver_options->dparam[0]=options->dparam[0];
       isVariable = 1;
-      alpha = dparam[3];
+      alpha = dparam[SICONOS_FRICTION_3D_PROXIMAL_DPARAM_ALPHA];
+    }
+  }
+  else if (iparam[SICONOS_FRICTION_3D_PROXIMAL_IPARAM_STRATEGY] ==
+        SICONOS_FRICTION_3D_PROXIMAL_PROX)
+  {
+    if (fabs(dparam[SICONOS_FRICTION_3D_PROXIMAL_DPARAM_ALPHA]) < 1e-12)
+    {
+      fprintf(stderr, "Numerics,  fc3d_proximal. Initial alpha parameters equal 0 \n");
+      exit(EXIT_FAILURE);
+    }
+    else if (dparam[SICONOS_FRICTION_3D_PROXIMAL_DPARAM_ALPHA] < -1e-12)
+    {
+      alpha = - dparam[SICONOS_FRICTION_3D_PROXIMAL_DPARAM_ALPHA];
+      isVariable = 0;
+    }
+    else
+    {
+      isVariable = 1;
+
+      sigma = options->dparam[SICONOS_FRICTION_3D_PROXIMAL_DPARAM_SIGMA];
+      nu = options->dparam[SICONOS_FRICTION_3D_PROXIMAL_DPARAM_NU];
+
+      fc3d_compute_error(problem, reaction , velocity, tolerance, options, norm_q,  &error);
+
+      alpha = sigma*pow(error,nu);
+      DEBUG_PRINTF("Initial error = %g\n",error);
+      if (error < tolerance) hasNotConverged = 0;
     }
   }
   else
-  {
-    if (fabs(dparam[3]) < 1e-12)
-    {
-      fprintf(stderr, "Numerics,  fc3d_proximal. Initial alpha parameters equal 0 \n");
-      exit(EXIT_FAILURE);
-    }
-    else if (dparam[3] < -1e-12)
-    {
-      alpha = - dparam[3];
-      isVariable = 0;
-    }
-    else
-    {
-      isVariable = 1;
-      /* parameters to set the value of alpha */
-      sigma = options->dparam[4];
-      nu = options->dparam[5];
-      fc3d_compute_error(problem, reaction , velocity, tolerance, options, norm_q,  &error);
-      internalsolver_options->dparam[0] = options->dparam[0];
-      internalsolver_options->dparam[0] = error;
-      alpha = sigma*pow(error,nu);
-      DEBUG_PRINTF("error = %g\n",error);
-    
-      DEBUG_PRINTF("tolerance = %g\n",tolerance);
-    
-      if (error < tolerance) hasNotConverged = 0;
-      DEBUG_PRINTF(" hasNotConverged = %i \n",hasNotConverged);
-    }
-  }
-  
-  DEBUG_PRINTF("options->iparam[2] = %i\n",options->iparam[2]);
-  DEBUG_PRINTF("options->iparam[3] = %i\n",options->iparam[3]);
-  DEBUG_PRINTF("options->dparam[4] = %i\n",options->dparam[4]);
-  DEBUG_PRINTF("options->dparam[5] = %i\n",options->dparam[5]);
+    numerics_error("fc3d_proximal", "Proximal strategy is unknown");
+
 
   double * reactionold = (double *)malloc(n * sizeof(double));
   cblas_dcopy(n , reaction , 1 , reactionold , 1);
 
   internalSolverPtr internalsolver =0;
-  int iter_iparam =7;
-  options->iparam[6]= 0;
+  options->iparam[SICONOS_FRICTION_3D_PROXIMAL_IPARAM_CUMULATIVE_ITER_DONE]= 0;
 
-  if (internalsolver_options) /* we assume that the solver option has been coherently set*/
+  if (internalsolver_options)
   {
     if (internalsolver_options->solverId == SICONOS_FRICTION_3D_NSGS)
     {
@@ -150,69 +145,89 @@ void fc3d_proximal(FrictionContactProblem* problem, double *reaction, double *ve
     else if (internalsolver_options->solverId == SICONOS_FRICTION_3D_NSN_AC)
     {
       internalsolver = &fc3d_nonsmooth_Newton_AlartCurnier;
-      iter_iparam =1;
     }
     else if (internalsolver_options->solverId == SICONOS_FRICTION_3D_NSN_FB)
     {
-
       internalsolver = &fc3d_nonsmooth_Newton_FischerBurmeister;
-      iter_iparam =1;
     }
+    else
+      numerics_error("fc3d_proximal", "unknown internal solver");
   }
   else
   {
-    numerics_error("fc3d_proximal", "The PROX method needs options for the internal solvers, soptions->internalSolvers should be diffrent from NULL");
+    numerics_error("fc3d_proximal", "The PROX method needs options for the internal solvers, soptions->internalSolvers should be different from NULL");
   }
 
-
-
-
-  
-  DEBUG_PRINTF("options->iparam[2] = %i\n",options->iparam[2]);
-  DEBUG_PRINTF("options->iparam[3] = %i\n",options->iparam[3]);
 
 
   DEBUG_PRINTF("isVariable = %i\n",isVariable);
-  DEBUG_PRINTF("(only regularization) options->iparam[9] = %i\n",options->iparam[9]);
+  DEBUG_PRINTF("options->iparam[SICONOS_FRICTION_3D_PROXIMAL_IPARAM_STRATEGY] = %i\n",options->iparam[SICONOS_FRICTION_3D_PROXIMAL_IPARAM_STRATEGY]);
 
   if (verbose > 0){
-    printf("------------------------ FC3D - PROXIMAL - Start with alpha = %12.8e\n", alpha);
+    printf("---- FC3D - PROXIMAL - Start with alpha = %12.8e\n", alpha);
+
     if (isVariable)
-      printf("------------------------ FC3D - PROXIMAL - Variable alpha strategy\n");
+      printf("---- FC3D - PROXIMAL - Variable alpha strategy\n");
     else
-      printf("------------------------ FC3D - PROXIMAL - Fixed alpha strategy\n");
-    if (options->iparam[9])
-      printf("------------------------ FC3D - PROXIMAL - Only regularization \n");
+      printf("---- FC3D - PROXIMAL - Fixed alpha strategy\n");
+
+    if (options->iparam[SICONOS_FRICTION_3D_PROXIMAL_IPARAM_STRATEGY]==SICONOS_FRICTION_3D_PROXIMAL_REGULARIZATION)
+      printf("---- FC3D - PROXIMAL - Only regularization \n");
   }
 
-  if (iparam[9])
-  {
-    double alpha_old = alpha;
+  if (iparam[SICONOS_FRICTION_3D_PROXIMAL_IPARAM_STRATEGY] ==
+      SICONOS_FRICTION_3D_PROXIMAL_REGULARIZATION)
+      {
+
+    DEBUG_PRINTF("hasNotConverged = %i \n",hasNotConverged);
     while ((iter < itermax) && (hasNotConverged > 0))
     {
       ++iter;
-      //Add proximal regularization on M
-      //This code looked weird before. Do we add (alpha - alpha_old) ?
-      double pert = alpha;
-      if (iter > 0)
-      {
-        pert -= alpha_old;
-      }
-      NM_add_to_diag3(M, pert);
+      cblas_dcopy(n , reaction , 1 , reactionold , 1);
+      /* add proximal regularization on q */
+      cblas_daxpy(n, -alpha, reactionold, 1, problem->q , 1) ;
 
+      /* add proximal regularization on M */
+      NM_add_to_diag3(M, alpha);
+      numerics_printf("---- FC3D - PROXIMAL - alpha = %8.4e\n",alpha);
+
+      fc3d_set_internalsolver_tolerance(problem,options,internalsolver_options, error);
       DEBUG_PRINTF("internal solver tolerance = %21.8e \n",internalsolver_options->dparam[0]);
 
+      /* call internal solver */
       (*internalsolver)(problem, reaction , velocity , info , internalsolver_options);
 
-      /* **** Criterium convergence **** */
-      fc3d_compute_error(problem, reaction , velocity, tolerance, options, norm_q, &error);
+      if (verbose >0 && *info)
+        printf("---- FC3D - PROXIMAL - internalsolver no convergence\n");
 
-      int iter_internalsolver = internalsolver_options->iparam[iter_iparam];
-      options->iparam[6] +=iter_internalsolver;
-
+      int iter_internalsolver = internalsolver_options->iparam[SICONOS_IPARAM_ITER_DONE];
+      options->iparam[SICONOS_FRICTION_3D_PROXIMAL_IPARAM_CUMULATIVE_ITER_DONE ] +=iter_internalsolver;
       DEBUG_PRINTF("iter_internalsolver = %i\n",iter_internalsolver);
       DEBUG_PRINTF("info = %i\n",*info);
-      DEBUG_PRINTF("options->iparam[1] = %i\n",options->iparam[1]);
+      DEBUG_PRINTF("options->iparam[SICONOS_IPARAM_ITER_DONE] = %i\n",options->iparam[SICONOS_IPARAM_ITER_DONE]);
+
+
+      /* **** Criterium convergence **** */
+
+      /* substract proximal regularization on q */
+      cblas_daxpy(n, alpha, reactionold, 1, problem->q, 1) ;
+      /* substract proximal regularization on M */
+      NM_add_to_diag3(M, -alpha);
+
+      fc3d_compute_error(problem, reaction , velocity, tolerance, options, norm_q, &error);
+      if (verbose > 0)
+        printf("---- FC3D - PROXIMAL - Iteration %i Residual = %14.7e with alpha = %12.8e\n\n", iter, error, alpha);
+
+      /* update alpha */
+      if (isVariable)
+      {
+        if (*info){
+          alpha = alpha*5;
+        }
+        else{
+          alpha = alpha/10.0;
+        }
+      }
       DEBUG_PRINTF("alpha = %8.4e\n",alpha);
 
       if (options->callback)
@@ -222,60 +237,102 @@ void fc3d_proximal(FrictionContactProblem* problem, double *reaction, double *ve
                                                  error, NULL);
       }
 
-      if (verbose > 0)
-        printf("------------------------ FC3D - PROXIMAL - Iteration %i Residual = %14.7e with alpha = %12.8e\n\n", iter, error, alpha);
-      if (isVariable)
-      {
-        alpha_old =alpha;
-        alpha = alpha*10;
-      }
+
       if (error < tolerance) hasNotConverged = 0;
       *info = hasNotConverged;
     }
   }
-  else // Real PROX iparam[9] == 0
+  /* { */
+  /*   double alpha_old = alpha; */
+  /*   while ((iter < itermax) && (hasNotConverged > 0)) */
+  /*   { */
+  /*     ++iter; */
+  /*     //Add proximal regularization on M */
+  /*     //This code looked weird before. Do we add (alpha - alpha_old) ? */
+  /*     double pert = alpha; */
+  /*     if (iter > 0) */
+  /*     { */
+  /*       pert -= alpha_old; */
+  /*     } */
+  /*     NM_add_to_diag3(M, pert); */
+
+  /*     DEBUG_PRINTF("internal solver tolerance = %21.8e \n",internalsolver_options->dparam[0]); */
+
+  /*     (*internalsolver)(problem, reaction , velocity , info , internalsolver_options); */
+
+  /*     /\* **** Criterium convergence **** *\/ */
+  /*     fc3d_compute_error(problem, reaction , velocity, tolerance, options, norm_q, &error); */
+
+  /*     int iter_internalsolver = internalsolver_options->iparam[SICONOS_IPARAM_ITER_DONE]; */
+  /*     options->iparam[SICONOS_FRICTION_3D_PROXIMAL_IPARAM_CUMULATIVE_ITER_DONE] */
+  /*       +=iter_internalsolver; */
+
+  /*     DEBUG_PRINTF("iter_internalsolver = %i\n",iter_internalsolver); */
+  /*     DEBUG_PRINTF("info = %i\n",*info); */
+  /*     DEBUG_PRINTF("options->iparam[SICONOS_IPARAM_ITER_DONE] = %i\n",options->iparam[SICONOS_IPARAM_ITER_DONE]); */
+  /*     DEBUG_PRINTF("alpha = %8.4e\n",alpha); */
+
+  /*     if (options->callback) */
+  /*     { */
+  /*       options->callback->collectStatsIteration(options->callback->env, nc * 3, */
+  /*                                                reaction, velocity, */
+  /*                                                error, NULL); */
+  /*     } */
+
+  /*     if (verbose > 0) */
+  /*       printf("---- FC3D - PROXIMAL - Iteration %i Residual = %14.7e with alpha = %12.8e\n\n", iter, error, alpha); */
+  /*     if (isVariable) */
+  /*     { */
+  /*       alpha_old =alpha; */
+  /*       alpha = alpha*10; */
+  /*     } */
+  /*     if (error < tolerance) hasNotConverged = 0; */
+  /*     *info = hasNotConverged; */
+  /*   } */
+  /* } */
+  else if (iparam[SICONOS_FRICTION_3D_PROXIMAL_IPARAM_STRATEGY] ==
+           SICONOS_FRICTION_3D_PROXIMAL_PROX) // Real PROX iparam[9] == 0
   {
 
-    DEBUG_PRINTF(" hasNotConverged = %i \n",hasNotConverged);
+    DEBUG_PRINTF("hasNotConverged = %i \n",hasNotConverged);
     while ((iter < itermax) && (hasNotConverged > 0))
     {
       ++iter;
       cblas_dcopy(n , reaction , 1 , reactionold , 1);
-      //Add proximal regularization on q
+      /* add proximal regularization on q */
       cblas_daxpy(n, -alpha, reactionold, 1, problem->q , 1) ;
 
-      //Add proximal regularization on M
+      /* add proximal regularization on M */
       NM_add_to_diag3(M, alpha);
 
-      // internal solver for the regularized problem
-      /*       fc3d_nsgs(problem, reaction , velocity , info , internalsolver_options); */
 
-      /* internalsolver_options->dparam[0] = max(error/10.0, options->dparam[0]); */
-      //internalsolver_options->dparam[0] = options->dparam[0];
-
-      internalsolver_options->dparam[0] = alpha*error;
+      fc3d_set_internalsolver_tolerance(problem,options,internalsolver_options, error);
       DEBUG_PRINTF("internal solver tolerance = %21.8e \n",internalsolver_options->dparam[0]);
+
+      /* call internal solver */
       (*internalsolver)(problem, reaction , velocity , info , internalsolver_options);
+
+      if (verbose >0 && *info)
+        printf("---- FC3D - PROXIMAL - internalsolver no convergence\n");
+
+      int iter_internalsolver = internalsolver_options->iparam[SICONOS_IPARAM_ITER_DONE];
+      options->iparam[SICONOS_FRICTION_3D_PROXIMAL_IPARAM_CUMULATIVE_ITER_DONE ] +=iter_internalsolver;
+      DEBUG_PRINTF("iter_internalsolver = %i\n",iter_internalsolver);
+      DEBUG_PRINTF("info (internal solver)= %i\n",*info);
+
+
+
 
       /* **** Criterium convergence **** */
 
-      //substract proximal regularization on q
-
+      /* substract proximal regularization on q */
       cblas_daxpy(n, alpha, reactionold, 1, problem->q, 1) ;
-
-      //substract proximal regularization on M
+      /* substract proximal regularization on M */
       NM_add_to_diag3(M, -alpha);
 
       fc3d_compute_error(problem, reaction , velocity, tolerance, options, norm_q, &error);
-      //update the alpha with respect to the number of internal iterations.
 
-      int iter_internalsolver = internalsolver_options->iparam[iter_iparam];
-      options->iparam[6] +=iter_internalsolver;
-      DEBUG_PRINTF("iter_internalsolver = %i\n",iter_internalsolver);
-      DEBUG_PRINTF("info = %i\n",*info);
-      DEBUG_PRINTF("options->iparam[1] = %i\n",options->iparam[1]);
-      if (verbose >0 && *info)
-        printf("------------------------ FC3D - PROXIMAL - internalsolver not converged\n");
+      /* update alpha */
       if (isVariable)
       {
         if (*info){
@@ -283,9 +340,8 @@ void fc3d_proximal(FrictionContactProblem* problem, double *reaction, double *ve
         }
         else{
           alpha = sigma*pow(error,nu);
-        } 
+        }
       }
-
       DEBUG_PRINTF("alpha = %8.4e\n",alpha);
 
       if (options->callback)
@@ -296,25 +352,24 @@ void fc3d_proximal(FrictionContactProblem* problem, double *reaction, double *ve
       }
 
       if (verbose > 0)
-        printf("------------------------ FC3D - PROXIMAL - Iteration %i Residual = %14.7e with alpha = %12.8e\n\n", iter, error, alpha);
+        printf("---- FC3D - PROXIMAL - Iteration %i Residual = %14.7e with alpha = %12.8e\n\n", iter, error, alpha);
 
       if (error < tolerance) hasNotConverged = 0;
       *info = hasNotConverged;
     }
   }
-
-
+  else
+    numerics_error("fc3d_proximal", "Proximal strategy is unknown");
 
 
   if (verbose > 0)
   {
-    printf("------------------------ FC3D - PROXIMAL - # Iteration %i Final Residual = %14.7e  \n", iter, error);
-    printf("------------------------ FC3D - PROXIMAL - # Iteration of internal solver %i \n", options->iparam[6]);
+    printf("---- FC3D - PROXIMAL - # Iteration %i Final Residual = %14.7e  \n", iter, error);
+    printf("---- FC3D - PROXIMAL - # Iteration of internal solver %i \n", options->iparam[SICONOS_FRICTION_3D_PROXIMAL_IPARAM_CUMULATIVE_ITER_DONE]);
   }
 
-  iparam[7] = iter;
-  dparam[0] = tolerance;
-  dparam[1] = error;
+  iparam[SICONOS_IPARAM_ITER_DONE] = iter;
+  dparam[SICONOS_DPARAM_RESIDU] = error;
 
   free(reactionold);
 
@@ -337,27 +392,34 @@ int fc3d_proximal_setDefaultSolverOptions(SolverOptions* options)
   options->dSize = 10;
   options->iparam = (int *)calloc(options->iSize, sizeof(int));
   options->dparam = (double *)calloc(options->dSize, sizeof(double));
-  options->dWork = NULL;
   solver_options_nullify(options);
-  options->iparam[0] = 1000;
-
-  options->iparam[2] = 5;    /* Default mimimun iteration of the internal
-                                solver for decreasing alpha */
-  options->iparam[3] = 15;   /* Default maximum iteration of the internal
-                                solver for increasing alpha */
-  options->iparam[8] = 0;    /* no overrelaxation by default */
-  options->iparam[9] = 0;    /* fixed regularization and not proximal */
-
-  options->iparam[3] = 15;   /* Default maximum iteration of the internal
-                                solver for increasing alpha */
 
 
+  options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
 
-  options->dparam[0] = 1e-4;
-  options->dparam[3] = 1.e4; /* default value for proximal parameter alpha; */
-  options->dparam[4] = 5.0;  /* default value for sigma; */
-  options->dparam[5] = 1.0;  /* default value for nu; */
-  options->dparam[8] = 1.5;  /* default value for relaxation parameter omega */
+  options->iparam[SICONOS_FRICTION_3D_IPARAM_INTERNAL_ERROR_STRATEGY] =
+    SICONOS_FRICTION_3D_INTERNAL_ERROR_STRATEGY_ADAPTIVE ;
+  /* no overrelaxation by default */
+  options->iparam[SICONOS_FRICTION_3D_PROXIMAL_IPARAM_RELAXATION] = 0;
+  /* fixed regularization or proximal */
+  options->iparam[SICONOS_FRICTION_3D_PROXIMAL_IPARAM_STRATEGY ] =
+    SICONOS_FRICTION_3D_PROXIMAL_PROX;
+
+
+
+
+  options->dparam[SICONOS_DPARAM_TOL] = 1e-4;
+  options->dparam[SICONOS_FRICTION_3D_DPARAM_INTERNAL_ERROR_RATIO] =10.0;
+
+
+  /* default value for proximal parameter alpha; */
+  options->dparam[SICONOS_FRICTION_3D_PROXIMAL_DPARAM_ALPHA] = 1.e4;
+  /* default value for sigma; */
+  options->dparam[SICONOS_FRICTION_3D_PROXIMAL_DPARAM_SIGMA] = 5.0;
+  /* default value for nu; */
+  options->dparam[SICONOS_FRICTION_3D_PROXIMAL_DPARAM_NU] = 1.0;
+  /* default value for relaxation parameter omega */
+  options->dparam[SICONOS_FRICTION_3D_PROXIMAL_DPARAM_RELAXATION] = 1.5;
 
   options->internalSolvers = (SolverOptions *)malloc(sizeof(SolverOptions));
   fc3d_nonsmooth_Newton_AlartCurnier_setDefaultSolverOptions(options->internalSolvers);

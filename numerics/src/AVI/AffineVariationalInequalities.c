@@ -18,7 +18,6 @@
 #ifndef AVI_PROBLEM_C
 #define AVI_PROBLEM_C
 
-
 #include <stdio.h>
 #include <math.h>
 #include <stdlib.h>
@@ -29,33 +28,33 @@
 #include "numerics_verbose.h"
 
 
-void AVI_display(AffineVariationalInequalities* problem)
+void AVI_display(AffineVariationalInequalities* avi)
 {
 
-  assert(problem);
-  int i, n = problem->size;
+  assert(avi);
+  int i, n = avi->size;
   printf("AffineVariationalInequalities Display :\n-------------\n");
-  printf("size :%d \n", problem->size);
-  if (problem->M)
+  printf("size :%d \n", avi->size);
+  if (avi->M)
   {
     printf("M matrix:\n");
-    NM_display(problem->M);
+    NM_display(avi->M);
   }
   else
     printf("No M matrix.\n");
 
-  if (problem->q)
+  if (avi->q)
   {
     printf("q vector:\n");
-    for (i = 0; i < n; i++) printf("q[ %i ] = %12.8e\n", i, problem->q[i]);
+    for (i = 0; i < n; i++) printf("q[ %i ] = %12.8e\n", i, avi->q[i]);
   }
   else
     printf("No q vector.\n");
 
-  if (problem->d)
+  if (avi->d)
   {
     printf("d vector:\n");
-    for (i = 0; i < n; i++) printf("d[ %i ] = %12.8e\n", i, problem->d[i]);
+    for (i = 0; i < n; i++) printf("d[ %i ] = %12.8e\n", i, avi->d[i]);
   }
   else
     printf("No d vector.\n");
@@ -66,69 +65,96 @@ void AVI_display(AffineVariationalInequalities* problem)
 
 
 
-int AVI_printInFile(AffineVariationalInequalities*  problem, FILE* file)
+int AVI_printInFile(AffineVariationalInequalities*  avi, FILE* file)
 {
-  if (! problem)
+  if (! avi)
   {
     fprintf(stderr, "Numerics, AffineVariationalInequalities printInFile failed, NULL input.\n");
     exit(EXIT_FAILURE);
   }
   int i;
-  int n = problem->size;
+  int n = avi->size;
   fprintf(file, "%d\n", n);
-  printInFile(problem->M, file);
-  for (i = 0; i < problem->M->size1; i++)
+  NM_write_in_file(avi->M, file);
+  for (i = 0; i < avi->M->size1; i++)
   {
-    fprintf(file, "%32.24e ", problem->q[i]);
+    fprintf(file, "%32.24e ", avi->q[i]);
   }
   return 1;
 }
 
-int AVI_newFromFile(AffineVariationalInequalities* problem, FILE* file)
+int AVI_newFromFile(AffineVariationalInequalities* avi, FILE* file)
 {
   int n = 0;
   int i;
 
   CHECK_IO(fscanf(file, "%d\n", &n));
-  problem->size = n;
-  problem->M = newNumericsMatrix();
+  avi->size = n;
+  avi->M = NM_new();
 
-  newFromFile(problem->M, file);
+  NM_new_from_file(avi->M, file);
 
-  problem->q = (double *) malloc(problem->M->size1 * sizeof(double));
-  for (i = 0; i < problem->M->size1; i++)
+  avi->q = (double *) malloc(avi->M->size1 * sizeof(double));
+  for (i = 0; i < avi->M->size1; i++)
   {
-    CHECK_IO(fscanf(file, "%lf ", &(problem->q[i])));
+    CHECK_IO(fscanf(file, "%lf ", &(avi->q[i])));
   }
   return 1;
 }
-int AVI_newFromFilename(AffineVariationalInequalities* problem, char* filename)
+int AVI_newFromFilename(AffineVariationalInequalities* avi, char* filename)
 {
   int info = 0;
   FILE * file = fopen(filename, "r");
 
-  info = AVI_newFromFile(problem, file);
+  info = AVI_newFromFile(avi, file);
 
   fclose(file);
   return info;
 }
 
-void freeAVI(AffineVariationalInequalities* problem)
+void freeAVI(AffineVariationalInequalities* avi)
 {
-  freeNumericsMatrix(problem->M);
-  free(problem->M);
-  free(problem->q);
-  if (problem->poly)
+  assert(avi);
+  if (avi->M)
   {
-    free_polyhedron(problem->poly);
+    NM_free(avi->M);
+    free(avi->M);
+    avi->M = NULL;
   }
-  if (problem->d)
-    free(problem->d);
-  free(problem);
-  problem = NULL;
+
+  if (avi->poly.set->id == SICONOS_SET_POLYHEDRON)
+  {
+    free_polyhedron(avi->poly.split);
+    avi->poly.split = NULL;
+  }
+  else if (avi->poly.set->id == SICONOS_SET_POLYHEDRON_UNIFIED)
+  {
+    free_polyhedron_unified(avi->poly.unif);
+    avi->poly.unif = NULL;
+  }
+
+  if (avi->q) { free(avi->q); avi->q = NULL; }
+  if (avi->d) { free(avi->d); avi->d = NULL; }
+  if (avi->lb) { free(avi->lb); avi->lb = NULL; }
+  if (avi->ub) { free(avi->ub); avi->ub = NULL; }
+
+  free(avi);
 }
 
+AffineVariationalInequalities* newAVI(void)
+{
+  AffineVariationalInequalities* avi;
+  avi = (AffineVariationalInequalities *) malloc(sizeof(AffineVariationalInequalities));
+  avi->size = 0;
+  avi->M = NULL;
+  avi->q = NULL;
+  avi->d = NULL;
+  avi->poly.set = NULL;
+  avi->lb = NULL;
+  avi->ub = NULL;
+  avi->cones = NULL;
 
+  return avi;
+}
 
 #endif
-

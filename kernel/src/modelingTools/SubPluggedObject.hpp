@@ -46,11 +46,7 @@ public:
 
   /** Default Constructor
    */
-  SubPluggedObject(): _indx(0), _p(0)
-  {
-    PluggedObject();
-    _parentfPtr = 0;
-  };
+  SubPluggedObject(): PluggedObject(), _parentfPtr(NULL), _indx(0), _p(0)  { };
 
   /** Constructor with the plugin name
    * \param PO a PluggedObject
@@ -60,7 +56,7 @@ public:
    */
   SubPluggedObject(const PluggedObject& PO, const unsigned int n, const unsigned int p, const unsigned int indx = 0):  _indx(indx), _p(p)
   {
-    _pluginName = "Sub" + PO.getPluginName();
+    _pluginName = "Sub" + PO.pluginName();
     _tmpMat.reset(new SimpleMatrix(n, p));
 #if (__GNUG__ && !( __clang__ || __INTEL_COMPILER || __APPLE__ ) && (((__GNUC__ > 5) && (__GNUC_MINOR__ > 0))))
 #pragma GCC diagnostic ignored "-Wpmf-conversions"

@@ -16,57 +16,46 @@
  * limitations under the License.
 */
 #include "FirstOrderLinearDS.hpp"
-//#include "Plugin.hpp"
+// #define DEBUG_MESSAGES
+// #define DEBUG_STDOUT
+#include "debug.h"
 #include <iostream>
 
 typedef void (*computeAfct)(double, unsigned int, unsigned int, double*, unsigned int, double*);
 
 // --- Constructors ---
-
 // From a minimum set of data, A and b connected to a plug-in
 FirstOrderLinearDS::FirstOrderLinearDS(SP::SiconosVector newX0, const std::string& APlugin, const std::string& bPlugin):
   FirstOrderNonLinearDS(newX0)
 {
-
-  _pluginb.reset(new PluggedObject());
-  _pluginA.reset(new PluggedObject());
-  _pluginA->setComputeFunction(APlugin);
-  _pluginb->setComputeFunction(bPlugin);
-
-  _f.reset(new SiconosVector(dimension()));
-  _A.reset(new SimpleMatrix(dimension(), dimension()));
-
-  checkDynamicalSystem();
+  _zeroPlugin();
+  setComputeAFunction(SSLH::getPluginName(APlugin), SSLH::getPluginFunctionName(APlugin));
+  setComputebFunction(SSLH::getPluginName(bPlugin), SSLH::getPluginFunctionName(bPlugin));
+  // dot x = A(t)x + b(t)
 }
 
 // From a minimum set of data, A from a given matrix
 FirstOrderLinearDS::FirstOrderLinearDS(SP::SiconosVector newX0, SP::SiconosMatrix newA):
   FirstOrderNonLinearDS(newX0)
 {
-  _f.reset(new SiconosVector(dimension()));
-  _pluginb.reset(new PluggedObject());
-  _pluginA.reset(new PluggedObject());
+  _zeroPlugin();
   if ((newA->size(0) != _n) || (newA->size(1) != _n))
     RuntimeException::selfThrow("FirstOrderLinearDS - constructor(number,x0,A): inconsistent dimensions with problem size for input matrix A");
-
   _A = newA;
-  checkDynamicalSystem();
 }
 
 FirstOrderLinearDS::FirstOrderLinearDS(SP::SiconosVector newX0):
   FirstOrderNonLinearDS(newX0)
 {
-  _f.reset(new SiconosVector(dimension()));
-  _pluginb.reset(new PluggedObject());
-  _pluginA.reset(new PluggedObject());
-  checkDynamicalSystem();
+  _zeroPlugin();
 }
+
 // From a minimum set of data, A from a given matrix
 FirstOrderLinearDS::FirstOrderLinearDS(SP::SiconosVector newX0, SP::SiconosMatrix newA, SP::SiconosVector newB):
   FirstOrderNonLinearDS(newX0)
 {
-  _pluginb.reset(new PluggedObject());
-  _pluginA.reset(new PluggedObject());
+  _zeroPlugin();
+    
   if ((newA->size(0) != _n) || (newA->size(1) != _n))
     RuntimeException::selfThrow("FirstOrderLinearDS - constructor(x0,A,b): inconsistent dimensions with problem size for input matrix A");
 
@@ -75,16 +64,17 @@ FirstOrderLinearDS::FirstOrderLinearDS(SP::SiconosVector newX0, SP::SiconosMatri
 
   _A = newA;
   _b = newB;
-  _f.reset(new SiconosVector(dimension()));
-
-  checkDynamicalSystem();
 }
 
 // Copy constructor
 FirstOrderLinearDS::FirstOrderLinearDS(const FirstOrderLinearDS & FOLDS): FirstOrderNonLinearDS(FOLDS)
 {
-  _A.reset(new SimpleMatrix(*(FOLDS.A())));
-
+  _zeroPlugin();
+  if(FOLDS.A())
+    _A.reset(new SimpleMatrix(*(FOLDS.A())));
+  if(FOLDS.b())
+    _b.reset(new SiconosVector(*(FOLDS.b())));
+  
   if (Type::value(FOLDS) == Type::FirstOrderLinearDS)
   {
     _pluginA.reset(new PluggedObject(*(FOLDS.getPluginA())));
@@ -92,15 +82,10 @@ FirstOrderLinearDS::FirstOrderLinearDS(const FirstOrderLinearDS & FOLDS): FirstO
   }
 }
 
-bool FirstOrderLinearDS::checkDynamicalSystem() // useless ...?
-{
-  bool output = DynamicalSystem::checkDynamicalSystem();
-  if (!output)  std::cout << "FirstOrderLinearDS Warning: your dynamical system seems to be uncomplete (check = false)" << std::endl;
-  return output;
-}
-
 void FirstOrderLinearDS::initRhs(double time)
 {
+
+  DEBUG_PRINT("init Rhs in FirstOrderLinearDS");
   computeRhs(time); // If necessary, this will also compute A and b.
   if (! _jacxRhs)  // if not allocated with a set or anything else
   {
@@ -115,38 +100,41 @@ void FirstOrderLinearDS::initRhs(double time)
 
 void FirstOrderLinearDS::updatePlugins(double time)
 {
-  computeA(time);
+  if(_M)
+    computeM(time);
+  if(_A)
+    computeA(time);
   if (_b)
     computeb(time);
 }
 
 void FirstOrderLinearDS::setComputeAFunction(const std::string& pluginPath, const std::string& functionName)
 {
+  if(!_A)
+    _A.reset(new SimpleMatrix(_n, _n));
   _pluginA->setComputeFunction(pluginPath, functionName);
-  //   Plugin::setFunction(&_APtr, pluginPath, functionName);
-  //   SSLH::buildPluginName(pluginNameAPtr,pluginPath,functionName);
 }
 
 void FirstOrderLinearDS::setComputeAFunction(LDSPtrFunction fct)
 {
+  if(!_A)
+    _A.reset(new SimpleMatrix(_n, _n));
   _pluginA->setComputeFunction((void*)fct);
-  //  _APtr=fct;
 }
+
 void FirstOrderLinearDS::setComputebFunction(const std::string& pluginPath, const std::string& functionName)
 {
-  //  Plugin::setFunction(&_bPtr, pluginPath, functionName);
-  _pluginb->setComputeFunction(pluginPath, functionName);
   if (!_b)
-    _b.reset(new SiconosVector(dimension()));
-  //  SSLH::buildPluginName(pluginNamebPtr,pluginPath,functionName);
+    _b.reset(new SiconosVector(_n));
+  _pluginb->setComputeFunction(pluginPath, functionName);
 }
 
 void FirstOrderLinearDS::setComputebFunction(LDSPtrFunction fct)
 {
+  if(!_b)
+    _b.reset(new SiconosVector(_n));
   _pluginb->setComputeFunction((void*)fct);
-  //  _bPtr = fct;
 }
-
 
 void FirstOrderLinearDS::computeA(double time)
 {
@@ -184,6 +172,7 @@ void FirstOrderLinearDS::computeRhs(double time, bool isDSup)
 
   if (_M)
   {
+    computeM(time);
     // allocate invM at the first call of the present function
     if (! _invM)
       _invM.reset(new SimpleMatrix(*_M));
@@ -194,47 +183,28 @@ void FirstOrderLinearDS::computeRhs(double time, bool isDSup)
 
 void FirstOrderLinearDS::computeJacobianRhsx(double time, bool isDSup)
 {
-  computeA(time);
-
-  if (_M && _A)
-  {
-    *_jacxRhs = *_A;
-    // copy M into invM for LU-factorisation, at the first call of this function.
-    if (! _invM)
-      _invM.reset(new SimpleMatrix(*_M));
-    // solve MjacobianRhsx = A
-    _invM->PLUForwardBackwardInPlace(*_jacxRhs);
-  }
-  // else jacobianRhsx = A, pointers equality.
-
+  if(_A)
+    {
+      computeA(time);
+      if (_M)
+	{
+	  computeM(time);
+	  *_jacxRhs = *_A;
+	  if (! _invM)
+	    _invM.reset(new SimpleMatrix(*_M));
+	  else if(_pluginM->fPtr) // if M is plugged, invM must be updated
+	    *_invM = *_M;
+	  // solve MjacobianRhsx = A
+	  _invM->PLUForwardBackwardInPlace(*_jacxRhs);
+	}
+    }
+  // else 0
 }
 
 void FirstOrderLinearDS::display() const
 {
   std::cout << "=== Linear system display, " << _number << std::endl;
   std::cout << "=============================" << std::endl;
-}
-
-void FirstOrderLinearDS::computef(double time)
-{
-  updatePlugins(time);
-  prod(*_A, *_x[0], *_f);
-  if (_b)
-  {
-    computeb(time);
-    *_f += *_b;
-  }
-}
-
-void FirstOrderLinearDS::computef(double time, SiconosVector& x2)
-{
-  updatePlugins(time);
-  prod(*_A, x2, *_f);
-  if (_b)
-  {
-    computeb(time);
-    *_f += *_b;
-  }
 }
 
 void FirstOrderLinearDS::setA(const SiconosMatrix& newA)
@@ -245,12 +215,8 @@ void FirstOrderLinearDS::setA(const SiconosMatrix& newA)
     _A.reset(new SimpleMatrix(newA));
 }
 
-void FirstOrderLinearDS::zeroPlugin()
+void FirstOrderLinearDS::_zeroPlugin()
 {
-  if (_pluginM)
-    _pluginM.reset(new PluggedObject());
-  if (_pluginA)
-    _pluginA.reset(new PluggedObject());
-  if (_pluginb)
-    _pluginb.reset(new PluggedObject());
+  _pluginA.reset(new PluggedObject());
+  _pluginb.reset(new PluggedObject());
 }

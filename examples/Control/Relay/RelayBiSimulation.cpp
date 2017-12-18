@@ -99,9 +99,9 @@ int main(int argc, char* argv[])
     // The Interaction which involves the first DS (the process)
     string nameInter = "processInteraction"; // Name
 
-    //    SP::Interaction myProcessInteraction(new Interaction(ninter, myNslaw, myProcessRelation));
+    //    SP::Interaction myProcessInteraction(new Interaction(myNslaw, myProcessRelation));
 
-    SP::Interaction myControllerInteraction(new Interaction(ninter, myNslaw, myControllerRelation));
+    SP::Interaction myControllerInteraction(new Interaction(myNslaw, myControllerRelation));
 
 
 
@@ -122,8 +122,7 @@ int main(int argc, char* argv[])
     // -- OneStepIntegrators --
     double theta = 0.5;
     SP::EulerMoreauOSI processIntegrator(new EulerMoreauOSI(theta));
-    processSimulation->insertIntegrator(processIntegrator);
-    process->nonSmoothDynamicalSystem()->topology()->setOSI(processDS,processIntegrator);
+
 
     // -------------
     // --- Model controller ---
@@ -142,8 +141,8 @@ int main(int argc, char* argv[])
     // -- OneStepIntegrators --
     double controllertheta = 0.5;
     SP::EulerMoreauOSI controllerIntegrator(new EulerMoreauOSI(controllertheta));
-    controllerSimulation->insertIntegrator(controllerIntegrator);
-    controller->nonSmoothDynamicalSystem()->topology()->setOSI(controllerDS,controllerIntegrator);
+
+
     // -- OneStepNsProblem --
     SP::LCP controllerLCP(new LCP());
 

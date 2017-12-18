@@ -40,6 +40,15 @@ static char* format_exception_msg(const char* first_line)
   strncat(error_msg, sn_msg, strlen(sn_msg) - 1);
   return error_msg;
 }
+
+static char* format_msg_concat(const char* msg1, const char* msg2)
+{
+  strncpy(error_msg, msg1, strlen(msg1)+1);
+  strncat(error_msg, "\n", 2);
+  strncat(error_msg, msg2, strlen(msg2));
+  return error_msg;
+}
+
 %}
 
 %exception {
@@ -89,20 +98,28 @@ static char* format_exception_msg(const char* first_line)
 { void* _ptr = NULL; if (!SWIG_IsOK(SWIG_ConvertPtr(var, &_ptr, SWIGTYPE_p_##type_, 0 |  0 ))) {
     char errmsg[1024];
     snprintf(errmsg, sizeof(errmsg), "Argument check failed! Argument %s has the wrong type, should be %s", #var, #type_);
-    PyErr_SetString(PyExc_TypeError, errmsg); PyErr_PrintEx(0); return NULL; }
+    SWIG_Error(SWIG_TypeError, errmsg); return NULL; }
     output = %static_cast(_ptr, type_*);
    }
 %enddef
 
 %{
-#include "SiconosNumerics.h"
 #include "SiconosConfig.h"
+#include "SiconosNumerics.h"
 #include "SolverOptions.h"
-#include "SparseMatrix.h"
+#include "SparseMatrix_internal.h"
 #include "NumericsMatrix.h"
 #include "SparseBlockMatrix.h"
 #include "NumericsSparseMatrix.h"
-#include "Numerics_functions.h"
+
+#ifdef SWIGPYTHON
+#include "Numerics_python_functions.h"
+#endif /* SWIGPYTHON */
+
+#ifdef SWIGMATLAB
+#include "Numerics_matlab_functions.h"
+#endif /* SWIGMATLAB */
+
 #include "SiconosSets.h"
 #include "GAMSlink.h"
 #include "NumericsFwd.h"
@@ -199,9 +216,11 @@ namespace std11 = boost;
 %include Numerics_typemaps_problems.i
 %include Numerics_typemaps_basic_linalg.i
 %include Numerics_typemaps_numericsmatrices.i
+
 %include NonSmoothDrivers.h
 %include solverOptions.i
 %import tlsdef.h
+%include NumericsVerbose.h
 %include numerics_verbose.h
 
 // this has to die --xhub
@@ -255,12 +274,15 @@ namespace std11 = boost;
 #endif
 %}
 
+#ifdef SWIGPYTHON
 %fragment("NumPy_Fragments");
+#endif /* SWIGPYTHON */
 
 // includes in 'begin' mandatory to avoid mess with
 // solverOptions.i, numerics_common and fwd decl
 // all this because of SolverOptions extend.
 %begin %{
+#include "SparseMatrix_internal.h" // must be before NumericsMatrix.h
 #include "relay_cst.h"
 #include "AVI_cst.h"
 #include "SOCLCP_cst.h"
@@ -270,6 +292,7 @@ namespace std11 = boost;
 #include "NCP_cst.h"
 #include "mlcp_cst.h"
 #include "VI_cst.h"
+#include "ConvexQP_cst.h"
 #include "GenericMechanical_cst.h"
 #include "fc2d_Solvers.h"
 #include "fc3d_Solvers.h"
@@ -277,8 +300,13 @@ namespace std11 = boost;
 #include "MCP_Solvers.h"
 #include "NCP_Solvers.h"
 #include "MLCP_Solvers.h"
+#include "ConvexQP_Solvers.h"
+#include "SiconosCompat.h"
+#include "SOCLCP_Solvers.h"
 #include "NonSmoothDrivers.h"
   %}
+
+%include numerics_NM.i
 
 %include numerics_MLCP.i
 
@@ -288,16 +316,13 @@ namespace std11 = boost;
 /////////////////////////
 
 %typemap(out) (double* q) {
-  npy_intp dims[1];
 
-  if (!arg1->M) { PyErr_SetString(PyExc_TypeError, "M is not present, don't known the size"); SWIG_fail; }
+  if (!arg1->M) { SWIG_exception_fail(SWIG_RuntimeError, "M is not present, don't known the size"); }
 
-  dims[0] = arg1->M->size0;
   if ($1)
   {
-    PyObject *obj = PyArray_SimpleNewFromData(1, dims, NPY_DOUBLE, $1);
-    PyArrayObject *array = (PyArrayObject*) obj;
-    if (!array || !require_fortran(array)) SWIG_fail;
+    SN_OBJ_TYPE *obj;
+    C_to_target_lang1(obj, arg1->M->size0, $1, SWIG_fail);
     $result = obj;
   }
   else
@@ -305,16 +330,13 @@ namespace std11 = boost;
  }
 
 %typemap(out) (double* mu) {
-  npy_intp dims[1];
 
-  if (arg1->numberOfContacts <= 0) { PyErr_SetString(PyExc_TypeError, "numberOfContacts is not set"); SWIG_fail; }
+  if (arg1->numberOfContacts <= 0) { SWIG_exception_fail(SWIG_RuntimeError, "numberOfContacts is not set"); }
 
-  dims[0] = arg1->numberOfContacts;
   if ($1)
   {
-    PyObject *obj = PyArray_SimpleNewFromData(1, dims, NPY_DOUBLE, $1);
-    PyArrayObject *array = (PyArrayObject*) obj;
-    if (!array || !require_fortran(array)) SWIG_fail;
+    SN_OBJ_TYPE *obj;
+    C_to_target_lang1(obj, arg1->numberOfContacts, $1, SWIG_fail);
     $result = obj;
   }
   else
@@ -326,7 +348,7 @@ namespace std11 = boost;
   // Still some dark magic :( --xhub
   if (arg1->numberOfContacts <= 0)
   {
-    PyErr_SetString(PyExc_RuntimeError, "numberOfContacts is not set, it sould be done first!");
+    SWIG_exception(SWIG_RuntimeError, "numberOfContacts is not set, it sould be done first!");
     SWIG_fail;
   }
 
@@ -334,8 +356,7 @@ namespace std11 = boost;
   {
     char msg[1024];
     snprintf(msg, sizeof(msg), "Size of mu is %ld, but the number of contacts is %d! Both should be equal!\n", array_size(array2, 0), arg1->numberOfContacts);
-    PyErr_SetString(PyExc_RuntimeError, msg);
-    SWIG_fail;
+    SWIG_exception_fail(SWIG_ValueError, msg);
   }
 
   if (!$1) { $1 = (double*)malloc(arg1->numberOfContacts * sizeof(double)); }
@@ -350,16 +371,14 @@ namespace std11 = boost;
   assert(arg1);
   if (!arg1->M)
   {
-    PyErr_SetString(PyExc_RuntimeError, "M is not initialized, it sould be done first!");
-    SWIG_fail;
+    SWIG_exception_fail(SWIG_RuntimeError, "M is not initialized, it sould be done first!");
   }
 
   int size = arg1->M->size0;
   if (size !=  array_size(array2, 0))
   {
     snprintf(msg, sizeof(msg), "Size of q is %ld, but the size of M is %d! Both should be equal!\n", array_size(array2, 0), size);
-    PyErr_SetString(PyExc_RuntimeError, msg);
-    SWIG_fail;
+    SWIG_exception_fail(SWIG_RuntimeError, msg);
   }
 
   if (!$1) { $1 = (double*)malloc(size * sizeof(double)); }
@@ -403,14 +422,20 @@ namespace std11 = boost;
   }
 %}
 
-%include Numerics_for_python_callback.i
 
 %include numerics_common.i
 
+%include Numerics_callback.i
+
+#ifdef SWIGPYTHON
+%include Numerics_for_python_callback.i
 %include numerics_MCP.i
+#endif /* SWIGPYTHON */
 %include Numerics_MCP2.i
 %include Numerics_NCP.i
 %include Numerics_VI.i
+%include Numerics_ConvexQP.i
+%include Numerics_SOCLCP.i
 
 
 
@@ -449,41 +474,27 @@ namespace std11 = boost;
 
 %define STR_FIELD_COPY(field,strobj)
 {
-%#if PY_MAJOR_VERSION < 3
-    if(!PyString_Check(strobj))
-%#else
-    if(!PyUnicode_Check(strobj))
-%#endif
-    {
-      PyErr_SetString(PyExc_TypeError, "The argument should be string");
-      PyErr_PrintEx(0);
-      return;
-    }
+  int alloc = 0;
+  char* name_str;
+  size_t len = 0;
+  int res = SWIG_AsCharPtrAndSize(strobj, &name_str, &len, &alloc);
+  if (!SWIG_IsOK(res)) {
+    SWIG_Error(SWIG_ArgError(res), "in method unknown', argument " "1"" of type '" "char *""'");
+  }
 
-    char* name_str;
-%#if PY_MAJOR_VERSION < 3
-    name_str = PyString_AsString(strobj);
-%#else
-    PyObject* tmp_ascii;
-    tmp_ascii = PyUnicode_AsASCIIString(strobj);
-    name_str = PyBytes_AsString(tmp_ascii);
-%#endif
-    size_t len = strlen(name_str) + 1;
+  // Some weird logic here
+  if (field)
+  {
+    field = (char*)realloc(field, len*sizeof(char));
+  }
+  else
+  {
+    field = (char*)malloc(len*sizeof(char));
+  }
+  strncpy(field, name_str, len);
 
-    // Some weird logic here
-    if (field)
-    {
-      field = (char*)realloc(field, len*sizeof(char));
-    }
-    else
-    {
-      field = (char*)malloc(len*sizeof(char));
-    }
-    strncpy(field, name_str, len);
+  if (alloc == SWIG_NEWOBJ) free(name_str);
 
-%#if PY_MAJOR_VERSION >= 3
-    Py_XDECREF(tmp_ascii);
-%#endif
 }
 %enddef
 
@@ -496,12 +507,12 @@ namespace std11 = boost;
     return (SN_GAMSparams*) SO->solverParameters;
   }
 
-  void gamsdir_set(PyObject* strobj)
+  void gamsdir_set(SN_OBJ_TYPE* strobj)
   {
     STR_FIELD_COPY($self->gams_dir, strobj)
   }
 
-  void modeldir_set(PyObject* strobj)
+  void modeldir_set(SN_OBJ_TYPE* strobj)
   {
     STR_FIELD_COPY($self->model_dir, strobj)
   }
@@ -520,8 +531,6 @@ namespace std11 = boost;
 #include <GenericMechanical_cst.h>
 %}
 //%include GenericMechanical_cst.h
-
-%include numerics_NM.i
 
 #ifdef WITH_SERIALIZATION
 %make_picklable(Callback, Numerics);

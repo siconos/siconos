@@ -96,7 +96,7 @@ int main(int argc, char* argv[])
     // -> Non-smooth law
     SP::NonSmoothLaw nslaw(new ComplementarityConditionNSL(4));
 
-    SP::Interaction InterPRC(new Interaction(4, nslaw, LTIRPRC));
+    SP::Interaction InterPRC(new Interaction(nslaw, LTIRPRC));
 
 
     // --- Model creation ---

@@ -44,7 +44,7 @@ protected:
    */
   unsigned int _indexSetLevelForProjection;
 
-  /** Cumulated Number of steps perfomed is the Newton Loop */
+  /** Cumulated Number of steps performed is the Newton Loop */
   unsigned int _cumulatedNewtonNbIterations;
 
   /** Number of iteration of projection
@@ -137,17 +137,6 @@ public:
   TimeSteppingCombinedProjection() {};
 
   virtual ~TimeSteppingCombinedProjection();
-  /** compute for the first time the _level* variables
-   * \warning it should only be called during initialize, if there are Interactions.
-   * Otherwise, call the overloaded method when addind a Relation
-   */
-  void computeLevelsForInputAndOutput();
-
-  /** Update the _level* attributes and add the specific index Set
-   * \param inter a new SP::Interaction
-   * \param init bool to determine if we are in the initialisation phase
-   */
-  void computeLevelsForInputAndOutput(SP::Interaction inter, bool init = false);
 
   virtual void updateWorldFromDS()
   {
@@ -168,7 +157,7 @@ public:
     return _nbCumulatedProjectionIteration;
   }
 
-  /** get the  Cumulated Number of steps perfomed in the Newton Loop
+  /** get the  Cumulated Number of steps performed in the Newton Loop
    * \return unsigned int
    */
   inline unsigned int cumulatedNewtonNbIterations()

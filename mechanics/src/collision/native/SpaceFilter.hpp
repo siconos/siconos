@@ -63,9 +63,6 @@ protected:
   /** the cell size */
   unsigned int _cellsize;
 
-  /** interaction counter */
-  unsigned int _interID;
-
   /** the siconos model */
   SP::Model _model;
 
@@ -213,14 +210,6 @@ public:
    */
   SP::NonSmoothLaw nslaw(long unsigned int class1, long unsigned class2);
 
-  /** Get an interaction id.
-      \return an unsigned int
-   * */
-  unsigned int newInteractionId()
-  {
-    return _interID++;
-  };
-
   /** get the neighbours
    * */
 //  std::pair<space_hash::iterator, space_hash::iterator> neighbours(SP::Hashed h);
@@ -235,15 +224,6 @@ public:
       \param h hashed component of a body.
    */
   double minDistance(SP::Hashed h);
-
-
-  /** Insert a new interaction and link it to 1 or 2 ds.
-      \param inter the new interaction.
-      \param ds1 a SP::DynamicalSystem.
-      \param ds2 a SP::DynamicalSystem (optional).
-  */
-  void link(SP::Interaction inter, SP::DynamicalSystem ds1,
-            SP::DynamicalSystem ds2 = SP::DynamicalSystem());
 
   /** Broadphase contact detection: add interactions in indexSet 0.
    *  \param time the current time.

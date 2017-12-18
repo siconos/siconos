@@ -116,16 +116,6 @@ int main(int argc, char* argv[])
     SP::SiconosVector bOfBeads(new SiconosVector(1));
     (*bOfBeads)(0) = -2 * R;
 
-    // This doesn't work !!!
-
-    //SP::Relation relationOfBeads(new LagrangianLinearTIR(HOfBeads));
-    //std::vector<SP::Interaction > interOfBeads(nBeads-1);
-    // for (unsigned int i =0; i< nBeads-1; i++)
-    // {
-    //   interOfBeads[i].reset(new Interaction(1, nslaw, relationOfBeads));
-    // }
-
-    // This works !!
     std::vector<SP::Relation > relationOfBeads(nBeads - 1);
     std::vector<SP::Interaction > interOfBeads(nBeads - 1);
     // for (unsigned int i =0; i< nBeads-1; i++)
@@ -139,9 +129,7 @@ int main(int argc, char* argv[])
     // ---      Model and simulation      ---
     // --------------------------------------
     SP::Model columnOfBeads(new Model(t0, T));
-    // --  (1) OneStepIntegrators --
-    SP::MoreauJeanOSI OSI(new MoreauJeanOSI(theta));
-
+    
     // add the dynamical system in the non smooth dynamical system
     for (unsigned int i = 0; i < nBeads; i++)
     {
@@ -155,6 +143,8 @@ int main(int argc, char* argv[])
     //   columnOfBeads->nonSmoothDynamicalSystem()->link(interOfBeads[i],beads[i+1]);
     // }
 
+    // --  (1) OneStepIntegrators --
+    SP::MoreauJeanOSI OSI(new MoreauJeanOSI(theta));
 
     // -- (2) Time discretisation --
     SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
@@ -220,7 +210,7 @@ int main(int argc, char* argv[])
             ncontact++;
             // std::cout << "Number of contact = " << ncontact << std::endl;
 
-            inter.reset(new Interaction(1, nslaw, relation));
+            inter.reset(new Interaction(nslaw, relation));
             columnOfBeads->nonSmoothDynamicalSystem()->link(inter, beads[0]);
             s->initializeInteraction(s->nextTime(), inter);
 
@@ -245,7 +235,7 @@ int main(int argc, char* argv[])
             // std::cout << "Number of contact = " << ncontact << std::endl;
 
             relationOfBeads[i].reset(new LagrangianLinearTIR(HOfBeads, bOfBeads));
-            interOfBeads[i].reset(new Interaction(1, nslaw, relationOfBeads[i]));
+            interOfBeads[i].reset(new Interaction(nslaw, relationOfBeads[i]));
 
             columnOfBeads->nonSmoothDynamicalSystem()->link(interOfBeads[i], beads[i], beads[i+1]);
             s->initializeInteraction(s->nextTime(), interOfBeads[i]);

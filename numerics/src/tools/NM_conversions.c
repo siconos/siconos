@@ -20,8 +20,9 @@
 #include <assert.h>
 #include <stdio.h>
 
-#include "NM_conversions.h"
 #include "SiconosConfig.h"
+#include "SparseMatrix_internal.h"
+#include "NM_conversions.h"
 
 #ifdef WITH_MKL_SPBLAS
 #include "tlsdef.h"
@@ -39,12 +40,12 @@ CSparseMatrix* NM_csc_to_triplet(CSparseMatrix* csc)
   assert(csc);
   CSparseMatrix* triplet = cs_spalloc(csc->m, csc->n, csc->p[csc->n], 1, 1);
 
-  csi* Ap = csc->p;
-  csi* Ai = csc->i;
+  CS_INT* Ap = csc->p;
+  CS_INT* Ai = csc->i;
   double* val = csc->x;
-  for (csi j = 0; j < csc->n; ++j)
+  for (CS_INT j = 0; j < csc->n; ++j)
   {
-    for (csi i = Ap[j]; i < Ap[j+1]; ++i)
+    for (CS_INT i = Ap[j]; i < Ap[j+1]; ++i)
     {
       cs_zentry(triplet, Ai[i], j, val[i]);
     }
@@ -66,9 +67,9 @@ CSparseMatrix* NM_triplet_to_csr(CSparseMatrix* triplet)
   assert(csr);
   csr->nz = -2;
 
-  csi n = csr->n;
-  csi job[6] = {0};
-  csi info = 0;
+  CS_INT n = csr->n;
+  CS_INT job[6] = {0};
+  CS_INT info = 0;
   job[0] = 2;
   (*mkl_dcsrcoo_p)(job, &n, csr->x, csr->i, csr->p, &(triplet->nz), triplet->x, triplet->i, triplet->p, &info);
 
@@ -92,11 +93,11 @@ CSparseMatrix* NM_csr_to_triplet(CSparseMatrix* csr)
   CSparseMatrix* triplet = cs_spalloc(csr->m, csr->n, csr->p[csr->m], 1, 1);
   assert(triplet);
 
-  csi n = csr->n;
-  csi job[6] = {0};
+  CS_INT n = csr->n;
+  CS_INT job[6] = {0};
   job[4] = csr->p[csr->m];
   job[5] = 3;
-  csi info = 0;
+  CS_INT info = 0;
   (*mkl_dcsrcoo_p)(job, &n, csr->x, csr->i, csr->p, &(csr->p[csr->m]), triplet->x, triplet->i, triplet->p, &info);
   triplet->nz = csr->p[csr->m];
 
@@ -121,9 +122,9 @@ CSparseMatrix* NM_csc_to_csr(CSparseMatrix* csc)
   assert(csr);
   csr->nz = -2;
 
-  csi n = csr->n;
-  csi job[6] = {0};
-  csi info = 0;
+  CS_INT n = csr->n;
+  CS_INT job[6] = {0};
+  CS_INT info = 0;
   job[0] = 1;
   job[5] = 1;
   (*mkl_dcsrcsc_p)(job, &n, csr->x, csr->i, csr->p, csc->x, csc->i, csc->p, &info);
@@ -149,10 +150,10 @@ CSparseMatrix* NM_csr_to_csc(CSparseMatrix* csr)
   CSparseMatrix* csc = cs_spalloc(csr->m, csr->n, csr->nzmax, 1, 0);
   assert(csc);
 
-  csi n = csr->n;
-  csi job[6] = {0};
+  CS_INT n = csr->n;
+  CS_INT job[6] = {0};
   job[5] = 1;
-  csi info = 0;
+  CS_INT info = 0;
   (*mkl_dcsrcsc_p)(job, &n, csr->x, csr->i, csr->p, csc->x, csc->i, csc->p, &info);
 
   return csc;

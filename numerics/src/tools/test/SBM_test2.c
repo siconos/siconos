@@ -36,10 +36,10 @@ int main(void)
   printf("========= Starts SBM tests 2 for SBM ========= \n");
   SparseBlockStructuredMatrix M;
   FILE *file = fopen("data/SBM1.dat", "r");
-  newFromFileSBM(&M, file);
+  SBM_new_from_file(&M, file);
   fclose(file);
   /*alloc enough memory */
-  int res = test_RowPermutationSBM(&M);
+  int res = test_SBM_row_permutation(&M);
   if (res)
   {
     printf("========= Failed SBM tests 2 for SBM  ========= \n");
@@ -50,9 +50,9 @@ int main(void)
 
   SparseBlockStructuredMatrix M2;
   file = fopen("data/SBM2.dat", "r");
-  newFromFileSBM(&M2, file);
+  SBM_new_from_file(&M2, file);
   fclose(file);
-  res = test_RowPermutationSBM(&M2);
+  res = test_SBM_row_permutation(&M2);
   if (res)
   {
     printf("========= Failed SBM tests 2 for SBM  ========= \n");

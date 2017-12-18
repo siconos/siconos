@@ -64,7 +64,7 @@ namespace detail {
 inline std::complex<float> dotc( const int n, const std::complex<float>* x,
         const int incx, const std::complex<float>* y, const int incy ) {
     std::complex<float> result;
-    cblas_cdotc_sub( n, x, incx, y, incy, &result );
+    cblas_cdotc_sub( n, OPENBLAS_CONST_FLOAT_CAST(x), incx, OPENBLAS_CONST_FLOAT_CAST(y), incy, OPENBLAS_OPENBLAS_COMPLEX_FLOAT_CAST(&result) );
     return result;
 }
 
@@ -76,7 +76,7 @@ inline std::complex<float> dotc( const int n, const std::complex<float>* x,
 inline std::complex<double> dotc( const int n, const std::complex<double>* x,
         const int incx, const std::complex<double>* y, const int incy ) {
     std::complex<double> result;
-    cblas_zdotc_sub( n, x, incx, y, incy, &result );
+    cblas_zdotc_sub( n, OPENBLAS_CONST_DOUBLE_CAST(x), incx, OPENBLAS_CONST_DOUBLE_CAST(y), incy, OPENBLAS_OPENBLAS_COMPLEX_DOUBLE_CAST(&result ));
     return result;
 }
 

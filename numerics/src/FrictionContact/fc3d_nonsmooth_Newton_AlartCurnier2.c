@@ -163,7 +163,7 @@ void fc3d_nonsmooth_Newton_AlartCurnier2(
     fc3d_VI_ExtraGradient_setDefaultSolverOptions(options_vi_eg);
     options_vi_eg->iparam[0] = 50;
     options_vi_eg->dparam[0] = sqrt(options->dparam[0]);
-    options_vi_eg->iparam[SICONOS_VI_ERROR_EVALUATION] = SICONOS_VI_ERROR_EVALUATION_LIGHT;
+    options_vi_eg->iparam[SICONOS_VI_IPARAM_ERROR_EVALUATION] = SICONOS_VI_ERROR_EVALUATION_LIGHT;
     fc3d_VI_ExtraGradient(problem, reaction , velocity , info , options_vi_eg);
     solver_options_delete(options_vi_eg);
     free(options_vi_eg);

@@ -33,7 +33,7 @@ def compute_dt_matrices(A, B, h, TV=False):
 
     rel = SK.FirstOrderLinearTIR(Csurface, B)
     nslaw = SK.RelayNSL(m)
-    inter = SK.Interaction(m, nslaw, rel)
+    inter = SK.Interaction(nslaw, rel)
 
     #process.nonSmoothDynamicalSystem().insertInteraction(inter, True)
     process.nonSmoothDynamicalSystem().link(inter, process_ds)

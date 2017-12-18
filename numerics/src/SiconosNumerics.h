@@ -26,9 +26,6 @@
 #include <string.h>
 
 #include "NonSmoothDrivers.h"
-#include "odepack.h"
-#include "hairer.h"
-#include "op3x3.h"
 
 #endif // SICONOSNUMERICS_H
 

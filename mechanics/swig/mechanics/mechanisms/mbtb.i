@@ -1,11 +1,9 @@
 /* mbtb.i this file contains exported API of the MBTB library.*/
-%module(package="mechanisms") mbtb
+%module(package="siconos.mechanics.mechanisms") mbtb
 
 %include start.i
 #undef WITH_IO
 #undef WITH_SERIALIZATION
-
-%include path.i
 
 %{
 #include <SiconosKernel.hpp>

@@ -19,18 +19,19 @@
 #include <assert.h>
 #include "VariationalInequality.h"
 #include "numerics_verbose.h"
+#include "NumericsMatrix.h"
 
 
-void variationalInequality_display(VariationalInequality* problem)
+void variationalInequality_display(VariationalInequality* vi)
 {
 
-  assert(problem);
+  assert(vi);
 
 }
 
-int variationalInequality_printInFile(VariationalInequality*  problem, FILE* file)
+int variationalInequality_printInFile(VariationalInequality*  vi, FILE* file)
 {
-  if (! problem)
+  if (! vi)
   {
     fprintf(stderr, "Numerics, VariationalInequality printInFile failed, NULL input.\n");
     exit(EXIT_FAILURE);
@@ -39,15 +40,20 @@ int variationalInequality_printInFile(VariationalInequality*  problem, FILE* fil
   return 0;
 }
 
-int variationalInequality_newFromFile(VariationalInequality* problem, FILE* file)
+int variationalInequality_newFromFile(VariationalInequality* vi, FILE* file)
 {
-
   return 0;
 }
 
-void freeVariationalInequalityProblem(VariationalInequality* problem)
+void freeVariationalInequalityProblem(VariationalInequality* vi)
 {
-  assert(problem);
+  if (vi->nabla_F)
+  {
+    NM_free(vi->nabla_F);
+    free(vi->nabla_F);
+    vi->nabla_F = NULL;
+  }
+  free(vi);
 }
 
 void variationalInequality_clear(VariationalInequality* vi)
@@ -70,4 +76,13 @@ VariationalInequality* variationalInequality_new(int size)
   fvi->size = size;
 
   return fvi;
+}
+
+VariationalInequality* newVI(void)
+{
+  VariationalInequality* vi = (VariationalInequality*) malloc(sizeof(VariationalInequality));
+  variationalInequality_clear(vi);
+
+  return vi;
+
 }

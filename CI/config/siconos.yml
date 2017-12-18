@@ -8,11 +8,15 @@ wildcard: any
 
 match:
   ubuntu: debian
+  nixos/nix: nix
+  
 ##############################################################################
+# Set commands used to install and update packages
 installer:
   any:
     fedora: dnf --setopt=deltarpm=false install -y
     debian: apt-get install -y --force-yes
+    nixos/nix: nix-env -i
 
 updater:
   any:
@@ -21,9 +25,29 @@ updater:
     debian: apt-get update -y
     ubuntu-16.04: printf "deb http://ppa.launchpad.net/siconos/siconos-daily/ubuntu xenial main\ndeb-src http://ppa.launchpad.net/siconos/siconos-daily/ubuntu xenial main\ndeb http://ppa.launchpad.net/siconos/fclib-daily/ubuntu xenial main\ndeb-src http://ppa.launchpad.net/siconos/fclib-daily/ubuntu xenial main " >> /etc/apt/sources.list && apt-get update -y
     fedora:  dnf --setopt=deltarpm=false install -y dnf-plugins-core && dnf -y copr enable xhub/siconos-git
+    nixos/nix: nix-env -qa > /tmp/nix-packages # ?
 
 ##############################################################################
+# set specific extra definitions for some packages/distrib
+# (read using get_entry function from mksenv.py)
+# example:
+# to add -DOPT=VALUE when using package clang-3.9 on ubuntu-17
+# use
+# env:
+#   clang-3.9:
+#      ubuntu-17:
+#         - OPT=VALUE
 env:
+  clang-3.9:
+    any:
+      - CC=/usr/bin/clang-3.9
+      - CXX=/usr/bin/clang++-3.9
+      - OMPI_CC=/usr/bin/clang-3.9
+      - OMPI_CXX=/usr/bin/clang++-3.9
+      - LLVM_SYMBOLIZER=/usr/lib/llvm-3.9/bin/llvm-symbolizer
+      - ASAN_SYMBOLIZER_PATH=/usr/lib/llvm-3.9/bin/llvm-symbolizer
+      - MSAN_SYMBOLIZER_PATH=/usr/lib/llvm-3.9/bin/llvm-symbolizer
+
   clang-3.8:
     any:
       - CC=/usr/bin/clang-3.8
@@ -62,6 +86,18 @@ env:
       - PATH_LICENSE_STRING="3413119131&Courtesy&&&USR&54784&12_1_2016&1000&PATH&GEN&31_12_2017&0_0_0&5000&0_0"
 
 ##############################################################################
+# set dependencies list for some packages/distrib
+# (read using pkg_entries function from mksenv.py)
+# example:
+# to set python-dev and scipy as dependencies of python-env on debian
+# use
+# pkgs:
+#   python-env:
+#      debian:
+#         - python-dev
+#         - python-scipy
+# 
+# 
 pkgs:
 
   build-base:
@@ -75,7 +111,15 @@ pkgs:
       - swig
       - cppunit
 
+  python-minimal:
+    nix:
+      - python-2.7.13
+
   python-env:
+    nix:
+      - python-2.7.13
+      - python-modules
+
     debian:
       - python
       - python-dev
@@ -91,7 +135,12 @@ pkgs:
       - scipy
       - python-matplotlib
 
+  python-modules:
+    nix:
+      command: 'printf "with import <nixpkgs> {}\;" > /tmp/python-env.nix && echo "" >> /tmp/python-env.nix && printf "pkgs.python27.withPackages (ps: with ps\; [lxml pytest scipy matplotlib])" >> /tmp/python-env.nix && echo "" >> /tmp/python-env.nix >> /tmp/python-env.nix && cat /tmp/python-env.nix >&2 && nix-env -if /tmp/python-env.nix'
+      
   python3-env:
+    nix:
     debian:
       - python3
       - python3-dev
@@ -111,8 +160,10 @@ pkgs:
 
   # bullet & serialization for full doc
   documentation:
-    ubuntu-16.04:
+    nix:
+    debian:
       - doxygen
+      - graphviz
       - python-sphinx
       - python-sphinx-bootstrap-theme
       - python-sphinx-rtd-theme
@@ -125,6 +176,8 @@ pkgs:
       - serialization
 
   pip-command:
+    nix:
+      - python2.7-pip-9.0.1
     debian:
       - python-pip
       - pip-upgrade
@@ -135,12 +188,14 @@ pkgs:
         pip install --upgrade pip
       
   siconos-doc-pip-pkgs:
-    ubuntu-16.04:
+    any:
       command:
         pip install sphinxcontrib-bibtex &&
         pip install sphinxcontrib-doxylink
       
   profiling:
+    nix:
+      - valgrind-3.12.0
     debian:
       - valgrind
       - python-dbg
@@ -149,18 +204,33 @@ pkgs:
       - python-debuginfo
 
   lpsolve:
+    nix:
     debian:
       - lp-solve
       - liblpsolve55-dev
     fedora:
       - lpsolve-devel
 
-  cmake:
-    ubuntu-12.04:
-       - python-software-properties
-       - cmake-3.0.2
-       - python-matplotlib
+  git-core:
+    nix:
+      - git-2.12.0
 
+  wget:
+    nix:
+      - wget-1.19.1
+
+  make:
+    nix:
+      - gnumake-4.2.1
+      
+  cmake:
+    nix:
+      - cmake-3.7.2
+    ubuntu-12.04:
+      - python-software-properties
+      - cmake-3.0.2
+      - python-matplotlib
+      
     ubuntu-14.04:
        - cmake-3.0.2
 
@@ -182,18 +252,29 @@ pkgs:
         ./configure&&
         make install
 
+  swig:
+    nix:
+      - swig-3.0.10
+        
   gfortran:
+    nix: gfortran-wrapper-6.3.0
     fedora: gcc-gfortran
 
+  gcc:
+    nix: gcc-wrapper-6.3.0
+
   gnu-c++:
+    nix: gcc
     debian: g++
     fedora: gcc-c++
 
   boost:
+    nix: boost-1.63.0
     debian: libboost-dev
     fedora: boost-devel
 
   serialization:
+    nix:
     debian:
       libboost-filesystem-dev
       libboost-serialization-dev
@@ -202,11 +283,14 @@ pkgs:
       boost-serialization
 
   gmp:
+    nix: gmp-with-cxx-6.1.1
     debian: libgmp-dev
     fedora: gmp-devel
 
 
   cppunit:
+    nix:
+      - cppunit-1.13.2
     debian:
       - libcppunit-dev
 
@@ -215,17 +299,23 @@ pkgs:
       - cppunit-devel
 
   hdf5:
+    nix: hdf5-1.8.18
     fedora: hdf5-devel
     debian: libhdf5-dev
 
   h5py:
+    nix: python2.7-h5py-2.6.0
     fedora: h5py
     debian: python-h5py
 
   h5py3:
+    nix: python3.5-h5py-2.6.0
     any: python3-h5py
 
   openblas-lapacke:
+    nix:
+      - openblas-0.2.19
+      - pfff_lapacke_is_missing
     debian:
       - libopenblas-dev
       - liblapacke-dev
@@ -234,6 +324,9 @@ pkgs:
       - lapack-devel
 
   atlas-lapack:
+    nix:
+      - blas-3.5.0
+      - atlas-with-lapack-3.10.2
     debian:
       - libblas-dev
       - liblapack-dev
@@ -246,6 +339,7 @@ pkgs:
       - atlas-devel
 
   oce:
+    nix: opencascade-oce-0.17.2
     debian:
       - liboce-foundation-dev
       - liboce-modeling-dev
@@ -257,6 +351,8 @@ pkgs:
       - OCE-devel
 
   mumps:
+    nix:
+      - pfff_mumps_is_missing
     debian-7.8:
       - libopenmpi-dev
       - openssh-client
@@ -281,21 +377,27 @@ pkgs:
       - environment-modules
 
   bullet:
+    nix:
+      - bullet-2.83.7
     debian:
       - libbullet-dev
 
   umfpack:
+    nix: pfff_umfpack_is_missing
     debian:
       - libsuitesparse-dev
     fedora:
       - suitesparse-devel
 
   asan:
+    nix: pfff_asan_is_missing
     fedora:
       - libasan
       - libubsan
 
   xz:
+    nix:
+      - xz-5.2.2
     debian:
       - xz-utils
 
@@ -308,32 +410,40 @@ pkgs:
                make install
 
   clang:
+    nix:
+      - clang-4.9.1
     debian-jessie:
       - clang-3.8
   # Don't worry, this is a hack to get cppunit to work with clang on ubuntu 15.10, because the system cppunit
   # has been compiled with a different string impl ...
-  cppunit_clang:
-    ubuntu-16.10:
-      command:  wget http://siconos.gforge.inria.fr/build-42/cppunit-clang-ubuntu-16.10.tar.xz &&
-                tar xJf cppunit-clang-ubuntu-16.10.tar.xz --strip-components=1 -C /usr/lib/x86_64-linux-gnu/ lib &&
-                tar xJf cppunit-clang-ubuntu-16.10.tar.xz --strip-components=1 -C /usr/include/cppunit/ include
+  cppunit_clang-3.9:
+    ubuntu-17.04:
+      command:  wget http://siconos.gforge.inria.fr/build-42/cppunit-clang-3.9-ubuntu-16.10.tar.xz &&
+                tar xJf cppunit-clang-3.9-ubuntu-16.10.tar.xz --strip-components=1 -C /usr/lib/x86_64-linux-gnu/ lib &&
+                tar xJf cppunit-clang-3.9-ubuntu-16.10.tar.xz --strip-components=1 -C /usr/include/cppunit/ include
 
   # this is for msan. It also contains the so files for cppunit compiled with msan
   libcxx_msan:
+    nix:
     any:
       command: wget http://siconos.gforge.inria.fr/build-42/libcxx_msan-clang-3.6.tar.xz &&
                tar xJf libcxx_msan-clang-3.6.tar.xz -C /
 
   # dummy target
   cfi:
+    nix:
     any:
       command: mkdir /tmp/clang && ln -s /usr/bin/ld.gold /tmp/clang/ld
 
   path:
     debian:
-      command: wget -O - https://github.com/ampl/pathlib/raw/master/lib/linux64/libpath47.so > /usr/lib/x86_64-linux-gnu/libpath47.so
+      command: wget -O - https://github.com/ampl/pathlib/raw/master/lib/linux64/libpath47.so > /usr/lib/x86_64-linux-gnu/libpath47.so &&
+               apt-get install -y --force-yes patchelf &&
+               patchelf --replace-needed libgfortran.so.3 libm.so.6
     fedora:
-      command: wget -O - https://github.com/ampl/pathlib/raw/master/lib/linux64/libpath47.so > /usr/lib64/libpath47.so
+      command: wget -O - https://github.com/ampl/pathlib/raw/master/lib/linux64/libpath47.so > /usr/lib64/libpath47.so &&
+               dnf --setopt=deltarpm=false install -y patchelf &&
+               patchelf --replace-needed libgfortran.so.3 libm.so.6
 
   pythonocc:
     any:
@@ -350,9 +460,16 @@ pkgs:
     any:
       command: wget https://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh &&
                bash ./Miniconda-latest-Linux-x86_64.sh -b -p /opt/conda &&
-               /opt/conda/bin/conda install numpy scipy lxml pytest matplotlib &&
+               /opt/conda/bin/conda install numpy scipy h5py lxml pytest matplotlib vtk &&
                /opt/conda/bin/conda install -c https://conda.anaconda.org/dlr-sc pythonocc-core &&
-               rm /opt/conda/lib/libgfortran.so*
+               rm /opt/conda/lib/libgfortran.so* &&
+               rm /opt/conda/pkgs/*.tar.bz2 -f &&
+               find /opt/conda/lib/ -maxdepth 1 -name libvtk*.so | xargs -n 1 -I{} sh -c 'ln -s {} $(echo {} | sed s/-.*/.so/)'
+
+               # for i in $(ls /opt/conda/lib/libvtk*.so); do ii=$(echo $i | sed s/-.*/.so/); ln -s $i $ii ; done
+
+               # conda is borken as of 10/03/2017: we need to install vtk by hand and the lib provided by conda ahave their name sufficex by -MV.mv.
+               # So we have to create the right symlink :( --xhub
 
                #echo 'export PATH=/opt/conda/bin:$PATH' > /etc/profile.d/conda.sh &&
                #echo 'export PATH=/opt/conda/bin:$PATH' >> $HOME/.profile &&
@@ -363,6 +480,7 @@ pkgs:
       - libglu1-mesa
       - libsm6
       - libice6
+      - libxt6
 
 
   # deps required for oce/pythonocc install, when oce/occ sources = git repos, last version.
@@ -394,7 +512,6 @@ pkgs:
                python -c 'import OCC'
 
   # ocaml package manager
-
   frama-c:
     any:
       command:
@@ -406,3 +523,4 @@ pkgs:
         touch Werror.mli &&
         make &&
         make install
+

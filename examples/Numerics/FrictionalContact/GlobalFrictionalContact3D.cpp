@@ -135,7 +135,7 @@ int main(int argc, char* argv[])
   numericsProblem.b = b;
 
 
-  numericsProblem.M = newNumericsMatrix();
+  numericsProblem.M = NM_new();
   NumericsMatrix *MM = numericsProblem.M ;
   MM->storageType = NM_DENSE;
   MM->matrix0 = M;
@@ -143,7 +143,7 @@ int main(int argc, char* argv[])
   MM->size1 = n;
 
 
-  numericsProblem.H  = newNumericsMatrix();
+  numericsProblem.H  = NM_new();
   NumericsMatrix *HH = numericsProblem.H;
   HH->storageType = NM_DENSE;
   HH->matrix0 = H;

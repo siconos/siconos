@@ -46,6 +46,8 @@
 #include <map>
 #endif
 
+#include <limits>
+
 /* gccxml 0.9 complains about ambiguous usage of size_t or std::size_t
  * in some boost headers, so we specify which one we want. It seems
  * that there is no difference anyway:
@@ -54,6 +56,8 @@ using std::size_t;
 
 #include <boost/graph/graph_utility.hpp>
 #include <boost/graph/adjacency_list.hpp>
+#include <boost/graph/graph_concepts.hpp>
+#include <boost/graph/directed_graph.hpp>
 
 #if (BOOST_VERSION >= 104000)
 #include <boost/property_map/property_map.hpp>
@@ -266,7 +270,7 @@ public:
     return ret;
   }
 
-  /* parrallel edges : edge_range needs multisetS as
+  /* parallel edges : edge_range needs multisetS as
      OutEdgesList and with multisetS remove_out_edges_if cannot
      compile as with listS.
      This is only needed for AdjointGraph where only 2 edges may be in
@@ -626,6 +630,7 @@ public:
 #endif
   }
 
+
   EDescriptor add_edge(const VDescriptor& vd1,
                        const VDescriptor& vd2,
                        const E& e_bundle)
@@ -817,6 +822,47 @@ public:
   }
 
 
+  /** Remove all the in-edges of vertex u for which the predicate p
+   * returns true. This expression is only required when the graph
+   * also models IncidenceGraph.
+   */
+  template<class Predicate>
+  void remove_in_edge_if(const VDescriptor& vd,
+                          const Predicate& pred)
+  //                      Predicate pred)
+  {
+
+    BOOST_CONCEPT_ASSERT((boost::IncidenceGraphConcept<graph_t>));
+    BOOST_CONCEPT_ASSERT((boost::MutableGraphConcept<graph_t>));
+
+    boost::remove_in_edge_if(vd, pred, g);
+    /*  debug */
+#ifndef NDEBUG
+    assert(state_assert());
+#endif
+  }
+
+  /** Remove all the in-edges of vertex u for which the predicate p
+   * returns true. This expression is only required when the graph
+   * also models IncidenceGraph.
+   */
+  template<class Predicate>
+  void remove_edge_if(const VDescriptor& vd,
+                      const Predicate& pred)
+  //                  Predicate pred)
+  {
+
+    BOOST_CONCEPT_ASSERT((boost::IncidenceGraphConcept<graph_t>));
+    BOOST_CONCEPT_ASSERT((boost::MutableGraphConcept<graph_t>));
+
+    boost::remove_edge_if(pred, g);
+    /*  debug */
+#ifndef NDEBUG
+    assert(state_assert());
+#endif
+  }
+
+
   int stamp() const
   {
     return _stamp;
@@ -859,7 +905,9 @@ public:
 
   void display() const
   {
-
+    std::cout << "vertices number :" << vertices_number() << std::endl;
+        
+    std::cout << "edges number :" << edges_number() << std::endl;
     VIterator vi, viend;
     for (std11::tie(vi, viend) = vertices();
          vi != viend; ++vi)

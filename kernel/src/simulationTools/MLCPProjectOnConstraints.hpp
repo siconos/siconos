@@ -131,6 +131,11 @@ public:
   */
   virtual void computeqBlock(InteractionsGraph::VDescriptor& vd, unsigned int pos);
 
+  /** compute vector q
+   *  \param time the current time
+   */
+  void computeq(double time);
+  
   /** post-treatment for  MLCPProjectOnConstraints
    */
   virtual void postCompute();

@@ -36,13 +36,13 @@
  */
 struct FrictionContactProblem_as_VI
 {
-  /* the VI associated with the FC3D probelem */
+  /* the VI associated with the FC3D problem */
   VariationalInequality * vi;
   /* the FC3D associated with the VI  */
   FrictionContactProblem * fc3d;
+  /* the SolverOptions that might be used to pass some numerical parameters */
+  SolverOptions * options;
 };
-
-
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
@@ -52,6 +52,14 @@ extern "C"
   void Function_VI_FC3D(void * self, int n, double *x, double *F);
 
   void Projection_VI_FC3D(void *viIn, double *x, double *PX);
+
+  void Function_VI_FC3D_Cylinder(void * self, int n, double *x, double *F);
+
+  void Projection_VI_FC3D_Cylinder(void *viIn, double *x, double *PX);
+
+  void Function_VI_FC3D_Disk(void * self, int n, double *x, double *F);
+
+  void Projection_VI_FC3D_Disk(void *viIn, double *x, double *PX);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

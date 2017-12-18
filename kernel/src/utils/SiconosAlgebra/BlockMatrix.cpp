@@ -26,6 +26,7 @@
 #include <boost/numeric/ublas/vector_proxy.hpp>
 
 #include "SiconosAlgebra.hpp"
+#include "Tools.hpp"
 
 using  std::cout;
 using std::endl;
@@ -41,8 +42,8 @@ BlockMatrix::BlockMatrix(const SiconosMatrix &m): SiconosMatrix(0), _dimRow(0), 
   if (m.isBlock())
   {
     const BlockMatrix& mB = static_cast<const BlockMatrix&>(m);
-    unsigned int nbRows = m.getNumberOfBlocks(0);
-    unsigned int nbCols = m.getNumberOfBlocks(1);
+    unsigned int nbRows = m.numberOfBlocks(0);
+    unsigned int nbCols = m.numberOfBlocks(1);
     _tabRow->reserve(nbRows);
     _tabCol->reserve(nbCols);
 
@@ -93,8 +94,8 @@ BlockMatrix::BlockMatrix(const SiconosMatrix &m): SiconosMatrix(0), _dimRow(0), 
 
 BlockMatrix::BlockMatrix(const BlockMatrix &m): SiconosMatrix(0), _dimRow(0), _dimCol(0)
 {
-  unsigned int nbRows = m.getNumberOfBlocks(0);
-  unsigned int nbCols = m.getNumberOfBlocks(1);
+  unsigned int nbRows = m.numberOfBlocks(0);
+  unsigned int nbCols = m.numberOfBlocks(1);
   _tabRow.reset(new Index());
   _tabCol.reset(new Index());
   _tabRow->reserve(nbRows);
@@ -220,7 +221,7 @@ BlockMatrix::~BlockMatrix()
 //    get number of blocks
 // =================================================
 
-unsigned int BlockMatrix::getNumberOfBlocks(unsigned int dim) const
+unsigned int BlockMatrix::numberOfBlocks(unsigned int dim) const
 {
   if (dim == 0)
     return _tabRow->size();
@@ -494,7 +495,7 @@ double BlockMatrix::normInf()const
 
 void BlockMatrix::display(void)const
 {
-  std::cout << "==========> BlockMatrix (" << getNumberOfBlocks(0) << " X " << getNumberOfBlocks(1) << " blocks): " << std::endl;
+  std::cout << "==========> BlockMatrix (" << numberOfBlocks(0) << " X " << numberOfBlocks(1) << " blocks): " << std::endl;
   BlocksMat::iterator1 it;
   BlocksMat::iterator2 it2;
   for (it = _mat->begin1(); it != _mat->end1(); ++it)
@@ -505,6 +506,36 @@ void BlockMatrix::display(void)const
     }
   }
   std::cout << "===========================================================================================" << std::endl;
+}
+
+//=====================
+// convert to a string
+//=====================
+
+std::string BlockMatrix::toString() const
+{
+  return ::toString(*this);
+}
+
+//=====================
+// convert to an ostream
+//=====================
+
+std::ostream& operator<<(std::ostream& os, const BlockMatrix& bm)
+{
+  BlocksMat::iterator1 it;
+  BlocksMat::iterator2 it2;
+  os << "[" << bm.numberOfBlocks(0) << "," << bm.numberOfBlocks(1) << "](";
+  for (it = bm._mat->begin1(); it != bm._mat->end1(); ++it)
+  {
+    for (it2 = it.begin(); it2 != it.end(); ++it2)
+    {
+      if (it2 != it.begin()) os << ",";
+      if (*it2) os << **it2; else os << "(nil)";
+    }
+  }
+  os << ")";
+  return os;
 }
 
 //=============================

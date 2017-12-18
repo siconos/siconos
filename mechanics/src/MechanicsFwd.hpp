@@ -24,6 +24,12 @@
   REGISTER(KneeJointR)                          \
   REGISTER(PivotJointR)                         \
   REGISTER(PrismaticJointR)                     \
+  REGISTER(CylindricalJointR)                   \
+  REGISTER(NewtonEulerJointR)                   \
+  REGISTER(FixedJointR)                         \
+  REGISTER(CouplerJointR)                       \
+  REGISTER(JointStopR)                          \
+  REGISTER(JointFrictionR)                      \
   REGISTER(FMatrix)                             \
   REGISTER(NSLawMatrix)                         \
   REGISTER(OccR)                                \
@@ -50,9 +56,8 @@
   REGISTER(BulletTimeStepping)                  \
   REGISTER(MBTB_FC3DContactRelation)            \
   REGISTER(MBTB_ContactRelation)                \
-                                                \
-  /* Proposed new Mechanics API */              \
   REGISTER(BodyDS)                              \
+  REGISTER(ContactR)                            \
   REGISTER(SiconosContactor)                    \
   REGISTER(SiconosContactorSet)                 \
   REGISTER(SiconosContactorBase)                \
@@ -64,6 +69,7 @@
   REGISTER(SiconosPlane)                        \
   REGISTER(SiconosMesh)                         \
   REGISTER(SiconosHeightMap)                    \
+  REGISTER(SiconosCollisionQueryResult)         \
   REGISTER(SiconosCollisionManager)             \
   REGISTER(SiconosBulletCollisionManager)
 

@@ -17,7 +17,11 @@
 
 %#if defined(__GNUC__)
 %#pragma GCC diagnostic push
+%#ifdef __cplusplus
+%#pragma GCC diagnostic ignored "-Wmissing-declarations"
+%#else
 %#pragma GCC diagnostic ignored "-Wmissing-prototypes"
+%#endif
 %#endif
 
 %#if NPY_API_VERSION < 0x00000007
@@ -35,6 +39,9 @@
  * it to fix some minor bugs, upgrade from Numeric to numpy (all
  * versions), add some comments and functionality, and convert from
  * direct code insertion to SWIG fragments.
+ *
+ * Siconos modification:
+ *   - array_size changed to a function to avoid conflict with boost::range_detail
  */
 
 %fragment("NumPy_Macros", "header")
@@ -46,7 +53,7 @@
 %#define array_type(a)          (int)(PyArray_TYPE((PyArrayObject*)a))
 %#define array_numdims(a)       (((PyArrayObject*)a)->nd)
 %#define array_dimensions(a)    (((PyArrayObject*)a)->dimensions)
-%#define array_size(a,i)        (((PyArrayObject*)a)->dimensions[i])
+npy_intp array_size(PyArrayObject *a, int i) { return ((PyArrayObject*)a)->dimensions[i]; }
 %#define array_strides(a)       (((PyArrayObject*)a)->strides)
 %#define array_stride(a,i)      (((PyArrayObject*)a)->strides[i])
 %#define array_data(a)          (((PyArrayObject*)a)->data)
@@ -60,7 +67,7 @@
 %#define array_dimensions(a)    PyArray_DIMS((PyArrayObject*)a)
 %#define array_strides(a)       PyArray_STRIDES((PyArrayObject*)a)
 %#define array_stride(a,i)      PyArray_STRIDE((PyArrayObject*)a,i)
-%#define array_size(a,i)        PyArray_DIM((PyArrayObject*)a,i)
+npy_intp array_size(PyArrayObject *a, int i) { return PyArray_DIM((PyArrayObject*)a,i); }
 %#define array_data(a)          PyArray_DATA((PyArrayObject*)a)
 %#define array_descr(a)         PyArray_DESCR((PyArrayObject*)a)
 %#define array_flags(a)         PyArray_FLAGS((PyArrayObject*)a)
@@ -95,7 +102,7 @@
     if (PyInstance_Check(py_obj)) return "instance"    ;
 %#endif
 
-    return "unkown type";
+    return "unknown type";
   }
 
   /* Given a NumPy typecode, return a string describing the type.

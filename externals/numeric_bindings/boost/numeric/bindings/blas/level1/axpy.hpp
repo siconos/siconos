@@ -84,7 +84,7 @@ inline void axpy( const int n, const double a, const double* x,
 inline void axpy( const int n, const std::complex<float> a,
         const std::complex<float>* x, const int incx, std::complex<float>* y,
         const int incy ) {
-    cblas_caxpy( n, &a, x, incx, y, incy );
+  cblas_caxpy( n, OPENBLAS_CONST_FLOAT_CAST(&a), OPENBLAS_CONST_FLOAT_CAST(x), incx, OPENBLAS_FLOAT_CAST(y), incy );
 }
 
 //
@@ -95,7 +95,7 @@ inline void axpy( const int n, const std::complex<float> a,
 inline void axpy( const int n, const std::complex<double> a,
         const std::complex<double>* x, const int incx,
         std::complex<double>* y, const int incy ) {
-    cblas_zaxpy( n, &a, x, incx, y, incy );
+  cblas_zaxpy( n, OPENBLAS_CONST_DOUBLE_CAST(&a), OPENBLAS_CONST_DOUBLE_CAST(x), incx, OPENBLAS_DOUBLE_CAST(y), incy );
 }
 
 #elif defined BOOST_NUMERIC_BINDINGS_BLAS_CUBLAS

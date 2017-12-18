@@ -30,6 +30,34 @@ def test_getVector():
     assert (K.getVector(v1) == K.getVector(v2)).all()
 
 
+def test_castVector():
+    i = [1.0,4.0,3.0]
+    v = K.SiconosVector([1,2,3])
+    assert str(v) == '[3](1,2,3)'
+    repr(v)
+    assert v[0] == 1.0
+    try:
+        v[5]
+        raise Exception("expected IndexError")
+    except IndexError:
+        pass
+    v[1] = 4
+    assert v[1] == 4.0
+    try:
+        v[4] = 5
+        raise Exception("expected IndexError")
+    except IndexError:
+        pass
+    for x,y in zip(v,i):
+        assert x == y
+    for x,y in zip(list(v),i):
+        assert x == y
+    for x,y in zip(np.array(v),i):
+        assert x == y
+    assert 3.0 in v
+    assert 5.0 not in v
+
+
 def test_getMatrix():
     assert (K.getMatrix([[1,2,3]]) == np.array([[1,2,3]])).all()
 

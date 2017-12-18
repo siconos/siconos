@@ -23,6 +23,9 @@
 #include "SimulationGraphs.hpp"
 
 #include <iostream>
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
+#include "debug.h"
 
 using namespace RELATION;
 
@@ -34,11 +37,10 @@ LagrangianLinearTIR::LagrangianLinearTIR(SP::SimpleMatrix C):
 }
 
 // Constructor from a complete set of data
-LagrangianLinearTIR::LagrangianLinearTIR(SP::SimpleMatrix C, SP::SimpleMatrix D, SP::SimpleMatrix F, SP::SiconosVector e):
+LagrangianLinearTIR::LagrangianLinearTIR(SP::SimpleMatrix C,  SP::SimpleMatrix F, SP::SiconosVector e):
   LagrangianR(LinearTIR)
 {
   _jachq = C;
-  _jachlambda = D;
   _F = F;
   _e = e;
 }
@@ -58,9 +60,6 @@ void LagrangianLinearTIR::initComponents(Interaction& inter, VectorOfBlockVector
   if (!(_jachq) || _jachq->size(1) !=  inter.getSizeOfDS() ||  _jachq->size(0) != sizeY)
     RuntimeException::selfThrow("LagrangianLinearTIR::initComponents inconsistent sizes between H matrix and the interaction.");
 
-  if ((_jachlambda) && (_jachlambda->size(0) != sizeY || _jachlambda->size(1) != sizeY))
-    RuntimeException::selfThrow("LagrangianLinearTIR::initComponents inconsistent sizes between D matrix and the interaction.");
-
   if ((_e) && _e->size() != sizeY)
     RuntimeException::selfThrow("LagrangianLinearTIR::initComponents inconsistent sizes between e vector and the dimension of the interaction.");
 
@@ -77,7 +76,6 @@ void LagrangianLinearTIR::computeOutput(double time, Interaction& inter, Interac
   // get y and lambda of the interaction
   SiconosVector& y = *inter.y(derivativeNumber);
   VectorOfBlockVectors& DSlink = *interProp.DSlink;
-
   prod(*_jachq, *DSlink[LagrangianR::q0 + derivativeNumber], y);
 
   if (derivativeNumber == 0)
@@ -93,17 +91,18 @@ void LagrangianLinearTIR::computeOutput(double time, Interaction& inter, Interac
     SiconosVector& lambda = *inter.lambda(derivativeNumber);
     prod(*_jachlambda, lambda, y, false);
   }
-
-
 }
 
 void LagrangianLinearTIR::computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level)
 {
+  
   // get lambda of the concerned interaction
   SiconosVector& lambda = *inter.lambda(level);
   VectorOfBlockVectors& DSlink = *interProp.DSlink;
   // computation of p = Ht lambda
+  DEBUG_PRINTF("LTIR::computeInp()%d\n", level);
   prod(lambda, *_jachq, *DSlink[LagrangianR::p0 + level], false);
+  DEBUG_BEGIN("LTIR END ()\n");
 }
 
 void LagrangianLinearTIR::display() const
@@ -118,11 +117,6 @@ void LagrangianLinearTIR::display() const
   std::cout << " e: " <<std::endl;
   if (_e)
     _e->display();
-  else
-    std::cout << " -> NULL " <<std::endl;
-  std::cout << " D: " <<std::endl;
-  if (_jachlambda)
-    _jachlambda->display();
   else
     std::cout << " -> NULL " <<std::endl;
   std::cout << " F: " <<std::endl;

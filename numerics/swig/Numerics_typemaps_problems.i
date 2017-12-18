@@ -2,7 +2,7 @@
  // in remaining args
  %typemap(in, numinputs=0) 
    (unsigned int problemSize) 
-   (unsigned int *p_problem_size, npy_intp number_of_contacts)
+   (unsigned int *p_problem_size, SN_ARRAY_INT_TYPE number_of_contacts)
  {
    // the first array length sets problemSize
    p_problem_size = &$1;

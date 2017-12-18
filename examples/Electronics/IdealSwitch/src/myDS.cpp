@@ -41,10 +41,9 @@ void MyDS::computeJacobianfx(double t, bool  b)
   _jacobianfx->setValue(0, 0, 0);
 }
 
-void MyDS::computeJacobianfx(double t, const SiconosVector& v)
+void MyDS::computeJacobianfx(double t, SP::SiconosVector v)
 {
   _jacobianfx->setValue(0, 0, 0);
-
 }
 
 void MyDS::computeRhs(double t, bool  b)

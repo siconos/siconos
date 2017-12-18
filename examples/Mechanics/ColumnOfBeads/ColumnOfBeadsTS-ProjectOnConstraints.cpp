@@ -124,7 +124,7 @@ int withLevel(unsigned int mylevel)
     //std::vector<SP::Interaction > interOfBeads(nBeads-1);
     // for (unsigned int i =0; i< nBeads-1; i++)
     // {
-    //   interOfBeads[i].reset(new Interaction(1, nslaw, relationOfBeads));
+    //   interOfBeads[i].reset(new Interaction(nslaw, relationOfBeads));
     // }
 
     // This works !!
@@ -133,7 +133,7 @@ int withLevel(unsigned int mylevel)
     // for (unsigned int i =0; i< nBeads-1; i++)
     // {
     //   relationOfBeads[i].reset(new LagrangianLinearTIR(HOfBeads,bOfBeads));
-    //   interOfBeads[i].reset(new Interaction(1, nslaw, relationOfBeads[i]));
+    //   interOfBeads[i].reset(new Interaction(nslaw, relationOfBeads[i]));
     // }
 
 
@@ -163,7 +163,7 @@ int withLevel(unsigned int mylevel)
     // -- (3) one step non smooth problem
     SP::OneStepNSProblem osnspb(new LCP());
     SP::OneStepNSProblem osnspb_pos(new MLCPProjectOnConstraints(SICONOS_MLCP_ENUM));
-
+    osnspb_pos->numericsSolverOptions()->iparam[0]=2000;
     // -- (4) Simulation setup with (1) (2) (3)
     unsigned int levelForProjection = mylevel; //(default =1)
     SP::TimeSteppingDirectProjection s(new TimeSteppingDirectProjection(t, OSI, osnspb, osnspb_pos, levelForProjection));
@@ -226,7 +226,7 @@ int withLevel(unsigned int mylevel)
             ncontact++;
             // std::cout << "Number of contact = " << ncontact << std::endl;
 
-            inter.reset(new Interaction(1, nslaw, relation));
+            inter.reset(new Interaction(nslaw, relation));
             columnOfBeads->nonSmoothDynamicalSystem()->link(inter, beads[0]);
 
             s->initializeInteraction(s->nextTime(), inter);
@@ -255,7 +255,7 @@ int withLevel(unsigned int mylevel)
             // std::cout << "Number of contact = " << ncontact << std::endl;
 
             relationOfBeads[i].reset(new LagrangianLinearTIR(HOfBeads, bOfBeads));
-            interOfBeads[i].reset(new Interaction(1, nslaw, relationOfBeads[i]));
+            interOfBeads[i].reset(new Interaction(nslaw, relationOfBeads[i]));
 
             columnOfBeads->nonSmoothDynamicalSystem()->link(interOfBeads[i], beads[i], beads[i+1]);
 

@@ -25,6 +25,12 @@
 #include <string>
 #include "SiconosSerialization.hpp"
 
+#ifdef __clang_analyzer__
+#define NO_RETURN  __attribute__((analyzer_noreturn))
+#else
+#define NO_RETURN
+#endif
+
 /** General Siconos Exception
  *
  *  \author SICONOS Development Team - copyright INRIA
@@ -33,7 +39,7 @@
  *
  *
  * SiconosException should not be throws directly; prefer to use an inherit class
- * This exception can be catched by "catch(SiconosException)"
+ * This exception can be caught by "catch(SiconosException)"
  *
  */
 class SiconosException

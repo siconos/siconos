@@ -59,6 +59,6 @@ void Projection_VI_SOCLCP(void *viIn, double *x, double *PX)
   for (cone = 0 ; cone < soclcp->nc  ; ++cone)
   {
     dim=soclcp->coneIndex[cone+1]-soclcp->coneIndex[cone];
-    projectionOnSecondOrderCone(&PX[soclcp->coneIndex[cone]], soclcp->mu[cone], dim);
+    projectionOnSecondOrderCone(&PX[soclcp->coneIndex[cone]], soclcp->tau[cone], dim);
   }
 }

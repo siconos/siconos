@@ -47,7 +47,8 @@ enum LCP_SOLVER
   SICONOS_LCP_NEWTON_MINFBLSA = 218,
   SICONOS_LCP_PATHSEARCH = 219,
   SICONOS_LCP_PIVOT_LUMOD = 220,
-  SICONOS_LCP_GAMS = 221
+  SICONOS_LCP_GAMS = 221,
+  SICONOS_LCP_CONVEXQP_PG = 222
 };
 
 enum LCP_PIVOT
@@ -80,4 +81,5 @@ extern const char* const   SICONOS_LCP_MURTY_STR;
 extern const char* const   SICONOS_LCP_PATHSEARCH_STR;
 extern const char* const   SICONOS_LCP_PIVOT_LUMOD_STR;
 extern const char* const   SICONOS_LCP_GAMS_STR;
+extern const char* const   SICONOS_LCP_CONVEXQP_PG_STR;
 #endif

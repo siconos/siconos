@@ -11,30 +11,25 @@
 
 %extend NonlinearComplementarityProblem
 {
+  CALL_COMPUTE_F(ncp, (void*))
+
+  CALL_COMPUTE_NABLA_F(ncp, (void*))
+
   NonlinearComplementarityProblem()
    {
-     NonlinearComplementarityProblem* NCP;
-     NCP = (NonlinearComplementarityProblem *) malloc(sizeof(NonlinearComplementarityProblem));
-     NCP->nabla_F = NULL;
-     NCP->compute_F = &call_py_compute_Fncp;
-     NCP->compute_nabla_F = &call_py_compute_nabla_Fncp;
-     NCP->env = NULL;
-
+     NonlinearComplementarityProblem* NCP = newNCP();
      return NCP;
    }
 
-  NonlinearComplementarityProblem(PyObject* n)
+  NonlinearComplementarityProblem(SN_OBJ_TYPE* n)
   {
-     NonlinearComplementarityProblem* NCP;
-     NCP =  (NonlinearComplementarityProblem *) malloc(sizeof(NonlinearComplementarityProblem));
+     NonlinearComplementarityProblem* NCP = newNCP();
 
-     NCP->compute_F = &call_py_compute_Fncp;
-     NCP->compute_nabla_F = &call_py_compute_nabla_Fncp;
-     NCP->n = (int) PyInt_AsLong(n);
+     SWIG_AsVal_unsigned_SS_int(n, &NCP->n);
 
      if (NCP->n<1)
      {
-       PyErr_SetString(PyExc_RuntimeError, "sizeInequalities has to be positive");
+       SWIG_Error(SWIG_RuntimeError, "sizeInequalities has to be positive");
        free(NCP);
        return NULL;
      }
@@ -47,18 +42,18 @@
   }
 
 
-  NonlinearComplementarityProblem(PyObject* n, PyObject* py_compute_class)
+#ifdef SWIGPYTHON
+  NonlinearComplementarityProblem(SN_OBJ_TYPE* n, SN_OBJ_TYPE* py_compute)
   {
-     NonlinearComplementarityProblem* NCP;
-     NCP =  (NonlinearComplementarityProblem *) malloc(sizeof(NonlinearComplementarityProblem));
+     NonlinearComplementarityProblem* NCP = newNCP();
 
      NCP->compute_F = &call_py_compute_Fncp;
      NCP->compute_nabla_F = &call_py_compute_nabla_Fncp;
-     NCP->n = (int) PyInt_AsLong(n);
+     SWIG_AsVal_unsigned_SS_int(n, &NCP->n);
 
      if (NCP->n<1)
      {
-       PyErr_SetString(PyExc_RuntimeError, "sizeInequalities has to be positive");
+       SWIG_Error(SWIG_RuntimeError, "sizeInequalities has to be positive");
        free(NCP);
        return NULL;
      }
@@ -67,44 +62,44 @@
        NCP->nabla_F = NM_create(NM_DENSE, NCP->n, NCP->n);
      }
 
-     PyObject* method_compute_F = PyObject_GetAttrString(py_compute_class, "compute_F");
-     PyObject* method_compute_nabla_F = PyObject_GetAttrString(py_compute_class, "compute_nabla_F");
+     SN_OBJ_TYPE* method_compute_F = NULL;
+     if (PyObject_HasAttrString(py_compute, "compute_F")) method_compute_F = PyObject_GetAttrString(py_compute, "compute_F");
+     SN_OBJ_TYPE* method_compute_nabla_F = NULL;
+     if (PyObject_HasAttrString(py_compute, "compute_nabla_F")) method_compute_nabla_F = PyObject_GetAttrString(py_compute, "compute_nabla_F");
+
      if (PyCallable_Check(method_compute_F) && PyCallable_Check(method_compute_nabla_F))
      {
        NCP->env = (void*) malloc(sizeof(class_env_python));
        class_env_python* ncp_env_python = (class_env_python*) NCP->env;
        ncp_env_python->id = ENV_IS_PYTHON_CLASS;
-       ncp_env_python->class_object = py_compute_class;
-       Py_DECREF(method_compute_F);
-       Py_DECREF(method_compute_nabla_F);
+       ncp_env_python->class_object = py_compute;
+       target_mem_mgmt_instr(method_compute_F);
+       target_mem_mgmt_instr(method_compute_nabla_F);
      }
      else
      {
-       Py_XDECREF(method_compute_F);
-       Py_XDECREF(method_compute_nabla_F);
-       PyErr_SetString(PyExc_TypeError, "argument 2 must be have a method compute_F and a method compute_nabla_F");
-       freeNumericsMatrix(NCP->nabla_F);
+       target_mem_mgmtX_instr(method_compute_F);
+       target_mem_mgmtX_instr(method_compute_nabla_F);
+       SWIG_Error(SWIG_TypeError, "argument 2 must be have a method compute_F and a method compute_nabla_F");
+       NM_free(NCP->nabla_F);
        free(NCP->nabla_F);
        free(NCP);
-       PyErr_PrintEx(0);
-       exit(1);
+       return NULL;
      }
 
      return NCP;
    }
+#endif /* SWIGPYTHON */
 
-  NonlinearComplementarityProblem(PyObject* n, PyObject* py_compute_F, PyObject* py_compute_nabla_F)
+  NonlinearComplementarityProblem(SN_OBJ_TYPE* n, SN_OBJ_TYPE* compute_F, SN_OBJ_TYPE* compute_nabla_F)
   {
-     NonlinearComplementarityProblem* NCP;
-     NCP =  (NonlinearComplementarityProblem *) malloc(sizeof(NonlinearComplementarityProblem));
+     NonlinearComplementarityProblem* NCP = newNCP();
 
-     NCP->compute_F = &call_py_compute_Fncp;
-     NCP->compute_nabla_F = &call_py_compute_nabla_Fncp;
-     NCP->n = (int) PyInt_AsLong(n);
+     SWIG_AsVal_unsigned_SS_int(n, &NCP->n);
 
      if (NCP->n<1)
      {
-       PyErr_SetString(PyExc_RuntimeError, "sizeInequalities has to be positive");
+       SWIG_Error(SWIG_RuntimeError, "sizeInequalities has to be positive");
        free(NCP);
        return NULL;
      }
@@ -113,45 +108,14 @@
        NCP->nabla_F = NM_create(NM_DENSE, NCP->n, NCP->n);
      }
 
-     NCP->env = (void*) malloc(sizeof(functions_env_python));
-     functions_env_python* ncp_env_python = (functions_env_python*) NCP->env;
-     ncp_env_python->id = ENV_IS_PYTHON_FUNCTIONS;
-
-     if (PyCallable_Check(py_compute_F)) 
-     {
-       ncp_env_python->env_compute_function = py_compute_F;
-     }
-     else
-     {
-       PyErr_SetString(PyExc_TypeError, "argument 3 must be callable");
-       freeNumericsMatrix(NCP->nabla_F);
-       free(NCP->nabla_F);
-       free(NCP->env);
-       free(NCP);
-       PyErr_PrintEx(0);
-       exit(1);
-     }
-
-
-     if (PyCallable_Check(py_compute_nabla_F))
-     {
-       ncp_env_python->env_compute_jacobian = py_compute_nabla_F;
-     }
-     else
-     {
-       PyErr_SetString(PyExc_TypeError, "argument 4 must be callable");
-       freeNumericsMatrix(NCP->nabla_F);
-       free(NCP->nabla_F);
-       free(NCP->env);
-       free(NCP);
-       PyErr_PrintEx(0);
-       exit(1);
-     }
+     check_save_target_fn(compute_F, NCP->env, env_compute_function, NonlinearComplementarityProblem_call_compute_F, NCP->compute_F, 2);
+     check_save_target_fn(compute_nabla_F, NCP->env, env_compute_jacobian, NonlinearComplementarityProblem_call_compute_nabla_F, NCP->compute_nabla_F, 3);
 
      return NCP;
    }
 
-  void set_compute_F_and_nabla_F_as_C_functions(PyObject* lib_name, PyObject* compute_F_name, PyObject* compute_nabla_F_name)
+#ifdef SWIGPYTHON
+  void set_compute_F_and_nabla_F_as_C_functions(SN_OBJ_TYPE* lib_name, SN_OBJ_TYPE* compute_F_name, SN_OBJ_TYPE* compute_nabla_F_name)
   {
 %#if PY_MAJOR_VERSION < 3
     if(PyString_Check(lib_name) && PyString_Check(compute_F_name) && PyString_Check(compute_nabla_F_name))
@@ -171,25 +135,26 @@
     }
     else
     {
-      PyErr_SetString(PyExc_TypeError, "All arguments should be strings");
+      SWIG_Error(SWIG_TypeError, "All arguments should be strings");
     }
   }
+#endif /* SWIGPYTHON */
 
-    PyObject* get_env_as_long(void)
+    SN_OBJ_TYPE* get_env_as_long(void)
     {
-      return PyInt_FromLong((uintptr_t)&$self->env);
+      return SWIG_From_long((uintptr_t)&$self->env);
     }
 
   ~NonlinearComplementarityProblem()
   {
     if ($self->nabla_F)
     {
-      freeNumericsMatrix($self->nabla_F);
+      NM_free($self->nabla_F);
       free($self->nabla_F);
     }
     if ($self->env)
     {
-      if(((env_python*)$self->env)->id > 0)
+      if(((env_target_lang*)$self->env)->id > 0)
       {
         free($self->env);
       }

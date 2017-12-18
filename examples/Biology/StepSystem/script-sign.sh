@@ -1,4 +1,4 @@
-#/bin/sh -fx
+#!/bin/sh -fx
 siconos SignSystem.cpp 1 6
 siconos SignSystem.cpp 1 7.5
 siconos SignSystem.cpp 1 9

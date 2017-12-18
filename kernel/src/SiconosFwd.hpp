@@ -18,6 +18,9 @@ TYPEDEF_SPTR(NumericsMatrix)
 // ----------------
 
 /* Kernel */
+
+
+
 DEFINE_SPTR(BlockCSRMatrix)
 
 DEFINE_SPTR(Interaction)
@@ -63,11 +66,11 @@ DEFINE_SPTR(TimeDiscretisation)
 // Dynamical systems
 DEFINE_SPTR(DynamicalSystem)
 DEFINE_SPTR(LagrangianLinearTIDS)
+DEFINE_SPTR(LagrangianLinearDiagonalDS)
 DEFINE_SPTR(NewtonEulerDS)
 
 DEFINE_SPTR(Event)
 DEFINE_SPTR(NonSmoothLaw)
-DEFINE_SPTR(DynamicalSystemsSet)
 
 DEFINE_SPTR(MatrixIntegrator)
 DEFINE_SPTR(PluggedObject)
@@ -91,6 +94,7 @@ DEFINE_SPTR(NewtonEulerFrom3DLocalFrameR)
 // OSI
 DEFINE_SPTR(EulerMoreauOSI)
 DEFINE_SPTR(MoreauJeanOSI)
+DEFINE_SPTR(MoreauJeanBilbaoOSI)
 DEFINE_SPTR(MoreauJeanGOSI)
 DEFINE_SPTR(MoreauJeanCombinedProjectionOSI)
 DEFINE_SPTR(MoreauJeanDirectProjectionOSI)
@@ -108,12 +112,14 @@ DEFINE_SPTR_STRUCT(GraphProperties)
 DEFINE_SPTR_STRUCT(DynamicalSystemsGraph)
 DEFINE_SPTR_STRUCT(InteractionsGraph)
 
-// Fortran
-#include <f2c.h>
+#ifndef _F2C_INCLUDE_H
+typedef int integer;
+typedef double doublereal;
+#endif
 
 TYPEDEF_SAPTR(integer)
-TYPEDEF_SPTR(integer)
 TYPEDEF_SAPTR(doublereal)
+TYPEDEF_SPTR(integer)
 TYPEDEF_SPTR(doublereal)
 
 #endif

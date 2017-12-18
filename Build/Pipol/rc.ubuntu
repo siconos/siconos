@@ -1,8 +1,10 @@
 #!/bin/sh
 
-# should support 12.04 to 16.10
+# should support 12.04 to 17.04
 
 apt-get update
+
+lsb_release -r || apt-get -y install lsb-release
 
 UBUNTU_VER=$(lsb_release -r | sed -n 's/.*\([0-9][0-9]\.[0-9][0-9]\).*/\1/p')
 LESS_THAN_1304=$(awk 'BEGIN{print '$UBUNTU_VER' < 13.04 ? 1 : 0}')
@@ -12,26 +14,26 @@ LESS_THAN_1610=$(awk 'BEGIN{print '$UBUNTU_VER' < 16.10 ? 1 : 0}')
 if [ "$LESS_THAN_1610" -eq 0 ]; then
 
 # 16.10 onwards
-apt-get -y install cmake gfortran gcc doxygen libboost-graph-dev libboost-filesystem-dev libboost-serialization-dev libopenblas-dev liblapacke-dev libgmp3-dev libcppunit-dev python-pytest python-numpy python-scipy python-dev  make g++ git python-pygccxml python-lxml swig3.0
+apt-get -y install cmake gfortran gcc doxygen libboost-graph-dev libboost-filesystem-dev libboost-serialization-dev libopenblas-dev liblapacke-dev libgmp3-dev libcppunit-dev python-pytest python-numpy python-scipy python-dev  make g++ git python-lxml swig3.0
 
 else
 
 if [ "$LESS_THAN_1404" -eq 0 ]; then
 
 # 14.04 onwards
-apt-get -y install cmake gfortran gcc doxygen libboost-graph-dev libboost-filesystem-dev libboost-serialization-dev libopenblas-dev liblapacke-dev libgmp3-dev libcppunit-dev python-pytest python-numpy python-scipy python-dev  make g++ git gccxml python-pygccxml python-lxml swig2.0
+apt-get -y install cmake gfortran gcc doxygen libboost-graph-dev libboost-filesystem-dev libboost-serialization-dev libopenblas-dev liblapacke-dev libgmp3-dev libcppunit-dev python-pytest python-numpy python-scipy python-dev  make g++ git python-lxml swig2.0
 
 else
 
 if [ "$LESS_THAN_1304" -eq 0 ]; then
 
 # 13.04 onwards
-apt-get -y install cmake gfortran gcc doxygen libboost-graph-dev libboost-filesystem-dev libboost-serialization-dev libatlas-base-dev libblas-dev libgmp3-dev libcppunit-dev libpcre3-dev python-pytest python-numpy  python-scipy python-dev make g++ git gccxml python-pygccxml python-lxml swig2.0
+apt-get -y install cmake gfortran gcc doxygen libboost-graph-dev libboost-filesystem-dev libboost-serialization-dev libatlas-base-dev libblas-dev libgmp3-dev libcppunit-dev libpcre3-dev python-pytest python-numpy  python-scipy python-dev make g++ git python-lxml swig2.0
 
 else
 
 # 12.04 and 12.10
-apt-get -y install cmake gfortran gcc doxygen libboost-graph-dev libboost-filesystem-dev libboost-serialization-dev libatlas-base-dev libblas-dev libgmp3-dev libcppunit-dev libpcre3-dev python-matplotlib  python-numpy  python-scipy python-dev python-py make g++ git gccxml python-pygccxml python-lxml swig2.0
+apt-get -y install cmake gfortran gcc doxygen libboost-graph-dev libboost-filesystem-dev libboost-serialization-dev libatlas-base-dev libblas-dev libgmp3-dev libcppunit-dev libpcre3-dev python-matplotlib  python-numpy  python-scipy python-dev python-py make g++ git python-lxml swig2.0
 
 fi
 

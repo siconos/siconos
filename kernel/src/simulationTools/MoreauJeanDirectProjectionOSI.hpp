@@ -29,7 +29,7 @@
 
 const unsigned int MOREAUPROJECTONCONSTRAINTSOSISTEPSINMEMORY = 1;
 
-/**  \class MoreauJeanDirectProjectionOSI 
+/**  \class MoreauJeanDirectProjectionOSI
  *   \brief One Step time Integrator for First Order Dynamical Systems  for
  *    mechanical Systems (LagrangianDS and NewtonEulerDS) with  Direct Projection Algorithm
  *  \author SICONOS Development Team - copyright INRIA
@@ -41,9 +41,9 @@ const unsigned int MOREAUPROJECTONCONSTRAINTSOSISTEPSINMEMORY = 1;
  *
  * References :
  *
- * V. Acary. Projected event-capturing time-stepping schemes for nonsmooth mechanical systems with unilateral contact 
- * and coulomb’s friction. 
- * Computer Methods in Applied Mechanics and Engineering, 256:224 – 250, 2013. ISSN 0045-7825. 
+ * V. Acary. Projected event-capturing time-stepping schemes for nonsmooth mechanical systems with unilateral contact
+ * and coulomb’s friction.
+ * Computer Methods in Applied Mechanics and Engineering, 256:224 – 250, 2013. ISSN 0045-7825.
  * URL http://www.sciencedirect.com/science/article/pii/S0045782512003829.
  *
  */
@@ -129,15 +129,33 @@ public:
     _activateYVelThreshold = newValue;
   };
 
-  /** initialization of the integrator; for linear time
-      invariant systems, we compute time invariant operator (example :
-      W)
-  */
-  void initialize(Model& m);
+  /** initialization of the work vectors and matrices (properties) related to
+   *  one dynamical system on the graph and needed by the osi
+   * \param m the Model
+   * \param t time of initialization
+   * \param ds the dynamical system
+   */
+  void initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds);
 
+  /** initialization of the work vectors and matrices (properties) related to
+   *  one interaction on the graph and needed by the osi
+   * \param inter the interaction
+   * \param interProp the properties on the graph
+   * \param DSG the dynamical systems graph
+   */
+  void fillDSLinks(Interaction &inter,
+                     InteractionProperties& interProp,
+                     DynamicalSystemsGraph & DSG);
+
+
+  /** get the number of index sets required for the simulation
+   * \return unsigned int
+   */
+  unsigned int numberOfIndexSets() const {return 2;};
+  
   /** Apply the rule to one Interaction to known if is it should be included
    * in the IndexSet of level i
-   * \param inter concerned interaction 
+   * \param inter concerned interaction
    * \param i level
    * \return bool
    */
@@ -145,7 +163,7 @@ public:
 
   /** Apply the rule to one Interaction to known if is it should be removed
    * in the IndexSet of level i
-   * \param inter concerned interaction 
+   * \param inter concerned interaction
    * \param i level
    * \return bool
    */

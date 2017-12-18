@@ -43,7 +43,7 @@ void relay_avi_caoferris(RelayProblem* problem, double *z, double *w, int *info,
   LinearComplementarityProblem lcplike_pb;
   lcplike_pb.size = s;
   NumericsMatrix num_mat;
-  fillNumericsMatrix(&num_mat, NM_DENSE, s, s, calloc(s*s, sizeof(double)));
+  NM_fill(&num_mat, NM_DENSE, s, s, calloc(s*s, sizeof(double)));
 
   lcplike_pb.M = &num_mat;
 
@@ -101,7 +101,7 @@ void relay_avi_caoferris(RelayProblem* problem, double *z, double *w, int *info,
   free(s_vec);
   free(A);
   free(d_vec);
-  freeNumericsMatrix(lcplike_pb.M);
+  NM_free(lcplike_pb.M);
   free(lcplike_pb.q);
   free(b_bar);
 }

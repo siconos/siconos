@@ -112,7 +112,7 @@ relation.setDPtr(M)
 
 nslaw = sk.ComplementarityConditionNSL(ninter)
 
-interaction = sk.Interaction(ninter, nslaw, relation)
+interaction = sk.Interaction(nslaw, relation)
 
 # -- The Model --
 circuit = sk.Model(t0, T, 'train')
@@ -137,7 +137,7 @@ circuit.initialize()
 
 # -- Get the values to be plotted --
 output_size = 2 * number_of_cars + 1
-nb_time_steps = ceil((T - t0) / tau) + 1
+nb_time_steps = int((T - t0) / tau) + 1
 data_plot = np.empty((nb_time_steps, output_size))
 data_plot[0, 0] = circuit.t0() / tscale
 data_plot[0, 1:] = RC.x()

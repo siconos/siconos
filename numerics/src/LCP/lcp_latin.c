@@ -40,7 +40,7 @@ void lcp_latin(LinearComplementarityProblem* problem, double *z, double *w, int 
 
 
   int i, j,  iter1, nrhs;
-  int info2 = 0;
+  lapack_int info2 = 0;
   int itt, it_end;
   int incx, incy;
   int itermax = options->iparam[0];

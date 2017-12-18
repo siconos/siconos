@@ -18,16 +18,15 @@
 #ifndef BOUNDARYCONDITION_HPP
 #define BOUNDARYCONDITION_HPP
 
-
-#include <vector>
 #include "SiconosPointers.hpp"
 
 #include "SiconosFwd.hpp"
 
 #include "SiconosVector.hpp"
 #include "PluggedObject.hpp"
+#include "Tools.hpp"
+
 typedef  void (*FPtrPrescribedVelocity)(double, unsigned int, double*);
-TYPEDEF_TPL1_SPTR(UnsignedIntVector, std::vector, unsigned int)
 
 /** \class BoundaryCondition
  *  \brief This class models simple boundary conditions for

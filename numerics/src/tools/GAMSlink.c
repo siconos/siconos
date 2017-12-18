@@ -7,11 +7,11 @@
 #elif _MSC_VER
 #define strdup _strdup
 #else
-static inline char* strdup(char* src)
+static inline char* strdup(const char* src)
 {
   size_t len = strlen(src) + 1;
   char* dest = (char*)malloc(len * sizeof(char));
-  strcpy(dest, src, len);
+  strncpy(dest, src, len);
   return dest;
 }
 #endif
@@ -23,6 +23,7 @@ static inline char* strdup(char* src)
 #include <stdbool.h>
 #include <float.h>
 
+#include "SparseMatrix_internal.h"
 #include "NumericsMatrix.h"
 #include "FrictionContactProblem.h"
 #include "SolverOptions.h"
@@ -149,7 +150,64 @@ void filename_datafiles(const int iter, const int solverId, const char* base_nam
 
 
 
-int SN_gams_solve(unsigned iter, optHandle_t Optr, char* sysdir, char* model, const char* base_name, SolverOptions* options, SN_GAMS_gdx* gdx_data)
+int NM_to_GDX(idxHandle_t Xptr, const char* name, const char* descr, NumericsMatrix* M)
+{
+  char msg[GMS_SSSIZE];
+
+  int dims[2];
+  dims[0] = M->size0;
+  dims[1] = M->size1;
+  if (idxDataWriteStart(Xptr, name, descr, 2, dims, msg, GMS_SSSIZE) == 0)
+    idxerrorR(idxGetLastError(Xptr), "idxDataWriteStart");
+
+  switch (M->storageType)
+  {
+  case NM_DENSE:
+  {
+    assert(M->matrix0);
+    idxDataWriteDenseColMajor(Xptr, 2, M->matrix0);
+    break;
+  }
+  case NM_SPARSE_BLOCK: /* Perform a conversion to sparse storage */
+  case NM_SPARSE:
+  {
+    CSparseMatrix* cs = NM_csc(M);
+    assert(cs->p);
+    assert(cs->i);
+    assert(cs->x);
+    int* p_int = (int*)malloc((cs->n+1) * sizeof(int));
+    int* i_int = (int*)malloc(cs->nzmax * sizeof(int));
+    assert(cs->n == M->size1);
+    assert(cs->m == M->size0);
+    for (unsigned i = 0; i < cs->n+1; ++i)
+    {
+      p_int[i] = (int) cs->p[i];
+    }
+
+    for (unsigned i = 0; i < cs->nzmax; ++i)
+    {
+      i_int[i] = (int) cs->i[i];
+    }
+
+    idxDataWriteSparseColMajor(Xptr, p_int, i_int, cs->x);
+
+    free(p_int);
+    free(i_int);
+    break;
+  }
+  default:
+  {
+    printf("NM_to_GDX :: unsupported matrix storage\n");
+    exit(EXIT_FAILURE);
+  }
+  }
+
+
+  if (0==idxDataWriteDone(Xptr))
+    idxerrorR(idxGetLastError(Xptr), "idxDataWriteDone");
+
+  return 0;
+}int SN_gams_solve(unsigned iter, optHandle_t Optr, char* sysdir, char* model, const char* base_name, SolverOptions* options, SN_GAMS_gdx* gdx_data)
 {
   assert(gdx_data);
   SN_GAMS_NM_gdx* mat_for_gdx = gdx_data->mat_for_gdx;

@@ -35,8 +35,17 @@ public:
   InteractionManager() : _nslaws(1) {}
   virtual ~InteractionManager() {}
 
-  /** Called by Simulation prior to advancing to the next Event */
+  /** Called by Simulation after updating positions prior to starting
+   * the Newton loop. */
   virtual void updateInteractions(SP::Simulation simulation) {}
+
+  /** Called by Simulation after updating positions inside the Newton
+   * loop but prior to performing the next iteration.  Only override
+   * if different behaviour during the loop is desired.  May or may
+   * not be called depending on Simulation options. */
+  virtual void updateInteractionsNewtonIteration(SP::Simulation simulation) {
+    updateInteractions(simulation);
+  }
 
   /** Specify a non-smooth law to use for a given combination of
    *  interaction groups.
@@ -53,8 +62,7 @@ public:
    * \param group1 first group
    * \param group2 second group */
   virtual SP::NonSmoothLaw nonSmoothLaw(long unsigned int group1,
-                                        long unsigned int group2)
-    { return _nslaws(group1, group2); }
+                                        long unsigned int group2);
 
 protected:
 

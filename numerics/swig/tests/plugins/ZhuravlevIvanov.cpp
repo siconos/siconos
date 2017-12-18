@@ -1,6 +1,5 @@
 #include "SiconosNumerics.h"
 #include "VariationalInequality_Solvers.h"
-#include "SparseMatrix.h"
 #include "NumericsMatrix.h"
 #ifdef __cplusplus
 
@@ -80,7 +79,7 @@ SICONOS_EXPORT void compute_nabla_F(void* problem, int n, double* restrict l, Nu
   d->nabla_eval += 1;
 }
 
-SICONOS_EXPORT void compute_Fmcp(void* env, int n1, int n2, double* restrict z, double* restrict F)
+SICONOS_EXPORT void compute_Fmcp(void* env, int n, double* restrict z, double* restrict F)
 {
   data* d = (data*) env;
   double l0 = 2.0*z[0] - 1.0;
@@ -96,7 +95,7 @@ SICONOS_EXPORT void compute_Fmcp(void* env, int n1, int n2, double* restrict z, 
   d->f_eval += 1;
 }
 
-SICONOS_EXPORT void compute_nabla_Fmcp(void* env, int n1, int n2, double* restrict z, double* restrict nabla_Fmcp)
+SICONOS_EXPORT void compute_nabla_Fmcp(void* env, int n, double* restrict z, double* restrict nabla_Fmcp)
 {
   data* d = (data*) env;
   double l0 = 2.0*z[0] - 1.0;
@@ -128,7 +127,7 @@ SICONOS_EXPORT void compute_nabla_Fmcp(void* env, int n1, int n2, double* restri
   d->nabla_eval += 1;
 }
 
-SICONOS_EXPORT void compute_nabla_Fmcp2(void* env, int n1, int n2, double* restrict z, double* restrict nabla_Fmcp)
+SICONOS_EXPORT void compute_nabla_Fmcp2(void* env, int n, double* restrict z, double* restrict nabla_Fmcp)
 {
   data* d = (data*) env;
   double l0 = 2.0*z[0] - 1.0;

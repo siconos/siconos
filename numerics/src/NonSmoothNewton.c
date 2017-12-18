@@ -88,7 +88,7 @@ int nonSmoothNewton(int n, double* z, NewtonFunctionPtr* phi, NewtonFunctionPtr*
 
   int incx = 1;
   int n2 = n * n;
-  int infoDGESV;
+  lapack_int infoDGESV;
 
   /* Memory allocation for phi and its jacobian */
   double * phiVector = (double*)malloc(n * sizeof(*phiVector));
@@ -96,7 +96,7 @@ int nonSmoothNewton(int n, double* z, NewtonFunctionPtr* phi, NewtonFunctionPtr*
   /** merit function and its jacobian */
   double psi;
   double *jacobian_psi = (double*)malloc(n * sizeof(*jacobian_psi));
-  int* ipiv = (int *)malloc(n * sizeof(*ipiv));
+  lapack_int* ipiv = (lapack_int *)malloc(n * sizeof(lapack_int));
   if (phiVector == NULL || jacobianPhiMatrix == NULL ||  jacobian_psi == NULL || ipiv == NULL)
   {
     fprintf(stderr, "NonSmoothNewton, memory allocation failed.\n");
@@ -167,7 +167,7 @@ int nonSmoothNewton(int n, double* z, NewtonFunctionPtr* phi, NewtonFunctionPtr*
     if (verbose > 0)
     {
       printf("Non Smooth Newton, iteration number %i, error equal to %14.7e .\n", niter, terminationCriterion);
-      printf(" -----------------------------------------------------------------------\n");
+      printf(" -----------\n");
     }
   }
 
@@ -216,14 +216,14 @@ int nonSmoothDirectNewton(int n, double* z, NewtonFunctionPtr* phi, NewtonFuncti
 
   int incx = 1;
   int n2 = n * n;
-  int infoDGESV = 0;
+  lapack_int infoDGESV = 0;
 
   /* Memory allocation for phi and its jacobian */
   double * phiVector = (double*)malloc(n * sizeof(*phiVector));
   double *jacobianPhiMatrix = (double*)malloc(n2 * sizeof(*jacobianPhiMatrix));
   /** merit function and its jacobian */
   double *jacobian_psi = (double*)malloc(n * sizeof(*jacobian_psi));
-  int* ipiv = (int *)malloc(n * sizeof(*ipiv));
+  lapack_int* ipiv = (lapack_int *)malloc(n * sizeof(lapack_int));
   if (phiVector == NULL || jacobianPhiMatrix == NULL ||  jacobian_psi == NULL || ipiv == NULL)
   {
     fprintf(stderr, "NonSmoothNewton, memory allocation failed.\n");
@@ -281,7 +281,7 @@ int nonSmoothDirectNewton(int n, double* z, NewtonFunctionPtr* phi, NewtonFuncti
     if (verbose > 0)
     {
       printf("Non Smooth Newton, iteration number %i, error equal to %14.7e .\n", niter, terminationCriterion);
-      printf(" -----------------------------------------------------------------------\n");
+      printf(" -----------\n");
     }
   }
 

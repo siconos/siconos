@@ -69,7 +69,7 @@ int main(int argc, char *argv[])
   SP::NonSmoothLaw aNSL(new RelayNSL(sNSLawSize, lb, ub));
   
   //****BUILD THE INTERACTION
-  SP::Interaction aI(new Interaction(sNSLawSize,aNSL,aR));
+  SP::Interaction aI(new Interaction(aNSL,aR));
 
 //****BUILD THE model
   SP::Model  aM(new Model(0,sTf));
@@ -170,8 +170,8 @@ int main(int argc, char *argv[])
 
   dataPlot.resize(cmp,outputSize);
   ioMatrix::write(filename, "ascii", dataPlot, "noDim");
-  //  if (argc==1)
-  if(argc== 10)
+  if (argc==1)
+  //if(argc== 10)
   {
     SimpleMatrix dataPlotRef(dataPlot);
     dataPlotRef.zero();

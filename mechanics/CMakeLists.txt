@@ -52,7 +52,8 @@ if(WITH_BULLET)
   set(${COMPONENT}_LINK_LIBRARIES ${${COMPONENT}_LINK_LIBRARIES} ${BULLET_LIBRARIES})
 endif()
 
-if(WITH_MECHANISMS OR WITH_OCC)
+if(WITH_MECHANISMS OR WITH_OCC OR CMAKE_SKIP_RPATH)
+  # if no RPATH, then linking does not work for tests without specifying externals
   # for n2qn1
   set(${COMPONENT}_LINK_LIBRARIES ${${COMPONENT}_LINK_LIBRARIES} externals)
 endif()

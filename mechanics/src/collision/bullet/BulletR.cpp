@@ -22,6 +22,8 @@
 #include <debug.h>
 
 #include "BulletR.hpp"
+#include <BodyDS.hpp>
+#include <Interaction.hpp>
 
 #if defined(__clang__)
 #pragma clang diagnostic push
@@ -43,79 +45,37 @@
 #pragma GCC diagnostic pop
 #endif
 
-#include <Interaction.hpp>
+static void copyBtVector3(const btVector3 &from, SiconosVector& to)
+{
+  to(0) = from.x();
+  to(1) = from.y();
+  to(2) = from.z();
+}
 
-BulletR::BulletR(SP::btManifoldPoint point,
+// TODO: "point" parameter used only by BulletSpaceFilter
+BulletR::BulletR(const btManifoldPoint &point,
+                 SP::SiconosVector q1, SP::SiconosVector q2,
                  bool flip,
                  double y_correction_A,
                  double y_correction_B,
-                 double scaling) :
-  NewtonEulerFrom3DLocalFrameR(),
-  _contactPoints(point),
-  _flip(flip),
-  _y_correction_A(y_correction_A),
-  _y_correction_B(y_correction_B),
-  _scaling(scaling)
+                 double scaling)
+  : ContactR(q1, q2, flip, y_correction_A, y_correction_B, scaling)
 {
-  updateVectors();
 }
 
-void BulletR::computeh(double time, BlockVector& q0, SiconosVector& y)
+void BulletR::updateContactPointsFromManifoldPoint(const btManifoldPoint& point,
+                                                   SP::NewtonEulerDS ds1,
+                                                   SP::NewtonEulerDS ds2)
 {
-  DEBUG_BEGIN("BulletR::computeh(...)\n");
+  // Get new positions
+  btVector3 posa = point.getPositionWorldOnA();
+  btVector3 posb = point.getPositionWorldOnB();
+  SiconosVector va(3), vb(3), vn(3);
+  copyBtVector3(posa, va);
+  copyBtVector3(posb, vb);
 
-  NewtonEulerR::computeh(time, q0, y);
+  // Get new normal
+  copyBtVector3(point.m_normalWorldOnB, vn);
 
-  DEBUG_PRINT("start of computeh\n");
-
-  // Due to margins we add, objects are reported as closer than they really
-  // are, so we correct by a factor.
-  double correction = _y_correction_A + _y_correction_B;
-  y.setValue(0, _contactPoints->getDistance()*_scaling + correction);
-
-  DEBUG_PRINTF("distance : %g\n",  y.getValue(0));
-
-  updateVectors();
-
-  DEBUG_PRINTF("position on A : %g,%g,%g\n", (*pc1())(0), (*pc1())(1), (*pc1())(2));
-  DEBUG_PRINTF("position on B : %g,%g,%g\n", (*pc2())(0), (*pc2())(1), (*pc2())(2));
-  DEBUG_PRINTF("normal on B   : %g,%g,%g\n", (*nc())(0), (*nc())(1), (*nc())(2));
-
-  DEBUG_END("BulletR::computeh(...)\n");
-}
-
-void BulletR::updateVectors()
-{
-  // Flip contact points if requested
-  btVector3 posa = _contactPoints->getPositionWorldOnA();
-  btVector3 posb = _contactPoints->getPositionWorldOnB();
-  if (_flip) {
-    posa = _contactPoints->getPositionWorldOnB();
-    posb = _contactPoints->getPositionWorldOnA();
-  }
-
-  // Update contact point locations
-  (*pc1())(0) = posa[0]*_scaling;
-  (*pc1())(1) = posa[1]*_scaling;
-  (*pc1())(2) = posa[2]*_scaling;
-  (*pc2())(0) = posb[0]*_scaling;
-  (*pc2())(1) = posb[1]*_scaling;
-  (*pc2())(2) = posb[2]*_scaling;
-
-  // Update normal
-  (*nc())(0) = _contactPoints->m_normalWorldOnB[0] * (_flip ? -1 : 1);
-  (*nc())(1) = _contactPoints->m_normalWorldOnB[1] * (_flip ? -1 : 1);
-  (*nc())(2) = _contactPoints->m_normalWorldOnB[2] * (_flip ? -1 : 1);
-
-  // Adjust contact point positions correspondingly along normal.  TODO: This
-  // assumes same distance in each direction, i.e. same margin per object.
-  (*pc1())(0) += (*nc())(0) * _y_correction_A;
-  (*pc1())(1) += (*nc())(1) * _y_correction_A;
-  (*pc1())(2) += (*nc())(2) * _y_correction_A;
-  (*pc2())(0) -= (*nc())(0) * _y_correction_B;
-  (*pc2())(1) -= (*nc())(1) * _y_correction_B;
-  (*pc2())(2) -= (*nc())(2) * _y_correction_B;
-
-  assert(!((*nc())(0)==0 && (*nc())(1)==0 && (*nc())(2)==0)
-         && "nc = 0, problems..\n");
+  ContactR::updateContactPoints(va, vb, point.getDistance(), vn, ds1, ds2);
 }

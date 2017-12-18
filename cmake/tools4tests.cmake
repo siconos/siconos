@@ -358,6 +358,15 @@ macro(NEW_GFC_3D_TEST)
   unset(TEST_NAME_PREFIX)
 endmacro()
 
+macro(NEW_GFC_3D_TEST_HDF5)
+  # Set name of the file used to generate tests (c)source files.
+  set(SOURCE_FILE_NAME gfc3d_test_hdf5.c.in )
+  set(TEST_NAME_PREFIX gfc3d)
+  NEW_FC_TEST(${ARGV})
+  unset(SOURCE_FILE_NAME)
+  unset(TEST_NAME_PREFIX)
+endmacro()
+
 
 MACRO(NEW_PB_TEST)
   SET(FILE_TO_CONF ${ARGV0})
@@ -366,17 +375,20 @@ MACRO(NEW_PB_TEST)
 
   SET(TEST_SBM ${ARGV3})
   SET(TEST_SBM_C "_SBM")
+  SET(TEST_SBM_PREFIX "LCP_NSGS_SBM_")
+  
   IF(NOT DEFINED TEST_SBM)
     SET(TEST_SBM 0)
     SET(TEST_SBM_C "")
+    SET(TEST_SBM_PREFIX "")
   ENDIF(NOT DEFINED TEST_SBM)
 
 
   STRING(REGEX REPLACE SICONOS_ "" TEST_SOLVER_NAME ${TEST_SOLVER})
   STRING(REGEX REPLACE "\\.dat" "" TEST_DATA_NAME ${TEST_DATA})
 
-  SET(TEST_EXE ${TEST_SOLVER_NAME}${TEST_SBM_C})
-  SET(TEST_NAME "test-${TEST_SOLVER_NAME}-${TEST_DATA_NAME}${TEST_SBM_C}")
+  SET(TEST_EXE ${TEST_SBM_PREFIX}${TEST_SOLVER_NAME}${TEST_SBM_C})
+  SET(TEST_NAME "test-${TEST_SBM_PREFIX}${TEST_SOLVER_NAME}-${TEST_DATA_NAME}")
 
 
   LIST(FIND _EXE_LIST_${_CURRENT_TEST_DIRECTORY} ${TEST_EXE} ALREADY_CONF)
@@ -592,11 +604,44 @@ macro(build_python_tests)
   endif()
 endmacro()
 
+# In certain cases, ex. no rpath, or running tests with plugins,
+# libraries cannot be found at link or test time, so we add the
+# LD_LIBRARY_PATH variable.
+SET(LDLIBPATH "")
+if (CMAKE_SKIP_RPATH)
+  FOREACH(_C ${COMPONENTS})
+    LIST(APPEND LDLIBPATH "${CMAKE_BINARY_DIR}/${_C}")
+  ENDFOREACH()
+else()
+  # Otherwise, still need the path to current component dir for tests
+  # that load plugins.
+  LIST(APPEND LDLIBPATH "${CMAKE_BINARY_DIR}/${COMPONENT}")
+endif()
+LIST(APPEND LDLIBPATH "${CMAKE_BINARY_DIR}/wrap/siconos/tests")
+if (NOT CMAKE_SYSTEM_NAME MATCHES WINDOWS)
+  STRING(REPLACE ";" ":" LDLIBPATH "${LDLIBPATH}")
+endif()
+if (CMAKE_SYSTEM_NAME MATCHES APPLE)
+  if ($ENV{DYLD_LIBRARY_PATH})
+    set(LDLIBPATH "${LDLIBPATH}:$ENV{DYLD_LIBRARY_PATH}")
+  endif()
+  SET(LDLIBPATH "DYLD_LIBRARY_PATH=${LDLIBPATH}")
+else()
+  if (CMAKE_SYSTEM_NAME MATCHES WINDOWS)
+    SET(LDLIBPATH "Path=${LDLIBPATH};$ENV{Path}")
+  else()
+    if ($ENV{LD_LIBRARY_PATH})
+      set(LDLIBPATH "${LDLIBPATH}:$ENV{LD_LIBRARY_PATH}")
+    endif()
+    SET(LDLIBPATH "LD_LIBRARY_PATH=${LDLIBPATH}")
+  endif()
+endif()
+
 # Declaration of a siconos test based on python bindings
 macro(add_python_test test_name test_file)
   add_test(${test_name} ${PYTHON_EXECUTABLE} ${TESTS_RUNNER} "${pytest_opt}" ${DRIVE_LETTER}${test_file})
   #    WORKING_DIRECTORY ${SICONOS_SWIG_ROOT_DIR}/tests)
   set_tests_properties(${test_name} PROPERTIES FAIL_REGULAR_EXPRESSION "FAILURE;Exception;[^x]failed;ERROR;Assertion")
   set_tests_properties(${test_name} PROPERTIES ENVIRONMENT "PYTHONPATH=$ENV{PYTHONPATH}:${CMAKE_BINARY_DIR}/wrap")
-  set_tests_properties(${test_name} PROPERTIES ENVIRONMENT "LD_LIBRARY_PATH=$ENV{LD_LIBRARY_PATH}:${CMAKE_BINARY_DIR}/wrap/siconos/tests") # for plugins
+  set_tests_properties(${test_name} PROPERTIES ENVIRONMENT LDLIBPATH)
 endmacro()

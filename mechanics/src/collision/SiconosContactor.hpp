@@ -36,7 +36,7 @@
 /** Class to hold the shape assigned to a body, and to associate each
  *  shape with an offset and collision group. */
 
-struct SiconosContactor
+class SiconosContactor
 {
 private:
   SiconosContactor() {};

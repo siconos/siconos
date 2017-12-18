@@ -21,6 +21,9 @@
 #include "SimulationGraphs.hpp"
 #include "Model.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
+#define DEBUG_STDOUT
+#define DEBUG_MESSAGES
+#include "debug.h"
 using namespace EventFactory;
 
 // Default constructor

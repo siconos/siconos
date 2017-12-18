@@ -17,6 +17,7 @@
 #include <math_Function.hxx>
 #include <math_BrentMinimum.hxx>
 #include <math_FunctionSetWithDerivatives.hxx>
+#include <math_Vector.hxx>
 #include <Precision.hxx>
 
 
@@ -202,7 +203,8 @@ static Standard_Boolean MinimizeDirection(const math_Vector&   P0,
   ax = -1; bx = 0;
   cx = (P2-P1).Norm()*invnorme;
   if (cx < 1.e-2) return Standard_False;
-  math_BrentMinimum Sol(F, ax, bx, cx, tol1d, 100, tol1d);
+  math_BrentMinimum Sol(tol1d, 100, tol1d);
+  Sol.Perform(F, ax, bx, cx);
   if(Sol.IsDone()) {
     tsol = Sol.Location();
     if (Sol.Minimum() < F1) {
@@ -295,7 +297,8 @@ static Standard_Boolean MinimizeDirection(const math_Vector&   P,
       ax = 0.0; bx = tsol; cx = 1.0;
     }
     if (mydebug) cout << " minimisation dans la direction" << endl;
-    math_BrentMinimum Sol(F, ax, bx, cx, tol1d, 100, tol1d);
+    math_BrentMinimum Sol(tol1d, 100, tol1d);
+    Sol.Perform(F, ax, bx, cx);
     if(Sol.IsDone()) {
       if (Sol.Minimum() <= Result) {
 	tsol = Sol.Location();

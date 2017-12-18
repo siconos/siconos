@@ -15,14 +15,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
+
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 #include "NonSmoothDrivers.h"
 #include "SecondOrderConeLinearComplementarityProblem.h"
 #include "SOCLCP_Solvers.h"
 #include "soclcp_test_function.h"
+#include "SiconosCompat.h"
 
-
+#ifdef __cplusplus
+using namespace std;
+#endif
 
 int soclcp_test_function(FILE * f, SolverOptions * options)
 {

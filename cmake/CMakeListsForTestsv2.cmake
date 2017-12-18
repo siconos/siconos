@@ -22,6 +22,34 @@ ELSE()
   SET(EXE_EXT)
 ENDIF()
 
+# In certain cases, ex. no rpath, or running tests with plugins,
+# libraries cannot be found at link or test time, so we add the
+# LD_LIBRARY_PATH variable.
+if (CMAKE_SKIP_RPATH)
+  SET(LDLIBPATH "")
+  FOREACH(_C ${COMPONENTS})
+    LIST(APPEND LDLIBPATH "${CMAKE_BINARY_DIR}/${_C}")
+  ENDFOREACH()
+  if (NOT CMAKE_SYSTEM_NAME MATCHES WINDOWS)
+    STRING(REPLACE ";" ":" LDLIBPATH "${LDLIBPATH}")
+  endif()
+  if (CMAKE_SYSTEM_NAME MATCHES APPLE)
+    if ($ENV{DYLD_LIBRARY_PATH})
+      set(LDLIBPATH "${LDLIBPATH}:$ENV{DYLD_LIBRARY_PATH}")
+    endif()
+    SET(LDLIBPATH "DYLD_LIBRARY_PATH=${LDLIBPATH}")
+  else()
+    if (CMAKE_SYSTEM_NAME MATCHES WINDOWS)
+      SET(LDLIBPATH "Path=${LDLIBPATH};$ENV{Path}")
+    else()
+      if ($ENV{LD_LIBRARY_PATH})
+        set(LDLIBPATH "${LDLIBPATH}:$ENV{LD_LIBRARY_PATH}")
+      endif()
+      SET(LDLIBPATH "LD_LIBRARY_PATH=${LDLIBPATH}")
+    endif()
+  endif()
+endif()
+
 FOREACH(_EXE ${_EXE_LIST_${_CURRENT_TEST_DIRECTORY}})
   file(APPEND ${TESTS_LOGFILE} "Adding test suite ${_CURRENT_TEST_DIRECTORY}/${_EXE} \n")
 
@@ -111,8 +139,8 @@ FOREACH(_EXE ${_EXE_LIST_${_CURRENT_TEST_DIRECTORY}})
 
     SET_TESTS_PROPERTIES(${_TEST_NAME} PROPERTIES FAIL_REGULAR_EXPRESSION "FAILURE;Exception;failed;ERROR;test unsucceeded")
 
-    if(CMAKE_SYSTEM_NAME MATCHES Windows)
-      set(ENV_PPTY "Path=${COMPONENT_BIN_DIR}\;@ENV_PATH@")
+    if (LDLIBPATH)
+      set(ENV_PPTY "${LDLIBPATH}")
     endif()
 
     SET(LOCAL_USE_SANITIZER "@USE_SANITIZER@")
@@ -130,7 +158,13 @@ FOREACH(_EXE ${_EXE_LIST_${_CURRENT_TEST_DIRECTORY}})
     IF(${_TEST_NAME}_PROPERTIES)
       SET_TESTS_PROPERTIES(${_TEST_NAME} PROPERTIES ${${_TEST_NAME}_PROPERTIES})
     ENDIF(${_TEST_NAME}_PROPERTIES)
-    set_tests_properties(${_TEST_NAME} PROPERTIES TIMEOUT ${tests_timeout})
+
+    if(${_EXE}_TIMEOUT)
+      set_tests_properties(${_TEST_NAME} PROPERTIES TIMEOUT ${${_EXE}_TIMEOUT})
+    else()
+      set_tests_properties(${_TEST_NAME} PROPERTIES TIMEOUT ${tests_timeout})
+    endif()
+
 
   ENDFOREACH(i RANGE ${count})
 

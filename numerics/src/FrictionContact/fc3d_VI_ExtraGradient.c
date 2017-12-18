@@ -25,6 +25,7 @@
 #include "FrictionContactProblem_as_VI.h"
 #include "VariationalInequality_Solvers.h"
 #include "fc3d_Solvers.h"
+#include "SiconosCompat.h"
 #include "fc3d_compute_error.h"
 
 #include "SolverOptions.h"
@@ -71,30 +72,22 @@ void fc3d_VI_ExtraGradient(FrictionContactProblem* problem, double *reaction, do
   int vi_isize = visolver_options->iSize;
   int vi_dsize = visolver_options->dSize;
 
+
   if (isize != vi_isize )
   {
-    printf("size prolem in fc3d_VI_ExtraGradient\n");
+    printf("Warning: options->iSize in fc3d_VI_ExtraGradient is not consitent with options->iSize in VI_EG\n");
   }
   if (dsize != vi_dsize )
   {
-    printf("size prolem in fc3d_VI_ExtraGradient\n");
+    printf("Warning: options->iSize in fc3d_VI_ExtraGradient is not consitent with options->iSize in VI_EG\n");
   }
-  /* int i; */
-  /* for (i = 0; i < isize; i++) */
-  /* { */
-  /*   visolver_options->iparam[i] = options->iparam[i] ; */
-  /* } */
-  /* for (i = 0; i < dsize; i++) */
-  /* { */
-  /*   visolver_options->dparam[i] = options->dparam[i] ; */
-  /* } */
   int i;
-  for (i = 0; i < isize; i++)
+  for (i = 0; i < min(isize,vi_isize); i++)
   {
     if (options->iparam[i] != 0 )
       visolver_options->iparam[i] = options->iparam[i] ;
   }
-  for (i = 0; i < dsize; i++)
+  for (i = 0; i < min(dsize,vi_dsize); i++)
   {
     if (fabs(options->dparam[i]) >= 1e-24 )
       visolver_options->dparam[i] = options->dparam[i] ;
@@ -113,6 +106,8 @@ void fc3d_VI_ExtraGradient(FrictionContactProblem* problem, double *reaction, do
   /* } */
 
   error = visolver_options->dparam[1];
+  options->dparam[3] =  visolver_options->dparam[SICONOS_VI_EG_DPARAM_RHO];
+
   iter = visolver_options->iparam[7];
 
   options->dparam[1] = error;
@@ -121,7 +116,7 @@ void fc3d_VI_ExtraGradient(FrictionContactProblem* problem, double *reaction, do
 
   if (verbose > 0)
   {
-    printf("----------------------------------- FC3D - VI Extra Gradient (VI_EG) - #Iteration %i Final Residual = %14.7e\n", iter, error);
+    printf("--------------- FC3D - VI Extra Gradient (VI_EG) - #Iteration %i Final Residual = %14.7e\n", iter, error);
   }
   free(vi);
 
@@ -142,22 +137,9 @@ int fc3d_VI_ExtraGradient_setDefaultSolverOptions(SolverOptions* options)
     printf("Set the Default SolverOptions for the ExtraGradient Solver\n");
   }
 
-  /*strcpy(options->solverName,"DSFP");*/
+  variationalInequality_ExtraGradient_setDefaultSolverOptions(options);
   options->solverId = SICONOS_FRICTION_3D_VI_EG;
-  options->numberOfInternalSolvers = 0;
-  options->isSet = 1;
-  options->filterOn = 1;
-  options->iSize = 8;
-  options->dSize = 8;
-  options->iparam = (int *)calloc(options->iSize, sizeof(int));
-  options->dparam = (double *)calloc(options->dSize, sizeof(double));
-  options->dWork = NULL;
-  solver_options_nullify(options);
-  options->iparam[0] = 20000;
-  options->dparam[0] = 1e-3;
-  options->dparam[3] = 1e-3;
-  options->dparam[3] = -1.0; // rho is variable by default
-  options->internalSolvers = NULL;
+
 
   return 0;
 }

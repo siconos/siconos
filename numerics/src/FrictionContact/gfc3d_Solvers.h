@@ -49,7 +49,7 @@ For each solver, the input argument are:
 
 typedef void (*SolverGlobalPtr)(int, int, double*, int*, double*);
 typedef void (*PostSolverGlobalPtr)(int, double*);
-typedef void (*ComputeErrorGlobalPtr)(GlobalFrictionContactProblem*, double*, double*, double *, double, double*);
+typedef void (*ComputeErrorGlobalPtr)(GlobalFrictionContactProblem*, double*, double*, double *, double, double, double*);
 typedef void (*FreeSolverGlobalPtr)(GlobalFrictionContactProblem*);
 
 
@@ -75,7 +75,7 @@ extern "C"
        \param options the pointer to the array of options to set
        \return int =0 if a trivial solution has been found, else = -1
    */
-  int checkTrivialCaseGlobal(int dim, double* q, double* velocity, double*reaction, double* globalVelocity, SolverOptions* options);
+  int gfc3d_checkTrivialCaseGlobal(int dim, double* q, double* velocity, double*reaction, double* globalVelocity, SolverOptions* options);
 
   /** Non-Smooth Gauss Seidel solver with reformulation for friction-contact 3D problem
       \param problem the friction-contact 3D problem to solve
@@ -203,7 +203,8 @@ extern "C"
       \param info return 0 if the solution is found
       \param options the solver options
   */
-  void gfc3d_AVI_gams_path(GlobalFrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options);
+  void gfc3d_AVI_gams_path(GlobalFrictionContactProblem* problem, double *reaction,
+                           double *velocity, int* info, SolverOptions* options);
 
   /** solver using PATHVI (via GAMS) for friction-contact 3D problem based on an AVI reformulation
       \param problem the friction-contact 3D problem to solve
@@ -212,12 +213,18 @@ extern "C"
       \param info return 0 if the solution is found
       \param options the solver options
   */
-  void gfc3d_AVI_gams_pathvi(GlobalFrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options);
+  void gfc3d_AVI_gams_pathvi(GlobalFrictionContactProblem* problem, double *reaction,
+                             double *velocity, int* info, SolverOptions* options);
 
 
   void gfc3d_nonsmooth_Newton_AlartCurnier(GlobalFrictionContactProblem* problem, double *reaction, double *velocity, double *globalVelocity, int *info, SolverOptions* options);
 
-
+  void gfc3d_VI_ExtraGradient(GlobalFrictionContactProblem* problem, double *reaction, double *velocity, double* globalVelocity, int* info, SolverOptions* options);
+  
+  int gfc3d_VI_ExtraGradient_setDefaultSolverOptions(SolverOptions* options);
+  void gfc3d_VI_FixedPointProjection(GlobalFrictionContactProblem* problem, double *reaction, double *velocity, double* globalVelocity, int* info, SolverOptions* options);
+  
+  int gfc3d_VI_FixedPointProjection_setDefaultSolverOptions(SolverOptions* options);
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif

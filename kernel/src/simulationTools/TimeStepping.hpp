@@ -61,10 +61,10 @@ protected:
   /** Default maximum number of Newton iteration*/
   unsigned int _newtonMaxIteration;
 
-  /** Number of steps perfomed in the Newton Loop */
+  /** Number of steps performed in the Newton Loop */
   unsigned int _newtonNbIterations;
 
-  /** Cumulative number of steps perfomed in the Newton Loops */
+  /** Cumulative number of steps performed in the Newton Loops */
   unsigned int _newtonCumulativeNbIterations;
 
   /** unsigned int  _newtonOptions
@@ -97,6 +97,11 @@ protected:
   /** boolean variable to know whether Newton iterations converge or not
    */
   bool _isNewtonConverge;
+
+  /** boolean variable indicating whether interactions should be
+   * updated within the Newton loop.
+   */
+  bool _newtonUpdateInteractionsPerIteration;
 
   /** boolean variable to display Newton info
    */
@@ -158,11 +163,6 @@ public:
 
   /** increment model current time according to User TimeDiscretisation and call SaveInMemory. */
   virtual void nextStep();
-
-  /** update input, state of each dynamical system and output
-   *  \param levelInput lambda order used to compute input
-   */
-  void update(unsigned int levelInput);
 
   /** integrates all the DynamicalSystems taking not into account nslaw, reactions (ie non-smooth part) ...
   */
@@ -318,6 +318,22 @@ public:
     return _newtonMaxIteration;
   };
 
+  /** set whether updateInterations should be called on each Newton iteration
+   *  \param update a bool indiciating the Newton updateInterations behaviour
+   */
+  void setNewtonUpdateInteractionsPerIteration(bool update)
+  {
+    _newtonUpdateInteractionsPerIteration = update;
+  };
+
+  /** get the Newton updateInterations behaviour
+   *  \return a bool indicating the Newton updateInterations behaviour
+   */
+  bool newtonUpdateInteractionsPerIteration()
+  {
+    return _newtonUpdateInteractionsPerIteration;
+  };
+
   /** set the NewtonOptions
    *  \param v Newton solver options
    */
@@ -359,16 +375,6 @@ public:
   {
     return _newtonResiduRMax;
   };
-
-
-  /*TS set the ds->q memory, the world (CAD model for example) must be updated.
-    Overload this method to update user model.*/
-  virtual void updateWorldFromDS()
-  {
-    ;
-  };
-
-
 
   /** visitors hook
   */

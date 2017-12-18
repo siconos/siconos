@@ -35,10 +35,10 @@ int main(void)
   printf("========= Starts SBM tests 3 for SBM ========= \n");
   SparseBlockStructuredMatrix M;
   FILE *file = fopen("data/SBM1.dat", "r");
-  newFromFileSBM(&M, file);
+  SBM_new_from_file(&M, file);
   fclose(file);
   /*alloc enough memory */
-  int res = test_ColPermutationSBM(&M);
+  int res = test_SBM_column_permutation(&M);
   if (res)
   {
     printf("========= Failed SBM tests 3 for SBM  ========= \n");
@@ -46,9 +46,9 @@ int main(void)
   }
   SBMfree(&M, NUMERICS_SBM_FREE_BLOCK);
   file = fopen("data/SBM2.dat", "r");
-  newFromFileSBM(&M, file);
+  SBM_new_from_file(&M, file);
   fclose(file);
-  res = test_ColPermutationSBM(&M);
+  res = test_SBM_column_permutation(&M);
   if (res)
   {
     printf("========= Failed SBM tests 3 for SBM  ========= \n");

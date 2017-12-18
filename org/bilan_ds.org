@@ -1,0 +1,307 @@
+
+
+
+|                       | _number | _n    | _x0     | _r                       | _x     | _jacxRhs | _z     | _pluging | _pluginJacgx | _pluginJacxDotG | _xMemory   | _stepsInMemory |
+|-----------------------+---------+-------+---------+--------------------------+--------+----------+--------+----------+--------------+-----------------+------------+----------------|
+| Status                | REQ     | REQ   | opt     | opt, level = f(simu)     | REQ    | opt      | opt    | removed  | removed      | removed         | OSI        | OSI            |
+|                       |         |       | EDonly? |                          |        |          |        |          |              |                 |            |                |
+|-----------------------+---------+-------+---------+--------------------------+--------+----------+--------+----------+--------------+-----------------+------------+----------------|
+| DynamicalSystem       | all c   | all c | copy    | no                       | resize | NO       | all    | X        | X            | X               |            | all c          |
+|                       |         |       |         |                          | only   |          | size 1 |          |              |                 |            |                |
+|-----------------------+---------+-------+---------+--------------------------+--------+----------+--------+----------+--------------+-----------------+------------+----------------|
+| FirstOrderNonLinearDS | inh     | inh   | REQ     | initializeNonSmoothInput | REQ    | initRhs  | inh    | X        | X            | X               | initMemory | inh            |
+|-----------------------+---------+-------+---------+--------------------------+--------+----------+--------+----------+--------------+-----------------+------------+----------------|
+| FirstOrderLinearDS    | inh     | inh   | inh     | inh                      | inh    |          | inh    | X        | X            | X               | inh        | inh            |
+
+Status
+- REQ : must be allocated/init
+- opt : optional
+- removed : has been deleted in my new version ...
+- OSI : move this to graph
+- inh : inherited
+
+Should we always check _n > 0 ???
+Should we always call zeroPlugin() ???
+Should we keep FirstOrderLinearTIDS class??? Only usefull for Lsodar (initRhs, computeRhs)
+LagDS : (q0,v0) to x0 copy or links???
+LagDS : mem for forces, could be optimized
+getRhs --> should compile rhs??
+
+r : resize
+a : alloc
+i : init content
+CREQ : required in all constructors
+
+
+verif branchements du updatePlugin
+DS Constructors: [3] default, dim, copy
+
+TOBEREVIEWED : useless compute when rhs + gradjac
+
+DS:
+MIN --> r[n]
+
+|                       | _M  | _f  | _b  | _fold | _jacobianfx | _pluginf | _pluginJacxf | _pluginM | _rMemory | _invM | _A  | _pluginA | _pluginB |
+|-----------------------+-----+-----+-----+-------+-------------+----------+--------------+----------+----------+-------+-----+----------+----------|
+| FirstOrderNonLinearDS | opt | opt | opt | OSI?  | opt         | opt      | opt          | opt      | OSI?     | OSI?  | DER | DER      | DER      |
+|-----------------------+-----+-----+-----+-------+-------------+----------+--------------+----------+----------+-------+-----+----------+----------|
+| FirstOrderLinearDS    | opt | opt | opt | OSI   | opt         | useless  | useless      | opt      | OSI      | OSI   | opt | opt      | opt      |
+|                       |     |     |     |       |             |          |              |          |          |       |     |          |          |
+
+
+FONLDS:
+Init : base + init memory for x[0] and x[1]
+
+
+
+|              | _ndof | _q  | _q0  | _velocity0 | _p    | _mass | _hasConstantMass | _inverseMass | _X | _jacobianXq | _jacobianXqDot | _fExt | _hasConstantFExt | _forcesMemory | _boundaryConditions | _reactionBoundaryConditons | _rhsMatrices | _jacxRhs | _pMemory | _qMemory | _velocityMemory |
+|--------------+-------+-----+------+------------+-------+-------+------------------+--------------+----+-------------+----------------+-------+------------------+---------------+---------------------+----------------------------+--------------+----------+----------+----------+-----------------|
+| LagrangianDS | CREQ  | 0,1 | CREQ | CREQ       | REQ   |       | REQ              |              |    |             |                |       | REQ              |               |                     |                            |              |          |          |          |                 |
+|              |       |     |      |            | lazy? |       |                  |              |    |             |                |       |                  |               |                     |                            |              |          |          |          |                 |
+|--------------+-------+-----+------+------------+-------+-------+------------------+--------------+----+-------------+----------------+-------+------------------+---------------+---------------------+----------------------------+--------------+----------+----------+----------+-----------------|
+| LagrangianDS |       |     |      |            |       |       |                  |              |    |             |                |       |                  |               |                     |                            |              |          |          |          |                 |
+|              |       |     |      |            |       |       |                  |              |    |             |                |       |                  |               |                     |                            |              |          |          |          |                 |
+
+
+X : fInt, fGyr, forces
+
+Should we always need q[2], p[0] and p[2]?
+
+
+
+|                 | dimension | checkDynamicalSystem | resetToInitialState | isLinear | initRhs | initializeNonSmoothInput | update | initMemory | swapInMemory | computeRhs | computeJacobianRhsx | display | resetAllNonSmoothPart | resetNonSmoothPart |   |
+|-----------------+-----------+----------------------+---------------------+----------+---------+--------------------------+--------+------------+--------------+------------+---------------------+---------+-----------------------+--------------------+---|
+| DynamicalSystem | v/i       | av/i                 | v/i                 | v/i      | av/ni   | av/ni                    | i      | v/i        | av/ni        | av/ni      | av/ni               | av/ni   | av/ni                 | av/ni              |   |
+|-----------------+-----------+----------------------+---------------------+----------+---------+--------------------------+--------+------------+--------------+------------+---------------------+---------+-----------------------+--------------------+---|
+| LagrangianDS    | v/i       | i                    | i                   | N        | i       | i                        | N      | i          | i            | v/i        | v/i                 | i       | i                     | i                  |   |
+|-----------------+-----------+----------------------+---------------------+----------+---------+--------------------------+--------+------------+--------------+------------+---------------------+---------+-----------------------+--------------------+---|
+| LagrangianLTIDS | N         | i                    | N                   | i        | i       | N                        | N      | N          | N            | i          | i dn                | i       | N                     | N                  |   |
+|-----------------+-----------+----------------------+---------------------+----------+---------+--------------------------+--------+------------+--------------+------------+---------------------+---------+-----------------------+--------------------+---|
+| NewtonEulerDS   | v/i       | i, always true       | i                   | N        | i       | i                        | N      | i          | i            | v/i        | v/i, runtime        | i       | i                     | i                  |   |
+|-----------------+-----------+----------------------+---------------------+----------+---------+--------------------------+--------+------------+--------------+------------+---------------------+---------+-----------------------+--------------------+---|
+| FONLDS          | N         | i, just call         | N                   | N        | i       | i                        | N      | i          | i            | i          | i                   | i       | v/i                   | v/i                |   |
+|                 |           | base class func      |                     |          |         |                          |        |            |              |            |                     |         |                       |                    |   |
+|-----------------+-----------+----------------------+---------------------+----------+---------+--------------------------+--------+------------+--------------+------------+---------------------+---------+-----------------------+--------------------+---|
+| FOLDS           | N         | i, just call         | N                   | i        | i       | N                        | N      | N          | N            | i          | i                   | i       | N                     | N                  |   |
+|                 |           | base class func      |                     |          |         |                          |        |            |              |            |                     |         |                       |                    |   |
+|-----------------+-----------+----------------------+---------------------+----------+---------+--------------------------+--------+------------+--------------+------------+---------------------+---------+-----------------------+--------------------+---|
+| FOLTIDS         | N         | N                    | N                   | i        | i       | N                        | N      | N          | N            | i          | i dn                | i       | N                     | N                  |   |
+|-----------------+-----------+----------------------+---------------------+----------+---------+--------------------------+--------+------------+--------------+------------+---------------------+---------+-----------------------+--------------------+---|
+
+
+
+
+RULE for FO : jacobianRhsx are available only if initRhs has been called.
+
+called by OSI: initMemory
+
+
+initMemory :  initializeDynamicalSystem (D1MinusLinearOSI, MoreauJeanOSI, SchatzmanPaoliOSI), topology::setOSI
+
+
+OSI must call initRhs during some initialization phase and then computeRhs and/or computeJacobianRhsx during computation phase.
+
+
+
+|                 | computeMass | computeFInt | computeFExt | computeFGyr | computeJacobianFIntq | computeJacobianFIntqDot | computeJacobianFGyrq | computeJacobianFGyrqDot | computeForces | computeJacobianqForces | computeJacobianqDotForces |
+|-----------------+-------------+-------------+-------------+-------------+----------------------+-------------------------+----------------------+-------------------------+---------------+------------------------+---------------------------|
+| LagrangianDS    | v/i  X2     | v/i X2      | v/i         | v/i X2      | v/i X2               | v/i X2                  | v/i X2               | v/i X2                  | v/i (X2)      | v/i                    | v/i                       |
+|-----------------+-------------+-------------+-------------+-------------+----------------------+-------------------------+----------------------+-------------------------+---------------+------------------------+---------------------------|
+| LagrangianLTIDS | N           | N           | N           | N           | N                    | N                       | N                    | N                       | i X2          | N                      | N                         |
+
+
+
+|         | jacobianfx | updatePlugins |
+|---------+------------+---------------|
+| FONLDS  | v/i        | v/i           |
+|---------+------------+---------------|
+| FOLDS   | v/i        | v/i           |
+|---------+------------+---------------|
+| FOLTIDS | v/i        | v/i dn        |
+|---------+------------+---------------|
+
+
+v : virtual
+av : abstract and virtual
+i : implemented
+N : neither declared nor implemented
+dn : does nothing
+
+zeroPlugin : create PluggedObject
+
+update : 
+
+resetToInitialState : set x[0] to x0
+
+checkDynamicalSystem : verif _n et _x0
+
+initRhs : init memory and compute _rhsMatrices and _jacxRhs
+
+initializeNonSmoothInput : mem for _p (and _pMemory in Lag) and _r ... what about _r called in initRhs???? Should we test it before???
+
+initMemory : create SiconosMemory vectors (except pMemory), NO swap in Lag, swap in NE
+
+computeRhs : _mass and invmass, q[2]
+
+resetAllNS : all _p to zero
+resetNS(i) : _p[i] to zero
+
+Review req
+----------
+
+LagrangianDS.init() not virtual. Exists also in NewtonEulerDS
+
+FOLNDS.updatePlugins
+
+Plugin system
+-------------
+
+
+|                 | _pluging | _pluginJacgx | _pluginJacxDotG | SCg(string...) | SC_g(Fptr6) | SCJacobianXG(string ... | SCJacobianXG(FPtr6) | SCJacobianDotXG(string) | SCJacobianDotXG(FPtr6) | updatePlugins | zeroPlugin |
+|-----------------+----------+--------------+-----------------+----------------+-------------+-------------------------+---------------------+-------------------------+------------------------+---------------+------------|
+| DynamicalSystem |          |              |                 | i              | i           | i                       | v/i dn              | i                       | v/i dn                 | v/i dn        | v/i        |
+|-----------------+----------+--------------+-----------------+----------------+-------------+-------------------------+---------------------+-------------------------+------------------------+---------------+------------|
+| LagrangianDS    |          |              |                 |                |             |                         |                     |                         |                        |               | v/i        |
+|-----------------+----------+--------------+-----------------+----------------+-------------+-------------------------+---------------------+-------------------------+------------------------+---------------+------------|
+| LagrangianTIDS  |          |              |                 |                |             |                         |                     |                         |                        |               | N          |
+|-----------------+----------+--------------+-----------------+----------------+-------------+-------------------------+---------------------+-------------------------+------------------------+---------------+------------|
+| NewtonEulerDS   |          |              |                 |                |             |                         |                     |                         |                        |               | i          |
+|-----------------+----------+--------------+-----------------+----------------+-------------+-------------------------+---------------------+-------------------------+------------------------+---------------+------------|
+| FONLDS          |          |              |                 |                |             |                         |                     |                         |                        |               | v/i        |
+
+
+SC... --> setCompute...Function
+
+LagrangianDS : ... == Mass, FInt, FExt, FGyr, JacobianFIntq, JacobianFGyrq, JacobianFGyrqDot, JacobianFIntqDot, JacobianFIntq,
+
+
+* What should be done when building ad DS???
+  ** set initial conditions (x0, q0, v0 ...) AND set state according to these values
+  ** set operators (mass, fint ...) i.e. memory allocation and initialization for required operators. 
+
+* Misc and questions
+
+** setNumber
+  should we really allow this? Don't think so. Use count instead, not both.
+  setNumber is used only in io/swig/io/mechanics_io.py, with number from importOccObject(..., number=None) or
+  importBulletObject(..., number=None)
+  
+** change n() to dimension() and do not allow setN(), check ndof() 
+** definitely remove workspace from ds (now in the graph)
+** test copy constructor
+** p is a std::vector in Lagrangian while just a SiconosVector in DS
+** check places where _p and _pMemory are created
+** check MatrixIntegrator, call to zeroPlugin required?
+
+
+** initializeDynamicalSystem : called in OSI::initialize AND in Topology.cpp through CallInitDS (still required??)
+** FONLDS : b() never documented, used in FOLDS, defined in FOLNDS ...
+
+* done 
+  ** remove initialize function
+
+
+** updatePlugins : to be checked
+** resetToInitialState : should we also initialize rhs/ _x[1]? 
+
+** initializeNonSmoothInput and resetNonSmoothPart : check behavior, sometimes redondent
+
+* Dynamical Systems
+
+** private vars
+  __count  static!!
+
+** protected vars
+  _number
+  _n
+  _x0
+  _r
+  _x
+  _jacxRhs
+  _z
+  _pluging
+  _pluginJacgx
+  _pluginJacxDotG
+  _xMemory
+  _stepsInMemory
+
+
+
+* About properties in interactions and ds
+  
+
+** DSGraph : model purpose. Change only when a new DS is created/removed. 
+** IG0 (broadphase)
+** InteractionGraph : always updated and used during simulation (IGi, i >0)
+
+** should we change DSgraph? (vector like to map like)?
+
+** DynamicalSystemProperties and DynamicalSystemProperties: 'rapid' (efficient) properties (like struct members), in base class interface
+     Req:  must be common to all derived classes, or present for efficiency if really needed
+     ** to be reviewed : WBoundaryConditions, forControl, 
+
+     access: 
+
+** DynamicalSystemsGraph, INSTALL_GRAPH_PROPERTIES
+*** map of optional properties that must be explicitely set (name, jacgx ...)
+*** Mind the eraseProperties : each optional property must be removed
+
+
+** why struct (DS) and class (Inter)?
+** subgraph in boost are (were?) static so Igi, i>0 are copies. 
+** what about properties really needed in subgraphs?
+** review const or not const properties?
+
+
+
+
+* Plugin(s) 'NAME' for attribute(s) _NAME
+** object _pluginNAME, type SP::PluggedObject
+** always initialized with _pluginNAME.reset(new PluggedObject()) (e.g. _zeroPlugin in DS), leads to fPtr->NULL
+** always a setComputeNAMEFunction(args), which calls PluggedObject::setComputeFunction(args)
+*** args may be (path, name) or fptr
+** always a computeNAME(args) method calling fPtr(otherargs) if fPtr not NULL used to set _NAME attribute.
+
+
+
+* setComputeXX and setXX : should we activate/deactivate? example : setFExt
+
+
+* Add a 'computeForces' to all DS (called in initializeDyna of OSI)
+
+* Do we need 'r' in first order formulation of second order?
+
+
+* add all op computation to resetToInitialState?
+
+* FirstOrderNonLinearDS
+** MUST return something in jacobianfx() if rhs is not equal to zero
+** f() is not always set (for example in LinearDS)
+
+* FirstOrderLinearDS
+** should we forbid f() call or link it properly?
+
+* OSI initializeDynamicalSystems
+** computeXX at the beginning?(i.e. before initW or during initW ...?)
+
+
+* initMemory
+** allocate all required xxMemory
+** called by osi->initializeDynamicalSystems
+** no swap
+
+* swapInMemory
+** checks if _xx exists (e.g. if(_forces) ...)
+** assumes xxMemory is already allocated
+** assumes _xx is uptodate (i.e. push current value, do not call any computeXX method...)
+** called by osi->initializeDynamicalSystems
+* copy constructors; should we forbid them??
+
+
+* Lsodar: move xWork to graph ...
+* invMass in NewtonEuler?
+* derived classes (in examples): how should we handle non-allocated operators?? Example : fext in BB. (setFExtPtr, ...)
+
+* check if alloc _jacxRhs is always required???
+
+* init_forces in LagDS, what is the best way to alloc forces and its jacobian?

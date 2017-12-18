@@ -1,4 +1,4 @@
-#/bin/sh -fx
+#!/bin/sh -fx
 siconos StepSystem.cpp 1 6
 siconos StepSystem.cpp 1 7.5
 siconos StepSystem.cpp 1 9

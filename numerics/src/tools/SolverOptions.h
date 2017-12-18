@@ -79,7 +79,8 @@ enum SICONOS_NUMERICS_PROBLEM_TYPE
   SICONOS_NUMERICS_PROBLEM_NCP = 5,
   SICONOS_NUMERICS_PROBLEM_MCP = 6,
   SICONOS_NUMERICS_PROBLEM_VI = 7,
-  SICONOS_NUMERICS_PROBLEM_AVI = 8
+  SICONOS_NUMERICS_PROBLEM_AVI = 8,
+  SICONOS_NUMERICS_PROBLEM_RELAY = 9,
 };
 
 
@@ -143,6 +144,7 @@ extern const char* const SICONOS_NUMERICS_PROBLEM_FC2D_STR;
 extern const char* const SICONOS_NUMERICS_PROBLEM_FC3D_STR;
 extern const char* const SICONOS_NUMERICS_PROBLEM_VI_STR;
 extern const char* const SICONOS_NUMERICS_PROBLEM_AVI_STR;
+extern const char* const SICONOS_NUMERICS_PROBLEM_RELAY_STR;
 
 
 #include "SolverOptions_helpers.h"
@@ -216,6 +218,9 @@ extern "C"
    */
   void solver_options_copy(SolverOptions* options_ori, SolverOptions* options);
 
+  SolverOptions * solver_options_get_internal_solver(SolverOptions * options, int n);
+  
+  
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif

@@ -20,7 +20,7 @@
 
 #include "fc3d_nonsmooth_Newton_solvers.h"
 
-#include "NumericsMatrix_private.h"
+#include "NumericsMatrix_internal.h"
 
 /* #define DEBUG_MESSAGES */
 /* #define DEBUG_STDOUT */
@@ -179,8 +179,8 @@ static void computeSparseAWpB(
   /*  AWpB += AW */
   NM_gemm(1., Amat, W, 1., AWpB);
 
-  freeNumericsMatrix(Amat);
-  freeNumericsMatrix(Bmat);
+  NM_free(Amat);
+  NM_free(Bmat);
   free(Amat);
   free(Bmat);
 }
@@ -538,7 +538,7 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers* equation
 
 
   assert(equation);
-
+  /* verbose=1; */
   FrictionContactProblem* problem = equation->problem;
 
   assert(problem);
@@ -573,7 +573,7 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers* equation
   assert(tolerance > 0);
 
   if (verbose > 0)
-    printf("------------------------ FC3D - _nonsmooth_Newton_solversSolve - Start with tolerance = %g\n", tolerance);
+    printf("---- FC3D - _nonsmooth_Newton_solversSolve - Start with tolerance = %g\n", tolerance);
 
   unsigned int _3problemSize = 3 * problemSize;
   double norm_q = cblas_dnrm2(problemSize , problem->q , 1);
@@ -652,8 +652,41 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers* equation
   }
 
   // compute rho here
+  FrictionContactProblem * localproblem =fc3d_local_problem_allocate(problem);
   assert(options->dparam[SICONOS_FRICTION_3D_NSN_RHO]>0.0);
-  for (unsigned int i = 0; i < problemSize; ++i) rho[i] = options->dparam[SICONOS_FRICTION_3D_NSN_RHO];
+  for (int contact = 0; contact < problem->numberOfContacts; ++contact)
+  {
+    if (options->iparam[SICONOS_FRICTION_3D_NSN_RHO_STRATEGY] == SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_SPLIT_SPECTRAL_NORM_COND)
+    {
+      fc3d_local_problem_fill_M(problem, localproblem, contact);
+      compute_rho_split_spectral_norm_cond(localproblem, &rho[3*contact]);
+    }
+    else if (options->iparam[SICONOS_FRICTION_3D_NSN_RHO_STRATEGY] == SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_SPLIT_SPECTRAL_NORM)
+    {
+      fc3d_local_problem_fill_M(problem, localproblem, contact);
+      compute_rho_split_spectral_norm(localproblem, &rho[3*contact]);
+    }
+    else if (options->iparam[SICONOS_FRICTION_3D_NSN_RHO_STRATEGY] == SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_SPECTRAL_NORM)
+    {
+      fc3d_local_problem_fill_M(problem, localproblem, contact);
+      compute_rho_spectral_norm(localproblem, &rho[3*contact]);
+    }
+    else if (options->iparam[SICONOS_FRICTION_3D_NSN_RHO_STRATEGY] == SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_CONSTANT)
+    {
+      rho[3*contact] = options->dparam[SICONOS_FRICTION_3D_NSN_RHO];
+      rho[3*contact+1] = options->dparam[SICONOS_FRICTION_3D_NSN_RHO];
+      rho[3*contact+2] = options->dparam[SICONOS_FRICTION_3D_NSN_RHO];
+    }
+    else if (options->iparam[SICONOS_FRICTION_3D_NSN_RHO_STRATEGY] == SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_ADAPTIVE)
+    {
+      numerics_error("fc3d_nonsmooth_Newton_solvers_solve", "Adaptive strategy for computing rho not yet implemented");
+    }
+    else
+      numerics_error("fc3d_nonsmooth_Newton_solvers_solve", "unknown strategy for computing rho");
+    numerics_printf("fc3d_AC_initialize""contact = %i, rho[0] = %4.2e, rho[1] = %4.2e, rho[2] = %4.2e", contact, rho[3*contact], rho[3*contact+1], rho[3*contact+2]);
+
+  }
+  
 
   // velocity <- M*reaction + qfree
   cblas_dcopy(problemSize, problem->q, 1, velocity, 1);
@@ -707,27 +740,27 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers* equation
 
     cblas_dcopy_msan(problemSize, tmp1, 1, tmp3, 1);
 
-    switch (options->iparam[11])
+    switch (options->iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH])
     {
-    case -1:
+    case SICONOS_FRICTION_3D_NSN_LINESEARCH_NO:
       /* without line search */
       info_ls = 1;
       break;
 
-    case 0:
+    case SICONOS_FRICTION_3D_NSN_LINESEARCH_GOLDSTEINPRICE:
       /* Goldstein Price */
       info_ls = globalLineSearchGP(equation, reaction, velocity, problem->mu, rho, F, Ax, Bx, problem->M, problem->q, AWpB, tmp1, tmp2, &alpha, options->iparam[12]);
       break;
-    case 1:
+    case SICONOS_FRICTION_3D_NSN_LINESEARCH_ARMIJO:
       /* FBLSA */
       info_ls = frictionContactFBLSA(equation, reaction, velocity, problem->mu, rho, F, Ax, Bx,
                                      problem->M, problem->q, AWpB, tmp1, tmp2, &alpha, options->iparam[12]);
       break;
     default:
-      {
-        numerics_error("fc3d_nonsmooth_Newton_solvers_solve",
-                       "Unknown line search option.\n");
-      }
+    {
+      numerics_error("fc3d_nonsmooth_Newton_solvers_solve",
+                     "Unknown line search option.\n");
+    }
     }
 
     if (!info_ls)
@@ -797,15 +830,21 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers* equation
   if (verbose > 0)
   {
     if (!info[0])
-      printf("------------------------ FC3D - NSN - convergence after %d iterations, residual : %g < %g \n",  iter, options->dparam[1],tolerance);
+      printf("---- FC3D - NSN - convergence after %d iterations, residual : %g < %g \n",  iter, options->dparam[1],tolerance);
     else
     {
-      printf("------------------------ FC3D - NSN - no convergence after %d iterations, residual : %g  < %g \n",  iter, options->dparam[1], tolerance);
+      printf("---- FC3D - NSN - no convergence after %d iterations, residual : %g  < %g \n",  iter, options->dparam[1], tolerance);
     }
   }
 
   options->iparam[SICONOS_IPARAM_ITER_DONE] = iter;
-
+  if (problem->M->storageType == NM_SPARSE_BLOCK)
+  {
+    /* we release the pointer to avoid deallocation of the diagonal blocks of the original matrix of the problem*/
+    localproblem->M->matrix0 = NULL;
+  }
+  freeFrictionContactProblem(localproblem);
+  
   if (!options->dWork)
   {
     assert(buffer);
@@ -819,11 +858,11 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers* equation
 
   if (!options->dWork)
   {
-    freeNumericsMatrix(AWpB);
+    NM_free(AWpB);
 
     free(AWpB);
   }
   if (verbose > 0)
-    printf("------------------------ FC3D - NSN - End\n");
+    printf("---- FC3D - NSN - End\n");
 
 }

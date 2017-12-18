@@ -9,6 +9,12 @@ if(NOT MODE)
   set(MODE "Experimental")
 endif()
 
+# -- Get config --
+# i.e. set extra options/values (cmake -Doption=value ...)
+# either from file default.cmake or
+# from file CI_CONFIG.cmake 
+# --> may set SICONOS_CMAKE_OPTIONS
+# --> may set DSICONOS_COMPONENTS
 if(CI_CONFIG)
   string(REPLACE "," ";" CI_CONFIG_LIST ${CI_CONFIG})
   foreach(_CI ${CI_CONFIG_LIST})
@@ -21,7 +27,7 @@ endif()
 
 string(REPLACE "," "-" CI_CONFIG_NAME ${CI_CONFIG})
 
-foreach(option ${CI_OPTIONS})
+foreach(option ${SICONOS_CMAKE_OPTIONS})
   set(CI_CONFIGURE_OPTIONS "${CI_CONFIGURE_OPTIONS} ${option}")
 endforeach()
 
@@ -114,8 +120,13 @@ if(WITH_COVERAGE)
   set(CTEST_CONFIGURE_COMMAND "${CTEST_CONFIGURE_COMMAND} -DWITH_TESTS_COVERAGE:BOOL=ON")
 endif()
 
-set(CTEST_CONFIGURE_COMMAND "${CTEST_CONFIGURE_COMMAND} ${CI_CONFIGURE_OPTIONS}")
+
 set(CTEST_CONFIGURE_COMMAND "${CTEST_CONFIGURE_COMMAND} ${CTEST_SOURCE_DIRECTORY}")
+set(CTEST_CONFIGURE_COMMAND "${CTEST_CONFIGURE_COMMAND} ${CI_CONFIGURE_OPTIONS}")
+if(SICONOS_COMPONENTS)
+  message("ooi ${SICONOS_COMPONENTS}")
+  set(CTEST_CONFIGURE_COMMAND "${CTEST_CONFIGURE_COMMAND} -DCOMPONENTS=${SICONOS_COMPONENTS}")
+endif()
 
 set( dashboard_cache "
      BUILD_TESTING:BOOL=ON

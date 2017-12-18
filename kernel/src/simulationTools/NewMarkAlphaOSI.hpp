@@ -34,7 +34,7 @@
  * NewMarkAlphaOSI is instantiated with values of beta, gamma, alpha_m, alpha_f and the list of concerned
  * dynamical systems. Each DynamicalSystem is associated to a SiconosMatrix named "W"
  *
- * W matrices are initialized and computed in initW and computeW.
+ * W matrices are initialized and computed in initializeIterationMatrixW and computeW.
  */
 class NewMarkAlphaOSI : public OneStepIntegrator
 {
@@ -53,12 +53,16 @@ protected:
    * _IsVelocityLevel = false: constraints at the position are handled
    */
   bool _IsVelocityLevel;
+
   /**
    * Default constructor
   */
   NewMarkAlphaOSI() {};
 
 public:
+
+  enum {OSNSP_RHS,WORK_INTERACTION_LENGTH};
+
   /** constructor with only parameters beta, gamma, alpha_m, alpha_f
   * \param beta double
   * \param gamma double
@@ -198,7 +202,7 @@ public:
   /** initialize W matrix
     *  \param ds a pointer to DynamicalSystem
     */
-  void initW(SP::DynamicalSystem ds );
+  void initializeIterationMatrixW(SP::DynamicalSystem ds);
 
   /** compute W matrix
    *  \param ds a pointer to DynamicalSystem
@@ -222,8 +226,31 @@ public:
                                  OneStepNSProblem* osnsp);
 
   /** initialize */
-  void initialize(Model& m);
+  //  void initialize(Model& m);
 
+  /** initialization of the work vectors and matrices (properties) related to
+   *  one dynamical system on the graph and needed by the osi
+   * \param m the Model
+   * \param t time of initialization
+   * \param ds the dynamical system
+   */
+  void initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds);
+
+  /** initialization of the work vectors and matrices (properties) related to
+   *  one interaction on the graph and needed by the osi
+   * \param inter the interaction
+   * \param interProp the properties on the graph
+   * \param DSG the dynamical systems graph
+   */
+  void fillDSLinks(Interaction &inter,
+		     InteractionProperties& interProp,
+		     DynamicalSystemsGraph & DSG);
+
+  /** get the number of index sets required for the simulation
+   * \return unsigned int
+   */
+  unsigned int numberOfIndexSets() const {return 3;};
+  
   /** prepare for Newton Iteration
    * \param time
    */

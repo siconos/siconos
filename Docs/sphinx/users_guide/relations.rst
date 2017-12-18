@@ -13,7 +13,7 @@ Then, depending on the sub-class, each relation holds some plug-in functions or 
 
 Available classes: :doxysiconos:`FirstOrderR`, :doxysiconos:`FirstOrderLinearR`, :doxysiconos:`FirstOrderLinearTIR`, :doxysiconos:`LagrangianR`, :doxysiconos:`LagrangianRheonomousR`, :doxysiconos:`LagrangianScleronomousR`, :doxysiconos:`LagrangianCompliantR`, :doxysiconos:`LagrangianLinearR`.
 
-.. image:: classRelation.*
+.. image:: /figures/relation_classes.*
 
 First Order Relations
 ^^^^^^^^^^^^^^^^^^^^^
@@ -25,17 +25,19 @@ Class :doxysiconos:`FirstOrderR`
 
 .. math::
    
-   output &= y =& h(X,t,\lambda,Z)\\
-   input &= R =& g(X,t,\lambda,Z)
+   output &= y = h(X,t,\lambda,Z)\\
+   input &= R = g(X,t,\lambda,Z)
 
 We denote: 
 
 .. math::
 
+   \begin{array}{ccc}
    H_0(X,t,\lambda,Z)=\nabla_X h(X,t,\lambda,Z)&, &  H_1(X,t,\lambda,Z)=\nabla_{\lambda} h(X,t,\lambda,Z) \\
    \\
    G_0(X,t,\lambda,Z)=\nabla_X g(X,t,\lambda,Z)&, &  G_1(X,t,\lambda,Z)=\nabla_{\lambda} g(X,t,\lambda,Z) 
-
+   \end{array}
+   
 :math:`h`, :math:`g` (and their jacobian according to :math:`X` and :math:`\lambda`) are defined with some plug-in functions. \n
 See the doxygen documentation of the class :doxysiconos:`FirstOrderR` to have a list of the set/get/compute functions.
 
@@ -48,8 +50,8 @@ Class: :doxysiconos:`FirstOrderLinearR`
 
 .. math::
    
-   y &=& C(t,Z)X + F(t,Z)Z + D(t,Z) \lambda + e(t,Z) \\
-   R &=& B(t,Z) \lambda
+   y &= C(t,Z)X + F(t,Z)Z + D(t,Z) \lambda + e(t,Z) \\
+   R &= B(t,Z) \lambda
 
 Plug-in functions are available for all operators.
 
@@ -60,8 +62,8 @@ Class :doxysiconos:`FirstOrderLinearTIR`
 
 .. math::
   
-   y &=& CX + FZ + D\lambda + e \\
-   R &=& B \lambda
+   y &= CX + FZ + D\lambda + e \\
+   R &= B \lambda
 
 Lagrangian (second order) Relations
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -75,9 +77,9 @@ The constraints depend only on the state,
 
 .. math::
    
-   y &=& h(Q,Z) \\
-   \dot y &=& G_0(Q,Z)\dot Q \\
-   P &=& G_0^t(Q,Z)\lambda 
+   y &= h(Q,Z) \\
+   \dot y &= G_0(Q,Z)\dot Q \\
+   P &= G_0^t(Q,Z)\lambda 
 
 with
  
@@ -94,9 +96,9 @@ The constraints depend on time and state,
 
 .. math::
    
-   y &=& h(Q,t,Z)\\
-   \dot y &=& G_0(Q,t,Z)\dot Q + \frac{\partial h}{\partial t}(Q,t,Z) \\
-   P &=& G_0^t(Q,t,Z)\lambda 
+   y &= h(Q,t,Z)\\
+   \dot y &= G_0(Q,t,Z)\dot Q + \frac{\partial h}{\partial t}(Q,t,Z) \\
+   P &= G_0^t(Q,t,Z)\lambda 
 
 with
  
@@ -113,9 +115,9 @@ The constraints depends on state and :math:`\lambda`, with a function of time fo
 
 .. math::
    
-   y &=& h(Q,\lambda(t),Z) \\
-   \dot y &=& G_0(Q,\lambda(t),Z)\dot Q + G_1(Q,\lambda(t),Z)\dot\lambda(t) \\
-   P &=& G_0^t(Q,\lambda(t),Z)\lambda(t) 
+   y &= h(Q,\lambda(t),Z) \\
+   \dot y &= G_0(Q,\lambda(t),Z)\dot Q + G_1(Q,\lambda(t),Z)\dot\lambda(t) \\
+   P &= G_0^t(Q,\lambda(t),Z)\lambda(t) 
 
 with
  
@@ -133,8 +135,8 @@ Lagrangian linear relations with time-invariant coefficients.
 
 .. math::
 
-   y&=& H Q + b + D\lambda +FZ \\
-   P &=& H^t \lambda 
+   y&= H Q + b + D\lambda +FZ \\
+   P &= H^t \lambda 
 
 Relations plug-in functions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^

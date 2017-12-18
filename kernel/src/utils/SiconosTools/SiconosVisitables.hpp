@@ -27,6 +27,7 @@
   REGISTER(OneStepIntegrator)                          \
   REGISTER(EulerMoreauOSI)                             \
   REGISTER(MoreauJeanOSI)                              \
+  REGISTER(MoreauJeanBilbaoOSI)                              \
   REGISTER(MoreauJeanGOSI)                             \
   REGISTER(MoreauJeanDirectProjectionOSI)              \
   REGISTER(MoreauJeanCombinedProjectionOSI)            \
@@ -50,6 +51,7 @@
   REGISTER(BlockMatrix)                                \
   REGISTER(LagrangianDS)                               \
   REGISTER(LagrangianLinearTIDS)                       \
+  REGISTER(LagrangianLinearDiagonalDS)                 \
   REGISTER(FirstOrderLinearDS)                         \
   REGISTER(FirstOrderNonLinearDS)                      \
   REGISTER(FirstOrderLinearTIDS)                       \

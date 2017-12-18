@@ -28,6 +28,7 @@ Ferris solves the subsequent AVI.
 #include "relay_cst.h"
 #include "AffineVariationalInequalities.h"
 #include "SiconosSets.h"
+#include "NumericsMatrix.h"
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
 #include "debug.h"
@@ -46,12 +47,13 @@ void relay_avi_caoferris_test(RelayProblem* problem, double *z, double *w, int *
   avi_pb.M = problem->M;
   avi_pb.q = problem->q;
   polyhedron poly;
-  avi_pb.poly = &poly;
+  avi_pb.poly.split = &poly;
 
   poly.id = SICONOS_SET_POLYHEDRON;
   poly.size_ineq = s;
   poly.size_eq = 0;
-  poly.H = (double *)calloc(s*n, sizeof(double));
+  poly.H = NM_create_from_data(NM_DENSE, s, n, calloc(s*n, sizeof(double)));
+  double* H = poly.H->matrix0;
   poly.K = (double *)malloc(s*sizeof(double));
   poly.Heq = NULL;
   poly.Keq = NULL;
@@ -64,19 +66,19 @@ void relay_avi_caoferris_test(RelayProblem* problem, double *z, double *w, int *
   {
     if (j >= n)
     {
-      poly.H[i + s*(j-n)] = 1.0;
+      H[i + s*(j-n)] = 1.0;
       poly.K[i] = problem->lb[j-n];
     }
     else
     {
-      poly.H[i + s*j] = -1.0;
+      H[i + s*j] = -1.0;
       poly.K[i] = -problem->ub[j];
     }
   }
   DEBUG_PRINT("H matrix\n");
   DEBUG_EXPR_WE(for (unsigned i = 0; i < s; ++i)
       { for(unsigned j = 0 ; j < n; ++j)
-      { DEBUG_PRINTF("% 2.2e ", poly.H[i + j*s]) }
+      { DEBUG_PRINTF("% 2.2e ", H[i + j*s]) }
       DEBUG_PRINT("\n")});
 
   DEBUG_PRINT("K vector\n");

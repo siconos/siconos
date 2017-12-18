@@ -43,7 +43,7 @@ TYPEDEF_SPTR(MemoryContainer)
     should have the same size.
 
 */
-class SiconosMemory : public std::vector<SiconosVector>
+class SiconosMemory : public MemoryContainer
 {
 private:
   /** serialization hooks
@@ -113,10 +113,11 @@ public:
 
   /** To get SiconosVector number i of the memory as mutable reference.
    * Use should be avoided whenever possible.
+   * (Used in LinearSMC::actuate)
    * \param int i: the position in the memory of the wanted SiconosVector
    * \return a SP::SiconosVector
    */
-  SiconosVector& getSiconosVectorMutable(const unsigned int) const;
+  SiconosVector& getSiconosVectorMutable(const unsigned int);
 
   /** gives the size of the memory
    * \return int >= 0
@@ -155,7 +156,6 @@ public:
   void display() const;
 
 };
-
 
 typedef std::vector<SiconosMemory> VectorOfMemories;
 

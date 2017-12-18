@@ -19,17 +19,30 @@
 #
 #
 
+do_plot = True
+try:
+    import matplotlib
+except:
+    do_plot = False
+if do_plot:
+    import os, sys
+    if sys.platform=='linux' and (not 'DISPLAY' in os.environ
+                                  or len(os.environ['DISPLAY'])==0):
+        matplotlib.use('Agg')
+    from matplotlib.pyplot import \
+        subplot, title, plot, grid, show, savefig, ylim
+
 from siconos.kernel import \
     Model, MoreauJeanOSI, TimeDiscretisation, \
-    FrictionContact, NewtonImpactFrictionNSL
+    FrictionContact, NewtonImpactFrictionNSL, TimeStepping
 
 import siconos.kernel as sk
 
 from siconos.mechanics.collision.bullet import \
-     btConvexHullShape, btVector3, btCollisionObject, \
-     btBoxShape, btMatrix3x3, \
-     BulletSpaceFilter, \
-     BulletWeightedShape, BulletDS, BulletTimeStepping
+     SiconosBulletCollisionManager
+
+from siconos.mechanics.collision import \
+    SiconosBox, SiconosPlane, BodyDS, SiconosContactor, SiconosContactorSet
 
 from numpy import zeros
 from numpy.linalg import norm
@@ -49,35 +62,29 @@ position_init = 10
 velocity_init = 0
 
 def makeBox(pos=position_init, vel=velocity_init):
-    if (True):
-        box = btConvexHullShape()
-        box.addPoint(btVector3(-1.0, 1.0, -1.0))
-        box.addPoint(btVector3(-1.0, -1.0, -1.0))
-        box.addPoint(btVector3(-1.0, -1.0, 1.0))
-        box.addPoint(btVector3(-1.0, 1.0, 1.0))
-        box.addPoint(btVector3(1.0, 1.0, 1.0))
-        box.addPoint(btVector3(1.0, 1.0, -1.0))
-        box.addPoint(btVector3(1.0, -1.0, -1.0))
-        box.addPoint(btVector3(1.0, -1.0, 1.0))
-    else:
-        box = btBoxShape(btVector3(1.0, 1.0, 1.0))
+    box = SiconosBox(1.0, 1.0, 1.0)
 
-    # a bullet shape with a mass (1.0)
-    box1 = BulletWeightedShape(box, 1.0)
-
-    # A Bullet Dynamical System : a shape + a mass + position and velocity
-    body = BulletDS(box1,
-                    [0, 0, pos, 1., 0, 0, 0],
-                    [0, 0, vel, 0., 0., 0.])
+    # A Bullet Dynamical System : a shape + a mass (1.0) + position and velocity
+    body = BodyDS([0, 0, pos, 1., 0, 0, 0],
+                  [0, 0, vel, 0., 0., 0.],
+                  1.0)
 
     # set external forces
-    weight = [0, 0, - box1.mass() * g]
+    weight = [0, 0, -body.scalarMass() * g]
     body.setFExtPtr(weight)
+
+    # Add the shape, wrapped in a SiconosContactor, to the body's
+    # contactor set.
+    body.contactors().push_back(SiconosContactor(box))
 
     return body
 
 # Initial box body
 body = makeBox()
+
+# set external forces
+weight = [0, 0, -body.scalarMass() * g]
+body.setFExtPtr(weight)
 
 #
 # Model
@@ -94,14 +101,8 @@ bouncingBox.nonSmoothDynamicalSystem().insertDynamicalSystem(body)
 # (1) OneStepIntegrators
 osi = MoreauJeanOSI(theta)
 
-ground = btCollisionObject()
-ground.setCollisionFlags(btCollisionObject.CF_STATIC_OBJECT)
-groundShape = btBoxShape(btVector3(30, 30, .5))
-basis = btMatrix3x3()
-basis.setIdentity()
-ground.getWorldTransform().setBasis(basis)
-ground.setCollisionShape(groundShape)
-ground.getWorldTransform().getOrigin().setZ(-.5)
+ground = SiconosPlane()
+groundOffset = [0,0,-0.5,1,0,0,0]
 
 # (2) Time discretisation --
 timedisc = TimeDiscretisation(t0, h)
@@ -111,6 +112,7 @@ osnspb = FrictionContact(3)
 
 osnspb.numericsSolverOptions().iparam[0] = 1000
 osnspb.numericsSolverOptions().dparam[0] = 1e-5
+osnspb.setMaxSize(16384)
 osnspb.setMStorageType(1)
 osnspb.setNumericsVerboseMode(False)
 
@@ -122,35 +124,33 @@ osnspb.setKeepLambdaAndYState(True)
 nslaw = NewtonImpactFrictionNSL(0.8, 0., 0., 3)
 
 # (5) broadphase contact detection
-broadphase = BulletSpaceFilter(bouncingBox)
+broadphase = SiconosBulletCollisionManager()
 
 # insert a non smooth law for contactors id 0
-broadphase.insert(nslaw, 0, 0)
-
-# add multipoint iterations to gather at least 3 contact points and
-# avoid object penetration
-broadphase.collisionConfiguration().setConvexConvexMultipointIterations()
-broadphase.collisionConfiguration().setPlaneConvexMultipointIterations()
+broadphase.insertNonSmoothLaw(nslaw, 0, 0)
 
 # The ground is a static object
 # we give it a group contactor id : 0
-broadphase.addStaticObject(ground, 0)
+scs = SiconosContactorSet()
+scs.append(SiconosContactor(ground))
+broadphase.insertStaticContactorSet(scs, groundOffset)
 
 # (6) Simulation setup with (1) (2) (3) (4) (5)
-simulation = BulletTimeStepping(timedisc)
-#simulation.setNewtonOptions(1)
+simulation = TimeStepping(timedisc)
+simulation.insertInteractionManager(broadphase)
+
 simulation.insertIntegrator(osi)
 simulation.insertNonSmoothProblem(osnspb)
 
-
 # simulation initialization
+
 bouncingBox.setSimulation(simulation)
 bouncingBox.initialize()
 
 # Get the values to be plotted
 # ->saved in a matrix dataPlot
 
-N = (T - t0) / h
+N = int((T - t0) / h)
 dataPlot = zeros((N+1, 4))
 
 #
@@ -173,18 +173,22 @@ while(simulation.hasNextEvent()):
 
     # Add a second box dynamically to the simulation
     if k == 100:
-        broadphase.addDynamicObject(makeBox(pos=3), simulation)
+        ds = makeBox(pos=3.0, vel=0.0)
+        bouncingBox.nonSmoothDynamicalSystem().insertDynamicalSystem(ds)
+        simulation.prepareIntegratorForDS(osi, ds, bouncingBox,
+                                          simulation.nextTime())
 
-    broadphase.buildInteractions(bouncingBox.currentTime())
     simulation.computeOneStep()
 
     dataPlot[k, 0] = simulation.nextTime()
     dataPlot[k, 1] = q[2]
     dataPlot[k, 2] = v[2]
 
-    if (broadphase.collisionWorld().getDispatcher().getNumManifolds() > 0):
+    #if (broadphase.collisionWorld().getDispatcher().getNumManifolds() > 0):
+    if (broadphase.statistics().new_interactions_created +
+        broadphase.statistics().existing_interactions_processed) > 0:
         if bouncingBox.nonSmoothDynamicalSystem().topology().\
-          numberOfIndexSet() > 1:
+          numberOfIndexSet() == 2:
             index1 = sk.interactions(simulation.indexSet(1))
             if (len(index1) == 4):
                 dataPlot[k, 3] = norm(index1[0].lambda_(1)) + \
@@ -211,18 +215,27 @@ if (norm(dataPlot - ref) > 1e-11):
 # plots
 #
 
-from matplotlib.pyplot import subplot, title, plot, grid, show
-
-subplot(511)
-title('position')
-plot(dataPlot[0:k, 0], dataPlot[0:k, 1])
-grid()
-subplot(513)
-title('velocity')
-plot(dataPlot[0:k, 0], dataPlot[0:k, 2])
-grid()
-subplot(515)
-plot(dataPlot[0:k, 0], dataPlot[0:k, 3])
-title('lambda')
-grid()
-show()
+if do_plot:
+    subplot(511)
+    title('position')
+    plot(dataPlot[0:k, 0], dataPlot[0:k, 1])
+    y = ylim()
+    plot(ref[0:k, 0], ref[0:k, 1])
+    ylim(y)
+    grid()
+    subplot(513)
+    title('velocity')
+    plot(dataPlot[0:k, 0], dataPlot[0:k, 2])
+    y = ylim()
+    plot(ref[0:k, 0], ref[0:k, 2])
+    ylim(y)
+    grid()
+    subplot(515)
+    plot(dataPlot[0:k, 0], dataPlot[0:k, 3])
+    y = ylim()
+    plot(ref[0:k, 0], ref[0:k, 3])
+    ylim(y)
+    title('lambda')
+    grid()
+    savefig('result_dynamic.png')
+    show()

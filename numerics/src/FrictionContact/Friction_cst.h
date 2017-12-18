@@ -57,9 +57,11 @@ enum FRICTION_SOLVER
   /** Non-smooth Newton, natural map, local formulation */
   SICONOS_FRICTION_3D_NSN_NM = 520,
   SICONOS_FRICTION_3D_NSN_AC_TEST = 521,
+  /** Panagiotopoulos, fixed point, local formulation */
+  SICONOS_FRICTION_3D_PFP = 522,
 
   /* 3D Frictional Contact solvers for one contact (used mainly inside NSGS solvers) */
-  
+
   /** Non-smooth Newton Alart-Curnier, 'direct', one contact solver */
   SICONOS_FRICTION_3D_ONECONTACT_NSN= 550,
   /** Non-smooth Newton Alart-Curnier, 'damped', one contact solver */
@@ -71,7 +73,7 @@ enum FRICTION_SOLVER
   SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithRegularization = 554,
   SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithDiagonalization = 555,
   SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone_velocity = 558,
-  SICONOS_FRICTION_3D_PGoC = 559,
+
   /** De Saxce fixed point, one contact solver */
   SICONOS_FRICTION_3D_DeSaxceFixedPoint = 560,
   /** Fischer Burmeister/Path, Glocker formulation, one contact solver */
@@ -83,7 +85,9 @@ enum FRICTION_SOLVER
   SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCylinder = 557,
   SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCylinderWithLocalIteration = 564,
   SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID = 565,
-  
+  SICONOS_FRICTION_3D_VI_FPP_Cylinder = 566,
+  SICONOS_FRICTION_3D_ConvexQP_PG_Cylinder = 567,
+
   /** 3D Frictional contact local solvers on global formulation */
   SICONOS_GLOBAL_FRICTION_3D_NSGS_WR = 600,
   SICONOS_GLOBAL_FRICTION_3D_NSGSV_WR = 601,
@@ -94,8 +98,11 @@ enum FRICTION_SOLVER
   SICONOS_GLOBAL_FRICTION_3D_NSN_AC_WR = 606,
   SICONOS_GLOBAL_FRICTION_3D_NSN_AC = 607,
   SICONOS_GLOBAL_FRICTION_3D_GAMS_PATH = 608,
-  SICONOS_GLOBAL_FRICTION_3D_GAMS_PATHVI = 609
-
+  SICONOS_GLOBAL_FRICTION_3D_GAMS_PATHVI = 609,
+  /** VI formulation, Fixed Point Projection, local formulation */
+  SICONOS_GLOBAL_FRICTION_3D_VI_FPP = 610,
+  /** VI formulation, Extra-gradient, local formulation */
+  SICONOS_GLOBAL_FRICTION_3D_VI_EG = 611
 };
 
 
@@ -110,6 +117,7 @@ extern const char* const   SICONOS_FRICTION_3D_NSGS_STR ;
 extern const char* const   SICONOS_FRICTION_3D_NSGSV_STR ;
 extern const char* const   SICONOS_FRICTION_3D_PROX_STR;
 extern const char* const   SICONOS_FRICTION_3D_TFP_STR ;
+extern const char* const   SICONOS_FRICTION_3D_PFP_STR ;
 extern const char* const   SICONOS_FRICTION_3D_NSN_AC_STR ;
 extern const char* const   SICONOS_FRICTION_3D_NSN_FB_STR ;
 extern const char* const   SICONOS_FRICTION_3D_NSN_NM_STR ;
@@ -131,7 +139,8 @@ extern const char* const   SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithRe
 extern const char* const   SICONOS_FRICTION_3D_NCPGlockerFBPATH_STR;
 extern const char* const   SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCylinder_STR;
 extern const char* const   SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone_velocity_STR;
-extern const char* const   SICONOS_FRICTION_3D_PGoC_STR;
+extern const char* const   SICONOS_FRICTION_3D_ConvexQP_PG_Cylinder_STR;
+extern const char* const   SICONOS_FRICTION_3D_VI_FPP_Cylinder_STR;
 extern const char* const   SICONOS_FRICTION_3D_DeSaxceFixedPoint_STR;
 extern const char* const   SICONOS_FRICTION_3D_GAMS_PATH_STR;
 extern const char* const   SICONOS_FRICTION_3D_GAMS_PATHVI_STR;
@@ -149,8 +158,31 @@ extern const char* const   SICONOS_GLOBAL_FRICTION_3D_NSN_AC_WR_STR ;
 extern const char* const   SICONOS_GLOBAL_FRICTION_3D_NSN_AC_STR;
 extern const char* const   SICONOS_GLOBAL_FRICTION_3D_GAMS_PATH_STR;
 extern const char* const   SICONOS_GLOBAL_FRICTION_3D_GAMS_PATHVI_STR;
+extern const char* const   SICONOS_GLOBAL_FRICTION_3D_VI_FPP_STR;
+extern const char* const   SICONOS_GLOBAL_FRICTION_3D_VI_EG_STR;
 extern const char* const   SICONOS_FRICTION_3D_ONECONTACT_QUARTIC_STR ;
 extern const char* const   SICONOS_FRICTION_3D_ONECONTACT_QUARTIC_NU_STR ;
+
+
+enum SICONOS_FRICTION_3D_IPARAM
+{
+  /** index in iparam to store the error strategy for the internal solver */
+  SICONOS_FRICTION_3D_IPARAM_INTERNAL_ERROR_STRATEGY =2
+};
+
+enum SICONOS_FRICTION_INTERNAL_ERROR_STRATEGY
+{
+  SICONOS_FRICTION_3D_INTERNAL_ERROR_STRATEGY_ADAPTIVE =0,
+  SICONOS_FRICTION_3D_INTERNAL_ERROR_STRATEGY_GIVEN_VALUE =1,
+  SICONOS_FRICTION_3D_INTERNAL_ERROR_STRATEGY_ADAPTIVE_N_CONTACT =2
+};
+
+enum SICONOS_FRICTION_3D_DPARAM
+{
+  /** index in iparam to store the internal solver error ratio*/
+  SICONOS_FRICTION_3D_DPARAM_INTERNAL_ERROR_RATIO = 2
+};
+
 
 enum SICONOS_FRICTION_3D_NSGS_IPARAM
 {
@@ -213,6 +245,9 @@ enum SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION_ENUM
 
 enum SICONOS_FRICTION_3D_NSN_IPARAM
 {
+
+  /** index in iparam to store the strategy for computing rho */
+  SICONOS_FRICTION_3D_NSN_RHO_STRATEGY = 9,
   /** index in iparam to store the formulation */
   SICONOS_FRICTION_3D_NSN_FORMULATION = 10,
   /** index in iparam to store the line-search */
@@ -224,15 +259,35 @@ enum SICONOS_FRICTION_3D_NSN_IPARAM
   /** index in iparam to store the maximum number of loop for the hybrid solver */
   SICONOS_FRICTION_3D_NSN_HYBRID_MAX_LOOP = 15,
   /** index in iparam to store the maximum number of iterations for the projection solver */
-  SICONOS_FRICTION_3D_NSN_HYBRID_MAX_ITER = 16
+  SICONOS_FRICTION_3D_NSN_HYBRID_MAX_ITER = 16,
+  /** index in iparam to store the boolean to know if allocation of dwork is needed */
+  SICONOS_FRICTION_3D_NSN_MEMORY_ALLOCATION= 17,
+  /** index in iparam to store the boolean to know if allocation of dwork is needed */
+  SICONOS_FRICTION_3D_NSN_MPI_COM= 18
+
 };
 
 enum SICONOS_FRICTION_3D_NSN_DPARAM
 {
-  /** index in dparam to store the rho value for porjection formulation */
+  /** index in dparam to store the rho value for projection formulation */
   SICONOS_FRICTION_3D_NSN_RHO = 3,
-
 };
+
+enum SICONOS_FRICTION_3D_NSN_RHO_STRATEGY_ENUM
+{
+  /** A constant value given in dparam[SICONOS_FRICTION_3D_NSN_RHO] is used */
+  SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_CONSTANT = 0,
+  /** A computed value stored in dparam[SICONOS_FRICTION_3D_NSN_RHO] is used */
+  SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_SPECTRAL_NORM =1,
+  /** A computed value stored in dparam[SICONOS_FRICTION_3D_NSN_RHO] is used */
+  SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_SPLIT_SPECTRAL_NORM_COND = 2,
+  /** An adaptive strategy for rho is used */
+  SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_SPLIT_SPECTRAL_NORM =3,
+  /** An adaptive strategy for rho is used */
+  SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_ADAPTIVE =4,
+};
+
+
 enum SICONOS_FRICTION_3D_NSN_FORMULATION_ENUM
 {
   SICONOS_FRICTION_3D_NSN_FORMULATION_ALARTCURNIER_STD =0,
@@ -261,6 +316,41 @@ enum SICONOS_FRICTION_3D_NSN_HYBRID_ENUM
   /** NSN and after Loop NSN-PLI strategy for the hybrid solver */
   SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_NSN_AND_NSN_PLI_LOOP = 3,
   SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_VI_EG_NSN =4,
+};
+
+
+
+enum SICONOS_FRICTION_3D_PROXIMAL_IPARAM
+{
+  /** index in iparam to store the error strategy for the internal solver */
+  SICONOS_FRICTION_3D_FP_ERROR_STRATEGY =2,
+  /** index in iparam to store the relaxation strategy*/
+  SICONOS_FRICTION_3D_PROXIMAL_IPARAM_CUMULATIVE_ITER_DONE =6,
+  /** index in iparam to store the relaxation strategy*/
+  SICONOS_FRICTION_3D_PROXIMAL_IPARAM_RELAXATION =8,
+  /** index in iparam to store the proximal strategy*/
+  SICONOS_FRICTION_3D_PROXIMAL_IPARAM_STRATEGY =9,
+};
+
+
+enum SICONOS_FRICTION_3D_PROXIMAL_DPARAM
+{
+  /** index in dparam to store the parameter alpha*/
+  SICONOS_FRICTION_3D_PROXIMAL_DPARAM_ALPHA =3,
+  SICONOS_FRICTION_3D_PROXIMAL_DPARAM_SIGMA =4,
+  SICONOS_FRICTION_3D_PROXIMAL_DPARAM_NU =5,
+  SICONOS_FRICTION_3D_PROXIMAL_DPARAM_RELAXATION =8,
+
+};
+
+enum SICONOS_FRICTION_3D_PROXIMAL
+{
+  /** Proximal algorithm */
+  SICONOS_FRICTION_3D_PROXIMAL_PROX = 0,
+
+  /** Regularization algorithm */
+  SICONOS_FRICTION_3D_PROXIMAL_REGULARIZATION = 1
+
 };
 
 

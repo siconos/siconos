@@ -83,10 +83,10 @@ typedef void (*computeNonsmoothFunction)(double *, double * , double , double * 
                                    double * reaction, SolverOptions* options);
 
   int fc3d_onecontact_nonsmooth_Newton_solvers_solve_direct(FrictionContactProblem* localproblem,
-                                 double * R, int *iparam, double *dparam);
+                                                            double * R, SolverOptions * options);
 
   int fc3d_onecontact_nonsmooth_Newton_solvers_solve_damped(FrictionContactProblem* localproblem,
-                                       double * R, int *iparam, double *dparam);
+                                                            double * R, SolverOptions * options);
 
   int fc3d_onecontact_nonsmooth_Newton_solvers_solve_hybrid_pli_nsn_loop(FrictionContactProblem* localproblem,
                                                             double * local_reaction, SolverOptions* options);
@@ -100,7 +100,8 @@ typedef void (*computeNonsmoothFunction)(double *, double * , double , double * 
    * options.dparam[0] = 1e-3 precision.
    * \param options  the solver options
    */
-  int fc3d_onecontact_nonsmooth_Newtow_setDefaultSolverOptions(SolverOptions* options);
+  int fc3d_onecontact_nonsmooth_Newton_setDefaultSolverOptions(SolverOptions* options);
+  int fc3d_onecontact_nonsmooth_Newton_gp_setDefaultSolverOptions(SolverOptions* options);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

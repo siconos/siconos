@@ -26,10 +26,11 @@
 
 
 // from data: _size
-SiconosMemory::SiconosMemory(const unsigned int size, const unsigned int vectorSize):
-  _nbVectorsInMemory(0)
+SiconosMemory::SiconosMemory(const unsigned int size, const unsigned int vectorSize)
+  : MemoryContainer(),
+    _nbVectorsInMemory(0),
+    _indx(size-1)
 {
-  _indx = size-1;
   for (unsigned int i = 0; i < size; i++)
   {
     push_back(SiconosVector(vectorSize));
@@ -37,10 +38,11 @@ SiconosMemory::SiconosMemory(const unsigned int size, const unsigned int vectorS
 }
 
 // copy of a std::vector of siconos vectors
-SiconosMemory::SiconosMemory(const MemoryContainer& V):
-  _nbVectorsInMemory(V.size())
+SiconosMemory::SiconosMemory(const MemoryContainer& V)
+  : MemoryContainer(),
+    _nbVectorsInMemory(V.size()),
+    _indx(V.size()-1)
 {
-  _indx = V.size()-1;
   for (unsigned int i = 0; i < V.size(); i++)
   {
     push_back(V[i]);
@@ -48,10 +50,12 @@ SiconosMemory::SiconosMemory(const MemoryContainer& V):
 }
 
 // copy of a std::vector of siconos vectors  + _size
-SiconosMemory::SiconosMemory(const unsigned int newMemorySize, const MemoryContainer& V):
-  _nbVectorsInMemory(V.size())
+SiconosMemory::SiconosMemory(const unsigned int newMemorySize,
+                             const MemoryContainer& V)
+  : MemoryContainer(),
+    _nbVectorsInMemory(V.size()),
+    _indx(newMemorySize-1)
 {
-  _indx = newMemorySize-1;
   if (newMemorySize < V.size())
     SiconosMemoryException::selfThrow(
       "SiconosMemory(int _size, vector<SP::SiconosVector> V) : V.size > _size");
@@ -71,10 +75,10 @@ SiconosMemory::SiconosMemory(const unsigned int newMemorySize, const MemoryConta
 
 //Copy constructor
 SiconosMemory::SiconosMemory(const SiconosMemory& Mem)
+  : MemoryContainer(),
+    _nbVectorsInMemory(Mem.nbVectorsInMemory()),
+    _indx(Mem.getMemorySize()-1)
 {
-  _indx = Mem.getMemorySize()-1;
-  _nbVectorsInMemory = Mem.nbVectorsInMemory();
-
   for (unsigned int i = 0; i < Mem.getMemorySize(); i++)
   {
     push_back(Mem[i]);
@@ -90,9 +94,10 @@ SiconosMemory::~SiconosMemory()
 void SiconosMemory::operator=(const SiconosMemory& V)
 {
   if (size() != V.size()) {
-    resize(V.size());
+    this->resize(V.size());
   }
   for (unsigned int i = 0; i < V.size(); i++) {
+    (*this)[i].resize(V[i].size(), true);
     (*this)[i] = V[i];
   }
   _indx = V._indx;
@@ -104,10 +109,11 @@ void SiconosMemory::operator=(const MemoryContainer& V)
 {
   _nbVectorsInMemory = V.size();
   if (V.size() > size())
-    resize(V.size());
+    this->resize(V.size());
   _indx = size()-1;
   for (unsigned int i = 0; i < V.size(); i++)
   {
+    (*this)[i].resize(V[i].size(), true);
     (*this)[i] = V[i];
   }
 }
@@ -122,6 +128,7 @@ void SiconosMemory::setVectorMemory(const MemoryContainer& V,
   _indx = size()-1;
   for (unsigned int i = 0; i < _nbVectorsInMemory; i++)
   {
+    (*this)[i].resize(V[i].size(), true);
     (*this)[i] = V[i];
   }
 }
@@ -130,9 +137,15 @@ void SiconosMemory::setVectorMemory(const MemoryContainer& V,
 void SiconosMemory::setMemorySize(const unsigned int steps,
                                   const unsigned int vectorSize)
 {
+  _nbVectorsInMemory = 0;
+  _indx = steps-1;
+  for (unsigned int i = 0; i < size(); i++)
+  {
+    this->at(i).resize(vectorSize, true);
+  }
   for (unsigned int i = size(); i < steps; i++)
   {
-    push_back(SiconosVector(vectorSize));
+    this->push_back(SiconosVector(vectorSize));
   }
 }
 
@@ -144,7 +157,7 @@ const SiconosVector& SiconosMemory::getSiconosVector(const unsigned int index) c
   return this->at( (_indx + 1 + index) % this->size() );
 }
 
-SiconosVector& SiconosMemory::getSiconosVectorMutable(const unsigned int index) const
+SiconosVector& SiconosMemory::getSiconosVectorMutable(const unsigned int index)
 {
   assert(index < _nbVectorsInMemory && "getSiconosVector(index) : inconsistent index value");
   return *(SiconosVector*)(&this->at( (_indx + 1 + index) % this->size() ));
