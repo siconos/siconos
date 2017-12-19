@@ -454,8 +454,8 @@ class Guitar(sk.Model):
             plt.plot((self.time[0], self.time[-1]),(ground, ground), '-')
         plt.subplot(2, 2, 2)
         plt.plot(self.time, data[dof, :], 'x-')
-        #plt.xlim(0, 0.008)
-        plt.xlim(0.47, 0.52)
+        plt.xlim(0, 0.008)
+        #plt.xlim(0.47, 0.52)
         if ground is not None:
             plt.plot((self.time[0], self.time[-1]),(ground, ground), '-x')
 
@@ -588,7 +588,7 @@ class Guitar(sk.Model):
         plt.title('percussion')
         return plt
 
-    def make_movie(self, ds, movie_name, sampling=1):
+    def make_movie(self, ds, movie_name, sampling=100):
         """Create animation from simulation results,
         for a given ds.
         """
@@ -626,7 +626,7 @@ class Guitar(sk.Model):
         # blit=True means only re-draw the parts that have changed.
         anim = animation.FuncAnimation(
             fig, animate, init_func=init,
-            frames=int(self.nb_time_steps_output / sampling),
+            frames=range(0,self.nb_time_steps_output,sampling),
             blit=True)
         anim.save(movie_name, fps=100, extra_args=['-vcodec', 'libx264'])
 

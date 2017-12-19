@@ -147,7 +147,7 @@ def load_model(filename, visu=True):
 
     # -- The interactions --
     frets_file = matlab_input + '_h.mat'
-    filt_frets=True
+    #filt_frets=True
     interactions = build_frets_from_file(string, restit, frets_file, filt_frets, visu)
 
     frets = list(interactions.keys())
