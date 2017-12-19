@@ -125,12 +125,10 @@ typedef Interaction Interaction;
   }
 %}
 
-<<<<<<< Updated upstream
-=======
 %feature("nodirector") Geometer;
 PY_FULL_REGISTER(Geometer, Mechanics);
 
->>>>>>> Stashed changes
+
 %feature("nodirector") ContactShapeDistance;
 PY_FULL_REGISTER(ContactShapeDistance, Mechanics);
 
