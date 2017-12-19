@@ -31,7 +31,6 @@ python: 3.6
 
 env:
   - TASK=default:distrib=ubuntu,14.04
-  - TASK=default:distrib=ubuntu,15.04
   - TASK=default:distrib=ubuntu,16.04
   - TASK=default:distrib=ubuntu,17.04
   - TASK=default:distrib=ubuntu,17.10
@@ -46,10 +45,10 @@ env:
   - TASK=default:distrib=ubuntu,17.04:build_configuration=Profiling:pkgs+=profiling
   - TASK=default:distrib=fedora,latest:ci_config=with_umfpack:pkgs-=atlas-lapack,python-env:pkgs+=openblas-lapacke,python3-env,umfpack
 
-  - TASK=default:pkgs-=atlas-lapack:pkgs+=openblas-lapacke
-  - TASK=default:ci_config=with_serialization:pkgs+=serialization
-  - TASK=default:ci_config=with_mumps:pkgs+=mumps
-  - TASK=default:ci_config=with_umfpack:pkgs+=umfpack
+  - TASK=default:pkgs-=atlas-lapack:pkgs+=openblas-lapacke,
+  - TASK=default:ci_config=with_serialization:pkgs+=serialization,
+  - TASK=default:ci_config=with_mumps:pkgs+=mumps,
+  - TASK=default:ci_config=with_umfpack:pkgs+=umfpack,
   - TASK=default:ci_config=with_dev_mode_strict
 
   - TASK=default:distrib=ubuntu,17.04:ci_config=with_bullet,with_py3:pkgs-=python-env:pkgs+=clang-3.9,bullet,cppunit_clang-3.9,wget,xz,python3-env,path,h5py3
@@ -59,7 +58,7 @@ env:
   - TASK=default:distrib=fedora,latest:ci_config=with_asan,with_mumps,with_hdf5,with_serialization:cmake_cmd=Build/ci-scripts/fedora-mpi.sh:pkgs+=mumps,hdf5,asan,serialization,path,wget:build_configuration=Debug
 
   # examples...
-  - TASK=minimal_with_python:ci_config=examples_all:pkgs+=bullet,:srcs+=examples,:targets=.,docker-build,docker-cmake,docker-make,docker-make-install,docker-make-clean:targets=examples,docker-build,docker-ctest,docker-make-clean
+  - TASK=minimal_with_python:ci_config=examples:pkgs+=bullet,:srcs+=examples,:targets=.,docker-build,docker-cmake,docker-make,docker-make-install,docker-make-clean:targets=examples,docker-build,docker-ctest,docker-make-clean
   - TASK=minimal_with_python:ci_config=examples_all:pkgs+=bullet,h5py:srcs+=examples,:targets=.,docker-build,docker-cmake,docker-make,docker-make-install,docker-make-clean:targets=examples,docker-build,docker-ctest,docker-make-clean
 
   # siconos package
