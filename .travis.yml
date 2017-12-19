@@ -11,21 +11,23 @@ python: 3.6
 # TASK line is of the form <config>:<parameters>
 # where <config> is a known config in tasks.py
 #
-# each parameter is of the form of <kwd>=<value>
+# Each parameter is of the form of <kwd>=<value> or <kwd>+=<values> or <kwd>-=<values>
 # where:
 #   - <kwd> is a named keyword accepted by ci_task.copy function
 #   - <value> can be:
 #       - a string
 #       - a list if ',' is present (i.e. "value," is the list [value] of one element)
 #
+#   - <kwd>+= is the same as add_<kwd>=
+#   - <kwd>-= is the same as remove_<kwd>=
+#
 # If kwd is present several times, associated values must be lists. In
 # this case a dictionay is incrementally built with the first element of the list as
 # the key, and the remaining as the associated internal value. This
 # concerns the targets keyword.
 #
-# Distributions are passed as lists of two elements the name and the version 
-
-
+# Distributions are passed as lists of two elements, the first element
+# is the name and the second the version.
 
 env:
   - TASK=default:distrib=ubuntu,14.04
@@ -79,7 +81,7 @@ before_script:
 
 script:
   - if test "$TRAVIS" = true; then
-      ../CI/driver.py --run --root-dir=.. --task="$TASK";
+      ../CI/driver.py --run --root-dir=.. --task="$TASK" --packages-db=../CI/config/siconos.yml;
     else
       ../CI/driver.py --run --root-dir=..;
     fi

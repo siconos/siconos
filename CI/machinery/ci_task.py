@@ -294,7 +294,7 @@ class CiTask(object):
                     print (msg)
 
             except Exception as error:
-                print src, self._targets
+                print ('failure on {0} for {1}'.format(src), self._targets[src])
                 raise error
 
         return return_code
