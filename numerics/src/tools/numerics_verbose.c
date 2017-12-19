@@ -143,9 +143,9 @@ void numerics_printf(const char * fmt, ...)
   }
 }
 
-void numerics_printf_verbose(int verbose_mode, const char * fmt, ...)
+void numerics_printf_verbose(int verbose_level, const char * fmt, ...)
 {
-  if (verbose_mode)
+  if (verbose >= verbose_level)
   {
     va_list args;
     va_start(args,fmt);
