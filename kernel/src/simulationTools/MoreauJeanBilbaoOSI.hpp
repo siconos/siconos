@@ -89,6 +89,7 @@ public:
   unsigned int numberOfIndexSets() const {return 2;};
 
   void compute_parameters(double time_step, double omega, double sigma, double& theta, double& sigma_star);
+  void compute_parameters_with_fd(double time_step, double omega, double sigma, double& theta, double& sigma_star);
 
   /** get iteration_matrix (pointer link) corresponding to DynamicalSystem ds
    * \param ds a pointer to DynamicalSystem

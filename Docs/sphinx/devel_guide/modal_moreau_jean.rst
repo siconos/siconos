@@ -147,6 +147,22 @@ with
    v_{free}^{i} &= v^i - W^{-1}(\Delta tKq^i + (\Delta t^2\theta K + \Delta tC) v^i) & = v^i - W^{-1}(\Delta tKq^i + 2\Delta t \Sigma^* v^i) \\
    \end{array}
 
+
+
+
+Small `\Delta t` : use of forward developements to ensure converge towards zero:
+
+.. math::
+   
+   1 - \theta_{k} &= 1 - \frac{2}{\omega_k^2\Delta t^2} + \frac{A_k}{1+e_k-A_k}, \\
+   \sigma^*_{k} &= \left(\frac{1}{\Delta t} + \frac{\omega_k^2\Delta t}{2} - \theta_k\frac{\omega_k^2\Delta t}{2} \right)\frac{1-e_k}{1+e_k} \\
+   A_k &= e^{-\sigma_k\Delta t}\left(e^{\sqrt{\sigma_k^2 - \omega_k^2}\Delta t} + e^{-\sqrt{\sigma_k^2 - \omega_k^2}\Delta t}\right) \\
+   e_k &= e^{-2\sigma_k\Delta t} \\
+
+.. math::
+   
+   A_k &= e^{-\sigma_k\Delta t}\left(2 + (\sigma_k^2 - \omega_k^2)\Delta t^2 + (\sigma_k^2 - \omega_k^2)^2 \Delta t^4 + o(\Delta t ^6)\right)  \\
+
    
 Notes, remarks, questions
 ^^^^^^^^^^^^^^^^^^^^^^^^^
