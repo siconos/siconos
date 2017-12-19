@@ -294,16 +294,16 @@ void MoreauJeanBilbaoOSI::_compute_osi_parameters_v1(LagrangianLinearDiagonalDS&
       sigmak = 0.5 * (*damp)(k);
     if(omega2)
       omega2k = (*omega2)(k);
-    if(time_step > 10e-5)
+    if(time_step > 10e-4)
       {
 	compute_parameters(time_step, omega2k, sigmak, one_minus_theta, dt_sigma_star);
 	iteration_matrix(k, k) = one / (massk + coeff * one_minus_theta * omega2k + dt_sigma_star);
       }
     else
       {
-	compute_parameters(time_step, omega2k, sigmak, one_minus_theta, dt_sigma_star);
+	// Warning : we get dt2 * (1 - theta) !!!!
 	compute_parameters_with_fd(time_step, omega2k, sigmak, one_minus_theta, dt_sigma_star);
-	iteration_matrix(k, k) = one / (massk + one_minus_theta * omega2k + dt_sigma_star);
+	iteration_matrix(k, k) = one / (massk + 0.5 * one_minus_theta * omega2k + dt_sigma_star);
       }
     (*work[MoreauJeanBilbaoOSI::ONE_MINUS_THETA])(k) = one_minus_theta;
     (*work[MoreauJeanBilbaoOSI::TWO_DT_SIGMA_STAR])(k) = two * dt_sigma_star;
@@ -331,32 +331,22 @@ void MoreauJeanBilbaoOSI::compute_parameters(double time_step, double omega2, do
   std::cout << "CAS 0  1 - thetak " <<one_minus_theta << std::endl; 
 }
 
-void MoreauJeanBilbaoOSI::compute_parameters_with_fd(double time_step, double omega2, double sigma, double& one_minus_theta, double& dt_sigma_star)
+void MoreauJeanBilbaoOSI::compute_parameters_with_fd(double time_step, double omega2, double sigma, double& dt2_one_minus_theta, double& dt_sigma_star)
 {
   std::cout << "forward devel" << std::endl;
-  // Computes:
-  // 1 - theta
-  // sigma_star = dt * sigma^*
-  // std::complex<double> cAk = ek * (std::exp(buff) + std::exp(-buff));
-  //assert(std::imag(cAk) < 1e-12);
-  //double Ak = std::real(cAk);
   double one = 1.;
-  double ek = one;// std::exp(-sigma * time_step);
-  // std::complex<double> buff = std::sqrt(std::complex<double>(sigma*sigma -omega2)) * time_step;
-
   double two = 2.;
   double one_over_two = 0.5;
-  ek = ek * ek;
-  //double res = omega2 * time_step * time_step;
-  //one_minus_theta = one - two / res + Ak / (one + ek - Ak);
   double dt2 = time_step * time_step;
   double omega4 = omega2 * omega2;
   double dt4 = dt2 * dt2;
-  double dt2_one_minus_theta = dt2 - two / omega2 + (two - omega2 * dt2 + omega4 * dt4 / 12.) / (omega2 - omega4 * dt2 / 12.);
-  dt_sigma_star = 0. ;//(one - ek) / (one + ek) * (one + one_over_two * res * one_minus_theta);
+  double sigma4 = sigma * sigma * sigma * sigma;
+  double dt2_one_minus_theta = dt2 * (1./6. + 2. * sigma*sigma / (3. * omega2));
+  dt2_one_minus_theta +=  dt4 * (omega2 / 120. + 2. * sigma * sigma / 45. - 2. * sigma4 / (45. * omega2));
+  double sigma3 = sigma * sigma * sigma;
+  dt_sigma_star = dt * sigma + dt2 $ dt * sigma * omega2 / 12. + dt4 * dt * (omega4 * sigma / 240. - omega2 * sigma3 / 180.);
   std::cout << " dt2 * (1 - thetak) " << dt2_one_minus_theta << " ts " << time_step <<  std::endl;
   std::cout << "(1 - thetak) " << dt2_one_minus_theta / dt2 << " ts " << time_step <<  std::endl;
-  one_minus_theta = dt2_one_minus_theta;
 }
 
 // void MoreauJeanBilbaoOSI::_compute_osi_parameters_v2(LagrangianLinearDiagonalDS& lldds, VectorOfVectors& work, SimpleMatrix& iteration_matrix_w)

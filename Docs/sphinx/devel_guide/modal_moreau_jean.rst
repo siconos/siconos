@@ -162,6 +162,9 @@ Small `\Delta t` : use of forward developements to ensure converge towards zero:
 .. math::
    
    A_k &= e^{-\sigma_k\Delta t}\left(2 + (\sigma_k^2 - \omega_k^2)\Delta t^2 + (\sigma_k^2 - \omega_k^2)^2 \Delta t^4 + o(\Delta t ^6)\right)  \\
+   \Delta t^2 (1-\Theta_{k}) &= \Delta t^{2} \left(\frac{1}{6} + \frac{2 \sigma^{2}}{3 \omega^{2}}\right) + \Delta t^{4} \left(\frac{\omega^{2}}{120} + \frac{2 \sigma^{2}}{45} - \frac{2 \sigma^{4}}{45 \omega^{2}}\right) + \mathcal{O}\left(\Delta t^{6}\right) \\
+   \Delta \sigma^* &= \Delta t \sigma + \frac{\Delta t^{3} \sigma}{12} \omega^{2} + \Delta t^{5} \left(\frac{\omega^{4} \sigma}{240} - \frac{\omega^{2} \sigma^{3}}{180}\right) + \mathcal{O}\left(\Delta t^{6}\right) \\
+
 
    
 Notes, remarks, questions
