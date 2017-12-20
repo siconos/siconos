@@ -30,11 +30,13 @@ extern "C"
 {
 #endif
 
-  /** Error computation for friction-contact 3D problem
+  /** Error computation for global friction-contact 3D problem
+   * The computation of the error uses as input the reaction (reaction) and the global velocity (globalVelocity)
+   * The value of the local velocity (velocity) is recomputed
    * \param problem the structure which defines the friction-contact problem
-   * \param reaction
-   * \param velocity
-   * \param globalVelocity
+   * \param[in] reaction
+   * \param[in] globalVelocity
+   * \param[out]velocity
    * \param tolerance value for error computation
    * \param[in,out] error value
    * \return 0 if successfull
