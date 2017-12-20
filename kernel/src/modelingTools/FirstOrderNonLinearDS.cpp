@@ -90,7 +90,8 @@ FirstOrderNonLinearDS::FirstOrderNonLinearDS(const FirstOrderNonLinearDS & FONLD
     _invM.reset(new SimpleMatrix(*(FONLDS.invM())));
 
   // Memory stuff to me moved to graph/osi
-  _fold.reset(new SiconosVector(*(FONLDS.fold())));
+  if (FONLDS.fold())
+    _fold.reset(new SiconosVector(*(FONLDS.fold())));
   _rMemory = FONLDS.rMemory();
 }
 
@@ -161,7 +162,10 @@ void FirstOrderNonLinearDS::swapInMemory()
 {
   _xMemory.swap(*_x[0]);
   _rMemory.swap(*_r);
-  *_fold = *_f;
+  if (_f) {
+    assert(_fold);
+    *_fold = *_f;
+  }
 }
 
 // ===== COMPUTE PLUGINS FUNCTIONS =====
