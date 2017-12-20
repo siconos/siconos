@@ -99,7 +99,8 @@ CS_INT initACPsiJacobian(
   CSparseMatrix* H,
   CSparseMatrix *A,
   CSparseMatrix *B,
-  CSparseMatrix *J)
+  CSparseMatrix *J,
+  double rescaling)
 {
   /* only triplet matrix */
   assert(M->nz>=0);
@@ -116,6 +117,10 @@ CS_INT initACPsiJacobian(
 
   assert(A->nz == B->nz);
 
+
+
+
+
   /* - M */
   for(int e = 0; e < M->nz; ++e)
   {
@@ -129,7 +134,7 @@ CS_INT initACPsiJacobian(
   {
     /* DEBUG_PRINTF("e=%d, H->i[e]=%td, H->p[e] + M->n + A->n=%td, H->x[e]=%g\n", */
     /*              e, H->i[e], H->p[e] + M->n + A->n , H->x[e]); */
-    CHECK_RETURN(cs_zentry(J, H->i[e], H->p[e] + M->n + A->n, H->x[e]));
+    CHECK_RETURN(cs_zentry(J, H->i[e], H->p[e] + M->n + A->n, rescaling*H->x[e]));
   }
 
   /* Ht */
@@ -156,7 +161,7 @@ CS_INT initACPsiJacobian(
   /* B */
   for(int e = 0; e < B->nz; ++e)
   {
-    CHECK_RETURN(cs_zentry(J, B->i[e] + M->m + H->n, B->p[e] + M->n + A->n, B->x[e]));
+    CHECK_RETURN(cs_zentry(J, B->i[e] + M->m + H->n, B->p[e] + M->n + A->n,  rescaling*B->x[e]));
   }
 
   return Astart;
@@ -271,7 +276,7 @@ int _globalLineSearchSparseGP(
   unsigned int maxiter_ls)
 {
   double inf = 1e10;
-  double alphamin = 1e-3;
+  double alphamin = 1e-8;
   double alphamax = inf;
 
   double m1 = 0.01, m2 = 0.99;
@@ -321,13 +326,10 @@ int _globalLineSearchSparseGP(
     DEBUG_PRINTF("C1=%i\t C2=%i\n",C1,C2);
     if(C1 && C2)
     {
-      if(verbose > 0)
-      {
-        printf("---- GFC3D - NSN_AC - global line search success. Number of ls iteration = %i  alpha = %.10e, q = %.10e\n",
-               iter,
-               alpha[0], q);
-      }
-
+      numerics_printf_verbose(1, "---- GFC3D - NSN_AC - global line search success. Number of ls iteration = %i  alpha = %.10e, q = %.10e\n",
+                              iter,
+                              alpha[0], q);
+      
       return 0;
 
     }
@@ -351,11 +353,9 @@ int _globalLineSearchSparseGP(
     }
 
   }
-  if(verbose > 0)
-  {
-    printf("---- GFC3D - NSN_AC - global line search unsuccessful. Max number of ls iteration reached  = %i  with alpha = %.10e \n",
-           maxiter_ls, alpha[0]);
-  }
+  numerics_printf_verbose(0,"---- GFC3D - NSN_AC - global line search unsuccessful. Max number of ls iteration reached  = %i  with alpha = %.10e \n",
+                  maxiter_ls, alpha[0]);
+  
 
   return -1;
 }
@@ -414,13 +414,11 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(
   double tolerance = options->dparam[SICONOS_DPARAM_TOL];
   assert(tolerance > 0);
 
-  if (verbose > 0)
-    printf("---- GFC3D - _nonsmooth_Newton_AlartCurnier - Start with tolerance = %g\n", tolerance);
+  numerics_printf_verbose(1,"---- GFC3D - NSN_AC","- Start with tolerance = %g\n", tolerance);
 
+  DEBUG_PRINTF("M sizes = %i x %i \n", problem->M->size0, problem->M->size1 );
+  DEBUG_PRINTF("H sizes = %i x %i \n", problem->H->size0, problem->H->size1 );
 
-
-  DEBUG_PRINTF("norm of M = %e\n", NM_norm(problem->M));
-  DEBUG_PRINTF("norm of H = %e\n", NM_norm(problem->H));
 
   /* sparse triplet storage */
   NM_triplet(problem->M);
@@ -433,7 +431,14 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(
 
   unsigned int problem_size = n+2*m;
 
+  double norm_q = cblas_dnrm2(n , problem->q , 1);
+  DEBUG_EXPR(double norm_b = cblas_dnrm2(m , problem->b , 1););
 
+  DEBUG_PRINTF("norm of q = %e\n", norm_q);
+  DEBUG_PRINTF("norm of b = %e\n", norm_b);
+
+  DEBUG_PRINTF("norm of M = %e\n", NM_norm(problem->M));
+  DEBUG_PRINTF("norm of H = %e\n", NM_norm(problem->H));
 
 
   assert((int)m == problem->numberOfContacts * problem->dimension);
@@ -534,6 +539,13 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(
                  NM_triplet(problem->M)->nzmax + 2*NM_triplet(problem->H)->nzmax +
                  2*A_.n + A_.nzmax + B_.nzmax, 1, 1);
 
+
+  DEBUG_PRINTF("NM_triplet(problem->M)->n= %i\t,NM_triplet(problem->M)->nzmax = %i\n",NM_triplet(problem->M)->n,NM_triplet(problem->M)->nzmax);
+  DEBUG_PRINTF("NM_triplet(problem->M)->n + A_.m + B_.m = %i\n",NM_triplet(problem->M)->n + A_.m + B_.m);
+  DEBUG_PRINTF("NM_triplet(problem->M)->nzmax + 2*NM_triplet(problem->H)->nzmax + 2*A_.n + A_.nzmax + B_.nzmax= %i\n", NM_triplet(problem->M)->nzmax + 2*NM_triplet(problem->H)->nzmax +
+                 2*A_.n + A_.nzmax + B_.nzmax);
+
+
   assert(A_.n == problem->H->size1);
   assert(A_.nz == problem->numberOfContacts * 9);
   assert(B_.n == problem->H->size1);
@@ -546,10 +558,13 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(
     problem->mu, rho,
     F, A, B);
 
-  CS_INT Astart = initACPsiJacobian(NM_triplet(problem->M),
-                                 NM_triplet(problem->H),
-                                 &A_, &B_, J);
+  double rescaling=1e+00;
 
+
+  CS_INT Astart = initACPsiJacobian(NM_triplet(problem->M),
+                                    NM_triplet(problem->H),
+                                    &A_, &B_, J, rescaling);
+    
   assert(Astart > 0);
 
   assert(A_.m == A_.n);
@@ -632,6 +647,10 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(
     /* compute psi */
     ACPsi(problem, computeACFun3x3, globalVelocity_k, reaction_k, velocity_k, rho, psi);
 
+
+    //cblas_dscal(problem_size, rescaling, psi, 1);
+
+
     /* compute A & B */
     fc3d_AlartCurnierFunction(m,
                               computeACFun3x3,
@@ -647,13 +666,19 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(
     cblas_dcopy(problem_size, psi, 1, rhs, 1);
     cblas_dscal(problem_size, -1., rhs, 1);
 
+
     /* get compress column storage for linear ops */
     CSparseMatrix* Jcsc = cs_compress(J);
 
     /* Solve: J X = -psi */
 
+
+
+    DEBUG_PRINTF("norm of AA = %e\n", NM_norm(AA));
     /* Solve: AWpB X = -F */
     int info_solver = NM_gesv(AA, rhs, true);
+
+    DEBUG_PRINTF("norm of rhs (direction) = %e\n", cblas_dnrm2(problem_size,rhs,1));
     if (info_solver > 0)
     {
       fprintf(stderr, "---- GFC3D - NSN_AC - solver failed info = %d\n", info_solver);
@@ -675,7 +700,7 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(
        * http://www.netlib.org/lapack/lug/node81.html */
     }
 
-    DEBUG_EXPR(NV_display(rhs,problem_size););
+    /* DEBUG_EXPR(NV_display(rhs,problem_size);); */
 
 
     /* line search */
@@ -722,7 +747,7 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(
     /* } */
     cblas_daxpy(problem_size, alpha, rhs, 1, solution, 1);
 
-
+    DEBUG_PRINTF("norm of the solution  = %e\n",cblas_dnrm2(problem_size,solution,1));
     DEBUG_EXPR(NV_display(globalVelocity_k,n););
     DEBUG_EXPR(NV_display(velocity_k,m););
     DEBUG_EXPR(NV_display(reaction_k,m););
@@ -732,7 +757,7 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(
 
     if(!(iter % erritermax))
     {
-      double norm_q = cblas_dnrm2(problem->M->size0 , problem->q , 1);
+
       gfc3d_compute_error(problem,
                           reaction_k, velocity_k, globalVelocity_k,
                           tolerance,
@@ -740,22 +765,30 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(
                           &(options->dparam[SICONOS_DPARAM_RESIDU]));
     }
 
-    if(verbose > 0)
-      printf("---- GFC3D - NSN_AC - iteration %d, residual = %g, linear solver residual = %g, tolerance = %g \n", iter, options->dparam[1],linear_solver_residual, tolerance);
 
-    if(options->dparam[SICONOS_DPARAM_RESIDU] < tolerance)
+    if(options->dparam[SICONOS_DPARAM_RESIDU] >= tolerance)
+    {
+      numerics_printf_verbose(1, "---- GFC3D - NSN_AC iteration %d, residual = %g >= %g , linear solver residual = %g",
+                              iter, options->dparam[1], tolerance, linear_solver_residual);
+    }
+    else 
     {
       info[0] = 0;
       break;
     }
-
-
   }
 
   memcpy(globalVelocity, solution,  n * sizeof(double));
   memcpy(velocity, &solution[n],  m * sizeof(double));
   memcpy(reaction, &solution[n+m], m * sizeof(double));
 
+  /* for (unsigned int k; k< n; k++){ */
+  /*   globalVelocity[k] =  solution[k] /rescaling; */
+  /* } */
+  /* for (unsigned int k =0  ; k< m; k++){ */
+  /*   reaction[k] =  solution[k+n+m] /rescaling; */
+  /* } */
+  
   if(verbose > 0)
   {
     if(!info[0])
@@ -807,6 +840,7 @@ int gfc3d_nonsmooth_Newton_AlartCurnier_setDefaultSolverOptions(
   solver_options_nullify(options);
 
 
+
   options->iparam[SICONOS_IPARAM_MAX_ITER] = 200;    /* input :  itermax */
   options->iparam[SICONOS_IPARAM_ITER_DONE] = 1;      /* output : #iter */
 
@@ -819,12 +853,12 @@ int gfc3d_nonsmooth_Newton_AlartCurnier_setDefaultSolverOptions(
   options->iparam[SICONOS_FRICTION_3D_NSN_FORMULATION] = SICONOS_FRICTION_3D_NSN_FORMULATION_ALARTCURNIER_STD;     /* 0 STD AlartCurnier, 1 JeanMoreau, 2 STD generated, 3 JeanMoreau generated */
   options->iparam[SICONOS_FRICTION_3D_NSN_FORMULATION] = SICONOS_FRICTION_3D_NSN_FORMULATION_JEANMOREAU_STD;     /* 0 STD AlartCurnier, 1 JeanMoreau, 2 STD generated, 3 JeanMoreau generated */
   options->iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH] = SICONOS_FRICTION_3D_NSN_LINESEARCH_GOLDSTEINPRICE;
-  options->iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH_MAXITER]=10;
+  options->iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH_MAXITER]=100;
 
 
 
   options->dparam[SICONOS_DPARAM_TOL] = 1e-10;
-  options->dparam[SICONOS_FRICTION_3D_NSN_RHO] = 1e-3;      /* default rho */
+  options->dparam[SICONOS_FRICTION_3D_NSN_RHO] = 1e+0;      /* default rho */
 
 
   options->internalSolvers = NULL;
