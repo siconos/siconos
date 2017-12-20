@@ -92,11 +92,6 @@ void gfc3d_nsgs(GlobalFrictionContactProblem* restrict problem, double* restrict
   if (*info == 0)
     return;
 
-  gfc3d_init_workspace(problem);
-
-
-  double* qtmp = problem->workspace->globalVelocity;
-
   SolverGlobalPtr local_solver = NULL;
   FreeSolverGlobalPtr freeSolver = NULL;
   ComputeErrorGlobalPtr computeError = NULL;
@@ -120,37 +115,31 @@ void gfc3d_nsgs(GlobalFrictionContactProblem* restrict problem, double* restrict
 
   double norm_q = cblas_dnrm2(n , problem->q , 1);
 
-  dparam[SICONOS_DPARAM_TOL] = dparam[2]; // set the tolerance for the local solver
   /* verbose=1; */
   while ((iter < itermax) && (hasNotConverged > 0))
   {
     ++iter;
     /* Solve the first part with the current reaction */
-    DEBUG_PRINTF("iter = %i\n", iter);
-    /* qtmp <--q */
-    cblas_dcopy_msan(n, q, 1, qtmp, 1);
-
-    if (nc > 0)
-    {
-      /*qtmp = H reaction +qtmp */
-      NM_gemv(1., H, reaction, 1., qtmp);
-    }
-    cblas_dcopy(n, qtmp, 1, globalVelocity, 1);
+    DEBUG_PRINTF("--------- iter = %i\n", iter);
+    /* globalVelocity <--q */
+    cblas_dcopy_msan(n, q, 1, globalVelocity, 1);
+    /* globalVelocity = H reaction + globalVelocity */
+    if (nc > 0) NM_gemv(1., H, reaction, 1., globalVelocity);
 
     CHECK_RETURN(!NM_gesv_expert(problem->M, globalVelocity, NM_KEEP_FACTORS));
 
-    DEBUG_PRINT("global velocity");
-    DEBUG_EXPR_WE(NM_vector_display(globalVelocity,n));
+    DEBUG_EXPR(NM_vector_display(reaction,m));
+    DEBUG_EXPR(NM_vector_display(globalVelocity,n));
 
     if (nc > 0)
     {
       /* Compute current local velocity */
       /*      velocity <--b */
       cblas_dcopy(m, b, 1, velocity, 1);
-      
+
       /* velocity <-- H^T globalVelocity + velocity*/
       NM_tgemv(1., H, globalVelocity, 1., velocity);
-      DEBUG_EXPR_WE(NM_vector_display(velocity,m););
+      DEBUG_EXPR(NM_vector_display(velocity,m););
 
       /* Loop through the contact points */
       for (contact = 0 ; contact < nc ; ++contact)
@@ -165,7 +154,7 @@ void gfc3d_nsgs(GlobalFrictionContactProblem* restrict problem, double* restrict
         reaction[pos + 2] -= an * velocity[pos + 2];
         projectionOnCone(&reaction[pos], mu[contact]);
       }
-      DEBUG_EXPR_WE(NM_vector_display(reaction,m););
+      DEBUG_EXPR(NM_vector_display(reaction,m););
   }
 
 
