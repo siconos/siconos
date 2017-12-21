@@ -27,6 +27,7 @@
 #include <debug.h>
 #include "LagrangianR.hpp"
 #include "NewtonImpactNSL.hpp"
+#include "SimulationTypeDef.hpp"
 
 using namespace RELATION;
 
@@ -147,8 +148,7 @@ void MoreauJeanBilbaoOSI::_initialize_iteration_matrix(SP::DynamicalSystem ds)
   const DynamicalSystemsGraph::VDescriptor& dsv = _dynamicalSystemsGraph->descriptor(ds);
   VectorOfVectors& work = *_dynamicalSystemsGraph->properties(dsv).workVectors;
 
-  if(work[MoreauJeanBilbaoOSI::ONE_MINUS_THETA]
-     || work[MoreauJeanBilbaoOSI::TWO_DT_SIGMA_STAR]
+  if( work[MoreauJeanBilbaoOSI::TWO_DT_SIGMA_STAR]
      || _dynamicalSystemsGraph->properties(dsv).W)
     RuntimeException::selfThrow("MoreauJeanBilbaoOSI::_initialize_iteration_matrix(t,ds) - W has already been initialized by another osi");
 
@@ -161,8 +161,6 @@ void MoreauJeanBilbaoOSI::_initialize_iteration_matrix(SP::DynamicalSystem ds)
   // - Iteration matrix
   _dynamicalSystemsGraph->properties(dsv).W.reset(new SimpleMatrix(ndof, ndof, Siconos::BANDED, 0, 0));
 
-  // - I - theta
-  work[MoreauJeanBilbaoOSI::ONE_MINUS_THETA].reset(new SiconosVector(ndof));
   // - dt * sigma*
   work[MoreauJeanBilbaoOSI::TWO_DT_SIGMA_STAR].reset(new SiconosVector(ndof));
   SimpleMatrix& iteration_matrix = *_dynamicalSystemsGraph->properties(dsv).W;
@@ -170,118 +168,15 @@ void MoreauJeanBilbaoOSI::_initialize_iteration_matrix(SP::DynamicalSystem ds)
   _compute_osi_parameters_v1(lldds, work, iteration_matrix);
 }
 
-// void MoreauJeanBilbaoOSI::_compute_osi_parameters_v0(LagrangianLinearDiagonalDS& lldds, VectorOfVectors& work, SimpleMatrix& iteration_matrix_w)
-// {
-//   // notations:
-//   // - stiffness(k) = omega
-//   // - damping(k) = sigma
-//   SiconosVector& stiffness = *lldds.stiffness();
-//   SiconosVector & damping = *lldds.damping();
-//   struct op { double operator() (double d) const { return std::exp(d); } };
-
-//   double time_step = _simulation->timeStep();
-
-//   DenseVect& omega2 = *stiffness.dense();
-//   DenseVect& sigma = *damping.dense();
-//   DenseVect& buffer = *work[MoreauJeanBilbaoOSI::ONE_MINUS_THETA]->dense();
-//   DenseVect& sigma_star = *work[MoreauJeanBilbaoOSI::TWO_DT_SIGMA_STAR]->dense();
-//   // sigma**2, saved in sigma_star. Remind that damping == 2.*sigma
-//   std::transform(sigma.begin(), sigma.end(),
-//                 sigma.begin(), sigma_star.begin(), std::multiplies<double>() );
-//   *work[MoreauJeanBilbaoOSI::TWO_DT_SIGMA_STAR] *= (0.25);
-//   // sqrt(sigma**2 - omega**2) saved in buffer
-//   sub(*work[MoreauJeanBilbaoOSI::TWO_DT_SIGMA_STAR], omega2, *work[MoreauJeanBilbaoOSI::ONE_MINUS_THETA]);
-//   std::transform(buffer.begin(), buffer.end(), buffer.begin(),
-//                  static_cast<std::complex<double> (*)(std::complex<double>)>(std::sqrt));
-//   *work[MoreauJeanBilbaoOSI::ONE_MINUS_THETA] *= time_step;
-//   // exp( work[MoreauJeanBilbaoOSI::ONE_MINUS_THETA]) = exp(sqrt(sigma**2 - omega**2), in sigma_star
-//   std::transform(buffer.begin(), buffer.end(), sigma_star.begin(), exp);
-//   // exp(-work[MoreauJeanBilbaoOSI::ONE_MINUS_THETA]) = exp(-sqrt(sigma**2 - omega**2) in buffer
-//   *work[MoreauJeanBilbaoOSI::ONE_MINUS_THETA] *= -1.;
-//   std::transform(buffer.begin(), buffer.end(), buffer.begin(), exp);
-//   // sum of exp in buffer
-//   add(*work[MoreauJeanBilbaoOSI::ONE_MINUS_THETA], *work[MoreauJeanBilbaoOSI::TWO_DT_SIGMA_STAR], *work[MoreauJeanBilbaoOSI::ONE_MINUS_THETA]);
-//   // exp(-sigma*time_step) in work[MoreauJeanBilbaoOSI::TWO_DT_SIGMA_STAR]
-//   *work[MoreauJeanBilbaoOSI::TWO_DT_SIGMA_STAR] = -time_step * sigma;
-//   std::transform(sigma_star.begin(), sigma_star.end(), sigma_star.begin(), exp);
-//   // Ak = exp(-sigma*time_step)*(exp(-sqrt(sigma**2 - omega**2)) + exp(sqrt(sigma**2 - omega**2))
-//   // i.e. Ak = sigma_star * buffer (component wise), result in buffer
-//   std::transform(sigma_star.begin(), sigma_star.end(),
-//                 buffer.begin(), buffer.begin(), std::multiplies<double>() );
-//   // ek = exp(-2sigma*time_step) = sigma_star**2 in sigma_star
-//   std::transform(sigma_star.begin(), sigma_star.end(),
-//                 sigma_star.begin(), sigma_star.begin(), std::multiplies<double>() );
-//   // 1 + ek in iteration_mat (temp buffer in VFREE)
-//   work[MoreauJeanBilbaoOSI::VFREE]->fill(1.);
-//   DenseVect& iteration_matrix = *work[MoreauJeanBilbaoOSI::VFREE]->dense();
-//   add(*work[MoreauJeanBilbaoOSI::VFREE], *work[MoreauJeanBilbaoOSI::TWO_DT_SIGMA_STAR],
-//       *work[MoreauJeanBilbaoOSI::VFREE]);
-//   // 1 - ek in ek (sigma_star)
-//   *work[MoreauJeanBilbaoOSI::TWO_DT_SIGMA_STAR] *= -1.;
-//   transform(sigma_star.begin(), sigma_star.end(), sigma_star.begin(),
-//             bind2nd(std::plus<double>(), 1.0));
-//   // 1 - ek/1 +ek in sigma_star
-//   std::transform(sigma_star.begin(), sigma_star.end(),
-//                 iteration_matrix.begin(), sigma_star.begin(), std::divides<double>() );
-//   // 1 + ek - Ak (i.e. iteration_matrix - buffer) in iteration_matrix
-//   sub(*work[MoreauJeanBilbaoOSI::VFREE], *work[MoreauJeanBilbaoOSI::ONE_MINUS_THETA],
-//       *work[MoreauJeanBilbaoOSI::VFREE]);
-//   // Ak / (1 + ek - Ak) in buffer (i.e. buffer/iteration_matrix in buffer)
-//   std::transform(buffer.begin(), buffer.end(),
-//                 iteration_matrix.begin(), buffer.begin(), std::divides<double>() );
-//   // 2./(omega_k**2 * time_step ** 2) in iteration_matrix
-//   double coeff = 2. / (time_step * time_step);
-//   work[MoreauJeanBilbaoOSI::VFREE]->fill(coeff);
-//   std::transform(iteration_matrix.begin(), iteration_matrix.end(),
-//                 omega2.begin(), iteration_matrix.begin(), std::divides<double>() );
-//   std::transform(iteration_matrix.begin(), iteration_matrix.end(),
-//                 omega2.begin(), iteration_matrix.begin(), std::divides<double>() );
-//   // 1 - theta_k = 1 - 2/w**2*dt**2 + (Ak / (1+ek -Ak) (i.e. 1. - iteration_matrix + buffer) in buffer
-//   sub(*work[MoreauJeanBilbaoOSI::ONE_MINUS_THETA], *work[MoreauJeanBilbaoOSI::VFREE],
-//       *work[MoreauJeanBilbaoOSI::ONE_MINUS_THETA]);
-//   transform(buffer.begin(), buffer.end(), buffer.begin(),
-//             bind2nd(std::plus<double>(), 1.0));
-//   // sigma* * dt= (1 + (1-theta_k)*omega**2*dt**2/2) * (1-ek)/(1+ek) in sigma_star
-//   // ie sigma_star = (1 + buffer / iteration_matrix ) * sigma_star
-//   std::transform(buffer.begin(), buffer.end(),
-//                  iteration_matrix.begin(), iteration_matrix.begin(), std::divides<double>() );
-//   transform(iteration_matrix.begin(), iteration_matrix.end(), iteration_matrix.begin(),
-//             bind2nd(std::plus<double>(), 1.0));
-//   std::transform(iteration_matrix.begin(), iteration_matrix.end(),
-//                  sigma_star.begin(), sigma_star.begin(), std::multiplies<double>() );
-//   // SUMMARY:
-//   // sigma_star = time_step * sigma*
-//   // buffer = 1 - theta
-
-//   // now we can compute the iteration matrix ...
-//   // W = M + K(1-theta)*dt**2/2 + dt*sigma^*
-//   // i.e W = mass + omega*buffer*dt**2*0.5 + sigma_star
-//   std::transform(omega2.begin(), omega2.end(),
-//                  buffer.begin(), iteration_matrix.begin(), std::multiplies<double>() );
-//   SiconosMatrix& mass = *lldds.mass();
-//   for(unsigned int i=0;i<lldds.dimension();++i)
-//   {
-//     iteration_matrix_w(i, i) =  mass(i, i) + 0.5 * time_step * time_step * (*work[MoreauJeanBilbaoOSI::VFREE])(i);
-//     iteration_matrix_w(i, i) += (*work[MoreauJeanBilbaoOSI::TWO_DT_SIGMA_STAR])(i);
-//     iteration_matrix_w(i, i) = 1. / iteration_matrix_w(i, i);
-//   }
-//   // save 2. * dt * sigma_* in sigma_star
-//   double two = 2.;
-//   *work[MoreauJeanBilbaoOSI::TWO_DT_SIGMA_STAR] *= two;
-// }
-
 void MoreauJeanBilbaoOSI::_compute_osi_parameters_v1(LagrangianLinearDiagonalDS& lldds, VectorOfVectors& work, SimpleMatrix& iteration_matrix)
 {
   SP::SiconosVector omega2 = lldds.stiffness();
   SP::SiconosVector damp = lldds.damping();
   SP::SiconosMatrix mass = lldds.mass();
 
-  double one_minus_theta, dt_sigma_star;
+  double dt_sigma_star;
   double time_step = _simulation->timeStep();
-  double coeff = 0.5 * time_step * time_step;
   unsigned int ndof = lldds.dimension();
-  double one = 1.;
-  double two = 2.;
   double omega2k, sigmak, massk;
   for(unsigned int k=0;k<ndof;++k)
   {
@@ -294,146 +189,132 @@ void MoreauJeanBilbaoOSI::_compute_osi_parameters_v1(LagrangianLinearDiagonalDS&
       sigmak = 0.5 * (*damp)(k);
     if(omega2)
       omega2k = (*omega2)(k);
-    if(time_step > 10e-4)
-      {
-	compute_parameters(time_step, omega2k, sigmak, one_minus_theta, dt_sigma_star);
-	iteration_matrix(k, k) = one / (massk + coeff * one_minus_theta * omega2k + dt_sigma_star);
-      }
-    else
-      {
-	// Warning : we get dt2 * (1 - theta) !!!!
-	compute_parameters_with_fd(time_step, omega2k, sigmak, one_minus_theta, dt_sigma_star);
-	iteration_matrix(k, k) = one / (massk + 0.5 * one_minus_theta * omega2k + dt_sigma_star);
-      }
-    (*work[MoreauJeanBilbaoOSI::ONE_MINUS_THETA])(k) = one_minus_theta;
-    (*work[MoreauJeanBilbaoOSI::TWO_DT_SIGMA_STAR])(k) = two * dt_sigma_star;
+
+
+    iteration_matrix(k, k) = compute_parameters_with_switch(time_step, massk, omega2k, sigmak, dt_sigma_star);
+    (*work[MoreauJeanBilbaoOSI::TWO_DT_SIGMA_STAR])(k) = 2. * dt_sigma_star;
   }
 }
 
-void MoreauJeanBilbaoOSI::compute_parameters(double time_step, double omega2, double sigma, double& one_minus_theta, double& dt_sigma_star)
+double  MoreauJeanBilbaoOSI::compute_parameters(double time_step, double mass, double omega2, double sigma, double& dt_sigma_star)
 {
   // Computes:
   // 1 - theta
   // sigma_star = dt * sigma^*
+  double expo = sigma*sigma - omega2;
   double ek = std::exp(-sigma * time_step);
-  std::complex<double> buff = std::sqrt(std::complex<double>(sigma*sigma -omega2)) * time_step;
-  std::complex<double> cAk = ek * (std::exp(buff) + std::exp(-buff));
-  assert(std::imag(cAk) < 1e-12);
-  double Ak = std::real(cAk);
-  double one = 1.;
-  double two = 2.;
-  double one_over_two = 0.5;
+  double Ak;
+  if(expo >= 0.)
+    {
+      std::complex<double> buff = std::sqrt(std::complex<double>(sigma*sigma -omega2)) * time_step;
+      std::complex<double> cAk = ek * (std::exp(buff) + std::exp(-buff));
+      assert(std::imag(cAk) < 1e-12);
+      Ak = std::real(cAk);
+    }
+  else
+    {
+      Ak = 2.* cos(std::sqrt(-expo) * time_step) * std::exp(-sigma * time_step);
+    }
   ek = ek * ek;
-  double res = omega2 * time_step * time_step;
-  one_minus_theta = one - two / res + Ak / (one + ek - Ak);
-  dt_sigma_star = (one - ek) / (one + ek) * (one + one_over_two * res * one_minus_theta);
-  std::cout << "CAS 0  dt2 * (1 - thetak) " << time_step * time_step * one_minus_theta << " dtsig* " << dt_sigma_star << " Ak " << Ak << std::endl; 
-  std::cout << "CAS 0  1 - thetak " <<one_minus_theta << std::endl; 
+  double dt2omega2 = omega2 * time_step * time_step;
+  double one_minus_theta = 1. - 2. / dt2omega2 + Ak / (1. + ek - Ak);
+  double dt2_omega2_one_minus_theta = 0.5 * dt2omega2 * one_minus_theta;
+  dt_sigma_star = (1. - ek) / (1. + ek) * (1. + dt2_omega2_one_minus_theta);
+  // std::cout << " dt2 * (1 - thetak) " << time_step * time_step * one_minus_theta << " ts " << time_step <<  std::endl;
+  // std::cout << "(1 - thetak) " << one_minus_theta << " ts " << time_step <<  std::endl;
+  // std::cout << "dtsig  " << dt_sigma_star <<  std::endl;
+  return (1. / (mass + dt2_omega2_one_minus_theta + dt_sigma_star));
 }
 
-void MoreauJeanBilbaoOSI::compute_parameters_with_fd(double time_step, double omega2, double sigma, double& dt2_one_minus_theta, double& dt_sigma_star)
+
+void MoreauJeanBilbaoOSI::update_dt_sigma_star(SP::DynamicalSystem ds, double dtsigmastar, int pos)
 {
-  std::cout << "forward devel" << std::endl;
-  double one = 1.;
-  double two = 2.;
-  double one_over_two = 0.5;
-  double dt2 = time_step * time_step;
-  double omega4 = omega2 * omega2;
-  double dt4 = dt2 * dt2;
-  double sigma4 = sigma * sigma * sigma * sigma;
-  double dt2_one_minus_theta = dt2 * (1./6. + 2. * sigma*sigma / (3. * omega2));
-  dt2_one_minus_theta +=  dt4 * (omega2 / 120. + 2. * sigma * sigma / 45. - 2. * sigma4 / (45. * omega2));
-  double sigma3 = sigma * sigma * sigma;
-  dt_sigma_star = dt * sigma + dt2 $ dt * sigma * omega2 / 12. + dt4 * dt * (omega4 * sigma / 240. - omega2 * sigma3 / 180.);
-  std::cout << " dt2 * (1 - thetak) " << dt2_one_minus_theta << " ts " << time_step <<  std::endl;
-  std::cout << "(1 - thetak) " << dt2_one_minus_theta / dt2 << " ts " << time_step <<  std::endl;
+  (*dt_sigma_star(ds))(pos) = dtsigmastar;
 }
 
-// void MoreauJeanBilbaoOSI::_compute_osi_parameters_v2(LagrangianLinearDiagonalDS& lldds, VectorOfVectors& work, SimpleMatrix& iteration_matrix_w)
-// {
-//   // notations:
-//   // - stiffness(k) = omega
-//   // - damping(k) = sigma
-//   SiconosVector& stiffness = *lldds.stiffness(); // equal to omega**2
-//   SiconosVector & damping = *lldds.damping(); // equal to 2*sigma
-//   struct op { double operator() (double d) const { return std::exp(d); } };
-//   unsigned int ndof = lldds.dimension();
-//   double time_step = _simulation->timeStep();
+void MoreauJeanBilbaoOSI::update_iteration_matrix(SP::DynamicalSystem ds, double inv_wk, int pos)
+{
+  (*iteration_matrix(ds))(pos, pos) = inv_wk;
+}
 
-//   DenseVect& omega2 = *stiffness.dense();
-//   DenseVect& sigma = *damping.dense();
-//   DenseVect& buffer = *work[MoreauJeanBilbaoOSI::ONE_MINUS_THETA]->dense();
-//   DenseVect& sigma_star = *work[MoreauJeanBilbaoOSI::TWO_DT_SIGMA_STAR]->dense();
-//   vector<std::complex<double> > buffer_cplx(ndof);
-//   // sigma**2, saved in buffer
-//   noalias(buffer) = element_prod(sigma, sigma);
-//   buffer_cplx = 0.25 * buffer;
-//   // dt*sqrt(sigma**2 - omega**2) saved in buffer
-//   buffer_cplx -= omega2;
-//   std::transform(buffer_cplx.begin(), buffer_cplx.end(), buffer_cplx.begin(),
-//                  (std::complex<double>(*)(std::complex<double>)) sqrt);
-//   buffer_cplx *= time_step;
-//   // exp( work[MoreauJeanBilbaoOSI::ONE_MINUS_THETA]) = exp(sqrt(sigma**2 - omega**2), in sigma_star
-//   std::transform(buffer_cplx.begin(), buffer_cplx.end(), sigma_star.begin(), exp);
-//   // exp(-work[MoreauJeanBilbaoOSI::ONE_MINUS_THETA]) = exp(-sqrt(sigma**2 - omega**2) in buffer
-//   buffer_cplx *= -1.;
-//   std::transform(buffer_cplx.begin(), buffer_cplx.end(), buffer_cplx.begin(), exp);
-//   // sum of exp in buffer
-//   buffer_cplx += sigma_star;
-//   // exp(-sigma*time_step) in work[MoreauJeanBilbaoOSI::TWO_DT_SIGMA_STAR]
-//   sigma_star = -time_step * sigma;
-//   std::transform(sigma_star.begin(), sigma_star.end(), sigma_star.begin(), exp);
-//   // Ak = exp(-sigma*time_step)*(exp(-sqrt(sigma**2 - omega**2)) + exp(sqrt(sigma**2 - omega**2))
-//   // i.e. Ak = sigma_star * buffer (component wise), result in buffer
-//   buffer = element_prod(sigma_star, buffer);
-//   // ek = exp(-2sigma*time_step) = sigma_star**2 in sigma_star
-//   sigma_star = element_prod(sigma_star, sigma_star);
-//   // 1 + ek in iteration_mat
-//   DenseVect& iteration_matrix = *work[MoreauJeanBilbaoOSI::VFREE]->dense();
-//   work[MoreauJeanBilbaoOSI::VFREE]->fill(1.);
-//   iteration_matrix += sigma_star;
-//   // 1 - ek in ek (sigma_star)
-//   sigma_star *= -1.;
-//   transform(sigma_star.begin(), sigma_star.end(), sigma_star.begin(),
-//             bind2nd(std::plus<double>(), 1.0));
-//   // 1 - ek/1 +ek in sigma_star
-//   sigma_star = element_div(sigma_star, iteration_matrix);
-//   // 1 + ek - Ak (i.e. iteration_matrix - buffer) in iteration_matrix
-//   iteration_matrix -= buffer;
-//   // Ak / (1 + ek - Ak) in buffer (i.e. buffer/iteration_matrix in buffer)
-//   buffer = element_div(buffer, iteration_matrix);
-//   // 2./(omega_k**2 * time_step ** 2) in iteration_matrix
-//   double coeff = 2. / (time_step * time_step);
-//   work[MoreauJeanBilbaoOSI::VFREE]->fill(coeff);
-//   iteration_matrix = element_div(iteration_matrix, omega2);
-//   // 1 - theta_k = 1 - 2/w**2*dt**2 + (Ak / (1+ek -Ak) (i.e. 1. - iteration_matrix + buffer) in buffer
-//   buffer -= iteration_matrix;
-//   transform(buffer.begin(), buffer.end(), buffer.begin(),
-//             bind2nd(std::plus<double>(), 1.0));
-//   // sigma* * dt= (1 + (1-theta_k)*omega**2*dt**2/2) * (1-ek)/(1+ek) in sigma_star
-//   // ie sigma_star = (1 + buffer / iteration_matrix ) * sigma_star
-//   iteration_matrix = element_div(buffer, iteration_matrix);
-//   transform(iteration_matrix.begin(), iteration_matrix.end(), iteration_matrix.begin(),
-//             bind2nd(std::plus<double>(), 1.0));
-//   sigma_star = element_prod(iteration_matrix, sigma_star);
-//   // SUMMARY:
-//   // sigma_star = time_step * sigma*
-//   // buffer = 1 - theta
+double MoreauJeanBilbaoOSI::compute_parameters_with_taylor_exp(double dt, double mass, double omega2, double sigma, double& dt_sigma_star)
+{
+  // Compute dt_sigma_star
+  double c0, c1, c2, c3, c4, c5, c6;
+  double dt2omega2 = dt * dt * omega2;
+  double dtsig = dt * sigma;
+  c0 = dtsig;  // dt coeff
+  c1 = c0 * dt2omega2 / 12.; // dt^3 coeff
+  c2 = c1 * (dt2omega2 / 20. - c0 * c0 / 15.); // dt^5 coeff
+  c3 = dt2omega2 * dt2omega2 * dtsig; // h5sigma.omega^4
+  c4 = dt2omega2 / 6048 - dtsig * dtsig / 1512;
+  c4 *= c3;
+  c4 += dt2omega2 * dtsig/1890 * dtsig * dtsig * dtsig * dtsig;  // dt^7 coeff
 
-//   // now we can compute the iteration matrix ...
-//   // W = M + K(1-theta)*dt**2/2 + dt*sigma^*
-//   // i.e W = mass + omega**2*buffer*dt**2*0.5 + sigma_star
-//   noalias(iteration_matrix) = element_prod(omega2, buffer);
-//   SiconosMatrix& mass = *lldds.mass();
-//   for(unsigned int i=0;i<lldds.dimension();++i)
-//   {
-//     iteration_matrix_w(i, i) = mass(i, i) + iteration_matrix(i) * 0.5 * time_step * time_step;
-//     iteration_matrix_w(i, i) += sigma_star(i);
-//     iteration_matrix_w(i, i) = 1. / iteration_matrix_w(i, i);
-//   }
-//   // save 2. * dt * sigma_* in sigma_star
-//   sigma_star *= 2.;
-// }
+  dt_sigma_star = c0 + c1 + c2;
+  std:: cout << "neglected term = " << c4 << std::endl;
+
+  // inv wkk
+  c0 = 1 - dtsig; // dt + const
+  c1 = -dt2omega2 / 12. + 2./3. * dtsig * dtsig; // dt^2
+  c2 = dt2omega2 / 12. * dtsig - dtsig * dtsig * dtsig / 3. ; // dt^3
+  c3 = dt2omega2 * (dt2omega2 / 360. - dtsig * dtsig / 20) + 2./ 15. * dtsig * dtsig * dtsig * dtsig; // dt4
+  c4 = dt2omega2 * dtsig * ( -dt2omega2 / 360. + dtsig * dtsig / 45.) - 2. / 45. * dtsig * dtsig * dtsig * dtsig * dtsig; // dt5
+  c5 = dt2omega2 * ( -1./ 126. * dtsig * dtsig * dtsig * dtsig + dt2omega2 * ( 1./ 630. * dtsig * dtsig +  -1. / 20160. * dt2omega2)); // dt6
+  c5 += 4. / 315. * dtsig * dtsig * dtsig * dtsig * dtsig * dtsig;
+  c6 = dt2omega2 * (dtsig /420. * dtsig * dtsig * dtsig * dtsig + ( - dt2omega2 / 1512. * dtsig * dtsig * dtsig + (dt2omega2/20160. * dtsig)));
+  c6 -= dtsig / 315. * dtsig * dtsig * dtsig * dtsig * dtsig * dtsig;
+  std:: cout << "iter, neglected term = " << c6 << std::endl;
+  
+  return c0 + c1 + c2 + c3 + c4 + c5;
+}
+
+double MoreauJeanBilbaoOSI::compute_parameters_with_switch(double dt, double mass, double omega2, double sigma, double& dt_sigma_star)
+{
+  double dt2omega2 = dt * dt * omega2;
+  double dtsig = dt * sigma;
+
+  double c7, d7;
+  // Computes dt^7 Taylor expansion term for dtsigma_star:
+  c7 = dt2omega2 / 6048. - dtsig * dtsig / 1512.;
+  c7 *= dt2omega2 * dt2omega2 * dtsig;
+  c7 += dt2omega2 * dtsig/1890. * dtsig * dtsig * dtsig * dtsig;
+  // Computes dt^7 Taylor exp term for inv wk:
+  d7 = dt2omega2 * (dtsig /420. * dtsig * dtsig * dtsig * dtsig + ( - dt2omega2 / 1512. * dtsig * dtsig * dtsig + (dt2omega2/20160. * dtsig)));
+  d7 -= dtsig / 315. * dtsig * dtsig * dtsig * dtsig * dtsig * dtsig;
+
+
+  double wkk = compute_parameters(dt, mass, omega2, sigma, dt_sigma_star);
+
+  double tol = 10 * MACHINE_PREC;
+  double c0, c1, c2, c3, c4, c5;
+   
+  if(fabs(c7) < tol)
+    {
+      c0 = dtsig;  // dt coeff
+      c1 = c0 * dt2omega2 / 12.; // dt^3 coeff
+      c2 = c1 * (dt2omega2 / 20. - c0 * c0 / 15.); // dt^5 coeff
+      dt_sigma_star = c0 + c1 + c2;
+      std::cout << "Warning : switch to Taylor expansion for dtSigStar, neglected coeff ==" << c7 <<  std::endl;
+    }
+
+  if(fabs(d7) < tol)
+    {
+      c0 = 1 - dtsig; // dt + const
+      c1 = -dt2omega2 / 12. + 2./3. * dtsig * dtsig; // dt^2
+      c2 = dt2omega2 / 12. * dtsig - dtsig * dtsig * dtsig / 3. ; // dt^3
+      c3 = dt2omega2 * (dt2omega2 / 360. - dtsig * dtsig / 20) + 2./ 15. * dtsig * dtsig * dtsig * dtsig; // dt4
+      c4 = dt2omega2 * dtsig * ( -dt2omega2 / 360. + dtsig * dtsig / 45.) - 2. / 45. * dtsig * dtsig * dtsig * dtsig * dtsig; // dt5
+      c5 = dt2omega2 * ( -1./ 126. * dtsig * dtsig * dtsig * dtsig + dt2omega2 * ( 1./ 630. * dtsig * dtsig +  -1. / 20160. * dt2omega2)); // dt6
+      c5 += 4. / 315. * dtsig * dtsig * dtsig * dtsig * dtsig * dtsig;
+      std::cout << "Warning : switch to Taylor expansion for inwk, neglected coeff ==" << d7 <<  std::endl;
+
+      return c0 + c1 + c2 + c3 + c4 + c5;
+    }
+  else
+    return wkk;
+}
+
 
 double MoreauJeanBilbaoOSI::computeResidu()
 {

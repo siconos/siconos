@@ -38,7 +38,7 @@ protected:
 
 public:
 
-  enum {TWO_DT_SIGMA_STAR, ONE_MINUS_THETA, VFREE, WORK_LENGTH};
+  enum {TWO_DT_SIGMA_STAR, VFREE, WORK_LENGTH};
 
   enum {OSNSP_RHS,WORK_INTERACTION_LENGTH};
   /* Constructor - No extra parameters: depends only on connected ds and simulation time step*/
@@ -88,9 +88,33 @@ public:
    */
   unsigned int numberOfIndexSets() const {return 2;};
 
-  void compute_parameters(double time_step, double omega, double sigma, double& theta, double& sigma_star);
-  void compute_parameters_with_fd(double time_step, double omega, double sigma, double& theta, double& sigma_star);
+  /** update iteration matrix diagonal term 
+      \param double time step
+      \param double mass coeff
+      \param double stiffness coeff (i.e. omega^2)
+      \param double  damping coeff (i.e. sigma)
+      \param[out] double dt*sigma^* value
+      \return 1/wkk 
+   */
+  double compute_parameters(double time_step, double mass, double omega2, double sigma, double& dt_sigma_star);
 
+  /** update iteration matrix diagonal term using Taylor expansions
+      \param double time step
+      \param double mass coeff
+      \param double stiffness coeff (i.e. omega^2)
+      \param double  damping coeff (i.e. sigma)
+      \param[out] double dt*sigma^* value
+      \return 1/wkk 
+   */
+  double compute_parameters_with_taylor_exp(double time_step, double mass, double omega2, double sigma, double& dt_sigma_star);
+  double compute_parameters_with_switch(double time_step, double mass, double omega2, double sigma, double& dt_sigma_star);
+
+  /** reset dt_sigma_star[pos] */
+  void update_dt_sigma_star(SP::DynamicalSystem ds, double dt_sigma_star, int pos);
+
+  /** reset inv(w[pos])  */
+  void update_iteration_matrix(SP::DynamicalSystem ds, double inv_wk, int pos);
+  
   /** get iteration_matrix (pointer link) corresponding to DynamicalSystem ds
    * \param ds a pointer to DynamicalSystem
    * \return pointer to a SiconosMatrix
@@ -100,6 +124,12 @@ public:
     return _dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).W;
   }
 
+  inline SP::SiconosVector dt_sigma_star(SP::DynamicalSystem ds)
+  {
+    
+    return (*_dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).workVectors)[MoreauJeanBilbaoOSI::TWO_DT_SIGMA_STAR];
+  }
+  
   /** integrate the system, between tinit and tend (->iout=true), with possible stop at tout (->iout=false)
    *  \param tinit initial time
    *  \param tend end time

@@ -116,42 +116,42 @@ print("Start simulation ...")
 start_time = time.clock()
 pos = 1
 
-# while simu.hasNextEvent():
-#     if k % 100000 == 0:
-#         print('step = ', k, '---- time = ',
-#               simu.nextTime(),
-#               '------------------------')
-#     simu.computeOneStep()
+while simu.hasNextEvent():
+    if k % 100000 == 0:
+        print('step = ', k, '---- time = ',
+              simu.nextTime(),
+              '------------------------')
+    simu.computeOneStep()
 
-#     # -- save data every output_freq time step --
-#     if k % guitar_model.output_freq == 0:
-#         # current time
-#         guitar_model.time[pos] = simu.nextTime()
-#         # modal positions
-#         guitar_model.save_ds_state_modal(pos, string)
+    # -- save data every output_freq time step --
+    if k % guitar_model.output_freq == 0:
+        # current time
+        guitar_model.time[pos] = simu.nextTime()
+        # modal positions
+        guitar_model.save_ds_state_modal(pos, string)
         
-#         # interactions
-#         if guitar_model.save_interactions:
-#             buff = guitar_model.data_interactions
-#             for i in range(nb_frets):
-#                 buff[frets[i]][0][pos] = frets[i].y(0) 
-#                 buff[frets[i]][1][pos] = frets[i].lambda_(1) 
-#                 #buff[frets[i]][2][pos = frets[i].y(1) 
+        # interactions
+        if guitar_model.save_interactions:
+            buff = guitar_model.data_interactions
+            for i in range(nb_frets):
+                buff[frets[i]][0][pos] = frets[i].y(0) 
+                buff[frets[i]][1][pos] = frets[i].lambda_(1) 
+                #buff[frets[i]][2][pos = frets[i].y(1) 
 
-#         pos += 1
-#     k += 1
-#     simu.nextStep()
-# print('End of simulation process. Duration: ', time.clock() - start_time)
-# print("nb steps", k)
-# # --- Output dir for results ---
-# result_dir = os.getcwd()# + '/temp'
-# if not os.path.exists(result_dir):
-#     os.mkdir(result_dir)
-# filename = output_name + '_' + str(number_of_modes) + '_' + str(int(fs)) + '.h5'
-# filename = os.path.join(result_dir, filename)
-# start = time.clock()
-# save_simu_to_hdf5(guitar_model, string,
-#                    matlab_data=matlab_input,
-#                    filename=filename, filt_frets=filt_frets,
-#                    restit=restit)
-# print('write (hdf5) file ' + filename + ': {0}.'.format(time.clock() - start))
+        pos += 1
+    k += 1
+    simu.nextStep()
+print('End of simulation process. Duration: ', time.clock() - start_time)
+print("nb steps", k)
+# --- Output dir for results ---
+result_dir = os.getcwd()# + '/temp'
+if not os.path.exists(result_dir):
+    os.mkdir(result_dir)
+filename = output_name + '_' + str(number_of_modes) + '_' + str(int(fs)) + '.h5'
+filename = os.path.join(result_dir, filename)
+start = time.clock()
+save_simu_to_hdf5(guitar_model, string,
+                   matlab_data=matlab_input,
+                   filename=filename, filt_frets=filt_frets,
+                   restit=restit)
+print('write (hdf5) file ' + filename + ': {0}.'.format(time.clock() - start))

@@ -199,3 +199,74 @@ def load_data(filename):
     time = np.asarray(h5source['times'])
     h5source.close()
     return data_ds, data_inter, time
+
+
+
+
+
+def compute_ak1(omega2, sigma, dt):
+    ak = 2. * np.exp(-dt * sigma) * np.cos(dt * np.sqrt(omega2 - sigma ** 2))
+    return ak
+
+
+def compute_ak2(omega2, sigma, dt):
+    expo = np.sqrt(sigma ** 2 - omega2) * dt
+    ak = np.exp(-dt * sigma) * (np.exp(expo) + np.exp(-expo))
+    return ak
+
+
+
+def compute_dtsigmastar(omega2, sigma, dt):
+    sigdt = sigma * dt
+    omega2dt2 = omega2 * (dt ** 2)
+    ek = np.exp(-2 * sigdt)
+    ak = compute_ak1(omega2, sigma, dt)
+    thetak = 2. / omega2dt2 - ak / (1 + ek - ak)
+    dtsigmastar = (1. + (1. - thetak) * omega2dt2 * 0.5) * (1 - ek) / (1 + ek)
+    return dtsigmastar, thetak
+
+def compute_iteration_matrix(omega2, sigma, dt):
+
+    # thetak
+    sigdt = sigma * dt
+    omega2dt2 = omega2 * (dt ** 2)
+    dtsigmastar, thetak = compute_dtsigmastar(omega2, sigma, dt)
+    wkk = 1 + dtsigmastar + 0.5 * (1 - thetak) * omega2dt2
+    invwkk = 1. / wkk
+    return invwkk
+
+
+def compute_fd_dtsigmastar(omega2, sigma, dt):
+
+    dtsig = dt*sigma
+    dt2omega2 = dt ** 2 * omega2
+    dtsigmastar = dtsig
+    dtsigmastar += dtsig * dt2omega2 / 12.
+    buff1 = dt2omega2 / 240 - dtsig ** 2 / 180
+    buff1 *= dt2omega2 * dtsig
+    dtsigmastar += buff1
+    c7 = dt2omega2 ** 3 * dtsig / 6048 - dt2omega2 ** 2 * dtsig ** 3 / 1512. + dt2omega2 * dtsig ** 5 / 1890.
+    print("neg ", c7)
+    return dtsigmastar
+
+
+def compute_fd_invwkk(omega2, sigma, dt):
+
+    dtsig = dt * sigma
+    dt2omega2 = dt ** 2 * omega2
+    fd_inv = 1 - dtsig
+    fd_inv += 2./3 * dtsig ** 2 - dt2omega2 / 12.
+    fd_inv += 1.12 * dt2omega2 * dtsig
+    fd_inv -= dtsig ** 3 / 3.
+    fd_inv += (dt2omega2 / (6. * np.sqrt(10))) ** 2
+    fd_inv -= (dt2omega2 / 20.) * dtsig ** 2
+    fd_inv += (dtsig ** 4) * 2. / 15.
+    fd_inv -= (dt2omega2 / (6. * np.sqrt(10))) ** 2 * dtsig
+    fd_inv += (dtsig ** 3) / 45 * dt2omega2
+    fd_inv -= (dtsig ** 5) / 45
+    fd_inv += dt2omega2 **3 / 20160. + dt2omega2 ** 2 * dtsig **2 / 630. - dt2omega2 * dtsig**4 / 126. + 4.*dtsig**6  / 315.
+    c7 = dt2omega2 ** 3 * dtsig / 20160. - dt2omega2**2*dtsig**3/1512. + dt2omega2 * dtsig**5/420. - dtsig**7 / 315.
+    print("neg ", c7)
+    return fd_inv
+
+

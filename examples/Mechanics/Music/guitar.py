@@ -354,7 +354,7 @@ class Guitar(sk.Model):
         default_integrator = moreau_bilbao
         if default_integrator == 'MoreauJean':
             default_integrator = moreau_jean
-
+        
         # (2) Time discretisation --
         t0 = time_range[0]
         tend = time_range[1]
