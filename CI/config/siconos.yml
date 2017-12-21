@@ -12,6 +12,10 @@ match:
   
 ##############################################################################
 # Set commands used to install and update packages
+
+# note as driver.py --print=script may be a replacement for rc.*
+# we must keep standard updater and installer availables
+
 installer:
   any:
     fedora: dnf --setopt=deltarpm=false install -y
@@ -19,13 +23,13 @@ installer:
     nixos/nix: nix-env -i
 
 updater:
-  launchpad:
+  # specific installer for sicono package from launchpad
+  siconos-source:
     ubuntu-16.04: printf "deb http://ppa.launchpad.net/siconos/siconos-daily/ubuntu xenial main\ndeb-src http://ppa.launchpad.net/siconos/siconos-daily/ubuntu xenial main\ndeb http://ppa.launchpad.net/siconos/fclib-daily/ubuntu xenial main\ndeb-src http://ppa.launchpad.net/siconos/fclib-daily/ubuntu xenial main " >> /etc/apt/sources.list && apt-get update -y
+    fedora:  dnf --setopt=deltarpm=false install -y dnf-plugins-core && dnf -y copr enable xhub/siconos-git
   llvm-toolchain:
     debian-sid: printf "deb http://llvm.org/apt/unstable/ llvm-toolchain-3.8 main\ndeb-src http://llvm.org/apt/unstable/ llvm-toolchain-3.8 main" >> /etc/apt/sources.list && apt-get update -y
     debian-jessie: printf "deb http://llvm.org/apt/jessie/ llvm-toolchain-jessie-3.8 main\ndeb-src http://llvm.org/apt/jessie/ llvm-toolchain-jessie-3.8 main" >> /etc/apt/sources.list && apt-get update -y
-  xhub:
-    fedora:  dnf --setopt=deltarpm=false install -y dnf-plugins-core && dnf -y copr enable xhub/siconos-git
   any:
     debian: apt-get update -y
     nixos/nix: nix-env -qa > /tmp/nix-packages # ?
@@ -81,10 +85,6 @@ env:
       - PERL5LIB="/root/.opam/system/lib/perl5"
       - OCAML_TOPLEVEL_PATH="/root/.opam/system/lib/toplevel"
       - PATH="/root/.opam/system/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
-
-  launchpad:
-    any:
-      - LAUNCHPAD=1
 
   # see http://pages.cs.wisc.edu/~ferris/path/LICENSE
   path:
@@ -534,3 +534,7 @@ pkgs:
         make &&
         make install
 
+  # dummy package needed for the specific installer for siconos package
+  siconos-source:
+    any:
+      command:
