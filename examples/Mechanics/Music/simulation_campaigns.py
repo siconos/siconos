@@ -77,8 +77,10 @@ def post_process_simus(filepath, remote_results_path, local_results_path, output
         node = current[2].strip('luke')
         coeff = current[4]
         name = current[5]
-        if name.find('one_contact') >= 0:
+        if name.find('one') >= 0:
             prefix = 'single_e' + name[-3:] + '_999_'
+        elif name.find('bass') >= 0:
+            prefix = 'bass_e' + name[-3:] + '_862_'
         else:
             prefix = name[:-3] + '_e' + name[-3:] + '_862_'
         resultsfile = os.path.join('F_' + freq + '_id_' + jobid)
