@@ -788,7 +788,12 @@ extern "C"
  /** Compute the  1-norm of a sparse matrix = max (sum (abs (A))), largest column sum of a matrix (the sparse format for now)
    * \param A the matrix 
    * \return the norm*/
-  double NM_norm(NumericsMatrix* const A);
+  double NM_norm_1(NumericsMatrix* const A);
+
+ /** Compute the  inf-norm of a sparse matrix = max (sum (abs (A^T))), largest row  sum of a matrix (the sparse format for now)
+   * \param A the matrix
+   * \return the norm*/
+  double NM_norm_inf(NumericsMatrix* const A);
 
 
 

@@ -326,7 +326,7 @@ int _globalLineSearchSparseGP(
     DEBUG_PRINTF("C1=%i\t C2=%i\n",C1,C2);
     if(C1 && C2)
     {
-      numerics_printf_verbose(1, "---- GFC3D - NSN_AC - global line search success. Number of ls iteration = %i  alpha = %.10e, q = %.10e\n",
+      numerics_printf_verbose(1, "---- GFC3D - NSN_AC - global line search success. Number of ls iteration = %i  alpha = %.10e, q = %.10e",
                               iter,
                               alpha[0], q);
       
@@ -353,7 +353,7 @@ int _globalLineSearchSparseGP(
     }
 
   }
-  numerics_printf_verbose(0,"---- GFC3D - NSN_AC - global line search unsuccessful. Max number of ls iteration reached  = %i  with alpha = %.10e \n",
+  numerics_printf_verbose(1,"---- GFC3D - NSN_AC - global line search unsuccessful. Max number of ls iteration reached  = %i  with alpha = %.10e",
                   maxiter_ls, alpha[0]);
   
 
@@ -414,7 +414,7 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(
   double tolerance = options->dparam[SICONOS_DPARAM_TOL];
   assert(tolerance > 0);
 
-  numerics_printf_verbose(1,"---- GFC3D - NSN_AC","- Start with tolerance = %g\n", tolerance);
+
 
   DEBUG_PRINTF("M sizes = %i x %i \n", problem->M->size0, problem->M->size1 );
   DEBUG_PRINTF("H sizes = %i x %i \n", problem->H->size0, problem->H->size1 );
@@ -432,13 +432,21 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(
   unsigned int problem_size = n+2*m;
 
   double norm_q = cblas_dnrm2(n , problem->q , 1);
-  DEBUG_EXPR(double norm_b = cblas_dnrm2(m , problem->b , 1););
 
-  DEBUG_PRINTF("norm of q = %e\n", norm_q);
-  DEBUG_PRINTF("norm of b = %e\n", norm_b);
+  double norm_b = cblas_dnrm2(m , problem->b , 1);
 
-  DEBUG_PRINTF("norm of M = %e\n", NM_norm(problem->M));
-  DEBUG_PRINTF("norm of H = %e\n", NM_norm(problem->H));
+  numerics_printf_verbose(1,"---- GFC3D - NSN_AC - Problem information");
+  numerics_printf_verbose(1,"---- GFC3D - NSN_AC - 1-norm of M = %g norm of q = %g ", NM_norm_1(problem->M), norm_q);
+  numerics_printf_verbose(1,"---- GFC3D - NSN_AC - inf-norm of M = %g ", NM_norm_inf(problem->M));
+
+  numerics_printf_verbose(1,"---- GFC3D - NSN_AC - 1-norm of H = %g norm of b = %g ", NM_norm_1(problem->H), norm_b);
+  numerics_printf_verbose(1,"---- GFC3D - NSN_AC - inf-norm of H = %g ", NM_norm_inf(problem->H));
+
+  /* DEBUG_PRINTF("norm of q = %e\n", norm_q); */
+  /* DEBUG_PRINTF("norm of b = %e\n", norm_b); */
+
+  /* DEBUG_PRINTF("norm of M = %e\n", NM_norm(problem->M)); */
+  /* DEBUG_PRINTF("norm of H = %e\n", NM_norm(problem->H)); */
 
 
   assert((int)m == problem->numberOfContacts * problem->dimension);
@@ -630,7 +638,7 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(
   memcpy(globalVelocity_k, globalVelocity,  n * sizeof(double));
   memcpy(velocity_k, velocity,  m * sizeof(double));
   memcpy(reaction_k, reaction, m * sizeof(double));
-
+  numerics_printf_verbose(1,"---- GFC3D - NSN_AC - Start with tolerance = %g", tolerance);
   while(iter++ < itermax)
   {
     /* /\* store the current solution *\/ */
@@ -693,9 +701,7 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(
       cblas_dcopy_msan(problem_size, psi, 1, tmp3, 1);
       NM_gemv(1., AA, rhs, 1., tmp3);
       linear_solver_residual = cblas_dnrm2(problem_size, tmp3, 1);
-
-      DEBUG_PRINTF("fc3d esolve: linear equation residual = %g\n",
-              cblas_dnrm2(problem_size, tmp3, 1));
+      numerics_printf_verbose(1, "---- GFC3D - NSN_AC iteration %d, linear_solver_residual = %g ", iter, linear_solver_residual);
       /* for the component wise scaled residual: cf mumps &
        * http://www.netlib.org/lapack/lug/node81.html */
     }
@@ -768,8 +774,8 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(
 
     if(options->dparam[SICONOS_DPARAM_RESIDU] >= tolerance)
     {
-      numerics_printf_verbose(1, "---- GFC3D - NSN_AC iteration %d, residual = %g >= %g , linear solver residual = %g",
-                              iter, options->dparam[1], tolerance, linear_solver_residual);
+      numerics_printf_verbose(1, "---- GFC3D - NSN_AC iteration %d, residual = %g >= %g" ,
+                              iter, options->dparam[1], tolerance);
     }
     else 
     {
@@ -853,7 +859,7 @@ int gfc3d_nonsmooth_Newton_AlartCurnier_setDefaultSolverOptions(
   options->iparam[SICONOS_FRICTION_3D_NSN_FORMULATION] = SICONOS_FRICTION_3D_NSN_FORMULATION_ALARTCURNIER_STD;     /* 0 STD AlartCurnier, 1 JeanMoreau, 2 STD generated, 3 JeanMoreau generated */
   options->iparam[SICONOS_FRICTION_3D_NSN_FORMULATION] = SICONOS_FRICTION_3D_NSN_FORMULATION_JEANMOREAU_STD;     /* 0 STD AlartCurnier, 1 JeanMoreau, 2 STD generated, 3 JeanMoreau generated */
   options->iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH] = SICONOS_FRICTION_3D_NSN_LINESEARCH_GOLDSTEINPRICE;
-  options->iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH_MAXITER]=100;
+  options->iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH_MAXITER]=1000;
 
 
 

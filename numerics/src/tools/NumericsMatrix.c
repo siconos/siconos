@@ -2917,7 +2917,7 @@ size_t NM_nnz(const NumericsMatrix* M)
 
 
 
-double NM_norm(NumericsMatrix* A)
+double NM_norm_1(NumericsMatrix* A)
 {
   assert(A);
 
@@ -2930,6 +2930,31 @@ double NM_norm(NumericsMatrix* A)
     assert(A->storageType == NM_SPARSE);
 
     return cs_norm(NM_csc(A));
+  }
+  default:
+    {
+      assert(0 && "NM_norm unknown storageType");
+    }
+  }
+  return NAN;
+}
+double NM_norm_inf(NumericsMatrix* A)
+{
+  assert(A);
+
+
+  switch (A->storageType)
+  {
+
+  case NM_SPARSE:
+  {
+    assert(A->storageType == NM_SPARSE);
+
+    cs_transpose(NM_csc(A), 1);
+    double norm = cs_norm(cs_transpose(NM_csc(A), 1));
+    NM_clearCSCTranspose(A);
+    return norm;
+
   }
   default:
     {
