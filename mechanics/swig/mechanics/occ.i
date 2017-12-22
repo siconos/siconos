@@ -128,7 +128,6 @@ typedef Interaction Interaction;
 %feature("nodirector") Geometer;
 PY_FULL_REGISTER(Geometer, Mechanics);
 
-
 %feature("nodirector") ContactShapeDistance;
 PY_FULL_REGISTER(ContactShapeDistance, Mechanics);
 
