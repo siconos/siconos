@@ -55,7 +55,7 @@ if(HAVE_SICONOS_MECHANICS)
     install(PROGRAMS ${SICONOS_SWIG_ROOT_DIR}/io/siconos_filter   DESTINATION bin)
     install(PROGRAMS ${SICONOS_SWIG_ROOT_DIR}/io/siconos_run      DESTINATION bin)
     if (WITH_MECHANISMS)
-      install(PROGRAMS ${SICONOS_SWIG_ROOT_DIR}/io/pprocess.py DESTINATION bin RENAME siconos_pprocess)
+      install(PROGRAMS ${SICONOS_SWIG_ROOT_DIR}/io/siconos_pprocess DESTINATION bin RENAME siconos_pprocess)
     endif()
 
     # automatic manpages using help2man
