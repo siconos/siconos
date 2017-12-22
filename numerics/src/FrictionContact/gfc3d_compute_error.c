@@ -30,13 +30,13 @@
 #include "numerics_verbose.h"
 #include "NumericsMatrix.h"
 
-
-/* #define DEBUG_STDOUT */
 /* #define DEBUG_NOCOLOR */
+/* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
 #include "debug.h"
 int gfc3d_compute_error(GlobalFrictionContactProblem* problem,
-                        double*  reaction , double*  velocity, double*  globalVelocity,
+                        double*  reaction , double*  velocity,
+                        double*  globalVelocity,
                         double tolerance,  double norm, double* restrict error)
 
 {
@@ -47,22 +47,33 @@ int gfc3d_compute_error(GlobalFrictionContactProblem* problem,
 
   gfc3d_init_workspace(problem);
 
+  double* tmp = problem->workspace->globalVelocity;
+
+  
   /* Computes error = dnorm2( GlobalVelocity -M^-1( q + H reaction)*/
   int nc = problem->numberOfContacts;
   int m = nc * 3;
   int n = problem->M->size0;
   double *mu = problem->mu;
   double *q = problem->q;
+  
   NumericsMatrix *H = problem->H;
+  NumericsMatrix *M = problem->M;
 
-  cblas_dcopy_msan(n, q, 1, globalVelocity, 1);
+
+  cblas_dcopy_msan(n, q, 1, tmp , 1);
   if (nc >0)
   {
-    NM_gemv(1.0, H, reaction, 1.0, globalVelocity);
+    NM_gemv(1.0, H, reaction, 1.0, tmp);
   }
 
-  CHECK_RETURN(!NM_gesv_expert(problem->M, globalVelocity, NM_KEEP_FACTORS));
-  *error = 0.0;
+  NM_gemv(-1.0, M, globalVelocity, 1.0, tmp);
+  *error = cblas_dnrm2(n,tmp,1);
+  *error = *error* *error;
+  DEBUG_PRINTF("square norm of -M v + H R + q = %e\n", *error);
+  
+  /* CHECK_RETURN(!NM_gesv_expert(problem->M, globalVelocity, NM_KEEP_FACTORS)); */
+ 
 
   if (nc >0)
   {
@@ -80,16 +91,28 @@ int gfc3d_compute_error(GlobalFrictionContactProblem* problem,
                                          error,  worktmp);
     }
   }
+
+  DEBUG_PRINTF("square of the error = %e\n", *error);
+  
   /* Done, taking the square root */
   *error = sqrt(*error);
 
+  DEBUG_PRINTF("error before normalization = %e\n", *error);
+  
   DEBUG_PRINTF("norm = %12.8e\n", norm);
   if (fabs(norm) > DBL_EPSILON)
     *error /= norm;
 
+  if (verbose)
+  {
+    if (tolerance * norm <  DBL_EPSILON)
+      numerics_warning("gfc3d_compute_error", "The required relative precision (tolerance * norm = %e) is below  the machine accuracy", tolerance * norm);
+  }
+
+  
   if (*error > tolerance)
   {
-    /*       if (verbose > 0) printf(" Numerics - gfc3d_compute_error failed: error = %g > tolerance = %g.\n",*error, tolerance); */
+    /*       if (verbose > 0) printf("Numerics - gfc3d_compute_error failed: error = %g > tolerance = %g.\n",*error, tolerance); */
     return 1;
   }
   else

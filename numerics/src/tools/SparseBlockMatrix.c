@@ -146,7 +146,7 @@ void SBM_gemv(unsigned int sizeX, unsigned int sizeY, double alpha, const Sparse
       /* Computes y[] += currentBlock*x[] */
       if (nbRows == 3 && nbColumns == 3)
       {
-        mvp3x3(A->block[blockNum], &x[posInX], &y[posInY]);
+        mvp_alpha3x3(alpha, A->block[blockNum], &x[posInX], &y[posInY]);
       }
       else
       {
