@@ -56,6 +56,20 @@ bool read(const std::string& fileName, const std::string& mode, SiconosMatrix& m
 */
 bool write(const std::string& fileName, const std::string& mode, const SiconosMatrix& m, const std::string& outputType = "python");
 
+/** Function to load data from a file and compare it with the provided
+ * data.  Returns true if the file was loaded and the comparison was
+ * performed.  Caller needs to check diff <= epsilon to verify the
+ * result.
+ * \param data The data to compare against the file.
+ * \param filename The name of the file to load and compare.
+ * \param epsilon The comparison threshold.
+ * \param verbose True to print verbose output.
+ * \param ref If provided, loaded matrix is returned in this pointer.
+ * \param diff If non-zero, scalar-valued difference is returned in this location.
+ */
+bool compareRefFile(const SimpleMatrix& data, std::string filename, double epsilon,
+                    double& error, SP::SimpleMatrix* ref=0,
+                    std::string mode="ascii", bool verbose=true);
 }
 
 #endif
