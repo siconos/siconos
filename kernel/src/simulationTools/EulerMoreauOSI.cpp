@@ -458,7 +458,7 @@ double EulerMoreauOSI::computeResidu()
 	  // 1 - Compute the free residu (purely on the "smooth" dynamics)
 
 	  residuFree = *(fonlds.x()); // last saved value for x: could be x_k or x_{k+1}^alpha
-	  SiconosVector& xold = *fonlds.xMemory()->getSiconosVector(0);
+	  const SiconosVector& xold = fonlds.xMemory().getSiconosVector(0);
 	  residuFree -= xold; // state x_k (at previous time step)
 
 	  SP::SiconosMatrix M = fonlds.M();
@@ -531,7 +531,7 @@ double EulerMoreauOSI::computeResidu()
 	  else
 	    {
 	      scal(-h*_gamma, *fonlds.r(), residu, false);
-	      scal(-h*(1-_gamma), *fonlds.rMemory()->getSiconosVector(0), residu, false);
+	      scal(-h*(1-_gamma), fonlds.rMemory().getSiconosVector(0), residu, false);
 	    }
 	  
 	  normResidu = residu.norm2();
@@ -553,7 +553,7 @@ double EulerMoreauOSI::computeResidu()
 	  if(foltids.A())  // residuFree += -h( A (\theta x_{k+1}^{\alpha} + (1-\theta) x_k)
 	    {
 	      SP::SiconosMatrix A = foltids.A();
-	      prod(*A, *foltids.xMemory()->getSiconosVector(0), residu, true);
+	      prod(*A, foltids.xMemory().getSiconosVector(0), residu, true);
 	      double coef = -h * (1 - _theta);
 	      scal(coef, residu, residuFree, false);
 
@@ -563,7 +563,7 @@ double EulerMoreauOSI::computeResidu()
 	    }
 
 	  // residuFree += M(x_{k+1}^{\alpha} - x_k)
-	  residu = *(foltids.x()) - *foltids.xMemory()->getSiconosVector(0);
+	  residu = *(foltids.x()) - foltids.xMemory().getSiconosVector(0);
 	  SP::SiconosMatrix M = foltids.M();
 	  if(M)
 	    {
@@ -647,12 +647,12 @@ void EulerMoreauOSI::computeFreeState()
 	  DEBUG_PRINT("EulerMoreauOSI::computeFreeState xfree <- residuFree\n");
 	  DEBUG_EXPR(xfree.display());
 
-	  if(_useGamma)
-	    {
-	      SiconosVector& rold = *d.rMemory()->getSiconosVector(0);
-	      double coeff = -h * (1 - _gamma);
-	      scal(coeff, rold, xfree, false); //  xfree += -h(1-gamma)*rold
-	    }
+      if (_useGamma)
+      {
+        const SiconosVector& rold = d.rMemory().getSiconosVector(0);
+        double coeff = -h * (1 - _gamma);
+        scal(coeff, rold, xfree, false); //  xfree += -h(1-gamma)*rold
+      }
 
 
 	  // At this point xfree = (ResiduFree - h(1-gamma)*rold)
@@ -700,8 +700,8 @@ void EulerMoreauOSI::computeFreeState()
 
 	      deltaxForRelation = xfree;
 
-	      scal(_gamma, deltaxForRelation, deltaxForRelation);
-	      SiconosVector& xold = *d.xMemory()->getSiconosVector(0);
+        scal(_gamma, deltaxForRelation, deltaxForRelation);
+        const SiconosVector& xold = d.xMemory().getSiconosVector(0);
 
 	      scal(1.0 - _gamma, xold, deltaxForRelation, false);
 	    }

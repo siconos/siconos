@@ -36,8 +36,13 @@
 // #define DEBUG_MESSAGES
 #include "debug.h"
 
+#include <boost/make_shared.hpp>
+
 /// @cond
 using namespace RELATION;
+
+/// for non-owned shared pointers
+static void null_deleter(const SiconosVector *) {}
 
 double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
 {
@@ -80,15 +85,16 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
       accFree.zero();
 
       // get left state from memory
-      SP::SiconosVector qold = d->qMemory()->getSiconosVector(0);
-      SP::SiconosVector vold = d->velocityMemory()->getSiconosVector(0); // right limit
+      // (copy because computeForces takes non-const pointer)
+      SiconosVector qold = d->qMemory().getSiconosVector(0);
+      SiconosVector vold = d->velocityMemory().getSiconosVector(0); // right limit
 
       DEBUG_EXPR(accFree.display());
       DEBUG_EXPR(qold->display());
       DEBUG_EXPR(vold->display());
 
       /* compute the force and store in accFree */
-      d->computeForces(told, qold, vold);
+      d->computeForces(told, qold.shared_from_this(), vold.shared_from_this());
       DEBUG_EXPR(d->forces()->display());
       accFree += *(d->forces());
 
@@ -117,8 +123,10 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
       SiconosVector& accFree = *workVectors[OneStepIntegrator::free];
 
       // get left state from memory
-      SP::SiconosVector qold = d->qMemory()->getSiconosVector(0);
-      SP::SiconosVector vold = d->twistMemory()->getSiconosVector(0); // right limit
+      const SiconosVector& qold = d->qMemory().getSiconosVector(0);
+      const SiconosVector& vold = d->twistMemory().getSiconosVector(0); // right limit
+      std11::shared_ptr<SiconosVector> pqold(&*(SiconosVector*)&qold, null_deleter);
+      std11::shared_ptr<SiconosVector> pvold(&*(SiconosVector*)&vold, null_deleter);
 
       DEBUG_EXPR(accFree.display());
       DEBUG_EXPR(qold->display());
@@ -128,7 +136,7 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
       work_tdg->zero();
       DEBUG_EXPR(work_tdg->display());
 
-      d->computeForces(told, qold, vold);
+      d->computeForces(told, pqold, pvold);
       DEBUG_EXPR(d->forces()->display());
 
       accFree += *(d->forces());
@@ -260,31 +268,31 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
       SiconosVector& accFree = *workVectors[OneStepIntegrator::free];
 
       // get left state from memory
-      SP::SiconosVector qold = d->qMemory()->getSiconosVector(0);
-      SP::SiconosVector vold = d->velocityMemory()->getSiconosVector(0);
+      const SiconosVector& qold = d->qMemory().getSiconosVector(0);
+      const SiconosVector& vold = d->velocityMemory().getSiconosVector(0);
 
       // initialize *it->residuFree and predicted right velocity (left limit)
-      SP::SiconosVector v = d->velocity(); //contains velocity v_{k+1}^- and not free velocity
+      SiconosVector& v = *d->velocity(); //contains velocity v_{k+1}^- and not free velocity
       residuFree.zero();
-      v->zero();
+      v.zero();
 
       DEBUG_EXPR(accFree.display());
       DEBUG_EXPR(qold->display());
       DEBUG_EXPR(vold->display());
 
 
-      residuFree -= 0.5 * h* accFree;
+      residuFree -= 0.5 * h*accFree;
 
-      *v += h* accFree;
-      *v += *vold;
+      v += h * accFree;
+      v += vold;
 
       DEBUG_EXPR(residuFree.display());
-      DEBUG_EXPR(v->display());
+      DEBUG_EXPR(v.display());
 
       SP::SiconosVector q = d->q(); // POINTER CONSTRUCTOR : contains position q_{k+1}
-      *q = *qold;
+      *q = qold;
 
-      scal(0.5 * h, *vold + *v, *q, false);
+      scal(0.5 * h, vold + v, *q, false);
       DEBUG_EXPR(q->display());
     }
     else if(dsType == Type::NewtonEulerDS)
@@ -293,47 +301,47 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
       SiconosVector& residuFree = *workVectors[OneStepIntegrator::residu_free];// contains residu without nonsmooth effect
       SiconosVector& accFree = *workVectors[OneStepIntegrator::free];
       // get left state from memory
-      SP::SiconosVector qold = d->qMemory()->getSiconosVector(0);
-      SP::SiconosVector vold = d->twistMemory()->getSiconosVector(0);
+      const SiconosVector& qold = d->qMemory().getSiconosVector(0);
+      const SiconosVector& vold = d->twistMemory().getSiconosVector(0);
 
       // initialize *it->residuFree and predicted right velocity (left limit)
-      SP::SiconosVector v = d->twist(); //contains velocity v_{k+1}^- and not free velocity
+      SiconosVector& v = *d->twist(); //contains velocity v_{k+1}^- and not free velocity
       residuFree.zero();
-      v->zero();
+      v.zero();
 
       DEBUG_EXPR(accFree.display());
-      DEBUG_EXPR(qold->display());
-      DEBUG_EXPR(vold->display());
+      DEBUG_EXPR(qold.display());
+      DEBUG_EXPR(vold.display());
 
 
       residuFree -= 0.5 * h* accFree;
 
-      *v += h* accFree;
-      *v += *vold;
+      v += h * accFree;
+      v += vold;
 
       DEBUG_EXPR(residuFree.display());
-      DEBUG_EXPR(v->display());
+      DEBUG_EXPR(v.display());
 
       //first step consists in computing  \dot q.
       //second step consists in updating q.
       //
       SP::SiconosMatrix T = d->T();
-      SP::SiconosVector dotq = d->dotq();
-      prod(*T, *v, *dotq, true);
+      SiconosVector& dotq = *d->dotq();
+      prod(*T, v, dotq, true);
 
-      SP::SiconosVector dotqold = d->dotqMemory()->getSiconosVector(0);
+      const SiconosVector& dotqold = d->dotqMemory().getSiconosVector(0);
 
-      SP::SiconosVector q = d->q(); // POINTER CONSTRUCTOR : contains position q_{k+1}
-      *q = *qold;
+      SiconosVector& q = *d->q(); // POINTER CONSTRUCTOR : contains position q_{k+1}
+      q = qold;
 
-      scal(0.5 * h, *dotqold + *dotq, *q, false);
+      scal(0.5 * h, dotqold + dotq, q, false);
       DEBUG_PRINT("new q before normalizing\n");
-      DEBUG_EXPR(q->display());
+      DEBUG_EXPR(q.display());
       //q[3:6] must be normalized
       d->normalizeq();
       d->computeT();
       DEBUG_PRINT("new q after normalizing\n");
-      DEBUG_EXPR(q->display());
+      DEBUG_EXPR(q.display());
 
 
 
@@ -416,8 +424,8 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
         SiconosVector& residuFree = *workVectors[OneStepIntegrator::residu_free];
         SP::SiconosVector v = d->velocity();
         SP::SiconosVector q = d->q();
-        SP::SiconosVector qold = d->qMemory()->getSiconosVector(0);
-        SP::SiconosVector vold = d->velocityMemory()->getSiconosVector(0); // right limit
+        const SiconosVector& qold = d->qMemory().getSiconosVector(0);
+        const SiconosVector& vold = d->velocityMemory().getSiconosVector(0); // right limit
         //residuFree.zero();
         //v->zero();
 
@@ -444,14 +452,14 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
         SiconosVector& residuFree = *workVectors[OneStepIntegrator::residu_free];
         SP::SiconosVector v = d->twist();
         SP::SiconosVector q = d->q();
-        SP::SiconosVector qold = d->qMemory()->getSiconosVector(0);
-        SP::SiconosVector vold = d->twistMemory()->getSiconosVector(0); // right limit
+        const SiconosVector qold = d->qMemory().getSiconosVector(0);
+        const SiconosVector vold = d->twistMemory().getSiconosVector(0); // right limit
 
         //residuFree.zero();
         v->zero();
         SP::SiconosVector work_tdg = workVectors[OneStepIntegrator::free_tdg];
         assert(work_tdg);
-        residuFree = 0.5 * h* *work_tdg;
+        residuFree = 0.5 * h * *work_tdg;
         work_tdg->zero();
 
 	d->computeForces(t, q, v);
@@ -463,7 +471,7 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
 	    d->update_inverse_mass();
 	    d->inverseMass()->PLUForwardBackwardInPlace(*work_tdg);
 	  }
-        residuFree -= 0.5 * h**work_tdg;
+        residuFree -= 0.5 * h * *work_tdg;
         DEBUG_EXPR(residuFree.display());
       }
       else

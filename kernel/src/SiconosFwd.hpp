@@ -86,8 +86,6 @@ DEFINE_SPTR(BlockVector)
 DEFINE_SPTR(OSNSMatrix)
 
 DEFINE_SPTR(SiconosMemory)
-#include <vector>
-typedef std::vector<SP::SiconosMemory> VectorOfMemories;
 
 DEFINE_SPTR(NewtonEulerR)
 DEFINE_SPTR(NewtonEulerFrom1DLocalFrameR)

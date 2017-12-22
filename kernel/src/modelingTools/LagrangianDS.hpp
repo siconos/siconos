@@ -141,10 +141,10 @@ protected:
   SP::SiconosVector _velocity0;
 
   /** memory of previous coordinates of the system */
-  SP::SiconosMemory _qMemory;
+  SiconosMemory _qMemory;
 
   /** memory of previous velocities of the system */
-  SP::SiconosMemory _velocityMemory;
+  SiconosMemory _velocityMemory;
 
   /** "Reaction", generalized forces or imuplses due to the non smooth law
    * The index corresponds to the kinematic
@@ -210,7 +210,7 @@ protected:
   SP::SiconosMatrix _jacobianqDotForces;
 
   /** memory of previous forces of the system */
-  SP::SiconosMemory _forcesMemory;
+  SiconosMemory _forcesMemory;
 
   /** Boundary condition applied to a dynamical system*/
   SP::BoundaryCondition _boundaryConditions;
@@ -699,18 +699,20 @@ public:
   /*! @name Memory vectors management
     @{ */
 
-  /** get all the values of the state vector q stored in memory
+  /** get all the values of the state vector q stored in memory.
+   * note: not const due to SchatzmanPaoliOSI::initializeDynamicalSystem
    *  \return a memory
    */
-  inline SP::SiconosMemory qMemory() const
+  inline SiconosMemory& qMemory()
   {
     return _qMemory;
   }
 
-  /** get all the values of the state vector velocity stored in memory
+  /** get all the values of the state vector velocity stored in memory.
+   * note: not const due to SchatzmanPaoliOSI::initializeDynamicalSystem
    *  \return a memory
    */
-  inline SP::SiconosMemory velocityMemory() const
+  inline SiconosMemory& velocityMemory()
   {
     return _velocityMemory;
   }
@@ -719,7 +721,7 @@ public:
    * \param level
    *  \return a memory
    */
-  inline SP::SiconosMemory pMemory(unsigned int level) const
+  inline const SiconosMemory& pMemory(unsigned int level)
   {
     return _pMemory[level];
   }
@@ -727,7 +729,7 @@ public:
   /** get forces in memory buff
    *  \return pointer on a SiconosMemory
    */
-  inline SP::SiconosMemory forcesMemory()
+  inline const SiconosMemory& forcesMemory()
   {
     return _forcesMemory;
   }

@@ -184,8 +184,8 @@ int main(int argc, char* argv[])
     SP::SiconosVector y = inter->y(0);
     SP::SiconosVector yDot = inter->y(1);
     // When a non-smooth event occurs, pre-impact values are saved in memory vectors at pos. 1:
-    SP::SiconosVector qMem = arm->getQMemoryPtr()->getSiconosVector(1);
-    SP::SiconosVector velMem = arm->getVelocityMemoryPtr()->getSiconosVector(1);
+    const SiconosVector& qMem = arm->getQMemoryPtr().getSiconosVector(1);
+    const SiconosVector& velMem = arm->getVelocityMemoryPtr().getSiconosVector(1);
     SP::SiconosVector yMem = inter->getYOldPtr(0);
     SP::SiconosVector yDotMem = inter->getYOldPtr(1);
 
@@ -222,12 +222,12 @@ int main(int argc, char* argv[])
       if (nonSmooth)
       {
         dataPlot(k, 0) =  s->startingTime();
-        dataPlot(k, 1) = (*qMem)(0);
-        dataPlot(k, 2) = (*velMem)(0);
-        dataPlot(k, 3) = (*qMem)(1);
-        dataPlot(k, 4) = (*velMem)(1);
-        dataPlot(k, 5) = (*qMem)(2);
-        dataPlot(k, 6) = (*velMem)(2);
+        dataPlot(k, 1) = qMem(0);
+        dataPlot(k, 2) = velMem(0);
+        dataPlot(k, 3) = qMem(1);
+        dataPlot(k, 4) = velMem(1);
+        dataPlot(k, 5) = qMem(2);
+        dataPlot(k, 6) = velMem(2);
         dataPlot(k, 7) = (*yMem)(0);
         dataPlot(k, 8) = (*yMem)(1);
         dataPlot(k, 9) = (*yDotMem)(0);

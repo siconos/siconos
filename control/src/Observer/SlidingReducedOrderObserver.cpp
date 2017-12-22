@@ -165,7 +165,7 @@ void SlidingReducedOrderObserver::process()
     //
     // But first we need to reset the state to the
     // previous value (at t_k)
-    _DS->setX(*_DS->xMemory()->getSiconosVector(0));
+    _DS->setX(_DS->xMemory().getSiconosVector(0));
     // integrate with the new innovation term
     _simulation->computeOneStep();
 

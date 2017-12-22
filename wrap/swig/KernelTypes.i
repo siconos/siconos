@@ -189,6 +189,7 @@ PY_REGISTER_WITHOUT_DIRECTOR(SiconosMatrix, Kernel);
 PY_REGISTER_WITHOUT_DIRECTOR(SimpleMatrix, Kernel);
 PY_REGISTER_WITHOUT_DIRECTOR(SiconosVector, Kernel);
 PY_REGISTER_WITHOUT_DIRECTOR(BlockVector, Kernel);
+PY_REGISTER_WITHOUT_DIRECTOR(SiconosMemory, Kernel);
 
 // set the base of the pyarray to a PyCapsule or PyCObject created from the shared_ptr
 %{
@@ -1281,7 +1282,8 @@ struct IsDense : public Question<bool>
 %template(VectorOfBlockVectors) std::vector< std11::shared_ptr<BlockVector> >;
 %template(VectorOfMatrices) std::vector< std11::shared_ptr<SiconosMatrix> >;
 %template(VectorOfSMatrices) std::vector< std11::shared_ptr<SimpleMatrix> >;
-%template(VectorOfMemories) std::vector< std11::shared_ptr<SiconosMemory> >;
+%shared_ptr(std::vector< SiconosVector >);
+%template(VectorOfMemories) std::vector< SiconosMemory >;
 
 // Other vector types
 %template(UnsignedIntVector) std::vector<unsigned int>;

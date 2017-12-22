@@ -53,7 +53,9 @@ void LinearSMC::actuate()
   }
 
   *(_DS_SMC->x()) = _sensor->y();
-  *(_DS_SMC->xMemory()->getSiconosVector(0)) = _sensor->y();
+
+  // SS: Really need to modify stored xMemory?
+  _DS_SMC->xMemory().getSiconosVectorMutable(0) = _sensor->y();
 
   Type::Siconos dsType = Type::value(*_DS_SMC);
   if (dsType == Type::FirstOrderNonLinearDS)

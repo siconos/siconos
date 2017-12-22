@@ -6,6 +6,9 @@
 #include "SiconosKernel.hpp"
 SICONOS_IO_REGISTER(SiconosException,
   (_reportMsg))
+SICONOS_IO_REGISTER(SiconosMemory,
+  (_indx)
+  (_nbVectorsInMemory))
 SICONOS_IO_REGISTER(BlockVector,
   (_sizeV)
   (_tabIndex)
@@ -18,11 +21,6 @@ SICONOS_IO_REGISTER_WITH_BASES(BlockMatrix,(SiconosMatrix),
   (_tabRow))
 SICONOS_IO_REGISTER(SiconosMatrix,
   (_num))
-SICONOS_IO_REGISTER(SiconosMemory,
-  (_indx)
-  (_nbVectorsInMemory)
-  (_size)
-  (_vectorMemory))
 SICONOS_IO_REGISTER(GraphProperties,
   (symmetric))
 SICONOS_IO_REGISTER(DynamicalSystemProperties,
@@ -615,9 +613,9 @@ template <class Archive>
 void siconos_io_register_generated_Kernel(Archive& ar)
 {
   ar.register_type(static_cast<SiconosException*>(NULL));
+  ar.register_type(static_cast<SiconosMemory*>(NULL));
   ar.register_type(static_cast<BlockVector*>(NULL));
   ar.register_type(static_cast<BlockMatrix*>(NULL));
-  ar.register_type(static_cast<SiconosMemory*>(NULL));
   ar.register_type(static_cast<GraphProperties*>(NULL));
   ar.register_type(static_cast<DynamicalSystemProperties*>(NULL));
   ar.register_type(static_cast<InteractionProperties*>(NULL));

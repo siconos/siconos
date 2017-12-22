@@ -428,9 +428,9 @@ void MoreauJeanBilbaoOSI::computeFreeState()
     VectorOfVectors& work_ds = *_dynamicalSystemsGraph->properties(*dsi).workVectors;
 
     // Get velocity computed at the beginning of the time step.
-    SiconosVector& v_i = *lldds.velocityMemory()->getSiconosVector(0);
-    SiconosVector& q_i = *lldds.qMemory()->getSiconosVector(0);
-    SiconosVector& stiffness = *lldds.stiffness();
+    const SiconosVector& v_i = lldds.velocityMemory().getSiconosVector(0);
+    const SiconosVector& q_i = lldds.qMemory().getSiconosVector(0);
+    const SiconosVector& stiffness = *lldds.stiffness();
     // Get iteration matrix
     const DynamicalSystemsGraph::VDescriptor& dsv = _dynamicalSystemsGraph->descriptor(ds);
     SimpleMatrix& inv_iteration_matrix = *_dynamicalSystemsGraph->properties(dsv).W;
@@ -530,7 +530,7 @@ void MoreauJeanBilbaoOSI::updatePosition(DynamicalSystem& ds)
   SiconosVector& v = *d.velocity();
   SiconosVector& q = *d.q();
   //  -> get positions at the beginning of the time step
-  SiconosVector& qold = *d.qMemory()->getSiconosVector(0);
+  const SiconosVector& qold = d.qMemory().getSiconosVector(0);
   // update positions
   scal(time_step, v, q, true) ;
   q += qold;

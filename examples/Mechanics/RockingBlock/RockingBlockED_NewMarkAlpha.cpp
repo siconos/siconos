@@ -235,12 +235,12 @@ int main(int argc, char* argv[])
       if (NSEvent)
       {
         DataPlot(k, 0) = EDscheme->startingTime(); // instant at non-smooth event
-        DataPlot(k, 1) = (*(RockingBlock->qMemory()->getSiconosVector(1)))(0);      // Position X
-        DataPlot(k, 2) = (*(RockingBlock->qMemory()->getSiconosVector(1)))(1);      // Position Y
-        DataPlot(k, 3) = (*(RockingBlock->qMemory()->getSiconosVector(1)))(2);      // Angle theta
-        DataPlot(k, 4) = (*(RockingBlock->velocityMemory()->getSiconosVector(1)))(0); // Velocity Vx
-        DataPlot(k, 5) = (*(RockingBlock->velocityMemory()->getSiconosVector(1)))(1); // Velocity Vy
-        DataPlot(k, 6) = (*(RockingBlock->velocityMemory()->getSiconosVector(1)))(2); // Angular velocity
+        DataPlot(k, 1) = RockingBlock->qMemory().getSiconosVector(1)(0);      // Position X
+        DataPlot(k, 2) = RockingBlock->qMemory().getSiconosVector(1)(1);      // Position Y
+        DataPlot(k, 3) = RockingBlock->qMemory().getSiconosVector(1)(2);      // Angle theta
+        DataPlot(k, 4) = RockingBlock->velocityMemory().getSiconosVector(1)(0); // Velocity Vx
+        DataPlot(k, 5) = RockingBlock->velocityMemory().getSiconosVector(1)(1); // Velocity Vy
+        DataPlot(k, 6) = RockingBlock->velocityMemory().getSiconosVector(1)(2); // Angular velocity
         //EDscheme->update(1);
         k++;
         ++NumberNSEvent;

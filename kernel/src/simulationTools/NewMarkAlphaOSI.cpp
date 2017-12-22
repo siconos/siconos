@@ -703,54 +703,56 @@ void NewMarkAlphaOSI::computeCoefsDenseOutput(SP::DynamicalSystem ds)
 {
   double h = _simulation->nextTime() - _simulation->startingTime();
   Type::Siconos dsType = Type::value(*ds);    // Type of the current DS
-  SP::SiconosVector q_n, dotq_n, ddotq_n, q_np1, dotq_np1, ddotq_np1;
   SP::SiconosVector _vec(new SiconosVector(ds->dimension()));
   VectorOfMatrices& workMatrices = *_dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).workMatrices;
   VectorOfVectors& workVectors = *_dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).workVectors;
   if((dsType == Type::LagrangianDS) || (dsType == Type::LagrangianLinearTIDS))
   {
     SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS>(ds);
-    q_n = d->qMemory()->getSiconosVector(0); // q_n
-    dotq_n = d->velocityMemory()->getSiconosVector(0); // dotq_n
-    //ddotq_n = d->workspace(DynamicalSystem::acce_memory); // ddotq_n
+
+    const SiconosVector&
+      q_n( d->qMemory().getSiconosVector(0) ),                // q_n
+      dotq_n( d->velocityMemory().getSiconosVector(0) ),      // dotq_n
+      //ddotq_n = d->workspace(DynamicalSystem::acce_memory); // ddotq_n
+      q_np1( *d->q() ),                                       // q_{n+1}
+      dotq_np1( *d->velocity() ),                             // dotq_{n+1}
+      ddotq_np1( *d->acceleration() );                        // ddotq_{n+1}
+
     SiconosVector& ddotq_n = *workVectors[OneStepIntegrator::acce_memory];
 
-    q_np1 = d->q(); // q_{n+1}
-    dotq_np1 = d->velocity(); // dotq_{n+1}
-    ddotq_np1 = d->acceleration(); // ddotq_{n+1}
     SP::SiconosMatrix _CoeffsDense = workMatrices[OneStepIntegrator::dense_output_coefficients];
     //d->workMatrix(OneStepIntegrator::dense_output_coefficients); // matrix of coefficients [a0 a1 a2 a3 a4 a5]
-    if(_CoeffsDense->size(1) != 6)
+    if (_CoeffsDense->size(1) != 6)
     {
       RuntimeException::selfThrow("In NewMarkAlphaOSI::computeCoefsDenseOutput: the number of polynomial coeffcients considered here must equal to 6 (dense output polynomial of order 5)");
     }
     //a0 = q_n
-    (*_vec) = (*q_n);
+    (*_vec) = q_n;
     _CoeffsDense->setCol(0, (*_vec));
     std::cout << "a0: ";
     _vec->display();
     //a1 = h*dotq_n
-    (*_vec) = h * (*dotq_n);
+    (*_vec) = h * dotq_n;
     _CoeffsDense->setCol(1, (*_vec));
     std::cout << "a1: ";
     _vec->display();
     //a2 = 0.5*h^2*ddotq_n
-    (*_vec) = (0.5 * h * h) * (ddotq_n);
+    (*_vec) = (0.5 * h * h) * ddotq_n;
     _CoeffsDense->setCol(2, (*_vec));
     std::cout << "a2: ";
     _vec->display();
     //a3 = -10*q_n - 6*h*dotq_n - 1.5*h^2*ddotq_n + 10*q_{n+1} - 4*h*dotq_{n+1} + 0.5*h^2*ddotq_{n+1}
-    (*_vec) = (-10.0) * (*q_n) - (6.0 * h) * (*dotq_n) - (1.5 * h * h) * (ddotq_n) + 10.0 * (*q_np1) - (4.0 * h) * (*dotq_np1) + (0.5 * h *h) * (*ddotq_np1);
+    (*_vec) = (-10.0) * q_n - (6.0 * h) * dotq_n - (1.5 * h * h) * ddotq_n + 10.0 * q_np1 - (4.0 * h) * dotq_np1 + (0.5 * h *h ) * ddotq_np1;
     _CoeffsDense->setCol(3, (*_vec));
     std::cout << "a3: ";
     _vec->display();
     //a4 = 15*q_n + 8*h*dotq_n + 1.5*h^2*ddotq_n - 15*q_{n+1} + 7*h*dotq_{n+1} - h^2*ddotq_{n+1}
-    (*_vec) = 15.0 * (*q_n) + (8.0 * h) * (*dotq_n) + (1.5 * h *h) * (ddotq_n) - 15.0 * (*q_np1) + (7.0 * h) * (*dotq_np1) - h*h * (*ddotq_np1);
+    (*_vec) = 15.0 * q_n + (8.0 * h) * dotq_n + (1.5 * h *h) * ddotq_n - 15.0 * q_np1 + (7.0 * h) * dotq_np1 - h*h * ddotq_np1;
     _CoeffsDense->setCol(4, (*_vec));
     std::cout << "a4: ";
     _vec->display();
     //a5 = -6*q_n - 3*h*dotq_n - 0.5*h^2*ddotq_n + 6*q_{n+1} - 3*h*dotq_{n+1} + 0.5*h^2*ddotq_{n+1}
-    (*_vec) = (-6.0) * (*q_n) - (3.0 * h) * (*dotq_n) - (0.5 * h*h) * (ddotq_n) + 6.0 * (*q_np1) - (3.0 * h) * (*dotq_np1) + (0.5 * h*h) * (*ddotq_np1);
+    (*_vec) = (-6.0) * q_n - (3.0 * h) * dotq_n - (0.5 * h*h) * ddotq_n + 6.0 * q_np1 - (3.0 * h) * dotq_np1 + (0.5 * h*h) * ddotq_np1;
     _CoeffsDense->setCol(5, (*_vec));
     std::cout << "a5: ";
     _vec->display();

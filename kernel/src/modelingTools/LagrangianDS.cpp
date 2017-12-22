@@ -605,16 +605,16 @@ void LagrangianDS::initMemory(unsigned int steps)
     std::cout << "Warning : LagragianDS::initMemory with size equal to zero" <<std::endl;
   else
   {
-    _qMemory.reset(new SiconosMemory(steps, _ndof));
-    _velocityMemory.reset(new SiconosMemory(steps, _ndof));
-    _forcesMemory.reset(new SiconosMemory(steps, _ndof));
+    _qMemory.setMemorySize(steps, _ndof);
+    _velocityMemory.setMemorySize(steps, _ndof);
+    _forcesMemory.setMemorySize(steps, _ndof);
     _pMemory.resize(3);
 
     //TODO : initMemory in graph + f(OSI/level)
     for(unsigned int level=0; level<3; ++level)
     {
-      if(!_pMemory[level])
-        _pMemory[level].reset(new SiconosMemory(steps, _ndof));
+      if(_pMemory[level].size()==0)
+        _pMemory[level].setMemorySize(steps, _ndof);
     }
 
     //swapInMemory();
@@ -623,24 +623,16 @@ void LagrangianDS::initMemory(unsigned int steps)
 
 void LagrangianDS::swapInMemory()
 {
-  _qMemory->swap(*_q[0]);
-  _velocityMemory->swap(*_q[1]);
-  if(_forces && _forcesMemory)
-    _forcesMemory->swap(*_forces);
-  if(_p[0] && _pMemory[0])
-  {
-    _pMemory[0]->swap(*_p[0]);
-  }
-  if(_p[1] && _pMemory[1])
-  {
-    _pMemory[1]->swap(*_p[1]);
-  }
-  if(_p[2] && _pMemory[2])
-  {
-    _pMemory[2]->swap(*_p[2]);
-  }
-  if(_x[0] && _xMemory)
-    _xMemory->swap(*_x[0]);
+  _qMemory.swap(*_q[0]);
+  _velocityMemory.swap(*_q[1]);
+  _forcesMemory.swap(*_forces);
+
+  // initialization of the reaction force due to the non smooth law
+  // note: these are a no-op if either memory or vector is null
+  _pMemory[0].swap(_p[0]);
+  _pMemory[1].swap(_p[1]);
+  _pMemory[2].swap(_p[2]);
+  _xMemory.swap(_x[0]);
 }
 
 void LagrangianDS::resetAllNonSmoothParts()

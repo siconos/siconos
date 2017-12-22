@@ -326,7 +326,7 @@ void D1MinusLinearOSI::computeFreeState()
 
 
       // get left state from memory
-      SiconosVector& vold = *d->velocityMemory()->getSiconosVector(0); // right limit
+      const SiconosVector& vold = d->velocityMemory().getSiconosVector(0); // right limit
       DEBUG_EXPR(vold.display());
       SiconosVector& residuFree = *workVectors[OneStepIntegrator::residu_free];
       SiconosVector &vfree  = *d->velocity(); // POINTER CONSTRUCTOR : contains free velocity
@@ -349,7 +349,7 @@ void D1MinusLinearOSI::computeFreeState()
       SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS> (ds);
 
       // get left state from memory
-      SiconosVector& vold = *d->twistMemory()->getSiconosVector(0); // right limit
+      const SiconosVector& vold = d->twistMemory().getSiconosVector(0); // right limit
       DEBUG_EXPR(vold.display());
 
 
