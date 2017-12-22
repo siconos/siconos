@@ -81,8 +81,10 @@ def post_process_simus(filepath, remote_results_path, local_results_path, output
             prefix = 'single_e' + name[-3:] + '_999_'
         elif name.find('bass') >= 0:
             prefix = 'bass_e' + name[-3:] + '_862_'
+        elif name.find('fretless') >= 0:
+            prefix = 'fretless_e' + name[-3:] + '_862_'
         else:
-            prefix = name[:-3] + '_e' + name[-3:] + '_862_'
+            raise IOError('Unknown simulation type.')
         resultsfile = os.path.join('F_' + freq + '_id_' + jobid)
         fname = prefix + freq.split('.')[0] + '.h5'
         fullname  = os.path.join(resultsfile, fname)
