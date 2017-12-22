@@ -103,7 +103,7 @@ void convexQP_ADMM(ConvexQP* problem,
   if (rho == 0.0)
     numerics_error("ConvexQP_ADMM", "dparam[SICONOS_CONVEXQP_PGOC_RHO] must be nonzero");
 
-  double tau=1;
+  /* double tau=1; */
 
 
   /* double * z_k; */

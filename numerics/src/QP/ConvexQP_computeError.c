@@ -124,7 +124,7 @@ int convexQP_computeError_full(
   }
   double *utmp =  options->dWork;
   double *utmp1 = &(options->dWork[m]) ;
-  double *wtmp =  &(options->dWork[m+m]);
+  /* double *wtmp =  &(options->dWork[m+m]); */
 
 
   if (!problem->istheNormConvexQPset)
