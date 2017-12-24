@@ -2949,10 +2949,8 @@ double NM_norm_inf(NumericsMatrix* A)
   case NM_SPARSE:
   {
     assert(A->storageType == NM_SPARSE);
-
-    cs_transpose(NM_csc(A), 1);
     double norm = cs_norm(cs_transpose(NM_csc(A), 1));
-    NM_clearCSCTranspose(A);
+    assert(norm >=0);
     return norm;
 
   }
