@@ -46,6 +46,6 @@
 
 #include "cs.h"
 
-#include "SparseMatrix.h"
+#include "CSparseMatrix.h"
 
 #endif // SparseMatrix_internal_H

@@ -32,34 +32,6 @@ def test_from_csr1():
     assert SBM_get_value(SBM,2,1) == 8
     assert SBM_get_value(SBM,2,2) == 9
 
-def test_from_csr1():
-
-    from siconos.numerics import SBM_from_csparse, SBM_get_value
-    from scipy.sparse.csr import csr_matrix
-
-    M = csr_matrix([[1,2,3],
-                    [4,5,6],
-                    [7,8,9]])
-
-    # print(M.indices)
-    # print(M.indptr)
-    # print(M.data)
-    
-    blocksize =3
-
-    r,SBM = SBM_from_csparse(blocksize,M)
-
-    assert SBM_get_value(SBM,0,0) == 1
-    assert SBM_get_value(SBM,0,1) == 2
-    assert SBM_get_value(SBM,0,2) == 3
-    assert SBM_get_value(SBM,1,0) == 4
-    assert SBM_get_value(SBM,1,1) == 5
-    assert SBM_get_value(SBM,1,2) == 6
-    assert SBM_get_value(SBM,2,0) == 7
-    assert SBM_get_value(SBM,2,1) == 8
-    assert SBM_get_value(SBM,2,2) == 9
-
-    
 def test_from_csc1():
 
     from siconos.numerics import SBM_from_csparse, SBM_get_value
@@ -122,21 +94,40 @@ def test_from_csc162x162():
     M = load_npz(os.path.join(working_dir, 'data/csc162x162.npz'))
 
     #M = load_npz('data/csc162x162.npz')
-    #print(linalg.eigs(M+M.transpose(),  which='LR')[1])
-    
+    #print(linalg.eigs(M+M.transpose(),  which='LR')[1])   
     #print(M.indices)
     #print(M.indptr)
     #print(M.data)
+
+    
     blocksize =9
     r,SBM = SBM_from_csparse(blocksize,M)
     assert SBM_get_value(SBM,0,0) == M[0,0]
     assert SBM_get_value(SBM,161,161) == M[161,161]
-
-
+    
     #print(SBM_get_value(SBM,0,0))
     #NM_display(SBM)
-   
 
+    
+#  # scipy csr 3x3 block
+# def test_from_csc162x162_to_dense():
+#     import siconos.numerics as sn
+#     from siconos.numerics import SBM_from_csparse, SBM_get_value, NM_display, NM_read_in_filename
+#     from scipy.sparse import csr_matrix, load_npz, linalg
+
+#     M = load_npz(os.path.join(working_dir, 'data/csc162x162.npz'))
+
+#     #M = load_npz('data/csc162x162.npz')
+#     #print(linalg.eigs(M+M.transpose(),  which='LR')[1])   
+#     #print(M.indices)
+#     #print(M.indptr)
+#     #print(M.data)
+#     NM_csc=None
+#     NM_read_in_filename(NM_csc,'data/NM_csc_162x162.dat')
+
+    
+#     Mdense= M.todense()
+#     print(Mdense)
     
 def test_SBM_to_sparse1():
     from siconos.numerics import SBM_get_value, SBM_new_from_file, SBM_print, SBM_to_sparse
@@ -190,6 +181,7 @@ def test_SBM_to_SBM_from_csparse():
 
 
 
-#test_from_csc1()
+#test_from_csc1(
 #test_from_csr1()
 #test_from_csc162x162()
+#test_from_csc162x162_to_dense()

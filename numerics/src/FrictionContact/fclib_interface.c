@@ -22,14 +22,14 @@
 
 #define DEBUG_MESSAGES
 
-#include "SparseMatrix_internal.h"
+#include "CSparseMatrix_internal.h"
 
 // avoid a conflict with old csparse.h in case fclib includes it
 #define _CS_H
 
 #include "debug.h"
 #ifdef WITH_FCLIB
-#include "SparseMatrix.h"
+#include "CSparseMatrix.h"
 #include "fclib_interface.h"
 #include "FrictionContactProblem.h"
 #include "NumericsMatrix.h"
@@ -291,7 +291,7 @@ GlobalFrictionContactProblem* from_fclib_global(const struct fclib_global* fclib
   {
     /* compressed colums */
     problem->M->matrix2->csc= M;
-    problem->M->matrix2->origin = NS_CSC;
+    problem->M->matrix2->origin = NSM_CSC;
     M->nz = (CS_INT) fclib_problem->M->nz;
     M->p = (CS_INT*) malloc(sizeof(CS_INT)*(M->n+1));
     int_to_csi(fclib_problem->M->p, M->p, (unsigned) (M->n+1));
@@ -313,7 +313,7 @@ GlobalFrictionContactProblem* from_fclib_global(const struct fclib_global* fclib
   {
     /* triplet */
     problem->M->matrix2->triplet=M;
-    problem->M->matrix2->origin = NS_TRIPLET;
+    problem->M->matrix2->origin = NSM_TRIPLET;
     M->nz = (CS_INT) fclib_problem->M->nz;
     M->p = (CS_INT*) malloc(sizeof(CS_INT)*M->nzmax);
     int_to_csi(fclib_problem->M->p, M->p, (unsigned) M->nzmax);
@@ -336,7 +336,7 @@ GlobalFrictionContactProblem* from_fclib_global(const struct fclib_global* fclib
   {
     /* compressed colums */
     problem->H->matrix2->csc= H;
-    problem->H->matrix2->origin = NS_CSC;
+    problem->H->matrix2->origin = NSM_CSC;
     H->p = (CS_INT*) malloc(sizeof(CS_INT)*(H->n+1));
     int_to_csi(fclib_problem->H->p, H->p, (unsigned) (H->n+1));
   }
@@ -350,7 +350,7 @@ GlobalFrictionContactProblem* from_fclib_global(const struct fclib_global* fclib
   {
     /* triplet */
     problem->H->matrix2->triplet=H;
-    problem->H->matrix2->origin = NS_TRIPLET;
+    problem->H->matrix2->origin = NSM_TRIPLET;
     H->p = (CS_INT*) malloc(sizeof(CS_INT)*H->nzmax);
     int_to_csi(fclib_problem->H->p, H->p, (unsigned) H->nzmax);
   }

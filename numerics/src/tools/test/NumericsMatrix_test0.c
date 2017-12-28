@@ -40,7 +40,6 @@ int main(void)
   for (i = 0 ; i < nmm; i++)
   {
     NMM[i] = NM_new();
-    Mread[i] = NM_new();
   }
 
 
@@ -68,9 +67,11 @@ int main(void)
     FILE * finput = fopen("testprintInfile.dat", "r");
     NM_read_in_file(NMM[i], finput);
     fclose(finput);
+    
     FILE * finput2 = fopen("testprintInfile.dat", "r");
-    NM_new_from_file(Mread[i], finput2);
+    Mread[i] = NM_new_from_file(finput2);
     fclose(finput2);
+    
     char  filename[50] = "testprintInfileName.dat";
     NM_write_in_filename(NMM[i], filename);
     NM_read_in_filename(NMM[i], filename);

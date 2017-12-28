@@ -68,7 +68,7 @@ void convexQP_ADMM(ConvexQP* problem,
     problem->m = n;
     problem->A= NM_create(NM_SPARSE,n,n);
     NM_triplet_alloc(problem->A,0);
-    problem->A->matrix2->origin= NS_TRIPLET;
+    problem->A->matrix2->origin= NSM_TRIPLET;
 
     for (int k =0; k< n; k++)
     {
@@ -164,7 +164,7 @@ void convexQP_ADMM(ConvexQP* problem,
       Atrans-> size0 = m;
       Atrans-> size1 = n;
       NM_csc_alloc(Atrans, 0);
-      Atrans->matrix2->origin = NS_CSC;
+      Atrans->matrix2->origin = NSM_CSC;
       Atrans->matrix2->csc = NM_csc_trans(A);
       DEBUG_EXPR(NM_display(Atrans));
     }

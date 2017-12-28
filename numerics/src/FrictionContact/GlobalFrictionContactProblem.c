@@ -69,13 +69,10 @@ int globalFrictionContact_newFromFile(GlobalFrictionContactProblem* problem, FIL
   problem->dimension = d;
   CHECK_IO(fscanf(file, "%d\n", &nc), &info);
   problem->numberOfContacts = nc;
-  problem->M = NM_new();
-
-  info = NM_new_from_file(problem->M, file);
+  problem->M = NM_new_from_file( file);
   if (info) goto fail;
 
-  problem->H = NM_new();
-  info = NM_new_from_file(problem->H, file);
+  problem->H =  NM_new_from_file(file);
   if (info) goto fail;
 
   problem->q = (double *) malloc(problem->M->size1 * sizeof(double));

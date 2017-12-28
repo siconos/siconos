@@ -190,7 +190,7 @@ namespace std
   }
 }
 %import NumericsMatrix.h
-%import SparseMatrix.h
+%import CSparseMatrix.h
 %import SparseBlockMatrix.h
 
  // segfaults...

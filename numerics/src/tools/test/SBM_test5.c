@@ -27,7 +27,7 @@
 #include "NumericsMatrix.h"
 #include <math.h>
 #include "numericsMatrixTestFunction.h"
-#include "SparseMatrix.h"
+#include "CSparseMatrix.h"
 #include "SparseBlockMatrix.h"
 
 #define nnz 10

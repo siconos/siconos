@@ -90,9 +90,7 @@ int AVI_newFromFile(AffineVariationalInequalities* avi, FILE* file)
 
   CHECK_IO(fscanf(file, "%d\n", &n));
   avi->size = n;
-  avi->M = NM_new();
-
-  NM_new_from_file(avi->M, file);
+  avi->M = NM_new_from_file(file);
 
   avi->q = (double *) malloc(avi->M->size1 * sizeof(double));
   for (i = 0; i < avi->M->size1; i++)

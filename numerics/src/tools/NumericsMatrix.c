@@ -23,7 +23,7 @@
 #include <stdint.h>
 #include <string.h>
 
-#include "SparseMatrix_internal.h"
+#include "CSparseMatrix_internal.h"
 #include "NumericsMatrix_internal.h"
 #include "NumericsSparseMatrix.h"
 #include "SiconosCompat.h"
@@ -77,7 +77,7 @@ void NM_prod_mv_3x3(int sizeX, int sizeY, NumericsMatrix* A,
     break;
   /* coordinate */
     case NM_SPARSE:
-      cs_aaxpy(alpha, NM_csc(A), x, beta, y);
+      CSparseMatrix_aaxpy(alpha, NM_csc(A), x, beta, y);
     break;
 
     default:
@@ -186,7 +186,7 @@ void NM_row_prod_no_diag(size_t sizeX, size_t sizeY, int block_start, size_t row
     }
 
     CSparseMatrix* M;
-    if (A->matrix2->origin == NS_CSR)
+    if (A->matrix2->origin == NSM_CSR)
     {
       M = NM_csr(A);
     }
@@ -287,7 +287,7 @@ void NM_row_prod_no_diag3(size_t sizeX, int block_start, size_t row_start, Numer
     x[is] = 0.;
 
     CSparseMatrix* M;
-    if (A->matrix2->origin == NS_CSR)
+    if (A->matrix2->origin == NSM_CSR)
     {
       M = NM_csr(A);
     }
@@ -367,7 +367,7 @@ void NM_row_prod_no_diag1x1(size_t sizeX, int block_start, size_t row_start, Num
     x[row_start] = 0.;
 
     CSparseMatrix* M;
-    if (A->matrix2->origin == NS_CSR)
+    if (A->matrix2->origin == NSM_CSR)
     {
       M = NM_csr(A);
     }
@@ -515,24 +515,24 @@ void NM_zentry(NumericsMatrix* M, int i, int j, double val)
     assert(M->matrix2);
     switch (M->matrix2->origin)
     {
-    case NS_TRIPLET:
+    case NSM_TRIPLET:
     {
       assert(M->matrix2->triplet);
-      CHECK_RETURN(cs_zentry(M->matrix2->triplet, i, j, val));
+      CHECK_RETURN(CSparseMatrix_zentry(M->matrix2->triplet, i, j, val));
       break;
     }
-    case NS_CSC:
+    case NSM_CSC:
     {
       assert(M->matrix2->csc);
-      CHECK_RETURN(cs_zentry(NM_triplet(M), i, j, val));
-      M->matrix2->origin= NS_TRIPLET;
+      CHECK_RETURN(CSparseMatrix_zentry(NM_triplet(M), i, j, val));
+      M->matrix2->origin= NSM_TRIPLET;
       NM_clearCSC(M);
       //NM_display(M);
       //NM_csc_alloc(M,M->matrix2->triplet->nz);
-      //M->matrix2->origin= NS_CSC;
+      //M->matrix2->origin= NSM_CSC;
       NM_csc(M);
 
-      M->matrix2->origin= NS_CSC;
+      M->matrix2->origin= NSM_CSC;
       NM_clearTriplet(M);
 
       //NM_display(M);
@@ -579,7 +579,7 @@ double NM_get_value(NumericsMatrix* M, int i, int j)
     assert(M->matrix2);
     switch (M->matrix2->origin)
     {
-    case NS_TRIPLET:
+    case NSM_TRIPLET:
     {
       assert(M->matrix2->triplet);
       assert(i <M->matrix2->triplet->m );
@@ -598,7 +598,7 @@ double NM_get_value(NumericsMatrix* M, int i, int j)
       return 0.0;
       break;
     }
-    case NS_CSC:
+    case NSM_CSC:
     {
       assert(M->matrix2->csc);
       CS_INT * Mi =   M->matrix2->csc->i;
@@ -642,8 +642,14 @@ bool NM_equal(NumericsMatrix* A, NumericsMatrix* B)
   {
     for (int j =0; j< A->size1 ; j++)
     {
-      //printf("error = %e\n", fabs(NM_get_value(A, i, j) - NM_get_value(B, i, j)));
-      if (fabs(NM_get_value(A, i, j) - NM_get_value(B, i, j)) >= DBL_EPSILON) return false;
+      DEBUG_PRINTF("error %i %i = %e\n",i,j, fabs(NM_get_value(A, i, j) - NM_get_value(B, i, j)));
+      if (fabs(NM_get_value(A, i, j) - NM_get_value(B, i, j)) >= DBL_EPSILON)
+      {
+        DEBUG_PRINTF("A %i %i = %e\n",i,j, NM_get_value(A, i, j));
+        DEBUG_PRINTF("B %i %i = %e\n",i,j, NM_get_value(B, i, j));
+        DEBUG_PRINTF("error %i %i = %e\n",i,j, fabs(NM_get_value(A, i, j) - NM_get_value(B, i, j)));
+        return false;
+      }
     }
   }
   return true;
@@ -700,19 +706,19 @@ void NM_display(const NumericsMatrix* const m)
     printf("========== storageType = NM_SPARSE\n");
     switch (m->matrix2->origin)
     {
-    case NS_TRIPLET:
+    case NSM_TRIPLET:
     {
-      printf("========== origin =  NS_TRIPLET\n");
+      printf("========== origin =  NSM_TRIPLET\n");
       break;
     }
-    case NS_CSC:
+    case NSM_CSC:
     {
-      printf("========== origin =  NS_CSC\n");
+      printf("========== origin =  NSM_CSC\n");
       break;
     }
-    case NS_CSR:
+    case NSM_CSR:
     {
-      printf("========== origin =  NS_CSR\n");
+      printf("========== origin =  NSM_CSR\n");
       break;
     }
     default:
@@ -790,11 +796,11 @@ void NM_display_row_by_row(const NumericsMatrix* const m)
 
 void NM_write_in_file(const NumericsMatrix* const m, FILE* file)
 {
-  DEBUG_PRINT("\n  ========== printInFile(const NumericsMatrix* const m, FILE* file) start\n");
+  DEBUG_PRINT("\n  ========== NM_write_in_file(const NumericsMatrix* const m, FILE* file) start\n");
 
   if (! m)
   {
-    fprintf(stderr, "Numerics, NumericsMatrix printInFile failed, NULL input.\n");
+    fprintf(stderr, "Numerics, NM_write_in_file failed, NULL input.\n");
     exit(EXIT_FAILURE);
   }
 
@@ -824,32 +830,16 @@ void NM_write_in_file(const NumericsMatrix* const m, FILE* file)
   }
   case NM_SPARSE:
   {
-    assert(m->matrix2);
-    if (m->matrix2->triplet)
-    {
-      cs_printInFile(m->matrix2->triplet, 0, file);
-    }
-    else if (m->matrix2->csc)
-    {
-      cs_printInFile(m->matrix2->csc, 0, file);
-    }
-    else if (m->matrix2->trans_csc)
-    {
-      cs_printInFile(m->matrix2->trans_csc, 0, file);
-    }
-    else
-    {
-      fprintf(stderr, "display for sparse matrix: no matrix found!\n");
-    }
+    NSM_write_in_file(m->matrix2, file);
     break;
   }
   default:
   {
-    fprintf(stderr, "Numerics, NumericsMatrix printInFile failed, unknown storage type .\n");
+    fprintf(stderr, "Numerics, NM_write_in_file failed, unknown storage type .\n");
     exit(EXIT_FAILURE);
   }
   }
-  DEBUG_PRINT("\n  ========== printInFile(const NumericsMatrix* const m, FILE* file) end\n");
+  DEBUG_PRINT("\n  ========== NM_write_in_file(const NumericsMatrix* const m, FILE* file) end\n");
 
 }
 void NM_write_in_file_python(const NumericsMatrix* const m, FILE* file)
@@ -905,9 +895,23 @@ void NM_write_in_filename(const NumericsMatrix* const m, const char *filename)
   fclose(foutput);
 }
 
+void NM_read_in_filename(NumericsMatrix* const m, const char *filename)
+{
+  FILE* finput = fopen(filename, "r");
+  if (finput == NULL)
+  {
+    puts("Error while opening file");
+  }
+  else
+  {
+    NM_read_in_file(m, finput);
+    fclose(finput);
+  }
+}
+
 void NM_read_in_file(NumericsMatrix* const m, FILE *file)
 {
-  if (! m)
+  if (!m)
   {
     fprintf(stderr, "Numerics, NumericsMatrix NM_read_in_file failed, NULL input.\n");
     exit(EXIT_FAILURE);
@@ -925,28 +929,28 @@ void NM_read_in_file(NumericsMatrix* const m, FILE *file)
     {
       CHECK_IO(fscanf(file, "%le ", &(m->matrix0[i])));
     }
-
-
   }
   else if (storageType == NM_SPARSE_BLOCK)
   {
     SBM_read_in_file(m->matrix1, file);
   }
+  else if (storageType == NM_SPARSE)
+  {
+    NumericsMatrix * tmp = NM_new_from_file(file);
+    NM_copy(tmp,m);
+    NM_free(tmp);
+  }
+  else
+  {
+    printf("NM_read_in_file :: unknown matrix storage");
+    exit(EXIT_FAILURE);
+  }
 }
 
 
-int NM_new_from_file(NumericsMatrix* const m, FILE *file)
+NumericsMatrix* NM_new_from_file(FILE *file)
 {
-  if (! m)
-  {
-    fprintf(stderr, "Numerics, NumericsMatrix NM_new_from_file failed, NULL input.\n");
-    exit(EXIT_FAILURE);
-  }
-
-  if (m->storageType >= 0)
-  {
-    NM_free(m);
-  }
+  NumericsMatrix* m = NM_new();
 
   int storageType;
   size_t size0;
@@ -962,8 +966,8 @@ int NM_new_from_file(NumericsMatrix* const m, FILE *file)
   {
     CHECK_IO(fscanf(file, SN_SIZE_T_F "\t" SN_SIZE_T_F "\n", &size0, &size1), &info);
 
-    data = malloc(size1 * size0 * sizeof(double));
-    double* data_d = (double*) data;
+    data =  malloc(size1 * size0 * sizeof(double));
+    double* data_d = (double *) data;
 
     for (size_t i = 0; i < size1 * size0; ++i)
     {
@@ -977,20 +981,54 @@ int NM_new_from_file(NumericsMatrix* const m, FILE *file)
   }
   else
   {
-    fprintf(stderr, "newFromFile :: storageType %d not supported yet", storageType);
+    data = NSM_new_from_file(file);
   }
 
   NM_fill(m, storageType, (int)size0, (int)size1, data);
 
-  return info;
+  return m;
 }
 
-void NM_read_in_filename(NumericsMatrix* const m, const char *filename)
+NumericsMatrix* NM_new_from_filename(char * filename)
 {
   FILE* finput = fopen(filename, "r");
-  NM_new_from_file(m, finput);
-  fclose(finput);
+  if (finput == NULL)
+  {
+    puts("Error while opening file");
+  }
+  else
+  {
+    NumericsMatrix * A= NM_new_from_file(finput);
+    fclose(finput);
+    return A;
+    
+  }
+  return NULL;
 }
+
+NumericsMatrix* NM_create_from_file(FILE *file)
+{
+  return NM_new_from_file(file);
+}
+
+NumericsMatrix* NM_create_from_filename(char * filename)
+{
+  FILE* finput = fopen(filename, "r");
+  if (finput == NULL)
+  {
+    puts("Error while opening file");
+  }
+  else
+  {
+    NumericsMatrix * A= NM_create_from_file(finput);
+    fclose(finput);
+    return A;
+    
+  }
+  return NULL;
+}
+
+
 
 void NM_read_in_file_scilab(NumericsMatrix* const M, FILE *file)
 {
@@ -1024,7 +1062,7 @@ void NM_extract_diag_block(NumericsMatrix* M, int block_row_nb, size_t start_row
   }
   case NM_SPARSE:
   {
-    NM_sparse_extract_block(M, *Block, start_row, start_row, size, size);
+    NSM_extract_block(M, *Block, start_row, start_row, size, size);
     break;
   }
   default:
@@ -1067,7 +1105,7 @@ void NM_extract_diag_block3(NumericsMatrix* M, int block_row_nb, double ** Block
   case NM_SPARSE:
   {
     size_t start_row = (size_t)block_row_nb + block_row_nb + block_row_nb;
-    NM_sparse_extract_block(M, *Block, start_row, start_row, 3, 3);
+    NSM_extract_block(M, *Block, start_row, start_row, 3, 3);
     break;
   }
   default:
@@ -1121,7 +1159,7 @@ void NM_copy_diag_block3(NumericsMatrix* M, int block_row_nb, double ** Block)
   case NM_SPARSE:
   {
     size_t start_row = (size_t)block_row_nb + block_row_nb + block_row_nb;
-    NM_sparse_extract_block(M, *Block, start_row, start_row, 3, 3);
+    NSM_extract_block(M, *Block, start_row, start_row, 3, 3);
     break;
   }
   default:
@@ -1155,8 +1193,8 @@ void NM_add_to_diag3(NumericsMatrix* M, double alpha)
   }
   case NM_SPARSE:
   {
-    CS_INT* diag_indices = NM_sparse_diag_indices(M);
-    double* Mx = NM_sparse_data(M->matrix2);
+    CS_INT* diag_indices = NSM_diag_indices(M);
+    double* Mx = NSM_data(M->matrix2);
     for (size_t i = 0; i < n; ++i) Mx[diag_indices[i]] += alpha;
 
     break;
@@ -1194,7 +1232,7 @@ NumericsMatrix* NM_duplicate(NumericsMatrix* mat)
       data = SBM_new();
       break;
     case NM_SPARSE:
-      data = newNumericsSparseMatrix();
+      data = NSM_new();
       break;
     default:
       fprintf(stderr, "NM_duplicate :: storageType value %d not implemented yet !", mat->storageType);
@@ -1228,13 +1266,13 @@ NumericsMatrix* NM_create(int storageType, int size0, int size1)
   switch (storageType)
   {
     case NM_DENSE:
-      data = malloc(size0*size1*sizeof(double));
+      data = calloc(size0*size1,sizeof(double));
       break;
     case NM_SPARSE_BLOCK:
       data = SBM_new();
       break;
     case NM_SPARSE:
-      data = newNumericsSparseMatrix();
+      data = NSM_new();
       break;
     default:
       data=NULL;
@@ -1273,11 +1311,11 @@ void NM_fill(NumericsMatrix* M, int storageType, int size0, int size1, void* dat
         M->matrix2 = (NumericsSparseMatrix*) data;
         if (data)
         {
-          if (M->matrix2->origin == NS_UNKNOWN)
+          if (M->matrix2->origin == NSM_UNKNOWN)
           {
-            if (M->matrix2->triplet) { M->matrix2->origin = NS_TRIPLET; }
-            else if (M->matrix2->csc) { M->matrix2->origin = NS_CSC; }
-            else if (M->matrix2->csr) { M->matrix2->origin = NS_CSR; }
+            if (M->matrix2->triplet) { M->matrix2->origin = NSM_TRIPLET; }
+            else if (M->matrix2->csc) { M->matrix2->origin = NSM_CSC; }
+            else if (M->matrix2->csr) { M->matrix2->origin = NSM_CSR; }
           }
         }
         break;
@@ -1318,7 +1356,7 @@ void NM_clearSparse(NumericsMatrix* A)
 {
   if (A->matrix2)
   {
-    freeNumericsSparseMatrix(A->matrix2);
+    NSM_free(A->matrix2);
     free(A->matrix2);
     A->matrix2 = NULL;
   }
@@ -1374,7 +1412,7 @@ void NM_clearCSR(NumericsMatrix* A)
 
 void NM_clearSparseStorage(NumericsMatrix *A)
 {
-  if (A->matrix2) A->matrix2->origin = NS_UNKNOWN;
+  if (A->matrix2) A->matrix2->origin = NSM_UNKNOWN;
   NM_clearTriplet(A);
   NM_clearCSC(A);
   NM_clearCSCTranspose(A);
@@ -1390,20 +1428,60 @@ void NM_dense_to_sparse(const NumericsMatrix* const A, NumericsMatrix* B)
   {
     for (int j = 0; j < A->size1; ++j)
     {
-      CHECK_RETURN(cs_zentry(B->matrix2->triplet, i, j, A->matrix0[i + A->size0*j]));
+      CHECK_RETURN(CSparseMatrix_zentry(B->matrix2->triplet, i, j, A->matrix0[i + A->size0*j]));
     }
   }
 }
-void NM_to_dense(const NumericsMatrix* const A, NumericsMatrix* B)
+int NM_to_dense(const NumericsMatrix* const A, NumericsMatrix* B)
 {
-  assert(B->matrix0);
-  for (int i = 0; i < A->size0; ++i)
+  int info = 1;
+  if (!B->matrix0)
   {
-    for (int j = 0; j < A->size1; ++j)
-    {
-      B->matrix0[i+ j*A->size0] = NM_get_value((NumericsMatrix*) A,i,j);
-    }
+    B->matrix0 = (double *)calloc(A->size0*A->size1, sizeof(double));
   }
+  
+  assert(B->matrix0);
+
+  B->size0 = A->size0;
+  B->size1 = A->size1;
+  
+  switch (A->storageType)
+  {
+  case NM_DENSE:
+  {
+    NM_copy(A, B);
+    info=0;
+    break;
+  }
+  case NM_SPARSE_BLOCK:
+  {
+    for (int i = 0; i < A->size0; ++i)
+    {
+      for (int j = 0; j < A->size1; ++j)
+      {
+        B->matrix0[i+ j*A->size0] = NM_get_value((NumericsMatrix*) A,i,j);
+      }
+    }
+    info=0;
+    break;
+  }
+  case NM_SPARSE:
+  {
+    assert(A->matrix2);
+    info  = NSM_to_dense(A->matrix2, B->matrix0);
+    break;
+  }
+  default:
+  {
+    numerics_error("NM_to_dense","Unsupported storage type %d, exiting!\n", A->storageType);
+    exit(EXIT_FAILURE);
+  }
+  }
+
+
+  return info;
+  
+
 }
 
 
@@ -1455,7 +1533,7 @@ void NM_copy_sparse(const CSparseMatrix* const A, CSparseMatrix* B)
   memcpy(B->p, A->p, size_cpy * sizeof(CS_INT));
 }
 
-void NM_sparse_extract_block(NumericsMatrix* M, double* blockM, size_t pos_row, size_t pos_col,
+void NSM_extract_block(NumericsMatrix* M, double* blockM, size_t pos_row, size_t pos_col,
                              size_t block_row_size, size_t block_col_size)
 {
   assert(M);
@@ -1473,7 +1551,7 @@ void NM_sparse_extract_block(NumericsMatrix* M, double* blockM, size_t pos_row, 
 
 //  switch (Msparse->origin)
   {
-//  case NS_CSC:
+//  case NSM_CSC:
   {
     CSparseMatrix* Mcsc = NM_csc(M);
     assert(Mcsc);
@@ -1501,7 +1579,7 @@ void NM_sparse_extract_block(NumericsMatrix* M, double* blockM, size_t pos_row, 
 //    break;
   }
 //  default:
-//    printf("NM_sparse_extract_block :: unsupported matrix type %d\n", Msparse->origin);
+//    printf("NSM_extract_block :: unsupported matrix type %d\n", Msparse->origin);
 //    exit(EXIT_FAILURE);
   }
 }
@@ -1516,7 +1594,7 @@ void NM_copy_to_sparse(const NumericsMatrix* const A, NumericsMatrix* B)
   assert(B->storageType == NM_SPARSE);
   if (!B->matrix2)
   {
-    B->matrix2 = newNumericsSparseMatrix();
+    B->matrix2 = NSM_new();
   }
 
   switch (A->storageType)
@@ -1524,7 +1602,7 @@ void NM_copy_to_sparse(const NumericsMatrix* const A, NumericsMatrix* B)
   case NM_DENSE:
   {
     B->matrix2->triplet = cs_spalloc(0,0,1,1,1);
-    B->matrix2->origin = NS_TRIPLET;
+    B->matrix2->origin = NSM_TRIPLET;
     NM_dense_to_sparse(A, B);
     break;
   }
@@ -1707,14 +1785,14 @@ void NM_copy(const NumericsMatrix* const A, NumericsMatrix* B)
 
     if (!B->matrix2)
     {
-      B->matrix2 = newNumericsSparseMatrix();
+      B->matrix2 = NSM_new();
     }
 
     B->matrix2->origin = A->matrix2->origin;
 
     switch (A->matrix2->origin)
     {
-    case NS_TRIPLET:
+    case NSM_TRIPLET:
     {
       A_ = A->matrix2->triplet;
 
@@ -1726,7 +1804,7 @@ void NM_copy(const NumericsMatrix* const A, NumericsMatrix* B)
       B_ = B->matrix2->triplet;
       break;
     }
-    case NS_CSC:
+    case NSM_CSC:
     {
       assert (A->matrix2->csc);
 
@@ -1740,7 +1818,7 @@ void NM_copy(const NumericsMatrix* const A, NumericsMatrix* B)
       B_ = B->matrix2->csc;
       break;
     }
-    case NS_CSR:
+    case NSM_CSR:
     {
       assert (A->matrix2->csr);
 
@@ -1776,7 +1854,7 @@ void NM_copy(const NumericsMatrix* const A, NumericsMatrix* B)
     else
     {
       NM_clearTriplet(B);
-      if (A->matrix2->origin == NS_CSC) { NM_clearCSR(B); }
+      if (A->matrix2->origin == NSM_CSC) { NM_clearCSR(B); }
       else { NM_clearCSC(B); }
     }
 
@@ -1785,28 +1863,28 @@ void NM_copy(const NumericsMatrix* const A, NumericsMatrix* B)
   }
 }
 
-NumericsSparseMatrix* NM_sparse(NumericsMatrix* A)
+NumericsSparseMatrix* numericsSparseMatrix(NumericsMatrix* A)
 {
   if(!A->matrix2)
   {
-    A->matrix2 = newNumericsSparseMatrix();
+    A->matrix2 = NSM_new();
   }
   return A->matrix2;
 }
 
-NumericsSparseLinearSolverParams* NM_linearSolverParams(NumericsMatrix* A)
+NSM_linear_solver_params* NM_linearSolverParams(NumericsMatrix* A)
 {
-  if(!NM_sparse(A)->linearSolverParams)
+  if(!numericsSparseMatrix(A)->linearSolverParams)
   {
-    NM_sparse(A)->linearSolverParams = newNumericsSparseLinearSolverParams();
+    numericsSparseMatrix(A)->linearSolverParams = newNSM_linear_solver_params();
   }
-  return NM_sparse(A)->linearSolverParams;
+  return numericsSparseMatrix(A)->linearSolverParams;
 }
 
 
 CSparseMatrix* NM_triplet(NumericsMatrix* A)
 {
-  if (!NM_sparse(A)->triplet)
+  if (!numericsSparseMatrix(A)->triplet)
   {
     switch(A->storageType)
     {
@@ -1820,7 +1898,7 @@ CSparseMatrix* NM_triplet(NumericsMatrix* A)
       NM_clearCSR(A);
       NM_clearCSCTranspose(A);
 
-      A->matrix2->origin = NS_TRIPLET;
+      A->matrix2->origin = NSM_TRIPLET;
 
       A->matrix2->triplet = cs_spalloc(0,0,1,1,1);
 
@@ -1853,7 +1931,7 @@ CSparseMatrix* NM_triplet(NumericsMatrix* A)
             {
               for(unsigned i = 0; i < inbr; ++i)
               {
-                CHECK_RETURN(cs_zentry(A->matrix2->triplet, i + roffset, j + coffset,
+                CHECK_RETURN(CSparseMatrix_zentry(A->matrix2->triplet, i + roffset, j + coffset,
                                        A->matrix1->block[bn][i + j*inbr]));
               }
             }
@@ -1875,22 +1953,22 @@ CSparseMatrix* NM_triplet(NumericsMatrix* A)
     {
       switch (A->matrix2->origin)
       {
-      case NS_CSC:
+      case NSM_CSC:
       {
         assert(A->matrix2->csc);
         A->matrix2->triplet = NM_csc_to_triplet(A->matrix2->csc);
         break;
       }
-      case NS_CSR:
+      case NSM_CSR:
       {
         assert(A->matrix2->csr);
         A->matrix2->triplet = NM_csr_to_triplet(A->matrix2->csr);
         break;
       }
       default:
-      case NS_UNKNOWN:
+      case NSM_UNKNOWN:
       {
-        NS_UNKNOWN_ERR("NM_triplet", A->matrix2->origin);
+        NSM_UNKNOWN_ERR("NM_triplet", A->matrix2->origin);
         exit(EXIT_FAILURE);
       }
       }
@@ -1913,26 +1991,26 @@ CSparseMatrix* NM_csc(NumericsMatrix *A)
 {
   assert(A);
 
-  if(!NM_sparse(A)->csc)
+  if(!numericsSparseMatrix(A)->csc)
   {
     assert(A->matrix2);
     switch (A->matrix2->origin)
     {
-    case NS_TRIPLET:
-    case NS_UNKNOWN:
+    case NSM_TRIPLET:
+    case NSM_UNKNOWN:
     {
       /*  triplet -> csc with allocation */
       A->matrix2->csc = cs_compress(NM_triplet(A));
       break;
     }
-    case NS_CSR:
+    case NSM_CSR:
     {
       A->matrix2->csc = NM_csr_to_csc(NM_csr(A));
       break;
     }
     default:
     {
-      NS_UNKNOWN_ERR("NM_csc", A->matrix2->origin);
+      NSM_UNKNOWN_ERR("NM_csc", A->matrix2->origin);
       exit(EXIT_FAILURE);
     }
     }
@@ -1945,7 +2023,7 @@ CSparseMatrix* NM_csc(NumericsMatrix *A)
 
 CSparseMatrix* NM_csc_trans(NumericsMatrix* A)
 {
-  if(!NM_sparse(A)->trans_csc)
+  if(!numericsSparseMatrix(A)->trans_csc)
   {
     assert(A->matrix2);
     A->matrix2->trans_csc = cs_transpose(NM_csc(A), 1); /* value = 1
@@ -1959,26 +2037,26 @@ CSparseMatrix* NM_csr(NumericsMatrix *A)
 {
   assert(A);
 
-  if(!NM_sparse(A)->csr)
+  if(!numericsSparseMatrix(A)->csr)
   {
     assert(A->matrix2);
     switch (A->matrix2->origin)
     {
-    case NS_TRIPLET:
-    case NS_UNKNOWN:
+    case NSM_TRIPLET:
+    case NSM_UNKNOWN:
     {
       /*  triplet -> csr with allocation */
       A->matrix2->csr = NM_triplet_to_csr(NM_triplet(A));
       break;
     }
-    case NS_CSR:
+    case NSM_CSR:
     {
       A->matrix2->csr = NM_csc_to_csr(NM_csr(A));
       break;
     }
     default:
     {
-      NS_UNKNOWN_ERR("NM_csr", A->matrix2->origin);
+      NSM_UNKNOWN_ERR("NM_csr", A->matrix2->origin);
       exit(EXIT_FAILURE);
     }
     }
@@ -2017,7 +2095,7 @@ void NM_gemv(const double alpha, NumericsMatrix* A, const double *x,
   {
     assert(A->storageType == NM_SPARSE);
     // if possible use the much simpler version provided by CSparse
-    // Also at the time of writing, cs_aaxpy is bugged --xhub
+    // Also at the time of writing, CSparseMatrix_aaxpy is bugged --xhub
     bool beta_check = false;
     if (fabs(beta) < 100*DBL_EPSILON)
     {
@@ -2030,7 +2108,7 @@ void NM_gemv(const double alpha, NumericsMatrix* A, const double *x,
     }
     else
     {
-      CHECK_RETURN(cs_aaxpy(alpha, NM_csc(A), x, beta, y));
+      CHECK_RETURN(CSparseMatrix_aaxpy(alpha, NM_csc(A), x, beta, y));
     }
     break;
   }
@@ -2057,7 +2135,7 @@ void NM_tgemv(const double alpha, NumericsMatrix* A, const double *x,
   case NM_SPARSE:
     {
       /* if possible use the much simpler version provided by CSparse
-       Also at the time of writing, cs_aaxpy is bugged --xhub */
+       Also at the time of writing, CSparseMatrix_aaxpy is bugged --xhub */
       bool beta_check = false;
       if (fabs(beta) < 100*DBL_EPSILON)
       {
@@ -2070,7 +2148,7 @@ void NM_tgemv(const double alpha, NumericsMatrix* A, const double *x,
       }
       else
       {
-        CHECK_RETURN(cs_aaxpy(alpha, NM_csc_trans(A), x, beta, y));
+        CHECK_RETURN(CSparseMatrix_aaxpy(alpha, NM_csc_trans(A), x, beta, y));
       }
       break;
     }
@@ -2151,21 +2229,21 @@ void NM_gemm(const double alpha, NumericsMatrix* A, NumericsMatrix* B,
     CSparseMatrix* tmp_matrix = cs_multiply(NM_csc(A), NM_csc(B));
     DEBUG_EXPR(cs_print((const cs * ) tmp_matrix,0););
     assert(tmp_matrix && "NM_gemm :: cs_multiply failed");
-    NM_sparse_fix_csc(tmp_matrix);
+    NSM_fix_csc(tmp_matrix);
 
     CSparseMatrix* result = cs_add(tmp_matrix, NM_csc(C), alpha, beta);
     assert(result && "NM_gemm :: cs_add failed");
-    NM_sparse_fix_csc(result);
+    NSM_fix_csc(result);
 
     cs_spfree(tmp_matrix);
     NM_clearDense(C);
     NM_clearSparseBlock(C);
     NM_clearSparseStorage(C);
 
-    NM_sparse(C)->csc = result;
+    numericsSparseMatrix(C)->csc = result;
     C->size0 = (int)C->matrix2->csc->m;
     C->size1 = (int)C->matrix2->csc->n;
-    NM_sparse(C)->origin = NS_CSC;
+    numericsSparseMatrix(C)->origin = NSM_CSC;
     break;
   }
   default:
@@ -2320,10 +2398,10 @@ int NM_gesv_expert(NumericsMatrix* A, double *b, unsigned keep)
   case NM_SPARSE_BLOCK: /* sparse block -> triplet -> csc */
   case NM_SPARSE:
   {
-    NumericsSparseLinearSolverParams* p = NM_linearSolverParams(A);
+    NSM_linear_solver_params* p = NM_linearSolverParams(A);
     switch (p->solver)
     {
-    case NS_CS_LUSOL:
+    case NSM_CS_LUSOL:
       if (verbose >= 2)
       {
         printf("NM_gesv: using CSparse\n" );
@@ -2332,19 +2410,19 @@ int NM_gesv_expert(NumericsMatrix* A, double *b, unsigned keep)
       {
         if (!(p->dWork && p->solver_data))
         {
-          assert(!NM_sparse_workspace(p));
-          assert(!NM_sparse_solver_data(p));
+          assert(!NSM_workspace(p));
+          assert(!NSM_solver_data(p));
           assert(!p->solver_free_hook);
 
-          p->solver_free_hook = &NM_sparse_free;
+          p->solver_free_hook = &NSM_free_p;
           p->dWork = (double*) malloc(A->size1 * sizeof(double));
           p->dWorkSize = A->size1;
-          cs_lu_factors* cs_lu_A = (cs_lu_factors*) malloc(sizeof(cs_lu_factors));
-          CHECK_RETURN(cs_lu_factorization(1, NM_csc(A), DBL_EPSILON, cs_lu_A));
+          CSparseMatrix_lu_factors* cs_lu_A = (CSparseMatrix_lu_factors*) malloc(sizeof(CSparseMatrix_lu_factors));
+          CHECK_RETURN(CSparsematrix_lu_factorization(1, NM_csc(A), DBL_EPSILON, cs_lu_A));
           p->solver_data = cs_lu_A;
         }
 
-        info = !cs_solve((cs_lu_factors *)NM_sparse_solver_data(p), NM_sparse_workspace(p), b);
+        info = !CSparseMatrix_solve((CSparseMatrix_lu_factors *)NSM_solver_data(p), NSM_workspace(p), b);
       }
       else
       {
@@ -2353,7 +2431,7 @@ int NM_gesv_expert(NumericsMatrix* A, double *b, unsigned keep)
       break;
 
 #ifdef WITH_MUMPS
-    case NS_MUMPS:
+    case NSM_MUMPS:
     {
       if (verbose >= 2)
       {
@@ -2401,7 +2479,7 @@ int NM_gesv_expert(NumericsMatrix* A, double *b, unsigned keep)
 #endif /* WITH_MUMPS */
 
 #ifdef WITH_UMFPACK
-    case NS_UMFPACK:
+    case NSM_UMFPACK:
     {
       if (verbose >= 2)
       {
@@ -2446,7 +2524,7 @@ int NM_gesv_expert(NumericsMatrix* A, double *b, unsigned keep)
 #endif /* WITH_UMFPACK */
 
 #ifdef WITH_SUPERLU
-    case NS_SUPERLU:
+    case NSM_SUPERLU:
     {
       if (verbose >= 2)
       {
@@ -2487,7 +2565,7 @@ int NM_gesv_expert(NumericsMatrix* A, double *b, unsigned keep)
 #endif /* WITH_SUPERLU */
 
 #ifdef WITH_SUPERLU_MT
-    case NS_SUPERLU_MT:
+    case NSM_SUPERLU_MT:
     {
       if (verbose >= 2)
       {
@@ -2528,7 +2606,7 @@ int NM_gesv_expert(NumericsMatrix* A, double *b, unsigned keep)
 #endif /* WITH_SUPERLU_MT */
 
 #ifdef WITH_MKL_PARDISO
-    case NS_MKL_PARDISO:
+    case NSM_MKL_PARDISO:
     {
       if (verbose >= 2)
       {
@@ -2625,7 +2703,7 @@ int NM_inv(NumericsMatrix* A, NumericsMatrix* Ainv)
     Ainv->size0 = A->size0;
     Ainv->size1 = A->size1;
     NM_triplet_alloc(Ainv,  A->size0);
-    Ainv->matrix2->origin = NS_TRIPLET;
+    Ainv->matrix2->origin = NSM_TRIPLET;
 
     for( int col_rhs =0; col_rhs < A->size1; col_rhs++ )
     {
@@ -2636,7 +2714,7 @@ int NM_inv(NumericsMatrix* A, NumericsMatrix* Ainv)
 
       for (int i = 0; i < A->size0; ++i)
       {
-        CHECK_RETURN(cs_zentry(Ainv->matrix2->triplet, i, col_rhs, b[i]));
+        CHECK_RETURN(CSparseMatrix_zentry(Ainv->matrix2->triplet, i, col_rhs, b[i]));
       }
     }
     break;
@@ -2708,19 +2786,19 @@ void NM_update_size(NumericsMatrix* A)
     assert(A->matrix2);
     switch (A->matrix2->origin)
     {
-    case NS_CSC:
+    case NSM_CSC:
     {
       A->size0 = (int)A->matrix2->csc->m;
       A->size1 = (int)A->matrix2->csc->n;
       break;
     }
-    case NS_CSR:
+    case NSM_CSR:
     {
       A->size0 = (int)A->matrix2->csc->m;
       A->size1 = (int)A->matrix2->csc->n;
       break;
     }
-    case NS_TRIPLET:
+    case NSM_TRIPLET:
     {
       A->size0 = (int)A->matrix2->triplet->m;
       A->size1 = (int)A->matrix2->triplet->n;
@@ -2738,7 +2816,7 @@ void NM_update_size(NumericsMatrix* A)
   }
 }
 
-CS_INT* NM_sparse_diag_indices(NumericsMatrix* M)
+CS_INT* NSM_diag_indices(NumericsMatrix* M)
 {
   NumericsSparseMatrix* A = M->matrix2;
   assert(A);
@@ -2747,10 +2825,10 @@ CS_INT* NM_sparse_diag_indices(NumericsMatrix* M)
   CS_INT* indices = (CS_INT*) malloc(M->size0 * sizeof(CS_INT));
   A->diag_indx = indices;
   /* XXX hack --xhub  */
-  if (A->origin == NS_TRIPLET) { NM_csc(M); A->origin = NS_CSC; }
+  if (A->origin == NSM_TRIPLET) { NM_csc(M); A->origin = NSM_CSC; }
   switch (A->origin)
   {
-  case NS_CSC:
+  case NSM_CSC:
   {
     assert(A->csc);
     indices[0] = 0;
@@ -2815,14 +2893,14 @@ CS_INT* NM_sparse_diag_indices(NumericsMatrix* M)
     }
     Np[M->size0] = Ap[M->size0] + inc;
     NM_clearSparseStorage(M);
-    A->origin = NS_CSC;
+    A->origin = NSM_CSC;
     A->csc = newMat;
     break;
   }
-  case NS_TRIPLET:
-  case NS_CSR:
+  case NSM_TRIPLET:
+  case NSM_CSR:
   default:
-    printf("NM_sparse_diag_indices :: unknown matrix origin %d", A->origin);
+    printf("NSM_diag_indices :: unknown matrix origin %d", A->origin);
     exit(EXIT_FAILURE);
   }
 
@@ -2831,72 +2909,49 @@ CS_INT* NM_sparse_diag_indices(NumericsMatrix* M)
 
 void NM_csc_alloc(NumericsMatrix* A, CS_INT nzmax)
 {
-  NM_sparse(A)->csc = cs_spalloc(A->size0, A->size1, nzmax, 1, 0);
+  numericsSparseMatrix(A)->csc = cs_spalloc(A->size0, A->size1, nzmax, 1, 0);
 }
 void NM_csc_empty_alloc(NumericsMatrix* A, CS_INT nzmax)
 {
   NM_csc_alloc(A, nzmax);
-  CS_INT* Ap = NM_sparse(A)->csc->p;
+  CS_INT* Ap = numericsSparseMatrix(A)->csc->p;
   for (int i =0 ; i < A->size1+1 ; i++)  Ap[i]= 0;
-  //CS_INT* Ai = NM_sparse(A)->csc->i;
+  //CS_INT* Ai = numericsSparseMatrix(A)->csc->i;
   //for (int i =0 ; i < nzmax ; i++)  Ai[i]= 0;
 }
 
 
 void NM_csr_alloc(NumericsMatrix* A, CS_INT nzmax)
 {
-  NM_sparse(A)->csr = cs_spalloc(A->size1, A->size0, nzmax, 1, 0);
-  NM_sparse(A)->csr->nz = -2;
-  NM_sparse(A)->csr->m =  A->size0;
-  NM_sparse(A)->csr->n = A->size1;
+  numericsSparseMatrix(A)->csr = cs_spalloc(A->size1, A->size0, nzmax, 1, 0);
+  numericsSparseMatrix(A)->csr->nz = -2;
+  numericsSparseMatrix(A)->csr->m =  A->size0;
+  numericsSparseMatrix(A)->csr->n = A->size1;
 }
 
 void NM_triplet_alloc(NumericsMatrix* A, CS_INT nzmax)
 {
-  NM_sparse(A)->triplet = cs_spalloc(A->size0, A->size1, nzmax, 1, 1);
+  numericsSparseMatrix(A)->triplet = cs_spalloc(A->size0, A->size1, nzmax, 1, 1);
 }
 
 void NM_setSparseSolver(NumericsMatrix* A, unsigned solver_id)
 {
-  NM_linearSolverParams(A)->solver = (NumericsSparseLinearSolver)solver_id;
+  NM_linearSolverParams(A)->solver = (NSM_linear_solver)solver_id;
 }
 
-unsigned NM_sparse_origin(NumericsMatrix* M)
-{
-  assert(M);
-  if (!M->matrix2) return -1;
-  return M->matrix2->origin;
-}
+
 
 int NM_check(const NumericsMatrix* const A)
 {
   int info = 0;
   if (!A->matrix2) return info;
 
-  if (A->matrix2->csc) info = cs_check_csc(A->matrix2->csc);
-  if (A->matrix2->csr) info = info ? info : cs_check_csc(A->matrix2->csr);
-  if (A->matrix2->triplet) info = info ? info : cs_check_triplet(A->matrix2->triplet);
+  if (A->matrix2->csc) info = CSparseMatrix_check_csc(A->matrix2->csc);
+  if (A->matrix2->csr) info = info ? info : CSparseMatrix_check_csc(A->matrix2->csr);
+  if (A->matrix2->triplet) info = info ? info : CSparseMatrix_check_triplet(A->matrix2->triplet);
   return info;
 }
 
-CSparseMatrix* NM_sparse_get_origin(const NumericsMatrix* M)
-{
-  assert(M);
-  if (!M->matrix2) { return NULL; }
-
-  switch (M->matrix2->origin)
-  {
-  case NS_CSC:
-    return M->matrix2->csc;
-  case NS_TRIPLET:
-    return M->matrix2->triplet;
-  case NS_CSR:
-    return M->matrix2->csr;
-  default:
-    numerics_error_nonfatal("NM_sparse_get_origin", "Unknown matrix origin %d", M->matrix2->origin);
-    return NULL;
-  }
-}
 
 size_t NM_nnz(const NumericsMatrix* M)
 {
@@ -2907,7 +2962,7 @@ size_t NM_nnz(const NumericsMatrix* M)
   case NM_SPARSE:
   {
     assert(M->matrix2);
-    return NM_sparse_nnz(NM_sparse_get_origin(M));
+    return NSM_nnz(NSM_get_origin(M->matrix2));
   }
   default:
     numerics_error("NM_nnz", "Unsupported matrix type %d in %s", M->storageType);

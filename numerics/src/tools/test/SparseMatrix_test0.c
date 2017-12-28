@@ -1,5 +1,5 @@
 
-#include "SparseMatrix_internal.h"
+#include "CSparseMatrix_internal.h"
 
 /* create an empty triplet matrix, insert 2 elements, print and free */
 int main()

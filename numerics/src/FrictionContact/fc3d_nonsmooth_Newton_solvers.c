@@ -47,7 +47,7 @@ static void NM_dense_to_sparse_diag_t(double* A, NumericsMatrix* B, size_t block
   assert(A);
   if(!B->matrix2->triplet) NM_triplet_alloc(B, block_row_size*block_col_size);
   CSparseMatrix* Btriplet = B->matrix2->triplet;
-  B->matrix2->origin = NS_TRIPLET;
+  B->matrix2->origin = NSM_TRIPLET;
   double* Alocal = A;
   for (size_t i = 0, j = 0; i < (size_t)B->size0; i += block_row_size, j+= block_col_size)
   {
@@ -56,7 +56,7 @@ static void NM_dense_to_sparse_diag_t(double* A, NumericsMatrix* B, size_t block
       {
         for (size_t row_indx = i; row_indx < block_row_size+i; ++row_indx, ++Alocal)
         {
-          CHECK_RETURN(cs_zentry(Btriplet, row_indx, col_indx, *Alocal));
+          CHECK_RETURN(CSparseMatrix_zentry(Btriplet, row_indx, col_indx, *Alocal));
         }
 //        Alocal = ;
       }
@@ -621,12 +621,12 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers* equation
     {
       case 0:
         {
-          NM_linearSolverParams(AWpB)->solver = NS_CS_LUSOL;
+          NM_linearSolverParams(AWpB)->solver = NSM_CS_LUSOL;
           break;
         }
       case 1:
         {
-          NM_linearSolverParams(AWpB)->solver = NS_MUMPS;
+          NM_linearSolverParams(AWpB)->solver = NSM_MUMPS;
 
 #ifdef HAVE_MPI
 

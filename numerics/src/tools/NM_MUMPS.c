@@ -16,7 +16,7 @@
  * limitations under the License.
 */
 
-#include "SparseMatrix_internal.h"
+#include "CSparseMatrix_internal.h"
 #include "NumericsMatrix_internal.h"
 #include "NumericsMatrix.h"
 #include "NumericsSparseMatrix.h"
@@ -93,9 +93,9 @@ MPI_Comm NM_MPI_com(MPI_Comm m)
 MUMPS_INT* NM_MUMPS_irn(NumericsMatrix* A)
 {
 
-  if (NM_sparse(A)->triplet)
+  if (numericsSparseMatrix(A)->triplet)
   {
-    CSparseMatrix* triplet = NM_sparse(A)->triplet;
+    CSparseMatrix* triplet = numericsSparseMatrix(A)->triplet;
     CS_INT nz = triplet->nz;
     assert(nz > 0);
 
@@ -117,7 +117,7 @@ MUMPS_INT* NM_MUMPS_irn(NumericsMatrix* A)
     exit(EXIT_FAILURE);
 
 #if 0
-    CSparseMatrix* csc = NM_sparse(A)->csc;
+    CSparseMatrix* csc = numericsSparseMatrix(A)->csc;
     CS_INT nzmax = csc->nzmax ;
 
     MUMPS_INT* iWork = NM_iWork(A, (int) (2*nzmax) + 1);
@@ -148,9 +148,9 @@ MUMPS_INT* NM_MUMPS_irn(NumericsMatrix* A)
 
 MUMPS_INT* NM_MUMPS_jcn(NumericsMatrix* A)
 {
-  if (NM_sparse(A)->triplet)
+  if (numericsSparseMatrix(A)->triplet)
   {
-    return &((MUMPS_INT*)NM_iWork(A, 0, 0))[NM_sparse(A)->triplet->nz];
+    return &((MUMPS_INT*)NM_iWork(A, 0, 0))[numericsSparseMatrix(A)->triplet->nz];
   }
   else
   {
@@ -166,7 +166,7 @@ MUMPS_INT* NM_MUMPS_jcn(NumericsMatrix* A)
 
 DMUMPS_STRUC_C* NM_MUMPS_id(NumericsMatrix* A)
 {
-  NumericsSparseLinearSolverParams* params = NM_linearSolverParams(A);
+  NSM_linear_solver_params* params = NM_linearSolverParams(A);
   DMUMPS_STRUC_C* mumps_id;
 
   if (!params->solver_data)
@@ -245,11 +245,11 @@ DMUMPS_STRUC_C* NM_MUMPS_id(NumericsMatrix* A)
     mumps_id->jcn = NM_MUMPS_jcn(A);
 
     MUMPS_INT nz;
-    if (NM_sparse(A)->triplet)
+    if (numericsSparseMatrix(A)->triplet)
     {
-      nz = (MUMPS_INT) NM_sparse(A)->triplet->nz;
+      nz = (MUMPS_INT) numericsSparseMatrix(A)->triplet->nz;
       mumps_id->nz = nz;
-      mumps_id->a = NM_sparse(A)->triplet->x;
+      mumps_id->a = numericsSparseMatrix(A)->triplet->x;
     }
     else
     {
@@ -258,7 +258,7 @@ DMUMPS_STRUC_C* NM_MUMPS_id(NumericsMatrix* A)
 #if 0
       nz = NM_linearSolverParams(A)->iWork[2 * NM_csc(A)->nzmax];
       mumps_id->nz = nz;
-      mumps_id->a = NM_sparse(A)->csc->x;
+      mumps_id->a = numericsSparseMatrix(A)->csc->x;
 #endif
     }
   }
@@ -266,8 +266,8 @@ DMUMPS_STRUC_C* NM_MUMPS_id(NumericsMatrix* A)
   {
     mumps_id = (DMUMPS_STRUC_C*) params->solver_data;
     DEBUG_EXPR_WE(double data_ptr = NULL;
-        if (NM_sparse(A)->triplet) { data_ptr = NM_sparse(A)->triplet->x; }
-        else { data_ptr = NM_sparse(A)->csc->x; }
+        if (numericsSparseMatrix(A)->triplet) { data_ptr = numericsSparseMatrix(A)->triplet->x; }
+        else { data_ptr = numericsSparseMatrix(A)->csc->x; }
         if (data_ptr != mumps_id->a) { fprintf(stderr, "the data array and mumps_id->a don't match: %p != %p\n", data_ptr, mumps_id-a); } )
 
   }
@@ -278,7 +278,7 @@ DMUMPS_STRUC_C* NM_MUMPS_id(NumericsMatrix* A)
 
 void NM_MUMPS_free(void* p)
 {
-  NumericsSparseLinearSolverParams* params = (NumericsSparseLinearSolverParams*) p;
+  NSM_linear_solver_params* params = (NSM_linear_solver_params*) p;
   DMUMPS_STRUC_C* mumps_id = (DMUMPS_STRUC_C*) params->solver_data;
 
   /* clean the mumps instance */

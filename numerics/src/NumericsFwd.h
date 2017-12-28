@@ -28,7 +28,7 @@
 // Matrices storage
 TYPEDEF_STRUCT(NumericsMatrix)
 TYPEDEF_STRUCT(NumericsSparseMatrix)
-TYPEDEF_STRUCT(NumericsSparseLinearSolverParams)
+TYPEDEF_STRUCT(NSM_linear_solver_params)
 TYPEDEF_STRUCT(SparseBlockStructuredMatrix)
 TYPEDEF_STRUCT(SparseBlockStructuredMatrixPred)
 TYPEDEF_STRUCT(SparseBlockCoordinateMatrix)

@@ -123,7 +123,7 @@ The following linear algebra operation are supported:
 
 #include "NumericsFwd.h"
 #include "SiconosConfig.h"
-#include "SparseMatrix.h" // for CS_INT
+#include "CSparseMatrix.h" // for CS_INT
 
 /** \struct NumericsMatrixInternalData NumericsMatrix.h
  * Structure for simple workspaces
@@ -203,6 +203,9 @@ extern "C"
    * \return a pointer to a NumericsMatrix
    */
   NumericsMatrix* NM_create_from_data(int storageType, int size0, int size1, void* data);
+  NumericsMatrix* NM_create_from_filename(char *filename);
+  NumericsMatrix* NM_create_from_file(FILE *file);
+  
 
  /** Copy a CSparseMatrix inside another CSparseMatrix.
    *  Reallocations are performed if B cannot hold a copy of A
@@ -238,7 +241,7 @@ extern "C"
    * \param[in,out] A a NumericsMatrix
    * \return a pointer on the sparse matrix storage
    */
-  NumericsSparseMatrix* NM_sparse(NumericsMatrix* A);
+  NumericsSparseMatrix* numericsSparseMatrix(NumericsMatrix* A);
 
   /** Creation, if needed, of triplet storage from sparse block storage.
    * \param[in,out] A a NumericsMatrix initialized with sparsed block storage.
@@ -371,11 +374,7 @@ extern "C"
    */
   bool NM_equal(NumericsMatrix* A, NumericsMatrix* B);
 
-  /** return the origin of a sparse part of a matrix
-   * \param M the matrix
-   * \return -1 if the matrix has no sparse representation, the origin
-   * otherwise*/
-  unsigned NM_sparse_origin(NumericsMatrix* M);
+
 
   /** return the number of non-zero element. For a dense matrix, it is the
    * product of the dimensions (e.g. an upper bound). For a sparse matrix, it is the true number
@@ -383,12 +382,6 @@ extern "C"
    * \return the number (or an upper bound) of non-zero elements in the matrix
    */
   size_t NM_nnz(const NumericsMatrix* M);
-
-  /** return the sparse matrix that has the original label
-   * \param M the matrix
-   * \return the sparse matrix that is at the origin, or NULL if an error occur
-   **/
-  CSparseMatrix* NM_sparse_get_origin(const NumericsMatrix* M);
 
   /** get the (square) diagonal block of a NumericsMatrix. No allocation is done.
    * \param[in] M a NumericsMatrix
@@ -423,7 +416,7 @@ extern "C"
    * \param M the matrix
    * \return the list of indices for the diagonal elements
    */
-  CS_INT* NM_sparse_diag_indices(NumericsMatrix* M);
+  CS_INT* NSM_diag_indices(NumericsMatrix* M);
 
   /**************************************************/
   /** Matrix - vector product           *************/
@@ -519,7 +512,7 @@ extern "C"
 
   void NM_dense_to_sparse(const NumericsMatrix* const A, NumericsMatrix* B);
 
-  void NM_to_dense(const NumericsMatrix* const A, NumericsMatrix* B);
+  int NM_to_dense(const NumericsMatrix* const A, NumericsMatrix* B);
 
 
 
@@ -590,9 +583,10 @@ extern "C"
   /** Create from file a NumericsMatrix with  memory allocation
      \param M the matrix to be read
      \param file the corresponding  file
-     \return 0 if ok
+     \return 0 if the matrix
   */
-  int  NM_new_from_file(NumericsMatrix* const M, FILE *file);
+  NumericsMatrix*  NM_new_from_file(FILE *file);
+  NumericsMatrix*  NM_new_from_filename(char * filename);
 
   /**  NM_write_in_file_scilab of the matrix content
    \param M the matrix to be printed
@@ -667,7 +661,7 @@ extern "C"
    * \param block_row_size block width
    * \param block_col_size block height
    */
-  void NM_sparse_extract_block(NumericsMatrix* M, double* blockM, size_t pos_row, size_t pos_col, size_t block_row_size, size_t block_col_size);
+  void NSM_extract_block(NumericsMatrix* M, double* blockM, size_t pos_row, size_t pos_col, size_t block_row_size, size_t block_col_size);
 
 
   /** Direct computation of the solution of a real system of linear
@@ -715,7 +709,7 @@ extern "C"
    * \param[in,out] A a NumericsMatrix.
    * \return a pointer on parameters.
    */
-  NumericsSparseLinearSolverParams* NM_linearSolverParams(NumericsMatrix* A);
+  NSM_linear_solver_params* NM_linearSolverParams(NumericsMatrix* A);
 
   /** Set the linear solver
    * \param A the matrix

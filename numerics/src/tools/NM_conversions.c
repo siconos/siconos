@@ -21,7 +21,7 @@
 #include <stdio.h>
 
 #include "SiconosConfig.h"
-#include "SparseMatrix_internal.h"
+#include "CSparseMatrix_internal.h"
 #include "NM_conversions.h"
 
 #ifdef WITH_MKL_SPBLAS
@@ -47,7 +47,7 @@ CSparseMatrix* NM_csc_to_triplet(CSparseMatrix* csc)
   {
     for (CS_INT i = Ap[j]; i < Ap[j+1]; ++i)
     {
-      cs_zentry(triplet, Ai[i], j, val[i]);
+      CSparseMatrix_zentry(triplet, Ai[i], j, val[i]);
     }
   }
   return triplet;
@@ -63,7 +63,7 @@ CSparseMatrix* NM_triplet_to_csr(CSparseMatrix* triplet)
     fprintf(stderr, "NM_triplet_to_csr :: the matrix has to be square\n");
     exit(EXIT_FAILURE);
   }
-  CSparseMatrix* csr = cs_spalloc(NS_NROW_CSR(triplet), NS_NCOL_CSR(triplet), triplet->nz, 1, 0);
+  CSparseMatrix* csr = cs_spalloc(NSM_NROW_CSR(triplet), NSM_NCOL_CSR(triplet), triplet->nz, 1, 0);
   assert(csr);
   csr->nz = -2;
 
@@ -118,7 +118,7 @@ CSparseMatrix* NM_csc_to_csr(CSparseMatrix* csc)
     fprintf(stderr, "NM_csc_to_csr :: the matrix has to be square\n");
     exit(EXIT_FAILURE);
   }
-  CSparseMatrix* csr = cs_spalloc(NS_NROW_CSR(csc), NS_NCOL_CSR(csc), csc->p[csc->n], 1, 0);
+  CSparseMatrix* csr = cs_spalloc(NSM_NROW_CSR(csc), NSM_NCOL_CSR(csc), csc->p[csc->n], 1, 0);
   assert(csr);
   csr->nz = -2;
 
