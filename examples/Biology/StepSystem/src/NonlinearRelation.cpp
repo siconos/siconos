@@ -4,7 +4,11 @@
 #include "NonlinearRelation.h"
 
 //#include "const.h"
-#define SICONOS_DEBUG
+
+
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
+#include "debug.h"
 
 NonlinearRelation::NonlinearRelation():
   FirstOrderType2R()
@@ -19,30 +23,21 @@ void NonlinearRelation::initComponents(Interaction& inter, VectorOfBlockVectors&
 /*y = h(X)*/
 void NonlinearRelation::computeh(double t, SiconosVector& x, SiconosVector& lambda, SiconosVector& y)
 {
-
-  // SiconosVector& lambda = *inter.lambda(0);
-
-  /*
-  #ifdef SICONOS_DEBUG
-    std::cout<<"******** NonlinearRelation::computeh computeh at "<<t<<std::endl;
-  #endif
-  */
-
+  DEBUG_PRINTF("NonlinearRelation::computeh at time %e\n ", t);
+  DEBUG_EXPR(x.display());
+  DEBUG_EXPR(lambda.display());
   y.setValue(0, 4.0 - x(0));
   y.setValue(1, 4.0 - x(1));
   y.setValue(2, 8.0 - x(0));
   y.setValue(3, 8.0 - x(1));
-
+  DEBUG_EXPR(y.display());
 }
 
 /*g=g(lambda)*/
 void NonlinearRelation::computeg(double t, SiconosVector& lambda, SiconosVector& r)
 {
-  /*
-  #ifdef SICONOS_DEBUG
-    std::cout<<"*** NonlinearRelation::computeg     computeg at: "<<t<<std::endl;
-  #endif
-  */
+  DEBUG_PRINTF("NonlinearRelation::computeg at time %e\n ", t);
+  DEBUG_EXPR(lambda.display());
 
   r(0) = 40.0 * (1 - lambda(2)) * (lambda(1));
   r(1) = 40.0 * (lambda(0)) * (1 - lambda(3));
@@ -56,22 +51,21 @@ void NonlinearRelation::computeg(double t, SiconosVector& lambda, SiconosVector&
     std::cout<<std::endl;
   #endif
   */
+  DEBUG_EXPR(r.display());
+
 
 }
 
 void NonlinearRelation::computeJachlambda(double t, SiconosVector& x, SiconosVector& lambda, SimpleMatrix& D)
 {
-  //    double *h = &(*_jachlambda)(0,0);
-  /*
-    #ifdef SICONOS_DEBUG
-    std::cout<<"NonlinearRelation::computeJachlambda " <<" at " <<" "<<t<<std::endl;
-    #endif
-  */
+  DEBUG_PRINTF("NonlinearRelation::computeJachlambda at time %e\n ", t);
   D.zero();
 }
 
 void NonlinearRelation::computeJachx(double t, SiconosVector& x, SiconosVector& lambda, SimpleMatrix& C)
 {
+  DEBUG_PRINTF("NonlinearRelation::computeJachx at time %e\n ", t);
+
   C.setValue(0, 0, -1);
   C.setValue(0, 1, 0);
   C.setValue(1, 0, 0);
@@ -80,13 +74,16 @@ void NonlinearRelation::computeJachx(double t, SiconosVector& x, SiconosVector& 
   C.setValue(2, 1, 0);
   C.setValue(3, 0, 0);
   C.setValue(3, 1, -1);
+  DEBUG_EXPR(C.display());
 
 }
 
 void NonlinearRelation::computeJacglambda(double t, SiconosVector& lambda, SimpleMatrix& B)
 {
+  DEBUG_PRINTF("NonlinearRelation::computeJacglambda at time %e\n ", t);
+  DEBUG_EXPR(lambda.display());
 
-  //  double *g = &(*Jacglambda)(0,0);
+
   B.setValue(0, 0, 0);
   B.setValue(1, 0, 40.0 * (1 - lambda(3)));
 
@@ -98,6 +95,7 @@ void NonlinearRelation::computeJacglambda(double t, SiconosVector& lambda, Simpl
 
   B.setValue(0, 3, 0);
   B.setValue(1, 3, -40.0 * lambda(0));
+  DEBUG_EXPR(B.display());
 
 }
 #endif
