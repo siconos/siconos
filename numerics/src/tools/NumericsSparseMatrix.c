@@ -25,7 +25,7 @@
 #include "CSparseMatrix_internal.h"
 #include "SiconosCompat.h"
 #include "NumericsSparseMatrix.h"
-#include "Numerics_verbose.h"
+#include "numerics_verbose.h"
 #include "NumericsMatrix.h"
 
 #include "debug.h"
