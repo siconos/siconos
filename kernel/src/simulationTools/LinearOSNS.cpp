@@ -829,6 +829,7 @@ void LinearOSNS::postCompute()
 void LinearOSNS::display() const
 {
   std::cout << "==========================" <<std::endl;
+  std::cout << "this : " << this <<std::endl;
   std::cout << "_M  ";
   if (_M) _M->display();
   else std::cout << "-> NULL" <<std::endl;

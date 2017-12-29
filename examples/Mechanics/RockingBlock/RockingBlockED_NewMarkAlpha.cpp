@@ -171,7 +171,7 @@ int main(int argc, char* argv[])
 
     InteractionsGraph::VIterator ui, uiend;
     //-------------------- Save the output during simulation ---------------------------------------------------------
-    SimpleMatrix DataPlot(NpointSave, SizeOutput);
+    SimpleMatrix DataPlot(NpointSave+1000, SizeOutput);
     //------------- At the initial time -----------------------------------------------------------------------------
     DataPlot(0, 0) = RoBlockModel->t0();
     DataPlot(0, 1) = (*PosBlock)(0); // Position X
@@ -235,17 +235,18 @@ int main(int argc, char* argv[])
       if (NSEvent)
       {
         DataPlot(k, 0) = EDscheme->startingTime(); // instant at non-smooth event
-        DataPlot(k, 1) = RockingBlock->qMemory().getSiconosVector(1)(0);      // Position X
-        DataPlot(k, 2) = RockingBlock->qMemory().getSiconosVector(1)(1);      // Position Y
-        DataPlot(k, 3) = RockingBlock->qMemory().getSiconosVector(1)(2);      // Angle theta
-        DataPlot(k, 4) = RockingBlock->velocityMemory().getSiconosVector(1)(0); // Velocity Vx
-        DataPlot(k, 5) = RockingBlock->velocityMemory().getSiconosVector(1)(1); // Velocity Vy
-        DataPlot(k, 6) = RockingBlock->velocityMemory().getSiconosVector(1)(2); // Angular velocity
+        DataPlot(k, 1) = RockingBlock->qMemory().getSiconosVector(0)(0);      // Position X
+        DataPlot(k, 2) = RockingBlock->qMemory().getSiconosVector(0)(1);      // Position Y
+        DataPlot(k, 3) = RockingBlock->qMemory().getSiconosVector(0)(2);      // Angle theta
+        DataPlot(k, 4) = RockingBlock->velocityMemory().getSiconosVector(0)(0); // Velocity Vx
+        DataPlot(k, 5) = RockingBlock->velocityMemory().getSiconosVector(0)(1); // Velocity Vy
+        DataPlot(k, 6) = RockingBlock->velocityMemory().getSiconosVector(0)(2); // Angular velocity
         //EDscheme->update(1);
         k++;
         ++NumberNSEvent;
         ++show_progress;
-        NSEvent = false;                        // The next event is maybe smooth
+        NSEvent = false;
+        // The next event is maybe smooth
       };
       //-------------------- get data at smooth events or at the end of non-smooth events ---------------
       DataPlot(k, 0) = EDscheme->startingTime();
