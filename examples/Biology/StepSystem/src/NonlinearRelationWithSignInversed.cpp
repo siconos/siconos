@@ -4,7 +4,7 @@
 #include "NonlinearRelationWithSignInversed.h"
 
 //#include "const.h"
-#define SICONOS_DEBUG
+//#define SICONOS_DEBUG
 
 NonlinearRelationWithSignInversed::NonlinearRelationWithSignInversed():
   FirstOrderType2R()
