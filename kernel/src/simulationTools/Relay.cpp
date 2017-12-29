@@ -186,6 +186,11 @@ void Relay::display() const
 {
   std::cout << "======= Relay of size " << _sizeOutput << " with: " <<std::endl;
   LinearOSNS::display();
+  std::cout<< "lower bound : (_lb)"<<std::endl;
+  _lb->display();
+  std::cout<< "upper bound : (_ub)"<<std::endl;
+  _ub->display();
+  
 }
 
 Relay::~Relay()

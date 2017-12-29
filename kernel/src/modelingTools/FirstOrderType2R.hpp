@@ -42,10 +42,10 @@ typedef void (*Type2PtrG)(unsigned int, double*,  unsigned int, double*);
  * \f}
  *
  * Operators (and their corresponding plug-in):
-- h: saved in Interaction as y (plug-in: output[0])
-- \f$ \nabla_x h \f$: jacobianH[0] ( output[1] )
-- g: saved in DS as r ( input[0])
-- \f$ \nabla_\lambda g \f$: jacobianG[0] ( input[1] )
+ * - h: saved in Interaction as y (plug-in: output[0])
+ * - \f$ \nabla_x h \f$: jacobianH[0] ( output[1] )
+ * - g: saved in DS as r ( input[0])
+ * - \f$ \nabla_\lambda g \f$: jacobianG[0] ( input[1] )
  *
  */
 class FirstOrderType2R : public FirstOrderR
@@ -56,10 +56,10 @@ protected:
   ACCEPT_SERIALIZATION(FirstOrderType2R);
 
 public:
-  
+
   /** Basic contructor */
   FirstOrderType2R();
-  
+
   /** data constructor
    *  \param pluginh name of the plugin to compute h
    *  \param pluging name of the plugin to compute g
@@ -78,14 +78,14 @@ public:
   */
   ~FirstOrderType2R() {};
 
-
   /** initialize the relation (check sizes, memory allocation ...)
    * \param inter the interaction that owns this relation
    * \param DSlink link to DS variable
    * \param workV work vectors to initialize
    * \param workM work matrices to initialize
   */
-  virtual void initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
+  virtual void initComponents(Interaction& inter, VectorOfBlockVectors& DSlink,
+                              VectorOfVectors& workV, VectorOfSMatrices& workM);
 
   /** default function to compute y = h(x, lambda, t)
   * \param time the current time
@@ -109,11 +109,6 @@ public:
   *  \param C the matrix used to store the jacobian
   */
   virtual void computeJachx(double time, SiconosVector& x, SiconosVector& lambda, SimpleMatrix& C);
-//  virtual void computeJachx(double time, SiconosVector& x, SiconosVector& z, SimpleMatrix& C);
-
-
-//  virtual void computeJachz(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
-//  virtual void computeJachz(double time, SiconosVector& x, SiconosVector& z, SimpleMatrix& D);
 
   /** default function to compute jacobianG according to lambda
   *  \param time current time (not used)
@@ -121,7 +116,14 @@ public:
   *  \param B the matrix used to store the jacobian
   */
   virtual void computeJacglambda(double time, SiconosVector& lambda, SimpleMatrix& B);
-//  virtual void computeJacglambda(double time, SiconosVector& lambda, SiconosVector& z, SimpleMatrix& B);
+
+  /** default function to compute jacobianh according to lambda
+  *  \param time current time (not used)
+  *  \param x the state used to evaluate the jacobian
+  *  \param lambda the nonsmooth input used to evaluate the jacobian
+  *  \param D the matrix used to store the jacobian
+  */
+  virtual void computeJachlambda(double time, SiconosVector& x, SiconosVector& lambda, SimpleMatrix& D);
 
   /** default function to compute y, using the data from the Interaction and DS
   *  \param time current time (not used)
@@ -129,7 +131,8 @@ public:
   *  \param interProp
   *  \param level not used
   */
-  virtual void computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level = 0);
+  virtual void computeOutput(double time, Interaction& inter, InteractionProperties& interProp,
+                             unsigned int level = 0);
 
   /** default function to compute r, using the data from the Interaction and DS
   *  \param time current time (not used)
@@ -137,7 +140,8 @@ public:
   *  \param interProp
   *  \param level not used
   */
-  virtual void computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level = 0);
+  virtual void computeInput(double time, Interaction& inter, InteractionProperties& interProp,
+                            unsigned int level = 0);
 
   /** return true if the relation requires the computation of residu
       \return true if residu are required, false otherwise
@@ -149,7 +153,6 @@ public:
 
   virtual void prepareNewtonIteration(Interaction& inter, InteractionProperties& interProp);
 
-  virtual void computeJachlambda(double time, SiconosVector& x, SiconosVector& lambda, SimpleMatrix& D);
 
   virtual void computeJach(double time, Interaction& inter, InteractionProperties& interProp);
 
