@@ -16,13 +16,19 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
-
+#define _POSIX_C_SOURCE 200112L
 #include <stdio.h>
 #include <stdlib.h>
+
 #include <assert.h>
 #include <math.h>
 #include <float.h>
+
+
+
 #include <string.h>
+
+
 
 #include "numerics_verbose.h"
 #include "CSparseMatrix_internal.h"
