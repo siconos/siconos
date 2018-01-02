@@ -134,7 +134,7 @@ int convexQP_computeError_full(
     problem->istheNormConvexQPset=1;
   }
 
-  double norm_q =problem->normConvexQP;
+  DEBUG_EXPR(double norm_q =problem->normConvexQP;);
   DEBUG_PRINTF("norm_q = %12.8e\n", norm_q);
 
   /* q --> w */

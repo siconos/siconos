@@ -4,7 +4,7 @@
 #include <time.h>
 #include <float.h>
 #include "SiconosBlas.h"
-#include "SparseMatrix_internal.h"
+#include "CSparseMatrix_internal.h"
 #include "fc3d_Solvers.h"
 #include "NonSmoothDrivers.h"
 

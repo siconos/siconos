@@ -120,11 +120,7 @@ int frictionContact_newFromFile(FrictionContactProblem* problem, FILE* file)
   DEBUG_PRINTF("problem->dimension = %i \n",problem->dimension );
   CHECK_IO(fscanf(file, "%d\n", &nc));
   problem->numberOfContacts = nc;
-  problem->M = NM_new();
-
-  /* fix: problem->M->storageType unitialized ! */
-
-  NM_new_from_file(problem->M, file);
+  problem->M =  NM_new_from_file(file);
 
   problem->q = (double *) malloc(problem->M->size1 * sizeof(double));
   for (i = 0; i < problem->M->size1; i++)

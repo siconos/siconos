@@ -71,22 +71,22 @@
     if (res > 0)
     {
       m->storageType = NM_SPARSE;
-      m->matrix2 = newNumericsSparseMatrix();
+      m->matrix2 = NSM_new();
 
       if (csm->nz > 0)
       {
         m->matrix2->triplet = csm;
-        m->matrix2->origin = NS_TRIPLET;
+        m->matrix2->origin = NSM_TRIPLET;
       }
       else if (csm->nz == -1)
       {
         m->matrix2->csc = csm;
-        m->matrix2->origin = NS_CSC;
+        m->matrix2->origin = NSM_CSC;
       }
       else if (csm->nz == -2)
       {
         m->matrix2->csr = csm;
-        m->matrix2->origin = NS_CSR;
+        m->matrix2->origin = NSM_CSR;
       }
       else
       {

@@ -17,7 +17,7 @@
 */
 
 #include "debug.h"
-#include "SparseMatrix_internal.h"
+#include "CSparseMatrix_internal.h"
 #include "NumericsMatrix_internal.h"
 #include "NumericsSparseMatrix.h"
 #include "numerics_verbose.h"
@@ -48,7 +48,7 @@ NM_SuperLU_WS* NM_SuperLU_factorize(NumericsMatrix* A)
 
   int status;
 
-  NumericsSparseLinearSolverParams* params = NM_linearSolverParams(A);
+  NSM_linear_solver_params* params = NM_linearSolverParams(A);
 
   if (params->solver_data)
   {
@@ -84,7 +84,7 @@ NM_SuperLU_WS* NM_SuperLU_factorize(NumericsMatrix* A)
   /* Symbolic part  */
   int_t* indices;
   int_t* pointers;
-  size_t nnz = NM_sparse_nnz(C);
+  size_t nnz = NSM_nnz(C);
 
   if (sizeof(*C->i) != sizeof(*indices))
   {
@@ -158,7 +158,7 @@ int NM_SuperLU_solve(NumericsMatrix* A, double* b, NM_SuperLU_WS* superlu_ws)
 void NM_SuperLU_free(void* p)
 {
   assert(p);
-  NumericsSparseLinearSolverParams* params = (NumericsSparseLinearSolverParams*) p;
+  NSM_linear_solver_params* params = (NSM_linear_solver_params*) p;
   assert(params);
   NM_SuperLU_WS* superlu_ws = (NM_SuperLU_WS*) params->solver_data;
   assert(superlu_ws);

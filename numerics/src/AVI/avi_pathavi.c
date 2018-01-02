@@ -19,7 +19,7 @@
 
 #include <string.h>
 
-#include "SparseMatrix_internal.h"
+#include "CSparseMatrix_internal.h"
 #include "AffineVariationalInequalities.h"
 #include "AVI_Solvers.h"
 #include "NumericsMatrix.h"

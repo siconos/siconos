@@ -1,6 +1,6 @@
 #include "NumericsMatrix.h"
 #include "NumericsSparseMatrix.h"
-#include "SparseMatrix.h"
+#include "CSparseMatrix.h"
 int gemm_square_triplet(void);
 int gemm_square_csc(void);
 int gemm_square_triplet_into_csc(void);
@@ -17,7 +17,7 @@ int gemm_square_triplet()
   // product of triplet matrices into triplet matrix
   NumericsMatrix * A  = NM_create(NM_SPARSE, size0, size1);
   NM_triplet_alloc(A,0);
-  A->matrix2->origin= NS_TRIPLET;
+  A->matrix2->origin= NSM_TRIPLET;
   NM_zentry(A, 0, 0, 1);
   NM_zentry(A, 0, 1, 2);
   NM_zentry(A, 0, 2, 3);
@@ -28,7 +28,7 @@ int gemm_square_triplet()
 
   NumericsMatrix * B  = NM_create(NM_SPARSE, size0, size1);
   NM_triplet_alloc(B,0);
-  B->matrix2->origin= NS_TRIPLET;
+  B->matrix2->origin= NSM_TRIPLET;
   NM_zentry(B, 0, 0, 1);
   NM_zentry(B, 1, 1, 2);
   NM_zentry(B, 2, 2, 3);
@@ -36,7 +36,7 @@ int gemm_square_triplet()
 
   NumericsMatrix * C  = NM_create(NM_SPARSE, size0, size1);
   NM_triplet_alloc(C,0);
-  C->matrix2->origin= NS_TRIPLET;
+  C->matrix2->origin= NSM_TRIPLET;
 
   double alpha = 1.0;
   double beta =0.0;
@@ -45,7 +45,7 @@ int gemm_square_triplet()
 
   NumericsMatrix * Cref  = NM_create(NM_SPARSE, size0, size1);
   NM_triplet_alloc(Cref,0);
-  Cref->matrix2->origin= NS_TRIPLET;
+  Cref->matrix2->origin= NSM_TRIPLET;
   NM_zentry(Cref, 0, 0, 1);
   NM_zentry(Cref, 0, 1, 4);
   NM_zentry(Cref, 0, 2, 9);
@@ -85,7 +85,7 @@ int gemm_square_csc()
   // product of csc matrices into csc matrix
   NumericsMatrix * A  = NM_create(NM_SPARSE, size0, size1);
   NM_csc_empty_alloc(A,0);
-  A->matrix2->origin= NS_CSC;
+  A->matrix2->origin= NSM_CSC;
   NM_zentry(A, 0, 0, 1);
   NM_zentry(A, 0, 1, 2);
   NM_zentry(A, 0, 2, 3);
@@ -96,7 +96,7 @@ int gemm_square_csc()
 
   NumericsMatrix * B  = NM_create(NM_SPARSE, size0, size1);
   NM_csc_empty_alloc(B,0);
-  B->matrix2->origin= NS_CSC;
+  B->matrix2->origin= NSM_CSC;
   NM_zentry(B, 0, 0, 1);
   NM_zentry(B, 1, 1, 2);
   NM_zentry(B, 2, 2, 3);
@@ -105,7 +105,7 @@ int gemm_square_csc()
   NumericsMatrix * C  = NM_create(NM_SPARSE, size0, size1);
   int nzmax = 10;
   NM_csc_empty_alloc(C,nzmax);
-  C->matrix2->origin= NS_CSC;
+  C->matrix2->origin= NSM_CSC;
 
   NM_display(C);
   double alpha = 1.0;
@@ -115,7 +115,7 @@ int gemm_square_csc()
 
   NumericsMatrix * Cref  = NM_create(NM_SPARSE, size0, size1);
   NM_csc_empty_alloc(Cref,0);
-  Cref->matrix2->origin= NS_CSC;
+  Cref->matrix2->origin= NSM_CSC;
   NM_zentry(Cref, 0, 0, 1);
   NM_zentry(Cref, 0, 1, 4);
   NM_zentry(Cref, 0, 2, 9);
@@ -148,7 +148,7 @@ int gemm_square_triplet_into_csc()
   // product of triplet matrices into triplet matrix
   NumericsMatrix * A  = NM_create(NM_SPARSE, size0, size1);
   NM_triplet_alloc(A,0);
-  A->matrix2->origin= NS_TRIPLET;
+  A->matrix2->origin= NSM_TRIPLET;
   NM_zentry(A, 0, 0, 1);
   NM_zentry(A, 0, 1, 2);
   NM_zentry(A, 0, 2, 3);
@@ -161,7 +161,7 @@ int gemm_square_triplet_into_csc()
 
   NumericsMatrix * B  = NM_create(NM_SPARSE, size0, size1);
   NM_triplet_alloc(B,0);
-  B->matrix2->origin= NS_TRIPLET;
+  B->matrix2->origin= NSM_TRIPLET;
   NM_zentry(B, 0, 0, 1);
   NM_zentry(B, 1, 1, 2);
   NM_zentry(B, 2, 2, 3);
@@ -170,7 +170,7 @@ int gemm_square_triplet_into_csc()
   NumericsMatrix * C  = NM_create(NM_SPARSE, size0, size1);
   int nzmax = 10;
   NM_csc_empty_alloc(C,nzmax);
-  C->matrix2->origin= NS_CSC;
+  C->matrix2->origin= NSM_CSC;
 
   double alpha = 1.0;
   double beta =0.0;
@@ -178,7 +178,7 @@ int gemm_square_triplet_into_csc()
   NM_display(C);
   NumericsMatrix * Cref  = NM_create(NM_SPARSE, size0, size1);
   NM_csc_empty_alloc(Cref,0);
-  Cref->matrix2->origin= NS_CSC;
+  Cref->matrix2->origin= NSM_CSC;
   NM_zentry(Cref, 0, 0, 1);
   NM_zentry(Cref, 0, 1, 4);
   NM_zentry(Cref, 0, 2, 9);
@@ -213,7 +213,7 @@ int gemm_rectangle_triplet()
   // product of triplet matrices into triplet matrix
   NumericsMatrix * A  = NM_create(NM_SPARSE, size0, size1);
   NM_triplet_alloc(A,0);
-  A->matrix2->origin= NS_TRIPLET;
+  A->matrix2->origin= NSM_TRIPLET;
   NM_zentry(A, 0, 0, 1);
   NM_zentry(A, 0, 1, 2);
   NM_zentry(A, 0, 2, 3);
@@ -228,7 +228,7 @@ int gemm_rectangle_triplet()
 
   NumericsMatrix * B  = NM_create(NM_SPARSE, size1, size0);
   NM_triplet_alloc(B,0);
-  B->matrix2->origin= NS_TRIPLET;
+  B->matrix2->origin= NSM_TRIPLET;
   NM_zentry(B, 0, 0, 1);
   NM_zentry(B, 1, 1, 2);
   NM_zentry(B, 2, 2, 3);
@@ -239,7 +239,7 @@ int gemm_rectangle_triplet()
 
   NumericsMatrix * C  = NM_create(NM_SPARSE, size0, size0);
   NM_triplet_alloc(C,0);
-  C->matrix2->origin= NS_TRIPLET;
+  C->matrix2->origin= NSM_TRIPLET;
 
   double alpha = 1.0;
   double beta =0.0;
@@ -248,7 +248,7 @@ int gemm_rectangle_triplet()
 
   NumericsMatrix * Cref  = NM_create(NM_SPARSE, size0, size0);
   NM_triplet_alloc(Cref,0);
-  Cref->matrix2->origin= NS_TRIPLET;
+  Cref->matrix2->origin= NSM_TRIPLET;
   NM_zentry(Cref, 0, 0, 1);
   NM_zentry(Cref, 0, 1, 4);
   NM_zentry(Cref, 0, 2, 9);

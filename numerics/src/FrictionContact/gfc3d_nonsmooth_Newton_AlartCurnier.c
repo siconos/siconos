@@ -22,7 +22,7 @@
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 
 #include "SiconosConfig.h"
-#include "SparseMatrix_internal.h"
+#include "CSparseMatrix_internal.h"
 #include "gfc3d_nonsmooth_Newton_AlartCurnier.h"
 #include "gfc3d_Solvers.h"
 #include "gfc3d_compute_error.h"
@@ -39,7 +39,7 @@
 
 #include "sanitizer.h"
 
-#include "SparseMatrix.h"
+#include "CSparseMatrix.h"
 #include "fc3d_nonsmooth_Newton_AlartCurnier.h"
 
 #include "gfc3d_compute_error.h"
@@ -47,9 +47,10 @@
 #include "NumericsMatrix.h"
 #include "NumericsSparseMatrix.h"
 #include "NumericsVector.h"
+#include "cond.h"
 
-/* #define DEBUG_MESSAGES 1 */
-/* #define DEBUG_STDOUT */
+#define DEBUG_MESSAGES 1
+#define DEBUG_STDOUT
 #include <debug.h>
 
 /* compute psi function */
@@ -125,7 +126,7 @@ CS_INT initACPsiJacobian(
   for(int e = 0; e < M->nz; ++e)
   {
     /* DEBUG_PRINTF("e=%d, M->i[e]=%td, M->p[e]=%td, M->x[e]=%g\n", e, M->i[e], M->p[e], M->x[e]); */
-    CHECK_RETURN(cs_zentry(J, M->i[e], M->p[e], - M->x[e]));
+    CHECK_RETURN(CSparseMatrix_zentry(J, M->i[e], M->p[e], - M->x[e]));
   }
 
   /* H */
@@ -134,19 +135,19 @@ CS_INT initACPsiJacobian(
   {
     /* DEBUG_PRINTF("e=%d, H->i[e]=%td, H->p[e] + M->n + A->n=%td, H->x[e]=%g\n", */
     /*              e, H->i[e], H->p[e] + M->n + A->n , H->x[e]); */
-    CHECK_RETURN(cs_zentry(J, H->i[e], H->p[e] + M->n + A->n, rescaling*H->x[e]));
+    CHECK_RETURN(CSparseMatrix_zentry(J, H->i[e], H->p[e] + M->n + A->n, rescaling*H->x[e]));
   }
 
   /* Ht */
   for(int e = 0; e < H->nz; ++e)
   {
-    CHECK_RETURN(cs_zentry(J, H->p[e] + M->m, H->i[e], H->x[e]));
+    CHECK_RETURN(CSparseMatrix_zentry(J, H->p[e] + M->m, H->i[e], H->x[e]));
   }
 
   /* -I */
   for(int e = 0; e < A->m; ++e)
   {
-    CHECK_RETURN(cs_zentry(J, e + M->m, e + M->n, -1.));
+    CHECK_RETURN(CSparseMatrix_zentry(J, e + M->m, e + M->n, -1.));
   }
 
   /* keep A start indice for update */
@@ -155,13 +156,13 @@ CS_INT initACPsiJacobian(
   /* A */
   for(int e = 0; e < A->nz; ++e)
   {
-    CHECK_RETURN(cs_zentry(J, A->i[e] + M->m + H->n, A->p[e] + M->n, A->x[e]));
+    CHECK_RETURN(CSparseMatrix_zentry(J, A->i[e] + M->m + H->n, A->p[e] + M->n, A->x[e]));
   }
 
   /* B */
   for(int e = 0; e < B->nz; ++e)
   {
-    CHECK_RETURN(cs_zentry(J, B->i[e] + M->m + H->n, B->p[e] + M->n + A->n,  rescaling*B->x[e]));
+    CHECK_RETURN(CSparseMatrix_zentry(J, B->i[e] + M->m + H->n, B->p[e] + M->n + A->n,  rescaling*B->x[e]));
   }
 
   return Astart;
@@ -415,7 +416,7 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(
   assert(tolerance > 0);
 
 
-
+  DEBUG_EXPR(NM_display(problem->M););
   DEBUG_PRINTF("M sizes = %i x %i \n", problem->M->size0, problem->M->size1 );
   DEBUG_PRINTF("H sizes = %i x %i \n", problem->H->size0, problem->H->size1 );
 
@@ -442,6 +443,13 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(
   numerics_printf_verbose(1,"---- GFC3D - NSN_AC - 1-norm of H = %g norm of b = %g ", NM_norm_1(problem->H), norm_b);
   numerics_printf_verbose(1,"---- GFC3D - NSN_AC - inf-norm of H = %g ", NM_norm_inf(problem->H));
 
+
+  DEBUG_EXPR(
+  NumericsMatrix* Mdense = NM_create(NM_DENSE,problem->M->size0, problem->M->size1 );;
+  NM_to_dense(problem->M, Mdense);
+  //NM_display(Mdense);
+  printf("conditioning = %g\n", cond(Mdense->matrix0, problem->M->size0, problem->M->size1));
+  );
   /* DEBUG_PRINTF("norm of q = %e\n", norm_q); */
   /* DEBUG_PRINTF("norm of b = %e\n", norm_b); */
 
@@ -548,9 +556,9 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(
                  2*A_.n + A_.nzmax + B_.nzmax, 1, 1);
 
 
-  DEBUG_PRINTF("NM_triplet(problem->M)->n= %i\t,NM_triplet(problem->M)->nzmax = %i\n",NM_triplet(problem->M)->n,NM_triplet(problem->M)->nzmax);
-  DEBUG_PRINTF("NM_triplet(problem->M)->n + A_.m + B_.m = %i\n",NM_triplet(problem->M)->n + A_.m + B_.m);
-  DEBUG_PRINTF("NM_triplet(problem->M)->nzmax + 2*NM_triplet(problem->H)->nzmax + 2*A_.n + A_.nzmax + B_.nzmax= %i\n", NM_triplet(problem->M)->nzmax + 2*NM_triplet(problem->H)->nzmax +
+  DEBUG_PRINTF("NM_triplet(problem->M)->n= %li\t,NM_triplet(problem->M)->nzmax = %li\n",NM_triplet(problem->M)->n,NM_triplet(problem->M)->nzmax);
+  DEBUG_PRINTF("NM_triplet(problem->M)->n + A_.m + B_.m = %li\n",NM_triplet(problem->M)->n + A_.m + B_.m);
+  DEBUG_PRINTF("NM_triplet(problem->M)->nzmax + 2*NM_triplet(problem->H)->nzmax + 2*A_.n + A_.nzmax + B_.nzmax= %li\n", NM_triplet(problem->M)->nzmax + 2*NM_triplet(problem->H)->nzmax +
                  2*A_.n + A_.nzmax + B_.nzmax);
 
 
@@ -594,7 +602,7 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(
   // need to use the functions from NumericsMatrix --xhub
 
 
-  NumericsSparseMatrix* SM = newNumericsSparseMatrix();
+  NumericsSparseMatrix* SM = NSM_new();
   SM->triplet = J;
   NumericsMatrix *AA = NM_create_from_data(NM_SPARSE,  (int)J->m, (int)J->n, SM);
 
@@ -682,7 +690,7 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(
 
 
 
-    DEBUG_PRINTF("norm of AA = %e\n", NM_norm(AA));
+    DEBUG_PRINTF("norm of AA = %e\n", NM_norm_1(AA));
     /* Solve: AWpB X = -F */
     int info_solver = NM_gesv(AA, rhs, true);
 
@@ -692,7 +700,7 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(
       fprintf(stderr, "---- GFC3D - NSN_AC - solver failed info = %d\n", info_solver);
       break;
       info[0] = 2;
-      CHECK_RETURN(!cs_check_triplet(NM_triplet(AA)));
+      CHECK_RETURN(!CSparseMatrix_check_triplet(NM_triplet(AA)));
     }
 
     /* Check the quality of the solution */

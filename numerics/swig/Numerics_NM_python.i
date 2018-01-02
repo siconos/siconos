@@ -20,7 +20,7 @@
 
 %inline %{
 
-#include "SparseMatrix.h"
+#include "CSparseMatrix.h"
 
 static inline bool sane_pyseq_check(PyObject *o)
 {
@@ -464,22 +464,22 @@ static inline bool is_Pyobject_scipy_sparse_matrix(PyObject* o, PyObject* scipy_
     if (res > 0)
     {
       m->storageType = NM_SPARSE;
-      m->matrix2 = newNumericsSparseMatrix();
+      m->matrix2 = NSM_new();
 
       if (csm->nz > 0)
       {
         m->matrix2->triplet = csm;
-        m->matrix2->origin = NS_TRIPLET;
+        m->matrix2->origin = NSM_TRIPLET;
       }
       else if (csm->nz == -1)
       {
         m->matrix2->csc = csm;
-        m->matrix2->origin = NS_CSC;
+        m->matrix2->origin = NSM_CSC;
       }
       else if (csm->nz == -2)
       {
         m->matrix2->csr = csm;
-        m->matrix2->origin = NS_CSR;
+        m->matrix2->origin = NSM_CSR;
       }
       else
       {
@@ -675,15 +675,15 @@ static PyObject* cs_sparse_to_coo_matrix(CSparseMatrix *M, bool copy)
     {
       switch(m->matrix2->origin)
       {
-      case NS_CSC:
+      case NSM_CSC:
       {
        return cs_sparse_to_csc_matrix(NM_csc(m), false);
       }
-      case NS_TRIPLET:
+      case NSM_TRIPLET:
       {
         return cs_sparse_to_coo_matrix(NM_triplet(m), false);
       }
-      case NS_CSR:
+      case NSM_CSR:
       {
         return cs_sparse_to_csr_matrix(NM_csr(m), false);
       }

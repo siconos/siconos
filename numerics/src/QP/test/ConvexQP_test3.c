@@ -8,7 +8,7 @@
 #include "ConvexQP_Solvers.h"
 #include "NumericsMatrix.h"
 #include "NumericsSparseMatrix.h"
-#include "SparseMatrix.h"
+#include "CSparseMatrix.h"
 #include "numerics_verbose.h"
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 
@@ -42,7 +42,7 @@ int main(void)
 
   NumericsMatrix * M  = NM_create(NM_SPARSE,cqp.size, cqp.size);
   NM_triplet_alloc(M,0);
-  M->matrix2->origin= NS_TRIPLET;
+  M->matrix2->origin= NSM_TRIPLET;
 
   for (int k =0; k< cqp.size; k++)
   {
@@ -61,7 +61,7 @@ int main(void)
   cqp.m=5;
   NumericsMatrix * A  = NM_create(NM_SPARSE,cqp.m, cqp.size);
   NM_triplet_alloc(A,0);
-  A->matrix2->origin= NS_TRIPLET;
+  A->matrix2->origin= NSM_TRIPLET;
 
   for (int k =0; k< cqp.m; k++)
   {

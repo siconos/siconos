@@ -22,7 +22,7 @@
 #include <stdbool.h>
 #include <float.h>
 
-#include "SparseMatrix_internal.h"
+#include "CSparseMatrix_internal.h"
 #include "NumericsMatrix.h"
 #include "NumericsSparseMatrix.h"
 #include "SolverOptions.h"
@@ -509,7 +509,7 @@ static int fc3d_AVI_gams_base(FrictionContactProblem* problem, double *reaction,
   DEBUG_PRINT("FC3D_AVI_GAMS :: Wt matrix constructed\n");
 
   Emat.storageType = NM_SPARSE;
-  NM_sparse(&Emat);
+  numericsSparseMatrix(&Emat);
   Emat.size0 = size;
   Emat.size1 = size;
 
@@ -521,7 +521,7 @@ static int fc3d_AVI_gams_base(FrictionContactProblem* problem, double *reaction,
   }
 
   Akmat.storageType = NM_SPARSE;
-  NM_sparse(&Akmat);
+  numericsSparseMatrix(&Akmat);
   Akmat.size0 = NB_APPROX*problem->numberOfContacts;
   Akmat.size1 = size;
   Akmat.matrix2->triplet = cs_spalloc(NB_APPROX*problem->numberOfContacts, size, NB_APPROX*problem->numberOfContacts*3, 1, 1);

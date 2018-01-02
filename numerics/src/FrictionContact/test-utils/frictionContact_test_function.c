@@ -19,7 +19,7 @@
 #include <stdlib.h>
 #include <math.h>
 
-#include "SparseMatrix_internal.h"
+#include "CSparseMatrix_internal.h"
 
 // avoid a conflict with old csparse.h in case fclib includes it
 #define _CS_H

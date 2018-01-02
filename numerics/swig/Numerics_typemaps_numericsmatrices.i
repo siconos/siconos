@@ -28,21 +28,21 @@
       assert(M->matrix2);
       switch (M->matrix2->origin)
       {
-      case NS_CSC:
+      case NSM_CSC:
       {
         NM_clean_cs(M->matrix2->csc, alloc_ctrl);
         free(M->matrix2->csc);
         M->matrix2->csc = NULL;
         break;
       }
-      case NS_CSR:
+      case NSM_CSR:
       {
         NM_clean_cs(M->matrix2->csr, alloc_ctrl);
         free(M->matrix2->csr);
         M->matrix2->csr = NULL;
         break;
       }
-      case NS_TRIPLET:
+      case NSM_TRIPLET:
       {
         NM_clean_cs(M->matrix2->triplet, alloc_ctrl);
         free(M->matrix2->triplet);
@@ -365,7 +365,7 @@
 %typemap(memberin) (CSparseMatrix*)
 {
  // perform a deep copy
- if (!$1) { $1 = NM_csparse_alloc_for_copy($input); }
+ if (!$1) { $1 = CSparseMatrix_alloc_for_copy($input); }
  NM_copy_sparse($input, $1);
 }
 

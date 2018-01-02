@@ -12,6 +12,7 @@ MACRO(BEGIN_TEST _D)
     *.mat
     *.dat
     *.hdf5
+    *.npz
     *.xml
     *.DAT
     *.INI)
@@ -46,6 +47,7 @@ MACRO(BEGIN_TEST2 _D)
     *.mat 
     *.dat
     *.hdf5
+    *.npz
     *.xml
     *.DAT
     *.INI)

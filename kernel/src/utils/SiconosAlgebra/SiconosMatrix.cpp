@@ -16,7 +16,7 @@
  * limitations under the License.
 */
 
-#include "SparseMatrix_internal.h"
+#include "CSparseMatrix_internal.h"
 #include "SiconosMatrix.hpp"
 #include "SiconosAlgebra.hpp"
 #include <boost/numeric/ublas/matrix_sparse.hpp>
@@ -231,7 +231,7 @@ bool SiconosMatrix::fillTriplet(CSparseMatrix* triplet, size_t row_off, size_t c
       {
         // col-major
 
-        cs_zentry(triplet, i + row_off, j + col_off, arr[i + j*nrow] );
+        CSparseMatrix_zentry(triplet, i + row_off, j + col_off, arr[i + j*nrow] );
       }
     }
   }

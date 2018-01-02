@@ -33,8 +33,8 @@
 %newobject buildEmptyGenericMechanicalProblem;
 
 // NumericsMatrix
-%newobject newNumericsSparseLinearSolverParams;
-%newobject newNumericsSparseMatrix;
+%newobject newNSM_linear_solver_params;
+%newobject NSM_new;
 %newobject NM_duplicate;
 %newobject NM_new;
 %newobject NM_create;

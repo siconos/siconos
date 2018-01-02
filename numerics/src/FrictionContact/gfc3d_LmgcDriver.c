@@ -4,7 +4,7 @@
 #include <time.h>
 #include <float.h>
 
-#include "SparseMatrix_internal.h"
+#include "CSparseMatrix_internal.h"
 
 // avoid a conflict with old csparse.h
 #define _CS_H
@@ -98,11 +98,11 @@ int gfc3d_LmgcDriver(double *reaction,
   H->size0 = M->size0;
   H->size1 = 3 * nc;
 
-  NumericsSparseMatrix * SM =newNumericsSparseMatrix();
+  NumericsSparseMatrix * SM =NSM_new();
   M->matrix2 = SM;
   SM->triplet =   (CSparseMatrix * )malloc(sizeof(CSparseMatrix));
   CSparseMatrix * _M = SM->triplet;
-  SM->origin = NS_TRIPLET;
+  SM->origin = NSM_TRIPLET;
 
   CS_INT * _colM = alloc_memory_csi(nzM, colM);
   CS_INT * _rowM = alloc_memory_csi(nzM, rowM);
@@ -119,11 +119,11 @@ int gfc3d_LmgcDriver(double *reaction,
   DEBUG_PRINTF("_M->n=%lli\t",_M->n);
   DEBUG_PRINTF("_M->m=%lli\n",_M->m);
 
-  NumericsSparseMatrix * SH =newNumericsSparseMatrix();
+  NumericsSparseMatrix * SH =NSM_new();
   H->matrix2 = SH;
   SH->triplet =   (CSparseMatrix * )malloc(sizeof(CSparseMatrix));
   CSparseMatrix * _H = SH->triplet;
-  SH->origin = NS_TRIPLET;
+  SH->origin = NSM_TRIPLET;
 
   CS_INT * _colH = alloc_memory_csi(nzH, colH);
   CS_INT * _rowH = alloc_memory_csi(nzH, rowH);

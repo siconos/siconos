@@ -28,7 +28,7 @@ Documentation to be done
 
 #include <stdio.h>
 
-/*!\file SparseMatrix.h
+/*!\file CSparseMatrix.h
   \brief Structure definition and functions related to sparse matrix storage in Numerics
 */
 
@@ -119,28 +119,74 @@ csi nz ;      : # of entries in triplet matrix;
 csi is either int64_t or int32_t and this is controlled at compile time*/
 
 
-#define NS_UNKNOWN_ERR(func, orig) \
+#define NSM_UNKNOWN_ERR(func, orig) \
 fprintf(stderr, #func ": unknown origin %d for sparse matrix\n", orig);
 
 
-#define NS_NROW_CSR(mat) mat->n
-#define NS_NCOL_CSR(mat) mat->m
+#define NSM_NROW_CSR(mat) mat->n
+#define NSM_NCOL_CSR(mat) mat->m
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {
 #endif
 
-  /** \struct cs_lu_factors SparseMatrix.h
+  /** \struct CSparseMatrix_lu_factors SparseMatrix.h
    * Information used and produced by CSparse for an LU factorization*/
   typedef struct {
     CS_INT n;       /**< size of linear system */
     css* S;      /**< symbolic analysis */
     csn* N;      /**< numerics factorization */
-  } cs_lu_factors;
+  } CSparseMatrix_lu_factors;
 
-  typedef void (*freeNSLSP)(void* p);
+ /** compute a LU factorization of A and store it in a workspace
+   * \param order control if ordering is used
+   * \param A the sparse matrix
+   * \param tol the tolerance
+   * \param cs_lu_A the parameter structure that eventually holds the factors
+   * \return 1 if the factorization was successful, 1 otherwise
+   */
+  int CSparsematrix_lu_factorization(CS_INT order, const CSparseMatrix *A, double tol, CSparseMatrix_lu_factors * cs_lu_A);
 
+  /** reuse a LU factorization (stored in the cs_lu_A) to solve a linear system Ax = b
+   * \param cs_lu_A contains the LU factors of A, permutation information
+   * \param x workspace
+   * \param[in,out] b on input RHS of the linear system; on output the solution
+   * \return 0 if failed, 1 otherwise*/
+  CS_INT CSparseMatrix_solve(CSparseMatrix_lu_factors* cs_lu_A, double* x, double *b);
+
+  /** Free a workspace related to a LU factorization
+   * \param cs_lu_A the structure to free
+   */
+  void CSparseMatrix_free_lu_factors(CSparseMatrix_lu_factors* cs_lu_A);
+
+  /** Matrix vector multiplication : y = alpha*A*x+beta*y
+   * \param[in] alpha matrix coefficient
+   * \param[in] A the sparse matrix
+   * \param[in] x pointer on a dense vector of size A->n
+   * \param[in] beta vector coefficient
+   * \param[in, out] y pointer on a dense vector of size A->n
+   * \return 0 if A x or y is NULL else 1
+   */
+  int CSparseMatrix_aaxpy(const double alpha, const CSparseMatrix *A, const double *x,
+               const double beta, double *y);
+
+
+    /** Allocate a CSparse matrix for future copy (as in NSM_copy)
+   * \param m the matrix used as model
+   * \return an newly allocated matrix
+   */
+  CSparseMatrix* CSparseMatrix_alloc_for_copy(const CSparseMatrix* const m);
+
+  CS_INT CSparseMatrix_to_dense(const CSparseMatrix* const A, double * B);
+
+  /** print a matrix to a text file
+   * \param A matrix to print
+   * \param brief if positive, print only a portion of the matrix
+   * \param file file descriptor*/
+  int CSparseMatrix_print_in_file(const CSparseMatrix *A, int brief, FILE* file);
+
+  CSparseMatrix * CSparseMatrix_new_from_file(FILE* file);
 
   /** Add an entry to a triplet matrix only if the absolute value is
    * greater than DBL_EPSILON.
@@ -151,36 +197,20 @@ extern "C"
    * \return integer value : 1 if the absolute value is less than
    * DBL_EPSILON, otherwise the return value of cs_entry.
    */
-  CS_INT cs_zentry(CSparseMatrix *T, CS_INT i, CS_INT j, double x);
+  CS_INT CSparseMatrix_zentry(CSparseMatrix *T, CS_INT i, CS_INT j, double x);
 
   /** Check if the given triplet matrix is properly constructed (col and row indices are correct)
    * \param T the sparse matrix to check
    * \return 0 if the matrix is fine, 1 otherwise
    * */
-  int cs_check_triplet(CSparseMatrix *T);
+  int CSparseMatrix_check_triplet(CSparseMatrix *T);
 
   /** Check if the given triplet matrix is properly constructed (col and row indices are correct)
    * \param T the sparse matrix to check
    * \return 0 if the matrix is fine, 1 otherwise
    * */
-  int cs_check_csc(CSparseMatrix *T);
+  int CSparseMatrix_check_csc(CSparseMatrix *T);
 
-  /** Create dense matrix from a CSparseMatrix.
-   * \param A the sparse matrix
-   * \return a pointer on A->m * A->n allocated storage
-   */
-  double* cs_dense(CSparseMatrix *A);
-
-  /** Matrix vector multiplication : y = alpha*A*x+beta*y
-   * \param[in] alpha matrix coefficient
-   * \param[in] A the sparse matrix
-   * \param[in] x pointer on a dense vector of size A->n
-   * \param[in] beta vector coefficient
-   * \param[in, out] y pointer on a dense vector of size A->n
-   * \return 0 if A x or y is NULL else 1
-   */
-  int cs_aaxpy(const double alpha, const CSparseMatrix *A, const double *x,
-               const double beta, double *y);
 
   /** Free space allocated for a SparseMatrix. note : cs_spfree also
    *  free the cs_struct this fails when the struct is allocated on
@@ -188,40 +218,7 @@ extern "C"
    * \param A the sparse matrix
    * \return NULL on success
   */
-  CSparseMatrix* cs_spfree_on_stack(CSparseMatrix* A);
-
-
-
-
-
-
-
-  /** reuse a LU factorization (stored in the cs_lu_A) to solve a linear system Ax = b
-   * \param cs_lu_A contains the LU factors of A, permutation information
-   * \param x workspace
-   * \param[in,out] b on input RHS of the linear system; on output the solution
-   * \return 0 if failed, 1 otherwise*/
-  CS_INT cs_solve (cs_lu_factors* cs_lu_A, double* x, double *b);
-
-  /** compute a LU factorization of A and store it in a workspace
-   * \param order control if ordering is used
-   * \param A the sparse matrix
-   * \param tol the tolerance
-   * \param cs_lu_A the parameter structure that eventually holds the factors
-   * \return 1 if the factorization was successful, 1 otherwise
-   */
-  int cs_lu_factorization(CS_INT order, const CSparseMatrix *A, double tol, cs_lu_factors * cs_lu_A);
-
-  /** Free a workspace related to a LU factorization
-   * \param cs_lu_A the structure to free
-   */
-  void cs_sparse_free(cs_lu_factors* cs_lu_A);
-
-  /** print a matrix to a text file
-   * \param A matrix to print
-   * \param brief if positive, print only a portion of the matrix
-   * \param file file descriptor*/
-  int cs_printInFile(const CSparseMatrix *A, int brief, FILE* file);
+  CSparseMatrix* CSparseMatrix_spfree_on_stack(CSparseMatrix* A);
 
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)

@@ -19,7 +19,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
-#include "SparseMatrix_internal.h"
+#include "CSparseMatrix_internal.h"
 #include "SparseBlockMatrix.h"
 #include "SiconosLapack.h"
 #include <math.h>
@@ -30,7 +30,7 @@
 //#define DEBUG_STDOUT 1
 //#define DEBUG_NOCOLOR 1
 #include "debug.h"
-#include "SparseMatrix.h"
+#include "CSparseMatrix.h"
 
 //#define VERBOSE_DEBUG
 

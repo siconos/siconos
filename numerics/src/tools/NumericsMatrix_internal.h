@@ -72,7 +72,7 @@ extern "C"
   DMUMPS_STRUC_C* NM_MUMPS_id(NumericsMatrix* A);
 
   /** Free the working data for MUMPS
-   * \param p a NumericsSparseLinearSolverParams object holding the data
+   * \param p a NSM_linear_solver_params object holding the data
    */
   void NM_MUMPS_free(void* p);
 
@@ -114,7 +114,7 @@ typedef struct {
   NM_UMFPACK_WS* NM_UMFPACK_ws(NumericsMatrix* A);
 
   /** Free the working data for UMFPACK
-   * \param p a NumericsSparseLinearSolverParams object holding the data
+   * \param p a NSM_linear_solver_params object holding the data
    */
   void NM_UMFPACK_free(void* p);
 
@@ -141,7 +141,7 @@ typedef struct NM_SuperLU_WS NM_SuperLU_WS;
   NM_SuperLU_WS* NM_SuperLU_ws(NumericsMatrix* A);
 
   /** Free the working data for SuperLU
-   * \param p a NumericsSparseLinearSolverParams object holding the data
+   * \param p a NSM_linear_solver_params object holding the data
    */
   void NM_SuperLU_free(void* p);
 
@@ -178,7 +178,7 @@ typedef struct NM_SuperLU_MT_WS NM_SuperLU_MT_WS;
   NM_SuperLU_MT_WS* NM_SuperLU_MT_ws(NumericsMatrix* A);
 
   /** Free the working data for SuperLU_MT
-   * \param p a NumericsSparseLinearSolverParams object holding the data
+   * \param p a NSM_linear_solver_params object holding the data
    */
   void NM_SuperLU_MT_free(void* p);
 
@@ -215,7 +215,7 @@ typedef struct NM_MKL_pardiso_WS NM_MKL_pardiso_WS;
   NM_MKL_pardiso_WS* NM_MKL_pardiso_ws(NumericsMatrix* A);
 
   /** Free the working data for MKL_pardiso
-   * \param p a NumericsSparseLinearSolverParams object holding the data
+   * \param p a NSM_linear_solver_params object holding the data
    */
   void NM_MKL_pardiso_free(void* p);
 

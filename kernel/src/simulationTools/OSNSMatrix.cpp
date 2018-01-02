@@ -359,7 +359,7 @@ void OSNSMatrix::fillM(DynamicalSystemsGraph & DSG, bool update)
       M_NM.size0 = sizeM;
       M_NM.size1 = sizeM;
       NM_triplet_alloc(&M_NM, sizeM); // At least one element per row
-      M_NM.matrix2->origin = NS_TRIPLET;
+      M_NM.matrix2->origin = NSM_TRIPLET;
       CSparseMatrix* Mtriplet = NM_triplet(&M_NM);
 
       unsigned int pos =0;
@@ -412,7 +412,7 @@ void OSNSMatrix::fillH(DynamicalSystemsGraph & DSG, InteractionsGraph& indexSet,
       H_NM.size0 = _dimRow;
       H_NM.size1 = _dimColumn;
       NM_triplet_alloc(&H_NM, _dimColumn);// At least one element per column
-      H_NM.matrix2->origin = NS_TRIPLET;
+      H_NM.matrix2->origin = NSM_TRIPLET;
       CSparseMatrix* Htriplet= NM_triplet(&H_NM);
       unsigned int pos = 0, pos_ds=0;
 
