@@ -18,6 +18,7 @@
 #include "LagrangianDS.hpp"
 #include "BlockVector.hpp"
 #include "BlockMatrix.hpp"
+// #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
 #include "debug.h"
@@ -157,6 +158,7 @@ void LagrangianDS::init_forces()
 
 void LagrangianDS::initRhs(double time)
 {
+  DEBUG_BEGIN("LagrangianDS::initRhs(double time)\n");
   // dim
   _n = 2 * _ndof;
 
@@ -228,6 +230,8 @@ void LagrangianDS::initRhs(double time)
   else
     _jacxRhs.reset(new BlockMatrix(_rhsMatrices[zeroMatrix], _rhsMatrices[idMatrix],
                                    _rhsMatrices[zeroMatrix], _rhsMatrices[zeroMatrix]));
+  DEBUG_EXPR(display(););
+  DEBUG_END("LagrangianDS::initRhs(double time)\n");
 }
 
 // --- GETTERS/SETTERS ---
@@ -428,6 +432,7 @@ void LagrangianDS::computeJacobianFGyrqDot(SP::SiconosVector position, SP::Sicon
 
 void LagrangianDS::computeRhs(double time, bool isDSup)
 {
+  DEBUG_BEGIN("LagrangianDS::computeRhs(double time, bool isDSup)");
   // if isDSup == true, this means that there is no need to re-compute mass ...
   *_q[2] = *(_p[2]); // Warning: r/p update is done in Interactions/Relations
 
@@ -435,6 +440,7 @@ void LagrangianDS::computeRhs(double time, bool isDSup)
   //   {
   computeForces(time, _q[0], _q[1]);
   *_q[2] += *_forces;
+  DEBUG_EXPR(_forces->display(););
   //#  }
 
   // Computes q[2] = inv(mass)*(fL+p) by solving Mq[2]=fL+p.
@@ -454,6 +460,7 @@ void LagrangianDS::computeRhs(double time, bool isDSup)
 
   _x[1]->setBlock(0, *_q[1]);
   _x[1]->setBlock(_ndof, *_q[2]);
+  DEBUG_END("LagrangianDS::computeRhs(double time, bool isDSup)");
 }
 
 void LagrangianDS::computeJacobianRhsx(double time, bool isDSup)

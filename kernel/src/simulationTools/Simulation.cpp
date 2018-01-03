@@ -175,6 +175,7 @@ void Simulation::insertNonSmoothProblem(SP::OneStepNSProblem osns, int Id)
 
 void Simulation::initialize(SP::Model m, bool withOSI)
 {
+  DEBUG_BEGIN("Simulation::initialize(SP::Model m, bool withOSI)\n");
   // === Connection with the model ===
   assert(m && "Simulation::initialize(model) - model = NULL.");
 
@@ -270,10 +271,12 @@ void Simulation::initialize(SP::Model m, bool withOSI)
     statOut << "The tolerance parameter is equal to: " << _tolerance <<std::endl;
     statOut <<std::endl <<std::endl;
   }
+  DEBUG_END("Simulation::initialize(SP::Model m, bool withOSI)\n");
 }
 
 void Simulation::initializeInteraction(double time, SP::Interaction inter)
 {
+  DEBUG_BEGIN("Simulation::initializeInteraction(double time, SP::Interaction inter)\n");
   // Get the interaction properties from the topology for initialization.
   SP::InteractionsGraph indexSet0 = _nsds->topology()->indexSet0();
   InteractionsGraph::VDescriptor ui = indexSet0->descriptor(inter);
@@ -330,6 +333,7 @@ void Simulation::initializeInteraction(double time, SP::Interaction inter)
       osi2.fillDSLinks(*inter, i_prop,  DSG);
       osi2.update_interaction_output(*inter, time, i_prop);
     }
+  DEBUG_END("Simulation::initializeInteraction(double time, SP::Interaction inter)\n");
 }
 
 
