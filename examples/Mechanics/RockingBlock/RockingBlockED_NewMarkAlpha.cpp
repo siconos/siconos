@@ -171,7 +171,7 @@ int main(int argc, char* argv[])
 
     InteractionsGraph::VIterator ui, uiend;
     //-------------------- Save the output during simulation ---------------------------------------------------------
-    SimpleMatrix DataPlot(NpointSave+1000, SizeOutput);
+    SimpleMatrix DataPlot(NpointSave, SizeOutput);
     //------------- At the initial time -----------------------------------------------------------------------------
     DataPlot(0, 0) = RoBlockModel->t0();
     DataPlot(0, 1) = (*PosBlock)(0); // Position X
