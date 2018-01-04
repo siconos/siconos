@@ -89,24 +89,22 @@ def test_from_csr2():
 def test_from_csc162x162():
 
     from siconos.numerics import SBM_from_csparse, SBM_get_value, NM_display
-    from scipy.sparse import csr_matrix, load_npz, linalg
+    from scipy.sparse import csr_matrix, linalg
+    try:
+        from scipy.sparse import load_npz
+    except:
+        return 0
 
+    
     M = load_npz(os.path.join(working_dir, 'data/csc162x162.npz'))
-
     #M = load_npz('data/csc162x162.npz')
-    #print(linalg.eigs(M+M.transpose(),  which='LR')[1])   
-    #print(M.indices)
-    #print(M.indptr)
-    #print(M.data)
-
     
     blocksize =9
     r,SBM = SBM_from_csparse(blocksize,M)
     assert SBM_get_value(SBM,0,0) == M[0,0]
     assert SBM_get_value(SBM,161,161) == M[161,161]
     
-    #print(SBM_get_value(SBM,0,0))
-    #NM_display(SBM)
+
 
     
 #  # scipy csr 3x3 block
