@@ -632,7 +632,8 @@ void LagrangianDS::swapInMemory()
 {
   _qMemory.swap(*_q[0]);
   _velocityMemory.swap(*_q[1]);
-  _forcesMemory.swap(*_forces);
+  if (_forces)
+    _forcesMemory.swap(*_forces);
 
   // initialization of the reaction force due to the non smooth law
   // note: these are a no-op if either memory or vector is null
