@@ -85,26 +85,27 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
       accFree.zero();
 
       // get left state from memory
-      // (copy because computeForces takes non-const pointer)
-      SiconosVector qold = d->qMemory().getSiconosVector(0);
-      SiconosVector vold = d->velocityMemory().getSiconosVector(0); // right limit
-
+      const SiconosVector& qold = d->qMemory().getSiconosVector(0);
+      const SiconosVector& vold = d->velocityMemory().getSiconosVector(0); // right limit
+      std11::shared_ptr<SiconosVector> pqold(&*(SiconosVector*)&qold, null_deleter);
+      std11::shared_ptr<SiconosVector> pvold(&*(SiconosVector*)&vold, null_deleter);
       DEBUG_EXPR(accFree.display());
       DEBUG_EXPR(qold->display());
       DEBUG_EXPR(vold->display());
 
       /* compute the force and store in accFree */
-      d->computeForces(told, qold.shared_from_this(), vold.shared_from_this());
+      d->computeForces(told, pqold, pvold);
+
       DEBUG_EXPR(d->forces()->display());
       accFree += *(d->forces());
 
       /* Compute the acceleration due to the external force */
       /* accFree contains left (right limit) acceleration without contact force */
       if(d->inverseMass())
-	{
-	  d->update_inverse_mass();
-	  d->inverseMass()->PLUForwardBackwardInPlace(accFree);
-	}
+      {
+        d->update_inverse_mass();
+        d->inverseMass()->PLUForwardBackwardInPlace(accFree);
+      }
 
       /* Store the value of accFree in d->workspace(DynamicalSystem::free_tdg called work_tdg*/
       work_tdg =  workVectors[OneStepIntegrator::free_tdg];
@@ -142,10 +143,10 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
       accFree += *(d->forces());
 
       if(d->inverseMass())
-	{
-	  d->update_inverse_mass();
-	  d->inverseMass()->PLUForwardBackwardInPlace(accFree); // contains left (right limit) acceleration without contact force
-	}
+      {
+        d->update_inverse_mass();
+        d->inverseMass()->PLUForwardBackwardInPlace(accFree); // contains left (right limit) acceleration without contact force
+      }
       *work_tdg = accFree; // store the value in WorkFreeFree
 
       DEBUG_PRINT("accFree contains right limit acceleration at  t^+_k with contact force :\n");
@@ -434,15 +435,15 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
         residuFree =  - 0.5 * h* *work_tdg;
 
 
-	d->computeForces(t, q, v);
-	*work_tdg = *(d->forces());
-	DEBUG_EXPR(d->forces()->display());
+        d->computeForces(t, q, v);
+        *work_tdg = *(d->forces());
+        DEBUG_EXPR(d->forces()->display());
 
-	if(d->inverseMass())
-	  {
-	    d->update_inverse_mass();
-	    d->inverseMass()->PLUForwardBackwardInPlace(*work_tdg);
-	  }
+        if(d->inverseMass())
+        {
+          d->update_inverse_mass();
+          d->inverseMass()->PLUForwardBackwardInPlace(*work_tdg);
+        }
         residuFree -= 0.5 * h**work_tdg;
         DEBUG_EXPR(residuFree.display());
       }
@@ -462,15 +463,15 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
         residuFree = 0.5 * h * *work_tdg;
         work_tdg->zero();
 
-	d->computeForces(t, q, v);
-	*work_tdg += *(d->forces());
+        d->computeForces(t, q, v);
+        *work_tdg += *(d->forces());
 
 
-	if(d->inverseMass())
-	  {
-	    d->update_inverse_mass();
-	    d->inverseMass()->PLUForwardBackwardInPlace(*work_tdg);
-	  }
+        if(d->inverseMass())
+        {
+          d->update_inverse_mass();
+          d->inverseMass()->PLUForwardBackwardInPlace(*work_tdg);
+        }
         residuFree -= 0.5 * h * *work_tdg;
         DEBUG_EXPR(residuFree.display());
       }
@@ -509,20 +510,20 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
         // Lagrangian Nonlinear Systems
         if(dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
         {
-	  d->computeForces(t, q, v);
-	  accFree += *(d->forces());
+          d->computeForces(t, q, v);
+          accFree += *(d->forces());
         }
         else
           RuntimeException::selfThrow
-          ("D1MinusLinearOSI::computeResidu - not yet implemented for Dynamical system type: " + dsType);
+            ("D1MinusLinearOSI::computeResidu - not yet implemented for Dynamical system type: " + dsType);
 
-	if(d->inverseMass())
-	  {
-	    d->update_inverse_mass();
-	    d->inverseMass()->PLUForwardBackwardInPlace(accFree);// contains right (left limit) acceleration without contact force
-	  }
-	DEBUG_PRINT("accFree contains left limit acceleration at  t^-_{k+1} without contact force :\n");
-	DEBUG_EXPR(accFree.display());
+        if(d->inverseMass())
+        {
+          d->update_inverse_mass();
+          d->inverseMass()->PLUForwardBackwardInPlace(accFree);// contains right (left limit) acceleration without contact force
+        }
+        DEBUG_PRINT("accFree contains left limit acceleration at  t^-_{k+1} without contact force :\n");
+        DEBUG_EXPR(accFree.display());
       }
       else if(dsType == Type::NewtonEulerDS)
       {
@@ -537,14 +538,14 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
         DEBUG_EXPR(q->display());
         DEBUG_EXPR(v->display());
 
-	d->computeForces(t, q, v);
-	accFree += *(d->forces());
+        d->computeForces(t, q, v);
+        accFree += *(d->forces());
 
-	if(d->inverseMass())
-	  {
-	    d->update_inverse_mass();
-	    d->inverseMass()->PLUForwardBackwardInPlace(accFree);// contains right (left limit) acceleration without contact force
-	  }
+        if(d->inverseMass())
+        {
+          d->update_inverse_mass();
+          d->inverseMass()->PLUForwardBackwardInPlace(accFree);// contains right (left limit) acceleration without contact force
+        }
 
         DEBUG_PRINT("accFree contains left limit acceleration at  t^-_{k+1} without contact force :\n");
         DEBUG_EXPR(accFree.display());
@@ -637,11 +638,11 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
           DEBUG_EXPR(d->inverseMass()->display());
           DEBUG_EXPR(d->p(2)->display());
           SiconosVector dummy(*(d->p(2))); // value = contact force
-	  if(d->inverseMass())
-	    {
-	      d->update_inverse_mass();
-	      d->inverseMass()->PLUForwardBackwardInPlace(dummy);
-	    }
+          if(d->inverseMass())
+          {
+            d->update_inverse_mass();
+            d->inverseMass()->PLUForwardBackwardInPlace(dummy);
+          }
           residuFree -= 0.5 * h*dummy;
 
         }
