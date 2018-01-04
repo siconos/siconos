@@ -131,6 +131,8 @@ void D1MinusLinearOSI::initializeDynamicalSystem(Model& m, double t, SP::Dynamic
     workVectors[OneStepIntegrator::residu_free].reset(new SiconosVector(lds->dimension()));
     workVectors[OneStepIntegrator::free].reset(new SiconosVector(lds->dimension()));
     workVectors[OneStepIntegrator::free_tdg].reset(new SiconosVector(lds->dimension()));
+    // Update dynamical system components (for memory swap).
+    lds->computeForces(t, lds->q(), lds->velocity());
     lds->swapInMemory();
   }
   else if(dsType == Type::NewtonEulerDS)
@@ -141,6 +143,8 @@ void D1MinusLinearOSI::initializeDynamicalSystem(Model& m, double t, SP::Dynamic
     workVectors[OneStepIntegrator::residu_free].reset(new SiconosVector(neds->dimension()));
     workVectors[OneStepIntegrator::free].reset(new SiconosVector(neds->dimension()));
     workVectors[OneStepIntegrator::free_tdg].reset(new SiconosVector(neds->dimension()));
+    //Compute a first value of the forces to store it in _forcesMemory
+    neds->computeForces(t, neds->q(), neds->twist());
     neds->swapInMemory();
   }
   else
