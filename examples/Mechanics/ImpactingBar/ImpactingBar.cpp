@@ -289,9 +289,8 @@ int main(int argc, char* argv[])
 
     double error = (dataPlot - dataPlotRef).normInf() ;
 cout << "Error = " << error << endl;
-    if (error > 1e-12)
+    if (error > 1e-11)
     {
-
       std::cout << "Warning. The result is rather different from the reference file." << std::endl;
       std::cout << "Error = "<< (dataPlot - dataPlotRef).normInf()<<std::endl;
       return 1;
