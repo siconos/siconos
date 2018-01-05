@@ -123,6 +123,8 @@ else()
     GranularMaterial
     GeometricPrimitives
     DirectProjection
+    Hacks
+    Queries
     )
 
   if (${mechanics_installed} LESS 0)
