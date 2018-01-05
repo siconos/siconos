@@ -60,7 +60,7 @@ Vinit = 10.0     # initial voltage
 withPlot = True
 if (withPlot):
     import matplotlib
-    #matplotlib.use('Agg')
+    matplotlib.use('Agg')
     from matplotlib.pyplot import subplot, title, plot, grid, savefig, show
 
 
@@ -205,4 +205,4 @@ if (withPlot):
     title('diode current')
     plot(dataPlot[0:k - 1, 0], dataPlot[0:k - 1, 4])
     savefig("circuit_rlcd.png")
-    show()
+    #show()
