@@ -115,7 +115,6 @@ else()
   # set the list of directories of examples based on mechanics component.
   set(mechanics_examples
     JointsTests
-    NewtonEuler
     RockFall
     RigidBodiesCollection
     OCC_Examples
@@ -184,7 +183,7 @@ else()
 	  else()
 		file(GLOB EXAMPLES_P ${src_dir}/*.cpp)
 	  endif()
-      file(GLOB EXAMPLES_DATA ${src_dir}/*.ref)
+      file(GLOB EXAMPLES_DATA ${src_dir}/*.ref$ {src_dir}/*.mat)
       if(EXAMPLES_P)
         foreach(_P ${EXAMPLES_P})
 	  # Full path to current file ...
@@ -205,6 +204,7 @@ else()
 	      set(bin_dir ${CMAKE_CURRENT_BINARY_DIR}/${_D}/${_dir}/${EXAMPLE_NAME})
 	      file(MAKE_DIRECTORY ${bin_dir})
 	      foreach(datafile ${EXAMPLES_DATA})
+		message_status("configure " ${datafile})
 	        configure_file(${datafile} ${bin_dir})
 	      endforeach()
 	      if(ext MATCHES ".py")
