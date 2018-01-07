@@ -639,8 +639,14 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
                   'stl': vtk.vtkSTLReader}
 
     for shape_name in io.shapes():
-
-        shape_type = io.shapes()[shape_name].attrs['type']
+ 
+        shape_type = (io.shapes()[shape_name].attrs['type'])
+        try:
+            # work-around h5py unicode bug
+            # https://github.com/h5py/h5py/issues/379
+            shape_type  = shape_type.decode('utf-8')
+        except AttributeError:
+            pass
         scale = None
         if 'scale' in io.shapes()[shape_name].attrs:
             scale = io.shapes()[shape_name].attrs['scale']
@@ -878,7 +884,6 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
         for contactor_instance_name in io.instances()[instance_name]:
             contactor = io.instances()[instance_name][contactor_instance_name]
             contact_shape_indx = None
-
             if 'shape_name' not in contactor.attrs:
                 print("Warning: old format: ctr.name must be ctr.shape_name for body {0}, contact {1}".format(instance_name, contactor_instance_name))
                 shape_attr_name='name'
@@ -892,6 +897,13 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
                                       contact_index)
             else:
                 contact_shape_indx = contactor.attrs[shape_attr_name]
+                try:
+                    # work-around h5py unicode bug
+                    # https://github.com/h5py/h5py/issues/379
+                    contact_shape_indx  = contact_shape_indx.decode('utf-8')
+                except AttributeError:
+                    pass
+
 
             contactors[instance].append(contact_shape_indx)
 
@@ -910,6 +922,7 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
                     config.get('static_opacity', 1.0))
 
             actor.GetProperty().SetColor(random_color())
+
             actor.SetMapper(unfrozen_mappers[contact_shape_indx])
 
             renderer.AddActor(actor)
