@@ -859,7 +859,7 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
     for shape_name in mappers.keys():
         if shape_name not in unfrozen_mappers:
             print (shape_name)
-            unfrozen_mappers[shape_name] = mappers[shape_name].next()
+            unfrozen_mappers[shape_name] = next(mappers[shape_name])
 
     for instance_name in io.instances():
 
@@ -1019,7 +1019,7 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
     set_actors_vizzz = numpy.vectorize(set_actors_viz)
 
     def set_dynamic_actors_visibility(time):
-        set_actors_vizzz(dynamic_actors.keys(), time)
+        set_actors_vizzz(list(dynamic_actors.keys()), time)
 
 
     # to be removed if ok
