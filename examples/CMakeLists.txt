@@ -99,7 +99,7 @@ else()
 
   # Control component examples
   if(${control_installed} GREATER -1)
-    MESSAGE(STATUS "control component found")
+    message(STATUS "control component found")
     set(EXAMPLES_DIRECTORIES
       "${EXAMPLES_DIRECTORIES}"
       Control
@@ -127,6 +127,7 @@ else()
     )
 
   if (${mechanics_installed} LESS 0)
+    message("mechanics component not found")
     foreach(_dir ${mechanics_examples})
       list(APPEND NO_TEST_FILES ${_dir})
     endforeach()
@@ -183,7 +184,7 @@ else()
 	  else()
 		file(GLOB EXAMPLES_P ${src_dir}/*.cpp)
 	  endif()
-      file(GLOB EXAMPLES_DATA ${src_dir}/*.ref$ {src_dir}/*.mat)
+      file(GLOB EXAMPLES_DATA ${src_dir}/*.ref ${src_dir}/*/*.mat)
       if(EXAMPLES_P)
         foreach(_P ${EXAMPLES_P})
 	  # Full path to current file ...
@@ -204,7 +205,7 @@ else()
 	      set(bin_dir ${CMAKE_CURRENT_BINARY_DIR}/${_D}/${_dir}/${EXAMPLE_NAME})
 	      file(MAKE_DIRECTORY ${bin_dir})
 	      foreach(datafile ${EXAMPLES_DATA})
-		message_status("configure " ${datafile})
+		message(STATUS "configure " ${datafile})
 	        configure_file(${datafile} ${bin_dir})
 	      endforeach()
 	      if(ext MATCHES ".py")
