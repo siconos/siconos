@@ -36,7 +36,7 @@ MoreauJeanBilbaoOSI::MoreauJeanBilbaoOSI():
 {
   _levelMinForOutput= 0;
   _levelMaxForOutput =1;
-  _levelMinForInput =0;
+  _levelMinForInput =1;
   _levelMaxForInput =1;
   _steps=1;
 }
