@@ -24,7 +24,6 @@
   Direct description of the model.
   Simulation with a Time-Stepping scheme.
 */
-#include "SphereNEDSPlanR.hpp"
 #include "SiconosKernel.hpp"
 
 //#define WITH_PROJ
