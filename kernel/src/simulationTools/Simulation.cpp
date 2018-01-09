@@ -205,10 +205,11 @@ void Simulation::initialize(SP::Model m, bool withOSI)
         _nsds->topology()->setOSI(DSG->bundle(*dsi), *_allOSI->begin());
         if (_allOSI->size() > 1)
         {
-          std::cout <<"Warning. The simulation has multiple OSIs but the DS number "
+          std::cout <<"Warning. The simulation has multiple OneStepIntegrators (OSI) but the DS number "
                     << DSG->bundle(*dsi)->number()
-                    << " is not assigned to an OSI. We assign the first OSI to this DS."
+                    << " is not assigned to an OSI. We assign the following OSI to this DS."
                     << std::endl;
+          (*_allOSI->begin())->display();
 
         }
       }
