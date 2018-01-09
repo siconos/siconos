@@ -621,8 +621,10 @@ void TimeSteppingDirectProjection::newtonSolve(double criterion, unsigned int ma
       }
     }
     if (!isNewtonConverge)
-      std::cout << "TimeStepping::newtonSolve -- Newton process stopped: max. number of steps (" << maxStep << ") reached." <<std::endl ;
-    else if (info)
+      if (_warnOnNonConvergence) {
+        std::cout << "TimeStepping::newtonSolve -- Newton process stopped: max. number of steps (" << maxStep << ") reached." <<std::endl ;
+      }
+    else if (info && _warnOnNonConvergence)
       std::cout << "TimeStepping::newtonSolve -- Newton process stopped: solver failed." <<std::endl ;
     //    else
     //      std::cout << "TimeStepping::newtonSolve succed nbit="<<_newtonNbIterations<<"maxStep="<<maxStep<<endl;

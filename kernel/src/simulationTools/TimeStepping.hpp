@@ -107,6 +107,10 @@ protected:
    */
   bool _displayNewtonConvergence;
 
+  /** boolean variable to display warning on non-convergence
+   */
+  bool _warnOnNonConvergence;
+
   /** boolean variable to force an explicit evaluation of the Jacobians
    * mapping of relations only at the beginning of the time--step and
    * not in the Newton iteration
@@ -241,6 +245,10 @@ public:
   void setDisplayNewtonConvergence(bool newval)
   {
     _displayNewtonConvergence = newval;
+  };
+  void setWarnOnNonConvergence(bool newval)
+  {
+    _warnOnNonConvergence = newval;
   };
   bool explicitJacobiansOfRelation()
   {
