@@ -444,7 +444,7 @@ void LagrangianDS::computeRhs(double time, bool isDSup)
   //#  }
 
   // Computes q[2] = inv(mass)*(fL+p) by solving Mq[2]=fL+p.
-  // -- Case 1: if mass is constant, then a copy of imass is LU-factorized during initialization and saved into _inverseMasse
+  // -- Case 1: if mass is constant, then a copy of imass is LU-factorized during initialization and saved into _inverseMass
   // -- Case 2: mass is not constant, we copy it into _inverseMass
   // Then we proceed with PLUForwardBackward.
   // mass and inv(mass) computation
@@ -480,6 +480,9 @@ void LagrangianDS::computeJacobianRhsx(double time, bool isDSup)
 
   if(_jacobianqForces)
   {
+    /** \warning the Jacobian of the inverse of the mass matrix
+     * w.r.t q is not taken into account */
+
     SP::SiconosMatrix bloc10 = _jacxRhs->block(1, 0);
     computeJacobianqForces(time);
     *bloc10 = *_jacobianqForces;
