@@ -97,7 +97,7 @@ void computeJacobianConvectedVectorInBodyFrame(double q0, double q1, double q2, 
   jacobian->setValue(2,6, q1*v0+q2*v1+q3*v2);
 
 
-  *jacobian *=2.0; 
+  *jacobian *=2.0;
 }
 
 
@@ -392,7 +392,7 @@ Q0 : contains the center of mass coordinate, and the quaternion initial. (dim(Q0
 Twist0 : contains the initial velocity of center of mass and the omega initial. (dim(VTwist0)=6)
 */
 NewtonEulerDS::NewtonEulerDS():
-  DynamicalSystem(6),
+  DynamicalSystem(13),
   _hasConstantFExt(false),
   _hasConstantMExt(false),
   _isMextExpressedInInertialFrame(false),
@@ -412,7 +412,7 @@ NewtonEulerDS::NewtonEulerDS():
 
 NewtonEulerDS::NewtonEulerDS(SP::SiconosVector Q0, SP::SiconosVector Twist0,
                              double  mass, SP::SiconosMatrix inertialMatrix):
-  DynamicalSystem(6),
+  DynamicalSystem(13),
   _hasConstantFExt(false),
   _hasConstantMExt(false),
   _isMextExpressedInInertialFrame(false),
@@ -452,10 +452,12 @@ NewtonEulerDS::NewtonEulerDS(SP::SiconosVector Q0, SP::SiconosVector Twist0,
 
 void NewtonEulerDS::_init()
 {
+  /** \todo lazy Memory allocation */
   _p.resize(3);
   _p[1].reset(new SiconosVector(_n)); // Needed in NewtonEulerR
+
+
   _zeroPlugin();
-  //assert(0);
 
   // --- NEWTONEULER INHERITED CLASS MEMBERS ---
   // -- Memory allocation for vector and matrix members --
@@ -465,9 +467,7 @@ void NewtonEulerDS::_init()
 
   // Current state
   _q.reset(new SiconosVector(_qDim));
-  // _deltaq.reset(new SiconosVector(_qDim));
   _twist.reset(new SiconosVector(_n));
-
   _dotq.reset(new SiconosVector(_qDim));
 
   _massMatrix.reset(new SimpleMatrix(_n, _n));
@@ -570,17 +570,82 @@ void NewtonEulerDS::initializeNonSmoothInput(unsigned int level)
 
 void NewtonEulerDS::initRhs(double time)
 {
+  DEBUG_BEGIN("NewtonEulerDS::initRhs(double time)\n");
   // dim
-  _n = 2 * 3;
+  _n = _qDim + 6;
 
-  //  _workMatrix.resize(sizeWorkMat);
-  // Solve Mq[2]=fL+p.
-  //*_q = *(_p[2]); // Warning: r/p update is done in Interactions/Relations
-  if(_wrench)
+  _x0.reset(new SiconosVector(*_q0, *_twist0));
+
+  _x[0].reset(new SiconosVector(*_q, *_twist));
+
+  if (!_acceleration)
+    _acceleration.reset(new SiconosVector(6));
+
+  // Compute _dotq
+  computeT();
+  prod(*_T, *_twist, *_dotq, true);
+  _x[1].reset(new SiconosVector(*_dotq, *_acceleration));
+
+
+  // Nothing to do for the initialization of the wrench
+
+
+  // Everything concerning rhs and its jacobian is handled in initRhs and computeXXX related functions.
+  _rhsMatrices.resize(numberOfRhsMatrices);
+
+  if(!_p[2])
+    _p[2].reset(new SiconosVector(6));
+
+
+  init_inverse_mass();
+
+  computeRhs(time);
+
+  /** \warning the derivative of T w.r.t to q is neglected */
+  _rhsMatrices[jacobianXBloc00].reset(new SimpleMatrix(_qDim, _qDim, Siconos::ZERO));
+
+
+  _rhsMatrices[jacobianXBloc01].reset(new SimpleMatrix(*_T));
+  bool flag1 = false, flag2 = false;
+  if(_jacobianWrenchq)
   {
-    computeForces(time);
-    //      *_q += *_forces;
+    // Solve MjacobianX(1,0) = jacobianFL[0]
+    computeJacobianqForces(time);
+
+    _rhsMatrices[jacobianXBloc10].reset(new SimpleMatrix(*_jacobianWrenchq));
+    _inverseMass->PLUForwardBackwardInPlace(*_rhsMatrices[jacobianXBloc10]);
+    flag1 = true;
   }
+
+  if(_jacobianWrenchTwist)
+  {
+    // Solve MjacobianX(1,1) = jacobianFL[1]
+    computeJacobianvForces(time);
+    _rhsMatrices[jacobianXBloc11].reset(new SimpleMatrix(*_jacobianWrenchTwist));
+    _inverseMass->PLUForwardBackwardInPlace(*_rhsMatrices[jacobianXBloc11]);
+    flag2 = true;
+  }
+
+  if(!_rhsMatrices[zeroMatrix])
+    _rhsMatrices[zeroMatrix].reset(new SimpleMatrix(6, 6, Siconos::ZERO));
+
+  if(!_rhsMatrices[zeroMatrixqDim])
+    _rhsMatrices[zeroMatrixqDim].reset(new SimpleMatrix(6, _qDim, Siconos::ZERO));
+
+  if(flag1 && flag2)
+    _jacxRhs.reset(new BlockMatrix(_rhsMatrices[jacobianXBloc00], _rhsMatrices[jacobianXBloc01],
+                                   _rhsMatrices[jacobianXBloc10], _rhsMatrices[jacobianXBloc11]));
+  else if(flag1)  // flag2 = false
+    _jacxRhs.reset(new BlockMatrix(_rhsMatrices[jacobianXBloc00], _rhsMatrices[jacobianXBloc01],
+                                   _rhsMatrices[jacobianXBloc10], _rhsMatrices[zeroMatrix]));
+  else if(flag2)  // flag1 = false
+    _jacxRhs.reset(new BlockMatrix(_rhsMatrices[jacobianXBloc00], _rhsMatrices[jacobianXBloc01],
+                                   _rhsMatrices[zeroMatrixqDim], _rhsMatrices[jacobianXBloc11]));
+  else
+    _jacxRhs.reset(new BlockMatrix(_rhsMatrices[jacobianXBloc00], _rhsMatrices[jacobianXBloc01],
+                                   _rhsMatrices[zeroMatrixqDim], _rhsMatrices[zeroMatrix]));
+  DEBUG_EXPR(display(););
+  DEBUG_END("NewtonEulerDS::initRhs(double time)\n");
 }
 
 void NewtonEulerDS::resetToInitialState()
@@ -991,18 +1056,44 @@ void NewtonEulerDS::computeJacobianMIntvByFD(double time, SP::SiconosVector q, S
 
 void NewtonEulerDS::computeRhs(double time, bool isDSup)
 {
+  DEBUG_BEGIN("NewtonEulerDS::computeRhs(double time, bool isDSup)");
   // if isDSup == true, this means that there is no need to re-compute mass ...
-  //  *_q = *(_p[2]); // Warning: r/p update is done in Interactions/Relations
-  if(_wrench)
-  {
-    computeForces(time);
-    //*_q += *_forces;
-  }
+  *_acceleration = *(_p[2]); // Warning: r/p update is done in Interactions/Relations
+
+  computeForces(time, _q, _twist);
+  *_acceleration += *_wrench;
+  DEBUG_EXPR(_wrench->display(););
+
+  if(_inverseMass)
+    _inverseMass->PLUForwardBackwardInPlace(*_acceleration);
+
+
+   // Compute _dotq
+  computeT();
+  prod(*_T, *_twist, *_dotq, true);
+
+  _x[1]->setBlock(0, *_dotq);
+  _x[1]->setBlock(_qDim, *_acceleration);
+
 }
 
 void NewtonEulerDS::computeJacobianRhsx(double time, bool isDSup)
 {
-  RuntimeException::selfThrow("NewtonEulerDS::computeJacobianRhsx - not yet implemented.");
+  if(_jacobianWrenchq)
+  {
+    SP::SiconosMatrix bloc10 = _jacxRhs->block(1, 0);
+    computeJacobianqForces(time);
+    *bloc10 = *_jacobianWrenchq;
+    _inverseMass->PLUForwardBackwardInPlace(*bloc10);
+  }
+  if(_jacobianWrenchTwist)
+  {
+    SP::SiconosMatrix bloc11 = _jacxRhs->block(1, 1);
+    computeJacobianvForces(time);
+    *bloc11 = *_jacobianWrenchTwist;
+    _inverseMass->PLUForwardBackwardInPlace(*bloc11);
+  }
+
 }
 
 void NewtonEulerDS::computeForces(double time)
@@ -1129,7 +1220,7 @@ void NewtonEulerDS::computeJacobianqForces(double time)
     _jacobianWrenchq->zero();
     if(_jacobianFIntq)
     {
-      computeJacobianFIntq(time);
+
       _jacobianWrenchq->setBlock(0,0,-1.0 * *_jacobianFIntq);
     }
     if(_jacobianMIntq)

@@ -161,6 +161,10 @@ protected:
   /** The time derivative of \f$q\f$, \f$\dot q\f$*/
   SP::SiconosVector _dotq;
 
+  /** _acceleration contains the time derivative of the twist
+   */
+  SP::SiconosVector _acceleration;
+
   /** Memory vectors that stores the values within the time--step */
   SiconosMemory _twistMemory;
   SiconosMemory _qMemory;
@@ -342,6 +346,15 @@ protected:
 
   /** Reaction to an applied  boundary condition */
   SP::SiconosVector _reactionToBoundaryConditions;
+
+  enum NewtonEulerDSRhsMatrices {jacobianXBloc00, jacobianXBloc01, jacobianXBloc10, jacobianXBloc11, zeroMatrix, zeroMatrixqDim, numberOfRhsMatrices};
+
+  /** A container of matrices to save matrices that are involed in first order from of
+   * NewtonEulerDS system values (jacobianXBloc10, jacobianXBloc11, zeroMatrix, idMatrix)
+   * No get-set functions at the time. Only used as a protected member.*/
+  VectorOfSMatrices _rhsMatrices;
+
+
 
   /** Default constructor
    */
