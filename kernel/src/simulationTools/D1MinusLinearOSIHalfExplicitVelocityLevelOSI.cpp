@@ -284,7 +284,7 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
 
       // get left state from memory
       const SiconosVector& qold = d->qMemory().getSiconosVector(0);
-      const SiconosVector& vold = d->twistMemory().getSiconosVector(0);
+      DEBUG_EXPR(const SiconosVector& vold = d->twistMemory().getSiconosVector(0););
 
       // initialize *it->residuFree and predicted right velocity (left limit)
       SiconosVector& v = *d->twist(); //contains velocity v_{k+1}^- and not free velocity
@@ -415,8 +415,8 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
         SiconosVector& residuFree = *workVectors[OneStepIntegrator::residu_free];
         SP::SiconosVector v = d->velocity();
         SP::SiconosVector q = d->q();
-        const SiconosVector& qold = d->qMemory().getSiconosVector(0);
-        const SiconosVector& vold = d->velocityMemory().getSiconosVector(0); // right limit
+        // const SiconosVector& qold = d->qMemory().getSiconosVector(0);
+        // const SiconosVector& vold = d->velocityMemory().getSiconosVector(0); // right limit
 
         //residuFree->zero();
         //v->zero();
@@ -450,8 +450,8 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
 
         SP::SiconosVector v = d->twist();
         SP::SiconosVector q = d->q();
-        const SiconosVector& qold = d->qMemory().getSiconosVector(0);
-        const SiconosVector& vold = d->twistMemory().getSiconosVector(0); // right limit
+        // const SiconosVector& qold = d->qMemory().getSiconosVector(0);
+        // const SiconosVector& vold = d->twistMemory().getSiconosVector(0); // right limit
 
         v->zero();
         SP::SiconosVector work_tdg = workVectors[OneStepIntegrator::free_tdg];
