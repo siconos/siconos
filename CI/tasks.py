@@ -275,16 +275,13 @@ siconos_frama_c = siconos_default.copy()(
 # 4. dispatch based on hostname and distrib type (to min. disk requirement)
 #
 known_tasks = {'siconos---vm0':
-               (siconos_fedora_latest,
-                siconos_gcc_asan,
+               (siconos_gcc_asan,
                 siconos_gcc_asan_latest,
-                siconos_debian_mechanisms,
-                siconos_ubuntu_15_10),
+                siconos_debian_mechanisms),
 
                'siconos---vm1':
                (minimal,
                 minimal_with_python,
-                siconos_with_lpsolve,
                 siconos_documentation,
                 siconos_dev_mode_strict,
                 siconos_clang,
@@ -292,22 +289,11 @@ known_tasks = {'siconos---vm0':
 
                'siconos---vm2':
                (siconos_clang_msan,
-                siconos_default_nix,
-                siconos_ubuntu_15_10_with_mechanisms,
-                siconos_ubuntu_15_04,
-                siconos_ubuntu_14_04),
+                siconos_ubuntu_15_10_with_mechanisms),
 
                'siconos---vm3':
-               (siconos_debian_latest,
-                siconos_openblas_lapacke,
-                siconos_with_mumps,
-                siconos_with_umfpack,
-                siconos_light_examples,
+               (siconos_light_examples,
                 siconos_all_examples),
 
                'siconos---vm4':
-               (siconos_profiling,
-                siconos_ubuntu_17_04,
-                siconos_numerics_only,
-                siconos_cxx_11_ubuntu_17_04,
-                siconos_serialization)}
+               (siconos_numerics_only)}
