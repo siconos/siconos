@@ -545,10 +545,10 @@ if(WITH_${COMPONENT}_TESTING)
 
   # --- Test from rock pile simulations using "time of birth" feature --- 
   # failure in local solver with line search
-  NEW_FC_3D_TEST(RockPile_tob1.dat SICONOS_FRICTION_3D_NSGS 1e-3 10000
+  NEW_FC_3D_TEST(RockPile_tob1.dat SICONOS_FRICTION_3D_NSGS 1e-3 1000
     SICONOS_FRICTION_3D_ONECONTACT_NSN_GP 1e-16 100 WILL_FAIL)
   #  an increasing number of newton iterations implies a failure
-  NEW_FC_3D_TEST(RockPile_tob1.dat SICONOS_FRICTION_3D_NSGS 1e-3 10000
+  NEW_FC_3D_TEST(RockPile_tob1.dat SICONOS_FRICTION_3D_NSGS 1e-3 1000
     SICONOS_FRICTION_3D_ONECONTACT_NSN_GP 1e-16 1000 WILL_FAIL )
   # removing the line --search is worth
   NEW_FC_3D_TEST(RockPile_tob1.dat SICONOS_FRICTION_3D_NSGS 1e-3 2000
