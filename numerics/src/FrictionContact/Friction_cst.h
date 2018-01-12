@@ -119,6 +119,7 @@ extern const char* const   SICONOS_FRICTION_3D_PROX_STR;
 extern const char* const   SICONOS_FRICTION_3D_TFP_STR ;
 extern const char* const   SICONOS_FRICTION_3D_PFP_STR ;
 extern const char* const   SICONOS_FRICTION_3D_NSN_AC_STR ;
+extern const char* const   SICONOS_FRICTION_3D_NSN_AC_TEST_STR ;
 extern const char* const   SICONOS_FRICTION_3D_NSN_FB_STR ;
 extern const char* const   SICONOS_FRICTION_3D_NSN_NM_STR ;
 extern const char* const   SICONOS_FRICTION_3D_DSFP_STR ;
