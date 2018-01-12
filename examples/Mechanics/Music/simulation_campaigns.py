@@ -133,8 +133,8 @@ def transfer_data(campaigns):
     
 
 #filepath = '/nfs_scratch/perignon/Music'
-indices = np.arange(3, 16)
-freqs = 2 ** indices * 1960
+#indices = np.arange(3, 16)
+#freqs = 2 ** indices * 1960
 
 # # Luke, bass guitar, coeff restit = 0.9, start on 30/11/2017
 # filepath = './results_bass/2017_11_30'
