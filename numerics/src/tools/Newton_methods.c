@@ -459,7 +459,7 @@ void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverO
 
   if (err > tol)
   {
-    numerics_printf_verbose(1,"--- newton_LSA :: No convergence of the Newton algo after %d iterations and residue = %g " , theta);
+    numerics_printf_verbose(1,"--- newton_LSA :: No convergence of the Newton algo after %d iterations and residue = %g " , iter, theta);
     *info = 1;
   }
   else
@@ -493,7 +493,7 @@ void newton_lsa_default_SolverOption(SolverOptions* options)
 {
   options->iparam[SICONOS_IPARAM_LSA_NONMONOTONE_LS] = 0;
   options->iparam[SICONOS_IPARAM_LSA_NONMONOTONE_LS_M] = 0;
-  options->dparam[SICONOS_DPARAM_LSA_ALPHA_MIN] = 1e-14;
+  options->dparam[SICONOS_DPARAM_LSA_ALPHA_MIN] = 1e-16;
 }
 
 void set_lsa_params_data(SolverOptions* options, NumericsMatrix* mat)
