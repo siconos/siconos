@@ -46,11 +46,11 @@ def save_dof(fileslist, dof, outputfile):
 
 
 
-def compute_errors(fileslist, dofs=None, shift=1, savedofs=None):
+def compute_errors(fileslist, dofs=None, shift=1, savedofs=None, ifref=-1):
     """Compute relative error defined in 3.36 from Clara's manuscript.
     """
-    fref = max(list(fileslist.keys()))
-    fref = list(fileslist.keys())[6]
+    #fref = max(list(fileslist.keys()))
+    fref = list(fileslist.keys())[ifref]
     print("compute errors with reference freq = " + str(fref))
     # Load reference and current simulations,
     reference_file = fileslist[fref]
@@ -63,7 +63,7 @@ def compute_errors(fileslist, dofs=None, shift=1, savedofs=None):
     sum_ref = (sref ** 2).sum(1)
     freqs = []
     tref = ref_model.time[::shift]
-    files = list(fileslist.values())[:5]
+    files = list(fileslist.values())[:ifref]
     files = [f for f in files if f != reference_file]
     # Number of freqs taken into account
     nbfiles = len(files)

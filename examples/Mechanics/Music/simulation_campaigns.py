@@ -14,7 +14,7 @@ camp, running = post_process_simus('./', '/nfs_scratch/perignon/Music', './Resul
 Args:
 1 : path to stdout/stderr files
 2 : path (remote) to h5 files (results)
-3 : path (local) where results (h5 files) should transfered
+3 : path (local) where results (h5 files) should be transfered
 4 : name of pkl
 
 2 and 3 will be used to produce 'transfert.sh' which contains commands like 'scp remote_path:...h5 local_path'
