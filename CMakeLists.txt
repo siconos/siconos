@@ -39,6 +39,7 @@ if(USER_OPTIONS_FILE)
   include(${input_file})
   # copy user file to binary dir, just for 'visual' check.
   configure_file(${input_file} ${input_file} COPYONLY)
+  assert(WITH_FORTRAN "The option WITH_FORTRAN is not defined in the user options file")
 else()
   include(default_options)
 endif()
@@ -62,16 +63,32 @@ endforeach()
 #   - ${PROJECT_NAME}_SOURCE_DIR : where sources (.f and .h and this CMakeLists.txt) are located
 # Note that because of OutOfSourceBuild, binary_dir and source_dir must be different.
 if(WITH_CXX)
-  # Set CXX compilation flags
-  project(${PROJECT_NAME} CXX C Fortran)
+  if (WITH_FORTRAN)
+    project(${PROJECT_NAME} CXX C Fortran)
+    # Fortran compiler configuration
+    include(FCompilerSetup)
+    set(HAS_FORTRAN TRUE)
+  else()
+    project(${PROJECT_NAME} CXX C)
+    #unset(HAS_FORTRAN)
+  endif()
+   # Set CXX compilation flags
   include(CXXCompilerSetup)
-else() # we may need to compile only numerics and only in C.
-  project(${PROJECT_NAME} C Fortran)
+else()
+  # we may need to compile only numerics and only in C.
+  if (WITH_FORTRAN)
+    project(${PROJECT_NAME} C Fortran)
+    # Fortran compiler configuration
+    include(FCompilerSetup)
+    set(HAS_FORTRAN TRUE)
+  else()
+    project(${PROJECT_NAME} C)
+    #unset(HAS_FORTRAN)
+  endif()
 endif()
+
 # Set C compilation flags
 include(CCompilerSetup)
-# Fortran compiler configuration
-include(FCompilerSetup)
 
 # Common setup
 include(SiconosSetup)

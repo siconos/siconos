@@ -673,11 +673,13 @@ void Hem5OSI::integrate(double& tinit, double& tend, double& tout, int& idid)
   //  --> definition and initialisation thanks to wrapper:
   hem5_global_object = std11::static_pointer_cast<Hem5OSI>(shared_from_this()); // Warning: global object must be initialized to current one before pointers to function initialisation.
 
+#ifdef HAS_FORTRAN
   // function to compute the system to simulation
   fprobpointer pointerToFPROB = Hem5OSI_fprob_wrapper;
 
   // function to compute the system to simulation
   soloutpointer pointerToSOLOUT = Hem5OSI_solout_wrapper;
+#endif
 
   // === HEM5 CALL ===
 
@@ -807,7 +809,7 @@ void Hem5OSI::integrate(double& tinit, double& tend, double& tout, int& idid)
     pointerToXL = NULL;
   else
     pointerToXL = &(*_lambdatmp)(0);
-
+#ifdef HAS_FORTRAN
   // call HEM5 to integrate dynamical equation
   CNAME(hem5)(&(_intData[0]),
               &(_intData[1]),
@@ -833,6 +835,9 @@ void Hem5OSI::integrate(double& tinit, double& tend, double& tout, int& idid)
               &(_intData[7]),
               &_idid);
 
+#else
+  RuntimeException::selfThrow("Hem5, Fortran Language is not enabled in siconos kernel. Compile with fortran if you need Hem5");
+#endif
   // === Post ===
   if(_idid < 0)  // if istate < 0 => HEM2 failed
   {

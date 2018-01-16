@@ -133,7 +133,7 @@ void OccTest::move()
   CPPUNIT_ASSERT(std::abs(rotat.W() - 0.35634832254989918) < 1e-9);
 
 }
-
+#ifdef HAS_FORTRAN
 void OccTest::distance()
 {
   const double pi = boost::math::constants::pi<double>();
@@ -216,3 +216,4 @@ void OccTest::distance()
   CPPUNIT_ASSERT(std::abs(dist.value - 1.0) < 1e-9);
 
 }
+#endif

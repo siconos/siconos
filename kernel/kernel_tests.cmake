@@ -76,9 +76,12 @@ if(WITH_${COMPONENT}_TESTING)
   # Simulation tests
   BEGIN_TEST(src/simulationTools/test)
 
-  NEW_TEST(testSimulationTools ZOHTest.cpp OSNSPTest.cpp)
+  NEW_TEST(testSimulationTools  OSNSPTest.cpp)
 
-
+  IF(WITH_FORTRAN)
+    NEW_TEST(ZOHTest.cpp)
+  ENDIF()
+  
   END_TEST()
 
 endif()

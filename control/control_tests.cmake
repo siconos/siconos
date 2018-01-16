@@ -15,8 +15,11 @@ if(WITH_${COMPONENT}_TESTING)
   # Simulation tests
   BEGIN_TEST(src/tests)
   
-  NEW_TEST(tests PIDTest.cpp SMCTest.cpp ObserverTest.cpp)
+  NEW_TEST(tests)
   
+  IF(WITH_FORTRAN)
+    NEW_TEST(PIDTest.cpp SMCTest.cpp ObserverTest.cpp)
+  ENDIF()
   END_TEST()
   
 endif()
