@@ -135,7 +135,7 @@ void fc3d_nonsmooth_Newton_AlartCurnier(
 
   AlartCurnierParams acparams;
 
-  switch (options->iparam[10])
+  switch (options->iparam[SICONOS_FRICTION_3D_NSN_FORMULATION])
   {
   case 0:
   {
@@ -169,8 +169,8 @@ void fc3d_nonsmooth_Newton_AlartCurnier(
   {
     SolverOptions * options_vi_eg =(SolverOptions *)malloc(sizeof(SolverOptions));
     fc3d_VI_ExtraGradient_setDefaultSolverOptions(options_vi_eg);
-    options_vi_eg->iparam[0] = 50;
-    options_vi_eg->dparam[0] = sqrt(options->dparam[0]);
+    options_vi_eg->iparam[SICONOS_IPARAM_MAX_ITER] = 50;
+    options_vi_eg->dparam[SICONOS_DPARAM_TOL] = sqrt(options->dparam[0]);
     options_vi_eg->iparam[SICONOS_VI_IPARAM_ERROR_EVALUATION] = SICONOS_VI_ERROR_EVALUATION_LIGHT;
     fc3d_VI_ExtraGradient(problem, reaction , velocity , info , options_vi_eg);
 
@@ -215,7 +215,7 @@ int fc3d_nonsmooth_Newton_AlartCurnier_setDefaultSolverOptions(
   options->iparam[SICONOS_IPARAM_MAX_ITER] = 200;
   options->iparam[3] = 100000; /* nzmax*/
   options->iparam[5] = 1;
-  options->iparam[7] = 1;      /* erritermax */
+  options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] = 1;      /* erritermax */
 
   options->dparam[SICONOS_DPARAM_TOL] = 1e-3;
   options->iparam[SICONOS_FRICTION_3D_NSN_RHO_STRATEGY] = SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_SPECTRAL_NORM;

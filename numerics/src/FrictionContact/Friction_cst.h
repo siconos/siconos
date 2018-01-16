@@ -168,7 +168,11 @@ extern const char* const   SICONOS_FRICTION_3D_ONECONTACT_QUARTIC_NU_STR ;
 enum SICONOS_FRICTION_3D_IPARAM
 {
   /** index in iparam to store the error strategy for the internal solver */
-  SICONOS_FRICTION_3D_IPARAM_INTERNAL_ERROR_STRATEGY =2
+  SICONOS_FRICTION_3D_IPARAM_INTERNAL_ERROR_STRATEGY =2,
+  /** index in iparam to store the error evaluation method */
+  SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION = 7,
+  /** index in iparam to store the frequency of error evaluation method */
+  SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION_FREQUENCY = 8,
 };
 
 enum SICONOS_FRICTION_INTERNAL_ERROR_STRATEGY
@@ -193,10 +197,6 @@ enum SICONOS_FRICTION_3D_NSGS_IPARAM
   SICONOS_FRICTION_3D_NSGS_SHUFFLE=5,
   /** index in iparam to store the shuffle seed */
   SICONOS_FRICTION_3D_NSGS_SHUFFLE_SEED=6,
-  /** index in iparam to store the error evaluation method */
-  SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION = 7,
-  /** index in iparam to store the frequency of error evaluation method */
-  SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_FREQUENCY = 8,
   /** index in iparam to store the  */
   SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION =14,
 };
@@ -246,7 +246,6 @@ enum SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION_ENUM
 
 enum SICONOS_FRICTION_3D_NSN_IPARAM
 {
-
   /** index in iparam to store the strategy for computing rho */
   SICONOS_FRICTION_3D_NSN_RHO_STRATEGY = 9,
   /** index in iparam to store the formulation */

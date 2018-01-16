@@ -413,18 +413,18 @@ double calculateFullErrorAdaptiveInterval(FrictionContactProblem *problem,
                                           double tolerance, double norm_q)
 {
   double error=1e+24;
-  if (options->iparam[SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_FREQUENCY] >0)
+  if (options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION_FREQUENCY] >0)
   {
-    if (iter % options->iparam[SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_FREQUENCY] == 0) {
+    if (iter % options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION_FREQUENCY] == 0) {
       (*computeError)(problem, reaction , velocity, tolerance, options, norm_q,  &error);
       if (error > tolerance
-          && options->iparam[SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_ADAPTIVE)
-        options->iparam[SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_FREQUENCY] *= 2;
+          && options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_ADAPTIVE)
+        options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION_FREQUENCY] *= 2;
     }
     if (verbose > 0)
       printf("--------------- FC3D - NSGS - Iteration %i "
-             "options->iparam[SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_FREQUENCY] = %i, options->iparam[SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION] = % i \n",
-             iter, options->iparam[SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_FREQUENCY], options->iparam[SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION]);
+             "options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION_FREQUENCY] = %i, options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] = % i \n",
+             iter, options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION_FREQUENCY], options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION]);
   }
   else
     (*computeError)(problem, reaction , velocity, tolerance, options, norm_q,  &error);
@@ -617,13 +617,13 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction,
     return;
   }
 
-  if (! (iparam[SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_FULL
-         || iparam[SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL
-         || iparam[SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT
-         || iparam[SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_ADAPTIVE))
+  if (! (iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_FULL
+         || iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL
+         || iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT
+         || iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_ADAPTIVE))
   {
     numerics_error(
-      "fc3d_nsgs", "iparam[SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION] must be equal to "
+      "fc3d_nsgs", "iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] must be equal to "
       "SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_FULL (0), "
       "SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL (1), "
       "SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT (2) or "
@@ -638,7 +638,7 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction,
   if (iparam[SICONOS_FRICTION_3D_NSGS_SHUFFLE] == SICONOS_FRICTION_3D_NSGS_SHUFFLE_FALSE
       && iparam[SICONOS_FRICTION_3D_NSGS_SHUFFLE] == SICONOS_FRICTION_3D_NSGS_RELAXATION_FALSE
       && iparam[SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION] == SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION_TRUE
-      && iparam[SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT)
+      && iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT)
   {
     while ((iter < itermax) && (hasNotConverged > 0))
     {
@@ -723,12 +723,12 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction,
 
       }
 
-      if (iparam[SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT)
+      if (iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT)
       {
         error = calculateLightError(light_error_sum, nc, reaction);
         hasNotConverged = determine_convergence(error, tolerance, iter, options);
       }
-      else if (iparam[SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL)
+      else if (iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL)
       {
         error = calculateLightError(light_error_sum, nc, reaction);
         hasNotConverged = determine_convergence_with_full_final(problem,  options, computeError,
@@ -737,7 +737,7 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction,
                                                                 iter);
 
       }
-      else if (iparam[SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_FULL)
+      else if (iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_FULL)
       {
         error = calculateFullErrorAdaptiveInterval(problem, computeError, options,
                                                    iter, reaction, velocity,
@@ -751,7 +751,7 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction,
 
 
   /* Full criterium */
-  if (iparam[SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL)
+  if (iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL)
   {
     error = calculateFullErrorFinal(problem, options, computeError, reaction, velocity,
                                     tolerance, norm_q);
@@ -793,7 +793,7 @@ int fc3d_nsgs_setDefaultSolverOptions(SolverOptions* options)
   solver_options_nullify(options);
 
   options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
-  options->iparam[SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION] = SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL;
+  options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] = SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL;
   options->iparam[SICONOS_FRICTION_3D_IPARAM_INTERNAL_ERROR_STRATEGY] = SICONOS_FRICTION_3D_INTERNAL_ERROR_STRATEGY_GIVEN_VALUE;
   /* options->iparam[SICONOS_FRICTION_3D_IPARAM_INTERNAL_ERROR_STRATEGY] = SICONOS_FRICTION_3D_INTERNAL_ERROR_STRATEGY_ADAPTIVE; */
   /* options->iparam[SICONOS_FRICTION_3D_IPARAM_INTERNAL_ERROR_STRATEGY] = SICONOS_FRICTION_3D_INTERNAL_ERROR_STRATEGY_ADAPTIVE_N_CONTACT; */

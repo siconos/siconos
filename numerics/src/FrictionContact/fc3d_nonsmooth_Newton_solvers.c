@@ -563,8 +563,8 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers* equation
   unsigned int problemSize = 3 * problem->numberOfContacts;
 
   unsigned int iter = 0;
-  unsigned int itermax = options->iparam[0];
-  unsigned int erritermax = options->iparam[7];
+  unsigned int itermax = options->iparam[SICONOS_IPARAM_MAX_ITER];
+  unsigned int erritermax = options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION];
 
   assert(itermax > 0);
 

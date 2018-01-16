@@ -401,7 +401,7 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(
 
   unsigned int iter = 0;
   unsigned int itermax = options->iparam[SICONOS_IPARAM_MAX_ITER];
-  unsigned int erritermax = options->iparam[SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION];
+  unsigned int erritermax = options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION];
 
   if (erritermax == 0)
   {
@@ -858,7 +858,7 @@ int gfc3d_nonsmooth_Newton_AlartCurnier_setDefaultSolverOptions(
   options->iparam[SICONOS_IPARAM_MAX_ITER] = 200;    /* input :  itermax */
   options->iparam[SICONOS_IPARAM_ITER_DONE] = 1;      /* output : #iter */
 
-  options->iparam[SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION] = 1;      /* erritermax */
+  options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] = 1;      /* erritermax */
 
   options->iparam[SICONOS_FRICTION_3D_NSN_MPI_COM] = -1;     /* mpi com fortran */
 

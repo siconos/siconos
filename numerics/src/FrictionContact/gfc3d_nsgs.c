@@ -160,9 +160,9 @@ void gfc3d_nsgs(GlobalFrictionContactProblem* restrict problem, double* restrict
 
     /* **** Criterium convergence **** */
     /* this is very expensive to check, you better do it only once in a while  */
-    if (options->iparam[SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_FREQUENCY]>0)
+    if (options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION_FREQUENCY]>0)
     {
-      if (!(iter % options->iparam[SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_FREQUENCY]))
+      if (!(iter % options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION_FREQUENCY]))
       {
         /* computeGlobalVelocity(problem, reaction, globalVelocity); */
         (*computeError)(problem, reaction , velocity, globalVelocity, tolerance, norm_q, &error);
