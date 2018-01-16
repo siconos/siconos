@@ -10,7 +10,7 @@ import scipy.io as sio
 
 
 def save_dof(fileslist, dof, outputfile):
-    """Compute relative error defined in 3.36 from Clara's manuscript.
+    """Save displacement values in mat file
     """
 
     files = list(fileslist.values())
