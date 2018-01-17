@@ -93,10 +93,14 @@ if(CTEST_BUILD_CONFIGURATION MATCHES "Profiling")
 endif()
 
 #######################################################################
-ctest_empty_binary_directory(${CTEST_BINARY_DIRECTORY}/)
+# this usually fails for some reasons and ctest may returns a fail code.
+# ctest_empty_binary_directory(${CTEST_BINARY_DIRECTORY}/)
+# cf discussions here:
+# https://gitlab.kitware.com/cmake/cmake/issues/17000
 
-# !!
-#file(REMOVE_RECURSE ${CTEST_BINARY_DIRECTORY})
+if(CTEST_BINARY_DIRECTORY)
+  file(REMOVE_RECURSE ${CTEST_BINARY_DIRECTORY})
+endif()
 
 find_program(CTEST_GIT_COMMAND NAMES git)
 find_program(CTEST_COVERAGE_COMMAND NAMES gcov)
@@ -158,5 +162,8 @@ endif (WITH_MEMCHECK AND CTEST_COVERAGE_COMMAND)
 if (WITH_MEMCHECK AND CTEST_MEMORYCHECK_COMMAND)
   ctest_memcheck()
 endif (WITH_MEMCHECK AND CTEST_MEMORYCHECK_COMMAND)
-ctest_submit()
 
+# note: if the submission process experiences some slow-down, then we
+# may get a return-code error, even if the configure, build and test
+# phase are successful.
+ctest_submit()
