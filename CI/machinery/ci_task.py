@@ -262,7 +262,6 @@ class CiTask(object):
                                '-DDOCKER_TEMPLATE={0}'.format(self.template_maker()),
                                '-DDOCKER_PROJECT_SOURCE_DIR={0}'.format(full_src)]
 
-
             if self._docker and self._directories is not None:
                 cmake_args.append('-DDOCKER_SHARED_DIRECTORIES={0}'.format(
                     ';'.join(self._directories)))
@@ -275,8 +274,8 @@ class CiTask(object):
             try:
                 if os.path.exists(os.path.join(full_src, 'CI')):
                     if self._docker:
-                        full_cmd = [self._cmake_cmd] + cmake_args + [os.path.join(full_src,
-                                                                          'CI')]
+                        full_cmd = [self._cmake_cmd] + cmake_args + \
+                                    [os.path.join(full_src, 'CI')]
                     else:
                         full_cmd = [self._cmake_cmd] + cmake_args + [full_src]
                 else:
@@ -285,7 +284,8 @@ class CiTask(object):
                     print("cmake command is: {:}".format(' '.join(full_cmd)))
                     return_code += call(full_cmd, cwd=bdir)
                     for target in self._targets[src]:
-                        return_code += call([self._make_cmd] + make_args + [target], cwd=bdir)
+                        return_code += call([self._make_cmd] + make_args +
+                                            [target], cwd=bdir)
                 else:
                     msg = 'Would call: \n  - {:}'.format(' '.join(full_cmd))
                     msg += '\n  - make target, \n for target in '
@@ -294,7 +294,7 @@ class CiTask(object):
                     print (msg)
 
             except Exception as error:
-                print ('failure on {0} for {1}'.format(src), self._targets[src])
+                print('failure on {0} for {1}'.format(src), self._targets[src])
                 raise error
 
         return return_code
@@ -309,11 +309,13 @@ class CiTask(object):
 
             try:
                 if self._docker:
-                    return_code += call([self._make_cmd] + make_args + ['docker-clean-usr-local'], cwd=bdir)
+                    return_code += call([self._make_cmd] + self._make_args +
+                                        ['docker-clean-usr-local'], cwd=bdir)
 
                     if not self._fast:
 
-                        return_code += call([self._make_cmd] + make_args + ['docker-clean'],
+                        return_code += call([self._make_cmd] +
+                                            self._make_args + ['docker-clean'],
                                             cwd=bdir)
 
             except Exception as error:
