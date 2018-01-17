@@ -166,4 +166,4 @@ endif (WITH_MEMCHECK AND CTEST_MEMORYCHECK_COMMAND)
 # note: if the submission process experiences some slow-down, then we
 # may get a return-code error, even if the configure, build and test
 # phase are successful.
-ctest_submit()
+ctest_submit(RETRY_COUNT 10 RETRY_DELAY 10)
