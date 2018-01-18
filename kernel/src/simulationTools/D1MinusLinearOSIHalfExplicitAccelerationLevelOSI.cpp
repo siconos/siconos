@@ -425,8 +425,8 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
         SiconosVector& residuFree = *workVectors[OneStepIntegrator::residu_free];
         SP::SiconosVector v = d->velocity();
         SP::SiconosVector q = d->q();
-        const SiconosVector& qold = d->qMemory().getSiconosVector(0);
-        const SiconosVector& vold = d->velocityMemory().getSiconosVector(0); // right limit
+        // const SiconosVector& qold = d->qMemory().getSiconosVector(0);
+        // const SiconosVector& vold = d->velocityMemory().getSiconosVector(0); // right limit
         //residuFree.zero();
         //v->zero();
 

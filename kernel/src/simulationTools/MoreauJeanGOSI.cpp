@@ -551,7 +551,7 @@ double MoreauJeanGOSI::computeResidu()
       SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
 
       // Get state i (previous time step) from Memories -> var. indexed with "Old"
-      const SiconosVector& qold = d->qMemory().getSiconosVector(0);
+      // const SiconosVector& qold = d->qMemory().getSiconosVector(0);
       const SiconosVector& vold = d->velocityMemory().getSiconosVector(0);
       SP::SiconosVector q = d->q();
 
