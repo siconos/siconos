@@ -130,6 +130,9 @@ protected:
 
   // -- MEMBERS --
 
+  /** Dimension of _twist, _ndof=6 */
+  unsigned int _ndof;
+
   /** _twist contains the twist of the Newton Euler dynamical system.
    *  _twist[0:2] : \f$v_G \in \RR^3 \f$ velocity of the center of mass in
    * the inertial frame of reference (world frame).
@@ -155,7 +158,7 @@ protected:
   /** Initial position */
   SP::SiconosVector _q0;
 
-  /** Dimension of _q, is not necessary equal to _n. In our case, _qDim = 7 and  _n =6*/
+  /** Dimension of _q, is not necessary equal to _ndof. In our case, _qDim = 7 and  _ndof =6*/
   unsigned int _qDim;
 
   /** The time derivative of \f$q\f$, \f$\dot q\f$*/
@@ -450,6 +453,13 @@ public:
   /*! @name Attributes access 
     @{ */
 
+  /** return the number of degrees of freedom of the system
+   *  \return an unsigned int.
+   */
+  virtual inline unsigned int dimension() const
+  {
+    return _ndof;
+  }
   /** Returns dimension of vector q */
   virtual inline unsigned int getqDim() const
   {
@@ -753,7 +763,7 @@ public:
     if(!_jacobianMExtq)
       _jacobianMExtq.reset(new SimpleMatrix(3, _qDim));
     if(!_jacobianWrenchq)
-      _jacobianWrenchq.reset(new SimpleMatrix(_n, _qDim));
+      _jacobianWrenchq.reset(new SimpleMatrix(_ndof, _qDim));
   }
 
   inline void setNullifyMGyr(bool value)
