@@ -133,7 +133,7 @@ int main()
     //      if (cmp==150)
     // numerics_set_verbose(à);
     //      else if (cmp==151)
-    numerics_set_verbose(1);
+    numerics_set_verbose(0);
     ++show_progress;
 
     cmp++;
