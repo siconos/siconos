@@ -24,6 +24,7 @@ option(WITH_SERIALIZATION "Compilation of serialization functions. Default = OFF
 option(WITH_GENERATION "Generation of serialization functions with doxygen XML. Default = OFF" OFF)
 option(WITH_CXX "Enable CXX compiler for numerics. Default = ON" ON)
 option(WITH_UNSTABLE "Enable this to include all 'unstable' sources. Default=OFF" OFF)
+option(WITH_UNSTABLE_TEST "Enable this to include all 'unstable' test. Default=OFF" OFF)
 option(BUILD_SHARED_LIBS "Building of shared libraries. Default = ON" ON)
 option(DEV_MODE "Compilation flags setup for developers. Default = OFF" OFF)
 option(DEV_MODE_STRICT "Compilation flags setup for developers (extra strict, conversion warnings). Default = OFF" OFF)
