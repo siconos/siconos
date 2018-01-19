@@ -286,7 +286,14 @@ extern "C"
    * \return  a pointer to a NumericsMatrix
    */
   NumericsMatrix* NM_new_SBM(int size0, int size1, SparseBlockStructuredMatrix* m1);
+  
+  /** new NumericsMatrix equal to the transpose of a given matrix
+   * \param[in] A 
+   * \return  a pointer to a NumericsMatrix
+   */
+  NumericsMatrix* NM_transpose(NumericsMatrix * A);
 
+  
   /** Allocate the internalData structure (but not its content!)
    * \param M the matrix to modify
    */

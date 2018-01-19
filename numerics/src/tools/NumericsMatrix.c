@@ -1331,6 +1331,48 @@ NumericsMatrix* NM_new_SBM(int size0, int size1, SparseBlockStructuredMatrix* m1
 {
   return NM_create_from_data(NM_SPARSE_BLOCK, size0, size1, (void*)m1);
 }
+NumericsMatrix* NM_transpose(NumericsMatrix * A)
+{
+  NumericsMatrix* Atrans;
+  switch (A->storageType)
+  {
+  case NM_DENSE:
+  {
+    Atrans = NM_create(NM_DENSE, A->size1, A->size0);
+    for(int i = 0; i < Atrans->size0; i++)
+    {
+      for(int j = 0; j < Atrans->size1; j++)
+      {
+        Atrans->matrix0[i+j*Atrans->size0] = A->matrix0[j+i*A->size0]; 
+      }
+    }
+    break;
+  }
+  case NM_SPARSE_BLOCK:
+  {
+    Atrans = NM_create(NM_SPARSE_BLOCK, A->size1, A->size0);
+    SBM_transpose(A->matrix1, Atrans->matrix1);
+    break;
+  }
+  case NM_SPARSE:
+  {
+    assert(A->matrix2);
+    Atrans = NM_create(NM_SPARSE,A->size1,A->size0);
+    NM_csc_alloc(Atrans, 0);
+    Atrans->matrix2->origin = NSM_CSC;
+    // \todo should be a copy */
+    NM_copy_sparse(NM_csc_trans(A), NM_csc(Atrans));
+    DEBUG_EXPR(NM_display(Atrans););
+    break;
+  }
+  default:
+  {
+    numerics_error("NM_to_dense","Unsupported storage type %d, exiting!\n", A->storageType);
+    exit(EXIT_FAILURE);
+  }
+  }
+  return Atrans;
+}
 
 
 void NM_clearDense(NumericsMatrix* A)
@@ -2180,7 +2222,8 @@ void NM_gemm(const double alpha, NumericsMatrix* A, NumericsMatrix* B,
     assert(A->matrix0);
     assert(B->matrix0);
     assert(C->matrix0);
-    cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans, A->size0, B->size1, B->size1, alpha, A->matrix0, A->size0, B->matrix0, B->size0, beta, C->matrix0, A->size0);
+    cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans, A->size0, B->size1, B->size0,
+                alpha, A->matrix0, A->size0, B->matrix0, B->size0, beta, C->matrix0, A->size0);
 
     NM_clearSparseBlock(C);
     NM_clearSparseStorage(C);
@@ -2225,7 +2268,7 @@ void NM_gemm(const double alpha, NumericsMatrix* A, NumericsMatrix* B,
     DEBUG_EXPR(NM_display(B));
     DEBUG_EXPR(cs_print((const cs * ) NM_csc(A),0););
     DEBUG_EXPR(cs_print((const cs * ) NM_csc(B),0););
-
+    assert(A->size1 == B->size0 && "NM_gemm :: A->size1 != B->size0 ");
     CSparseMatrix* tmp_matrix = cs_multiply(NM_csc(A), NM_csc(B));
     DEBUG_EXPR(cs_print((const cs * ) tmp_matrix,0););
     assert(tmp_matrix && "NM_gemm :: cs_multiply failed");
