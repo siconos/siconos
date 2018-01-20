@@ -22,7 +22,7 @@
 
 #include "ConvexQP.h"
 #include "ConvexQP_cst.h"
-#include "ConvexQP_solvers.h"
+#include "ConvexQP_Solvers.h"
 #include "GlobalFrictionContactProblem_as_ConvexQP.h"
 #include "VI_cst.h"
 #include "NumericsMatrix.h"
