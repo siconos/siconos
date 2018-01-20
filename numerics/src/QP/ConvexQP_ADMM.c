@@ -46,12 +46,17 @@ void convexQP_ADMM(ConvexQP* problem,
                    double * xi, double *u,
                    int* info, SolverOptions* options)
 {
-  /* int and double parameters */
+
+  //DEBUG_EXPR(convexQP_display(problem););
+/* int and double parameters */
   int* iparam = options->iparam;
   double* dparam = options->dparam;
+  if (verbose > 0)
+  {
+    solver_options_print(options);
+  }
 
-
-
+  
   double* q = problem->q;
   NumericsMatrix* M = problem->M;
 
@@ -64,7 +69,7 @@ void convexQP_ADMM(ConvexQP* problem,
 
   if (!A) /* A is considered to be the identity and b =0 */
   {
-    DEBUG_PRINTF("A is not given and then considered as Identity and b =0\n");
+    DEBUG_PRINT("A is not given and then considered as Identity and b =0\n");
     problem->m = n;
     problem->A= NM_create(NM_SPARSE,n,n);
     NM_triplet_alloc(problem->A,0);
@@ -149,30 +154,7 @@ void convexQP_ADMM(ConvexQP* problem,
   }
   else
   {
-
-    if (M->storageType == NM_SPARSE_BLOCK)
-    {
-      Atrans = NM_create(NM_SPARSE_BLOCK, A->size1, A->size0);
-      SBM_transpose(A->matrix1, Atrans->matrix1);
-    }
-    else if (A->storageType == NM_SPARSE)
-    {
-      NM_csc_trans(A);
-
-      Atrans = NM_new();
-      Atrans->storageType = NM_SPARSE;
-      Atrans-> size0 = m;
-      Atrans-> size1 = n;
-      NM_csc_alloc(Atrans, 0);
-      Atrans->matrix2->origin = NSM_CSC;
-      Atrans->matrix2->csc = NM_csc_trans(A);
-      DEBUG_EXPR(NM_display(Atrans));
-    }
-    else
-    {
-      printf("gfc3d_reformulation_local_problem :: unknown matrix storage");
-      exit(EXIT_FAILURE);
-    }
+    Atrans = NM_transpose(A);
     NM_gemm(rho, Atrans, A, 1.0, W);
   }
 
@@ -207,11 +189,13 @@ void convexQP_ADMM(ConvexQP* problem,
     {
       NM_gemv(rho, Atrans, u, 1.0, z);
     }
+    DEBUG_PRINT("rhs:")
     DEBUG_EXPR(NV_display(z,n));
 
     /* Linear system solver */
     /* cblas_dcopy(n , w_k , 1 , z, 1); */
     NM_gesv_expert(W,z,NM_KEEP_FACTORS);
+    DEBUG_PRINT("z:")
     DEBUG_EXPR(NV_display(z,n));
 
     /********************/
@@ -229,6 +213,8 @@ void convexQP_ADMM(ConvexQP* problem,
     {
       NM_gemv(1.0, A, z, 1.0, u_tmp);
     }
+    DEBUG_PRINT("before projection")
+    DEBUG_EXPR(NV_display(u_tmp,m));
     problem->ProjectionOnC(problem,u_tmp,u);
     DEBUG_EXPR(NV_display(u,m));
 
@@ -257,10 +243,9 @@ void convexQP_ADMM(ConvexQP* problem,
     /* **** Criterium convergence **** */
     //convexQP_computeError(problem, z , w_k, tolerance, options, &error);
     convexQP_computeError_full(problem, z , xi, w, u, tolerance, options, &error);
-    DEBUG_EXPR(NV_display(w_k,n));
-    DEBUG_EXPR(NV_display(q,n));
-    if (verbose > 0)
-      printf("--------------- ConvexQP - ADMM  - Iteration %i rho = %14.7e \tError = %14.7e\n", iter, rho, error);
+    //DEBUG_EXPR(NV_display(w_k,n));
+    //DEBUG_EXPR(NV_display(q,n));
+    numerics_printf_verbose(1,"---- ConvexQP - ADMM  - Iteration %i rho = %14.7e \tError = %14.7e", iter, rho, error);
 
     if (error < tolerance) hasNotConverged = 0;
     *info = hasNotConverged;
@@ -271,8 +256,7 @@ void convexQP_ADMM(ConvexQP* problem,
 
   //verbose=1;
 
-  if (verbose > 0)
-  printf("---------------  ConvexQP - ADMM - #Iteration %i Final Residual = %14.7e\n", iter, error);
+  numerics_printf_verbose(1,"---- ConvexQP - ADMM - #Iteration %i Final Residual = %14.7e", iter, error);
   dparam[SICONOS_DPARAM_RESIDU] = error;
   iparam[SICONOS_IPARAM_ITER_DONE] = iter;
 
@@ -310,7 +294,7 @@ int convexQP_ADMM_setDefaultSolverOptions(SolverOptions* options)
 
   options->dparam[SICONOS_DPARAM_TOL] = 1e-6;
 
-  options->dparam[SICONOS_CONVEXQP_ADMM_RHO] = 1.e+2; 
+  options->dparam[SICONOS_CONVEXQP_ADMM_RHO] = 1.0; 
 
   options->internalSolvers = NULL;
 

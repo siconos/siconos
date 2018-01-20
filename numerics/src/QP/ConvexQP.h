@@ -46,6 +46,19 @@
  *    s.t  & &  z  \in C \\
  *  \end{array}
  * \f}
+ * Most of the solver returns
+ * <ul>
+ *   <li> the solution vector \f$ z \in  \mathrm{I\!R}^n\f$ </li>
+ *   <li> the vector \f$ u \in  \mathrm{I\!R}^m\f$ </li>
+ *   <li> the multiplier \f$ \xi \in  \mathrm{I\!R}^m\f$ such that \f$ - \xi \in \partial \Psi_C(u) \f$ </li>
+ *   <li> the vector \f$ w \in  \mathrm{I\!R}^n\f$ such that \f$ w =A^T \xi \f$ </li>
+ * </ul>
+ * In the most simple case, we return
+ * <ul>
+ *   <li> the solution vector \f$ z = u \in  \mathrm{I\!R}^n\f$ </li>
+ *   <li> the vector \f$ w =\xi \in  \mathrm{I\!R}^m\f$ </li>
+ * </ul>
+ * 
  */
 
 #ifndef CONVEXQP_H

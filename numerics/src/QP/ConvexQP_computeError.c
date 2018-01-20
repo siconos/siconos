@@ -43,7 +43,7 @@ int convexQP_computeError(
   assert(z);
   assert(w);
   assert(error);
-  
+
   int incx = 1;
   int n = problem->size;
 
@@ -55,7 +55,7 @@ int convexQP_computeError(
   double *ztmp =  options->dWork;
   double *wtmp =  &(options->dWork[n]);
 
-  
+
   if (!problem->istheNormConvexQPset)
   {
     problem->normConvexQP= cblas_dnrm2(n , problem->q , 1);
@@ -124,7 +124,7 @@ int convexQP_computeError_full(
   }
   double *utmp =  options->dWork;
   double *utmp1 = &(options->dWork[m]) ;
-  /* double *wtmp =  &(options->dWork[m+m]); */
+  double *wtmp =  &(options->dWork[m+m]);
 
 
   if (!problem->istheNormConvexQPset)
@@ -134,8 +134,11 @@ int convexQP_computeError_full(
     problem->istheNormConvexQPset=1;
   }
 
-  DEBUG_EXPR(double norm_q =problem->normConvexQP;);
+  double norm_q =problem->normConvexQP;
   DEBUG_PRINTF("norm_q = %12.8e\n", norm_q);
+  DEBUG_EXPR(NV_display(z,n));
+  DEBUG_EXPR(NV_display(xi,m));
+  DEBUG_EXPR(NV_display(u,m));
 
   /* q --> w */
   cblas_dcopy(n , problem->q , 1 , w, 1);
@@ -146,8 +149,19 @@ int convexQP_computeError_full(
   DEBUG_EXPR(NV_display(w,n));
 
   /* Check that w= A^T xi */
-  /* to do  */
+  DEBUG_EXPR(NV_display(xi,m));
   
+  cblas_dcopy(n , w , 1 , wtmp, 1);
+  NM_tgemv(-1.0, problem->A, xi, 1.0, wtmp);
+  DEBUG_EXPR(NV_display(wtmp,n));
+  *error = cblas_dnrm2(n , wtmp , incx);
+  *error = *error * *error;
+  DEBUG_PRINTF("square norm of Mz + q - A^T xi  = %e\n", *error);
+  DEBUG_PRINTF("error = %e\n",*error);
+  /* if (fabs(norm_q) > DBL_EPSILON)  */
+  /*   *error /= norm_q;  */
+  /* to do  */
+
   if (!problem->A)
   {
     cblas_dcopy(n,z,1,u,1);
@@ -159,21 +173,30 @@ int convexQP_computeError_full(
     /* A z + b --> u */
     NM_gemv(1.0, problem->A, z, 1.0, u);
   }
-
+  DEBUG_EXPR(NV_display(u,m));
 
   /* Check that - xi \in \partial \Psi_C(u) */
-  
+
   cblas_dcopy(m , u , 1 , utmp, 1);
   cblas_daxpy(m, -1.0, xi , 1, utmp , 1) ;
 
   problem->ProjectionOnC(problem,utmp,utmp1);
 
   DEBUG_EXPR(NV_display(utmp,m));
+  DEBUG_EXPR(NV_display(utmp1,m));
 
   cblas_daxpy(m, -1.0, u , 1, utmp1 , 1) ;
   DEBUG_EXPR(NV_display(utmp1,m));
-  *error = cblas_dnrm2(m , utmp1 , incx);
 
+  double err= cblas_dnrm2(m , utmp1 , incx);
+  *error += err*err;
+  DEBUG_PRINTF("error = %e\n",*error);
+  /* Done, taking the square root */
+  *error = sqrt(*error);
+
+  DEBUG_PRINTF("norm_q = %12.8e\n", norm_q);
+  if (fabs(norm_q) > DBL_EPSILON)
+    *error /= norm_q;
   /* Computes error */
   /* if (fabs(norm_q) > DBL_EPSILON) */
   /*   *error /= norm_q; */

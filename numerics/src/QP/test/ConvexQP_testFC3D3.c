@@ -54,7 +54,6 @@ int main(void)
   verbose=1;
   int info = convexQP_ADMM_setDefaultSolverOptions(options);
   options->dparam[0]=1e-8;
-  options->dparam[3]=1e+1;
 
   char filename[50] = "./data/FC3D_Example1_SBM.dat";
   FILE * finput  =  fopen(filename, "r");
