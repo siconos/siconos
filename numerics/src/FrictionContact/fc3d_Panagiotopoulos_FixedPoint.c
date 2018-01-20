@@ -139,7 +139,8 @@ void fc3d_Panagiotopoulos_FixedPoint(FrictionContactProblem* problem, double *re
     tangent_cqp->M = splitted_problem->M_tt;
     tangent_cqp->q = (double *) malloc(2* nc * sizeof(double));
     tangent_cqp->ProjectionOnC = &Projection_ConvexQP_FC3D_Disk;
-
+    tangent_cqp->A=NULL;
+    tangent_cqp->b= NULL;
     FrictionContactProblem_as_ConvexQP *fc3d_as_cqp= (FrictionContactProblem_as_ConvexQP*)malloc(sizeof(FrictionContactProblem_as_ConvexQP));
     tangent_cqp->env = fc3d_as_cqp ;
     tangent_cqp->size = nc*2;
