@@ -51,9 +51,9 @@ void fc3d_ACLMFixedPoint(FrictionContactProblem* problem, double *reaction, doub
 
 
   /* Maximum number of iterations */
-  int itermax = iparam[0];
+  int itermax = iparam[SICONOS_IPARAM_MAX_ITER];
   /* Tolerance */
-  double tolerance = dparam[0];
+  double tolerance = dparam[SICONOS_DPARAM_TOL];
   double norm_q = cblas_dnrm2(nc*3 , problem->q , 1);
 
 
