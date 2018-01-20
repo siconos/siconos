@@ -54,6 +54,7 @@ int main(void)
   verbose=1;
   int info = convexQP_ADMM_setDefaultSolverOptions(options);
   options->dparam[0]=1e-8;
+  options->dparam[3]=0.8;
 
   char filename[50] = "./data/FC3D_Example1_SBM.dat";
   FILE * finput  =  fopen(filename, "r");
@@ -91,11 +92,24 @@ int main(void)
   convexQP_ADMM(&cqp, z, w, xi, u, &info, options);
 
   int i =0;
+  printf("--------- \n\n");
   for (i =0; i< n ; i++)
   {
-    printf("x[%i]=%f\t",i,z[i]);    printf("w[%i]=F[%i]=%f\n",i,i,w[i]);
+    printf("x[%i]=%f\t",i,z[i]);    printf("w[%i]=A^Txi[%i]=%f\n",i,i,w[i]);
   }
-
+  printf("--------- \n\n");
+  for (i= 0; i< n ; i++)
+  {
+    printf("xi[%i]=%f\t",i,xi[i]);    printf("u[%i]=%f\n",i,u[i]);
+  }
+  if (!info)
+  {
+    printf("test successful, residual = %g\n", options->dparam[1]);
+  }
+  else
+  {
+    printf("test unsuccessful, residual = %g\n", options->dparam[1]);
+  }
   solver_options_delete(options);
   free(options);
   free(problem);

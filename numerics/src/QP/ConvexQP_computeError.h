@@ -49,6 +49,7 @@ extern "C"
                                  double *z , double *xi,
                                  double* w, double * u,
                                  double tolerance,
+                                 double scaling,
                                  SolverOptions * options, double * error);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)

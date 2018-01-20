@@ -215,7 +215,9 @@ void convexQP_ADMM(ConvexQP* problem,
     }
     DEBUG_PRINT("before projection")
     DEBUG_EXPR(NV_display(u_tmp,m));
+    
     problem->ProjectionOnC(problem,u_tmp,u);
+
     DEBUG_EXPR(NV_display(u,m));
 
     /**********************/
@@ -237,21 +239,17 @@ void convexQP_ADMM(ConvexQP* problem,
     cblas_daxpy(m, 1, u, 1, xi , 1);
     DEBUG_EXPR(NV_display(xi,m));
 
-    //cblas_daxpy(m,rho, u_k, 0 , w_k, 1);
-    //DEBUG_EXPR(NV_display(w_k,n));
 
     /* **** Criterium convergence **** */
-    //convexQP_computeError(problem, z , w_k, tolerance, options, &error);
-    convexQP_computeError_full(problem, z , xi, w, u, tolerance, options, &error);
-    //DEBUG_EXPR(NV_display(w_k,n));
-    //DEBUG_EXPR(NV_display(q,n));
+    convexQP_computeError_full(problem, z , xi, w, u, tolerance, rho, options, &error);
+
     numerics_printf_verbose(1,"---- ConvexQP - ADMM  - Iteration %i rho = %14.7e \tError = %14.7e", iter, rho, error);
 
     if (error < tolerance) hasNotConverged = 0;
     *info = hasNotConverged;
   }
 
-  //cblas_dscal(m, -1, xi, 1);
+  cblas_dscal(m, rho, xi, 1);
 
 
   //verbose=1;

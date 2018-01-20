@@ -28,6 +28,7 @@
 #include <assert.h>
 #include <float.h>
 
+/* #define DEBUG_NOCOLOR */
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
 #include "debug.h"
@@ -104,7 +105,9 @@ int convexQP_computeError_full(
   double *z , double * xi,
   double *w , double * u,
   double tolerance,
-  SolverOptions * options, double * error)
+  double scaling,
+  SolverOptions * options,
+  double * error)
 {
 
   assert(problem);
@@ -152,7 +155,7 @@ int convexQP_computeError_full(
   DEBUG_EXPR(NV_display(xi,m));
   
   cblas_dcopy(n , w , 1 , wtmp, 1);
-  NM_tgemv(-1.0, problem->A, xi, 1.0, wtmp);
+  NM_tgemv(-scaling, problem->A, xi, 1.0, wtmp);
   DEBUG_EXPR(NV_display(wtmp,n));
   *error = cblas_dnrm2(n , wtmp , incx);
   *error = *error * *error;
