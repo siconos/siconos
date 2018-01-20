@@ -29,8 +29,9 @@
 #include "sanitizer.h"
 #include "numerics_verbose.h"
 #include "NumericsMatrix.h"
+#include "NumericsVector.h"
 
-/* #define DEBUG_NOCOLOR */
+//#define DEBUG_NOCOLOR
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
 #include "debug.h"
@@ -45,10 +46,12 @@ int gfc3d_compute_error(GlobalFrictionContactProblem* problem,
   if (problem == NULL || globalVelocity == NULL)
     numerics_error("gfc3d_compute_error", "null input");
 
+
+
+  
   gfc3d_init_workspace(problem);
 
   double* tmp = problem->workspace->globalVelocity;
-
   
   /* Computes error = dnorm2( GlobalVelocity -M^-1( q + H reaction)*/
   int nc = problem->numberOfContacts;
@@ -56,6 +59,12 @@ int gfc3d_compute_error(GlobalFrictionContactProblem* problem,
   int n = problem->M->size0;
   double *mu = problem->mu;
   double *q = problem->q;
+
+  DEBUG_EXPR(NV_display(globalVelocity,n));
+  DEBUG_EXPR(NV_display(reaction,m));
+  DEBUG_EXPR(NV_display(velocity,m));
+
+
   
   NumericsMatrix *H = problem->H;
   NumericsMatrix *M = problem->M;
@@ -66,10 +75,11 @@ int gfc3d_compute_error(GlobalFrictionContactProblem* problem,
   {
     NM_gemv(1.0, H, reaction, 1.0, tmp);
   }
+  DEBUG_EXPR(NV_display(tmp,n));
 
   NM_gemv(-1.0, M, globalVelocity, 1.0, tmp);
   *error = cblas_dnrm2(n,tmp,1);
-  *error = *error* *error;
+  *error = *error * *error;
   DEBUG_PRINTF("square norm of -M v + H R + q = %e\n", *error);
   
   /* CHECK_RETURN(!NM_gesv_expert(problem->M, globalVelocity, NM_KEEP_FACTORS)); */

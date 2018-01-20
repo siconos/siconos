@@ -66,6 +66,12 @@ extern "C"
   */
   int gfc3d_setDefaultSolverOptions(SolverOptions* options, int solverId);
 
+  void gfc3d_set_internalsolver_tolerance(GlobalFrictionContactProblem* problem,
+                                          SolverOptions* options,
+                                          SolverOptions* internalsolver_options,
+                                          double error);
+
+  
   /** Check for trivial solution in the friction-contact 3D problem
        \param dim of the problem
        \param q global vector (n)
@@ -194,7 +200,9 @@ extern "C"
         dparam[2] : localtolerance
         dparam[1] : (out) error
     */
-  void gfc3d_FixedPointCadoux(GlobalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, int* info, SolverOptions* options);
+  void gfc3d_ACLMFixedPoint(GlobalFrictionContactProblem* restrict problem, double* restrict reaction, double* restrict velocity,
+                            double* restrict globalVelocity, int* restrict info, SolverOptions* restrict options);
+  int gfc3d_ACLMFixedPoint_setDefaultSolverOptions(SolverOptions* options);
 
   /** solver using PATH (via GAMS) for friction-contact 3D problem based on an AVI reformulation
       \param problem the friction-contact 3D problem to solve

@@ -78,6 +78,11 @@ int gfc3d_setDefaultSolverOptions(SolverOptions* options, int solverId)
     info = gfc3d_VI_ExtraGradient_setDefaultSolverOptions(options);
     break;
   }
+  case SICONOS_GLOBAL_FRICTION_3D_ACLMFP:
+  {
+    info = gfc3d_ACLMFixedPoint_setDefaultSolverOptions(options);
+    break;
+  }
   case SICONOS_GLOBAL_FRICTION_3D_VI_FPP:
   {
     info = gfc3d_VI_FixedPointProjection_setDefaultSolverOptions(options);
