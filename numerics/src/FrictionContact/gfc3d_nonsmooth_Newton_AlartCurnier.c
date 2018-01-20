@@ -49,8 +49,8 @@
 #include "NumericsVector.h"
 #include "cond.h"
 
-#define DEBUG_MESSAGES 1
-#define DEBUG_STDOUT
+/* #define DEBUG_MESSAGES 1 */
+/* #define DEBUG_STDOUT */
 #include <debug.h>
 
 /* compute psi function */
@@ -277,7 +277,7 @@ int _globalLineSearchSparseGP(
   unsigned int maxiter_ls)
 {
   double inf = 1e10;
-  double alphamin = 1e-8;
+  double alphamin = 1e-16;
   double alphamax = inf;
 
   double m1 = 0.01, m2 = 0.99;
