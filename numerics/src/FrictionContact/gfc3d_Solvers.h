@@ -200,8 +200,9 @@ extern "C"
         dparam[2] : localtolerance
         dparam[1] : (out) error
     */
-  void gfc3d_ACLMFixedPoint(GlobalFrictionContactProblem* restrict problem, double* restrict reaction, double* restrict velocity,
-                            double* restrict globalVelocity, int* restrict info, SolverOptions* restrict options);
+  void gfc3d_ACLMFixedPoint(GlobalFrictionContactProblem*  problem, double*  reaction, double*  velocity,
+                            double*  globalVelocity, int*  info, SolverOptions* options);
+  
   int gfc3d_ACLMFixedPoint_setDefaultSolverOptions(SolverOptions* options);
 
   /** solver using PATH (via GAMS) for friction-contact 3D problem based on an AVI reformulation
