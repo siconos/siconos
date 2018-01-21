@@ -3022,7 +3022,18 @@ double NM_norm_1(NumericsMatrix* A)
 
   switch (A->storageType)
   {
+  case NM_DENSE:
+  {
+    assert(A->storageType == NM_DENSE);
 
+    return cs_norm(NM_csc(A));
+  }
+  case NM_SPARSE_BLOCK:
+  {
+    assert(A->storageType == NM_SPARSE_BLOCK);
+
+    return cs_norm(NM_csc(A));
+  }
   case NM_SPARSE:
   {
     assert(A->storageType == NM_SPARSE);
@@ -3043,7 +3054,22 @@ double NM_norm_inf(NumericsMatrix* A)
 
   switch (A->storageType)
   {
+  case NM_DENSE:
+  {
+    assert(A->storageType == NM_DENSE);
+    double norm = cs_norm(cs_transpose(NM_csc(A), 1));
+    assert(norm >=0);
+    return norm;
 
+  }
+  case NM_SPARSE_BLOCK:
+  {
+    assert(A->storageType == NM_SPARSE_BLOCK);
+    double norm = cs_norm(cs_transpose(NM_csc(A), 1));
+    assert(norm >=0);
+    return norm;
+
+  }
   case NM_SPARSE:
   {
     assert(A->storageType == NM_SPARSE);
