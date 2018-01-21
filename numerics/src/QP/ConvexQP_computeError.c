@@ -121,10 +121,7 @@ int convexQP_computeError_full(
   int m = problem->m;
 
   *error = 0.;
-  if (!options->dWork)
-  {
-    options->dWork = (double*)calloc(2*m+n,sizeof(double));
-  }
+
   double *utmp =  options->dWork;
   double *utmp1 = &(options->dWork[m]) ;
   double *wtmp =  &(options->dWork[m+m]);

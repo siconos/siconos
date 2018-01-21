@@ -89,14 +89,14 @@ void gfc3d_ACLMFixedPoint(GlobalFrictionContactProblem* restrict problem, double
   cqp->size = n;
   cqp->m = m;
   cqp->M = problem->M;
-  
+
   cqp->q = (double *) malloc(n* sizeof(double));
   for(int i = 0; i < n ; i++)
   {
     cqp->q[i] = -problem->q[i];
   }
   DEBUG_EXPR(NM_display(problem->H));
-  
+
   cqp->A = NM_transpose(problem->H);
   DEBUG_EXPR(NM_display(cqp->A));
   cqp->b = (double *) malloc(m* sizeof(double));
@@ -114,6 +114,7 @@ void gfc3d_ACLMFixedPoint(GlobalFrictionContactProblem* restrict problem, double
   {
     numerics_printf_verbose(1," ========================== set ADMM solver internal ConveQP problem ==========================\n");
     internalsolver = &convexQP_ADMM;
+    convexQP_ADMM_init(cqp, options->internalSolvers);
   }
   else
   {
@@ -140,7 +141,7 @@ void gfc3d_ACLMFixedPoint(GlobalFrictionContactProblem* restrict problem, double
     gfc3d_set_internalsolver_tolerance(problem,options,internalsolver_options, error);
 
     (*internalsolver)(cqp, globalVelocity, w,  reaction , velocity , info , internalsolver_options);
-    
+
     cumul_iter +=  internalsolver_options->iparam[SICONOS_IPARAM_ITER_DONE];
     /* **** Criterium convergence **** */
 
@@ -154,7 +155,7 @@ void gfc3d_ACLMFixedPoint(GlobalFrictionContactProblem* restrict problem, double
 
   numerics_printf_verbose(1,"---- GFC3D - ACLMFP - # Iteration %i Final Residual = %14.7e", iter, error);
   numerics_printf_verbose(1,"---- GFC3D - ACLMFP - #              internal iteration = %i", cumul_iter);
-  
+
   NM_free(cqp->A);
   free(cqp->b);
   free(cqp->q);
@@ -162,9 +163,11 @@ void gfc3d_ACLMFixedPoint(GlobalFrictionContactProblem* restrict problem, double
   free(cqp);
 
 
-  if (internalsolver_options->internalSolvers != NULL)
-    internalsolver_options->internalSolvers->dWork = NULL;
-  dparam[SICONOS_VI_EG_DPARAM_RHO] = internalsolver_options->dparam[SICONOS_VI_EG_DPARAM_RHO];
+ if (internalsolver_options->solverId == SICONOS_CONVEXQP_ADMM  )
+  {
+    convexQP_ADMM_free(cqp, options->internalSolvers);
+  }
+
   dparam[SICONOS_DPARAM_RESIDU] = error;
   iparam[SICONOS_IPARAM_ITER_DONE] = iter;
 

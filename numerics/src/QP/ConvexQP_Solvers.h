@@ -87,7 +87,8 @@ extern "C"
   */
   int convexQP_ADMM_setDefaultSolverOptions(SolverOptions* options);
 
-
+  void convexQP_ADMM_init(ConvexQP* problem, SolverOptions* options);
+  void convexQP_ADMM_free(ConvexQP* problem, SolverOptions* options);
   
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

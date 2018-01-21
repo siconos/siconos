@@ -41,6 +41,27 @@
 const char* const   SICONOS_CONVEXQP_ADMM_STR = "CONVEXQP ADMM";
 
 
+void convexQP_ADMM_init(ConvexQP* problem, SolverOptions* options)
+{
+  int n = problem->size;
+  int m = problem->m;
+  
+  if (!options->dWork || options->dWorkSize != 2*m+n)
+  {
+    options->dWork = (double*)calloc(2*m+n,sizeof(double));
+    options->dWorkSize = 2*m+n;
+  }
+}
+void convexQP_ADMM_free(ConvexQP* problem, SolverOptions* options)
+{
+  if (options->dWork)
+  {
+    free(options->dWork);
+    options->dWork=NULL;
+    options->dWorkSize = 0;
+  }
+}
+
 void convexQP_ADMM(ConvexQP* problem,
                    double *z, double * w,
                    double * xi, double *u,
@@ -109,12 +130,17 @@ void convexQP_ADMM(ConvexQP* problem,
     numerics_error("ConvexQP_ADMM", "dparam[SICONOS_CONVEXQP_PGOC_RHO] must be nonzero");
 
   /* double tau=1; */
-
+  int internal_allocation=0;
+  if (!options->dWork || options->dWorkSize != 2*m+n)
+  {
+    convexQP_ADMM_init(problem, options);
+    internal_allocation = 1;
+  }
 
   /* double * z_k; */
   /* double * w_k; */
   /* double * u_k; */
-  double * u_tmp;
+  double * u_tmp =  options->dWork;
   /* double * xi_k; */
   /* double * xi_tmp; */
 
@@ -260,7 +286,10 @@ void convexQP_ADMM(ConvexQP* problem,
 
   /* free(z_k); */
   /* free(w_k); */
-  free(u_tmp);
+  if (internal_allocation)
+  {
+    convexQP_ADMM_free(problem,options);
+  }
   /* free(xi_k); */
 
 }
