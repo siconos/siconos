@@ -223,6 +223,7 @@ def plot_errors(errors, freqs, dof, xref, iplot=0, figures_path=None):
         plt.loglog(ref_freqs, ref_error[:, dof], tickslabels[i])
         leg.append(name)
         plt.grid(True,which="both",ls="-")
+        i+=1
     plt.title("Convergence, x=" + str(xref[name][dof])) # ...
     #ax.yaxis.set_major_locator(matplotlib.ticker.MultipleLocator(0.1))
     #ax.yaxis.set_ticks(np.arange(-2, 2, 0.025))

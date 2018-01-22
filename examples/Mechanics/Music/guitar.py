@@ -340,13 +340,18 @@ class Guitar(sk.Model):
         # - insert ds into the nonsmooth dynamical system
         # - link each ds to its interaction
         nsds = self.nonSmoothDynamicalSystem()
-        for interaction in strings_and_frets:
-            ds = strings_and_frets[interaction]
-            assert isinstance(interaction, Fret)
+        if None in strings_and_frets:
+            ds = strings_and_frets[None]
             assert isinstance(ds, StringDS)
             nsds.insertDynamicalSystem(ds)
-            # link the interaction and the dynamical system
-            nsds.link(interaction, ds)
+        else:
+            for interaction in strings_and_frets:
+                ds = strings_and_frets[interaction]
+                assert isinstance(interaction, Fret)
+                assert isinstance(ds, StringDS)
+                nsds.insertDynamicalSystem(ds)
+                # link the interaction and the dynamical system
+                nsds.link(interaction, ds)
         self.strings_and_frets = strings_and_frets
         # -- Simulation --
         moreau_bilbao = sk.MoreauJeanBilbaoOSI()
@@ -381,6 +386,9 @@ class Guitar(sk.Model):
         for ds in self.strings_and_frets.values():
             ndof = ds.dimension()
             self.data_ds[ds] = npw.zeros((ndof, self.nb_time_steps_output + 1))
+        if None in self.strings_and_frets:
+            self.strings_and_frets = {}
+
         # A dict of buffers to save interactions variables for all time steps
         self.data_interactions = {}
         self.save_interactions = interactions_output > 0

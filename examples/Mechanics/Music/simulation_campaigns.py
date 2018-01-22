@@ -119,7 +119,10 @@ def transfer_data(campaigns):
         if name != 'results_paths':
             for freq in campaigns[name]:
                 target_name = os.path.join(local_dir, campaigns[name][freq][4])
-                if not os.path.exists(target_name):
+                conver_name = os.path.join(local_dir, campaigns[name][freq][5])
+                do_transfer = (not os.path.exists(target_name)) and (not os.path.exists(conver_name))
+                print(do_transfer, target_name)
+                if do_transfer:
                     sources.append(os.path.join(remote_dir, campaigns[name][freq][4]))
                     sources[-1] = os.path.dirname(sources[-1])
                     commands.append("scp -r luke.ciment:" + sources[-1] + " " + local_dir)

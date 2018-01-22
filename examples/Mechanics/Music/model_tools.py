@@ -170,6 +170,68 @@ def load_model(filename, visu=True):
     return guitar_model, string, frets, restit
 
 
+def load_model_nointer(filename, visu=True):
+    """Read hdf file to:
+    * load parameters and create model
+    * load simulation results
+
+    Parameters
+    ----------
+    filename : string
+         hdf5 file (relative or full path)
+
+    Remark: the hdf file should have been created at the
+    end of a simulation using "save_simu_to_hdf5" method.
+    """
+
+    # Load hdf attributes, to create the model
+    print('Load model from file ' + filename)
+    mode = 'r'
+    h5file = h5py.File(filename, mode)
+    n_modes = h5file.attrs['number_of_modes']
+    max_coords = h5file.attrs['max_coords']
+    fs = h5file.attrs['frequency']
+    initial_time = h5file.attrs['initial_time']
+    final_time = h5file.attrs['final_time']
+    output_freq = h5file.attrs['output_freq']
+    matlab_input = h5file.attrs['matlab_data']
+    filt_frets = h5file.attrs['filter frets']
+    interactions_output = 0
+    restit = h5file.attrs['restit']
+    length = h5file.attrs['length']
+    G_string = {
+        'length': length,
+        }
+    # -- The dynamical system --
+    string = StringDS(n_modes, geometry_and_material=G_string,
+                      max_coords=max_coords,
+                      matlab_input=matlab_input)
+
+    # -- The interactions --
+    frets_file = matlab_input + '_h.mat'
+    #filt_frets=True
+    interactions = build_frets_from_file(string, restit, frets_file, filt_frets, visu)
+    interactions = {None:string}
+    frets = list(interactions.keys())
+    nb_frets = 0
+    
+    # -- The nsds --
+    guitar_model = Guitar(interactions, [initial_time, final_time],
+                          fs, output_freq,
+                          interactions_output=interactions_output)
+    guitar_model.time[...] = h5file['times']
+    guitar_model.data_ds[string][...] = h5file['dof']
+    guitar_model.modal_values = h5file.attrs['modal']
+    if guitar_model.save_interactions:
+        for ic in range(nb_frets):
+            interaction = frets[ic]
+            ref = 'contact_' + str(ic)
+            for i in range(guitar_model.interactions_output):
+                guitar_model.data_interactions[interaction][i][...] = h5file[ref][:, i]
+    h5file.close()
+    return guitar_model, string, frets, restit
+
+
 def load_convert_and_save(filename):
     # Load hdf5 file to set model and string
     ref_model, ref_string, ref_frets, restit = load_model(filename)

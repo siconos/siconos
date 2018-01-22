@@ -46,7 +46,7 @@ assert fs > 14000.
 
 initial_time = 0.
 
-max_coords = (3.6e-3, 0.64)
+max_coords = None#(3.6e-3, 0.64)
 
 #max_coords = (7.8e-3, 0.64)
 
