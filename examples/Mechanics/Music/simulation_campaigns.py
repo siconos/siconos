@@ -77,7 +77,9 @@ def post_process_simus(filepath, remote_results_path, local_results_path, output
         node = current[2].strip('luke')
         coeff = current[4]
         name = current[5]
-        if name.find('one') >= 0:
+        if name.find('bass_one_c') >= 0:
+            prefix = 'guitar_single_e' + name[-3:] + '_1001_'
+        elif name.find('one') >= 0:
             prefix = 'single_e' + name[-3:] + '_999_'
         elif name.find('bass') >= 0:
             prefix = 'bass_e' + name[-3:] + '_862_'
