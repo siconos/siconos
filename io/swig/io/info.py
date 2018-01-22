@@ -2,6 +2,7 @@
 """Show information about a Siconos mechanics-IO HDF5 file."""
 
 # Lighter imports before command line parsing
+from __future__ import print_function
 import sys, argparse
 
 parser = argparse.ArgumentParser(
