@@ -921,3 +921,20 @@ void CylindricalJointR::computeJachqDoF(double time, Interaction& inter,
     i++;
   }
 }
+
+
+/** Return the normal of the angular DoF axis of rotation.
+ * \param axis must be 0 */
+void CylindricalJointR::_normalDoF(SiconosVector& ans, const BlockVector& q0,
+                                   int axis, bool absoluteRef)
+{
+  // Return the same axis for linear and rotational DoFs
+  assert(axis == 0 || axis == 1);
+  if (axis != 0 && axis != 1) return;
+
+  // We assume that _axis0 is normalized.
+  ans = *_axis0;
+
+  if (absoluteRef)
+    changeFrameBodyToAbs(*q0.getAllVect()[0], ans);
+}
