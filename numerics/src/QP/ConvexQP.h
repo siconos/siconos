@@ -84,7 +84,7 @@ struct ConvexQP
   void (*ProjectionOnC)(void *self, double *x, double * PX); /**< Projection on C  */
   double normConvexQP; /**< Norm of the  problem to compute relative solution */
   int istheNormConvexQPset; /**< Boolean to know if the norm is set 
-                             * If not (istheNormConvexQPset=0) it will be computed in the first call of convexQP_computeError
+                             * If not (istheNormConvexQPset=0) it will be computed in the first call of convexQP_compute_error
                              * By default, set istheNormConvexQPset =0 */
   void* set; /**< opaque struct that represent the set C (possibly empty) */
 };

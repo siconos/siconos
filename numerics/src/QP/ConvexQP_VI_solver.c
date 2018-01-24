@@ -120,7 +120,7 @@ void convexQP_VI_solver(ConvexQP* problem, double *z, double *w, int* info, Solv
 
 
   /* **** Criterium convergence **** */
-  convexQP_computeError(problem, z , w, options->dparam[0], options, &error);
+  convexQP_compute_error_reduced(problem, z , w, options->dparam[0], options, norm_q, &error);
 
   /* for (i =0; i< n ; i++) */
   /* { */

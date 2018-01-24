@@ -39,17 +39,32 @@
 #include "debug.h"
 
 const char* const   SICONOS_CONVEXQP_ADMM_STR = "CONVEXQP ADMM";
-
+typedef struct {
+  double * xi_hat;
+  double * u_hat;
+  double * u_k;
+  double * xi_k;
+}
+  ConvexQP_ADDM_data;
 
 void convexQP_ADMM_init(ConvexQP* problem, SolverOptions* options)
 {
   int n = problem->size;
   int m = problem->m;
-  
   if (!options->dWork || options->dWorkSize != 2*m+n)
   {
     options->dWork = (double*)calloc(2*m+n,sizeof(double));
     options->dWorkSize = 2*m+n;
+  }
+  if  (options->iparam[SICONOS_CONVEXQP_ADMM_IPARAM_ACCELERATION] == SICONOS_CONVEXQP_ADMM_ACCELERATION ||
+       options->iparam[SICONOS_CONVEXQP_ADMM_IPARAM_ACCELERATION] == SICONOS_CONVEXQP_ADMM_ACCELERATION_AND_RESTART )
+  {
+    options->solverData=(ConvexQP_ADDM_data *)malloc(sizeof(ConvexQP_ADDM_data));
+    ConvexQP_ADDM_data * data = (ConvexQP_ADDM_data *)options->solverData;
+    data->xi_hat =  (double*)calloc(m,sizeof(double));
+    data->u_hat =  (double*)calloc(m,sizeof(double));
+    data->xi_k =  (double*)calloc(m,sizeof(double));
+    data->u_k =  (double*)calloc(m,sizeof(double));
   }
 }
 void convexQP_ADMM_free(ConvexQP* problem, SolverOptions* options)
@@ -60,6 +75,16 @@ void convexQP_ADMM_free(ConvexQP* problem, SolverOptions* options)
     options->dWork=NULL;
     options->dWorkSize = 0;
   }
+  if (options->solverData)
+  {
+    ConvexQP_ADDM_data * data = (ConvexQP_ADDM_data *)options->solverData;
+    free(data->xi_hat);
+    free(data->u_hat);
+    free(data->xi_k);
+    free(data->u_k);
+    free(data);
+  }
+
 }
 
 void convexQP_ADMM(ConvexQP* problem,
@@ -77,7 +102,7 @@ void convexQP_ADMM(ConvexQP* problem,
     solver_options_print(options);
   }
 
-  
+
   double* q = problem->q;
   NumericsMatrix* M = problem->M;
 
@@ -87,6 +112,14 @@ void convexQP_ADMM(ConvexQP* problem,
   /* Dimension of the problem */
   int n =  problem->size;
   int AisIdentity = 0;
+  if (!problem->istheNormConvexQPset)
+  {
+    problem->normConvexQP= cblas_dnrm2(n , problem->q , 1);
+    DEBUG_PRINTF("problem->norm ConvexQP= %12.8e\n", problem->normConvexQP);
+    problem->istheNormConvexQPset=1;
+  }
+  double norm_q =problem->normConvexQP;
+  DEBUG_PRINTF("norm_q = %12.8e\n", norm_q);
 
   if (!A) /* A is considered to be the identity and b =0 */
   {
@@ -137,24 +170,13 @@ void convexQP_ADMM(ConvexQP* problem,
     internal_allocation = 1;
   }
 
-  /* double * z_k; */
-  /* double * w_k; */
-  /* double * u_k; */
-  double * u_tmp =  options->dWork;
-  /* double * xi_k; */
-  /* double * xi_tmp; */
+  double * tmp =  options->dWork;
 
   int accelerated = iparam[SICONOS_CONVEXQP_ADMM_IPARAM_ACCELERATION];
-  if (accelerated == iparam[SICONOS_CONVEXQP_ADMM_NO_ACCELERATION])
-  {
-
-  }
-
 
   /* z_k = (double *)malloc(n * sizeof(double)); */
   /* w_k = (double *)malloc(n * sizeof(double)); */
   /* u_k = (double *)calloc(m,sizeof(double)); */
-  u_tmp = (double *)calloc(m,sizeof(double));
   /* xi_k = (double *)calloc(m,sizeof(double)); */
   /* xi_tmp = (double *)calloc(m,sizeof(double)); */
 
@@ -185,97 +207,298 @@ void convexQP_ADMM(ConvexQP* problem,
   }
 
 
-
-
-  while ((iter < itermax) && (hasNotConverged > 0))
+  if (accelerated == SICONOS_CONVEXQP_ADMM_NO_ACCELERATION)
   {
-    ++iter;
+    while ((iter < itermax) && (hasNotConverged > 0))
+    {
+      ++iter;
 
-    /********************/
-    /*  1 - Compute z */
-    /********************/
+      /********************/
+      /*  1 - Compute z */
+      /********************/
 
+      /* compute the rhs */
+      /* q --> z */
+      cblas_dcopy(n , q , 1 , z, 1);
+      cblas_dscal(n, -1, z,1);
+
+      DEBUG_EXPR(NV_display(u,m));
+      DEBUG_EXPR(NV_display(xi,m));
+
+      /*  u -b + xi_k --> u */
+      cblas_daxpy(m, -1.0, b, 1, u , 1);
+      DEBUG_EXPR(NV_display(u,m));
+      cblas_daxpy(m, 1.0, xi, 1, u , 1);
+      DEBUG_EXPR(NV_display(u,m));
+
+      if (AisIdentity)
+      {
+        cblas_daxpy(m, rho, u, 1, z, 1);
+      }
+      else
+      {
+        NM_gemv(rho, Atrans, u, 1.0, z);
+      }
+      DEBUG_PRINT("rhs:")
+        DEBUG_EXPR(NV_display(z,n));
+
+      /* Linear system solver */
+      /* cblas_dcopy(n , w_k , 1 , z, 1); */
+      NM_gesv_expert(W,z,NM_KEEP_FACTORS);
+      DEBUG_PRINT("z:")
+        DEBUG_EXPR(NV_display(z,n));
+
+      /********************/
+      /*  2 - Compute u */
+      /********************/
+
+      /* A z_k - xi_k + b */
+      cblas_dcopy(m , b , 1 , tmp, 1);
+      cblas_daxpy(m, -1, xi, 1, tmp , 1);
+      if (AisIdentity)
+      {
+        cblas_daxpy(m, 1.0, z, 1, tmp , 1);
+      }
+      else
+      {
+        NM_gemv(1.0, A, z, 1.0, tmp);
+      }
+      DEBUG_PRINT("before projection")
+        DEBUG_EXPR(NV_display(tmp,m));
+
+      problem->ProjectionOnC(problem,tmp,u);
+
+      DEBUG_EXPR(NV_display(u,m));
+
+      /**********************/
+      /*  3 - Compute xi */
+      /**********************/
+
+      /* xi_k + A z_k -u_k +b -> xi_k */
+      cblas_daxpy(m, -1, b, 1, xi , 1);
+
+      if (AisIdentity)
+      {
+        cblas_daxpy(m, -1.0, z, 1, xi , 1);
+      }
+      else
+      {
+        NM_gemv(-1.0, A, z, 1.0, xi);
+      }
+
+      cblas_daxpy(m, 1, u, 1, xi , 1);
+      DEBUG_EXPR(NV_display(xi,m));
+
+      DEBUG_EXPR(NV_display(u,m));
+
+      /* **** Criterium convergence **** */
+      convexQP_compute_error(problem, z , xi, w, u, tolerance, rho, options, norm_q, &error);
+
+      numerics_printf_verbose(1,"---- ConvexQP - ADMM  - Iteration %i rho = %14.7e \tError = %14.7e", iter, rho, error);
+
+      if (error < tolerance) hasNotConverged = 0;
+      *info = hasNotConverged;
+    }
+
+    cblas_dscal(m, rho, xi, 1);
+  }
+  else if (accelerated == SICONOS_CONVEXQP_ADMM_ACCELERATION ||
+           accelerated == SICONOS_CONVEXQP_ADMM_ACCELERATION_AND_RESTART)
+  {
+    double eta = dparam[SICONOS_CONVEXQP_ADMM_RESTART_ETA];
+
+    ConvexQP_ADDM_data * data = (ConvexQP_ADDM_data *)options->solverData;
+
+    double * u_k = data->u_k;
+    double * xi_k =  data->xi_k;
+    double * u_hat =  data->u_hat;
+    double * xi_hat = data->xi_hat;
+
+    cblas_dcopy(m , xi , 1 , xi_k, 1);
+    cblas_dcopy(m , u , 1 , u_k, 1);
+    cblas_dcopy(m , xi , 1 , xi_hat, 1);
+    cblas_dcopy(m , u , 1 , u_hat, 1);
+
+    double e_k = INFINITY, e, d, alpha;
+    double tau , tau_k = 1.0;
+    while ((iter < itermax) && (hasNotConverged > 0))
+    {
+      ++iter;
+
+      /********************/
+      /*  1 - Compute z */
+      /********************/
+
+      /* compute the rhs */
+      /* q --> z */
+      cblas_dcopy(n , q , 1 , z, 1);
+      cblas_dscal(n, -1, z,1);
+      /*  u -b + xi_k --> u */
+      cblas_dcopy(m , u_hat , 1 , tmp, 1);
+      cblas_daxpy(m, -1.0, b, 1, tmp , 1);
+      cblas_daxpy(m, 1.0, xi_hat, 1, tmp , 1);
+      if (AisIdentity)
+      {
+        cblas_daxpy(m, rho, tmp, 1, z, 1);
+      }
+      else
+      {
+        NM_gemv(rho, Atrans, tmp, 1.0, z);
+      }
+      DEBUG_PRINT("rhs:");
+      DEBUG_EXPR(NV_display(z,n));
+
+      /* Linear system solver */
+      /* cblas_dcopy(n , w_k , 1 , z, 1); */
+      NM_gesv_expert(W,z,NM_KEEP_FACTORS);
+      DEBUG_PRINT("z:");
+      DEBUG_EXPR(NV_display(z,n));
+
+      /********************/
+      /*  2 - Compute u */
+      /********************/
+
+      /* A z_k - xi_k + b */
+      cblas_dcopy(m , b , 1 , tmp, 1);
+      cblas_daxpy(m, -1, xi_hat, 1, tmp , 1);
+      if (AisIdentity)
+      {
+        cblas_daxpy(m, 1.0, z, 1, tmp , 1);
+      }
+      else
+      {
+        NM_gemv(1.0, A, z, 1.0, tmp);
+      }
+      DEBUG_PRINT("before projection");
+      DEBUG_EXPR(NV_display(tmp,m));
+
+      problem->ProjectionOnC(problem,tmp,u);
+
+      DEBUG_EXPR(NV_display(u,m));
+
+      /**********************/
+      /*  3 - Compute xi */
+      /**********************/
+
+      /* xi_k + A z_k -u_k +b -> xi_k */
+      cblas_dcopy(m , xi_hat , 1 , xi, 1);
+      cblas_daxpy(m, -1, b, 1, xi , 1);
+
+      if (AisIdentity)
+      {
+        cblas_daxpy(m, -1.0, z, 1, xi , 1);
+      }
+      else
+      {
+        NM_gemv(-1.0, A, z, 1.0, xi);
+      }
+
+      cblas_daxpy(m, 1, u, 1, xi , 1);
+      DEBUG_EXPR(NV_display(xi,m));
+
+
+
+      /**********************/
+      /*  3 - Acceleration  */
+      /**********************/
+      DEBUG_EXPR(NV_display(u_hat,m));
+      cblas_dcopy(m , u_hat , 1 , tmp, 1);
+      cblas_daxpy(m, -1, u, 1, tmp , 1);
+      d = cblas_dnrm2(m , tmp , 1);
+      e = d * d;
+      DEBUG_EXPR(NV_display(xi_hat,m));
+      cblas_dcopy(m , xi_hat , 1 , tmp, 1);
+      cblas_daxpy(m, -1, xi, 1, tmp , 1);
+      d = cblas_dnrm2(m , tmp , 1);
+      e += d * d;
+
+      DEBUG_PRINTF("residual e = %e \n", e);
+      DEBUG_PRINTF("residual e_k = %e \n", e_k);
+      DEBUG_PRINTF("eta  = %e \n", eta);
+
+      if ((e <  eta * e_k) || (accelerated == SICONOS_CONVEXQP_ADMM_ACCELERATION))
+      {
+        tau  = 0.5 *(1 +sqrt(1.0+4.0*tau_k*tau_k));
+        alpha = (tau_k-1.0)/tau;
+
+        cblas_dcopy(m , u , 1 , u_hat, 1);
+        cblas_dscal(m, 1+alpha, u_hat,1);
+        cblas_daxpy(m, -alpha, u_k, 1, u_hat , 1);
+        DEBUG_EXPR(NV_display(u_hat,m));
+
+        cblas_dcopy(m , xi , 1 , xi_hat, 1);
+        cblas_dscal(m, 1+alpha, xi_hat,1);
+        cblas_daxpy(m, -alpha, xi_k, 1, xi_hat , 1);
+        DEBUG_EXPR(NV_display(xi_hat,m));
+        DEBUG_PRINTF("tau  = %e, \t tau_k  = %e \t alpha  = %e   \n", tau, tau_k, alpha);
+        tau_k=tau;
+        e_k=e;
+      }
+      else
+      {
+        tau_k=1.0;
+        e_k = e_k /eta;
+        DEBUG_PRINTF("tau_k  = %e \t alpha  = %e   \n", tau_k);
+        cblas_dcopy(m , xi_k , 1 , xi_hat, 1);
+        cblas_dcopy(m , u_k , 1 , u_hat, 1);
+      }
+
+      cblas_dcopy(m , xi , 1 , xi_k, 1);
+      cblas_dcopy(m , u , 1 , u_k, 1);
+
+
+      error = sqrt(e);
+      if (fabs(norm_q) > DBL_EPSILON)
+        error /= norm_q;
+
+      numerics_printf_verbose(1,"---- ConvexQP - ADMM  - Iteration %i rho = %14.7e \t residual = %14.7e", iter, rho, error);
+
+      if (error < tolerance) hasNotConverged = 0;
+      *info = hasNotConverged;
+    }
+
+    /* recompute a last value of z with u and xi */
     /* compute the rhs */
     /* q --> z */
     cblas_dcopy(n , q , 1 , z, 1);
     cblas_dscal(n, -1, z,1);
-
     /*  u -b + xi_k --> u */
-    cblas_daxpy(m, -1.0, b, 1, u , 1);
-    cblas_daxpy(m, 1.0, xi, 1, u , 1);
-
-    /* rho A^T (u_k +xi_k -b  ) - q --> w_k */
-    /* for (int k =0; k< n; k++) w_k[k] = -w_k[k]; */
-
+    cblas_dcopy(m , u , 1 , tmp, 1);
+    cblas_daxpy(m, -1.0, b, 1, tmp , 1);
+    cblas_daxpy(m, 1.0, xi, 1, tmp , 1);
     if (AisIdentity)
     {
-      cblas_daxpy(m, rho, u, 1, z, 1);
+      cblas_daxpy(m, rho, tmp, 1, z, 1);
     }
     else
     {
-      NM_gemv(rho, Atrans, u, 1.0, z);
+      NM_gemv(rho, Atrans, tmp, 1.0, z);
     }
-    DEBUG_PRINT("rhs:")
+    DEBUG_PRINT("rhs:");
     DEBUG_EXPR(NV_display(z,n));
 
     /* Linear system solver */
     /* cblas_dcopy(n , w_k , 1 , z, 1); */
     NM_gesv_expert(W,z,NM_KEEP_FACTORS);
-    DEBUG_PRINT("z:")
+    DEBUG_PRINT("z:");
     DEBUG_EXPR(NV_display(z,n));
-
-    /********************/
-    /*  2 - Compute u */
-    /********************/
-
-    /* A z_k - xi_k + b */
-    cblas_dcopy(m , b , 1 , u_tmp, 1);
-    cblas_daxpy(m, -1, xi, 1, u_tmp , 1);
-    if (AisIdentity)
-    {
-      cblas_daxpy(m, 1.0, z, 1, u_tmp , 1);
-    }
-    else
-    {
-      NM_gemv(1.0, A, z, 1.0, u_tmp);
-    }
-    DEBUG_PRINT("before projection")
-    DEBUG_EXPR(NV_display(u_tmp,m));
     
-    problem->ProjectionOnC(problem,u_tmp,u);
-
-    DEBUG_EXPR(NV_display(u,m));
-
-    /**********************/
-    /*  3 - Compute xi */
-    /**********************/
-
-    /* xi_k + A z_k -u_k +b -> xi_k */
-    cblas_daxpy(m, -1, b, 1, xi , 1);
-    
-    if (AisIdentity)
-    {
-      cblas_daxpy(m, -1.0, z, 1, xi , 1);
-    }
-    else
-    {
-      NM_gemv(-1.0, A, z, 1.0, xi);
-    }
-
-    cblas_daxpy(m, 1, u, 1, xi , 1);
-    DEBUG_EXPR(NV_display(xi,m));
-
-
+    /* check the full criterion */
     /* **** Criterium convergence **** */
-    convexQP_computeError_full(problem, z , xi, w, u, tolerance, rho, options, &error);
-
-    numerics_printf_verbose(1,"---- ConvexQP - ADMM  - Iteration %i rho = %14.7e \tError = %14.7e", iter, rho, error);
+    convexQP_compute_error(problem, z , xi, w, u, tolerance, rho, options, norm_q, &error);
+    numerics_printf_verbose(1,"---- ConvexQP - ADMM  - Iteration %i rho = %14.7e \t error = %14.7e", iter, rho, error);
 
     if (error < tolerance) hasNotConverged = 0;
+    else hasNotConverged = 1;
     *info = hasNotConverged;
+
+
+
+    cblas_dscal(m, rho, xi, 1);
   }
 
-  cblas_dscal(m, rho, xi, 1);
+
+
 
 
   //verbose=1;
@@ -316,12 +539,13 @@ int convexQP_ADMM_setDefaultSolverOptions(SolverOptions* options)
   solver_options_nullify(options);
 
   options->iparam[SICONOS_IPARAM_MAX_ITER] = 20000;
-  options->iparam[SICONOS_CONVEXQP_ADMM_ACCELERATION] = 0; /* 0 Acceleration */
+  options->iparam[SICONOS_CONVEXQP_ADMM_IPARAM_ACCELERATION] = SICONOS_CONVEXQP_ADMM_NO_ACCELERATION; /* 0 Acceleration */
 
 
   options->dparam[SICONOS_DPARAM_TOL] = 1e-6;
 
-  options->dparam[SICONOS_CONVEXQP_ADMM_RHO] = 1.0; 
+  options->dparam[SICONOS_CONVEXQP_ADMM_RHO] = 1.0;
+  options->dparam[SICONOS_CONVEXQP_ADMM_RESTART_ETA] = 0.999;
 
   options->internalSolvers = NULL;
 

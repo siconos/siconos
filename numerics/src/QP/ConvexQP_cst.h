@@ -38,21 +38,36 @@ enum SICONOS_CONVEXQP_PGOC_DPARAM_ENUM
 
 enum SICONOS_CONVEXQP_ADMM_IPARAM_ENUM
 {
+  /** index in iparam to store the strategy for computing rho */
+  SICONOS_CONVEXQP_ADMM_IPARAM_RHO_STRATEGY = 9,
   /** index in iparam to store the acceleration paramter */
   SICONOS_CONVEXQP_ADMM_IPARAM_ACCELERATION= 10
+
 };
 
 enum SICONOS_CONVEXQP_ADMM_DPARAM_ENUM
 {
   /** index in dparam to store the rho value for projection formulation */
   SICONOS_CONVEXQP_ADMM_RHO = 3,
+  /** index in dparam to store the rho value for projection formulation */
+  SICONOS_CONVEXQP_ADMM_RESTART_ETA = 4
 };
+
 enum SICONOS_CONVEXQP_ADMM_ACCELERATION_ENUM
 {
   SICONOS_CONVEXQP_ADMM_NO_ACCELERATION= 0,
   SICONOS_CONVEXQP_ADMM_ACCELERATION= 1,
   SICONOS_CONVEXQP_ADMM_ACCELERATION_AND_RESTART= 2
 };
+
+enum SICONOS_CONVEXQP_RHO_STRATEGY_ENUM
+{
+  /** A constant value given in dparam[CONVEXQP_RHO_RHO] is used */
+  SICONOS_CONVEXQP_RHO_STRATEGY_CONSTANT = 0,
+  /** An adaptive strategy for rho is used */
+  SICONOS_CONVEXQP_RHO_STRATEGY_ADAPTIVE =1,
+};
+
 
 
 

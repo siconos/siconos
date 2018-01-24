@@ -34,10 +34,11 @@
 #include "debug.h"
 #include "numerics_verbose.h"
 
-int convexQP_computeError(
+int convexQP_compute_error_reduced(
   ConvexQP* problem,
   double *z , double *w, double tolerance,
-  SolverOptions * options, double * error)
+  SolverOptions * options,
+  double norm, double * error)
 {
 
   assert(problem);
@@ -56,17 +57,6 @@ int convexQP_computeError(
   double *ztmp =  options->dWork;
   double *wtmp =  &(options->dWork[n]);
 
-
-  if (!problem->istheNormConvexQPset)
-  {
-    problem->normConvexQP= cblas_dnrm2(n , problem->q , 1);
-    DEBUG_PRINTF("problem->norm ConvexQP= %12.8e\n", problem->normConvexQP);
-    problem->istheNormConvexQPset=1;
-  }
-
-  double norm_q =problem->normConvexQP;
-  DEBUG_PRINTF("norm_q = %12.8e\n", norm_q);
-
   /* q --> w */
   cblas_dcopy(n , problem->q , 1 , w, 1);
 
@@ -83,8 +73,8 @@ int convexQP_computeError(
   *error = cblas_dnrm2(n , wtmp , incx);
 
   /* Computes error */
-  if (fabs(norm_q) > DBL_EPSILON)
-    *error /= norm_q;
+  if (fabs(norm) > DBL_EPSILON)
+    *error /= norm;
 
   DEBUG_PRINTF("error = %e\n",*error);
   if (*error > tolerance)
@@ -100,13 +90,14 @@ int convexQP_computeError(
 
 
 
-int convexQP_computeError_full(
+int convexQP_compute_error(
   ConvexQP* problem,
   double *z , double * xi,
   double *w , double * u,
   double tolerance,
   double scaling,
   SolverOptions * options,
+  double norm,
   double * error)
 {
 
@@ -120,6 +111,9 @@ int convexQP_computeError_full(
   int n = problem->size;
   int m = problem->m;
 
+
+  double tmp = 0.0;
+
   *error = 0.;
 
   double *utmp =  options->dWork;
@@ -127,15 +121,8 @@ int convexQP_computeError_full(
   double *wtmp =  &(options->dWork[m+m]);
 
 
-  if (!problem->istheNormConvexQPset)
-  {
-    problem->normConvexQP= cblas_dnrm2(n , problem->q , 1);
-    DEBUG_PRINTF("problem->norm ConvexQP= %12.8e\n", problem->normConvexQP);
-    problem->istheNormConvexQPset=1;
-  }
 
-  double norm_q =problem->normConvexQP;
-  DEBUG_PRINTF("norm_q = %12.8e\n", norm_q);
+
   DEBUG_EXPR(NV_display(z,n));
   DEBUG_EXPR(NV_display(xi,m));
   DEBUG_EXPR(NV_display(u,m));
@@ -154,29 +141,28 @@ int convexQP_computeError_full(
   cblas_dcopy(n , w , 1 , wtmp, 1);
   NM_tgemv(-scaling, problem->A, xi, 1.0, wtmp);
   DEBUG_EXPR(NV_display(wtmp,n));
-  *error = cblas_dnrm2(n , wtmp , incx);
-  *error = *error * *error;
+  tmp = cblas_dnrm2(n , wtmp , incx);
+  *error = tmp * tmp;
   DEBUG_PRINTF("square norm of Mz + q - A^T xi  = %e\n", *error);
   DEBUG_PRINTF("error = %e\n",*error);
-  /* if (fabs(norm_q) > DBL_EPSILON)  */
-  /*   *error /= norm_q;  */
-  /* to do  */
 
   if (!problem->A)
   {
-    cblas_dcopy(n,z,1,u,1);
+    cblas_dcopy(n,z,1,utmp,1);
   }
   else
   {
     /* b --> u */
-    cblas_dcopy(m , problem->b , 1 , u, 1);
+    cblas_dcopy(m , problem->b , 1 , utmp, 1);
     /* A z + b --> u */
-    NM_gemv(1.0, problem->A, z, 1.0, u);
+    NM_gemv(1.0, problem->A, z, 1.0, utmp);
   }
-  DEBUG_EXPR(NV_display(u,m));
+
+  cblas_daxpy(m, -1.0, u , 1, utmp , 1) ;
+  tmp = cblas_dnrm2(m , utmp , incx);
+  *error += tmp * tmp;
 
   /* Check that - xi \in \partial \Psi_C(u) */
-
   cblas_dcopy(m , u , 1 , utmp, 1);
   cblas_daxpy(m, -1.0, xi , 1, utmp , 1) ;
 
@@ -188,18 +174,15 @@ int convexQP_computeError_full(
   cblas_daxpy(m, -1.0, u , 1, utmp1 , 1) ;
   DEBUG_EXPR(NV_display(utmp1,m));
 
-  double err= cblas_dnrm2(m , utmp1 , incx);
-  *error += err*err;
+  tmp= cblas_dnrm2(m , utmp1 , incx);
+  *error += tmp * tmp;
   DEBUG_PRINTF("error = %e\n",*error);
   /* Done, taking the square root */
   *error = sqrt(*error);
 
-  DEBUG_PRINTF("norm_q = %12.8e\n", norm_q);
-  if (fabs(norm_q) > DBL_EPSILON)
-    *error /= norm_q;
-  /* Computes error */
-  /* if (fabs(norm_q) > DBL_EPSILON) */
-  /*   *error /= norm_q; */
+  DEBUG_PRINTF("norm = %12.8e\n", norm);
+  if (fabs(norm) > DBL_EPSILON)
+    *error /= norm;
 
   DEBUG_PRINTF("error = %e\n",*error);
   if (*error > tolerance)
