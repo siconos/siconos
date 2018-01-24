@@ -174,6 +174,7 @@ def env(definitions=None, output_mode=None):
 
 
 def install(installer=None, command=None, pkg=None, pkgs=None,
+            run_command=None,
             output_mode=OutputMode.Script):
     """Format an install command according to output mode.
 
@@ -191,38 +192,47 @@ def install(installer=None, command=None, pkg=None, pkgs=None,
         see :class:`OutputMode`
     """
 
-    if output_mode == OutputMode.Docker:
-        items = ['RUN']
+    if (run_command is not None or command is not None or pkg is not None or
+        (pkgs is not None and pkgs != [])):
 
-    else:
-        if output_mode == OutputMode.Script:
-            items = []
+        if output_mode == OutputMode.Docker:
+            if run_command is not None:
+                items = ['CMD']
+            else:
+                items = ['RUN']
 
         else:
-            sys.stderr.write('output mode {0} is not implemented\n'.format(
-                output_mode))
-            exit(1)
+            if output_mode == OutputMode.Script:
+                items = []
 
-    # format items according to command or installer
-    if installer is not None and pkgs is not None and len(pkgs) > 0:
-        items.append(installer)
+            else:
+                sys.stderr.write('output mode {0} is not implemented\n'.format(
+                    output_mode))
+                exit(1)
 
-    if command is not None:
-        if '&&' in command:
-            coms = command.split('&&')
-            items += ['{0} &&'.format(c.lstrip().rstrip()) for c in coms[:-1]]
-            items.append(coms[-1].lstrip().rstrip())
-        else:
-            items.append(command)
+        # format items according to command or installer
+        if installer is not None and pkgs is not None and len(pkgs) > 0:
+            items.append(installer)
 
-    if pkg is not None:
-        items.append(pkg)
+        if run_command is not None:
+            assert command is None
+            command = run_command
+        if command is not None:
+            if '&&' in command:
+                coms = command.split('&&')
+                items += ['{0} &&'.format(c.lstrip().rstrip()) for c in coms[:-1]]
+                items.append(coms[-1].lstrip().rstrip())
+            else:
+                items.append(command)
 
-    if pkgs is not None:
-        items += pkgs
+        if pkg is not None:
+            items.append(pkg)
 
-    # write items into output
-    sys.stdout.write('{0}\n'.format(' \\\n  '.join(items)))
+        if pkgs is not None:
+            items += pkgs
+
+        # write items into output
+        sys.stdout.write('{0}\n'.format(' \\\n  '.join(items)))
 
 
 class Options(object):
@@ -307,15 +317,16 @@ def print_commands(*args, **kwargs):
 
     # Read yaml file
     with open(options.specfilename) as specfile:
-    
+
         spec = yaml.load(specfile.read())
 
         by_installer = list()
         by_command = list()
+        by_run_commands = list()
         definitions = list()
         installer = None
         updater = None
-        
+
         for pkg in options.pkgs:
 
             installer = get_entry(spec, options.distrib, options.distrib_version,
@@ -349,6 +360,9 @@ def print_commands(*args, **kwargs):
                     if is_dict(entry):
                         if 'command' in entry:
                             by_command.append(entry['command'])
+                        else:
+                            if 'run-command' in entry:
+                                by_run_commands.append(entry['run-command'])
                     elif hasattr(entry, 'sort'):
                         by_installer += entry
                     else:
@@ -389,6 +403,9 @@ def print_commands(*args, **kwargs):
         for command in by_command:
             install(command=command, output_mode=options.output_mode)
 
+        run_command = '&&'.join(by_run_commands)
+        install(run_command=run_command, output_mode=options.output_mode)
+            
         env(definitions, options.output_mode)
 
 
