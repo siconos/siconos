@@ -94,9 +94,9 @@ class StringDS(sk.LagrangianLinearDiagonalDS):
         self.matlab_input = matlab_input
         # - Build siconos dynamical system -
         # -- initial conditions --
-        q0 = self.compute_initial_state_modal(max_coords)
-        v0 = npw.zeros_like(q0)
-        super(StringDS, self).__init__(q0, v0, stiffness_mat, damping_mat)
+        qmod0 = self.compute_initial_state_modal(max_coords)
+        v0 = npw.zeros_like(qmod0)
+        super(StringDS, self).__init__(qmod0, v0, stiffness_mat, damping_mat)
         self.ic_status = self.check_initial_conditions()
 
     def check_initial_conditions(self):
@@ -341,6 +341,7 @@ class Guitar(sk.Model):
         # - link each ds to its interaction
         nsds = self.nonSmoothDynamicalSystem()
         if None in strings_and_frets:
+            # No interactions in the model
             ds = strings_and_frets[None]
             assert isinstance(ds, StringDS)
             nsds.insertDynamicalSystem(ds)
