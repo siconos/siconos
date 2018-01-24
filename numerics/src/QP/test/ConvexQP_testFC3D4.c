@@ -55,6 +55,7 @@ int main(void)
   int info = convexQP_ADMM_setDefaultSolverOptions(options);
   options->dparam[0]=1e-13;
   options->dparam[3]=0.8;
+  options->iparam[SICONOS_CONVEXQP_ADMM_IPARAM_ACCELERATION] = SICONOS_CONVEXQP_ADMM_ACCELERATION;
 
   char filename[50] = "./data/FC3D_Example1_SBM.dat";
   FILE * finput  =  fopen(filename, "r");

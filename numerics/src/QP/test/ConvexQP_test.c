@@ -55,7 +55,9 @@ int main(void)
   cqp.M = M;
   cqp.ProjectionOnC = &PXtest ;
   cqp.q = q;
-
+  cqp.A = NULL;
+  cqp.b = NULL;
+ 
   convexQP_display(&cqp);
 
   /* Call the callback */

@@ -319,7 +319,7 @@ void convexQP_ADMM(ConvexQP* problem,
     cblas_dcopy(m , xi , 1 , xi_hat, 1);
     cblas_dcopy(m , u , 1 , u_hat, 1);
 
-    double e_k = INFINITY, e, d, alpha;
+    double e_k = INFINITY, e, d, alpha, r, s;
     double tau , tau_k = 1.0;
     while ((iter < itermax) && (hasNotConverged > 0))
     {
@@ -380,10 +380,10 @@ void convexQP_ADMM(ConvexQP* problem,
       /*  3 - Compute xi */
       /**********************/
 
-      /* xi_k + A z_k -u_k +b -> xi_k */
-      cblas_dcopy(m , xi_hat , 1 , xi, 1);
-      cblas_daxpy(m, -1, b, 1, xi , 1);
 
+      /* A z_k - u_k +b ->  xi (residual) */
+      cblas_dcopy(m , u, 1 , xi, 1);
+      cblas_daxpy(m, -1, b, 1, xi , 1);
       if (AisIdentity)
       {
         cblas_daxpy(m, -1.0, z, 1, xi , 1);
@@ -392,27 +392,27 @@ void convexQP_ADMM(ConvexQP* problem,
       {
         NM_gemv(-1.0, A, z, 1.0, xi);
       }
+      d = cblas_dnrm2(m , xi , 1);
+      r = d * d;
 
-      cblas_daxpy(m, 1, u, 1, xi , 1);
-      DEBUG_EXPR(NV_display(xi,m));
-
-
-
+      /* xi_hat+ A z_k - u_k +b ->  xi */
+      cblas_daxpy(m, 1, xi_hat, 1, xi , 1);
+      
       /**********************/
       /*  3 - Acceleration  */
       /**********************/
+
       DEBUG_EXPR(NV_display(u_hat,m));
       cblas_dcopy(m , u_hat , 1 , tmp, 1);
       cblas_daxpy(m, -1, u, 1, tmp , 1);
       d = cblas_dnrm2(m , tmp , 1);
-      e = d * d;
-      DEBUG_EXPR(NV_display(xi_hat,m));
-      cblas_dcopy(m , xi_hat , 1 , tmp, 1);
-      cblas_daxpy(m, -1, xi, 1, tmp , 1);
-      d = cblas_dnrm2(m , tmp , 1);
-      e += d * d;
+      s = d * d;
 
+      e =r+s;
+      
       DEBUG_PRINTF("residual e = %e \n", e);
+      DEBUG_PRINTF("residual r = %e \n", r);
+      DEBUG_PRINTF("residual s = %e \n", s);
       DEBUG_PRINTF("residual e_k = %e \n", e_k);
       DEBUG_PRINTF("eta  = %e \n", eta);
 

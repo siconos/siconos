@@ -53,7 +53,7 @@ int main(void)
 
   verbose=1;
   int info = convexQP_ProjectedGradient_setDefaultSolverOptions(options);
-  options->dparam[0]=1e-8;
+  options->dparam[0]=1e-13;
 
   char filename[50] = "./data/FC3D_Example1_SBM.dat";
   FILE * finput  =  fopen(filename, "r");
