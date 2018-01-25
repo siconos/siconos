@@ -30,6 +30,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
+#include <float.h>
 #include "ConvexQP_cst.h"
 #include "numerics_verbose.h"
 
