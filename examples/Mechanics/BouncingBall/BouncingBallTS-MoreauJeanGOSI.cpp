@@ -65,6 +65,8 @@ int main(int argc, char* argv[])
     (*v0)(0) = velocity_init;
 
     // -- The dynamical system --
+    //SP::LagrangianDS ball(new LagrangianDS(q0, v0, Mass));
+
     SP::LagrangianLinearTIDS ball(new LagrangianLinearTIDS(q0, v0, Mass));
 
     // -- Set external forces (weight) --
@@ -115,6 +117,7 @@ int main(int argc, char* argv[])
 
     // -- (3) one step non smooth problem
     SP::OneStepNSProblem osnspb(new GlobalFrictionContact(3));
+    osnspb->numericsSolverOptions()->dparam[0]=1e-12;
 
     // -- (4) Simulation setup with (1) (2) (3)
     SP::TimeStepping s(new TimeStepping(t, OSI, osnspb));
