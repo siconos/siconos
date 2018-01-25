@@ -114,6 +114,7 @@ int main(void)
   options->dparam[SICONOS_DPARAM_TOL]=1e-14;
   //options->iparam[0]=30;
   options->dparam[SICONOS_CONVEXQP_ADMM_RHO]=1.0;
+  options->iparam[SICONOS_CONVEXQP_ADMM_IPARAM_ACCELERATION]=SICONOS_CONVEXQP_ADMM_NO_ACCELERATION;
   printf("test step 1\n");
   convexQP_ADMM(&cqp, z, w, xi, u, &info, options);
   //convexQP_ProjectedGradient(&cqp, x, w, &info, options);

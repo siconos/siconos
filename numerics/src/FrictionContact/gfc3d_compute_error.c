@@ -31,27 +31,23 @@
 #include "NumericsMatrix.h"
 #include "NumericsVector.h"
 
-//#define DEBUG_NOCOLOR
+/* #define DEBUG_NOCOLOR */
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
 #include "debug.h"
 int gfc3d_compute_error(GlobalFrictionContactProblem* problem,
                         double*  reaction , double*  velocity,
                         double*  globalVelocity,
-                        double tolerance,  double norm, double* restrict error)
+                        double tolerance,
+                        SolverOptions * options, double norm, double* restrict error)
 
 {
-
+  DEBUG_BEGIN("gfc3d_compute_error(...)\n");
   /* Checks inputs */
   if (problem == NULL || globalVelocity == NULL)
     numerics_error("gfc3d_compute_error", "null input");
-
-
-
   
-  gfc3d_init_workspace(problem);
 
-  double* tmp = problem->workspace->globalVelocity;
   
   /* Computes error = dnorm2( GlobalVelocity -M^-1( q + H reaction)*/
   int nc = problem->numberOfContacts;
@@ -69,6 +65,13 @@ int gfc3d_compute_error(GlobalFrictionContactProblem* problem,
   NumericsMatrix *H = problem->H;
   NumericsMatrix *M = problem->M;
 
+  if (!options->dWork)
+  {
+    options->dWork = (double *)calloc(n,sizeof(double));
+  }
+  double* tmp = options->dWork;
+
+  
 
   cblas_dcopy_msan(n, q, 1, tmp , 1);
   if (nc >0)
@@ -123,8 +126,12 @@ int gfc3d_compute_error(GlobalFrictionContactProblem* problem,
   if (*error > tolerance)
   {
     /*       if (verbose > 0) printf("Numerics - gfc3d_compute_error failed: error = %g > tolerance = %g.\n",*error, tolerance); */
+    DEBUG_END("gfc3d_compute_error(...)");
     return 1;
   }
   else
+  {
+    DEBUG_END("gfc3d_compute_error(...)");
     return 0;
+  }
 }

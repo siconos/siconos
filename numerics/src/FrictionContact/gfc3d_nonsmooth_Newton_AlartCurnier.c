@@ -775,6 +775,7 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(
       gfc3d_compute_error(problem,
                           reaction_k, velocity_k, globalVelocity_k,
                           tolerance,
+                          options,
                           norm_q,
                           &(options->dparam[SICONOS_DPARAM_RESIDU]));
     }

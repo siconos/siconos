@@ -142,7 +142,7 @@ void gfc3d_VI_ExtraGradient(GlobalFrictionContactProblem* problem,
 
    double norm_q = cblas_dnrm2(n , problem->q , 1);
   /* **** Criterium convergence **** */
-  gfc3d_compute_error(problem, reaction , velocity, globalVelocity, options->dparam[0], norm_q, &error);
+   gfc3d_compute_error(problem, reaction , velocity, globalVelocity, options->dparam[0], options, norm_q, &error);
 
   DEBUG_EXPR(NM_vector_display(reaction,m));
   DEBUG_EXPR(NM_vector_display(velocity,m));

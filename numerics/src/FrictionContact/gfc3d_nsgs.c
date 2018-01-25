@@ -57,8 +57,9 @@ static void gfc3d_nsgs_initialize_local_solver(int n, SolverGlobalPtr* solve, Fr
 }
 
 
-void gfc3d_nsgs(GlobalFrictionContactProblem* restrict problem, double* restrict reaction, double* restrict velocity,
-                double* restrict globalVelocity, int* restrict info, SolverOptions* restrict options)
+void gfc3d_nsgs(GlobalFrictionContactProblem* restrict problem, double* restrict reaction,
+                double* restrict velocity, double* restrict globalVelocity,
+                int* restrict info, SolverOptions* restrict options)
 {
   /* int and double parameters */
   int* iparam = options->iparam;
@@ -75,7 +76,6 @@ void gfc3d_nsgs(GlobalFrictionContactProblem* restrict problem, double* restrict
 
   assert((int)H->size1 == problem->numberOfContacts * problem->dimension);
   assert((int)M->size0 == M->size1);
-
   assert((int)M->size0 == H->size0); /* size(velocity) ==
                                       * Htrans*globalVelocity */
 
@@ -165,14 +165,14 @@ void gfc3d_nsgs(GlobalFrictionContactProblem* restrict problem, double* restrict
       if (!(iter % options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION_FREQUENCY]))
       {
         /* computeGlobalVelocity(problem, reaction, globalVelocity); */
-        (*computeError)(problem, reaction , velocity, globalVelocity, tolerance, norm_q, &error);
+        (*computeError)(problem, reaction , velocity, globalVelocity, tolerance, options, norm_q, &error);
       }
     }
     else
     {
-      (*computeError)(problem, reaction , velocity, globalVelocity, tolerance, norm_q, &error);
-      if (verbose > 0)
-          printf("--------------- GFC3D - NSGS - Iteration %i Residual = %14.7e; Tol = %g\n", iter, error, tolerance);
+      (*computeError)(problem, reaction , velocity, globalVelocity, tolerance, options, norm_q, &error);
+   
+      numerics_printf_verbose(1,"----- GFC3D - NSGS - Iteration %i Residual = %14.7e; Tol = %g", iter, error, tolerance);
     }
     if (error < tolerance) hasNotConverged = 0;
     *info = hasNotConverged;
@@ -181,7 +181,7 @@ void gfc3d_nsgs(GlobalFrictionContactProblem* restrict problem, double* restrict
   /*  One last error computation in case where are at the very end */
   if (iter == itermax)
   {
-    (*computeError)(problem, reaction , velocity, globalVelocity, tolerance, norm_q, &error);
+    (*computeError)(problem, reaction , velocity, globalVelocity, tolerance, options, norm_q, &error);
   }
 
   dparam[SICONOS_DPARAM_TOL] = tolerance;

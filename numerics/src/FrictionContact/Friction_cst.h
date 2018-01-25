@@ -103,7 +103,8 @@ enum FRICTION_SOLVER
   SICONOS_GLOBAL_FRICTION_3D_VI_FPP = 610,
   /** VI formulation, Extra-gradient, local formulation */
   SICONOS_GLOBAL_FRICTION_3D_VI_EG = 611,
-  SICONOS_GLOBAL_FRICTION_3D_ACLMFP = 612
+  SICONOS_GLOBAL_FRICTION_3D_ACLMFP = 612,
+  SICONOS_GLOBAL_FRICTION_3D_ADMM = 613
 };
 
 
@@ -163,6 +164,7 @@ extern const char* const   SICONOS_GLOBAL_FRICTION_3D_GAMS_PATHVI_STR;
 extern const char* const   SICONOS_GLOBAL_FRICTION_3D_VI_FPP_STR;
 extern const char* const   SICONOS_GLOBAL_FRICTION_3D_VI_EG_STR;
 extern const char* const   SICONOS_GLOBAL_FRICTION_3D_ACLMFP_STR;
+extern const char* const   SICONOS_GLOBAL_FRICTION_3D_ADMM_STR;
 extern const char* const   SICONOS_FRICTION_3D_ONECONTACT_QUARTIC_STR ;
 extern const char* const   SICONOS_FRICTION_3D_ONECONTACT_QUARTIC_NU_STR ;
 
@@ -355,8 +357,29 @@ enum SICONOS_FRICTION_3D_PROXIMAL
 
 };
 
+enum SICONOS_FRICTION_3D_ADMM_IPARAM_ENUM
+{
+  /** index in iparam to store the strategy for computing rho */
+  SICONOS_FRICTION_3D_ADMM_IPARAM_RHO_STRATEGY = 9,
+  /** index in iparam to store the acceleration paramter */
+  SICONOS_FRICTION_3D_ADMM_IPARAM_ACCELERATION= 10
 
+};
 
+enum SICONOS_FRICTION_3D_ADMM_DPARAM_ENUM
+{
+  /** index in dparam to store the rho value for projection formulation */
+  SICONOS_FRICTION_3D_ADMM_RHO = 3,
+  /** index in dparam to store the rho value for projection formulation */
+  SICONOS_FRICTION_3D_ADMM_RESTART_ETA = 4
+};
+
+enum SICONOS_FRICTION_3D_ADMM_ACCELERATION_ENUM
+{
+  SICONOS_FRICTION_3D_ADMM_NO_ACCELERATION= 0,
+  SICONOS_FRICTION_3D_ADMM_ACCELERATION= 1,
+  SICONOS_FRICTION_3D_ADMM_ACCELERATION_AND_RESTART= 2
+};
 
 
 

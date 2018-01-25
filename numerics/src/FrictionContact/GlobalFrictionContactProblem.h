@@ -99,15 +99,6 @@ with \f$C^{\alpha}_{\mu^\alpha} =\{ r^\alpha, \|r_{t}\| \leq \mu_{\alpha} |r^\al
 #include "NumericsFwd.h"
 #include "SiconosConfig.h"
 #include <stdio.h>
-/** \struct GFC3D_workspace GlobalFrictionContactProblem.h
- * Workspace for GFC3D computations: factorized M (since we compute multiples
- * time the global velocity*/
-
-typedef struct
-{
-  NumericsMatrix* factorized_M; /**< factorized mass matrix*/
-  double* globalVelocity; /**<  vector of size factorized_M->size0 */
-} GFC3D_workspace;
 
 /** \struct GlobalFrictionContactProblem GlobalFrictionContactProblem.h
  * The structure that defines a Friction-Contact (3D or 2D ) problem \f$\mathrm{PFC}(M,H,q,b,\mu)\f$  such that
@@ -149,8 +140,6 @@ struct GlobalFrictionContactProblem
   double* mu;
   /** opaque environment, solver specific */
   void* env; 
-  /** workspace */
-  GFC3D_workspace* workspace;
 };
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
@@ -173,7 +162,6 @@ extern "C"
     problem->b = NULL;
     problem->mu = NULL;
     problem->env = NULL;
-    problem->workspace = NULL;
     problem->numberOfContacts = 0;
     problem->dimension = 0;
 
@@ -181,9 +169,8 @@ extern "C"
 
  void freeGlobalFrictionContactProblem(GlobalFrictionContactProblem* problem);
 
-  void gfc3d_init_workspace(GlobalFrictionContactProblem* problem);
 
-  void gfc3d_free_workspace(GlobalFrictionContactProblem* problem);
+  
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

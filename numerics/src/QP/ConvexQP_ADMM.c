@@ -161,7 +161,7 @@ void convexQP_ADMM(ConvexQP* problem,
   double rho = 0.0;
   rho = dparam[SICONOS_CONVEXQP_ADMM_RHO];
   if (rho == 0.0)
-    numerics_error("ConvexQP_ADMM", "dparam[SICONOS_CONVEXQP_PGOC_RHO] must be nonzero");
+    numerics_error("ConvexQP_ADMM", "dparam[SICONOS_CONVEXQP_ADMM_RHO] must be nonzero");
 
   /* double tau=1; */
   int internal_allocation=0;
@@ -174,13 +174,6 @@ void convexQP_ADMM(ConvexQP* problem,
   double * tmp =  options->dWork;
 
   int accelerated = iparam[SICONOS_CONVEXQP_ADMM_IPARAM_ACCELERATION];
-
-  /* z_k = (double *)malloc(n * sizeof(double)); */
-  /* w_k = (double *)malloc(n * sizeof(double)); */
-  /* u_k = (double *)calloc(m,sizeof(double)); */
-  /* xi_k = (double *)calloc(m,sizeof(double)); */
-  /* xi_tmp = (double *)calloc(m,sizeof(double)); */
-
 
   /* Compute M + rho A^T A (storage in M)*/
   NumericsMatrix *Atrans;
@@ -334,6 +327,7 @@ void convexQP_ADMM(ConvexQP* problem,
       /* q --> z */
       cblas_dcopy(n , q , 1 , z, 1);
       cblas_dscal(n, -1, z,1);
+      
       /*  u -b + xi_k --> u */
       cblas_dcopy(m , u_hat , 1 , tmp, 1);
       cblas_daxpy(m, -1.0, b, 1, tmp , 1);
@@ -382,7 +376,7 @@ void convexQP_ADMM(ConvexQP* problem,
       /**********************/
 
 
-      /* A z_k - u_k +b ->  xi (residual) */
+      /* - A z_k + u_k -b ->  xi (residual) */
       cblas_dcopy(m , u, 1 , xi, 1);
       cblas_daxpy(m, -1, b, 1, xi , 1);
       if (AisIdentity)
@@ -396,7 +390,7 @@ void convexQP_ADMM(ConvexQP* problem,
       d = cblas_dnrm2(m , xi , 1);
       r = d * d;
 
-      /* xi_hat+ A z_k - u_k +b ->  xi */
+      /* xi_hat -  A z_k + u_k -b ->  xi */
       cblas_daxpy(m, 1, xi_hat, 1, xi , 1);
       
       /**********************/
@@ -446,7 +440,6 @@ void convexQP_ADMM(ConvexQP* problem,
 
       cblas_dcopy(m , xi , 1 , xi_k, 1);
       cblas_dcopy(m , u , 1 , u_k, 1);
-
 
       error = sqrt(e);
       if (fabs(norm_q) > DBL_EPSILON)
@@ -540,7 +533,7 @@ int convexQP_ADMM_setDefaultSolverOptions(SolverOptions* options)
   solver_options_nullify(options);
 
   options->iparam[SICONOS_IPARAM_MAX_ITER] = 20000;
-  options->iparam[SICONOS_CONVEXQP_ADMM_IPARAM_ACCELERATION] = SICONOS_CONVEXQP_ADMM_NO_ACCELERATION; /* 0 Acceleration */
+  options->iparam[SICONOS_CONVEXQP_ADMM_IPARAM_ACCELERATION] = SICONOS_CONVEXQP_ADMM_ACCELERATION_AND_RESTART; /* 0 Acceleration */
 
 
   options->dparam[SICONOS_DPARAM_TOL] = 1e-6;

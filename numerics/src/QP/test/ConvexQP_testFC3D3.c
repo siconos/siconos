@@ -53,6 +53,7 @@ int main(void)
 
   verbose=1;
   int info = convexQP_ADMM_setDefaultSolverOptions(options);
+  options->iparam[SICONOS_CONVEXQP_ADMM_IPARAM_ACCELERATION]=SICONOS_CONVEXQP_ADMM_NO_ACCELERATION;
   options->dparam[0]=1e-13;
   options->dparam[3]=0.8;
 

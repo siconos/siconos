@@ -49,7 +49,7 @@ For each solver, the input argument are:
 
 typedef void (*SolverGlobalPtr)(int, int, double*, int*, double*);
 typedef void (*PostSolverGlobalPtr)(int, double*);
-typedef void (*ComputeErrorGlobalPtr)(GlobalFrictionContactProblem*, double*, double*, double *, double, double, double*);
+typedef void (*ComputeErrorGlobalPtr)(GlobalFrictionContactProblem*, double*, double*, double *, double, SolverOptions*, double, double*);
 typedef void (*FreeSolverGlobalPtr)(GlobalFrictionContactProblem*);
 
 
@@ -234,6 +234,20 @@ extern "C"
   void gfc3d_VI_FixedPointProjection(GlobalFrictionContactProblem* problem, double *reaction, double *velocity, double* globalVelocity, int* info, SolverOptions* options);
   
   int gfc3d_VI_FixedPointProjection_setDefaultSolverOptions(SolverOptions* options);
+
+  
+
+
+  void gfc3d_ADMM(GlobalFrictionContactProblem*  problem, double*  reaction,
+                  double*  velocity, double*  globalVelocity,
+                  int*  info, SolverOptions*  options);
+
+  void gfc3d_ADMM_init(GlobalFrictionContactProblem* problem, SolverOptions* options);
+  
+  void gfc3d_ADMM_free(GlobalFrictionContactProblem* problem, SolverOptions* options);
+
+  int gfc3d_ADMM_setDefaultSolverOptions(SolverOptions* options);
+  
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif
