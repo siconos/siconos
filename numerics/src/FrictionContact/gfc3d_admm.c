@@ -22,7 +22,6 @@
 #include "projectionOnCone.h"
 #include "SiconosLapack.h"
 #include "SparseBlockMatrix.h"
-#include "ConvexQP_solvers.h"
 #include <stdio.h>
 #include <assert.h>
 #include <math.h>
