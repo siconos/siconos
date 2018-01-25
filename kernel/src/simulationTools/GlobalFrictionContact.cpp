@@ -437,7 +437,18 @@ void GlobalFrictionContact::postCompute()
       setBlock(*_globalVelocities, velocity, sizeDS, pos, 0 );
       DEBUG_EXPR(velocity->display(););
     }
-
+    else if(dsType == Type::NewtonEulerDS)
+    {
+      NewtonEulerDS& neds = static_cast<NewtonEulerDS&> (ds);;
+      sizeDS = neds.dimension();
+      SP::SiconosVector twist = neds.twist();
+      DEBUG_PRINTF("ds.number() : %i \n",ds.number());
+      DEBUG_EXPR(twist->display(););
+      DEBUG_EXPR(_globalVelocities->display(););
+      pos = DSG0.properties(*dsi).absolute_position;
+      setBlock(*_globalVelocities, twist, sizeDS, pos, 0 );
+      DEBUG_EXPR(twist->display(););
+    }
     else RuntimeException::selfThrow("GlobalFrictionContact::postCompute() - not yet implemented for Dynamical system of type: " +  Type::name(ds));
 
   }
