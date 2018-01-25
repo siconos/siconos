@@ -33,7 +33,7 @@
 /* #define DEBUG_NOCOLOR */
 /* #define DEBUG_MESSAGES */
 #include "debug.h"
-const char* const   SICONOS_GLOBAL_FRICTION_3D_ADMM_STR = "CONVEXQP ADMM";
+const char* const   SICONOS_GLOBAL_FRICTION_3D_ADMM_STR = "GFC3D ADMM";
 
 typedef struct {
   double * reaction_hat;
@@ -128,7 +128,7 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
 
   double norm_q = cblas_dnrm2(n , problem->q , 1);
 
-  
+
 
   int internal_allocation=0;
   if (!options->dWork || options->dWorkSize != 2*m+n)
@@ -146,7 +146,7 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
   if (rho == 0.0)
     numerics_error("gfc3d_ADMM", "dparam[SICONOS_FRICTION_3D_ADMM_RHO] must be nonzero");
 
-  
+
   double * tmp =  options->dWork;
 
   /* Compute M + rho H H^T (storage in M)*/
@@ -173,14 +173,14 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
   double * b = data->b;
 
   cblas_dscal(m, 1.0/rho, reaction, 1);
-  
+
   cblas_dcopy(m , reaction , 1 , reaction_k, 1);
   cblas_dcopy(m , u , 1 , u_k, 1);
 
   cblas_dcopy(m , reaction , 1 , reaction_hat, 1);
   cblas_dcopy(m , u , 1 , u_hat, 1);
-  
-  double e_k = INFINITY, e, d, alpha, r, s;
+
+  double e_k = INFINITY, e, d, alpha, r, s, residual;
   double tau , tau_k = 1.0;
   int pos;
   double normUT;
@@ -196,11 +196,11 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
       {
         pos = contact * 3;
         normUT = sqrt(u[pos + 1] * u[pos + 1] + u[pos + 2] * u[pos + 2]);
-        b[pos] +=  problem->mu[contact]*normUT; 
-        
+        b[pos] +=  problem->mu[contact]*normUT;
+
       }
 
-      
+
       /********************/
       /*  1 - Compute z */
       /********************/
@@ -209,14 +209,14 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
       /* q --> z */
       cblas_dcopy(n , q , 1 , z, 1);
       //cblas_dscal(n, -1, z,1);
-      
+
       /*  u -b + reaction_k --> u */
       cblas_dcopy(m , u_hat , 1 , tmp, 1);
       cblas_daxpy(m, -1.0, b, 1, tmp , 1);
       cblas_daxpy(m, 1.0, reaction_hat, 1, tmp , 1);
       NM_gemv(rho, H, tmp, 1.0, z);
 
-      
+
       DEBUG_PRINT("rhs:");
       DEBUG_EXPR(NV_display(z,n));
 
@@ -262,7 +262,7 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
 
       /* reaction_hat -  A z_k + u_k -b ->  xi */
       cblas_daxpy(m, 1, reaction_hat, 1, reaction , 1);
-      
+
       /**********************/
       /*  3 - Acceleration  */
       /**********************/
@@ -274,7 +274,7 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
       s = d * d;
 
       e =r+s;
-      
+
       DEBUG_PRINTF("residual e = %e \n", e);
       DEBUG_PRINTF("residual r = %e \n", r);
       DEBUG_PRINTF("residual s = %e \n", s);
@@ -311,33 +311,38 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
       cblas_dcopy(m , reaction , 1 , reaction_k, 1);
       cblas_dcopy(m , u , 1 , u_k, 1);
 
-      error = sqrt(e);
+      residual = sqrt(e);
       if (fabs(norm_q) > DBL_EPSILON)
-        error /= norm_q;
+        residual /= norm_q;
 
-      numerics_printf_verbose(1,"---- GFC3D - ADMM  - Iteration %i rho = %14.7e \t residual = %14.7e", iter, rho, error);
+      numerics_printf_verbose(1,"---- GFC3D - ADMM  - Iteration %i rho = %14.7e, residual = %14.7e, tol = %14.7e", iter, rho, residual, tolerance);
 
-      if (error < tolerance) hasNotConverged = 0;
+      if (residual < tolerance)
+      {
+        /* check the full criterion */
+        cblas_dscal(m, rho, reaction, 1);
+        gfc3d_compute_error(problem,  reaction, u, z,  tolerance, options, norm_q, &error);
+        if (error < dparam[SICONOS_DPARAM_TOL])
+        {
+          hasNotConverged = 0;
+          numerics_printf_verbose(1,"---- GFC3D - ADMM  - Iteration %i rho = %14.7e \t full error = %14.7e", iter, rho, error);
+        }
+        else
+        {
+          numerics_printf_verbose(1,"---- GFC3D - ADMM  - The tolerance on the  residual is not sufficient to reach accuracy (error =  %14.7e)", error);
+          tolerance = tolerance * residual/error;
+          numerics_printf_verbose(1,"---- GFC3D - ADMM  - We reduce the tolerance on the residual to %14.7e", tolerance);
+          cblas_dscal(m, 1.0/rho, reaction, 1);
+        }
+      }
       *info = hasNotConverged;
     }
-  
-  /* check the full criterion */
-  /* **** Criterium convergence **** */
 
-  cblas_dscal(m, rho, reaction, 1);
-  gfc3d_compute_error(problem,  reaction, u, z,  tolerance, options, norm_q, &error);
-  numerics_printf_verbose(1,"---- GFC3D - ADMM  - Iteration %i rho = %14.7e \t error = %14.7e", iter, rho, error);
-  
-  if (error < tolerance) hasNotConverged = 0;
-  else hasNotConverged = 1;
-  *info = hasNotConverged;
-   
-  numerics_printf_verbose(1,"---- GFC3D - ADMM - #Iteration %i Final Residual = %14.7e", iter, error);
   dparam[SICONOS_DPARAM_RESIDU] = error;
   iparam[SICONOS_IPARAM_ITER_DONE] = iter;
-  
-  
-  
+
+
+
   /***** Free memory *****/
   if (internal_allocation)
   {
@@ -369,7 +374,7 @@ int gfc3d_ADMM_setDefaultSolverOptions(SolverOptions* options)
 
   options->iparam[SICONOS_IPARAM_MAX_ITER] = 20000;
   options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_ACCELERATION] = SICONOS_FRICTION_3D_ADMM_ACCELERATION_AND_RESTART;
-  
+
   options->dparam[SICONOS_DPARAM_TOL] = 1e-6;
 
   options->dparam[SICONOS_FRICTION_3D_ADMM_RHO] = 1.0;
