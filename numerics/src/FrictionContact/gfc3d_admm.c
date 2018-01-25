@@ -28,6 +28,7 @@
 #include "sanitizer.h"
 #include "numerics_verbose.h"
 #include "NumericsVector.h"
+#include "float.h"
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_NOCOLOR */
 /* #define DEBUG_MESSAGES */
@@ -157,7 +158,7 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
   Htrans = NM_transpose(H);
   NM_gemm(rho, H, Htrans, 1.0, W);
 
-  double eta = dparam[SICONOS_CONVEXQP_ADMM_RESTART_ETA];
+  double eta = dparam[SICONOS_FRICTION_3D_ADMM_RESTART_ETA];
 
   Gfc3d_ADDM_data * data = (Gfc3d_ADDM_data *)options->solverData;
 
@@ -371,8 +372,8 @@ int gfc3d_ADMM_setDefaultSolverOptions(SolverOptions* options)
   
   options->dparam[SICONOS_DPARAM_TOL] = 1e-6;
 
-  options->dparam[SICONOS_CONVEXQP_ADMM_RHO] = 1.0;
-  options->dparam[SICONOS_CONVEXQP_ADMM_RESTART_ETA] = 0.999;
+  options->dparam[SICONOS_FRICTION_3D_ADMM_RHO] = 1.0;
+  options->dparam[SICONOS_FRICTION_3D_ADMM_RESTART_ETA] = 0.999;
 
   options->internalSolvers = NULL;
 
