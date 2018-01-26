@@ -2289,8 +2289,7 @@ class Hdf5():
 
         print('SolverInfos at time :', time,
               'iterations= ', iterations,
-              'precision=', precision,
-              'local_precision=', )
+              'precision=', precision)
 
     def addPluginSource(self, name, filename):
         """
@@ -2931,10 +2930,12 @@ class Hdf5():
         print_verbose ('load siconos module ...')
         from siconos.kernel import \
             Model, NonSmoothDynamicalSystem, OneStepNSProblem,\
-            TimeDiscretisation, GenericMechanical, FrictionContact,\
+            TimeDiscretisation,\
+            GenericMechanical, FrictionContact, GlobalFrictionContact,\
             NewtonImpactFrictionNSL
 
         from siconos.numerics import SICONOS_FRICTION_3D_ONECONTACT_NSN
+        from siconos.numerics import SICONOS_GLOBAL_FRICTION_3D_ADMM
 
         print_verbose ('setup model simulation ...')
         if set_external_forces is not None:
@@ -2985,16 +2986,32 @@ class Hdf5():
         timedisc=TimeDiscretisation(t0, h)
 
         fc_index=0
-        if (friction_contact_trace == False) :
-            if len(joints) > 0:
-                osnspb=GenericMechanical(SICONOS_FRICTION_3D_ONECONTACT_NSN)
-                fc_index=1
+        
+        if (osi == Kernel.MoreauJeanGOSI):
+            if (friction_contact_trace == False) :
+                if len(joints) > 0:
+                    RuntimeException()
+                else:
+                    osnspb=GlobalFrictionContact(3,SICONOS_GLOBAL_FRICTION_3D_ADMM)
             else:
-                osnspb=FrictionContact(3, solver)
+                from siconos.io.FrictionContactTrace import GlobalFrictionContactTrace
+                osnspb=GlobalFrictionContactTrace(3, SICONOS_GLOBAL_FRICTION_3D_ADMM,friction_contact_trace_params,model)
+            osnspb.setMaxSize(30000)
+            osnspb.setMStorageType(2)  
         else:
-            from siconos.io.FrictionContactTrace import FrictionContactTrace
-            osnspb=FrictionContactTrace(3, solver,friction_contact_trace_params,model)
+            if (friction_contact_trace == False) :
+                if len(joints) > 0:
+                    osnspb=GenericMechanical(SICONOS_FRICTION_3D_ONECONTACT_NSN)
+                    fc_index=1
+                else:
+                    osnspb=FrictionContact(3, solver)
 
+            else:
+                from siconos.io.FrictionContactTrace import FrictionContactTrace
+                osnspb=FrictionContactTrace(3, solver,friction_contact_trace_params,model)
+            osnspb.setMaxSize(30000)
+            osnspb.setMStorageType(1)
+            
         self._contact_index_set = contact_index_set
 
         # Global solver options
@@ -3010,14 +3027,14 @@ class Hdf5():
         solverOptions.iparam[14] = Numerics.SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION_TRUE
         solverOptions.dparam[0] = tolerance
 
-        # Friction one-contact solver options
-        fcOptions = solverOptions.internalSolvers[fc_index]
-        fcOptions.solverId = Numerics.SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID
-        fcOptions.iparam[0] = 100  # Local solver iterations
+        if (osi != Kernel.MoreauJeanGOSI):
+            # Friction one-contact solver options
+            fcOptions = solverOptions.internalSolvers[fc_index]
+            fcOptions.solverId = Numerics.SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID
+            fcOptions.iparam[0] = 100  # Local solver iterations
 
-        osnspb.setMaxSize(30000)
-        osnspb.setMStorageType(1)
-        osnspb.setNumericsVerboseMode(numerics_verbose)
+        
+        osnspb.setNumericsVerboseMode(True)
 
         # keep previous solution
         osnspb.setKeepLambdaAndYState(True)

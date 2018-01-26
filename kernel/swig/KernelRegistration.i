@@ -51,11 +51,13 @@
   PY_REGISTER(MLCPProjectOnConstraints, Kernel);                                \
   PY_REGISTER(GenericMechanical, Kernel);                                       \
   PY_REGISTER(FrictionContact, Kernel);                                         \
+  PY_REGISTER(GlobalFrictionContact, Kernel);                                         \
   PY_REGISTER(EulerMoreauOSI, Kernel);                                          \
   PY_REGISTER(MoreauJeanOSI, Kernel);                                           \
   PY_REGISTER(MoreauJeanBilbaoOSI, Kernel);                                     \
   PY_REGISTER(MoreauJeanCombinedProjectionOSI, Kernel);                         \
   PY_REGISTER(MoreauJeanDirectProjectionOSI, Kernel);                           \
+  PY_REGISTER(MoreauJeanGOSI, Kernel);                                          \
   PY_REGISTER(ZeroOrderHoldOSI, Kernel);                                        \
   PY_REGISTER(Simulation, Kernel);                                              \
   PY_REGISTER(TimeStepping, Kernel);                                            \
