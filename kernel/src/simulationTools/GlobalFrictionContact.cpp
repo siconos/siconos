@@ -185,6 +185,36 @@ void GlobalFrictionContact::initialize(SP::Simulation sim)
 
 }
 
+SP::GlobalFrictionContactProblem GlobalFrictionContact::globalFrictionContactProblem()
+{
+  SP::GlobalFrictionContactProblem numerics_problem(new GlobalFrictionContactProblem());
+  globalFrictionContact_null(numerics_problem.get());
+  numerics_problem->M = &*_M->numericsMatrix();
+  numerics_problem->H = &*_H->numericsMatrix();
+  numerics_problem->q = _q->getArray();
+  numerics_problem->b = _b->getArray();
+  numerics_problem->numberOfContacts = _sizeOutput / _contactProblemDim;
+  numerics_problem->mu = _mu->data();
+  numerics_problem->dimension = 3;
+  return numerics_problem;
+}
+
+GlobalFrictionContactProblem *GlobalFrictionContact::globalFrictionContactProblemPtr()
+{
+  GlobalFrictionContactProblem *numerics_problem = &_numerics_problem;
+  globalFrictionContact_null(numerics_problem);
+  numerics_problem->M = &*_M->numericsMatrix();
+  numerics_problem->H = &*_H->numericsMatrix();
+  numerics_problem->q = _q->getArray();
+  numerics_problem->b = _b->getArray();
+  numerics_problem->numberOfContacts = _sizeOutput / _contactProblemDim;
+  numerics_problem->mu = _mu->data();
+  numerics_problem->dimension = 3; 
+  return numerics_problem;
+}
+
+
+
 bool GlobalFrictionContact::preCompute(double time)
 {
   DEBUG_BEGIN("GlobalFrictionContact::preCompute(double time)\n");
@@ -355,34 +385,30 @@ int GlobalFrictionContact::compute(double time)
   bool cont = preCompute(time);
   if (!cont)
     return info;
-
-
+  updateMu();
   // --- Call Numerics solver ---
-  //if (_sizeOutput != 0)
-  {
-    // The GlobalFrictionContact Problem in Numerics format
-    GlobalFrictionContactProblem numerics_problem;
-    globalFrictionContact_null(&numerics_problem);
-    numerics_problem.M = &*_M->numericsMatrix();
-    numerics_problem.H = &*_H->numericsMatrix();
-    numerics_problem.q = _q->getArray();
-    numerics_problem.b = _b->getArray();
-    numerics_problem.numberOfContacts = _sizeOutput / _contactProblemDim;
-    numerics_problem.mu = _mu->data();
-    numerics_problem.dimension = 3;
-    DEBUG_EXPR(display(););
-    info = (*_gfc_driver)(&numerics_problem,
-                          _z->getArray(),
-                           _w->getArray(),
-                           _globalVelocities->getArray(),
-			  &*_numerics_solver_options);
-    DEBUG_EXPR(display(););
-    postCompute();
-
-  }
-
+  info= solve();
+  DEBUG_EXPR(display(););
+  postCompute();
   return info;
 }
+
+
+
+int GlobalFrictionContact::solve(SP::GlobalFrictionContactProblem problem)
+{
+  if (!problem)
+  {
+    problem = globalFrictionContactProblem();
+  }
+  return (*_gfc_driver)(&*problem,
+                        _z->getArray(),
+                        _w->getArray(),
+                        _globalVelocities->getArray(),
+                        &*_numerics_solver_options);
+}
+
+
 
 void GlobalFrictionContact::postCompute()
 {
@@ -501,4 +527,16 @@ void GlobalFrictionContact::display() const
   else std::cout << "-> NULL" <<std::endl;
 
   std::cout << "============================================================" <<std::endl;
+}
+
+void GlobalFrictionContact::updateMu()
+{
+  _mu->clear();
+  SP::InteractionsGraph indexSet = simulation()->indexSet(indexSetLevel());
+  InteractionsGraph::VIterator ui, uiend;
+  for (std11::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
+  {
+    _mu->push_back(std11::static_pointer_cast<NewtonImpactFrictionNSL>
+                   (indexSet->bundle(*ui)->nonSmoothLaw())->mu());
+  }
 }
