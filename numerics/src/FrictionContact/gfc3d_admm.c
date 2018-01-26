@@ -338,6 +338,11 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
       *info = hasNotConverged;
     }
 
+  if (iter==itermax)
+  {
+    error =residual;
+  }
+  
   dparam[SICONOS_DPARAM_RESIDU] = error;
   iparam[SICONOS_IPARAM_ITER_DONE] = iter;
 
