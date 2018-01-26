@@ -152,7 +152,7 @@ namespace std
 %shared_ptr(NumericsMatrix);
 %shared_ptr(CSparseMatrix);
 %shared_ptr(SparseBlockStructuredMatrix);
-%shared_ptr(GlobalFrictionContactProblem);
+//%shared_ptr(GlobalFrictionContactProblem);
 
 %include solverOptions.i
 
