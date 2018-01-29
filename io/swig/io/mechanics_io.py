@@ -2990,7 +2990,7 @@ class Hdf5():
         if (osi == Kernel.MoreauJeanGOSI):
             if (friction_contact_trace == False) :
                 if len(joints) > 0:
-                    RuntimeException()
+                    raise RuntimeError("MoreauJeanGOSI can not deal with joints")
                 else:
                     osnspb=GlobalFrictionContact(3,SICONOS_GLOBAL_FRICTION_3D_ADMM)
             else:
