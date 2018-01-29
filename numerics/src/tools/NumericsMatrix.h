@@ -796,7 +796,7 @@ extern "C"
    * \return the norm*/
   double NM_norm_inf(NumericsMatrix* const A);
 
-
+  int NM_is_symmetric(NumericsMatrix* A);
 
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)

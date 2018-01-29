@@ -43,14 +43,6 @@
 #endif
 
 
-
-
-
-
-
-
-
-
 void NM_prod_mv_3x3(int sizeX, int sizeY, NumericsMatrix* A,
                            double* const x, double* y)
 {
@@ -3047,6 +3039,7 @@ double NM_norm_1(NumericsMatrix* A)
   }
   return NAN;
 }
+
 double NM_norm_inf(NumericsMatrix* A)
 {
   assert(A);
@@ -3084,4 +3077,20 @@ double NM_norm_inf(NumericsMatrix* A)
     }
   }
   return NAN;
+}
+int NM_is_symmetric(NumericsMatrix* A)
+{
+  int n = A->size0;
+  int m = A->size1;
+
+
+  for (int i =0; i < n ; i++)
+  {
+    for (int j =0 ; j < m ; j++)
+    {
+      if (fabs(NM_get_value(A,i,j)-NM_get_value(A,j,i)) >= DBL_EPSILON)
+        return 0;
+    }
+  }
+  return 1;
 }
