@@ -90,14 +90,17 @@ guitar_model = Guitar(interactions, [initial_time, final_time],
                fs, output_freq,
                       interactions_output=2) # 2 to save y and lambda
 
+if not guitar_model.save_interactions:
+    print("Warning! No interactions output!")
 # Save initial state
 guitar_model.time[0] = initial_time
 guitar_model.save_ds_state_modal(0, string)
 
-buff = guitar_model.data_interactions
-for i in range(nb_frets):
-    buff[frets[i]][0][0] = frets[i].y(0) 
-    buff[frets[i]][1][0] = frets[i].lambda_(1) 
+if guitar_model.save_interactions:
+    buff = guitar_model.data_interactions
+    for i in range(nb_frets):
+        buff[frets[i]][0][0] = frets[i].y(0) 
+        buff[frets[i]][1][0] = frets[i].lambda_(1) 
 
 print('Ready to start simulation for frequency {0}.'.format(fs))
 print('Save output every {0} time steps.'.format(output_freq))
