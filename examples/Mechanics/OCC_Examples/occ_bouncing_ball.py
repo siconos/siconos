@@ -4,7 +4,7 @@
 # Example of a bouncing ball with OpenCascade contactors
 #
 
-from siconos.mechanics.collision.tools import Contactor
+from siconos.mechanics.collision.tools import Volume, Contactor
 from siconos.io.mechanics_io import Hdf5
 from siconos import numerics
 import siconos.io.mechanics_io
@@ -24,7 +24,7 @@ with Hdf5() as io:
     io.addOccShape('Ground', ground)
 
     io.addObject('sphere',
-                 [Contactor('Sphere', contact_type='Face', contact_index=0)],
+                 [Volume('Sphere'), Contactor('Sphere', contact_type='Face', contact_index=0)],
                  mass=1, translation=[0, 0, 10], velocity=[0, 0, 0, 0, 0, 0])
 
     io.addObject('ground',
@@ -32,9 +32,9 @@ with Hdf5() as io:
                  mass=0, translation=[0, 0, 0])
 
     io.addInteraction('sphere-ground',
-                      'sphere', 'Sphere-0',
+                      'sphere', 'Sphere-1',
                       'ground', 'Ground-0',
-                      distance_calculator='cadmbtb',
+                      distance_calculator='occ',
                       offset=0.01)
 
     io.addNewtonImpactFrictionNSL('contact', mu=0.3, e=0.9)

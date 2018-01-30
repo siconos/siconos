@@ -27,7 +27,7 @@
 
 #include "SiconosConfig.h"
 #include "NumericsFwd.h"
-#include "SparseMatrix.h" // for freeNSLSP
+#include "CSparseMatrix.h" // for freeNSLSP
 
 
 /**\struct linalg_data_t NumericsSparseMatrix.h
@@ -47,19 +47,21 @@ extern "C"
 #endif
 
 
-  /** \enum NumericsSparseLinearSolver NumericsSparseMatrix.h
+  /** \enum NSM_linear_solver NumericsSparseMatrix.h
    * id for linear algebra solvers */
-  typedef enum { NS_CS_LUSOL, NS_MUMPS, NS_UMFPACK, NS_MKL_PARDISO, NS_SUPERLU, NS_SUPERLU_MT } NumericsSparseLinearSolver;
+  typedef enum { NSM_CS_LUSOL, NSM_MUMPS, NSM_UMFPACK, NSM_MKL_PARDISO, NSM_SUPERLU, NSM_SUPERLU_MT } NSM_linear_solver;
+  
+  typedef void (*freeNSLSP)(void* p);
 
   /** \enum NumericsSparseTypesNZ
    * value of nz for some matrix storage type */
-  typedef enum { NS_CS_CSC = -1, NS_CS_CSR = -2 } NumericsSparseTypesNZ;
+  typedef enum { NSM_CS_CSC = -1, NSM_CS_CSR = -2 } NumericsSparseTypesNZ;
 
-  /** \struct NumericsSparseLinearSolverParams NumericsSparseMatrix.h
+  /** \struct NSM_linear_solver_params NumericsSparseMatrix.h
    * solver-specific parameters*/
-  struct NumericsSparseLinearSolverParams
+  struct NSM_linear_solver_params
   {
-    NumericsSparseLinearSolver solver;
+    NSM_linear_solver solver;
 
     void* solver_data; /**< solver-specific data (or workspace) */
     freeNSLSP solver_free_hook; /**< solver-specific hook to free solver_data  */
@@ -74,20 +76,21 @@ extern "C"
 
   /**\enum NumericsSparseOrigin NumericsSparseMatrix.h
    * matrix storage types */
-  typedef enum { NS_UNKNOWN, NS_TRIPLET, NS_CSC, NS_CSR } NumericsSparseOrigin;
+  typedef enum { NSM_UNKNOWN, NSM_TRIPLET, NSM_CSC, NSM_CSR } NumericsSparseOrigin;
+
 
   /** \struct NumericsSparseMatrix NumericsSparseMatrix.h
    * Sparse matrix representation in Numerics. The supported format are:
    * triplet (aka coordinate, COO), CSC (via CSparse) and CSR if MKL is used */
   struct NumericsSparseMatrix
   {
-    NumericsSparseLinearSolverParams* linearSolverParams;
+    NSM_linear_solver_params* linearSolverParams;
                                /**< solver-specific parameters */
     CSparseMatrix* triplet;    /**< triplet format, aka coordinate */
     CSparseMatrix* csc;        /**< csc matrix */
     CSparseMatrix* trans_csc;  /**< transpose of a csc matrix (used by CSparse) */
     CSparseMatrix* csr;        /**< csr matrix, only supported with mkl */
-    csi*           diag_indx;  /**< indices for the diagonal terms.
+    CS_INT*           diag_indx;  /**< indices for the diagonal terms.
                                     Very useful for the proximal perturbation */
     unsigned       origin;     /**< original format of the matrix */
   };
@@ -96,47 +99,42 @@ extern "C"
   /** Initialize the fields of a NumericsSparseMatrix
    * \param A the sparse matrix
    */
-  void NM_sparse_null(NumericsSparseMatrix* A);
+  void NSM_null(NumericsSparseMatrix* A);
 
   /** New and empty NumericsSparseMatrix with correctly initialized fields.
    * \return a pointer on the allocated space.
    */
-  NumericsSparseMatrix* newNumericsSparseMatrix(void);
+  NumericsSparseMatrix* NSM_new(void);
 
 
   /** Free allocated space for a NumericsSparseMatrix.
    * \param A a NumericsSparseMatrix
    * \return NULL on success
    */
-  NumericsSparseMatrix* freeNumericsSparseMatrix(NumericsSparseMatrix* A);
+  NumericsSparseMatrix* NSM_free(NumericsSparseMatrix* A);
 
 
-  /** New and empty NumericsSparseLinearSolverParams.
+  /** New and empty NSM_linear_solver_params.
    * \return a pointer on the allocated space.
    */
-  NumericsSparseLinearSolverParams* newNumericsSparseLinearSolverParams(void);
+  NSM_linear_solver_params* newNSM_linear_solver_params(void);
 
    /** Free a workspace related to a LU factorization
    * \param p the structure to free
    */
-  void NM_sparse_free(void *p);
+  void NSM_free_p(void *p);
 
   /** Get the data part of sparse matrix
    * \param A the sparse matrix
    * \return a pointer to the data array
    */
-  double* NM_sparse_data(NumericsSparseMatrix* A);
+  double* NSM_data(NumericsSparseMatrix* A);
 
-  /** Allocate a CSparse matrix for future copy (as in NM_sparse_copy)
-   * \param m the matrix used as model
-   * \return an newly allocated matrix
-   */
-  CSparseMatrix* NM_csparse_alloc_for_copy(const CSparseMatrix* const m);
 
   /** Get the LU factors for cs_lusol
    * \param p the structure holding the data for the solver
    */
-  static inline void* NM_sparse_solver_data(NumericsSparseLinearSolverParams* p)
+  static inline void* NSM_solver_data(NSM_linear_solver_params* p)
   {
     return p->solver_data;
   }
@@ -144,7 +142,7 @@ extern "C"
    * \param p the structure holding the data for the solver
    * \return the (double) workspace
    */
-  static inline double* NM_sparse_workspace(NumericsSparseLinearSolverParams* p)
+  static inline double* NSM_workspace(NSM_linear_solver_params* p)
 
   {
     return p->dWork;
@@ -154,18 +152,42 @@ extern "C"
    * \param A the matrix
    * \return the number of non-zero elements in the matrix
    */
-  size_t NM_sparse_nnz(const CSparseMatrix* const A);
+  size_t NSM_nnz(const CSparseMatrix* const A);
 
-  /** Free allocated space for NumericsSparseLinearSolverParams.
-   * \param p a NumericsSparseLinearSolverParams
+  /** Free allocated space for NSM_linear_solver_params.
+   * \param p a NSM_linear_solver_params
    * \return NULL on success
    */
-  NumericsSparseLinearSolverParams* freeNumericsSparseLinearSolverParams(NumericsSparseLinearSolverParams* p);
+  NSM_linear_solver_params* NSM_LinearSolverParams_free(NSM_linear_solver_params* p);
 
   /** Check and fix a matrix, if needed
    * \param A the matrix to check, modified if necessary to have ordered indices
    */
-  void NM_sparse_fix_csc(CSparseMatrix* A);
+  void NSM_fix_csc(CSparseMatrix* A);
+
+  /** return the origin of a sparse part of a matrix
+   * \param M the matrix
+   * \return -1 if the matrix has no sparse representation, the origin
+   * otherwise*/
+  unsigned NSM_origin(const NumericsSparseMatrix* M);
+
+  /** return the sparse matrix that has the original label
+   * \param M the matrix
+   * \return the sparse matrix that is at the origin, or NULL if an error occur
+   **/
+  CSparseMatrix* NSM_get_origin(const NumericsSparseMatrix* M);
+
+  void NSM_write_in_file(const NumericsSparseMatrix* m, FILE* file);
+
+  /** New and empty NumericsSparseMatrix with correctly initialized fields.
+   * \return a pointer on the allocated space.
+   */
+  NumericsSparseMatrix* NSM_new_from_file(FILE *file);
+ 
+
+  
+  int NSM_to_dense(const NumericsSparseMatrix * const A, double * B);
+
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

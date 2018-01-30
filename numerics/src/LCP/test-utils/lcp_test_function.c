@@ -33,6 +33,7 @@ static inline char* strdup(char* src)
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 
 #include "NonSmoothDrivers.h"
 #include "lcp_test_function.h"
@@ -41,6 +42,11 @@ static inline char* strdup(char* src)
 #include "LCP_Solvers.h"
 #include "LinearComplementarityProblem.h"
 #include "SolverOptions.h"
+#include "SiconosCompat.h"
+
+#ifdef __cplusplus
+using namespace std;
+#endif
 
 int lcp_test_function(FILE * f, int solverId, char* filename)
 {

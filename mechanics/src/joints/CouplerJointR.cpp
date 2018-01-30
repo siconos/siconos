@@ -95,8 +95,8 @@ void CouplerJointR::setReferences(SP::NewtonEulerJointR joint1, unsigned int dof
   _dof2 = dof2;
   _ref1 = ref1;
   _ref2 = ref2;
-  _ref1_index = _ref1_index;
-  _ref2_index = _ref2_index;
+  _ref1_index = ref1_index;
+  _ref2_index = ref2_index;
 }
 
 void CouplerJointR::setReferences(SP::NewtonEulerJointR joint1, unsigned int dof1,
@@ -110,8 +110,8 @@ void CouplerJointR::setReferences(SP::NewtonEulerJointR joint1, unsigned int dof
   _dof2 = dof2;
   _ref1 = refds1->q();
   _ref2 = refds2->q();
-  _ref1_index = _ref1_index;
-  _ref2_index = _ref2_index;
+  _ref1_index = ref1_index;
+  _ref2_index = ref2_index;
 }
 
 void CouplerJointR::setRatio(double ratio)

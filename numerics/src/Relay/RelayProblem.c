@@ -105,9 +105,7 @@ int relay_newFromFile(RelayProblem* problem, FILE* file)
 
   CHECK_IO(fscanf(file, "%d\n", &n));
   problem->size = n;
-  problem->M = NM_new();
-
-  NM_new_from_file(problem->M, file);
+  problem->M =  NM_new_from_file(file);
 
   problem->q = (double *) malloc(problem->M->size1 * sizeof(double));
   for (i = 0; i < problem->M->size1; i++)

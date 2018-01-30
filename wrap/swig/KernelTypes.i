@@ -137,7 +137,7 @@
 
 #undef PY_REGISTER_WITHOUT_DIRECTOR
 
-%define PY_REGISTER_WITHOUT_DIRECTOR(TYPE)
+%define PY_REGISTER_WITHOUT_DIRECTOR(TYPE, COMPONENT)
 %inline
 %{
 #include "TYPE.hpp"
@@ -156,7 +156,7 @@
 %shared_ptr(STD11::enable_shared_from_this<TYPE>); // warning 520 suppression
 %template (shared ## TYPE) STD11::enable_shared_from_this<TYPE>;
 %shared_ptr(TYPE);
-%make_picklable(TYPE, Kernel);
+%make_picklable(TYPE, COMPONENT);
 REF_PTR(TYPE);
 %enddef
 
@@ -185,10 +185,11 @@ REF_PTR(TYPE);
 //
 
 
-PY_REGISTER_WITHOUT_DIRECTOR(SiconosMatrix);
-PY_REGISTER_WITHOUT_DIRECTOR(SimpleMatrix);
-PY_REGISTER_WITHOUT_DIRECTOR(SiconosVector);
-PY_REGISTER_WITHOUT_DIRECTOR(BlockVector);
+PY_REGISTER_WITHOUT_DIRECTOR(SiconosMatrix, Kernel);
+PY_REGISTER_WITHOUT_DIRECTOR(SimpleMatrix, Kernel);
+PY_REGISTER_WITHOUT_DIRECTOR(SiconosVector, Kernel);
+PY_REGISTER_WITHOUT_DIRECTOR(BlockVector, Kernel);
+PY_REGISTER_WITHOUT_DIRECTOR(SiconosMemory, Kernel);
 
 // set the base of the pyarray to a PyCapsule or PyCObject created from the shared_ptr
 %{
@@ -483,7 +484,6 @@ struct IsDense : public Question<bool>
     {
       return SP_SiconosVector_from_numpy(vec, array_p, is_new_object);
     }
-    return SP::SiconosVector();
   }
 
   SiconosVector* SiconosVector_in(PyObject* vec, PyArrayObject** array_p, int* is_new_object, std::vector<SP::SiconosVector>& keeper)
@@ -1277,112 +1277,18 @@ struct IsDense : public Question<bool>
 }
 
 //////////////////////////
-// VectorOfVectors
-%typemap(out,fragment="SiconosVector") VectorOfVectors
-{
-  VectorOfVectors::size_type i = $1.size();
-  $result = PyList_New(i);
-  for (; i > 0;) {
-    if ($1.at(--i)) {
-      PyList_SET_ITEM($result, i, SP_SiconosVector_to_numpy($1.at(i)));
-    }
-    else
-      PyList_SET_ITEM($result, i, Py_None);
-  }
-}
+// VectorOf..
+%template(VectorOfVectors) std::vector< std11::shared_ptr<SiconosVector> >;
+%template(VectorOfBlockVectors) std::vector< std11::shared_ptr<BlockVector> >;
+%template(VectorOfMatrices) std::vector< std11::shared_ptr<SiconosMatrix> >;
+%template(VectorOfSMatrices) std::vector< std11::shared_ptr<SimpleMatrix> >;
+%shared_ptr(std::vector< SiconosVector >);
+%template(VectorOfMemories) std::vector< SiconosMemory >;
 
-%typemap(out,fragment="SiconosVector") VectorOfVectors&
-{
-  VectorOfVectors::size_type i = $1->size();
-  $result = PyList_New(i);
-  for (; i > 0;) {
-    if ($1->at(--i)) {
-      PyList_SET_ITEM($result, i, SP_SiconosVector_to_numpy($1->at(i)));
-    }
-    else
-      PyList_SET_ITEM($result, i, Py_None);
-  }
-}
+// Other vector types
+%template(UnsignedIntVector) std::vector<unsigned int>;
 
-%typemap(in,fragment="SiconosVector") VectorOfVectors (VectorOfVectors v)
-{
-  v.resize(PySequence_Size($input));
-  $1 = v;
-  for (VectorOfVectors::size_type i=0; i < $1.size(); i++)
-  {
-    PyObject *o = PySequence_GetItem($input, i);
-    PyArrayObject* array = NULL;
-    int is_new_object = 0;
-    $1.at(i) = SP_SiconosVector_in(o, &array, &is_new_object);
-    if (array && is_new_object) { Py_DECREF(array); }
-    Py_XDECREF(o);
-  }
-}
-
-%typemap(in,fragment="SiconosVector") VectorOfVectors& (VectorOfVectors v)
-{
-  v.resize(PySequence_Size($input));
-  $1 = &v;
-  for (VectorOfVectors::size_type i=0; i < v.size(); i++)
-  {
-    PyObject *o = PySequence_GetItem($input, i);
-    PyArrayObject* array = NULL;
-    int is_new_object = 0;
-    v[i] = SP_SiconosVector_in(o, &array, &is_new_object);
-    if (array && is_new_object) { Py_DECREF(array); }
-    Py_XDECREF(o);
-  }
-}
-
-%typemap(in,fragment="SiconosVector") std11::shared_ptr<VectorOfVectors> (std11::shared_ptr<VectorOfVectors> v)
-{
-  v.reset( new VectorOfVectors(PySequence_Size($input), SP::SiconosVector()) );
-  $1 = v;
-  for (VectorOfVectors::size_type i=0; i < v->size(); i++)
-  {
-    PyObject *o = PySequence_GetItem($input, i);
-    PyArrayObject* array = NULL;
-    int is_new_object = 0;
-    v->at(i) = SP_SiconosVector_in(o, &array, &is_new_object);
-    if (array && is_new_object) { Py_DECREF(array); }
-    Py_XDECREF(o);
-  }
-}
-
-%typemap(in,fragment="SiconosVector") std11::shared_ptr<VectorOfVectors>& (std11::shared_ptr<VectorOfVectors> v)
-{
-  v.reset( new VectorOfVectors(PySequence_Size($input), SP::SiconosVector()) );
-  $1 = &v;
-  for (VectorOfVectors::size_type i=0; i < v->size(); i++)
-  {
-    PyObject *o = PySequence_GetItem($input, i);
-    PyArrayObject* array = NULL;
-    int is_new_object = 0;
-    v->at(i) = SP_SiconosVector_in(o, &array, &is_new_object);
-    if (array && is_new_object) { Py_DECREF(array); }
-    Py_XDECREF(o);
-  }
-}
-
-%typecheck(SWIG_TYPECHECK_INTEGER) VectorOfVectors
-%{
-  $1 = PySequence_Check($input);
-%}
-
-%typecheck(SWIG_TYPECHECK_INTEGER) VectorOfVectors&
-%{
-  $1 = PySequence_Check($input);
-%}
-
-%typecheck(SWIG_TYPECHECK_INTEGER) std11::shared_ptr<VectorOfVectors>
-%{
-  $1 = PySequence_Check($input);
-%}
-
-%typecheck(SWIG_TYPECHECK_INTEGER) std11::shared_ptr<VectorOfVectors>&
-%{
-  $1 = PySequence_Check($input);
-%}
+//////////////////////////
 
 TYPECHECK(std11::shared_ptr<SiconosVector>);
 TYPECHECK(std11::shared_ptr<SiconosMatrix>);

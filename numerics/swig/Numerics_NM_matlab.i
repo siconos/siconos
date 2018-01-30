@@ -71,22 +71,22 @@
     if (res > 0)
     {
       m->storageType = NM_SPARSE;
-      m->matrix2 = newNumericsSparseMatrix();
+      m->matrix2 = NSM_new();
 
       if (csm->nz > 0)
       {
         m->matrix2->triplet = csm;
-        m->matrix2->origin = NS_TRIPLET;
+        m->matrix2->origin = NSM_TRIPLET;
       }
       else if (csm->nz == -1)
       {
         m->matrix2->csc = csm;
-        m->matrix2->origin = NS_CSC;
+        m->matrix2->origin = NSM_CSC;
       }
       else if (csm->nz == -2)
       {
         m->matrix2->csr = csm;
-        m->matrix2->origin = NS_CSR;
+        m->matrix2->origin = NSM_CSR;
       }
       else
       {
@@ -173,8 +173,8 @@ static mxArray* cs_sparse_to_matlab(CSparseMatrix *M, bool copy)
       mwIndex* outp = mxGetJc(out_mat);
 
       double* Mx = M->x;
-      csi* Mi = M->i;
-      csi* Mp = M->p;
+      CS_INT* Mi = M->i;
+      CS_INT* Mp = M->p;
 
       size_t nnz = Mp[M->n];
       memcpy(outx, Mx, nnz * sizeof(double));

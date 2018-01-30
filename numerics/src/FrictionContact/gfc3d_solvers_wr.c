@@ -326,7 +326,7 @@ int gfc3d_reformulation_local_problem(GlobalFrictionContactProblem* problem, Fri
 
     NumericsMatrix* MinvH = NM_create(NM_SPARSE,n,m);
     NM_triplet_alloc(MinvH, n);
-    MinvH->matrix2->origin = NS_TRIPLET;
+    MinvH->matrix2->origin = NSM_TRIPLET;
     DEBUG_EXPR(NM_display(MinvH););
     NM_gemm(1.0, Minv, H, 0.0, MinvH);
     DEBUG_EXPR(NM_display(MinvH););
@@ -338,7 +338,7 @@ int gfc3d_reformulation_local_problem(GlobalFrictionContactProblem* problem, Fri
     Htrans-> size0 = m;
     Htrans-> size1 = n;
     NM_csc_alloc(Htrans, 0);
-    Htrans->matrix2->origin = NS_CSC;
+    Htrans->matrix2->origin = NSM_CSC;
     Htrans->matrix2->csc = NM_csc_trans(H);
     DEBUG_EXPR(NM_display(Htrans););
 
@@ -347,7 +347,7 @@ int gfc3d_reformulation_local_problem(GlobalFrictionContactProblem* problem, Fri
     NumericsMatrix *W = localproblem->M;
     int nzmax= m*m;
     NM_csc_empty_alloc(W, nzmax);
-    W->matrix2->origin = NS_CSC;
+    W->matrix2->origin = NSM_CSC;
 
     NM_gemm(1.0, Htrans, MinvH, 0.0, W);
     DEBUG_EXPR(NM_display(W););
@@ -559,10 +559,8 @@ void  gfc3d_nonsmooth_Newton_AlartCurnier_wr(GlobalFrictionContactProblem* probl
     }
     gfc3d_reformulation_local_problem(problem, localproblem);
     DEBUG_EXPR(frictionContact_display(localproblem););
-    if (verbose)
-    {
-      printf("Call to the fc3d solver ...\n");
-    }
+    numerics_printf("gfc3d_nonsmooth_Newton_AlartCurnier_wr - Call to the fc3d solver ...\n");
+
     fc3d_nonsmooth_Newton_AlartCurnier(localproblem, reaction , velocity , info , options->internalSolvers);
 
     options->iparam[1] =  options->internalSolvers->iparam[1];
@@ -591,7 +589,7 @@ int gfc3d_nonsmooth_Newton_AlartCurnier_wr_setDefaultSolverOptions(SolverOptions
   options->solverId = SICONOS_GLOBAL_FRICTION_3D_NSN_AC_WR;
   options->numberOfInternalSolvers = 1;
   options->internalSolvers = (SolverOptions *)malloc(sizeof(SolverOptions));
-  gfc3d_nonsmooth_Newton_AlartCurnier_setDefaultSolverOptions(options->internalSolvers);
+  fc3d_nonsmooth_Newton_AlartCurnier_setDefaultSolverOptions(options->internalSolvers);
   return 0;
 }
 

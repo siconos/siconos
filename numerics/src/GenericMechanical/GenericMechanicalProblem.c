@@ -233,8 +233,7 @@ GenericMechanicalProblem * genericMechanical_newFromFile(FILE* file)
 
   //fscanf(file,"%d\n",&nsubProb);
 
-  pGMP->M = NM_new();
-  NM_new_from_file(pGMP->M, file);
+  pGMP->M = NM_new_from_file(file);
   SparseBlockStructuredMatrix* m = pGMP->M->matrix1;
 
   pGMP->q = (double *) malloc(pGMP->M->size1 * sizeof(double));

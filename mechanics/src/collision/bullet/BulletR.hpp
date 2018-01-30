@@ -57,8 +57,9 @@ public:
     _contactPoints = p;
   };
 
-  virtual void updateContactPoints(const btManifoldPoint& point,
-                                   SP::NewtonEulerDS ds1, SP::NewtonEulerDS ds2);
+  virtual void updateContactPointsFromManifoldPoint(const btManifoldPoint& point,
+                                                    SP::NewtonEulerDS ds1,
+                                                    SP::NewtonEulerDS ds2);
 
   ACCEPT_STD_VISITORS();
 };

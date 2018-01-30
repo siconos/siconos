@@ -24,10 +24,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "CSparseMatrix_internal.h"
 #include "NumericsMatrix.h"
 #include <math.h>
 #include "numericsMatrixTestFunction.h"
-#include "SparseMatrix.h"
+#include "CSparseMatrix.h"
 #include"SparseBlockMatrix.h"
 
 int main(void)
@@ -55,7 +56,7 @@ int main(void)
     return 1;
   }
   cs_print(&sparseMat, 1);
-  cs_spfree_on_stack(&sparseMat);
+  CSparseMatrix_spfree_on_stack(&sparseMat);
 
   int n = M.blocksize0[M.blocknumber0 - 1];
   int m = M.blocksize1[M.blocknumber1 - 1];

@@ -46,6 +46,8 @@
 #include <map>
 #endif
 
+#include <limits>
+
 /* gccxml 0.9 complains about ambiguous usage of size_t or std::size_t
  * in some boost headers, so we specify which one we want. It seems
  * that there is no difference anyway:

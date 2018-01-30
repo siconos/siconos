@@ -178,8 +178,8 @@ int main(int argc, char* argv[])
       if (nonSmooth)
       {
         dataPlot(k, 0) = s->startingTime();
-        dataPlot(k, 1) = (*ball->qMemory()->getSiconosVector(1))(0);
-        dataPlot(k, 2) = (*ball->velocityMemory()->getSiconosVector(1))(0);
+        dataPlot(k, 1) = ball->qMemory().getSiconosVector(1)(0);
+        dataPlot(k, 2) = ball->velocityMemory().getSiconosVector(1)(0);
         k++;
         kns++;
         nonSmooth = false;

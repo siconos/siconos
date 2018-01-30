@@ -16,8 +16,9 @@
  * limitations under the License.
 */
 #include "myDS.h"
-
-#define SICONOS_DEBUG
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
+#include "debug.h"
 
 MyDS::MyDS(SP::SiconosVector x0): FirstOrderNonLinearDS(x0)
 {
@@ -30,12 +31,13 @@ MyDS::MyDS(SP::SiconosVector x0): FirstOrderNonLinearDS(x0)
   _M->setValue(1, 1, 1);
 }
 
-void  MyDS::computef(double t)
+void  MyDS::computef(double t, SP::SiconosVector x)
 {
   //SP::SiconosVector x=x();
-  _f->setValue(0, -4.5 * (x()->getValue(0)));
-  _f->setValue(1, -1.5 * (x()->getValue(1)));
-
+  _f->setValue(0, -4.5 * x->getValue(0));
+  _f->setValue(1, -1.5 * x->getValue(1));
+  DEBUG_PRINT("MyDS::computeF");
+  DEBUG_EXPR(x->display(););
   /*
   #ifdef SICONOS_DEBUG
     std::cout<<"MyDS::computeF with x="<<std::endl;
@@ -49,13 +51,14 @@ void  MyDS::computef(double t)
 
 }
 
-void MyDS::computeJacobianfx(double t, bool)
+void MyDS::computeJacobianfx(double t, SP::SiconosVector x)
 {
   _jacobianfx->setValue(0, 0, -4.5);
   _jacobianfx->setValue(1, 0, 0);
   _jacobianfx->setValue(0, 1, 0);
   _jacobianfx->setValue(1, 1, -1.5);
 
+  
   /*
   #ifdef SICONOS_DEBUG
     std::cout<<"MyDS::computeJacobianfx."<<std::endl;

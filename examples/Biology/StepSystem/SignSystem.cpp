@@ -67,8 +67,8 @@ int main(int argc, char *argv[])
   SP::NonlinearRelationWithSignInversed aR(new NonlinearRelationWithSignInversed());
 
 //*****BUILD THE NSLAW
-  double ub = -1.;
-  double lb = 1.;
+  double ub = 1.;
+  double lb = -1.;
   SP::NonSmoothLaw aNSL(new RelayNSL(sNSLawSize, lb, ub));
   
   //****BUILD THE INTERACTION
@@ -135,8 +135,6 @@ int main(int argc, char *argv[])
   time.restart();
 
   
-  std::cout << NBStep << std::endl;
-  NBStep = 10;
   for(int k = 0 ; k < NBStep ; k++)
   {
 #ifdef SICONOS_DEBUG

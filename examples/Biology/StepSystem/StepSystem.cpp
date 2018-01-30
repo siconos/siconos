@@ -6,13 +6,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-//#define SICONOS_DEBUG
+
 using namespace std;
 
 /*main program*/
 
 int main(int argc, char *argv[])
 {
+  try
+  {
   //printf("argc %i\n", argc);
   int cmp=0;
   int dimX = 2;
@@ -64,8 +66,8 @@ int main(int argc, char *argv[])
   SP::NonlinearRelation aR(new NonlinearRelation());
 
   //*****BUILD THE NSLAW
-  double ub = -0.;
-  double lb = 1.;
+  double ub = 1.;
+  double lb = 0.;
   SP::NonSmoothLaw aNSL(new RelayNSL(sNSLawSize, lb, ub));
   
   //****BUILD THE INTERACTION
@@ -83,7 +85,9 @@ int main(int argc, char *argv[])
   SP::TimeDiscretisation  aTD(new TimeDiscretisation(0,sStep));
 
   // -- (3) Non smooth problem
-  SP::Relay osnspb(new Relay(SICONOS_RELAY_ENUM));
+  //SP::Relay osnspb(new Relay(SICONOS_RELAY_ENUM));
+  SP::Relay osnspb(new Relay(SICONOS_RELAY_LEMKE));
+  
   osnspb->numericsSolverOptions()->dparam[0]=1e-08;
   osnspb->numericsSolverOptions()->iparam[0]=0;  // Multiple solutions 0 or 1
   //osnspb->numericsSolverOptions()->iparam[3]=48;
@@ -102,6 +106,8 @@ int main(int argc, char *argv[])
   aM->initialize();
   printf("-> End of initialization \n");
 
+
+  
 // BUILD THE STEP INTEGRATOR
 
   SP::SiconosVector  x = aDS->x();
@@ -134,9 +140,6 @@ int main(int argc, char *argv[])
   for(int k = 0 ; k < NBStep ; k++)
 //  while(aS->hasNextEvent())
   {
-#ifdef SICONOS_DEBUG
-    std::cout<<"-> Running step:"<<k<<std::endl;
-#endif
     cmp++;
 
     aS->newtonSolve(5e-4, 20);
@@ -190,7 +193,20 @@ int main(int argc, char *argv[])
 
   }
 
+  
   cout << "=== End of simulation. === " << endl;
+  }
+  catch (SiconosException e)
+  {
+    cout << e.report() << endl;
+  }
+  catch (...)
+  {
+    cout << "Exception caught in BouncingBallTS.cpp" << endl;
+  }
+
+
+
   return 0;
 
 }

@@ -830,7 +830,14 @@ void subprod(const SiconosMatrix& A, const BlockVector& x, SiconosVector& y, con
 
 void prod(const SiconosVector& x, const SiconosMatrix& A, BlockVector& y, bool init)
 {
+
   assert(!(A.isPLUFactorized()) && "A is PLUFactorized in prod !!");
+
+  if (A.size(0) != x.size())
+    SiconosMatrixException::selfThrow("prod(x,A,y) error: inconsistent sizes between A and x.");
+
+  if (A.size(1) != y.size())
+    SiconosMatrixException::selfThrow("prod(x,A,y) error: inconsistent sizes between A and y.");
   unsigned int startRow = 0;
   VectorOfVectors::const_iterator it;
   // For Each subvector of y, y[i], private_prod computes y[i] = subA x, subA being a submatrix of A corresponding to y[i] position.

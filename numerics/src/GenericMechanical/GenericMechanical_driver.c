@@ -38,6 +38,7 @@
 #include "relay_cst.h"
 #include "fc3d_onecontact_nonsmooth_Newton_solvers.h"
 #include "NumericsMatrix.h"
+#include "numerics_verbose.h"
 /* #define GENERICMECHANICAL_DEBUG  */
 /* #define GENERICMECHANICAL_DEBUG2  */
 /* #define GENERICMECHANICAL_DEBUG_CMP */
@@ -442,7 +443,8 @@ void genericMechanicalProblem_GS(GenericMechanicalProblem* pGMP, double * reacti
 #endif
   if (tolViolate)
   {
-    printf("genericMechanicalProblem_GS failed with Iteration %i Residual = %14.7e <= %7.3e\n", it, *err, options->dparam[0]);
+    if (verbose > 0)
+      printf("genericMechanicalProblem_GS failed with Iteration %i Residual = %14.7e <= %7.3e\n", it, *err, options->dparam[0]);
 
 #ifdef GMP_WRITE_FAILED_PRB
     FILE * toto  = fopen("GMP_FAILED.txt", "w");
@@ -466,7 +468,7 @@ void genericMechanicalProblem_GS(GenericMechanicalProblem* pGMP, double * reacti
     currentRowNumber = 0;
     curProblem =  pGMP->firstListElem;
     while (curProblem) {
-      if (curProblem->error)
+      if (curProblem->error && verbose)
         printf("genericMechanical_GS Numerics : Local solver FAILED row %d of type %s\n",
                currentRowNumber, ns_problem_id_to_name(curProblem->type));
       curProblem = curProblem->nextProblem;

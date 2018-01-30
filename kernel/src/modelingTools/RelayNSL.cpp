@@ -22,11 +22,15 @@
 
 // Default (private)
 RelayNSL::RelayNSL(): NonSmoothLaw(), _lb(-1.0), _ub(1.0)
-{}
+{
+}
 
 RelayNSL::RelayNSL(unsigned int size, double lb, double ub):
   NonSmoothLaw(size), _lb(lb), _ub(ub)
-{}
+{
+  if(ub < lb)
+    RuntimeException::selfThrow("RelayNSL::RelayNSL(unsigned int size, double lb, double ub). Upper bound ub must be greater than lower bound lb");
+}
 
 RelayNSL::~RelayNSL()
 {}

@@ -140,7 +140,7 @@ void gfc3d_VI_FixedPointProjection(GlobalFrictionContactProblem* problem,
 
   /* **** Criterium convergence **** */
   double norm_q = cblas_dnrm2(n , problem->q , 1);
-  gfc3d_compute_error(problem, reaction , velocity, globalVelocity, options->dparam[0], norm_q, &error);
+  gfc3d_compute_error(problem, reaction , velocity, globalVelocity, options->dparam[0], options, norm_q, &error);
 
   DEBUG_EXPR(NM_vector_display(reaction,m));
   DEBUG_EXPR(NM_vector_display(velocity,m));
@@ -160,7 +160,7 @@ void gfc3d_VI_FixedPointProjection(GlobalFrictionContactProblem* problem,
 
   if (verbose > 0)
   {
-    printf("--------------- FC3D - VI Extra Gradient (VI_EG) - #Iteration %i Final Residual = %14.7e\n", iter, error);
+    printf("--------------- GFC3D - VI Extra Gradient (VI_EG) - #Iteration %i Final Residual = %14.7e\n", iter, error);
   }
   free(vi);
 

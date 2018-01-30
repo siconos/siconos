@@ -103,7 +103,7 @@ protected:
   /** Pointer to the function used to call the Numerics driver to solve the problem */
   GFC3D_Driver _gfc_driver;
 
-
+  GlobalFrictionContactProblem _numerics_problem;
 public:
 
   /** constructor from data
@@ -193,6 +193,22 @@ public:
     */
   virtual void initialize(SP::Simulation sim);
 
+  /**
+   * \return the friction contact problem from Numerics
+   */
+  SP::GlobalFrictionContactProblem globalFrictionContactProblem();
+
+  /**
+   * \return the friction contact problem from Numerics (raw ptr, do not free)
+   */
+  GlobalFrictionContactProblem *globalFrictionContactProblemPtr();
+
+  /** solve a friction contact problem
+   * \param problem the friction contact problem
+   * \return info solver information result
+   */
+  int solve(SP::GlobalFrictionContactProblem problem = SP::GlobalFrictionContactProblem());
+
   /** Construction of the problem
    *  \param time current time
    */
@@ -209,6 +225,10 @@ public:
    */
   virtual void postCompute();
 
+
+  
+  void updateMu();
+  
   /** print the data to the screen */
   void display() const;
 };

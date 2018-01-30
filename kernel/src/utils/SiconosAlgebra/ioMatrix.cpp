@@ -23,6 +23,8 @@
 #include "ioMatrix.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosMatrixException.hpp"
+#include "SimpleMatrix.hpp"
+#include "SiconosVector.hpp"
 #include <boost/numeric/ublas/io.hpp>
 #include <boost/numeric/ublas/matrix_sparse.hpp>
 
@@ -179,7 +181,64 @@ bool write(const std::string& fileName, const std::string& mode, const SiconosMa
   return true;
 }
 
+bool compareRefFile(const SimpleMatrix& data, std::string filename, double epsilon,
+                    double& error, Index index, SP::SimpleMatrix* ref,
+                    std::string mode, bool verbose)
+{
+  SP::SimpleMatrix r;
+  if (!ref) ref = &r;
+  *ref = std11::make_shared<SimpleMatrix>(data);
+  (*ref)->zero();
+  bool compare = false;
+
+  try {
+    compare = ioMatrix::read(filename, mode, **ref);
+  }
+  catch (SiconosMatrixException &e) {
+    if (verbose)
+      std::cout << "Warning: reference file " << filename
+                << " not found, no comparison performed." << std::endl;
+  }
+  if (!compare)
+    return false;
+
+  if (verbose)
+    std::cout << "Comparison with reference file " << filename << std::endl;
+
+  SP::SiconosVector err(new SiconosVector(data.size(1)));
+  (data - **ref).normInfByColumn(err);
+
+  if (verbose)
+    err->display();
+
+  if (index.size()==0)
+    for (unsigned int i = 0; i < err->size(); ++i)
+      index.push_back(i);
+
+  /* Scalar error = max of columns */
+  error = 0.0;
+  for (unsigned int i = 0; i < index.size(); ++i)
+  {
+    if (error < (*err)(index[i]))
+      error = (*err)(index[i]);
+  }
+
+  if (verbose)
+    std::cout << "Error = " << error << std::endl;
+  if (error > epsilon)
+  {
+    if (verbose)
+    {
+      std::cout << "Warning. The results are rather different from the reference file." << std::endl;
+      std::cout << "Error = "<< error << std::endl;
+    }
+  }
+
+  return true;
 }
+
+} // namespace ioMatrix
+
 // To be used later ... ?
 //   template <class T, class iterator1> friend void write( const T& obj, iterator1 row, std::ofstream outfile)
 //   {

@@ -28,21 +28,21 @@
       assert(M->matrix2);
       switch (M->matrix2->origin)
       {
-      case NS_CSC:
+      case NSM_CSC:
       {
         NM_clean_cs(M->matrix2->csc, alloc_ctrl);
         free(M->matrix2->csc);
         M->matrix2->csc = NULL;
         break;
       }
-      case NS_CSR:
+      case NSM_CSR:
       {
         NM_clean_cs(M->matrix2->csr, alloc_ctrl);
         free(M->matrix2->csr);
         M->matrix2->csr = NULL;
         break;
       }
-      case NS_TRIPLET:
+      case NSM_TRIPLET:
       {
         NM_clean_cs(M->matrix2->triplet, alloc_ctrl);
         free(M->matrix2->triplet);
@@ -260,11 +260,20 @@
                                      SWIG_NewPointerObj(SWIG_as_voidptr($1), $1_descriptor, SWIG_POINTER_OWN));
 }
 
-
 #ifdef __cplusplus
-#define CSparseMatrix cs_sparse
+// SWIG gives syntax error for CS_NAME(_sparse)
+#ifdef SICONOS_INT64
+#define CSparseMatrix cs_dl_sparse
 #else
-#define CSparseMatrix struct cs_sparse
+#define CSparseMatrix cs_di_sparse
+#endif
+#else
+// SWIG gives syntax error for CS_NAME(_sparse)
+#ifdef SICONOS_INT64
+#define CSparseMatrix struct cs_dl_sparse
+#else
+#define CSparseMatrix struct cs_di_sparse
+#endif
 #endif
 
 
@@ -298,7 +307,7 @@
 
   if (!csrm) { SWIG_fail; }
   $result = SWIG_AppendOutput($result, csrm);
-  free($1);
+  cs_spfree($1);
 }
 
 %typemap(out) (CSparseMatrix *)
@@ -356,7 +365,7 @@
 %typemap(memberin) (CSparseMatrix*)
 {
  // perform a deep copy
- if (!$1) { $1 = NM_csparse_alloc_for_copy($input); }
+ if (!$1) { $1 = CSparseMatrix_alloc_for_copy($input); }
  NM_copy_sparse($input, $1);
 }
 

@@ -20,6 +20,7 @@
 #include "ConvexQP_Solvers.h"
 #include "ConvexQP_computeError.h"
 #include "NumericsMatrix.h"
+#include "SiconosCompat.h"
 
 
 #include "SiconosBlas.h"
@@ -30,6 +31,8 @@
 #include <string.h>
 #include "ConvexQP_cst.h"
 #include "numerics_verbose.h"
+
+#include "debug.h"
 
 //#define VERBOSE_DEBUG
 const char* const   SICONOS_CONVEXQP_PG_STR = "CONVEXQP PG";
@@ -45,13 +48,28 @@ void convexQP_ProjectedGradient(ConvexQP* problem, double *z, double *w, int* in
 
   double* q = problem->q;
   NumericsMatrix* M = problem->M;
+  NumericsMatrix* A = problem->A;
+  
+  if (!A)
+  {
+    numerics_warning("ConvexQP_ProjectedGradient", "This solver does not support a specific matrix A different from the identity and b=0");
+  }
+
   /* Dimension of the problem */
   int n =  problem->size;
 
+  if (!problem->istheNormConvexQPset)
+  {
+    problem->normConvexQP= cblas_dnrm2(n , problem->q , 1);
+    DEBUG_PRINTF("problem->norm ConvexQP= %12.8e\n", problem->normConvexQP);
+    problem->istheNormConvexQPset=1;
+  }
+  double norm_q =problem->normConvexQP;
+  DEBUG_PRINTF("norm_q = %12.8e\n", norm_q);
   /* Maximum number of iterations */
-  int itermax = iparam[0];
+  int itermax = iparam[SICONOS_IPARAM_MAX_ITER];
   /* Tolerance */
-  double tolerance = dparam[0];
+  double tolerance = dparam[SICONOS_DPARAM_TOL];
 
   /*****  Projected Gradient iterations *****/
   int iter = 0; /* Current iteration number */
@@ -77,7 +95,7 @@ void convexQP_ProjectedGradient(ConvexQP* problem, double *z, double *w, int* in
   }
 
   if (rho == 0.0)
-    numerics_error("fc3d_ProjectedGradientOnCylinder", "dparam[SICONOS_CONVEXQP_PGOC_RHO] must be nonzero");
+    numerics_error("ConvexQP_ProjectedGradient", "dparam[SICONOS_CONVEXQP_PGOC_RHO] must be nonzero");
 
   double rho_k =rho;
   double * z_tmp= (double *)malloc(n * sizeof(double));
@@ -114,7 +132,7 @@ void convexQP_ProjectedGradient(ConvexQP* problem, double *z, double *w, int* in
       problem->ProjectionOnC(problem,z_tmp,z);
 
       /* **** Criterium convergence **** */
-      convexQP_computeError(problem, z , w, tolerance, options, &error);
+      convexQP_compute_error_reduced(problem, z , w, tolerance, options, norm_q, &error);
 
       if (verbose > 0)
         printf("--------------- ConvexQP - Projected Gradient (PG) - Iteration %i rho = %14.7e \tError = %14.7e\n", iter, rho, error);
@@ -186,8 +204,14 @@ void convexQP_ProjectedGradient(ConvexQP* problem, double *z, double *w, int* in
         //  Compute the new value of the cost function (we use velocity as tmp)
         /* q --> w */
         cblas_dcopy(n , q , 1 , w, 1);
+
+        cblas_daxpy(n, 1.0, q, 1, w, 1);
+        NM_gemv(1.0, M, z, 1.0, w);
+
         /* M r + 2*q --> w */
-        NM_gemv(1.0, M, z, 2.0, w);
+        //NM_gemv(1.0, M, z, 2.0, w);
+
+
         /* theta = 0.5 R^T M r + r^T q */
         theta = 0.5*  cblas_ddot(n, w, 1, z, 1);
 
@@ -217,7 +241,7 @@ void convexQP_ProjectedGradient(ConvexQP* problem, double *z, double *w, int* in
       theta_k = 0.5*cblas_ddot(n, z, 1, w, 1);
       rho  = rho/tau;
       /* **** Criterium convergence **** */
-      convexQP_computeError(problem, z , w, tolerance, options,  &error);
+      convexQP_compute_error_reduced(problem, z , w, tolerance, options,  norm_q, &error);
 
       if (verbose > 0)
         printf("--------------- ConvexQP - Projected Gradient (PG) - Iteration %i rho_k = %10.5e  rho =%10.5e error = %10.5e < %10.5e\n", iter, rho_k, rho, error, tolerance);

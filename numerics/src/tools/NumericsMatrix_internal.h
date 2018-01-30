@@ -16,10 +16,10 @@
  * limitations under the License.
 */
 
-#ifndef NumericsMatrix_private_H
-#define NumericsMatrix_private_H
+#ifndef NumericsMatrix_internal_H
+#define NumericsMatrix_internal_H
 
-/*!\file NumericsMatrix_private.h
+/*!\file NumericsMatrix_internal.h
  * \brief non-public functions and data structures
  */
 
@@ -72,7 +72,7 @@ extern "C"
   DMUMPS_STRUC_C* NM_MUMPS_id(NumericsMatrix* A);
 
   /** Free the working data for MUMPS
-   * \param p a NumericsSparseLinearSolverParams object holding the data
+   * \param p a NSM_linear_solver_params object holding the data
    */
   void NM_MUMPS_free(void* p);
 
@@ -95,7 +95,7 @@ extern "C"
 
 #define UMFPACK_FN(X) UMFPACKPREFIX(_ ## X)
 
-/** \struct NM_UMFPACK_WS NumericsMatrix_private.h
+/** \struct NM_UMFPACK_WS NumericsMatrix_internal.h
  * Structure for holding the data UMFPACK needs
  */
 typedef struct {
@@ -103,7 +103,7 @@ typedef struct {
   void* numeric;  /**< for the numerical factorization */
   double control[UMFPACK_CONTROL]; /**< control parameters */
   double info[UMFPACK_INFO]; /**< information from UMFPACK */
-  csi* wi; /**< integer workspace, size n */
+  CS_INT* wi; /**< integer workspace, size n */
   double* wd; /**< double workspace, size: with iterative refinement: 5n, without: n */
   double* x; /**< solution of the problem, size n */
 } NM_UMFPACK_WS;
@@ -114,7 +114,7 @@ typedef struct {
   NM_UMFPACK_WS* NM_UMFPACK_ws(NumericsMatrix* A);
 
   /** Free the working data for UMFPACK
-   * \param p a NumericsSparseLinearSolverParams object holding the data
+   * \param p a NSM_linear_solver_params object holding the data
    */
   void NM_UMFPACK_free(void* p);
 
@@ -141,7 +141,7 @@ typedef struct NM_SuperLU_WS NM_SuperLU_WS;
   NM_SuperLU_WS* NM_SuperLU_ws(NumericsMatrix* A);
 
   /** Free the working data for SuperLU
-   * \param p a NumericsSparseLinearSolverParams object holding the data
+   * \param p a NSM_linear_solver_params object holding the data
    */
   void NM_SuperLU_free(void* p);
 
@@ -178,7 +178,7 @@ typedef struct NM_SuperLU_MT_WS NM_SuperLU_MT_WS;
   NM_SuperLU_MT_WS* NM_SuperLU_MT_ws(NumericsMatrix* A);
 
   /** Free the working data for SuperLU_MT
-   * \param p a NumericsSparseLinearSolverParams object holding the data
+   * \param p a NSM_linear_solver_params object holding the data
    */
   void NM_SuperLU_MT_free(void* p);
 
@@ -215,7 +215,7 @@ typedef struct NM_MKL_pardiso_WS NM_MKL_pardiso_WS;
   NM_MKL_pardiso_WS* NM_MKL_pardiso_ws(NumericsMatrix* A);
 
   /** Free the working data for MKL_pardiso
-   * \param p a NumericsSparseLinearSolverParams object holding the data
+   * \param p a NSM_linear_solver_params object holding the data
    */
   void NM_MKL_pardiso_free(void* p);
 

@@ -53,9 +53,20 @@ macro(LIBRARY_PROJECT_SETUP)
   foreach(_DIR ${${COMPONENT}_HDRS_EXCLUDE_DIR})
     list(REMOVE_ITEM HDRS_DIRS ${_DIR})
   endforeach()
-  
+
   get_headers("${HDRS_DIRS}")
-  set(${COMPONENT}_HDRS ${HDRS_FILES})
+  set(${COMPONENT}_HDRS "${HDRS_FILES}")
+
+  # --- remove excluded headers if any ---
+  # if not found, error to indicate that it should be removed.
+  foreach(_HDR ${${COMPONENT}_HDRS_EXCLUDE})
+    file(GLOB _EXCL_HDR ${_HDR})
+    if (_EXCL_HDR)
+      list(REMOVE_ITEM ${COMPONENT}_HDRS ${_EXCL_HDR})
+    else()
+      message(FATAL_ERROR "Excluded header ${_HDR} not found.")
+    endif()
+  endforeach()
 
   # --- include dirs for library ---
   # --> local includes (for build) : ${PROJECT_NAME}_LOCAL_INCLUDE_DIRECTORIES
@@ -104,7 +115,8 @@ macro(LIBRARY_PROJECT_SETUP)
     CACHE INTERNAL "Include directories for external dependencies.")
   set_target_properties(${COMPONENT} PROPERTIES 
     OUTPUT_NAME "${COMPONENT_LIBRARY_NAME}"
-    SOVERSION "${SICONOS_SOVERSION}"
+    VERSION "${SICONOS_SOVERSION}"
+    SOVERSION "${SICONOS_SOVERSION_MAJOR}"
     CLEAN_DIRECT_OUTPUT 1 # no clobbering
     LINKER_LANGUAGE ${${COMPONENT}_LINKER_LANGUAGE})
 

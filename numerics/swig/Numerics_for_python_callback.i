@@ -32,11 +32,11 @@ static void  my_call_to_callback_NablaFmcp (int size, double *z, double *nablaF)
   PyObject* pyarray = FPyArray_SimpleNewFromData(1,this_matrix_dim, NPY_DOUBLE, z);   
   PyObject* tuple = PyTuple_New(1);
   PyTuple_SetItem(tuple, 0, pyarray);  
-  PyObject* result; 
+  PyArrayObject* result; 
 
   if (PyCallable_Check(my_callback_NablaFmcp))
   {
-    result = PyObject_CallObject(my_callback_NablaFmcp, tuple);
+    result = (PyArrayObject*)PyObject_CallObject(my_callback_NablaFmcp, tuple);
   }
   else
   {
@@ -84,7 +84,7 @@ static void  my_call_to_callback_NablaFmcp (int size, double *z, double *nablaF)
   else
   {      
     const char * desired_type = typecode_string(NPY_DOUBLE);
-    const char * actual_type  = pytype_string(result);
+    const char * actual_type  = pytype_string((PyObject*)result);
     PyErr_Format(PyExc_TypeError,
                  "Array of type '%s' required as return value fo callback function. A '%s' was returned",
                    desired_type, actual_type);
@@ -126,11 +126,11 @@ static void  my_call_to_callback_Fmcp (int size, double *z, double *F)
   PyObject* pyarray = FPyArray_SimpleNewFromData(1,this_matrix_dim, NPY_DOUBLE, z);   
   PyObject* tuple = PyTuple_New(1);
   PyTuple_SetItem(tuple, 0, pyarray);  
-  PyObject* result; 
+  PyArrayObject* result; 
 
   if (PyCallable_Check(my_callback_Fmcp))
   {
-    result = PyObject_CallObject(my_callback_Fmcp, tuple);
+    result = (PyArrayObject*)PyObject_CallObject(my_callback_Fmcp, tuple);
   }
   else
   {
@@ -169,7 +169,7 @@ static void  my_call_to_callback_Fmcp (int size, double *z, double *F)
   else
   {
     const char * desired_type = typecode_string(NPY_DOUBLE);
-    const char * actual_type  = pytype_string(result);
+    const char * actual_type  = pytype_string((PyObject*)result);
     PyErr_Format(PyExc_TypeError,
                  "Array of type '%s' required as return value fo callback function. A '%s' was returned",
                    desired_type, actual_type);

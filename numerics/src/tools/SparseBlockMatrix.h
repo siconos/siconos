@@ -19,14 +19,12 @@
 #ifndef SparseBlockMatrix_H
 #define SparseBlockMatrix_H
 
-/* #include <stddef.h> */
-/* #include <stdio.h> */
 #include "NumericsFwd.h"
 #include "SiconosConfig.h"
 #include <stdio.h>
 /* #include "SiconosCompat.h" */
 
-#include "SparseMatrix.h"
+#include "CSparseMatrix.h"
 
 /*!\file SparseBlockMatrix.h
   \brief Structure definition and functions related to

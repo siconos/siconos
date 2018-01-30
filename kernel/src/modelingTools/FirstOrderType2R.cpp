@@ -22,9 +22,8 @@
 #include "BlockVector.hpp"
 #include "SimulationGraphs.hpp"
 
-//#define DEBUG_STDOUT
-//#define DEBUG_MESSAGES 1
-
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES 1
 #include <debug.h>
 
 
@@ -96,7 +95,7 @@ void FirstOrderType2R::computeg(double time, SiconosVector& lambda, SiconosVecto
 
 void FirstOrderType2R::computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level)
 {
-  DEBUG_PRINT("FirstOrderType2R::computeOutput \n");
+  DEBUG_BEGIN("FirstOrderType2R::computeOutput\n");
   // compute the new y  obtained by linearisation (see DevNotes)
   // y_{alpha+1}_{k+1} = h(x_{k+1}^{alpha},lambda_{k+1}^{alpha},t_k+1)
   //                     + C_{k+1}^alpha ( x_{k+1}^{alpha+1}- x_{k+1}^{alpha} )
@@ -126,7 +125,7 @@ void FirstOrderType2R::computeOutput(double time, Interaction& inter, Interactio
 
   DEBUG_PRINT("FirstOrderType2R::computeOutput : ResiduY() \n");
   SiconosVector& residuY = *workV[FirstOrderR::vec_residuY];
-  DEBUG_EXPR(residuY().display());
+  DEBUG_EXPR(residuY.display());
 
   y -= residuY;
   DEBUG_PRINT("FirstOrderType2R::computeOutput : y(level) \n");
@@ -155,13 +154,13 @@ void FirstOrderType2R::computeOutput(double time, Interaction& inter, Interactio
   SiconosVector& hAlpha= *workV[FirstOrderR::h_alpha];
   computeh(time, x, *inter.lambda(level), hAlpha);
   DEBUG_PRINT("FirstOrderType2R::computeOutput : new Halpha \n");
-  DEBUG_EXPR(hAlpha()->display());
-
+  DEBUG_EXPR(hAlpha.display());
+  DEBUG_END("FirstOrderType2R::computeOutput\n");
 }
 
 void FirstOrderType2R::computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level)
 {
-  DEBUG_PRINT("FirstOrderType2R::computeInput \n");
+  DEBUG_BEGIN("FirstOrderType2R::computeInput\n");
   // compute the new r  obtained by linearisation
   // r_{alpha+1}_{k+1} = g(lambda_{k+1}^{alpha},t_k+1)
   //                     + B_{k+1}^alpha ( lambda_{k+1}^{alpha+1}- lambda_{k+1}^{alpha} )
@@ -190,7 +189,7 @@ void FirstOrderType2R::computeInput(double time, Interaction& inter, Interaction
 
   //compute the new g_alpha
   computeg(time, *inter.lambda(level), *workV[FirstOrderR::g_alpha]);
-
+  DEBUG_END("FirstOrderType2R::computeInput\n");
 
 
 }
@@ -223,6 +222,7 @@ void FirstOrderType2R::computeJachx(double time, SiconosVector& x, SiconosVector
 
 void FirstOrderType2R::computeJach(double time, Interaction& inter, InteractionProperties& interProp)
 {
+  DEBUG_BEGIN("FirstOrderType2R::computeJach\n");
   VectorOfBlockVectors& DSlink = *interProp.DSlink;
   VectorOfVectors& workV = *interProp.workVectors;
   VectorOfSMatrices& workM = *interProp.workMatrices;
@@ -238,6 +238,7 @@ void FirstOrderType2R::computeJach(double time, Interaction& inter, InteractionP
     x = *DSlink[FirstOrderR::x];
     computeJachlambda(time, x, *inter.lambda(0), *workM[FirstOrderR::mat_D]);
   }
+  DEBUG_END("FirstOrderType2R::computeJach\n");
 }
 
 void FirstOrderType2R::computeJacglambda(double time, SiconosVector& lambda, SimpleMatrix& B)
@@ -247,9 +248,11 @@ void FirstOrderType2R::computeJacglambda(double time, SiconosVector& lambda, Sim
 
 void FirstOrderType2R::computeJacg(double time, Interaction& inter, InteractionProperties& interProp)
 {
+  DEBUG_BEGIN("FirstOrderType2R::computeJacg\n");
   if (!_B)
   {
     VectorOfSMatrices& workM = *interProp.workMatrices;
     computeJacglambda(time, *inter.lambda(0), *workM[FirstOrderR::mat_B]);
   }
+  DEBUG_END("FirstOrderType2R::computeJacg\n");
 }

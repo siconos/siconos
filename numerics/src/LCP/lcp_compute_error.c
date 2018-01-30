@@ -46,10 +46,9 @@
 void lcp_compute_error_only(unsigned int n, double* restrict z , double* restrict w, double* restrict error)
 {
   *error = 0.;
-  double zi, wi;
   for (unsigned int i = 0 ; i < n ; i++)
   {
-    *error += pow(z[i] - max(0,(z[i] - w[i])),2);
+    *error += pow(z[i] - fmax(0,(z[i] - w[i])),2);
   }
   *error =sqrt(*error);
 }

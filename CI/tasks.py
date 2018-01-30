@@ -11,7 +11,23 @@ A task, see :class:`machinery.ci_tasks.CiTask` must be defined with at least:
 from machinery.ci_task import CiTask
 import os
 
-# PLEASE KEEP CONFIG AS WHAT THEY MEAN.
+# not generic, to be moved somewhere else
+#
+
+class SiconosCiTask(CiTask):
+
+    def __init__(self, *args, **kwargs):
+        return super(SiconosCiTask, self).__init__(*args, **kwargs)
+    
+    def template_maker(self):
+        redundants = [
+            'build-base', 'gfortran', 'gnu-c++', 'lpsolve', 'wget', 'xz',
+            'asan', 'cppunit_clang', 'python-env', 'profiling',
+            'python3-env', 'path', 'h5py3']
+        return '-'.join([p.replace('+', 'x')
+                         for p in self._pkgs if p not in redundants])
+
+# PLEASE KEEP CONFIGS AS WHAT THEY MEAN.
 # DO NOT ADD PACKAGES IF THEY ARE NOT NECESSARY.
 
 #
@@ -19,10 +35,21 @@ import os
 # Used in driver.py.
 database = os.path.join('config', 'siconos.yml')
 
+
+empty = SiconosCiTask()
+
+base = empty.copy()(
+    ci_config='default',
+    pkgs=['build-base', 'gcc', 'gfortran', 'gnu-c++', 'atlas-lapack',
+          'python-env'],
+    srcs=['.'],
+    targets={'.': ['all', 'test']})
 #
 # 2. the default task
 #
-default = CiTask(
+
+default = SiconosCiTask(
+    docker=True,
     ci_config='default',
     distrib='ubuntu:16.04',
     pkgs=['build-base', 'gcc', 'gfortran', 'gnu-c++', 'atlas-lapack',
@@ -30,7 +57,8 @@ default = CiTask(
     srcs=['.'],
     targets={'.': ['docker-build', 'docker-ctest']})
 
-minimal = CiTask(
+minimal = SiconosCiTask(
+    docker=True,
     ci_config='minimal',
     distrib='ubuntu:16.10',
     pkgs=['build-base', 'gcc', 'gfortran', 'gnu-c++',
@@ -38,7 +66,8 @@ minimal = CiTask(
     srcs=['.'],
     targets={'.': ['docker-build', 'docker-ctest']})
 
-minimal_with_python = CiTask(
+minimal_with_python = SiconosCiTask(
+    docker=True,
     ci_config='minimal_with_python',
     distrib='ubuntu:16.10',
     pkgs=['build-base', 'gcc', 'gfortran', 'gnu-c++',
@@ -52,24 +81,24 @@ minimal_with_python = CiTask(
 
 siconos_default = default
 
+print (default.template_maker())
+
+
 siconos_default_nix = default.copy()(
     ci_config='nix',
-    distrib='nixos/nix:latest',
-    targets={'.': ['docker-build', 'docker-ctest']})
-
-siconos_with_lpsolve = siconos_default.copy()(
-    add_pkgs=['lpsolve'])
+    distrib='nixos/nix:latest')
 
 siconos_debian_latest = siconos_default.copy()(
-    ci_config='with_bullet',
-    add_pkgs=['bullet', 'h5py'],  # for mechanics.io
     distrib='debian:latest')
+
+siconos_ubuntu_14_04 = siconos_default.copy()(
+    distrib='ubuntu:14.04')
 
 siconos_ubuntu_15_04 = siconos_default.copy()(
     distrib='ubuntu:15.04')
 
-siconos_ubuntu_14_04 = siconos_default.copy()(
-    distrib='ubuntu:14.04')
+siconos_ubuntu_15_10 = siconos_default.copy()(
+    distrib='ubuntu:15.10')
 
 siconos_ubuntu_16_10 = siconos_default.copy()(
     distrib='ubuntu:16.10')
@@ -77,13 +106,19 @@ siconos_ubuntu_16_10 = siconos_default.copy()(
 siconos_ubuntu_17_04 = siconos_default.copy()(
     distrib='ubuntu:17.04')
 
-siconos_ubuntu_15_10 = siconos_default.copy()(
-    distrib='ubuntu:15.10')
+siconos_ubuntu_17_10 = siconos_default.copy()(
+    distrib='ubuntu:17.10')
+
+siconos_fedora_latest = siconos_default.copy()(
+    distrib='fedora:latest')
 
 siconos_cxx_11_ubuntu_17_04 = siconos_default.copy()(
     distrib='ubuntu:17.04',
     ci_config='with_cxx11')
 
+
+siconos_with_lpsolve = siconos_default.copy()(
+    add_pkgs=['lpsolve'])
 
 import os
 from os.path import expanduser
@@ -127,7 +162,7 @@ siconos_profiling = siconos_ubuntu_17_04.copy()(
     add_pkgs=['profiling'])
 
 # note fedora/atlas-lapack in siconos.yml -> cmake does not detect blas
-siconos_fedora_latest = siconos_default.copy()(
+siconos_fedora_latest_with_umfpack = siconos_default.copy()(
     distrib='fedora:latest',
     ci_config=('with_umfpack',),
     remove_pkgs=['atlas-lapack', 'python-env'],
@@ -215,17 +250,20 @@ siconos_all_examples = minimal_with_python.copy()(
              'examples': ['docker-build', 'docker-ctest', 'docker-make-clean']},
     add_srcs=['examples'])
 
-siconos_test_deb = CiTask(
+siconos_test_deb = SiconosCiTask(
     ci_config='examples',
     distrib='ubuntu:16.04',
     pkgs=['siconos'],
     srcs=['examples'])
 
-siconos_test_rpm = CiTask(
+siconos_test_rpm = SiconosCiTask(
     ci_config='examples',
     distrib='fedora:latest',
     pkgs=['siconos'],
     srcs=['examples'])
+
+siconos_dev_mode_strict = siconos_default.copy()(
+    ci_config='with_dev_mode_strict')
 
 siconos_frama_c = siconos_default.copy()(
     ci_config='with_frama_c',
@@ -237,38 +275,25 @@ siconos_frama_c = siconos_default.copy()(
 # 4. dispatch based on hostname and distrib type (to min. disk requirement)
 #
 known_tasks = {'siconos---vm0':
-               (siconos_fedora_latest,
-                siconos_gcc_asan,
+               (siconos_gcc_asan,
                 siconos_gcc_asan_latest,
-                siconos_debian_mechanisms,
-                siconos_ubuntu_15_10),
+                siconos_debian_mechanisms),
 
                'siconos---vm1':
                (minimal,
                 minimal_with_python,
-                siconos_with_lpsolve,
                 siconos_documentation,
+                siconos_dev_mode_strict,
                 siconos_clang,
                 siconos_clang_asan),
 
                'siconos---vm2':
                (siconos_clang_msan,
-                siconos_default_nix,
-                siconos_ubuntu_15_10_with_mechanisms,
-                siconos_ubuntu_15_04,
-                siconos_ubuntu_14_04),
+                siconos_ubuntu_15_10_with_mechanisms),
 
                'siconos---vm3':
-               (siconos_debian_latest,
-                siconos_openblas_lapacke,
-                siconos_with_mumps,
-                siconos_with_umfpack,
-                siconos_light_examples,
+               (siconos_light_examples,
                 siconos_all_examples),
 
                'siconos---vm4':
-               (siconos_profiling,
-                siconos_ubuntu_17_04,
-                siconos_numerics_only,
-                siconos_cxx_11_ubuntu_17_04,
-                siconos_serialization)}
+               (siconos_numerics_only)}

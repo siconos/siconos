@@ -130,6 +130,9 @@ protected:
 
   // -- MEMBERS --
 
+  /** Dimension of _twist, _ndof=6 */
+  unsigned int _ndof;
+
   /** _twist contains the twist of the Newton Euler dynamical system.
    *  _twist[0:2] : \f$v_G \in \RR^3 \f$ velocity of the center of mass in
    * the inertial frame of reference (world frame).
@@ -155,17 +158,21 @@ protected:
   /** Initial position */
   SP::SiconosVector _q0;
 
-  /** Dimension of _q, is not necessary equal to _n. In our case, _qDim = 7 and  _n =6*/
+  /** Dimension of _q, is not necessary equal to _ndof. In our case, _qDim = 7 and  _ndof =6*/
   unsigned int _qDim;
 
   /** The time derivative of \f$q\f$, \f$\dot q\f$*/
   SP::SiconosVector _dotq;
 
+  /** _acceleration contains the time derivative of the twist
+   */
+  SP::SiconosVector _acceleration;
+
   /** Memory vectors that stores the values within the time--step */
-  SP::SiconosMemory _twistMemory;
-  SP::SiconosMemory _qMemory;
-  SP::SiconosMemory _forcesMemory;
-  SP::SiconosMemory _dotqMemory;
+  SiconosMemory _twistMemory;
+  SiconosMemory _qMemory;
+  SiconosMemory _forcesMemory;
+  SiconosMemory _dotqMemory;
 
   /** Inertial matrix
    */
@@ -343,6 +350,15 @@ protected:
   /** Reaction to an applied  boundary condition */
   SP::SiconosVector _reactionToBoundaryConditions;
 
+  enum NewtonEulerDSRhsMatrices {jacobianXBloc00, jacobianXBloc01, jacobianXBloc10, jacobianXBloc11, zeroMatrix, zeroMatrixqDim, numberOfRhsMatrices};
+
+  /** A container of matrices to save matrices that are involed in first order from of
+   * NewtonEulerDS system values (jacobianXBloc10, jacobianXBloc11, zeroMatrix, idMatrix)
+   * No get-set functions at the time. Only used as a protected member.*/
+  VectorOfSMatrices _rhsMatrices;
+
+
+
   /** Default constructor
    */
   NewtonEulerDS();
@@ -437,6 +453,13 @@ public:
   /*! @name Attributes access 
     @{ */
 
+  /** return the number of degrees of freedom of the system
+   *  \return an unsigned int.
+   */
+  virtual inline unsigned int dimension() const
+  {
+    return _ndof;
+  }
   /** Returns dimension of vector q */
   virtual inline unsigned int getqDim() const
   {
@@ -681,7 +704,7 @@ public:
   /** get all the values of the state vector q stored in memory
    *  \return a memory
    */
-  inline SP::SiconosMemory qMemory() const
+  inline const SiconosMemory& qMemory()
   {
     return _qMemory;
   }
@@ -690,7 +713,7 @@ public:
   /** get all the values of the state vector twist stored in memory
    *  \return a memory
    */
-  inline SP::SiconosMemory twistMemory() const
+  inline const SiconosMemory& twistMemory()
   {
     return _twistMemory;
   }
@@ -706,11 +729,12 @@ public:
    */
   void swapInMemory();
 
-  inline SP::SiconosMemory forcesMemory()
+  inline const SiconosMemory& forcesMemory()
   {
     return _forcesMemory;
   }
-  inline SP::SiconosMemory dotqMemory()
+
+  inline const SiconosMemory& dotqMemory()
   {
     return _dotqMemory;
   }
@@ -739,7 +763,7 @@ public:
     if(!_jacobianMExtq)
       _jacobianMExtq.reset(new SimpleMatrix(3, _qDim));
     if(!_jacobianWrenchq)
-      _jacobianWrenchq.reset(new SimpleMatrix(_n, _qDim));
+      _jacobianWrenchq.reset(new SimpleMatrix(_ndof, _qDim));
   }
 
   inline void setNullifyMGyr(bool value)

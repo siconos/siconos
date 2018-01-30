@@ -170,24 +170,18 @@ int main(int argc, char* argv[])
     cout << "====> Output file writing ..." << endl;
     ioMatrix::write("Twisting.dat", "ascii", *dataPlot, "noDim");
 
-    // Comparison with a reference file
-    SP::SiconosMatrix dataPlotRef( new SimpleMatrix(*dataPlot));
-    dataPlotRef->zero();
-    ioMatrix::read("Twisting.ref", "ascii", *dataPlotRef);
-    // We do not compare the Lagrange multiplier that are very sensitive to numerical approximations
-    Index * coord= new Index(4);
-    (*coord)[0]= 0;
-    (*coord)[1]= k;
-    (*coord)[2]= 0;
-    (*coord)[3]= 3;
-    SP::SiconosMatrix  stateDataPlot(new SimpleMatrix(*dataPlot, *coord));
-    SP::SiconosMatrix  stateDataPlotRef(new SimpleMatrix(*dataPlotRef, *coord));
+    // We do not compare the Lagrange multiplier that are very
+    // sensitive to numerical approximations
+    Index idx;
+    idx.push_back(0);
+    idx.push_back(1);
+    idx.push_back(2);
 
-    double error =  (*stateDataPlotRef-*stateDataPlot).normInf() ;
-    std::cout << "Error =" << error <<std::endl;
-    if (error > 1e-12)
+    // Comparison with a reference file
+    double error = 0;
+    if (ioMatrix::compareRefFile(*dataPlot, "Twisting.ref", 1e-12, error, idx)
+        && error > 1e-12)
     {
-      std::cout << "Warning. The results is rather different from the reference file." << std::endl;
       return 1;
     }
 

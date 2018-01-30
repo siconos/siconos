@@ -16,7 +16,8 @@
  * limitations under the License.
 */
 
-#include "NumericsMatrix_private.h"
+#include "CSparseMatrix_internal.h"
+#include "NumericsMatrix_internal.h"
 #include "NumericsMatrix.h"
 #include "NumericsSparseMatrix.h"
 #include "debug.h"
@@ -26,7 +27,7 @@
 
 NM_UMFPACK_WS* NM_UMFPACK_factorize(NumericsMatrix* A)
 {
-  NumericsSparseLinearSolverParams* params = NM_linearSolverParams(A);
+  NSM_linear_solver_params* params = NM_linearSolverParams(A);
 
   if (params->solver_data)
   {
@@ -44,7 +45,7 @@ NM_UMFPACK_WS* NM_UMFPACK_factorize(NumericsMatrix* A)
 
   CSparseMatrix* C = NM_csc(A);
 
-  csi status;
+  CS_INT status;
 
   status = UMFPACK_FN(symbolic) (C->m, C->n, C->p, C->i, C->x, &(umfpack_ws->symbolic), umfpack_ws->control, umfpack_ws->info);
 
@@ -64,9 +65,9 @@ NM_UMFPACK_WS* NM_UMFPACK_factorize(NumericsMatrix* A)
     return NULL;
   }
 
-  umfpack_ws->wi = (csi*)malloc(C->n * sizeof(csi));
+  umfpack_ws->wi = (CS_INT*)malloc(C->n * sizeof(CS_INT));
 
-  csi size_wd;
+  CS_INT size_wd;
   if (umfpack_ws->control[UMFPACK_IRSTEP] > 0)
   {
     size_wd = 5 * C->n;
@@ -87,7 +88,7 @@ NM_UMFPACK_WS* NM_UMFPACK_factorize(NumericsMatrix* A)
 void NM_UMFPACK_free(void* p)
 {
   assert(p);
-  NumericsSparseLinearSolverParams* params = (NumericsSparseLinearSolverParams*) p;
+  NSM_linear_solver_params* params = (NSM_linear_solver_params*) p;
   assert(params);
   NM_UMFPACK_WS* umfpack_ws = (NM_UMFPACK_WS*) params->solver_data;
   assert(umfpack_ws);

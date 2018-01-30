@@ -1,58 +1,29 @@
 #!/usr/bin/env @PYTHON_EXECUTABLE@
-import sys, os, json
-import vtk
-from vtk.util import numpy_support
-from math import pi
-import bisect
-from numpy.linalg import norm
-import numpy
-import random
+"""Viewer for Siconos mechanics-IO HDF5 files based on VTK."""
 
+# Lighter imports before command line parsing
+from __future__ import print_function
+import sys, os, json
 import getopt
 
-from siconos.io.mechanics_io import Quaternion, Hdf5
-from siconos.io.mechanics_io import tmpfile as io_tmpfile
-
-## Persistent configuration
-config = {'window_size': [600,600]}
-config_fn = os.path.join(os.environ['HOME'], '.config', 'siconos_vview.json')
-should_save_config = True
-
-def load_configuration():
-    global should_save_config
-    if os.path.exists(config_fn):
-        try:
-            config.update(json.load(open(config_fn)))
-            should_save_config = True
-        except:
-            should_save_config = False
-            print("Warning: Error loading configuration `{}'".format(config_fn))
-
-def save_configuration():
-    try:
-        if not os.path.exists(os.path.join(os.environ['HOME'], '.config')):
-            os.mkdir(os.path.join(os.environ['HOME'], '.config'))
-        json.dump(config, open(config_fn,'w'))
-    except:
-        print("Error saving configuration `{}'".format(config_fn))
-
-# Load it immediately
-load_configuration()
-
 ## Print usage information
-def usage():
-    print('{0}: Usage'.format(sys.argv[0]))
-    print("""
-    {0} [--help] [tmin=<float value>] [tmax=<float value>]
+def usage(long=False):
+    print(__doc__); print()
+    print('Usage: {0} [OPTION]... <HDF5>'
+          .format(os.path.split(sys.argv[0])[1]))
+    print()
+    if not long:
+        print("""[--help] [tmin=<float value>] [tmax=<float value>]
         [--cf-scale=<float value>] [--no-cf]
         [--advance=<'fps' or float value>] [--fps=float value]
         [--camera=x,y,z] [--lookat=x,y,z] [--up=x,y,z] [--ortho=scale]
-        <hdf5 file>
-    """)
-    print("""
-    Options :
-      --help
-        display this message
+        """)
+    else:
+        print("""Options:
+     --help
+       display this message
+     --version
+       display version information
      --tmin= value
        set the time lower bound for visualization
      --tmax= value
@@ -81,28 +52,44 @@ def usage():
     """)
 
 
-def add_compatiblity_methods(obj):
-    """
-    Add missing methods in previous VTK versions.
-    """
-
-    if hasattr(obj, 'SetInput'):
-        obj.SetInputData = obj.SetInput
-
-    if hasattr(obj, 'AddInput'):
-        obj.AddInputData = obj.AddInput
-
 ## Parse command line
 try:
     opts, args = getopt.gnu_getopt(sys.argv[1:], '',
-                                   ['help', 'dat', 'tmin=', 'tmax=', 'no-cf',
+                                   ['help', 'version',
+                                    'dat', 'tmin=', 'tmax=', 'no-cf',
                                     'cf-scale=', 'normalcone-ratio=',
                                     'advance=', 'fps=', 'camera=', 'lookat=',
                                     'up=', 'ortho='])
 except getopt.GetoptError as err:
-        sys.stderr.write('{0}\n'.format(str(err)))
-        usage()
-        exit(2)
+    sys.stderr.write('{0}\n'.format(str(err)))
+    usage()
+    exit(2)
+
+## Persistent configuration
+config = {'window_size': [600,600]}
+config_fn = os.path.join(os.environ['HOME'], '.config', 'siconos_vview.json')
+should_save_config = True
+
+def load_configuration():
+    global should_save_config
+    if os.path.exists(config_fn):
+        try:
+            config.update(json.load(open(config_fn)))
+            should_save_config = True
+        except:
+            should_save_config = False
+            print("Warning: Error loading configuration `{}'".format(config_fn))
+
+def save_configuration():
+    try:
+        if not os.path.exists(os.path.join(os.environ['HOME'], '.config')):
+            os.mkdir(os.path.join(os.environ['HOME'], '.config'))
+        json.dump(config, open(config_fn,'w'))
+    except:
+        print("Error saving configuration `{}'".format(config_fn))
+
+# Load it immediately
+load_configuration()
 
 min_time = None
 max_time = None
@@ -118,7 +105,11 @@ initial_camera = [None] * 4
 for o, a in opts:
 
     if o == '--help':
-        usage()
+        usage(long=True)
+        exit(0)
+
+    elif o == '--version':
+        print('{0} @SICONOS_VERSION@'.format(os.path.split(sys.argv[0])[1]))
         exit(0)
 
     elif o == '--tmin':
@@ -167,7 +158,32 @@ else:
     usage()
     exit(1)
 
+# Heavier imports after command line parsing
+import vtk
+from vtk.util import numpy_support
+from math import pi
+import bisect
+from numpy.linalg import norm
+import numpy
+import random
+
+from siconos.io.mechanics_io import Quaternion, Hdf5
+from siconos.io.mechanics_io import tmpfile as io_tmpfile
+from siconos.io.mechanics_io import occ_topo_list, occ_load_file,\
+    topods_shape_reader, brep_reader
+
 ## Utilities
+
+def add_compatiblity_methods(obj):
+    """
+    Add missing methods in previous VTK versions.
+    """
+
+    if hasattr(obj, 'SetInput'):
+        obj.SetInputData = obj.SetInput
+
+    if hasattr(obj, 'AddInput'):
+        obj.AddInputData = obj.AddInput
 
 def random_color():
     r = random.uniform(0.1, 0.9)
@@ -187,72 +203,6 @@ big_data_writer.SetInputConnection(big_data_source.GetOutputPort())
 
 contactors = dict()
 offsets = dict()
-
-def step_reader(step_string):
-
-    from OCC.StlAPI import StlAPI_Writer
-    from OCC.STEPControl import STEPControl_Reader
-    from OCC.BRep import BRep_Builder
-    from OCC.TopoDS import TopoDS_Compound
-    from OCC.IFSelect import IFSelect_RetDone, IFSelect_ItemsByEntity
-
-    builder = BRep_Builder()
-    comp = TopoDS_Compound()
-    builder.MakeCompound(comp)
-
-    stl_writer = StlAPI_Writer()
-    stl_writer.SetASCIIMode(True)
-
-    with io_tmpfile(contents=io.shapes()[shape_name][:][0]) as tmpfile:
-        step_reader = STEPControl_Reader()
-
-        status = step_reader.ReadFile(tmpfile[1])
-
-        if status == IFSelect_RetDone:  # check status
-            failsonly = False
-            step_reader.PrintCheckLoad(failsonly, IFSelect_ItemsByEntity)
-            step_reader.PrintCheckTransfer(failsonly, IFSelect_ItemsByEntity)
-            ok = step_reader.TransferRoot(1)
-            nbs = step_reader.NbShapes()
-
-            for i in range(1, nbs + 1):
-                shape = step_reader.Shape(i)
-
-                builder.Add(comp, shape)
-
-            with io_tmpfile(suffix='.stl') as tmpf:
-                    stl_writer.Write(comp, tmpf[1])
-                    tmpf[0].flush()
-
-                    reader = vtk.vtkSTLReader()
-                    reader.SetFileName(tmpf[1])
-                    reader.Update()
-
-                    return reader
-
-
-def brep_reader(brep_string, indx):
-
-    from OCC.StlAPI import StlAPI_Writer
-
-    from OCC.BRepTools import BRepTools_ShapeSet
-    shape_set = BRepTools_ShapeSet()
-    shape_set.ReadFromString(brep_string)
-    shape = shape_set.Shape(shape_set.NbShapes())
-    location = shape_set.Locations().Location(indx)
-    shape.Location(location)
-
-    stl_writer = StlAPI_Writer()
-
-    with io_tmpfile(suffix='.stl') as tmpf:
-        stl_writer.Write(shape, tmpf[1])
-        tmpf[0].flush()
-
-        reader = vtk.vtkSTLReader()
-        reader.SetFileName(tmpf[1])
-        reader.Update()
-
-        return reader
 
 
 ## Program starts
@@ -690,8 +640,14 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
                   'stl': vtk.vtkSTLReader}
 
     for shape_name in io.shapes():
-
-        shape_type = io.shapes()[shape_name].attrs['type']
+ 
+        shape_type = (io.shapes()[shape_name].attrs['type'])
+        try:
+            # work-around h5py unicode bug
+            # https://github.com/h5py/h5py/issues/379
+            shape_type  = shape_type.decode('utf-8')
+        except AttributeError:
+            pass
         scale = None
         if 'scale' in io.shapes()[shape_name].attrs:
             scale = io.shapes()[shape_name].attrs['scale']
@@ -742,7 +698,7 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
                 mapper.SetInputConnection(reader.GetOutputPort())
                 mappers[shape_name] = (x for x in [mapper])
 
-        elif shape_type in ['stp', 'step']:
+        elif shape_type in ['stp', 'step', 'igs', 'iges']:
             # try to find an associated shape
             if 'associated_shape' in io.shapes()[shape_name].attrs:
                 associated_shape = \
@@ -751,14 +707,41 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
                 # delayed
                 mappers[shape_name] = (
                     x for x in [mappers[associated_shape]()])
-            else:
-                reader = step_reader(str(io.shapes()[shape_name][:]))
 
-                readers[shape_name] = reader
-                mapper = vtk.vtkDataSetMapper()
-                add_compatiblity_methods(mapper)
-                mapper.SetInputConnection(reader.GetOutputPort())
-                mappers[shape_name] = (x for x in [mapper])
+            elif shape_type in ['stp', 'step', 'igs', 'iges']:
+                with io_tmpfile(
+                        debug=True,
+                        suffix='.{0}'.format(shape_type),
+                        contents=str(io.shapes()[shape_name][:][0])) as tmpf:
+                    shape = occ_load_file(tmpf[1])
+
+                    # whole shape
+                    reader = topods_shape_reader(shape)
+                    readers[shape_name] = reader
+                    mapper = vtk.vtkDataSetMapper()
+                    add_compatiblity_methods(mapper)
+                    mapper.SetInputConnection(reader.GetOutputPort())
+                    mappers[shape_name] = (x for x in [mapper])
+
+                    # subparts
+                    faces, edges = occ_topo_list(shape)
+                    for i, f in enumerate(faces):
+                        shape_indx = ('Face', shape_name, i)
+                        reader = topods_shape_reader(f)
+                        readers[shape_indx] = reader
+                        mapper = vtk.vtkDataSetMapper()
+                        add_compatiblity_methods(mapper)
+                        mapper.SetInputConnection(reader.GetOutputPort())
+                        mappers[shape_indx] = (x for x in [mapper])
+
+                    for i, e in enumerate(edges):
+                        shape_indx = ('Edge', shape_name, i)
+                        reader = topods_shape_reader(e)
+                        readers[shape_indx] = reader
+                        mapper = vtk.vtkDataSetMapper()
+                        add_compatiblity_methods(mapper)
+                        mapper.SetInputConnection(reader.GetOutputPort())
+                        mappers[shape_indx] = (x for x in [mapper])
 
         elif shape_type == 'heightmap':
             points = vtk.vtkPoints()
@@ -878,10 +861,12 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
             mapper.SetInputConnection(source.GetOutputPort())
             mappers[shape_name] = (x for x in [mapper])
 
-    fixed_mappers = dict()
-    for shape_name in io.shapes():
-        if shape_name not in fixed_mappers:
-            fixed_mappers[shape_name] = mappers[shape_name].next()
+    unfrozen_mappers = dict()
+
+    for shape_name in mappers.keys():
+        if shape_name not in unfrozen_mappers:
+            print (shape_name)
+            unfrozen_mappers[shape_name] = next(mappers[shape_name])
 
     for instance_name in io.instances():
 
@@ -898,12 +883,33 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
             static_actors[instance] = list()
 
         for contactor_instance_name in io.instances()[instance_name]:
-            contactor_name = io.instances()[instance_name][
-                contactor_instance_name].attrs['name']
-            contactors[instance].append(contactor_name)
+            contactor = io.instances()[instance_name][contactor_instance_name]
+            contact_shape_indx = None
+            if 'shape_name' not in contactor.attrs:
+                print("Warning: old format: ctr.name must be ctr.shape_name for body {0}, contact {1}".format(instance_name, contactor_instance_name))
+                shape_attr_name='name'
+            else:
+                shape_attr_name='shape_name'
+
+            if 'type' in contactor.attrs:
+                contact_type = contactor.attrs['type']
+                contact_index = contactor.attrs['contact_index']
+                contact_shape_indx = (contact_type, contactor.attrs[shape_attr_name],
+                                      contact_index)
+            else:
+                contact_shape_indx = contactor.attrs[shape_attr_name]
+                try:
+                    # work-around h5py unicode bug
+                    # https://github.com/h5py/h5py/issues/379
+                    contact_shape_indx  = contact_shape_indx.decode('utf-8')
+                except AttributeError:
+                    pass
+
+
+            contactors[instance].append(contact_shape_indx)
 
             actor = vtk.vtkActor()
-            if io.instances()[instance_name].attrs.get('mass',0) > 0:
+            if io.instances()[instance_name].attrs.get('mass', 0) > 0:
                 # objects that may move
                 dynamic_actors[instance].append(actor)
 
@@ -917,21 +923,27 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
                     config.get('static_opacity', 1.0))
 
             actor.GetProperty().SetColor(random_color())
-            actor.SetMapper(fixed_mappers[contactor_name])
+
+            actor.SetMapper(unfrozen_mappers[contact_shape_indx])
 
             renderer.AddActor(actor)
 
             transform = vtk.vtkTransform()
             transformer = vtk.vtkTransformFilter()
 
-            if contactor_name in readers:
+            if contact_shape_indx in readers:
                 transformer.SetInputConnection(
-                    readers[contactor_name].GetOutputPort())
+                    readers[contact_shape_indx].GetOutputPort())
             else:
-                transformer.SetInputData(datasets[contactor_name])
+                transformer.SetInputData(datasets[contact_shape_indx])
 
-            if 'scale' in io.shapes()[contactor_name].attrs:
-                scale = io.shapes()[contactor_name].attrs['scale']
+            if isinstance(contact_shape_indx, tuple):
+                contact_shape_name = contact_shape_indx[1]
+            else:
+                contact_shape_name = contact_shape_indx
+
+            if 'scale' in io.shapes()[contact_shape_name].attrs:
+                scale = io.shapes()[contact_shape_name].attrs['scale']
                 scale_transform = vtk.vtkTransform()
                 scale_transform.Scale(scale, scale, scale)
                 scale_transform.SetInput(transform)
@@ -941,7 +953,7 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
                 transformer.SetTransform(transform)
                 actor.SetUserTransform(transform)
 
-            transformers[contactor_name] = transformer
+            transformers[contact_shape_indx] = transformer
 
             big_data_source.AddInputConnection(transformer.GetOutputPort())
 
@@ -1021,7 +1033,7 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
     set_actors_vizzz = numpy.vectorize(set_actors_viz)
 
     def set_dynamic_actors_visibility(time):
-        set_actors_vizzz(dynamic_actors.keys(), time)
+        set_actors_vizzz(list(dynamic_actors.keys()), time)
 
 
     # to be removed if ok

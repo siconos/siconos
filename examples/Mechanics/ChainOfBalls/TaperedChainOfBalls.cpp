@@ -288,10 +288,10 @@ int main(int argc, char* argv[]){
 		{
 		  SP::DynamicalSystem ds = DSG0->bundle(*ui);
 		  SP::LagrangianDS lag_ds = std11::dynamic_pointer_cast<LagrangianDS>(ds);
-		  SP::SiconosVector q = lag_ds->qMemory()->getSiconosVector(1);
-		  SP::SiconosVector v = lag_ds->velocityMemory()->getSiconosVector(1);
-		  dataPlot(k,col_pos) = (*q)(0);
-		  dataPlot(k,col_vel) = (*v)(0);
+		  const SiconosVector& q = lag_ds->qMemory().getSiconosVector(1);
+		  const SiconosVector& v = lag_ds->velocityMemory().getSiconosVector(1);
+		  dataPlot(k,col_pos) = q(0);
+		  dataPlot(k,col_vel) = v(0);
 		  col_pos++;
 		  col_vel++;
 		}

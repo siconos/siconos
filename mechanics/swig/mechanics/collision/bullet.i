@@ -1,6 +1,6 @@
 // -*- c++ -*-
 // SWIG interface for Siconos Mechanics/ContactDetection/Bullet
-%module(package="collision", directors="1", allprotected="1") bullet
+%module(package="siconos.mechanics.collision", directors="1", allprotected="1") bullet
 
  // serialization not yet implemented for bullet
 #undef WITH_IO
@@ -199,13 +199,13 @@ PY_REGISTER_BULLET_COLLISION_DETECTION(btUniformScalingShape);
 typedef Interaction Interaction;
 
 %include "BulletSiconosFwd.hpp"
-PY_FULL_REGISTER(BulletR);
-PY_FULL_REGISTER(BulletDS);
-PY_FULL_REGISTER(BulletSpaceFilter);
-PY_FULL_REGISTER(BulletTimeStepping);
-PY_FULL_REGISTER(BulletTimeSteppingDirectProjection);
-PY_FULL_REGISTER(BulletWeightedShape);
-PY_FULL_REGISTER(BulletFrom1DLocalFrameR);
+PY_FULL_REGISTER(BulletR, Mechanics);
+PY_FULL_REGISTER(BulletDS, Mechanics);
+PY_FULL_REGISTER(BulletSpaceFilter, Mechanics);
+PY_FULL_REGISTER(BulletTimeStepping, Mechanics);
+PY_FULL_REGISTER(BulletTimeSteppingDirectProjection, Mechanics);
+PY_FULL_REGISTER(BulletWeightedShape, Mechanics);
+PY_FULL_REGISTER(BulletFrom1DLocalFrameR, Mechanics);
 
 
 
@@ -289,6 +289,6 @@ PY_FULL_REGISTER(BulletFrom1DLocalFrameR);
 
 %include base.i
 
-PY_REGISTER_WITHOUT_HEADER(SiconosBulletOptions);
-PY_REGISTER_WITHOUT_HEADER(SiconosBulletStatistics);
-PY_FULL_REGISTER(SiconosBulletCollisionManager);
+PY_REGISTER_WITHOUT_HEADER(SiconosBulletOptions, Mechanics);
+PY_REGISTER_WITHOUT_HEADER(SiconosBulletStatistics, Mechanics);
+PY_FULL_REGISTER(SiconosBulletCollisionManager, Mechanics);

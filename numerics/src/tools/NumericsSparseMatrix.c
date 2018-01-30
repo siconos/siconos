@@ -22,10 +22,13 @@
 #include <math.h>
 #include <float.h>
 #include <stdbool.h>
-#include "SparseMatrix.h"
+#include "CSparseMatrix_internal.h"
 #include "SiconosCompat.h"
 #include "NumericsSparseMatrix.h"
+#include "numerics_verbose.h"
+#include "NumericsMatrix.h"
 
+#include "debug.h"
 
 #if defined(__clang__)
 #pragma clang diagnostic push
@@ -37,7 +40,7 @@
 
 typedef struct
 {
-  csi i;
+  CS_INT i;
   size_t indx;
 } sort_indices_struct;
 
@@ -52,7 +55,7 @@ typedef struct
 #pragma GCC diagnostic pop
 #endif
 
-void NM_sparse_null(NumericsSparseMatrix* A)
+void NSM_null(NumericsSparseMatrix* A)
 {
   A->linearSolverParams = NULL;
   A->triplet = NULL;
@@ -60,53 +63,53 @@ void NM_sparse_null(NumericsSparseMatrix* A)
   A->trans_csc = NULL;
   A->csr = NULL;
   A->diag_indx = NULL;
-  A->origin = NS_UNKNOWN;
+  A->origin = NSM_UNKNOWN;
 }
 
-double* NM_sparse_data(NumericsSparseMatrix* A)
+double* NSM_data(NumericsSparseMatrix* A)
 {
   switch (A->origin)
   {
-  case NS_CSC:
+  case NSM_CSC:
   {
     assert(A->csc);
     return A->csc->x;
     break;
   }
-  case NS_CSR:
+  case NSM_CSR:
   {
     assert(A->csr);
     return A->csr->x;
     break;
   }
-  case NS_TRIPLET:
+  case NSM_TRIPLET:
   {
     assert(A->triplet);
     return A->triplet->x;
     break;
   }
   default:
-    printf("NM_sparse_data :: unknown matrix origin %d", A->origin);
+    printf("NSM_data :: unknown matrix origin %d", A->origin);
     exit(EXIT_FAILURE);
   }
 }
 
-NumericsSparseMatrix* newNumericsSparseMatrix(void)
+NumericsSparseMatrix* NSM_new(void)
 {
   NumericsSparseMatrix* p = (NumericsSparseMatrix*)
     malloc(sizeof(NumericsSparseMatrix));
 
-  NM_sparse_null(p);
-  p->linearSolverParams = newNumericsSparseLinearSolverParams();
+  NSM_null(p);
+  p->linearSolverParams = newNSM_linear_solver_params();
 
   return p;
 }
 
-NumericsSparseMatrix* freeNumericsSparseMatrix(NumericsSparseMatrix* A)
+NumericsSparseMatrix* NSM_free(NumericsSparseMatrix* A)
 {
   if (A->linearSolverParams)
   {
-    freeNumericsSparseLinearSolverParams(A->linearSolverParams);
+    NSM_LinearSolverParams_free(A->linearSolverParams);
     A->linearSolverParams = NULL;
   }
   if (A->triplet)
@@ -138,23 +141,23 @@ NumericsSparseMatrix* freeNumericsSparseMatrix(NumericsSparseMatrix* A)
 }
 
 
-NumericsSparseLinearSolverParams* newNumericsSparseLinearSolverParams(void)
+NSM_linear_solver_params* newNSM_linear_solver_params(void)
 {
-  NumericsSparseLinearSolverParams* p = (NumericsSparseLinearSolverParams*)
-    malloc(sizeof(NumericsSparseLinearSolverParams));
+  NSM_linear_solver_params* p = (NSM_linear_solver_params*)
+    malloc(sizeof(NSM_linear_solver_params));
 
 #if defined(WITH_MUMPS)
-  p->solver = NS_MUMPS;
+  p->solver = NSM_MUMPS;
 #elif defined(WITH_UMFPACK)
-  p->solver = NS_UMFPACK;
+  p->solver = NSM_UMFPACK;
 #elif defined(WITH_SUPERLU)
-  p->solver = NS_SUPERLU;
+  p->solver = NSM_SUPERLU;
 #elif defined(WITH_SUPERLU_MT)
-  p->solver = NS_SUPERLU_MT;
+  p->solver = NSM_SUPERLU_MT;
 #elif defined(WITH_MKL_PARDISO)
-  p->solver = NS_MKL_PARDISO;
+  p->solver = NSM_MKL_PARDISO;
 #else
-  p->solver = NS_CS_LUSOL;
+  p->solver = NSM_CS_LUSOL;
 #endif
 
   p->solver_data = NULL;
@@ -170,7 +173,7 @@ NumericsSparseLinearSolverParams* newNumericsSparseLinearSolverParams(void)
   return p;
 }
 
-NumericsSparseLinearSolverParams* freeNumericsSparseLinearSolverParams(NumericsSparseLinearSolverParams* p)
+NSM_linear_solver_params* NSM_LinearSolverParams_free(NSM_linear_solver_params* p)
 {
   /* First free solver_data if some additional information has been given  */
   if (p->solver_free_hook)
@@ -210,77 +213,49 @@ NumericsSparseLinearSolverParams* freeNumericsSparseLinearSolverParams(NumericsS
   return NULL;
 }
 
-CSparseMatrix* NM_csparse_alloc_for_copy(const CSparseMatrix* const m)
-{
-  assert(m);
-  CSparseMatrix* out = NULL;
-  if (m->nz >= 0) /* triplet  */
-  {
-    out = cs_spalloc(m->m, m->n, m->nzmax, 1, 1);
-  }
-  else if (m->nz == -1) /* csc */
-  {
-    out = cs_spalloc(m->m, m->n, m->nzmax, 1, 0);
-  }
-  else if (m->nz == -2) /* csr  */
-  {
-    out = cs_spalloc(m->n, m->m, m->nzmax, 1, 0);
-    out->nz = -2;
-    out->m = m->m;
-    out->n = m->n;
-  }
-  else
-  {
-    fprintf(stderr, "NM_copy :: error unknown type %lld for CSparse matrix\n",  (long long int)m->nz);
-    exit(EXIT_FAILURE);
-  }
-
-  return out;
-}
-
-void NM_sparse_free(void *p)
+void NSM_free_p(void *p)
 {
   assert(p);
-  NumericsSparseLinearSolverParams* ptr = (NumericsSparseLinearSolverParams*) p;
-  cs_lu_factors* cs_lu_A = (cs_lu_factors*)NM_sparse_solver_data(ptr);
+  NSM_linear_solver_params* ptr = (NSM_linear_solver_params*) p;
+  CSparseMatrix_lu_factors* cs_lu_A = (CSparseMatrix_lu_factors*)NSM_solver_data(ptr);
 
-  cs_sparse_free(cs_lu_A);
+  CSparseMatrix_free_lu_factors(cs_lu_A);
 
   ptr->solver_data = NULL;
 }
 
-size_t NM_sparse_nnz(const CSparseMatrix* const A)
+size_t NSM_nnz(const CSparseMatrix* const A)
 {
   if (A->nz >= 0)
   {
     return (size_t)A->nz;
   }
-  else if (A->nz == NS_CS_CSC)
+  else if (A->nz == NSM_CS_CSC)
   {
     return (size_t)A->p[A->n];
   }
-  else if (A->nz == NS_CS_CSR)
+  else if (A->nz == NSM_CS_CSR)
   {
     return (size_t)A->p[A->m];
   }
   else
   {
-    fprintf(stderr, "NM_sparse_nnz :: unsupported nz number %lld", A->nz);
+    fprintf(stderr, "NSM_nnz :: unsupported nz number " CS_ID, A->nz);
     exit(EXIT_FAILURE);
   }
 }
 
-void NM_sparse_fix_csc(CSparseMatrix* A)
+void NSM_fix_csc(CSparseMatrix* A)
 {
-  csi* Ap = A->p;
-  csi* Ai = A->i;
+  CS_INT* Ap = A->p;
+  CS_INT* Ai = A->i;
   double* xbck = NULL;
   sort_indices_struct* s = NULL;
   for (size_t j = 0; j < (size_t) A->n; ++j)
   {
     bool need_sorting = false;
-    csi max_indx = -1;
-    csi p = Ap[j];
+    CS_INT max_indx = -1;
+    CS_INT p = Ap[j];
     for ( ; p < Ap[j+1]; ++p)
     {
       if (Ai[p] <= max_indx)
@@ -296,8 +271,8 @@ void NM_sparse_fix_csc(CSparseMatrix* A)
     if (need_sorting)
     {
       double* Ax = A->x;
-      csi min_indx = Ai[p];
-      csi ps = p-1;
+      CS_INT min_indx = Ai[p];
+      CS_INT ps = p-1;
       for ( ; ps > Ap[j]; --ps)
       {
         if (Ai[ps] < min_indx)
@@ -336,3 +311,76 @@ void NM_sparse_fix_csc(CSparseMatrix* A)
     s = NULL;
   }
 }
+int NSM_to_dense(const NumericsSparseMatrix* const A, double * B)
+{
+
+  if (!A) { printf ("NSM_to_dense :: A = null\n") ; return (0) ; }
+  return  (int)CSparseMatrix_to_dense(NSM_get_origin(A), B);
+}
+
+unsigned NSM_origin(const NumericsSparseMatrix* M)
+{
+  assert(M);
+  if (!M) return -1;
+  return M->origin;
+}
+
+CSparseMatrix* NSM_get_origin(const NumericsSparseMatrix* M)
+{
+  assert(M);
+  switch (M->origin)
+  {
+  case NSM_CSC:
+    return M->csc;
+  case NSM_TRIPLET:
+    return M->triplet;
+  case NSM_CSR:
+    return M->csr;
+  default:
+    numerics_error_nonfatal("NSM_get_origin", "Unknown matrix origin %d", M->origin);
+    return NULL;
+  }
+}
+
+
+
+void NSM_write_in_file(const NumericsSparseMatrix* m, FILE* file)
+{
+   assert(m);
+   fprintf(file, "%d\n", NSM_origin(m));
+   CSparseMatrix_print_in_file(NSM_get_origin(m), 0, file);
+}
+
+
+NumericsSparseMatrix * NSM_new_from_file(FILE* file)
+{
+  int info;
+  int _origin =0;
+  CHECK_IO(fscanf(file, "%d", &_origin), &info);
+  NumericsSparseMatrix * out = NSM_new();
+  out->origin = _origin;
+  
+  CSparseMatrix * C = CSparseMatrix_new_from_file(file);
+
+  if (C->nz >= 0)
+  {
+    assert(out->origin ==NSM_TRIPLET);
+    out->triplet = C;
+    out->origin = NSM_TRIPLET;
+  }
+  else
+  {
+    if (out->origin == NSM_CSC)
+    {
+      out->csc = C;
+      out->origin = NSM_CSC;
+    }
+    else if (out->origin == NSM_CSR)
+    {
+      out->csr = C;
+      out->origin = NSM_CSR;
+    }
+  }
+  return out;
+}
+

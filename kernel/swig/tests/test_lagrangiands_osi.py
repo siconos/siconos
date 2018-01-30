@@ -91,7 +91,12 @@ def test_lagrangian_and_osis():
     lcp = sk.LCP()
     # -- (4) Simulation setup with (1) (2) (3)
     simu = sk.TimeStepping(td, standard, lcp)
+
+    
     # extra osi must be explicitely inserted into simu and linked to ds
+    simu.prepareIntegratorForDS(standard, ds_list['LTIDS+MJ'], model, tinit)
+    simu.prepareIntegratorForDS(standard, ds_list['LLDDS+MJ'], model, tinit)
+
     simu.prepareIntegratorForDS(bilbao, ds_list['LLDDS+MJB'], model, tinit)
     simu.prepareIntegratorForDS(bilbao, ds_list['LLDDS+MJB2'], model, tinit)
 

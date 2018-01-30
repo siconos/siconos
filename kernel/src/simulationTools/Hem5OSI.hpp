@@ -21,13 +21,14 @@
 #ifndef Hem5OSI_H
 #define Hem5OSI_H
 
-#include"OneStepIntegrator.hpp"
-#include<vector>
-
-#include <hairer.h>
+#include "OneStepIntegrator.hpp"
+#include <vector>
 
 #define HEM5_ATOL_DEFAULT 100 * MACHINE_PREC;
 #define HEM5_RTOL_DEFAULT 10 * MACHINE_PREC;
+
+class Hem5OSI_impl;
+TYPEDEF_SPTR(Hem5OSI_impl);
 
 /** Hem5OSI solver (odepack)
  *
@@ -109,7 +110,9 @@ private:
 
 
 public:
-  
+  SP::Hem5OSI_impl _impl;
+  friend class Hem5OSI_impl;
+
   enum {OSNSP_RHS,WORK_INTERACTION_LENGTH};
 
   /** constructor from a minimum set of data
@@ -238,10 +241,6 @@ public:
   void computeJacobianRhs(double) ;
 
   unsigned int numberOfConstraints();
-
-  fprobfunction fprob;
-
-  soloutfunction solout;
 
   void f(integer* sizeOfX, doublereal* time, doublereal* x, doublereal* xdot);
 

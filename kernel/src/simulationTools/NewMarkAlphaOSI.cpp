@@ -1,4 +1,3 @@
-
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
@@ -371,26 +370,27 @@ void NewMarkAlphaOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_i
 	      subprod(*ID, *(_SclerR->dotjacqhXqdot()), osnsp_rhs, xcoord, false); // y += NonLinearPart
 	    }
       else if(((*allOSNS)[SICONOS_OSNSP_ED_SMOOTH_POS]).get() == osnsp)  // LCP at position level
-	    {
-	      // Update Jacobian matrix
-	      inter->relation()->computeJach(t, *inter, indexSet->properties(vertex_inter));
-	      // compute osnsp_rhs = y_{n,k} + G*q_free
-	      if(!_IsVelocityLevel)  // output at the position level y_{n,k} = g_{n,k}
+      {
+        // Update Jacobian matrix
+        inter->relation()->computeJach(t, *inter, indexSet->properties(vertex_inter));
+        // compute osnsp_rhs = y_{n,k} + G*q_free
+        if(!_IsVelocityLevel)  // output at the position level y_{n,k} = g_{n,k}
         {
           inter->computeOutput(t, indexSet->properties(vertex_inter), 0); // Update output of level 0
           osnsp_rhs = *(inter->y(0)); //g_{n,k}
         }
-	      else                  // output at the velocity level y_{n,k} = (h/gamma_prime)*dotg_{n,k}
+        else                  // output at the velocity level y_{n,k} = (h/gamma_prime)*dotg_{n,k}
         {
           double h = _simulation->nextTime() - _simulation->startingTime();
           double gamma_prime = _gamma / _beta;
           inter->computeOutput(t, indexSet->properties(vertex_inter), 1); // Update output of level 1
           osnsp_rhs = (h / gamma_prime) * (*(inter->y(1))); //(h/gamma_prime)*dotg_{n,k}
         }
-	      subprod(*C, *q_free, osnsp_rhs, coord, false);
-	    }
+        subprod(*C, *q_free, osnsp_rhs, coord, false);
+      }
       else
 	    {
+        osnsp->display();
 	      RuntimeException::selfThrow("NewMarkAlphaOSI::computeFreeOutput, this OSNSP does not exist");
 	    }
     }
@@ -436,7 +436,8 @@ void NewMarkAlphaOSI::initializeDynamicalSystem(Model& m, double t, SP::Dynamica
 
     workVectors.resize(OneStepIntegrator::work_vector_of_vector_size);
     workVectors[OneStepIntegrator::residu_free].reset(new SiconosVector(d->dimension()));
-    workVectors[OneStepIntegrator::free].reset(new SiconosVector(d->dimension()));
+    //workVectors[OneStepIntegrator::free].reset(new SiconosVector(d->dimension()));
+    workVectors[OneStepIntegrator::free].reset(new SiconosVector(*(d->acceleration())));
     workVectors[OneStepIntegrator::acce_like].reset(new SiconosVector(*(d->acceleration()))); // set a0 = ddotq0
     workVectors[OneStepIntegrator::acce_memory].reset(new SiconosVector(*(d->acceleration()))); // set a0 = ddotq0
 
@@ -463,9 +464,10 @@ void NewMarkAlphaOSI::initializeDynamicalSystem(Model& m, double t, SP::Dynamica
 
     }
 void NewMarkAlphaOSI::fillDSLinks(Interaction &inter,
-                                    InteractionProperties& interProp,
-                                    DynamicalSystemsGraph & DSG)
+                                  InteractionProperties& interProp,
+                                  DynamicalSystemsGraph & DSG)
 {
+  DEBUG_BEGIN("NewMarkAlphaOSI::fillDSLinks(...)\n")
   SP::DynamicalSystem ds1= interProp.source;
   SP::DynamicalSystem ds2= interProp.target;
   assert(ds1);
@@ -515,8 +517,13 @@ void NewMarkAlphaOSI::fillDSLinks(Interaction &inter,
   VectorOfVectors &workVds1 = *DSG.properties(DSG.descriptor(ds1)).workVectors;
   if (relationType == Lagrangian)
   {
+    LagrangianDS& lds = *std11::static_pointer_cast<LagrangianDS> (ds1);
     DSlink[LagrangianR::xfree].reset(new BlockVector());
     DSlink[LagrangianR::xfree]->insertPtr(workVds1[OneStepIntegrator::free]);
+    DSlink[LagrangianR::p2].reset(new BlockVector());
+    DSlink[LagrangianR::p2]->insertPtr(lds.p(2));
+    DSlink[LagrangianR::q2].reset(new BlockVector());
+    DSlink[LagrangianR::q2]->insertPtr(lds.acceleration());
   }
   // else if (relationType == NewtonEuler)
   // {
@@ -529,17 +536,24 @@ void NewMarkAlphaOSI::fillDSLinks(Interaction &inter,
     VectorOfVectors &workVds2 = *DSG.properties(DSG.descriptor(ds2)).workVectors;
     if (relationType == Lagrangian)
     {
+      LagrangianDS& lds = *std11::static_pointer_cast<LagrangianDS> (ds2);
       DSlink[LagrangianR::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
+      DSlink[LagrangianR::p2]->insertPtr(lds.p(2));
+      DSlink[LagrangianR::q2]->insertPtr(lds.acceleration());
     }
     // else if (relationType == NewtonEuler)
     // {
     //   DSlink[NewtonEulerR::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
     // }
   }
+
+
+  DEBUG_END("NewMarkAlphaOSI::fillDSLinks(...)\n")
 }
 
 void NewMarkAlphaOSI::prepareNewtonIteration(double time)
 {
+  DEBUG_BEGIN("NewMarkAlphaOSI::prepareNewtonIteration(double time)\n");
   // Compute matrix W for all Dynamical Systems
   DynamicalSystemsGraph::VIterator dsi, dsend;
   for(std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
@@ -549,6 +563,7 @@ void NewMarkAlphaOSI::prepareNewtonIteration(double time)
     SiconosMatrix& W = *_dynamicalSystemsGraph->properties(*dsi).W;
     computeW(ds, W);
   }
+  DEBUG_END("NewMarkAlphaOSI::prepareNewtonIteration(double time)\n");
 }
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -703,57 +718,59 @@ void NewMarkAlphaOSI::computeCoefsDenseOutput(SP::DynamicalSystem ds)
 {
   double h = _simulation->nextTime() - _simulation->startingTime();
   Type::Siconos dsType = Type::value(*ds);    // Type of the current DS
-  SP::SiconosVector q_n, dotq_n, ddotq_n, q_np1, dotq_np1, ddotq_np1;
   SP::SiconosVector _vec(new SiconosVector(ds->dimension()));
   VectorOfMatrices& workMatrices = *_dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).workMatrices;
   VectorOfVectors& workVectors = *_dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).workVectors;
   if((dsType == Type::LagrangianDS) || (dsType == Type::LagrangianLinearTIDS))
   {
     SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS>(ds);
-    q_n = d->qMemory()->getSiconosVector(0); // q_n
-    dotq_n = d->velocityMemory()->getSiconosVector(0); // dotq_n
-    //ddotq_n = d->workspace(DynamicalSystem::acce_memory); // ddotq_n
+
+    const SiconosVector&
+      q_n( d->qMemory().getSiconosVector(0) ),                // q_n
+      dotq_n( d->velocityMemory().getSiconosVector(0) ),      // dotq_n
+      //ddotq_n = d->workspace(DynamicalSystem::acce_memory); // ddotq_n
+      q_np1( *d->q() ),                                       // q_{n+1}
+      dotq_np1( *d->velocity() ),                             // dotq_{n+1}
+      ddotq_np1( *d->acceleration() );                        // ddotq_{n+1}
+
     SiconosVector& ddotq_n = *workVectors[OneStepIntegrator::acce_memory];
 
-    q_np1 = d->q(); // q_{n+1}
-    dotq_np1 = d->velocity(); // dotq_{n+1}
-    ddotq_np1 = d->acceleration(); // ddotq_{n+1}
     SP::SiconosMatrix _CoeffsDense = workMatrices[OneStepIntegrator::dense_output_coefficients];
     //d->workMatrix(OneStepIntegrator::dense_output_coefficients); // matrix of coefficients [a0 a1 a2 a3 a4 a5]
-    if(_CoeffsDense->size(1) != 6)
+    if (_CoeffsDense->size(1) != 6)
     {
       RuntimeException::selfThrow("In NewMarkAlphaOSI::computeCoefsDenseOutput: the number of polynomial coeffcients considered here must equal to 6 (dense output polynomial of order 5)");
     }
     //a0 = q_n
-    (*_vec) = (*q_n);
+    (*_vec) = q_n;
     _CoeffsDense->setCol(0, (*_vec));
-    std::cout << "a0: ";
-    _vec->display();
+    DEBUG_EXPR(std::cout << "a0: ";
+               _vec->display(););
     //a1 = h*dotq_n
-    (*_vec) = h * (*dotq_n);
+    (*_vec) = h * dotq_n;
     _CoeffsDense->setCol(1, (*_vec));
-    std::cout << "a1: ";
-    _vec->display();
+    DEBUG_EXPR(std::cout << "a1: ";
+               _vec->display(););
     //a2 = 0.5*h^2*ddotq_n
-    (*_vec) = (0.5 * h * h) * (ddotq_n);
+    (*_vec) = (0.5 * h * h) * ddotq_n;
     _CoeffsDense->setCol(2, (*_vec));
-    std::cout << "a2: ";
-    _vec->display();
+    DEBUG_EXPR(std::cout << "a2: ";
+               _vec->display(););
     //a3 = -10*q_n - 6*h*dotq_n - 1.5*h^2*ddotq_n + 10*q_{n+1} - 4*h*dotq_{n+1} + 0.5*h^2*ddotq_{n+1}
-    (*_vec) = (-10.0) * (*q_n) - (6.0 * h) * (*dotq_n) - (1.5 * h * h) * (ddotq_n) + 10.0 * (*q_np1) - (4.0 * h) * (*dotq_np1) + (0.5 * h *h) * (*ddotq_np1);
+    (*_vec) = (-10.0) * q_n - (6.0 * h) * dotq_n - (1.5 * h * h) * ddotq_n + 10.0 * q_np1 - (4.0 * h) * dotq_np1 + (0.5 * h *h ) * ddotq_np1;
     _CoeffsDense->setCol(3, (*_vec));
-    std::cout << "a3: ";
-    _vec->display();
+    DEBUG_EXPR(std::cout << "a3: ";
+               _vec->display(););
     //a4 = 15*q_n + 8*h*dotq_n + 1.5*h^2*ddotq_n - 15*q_{n+1} + 7*h*dotq_{n+1} - h^2*ddotq_{n+1}
-    (*_vec) = 15.0 * (*q_n) + (8.0 * h) * (*dotq_n) + (1.5 * h *h) * (ddotq_n) - 15.0 * (*q_np1) + (7.0 * h) * (*dotq_np1) - h*h * (*ddotq_np1);
+    (*_vec) = 15.0 * q_n + (8.0 * h) * dotq_n + (1.5 * h *h) * ddotq_n - 15.0 * q_np1 + (7.0 * h) * dotq_np1 - h*h * ddotq_np1;
     _CoeffsDense->setCol(4, (*_vec));
-    std::cout << "a4: ";
-    _vec->display();
+    DEBUG_EXPR(std::cout << "a4: ";
+               _vec->display(););
     //a5 = -6*q_n - 3*h*dotq_n - 0.5*h^2*ddotq_n + 6*q_{n+1} - 3*h*dotq_{n+1} + 0.5*h^2*ddotq_{n+1}
-    (*_vec) = (-6.0) * (*q_n) - (3.0 * h) * (*dotq_n) - (0.5 * h*h) * (ddotq_n) + 6.0 * (*q_np1) - (3.0 * h) * (*dotq_np1) + (0.5 * h*h) * (*ddotq_np1);
+    (*_vec) = (-6.0) * q_n - (3.0 * h) * dotq_n - (0.5 * h*h) * ddotq_n + 6.0 * q_np1 - (3.0 * h) * dotq_np1 + (0.5 * h*h) * ddotq_np1;
     _CoeffsDense->setCol(5, (*_vec));
-    std::cout << "a5: ";
-    _vec->display();
+    DEBUG_EXPR(std::cout << "a5: ";
+               _vec->display(););
     //
 #ifdef DEBUG_NEWMARK
     std::cout << "==================== In NewMarkAlphaOSI::computeCoefsDenseOutput ================" <<std::endl;

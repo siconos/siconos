@@ -104,10 +104,10 @@ static char* format_msg_concat(const char* msg1, const char* msg2)
 %enddef
 
 %{
-#include "SiconosNumerics.h"
 #include "SiconosConfig.h"
+#include "SiconosNumerics.h"
 #include "SolverOptions.h"
-#include "SparseMatrix.h"
+#include "CSparseMatrix_internal.h"
 #include "NumericsMatrix.h"
 #include "SparseBlockMatrix.h"
 #include "NumericsSparseMatrix.h"
@@ -220,6 +220,7 @@ namespace std11 = boost;
 %include NonSmoothDrivers.h
 %include solverOptions.i
 %import tlsdef.h
+%include NumericsVerbose.h
 %include numerics_verbose.h
 
 // this has to die --xhub
@@ -281,6 +282,7 @@ namespace std11 = boost;
 // solverOptions.i, numerics_common and fwd decl
 // all this because of SolverOptions extend.
 %begin %{
+#include "CSparseMatrix_internal.h" // must be before NumericsMatrix.h
 #include "relay_cst.h"
 #include "AVI_cst.h"
 #include "SOCLCP_cst.h"
@@ -299,6 +301,7 @@ namespace std11 = boost;
 #include "NCP_Solvers.h"
 #include "MLCP_Solvers.h"
 #include "ConvexQP_Solvers.h"
+#include "SiconosCompat.h"
 #include "SOCLCP_Solvers.h"
 #include "NonSmoothDrivers.h"
   %}

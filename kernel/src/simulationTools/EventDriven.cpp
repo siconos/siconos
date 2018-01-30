@@ -41,6 +41,7 @@
 using namespace std;
 using namespace RELATION;
 
+#define DEFAULT_TOL_ED 1000 * DEFAULT_TOLERANCE
 
 /** defaut constructor
  *  \param a pointer to a timeDiscretisation (linked to the model that owns this simulation)
@@ -91,6 +92,8 @@ void EventDriven::insertIntegrator(SP::OneStepIntegrator osi)
 
 void EventDriven::updateIndexSet(unsigned int i)
 {
+  DEBUG_BEGIN("EventDriven::updateIndexSet(unsigned int i)\n");
+  DEBUG_PRINTF("with i = %i\n",i);
   assert(_nsds);
   assert(_nsds->topology());
   SP::Topology topo = _nsds->topology();
@@ -109,7 +112,7 @@ void EventDriven::updateIndexSet(unsigned int i)
   assert(indexSet1);
   assert(indexSet2);
 
-  DEBUG_PRINTF("update indexSets start : indexSet0 size : %ld\n", _indexSet0->size());
+  DEBUG_PRINTF("update indexSets start : _indexSet0 size : %ld\n", _indexSet0->size());
   DEBUG_PRINTF("update IndexSets start : indexSet1 size : %ld\n", indexSet1->size());
   DEBUG_PRINTF("update IndexSets start : indexSet2 size : %ld\n", indexSet2->size());
 
@@ -185,9 +188,10 @@ void EventDriven::updateIndexSet(unsigned int i)
     }
   }
 
-  // DEBUG_PRINTF("update indexSets end : indexSet0 size : %ld\n", indexSet0->size());
-  // DEBUG_PRINTF("update IndexSets end : indexSet1 size : %ld\n", indexSet1->size());
-  // DEBUG_PRINTF("update IndexSets end : indexSet2 size : %ld\n", indexSet2->size());
+  DEBUG_PRINTF("update indexSets end : _indexSet0 size : %ld\n", _indexSet0->size());
+  DEBUG_PRINTF("update IndexSets end : indexSet1 size : %ld\n", indexSet1->size());
+  DEBUG_PRINTF("update IndexSets end : indexSet2 size : %ld\n", indexSet2->size());
+  DEBUG_END("EventDriven::updateIndexSet(unsigned int i)\n");
 }
 
 void EventDriven::updateIndexSetsWithDoubleCondition()
@@ -230,6 +234,7 @@ void EventDriven::updateIndexSetsWithDoubleCondition()
 
 void EventDriven::initOSNS()
 {
+  DEBUG_BEGIN("EventDriven::initOSNS()\n");
   assert(_nsds);
   assert(_nsds->topology());
   // for all Interactions in indexSet[i-1], compute y[i-1] and
@@ -273,12 +278,13 @@ void EventDriven::initOSNS()
                                                             * does not exist */
       RuntimeException::selfThrow
       ("EventDriven::initialize, an EventDriven simulation must have an 'acceleration' non smooth problem.");
+
     // Initialize OSNSP for impact problem and at the acceleration level
     // WARNING: only for Lagrangian systems - To be reviewed for other ones.
     (*_allNSProblems)[SICONOS_OSNSP_ED_IMPACT]->setInputOutputLevel(1);
     (*_allNSProblems)[SICONOS_OSNSP_ED_IMPACT]->setIndexSetLevel(1);
-
     (*_allNSProblems)[SICONOS_OSNSP_ED_IMPACT]->initialize(shared_from_this());
+
     (*_allNSProblems)[SICONOS_OSNSP_ED_SMOOTH_ACC]->setInputOutputLevel(2);
     (*_allNSProblems)[SICONOS_OSNSP_ED_SMOOTH_ACC]->setIndexSetLevel(2);
     (*_allNSProblems)[SICONOS_OSNSP_ED_SMOOTH_ACC]->initialize(shared_from_this());
@@ -289,10 +295,12 @@ void EventDriven::initOSNS()
       SP::InteractionsGraph indexSet1 = _nsds->topology()->indexSet(1);
       if (indexSet1->size() != 0) // There is one non-smooth event to be added
       {
+        DEBUG_PRINT("Schedule an event at starting time\n");
         _eventsManager->scheduleNonSmoothEvent(*this, _eventsManager->startingTime(), false);
       };
     }
   }
+  DEBUG_END("EventDriven::initOSNS()\n");
 }
 
 void EventDriven::initOSIs()
@@ -610,6 +618,7 @@ void EventDriven::updateOutput(unsigned int levelInput)
 
 void EventDriven::advanceToEvent()
 {
+  DEBUG_BEGIN("EventDriven::advanceToEvent()\n");
   // Update interactions if a manager was provided
   updateInteractions();
 
@@ -757,6 +766,7 @@ void EventDriven::advanceToEvent()
   {
     RuntimeException::selfThrow("In EventDriven::advanceToEvent, this type of OneStepIntegrator does not exist for Event-Driven scheme!!!");
   }
+  DEBUG_END("EventDriven::advanceToEvent()\n");
 }
 
 
@@ -811,6 +821,7 @@ double EventDriven::computeResiduConstraints()
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 void EventDriven::prepareNewtonIteration()
 {
+  DEBUG_BEGIN("EventDriven::prepareNewtonIteration()\n");
   // At this stage, we do
   // (1) compute iteration matrix W for all DSs belonging to all OSIs
   // (2) compute free residu for all DSs belonging to all OSIs and get maximum residu
@@ -843,6 +854,7 @@ void EventDriven::prepareNewtonIteration()
   }
   // Compute maximum gap residu
   _newtonResiduYMax = computeResiduConstraints();
+  DEBUG_END("EventDriven::prepareNewtonIteration()\n");
 }
 
 

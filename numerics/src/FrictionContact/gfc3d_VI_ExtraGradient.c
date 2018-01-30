@@ -92,11 +92,11 @@ void gfc3d_VI_ExtraGradient(GlobalFrictionContactProblem* problem,
 
   if (isize != vi_isize )
   {
-    printf("size prolem in gfc3d_VI_ExtraGradient\n");
+    printf("size problem in gfc3d_VI_ExtraGradient\n");
   }
   if (dsize != vi_dsize )
   {
-    printf("size prolem in gfc3d_VI_ExtraGradient\n");
+    printf("size problem in gfc3d_VI_ExtraGradient\n");
   }
   int i;
   for (i = 0; i < isize; i++)
@@ -142,7 +142,7 @@ void gfc3d_VI_ExtraGradient(GlobalFrictionContactProblem* problem,
 
    double norm_q = cblas_dnrm2(n , problem->q , 1);
   /* **** Criterium convergence **** */
-  gfc3d_compute_error(problem, reaction , velocity, globalVelocity, options->dparam[0], norm_q, &error);
+   gfc3d_compute_error(problem, reaction , velocity, globalVelocity, options->dparam[0], options, norm_q, &error);
 
   DEBUG_EXPR(NM_vector_display(reaction,m));
   DEBUG_EXPR(NM_vector_display(velocity,m));
@@ -162,7 +162,7 @@ void gfc3d_VI_ExtraGradient(GlobalFrictionContactProblem* problem,
 
   if (verbose > 0)
   {
-    printf("--------------- FC3D - VI Extra Gradient (VI_EG) - #Iteration %i Final Residual = %14.7e\n", iter, error);
+    printf("--------------- GFC3D - VI Extra Gradient (VI_EG) - #Iteration %i Final Residual = %14.7e\n", iter, error);
   }
   free(vi);
 

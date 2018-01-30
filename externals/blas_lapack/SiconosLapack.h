@@ -30,7 +30,7 @@
 #include <assert.h>
 #include <stdio.h>
 
-#if defined(__cplusplus) && !defined (_NUMERICS_INTERNAL_CXX_)
+#if defined(__cplusplus)
 extern "C"
 {
 #endif
@@ -289,7 +289,7 @@ extern "C"
 #endif // No atlas
 
 
-#if defined(__cplusplus) && !defined (_NUMERICS_INTERNAL_CXX_)
+#if defined(__cplusplus)
 }
 #endif
 

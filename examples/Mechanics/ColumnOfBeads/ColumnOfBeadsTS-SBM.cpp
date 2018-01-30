@@ -128,7 +128,7 @@ int main(int argc, char* argv[])
     // ---      Model and simulation      ---
     // --------------------------------------
     SP::Model columnOfBeads(new Model(t0, T));
-    
+
     // add the dynamical system in the non smooth dynamical system
     for (unsigned int i = 0; i < nBeads; i++)
     {
@@ -277,18 +277,20 @@ int main(int argc, char* argv[])
     cout << "====> Output file writing ..." << endl;
     dataPlot.resize(k, outputSize);
     ioMatrix::write("result.dat", "ascii", dataPlot, "noDim");
+
+
     // Comparison with a reference file
-    SimpleMatrix dataPlotRef(dataPlot);
-    dataPlotRef.zero();
-
-    ioMatrix::read("result-SBM.ref", "ascii", dataPlotRef);
-
     cout << "====> Comparison with reference file ..." << endl;
-    std::cout << "Error w.r.t. reference file : " << (dataPlot - dataPlotRef).normInf() << std::endl;
-    if ((dataPlot - dataPlotRef).normInf() > 1e-12)
+    double error=0.0, eps=1e-12;
+    if (ioMatrix::compareRefFile(dataPlot, "ColumnOfBeadsTS-SBM.ref", eps, error)
+        && error > eps)
     {
       std::cout << "Warning. The result is rather different from the reference file." << std::endl;
       return 1;
+    }
+    else
+    {
+      std::cout << "Error w.r.t. reference file : " << error << std::endl;
     }
 
   }

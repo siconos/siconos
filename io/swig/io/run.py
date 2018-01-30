@@ -1,10 +1,12 @@
-#!/usr/bin/env python
+#!/usr/bin/env @PYTHON_EXECUTABLE@
+"""Run a pre-generated Siconos mechanics-IO HDF5 simulation file."""
 
+# Lighter imports before command line parsing
+from __future__ import print_function
 import argparse
-from siconos.io.mechanics_io import Hdf5
 
 parser = argparse.ArgumentParser(
-    description = 'Run a pre-generated Siconos HDF5 simulation file.',
+    description = __doc__,
     epilog = """Note that this script only provides a basic interface for the most
     common simulation options.  For more complex options, or to
     specify behaviour such as controllers, you must create a custom
@@ -24,11 +26,16 @@ parser.add_argument('-e','--every', metavar='interval', type=int,
 parser.add_argument('-f','--frequency', metavar='Hz', type=float,
                     help = 'alternative to -p, specify simulation frequency in Hz'+
                     ' (default=200 Hz)')
+parser.add_argument('-V','--version', action='version',
+                    version='@SICONOS_VERSION@')
 
 args = parser.parse_args()
 
 if args.frequency is not None:
     args.p = 1.0 / args.frequency
+
+# Heavier imports after command line parsing
+from siconos.io.mechanics_io import Hdf5
 
 # Run the simulation from the inputs previously defined and add
 # results to the hdf5 file. The visualisation of the output may be done

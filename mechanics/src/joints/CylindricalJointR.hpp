@@ -76,6 +76,11 @@ protected:
   double _previousAngle; // Needed to track _twistCount, TODO: work vector?
   double _initialAngle;
 
+  /** Return the normal of the angular DoF axis of rotation.
+   * \param axis must be 0 */
+  virtual void _normalDoF(SiconosVector& ans, const BlockVector& q0, int axis,
+                          bool absoluteRef=true);
+
 public:
 
   /** Empty constructor. The relation may be initialized later by

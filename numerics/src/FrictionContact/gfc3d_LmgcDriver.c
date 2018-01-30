@@ -4,6 +4,11 @@
 #include <time.h>
 #include <float.h>
 
+#include "CSparseMatrix_internal.h"
+
+// avoid a conflict with old csparse.h
+#define _CS_H
+
 #include "fc3d_Solvers.h"
 #include "NonSmoothDrivers.h"
 #include "fclib_interface.h"
@@ -35,12 +40,12 @@ static double * alloc_memory_double(unsigned int size, double *p)
   return r;
 }
 
-static csi * alloc_memory_csi(unsigned int size, unsigned int *p)
+static CS_INT * alloc_memory_csi(unsigned int size, unsigned int *p)
 {
-  csi * r = (csi *) malloc (size * sizeof(csi));
+  CS_INT * r = (CS_INT *) malloc (size * sizeof(CS_INT));
   for(unsigned int i=0; i<size; ++i)
   {
-    r[i] = (csi) p[i];
+    r[i] = (CS_INT) p[i];
   }
   return r;
 }
@@ -93,35 +98,35 @@ int gfc3d_LmgcDriver(double *reaction,
   H->size0 = M->size0;
   H->size1 = 3 * nc;
 
-  NumericsSparseMatrix * SM =newNumericsSparseMatrix();
+  NumericsSparseMatrix * SM =NSM_new();
   M->matrix2 = SM;
   SM->triplet =   (CSparseMatrix * )malloc(sizeof(CSparseMatrix));
   CSparseMatrix * _M = SM->triplet;
-  SM->origin = NS_TRIPLET;
+  SM->origin = NSM_TRIPLET;
 
-  csi * _colM = alloc_memory_csi(nzM, colM);
-  csi * _rowM = alloc_memory_csi(nzM, rowM);
+  CS_INT * _colM = alloc_memory_csi(nzM, colM);
+  CS_INT * _rowM = alloc_memory_csi(nzM, rowM);
 
   _M->nzmax = nzM;
   _M->nz = nzM;
   _M->m = M->size0;
   _M->n = M->size1;
-  _M->p = (csi *) _colM;
-  _M->i = (csi *) _rowM;
+  _M->p = (CS_INT *) _colM;
+  _M->i = (CS_INT *) _rowM;
   double * _Mdata = alloc_memory_double(nzM, Mdata);
   _M->x = _Mdata;
 
   DEBUG_PRINTF("_M->n=%lli\t",_M->n);
   DEBUG_PRINTF("_M->m=%lli\n",_M->m);
 
-  NumericsSparseMatrix * SH =newNumericsSparseMatrix();
+  NumericsSparseMatrix * SH =NSM_new();
   H->matrix2 = SH;
   SH->triplet =   (CSparseMatrix * )malloc(sizeof(CSparseMatrix));
   CSparseMatrix * _H = SH->triplet;
-  SH->origin = NS_TRIPLET;
+  SH->origin = NSM_TRIPLET;
 
-  csi * _colH = alloc_memory_csi(nzH, colH);
-  csi * _rowH = alloc_memory_csi(nzH, rowH);
+  CS_INT * _colH = alloc_memory_csi(nzH, colH);
+  CS_INT * _rowH = alloc_memory_csi(nzH, rowH);
 
   _H->nzmax = nzH;
   _H->nz = nzH;
@@ -181,7 +186,6 @@ int gfc3d_LmgcDriver(double *reaction,
   problem->dimension = 3;
   problem->numberOfContacts = nc;
   problem->env = NULL;
-  problem->workspace = NULL;
 
   problem->M = M;
   problem->H = H;
@@ -195,11 +199,13 @@ int gfc3d_LmgcDriver(double *reaction,
   assert(!infi);
   int iSize_min = isize < numerics_solver_options.iSize ? isize : numerics_solver_options.iSize;
   DEBUG_PRINTF("iSize_min = %i", iSize_min);
-  for (int i = 0; i < iSize_min; ++i) 
-    numerics_solver_options.iparam[i] = iparam[i];
+  for (int i = 0; i < iSize_min; ++i)
+    if (abs(iparam[i])>0)
+      numerics_solver_options.iparam[i] = iparam[i];
 
   int dSize_min = dsize <  numerics_solver_options.dSize ? dsize : numerics_solver_options.dSize;
   for (int i=0; i < dSize_min; ++i)
+    if (fabs(dparam[i]) > 0)
     numerics_solver_options.dparam[i] = dparam[i];
 
   /* solver_options_print(&numerics_solver_options); */

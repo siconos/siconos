@@ -431,12 +431,12 @@ void Interaction::initializeMemory(bool computeResidu, unsigned int steps)
   unsigned int nslawSize = _nslaw->size();
 
   for (unsigned int i = _lowerLevelForOutput ; i < _upperLevelForOutput + 1 ; i++)
-    _yMemory[i].reset(new SiconosMemory(steps, nslawSize));
+    _yMemory[i].setMemorySize(steps, nslawSize);
 
   for (unsigned int i = _lowerLevelForInput ; i < _upperLevelForInput + 1 ; i++)
   {
     DEBUG_PRINTF("Interaction::initializeMemory(). _lambda[%i].reset()\n",i)
-    _lambdaMemory[i].reset(new SiconosMemory(steps, nslawSize));
+    _lambdaMemory[i].setMemorySize(steps, nslawSize);
   }
 
 
@@ -798,12 +798,12 @@ void Interaction::swapInMemory()
   for (unsigned int  i = _lowerLevelForOutput; i < _upperLevelForOutput + 1 ; i++)
   {
     *(_y_k[i]) = *(_y[i]) ;
-    _yMemory[i]->swap(*_y[i]);
+    _yMemory[i].swap(*_y[i]);
   }
 
   for (unsigned int i = _lowerLevelForInput; i < _upperLevelForInput + 1  ; i++)
   {
-    _lambdaMemory[i]->swap(*_lambda[i]);
+    _lambdaMemory[i].swap(*_lambda[i]);
   }
 
 }

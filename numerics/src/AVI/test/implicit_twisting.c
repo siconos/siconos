@@ -37,8 +37,8 @@
 int main(void)
 {
   double x[2];
-  unsigned short xsubi1[] = {0., 0., 0.};
-  unsigned short xsubi2[] = {0., 0., 0.};
+  unsigned short xsubi1[] = {0, 0, 0};
+  unsigned short xsubi2[] = {0, 0, 0};
   x[0] = 50*erand48(xsubi1);
   x[1] = 50*erand48(xsubi2);
   /* column major */
@@ -66,13 +66,12 @@ int main(void)
 
   double q[2] = { x[0] + TS*x[1], x[1] };
 
-  AffineVariationalInequalities avi = {
-    .size = 2,
-    .M = &num_mat,
-    .q = q,
-    .d = NULL,
-    .poly.split = &poly
-  };
+  AffineVariationalInequalities avi;
+  avi.size = 2;
+  avi.M = &num_mat;
+  avi.q = q;
+  avi.d = NULL;
+  avi.poly.split = &poly;
 
   SolverOptions options;
   solver_options_set(&options, SICONOS_AVI_CAOFERRIS);

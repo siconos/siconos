@@ -17,6 +17,13 @@
 */
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
+
+#include "CSparseMatrix_internal.h"
+
+// avoid a conflict with old csparse.h in case fclib includes it
+#define _CS_H
+
 #include "NonSmoothDrivers.h"
 #include "frictionContact_test_function.h"
 #include "fc3d_Solvers.h"
@@ -27,6 +34,7 @@
 #include <fclib_interface.h>
 #endif
 #include "numerics_verbose.h"
+#include "SiconosCompat.h"
 
 void frictionContact_test_gams_opts(SN_GAMSparams* GP, int solverId)
 {
@@ -139,7 +147,7 @@ int frictionContact_test_function(FILE * f, SolverOptions * options)
   }
   else
   {
-    printf("test unsuccessful, residual = %g, info = %d, nb iter = %d\n", options->dparam[1], info, options->iparam[1] ? options->iparam[1] : options->iparam[7]);
+    printf("test unsuccessful, residual = %g, info = %d, nb iter = %d\n", options->dparam[1], info, options->iparam[SICONOS_IPARAM_ITER_DONE]);
   }
   free(reaction);
   free(velocity);

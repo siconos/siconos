@@ -90,10 +90,9 @@ FirstOrderNonLinearDS::FirstOrderNonLinearDS(const FirstOrderNonLinearDS & FONLD
     _invM.reset(new SimpleMatrix(*(FONLDS.invM())));
 
   // Memory stuff to me moved to graph/osi
-  if(FONLDS.fold())
+  if (FONLDS.fold())
     _fold.reset(new SiconosVector(*(FONLDS.fold())));
-  if(FONLDS.rMemory())
-    _rMemory.reset(new SiconosMemory(*(FONLDS.rMemory())));
+  _rMemory = FONLDS.rMemory();
 }
 
 
@@ -156,16 +155,17 @@ void FirstOrderNonLinearDS::initMemory(unsigned int steps)
   if (steps == 0)
     std::cout << "Warning : FirstOrderNonLinearDS::initMemory with size equal to zero" <<std::endl;
   else
-    _rMemory.reset(new SiconosMemory(steps, _n));
+    _rMemory.setMemorySize(steps, _n);
 }
 
 void FirstOrderNonLinearDS::swapInMemory()
 {
-  _xMemory->swap(*_x[0]);
-  if(_rMemory && _r)
-    _rMemory->swap(*_r);
-  if(_f && _fold)
+  _xMemory.swap(*_x[0]);
+  _rMemory.swap(*_r);
+  if (_f) {
+    assert(_fold);
     *_fold = *_f;
+  }
 }
 
 // ===== COMPUTE PLUGINS FUNCTIONS =====

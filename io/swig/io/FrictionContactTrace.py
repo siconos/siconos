@@ -22,13 +22,18 @@ import siconos.numerics as N
 import siconos.kernel as K
 
 from siconos.kernel import \
-    FrictionContact
+    FrictionContact,\
+    GlobalFrictionContact
+
 from siconos.numerics import \
-    FrictionContactProblem
+    FrictionContactProblem,\
+    GlobalFrictionContactProblem
 
 try:
     import siconos.fclib as F
+    has_fclib=True
 except :
+    has_fclib=False
     print("No module named siconos.fclib.")
 
 import imp
@@ -37,7 +42,7 @@ import time
 import getopt
 import random
 import h5py
-
+import os 
 
 class FrictionContactTraceParams():
     def __init__(self, dump_itermax=10, dump_probability=None, fileName="filename", title = "title", description = "description", mathInfo= "mathInfo"):
@@ -78,7 +83,7 @@ class FrictionContactTrace(FrictionContact):
         super(FrictionContactTrace, self).__init__(dim, solver)
 
     def maxiter_condition(self, SO):
-        return SO.iparam[7] >= self._maxiter
+        return SO.iparam[N.SICONOS_IPARAM_ITER_DONE] >= self._maxiter
 
     def random_condition(self, SO):
         return random.random() > self._proba
@@ -114,7 +119,6 @@ class FrictionContactTrace(FrictionContact):
             w_backup = self.w().copy()
             z_backup = self.z().copy()
             SO = self.numericsSolverOptions()
-            SO.internalSolvers.iparam[19] = self._stepcounter
 
 
             info = self.solve()
@@ -129,9 +133,13 @@ class FrictionContactTrace(FrictionContact):
                 n_format_string=len(str(solver_maxiter))
                 format_string = "{0}-i{1:0"+str(n_format_string)+"d}-{2}-{3}.hdf5"
                 filename = format_string.format(self._params._fileName,
-                                                              SO.iparam[7],
+                                                              SO.iparam[N.SICONOS_IPARAM_ITER_DONE],
                                                               problem.numberOfContacts,
                                                               self._counter)
+                if os.path.exists(filename):
+                    os.remove(filename)
+                    print('WARNING: file '+filename+ ' was existing and has been replaced')
+                
                 self._counter += 1
                 N.frictionContact_fclib_write(problem,
                                               self._params._title,
@@ -142,7 +150,7 @@ class FrictionContactTrace(FrictionContact):
                 guess = F.fclib_solution()
                 guess.u = w_backup
                 guess.r = z_backup
-                F.fclib_write_guesses([guess], filename)
+                F.fclib_write_guesses(1, [guess], filename)
                 
                 solution = F.fclib_solution()
                 solution.u = self.w()
@@ -156,5 +164,109 @@ class FrictionContactTrace(FrictionContact):
 
                 
             self.postCompute()
+
+        return info
+    
+class GlobalFrictionContactTraceParams():
+    def __init__(self, dump_itermax=10, dump_probability=None, fileName="filename", title = "title", description = "description", mathInfo= "mathInfo"):
+        self._dump_itermax = dump_itermax
+        self._dump_probability = dump_probability
+        self._fileName = fileName
+        self._title = title
+        self._description = description
+        self._mathInfo = mathInfo
+
+    def display(self):
+        print('title',self._title)
+    
+
+
+
+class GlobalFrictionContactTrace(GlobalFrictionContact):
+
+    def __init__(self, dim, solver, params=None, model=None):
+        if params == None:
+            self._params = GlobalFrictionContactTraceParams()
+        else:
+            self._params = params
+        proba= params._dump_probability
+        maxiter =  params._dump_itermax
+        if proba is not None:
+            self._proba = 1. - proba
+            self.condition = self.random_condition
+        if maxiter is not None:
+            self._maxiter = maxiter
+            if proba is None:
+                self.condition = self.maxiter_condition
+            else:
+                self.condition = self.random_and_maxiter_condition
+        self._counter = 0
+        self._stepcounter = 0
+        self._model=model
+        super(GlobalFrictionContactTrace, self).__init__(dim, solver)
+
+    def maxiter_condition(self, SO):
+        return SO.iparam[N.SICONOS_IPARAM_ITER_DONE] >= self._maxiter
+
+    def random_condition(self, SO):
+        return random.random() > self._proba
+
+    def random_and_maxiter_condition(self, SO):
+        return self.maxiter_condition(SO) and self.random_condition(SO)
+
+    def compute(self,time):
+        info = 0
+
+        cont = self.preCompute(time)
+
+        if (not cont):
+            return 0
+
+        if (self.indexSetLevel() == 999):
+            return 0
+
+        self.updateMu()
+
+        w_backup = self.w().copy()
+        z_backup = self.z().copy()
+        SO = self.numericsSolverOptions()
+
+        info = self.solve()
+        if self.condition(SO) and has_fclib:
+            # problem = self.getNumericsProblemPtr()
+            # print(problem, type(problem))
+            
+            problem = self.globalFrictionContactProblemPtr()
+
+            solver_maxiter=SO.iparam[0]
+            n_format_string=len(str(solver_maxiter))
+            format_string = "{0}-i{1:0"+str(n_format_string)+"d}-{2}-{3}.hdf5"
+            filename = format_string.format(self._params._fileName,
+                                            SO.iparam[N.SICONOS_IPARAM_ITER_DONE],
+                                            problem.numberOfContacts,
+                                            self._counter)
+            
+            if os.path.exists(filename):
+                os.remove(filename)
+                print('WARNING: file '+filename+ ' was existing and has been replaced')
+                
+            self._counter += 1
+            N.globalFrictionContact_fclib_write(problem,
+                                                self._params._title,
+                                                self._params._description,
+                                                self._params._mathInfo,
+                                                filename)
+            guess = F.fclib_solution()
+            guess.u = w_backup
+            guess.r = z_backup
+            F.fclib_write_guesses(1, guess, filename)
+            
+            solution = F.fclib_solution()
+            solution.u = self.w()
+            solution.z = self.z()
+            F.fclib_write_solution(solution, filename)
+            
+                
+        self.postCompute()
 
         return info

@@ -21,6 +21,7 @@
 #include "VariationalInequality_Solvers.h"
 #include "ConvexQP_Solvers.h"
 #include "ConvexQP_computeError.h"
+#include "SiconosCompat.h"
 
 #include "SolverOptions.h"
 #include "numerics_verbose.h"
@@ -42,6 +43,11 @@ void convexQP_VI_solver(ConvexQP* problem, double *z, double *w, int* info, Solv
 
 void convexQP_VI_solver(ConvexQP* problem, double *z, double *w, int* info, SolverOptions* options)
 {
+  NumericsMatrix* A = problem->A;
+  if (A)
+  {
+    numerics_error("ConvexQP_VI_Solver", "This solver does not support a specific matrix A different from the identity");
+  }
   /* Dimension of the problem */
   int n = problem->size;
 
@@ -114,7 +120,7 @@ void convexQP_VI_solver(ConvexQP* problem, double *z, double *w, int* info, Solv
 
 
   /* **** Criterium convergence **** */
-  convexQP_computeError(problem, z , w, options->dparam[0], options, &error);
+  convexQP_compute_error_reduced(problem, z , w, options->dparam[0], options, norm_q, &error);
 
   /* for (i =0; i< n ; i++) */
   /* { */

@@ -4,10 +4,16 @@
 #include <time.h>
 #include <float.h>
 #include "SiconosBlas.h"
+#include "CSparseMatrix_internal.h"
 #include "fc3d_Solvers.h"
 #include "NonSmoothDrivers.h"
+
+// avoid a conflict with old csparse.h in case fclib includes it
+#define _CS_H
+
 #include "fclib_interface.h"
 #include "numerics_verbose.h"
+#include "SiconosCompat.h"
 static int fccounter = -1;
 
 /* #define DEBUG_NOCOLOR */
@@ -52,7 +58,7 @@ int fc3d_LmgcDriver(double *reaction,
 
   if (solver_id == SICONOS_FRICTION_3D_NSGS)
   {
-    numerics_solver_options.iparam[SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION] = SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL;
+    numerics_solver_options.iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] = SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL;
   }
   else if  (solver_id == SICONOS_FRICTION_3D_NSN_AC)
   {

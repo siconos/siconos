@@ -195,8 +195,8 @@ int main(int argc, char* argv[])
       if (nonSmooth) // if the event is nonsmooth
       {
         dataPlot(k,0) = s->startingTime(); // get the time at nonsmooth event
-        dataPlot(k,1) = (*ball->qMemory()->getSiconosVector(1))(0);
-        dataPlot(k,2) = (*ball->velocityMemory()->getSiconosVector(1))(0);
+        dataPlot(k,1) = ball->qMemory().getSiconosVector(1)(0);
+        dataPlot(k,2) = ball->velocityMemory().getSiconosVector(1)(0);
         k++;
         nonSmooth = false;
         ++show_progress;

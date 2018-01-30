@@ -1,6 +1,0 @@
-CSparse is part of SuiteSparse http://faculty.cse.tamu.edu/davis/suitesparse.html
-
-The file csparse.c is the concatenation of all the separate c files. Then we modify the source to make it compilable with a C++ compiler.
-This basically amounts to add explicit cast for the allocation and a few other cosmetic change.
-
-The other important change is that we use only csi in the struct css and no double type.

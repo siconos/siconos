@@ -23,6 +23,7 @@
 #include "RelayProblem.h"
 #include "SolverOptions.h"
 #include "Relay_Solvers.h"
+#include "SiconosCompat.h"
 
 int relay_test_function(FILE * f, int  solverId)
 {

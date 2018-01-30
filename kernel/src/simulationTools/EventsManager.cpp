@@ -30,6 +30,12 @@
 
 unsigned long int EventsManager::_GapLimit2Events = GAPLIMIT_DEFAULT;
 
+// #define DEBUG_BEGIN_END_ONLY
+// #define DEBUG_NOCOLOR
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
+#include "debug.h"
+
 EventsManager::EventsManager(SP::TimeDiscretisation td): _k(0), _td(td),
   _T(std::numeric_limits<double>::infinity()), _NSeventInsteadOfTD(false)
 {
@@ -85,6 +91,7 @@ void EventsManager::noSaveInMemory(const Simulation& sim)
 
 void EventsManager::preUpdate(Simulation& sim)
 {
+  DEBUG_BEGIN("EventsManager::preUpdate(Simulation& sim)\n");
   const mpz_t *t1 = _events[0]->getTimeOfEvent();
   _events[0]->process(sim);
   for (unsigned int i = 1; i < _events.size() ; i++)
@@ -102,6 +109,7 @@ void EventsManager::preUpdate(Simulation& sim)
     else
       break;
   }
+  DEBUG_END("EventsManager::preUpdate(Simulation& sim)\n");
 }
 
 double EventsManager::startingTime() const

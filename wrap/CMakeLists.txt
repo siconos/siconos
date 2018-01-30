@@ -127,11 +127,9 @@ if(WITH_PYTHON_WRAPPER)
     configure_file(utils/${_filename} ${SICONOS_SWIG_ROOT_DIR}/${_filename} COPYONLY)
   endforeach()
 
-  
-  configure_file(swig/path.i.in ${SICONOS_SWIG_ROOT_DIR}/path.i @ONLY)
   # ====== Create (and setup) build target ======
-  
-  add_custom_target(python-build 
+
+  add_custom_target(python-build
     COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/setup.py build
     COMMENT "Build ${SICONOS_PYTHON_PACKAGE} package")
 

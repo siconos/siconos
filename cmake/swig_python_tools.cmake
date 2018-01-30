@@ -37,21 +37,27 @@ macro(doxy2swig_docstrings COMP)
 	list(APPEND DOCSTRINGS_FILES ${outfile_name})
       endforeach()
     endforeach()
-    
-    add_custom_command(OUTPUT ${SICONOS_SWIG_ROOT_DIR}/${COMP}-docstrings.i
-      DEPENDS ${DOCSTRINGS_FILES}
-      COMMAND cat
-      ARGS ${DOCSTRINGS_FILES} > ${SICONOS_SWIG_ROOT_DIR}/${COMP}-docstrings.i
-      COMMENT "${COMP} docstrings concatenation")
-    add_custom_target(${COMP}_docstrings DEPENDS ${SICONOS_SWIG_ROOT_DIR}/${COMP}-docstrings.i)
+
+    if (DOCSTRINGS_FILES)
+      add_custom_command(OUTPUT ${SICONOS_SWIG_ROOT_DIR}/${COMP}-docstrings.i
+        DEPENDS ${DOCSTRINGS_FILES}
+        COMMAND cat
+        ARGS ${DOCSTRINGS_FILES} > ${SICONOS_SWIG_ROOT_DIR}/${COMP}-docstrings.i
+        COMMENT "${COMP} docstrings concatenation")
+    else()
+      add_custom_command(OUTPUT ${SICONOS_SWIG_ROOT_DIR}/${COMP}-docstrings.i
+        DEPENDS ${DOCSTRINGS_FILES}
+        COMMAND touch
+        ARGS ${SICONOS_SWIG_ROOT_DIR}/${COMP}-docstrings.i)
+    endif()
   else()
     add_custom_command(OUTPUT ${SICONOS_SWIG_ROOT_DIR}/${COMP}-docstrings.i
       DEPENDS ${DOCSTRINGS_FILES}
-      COMMAND printf \"\" > ${COMP}-docstrings.i
+      COMMAND touch
+      ARGS ${SICONOS_SWIG_ROOT_DIR}/${COMP}-docstrings.i
       )
-    
-    add_custom_target(${COMP}_docstrings DEPENDS ${SICONOS_SWIG_ROOT_DIR}/${COMP}-docstrings.i)
   endif()
+  add_custom_target(${COMP}_docstrings DEPENDS ${SICONOS_SWIG_ROOT_DIR}/${COMP}-docstrings.i)
 endmacro()
 
 # ----------------------------------------------------------------------
@@ -121,7 +127,8 @@ macro(add_siconos_swig_sub_module fullname)
   # Set the SONAME for the SWIG module to the Siconos SONAME
   set_target_properties(${SWIG_MODULE_${name}_REAL_NAME} PROPERTIES
     NO_SONAME OFF
-    SOVERSION "${SICONOS_SOVERSION}")
+    VERSION "${SICONOS_SOVERSION}"
+    SOVERSION "${SICONOS_SOVERSION_MAJOR}")
 
   IF(MSVC AND ${COMPONENT} MATCHES "kernel")
     set_source_files_properties(${${_name}_generated_file_fullname} PROPERTIES COMPILE_FLAGS "/bigobj")

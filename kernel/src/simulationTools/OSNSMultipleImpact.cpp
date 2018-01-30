@@ -1061,7 +1061,7 @@ void OSNSMultipleImpact::display() const
     SP::LagrangianDS lag_ds = std11::dynamic_pointer_cast<LagrangianDS>(ds);
     std::cout << "DS number: " << ds->number() <<std::endl;
     std::cout << "Pre-impact velocity: ";
-    (lag_ds->velocityMemory()->getSiconosVector(1))->display();
+    (lag_ds->velocityMemory().getSiconosVector(1)).display();
     std::cout << "Post-impact velocity: ";
     (lag_ds->velocity())->display();
   }

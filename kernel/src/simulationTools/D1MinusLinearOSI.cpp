@@ -131,6 +131,8 @@ void D1MinusLinearOSI::initializeDynamicalSystem(Model& m, double t, SP::Dynamic
     workVectors[OneStepIntegrator::residu_free].reset(new SiconosVector(lds->dimension()));
     workVectors[OneStepIntegrator::free].reset(new SiconosVector(lds->dimension()));
     workVectors[OneStepIntegrator::free_tdg].reset(new SiconosVector(lds->dimension()));
+    // Update dynamical system components (for memory swap).
+    lds->computeForces(t, lds->q(), lds->velocity());
     lds->swapInMemory();
   }
   else if(dsType == Type::NewtonEulerDS)
@@ -141,6 +143,8 @@ void D1MinusLinearOSI::initializeDynamicalSystem(Model& m, double t, SP::Dynamic
     workVectors[OneStepIntegrator::residu_free].reset(new SiconosVector(neds->dimension()));
     workVectors[OneStepIntegrator::free].reset(new SiconosVector(neds->dimension()));
     workVectors[OneStepIntegrator::free_tdg].reset(new SiconosVector(neds->dimension()));
+    //Compute a first value of the forces to store it in _forcesMemory
+    neds->computeForces(t, neds->q(), neds->twist());
     neds->swapInMemory();
   }
   else
@@ -326,7 +330,7 @@ void D1MinusLinearOSI::computeFreeState()
 
 
       // get left state from memory
-      SiconosVector& vold = *d->velocityMemory()->getSiconosVector(0); // right limit
+      const SiconosVector& vold = d->velocityMemory().getSiconosVector(0); // right limit
       DEBUG_EXPR(vold.display());
       SiconosVector& residuFree = *workVectors[OneStepIntegrator::residu_free];
       SiconosVector &vfree  = *d->velocity(); // POINTER CONSTRUCTOR : contains free velocity
@@ -349,7 +353,7 @@ void D1MinusLinearOSI::computeFreeState()
       SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS> (ds);
 
       // get left state from memory
-      SiconosVector& vold = *d->twistMemory()->getSiconosVector(0); // right limit
+      const SiconosVector& vold = d->twistMemory().getSiconosVector(0); // right limit
       DEBUG_EXPR(vold.display());
 
 

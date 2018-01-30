@@ -40,6 +40,8 @@ def is_list(a):
 def is_dict(a):
     return isinstance(a, dict)
 
+def is_str(a):
+    return isinstance(a, str)
 
 def is_atom(a):
     return not (hasattr(a, '__iter__'))
@@ -123,7 +125,7 @@ def pkg_entries(spec=None, distrib=None, distrib_version=None, pkg=None):
         return [result]
     else:
 
-        if is_atom(result):
+        if is_str(result):
             result = [result]
         r = list()
 
@@ -311,7 +313,16 @@ def print_commands(*args, **kwargs):
         by_installer = list()
         by_command = list()
         definitions = list()
+        installer = None
+        updater = None
+        
         for pkg in options.pkgs:
+
+            installer = get_entry(spec, options.distrib, options.distrib_version,
+                                  pkg, 'installer')
+
+            updater = get_entry(spec, options.distrib, options.distrib_version,
+                            pkg, 'updater')
 
             # Get 'env' section from yaml file and check
             # for specific config of pkg for the given
@@ -335,7 +346,7 @@ def print_commands(*args, **kwargs):
 
             for entry in entries:
                 if entry is not None:
-                    if hasattr(entry, 'has_key'):
+                    if is_dict(entry):
                         if 'command' in entry:
                             by_command.append(entry['command'])
                     elif hasattr(entry, 'sort'):
@@ -352,15 +363,17 @@ def print_commands(*args, **kwargs):
 
         # read and set command line to install package for the given distrib
         # e.g. 'apt-get install ...' on a debian
-        installer = get_entry(spec, options.distrib, options.distrib_version,
-                              wildcard(spec), 'installer')
+        if installer is None:
+            installer = get_entry(spec, options.distrib, options.distrib_version,
+                                  wildcard(spec), 'installer')
 
         assert installer is not None
 
         # read and set command line to update package for the given distrib
         # e.g. 'apt-get update ...' on a debian
-        updater = get_entry(spec, options.distrib, options.distrib_version,
-                            wildcard(spec), 'updater')
+        if updater is None:
+            updater = get_entry(spec, options.distrib, options.distrib_version,
+                                wildcard(spec), 'updater')
 
         if updater:
             installer = '{0} && {1}'.format(updater, installer)

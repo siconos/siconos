@@ -22,16 +22,15 @@
 
 #ifdef HAVE_GAMS_C_API
 
-#include "GAMSlink.h"
-
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
 #include <stdlib.h>
 #include <math.h>
 
-
+#include "GAMSlink.h"
 #include "sanitizer.h"
+#include "CSparseMatrix_internal.h"
 
 #define DEBUG_STDOUT
 #define DEBUG_MESSAGES
@@ -100,7 +99,7 @@ static int gfc3d_AVI_gams_base(GlobalFrictionContactProblem* problem, double *re
   NumericsMatrix Emat;
   NM_null(&Emat);
   Emat.storageType = NM_SPARSE;
-  NM_sparse(&Emat);
+  numericsSparseMatrix(&Emat);
   Emat.size0 = size;
   Emat.size1 = size;
 
@@ -114,7 +113,7 @@ static int gfc3d_AVI_gams_base(GlobalFrictionContactProblem* problem, double *re
   NumericsMatrix Akmat;
   NM_null(&Akmat);
   Akmat.storageType = NM_SPARSE;
-  NM_sparse(&Akmat);
+  numericsSparseMatrix(&Akmat);
   Akmat.size0 = NB_APPROX*problem->numberOfContacts;
   Akmat.size1 = size;
   Akmat.matrix2->triplet = cs_spalloc(NB_APPROX*problem->numberOfContacts, size, NB_APPROX*problem->numberOfContacts*3, 1, 1);

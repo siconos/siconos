@@ -25,6 +25,10 @@ set(${COMPONENT}_DIRS
   src/simulationTools
 )
 
+set(${COMPONENT}_HDRS_EXCLUDE
+  src/utils/SiconosTools/CxxStd.hpp
+  )
+
 # Unstable sources. Will be included only
 # if WITH_${COMPONENT}_UNSTABLE is true.
 set(${COMPONENT}_Unstable_SRCS

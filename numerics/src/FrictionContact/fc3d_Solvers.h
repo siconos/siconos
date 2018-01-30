@@ -34,7 +34,6 @@
 #include "fc3d_nonsmooth_Newton_FischerBurmeister.h"
 #include "fc3d_unitary_enumerative.h"
 #include "Friction_cst.h"
-#include "SiconosCompat.h"
 #include "fc3d_nonsmooth_Newton_natural_map.h"
 #include "fc3d_local_problem_tools.h"
 
@@ -81,7 +80,7 @@ extern "C"
       \param options the solver options :
       [in] iparam[0] : Maximum iteration number
 
-      [in] iparam[SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION (7)] : error computation method :
+      [in] iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION (7)] : error computation method :
           SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_FULL (0) : Full error computation with velocity computation
           SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL (1) : Light error computation with incremental values on reaction verification of absolute error at the end
           SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT (2) : only light error computation (velocity not computed)

@@ -102,7 +102,9 @@ enum FRICTION_SOLVER
   /** VI formulation, Fixed Point Projection, local formulation */
   SICONOS_GLOBAL_FRICTION_3D_VI_FPP = 610,
   /** VI formulation, Extra-gradient, local formulation */
-  SICONOS_GLOBAL_FRICTION_3D_VI_EG = 611
+  SICONOS_GLOBAL_FRICTION_3D_VI_EG = 611,
+  SICONOS_GLOBAL_FRICTION_3D_ACLMFP = 612,
+  SICONOS_GLOBAL_FRICTION_3D_ADMM = 613
 };
 
 
@@ -119,6 +121,7 @@ extern const char* const   SICONOS_FRICTION_3D_PROX_STR;
 extern const char* const   SICONOS_FRICTION_3D_TFP_STR ;
 extern const char* const   SICONOS_FRICTION_3D_PFP_STR ;
 extern const char* const   SICONOS_FRICTION_3D_NSN_AC_STR ;
+extern const char* const   SICONOS_FRICTION_3D_NSN_AC_TEST_STR ;
 extern const char* const   SICONOS_FRICTION_3D_NSN_FB_STR ;
 extern const char* const   SICONOS_FRICTION_3D_NSN_NM_STR ;
 extern const char* const   SICONOS_FRICTION_3D_DSFP_STR ;
@@ -160,8 +163,8 @@ extern const char* const   SICONOS_GLOBAL_FRICTION_3D_GAMS_PATH_STR;
 extern const char* const   SICONOS_GLOBAL_FRICTION_3D_GAMS_PATHVI_STR;
 extern const char* const   SICONOS_GLOBAL_FRICTION_3D_VI_FPP_STR;
 extern const char* const   SICONOS_GLOBAL_FRICTION_3D_VI_EG_STR;
-extern const char* const   SICONOS_FRICTION_3D_ONECONTACT_QUARTIC_STR ;
-extern const char* const   SICONOS_GLOBAL_FRICTION_3D_GAMS_PATHVI_STR;
+extern const char* const   SICONOS_GLOBAL_FRICTION_3D_ACLMFP_STR;
+extern const char* const   SICONOS_GLOBAL_FRICTION_3D_ADMM_STR;
 extern const char* const   SICONOS_FRICTION_3D_ONECONTACT_QUARTIC_STR ;
 extern const char* const   SICONOS_FRICTION_3D_ONECONTACT_QUARTIC_NU_STR ;
 
@@ -169,7 +172,11 @@ extern const char* const   SICONOS_FRICTION_3D_ONECONTACT_QUARTIC_NU_STR ;
 enum SICONOS_FRICTION_3D_IPARAM
 {
   /** index in iparam to store the error strategy for the internal solver */
-  SICONOS_FRICTION_3D_IPARAM_INTERNAL_ERROR_STRATEGY =2
+  SICONOS_FRICTION_3D_IPARAM_INTERNAL_ERROR_STRATEGY =2,
+  /** index in iparam to store the error evaluation method */
+  SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION = 7,
+  /** index in iparam to store the frequency of error evaluation method */
+  SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION_FREQUENCY = 8,
 };
 
 enum SICONOS_FRICTION_INTERNAL_ERROR_STRATEGY
@@ -194,10 +201,6 @@ enum SICONOS_FRICTION_3D_NSGS_IPARAM
   SICONOS_FRICTION_3D_NSGS_SHUFFLE=5,
   /** index in iparam to store the shuffle seed */
   SICONOS_FRICTION_3D_NSGS_SHUFFLE_SEED=6,
-  /** index in iparam to store the error evaluation method */
-  SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION = 7,
-  /** index in iparam to store the frequency of error evaluation method */
-  SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_FREQUENCY = 8,
   /** index in iparam to store the  */
   SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION =14,
 };
@@ -260,7 +263,12 @@ enum SICONOS_FRICTION_3D_NSN_IPARAM
   /** index in iparam to store the maximum number of loop for the hybrid solver */
   SICONOS_FRICTION_3D_NSN_HYBRID_MAX_LOOP = 15,
   /** index in iparam to store the maximum number of iterations for the projection solver */
-  SICONOS_FRICTION_3D_NSN_HYBRID_MAX_ITER = 16
+  SICONOS_FRICTION_3D_NSN_HYBRID_MAX_ITER = 16,
+  /** index in iparam to store the boolean to know if allocation of dwork is needed */
+  SICONOS_FRICTION_3D_NSN_MEMORY_ALLOCATION= 17,
+  /** index in iparam to store the boolean to know if allocation of dwork is needed */
+  SICONOS_FRICTION_3D_NSN_MPI_COM= 18
+
 };
 
 enum SICONOS_FRICTION_3D_NSN_DPARAM
@@ -349,7 +357,39 @@ enum SICONOS_FRICTION_3D_PROXIMAL
 
 };
 
+enum SICONOS_FRICTION_3D_ADMM_IPARAM_ENUM
+{
+  /** index in iparam to store the strategy for computing rho */
+  SICONOS_FRICTION_3D_ADMM_IPARAM_RHO_STRATEGY = 9,
+  /** index in iparam to store the acceleration paramter */
+  SICONOS_FRICTION_3D_ADMM_IPARAM_ACCELERATION= 10
 
+};
+
+enum SICONOS_FRICTION_3D_ADMM_DPARAM_ENUM
+{
+  /** index in dparam to store the rho value for projection formulation */
+  SICONOS_FRICTION_3D_ADMM_RHO = 3,
+  /** index in dparam to store the eta value for the restarting criteria */
+  SICONOS_FRICTION_3D_ADMM_RESTART_ETA = 4
+};
+
+enum SICONOS_FRICTION_3D_ADMM_ACCELERATION_ENUM
+{
+  SICONOS_FRICTION_3D_ADMM_NO_ACCELERATION= 0,
+  SICONOS_FRICTION_3D_ADMM_ACCELERATION= 1,
+  SICONOS_FRICTION_3D_ADMM_ACCELERATION_AND_RESTART= 2
+};
+
+enum SICONOS_FRICTION_3D_ADMM_STRATEGY_ENUM
+{
+  /** A constant value given in dparam[SICONOS_FRICTION_3D_NSN_RHO] is used */
+  SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_CONSTANT = 0,
+  /** A computed value stored in dparam[SICONOS_FRICTION_3D_NSN_RHO] is used */
+  SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_NORM_INF =1,
+  /** An adaptive strategy for rho is used */
+  SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_ADAPTIVE =2
+};
 
 
 

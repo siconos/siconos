@@ -20,6 +20,7 @@
 #include <string.h>
 #include <time.h>
 #include <float.h>
+#include <assert.h>
 
 #include "fc3d_Solvers.h"
 #include "NonSmoothDrivers.h"
@@ -30,6 +31,7 @@ const char* const   SICONOS_FRICTION_3D_NSGSV_STR = "FC3D_NSGSV";
 const char* const   SICONOS_FRICTION_3D_TFP_STR = "FC3D_TFP";
 const char* const   SICONOS_FRICTION_3D_PFP_STR = "FC3D_PFP";
 const char* const   SICONOS_FRICTION_3D_NSN_AC_STR = "FC3D_NSN_AC";
+const char* const   SICONOS_FRICTION_3D_NSN_AC_TEST_STR = "FC3D_NSN_AC_TEST";
 const char* const   SICONOS_FRICTION_3D_NSN_FB_STR = "FC3D_NSN_FB";
 const char* const   SICONOS_FRICTION_3D_NSN_NM_STR = "FC3D_NSN_NM";
 const char* const   SICONOS_FRICTION_3D_DSFP_STR = "FC3D_DeSaxceFixedPoint";

@@ -1612,6 +1612,42 @@ Steve, Vincent.
 *** Missing devel for Siconos/Gazebo
  + SDF, siconos configuration
    profile in SDF for siconos ?
+   configuration file for siconos hdf5, xml, without various profile serializatoion xml
+
+   - time step
+   - Newton tolerance, nb iterations
+   - osi class
+   - onsnp
+   - onsnp solver, tolerance, nb iterations
+   - projection techniques (position, velocities)
+
+     time_stepping=None,
+     h=0.0005,
+
+     osi=Kernel.MoreauJeanOSI,
+     theta=0.50001,
+
+     Newton_options=Kernel.SICONOS_TS_NONLINEAR,
+     Newton_max_iter=20,
+     Newton_update_interactions=False,
+
+     solver=Numerics.SICONOS_FRICTION_3D_NSGS,
+     itermax=100000,
+     tolerance=1e-8,
+
+     projection_itermax=20,
+     projection_tolerance=1e-8,
+     projection_tolerance_unilateral=1e-8,
+     contact_index_set=1,
+
+     numerics_verbose=False,
+     verbose=True,
+     verbose_progress=True,
+
+     output_frequency=None,
+
+
+
  + debian packages
  + docker file. [[http://siconos.github.io/gazebo-siconos/]]
  + Evaluation of the devel with examples

@@ -34,6 +34,21 @@ IF(GAMSCAPI_FOUND)
   #  ENDIF(UNIX AND NOT APPLE)
 ENDIF(GAMSCAPI_FOUND)
 
+# --- SuiteSparse ---
+# Look for system-installed SuiteSparse/CSparse
+if (WITH_SYSTEM_SUITESPARSE)
+  compile_with(SuiteSparse COMPONENTS CXSparse)
+  if (NOT SuiteSparse_FOUND OR NOT SuiteSparse_CXSparse_FOUND)
+    set(_sys_CXSparse FALSE)
+    message(STATUS "System SuiteSparse was requested (WITH_SYSTEM_SUITESPARSE=${WITH_SYSTEM_SUITESPARSE})\ 
+    but not found! Using the internal copy of suitesparse")
+  else()
+    set(_sys_CXSparse TRUE)
+    list(APPEND SICONOS_LINK_LIBRARIES ${CXSparse_LIBRARY})
+  endif()
+  set(USE_SYSTEM_SUITESPARSE ${_sys_CXSparse} CACHE INTERNAL "flag to check to systemwide SuiteSparse install")
+endif()
+
 compile_with(PathFerris)
 compile_with(PathVI)
 compile_with(LpSolve)
@@ -111,7 +126,7 @@ ENDIF()
 # --- Bullet ---
 SET(BULLET_PATHS "")
 IF(WITH_BULLET)
-  COMPILE_WITH(Bullet REQUIRED)
+  COMPILE_WITH(Bullet REQUIRED ONLY mechanics)
   IF(BULLET_FOUND)
     SET(SICONOS_HAVE_BULLET TRUE)
     MESSAGE( STATUS " Bullet include dirs : ${BULLET_INCLUDE_DIRS}" )
@@ -146,8 +161,14 @@ IF(WITH_OCC)
   if(NOT WITH_MECHANISMS)
     COMPILE_WITH(OCE 0.15 REQUIRED ONLY mechanics)
     SET(SICONOS_HAVE_OCC TRUE)
-    LIST(REMOVE_ITEM SICONOS_LINK_LIBRARIES DRAWEXE)
-    LIST(REMOVE_ITEM mechanics_LINK_LIBRARIES DRAWEXE)
+  endif()
+  if(OCE_VERSION VERSION_LESS 0.18)
+    # DRAWEXE link fails on some systems and must be removed.
+    # MESSAGE(STATUS "DRAWEXE link fails on some systems is removed.")
+    list(REMOVE_ITEM SICONOS_LINK_LIBRARIES DRAWEXE)
+    list(REMOVE_ITEM mechanics_LINK_LIBRARIES DRAWEXE)
+    set(SICONOS_LINK_LIBRARIES ${SICONOS_LINK_LIBRARIES} "m" CACHE INTERNAL "List of external libraries")
+    set(mechanics_LINK_LIBRARIES ${mechanics_LINK_LIBRARIES} "m" CACHE INTERNAL "List of external libraries")
   endif()
 ENDIF()
 
@@ -157,8 +178,9 @@ IF(WITH_MECHANISMS)
 
   message(STATUS "Searching for OCE ....")
   compile_with(OCE COMPONENTS ${OCE_TOOLKITS} ONLY mechanics)
-  if(OCE_VERSION VERSION_LESS 0.16)
+  if(OCE_VERSION VERSION_LESS 0.18)
     # DRAWEXE link fails on some systems and must be removed.
+    #MESSAGE(STATUS "DRAWEXE link fails on some systems is removed.")
     list(REMOVE_ITEM mechanics_LINK_LIBRARIES DRAWEXE)
     list(REMOVE_ITEM SICONOS_LINK_LIBRARIES DRAWEXE)
     set(SICONOS_LINK_LIBRARIES ${SICONOS_LINK_LIBRARIES} "m" CACHE INTERNAL "List of external libraries")
@@ -171,7 +193,6 @@ IF(WITH_MECHANISMS)
       message(WARNING "Ignoring OCE installation due to missing toolkit(s): ${OCE_MISSING_TOOLKITS}")
     endif(NOT OCE_ALL_FOUND)
   endif(OCE_FOUND)
-
   if(OCE_FOUND)
     # Include files reside in ${OCE_INCLUDE_DIRS};
     #    include_directories(${OCE_INCLUDE_DIRS})
@@ -233,6 +254,11 @@ ENDIF(WITH_HDF5)
 include(serialization_vector_test)
 if(WITH_SERIALIZATION)
   COMPILE_WITH(Boost 1.47 COMPONENTS serialization filesystem REQUIRED)
+  if (Boost_VERSION GREATER 106100)
+    # If boost is recent enough, prefer system boost serialization to
+    # the one included in "externals/boost_serialization".
+    set(WITH_SYSTEM_BOOST_SERIALIZATION ON)
+  endif()
   TEST_SERIALIZATION_VECTOR_BUG()
 endif()
 
@@ -257,6 +283,8 @@ if(WITH_PYTHON_WRAPPER)
   ENDIF(NOT NO_RUNTIME_BUILD_DEP)
 endif()
 
+# See if help2man is available
+find_program(HELP2MAN help2man)
 
 #
 # Fedora13 https://fedoraproject.org/wiki/UnderstandingDSOLinkChange
@@ -268,12 +296,17 @@ if(UNIX)
   endif()
 endif()
 
-
 # SiconosConfig.h generation and include
 if(EXISTS ${CMAKE_SOURCE_DIR}/config.h.cmake)
   configure_file(${CMAKE_SOURCE_DIR}/config.h.cmake
     ${CMAKE_BINARY_DIR}/SiconosConfig.h)
 endif()
+
+# man pages
+IF(IS_DIRECTORY ${CMAKE_SOURCE_DIR}/man)
+  CONFIGURE_FILE(man/siconos.1.in man/siconos.1)
+  INSTALL(FILES ${CMAKE_BINARY_DIR}/man/siconos.1 DESTINATION share/man/man1)
+ENDIF(IS_DIRECTORY ${CMAKE_SOURCE_DIR}/man)
 
 set(${PROJECT_NAME}_LOCAL_INCLUDE_DIRECTORIES
   ${${PROJECT_NAME}_LOCAL_INCLUDE_DIRECTORIES}

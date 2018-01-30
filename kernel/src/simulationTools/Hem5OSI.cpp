@@ -17,6 +17,7 @@
  */
 
 #include "Hem5OSI.hpp"
+#include <hairer.h>
 #include "EventDriven.hpp"
 #include "LagrangianLinearTIDS.hpp"
 #include "BlockVector.hpp"
@@ -31,7 +32,6 @@
 #include "NewtonEulerR.hpp"
 #include "OneStepNSProblem.hpp"
 
-
 using namespace RELATION;
 
 //#define DEBUG_STDOUT
@@ -40,6 +40,17 @@ using namespace RELATION;
 
 // initial step size guess (typical value 1e-3)
 #define INITIAL_GUESS_TS 1.e-3
+
+// ===== Hidden implementation so we don't depend on hairer.h publically =====
+
+class Hem5OSI_impl
+{
+public:
+  Hem5OSI_impl(Hem5OSI* h) : hem5osi(h) {}
+  Hem5OSI *hem5osi;
+  fprobfunction fprob;
+  soloutfunction solout;
+};
 
 // ===== Out of class objects and functions =====
 
@@ -64,7 +75,7 @@ void Hem5OSI_fprob_wrapper(integer* IFCN,
                            doublereal* GQQ, doublereal* GT, doublereal * FL,
                            doublereal* QDOT, doublereal* UDOT, doublereal * AM)
 {
-  return hem5_global_object->fprob(IFCN,
+  return hem5_global_object->_impl->fprob(IFCN,
                                    NQ,
                                    NV,
                                    NU,
@@ -94,7 +105,7 @@ void Hem5OSI_solout_wrapper(integer* MODE,
                             doublereal* q, doublereal* v, doublereal* u,
                             doublereal *DOWK, integer* IDOWK)
 {
-  return hem5_global_object->solout(MODE,
+  return hem5_global_object->_impl->solout(MODE,
                                     NSTEP,
                                     NQ,
                                     NV,
@@ -107,9 +118,11 @@ void Hem5OSI_solout_wrapper(integer* MODE,
                                     DOWK, IDOWK);
 }
 
+// ===== Main class implementation ====
 
 Hem5OSI::Hem5OSI():
   OneStepIntegrator(OSI::HEM5OSI), _idid(0)
+  , _impl(std11::make_shared<Hem5OSI_impl>(this))
 {
   _steps=1;
   _intData.resize(9);
@@ -274,7 +287,7 @@ void Hem5OSI::computeJacobianRhs(double t)
   }
 }
 
-void Hem5OSI::fprob(integer* IFCN,
+void Hem5OSI_impl::fprob(integer* IFCN,
                     integer* NQ,
                     integer* NV,
                     integer* NU,
@@ -294,12 +307,12 @@ void Hem5OSI::fprob(integer* IFCN,
   DEBUG_PRINTF("LDG = %i\t LDF = %i \t LDA = %i \n", (int)*LDG, (int)*LDF, (int)*LDA);
 
   // fill in xWork vector (ie all the x of the ds of this osi) with x
-  fillqWork(NQ, q);
-  fillvWork(NV, v);
+  hem5osi->fillqWork(NQ, q);
+  hem5osi->fillvWork(NV, v);
 
   double t = *time;
 
-  SP::DynamicalSystemsGraph dsGraph =  _dynamicalSystemsGraph;
+  SP::DynamicalSystemsGraph dsGraph =  hem5osi->_dynamicalSystemsGraph;
 
 
 
@@ -362,8 +375,8 @@ void Hem5OSI::fprob(integer* IFCN,
          Type::value(*ds) == Type::LagrangianLinearTIDS)
 	    {
 	      LagrangianDS& lds = *std11::static_pointer_cast<LagrangianDS>(ds);
-	      fillqWork(NQ,q);
-	      fillvWork(NV,v);
+	      hem5osi->fillqWork(NQ,q);
+	      hem5osi->fillvWork(NV,v);
 	      lds.computeForces((double)*time, lds.q(), lds.velocity());
 	    }
       else if(Type::value(*ds) == Type::NewtonEulerDS)
@@ -377,14 +390,14 @@ void Hem5OSI::fprob(integer* IFCN,
     }
     for(unsigned int ii =0 ; ii < (unsigned int)(*NV); ii ++)
     {
-      F[ii] = _forcesWork->getValue(ii) ;
+      F[ii] = hem5osi->_forcesWork->getValue(ii) ;
     }
   }
   if(ifcn == 4)  // compute G (constraints)
   {
     InteractionsGraph::VIterator ui, uiend;
     SP::InteractionsGraph indexSet2
-      = _simulation->nonSmoothDynamicalSystem()->topology()->indexSet(2);
+      = hem5osi->_simulation->nonSmoothDynamicalSystem()->topology()->indexSet(2);
     assert(indexSet2);
     for(std11::tie(ui, uiend) = indexSet2->vertices(); ui != uiend; ++ui)
     {
@@ -398,7 +411,8 @@ void Hem5OSI::fprob(integer* IFCN,
   if((ifcn == 6) || (ifcn >= 10))   // compute GP ( Jacobian of the constraints)
   {
     InteractionsGraph::VIterator ui, uiend;
-    SP::InteractionsGraph indexSet2 = _simulation->nonSmoothDynamicalSystem()->topology()->indexSet(2);
+    SP::InteractionsGraph indexSet2 =
+      hem5osi->_simulation->nonSmoothDynamicalSystem()->topology()->indexSet(2);
     for(std11::tie(ui, uiend) = indexSet2->vertices(); ui != uiend; ++ui)
     {
       SP::Interaction inter = indexSet2->bundle(*ui);
@@ -416,7 +430,8 @@ void Hem5OSI::fprob(integer* IFCN,
   if((ifcn == 3) || (ifcn == 6) || (ifcn >= 10))   // compute GT (partial time derivative of the constraints)
   {
     InteractionsGraph::VIterator ui, uiend;
-    SP::InteractionsGraph indexSet2 = _simulation->nonSmoothDynamicalSystem()->topology()->indexSet(2);
+    SP::InteractionsGraph indexSet2 =
+      hem5osi->_simulation->nonSmoothDynamicalSystem()->topology()->indexSet(2);
     for(std11::tie(ui, uiend) = indexSet2->vertices(); ui != uiend; ++ui)
     {
       SP::Interaction inter = indexSet2->bundle(*ui);
@@ -612,7 +627,8 @@ void Hem5OSI::initialize(Model& m)
 
 
 }
-void Hem5OSI::solout(integer* MODE,
+
+void Hem5OSI_impl::solout(integer* MODE,
                      integer* NSTEP,
                      integer* NQ,
                      integer* NV,

@@ -34,6 +34,8 @@ void RegisterModelIbin(std::ifstream& ifs, SP::Model& model)
   boost::archive::binary_iarchive ar(ifs);
   siconos_io_register_Numerics(ar);
   siconos_io_register_Kernel(ar);
+  siconos_io_register_Mechanics(ar);
+  siconos_io_register_Control(ar);
   ar >> NVP(model);
 }
 #endif

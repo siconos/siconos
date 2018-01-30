@@ -215,9 +215,9 @@ int main(int argc, char* argv[])
         DataPlot(k, 1) = (*PosBlock)(0); //Position X
         DataPlot(k, 2) = (*PosBlock)(1); //Position Y
         DataPlot(k, 3) = (*PosBlock)(2); // Position theta
-        DataPlot(k, 4) = (*(RockingBlock->velocityMemory()->getSiconosVector(1)))(0); // Velocity Vx
-        DataPlot(k, 5) = (*(RockingBlock->velocityMemory()->getSiconosVector(1)))(1); // Velocity Vy
-        DataPlot(k, 6) = (*(RockingBlock->velocityMemory()->getSiconosVector(1)))(2); // Angular velocity
+        DataPlot(k, 4) = RockingBlock->velocityMemory().getSiconosVector(1)(0); // Velocity Vx
+        DataPlot(k, 5) = RockingBlock->velocityMemory().getSiconosVector(1)(1); // Velocity Vy
+        DataPlot(k, 6) = RockingBlock->velocityMemory().getSiconosVector(1)(2); // Angular velocity
         DataPlot(k, 7) = (*GapCon1)(0);  // Gap at first contact
         DataPlot(k, 8) = (*GapCon2)(0);  // Gap at second contact
         DataPlot(k, 9) = (*VelCon1)(0);  // Relative velocity at first contact

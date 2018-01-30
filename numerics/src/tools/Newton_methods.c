@@ -17,6 +17,7 @@
 */
 
 #include "SiconosConfig.h"
+#include "SiconosCompat.h"
 
 #include "Newton_methods.h"
 
@@ -44,6 +45,10 @@
 
 typedef double (*linesearch_fptr)(int n, double theta, double preRHS, search_data*);
 
+#ifdef __cplusplus
+using namespace std;
+#endif
+
 void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverOptions* options, functions_LSA* functions)
 {
   /* size of the problem */
@@ -63,8 +68,8 @@ void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverO
 
 
   unsigned int iter;
-
-
+  /* if (verbose) */
+  /*   solver_options_print(options); */
   int incx, incy;
   double theta, preRHS, tau, threshold;
   double theta_iter = 0.0;
@@ -213,7 +218,7 @@ void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverO
 
   unsigned log_hdf5 = SN_logh5_loglevel(SN_LOGLEVEL_NO);
 
-  char* hdf5_filename = getenv("SICONOS_HDF5_NAME");
+  const char* hdf5_filename = getenv("SICONOS_HDF5_NAME");
   if (!hdf5_filename) hdf5_filename = "test.hdf5";
   SN_logh5* logger_s = NULL;
   if (log_hdf5)
@@ -222,6 +227,8 @@ void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverO
     SN_logh5_scalar_uinteger(0, "version", logger_s->file);
   }
 
+
+  numerics_printf_verbose(1,"--- newton_LSA :: start iterations");
   // Newton Iteration
   while ((iter < itermax) && (err > tol))
   {
@@ -375,8 +382,7 @@ void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverO
         SN_LOG_SCALAR(log_hdf5,SN_logh5_scalar_double(params->sigma * theta, "theta_iter_threshold", logger_s->group));
       }
 
-      if (verbose > 1)
-        printf("newton_LSA :: pure Newton direction not acceptable theta_iter = %g > %g = theta\n", theta_iter, theta);
+      numerics_printf_verbose(2,"--- newton_LSA :: pure Newton direction not acceptable theta_iter = %g > %g = theta\n", theta_iter, theta);
 
       // Computations for the line search
       // preRHS = <JacThetaF_merit, d>
@@ -395,8 +401,7 @@ void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverO
 
       if (params->check_dir_quality && preRHS > threshold)
       {
-        if (verbose > 1)
-          printf("newton_LSA :: direction not acceptable %g > %g\n", preRHS, threshold);
+        numerics_printf_verbose(2,"newton_LSA :: direction not acceptable %g > %g\n", preRHS, threshold);
 
         cblas_dcopy(n, JacThetaF_merit, incx, workV1, incy);
         cblas_dscal(n, -1.0, workV1, incx);
@@ -444,33 +449,25 @@ void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverO
       stats_iteration.status = 0;
       options->callback->collectStatsIteration(options->callback->env, n, z, F, err, &stats_iteration);
     }
-
+    if (err >tol)
+      numerics_printf_verbose(1,"--- newton_LSA :: iter = %i, err = %e > tol = %e",iter,err,tol);
   }
 
   options->iparam[1] = iter;
   options->dparam[1] = err;
 
 
-  if (verbose > 0)
+  if (err > tol)
   {
-    if (err > tol)
-    {
-      printf(" No convergence of the Newton algo after %d iterations\n" , iter);
-      printf(" The residue is : %g \n", theta);
-      *info = 1;
-    }
-    else
-    {
-      printf(" Convergence of the Newton algo after %d iterations\n" , iter);
-      printf(" The residue is : %g \n", theta);
-      *info = 0;
-    }
+    numerics_printf_verbose(1,"--- newton_LSA :: No convergence of the Newton algo after %d iterations and residue = %g " , iter, theta);
+    *info = 1;
   }
   else
   {
-    if (err > tol) *info = 1;
-    else *info = 0;
+    numerics_printf_verbose(1,"--- newton_LSA :: Convergence of the Newton algo after %d iterations and residue = %g " , theta);
+    *info = 0;
   }
+
 
 newton_LSA_free:
 
@@ -496,7 +493,7 @@ void newton_lsa_default_SolverOption(SolverOptions* options)
 {
   options->iparam[SICONOS_IPARAM_LSA_NONMONOTONE_LS] = 0;
   options->iparam[SICONOS_IPARAM_LSA_NONMONOTONE_LS_M] = 0;
-  options->dparam[SICONOS_DPARAM_LSA_ALPHA_MIN] = 0.;
+  options->dparam[SICONOS_DPARAM_LSA_ALPHA_MIN] = 1e-16;
 }
 
 void set_lsa_params_data(SolverOptions* options, NumericsMatrix* mat)

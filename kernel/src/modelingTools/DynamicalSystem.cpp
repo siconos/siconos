@@ -75,8 +75,7 @@ DynamicalSystem::DynamicalSystem(const DynamicalSystem & ds):
 
   _z.reset(new SiconosVector(*(ds.z())));
 
-  if (ds.xMemory())
-    _xMemory.reset(new SiconosMemory(*(ds.xMemory())));
+  _xMemory = ds.xMemory();
   _stepsInMemory = ds.stepsInMemory();
 }
 
@@ -245,7 +244,7 @@ void DynamicalSystem::initMemory(unsigned int steps)
   else
   {
     _stepsInMemory = steps;
-    _xMemory.reset(new SiconosMemory(steps, _n));
+    _xMemory.setMemorySize(steps, _n);
   }
 
 }

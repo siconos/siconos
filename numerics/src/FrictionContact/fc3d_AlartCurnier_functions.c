@@ -25,6 +25,7 @@
 #include "op3x3.h"
 #include "SiconosBlas.h"
 #include "AlartCurnierGenerated.h"
+#include "NumericsVector.h"
 
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 
@@ -654,7 +655,7 @@ void computeAlartCurnierSTD(double R[3], double velocity[3], double mu, double r
       *B22 = 0.0;
     }
   }
-  else if (RV > Radius) // We are out the disk and Radius is postive
+  else if (RV > Radius) // We are out the disk and Radius is positive
   {
 
     if (Radius > 0)
@@ -800,9 +801,10 @@ void computeAlartCurnierJeanMoreau(double R[3], double velocity[3], double mu, d
   Radius = mu * R[0];
 
   // Compute the value of the Alart--Curnier Function and its gradient for the normal part
-
+  DEBUG_PRINTF("[Numerics]  computeAlartCurnierJeanMoreau - RVN = %e\n", RVN);
   if (RVN >= 0.0)
   {
+    DEBUG_PRINT("[Numerics]  computeAlartCurnierJeanMoreau - Normal part in the cone\n");
     F[0] = RhoN * (velocity[0]);
     if (A && B)
     {
@@ -812,6 +814,7 @@ void computeAlartCurnierJeanMoreau(double R[3], double velocity[3], double mu, d
   }
   else
   {
+    DEBUG_PRINT("[Numerics]  computeAlartCurnierJeanMoreau - Normal part out the cone\n");
     F[0] = R[0];
     if (A && B)
     {
@@ -822,16 +825,13 @@ void computeAlartCurnierJeanMoreau(double R[3], double velocity[3], double mu, d
 
   // Compute the value of the Alart--Curnier Function and its gradient for the tangential part
 
-
-#ifdef VERBOSE_DEBUG
-  printf("Radius=%le\n", Radius);
-  printf("RV=%le\n", RV);
-#endif
+  DEBUG_PRINTF("[Numerics]  computeAlartCurnierJeanMoreau - Radius=%le\n", Radius);
+  DEBUG_PRINTF("[Numerics]  computeAlartCurnierJeanMoreau - RV=%le\n", RV);
   if (RV < Radius || RV < 1e-20)  // We are in the disk
   {
-#ifdef VERBOSE_DEBUG
-    printf("We are in the disk \n");
-#endif
+
+    DEBUG_PRINT("[Numerics]  computeAlartCurnierJeanMoreau - We are in the disk \n");
+
     F[1] = RhoT * (velocity[1]);
     F[2] = RhoT * (velocity[2]);
     if (A && B)
@@ -850,9 +850,8 @@ void computeAlartCurnierJeanMoreau(double R[3], double velocity[3], double mu, d
   }
   else  // We are out the disk
   {
-#ifdef VERBOSE_DEBUG
-    printf("We are out the disk\n");
-#endif
+    DEBUG_PRINT("[Numerics]  computeAlartCurnierJeanMoreau - We are out the disk\n");
+
     /*        RV1 = 1.0/RV; */
     /*        F[1] = R[1] - Radius*RVT*RV1; */
     /*        F[2] = R[2] - Radius*RVS*RV1; */
@@ -899,10 +898,22 @@ void computeAlartCurnierJeanMoreau(double R[3], double velocity[3], double mu, d
     }
   }
 
+  DEBUG_EXPR(NV_display(F,3););
+
+  DEBUG_EXPR(if (A && B)
+             {
+               NV_display(A,9);
+               NV_display(B,9);
+             }
+    );
 
 
 
 #ifdef VERBOSE_DEBUG
+
+
+
+
   printf("F[0] = %le\n", F[0]);
   printf("F[1] = %le\n", F[1]);
   printf("F[2] = %le\n", F[2]);

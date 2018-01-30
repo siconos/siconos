@@ -227,11 +227,11 @@ void FirstOrderNonLinearDSTest::testInitMemory()
   std::cout << "--> Test: initMemory." <<std::endl;
   SP::FirstOrderNonLinearDS ds1(new FirstOrderNonLinearDS(xnull));
   ds1->initMemory(2);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testInitMem1 : ", ds1->xMemory()->getMemorySize() == 2, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testInitMem3 : ", ds1->rMemory()->getMemorySize() == 2, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testInitMem1 : ", ds1->xMemory().getMemorySize() == 2, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testInitMem3 : ", ds1->rMemory().getMemorySize() == 2, true);
 
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testInitMem4 : ", ds1->xMemory()->nbVectorsInMemory() == 0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testInitMem6 : ", ds1->rMemory()->nbVectorsInMemory() == 0, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testInitMem4 : ", ds1->xMemory().nbVectorsInMemory() == 0, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testInitMem6 : ", ds1->rMemory().nbVectorsInMemory() == 0, true);
   std::cout << "--> initMemory test ended with success." <<std::endl;
 }
 
@@ -245,8 +245,8 @@ void FirstOrderNonLinearDSTest::testSwap()
   ds1->setR(*x0);
   ds1->initMemory(1);
   ds1->swapInMemory();
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSwap1 : ", *(ds1->xMemory()->getSiconosVector(0)) == *x0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSwap3 : ", *(ds1->rMemory()->getSiconosVector(0)) == *x0, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSwap1 : ", ds1->xMemory().getSiconosVector(0) == *x0, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSwap3 : ", ds1->rMemory().getSiconosVector(0) == *x0, true);
   std::cout << "--> swap test ended with success." <<std::endl;
 }
 

@@ -33,17 +33,42 @@ extern "C"
 {
 #endif
 
-  /** Error computation for a ConvexQP problem. This function requires dWork to point to
-   * at least 2*n double of allocated memory or it malloc this memory
+  /** Error computation for a reduced ConvexQP problem (A=I, b=0).
+   * This function requires dWork to point to
+   * at least 2*n+m double of allocated memory or it mallocs this memory
       \param problem the structure which defines the ConvexQP problem
       \param z vector
       \param w vector
       \param tolerance value for error computation
       \param options solver options
+      \param norm, a norm ot compute the relative error value
       \param[in,out] error value
       \return 0 if ok
    */
-  int convexQP_computeError(ConvexQP* problem, double *z , double *w, double tolerance, SolverOptions * options, double * error);
+  int convexQP_compute_error_reduced(ConvexQP* problem, double *z , double *w, double tolerance, SolverOptions * options, double norm, double * error);
+
+  /** Error computation for a ConvexQP problem.
+   * This function requires dWork to point to
+   * at least 2*n+m double of allocated memory or it mallocs this memory
+      \param problem the structure which defines the ConvexQP problem
+      \param z vector
+      \param xi multiplier vector
+      \param w vector (w = s A^T xi)
+      \param u (=Az+b) constraints vector
+      \param tolerance value for error computation
+      \param scaling  parameter s applied on the multiplier xi
+      \param options solver options
+      \param norm, a norm ot compute the relative error value
+      \param[in,out] error value
+      \return 0 if ok
+   */
+  int convexQP_compute_error(ConvexQP* problem,
+                                 double *z , double *xi,
+                                 double* w, double * u,
+                                 double tolerance,
+                                 double scaling,
+                                 SolverOptions * options, double norm,
+                                 double * error);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

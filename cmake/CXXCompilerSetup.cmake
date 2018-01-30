@@ -50,7 +50,12 @@ endif()
 if(DEV_MODE)
   # --- Clang ----
   #add_cxx_options("-Weverything" Clang) # like Wall and more
-  add_cxx_options("-Werror=unreachable-code" "Clang")
+  if (WITH_BULLET)
+    # some unreachable code errors come from the Bullet headers
+    add_cxx_options("-Wunreachable-code" "Clang")
+  else()
+    add_cxx_options("-Werror=unreachable-code" "Clang")
+  endif()
   # --- All compilers but MSVC (Microsoft Visual C) ---
   if(NOT MSVC)
     add_cxx_options("-Wall")
@@ -141,6 +146,3 @@ add_cxx_options("-Wno-string-plus-int" "Clang")
 if(WITH_SERIALIZATION)
   add_cxx_options("-ftemplate-depth=1024" Clang)
 endif(WITH_SERIALIZATION)
-
-# Do we still need this?
-append_cxx_flags("-D_NUMERICS_INTERNAL_CXX_")

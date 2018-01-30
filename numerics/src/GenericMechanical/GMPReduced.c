@@ -30,6 +30,7 @@
 #include "mlcp_cst.h"
 #include "lcp_cst.h"
 #include "MLCP_Solvers.h"
+#include "SiconosCompat.h"
 #include "SparseBlockMatrix.h"
 #include "NumericsMatrix.h"
 #include <string.h>

@@ -23,7 +23,6 @@
 #define __SiconosVectorException__
 
 #include "SiconosException.hpp"
-#include "numerics_verbose.h"
 
 /** Exception caused by a SiconosVector
  *

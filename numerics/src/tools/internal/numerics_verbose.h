@@ -19,10 +19,11 @@
 /*!\file numerics_verbose.h
  * \brief verbosity related functions*/
 
-#ifndef _NUMERICS_VERBOSE_H_
-#define _NUMERICS_VERBOSE_H_
+#ifndef _NUMERICS_VERBOSE_INTERNAL_H_
+#define _NUMERICS_VERBOSE_INTERNAL_H_
 
 #include "SiconosConfig.h"
+#include "NumericsVerbose.h"
 #include <errno.h>
 #include <stdint.h>
 #include <stddef.h>
@@ -31,9 +32,6 @@
 
 /** Verbose mode */
 extern tlsvar int verbose;
-
-/** logging types */
-enum numerics_loggers { NUMERICS_LOG_TO_SCREEN, NUMERICS_LOG_TO_FILE, NUMERICS_EXTERNAL_LOGGER };
 
 #if defined(__cplusplus) && !defined (BUILD_AS_CPP)
 extern "C"
@@ -120,10 +118,6 @@ extern "C"
 #define WARN_RESULT_IGNORED
 #endif
 
-  /* Set verbose mode in numerics
-     \param newVerboseMode 0 no verbose, 1 verbose.
-  */
-  void numerics_set_verbose(int newVerboseMode);
 
   /* msg output and exit with error
      \param fn_name name of the function where error occurs

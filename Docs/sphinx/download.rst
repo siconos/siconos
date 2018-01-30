@@ -3,17 +3,21 @@
 Download Siconos
 ================
 
-Binaries
---------
 
-Binaries generated for different platforms can be download here: https://gforge.inria.fr/frs/?group_id=9
+Latest source release
+---------------------
 
-Sources
--------
+Latest source release is downloadable in zip or tar.gz format from here:
+
+https://github.com/siconos/siconos/releases/latest
+
+
+Development sources
+-------------------
 
 Siconos project is hosted on github : https://github.com/siconos/siconos
 
-and the source code can be freely downloaded. Try for example::
+and the development source code can be freely downloaded. Try for example:
 
   git clone git@github.com:siconos/siconos.git
 
@@ -58,3 +62,9 @@ Below, you can find a short git refresher:
 * propagate your changes to the main repository::
 
     git push
+
+
+Binaries
+--------
+
+Old binaries generated for some old platforms may be download from here: https://gforge.inria.fr/frs/?group_id=9

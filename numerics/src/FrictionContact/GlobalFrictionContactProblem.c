@@ -69,13 +69,10 @@ int globalFrictionContact_newFromFile(GlobalFrictionContactProblem* problem, FIL
   problem->dimension = d;
   CHECK_IO(fscanf(file, "%d\n", &nc), &info);
   problem->numberOfContacts = nc;
-  problem->M = NM_new();
-
-  info = NM_new_from_file(problem->M, file);
+  problem->M = NM_new_from_file( file);
   if (info) goto fail;
 
-  problem->H = NM_new();
-  info = NM_new_from_file(problem->H, file);
+  problem->H =  NM_new_from_file(file);
   if (info) goto fail;
 
   problem->q = (double *) malloc(problem->M->size1 * sizeof(double));
@@ -97,7 +94,6 @@ int globalFrictionContact_newFromFile(GlobalFrictionContactProblem* problem, FIL
 
 fail:
   problem->env = NULL;
-  problem->workspace = NULL;
   return info;
 }
 
@@ -137,8 +133,6 @@ void freeGlobalFrictionContactProblem(GlobalFrictionContactProblem* problem)
   }
 
   if (problem->env) assert(0 && "freeGlobalFrictionContactProblem :: problem->env != NULL, don't know what to do");
-
-  gfc3d_free_workspace(problem);
 
   free(problem);
 
@@ -193,53 +187,3 @@ void globalFrictionContact_display(GlobalFrictionContactProblem* problem)
 
 }
 
-void gfc3d_init_workspace(GlobalFrictionContactProblem* problem)
-{
-  DEBUG_BEGIN("gfc3d_init_workspace(GlobalFrictionContactProblem* problem)\n");
-  assert(problem);
-  assert(problem->M);
-
-  if (!problem->workspace)
-  {
-    problem->workspace = (GFC3D_workspace*) malloc(sizeof(GFC3D_workspace));
-    problem->workspace->factorized_M = NULL;
-    problem->workspace->globalVelocity = NULL;
-  }
-
-  if (!problem->workspace->factorized_M)
-  {
-    problem->workspace->factorized_M = NM_create(problem->M->storageType,
-                                                            problem->M->size0,
-                                                            problem->M->size1);
-    NM_copy(problem->M, problem->workspace->factorized_M);
-    DEBUG_EXPR(NM_display(problem->workspace->factorized_M));
-  }
-
-  if (!problem->workspace->globalVelocity)
-  {
-    problem->workspace->globalVelocity = (double*)malloc(problem->M->size1 * sizeof(double));
-  }
-  DEBUG_END("gfc3d_init_workspace(GlobalFrictionContactProblem* problem)\n");
-}
-
-void gfc3d_free_workspace(GlobalFrictionContactProblem* problem)
-{
-  if (problem->workspace)
-  {
-    if (problem->workspace->factorized_M)
-    {
-      NM_free(problem->workspace->factorized_M);
-      free(problem->workspace->factorized_M);
-      problem->workspace->factorized_M = NULL;
-    }
-
-    if (problem->workspace->globalVelocity)
-    {
-      free(problem->workspace->globalVelocity);
-      problem->workspace->globalVelocity = NULL;
-    }
-
-    free(problem->workspace);
-    problem->workspace = NULL;
-  }
-}

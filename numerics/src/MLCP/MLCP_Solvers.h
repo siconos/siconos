@@ -187,7 +187,6 @@ The direct and simplex solver must be initialize: \n
 
 #include "SolverOptions.h"
 #include "MixedLinearComplementarityProblem.h"
-#include "SiconosCompat.h"
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"

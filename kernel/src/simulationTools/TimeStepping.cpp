@@ -71,6 +71,7 @@ TimeStepping::TimeStepping(SP::TimeDiscretisation td,
     _computeResiduY(false),_computeResiduR(false),
     _isNewtonConverge(false),
     _newtonUpdateInteractionsPerIteration(false),_displayNewtonConvergence(false),
+    _warnOnNonConvergence(true),
     _explicitJacobiansOfRelation(false)
 {
 
@@ -87,6 +88,7 @@ TimeStepping::TimeStepping(SP::TimeDiscretisation td, int nb)
     _computeResiduR(false),
     _isNewtonConverge(false),
     _newtonUpdateInteractionsPerIteration(false),_displayNewtonConvergence(false),
+    _warnOnNonConvergence(true),
     _explicitJacobiansOfRelation(false)
 {
   (*_allNSProblems).resize(nb);
@@ -539,7 +541,7 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
 
       prepareNewtonIteration();
       computeFreeState();
-      if (info)
+      if (info && _warnOnNonConvergence)
         std::cout << "New Newton loop because of nonsmooth solver failed\n" <<std::endl;
 
       // if there is not any Interaction at
@@ -609,9 +611,10 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
      }
     if (!_isNewtonConverge)
     {
-      std::cout << "TimeStepping::newtonSolve -- Newton process stopped: max. number of steps (" << maxStep <<
-        ") reached at accuracy = "<< _newtonResiduDSMax  <<"." <<std::endl ;
-      if (info)
+      if (_warnOnNonConvergence)
+        std::cout << "TimeStepping::newtonSolve -- Newton process stopped: max. number of steps (" << maxStep <<
+          ") reached at accuracy = "<< _newtonResiduDSMax  <<"." <<std::endl ;
+      if (info && _warnOnNonConvergence)
         std::cout << "TimeStepping::newtonSolve -- nonsmooth solver failed." <<std::endl ;
     }
   }

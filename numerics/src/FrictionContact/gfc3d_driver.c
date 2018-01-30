@@ -51,6 +51,7 @@ const char* const SICONOS_GLOBAL_FRICTION_3D_NSN_AC_STR = "GFC3D_NSN_AC";
 const char* const  SICONOS_GLOBAL_FRICTION_3D_GAMS_PATH_STR = "GFC3D_GAMS_PATH";
 const char* const  SICONOS_GLOBAL_FRICTION_3D_GAMS_PATHVI_STR = "GFC3D_GAMS_PATHVI";
 const char* const  SICONOS_GLOBAL_FRICTION_3D_VI_EG_STR = "GFC3D_VI_EG";
+const char* const  SICONOS_GLOBAL_FRICTION_3D_ACLMFP_STR = "GFC3D_ACLMFP";
 const char* const  SICONOS_GLOBAL_FRICTION_3D_VI_FPP_STR = "GFC3D_VI_FPP";
 
 
@@ -180,6 +181,20 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction , doubl
   {
     gfc3d_VI_ExtraGradient(problem, reaction , velocity,
                            globalVelocity, &info , options);
+    break;
+
+  }
+  case SICONOS_GLOBAL_FRICTION_3D_ACLMFP:
+  {
+    gfc3d_ACLMFixedPoint(problem, reaction , velocity,
+                         globalVelocity, &info , options);
+    break;
+
+  }
+  case SICONOS_GLOBAL_FRICTION_3D_ADMM:
+  {
+    gfc3d_ADMM(problem, reaction , velocity,
+               globalVelocity, &info , options);
     break;
 
   }

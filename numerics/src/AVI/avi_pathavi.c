@@ -19,6 +19,7 @@
 
 #include <string.h>
 
+#include "CSparseMatrix_internal.h"
 #include "AffineVariationalInequalities.h"
 #include "AVI_Solvers.h"
 #include "NumericsMatrix.h"
@@ -43,7 +44,7 @@ static void pathvi_csc_transfert(struct csc_matrix *primjac, CSparseMatrix* M)
   memcpy(primjac->x, M->x, nnz * sizeof(double));
 
   /*  we may have to change the behavior based on the type used for integers */
-  if (sizeof(primjac->i) != sizeof(csi))
+  if (sizeof(primjac->i) != sizeof(CS_INT))
   {
     for (size_t i = 0; i < nnz; ++i)
     {
@@ -57,8 +58,8 @@ static void pathvi_csc_transfert(struct csc_matrix *primjac, CSparseMatrix* M)
   }
   else
   {
-    memcpy(primjac->i, M->i, nnz * sizeof(csi));
-    memcpy(primjac->j, M->p, n+1 * sizeof(csi));
+    memcpy(primjac->i, M->i, nnz * sizeof(CS_INT));
+    memcpy(primjac->j, M->p, n+1 * sizeof(CS_INT));
   }
 
 }
@@ -66,7 +67,7 @@ static void pathvi_csc_transfert(struct csc_matrix *primjac, CSparseMatrix* M)
 
 static int pathvi_evaluate_function(struct vi_desc *desc, double *primvar, double *primfunc)
 {
-  SN_generic_pathvi_env* env = vi_desc_get_controller(desc);
+  SN_generic_pathvi_env* env = (SN_generic_pathvi_env*)vi_desc_get_controller(desc);
   AffineVariationalInequalities* AVI = (AffineVariationalInequalities*) env->problem;
 
   memcpy(primfunc, AVI->q, AVI->size * sizeof(double));
@@ -77,7 +78,7 @@ static int pathvi_evaluate_function(struct vi_desc *desc, double *primvar, doubl
 
 static int pathvi_evaluate_jacobian(struct vi_desc *desc, double *primvar, double *primfunc, struct csc_matrix *primjac)
 {
-  SN_generic_pathvi_env* env = vi_desc_get_controller(desc);
+  SN_generic_pathvi_env* env = (SN_generic_pathvi_env*)vi_desc_get_controller(desc);
   AffineVariationalInequalities* AVI = (AffineVariationalInequalities*) env->problem;
 
   size_t n = AVI->size;
@@ -93,7 +94,7 @@ static int pathvi_evaluate_jacobian(struct vi_desc *desc, double *primvar, doubl
   case NM_SPARSE:
   {
     CSparseMatrix* M = NM_csc(AVI->M);
-    csi nnz = M->p[n];
+    CS_INT nnz = M->p[n];
 
     /* check dimenstions */
     if (M->n > primjac->max_n) { primjac->max_n = M->n; primjac->j = (PATHVI_INDX_TYPE*)realloc(primjac->j, (M->n+1) * sizeof(primjac->j)); }
@@ -121,14 +122,14 @@ static int pathvi_evaluate_jacobian(struct vi_desc *desc, double *primvar, doubl
 
 static int pathavi_get_jacobian_nnz(struct vi_desc *desc, int *nnz)
 {
-  SN_generic_pathvi_env* env = vi_desc_get_controller(desc);
+  SN_generic_pathvi_env* env = (SN_generic_pathvi_env*)vi_desc_get_controller(desc);
   *nnz = (int)NM_nnz(((AffineVariationalInequalities*) env->problem)->M);
   return 0;
 }
 
 static int pathavi_get_jacobian_structure(struct vi_desc *desc, struct csc_matrix *primjac)
 {
-  SN_generic_pathvi_env* env = vi_desc_get_controller(desc);
+  SN_generic_pathvi_env* env = (SN_generic_pathvi_env*)vi_desc_get_controller(desc);
   NumericsMatrix *M = ((AffineVariationalInequalities*) env->problem)->M;
 
   CSparseMatrix* Mcsc = NM_csc(M);
@@ -195,6 +196,12 @@ int avi_pathavi(AffineVariationalInequalities* problem, double *z, double *w, So
     .get_jacobian_structure = &pathavi_get_jacobian_structure
   };
 
+  struct printv_operations printv_ops = {
+    .print       = &pathvi_print
+  };
+
+  set_printv_operations(&printv_ops);
+
   struct vi_desc * pathvi_obj = vi_desc_create(nb_cstr, problem->size, NM_nnz(problem->M), nnz_H, &env, &vi_ops);
   pathvi_obj->nlflag = 0;
 
@@ -254,7 +261,7 @@ int avi_pathavi(AffineVariationalInequalities* problem, double *z, double *w, So
         {
           numerics_error_nonfatal("avi_pathavi", "unsupported constraint type %c", p->type[i]);
           info = EINVAL;
-          goto exit;
+          goto _exit;
         }
         }
       }
@@ -276,12 +283,6 @@ int avi_pathavi(AffineVariationalInequalities* problem, double *z, double *w, So
 
   option_set_d(pathvi_obj->opt, "convergence_tolerance", options->dparam[0]);
 
-  struct printv_operations printv_ops = {
-    .print       = &pathvi_print
-  };
-
-  set_printv_operations(&printv_ops);
-
 
   // Solve the problem
   if (use_scheduler)
@@ -299,7 +300,7 @@ int avi_pathavi(AffineVariationalInequalities* problem, double *z, double *w, So
     vi_solver_free(&avi);
   }
 
-exit:
+_exit:
 
   return info;
 }

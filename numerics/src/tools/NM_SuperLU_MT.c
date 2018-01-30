@@ -16,8 +16,7 @@
  * limitations under the License.
 */
 
-#include "NumericsMatrix_private.h"
-#include "NumericsMatrix.h"
+#include "NumericsMatrix_internal.h"
 #include "NumericsSparseMatrix.h"
 #include "debug.h"
 #include "numerics_verbose.h"
@@ -26,7 +25,7 @@
 
 #include <slu_mt_ddefs.h>
 
-/** \struct NM_SuperLU_MT_WS NumericsMatrix_private.h
+/** \struct NM_SuperLU_MT_WS NumericsMatrix_internal.h
  * Structure for holding the data SuperLU needs
  */
 struct NM_SuperLU_MT_WS {
@@ -45,7 +44,7 @@ NM_SuperLU_MT_WS* NM_SuperLU_MT_factorize(NumericsMatrix* A)
 
   int status;
 
-  NumericsSparseLinearSolverParams* params = NM_linearSolverParams(A);
+  NSM_linear_solver_params* params = NM_linearSolverParams(A);
 
   if (params->solver_data)
   {
@@ -68,7 +67,7 @@ NM_SuperLU_MT_WS* NM_SuperLU_MT_factorize(NumericsMatrix* A)
   /* Symbolic part  */
   int_t* indices;
   int_t* pointers;
-  size_t nnz = NM_sparse_nnz(C);
+  size_t nnz = NSM_nnz(C);
   assert(C->n > 0);
 
   if (sizeof(*C->i) != sizeof(*indices))
@@ -204,7 +203,7 @@ int NM_SuperLU_MT_solve(NumericsMatrix* A, double* b, NM_SuperLU_MT_WS* superlu_
 void NM_SuperLU_MT_free(void* p)
 {
   assert(p);
-  NumericsSparseLinearSolverParams* params = (NumericsSparseLinearSolverParams*) p;
+  NSM_linear_solver_params* params = (NSM_linear_solver_params*) p;
   assert(params);
   NM_SuperLU_MT_WS* superlu_mt_ws = (NM_SuperLU_MT_WS*) params->solver_data;
   assert(superlu_mt_ws);

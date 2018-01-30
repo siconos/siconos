@@ -285,7 +285,7 @@ static inline void mtv3x3(double* restrict a, double* restrict v, double* restri
 /** add a matrix vector multiplication
  * \param[in] a a[9]
  * \param[in] v v[3]
- * \param[out] r r[3]
+ * \param[out] r r[3] the result of r += av
  */
 static inline void mvp3x3(const double* restrict a, const double* restrict v, double* restrict r)
 {
@@ -311,6 +311,34 @@ static inline void mvp3x3(const double* restrict a, const double* restrict v, do
   *pr++ += *a++ * *v++;
 }
 
+/** add a matrix vector multiplication scaled by alpha
+ * \param[in] a a[9]
+ * \param[in] v v[3]
+ * \param[out] r r[3] the result of r += av
+ */
+static inline void mvp_alpha3x3(double alpha, const double* restrict a, const double* restrict v, double* restrict r)
+{
+
+  double* pr;
+
+  pr = r;
+
+  *pr++ += alpha * *a++ * *v;
+  *pr++ += alpha * *a++ * *v;
+  *pr++ += alpha * *a++ * *v++;
+
+  pr = r;
+
+  *pr++ += alpha *  *a++ * *v;
+  *pr++ += alpha *  *a++ * *v;
+  *pr++ += alpha *  *a++ * *v++;
+
+  pr = r;
+
+  *pr++ += alpha *  *a++ * *v;
+  *pr++ += alpha *  *a++ * *v;
+  *pr++ += alpha *  *a++ * *v++;
+}
 /** minux the result a matrix vector multiplication
  * \param[in] a matrix
  * \param[in] v vector
