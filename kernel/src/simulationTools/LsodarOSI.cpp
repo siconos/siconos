@@ -474,15 +474,17 @@ void LsodarOSI::integrate(double& tinit, double& tend, double& tout, int& istate
   //  --> definition and initialisation thanks to wrapper:
   global_object = std11::static_pointer_cast<LsodarOSI>(shared_from_this()); // Warning: global object must be initialized to current one before pointers to function initialisation.
 
+#ifdef HAS_FORTRAN
   // function to compute the righ-hand side of xdot = f(x,t) + Tu
   fpointer pointerToF = LsodarOSI_f_wrapper;
 
   // function to compute the Jacobian/x of the rhs.
   jacopointer pointerToJacobianF = LsodarOSI_jacobianf_wrapper; // function to compute the Jacobian/x of the rhs.
-
+#endif
   // function to compute the constraints
   gpointer pointerToG;
   pointerToG = LsodarOSI_g_wrapper; // function to compute the constraints
+
 
   // === LSODAR CALL ===
 
@@ -494,6 +496,7 @@ void LsodarOSI::integrate(double& tinit, double& tend, double& tout, int& istate
 
   _intData[4] = istate;
 
+#ifdef HAS_FORTRAN
   // call LSODAR to integrate dynamical equation
   CNAME(dlsodar)(pointerToF,
                  &(_intData[0]),
@@ -515,7 +518,9 @@ void LsodarOSI::integrate(double& tinit, double& tend, double& tout, int& istate
                  pointerToG, &
                  (_intData[1]),
                  jroot.get());
-
+#else
+  RuntimeException::selfThrow("LsodarOSI, Fortran Language is not enabled in siconos kernel. Compile with fortran if you need Lsodar");
+#endif
   // jroot: jroot[i] = 1 if g(i) has a root at t, else jroot[i] = 0.
 
   // === Post ===

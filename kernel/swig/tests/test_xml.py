@@ -279,74 +279,75 @@ def test_xml4():
     # dataPlot (ascii) output
     np.savetxt("CamFollower.dat", dataPlot)
 
+import siconos
+if siconos.WITH_FORTRAN :
+    def test_xml5():
+        ''' Bouncing Ball ED '''
+        # --- buildModelXML loading from xml file ---
+        bouncingBall = buildModelXML(os.path.join(working_dir, 'data/BBallED.xml'))
 
-def test_xml5():
-    ''' Bouncing Ball ED '''
-    # --- buildModelXML loading from xml file ---
-    bouncingBall = buildModelXML(os.path.join(working_dir, 'data/BBallED.xml'))
+        # --- Get and initialize the simulation ---
+        s = bouncingBall.simulation()
+        dsN = SK.dynamicalSystems(bouncingBall.nonSmoothDynamicalSystem().topology().dSG(0))[0].number()
+        ball = bouncingBall.nonSmoothDynamicalSystem().dynamicalSystem(dsN)
 
-    # --- Get and initialize the simulation ---
-    s = bouncingBall.simulation()
-    dsN = SK.dynamicalSystems(bouncingBall.nonSmoothDynamicalSystem().topology().dSG(0))[0].number()
-    ball = bouncingBall.nonSmoothDynamicalSystem().dynamicalSystem(dsN)
+        # --- Get the values to be plotted ---
+        # . saved in a matrix dataPlot
 
-    # --- Get the values to be plotted ---
-    # . saved in a matrix dataPlot
+        N = 12368  # Number of saved points: depends on the number of events ...
+        outputSize = 5
+        dataPlot = np.zeros((N + 1, outputSize))
 
-    N = 12368  # Number of saved points: depends on the number of events ...
-    outputSize = 5
-    dataPlot = np.zeros((N + 1, outputSize))
+        q = ball.q()
+        v = ball.velocity()
+        p = ball.p(1)
+        f = ball.p(2)
 
-    q = ball.q()
-    v = ball.velocity()
-    p = ball.p(1)
-    f = ball.p(2)
+        dataPlot[0, 0] = bouncingBall.t0()
+        dataPlot[0, 1] = q[0]
+        dataPlot[0, 2] = v[0]
+        dataPlot[0, 3] = p[0]
+        dataPlot[0, 4] = f[0]
 
-    dataPlot[0, 0] = bouncingBall.t0()
-    dataPlot[0, 1] = q[0]
-    dataPlot[0, 2] = v[0]
-    dataPlot[0, 3] = p[0]
-    dataPlot[0, 4] = f[0]
+        print("====> Start computation ... ")
+        # --- Time loop  ---
+        eventsManager = s.eventsManager()
+        numberOfEvent = 0
+        k = 0
+        nonSmooth = False
 
-    print("====> Start computation ... ")
-    # --- Time loop  ---
-    eventsManager = s.eventsManager()
-    numberOfEvent = 0
-    k = 0
-    nonSmooth = False
-
-    while s.hasNextEvent():
-        k += 1
-
-        s.advanceToEvent()
-        if eventsManager.nextEvent().getType() == 2:
-            nonSmooth = True
-
-        s.processEvents()
-        # If the treated event is non smooth, the pre-impact state has been solved in memory vectors during process.
-        if nonSmooth:
-            dataPlot[k, 0] = s.startingTime()
-            dataPlot[k, 1] = ball.qMemory().getSiconosVector(1)[0]
-            dataPlot[k, 2] = ball.velocityMemory().getSiconosVector(1)[0]
+        while s.hasNextEvent():
             k += 1
-            nonSmooth = False
-        dataPlot[k, 0] = s.startingTime()
-        dataPlot[k, 1] = q[0]
-        dataPlot[k, 2] = v[0]
-        dataPlot[k, 3] = p[0]
-        dataPlot[k, 4] = f[0]
-        numberOfEvent += 1
 
-    # --- Output files ---
-    dataPlot.resize(k, outputSize)
-    np.savetxt("BBallED.dat",  dataPlot)
-    # Comparison with a reference file
-    dataPlotRef = SK.getMatrix(SK.SimpleMatrix(os.path.join(working_dir, 'data/BouncingBallEDXml.ref')))
+            s.advanceToEvent()
+            if eventsManager.nextEvent().getType() == 2:
+                nonSmooth = True
 
-    if np.linalg.norm(dataPlot - dataPlotRef, ord=np.inf) > 1e-11:
-        print("Warning. The results is rather different from the reference file.")
-        print(np.linalg.norm(dataPlot - dataPlotRef, ord=np.inf))
-        exit(1)
+            s.processEvents()
+            # If the treated event is non smooth, the pre-impact state has been solved in memory vectors during process.
+            if nonSmooth:
+                dataPlot[k, 0] = s.startingTime()
+                dataPlot[k, 1] = ball.qMemory().getSiconosVector(1)[0]
+                dataPlot[k, 2] = ball.velocityMemory().getSiconosVector(1)[0]
+                k += 1
+                nonSmooth = False
+            dataPlot[k, 0] = s.startingTime()
+            dataPlot[k, 1] = q[0]
+            dataPlot[k, 2] = v[0]
+            dataPlot[k, 3] = p[0]
+            dataPlot[k, 4] = f[0]
+            numberOfEvent += 1
+
+        # --- Output files ---
+        dataPlot.resize(k, outputSize)
+        np.savetxt("BBallED.dat",  dataPlot)
+        # Comparison with a reference file
+        dataPlotRef = SK.getMatrix(SK.SimpleMatrix(os.path.join(working_dir, 'data/BouncingBallEDXml.ref')))
+
+        if np.linalg.norm(dataPlot - dataPlotRef, ord=np.inf) > 1e-11:
+            print("Warning. The results is rather different from the reference file.")
+            print(np.linalg.norm(dataPlot - dataPlotRef, ord=np.inf))
+            exit(1)
 
 
 def test_xml6():

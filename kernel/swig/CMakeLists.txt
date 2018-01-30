@@ -29,6 +29,11 @@ if(NOT WITH_XML)
   list(APPEND ${COMPONENT}_python_excluded_tests
     ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_xml.py)
 endif()
+if(NOT WITH_FORTRAN)
+  list(APPEND ${COMPONENT}_python_excluded_tests
+    ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_matrix_exp.py)
+endif()
+
 build_python_tests()
 
 

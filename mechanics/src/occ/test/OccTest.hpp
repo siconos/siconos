@@ -33,9 +33,9 @@ private:
   CPPUNIT_TEST(computeUVBounds);
 
   CPPUNIT_TEST(move);
-
+#ifdef HAS_FORTRAN
   CPPUNIT_TEST(distance);
-
+#endif
   CPPUNIT_TEST_SUITE_END();
 
   // Members
@@ -44,9 +44,9 @@ private:
   void computeUVBounds();
 
   void move();
-
+#ifdef HAS_FORTRAN
   void distance();
-
+#endif
 public:
   void setUp();
   void tearDown();

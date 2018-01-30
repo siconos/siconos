@@ -35,6 +35,7 @@
 #cmakedefine HAVE_GENERATION
 #cmakedefine WITH_HDF5
 #cmakedefine WITH_OPENMP
+#cmakedefine HAS_FORTRAN
 
 // Is cblas available? 
 #cmakedefine HAS_CBLAS
