@@ -128,6 +128,17 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
 
   double norm_q = cblas_dnrm2(n , problem->q , 1);
 
+  double norm_b = cblas_dnrm2(m , problem->b , 1);
+
+
+  
+  numerics_printf_verbose(1,"---- GFC3D - ADMM - Problem information");
+  numerics_printf_verbose(1,"---- GFC3D - ADMM - 1-norm of M = %g norm of q = %g ", NM_norm_1(problem->M), norm_q);
+  numerics_printf_verbose(1,"---- GFC3D - ADMM - inf-norm of M = %g ", NM_norm_inf(problem->M));
+
+  numerics_printf_verbose(1,"---- GFC3D - ADMM - 1-norm of H = %g norm of b = %g ", NM_norm_1(problem->H), norm_b);
+  numerics_printf_verbose(1,"---- GFC3D - ADMM - inf-norm of H = %g ", NM_norm_inf(problem->H));
+  numerics_printf_verbose(1,"---- GFC3D - ADMM -  M is symmetric = %i ", NM_is_symmetric(problem->M));
 
 
   int internal_allocation=0;
@@ -142,10 +153,31 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
   int hasNotConverged = 1;
 
   double rho = 0.0;
-  rho = dparam[SICONOS_FRICTION_3D_ADMM_RHO];
-  if (rho == 0.0)
-    numerics_error("gfc3d_ADMM", "dparam[SICONOS_FRICTION_3D_ADMM_RHO] must be nonzero");
 
+  if (options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_RHO_STRATEGY] ==
+      SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_CONSTANT)
+  {
+    rho = dparam[SICONOS_FRICTION_3D_ADMM_RHO];
+  }
+  else if (options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_RHO_STRATEGY] ==
+           SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_NORM_INF)
+  {
+    double norm_1_M =   NM_norm_1(problem->M);
+    double norm_1_H =   NM_norm_1(problem->H);
+    if ((fabs(norm_1_H) > DBL_EPSILON) &&  (fabs(norm_1_M) > DBL_EPSILON))
+      rho = norm_1_M/norm_1_H;
+    else
+      rho = dparam[SICONOS_FRICTION_3D_ADMM_RHO];
+  }
+  else if  (options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_RHO_STRATEGY] ==
+            SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_ADAPTIVE)
+  {
+    numerics_error("gfc3d_ADMM", "Adaptive rho stratgey not yet implemented.");
+  }
+  
+  
+  if (rho <= DBL_EPSILON)
+    numerics_error("gfc3d_ADMM", "dparam[SICONOS_FRICTION_3D_ADMM_RHO] must be nonzero");
 
   double * tmp =  options->dWork;
 
@@ -340,7 +372,9 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
 
   if (iter==itermax)
   {
-    error =residual;
+    cblas_dscal(m, rho, reaction, 1);
+    gfc3d_compute_error(problem,  reaction, u, z,  tolerance, options, norm_q, &error);
+    numerics_printf_verbose(1,"---- GFC3D - ADMM  - Iteration %i rho = %14.7e \t full error = %14.7e", iter, rho, error);
   }
   
   dparam[SICONOS_DPARAM_RESIDU] = error;
@@ -382,6 +416,10 @@ int gfc3d_ADMM_setDefaultSolverOptions(SolverOptions* options)
 
   options->dparam[SICONOS_DPARAM_TOL] = 1e-6;
 
+
+  options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_RHO_STRATEGY] =
+    SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_NORM_INF;
+  
   options->dparam[SICONOS_FRICTION_3D_ADMM_RHO] = 1.0;
   options->dparam[SICONOS_FRICTION_3D_ADMM_RESTART_ETA] = 0.999;
 
