@@ -42,7 +42,7 @@ import time
 import getopt
 import random
 import h5py
-
+import os 
 
 class FrictionContactTraceParams():
     def __init__(self, dump_itermax=10, dump_probability=None, fileName="filename", title = "title", description = "description", mathInfo= "mathInfo"):
@@ -136,6 +136,10 @@ class FrictionContactTrace(FrictionContact):
                                                               SO.iparam[N.SICONOS_IPARAM_ITER_DONE],
                                                               problem.numberOfContacts,
                                                               self._counter)
+                if os.path.exists(filename):
+                    os.remove(filename)
+                    print('WARNING: file '+filename+ ' was existing and has been replaced')
+                
                 self._counter += 1
                 N.frictionContact_fclib_write(problem,
                                               self._params._title,
@@ -241,6 +245,11 @@ class GlobalFrictionContactTrace(GlobalFrictionContact):
                                             SO.iparam[N.SICONOS_IPARAM_ITER_DONE],
                                             problem.numberOfContacts,
                                             self._counter)
+            
+            if os.path.exists(filename):
+                os.remove(filename)
+                print('WARNING: file '+filename+ ' was existing and has been replaced')
+                
             self._counter += 1
             N.globalFrictionContact_fclib_write(problem,
                                                 self._params._title,
@@ -257,11 +266,6 @@ class GlobalFrictionContactTrace(GlobalFrictionContact):
             solution.z = self.z()
             F.fclib_write_solution(solution, filename)
             
-            with h5py.File(filename, 'r+') as fclib_file:
-                attrs = fclib_file['fclib_global']['info'].attrs
-                attrs.create('numberOfInvolvedDS',
-                             self._model.nonSmoothDynamicalSystem().topology().numberOfInvolvedDS(1))
-
                 
         self.postCompute()
 
