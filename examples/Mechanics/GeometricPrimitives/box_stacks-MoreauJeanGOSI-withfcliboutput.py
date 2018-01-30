@@ -63,7 +63,7 @@ with Hdf5() as io:
 solver=Numerics.SICONOS_GLOBAL_FRICTION_3D_ADMM
 
 
-step=5000
+step=125
 hstep=1e-2
 itermax=1000
 dump_probability = .02
@@ -97,11 +97,11 @@ friction_contact_trace_params = FrictionContactTraceParams(dump_itermax=20, dump
 # Load and run the simulation
 with Hdf5(mode='r+') as io:
     io.run(t0=0,
-           T=10,
+           T=step*hstep,
            h=hstep,
            theta=theta,
            Newton_max_iter=1,
-           solver=Numerics.SICONOS_FRICTION_3D_NSGS,
+           solver=Numerics.SICONOS_GLOBAL_FRICTION_3D_ADMM,
            itermax=itermax,
            tolerance=tolerance,
            output_frequency=1,
