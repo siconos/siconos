@@ -25,8 +25,6 @@ DEFINE_SPTR(BlockCSRMatrix)
 
 DEFINE_SPTR(Interaction)
 
-DEFINE_SPTR(Model)
-
 DEFINE_SPTR(NonSmoothDynamicalSystem)
 
 // --- Non-Smooth problems ---

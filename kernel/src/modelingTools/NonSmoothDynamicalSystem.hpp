@@ -79,6 +79,12 @@ public:
    */
   NonSmoothDynamicalSystem();
 
+  /** constructor with t0 and T
+   * \param t0 initial time
+   * \param T final time
+   */
+  NonSmoothDynamicalSystem(double t0, double T);
+
   /** destructor
    */
   ~NonSmoothDynamicalSystem();

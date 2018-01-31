@@ -36,13 +36,12 @@ void OSNSPTest::init()
 {
   _DS.reset(new FirstOrderLinearTIDS(_x0, _A, _b));
   _TD.reset(new TimeDiscretisation(_t0, _h));
-  _model.reset(new Model(_t0, _T));
+  _nsds.reset(new NonSmoothDynamicalSystem(_t0, _T));
   _osi.reset(new EulerMoreauOSI(_theta));
-  _model->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DS);
+  _nsds->insertDynamicalSystem(_DS);
   _sim.reset(new TimeStepping(_TD, 0));
-  _sim->prepareIntegratorForDS(_osi, _DS, _model, _t0);
-  _model->setSimulation(_sim);
-  _model->initialize();
+  _sim->associate(_osi,_DS);
+  _sim->setNonSmoothDynamicalSystemPtr(_nsds);
 }
 
 void OSNSPTest::tearDown()
@@ -84,17 +83,18 @@ void OSNSPTest::testAVI()
   SP::NonSmoothLaw nslaw(new NormalConeNSL(_n, H, K));
   _DS.reset(new FirstOrderLinearTIDS(_x0, _A, _b));
   _TD.reset(new TimeDiscretisation(_t0, _h));
-  _model.reset(new Model(_t0, _T));
+  _nsds.reset(new NonSmoothDynamicalSystem(_t0, _T));
   SP::Interaction inter(new Interaction(nslaw, rel));
   _osi.reset(new EulerMoreauOSI(_theta));
-  _model->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DS);
-  _model->nonSmoothDynamicalSystem()->link(inter, _DS);
+  _nsds->insertDynamicalSystem(_DS);
+  _nsds->link(inter, _DS);
+  _sim->setNonSmoothDynamicalSystemPtr(_nsds);
   _sim.reset(new TimeStepping(_TD));
-  _sim->prepareIntegratorForDS(_osi, _DS, _model, _t0);
+  _sim->associate(_osi,_DS);
   SP::AVI osnspb(new AVI());
   _sim->insertNonSmoothProblem(osnspb);
-  _model->setSimulation(_sim);
-  _model->initialize();
+
+
   SimpleMatrix dataPlot((unsigned)ceil((_T - _t0) / _h) + 10, 5);
   SiconosVector& xProc = *_DS->x();
   SiconosVector& lambda = *inter->lambda(0);

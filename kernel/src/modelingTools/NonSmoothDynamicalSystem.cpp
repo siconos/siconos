@@ -41,14 +41,24 @@ using namespace RELATION;
 // --- CONSTRUCTORS/DESTRUCTOR ---
 
 // Default constructor
-NonSmoothDynamicalSystem::NonSmoothDynamicalSystem():  _t(0.0), _t0(0.0), _T(0.0), _title("none"), _author("nobody"), _description("none"),
-                                                       _date("none"), _BVP(false),_version(0) , _mIsLinear(true)
+NonSmoothDynamicalSystem::NonSmoothDynamicalSystem():
+  _t(0.0), _t0(0.0), _T(0.0), _title("none"), _author("nobody"), _description("none"),
+  _date("none"), _BVP(false),_version(0) , _mIsLinear(true)
 {
   // === Builds an empty topology ===
   _topology.reset(new Topology());
 
 };
+//  constructor
+NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(double t0, double T):
+  _t(t0), _t0(t0), _T(T),
+  _title("none"), _author("nobody"), _description("none"),
+  _date("none"), _BVP(false),_version(0) , _mIsLinear(true)
+{
+  // === Builds an empty topology ===
+  _topology.reset(new Topology());
 
+};
 
 NonSmoothDynamicalSystem::~NonSmoothDynamicalSystem()
 {
