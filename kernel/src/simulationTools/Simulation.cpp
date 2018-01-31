@@ -131,6 +131,19 @@ void Simulation::insertIntegrator(SP::OneStepIntegrator osi)
   _allOSI->insert(osi);
 }
 
+void Simulation::associate(SP::OneStepIntegrator osi, SP::DynamicalSystem ds)
+{
+  _allOSI->insert(osi);
+
+  _OSIDSmap[osi].push_back(ds);
+
+}
+
+
+
+
+
+
 SP::InteractionsGraph Simulation::indexSet(unsigned int i)
 {
   return _nsds->topology()->indexSet(i) ;
@@ -172,6 +185,28 @@ void Simulation::insertNonSmoothProblem(SP::OneStepNSProblem osns, int Id)
   (*_allNSProblems)[Id] = osns;
 
 }
+void Simulation::initialize_new()
+{
+  DEBUG_BEGIN("Simulation::initialize(SP::Model m, bool withOSI)\n");
+
+  std::map< SP::OneStepIntegrator, std::list<SP::DynamicalSystem> >::iterator  it;
+  std::list<SP::DynamicalSystem> ::iterator  itlist;
+
+  for ( it = _OSIDSmap.begin();  it !=_OSIDSmap
+          .end(); ++it)
+  {
+    for ( itlist = it->second.begin();  itlist !=it->second.end(); ++itlist)
+    {
+      _nsds->topology()->setOSI( *itlist ,it->first);
+    }
+    it->second.clear();
+  }
+
+  
+  
+  
+  DEBUG_END("Simulation::initialize(SP::Model m, bool withOSI)\n");
+}
 
 void Simulation::initialize(SP::Model m, bool withOSI)
 {
@@ -188,7 +223,7 @@ void Simulation::initialize(SP::Model m, bool withOSI)
   _tinit = _eventsManager->startingTime();
   //===
 
-
+  
   if (withOSI)
   {
     if (numberOfOSI() == 0)

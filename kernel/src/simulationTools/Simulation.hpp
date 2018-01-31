@@ -32,6 +32,7 @@
 // #include "NonSmoothDynamicalSystem.hpp"
 // #include "Topology.hpp"
 #include "InteractionManager.hpp"
+#include <list>
 
 
 /** Description of the simulation process (integrators, time
@@ -138,6 +139,9 @@ protected:
    */
   bool _linkOrUnlink;
 
+  std::map< SP::OneStepIntegrator, std::list<SP::DynamicalSystem> >  _OSIDSmap;
+
+  
   /** default constructor.
    */
   Simulation() {};
@@ -285,7 +289,7 @@ public:
    *  \param osi the OneStepIntegrator to add
    */
   virtual void insertIntegrator(SP::OneStepIntegrator osi);
-
+  void associate(SP::OneStepIntegrator osi, SP::DynamicalSystem ds);
   /** get a pointer to indexSets[i]
       \param i number of the required index set
       \return a graph of interactions
@@ -390,7 +394,7 @@ public:
       \param init optional flag for partial initialization
   */
   virtual void initialize(SP::Model m, bool init = true);
-
+  virtual void initialize_new();
   /** Initialize a single Interaction for this Simulation, used for dynamic
    *  topology updates. */
   virtual void initializeInteraction(double time, SP::Interaction inter);
@@ -410,7 +414,7 @@ public:
   /** Set an object to automatically manage interactions during the simulation */
   void insertInteractionManager(SP::InteractionManager manager)
     { _interman = manager; }
-
+  
   /** computes a one step NS problem
    *  \param nb the id of the OneStepNSProblem to be computed
    *  \return information about the solver convergence.
