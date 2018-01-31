@@ -19,8 +19,6 @@
 #include "BulletSpaceFilter.hpp"
 #include "BulletSpaceFilter_impl.hpp"
 #include "SpaceFilter_impl.hpp"
-
-#include <Model.hpp>
 #include <Simulation.hpp>
 #include <NonSmoothDynamicalSystem.hpp>
 #include <SimulationTypeDef.hpp>

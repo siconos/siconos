@@ -22,7 +22,6 @@ Include files related to Siconos Kernel
 #ifndef SiconosKernel_hpp
 #define SiconosKernel_hpp
 
-#include "Model.hpp"
 #include "Utils.hpp"
 #include "ModelingTools.hpp"
 #include "SimulationTools.hpp"

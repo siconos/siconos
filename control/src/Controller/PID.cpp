@@ -24,7 +24,6 @@
 #include "TimeDiscretisation.hpp"
 #include "ControlSensor.hpp"
 #include "SimpleMatrix.hpp"
-#include "Model.hpp"
 #include "Simulation.hpp"
 #include "EventsManager.hpp"
 

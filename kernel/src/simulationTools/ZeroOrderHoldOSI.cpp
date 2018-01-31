@@ -91,7 +91,7 @@ void ZeroOrderHoldOSI::initializeDynamicalSystem( double t, SP::DynamicalSystem 
 
   // init extra term, usually to add control terms
   if(_extraAdditionalTerms)
-    _extraAdditionalTerms->init(DSG0, *_simulation->nonSmoothDynamicalSystem());
+    _extraAdditionalTerms->init(DSG0, *_simulation->nonSmoothDynamicalSystem(), _simulation->eventsManager()->timeDiscretisation());
 
   // Now we search for an Interaction dedicated to control
   for(std11::tie(avi, aviend) = DSG0.adjacent_vertices(dsgVD);

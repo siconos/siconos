@@ -23,7 +23,7 @@
 #include "MatrixIntegrator.hpp"
 #include "SimpleMatrix.hpp"
 
-void ControlZOHAdditionalTerms::init(DynamicalSystemsGraph& DSG0, const Model& model)
+void ControlZOHAdditionalTerms::init(DynamicalSystemsGraph& DSG0, const NonSmoothDynamicalSystem & nsds, const TimeDiscretisation & td)
 {
   DynamicalSystemsGraph::VIterator dsvi, dsvdend;
   for (std11::tie(dsvi, dsvdend) = DSG0.vertices(); dsvi != dsvdend; ++dsvi)
@@ -31,20 +31,20 @@ void ControlZOHAdditionalTerms::init(DynamicalSystemsGraph& DSG0, const Model& m
     DynamicalSystem& ds = *DSG0.bundle(*dsvi);
     if (DSG0.B.hasKey(*dsvi))
     {
-      DSG0.Bd[*dsvi].reset(new MatrixIntegrator(ds, model, DSG0.B[*dsvi]));
+      DSG0.Bd[*dsvi].reset(new MatrixIntegrator(ds, nsds, td, DSG0.B[*dsvi]));
       if (DSG0.Bd.at(*dsvi)->isConst())
         DSG0.Bd.at(*dsvi)->integrate();
     }
     if (DSG0.L.hasKey(*dsvi))
     {
-      DSG0.Ld[*dsvi].reset(new MatrixIntegrator(ds, model, DSG0.L[*dsvi]));
+      DSG0.Ld[*dsvi].reset(new MatrixIntegrator(ds, nsds, td, DSG0.L[*dsvi]));
       if (DSG0.Ld.at(*dsvi)->isConst())
         DSG0.Ld.at(*dsvi)->integrate();
     }
     if (DSG0.pluginB.hasKey(*dsvi))
-      DSG0.Bd[*dsvi].reset(new MatrixIntegrator(ds, model, DSG0.pluginB[*dsvi], DSG0.u[*dsvi]->size()));
+      DSG0.Bd[*dsvi].reset(new MatrixIntegrator(ds, nsds, td, DSG0.pluginB[*dsvi], DSG0.u[*dsvi]->size()));
     if (DSG0.pluginL.hasKey(*dsvi))
-      DSG0.Ld[*dsvi].reset(new MatrixIntegrator(ds, model, DSG0.pluginL[*dsvi], DSG0.e[*dsvi]->size()));
+      DSG0.Ld[*dsvi].reset(new MatrixIntegrator(ds, nsds, td, DSG0.pluginL[*dsvi], DSG0.e[*dsvi]->size()));
   }
 }
 

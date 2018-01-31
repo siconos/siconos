@@ -12,7 +12,6 @@ class OccBody;
 #include "OccTimeStepping.hpp"
 #include "OccBody.hpp"
 
-#include <Model.hpp>
 #include <NonSmoothDynamicalSystem.hpp>
 
 #include <SiconosVisitor.hpp>

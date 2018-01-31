@@ -22,6 +22,7 @@
 #include "NonSmoothDynamicalSystem.hpp"
 #include "ExtraAdditionalTerms.hpp"
 #include "Relation.hpp"
+#include "EventsManager.hpp"
 #include <SiconosConfig.h>
 #if defined(SICONOS_STD_FUNCTIONAL) && !defined(SICONOS_USE_BOOST_FOR_CXX11)
 #include <functional>
@@ -57,7 +58,7 @@ void OneStepIntegrator::initialize()
 {
   if (_extraAdditionalTerms)
   {
-    _extraAdditionalTerms->init(*_simulation->nonSmoothDynamicalSystem()->topology()->dSG(0), *_simulation->nonSmoothDynamicalSystem());
+    _extraAdditionalTerms->init(*_simulation->nonSmoothDynamicalSystem()->topology()->dSG(0), *_simulation->nonSmoothDynamicalSystem(), _simulation->eventsManager()->timeDiscretisation());
   }
   // a subgraph has to be implemented.
   _dynamicalSystemsGraph = _simulation->nonSmoothDynamicalSystem()->topology()->dSG(0);

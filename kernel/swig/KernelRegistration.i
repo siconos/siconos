@@ -67,7 +67,6 @@
   PY_REGISTER(EventDriven, Kernel);                                             \
   PY_REGISTER(EventsManager, Kernel);                                           \
   PY_REGISTER(Event, Kernel);                                                   \
-  PY_REGISTER(Model, Kernel);                                                   \
   PY_REGISTER(BoundaryCondition, Kernel);                                       \
   PY_REGISTER(HarmonicBC, Kernel);                                              \
   PY_REGISTER(FixedBC, Kernel);                                                 \

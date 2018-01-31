@@ -18,9 +18,7 @@
 
 
 #include "SiconosBodies.hpp"
-
 #include <Simulation.hpp>
-#include <Model.hpp>
 #include "SpaceFilter.hpp"
 
 #include <iostream>
@@ -29,11 +27,11 @@ void SiconosBodies::compute()
 {
   try
   {
-    _playground->buildInteractions(_model->currentTime());
+    _playground->buildInteractions(_sim->getTk());
 
-    _model->simulation()->advanceToEvent();
+    _sim->advanceToEvent();
 
-    _model->simulation()->processEvents();
+    _sim->processEvents();
 
   }
 

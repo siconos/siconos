@@ -21,7 +21,7 @@
 */
 #ifndef SiconosBodies_hpp
 #define SiconosBodies_hpp
-
+#include "Simulation.hpp"
 #include "MechanicsFwd.hpp"
 #include <SiconosFwd.hpp>
 #include <SiconosSerialization.hpp>
@@ -40,7 +40,7 @@ protected:
 
   SP::FMatrix _moving_plans;
   SP::SiconosMatrix _plans;
-  SP::Model _model;
+  SP::Simulation _sim;
   SP::SpaceFilter _playground;
 
 public:
@@ -49,9 +49,9 @@ public:
 
   virtual void compute();
 
-  SP::Model model()
+  SP::Simulation simulation()
   {
-    return _model;
+    return _sim;
   }
 
 

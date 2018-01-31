@@ -16,8 +16,6 @@
 #include "SphereNEDS.hpp"
 #include "SphereNEDSPlanR.hpp"
 #include "ExternalBody.hpp"
-
-#include <Model.hpp>
 #include <Simulation.hpp>
 #include <NonSmoothDynamicalSystem.hpp>
 #include <SimulationTypeDef.hpp>

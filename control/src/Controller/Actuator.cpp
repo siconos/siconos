@@ -20,7 +20,6 @@
 #include "Actuator.hpp"
 #include "ActuatorEvent.hpp"
 #include "ControlSensor.hpp"
-#include "Model.hpp"
 #include "TimeDiscretisation.hpp"
 #include "EventFactory.hpp"
 #include "Simulation.hpp"
