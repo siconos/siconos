@@ -38,12 +38,6 @@ if(WITH_${COMPONENT}_TESTING)
   NEW_TEST(testSiconosMemory SiconosMemoryTest.cpp)
   END_TEST()
   
-  # model
-  BEGIN_TEST(src/model/test)
-  
-  NEW_TEST(testModel ModelTest.cpp)
-  
-  END_TEST()
   # modeling tools 
   BEGIN_TEST(src/modelingTools/test)
   
