@@ -102,6 +102,8 @@ protected:
    */
   unsigned int _levelMaxForInput;
 
+  bool _isInitialized;
+  
   /** A link to the simulation that owns this OSI */
   SP::Simulation _simulation;
 
@@ -111,7 +113,8 @@ protected:
   OneStepIntegrator(const OSI::TYPES& type)
     : _integratorType(type), _sizeMem(1), _steps(0),
       _levelMinForOutput(0), _levelMaxForOutput(0),
-      _levelMinForInput(0), _levelMaxForInput(0) {};
+      _levelMinForInput(0), _levelMaxForInput(0),
+      _isInitialized(false) {};
 
   /** struct to add terms in the integration. Useful for Control */
   SP::ExtraAdditionalTerms _extraAdditionalTerms;
@@ -235,10 +238,19 @@ public:
   /*! @name internal memory (graph properties) management
     @{ */
 
+
+  inline bool isInitialized(){return _isInitialized;};
+
+  inline void setIsInitialized( bool value) {_isInitialized = value;};
+
+  
   /** initialise the integrator
    */
   virtual void initialize();
+  
+  void initializeExtraAdditionalTerms();
 
+  
   /** Initialization process of the nonsmooth problems
       linked to this OSI*/
   virtual void initialize_nonsmooth_problems(){};

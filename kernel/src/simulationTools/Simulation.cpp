@@ -189,27 +189,42 @@ void Simulation::initialize_new()
 {
   DEBUG_BEGIN("Simulation::initialize(SP::Model m, bool withOSI)\n");
 
+  // === OneStepIntegrators initialization ===
+  for (OSIIterator itosi = _allOSI->begin();
+       itosi != _allOSI->end(); ++itosi)
+  {
+    if (!(*itosi)->isInitialized()){
+      
+      (*itosi)->initializeExtraAdditionalTerms();
+      (*itosi)->initialize_nonsmooth_problems();
+      _numberOfIndexSets = std::max<int>((*itosi)->numberOfIndexSets(), _numberOfIndexSets);
+    }
+  }
+  
+
+
+
+  
   std::map< SP::OneStepIntegrator, std::list<SP::DynamicalSystem> >::iterator  it;
   std::list<SP::DynamicalSystem> ::iterator  itlist;
-
   for ( it = _OSIDSmap.begin();  it !=_OSIDSmap.end(); ++it)
   {
     for ( itlist = it->second.begin();  itlist !=it->second.end(); ++itlist)
     {
-
       SP::DynamicalSystem ds =  *itlist;
       SP::OneStepIntegrator osi =it->first;
+      
       _nsds->topology()->setOSI( ds , osi);
-      
-      it->first->initializeDynamicalSystem(getTk(),ds );
-
-      
+      osi->initializeDynamicalSystem(getTk(),ds );
     }
     it->second.clear();
   }
 
   if (_nsds->version() != _nsdsVersion)
   {
+
+    
+    
     DynamicalSystemsGraph::VIterator dsi, dsend;
     SP::DynamicalSystemsGraph DSG = _nsds->topology()->dSG(0);
     for (std11::tie(dsi, dsend) = DSG->vertices(); dsi != dsend; ++dsi)
@@ -219,32 +234,38 @@ void Simulation::initialize_new()
       if (!DSG->properties(*dsi).osi)
       {
         SP::DynamicalSystem ds = DSG->bundle(*dsi);
-        _nsds->topology()->setOSI(DSG->bundle(*dsi), *_allOSI->begin());
+        SP::OneStepIntegrator osi_default = *_allOSI->begin();
+        
+        _nsds->topology()->setOSI(ds, osi_default);
+
         if (_allOSI->size() > 1)
         {
           std::cout <<"Warning. The simulation has multiple OneStepIntegrators (OSI) but the DS number "
-                    << DSG->bundle(*dsi)->number()
+                    << ds->number()
                     << " is not assigned to an OSI. We assign the following OSI to this DS."
                     << std::endl;
-          (*_allOSI->begin())->display();
+          osi_default->display();
 
         }
-        (*_allOSI->begin())->initializeDynamicalSystem(getTk(),ds);
-        
+        osi_default->initializeDynamicalSystem(getTk(),ds);
+
       }
-
-      
-
-
-
-      
+    }
+    
+    SP::InteractionsGraph indexSet0 = _nsds->topology()->indexSet0();
+    InteractionsGraph::VIterator ui, uiend;
+    for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+    {
+      SP::Interaction inter = indexSet0->bundle(*ui);
+      initializeInteraction(getTk(), inter);
     }
 
+    
 
-
+    
   }
-  
-  
+
+
   DEBUG_END("Simulation::initialize(SP::Model m, bool withOSI)\n");
 }
 
@@ -263,7 +284,7 @@ void Simulation::initialize_new()
 //   _tinit = _eventsManager->startingTime();
 //   //===
 
-  
+
 //   if (withOSI)
 //   {
 //     if (numberOfOSI() == 0)

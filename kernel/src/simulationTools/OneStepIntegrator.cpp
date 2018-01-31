@@ -53,12 +53,23 @@ OneStepIntegrator::_initializeDSWorkVectors(SP::DynamicalSystem ds)
 
   return wv;
 }
+void OneStepIntegrator::initializeExtraAdditionalTerms()
+{
+  if (_extraAdditionalTerms)
+  {
+    _extraAdditionalTerms->init(*_simulation->nonSmoothDynamicalSystem()->topology()->dSG(0),
+                                *_simulation->nonSmoothDynamicalSystem(),
+                                _simulation->eventsManager()->timeDiscretisation());
+  }
+}
 
 void OneStepIntegrator::initialize()
 {
   if (_extraAdditionalTerms)
   {
-    _extraAdditionalTerms->init(*_simulation->nonSmoothDynamicalSystem()->topology()->dSG(0), *_simulation->nonSmoothDynamicalSystem(), _simulation->eventsManager()->timeDiscretisation());
+    _extraAdditionalTerms->init(*_simulation->nonSmoothDynamicalSystem()->topology()->dSG(0),
+                                *_simulation->nonSmoothDynamicalSystem(),
+                                _simulation->eventsManager()->timeDiscretisation());
   }
   // a subgraph has to be implemented.
   _dynamicalSystemsGraph = _simulation->nonSmoothDynamicalSystem()->topology()->dSG(0);
