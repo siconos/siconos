@@ -38,12 +38,12 @@ PID::~PID()
 {
 }
 
-void PID::initialize(const Model& m)
+void PID::initialize(const NonSmoothDynamicalSystem& nsds, const Simulation& s)
 {
   _u.reset(new SiconosVector(1, 0));
-  Actuator::initialize(m);
+  Actuator::initialize(nsds,s);
 
-  _curDeltaT = m.simulation()->currentTimeStep();
+  _curDeltaT = s.currentTimeStep();
 
   // initialize _err
   _err.reset(new boost::circular_buffer<double> (3));

@@ -39,9 +39,9 @@ ExplicitLinearSMC::~ExplicitLinearSMC()
   _sigma.reset();
 }
 
-void ExplicitLinearSMC::initialize(const Model& m)
+void ExplicitLinearSMC::initialize(const NonSmoothDynamicalSystem& nsds, const Simulation &s)
 {
-  CommonSMC::initialize(m);
+  CommonSMC::initialize(nsds,s);
 
   _sigma.reset(new SiconosVector(_u->size()));
 }

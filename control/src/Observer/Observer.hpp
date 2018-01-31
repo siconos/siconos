@@ -77,8 +77,11 @@ protected:
   /** id of the Observer */
   std::string _id;
 
-  /** Model for integration */
-  SP::Model _model;
+  // /** Model for integration */
+  // SP::Model _model;
+
+  // /** Model for integration */
+  SP::NonSmoothDynamicalSystem _nsds;
 
   /** Simulation for integration */
   SP::TimeStepping _simulation;
@@ -144,9 +147,9 @@ public:
   virtual void setTimeDiscretisation(const TimeDiscretisation& td);
 
   /** initialize observer data.
-   * \param m a SP::Model
+   * \param nsds
    */
-  virtual void initialize(const Model& m);
+  virtual void initialize(const NonSmoothDynamicalSystem& nsds, const Simulation& s);
 
   /** capture data when the ObserverEvent is processed
    */
@@ -183,7 +186,7 @@ public:
   /** get the Model used in the Observer
    * \return The Model used in the Observer
    */
-  virtual SP::Model getInternalModel() const { return _model; };
+  virtual SP::NonSmoothDynamicalSystem getInternalNSDS() const { return _nsds; };
 
 };
 

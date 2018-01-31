@@ -4,7 +4,7 @@ import os
 
 # this test is taken almost ve@rbatim from RelayBiSimulation_OT2_noCplugin.py
 def test_smc1():
-    from siconos.kernel import FirstOrderLinearDS, Model, TimeDiscretisation, \
+    from siconos.kernel import FirstOrderLinearDS,  TimeDiscretisation, \
         TimeStepping, ZeroOrderHoldOSI, TD_EVENT
     from siconos.control.simulation import ControlManager
     from siconos.control.sensor import LinearSensor

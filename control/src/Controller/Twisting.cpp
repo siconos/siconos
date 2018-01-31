@@ -74,14 +74,14 @@ void Twisting::setNSdata(double hControl)
   _numericsSolverId = SICONOS_AVI_CAOFERRIS;
 }
 
-void Twisting::initialize(const Model& m)
+void Twisting::initialize(const NonSmoothDynamicalSystem& nsds, const Simulation& s)
 {
   // basic check
   if (!_nsLawSMC || !_OSNSPB_SMC)
   {
     RuntimeException::selfThrow("Twisting::initialize - nslaw or osnsp not set. If you used the constructor with only the ControlSensor as argument, you need to manually call setNSdata");
   }
-  CommonSMC::initialize(m);
+  CommonSMC::initialize(nsds, s);
 }
 
 

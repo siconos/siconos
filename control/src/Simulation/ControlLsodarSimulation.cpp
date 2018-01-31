@@ -18,7 +18,6 @@
 
 #include "EventDriven.hpp"
 #include "LsodarOSI.hpp"
-#include "Model.hpp"
 #include "EventsManager.hpp"
 #include "Event.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
@@ -46,8 +45,8 @@ ControlLsodarSimulation::ControlLsodarSimulation(double t0, double T, double h):
   std11::static_pointer_cast<LsodarOSI>(_processIntegrator)->setExtraAdditionalTerms(
       std11::shared_ptr<ControlLinearAdditionalTermsED>(new ControlLinearAdditionalTermsED()));
 
-  _DSG0 = _model->nonSmoothDynamicalSystem()->topology()->dSG(0);
-  _IG0 = _model->nonSmoothDynamicalSystem()->topology()->indexSet0();
+  _DSG0 = _nsds->topology()->dSG(0);
+  _IG0 = _nsds->topology()->indexSet0();
 
   // Control part
   _CM.reset(new ControlManager(_processSimulation));

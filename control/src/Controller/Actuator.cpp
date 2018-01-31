@@ -43,7 +43,7 @@ void Actuator::addSensorPtr(SP::ControlSensor newSensor)
   _sensor = newSensor;
 }
 
-void Actuator::initialize(const Model& m)
+void Actuator::initialize(const NonSmoothDynamicalSystem& nsds, const Simulation& s)
 {
   if (!_sensor)
   {
@@ -51,7 +51,7 @@ void Actuator::initialize(const Model& m)
   }
 
   // Init the control variable and add the necessary properties
-  DynamicalSystemsGraph& DSG0 = *m.nonSmoothDynamicalSystem()->topology()->dSG(0);
+  DynamicalSystemsGraph& DSG0 = *nsds.topology()->dSG(0);
   DynamicalSystemsGraph::VDescriptor dsgVD = DSG0.descriptor(_sensor->getDS());
   if (_B)
   {
@@ -82,9 +82,9 @@ void Actuator::setSizeu(unsigned size)
   _u.reset(new SiconosVector(size, 0));
 }
 
-SP::Model Actuator::getInternalModel() const
+SP::NonSmoothDynamicalSystem Actuator::getInternalNSDS() const
 {
-  return std11::shared_ptr<Model>();
+  return std11::shared_ptr<NonSmoothDynamicalSystem>();
 }
 
 void Actuator::display() const

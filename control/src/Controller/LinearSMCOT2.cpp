@@ -25,7 +25,6 @@
 #include "SiconosVector.hpp"
 #include "LsodarOSI.hpp"
 #include "ControlSensor.hpp"
-#include "Model.hpp"
 #include "TimeDiscretisation.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
 
@@ -37,7 +36,7 @@ LinearSMCOT2::~LinearSMCOT2()
 {
 }
 
-void LinearSMCOT2::initialize(const Model& m)
+void LinearSMCOT2::initialize(const NonSmoothDynamicalSystem& nsds, const Simulation & s)
 {
   if (!_Csurface)
   {
@@ -49,7 +48,7 @@ void LinearSMCOT2::initialize(const Model& m)
       _u.reset(new SiconosVector(_Csurface->size(0), 0));
   }
 
-  Actuator::initialize(m);
+  Actuator::initialize(nsds,s);
 
   // We can only work with FirstOrderNonLinearDS, FirstOrderLinearDS and FirstOrderLinearTIDS
   // We can use the Visitor mighty power to check if we have the right type
@@ -95,8 +94,8 @@ void LinearSMCOT2::initialize(const Model& m)
   //  _Phi->eye();
   //  _Xold.reset(new SiconosVector(_nDim));
   //  *_Xold = *(_sensor->y());
-  double _t0 = m.t0();
-  double _T = m.finalT() + _tdPhi->currentTimeStep(0);
+  double _t0 = nsds.t0();
+  double _T = nsds.finalT() + _tdPhi->currentTimeStep(0);
 
   //  _XPhi.reset(new SiconosVector(_nDim));
   //  (*_XPhi) = _DS->getX0();
@@ -114,21 +113,18 @@ void LinearSMCOT2::initialize(const Model& m)
   //  _Xhat.reset(new SiconosVector(_nDim, 0));
   //  _DSPred->setXPtr(_Xhat);
 
-  _modelPhi.reset(new Model(_t0, _T));
+  _nsdsPhi.reset(new NonSmoothDynamicalSystem(_t0, _T));
   _PhiOSI.reset(new LsodarOSI());
-  _modelPhi->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DSPhi);
+  _nsdsPhi->insertDynamicalSystem(_DSPhi);
   _simulPhi.reset(new EventDriven(_tdPhi, 0));
-  _simulPhi->prepareIntegratorForDS(_PhiOSI, _DSPhi, _modelPhi, _t0);
-  _modelPhi->setSimulation(_simulPhi);
-  _modelPhi->initialize();
+  _simulPhi->associate(_PhiOSI, _DSPhi);
+
   // Integration for Gamma
-  _modelPred.reset(new Model(_t0, _T));
+  _nsdsPred.reset(new NonSmoothDynamicalSystem(_t0, _T));
   _PredOSI.reset(new LsodarOSI());
-  _modelPred->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DSPred);
+  _nsdsPred->insertDynamicalSystem(_DSPred);
   _simulPred.reset(new EventDriven(_tdPred, 0));
-  _simulPred->prepareIntegratorForDS(_PredOSI, _DSPred, _modelPred, _t0);
-  _modelPred->setSimulation(_simulPred);
-  _modelPred->initialize();
+  _simulPred->associate(_PredOSI, _DSPred);
 
   _X = _sensor->yTk();
 

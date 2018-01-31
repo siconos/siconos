@@ -18,7 +18,6 @@
 
 #include "TimeStepping.hpp"
 #include "ZeroOrderHoldOSI.hpp"
-#include "Model.hpp"
 #include "EventsManager.hpp"
 #include "Event.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
@@ -42,8 +41,8 @@ ControlZOHSimulation::ControlZOHSimulation(double t0, double T, double h):
   _processSimulation->setName("plant simulation");
   _processSimulation->insertIntegrator(_processIntegrator);
 
-  _DSG0 = _model->nonSmoothDynamicalSystem()->topology()->dSG(0);
-  _IG0 = _model->nonSmoothDynamicalSystem()->topology()->indexSet0();
+  _DSG0 = _nsds->topology()->dSG(0);
+  _IG0 = _nsds->topology()->indexSet0();
 
   // Control part
   _CM.reset(new ControlManager(_processSimulation));

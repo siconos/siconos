@@ -25,9 +25,9 @@
 #include "TimeDiscretisation.hpp"
 #include "SiconosVector.hpp"
 
-void ControlSensor::initialize(const Model& m)
+void ControlSensor::initialize(const  NonSmoothDynamicalSystem& nsds)
 {
-  Sensor::initialize(m);
+  Sensor::initialize(nsds);
 //  if (_delay > 0)
 //  {
 //    if (_timeDiscretisation->getTDCase() != 2)

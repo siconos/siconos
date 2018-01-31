@@ -27,14 +27,13 @@
 #include "ControlSimulation.hpp"
 #include <boost/progress.hpp>
 #include <boost/timer.hpp>
-#include "Model.hpp"
 
 #include "ControlSimulation_impl.hpp"
 
 ControlSimulation::ControlSimulation(double t0, double T, double h):
   _t0(t0), _T(T), _h(h), _theta(0.5), _elapsedTime(0.0), _N(0), _saveOnlyMainSimulation(false), _silent(false)
 {
-  _model.reset(new Model(_t0, _T));
+  _nsds.reset(new NonSmoothDynamicalSystem(_t0, _T));
   _processTD.reset(new TimeDiscretisation(_t0, _h));
 
 }
@@ -45,15 +44,16 @@ void ControlSimulation::initialize()
   _dataLegend = "time";
 
   // Simulation part
-  _model->setSimulation(_processSimulation);
-  _model->initialize();
+  _processSimulation->setNonSmoothDynamicalSystemPtr(_nsds);
+  // _model->setSimulation(_processSimulation);
+  // _model->initialize();
   // Control part
-  _CM->initialize(*_model);
+  _CM->initialize(*_nsds);
 
   // Output
   _N = (unsigned)ceil((_T - _t0) / _h) + 10; // Number of time steps
-  DynamicalSystemsGraph& DSG0 = *_model->nonSmoothDynamicalSystem()->topology()->dSG(0);
-  InteractionsGraph& IG0 = *_model->nonSmoothDynamicalSystem()->topology()->indexSet0();
+  DynamicalSystemsGraph& DSG0 = *_nsds->topology()->dSG(0);
+  InteractionsGraph& IG0 = *_nsds->topology()->indexSet0();
   res = getNumberOfStates(DSG0, IG0);
   _nDim = res.first;
   _dataLegend += res.second;
@@ -63,9 +63,9 @@ void ControlSimulation::initialize()
     const Actuators& allActuators = _CM->getActuators();
     for (ActuatorsIterator it = allActuators.begin(); it != allActuators.end(); ++it)
     {
-      if ((*it)->getInternalModel())
+      if ((*it)->getInternalNSDS())
       {
-        Topology& topo = *(*it)->getInternalModel()->nonSmoothDynamicalSystem()->topology();
+        Topology& topo = *(*it)->getInternalNSDS()->topology();
         res = getNumberOfStates(*topo.dSG(0), *topo.indexSet0());
         _nDim += res.first;
         _dataLegend += res.second;
@@ -74,9 +74,9 @@ void ControlSimulation::initialize()
     const Observers& allObservers = _CM->getObservers();
     for (ObserversIterator it = allObservers.begin(); it != allObservers.end(); ++it)
     {
-      if ((*it)->getInternalModel())
+      if ((*it)->getInternalNSDS())
       {
-        Topology& topo = *(*it)->getInternalModel()->nonSmoothDynamicalSystem()->topology();
+        Topology& topo = *(*it)->getInternalNSDS()->topology();
         res = getNumberOfStates(*topo.dSG(0), *topo.indexSet0());
         _nDim += res.first;
         _dataLegend += res.second;
@@ -93,14 +93,12 @@ void ControlSimulation::setTheta(unsigned int newTheta)
 
 void ControlSimulation::addDynamicalSystem(SP::DynamicalSystem ds, const std::string& name)
 {
-  _model->nonSmoothDynamicalSystem()->insertDynamicalSystem(ds);
-
-  _processSimulation->prepareIntegratorForDS(_processIntegrator, ds, _model,
-                                             _processSimulation->nextTime());
+  _nsds->insertDynamicalSystem(ds);
+  _processSimulation->associate(_processIntegrator, ds);
 
   if (!name.empty())
   {
-    _model->nonSmoothDynamicalSystem()->setName(ds, name);
+    _nsds->setName(ds, name);
   }
 }
 
@@ -132,18 +130,18 @@ void ControlSimulation::storeData(unsigned indx)
     const Actuators& allActuators = _CM->getActuators();
     for (ActuatorsIterator it = allActuators.begin(); it != allActuators.end(); ++it)
     {
-      if ((*it)->getInternalModel())
+      if ((*it)->getInternalNSDS())
       {
-        Topology& topo = *(*it)->getInternalModel()->nonSmoothDynamicalSystem()->topology();
+        Topology& topo = *(*it)->getInternalNSDS()->topology();
         startingColumn = storeAllStates(indx, startingColumn, *topo.dSG(0), *topo.indexSet0(), *_dataM);
       }
     }
     const Observers& allObservers = _CM->getObservers();
     for (ObserversIterator it = allObservers.begin(); it != allObservers.end(); ++it)
     {
-      if ((*it)->getInternalModel())
+      if ((*it)->getInternalNSDS())
       {
-        Topology& topo = *(*it)->getInternalModel()->nonSmoothDynamicalSystem()->topology();
+        Topology& topo = *(*it)->getInternalNSDS()->topology();
         startingColumn = storeAllStates(indx, startingColumn, *topo.dSG(0), *topo.indexSet0(), *_dataM);
       }
     }

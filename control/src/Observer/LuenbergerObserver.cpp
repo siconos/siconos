@@ -18,15 +18,13 @@
 
 #include "ModelingTools.hpp"
 #include "SimulationTools.hpp"
-#include "Model.hpp"
-
 #include "LuenbergerObserver.hpp"
 #include "ControlSensor.hpp"
 #include "ObserverFactory.hpp"
 #include "ControlZOHAdditionalTerms.hpp"
 
 
-void LuenbergerObserver::initialize(const Model& m)
+void LuenbergerObserver::initialize(const NonSmoothDynamicalSystem& nsds, const Simulation &s)
 {
   if (!_C)
   {
@@ -34,10 +32,10 @@ void LuenbergerObserver::initialize(const Model& m)
   }
   else
   {
-    Observer::initialize(m);
+    Observer::initialize(nsds, s);
   }
   bool isDSinDSG0 = true;
-  DynamicalSystemsGraph& originalDSG0 = *m.nonSmoothDynamicalSystem()->topology()->dSG(0);
+  DynamicalSystemsGraph& originalDSG0 = *nsds.topology()->dSG(0);
   DynamicalSystemsGraph::VDescriptor originaldsgVD;
   if (!_DS) // No DynamicalSystem was given
   {
@@ -80,17 +78,17 @@ void LuenbergerObserver::initialize(const Model& m)
   _e.reset(new SiconosVector(_C->size(0)));
   _y.reset(new SiconosVector(_C->size(0)));
 
-  double t0 = m.t0();
-  double h = m.simulation()->currentTimeStep();
-  double T = m.finalT() + h;
-  _model.reset(new Model(t0, T));
+  double t0 = nsds.t0();
+  double h = s.currentTimeStep();
+  double T = nsds.finalT() + h;
+  _nsds.reset(new NonSmoothDynamicalSystem(t0, T));
   _integrator.reset(new ZeroOrderHoldOSI());
   std11::static_pointer_cast<ZeroOrderHoldOSI>(_integrator)->setExtraAdditionalTerms(
-      std11::shared_ptr<ControlZOHAdditionalTerms>(new ControlZOHAdditionalTerms()));
-  _model->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DS);
+    std11::shared_ptr<ControlZOHAdditionalTerms>(new ControlZOHAdditionalTerms()));
+  _nsds->insertDynamicalSystem(_DS);
 
   // Add the necessary properties
-  DynamicalSystemsGraph& DSG0 = *_model->nonSmoothDynamicalSystem()->topology()->dSG(0);
+  DynamicalSystemsGraph& DSG0 = *_nsds->topology()->dSG(0);
   DynamicalSystemsGraph::VDescriptor dsgVD = DSG0.descriptor(_DS);
   // Observer part
   DSG0.L[dsgVD] = _L;
@@ -106,9 +104,7 @@ void LuenbergerObserver::initialize(const Model& m)
 
   // all necessary things for simulation
   _simulation.reset(new TimeStepping(_td, 0));
-  _simulation->prepareIntegratorForDS(_integrator, _DS, _model, t0);
-  _model->setSimulation(_simulation);
-  _model->initialize();
+  _simulation->associate(_integrator, _DS);
 
   // initialize error
   *_y = _sensor->y();

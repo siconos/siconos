@@ -86,7 +86,7 @@ public:
   /** Initialize Controller
    * \param m the Model
    */
-  virtual void initialize(const Model& m);
+  virtual void initialize(const NonSmoothDynamicalSystem& nsds, const Simulation & s);
 
   /** Compute the new control law at each event
    * Here we are using the following formula:

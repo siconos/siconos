@@ -20,12 +20,11 @@
 #include "SimulationTools.hpp"
 #include "CommonSMC.hpp"
 #include "ControlSensor.hpp"
-#include "Model.hpp"
 #include "FirstOrderR_helpers.hpp"
 
 #include <string>
 
-void CommonSMC::initialize(const Model& m)
+void CommonSMC::initialize(const NonSmoothDynamicalSystem & nsds, const Simulation & s)
 {
   if (!_Csurface && _pluginhName.empty())
   {
@@ -36,7 +35,7 @@ void CommonSMC::initialize(const Model& m)
     if (_Csurface && !_u)
       _u.reset(new SiconosVector(_Csurface->size(0), 0));
 
-    Actuator::initialize(m);
+    Actuator::initialize(nsds,s);
   }
   // We can only work with FirstOrderNonLinearDS, FirstOrderLinearDS and FirstOrderLinearTIDS
   // We can use the Visitor mighty power to check if we have the right type
@@ -77,10 +76,10 @@ void CommonSMC::initialize(const Model& m)
   }
   // Get the dimension of the output
   // XXX What if there is more than one sensor ...
-  double t0 = m.t0();
-  double T = m.finalT() + _td->currentTimeStep(0);
+  double t0 = nsds.t0();
+  double T = nsds.finalT() + _td->currentTimeStep(0);
   // create the SMC Model
-  _SMC.reset(new Model(t0, T));
+  _nsdsSMC.reset(new NonSmoothDynamicalSystem(t0, T));
   // Set up the simulation
   _simulationSMC.reset(new TimeStepping(_td));
 
@@ -155,20 +154,22 @@ void CommonSMC::initialize(const Model& m)
     _integratorSMC.reset(new ZeroOrderHoldOSI());
   }
 
-  _SMC->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DS_SMC);
-  _SMC->nonSmoothDynamicalSystem()->setName(_DS_SMC, "plant_SMC");
-  _SMC->nonSmoothDynamicalSystem()->link(_interactionSMC, _DS_SMC);
-  _SMC->nonSmoothDynamicalSystem()->setControlProperty(_interactionSMC, true);
-  _SMC->nonSmoothDynamicalSystem()->topology()->setName(_interactionSMC, "Sgn_SMC");
+  _nsdsSMC->insertDynamicalSystem(_DS_SMC);
+  _nsdsSMC->setName(_DS_SMC, "plant_SMC");
+  _nsdsSMC->link(_interactionSMC, _DS_SMC);
+  _nsdsSMC->setControlProperty(_interactionSMC, true);
+  _nsdsSMC->topology()->setName(_interactionSMC, "Sgn_SMC");
   _simulationSMC->setName("linear sliding mode controller simulation");
-  _simulationSMC->prepareIntegratorForDS(_integratorSMC, _DS_SMC, _SMC, t0);
+  _simulationSMC->associate(_integratorSMC, _DS_SMC);
   // OneStepNsProblem
   _OSNSPB_SMC->numericsSolverOptions()->dparam[0] = _precision;
   //    std::cout << _OSNSPB_SMC->numericsSolverOptions()->dparam[0] <<std::endl;
   _simulationSMC->insertNonSmoothProblem(_OSNSPB_SMC);
   // Finally we can initialize everything ...
-  _SMC->setSimulation(_simulationSMC);
-  _SMC->initialize();
+  _simulationSMC->associate(_integratorSMC,_DS_SMC);
+
+  // _SMC->setSimulation(_simulationSMC);
+  // _SMC->initialize();
 
   // Handy
   _eventsManager = _simulationSMC->eventsManager();
