@@ -19,7 +19,7 @@ if(WITH_${COMPONENT}_TESTING)
     OUTPUT_NAME TestPlugin)
 
   # the main test driver
-  SET(TEST_MAIN src/model/test/TestMain.cpp)
+  SET(TEST_MAIN src/test/TestMain.cpp)
 
   # For Windows
   SET(PATH_FOR_PLUGIN
