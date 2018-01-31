@@ -41,10 +41,12 @@ using namespace RELATION;
 // --- CONSTRUCTORS/DESTRUCTOR ---
 
 // Default constructor
-NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(): _BVP(false), _mIsLinear(true)
+NonSmoothDynamicalSystem::NonSmoothDynamicalSystem():  _t(0.0), _t0(0.0), _T(0.0), _title("none"), _author("nobody"), _description("none"),
+                                                       _date("none"), _BVP(false),_version(0) , _mIsLinear(true)
 {
   // === Builds an empty topology ===
   _topology.reset(new Topology());
+
 };
 
 
@@ -68,12 +70,14 @@ void NonSmoothDynamicalSystem::link(SP::Interaction inter, SP::DynamicalSystem d
 {
   _mIsLinear = (inter->relation()->isLinear() && _mIsLinear);
   _topology->link(inter, ds1, ds2);
+  _version++;
 };
 
 
 void NonSmoothDynamicalSystem::clear()
 {
   _topology->clear();
+  _version++;
 }
 
 void NonSmoothDynamicalSystem::setSymmetric(bool val)

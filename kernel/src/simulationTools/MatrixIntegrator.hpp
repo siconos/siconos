@@ -56,8 +56,8 @@ protected:
   /** DynamicalSystem to integrate */
   SP::DynamicalSystem _DS;
 
-  /** Model for integration */
-  SP::Model _model;
+  /** NonSmoothDynamicalSystem for integration */
+  SP::NonSmoothDynamicalSystem _nsds;
 
   /** TimeDiscretisation for integration */
   SP::TimeDiscretisation _TD;
@@ -69,7 +69,7 @@ protected:
   SP::LsodarOSI _OSI;
 
   /** */
-  void commonInit(const DynamicalSystem& ds, const Model& m);
+  void commonInit(const DynamicalSystem& ds, const NonSmoothDynamicalSystem& nsds, const TimeDiscretisation & td);
 
   /** Default constructor */
   MatrixIntegrator() {};
@@ -81,7 +81,7 @@ public:
    * \param m the original Model
    * \param E a matrix
    */
-  MatrixIntegrator(const DynamicalSystem& ds, const Model& m, SP::SiconosMatrix E);
+  MatrixIntegrator(const DynamicalSystem& ds, const NonSmoothDynamicalSystem& nsds, const TimeDiscretisation &td, const  SP::SiconosMatrix E);
 
   /** Constructor to compute \f$\int exp(A\tau)E(\tau)\mathrm{d}\tau\f$
    * \param ds the DynamicalSystem
@@ -89,13 +89,13 @@ public:
    * \param plugin the plugin to compute \f$E(t)\f$
    * \param p the number of column in E
    */
-  MatrixIntegrator(const DynamicalSystem& ds, const Model& m, SP::PluggedObject plugin, const unsigned int p);
+  MatrixIntegrator(const DynamicalSystem& ds, const NonSmoothDynamicalSystem& nsds, const TimeDiscretisation &td, SP::PluggedObject plugin, const unsigned int p);
 
   /** Constructor to compute \f$\int exp(A\tau)\mathrm{d}\tau\f$
    * \param ds the DynamicalSystem
    * \param m the original Model
    */
-  MatrixIntegrator(const DynamicalSystem& ds, const Model& m);
+  MatrixIntegrator(const DynamicalSystem& ds,const NonSmoothDynamicalSystem& nsds, const TimeDiscretisation &td);
 
   /** Computes the next value of _mat */
   void integrate();

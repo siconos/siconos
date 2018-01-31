@@ -19,7 +19,6 @@
 #include "EventDriven.hpp"
 #include "LsodarOSI.hpp"
 #include "LCP.hpp"
-#include "Model.hpp"
 #include "Interaction.hpp"
 #include "EventsManager.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
@@ -221,7 +220,7 @@ void EventDriven::updateIndexSetsWithDoubleCondition()
     DEBUG_PRINTF("ED 2 update with double condition %f\n", gamma);
     DEBUG_PRINTF("ED 3 update with double condition%f\n", _TOL_ED);
 
-    
+
     if (fabs(F) < _TOL_ED)
       indexSet2->remove_vertex(inter);
     else if ((gamma < -_TOL_ED) || (F < -_TOL_ED))
@@ -335,13 +334,13 @@ void EventDriven::initOSIRhs()
   }
 }
 
-void EventDriven::initialize(SP::Model m, bool withOSI)
+void EventDriven::initialize()
 {
   // Initialization for Simulation
-  _indexSet0 = m->nonSmoothDynamicalSystem()->topology()->indexSet(0);
-  _DSG0 = m->nonSmoothDynamicalSystem()->topology()->dSG(0);
+  _indexSet0 = _nsds->topology()->indexSet(0);
+  _DSG0 = _nsds->topology()->dSG(0);
 
-  Simulation::initialize(m, withOSI);
+  Simulation::initialize_new();
   // Initialization for all OneStepIntegrators
   //initOSIs();
   initOSIRhs();
@@ -416,7 +415,7 @@ void EventDriven::computef(OneStepIntegrator& osi, integer * sizeOfX, doublereal
     }
   }
   DEBUG_END("EventDriven::computef(OneStepIntegrator& osi, integer * sizeOfX, doublereal * time, doublereal * x, doublereal * xdot)\n");
-    
+
 }
 
 void EventDriven::computeJacobianfx(OneStepIntegrator& osi,

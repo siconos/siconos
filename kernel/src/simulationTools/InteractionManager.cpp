@@ -2,7 +2,6 @@
 #include "InteractionManager.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
 #include "Simulation.hpp"
-#include "Model.hpp"
 
 #include "debug.h"
 

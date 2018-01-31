@@ -20,7 +20,6 @@
 #include "EqualityConditionNSL.hpp"
 #include "Simulation.hpp"
 #include "OSNSMatrix.hpp"
-#include "Model.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
 
 // --- Numerics headers ---

@@ -19,7 +19,6 @@
 #include "EventFactory.hpp"
 #include "Simulation.hpp"
 #include "TimeDiscretisation.hpp"
-#include "Model.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
 using namespace EventFactory;
 

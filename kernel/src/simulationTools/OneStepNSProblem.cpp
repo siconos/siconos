@@ -21,7 +21,6 @@
 #include "Interaction.hpp"
 #include "Topology.hpp"
 #include "Simulation.hpp"
-#include "Model.hpp"
 #include "EulerMoreauOSI.hpp"
 #include "MoreauJeanOSI.hpp"
 #include "MoreauJeanBilbaoOSI.hpp"

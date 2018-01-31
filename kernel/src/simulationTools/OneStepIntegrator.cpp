@@ -18,7 +18,6 @@
 
 #include "OneStepIntegrator.hpp"
 #include "Simulation.hpp"
-#include "Model.hpp"
 #include "DynamicalSystem.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
 #include "ExtraAdditionalTerms.hpp"
@@ -54,11 +53,11 @@ OneStepIntegrator::_initializeDSWorkVectors(SP::DynamicalSystem ds)
   return wv;
 }
 
-void OneStepIntegrator::initialize( Model& m )
+void OneStepIntegrator::initialize()
 {
   if (_extraAdditionalTerms)
   {
-    _extraAdditionalTerms->init(*m.nonSmoothDynamicalSystem()->topology()->dSG(0), m);
+    _extraAdditionalTerms->init(*_simulation->nonSmoothDynamicalSystem()->topology()->dSG(0), *_simulation->nonSmoothDynamicalSystem());
   }
   // a subgraph has to be implemented.
   _dynamicalSystemsGraph = _simulation->nonSmoothDynamicalSystem()->topology()->dSG(0);
@@ -74,7 +73,7 @@ void OneStepIntegrator::initialize( Model& m )
   {
     if(!checkOSI(dsi)) continue;
     SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
-    initializeDynamicalSystem(m, t0, ds);
+    initializeDynamicalSystem(t0, ds);
   }
 
   // 2 - Nonsmooth problems : set levels and initialize. Depends on OSI type.
@@ -85,7 +84,7 @@ void OneStepIntegrator::initialize( Model& m )
   // For each interaction, allocate/initialize buffers in the interaction graph
   // (DSlink property) and connect/fill these buffers with DS buffers.
   // This strongly depends on the DS and OSI types.
-  SP::InteractionsGraph indexSet0 = m.nonSmoothDynamicalSystem()->topology()->indexSet0();
+  SP::InteractionsGraph indexSet0 = _simulation->nonSmoothDynamicalSystem()->topology()->indexSet0();
   InteractionsGraph::VIterator ui, uiend;
   for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
   {
@@ -172,7 +171,7 @@ void OneStepIntegrator::_check_and_update_interaction_levels(Interaction& inter)
     inter.reset();
 }
 
-// void OneStepIntegrator::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds)
+// void OneStepIntegrator::initializeDynamicalSystem( double t, SP::DynamicalSystem ds)
 // {
 //   RuntimeException::selfThrow("OneStepIntegrator::initializeDynamicalSystem not implemented for integrator of type " + _integratorType);
 // }

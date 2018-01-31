@@ -19,7 +19,6 @@
 #include "GlobalFrictionContact.hpp"
 #include "Simulation.hpp"
 //#include "Interaction.hpp"
-#include "Model.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
 #include "Relation.hpp"
 #include "NewtonImpactFrictionNSL.hpp"

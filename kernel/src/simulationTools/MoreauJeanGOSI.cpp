@@ -17,7 +17,6 @@
  */
 #include "MoreauJeanGOSI.hpp"
 #include "Simulation.hpp"
-#include "Model.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
 #include "NewtonEulerDS.hpp"
 #include "LagrangianLinearTIDS.hpp"
@@ -73,7 +72,7 @@ MoreauJeanGOSI::MoreauJeanGOSI(double theta, double gamma):
     _useGamma = false;
   }
 }
-void MoreauJeanGOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds)
+void MoreauJeanGOSI::initializeDynamicalSystem( double t, SP::DynamicalSystem ds)
 {
   // Get work buffers from the graph
   VectorOfVectors& workVectors = *_initializeDSWorkVectors(ds);
@@ -92,7 +91,7 @@ void MoreauJeanGOSI::initializeDynamicalSystem(Model& m, double t, SP::Dynamical
     workVectors[OneStepIntegrator::free].reset(new SiconosVector(lds->dimension()));
     workVectors[OneStepIntegrator::local_buffer].reset(new SiconosVector(lds->dimension()));
 
-    lds->computeForces(m.t0(), lds->q(), lds->velocity());
+    lds->computeForces(t, lds->q(), lds->velocity());
     lds->swapInMemory();
   }
   else if(dsType == Type::NewtonEulerDS)
@@ -108,7 +107,7 @@ void MoreauJeanGOSI::initializeDynamicalSystem(Model& m, double t, SP::Dynamical
     prod(*T, *v, *dotq, true);
 
     //Compute a first value of the forces to store it in _forcesMemory
-    neds->computeForces(m.t0(), neds->q(), v);
+    neds->computeForces(t, neds->q(), v);
     neds->swapInMemory();
   }
 }

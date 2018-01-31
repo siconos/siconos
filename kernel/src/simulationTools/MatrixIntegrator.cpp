@@ -19,7 +19,6 @@
 #include "MatrixIntegrator.hpp"
 #include "SiconosAlgebra.hpp"
 #include "FirstOrderLinearTIDS.hpp"
-#include "Model.hpp"
 #include "EventDriven.hpp"
 #include "SubPluggedObject.hpp"
 #include "LsodarOSI.hpp"
@@ -27,17 +26,17 @@
 #include "NonSmoothDynamicalSystem.hpp"
 #include "EventsManager.hpp"
 
-MatrixIntegrator::MatrixIntegrator(const DynamicalSystem& ds, const Model& m, SP::SiconosMatrix E): _E(E)
+MatrixIntegrator::MatrixIntegrator(const DynamicalSystem& ds, const NonSmoothDynamicalSystem& nsds, const  TimeDiscretisation & td, SP::SiconosMatrix E): _E(E)
 {
-  commonInit(ds, m);
+  commonInit(ds, nsds, td);
   _mat.reset(new SimpleMatrix(*E));
   _mat->zero();
 }
 
-MatrixIntegrator::MatrixIntegrator(const DynamicalSystem& ds, const Model& m, SP::PluggedObject plugin, const unsigned int p):
+MatrixIntegrator::MatrixIntegrator(const DynamicalSystem& ds, const NonSmoothDynamicalSystem& nsds, const TimeDiscretisation & td, SP::PluggedObject plugin, const unsigned int p):
   _plugin(plugin)
 {
-  commonInit(ds, m);
+  commonInit(ds, nsds, td);
   unsigned int n = ds.n();
   _mat.reset(new SimpleMatrix(n, p, 0));
   _spo.reset(new SubPluggedObject(*_plugin, n, p));
@@ -45,16 +44,17 @@ MatrixIntegrator::MatrixIntegrator(const DynamicalSystem& ds, const Model& m, SP
   _isConst = false;
 }
 
-MatrixIntegrator::MatrixIntegrator(const DynamicalSystem& ds, const Model& m)
+MatrixIntegrator::MatrixIntegrator(const DynamicalSystem& ds, const NonSmoothDynamicalSystem& nsds, const  TimeDiscretisation & td)
 {
   unsigned int n = ds.n();
   _mat.reset(new SimpleMatrix(n, n, 0));
-  commonInit(ds, m);
+  commonInit(ds, nsds, td);
 }
 
-void MatrixIntegrator::commonInit(const DynamicalSystem& ds, const Model& m)
+void MatrixIntegrator::commonInit(const DynamicalSystem& ds, const NonSmoothDynamicalSystem& nsds, const TimeDiscretisation & td)
 {
-  _TD.reset(new TimeDiscretisation(m.simulation()->eventsManager()->timeDiscretisation()));
+  _TD.reset(new TimeDiscretisation(td));
+
   Type::Siconos dsType = Type::value(ds);
   if (dsType == Type::FirstOrderLinearTIDS)
   {
@@ -74,13 +74,19 @@ void MatrixIntegrator::commonInit(const DynamicalSystem& ds, const Model& m)
   }
 
   // integration stuff
-  _model.reset(new Model(m.t0(), m.finalT()));
+  _nsds.reset(new NonSmoothDynamicalSystem());
+  _nsds->sett0(nsds.t0());
+  _nsds->setT(nsds.finalT());
+
+  
   _OSI.reset(new LsodarOSI());
-  _model->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DS);
+  _nsds->insertDynamicalSystem(_DS);
   _sim.reset(new EventDriven(_TD, 0));
-  _sim->prepareIntegratorForDS(_OSI, _DS, _model, m.t0());
-  _model->setSimulation(_sim);
-  _model->initialize();
+  _sim->associate(_OSI, _DS);
+  _sim->setNonSmoothDynamicalSystemPtr(_nsds);
+
+  // _model->setSimulation(_sim);
+  // _model->initialize();
 
   //change tolerance
   _OSI->setTol(1, 10 * MACHINE_PREC, 5 * MACHINE_PREC);

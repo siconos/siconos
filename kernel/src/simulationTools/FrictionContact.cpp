@@ -18,7 +18,6 @@
 #include "FrictionContact.hpp"
 #include "Topology.hpp"
 #include "Simulation.hpp"
-#include "Model.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
 #include "NewtonImpactFrictionNSL.hpp"
 #include "OSNSMatrix.hpp"

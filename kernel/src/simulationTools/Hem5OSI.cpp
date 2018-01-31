@@ -22,7 +22,6 @@
 #include "LagrangianLinearTIDS.hpp"
 #include "BlockVector.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
-#include "Model.hpp"
 #include "Topology.hpp"
 #include "LagrangianRheonomousR.hpp"
 #include "LagrangianScleronomousR.hpp"
@@ -494,7 +493,7 @@ void Hem5OSI_impl::fprob(integer* IFCN,
 // {
 //   std11::static_pointer_cast<EventDriven>(_simulation)->computeJacobianfx(shared_from_this(), sizeOfX, time, x, jacob);
 // }
-void Hem5OSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds)
+void Hem5OSI::initializeDynamicalSystem(double t, SP::DynamicalSystem ds)
 {
   // Get work buffers from the graph
   VectorOfVectors& workVectors = *_initializeDSWorkVectors(ds);
@@ -602,7 +601,7 @@ void Hem5OSI::fillDSLinks(Interaction &inter,
 }
 
 
-void Hem5OSI::initialize(Model& m)
+void Hem5OSI::initialize()
 {
 
   DEBUG_PRINT("Hem5OSI::initialize(Model& m)\n");
@@ -613,7 +612,7 @@ void Hem5OSI::initialize(Model& m)
   _uWork.reset(new BlockVector());
   _lambdaWork.reset(new BlockVector());
   _forcesWork.reset(new BlockVector());
-  OneStepIntegrator::initialize(m);
+  OneStepIntegrator::initialize();
 
   // InteractionsGraph::VIterator ui, uiend;
   // SP::InteractionsGraph indexSet0

@@ -114,7 +114,7 @@ public:
    * \param m the Model
    * \param withOSI
    */
-  void initialize(SP::Model m, bool withOSI = true);
+  void initialize();
 
   /* Getters and setters */
 

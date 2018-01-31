@@ -17,7 +17,6 @@
  */
 #include "EulerMoreauOSI.hpp"
 #include "Simulation.hpp"
-#include "Model.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
 #include "FirstOrderLinearTIDS.hpp"
 #include "FirstOrderLinearTIR.hpp"
@@ -93,7 +92,7 @@ SP::SiconosMatrix EulerMoreauOSI::WBoundaryConditions(SP::DynamicalSystem ds)
   return _dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).WBoundaryConditions;
 }
 
-void EulerMoreauOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds)
+void EulerMoreauOSI::initializeDynamicalSystem(double t, SP::DynamicalSystem ds)
 {
   VectorOfVectors& workVectors = *_initializeDSWorkVectors(ds);
 

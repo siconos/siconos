@@ -41,10 +41,29 @@ private:
   */
   ACCEPT_SERIALIZATION(NonSmoothDynamicalSystem);
 
+  /** current time of the simulation 
+      Warning FP : it corresponds to the time 
+      at the end of the integration step. 
+      It means that _t corresponds to tkp1 of the
+      simulation or nextTime().
+   */
+  double _t;
+
+  /** initial time of the simulation */
+  double _t0;
+
+  /** final time of the simulation */
+  double _T;
+
+  /** information concerning the Model */
+  std::string _title, _author, _description, _date;
 
   /** TRUE if the NonSmoothDynamicalSystem is a boundary value problem*/
   bool _BVP;
 
+
+  unsigned int _version;
+  
   /** the topology of the system */
   SP::Topology _topology;
 
@@ -65,7 +84,121 @@ public:
   ~NonSmoothDynamicalSystem();
 
   // --- GETTERS/SETTERS ---
+/** get the current time
+   *  \return a double
+   */
+  inline double currentTime() const
+  {
+    return _t;
+  }
 
+  /** set the current time
+   *  \param newValue the new time
+   */
+  inline void setCurrentTime(double newValue)
+  {
+    _t = newValue;
+  }
+
+  /** get initial time
+   *  \return a double
+   */
+  inline double t0() const
+  {
+    return _t0;
+  }
+
+  /** set initial time of the time discretisation
+   *  \param newT0
+   */
+  inline void sett0(double newT0)
+  {
+    _t0 = newT0;
+  };
+
+  /** get final time
+   *  \return a double
+   */
+  inline double finalT() const
+  {
+    return _T;
+  }
+
+  /** set final time
+   *  \param newValue the new final time for the Simulatiom
+   */
+  void setT(double newValue)
+  {
+    _T = newValue;
+  };
+
+/** get the title of the simulation
+   *  \return std::string : the title
+   */
+  inline const std::string  title() const
+  {
+    return _title;
+  }
+
+  /** set the title of the simulation
+   *  \param s : the title
+   */
+  inline void setTitle(const std::string & s)
+  {
+    _title = s;
+  }
+
+  /** get the author of the simulation
+   *  \return std::string : the author
+   */
+  inline const std::string  author() const
+  {
+    return _author;
+  }
+
+  /** set the author of the simulation
+   *  \param s std::string : the author
+   */
+  inline void setAuthor(const std::string & s)
+  {
+    _author = s;
+  }
+
+  /** allows to get the description of the simulation
+   *  \return std::string : the description
+   */
+  inline const std::string  description() const
+  {
+    return _description;
+  }
+
+  /** set the author of the simulation
+   *  \param s std::string : the author
+   */
+  inline void setDescription(const std::string & s)
+  {
+    _description = s;
+  }
+
+  /** allows to get the date of the simulation
+   *  \return std::string : the date
+   */
+  inline const std::string  date() const
+  {
+    return _date;
+  }
+
+  /** set the date of the simulation
+   *  \param s std::string : the date
+   */
+  inline void setDate(const std::string & s)
+  {
+    _date = s;
+  }
+
+
+
+  
   /** get problem type (true if BVP)
    *  \return a bool
    */
@@ -82,6 +215,12 @@ public:
     return !_BVP;
   }
 
+  inline unsigned int version()
+  {
+    return _version;
+  }
+
+  
   /** set the NonSmoothDynamicalSystem to BVP, else it is IVP
    *  \param newBvp true if BVP, false otherwise
    */
@@ -114,6 +253,7 @@ public:
   inline void insertDynamicalSystem(SP::DynamicalSystem ds)
   {
     _topology->insertDynamicalSystem(ds);
+    _version ++;
     _mIsLinear = ((ds)->isLinear() && _mIsLinear);
   };
 
@@ -133,6 +273,7 @@ public:
   inline void removeDynamicalSystem(SP::DynamicalSystem ds)
   {
     _topology->removeDynamicalSystem(ds);
+    _version ++;
   };
 
 
@@ -162,6 +303,7 @@ public:
   inline void removeInteraction(SP::Interaction inter)
   {
     _topology->removeInteraction(inter);
+    _version ++;
   };
 
   /** get Interaction number I

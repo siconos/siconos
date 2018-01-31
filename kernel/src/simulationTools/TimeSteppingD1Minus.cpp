@@ -33,7 +33,6 @@
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
 #include "debug.h"
-#include "Model.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
 #include "EventsManager.hpp"
 #include "OneStepNSProblem.hpp"

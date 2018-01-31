@@ -18,7 +18,7 @@
 
 #include "ZeroOrderHoldOSI.hpp"
 #include "EventDriven.hpp"
-#include "Model.hpp"
+#include "EventsManager.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
 #include "FirstOrderLinearTIDS.hpp"
 #include "FirstOrderLinearTIR.hpp"
@@ -56,7 +56,7 @@ ZeroOrderHoldOSI::ZeroOrderHoldOSI():
   _levelMaxForInput =0;
 }
 
-void ZeroOrderHoldOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds)
+void ZeroOrderHoldOSI::initializeDynamicalSystem( double t, SP::DynamicalSystem ds)
 {
   // Get work buffers from the graph
   VectorOfVectors& workVectors = *_initializeDSWorkVectors(ds);
@@ -73,7 +73,7 @@ void ZeroOrderHoldOSI::initializeDynamicalSystem(Model& m, double t, SP::Dynamic
   DynamicalSystemsGraph::VDescriptor dsgVD = DSG0.descriptor(ds);
   if(!DSG0.Ad.hasKey(dsgVD))
   {
-    DSG0.Ad[dsgVD].reset(new MatrixIntegrator(*ds, m));
+    DSG0.Ad[dsgVD].reset(new MatrixIntegrator(*ds, *_simulation->nonSmoothDynamicalSystem(), _simulation->eventsManager()->timeDiscretisation() ));
     if(DSG0.Ad.at(dsgVD)->isConst())
       DSG0.Ad.at(dsgVD)->integrate();
   }
@@ -84,14 +84,14 @@ void ZeroOrderHoldOSI::initializeDynamicalSystem(Model& m, double t, SP::Dynamic
   {
     SP::SiconosMatrix E(new SimpleMatrix(ds->n(), ds->n(), 0));
     E->eye();
-    DSG0.AdInt.insert(dsgVD, SP::MatrixIntegrator(new MatrixIntegrator(*ds, m, E)));
+    DSG0.AdInt.insert(dsgVD, SP::MatrixIntegrator(new MatrixIntegrator(*ds,* _simulation->nonSmoothDynamicalSystem(),_simulation->eventsManager()->timeDiscretisation(), E)));
     if(DSG0.AdInt.at(dsgVD)->isConst())
       DSG0.AdInt.at(dsgVD)->integrate();
   }
 
   // init extra term, usually to add control terms
   if(_extraAdditionalTerms)
-    _extraAdditionalTerms->init(DSG0, m);
+    _extraAdditionalTerms->init(DSG0, *_simulation->nonSmoothDynamicalSystem());
 
   // Now we search for an Interaction dedicated to control
   for(std11::tie(avi, aviend) = DSG0.adjacent_vertices(dsgVD);
@@ -113,13 +113,13 @@ void ZeroOrderHoldOSI::initializeDynamicalSystem(Model& m, double t, SP::Dynamic
         indxIter++;
         if(!relR.getPluginJacLg()->isPlugged())
         {
-          DSG0.Bd[dsgVD].reset(new MatrixIntegrator(*ds, m, relR.B()));
+          DSG0.Bd[dsgVD].reset(new MatrixIntegrator(*ds,*_simulation->nonSmoothDynamicalSystem(),_simulation->eventsManager()->timeDiscretisation(), relR.B()));
           if(DSG0.Bd.at(dsgVD)->isConst())
             DSG0.Bd.at(dsgVD)->integrate();
         }
         else
         {
-          DSG0.Bd[dsgVD].reset(new MatrixIntegrator(*ds, m, relR.getPluging(), inter.getSizeOfY()));
+          DSG0.Bd[dsgVD].reset(new MatrixIntegrator(*ds, *_simulation->nonSmoothDynamicalSystem(),_simulation->eventsManager()->timeDiscretisation(), relR.getPluging(), inter.getSizeOfY()));
         }
       }
       else

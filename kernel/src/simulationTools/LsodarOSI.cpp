@@ -22,7 +22,6 @@
 #include "LagrangianLinearTIDS.hpp"
 #include "BlockVector.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
-#include "Model.hpp"
 #include "Topology.hpp"
 #include "LagrangianRheonomousR.hpp"
 #include "LagrangianScleronomousR.hpp"
@@ -235,9 +234,9 @@ void LsodarOSI::jacobianfx(integer* sizeOfX, doublereal* time, doublereal* x, in
 }
 
 
-void LsodarOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds)
+void LsodarOSI::initializeDynamicalSystem( double t, SP::DynamicalSystem ds)
 {
-  DEBUG_BEGIN("LsodarOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds)\n");
+  DEBUG_BEGIN("LsodarOSI::initializeDynamicalSystem( double t, SP::DynamicalSystem ds)\n");
   // Get work buffers from the graph
   VectorOfVectors& workVectors = *_initializeDSWorkVectors(ds);
 
@@ -259,7 +258,7 @@ void LsodarOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSyste
 
   ds->swapInMemory();
 
-  DEBUG_END("LsodarOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds)\n");
+  DEBUG_END("LsodarOSI::initializeDynamicalSystem( double t, SP::DynamicalSystem ds)\n");
 }
 
 void LsodarOSI::fillDSLinks(Interaction &inter,
@@ -353,11 +352,11 @@ void LsodarOSI::fillDSLinks(Interaction &inter,
   }
 }
 
-void LsodarOSI::initialize(Model& m)
+void LsodarOSI::initialize()
 {
-  DEBUG_BEGIN("LsodarOSI::initialize(Model& m)\n");
+  DEBUG_BEGIN("LsodarOSI::initialize()\n");
   _xWork.reset(new BlockVector());
-  OneStepIntegrator::initialize(m);
+  OneStepIntegrator::initialize();
   //std::string type;
   // initialize xWork with x values of the dynamical systems present in the set.
 
@@ -379,7 +378,7 @@ void LsodarOSI::initialize(Model& m)
   //     fillDSLinks(m.t0(), inter, indexSet0->properties(*ui), *_dynamicalSystemsGraph);
   //   }
 
-  computeRhs(m.t0(),*_dynamicalSystemsGraph);
+  computeRhs(_simulation->nonSmoothDynamicalSystem()->t0(),*_dynamicalSystemsGraph);
 
 
   //   Integer parameters for LSODAROSI are saved in vector intParam.

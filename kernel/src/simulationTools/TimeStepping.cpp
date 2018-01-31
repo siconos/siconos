@@ -20,7 +20,6 @@
 #include "Topology.hpp"
 #include "LCP.hpp"
 #include "Relay.hpp"
-#include "Model.hpp"
 #include "TimeDiscretisation.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
 //#include "Interaction.hpp"

@@ -19,7 +19,6 @@
 #include "EventFactory.hpp"
 #include "TimeDiscretisationEvent.hpp"
 #include "TimeDiscretisationEventNoSaveInMemory.hpp"
-#include "Model.hpp"
 #include "Simulation.hpp"
 #include <cmath>
 #include <limits> // for ULONG_MAX

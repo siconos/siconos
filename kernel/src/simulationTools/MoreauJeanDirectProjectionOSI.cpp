@@ -17,7 +17,6 @@
 */
 #include "MoreauJeanDirectProjectionOSI.hpp"
 #include "Simulation.hpp"
-#include "Model.hpp"
 #include "NewtonEulerDS.hpp"
 #include "LagrangianDS.hpp"
 
@@ -73,10 +72,10 @@ MoreauJeanDirectProjectionOSI::MoreauJeanDirectProjectionOSI(double theta, doubl
   _activateYVelThreshold =   SICONOS_MPC_DEFAULT_ACTIVATION_VEL_THRESHOLD;
 }
 
-void MoreauJeanDirectProjectionOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds)
+void MoreauJeanDirectProjectionOSI::initializeDynamicalSystem( double t, SP::DynamicalSystem ds)
 {
-  DEBUG_BEGIN("MoreauJeanDirectProjectionOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds) \n");
-  MoreauJeanOSI::initializeDynamicalSystem(m, t, ds);
+  DEBUG_BEGIN("MoreauJeanDirectProjectionOSI::initializeDynamicalSystem( double t, SP::DynamicalSystem ds) \n");
+  MoreauJeanOSI::initializeDynamicalSystem(t, ds);
   const DynamicalSystemsGraph::VDescriptor& dsv = _dynamicalSystemsGraph->descriptor(ds);
   VectorOfVectors& workVectors = *_dynamicalSystemsGraph->properties(dsv).workVectors;
   Type::Siconos dsType = Type::value(*ds);
@@ -105,7 +104,7 @@ void MoreauJeanDirectProjectionOSI::initializeDynamicalSystem(Model& m, double t
       );
 
   }
-  DEBUG_END("MoreauJeanDirectProjectionOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds) \n");
+  DEBUG_END("MoreauJeanDirectProjectionOSI::initializeDynamicalSystem( double t, SP::DynamicalSystem ds) \n");
 
 }
 

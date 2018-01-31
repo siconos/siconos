@@ -29,7 +29,7 @@
 // #include "SiconosPointers.hpp"
 #include <fstream>
 // #include "Model.hpp"
-// #include "NonSmoothDynamicalSystem.hpp"
+#include "NonSmoothDynamicalSystem.hpp"
 // #include "Topology.hpp"
 #include "InteractionManager.hpp"
 #include <list>
@@ -65,7 +65,12 @@ protected:
   /** tool to manage all events */
   SP::EventsManager _eventsManager;
 
-  /** current starting time for integration */
+  
+  /** tool to manage all events */
+  unsigned int _nsdsVersion;
+
+
+/** current starting time for integration */
   double _tinit;
 
   /** current ending time for integration */
@@ -342,6 +347,14 @@ public:
   void setNonSmoothDynamicalSystemPtr(SP::NonSmoothDynamicalSystem newPtr)
   {
     _nsds = newPtr;
+    _nsdsVersion = _nsds->version();
+
+
+    // === topology init (computes Interaction sets, relative degrees ...) ===
+    _nsds->topology()->initialize();
+    
+    // symmetry in indexSets
+    _nsds->topology()->setProperties();
   }
 
   /** get tolerance
@@ -393,7 +406,7 @@ public:
       \param m the model to be linked to this Simulation
       \param init optional flag for partial initialization
   */
-  virtual void initialize(SP::Model m, bool init = true);
+  //virtual void initialize(SP::Model m, bool init = true);
   virtual void initialize_new();
   /** Initialize a single Interaction for this Simulation, used for dynamic
    *  topology updates. */
@@ -408,8 +421,8 @@ public:
    *            into the NonSmoothDynamicalSystem.
    *  \param m The Model for initializing the OSI.
    *  \param time The current time for initializing the OSI. */
-  void prepareIntegratorForDS(SP::OneStepIntegrator osi, SP::DynamicalSystem ds,
-                              SP::Model m, double time);
+  // void prepareIntegratorForDS(SP::OneStepIntegrator osi, SP::DynamicalSystem ds,
+  //                             SP::Model m, double time);
 
   /** Set an object to automatically manage interactions during the simulation */
   void insertInteractionManager(SP::InteractionManager manager)

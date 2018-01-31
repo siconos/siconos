@@ -25,7 +25,6 @@
 #include "NewtonEulerFrom1DLocalFrameR.hpp"
 #include "OSNSMatrixProjectOnConstraints.hpp"
 #include "LagrangianLinearTIDS.hpp"
-#include "Model.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
 
 // #define DEBUG_NOCOLOR
