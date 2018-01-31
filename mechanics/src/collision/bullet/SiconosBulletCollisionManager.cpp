@@ -51,7 +51,6 @@ DEFINE_SPTR(UpdateShapeVisitor)
 #include <boost/make_shared.hpp>
 #include <CxxStd.hpp>
 
-#include <Model.hpp>
 #include <Relation.hpp>
 #include <Simulation.hpp>
 #include <NonSmoothDynamicalSystem.hpp>

@@ -6,7 +6,7 @@
 class OccSpaceFilter : public SpaceFilter
 {
 public:
-  OccSpaceFilter(SP::Model model) : SpaceFilter(model) {};
+  OccSpaceFilter(SP::NonSmoothDynamicalSystem nsds) : SpaceFilter(nsds) {};
 
   virtual void buildInteractions(double time) {};
 
