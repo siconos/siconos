@@ -51,7 +51,7 @@ Simulation::Simulation(SP::TimeDiscretisation td):
   _name("unnamed"), _tinit(0.0), _tend(0.0), _tout(0.0),
   _numberOfIndexSets(0),
   _tolerance(DEFAULT_TOLERANCE), _printStat(false),
-  _staticLevels(false)
+  _staticLevels(false),_isInitialized(false)
 {
   if (!td)
     RuntimeException::selfThrow("Simulation constructor - timeDiscretisation == NULL.");
@@ -128,7 +128,6 @@ void Simulation::clear()
 void Simulation::insertIntegrator(SP::OneStepIntegrator osi)
 {
   _allOSI->insert(osi);
-  osi->setSimulationPtr(shared_from_this());
 }
 
 void Simulation::associate(SP::OneStepIntegrator osi, SP::DynamicalSystem ds)
@@ -194,17 +193,17 @@ void Simulation::initialize_new()
        itosi != _allOSI->end(); ++itosi)
   {
     if (!(*itosi)->isInitialized()){
-      
-      (*itosi)->initializeExtraAdditionalTerms();
-      (*itosi)->initialize_nonsmooth_problems();
+      (*itosi)->setSimulationPtr(shared_from_this());
+
+      (*itosi)->initialize();
       _numberOfIndexSets = std::max<int>((*itosi)->numberOfIndexSets(), _numberOfIndexSets);
     }
   }
-  
 
 
 
-  
+
+
   std::map< SP::OneStepIntegrator, std::list<SP::DynamicalSystem> >::iterator  it;
   std::list<SP::DynamicalSystem> ::iterator  itlist;
   for ( it = _OSIDSmap.begin();  it !=_OSIDSmap.end(); ++it)
@@ -213,7 +212,7 @@ void Simulation::initialize_new()
     {
       SP::DynamicalSystem ds =  *itlist;
       SP::OneStepIntegrator osi =it->first;
-      
+
       _nsds->topology()->setOSI( ds , osi);
       osi->initializeDynamicalSystem(getTk(),ds );
     }
@@ -223,8 +222,8 @@ void Simulation::initialize_new()
   if (_nsds->version() != _nsdsVersion)
   {
 
-    
-    
+
+
     DynamicalSystemsGraph::VIterator dsi, dsend;
     SP::DynamicalSystemsGraph DSG = _nsds->topology()->dSG(0);
     for (std11::tie(dsi, dsend) = DSG->vertices(); dsi != dsend; ++dsi)
@@ -235,7 +234,7 @@ void Simulation::initialize_new()
       {
         SP::DynamicalSystem ds = DSG->bundle(*dsi);
         SP::OneStepIntegrator osi_default = *_allOSI->begin();
-        
+
         _nsds->topology()->setOSI(ds, osi_default);
 
         if (_allOSI->size() > 1)
@@ -251,7 +250,7 @@ void Simulation::initialize_new()
 
       }
     }
-    
+
     SP::InteractionsGraph indexSet0 = _nsds->topology()->indexSet0();
     InteractionsGraph::VIterator ui, uiend;
     for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
@@ -259,12 +258,48 @@ void Simulation::initialize_new()
       SP::Interaction inter = indexSet0->bundle(*ui);
       initializeInteraction(getTk(), inter);
     }
-
-    
-
-    
   }
+  
+  if(!_isInitialized)
+  {
+    SP::Topology topo = _nsds->topology();
+    unsigned int indxSize = topo->indexSetsSize();
+    assert (_numberOfIndexSets >0);
+    if ((indxSize == LEVELMAX) || (indxSize < _numberOfIndexSets ))
+    {
+      topo->indexSetsResize(_numberOfIndexSets);
+      // Init if the size has changed
+      for (unsigned int i = indxSize; i < topo->indexSetsSize(); i++) // ++i ???
+        topo->resetIndexSetPtr(i);
+    }
 
+
+    // Initialize OneStepNSProblem(s). Depends on the type of simulation.
+    // Warning FP : must be done in any case, even if the interactions set
+    // is empty.
+    initOSNS();
+
+    // Process events at time _tinit. Useful to save values in memories
+    // for example.  Warning: can not be called during
+    // eventsManager->initialize, because it needs the initialization of
+    // OSI, OSNS ...
+    _eventsManager->preUpdate(*this);
+
+    _tend =  _eventsManager->nextTime();
+
+    // End of initialize:
+
+    //  - all OSI and OSNS (ie DS and Interactions) states are computed
+    //  - for time _tinit and saved into memories.
+    //  - Sensors or related objects are updated for t=_tinit.
+    //  - current time of the model is equal to t1, time of the first
+    //  - event after _tinit.
+    //  - currentEvent of the simu. corresponds to _tinit and nextEvent
+    //  - to _tend.
+
+    _isInitialized = true;
+  }
+  
 
   DEBUG_END("Simulation::initialize(SP::Model m, bool withOSI)\n");
 }

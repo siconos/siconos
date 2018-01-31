@@ -144,6 +144,9 @@ protected:
    */
   bool _linkOrUnlink;
 
+  bool _isInitialized;
+
+  
   std::map< SP::OneStepIntegrator, std::list<SP::DynamicalSystem> >  _OSIDSmap;
 
   
@@ -347,9 +350,6 @@ public:
   void setNonSmoothDynamicalSystemPtr(SP::NonSmoothDynamicalSystem newPtr)
   {
     _nsds = newPtr;
-    _nsdsVersion = _nsds->version();
-
-
     // === topology init (computes Interaction sets, relative degrees ...) ===
     _nsds->topology()->initialize();
     

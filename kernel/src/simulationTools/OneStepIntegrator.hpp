@@ -248,9 +248,6 @@ public:
    */
   virtual void initialize();
   
-  void initializeExtraAdditionalTerms();
-
-  
   /** Initialization process of the nonsmooth problems
       linked to this OSI*/
   virtual void initialize_nonsmooth_problems(){};
