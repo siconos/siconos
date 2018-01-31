@@ -34,11 +34,11 @@ env:
   - TASK=default:distrib=ubuntu,16.04
   - TASK=default:distrib=ubuntu,17.10
   - TASK=default:distrib=debian,latest
-  - TASK=default:distrib=fedora,latest
+  - TASK=default:distrib=fedora,latest:pkgs-=atlas-lapack,:pkgs+=openblas-lapacke,
   
   - TASK=default:distrib=ubuntu,17.10:ci_config=with_cxx11
   - TASK=default:pkgs+=lpsolve,
-  - TASK=default:distrib=nixos/nix,latest:ci_config=nix:targets=.,docker-build,docker-cmd,docker-ctest:pkgs=make,cmake,siconos-nix-default,
+  - TASK=default:distrib=nixos/nix,latest:ci_config=nix:targets=.,docker-build,docker-cmd,docker-ctest:pkgs=make,cmake,gcc-wrapper,siconos-nix-default,
   
   - TASK=default:distrib=ubuntu,17.10:build_configuration=Profiling:pkgs+=profiling,
 
