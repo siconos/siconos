@@ -159,11 +159,6 @@ void Simulation::associate(SP::OneStepIntegrator osi, SP::DynamicalSystem ds)
 
 }
 
-
-
-
-
-
 SP::InteractionsGraph Simulation::indexSet(unsigned int i)
 {
   return _nsds->topology()->indexSet(i) ;
@@ -209,6 +204,8 @@ void Simulation::initialize_new()
 {
   DEBUG_BEGIN("Simulation::initialize(SP::Model m, bool withOSI)\n");
 
+
+
   // symmetry in indexSets Do we need it ?
   _nsds->topology()->setProperties();
 
@@ -223,10 +220,6 @@ void Simulation::initialize_new()
       _numberOfIndexSets = std::max<int>((*itosi)->numberOfIndexSets(), _numberOfIndexSets);
     }
   }
-
-
-
-
 
   std::map< SP::OneStepIntegrator, std::list<SP::DynamicalSystem> >::iterator  it;
   std::list<SP::DynamicalSystem> ::iterator  itlist;
@@ -245,9 +238,7 @@ void Simulation::initialize_new()
 
   if (_nsds->version() != _nsdsVersion)
   {
-    
-
-
+ 
     DynamicalSystemsGraph::VIterator dsi, dsend;
     SP::DynamicalSystemsGraph DSG = _nsds->topology()->dSG(0);
     for (std11::tie(dsi, dsend) = DSG->vertices(); dsi != dsend; ++dsi)
@@ -286,6 +277,14 @@ void Simulation::initialize_new()
   
   if(!_isInitialized)
   {
+    
+    _T = _nsds->finalT();
+    
+    // === Events manager initialization ===
+    _eventsManager->initialize(_T);
+    _tinit = _eventsManager->startingTime();
+
+    
     SP::Topology topo = _nsds->topology();
     unsigned int indxSize = topo->indexSetsSize();
     assert (_numberOfIndexSets >0);
