@@ -88,8 +88,7 @@ void OSNSPTest::testAVI()
   _osi.reset(new EulerMoreauOSI(_theta));
   _nsds->insertDynamicalSystem(_DS);
   _nsds->link(inter, _DS);
-  _sim->setNonSmoothDynamicalSystemPtr(_nsds);
-  _sim.reset(new TimeStepping(_TD));
+  _sim.reset(new TimeStepping(_nsds, _TD));
   _sim->associate(_osi,_DS);
   SP::AVI osnspb(new AVI());
   _sim->insertNonSmoothProblem(osnspb);
