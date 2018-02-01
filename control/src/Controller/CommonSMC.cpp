@@ -81,7 +81,7 @@ void CommonSMC::initialize(const NonSmoothDynamicalSystem & nsds, const Simulati
   // create the SMC Model
   _nsdsSMC.reset(new NonSmoothDynamicalSystem(t0, T));
   // Set up the simulation
-  _simulationSMC.reset(new TimeStepping(_td));
+  _simulationSMC.reset(new TimeStepping(_nsdsSMC,_td));
 
   unsigned int sDim = _u->size();
   // create the interaction
