@@ -37,7 +37,7 @@ ControlZOHSimulation::ControlZOHSimulation(double t0, double T, double h):
   _processIntegrator.reset(new ZeroOrderHoldOSI());
   std11::static_pointer_cast<ZeroOrderHoldOSI>(_processIntegrator)->setExtraAdditionalTerms(
       std11::shared_ptr<ControlZOHAdditionalTerms>(new ControlZOHAdditionalTerms()));
-  _processSimulation.reset(new TimeStepping(_processTD, 0));
+  _processSimulation.reset(new TimeStepping(_nsds,_processTD, 0));
   _processSimulation->setName("plant simulation");
   _processSimulation->insertIntegrator(_processIntegrator);
 

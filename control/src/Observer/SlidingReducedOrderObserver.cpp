@@ -103,8 +103,7 @@ void SlidingReducedOrderObserver::initialize(const NonSmoothDynamicalSystem& nsd
   }
 
   // all necessary things for simulation
-  _simulation.reset(new TimeStepping(_td, 0));
-  _simulation->setNonSmoothDynamicalSystemPtr(_nsds);
+  _simulation.reset(new TimeStepping(_nsds, _td, 0));
   _simulation->associate(_integrator, _DS);
 
   // initialize error
