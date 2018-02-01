@@ -166,7 +166,7 @@ void  MBTB_initSimu(double hTS, int withProj);
   The model may be used outside MBTB in Siconos Front-End.
   \return  SP::Model
 */
-SP::Model MBTB_model();
+SP::NonSmoothDynamicalSystem MBTB_nsds();
 
 //! It runs the simulation.
 /*!
