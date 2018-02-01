@@ -46,7 +46,7 @@ def test_LagrangianLinearTIR():
     assert np.allclose(relation.jachq(), H, rtol=tol, atol=tol)
 
 
-def test_Model():
-    bouncing_ball = K.Model(t0, T)
+def test_Nsds():
+    bouncing_ball = K.NonSmoothDynamicalSystem(t0, T)
     assert bouncing_ball.t0() == t0
 

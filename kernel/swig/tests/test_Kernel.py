@@ -5,12 +5,12 @@ import siconos.kernel as K
 def test_autocast():
     dsA = K.LagrangianDS([0],[0],[[1]])
     dsB = K.FirstOrderLinearDS([0],[[1]])
-    model = K.Model(0, 0)
-    model.nonSmoothDynamicalSystem().insertDynamicalSystem(dsA)
-    model.nonSmoothDynamicalSystem().insertDynamicalSystem(dsB)
+    nsds = K.NonSmoothDynamicalSystem(0, 0)
+    nsds.insertDynamicalSystem(dsA)
+    nsds.insertDynamicalSystem(dsB)
 
-    assert(type(model.nonSmoothDynamicalSystem().dynamicalSystem(dsA.number())) == K.LagrangianDS)
-    assert(type(model.nonSmoothDynamicalSystem().dynamicalSystem(dsB.number())) == K.FirstOrderLinearDS)
+    assert(type(nsds.dynamicalSystem(dsA.number())) == K.LagrangianDS)
+    assert(type(nsds.dynamicalSystem(dsB.number())) == K.FirstOrderLinearDS)
 
 
 def test_getVector():
