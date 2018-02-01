@@ -44,13 +44,14 @@ private:
   void computeUVBounds();
 
   void move();
+
 #ifdef HAS_FORTRAN
   void distance();
 #endif
+  
 public:
   void setUp();
   void tearDown();
-
 };
 
 #endif

@@ -691,6 +691,10 @@ SP::NonSmoothDynamicalSystem MBTB_nsds()
 {
   return myNsds;
 }
+SP::Simulation MBTB_simulation()
+{
+  return sSimu;
+}
 
 void MBTB_doProj(unsigned int v)
 {
