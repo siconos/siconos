@@ -209,6 +209,9 @@ void Simulation::initialize_new()
 {
   DEBUG_BEGIN("Simulation::initialize(SP::Model m, bool withOSI)\n");
 
+  // symmetry in indexSets Do we need it ?
+  _nsds->topology()->setProperties();
+
   // === OneStepIntegrators initialization ===
   for (OSIIterator itosi = _allOSI->begin();
        itosi != _allOSI->end(); ++itosi)

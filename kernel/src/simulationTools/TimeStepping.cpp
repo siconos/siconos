@@ -333,8 +333,6 @@ void TimeStepping::initOSNS()
     // equal to the minimum value of the relative degree - 1 except
     // for degree 0 case where we keep 0.
 
-    assert(_nsds->topology()->isUpToDate());
-
 
     // === update all index sets ===
     updateIndexSets();

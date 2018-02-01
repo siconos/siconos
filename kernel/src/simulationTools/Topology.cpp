@@ -41,7 +41,7 @@
 // --- CONSTRUCTORS/DESTRUCTOR ---
 
 // default
-Topology::Topology(): _isTopologyUpToDate(false), _hasChanged(true),
+Topology::Topology(): _hasChanged(true),
   _numberOfConstraints(0), _symmetric(false)
 {
   _IG.resize(1);
@@ -375,11 +375,6 @@ bool Topology::hasInteraction(SP::Interaction inter) const
   return indexSet0()->is_vertex(inter);
 }
 
-void Topology::initialize()
-{
-  _isTopologyUpToDate = true;
-}
-
 void Topology::setProperties()
 {
   _IG[0]->update_vertices_indices();
@@ -409,8 +404,6 @@ void Topology::clear()
 {
   _IG.clear();
   _DSG.clear();
-
-  _isTopologyUpToDate = false;
 }
 
 SP::DynamicalSystem Topology::getDynamicalSystem(unsigned int requiredNumber) const

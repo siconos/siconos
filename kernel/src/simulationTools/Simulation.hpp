@@ -355,11 +355,6 @@ public:
   void setNonSmoothDynamicalSystemPtr(SP::NonSmoothDynamicalSystem newPtr)
   {
     _nsds = newPtr;
-    // === topology init (computes Interaction sets, relative degrees ...) ===
-    _nsds->topology()->initialize();
-    
-    // symmetry in indexSets
-    _nsds->topology()->setProperties();
   }
 
   /** get tolerance

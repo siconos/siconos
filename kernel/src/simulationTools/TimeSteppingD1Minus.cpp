@@ -54,7 +54,6 @@ using namespace RELATION;
 void TimeSteppingD1Minus::initOSNS()
 {
   // initialize OSNS for InteractionsGraph from Topology
-  assert(_nsds->topology()->isUpToDate());
   SP::Topology topo =  _nsds->topology();
 
   // there is at least one OSNP
