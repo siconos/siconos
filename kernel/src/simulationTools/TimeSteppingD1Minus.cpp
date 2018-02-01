@@ -70,7 +70,7 @@ void TimeSteppingD1Minus::initOSNS()
   }
 }
 
-TimeSteppingD1Minus::TimeSteppingD1Minus(SP::TimeDiscretisation td, int nb) : Simulation(td)
+TimeSteppingD1Minus::TimeSteppingD1Minus(SP::NonSmoothDynamicalSystem nsds, SP::TimeDiscretisation td, int nb) : Simulation(nsds, td)
 {
   (*_allNSProblems).resize(nb);
 }
@@ -180,6 +180,10 @@ void TimeSteppingD1Minus::run()
 
 void TimeSteppingD1Minus::advanceToEvent()
 {
+
+  initialize_new();
+
+  
   // Update interactions if a manager was provided
   updateInteractions();
 

@@ -618,6 +618,10 @@ void EventDriven::updateOutput(unsigned int levelInput)
 void EventDriven::advanceToEvent()
 {
   DEBUG_BEGIN("EventDriven::advanceToEvent()\n");
+
+  initialize_new();
+
+  
   // Update interactions if a manager was provided
   updateInteractions();
 

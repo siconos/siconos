@@ -99,6 +99,9 @@ void TimeSteppingDirectProjection::nextStep()
 
 void TimeSteppingDirectProjection::advanceToEvent()
 {
+
+  initialize_new();
+  
   /** First step, Solve the standard velocity formulation.*/
 
   DEBUG_BEGIN("TimeStepping::newtonSolve\n");
