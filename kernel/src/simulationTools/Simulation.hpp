@@ -184,6 +184,11 @@ public:
   /** default constructor
    *  \param td the timeDiscretisation for this Simulation
    */
+  Simulation(SP::NonSmoothDynamicalSystem nsds, SP::TimeDiscretisation td);
+
+  /** constructor with only a TimeDiscretisation
+   *  \param td the timeDiscretisation for this Simulation
+   */
   Simulation(SP::TimeDiscretisation td);
 
   /** destructor

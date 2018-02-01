@@ -94,7 +94,7 @@ public:
   /** defaut constructor
    *  \param td time discretisation
    */
-  EventDriven(SP::TimeDiscretisation td);
+  EventDriven(SP::NonSmoothDynamicalSystem nsds, SP::TimeDiscretisation td);
 
   /** constructor with data
    *  \param td time discretisation

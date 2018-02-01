@@ -118,6 +118,7 @@ public:
 
 
   /** Constructor with the time-discretisation.
+   * \param nsds the nsds that we want to simulate
    *  \param td a pointer to a timeDiscretisation (linked to the model
    *  that owns this simulation)
    *  \param osi a one step integrator
@@ -125,11 +126,13 @@ public:
    *  \param osnspb_pos a one step non smooth problem for the position formulation
    *  \param _level
    */
-  TimeSteppingCombinedProjection(SP::TimeDiscretisation td,
-                                 SP::OneStepIntegrator osi,
-                                 SP::OneStepNSProblem osnspb_velo,
-                                 SP::OneStepNSProblem osnspb_pos,
-                                 unsigned int _level = 2);
+  TimeSteppingCombinedProjection(
+    SP::NonSmoothDynamicalSystem nsds,
+    SP::TimeDiscretisation td,
+    SP::OneStepIntegrator osi,
+    SP::OneStepNSProblem osnspb_velo,
+    SP::OneStepNSProblem osnspb_pos,
+    unsigned int _level = 2);
 
 
   /** default constructor
