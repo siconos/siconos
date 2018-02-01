@@ -342,19 +342,19 @@ def buildModelXML(xmlFile):
     (constructorArgsDS, constructorArgsR, pluginsDS, pluginsR, dataNSL, dataOSI, dataOSNSP) = _parseReferenceXMLSchema(xsdfile)
 
     #  Built DOMtree
-    modelxml = xml_parser.parse(xmlFile, silence=True)
+    siconosxml = xml_parser.parse(xmlFile, silence=True)
 
-    T = modelxml.Time.T
-    t0 = modelxml.Time.t0
-    title = modelxml.Title
-    author = modelxml.Author
-    description = modelxml.Description
-    date = modelxml.Date
-    xmlSchema = modelxml.SchemaXML
+    T = siconosxml.NSDS.Time.T
+    t0 = siconosxml.NSDS.Time.t0
+    title = siconosxml.NSDS.Title
+    author = siconosxml.NSDS.Author
+    description = siconosxml.NSDS.Description
+    date = siconosxml.NSDS.Date
+    xmlSchema = siconosxml.NSDS.SchemaXML
 
 
     # create the Model
-    model = SK.Model(t0, T)
+    nsds = SK.NonsmoothDynamicalSystem(t0, T)
     nsdsxml = modelxml.NSDS
     nsds = model.nonSmoothDynamicalSystem()
 

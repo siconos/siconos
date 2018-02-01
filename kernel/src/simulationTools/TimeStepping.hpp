@@ -147,7 +147,7 @@ public:
    *  (linked to the model that owns this simulation)
    *  \param nb number of non smooth problem
    */
-  TimeStepping(SP::TimeDiscretisation td, int nb);
+  TimeStepping(SP::NonSmoothDynamicalSystem nsds, SP::TimeDiscretisation td, int nb);
 
   /** Destructor.
   */

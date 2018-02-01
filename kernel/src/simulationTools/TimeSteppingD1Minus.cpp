@@ -181,7 +181,7 @@ void TimeSteppingD1Minus::run()
 void TimeSteppingD1Minus::advanceToEvent()
 {
 
-  initialize_new();
+  initialize();
 
   
   // Update interactions if a manager was provided

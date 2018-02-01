@@ -19,90 +19,89 @@
 
 <!-- SICONOS Model XML file -->
 
-<SiconosModel>
-	<Title>title</Title>
-	<Author>author</Author>
-	<Description>description</Description>
-	<Date>date</Date>
-	<Time>
-		<t0>0.0</t0>
-		<T>1.50</T>
-	</Time>
-	<NSDS bvp='false'>
+<Siconos>
+  <NSDS bvp='false'>
+    <Title>title</Title>
+    <Author>author</Author>
+    <Description>description</Description>
+    <Date>date</Date>
+    <Time>
+      <t0>0.0</t0>
+      <T>1.50</T>
+    </Time>
+    <!-- DSs defined in the problem -->
+    <DS_Definition>
+      <LagrangianLinearTIDS Name='Ball'>
+	<q0 vectorSize='3'>
+	  0.4 0.2 0.0
+	</q0>
+	<Velocity0  vectorSize='3'>
+	  0.0 0.0 0.0
+	</Velocity0>
+	<FExt vectorPlugin="BallInBowlPlugin:ballFExt"/>
+	<Mass matrixRowSize='3' matrixColSize='3'>
+	  <row>1.0 0.0 0.0</row>
+	  <row>0.0 1.0 0.0</row>
+	  <row>0.0 0.0 1.0</row>
+	</Mass>
+      </LagrangianLinearTIDS>
+      <LagrangianLinearTIDS Name='Ground'>
+	<q0 vectorSize='1'>
+	  0.0
+	</q0>
+	<Velocity0 vectorSize='1'>
+	  0.0
+	</Velocity0>
+	<Mass matrixRowSize='1' matrixColSize='1'>
+	  <row>1.0 </row>
+	</Mass>
+      </LagrangianLinearTIDS>
+    </DS_Definition>
 
-		<!-- DSs defined in the problem -->
-		<DS_Definition>
-			<LagrangianLinearTIDS Name='Ball'>
-				<q0 vectorSize='3'>
-					0.4 0.2 0.0
-				</q0>
-				<Velocity0  vectorSize='3'>
-					0.0 0.0 0.0
-				</Velocity0>
-				<FExt vectorPlugin="BallInBowlPlugin:ballFExt"/>
-				<Mass matrixRowSize='3' matrixColSize='3'>
-					<row>1.0 0.0 0.0</row>
-					<row>0.0 1.0 0.0</row>
-					<row>0.0 0.0 1.0</row>
-				</Mass>
-			</LagrangianLinearTIDS>
-			<LagrangianLinearTIDS Name='Ground'>
-				<q0 vectorSize='1'>
-					0.0
-				</q0>
-				<Velocity0 vectorSize='1'>
-					0.0
-				</Velocity0>
-				<Mass matrixRowSize='1' matrixColSize='1'>
-					<row>1.0 </row>
-				</Mass>
-			</LagrangianLinearTIDS>
-		</DS_Definition>
 
+    <!-- Interactions defined in the problem -->
+    <Interaction_Definition>
+      <!-- A definition of a DS interaction, and list of couple of DSs who are concerned by it -->
+      <Interaction Name='1'>
+	<!-- List of couple of DS concerned by this interaction -->
+	<DS_Concerned>Ball</DS_Concerned>
+	<!-- Relation of this interaction -->
+	<Interaction_Content>
+	  <LagrangianScleronomousR>
+	    <h plugin="BallInBowlPlugin:h0"/>
+	    <Jacobianhq plugin="BallInBowlPlugin:G0"/>
+	  </LagrangianScleronomousR>
+	  <!-- NS Law of this interaction	-->
+	  <NewtonImpactNSL size='1'>
+	    <e>0.9</e>
+	  </NewtonImpactNSL>
+	</Interaction_Content>
+      </Interaction>
+    </Interaction_Definition>
+  </NSDS>
+  <!-- Simulation to use in order to solve the problem -->
+  <Simulation type='TimeStepping'>
 
-		<!-- Interactions defined in the problem -->
-		<Interaction_Definition>
-			<!-- A definition of a DS interaction, and list of couple of DSs who are concerned by it -->
-			<Interaction Name='1'>
-				<!-- List of couple of DS concerned by this interaction -->
-				<DS_Concerned>Ball</DS_Concerned>
-				<!-- Relation of this interaction -->
-				<Interaction_Content>
-					<LagrangianScleronomousR>
-						<h plugin="BallInBowlPlugin:h0"/>
-						<Jacobianhq plugin="BallInBowlPlugin:G0"/>
-					</LagrangianScleronomousR>
-					<!-- NS Law of this interaction	-->
-					<NewtonImpactNSL size='1'>
-						<e>0.9</e>
-					</NewtonImpactNSL>
-				</Interaction_Content>
-			</Interaction>
-		</Interaction_Definition>
-	</NSDS>
-	<!-- Simulation to use in order to solve the problem -->
-	<Simulation type='TimeStepping'>
+    <TimeDiscretisation>
+      <h>0.001</h>
+    </TimeDiscretisation>
 
-		<TimeDiscretisation>
-			<h>0.001</h>
-		</TimeDiscretisation>
-
-		<!-- One Step Integrators -->
-		<OneStepIntegrator_Definition>
-			<!-- A definition of a OneStepIntegrator, and list of couple of DSs who are concerned by it -->
-			<MoreauJeanOSI>
-				<DS_Concerned>Ball Ground</DS_Concerned>
-				<Theta all="0.5"></Theta>
-			</MoreauJeanOSI>
-		</OneStepIntegrator_Definition>
-		<!-- One Step NS Problem of th Simulation-->
-		<OneStepNSProblems_List>
-			<LCP StorageType="0">
-				<NonSmoothSolver Name="Lemke">
-					<iparam  vectorSize='5'>1000 0 0 0 0</iparam>
-					<dparam  vectorSize='5'>1e-6 0 0 0 0</dparam>
-				</NonSmoothSolver>
-			</LCP>
-		</OneStepNSProblems_List>
-	</Simulation>
-</SiconosModel>
+    <!-- One Step Integrators -->
+    <OneStepIntegrator_Definition>
+      <!-- A definition of a OneStepIntegrator, and list of couple of DSs who are concerned by it -->
+      <MoreauJeanOSI>
+	<DS_Concerned>Ball Ground</DS_Concerned>
+	<Theta all="0.5"></Theta>
+      </MoreauJeanOSI>
+    </OneStepIntegrator_Definition>
+    <!-- One Step NS Problem of th Simulation-->
+    <OneStepNSProblems_List>
+      <LCP StorageType="0">
+	<NonSmoothSolver Name="Lemke">
+	  <iparam  vectorSize='5'>1000 0 0 0 0</iparam>
+	  <dparam  vectorSize='5'>1e-6 0 0 0 0</dparam>
+	</NonSmoothSolver>
+      </LCP>
+    </OneStepNSProblems_List>
+  </Simulation>
+</Siconos>

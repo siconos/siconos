@@ -406,8 +406,8 @@ public:
       \param m the model to be linked to this Simulation
       \param init optional flag for partial initialization
   */
-  //virtual void initialize(SP::Model m, bool init = true);
-  virtual void initialize_new();
+  virtual void initialize();
+
   /** Initialize a single Interaction for this Simulation, used for dynamic
    *  topology updates. */
   virtual void initializeInteraction(double time, SP::Interaction inter);

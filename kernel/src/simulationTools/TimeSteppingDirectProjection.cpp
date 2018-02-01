@@ -100,7 +100,7 @@ void TimeSteppingDirectProjection::nextStep()
 void TimeSteppingDirectProjection::advanceToEvent()
 {
 
-  initialize_new();
+  initialize();
   
   /** First step, Solve the standard velocity formulation.*/
 

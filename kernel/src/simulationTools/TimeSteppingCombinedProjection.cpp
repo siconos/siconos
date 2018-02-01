@@ -142,7 +142,7 @@ void TimeSteppingCombinedProjection::initOSNS()
 void TimeSteppingCombinedProjection::advanceToEventOLD()
 {
 
-  initialize_new();
+  initialize();
 
   newtonSolve(_newtonTolerance, _newtonMaxIteration);
 
@@ -159,7 +159,7 @@ void TimeSteppingCombinedProjection::advanceToEvent()
   DEBUG_PRINT("================================================\n");
 
 
-  initialize_new();
+  initialize();
 
   
   _isIndexSetsStable = false;

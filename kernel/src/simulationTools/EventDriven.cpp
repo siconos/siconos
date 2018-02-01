@@ -340,7 +340,7 @@ void EventDriven::initialize()
   _indexSet0 = _nsds->topology()->indexSet(0);
   _DSG0 = _nsds->topology()->dSG(0);
 
-  Simulation::initialize_new();
+  Simulation::initialize();
   // Initialization for all OneStepIntegrators
   //initOSIs();
   initOSIRhs();
@@ -619,7 +619,7 @@ void EventDriven::advanceToEvent()
 {
   DEBUG_BEGIN("EventDriven::advanceToEvent()\n");
 
-  initialize_new();
+  initialize();
 
   
   // Update interactions if a manager was provided

@@ -200,11 +200,9 @@ void Simulation::insertNonSmoothProblem(SP::OneStepNSProblem osns, int Id)
   (*_allNSProblems)[Id] = osns;
 
 }
-void Simulation::initialize_new()
+void Simulation::initialize()
 {
-  DEBUG_BEGIN("Simulation::initialize(SP::Model m, bool withOSI)\n");
-
-
+  DEBUG_BEGIN("Simulation::initialize()\n");
 
   // symmetry in indexSets Do we need it ?
   _nsds->topology()->setProperties();
@@ -221,6 +219,20 @@ void Simulation::initialize_new()
     }
   }
 
+  SP::Topology topo = _nsds->topology();
+  unsigned int indxSize = topo->indexSetsSize();
+  assert (_numberOfIndexSets >0);
+  if ((indxSize == LEVELMAX) || (indxSize < _numberOfIndexSets ))
+  {
+    topo->indexSetsResize(_numberOfIndexSets);
+    // Init if the size has changed
+    for (unsigned int i = indxSize; i < topo->indexSetsSize(); i++) // ++i ???
+      topo->resetIndexSetPtr(i);
+  }
+
+
+
+  
   std::map< SP::OneStepIntegrator, std::list<SP::DynamicalSystem> >::iterator  it;
   std::list<SP::DynamicalSystem> ::iterator  itlist;
   for ( it = _OSIDSmap.begin();  it !=_OSIDSmap.end(); ++it)
@@ -275,6 +287,8 @@ void Simulation::initialize_new()
     }
   }
   
+
+  
   if(!_isInitialized)
   {
     
@@ -285,16 +299,6 @@ void Simulation::initialize_new()
     _tinit = _eventsManager->startingTime();
 
     
-    SP::Topology topo = _nsds->topology();
-    unsigned int indxSize = topo->indexSetsSize();
-    assert (_numberOfIndexSets >0);
-    if ((indxSize == LEVELMAX) || (indxSize < _numberOfIndexSets ))
-    {
-      topo->indexSetsResize(_numberOfIndexSets);
-      // Init if the size has changed
-      for (unsigned int i = indxSize; i < topo->indexSetsSize(); i++) // ++i ???
-        topo->resetIndexSetPtr(i);
-    }
 
 
     // Initialize OneStepNSProblem(s). Depends on the type of simulation.

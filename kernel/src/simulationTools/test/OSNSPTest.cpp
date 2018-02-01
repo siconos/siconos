@@ -39,9 +39,8 @@ void OSNSPTest::init()
   _nsds.reset(new NonSmoothDynamicalSystem(_t0, _T));
   _osi.reset(new EulerMoreauOSI(_theta));
   _nsds->insertDynamicalSystem(_DS);
-  _sim.reset(new TimeStepping(_TD, 0));
+  _sim.reset(new TimeStepping(_nsds, _TD, 0));
   _sim->associate(_osi,_DS);
-  _sim->setNonSmoothDynamicalSystemPtr(_nsds);
 }
 
 void OSNSPTest::tearDown()
