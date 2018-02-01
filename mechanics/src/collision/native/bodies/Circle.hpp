@@ -59,7 +59,7 @@ public:
   virtual ~Circle();
 
   /** visitors hook */
-  ACCEPT_BASE_SP_VISITORS(LagrangianDS);
+  //ACCEPT_BASE_SP_VISITORS(LagrangianDS);
 
 };
 #endif /* Circle_H */

@@ -133,7 +133,7 @@ public:
 
   /** visitor hooks
    */
-  ACCEPT_VISITORS();
+  //ACCEPT_VISITORS();
 
   ~DiskPlanR() {};
 
