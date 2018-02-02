@@ -93,13 +93,22 @@ int main(int argc, char* argv[])
     // --- Model ---
     // -------------
     SP::NonSmoothDynamicalSystem bouncingBall(new NonSmoothDynamicalSystem(t0, T));
-
+    std::cout<< "1-"<< std::endl;
+    bouncingBall->changeLog().begin()->display();
+    bouncingBall->changeLogPosition()->display();
     // add the dynamical system in the non smooth dynamical system
     bouncingBall->insertDynamicalSystem(ball);
+    std::cout<< "2-"<< std::endl;
+    bouncingBall->changeLog().begin()->display();
+    bouncingBall->changeLogPosition()->display();
 
     // link the interaction and the dynamical system
     bouncingBall->link(inter, ball);
 
+    std::cout<< "3-"<< std::endl;
+    bouncingBall->changeLog().begin()->display();
+    bouncingBall->changeLogPosition()->display();
+    
     // ------------------
     // --- Simulation ---
     // ------------------
@@ -116,7 +125,10 @@ int main(int argc, char* argv[])
 
     // -- (4) Simulation setup with (1) (2) (3)
     SP::TimeStepping s(new TimeStepping(bouncingBall, t, OSI, osnspb));
-
+    std::cout<< "4-"<< std::endl;
+    bouncingBall->changeLog().begin()->display();
+    bouncingBall->changeLogPosition()->display();
+    s->_nsdsChangeLogPosition->display();
     // =========================== End of model definition ===========================
 
     // ================================= Computation =================================
@@ -150,6 +162,10 @@ int main(int argc, char* argv[])
 
     while (s->hasNextEvent())
     {
+      std::cout<< "5-"<< std::endl;
+      bouncingBall->changeLog().begin()->display();
+      bouncingBall->changeLogPosition()->display();
+      s->_nsdsChangeLogPosition->display();
       s->computeOneStep();
       // --- Get values to be plotted ---
       dataPlot(k, 0) =  s->nextTime();
