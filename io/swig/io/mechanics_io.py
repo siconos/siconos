@@ -3065,12 +3065,12 @@ class Hdf5():
             osnspb_pos.setMStorageType(0) # "not yet implemented for sparse storage"
             osnspb_pos.setNumericsVerboseMode(numerics_verbose)
             osnspb_pos.setKeepLambdaAndYState(True)
-            simulation=time_stepping(timedisc, self._osi, osnspb, osnspb_pos)
+            simulation=time_stepping(nsds,timedisc, self._osi, osnspb, osnspb_pos)
             simulation.setProjectionMaxIteration(projection_itermax)
             simulation.setConstraintTolUnilateral(projection_tolerance_unilateral);
             simulation.setConstraintTol(projection_tolerance);
         else:
-            simulation=time_stepping(timedisc)
+            simulation=time_stepping(nsds,timedisc)
             simulation.insertIntegrator(self._osi)
             simulation.insertNonSmoothProblem(osnspb)
         if use_proposed:
