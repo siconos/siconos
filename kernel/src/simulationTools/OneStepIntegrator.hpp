@@ -103,7 +103,7 @@ protected:
   unsigned int _levelMaxForInput;
 
   bool _isInitialized;
-  
+
   /** A link to the simulation that owns this OSI */
   SP::Simulation _simulation;
 
@@ -170,6 +170,13 @@ public:
   inline SP::DynamicalSystemsGraph dynamicalSystemsGraph() const
   {
     return _dynamicalSystemsGraph;
+  };
+
+  /** set the graph of dynamical systems associated with the Integrator
+   */
+  inline void setDynamicalSystemsGraph(SP::DynamicalSystemsGraph dsg)
+  {
+    _dynamicalSystemsGraph = dsg;
   };
 
   /** get number of internal memory vectors needed in dynamical systems integrated with this osi.
@@ -243,11 +250,11 @@ public:
 
   inline void setIsInitialized( bool value) {_isInitialized = value;};
 
-  
+
   /** initialise the integrator
    */
   virtual void initialize();
-  
+
   /** Initialization process of the nonsmooth problems
       linked to this OSI*/
   virtual void initialize_nonsmooth_problems(){};
@@ -328,7 +335,7 @@ public:
    * \param indexSet the index set of the interaction that are concerned
    */
   virtual double computeResiduInput(double time, SP::InteractionsGraph indexSet);
-  
+
   /** integrate the system, between tinit and tend, with possible stop at tout
    *  \param tinit start time
    *  \param tend expected end time

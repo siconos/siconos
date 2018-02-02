@@ -45,8 +45,8 @@
 // --- Constructor with a TimeDiscretisation (and thus a NonSmoothDynamicalSystem) and an
 // --- id ---
 Simulation::Simulation(SP::NonSmoothDynamicalSystem nsds, SP::TimeDiscretisation td):
-  _nsds(nsds),
   _name("unnamed"), _tinit(0.0), _tend(0.0), _tout(0.0),
+  _nsds(nsds),
   _numberOfIndexSets(0),
   _tolerance(DEFAULT_TOLERANCE), _printStat(false),
   _staticLevels(false),_isInitialized(false)
@@ -204,31 +204,15 @@ void Simulation::initialize()
 {
   DEBUG_BEGIN("Simulation::initialize()\n");
 
-  // symmetry in indexSets Do we need it ?
-  _nsds->topology()->setProperties();
-
   // === OneStepIntegrators initialization ===
   for (OSIIterator itosi = _allOSI->begin();
        itosi != _allOSI->end(); ++itosi)
   {
-    if (!(*itosi)->isInitialized()){
-      (*itosi)->setSimulationPtr(shared_from_this());
-
-      (*itosi)->initialize();
-      _numberOfIndexSets = std::max<int>((*itosi)->numberOfIndexSets(), _numberOfIndexSets);
-    }
+    (*itosi)->setSimulationPtr(shared_from_this());
+    // a subgraph has to be implemented.
+    (*itosi)->setDynamicalSystemsGraph(_nsds->topology()->dSG(0));
   }
 
-  SP::Topology topo = _nsds->topology();
-  unsigned int indxSize = topo->indexSetsSize();
-  assert (_numberOfIndexSets >0);
-  if ((indxSize == LEVELMAX) || (indxSize < _numberOfIndexSets ))
-  {
-    topo->indexSetsResize(_numberOfIndexSets);
-    // Init if the size has changed
-    for (unsigned int i = indxSize; i < topo->indexSetsSize(); i++) // ++i ???
-      topo->resetIndexSetPtr(i);
-  }
 
 
 
@@ -247,7 +231,7 @@ void Simulation::initialize()
     }
     it->second.clear();
   }
-
+  
   if (_nsds->version() != _nsdsVersion)
   {
  
@@ -286,7 +270,34 @@ void Simulation::initialize()
       initializeInteraction(getTk(), inter);
     }
   }
+  // symmetry in indexSets Do we need it ?
+  _nsds->topology()->setProperties();
   
+  // === OneStepIntegrators initialization ===
+  for (OSIIterator itosi = _allOSI->begin();
+       itosi != _allOSI->end(); ++itosi)
+  {
+    if (!(*itosi)->isInitialized()){
+      (*itosi)->initialize();
+
+      
+      _numberOfIndexSets = std::max<int>((*itosi)->numberOfIndexSets(), _numberOfIndexSets);
+    }
+  }
+     
+
+
+
+  SP::Topology topo = _nsds->topology();
+  unsigned int indxSize = topo->indexSetsSize();
+  assert (_numberOfIndexSets >0);
+  if ((indxSize == LEVELMAX) || (indxSize < _numberOfIndexSets ))
+  {
+    topo->indexSetsResize(_numberOfIndexSets);
+    // Init if the size has changed
+    for (unsigned int i = indxSize; i < topo->indexSetsSize(); i++) // ++i ???
+      topo->resetIndexSetPtr(i);
+  }
 
   
   if(!_isInitialized)
