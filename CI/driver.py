@@ -101,6 +101,7 @@ for o, a in opts:
         from machinery.ci_task import CiTask
         for s in dir(tasks):
             if isinstance(getattr(tasks, s), CiTask):
+                print(s)
                 if verbose:
                     t = getattr(tasks, s)
                     t.display()
