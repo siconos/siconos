@@ -301,7 +301,6 @@ void Simulation::initialize()
   }
 
 
->>>>>>> 334b285da... [kernel] fix bug in initialization of Lsodar
   if(!_isInitialized)
   {
     
