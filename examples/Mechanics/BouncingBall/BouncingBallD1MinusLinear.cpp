@@ -89,13 +89,13 @@ int main(int argc, char* argv[])
     // -------------
     // --- Model ---
     // -------------
-    SP::Model bouncingBall(new Model(t0, T));
+    SP::NonSmoothDynamicalSystem bouncingBall(new NonSmoothDynamicalSystem(t0, T));
 
     // add the dynamical system in the non smooth dynamical system
-    bouncingBall->nonSmoothDynamicalSystem()->insertDynamicalSystem(ball);
+    bouncingBall->insertDynamicalSystem(ball);
 
     // link the interaction and the dynamical system
-    bouncingBall->nonSmoothDynamicalSystem()->link(inter, ball);
+    bouncingBall->link(inter, ball);
 
     // ------------------
     // --- Simulation ---
@@ -111,18 +111,16 @@ int main(int argc, char* argv[])
     SP::OneStepNSProblem force(new LCP()); // contact force right limit left side
 
     // -- (4) Simulation setup with (1) (2) (3)
-    SP::TimeSteppingD1Minus s(new TimeSteppingD1Minus(t, 2));
+    SP::TimeSteppingD1Minus s(new TimeSteppingD1Minus(bouncingBall,t, 2));
     s->insertIntegrator(OSI);
     s->insertNonSmoothProblem(impact, SICONOS_OSNSP_TS_VELOCITY);
     s->insertNonSmoothProblem(force, SICONOS_OSNSP_TS_VELOCITY + 1);
-    bouncingBall->setSimulation(s);
     // =========================== End of model definition ===========================
 
     // ================================= Computation =================================
 
     // --- Simulation initialization ---
-    cout << "====> Initialisation ..." << endl << endl;
-    bouncingBall->initialize();
+
     int N = ceil((T - t0) / h); // Number of time steps
     int Nplot = (int)((T - t0) / hplot); // Number of plot steps
 
@@ -143,9 +141,14 @@ int main(int argc, char* argv[])
     dataPlot(0, 2) = (*v)(0);
     dataPlot(0, 3) = (*p)(0);
     dataPlot(0, 4) = (*lambda)(0);
-    dataPlot(0, 5) = (*p2)(0);
-    dataPlot(0, 6) = (*lambda2)(0);
-
+    if(p2)
+      dataPlot(0, 5) = (*p2)(0);
+    else
+      dataPlot(0, 5) = 0.0;
+    if (lambda2)
+      dataPlot(0, 6) = (*lambda2)(0);
+    else
+      dataPlot(0, 6) =0.0;
     // --- Time loop ---
     cout << "====> Start computation ... " << endl << endl;
 

@@ -104,13 +104,13 @@ int main(int argc, char* argv[])
     // --- Model ---
     // -------------
 
-    SP::Model bouncingBall(new Model(t0, T));
+    SP::NonSmoothDynamicalSystem bouncingBall(new NonSmoothDynamicalSystem(t0, T));
     // add the dynamical system in the non smooth dynamical system
-    bouncingBall->nonSmoothDynamicalSystem()->insertDynamicalSystem(ball);
+    bouncingBall->insertDynamicalSystem(ball);
 
     // link the interaction and the dynamical system
-    bouncingBall->nonSmoothDynamicalSystem()->link(inter1, ball);
-    bouncingBall->nonSmoothDynamicalSystem()->link(inter2, ball);
+    bouncingBall->link(inter1, ball);
+    bouncingBall->link(inter2, ball);
 
     // ----------------
     // --- Simulation ---
@@ -127,21 +127,18 @@ int main(int argc, char* argv[])
     SP::OneStepNSProblem acceleration(new LCP());
 
     // -- (4) Simulation setup with (1) (2) (3)
-    SP::EventDriven s(new EventDriven(t));
+    SP::EventDriven s(new EventDriven(bouncingBall, t));
     s->insertIntegrator(OSI);
     s->insertNonSmoothProblem(impact, SICONOS_OSNSP_ED_IMPACT);
     s->insertNonSmoothProblem(acceleration, SICONOS_OSNSP_ED_SMOOTH_ACC);
     cout << "SICONOS_OSNSP_ED_IMPACT: " << SICONOS_OSNSP_ED_IMPACT << endl;
     cout << "SICONOS_OSNSP_ED_ACCELERATION :" << SICONOS_OSNSP_ED_SMOOTH_ACC << endl;
-    bouncingBall->setSimulation(s);
     // =========================== End of model definition ===========================
 
     // ================================= Computation =================================
 
     // --- Simulation initialization ---
-    cout << "====> Simulation initialisation ..." << endl << endl;
     s->setPrintStat(true);
-    bouncingBall->initialize();
     OSI->display();
     int N = 1850; // Number of saved points: depends on the number of events ...
     int ll = 0;
@@ -152,9 +149,9 @@ int main(int argc, char* argv[])
     SimpleMatrix dataPlot(N, outputSize);
     SP::SiconosVector q = ball->q();        // ball position
     SP::SiconosVector v = ball->velocity(); // ball velocity
-    SP::SiconosVector gamma = ball->acceleration(); // ball velocity
-    SP::SiconosVector f = ball->p(2);       // resultant force deduced from the LCP at acceleration level
-    SP::SiconosVector p = ball->p(1);       // resultant force deduced from the LCP at velocity level
+    SP::SiconosVector gamma; // ball acceleration
+    SP::SiconosVector f ;     // resultant force deduced from the LCP at acceleration level
+    SP::SiconosVector p  = ball->p(1);       // resultant force deduced from the LCP at velocity level
 
 
     SP::SiconosVector y1 = inter1->y(0);
@@ -173,8 +170,8 @@ int main(int argc, char* argv[])
     dataPlot(0, 4) = 0;
     dataPlot(0, 5) = (*y1)(0);
     dataPlot(0, 6) = (*y2)(0);
-    dataPlot(0, 7) = (*gamma)(0);
-    dataPlot(0, 8) = (*f)(0);
+    dataPlot(0, 7) = 0.0;
+    dataPlot(0, 8) = 0.0;
 
     // --- Time loop ---
     cout << "====> Start computation ... " << endl << endl;
@@ -187,6 +184,8 @@ int main(int argc, char* argv[])
     while (s->hasNextEvent())
     {
       s->advanceToEvent(); // run simulation from one event to the next
+      f = ball->p(2);       // resultant force deduced from the LCP at acceleration level
+      gamma = ball->acceleration();
       if (eventsManager->nextEvent()->getType() == 2)
         nonSmooth = true;
 
@@ -238,18 +237,10 @@ int main(int argc, char* argv[])
     dataPlot.resize(k, outputSize);
     ioMatrix::write("BouncingBallTwoContactsED.dat", "ascii", dataPlot, "noDim");
 
-    // Comparison with a reference file
-    SimpleMatrix dataPlotRef(dataPlot);
-    dataPlotRef.zero();
-    ioMatrix::read("BouncingBallTwoContactsED.ref", "ascii", dataPlotRef);
-
-    std:: cout << " Error ="<< (dataPlot - dataPlotRef).normInf() << std::endl;
-
-    if ((dataPlot - dataPlotRef).normInf() > 1e-12)
-    {
-      std::cout << "Warning. The results is rather different from the reference file." << std::endl;
+    double error=0.0, eps=1e-12;
+    if (ioMatrix::compareRefFile(dataPlot, "BouncingBallTwoContactsED.ref", eps, error)
+        && error > eps)
       return 1;
-    }
 
   }
 
