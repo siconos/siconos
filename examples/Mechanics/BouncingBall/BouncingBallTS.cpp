@@ -169,18 +169,10 @@ int main(int argc, char* argv[])
     cout << "====> Output file writing ..." << endl;
     dataPlot.resize(k, outputSize);
     ioMatrix::write("result.dat", "ascii", dataPlot, "noDim");
-    std::cout << "Comparison with a reference file" << std::endl;
-    SimpleMatrix dataPlotRef(dataPlot);
-    dataPlotRef.zero();
-    ioMatrix::read("result.ref", "ascii", dataPlotRef);
-    double error = (dataPlot - dataPlotRef).normInf();
-    std::cout << "error =" << error << std::endl;
-
-    if (error> 1e-12)
-    {
-      std::cout << "Warning. The result is rather different from the reference file." << std::endl;
+    double error=0.0, eps=1e-12;
+    if (ioMatrix::compareRefFile(dataPlot, "BouncingBallTS-MoreauJeanGOSI.ref", eps, error)
+        && error > eps)
       return 1;
-    }
 
   }
 
