@@ -137,7 +137,7 @@ int main(int argc, char* argv[])
     SP::SiconosVector q = ball->q();
     SP::SiconosVector v = ball->velocity();
     SP::SiconosVector p = ball->p(1);
-
+    SP::SiconosVector f ;
     //   SiconosVector * y = bouncingBall->nonSmoothDynamicalSystem()->interaction(0)->y(0);
 
     SP::EventsManager eventsManager = s->eventsManager();
@@ -149,7 +149,7 @@ int main(int argc, char* argv[])
     dataPlot(0, 1) = (*q)(0);
     dataPlot(0, 2) = (*v)(0);
     dataPlot(0, 3) = (*p)(0);
-    //dataPlot(0, 4) = (*f)(0);
+    dataPlot(0, 4) = 0.0;
 
     // --- Time loop ---
     cout << "====> Start computation ... " << endl << endl;
@@ -161,7 +161,7 @@ int main(int argc, char* argv[])
     while (s->hasNextEvent() && k < N)
     {
       s->advanceToEvent();
-      SP::SiconosVector f = ball->p(2);
+      f = ball->p(2);
       if (eventsManager->nextEvent()->getType() == 2)
         nonSmooth = true;
 
@@ -205,16 +205,10 @@ int main(int argc, char* argv[])
     dataPlot.resize(k, outputSize);
     ioMatrix::write("result.dat", "ascii", dataPlot, "noDim");
 
-    // Comparison with a reference file
-    SimpleMatrix dataPlotRef(dataPlot);
-    dataPlotRef.zero();
-    ioMatrix::read("BouncingBallED.ref", "ascii", dataPlotRef);
-    std::cout << "error = " << (dataPlot - dataPlotRef).normInf() << std::endl;
-    if ((dataPlot - dataPlotRef).normInf() > 1e-12)
-    {
-      std::cout << "Warning. The results is rather different from the reference file." << std::endl;
+    double error=0.0, eps=1e-12;
+    if (ioMatrix::compareRefFile(dataPlot, "BouncingBallED.ref", eps, error)
+        && error > eps)
       return 1;
-    }
 
   }
 
