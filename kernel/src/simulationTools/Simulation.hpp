@@ -65,12 +65,9 @@ protected:
   /** tool to manage all events */
   SP::EventsManager _eventsManager;
 
-  
-  /** tool to manage all events */
-  unsigned int _nsdsVersion;
 
 
-/** current starting time for integration */
+  /** current starting time for integration */
   double _tinit;
 
   /** current ending time for integration */
@@ -180,7 +177,7 @@ private:
 
 public:
 
-
+  std::list<NonSmoothDynamicalSystem::Changes>::iterator _nsdsChangeLogPosition;
   /** default constructor
    *  \param td the timeDiscretisation for this Simulation
    */
@@ -354,6 +351,7 @@ public:
    */
   void setNonSmoothDynamicalSystemPtr(SP::NonSmoothDynamicalSystem newPtr)
   {
+    _nsdsChangeLogPosition = _nsds->changeLog().begin();
     _nsds = newPtr;
   }
 

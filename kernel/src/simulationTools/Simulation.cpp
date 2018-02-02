@@ -36,9 +36,9 @@
 #include "TypeName.hpp"
 // for Debug
 // #define DEBUG_BEGIN_END_ONLY
-// #define DEBUG_NOCOLOR
-// #define DEBUG_STDOUT
-// #define DEBUG_MESSAGES
+#define DEBUG_NOCOLOR
+#define DEBUG_STDOUT
+#define DEBUG_MESSAGES
 #include <debug.h>
 #include <fstream>
 
@@ -51,17 +51,30 @@ Simulation::Simulation(SP::NonSmoothDynamicalSystem nsds, SP::TimeDiscretisation
   _tolerance(DEFAULT_TOLERANCE), _printStat(false),
   _staticLevels(false),_isInitialized(false)
 {
+  std::cout << "START Simulation::Simulation(SP::NonSmoothDynamicalSystem nsds, SP::TimeDiscretisation td):" <<std::endl;
+  _nsdsChangeLogPosition = nsds->changeLog().begin();
+  DEBUG_EXPR((_nsdsChangeLogPosition)->display());
+  std::cout << "END Simulation::Simulation(SP::NonSmoothDynamicalSystem nsds, SP::TimeDiscretisation td):" <<std::endl;
+
   if (!td)
     RuntimeException::selfThrow("Simulation constructor - timeDiscretisation == NULL.");
   _useRelativeConvergenceCriterion = false;
   _relativeConvergenceCriterionHeld = false;
   _relativeConvergenceTol = 10e-3;
 
-  // === indexSets will be updated during initialize() call ===
+  // // === indexSets will be updated during initialize() call ===
 
   _allOSI.reset(new OSISet());
-  _allNSProblems.reset(new OneStepNSProblems());
-  _eventsManager.reset(new EventsManager(td)); //
+  //_allNSProblems.reset(new OneStepNSProblems());
+  // _eventsManager.reset(new EventsManager(td)); //
+
+  std::cout << "START Simulation::Simulation(SP::NonSmoothDynamicalSystem nsds, SP::TimeDiscretisation td):" <<std::endl;
+  _nsdsChangeLogPosition = nsds->changeLog().begin();
+  DEBUG_EXPR((_nsdsChangeLogPosition)->display());
+  std::cout << "END Simulation::Simulation(SP::NonSmoothDynamicalSystem nsds, SP::TimeDiscretisation td):" <<std::endl;
+
+
+  
 }
 
 
@@ -203,6 +216,9 @@ void Simulation::insertNonSmoothProblem(SP::OneStepNSProblem osns, int Id)
 void Simulation::initialize()
 {
   DEBUG_BEGIN("Simulation::initialize()\n");
+  DEBUG_EXPR(std::cout << "first: "; _nsds->changeLog().begin()->display();
+             std::cout << "last: "; (--_nsds->changeLog().end())->display();
+             std::cout << "nsdsChangeLogPosition: "; (_nsdsChangeLogPosition)->display(););
 
   // === OneStepIntegrators initialization ===
   for (OSIIterator itosi = _allOSI->begin();
@@ -216,7 +232,7 @@ void Simulation::initialize()
 
 
 
-  
+
   std::map< SP::OneStepIntegrator, std::list<SP::DynamicalSystem> >::iterator  it;
   std::list<SP::DynamicalSystem> ::iterator  itlist;
   for ( it = _OSIDSmap.begin();  it !=_OSIDSmap.end(); ++it)
@@ -231,19 +247,44 @@ void Simulation::initialize()
     }
     it->second.clear();
   }
+
+
+
+
   
-  if (_nsds->version() != _nsdsVersion)
+
+  SP::DynamicalSystemsGraph DSG = _nsds->topology()->dSG(0);
+  //std::list<NonSmoothDynamicalSystem::Changes>::iterator itc(_nsdsChangeLogPosition);
+  
+  DEBUG_EXPR(std::cout << "first: "; _nsds->changeLog().begin()->display();
+             std::cout << "last: "; (--_nsds->changeLog().end())->display();
+             std::cout << "nsdsChangeLogPosition: "; (_nsdsChangeLogPosition)->display(););
+
+
+  
+  std::list<NonSmoothDynamicalSystem::Changes>::iterator itc = _nsdsChangeLogPosition ;
+  DEBUG_EXPR(_nsdsChangeLogPosition->display(););
+  itc++;
+  DEBUG_EXPR(
+    std::cout << "itc++: ";
+    if (itc != _nsds->changeLog().end()) itc->display(); else { std::cout<<"end"<<std::endl; });
+
+
+  
+
+  
+  while(itc != _nsds->changeLog().end())
   {
- 
-    DynamicalSystemsGraph::VIterator dsi, dsend;
-    SP::DynamicalSystemsGraph DSG = _nsds->topology()->dSG(0);
-    for (std11::tie(dsi, dsend) = DSG->vertices(); dsi != dsend; ++dsi)
+    std::cout << "tt" << std::endl;
+    NonSmoothDynamicalSystem::Changes& changes = *itc;
+    DEBUG_EXPR(changes.display(););
+    itc++;
+    if (changes.typeOfChange == NonSmoothDynamicalSystem::addDynamicalSystem)
     {
-      // By default, if the user has not set the OSI, we assign the first OSI to all DS
-      // that has no defined osi.
-      if (!DSG->properties(*dsi).osi)
+      SP::DynamicalSystem ds = changes.ds;
+      ds->display();
+      if (!DSG->properties(DSG->descriptor(ds)).osi)
       {
-        SP::DynamicalSystem ds = DSG->bundle(*dsi);
         SP::OneStepIntegrator osi_default = *_allOSI->begin();
 
         _nsds->topology()->setOSI(ds, osi_default);
@@ -255,38 +296,70 @@ void Simulation::initialize()
                     << " is not assigned to an OSI. We assign the following OSI to this DS."
                     << std::endl;
           osi_default->display();
-
         }
         osi_default->initializeDynamicalSystem(getTk(),ds);
-
+        
       }
     }
-
-    SP::InteractionsGraph indexSet0 = _nsds->topology()->indexSet0();
-    InteractionsGraph::VIterator ui, uiend;
-    for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+    else if (changes.typeOfChange == NonSmoothDynamicalSystem::addInteraction)
     {
-      SP::Interaction inter = indexSet0->bundle(*ui);
+      SP::Interaction inter = changes.i;
       initializeInteraction(getTk(), inter);
-    }
+    } 
   }
+  //_nsdsChangeLogPosition = _nsds->changeLogPosition();
+
+
+    
+  // DynamicalSystemsGraph::VIterator dsi, dsend;
+  // SP::DynamicalSystemsGraph DSG = _nsds->topology()->dSG(0);
+  // for (std11::tie(dsi, dsend) = DSG->vertices(); dsi != dsend; ++dsi)
+  // {
+  //   // By default, if the user has not set the OSI, we assign the first OSI to all DS
+  //   // that has no defined osi.
+  //   if (!DSG->properties(*dsi).osi)
+  //   {
+  //     SP::DynamicalSystem ds = DSG->bundle(*dsi);
+  //     SP::OneStepIntegrator osi_default = *_allOSI->begin();
+
+  //     _nsds->topology()->setOSI(ds, osi_default);
+
+  //     if (_allOSI->size() > 1)
+  //     {
+  //       std::cout <<"Warning. The simulation has multiple OneStepIntegrators (OSI) but the DS number "
+  //                 << ds->number()
+  //                 << " is not assigned to an OSI. We assign the following OSI to this DS."
+  //                 << std::endl;
+  //       osi_default->display();
+
+  //     }
+  //     osi_default->initializeDynamicalSystem(getTk(),ds);
+
+  //   }
+    
+
+    // SP::InteractionsGraph indexSet0 = _nsds->topology()->indexSet0();
+    // InteractionsGraph::VIterator ui, uiend;
+    // for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+    // {
+    //   SP::Interaction inter = indexSet0->bundle(*ui);
+    //   initializeInteraction(getTk(), inter);
+    // }
+
+    
+
   // symmetry in indexSets Do we need it ?
   _nsds->topology()->setProperties();
-  
+
   // === OneStepIntegrators initialization ===
   for (OSIIterator itosi = _allOSI->begin();
        itosi != _allOSI->end(); ++itosi)
   {
     if (!(*itosi)->isInitialized()){
       (*itosi)->initialize();
-
-      
       _numberOfIndexSets = std::max<int>((*itosi)->numberOfIndexSets(), _numberOfIndexSets);
     }
   }
-     
-
-
 
   SP::Topology topo = _nsds->topology();
   unsigned int indxSize = topo->indexSetsSize();
@@ -299,18 +372,15 @@ void Simulation::initialize()
       topo->resetIndexSetPtr(i);
   }
 
-  
+
   if(!_isInitialized)
   {
-    
+
     _T = _nsds->finalT();
-    
+
     // === Events manager initialization ===
     _eventsManager->initialize(_T);
     _tinit = _eventsManager->startingTime();
-
-    
-
 
     // Initialize OneStepNSProblem(s). Depends on the type of simulation.
     // Warning FP : must be done in any case, even if the interactions set
@@ -337,7 +407,7 @@ void Simulation::initialize()
 
     _isInitialized = true;
   }
-  
+
 
   DEBUG_END("Simulation::initialize(SP::Model m, bool withOSI)\n");
 }
