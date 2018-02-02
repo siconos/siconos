@@ -304,14 +304,12 @@ void EventDriven::initOSNS()
 
 void EventDriven::initOSIs()
 {
-  for (OSIIterator itosi = _allOSI->begin();  itosi != _allOSI->end(); ++itosi)
-  {
 
-  }
 }
 
 void EventDriven::initOSIRhs()
 {
+  DEBUG_BEGIN("void EventDriven::initOSIRhs()\n")
   // === initialization for OneStepIntegrators ===
   OSI::TYPES  osiType = (*_allOSI->begin())->getType();
   for (OSIIterator itosi = _allOSI->begin();  itosi != _allOSI->end(); ++itosi)
@@ -332,10 +330,12 @@ void EventDriven::initOSIRhs()
       ds->initRhs(startingTime());
     }
   }
+  DEBUG_END("void EventDriven::initOSIRhs()\n")
 }
 
 void EventDriven::initialize()
 {
+  DEBUG_BEGIN("void EventDriven::initialize()\n")
   // Initialization for Simulation
   _indexSet0 = _nsds->topology()->indexSet(0);
   _DSG0 = _nsds->topology()->dSG(0);
@@ -344,6 +344,8 @@ void EventDriven::initialize()
   // Initialization for all OneStepIntegrators
   //initOSIs();
   initOSIRhs();
+  DEBUG_END("void EventDriven::initialize()\n")
+
 }
 
 void EventDriven::computef(OneStepIntegrator& osi, integer * sizeOfX, doublereal * time, doublereal * x, doublereal * xdot)
@@ -724,6 +726,7 @@ void EventDriven::advanceToEvent()
       }
       if (_istate == 3) // ie if _tout is not equal to _tend: one or more roots have been found.
       {
+        DEBUG_PRINTF("An event has been found at time = %g", _tout);
         isNewEventOccur = true;
         // Add an event into the events manager list
         _eventsManager->scheduleNonSmoothEvent(*this, _tout);

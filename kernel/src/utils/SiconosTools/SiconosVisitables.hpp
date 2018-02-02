@@ -27,7 +27,7 @@
   REGISTER(OneStepIntegrator)                          \
   REGISTER(EulerMoreauOSI)                             \
   REGISTER(MoreauJeanOSI)                              \
-  REGISTER(MoreauJeanBilbaoOSI)                              \
+  REGISTER(MoreauJeanBilbaoOSI)                        \
   REGISTER(MoreauJeanGOSI)                             \
   REGISTER(MoreauJeanDirectProjectionOSI)              \
   REGISTER(MoreauJeanCombinedProjectionOSI)            \

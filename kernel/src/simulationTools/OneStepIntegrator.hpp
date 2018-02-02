@@ -172,6 +172,13 @@ public:
     return _dynamicalSystemsGraph;
   };
 
+  /** set the graph of dynamical systems associated with the Integrator
+   */
+  inline void setDynamicalSystemsGraph(SP::DynamicalSystemsGraph dsg)
+  {
+    _dynamicalSystemsGraph = dsg;
+  };
+
   /** get number of internal memory vectors needed in dynamical systems integrated with this osi.
    *  \return an unsigned int
    */
@@ -328,7 +335,7 @@ public:
    * \param indexSet the index set of the interaction that are concerned
    */
   virtual double computeResiduInput(double time, SP::InteractionsGraph indexSet);
-  
+
   /** integrate the system, between tinit and tend, with possible stop at tout
    *  \param tinit start time
    *  \param tend expected end time

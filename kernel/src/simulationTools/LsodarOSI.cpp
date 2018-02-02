@@ -175,6 +175,7 @@ void LsodarOSI::fillXWork(integer* sizeOfX, doublereal* x)
 
 void LsodarOSI::computeRhs(double t, DynamicalSystemsGraph& DSG0)
 {
+  DEBUG_BEGIN("LsodarOSI::computeRhs(double t, DynamicalSystemsGraph& DSG0)\n")
   DynamicalSystemsGraph::VIterator dsi, dsend;
   for(std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
   {
@@ -192,6 +193,7 @@ void LsodarOSI::computeRhs(double t, DynamicalSystemsGraph& DSG0)
       free = *lds->forces();
       if(lds->inverseMass())
         lds->inverseMass()->PLUForwardBackwardInPlace(free);
+      DEBUG_EXPR(free.display(););
     }
     if(_extraAdditionalTerms)
     {
@@ -199,6 +201,8 @@ void LsodarOSI::computeRhs(double t, DynamicalSystemsGraph& DSG0)
       _extraAdditionalTerms->addSmoothTerms(DSG0, dsgVD, t, ds->getRhs());
     }
   }
+  DEBUG_END("LsodarOSI::computeRhs(double t, DynamicalSystemsGraph& DSG0)\n")
+
 }
 
 void LsodarOSI::computeJacobianRhs(double t, DynamicalSystemsGraph& DSG0)
@@ -248,14 +252,17 @@ void LsodarOSI::initializeDynamicalSystem( double t, SP::DynamicalSystem ds)
   {
     LagrangianDS& lds = *std11::static_pointer_cast<LagrangianDS>(ds);
     // TODO FP: use buffer in graph for xWork?
+    _xWork.reset(new BlockVector());
     _xWork->insertPtr(lds.q());
     _xWork->insertPtr(lds.velocity());
     workVectors.resize(OneStepIntegrator::work_vector_of_vector_size);
     workVectors[OneStepIntegrator::free].reset(new SiconosVector(lds.dimension()));
   }
   else
+  {
+    _xWork.reset(new BlockVector());
     _xWork->insertPtr(ds->x());
-
+  }
   ds->swapInMemory();
 
   DEBUG_END("LsodarOSI::initializeDynamicalSystem( double t, SP::DynamicalSystem ds)\n");
@@ -355,7 +362,6 @@ void LsodarOSI::fillDSLinks(Interaction &inter,
 void LsodarOSI::initialize()
 {
   DEBUG_BEGIN("LsodarOSI::initialize()\n");
-  _xWork.reset(new BlockVector());
   OneStepIntegrator::initialize();
   //std::string type;
   // initialize xWork with x values of the dynamical systems present in the set.
@@ -387,7 +393,6 @@ void LsodarOSI::initialize()
   // 1 - Neq; x vector size.
   _intData[0] = _xWork->size();
   _xtmp.reset(new SiconosVector(_xWork->size()));
-
   // 2 - Ng, number of constraints:
   _intData[1] = std11::static_pointer_cast<EventDriven>(_simulation)->computeSizeOfg();
   // 3 - Itol, itask, iopt
@@ -456,7 +461,7 @@ void LsodarOSI::initialize()
   //   2     scalar     array      RTOL*ABS(Y(i)) + ATOL(i)
   //   3     array      scalar     RTOL(i)*ABS(Y(i)) + ATOL
   //   4     array      array      RTOL(i)*ABS(Y(i)) + ATOL(i)
-  DEBUG_END("LsodarOSI::initialize(Model& m)\n");
+  DEBUG_END("LsodarOSI::initialize()\n");
 }
 
 void LsodarOSI::integrate(double& tinit, double& tend, double& tout, int& istate)
@@ -540,8 +545,9 @@ void LsodarOSI::integrate(double& tinit, double& tend, double& tout, int& istate
   istate = _intData[4];
   tout  = tinit_DR; // real ouput time
   tend  = tend_DR; // necessary for next start of DLSODAR
-
-
+  DEBUG_PRINTF("tout = %g, tinit = %g, tend = %g ", tout, tinit, tend);
+  DEBUG_EXPR(_xtmp->display(););
+  DEBUG_EXPR(_xWork->display(););
   if(istate == 3)
   {
     //      std:: std::cout << "ok\n";

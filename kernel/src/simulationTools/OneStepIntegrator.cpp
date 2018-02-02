@@ -62,10 +62,8 @@ void OneStepIntegrator::initialize()
                                 _simulation->eventsManager()->timeDiscretisation());
   }
 
-  // a subgraph has to be implemented.
-  _dynamicalSystemsGraph = _simulation->nonSmoothDynamicalSystem()->topology()->dSG(0);
-
   initialize_nonsmooth_problems();
+  _isInitialized=true;
 
 }
 
