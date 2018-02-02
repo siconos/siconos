@@ -21,7 +21,7 @@
 
 from numpy.linalg import norm
 from siconos.kernel import LagrangianLinearTIDS, NewtonImpactNSL,\
-    LagrangianLinearTIR, Interaction, Model, MoreauJeanOSI,\
+    LagrangianLinearTIR, Interaction, NonSmoothDynamicalSystem, MoreauJeanOSI,\
     TimeDiscretisation, LCP, TimeStepping
 from siconos.kernel import SimpleMatrix, getMatrix
 
@@ -66,13 +66,13 @@ inter = Interaction(nslaw, relation)
 #
 # Model
 #
-bouncingBall = Model(t0, T)
+bouncingBall = NonSmoothDynamicalSystem(t0, T)
 
 # add the dynamical system to the non smooth dynamical system
-bouncingBall.nonSmoothDynamicalSystem().insertDynamicalSystem(ball)
+bouncingBall.insertDynamicalSystem(ball)
 
 # link the interaction and the dynamical system
-bouncingBall.nonSmoothDynamicalSystem().link(inter, ball)
+bouncingBall.link(inter, ball)
 
 
 #
@@ -89,7 +89,7 @@ t = TimeDiscretisation(t0, h)
 osnspb = LCP()
 
 # (4) Simulation setup with (1) (2) (3)
-s = TimeStepping(t, OSI, osnspb)
+s = TimeStepping(bouncingBall,t, OSI, osnspb)
 
 
 # end of model definition
@@ -97,10 +97,6 @@ s = TimeStepping(t, OSI, osnspb)
 #
 # computation
 #
-
-# simulation initialization
-bouncingBall.setSimulation(s)
-bouncingBall.initialize()
 
 
 # the number of time steps
