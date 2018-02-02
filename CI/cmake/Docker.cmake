@@ -190,7 +190,12 @@ macro(add_docker_targets)
   # volumes /usr/local and WORKDIR are persistent
   # (see docker doc, https://docs.docker.com/engine/reference/run/#clean-up---rm,
   # : "if the original volume was specified with a name it will not be removed."
-  # 
+  #
+  add_custom_target(
+    ${DOCKER_IMAGE_AS_DIR}-cmd
+    COMMENT "Docker cmd : ${DOCKER_IMAGE}"
+    COMMAND ${DOCKER_COMMAND} run -h ${DOCKER_HOSTNAME} --rm=true ${DOCKER_VFLAGS} --env SOURCE_DIR=${DOCKER_PROJECT_SOURCE_DIR} --volumes-from=${DOCKER_WORKDIR_VOLUME} --volumes-from=${DOCKER_REPOSITORY}-${DOCKER_IMAGE}-usr-local --workdir=${DOCKER_WORKDIR} -t ${DOCKER_REPOSITORY}/${DOCKER_IMAGE} )
+  
   add_custom_target(
     ${DOCKER_IMAGE_AS_DIR}-cmake
     COMMENT "Docker cmake : ${DOCKER_IMAGE}"
@@ -275,6 +280,13 @@ macro(add_docker_targets)
       )
   endif()
 
+  if(NOT TARGET docker-cmd)
+    add_custom_target(
+      docker-cmd ALL
+      COMMENT "Docker cmd"
+      )
+  endif()
+
   if(NOT TARGET docker-cmake)
     add_custom_target(
       docker-cmake ALL
@@ -348,6 +360,7 @@ macro(add_docker_targets)
   add_dependencies(docker-clean-usr-local ${DOCKER_IMAGE_AS_DIR}-clean-usr-local)
   add_dependencies(docker-clean ${DOCKER_IMAGE_AS_DIR}-clean)
   add_dependencies(docker-build ${DOCKER_IMAGE_AS_DIR}-build)
+  add_dependencies(docker-cmd ${DOCKER_IMAGE_AS_DIR}-cmd)
   add_dependencies(docker-cmake ${DOCKER_IMAGE_AS_DIR}-cmake)
   add_dependencies(docker-make ${DOCKER_IMAGE_AS_DIR}-make)
   add_dependencies(docker-make-test ${DOCKER_IMAGE_AS_DIR}-make-test)

@@ -32,7 +32,7 @@ updater:
     debian-jessie: printf "deb http://llvm.org/apt/jessie/ llvm-toolchain-jessie-3.8 main\ndeb-src http://llvm.org/apt/jessie/ llvm-toolchain-jessie-3.8 main" >> /etc/apt/sources.list && apt-get update -y
   any:
     debian: apt-get update -y
-    nixos/nix: nix-env -qa > /tmp/nix-packages # ?
+
 
 ##############################################################################
 # set specific extra definitions for some packages/distrib
@@ -201,7 +201,7 @@ pkgs:
       
   profiling:
     nix:
-      - valgrind-3.12.0
+      - valgrind
     debian:
       - valgrind
       - python-dbg
@@ -219,19 +219,17 @@ pkgs:
 
   git-core:
     nix:
-      - git-2.12.0
+      - git
 
   wget:
     nix:
-      - wget-1.19.1
+      - wget
 
   make:
     nix:
-      - gnumake-4.2.1
+      - gnumake
       
   cmake:
-    nix:
-      - cmake-3.7.2
     ubuntu-12.04:
       - python-software-properties
       - cmake-3.0.2
@@ -260,14 +258,14 @@ pkgs:
 
   swig:
     nix:
-      - swig-3.0.10
+      - swig
         
   gfortran:
-    nix: gfortran-wrapper-6.3.0
+    nix: gfortran-wrapper
     fedora: gcc-gfortran
 
   gcc:
-    nix: gcc-wrapper-6.3.0
+    nix: gcc-wrapper
 
   gnu-c++:
     nix: gcc
@@ -289,14 +287,14 @@ pkgs:
       boost-serialization
 
   gmp:
-    nix: gmp-with-cxx-6.1.1
+    nix: gmp-with-cxx
     debian: libgmp-dev
     fedora: gmp-devel
 
 
   cppunit:
     nix:
-      - cppunit-1.13.2
+      - cppunit
     debian:
       - libcppunit-dev
 
@@ -305,7 +303,7 @@ pkgs:
       - cppunit-devel
 
   hdf5:
-    nix: hdf5-1.8.18
+    nix: hdf5
     fedora: hdf5-devel
     debian: libhdf5-dev
 
@@ -320,7 +318,7 @@ pkgs:
 
   openblas-lapacke:
     nix:
-      - openblas-0.2.19
+      - openblas
       - pfff_lapacke_is_missing
     debian:
       - libopenblas-dev
@@ -331,8 +329,8 @@ pkgs:
 
   atlas-lapack:
     nix:
-      - blas-3.5.0
-      - atlas-with-lapack-3.10.2
+      - blas
+      - atlas-with-lapack
     debian:
       - libblas-dev
       - liblapack-dev
@@ -538,3 +536,9 @@ pkgs:
   siconos-source:
     any:
       command:
+
+  siconos-nix-default:
+    nix:
+      run-command:
+        cd $SOURCE_DIR && nix-env -f . -iA  siconos-full
+      
