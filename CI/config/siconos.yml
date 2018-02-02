@@ -9,7 +9,8 @@ wildcard: any
 match:
   ubuntu: debian
   nixos/nix: nix
-  
+  nvidia/opengl: debian
+
 ##############################################################################
 # Set commands used to install and update packages
 
@@ -425,7 +426,7 @@ pkgs:
   # Don't worry, this is a hack to get cppunit to work with clang on ubuntu 15.10, because the system cppunit
   # has been compiled with a different string impl ...
   cppunit_clang-3.9:
-    ubuntu-17.04:
+    ubuntu-16.04:
       command:  wget http://siconos.gforge.inria.fr/build-42/cppunit-clang-3.9-ubuntu-16.10.tar.xz &&
                 tar xJf cppunit-clang-3.9-ubuntu-16.10.tar.xz --strip-components=1 -C /usr/lib/x86_64-linux-gnu/ lib &&
                 tar xJf cppunit-clang-3.9-ubuntu-16.10.tar.xz --strip-components=1 -C /usr/include/cppunit/ include
@@ -518,6 +519,133 @@ pkgs:
                make install &&
                cd &&
                python -c 'import OCC'
+
+  # building gazebo siconos fork
+  gazebo:
+    nvidia/opengl:
+      # - python-dev
+      # - python-lxml
+      # - python-pytest
+      # - python-scipy
+      # - python-matplotlib
+      # - libboost-all-dev
+      - libboost-thread-dev
+      - libboost-signals-dev
+      - libboost-system-dev
+      - libboost-filesystem-dev
+      - libboost-program-options-dev
+      - libboost-regex-dev
+      - libboost-date-time-dev
+      - libboost-iostreams-dev
+      # - libgmp-dev
+      # - libcppunit-dev
+      - libglu1-mesa
+      - libgl1-mesa-dev
+      - libglu1-mesa-dev
+      - libfreetype6-dev
+      # - pkg-config
+      - libzmq3-dev
+      - uuid-dev
+      - libprotobuf-dev
+      - libprotoc-dev
+      - protobuf-compiler
+      - libgdal-dev
+      - libfreeimage-dev
+      - libcurl4-gnutls-dev
+      - libtar-dev
+      - libtbb-dev
+      - libogre-1.9-dev
+      - libqwt-qt5-dev
+      - libqt5opengl5-dev
+      - mercurial
+      - libtinyxml2-dev
+      - libtinyxml-dev
+      - ruby
+      # optional, for comparing physics engines
+      - libsimbody-dev
+      - libbullet-dev
+      # TODO: add DART from sources
+      - gazebo-dependencies
+      - gazebo-siconos-test
+
+  # Install and build all Gazebo dependencies.  If the Siconos-enabled
+  # Gazebo fork is updated, dependency branches may need to be
+  # changed.  Unfortunately there is currently no way to automatically
+  # know which branch of the dependencies is needed by which version
+  # of Gazebo.
+  gazebo-dependencies:
+    any:
+      command:
+        gem install protobuf &&
+        cd ~ &&
+        hg clone https://bitbucket.org/ignitionrobotics/ign-cmake &&
+        cd ~/ign-cmake &&
+        mkdir bld &&
+        cd bld &&
+        cmake .. &&
+        make -j5 &&
+        make install &&
+        cd ~ &&
+        hg clone https://bitbucket.org/ignitionrobotics/ign-math &&
+        cd ~/ign-math &&
+        hg up ign-math3 &&
+        mkdir bld &&
+        cd bld &&
+        cmake .. -DENABLE_TESTS_COMPILATION=NO -DCMAKE_BUILD_TYPE=Release &&
+        make -j5 &&
+        make install &&
+        cd ~ &&
+        hg clone https://bitbucket.org/ignitionrobotics/ign-tools &&
+        cd ~/ign-tools &&
+        mkdir bld &&
+        cd bld &&
+        cmake .. -DENABLE_TESTS_COMPILATION=NO -DCMAKE_BUILD_TYPE=Release &&
+        make -j5 &&
+        make install &&
+        cd ~ &&
+        hg clone https://bitbucket.org/ignitionrobotics/ign-msgs &&
+        cd ~/ign-msgs &&
+        hg up ign-msgs0 &&
+        mkdir bld &&
+        cd bld &&
+        cmake .. -DENABLE_TESTS_COMPILATION=NO -DCMAKE_BUILD_TYPE=Release &&
+        make -j5 &&
+        make install &&
+        cd ~ &&
+        hg clone https://bitbucket.org/ignitionrobotics/ign-transport &&
+        cd ~/ign-transport &&
+        hg up ign-transport3 &&
+        mkdir bld &&
+        cd bld &&
+        cmake .. -DENABLE_TESTS_COMPILATION=NO -DCMAKE_BUILD_TYPE=Release &&
+        make -j5 &&
+        make install &&
+        cd ~ &&
+        hg clone https://bitbucket.org/osrf/sdformat &&
+        cd ~/sdformat &&
+        hg up sdf5 &&
+        mkdir bld &&
+        cd bld &&
+        cmake .. &&
+        make -j5 &&
+        make install &&
+        ldconfig
+
+  # Compile and run the Siconos-enabled fork of Gazebo.
+  # Do it using run-command since it must be done after docker-make-install.
+  gazebo-siconos-test:
+    any:
+      run-command:
+        cd ~ &&
+        git clone http://github.com/siconos/gazebo-siconos gazebo &&
+        cd ~/gazebo &&
+        git checkout siconos_integration &&
+        mkdir bld &&
+        cd bld &&
+        cmake .. &&
+        make -j5 &&
+        make install && ldconfig &&
+        gzserver --verbose -e siconos --iters 2000 /usr/local/share/gazebo-9/worlds/simple_gripper.world
 
   # ocaml package manager
   frama-c:
