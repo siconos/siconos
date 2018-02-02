@@ -236,7 +236,7 @@ public:
 
   /** visitor hook
    */
-  //ACCEPT_STD_VISITORS();
+  ACCEPT_STD_VISITORS();
 };
 
 #endif /* SpaceFilter_hpp */

@@ -21,10 +21,10 @@
 */
 #ifndef SiconosBodies_hpp
 #define SiconosBodies_hpp
-#include "Simulation.hpp"
-#include "MechanicsFwd.hpp"
+#include <MechanicsFwd.hpp>
 #include <SiconosFwd.hpp>
 #include <SiconosSerialization.hpp>
+#include <Simulation.hpp>
 
 /** SiconosBodies : a Siconos Model, some plans and space filtering capabilities
  */

@@ -16,7 +16,7 @@
  * limitations under the License.
 */
 
-
+\
 #include "SiconosBodies.hpp"
 #include <Simulation.hpp>
 #include "SpaceFilter.hpp"
