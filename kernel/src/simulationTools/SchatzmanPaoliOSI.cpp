@@ -109,7 +109,7 @@ void SchatzmanPaoliOSI::initializeDynamicalSystem( double t, SP::DynamicalSystem
   {
     SP::LagrangianLinearTIDS lltids = std11::static_pointer_cast<LagrangianLinearTIDS> (ds);
     // buffers allocation (inside the graph)
-    
+
     workVectors.resize(OneStepIntegrator::work_vector_of_vector_size);
     workVectors[OneStepIntegrator::residu_free].reset(new SiconosVector(lltids->dimension()));
     workVectors[OneStepIntegrator::free].reset(new SiconosVector(lltids->dimension()));
@@ -144,13 +144,13 @@ void SchatzmanPaoliOSI::initializeDynamicalSystem( double t, SP::DynamicalSystem
   }
   // W initialization
   initializeIterationMatrixW(t, ds);
-  
+
   for (unsigned int k = _levelMinForInput ; k < _levelMaxForInput + 1; k++)
   {
     ds->initializeNonSmoothInput(k);
   }
 
-  
+
   //      if ((*itDS)->getType() == Type::LagrangianDS || (*itDS)->getType() == Type::FirstOrderNonLinearDS)
   DEBUG_EXPR(ds->display());
   DEBUG_END("SchatzmanPaoliOSI::initializeDynamicalSystem( double t, SP::DynamicalSystem ds)\n");
@@ -167,17 +167,30 @@ void SchatzmanPaoliOSI::fillDSLinks(Interaction &inter,
   assert(ds1);
   assert(ds2);
 
-  VectorOfVectors& workV = *interProp.workVectors;
-  workV.resize(SchatzmanPaoliOSI::WORK_INTERACTION_LENGTH);
-  workV[SchatzmanPaoliOSI::OSNSP_RHS].reset(new SiconosVector(inter.getSizeOfY()));
-
   VectorOfBlockVectors& DSlink = *interProp.DSlink;
   // Note FP: call (again) initalize to update DSlinks, since some new fields
   // must be taken into account for this OSI (acceleration for example).
   // This is a temp workaround that should be fixed properly.
   //  inter.initialize_ds_links(interProp, *ds1, *ds2);
 
-  Relation &relation =  *inter.relation();  
+  // -- Create buffers (in the graph) that will be used for relation/interaction internal operations --
+  // Relation initializes the work vectors and matrices
+  //
+  interProp.workVectors.reset(new VectorOfVectors);
+  interProp.workMatrices.reset(new VectorOfSMatrices);
+
+  VectorOfVectors& workV = *interProp.workVectors;
+  VectorOfSMatrices& workM = *interProp.workMatrices;
+
+  Relation &relation =  *inter.relation();
+  relation.initialize(inter, DSlink, workV, workM);
+
+  workV.resize(SchatzmanPaoliOSI::WORK_INTERACTION_LENGTH);
+  workV[SchatzmanPaoliOSI::OSNSP_RHS].reset(new SiconosVector(inter.getSizeOfY()));
+
+
+
+
   RELATION::TYPES relationType = relation.getType();
 
   // Check if interations levels (i.e. y and lambda sizes) are compliant with the current osi.
@@ -198,10 +211,10 @@ void SchatzmanPaoliOSI::fillDSLinks(Interaction &inter,
     LagrangianDS& lds = *std11::static_pointer_cast<LagrangianDS> (ds1);
     DSlink[LagrangianR::p0].reset(new BlockVector());
     DSlink[LagrangianR::p0]->insertPtr(lds.p(0));
-    
+
     DSlink[LagrangianR::xfree].reset(new BlockVector());
     DSlink[LagrangianR::xfree]->insertPtr(workVds1[OneStepIntegrator::free]);
-    
+
   }
   else if (relationType == NewtonEuler)
   {
@@ -612,7 +625,7 @@ struct SchatzmanPaoliOSI::_NSLEffectOnFreeOutput : public SiconosVisitor
       _inter->yMemory(_osnsp->inputOutputLevel()).getSiconosVector(1));
 
     DEBUG_PRINTF("_osnsp->inputOutputLevel() = %i \n ",_osnsp->inputOutputLevel() );
-    DEBUG_EXPR(y_k_1->display());;
+    DEBUG_EXPR(y_k_1.display());;
     SiconosVector & osnsp_rhs = *(*_interProp.workVectors)[SchatzmanPaoliOSI::OSNSP_RHS];
     subscal(e, y_k_1, osnsp_rhs, subCoord, false);
   }

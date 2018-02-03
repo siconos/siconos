@@ -392,14 +392,14 @@ void Interaction::initialize_ds_links(InteractionProperties& interaction_propert
     RuntimeException::selfThrow("Interaction::initData unknown initialization procedure for \
         a relation of type: " + relationType);
 
-  // -- Stage 2 : create buffers (in the graph) that will be used for relation/interaction internal operations --
-  // Relation initializes the work vectors and matrices
-  //
-  interaction_properties.workVectors.reset(new VectorOfVectors);
-  interaction_properties.workMatrices.reset(new VectorOfSMatrices);
-  VectorOfVectors& workVInter = *interaction_properties.workVectors;
-  VectorOfSMatrices& workMInter = *interaction_properties.workMatrices;
-  _relation->initialize(*this, DSlink, workVInter, workMInter);
+  // // -- Stage 2 : create buffers (in the graph) that will be used for relation/interaction internal operations --
+  // // Relation initializes the work vectors and matrices
+  // //
+  // interaction_properties.workVectors.reset(new VectorOfVectors);
+  // interaction_properties.workMatrices.reset(new VectorOfSMatrices);
+  // VectorOfVectors& workVInter = *interaction_properties.workVectors;
+  // VectorOfSMatrices& workMInter = *interaction_properties.workMatrices;
+  // _relation->initialize(*this, DSlink, workVInter, workMInter);
 }
 
 
@@ -794,18 +794,21 @@ void Interaction::swapInOldVariables()
 
 void Interaction::swapInMemory()
 {
+  DEBUG_BEGIN("void Interaction::swapInMemory()\n");
   // i corresponds to the derivative number and j the relation number.
   for (unsigned int  i = _lowerLevelForOutput; i < _upperLevelForOutput + 1 ; i++)
   {
     *(_y_k[i]) = *(_y[i]) ;
     _yMemory[i].swap(*_y[i]);
+    DEBUG_PRINTF("swap level i = %i",i);
+    DEBUG_EXPR(_yMemory[i].display(););
   }
-
+  
   for (unsigned int i = _lowerLevelForInput; i < _upperLevelForInput + 1  ; i++)
   {
     _lambdaMemory[i].swap(*_lambda[i]);
   }
-
+  DEBUG_END("void Interaction::swapInMemory()\n");
 }
 
 void Interaction::display() const

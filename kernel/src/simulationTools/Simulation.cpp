@@ -216,7 +216,7 @@ void Simulation::initialize()
 
 
 
-  
+
   std::map< SP::OneStepIntegrator, std::list<SP::DynamicalSystem> >::iterator  it;
   std::list<SP::DynamicalSystem> ::iterator  itlist;
   for ( it = _OSIDSmap.begin();  it !=_OSIDSmap.end(); ++it)
@@ -234,7 +234,7 @@ void Simulation::initialize()
 
   if (_nsds->version() != _nsdsVersion)
   {
- 
+
     DynamicalSystemsGraph::VIterator dsi, dsend;
     SP::DynamicalSystemsGraph DSG = _nsds->topology()->dSG(0);
     for (std11::tie(dsi, dsend) = DSG->vertices(); dsi != dsend; ++dsi)
@@ -266,11 +266,16 @@ void Simulation::initialize()
     InteractionsGraph::VIterator ui, uiend;
     for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
     {
-      SP::Interaction inter = indexSet0->bundle(*ui);
-      initializeInteraction(getTk(), inter);
+      InteractionProperties& interProp = indexSet0->properties(*ui);
+
+      if (!interProp.workVectors)
+      {
+        SP::Interaction inter = indexSet0->bundle(*ui);
+        initializeInteraction(getTk(), inter);
+
+      }
     }
   }
-
   // symmetry in indexSets Do we need it ?
   _nsds->topology()->setProperties();
 
@@ -303,14 +308,14 @@ void Simulation::initialize()
 
   if(!_isInitialized)
   {
-    
+
     _T = _nsds->finalT();
-    
+
     // === Events manager initialization ===
     _eventsManager->initialize(_T);
     _tinit = _eventsManager->startingTime();
 
-    
+
 
 
     // Initialize OneStepNSProblem(s). Depends on the type of simulation.
@@ -338,7 +343,7 @@ void Simulation::initialize()
 
     _isInitialized = true;
   }
-  
+
 
   DEBUG_END("Simulation::initialize(SP::Model m, bool withOSI)\n");
 }

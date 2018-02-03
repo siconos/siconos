@@ -120,13 +120,22 @@ void MoreauJeanGOSI::fillDSLinks(Interaction &inter,
   SP::DynamicalSystem ds2= interProp.target;
   assert(ds1);
   assert(ds2);
-  VectorOfVectors& workV = *interProp.workVectors;
-  workV.resize(MoreauJeanGOSI::WORK_INTERACTION_LENGTH);
-  workV[MoreauJeanGOSI::OSNSP_RHS].reset(new SiconosVector(inter.getSizeOfY()));
+
   VectorOfBlockVectors& DSlink = *interProp.DSlink;
 
+  interProp.workVectors.reset(new VectorOfVectors);
+  interProp.workMatrices.reset(new VectorOfSMatrices);
+
+
+  VectorOfVectors& workV = *interProp.workVectors;
+  VectorOfSMatrices& workM = *interProp.workMatrices;
+
   Relation &relation =  *inter.relation();
+  relation.initialize(inter, DSlink, workV, workM);
   RELATION::TYPES relationType = relation.getType();
+  
+  workV.resize(MoreauJeanGOSI::WORK_INTERACTION_LENGTH);
+  workV[MoreauJeanGOSI::OSNSP_RHS].reset(new SiconosVector(inter.getSizeOfY()));
 
   // Check if interations levels (i.e. y and lambda sizes) are compliant with the current osi.
   _check_and_update_interaction_levels(inter);
@@ -566,7 +575,7 @@ double MoreauJeanGOSI::computeResidu()
       SiconosMatrix& W = *_dynamicalSystemsGraph->properties(*dsi).W;
       prod(W, vold, free_rhs);
 
-      
+
 
       if(d->forces())
       {
@@ -600,7 +609,7 @@ double MoreauJeanGOSI::computeResidu()
 
       residu =  -1.0* free_rhs;
       prod(1.0, W, *v, residu, false);
-      
+
       DEBUG_EXPR(residu.display());
 
       if(d->p(1))
@@ -684,7 +693,7 @@ double MoreauJeanGOSI::computeResidu()
         RuntimeException::selfThrow("MoreauJeanGOSI::computeResidu - boundary conditions not yet implemented for Dynamical system of type: " + Type::name(*ds));
       }
 
-      // residu = -1.0*free_rhs;      
+      // residu = -1.0*free_rhs;
       // prod(1.0, W, *v, residu, false);
       // DEBUG_EXPR(free_rhs.display());
       // if(d->p(1))
@@ -720,7 +729,7 @@ double MoreauJeanGOSI::computeResidu()
       DEBUG_EXPR(q->display());
       DEBUG_EXPR(v->display());
 
-      
+
       residu.zero();
       // Get the (constant mass matrix)
       // SP::SiconosMatrix massMatrix = d->mass();
@@ -730,7 +739,7 @@ double MoreauJeanGOSI::computeResidu()
       SiconosMatrix& W = *_dynamicalSystemsGraph->properties(*dsi).W;
       prod(W, vold, free_rhs);
 
-      
+
 
       if(d->forces())   // if fL exists
       {
@@ -768,10 +777,10 @@ double MoreauJeanGOSI::computeResidu()
       }
 
       residu =  -1.0* free_rhs;
-      
+
       prod(1.0, W, *v, residu, false);
 
-      
+
       if(d->p(1))
         residu -= *d->p(1);// We use DynamicalSystem::free as tmp buffer
 

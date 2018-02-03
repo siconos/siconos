@@ -168,14 +168,20 @@ void MoreauJeanOSI::fillDSLinks(Interaction &inter, InteractionProperties& inter
   SP::DynamicalSystem ds2= interProp.target;
   assert(ds1);
   assert(ds2);
-  assert(interProp.workVectors);
-  
-  VectorOfVectors& workV = *interProp.workVectors;
-  workV.resize(MoreauJeanOSI::WORK_INTERACTION_LENGTH);
-  workV[MoreauJeanOSI::OSNSP_RHS].reset(new SiconosVector(inter.getSizeOfY()));
 
   VectorOfBlockVectors& DSlink = *interProp.DSlink;
+
+  interProp.workVectors.reset(new VectorOfVectors);
+  interProp.workMatrices.reset(new VectorOfSMatrices);
+
+  VectorOfVectors& workV = *interProp.workVectors;
+  VectorOfSMatrices& workM = *interProp.workMatrices;
+
   Relation &relation =  *inter.relation();
+  relation.initialize(inter, DSlink, workV, workM);
+
+  workV.resize(MoreauJeanOSI::WORK_INTERACTION_LENGTH);
+  workV[MoreauJeanOSI::OSNSP_RHS].reset(new SiconosVector(inter.getSizeOfY()));
 
   RELATION::TYPES relationType = relation.getType();
 
@@ -1339,7 +1345,7 @@ struct MoreauJeanOSI::_NSLEffectOnFreeOutput : public SiconosVisitor
   OneStepNSProblem * _osnsp;
   Interaction& _inter;
   InteractionProperties& _interProp;
-  
+
   _NSLEffectOnFreeOutput(OneStepNSProblem *p, Interaction& inter, InteractionProperties& interProp) :
     _osnsp(p), _inter(inter), _interProp(interProp) {};
 
@@ -1413,7 +1419,7 @@ void MoreauJeanOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_int
   RELATION::TYPES relationType = inter.relation()->getType();
   RELATION::SUBTYPES relationSubType = inter.relation()->getSubType();
 
-  
+
   unsigned int sizeY = inter.nonSmoothLaw()->size();
 
   unsigned int relativePosition = 0;
@@ -1427,11 +1433,11 @@ void MoreauJeanOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_int
   coord[7] = sizeY;
   SP::SiconosMatrix  F;
   //  SP::BlockVector deltax;
-  
+
   //SiconosVector& yForNSsolver = *inter.yForNSsolver()
 
   SiconosVector& osnsp_rhs = *(*indexSet.properties(vertex_inter).workVectors)[MoreauJeanOSI::OSNSP_RHS];
-  
+
   SP::BlockVector Xfree;
 
   /** \todo VA. All of these values should be stored in a node in the interactionGraph
