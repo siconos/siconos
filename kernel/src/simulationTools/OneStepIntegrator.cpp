@@ -133,33 +133,32 @@ void OneStepIntegrator::update_interaction_output(Interaction& inter, double tim
   //      - simu->osi->update_interaction_output()
 
   if (_steps > 1) // Multi--step methods
+  {
+    // Compute the old Values of Output with stored values in Memory
+    for (unsigned int k = 0; k < _steps - 1; k++)
     {
-      // Compute the old Values of Output with stored values in Memory
-      for (unsigned int k = 0; k < _steps - 1; k++)
-	{
-	  /** ComputeOutput to fill the Memory
-	   * We assume the state x is stored in xMemory except for the  initial
-	   * condition which has not been swap yet.
-	   */
-	  //        relation()->LinkDataFromMemory(k);
-	  for (unsigned int i = 0; i < inter.upperLevelForOutput() + 1; ++i)
+      /** ComputeOutput to fill the Memory
+       * We assume the state x is stored in xMemory except for the  initial
+       * condition which has not been swap yet.
+       */
+      //        relation()->LinkDataFromMemory(k);
+      for (unsigned int i = 0; i < inter.upperLevelForOutput() + 1; ++i)
 	    {
 	      inter.computeOutput(time, interaction_properties, i);
 	      //_yMemory[i]->swap(*_y[i]);
 	    }
-	}
-      inter.swapInMemory();
-	
     }
+    inter.swapInMemory();
+  }
   // Compute a first value for the output
   inter.computeOutput(time, interaction_properties, 0);
     
   // prepare the gradients
   inter.relation()->computeJach(time, inter, interaction_properties);
   for (unsigned int i = 0; i < inter.upperLevelForOutput() + 1; ++i)
-    {
-      inter.computeOutput(time, interaction_properties, i);
-    }
+  {
+    inter.computeOutput(time, interaction_properties, i);
+  }
   inter.swapInMemory();
 }
 
