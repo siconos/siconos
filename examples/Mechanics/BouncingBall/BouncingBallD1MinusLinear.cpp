@@ -133,22 +133,16 @@ int main(int argc, char* argv[])
     SP::SiconosVector v = ball->velocity();
     SP::SiconosVector p = ball->p(1);
     SP::SiconosVector lambda = inter->lambda(1);
-    SP::SiconosVector p2 = ball->p(2);
-    SP::SiconosVector lambda2 = inter->lambda(2);
+    SP::SiconosVector p2;
+    SP::SiconosVector lambda2;
 
     dataPlot(0, 0) = bouncingBall->t0();
     dataPlot(0, 1) = (*q)(0);
     dataPlot(0, 2) = (*v)(0);
     dataPlot(0, 3) = (*p)(0);
     dataPlot(0, 4) = (*lambda)(0);
-    if(p2)
-      dataPlot(0, 5) = (*p2)(0);
-    else
-      dataPlot(0, 5) = 0.0;
-    if (lambda2)
-      dataPlot(0, 6) = (*lambda2)(0);
-    else
-      dataPlot(0, 6) =0.0;
+    dataPlot(0, 5) = 0.0;
+    dataPlot(0, 6) = 0.0;
     // --- Time loop ---
     cout << "====> Start computation ... " << endl << endl;
 
@@ -162,6 +156,8 @@ int main(int argc, char* argv[])
     while (s->hasNextEvent())
     {
       s->advanceToEvent();
+      p2 = ball->p(2);
+      lambda2 = inter->lambda(2);
       // ball->display();
       // --- Get values to be plotted ---
       //  if (fmod(s->nextTime(), hplot) < h)

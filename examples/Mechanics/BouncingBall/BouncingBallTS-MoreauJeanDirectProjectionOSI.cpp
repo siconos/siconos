@@ -92,13 +92,13 @@ int main(int argc, char* argv[])
     // -------------
     // --- Model ---
     // -------------
-    SP::Model bouncingBall(new Model(t0, T));
+    SP::NonSmoothDynamicalSystem bouncingBall(new NonSmoothDynamicalSystem(t0, T));
 
     // add the dynamical system in the non smooth dynamical system
-    bouncingBall->nonSmoothDynamicalSystem()->insertDynamicalSystem(ball);
+    bouncingBall->insertDynamicalSystem(ball);
 
     // link the interaction and the dynamical system
-    bouncingBall->nonSmoothDynamicalSystem()->link(inter, ball);
+    bouncingBall->link(inter, ball);
 
 
     // ------------------
@@ -117,20 +117,15 @@ int main(int argc, char* argv[])
 
     // -- (4) Simulation setup with (1) (2) (3)
     unsigned int levelForProjection = 1; //(default =1)
-    SP::TimeSteppingDirectProjection s(new TimeSteppingDirectProjection(t, OSI, osnspb, osnspb_pos, levelForProjection));
+    SP::TimeSteppingDirectProjection s(new TimeSteppingDirectProjection(bouncingBall, t, OSI, osnspb, osnspb_pos, levelForProjection));
     s->setProjectionMaxIteration(20);
     s->setConstraintTolUnilateral(1e-08);
     s->setConstraintTol(1e-04);
-    bouncingBall->setSimulation(s);
 
     // =========================== End of model definition ===========================
 
     // ================================= Computation =================================
 
-    // --- Simulation initialization ---
-
-    cout << "====> Initialisation ..." << endl << endl;
-    bouncingBall->initialize();
     int N = ceil((T - t0) / h); // Number of time steps
 
     // --- Get the values to be plotted ---
@@ -141,16 +136,16 @@ int main(int argc, char* argv[])
     SP::SiconosVector q = ball->q();
     SP::SiconosVector v = ball->velocity();
     SP::SiconosVector p1 = ball->p(1);
-    SP::SiconosVector lambda1 = inter->lambda(1);
+    SP::SiconosVector lambda1; // = inter->lambda(1);
     SP::SiconosVector lambda0 = inter->lambda(0);
-    SP::SiconosVector p0 = ball->p(0);
+    SP::SiconosVector p0; // = ball->p(0);
 
     dataPlot(0, 0) = bouncingBall->t0();
     dataPlot(0, 1) = (*q)(0);
     dataPlot(0, 2) = (*v)(0);
     dataPlot(0, 3) = (*p1)(0);
-    dataPlot(0, 4) = (*lambda1)(0);
-    dataPlot(0, 5) = (*p0)(0);
+    dataPlot(0, 4) = 0.0;
+    dataPlot(0, 5) = 0.0;
     dataPlot(0, 6) = (*lambda0)(0);
     // --- Time loop ---
     cout << "====> Start computation ... " << endl << endl;
@@ -166,6 +161,8 @@ int main(int argc, char* argv[])
       s->computeOneStep();
       //std ::cout << "time step k = " << k << std::endl;
       // --- Get values to be plotted ---
+      lambda1 = inter->lambda(1);
+      p0  = ball->p(0);
       dataPlot(k, 0) =  s->nextTime();
       dataPlot(k, 1) = (*q)(0);
       dataPlot(k, 2) = (*v)(0);
