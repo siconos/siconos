@@ -252,7 +252,8 @@ void LsodarOSI::initializeDynamicalSystem( double t, SP::DynamicalSystem ds)
   {
     LagrangianDS& lds = *std11::static_pointer_cast<LagrangianDS>(ds);
     // TODO FP: use buffer in graph for xWork?
-    _xWork.reset(new BlockVector());
+    if (!_xWork)
+      _xWork.reset(new BlockVector());
     _xWork->insertPtr(lds.q());
     _xWork->insertPtr(lds.velocity());
     workVectors.resize(OneStepIntegrator::work_vector_of_vector_size);
@@ -260,7 +261,8 @@ void LsodarOSI::initializeDynamicalSystem( double t, SP::DynamicalSystem ds)
   }
   else
   {
-    _xWork.reset(new BlockVector());
+    if (!_xWork)
+      _xWork.reset(new BlockVector());
     _xWork->insertPtr(ds->x());
   }
   ds->swapInMemory();
@@ -274,20 +276,26 @@ void LsodarOSI::fillDSLinks(Interaction &inter,
 {
   SP::DynamicalSystem ds1= interProp.source;
   SP::DynamicalSystem ds2= interProp.target;
+  assert(ds1);
+  assert(ds2);
 
+  VectorOfBlockVectors& DSlink = *interProp.DSlink;
+
+  interProp.workVectors.reset(new VectorOfVectors);
+  interProp.workMatrices.reset(new VectorOfSMatrices);
 
   VectorOfVectors& workV = *interProp.workVectors;
+  VectorOfSMatrices& workM = *interProp.workMatrices;
+
+  Relation &relation =  *inter.relation();
+  relation.initialize(inter, DSlink, workV, workM);
+  RELATION::TYPES relationType = relation.getType();
+
   workV.resize(LsodarOSI::WORK_INTERACTION_LENGTH);
   workV[LsodarOSI::OSNSP_RHS].reset(new SiconosVector(inter.getSizeOfY()));
 
-  assert(interProp.DSlink);
-  VectorOfBlockVectors& DSlink = *interProp.DSlink;
-  // VectorOfVectors& workVInter = *interProp.workVectors;
-  // VectorOfSMatrices& workMInter = *interProp.workMatrices;
-
-  Relation &relation =  *inter.relation();
   NonSmoothLaw & nslaw = *inter.nonSmoothLaw();
-  RELATION::TYPES relationType = relation.getType();
+
   Type::Siconos nslType = Type::value(nslaw);
 
   if (nslType == Type::NewtonImpactNSL || nslType == Type::MultipleImpactNSL)

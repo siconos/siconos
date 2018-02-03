@@ -499,7 +499,22 @@ void Hem5OSI::initializeDynamicalSystem(double t, SP::DynamicalSystem ds)
   VectorOfVectors& workVectors = *_initializeDSWorkVectors(ds);
 
   Type::Siconos dsType = Type::value(*ds);
-
+  
+   ds->initRhs(t); // This will create p[2] and other required vectors/buffers
+  
+  if (!_qWork)
+    _qWork.reset(new BlockVector());
+  if (!_vWork)
+    _vWork.reset(new BlockVector());
+  if (!_aWork)
+    _aWork.reset(new BlockVector());
+  if (!_uWork)
+    _uWork.reset(new BlockVector());
+  if (!_lambdaWork)
+    _lambdaWork.reset(new BlockVector());
+  if (!_forcesWork)
+    _forcesWork.reset(new BlockVector());
+  
   if(dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
   {
     LagrangianDS& lds = *std11::static_pointer_cast<LagrangianDS>(ds);
@@ -529,19 +544,23 @@ void Hem5OSI::fillDSLinks(Interaction &inter,
   SP::DynamicalSystem ds1= interProp.source;
   SP::DynamicalSystem ds2= interProp.target;
 
-  assert(interProp.DSlink);
+  VectorOfBlockVectors& DSlink = *interProp.DSlink;
+
+  interProp.workVectors.reset(new VectorOfVectors);
+  interProp.workMatrices.reset(new VectorOfSMatrices);
 
   VectorOfVectors& workV = *interProp.workVectors;
-  workV.resize(Hem5OSI::WORK_INTERACTION_LENGTH);
-  workV[Hem5OSI::OSNSP_RHS].reset(new SiconosVector(inter.getSizeOfY()));
-  
-  VectorOfBlockVectors& DSlink = *interProp.DSlink;
-  // VectorOfVectors& workVInter = *interProp.workVectors;
-  // VectorOfSMatrices& workMInter = *interProp.workMatrices;
+  VectorOfSMatrices& workM = *interProp.workMatrices;
 
   Relation &relation =  *inter.relation();
-  NonSmoothLaw & nslaw = *inter.nonSmoothLaw();
+  relation.initialize(inter, DSlink, workV, workM);
   RELATION::TYPES relationType = relation.getType();
+
+  assert(interProp.DSlink);
+
+  workV.resize(Hem5OSI::WORK_INTERACTION_LENGTH);
+  workV[Hem5OSI::OSNSP_RHS].reset(new SiconosVector(inter.getSizeOfY()));
+  NonSmoothLaw & nslaw = *inter.nonSmoothLaw();
   Type::Siconos nslType = Type::value(nslaw);
 
   if (nslType == Type::NewtonImpactNSL || nslType == Type::MultipleImpactNSL)
@@ -606,12 +625,6 @@ void Hem5OSI::initialize()
 
   DEBUG_PRINT("Hem5OSI::initialize(Model& m)\n");
 
-  _qWork.reset(new BlockVector());
-  _vWork.reset(new BlockVector());
-  _aWork.reset(new BlockVector());
-  _uWork.reset(new BlockVector());
-  _lambdaWork.reset(new BlockVector());
-  _forcesWork.reset(new BlockVector());
   OneStepIntegrator::initialize();
 
   // InteractionsGraph::VIterator ui, uiend;
