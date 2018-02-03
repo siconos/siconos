@@ -214,15 +214,23 @@ void D1MinusLinearOSI::fillDSLinks(Interaction &inter,
   assert(ds1);
   assert(ds2);
 
-  VectorOfVectors& workV = *interProp.workVectors;
-  workV.resize(D1MinusLinearOSI::WORK_INTERACTION_LENGTH);
-  workV[D1MinusLinearOSI::OSNSP_RHS].reset(new SiconosVector(inter.getSizeOfY()));
 
   VectorOfBlockVectors& DSlink = *interProp.DSlink;
   assert(interProp.DSlink);
 
+  interProp.workVectors.reset(new VectorOfVectors);
+  interProp.workMatrices.reset(new VectorOfSMatrices);
+
+  VectorOfVectors& workV = *interProp.workVectors;
+  VectorOfSMatrices& workM = *interProp.workMatrices;
+
   Relation &relation =  *inter.relation();
+  relation.initialize(inter, DSlink, workV, workM);
   RELATION::TYPES relationType = relation.getType();
+
+  workV.resize(D1MinusLinearOSI::WORK_INTERACTION_LENGTH);
+  workV[D1MinusLinearOSI::OSNSP_RHS].reset(new SiconosVector(inter.getSizeOfY()));
+
 
   // Check if interations levels (i.e. y and lambda sizes) are compliant with the current osi.
   _check_and_update_interaction_levels(inter);

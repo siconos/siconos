@@ -179,11 +179,12 @@ void MoreauJeanOSI::fillDSLinks(Interaction &inter, InteractionProperties& inter
 
   Relation &relation =  *inter.relation();
   relation.initialize(inter, DSlink, workV, workM);
+  RELATION::TYPES relationType = relation.getType();
 
   workV.resize(MoreauJeanOSI::WORK_INTERACTION_LENGTH);
   workV[MoreauJeanOSI::OSNSP_RHS].reset(new SiconosVector(inter.getSizeOfY()));
 
-  RELATION::TYPES relationType = relation.getType();
+
 
   // Check if interations levels (i.e. y and lambda sizes) are compliant with the current osi.
   _check_and_update_interaction_levels(inter);
