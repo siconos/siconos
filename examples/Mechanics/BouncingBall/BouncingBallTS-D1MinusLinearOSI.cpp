@@ -132,7 +132,7 @@ int main(int argc, char* argv[])
     SP::SiconosVector q = ball->q();
     SP::SiconosVector v = ball->velocity();
     SP::SiconosVector p = ball->p(1);
-    SP::SiconosVector lambda = inter->lambda(1);
+    SP::SiconosVector lambda;
     SP::SiconosVector p2;
     SP::SiconosVector lambda2;
 
@@ -140,7 +140,7 @@ int main(int argc, char* argv[])
     dataPlot(0, 1) = (*q)(0);
     dataPlot(0, 2) = (*v)(0);
     dataPlot(0, 3) = (*p)(0);
-    dataPlot(0, 4) = (*lambda)(0);
+    dataPlot(0, 4) = 0.0;
     dataPlot(0, 5) = 0.0;
     dataPlot(0, 6) = 0.0;
     // --- Time loop ---
@@ -158,6 +158,7 @@ int main(int argc, char* argv[])
       s->advanceToEvent();
       p2 = ball->p(2);
       lambda2 = inter->lambda(2);
+      lambda = inter->lambda(1);
       // ball->display();
       // --- Get values to be plotted ---
       //  if (fmod(s->nextTime(), hplot) < h)
