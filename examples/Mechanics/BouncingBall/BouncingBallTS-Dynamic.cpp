@@ -182,7 +182,7 @@ int main(int argc, char* argv[])
 
 
     double error=0.0, eps=1e-12;
-    if (ioMatrix::compareRefFile(dataPlot, "result-Dynamic.ref", eps, error)
+    if (ioMatrix::compareRefFile(dataPlot, "BouncingBallTS-Dynamic.ref", eps, error)
         && error > eps)
       return 1;
 

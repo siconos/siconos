@@ -206,19 +206,10 @@ int main(int argc, char* argv[])
     dataPlot.resize(k, outputSize);
     ioMatrix::write("result.dat", "ascii", dataPlot, "noDim");
     // Comparison with a reference file
-    cout << "====> Comparison with a reference file ..." << endl;
-    SimpleMatrix dataPlotRef(dataPlot);
-    dataPlotRef.zero();
-    ioMatrix::read("result-CombinedProjection.ref", "ascii", dataPlotRef);
-    std::cout << "Error w.r.t reference file = " << (dataPlot - dataPlotRef).normInf() << std::endl;
-
-    if ((dataPlot - dataPlotRef).normInf() > 1e-12)
-    {
-      std::cout << "Warning. The result is rather different from the reference file." << std::endl;
-      std::cout << (dataPlot - dataPlotRef).normInf() << std::endl;
-      (dataPlot - dataPlotRef).display();
+    double error=0.0, eps=1e-12;
+    if (ioMatrix::compareRefFile(dataPlot, "BouncingBallTS-MoreauJeanCombinedProjectionOSI.ref", eps, error)
+        && error > eps)
       return 1;
-    }
 
   }
 

@@ -170,7 +170,7 @@ int main(int argc, char* argv[])
     dataPlot.resize(k, outputSize);
     ioMatrix::write("result.dat", "ascii", dataPlot, "noDim");
     double error=0.0, eps=1e-12;
-    if (ioMatrix::compareRefFile(dataPlot, "BouncingBallTS-MoreauJeanGOSI.ref", eps, error)
+    if (ioMatrix::compareRefFile(dataPlot, "BouncingBallTS.ref", eps, error)
         && error > eps)
       return 1;
 
