@@ -55,7 +55,7 @@ public:
     Changes(int t, SP::DynamicalSystem dsnew ):typeOfChange(t),ds(dsnew){};
     Changes(int t, SP::Interaction inew):typeOfChange(t),i(inew){};
     Changes(int t):typeOfChange(t){};
-    void display()
+    void display() const
     {
       std::cout << typeOfChange << std::endl;
       if (!ds)
@@ -263,11 +263,11 @@ public:
   }
 
 
-  inline std::list<Changes> changeLog()
+  inline const std::list<Changes>& changeLog()
   {
     return _changeLog;
   };
-  
+
   inline std::list<Changes>::iterator changeLogPosition()
   {
     std::list<Changes>::iterator it = _changeLog.end();

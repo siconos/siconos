@@ -62,14 +62,17 @@ Simulation::Simulation(SP::NonSmoothDynamicalSystem nsds, SP::TimeDiscretisation
   _relativeConvergenceCriterionHeld = false;
   _relativeConvergenceTol = 10e-3;
 
-  // // === indexSets will be updated during initialize() call ===
+  // === indexSets will be updated during initialize() call ===
 
   _allOSI.reset(new OSISet());
-  //_allNSProblems.reset(new OneStepNSProblems());
-  // _eventsManager.reset(new EventsManager(td)); //
+  _allNSProblems.reset(new OneStepNSProblems());
+  _eventsManager.reset(new EventsManager(td)); //
 
   std::cout << "START Simulation::Simulation(SP::NonSmoothDynamicalSystem nsds, SP::TimeDiscretisation td):" <<std::endl;
   _nsdsChangeLogPosition = nsds->changeLog().begin();
+  DEBUG_EXPR((_nsdsChangeLogPosition)->display());
+  DEBUG_EXPR((_nsdsChangeLogPosition)->display());
+  std::list<NonSmoothDynamicalSystem::Changes>::const_iterator it = nsds->changeLog().begin();
   DEBUG_EXPR((_nsdsChangeLogPosition)->display());
   std::cout << "END Simulation::Simulation(SP::NonSmoothDynamicalSystem nsds, SP::TimeDiscretisation td):" <<std::endl;
 
@@ -262,7 +265,7 @@ void Simulation::initialize()
 
 
   
-  std::list<NonSmoothDynamicalSystem::Changes>::iterator itc = _nsdsChangeLogPosition ;
+  std::list<NonSmoothDynamicalSystem::Changes>::const_iterator itc = _nsdsChangeLogPosition ;
   DEBUG_EXPR(_nsdsChangeLogPosition->display(););
   itc++;
   DEBUG_EXPR(
@@ -276,7 +279,7 @@ void Simulation::initialize()
   while(itc != _nsds->changeLog().end())
   {
     std::cout << "tt" << std::endl;
-    NonSmoothDynamicalSystem::Changes& changes = *itc;
+    const NonSmoothDynamicalSystem::Changes& changes = *itc;
     DEBUG_EXPR(changes.display(););
     itc++;
     if (changes.typeOfChange == NonSmoothDynamicalSystem::addDynamicalSystem)

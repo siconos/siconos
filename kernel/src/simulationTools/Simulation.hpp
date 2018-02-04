@@ -177,7 +177,7 @@ private:
 
 public:
 
-  std::list<NonSmoothDynamicalSystem::Changes>::iterator _nsdsChangeLogPosition;
+  std::list<NonSmoothDynamicalSystem::Changes>::const_iterator _nsdsChangeLogPosition;
   /** default constructor
    *  \param td the timeDiscretisation for this Simulation
    */
