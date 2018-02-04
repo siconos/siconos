@@ -53,20 +53,20 @@ LagrangianLinearTIR::LagrangianLinearTIR(SP::SimpleMatrix C, SP::SiconosVector e
   _e = e;
 }
 
-void LagrangianLinearTIR::initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
+void LagrangianLinearTIR::initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
 {
   unsigned int sizeY = inter.getSizeOfY();
 
   if (!(_jachq) || _jachq->size(1) !=  inter.getSizeOfDS() ||  _jachq->size(0) != sizeY)
-    RuntimeException::selfThrow("LagrangianLinearTIR::initComponents inconsistent sizes between H matrix and the interaction.");
+    RuntimeException::selfThrow("LagrangianLinearTIR::initializeWorkVectorsAndMatrices inconsistent sizes between H matrix and the interaction.");
 
   if ((_e) && _e->size() != sizeY)
-    RuntimeException::selfThrow("LagrangianLinearTIR::initComponents inconsistent sizes between e vector and the dimension of the interaction.");
+    RuntimeException::selfThrow("LagrangianLinearTIR::initializeWorkVectorsAndMatrices inconsistent sizes between e vector and the dimension of the interaction.");
 
   unsigned int sizeZ = DSlink[LagrangianR::z]->size();
   if ((_F) && (
         _F->size(0) != sizeZ || _F->size(1) != sizeZ))
-    RuntimeException::selfThrow("LagrangianLinearTIR::initComponents inconsistent sizes between F matrix and the interaction.");
+    RuntimeException::selfThrow("LagrangianLinearTIR::initializeWorkVectorsAndMatrices inconsistent sizes between F matrix and the interaction.");
 
 
 }

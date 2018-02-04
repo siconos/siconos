@@ -204,10 +204,19 @@ public:
   /** initialize the relation (check sizes, memory allocation ...)
    * \param inter the interaction using this relation
    * \param DSlink the container of the link to DynamicalSystem attributes
+   */
+  virtual void initializeDSLink(Interaction& inter, VectorOfBlockVectors& DSlink) = 0;
+
+  /** initialize the relation (check sizes, memory allocation ...)
+   * \param inter the interaction using this relation
+   * \param DSlink the container of the link to DynamicalSystem attributes
    * \param workV work vectors
    * \param workM work matrices
    */
-  virtual void initialize(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM) = 0;
+  virtual void initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM) = 0;
+
+
+
   
   /** compute all the H Jacobian
    * \param time the current time

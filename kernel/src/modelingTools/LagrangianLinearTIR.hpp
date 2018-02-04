@@ -90,7 +90,7 @@ public:
    * \param workV
    * \param workM
    */
-  void initComponents(Interaction& inter, VectorOfBlockVectors& DSlink,
+  void initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink,
                       VectorOfVectors& workV, VectorOfSMatrices& workM);
 
   /** default function to compute y

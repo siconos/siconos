@@ -52,7 +52,7 @@ protected:
    * \param workV
    * \param workM
    */
-  virtual void initComponents(Interaction& inter, VectorOfBlockVectors& DSlink,
+  virtual void initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink,
                               VectorOfVectors& workV, VectorOfSMatrices& workM);
 
   SP::SiconosVector _e;

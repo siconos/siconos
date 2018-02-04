@@ -53,8 +53,11 @@ FirstOrderType2R::FirstOrderType2R(const std::string& pluginh, const std::string
   setComputeJacglambdaFunction(SSLH::getPluginName(pluginJacobianglambda), SSLH::getPluginFunctionName(pluginJacobianglambda));
 }
 
-void FirstOrderType2R::initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
+void FirstOrderType2R::initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
 {
+  
+  FirstOrderR::initializeWorkVectorsAndMatrices(inter, DSlink, workV, workM);
+
 
   // Check if an Interaction is connected to the Relation.
   unsigned int sizeY = inter.getSizeOfY();
@@ -109,7 +112,7 @@ void FirstOrderType2R::computeOutput(double time, Interaction& inter, Interactio
   VectorOfBlockVectors& DSlink = *interProp.DSlink;
   VectorOfVectors& workV = *interProp.workVectors;
   VectorOfSMatrices& workM = *interProp.workMatrices;
-  SiconosMatrix& osnsM = *interProp.block;
+
 
   if (_D)
     prod(*_D, *(inter.lambdaOld(level)), y, true);
@@ -144,9 +147,13 @@ void FirstOrderType2R::computeOutput(double time, Interaction& inter, Interactio
 
   DEBUG_PRINT("FirstOrderType2R::computeOutput : y before osnsM\n");
   DEBUG_EXPR(y.display());
-  prod(osnsM, *inter.lambda(level), y, false);
-  DEBUG_PRINT("FirstOrderType2R::computeOutput : new linearized y \n");
-  DEBUG_EXPR(y.display());
+  if (interProp.block)
+  {
+    SiconosMatrix& osnsM = *interProp.block;
+    prod(osnsM, *inter.lambda(level), y, false);
+    DEBUG_PRINT("FirstOrderType2R::computeOutput : new linearized y \n");
+    DEBUG_EXPR(y.display());
+  }
 
   SiconosVector& x = *workV[FirstOrderR::vec_x];
   x = *DSlink[FirstOrderR::x];

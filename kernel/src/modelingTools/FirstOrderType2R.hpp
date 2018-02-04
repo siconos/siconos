@@ -84,7 +84,7 @@ public:
    * \param workV work vectors to initialize
    * \param workM work matrices to initialize
   */
-  virtual void initComponents(Interaction& inter, VectorOfBlockVectors& DSlink,
+  virtual void initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink,
                               VectorOfVectors& workV, VectorOfSMatrices& workM);
 
   /** default function to compute y = h(x, lambda, t)

@@ -37,10 +37,10 @@
 #include <iostream>
 
 
-void NewtonEulerR::initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
+void NewtonEulerR::initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
 {
 
-  DEBUG_BEGIN("NewtonEulerR::initComponents(Interaction& inter, ...)\n");
+  DEBUG_BEGIN("NewtonEulerR::initializeWorkVectorsAndMatrices(Interaction& inter, ...)\n");
 
   unsigned int ySize = inter.getSizeOfY();
   unsigned int xSize = inter.getSizeOfDS();
@@ -58,8 +58,8 @@ void NewtonEulerR::initComponents(Interaction& inter, VectorOfBlockVectors& DSli
     else
     {
       assert((_jachq->size(1) == qSize && _jachq->size(0) == ySize) ||
-             (printf("NewtonEuler::initComponents _jachq->size(1) = %d ,_qsize = %d , _jachq->size(0) = %d ,_ysize =%d \n", _jachq->size(1), qSize, _jachq->size(0), ySize) && false) ||
-             ("NewtonEuler::initComponents inconsistent sizes between _jachq matrix and the interaction." && false));
+             (printf("NewtonEuler::initializeWorkVectorsAndMatrices _jachq->size(1) = %d ,_qsize = %d , _jachq->size(0) = %d ,_ysize =%d \n", _jachq->size(1), qSize, _jachq->size(0), ySize) && false) ||
+             ("NewtonEuler::initializeWorkVectorsAndMatrices inconsistent sizes between _jachq matrix and the interaction." && false));
     }
   }
 
@@ -81,7 +81,7 @@ void NewtonEulerR::initComponents(Interaction& inter, VectorOfBlockVectors& DSli
   DEBUG_EXPR(_jachqT->display());
 
 
-  DEBUG_END("NewtonEulerR::initComponents(Interaction& inter)\n");
+  DEBUG_END("NewtonEulerR::initializeWorkVectorsAndMatrices(Interaction& inter)\n");
 }
 
 void NewtonEulerR::setJachq(SP::SimpleMatrix newJachq)
@@ -95,11 +95,8 @@ void NewtonEulerR::setJachqPtr(SP::SimpleMatrix newPtr)
 }
 
 
-void NewtonEulerR::initialize(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
+void NewtonEulerR::initializeDSLink(Interaction& inter, VectorOfBlockVectors& DSlink)
 {
- // Memory allocation for G[i], if required (depends on the chosen constructor).
-  initComponents(inter, DSlink, workV, workM);
-
   _contactForce.reset(new SiconosVector(DSlink[NewtonEulerR::p1]->size()));
   _contactForce->zero();
 }

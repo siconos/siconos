@@ -68,7 +68,7 @@ void LagrangianScleronomousR::_zeroPlugin()
   _plugindotjacqh.reset(new PluggedObject());
 }
 
-void LagrangianScleronomousR::initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
+void LagrangianScleronomousR::initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
 {
   if (_plugindotjacqh && _plugindotjacqh->fPtr)
   {

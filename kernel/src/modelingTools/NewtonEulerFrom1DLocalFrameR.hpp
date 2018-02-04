@@ -64,8 +64,6 @@ protected:
   SP::SiconosVector _Nc;
 
 
-  virtual void initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
-
   /* Rotation matrix converting the absolute coordinate to the contact frame coordinate.
    * This matrix contains the unit vector(s)of the contact frame in row.
    */
@@ -109,6 +107,9 @@ public:
   virtual ~NewtonEulerFrom1DLocalFrameR() {};
 
   virtual void computeJachq(double time, Interaction& inter, SP::BlockVector q0);
+
+
+  virtual void initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
 
   /* Default implementation consists in multiplying jachq and T (see NewtonEulerR::computeJachqT)
    * but here we compute the operator from the the contact point locations

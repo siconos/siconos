@@ -137,7 +137,7 @@ void EulerMoreauOSI::fillDSLinks(Interaction &inter,
   VectorOfSMatrices& workM = *interProp.workMatrices;
 
   Relation &relation =  *inter.relation();
-  relation.initialize(inter, DSlink, workV, workM);
+  relation.initializeWorkVectorsAndMatrices(inter, DSlink, workV, workM);
   RELATION::TYPES relationType = relation.getType();
 
   workV[FirstOrderR::osnsp_rhs].reset(new SiconosVector(inter.getSizeOfY()));

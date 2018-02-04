@@ -72,9 +72,10 @@ FirstOrderLinearR::FirstOrderLinearR(SP::SimpleMatrix C, SP::SimpleMatrix D, SP:
   _e = E;
 }
 
-void FirstOrderLinearR::initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
+void FirstOrderLinearR::initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
 {
-  // Note: do not call FirstOrderR::initialize to avoid jacobianH and jacobianG allocation.
+  
+  FirstOrderR::initializeWorkVectorsAndMatrices(inter, DSlink, workV, workM);
 
   // get interesting size
   unsigned int sizeY = inter.getSizeOfY();

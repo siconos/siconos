@@ -131,7 +131,7 @@ void MoreauJeanGOSI::fillDSLinks(Interaction &inter,
   VectorOfSMatrices& workM = *interProp.workMatrices;
 
   Relation &relation =  *inter.relation();
-  relation.initialize(inter, DSlink, workV, workM);
+  relation.initializeWorkVectorsAndMatrices(inter, DSlink, workV, workM);
   RELATION::TYPES relationType = relation.getType();
   
   workV.resize(MoreauJeanGOSI::WORK_INTERACTION_LENGTH);

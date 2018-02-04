@@ -183,7 +183,7 @@ void SchatzmanPaoliOSI::fillDSLinks(Interaction &inter,
   VectorOfSMatrices& workM = *interProp.workMatrices;
 
   Relation &relation =  *inter.relation();
-  relation.initialize(inter, DSlink, workV, workM);
+  relation.initializeWorkVectorsAndMatrices(inter, DSlink, workV, workM);
 
   workV.resize(SchatzmanPaoliOSI::WORK_INTERACTION_LENGTH);
   workV[SchatzmanPaoliOSI::OSNSP_RHS].reset(new SiconosVector(inter.getSizeOfY()));

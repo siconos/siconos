@@ -117,7 +117,7 @@ protected:
     _zeroPlugin();
   }
 
-  virtual void initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
+ 
 
 public:
 
@@ -219,7 +219,8 @@ public:
   void computeInput(double time, Interaction& inter, InteractionProperties& interProp,
                     unsigned int level = 0);
 
-
+  virtual void initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
+  
   ACCEPT_STD_VISITORS();
 
 };

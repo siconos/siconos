@@ -82,7 +82,7 @@ protected:
    * \param workV : work vectors
    * \param workM : work vectors
   */
-  void initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
+  void initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
   void _zeroPlugin();
 
 public:

@@ -81,13 +81,7 @@ protected:
   */
   SP::PluggedObject _pluginhDot;
 
-  /** initialize G matrices or components specific to derived classes.
-   * \param inter the Interaction
-   * \param DSlink block vectors from dynamical systems
-   * \param workV work vectors
-   * \param workM work vectors
-   */
-  void initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
+
 
   /** default constructor
   */
@@ -112,6 +106,15 @@ public:
   */
   virtual ~LagrangianRheonomousR() {};
 
+  /** initialize G matrices or components specific to derived classes.
+   * \param inter the Interaction
+   * \param DSlink block vectors from dynamical systems
+   * \param workV work vectors
+   * \param workM work vectors
+   */
+  void initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
+
+  
   // -- hDot --
 
   /** get vector hDot

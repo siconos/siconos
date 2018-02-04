@@ -70,7 +70,7 @@ protected:
   ACCEPT_SERIALIZATION(FirstOrderNonLinearR);
 
 
-  virtual void initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
+
 
 public:
 
@@ -82,6 +82,8 @@ public:
   */
   virtual ~FirstOrderNonLinearR() {};
 
+  virtual void initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
+  
   /** default function to compute h
    * \param time : current time
    * \param x

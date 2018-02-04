@@ -101,20 +101,13 @@ Topology::__addInteractionInIndexSet0(SP::Interaction inter, SP::DynamicalSystem
   if(ds2)
     {
       dsgv2 = _DSG[0]->add_vertex(ds2);
-      // workVds2 = _DSG[0]->properties(dsgv2).workVectors;
-      // if (!workVds2)
-      // 	{
-      // 	  // V.A. 210/06/2017 Could we defer  this initialization ?
-      // 	  workVds2.reset(new VectorOfVectors());
-      // 	  _DSG[0]->properties(dsgv2).workMatrices.reset(new VectorOfMatrices());
-      // 	}
     }
   else
     {
       dsgv2 = dsgv1;
       ds2_ = ds1;
-      //workVds2 = workVds1;
     }
+
   // this may be a multi edges graph
   assert(!_DSG[0]->is_edge(dsgv1, dsgv2, inter));
   assert(!_IG[0]->is_vertex(inter));
@@ -122,9 +115,10 @@ Topology::__addInteractionInIndexSet0(SP::Interaction inter, SP::DynamicalSystem
   DynamicalSystemsGraph::EDescriptor new_ed;
   std11::tie(new_ed, ig_new_ve) = _DSG[0]->add_edge(dsgv1, dsgv2, inter, *_IG[0]);
   InteractionProperties& interProp = _IG[0]->properties(ig_new_ve);
+
+
+  
   inter->initialize_ds_links(interProp, *ds1, *ds2_);
-
-
   // V.A. 210/06/2017 Could we defer  this initialization ?
   // F.P. No! DSlink must be uptodate as soon as the
   // interaction is connected to ds, to ensure computeInput/computeOutput

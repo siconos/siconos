@@ -159,9 +159,9 @@ void NewtonEulerFrom1DLocalFrameR::NIcomputeJachqTFromContacts(SP::SiconosVector
     _jachqT->setValue(0, jj + 6, -_AUX2->getValue(0, jj - 3));
 }
 
-void NewtonEulerFrom1DLocalFrameR::initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
+void NewtonEulerFrom1DLocalFrameR::initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
 {
-  NewtonEulerR::initComponents(inter, DSlink, workV, workM);
+  NewtonEulerR::initializeWorkVectorsAndMatrices(inter, DSlink, workV, workM);
   //proj_with_q  _jachqProj.reset(new SimpleMatrix(_jachq->size(0),_jachq->size(1)));
   unsigned int qSize = 7 * (inter.getSizeOfDS() / 6);
   _jachq.reset(new SimpleMatrix(1, qSize));

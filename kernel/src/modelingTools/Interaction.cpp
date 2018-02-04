@@ -392,14 +392,8 @@ void Interaction::initialize_ds_links(InteractionProperties& interaction_propert
     RuntimeException::selfThrow("Interaction::initData unknown initialization procedure for \
         a relation of type: " + relationType);
 
-  // // -- Stage 2 : create buffers (in the graph) that will be used for relation/interaction internal operations --
-  // // Relation initializes the work vectors and matrices
-  // //
-  // interaction_properties.workVectors.reset(new VectorOfVectors);
-  // interaction_properties.workMatrices.reset(new VectorOfSMatrices);
-  // VectorOfVectors& workVInter = *interaction_properties.workVectors;
-  // VectorOfSMatrices& workMInter = *interaction_properties.workMatrices;
-  // _relation->initialize(*this, DSlink, workVInter, workMInter);
+  // -- Stage 2 : create buffers (in the graph) that will be used for relation/interaction internal operations in DSLink --
+  _relation->initializeDSLink(*this, DSlink);
 }
 
 

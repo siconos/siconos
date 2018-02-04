@@ -44,9 +44,9 @@ LagrangianRheonomousR::LagrangianRheonomousR(const std::string& pluginh, const s
   setComputehDotFunction(SSLH::getPluginName(pluginDoth), SSLH::getPluginFunctionName(pluginDoth));
 }
 
-void LagrangianRheonomousR::initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
+void LagrangianRheonomousR::initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
 {
-  LagrangianR::initComponents(inter, DSlink, workV, workM);
+  LagrangianR::initializeWorkVectorsAndMatrices(inter, DSlink, workV, workM);
 
   unsigned int sizeY = inter.getSizeOfY();
   // hDot

@@ -53,11 +53,12 @@ FirstOrderLinearTIR::FirstOrderLinearTIR(SP::SimpleMatrix C, SP::SimpleMatrix D,
   _e = e;
 }
 
-void FirstOrderLinearTIR::initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
+void FirstOrderLinearTIR::initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
 {
   DEBUG_PRINT("FirstOrderLinearTIR::initialize(Interaction & inter)\n");
-  // Note: do not call FirstOrderR::initialize to avoid jacobianH and jacobianG allocation.
 
+  FirstOrderR::initializeWorkVectorsAndMatrices(inter, DSlink, workV, workM); // ?
+  
   if (!_C)
     RuntimeException::selfThrow("FirstOrderLinearTIR::initialize() C is null and is a required input.");
   if (!_B)

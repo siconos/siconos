@@ -56,13 +56,7 @@ protected:
   */
   ACCEPT_SERIALIZATION(FirstOrderLinearR);
 
-  /** initialize the relation (check sizes, memory allocation in workV and workM ...)
-  *  \param inter Interaction using this Relation
-  *  \param DSlink
-  *  \param workV
-  *  \param workM
-  */
-  virtual void initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
+
 
   SP::SiconosVector _e;
 
@@ -134,7 +128,14 @@ public:
   {
     setComputeJacglambdaFunction(pluginPath,  functionName);
   }
-
+  /** initialize the relation (check sizes, memory allocation in workV and workM ...)
+   *  \param inter Interaction using this Relation
+   *  \param DSlink
+   *  \param workV
+   *  \param workM
+   */
+  virtual void initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
+  
   /** Function to compute the matrix C
    * \param time the current time
    * \param z the auxiliary input vector

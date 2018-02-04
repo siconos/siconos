@@ -401,6 +401,7 @@ public:
    */
   inline const SiconosVector getCopyOfy(const unsigned int i) const
   {
+    assert(_y[i] && "_y[i]");
     return *(_y[i]);
   }
 
@@ -410,6 +411,7 @@ public:
    */
   inline const SiconosVector getCopyOfyOld(const unsigned int i) const
   {
+    assert(_yOld[i]);
     return *(_yOld[i]);
   }
 
@@ -429,6 +431,7 @@ public:
    */
   inline SP::SiconosVector y(const unsigned int i) const
   {
+    assert(_y[i]);
     return _y[i];
   }
 
@@ -472,6 +475,7 @@ public:
    */
   inline const SiconosVector getYOld(const unsigned int i) const
   {
+    assert(_yOld[i]);
     return *(_yOld[i]);
   }
 
@@ -481,6 +485,7 @@ public:
    */
   inline SP::SiconosVector yOld(const unsigned int i) const
   {
+    assert(_yOld[i]);
     return _yOld[i];
   }
   /* get y_k[i]
@@ -489,6 +494,7 @@ public:
    */
   inline SP::SiconosVector y_k(const unsigned int i) const
   {
+    assert(_y_k[i]);
     return _y_k[i];
   }
 
@@ -514,8 +520,6 @@ public:
    * \param v a SP::SiconosVector  and an unsigned int
    */
   void setYOldPtr(const unsigned int i, SP::SiconosVector v);
-
-
 
 
   /** get all the values of the state vector y stored in memory
@@ -604,6 +608,7 @@ public:
    */
   inline const SiconosVector getLambdaOld(const unsigned int i) const
   {
+    assert(_lambdaOld[i]);
     return *(_lambdaOld[i]);
   }
 
@@ -613,6 +618,7 @@ public:
    */
   inline SP::SiconosVector lambdaOld(const unsigned int i) const
   {
+    assert(_lambdaOld[i]);
     return _lambdaOld[i];
   }
 

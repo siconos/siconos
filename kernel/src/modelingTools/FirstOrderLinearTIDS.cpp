@@ -79,6 +79,15 @@ void FirstOrderLinearTIDS::display() const
   std::cout << "- M: " <<std::endl;
   if (_M) _M->display();
   else std::cout << "-> NULL" <<std::endl;
+  std::cout << "- x " <<std::endl;
+  if(_x[0]) _x[0]->display();
+  else std::cout << "-> NULL" <<std::endl;
+  std::cout << "- x0 " <<std::endl;
+  if(_x0) _x0->display();
+  std::cout << "- x[1] " <<std::endl;
+  if(_x[1]) _x[1]->display();
+  else std::cout << "-> NULL" <<std::endl;
 
+  
   std::cout << "============================================" <<std::endl;
 }

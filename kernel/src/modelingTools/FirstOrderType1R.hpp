@@ -85,7 +85,7 @@ public:
    * \param workV work vectors to initialize
    * \param workM work matrices to initialize
   */
-  virtual void initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
+  virtual void initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
 
   /** default function to compute y = h(x, z, t)
   * \param time the current time

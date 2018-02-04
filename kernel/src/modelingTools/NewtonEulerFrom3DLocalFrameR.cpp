@@ -33,9 +33,9 @@
 /*
 See devNotes.pdf for details. A detailed documentation is available in DevNotes.pdf: chapter 'NewtonEulerR: computation of \nabla q H'. Subsection 'Case FC3D: using the local frame local velocities'
 */
-void NewtonEulerFrom3DLocalFrameR::initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
+void NewtonEulerFrom3DLocalFrameR::initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
 {
-  NewtonEulerFrom1DLocalFrameR::initComponents(inter, DSlink, workV, workM);
+  NewtonEulerFrom1DLocalFrameR::initializeWorkVectorsAndMatrices(inter, DSlink, workV, workM);
   unsigned int qSize = 7 * (inter.getSizeOfDS() / 6);
   /*keep only the distance.*/
   _jachq.reset(new SimpleMatrix(3, qSize));
