@@ -39,7 +39,7 @@
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
-#include <debug.h>
+#include "debug.h"
 #include <fstream>
 
 // --- Constructor with a TimeDiscretisation (and thus a NonSmoothDynamicalSystem) and an
@@ -218,7 +218,6 @@ void Simulation::initialize()
   }
 
   // 2 - we set the osi of DS that ha been defined through associate(ds,osi)
-
   std::map< SP::OneStepIntegrator, std::list<SP::DynamicalSystem> >::iterator  it;
   std::list<SP::DynamicalSystem> ::iterator  itlist;
   for ( it = _OSIDSmap.begin();  it !=_OSIDSmap.end(); ++it)
@@ -229,50 +228,50 @@ void Simulation::initialize()
       SP::OneStepIntegrator osi =it->first;
 
       _nsds->topology()->setOSI( ds , osi);
-      osi->initializeDynamicalSystem(getTk(),ds );
     }
     it->second.clear();
   }
 
+
+
+  // 3- we initialize new  ds and interaction 
   SP::DynamicalSystemsGraph DSG = _nsds->topology()->dSG(0);
   std::list<NonSmoothDynamicalSystem::Changes>::const_iterator itc = _nsdsChangeLogPosition ;
   itc++;
   while(itc != _nsds->changeLog().end())
   {
+    DEBUG_PRINT("The nsds has changed\n")
     const NonSmoothDynamicalSystem::Changes& changes = *itc;
     itc++;
+
+    DEBUG_EXPR(changes.display());
+    
     if (changes.typeOfChange == NonSmoothDynamicalSystem::addDynamicalSystem)
     {
       SP::DynamicalSystem ds = changes.ds;
       if (!DSG->properties(DSG->descriptor(ds)).osi)
       {
         SP::OneStepIntegrator osi_default = *_allOSI->begin();
-
         _nsds->topology()->setOSI(ds, osi_default);
-
         if (_allOSI->size() > 1)
         {
           std::cout << "Warning. The simulation has multiple OneStepIntegrators "
             "(OSI) but the DS number " << ds->number() << " is not assigned to an "
             "OSI. We assign the following OSI to this DS." << std::endl;
         }
-        DEBUG_EXPR(ds->display(););
-        osi_default->initializeDynamicalSystem(getTk(),ds);
-        DEBUG_EXPR(ds->display(););
       }
+      DEBUG_EXPR(ds->display(););
+      OneStepIntegrator& osi = *DSG->properties(DSG->descriptor(ds)).osi;
+      osi.initializeDynamicalSystem(getTk(),ds);
+      DEBUG_EXPR(ds->display(););
     }
     else if (changes.typeOfChange == NonSmoothDynamicalSystem::addInteraction)
     {
-      InteractionProperties& interProp = indexSet0->properties(*ui);
-
-      if (!interProp.workVectors)
-      {
-        SP::Interaction inter = indexSet0->bundle(*ui);
-        initializeInteraction(getTk(), inter);
-
-      }
+      SP::Interaction inter = changes.i;
+      initializeInteraction(getTk(), inter);
     }
   }
+  _nsdsChangeLogPosition = _nsds->changeLogPosition();
 
 
   // 4 - we finalize the initialization of osi

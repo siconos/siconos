@@ -57,11 +57,27 @@ public:
     Changes(int t):typeOfChange(t){};
     void display() const
     {
-      std::cout << typeOfChange << std::endl;
-      if (!ds)
-        std::cout << "ds NULL" << std::endl;
-       if (!i)
-        std::cout << "i NULL" << std::endl;
+      std::cout << "Changes display   " << this <<std::endl;
+      if (typeOfChange == addDynamicalSystem)
+      {
+        std::cout << "typeOfChange : " << typeOfChange << " : addDynamicalSystem" << std::endl;
+      }
+      else if (typeOfChange == rmDynamicalSystem)
+      {
+        std::cout << "typeOfChange : " << typeOfChange << " : rmDynamicalSystem" << std::endl;
+      }
+      else if (typeOfChange == addInteraction)
+      {
+        std::cout << "typeOfChange : " << typeOfChange << " : addInteraction" << std::endl;
+      }
+      else if (typeOfChange == rmInteraction)
+      {
+        std::cout << "typeOfChange : " << typeOfChange << " : rmInteraction" << std::endl;
+      }
+      else if (typeOfChange == clearTopology)
+      {
+        std::cout << "typeOfChange : " << typeOfChange << " : clearTopology" << std::endl;
+      }
     };
   };
 

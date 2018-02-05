@@ -50,7 +50,7 @@ NonSmoothDynamicalSystem::NonSmoothDynamicalSystem():
 
   // we push a first element in the list to avoid acces to null when we call --_changeLog.end();
   _changeLog.push_back(Changes(clearTopology));
-  (--_changeLog.end())->display();
+  DEBUG_EXPR((--_changeLog.end())->display(););
 };
 //  constructor
 NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(double t0, double T):
@@ -62,8 +62,7 @@ NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(double t0, double T):
   _topology.reset(new Topology());
   // we push a first element in the list to avoid acces to null when we call --_changeLog.end();
   _changeLog.push_back(Changes(clearTopology));
-  (--_changeLog.end())->display();
-  changeLogPosition()->display();
+  DEBUG_EXPR((--_changeLog.end())->display());
 };
 
 NonSmoothDynamicalSystem::~NonSmoothDynamicalSystem()
@@ -79,6 +78,8 @@ void NonSmoothDynamicalSystem::display() const
   std::cout << "---> isBVP = " << _BVP <<std::endl;
   dynamicalSystems()->begin();
   _topology->indexSet0()->display();
+  std::cout << "---> last change : " <<std::endl;
+  (--_changeLog.end())->display();
   std::cout << "===================================================" <<std::endl;
 }
 
