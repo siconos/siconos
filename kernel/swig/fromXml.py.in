@@ -342,21 +342,21 @@ def buildModelXML(xmlFile):
     (constructorArgsDS, constructorArgsR, pluginsDS, pluginsR, dataNSL, dataOSI, dataOSNSP) = _parseReferenceXMLSchema(xsdfile)
 
     #  Built DOMtree
-    siconosxml = xml_parser.parse(xmlFile, silence=True)
+    modelxml = xml_parser.parse(xmlFile, silence=True)
 
-    T = siconosxml.NSDS.Time.T
-    t0 = siconosxml.NSDS.Time.t0
-    title = siconosxml.NSDS.Title
-    author = siconosxml.NSDS.Author
-    description = siconosxml.NSDS.Description
-    date = siconosxml.NSDS.Date
-    xmlSchema = siconosxml.NSDS.SchemaXML
+    T = modelxml.Time.T
+    t0 = modelxml.Time.t0
+    title = modelxml.Title
+    author = modelxml.Author
+    description = modelxml.Description
+    date = modelxml.Date
+    xmlSchema = modelxml.SchemaXML
 
 
     # create the Model
-    nsds = SK.NonsmoothDynamicalSystem(t0, T)
+    nsds = SK.NonSmoothDynamicalSystem(t0, T)
     nsdsxml = modelxml.NSDS
-    nsds = model.nonSmoothDynamicalSystem()
+    #nsds = model.nonSmoothDynamicalSystem()
 
     # NSDS
     nsds.setBVP(nsdsxml.bvp)
@@ -409,13 +409,12 @@ def buildModelXML(xmlFile):
         exit(1)
 
     try:
-        sim = getattr(SK, simxml.type_)(td)
+        sim = getattr(SK, simxml.type_)(nsds,td)
     except:
         print("wrong type of simulation" + simxml.Type_)
         exit(1)
 
     # OSI
-    sim.setNonSmoothDynamicalSystemPtr(nsds)
     allOSI = []
     for osiType in dataOSI.keys():
         for osixml in simxml.OneStepIntegrator_Definition.__dict__[osiType]:
@@ -423,7 +422,7 @@ def buildModelXML(xmlFile):
             _additionalInputsOSI(osixml, osi, dataOSI[osiType])
             print(osixml.DS_Concerned)
             for dsN in osixml.DS_Concerned:
-                sim.prepareIntegratorForDS(osi, allDS[dsN], model, sim.nextTime())
+                sim.associate(osi, allDS[dsN])
             allOSI.append(osi)
 
     # OSNSPB
@@ -452,9 +451,5 @@ def buildModelXML(xmlFile):
                 sim.insertNonSmoothProblem(osnsp, numId)
                 allOSNSP.append(osnsp)
 
-    model.setSimulation(sim)
-    model.initialize()
-    model.display()
     nsds.display()
-
-    return model
+    return nsds, sim

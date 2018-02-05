@@ -19,16 +19,16 @@
 
 <!-- SICONOS Model XML file -->
 
-<Siconos>
-  <NSDS bvp='false'>
-    <Title>title</Title>
-    <Author>author</Author>
-    <Description>description</Description>
-    <Date>date</Date>
-    <Time>
-      <t0>0.0</t0>
+<SiconosModel>
+  <Title>title</Title>
+  <Author>author</Author>
+  <Description>description</Description>
+  <Date>date</Date>
+  <Time>
+    <t0>0.0</t0>
       <T>1.50</T>
-    </Time>
+  </Time>
+  <NSDS bvp='false'>
     <!-- DSs defined in the problem -->
     <DS_Definition>
       <LagrangianLinearTIDS Name='Ball'>
@@ -104,4 +104,4 @@
       </LCP>
     </OneStepNSProblems_List>
   </Simulation>
-</Siconos>
+</SiconosModel>
