@@ -25,6 +25,9 @@
 #include "Topology.hpp"
 #include "DynamicalSystem.hpp"
 
+
+
+
 /** the Non Smooth Dynamical System consists of DynamicalSystem
  *  and Interaction regrouped together in a Topology object,
  *  in the form of a graph of DynamicalSystem as nodes and Interaction as edges
@@ -36,15 +39,42 @@
  */
 class NonSmoothDynamicalSystem
 {
+public:
+  enum
+  {
+    addDynamicalSystem, rmDynamicalSystem, addInteraction, rmInteraction, clearTopology
+  };
+  
+  class Changes
+  {
+  public:
+    int typeOfChange;
+    SP::DynamicalSystem ds;
+    SP::Interaction i;
+
+    Changes(int t, SP::DynamicalSystem dsnew ):typeOfChange(t),ds(dsnew){};
+    Changes(int t, SP::Interaction inew):typeOfChange(t),i(inew){};
+    Changes(int t):typeOfChange(t){};
+    void display() const
+    {
+      std::cout << typeOfChange << std::endl;
+      if (!ds)
+        std::cout << "ds NULL" << std::endl;
+       if (!i)
+        std::cout << "i NULL" << std::endl;
+    };
+  };
+
 private:
   /** serialization hooks
   */
   ACCEPT_SERIALIZATION(NonSmoothDynamicalSystem);
 
-  /** current time of the simulation 
-      Warning FP : it corresponds to the time 
-      at the end of the integration step. 
-      It means that _t corresponds to tkp1 of the
+
+  /** current time of the simulation
+      Warning FP : it corresponds to the time
+      at the end of the integration step.
+      It means that _t corresponds to tkp1 of the≈b
       simulation or nextTime().
    */
   double _t;
@@ -61,9 +91,10 @@ private:
   /** TRUE if the NonSmoothDynamicalSystem is a boundary value problem*/
   bool _BVP;
 
+  /** log list of the modifications of the nsds */
+  std::list<Changes> _changeLog;
 
-  unsigned int _version;
-  
+
   /** the topology of the system */
   SP::Topology _topology;
 
@@ -204,7 +235,7 @@ public:
 
 
 
-  
+
   /** get problem type (true if BVP)
    *  \return a bool
    */
@@ -221,12 +252,8 @@ public:
     return !_BVP;
   }
 
-  inline unsigned int version()
-  {
-    return _version;
-  }
 
-  
+
   /** set the NonSmoothDynamicalSystem to BVP, else it is IVP
    *  \param newBvp true if BVP, false otherwise
    */
@@ -235,6 +262,24 @@ public:
     _BVP = newBvp;
   }
 
+
+  inline const std::list<Changes>& changeLog()
+  {
+    return _changeLog;
+  };
+
+  inline std::list<Changes>::iterator changeLogPosition()
+  {
+    std::list<Changes>::iterator it = _changeLog.end();
+    return --it;
+  };
+
+  
+
+
+
+
+  
   // === DynamicalSystems management ===
 
   /** get the number of Dynamical Systems present in the NSDS
@@ -256,12 +301,7 @@ public:
   /** add a dynamical system into the DS graph (as a vertex)
    * \param ds a pointer to the system to add
    */
-  inline void insertDynamicalSystem(SP::DynamicalSystem ds)
-  {
-    _topology->insertDynamicalSystem(ds);
-    _version ++;
-    _mIsLinear = ((ds)->isLinear() && _mIsLinear);
-  };
+  void insertDynamicalSystem(SP::DynamicalSystem ds);
 
   /** get Dynamical system number I
    * \param nb the identifier of the DynamicalSystem to get
@@ -276,13 +316,7 @@ public:
    * \param ds a pointer to the dynamical system to remove
    * \param removeInterations if true, all interactions connected to the ds will also be removed
    */
-  inline void removeDynamicalSystem(SP::DynamicalSystem ds)
-  {
-    _topology->removeDynamicalSystem(ds);
-    _version ++;
-  };
-
-
+  void removeDynamicalSystem(SP::DynamicalSystem ds);
 
   // === Interactions management ===
 
@@ -306,11 +340,7 @@ public:
   /** remove an interaction to the system
    * \param inter a pointer to the interaction to remove
    */
-  inline void removeInteraction(SP::Interaction inter)
-  {
-    _topology->removeInteraction(inter);
-    _version ++;
-  };
+  void removeInteraction(SP::Interaction inter);
 
   /** get Interaction number I
    * \param nb the identifier of the Interaction to get
@@ -451,4 +481,3 @@ public:
 
 
 #endif
-

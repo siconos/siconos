@@ -103,7 +103,7 @@ protected:
   unsigned int _levelMaxForInput;
 
   bool _isInitialized;
-  
+
   /** A link to the simulation that owns this OSI */
   SP::Simulation _simulation;
 
@@ -250,11 +250,11 @@ public:
 
   inline void setIsInitialized( bool value) {_isInitialized = value;};
 
-  
+
   /** initialise the integrator
    */
   virtual void initialize();
-  
+
   /** Initialization process of the nonsmooth problems
       linked to this OSI*/
   virtual void initialize_nonsmooth_problems(){};

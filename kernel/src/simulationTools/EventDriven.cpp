@@ -347,7 +347,6 @@ void EventDriven::initialize()
   //initOSIs();
   initOSIRhs();
   DEBUG_END("void EventDriven::initialize()\n")
-
 }
 
 void EventDriven::computef(OneStepIntegrator& osi, integer * sizeOfX, doublereal * time, doublereal * x, doublereal * xdot)

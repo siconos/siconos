@@ -248,7 +248,7 @@ void LsodarOSI::initializeDynamicalSystem( double t, SP::DynamicalSystem ds)
   Type::Siconos dsType = Type::value(*ds);
 
   ds->initRhs(t); // This will create p[2] and other required vectors/buffers
-
+  
   if(dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
   {
     LagrangianDS& lds = *std11::static_pointer_cast<LagrangianDS>(ds);
@@ -549,7 +549,7 @@ void LsodarOSI::integrate(double& tinit, double& tend, double& tout, int& istate
     std::cout << " -7 means work space insufficient to finish (see messages)." <<std::endl;
     RuntimeException::selfThrow("LsodarOSI, integration failed");
   }
-
+ 
   *_xWork = *_xtmp;
   istate = _intData[4];
   tout  = tinit_DR; // real ouput time
