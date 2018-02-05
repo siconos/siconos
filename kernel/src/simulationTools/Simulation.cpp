@@ -35,7 +35,7 @@
 #include "NonSmoothLaw.hpp"
 #include "TypeName.hpp"
 // for Debug
-// #define DEBUG_BEGIN_END_ONLY
+//#define DEBUG_BEGIN_END_ONLY
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
@@ -204,7 +204,9 @@ void Simulation::initialize()
 {
   DEBUG_BEGIN("Simulation::initialize()\n");
 
-  // === OneStepIntegrators initialization ===
+  // 1-  OneStepIntegrators initialization ===
+  // we set the simulation pointer and the graph of DS in osi
+  
   for (OSIIterator itosi = _allOSI->begin();
        itosi != _allOSI->end(); ++itosi)
   {
@@ -215,8 +217,7 @@ void Simulation::initialize()
 
 
 
-
-
+  // 2 - we set the osi of DS that ha been defined through associate(ds,osi)
   std::map< SP::OneStepIntegrator, std::list<SP::DynamicalSystem> >::iterator  it;
   std::list<SP::DynamicalSystem> ::iterator  itlist;
   for ( it = _OSIDSmap.begin();  it !=_OSIDSmap.end(); ++it)
@@ -231,10 +232,10 @@ void Simulation::initialize()
     }
     it->second.clear();
   }
-
+  
+  // 3 - we call the initialize for ds and interaction if the version of the nsds has changed
   if (_nsds->version() != _nsdsVersion)
   {
-
     DynamicalSystemsGraph::VIterator dsi, dsend;
     SP::DynamicalSystemsGraph DSG = _nsds->topology()->dSG(0);
     for (std11::tie(dsi, dsend) = DSG->vertices(); dsi != dsend; ++dsi)
@@ -257,8 +258,9 @@ void Simulation::initialize()
           osi_default->display();
 
         }
+        DEBUG_EXPR(ds->display(););
         osi_default->initializeDynamicalSystem(getTk(),ds);
-
+        DEBUG_EXPR(ds->display(););
       }
     }
 
@@ -276,6 +278,11 @@ void Simulation::initialize()
       }
     }
   }
+
+
+  // 4 - we finalize the initialization of osi
+
+  
   // symmetry in indexSets Do we need it ?
   _nsds->topology()->setProperties();
 
@@ -345,7 +352,7 @@ void Simulation::initialize()
   }
 
 
-  DEBUG_END("Simulation::initialize(SP::Model m, bool withOSI)\n");
+  DEBUG_END("Simulation::initialize()\n");
 }
 
 // void Simulation::initialize(SP::Model m, bool withOSI)

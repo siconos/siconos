@@ -116,14 +116,14 @@ void LinearSMCOT2::initialize(const NonSmoothDynamicalSystem& nsds, const Simula
   _nsdsPhi.reset(new NonSmoothDynamicalSystem(_t0, _T));
   _PhiOSI.reset(new LsodarOSI());
   _nsdsPhi->insertDynamicalSystem(_DSPhi);
-  _simulPhi.reset(new EventDriven(_tdPhi, 0));
+  _simulPhi.reset(new EventDriven(_nsdsPhi, _tdPhi, 0));
   _simulPhi->associate(_PhiOSI, _DSPhi);
 
   // Integration for Gamma
   _nsdsPred.reset(new NonSmoothDynamicalSystem(_t0, _T));
   _PredOSI.reset(new LsodarOSI());
   _nsdsPred->insertDynamicalSystem(_DSPred);
-  _simulPred.reset(new EventDriven(_tdPred, 0));
+  _simulPred.reset(new EventDriven(_nsdsPred, _tdPred, 0));
   _simulPred->associate(_PredOSI, _DSPred);
 
   _X = _sensor->yTk();

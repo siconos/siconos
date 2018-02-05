@@ -26,6 +26,12 @@
 #include "NonSmoothDynamicalSystem.hpp"
 #include "EventsManager.hpp"
 
+// #define DEBUG_NOCOLOR
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
+//#define DEBUG_WHERE_MESSAGES
+#include <debug.h>
+
 MatrixIntegrator::MatrixIntegrator(const DynamicalSystem& ds, const NonSmoothDynamicalSystem& nsds, const  TimeDiscretisation & td, SP::SiconosMatrix E): _E(E)
 {
   commonInit(ds, nsds, td);
@@ -81,21 +87,21 @@ void MatrixIntegrator::commonInit(const DynamicalSystem& ds, const NonSmoothDyna
   
   _OSI.reset(new LsodarOSI());
   _nsds->insertDynamicalSystem(_DS);
-  _sim.reset(new EventDriven(_TD, 0));
+  _sim.reset(new EventDriven(_nsds, _TD, 0));
   _sim->associate(_OSI, _DS);
-  _sim->setNonSmoothDynamicalSystemPtr(_nsds);
-
-  // _model->setSimulation(_sim);
-  // _model->initialize();
 
   //change tolerance
-  _OSI->setTol(1, 10 * MACHINE_PREC, 5 * MACHINE_PREC);
+  //_OSI->setTol(1, 10 * MACHINE_PREC, 5 * MACHINE_PREC);
 
 }
 
 void MatrixIntegrator::integrate()
 {
-  SiconosVector& x = *_DS->x();
+  DEBUG_BEGIN("MatrixIntegrator::integrate()\n");
+  SiconosVector& x0 = *_DS->x0();
+
+  SP::SiconosVector x0_save(new SiconosVector(*_DS->x0()));
+  
   SP::SiconosVector Ecol = static_cast<FirstOrderLinearDS&>(*_DS).b();
   if (!Ecol && _E)
   {
@@ -105,17 +111,25 @@ void MatrixIntegrator::integrate()
   unsigned int p = _mat->size(1);
   for (unsigned int i = 0; i < p; i++)
   {
-    x.zero();
+    x0.zero();
     if (_E)
       _E->getCol(i, *Ecol);
     else if (_plugin)
       _spo->setIndex(i);
     else
-      x(i) = 1;
+      x0(i) = 1;
+
+    DEBUG_EXPR(x0.display(););
     //Reset LsodarOSI
+    //_OSI->setIsInitialized(false);
+    _DS->resetToInitialState();
     _sim->setIstate(1);
     _sim->advanceToEvent();
-    _mat->setCol(i, x);
+    _mat->setCol(i, x0);
   }
+  DEBUG_EXPR(_mat->display();)
   _sim->processEvents();
+  x0 = *x0_save;
+  
+  DEBUG_END("MatrixIntegrator::integrate()\n");
 }

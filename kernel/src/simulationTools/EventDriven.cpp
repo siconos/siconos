@@ -45,7 +45,7 @@ using namespace RELATION;
 /** defaut constructor
  *  \param a pointer to a timeDiscretisation (linked to the model that owns this simulation)
  */
-EventDriven::EventDriven(SP::NonSmoothDynamicalSystem nsds, SP::TimeDiscretisation td): Simulation(nsds,td), _istate(1), _isNewtonConverge(false)
+EventDriven::EventDriven(SP::NonSmoothDynamicalSystem nsds, SP::TimeDiscretisation td): Simulation(nsds, td), _istate(1), _isNewtonConverge(false)
 {
   _numberOfOneStepNSproblems = 2;
   (*_allNSProblems).resize(_numberOfOneStepNSproblems);
@@ -57,7 +57,7 @@ EventDriven::EventDriven(SP::NonSmoothDynamicalSystem nsds, SP::TimeDiscretisati
   _localizeEventMaxIter = 100;
 }
 
-EventDriven::EventDriven(SP::TimeDiscretisation td, int nb): Simulation(td), _istate(1), _isNewtonConverge(false)
+EventDriven::EventDriven(SP::NonSmoothDynamicalSystem nsds, SP::TimeDiscretisation td, int nb): Simulation(nsds, td), _istate(1), _isNewtonConverge(false)
 {
   (*_allNSProblems).resize(nb);
   _numberOfOneStepNSproblems = 0;
@@ -328,6 +328,7 @@ void EventDriven::initOSIRhs()
       SP::DynamicalSystem ds = osiDSGraph->bundle(*dsi);
       // Initialize right-hand side
       ds->initRhs(startingTime());
+      //DEBUG_EXPR(ds->display());
     }
   }
   DEBUG_END("void EventDriven::initOSIRhs()\n")
@@ -335,8 +336,9 @@ void EventDriven::initOSIRhs()
 
 void EventDriven::initialize()
 {
-  DEBUG_BEGIN("void EventDriven::initialize()\n")
-  // Initialization for Simulation
+  DEBUG_BEGIN("void EventDriven::initialize()\n");
+
+    // Initialization for Simulation
   _indexSet0 = _nsds->topology()->indexSet(0);
   _DSG0 = _nsds->topology()->dSG(0);
 
@@ -412,7 +414,7 @@ void EventDriven::computef(OneStepIntegrator& osi, integer * sizeOfX, doublereal
     else
     {
       SiconosVector& xtmp2 = ds.getRhs(); // Pointer link !
-      DEBUG_EXPR(xtmp2.display(););
+      //DEBUG_EXPR(xtmp2.display(););
       pos += xtmp2.copyData(&xdot[pos]);
     }
   }

@@ -39,7 +39,7 @@ ControlLsodarSimulation::ControlLsodarSimulation(double t0, double T, double h):
   ControlSimulation(t0, T, h)
 {
   _processIntegrator.reset(new LsodarOSI());
-  _processSimulation.reset(new EventDriven(_processTD, 0));
+  _processSimulation.reset(new EventDriven(_nsds, _processTD, 0));
   _processSimulation->setName("plant simulation");
   _processSimulation->insertIntegrator(_processIntegrator);
   std11::static_pointer_cast<LsodarOSI>(_processIntegrator)->setExtraAdditionalTerms(

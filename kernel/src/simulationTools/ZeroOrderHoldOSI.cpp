@@ -33,7 +33,10 @@
 #include "OneStepNSProblem.hpp"
 #include "BlockVector.hpp"
 
-//#define DEBUG_MESSAGES
+
+// #define DEBUG_NOCOLOR
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
 //#define DEBUG_WHERE_MESSAGES
 #include <debug.h>
 
@@ -58,6 +61,7 @@ ZeroOrderHoldOSI::ZeroOrderHoldOSI():
 
 void ZeroOrderHoldOSI::initializeDynamicalSystem( double t, SP::DynamicalSystem ds)
 {
+  DEBUG_BEGIN("void ZeroOrderHoldOSI::initializeDynamicalSystem( double t, SP::DynamicalSystem ds)\n");
   // Get work buffers from the graph
   VectorOfVectors& workVectors = *_initializeDSWorkVectors(ds);
 
@@ -134,6 +138,7 @@ void ZeroOrderHoldOSI::initializeDynamicalSystem( double t, SP::DynamicalSystem 
   workVectors.resize(OneStepIntegrator::work_vector_of_vector_size);
   workVectors[OneStepIntegrator::free].reset(new SiconosVector(ds->dimension()));
   workVectors[OneStepIntegrator::delta_x_for_relation].reset(new SiconosVector(ds->dimension()));
+  DEBUG_END("void ZeroOrderHoldOSI::initializeDynamicalSystem( double t, SP::DynamicalSystem ds)\n");
 }
 
 void ZeroOrderHoldOSI::fillDSLinks(Interaction &inter,
@@ -144,14 +149,20 @@ void ZeroOrderHoldOSI::fillDSLinks(Interaction &inter,
   SP::DynamicalSystem ds2= interProp.target;
   assert(ds1);
   assert(ds2);
-
-  VectorOfVectors& workV = *interProp.workVectors;
-  workV[FirstOrderR::osnsp_rhs].reset(new SiconosVector(inter.getSizeOfY()));
-
   VectorOfBlockVectors& DSlink = *interProp.DSlink;
 
+  interProp.workVectors.reset(new VectorOfVectors);
+  interProp.workMatrices.reset(new VectorOfSMatrices);
+
+  VectorOfVectors& workV = *interProp.workVectors;
+  VectorOfSMatrices& workM = *interProp.workMatrices;
+
   Relation &relation =  *inter.relation();
+  relation.initializeWorkVectorsAndMatrices(inter, DSlink, workV, workM);
   RELATION::TYPES relationType = relation.getType();
+
+  
+  workV[FirstOrderR::osnsp_rhs].reset(new SiconosVector(inter.getSizeOfY()));
 
   // Check if interations levels (i.e. y and lambda sizes) are compliant with the current osi.
   _check_and_update_interaction_levels(inter);

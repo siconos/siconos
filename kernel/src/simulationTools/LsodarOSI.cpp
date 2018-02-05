@@ -183,6 +183,7 @@ void LsodarOSI::computeRhs(double t, DynamicalSystemsGraph& DSG0)
     SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
     // compute standard rhs stored in the dynamical system
     ds->computeRhs(t);
+    DEBUG_EXPR(ds->getRhs().display(););
     VectorOfVectors& workVectors = *_dynamicalSystemsGraph->properties(*dsi).workVectors;
     Type::Siconos dsType = Type::value(*ds);
     if(dsType == Type::LagrangianLinearTIDS || dsType == Type::LagrangianDS)
@@ -475,7 +476,7 @@ void LsodarOSI::initialize()
 void LsodarOSI::integrate(double& tinit, double& tend, double& tout, int& istate)
 {
 
-  DEBUG_PRINT("LsodarOSI::integrate(double& tinit, double& tend, double& tout, int& istate) with \n");
+  DEBUG_BEGIN("LsodarOSI::integrate(double& tinit, double& tend, double& tout, int& istate) with \n");
   DEBUG_PRINTF("tinit = %f, tend= %f, tout = %f, istate = %i\n", tinit, tend,  tout, istate);
 
   // For details on DLSODAR parameters, see opkdmain.f in externals/odepack
@@ -499,7 +500,7 @@ void LsodarOSI::integrate(double& tinit, double& tend, double& tout, int& istate
 
 
   // === LSODAR CALL ===
-
+  DEBUG_EXPR(_xWork->display(););
   *_xtmp = *_xWork;
   if(istate == 3)
   {
@@ -565,6 +566,7 @@ void LsodarOSI::integrate(double& tinit, double& tend, double& tout, int& istate
   count_NST = iwork[10];
   count_NFE = iwork[11];
   //  tinit = tinit_DR;
+  DEBUG_END("LsodarOSI::integrate(double& tinit, double& tend, double& tout, int& istate)\n");
 }
 
 

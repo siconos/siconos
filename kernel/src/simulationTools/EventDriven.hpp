@@ -100,7 +100,7 @@ public:
    *  \param td time discretisation
    *  \param nb number of NSProblem
    */
-  EventDriven(SP::TimeDiscretisation td, int nb);
+  EventDriven(SP::NonSmoothDynamicalSystem nsds, SP::TimeDiscretisation td, int nb);
 
   /** defaut constructor (needed for serialization)
    */
