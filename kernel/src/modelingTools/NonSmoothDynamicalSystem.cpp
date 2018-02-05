@@ -111,7 +111,6 @@ void NonSmoothDynamicalSystem::link(SP::Interaction inter, SP::DynamicalSystem d
 
 void NonSmoothDynamicalSystem::clear()
 {
-  assert(0);
   _topology->clear();
   _changeLog.push_back(Changes(clearTopology));
 }
