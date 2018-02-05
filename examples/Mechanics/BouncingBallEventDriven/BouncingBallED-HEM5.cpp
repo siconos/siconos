@@ -93,13 +93,13 @@ int main(int argc, char* argv[])
     // --- Model ---
     // -------------
 
-    SP::Model bouncingBall(new Model(t0, T));
+    SP::NonSmoothDynamicalSystem bouncingBall(new NonSmoothDynamicalSystem(t0, T));
 
     // add the dynamical system in the non smooth dynamical system
-    bouncingBall->nonSmoothDynamicalSystem()->insertDynamicalSystem(ball);
+    bouncingBall->insertDynamicalSystem(ball);
 
     // link the interaction and the dynamical system
-    bouncingBall->nonSmoothDynamicalSystem()->link(inter, ball);
+    bouncingBall->link(inter, ball);
 
     // ----------------
     // --- Simulation ---
@@ -122,20 +122,16 @@ int main(int argc, char* argv[])
     SP::OneStepNSProblem acceleration(new LCP());
 
     // -- (4) Simulation setup with (1) (2) (3)
-    SP::EventDriven s(new EventDriven(t));
+    SP::EventDriven s(new EventDriven(bouncingBall,t));
     s->insertIntegrator(OSI);
     s->insertNonSmoothProblem(impact, SICONOS_OSNSP_ED_IMPACT);
     s->insertNonSmoothProblem(acceleration, SICONOS_OSNSP_ED_SMOOTH_ACC);
-    bouncingBall->setSimulation(s);
-
+    s->setPrintStat(true);
+    
     // =========================== End of model definition ===========================
 
     // ================================= Computation =================================
 
-    // --- Simulation initialization ---
-    cout << "====> Simulation initialisation ..." << endl << endl;
-    s->setPrintStat(true);
-    bouncingBall->initialize();
 
     int N = 1854; // Number of saved points: depends on the number of events ...
 
@@ -145,8 +141,8 @@ int main(int argc, char* argv[])
     SimpleMatrix dataPlot(N + 1, outputSize);
     SP::SiconosVector q = ball->q();
     SP::SiconosVector v = ball->velocity();
-    SP::SiconosVector p = ball->p(1);
-    SP::SiconosVector f = ball->p(2);
+    SP::SiconosVector p ;
+    SP::SiconosVector f ;
     //   SiconosVector * y = bouncingBall->nonSmoothDynamicalSystem()->interaction(0)->y(0);
 
     SP::EventsManager eventsManager = s->eventsManager();
@@ -157,8 +153,8 @@ int main(int argc, char* argv[])
     dataPlot(0, 0) = bouncingBall->t0();
     dataPlot(0, 1) = (*q)(0);
     dataPlot(0, 2) = (*v)(0);
-    dataPlot(0, 3) = (*p)(0);
-    dataPlot(0, 4) = (*f)(0);
+    dataPlot(0, 3) = 0.0;
+    dataPlot(0, 4) = 0.0;
 
     // --- Time loop ---
     cout << "====> Start computation ... " << endl << endl;
@@ -170,6 +166,8 @@ int main(int argc, char* argv[])
     while (s->hasNextEvent() && k < N)
     {
       s->advanceToEvent();
+      p = ball->p(1);
+      f = ball->p(2);
       if (eventsManager->nextEvent()->getType() == 2)
         nonSmooth = true;
 
@@ -207,17 +205,6 @@ int main(int argc, char* argv[])
     dataPlot.resize(k, outputSize);
     ioMatrix::write("result.dat", "ascii", dataPlot);
 
-    // // Comparison with a reference file
-    // SimpleMatrix dataPlotRef(dataPlot);
-    // dataPlotRef.zero();
-    // ioMatrix::read("BouncingBallED.ref", "ascii", dataPlotRef);
-
-    // if ((dataPlot - dataPlotRef).normInf() > 1e-12)
-    // {
-    //   std::cout << "Warning. The results is rather different from the reference file." << std::endl;
-    //   std::cout << "error = " << (dataPlot - dataPlotRef).normInf() << std::endl;
-    //   return 1;
-    // }
 
   }
 

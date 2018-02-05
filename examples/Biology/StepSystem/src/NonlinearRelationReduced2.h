@@ -10,7 +10,7 @@ public:
   NonlinearRelationReduced2();
   virtual ~NonlinearRelationReduced2() {};
 
-  virtual void initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
+  virtual void initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
 
 
   /** default function to compute h

@@ -11,9 +11,9 @@ NonlinearRelationReduced2::NonlinearRelationReduced2():
 {
 }
 
-void NonlinearRelationReduced2::initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
+void NonlinearRelationReduced2::initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
 {
-  FirstOrderType2R::initComponents(inter, DSlink, workV, workM);
+  FirstOrderType2R::initializeWorkVectorsAndMatrices(inter, DSlink, workV, workM);
 }
 
 /*y = h(X)*/

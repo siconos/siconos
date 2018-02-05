@@ -15,9 +15,9 @@ NonlinearRelation::NonlinearRelation():
 {
 }
 
-void NonlinearRelation::initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
+void NonlinearRelation::initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
 {
-  FirstOrderType2R::initComponents(inter, DSlink, workV, workM);
+  FirstOrderType2R::initializeWorkVectorsAndMatrices(inter, DSlink, workV, workM);
 }
 
 /*y = h(X)*/

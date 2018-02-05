@@ -102,11 +102,12 @@ int main(int argc, char* argv[])
     SP::Interaction InterDiodeBridge(new Interaction(nslaw, LTIRDiodeBridge));
 
     // --- Model creation ---
-    SP::Model DiodeBridge(new Model(t0, T, Modeltitle));
+    SP::NonSmoothDynamicalSystem DiodeBridge(new NonSmoothDynamicalSystem(t0, T));
+    DiodeBridge->setTitle(Modeltitle);
     // add the dynamical system in the non smooth dynamical system
-    DiodeBridge->nonSmoothDynamicalSystem()->insertDynamicalSystem(LSDiodeBridge);
+    DiodeBridge->insertDynamicalSystem(LSDiodeBridge);
     // link the interaction and the dynamical system
-    DiodeBridge->nonSmoothDynamicalSystem()->link(InterDiodeBridge, LSDiodeBridge);
+    DiodeBridge->link(InterDiodeBridge, LSDiodeBridge);
 
     // ------------------
     // --- Simulation ---
@@ -124,13 +125,9 @@ int main(int argc, char* argv[])
     SP::LCP aLCP(new LCP());
 
     // -- (4) Simulation setup with (1) (2) (3)
-    SP::TimeStepping aTS(new TimeStepping(aTiDisc, aOSI, aLCP));
-    DiodeBridge->setSimulation(aTS);
-    
-    // Initialization
-    cout << "====> Initialisation ..." << endl << endl;
-    DiodeBridge->initialize();
-    cout << " ---> End of initialization." << endl;
+    SP::TimeStepping aTS(new TimeStepping(DiodeBridge, aTiDisc, aOSI, aLCP));
+
+
 
     int k = 0;
     double h = aTS->timeStep();

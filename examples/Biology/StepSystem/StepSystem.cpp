@@ -13,6 +13,7 @@ using namespace std;
 
 int main(int argc, char *argv[])
 {
+  
   try
   {
   //printf("argc %i\n", argc);
@@ -74,9 +75,9 @@ int main(int argc, char *argv[])
   SP::Interaction aI(new Interaction(aNSL,aR));
 
 //****BUILD THE model
-  SP::Model  aM(new Model(0,sTf));
-  aM->nonSmoothDynamicalSystem()->insertDynamicalSystem(aDS);
-  aM->nonSmoothDynamicalSystem()->link(aI,aDS);
+  SP::NonSmoothDynamicalSystem  aN(new NonSmoothDynamicalSystem(0,sTf));
+  aN->insertDynamicalSystem(aDS);
+  aN->link(aI,aDS);
 
   // -- (1) OneStepIntegrators --
   SP::OneStepIntegrator  aEulerMoreauOSI(new EulerMoreauOSI(0.5));
@@ -95,19 +96,12 @@ int main(int argc, char *argv[])
   osnspb->setNumericsVerboseMode(0);
 
   // -- (4) Simulation setup with (1) (2) (3)
-  SP::TimeStepping aS(new TimeStepping(aTD,aEulerMoreauOSI,osnspb));
+  SP::TimeStepping aS(new TimeStepping(aN, aTD,aEulerMoreauOSI,osnspb));
   aS->setComputeResiduY(true);
   aS->setComputeResiduR(true);
   aS->setUseRelativeConvergenceCriteron(false);
-
-// Initialization
-  printf("-> Initialisation \n");
-  aM->setSimulation(aS);
-  aM->initialize();
-  printf("-> End of initialization \n");
-
-
-  
+  aS->setNewtonTolerance(5e-4);
+  aS->setNewtonMaxIteration(20);
 // BUILD THE STEP INTEGRATOR
 
   SP::SiconosVector  x = aDS->x();
@@ -122,7 +116,7 @@ int main(int argc, char *argv[])
 
   printf("=== Start of simulation: %d steps ===  \n", NBStep);
 
-  dataPlot(0, 0) = aM->t0();
+  dataPlot(0, 0) = aN->t0();
   dataPlot(0,1) = x->getValue(0);
   dataPlot(0,2) = x->getValue(1);
   dataPlot(0, 3) = lambda->getValue(0);
@@ -142,7 +136,7 @@ int main(int argc, char *argv[])
   {
     cmp++;
 
-    aS->newtonSolve(5e-4, 20);
+    aS->advanceToEvent();
 
     dataPlot(cmp, 0) = aS->nextTime();
     dataPlot(cmp, 1) = x->getValue(0);
