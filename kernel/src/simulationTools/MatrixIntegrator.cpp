@@ -26,10 +26,12 @@
 #include "NonSmoothDynamicalSystem.hpp"
 #include "EventsManager.hpp"
 
+//#define DEBUG_WHERE_MESSAGES
+
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
-//#define DEBUG_WHERE_MESSAGES
+
 #include <debug.h>
 
 MatrixIntegrator::MatrixIntegrator(const DynamicalSystem& ds, const NonSmoothDynamicalSystem& nsds, const  TimeDiscretisation & td, SP::SiconosMatrix E): _E(E)
@@ -99,6 +101,7 @@ void MatrixIntegrator::integrate()
 {
   DEBUG_BEGIN("MatrixIntegrator::integrate()\n");
   SiconosVector& x0 = *_DS->x0();
+  SiconosVector& x = *_DS->x();
 
   SP::SiconosVector x0_save(new SiconosVector(*_DS->x0()));
   
@@ -125,11 +128,11 @@ void MatrixIntegrator::integrate()
     _DS->resetToInitialState();
     _sim->setIstate(1);
     _sim->advanceToEvent();
-    _mat->setCol(i, x0);
+    _mat->setCol(i, x);
   }
-  DEBUG_EXPR(_mat->display();)
+  DEBUG_EXPR(_mat->display(););
   _sim->processEvents();
   x0 = *x0_save;
-  
+  _DS->resetToInitialState();
   DEBUG_END("MatrixIntegrator::integrate()\n");
 }
