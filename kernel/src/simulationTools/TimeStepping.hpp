@@ -125,6 +125,14 @@ protected:
     _computeResiduR(false),
     _isNewtonConverge(false) {};
 
+
+  /** newton algorithm
+   * \param criterion convergence criterion
+   * \param maxStep maximum number of Newton steps
+   */
+  virtual void newtonSolve(double criterion, unsigned int maxStep);
+
+  
 public:
 
   /** initialisation specific to TimeStepping for OneStepNSProblem.
@@ -181,11 +189,7 @@ public:
   */
   void computeOneStep();
 
-  /** newton algorithm
-   * \param criterion convergence criterion
-   * \param maxStep maximum number of Newton steps
-   */
-  virtual void newtonSolve(double criterion, unsigned int maxStep);
+
 
   /** To known the number of steps performed by the Newton algorithm.
    * \return  the number of steps performed by the Newton algorithm
