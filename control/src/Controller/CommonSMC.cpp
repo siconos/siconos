@@ -74,6 +74,11 @@ void CommonSMC::initialize(const NonSmoothDynamicalSystem & nsds, const Simulati
   {
     RuntimeException::selfThrow("LinearSMC is not yet implemented for system of type" + dsType);
   }
+  _DS_SMC->setNumber(999999);
+  _DS_SMC->initMemory(1);
+  _DS_SMC->swapInMemory();
+
+
   // Get the dimension of the output
   // XXX What if there is more than one sensor ...
   double t0 = nsds.t0();
@@ -279,5 +284,3 @@ void CommonSMC::setJacglambda(const std::string& plugin)
 {
   _pluginJacglambdaName = plugin;
 }
-
-
