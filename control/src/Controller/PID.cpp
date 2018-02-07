@@ -28,6 +28,12 @@
 #include "EventsManager.hpp"
 
 #include <iostream>
+// #define DEBUG_NOCOLOR
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
+//#define DEBUG_WHERE_MESSAGES
+#include "debug.h"
+
 
 PID::PID(SP::ControlSensor sensor, SP::SimpleMatrix B): Actuator(PID_, sensor), _ref(0), _curDeltaT(0)
 {
@@ -53,6 +59,7 @@ void PID::initialize(const NonSmoothDynamicalSystem& nsds, const Simulation& s)
 
 void PID::actuate()
 {
+  DEBUG_BEGIN("void PID::actuate()\n");
   /** \todo We have to distinguish two cases : linear or nonlinear
    *  support the nonlinear case
    */
@@ -60,10 +67,17 @@ void PID::actuate()
   // Compute the new error
 
   (*_err).push_front(_ref - _sensor->y()(0));
-
+  DEBUG_PRINTF("_curDeltaT = %g\n", _curDeltaT);
+  DEBUG_PRINTF("_ref = %g\n", _ref);
+  DEBUG_EXPR(_sensor->y().display(););
+  DEBUG_EXPR(_u->display(););
+  DEBUG_PRINTF("added term  = %g\n", ((*_K)(0) + (*_K)(2) / _curDeltaT + (*_K)(1) * _curDeltaT) * (*_err)[0] +
+               (-(*_K)(0) - 2 * (*_K)(2) / _curDeltaT) * (*_err)[1] + (*_K)(2) / _curDeltaT * (*_err)[2]);
   // compute the new control and update it
   (*_u)(0) += ((*_K)(0) + (*_K)(2) / _curDeltaT + (*_K)(1) * _curDeltaT) * (*_err)[0] +
               (-(*_K)(0) - 2 * (*_K)(2) / _curDeltaT) * (*_err)[1] + (*_K)(2) / _curDeltaT * (*_err)[2];
+  DEBUG_EXPR(_u->display(););
+  DEBUG_END("void PID::actuate()\n");
 }
 
 void PID::setK(SP::SiconosVector K)

@@ -23,8 +23,19 @@
 #include "MatrixIntegrator.hpp"
 #include "SimpleMatrix.hpp"
 
-void ControlZOHAdditionalTerms::init(DynamicalSystemsGraph& DSG0, const NonSmoothDynamicalSystem & nsds, const TimeDiscretisation & td)
+//#define DEBUG_WHERE_MESSAGES
+
+// #define DEBUG_NOCOLOR
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
+
+#include "debug.h"
+
+void ControlZOHAdditionalTerms::init(DynamicalSystemsGraph& DSG0,
+                                     const NonSmoothDynamicalSystem & nsds,
+                                     const TimeDiscretisation & td)
 {
+  DEBUG_BEGIN("void ControlZOHAdditionalTerms::init(...)\n")
   DynamicalSystemsGraph::VIterator dsvi, dsvdend;
   for (std11::tie(dsvi, dsvdend) = DSG0.vertices(); dsvi != dsvdend; ++dsvi)
   {
@@ -46,18 +57,26 @@ void ControlZOHAdditionalTerms::init(DynamicalSystemsGraph& DSG0, const NonSmoot
     if (DSG0.pluginL.hasKey(*dsvi))
       DSG0.Ld[*dsvi].reset(new MatrixIntegrator(ds, nsds, td, DSG0.pluginL[*dsvi], DSG0.e[*dsvi]->size()));
   }
+  DEBUG_END("void ControlZOHAdditionalTerms::init(...)\n")
 }
 
-void ControlZOHAdditionalTerms::addSmoothTerms(DynamicalSystemsGraph& DSG0, const DynamicalSystemsGraph::VDescriptor& dsgVD, const double h, SiconosVector& xfree)
+void ControlZOHAdditionalTerms::addSmoothTerms(DynamicalSystemsGraph& DSG0,
+                                               const DynamicalSystemsGraph::VDescriptor& dsgVD,
+                                               const double h, SiconosVector& xfree)
 {
+  DEBUG_BEGIN("void ControlZOHAdditionalTerms::addSmoothTerms(...)\n")
   // check whether we have a system with a control input
   if (DSG0.u.hasKey(dsgVD))
   {
+    DEBUG_PRINT("a system has a control input\n");
     assert(DSG0.Bd.hasKey(dsgVD));
     if (!DSG0.Bd.at(dsgVD)->isConst())
     {
       DSG0.Bd.at(dsgVD)->integrate();
     }
+    DEBUG_EXPR(DSG0.Bd.at(dsgVD)->mat().display());
+    DEBUG_EXPR(xfree.display());
+    DEBUG_EXPR((*DSG0.u.at(dsgVD)).display());
     prod(DSG0.Bd.at(dsgVD)->mat(), *DSG0.u.at(dsgVD), xfree, false); // xfree += Bd*u
   }
   // check whether the DynamicalSystem is an Observer
@@ -70,6 +89,7 @@ void ControlZOHAdditionalTerms::addSmoothTerms(DynamicalSystemsGraph& DSG0, cons
     }
     prod(DSG0.Ld.at(dsgVD)->mat(), *DSG0.e.at(dsgVD), xfree, false); // xfree += -Ld*e
   }
+  DEBUG_END("void ControlZOHAdditionalTerms::addSmoothTerms(...)\n");
 }
 
 void ControlZOHAdditionalTerms::addJacobianRhsContribution(DynamicalSystemsGraph& DSG0, const DynamicalSystemsGraph::VDescriptor& dsgVD, const double h, SiconosMatrix& jacRhs)

@@ -33,6 +33,11 @@
 #include "ActuatorEvent.hpp"
 #include "ObserverEvent.hpp"
 #include "ExtraAdditionalTerms.hpp"
+//#define DEBUG_BEGIN_END_ONLY
+// #define DEBUG_NOCOLOR
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
+#include "debug.h"
 
 ControlManager::ControlManager(SP::Simulation sim): _sim(sim)
 {
@@ -45,6 +50,7 @@ ControlManager::~ControlManager()
 
 void ControlManager::initialize(const NonSmoothDynamicalSystem& nsds)
 {
+  DEBUG_BEGIN("ControlManager::initialize(const NonSmoothDynamicalSystem& nsds)\n")
   // Initialize all the Sensors and insert their events into the
   // EventsManager of the Simulation.
   for (SensorsIterator itS = _allSensors.begin();
@@ -80,6 +86,7 @@ void ControlManager::initialize(const NonSmoothDynamicalSystem& nsds)
       (*itosi)->extraAdditionalTerms()->init(DSG0, nsds, _sim->eventsManager()->timeDiscretisation());
     }
   }
+  DEBUG_END("ControlManager::initialize(const NonSmoothDynamicalSystem& nsds)\n");
 }
 
 SP::Sensor ControlManager::addSensor(int type, SP::TimeDiscretisation td, SP::DynamicalSystem ds)

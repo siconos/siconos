@@ -31,6 +31,13 @@
 #include <boost/progress.hpp>
 #include <boost/timer.hpp>
 
+//#define DEBUG_BEGIN_END_ONLY
+#define DEBUG_NOCOLOR
+#define DEBUG_STDOUT
+#define DEBUG_MESSAGES
+#include "debug.h"
+
+
 ControlZOHSimulation::ControlZOHSimulation(double t0, double T, double h):
   ControlSimulation(t0, T, h)
 {
@@ -50,6 +57,7 @@ ControlZOHSimulation::ControlZOHSimulation(double t0, double T, double h):
 
 void ControlZOHSimulation::run()
 {
+  DEBUG_BEGIN("void ControlZOHSimulation::run()\n");
   EventsManager& eventsManager = *_processSimulation->eventsManager();
   unsigned k = 0;
   boost::progress_display show_progress(_N);
@@ -87,4 +95,5 @@ void ControlZOHSimulation::run()
 
   _elapsedTime = time.elapsed();
   _dataM->resize(k, _nDim + 1);
+  DEBUG_END("void ControlZOHSimulation::run()\n");
 }
