@@ -304,7 +304,7 @@ void NewMarkAlphaOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_i
   SP::InteractionsGraph indexSet = osnsp->simulation()->indexSet(osnsp->indexSetLevel());
   SP::Interaction inter = indexSet->bundle(vertex_inter);
 
-  VectorOfBlockVectors& DSlink = *indexSet->properties(vertex_inter).DSlink;
+  VectorOfBlockVectors& DSlink = inter->linkToDSVariables();
 
   // Get the type of relation
   RELATION::TYPES relationType = inter->relation()->getType();
@@ -375,14 +375,14 @@ void NewMarkAlphaOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_i
         // compute osnsp_rhs = y_{n,k} + G*q_free
         if(!_IsVelocityLevel)  // output at the position level y_{n,k} = g_{n,k}
         {
-          inter->computeOutput(t, indexSet->properties(vertex_inter), 0); // Update output of level 0
+          inter->computeOutput(t, 0); // Update output of level 0
           osnsp_rhs = *(inter->y(0)); //g_{n,k}
         }
         else                  // output at the velocity level y_{n,k} = (h/gamma_prime)*dotg_{n,k}
         {
           double h = _simulation->nextTime() - _simulation->startingTime();
           double gamma_prime = _gamma / _beta;
-          inter->computeOutput(t, indexSet->properties(vertex_inter), 1); // Update output of level 1
+          inter->computeOutput(t, 1); // Update output of level 1
           osnsp_rhs = (h / gamma_prime) * (*(inter->y(1))); //(h/gamma_prime)*dotg_{n,k}
         }
         subprod(*C, *q_free, osnsp_rhs, coord, false);
@@ -476,8 +476,7 @@ void NewMarkAlphaOSI::fillDSLinks(Interaction &inter,
   workV.resize(NewMarkAlphaOSI::WORK_INTERACTION_LENGTH);
   workV[NewMarkAlphaOSI::OSNSP_RHS].reset(new SiconosVector(inter.getSizeOfY()));
 
-  VectorOfBlockVectors& DSlink = *interProp.DSlink;
-
+  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
   Relation &relation =  *inter.relation();  
   RELATION::TYPES relationType = relation.getType();
 

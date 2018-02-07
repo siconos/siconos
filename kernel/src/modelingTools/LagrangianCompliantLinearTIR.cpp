@@ -79,7 +79,34 @@ void LagrangianCompliantLinearTIR::computeOutput(double time, Interaction& inter
   // get y and lambda of the interaction
   SiconosVector& y = *inter.y(derivativeNumber);
   SiconosVector& lambda = *inter.lambda(derivativeNumber);
-  VectorOfBlockVectors& DSlink = *interProp.DSlink;
+  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
+  prod(*_jachq, *DSlink[LagrangianR::q0 + derivativeNumber], y);
+  prod(*_jachlambda, lambda, y, false);
+
+  if (derivativeNumber == 0)
+  {
+    if (_e)
+      y += *_e;
+    if (_F)
+      prod(*_F, *DSlink[LagrangianR::z], y, false);
+  }
+
+}
+
+void LagrangianCompliantLinearTIR::computeInput(double time, Interaction& inter, unsigned int level)
+{
+  // get lambda of the concerned interaction
+  SiconosVector& lambda = *inter.lambda(level);
+  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
+  // computation of p = Ht lambda
+  prod(lambda, *_jachq, *DSlink[LagrangianR::p0 + level], false);
+}
+void LagrangianCompliantLinearTIR::computeOutput(double time, Interaction& inter, unsigned int derivativeNumber)
+{
+  // get y and lambda of the interaction
+  SiconosVector& y = *inter.y(derivativeNumber);
+  SiconosVector& lambda = *inter.lambda(derivativeNumber);
+  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
 
   prod(*_jachq, *DSlink[LagrangianR::q0 + derivativeNumber], y);
   prod(*_jachlambda, lambda, y, false);
@@ -98,11 +125,10 @@ void LagrangianCompliantLinearTIR::computeInput(double time, Interaction& inter,
 {
   // get lambda of the concerned interaction
   SiconosVector& lambda = *inter.lambda(level);
-  VectorOfBlockVectors& DSlink = *interProp.DSlink;
+  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
   // computation of p = Ht lambda
   prod(lambda, *_jachq, *DSlink[LagrangianR::p0 + level], false);
 }
-
 void LagrangianCompliantLinearTIR::display() const
 {
   LagrangianR::display();

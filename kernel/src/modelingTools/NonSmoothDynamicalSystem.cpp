@@ -190,7 +190,7 @@ void NonSmoothDynamicalSystem::updateInput(double time, unsigned int level)
     inter = indexSet0->bundle(*ui);
     assert(inter->lowerLevelForInput() <= level);
     assert(inter->upperLevelForInput() >= level);
-    inter->computeInput(time, indexSet0->properties(*ui), level);
+    inter->computeInput(time, level);
   }
 
   DEBUG_END("Nonsmoothdynamicalsystem::updateInput(double time, unsigned int level)\n");
@@ -214,7 +214,7 @@ void NonSmoothDynamicalSystem::updateOutput(double time, unsigned int level)
     inter = indexSet0->bundle(*ui);
     assert(inter->lowerLevelForOutput() <= level);
     assert(inter->upperLevelForOutput() >= level);
-    inter->computeOutput(time, indexSet0->properties(*ui), level);
+    inter->computeOutput(time, level);
   }
   DEBUG_END("NonSmoothDynamicalSystem::updateOutput(unsigned int level)\n");
 

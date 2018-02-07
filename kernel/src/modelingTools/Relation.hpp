@@ -111,6 +111,7 @@ protected:
    */
   Relation(RELATION::TYPES type, RELATION::SUBTYPES subtype);
 
+
 private:
 
   /** default constructor => private, no copy nor pass-by-value
@@ -239,15 +240,16 @@ public:
    *  \param interProp
    *  \param derivativeNumber number of the derivative to compute (optional, default = 0)
    */
-  virtual void computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int derivativeNumber = 0) = 0;
-
+  virtual void computeOutput(double time, Interaction& inter,
+                             unsigned int derivativeNumber = 0) = 0;
   /** default function to compute r
    *  \param time the current time
    *  \param inter the interaction using this relation
    *  \param interProp
    *  \param level the input "derivative" order of lambda used to compute input
    */
-  virtual void computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level = 0) = 0;
+  virtual void computeInput(double time, Interaction& inter,
+                            unsigned int level = 0) = 0;
 
   virtual SP::SimpleMatrix C() const = 0;
 

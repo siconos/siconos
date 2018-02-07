@@ -114,11 +114,9 @@ Topology::__addInteractionInIndexSet0(SP::Interaction inter, SP::DynamicalSystem
   InteractionsGraph::VDescriptor ig_new_ve;
   DynamicalSystemsGraph::EDescriptor new_ed;
   std11::tie(new_ed, ig_new_ve) = _DSG[0]->add_edge(dsgv1, dsgv2, inter, *_IG[0]);
-  InteractionProperties& interProp = _IG[0]->properties(ig_new_ve);
 
+  inter->initializeLinkToDsVariables(*ds1, *ds2_);
 
-  
-  inter->initialize_ds_links(interProp, *ds1, *ds2_);
   // V.A. 210/06/2017 Could we defer  this initialization ?
   // F.P. No! DSlink must be uptodate as soon as the
   // interaction is connected to ds, to ensure computeInput/computeOutput

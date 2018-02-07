@@ -798,12 +798,12 @@ double EventDriven::computeResiduConstraints()
         Interaction& inter = *indexSet2->bundle(*ui);
         if (!_flag) // constraints at the position level
         {
-          inter.computeOutput(t, indexSet2->properties(*ui), 0); // compute y[0] for the interaction at the end time
+          inter.computeOutput(t, 0); // compute y[0] for the interaction at the end time
           _y = (*inter.y(0))(0);
         }
         else // constraints at the velocity level
         {
-          inter.computeOutput(t, indexSet2->properties(*ui), 1); // compute y[1] for the interaction at the end time
+          inter.computeOutput(t, 1); // compute y[1] for the interaction at the end time
           _y = (*inter.y(1))(0);
         }
 
@@ -899,7 +899,7 @@ void EventDriven::predictionNewtonIteration()
   for (std11::tie(ui, uiend) = _indexSet0->vertices(); ui != uiend; ++ui)
   {
     Interaction& inter = *_indexSet0->bundle(*ui);
-    inter.computeOutput(t, _indexSet0->properties(*ui), 0); // compute y[0] for the interaction at the end time with the state predicted for Dynamical Systems
+    inter.computeOutput(t, 0); // compute y[0] for the interaction at the end time with the state predicted for Dynamical Systems
     inter.lambda(2)->zero(); // reset lambda[2] to zero
   }
 }

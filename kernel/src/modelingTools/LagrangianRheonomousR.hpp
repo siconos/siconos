@@ -176,6 +176,8 @@ public:
   *  \param derivativeNumber number of the derivative to compute, optional, default = 0.
   */
   virtual void computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int derivativeNumber = 0);
+  virtual void computeOutput(double time, Interaction& inter,
+                             unsigned int derivativeNumber = 0);
 
   /** to compute p
    * \param time current time
@@ -184,6 +186,8 @@ public:
    * \param level "derivative" order of lambda used to compute input
    */
   virtual void computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level = 0);
+  virtual void computeInput(double time, Interaction& inter,
+                            unsigned int level = 0);
 
   ACCEPT_STD_VISITORS();
 

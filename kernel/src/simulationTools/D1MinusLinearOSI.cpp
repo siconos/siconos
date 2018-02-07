@@ -214,9 +214,7 @@ void D1MinusLinearOSI::fillDSLinks(Interaction &inter,
   assert(ds1);
   assert(ds2);
 
-
-  VectorOfBlockVectors& DSlink = *interProp.DSlink;
-  assert(interProp.DSlink);
+  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
 
   interProp.workVectors.reset(new VectorOfVectors);
   interProp.workMatrices.reset(new VectorOfSMatrices);

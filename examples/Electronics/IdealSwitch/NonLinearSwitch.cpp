@@ -68,7 +68,7 @@ int main()
 
   int NBStep = (int) floor(sTf / sStep);
 
-  //  NBStep = 3;
+  NBStep = 3;
   //*****BUILD THE DYNAMIC SYSTEM
   SP::MyDS aDS ;
   aDS.reset(new MyDS(xti));
@@ -182,7 +182,7 @@ int main()
     cmp++;
     // solve ...
     aS->computeOneStep();
-
+    aMLCP->display();
     aS->nextStep();
     x = aDS->x();
     lambda = aI->lambda(0);

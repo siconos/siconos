@@ -144,20 +144,20 @@ void OneStepIntegrator::update_interaction_output(Interaction& inter, double tim
       //        relation()->LinkDataFromMemory(k);
       for (unsigned int i = 0; i < inter.upperLevelForOutput() + 1; ++i)
 	    {
-	      inter.computeOutput(time, interaction_properties, i);
+	      inter.computeOutput(time, i);
 	      //_yMemory[i]->swap(*_y[i]);
 	    }
     }
     inter.swapInMemory();
   }
   // Compute a first value for the output
-  inter.computeOutput(time, interaction_properties, 0);
+  inter.computeOutput(time,  0);
     
   // prepare the gradients
   inter.relation()->computeJach(time, inter, interaction_properties);
   for (unsigned int i = 0; i < inter.upperLevelForOutput() + 1; ++i)
   {
-    inter.computeOutput(time, interaction_properties, i);
+    inter.computeOutput(time, i);
   }
   inter.swapInMemory();
 }

@@ -74,8 +74,7 @@ void MoreauJeanBilbaoOSI::fillDSLinks(Interaction &inter, InteractionProperties&
   assert(ds2);
 
 
-  
-  VectorOfBlockVectors& DSlink = *interProp.DSlink;
+  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
 
   interProp.workVectors.reset(new VectorOfVectors);
   interProp.workMatrices.reset(new VectorOfSMatrices);
@@ -481,9 +480,9 @@ void MoreauJeanBilbaoOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vert
 {
   InteractionsGraph& indexSet = *osnsp->simulation()->indexSet(osnsp->indexSetLevel());
   assert(indexSet.bundle(vertex_inter));
-  VectorOfBlockVectors& DSlink = *indexSet.properties(vertex_inter).DSlink;
   // current interaction
   Interaction& inter = *indexSet.bundle(vertex_inter);
+  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
   assert(inter.relation());
   // Get relation and non smooth law types
   // RELATION::TYPES relationType = inter.relation()->getType();

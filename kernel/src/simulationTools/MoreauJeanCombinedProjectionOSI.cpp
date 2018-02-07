@@ -85,7 +85,8 @@ void MoreauJeanCombinedProjectionOSI::fillDSLinks(Interaction &inter, Interactio
   SP::DynamicalSystem ds2= interProp.target;
   assert(ds1);
   assert(ds2);
-  VectorOfBlockVectors& DSlink = *interProp.DSlink;
+  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
+
   Relation &relation =  *inter.relation();
   RELATION::TYPES relationType = relation.getType();
 

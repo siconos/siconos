@@ -133,7 +133,37 @@ void LagrangianScleronomousR::computeOutput(double time, Interaction& inter, Int
 {
 
   DEBUG_PRINTF("LagrangianScleronomousR::computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int derivativeNumber) with time = %f and derivativeNumber = %i\n", time, derivativeNumber);
-  VectorOfBlockVectors& DSlink = *interProp.DSlink;
+  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
+  SiconosVector& y = *inter.y(derivativeNumber);
+  SiconosVector q = *DSlink[LagrangianR::q0];
+  SiconosVector z = *DSlink[LagrangianR::z];
+  if (derivativeNumber == 0)
+  { 
+    computeh(q, z, y);
+  }
+  else
+  {
+   computeJachq(q, z);
+
+    if (derivativeNumber == 1)
+      prod(*_jachq, *DSlink[LagrangianR::q1], y);
+    else if (derivativeNumber == 2)
+    {
+      SiconosVector qDot = *DSlink[LagrangianR::q1];
+      computeDotJachq(q, z, qDot);
+      prod(*_jachq, *DSlink[LagrangianR::q2], y);
+      prod(*_dotjachq, *DSlink[LagrangianR::q1], y, false);
+    }
+    else
+      RuntimeException::selfThrow("LagrangianScleronomousR::computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int derivativeNumber), index out of range");
+  }
+  *DSlink[LagrangianR::z] = z;
+}
+void LagrangianScleronomousR::computeOutput(double time, Interaction& inter,  unsigned int derivativeNumber)
+{
+
+  DEBUG_PRINTF("LagrangianScleronomousR::computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int derivativeNumber) with time = %f and derivativeNumber = %i\n", time, derivativeNumber);
+  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
   SiconosVector& y = *inter.y(derivativeNumber);
   SiconosVector q = *DSlink[LagrangianR::q0];
   SiconosVector z = *DSlink[LagrangianR::z];
@@ -165,7 +195,27 @@ void LagrangianScleronomousR::computeInput(double time, Interaction& inter, Inte
   DEBUG_BEGIN("void LagrangianScleronomousR::computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level) \n");
 
   DEBUG_PRINTF("level = %i\n", level);
-  VectorOfBlockVectors& DSlink = *interProp.DSlink;
+
+  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
+  SiconosVector q = *DSlink[LagrangianR::q0];
+  SiconosVector z = *DSlink[LagrangianR::z];
+  computeJachq(q, z);
+  // get lambda of the concerned interaction
+  SiconosVector& lambda = *inter.lambda(level);
+  DEBUG_EXPR(lambda.display(););
+  DEBUG_EXPR(_jachq->display(););
+  // data[name] += trans(G) * lambda
+  prod(lambda, *_jachq, *DSlink[LagrangianR::p0 + level], false);
+  DEBUG_EXPR(DSlink[LagrangianR::p0 + level]->display(););
+  *DSlink[LagrangianR::z] = z;
+  DEBUG_END("void LagrangianScleronomousR::computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level) \n");
+}
+void LagrangianScleronomousR::computeInput(double time, Interaction& inter, unsigned int level)
+{
+  DEBUG_BEGIN("void LagrangianScleronomousR::computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level) \n");
+
+  DEBUG_PRINTF("level = %i\n", level);
+  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
 
   SiconosVector q = *DSlink[LagrangianR::q0];
   SiconosVector z = *DSlink[LagrangianR::z];
@@ -183,7 +233,7 @@ void LagrangianScleronomousR::computeInput(double time, Interaction& inter, Inte
 
 void LagrangianScleronomousR::computeJach(double time, Interaction& inter, InteractionProperties& interProp)
 {
-  VectorOfBlockVectors& DSlink = *interProp.DSlink;
+  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
   SiconosVector q = *DSlink[LagrangianR::q0];
   SiconosVector z = *DSlink[LagrangianR::z];
   SiconosVector qDot = *DSlink[LagrangianR::q1];
