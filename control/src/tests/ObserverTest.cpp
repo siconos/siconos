@@ -93,12 +93,10 @@ void ObserverTest::test_SMO_ZOH()
   simZOH->run();
   SimpleMatrix& data = *simZOH->data();
   ioMatrix::write("SMO_ZOH.dat", "ascii", data, "noDim");
-  // Reference Matrix
-  SimpleMatrix dataRef(data);
-  dataRef.zero();
-  ioMatrix::read("SMO.ref", "ascii", dataRef);
-  std::cout << "------- Integration done, error = " << (data - dataRef).normInf() << " -------" <<std::endl;
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("test_SMO_ZOH : ", (data - dataRef).normInf() < _tol, true);
+  double error =0.0;
+  bool test = !(ioMatrix::compareRefFile(data, "SMO.ref", _tol, error)&& error > _tol);
+  std::cout << "------- Integration done -------" << test <<std::endl;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test_SMO_ZOH : ", test, true);
 }
 
 void ObserverTest::test_SMO_Lsodar()
@@ -114,12 +112,10 @@ void ObserverTest::test_SMO_Lsodar()
   simLsodar->run();
   SimpleMatrix& data = *simLsodar->data();
   ioMatrix::write("SMO_Lsodar.dat", "ascii", data, "noDim");
-  // Reference Matrix
-  SimpleMatrix dataRef(data);
-  dataRef.zero();
-  ioMatrix::read("SMO.ref", "ascii", dataRef);
-  std::cout << "------- Integration done, error = " << (data - dataRef).normInf() << " -------" <<std::endl;
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("test_SMO_Lsodar : ", (data - dataRef).normInf() < _tol, true);
+  double error =0.0;
+  bool test = !(ioMatrix::compareRefFile(data, "SMO.ref", _tol, error)&& error > _tol);
+  std::cout << "------- Integration done -------" << test <<std::endl;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test_SMO_Lsodar : ", test, true);
 }
 
 void ObserverTest::test_Luenberger_ZOH()
@@ -135,12 +131,10 @@ void ObserverTest::test_Luenberger_ZOH()
   simZOH->run();
   SimpleMatrix& data = *simZOH->data();
   ioMatrix::write("Luenberger_ZOH.dat", "ascii", data, "noDim");
-  // Reference Matrix
-  SimpleMatrix dataRef(data);
-  dataRef.zero();
-  ioMatrix::read("Luenberger.ref", "ascii", dataRef);
-  std::cout << "------- Integration done, error = " << (data - dataRef).normInf() << " -------" <<std::endl;
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("test_Luenberger_ZOH : ", (data - dataRef).normInf() < _tol, true);
+  double error =0.0;
+  bool test = !(ioMatrix::compareRefFile(data, "Luenberger.ref", _tol, error)&& error > _tol);
+  std::cout << "------- Integration done -------" << test <<std::endl;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test_Luenberger_ZOH : ", test , true);
 }
 
 void ObserverTest::test_Luenberger_Lsodar()
@@ -156,10 +150,9 @@ void ObserverTest::test_Luenberger_Lsodar()
   simLsodar->run();
   SimpleMatrix& data = *simLsodar->data();
   ioMatrix::write("Luenberger_Lsodar.dat", "ascii", data, "noDim");
-  // Reference Matrix
-  SimpleMatrix dataRef(data);
-  dataRef.zero();
-  ioMatrix::read("Luenberger.ref", "ascii", dataRef);
-  std::cout << "------- Integration done, error = " << (data - dataRef).normInf() << " -------" <<std::endl;
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("test_Luenberger_Lsodar : ", (data - dataRef).normInf() < _tol, true);
+  double error =0.0;
+  bool test = !(ioMatrix::compareRefFile(data, "Luenberger.ref", _tol, error)&& error > _tol);
+  std::cout << "------- Integration done -------" << test <<std::endl;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test_Luenberger_Lsodar : ", test , true);
+
 }
