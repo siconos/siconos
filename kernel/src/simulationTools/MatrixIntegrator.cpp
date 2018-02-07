@@ -63,6 +63,9 @@ void MatrixIntegrator::commonInit(const DynamicalSystem& ds, const NonSmoothDyna
 {
   _TD.reset(new TimeDiscretisation(td));
 
+  DEBUG_EXPR(ds.display(););
+
+
   Type::Siconos dsType = Type::value(ds);
   if (dsType == Type::FirstOrderLinearTIDS)
   {
@@ -81,17 +84,19 @@ void MatrixIntegrator::commonInit(const DynamicalSystem& ds, const NonSmoothDyna
      _isConst = (_TD->hConst()) && !(cfolds.getPluginA()->isPlugged()) ? true : false;
   }
 
+  _DS->setNumber(9999999);
+  DEBUG_EXPR(_DS->display(););
   // integration stuff
   _nsds.reset(new NonSmoothDynamicalSystem());
   _nsds->sett0(nsds.t0());
   _nsds->setT(nsds.finalT());
 
-  
+
   _OSI.reset(new LsodarOSI());
   _nsds->insertDynamicalSystem(_DS);
   _sim.reset(new EventDriven(_nsds, _TD, 0));
   _sim->associate(_OSI, _DS);
-
+  _sim->setName("Matrix integrator simulation");
   //change tolerance
   //_OSI->setTol(1, 10 * MACHINE_PREC, 5 * MACHINE_PREC);
 
@@ -103,8 +108,6 @@ void MatrixIntegrator::integrate()
   SiconosVector& x0 = *_DS->x0();
   SiconosVector& x = *_DS->x();
 
-  SP::SiconosVector x0_save(new SiconosVector(*_DS->x0()));
-  
   SP::SiconosVector Ecol = static_cast<FirstOrderLinearDS&>(*_DS).b();
   if (!Ecol && _E)
   {
@@ -122,7 +125,6 @@ void MatrixIntegrator::integrate()
     else
       x0(i) = 1;
 
-    DEBUG_EXPR(x0.display(););
     //Reset LsodarOSI
     //_OSI->setIsInitialized(false);
     _DS->resetToInitialState();
@@ -130,9 +132,11 @@ void MatrixIntegrator::integrate()
     _sim->advanceToEvent();
     _mat->setCol(i, x);
   }
-  DEBUG_EXPR(_mat->display(););
+
   _sim->processEvents();
-  x0 = *x0_save;
-  _DS->resetToInitialState();
+  //_DS->resetToInitialState();
+
+  DEBUG_EXPR(_mat->display(););
+  DEBUG_EXPR(_DS->display(););
   DEBUG_END("MatrixIntegrator::integrate()\n");
 }
