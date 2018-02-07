@@ -23,9 +23,15 @@
 #include "ObserverFactory.hpp"
 #include "ControlZOHAdditionalTerms.hpp"
 
+//#define DEBUG_BEGIN_END_ONLY
+// #define DEBUG_NOCOLOR
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
+#include "debug.h"
 
 void LuenbergerObserver::initialize(const NonSmoothDynamicalSystem& nsds, const Simulation &s)
 {
+  DEBUG_BEGIN("void LuenbergerObserver::initialize(const NonSmoothDynamicalSystem& nsds, const Simulation &s)\n");
   if (!_C)
   {
     RuntimeException::selfThrow("LuenbergerObserver::initialize - you have to set C before initializing the Observer");
@@ -74,7 +80,8 @@ void LuenbergerObserver::initialize(const NonSmoothDynamicalSystem& nsds, const 
 
   // Initialize with the guessed state
   _DS->setX0Ptr(_xHat);
-
+  _DS->resetToInitialState();
+  DEBUG_EXPR(_DS->display(););
   _e.reset(new SiconosVector(_C->size(0)));
   _y.reset(new SiconosVector(_C->size(0)));
 
@@ -83,6 +90,7 @@ void LuenbergerObserver::initialize(const NonSmoothDynamicalSystem& nsds, const 
   double T = nsds.finalT() + h;
   _nsds.reset(new NonSmoothDynamicalSystem(t0, T));
   _integrator.reset(new ZeroOrderHoldOSI());
+  
   std11::static_pointer_cast<ZeroOrderHoldOSI>(_integrator)->setExtraAdditionalTerms(
     std11::shared_ptr<ControlZOHAdditionalTerms>(new ControlZOHAdditionalTerms()));
   _nsds->insertDynamicalSystem(_DS);
@@ -108,6 +116,7 @@ void LuenbergerObserver::initialize(const NonSmoothDynamicalSystem& nsds, const 
 
   // initialize error
   *_y = _sensor->y();
+  DEBUG_END("void LuenbergerObserver::initialize(const NonSmoothDynamicalSystem& nsds, const Simulation &s)\n");
 }
 
 void LuenbergerObserver::process()
