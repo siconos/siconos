@@ -214,18 +214,10 @@ int main(int argc, char* argv[])
     // dataPlot (ascii) output
     ioMatrix::write("DiodeBridge.dat", "ascii", dataPlot, "noDim");
 
-
-    SimpleMatrix dataPlotRef(dataPlot);
-    dataPlotRef.zero();
-    ioMatrix::read("result.ref", "ascii", dataPlotRef);
-    std::cout << (dataPlot - dataPlotRef).normInf() << std::endl;
-    if ((dataPlot - dataPlotRef).normInf() > 1e-12)
-    {
-      std::cout <<
-                "Warning. The result is rather different from the reference file."
-                << std::endl;
+    double error=0.0, eps=1e-12;
+    if (ioMatrix::compareRefFile(dataPlot, "DiodeBridge.ref", eps, error)
+        && error > eps)
       return 1;
-    }
 
   }
   // --- Exceptions handling ---
