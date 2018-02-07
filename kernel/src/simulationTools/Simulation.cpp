@@ -205,7 +205,7 @@ void Simulation::insertNonSmoothProblem(SP::OneStepNSProblem osns, int Id)
 void Simulation::initialize()
 {
   DEBUG_BEGIN("Simulation::initialize()\n");
-
+  DEBUG_EXPR_WE(std::cout << "Name :"<< name() << std::endl;);
   // 1-  OneStepIntegrators initialization ===
   // we set the simulation pointer and the graph of DS in osi
 
@@ -234,7 +234,7 @@ void Simulation::initialize()
 
 
 
-  // 3- we initialize new  ds and interaction 
+  // 3- we initialize new  ds and interaction
   SP::DynamicalSystemsGraph DSG = _nsds->topology()->dSG(0);
   std::list<NonSmoothDynamicalSystem::Changes>::const_iterator itc = _nsdsChangeLogPosition ;
   itc++;
@@ -245,7 +245,6 @@ void Simulation::initialize()
     itc++;
 
     DEBUG_EXPR(changes.display());
-    
     if (changes.typeOfChange == NonSmoothDynamicalSystem::addDynamicalSystem)
     {
       SP::DynamicalSystem ds = changes.ds;
@@ -260,10 +259,8 @@ void Simulation::initialize()
             "OSI. We assign the following OSI to this DS." << std::endl;
         }
       }
-      DEBUG_EXPR(ds->display(););
       OneStepIntegrator& osi = *DSG->properties(DSG->descriptor(ds)).osi;
       osi.initializeDynamicalSystem(getTk(),ds);
-      DEBUG_EXPR(ds->display(););
     }
     else if (changes.typeOfChange == NonSmoothDynamicalSystem::addInteraction)
     {
@@ -321,7 +318,7 @@ void Simulation::initialize()
     // for example.  Warning: can not be called during
     // eventsManager->initialize, because it needs the initialization of
     // OSI, OSNS ...
-    _eventsManager->preUpdate(*this);
+    // _eventsManager->preUpdate(*this);
 
     _tend =  _eventsManager->nextTime();
 
