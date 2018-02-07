@@ -33,11 +33,12 @@
 #include "OneStepNSProblem.hpp"
 #include "BlockVector.hpp"
 
+//#define DEBUG_WHERE_MESSAGES
 
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
-//#define DEBUG_WHERE_MESSAGES
+
 #include <debug.h>
 
 
@@ -204,7 +205,7 @@ void ZeroOrderHoldOSI::fillDSLinks(Interaction &inter,
 
 double ZeroOrderHoldOSI::computeResidu()
 {
-
+  DEBUG_BEGIN("double ZeroOrderHoldOSI::computeResidu()\n");
   // This function is used to compute the residu for each "MoreauJeanOSI-discretized" dynamical system.
   // It then computes the norm of each of them and finally return the maximum
   // value for those norms.
@@ -241,12 +242,13 @@ double ZeroOrderHoldOSI::computeResidu()
     else
       RuntimeException::selfThrow("ZeroOrderHoldOSI::computeResidu - not yet implemented for Dynamical system type: " + dsType);
   }
-
-  return maxResidu;
+  DEBUG_END("double ZeroOrderHoldOSI::computeResidu()\n");
+  return maxResidu; 
 }
 
 void ZeroOrderHoldOSI::computeFreeState()
 {
+  DEBUG_BEGIN("void ZeroOrderHoldOSI::computeFreeState()\n");
   // This function computes "free" states of the DS belonging to this Integrator.
   // "Free" means without taking non-smooth effects into account.
 
@@ -259,13 +261,13 @@ void ZeroOrderHoldOSI::computeFreeState()
   Type::Siconos dsType ; // Type of the current DS.
 
   DynamicalSystemsGraph::VIterator dsi, dsend;
-
+  DEBUG_EXPR(display(););
   for(std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
   {
     if(!checkOSI(dsi)) continue;
     SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
     dsType = Type::value(*ds); // Its type
-
+    DEBUG_EXPR(ds->display(););
     DynamicalSystemsGraph::VDescriptor dsgVD = DSG0.descriptor(ds);
     VectorOfVectors& workVectors = *DSG0.properties(dsgVD).workVectors;
 //    updateMatrices(dsDescr);
@@ -279,21 +281,30 @@ void ZeroOrderHoldOSI::computeFreeState()
         DSG0.AdInt.at(dsgVD)->integrate();
 
       SiconosVector& xfree = *workVectors[OneStepIntegrator::free];
+      DEBUG_EXPR(xfree.display(););
+      
       prod(DSG0.Ad.at(dsgVD)->mat(), *d.x(), xfree); // xfree = Ad*xold
+      DEBUG_EXPR(xfree.display(););
       if(d.b())
       {
         assert(DSG0.AdInt.hasKey(dsgVD));
         prod(DSG0.AdInt.at(dsgVD)->mat(), *d.b(), xfree, false); // xfree += AdInt*b
+        DEBUG_EXPR(xfree.display(););
       }
 
       // add extra term, possible control terms
       if(_extraAdditionalTerms)
+      {
+        DEBUG_PRINT("add extra additional terms\n");
         _extraAdditionalTerms->addSmoothTerms(DSG0, dsgVD, h, xfree);
+      }
+      DEBUG_EXPR(xfree.display(););
     }
     else
       RuntimeException::selfThrow("ZeroOrderHoldOSI::computeFreeState - not yet implemented for Dynamical system type: " + dsType);
+    
   }
-
+  DEBUG_END("void ZeroOrderHoldOSI::computeFreeState()\n");
 }
 
 void ZeroOrderHoldOSI::prepareNewtonIteration(double time)
@@ -355,6 +366,7 @@ struct ZeroOrderHoldOSI::_NSLEffectOnFreeOutput : public SiconosVisitor
 
 void ZeroOrderHoldOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, OneStepNSProblem * osnsp)
 {
+  DEBUG_BEGIN("void ZeroOrderHoldOSI::computeFreeOutput(...)\n");
   /** \warning: ensures that it can also work with two different osi for two different ds ?
   */
   SP::InteractionsGraph indexSet = osnsp->simulation()->indexSet(osnsp->indexSetLevel());
@@ -488,7 +500,7 @@ void ZeroOrderHoldOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_
     }
   }
 
-
+  DEBUG_END("void ZeroOrderHoldOSI::computeFreeOutput(...)\n");
 }
 void ZeroOrderHoldOSI::integrate(double& tinit, double& tend, double& tout, int&)
 {
@@ -498,6 +510,7 @@ void ZeroOrderHoldOSI::integrate(double& tinit, double& tend, double& tout, int&
 
 void ZeroOrderHoldOSI::updateState(const unsigned int level)
 {
+  DEBUG_BEGIN("ZeroOrderHoldOSI::updateState(const unsigned int level)\n");
   bool useRCC = _simulation->useRelativeConvergenceCriteron();
   if(useRCC)
     _simulation->setRelativeConvergenceCriterionHeld(true);
@@ -509,7 +522,7 @@ void ZeroOrderHoldOSI::updateState(const unsigned int level)
   {
     if(!checkOSI(dsi)) continue;
     SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
-
+    DEBUG_EXPR(ds->display(););
     Type::Siconos dsType = Type::value(*ds);
 
     DynamicalSystemsGraph::VDescriptor dsgVD = DSG0.descriptor(ds);
@@ -536,6 +549,7 @@ void ZeroOrderHoldOSI::updateState(const unsigned int level)
         }
         if(interC)
         {
+          DEBUG_PRINT("A control interaction is found\n");
           MatrixIntegrator& Bd = *DSG0.Bd[dsgVD];
           if(!Bd.isConst())
           {
@@ -544,10 +558,12 @@ void ZeroOrderHoldOSI::updateState(const unsigned int level)
           prod(Bd.mat(), *interC->lambda(0), x, false); // x += Bd*\lambda
         }
       }
+      DEBUG_EXPR(ds->display(););
     }
     else
       RuntimeException::selfThrow("ZeroOrderHoldOSI::updateState - not yet implemented for Dynamical system type: " + dsType);
   }
+  DEBUG_END("ZeroOrderHoldOSI::updateState(const unsigned int level)\n");
 }
 
 
@@ -612,12 +628,10 @@ void ZeroOrderHoldOSI::display()
   {
     if(!checkOSI(dsi)) continue;
     SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
-//    cout << "--> Phi of dynamical system number " << itN << ": " << endl;
-//    if (Ad(ds)) Ad(ds)->display();
-//    else cout << "-> NULL" << endl;
-//    cout << "--> Psi of dynamical system number " << itN << ": " << endl;
-//    if (Bd(ds)) Bd(ds)->display();
-//    else cout << "-> NULL" << endl;
+    std::cout << "--> Phi of dynamical system number " <<  ": " <<    std::endl;
+    Ad(ds).display();
+    std::cout << "--> Psi of dynamical system number " <<  ": " <<    std::endl;
+    Bd(ds).display();
   }
   std::cout << "================================" <<std::endl;
 }

@@ -347,7 +347,9 @@ void TimeStepping::initOSNS()
 
 void TimeStepping::nextStep()
 {
+  DEBUG_BEGIN("void TimeStepping::nextStep()\n");
   processEvents();
+  DEBUG_END("void TimeStepping::nextStep()\n");
 }
 
 void TimeStepping::computeFreeState()
