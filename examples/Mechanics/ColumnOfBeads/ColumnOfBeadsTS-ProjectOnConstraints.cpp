@@ -118,44 +118,22 @@ int withLevel(unsigned int mylevel)
     SP::SiconosVector bOfBeads(new SiconosVector(1));
     (*bOfBeads)(0) = -2 * R;
 
-    // This doesn't work !!!
-
-    //SP::Relation relationOfBeads(new LagrangianLinearTIR(HOfBeads));
-    //std::vector<SP::Interaction > interOfBeads(nBeads-1);
-    // for (unsigned int i =0; i< nBeads-1; i++)
-    // {
-    //   interOfBeads[i].reset(new Interaction(nslaw, relationOfBeads));
-    // }
-
     // This works !!
     std::vector<SP::Relation > relationOfBeads(nBeads - 1);
     std::vector<SP::Interaction > interOfBeads(nBeads - 1);
-    // for (unsigned int i =0; i< nBeads-1; i++)
-    // {
-    //   relationOfBeads[i].reset(new LagrangianLinearTIR(HOfBeads,bOfBeads));
-    //   interOfBeads[i].reset(new Interaction(nslaw, relationOfBeads[i]));
-    // }
-
 
     // --------------------------------------
     // ---      Model and simulation      ---
     // --------------------------------------
-    SP::Model columnOfBeads(new Model(t0, T));
+    SP::NonSmoothDynamicalSystem columnOfBeads(new NonSmoothDynamicalSystem(t0, T));
+   
     // --  (1) OneStepIntegrators --
     SP::MoreauJeanDirectProjectionOSI OSI(new MoreauJeanDirectProjectionOSI(theta));
     // add the dynamical system in the non smooth dynamical system
     for (unsigned int i = 0; i < nBeads; i++)
     {
-      columnOfBeads->nonSmoothDynamicalSystem()->insertDynamicalSystem(beads[i]);
+      columnOfBeads->insertDynamicalSystem(beads[i]);
     }
-
-    // // link the interaction and the dynamical system
-    // for (unsigned int i =0; i< nBeads-1; i++)
-    // {
-    //   columnOfBeads->nonSmoothDynamicalSystem()->link(interOfBeads[i],beads[i]);
-    //   columnOfBeads->nonSmoothDynamicalSystem()->link(interOfBeads[i],beads[i+1]);
-    // }
-
 
     // -- (2) Time discretisation --
     SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
@@ -166,21 +144,15 @@ int withLevel(unsigned int mylevel)
     osnspb_pos->numericsSolverOptions()->iparam[0]=2000;
     // -- (4) Simulation setup with (1) (2) (3)
     unsigned int levelForProjection = mylevel; //(default =1)
-    SP::TimeSteppingDirectProjection s(new TimeSteppingDirectProjection(t, OSI, osnspb, osnspb_pos, levelForProjection));
+    SP::TimeSteppingDirectProjection s(new TimeSteppingDirectProjection(columnOfBeads, t, OSI, osnspb, osnspb_pos, levelForProjection));
     s->setProjectionMaxIteration(10);
     s->setConstraintTolUnilateral(1e-08);
     // s->setConstraintTol(1e-10);
-    columnOfBeads->setSimulation(s);
 
 
     // =========================== End of model definition ===========================
 
     // ================================= Computation =================================
-
-    // --- Simulation initialization ---
-
-    cout << "====> Initialisation ..." << endl << endl;
-    columnOfBeads->initialize();
 
     int N = ceil((T - t0) / h); // Number of time steps
 
@@ -212,8 +184,6 @@ int withLevel(unsigned int mylevel)
     boost::timer time;
     time.restart();
     int ncontact = 0 ;
-    bool isOSNSinitialized = false;
-    InteractionsGraph& indexSet0 = *columnOfBeads->nonSmoothDynamicalSystem()->topology()->indexSet0();
     while (s->hasNextEvent())
     {
       // Rough contact detection
@@ -227,15 +197,7 @@ int withLevel(unsigned int mylevel)
             // std::cout << "Number of contact = " << ncontact << std::endl;
 
             inter.reset(new Interaction(nslaw, relation));
-            columnOfBeads->nonSmoothDynamicalSystem()->link(inter, beads[0]);
-
-            s->initializeInteraction(s->nextTime(), inter);
-
-            if (!isOSNSinitialized)
-            {
-              s->initOSNS();
-              isOSNSinitialized = true;
-            }
+            columnOfBeads->link(inter, beads[0]);
 
             assert(inter->y(0)->getValue(0) >= 0);
             // std::cout<< "inter->y(0)->getValue(0)" <<inter->y(0)->getValue(0)   <<std::endl;
@@ -257,17 +219,8 @@ int withLevel(unsigned int mylevel)
             relationOfBeads[i].reset(new LagrangianLinearTIR(HOfBeads, bOfBeads));
             interOfBeads[i].reset(new Interaction(nslaw, relationOfBeads[i]));
 
-            columnOfBeads->nonSmoothDynamicalSystem()->link(interOfBeads[i], beads[i], beads[i+1]);
+            columnOfBeads->link(interOfBeads[i], beads[i], beads[i+1]);
 
-            s->initializeInteraction(s->nextTime(), interOfBeads[i]);
-
-            if (!isOSNSinitialized)
-            {
-              s->initOSNS();
-              isOSNSinitialized = true;
-            }
-
-            // std::cout<< "interOfBeads["<<i<<"]->y(0)->getValue(0)" <<interOfBeads[i]->y(0)->getValue(0)   <<std::endl;
             assert(interOfBeads[i]->y(0)->getValue(0) >= 0);
           }
         }
@@ -305,25 +258,22 @@ int withLevel(unsigned int mylevel)
     // This is the power of c++
     ostringstream convert;
     convert << mylevel;
-    ioMatrix::write("result-level" + convert.str() + ".dat", "ascii", dataPlot, "noDim");
-    // Comparison with a reference file
-    SimpleMatrix dataPlotRef(dataPlot);
-    dataPlotRef.zero();
+    ioMatrix::write("ColumnOfbeadsTS-ProjectionOnConstraints-level" + convert.str() + ".dat", "ascii", dataPlot, "noDim");
+
+    double error=0.0, eps=1e-12;
     if (levelForProjection == 1)
     {
-      ioMatrix::read("result-WITHPROJ.ref", "ascii", dataPlotRef);
+      if (ioMatrix::compareRefFile(dataPlot, "ColumnOfbeadsTS-ProjectionOnConstraints.ref", eps, error)
+          && error > eps)
+        return 1;
     }
     else if (levelForProjection == 0)
     {
-      ioMatrix::read("result-WITHPROJ-level0.ref", "ascii", dataPlotRef);
+      if (ioMatrix::compareRefFile(dataPlot, "ColumnOfbeadsTS-ProjectionOnConstraints-level0.ref", eps, error)
+          && error > eps)
+        return 1;
     }
-    cout << "====> Comparison with reference file ..." << endl;
-    std::cout << "Error w.r.t. reference file : " << (dataPlot - dataPlotRef).normInf() << std::endl;
-    if ((dataPlot - dataPlotRef).normInf() > 1e-12)
-    {
-      std::cout << "Warning. The result is rather different from the reference file." << std::endl;
-      return 1;
-    }
+    
 
   }
 

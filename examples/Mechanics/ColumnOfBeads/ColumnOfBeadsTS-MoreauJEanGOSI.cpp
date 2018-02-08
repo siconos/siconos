@@ -149,13 +149,13 @@ int withLevel(unsigned int mylevel)
     // --------------------------------------
     // ---      Model and simulation      ---
     // --------------------------------------
-    SP::Model columnOfBeads(new Model(t0, T));
+    SP::NonSmoothDynamicalSystem columnOfBeads(new NonSmoothDynamicalSystem(t0, T));
     // --  (1) OneStepIntegrators --
     SP::MoreauJeanGOSI OSI(new MoreauJeanGOSI(theta));
     // add the dynamical system in the non smooth dynamical system
     for (unsigned int i = 0; i < nBeads; i++)
     {
-      columnOfBeads->nonSmoothDynamicalSystem()->insertDynamicalSystem(beads[i]);
+      columnOfBeads->insertDynamicalSystem(beads[i]);
     }
 
     // // link the interaction and the dynamical system
@@ -175,20 +175,15 @@ int withLevel(unsigned int mylevel)
 
     // -- (4) Simulation setup with (1) (2) (3)
 
-    SP::TimeStepping s(new TimeStepping(t, OSI, osnspb));
+    SP::TimeStepping s(new TimeStepping(columnOfBeads, t, OSI, osnspb));
 
     // s->setConstraintTol(1e-10);
-    columnOfBeads->setSimulation(s);
 
 
     // =========================== End of model definition ===========================
 
     // ================================= Computation =================================
 
-    // --- Simulation initialization ---
-
-    cout << "====> Initialisation ..." << endl << endl;
-    columnOfBeads->initialize();
 
     int N = ceil((T - t0) / h); // Number of time steps
 
@@ -234,15 +229,7 @@ int withLevel(unsigned int mylevel)
             // std::cout << "Number of contact = " << ncontact << std::endl;
 
             inter.reset(new Interaction(nslaw, relation));
-            columnOfBeads->nonSmoothDynamicalSystem()->link(inter, beads[0]);
-
-            s->initializeInteraction(s->nextTime(), inter);
-
-            if (!isOSNSinitialized)
-            {
-              s->initOSNS();
-              isOSNSinitialized = true;
-            }
+            columnOfBeads->link(inter, beads[0]);
 
             assert(inter->y(0)->getValue(0) >= 0);
             // std::cout<< "inter->y(0)->getValue(0)" <<inter->y(0)->getValue(0)   <<std::endl;
@@ -264,15 +251,7 @@ int withLevel(unsigned int mylevel)
             relationOfBeads[i].reset(new LagrangianLinearTIR(HOfBeads, bOfBeads));
             interOfBeads[i].reset(new Interaction(nslaw, relationOfBeads[i]));
 
-            columnOfBeads->nonSmoothDynamicalSystem()->link(interOfBeads[i], beads[i], beads[i+1]);
-
-            s->initializeInteraction(s->nextTime(), interOfBeads[i]);
-
-            if (!isOSNSinitialized)
-            {
-              s->initOSNS();
-              isOSNSinitialized = true;
-            }
+            columnOfBeads->link(interOfBeads[i], beads[i], beads[i+1]);
 
             // std::cout<< "interOfBeads["<<i<<"]->y(0)->getValue(0)" <<interOfBeads[i]->y(0)->getValue(0)   <<std::endl;
             assert(interOfBeads[i]->y(0)->getValue(0) >= 0);
@@ -310,20 +289,11 @@ int withLevel(unsigned int mylevel)
     dataPlot.resize(k, outputSize);
 
     // This is the power of c++
-    ioMatrix::write("result-MoreauJeanGOSI.dat", "ascii", dataPlot);
-    // Comparison with a reference file
-    SimpleMatrix dataPlotRef(dataPlot);
-    dataPlotRef.zero();
-    ioMatrix::read("result-MoreauJeanGOSI.ref", "ascii", dataPlotRef);
-
-    cout << "====> Comparison with reference file ..." << endl;
-    std::cout << "Error w.r.t. reference file : " << (dataPlot - dataPlotRef).normInf() << std::endl;
-    if ((dataPlot - dataPlotRef).normInf() > 1e-12)
-    {
-      std::cout << "Warning. The result is rather different from the reference file." << std::endl;
+    ioMatrix::write("ColumnOfbeadsTS-MoreauJeanGOSI.dat", "ascii", dataPlot);
+    double error=0.0, eps=1e-12;
+    if (ioMatrix::compareRefFile(dataPlot, "ColumnOfbeadsTS-MoreauJeanGOSI.ref", eps, error)
+        && error > eps)
       return 1;
-    }
-
   }
 
   catch (SiconosException e)
