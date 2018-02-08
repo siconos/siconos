@@ -68,7 +68,7 @@ int main()
 
   int NBStep = (int) floor(sTf / sStep);
 
-  NBStep = 3;
+  //NBStep = 130;
   //*****BUILD THE DYNAMIC SYSTEM
   SP::MyDS aDS ;
   aDS.reset(new MyDS(xti));
@@ -102,7 +102,6 @@ int main()
   aN->insertDynamicalSystem(aDS);
   aN->link(aI, aDS);
 
-
   // -- (1) OneStepIntegrators --
   SP::OneStepIntegrator  aEulerMoreauOSI ;
   aEulerMoreauOSI.reset(new EulerMoreauOSI(0.5));
@@ -122,7 +121,7 @@ int main()
   aS->setUseRelativeConvergenceCriteron(false);
   aS->setNewtonMaxIteration(20);
   aS->setNewtonTolerance(1e-11);
-
+  aS->setResetAllLambda(false);
   //To compute necessary information for memory allocator
   
   aS->initialize();
@@ -174,6 +173,14 @@ int main()
 
   for (int k = 0 ; k < NBStep ; k++)
   {
+    cout << "        " << endl;
+    cout << "        " << endl;
+    cout << "        " << endl;
+    cout << "        " << endl;
+    cout << "        " << endl;
+    cout << "        " << endl;
+    cout << "        " << endl;
+    cout << "########" << k << endl;
     //      if (cmp==150)
     //        numerics_set_verbose(1);
     //      else if (cmp==151)
