@@ -19,8 +19,8 @@
 /*!\file BouncingBallED.cpp
   \brief \ref EMBouncingBall - C++ input file, Event-Driven version - V. Acary, F. Perignon.
 
-  A Ball bouncing on the ground. 
-  Direct description of the model. 
+  A Ball bouncing on the ground.
+  Direct description of the model.
   Simulation with an Event-Driven scheme.
 */
 
@@ -35,8 +35,8 @@ int main(int argc, char* argv[]){
     time.restart();
   try{
     // ================= Creation of the model =======================
-    
-    // User-defined main parameters 
+
+    // User-defined main parameters
     unsigned int nDofBall = 1;            // degrees of freedom of ball 1
     double Height = 0.2;         // Distance between impactor balls and monodisperse balls
     double V_impact = 1.0;
@@ -44,15 +44,15 @@ int main(int argc, char* argv[]){
     unsigned int NumberBalls  = 10;            // Number
     double R_ball = 0.01;         // Ball radius
     // Material properties of balls
-    double mass_density = 7780;           // mass density 
+    double mass_density = 7780;           // mass density
     double CoefRes = 1.0;          // Restitution coefficient
     double YoungBall = 203.0e9;           // Young modulus of the balls
     double PoissonBall = 0.3;             // Poison coefficient of the balls
-    double PowCompLaw = 1.5;              // Power of the compliance law: 1.0 for linear contact and 3/2 for the Hertzian contact 
+    double PowCompLaw = 1.5;              // Power of the compliance law: 1.0 for linear contact and 3/2 for the Hertzian contact
     string TypeContactLaw = "BiStiffness"; // Type of compliance contact law
-    // Parameters for the global simulation 
+    // Parameters for the global simulation
     double t0 = 0;                         // initial computation time
-    double T = 0.6;                        // final computation time 
+    double T = 0.6;                        // final computation time
     double h = 0.001;                      // time step
     unsigned int Npointsave = 610;        // Number of data points to be saved
     // For impact computation
@@ -65,7 +65,7 @@ int main(int argc, char* argv[]){
     string impact_data_name = "data_impact.dat";
     bool _IsSaveDataImpact = false;
     //---------------------------------------
-    // ---- Configuration of chaines 
+    // ---- Configuration of chaines
     //--------------------------------------
     //************* Balls ******************
     double NumberContacts = NumberBalls -1 ; // Number of contacts
@@ -87,7 +87,7 @@ int main(int argc, char* argv[]){
    (*InitPosBalls)(0) = 0.0;
    (*InitPosBalls)(1) = (*RadiusBalls)(0) + Height + (*RadiusBalls)(1);
    for (unsigned int j = 2; j < NumberBalls; ++j)
-     {   
+     {
        (*InitPosBalls)(j) = (*InitPosBalls)(j - 1) + (*RadiusBalls)(j - 1) + (*RadiusBalls)(j);
      }
    // (4) Initial velocity of balls
@@ -113,7 +113,7 @@ int main(int argc, char* argv[]){
     {
       Emoy = (2.0/3.0)*(YoungBall/(1.0 - pow(PoissonBall,2)));
       Rmoy = ((*RadiusBalls)(id)*(*RadiusBalls)(id+1))/((*RadiusBalls)(id) + (*RadiusBalls)(id+1));
-      (*StiffContacts)(id) = pow(Rmoy,0.5)*Emoy; 
+      (*StiffContacts)(id) = pow(Rmoy,0.5)*Emoy;
     }
     // // Display and save the configuration of the chain simulated
     // cout << "Configuation of ball chains" << endl;
@@ -131,13 +131,13 @@ int main(int argc, char* argv[]){
     // cout<< "Stiffness at contacts: " << endl;
     // StiffContacts->display();
     // -------------------------
-    // --- Dynamical systems --- 
+    // --- Dynamical systems ---
     // -------------------------
     cout << "====> Model loading ..." <<endl<<endl;
     // -------------
     // --- Model ---
     // -------------
-    SP::Model BallChain(new Model(t0,T));
+    SP::NonSmoothDynamicalSystem BallChain(new NonSmoothDynamicalSystem(t0,T));
     // -- (1) OneStepIntegrators --
     SP::OneStepIntegrator OSI(new LsodarOSI());
 
@@ -159,7 +159,7 @@ int main(int argc, char* argv[]){
 	      (*MassBall)(0,0) = _massBall;
 	      // -- Initial positions and velocities --
 	      q0Ball = SP::SiconosVector(new SiconosVector(nDofBall));
-	      v0Ball = SP::SiconosVector(new SiconosVector(nDofBall)); 
+	      v0Ball = SP::SiconosVector(new SiconosVector(nDofBall));
 	      (*q0Ball)(0) = _Pos0Ball;
 	      (*v0Ball)(0) = _Vel0Ball;
 	      // -- The dynamical system --
@@ -170,7 +170,7 @@ int main(int argc, char* argv[]){
 	      ball->setFExtPtr(FextBall);
 	      //
 	      VecOfallDS.push_back(ball);
-        BallChain->nonSmoothDynamicalSystem()->insertDynamicalSystem(ball);
+        BallChain->insertDynamicalSystem(ball);
       }
     // --------------------
     // --- Interactions ---
@@ -194,7 +194,7 @@ int main(int argc, char* argv[]){
 	      nslaw = SP::NonSmoothLaw(new MultipleImpactNSL(ResCoef,Stiff,ElasPow));
 	      relation = SP::Relation(new LagrangianLinearTIR(H,E));
 	      interaction = SP::Interaction(new Interaction(nslaw, relation));
-        BallChain->nonSmoothDynamicalSystem()->link(interaction, VecOfallDS[j],VecOfallDS[j+1]);
+        BallChain->link(interaction, VecOfallDS[j],VecOfallDS[j+1]);
 	    }
 
     // ----------------
@@ -214,24 +214,18 @@ int main(int argc, char* argv[]){
     multiple_impact->SetSizeDataSave(Npoint_save_impact);
     SP::OneStepNSProblem acceleration(new LCP());
     // -- (4) Simulation setup with (1) (2) (3)
-    SP::EventDriven s(new EventDriven(t));
+    SP::EventDriven s(new EventDriven(BallChain, t));
     s->insertIntegrator(OSI);
     s->insertNonSmoothProblem(impact,SICONOS_OSNSP_ED_IMPACT);
     s->insertNonSmoothProblem(acceleration,SICONOS_OSNSP_ED_SMOOTH_ACC);
-    BallChain->setSimulation(s);
 
     // =========================== End of model definition ===========================
     //----------------------------------- Initialization-------------------------------
     s->setPrintStat(true);
-    BallChain->initialize();
-    SP::DynamicalSystemsGraph DSG0 = BallChain->nonSmoothDynamicalSystem()->topology()->dSG(0);
-    SP::InteractionsGraph IndexSet0 = BallChain->nonSmoothDynamicalSystem()->topology()->indexSet(0);
-    SP::InteractionsGraph IndexSet1 = BallChain->nonSmoothDynamicalSystem()->topology()->indexSet(1);
-    SP::InteractionsGraph IndexSet2 = BallChain->nonSmoothDynamicalSystem()->topology()->indexSet(2);
+    SP::DynamicalSystemsGraph DSG0 = BallChain->topology()->dSG(0);
+    SP::InteractionsGraph IndexSet0 = BallChain->topology()->indexSet(0);
     // // Display topology of the system
     // cout << "Number of vectices of IndexSet0: " << IndexSet0->size() << endl;
-    // cout << "Number of vectices of IndexSet1: " << IndexSet1->size() << endl;
-    // cout << "Number of vectices of IndexSet2: " << IndexSet2->size() << endl;
     // cout << "Number of vectices of DSG0: " << DSG0->size() << endl;
     //
     SP::EventsManager eventsManager = s->eventsManager();
@@ -268,7 +262,7 @@ int main(int argc, char* argv[]){
 	      col_pos++;
 	      col_vel++;
 	    }
-	  ++k;   
+	  ++k;
 	  s->advanceToEvent(); // run simulation from one event to the next
 	  if(eventsManager->nextEvent()->getType() == 2)
 	    {
@@ -279,7 +273,7 @@ int main(int argc, char* argv[]){
 	  if (nonSmooth)
 	    {
 	      //multiple_impact->display();
-	      dataPlot(k,0) = s->startingTime(); 
+	      dataPlot(k,0) = s->startingTime();
 	      // Save state of the balls
 	      unsigned int col_pos = 1;
 	      unsigned int col_vel = NumberBalls + 1;
@@ -308,17 +302,13 @@ int main(int argc, char* argv[]){
     cout << "\nComputation Time " << time.elapsed()  << endl;
     // --- Output files ---
     cout<<"====> Output file writing ..."<<endl;
-    ioMatrix::write("result.dat", "ascii",dataPlot,"noDim");
-    // Comparison with a reference file 
-    SimpleMatrix dataPlotRef(dataPlot);
-    dataPlotRef.zero();
-    ioMatrix::read("resultMonodisperseChain_LZBModel.ref", "ascii", dataPlotRef);
+    ioMatrix::write("MonodisperseChainOfBalls-LZBModel.dat", "ascii",dataPlot,"noDim");
 
-    if ((dataPlot-dataPlotRef).normInf() > 1e-12) 
-      {
-        std::cout << "Warning. The results is rather different from the reference file."<< std::endl;
-        return 1;
-      }
+    double error=0.0, eps=1e-12;
+    if (ioMatrix::compareRefFile(dataPlot, "MonodisperseChainOfBalls-LZBModel.ref", eps, error)
+        && error > eps)
+      return 1;
+
   }
   catch(SiconosException e)
     {cout << e.report() << endl;}
