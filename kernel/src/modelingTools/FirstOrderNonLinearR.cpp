@@ -156,7 +156,7 @@ void FirstOrderNonLinearR::computeLinearizedOutput(double time, Interaction& int
   VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
   VectorOfVectors& workV = *interProp.workVectors;
   VectorOfSMatrices& workM = *interProp.workMatrices;
-  SiconosMatrix& osnsM = *interProp.block;
+  
 
   if (_D)
     prod(*_D, *(inter.lambdaOld(level)), y, true);
@@ -188,11 +188,16 @@ void FirstOrderNonLinearR::computeLinearizedOutput(double time, Interaction& int
   else
     prod(*workM[FirstOrderR::mat_C], deltax, y, false);
 
-  // osnsM = h * C * W^-1 * B + D
-  prod(osnsM, *inter.lambda(level), y, false);
+  if (interProp.block)
+  {
+    SiconosMatrix& osnsM = *interProp.block;
+    // osnsM = h * C * W^-1 * B + D
+    DEBUG_EXPR(osnsM.display(););
+    prod(osnsM, *inter.lambda(level), y, false);
+  }
   DEBUG_PRINT("FirstOrderNonLinearR::computeOutput : new linearized y \n");
   DEBUG_EXPR(y.display());
-
+    
   SiconosVector& x = *workV[FirstOrderR::vec_x];
   x = *DSlink[FirstOrderR::x];
   SiconosVector& z = *workV[FirstOrderR::vec_z];
