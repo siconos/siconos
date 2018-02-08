@@ -72,6 +72,7 @@ TimeStepping::TimeStepping(SP::NonSmoothDynamicalSystem nsds,
     _isNewtonConverge(false),
     _newtonUpdateInteractionsPerIteration(false),_displayNewtonConvergence(false),
     _warnOnNonConvergence(true),
+    _resetAllLambda(true),
     _explicitJacobiansOfRelation(false)
 {
 
@@ -89,6 +90,7 @@ TimeStepping::TimeStepping(SP::NonSmoothDynamicalSystem nsds, SP::TimeDiscretisa
     _isNewtonConverge(false),
     _newtonUpdateInteractionsPerIteration(false),_displayNewtonConvergence(false),
     _warnOnNonConvergence(true),
+    _resetAllLambda(true),
     _explicitJacobiansOfRelation(false)
 {
   (*_allNSProblems).resize(nb);
@@ -434,15 +436,17 @@ void TimeStepping::advanceToEvent()
   DEBUG_PRINTF("TimeStepping::advanceToEvent(). Time =%f\n",getTkp1());
 
   initialize();
-
-  // Initialize lambdas of all interactions.
-  SP::InteractionsGraph indexSet0 = _nsds->topology()->indexSet(0);
-  InteractionsGraph::VIterator ui, uiend, vnext;
-  std11::tie(ui, uiend) = indexSet0->vertices();
-  for (vnext = ui; ui != uiend; ui = vnext)
+  if (_resetAllLambda)
   {
-    ++vnext;
-    indexSet0->bundle(*ui)->resetAllLambda();
+    // Initialize lambdas of all interactions.
+    SP::InteractionsGraph indexSet0 = _nsds->topology()->indexSet(0);
+    InteractionsGraph::VIterator ui, uiend, vnext;
+    std11::tie(ui, uiend) = indexSet0->vertices();
+    for (vnext = ui; ui != uiend; ui = vnext)
+    {
+      ++vnext;
+      indexSet0->bundle(*ui)->resetAllLambda();
+    }
   }
   newtonSolve(_newtonTolerance, _newtonMaxIteration);
 }

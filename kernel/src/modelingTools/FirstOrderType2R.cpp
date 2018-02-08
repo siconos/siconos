@@ -22,9 +22,9 @@
 #include "BlockVector.hpp"
 #include "SimulationGraphs.hpp"
 
-#define DEBUG_NOCOLOR
-#define DEBUG_STDOUT
-#define DEBUG_MESSAGES
+// #define DEBUG_NOCOLOR
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
 #include <debug.h>
 
 
@@ -115,7 +115,7 @@ void FirstOrderType2R::computeOutput(double time, Interaction& inter, unsigned i
 void FirstOrderType2R::computeLinearizedOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level)
 {
   DEBUG_BEGIN("FirstOrderType2R::computeLinearizedOutput\n");
-  // compute the new y  obtained by linearisation (see DevNotes)
+  // compute the new y obtained by linearisation (see DevNotes)
   // y_{alpha+1}_{k+1} = h(x_{k+1}^{alpha},lambda_{k+1}^{alpha},t_k+1)
   //                     + C_{k+1}^alpha ( x_{k+1}^{alpha+1}- x_{k+1}^{alpha} )
   //                     + D_{k+1}^alpha ( lambda_{k+1}^{alpha+1} - lambda_{k+1}^{alpha} )
@@ -129,7 +129,8 @@ void FirstOrderType2R::computeLinearizedOutput(double time, Interaction& inter, 
   VectorOfVectors& workV = *interProp.workVectors;
   VectorOfSMatrices& workM = *interProp.workMatrices;
 
-
+  SiconosVector& hAlpha= *workV[FirstOrderR::h_alpha];
+  
   if (_D)
     prod(*_D, *(inter.lambdaOld(level)), y, true);
   else
@@ -167,6 +168,8 @@ void FirstOrderType2R::computeLinearizedOutput(double time, Interaction& inter, 
   {
     SiconosMatrix& osnsM = *interProp.block;
     prod(osnsM, *inter.lambda(level), y, false);
+    DEBUG_EXPR(inter.lambda(level)->display());
+    DEBUG_EXPR(osnsM.display());
     DEBUG_PRINT("FirstOrderType2R::computeOutput : new linearized y \n");
     DEBUG_EXPR(y.display());
   }
@@ -174,7 +177,8 @@ void FirstOrderType2R::computeLinearizedOutput(double time, Interaction& inter, 
   SiconosVector& x = *workV[FirstOrderR::vec_x];
   x = *DSlink[FirstOrderR::x];
 
-  SiconosVector& hAlpha= *workV[FirstOrderR::h_alpha];
+  
+  
   computeh(time, x, *inter.lambda(level), hAlpha);
   DEBUG_PRINT("FirstOrderType2R::computeOutput : new Halpha \n");
   DEBUG_EXPR(hAlpha.display());

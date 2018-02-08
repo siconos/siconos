@@ -205,16 +205,18 @@ void Simulation::insertNonSmoothProblem(SP::OneStepNSProblem osns, int Id)
 void Simulation::initialize()
 {
   DEBUG_BEGIN("Simulation::initialize()\n");
-  DEBUG_EXPR_WE(std::cout << "Name :"<< name() << std::endl;);
+  DEBUG_EXPR(std::cout << "Name :"<< name() << std::endl;);
   // 1-  OneStepIntegrators initialization ===
   // we set the simulation pointer and the graph of DS in osi
 
   for (OSIIterator itosi = _allOSI->begin();
        itosi != _allOSI->end(); ++itosi)
   {
-    (*itosi)->setSimulationPtr(shared_from_this());
-    // a subgraph has to be implemented.
-    (*itosi)->setDynamicalSystemsGraph(_nsds->topology()->dSG(0));
+    if (!(*itosi)->isInitialized()){
+      (*itosi)->setSimulationPtr(shared_from_this());
+      // a subgraph has to be implemented.
+      (*itosi)->setDynamicalSystemsGraph(_nsds->topology()->dSG(0));
+    }
   }
 
   // 2 - we set the osi of DS that ha been defined through associate(ds,osi)
@@ -281,6 +283,7 @@ void Simulation::initialize()
        itosi != _allOSI->end(); ++itosi)
   {
     if (!(*itosi)->isInitialized()){
+      DEBUG_PRINT("osi->initialize\n")
       (*itosi)->initialize();
       _numberOfIndexSets = std::max<int>((*itosi)->numberOfIndexSets(), _numberOfIndexSets);
     }
@@ -292,6 +295,7 @@ void Simulation::initialize()
   assert (_numberOfIndexSets >0);
   if ((indxSize == LEVELMAX) || (indxSize < _numberOfIndexSets ))
   {
+    DEBUG_PRINT("Topology : difference number of indexSets\n");
     topo->indexSetsResize(_numberOfIndexSets);
     // Init if the size has changed
     for (unsigned int i = indxSize; i < topo->indexSetsSize(); i++) // ++i ???

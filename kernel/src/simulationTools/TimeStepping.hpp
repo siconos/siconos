@@ -47,7 +47,6 @@ typedef void (*CheckSolverFPtr)(int, Simulation*);
 #define SICONOS_TS_LINEAR_IMPLICIT 2
 #define SICONOS_TS_NONLINEAR 3
 
-
 class TimeStepping : public Simulation
 {
 protected:
@@ -110,6 +109,10 @@ protected:
   /** boolean variable to display warning on non-convergence
    */
   bool _warnOnNonConvergence;
+
+  /** boolean variable to resetAllLamda at each step (default true)
+   */
+  bool _resetAllLambda;
 
   /** boolean variable to force an explicit evaluation of the Jacobians
    * mapping of relations only at the beginning of the time--step and
@@ -255,6 +258,15 @@ public:
   {
     _warnOnNonConvergence = newval;
   };
+
+  void setResetAllLambda(bool newval)
+  {
+    _resetAllLambda = newval;
+  };
+
+  
+
+  
   bool explicitJacobiansOfRelation()
   {
   return  _explicitJacobiansOfRelation;
