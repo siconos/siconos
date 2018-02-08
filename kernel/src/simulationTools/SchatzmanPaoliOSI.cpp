@@ -129,18 +129,9 @@ void SchatzmanPaoliOSI::initializeDynamicalSystem( double t, SP::DynamicalSystem
 
     //*velocity=*velocity; we do nothing for the velocity
 
-    // This value will swapped when OneStepIntegrator::saveInMemory will be called
-    // by the rest of  Simulation::initialize (_eventsManager->preUpdate();)
+    lltids->qMemory().swap(*q);
+    lltids->velocityMemory().swap(*velocity);
 
-    // SP::SiconosVector qprev = lltids->qMemory()->getSiconosVector(0);
-    // SP::SiconosVector qprev2 = lltids->qMemory()->getSiconosVector(1);
-    // SP::SiconosVector vprev = lltids->velocityMemory()->getSiconosVector(0);
-    //  std::cout << " qprev = " << std::endl;
-    // qprev->display();
-    //  std::cout << " qprev2 = " << std::endl;
-    // qprev2->display();
-    //  std::cout << " vprev = " << std::endl;
-    // vprev->display();
   }
   // W initialization
   initializeIterationMatrixW(t, ds);
