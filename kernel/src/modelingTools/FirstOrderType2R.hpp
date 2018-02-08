@@ -133,8 +133,6 @@ public:
   */
   virtual void computeOutput(double time, Interaction& inter, 
                              unsigned int level = 0);
-  virtual void computeOutput(double time, Interaction& inter, InteractionProperties& interProp,
-                             unsigned int level = 0);
   virtual void computeLinearizedOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level = 0);
   /** default function to compute r, using the data from the Interaction and DS
   *  \param time current time (not used)
@@ -142,8 +140,6 @@ public:
   *  \param interProp
   *  \param level not used
   */
-  virtual void computeInput(double time, Interaction& inter, InteractionProperties& interProp,
-                            unsigned int level = 0);
   virtual void computeInput(double time, Interaction& inter,
                             unsigned int level = 0);
   virtual void computeLinearizedInput(double time, Interaction& inter,

@@ -100,50 +100,6 @@ void LagrangianRheonomousR::computeJachq(double time,  SiconosVector& q, Siconos
     }
 }
 
-void LagrangianRheonomousR::computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int derivativeNumber)
-{
-  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
-  SiconosVector q = *DSlink[LagrangianR::q0];
-  SiconosVector z = *DSlink[LagrangianR::z];
-  SiconosVector& y = *inter.y(derivativeNumber);
-  if (derivativeNumber == 0)
-    computeh(time, q, z, y);
-  else
-  {
-    computeJachq(time, q, z);
-    if (derivativeNumber == 1)
-    {
-      // Computation of the partial derivative w.r.t time of h(q,t)
-      computehDot(time, q, z);
-      // Computation of the partial derivative w.r.t q of h(q,t) : \nabla_q h(q,t) \dot q
-      prod(*_jachq, *DSlink[LagrangianR::q1], y);
-      // Sum of the terms
-      y += *_hDot;
-    }
-    else if (derivativeNumber == 2)
-      prod(*_jachq, *DSlink[LagrangianR::q2], y); // Approx:,  ...
-    // \warning : the computation of y[2] (in event-driven
-    // simulation for instance) is approximated by y[2] =
-    // Jach[0]q[2]. For the moment, other terms are neglected
-    // (especially, partial derivatives with respect to time).
-    else
-      RuntimeException::selfThrow("LagrangianRheonomousR::computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int derivativeNumber) index >2  not yet implemented.");
-  }
-  *DSlink[LagrangianR::z] = z;
-}
-
-void LagrangianRheonomousR::computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level)
-{
-  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
-  SiconosVector q = *DSlink[LagrangianR::q0];
-  SiconosVector z = *DSlink[LagrangianR::z];
-  computeJachq(time, q, z);
-  // get lambda of the concerned interaction
-  SiconosVector& lambda = *inter.lambda(level);
-  // data[name] += trans(G) * lambda
-  prod(lambda, *_jachq, *DSlink[LagrangianR::p0 + level], false);
-  *DSlink[LagrangianR::z] = z;
-}
 
 void LagrangianRheonomousR::computeOutput(double time, Interaction& inter, unsigned int derivativeNumber)
 {

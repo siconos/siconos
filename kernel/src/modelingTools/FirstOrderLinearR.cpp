@@ -237,12 +237,6 @@ void FirstOrderLinearR::computeh(double time, BlockVector& x, SiconosVector& lam
 
 }
 
-void FirstOrderLinearR::computeOutput(double time, Interaction& inter,
-                                      InteractionProperties& interProp, unsigned int level)
-{
-  assert(0);
-}
-
 void FirstOrderLinearR::computeOutput(double time, Interaction& inter, unsigned int level)
 {
   DEBUG_BEGIN("FirstOrderType2R::computeOutput \n");
@@ -286,10 +280,7 @@ void FirstOrderLinearR::computeInput(double time, Interaction& inter, unsigned i
   computeg(time, lambda, *z_vec, *DSlink[FirstOrderR::r]);
   *DSlink[FirstOrderR::z] = *z_vec;
 }
-void FirstOrderLinearR::computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level)
-{
-  assert(0);
-}
+
 
 void FirstOrderLinearR::display() const
 {

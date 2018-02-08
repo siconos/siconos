@@ -71,27 +71,6 @@ void LagrangianLinearTIR::initializeWorkVectorsAndMatrices(Interaction& inter, V
 
 }
 
-void LagrangianLinearTIR::computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int derivativeNumber)
-{
-  // get y and lambda of the interaction
-  SiconosVector& y = *inter.y(derivativeNumber);
-  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
-  prod(*_jachq, *DSlink[LagrangianR::q0 + derivativeNumber], y);
-
-  if (derivativeNumber == 0)
-  {
-    if (_e)
-      y += *_e;
-    if (_F)
-      prod(*_F, *DSlink[LagrangianR::z], y, false);
-  }
-
-  if (_jachlambda)
-  {
-    SiconosVector& lambda = *inter.lambda(derivativeNumber);
-    prod(*_jachlambda, lambda, y, false);
-  }
-}
 void LagrangianLinearTIR::computeOutput(double time, Interaction& inter, unsigned int derivativeNumber)
 {
   // get y and lambda of the interaction
@@ -112,18 +91,6 @@ void LagrangianLinearTIR::computeOutput(double time, Interaction& inter, unsigne
     SiconosVector& lambda = *inter.lambda(derivativeNumber);
     prod(*_jachlambda, lambda, y, false);
   }
-}
-void LagrangianLinearTIR::computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level)
-{
-  
-  // get lambda of the concerned interaction
-  SiconosVector& lambda = *inter.lambda(level);
-  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
-
-  // computation of p = Ht lambda
-  DEBUG_PRINTF("LTIR::computeInp()%d\n", level);
-  prod(lambda, *_jachq, *DSlink[LagrangianR::p0 + level], false);
-  DEBUG_BEGIN("LTIR END ()\n");
 }
 void LagrangianLinearTIR::computeInput(double time, Interaction& inter, unsigned int level)
 {

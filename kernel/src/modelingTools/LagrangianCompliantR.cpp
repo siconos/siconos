@@ -78,40 +78,6 @@ void LagrangianCompliantR::computeJachlambda(double time, SiconosVector& q0, Sic
   }
 }
 
-void LagrangianCompliantR::computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int derivativeNumber)
-{
-  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
-
-  SiconosVector workZ = *DSlink[LagrangianR::z];
-  if (derivativeNumber == 0)
-  {
-    SiconosVector& y = *inter.y(0);
-    SiconosVector& lambda = *inter.lambda(0);
-    SiconosVector workQ = *DSlink[LagrangianR::q0];
-
-    computeh(time, workQ, lambda, workZ, y);
-  }
-  else
-  {
-    SiconosVector& y = *inter.y(derivativeNumber);
-    SiconosVector& lambda = *inter.lambda(derivativeNumber);
-    SiconosVector workQ = *DSlink[LagrangianR::q0];
-    computeJachq(time, workQ, lambda, workZ);
-    computeJachlambda(time, workQ, lambda, workZ);
-    if (derivativeNumber == 1)
-    {
-      // y = Jach[0] q1 + Jach[1] lambda
-      prod(*_jachq, *DSlink[LagrangianR::q1], y);
-      prod(*_jachlambda, lambda, y, false);
-    }
-    else if (derivativeNumber == 2)
-      prod(*_jachq, *DSlink[LagrangianR::q2], y); // Approx: y[2] = Jach[0]q[2], other terms are neglected ...
-    else
-      RuntimeException::selfThrow("LagrangianCompliantR::computeOutput, index out of range or not yet implemented.");
-  }
-
-  *DSlink[LagrangianR::z] = workZ;
-}
 void LagrangianCompliantR::computeOutput(double time, Interaction& inter, unsigned int derivativeNumber)
 {
   VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
@@ -143,19 +109,6 @@ void LagrangianCompliantR::computeOutput(double time, Interaction& inter, unsign
       RuntimeException::selfThrow("LagrangianCompliantR::computeOutput, index out of range or not yet implemented.");
   }
 
-  *DSlink[LagrangianR::z] = workZ;
-}
-void LagrangianCompliantR::computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level)
-{
-  // get lambda of the concerned interaction
-  SiconosVector& lambda = *inter.lambda(level);
-  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
-
-  SiconosVector workQ = *DSlink[LagrangianR::q0];
-  SiconosVector workZ = *DSlink[LagrangianR::z];
-  computeJachq(time, workQ, lambda, workZ);
-  // data[name] += trans(G) * lambda
-  prod(lambda, *_jachq, *DSlink[LagrangianR::p0 + level], false);
   *DSlink[LagrangianR::z] = workZ;
 }
 

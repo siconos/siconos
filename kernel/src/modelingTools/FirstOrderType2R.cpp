@@ -111,10 +111,7 @@ void FirstOrderType2R::computeOutput(double time, Interaction& inter, unsigned i
   DEBUG_EXPR(y.display());
   DEBUG_END("FirstOrderType2R::computeOutput \n");
 }
-void FirstOrderType2R::computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level)
-{
-  assert(0);
-}
+
 void FirstOrderType2R::computeLinearizedOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level)
 {
   DEBUG_BEGIN("FirstOrderType2R::computeLinearizedOutput\n");
@@ -196,10 +193,7 @@ void FirstOrderType2R::computeInput(double time, Interaction& inter, unsigned in
   DEBUG_EXPR(DSlink[FirstOrderR::r]->display());
   DEBUG_END("FirstOrderType2R::computeInput \n");
 }
-void FirstOrderType2R::computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level)
-{
-  assert(0);
-}
+
 void FirstOrderType2R::computeLinearizedInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level)
 {
   DEBUG_BEGIN("FirstOrderType2R::computeLinearizedInput\n");

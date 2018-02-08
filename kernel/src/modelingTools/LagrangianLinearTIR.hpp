@@ -99,7 +99,6 @@ public:
   *  \param interProp interaction properties
   *  \param derivativeNumber the derivative of y we want to compute
   */
-  void computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int derivativeNumber = 0);
   void computeOutput(double time, Interaction& inter,  unsigned int derivativeNumber = 0);
 
   /** default function to compute r
@@ -108,7 +107,6 @@ public:
   *  \param interProp interaction properties
   *  \param level the derivative of lambda we want to compute
   */
-  void computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level = 0);
   void computeInput(double time, Interaction& inter, unsigned int level = 0);
 
   /* compute all the H Jacobian
