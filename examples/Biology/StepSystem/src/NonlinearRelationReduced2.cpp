@@ -1,7 +1,7 @@
 #ifndef NONLINEARRELATIONREDUCED2_CPP
 #define NONLINEARRELATIONREDUCED2_CPP
 
-#include "NonlinearRelationReduced2.h"
+#include "NonlinearRelationReduced2.hpp"
 
 //#include "const.h"
 #define SICONOS_DEBUG
@@ -9,11 +9,6 @@
 NonlinearRelationReduced2::NonlinearRelationReduced2():
   FirstOrderType2R()
 {
-}
-
-void NonlinearRelationReduced2::initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
-{
-  FirstOrderType2R::initializeWorkVectorsAndMatrices(inter, DSlink, workV, workM);
 }
 
 /*y = h(X)*/

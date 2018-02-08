@@ -1,16 +1,14 @@
-#ifndef NONLINEARRELATIONWITHSIGN_H
-#define NONLINEARRELATIONWITHSIGN_H
+#ifndef NONLINEARRELATIONREDUCED2_H
+#define NONLINEARRELATIONREDUCED2_H
 
 #include "SiconosKernel.hpp"
 
-class NonlinearRelationWithSign : public FirstOrderType2R
+class NonlinearRelationReduced2 : public FirstOrderType2R
 {
 protected:
 public:
-  NonlinearRelationWithSign();
-  virtual ~NonlinearRelationWithSign() {};
-
-  virtual void initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
+  NonlinearRelationReduced2();
+  virtual ~NonlinearRelationReduced2() {};
 
 
   /** default function to compute h
@@ -38,6 +36,6 @@ public:
 
 };
 
-TYPEDEF_SPTR(NonlinearRelationWithSign);
+TYPEDEF_SPTR(NonlinearRelationReduced2);
 
 #endif

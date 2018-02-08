@@ -1,7 +1,7 @@
 #ifndef NONLINEARRELATION_CPP
 #define NONLINEARRELATION_CPP
 
-#include "NonlinearRelation.h"
+#include "NonlinearRelation.hpp"
 
 //#include "const.h"
 
@@ -13,11 +13,6 @@
 NonlinearRelation::NonlinearRelation():
   FirstOrderType2R()
 {
-}
-
-void NonlinearRelation::initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
-{
-  FirstOrderType2R::initializeWorkVectorsAndMatrices(inter, DSlink, workV, workM);
 }
 
 /*y = h(X)*/

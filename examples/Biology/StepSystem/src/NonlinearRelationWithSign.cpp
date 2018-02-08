@@ -1,7 +1,7 @@
 #ifndef NONLINEARRELATIONWITHSIGN_CPP
 #define NONLINEARRELATIONWITHSIGN_CPP
 
-#include "NonlinearRelationWithSign.h"
+#include "NonlinearRelationWithSign.hpp"
 
 //#include "const.h"
 #define SICONOS_DEBUG
@@ -11,10 +11,6 @@ NonlinearRelationWithSign::NonlinearRelationWithSign():
 {
 }
 
-void NonlinearRelationWithSign::initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
-{
-  FirstOrderType2R::initializeWorkVectorsAndMatrices(inter, DSlink, workV, workM);
-}
 
 /*y = h(X)*/
 void NonlinearRelationWithSign::computeh(double t, SiconosVector& x, SiconosVector& lambda, SiconosVector& y)
