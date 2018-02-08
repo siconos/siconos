@@ -3029,7 +3029,7 @@ class Hdf5():
             fcOptions.iparam[0] = 100  # Local solver iterations
 
         
-        osnspb.setNumericsVerboseMode(True)
+        osnspb.setNumericsVerboseMode(numerics_verbose)
 
         # keep previous solution
         osnspb.setKeepLambdaAndYState(True)
