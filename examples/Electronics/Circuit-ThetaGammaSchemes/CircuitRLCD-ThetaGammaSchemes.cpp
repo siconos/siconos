@@ -92,9 +92,10 @@ int main(int argc, char* argv[])
     SP::Interaction InterCircuitRLCD(new Interaction(NSLaw, LTIRCircuitRLCD));
 
     // --- Model creation ---
-    SP::Model CircuitRLCD(new Model(t0, T, Modeltitle));
-    CircuitRLCD->nonSmoothDynamicalSystem()->insertDynamicalSystem(LSCircuitRLCD);
-    CircuitRLCD->nonSmoothDynamicalSystem()->link(InterCircuitRLCD, LSCircuitRLCD);
+    SP::NonSmoothDynamicalSystem CircuitRLCD(new NonSmoothDynamicalSystem(t0, T));
+    CircuitRLCD->setTitle(Modeltitle);
+    CircuitRLCD->insertDynamicalSystem(LSCircuitRLCD);
+    CircuitRLCD->link(InterCircuitRLCD, LSCircuitRLCD);
     // ------------------
     // --- Simulation ---
     // ------------------
@@ -110,11 +111,7 @@ int main(int argc, char* argv[])
     SP::LCP LCP_RLCD(new LCP());
 
     // -- (4) Simulation setup with (1) (2) (3)
-    SP::TimeStepping StratCircuitRLCD(new TimeStepping(TiDiscRLCD, OSI_RLCD, LCP_RLCD));
-    CircuitRLCD->setSimulation(StratCircuitRLCD);
-    cout << "====> Initialisation ..." << endl << endl;
-    CircuitRLCD->initialize();
-    cout << " -----> End of initialization." << endl;
+    SP::TimeStepping StratCircuitRLCD(new TimeStepping(CircuitRLCD, TiDiscRLCD, OSI_RLCD, LCP_RLCD));
 
     double h = StratCircuitRLCD->timeStep();
     int N = ceil((T - t0) / h); // Number of time steps
