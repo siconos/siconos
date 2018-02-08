@@ -36,9 +36,9 @@
 #include "TypeName.hpp"
 // for Debug
 //#define DEBUG_BEGIN_END_ONLY
-#define DEBUG_NOCOLOR
-#define DEBUG_STDOUT
-#define DEBUG_MESSAGES
+// #define DEBUG_NOCOLOR
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
 #include "debug.h"
 #include <fstream>
 

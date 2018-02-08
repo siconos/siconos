@@ -104,7 +104,6 @@ public:
    *  \param interProp
    *  \param level not used
    */
-  virtual void computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level = 0);
  virtual void computeOutput(double time, Interaction& inter,  unsigned int level = 0);
   /** default function to compute r
    *  \param time current time
@@ -112,7 +111,6 @@ public:
    *  \param interProp
    *  \param level not used
    */
-  virtual void computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level = 0);
   virtual void computeInput(double time, Interaction& inter, unsigned int level = 0);
 
   /** print the data to the screen

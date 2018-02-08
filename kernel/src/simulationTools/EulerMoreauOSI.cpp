@@ -28,6 +28,7 @@
 #include "CxxStd.hpp"
 #include "OneStepNSProblem.hpp"
 #include "BlockVector.hpp"
+// #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
 //#define DEBUG_WHERE_MESSAGES
@@ -1091,7 +1092,6 @@ void EulerMoreauOSI::updateOutput(double time, unsigned int level)
     inter = indexSet0->bundle(*ui);
     assert(inter->lowerLevelForOutput() <= level);
     assert(inter->upperLevelForOutput() >= level);
-    inter->computeOutput(time, level);
     
     RELATION::SUBTYPES relationSubType = inter->relation()->getSubType();
     if (relationSubType == Type2R)
@@ -1109,6 +1109,8 @@ void EulerMoreauOSI::updateOutput(double time, unsigned int level)
       FirstOrderNonLinearR & r = static_cast<FirstOrderNonLinearR&>(*inter->relation());
       r.computeLinearizedOutput(time, *inter, indexSet0->properties(*ui), level);
     }
+    else
+      inter->computeOutput(time, level);
   }
 }
 
@@ -1116,6 +1118,11 @@ void EulerMoreauOSI::updateInput(double time, unsigned int level)
 {
   /** VA. 16/02/2017 This should normally be done only for interaction managed by the osi */
   //_simulation->nonSmoothDynamicalSystem()->updateInput(time,level);
+
+  // Set dynamical systems non-smooth part to zero.
+  _simulation->nonSmoothDynamicalSystem()->reset(level);
+
+  
   InteractionsGraph::VIterator ui, uiend;
   SP::Interaction inter;
   SP::InteractionsGraph indexSet0 = _simulation->nonSmoothDynamicalSystem()->topology()->indexSet0();
@@ -1124,8 +1131,7 @@ void EulerMoreauOSI::updateInput(double time, unsigned int level)
     inter = indexSet0->bundle(*ui);
     assert(inter->lowerLevelForInput() <= level);
     assert(inter->upperLevelForInput() >= level);
-    inter->computeInput(time, level);
-    
+
     RELATION::SUBTYPES relationSubType = inter->relation()->getSubType();
     if (relationSubType == Type2R)
     {
@@ -1142,13 +1148,12 @@ void EulerMoreauOSI::updateInput(double time, unsigned int level)
       FirstOrderNonLinearR & r = static_cast<FirstOrderNonLinearR&>(*inter->relation());
       r.computeLinearizedInput(time, *inter, indexSet0->properties(*ui), level);
     }
+    else
+    {
+      inter->computeInput(time, level);
+    }
   }
 
-  
-
-
-
-  
 }
 
 
