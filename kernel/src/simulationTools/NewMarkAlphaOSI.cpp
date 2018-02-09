@@ -324,7 +324,7 @@ void NewMarkAlphaOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_i
   DEBUG_EXPR(q_free->display(););
 
   // get pointer to yForNSsolver vector
-  
+
 
   SiconosVector& osnsp_rhs = *(*indexSet->properties(vertex_inter).workVectors)[NewMarkAlphaOSI::OSNSP_RHS];
 
@@ -471,18 +471,27 @@ void NewMarkAlphaOSI::fillDSLinks(Interaction &inter,
   SP::DynamicalSystem ds2= interProp.target;
   assert(ds1);
   assert(ds2);
-  
+
+  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
+  interProp.workVectors.reset(new VectorOfVectors);
+  interProp.workMatrices.reset(new VectorOfSMatrices);
+
+
   VectorOfVectors& workV = *interProp.workVectors;
+  VectorOfSMatrices& workM = *interProp.workMatrices;
+
+
+  Relation &relation =  *inter.relation();
+  relation.initializeWorkVectorsAndMatrices(inter, DSlink, workV, workM);
+  RELATION::TYPES relationType = relation.getType();
+
   workV.resize(NewMarkAlphaOSI::WORK_INTERACTION_LENGTH);
   workV[NewMarkAlphaOSI::OSNSP_RHS].reset(new SiconosVector(inter.getSizeOfY()));
 
-  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
-  Relation &relation =  *inter.relation();  
-  RELATION::TYPES relationType = relation.getType();
 
   NonSmoothLaw & nslaw = *inter.nonSmoothLaw();
   Type::Siconos nslType = Type::value(nslaw);
- 
+
   if (nslType == Type::NewtonImpactNSL || nslType == Type::MultipleImpactNSL)
   {
     _levelMinForOutput = 0;
@@ -644,7 +653,7 @@ void NewMarkAlphaOSI::correction()
     SiconosVector& residuFree = *workVectors[OneStepIntegrator::residu_free];
     SiconosVector& acce_like = *workVectors[OneStepIntegrator::acce_like];
 
-    
+
     dsType = Type::value(*ds); // Its type
     if((dsType == Type::LagrangianDS) || (dsType == Type::LagrangianLinearTIDS))
     {
@@ -658,7 +667,7 @@ void NewMarkAlphaOSI::correction()
       *(d->velocity()) += (gamma_prime / h) * (*delta_q); // dotq_{n+1,k+1} = dotq_{n+1,k} + (gamma_prime/h)*delta_q
       *(d->acceleration()) += beta_prime / (h*h) * (*delta_q); // ddotq_{n+1,k+1} = ddotq_{n+1,k} + (beta_prime/h^2)*delta_q
       //a_{n+1,k+1} = a_{n+1,k} + ((1-alpha_f)/(1-alpha_m))*(beta_prime/h^2)*delta_q
-      
+
       acce_like += ((1 - _alpha_f) / (1 - _alpha_m)) * ((beta_prime / (h*h)) * (*delta_q));
 
       DEBUG_PRINT("After correction : \n");
