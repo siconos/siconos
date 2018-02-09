@@ -302,7 +302,7 @@ int withLevel(unsigned int mylevel)
   }
   catch (...)
   {
-    cout << "Exception caught in ColumnOfBeadsTS.cpp" << endl;
+    cout << "Exception caught in ColumnOfBeadsTS-MoreauJeanGOSI.cpp" << endl;
   }
 
   return 0;

@@ -131,13 +131,13 @@ int main(int argc, char* argv[])
     // -------------
     // --- Model ---
     // -------------
-    SP::Model impactingBar(new Model(t0, T));
+    SP::NonSmoothDynamicalSystem impactingBar(new NonSmoothDynamicalSystem(t0, T));
 
     // add the dynamical system in the non smooth dynamical system
-    impactingBar->nonSmoothDynamicalSystem()->insertDynamicalSystem(bar);
+    impactingBar->insertDynamicalSystem(bar);
 
     // link the interaction and the dynamical system
-    impactingBar->nonSmoothDynamicalSystem()->link(inter,bar);
+    impactingBar->link(inter,bar);
 
 
     // ------------------
@@ -162,21 +162,16 @@ int main(int argc, char* argv[])
     SP::OneStepNSProblem impact(new LCP());
     SP::OneStepNSProblem force(new LCP());
 
-    SP::TimeSteppingD1Minus s(new TimeSteppingD1Minus(t, 2));
+    SP::TimeSteppingD1Minus s(new TimeSteppingD1Minus(impactingBar, t, 2));
     s->insertIntegrator(OSI);
     s->insertNonSmoothProblem(impact, SICONOS_OSNSP_TS_VELOCITY);
     s->insertNonSmoothProblem(force, SICONOS_OSNSP_TS_VELOCITY + 1);
-
-    impactingBar->setSimulation(s);
 
     // =========================== End of model definition ===========================
 
     // ================================= Computation =================================
 
-    // --- Simulation initialization ---
 
-    cout <<"====> Initialisation ..." <<endl<<endl;
-    impactingBar->initialize();
     int N = floor((T-t0)/h) +1; // Number of time steps
 
     // --- Get the values to be plotted ---
