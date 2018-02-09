@@ -117,9 +117,9 @@ int main(int argc, char* argv[])
     // --- Model ---
     // -------------
 
-    SP::Model Pendulum(new Model(t0, T));
-    Pendulum->nonSmoothDynamicalSystem()->insertDynamicalSystem(simplependulum);
-    Pendulum->nonSmoothDynamicalSystem()->link(inter, simplependulum);
+    SP::NonSmoothDynamicalSystem Pendulum(new NonSmoothDynamicalSystem(t0, T));
+    Pendulum->insertDynamicalSystem(simplependulum);
+    Pendulum->link(inter, simplependulum);
 
     // ----------------
     // --- Simulation ---
@@ -128,10 +128,9 @@ int main(int argc, char* argv[])
     // -- Time discretisation --
     SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
 
-    SP::TimeStepping s(new TimeStepping(t));
-    //    s->setUseRelativeConvergenceCriteron(true);
-    //  s->setRelativeConvergenceTol(0.5);
-
+    SP::TimeStepping s(new TimeStepping(Pendulum, t));
+    s->setNewtonTolerance(criterion);
+    s->setNewtonMaxIteration(maxIter);
 
     // -- OneStepIntegrators --
 
@@ -143,21 +142,9 @@ int main(int argc, char* argv[])
 
     SP::OneStepNSProblem osnspb(new LCP());
     s->insertNonSmoothProblem(osnspb);
-
-    Pendulum->setSimulation(s);
-
     cout << "=== End of model loading === " << endl;
 
-    // =========================== End of model definition ===========================  dataPlot(k,7) = (*inter->y(0))(0);
-
-
-    // ================================= Computation =================================
-
-
     // --- Simulation initialization ---
-    Pendulum->initialize();
-    cout << "End of simulation initialisation" << endl;
-
     int k = 0;
     int N = ceil((T - t0) / h);
     cout << "Number of time step" << N << endl;
@@ -183,10 +170,10 @@ int main(int argc, char* argv[])
     while (s->hasNextEvent())
     {
       k++;
-      if (!(div(k, 1000).rem))  cout << "Step number " << k << "\n";
+      if (!(div(k, 10000).rem))  cout << "Step number " << k << "\n";
 
       // Solve problem
-      s->newtonSolve(criterion, maxIter);
+      s->advanceToEvent();
       // Data Output
       dataPlot(k, 0) =  s->nextTime();
       dataPlot(k, 1) = (*simplependulum->q())(0);

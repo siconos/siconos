@@ -44,16 +44,16 @@ public:
 
   my_NewtonEulerR(double radius): R_CLASS(), _sBallRadius(radius) { };
 
-  virtual void computeOutput(double t, Interaction& inter, InteractionProperties& interProp, unsigned int derivativeNumber)
+  virtual void computeOutput(double t, Interaction& inter, unsigned int derivativeNumber)
   {
-    VectorOfBlockVectors& DSlink = *interProp.DSlink;
+    VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
     if (derivativeNumber == 0)
     {
       computeh(t, *DSlink[NewtonEulerR::q0], *inter.y(0));
     }
     else
     {
-      R_CLASS::computeOutput(t, inter, interProp, derivativeNumber);
+      R_CLASS::computeOutput(t, inter, derivativeNumber);
     }
 
   }
@@ -188,12 +188,12 @@ int main(int argc, char* argv[])
     // -------------
     // --- Model ---
     // -------------
-    SP::Model bouncingBall(new Model(t0, T));
+    SP::NonSmoothDynamicalSystem bouncingBall(new NonSmoothDynamicalSystem(t0, T));
     // add the dynamical system in the non smooth dynamical system
-    bouncingBall->nonSmoothDynamicalSystem()->insertDynamicalSystem(ball);
+    bouncingBall->insertDynamicalSystem(ball);
 
     // link the interaction and the dynamical system
-    bouncingBall->nonSmoothDynamicalSystem()->link(inter, ball);
+    bouncingBall->link(inter, ball);
 
     // ------------------
     // --- Simulation ---
@@ -215,24 +215,19 @@ int main(int argc, char* argv[])
 #endif
     // -- (4) Simulation setup with (1) (2) (3)
 #ifdef WITH_PROJ
-    SP::TimeSteppingDirectProjection s(new TimeSteppingDirectProjection(t, OSI, osnspb, osnspb_pos));
+    SP::TimeSteppingDirectProjection s(new TimeSteppingDirectProjection(bouncingBall, t, OSI, osnspb, osnspb_pos));
     s->setProjectionMaxIteration(20);
     s->setConstraintTolUnilateral(1e-08);
     s->setConstraintTol(1e-08);
 #else
-    SP::TimeStepping s(new TimeStepping(t, OSI, osnspb));
+    SP::TimeStepping s(new TimeStepping(bouncingBall, t, OSI, osnspb));
 #endif
     s->setNewtonTolerance(1e-10);
     s->setNewtonMaxIteration(10);
-    bouncingBall->setSimulation(s);
     // =========================== End of model definition ===========================
 
     // ================================= Computation =================================
 
-    // --- Simulation initialization ---
-
-    cout << "====> Initialisation ..." << endl << endl;
-    bouncingBall->initialize();
     int N = ceil((T - t0) / h); // Number of time steps
 
     // --- Get the values to be plotted ---
@@ -305,55 +300,18 @@ int main(int argc, char* argv[])
     ioMatrix::write("result.dat", "ascii", dataPlot, "noDim");
 
     // Comparison with a reference file
-    cout << "====> Comparison with a reference file ..." << endl;
-    SimpleMatrix dataPlotRef(dataPlot);
-    dataPlotRef.zero();
 #ifdef WITH_PROJ
-    ioMatrix::read("resultNETS-WITHPROJ.ref", "ascii", dataPlotRef);
-#else
-    ioMatrix::read("resultNETS.ref", "ascii", dataPlotRef);
-#endif
-    std::cout << "Error w.r.t reference file = " << (dataPlot - dataPlotRef).normInf() << std::endl;
-
-    if ((dataPlot - dataPlotRef).normInf() > 1e-10)
-    {
-      std::cout << "Warning. The results is rather different from the reference file. err = " << (dataPlot - dataPlotRef).normInf() << std::endl;
-      //(dataPlot-dataPlotRef).display();
-
-      double maxerror = -1e+24;
-      unsigned int imax = -1;
-      unsigned int jmax = -1;
-      double error;
-      for (unsigned int ii = 0;  ii < dataPlot.size(0); ii++)
-      {
-        for (unsigned int jj = 0;  jj < dataPlot.size(1); jj++)
-        {
-          error = std::abs(dataPlot.getValue(ii, jj) - dataPlotRef.getValue(ii, jj)) ;
-          if (error > 1e-12)
-          {
-
-            std::cout << "error = " << error << std::endl;
-            std::cout << "ii  = " << ii << "  jj  = " << jmax << std::endl;
-            std::cout << "dataPlot.getValue(ii,jj) = " <<  dataPlot.getValue(ii, jj) << std::endl;
-            std::cout << "dataPlotRef.getValue(ii,jj) =" <<  dataPlotRef.getValue(ii, jj) << std::endl;
-          }
-
-          if (error > maxerror)
-          {
-            maxerror = error ;
-            imax = ii;
-            jmax = jj;
-          }
-        }
-      }
-      std::cout << "max error = " << maxerror << std::endl;
-      std::cout << "imax  = " << imax << "  jmax  = " << jmax << std::endl;
-      std::cout << "dataPlot.getValue(imax,jmax) = " <<  dataPlot.getValue(imax, jmax) << std::endl;
-      std::cout << "dataPlotRef.getValue(imax,jmax) =" <<  dataPlotRef.getValue(imax, jmax) << std::endl;
-
-
+    double error=0.0, eps=1e-12;
+    if (ioMatrix::compareRefFile(dataPlot, "BouncingBallNETS-WITHPROJ.ref", eps, error)
+        && error > eps)
       return 1;
-    }
+#else
+    double error=0.0, eps=1e-12;
+    if (ioMatrix::compareRefFile(dataPlot, "BouncingBallNETS-WITHPROJ.ref", eps, error)
+        && error > eps)
+      return 1;
+#endif
+
   }
 
   catch (SiconosException e)

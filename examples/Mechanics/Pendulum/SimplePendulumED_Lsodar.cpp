@@ -94,10 +94,10 @@ int main(int argc, char* argv[])
     // --- Model ---
     // -------------
 
-    SP::Model Pendulum(new Model(t0, T));
-    Pendulum->nonSmoothDynamicalSystem()->insertDynamicalSystem(simplependulum);
-    Pendulum->nonSmoothDynamicalSystem()->link(inter, simplependulum);
-
+    SP::NonSmoothDynamicalSystem Pendulum(new NonSmoothDynamicalSystem(t0, T));
+    Pendulum->insertDynamicalSystem(simplependulum);
+    Pendulum->link(inter, simplependulum);
+    
     // ----------------
     // --- Simulation ---
     // ----------------
@@ -110,18 +110,12 @@ int main(int argc, char* argv[])
     SP::OneStepNSProblem impact(new LCP());
     SP::OneStepNSProblem acceleration(new LCP());
     //4. Simulation with (1), (2), (3)
-    SP::Simulation EDscheme(new EventDriven(TimeDiscret));
+    SP::Simulation EDscheme(new EventDriven(Pendulum, TimeDiscret));
     EDscheme->insertIntegrator(OSI);
     EDscheme->insertNonSmoothProblem(impact, SICONOS_OSNSP_ED_IMPACT);
     EDscheme->insertNonSmoothProblem(acceleration, SICONOS_OSNSP_ED_SMOOTH_ACC);
-    Pendulum->setSimulation(EDscheme); // initialize the model
 
     // =========================== End of model definition ===========================
-    // --- Simulation Initialization ---
-    cout << "====> Simulation initialisation ..." << endl << endl;
-    EDscheme->setPrintStat(true);
-    Pendulum->initialize(); // initialize the model
-    cout << "End of simulation initialisation" << endl;
 
     // SP::LsodarOSI lsodar = std11::static_pointer_cast<LsodarOSI>(OSI);
     // lsodar->setMinMaxStepSizes(9.5e-4,1.0e-3);
@@ -132,18 +126,16 @@ int main(int argc, char* argv[])
     // ================================= Computation =================================
 
     SP::EventsManager eventsManager = EDscheme->eventsManager(); // ponters point to the "eventsManager" object
-    SP::SiconosVector _q = simplependulum->q();              // pointer points to the position vector of the rocking block
-    SP::SiconosVector _qdot = simplependulum->velocity();       // pointer points to the velocity of the rocking block
-    SP::SiconosVector _qddot = simplependulum->acceleration();       // pointer points to the velocity of the rocking block
+    SP::SiconosVector _q = simplependulum->q();              // pointer points to the position vector
+    SP::SiconosVector _qdot = simplependulum->velocity();      // pointer points to the velocity
+    simplependulum->initRhs(t0);
+    simplependulum->computeRhs(t0);
+    SP::SiconosVector _qddot = simplependulum->acceleration();;     // pointer points to the acceleration
     SP::SiconosVector _g = inter->y(0);
-    SP::SiconosVector _gdot = inter->y(1);
-    SP::SiconosVector _lambda = inter->lambda(2);
-    SP::InteractionsGraph indexSet0 = Pendulum->nonSmoothDynamicalSystem()->topology()->indexSet(0);
-    SP::InteractionsGraph indexSet1 = Pendulum->nonSmoothDynamicalSystem()->topology()->indexSet(1);
-    SP::InteractionsGraph indexSet2 = Pendulum->nonSmoothDynamicalSystem()->topology()->indexSet(2);
+    SP::SiconosVector _gdot;
+    SP::SiconosVector _lambda ;
+    SP::InteractionsGraph indexSet0 = Pendulum->topology()->indexSet(0);
     cout << "Size of IndexSet0: " << indexSet0->size() << endl;
-    cout << "Size of IndexSet1: " << indexSet1->size() << endl;
-    cout << "Size of IndexSet2: " << indexSet2->size() << endl;
     //-------------------- Save the output during simulation ---------------------------------------------------------
     SimpleMatrix DataPlot(N, 10);
     //------------- At the initial time -----------------------------------------------------------------------------
@@ -151,12 +143,12 @@ int main(int argc, char* argv[])
     DataPlot(0, 1) = (*_q)(0); // Position X
     DataPlot(0, 2) = (*_q)(1); // Position Y
     DataPlot(0, 3) = (*_qdot)(0); // Velocity Vx
-    DataPlot(0, 4) = (*_qdot)(1); // Velocity Vy
+    DataPlot(0, 4) = (*_qdot)(1) ; // Velocity Vy
     DataPlot(0, 5) = (*_qddot)(0); // Acceleration ax
     DataPlot(0, 6) = (*_qddot)(1); // Acceleration ay
     DataPlot(0, 7) = (*_g)(0);     // Contraint in position
-    DataPlot(0, 8) = (*_gdot)(0);  // Constraint in velocity
-    DataPlot(0, 9) = (*_lambda)(0); // Reaction force
+    DataPlot(0, 8) = 0.0;  // Constraint in velocity
+    DataPlot(0, 9) = 0.0; // Reaction force
 
     //----------------------------------- Simulation starts ----------------------------------------------------------
     cout << "====> Start computation ... " << endl << endl;
@@ -174,9 +166,13 @@ int main(int argc, char* argv[])
       };
       EDscheme->processEvents();  // process the current event
       //------------------- get data at the beginning of non-smooth events ---------------------------
+      
+      _lambda = inter->lambda(2);
+      _gdot = inter->y(1);
       if (NSEvent)
       {
         DataPlot(k, 0) = EDscheme->startingTime(); // instant at non-smooth event
+
         const SiconosVector& _qMemory = simplependulum->qMemory().getSiconosVector(1);
         const SiconosVector& _qdotMemory = simplependulum->velocityMemory().getSiconosVector(1);
         DataPlot(k, 1) = _qMemory(0);
@@ -205,22 +201,16 @@ int main(int argc, char* argv[])
     }
     //----------------------- At the end of the simulation --------------------------
     cout << " " << endl;
- 
     cout << "End of the simulation" << endl;
     cout << "Number of events processed during simulation: " << (k + 1) << endl;
     cout << "Number of non-smooth events: " << NumberNSEvent << endl;
     cout << "====> Output file writing ..." << endl << endl;
     ioMatrix::write("SimplependulumResult.dat", "ascii", DataPlot, "noDim");
-    // Comparison with a reference file
-    SimpleMatrix dataPlotRef(DataPlot);
-    dataPlotRef.zero();
-    ioMatrix::read("result_LsodarOSI.ref", "ascii", dataPlotRef);
-    std::cout << (DataPlot - dataPlotRef).normInf() << std::endl;
-    if ((DataPlot - dataPlotRef).normInf() > 1e-12)
-    {
-      std::cout << "Warning. The results is rather different from the reference file." << std::endl;
+
+    double error=0.0, eps=1e-12;
+    if (ioMatrix::compareRefFile(DataPlot, "result_LsodarOSI.ref", eps, error)
+        && error > eps)
       return 1;
-    }
   }
 
   catch (SiconosException e)
