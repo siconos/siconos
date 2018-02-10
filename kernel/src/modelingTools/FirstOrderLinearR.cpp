@@ -24,9 +24,9 @@
 
 #include <iostream>
 
-#define DEBUG_NOCOLOR
-#define DEBUG_STDOUT
-#define DEBUG_MESSAGES
+// #define DEBUG_NOCOLOR
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
 #include <debug.h>
 using namespace RELATION;
 
@@ -239,7 +239,7 @@ void FirstOrderLinearR::computeh(double time, BlockVector& x, SiconosVector& lam
 
 void FirstOrderLinearR::computeOutput(double time, Interaction& inter, unsigned int level)
 {
-  DEBUG_BEGIN("FirstOrderType2R::computeOutput \n");
+  DEBUG_BEGIN("FirstOrderLinearR::computeOutput \n");
   VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
   BlockVector& z = *DSlink[FirstOrderR::z];
   BlockVector& x = *DSlink[FirstOrderR::x];
