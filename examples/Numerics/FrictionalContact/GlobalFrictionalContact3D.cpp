@@ -190,7 +190,6 @@ int main(int argc, char* argv[])
   free(globalVelocity);
   free(numericsProblem.M);
   free(numericsProblem.H);
-  gfc3d_free_workspace(&numericsProblem);
   return info;
 
 
