@@ -25,32 +25,26 @@
 #include "SiconosConst.hpp"
 #include "SimulationTypeDef.hpp"
 #include "SiconosFwd.hpp"
-// #include "EventsManager.hpp"
-// #include "SiconosPointers.hpp"
 #include <fstream>
-// #include "Model.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
-// #include "Topology.hpp"
 #include "InteractionManager.hpp"
 #include <list>
 
-
 /** Description of the simulation process (integrators, time
-    discretisation and so on) - Base class for TimeStepping or
-    EventDriven.
+ *  discretisation and so on) - Base class for TimeStepping or
+ *  EventDriven.
+ *
+ *   \author SICONOS Development Team - copyright INRIA
+ *   \version 4.2.0.
+ *   \date (Creation) Apr 26, 2004
+ *
+ *   !!! This is an abstract class !!!
+ *
+ *   The available simulations are TimeStepping and EventDriven. See
+ *   derived classes for more details.
+ *
+ */
 
-    \author SICONOS Development Team - copyright INRIA
-    \version 3.8.0.
-    \date (Creation) Apr 26, 2004
-
-    !!! This is an abstract class !!!
-
-    The available simulations are TimeStepping and EventDriven. See
-    derived classes for more details.
-
-  Rules:
-  - A Model must be given to the constructor, otherwise an exception is thrown.
-*/
 class Simulation : public std11::enable_shared_from_this<Simulation>
 {
 protected:
@@ -58,14 +52,11 @@ protected:
   */
   ACCEPT_SERIALIZATION(Simulation);
 
-
   /** name or id of the Simulation */
   std::string _name;
 
   /** tool to manage all events */
   SP::EventsManager _eventsManager;
-
-
 
   /** current starting time for integration */
   double _tinit;
@@ -75,10 +66,11 @@ protected:
 
   /** real ending time for integration (different from tend in case of
       stop during integrate, for example when a root is found in
-      LsodarOSI procedure)
+      an EventDriven strategy)
   */
   double _tout;
 
+  
   double _T;
 
   /** the dynamical systems integrators */

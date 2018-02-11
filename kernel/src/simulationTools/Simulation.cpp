@@ -197,10 +197,17 @@ void Simulation::updateIndexSets()
 
 void Simulation::insertNonSmoothProblem(SP::OneStepNSProblem osns, int Id)
 {
-  if (_allNSProblems->size() > 0 && ((*_allNSProblems)[Id]))
-    RuntimeException::selfThrow("Simulation - insertNonSmoothProblem(osns), trying to insert a OSNSP already existing. ");
-  (*_allNSProblems)[Id] = osns;
-
+  if (_allNSProblems->size() > Id)
+  {
+    if ((*_allNSProblems)[Id])
+      RuntimeException::selfThrow("Simulation - insertNonSmoothProblem(osns), trying to insert a OSNSP already existing. ");
+    (*_allNSProblems)[Id] = osns;
+  }
+  else
+  {
+    _allNSProblems->resize(Id+1);
+    (*_allNSProblems)[Id] = osns;
+  }
 }
 void Simulation::initialize()
 {
@@ -208,10 +215,10 @@ void Simulation::initialize()
   DEBUG_EXPR(std::cout << "Name :"<< name() << std::endl;);
   // 1-  OneStepIntegrators initialization ===
   // we set the simulation pointer and the graph of DS in osi
-
   for (OSIIterator itosi = _allOSI->begin();
        itosi != _allOSI->end(); ++itosi)
   {
+    DEBUG_PRINT("- 1 - set simulation pointer  and the graph of ds in osi\n");
     if (!(*itosi)->isInitialized()){
       (*itosi)->setSimulationPtr(shared_from_this());
       // a subgraph has to be implemented.
@@ -219,11 +226,12 @@ void Simulation::initialize()
     }
   }
 
-  // 2 - we set the osi of DS that ha been defined through associate(ds,osi)
+  // 2 - we set the osi of DS that has been defined through associate(ds,osi)
   std::map< SP::OneStepIntegrator, std::list<SP::DynamicalSystem> >::iterator  it;
   std::list<SP::DynamicalSystem> ::iterator  itlist;
   for ( it = _OSIDSmap.begin();  it !=_OSIDSmap.end(); ++it)
   {
+    DEBUG_PRINT("- 2 - we set the osi of DS that has been defined through associate(ds,osi)\n");
     for ( itlist = it->second.begin();  itlist !=it->second.end(); ++itlist)
     {
       SP::DynamicalSystem ds =  *itlist;
@@ -242,6 +250,7 @@ void Simulation::initialize()
   itc++;
   while(itc != _nsds->changeLog().end())
   {
+    DEBUG_PRINT("- 3 - we initialize new  ds and interaction \n");
     DEBUG_PRINT("The nsds has changed\n")
     const NonSmoothDynamicalSystem::Changes& changes = *itc;
     itc++;
@@ -252,6 +261,10 @@ void Simulation::initialize()
       SP::DynamicalSystem ds = changes.ds;
       if (!DSG->properties(DSG->descriptor(ds)).osi)
       {
+        if (_allOSI->size() == 0)
+        RuntimeException::selfThrow
+            ("Simulation::initialize - there is no osi in this Simulation !!");
+        DEBUG_PRINTF("_allOSI->size() = %i\n", _allOSI->size());
         SP::OneStepIntegrator osi_default = *_allOSI->begin();
         _nsds->topology()->setOSI(ds, osi_default);
         if (_allOSI->size() > 1)
@@ -281,7 +294,7 @@ void Simulation::initialize()
   // === OneStepIntegrators initialization ===
   for (OSIIterator itosi = _allOSI->begin();
        itosi != _allOSI->end(); ++itosi)
-  {
+  { 
     if (!(*itosi)->isInitialized()){
       DEBUG_PRINT("osi->initialize\n")
       (*itosi)->initialize();
@@ -295,7 +308,7 @@ void Simulation::initialize()
   assert (_numberOfIndexSets >0);
   if ((indxSize == LEVELMAX) || (indxSize < _numberOfIndexSets ))
   {
-    DEBUG_PRINT("Topology : difference number of indexSets\n");
+    DEBUG_PRINT("Topology : different number of indexSets\n");
     topo->indexSetsResize(_numberOfIndexSets);
     // Init if the size has changed
     for (unsigned int i = indxSize; i < topo->indexSetsSize(); i++) // ++i ???

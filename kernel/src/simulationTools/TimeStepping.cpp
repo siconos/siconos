@@ -342,7 +342,10 @@ void TimeStepping::initOSNS()
     // initialization of  OneStepNonSmoothProblem
     for (OSNSIterator itOsns = _allNSProblems->begin(); itOsns != _allNSProblems->end(); ++itOsns)
     {
-      (*itOsns)->initialize(shared_from_this());
+      if (*itOsns)
+        (*itOsns)->initialize(shared_from_this());
+      else
+        RuntimeException::selfThrow("TimeStepping::initOSNS failed. A OneStepNSProblem has not been set. ");
     }
   }
 }
@@ -350,6 +353,11 @@ void TimeStepping::initOSNS()
 void TimeStepping::nextStep()
 {
   DEBUG_BEGIN("void TimeStepping::nextStep()\n");
+  // if(!_isInitialized)
+  // {
+  //   // if the simulation run starts with nextStep();
+  //   initialize();
+  // }
   processEvents();
   DEBUG_END("void TimeStepping::nextStep()\n");
 }
