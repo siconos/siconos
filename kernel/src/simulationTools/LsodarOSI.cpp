@@ -73,6 +73,9 @@ extern "C" void LsodarOSI_jacobianf_wrapper(integer* sizeOfX, doublereal* time, 
 LsodarOSI::LsodarOSI():
   OneStepIntegrator(OSI::LSODAROSI)
 {
+
+  _sizeTol =1;
+  _itol=1;
   _intData.resize(9);
   for(int i = 0; i < 9; i++) _intData[i] = 0;
   _sizeMem = 2;
@@ -83,7 +86,12 @@ LsodarOSI::LsodarOSI():
   _levelMaxForOutput=2;
   _levelMinForInput=1;
   _levelMaxForInput=2;
-
+  
+  rtol.reset(new doublereal[_sizeTol]) ;  // rtol, relative tolerance
+  atol.reset(new doublereal[_sizeTol]) ;  // atol, absolute tolerance
+  // Set atol and rtol values ...
+  rtol[0] = RTOL_DEFAULT ; // rtol
+  atol[0] = ATOL_DEFAULT ;  // atol
 }
 
 void LsodarOSI::setTol(integer newItol, SA::doublereal newRtol, SA::doublereal newAtol)
@@ -104,8 +112,7 @@ void LsodarOSI::setTol(integer newItol, SA::doublereal newRtol, SA::doublereal n
   //             3     array      scalar     RTOL(i)*ABS(Y(i)) + ATOL
   //             4     array      array      RTOL(i)*ABS(Y(i)) + ATOL(i)
 
-  _intData[2] = newItol; // itol
-
+  _itol = newItol; // itol
   rtol = newRtol;
   atol = newAtol;
 }
@@ -125,7 +132,7 @@ void LsodarOSI::setMaxNstep(integer maxNumberSteps)
 
 void LsodarOSI::setTol(integer newItol, doublereal newRtol, doublereal newAtol)
 {
-  _intData[2] = newItol; // itol
+  _itol = newItol; // itol
   rtol[0] = newRtol; // rtol
   atol[0] = newRtol;  // atol
 }
@@ -141,21 +148,7 @@ void LsodarOSI::updateData()
 {
   // Used to update some data (iwork ...) when _intData is modified.
   // Warning: it only checks sizes and possibly reallocate memory, but no values are set.
-
-  unsigned int sizeTol = _intData[0]; // size of rtol, atol ... If itol (_intData[0]) = 1 => scalar else, vector of size neq (_intData[0]).
-  //  if(_intData[0]==1) sizeTol = 1;
-  //  else sizeTol = _intData[0];
-
-  rtol.reset(new doublereal[sizeTol]) ;    // rtol, relative tolerance
-
-  atol.reset(new doublereal[sizeTol]) ;  // atol, absolute tolerance
-  for(unsigned int i = 0; i < sizeTol; i++)
-  {
-    atol[i] = 0.0;
-  }
-
-
-
+  
   iwork.reset(new integer[_intData[7]]);
   for(int i = 0; i < _intData[7]; i++) iwork[i] = 0;
 
@@ -406,7 +399,7 @@ void LsodarOSI::initialize()
   // 2 - Ng, number of constraints:
   _intData[1] = std11::static_pointer_cast<EventDriven>(_simulation)->computeSizeOfg();
   // 3 - Itol, itask, iopt
-  _intData[2] = 1; // itol, 1 if ATOL is a scalar, else 2 (ATOL array)
+  _intData[2] = _itol; // itol, 1 if ATOL is a scalar, else 2 (ATOL array)
   _intData[3] = 1; // itask, an index specifying the task to be performed. 1: normal computation.
   _intData[5] = 0; // iopt: 0 if no optional input else 1.
 
@@ -454,9 +447,7 @@ void LsodarOSI::initialize()
   iwork[7] = 0;
   // Set   the maximum order to be allowed for the stiff  (BDF) method.
   iwork[8] = 0;
-  // Set atol and rtol values ...
-  rtol[0] = RTOL_DEFAULT ; // rtol
-  atol[0] = ATOL_DEFAULT ;  // atol
+
 
   // === Error handling in LSODAROSI===
 

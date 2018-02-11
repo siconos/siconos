@@ -57,6 +57,12 @@ private:
    * See opkdmain.f and lsodar routine for details on those variables.
    */
   std::vector<integer> _intData;
+  /** _sizeTol size of the vector ot tolerances */
+  unsigned int _sizeTol;
+
+  /** Type of tolerances */
+  unsigned int _itol;
+  
   /** relative tolerance */
   SA::doublereal rtol;
   /** absolute tolerance */
