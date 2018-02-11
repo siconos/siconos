@@ -97,9 +97,9 @@ int main(int argc, char* argv[])
     // -------------
     // --- Model ---
     // -------------
-    SP::Model filippov(new Model(t0, T));
-    filippov->nonSmoothDynamicalSystem()->insertDynamicalSystem(process);
-    filippov->nonSmoothDynamicalSystem()->link(myProcessInteraction,process);
+    SP::NonSmoothDynamicalSystem filippov(new NonSmoothDynamicalSystem(t0, T));
+    filippov->insertDynamicalSystem(process);
+    filippov->link(myProcessInteraction,process);
 
     // ------------------
     // --- Simulation ---
@@ -107,7 +107,7 @@ int main(int argc, char* argv[])
     // TimeDiscretisation
     SP::TimeDiscretisation td(new TimeDiscretisation(t0, h));
     // == Creation of the Simulation ==
-    SP::TimeStepping s(new TimeStepping(td));
+    SP::TimeStepping s(new TimeStepping(filippov, td));
     // -- OneStepIntegrators --
     double theta = 0.5;
     SP::EulerMoreauOSI myIntegrator(new EulerMoreauOSI(theta));
@@ -116,27 +116,13 @@ int main(int argc, char* argv[])
     // -- OneStepNsProblem --
 
     SP::Relay osnspb(new Relay());
-
-
     osnspb->setSolverId(SICONOS_RELAY_LEMKE);
     osnspb->numericsSolverOptions()->dparam[0] = 1e-08;
-
-
     s->insertNonSmoothProblem(osnspb);
-    filippov->setSimulation(s);
+
     // =========================== End of model definition ===========================
 
     // ================================= Computation =================================
-
-    // --- Simulation initialization ---
-
-    cout << "====> Simulation initialisation ..." << endl << endl;
-
-    filippov->initialize();
-
-
-    //  (s->oneStepNSProblems)[0]->initialize();
-
 
     // --- Get the values to be plotted ---
     unsigned int outputSize = 7; // number of required data
@@ -190,19 +176,10 @@ int main(int argc, char* argv[])
     // --- Output files ---
     cout << "====> Output file writing ..." << endl;
     ioMatrix::write("Filippov.dat", "ascii", dataPlot, "noDim");
-
-    // Comparison with a reference file
-    SimpleMatrix dataPlotRef(dataPlot);
-    dataPlotRef.zero();
-    ioMatrix::read("Filippov.ref", "ascii", dataPlotRef);
-    std::cout << (dataPlot-dataPlotRef).normInf() <<std::endl;
-    if ((dataPlot - dataPlotRef).normInf() > 1e-12)
-    {
-      std::cout << "Warning. The results is rather different from the reference file." << std::endl;
+    double error=0.0, eps=1e-05;
+    if (ioMatrix::compareRefFile(dataPlot, "Filippov.ref", eps, error)
+        && error > eps)
       return 1;
-    }
-
-
   }
 
   catch (SiconosException e)
