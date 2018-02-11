@@ -307,7 +307,7 @@ int main(int argc, char* argv[])
       return 1;
 #else
     double error=0.0, eps=1e-12;
-    if (ioMatrix::compareRefFile(dataPlot, "BouncingBallNETS-WITHPROJ.ref", eps, error)
+    if (ioMatrix::compareRefFile(dataPlot, "BouncingBallNETS.ref", eps, error)
         && error > eps)
       return 1;
 #endif

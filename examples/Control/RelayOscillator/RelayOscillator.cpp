@@ -102,9 +102,9 @@ int main(int argc, char* argv[])
     // -------------
     // --- Model ---
     // -------------
-    SP::Model relayOscillator(new Model(t0, T));
-    relayOscillator->nonSmoothDynamicalSystem()->insertDynamicalSystem(process);
-    relayOscillator->nonSmoothDynamicalSystem()->link(myProcessInteraction, process);
+    SP::NonSmoothDynamicalSystem relayOscillator(new NonSmoothDynamicalSystem(t0, T));
+    relayOscillator->insertDynamicalSystem(process);
+    relayOscillator->link(myProcessInteraction, process);
 
     // ------------------
     // --- Simulation ---
@@ -112,11 +112,10 @@ int main(int argc, char* argv[])
     // TimeDiscretisation
     SP::TimeDiscretisation td(new TimeDiscretisation(t0, h));
     // == Creation of the Simulation ==
-    SP::TimeStepping s(new TimeStepping(td));
+    SP::TimeStepping s(new TimeStepping(relayOscillator, td));
     // -- OneStepIntegrators --
     double theta = 0.5;
     SP::EulerMoreauOSI myIntegrator(new EulerMoreauOSI(theta));
-
     s->insertIntegrator(myIntegrator);
 
     // -- OneStepNsProblem --
@@ -126,24 +125,11 @@ int main(int argc, char* argv[])
 
     osnspb->setSolverId(SICONOS_RELAY_LEMKE);
     osnspb->numericsSolverOptions()->dparam[0] = 1e-08;
-
-
     s->insertNonSmoothProblem(osnspb);
 
-    relayOscillator->setSimulation(s);
     // =========================== End of model definition ===========================
 
     // ================================= Computation =================================
-
-    // --- Simulation initialization ---
-
-    cout << "====> Simulation initialisation ..." << endl << endl;
-
-    relayOscillator->initialize();
-
-
-    //  (s->oneStepNSProblems)[0]->initialize();
-
 
     // --- Get the values to be plotted ---
     unsigned int outputSize = 7; // number of required data

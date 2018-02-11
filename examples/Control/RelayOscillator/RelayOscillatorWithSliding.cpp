@@ -119,9 +119,9 @@ int main(int argc, char* argv[])
     // -------------
     // --- Model ---
     // -------------
-    SP::Model relayOscillatorWithSliding(new Model(t0, T));
-    relayOscillatorWithSliding->nonSmoothDynamicalSystem()->insertDynamicalSystem(process);
-    relayOscillatorWithSliding->nonSmoothDynamicalSystem()->link(myProcessInteraction, process);
+    SP::NonSmoothDynamicalSystem relayOscillatorWithSliding(new NonSmoothDynamicalSystem(t0, T));
+    relayOscillatorWithSliding->insertDynamicalSystem(process);
+    relayOscillatorWithSliding->link(myProcessInteraction, process);
 
     // ------------------
     // --- Simulation ---
@@ -129,7 +129,7 @@ int main(int argc, char* argv[])
     // TimeDiscretisation
     SP::TimeDiscretisation td(new TimeDiscretisation(t0, h));
     // == Creation of the Simulation ==
-    SP::TimeStepping s(new TimeStepping(td));
+    SP::TimeStepping s(new TimeStepping(relayOscillatorWithSliding, td));
     // -- OneStepIntegrators --
     double theta = 0.5;
     SP::EulerMoreauOSI myIntegrator(new EulerMoreauOSI(theta));
@@ -142,23 +142,11 @@ int main(int argc, char* argv[])
 
     osnspb->setSolverId(SICONOS_RELAY_LEMKE);
     osnspb->numericsSolverOptions()->dparam[0] = 1e-08;
-
-
     s->insertNonSmoothProblem(osnspb);
-    relayOscillatorWithSliding->setSimulation(s);
+
     // =========================== End of model definition ===========================
 
     // ================================= Computation =================================
-
-    // --- Simulation initialization ---
-
-    cout << "====> Simulation initialisation ..." << endl << endl;
-
-    relayOscillatorWithSliding->initialize();
-
-
-    //  (s->oneStepNSProblems)[0]->initialize();
-
 
     // --- Get the values to be plotted ---
     unsigned int outputSize = 7; // number of required data
@@ -210,18 +198,6 @@ int main(int argc, char* argv[])
     // --- Output files ---
     cout << "====> Output file writing ..." << endl;
     ioMatrix::write("RelayOscillatorWithSliding.dat", "ascii", dataPlot, "noDim");
-
-    // // Comparison with a reference file
-    // SimpleMatrix dataPlotRef(dataPlot);
-    // dataPlotRef.zero();
-    // ioMatrix::read("RelayOscillatorWithSliding.ref", "ascii", dataPlotRef);
-    // //std::cout << (dataPlot-dataPlotRef).normInf() <<std::endl;
-    // if ((dataPlot-dataPlotRef).normInf() > 1e-12)
-    // {
-    //   std::cout << "Warning. The results is rather different from the reference file."<< std::endl;
-    //   return 1;
-    // }
-
 
   }
 
