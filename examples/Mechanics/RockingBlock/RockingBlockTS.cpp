@@ -1,11 +1,11 @@
 // This is the program to simulate the dynamic of a rocking block by using the Siconos platform
-//==================================================================================================================
+//============================================================================
 #include "SiconosKernel.hpp"
 #include <stdlib.h>
 using namespace std;
 #define PI 3.14159
 #define GGearth  9.8100
-//---------------------------------Decalre global variables ---------------------------------------------------
+//---------------------------------Decalre global variables ------------------
 double LengthBlock = 1.0;        // Length of the rocking block
 double HeightBlock = 1.5;        // Height of the rocking block
 unsigned int Nfreedom = 3;       // Number of degrees of freedom
@@ -25,19 +25,19 @@ unsigned int NpointSave = 200;   //
 unsigned int SizeOutput = 9;     //
 double criterion = 0.05;
 unsigned int maxIter = 20000;
-//==========================================================================================================
+//=============================================================================
 //                                             Main function
-//==========================================================================================================
+//=============================================================================
 int main(int argc, char* argv[])
 {
-  //---------------------------- calculate the computation time --------------------------------------------------
+  //---------------------------- calculate the computation time --------------
   boost::timer time;
   time.restart();
   try
   {
-    //===========================================================================================================
+    //=========================================================================
     //                  I: Declare the dynamical systems
-    //===========================================================================================================
+    //=========================================================================
     //1. Set the mass matrix
     SP::SiconosMatrix Mass(new SimpleMatrix(Nfreedom, Nfreedom));
     double InertiaBlock;
@@ -72,7 +72,7 @@ int main(int argc, char* argv[])
     (*ForceExtern)(1) = -MassBlock * GGearth;
     RockingBlock->setFExtPtr(ForceExtern);
     //
-    //----------------------------- Display variables of the dynamical system---------------------------------------
+    //----------------------------- Display variables of the dynamical system-
     cout << "Initial position of the rocking block:" << endl;
     PosIniBlock->display();
     cout << "Initial velocity of the rocking block:" << endl;
@@ -81,9 +81,9 @@ int main(int argc, char* argv[])
     Mass->display();
     cout << "External force applied on the rocking block:"  << endl;
     ForceExtern->display();
-    //==================================================================================================================
+    //=========================================================================
     //              II: Declare the relation et interaction between dynamical systems
-    //==================================================================================================================
+    //========================================================================
     // Impact law
     SP::NonSmoothLaw nslaw(new NewtonImpactNSL(e));
     // Interaction at contact point 1
@@ -93,17 +93,17 @@ int main(int argc, char* argv[])
     SP::Relation relation2(new LagrangianScleronomousR("RockingBlockPlugin:h2", "RockingBlockPlugin:G2"));
     SP::Interaction inter2(new Interaction(nslaw, relation2));
     // Interactions for the whole dynamical system
-    //================================================================================================================
+    //==========================================================================
     //            III. Create the "model" object
-    //================================================================================================================
-    SP::Model RoBlockModel(new Model(TimeInitial, TimeFinal));
-    RoBlockModel->nonSmoothDynamicalSystem()->insertDynamicalSystem(RockingBlock);
-    RoBlockModel->nonSmoothDynamicalSystem()->link(inter1, RockingBlock);
-    RoBlockModel->nonSmoothDynamicalSystem()->link(inter2, RockingBlock);
+    //==========================================================================
+    SP::NonSmoothDynamicalSystem RoBlockModel(new NonSmoothDynamicalSystem(TimeInitial, TimeFinal));
+    RoBlockModel->insertDynamicalSystem(RockingBlock);
+    RoBlockModel->link(inter1, RockingBlock);
+    RoBlockModel->link(inter2, RockingBlock);
 
-    //================================================================================================================
+    //==========================================================================
     //            IV. Create the simulation
-    //================================================================================================================
+    //==========================================================================
     //1. Time discretization
     SP::TimeDiscretisation TimeDiscret(new TimeDiscretisation(TimeInitial, StepSize));
     //2. Integration solver for one step
@@ -111,23 +111,21 @@ int main(int argc, char* argv[])
     //3. Nonsmooth problem
     SP::OneStepNSProblem impact(new LCP());
     //4. Simulation with (1), (2), (3)
-    SP::TimeStepping TSscheme(new TimeStepping(TimeDiscret));
+    SP::TimeStepping TSscheme(new TimeStepping(RoBlockModel, TimeDiscret));
+    TSscheme->setNewtonTolerance(criterion);
+    TSscheme->setNewtonMaxIteration(maxIter);
     TSscheme->insertIntegrator(OSI);
     TSscheme->insertNonSmoothProblem(impact);
-    RoBlockModel->setSimulation(TSscheme);
 
-    //==================================================================================================================
+    //============================================================================
     //                    V. Process the simulation
-    //==================================================================================================================
-    // -------------------------------- Simulation initialization ------------------------------------------------------
-    cout << "====> Simulation initialisation ..." << endl << endl;
-    RoBlockModel->initialize(); // initialize the model
+    //============================================================================
 
     SP::SiconosVector PosBlock = RockingBlock->q();        // pointer points to the position vector of the rocking block
     SP::SiconosVector VelBlock = RockingBlock->velocity(); // pointer points to the velocity of the rocking block
-    //-------------------- Save the output during simulation ---------------------------------------------------------
+    //-------------------- Save the output during simulation ------------------
     SimpleMatrix DataPlot(NpointSave, SizeOutput);
-    //------------- At the initial time -----------------------------------------------------------------------------
+    //------------- At the initial time ---------------------------------------
     DataPlot(0, 0) = RoBlockModel->t0();
     DataPlot(0, 1) = (*PosBlock)(0); // Position X
     DataPlot(0, 2) = (*PosBlock)(1); // Position Y
@@ -151,13 +149,13 @@ int main(int argc, char* argv[])
 
 
 
-    //----------------------------------- Simulation starts ----------------------------------------------------------
+    //----------------------------------- Simulation starts ------------------
     cout << "====> Start computation ... " << endl << endl;
     unsigned int k = 1;
     boost::progress_display show_progress(NpointSave);
     while (k < NpointSave)
     {
-      TSscheme->newtonSolve(criterion, maxIter);
+      TSscheme->advanceToEvent();
       DataPlot(k, 0) = TSscheme->nextTime();
       DataPlot(k, 1) = (*PosBlock)(0); //Position X
       DataPlot(k, 2) = (*PosBlock)(1); //Position Y
@@ -178,12 +176,12 @@ int main(int argc, char* argv[])
       ++show_progress;
       TSscheme->nextStep();
     };
-    //----------------------- At the end of the simulation --------------------------
-    cout << "End of the simulation" << endl;
+    //----------------------- At the end of the simulation -------------------
+    cout << "\nEnd of the simulation" << endl;
     cout << "====> Output file writing ..." << endl << endl;
     ioMatrix::write("result.dat", "ascii", DataPlot, "noDim");
   }
-  //============================== Catch exceptions ===================================================================
+  //============================== Catch exceptions ==========================
   catch (SiconosException e)
   {
     cout << e.report() << endl;

@@ -114,11 +114,11 @@ int main(int argc, char* argv[])
     // -------------
     // --- Model ---
     // -------------
-    SP::Model ObserverLCS(new Model(t0, T));
-    ObserverLCS->nonSmoothDynamicalSystem()->insertDynamicalSystem(process);
-    ObserverLCS->nonSmoothDynamicalSystem()->insertDynamicalSystem(observer);
-    ObserverLCS->nonSmoothDynamicalSystem()->link(myProcessInteraction, process);
-    ObserverLCS->nonSmoothDynamicalSystem()->link(myObserverInteraction, observer);
+    SP::NonSmoothDynamicalSystem ObserverLCS(new NonSmoothDynamicalSystem(t0, T));
+    ObserverLCS->insertDynamicalSystem(process);
+    ObserverLCS->insertDynamicalSystem(observer);
+    ObserverLCS->link(myProcessInteraction, process);
+    ObserverLCS->link(myObserverInteraction, observer);
 
     // ------------------
     // --- Simulation ---
@@ -126,27 +126,19 @@ int main(int argc, char* argv[])
     // TimeDiscretisation
     SP::TimeDiscretisation td(new TimeDiscretisation(t0, h));
     // == Creation of the Simulation ==
-    SP::TimeStepping s(new TimeStepping(td));
+    SP::TimeStepping s(new TimeStepping(ObserverLCS, td));
     // -- OneStepIntegrators --
     double theta = 0.5;
     SP::EulerMoreauOSI myIntegrator(new EulerMoreauOSI(theta));
-
     s->insertIntegrator(myIntegrator);
 
     // -- OneStepNsProblem --
     SP::LCP osnspb(new LCP());
     s->insertNonSmoothProblem(osnspb);
-    ObserverLCS->setSimulation(s);
-    
+
     // =========================== End of model definition ===========================
 
     // ================================= Computation =================================
-
-    // --- Simulation initialization ---
-
-    cout << "====> Simulation initialisation ..." << endl << endl;
-
-    ObserverLCS->initialize();
 
     // --- Get the values to be plotted ---
     unsigned int outputSize = 10; // number of required data
@@ -161,6 +153,8 @@ int main(int argc, char* argv[])
     SP::SiconosVector yProc = myProcessInteraction->y(0);
     SP::SiconosVector yObs = myObserverInteraction->y(0);
     SP::SiconosVector z = observer->z();
+
+    myProcessInteraction->computeOutput(t0,0);
 
     // -> saved in a matrix dataPlot
     dataPlot(0, 0) = ObserverLCS->t0(); // Initial time of the model
@@ -207,20 +201,10 @@ int main(int argc, char* argv[])
     // --- Output files ---
     cout << "====> Output file writing ..." << endl;
     ioMatrix::write("ObserverLCS.dat", "ascii", dataPlot, "noDim");
-    // Comparison with a reference file
-    SimpleMatrix dataPlotRef(dataPlot);
-    dataPlotRef.zero();
-    ioMatrix::read("ObserverLCS.ref", "ascii", dataPlotRef);
-
-    std::cout << "error =" << (dataPlot - dataPlotRef).normInf() << std::endl;
-    if ((dataPlot - dataPlotRef).normInf() > 1e-10)
-    {
-
-      std::cout << "Warning. The results is rather different from the reference file." << std::endl;
+    double error=0.0, eps=1e-12;
+    if (ioMatrix::compareRefFile(dataPlot, "ObserverLCS.ref", eps, error)
+        && error > eps)
       return 1;
-    }
-
-
 
   }
 

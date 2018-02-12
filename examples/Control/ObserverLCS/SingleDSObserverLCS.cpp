@@ -90,13 +90,13 @@ int main(int argc, char* argv[])
     SP::Interaction myProcessInteraction(new Interaction(myNslaw, myProcessRelation));
 
     // Model
-    SP::Model ObserverLCS(new Model(t0, T));
-    ObserverLCS->nonSmoothDynamicalSystem()->insertDynamicalSystem(processObserver);
-    ObserverLCS->nonSmoothDynamicalSystem()->link(myProcessInteraction, processObserver);
+    SP::NonSmoothDynamicalSystem ObserverLCS(new NonSmoothDynamicalSystem(t0, T));
+    ObserverLCS->insertDynamicalSystem(processObserver);
+    ObserverLCS->link(myProcessInteraction, processObserver);
     // TimeDiscretisation
     SP::TimeDiscretisation td(new TimeDiscretisation(t0, h));
     // == Creation of the Simulation ==
-    SP::TimeStepping s(new TimeStepping(td));
+    SP::TimeStepping s(new TimeStepping(ObserverLCS, td));
 
 
     // OneStepIntegrator
@@ -104,20 +104,13 @@ int main(int argc, char* argv[])
     // One Step Integrator
     SP::EulerMoreauOSI myIntegrator(new EulerMoreauOSI(theta));
     s->insertIntegrator(myIntegrator);
-    // OneStepNSProblem
-
-
 
     // One Step non smooth problem
 
     SP::LCP osnspb(new LCP());
     s->insertNonSmoothProblem(osnspb);
 
-    ObserverLCS->setSimulation(s);
     // ================================= Computation =================================
-
-    // --- Initialisation of the simulation ---
-    ObserverLCS->initialize();
 
     int k = 0; // Current step
     unsigned int N = ceil((T - t0) / h) + 1; // Number of time steps
@@ -125,7 +118,7 @@ int main(int argc, char* argv[])
     SimpleMatrix dataPlot(N, outputSize);
     SP::SiconosVector processLambda = myProcessInteraction->lambda(0);
 
-
+    myProcessInteraction->computeOutput(t0,0);
     // We get values for the initial time step:
     // time
     dataPlot(k, 0) = s->nextTime();;
@@ -168,22 +161,10 @@ int main(int argc, char* argv[])
 
     // Write the results into the file "ObserverLCS.dat"
     ioMatrix::write("SingleDSObserverLCS.dat", "ascii", dataPlot, "noDim");
-
-    // --- Time loop ---
-    // Comparison with a reference file
-    SimpleMatrix dataPlotRef(dataPlot);
-    dataPlotRef.zero();
-    ioMatrix::read("SingleDSObserverLCS.ref", "ascii", dataPlotRef);
-
-    std::cout << "Error =" << (dataPlot - dataPlotRef).normInf() << std::endl;
-    if ((dataPlot - dataPlotRef).normInf() > 1e-09)
-    {
-
-      std::cout << "Warning. The results is rather different from the reference file." << std::endl;
-
+    double error=0.0, eps=1e-10;
+    if (ioMatrix::compareRefFile(dataPlot, "SingleDSObserverLCS.ref", eps, error)
+        && error > eps)
       return 1;
-    }
-
 
 
   }

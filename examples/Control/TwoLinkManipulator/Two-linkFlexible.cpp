@@ -130,14 +130,14 @@ int main(int argc, char* argv[])
     // --- Model ---
     // -------------
 
-    SP::Model Manipulator(new Model(t0, T));
+    SP::NonSmoothDynamicalSystem Manipulator(new NonSmoothDynamicalSystem(t0, T));
 
     // add the dynamical system in the non smooth dynamical system
-    Manipulator->nonSmoothDynamicalSystem()->insertDynamicalSystem(arm);
+    Manipulator->insertDynamicalSystem(arm);
 
     // link the interaction and the dynamical system
-    Manipulator->nonSmoothDynamicalSystem()->link(inter1, arm);
-    Manipulator->nonSmoothDynamicalSystem()->link(inter2, arm);
+    Manipulator->link(inter1, arm);
+    Manipulator->link(inter2, arm);
 
     // ----------------
     // --- Simulation ---
@@ -146,8 +146,9 @@ int main(int argc, char* argv[])
     // -- Time discretisation --
     SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
 
-    SP::TimeStepping s(new TimeStepping(t));
-
+    SP::TimeStepping s(new TimeStepping(Manipulator, t));
+    s->setNewtonTolerance(criterion);
+    s->setNewtonMaxIteration(maxIter);
     // -- OneStepIntegrators --
     SP::OneStepIntegrator OSI(new MoreauJeanOSI(0.500001));
     s->insertIntegrator(OSI);
@@ -157,22 +158,13 @@ int main(int argc, char* argv[])
     SP::OneStepNSProblem osnspb(new LCP());
     osnspb->numericsSolverOptions()->dparam[0] = 1e-8;
 
-
-
     s->insertNonSmoothProblem(osnspb);
-    Manipulator->setSimulation(s);
     cout << "=== End of model loading === " << endl;
 
     // =========================== End of model definition ===========================
 
 
     // ================================= Computation
-    // --- Simulation initialization ---
-
-
-
-    Manipulator->initialize();
-    cout << "End of model initialisation" << endl;
 
     unsigned int k = 0;
     unsigned int N = ceil((T - t0) / h); // Number of time steps
@@ -239,7 +231,7 @@ int main(int argc, char* argv[])
       dataPlot(k, 13) = (*z)(15);
 
 
-      s->newtonSolve(criterion, maxIter);
+      s->advanceToEvent();
       dataPlot(k, 11) = (*p)(1);
       (*z)(4) = (inter2->getLambda(1))(0);
       s->nextStep();
