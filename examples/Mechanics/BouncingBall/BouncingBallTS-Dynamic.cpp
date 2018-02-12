@@ -162,6 +162,8 @@ int main(int argc, char* argv[])
 
       s->computeOneStep();
 
+      s->clearNSDSChangeLog();
+
       // --- Get values to be plotted ---
       dataPlot(k, 0) =  s->nextTime();
       dataPlot(k, 1) = (*q)(0);
