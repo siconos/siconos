@@ -135,10 +135,12 @@ protected:
 
   bool _isInitialized;
 
-  
+  /** current NSDS changelog position */
+  NonSmoothDynamicalSystem::ChangeLogIter _nsdsChangeLogPosition;
+
+  /** map of not-yet-initialized DS variables for each OSI */
   std::map< SP::OneStepIntegrator, std::list<SP::DynamicalSystem> >  _OSIDSmap;
 
-  
   /** default constructor.
    */
   Simulation() {};
@@ -169,7 +171,6 @@ private:
 
 public:
 
-  std::list<NonSmoothDynamicalSystem::Changes>::const_iterator _nsdsChangeLogPosition;
   /** default constructor
    *  \param td the timeDiscretisation for this Simulation
    */
@@ -460,6 +461,14 @@ public:
   /** step from current event to next event of EventsManager
    */
   virtual void advanceToEvent() = 0;
+
+
+  /** clear the NSDS changelog up to current position.  If you have a
+   * particularly dynamic simulation (DS and Interactions created and
+   * destroyed frequently), then it is important to call this
+   * periodically.
+   */
+  void clearNSDSChangeLog();
 
 
   /* Set the option to specify if a relative convergence criterion must

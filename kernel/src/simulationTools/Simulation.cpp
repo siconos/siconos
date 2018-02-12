@@ -242,9 +242,12 @@ void Simulation::initialize()
     it->second.clear();
   }
 
-
-
   // 3- we initialize new  ds and interaction
+  /* Changes to the NSDS are tracked by a changelog, making it fast
+   * for the Simulation to scan any changes it has not yet seen and
+   * initialize the associated ata structures.  It is just an
+   * optimisation over scanning the whole NSDS for new elements at
+   * each step. */
   SP::DynamicalSystemsGraph DSG = _nsds->topology()->dSG(0);
   std::list<NonSmoothDynamicalSystem::Changes>::const_iterator itc = _nsdsChangeLogPosition ;
   itc++;
@@ -524,6 +527,10 @@ void Simulation::processEvents()
   }
 }
 
+void Simulation::clearNSDSChangeLog()
+{
+  _nsds->clearChangeLogTo(_nsdsChangeLogPosition);
+}
 
 void Simulation::updateT(double T)
 {

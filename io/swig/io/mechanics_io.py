@@ -3156,6 +3156,7 @@ class Hdf5():
 
                 log(self._out.flush)()
 
+            log(simulation.clearNSDSChangeLog, with_timer)()
 
             if use_proposed:
                 number_of_contacts = (
