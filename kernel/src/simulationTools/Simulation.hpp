@@ -128,11 +128,6 @@ protected:
    */
   double _relativeConvergenceTol;
 
-  /**
-   * track whether link() or unlink() has been called
-   */
-  bool _linkOrUnlink;
-
   bool _isInitialized;
 
   /** current NSDS changelog position */

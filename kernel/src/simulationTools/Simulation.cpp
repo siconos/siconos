@@ -548,14 +548,11 @@ void Simulation::link(SP::Interaction inter,
   nonSmoothDynamicalSystem()->link(inter, ds1, ds2);
 
   initializeInteraction(nextTime(), inter);
-
-  _linkOrUnlink = true;
 }
 
 void Simulation::unlink(SP::Interaction inter)
 {
   nonSmoothDynamicalSystem()->removeInteraction(inter);
-  _linkOrUnlink = true;
 }
 
 void Simulation::updateInteractions()
@@ -564,14 +561,13 @@ void Simulation::updateInteractions()
   if (_interman)
     _interman->updateInteractions(shared_from_this());
 
-  if (_linkOrUnlink) {
+  if (_nsdsChangeLogPosition != _nsds->changeLogPosition()) {
     initOSNS();
 
     // Since initOSNS calls updateIndexSets() which resets the
     // topology->hasChanged() flag, it must be specified explicitly.
     // Otherwise OneStepNSProblem may fail to update its matrices.
     _nsds->topology()->setHasChanged(true);
-    _linkOrUnlink = false;
   }
 }
 
@@ -581,14 +577,13 @@ void Simulation::updateInteractionsNewtonIteration()
   if (_interman)
     _interman->updateInteractionsNewtonIteration(shared_from_this());
 
-  if (_linkOrUnlink) {
+  if (_nsdsChangeLogPosition != _nsds->changeLogPosition()) {
     initOSNS();
 
     // Since initOSNS calls updateIndexSets() which resets the
     // topology->hasChanged() flag, it must be specified explicitly.
     // Otherwise OneStepNSProblem may fail to update its matrices.
     _nsds->topology()->setHasChanged(true);
-    _linkOrUnlink = false;
   }
 }
 
