@@ -2873,7 +2873,6 @@ class Hdf5():
             theta=0.50001,
             Newton_options=Kernel.SICONOS_TS_NONLINEAR,
             Newton_max_iter=20,
-            Newton_update_interactions=False,
             set_external_forces=None,
             solver=Numerics.SICONOS_FRICTION_3D_NSGS,
             itermax=100000,
@@ -3079,7 +3078,6 @@ class Hdf5():
         simulation.setNewtonOptions(Newton_options)
         simulation.setNewtonMaxIteration(Newton_max_iter)
         simulation.setNewtonTolerance(1e-10)
-        simulation.setNewtonUpdateInteractionsPerIteration(Newton_update_interactions)
 
 
         self._simulation = simulation

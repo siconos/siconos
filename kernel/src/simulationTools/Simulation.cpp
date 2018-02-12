@@ -573,26 +573,6 @@ void Simulation::updateInteractions()
     _interman->updateInteractions(shared_from_this());
 }
 
-void Simulation::updateInteractionsNewtonIteration()
-{
-  NonSmoothDynamicalSystem::ChangeLogIter it( _nsds->changeLogPosition() );
-
-  // Update interactions if a manager was provided
-  if (_interman)
-    _interman->updateInteractionsNewtonIteration(shared_from_this());
-
-  // If anything changed, re-init OSNS
-  if (it != _nsds->changeLogPosition() )
-  {
-    initOSNS();
-
-    // Since initOSNS calls updateIndexSets() which resets the
-    // topology->hasChanged() flag, it must be specified explicitly.
-    // Otherwise OneStepNSProblem may fail to update its matrices.
-    _nsds->topology()->setHasChanged(true);
-  }
-}
-
 void Simulation::updateInput(unsigned int)
 {
   DEBUG_BEGIN("Simulation::updateInput()\n");

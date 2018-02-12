@@ -143,9 +143,6 @@ protected:
   /** Call the interaction manager one if is registered, otherwise do nothing. */
   void updateInteractions();
 
-  /** Call the interaction manager one if is registered, otherwise do nothing. */
-  void updateInteractionsNewtonIteration();
-
   /*TS set the ds->q memory, the world (CAD model for example) must be updated.
     Overload this method to update user model.*/
   virtual void updateWorldFromDS()
@@ -287,7 +284,10 @@ public:
    *  \param osi the OneStepIntegrator to add
    */
   virtual void insertIntegrator(SP::OneStepIntegrator osi);
+
+  /** associate an OSI with a DS */
   void associate(SP::OneStepIntegrator osi, SP::DynamicalSystem ds);
+
   /** get a pointer to indexSets[i]
       \param i number of the required index set
       \return a graph of interactions

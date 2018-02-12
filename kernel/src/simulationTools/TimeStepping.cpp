@@ -575,9 +575,6 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
       updateState();
 
       if (!_isNewtonConverge && _newtonNbIterations < maxStep) {
-        if (_newtonUpdateInteractionsPerIteration)
-          updateInteractionsNewtonIteration();
-        updateWorldFromDS();
         //hasNSProblems = (!_allNSProblems->empty() &&   indexSet0.size() > 0) ? true : false;
         hasNSProblems = (!_allNSProblems->empty()) ? true : false;
         updateOutput();

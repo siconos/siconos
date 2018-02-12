@@ -196,9 +196,6 @@ void TimeSteppingDirectProjection::advanceToEvent()
     _nbProjectionIteration++;
     DEBUG_PRINTF("TimeSteppingDirectProjection projection step = %d\n", _nbProjectionIteration);
 
-    if (_newtonUpdateInteractionsPerIteration)
-      updateInteractionsNewtonIteration();
-
     SP::InteractionsGraph indexSet = _nsds->topology()->indexSet(0);
     InteractionsGraph::VIterator ui, uiend;
     for (std11::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
@@ -288,10 +285,6 @@ void TimeSteppingDirectProjection::advanceToEvent()
         RuntimeException::selfThrow("TimeSteppingDirectProjection::advanceToEvent() :: - Ds is not from NewtonEulerDS neither from LagrangianDS.");
 
     }
-
-    if (_newtonUpdateInteractionsPerIteration)
-      updateInteractionsNewtonIteration();
-    updateWorldFromDS();
 
     computeCriteria(&runningProjection);
 
@@ -613,8 +606,6 @@ void TimeSteppingDirectProjection::newtonSolve(double criterion, unsigned int ma
       isNewtonConverge = newtonCheckConvergence(criterion);
       if (!isNewtonConverge && !info)
       {
-        if (_newtonUpdateInteractionsPerIteration)
-          updateInteractionsNewtonIteration();
         updateOutput();
         if (!_allNSProblems->empty() &&  indexSet->size()>0)
           saveYandLambdaInOldVariables();
