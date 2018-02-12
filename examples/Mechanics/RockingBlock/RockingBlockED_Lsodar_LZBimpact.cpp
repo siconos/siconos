@@ -113,10 +113,10 @@ int main(int argc, char* argv[])
     //================================================================================================================
     //            III. Create the "model" object
     //================================================================================================================
-    SP::Model RoBlockModel(new Model(TimeInitial, TimeFinal));
-    RoBlockModel->nonSmoothDynamicalSystem()->insertDynamicalSystem(RockingBlock);
-    RoBlockModel->nonSmoothDynamicalSystem()->link(inter1, RockingBlock);
-    RoBlockModel->nonSmoothDynamicalSystem()->link(inter2, RockingBlock);
+    SP::NonSmoothDynamicalSystem RoBlockModel(new NonSmoothDynamicalSystem(TimeInitial, TimeFinal));
+    RoBlockModel->insertDynamicalSystem(RockingBlock);
+    RoBlockModel->link(inter1, RockingBlock);
+    RoBlockModel->link(inter2, RockingBlock);
     //================================================================================================================
     //            IV. Create the simulation
     //================================================================================================================
@@ -135,7 +135,7 @@ int main(int argc, char* argv[])
     multiple_impact->SetStepMinMaxSave(step_start, step_end);
     SP::OneStepNSProblem acceleration(new LCP());
     //4. Simulation with (1), (2), (3)
-    SP::Simulation EDscheme(new EventDriven(TimeDiscret));
+    SP::Simulation EDscheme(new EventDriven(RoBlockModel, TimeDiscret));
     EDscheme->insertIntegrator(OSI);
     EDscheme->insertNonSmoothProblem(impact, SICONOS_OSNSP_ED_IMPACT);
     EDscheme->insertNonSmoothProblem(acceleration, SICONOS_OSNSP_ED_SMOOTH_ACC);
@@ -143,16 +143,10 @@ int main(int argc, char* argv[])
     // bool check2 = EDscheme->hasOneStepNSProblem(acceleration);
     // cout << "Impact law included in the simulation: " << check1 << endl;
     // cout << "LCP at acceleration level included in the simulation: " << check2 << endl;
-    RoBlockModel->setSimulation(EDscheme);
     //==================================================================================================================
     //                    V. Process the simulation
     //==================================================================================================================
     // -------------------------------- Simulation initialization ------------------------------------------------------
-    cout << "====> Simulation initialisation ..." << endl << endl;
-    EDscheme->setPrintStat(true);
-    RoBlockModel->initialize(); // initialize the model
-
-
     //SP::LsodarOSI lsodar = std11::static_pointer_cast<LsodarOSI>(OSI);
     //lsodar->setMinMaxStepSizes(1.0e-3,1.0e-3);
     //lsodar->setTol(1,1.0e-3,1.0e-6);
@@ -169,12 +163,8 @@ int main(int argc, char* argv[])
     SP::SiconosVector VelCon2 = inter2->y(1);
     SP::SiconosVector LambdaCon1 = inter1->lambda(2);
     SP::SiconosVector LambdaCon2 = inter2->lambda(2);
-    SP::InteractionsGraph indexSet0 = RoBlockModel->nonSmoothDynamicalSystem()->topology()->indexSet(0);
-    SP::InteractionsGraph indexSet1 = RoBlockModel->nonSmoothDynamicalSystem()->topology()->indexSet(1);
-    SP::InteractionsGraph indexSet2 = RoBlockModel->nonSmoothDynamicalSystem()->topology()->indexSet(2);
+    SP::InteractionsGraph indexSet0 = RoBlockModel->topology()->indexSet(0);
     cout << "Size of IndexSet0: " << indexSet0->size() << endl;
-    cout << "Size of IndexSet1: " << indexSet1->size() << endl;
-    cout << "Size of IndexSet2: " << indexSet2->size() << endl;
 
     InteractionsGraph::VIterator ui, uiend;
     //-------------------- Save the output during simulation ---------------------------------------------------------

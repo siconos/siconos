@@ -73,7 +73,7 @@ public:
   /** Initialization
    * \param m the Model
    */
-  virtual void initialize(const Model& m);
+  virtual void initialize(const NonSmoothDynamicalSystem& nsds, const Simulation& s);
 
   /** Set the L matrix
    * \param L the new L matrix

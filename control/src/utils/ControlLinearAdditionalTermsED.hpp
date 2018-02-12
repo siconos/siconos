@@ -35,7 +35,7 @@ public:
    * \param DSG0 the graph of DynamicalSystems
    * \param model the current Model
    */
-  virtual void init(DynamicalSystemsGraph& DSG0, const Model& model);
+  virtual void init(DynamicalSystemsGraph& DSG0, const NonSmoothDynamicalSystem& nsds, const TimeDiscretisation & td);
 
   /** add smooth term to xfree (like the control input, the error correction for an observer)
    * \param DSG0 the graph of DynamicalSystems

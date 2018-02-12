@@ -80,7 +80,6 @@ struct InteractionProperties
   unsigned int absolute_position_proj; /**< Absolute position of the interaction variables in the unknown vector in osnsp
                                           for projection*/
   bool forControl;                     /**< true if the relation is used to add a control input to a DS */
-  SP::VectorOfBlockVectors DSlink;     /**< pointer links to DS variables needed for computation, mostly used in Relations (computeOutput and computeInput) and OneStepIntegrator classes. */
   SP::VectorOfVectors workVectors;     /**< set of SiconosVector, useful to ensure contiguous memory vectors, used as buffers in OneStepIntegrator classes. */
   SP::VectorOfSMatrices workMatrices;  /**< Internal buffers used on simulation size, to store jacobians or other temporary matrices. */
 

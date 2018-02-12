@@ -27,7 +27,6 @@
 #include "MLCPProjectOnConstraints.hpp"
 #include "NonSmoothLaw.hpp"
 #include "NewtonEulerR.hpp"
-#include "Model.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
 #include "Topology.hpp"
 
@@ -44,12 +43,14 @@
 
 
 
-TimeSteppingCombinedProjection::TimeSteppingCombinedProjection(SP::TimeDiscretisation td,
-    SP::OneStepIntegrator osi,
-    SP::OneStepNSProblem osnspb_velo,
-    SP::OneStepNSProblem osnspb_pos,
-    unsigned int level)
-  : TimeStepping(td, osi, osnspb_velo)
+TimeSteppingCombinedProjection::TimeSteppingCombinedProjection(
+  SP::NonSmoothDynamicalSystem nsds,
+  SP::TimeDiscretisation td,
+  SP::OneStepIntegrator osi,
+  SP::OneStepNSProblem osnspb_velo,
+  SP::OneStepNSProblem osnspb_pos,
+  unsigned int level)
+  : TimeStepping(nsds,td, osi, osnspb_velo)
 {
   (*_allNSProblems).resize(SICONOS_NB_OSNSP_TSP);
   insertNonSmoothProblem(osnspb_pos, SICONOS_OSNSP_TS_POS);
@@ -141,6 +142,7 @@ void TimeSteppingCombinedProjection::initOSNS()
 void TimeSteppingCombinedProjection::advanceToEventOLD()
 {
 
+  initialize();
 
   newtonSolve(_newtonTolerance, _newtonMaxIteration);
 
@@ -155,6 +157,11 @@ void TimeSteppingCombinedProjection::advanceToEvent()
   DEBUG_PRINT("================================================");
   DEBUG_PRINT("TimeSteppingCombinedProjection::advanceToEvent()");
   DEBUG_PRINT("================================================\n");
+
+
+  initialize();
+
+  
   _isIndexSetsStable = false;
   _maxViolationUnilateral = 0.0;
   _maxViolationEquality = 0.0;
@@ -665,7 +672,7 @@ void TimeSteppingCombinedProjection::computeCriteria(bool * runningProjection)
   {
     SP::Interaction interac = indexSet->bundle(*aVi);
 
-    interac->computeOutput(getTkp1(), indexSet->properties(*aVi), 0);
+    interac->computeOutput(getTkp1(),  0);
     interac->relation()->computeJach(getTkp1(), *interac, indexSet->properties(*aVi));
 
     if (Type::value(*(interac->nonSmoothLaw())) ==  Type::NewtonImpactFrictionNSL ||

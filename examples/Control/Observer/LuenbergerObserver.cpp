@@ -113,7 +113,7 @@ int main(int argc, char* argv[])
   cout << "====> Initialisation ..." << endl << endl;
   // Initialize the model and the controlManager
   sim->initialize();
- // --- Time loop ---
+  // --- Time loop ---
   cout << "====> Start computation ... " << endl << endl;
   // ==== Simulation loop - Writing without explicit event handling =====
   sim->run();
@@ -123,22 +123,12 @@ int main(int argc, char* argv[])
   cout << "====> Output file writing ..." << endl;
   SimpleMatrix& dataPlot = *sim->data();
   ioMatrix::write("LuenbergerObserver.dat", "ascii", dataPlot, "noDim");
-  // Comparison with a reference file
-  SimpleMatrix dataPlotRef(dataPlot);
-  dataPlotRef.zero();
-  ioMatrix::read("LuenbergerObserver.ref", "ascii", dataPlotRef);
 
-  std::cout << (dataPlot - dataPlotRef).normInf() << std::endl;
-
-  if ((dataPlot - dataPlotRef).normInf() > 1e-12)
-  {
-    std::cout << "Warning. The result is rather different from the reference file." << std::endl;
-    std::cout << (dataPlot - dataPlotRef).normInf() << std::endl;
+  double error=0.0, eps=1e-12;
+  if (ioMatrix::compareRefFile(dataPlot, "LuenbergerObserver.ref", eps, error)
+      && error > eps)
     return 1;
-  }
   else
-  {
     return 0;
-  }
 
 }

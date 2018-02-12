@@ -100,11 +100,15 @@ int main(int argc, char* argv[])
 
 
     // --- Model creation ---
-    SP::Model PRC(new Model(t0, T, Modeltitle, Author, Description, Date));
+    SP::NonSmoothDynamicalSystem PRC(new NonSmoothDynamicalSystem(t0, T));
+    PRC->setTitle(Modeltitle);
+    PRC->setAuthor(Author);
+    PRC->setDescription(Description);
+    PRC->setDate(Date);
     // add the dynamical system in the non smooth dynamical system
-    PRC->nonSmoothDynamicalSystem()->insertDynamicalSystem(LSPRC);
+    PRC->insertDynamicalSystem(LSPRC);
     // link the interaction and the dynamical system
-    PRC->nonSmoothDynamicalSystem()->link(InterPRC, LSPRC);
+    PRC->link(InterPRC, LSPRC);
 
     // ------------------
     // --- Simulation ---
@@ -120,15 +124,11 @@ int main(int argc, char* argv[])
     SP::LCP aLCP(new LCP());
 
     // -- (4) Simulation setup with (1) (2) (3)
-    SP::TimeStepping aTS(new TimeStepping(aTiDisc, aOSI, aLCP));
-    PRC->setSimulation(aTS);
+    SP::TimeStepping aTS(new TimeStepping(PRC, aTiDisc, aOSI, aLCP));
 
     // =========================== End of model definition ===========================
 
     // ================================= Computation =================================
-
-    cout << "====> Simulation initialisation ..." << endl << endl;
-    PRC->initialize();
 
     double h = aTS->timeStep();
     int N = ceil((T - t0) / h); // Number of time steps

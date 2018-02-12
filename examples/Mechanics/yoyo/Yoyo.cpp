@@ -110,9 +110,9 @@ int main(int argc, char* argv[])
       SP::Interaction inter(new Interaction(loi0, relation0));
 
       /////////////////////////  MODEL //////////////////////////////////////////////////
-      SP::Model jeu(new Model(t0, T));
-      jeu->nonSmoothDynamicalSystem()->insertDynamicalSystem(yoyo);
-      jeu->nonSmoothDynamicalSystem()->link(inter, yoyo);
+      SP::NonSmoothDynamicalSystem jeu(new NonSmoothDynamicalSystem(t0, T));
+      jeu->insertDynamicalSystem(yoyo);
+      jeu->link(inter, yoyo);
       ///////////////////// SIMULATION /////////////////////////////////
 
 
@@ -125,12 +125,7 @@ int main(int argc, char* argv[])
       // -- OneStepNsProblem --
       SP::OneStepNSProblem osnspb(new LCP());
 
-      SP::TimeStepping s(new TimeStepping(t, OSI, osnspb));
-
-      jeu->setSimulation(s);
-
-      // --- Model initialization ---
-      jeu->initialize();
+      SP::TimeStepping s(new TimeStepping(jeu, t, OSI, osnspb));
 
       q = yoyo->q();
       v = yoyo->velocity();
@@ -197,17 +192,15 @@ int main(int argc, char* argv[])
 
         inter.reset(new Interaction(loi, relation));
 
-        jeu.reset(new Model(t0, T));
-        jeu->nonSmoothDynamicalSystem()->insertDynamicalSystem(yoyo);
-        jeu->nonSmoothDynamicalSystem()->link(inter, yoyo);
+        jeu.reset(new NonSmoothDynamicalSystem(t0, T));
+        jeu->insertDynamicalSystem(yoyo);
+        jeu->link(inter, yoyo);
 
         t.reset(new TimeDiscretisation(t0, h));
         OSI.reset(new MoreauJeanOSI(theta));
         osnspb.reset(new LCP());
-        s.reset(new TimeStepping(t, OSI, osnspb));
-	jeu->setSimulation(s);
-        jeu->initialize();
-
+        s.reset(new TimeStepping(jeu, t, OSI, osnspb));
+        
         q = yoyo->q();
         v = yoyo->velocity();
         p = yoyo->p(1);

@@ -23,40 +23,40 @@
 
 #include "LagrangianR.hpp"
 
-/** Lagrangian (Non Linear) Rheonomous Relation 
-    
+/** Lagrangian (Non Linear) Rheonomous Relation
+
     \author SICONOS Development Team - copyright INRIA
     \date February 28, 2007
-    
+
     This class provides tools to describe non linear relation of the type:
-    
+
     \f[
     y &= h(q,t,z) \\
     \dot y &=  \nabla^\top_q(q,t,z)\dot q + \frac{\partial }{\partial t}h(q,t,z) \\
     \f]
 
     or more generally
-    
+
     \f[
     \dot y =  H(q,t,z)\dot q + \frac{\partial }{\partial t}h(q,t,z)
     \f]
-    
+
     and by duality
 
     \f[
     p = H^\top(q,t,z)\lambda
     \f]
-    
+
     The following operators (and their jacobians) can be plugged, in the usual way (see User Guide, 'User-defined plugins')
-    
+
     - \f$ h(q,t,z)\f$
     - \f$ \nabla_q h(q,t,z)\f$
     - \f$ \dot h(q,t,z)\f$
 
     The plugin functions must fit with the following signature (FPtr4):
-    
+
     void func(unsigned int qsize, double* q, double time, unsigned int ysize, double* buffer , unsigned int sizez, double* z)
-    
+
     buffer being either \f$y\f$, \f$\dot h\f$ or \f$\nabla_qh\f$.
  */
 class LagrangianRheonomousR : public LagrangianR
@@ -81,13 +81,7 @@ protected:
   */
   SP::PluggedObject _pluginhDot;
 
-  /** initialize G matrices or components specific to derived classes.
-   * \param inter the Interaction
-   * \param DSlink block vectors from dynamical systems
-   * \param workV work vectors
-   * \param workM work vectors
-   */
-  void initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
+
 
   /** default constructor
   */
@@ -111,6 +105,15 @@ public:
   /** destructor
   */
   virtual ~LagrangianRheonomousR() {};
+
+  /** initialize G matrices or components specific to derived classes.
+   * \param inter the Interaction
+   * \param DSlink block vectors from dynamical systems
+   * \param workV work vectors
+   * \param workM work vectors
+   */
+  void initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
+
 
   // -- hDot --
 
@@ -169,18 +172,18 @@ public:
   /** to compute output
    * \param time current time
    * \param inter the Interaction
-   * \param interProp the Interaction properties
-  *  \param derivativeNumber number of the derivative to compute, optional, default = 0.
-  */
-  virtual void computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int derivativeNumber = 0);
+   *  \param derivativeNumber number of the derivative to compute, optional, default = 0.
+   */
+  virtual void computeOutput(double time, Interaction& inter,
+                             unsigned int derivativeNumber = 0);
 
   /** to compute p
    * \param time current time
    * \param inter the Interaction
-   * \param interProp the Interactions properties
    * \param level "derivative" order of lambda used to compute input
    */
-  virtual void computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level = 0);
+  virtual void computeInput(double time, Interaction& inter,
+                            unsigned int level = 0);
 
   ACCEPT_STD_VISITORS();
 

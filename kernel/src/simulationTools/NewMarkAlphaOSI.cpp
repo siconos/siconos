@@ -22,7 +22,6 @@
 #include "LagrangianR.hpp"
 #include "NonSmoothLaw.hpp"
 #include "NewtonEulerR.hpp"
-#include "Model.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
 #include "OneStepNSProblem.hpp"
 #include "BlockVector.hpp"
@@ -305,7 +304,7 @@ void NewMarkAlphaOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_i
   SP::InteractionsGraph indexSet = osnsp->simulation()->indexSet(osnsp->indexSetLevel());
   SP::Interaction inter = indexSet->bundle(vertex_inter);
 
-  VectorOfBlockVectors& DSlink = *indexSet->properties(vertex_inter).DSlink;
+  VectorOfBlockVectors& DSlink = inter->linkToDSVariables();
 
   // Get the type of relation
   RELATION::TYPES relationType = inter->relation()->getType();
@@ -325,7 +324,7 @@ void NewMarkAlphaOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_i
   DEBUG_EXPR(q_free->display(););
 
   // get pointer to yForNSsolver vector
-  
+
 
   SiconosVector& osnsp_rhs = *(*indexSet->properties(vertex_inter).workVectors)[NewMarkAlphaOSI::OSNSP_RHS];
 
@@ -376,14 +375,14 @@ void NewMarkAlphaOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_i
         // compute osnsp_rhs = y_{n,k} + G*q_free
         if(!_IsVelocityLevel)  // output at the position level y_{n,k} = g_{n,k}
         {
-          inter->computeOutput(t, indexSet->properties(vertex_inter), 0); // Update output of level 0
+          inter->computeOutput(t, 0); // Update output of level 0
           osnsp_rhs = *(inter->y(0)); //g_{n,k}
         }
         else                  // output at the velocity level y_{n,k} = (h/gamma_prime)*dotg_{n,k}
         {
           double h = _simulation->nextTime() - _simulation->startingTime();
           double gamma_prime = _gamma / _beta;
-          inter->computeOutput(t, indexSet->properties(vertex_inter), 1); // Update output of level 1
+          inter->computeOutput(t, 1); // Update output of level 1
           osnsp_rhs = (h / gamma_prime) * (*(inter->y(1))); //(h/gamma_prime)*dotg_{n,k}
         }
         subprod(*C, *q_free, osnsp_rhs, coord, false);
@@ -404,9 +403,9 @@ void NewMarkAlphaOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_i
   DEBUG_END("NewMarkAlphaOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, OneStepNSProblem* osnsp)\n");
 }
 
-void NewMarkAlphaOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds)
+void NewMarkAlphaOSI::initializeDynamicalSystem( double t, SP::DynamicalSystem ds)
 {
-  DEBUG_BEGIN("NewMarkAlphaOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds)\n")
+  DEBUG_BEGIN("NewMarkAlphaOSI::initializeDynamicalSystem( double t, SP::DynamicalSystem ds)\n")
 
   // Get work buffers from the graph
   VectorOfVectors& workVectors = *_initializeDSWorkVectors(ds);
@@ -459,7 +458,7 @@ void NewMarkAlphaOSI::initializeDynamicalSystem(Model& m, double t, SP::Dynamica
     RuntimeException::selfThrow("In NewMarkAlphaOSI::initialize: this type of DS is not yet implemented");
   }
 
-  DEBUG_END("NewMarkAlphaOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds)\n")
+  DEBUG_END("NewMarkAlphaOSI::initializeDynamicalSystem( double t, SP::DynamicalSystem ds)\n")
 
 
     }
@@ -472,19 +471,27 @@ void NewMarkAlphaOSI::fillDSLinks(Interaction &inter,
   SP::DynamicalSystem ds2= interProp.target;
   assert(ds1);
   assert(ds2);
-  
+
+  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
+  interProp.workVectors.reset(new VectorOfVectors);
+  interProp.workMatrices.reset(new VectorOfSMatrices);
+
+
   VectorOfVectors& workV = *interProp.workVectors;
+  VectorOfSMatrices& workM = *interProp.workMatrices;
+
+
+  Relation &relation =  *inter.relation();
+  relation.initializeWorkVectorsAndMatrices(inter, DSlink, workV, workM);
+  RELATION::TYPES relationType = relation.getType();
+
   workV.resize(NewMarkAlphaOSI::WORK_INTERACTION_LENGTH);
   workV[NewMarkAlphaOSI::OSNSP_RHS].reset(new SiconosVector(inter.getSizeOfY()));
 
-  VectorOfBlockVectors& DSlink = *interProp.DSlink;
-
-  Relation &relation =  *inter.relation();  
-  RELATION::TYPES relationType = relation.getType();
 
   NonSmoothLaw & nslaw = *inter.nonSmoothLaw();
   Type::Siconos nslType = Type::value(nslaw);
- 
+
   if (nslType == Type::NewtonImpactNSL || nslType == Type::MultipleImpactNSL)
   {
     _levelMinForOutput = 0;
@@ -646,7 +653,7 @@ void NewMarkAlphaOSI::correction()
     SiconosVector& residuFree = *workVectors[OneStepIntegrator::residu_free];
     SiconosVector& acce_like = *workVectors[OneStepIntegrator::acce_like];
 
-    
+
     dsType = Type::value(*ds); // Its type
     if((dsType == Type::LagrangianDS) || (dsType == Type::LagrangianLinearTIDS))
     {
@@ -660,7 +667,7 @@ void NewMarkAlphaOSI::correction()
       *(d->velocity()) += (gamma_prime / h) * (*delta_q); // dotq_{n+1,k+1} = dotq_{n+1,k} + (gamma_prime/h)*delta_q
       *(d->acceleration()) += beta_prime / (h*h) * (*delta_q); // ddotq_{n+1,k+1} = ddotq_{n+1,k} + (beta_prime/h^2)*delta_q
       //a_{n+1,k+1} = a_{n+1,k} + ((1-alpha_f)/(1-alpha_m))*(beta_prime/h^2)*delta_q
-      
+
       acce_like += ((1 - _alpha_f) / (1 - _alpha_m)) * ((beta_prime / (h*h)) * (*delta_q));
 
       DEBUG_PRINT("After correction : \n");

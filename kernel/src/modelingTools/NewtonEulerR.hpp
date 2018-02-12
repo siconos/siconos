@@ -101,13 +101,7 @@ protected:
   */
   NewtonEulerR(RELATION::SUBTYPES lagType): Relation(RELATION::NewtonEuler, lagType) {}
 
-  /** initialize components specific to derived classes.
-   * \param inter  Interaction associated with the Relation
-   * \param DSlink
-   * \param workV
-   * \param workM
-   */
-  virtual void initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
+
 
 public:
   NewtonEulerR(): Relation(RELATION::NewtonEuler, RELATION::NonLinearR) {}
@@ -188,10 +182,16 @@ public:
   /** initialize the relation (check sizes, memory allocation ...)
    * \param inter the interaction using this relation
    * \param DSlink the container of the link to DynamicalSystem attributes
-   * \param workV the work vectors
-   * \param workM work matrices
   */
-  void initialize(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
+  void initializeDSLink(Interaction& inter, VectorOfBlockVectors& DSlink);
+
+  /** initialize components specific to derived classes.
+   * \param inter  Interaction associated with the Relation
+   * \param DSlink
+   * \param workV
+   * \param workM
+   */
+  virtual void initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
 
   /** to compute y = h(q,v,t) using plug-in mechanism
   * \param time current time
@@ -302,18 +302,16 @@ public:
   /** to compute output
    * \param time current time
    * \param inter the interaction using this relation
-   * \param interProp Interaction properties
    * \param derivativeNumber number of the derivative to compute, optional, default = 0.
    */
-  virtual void computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int derivativeNumber = 0);
+  virtual void computeOutput(double time, Interaction& inter, unsigned int derivativeNumber = 0);
 
   /** to compute the input
    * \param time current time
    * \param inter the interaction using this relation
-   * \param interProp Interaction properties
    * \param level number of the derivative to compute, optional, default = 0.
    */
-  virtual void computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level = 0);
+  virtual void computeInput(double time, Interaction& inter, unsigned int level = 0);
 
   /**
   * return a SP on the C matrix.

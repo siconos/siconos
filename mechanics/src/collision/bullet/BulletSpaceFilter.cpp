@@ -19,8 +19,6 @@
 #include "BulletSpaceFilter.hpp"
 #include "BulletSpaceFilter_impl.hpp"
 #include "SpaceFilter_impl.hpp"
-
-#include <Model.hpp>
 #include <Simulation.hpp>
 #include <NonSmoothDynamicalSystem.hpp>
 #include <SimulationTypeDef.hpp>
@@ -132,37 +130,37 @@ struct ForPosition : public Question<SP::SiconosVector>
    so we visit some integrators which provide this initialization.
 */
 
-/* first, a generic visitor is defined. */
-struct CallInitDS : public SiconosVisitor
-{
-  double time;
-  SP::DynamicalSystem ds;
-  SP::Model m ; 
-  template<typename T>
-  void operator()(const T& osi)
-  {
-    const_cast<T*>(&osi)->initializeDynamicalSystem(*(this->m), this->time, this->ds);
-  }
-};
+// /* first, a generic visitor is defined. */
+// struct CallInitDS : public SiconosVisitor
+// {
+//   double time;
+//   SP::DynamicalSystem ds;
+//   SP::Model m ; 
+//   template<typename T>
+//   void operator()(const T& osi)
+//   {
+//     const_cast<T*>(&osi)->initializeDynamicalSystem(*(this->m), this->time, this->ds);
+//   }
+// };
 
-/* the visit is made on classes which provide the function initializeIterationMatrixW */
-// typedef Visitor < Classes < MoreauJeanOSI >,
+// /* the visit is made on classes which provide the function initializeIterationMatrixW */
+// // typedef Visitor < Classes < MoreauJeanOSI >,
+// //                   CallInitDS >::Make InitDynamicalSystem;
+
+// typedef Visitor < Classes < MoreauJeanOSI,
+//                             MoreauJeanGOSI,
+//                             EulerMoreauOSI,
+//                             SchatzmanPaoliOSI >,
 //                   CallInitDS >::Make InitDynamicalSystem;
 
-typedef Visitor < Classes < MoreauJeanOSI,
-                            MoreauJeanGOSI,
-                            EulerMoreauOSI,
-                            SchatzmanPaoliOSI >,
-                  CallInitDS >::Make InitDynamicalSystem;
-
-BulletSpaceFilter::BulletSpaceFilter(SP::Model model) :
+BulletSpaceFilter::BulletSpaceFilter(SP::NonSmoothDynamicalSystem nsds) :
   SpaceFilter(),
   _dynamicCollisionsObjectsInserted(false),
   _staticCollisionsObjectsInserted(false),
   _closeContactsThreshold(0.)
 {
 
-  _model = model;
+  _nsds = nsds;
   _nslaws.reset(new NSLawMatrix());
   _staticObjects.reset(new StaticObjects());
 
@@ -235,7 +233,7 @@ void BulletSpaceFilter::buildInteractions(double time)
 
   if (! _dynamicCollisionsObjectsInserted)
   {
-    DynamicalSystemsGraph& dsg = *(_model->nonSmoothDynamicalSystem()->dynamicalSystems());
+    DynamicalSystemsGraph& dsg = *(_nsds->dynamicalSystems());
     DynamicalSystemsGraph::VIterator dsi, dsiend;
     std11::tie(dsi, dsiend) = dsg.vertices();
     for (; dsi != dsiend; ++dsi)
@@ -278,7 +276,7 @@ void BulletSpaceFilter::buildInteractions(double time)
 
   std::map<Interaction*, bool> activeInteractions;
 
-  SP::InteractionsGraph indexSet0 = model()->nonSmoothDynamicalSystem()->topology()->indexSet(0);
+  SP::InteractionsGraph indexSet0 = _nsds->topology()->indexSet(0);
   InteractionsGraph::VIterator ui0, ui0end, v0next;
   std11::tie(ui0, ui0end) = indexSet0->vertices();
   for (v0next = ui0 ;
@@ -289,7 +287,7 @@ void BulletSpaceFilter::buildInteractions(double time)
 
     if (gOrphanedInteractions.find(&*inter0) != gOrphanedInteractions.end())
     {
-      model()->nonSmoothDynamicalSystem()->removeInteraction(inter0);
+      nsds()->removeInteraction(inter0);
     }
 
     else
@@ -429,17 +427,17 @@ void BulletSpaceFilter::buildInteractions(double time)
             if (dsa && !dsb)
             {
                 cpoint->m_userPersistentData = &*inter;
-                model()->simulation()->link(inter, dsa);
+                nsds()->link(inter, dsa);
             }
             else if (!dsa && dsb)
             {
                 cpoint->m_userPersistentData = &*inter;
-                model()->simulation()->link(inter, dsb);
+                nsds()->link(inter, dsb);
             }
             else if (dsa && dsb && (dsa != dsb))
             {
                 cpoint->m_userPersistentData = &*inter;
-                model()->simulation()->link(inter, dsa, dsb);
+                nsds()->link(inter, dsa, dsb);
             }
           }
 
@@ -485,14 +483,14 @@ void BulletSpaceFilter::buildInteractions(double time)
         DEBUG_PRINTF("remove contact %p, lifetime %d\n",
                      &*ask<ForContactPoint>(*(inter0->relation())),
                      ask<ForContactPoint>(*(inter0->relation()))->getLifeTime());
-        model()->nonSmoothDynamicalSystem()->removeInteraction(inter0);
+        nsds()->removeInteraction(inter0);
       }
     }
   }
 
   DEBUG_PRINT("-----end build interaction\n");
 
-  model()->simulation()->initOSNS();
+  // model()->simulation()->initOSNS();
 
 }
 
@@ -516,13 +514,13 @@ void BulletSpaceFilter::addDynamicObject(SP::BulletDS ds,
   }
 
   /* Insert the new DS into the OSI, model, and simulation. */
-  this->model()->nonSmoothDynamicalSystem()->insertDynamicalSystem(ds);
+  this->nsds()->insertDynamicalSystem(ds);
 
   /* Associate/initialize the OSI */
-  simulation->prepareIntegratorForDS(osi, ds, this->model(), simulation->nextTime());
+  simulation->associate(osi, ds);
 
   /* Partially re-initialize the simulation. */
-  simulation->initialize(this->model(), false);
+  // simulation->initialize(this->model(), false);
 
   /* Re-create the world from scratch */
 #if 0

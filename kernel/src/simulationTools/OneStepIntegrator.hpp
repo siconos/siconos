@@ -102,6 +102,8 @@ protected:
    */
   unsigned int _levelMaxForInput;
 
+  bool _isInitialized;
+
   /** A link to the simulation that owns this OSI */
   SP::Simulation _simulation;
 
@@ -111,7 +113,8 @@ protected:
   OneStepIntegrator(const OSI::TYPES& type)
     : _integratorType(type), _sizeMem(1), _steps(0),
       _levelMinForOutput(0), _levelMaxForOutput(0),
-      _levelMinForInput(0), _levelMaxForInput(0) {};
+      _levelMinForInput(0), _levelMaxForInput(0),
+      _isInitialized(false) {};
 
   /** struct to add terms in the integration. Useful for Control */
   SP::ExtraAdditionalTerms _extraAdditionalTerms;
@@ -167,6 +170,13 @@ public:
   inline SP::DynamicalSystemsGraph dynamicalSystemsGraph() const
   {
     return _dynamicalSystemsGraph;
+  };
+
+  /** set the graph of dynamical systems associated with the Integrator
+   */
+  inline void setDynamicalSystemsGraph(SP::DynamicalSystemsGraph dsg)
+  {
+    _dynamicalSystemsGraph = dsg;
   };
 
   /** get number of internal memory vectors needed in dynamical systems integrated with this osi.
@@ -235,10 +245,15 @@ public:
   /*! @name internal memory (graph properties) management
     @{ */
 
+
+  inline bool isInitialized(){return _isInitialized;};
+
+  inline void setIsInitialized( bool value) {_isInitialized = value;};
+
+
   /** initialise the integrator
-   * \param m a Model
    */
-  virtual void initialize(Model& m );
+  virtual void initialize();
 
   /** Initialization process of the nonsmooth problems
       linked to this OSI*/
@@ -250,7 +265,7 @@ public:
    * \param t time of initialization
    * \param ds the dynamical system
    */
-  virtual void initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds) = 0 ;
+  virtual void initializeDynamicalSystem(double t, SP::DynamicalSystem ds) = 0 ;
 
   /** initialization of the work vectors and matrices (properties) related to
    *  one interaction on the graph and needed by the osi
@@ -320,7 +335,7 @@ public:
    * \param indexSet the index set of the interaction that are concerned
    */
   virtual double computeResiduInput(double time, SP::InteractionsGraph indexSet);
-  
+
   /** integrate the system, between tinit and tend, with possible stop at tout
    *  \param tinit start time
    *  \param tend expected end time
@@ -353,21 +368,21 @@ public:
 
   /** update the output of the Interaction attached to this Integrator
    */
-  void updateOutput(double time);
+  virtual void updateOutput(double time);
 
   /** update the input of the Interaction attached to this Integrator
    */
-  void updateInput(double time);
+  virtual void updateInput(double time);
 
   /** update the output of the Interaction attached to this Integrator
    *  \param level level of interest for the dynamics
    */
-  void updateOutput(double time, unsigned int level);
+  virtual void updateOutput(double time, unsigned int level);
 
   /** update the input of the Interaction attached to this Integrator
    *  \param level level of interest for the dynamics
    */
-  void updateInput(double time, unsigned int level);
+  virtual void updateInput(double time, unsigned int level);
 
   /** */
   virtual void prepareNewtonIteration(double time) = 0;

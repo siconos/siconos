@@ -160,12 +160,15 @@ void FirstOrderNonLinearDS::initMemory(unsigned int steps)
 
 void FirstOrderNonLinearDS::swapInMemory()
 {
+  DEBUG_BEGIN("void FirstOrderNonLinearDS::swapInMemory()\n");
   _xMemory.swap(*_x[0]);
   _rMemory.swap(*_r);
   if (_f) {
     assert(_fold);
     *_fold = *_f;
   }
+  DEBUG_EXPR(_xMemory.display());
+  DEBUG_END("void FirstOrderNonLinearDS::swapInMemory()\n");
 }
 
 // ===== COMPUTE PLUGINS FUNCTIONS =====

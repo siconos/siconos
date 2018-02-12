@@ -84,7 +84,7 @@ public:
    * \param workV work vectors to initialize
    * \param workM work matrices to initialize
   */
-  virtual void initComponents(Interaction& inter, VectorOfBlockVectors& DSlink,
+  virtual void initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink,
                               VectorOfVectors& workV, VectorOfSMatrices& workM);
 
   /** default function to compute y = h(x, lambda, t)
@@ -131,18 +131,21 @@ public:
   *  \param interProp
   *  \param level not used
   */
-  virtual void computeOutput(double time, Interaction& inter, InteractionProperties& interProp,
+  virtual void computeOutput(double time, Interaction& inter, 
                              unsigned int level = 0);
-
+  virtual void computeLinearizedOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level = 0);
   /** default function to compute r, using the data from the Interaction and DS
   *  \param time current time (not used)
   *  \param inter Interaction using this Relation
   *  \param interProp
   *  \param level not used
   */
-  virtual void computeInput(double time, Interaction& inter, InteractionProperties& interProp,
+  virtual void computeInput(double time, Interaction& inter,
                             unsigned int level = 0);
-
+  virtual void computeLinearizedInput(double time, Interaction& inter,
+                                      InteractionProperties& interProp,
+                                      unsigned int level = 0);
+  
   /** return true if the relation requires the computation of residu
       \return true if residu are required, false otherwise
    */

@@ -25,7 +25,6 @@
 #include "OneStepIntegrator.hpp"
 #include "NonSmoothLaw.hpp"
 #include "NewtonEulerR.hpp"
-#include "Model.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
 #include "OneStepNSProblem.hpp"
 
@@ -35,12 +34,14 @@ static CheckSolverFPtr checkSolverOutputProjectOnConstraints = NULL;
 // #define DEBUG_MESSAGES
 #include "debug.h"
 //#define CORRECTIONSVELOCITIES
-TimeSteppingDirectProjection::TimeSteppingDirectProjection(SP::TimeDiscretisation td,
-    SP::OneStepIntegrator osi,
-    SP::OneStepNSProblem osnspb_velo,
-    SP::OneStepNSProblem osnspb_pos,
-    unsigned int level)
-  : TimeStepping(td, osi, osnspb_velo)
+TimeSteppingDirectProjection::TimeSteppingDirectProjection(
+  SP::NonSmoothDynamicalSystem nsds,
+  SP::TimeDiscretisation td,
+  SP::OneStepIntegrator osi,
+  SP::OneStepNSProblem osnspb_velo,
+  SP::OneStepNSProblem osnspb_pos,
+  unsigned int level)
+  : TimeStepping(nsds,td, osi, osnspb_velo)
 {
 
   //if (Type::value(osi) != Type::MoreauJeanDirectProjectionOSI)
@@ -98,6 +99,9 @@ void TimeSteppingDirectProjection::nextStep()
 
 void TimeSteppingDirectProjection::advanceToEvent()
 {
+
+  initialize();
+  
   /** First step, Solve the standard velocity formulation.*/
 
   DEBUG_BEGIN("TimeStepping::newtonSolve\n");
@@ -501,7 +505,7 @@ void TimeSteppingDirectProjection::computeCriteria(bool * runningProjection)
        aVi != viend; ++aVi)
   {
     SP::Interaction inter = indexSet->bundle(*aVi);
-    inter->computeOutput(getTkp1(), indexSet->properties(*aVi), 0);
+    inter->computeOutput(getTkp1(), 0);
     inter->relation()->computeJach(getTkp1(), *inter, indexSet->properties(*aVi));
 
     if (Type::value(*(inter->nonSmoothLaw())) ==  Type::NewtonImpactFrictionNSL ||

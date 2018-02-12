@@ -1,7 +1,7 @@
 #ifndef NONLINEARRELATIONWITHSIGNINVERSED_CPP
 #define NONLINEARRELATIONWITHSIGNINVERSED_CPP
 
-#include "NonlinearRelationWithSignInversed.h"
+#include "NonlinearRelationWithSignInversed.hpp"
 
 //#include "const.h"
 //#define SICONOS_DEBUG
@@ -9,11 +9,6 @@
 NonlinearRelationWithSignInversed::NonlinearRelationWithSignInversed():
   FirstOrderType2R()
 {
-}
-
-void NonlinearRelationWithSignInversed::initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
-{
-  FirstOrderType2R::initComponents(inter, DSlink, workV, workM);
 }
 
 /*y = h(X)*/

@@ -114,9 +114,9 @@ int main(int argc, char* argv[])
     // -------------
     // --- Model ---
     // -------------
-    SP::Model bouncingBall(new Model(t0, T));
-    bouncingBall->nonSmoothDynamicalSystem()->insertDynamicalSystem(beam1);
-    bouncingBall->nonSmoothDynamicalSystem()->link(inter1, beam1);
+    SP::NonSmoothDynamicalSystem bouncingBall(new NonSmoothDynamicalSystem(t0, T));
+    bouncingBall->insertDynamicalSystem(beam1);
+    bouncingBall->link(inter1, beam1);
 
     // ------------------
     // --- Simulation ---
@@ -125,27 +125,21 @@ int main(int argc, char* argv[])
     // -- Time discretisation --
     SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
 
-    SP::TimeStepping s(new TimeStepping(t));
-    //    s->setComputeResiduY(true);
-    //  s->setUseRelativeConvergenceCriteron(false);
-
     // -- OneStepIntegrators --
     SP::MoreauJeanOSI OSI1(new MoreauJeanOSI(theta));
-    s->insertIntegrator(OSI1);
-
 
     // -- OneStepNsProblem --
     SP::OneStepNSProblem osnspb(new Equality());
-    s->insertNonSmoothProblem(osnspb);
-    bouncingBall->setSimulation(s);
+
+    SP::TimeStepping s(new TimeStepping(bouncingBall, t, OSI1, osnspb));
+    s->setNewtonTolerance(5e-4);
+    s->setNewtonMaxIteration(50);
     // =========================== End of model definition ===========================
 
     // ================================= Computation =================================
 
     // --- Simulation initialization ---
 
-    cout << "====> Initialisation ..." << endl << endl;
-    bouncingBall->initialize();
     int N = 2000; // Number of time steps
 
     // --- Get the values to be plotted ---
@@ -168,7 +162,8 @@ int main(int argc, char* argv[])
     for (cmp = 0; cmp < N; cmp++)
     {
       // solve ...
-      s->newtonSolve(1e-4, 50);
+      s->advanceToEvent();
+
 
       // --- Get values to be plotted ---
       dataPlot(k, 0) =  s->nextTime();
@@ -191,19 +186,12 @@ int main(int argc, char* argv[])
     cout << "====> Output file writing ..." << endl;
     ioMatrix::write("PrismaticTest.dat", "ascii", dataPlot, "noDim");
 
-    cout << "====> Comparison with a reference file ..." << endl;
-    SimpleMatrix dataPlotRef(dataPlot);
-    dataPlotRef.zero();
-
-    ioMatrix::read("PrismaticTest.ref", "ascii", dataPlotRef);
-    double error = (dataPlot - dataPlotRef).normInf()/ dataPlotRef.normInf();
-    std::cout << "Error = "<< error << std::endl;
-    if (error > 1e-12)
-    {
-      std::cout << "Warning. The result is rather different from the reference file." << std::endl;
-      std::cout <<  "error  = " << (dataPlot - dataPlotRef).normInf() << std::endl;
+    double error=0.0, eps=1e-11;
+    if (ioMatrix::compareRefFile(dataPlot, "PrismaticTest.ref", eps, error)
+        && error > eps)
       return 1;
-    }
+
+    
 
 
   }

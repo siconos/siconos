@@ -42,7 +42,7 @@ protected:
   double _closeContactsThreshold;
 
 public:
-  BulletSpaceFilter(SP::Model model);
+  BulletSpaceFilter(SP::NonSmoothDynamicalSystem nsds);
 
   /** Destructor.
    */

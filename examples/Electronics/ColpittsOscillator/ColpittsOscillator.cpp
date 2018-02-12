@@ -109,11 +109,12 @@ int main(int argc, char* argv[])
     SP::Interaction InterCollpitts(new Interaction(nslaw, LTIRCollpitts));
 
     // --- Model creation ---
-    SP::Model Collpitts(new Model(t0, T, Modeltitle));
+    SP::NonSmoothDynamicalSystem Collpitts(new NonSmoothDynamicalSystem(t0, T));
+    Collpitts->setTitle(Modeltitle);
     // add the dynamical system in the non smooth dynamical system
-    Collpitts->nonSmoothDynamicalSystem()->insertDynamicalSystem(LSCollpitts);
+    Collpitts->insertDynamicalSystem(LSCollpitts);
     // link the interaction and the dynamical system
-    Collpitts->nonSmoothDynamicalSystem()->link(InterCollpitts, LSCollpitts);
+    Collpitts->link(InterCollpitts, LSCollpitts);
 
     // ------------------
     // --- Simulation ---
@@ -135,13 +136,7 @@ int main(int argc, char* argv[])
     // aLCP->setNumericsVerboseMode(1);
 
     // -- (4) Simulation setup with (1) (2) (3)
-    SP::TimeStepping aTS(new TimeStepping(aTiDisc, aOSI, aLCP));
-    Collpitts->setSimulation(aTS);
-    
-    // Initialization
-    cout << "====> Initialisation ..." << endl << endl;
-    Collpitts->initialize();
-    cout << " ---> End of initialization." << endl;
+    SP::TimeStepping aTS(new TimeStepping(Collpitts, aTiDisc, aOSI, aLCP));
 
     int k = 0;
     double h = aTS->timeStep();
@@ -217,30 +212,15 @@ int main(int argc, char* argv[])
     ioMatrix::write("Colpitts.dat", "ascii", dataPlot,"noDim");
 
 
-    SimpleMatrix dataPlotRef(dataPlot);
-    dataPlotRef.zero();
-    ioMatrix::read("Colpitts.ref", "ascii", dataPlotRef);
-    double errRef= (dataPlot - dataPlotRef).normInf();
-    if (errRef > 1e-12)
+    double error=0.0, eps=1e-12;
+    if (ioMatrix::compareRefFile(dataPlot, "Colpitts.ref", eps, error)
+        && error > eps)
     {
-      SimpleMatrix dataPlotRef2(dataPlot);
-      dataPlotRef2.zero();
-      ioMatrix::read("Colpitts-sol2.ref", "ascii", dataPlotRef2);
-      double errRef2 = (dataPlot - dataPlotRef2).normInf();
-      if (errRef2 < errRef) errRef = errRef2;
+      if (ioMatrix::compareRefFile(dataPlot, "Colpitts-sol2.ref", eps, error)
+          && error > eps)
+        return 1;
     }
-
-    std::cout <<
-                "Error with respect to  the reference file : "
-              <<errRef << std::endl;
-    if (errRef > 1e-12)
-    {    
-      std::cout <<
-                "Warning. The result is rather different from the reference file."
-                << std::endl;
-      //return 1; Since two solutions are possible, we return only a warning
-    }
-
+    
   }
   // --- Exceptions handling ---
   catch(SiconosException e)

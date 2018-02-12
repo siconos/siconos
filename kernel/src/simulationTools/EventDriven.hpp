@@ -94,13 +94,13 @@ public:
   /** defaut constructor
    *  \param td time discretisation
    */
-  EventDriven(SP::TimeDiscretisation td);
+  EventDriven(SP::NonSmoothDynamicalSystem nsds, SP::TimeDiscretisation td);
 
   /** constructor with data
    *  \param td time discretisation
    *  \param nb number of NSProblem
    */
-  EventDriven(SP::TimeDiscretisation td, int nb);
+  EventDriven(SP::NonSmoothDynamicalSystem nsds, SP::TimeDiscretisation td, int nb);
 
   /** defaut constructor (needed for serialization)
    */
@@ -114,7 +114,7 @@ public:
    * \param m the Model
    * \param withOSI
    */
-  void initialize(SP::Model m, bool withOSI = true);
+  void initialize();
 
   /* Getters and setters */
 

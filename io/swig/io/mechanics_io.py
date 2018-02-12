@@ -130,7 +130,7 @@ def setup_default_classes():
     global use_bullet
     if use_proposed:
         if backend == 'bullet':
-            def m(model, options):
+            def m(nsds, options):
                 if options is None:
                     options = SiconosBulletOptions()
                 return SiconosBulletCollisionManager(options)
@@ -140,12 +140,12 @@ def setup_default_classes():
         default_body_class = BodyDS
     elif use_original:
         if backend == 'bullet':
-            default_manager_class = lambda model,options: BulletSpaceFilter(model)
+            default_manager_class = lambda nsds,options: BulletSpaceFilter(nsds)
             default_simulation_class = BulletTimeStepping
             default_body_class = BulletDS
             use_bullet = have_bullet
         elif backend == 'occ':
-            default_manager_class = lambda model,options: occ.OccSpaceFilter(model)
+            default_manager_class = lambda nsds,options: occ.OccSpaceFilter(nsds)
             default_simulation_class = occ.OccTimeStepping
             default_body_class = occ.OccBody
             use_bullet = have_bullet
@@ -1075,7 +1075,7 @@ class Hdf5():
     """
 
     def __init__(self, io_filename=None, mode='w',
-                 broadphase=None, model=None, osi=None, shape_filename=None,
+                 broadphase=None, nsds=None, simulation=None,osi=None, shape_filename=None,
                  set_external_forces=None, gravity_scale=None, collision_margin=None,
                  use_compression=False, output_domains=False, verbose=True):
 
@@ -1086,7 +1086,8 @@ class Hdf5():
             self._io_filename = io_filename
         self._mode = mode
         self._broadphase = broadphase
-        self._model = model
+        self._nsds = nsds
+        self._simulation = simulation
         self._osi = osi
         self._static = {}
         self._shape = None
@@ -1374,9 +1375,8 @@ class Hdf5():
             if birth:
                 if self.verbose:
                     print ('birth of body named {0}, translation {1}, orientation {2}'.format(name, translation, orientation))
-                nsds = self._model.nonSmoothDynamicalSystem()
-                nsds.insertDynamicalSystem(body)
-                nsds.setName(body, str(name))
+                self._nsds.insertDynamicalSystem(body)
+                self._nsds.setName(body, str(name))
 
         return body
 
@@ -1535,28 +1535,24 @@ class Hdf5():
                 # add the dynamical system to the non smooth
                 # dynamical system
                 if birth:
-                    nsds = self._model.nonSmoothDynamicalSystem()
+                    nsds = self._nsds
                     if use_proposed:
                         nsds.insertDynamicalSystem(body)
-                        self._model.simulation().prepareIntegratorForDS(
-                            self._osi, body, self._model,
-                            self._model.simulation().nextTime())
-                        self._model.simulation().initialize(self._model, False)
                     elif use_original:
                         self._broadphase.addDynamicObject(
                             body,
-                            self._model.simulation(),
+                            self._simulation,
                             self._osi)
                     nsds.setName(body, str(name))
                 else:
-                    nsds = self._model.nonSmoothDynamicalSystem()
+                    nsds = self._nsds
                     nsds.insertDynamicalSystem(body)
                     nsds.setName(body, str(name))
 
         return body
 
     def make_CouplerJointR(self, ds1_name, ds2_name, coupled, references):
-        topo = self._model.nonSmoothDynamicalSystem().topology()
+        topo = self._nsds.topology()
         dof1, dof2, ratio = coupled[0,:]
         refds_name = None
         if len(references)>0:
@@ -1618,7 +1614,7 @@ class Hdf5():
 
     def importJoint(self, name):
         if self._broadphase is not None:
-            nsds = self._model.nonSmoothDynamicalSystem()
+            nsds = self._nsds
             topo = nsds.topology()
 
             joint_type = self.joints()[name].attrs['type']
@@ -1677,7 +1673,7 @@ class Hdf5():
                 joint.setAllowSelfCollide(not not allow_self_collide)
             joint_nslaw = EqualityConditionNSL(joint.numberOfConstraints())
             joint_inter = Interaction(joint_nslaw, joint)
-            self._model.nonSmoothDynamicalSystem().\
+            self._nsds.\
                 link(joint_inter, ds1, ds2)
             nsds.setName(joint_inter, str(name))
 
@@ -1699,7 +1695,7 @@ class Hdf5():
                     # numpy.bool_, which SWIG doesn't handle well.
                     stop = joints.JointStopR(joint, pos, bool(dir<0), int(axis))
                     stop_inter = Interaction(nsl, stop)
-                    self._model.nonSmoothDynamicalSystem().\
+                    self._nsds.\
                         link(stop_inter, ds1, ds2)
                     nsds.setName(stop_inter, '%s_stop%d'%(str(name),n))
 
@@ -1718,7 +1714,7 @@ class Hdf5():
                     nslaw = self._nslaws[fr_nslaw]
                     fr = joints.JointFrictionR(joint, [ax])
                     fr_inter = Interaction(nslaw, fr)
-                    self._model.nonSmoothDynamicalSystem().\
+                    self._nsds.\
                         link(fr_inter, ds1, ds2)
                     nsds.setName(fr_inter, '%s_friction%d'%(str(name),ax))
 
@@ -1733,13 +1729,13 @@ class Hdf5():
                                                joint, int(dof2), ratio)
                     cpl.setBasePositions(q1, q2)
                     cpl_inter = Interaction(EqualityConditionNSL(1), cpl)
-                    self._model.nonSmoothDynamicalSystem().\
+                    self._nsds.\
                         link(cpl_inter, ds1, ds2)
                     nsds.setName(cpl_inter, '%s_coupler%d'%(str(name),n))
 
     def importBoundaryConditions(self, name):
         if self._broadphase is not None:
-            topo = self._model.nonSmoothDynamicalSystem().\
+            topo = self._nsds.\
                 topology()
 
             bc_type = self.boundary_conditions()[name].attrs['type']
@@ -1768,7 +1764,7 @@ class Hdf5():
             ds1.setBoundaryConditions(bc);
 
             #joint_inter = Interaction(joint_nslaw, joint)
-            #    self._model.nonSmoothDynamicalSystem().\
+            #    self._nsds.\
             #        link(joint_inter, ds1)
 
     def importPermanentInteractions(self, name):
@@ -1776,7 +1772,7 @@ class Hdf5():
         """
         if (self._broadphase is not None and 'input' in self._data
               and self.permanent_interactions() is not None):
-            topo = self._model.nonSmoothDynamicalSystem().\
+            topo = self._nsds.\
                 topology()
 
             pinter = self.permanent_interactions()[name]
@@ -1858,10 +1854,10 @@ class Hdf5():
                     inter = Interaction(nslaw, relation)
 
                     if ds2 is not None:
-                        self._model.nonSmoothDynamicalSystem().link(inter, ds1,
+                        self._nsds.link(inter, ds1,
                                                                     ds2)
                     else:
-                        self._model.nonSmoothDynamicalSystem().link(inter, ds1)
+                        self._nsds.link(inter, ds1)
 
                     # keep pointers
                     self._keep.append([cocs1, cocs2, cp1,
@@ -2078,9 +2074,9 @@ class Hdf5():
 
     def currentTime(self):
         if self._initializing:
-            return self._model.simulation().startingTime()
+            return self._simulation.startingTime()
         else:
-            return self._model.simulation().nextTime()
+            return self._simulation.nextTime()
 
     def importBirths(self, body_class=None, shape_class=None,
                      face_class=None, edge_class=None,):
@@ -2113,8 +2109,7 @@ class Hdf5():
         for time_of_death in current_times_of_deaths:
             for (name, obj, body) in self._deaths[time_of_death]:
                 self._broadphase.removeBody(body)
-                nsds = self._model.nonSmoothDynamicalSystem()
-                nsds.removeDynamicalSystem(body)
+                self._nsds.removeDynamicalSystem(body)
 
     def outputStaticObjects(self):
         """
@@ -2160,7 +2155,7 @@ class Hdf5():
 
         time = self.currentTime()
 
-        positions = self._io.positions(self._model)
+        positions = self._io.positions(self._nsds)
 
         if positions is not None:
 
@@ -2182,7 +2177,7 @@ class Hdf5():
 
         time = self.currentTime()
 
-        velocities = self._io.velocities(self._model)
+        velocities = self._io.velocities(self._nsds)
 
         if velocities is not None:
 
@@ -2200,10 +2195,10 @@ class Hdf5():
         Outputs contact forces
         _contact_index_set default value is 1.
         """
-        if self._model.nonSmoothDynamicalSystem().\
+        if self._nsds.\
                 topology().indexSetsSize() > 1:
             time = self.currentTime()
-            contact_points = self._io.contactPoints(self._model,
+            contact_points = self._io.contactPoints(self._nsds,
                                                     self._contact_index_set)
 
             if contact_points is not None:
@@ -2222,10 +2217,10 @@ class Hdf5():
         """
         Outputs domains of contact points
         """
-        if self._model.nonSmoothDynamicalSystem().\
+        if self._nsds.\
                 topology().indexSetsSize() > 1:
             time = self.currentTime()
-            domains = self._io.domains(self._model)
+            domains = self._io.domains(self._nsds)
 
             if domains is not None:
 
@@ -2243,7 +2238,7 @@ class Hdf5():
         """
 
         time = self.currentTime()
-        so = self._model.simulation().oneStepNSProblem(0).\
+        so = self._simulation.oneStepNSProblem(0).\
             numericsSolverOptions()
 
         current_line = self._solv_data.shape[0]
@@ -2270,7 +2265,7 @@ class Hdf5():
         Outputs solver #iterations & precision reached
         """
         time = self.currentTime()
-        so = self._model.simulation().oneStepNSProblem(0).\
+        so = self._simulation.oneStepNSProblem(0).\
             numericsSolverOptions()
         if so.solverId == Numerics.SICONOS_GENERIC_MECHANICAL_NSGS:
             iterations = so.iparam[3]
@@ -2343,7 +2338,7 @@ class Hdf5():
             ext_fun.attrs['bc_indices'] = bc_indices
 
     def importExternalFunctions(self):
-        topo = self._model.nonSmoothDynamicalSystem().\
+        topo = self._nsds.\
                 topology()
 
         for name in self._external_functions:
@@ -2929,7 +2924,7 @@ class Hdf5():
 
         print_verbose ('load siconos module ...')
         from siconos.kernel import \
-            Model, NonSmoothDynamicalSystem, OneStepNSProblem,\
+            NonSmoothDynamicalSystem, OneStepNSProblem,\
             TimeDiscretisation,\
             GenericMechanical, FrictionContact, GlobalFrictionContact,\
             NewtonImpactFrictionNSL
@@ -2974,8 +2969,8 @@ class Hdf5():
 
         # Model
         #
-        self._model=Model(t0, T)
-        model=self._model
+        self._nsds=NonSmoothDynamicalSystem(t0, T)
+        nsds=self._nsds
 
         # (1) OneStepIntegrators
         joints=list(self.joints())
@@ -2995,7 +2990,7 @@ class Hdf5():
                     osnspb=GlobalFrictionContact(3,SICONOS_GLOBAL_FRICTION_3D_ADMM)
             else:
                 from siconos.io.FrictionContactTrace import GlobalFrictionContactTrace
-                osnspb=GlobalFrictionContactTrace(3, SICONOS_GLOBAL_FRICTION_3D_ADMM,friction_contact_trace_params,model)
+                osnspb=GlobalFrictionContactTrace(3, SICONOS_GLOBAL_FRICTION_3D_ADMM,friction_contact_trace_params,nsds)
             osnspb.setMaxSize(30000)
             osnspb.setMStorageType(2)  
         else:
@@ -3008,7 +3003,7 @@ class Hdf5():
 
             else:
                 from siconos.io.FrictionContactTrace import FrictionContactTrace
-                osnspb=FrictionContactTrace(3, solver,friction_contact_trace_params,model)
+                osnspb=FrictionContactTrace(3, solver,friction_contact_trace_params,nsds)
             osnspb.setMaxSize(30000)
             osnspb.setMStorageType(1)
             
@@ -3034,7 +3029,7 @@ class Hdf5():
             fcOptions.iparam[0] = 100  # Local solver iterations
 
         
-        osnspb.setNumericsVerboseMode(True)
+        osnspb.setNumericsVerboseMode(numerics_verbose)
 
         # keep previous solution
         osnspb.setKeepLambdaAndYState(True)
@@ -3046,7 +3041,7 @@ class Hdf5():
             options = SiconosBulletOptions()
             options.perturbationIterations = 3*multipoints_iterations
             options.minimumPointsPerturbationThreshold = 3*multipoints_iterations
-        self._broadphase = space_filter(model, options)
+        self._broadphase = space_filter(nsds, options)
 
         if use_original:
             if multipoints_iterations:
@@ -3070,12 +3065,12 @@ class Hdf5():
             osnspb_pos.setMStorageType(0) # "not yet implemented for sparse storage"
             osnspb_pos.setNumericsVerboseMode(numerics_verbose)
             osnspb_pos.setKeepLambdaAndYState(True)
-            simulation=time_stepping(timedisc, self._osi, osnspb, osnspb_pos)
+            simulation=time_stepping(nsds,timedisc, self._osi, osnspb, osnspb_pos)
             simulation.setProjectionMaxIteration(projection_itermax)
             simulation.setConstraintTolUnilateral(projection_tolerance_unilateral);
             simulation.setConstraintTol(projection_tolerance);
         else:
-            simulation=time_stepping(timedisc)
+            simulation=time_stepping(nsds,timedisc)
             simulation.insertIntegrator(self._osi)
             simulation.insertNonSmoothProblem(osnspb)
         if use_proposed:
@@ -3086,6 +3081,10 @@ class Hdf5():
         simulation.setNewtonTolerance(1e-10)
         simulation.setNewtonUpdateInteractionsPerIteration(Newton_update_interactions)
 
+
+        self._simulation = simulation
+
+        
         if len(self._plugins) > 0:
             print_verbose ('import plugins ...')
             self.importPlugins()
@@ -3101,8 +3100,7 @@ class Hdf5():
         if controller is not None:
             controller.initialize(self)
 
-        model.setSimulation(simulation)
-        model.initialize()
+
         print_verbose ('first output static and dynamic objects ...')
         self.outputStaticObjects()
         self.outputDynamicObjects()
@@ -3135,7 +3133,7 @@ class Hdf5():
 
             if use_original:
                 log(self._broadphase.buildInteractions, with_timer)\
-                    (model.currentTime())
+                    (self._nsds.currentTime())
 
             if (friction_contact_trace == True) :
                  osnspb._stepcounter = k
@@ -3164,12 +3162,12 @@ class Hdf5():
                     self._broadphase.statistics().new_interactions_created
                     + self._broadphase.statistics().existing_interactions_processed)
             elif use_original:
-                number_of_contacts = (self._model.simulation()
+                number_of_contacts = (self._simulation()
                                    .oneStepNSProblem(0).getSizeOutput()//3)
 
             if verbose and number_of_contacts > 0 :
                 print_verbose('number of contacts',
-                    self._model.simulation().oneStepNSProblem(0).getSizeOutput()//3)
+                    self._simulation.oneStepNSProblem(0).getSizeOutput()//3)
                 self.printSolverInfos()
 
             if violation_verbose and number_of_contacts > 0 :

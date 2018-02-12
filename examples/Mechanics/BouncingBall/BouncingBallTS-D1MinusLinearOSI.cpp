@@ -89,13 +89,13 @@ int main(int argc, char* argv[])
     // -------------
     // --- Model ---
     // -------------
-    SP::Model bouncingBall(new Model(t0, T));
+    SP::NonSmoothDynamicalSystem bouncingBall(new NonSmoothDynamicalSystem(t0, T));
 
     // add the dynamical system in the non smooth dynamical system
-    bouncingBall->nonSmoothDynamicalSystem()->insertDynamicalSystem(ball);
+    bouncingBall->insertDynamicalSystem(ball);
 
     // link the interaction and the dynamical system
-    bouncingBall->nonSmoothDynamicalSystem()->link(inter, ball);
+    bouncingBall->link(inter, ball);
 
     // ------------------
     // --- Simulation ---
@@ -111,18 +111,16 @@ int main(int argc, char* argv[])
     SP::OneStepNSProblem force(new LCP()); // contact force right limit left side
 
     // -- (4) Simulation setup with (1) (2) (3)
-    SP::TimeSteppingD1Minus s(new TimeSteppingD1Minus(t, 2));
+    SP::TimeSteppingD1Minus s(new TimeSteppingD1Minus(bouncingBall,t, 2));
     s->insertIntegrator(OSI);
     s->insertNonSmoothProblem(impact, SICONOS_OSNSP_TS_VELOCITY);
     s->insertNonSmoothProblem(force, SICONOS_OSNSP_TS_VELOCITY + 1);
-    bouncingBall->setSimulation(s);
     // =========================== End of model definition ===========================
 
     // ================================= Computation =================================
 
     // --- Simulation initialization ---
-    cout << "====> Initialisation ..." << endl << endl;
-    bouncingBall->initialize();
+
     int N = ceil((T - t0) / h); // Number of time steps
     int Nplot = (int)((T - t0) / hplot); // Number of plot steps
 
@@ -134,18 +132,17 @@ int main(int argc, char* argv[])
     SP::SiconosVector q = ball->q();
     SP::SiconosVector v = ball->velocity();
     SP::SiconosVector p = ball->p(1);
-    SP::SiconosVector lambda = inter->lambda(1);
-    SP::SiconosVector p2 = ball->p(2);
-    SP::SiconosVector lambda2 = inter->lambda(2);
+    SP::SiconosVector lambda;
+    SP::SiconosVector p2;
+    SP::SiconosVector lambda2;
 
     dataPlot(0, 0) = bouncingBall->t0();
     dataPlot(0, 1) = (*q)(0);
     dataPlot(0, 2) = (*v)(0);
     dataPlot(0, 3) = (*p)(0);
-    dataPlot(0, 4) = (*lambda)(0);
-    dataPlot(0, 5) = (*p2)(0);
-    dataPlot(0, 6) = (*lambda2)(0);
-
+    dataPlot(0, 4) = 0.0;
+    dataPlot(0, 5) = 0.0;
+    dataPlot(0, 6) = 0.0;
     // --- Time loop ---
     cout << "====> Start computation ... " << endl << endl;
 
@@ -159,6 +156,9 @@ int main(int argc, char* argv[])
     while (s->hasNextEvent())
     {
       s->advanceToEvent();
+      p2 = ball->p(2);
+      lambda2 = inter->lambda(2);
+      lambda = inter->lambda(1);
       // ball->display();
       // --- Get values to be plotted ---
       //  if (fmod(s->nextTime(), hplot) < h)
@@ -186,18 +186,14 @@ int main(int argc, char* argv[])
     cout << "====> Output file writing ..." << endl;
     dataPlot.resize(k, outputSize);
     ioMatrix::write("result_tdg.dat", "ascii", dataPlot, "noDim");
-    cout << "====> Comparison with a reference file ..." << endl;
-    SimpleMatrix dataPlotRef(dataPlot);
-    dataPlotRef.zero();
-    ioMatrix::read("result_tdg.ref", "ascii", dataPlotRef);
-    double error = (dataPlot - dataPlotRef).normInf()/ dataPlotRef.normInf();
-    std::cout << "Error = "<< error << std::endl;
-    if (error > 1e-12)
-    {
-      std::cout << "Warning. The result is rather different from the reference file." << std::endl;
-      std::cout <<  "error  = " << (dataPlot - dataPlotRef).normInf() << std::endl;
+
+    double error=0.0, eps=1e-12;
+    if (ioMatrix::compareRefFile(dataPlot, "BouncingBallTS-D1MinusLinearOSI.ref", eps, error)
+        && error > eps)
       return 1;
-    }
+    
+
+
 
   }
 

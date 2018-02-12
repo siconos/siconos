@@ -47,7 +47,6 @@ typedef void (*CheckSolverFPtr)(int, Simulation*);
 #define SICONOS_TS_LINEAR_IMPLICIT 2
 #define SICONOS_TS_NONLINEAR 3
 
-
 class TimeStepping : public Simulation
 {
 protected:
@@ -111,6 +110,10 @@ protected:
    */
   bool _warnOnNonConvergence;
 
+  /** boolean variable to resetAllLamda at each step (default true)
+   */
+  bool _resetAllLambda;
+
   /** boolean variable to force an explicit evaluation of the Jacobians
    * mapping of relations only at the beginning of the time--step and
    * not in the Newton iteration
@@ -125,6 +128,14 @@ protected:
     _computeResiduR(false),
     _isNewtonConverge(false) {};
 
+
+  /** newton algorithm
+   * \param criterion convergence criterion
+   * \param maxStep maximum number of Newton steps
+   */
+  virtual void newtonSolve(double criterion, unsigned int maxStep);
+
+  
 public:
 
   /** initialisation specific to TimeStepping for OneStepNSProblem.
@@ -132,21 +143,31 @@ public:
   virtual void initOSNS();
 
   /** Constructor with the time-discretisation.
+   * \param nsds the nsds that we want to simulate
    *  \param td pointer to a timeDiscretisation used in the integration
    *  (linked to the model that owns this simulation)
    *  \param osi one step integrator (default none)
    *  \param osnspb one step non smooth problem (default none)
    */
-  TimeStepping(SP::TimeDiscretisation td,
-               SP::OneStepIntegrator osi = SP::OneStepIntegrator(),
-               SP::OneStepNSProblem osnspb = SP::OneStepNSProblem());
+  TimeStepping(SP::NonSmoothDynamicalSystem nsds, SP::TimeDiscretisation td,
+               SP::OneStepIntegrator osi,
+               SP::OneStepNSProblem osnspb);
 
+  // /** Constructor with the time-discretisation.
+  //  * \param nsds the nsds that we want to simulate
+  //  *  \param td pointer to a timeDiscretisation used in the integration
+  //  *  (linked to the model that owns this simulation)
+  //  *  \param osi one step integrator (default none)
+  //  *  \param osnspb one step non smooth problem (default none)
+  //  */
+  // TimeStepping(SP::NonSmoothDynamicalSystem nsds, SP::TimeDiscretisation td);
+  
   /** Constructor with the time-discretisation.
    *  \param td pointer to a timeDiscretisation used in the integration
    *  (linked to the model that owns this simulation)
    *  \param nb number of non smooth problem
    */
-  TimeStepping(SP::TimeDiscretisation td, int nb);
+  TimeStepping(SP::NonSmoothDynamicalSystem nsds, SP::TimeDiscretisation td, int nb =0);
 
   /** Destructor.
   */
@@ -180,11 +201,7 @@ public:
   */
   void computeOneStep();
 
-  /** newton algorithm
-   * \param criterion convergence criterion
-   * \param maxStep maximum number of Newton steps
-   */
-  virtual void newtonSolve(double criterion, unsigned int maxStep);
+
 
   /** To known the number of steps performed by the Newton algorithm.
    * \return  the number of steps performed by the Newton algorithm
@@ -250,6 +267,15 @@ public:
   {
     _warnOnNonConvergence = newval;
   };
+
+  void setResetAllLambda(bool newval)
+  {
+    _resetAllLambda = newval;
+  };
+
+  
+
+  
   bool explicitJacobiansOfRelation()
   {
   return  _explicitJacobiansOfRelation;

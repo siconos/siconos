@@ -171,11 +171,11 @@ int main(int argc, char* argv[])
     // -------------
     // --- Model ---
     // -------------
-    SP::Model myModel(new Model(t0, T));
+    SP::NonSmoothDynamicalSystem myModel(new NonSmoothDynamicalSystem(t0, T));
     // add the dynamical system in the non smooth dynamical system
-    myModel->nonSmoothDynamicalSystem()->insertDynamicalSystem(beam1);
+    myModel->insertDynamicalSystem(beam1);
     // link the interaction and the dynamical system
-    myModel->nonSmoothDynamicalSystem()->link(inter1, beam1);
+    myModel->link(inter1, beam1);
     // ------------------
     // --- Simulation ---
     // ------------------
@@ -195,21 +195,15 @@ int main(int argc, char* argv[])
     // -- (4) Simulation setup with (1) (2) (3)
 
 
-    SP::TimeSteppingCombinedProjection s(new TimeSteppingCombinedProjection(t, OSI, osnspb, osnspb_pos));
+    SP::TimeSteppingCombinedProjection s(new TimeSteppingCombinedProjection(myModel, t, OSI, osnspb, osnspb_pos));
     s->setProjectionMaxIteration(1000);
     s->setConstraintTolUnilateral(1e-08);
-    myModel->setSimulation(s);
-
 
     // =========================== End of model definition ===========================
 
     // ================================= Computation =================================
 
     // --- Simulation initialization ---
-
-    cout << "====> Initialisation ..." << endl << endl;
-    myModel->initialize();
-
 
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
@@ -288,18 +282,11 @@ int main(int argc, char* argv[])
     ioMatrix::write("NE_1DS_1Knee_MLCP_MoreauJeanCombinedProjection.dat", "ascii", dataPlot, "noDim");
     ioMatrix::write("NE_1DS_1Knee_MLCP_beam1.dat", "ascii", beam1Plot, "noDim");
 
-    SimpleMatrix dataPlotRef(dataPlot);
-    dataPlotRef.zero();
-    ioMatrix::read("NE_1DS_1Knee_MLCP_MoreauJeanCombinedProjection.ref", "ascii", dataPlotRef);
-    std::cout << "Error w.r.t. reference file : " << (dataPlot - dataPlotRef).normInf() << std::endl;
-
-
-    if ((dataPlot - dataPlotRef).normInf() > 1e-7)
-    {
-      //(dataPlot - dataPlotRef).display();
-      std::cout << "Warning. The results is rather different from the reference file." << std::endl;
+    double error=0.0, eps=1e-12;
+    if (ioMatrix::compareRefFile(dataPlot, "NE_1DS_1Knee_MLCP_MoreauJeanCombinedProjection.ref", eps, error)
+        && error > eps)
       return 1;
-    }
+
 
     fclose(pFile);
   }

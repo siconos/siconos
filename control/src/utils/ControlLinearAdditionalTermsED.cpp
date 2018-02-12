@@ -25,7 +25,7 @@
 
 typedef void (*AdditionalTermsEDfctU)(double, unsigned, double*, unsigned, double*, double*, unsigned, double*);
 
-void ControlLinearAdditionalTermsED::init(DynamicalSystemsGraph& DSG0, const Model& model)
+void ControlLinearAdditionalTermsED::init(DynamicalSystemsGraph& DSG0, const NonSmoothDynamicalSystem& nsds, const TimeDiscretisation& td)
 {
 
   DynamicalSystemsGraph::VIterator dsvi, dsvdend;

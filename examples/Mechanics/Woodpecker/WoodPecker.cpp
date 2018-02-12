@@ -126,11 +126,11 @@ int main(int argc, char* argv[])
     // --- Model ---
     // -------------
 
-    SP::Model model(new Model(t0, T));
-    model->nonSmoothDynamicalSystem()->insertDynamicalSystem(dynamicalSystem);
-    model->nonSmoothDynamicalSystem()->link(I1, dynamicalSystem);
-    model->nonSmoothDynamicalSystem()->link(I2, dynamicalSystem);
-    model->nonSmoothDynamicalSystem()->link(I3, dynamicalSystem);
+    SP::NonSmoothDynamicalSystem model(new NonSmoothDynamicalSystem(t0, T));
+    model->insertDynamicalSystem(dynamicalSystem);
+    model->link(I1, dynamicalSystem);
+    model->link(I2, dynamicalSystem);
+    model->link(I3, dynamicalSystem);
 
     // ----------------
     // --- Simulation ---
@@ -139,7 +139,7 @@ int main(int argc, char* argv[])
     // -- Time discretisation --
     SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
 
-    SP::TimeStepping s(new TimeStepping(t));
+    SP::TimeStepping s(new TimeStepping(model, t));
 
     // -- OneStepIntegrators --
     SP::OneStepIntegrator vOSI(new MoreauJeanOSI(theta));
@@ -148,18 +148,9 @@ int main(int argc, char* argv[])
 
     SP::OneStepNSProblem osnspb(new FrictionContact(2));
     s->insertNonSmoothProblem(osnspb);
-
-    model->setSimulation(s);
-
     cout << "=== End of model loading === " << endl;
 
     // ================= Computation =================
-
-    // --- Simulation initialization ---
-    model->initialize();
-
-    cout << "End of model initialisation" << endl;
-
 
     int k = 0;
     int N = floor((T - t0) / h);
@@ -200,18 +191,12 @@ int main(int argc, char* argv[])
 
     // --- Output files ---
     ioMatrix::write("result.dat", "ascii", dataPlot, "noDim");
-    std::cout << "Comparison with a reference file" << std::endl;
-    SimpleMatrix dataPlotRef(dataPlot);
-    dataPlotRef.zero();
-    ioMatrix::read("Woodpecker.ref", "ascii", dataPlotRef);
-    double error = (dataPlot - dataPlotRef).normInf()/  dataPlotRef.normInf();
-    std::cout << "Error = "<< error <<std::endl;
-    if (error > 1e-12)
-    {
-      std::cout << "Warning. The results is rather different from the reference file." << std::endl;
-      std::cout << (dataPlot - dataPlotRef).normInf() << std::endl;
+
+    double error=0.0, eps=1e-11;
+    if (ioMatrix::compareRefFile(dataPlot, "Woodpecker.ref", eps, error)
+        && error > eps)
       return 1;
-    }
+    
   }
 
   catch (SiconosException e)

@@ -52,7 +52,7 @@ protected:
    * \param workV
    * \param workM
    */
-  virtual void initComponents(Interaction& inter, VectorOfBlockVectors& DSlink,
+  virtual void initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink,
                               VectorOfVectors& workV, VectorOfSMatrices& workM);
 
   SP::SiconosVector _e;
@@ -104,15 +104,14 @@ public:
    *  \param interProp
    *  \param level not used
    */
-  virtual void computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level = 0);
-
+ virtual void computeOutput(double time, Interaction& inter,  unsigned int level = 0);
   /** default function to compute r
    *  \param time current time
    *  \param inter Interaction using this Relation
    *  \param interProp
    *  \param level not used
    */
-  virtual void computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level = 0);
+  virtual void computeInput(double time, Interaction& inter, unsigned int level = 0);
 
   /** print the data to the screen
    */

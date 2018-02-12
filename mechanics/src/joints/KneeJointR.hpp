@@ -55,11 +55,10 @@ protected:
   double _G2P0y;
   double _G2P0z;
 
-  virtual void initComponents(Interaction& inter, VectorOfBlockVectors& DSlink,
-                              VectorOfVectors& workV, VectorOfSMatrices& workM);
 
 public:
 
+  
   /** Empty constructor. The relation may be initialized later by
    * setPoint, setAbsolute, and setBasePositions. */
   KneeJointR();
@@ -81,6 +80,11 @@ public:
    */
   virtual ~KneeJointR() {};
 
+  virtual void initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink,
+                              VectorOfVectors& workV, VectorOfSMatrices& workM);
+  
+
+  
   /** Initialize the joint constants based on the provided base positions.
    * \param q1 A SiconosVector of size 7 indicating translation and
    *           orientation in inertial coordinates.

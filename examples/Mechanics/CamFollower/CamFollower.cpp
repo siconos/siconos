@@ -93,11 +93,9 @@ int main(int argc, char* argv[])
     // --- Model ---
     // -------------
 
-    SP::Model Follower(new Model(t0, T));
-
-    Follower->nonSmoothDynamicalSystem()->insertDynamicalSystem(lds);
-    Follower->nonSmoothDynamicalSystem()->link(inter, lds);
-
+    SP::NonSmoothDynamicalSystem Follower(new NonSmoothDynamicalSystem(t0, T));
+    Follower->insertDynamicalSystem(lds);
+    Follower->link(inter,lds);
 
     // ----------------
     // --- Simulation ---
@@ -121,19 +119,11 @@ int main(int argc, char* argv[])
     // tolerance
     osnspb->numericsSolverOptions()->dparam[0] = 1e-5;
 
-    SP::TimeStepping S(new TimeStepping(t));
-    S->insertIntegrator(OSI);
-    S->insertNonSmoothProblem(osnspb);
-    Follower->setSimulation(S);
+    SP::TimeStepping S(new TimeStepping(Follower, t, OSI, osnspb));
     cout << "=== End of model loading === " << endl;
     // =========================== End of model definition ===========================
 
     // ================================= Computation =================================
-
-    // --- Simulation initialization ---
-    Follower->initialize();
-    cout << "End of model initialisation" << endl;
-
 
     int k = 0;
     int N = ceil((T - t0) / h); // Number of time steps

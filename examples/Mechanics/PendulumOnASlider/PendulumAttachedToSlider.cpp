@@ -23,7 +23,7 @@
 
 #include "SiconosKernel.hpp"
 #define WITH_FRICTION
-#define DISPLAY_INTER
+//#define DISPLAY_INTER
 using namespace std;
 
 int main(int argc, char* argv[])
@@ -84,11 +84,11 @@ int main(int argc, char* argv[])
     // -------------
     // --- Model ---
     // -------------
-    SP::Model pendulumWithSlider(new Model(t0, T));
-    pendulumWithSlider->nonSmoothDynamicalSystem()->insertDynamicalSystem(pendulum);
-    pendulumWithSlider->nonSmoothDynamicalSystem()->link(inter1, pendulum);
-    pendulumWithSlider->nonSmoothDynamicalSystem()->link(inter2, pendulum);
-    pendulumWithSlider->nonSmoothDynamicalSystem()->link(inter3, pendulum);
+    SP::NonSmoothDynamicalSystem pendulumWithSlider(new NonSmoothDynamicalSystem(t0, T));
+    pendulumWithSlider->insertDynamicalSystem(pendulum);
+    pendulumWithSlider->link(inter1, pendulum);
+    pendulumWithSlider->link(inter2, pendulum);
+    pendulumWithSlider->link(inter3, pendulum);
 
     // ----------------
     // --- Simulation ---
@@ -102,20 +102,16 @@ int main(int argc, char* argv[])
     impact->numericsSolverOptions()->dparam[0] = 1e-08;
     impact->numericsSolverOptions()->iparam[0] = 100;
     impact->numericsSolverOptions()->iparam[2] = 1; // random
-    SP::TimeStepping s(new TimeStepping(t));
+    SP::TimeStepping s(new TimeStepping(pendulumWithSlider, t));
     s->insertIntegrator(OSI);
     s->insertNonSmoothProblem(impact, SICONOS_OSNSP_TS_VELOCITY);
     s->setNewtonTolerance(1e-10);
     s->setNewtonMaxIteration(200);
 
-    SP::Topology topo = pendulumWithSlider->nonSmoothDynamicalSystem()->topology();
+    SP::Topology topo = pendulumWithSlider->topology();
 
     // ================================= Computation =================================
 
-    // --- Simulation initialization ---
-    cout << "====> Initialisation ..." << endl << endl;
-    pendulumWithSlider->setSimulation(s);
-    pendulumWithSlider->initialize();
     int N = ceil((T - t0) / h) + 1; // Number of time steps
 
     // --- Get the values to be plotted ---
@@ -146,20 +142,19 @@ int main(int argc, char* argv[])
 
     boost::timer time;
     time.restart();
-    SP::InteractionsGraph indexSet1 = topo->indexSet(1);
+
 
     while ((s->hasNextEvent()) && (k<= 3000))
 //    while ((s->hasNextEvent()))
     {
-      std::cout <<"t = " <<s->nextTime()-h  <<std::endl;
-      //std::cout <<"=====================================================" <<std::endl;
-      cout << "q[0] = " << (*q)(0)  << endl;
-      cout << "q[1] = " << (*q)(1)  << endl;
-      cout << "q[2] = " << (*q)(2)  << endl;
-      cout << "v[0] = " << (*v)(0)  << endl;
-      cout << "v[1] = " << (*v)(1)  << endl;
-      cout << "v[2] = " << (*v)(2)  << endl;
-      impact->display();
+      // std::cout <<"t = " <<s->nextTime()-h  <<std::endl;
+      // //std::cout <<"=====================================================" <<std::endl;
+      // cout << "q[0] = " << (*q)(0)  << endl;
+      // cout << "q[1] = " << (*q)(1)  << endl;
+      // cout << "q[2] = " << (*q)(2)  << endl;
+      // cout << "v[0] = " << (*v)(0)  << endl;
+      // cout << "v[1] = " << (*v)(1)  << endl;
+      // cout << "v[2] = " << (*v)(2)  << endl;
 
 
 
@@ -178,20 +173,21 @@ int main(int argc, char* argv[])
       dataPlot(k, 8) = (*inter2->y(0))(0) ; // g2
       dataPlot(k, 9) = (*inter3->y(0))(0) ; // g3
       dataPlot(k, 10) = s->getNewtonNbIterations();
+      SP::InteractionsGraph indexSet1 = topo->indexSet(1);
       dataPlot(k, 11) = indexSet1->size();
 
-      if (indexSet1->size() > 5)
-      {
-        impact->display();
-      }
+      // if (indexSet1->size() > 5)
+      // {
+      //   impact->display();
+      // }
       //      if (s->nextTime() > 0.035 and (*inter1->lambda(1))(0) >0.0)
 #ifdef DISPLAY_INTER
-        std::cout << "=============== Step k =" << k << std::endl;
-        std::cout << "Time " << s->nextTime() << std::endl;
+      std::cout << "=============== Step k =" << k << std::endl;
+      std::cout << "Time " << s->nextTime() << std::endl;
 
-        impact->display();
-        //std::cout << " (*inter1->lambda(1))(0) " << (*inter1->lambda(1))(0) << std:: endl;
-        //std::cout << " (*inter2->lambda(1))(0) " << (*inter2->lambda(1))(0) << std:: endl;
+      impact->display();
+      std::cout << " (*inter1->lambda(1))(0) " << (*inter1->lambda(1))(0) << std:: endl;
+      std::cout << " (*inter2->lambda(1))(0) " << (*inter2->lambda(1))(0) << std:: endl;
 #endif
 
       s->processEvents();

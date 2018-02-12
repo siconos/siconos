@@ -82,9 +82,9 @@ int main(int argc, char* argv[])
     // -------------
     // --- Model ---
     // -------------
-    SP::Model itw(new Model(t0, T));
-    itw->nonSmoothDynamicalSystem()->insertDynamicalSystem(doubleIntegrator);
-    itw->nonSmoothDynamicalSystem()->link(twistingInteraction,doubleIntegrator);
+    SP::NonSmoothDynamicalSystem itw(new NonSmoothDynamicalSystem(t0, T));
+    itw->insertDynamicalSystem(doubleIntegrator);
+    itw->link(twistingInteraction,doubleIntegrator);
 
     // ------------------
     // --- Simulation ---
@@ -92,31 +92,19 @@ int main(int argc, char* argv[])
     // TimeDiscretisation
     SP::TimeDiscretisation td(new TimeDiscretisation(t0, h));
     // == Creation of the Simulation ==
-    SP::TimeStepping s(new TimeStepping(td));
+    SP::TimeStepping s(new TimeStepping(itw, td));
     // -- OneStepIntegrators --
     double theta = 0.5;
     SP::EulerMoreauOSI integrator(new EulerMoreauOSI(theta));
     s->insertIntegrator(integrator);
-    itw->setSimulation(s);
     // -- OneStepNsProblem --
 
     SP::AVI osnspb(new AVI());
-
     s->insertNonSmoothProblem(osnspb);
 
     // =========================== End of model definition ===========================
 
     // ================================= Computation =================================
-
-    // --- Simulation initialization ---
-
-    cout << "====> Simulation initialisation ..." << endl << endl;
-
-    itw->initialize();
-
-
-    //  (s->oneStepNSProblems)[0]->initialize();
-
 
     // --- Get the values to be plotted ---
     unsigned outputSize = 5; // number of required data

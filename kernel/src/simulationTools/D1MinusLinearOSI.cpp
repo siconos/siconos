@@ -27,7 +27,6 @@
 #include "BlockVector.hpp"
 #include "CxxStd.hpp"
 #include "Topology.hpp"
-#include "Model.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
 #include "OneStepNSProblem.hpp"
 
@@ -112,7 +111,7 @@ unsigned int D1MinusLinearOSI::numberOfIndexSets() const
   RuntimeException::selfThrow("D1MinusLinearOSI::numberOfIndexSet - not implemented for D1minusLinear of type: " + _typeOfD1MinusLinearOSI);
   return 0;
 }
-void D1MinusLinearOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds)
+void D1MinusLinearOSI::initializeDynamicalSystem(double t, SP::DynamicalSystem ds)
 {
   // Get work buffers from the graph
   VectorOfVectors& workVectors = *_initializeDSWorkVectors(ds);
@@ -215,15 +214,21 @@ void D1MinusLinearOSI::fillDSLinks(Interaction &inter,
   assert(ds1);
   assert(ds2);
 
+  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
+
+  interProp.workVectors.reset(new VectorOfVectors);
+  interProp.workMatrices.reset(new VectorOfSMatrices);
+
   VectorOfVectors& workV = *interProp.workVectors;
+  VectorOfSMatrices& workM = *interProp.workMatrices;
+
+  Relation &relation =  *inter.relation();
+  relation.initializeWorkVectorsAndMatrices(inter, DSlink, workV, workM);
+  RELATION::TYPES relationType = relation.getType();
+
   workV.resize(D1MinusLinearOSI::WORK_INTERACTION_LENGTH);
   workV[D1MinusLinearOSI::OSNSP_RHS].reset(new SiconosVector(inter.getSizeOfY()));
 
-  VectorOfBlockVectors& DSlink = *interProp.DSlink;
-  assert(interProp.DSlink);
-
-  Relation &relation =  *inter.relation();
-  RELATION::TYPES relationType = relation.getType();
 
   // Check if interations levels (i.e. y and lambda sizes) are compliant with the current osi.
   _check_and_update_interaction_levels(inter);

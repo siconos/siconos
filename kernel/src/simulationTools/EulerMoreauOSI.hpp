@@ -281,7 +281,7 @@ public:
    * \param t time of initialization
    * \param ds the dynamical system
    */
-  void initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds);
+  void initializeDynamicalSystem( double t, SP::DynamicalSystem ds);
 
   /** initialization of the work vectors and matrices (properties) related to
    *  one interaction on the graph and needed by the osi
@@ -332,6 +332,23 @@ public:
    */
   virtual void computeFreeState();
 
+  /** update the output of the Interaction attached to this Integrator
+   */
+  void updateOutput(double time);
+
+  /** update the input of the Interaction attached to this Integrator
+   */
+  void updateInput(double time);
+
+  /** update the output of the Interaction attached to this Integrator
+   *  \param level level of interest for the dynamics
+   */
+  void updateOutput(double time, unsigned int level);
+
+  /** update the input of the Interaction attached to this Integrator
+   *  \param level level of interest for the dynamics
+   */
+  void updateInput(double time, unsigned int level);
   
   double computeResiduOutput(double time, SP::InteractionsGraph indexSet);
   

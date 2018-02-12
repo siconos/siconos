@@ -29,18 +29,18 @@
 namespace Siconos
 {
 
-/** save a Siconos Model with the full simulation state into a
+/** save a Siconos Simulation with the full simulation state into a
  *  file
- * \param model
+ * \param s
  * \param filename with extension : .xml, .bin (binary archive)
  */
-void save(SP::Model model, const std::string& filename);
+void save(SP::Simulation s, const std::string& filename);
 
 /** load a Siconos Model with the full simulation state from file
  * \param filename
  * \return a SP::Model
  */
-SP::Model load(const std::string& filename);
+SP::Simulation load(const std::string& filename);
 
 }
 

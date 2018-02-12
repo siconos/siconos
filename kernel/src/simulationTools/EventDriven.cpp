@@ -19,7 +19,6 @@
 #include "EventDriven.hpp"
 #include "LsodarOSI.hpp"
 #include "LCP.hpp"
-#include "Model.hpp"
 #include "Interaction.hpp"
 #include "EventsManager.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
@@ -46,7 +45,7 @@ using namespace RELATION;
 /** defaut constructor
  *  \param a pointer to a timeDiscretisation (linked to the model that owns this simulation)
  */
-EventDriven::EventDriven(SP::TimeDiscretisation td): Simulation(td), _istate(1), _isNewtonConverge(false)
+EventDriven::EventDriven(SP::NonSmoothDynamicalSystem nsds, SP::TimeDiscretisation td): Simulation(nsds, td), _istate(1), _isNewtonConverge(false)
 {
   _numberOfOneStepNSproblems = 2;
   (*_allNSProblems).resize(_numberOfOneStepNSproblems);
@@ -58,7 +57,7 @@ EventDriven::EventDriven(SP::TimeDiscretisation td): Simulation(td), _istate(1),
   _localizeEventMaxIter = 100;
 }
 
-EventDriven::EventDriven(SP::TimeDiscretisation td, int nb): Simulation(td), _istate(1), _isNewtonConverge(false)
+EventDriven::EventDriven(SP::NonSmoothDynamicalSystem nsds, SP::TimeDiscretisation td, int nb): Simulation(nsds, td), _istate(1), _isNewtonConverge(false)
 {
   (*_allNSProblems).resize(nb);
   _numberOfOneStepNSproblems = 0;
@@ -221,7 +220,7 @@ void EventDriven::updateIndexSetsWithDoubleCondition()
     DEBUG_PRINTF("ED 2 update with double condition %f\n", gamma);
     DEBUG_PRINTF("ED 3 update with double condition%f\n", _TOL_ED);
 
-    
+
     if (fabs(F) < _TOL_ED)
       indexSet2->remove_vertex(inter);
     else if ((gamma < -_TOL_ED) || (F < -_TOL_ED))
@@ -305,14 +304,12 @@ void EventDriven::initOSNS()
 
 void EventDriven::initOSIs()
 {
-  for (OSIIterator itosi = _allOSI->begin();  itosi != _allOSI->end(); ++itosi)
-  {
 
-  }
 }
 
 void EventDriven::initOSIRhs()
 {
+  DEBUG_BEGIN("void EventDriven::initOSIRhs()\n")
   // === initialization for OneStepIntegrators ===
   OSI::TYPES  osiType = (*_allOSI->begin())->getType();
   for (OSIIterator itosi = _allOSI->begin();  itosi != _allOSI->end(); ++itosi)
@@ -331,20 +328,25 @@ void EventDriven::initOSIRhs()
       SP::DynamicalSystem ds = osiDSGraph->bundle(*dsi);
       // Initialize right-hand side
       ds->initRhs(startingTime());
+      //DEBUG_EXPR(ds->display());
     }
   }
+  DEBUG_END("void EventDriven::initOSIRhs()\n")
 }
 
-void EventDriven::initialize(SP::Model m, bool withOSI)
+void EventDriven::initialize()
 {
-  // Initialization for Simulation
-  _indexSet0 = m->nonSmoothDynamicalSystem()->topology()->indexSet(0);
-  _DSG0 = m->nonSmoothDynamicalSystem()->topology()->dSG(0);
+  DEBUG_BEGIN("void EventDriven::initialize()\n");
 
-  Simulation::initialize(m, withOSI);
+    // Initialization for Simulation
+  _indexSet0 = _nsds->topology()->indexSet(0);
+  _DSG0 = _nsds->topology()->dSG(0);
+
+  Simulation::initialize();
   // Initialization for all OneStepIntegrators
   //initOSIs();
   initOSIRhs();
+  DEBUG_END("void EventDriven::initialize()\n")
 }
 
 void EventDriven::computef(OneStepIntegrator& osi, integer * sizeOfX, doublereal * time, doublereal * x, doublereal * xdot)
@@ -411,12 +413,12 @@ void EventDriven::computef(OneStepIntegrator& osi, integer * sizeOfX, doublereal
     else
     {
       SiconosVector& xtmp2 = ds.getRhs(); // Pointer link !
-      DEBUG_EXPR(xtmp2.display(););
+      //DEBUG_EXPR(xtmp2.display(););
       pos += xtmp2.copyData(&xdot[pos]);
     }
   }
   DEBUG_END("EventDriven::computef(OneStepIntegrator& osi, integer * sizeOfX, doublereal * time, doublereal * x, doublereal * xdot)\n");
-    
+
 }
 
 void EventDriven::computeJacobianfx(OneStepIntegrator& osi,
@@ -619,6 +621,10 @@ void EventDriven::updateOutput(unsigned int levelInput)
 void EventDriven::advanceToEvent()
 {
   DEBUG_BEGIN("EventDriven::advanceToEvent()\n");
+
+  initialize();
+
+  
   // Update interactions if a manager was provided
   updateInteractions();
 
@@ -721,6 +727,7 @@ void EventDriven::advanceToEvent()
       }
       if (_istate == 3) // ie if _tout is not equal to _tend: one or more roots have been found.
       {
+        DEBUG_PRINTF("An event has been found at time = %g", _tout);
         isNewEventOccur = true;
         // Add an event into the events manager list
         _eventsManager->scheduleNonSmoothEvent(*this, _tout);
@@ -791,12 +798,12 @@ double EventDriven::computeResiduConstraints()
         Interaction& inter = *indexSet2->bundle(*ui);
         if (!_flag) // constraints at the position level
         {
-          inter.computeOutput(t, indexSet2->properties(*ui), 0); // compute y[0] for the interaction at the end time
+          inter.computeOutput(t, 0); // compute y[0] for the interaction at the end time
           _y = (*inter.y(0))(0);
         }
         else // constraints at the velocity level
         {
-          inter.computeOutput(t, indexSet2->properties(*ui), 1); // compute y[1] for the interaction at the end time
+          inter.computeOutput(t, 1); // compute y[1] for the interaction at the end time
           _y = (*inter.y(1))(0);
         }
 
@@ -892,7 +899,7 @@ void EventDriven::predictionNewtonIteration()
   for (std11::tie(ui, uiend) = _indexSet0->vertices(); ui != uiend; ++ui)
   {
     Interaction& inter = *_indexSet0->bundle(*ui);
-    inter.computeOutput(t, _indexSet0->properties(*ui), 0); // compute y[0] for the interaction at the end time with the state predicted for Dynamical Systems
+    inter.computeOutput(t, 0); // compute y[0] for the interaction at the end time with the state predicted for Dynamical Systems
     inter.lambda(2)->zero(); // reset lambda[2] to zero
   }
 }

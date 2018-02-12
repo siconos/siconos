@@ -81,7 +81,6 @@ protected:
   */
   FirstOrderR(RELATION::SUBTYPES newType): Relation(RELATION::FirstOrder, newType) {}
 
-  virtual void initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM) = 0;
 
   SP::SimpleMatrix _C;
   SP::SimpleMatrix _D;
@@ -102,8 +101,11 @@ public:
    * \param workV
    * \param workM
    */
-  virtual void initialize(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
+  virtual void initializeDSLink(Interaction& inter, VectorOfBlockVectors& DSlink);
 
+  virtual void initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM) = 0;
+
+  
   /** set C to pointer newC
   *  \param newC the C matrix
   */

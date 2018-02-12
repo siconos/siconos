@@ -80,8 +80,8 @@ protected:
   /** Numerical precision expected for the Relay solver */
   double _precision;
 
-  /** the Model for the controller */
-  SP::Model _SMC;
+  /** the nsds for the controller */
+  SP::NonSmoothDynamicalSystem _nsdsSMC;
 
   /** the DynamicalSystem for the controller */
   SP::FirstOrderNonLinearDS _DS_SMC; // XXX replace this by FirstOrderDS
@@ -159,7 +159,7 @@ public:
   /** Initialization
    * \param m the Model
    */
-  virtual void initialize(const Model& m);
+  virtual void initialize(const NonSmoothDynamicalSystem& nsds, const Simulation& s);
 
 
   void sete(const std::string& plugin);
@@ -278,10 +278,10 @@ public:
     _DS_SMC = ds;
   };
 
-  /** get the Model used in the SMC
-   * \return the Model used in the SMC
+  /** get the NSDS used in the SMC
+   * \return the NSDS used in the SMC
    */
-  virtual SP::Model getInternalModel() const { return _SMC; };
+  virtual SP::NonSmoothDynamicalSystem getInternalNSDS() const { return _nsdsSMC; };
 
   /** get the Integrator used in the SMC
    * \return the Integrator used in the SMC

@@ -68,7 +68,7 @@ int main()
 
   int NBStep = (int) floor(sTf / sStep);
 
-  //  NBStep = 3;
+  //NBStep = 130;
   //*****BUILD THE DYNAMIC SYSTEM
   SP::MyDS aDS ;
   aDS.reset(new MyDS(xti));
@@ -98,10 +98,9 @@ int main()
   //  aI->insert(LSDiodeBridge);
   //****BUILD THE SYSTEM
 
-  SP::Model  aM(new Model(0, sTf));
-  aM->nonSmoothDynamicalSystem()->insertDynamicalSystem(aDS);
-  aM->nonSmoothDynamicalSystem()->link(aI, aDS);
-
+  SP::NonSmoothDynamicalSystem  aN(new NonSmoothDynamicalSystem(0, sTf));
+  aN->insertDynamicalSystem(aDS);
+  aN->link(aI, aDS);
 
   // -- (1) OneStepIntegrators --
   SP::OneStepIntegrator  aEulerMoreauOSI ;
@@ -116,26 +115,26 @@ int main()
 
 
   // -- (4) Simulation setup with (1) (2) (3)
-  SP::TimeStepping aS(new TimeStepping(aTD, aEulerMoreauOSI, aMLCP));
+  SP::TimeStepping aS(new TimeStepping(aN, aTD, aEulerMoreauOSI, aMLCP));
   aS->setComputeResiduY(true);
   aS->setComputeResiduR(true);
   aS->setUseRelativeConvergenceCriteron(false);
-  aM->setSimulation(aS);
-
-  // Initialization
-  cout << "====> Initialisation ..." << endl << endl;
-  aM->initialize();
-
+  aS->setNewtonMaxIteration(20);
+  aS->setNewtonTolerance(1e-11);
+  aS->setResetAllLambda(false);
   //To compute necessary information for memory allocator
+  
+  aS->initialize();
+  
   aMLCP->preCompute(0.0);
   cout << "nonSmoothDynamicalSystem()->isLinear() : " << boolalpha
-       << aM->nonSmoothDynamicalSystem()->isLinear() << endl;
+       << aN->isLinear() << endl;
 
   cout << "nonSmoothDynamicalSystem()->topology()->hasChanged() : "
        << boolalpha
-       << aM->nonSmoothDynamicalSystem()->topology()->hasChanged() << endl;
+       << aN->topology()->hasChanged() << endl;
 
-  cout << " ---> End of initialization." << endl;
+
   //  aS->insertNonSmoothProblem(aMLCP);
   SP::SolverOptions numSolOptions = aMLCP->numericsSolverOptions();
   //  Alloc working mem for the solver
@@ -174,6 +173,14 @@ int main()
 
   for (int k = 0 ; k < NBStep ; k++)
   {
+    cout << "        " << endl;
+    cout << "        " << endl;
+    cout << "        " << endl;
+    cout << "        " << endl;
+    cout << "        " << endl;
+    cout << "        " << endl;
+    cout << "        " << endl;
+    cout << "########" << k << endl;
     //      if (cmp==150)
     //        numerics_set_verbose(1);
     //      else if (cmp==151)
@@ -181,9 +188,8 @@ int main()
     cout << "..." << cmp << endl;
     cmp++;
     // solve ...
-    /*aS->computeOneStep();*/
-
-    aS-> newtonSolve(1e-11, 20);
+    aS->computeOneStep();
+    aMLCP->display();
     aS->nextStep();
     x = aDS->x();
     lambda = aI->lambda(0);

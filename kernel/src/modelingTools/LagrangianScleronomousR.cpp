@@ -68,7 +68,7 @@ void LagrangianScleronomousR::_zeroPlugin()
   _plugindotjacqh.reset(new PluggedObject());
 }
 
-void LagrangianScleronomousR::initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
+void LagrangianScleronomousR::initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
 {
   if (_plugindotjacqh && _plugindotjacqh->fPtr)
   {
@@ -129,11 +129,11 @@ void  LagrangianScleronomousR::computedotjacqhXqdot(double time, Interaction& in
   *DSlink[LagrangianR::z] = z;
 }
 
-void LagrangianScleronomousR::computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int derivativeNumber)
+void LagrangianScleronomousR::computeOutput(double time, Interaction& inter,  unsigned int derivativeNumber)
 {
 
   DEBUG_PRINTF("LagrangianScleronomousR::computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int derivativeNumber) with time = %f and derivativeNumber = %i\n", time, derivativeNumber);
-  VectorOfBlockVectors& DSlink = *interProp.DSlink;
+  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
   SiconosVector& y = *inter.y(derivativeNumber);
   SiconosVector q = *DSlink[LagrangianR::q0];
   SiconosVector z = *DSlink[LagrangianR::z];
@@ -160,12 +160,13 @@ void LagrangianScleronomousR::computeOutput(double time, Interaction& inter, Int
   *DSlink[LagrangianR::z] = z;
 }
 
-void LagrangianScleronomousR::computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level)
+
+void LagrangianScleronomousR::computeInput(double time, Interaction& inter, unsigned int level)
 {
   DEBUG_BEGIN("void LagrangianScleronomousR::computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level) \n");
 
   DEBUG_PRINTF("level = %i\n", level);
-  VectorOfBlockVectors& DSlink = *interProp.DSlink;
+  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
 
   SiconosVector q = *DSlink[LagrangianR::q0];
   SiconosVector z = *DSlink[LagrangianR::z];
@@ -183,7 +184,7 @@ void LagrangianScleronomousR::computeInput(double time, Interaction& inter, Inte
 
 void LagrangianScleronomousR::computeJach(double time, Interaction& inter, InteractionProperties& interProp)
 {
-  VectorOfBlockVectors& DSlink = *interProp.DSlink;
+  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
   SiconosVector q = *DSlink[LagrangianR::q0];
   SiconosVector z = *DSlink[LagrangianR::z];
   SiconosVector qDot = *DSlink[LagrangianR::q1];

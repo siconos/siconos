@@ -19,7 +19,7 @@ if(WITH_${COMPONENT}_TESTING)
     OUTPUT_NAME TestPlugin)
 
   # the main test driver
-  SET(TEST_MAIN src/model/test/TestMain.cpp)
+  SET(TEST_MAIN src/test/TestMain.cpp)
 
   # For Windows
   SET(PATH_FOR_PLUGIN
@@ -38,12 +38,6 @@ if(WITH_${COMPONENT}_TESTING)
   NEW_TEST(testSiconosMemory SiconosMemoryTest.cpp)
   END_TEST()
   
-  # model
-  BEGIN_TEST(src/model/test)
-  
-  NEW_TEST(testModel ModelTest.cpp)
-  
-  END_TEST()
   # modeling tools 
   BEGIN_TEST(src/modelingTools/test)
   

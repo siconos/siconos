@@ -17,12 +17,14 @@ public:
    *  \param osnspb_pos one step non smooth problem (default none)
    *  \param level
    */
-  MBTB_TimeSteppingCombinedProj(SP::TimeDiscretisation td,
-                                SP::OneStepIntegrator osi,
-                                SP::OneStepNSProblem osnspb_velo,
-                                SP::OneStepNSProblem osnspb_pos,
-                                unsigned int level) 
-    :TimeSteppingCombinedProjection(td,osi,osnspb_velo,osnspb_pos,level) {} ;
+  MBTB_TimeSteppingCombinedProj(
+    SP::NonSmoothDynamicalSystem nsds,
+    SP::TimeDiscretisation td,
+    SP::OneStepIntegrator osi,
+    SP::OneStepNSProblem osnspb_velo,
+    SP::OneStepNSProblem osnspb_pos,
+    unsigned int level) 
+    :TimeSteppingCombinedProjection(nsds,td,osi,osnspb_velo,osnspb_pos,level) {} ;
 
   //! Overloading of updateWorldFromDS.
   /*!

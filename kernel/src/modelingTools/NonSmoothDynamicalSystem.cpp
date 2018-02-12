@@ -41,12 +41,29 @@ using namespace RELATION;
 // --- CONSTRUCTORS/DESTRUCTOR ---
 
 // Default constructor
-NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(): _BVP(false), _mIsLinear(true)
+NonSmoothDynamicalSystem::NonSmoothDynamicalSystem():
+  _t(0.0), _t0(0.0), _T(0.0), _title("none"), _author("nobody"), _description("none"),
+  _date("none"), _BVP(false) , _mIsLinear(true)
 {
   // === Builds an empty topology ===
   _topology.reset(new Topology());
-};
 
+  // we push a first element in the list to avoid acces to null when we call --_changeLog.end();
+  _changeLog.push_back(Changes(clearTopology));
+  DEBUG_EXPR((--_changeLog.end())->display(););
+};
+//  constructor
+NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(double t0, double T):
+  _t(t0), _t0(t0), _T(T),
+  _title("none"), _author("nobody"), _description("none"),
+  _date("none"), _BVP(false), _mIsLinear(true)
+{
+  // === Builds an empty topology ===
+  _topology.reset(new Topology());
+  // we push a first element in the list to avoid acces to null when we call --_changeLog.end();
+  _changeLog.push_back(Changes(clearTopology));
+  DEBUG_EXPR((--_changeLog.end())->display());
+};
 
 NonSmoothDynamicalSystem::~NonSmoothDynamicalSystem()
 {
@@ -61,19 +78,41 @@ void NonSmoothDynamicalSystem::display() const
   std::cout << "---> isBVP = " << _BVP <<std::endl;
   dynamicalSystems()->begin();
   _topology->indexSet0()->display();
+  std::cout << "---> last change : " <<std::endl;
+  (--_changeLog.end())->display();
   std::cout << "===================================================" <<std::endl;
+}
+
+void  NonSmoothDynamicalSystem::insertDynamicalSystem(SP::DynamicalSystem ds)
+{
+  _topology->insertDynamicalSystem(ds);
+  _changeLog.push_back(Changes(addDynamicalSystem,ds));
+  _mIsLinear = ((ds)->isLinear() && _mIsLinear);
+}
+
+void  NonSmoothDynamicalSystem::removeDynamicalSystem(SP::DynamicalSystem ds)
+{
+  _topology->removeDynamicalSystem(ds);
+  _changeLog.push_back(Changes(rmDynamicalSystem,ds));
+}
+void  NonSmoothDynamicalSystem::removeInteraction(SP::Interaction inter)
+{
+  _topology->removeInteraction(inter);
+  _changeLog.push_back(Changes(rmInteraction,inter));
 }
 
 void NonSmoothDynamicalSystem::link(SP::Interaction inter, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2)
 {
   _mIsLinear = (inter->relation()->isLinear() && _mIsLinear);
   _topology->link(inter, ds1, ds2);
+  _changeLog.push_back(Changes(addInteraction,inter));
 };
 
 
 void NonSmoothDynamicalSystem::clear()
 {
   _topology->clear();
+  _changeLog.push_back(Changes(clearTopology));
 }
 
 void NonSmoothDynamicalSystem::setSymmetric(bool val)
@@ -151,7 +190,7 @@ void NonSmoothDynamicalSystem::updateInput(double time, unsigned int level)
     inter = indexSet0->bundle(*ui);
     assert(inter->lowerLevelForInput() <= level);
     assert(inter->upperLevelForInput() >= level);
-    inter->computeInput(time, indexSet0->properties(*ui), level);
+    inter->computeInput(time, level);
   }
 
   DEBUG_END("Nonsmoothdynamicalsystem::updateInput(double time, unsigned int level)\n");
@@ -175,7 +214,7 @@ void NonSmoothDynamicalSystem::updateOutput(double time, unsigned int level)
     inter = indexSet0->bundle(*ui);
     assert(inter->lowerLevelForOutput() <= level);
     assert(inter->upperLevelForOutput() >= level);
-    inter->computeOutput(time, indexSet0->properties(*ui), level);
+    inter->computeOutput(time, level);
   }
   DEBUG_END("NonSmoothDynamicalSystem::updateOutput(unsigned int level)\n");
 

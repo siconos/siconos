@@ -380,7 +380,7 @@ void _MBTB_displayStep()
 
       printf("\n");
 
-      SP::InteractionsGraph indexSet1=myModel->nonSmoothDynamicalSystem()->topology()->indexSet(1);
+      SP::InteractionsGraph indexSet1=myNsds->topology()->indexSet(1);
       InteractionsGraph::VIterator ui1, ui1end, v1next;
       boost::tie(ui1,ui1end) = indexSet1->vertices();
       //Remove interactions from the indexSet1
@@ -519,7 +519,7 @@ void _MBTB_printStep(FILE *fp)
   for(unsigned int numC=0; numC<sNbOfContacts; numC++)
   {
 
-    SP::InteractionsGraph indexSet1=myModel->nonSmoothDynamicalSystem()->topology()->indexSet(1);
+    SP::InteractionsGraph indexSet1=myNsds->topology()->indexSet(0);
     InteractionsGraph::VIterator ui1, ui1end, v1next;
     boost::tie(ui1,ui1end) = indexSet1->vertices();
     //Remove interactions from the indexSet1

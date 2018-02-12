@@ -25,38 +25,32 @@
 #include "SiconosConst.hpp"
 #include "SimulationTypeDef.hpp"
 #include "SiconosFwd.hpp"
-// #include "EventsManager.hpp"
-// #include "SiconosPointers.hpp"
 #include <fstream>
-// #include "Model.hpp"
-// #include "NonSmoothDynamicalSystem.hpp"
-// #include "Topology.hpp"
+#include "NonSmoothDynamicalSystem.hpp"
 #include "InteractionManager.hpp"
-
+#include <list>
 
 /** Description of the simulation process (integrators, time
-    discretisation and so on) - Base class for TimeStepping or
-    EventDriven.
+ *  discretisation and so on) - Base class for TimeStepping or
+ *  EventDriven.
+ *
+ *   \author SICONOS Development Team - copyright INRIA
+ *   \version 4.2.0.
+ *   \date (Creation) Apr 26, 2004
+ *
+ *   !!! This is an abstract class !!!
+ *
+ *   The available simulations are TimeStepping and EventDriven. See
+ *   derived classes for more details.
+ *
+ */
 
-    \author SICONOS Development Team - copyright INRIA
-    \version 3.8.0.
-    \date (Creation) Apr 26, 2004
-
-    !!! This is an abstract class !!!
-
-    The available simulations are TimeStepping and EventDriven. See
-    derived classes for more details.
-
-  Rules:
-  - A Model must be given to the constructor, otherwise an exception is thrown.
-*/
 class Simulation : public std11::enable_shared_from_this<Simulation>
 {
 protected:
   /** serialization hooks
   */
   ACCEPT_SERIALIZATION(Simulation);
-
 
   /** name or id of the Simulation */
   std::string _name;
@@ -72,10 +66,11 @@ protected:
 
   /** real ending time for integration (different from tend in case of
       stop during integrate, for example when a root is found in
-      LsodarOSI procedure)
+      an EventDriven strategy)
   */
   double _tout;
 
+  
   double _T;
 
   /** the dynamical systems integrators */
@@ -138,6 +133,12 @@ protected:
    */
   bool _linkOrUnlink;
 
+  bool _isInitialized;
+
+  
+  std::map< SP::OneStepIntegrator, std::list<SP::DynamicalSystem> >  _OSIDSmap;
+
+  
   /** default constructor.
    */
   Simulation() {};
@@ -168,8 +169,13 @@ private:
 
 public:
 
-
+  std::list<NonSmoothDynamicalSystem::Changes>::const_iterator _nsdsChangeLogPosition;
   /** default constructor
+   *  \param td the timeDiscretisation for this Simulation
+   */
+  Simulation(SP::NonSmoothDynamicalSystem nsds, SP::TimeDiscretisation td);
+
+  /** constructor with only a TimeDiscretisation
    *  \param td the timeDiscretisation for this Simulation
    */
   Simulation(SP::TimeDiscretisation td);
@@ -285,7 +291,7 @@ public:
    *  \param osi the OneStepIntegrator to add
    */
   virtual void insertIntegrator(SP::OneStepIntegrator osi);
-
+  void associate(SP::OneStepIntegrator osi, SP::DynamicalSystem ds);
   /** get a pointer to indexSets[i]
       \param i number of the required index set
       \return a graph of interactions
@@ -337,6 +343,7 @@ public:
    */
   void setNonSmoothDynamicalSystemPtr(SP::NonSmoothDynamicalSystem newPtr)
   {
+    _nsdsChangeLogPosition = _nsds->changeLog().begin();
     _nsds = newPtr;
   }
 
@@ -389,7 +396,7 @@ public:
       \param m the model to be linked to this Simulation
       \param init optional flag for partial initialization
   */
-  virtual void initialize(SP::Model m, bool init = true);
+  virtual void initialize();
 
   /** Initialize a single Interaction for this Simulation, used for dynamic
    *  topology updates. */
@@ -404,13 +411,13 @@ public:
    *            into the NonSmoothDynamicalSystem.
    *  \param m The Model for initializing the OSI.
    *  \param time The current time for initializing the OSI. */
-  void prepareIntegratorForDS(SP::OneStepIntegrator osi, SP::DynamicalSystem ds,
-                              SP::Model m, double time);
+  // void prepareIntegratorForDS(SP::OneStepIntegrator osi, SP::DynamicalSystem ds,
+  //                             SP::Model m, double time);
 
   /** Set an object to automatically manage interactions during the simulation */
   void insertInteractionManager(SP::InteractionManager manager)
     { _interman = manager; }
-
+  
   /** computes a one step NS problem
    *  \param nb the id of the OneStepNSProblem to be computed
    *  \return information about the solver convergence.

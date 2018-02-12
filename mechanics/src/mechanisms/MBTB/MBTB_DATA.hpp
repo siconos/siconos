@@ -40,7 +40,7 @@ extern SP::Interaction sInterJoints[];
 //!The siconos contact interactions.
 extern SP::Interaction sInterContacts[];
 //!siconos model.
-extern SP::Model myModel;
+extern SP::NonSmoothDynamicalSystem myNsds;
 //!siconos model t0.
 extern double myt0;
 //!siconos model Tf.

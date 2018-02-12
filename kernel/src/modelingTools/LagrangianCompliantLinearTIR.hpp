@@ -96,25 +96,22 @@ public:
    * \param workV
    * \param workM
    */
-  void initComponents(Interaction& inter, VectorOfBlockVectors& DSlink,
+  void initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink,
                       VectorOfVectors& workV, VectorOfSMatrices& workM);
 
   /** default function to compute y
   *  \param time not used
   *  \param inter the Interaction we want to update
-  *  \param interProp interaction properties
   *  \param derivativeNumber the derivative of y we want to compute
   */
-  void computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int derivativeNumber = 0);
+  void computeOutput(double time, Interaction& inter, unsigned int derivativeNumber = 0);
 
   /** default function to compute r
   *  \param time not used
   *  \param inter the Interaction we want to update
-  *  \param interProp interaction properties
   *  \param level the derivative of lambda we want to compute
   */
-  void computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level = 0);
-
+  void computeInput(double time, Interaction& inter, unsigned int level = 0);
   /* compute all the H Jacobian
    *  \param time not used
    *  \param inter the Interaction we want to update

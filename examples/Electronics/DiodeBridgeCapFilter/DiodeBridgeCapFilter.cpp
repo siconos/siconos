@@ -126,12 +126,13 @@ int main(int argc, char* argv[])
     SP::Interaction InterDiodeBridgeCapFilter(new Interaction(nslaw, LTIRDiodeBridgeCapFilter));
 
     // --- Model creation ---
-    SP::Model DiodeBridgeCapFilter(new Model(t0, T, Modeltitle));
+    SP::NonSmoothDynamicalSystem DiodeBridgeCapFilter(new NonSmoothDynamicalSystem(t0, T));
+    DiodeBridgeCapFilter->setTitle(Modeltitle);
     // add the dynamical system in the non smooth dynamical system
-    DiodeBridgeCapFilter->nonSmoothDynamicalSystem()->insertDynamicalSystem(LS1DiodeBridgeCapFilter);
-    DiodeBridgeCapFilter->nonSmoothDynamicalSystem()->insertDynamicalSystem(LS2DiodeBridgeCapFilter);
+    DiodeBridgeCapFilter->insertDynamicalSystem(LS1DiodeBridgeCapFilter);
+    DiodeBridgeCapFilter->insertDynamicalSystem(LS2DiodeBridgeCapFilter);
     // link the interaction and the dynamical system
-    DiodeBridgeCapFilter->nonSmoothDynamicalSystem()->link(InterDiodeBridgeCapFilter, LS1DiodeBridgeCapFilter, LS2DiodeBridgeCapFilter);
+    DiodeBridgeCapFilter->link(InterDiodeBridgeCapFilter, LS1DiodeBridgeCapFilter, LS2DiodeBridgeCapFilter);
 
 
     // ------------------
@@ -146,14 +147,7 @@ int main(int argc, char* argv[])
     // -- (3) Non smooth problem
     SP::LCP aLCP(new LCP());
     // -- (4) Simulation setup with (1) (2) (3)
-    SP::TimeStepping aTS(new TimeStepping(aTiDisc, aOSI, aLCP));
-    DiodeBridgeCapFilter->setSimulation(aTS);
-    
-    // Initialization
-    cout << "====> Initialisation ..." << endl << endl;
-    DiodeBridgeCapFilter->initialize();
-    cout << " ---> End of initialization." << endl;
-
+    SP::TimeStepping aTS(new TimeStepping(DiodeBridgeCapFilter, aTiDisc, aOSI, aLCP));
 
     int k = 0;
     double h = aTS->timeStep();

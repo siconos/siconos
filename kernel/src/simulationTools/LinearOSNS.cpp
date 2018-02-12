@@ -18,7 +18,6 @@
 #include "LinearOSNS.hpp"
 #include "Simulation.hpp"
 #include "Topology.hpp"
-#include "Model.hpp"
 #include "MoreauJeanOSI.hpp"
 #include "MoreauJeanBilbaoOSI.hpp"
 #include "D1MinusLinearOSI.hpp"

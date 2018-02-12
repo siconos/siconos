@@ -21,9 +21,9 @@
 #include "BlockVector.hpp"
 #include "SimulationGraphs.hpp"
 #include <iostream>
-
-//#define DEBUG_STDOUT
-//#define DEBUG_MESSAGES
+// #define DEBUG_NOCOLOR
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
 #include "debug.h"
 
 using namespace RELATION;
@@ -53,11 +53,12 @@ FirstOrderLinearTIR::FirstOrderLinearTIR(SP::SimpleMatrix C, SP::SimpleMatrix D,
   _e = e;
 }
 
-void FirstOrderLinearTIR::initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
+void FirstOrderLinearTIR::initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
 {
   DEBUG_PRINT("FirstOrderLinearTIR::initialize(Interaction & inter)\n");
-  // Note: do not call FirstOrderR::initialize to avoid jacobianH and jacobianG allocation.
 
+  FirstOrderR::initializeWorkVectorsAndMatrices(inter, DSlink, workV, workM); // ?
+  
   if (!_C)
     RuntimeException::selfThrow("FirstOrderLinearTIR::initialize() C is null and is a required input.");
   if (!_B)
@@ -104,25 +105,30 @@ void FirstOrderLinearTIR::computeh(BlockVector& x, SiconosVector& lambda, BlockV
 
 }
 
-void FirstOrderLinearTIR::computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level)
+void FirstOrderLinearTIR::computeOutput(double time, Interaction& inter, unsigned int level)
 {
   // We get y and lambda of the interaction (pointers)
-  SiconosVector& y = *inter.y(0);
-  SiconosVector& lambda = *inter.lambda(0);
+  SiconosVector& y = *inter.y(level);
+  SiconosVector& lambda = *inter.lambda(level);
 
-  VectorOfBlockVectors& DSlink = *interProp.DSlink;
+  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
   computeh(*DSlink[FirstOrderR::x], lambda, *DSlink[FirstOrderR::z], y);
 }
+
 
 void FirstOrderLinearTIR::computeg(SiconosVector& lambda, BlockVector& r)
 {
   prod(*_B, lambda, r, false);
 }
 
-void FirstOrderLinearTIR::computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level)
+void FirstOrderLinearTIR::computeInput(double time, Interaction& inter, unsigned int level)
 {
-  VectorOfBlockVectors& DSlink = *interProp.DSlink;
+  DEBUG_BEGIN("FirstOrderLinearTIR::computeInput(double time, Interaction& inter, unsigned int level)\n")
+  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
+  DEBUG_EXPR(inter.lambda(level)->display(););
+  DEBUG_EXPR(DSlink[FirstOrderR::r]->display(););
   computeg(*inter.lambda(level), *DSlink[FirstOrderR::r]);
+  DEBUG_END("FirstOrderLinearTIR::computeInput(double time, Interaction& inter, unsigned int level)\n")
 }
 
 void FirstOrderLinearTIR::display() const

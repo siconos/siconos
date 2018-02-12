@@ -24,7 +24,6 @@
 #define InteractionManager_h
 
 #include "Interaction.hpp"
-#include "Model.hpp"
 #include "DynamicalSystem.hpp"
 #include "SiconosVisitor.hpp"
 #include "NSLawMatrix.hpp"

@@ -44,9 +44,9 @@ LagrangianRheonomousR::LagrangianRheonomousR(const std::string& pluginh, const s
   setComputehDotFunction(SSLH::getPluginName(pluginDoth), SSLH::getPluginFunctionName(pluginDoth));
 }
 
-void LagrangianRheonomousR::initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
+void LagrangianRheonomousR::initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
 {
-  LagrangianR::initComponents(inter, DSlink, workV, workM);
+  LagrangianR::initializeWorkVectorsAndMatrices(inter, DSlink, workV, workM);
 
   unsigned int sizeY = inter.getSizeOfY();
   // hDot
@@ -100,9 +100,10 @@ void LagrangianRheonomousR::computeJachq(double time,  SiconosVector& q, Siconos
     }
 }
 
-void LagrangianRheonomousR::computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int derivativeNumber)
+
+void LagrangianRheonomousR::computeOutput(double time, Interaction& inter, unsigned int derivativeNumber)
 {
-  VectorOfBlockVectors& DSlink = *interProp.DSlink;
+  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
   SiconosVector q = *DSlink[LagrangianR::q0];
   SiconosVector z = *DSlink[LagrangianR::z];
   SiconosVector& y = *inter.y(derivativeNumber);
@@ -132,9 +133,9 @@ void LagrangianRheonomousR::computeOutput(double time, Interaction& inter, Inter
   *DSlink[LagrangianR::z] = z;
 }
 
-void LagrangianRheonomousR::computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level)
+void LagrangianRheonomousR::computeInput(double time, Interaction& inter,  unsigned int level)
 {
-  VectorOfBlockVectors& DSlink = *interProp.DSlink;
+  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
   SiconosVector q = *DSlink[LagrangianR::q0];
   SiconosVector z = *DSlink[LagrangianR::z];
   computeJachq(time, q, z);
@@ -147,7 +148,7 @@ void LagrangianRheonomousR::computeInput(double time, Interaction& inter, Intera
 
 void LagrangianRheonomousR::computeJach(double time, Interaction& inter, InteractionProperties& interProp)
 {
-  VectorOfBlockVectors& DSlink = *interProp.DSlink;
+  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
   SiconosVector q = *DSlink[LagrangianR::q0];
   SiconosVector z = *DSlink[LagrangianR::z];
   computeJachq(time, q, z);

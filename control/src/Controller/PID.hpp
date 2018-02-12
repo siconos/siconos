@@ -61,9 +61,10 @@ public:
   virtual ~PID();
 
   /** initialize actuator data.
-   * \param m a SP::Model
+   * \param nsds a NonSmoothDynamicalSystem
+   * \param s the simulation
    */
-  virtual void initialize(const Model& m);
+  virtual void initialize(const NonSmoothDynamicalSystem& nsds, const Simulation& s);
 
   /** Compute the new control law at each event
    * Here we are using the following formula:

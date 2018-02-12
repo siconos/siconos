@@ -99,11 +99,12 @@ int main(int argc, char* argv[])
     SP::Interaction InterDiodeBridge(new Interaction(nslaw, LTIRDiodeBridge));
 
     // --- Model creation ---
-    SP::Model DiodeBridge(new Model(t0, T, Modeltitle));
+    SP::NonSmoothDynamicalSystem DiodeBridge(new NonSmoothDynamicalSystem(t0, T));
+    DiodeBridge->setTitle(Modeltitle);
     // add the dynamical system in the non smooth dynamical system
-    DiodeBridge->nonSmoothDynamicalSystem()->insertDynamicalSystem(LSDiodeBridge);
+    DiodeBridge->insertDynamicalSystem(LSDiodeBridge);
     // link the interaction and the dynamical system
-    DiodeBridge->nonSmoothDynamicalSystem()->link(InterDiodeBridge, LSDiodeBridge);
+    DiodeBridge->link(InterDiodeBridge, LSDiodeBridge);
 
     // ------------------
     // --- Simulation ---
@@ -123,14 +124,8 @@ int main(int argc, char* argv[])
     SP::LCP aLCP(new LCP());
 
     // -- (4) Simulation setup with (1) (2) (3)
-    SP::TimeStepping aTS(new TimeStepping(aTiDisc, aOSI, aLCP));
-    DiodeBridge->setSimulation(aTS);
+    SP::TimeStepping aTS(new TimeStepping(DiodeBridge,aTiDisc, aOSI, aLCP));
     
-    // Initialization
-    cout << "====> Initialisation ..." << endl << endl;
-    DiodeBridge->initialize();
-    cout << " ---> End of initialization." << endl;
-
     int k = 0;
     double h = aTS->timeStep();
     int N = ceil((T - t0) / h); // Number of time steps
@@ -255,18 +250,10 @@ int main(int argc, char* argv[])
     // dataPlot (ascii) output
     dataPlot.resize(k, 10);
     ioMatrix::write("DiodeBridge.dat", "ascii", dataPlot, "noDim");
-    cout << "Comparison with a reference file ..."<< endl;
-    SimpleMatrix dataPlotRef(dataPlot);
-    dataPlotRef.zero();
-
-    ioMatrix::read("DiodeBridge.ref", "ascii", dataPlotRef);
-    double error = (dataPlot - dataPlotRef).normInf();
-    cout << "error ="<<error << endl;
-    if ((dataPlot - dataPlotRef).normInf() > 1e-10)
-    {
-      std::cout << "Warning. The results is rather different from the reference file." << std::endl;
+    double error=0.0, eps=1e-10;
+    if (ioMatrix::compareRefFile(dataPlot, "DiodeBridge.ref", eps, error)
+        && error > eps)
       return 1;
-    }
 
 
   }

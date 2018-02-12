@@ -96,9 +96,9 @@ int main(int argc, char* argv[])
     // --- Model ---
     // -------------
 
-    SP::Model Pendulum(new Model(t0, T));
-    Pendulum->nonSmoothDynamicalSystem()->insertDynamicalSystem(simplependulum);
-    Pendulum->nonSmoothDynamicalSystem()->link(inter, simplependulum);
+    SP::NonSmoothDynamicalSystem Pendulum(new NonSmoothDynamicalSystem(t0, T));
+    Pendulum->insertDynamicalSystem(simplependulum);
+    Pendulum->link(inter, simplependulum);
     // ----------------
     // --- Simulation ---
     // ----------------
@@ -112,35 +112,29 @@ int main(int argc, char* argv[])
     SP::OneStepNSProblem acceleration(new LCP());
     SP::OneStepNSProblem position(new LCP());
     //4. Simulation with (1), (2), (3)
-    SP::Simulation EDscheme(new EventDriven(TimeDiscret));
+    SP::Simulation EDscheme(new EventDriven(Pendulum, TimeDiscret));
     EDscheme->insertIntegrator(OSI);
     EDscheme->insertNonSmoothProblem(impact, SICONOS_OSNSP_ED_IMPACT);
     EDscheme->insertNonSmoothProblem(acceleration, SICONOS_OSNSP_ED_SMOOTH_ACC);
     EDscheme->insertNonSmoothProblem(position, SICONOS_OSNSP_ED_SMOOTH_POS);
-    Pendulum->setSimulation(EDscheme); // initialize the model
+    EDscheme->setPrintStat(true);
     
     // =========================== End of model definition ===========================
-    // --- Simulation Initialization ---
-    cout << "====> Simulation initialisation ..." << endl << endl;
-    EDscheme->setPrintStat(true);
-    Pendulum->setSimulation(EDscheme);
-    Pendulum->initialize(); // initialize the model
-    cout << "End of simulation initialisation" << endl;
+
+
     // ================================= Computation =================================
 
     SP::EventsManager eventsManager = EDscheme->eventsManager(); // ponters point to the "eventsManager" object
     SP::SiconosVector _q = simplependulum->q();              // pointer points to the position vector of the rocking block
     SP::SiconosVector _qdot = simplependulum->velocity();       // pointer points to the velocity of the rocking block
+    simplependulum->initRhs(t0);
+    simplependulum->computeRhs(t0);
     SP::SiconosVector _qddot = simplependulum->acceleration();       // pointer points to the velocity of the rocking block
     SP::SiconosVector _g = inter->y(0);
-    SP::SiconosVector _gdot = inter->y(1);
-    SP::SiconosVector _lambda = inter->lambda(2);
-    SP::InteractionsGraph indexSet0 = Pendulum->nonSmoothDynamicalSystem()->topology()->indexSet(0);
-    SP::InteractionsGraph indexSet1 = Pendulum->nonSmoothDynamicalSystem()->topology()->indexSet(1);
-    SP::InteractionsGraph indexSet2 = Pendulum->nonSmoothDynamicalSystem()->topology()->indexSet(2);
+    SP::SiconosVector _gdot;
+    SP::SiconosVector _lambda;
+    SP::InteractionsGraph indexSet0 = Pendulum->topology()->indexSet(0);
     cout << "Size of IndexSet0: " << indexSet0->size() << endl;
-    cout << "Size of IndexSet1: " << indexSet1->size() << endl;
-    cout << "Size of IndexSet2: " << indexSet2->size() << endl;
     //-------------------- Save the output during simulation ---------------------------------------------------------
     SimpleMatrix DataPlot(N, 10);
     //------------- At the initial time -----------------------------------------------------------------------------
@@ -152,8 +146,8 @@ int main(int argc, char* argv[])
     DataPlot(0, 5) = (*_qddot)(0); // Acceleration ax
     DataPlot(0, 6) = (*_qddot)(1); // Acceleration ay
     DataPlot(0, 7) = (*_g)(0);     // Contraint in position
-    DataPlot(0, 8) = (*_gdot)(0);  // Constraint in velocity
-    DataPlot(0, 9) = (*_lambda)(0); // Reaction force
+    DataPlot(0, 8) = 0.0;  // Constraint in velocity
+    DataPlot(0, 9) = 0.0; // Reaction force
 
     //----------------------------------- Simulation starts ----------------------------------------------------------
     cout << "====> Start computation ... " << endl << endl;
@@ -171,6 +165,9 @@ int main(int argc, char* argv[])
       };
       EDscheme->processEvents();  // process the current event
       //------------------- get data at the beginning of non-smooth events ---------------------------
+      _gdot = inter->y(1);
+      _lambda = inter->lambda(2);
+
       if (NSEvent)
       {
         DataPlot(k, 0) = EDscheme->startingTime(); // instant at non-smooth event
@@ -206,20 +203,11 @@ int main(int argc, char* argv[])
     cout << "Number of non-smooth events: " << NumberNSEvent << endl;
     cout << "====> Output file writing ..." << endl << endl;
     ioMatrix::write("result.dat", "ascii", DataPlot, "noDim");
-    // Comparison with a reference file
-    std::cout << "Comparison with a reference file" << std::endl;
 
-    SimpleMatrix dataPlotRef(DataPlot);
-    dataPlotRef.zero();
-    ioMatrix::read("result_AlphaScheme.ref", "ascii", dataPlotRef);
-    double error = (DataPlot - dataPlotRef).normInf()/ dataPlotRef.normInf();
-    std::cout << "Error = "<< error << std::endl;
-    if (error > 1e-05)
-    {
-      std::cout << "Warning. The results is rather different from the reference file." << std::endl;
-
+    double error=0.0, eps=1e-05;
+    if (ioMatrix::compareRefFile(DataPlot, "result_AlphaScheme.ref", eps, error)
+        && error > eps)
       return 1;
-    }
   }
 
   catch (SiconosException e)

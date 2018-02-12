@@ -72,10 +72,6 @@ private:
       transformation) */
   std::vector<SP::InteractionsGraph> _IG;
 
-  /** check if topology has been updated since nsds modifications
-      occur */
-  bool _isTopologyUpToDate;
-
   /** check if topology is static or  not */
   bool _hasChanged;
 
@@ -285,15 +281,6 @@ public:
     _IG.resize(newSize);
   };
 
-  // --- isTopologyUpToDate ---
-
-  /** check if topology has been updated since modifications occurs on nsds
-  *  \return a bool
-  */
-  inline bool isUpToDate() const
-  {
-    return _isTopologyUpToDate;
-  }
 
   // --- _hasChanged ---
 
@@ -320,10 +307,6 @@ public:
   {
     return _numberOfConstraints;
   };
-
-  /** initializes the topology (called in Simulation->initialize)
-  */
-  void initialize();
 
   void clear();
 

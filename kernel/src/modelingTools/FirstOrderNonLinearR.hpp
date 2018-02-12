@@ -70,7 +70,7 @@ protected:
   ACCEPT_SERIALIZATION(FirstOrderNonLinearR);
 
 
-  virtual void initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
+
 
 public:
 
@@ -82,6 +82,8 @@ public:
   */
   virtual ~FirstOrderNonLinearR() {};
 
+  virtual void initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
+  
   /** default function to compute h
    * \param time : current time
    * \param x
@@ -129,8 +131,13 @@ public:
   virtual void computeJacgx(double time, SiconosVector& x, SiconosVector& lambda, SiconosVector& z, SimpleMatrix& K);
 
   virtual void computeJacg(double time, Interaction& inter, InteractionProperties& interProp);
-  virtual void computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level = 0);
-  virtual void computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level = 0);
+  virtual void computeOutput(double time, Interaction& inter, unsigned int level = 0);
+  virtual void computeLinearizedOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level = 0);
+  virtual void computeInput(double time, Interaction& inter, unsigned int level = 0);
+  virtual void computeLinearizedInput(double time, Interaction& inter,
+                                      InteractionProperties& interProp,
+                                      unsigned int level = 0);
+  
   virtual void prepareNewtonIteration(Interaction& inter, InteractionProperties& interProp);
 
   /** return true if the relation requires the computation of residu

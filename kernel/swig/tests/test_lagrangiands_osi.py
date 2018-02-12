@@ -65,13 +65,12 @@ def test_lagrangian_and_osis():
     for k in range(nb_ds):
         interactions.append(sk.Interaction(nslaw, relation))
 
-    # --- Model ---
+    # --- NSDS ---
     tinit = 0.
     tend = 3.
-    model = sk.Model(tinit, tend)
+    nsds = sk.NonSmoothDynamicalSystem(tinit, tend)
 
     # - insert ds into the model and link them with their interaction -
-    nsds = model.nonSmoothDynamicalSystem()
     ninter = 0
     for ds in ds_list.values():
         nsds.insertDynamicalSystem(ds)
@@ -90,19 +89,16 @@ def test_lagrangian_and_osis():
     # -- (3) one step non smooth problem
     lcp = sk.LCP()
     # -- (4) Simulation setup with (1) (2) (3)
-    simu = sk.TimeStepping(td, standard, lcp)
+    simu = sk.TimeStepping(nsds, td, standard, lcp)
 
     
     # extra osi must be explicitely inserted into simu and linked to ds
-    simu.prepareIntegratorForDS(standard, ds_list['LTIDS+MJ'], model, tinit)
-    simu.prepareIntegratorForDS(standard, ds_list['LLDDS+MJ'], model, tinit)
+    simu.associate(standard, ds_list['LTIDS+MJ'])
+    simu.associate(standard, ds_list['LLDDS+MJ'])
 
-    simu.prepareIntegratorForDS(bilbao, ds_list['LLDDS+MJB'], model, tinit)
-    simu.prepareIntegratorForDS(bilbao, ds_list['LLDDS+MJB2'], model, tinit)
+    simu.associate(bilbao, ds_list['LLDDS+MJB'])
+    simu.associate(bilbao, ds_list['LLDDS+MJB2'])
 
-    # link simu and model, initialize
-    model.setSimulation(simu)
-    model.initialize()
 
     positions = []
     velocities = []

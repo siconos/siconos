@@ -18,11 +18,11 @@
 
 #include "OneStepIntegrator.hpp"
 #include "Simulation.hpp"
-#include "Model.hpp"
 #include "DynamicalSystem.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
 #include "ExtraAdditionalTerms.hpp"
 #include "Relation.hpp"
+#include "EventsManager.hpp"
 #include <SiconosConfig.h>
 #if defined(SICONOS_STD_FUNCTIONAL) && !defined(SICONOS_USE_BOOST_FOR_CXX11)
 #include <functional>
@@ -53,57 +53,70 @@ OneStepIntegrator::_initializeDSWorkVectors(SP::DynamicalSystem ds)
 
   return wv;
 }
-
-void OneStepIntegrator::initialize( Model& m )
+void OneStepIntegrator::initialize()
 {
   if (_extraAdditionalTerms)
   {
-    _extraAdditionalTerms->init(*m.nonSmoothDynamicalSystem()->topology()->dSG(0), m);
-  }
-  // a subgraph has to be implemented.
-  _dynamicalSystemsGraph = _simulation->nonSmoothDynamicalSystem()->topology()->dSG(0);
-
-  double t0 = _simulation->startingTime();
-
-  // 1 - Loop over all dynamical systems
-  //  For each ds, allocate/initialize the required buffers in the ds graph
-  // (workDS and workMatrices properties, that depend both on osi and ds types)
-  // Note FP : what if a DS is associated with more than one osi?
-  DynamicalSystemsGraph::VIterator dsi, dsend;
-  for(std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
-  {
-    if(!checkOSI(dsi)) continue;
-    SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
-    initializeDynamicalSystem(m, t0, ds);
+    _extraAdditionalTerms->init(*_simulation->nonSmoothDynamicalSystem()->topology()->dSG(0),
+                                *_simulation->nonSmoothDynamicalSystem(),
+                                _simulation->eventsManager()->timeDiscretisation());
   }
 
-  // 2 - Nonsmooth problems : set levels and initialize. Depends on OSI type.
-  // Note FP : is it the right place for this initialization??
   initialize_nonsmooth_problems();
+  _isInitialized=true;
 
-  // 3 - Loop over all interactions of index set 0.
-  // For each interaction, allocate/initialize buffers in the interaction graph
-  // (DSlink property) and connect/fill these buffers with DS buffers.
-  // This strongly depends on the DS and OSI types.
-  SP::InteractionsGraph indexSet0 = m.nonSmoothDynamicalSystem()->topology()->indexSet0();
-  InteractionsGraph::VIterator ui, uiend;
-  for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
-  {
-    Interaction& inter = *indexSet0->bundle(*ui);
-    unsigned int nslawSize = inter.nonSmoothLaw()->size();
-    InteractionProperties& interaction_properties = indexSet0->properties(*ui);
-    // init block property. Note FP: this should probably be moved
-    // to OSNSPb init?
-    interaction_properties.block.reset(new SimpleMatrix(nslawSize, nslawSize));
-
-    // Update DSlink : this depends on OSI and relation types.
-    fillDSLinks(inter, interaction_properties, *_dynamicalSystemsGraph);
-
-    // Update interaction attributes (output)
-    update_interaction_output(inter, t0, interaction_properties);
-
-  }
 }
+
+// void OneStepIntegrator::initialize_old()
+// {
+//   if (_extraAdditionalTerms)
+//   {
+//     _extraAdditionalTerms->init(*_simulation->nonSmoothDynamicalSystem()->topology()->dSG(0),
+//                                 *_simulation->nonSmoothDynamicalSystem(),
+//                                 _simulation->eventsManager()->timeDiscretisation());
+//   }
+
+//   double t0 = _simulation->startingTime();
+
+//   // 1 - Loop over all dynamical systems
+//   //  For each ds, allocate/initialize the required buffers in the ds graph
+//   // (workDS and workMatrices properties, that depend both on osi and ds types)
+//   // Note FP : what if a DS is associated with more than one osi?
+//   DynamicalSystemsGraph::VIterator dsi, dsend;
+//   for(std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
+//   {
+//     if(!checkOSI(dsi)) continue;
+//     SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
+//     initializeDynamicalSystem(t0, ds);
+//   }
+
+//   // 2 - Nonsmooth problems : set levels and initialize. Depends on OSI type.
+//   // Note FP : is it the right place for this initialization??
+//   initialize_nonsmooth_problems();
+
+//   // 3 - Loop over all interactions of index set 0.
+//   // For each interaction, allocate/initialize buffers in the interaction graph
+//   // (DSlink property) and connect/fill these buffers with DS buffers.
+//   // This strongly depends on the DS and OSI types.
+//   SP::InteractionsGraph indexSet0 = _simulation->nonSmoothDynamicalSystem()->topology()->indexSet0();
+//   InteractionsGraph::VIterator ui, uiend;
+//   for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+//   {
+//     Interaction& inter = *indexSet0->bundle(*ui);
+//     unsigned int nslawSize = inter.nonSmoothLaw()->size();
+//     InteractionProperties& interaction_properties = indexSet0->properties(*ui);
+//     // init block property. Note FP: this should probably be moved
+//     // to OSNSPb init?
+//     interaction_properties.block.reset(new SimpleMatrix(nslawSize, nslawSize));
+
+//     // Update DSlink : this depends on OSI and relation types.
+//     fillDSLinks(inter, interaction_properties, *_dynamicalSystemsGraph);
+
+//     // Update interaction attributes (output)
+//     update_interaction_output(inter, t0, interaction_properties);
+
+//   }
+// }
 
 void OneStepIntegrator::update_interaction_output(Interaction& inter, double time, InteractionProperties& interaction_properties)
 {
@@ -120,33 +133,32 @@ void OneStepIntegrator::update_interaction_output(Interaction& inter, double tim
   //      - simu->osi->update_interaction_output()
 
   if (_steps > 1) // Multi--step methods
+  {
+    // Compute the old Values of Output with stored values in Memory
+    for (unsigned int k = 0; k < _steps - 1; k++)
     {
-      // Compute the old Values of Output with stored values in Memory
-      for (unsigned int k = 0; k < _steps - 1; k++)
-	{
-	  /** ComputeOutput to fill the Memory
-	   * We assume the state x is stored in xMemory except for the  initial
-	   * condition which has not been swap yet.
-	   */
-	  //        relation()->LinkDataFromMemory(k);
-	  for (unsigned int i = 0; i < inter.upperLevelForOutput() + 1; ++i)
+      /** ComputeOutput to fill the Memory
+       * We assume the state x is stored in xMemory except for the  initial
+       * condition which has not been swap yet.
+       */
+      //        relation()->LinkDataFromMemory(k);
+      for (unsigned int i = 0; i < inter.upperLevelForOutput() + 1; ++i)
 	    {
-	      inter.computeOutput(time, interaction_properties, i);
+	      inter.computeOutput(time, i);
 	      //_yMemory[i]->swap(*_y[i]);
 	    }
-	}
-      inter.swapInMemory();
-	
     }
+    inter.swapInMemory();
+  }
   // Compute a first value for the output
-  inter.computeOutput(time, interaction_properties, 0);
+  inter.computeOutput(time,  0);
     
   // prepare the gradients
   inter.relation()->computeJach(time, inter, interaction_properties);
   for (unsigned int i = 0; i < inter.upperLevelForOutput() + 1; ++i)
-    {
-      inter.computeOutput(time, interaction_properties, i);
-    }
+  {
+    inter.computeOutput(time, i);
+  }
   inter.swapInMemory();
 }
 
@@ -172,7 +184,7 @@ void OneStepIntegrator::_check_and_update_interaction_levels(Interaction& inter)
     inter.reset();
 }
 
-// void OneStepIntegrator::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds)
+// void OneStepIntegrator::initializeDynamicalSystem( double t, SP::DynamicalSystem ds)
 // {
 //   RuntimeException::selfThrow("OneStepIntegrator::initializeDynamicalSystem not implemented for integrator of type " + _integratorType);
 // }

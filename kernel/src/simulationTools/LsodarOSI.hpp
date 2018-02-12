@@ -57,6 +57,12 @@ private:
    * See opkdmain.f and lsodar routine for details on those variables.
    */
   std::vector<integer> _intData;
+  /** _sizeTol size of the vector ot tolerances */
+  unsigned int _sizeTol;
+
+  /** Type of tolerances */
+  unsigned int _itol;
+  
   /** relative tolerance */
   SA::doublereal rtol;
   /** absolute tolerance */
@@ -245,7 +251,7 @@ public:
 
   /** initialization of the integrator
    */
-  void initialize(Model& m);
+  void initialize();
 
   /** initialization of the work vectors and matrices (properties) related to
    *  one dynamical system on the graph and needed by the osi
@@ -253,7 +259,7 @@ public:
    * \param t time of initialization
    * \param ds the dynamical system
    */
-  void initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds);
+  void initializeDynamicalSystem( double t, SP::DynamicalSystem ds);
 
   /** initialization of the work vectors and matrices (properties) related to
    *  one interaction on the graph and needed by the osi

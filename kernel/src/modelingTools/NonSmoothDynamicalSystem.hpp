@@ -25,6 +25,9 @@
 #include "Topology.hpp"
 #include "DynamicalSystem.hpp"
 
+
+
+
 /** the Non Smooth Dynamical System consists of DynamicalSystem
  *  and Interaction regrouped together in a Topology object,
  *  in the form of a graph of DynamicalSystem as nodes and Interaction as edges
@@ -36,14 +39,77 @@
  */
 class NonSmoothDynamicalSystem
 {
+public:
+  enum
+  {
+    addDynamicalSystem, rmDynamicalSystem, addInteraction, rmInteraction, clearTopology
+  };
+  
+  class Changes
+  {
+  public:
+    int typeOfChange;
+    SP::DynamicalSystem ds;
+    SP::Interaction i;
+
+    Changes(int t, SP::DynamicalSystem dsnew ):typeOfChange(t),ds(dsnew){};
+    Changes(int t, SP::Interaction inew):typeOfChange(t),i(inew){};
+    Changes(int t):typeOfChange(t){};
+    void display() const
+    {
+      std::cout << "Changes display   " << this <<std::endl;
+      if (typeOfChange == addDynamicalSystem)
+      {
+        std::cout << "typeOfChange : " << typeOfChange << " : addDynamicalSystem" << std::endl;
+      }
+      else if (typeOfChange == rmDynamicalSystem)
+      {
+        std::cout << "typeOfChange : " << typeOfChange << " : rmDynamicalSystem" << std::endl;
+      }
+      else if (typeOfChange == addInteraction)
+      {
+        std::cout << "typeOfChange : " << typeOfChange << " : addInteraction" << std::endl;
+      }
+      else if (typeOfChange == rmInteraction)
+      {
+        std::cout << "typeOfChange : " << typeOfChange << " : rmInteraction" << std::endl;
+      }
+      else if (typeOfChange == clearTopology)
+      {
+        std::cout << "typeOfChange : " << typeOfChange << " : clearTopology" << std::endl;
+      }
+    };
+  };
+
 private:
   /** serialization hooks
   */
   ACCEPT_SERIALIZATION(NonSmoothDynamicalSystem);
 
 
+  /** current time of the simulation
+      Warning FP : it corresponds to the time
+      at the end of the integration step.
+      It means that _t corresponds to tkp1 of the≈b
+      simulation or nextTime().
+   */
+  double _t;
+
+  /** initial time of the simulation */
+  double _t0;
+
+  /** final time of the simulation */
+  double _T;
+
+  /** information concerning the Model */
+  std::string _title, _author, _description, _date;
+
   /** TRUE if the NonSmoothDynamicalSystem is a boundary value problem*/
   bool _BVP;
+
+  /** log list of the modifications of the nsds */
+  std::list<Changes> _changeLog;
+
 
   /** the topology of the system */
   SP::Topology _topology;
@@ -60,11 +126,131 @@ public:
    */
   NonSmoothDynamicalSystem();
 
+  /** constructor with t0 and T
+   * \param t0 initial time
+   * \param T final time
+   */
+  NonSmoothDynamicalSystem(double t0, double T);
+
   /** destructor
    */
   ~NonSmoothDynamicalSystem();
 
   // --- GETTERS/SETTERS ---
+/** get the current time
+   *  \return a double
+   */
+  inline double currentTime() const
+  {
+    return _t;
+  }
+
+  /** set the current time
+   *  \param newValue the new time
+   */
+  inline void setCurrentTime(double newValue)
+  {
+    _t = newValue;
+  }
+
+  /** get initial time
+   *  \return a double
+   */
+  inline double t0() const
+  {
+    return _t0;
+  }
+
+  /** set initial time of the time discretisation
+   *  \param newT0
+   */
+  inline void sett0(double newT0)
+  {
+    _t0 = newT0;
+  };
+
+  /** get final time
+   *  \return a double
+   */
+  inline double finalT() const
+  {
+    return _T;
+  }
+
+  /** set final time
+   *  \param newValue the new final time for the Simulatiom
+   */
+  void setT(double newValue)
+  {
+    _T = newValue;
+  };
+
+/** get the title of the simulation
+   *  \return std::string : the title
+   */
+  inline const std::string  title() const
+  {
+    return _title;
+  }
+
+  /** set the title of the simulation
+   *  \param s : the title
+   */
+  inline void setTitle(const std::string & s)
+  {
+    _title = s;
+  }
+
+  /** get the author of the simulation
+   *  \return std::string : the author
+   */
+  inline const std::string  author() const
+  {
+    return _author;
+  }
+
+  /** set the author of the simulation
+   *  \param s std::string : the author
+   */
+  inline void setAuthor(const std::string & s)
+  {
+    _author = s;
+  }
+
+  /** allows to get the description of the simulation
+   *  \return std::string : the description
+   */
+  inline const std::string  description() const
+  {
+    return _description;
+  }
+
+  /** set the author of the simulation
+   *  \param s std::string : the author
+   */
+  inline void setDescription(const std::string & s)
+  {
+    _description = s;
+  }
+
+  /** allows to get the date of the simulation
+   *  \return std::string : the date
+   */
+  inline const std::string  date() const
+  {
+    return _date;
+  }
+
+  /** set the date of the simulation
+   *  \param s std::string : the date
+   */
+  inline void setDate(const std::string & s)
+  {
+    _date = s;
+  }
+
+
+
 
   /** get problem type (true if BVP)
    *  \return a bool
@@ -82,6 +268,8 @@ public:
     return !_BVP;
   }
 
+
+
   /** set the NonSmoothDynamicalSystem to BVP, else it is IVP
    *  \param newBvp true if BVP, false otherwise
    */
@@ -90,6 +278,24 @@ public:
     _BVP = newBvp;
   }
 
+
+  inline const std::list<Changes>& changeLog()
+  {
+    return _changeLog;
+  };
+
+  inline std::list<Changes>::iterator changeLogPosition()
+  {
+    std::list<Changes>::iterator it = _changeLog.end();
+    return --it;
+  };
+
+  
+
+
+
+
+  
   // === DynamicalSystems management ===
 
   /** get the number of Dynamical Systems present in the NSDS
@@ -111,11 +317,7 @@ public:
   /** add a dynamical system into the DS graph (as a vertex)
    * \param ds a pointer to the system to add
    */
-  inline void insertDynamicalSystem(SP::DynamicalSystem ds)
-  {
-    _topology->insertDynamicalSystem(ds);
-    _mIsLinear = ((ds)->isLinear() && _mIsLinear);
-  };
+  void insertDynamicalSystem(SP::DynamicalSystem ds);
 
   /** get Dynamical system number I
    * \param nb the identifier of the DynamicalSystem to get
@@ -130,12 +332,7 @@ public:
    * \param ds a pointer to the dynamical system to remove
    * \param removeInterations if true, all interactions connected to the ds will also be removed
    */
-  inline void removeDynamicalSystem(SP::DynamicalSystem ds)
-  {
-    _topology->removeDynamicalSystem(ds);
-  };
-
-
+  void removeDynamicalSystem(SP::DynamicalSystem ds);
 
   // === Interactions management ===
 
@@ -159,10 +356,7 @@ public:
   /** remove an interaction to the system
    * \param inter a pointer to the interaction to remove
    */
-  inline void removeInteraction(SP::Interaction inter)
-  {
-    _topology->removeInteraction(inter);
-  };
+  void removeInteraction(SP::Interaction inter);
 
   /** get Interaction number I
    * \param nb the identifier of the Interaction to get
@@ -303,4 +497,3 @@ public:
 
 
 #endif
-

@@ -22,7 +22,6 @@
 #include "LagrangianLinearTIDS.hpp"
 #include "BlockVector.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
-#include "Model.hpp"
 #include "Topology.hpp"
 #include "LagrangianRheonomousR.hpp"
 #include "LagrangianScleronomousR.hpp"
@@ -402,7 +401,7 @@ void Hem5OSI_impl::fprob(integer* IFCN,
     for(std11::tie(ui, uiend) = indexSet2->vertices(); ui != uiend; ++ui)
     {
       SP::Interaction inter = indexSet2->bundle(*ui);
-      inter->computeOutput(t, indexSet2->properties(*ui), 0);
+      inter->computeOutput(t, 0);
       assert(0);
     }
 
@@ -494,13 +493,28 @@ void Hem5OSI_impl::fprob(integer* IFCN,
 // {
 //   std11::static_pointer_cast<EventDriven>(_simulation)->computeJacobianfx(shared_from_this(), sizeOfX, time, x, jacob);
 // }
-void Hem5OSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds)
+void Hem5OSI::initializeDynamicalSystem(double t, SP::DynamicalSystem ds)
 {
   // Get work buffers from the graph
   VectorOfVectors& workVectors = *_initializeDSWorkVectors(ds);
 
   Type::Siconos dsType = Type::value(*ds);
-
+  
+   ds->initRhs(t); // This will create p[2] and other required vectors/buffers
+  
+  if (!_qWork)
+    _qWork.reset(new BlockVector());
+  if (!_vWork)
+    _vWork.reset(new BlockVector());
+  if (!_aWork)
+    _aWork.reset(new BlockVector());
+  if (!_uWork)
+    _uWork.reset(new BlockVector());
+  if (!_lambdaWork)
+    _lambdaWork.reset(new BlockVector());
+  if (!_forcesWork)
+    _forcesWork.reset(new BlockVector());
+  
   if(dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
   {
     LagrangianDS& lds = *std11::static_pointer_cast<LagrangianDS>(ds);
@@ -529,20 +543,23 @@ void Hem5OSI::fillDSLinks(Interaction &inter,
 {
   SP::DynamicalSystem ds1= interProp.source;
   SP::DynamicalSystem ds2= interProp.target;
+  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
 
-  assert(interProp.DSlink);
+
+  interProp.workVectors.reset(new VectorOfVectors);
+  interProp.workMatrices.reset(new VectorOfSMatrices);
 
   VectorOfVectors& workV = *interProp.workVectors;
-  workV.resize(Hem5OSI::WORK_INTERACTION_LENGTH);
-  workV[Hem5OSI::OSNSP_RHS].reset(new SiconosVector(inter.getSizeOfY()));
-  
-  VectorOfBlockVectors& DSlink = *interProp.DSlink;
-  // VectorOfVectors& workVInter = *interProp.workVectors;
-  // VectorOfSMatrices& workMInter = *interProp.workMatrices;
+  VectorOfSMatrices& workM = *interProp.workMatrices;
 
   Relation &relation =  *inter.relation();
-  NonSmoothLaw & nslaw = *inter.nonSmoothLaw();
+  relation.initializeWorkVectorsAndMatrices(inter, DSlink, workV, workM);
   RELATION::TYPES relationType = relation.getType();
+
+
+  workV.resize(Hem5OSI::WORK_INTERACTION_LENGTH);
+  workV[Hem5OSI::OSNSP_RHS].reset(new SiconosVector(inter.getSizeOfY()));
+  NonSmoothLaw & nslaw = *inter.nonSmoothLaw();
   Type::Siconos nslType = Type::value(nslaw);
 
   if (nslType == Type::NewtonImpactNSL || nslType == Type::MultipleImpactNSL)
@@ -602,18 +619,12 @@ void Hem5OSI::fillDSLinks(Interaction &inter,
 }
 
 
-void Hem5OSI::initialize(Model& m)
+void Hem5OSI::initialize()
 {
 
   DEBUG_PRINT("Hem5OSI::initialize(Model& m)\n");
 
-  _qWork.reset(new BlockVector());
-  _vWork.reset(new BlockVector());
-  _aWork.reset(new BlockVector());
-  _uWork.reset(new BlockVector());
-  _lambdaWork.reset(new BlockVector());
-  _forcesWork.reset(new BlockVector());
-  OneStepIntegrator::initialize(m);
+  OneStepIntegrator::initialize();
 
   // InteractionsGraph::VIterator ui, uiend;
   // SP::InteractionsGraph indexSet0
@@ -954,7 +965,7 @@ void Hem5OSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, On
   SP::InteractionsGraph indexSet = osnsp->simulation()->indexSet(osnsp->indexSetLevel());
   SP::Interaction inter = indexSet->bundle(vertex_inter);
 
-  VectorOfBlockVectors& DSlink = *indexSet->properties(vertex_inter).DSlink;
+  VectorOfBlockVectors& DSlink = inter->linkToDSVariables();
   // Get relation and non smooth law types
   RELATION::TYPES relationType = inter->relation()->getType();
   RELATION::SUBTYPES relationSubType = inter->relation()->getSubType();

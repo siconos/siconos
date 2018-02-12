@@ -81,8 +81,8 @@ protected:
   /** Legend for the columns in the matrix _dataM*/
   std::string _dataLegend;
 
-  /** Model */
-  SP::Model _model;
+  /** NonSmoothDynamicalSystem */
+  SP::NonSmoothDynamicalSystem _nsds;
 
   /** TimeDiscretisation for the simulation*/
   SP::TimeDiscretisation _processTD;
@@ -160,12 +160,12 @@ public:
     return _processIntegrator;
   };
 
-  /** Return the Model
-   * \return the Model 
+  /** Return the NonSmoothDynamicalSystem
+   * \return the NonSmoothDynamicalSystem
   */
-  inline SP::Model model() const
+  inline SP::NonSmoothDynamicalSystem model() const
   {
-    return _model;
+    return _nsds;
   }
 
   /** Return the data matrix

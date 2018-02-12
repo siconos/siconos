@@ -17,7 +17,6 @@
 */
 #include "MoreauJeanOSI.hpp"
 #include "Simulation.hpp"
-#include "Model.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
 #include "NewtonEulerDS.hpp"
 #include "LagrangianLinearTIDS.hpp"
@@ -112,7 +111,7 @@ SP::SiconosMatrix MoreauJeanOSI::WBoundaryConditions(SP::DynamicalSystem ds)
 }
 
 
-void MoreauJeanOSI::initializeDynamicalSystem(Model&, double t, SP::DynamicalSystem ds)
+void MoreauJeanOSI::initializeDynamicalSystem(double t, SP::DynamicalSystem ds)
 {
   DEBUG_BEGIN("MoreauJeanOSI::initializeDynamicalSystem(Model&, double t, SP::DynamicalSystem ds)\n");
   VectorOfVectors& workVectors = *_initializeDSWorkVectors(ds);
@@ -169,16 +168,22 @@ void MoreauJeanOSI::fillDSLinks(Interaction &inter, InteractionProperties& inter
   SP::DynamicalSystem ds2= interProp.target;
   assert(ds1);
   assert(ds2);
-  assert(interProp.workVectors);
-  
+
+  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
+  interProp.workVectors.reset(new VectorOfVectors);
+  interProp.workMatrices.reset(new VectorOfSMatrices);
+
   VectorOfVectors& workV = *interProp.workVectors;
+  VectorOfSMatrices& workM = *interProp.workMatrices;
+
+  Relation &relation =  *inter.relation();
+  relation.initializeWorkVectorsAndMatrices(inter, DSlink, workV, workM);
+  RELATION::TYPES relationType = relation.getType();
+
   workV.resize(MoreauJeanOSI::WORK_INTERACTION_LENGTH);
   workV[MoreauJeanOSI::OSNSP_RHS].reset(new SiconosVector(inter.getSizeOfY()));
 
-  VectorOfBlockVectors& DSlink = *interProp.DSlink;
-  Relation &relation =  *inter.relation();
 
-  RELATION::TYPES relationType = relation.getType();
 
   // Check if interations levels (i.e. y and lambda sizes) are compliant with the current osi.
   _check_and_update_interaction_levels(inter);
@@ -1340,7 +1345,7 @@ struct MoreauJeanOSI::_NSLEffectOnFreeOutput : public SiconosVisitor
   OneStepNSProblem * _osnsp;
   Interaction& _inter;
   InteractionProperties& _interProp;
-  
+
   _NSLEffectOnFreeOutput(OneStepNSProblem *p, Interaction& inter, InteractionProperties& interProp) :
     _osnsp(p), _inter(inter), _interProp(interProp) {};
 
@@ -1407,14 +1412,15 @@ void MoreauJeanOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_int
   InteractionsGraph& indexSet = *osnsp->simulation()->indexSet(osnsp->indexSetLevel());
   assert(indexSet.bundle(vertex_inter));
   Interaction& inter = *indexSet.bundle(vertex_inter);
+  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
 
-  VectorOfBlockVectors& DSlink = *indexSet.properties(vertex_inter).DSlink;
+
   // Get relation and non smooth law types
   assert(inter.relation());
   RELATION::TYPES relationType = inter.relation()->getType();
   RELATION::SUBTYPES relationSubType = inter.relation()->getSubType();
 
-  
+
   unsigned int sizeY = inter.nonSmoothLaw()->size();
 
   unsigned int relativePosition = 0;
@@ -1428,11 +1434,11 @@ void MoreauJeanOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_int
   coord[7] = sizeY;
   SP::SiconosMatrix  F;
   //  SP::BlockVector deltax;
-  
+
   //SiconosVector& yForNSsolver = *inter.yForNSsolver()
 
   SiconosVector& osnsp_rhs = *(*indexSet.properties(vertex_inter).workVectors)[MoreauJeanOSI::OSNSP_RHS];
-  
+
   SP::BlockVector Xfree;
 
   /** \todo VA. All of these values should be stored in a node in the interactionGraph

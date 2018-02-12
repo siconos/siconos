@@ -22,12 +22,10 @@ import numpy as np
 def test_xml1():
     ''' the BouncingBall '''
 
-    bouncingBall = buildModelXML(os.path.join(working_dir, 'data/BBallTS.xml'))
-    # --- Get the simulation ---
-    s = bouncingBall.simulation()
+    bouncingBall, s = buildModelXML(os.path.join(working_dir, 'data/BBallTS.xml'))
 
-    dsN = SK.dynamicalSystems(bouncingBall.nonSmoothDynamicalSystem().topology().dSG(0))[0].number()
-    ball = bouncingBall.nonSmoothDynamicalSystem().dynamicalSystem(dsN)
+    dsN = SK.dynamicalSystems(bouncingBall.topology().dSG(0))[0].number()
+    ball = bouncingBall.dynamicalSystem(dsN)
 
     N = 2000  # Number of time steps
     # saved in a matrix dataPlot
@@ -72,11 +70,10 @@ def test_xml1():
 def test_xml2():
     ''' BallInBowl '''
     # --- buildModelXML loading from xml file ---
-    bouncingBall = buildModelXML(os.path.join(working_dir,
+    bouncingBall, s = buildModelXML(os.path.join(working_dir,
                                               'data/BallInBowl.xml'))
 
     # --- Get the simulation ---
-    s = bouncingBall.simulation()
     k = 0
     T = bouncingBall.finalT()
     t0 = bouncingBall.t0()
@@ -92,8 +89,8 @@ def test_xml2():
     # time
     dataPlot[k, 0] = bouncingBall.t0()
     # state q for the first dynamical system (ball)
-    dsN = SK.dynamicalSystems(bouncingBall.nonSmoothDynamicalSystem().topology().dSG(0))[0].number()
-    ball = bouncingBall.nonSmoothDynamicalSystem().dynamicalSystem(dsN)
+    dsN = SK.dynamicalSystems(bouncingBall.topology().dSG(0))[0].number()
+    ball = bouncingBall.dynamicalSystem(dsN)
 
     q = ball.q()
     v = ball.velocity()
@@ -141,11 +138,10 @@ def test_xml2():
 def test_xml3():
     ''' DryFriction '''
     # --- buildModelXML loading from xml file ---
-    oscillator = buildModelXML(os.path.join(working_dir,
+    oscillator, s = buildModelXML(os.path.join(working_dir,
                                             'data/DryFriction.xml'))
 
     # --- Get the simulation ---
-    s = oscillator.simulation()
     k = 0
     T = oscillator.finalT()
     t0 = oscillator.t0()
@@ -160,9 +156,9 @@ def test_xml3():
     # time
     dataPlot[k, 0] = t0
     # state q for the first dynamical system (ball)
-    dsN = SK.dynamicalSystems(oscillator.nonSmoothDynamicalSystem().topology().dSG(0))[0].number()
-    oscillo = oscillator.nonSmoothDynamicalSystem().dynamicalSystem(dsN)
-    inter = SK.interactions(oscillator.nonSmoothDynamicalSystem().topology().indexSet(0))[0]
+    dsN = SK.dynamicalSystems(oscillator.topology().dSG(0))[0].number()
+    oscillo = oscillator.dynamicalSystem(dsN)
+    inter = SK.interactions(oscillator.topology().indexSet(0))[0]
 
     dataPlot[k, 1] = oscillo.q()[0]
     # velocity for the oscillo
@@ -203,11 +199,10 @@ def test_xml3():
 def test_xml4():
     ''' CamFollower '''
     # --- buildModelXML loading from xml file ---
-    CamFollower = buildModelXML(os.path.join(working_dir,
+    CamFollower, s = buildModelXML(os.path.join(working_dir,
                                              'data/CamFollower_TIDS.xml'))
 
     # --- Get and initialize the simulation ---
-    S = CamFollower.simulation()
     k = 0
     T = CamFollower.finalT()
     t0 = CamFollower.t0()
@@ -224,9 +219,9 @@ def test_xml4():
     dataPlot[k, 0] = t0
 
     # state q for the Follower
-    dsN = CamFollower.nonSmoothDynamicalSystem().topology().dSG(0).dynamicalSystems()[0].number()
-    Follower = CamFollower.nonSmoothDynamicalSystem().dynamicalSystem(dsN)
-    inter = CamFollower.nonSmoothDynamicalSystem().topology().dSG(0).interactions()[0]
+    dsN = CamFollower.topology().dSG(0).dynamicalSystems()[0].number()
+    Follower = CamFollower.dynamicalSystem(dsN)
+    inter = CamFollower.topology().dSG(0).interactions()[0]
     # Position of the Follower
     dataPlot[k, 1] = Follower.q()[0]
     # Velocity for the Follower
@@ -284,12 +279,11 @@ if siconos.WITH_FORTRAN :
     def test_xml5():
         ''' Bouncing Ball ED '''
         # --- buildModelXML loading from xml file ---
-        bouncingBall = buildModelXML(os.path.join(working_dir, 'data/BBallED.xml'))
+        bouncingBall,s = buildModelXML(os.path.join(working_dir, 'data/BBallED.xml'))
 
         # --- Get and initialize the simulation ---
-        s = bouncingBall.simulation()
-        dsN = SK.dynamicalSystems(bouncingBall.nonSmoothDynamicalSystem().topology().dSG(0))[0].number()
-        ball = bouncingBall.nonSmoothDynamicalSystem().dynamicalSystem(dsN)
+        dsN = SK.dynamicalSystems(bouncingBall.topology().dSG(0))[0].number()
+        ball = bouncingBall.dynamicalSystem(dsN)
 
         # --- Get the values to be plotted ---
         # . saved in a matrix dataPlot
@@ -300,14 +294,12 @@ if siconos.WITH_FORTRAN :
 
         q = ball.q()
         v = ball.velocity()
-        p = ball.p(1)
-        f = ball.p(2)
 
         dataPlot[0, 0] = bouncingBall.t0()
         dataPlot[0, 1] = q[0]
         dataPlot[0, 2] = v[0]
-        dataPlot[0, 3] = p[0]
-        dataPlot[0, 4] = f[0]
+        dataPlot[0, 3] = 0.0
+        dataPlot[0, 4] = 0.0
 
         print("====> Start computation ... ")
         # --- Time loop  ---
@@ -320,6 +312,9 @@ if siconos.WITH_FORTRAN :
             k += 1
 
             s.advanceToEvent()
+            p = ball.p(1)
+            f = ball.p(2)
+
             if eventsManager.nextEvent().getType() == 2:
                 nonSmooth = True
 
@@ -353,10 +348,9 @@ if siconos.WITH_FORTRAN :
 def test_xml6():
     ''' BeadPlan '''
     # --- buildModelXML loading from xml file ---
-    oscillator = buildModelXML(os.path.join(working_dir, 'data/BeadPlan.xml'))
+    oscillator, s = buildModelXML(os.path.join(working_dir, 'data/BeadPlan.xml'))
 
     # --- Get and initialize the simulation ---
-    s = oscillator.simulation()
 
     k = 0
     t0 = oscillator.t0()
@@ -371,8 +365,8 @@ def test_xml6():
     print("Prepare data for plotting ... ")
     # For the initi)al time step:
     # XXX fix this crap
-    dsN = SK.dynamicalSystems(oscillator.nonSmoothDynamicalSystem().topology().dSG(0))[0].number()
-    oscillo = oscillator.nonSmoothDynamicalSystem().dynamicalSystem(dsN)
+    dsN = SK.dynamicalSystems(oscillator.topology().dSG(0))[0].number()
+    oscillo = oscillator.dynamicalSystem(dsN)
     q = oscillo.q()
     v = oscillo.velocity()
     p = oscillo.p(1)
@@ -402,3 +396,9 @@ def test_xml6():
 
     # dataPlot (ascii) output
     np.savetxt("BeadPlan.dat", dataPlot)
+
+
+if __name__ == '__main__':
+    print('test_xml1')
+    test_xml1()
+    

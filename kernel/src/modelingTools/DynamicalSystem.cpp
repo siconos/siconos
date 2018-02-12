@@ -17,6 +17,7 @@
 */
 #include "DynamicalSystem.hpp"
 
+// #define DEBUG_NOCOLOR
 // #define DEBUG_MESSAGES
 // #define DEBUG_STDOUT
 #include "debug.h"
@@ -238,14 +239,19 @@ void DynamicalSystem::update(double time)
 
 void DynamicalSystem::initMemory(unsigned int steps)
 {
-
-  if (steps == 0)
-    std::cout << "Warning : initMemory with size equal to zero" << std::endl;
-  else
+  DEBUG_BEGIN("void DynamicalSystem::initMemory(unsigned int steps)\n");
+  if (steps > _xMemory.size())
   {
-    _stepsInMemory = steps;
-    _xMemory.setMemorySize(steps, _n);
+    if (steps == 0)
+      std::cout << "Warning : initMemory with size equal to zero" << std::endl;
+    else
+    {
+      _stepsInMemory = steps;
+      _xMemory.setMemorySize(steps, _n);
+    }
   }
-
+  DEBUG_EXPR(_xMemory.display(););
+  
+  DEBUG_END("void DynamicalSystem::initMemory(unsigned int steps)\n");
 }
 

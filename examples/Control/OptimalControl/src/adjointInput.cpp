@@ -8,9 +8,9 @@ adjointInput::adjointInput(): FirstOrderNonLinearR()
 }
 
 
-void adjointInput::initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
+void adjointInput::initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
 {
-  FirstOrderNonLinearR::initComponents(inter, DSlink, workV, workM);
+  FirstOrderNonLinearR::initializeWorkVectorsAndMatrices(inter, DSlink, workV, workM);
 
   K2.reset(new SimpleMatrix(2, 2));
   K2->setValue(0, 0, 0.0);

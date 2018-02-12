@@ -108,14 +108,7 @@ protected:
    */
   LagrangianR(RELATION::SUBTYPES lagType): Relation(RELATION::Lagrangian, lagType) {}
 
-  /** initialize components specific to derived classes.
-   * \param inter the interaction using this relation
-   * \param DSlink the container of the link to DynamicalSystem attributes
-   * \param workV work vectors
-   * \param workM work matrices
-   */
-  virtual void initComponents(Interaction& inter, VectorOfBlockVectors& DSlink,
-                              VectorOfVectors& workV, VectorOfSMatrices& workM);
+
   virtual void _zeroPlugin();
 
 public:
@@ -167,11 +160,18 @@ public:
   /** initialize the relation (check sizes, memory allocation ...)
    * \param inter the interaction using this relation
    * \param DSlink the container of the link to DynamicalSystem attributes
+  */
+  void initializeDSLink(Interaction& inter, VectorOfBlockVectors& DSlink);
+
+  /** initialize components specific to derived classes.
+   * \param inter the interaction using this relation
+   * \param DSlink the container of the link to DynamicalSystem attributes
    * \param workV work vectors
    * \param workM work matrices
-  */
-  void initialize(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
-
+   */
+  virtual void initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink,
+                                                VectorOfVectors& workV, VectorOfSMatrices& workM);
+  
   /* compute all the H Jacobian 
    * \param time
    * \param inter

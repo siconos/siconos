@@ -26,10 +26,11 @@ class BulletTimeStepping : public TimeStepping
 {
 
 public:
-  BulletTimeStepping(SP::TimeDiscretisation td,
-		     SP::OneStepIntegrator osi = SP::OneStepIntegrator(),
-		     SP::OneStepNSProblem osnspb = SP::OneStepNSProblem()) :
-    TimeStepping(td, osi, osnspb) {};
+  BulletTimeStepping(SP::NonSmoothDynamicalSystem nsds,
+                     SP::TimeDiscretisation td,
+                     SP::OneStepIntegrator osi = SP::OneStepIntegrator(),
+                     SP::OneStepNSProblem osnspb = SP::OneStepNSProblem()) :
+    TimeStepping(nsds,td, osi, osnspb) {};
 
   void updateWorldFromDS();
 };

@@ -32,9 +32,12 @@
 // #define DEBUG_MESSAGES
 #include "debug.h"
 
-void KneeJointR::initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
+
+void KneeJointR::initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
 {
-  NewtonEulerR::initComponents(inter, DSlink, workV, workM);
+  NewtonEulerR::initializeWorkVectorsAndMatrices(inter, DSlink, workV, workM);
+
+  // should be in initialize 
   if (!_dotjachq)
   {
     unsigned int sizeY = inter.getSizeOfY();

@@ -122,13 +122,13 @@ int main(int argc, char* argv[])
     // -------------
     // --- Model ---
     // -------------
-    SP::Model impactingBar(new Model(t0, T));
+    SP::NonSmoothDynamicalSystem impactingBar(new NonSmoothDynamicalSystem(t0, T));
 
     // add the dynamical system in the non smooth dynamical system
-    impactingBar->nonSmoothDynamicalSystem()->insertDynamicalSystem(bar);
+    impactingBar->insertDynamicalSystem(bar);
 
     // link the interaction and the dynamical system
-    impactingBar->nonSmoothDynamicalSystem()->link(inter,bar);
+    impactingBar->link(inter,bar);
 
 
     // ------------------
@@ -158,7 +158,7 @@ int main(int argc, char* argv[])
     // -- (4) Simulation setup with (1) (2) (3)
 #ifdef TS_PROJ
     SP::MLCPProjectOnConstraints position(new MLCPProjectOnConstraints());
-    SP::TimeSteppingDirectProjection s(new TimeSteppingDirectProjection(t,OSI, osnspb, position,0));
+    SP::TimeSteppingDirectProjection s(new TimeSteppingDirectProjection(impactingBar, t,OSI, osnspb, position,0));
     s->setProjectionMaxIteration(10);
     s->setConstraintTolUnilateral(1e-10);
     s->setConstraintTol(1e-10);
@@ -167,15 +167,14 @@ int main(int argc, char* argv[])
 #else
 #ifdef TS_COMBINED
     SP::OneStepNSProblem position(new MLCPProjectOnConstraints(SICONOS_MLCP_ENUM));
-    SP::TimeSteppingCombinedProjection s(new TimeSteppingCombinedProjection(t,OSI, osnspb, position,2));
+    SP::TimeSteppingCombinedProjection s(new TimeSteppingCombinedProjection(impactingBar, t,OSI, osnspb, position,2));
     s->setProjectionMaxIteration(500);
     s->setConstraintTolUnilateral(1e-10);
     s->setConstraintTol(1e-10);
 #else
-    SP::TimeStepping s(new TimeStepping(t,OSI,osnspb));
+    SP::TimeStepping s(new TimeStepping(impactingBar, t,OSI,osnspb));
 #endif
 #endif
-    impactingBar->setSimulation(s);
 
     // =========================== End of model definition ===========================
 
@@ -183,8 +182,7 @@ int main(int argc, char* argv[])
 
     // --- Simulation initialization ---
 
-    cout <<"====> Initialisation ..." <<endl<<endl;
-    impactingBar->initialize();
+
     int N = floor((T-t0)/h); // Number of time steps
 
     // --- Get the values to be plotted ---

@@ -50,15 +50,15 @@ K = [.25, .125, 2]
 # Declaration of the Dynamical System
 doubleIntegrator = sk.FirstOrderLinearTIDS(x0, A)
 # Model
-process = sk.Model(t0, T)
-process.nonSmoothDynamicalSystem().insertDynamicalSystem(doubleIntegrator)
+process = sk.NonSmoothDynamicalSystem(t0, T)
+process.insertDynamicalSystem(doubleIntegrator)
 # Declaration of the integrator
 OSI = sk.EulerMoreauOSI(theta)
 # time discretisation
 t = sk.TimeDiscretisation(t0, h)
 tSensor = sk.TimeDiscretisation(t0, h)
 tActuator = sk.TimeDiscretisation(t0, h)
-s = sk.TimeStepping(t, 0)
+s = sk.TimeStepping(process, t, 0)
 s.insertIntegrator(OSI)
 
 # Actuator, Sensor & ControlManager
@@ -70,8 +70,6 @@ act.setB(B)
 control.addActuatorPtr(act, tActuator)
 
 # Initialization
-process.setSimulation(s)
-process.initialize()
 control.initialize(process)
 act.setRef(xFinal)
 act.setK(K)
@@ -91,6 +89,7 @@ if doubleIntegrator.b() is not None:
 # Main loop
 k = 1
 while(s.hasNextEvent()):
+    print("iteration k", k)
     if (s.eventsManager().nextEvent() == 1):
         s.computeOneStep()
         dataPlot[k, 0] = s.nextTime()

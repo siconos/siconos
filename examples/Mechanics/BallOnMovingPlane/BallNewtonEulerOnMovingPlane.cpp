@@ -44,16 +44,16 @@ public:
 
   my_NewtonEulerR(double radius): R_CLASS(), _sBallRadius(radius) { };
 
-  virtual void computeOutput(double t, Interaction& inter, InteractionProperties& interProp, unsigned int derivativeNumber)
+  virtual void computeOutput(double t, Interaction& inter, unsigned int derivativeNumber)
   {
-    VectorOfBlockVectors& DSlink = *interProp.DSlink;
+    VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
     if (derivativeNumber == 0)
     {
       computeh(t, *DSlink[NewtonEulerR::q0], *inter.y(0));
     }
     else
     {
-      R_CLASS::computeOutput(t, inter, interProp, derivativeNumber);
+      R_CLASS::computeOutput(t, inter, derivativeNumber);
     }
 
   }
@@ -206,14 +206,14 @@ int main(int argc, char* argv[])
     // -------------
     // --- Model ---
     // -------------
-    SP::Model bouncingBall(new Model(t0, T));
+    SP::NonSmoothDynamicalSystem bouncingBall(new NonSmoothDynamicalSystem(t0, T));
     // add the dynamical system in the non smooth dynamical system
-    bouncingBall->nonSmoothDynamicalSystem()->insertDynamicalSystem(ball);
-    bouncingBall->nonSmoothDynamicalSystem()->insertDynamicalSystem(movingplane);
+    bouncingBall->insertDynamicalSystem(ball);
+    bouncingBall->insertDynamicalSystem(movingplane);
 
     // link the interaction and the dynamical system
     //r
-    bouncingBall->nonSmoothDynamicalSystem()->link(inter, ball, movingplane);
+    bouncingBall->link(inter, ball, movingplane);
 
     // ------------------
     // --- Simulation ---
@@ -235,25 +235,20 @@ int main(int argc, char* argv[])
 #endif
     // -- (4) Simulation setup with (1) (2) (3)
 #ifdef WITH_PROJ
-    SP::TimeSteppingDirectProjection s(new TimeSteppingDirectProjection(t, OSI, osnspb, osnspb_pos));
+    SP::TimeSteppingDirectProjection s(new TimeSteppingDirectProjection(bouncingBall, t, OSI, osnspb, osnspb_pos));
     s->setProjectionMaxIteration(20);
     s->setConstraintTolUnilateral(1e-08);
     s->setConstraintTol(1e-08);
 #else
-    SP::TimeStepping s(new TimeStepping(t, OSI, osnspb));
+    SP::TimeStepping s(new TimeStepping(bouncingBall, t, OSI, osnspb));
 #endif
     s->setNewtonTolerance(1e-10);
     s->setNewtonMaxIteration(10);
-    bouncingBall->setSimulation(s);
     
     // =========================== End of model definition ===========================
 
     // ================================= Computation =================================
 
-    // --- Simulation initialization ---
-
-    cout << "====> Initialisation ..." << endl << endl;
-    bouncingBall->initialize();
     int N = ceil((T - t0) / h); // Number of time steps
 
     // --- Get the values to be plotted ---

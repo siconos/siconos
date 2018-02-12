@@ -81,7 +81,7 @@ public:
   /** initialize sensor data
    * \param m the Model
    */
-  virtual void initialize(const Model& m);
+  virtual void initialize(const NonSmoothDynamicalSystem& nsds);
 
   /** capture data when the SensorEvent is processed ( for example set data[SensorEvent]=... )
    */

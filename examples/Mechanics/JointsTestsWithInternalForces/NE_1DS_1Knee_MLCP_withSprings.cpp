@@ -166,51 +166,6 @@ int main(int argc, char* argv[])
     (*q02)(1) = 0;
     (*q02)(2) = -L1 / sqrt(2.0) - 0.5 * L2 / sqrt(2.0);
 
-    // angle = -M_PI / 4;
-    // V1.zero();
-    // V1.setValue(0, 0);
-    // V1.setValue(1, 1);
-    // V1.setValue(2, 0);
-    // q02->setValue(3, cos(angle / 2));
-    // q02->setValue(4, V1.getValue(0)*sin(angle / 2));
-    // q02->setValue(5, V1.getValue(1)*sin(angle / 2));
-    // q02->setValue(6, V1.getValue(2)*sin(angle / 2));
-
-    // SP::NewtonEulerDS beam2(new NewtonEulerDS(q02, v02, m, I2));
-    // // -- Set external forces (weight) --
-    // SP::SiconosVector weight2(new SiconosVector(nDof));
-    // (*weight2)(2) = -m * g;
-    // beam2->setFExtPtr(weight2);
-
-
-    // SP::SiconosVector q03(new SiconosVector(qDim));
-    // SP::SiconosVector v03(new SiconosVector(nDim));
-    // SP::SimpleMatrix I3(new SimpleMatrix(3, 3));
-    // v03->zero();
-    // I3->eye();
-    // I3->setValue(0, 0, 0.1);
-    // q03->zero();
-    // (*q03)(2) = -L1 * sqrt(2.0) - L1 / 2;
-
-    // angle = M_PI / 2;
-    // V1.zero();
-    // V1.setValue(0, 0);
-    // V1.setValue(1, 1);
-    // V1.setValue(2, 0);
-    // q03->setValue(3, cos(angle / 2));
-    // q03->setValue(4, V1.getValue(0)*sin(angle / 2));
-    // q03->setValue(5, V1.getValue(1)*sin(angle / 2));
-    // q03->setValue(6, V1.getValue(2)*sin(angle / 2));
-
-    // SP::NewtonEulerDS beam3(new NewtonEulerDS(q03, v03, m, I3));
-    // // -- Set external forces (weight) --
-    // SP::SiconosVector weight3(new SiconosVector(nDof));
-    // (*weight3)(2) = -m * g;
-    // beam3->setFExtPtr(weight3);
-
-
-
-
 
     beam1->setComputeFIntFunction("SimplePlugin", "fInt_beam1");
     beam1->setComputeJacobianFIntqFunction("SimplePlugin", "jacobianFIntq_beam1");
@@ -256,11 +211,11 @@ int main(int argc, char* argv[])
     // -------------
     // --- Model ---
     // -------------
-    SP::Model myModel(new Model(t0, T));
+    SP::NonSmoothDynamicalSystem myModel(new NonSmoothDynamicalSystem(t0, T));
     // add the dynamical system in the non smooth dynamical system
-    myModel->nonSmoothDynamicalSystem()->insertDynamicalSystem(beam1);
+    myModel->insertDynamicalSystem(beam1);
     // link the interaction and the dynamical system
-    myModel->nonSmoothDynamicalSystem()->link(inter1, beam1);
+    myModel->link(inter1, beam1);
 
     // ------------------
     // --- Simulation ---
@@ -277,24 +232,12 @@ int main(int argc, char* argv[])
     osnspb->numericsSolverOptions()->dparam[0]=1e-10;
 
     // -- (4) Simulation setup with (1) (2) (3)
-    SP::TimeStepping s(new TimeStepping(t, OSI1, osnspb));
-
-//    s->insertIntegrator(OSI2);
-    //s->insertIntegrator(OSI3);
-    //    s->setComputeResiduY(true);
-    //  s->setUseRelativeConvergenceCriteron(false);
-    myModel->setSimulation(s);
-
-
-
+    SP::TimeStepping s(new TimeStepping(myModel, t, OSI1, osnspb));
+    s->setNewtonTolerance(1e-10);
+    s->setNewtonMaxIteration(50);
     // =========================== End of model definition ===========================
 
     // ================================= Computation =================================
-
-    // --- Simulation initialization ---
-
-    cout << "====> Initialisation ..." << endl << endl;
-    myModel->initialize();
 
 
     // --- Get the values to be plotted ---
@@ -327,7 +270,7 @@ int main(int argc, char* argv[])
     for (k = 0; k < N; k++)
     {
       // solve ...
-      s->newtonSolve(1e-10, 4);
+      s->advanceToEvent();
 
 
 
@@ -388,18 +331,12 @@ int main(int argc, char* argv[])
     ioMatrix::write("NE_1DS_1Knee_MLCP.dat", "ascii", dataPlot, "noDim");
     ioMatrix::write("NE_1DS_1Knee_MLCP_beam1.dat", "ascii", beam1Plot, "noDim");
     
-    std::cout << "====> Comparison with reference file ..." << std::endl;
 
-    SimpleMatrix dataPlotRef(dataPlot);
-    dataPlotRef.zero();
-    ioMatrix::read("NE_1DS_1Knee_MLCP.ref", "ascii", dataPlotRef);
-    std::cout << "Error w.r.t. reference file : " << (dataPlot - dataPlotRef).normInf() << std::endl;
-    if ((dataPlot - dataPlotRef).normInf() > 1e-7)
-    {
-      (dataPlot - dataPlotRef).display();
-      std::cout << "Warning. The results is rather different from the reference file." << std::endl;
+    double error=0.0, eps=1e-11;
+    if (ioMatrix::compareRefFile(dataPlot, "NE_1DS_1Knee_MLCP.ref", eps, error)
+        && error > eps)
       return 1;
-    }
+
 
     fclose(pFile);
   }

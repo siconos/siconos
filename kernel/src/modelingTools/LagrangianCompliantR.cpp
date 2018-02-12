@@ -42,9 +42,9 @@ void LagrangianCompliantR::_zeroPlugin()
   _pluginJachlambda.reset(new PluggedObject());
 }
 
-void LagrangianCompliantR::initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
+void LagrangianCompliantR::initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
 {
-  LagrangianR::initComponents(inter, DSlink, workV, workM);
+  LagrangianR::initializeWorkVectorsAndMatrices(inter, DSlink, workV, workM);
   unsigned int sizeY = inter.getSizeOfY();
 
   if (! _jachlambda)
@@ -78,9 +78,9 @@ void LagrangianCompliantR::computeJachlambda(double time, SiconosVector& q0, Sic
   }
 }
 
-void LagrangianCompliantR::computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int derivativeNumber)
+void LagrangianCompliantR::computeOutput(double time, Interaction& inter, unsigned int derivativeNumber)
 {
-  VectorOfBlockVectors& DSlink = *interProp.DSlink;
+  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
   SiconosVector workZ = *DSlink[LagrangianR::z];
   if (derivativeNumber == 0)
   {
@@ -112,11 +112,12 @@ void LagrangianCompliantR::computeOutput(double time, Interaction& inter, Intera
   *DSlink[LagrangianR::z] = workZ;
 }
 
-void LagrangianCompliantR::computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level)
+void LagrangianCompliantR::computeInput(double time, Interaction& inter , unsigned int level)
 {
   // get lambda of the concerned interaction
+  
   SiconosVector& lambda = *inter.lambda(level);
-  VectorOfBlockVectors& DSlink = *interProp.DSlink;
+  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
 
   SiconosVector workQ = *DSlink[LagrangianR::q0];
   SiconosVector workZ = *DSlink[LagrangianR::z];
@@ -126,10 +127,9 @@ void LagrangianCompliantR::computeInput(double time, Interaction& inter, Interac
   *DSlink[LagrangianR::z] = workZ;
 }
 
-
 void LagrangianCompliantR::computeJach(double time, Interaction& inter, InteractionProperties& interProp)
 {
-  VectorOfBlockVectors& DSlink = *interProp.DSlink;
+  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
   SiconosVector q = *DSlink[LagrangianR::q0];
   SiconosVector z = *DSlink[LagrangianR::z];
   SiconosVector& lambda = *inter.lambda(0);

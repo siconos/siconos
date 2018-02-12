@@ -127,18 +127,17 @@ int main(int argc, char* argv[])
     // --------------------------------------
     // ---      Model and simulation      ---
     // --------------------------------------
-    SP::Model columnOfBeads(new Model(t0, T));
-
+    SP::NonSmoothDynamicalSystem columnOfBeads(new NonSmoothDynamicalSystem(t0, T));
     // add the dynamical system in the non smooth dynamical system
     for (unsigned int i = 0; i < nBeads; i++)
     {
-      columnOfBeads->nonSmoothDynamicalSystem()->insertDynamicalSystem(beads[i]);
+      columnOfBeads->insertDynamicalSystem(beads[i]);
     }
 
-    columnOfBeads->nonSmoothDynamicalSystem()->link(inter, beads[0]);
+    columnOfBeads->link(inter, beads[0]);
     // link the interaction and the dynamical systems
     for (unsigned int i =0; i< nBeads-1; i++)
-      columnOfBeads->nonSmoothDynamicalSystem()->link(interOfBeads[i],beads[i], beads[i+1]);
+      columnOfBeads->link(interOfBeads[i],beads[i], beads[i+1]);
 
     // --  (1) OneStepIntegrators --
     SP::MoreauJeanOSI OSI(new MoreauJeanOSI(theta));
@@ -150,18 +149,12 @@ int main(int argc, char* argv[])
     SP::LinearOSNS osnspb(new LCP(SICONOS_LCP_NSGS_SBM));
     osnspb->setMStorageType(1);
     // -- (4) Simulation setup with (1) (2) (3)
-    SP::TimeStepping s(new TimeStepping(t, OSI, osnspb));
+    SP::TimeStepping s(new TimeStepping(columnOfBeads, t, OSI, osnspb));
 
-    columnOfBeads->setSimulation(s);
 
     // =========================== End of model definition ===========================
 
     // ================================= Computation =================================
-
-    // --- Simulation initialization ---
-
-    cout << "====> Initialisation ..." << endl << endl;
-    columnOfBeads->initialize();
 
     int N = ceil((T - t0) / h); // Number of time steps
 
@@ -208,14 +201,7 @@ int main(int argc, char* argv[])
             // std::cout << "Number of contact = " << ncontact << std::endl;
 
             inter.reset(new Interaction(nslaw, relation));
-            columnOfBeads->nonSmoothDynamicalSystem()->link(inter, beads[0]);
-            s->initializeInteraction(s->nextTime(), inter);
-
-            if (!isOSNSinitialized)
-            {
-              s->initOSNS();
-              isOSNSinitialized = true;
-            }
+            columnOfBeads->link(inter, beads[0]);
 
             assert(inter->y(0)->getValue(0) >= 0);
           }
@@ -234,14 +220,7 @@ int main(int argc, char* argv[])
             relationOfBeads[i].reset(new LagrangianLinearTIR(HOfBeads, bOfBeads));
             interOfBeads[i].reset(new Interaction(nslaw, relationOfBeads[i]));
 
-            columnOfBeads->nonSmoothDynamicalSystem()->link(interOfBeads[i], beads[i], beads[i+1]);
-            s->initializeInteraction(s->nextTime(), interOfBeads[i]);
-
-            if (!isOSNSinitialized)
-            {
-              s->initOSNS();
-              isOSNSinitialized = true;
-            }
+            columnOfBeads->link(interOfBeads[i], beads[i], beads[i+1]);
 
             assert(interOfBeads[i]->y(0)->getValue(0) >= 0);
           }

@@ -41,7 +41,7 @@ MoreauJeanBilbaoOSI::MoreauJeanBilbaoOSI():
   _steps=1;
 }
 
-void MoreauJeanBilbaoOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds)
+void MoreauJeanBilbaoOSI::initializeDynamicalSystem( double t, SP::DynamicalSystem ds)
 {
   // Get work buffers from the graph
   // const DynamicalSystemsGraph::VDescriptor& dsv = _dynamicalSystemsGraph->descriptor(ds);
@@ -64,26 +64,31 @@ void MoreauJeanBilbaoOSI::initializeDynamicalSystem(Model& m, double t, SP::Dyna
   lldds.swapInMemory();
 }
 
-void MoreauJeanBilbaoOSI::fillDSLinks(Interaction &inter, InteractionProperties& interaction_properties,
+void MoreauJeanBilbaoOSI::fillDSLinks(Interaction &inter, InteractionProperties& interProp,
 				  DynamicalSystemsGraph & DSG)
 {
   // Get the dynamical systems linked by inter
-  SP::DynamicalSystem ds1= interaction_properties.source;
-  SP::DynamicalSystem ds2= interaction_properties.target;
+  SP::DynamicalSystem ds1= interProp.source;
+  SP::DynamicalSystem ds2= interProp.target;
   assert(ds1);
   assert(ds2);
 
-  VectorOfVectors& workV = *interaction_properties.workVectors;
-  workV.resize(MoreauJeanBilbaoOSI::WORK_INTERACTION_LENGTH);
-  workV[MoreauJeanBilbaoOSI::OSNSP_RHS].reset(new SiconosVector(inter.getSizeOfY()));
 
-  // work vector of the interaction (from interaction_properties)
-  VectorOfBlockVectors& DSlink = *interaction_properties.DSlink;
+  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
 
-  // // Relation type.
+  interProp.workVectors.reset(new VectorOfVectors);
+  interProp.workMatrices.reset(new VectorOfSMatrices);
+
+  VectorOfVectors& workV = *interProp.workVectors;
+  VectorOfSMatrices& workM = *interProp.workMatrices;
+
   Relation &relation =  *inter.relation();
+  relation.initializeWorkVectorsAndMatrices(inter, DSlink, workV, workM);
   RELATION::TYPES relationType = relation.getType();
   RELATION::SUBTYPES relationSubType = inter.relation()->getSubType();
+  
+  workV.resize(MoreauJeanBilbaoOSI::WORK_INTERACTION_LENGTH);
+  workV[MoreauJeanBilbaoOSI::OSNSP_RHS].reset(new SiconosVector(inter.getSizeOfY()));
 
   if(relationType != Lagrangian || relationSubType != LinearTIR)
     RuntimeException::selfThrow("MoreauJeanBilbaoOSI::computeFreeOutput only Lagrangian Linear Relations are allowed.");
@@ -475,9 +480,9 @@ void MoreauJeanBilbaoOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vert
 {
   InteractionsGraph& indexSet = *osnsp->simulation()->indexSet(osnsp->indexSetLevel());
   assert(indexSet.bundle(vertex_inter));
-  VectorOfBlockVectors& DSlink = *indexSet.properties(vertex_inter).DSlink;
   // current interaction
   Interaction& inter = *indexSet.bundle(vertex_inter);
+  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
   assert(inter.relation());
   // Get relation and non smooth law types
   // RELATION::TYPES relationType = inter.relation()->getType();

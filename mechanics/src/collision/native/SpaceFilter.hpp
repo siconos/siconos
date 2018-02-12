@@ -63,8 +63,8 @@ protected:
   /** the cell size */
   unsigned int _cellsize;
 
-  /** the siconos model */
-  SP::Model _model;
+  /** the siconos nsds */
+  SP::NonSmoothDynamicalSystem _nsds;
 
   /** nslaws */
   SP::NSLawMatrix _nslaws;
@@ -139,16 +139,16 @@ public:
 
   SpaceFilter(unsigned int bboxfactor,
               unsigned int cellsize,
-              SP::Model model,
+              SP::NonSmoothDynamicalSystem nsds,
               SP::SiconosMatrix plans,
               SP::FMatrix moving_plans);
 
   SpaceFilter(unsigned int bboxfactor,
               unsigned int cellsize,
-              SP::Model model,
+              SP::NonSmoothDynamicalSystem nsds,
               SP::SiconosMatrix plans);
 
-  SpaceFilter(SP::Model model);
+  SpaceFilter(SP::NonSmoothDynamicalSystem nsds);
 
   SpaceFilter();
 
@@ -190,9 +190,9 @@ public:
   /** Get the model.
       \return a Model object.
    */
-  SP::Model model()
+  SP::NonSmoothDynamicalSystem nsds()
   {
-    return _model;
+    return _nsds;
   };
 
   /** Get non smooth laws.

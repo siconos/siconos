@@ -20,7 +20,6 @@
 #include "SensorFactory.hpp"
 #include "SiconosVector.hpp"
 #include "DynamicalSystem.hpp"
-#include "Model.hpp"
 #include "TimeDiscretisation.hpp"
 
 
@@ -35,10 +34,10 @@ LinearSensor::~LinearSensor()
 {
 }
 
-void LinearSensor::initialize(const Model& m)
+void LinearSensor::initialize(const NonSmoothDynamicalSystem& nsds)
 {
   // Call initialize of base class
-  ControlSensor::initialize(m);
+  ControlSensor::initialize(nsds);
 
   // consistency checks
   if (!_matC)

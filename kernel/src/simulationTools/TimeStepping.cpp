@@ -20,7 +20,6 @@
 #include "Topology.hpp"
 #include "LCP.hpp"
 #include "Relay.hpp"
-#include "Model.hpp"
 #include "TimeDiscretisation.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
 //#include "Interaction.hpp"
@@ -62,16 +61,18 @@ using namespace RELATION;
 */
 static CheckSolverFPtr checkSolverOutput = NULL;
 
-TimeStepping::TimeStepping(SP::TimeDiscretisation td,
+TimeStepping::TimeStepping(SP::NonSmoothDynamicalSystem nsds,
+                           SP::TimeDiscretisation td,
                            SP::OneStepIntegrator osi,
                            SP::OneStepNSProblem osnspb)
-  : Simulation(td), _newtonTolerance(1e-6), _newtonMaxIteration(50), _newtonNbIterations(0),
+  : Simulation(nsds,td), _newtonTolerance(1e-6), _newtonMaxIteration(50), _newtonNbIterations(0),
     _newtonCumulativeNbIterations(0), _newtonOptions(SICONOS_TS_NONLINEAR),
     _newtonResiduDSMax(0.0), _newtonResiduYMax(0.0), _newtonResiduRMax(0.0),
     _computeResiduY(false),_computeResiduR(false),
     _isNewtonConverge(false),
     _newtonUpdateInteractionsPerIteration(false),_displayNewtonConvergence(false),
     _warnOnNonConvergence(true),
+    _resetAllLambda(true),
     _explicitJacobiansOfRelation(false)
 {
 
@@ -81,14 +82,15 @@ TimeStepping::TimeStepping(SP::TimeDiscretisation td,
 
 }
 
-TimeStepping::TimeStepping(SP::TimeDiscretisation td, int nb)
-  : Simulation(td), _newtonTolerance(1e-6), _newtonMaxIteration(50), _newtonNbIterations(0),
+TimeStepping::TimeStepping(SP::NonSmoothDynamicalSystem nsds, SP::TimeDiscretisation td, int nb)
+  : Simulation(nsds,td), _newtonTolerance(1e-6), _newtonMaxIteration(50), _newtonNbIterations(0),
     _newtonCumulativeNbIterations(0), _newtonOptions(SICONOS_TS_NONLINEAR),
     _newtonResiduDSMax(0.0), _newtonResiduYMax(0.0), _newtonResiduRMax(0.0), _computeResiduY(false),
     _computeResiduR(false),
     _isNewtonConverge(false),
     _newtonUpdateInteractionsPerIteration(false),_displayNewtonConvergence(false),
     _warnOnNonConvergence(true),
+    _resetAllLambda(true),
     _explicitJacobiansOfRelation(false)
 {
   (*_allNSProblems).resize(nb);
@@ -333,8 +335,6 @@ void TimeStepping::initOSNS()
     // equal to the minimum value of the relative degree - 1 except
     // for degree 0 case where we keep 0.
 
-    assert(_nsds->topology()->isUpToDate());
-
 
     // === update all index sets ===
     updateIndexSets();
@@ -342,14 +342,24 @@ void TimeStepping::initOSNS()
     // initialization of  OneStepNonSmoothProblem
     for (OSNSIterator itOsns = _allNSProblems->begin(); itOsns != _allNSProblems->end(); ++itOsns)
     {
-      (*itOsns)->initialize(shared_from_this());
+      if (*itOsns)
+        (*itOsns)->initialize(shared_from_this());
+      else
+        RuntimeException::selfThrow("TimeStepping::initOSNS failed. A OneStepNSProblem has not been set. ");
     }
   }
 }
 
 void TimeStepping::nextStep()
 {
+  DEBUG_BEGIN("void TimeStepping::nextStep()\n");
+  // if(!_isInitialized)
+  // {
+  //   // if the simulation run starts with nextStep();
+  //   initialize();
+  // }
   processEvents();
+  DEBUG_END("void TimeStepping::nextStep()\n");
 }
 
 void TimeStepping::computeFreeState()
@@ -433,14 +443,18 @@ void TimeStepping::advanceToEvent()
 {
   DEBUG_PRINTF("TimeStepping::advanceToEvent(). Time =%f\n",getTkp1());
 
-  // Initialize lambdas of all interactions.
-  SP::InteractionsGraph indexSet0 = _nsds->topology()->indexSet(0);
-  InteractionsGraph::VIterator ui, uiend, vnext;
-  std11::tie(ui, uiend) = indexSet0->vertices();
-  for (vnext = ui; ui != uiend; ui = vnext)
+  initialize();
+  if (_resetAllLambda)
   {
-    ++vnext;
-    indexSet0->bundle(*ui)->resetAllLambda();
+    // Initialize lambdas of all interactions.
+    SP::InteractionsGraph indexSet0 = _nsds->topology()->indexSet(0);
+    InteractionsGraph::VIterator ui, uiend, vnext;
+    std11::tie(ui, uiend) = indexSet0->vertices();
+    for (vnext = ui; ui != uiend; ui = vnext)
+    {
+      ++vnext;
+      indexSet0->bundle(*ui)->resetAllLambda();
+    }
   }
   newtonSolve(_newtonTolerance, _newtonMaxIteration);
 }

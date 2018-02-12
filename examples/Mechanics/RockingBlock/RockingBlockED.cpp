@@ -101,10 +101,10 @@ int main(int argc, char* argv[])
     //================================================================================================================
     //            III. Create the "model" object
     //================================================================================================================
-    SP::Model RoBlockModel(new Model(TimeInitial, TimeFinal));
-    RoBlockModel->nonSmoothDynamicalSystem()->insertDynamicalSystem(RockingBlock);
-    RoBlockModel->nonSmoothDynamicalSystem()->link(inter1, RockingBlock);
-    RoBlockModel->nonSmoothDynamicalSystem()->link(inter2, RockingBlock);
+    SP::NonSmoothDynamicalSystem RoBlockModel(new NonSmoothDynamicalSystem(TimeInitial, TimeFinal));
+    RoBlockModel->insertDynamicalSystem(RockingBlock);
+    RoBlockModel->link(inter1, RockingBlock);
+    RoBlockModel->link(inter2, RockingBlock);
     
     //================================================================================================================
     //            IV. Create the simulation
@@ -117,11 +117,10 @@ int main(int argc, char* argv[])
     SP::OneStepNSProblem impact(new LCP());
     SP::OneStepNSProblem acceleration(new LCP());
     //4. Simulation with (1), (2), (3)
-    SP::Simulation EDscheme(new EventDriven(TimeDiscret));
+    SP::Simulation EDscheme(new EventDriven(RoBlockModel, TimeDiscret));
     EDscheme->insertIntegrator(OSI);
     EDscheme->insertNonSmoothProblem(impact, SICONOS_OSNSP_ED_IMPACT);
     EDscheme->insertNonSmoothProblem(acceleration, SICONOS_OSNSP_ED_SMOOTH_ACC);
-    RoBlockModel->setSimulation(EDscheme); // initialize the model
 
     // bool check1 = EDscheme->hasOneStepNSProblem(impact);
     // bool check2 = EDscheme->hasOneStepNSProblem(acceleration);
@@ -131,8 +130,6 @@ int main(int argc, char* argv[])
     //                    V. Process the simulation
     //==================================================================================================================
     // -------------------------------- Simulation initialization ------------------------------------------------------
-    cout << "====> Simulation initialisation ..." << endl << endl;
-    RoBlockModel->initialize(); // initialize the model
     EDscheme->setPrintStat(true);
     SP::EventsManager eventsManager = EDscheme->eventsManager(); // ponters point to the "eventsManager" object
     SP::SiconosVector PosBlock = RockingBlock->q();              // pointer points to the position vector of the rocking block
