@@ -216,7 +216,7 @@ public:
    * \param t time of initialization
    * \param ds the dynamical system
    */
-  void initializeDynamicalSystem( double t, SP::DynamicalSystem ds);
+  void initializeWorkVectorsForDS( double t, SP::DynamicalSystem ds);
 
   /** initialization of the work vectors and matrices (properties) related to
    *  one interaction on the graph and needed by the osi
@@ -224,7 +224,7 @@ public:
    * \param interProp the properties on the graph
    * \param DSG the dynamical systems graph
    */
-  void fillDSLinks(Interaction &inter, InteractionProperties& interProp,
+  void initializeWorkVectorsForInteraction(Interaction &inter, InteractionProperties& interProp,
 			     DynamicalSystemsGraph & DSG);
   
   /** return the maximum of all norms for the residus of DS

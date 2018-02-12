@@ -95,9 +95,9 @@ SP::SiconosMatrix SchatzmanPaoliOSI::WBoundaryConditions(SP::DynamicalSystem ds)
   return _dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).WBoundaryConditions;
 }
 
-void SchatzmanPaoliOSI::initializeDynamicalSystem( double t, SP::DynamicalSystem ds)
+void SchatzmanPaoliOSI::initializeWorkVectorsForDS( double t, SP::DynamicalSystem ds)
 {
-  DEBUG_BEGIN("SchatzmanPaoliOSI::initializeDynamicalSystem( double t, SP::DynamicalSystem ds)\n");
+  DEBUG_BEGIN("SchatzmanPaoliOSI::initializeWorkVectorsForDS( double t, SP::DynamicalSystem ds)\n");
 
   // Get work buffers from the graph
   VectorOfVectors& workVectors = *_initializeDSWorkVectors(ds);
@@ -144,12 +144,12 @@ void SchatzmanPaoliOSI::initializeDynamicalSystem( double t, SP::DynamicalSystem
 
   //      if ((*itDS)->getType() == Type::LagrangianDS || (*itDS)->getType() == Type::FirstOrderNonLinearDS)
   DEBUG_EXPR(ds->display());
-  DEBUG_END("SchatzmanPaoliOSI::initializeDynamicalSystem( double t, SP::DynamicalSystem ds)\n");
+  DEBUG_END("SchatzmanPaoliOSI::initializeWorkVectorsForDS( double t, SP::DynamicalSystem ds)\n");
 
 }
 
 
-void SchatzmanPaoliOSI::fillDSLinks(Interaction &inter,
+void SchatzmanPaoliOSI::initializeWorkVectorsForInteraction(Interaction &inter,
 				      InteractionProperties& interProp,
 				      DynamicalSystemsGraph & DSG)
 {
@@ -192,7 +192,7 @@ void SchatzmanPaoliOSI::fillDSLinks(Interaction &inter,
 
   if (!(checkOSI(DSG.descriptor(ds1)) && checkOSI(DSG.descriptor(ds2))))
   {
-    RuntimeException::selfThrow("SchatzmanPaoliOSI::fillDSLinks. The implementation is not correct for two different OSI for one interaction");
+    RuntimeException::selfThrow("SchatzmanPaoliOSI::initializeWorkVectorsForInteraction. The implementation is not correct for two different OSI for one interaction");
   }
 
   /* allocate and set work vectors for the osi */

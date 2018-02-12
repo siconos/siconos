@@ -94,7 +94,7 @@ SP::SiconosMatrix EulerMoreauOSI::WBoundaryConditions(SP::DynamicalSystem ds)
   return _dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).WBoundaryConditions;
 }
 
-void EulerMoreauOSI::initializeDynamicalSystem(double t, SP::DynamicalSystem ds)
+void EulerMoreauOSI::initializeWorkVectorsForDS(double t, SP::DynamicalSystem ds)
 {
   VectorOfVectors& workVectors = *_initializeDSWorkVectors(ds);
 
@@ -121,7 +121,7 @@ void EulerMoreauOSI::initializeDynamicalSystem(double t, SP::DynamicalSystem ds)
 
 }
 
-void EulerMoreauOSI::fillDSLinks(Interaction &inter,
+void EulerMoreauOSI::initializeWorkVectorsForInteraction(Interaction &inter,
                                  InteractionProperties& interProp,
                                  DynamicalSystemsGraph & DSG)
 {
@@ -500,6 +500,7 @@ double EulerMoreauOSI::computeResidu()
           folds.computeb(told);
           residu += *folds.b();
         }
+        DEBUG_EXPR(residuFree.display());
 	      // residuFree += -h * (1 - _theta) * f(t_k,x_k)
 	      scal(coef, residu, residuFree, false);
 	      residu.zero();
@@ -516,6 +517,10 @@ double EulerMoreauOSI::computeResidu()
 	      // residuFree += -h * _theta * f(t_{x+1}, x_{k+1}^alpha)
 	      coef = -h * _theta;
 	      scal(coef, residu, residuFree, false);
+        DEBUG_PRINT("- 3 -\n");
+        DEBUG_EXPR(residuFree.display());
+        DEBUG_EXPR(xold.display());
+        DEBUG_EXPR(folds.x()->display());
 	    }
       else if(dsType == Type::FirstOrderNonLinearDS) // FirstOrderNonLinearDS
 	    {
@@ -541,6 +546,8 @@ double EulerMoreauOSI::computeResidu()
 
       if(!_useGamma)  // no gamma
 	    {
+        DEBUG_EXPR(fonlds.r()->display(););
+        DEBUG_EXPR(residu.display());
 	      scal(-h, *fonlds.r(), residu, false); // residu = residu - h*r
 	    }
       else

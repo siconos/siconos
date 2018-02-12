@@ -81,7 +81,7 @@ LsodarOSI::LsodarOSI():
   _sizeMem = 2;
   _steps=1;
 
-  // Set levels. This may depend on the nonsmooth law and will be updated during fillDSLinks(...) call.
+  // Set levels. This may depend on the nonsmooth law and will be updated during initializeWorkVectorsForInteraction(...) call.
   _levelMinForOutput=0;
   _levelMaxForOutput=2;
   _levelMinForInput=1;
@@ -232,9 +232,9 @@ void LsodarOSI::jacobianfx(integer* sizeOfX, doublereal* time, doublereal* x, in
 }
 
 
-void LsodarOSI::initializeDynamicalSystem( double t, SP::DynamicalSystem ds)
+void LsodarOSI::initializeWorkVectorsForDS( double t, SP::DynamicalSystem ds)
 {
-  DEBUG_BEGIN("LsodarOSI::initializeDynamicalSystem( double t, SP::DynamicalSystem ds)\n");
+  DEBUG_BEGIN("LsodarOSI::initializeWorkVectorsForDS( double t, SP::DynamicalSystem ds)\n");
   // Get work buffers from the graph
   VectorOfVectors& workVectors = *_initializeDSWorkVectors(ds);
 
@@ -261,10 +261,10 @@ void LsodarOSI::initializeDynamicalSystem( double t, SP::DynamicalSystem ds)
   }
   ds->swapInMemory();
 
-  DEBUG_END("LsodarOSI::initializeDynamicalSystem( double t, SP::DynamicalSystem ds)\n");
+  DEBUG_END("LsodarOSI::initializeWorkVectorsForDS( double t, SP::DynamicalSystem ds)\n");
 }
 
-void LsodarOSI::fillDSLinks(Interaction &inter,
+void LsodarOSI::initializeWorkVectorsForInteraction(Interaction &inter,
                               InteractionProperties& interProp,
                               DynamicalSystemsGraph & DSG)
 {
@@ -306,10 +306,10 @@ void LsodarOSI::fillDSLinks(Interaction &inter,
     _levelMaxForOutput = 4;
     _levelMinForInput = 1;
     _levelMaxForInput = 2;
-    RuntimeException::selfThrow("LsodarOSI::fillDSLinks  not yet implemented for nonsmooth law of type NewtonImpactFrictionNSL");
+    RuntimeException::selfThrow("LsodarOSI::initializeWorkVectorsForInteraction  not yet implemented for nonsmooth law of type NewtonImpactFrictionNSL");
   }
   else
-    RuntimeException::selfThrow("LsodarOSI::fillDSLinks not yet implemented  for nonsmooth of type");
+    RuntimeException::selfThrow("LsodarOSI::initializeWorkVectorsForInteraction not yet implemented  for nonsmooth of type");
 
   // Check if interations levels (i.e. y and lambda sizes) are compliant with the current osi.
   _check_and_update_interaction_levels(inter);
@@ -321,7 +321,7 @@ void LsodarOSI::fillDSLinks(Interaction &inter,
 
   if (!(checkOSI(DSG.descriptor(ds1)) && checkOSI(DSG.descriptor(ds2))))
   {
-    RuntimeException::selfThrow("LsodarOSI::fillDSLinks. The implementation is not correct for two different OSI for one interaction");
+    RuntimeException::selfThrow("LsodarOSI::initializeWorkVectorsForInteraction. The implementation is not correct for two different OSI for one interaction");
   }
 
 
@@ -374,7 +374,7 @@ void LsodarOSI::initialize()
   //   {
   //     if(!checkOSI(dsi)) continue;
   //     SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
-  //     initializeDynamicalSystem(m, m.t0(),ds);
+  //     initializeWorkVectorsForDS(m, m.t0(),ds);
   //     //ds->resetToInitialState();
   //     //ds->swapInMemory();
   //   }
@@ -384,7 +384,7 @@ void LsodarOSI::initialize()
   // for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
   //   {
   //     Interaction& inter = *indexSet0->bundle(*ui);
-  //     fillDSLinks(m.t0(), inter, indexSet0->properties(*ui), *_dynamicalSystemsGraph);
+  //     initializeWorkVectorsForInteraction(m.t0(), inter, indexSet0->properties(*ui), *_dynamicalSystemsGraph);
   //   }
 
   computeRhs(_simulation->nonSmoothDynamicalSystem()->t0(),*_dynamicalSystemsGraph);

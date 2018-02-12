@@ -72,7 +72,7 @@ MoreauJeanGOSI::MoreauJeanGOSI(double theta, double gamma):
     _useGamma = false;
   }
 }
-void MoreauJeanGOSI::initializeDynamicalSystem( double t, SP::DynamicalSystem ds)
+void MoreauJeanGOSI::initializeWorkVectorsForDS( double t, SP::DynamicalSystem ds)
 {
   // Get work buffers from the graph
   VectorOfVectors& workVectors = *_initializeDSWorkVectors(ds);
@@ -112,7 +112,7 @@ void MoreauJeanGOSI::initializeDynamicalSystem( double t, SP::DynamicalSystem ds
   }
 }
 
-void MoreauJeanGOSI::fillDSLinks(Interaction &inter,
+void MoreauJeanGOSI::initializeWorkVectorsForInteraction(Interaction &inter,
                                  InteractionProperties& interProp,
                                  DynamicalSystemsGraph & DSG)
 {
@@ -146,7 +146,7 @@ void MoreauJeanGOSI::fillDSLinks(Interaction &inter,
 
   // if (!(checkOSI(DSG.descriptor(ds1)) && checkOSI(DSG.descriptor(ds2))))
   // {
-  //   RuntimeException::selfThrow("MoreauJeanGOSI::fillDSLinks. The implementation is not correct for two different OSI for one interaction");
+  //   RuntimeException::selfThrow("MoreauJeanGOSI::initializeWorkVectorsForInteraction. The implementation is not correct for two different OSI for one interaction");
   // }
 
 

@@ -41,17 +41,17 @@ MoreauJeanBilbaoOSI::MoreauJeanBilbaoOSI():
   _steps=1;
 }
 
-void MoreauJeanBilbaoOSI::initializeDynamicalSystem( double t, SP::DynamicalSystem ds)
+void MoreauJeanBilbaoOSI::initializeWorkVectorsForDS( double t, SP::DynamicalSystem ds)
 {
   // Get work buffers from the graph
   // const DynamicalSystemsGraph::VDescriptor& dsv = _dynamicalSystemsGraph->descriptor(ds);
   //if(!(checkOSI(dsv)))
-  // RuntimeException::selfThrow("MoreauJeanBilbaoOSI::initializeDynamicalSystem(m,t,ds) - ds does not belong to the OSI.");
+  // RuntimeException::selfThrow("MoreauJeanBilbaoOSI::initializeWorkVectorsForDS(m,t,ds) - ds does not belong to the OSI.");
   VectorOfVectors& work_ds = *_initializeDSWorkVectors(ds);
   //VectorOfVectors& work_ds = *_dynamicalSystemsGraph->properties(dsv).workVectors;
   Type::Siconos dsType = Type::value(*ds);
   if(dsType != Type::LagrangianLinearDiagonalDS)
-    RuntimeException::selfThrow("MoreauJeanBilbaoOSI::initializeDynamicalSystem - not yet implemented for Dynamical system of type : " + Type::name(*ds));
+    RuntimeException::selfThrow("MoreauJeanBilbaoOSI::initializeWorkVectorsForDS - not yet implemented for Dynamical system of type : " + Type::name(*ds));
 
   work_ds.resize(MoreauJeanBilbaoOSI::WORK_LENGTH);
   // - work buffer, used to save vfree.
@@ -64,7 +64,7 @@ void MoreauJeanBilbaoOSI::initializeDynamicalSystem( double t, SP::DynamicalSyst
   lldds.swapInMemory();
 }
 
-void MoreauJeanBilbaoOSI::fillDSLinks(Interaction &inter, InteractionProperties& interProp,
+void MoreauJeanBilbaoOSI::initializeWorkVectorsForInteraction(Interaction &inter, InteractionProperties& interProp,
 				  DynamicalSystemsGraph & DSG)
 {
   // Get the dynamical systems linked by inter
@@ -487,7 +487,7 @@ void MoreauJeanBilbaoOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vert
   // Get relation and non smooth law types
   // RELATION::TYPES relationType = inter.relation()->getType();
   // RELATION::SUBTYPES relationSubType = inter.relation()->getSubType();
-  // check relation type: done in fillDSLinks.
+  // check relation type: done in initializeWorkVectorsForInteraction.
   // if(relationType != Lagrangian || relationSubType != LinearR)
   //   RuntimeException::selfThrow("MoreauJeanBilbaoOSI::computeFreeOutput only Lagrangian Linear Relations are allowed.");
 

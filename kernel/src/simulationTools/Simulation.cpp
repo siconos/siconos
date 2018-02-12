@@ -197,7 +197,7 @@ void Simulation::updateIndexSets()
 
 void Simulation::insertNonSmoothProblem(SP::OneStepNSProblem osns, int Id)
 {
-  if (_allNSProblems->size() > Id)
+  if (_allNSProblems->size() > (unsigned int)Id)
   {
     if ((*_allNSProblems)[Id])
       RuntimeException::selfThrow("Simulation - insertNonSmoothProblem(osns), trying to insert a OSNSP already existing. ");
@@ -283,7 +283,7 @@ void Simulation::initialize()
         }
       }
       OneStepIntegrator& osi = *DSG->properties(DSG->descriptor(ds)).osi;
-      osi.initializeDynamicalSystem(getTk(),ds);
+      osi.initializeWorkVectorsForDS(getTk(),ds);
     }
     else if (changes.typeOfChange == NonSmoothDynamicalSystem::addInteraction)
     {
@@ -420,14 +420,14 @@ void Simulation::initializeInteraction(double time, SP::Interaction inter)
   InteractionProperties& i_prop = indexSet0->properties(ui);
   if (&osi1 == &osi2 )
     {
-      osi1.fillDSLinks(*inter, i_prop,  DSG);
+      osi1.initializeWorkVectorsForInteraction(*inter, i_prop,  DSG);
       osi1.update_interaction_output(*inter, time, i_prop);
     }
   else
     {
-      osi1.fillDSLinks(*inter, i_prop,  DSG);
+      osi1.initializeWorkVectorsForInteraction(*inter, i_prop,  DSG);
       osi1.update_interaction_output(*inter, time, i_prop);
-      osi2.fillDSLinks(*inter, i_prop,  DSG);
+      osi2.initializeWorkVectorsForInteraction(*inter, i_prop,  DSG);
       osi2.update_interaction_output(*inter, time, i_prop);
     }
   DEBUG_END("Simulation::initializeInteraction(double time, SP::Interaction inter)\n");
@@ -634,7 +634,7 @@ void Simulation::updateOutput(unsigned int)
 //    *
 //    * 4. If Simulation already initialized, then DS work vectors in
 //    *    _dynamicalSystemsGraph properties for the DS must be
-//    *    initialized (OSI::initializeDynamicalSystem), otherwise it will
+//    *    initialized (OSI::initializeWorkVectorsForDS), otherwise it will
 //    *    be called later during Simulation::initialize().
 //   */
 
@@ -648,5 +648,5 @@ void Simulation::updateOutput(unsigned int)
 //   // If OSI has no DSG yet, assume DS will be initialized later.
 //   // (Typically, during Simulation::initialize())
 //   if (osi->dynamicalSystemsGraph())
-//     osi->initializeDynamicalSystem(*m, time, ds);
+//     osi->initializeWorkVectorsForDS(*m, time, ds);
 // }

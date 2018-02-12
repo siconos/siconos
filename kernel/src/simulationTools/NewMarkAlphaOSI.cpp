@@ -40,7 +40,7 @@ NewMarkAlphaOSI::NewMarkAlphaOSI(double new_beta, double new_gamma, double new_a
   _alpha_f = new_alpha_f;
   _orderDenseOutput = 5.0;
   _IsVelocityLevel = flag;
-  // Set levels. This may depend on the nonsmooth law and will be updated during fillDSLinks(...) call.
+  // Set levels. This may depend on the nonsmooth law and will be updated during initializeWorkVectorsForInteraction(...) call.
   _levelMinForOutput=0;
   _levelMaxForOutput=2;
   _levelMinForInput=1;
@@ -57,7 +57,7 @@ NewMarkAlphaOSI::NewMarkAlphaOSI(double _rho_infty, bool flag = false):
   _beta = 0.25 * std::pow((_gamma + 0.5), 2);
   _orderDenseOutput = 5.0;
   _IsVelocityLevel = flag;
-  // Set levels. This may depend on the nonsmooth law and will be updated during fillDSLinks(...) call.
+  // Set levels. This may depend on the nonsmooth law and will be updated during initializeWorkVectorsForInteraction(...) call.
   _levelMinForOutput=0;
   _levelMaxForOutput=2;
   _levelMinForInput=1;
@@ -403,9 +403,9 @@ void NewMarkAlphaOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_i
   DEBUG_END("NewMarkAlphaOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, OneStepNSProblem* osnsp)\n");
 }
 
-void NewMarkAlphaOSI::initializeDynamicalSystem( double t, SP::DynamicalSystem ds)
+void NewMarkAlphaOSI::initializeWorkVectorsForDS( double t, SP::DynamicalSystem ds)
 {
-  DEBUG_BEGIN("NewMarkAlphaOSI::initializeDynamicalSystem( double t, SP::DynamicalSystem ds)\n")
+  DEBUG_BEGIN("NewMarkAlphaOSI::initializeWorkVectorsForDS( double t, SP::DynamicalSystem ds)\n")
 
   // Get work buffers from the graph
   VectorOfVectors& workVectors = *_initializeDSWorkVectors(ds);
@@ -458,15 +458,15 @@ void NewMarkAlphaOSI::initializeDynamicalSystem( double t, SP::DynamicalSystem d
     RuntimeException::selfThrow("In NewMarkAlphaOSI::initialize: this type of DS is not yet implemented");
   }
 
-  DEBUG_END("NewMarkAlphaOSI::initializeDynamicalSystem( double t, SP::DynamicalSystem ds)\n")
+  DEBUG_END("NewMarkAlphaOSI::initializeWorkVectorsForDS( double t, SP::DynamicalSystem ds)\n")
 
 
     }
-void NewMarkAlphaOSI::fillDSLinks(Interaction &inter,
+void NewMarkAlphaOSI::initializeWorkVectorsForInteraction(Interaction &inter,
                                   InteractionProperties& interProp,
                                   DynamicalSystemsGraph & DSG)
 {
-  DEBUG_BEGIN("NewMarkAlphaOSI::fillDSLinks(...)\n")
+  DEBUG_BEGIN("NewMarkAlphaOSI::initializeWorkVectorsForInteraction(...)\n")
   SP::DynamicalSystem ds1= interProp.source;
   SP::DynamicalSystem ds2= interProp.target;
   assert(ds1);
@@ -505,10 +505,10 @@ void NewMarkAlphaOSI::fillDSLinks(Interaction &inter,
     _levelMaxForOutput = 4;
     _levelMinForInput = 1;
     _levelMaxForInput = 2;
-    RuntimeException::selfThrow("NewMarkAlphaOSI::fillDSLinks  not yet implemented for nonsmooth law of type NewtonImpactFrictionNSL");
+    RuntimeException::selfThrow("NewMarkAlphaOSI::initializeWorkVectorsForInteraction  not yet implemented for nonsmooth law of type NewtonImpactFrictionNSL");
   }
   else
-    RuntimeException::selfThrow("NewMarkAlphaOSI::fillDSLinks not yet implemented  for nonsmooth of type");
+    RuntimeException::selfThrow("NewMarkAlphaOSI::initializeWorkVectorsForInteraction not yet implemented  for nonsmooth of type");
 
   // Check if interations levels (i.e. y and lambda sizes) are compliant with the current osi.
   _check_and_update_interaction_levels(inter);
@@ -519,7 +519,7 @@ void NewMarkAlphaOSI::fillDSLinks(Interaction &inter,
   /* allocate and set work vectors for the osi */
   if (!(checkOSI(DSG.descriptor(ds1)) && checkOSI(DSG.descriptor(ds2))))
   {
-    RuntimeException::selfThrow("NewMarkAlphaOSI::fillDSLinks. The implementation is not correct for two different OSI for one interaction");
+    RuntimeException::selfThrow("NewMarkAlphaOSI::initializeWorkVectorsForInteraction. The implementation is not correct for two different OSI for one interaction");
   }
   VectorOfVectors &workVds1 = *DSG.properties(DSG.descriptor(ds1)).workVectors;
   if (relationType == Lagrangian)
@@ -555,7 +555,7 @@ void NewMarkAlphaOSI::fillDSLinks(Interaction &inter,
   }
 
 
-  DEBUG_END("NewMarkAlphaOSI::fillDSLinks(...)\n")
+  DEBUG_END("NewMarkAlphaOSI::initializeWorkVectorsForInteraction(...)\n")
 }
 
 void NewMarkAlphaOSI::prepareNewtonIteration(double time)

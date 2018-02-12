@@ -111,7 +111,7 @@ unsigned int D1MinusLinearOSI::numberOfIndexSets() const
   RuntimeException::selfThrow("D1MinusLinearOSI::numberOfIndexSet - not implemented for D1minusLinear of type: " + _typeOfD1MinusLinearOSI);
   return 0;
 }
-void D1MinusLinearOSI::initializeDynamicalSystem(double t, SP::DynamicalSystem ds)
+void D1MinusLinearOSI::initializeWorkVectorsForDS(double t, SP::DynamicalSystem ds)
 {
   // Get work buffers from the graph
   VectorOfVectors& workVectors = *_initializeDSWorkVectors(ds);
@@ -205,7 +205,7 @@ void D1MinusLinearOSI::initialize_nonsmooth_problems()
   }
 }
 
-void D1MinusLinearOSI::fillDSLinks(Interaction &inter,
+void D1MinusLinearOSI::initializeWorkVectorsForInteraction(Interaction &inter,
 				     InteractionProperties& interProp,
 				     DynamicalSystemsGraph & DSG)
 {
@@ -246,7 +246,7 @@ void D1MinusLinearOSI::fillDSLinks(Interaction &inter,
               << checkOSI(DSG.descriptor(ds2)) << std::endl;
 
 
-    RuntimeException::selfThrow("D1MinusLinearOSI::fillDSLinks. The implementation is not correct for two different OSI for one interaction");
+    RuntimeException::selfThrow("D1MinusLinearOSI::initializeWorkVectorsForInteraction. The implementation is not correct for two different OSI for one interaction");
   }
 
 

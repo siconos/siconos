@@ -60,9 +60,9 @@ ZeroOrderHoldOSI::ZeroOrderHoldOSI():
   _levelMaxForInput =0;
 }
 
-void ZeroOrderHoldOSI::initializeDynamicalSystem( double t, SP::DynamicalSystem ds)
+void ZeroOrderHoldOSI::initializeWorkVectorsForDS( double t, SP::DynamicalSystem ds)
 {
-  DEBUG_BEGIN("void ZeroOrderHoldOSI::initializeDynamicalSystem( double t, SP::DynamicalSystem ds)\n");
+  DEBUG_BEGIN("void ZeroOrderHoldOSI::initializeWorkVectorsForDS( double t, SP::DynamicalSystem ds)\n");
   // Get work buffers from the graph
   VectorOfVectors& workVectors = *_initializeDSWorkVectors(ds);
 
@@ -139,10 +139,10 @@ void ZeroOrderHoldOSI::initializeDynamicalSystem( double t, SP::DynamicalSystem 
   workVectors.resize(OneStepIntegrator::work_vector_of_vector_size);
   workVectors[OneStepIntegrator::free].reset(new SiconosVector(ds->dimension()));
   workVectors[OneStepIntegrator::delta_x_for_relation].reset(new SiconosVector(ds->dimension()));
-  DEBUG_END("void ZeroOrderHoldOSI::initializeDynamicalSystem( double t, SP::DynamicalSystem ds)\n");
+  DEBUG_END("void ZeroOrderHoldOSI::initializeWorkVectorsForDS( double t, SP::DynamicalSystem ds)\n");
 }
 
-void ZeroOrderHoldOSI::fillDSLinks(Interaction &inter,
+void ZeroOrderHoldOSI::initializeWorkVectorsForInteraction(Interaction &inter,
 				     InteractionProperties& interProp,
 				     DynamicalSystemsGraph & DSG)
 {
@@ -174,7 +174,7 @@ void ZeroOrderHoldOSI::fillDSLinks(Interaction &inter,
   /* allocate and set work vectors for the osi */
   if (!(checkOSI(DSG.descriptor(ds1)) && checkOSI(DSG.descriptor(ds2))))
   {
-    RuntimeException::selfThrow("ZeroOrderHoldOSI::fillDSLinks. The implementation is not correct for two different OSI for one interaction");
+    RuntimeException::selfThrow("ZeroOrderHoldOSI::initializeWorkVectorsForInteraction. The implementation is not correct for two different OSI for one interaction");
   }
 
   VectorOfVectors &workVds1 = *DSG.properties(DSG.descriptor(ds1)).workVectors;

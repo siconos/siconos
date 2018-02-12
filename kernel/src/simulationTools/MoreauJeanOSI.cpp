@@ -111,9 +111,9 @@ SP::SiconosMatrix MoreauJeanOSI::WBoundaryConditions(SP::DynamicalSystem ds)
 }
 
 
-void MoreauJeanOSI::initializeDynamicalSystem(double t, SP::DynamicalSystem ds)
+void MoreauJeanOSI::initializeWorkVectorsForDS(double t, SP::DynamicalSystem ds)
 {
-  DEBUG_BEGIN("MoreauJeanOSI::initializeDynamicalSystem(Model&, double t, SP::DynamicalSystem ds)\n");
+  DEBUG_BEGIN("MoreauJeanOSI::initializeWorkVectorsForDS(Model&, double t, SP::DynamicalSystem ds)\n");
   VectorOfVectors& workVectors = *_initializeDSWorkVectors(ds);
   workVectors.resize(MoreauJeanOSI::WORK_LENGTH);
 
@@ -157,13 +157,13 @@ void MoreauJeanOSI::initializeDynamicalSystem(double t, SP::DynamicalSystem ds)
     neds->computeForces(t, neds->q(), v);
     neds->swapInMemory();
   }
-  DEBUG_END("MoreauJeanOSI::initializeDynamicalSystem(Model&, double t, SP::DynamicalSystem ds)\n");
+  DEBUG_END("MoreauJeanOSI::initializeWorkVectorsForDS(Model&, double t, SP::DynamicalSystem ds)\n");
 
 }
-void MoreauJeanOSI::fillDSLinks(Interaction &inter, InteractionProperties& interProp,
+void MoreauJeanOSI::initializeWorkVectorsForInteraction(Interaction &inter, InteractionProperties& interProp,
                                   DynamicalSystemsGraph & DSG)
 {
-  DEBUG_BEGIN("MoreauJeanOSI::fillDSLinks(Interaction &inter, InteractionProperties& interProp, DynamicalSystemsGraph & DSG)\n");
+  DEBUG_BEGIN("MoreauJeanOSI::initializeWorkVectorsForInteraction(Interaction &inter, InteractionProperties& interProp, DynamicalSystemsGraph & DSG)\n");
   SP::DynamicalSystem ds1= interProp.source;
   SP::DynamicalSystem ds2= interProp.target;
   assert(ds1);
@@ -235,7 +235,7 @@ void MoreauJeanOSI::fillDSLinks(Interaction &inter, InteractionProperties& inter
       DSlink[xfree]->setVectorPtr(1,workVds2[MoreauJeanOSI::VFREE]);
     }
   }
-  DEBUG_END("MoreauJeanOSI::fillDSLinks(Interaction &inter, InteractionProperties& interProp, DynamicalSystemsGraph & DSG)\n");
+  DEBUG_END("MoreauJeanOSI::initializeWorkVectorsForInteraction(Interaction &inter, InteractionProperties& interProp, DynamicalSystemsGraph & DSG)\n");
 
 }
 

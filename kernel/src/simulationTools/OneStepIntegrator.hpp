@@ -265,7 +265,7 @@ public:
    * \param t time of initialization
    * \param ds the dynamical system
    */
-  virtual void initializeDynamicalSystem(double t, SP::DynamicalSystem ds) = 0 ;
+  virtual void initializeWorkVectorsForDS(double t, SP::DynamicalSystem ds) = 0 ;
 
   /** initialization of the work vectors and matrices (properties) related to
    *  one interaction on the graph and needed by the osi
@@ -273,7 +273,7 @@ public:
    * \param interProp the properties on the graph
    * \param DSG the dynamical systems graph
    */
-  virtual void fillDSLinks(Interaction &inter,
+  virtual void initializeWorkVectorsForInteraction(Interaction &inter,
                              InteractionProperties& interProp,
                              DynamicalSystemsGraph & DSG) = 0 ;
 

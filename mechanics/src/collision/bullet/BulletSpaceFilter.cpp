@@ -139,7 +139,7 @@ struct ForPosition : public Question<SP::SiconosVector>
 //   template<typename T>
 //   void operator()(const T& osi)
 //   {
-//     const_cast<T*>(&osi)->initializeDynamicalSystem(*(this->m), this->time, this->ds);
+//     const_cast<T*>(&osi)->initializeWorkVectorsForDS(*(this->m), this->time, this->ds);
 //   }
 // };
 
