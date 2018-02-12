@@ -23,6 +23,7 @@
 #include "SimulationGraphs.hpp"
 
 #include <iostream>
+// #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
 #include "debug.h"
@@ -55,8 +56,12 @@ LagrangianLinearTIR::LagrangianLinearTIR(SP::SimpleMatrix C, SP::SiconosVector e
 
 void LagrangianLinearTIR::initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
 {
+  checkSize(inter);
+}
+void LagrangianLinearTIR::checkSize(Interaction& inter)
+{
   unsigned int sizeY = inter.getSizeOfY();
-
+  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
   if (!(_jachq) || _jachq->size(1) !=  inter.getSizeOfDS() ||  _jachq->size(0) != sizeY)
     RuntimeException::selfThrow("LagrangianLinearTIR::initializeWorkVectorsAndMatrices inconsistent sizes between H matrix and the interaction.");
 
@@ -70,9 +75,9 @@ void LagrangianLinearTIR::initializeWorkVectorsAndMatrices(Interaction& inter, V
 
 
 }
-
 void LagrangianLinearTIR::computeOutput(double time, Interaction& inter, unsigned int derivativeNumber)
 {
+  DEBUG_BEGIN("LagrangianLinearTIR::computeOutput(double time, Interaction& inter, unsigned int derivativeNumber)\n");
   // get y and lambda of the interaction
   SiconosVector& y = *inter.y(derivativeNumber);
   VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
@@ -91,17 +96,20 @@ void LagrangianLinearTIR::computeOutput(double time, Interaction& inter, unsigne
     SiconosVector& lambda = *inter.lambda(derivativeNumber);
     prod(*_jachlambda, lambda, y, false);
   }
+  DEBUG_END("LagrangianLinearTIR::computeOutput(double time, Interaction& inter, unsigned int derivativeNumber)\n");
 }
 void LagrangianLinearTIR::computeInput(double time, Interaction& inter, unsigned int level)
 {
-  
+  DEBUG_BEGIN("void LagrangianLinearTIR::computeInput(double time, Interaction& inter, unsigned int level)\n")
   // get lambda of the concerned interaction
   SiconosVector& lambda = *inter.lambda(level);
   VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
   // computation of p = Ht lambda
-  DEBUG_PRINTF("LTIR::computeInp()%d\n", level);
+  DEBUG_EXPR(lambda.display(););
+  DEBUG_EXPR(_jachq->display(););
+  DEBUG_EXPR(DSlink[LagrangianR::p0 + level]->display(););
   prod(lambda, *_jachq, *DSlink[LagrangianR::p0 + level], false);
-  DEBUG_BEGIN("LTIR END ()\n");
+  DEBUG_END("void LagrangianLinearTIR::computeInput(double time, Interaction& inter, unsigned int level)\n")
 }
 
 void LagrangianLinearTIR::display() const

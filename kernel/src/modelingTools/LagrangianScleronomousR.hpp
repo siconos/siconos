@@ -219,6 +219,11 @@ public:
 
   virtual void initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
   
+  /** check sizes of the relation specific operators.
+   * \param inter an Interaction using this relation
+   */
+  virtual void checkSize(Interaction& inter);
+
   ACCEPT_STD_VISITORS();
 
 };

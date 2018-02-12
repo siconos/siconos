@@ -52,7 +52,9 @@ void LagrangianCompliantR::initializeWorkVectorsAndMatrices(Interaction& inter, 
   else
     _jachlambda->resize(sizeY, sizeY);
 }
-
+void LagrangianCompliantR::checkSize(Interaction& inter)
+{
+}
 void LagrangianCompliantR::computeh(double time, SiconosVector& q0, SiconosVector& lambda, SiconosVector& z, SiconosVector& y)
 {
   if (_pluginh->fPtr)

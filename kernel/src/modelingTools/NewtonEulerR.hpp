@@ -104,7 +104,8 @@ protected:
 
 
 public:
-  NewtonEulerR(): Relation(RELATION::NewtonEuler, RELATION::NonLinearR) {}
+  NewtonEulerR(): Relation(RELATION::NewtonEuler, RELATION::NonLinearR){};
+
 
   /** destructor
   */
@@ -187,6 +188,13 @@ public:
    * \param workM
    */
   virtual void initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
+
+  virtual void initialize(Interaction& inter);
+
+  /** check sizes of the relation specific operators.
+   * \param inter an Interaction using this relation
+   */
+  virtual void checkSize(Interaction& inter);
 
   /** to compute y = h(q,v,t) using plug-in mechanism
   * \param time current time

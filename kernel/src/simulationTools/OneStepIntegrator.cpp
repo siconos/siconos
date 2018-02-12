@@ -53,6 +53,8 @@ OneStepIntegrator::_initializeDSWorkVectors(SP::DynamicalSystem ds)
 
   return wv;
 }
+
+
 void OneStepIntegrator::initialize()
 {
   if (_extraAdditionalTerms)

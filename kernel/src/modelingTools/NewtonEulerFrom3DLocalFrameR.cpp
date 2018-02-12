@@ -45,6 +45,17 @@ void NewtonEulerFrom3DLocalFrameR::initializeWorkVectorsAndMatrices(Interaction&
   _AUX2.reset(new SimpleMatrix(3, 3));
   //  _isContact=1;
 }
+void NewtonEulerFrom3DLocalFrameR::initialize(Interaction& inter)
+{
+  NewtonEulerFrom1DLocalFrameR::initialize(inter);
+  unsigned int qSize = 7 * (inter.getSizeOfDS() / 6);
+  /*keep only the distance.*/
+  _jachq.reset(new SimpleMatrix(3, qSize));
+
+  _RotationAbsToContactFrame.reset(new SimpleMatrix(3, 3));
+  _AUX2.reset(new SimpleMatrix(3, 3));
+  //  _isContact=1;
+}
 void NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts(SP::SiconosVector q1)
 {
   DEBUG_BEGIN("NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts(SP::SiconosVector q1)\n");

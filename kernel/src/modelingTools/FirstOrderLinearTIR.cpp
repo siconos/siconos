@@ -64,8 +64,12 @@ void FirstOrderLinearTIR::initializeWorkVectorsAndMatrices(Interaction& inter, V
   if (!_B)
     RuntimeException::selfThrow("FirstOrderLinearTIR::initialize() B is null and is a required input.");
 
-  // Check if various operators sizes are consistent.
-  // Reference: interaction.
+  checkSize(inter);
+}
+void FirstOrderLinearTIR::checkSize(Interaction& inter)
+{
+  DEBUG_PRINT("FirstOrderLinearTIR::checkSize(Interaction & inter)\n");
+  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
 
   DEBUG_PRINTF("_C->size(0) = %i,\t inter.getSizeOfY() = %i\n ",_C->size(0),inter.getSizeOfY() );
   DEBUG_PRINTF("_C->size(1) = %i,\t inter.getSizeOfDS() = %i\n ",_C->size(1),inter.getSizeOfDS() );
@@ -84,6 +88,7 @@ void FirstOrderLinearTIR::initializeWorkVectorsAndMatrices(Interaction& inter, V
     assert(((_F->size(0) != inter.getSizeOfY()) && (_F->size(1) != DSlink[FirstOrderR::z]->size())) && "FirstOrderLinearTIR::initialize , inconsistent size between C and F.");
   if (_e)
     assert(_e->size() == inter.getSizeOfY() && "FirstOrderLinearTIR::initialize , inconsistent size between C and e.");
+
 }
 
 void FirstOrderLinearTIR::computeh(BlockVector& x, SiconosVector& lambda, BlockVector& z, SiconosVector& y)

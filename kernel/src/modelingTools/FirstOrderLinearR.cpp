@@ -106,6 +106,17 @@ void FirstOrderLinearR::initializeWorkVectorsAndMatrices(Interaction& inter, Vec
   {
     workV[FirstOrderR::e].reset(new SiconosVector(sizeY));
   }
+  checkSize(inter);
+}
+void FirstOrderLinearR::checkSize(Interaction& inter)
+{
+
+  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
+
+  // get interesting size
+  unsigned int sizeY = inter.getSizeOfY();
+  unsigned int sizeX = inter.getSizeOfDS();
+  unsigned int sizeZ = DSlink[FirstOrderR::z]->size();
 
   // Check if various operators sizes are consistent.
   // Reference: interaction.
@@ -150,7 +161,6 @@ void FirstOrderLinearR::initializeWorkVectorsAndMatrices(Interaction& inter, Vec
       assert(_e->size() == sizeY && "FirstOrderLinearR::initialize , inconsistent size between C and e.");
   }
 }
-
 void FirstOrderLinearR::computeC(double time, SiconosVector& z, SimpleMatrix& C)
 {
   if (_pluginJachx->fPtr)

@@ -694,6 +694,7 @@ void D1MinusLinearOSI::computeFreeOutputHalfExplicitVelocityLevel(InteractionsGr
   SP::InteractionsGraph indexSet = osnsp->simulation()->indexSet(osnsp->indexSetLevel());
   SP::Interaction inter = indexSet->bundle(vertex_inter);
   VectorOfBlockVectors& DSlink = inter->linkToDSVariables();
+  VectorOfBlockVectors& workBlockV = *indexSet->properties(vertex_inter).workBlockVectors;
   // get relation and non smooth law information
   RELATION::TYPES relationType = inter->relation()->getType(); // relation
   RELATION::SUBTYPES relationSubType = inter->relation()->getSubType();
@@ -744,11 +745,11 @@ void D1MinusLinearOSI::computeFreeOutputHalfExplicitVelocityLevel(InteractionsGr
     /* get the free velocity of the aggregated ds */
     if(relationType == Lagrangian)
     {
-      Xfree = DSlink[LagrangianR::xfree];
+      Xfree = workBlockV[D1MinusLinearOSI::xfree];
     }
     else if(relationType == NewtonEuler)
     {
-      Xfree = DSlink[NewtonEulerR::xfree];
+      Xfree = workBlockV[D1MinusLinearOSI::xfree];
     }
     else
       RuntimeException::selfThrow("D1MinusLinearOSI::computeFreeOutput - unknown relation type.");

@@ -33,11 +33,10 @@
 #include "debug.h"
 
 
-void KneeJointR::initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
+void KneeJointR::initialize(Interaction& inter)
 {
-  NewtonEulerR::initializeWorkVectorsAndMatrices(inter, DSlink, workV, workM);
+  NewtonEulerR::initialize(inter);
 
-  // should be in initialize 
   if (!_dotjachq)
   {
     unsigned int sizeY = inter.getSizeOfY();

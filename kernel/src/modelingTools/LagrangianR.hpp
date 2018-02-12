@@ -69,7 +69,7 @@
 class LagrangianR : public Relation
 {
 public:
-  enum LagrangianRDS  {xfree, z, q0, q1, q2, p0, p1, p2, DSlinkSize};
+  enum LagrangianRDS  {z, q0, q1, q2, p0, p1, p2, DSlinkSize};
   // enum LagrangianRVec {vec_xfree, vec_z, vec_q0, vec_q1, vec_q2, vec_p0, vec_p1, vec_p2, vec_workVecSize};
   // enum LagrangianRMat {mat_C, mat_D, mat_F, mat_workMatSize};
 
@@ -165,7 +165,11 @@ public:
    */
   virtual void initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink,
                                                 VectorOfVectors& workV, VectorOfSMatrices& workM);
-  
+  /** check sizes of the relation specific operators.
+   * \param inter an Interaction using this relation
+   */
+  virtual void checkSize(Interaction& inter) = 0;
+
   /* compute all the H Jacobian 
    * \param time
    * \param inter

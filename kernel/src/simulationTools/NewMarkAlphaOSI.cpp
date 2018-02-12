@@ -305,7 +305,7 @@ void NewMarkAlphaOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_i
   SP::Interaction inter = indexSet->bundle(vertex_inter);
 
   VectorOfBlockVectors& DSlink = inter->linkToDSVariables();
-
+  VectorOfBlockVectors& workBlockV = *indexSet->properties(vertex_inter).workBlockVectors;
   // Get the type of relation
   RELATION::TYPES relationType = inter->relation()->getType();
   RELATION::SUBTYPES relationSubType = inter->relation()->getSubType();
@@ -318,7 +318,7 @@ void NewMarkAlphaOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_i
   SP::BlockVector q_free;
   if(relationType == Lagrangian)
   {
-    q_free = DSlink[LagrangianR::xfree];
+    q_free = workBlockV[NewMarkAlphaOSI::xfree];
   }
   assert(q_free);
   DEBUG_EXPR(q_free->display(););
@@ -479,6 +479,9 @@ void NewMarkAlphaOSI::initializeWorkVectorsForInteraction(Interaction &inter,
 
   VectorOfVectors& workV = *interProp.workVectors;
   VectorOfSMatrices& workM = *interProp.workMatrices;
+  interProp.workBlockVectors.reset(new VectorOfBlockVectors);
+  VectorOfBlockVectors& workBlockV = *interProp.workBlockVectors;
+  workBlockV.resize(NewMarkAlphaOSI::BLOCK_WORK_LENGTH);
 
 
   Relation &relation =  *inter.relation();
@@ -525,8 +528,8 @@ void NewMarkAlphaOSI::initializeWorkVectorsForInteraction(Interaction &inter,
   if (relationType == Lagrangian)
   {
     LagrangianDS& lds = *std11::static_pointer_cast<LagrangianDS> (ds1);
-    DSlink[LagrangianR::xfree].reset(new BlockVector());
-    DSlink[LagrangianR::xfree]->insertPtr(workVds1[OneStepIntegrator::free]);
+    workBlockV[NewMarkAlphaOSI::xfree].reset(new BlockVector());
+    workBlockV[NewMarkAlphaOSI::xfree]->insertPtr(workVds1[OneStepIntegrator::free]);
     DSlink[LagrangianR::p2].reset(new BlockVector());
     DSlink[LagrangianR::p2]->insertPtr(lds.p(2));
     DSlink[LagrangianR::q2].reset(new BlockVector());
@@ -534,8 +537,8 @@ void NewMarkAlphaOSI::initializeWorkVectorsForInteraction(Interaction &inter,
   }
   // else if (relationType == NewtonEuler)
   // {
-  //   DSlink[NewtonEulerR::xfree].reset(new BlockVector());
-  //   DSlink[NewtonEulerR::xfree]->insertPtr(workVds1[OneStepIntegrator::free]);
+  //   workBlockV[NewMarkAlphaOSI::xfree].reset(new BlockVector());
+  //   workBlockV[NewMarkAlphaOSI::xfree]->insertPtr(workVds1[OneStepIntegrator::free]);
   // }
 
   if (ds1 != ds2)
@@ -544,13 +547,13 @@ void NewMarkAlphaOSI::initializeWorkVectorsForInteraction(Interaction &inter,
     if (relationType == Lagrangian)
     {
       LagrangianDS& lds = *std11::static_pointer_cast<LagrangianDS> (ds2);
-      DSlink[LagrangianR::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
+      workBlockV[NewMarkAlphaOSI::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
       DSlink[LagrangianR::p2]->insertPtr(lds.p(2));
       DSlink[LagrangianR::q2]->insertPtr(lds.acceleration());
     }
     // else if (relationType == NewtonEuler)
     // {
-    //   DSlink[NewtonEulerR::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
+    //   workBlockV[NewMarkAlphaOSI::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
     // }
   }
 

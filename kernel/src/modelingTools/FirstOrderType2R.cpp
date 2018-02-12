@@ -85,6 +85,7 @@ void FirstOrderType2R::initializeWorkVectorsAndMatrices(Interaction& inter, Vect
 
 
 }
+void FirstOrderType2R::checkSize(Interaction& inter){}
 
 void FirstOrderType2R::computeh(double time, SiconosVector& x, SiconosVector& lambda, SiconosVector& y)
 {

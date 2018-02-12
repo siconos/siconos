@@ -64,6 +64,7 @@ public:
    */
   virtual void initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink,
                               VectorOfVectors& workV, VectorOfSMatrices& workM);
+  virtual void initialize(Interaction& inter);
 
   /* Default implementation consists in multiplying jachq and T (see NewtonEulerR::computeJachqT)
    * but here we compute the operator from the the contact point locations

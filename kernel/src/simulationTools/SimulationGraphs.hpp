@@ -81,6 +81,7 @@ struct InteractionProperties
                                           for projection*/
   bool forControl;                     /**< true if the relation is used to add a control input to a DS */
   SP::VectorOfVectors workVectors;     /**< set of SiconosVector, useful to ensure contiguous memory vectors, used as buffers in OneStepIntegrator classes. */
+  SP::VectorOfBlockVectors workBlockVectors;     /**< set of BlockVector, used as buffers in OneStepIntegrator classes. */
   SP::VectorOfSMatrices workMatrices;  /**< Internal buffers used on simulation size, to store jacobians or other temporary matrices. */
 
   ACCEPT_SERIALIZATION(InteractionProperties);

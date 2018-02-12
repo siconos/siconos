@@ -41,6 +41,8 @@ public:
   enum {TWO_DT_SIGMA_STAR, ONE_MINUS_THETA, VFREE, WORK_LENGTH};
 
   enum {OSNSP_RHS,WORK_INTERACTION_LENGTH};
+
+  enum MoreauJeanOSI_workBlockVector{xfree, BLOCK_WORK_LENGTH};
   /* Constructor - No extra parameters: depends only on connected ds and simulation time step*/
   MoreauJeanBilbaoOSI();
 

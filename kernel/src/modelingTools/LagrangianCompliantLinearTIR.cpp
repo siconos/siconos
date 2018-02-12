@@ -55,7 +55,12 @@ LagrangianCompliantLinearTIR::LagrangianCompliantLinearTIR(SP::SimpleMatrix C, S
 
 void LagrangianCompliantLinearTIR::initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
 {
+  checkSize(inter);
+}
+void LagrangianCompliantLinearTIR::checkSize(Interaction& inter)
+{
   unsigned int sizeY = inter.getSizeOfY();
+  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
 
   if (!(_jachq) || _jachq->size(1) !=  inter.getSizeOfDS() ||  _jachq->size(0) != sizeY)
     RuntimeException::selfThrow("LagrangianCompliantLinearTIR::initializeWorkVectorsAndMatrices inconsistent sizes between H matrix and the interaction.");
@@ -70,7 +75,6 @@ void LagrangianCompliantLinearTIR::initializeWorkVectorsAndMatrices(Interaction&
   if ((_F) && (
         _F->size(0) != sizeZ || _F->size(1) != sizeZ))
     RuntimeException::selfThrow("LagrangianCompliantLinearTIR::initializeWorkVectorsAndMatrices inconsistent sizes between F matrix and the interaction.");
-
 
 }
 

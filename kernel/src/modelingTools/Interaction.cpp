@@ -381,7 +381,10 @@ void Interaction::initializeLinkToDsVariables(DynamicalSystem& ds1,
     __initDataLagrangian(DSlink, ds1, ds2);
 
   else if (relationType == NewtonEuler)
+  {
     __initDataNewtonEuler(DSlink, ds1, ds2);
+    static_cast<NewtonEulerR&> (*_relation).initialize(*this);
+  }
   else
     RuntimeException::selfThrow("Interaction::initData unknown initialization procedure for \
         a relation of type: " + relationType);

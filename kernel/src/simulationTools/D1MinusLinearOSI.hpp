@@ -159,6 +159,8 @@ public:
 
   enum {OSNSP_RHS,WORK_INTERACTION_LENGTH};
 
+  enum D1MinusLinear_workBlockVector{xfree, BLOCK_WORK_LENGTH};
+
   /** basic constructor
    */
   D1MinusLinearOSI();

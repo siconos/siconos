@@ -135,7 +135,10 @@ public:
    *  \param workM
    */
   virtual void initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
-  
+  /** check sizes of the relation specific operators.
+   * \param inter an Interaction using this relation
+   */
+  virtual void checkSize(Interaction& inter);
   /** Function to compute the matrix C
    * \param time the current time
    * \param z the auxiliary input vector

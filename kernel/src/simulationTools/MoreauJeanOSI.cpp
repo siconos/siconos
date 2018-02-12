@@ -160,8 +160,9 @@ void MoreauJeanOSI::initializeWorkVectorsForDS(double t, SP::DynamicalSystem ds)
   DEBUG_END("MoreauJeanOSI::initializeWorkVectorsForDS(Model&, double t, SP::DynamicalSystem ds)\n");
 
 }
-void MoreauJeanOSI::initializeWorkVectorsForInteraction(Interaction &inter, InteractionProperties& interProp,
-                                  DynamicalSystemsGraph & DSG)
+void MoreauJeanOSI::initializeWorkVectorsForInteraction(Interaction &inter,
+                                                        InteractionProperties& interProp,
+                                                        DynamicalSystemsGraph & DSG)
 {
   DEBUG_BEGIN("MoreauJeanOSI::initializeWorkVectorsForInteraction(Interaction &inter, InteractionProperties& interProp, DynamicalSystemsGraph & DSG)\n");
   SP::DynamicalSystem ds1= interProp.source;
@@ -172,12 +173,17 @@ void MoreauJeanOSI::initializeWorkVectorsForInteraction(Interaction &inter, Inte
   VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
   interProp.workVectors.reset(new VectorOfVectors);
   interProp.workMatrices.reset(new VectorOfSMatrices);
+  interProp.workBlockVectors.reset(new VectorOfBlockVectors);
 
   VectorOfVectors& workV = *interProp.workVectors;
+  VectorOfBlockVectors& workBlockV = *interProp.workBlockVectors;
   VectorOfSMatrices& workM = *interProp.workMatrices;
 
+  workBlockV.resize(MoreauJeanOSI::BLOCK_WORK_LENGTH);
+
   Relation &relation =  *inter.relation();
-  relation.initializeWorkVectorsAndMatrices(inter, DSlink, workV, workM);
+  relation.checkSize(inter);
+  //relation.initializeWorkVectorsAndMatrices(inter, DSlink, workV, workM);
   RELATION::TYPES relationType = relation.getType();
 
   workV.resize(MoreauJeanOSI::WORK_INTERACTION_LENGTH);
@@ -192,26 +198,18 @@ void MoreauJeanOSI::initializeWorkVectorsForInteraction(Interaction &inter, Inte
   inter.initializeMemory(computeResidu,_steps);
 
   /* allocate and set work vectors for the osi */
-  unsigned int xfree =0;
-  if (relationType == Lagrangian)
-  {
-    xfree = LagrangianR::xfree;
-  }
-  else if (relationType == NewtonEuler)
-  {
-    xfree = NewtonEulerR::xfree;
-  }
+  unsigned int xfree = xfree = MoreauJeanOSI::xfree;
 
   if (ds1 != ds2)
   {
     DEBUG_PRINT("ds1 != ds2\n");
-    if ((!DSlink[xfree]) || (DSlink[xfree]->numberOfBlocks() !=2 ))
-      DSlink[xfree].reset(new BlockVector(2));
+    if ((!workBlockV[xfree]) || (workBlockV[xfree]->numberOfBlocks() !=2 ))
+      workBlockV[xfree].reset(new BlockVector(2));
   }
   else
   {
-    if ((!DSlink[xfree]) || (DSlink[xfree]->numberOfBlocks() !=1 ))
-      DSlink[xfree].reset(new BlockVector(1));
+    if ((!workBlockV[xfree]) || (workBlockV[xfree]->numberOfBlocks() !=1 ))
+      workBlockV[xfree].reset(new BlockVector(1));
   }
 
   if(checkOSI(DSG.descriptor(ds1)))
@@ -219,7 +217,7 @@ void MoreauJeanOSI::initializeWorkVectorsForInteraction(Interaction &inter, Inte
     DEBUG_PRINTF("ds1->number() %i is taken into account\n", ds1->number());
     assert(DSG.properties(DSG.descriptor(ds1)).workVectors);
     VectorOfVectors &workVds1 = *DSG.properties(DSG.descriptor(ds1)).workVectors;
-    DSlink[xfree]->setVectorPtr(0,workVds1[MoreauJeanOSI::VFREE]);
+    workBlockV[xfree]->setVectorPtr(0,workVds1[MoreauJeanOSI::VFREE]);
   }
   DEBUG_PRINTF("ds1->number() %i\n",ds1->number());
   DEBUG_PRINTF("ds2->number() %i\n",ds2->number());
@@ -232,7 +230,7 @@ void MoreauJeanOSI::initializeWorkVectorsForInteraction(Interaction &inter, Inte
       DEBUG_PRINTF("ds2->number() %i is taken into account\n",ds2->number());
       assert(DSG.properties(DSG.descriptor(ds2)).workVectors);
       VectorOfVectors &workVds2 = *DSG.properties(DSG.descriptor(ds2)).workVectors;
-      DSlink[xfree]->setVectorPtr(1,workVds2[MoreauJeanOSI::VFREE]);
+      workBlockV[xfree]->setVectorPtr(1,workVds2[MoreauJeanOSI::VFREE]);
     }
   }
   DEBUG_END("MoreauJeanOSI::initializeWorkVectorsForInteraction(Interaction &inter, InteractionProperties& interProp, DynamicalSystemsGraph & DSG)\n");
@@ -1413,7 +1411,7 @@ void MoreauJeanOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_int
   assert(indexSet.bundle(vertex_inter));
   Interaction& inter = *indexSet.bundle(vertex_inter);
   VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
-
+  VectorOfBlockVectors& workBlockV = *indexSet.properties(vertex_inter).workBlockVectors;
 
   // Get relation and non smooth law types
   assert(inter.relation());
@@ -1439,24 +1437,7 @@ void MoreauJeanOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_int
 
   SiconosVector& osnsp_rhs = *(*indexSet.properties(vertex_inter).workVectors)[MoreauJeanOSI::OSNSP_RHS];
 
-  SP::BlockVector Xfree;
-
-  /** \todo VA. All of these values should be stored in a node in the interactionGraph
-   * corresponding to the Interaction
-   * when a MoreauJeanOSI scheme is used.
-   */
-
-//  deltax = DSlink[FirstOrderR::deltax];;
-
-  if(relationType == NewtonEuler)
-  {
-    Xfree = DSlink[NewtonEulerR::xfree];
-  }
-  else if(relationType == Lagrangian)
-  {
-    Xfree = DSlink[LagrangianR::xfree];
-  }
-
+  SP::BlockVector Xfree = workBlockV[MoreauJeanOSI::xfree];
   assert(Xfree);
   DEBUG_EXPR(Xfree->display(););
 

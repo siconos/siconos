@@ -47,6 +47,12 @@ LagrangianRheonomousR::LagrangianRheonomousR(const std::string& pluginh, const s
 void LagrangianRheonomousR::initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
 {
   LagrangianR::initializeWorkVectorsAndMatrices(inter, DSlink, workV, workM);
+  checkSize(inter);
+}
+
+void LagrangianRheonomousR::checkSize(Interaction& inter)
+{
+  LagrangianR::checkSize(inter);
 }
 
 void LagrangianRheonomousR::setComputehDotFunction(const std::string& pluginPath, const std::string& functionName)
@@ -100,7 +106,6 @@ void LagrangianRheonomousR::computeOutput(double time, Interaction& inter, unsig
     computeJachq(time, q, z);
     if (derivativeNumber == 1)
     {
-      unsigned int sizeQ = DSlink[LagrangianR::q0]->size();
       if (!_hDot)
       {
         unsigned int sizeY = inter.getSizeOfY();

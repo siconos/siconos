@@ -87,6 +87,11 @@ public:
   virtual void initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink,
                               VectorOfVectors& workV, VectorOfSMatrices& workM);
 
+  /** check sizes of the relation specific operators.
+   * \param inter an Interaction using this relation
+   */
+  virtual void checkSize(Interaction& inter);
+
   /** default function to compute y = h(x, lambda, t)
   * \param time the current time
   * \param x the state vector
@@ -131,7 +136,7 @@ public:
   *  \param interProp
   *  \param level not used
   */
-  virtual void computeOutput(double time, Interaction& inter, 
+  virtual void computeOutput(double time, Interaction& inter,
                              unsigned int level = 0);
   virtual void computeLinearizedOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level = 0);
   /** default function to compute r, using the data from the Interaction and DS
@@ -145,7 +150,7 @@ public:
   virtual void computeLinearizedInput(double time, Interaction& inter,
                                       InteractionProperties& interProp,
                                       unsigned int level = 0);
-  
+
   /** return true if the relation requires the computation of residu
       \return true if residu are required, false otherwise
    */

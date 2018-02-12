@@ -731,11 +731,11 @@ void D1MinusLinearOSI::computeFreeOutputHalfExplicitAccelerationLevel(Interactio
     /* get the "free" acceleration of the aggregated ds */
     if(relationType == Lagrangian)
     {
-      Xfree = DSlink[LagrangianR::xfree];
+      Xfree = DSlink[D1MinusLinearOSI::xfree];
     }
     else if(relationType == NewtonEuler)
     {
-      Xfree = DSlink[NewtonEulerR::xfree];
+      Xfree = DSlink[D1MinusLinearOSI::xfree];
     }
     else
       RuntimeException::selfThrow("D1MinusLinearOSI::computeFreeOutput - unknown relation type.");

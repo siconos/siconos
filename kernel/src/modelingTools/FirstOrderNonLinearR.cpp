@@ -61,6 +61,9 @@ void FirstOrderNonLinearR::initializeWorkVectorsAndMatrices(Interaction& inter, 
 
 }
 
+void FirstOrderNonLinearR::checkSize(Interaction& inter)
+{}
+
 void FirstOrderNonLinearR::computeh(double time, SiconosVector& x, SiconosVector& lambda, SiconosVector& z, SiconosVector& y)
 {
   if (_pluginh)

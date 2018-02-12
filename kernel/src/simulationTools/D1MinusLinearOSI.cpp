@@ -218,9 +218,13 @@ void D1MinusLinearOSI::initializeWorkVectorsForInteraction(Interaction &inter,
 
   interProp.workVectors.reset(new VectorOfVectors);
   interProp.workMatrices.reset(new VectorOfSMatrices);
+  interProp.workBlockVectors.reset(new VectorOfBlockVectors);
 
   VectorOfVectors& workV = *interProp.workVectors;
   VectorOfSMatrices& workM = *interProp.workMatrices;
+  VectorOfBlockVectors& workBlockV = *interProp.workBlockVectors;
+
+  workBlockV.resize(D1MinusLinearOSI::BLOCK_WORK_LENGTH);
 
   Relation &relation =  *inter.relation();
   relation.initializeWorkVectorsAndMatrices(inter, DSlink, workV, workM);
@@ -258,13 +262,13 @@ void D1MinusLinearOSI::initializeWorkVectorsForInteraction(Interaction &inter,
     DSlink[LagrangianR::p2].reset(new BlockVector());
     DSlink[LagrangianR::p2]->insertPtr(lds.p(2));
 
-    DSlink[LagrangianR::xfree].reset(new BlockVector());
-    DSlink[LagrangianR::xfree]->insertPtr(workVds1[OneStepIntegrator::free]);
+    workBlockV[D1MinusLinearOSI::xfree].reset(new BlockVector());
+    workBlockV[D1MinusLinearOSI::xfree]->insertPtr(workVds1[OneStepIntegrator::free]);
   }
   else if (relationType == NewtonEuler)
   {
-    DSlink[NewtonEulerR::xfree].reset(new BlockVector());
-    DSlink[NewtonEulerR::xfree]->insertPtr(workVds1[OneStepIntegrator::free]);
+    workBlockV[D1MinusLinearOSI::xfree].reset(new BlockVector());
+    workBlockV[D1MinusLinearOSI::xfree]->insertPtr(workVds1[OneStepIntegrator::free]);
   }
 
   if (ds1 != ds2)
@@ -272,14 +276,14 @@ void D1MinusLinearOSI::initializeWorkVectorsForInteraction(Interaction &inter,
     VectorOfVectors &workVds2 = *DSG.properties(DSG.descriptor(ds2)).workVectors;
     if (relationType == Lagrangian)
     {
-      DSlink[LagrangianR::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
+      workBlockV[D1MinusLinearOSI::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
       LagrangianDS& lds = *std11::static_pointer_cast<LagrangianDS> (ds2);
       DSlink[LagrangianR::p2]->insertPtr(lds.p(2));
 
     }
     else if (relationType == NewtonEuler)
     {
-      DSlink[NewtonEulerR::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
+      workBlockV[D1MinusLinearOSI::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
     }
   }
 }

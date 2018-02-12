@@ -93,6 +93,11 @@ public:
   void initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink,
                       VectorOfVectors& workV, VectorOfSMatrices& workM);
 
+  /** check sizes of the relation specific operators.
+   * \param inter an Interaction using this relation
+   */
+  void checkSize(Interaction& inter);
+
   /** default function to compute y
   *  \param time not used
   *  \param inter the Interaction we want to update

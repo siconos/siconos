@@ -141,11 +141,12 @@ protected:
 
 public:
 
-  enum {RESIDU_FREE, VFREE, BUFFER, WORK_LENGTH};
+  enum MoreauJeanOSI_workVector{RESIDU_FREE, VFREE, BUFFER, WORK_LENGTH};
 
-  enum {OSNSP_RHS,WORK_INTERACTION_LENGTH};
+  enum MoreauJeanOSI_workVector_bis{OSNSP_RHS,WORK_INTERACTION_LENGTH};
 
-  
+  enum MoreauJeanOSI_workBlockVector{xfree, BLOCK_WORK_LENGTH};
+
   /** constructor from theta value only
    *  \param theta value for all linked DS (default = 0.5).
    *  \param gamma value for all linked DS (default = NaN and gamma is not used).

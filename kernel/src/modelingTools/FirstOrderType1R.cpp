@@ -71,7 +71,10 @@ void FirstOrderType1R::initializeWorkVectorsAndMatrices(Interaction& inter, Vect
   if (!_B)
     workM[FirstOrderR::mat_B].reset(new SimpleMatrix(sizeDS, sizeY));
 }
+void FirstOrderType1R::checkSize(Interaction& inter)
+{
 
+}
 void FirstOrderType1R::computeh(double time, SiconosVector& x, SiconosVector& z, SiconosVector& y)
 {
   assert(_pluginh && "FirstOrderType1R::computeOutput() is not linked to a plugin function");

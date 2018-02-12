@@ -63,7 +63,7 @@ class SchatzmanPaoliOSI : public OneStepIntegrator
 {
 public:
    enum {OSNSP_RHS,WORK_INTERACTION_LENGTH};
-
+  enum SchatzmanPaoliOSI_workBlockVector{xfree, BLOCK_WORK_LENGTH};
 protected:
   /** serialization hooks
   */

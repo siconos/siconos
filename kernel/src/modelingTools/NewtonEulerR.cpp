@@ -28,6 +28,7 @@
 #include "SimulationGraphs.hpp"
 
 // #define DEBUG_BEGIN_END_ONLY
+// #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
 
@@ -35,12 +36,17 @@
 
 
 #include <iostream>
+// NewtonEulerR(): Relation(RELATION::NewtonEuler, RELATION::NonLinearR)
+// {
 
 
-void NewtonEulerR::initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
+// }
+
+void NewtonEulerR::initialize(Interaction& inter)
 {
 
-  DEBUG_BEGIN("NewtonEulerR::initializeWorkVectorsAndMatrices(Interaction& inter, ...)\n");
+
+  DEBUG_BEGIN("NewtonEulerR::initialize(Interaction& inter)\n");
 
   unsigned int ySize = inter.getSizeOfY();
   unsigned int xSize = inter.getSizeOfDS();
@@ -68,8 +74,6 @@ void NewtonEulerR::initializeWorkVectorsAndMatrices(Interaction& inter, VectorOf
   if (! _jachqT)
     _jachqT.reset(new SimpleMatrix(ySize, xSize));
 
-  //_jachqT.reset(new SimpleMatrix(ySize, xSize));
-
   if (! _T)
   {
     _T.reset(new SimpleMatrix(7, 6));
@@ -79,10 +83,35 @@ void NewtonEulerR::initializeWorkVectorsAndMatrices(Interaction& inter, VectorOf
     _T->setValue(2, 2, 1.0);
   }
   DEBUG_EXPR(_jachqT->display());
+  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
+  if (!_contactForce)
+  {
+    _contactForce.reset(new SiconosVector(DSlink[NewtonEulerR::p1]->size()));
+    _contactForce->zero();
+  }
+  DEBUG_END("NewtonEulerR::initialize(Interaction& inter)\n");
+}
 
+
+void NewtonEulerR::initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
+{
+
+  DEBUG_BEGIN("NewtonEulerR::initializeWorkVectorsAndMatrices(Interaction& inter, ...)\n");
 
   DEBUG_END("NewtonEulerR::initializeWorkVectorsAndMatrices(Interaction& inter)\n");
 }
+
+void NewtonEulerR::checkSize(Interaction& inter)
+{
+  unsigned int ySize = inter.getSizeOfY();
+  unsigned int xSize = inter.getSizeOfDS();
+  unsigned int qSize = 7 * (xSize / 6);
+  assert((_jachq->size(1) == qSize && _jachq->size(0) == ySize) ||
+         (printf("NewtonEuler::initializeWorkVectorsAndMatrices _jachq->size(1) = %d ,_qsize = %d , _jachq->size(0) = %d ,_ysize =%d \n", _jachq->size(1), qSize, _jachq->size(0), ySize) && false) ||
+         ("NewtonEuler::initializeWorkVectorsAndMatrices inconsistent sizes between _jachq matrix and the interaction." && false));
+}
+
+
 
 void NewtonEulerR::setJachq(SP::SimpleMatrix newJachq)
 {
@@ -146,8 +175,9 @@ void NewtonEulerR::computeOutput(double time, Interaction& inter, unsigned int d
       RuntimeException::selfThrow("NewtonEulerR::computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int derivativeNumber) derivativeNumber out of range or not yet implemented.");
   }
   DEBUG_END("NewtonEulerR::computeOutput(...)\n");
-
 }
+
+
 
 /** to compute p
 *  \param double : current time
@@ -171,11 +201,7 @@ void NewtonEulerR::computeInput(double time, Interaction& inter, unsigned int le
 
   if (level == 1) /* \warning : we assume that ContactForce is given by lambda[level] */
   {
-    if (!_contactForce)
-    {
-      _contactForce.reset(new SiconosVector(DSlink[NewtonEulerR::p1]->size()));
-      _contactForce->zero();
-    }
+
     prod(lambda, *_jachqT, *_contactForce, true);
 
     DEBUG_PRINT("NewtonEulerR::computeInput contact force :\n");
@@ -196,11 +222,7 @@ void NewtonEulerR::computeInput(double time, Interaction& inter, unsigned int le
 
   else if (level == 2) /* \warning : we assume that ContactForce is given by lambda[level] */
   {
-    if (!_contactForce)
-    {
-      _contactForce.reset(new SiconosVector(DSlink[NewtonEulerR::p1]->size()));
-      _contactForce->zero();
-    }
+
     prod(lambda, *_jachqT, *_contactForce, true);
     DEBUG_EXPR(_contactForce->display(););
 

@@ -278,9 +278,11 @@ void LsodarOSI::initializeWorkVectorsForInteraction(Interaction &inter,
 
   interProp.workVectors.reset(new VectorOfVectors);
   interProp.workMatrices.reset(new VectorOfSMatrices);
-
+  interProp.workBlockVectors.reset(new VectorOfBlockVectors);
   VectorOfVectors& workV = *interProp.workVectors;
   VectorOfSMatrices& workM = *interProp.workMatrices;
+  VectorOfBlockVectors& workBlockV = *interProp.workBlockVectors;
+  workBlockV.resize(LsodarOSI::BLOCK_WORK_LENGTH);
 
   Relation &relation =  *inter.relation();
   relation.initializeWorkVectorsAndMatrices(inter, DSlink, workV, workM);
@@ -330,8 +332,8 @@ void LsodarOSI::initializeWorkVectorsForInteraction(Interaction &inter,
   if (relationType == Lagrangian)
   {
     LagrangianDS& lds = *std11::static_pointer_cast<LagrangianDS> (ds1);
-    DSlink[LagrangianR::xfree].reset(new BlockVector());
-    DSlink[LagrangianR::xfree]->insertPtr(workVds1[OneStepIntegrator::free]);
+    workBlockV[LsodarOSI::xfree].reset(new BlockVector());
+    workBlockV[LsodarOSI::xfree]->insertPtr(workVds1[OneStepIntegrator::free]);
     DSlink[LagrangianR::p2].reset(new BlockVector());
     DSlink[LagrangianR::p2]->insertPtr(lds.p(2));
     DSlink[LagrangianR::q2].reset(new BlockVector());
@@ -339,8 +341,8 @@ void LsodarOSI::initializeWorkVectorsForInteraction(Interaction &inter,
   }
   // else if (relationType == NewtonEuler)
   // {
-  //   DSlink[NewtonEulerR::xfree].reset(new BlockVector());
-  //   DSlink[NewtonEulerR::xfree]->insertPtr(workVds1[OneStepIntegrator::free]);
+  //   workBlockV[NewtonEulerR::xfree].reset(new BlockVector());
+  //   workBlockV[NewtonEulerR::xfree]->insertPtr(workVds1[OneStepIntegrator::free]);
   // }
 
 
@@ -351,13 +353,13 @@ void LsodarOSI::initializeWorkVectorsForInteraction(Interaction &inter,
     if (relationType == Lagrangian)
     {
       LagrangianDS& lds = *std11::static_pointer_cast<LagrangianDS> (ds2);
-      DSlink[LagrangianR::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
+      workBlockV[LsodarOSI::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
       DSlink[LagrangianR::p2]->insertPtr(lds.p(2));
       DSlink[LagrangianR::q2]->insertPtr(lds.acceleration());
     }
     // else if (relationType == NewtonEuler)
     // {
-    //   DSlink[NewtonEulerR::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
+    //   workBlockV[NewtonEulerR::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
     // }
   }
 }
@@ -628,7 +630,9 @@ void LsodarOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, 
   SP::InteractionsGraph indexSet = osnsp->simulation()->indexSet(osnsp->indexSetLevel());
   SP::Interaction inter = indexSet->bundle(vertex_inter);
   VectorOfBlockVectors& DSlink = inter->linkToDSVariables();
-  // Get relation and non smooth law types
+  VectorOfBlockVectors& workBlockV = *indexSet->properties(vertex_inter).workBlockVectors;
+
+// Get relation and non smooth law types
   RELATION::TYPES relationType = inter->relation()->getType();
   RELATION::SUBTYPES relationSubType = inter->relation()->getSubType();
   unsigned int sizeY = inter->nonSmoothLaw()->size();
@@ -663,7 +667,7 @@ void LsodarOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, 
   {
     if(relationType == Lagrangian)
     {
-      Xfree = DSlink[LagrangianR::xfree];
+      Xfree = workBlockV[LsodarOSI::xfree];
       DEBUG_EXPR(Xfree->display(););
     }
     // else if  (relationType == NewtonEuler)

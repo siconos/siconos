@@ -548,9 +548,12 @@ void Hem5OSI::initializeWorkVectorsForInteraction(Interaction &inter,
 
   interProp.workVectors.reset(new VectorOfVectors);
   interProp.workMatrices.reset(new VectorOfSMatrices);
+  interProp.workBlockVectors.reset(new VectorOfBlockVectors);
 
   VectorOfVectors& workV = *interProp.workVectors;
   VectorOfSMatrices& workM = *interProp.workMatrices;
+  VectorOfBlockVectors& workBlockV = *interProp.workBlockVectors;
+  workBlockV.resize(Hem5OSI::BLOCK_WORK_LENGTH);
 
   Relation &relation =  *inter.relation();
   relation.initializeWorkVectorsAndMatrices(inter, DSlink, workV, workM);
@@ -595,13 +598,13 @@ void Hem5OSI::initializeWorkVectorsForInteraction(Interaction &inter,
   VectorOfVectors &workVds1 = *DSG.properties(DSG.descriptor(ds1)).workVectors;
   if (relationType == Lagrangian)
   {
-    DSlink[LagrangianR::xfree].reset(new BlockVector());
-    DSlink[LagrangianR::xfree]->insertPtr(workVds1[OneStepIntegrator::free]);
+    workBlockV[Hem5OSI::xfree].reset(new BlockVector());
+    workBlockV[Hem5OSI::xfree]->insertPtr(workVds1[OneStepIntegrator::free]);
   }
   // else if (relationType == NewtonEuler)
   // {
-  //   DSlink[NewtonEulerR::xfree].reset(new BlockVector());
-  //   DSlink[NewtonEulerR::xfree]->insertPtr(workVds1[OneStepIntegrator::free]);
+  //   workBlockV[NewtonEulerR::xfree].reset(new BlockVector());
+  //   workBlockV[NewtonEulerR::xfree]->insertPtr(workVds1[OneStepIntegrator::free]);
   // }
 
   if (ds1 != ds2)
@@ -609,11 +612,11 @@ void Hem5OSI::initializeWorkVectorsForInteraction(Interaction &inter,
     VectorOfVectors &workVds2 = *DSG.properties(DSG.descriptor(ds2)).workVectors;
     if (relationType == Lagrangian)
     {
-      DSlink[LagrangianR::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
+      workBlockV[Hem5OSI::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
     }
     // else if (relationType == NewtonEuler)
     // {
-    //   DSlink[NewtonEulerR::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
+    //   workBlockV[NewtonEulerR::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
     // }
   }
 }
@@ -998,7 +1001,7 @@ void Hem5OSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, On
   {
     if(relationType == Lagrangian)
     {
-      Xfree = DSlink[LagrangianR::xfree];
+      Xfree = DSlink[Hem5OSI::xfree];
     }
     // else if  (relationType == NewtonEuler)
     // {

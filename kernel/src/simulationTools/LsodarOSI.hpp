@@ -86,6 +86,7 @@ public:
   
   enum {OSNSP_RHS,WORK_INTERACTION_LENGTH};
 
+  enum LsodarOSI_workBlockVector{xfree, BLOCK_WORK_LENGTH};
 
   /** Lsodar counter : Number of steps taken for the problem so far. */
   static int count_NST;

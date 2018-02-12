@@ -70,6 +70,10 @@ void LagrangianScleronomousR::_zeroPlugin()
 
 void LagrangianScleronomousR::initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
 {
+  checkSize(inter);
+}
+void LagrangianScleronomousR::checkSize(Interaction& inter)
+{
 
 }
 

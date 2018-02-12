@@ -117,13 +117,6 @@ Topology::__addInteractionInIndexSet0(SP::Interaction inter, SP::DynamicalSystem
 
   inter->initializeLinkToDsVariables(*ds1, *ds2_);
 
-  // V.A. 210/06/2017 Could we defer  this initialization ?
-  // F.P. No! DSlink must be uptodate as soon as the
-  // interaction is connected to ds, to ensure computeInput/computeOutput
-  // run properly.
-  // But yes for workVectors and Matrices that are buffers
-  // related to simulation objects.
-  //interProp.DSlink.reset(new VectorOfBlockVectors);
   
   // unsigned int nslawSize = inter->nonSmoothLaw()->size();
   // interProp.block.reset(new SimpleMatrix(nslawSize, nslawSize));

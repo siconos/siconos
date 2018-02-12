@@ -115,6 +115,8 @@ public:
 
   enum {OSNSP_RHS,WORK_INTERACTION_LENGTH};
 
+  enum Hem5OSI_workBlockVector{xfree, BLOCK_WORK_LENGTH};
+
   /** constructor from a minimum set of data
    */
   Hem5OSI();

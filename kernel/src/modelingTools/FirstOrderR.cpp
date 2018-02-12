@@ -39,3 +39,7 @@ void FirstOrderR::initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfB
     }
 }
 
+void FirstOrderR::checkSize(Interaction& inter)
+{
+
+}

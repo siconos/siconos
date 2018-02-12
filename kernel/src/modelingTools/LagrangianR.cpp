@@ -28,8 +28,10 @@ void LagrangianR::initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfB
 {
   // do nothing here, overload this if you need something done
 }
-
-
+void LagrangianR::checkSize(Interaction& inter)
+{
+  // do nothing here, overload this if you need something done
+}
 
 void LagrangianR::_zeroPlugin()
 {
