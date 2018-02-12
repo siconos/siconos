@@ -29,15 +29,7 @@ void LagrangianR::initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfB
   // do nothing here, overload this if you need something done
 }
 
-void LagrangianR::initializeDSLink(Interaction& inter, VectorOfBlockVectors& DSlink)
-{
-  // Memory allocation for G[i], if required (depends on the chosen constructor).
-  unsigned int sizeY = inter.getSizeOfY();
-  unsigned int sizeDS = inter.getSizeOfDS();
 
-  if (! _jachq)
-    _jachq.reset(new SimpleMatrix(sizeY, sizeDS));
-}
 
 void LagrangianR::_zeroPlugin()
 {

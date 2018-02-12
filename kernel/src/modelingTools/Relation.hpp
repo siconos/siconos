@@ -205,12 +205,6 @@ public:
   /** initialize the relation (check sizes, memory allocation ...)
    * \param inter the interaction using this relation
    * \param DSlink the container of the link to DynamicalSystem attributes
-   */
-  virtual void initializeDSLink(Interaction& inter, VectorOfBlockVectors& DSlink) = 0;
-
-  /** initialize the relation (check sizes, memory allocation ...)
-   * \param inter the interaction using this relation
-   * \param DSlink the container of the link to DynamicalSystem attributes
    * \param workV work vectors
    * \param workM work matrices
    */
@@ -218,7 +212,7 @@ public:
 
 
 
-  
+
   /** compute all the H Jacobian
    * \param time the current time
    * \param inter the interaction using this relation
@@ -269,11 +263,11 @@ public:
     return false;
   }
 
-  /** main relation members display 
+  /** main relation members display
    */
   virtual void display() const;
 
-  /** Get _pluginh 
+  /** Get _pluginh
       \return a shared pointer to the plugin
   */
   inline SP::PluggedObject getPluginh() const
@@ -329,7 +323,7 @@ public:
     return _plugine;
   };
   /** visitors hook
-   *  \param inter  interaction 
+   *  \param inter  interaction
    *  \param interProp
    */
   virtual void prepareNewtonIteration(Interaction& inter, InteractionProperties& interProp)

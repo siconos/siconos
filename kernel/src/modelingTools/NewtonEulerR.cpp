@@ -95,12 +95,6 @@ void NewtonEulerR::setJachqPtr(SP::SimpleMatrix newPtr)
 }
 
 
-void NewtonEulerR::initializeDSLink(Interaction& inter, VectorOfBlockVectors& DSlink)
-{
-  _contactForce.reset(new SiconosVector(DSlink[NewtonEulerR::p1]->size()));
-  _contactForce->zero();
-}
-
 
 void NewtonEulerR::computeh(double time, BlockVector& q0, SiconosVector& y)
 {
@@ -177,6 +171,11 @@ void NewtonEulerR::computeInput(double time, Interaction& inter, unsigned int le
 
   if (level == 1) /* \warning : we assume that ContactForce is given by lambda[level] */
   {
+    if (!_contactForce)
+    {
+      _contactForce.reset(new SiconosVector(DSlink[NewtonEulerR::p1]->size()));
+      _contactForce->zero();
+    }
     prod(lambda, *_jachqT, *_contactForce, true);
 
     DEBUG_PRINT("NewtonEulerR::computeInput contact force :\n");
@@ -197,6 +196,11 @@ void NewtonEulerR::computeInput(double time, Interaction& inter, unsigned int le
 
   else if (level == 2) /* \warning : we assume that ContactForce is given by lambda[level] */
   {
+    if (!_contactForce)
+    {
+      _contactForce.reset(new SiconosVector(DSlink[NewtonEulerR::p1]->size()));
+      _contactForce->zero();
+    }
     prod(lambda, *_jachqT, *_contactForce, true);
     DEBUG_EXPR(_contactForce->display(););
 

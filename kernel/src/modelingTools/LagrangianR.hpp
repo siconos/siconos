@@ -157,12 +157,6 @@ public:
     return _jachq;
   }
 
-  /** initialize the relation (check sizes, memory allocation ...)
-   * \param inter the interaction using this relation
-   * \param DSlink the container of the link to DynamicalSystem attributes
-  */
-  void initializeDSLink(Interaction& inter, VectorOfBlockVectors& DSlink);
-
   /** initialize components specific to derived classes.
    * \param inter the interaction using this relation
    * \param DSlink the container of the link to DynamicalSystem attributes

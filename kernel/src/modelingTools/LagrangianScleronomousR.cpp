@@ -70,15 +70,7 @@ void LagrangianScleronomousR::_zeroPlugin()
 
 void LagrangianScleronomousR::initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
 {
-  if (_plugindotjacqh && _plugindotjacqh->fPtr)
-  {
-    if (!_dotjachq)
-    {
-      unsigned int sizeY = inter.getSizeOfY();
-      unsigned int sizeDS = inter.getSizeOfDS();
-      _dotjachq.reset(new SimpleMatrix(sizeY, sizeDS));
-    }
-  }
+
 }
 
 void LagrangianScleronomousR::computeh(SiconosVector& q, SiconosVector& z, SiconosVector& y)
@@ -138,7 +130,7 @@ void LagrangianScleronomousR::computeOutput(double time, Interaction& inter,  un
   SiconosVector q = *DSlink[LagrangianR::q0];
   SiconosVector z = *DSlink[LagrangianR::z];
   if (derivativeNumber == 0)
-  { 
+  {
     computeh(q, z, y);
   }
   else
@@ -146,9 +138,30 @@ void LagrangianScleronomousR::computeOutput(double time, Interaction& inter,  un
    computeJachq(q, z);
 
     if (derivativeNumber == 1)
+    {
+      if (!_jachq)
+      {
+        unsigned int sizeY = inter.getSizeOfY();
+        unsigned int sizeDS = inter.getSizeOfDS();
+        _jachq.reset(new SimpleMatrix(sizeY, sizeDS));
+      }
+
       prod(*_jachq, *DSlink[LagrangianR::q1], y);
+    }
     else if (derivativeNumber == 2)
     {
+      if (!_dotjachq)
+      {
+        if (_plugindotjacqh && _plugindotjacqh->fPtr)
+        {
+          unsigned int sizeY = inter.getSizeOfY();
+          unsigned int sizeDS = inter.getSizeOfDS();
+          _dotjachq.reset(new SimpleMatrix(sizeY, sizeDS));
+        }
+      }
+
+
+
       SiconosVector qDot = *DSlink[LagrangianR::q1];
       computeDotJachq(q, z, qDot);
       prod(*_jachq, *DSlink[LagrangianR::q2], y);
@@ -195,4 +208,3 @@ void LagrangianScleronomousR::computeJach(double time, Interaction& inter, Inter
   // computehDot(time,inter);
   *DSlink[LagrangianR::z] = z;
 }
-

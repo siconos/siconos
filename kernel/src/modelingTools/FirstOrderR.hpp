@@ -95,14 +95,6 @@ public:
   */
   virtual ~FirstOrderR() {};
 
-  /** initialize the relation (check sizes, memory allocation ...)
-   * \param inter the interaction that owns this relation
-   * \param DSlink
-   * \param workV
-   * \param workM
-   */
-  virtual void initializeDSLink(Interaction& inter, VectorOfBlockVectors& DSlink);
-
   virtual void initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM) = 0;
 
   

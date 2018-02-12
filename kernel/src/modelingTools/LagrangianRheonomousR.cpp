@@ -47,19 +47,6 @@ LagrangianRheonomousR::LagrangianRheonomousR(const std::string& pluginh, const s
 void LagrangianRheonomousR::initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
 {
   LagrangianR::initializeWorkVectorsAndMatrices(inter, DSlink, workV, workM);
-
-  unsigned int sizeY = inter.getSizeOfY();
-  // hDot
-  if (!_hDot)
-    _hDot.reset(new SiconosVector(sizeY));
-  else
-    _hDot->resize(sizeY);
-  if (_pluginJachq->fPtr && !_jachq)
-  {
-    unsigned int sizeY = inter.getSizeOfY();
-    unsigned int sizeQ = DSlink[LagrangianR::q0]->size();
-    _jachq.reset(new SimpleMatrix(sizeY, sizeQ));
-  }
 }
 
 void LagrangianRheonomousR::setComputehDotFunction(const std::string& pluginPath, const std::string& functionName)
@@ -80,7 +67,6 @@ void LagrangianRheonomousR::computeh(double time, SiconosVector& q, SiconosVecto
   if (_pluginh->fPtr)
     {
       ((FPtr4)(_pluginh->fPtr))(q.size(), &(q)(0), time, y.size(),  &(y)(0), z.size(), &(z)(0));
-      
     }
 }
 
@@ -95,9 +81,9 @@ void LagrangianRheonomousR::computehDot(double time, SiconosVector& q, SiconosVe
 void LagrangianRheonomousR::computeJachq(double time,  SiconosVector& q, SiconosVector& z)
 {
   if (_jachq && _pluginJachq->fPtr)
-    {
-      ((FPtr4)(_pluginJachq->fPtr))(q.size(), &(q)(0), time, _jachq->size(0), &(*_jachq)(0, 0), z.size(), &(z)(0));
-    }
+  {
+    ((FPtr4)(_pluginJachq->fPtr))(q.size(), &(q)(0), time, _jachq->size(0), &(*_jachq)(0, 0), z.size(), &(z)(0));
+  }
 }
 
 
@@ -114,19 +100,39 @@ void LagrangianRheonomousR::computeOutput(double time, Interaction& inter, unsig
     computeJachq(time, q, z);
     if (derivativeNumber == 1)
     {
+      unsigned int sizeQ = DSlink[LagrangianR::q0]->size();
+      if (!_hDot)
+      {
+        unsigned int sizeY = inter.getSizeOfY();
+        _hDot.reset(new SiconosVector(sizeY));
+      }
       // Computation of the partial derivative w.r.t time of h(q,t)
       computehDot(time, q, z);
+      if (_pluginJachq->fPtr && !_jachq)
+      {
+        unsigned int sizeY = inter.getSizeOfY();
+        unsigned int sizeQ = DSlink[LagrangianR::q0]->size();
+        _jachq.reset(new SimpleMatrix(sizeY, sizeQ));
+      }
       // Computation of the partial derivative w.r.t q of h(q,t) : \nabla_q h(q,t) \dot q
       prod(*_jachq, *DSlink[LagrangianR::q1], y);
       // Sum of the terms
       y += *_hDot;
     }
     else if (derivativeNumber == 2)
+    {
+      if (_pluginJachq->fPtr && !_jachq)
+      {
+        unsigned int sizeY = inter.getSizeOfY();
+        unsigned int sizeQ = DSlink[LagrangianR::q0]->size();
+        _jachq.reset(new SimpleMatrix(sizeY, sizeQ));
+      }
       prod(*_jachq, *DSlink[LagrangianR::q2], y); // Approx:,  ...
-    // \warning : the computation of y[2] (in event-driven
-    // simulation for instance) is approximated by y[2] =
-    // Jach[0]q[2]. For the moment, other terms are neglected
-    // (especially, partial derivatives with respect to time).
+      // \warning : the computation of y[2] (in event-driven
+      // simulation for instance) is approximated by y[2] =
+      // Jach[0]q[2]. For the moment, other terms are neglected
+      // (especially, partial derivatives with respect to time).
+    }
     else
       RuntimeException::selfThrow("LagrangianRheonomousR::computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int derivativeNumber) index >2  not yet implemented.");
   }

@@ -17,10 +17,6 @@
 */
 #include "FirstOrderR.hpp"
 
-void FirstOrderR::initializeDSLink(Interaction& inter, VectorOfBlockVectors& DSlink)
-{
-  
-}
 
 
 void FirstOrderR::initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workVInter, VectorOfSMatrices& workMInter)

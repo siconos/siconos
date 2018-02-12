@@ -386,8 +386,6 @@ void Interaction::initializeLinkToDsVariables(DynamicalSystem& ds1,
     RuntimeException::selfThrow("Interaction::initData unknown initialization procedure for \
         a relation of type: " + relationType);
 
-  // -- Stage 2 : create buffers (in the graph) that will be used for relation/interaction internal operations in DSLink --
-  _relation->initializeDSLink(*this, DSlink);
 }
 
 
