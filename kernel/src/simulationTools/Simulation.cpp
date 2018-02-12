@@ -242,6 +242,10 @@ void Simulation::initialize()
     it->second.clear();
   }
 
+  // Allow the InteractionManager to add/remove any interactions it wants
+  updateWorldFromDS();
+  updateInteractions();
+
   // 3- we initialize new  ds and interaction
   /* Changes to the NSDS are tracked by a changelog, making it fast
    * for the Simulation to scan any changes it has not yet seen and
@@ -250,6 +254,7 @@ void Simulation::initialize()
    * each step. */
   SP::DynamicalSystemsGraph DSG = _nsds->topology()->dSG(0);
   std::list<NonSmoothDynamicalSystem::Changes>::const_iterator itc = _nsdsChangeLogPosition ;
+  bool interactionInitialized = false;
   itc++;
   while(itc != _nsds->changeLog().end())
   {
@@ -284,6 +289,7 @@ void Simulation::initialize()
     {
       SP::Interaction inter = changes.i;
       initializeInteraction(getTk(), inter);
+      interactionInitialized = true;
     }
   }
   _nsdsChangeLogPosition = _nsds->changeLogPosition();
@@ -318,6 +324,18 @@ void Simulation::initialize()
       topo->resetIndexSetPtr(i);
   }
 
+  if (interactionInitialized || !_isInitialized)
+  {
+    // Initialize OneStepNSProblem(s). Depends on the type of simulation.
+    // Warning FP : must be done in any case, even if the interactions set
+    // is empty.
+    initOSNS();
+
+    // Since initOSNS calls updateIndexSets() which resets the
+    // topology->hasChanged() flag, it must be specified explicitly.
+    // Otherwise OneStepNSProblem may fail to update its matrices.
+    _nsds->topology()->setHasChanged(true);
+  }
 
   if(!_isInitialized)
   {
@@ -327,12 +345,6 @@ void Simulation::initialize()
     // === Events manager initialization ===
     _eventsManager->initialize(_T);
     _tinit = _eventsManager->startingTime();
-
-
-    // Initialize OneStepNSProblem(s). Depends on the type of simulation.
-    // Warning FP : must be done in any case, even if the interactions set
-    // is empty.
-    initOSNS();
 
     // Process events at time _tinit. Useful to save values in memories
     // for example.  Warning: can not be called during
@@ -546,8 +558,6 @@ void Simulation::link(SP::Interaction inter,
   DEBUG_PRINTF("link interaction : %d\n", inter->number());
 
   nonSmoothDynamicalSystem()->link(inter, ds1, ds2);
-
-  initializeInteraction(nextTime(), inter);
 }
 
 void Simulation::unlink(SP::Interaction inter)
@@ -557,27 +567,23 @@ void Simulation::unlink(SP::Interaction inter)
 
 void Simulation::updateInteractions()
 {
-  // Update interactions if a manager was provided
+  // Update interactions if a manager was provided.  Changes will be
+  // detected by Simulation::initialize() changelog code.
   if (_interman)
     _interman->updateInteractions(shared_from_this());
-
-  if (_nsdsChangeLogPosition != _nsds->changeLogPosition()) {
-    initOSNS();
-
-    // Since initOSNS calls updateIndexSets() which resets the
-    // topology->hasChanged() flag, it must be specified explicitly.
-    // Otherwise OneStepNSProblem may fail to update its matrices.
-    _nsds->topology()->setHasChanged(true);
-  }
 }
 
 void Simulation::updateInteractionsNewtonIteration()
 {
+  NonSmoothDynamicalSystem::ChangeLogIter it( _nsds->changeLogPosition() );
+
   // Update interactions if a manager was provided
   if (_interman)
     _interman->updateInteractionsNewtonIteration(shared_from_this());
 
-  if (_nsdsChangeLogPosition != _nsds->changeLogPosition()) {
+  // If anything changed, re-init OSNS
+  if (it != _nsds->changeLogPosition() )
+  {
     initOSNS();
 
     // Since initOSNS calls updateIndexSets() which resets the
