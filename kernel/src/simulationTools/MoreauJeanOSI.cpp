@@ -170,21 +170,19 @@ void MoreauJeanOSI::initializeWorkVectorsForInteraction(Interaction &inter,
   assert(ds1);
   assert(ds2);
 
-  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
   interProp.workVectors.reset(new VectorOfVectors);
   interProp.workMatrices.reset(new VectorOfSMatrices);
   interProp.workBlockVectors.reset(new VectorOfBlockVectors);
 
   VectorOfVectors& workV = *interProp.workVectors;
   VectorOfBlockVectors& workBlockV = *interProp.workBlockVectors;
-  VectorOfSMatrices& workM = *interProp.workMatrices;
+  //VectorOfSMatrices& workM = *interProp.workMatrices;
 
   workBlockV.resize(MoreauJeanOSI::BLOCK_WORK_LENGTH);
 
   Relation &relation =  *inter.relation();
   relation.checkSize(inter);
   //relation.initializeWorkVectorsAndMatrices(inter, DSlink, workV, workM);
-  RELATION::TYPES relationType = relation.getType();
 
   workV.resize(MoreauJeanOSI::WORK_INTERACTION_LENGTH);
   workV[MoreauJeanOSI::OSNSP_RHS].reset(new SiconosVector(inter.getSizeOfY()));
