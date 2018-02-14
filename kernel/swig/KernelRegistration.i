@@ -28,6 +28,7 @@
   PY_REGISTER(LagrangianRheonomousR, Kernel);                                   \
   PY_REGISTER(LagrangianScleronomousR, Kernel);                                 \
   PY_REGISTER(LagrangianCompliantR, Kernel);                                    \
+  PY_REGISTER(LagrangianCompliantLinearTIR, Kernel);                                    \
   PY_REGISTER(NewtonEulerR, Kernel);                                            \
   PY_REGISTER(NewtonEulerFrom1DLocalFrameR, Kernel);                            \
   PY_REGISTER(NewtonEulerFrom3DLocalFrameR, Kernel);                            \
