@@ -72,6 +72,7 @@ TimeStepping::TimeStepping(SP::NonSmoothDynamicalSystem nsds,
     _isNewtonConverge(false),
     _newtonUpdateInteractionsPerIteration(false),_displayNewtonConvergence(false),
     _warnOnNonConvergence(true),
+    _resetAllLambda(true),
     _explicitJacobiansOfRelation(false)
 {
 
@@ -89,6 +90,7 @@ TimeStepping::TimeStepping(SP::NonSmoothDynamicalSystem nsds, SP::TimeDiscretisa
     _isNewtonConverge(false),
     _newtonUpdateInteractionsPerIteration(false),_displayNewtonConvergence(false),
     _warnOnNonConvergence(true),
+    _resetAllLambda(true),
     _explicitJacobiansOfRelation(false)
 {
   (*_allNSProblems).resize(nb);
@@ -340,7 +342,10 @@ void TimeStepping::initOSNS()
     // initialization of  OneStepNonSmoothProblem
     for (OSNSIterator itOsns = _allNSProblems->begin(); itOsns != _allNSProblems->end(); ++itOsns)
     {
-      (*itOsns)->initialize(shared_from_this());
+      if (*itOsns)
+        (*itOsns)->initialize(shared_from_this());
+      else
+        RuntimeException::selfThrow("TimeStepping::initOSNS failed. A OneStepNSProblem has not been set. ");
     }
   }
 }
@@ -348,6 +353,11 @@ void TimeStepping::initOSNS()
 void TimeStepping::nextStep()
 {
   DEBUG_BEGIN("void TimeStepping::nextStep()\n");
+  // if(!_isInitialized)
+  // {
+  //   // if the simulation run starts with nextStep();
+  //   initialize();
+  // }
   processEvents();
   DEBUG_END("void TimeStepping::nextStep()\n");
 }
@@ -378,11 +388,6 @@ void TimeStepping::initializeNewtonLoop()
     (*it)->computeInitialNewtonState();
     (*it)->computeResidu();
   }
-
-  // Since computeInitialNewtonState updates each DS position we must
-  // update the Interaction set here as well as during update().
-  updateInteractions();
-  updateWorldFromDS();
 
   SP::InteractionsGraph indexSet0 = _nsds->topology()->indexSet0();
   if (indexSet0->size()>0)
@@ -434,15 +439,17 @@ void TimeStepping::advanceToEvent()
   DEBUG_PRINTF("TimeStepping::advanceToEvent(). Time =%f\n",getTkp1());
 
   initialize();
-
-  // Initialize lambdas of all interactions.
-  SP::InteractionsGraph indexSet0 = _nsds->topology()->indexSet(0);
-  InteractionsGraph::VIterator ui, uiend, vnext;
-  std11::tie(ui, uiend) = indexSet0->vertices();
-  for (vnext = ui; ui != uiend; ui = vnext)
+  if (_resetAllLambda)
   {
-    ++vnext;
-    indexSet0->bundle(*ui)->resetAllLambda();
+    // Initialize lambdas of all interactions.
+    SP::InteractionsGraph indexSet0 = _nsds->topology()->indexSet(0);
+    InteractionsGraph::VIterator ui, uiend, vnext;
+    std11::tie(ui, uiend) = indexSet0->vertices();
+    for (vnext = ui; ui != uiend; ui = vnext)
+    {
+      ++vnext;
+      indexSet0->bundle(*ui)->resetAllLambda();
+    }
   }
   newtonSolve(_newtonTolerance, _newtonMaxIteration);
 }
@@ -568,9 +575,6 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
       updateState();
 
       if (!_isNewtonConverge && _newtonNbIterations < maxStep) {
-        if (_newtonUpdateInteractionsPerIteration)
-          updateInteractionsNewtonIteration();
-        updateWorldFromDS();
         //hasNSProblems = (!_allNSProblems->empty() &&   indexSet0.size() > 0) ? true : false;
         hasNSProblems = (!_allNSProblems->empty()) ? true : false;
         updateOutput();

@@ -40,46 +40,26 @@
 class NonSmoothDynamicalSystem
 {
 public:
-  enum
+  typedef enum
   {
     addDynamicalSystem, rmDynamicalSystem, addInteraction, rmInteraction, clearTopology
-  };
-  
+  } ChangeType;
+
   class Changes
   {
   public:
-    int typeOfChange;
+    ChangeType typeOfChange;
     SP::DynamicalSystem ds;
     SP::Interaction i;
 
-    Changes(int t, SP::DynamicalSystem dsnew ):typeOfChange(t),ds(dsnew){};
-    Changes(int t, SP::Interaction inew):typeOfChange(t),i(inew){};
-    Changes(int t):typeOfChange(t){};
-    void display() const
-    {
-      std::cout << "Changes display   " << this <<std::endl;
-      if (typeOfChange == addDynamicalSystem)
-      {
-        std::cout << "typeOfChange : " << typeOfChange << " : addDynamicalSystem" << std::endl;
-      }
-      else if (typeOfChange == rmDynamicalSystem)
-      {
-        std::cout << "typeOfChange : " << typeOfChange << " : rmDynamicalSystem" << std::endl;
-      }
-      else if (typeOfChange == addInteraction)
-      {
-        std::cout << "typeOfChange : " << typeOfChange << " : addInteraction" << std::endl;
-      }
-      else if (typeOfChange == rmInteraction)
-      {
-        std::cout << "typeOfChange : " << typeOfChange << " : rmInteraction" << std::endl;
-      }
-      else if (typeOfChange == clearTopology)
-      {
-        std::cout << "typeOfChange : " << typeOfChange << " : clearTopology" << std::endl;
-      }
-    };
+    Changes(ChangeType t, SP::DynamicalSystem dsnew ):typeOfChange(t),ds(dsnew){};
+    Changes(ChangeType t, SP::Interaction inew):typeOfChange(t),i(inew){};
+    Changes(ChangeType t):typeOfChange(t){};
+    void display() const;
   };
+
+  typedef std::list<Changes> ChangeLog;
+  typedef ChangeLog::const_iterator ChangeLogIter;
 
 private:
   /** serialization hooks
@@ -279,23 +259,31 @@ public:
   }
 
 
-  inline const std::list<Changes>& changeLog()
+  /** get a reference to the changelog for an NSDS.
+   * \return a reference to the changelog.
+   */
+  inline const ChangeLog& changeLog()
   {
     return _changeLog;
   };
 
-  inline std::list<Changes>::iterator changeLogPosition()
+  /** get an iterator to the last item in the changelog.
+   * \return an iterator pointing at the last item in the changelog.
+   */
+  inline ChangeLogIter changeLogPosition()
   {
-    std::list<Changes>::iterator it = _changeLog.end();
+    std::list<Changes>::const_iterator it = _changeLog.end();
+    // return iterator to last item, i.e. one less than end
     return --it;
   };
 
-  
+  /** clear the changelog up to a given position.
+   *  \param it  This iterator must point to somewhere in the changelog
+   *             for this NSDS.
+   */
+  void clearChangeLogTo(const ChangeLogIter& it);
 
 
-
-
-  
   // === DynamicalSystems management ===
 
   /** get the number of Dynamical Systems present in the NSDS

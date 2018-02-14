@@ -83,6 +83,11 @@ protected:
    * \param workM : work vectors
   */
   void initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
+  /** check sizes of the relation specific operators.
+   * \param inter an Interaction using this relation
+   */
+  virtual void checkSize(Interaction& inter);
+
   void _zeroPlugin();
 
 public:
@@ -126,20 +131,16 @@ public:
   /** to compute output
   *  \param time the current time
   *  \param inter the Interaction owning y
-  *  \param interProp Interaction properties
   *  \param derivativeNumber the number of the derivative to compute,
   *  optional, default = 0.
   */
-  void computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int derivativeNumber = 0);
-
+  void computeOutput(double time, Interaction& inter,  unsigned int derivativeNumber = 0);
   /** to compute the input
   *  \param time the current time
   *  \param inter the Interaction owning lambda
-  *  \param interProp Interaction properties
   *  \param level "derivative" order of lambda used to compute input
   */
-  void computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level = 0);
-
+  void computeInput(double time, Interaction& inter, unsigned int level = 0);
   /* compute all the H Jacobian */
   void computeJach(double time, Interaction& inter, InteractionProperties& interProp);
 

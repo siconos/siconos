@@ -71,7 +71,10 @@ void FirstOrderType1R::initializeWorkVectorsAndMatrices(Interaction& inter, Vect
   if (!_B)
     workM[FirstOrderR::mat_B].reset(new SimpleMatrix(sizeDS, sizeY));
 }
+void FirstOrderType1R::checkSize(Interaction& inter)
+{
 
+}
 void FirstOrderType1R::computeh(double time, SiconosVector& x, SiconosVector& z, SiconosVector& y)
 {
   assert(_pluginh && "FirstOrderType1R::computeOutput() is not linked to a plugin function");
@@ -87,45 +90,49 @@ void FirstOrderType1R::computeg(double time, SiconosVector& lambda, SiconosVecto
   ((Type1Ptr)(_pluging->fPtr))(lambda.size(), &(lambda)(0), r.size(), &(r)(0), z.size(), &(z)(0));
 
 }
-
-void FirstOrderType1R::computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level)
+void FirstOrderType1R::computeOutput(double time, Interaction& inter, unsigned int level)
 {
   SiconosVector& y = *inter.y(0);
   // Warning: temporary method to have contiguous values in memory, copy of block to simple.
+  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
+  BlockVector& x = *DSlink[FirstOrderR::x];
+  BlockVector& z = *DSlink[FirstOrderR::z];
+  // copy into Siconos continuous memory vector
+  SP::SiconosVector x_vec(new SiconosVector(x));
+  SP::SiconosVector z_vec(new SiconosVector(z));
+  
+  computeh(time, *x_vec, *z_vec, y);
 
-  VectorOfBlockVectors& DSlink = *interProp.DSlink;
-  VectorOfVectors& workV = *interProp.workVectors;
-
-  SiconosVector& workX = *workV[FirstOrderR::vec_x];
-  workX = *DSlink[FirstOrderR::x];
-  SiconosVector& workZ = *workV[FirstOrderR::vec_z];
-  workZ = *DSlink[FirstOrderR::z];
-
-  computeh(time, workX, workZ, y);
-
-  *DSlink[FirstOrderR::z] = workZ;
+  *DSlink[FirstOrderR::z] = *z_vec;
 }
 
-void FirstOrderType1R::computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level)
+void FirstOrderType1R::computeLinearizedOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level)
+{
+  assert(0);
+}
+void FirstOrderType1R::computeInput(double time, Interaction& inter, unsigned int level)
 {
   assert(_pluging && "FirstOrderType1R::computeInput() is not linked to a plugin function");
 
   SiconosVector& lambda = *inter.lambda(level);
+
+  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
   // Warning: temporary method to have contiguous values in memory, copy of block to simple.
-  VectorOfBlockVectors& DSlink = *interProp.DSlink;
-  VectorOfVectors& workV = *interProp.workVectors;
+  BlockVector& r = *DSlink[FirstOrderR::r];
+  BlockVector& z = *DSlink[FirstOrderR::z];
+  // copy into Siconos continuous memory vector
+  SP::SiconosVector r_vec(new SiconosVector(r));
+  SP::SiconosVector z_vec(new SiconosVector(z));
 
-  SiconosVector& workR = *workV[FirstOrderR::vec_r];
-  workR = *DSlink[FirstOrderR::r];
-  SiconosVector& workZ = *workV[FirstOrderR::vec_z];
-  workZ = *DSlink[FirstOrderR::z];
+  computeg(time, lambda, *z_vec, *r_vec);
 
-  computeg(time, lambda, workZ, workR);
-
-  *DSlink[FirstOrderR::r] = workR;
-  *DSlink[FirstOrderR::z] = workZ;
+  *DSlink[FirstOrderR::r] = *r_vec;
+  *DSlink[FirstOrderR::z] = *z_vec;
 }
-
+void FirstOrderType1R::computeLinearizedInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level)
+{
+  assert(0);
+}
 void FirstOrderType1R::computeJachx(double time, SiconosVector& x, SiconosVector& z, SimpleMatrix& C)
 {
   //
@@ -151,7 +158,7 @@ void FirstOrderType1R::computeJacglambda(double time, SiconosVector& lambda, Sic
 
 void FirstOrderType1R::computeJach(double time, Interaction& inter, InteractionProperties& interProp)
 {
-  VectorOfBlockVectors& DSlink = *interProp.DSlink;
+  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
   VectorOfVectors& workV = *interProp.workVectors;
   VectorOfSMatrices& workM = *interProp.workMatrices;
   SiconosVector& x = *workV[FirstOrderR::vec_x];
@@ -171,7 +178,7 @@ void FirstOrderType1R::computeJach(double time, Interaction& inter, InteractionP
 
 void FirstOrderType1R::computeJacg(double time, Interaction& inter, InteractionProperties& interProp)
 {
-  VectorOfBlockVectors& DSlink = *interProp.DSlink;
+  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
   VectorOfVectors& workV = *interProp.workVectors;
   VectorOfSMatrices& workM = *interProp.workMatrices;
   SiconosVector& z = *workV[FirstOrderR::vec_z];

@@ -95,9 +95,9 @@ SP::SiconosMatrix SchatzmanPaoliOSI::WBoundaryConditions(SP::DynamicalSystem ds)
   return _dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).WBoundaryConditions;
 }
 
-void SchatzmanPaoliOSI::initializeDynamicalSystem( double t, SP::DynamicalSystem ds)
+void SchatzmanPaoliOSI::initializeWorkVectorsForDS( double t, SP::DynamicalSystem ds)
 {
-  DEBUG_BEGIN("SchatzmanPaoliOSI::initializeDynamicalSystem( double t, SP::DynamicalSystem ds)\n");
+  DEBUG_BEGIN("SchatzmanPaoliOSI::initializeWorkVectorsForDS( double t, SP::DynamicalSystem ds)\n");
 
   // Get work buffers from the graph
   VectorOfVectors& workVectors = *_initializeDSWorkVectors(ds);
@@ -129,18 +129,9 @@ void SchatzmanPaoliOSI::initializeDynamicalSystem( double t, SP::DynamicalSystem
 
     //*velocity=*velocity; we do nothing for the velocity
 
-    // This value will swapped when OneStepIntegrator::saveInMemory will be called
-    // by the rest of  Simulation::initialize (_eventsManager->preUpdate();)
+    lltids->qMemory().swap(*q);
+    lltids->velocityMemory().swap(*velocity);
 
-    // SP::SiconosVector qprev = lltids->qMemory()->getSiconosVector(0);
-    // SP::SiconosVector qprev2 = lltids->qMemory()->getSiconosVector(1);
-    // SP::SiconosVector vprev = lltids->velocityMemory()->getSiconosVector(0);
-    //  std::cout << " qprev = " << std::endl;
-    // qprev->display();
-    //  std::cout << " qprev2 = " << std::endl;
-    // qprev2->display();
-    //  std::cout << " vprev = " << std::endl;
-    // vprev->display();
   }
   // W initialization
   initializeIterationMatrixW(t, ds);
@@ -153,12 +144,12 @@ void SchatzmanPaoliOSI::initializeDynamicalSystem( double t, SP::DynamicalSystem
 
   //      if ((*itDS)->getType() == Type::LagrangianDS || (*itDS)->getType() == Type::FirstOrderNonLinearDS)
   DEBUG_EXPR(ds->display());
-  DEBUG_END("SchatzmanPaoliOSI::initializeDynamicalSystem( double t, SP::DynamicalSystem ds)\n");
+  DEBUG_END("SchatzmanPaoliOSI::initializeWorkVectorsForDS( double t, SP::DynamicalSystem ds)\n");
 
 }
 
 
-void SchatzmanPaoliOSI::fillDSLinks(Interaction &inter,
+void SchatzmanPaoliOSI::initializeWorkVectorsForInteraction(Interaction &inter,
 				      InteractionProperties& interProp,
 				      DynamicalSystemsGraph & DSG)
 {
@@ -167,7 +158,7 @@ void SchatzmanPaoliOSI::fillDSLinks(Interaction &inter,
   assert(ds1);
   assert(ds2);
 
-  VectorOfBlockVectors& DSlink = *interProp.DSlink;
+  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
   // Note FP: call (again) initalize to update DSlinks, since some new fields
   // must be taken into account for this OSI (acceleration for example).
   // This is a temp workaround that should be fixed properly.
@@ -178,9 +169,13 @@ void SchatzmanPaoliOSI::fillDSLinks(Interaction &inter,
   //
   interProp.workVectors.reset(new VectorOfVectors);
   interProp.workMatrices.reset(new VectorOfSMatrices);
+  interProp.workBlockVectors.reset(new VectorOfBlockVectors);
 
   VectorOfVectors& workV = *interProp.workVectors;
   VectorOfSMatrices& workM = *interProp.workMatrices;
+  VectorOfBlockVectors& workBlockV = *interProp.workBlockVectors;
+  workBlockV.resize(SchatzmanPaoliOSI::BLOCK_WORK_LENGTH);
+
 
   Relation &relation =  *inter.relation();
   relation.initializeWorkVectorsAndMatrices(inter, DSlink, workV, workM);
@@ -201,7 +196,7 @@ void SchatzmanPaoliOSI::fillDSLinks(Interaction &inter,
 
   if (!(checkOSI(DSG.descriptor(ds1)) && checkOSI(DSG.descriptor(ds2))))
   {
-    RuntimeException::selfThrow("SchatzmanPaoliOSI::fillDSLinks. The implementation is not correct for two different OSI for one interaction");
+    RuntimeException::selfThrow("SchatzmanPaoliOSI::initializeWorkVectorsForInteraction. The implementation is not correct for two different OSI for one interaction");
   }
 
   /* allocate and set work vectors for the osi */
@@ -212,14 +207,14 @@ void SchatzmanPaoliOSI::fillDSLinks(Interaction &inter,
     DSlink[LagrangianR::p0].reset(new BlockVector());
     DSlink[LagrangianR::p0]->insertPtr(lds.p(0));
 
-    DSlink[LagrangianR::xfree].reset(new BlockVector());
-    DSlink[LagrangianR::xfree]->insertPtr(workVds1[OneStepIntegrator::free]);
+    workBlockV[SchatzmanPaoliOSI::xfree].reset(new BlockVector());
+    workBlockV[SchatzmanPaoliOSI::xfree]->insertPtr(workVds1[OneStepIntegrator::free]);
 
   }
   else if (relationType == NewtonEuler)
   {
-    DSlink[NewtonEulerR::xfree].reset(new BlockVector());
-    DSlink[NewtonEulerR::xfree]->insertPtr(workVds1[OneStepIntegrator::free]);
+    workBlockV[SchatzmanPaoliOSI::xfree].reset(new BlockVector());
+    workBlockV[SchatzmanPaoliOSI::xfree]->insertPtr(workVds1[OneStepIntegrator::free]);
   }
 
   if (ds1 != ds2)
@@ -227,13 +222,13 @@ void SchatzmanPaoliOSI::fillDSLinks(Interaction &inter,
     VectorOfVectors &workVds2 = *DSG.properties(DSG.descriptor(ds2)).workVectors;
     if (relationType == Lagrangian)
     {
-      DSlink[LagrangianR::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
+      workBlockV[SchatzmanPaoliOSI::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
       LagrangianDS& lds = *std11::static_pointer_cast<LagrangianDS> (ds2);
       DSlink[LagrangianR::p0]->insertPtr(lds.p(0));
     }
     else if (relationType == NewtonEuler)
     {
-      DSlink[NewtonEulerR::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
+      workBlockV[SchatzmanPaoliOSI::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
     }
   }
 }
@@ -662,8 +657,9 @@ void SchatzmanPaoliOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex
   SP::InteractionsGraph indexSet = osnsp->simulation()->indexSet(osnsp->indexSetLevel());
   SP::Interaction inter = indexSet->bundle(vertex_inter);
   SP::OneStepNSProblems  allOSNS  = _simulation->oneStepNSProblems();
+  VectorOfBlockVectors& workBlockV = *indexSet->properties(vertex_inter).workBlockVectors;
 
-  VectorOfBlockVectors& DSlink = *indexSet->properties(vertex_inter).DSlink;
+
   // Get relation and non smooth law types
   RELATION::TYPES relationType = inter->relation()->getType();
   RELATION::SUBTYPES relationSubType = inter->relation()->getSubType();
@@ -687,19 +683,7 @@ void SchatzmanPaoliOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex
   SiconosVector& osnsp_rhs = *(*indexSet->properties(vertex_inter).workVectors)[SchatzmanPaoliOSI::OSNSP_RHS];
 
   SP::SiconosVector e;
-  SP::BlockVector Xfree;
-
-  if(relationType == NewtonEuler)
-  {
-    Xfree = DSlink[NewtonEulerR::xfree];
-  }
-  else if(relationType == Lagrangian)
-  {
-    Xfree = DSlink[LagrangianR::xfree];
-  }
-
-  assert(Xfree);
-
+  SP::BlockVector Xfree =  workBlockV[SchatzmanPaoliOSI::xfree];;
   assert(Xfree);
 
 

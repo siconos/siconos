@@ -673,11 +673,9 @@ void  MBTB_initSimu(double hTS, int withProj)
   {
     printf("-->compute h of %d \n",numJ);
     SP::Interaction inter = sJointRelations[numJ]->_interaction;
-    InteractionsGraph::VDescriptor ui = indexSet0->descriptor(inter);
     SiconosVector& y = *(inter->y(0));
-    VectorOfBlockVectors& DSlink = *(indexSet0->properties(ui)).DSlink;
-
-    sJointRelations[numJ]->_jointR->computeh(0., *DSlink[NewtonEulerR::q0], y);
+    sJointRelations[numJ]->_jointR->computeOutput(0.,*inter,0);
+    y.display();
   }
   printf("====> COMPUTE H OF INTERATION END)\n");
 

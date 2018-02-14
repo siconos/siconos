@@ -113,12 +113,12 @@ int main(int argc, char* argv[])
     // -------------
     // --- Model ---
     // -------------
-    SP::Model sliderWithClearance(new Model(t0, T));
-    sliderWithClearance->nonSmoothDynamicalSystem()->insertDynamicalSystem(slider);
-    sliderWithClearance->nonSmoothDynamicalSystem()->link(inter1, slider);
-    sliderWithClearance->nonSmoothDynamicalSystem()->link(inter2, slider);
-    sliderWithClearance->nonSmoothDynamicalSystem()->link(inter3, slider);
-    sliderWithClearance->nonSmoothDynamicalSystem()->link(inter4, slider);
+    SP::NonSmoothDynamicalSystem sliderWithClearance(new NonSmoothDynamicalSystem(t0, T));
+    sliderWithClearance->insertDynamicalSystem(slider);
+    sliderWithClearance->link(inter1, slider);
+    sliderWithClearance->link(inter2, slider);
+    sliderWithClearance->link(inter3, slider);
+    sliderWithClearance->link(inter4, slider);
 
     // ----------------
     // --- Simulation ---
@@ -136,18 +136,15 @@ int main(int argc, char* argv[])
     impact->numericsSolverOptions()->iparam[2] = 1; // random
     SP::MLCPProjectOnConstraints position(new MLCPProjectOnConstraints());
 
-    SP::TimeSteppingDirectProjection s(new TimeSteppingDirectProjection(t, OSI, impact, position, 0));
+    SP::TimeSteppingDirectProjection s(new TimeSteppingDirectProjection(sliderWithClearance, t, OSI, impact, position, 0));
     s->setProjectionMaxIteration(10);
     s->setConstraintTolUnilateral(1e-10);
     s->setConstraintTol(1e-10);
-    sliderWithClearance->setSimulation(s);
+
     // =========================== End of model definition ===========================
 
     // ================================= Computation =================================
 
-    // --- Simulation initialization ---
-    cout << "====> Initialisation ..." << endl << endl;
-    sliderWithClearance->initialize();
     int N = ceil((T - t0) / h) + 1; // Number of time steps
 
     // --- Get the values to be plotted ---
@@ -157,7 +154,13 @@ int main(int argc, char* argv[])
 
     SP::SiconosVector q = slider->q();
     SP::SiconosVector v = slider->velocity();
-
+    
+    // computation for a first consistent output
+    inter1->computeOutput(t0,0);
+    inter2->computeOutput(t0,0);
+    inter3->computeOutput(t0,0);
+    inter4->computeOutput(t0,0);
+    
     dataPlot(0, 0) = sliderWithClearance->t0();
     dataPlot(0, 1) = (*q)(0) / (2.*M_PI); // crank revolution
     dataPlot(0, 2) = (*q)(1);
@@ -270,25 +273,11 @@ int main(int argc, char* argv[])
     cout << "====> Output file writing ..." << endl;
     dataPlot.resize(k, outputSize);
     ioMatrix::write("result.dat", "ascii", dataPlot, "noDim");
-    cout << "====> Comparison with a reference file ..." << endl;
-    SimpleMatrix dataPlotRef(dataPlot);
-    dataPlotRef.zero();
-    ioMatrix::read("SliderCrankMoreauJeanDirectProjectionOSI.ref", "ascii", dataPlotRef);
-    double error = (dataPlot - dataPlotRef).normInf()/ dataPlotRef.normInf();
-    std::cout << "Error = "<< error << std::endl;
-    if (error > 1e-12)
-    {
-      std::cout << "Warning. The result is rather different from the reference file." << std::endl;
 
-      std::cout <<  "Absolute error  = " << (dataPlot - dataPlotRef).normInf() << std::endl;
-      std::cout <<  "Norm inf of the ref file  = " << (dataPlotRef).normInf() << std::endl;
-      std::cout <<  "Norm inf of the result file  = " << (dataPlot).normInf() << std::endl;
-
-      SP::SiconosVector err(new SiconosVector(dataPlot.size(1)));
-      (dataPlot - dataPlotRef).normInfByColumn(err);
-      err->display();
-      //return 1; We return only a warning since this example is sensitive to the numerical precision
-    }
+    double error=0.0, eps=1e-12;
+    if (ioMatrix::compareRefFile(dataPlot, "SliderCrankMoreauJeanDirectProjectionOSI.ref", eps, error)
+        && error > eps)
+      return 1;
 
 
   }

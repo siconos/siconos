@@ -4,7 +4,7 @@ import os
 
 # this test is taken almost ve@rbatim from RelayBiSimulation_OT2_noCplugin.py
 def test_smc1():
-    from siconos.kernel import FirstOrderLinearDS,  TimeDiscretisation, \
+    from siconos.kernel import FirstOrderLinearDS, NonSmoothDynamicalSystem, TimeDiscretisation, \
         TimeStepping, ZeroOrderHoldOSI, TD_EVENT
     from siconos.control.simulation import ControlManager
     from siconos.control.sensor import LinearSensor
@@ -49,20 +49,19 @@ def test_smc1():
     # XXX b is not automatically created ...
 #    processDS.setb([0, 0])
     # Model
-    process = Model(t0, T)
-    process.nonSmoothDynamicalSystem().insertDynamicalSystem(processDS)
+    process = NonSmoothDynamicalSystem(t0, T)
+    process.insertDynamicalSystem(processDS)
     # time discretization
     processTD = TimeDiscretisation(t0, h)
     tSensor = TimeDiscretisation(t0, hControl)
     tActuator = TimeDiscretisation(t0, hControl)
     # Creation of the Simulation
-    processSimulation = TimeStepping(processTD, 0)
+    processSimulation = TimeStepping(process,processTD, 0)
     processSimulation.setName("plant simulation")
-    processSimulation.setNonSmoothDynamicalSystemPtr(
-        process.nonSmoothDynamicalSystem())
+
     # Declaration of the integrator
     processIntegrator = ZeroOrderHoldOSI()
-    processSimulation.prepareIntegratorForDS(processIntegrator, processDS, process, t0)
+    processSimulation.associate(processIntegrator, processDS)
     # Actuator, Sensor & ControlManager
     control = ControlManager(processSimulation)
     sens = LinearSensor(processDS, sensorC, sensorD)
@@ -74,8 +73,6 @@ def test_smc1():
     control.addActuatorPtr(act, tActuator)
 
     # Initialization.
-    process.setSimulation(processSimulation)
-    process.initialize()
     control.initialize(process)
     # This is not working right now
     # eventsManager = s.eventsManager()
@@ -171,3 +168,9 @@ def test_smc2():
         print(dataPlot - ref)
         print("ERROR: The result is rather different from the reference file.")
     assert norm(dataPlot - ref) < 5e-12
+
+if __name__ == '__main__':
+    print('test_smc1')
+    test_smc1()
+    test_smc2()
+    

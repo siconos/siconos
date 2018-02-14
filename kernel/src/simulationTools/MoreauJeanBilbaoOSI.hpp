@@ -41,6 +41,8 @@ public:
   enum {TWO_DT_SIGMA_STAR, ONE_MINUS_THETA, VFREE, WORK_LENGTH};
 
   enum {OSNSP_RHS,WORK_INTERACTION_LENGTH};
+
+  enum MoreauJeanOSI_workBlockVector{xfree, BLOCK_WORK_LENGTH};
   /* Constructor - No extra parameters: depends only on connected ds and simulation time step*/
   MoreauJeanBilbaoOSI();
 
@@ -53,7 +55,7 @@ public:
    * \param t time of initialization
    * \param ds the dynamical system
    */
-  virtual void initializeDynamicalSystem( double t, SP::DynamicalSystem ds);
+  virtual void initializeWorkVectorsForDS( double t, SP::DynamicalSystem ds);
 
   /** initialization of the work vectors and matrices (properties) related to
    *  one interaction on the graph and needed by the osi
@@ -61,7 +63,7 @@ public:
    * \param interProp the properties on the graph
    * \param DSG the dynamical systems graph
    */
-  virtual void fillDSLinks(Interaction &inter,
+  virtual void initializeWorkVectorsForInteraction(Interaction &inter,
 			     InteractionProperties& interProp,
 			     DynamicalSystemsGraph & DSG);
 

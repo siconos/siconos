@@ -63,7 +63,7 @@ class SchatzmanPaoliOSI : public OneStepIntegrator
 {
 public:
    enum {OSNSP_RHS,WORK_INTERACTION_LENGTH};
-
+  enum SchatzmanPaoliOSI_workBlockVector{xfree, BLOCK_WORK_LENGTH};
 protected:
   /** serialization hooks
   */
@@ -248,7 +248,7 @@ public:
    * \param t time of initialization
    * \param ds the dynamical system
    */
-  void initializeDynamicalSystem( double t, SP::DynamicalSystem ds);
+  void initializeWorkVectorsForDS( double t, SP::DynamicalSystem ds);
 
   /** initialization of the work vectors and matrices (properties) related to
    *  one interaction on the graph and needed by the osi
@@ -256,7 +256,7 @@ public:
    * \param interProp the properties on the graph
    * \param DSG the dynamical systems graph
    */
-  void fillDSLinks(Interaction &inter,
+  void initializeWorkVectorsForInteraction(Interaction &inter,
 		     InteractionProperties& interProp,
 		     DynamicalSystemsGraph & DSG);
 

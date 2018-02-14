@@ -1,7 +1,7 @@
 
 #include "SiconosKernel.hpp"
 #include "const.h"
-#include "NonlinearRelation.h"
+#include "NonlinearRelation.hpp"
 #include "myDS.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -102,6 +102,7 @@ int main(int argc, char *argv[])
   aS->setUseRelativeConvergenceCriteron(false);
   aS->setNewtonTolerance(5e-4);
   aS->setNewtonMaxIteration(20);
+  aS->setResetAllLambda(false);
 // BUILD THE STEP INTEGRATOR
 
   SP::SiconosVector  x = aDS->x();
@@ -170,21 +171,11 @@ int main(int argc, char *argv[])
   if (argc==1)
   //if(argc== 10)
   {
-    SimpleMatrix dataPlotRef(dataPlot);
-    dataPlotRef.zero();
-    ioMatrix::read("simu.1.6.ref", "ascii", dataPlotRef);
-    cout<<"====> Comparison with reference file ..."<<endl;
-    SP::SiconosVector err(new SiconosVector(dataPlot.size(1)));
-    (dataPlot - dataPlotRef).normInfByColumn(err);
-    err->display();
-
-    std::cout << "Error w.r.t. reference file : " <<(dataPlot-dataPlotRef).normInf() << std::endl;
-    if ((dataPlot-dataPlotRef).normInf() > 1e-11)
-    {
-      std::cout << "Warning. The result is rather different from the reference file."<< std::endl;
+    // Comparison with a reference file
+    double error=0.0, eps=1e-12;
+    if (ioMatrix::compareRefFile(dataPlot, "simu.1.6.ref", eps, error)
+        && error > eps)
       return 1;
-    }
-
   }
 
   

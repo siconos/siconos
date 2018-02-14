@@ -28,7 +28,8 @@
 #include "SiconosPointers.hpp"
 #include "SiconosVector.hpp"
 #include "SiconosMemory.hpp"
-#include "SiconosFwd.hpp"
+//#include "SiconosFwd.hpp"
+
 #include <vector>
 
 /** Non-smooth interaction involving 1 or 2 Dynamical Systems.
@@ -152,12 +153,19 @@ private:
   /** the type of Relation of the interaction */
   SP::Relation _relation;
 
+  
+  /** pointer links to DS variables needed for computation,
+   *  mostly used in Relations (computeOutput and computeInput)
+   * and OneStepIntegrator classes. */
+  VectorOfBlockVectors _linkToDSVariables;
+
+  
+
   struct _setLevels;
   friend struct Interaction::_setLevels;
 
 
 
-  
   // === PRIVATE FUNCTIONS ===
 
   /** copy constructor => private, no copy nor pass-by-value.
@@ -253,14 +261,13 @@ public:
   /*! @name DSlink graph property management */
   //@{
 
-  /** set the links (DSlink graph property) between the interaction and the DynamicalSystem(s) members.
+  /** set the links  between the interaction and the DynamicalSystem(s) members.
    *  \param interaction_properties properties (inside the graph) of the current interaction
       \param ds1 first ds linked to this Interaction (i.e IG->vertex.source)
       \param ds2 second ds linked to this Interaction (i.e IG->vertex.target) ds1 == ds2 is allowed.
   */
-  void initialize_ds_links(InteractionProperties& interaction_properties, DynamicalSystem& ds1,
-			   DynamicalSystem& ds2);
-
+  void initializeLinkToDsVariables(DynamicalSystem& ds1,
+                                   DynamicalSystem& ds2);
   ///@}
   
   /** set all lambda to zero */
@@ -659,6 +666,12 @@ public:
   {
     return _nslaw;
   }
+
+
+  inline VectorOfBlockVectors & linkToDSVariables()
+  {
+    return _linkToDSVariables;
+  };
   
   // --- OTHER FUNCTIONS ---
 
@@ -695,19 +708,16 @@ public:
   
   /** Computes output y; depends on the relation type.
    *  \param time current time
-   *  \param interProp
    *  \param derivativeNumber number of the derivative to compute,
    *  optional, default = 0.
    */
-  void computeOutput(double time, InteractionProperties& interProp, unsigned int derivativeNumber = 0);
-
+  void computeOutput(double time, unsigned int derivativeNumber = 0);
   /** Compute input r of all Dynamical Systems involved in the present
    *   Interaction.
    *  \param time current time
-   *  \param interProp
    *  \param level order of _lambda used to compute input.
    */
-  void computeInput(double time, InteractionProperties& interProp, unsigned int level = 0);
+  void computeInput(double time, unsigned int level = 0);
 
   /** gets the matrix used in interactionBlock computation, (left * W * right), depends on the relation type (ex, LinearTIR, left = C, right = B).
    *  \param workM

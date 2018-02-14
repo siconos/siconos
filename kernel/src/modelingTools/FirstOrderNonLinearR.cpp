@@ -61,6 +61,9 @@ void FirstOrderNonLinearR::initializeWorkVectorsAndMatrices(Interaction& inter, 
 
 }
 
+void FirstOrderNonLinearR::checkSize(Interaction& inter)
+{}
+
 void FirstOrderNonLinearR::computeh(double time, SiconosVector& x, SiconosVector& lambda, SiconosVector& z, SiconosVector& y)
 {
   if (_pluginh)
@@ -126,11 +129,23 @@ void FirstOrderNonLinearR::computeJacgx(double time, SiconosVector& x, SiconosVe
 }
 
 
-
-
-void FirstOrderNonLinearR::computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level)
+void FirstOrderNonLinearR::computeOutput(double time, Interaction& inter, unsigned int level)
 {
   DEBUG_PRINT("FirstOrderNonLinearR::computeOutput \n");
+  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
+  BlockVector& x = *DSlink[FirstOrderR::x];
+  BlockVector& z = *DSlink[FirstOrderR::z];
+  // copy into Siconos continuous memory vector
+  SP::SiconosVector x_vec(new SiconosVector(x));
+  SP::SiconosVector z_vec(new SiconosVector(z));
+  SiconosVector& y = *inter.y(level);
+  SiconosVector& lambda = *inter.lambda(level);
+  computeh(time, *x_vec, lambda, *z_vec, y);
+  DEBUG_END("FirstOrderNonLinearR::computeOutput \n");
+}
+void FirstOrderNonLinearR::computeLinearizedOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level)
+{
+  DEBUG_BEGIN("FirstOrderNonLinearR::computeLinearizedOutput \n");
   // compute the new y  obtained by linearisation (see DevNotes)
   // y_{alpha+1}_{k+1} = h(x_{k+1}^{alpha},lambda_{k+1}^{alpha},t_k+1)
   //                     + C_{k+1}^alpha ( x_{k+1}^{alpha+1}- x_{k+1}^{alpha} )
@@ -141,10 +156,10 @@ void FirstOrderNonLinearR::computeOutput(double time, Interaction& inter, Intera
   //                     + D_{k+1}^alpha ( lambda_{k+1}^{alpha+1} - lambda_{k+1}^{alpha} )
   SiconosVector& y = *inter.y(level);
   DEBUG_EXPR(y.display());
-  VectorOfBlockVectors& DSlink = *interProp.DSlink;
+  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
   VectorOfVectors& workV = *interProp.workVectors;
   VectorOfSMatrices& workM = *interProp.workMatrices;
-  SiconosMatrix& osnsM = *interProp.block;
+  
 
   if (_D)
     prod(*_D, *(inter.lambdaOld(level)), y, true);
@@ -176,11 +191,16 @@ void FirstOrderNonLinearR::computeOutput(double time, Interaction& inter, Intera
   else
     prod(*workM[FirstOrderR::mat_C], deltax, y, false);
 
-  // osnsM = h * C * W^-1 * B + D
-  prod(osnsM, *inter.lambda(level), y, false);
+  if (interProp.block)
+  {
+    SiconosMatrix& osnsM = *interProp.block;
+    // osnsM = h * C * W^-1 * B + D
+    DEBUG_EXPR(osnsM.display(););
+    prod(osnsM, *inter.lambda(level), y, false);
+  }
   DEBUG_PRINT("FirstOrderNonLinearR::computeOutput : new linearized y \n");
   DEBUG_EXPR(y.display());
-
+    
   SiconosVector& x = *workV[FirstOrderR::vec_x];
   x = *DSlink[FirstOrderR::x];
   SiconosVector& z = *workV[FirstOrderR::vec_z];
@@ -190,11 +210,27 @@ void FirstOrderNonLinearR::computeOutput(double time, Interaction& inter, Intera
   computeh(time, x, *inter.lambda(level), z, hAlpha);
 
   *DSlink[FirstOrderR::z] = z;
+  DEBUG_END("FirstOrderNonLinearR::computeLinearizedOutput \n");
 }
-
-void FirstOrderNonLinearR::computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level)
+void FirstOrderNonLinearR::computeInput(double time, Interaction& inter, unsigned int level)
 {
   DEBUG_PRINT("FirstOrderNonLinearR::computeInput \n");
+  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
+  BlockVector& x = *DSlink[FirstOrderR::x];
+  BlockVector& z = *DSlink[FirstOrderR::z];
+  // copy into Siconos continuous memory vector
+  SP::SiconosVector x_vec(new SiconosVector(x));
+  SP::SiconosVector z_vec(new SiconosVector(z));
+  SP::SiconosVector r_vec(new SiconosVector(*DSlink[FirstOrderR::r]));
+  SiconosVector& lambda = *inter.lambda(level);
+  computeg(time, *x_vec, lambda, *z_vec, *r_vec);
+  *DSlink[FirstOrderR::r] = *r_vec;
+  DEBUG_END("FirstOrderNonLinearR::computeinput \n");
+}
+
+void FirstOrderNonLinearR::computeLinearizedInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level)
+{
+  DEBUG_BEGIN("FirstOrderNonLinearR::computeLinearizedInput \n");
   // compute the new r  obtained by linearisation
   // r_{alpha+1}_{k+1} = g(lambda_{k+1}^{alpha},t_k+1)
   //                     + B_{k+1}^alpha ( lambda_{k+1}^{alpha+1}- lambda_{k+1}^{alpha} )
@@ -203,7 +239,7 @@ void FirstOrderNonLinearR::computeInput(double time, Interaction& inter, Interac
   SiconosVector lambda = *inter.lambda(level);
   lambda -= *(inter.lambdaOld(level));
 
-  VectorOfBlockVectors& DSlink = *interProp.DSlink;
+  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
   VectorOfVectors& workV = *interProp.workVectors;
   VectorOfSMatrices& workM = *interProp.workMatrices;
 
@@ -236,6 +272,7 @@ void FirstOrderNonLinearR::computeInput(double time, Interaction& inter, Interac
   z = *DSlink[FirstOrderR::z];
   computeg(time, x, *inter.lambda(level), z, g_alpha);
   *DSlink[FirstOrderR::z] = z;
+  DEBUG_BEGIN("FirstOrderNonLinearR::computeLinearizedInput \n");
 }
 
 void FirstOrderNonLinearR::prepareNewtonIteration(Interaction& inter, InteractionProperties& interProp)
@@ -243,8 +280,7 @@ void FirstOrderNonLinearR::prepareNewtonIteration(Interaction& inter, Interactio
 
   /* compute the contribution in xPartialNS for the next iteration */
   DEBUG_PRINT("FirstOrderNonLinearR::prepareNewtonIteration\n");
-
-  VectorOfBlockVectors& DSlink = *interProp.DSlink;
+  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
   VectorOfVectors& workV = *interProp.workVectors;
   VectorOfSMatrices& workM = *interProp.workMatrices;
 
@@ -263,7 +299,7 @@ void FirstOrderNonLinearR::prepareNewtonIteration(Interaction& inter, Interactio
 
 void FirstOrderNonLinearR::computeJach(double time, Interaction& inter, InteractionProperties& interProp)
 {
-  VectorOfBlockVectors& DSlink = *interProp.DSlink;
+  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
   VectorOfVectors& workV = *interProp.workVectors;
   VectorOfSMatrices& workM = *interProp.workMatrices;
 
@@ -287,7 +323,7 @@ void FirstOrderNonLinearR::computeJach(double time, Interaction& inter, Interact
 
 void FirstOrderNonLinearR::computeJacg(double time, Interaction& inter, InteractionProperties& interProp)
 {
-  VectorOfBlockVectors& DSlink = *interProp.DSlink;
+  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
   VectorOfVectors& workV = *interProp.workVectors;
   VectorOfSMatrices& workM = *interProp.workMatrices;
   SiconosVector& x = *workV[FirstOrderR::vec_x];

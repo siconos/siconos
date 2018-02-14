@@ -72,7 +72,7 @@ MoreauJeanGOSI::MoreauJeanGOSI(double theta, double gamma):
     _useGamma = false;
   }
 }
-void MoreauJeanGOSI::initializeDynamicalSystem( double t, SP::DynamicalSystem ds)
+void MoreauJeanGOSI::initializeWorkVectorsForDS( double t, SP::DynamicalSystem ds)
 {
   // Get work buffers from the graph
   VectorOfVectors& workVectors = *_initializeDSWorkVectors(ds);
@@ -112,7 +112,7 @@ void MoreauJeanGOSI::initializeDynamicalSystem( double t, SP::DynamicalSystem ds
   }
 }
 
-void MoreauJeanGOSI::fillDSLinks(Interaction &inter,
+void MoreauJeanGOSI::initializeWorkVectorsForInteraction(Interaction &inter,
                                  InteractionProperties& interProp,
                                  DynamicalSystemsGraph & DSG)
 {
@@ -121,18 +121,21 @@ void MoreauJeanGOSI::fillDSLinks(Interaction &inter,
   assert(ds1);
   assert(ds2);
 
-  VectorOfBlockVectors& DSlink = *interProp.DSlink;
+
+  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
 
   interProp.workVectors.reset(new VectorOfVectors);
   interProp.workMatrices.reset(new VectorOfSMatrices);
+  interProp.workBlockVectors.reset(new VectorOfBlockVectors);
 
 
   VectorOfVectors& workV = *interProp.workVectors;
   VectorOfSMatrices& workM = *interProp.workMatrices;
+  VectorOfBlockVectors& workBlockV = *interProp.workBlockVectors;
+  workBlockV.resize(MoreauJeanGOSI::BLOCK_WORK_LENGTH);
 
   Relation &relation =  *inter.relation();
   relation.initializeWorkVectorsAndMatrices(inter, DSlink, workV, workM);
-  RELATION::TYPES relationType = relation.getType();
   
   workV.resize(MoreauJeanGOSI::WORK_INTERACTION_LENGTH);
   workV[MoreauJeanGOSI::OSNSP_RHS].reset(new SiconosVector(inter.getSizeOfY()));
@@ -145,32 +148,25 @@ void MoreauJeanGOSI::fillDSLinks(Interaction &inter,
 
   // if (!(checkOSI(DSG.descriptor(ds1)) && checkOSI(DSG.descriptor(ds2))))
   // {
-  //   RuntimeException::selfThrow("MoreauJeanGOSI::fillDSLinks. The implementation is not correct for two different OSI for one interaction");
+  //   RuntimeException::selfThrow("MoreauJeanGOSI::initializeWorkVectorsForInteraction. The implementation is not correct for two different OSI for one interaction");
   // }
 
 
 
 
   /* allocate and set work vectors for the osi */
-  unsigned int xfree =0;
-  if (relationType == Lagrangian)
-  {
-    xfree = LagrangianR::xfree;
-  }
-  else if (relationType == NewtonEuler)
-  {
-    xfree = NewtonEulerR::xfree;
-  }
+  unsigned int xfree = MoreauJeanGOSI::xfree;
+
   if (ds1 != ds2)
   {
     DEBUG_PRINT("ds1 != ds2\n");
-    if ((!DSlink[xfree]) || (DSlink[xfree]->numberOfBlocks() !=2 ))
-      DSlink[xfree].reset(new BlockVector(2));
+    if ((!workBlockV[xfree]) || (workBlockV[xfree]->numberOfBlocks() !=2 ))
+      workBlockV[xfree].reset(new BlockVector(2));
   }
   else
   {
-    if ((!DSlink[xfree]) || (DSlink[xfree]->numberOfBlocks() !=1 ))
-      DSlink[xfree].reset(new BlockVector(1));
+    if ((!workBlockV[xfree]) || (workBlockV[xfree]->numberOfBlocks() !=1 ))
+      workBlockV[xfree].reset(new BlockVector(1));
   }
 
   if(checkOSI(DSG.descriptor(ds1)))
@@ -178,7 +174,7 @@ void MoreauJeanGOSI::fillDSLinks(Interaction &inter,
     DEBUG_PRINTF("ds1->number() %i is taken into account\n", ds1->number());
     assert(DSG.properties(DSG.descriptor(ds1)).workVectors);
     VectorOfVectors &workVds1 = *DSG.properties(DSG.descriptor(ds1)).workVectors;
-    DSlink[xfree]->setVectorPtr(0,workVds1[OneStepIntegrator::free]);
+    workBlockV[xfree]->setVectorPtr(0,workVds1[OneStepIntegrator::free]);
   }
   DEBUG_PRINTF("ds1->number() %i\n",ds1->number());
   DEBUG_PRINTF("ds2->number() %i\n",ds2->number());
@@ -192,7 +188,7 @@ void MoreauJeanGOSI::fillDSLinks(Interaction &inter,
       DEBUG_PRINTF("ds2->number() %i is taken into account\n",ds2->number());
       assert(DSG.properties(DSG.descriptor(ds2)).workVectors);
       VectorOfVectors &workVds2 = *DSG.properties(DSG.descriptor(ds2)).workVectors;
-      DSlink[xfree]->setVectorPtr(1,workVds2[OneStepIntegrator::free]);
+      workBlockV[xfree]->setVectorPtr(1,workVds2[OneStepIntegrator::free]);
     }
   }
 

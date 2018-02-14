@@ -161,9 +161,9 @@ int main(int argc, char* argv[])
     // -------------
     // --- Model ---
     // -------------
-    SP::Model simpleExampleRelay(new Model(t0, T));
-    simpleExampleRelay->nonSmoothDynamicalSystem()->insertDynamicalSystem(process);
-    simpleExampleRelay->nonSmoothDynamicalSystem()->link(myProcessInteraction, process);
+    SP::NonSmoothDynamicalSystem simpleExampleRelay(new NonSmoothDynamicalSystem(t0, T));
+    simpleExampleRelay->insertDynamicalSystem(process);
+    simpleExampleRelay->link(myProcessInteraction, process);
     
     // ------------------
     // --- Simulation ---
@@ -171,7 +171,7 @@ int main(int argc, char* argv[])
     // TimeDiscretisation
     SP::TimeDiscretisation td(new TimeDiscretisation(t0, h));
     // == Creation of the Simulation ==
-    SP::TimeStepping s(new TimeStepping(td));
+    SP::TimeStepping s(new TimeStepping(simpleExampleRelay, td));
     // -- OneStepIntegrators --
     double theta = 0.5;
     SP::EulerMoreauOSI myIntegrator(new EulerMoreauOSI(theta));
@@ -185,16 +185,8 @@ int main(int argc, char* argv[])
 
     //osnspb->setNumericsSolverName("Lemke");
     //osnspb->numericsSolverOptions()->dparam[0]=1e-08;
-
-
     s->insertNonSmoothProblem(osnspb);
 
-
-    //SP::LCP osnspb1(new LCP());
-
-    //SP::Relay osnspb(new Relay("Lemke"));
-    //s->insertNonSmoothProblem(osnspb);
-    simpleExampleRelay->setSimulation(s);
     // =========================== End of model definition ===========================
 
     // ================================= Computation =================================
@@ -202,12 +194,6 @@ int main(int argc, char* argv[])
     // --- Simulation initialization ---
 
     cout << "====> Simulation initialisation ..." << endl << endl;
-
-    simpleExampleRelay->initialize();
-
-
-    //  (s->oneStepNSProblems)[0]->initialize();
-
 
     // --- Get the values to be plotted ---
     unsigned int outputSize = 17; // number of required data
@@ -218,7 +204,7 @@ int main(int argc, char* argv[])
     SP::SiconosVector xProc = process->x();
     SP::SiconosVector lambdaProc = myProcessInteraction->lambda(0);
     SP::SiconosVector yProc = myProcessInteraction->y(0);
-
+    myProcessInteraction->computeOutput(t0,0);
     // -> saved in a matrix dataPlot
     dataPlot(0, 0) = simpleExampleRelay->t0(); // Initial time of the model
     dataPlot(0, 1) = (*xProc)(0);
@@ -310,20 +296,11 @@ int main(int argc, char* argv[])
     // --- Output files ---
     cout << "====> Output file writing ..." << endl;
     ioMatrix::write("ParallelInverter.dat", "ascii", dataPlot, "noDim");
-    std::cout << "Comparison with a reference file" << std::endl;
-    SimpleMatrix dataPlotRef(dataPlot);
-    dataPlotRef.zero();
-    ioMatrix::read("ParallelInverter.ref", "ascii", dataPlotRef);
-    SP::SiconosVector errSim = compareMatrices(dataPlot, dataPlotRef);
-    std::cout << "errSim display :" << std::endl;
-    errSim->display();
-    double error = ((dataPlot - dataPlotRef).normInf())/(dataPlotRef.normInf());
-    std::cout << "error =" << error << std::endl;
-    if (error > 1e-12) // some data are > 1e4
-    {
-      std::cout << "Warning. The results is rather different from the reference file." << std::endl;
+
+    double error=0.0, eps=1e-08;
+    if (ioMatrix::compareRefFile(dataPlot, "ParallelInverter.ref", eps, error)
+        && error > eps)
       return 1;
-    }
 
   }
 

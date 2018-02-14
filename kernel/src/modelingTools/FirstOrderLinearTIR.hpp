@@ -55,6 +55,11 @@ protected:
   virtual void initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink,
                               VectorOfVectors& workV, VectorOfSMatrices& workM);
 
+  /** check sizes of the relation specific operators.
+   * \param inter an Interaction using this relation
+   */
+  virtual void checkSize(Interaction& inter);
+
   SP::SiconosVector _e;
 
 public:
@@ -104,15 +109,14 @@ public:
    *  \param interProp
    *  \param level not used
    */
-  virtual void computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level = 0);
-
+ virtual void computeOutput(double time, Interaction& inter,  unsigned int level = 0);
   /** default function to compute r
    *  \param time current time
    *  \param inter Interaction using this Relation
    *  \param interProp
    *  \param level not used
    */
-  virtual void computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level = 0);
+  virtual void computeInput(double time, Interaction& inter, unsigned int level = 0);
 
   /** print the data to the screen
    */

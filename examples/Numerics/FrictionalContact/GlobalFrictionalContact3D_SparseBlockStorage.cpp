@@ -251,7 +251,6 @@ int main(int argc, char* argv[])
   NM_free(HH);
   free(MM);
   free(HH);
-  gfc3d_free_workspace(&numericsProblem);
 
 
   /*     while (1) sleep(60); */

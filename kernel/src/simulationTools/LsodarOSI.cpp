@@ -73,17 +73,25 @@ extern "C" void LsodarOSI_jacobianf_wrapper(integer* sizeOfX, doublereal* time, 
 LsodarOSI::LsodarOSI():
   OneStepIntegrator(OSI::LSODAROSI)
 {
+
+  _sizeTol =1;
+  _itol=1;
   _intData.resize(9);
   for(int i = 0; i < 9; i++) _intData[i] = 0;
   _sizeMem = 2;
   _steps=1;
 
-  // Set levels. This may depend on the nonsmooth law and will be updated during fillDSLinks(...) call.
+  // Set levels. This may depend on the nonsmooth law and will be updated during initializeWorkVectorsForInteraction(...) call.
   _levelMinForOutput=0;
   _levelMaxForOutput=2;
   _levelMinForInput=1;
   _levelMaxForInput=2;
-
+  
+  rtol.reset(new doublereal[_sizeTol]) ;  // rtol, relative tolerance
+  atol.reset(new doublereal[_sizeTol]) ;  // atol, absolute tolerance
+  // Set atol and rtol values ...
+  rtol[0] = RTOL_DEFAULT ; // rtol
+  atol[0] = ATOL_DEFAULT ;  // atol
 }
 
 void LsodarOSI::setTol(integer newItol, SA::doublereal newRtol, SA::doublereal newAtol)
@@ -104,8 +112,7 @@ void LsodarOSI::setTol(integer newItol, SA::doublereal newRtol, SA::doublereal n
   //             3     array      scalar     RTOL(i)*ABS(Y(i)) + ATOL
   //             4     array      array      RTOL(i)*ABS(Y(i)) + ATOL(i)
 
-  _intData[2] = newItol; // itol
-
+  _itol = newItol; // itol
   rtol = newRtol;
   atol = newAtol;
 }
@@ -125,7 +132,7 @@ void LsodarOSI::setMaxNstep(integer maxNumberSteps)
 
 void LsodarOSI::setTol(integer newItol, doublereal newRtol, doublereal newAtol)
 {
-  _intData[2] = newItol; // itol
+  _itol = newItol; // itol
   rtol[0] = newRtol; // rtol
   atol[0] = newRtol;  // atol
 }
@@ -141,21 +148,7 @@ void LsodarOSI::updateData()
 {
   // Used to update some data (iwork ...) when _intData is modified.
   // Warning: it only checks sizes and possibly reallocate memory, but no values are set.
-
-  unsigned int sizeTol = _intData[0]; // size of rtol, atol ... If itol (_intData[0]) = 1 => scalar else, vector of size neq (_intData[0]).
-  //  if(_intData[0]==1) sizeTol = 1;
-  //  else sizeTol = _intData[0];
-
-  rtol.reset(new doublereal[sizeTol]) ;    // rtol, relative tolerance
-
-  atol.reset(new doublereal[sizeTol]) ;  // atol, absolute tolerance
-  for(unsigned int i = 0; i < sizeTol; i++)
-  {
-    atol[i] = 0.0;
-  }
-
-
-
+  
   iwork.reset(new integer[_intData[7]]);
   for(int i = 0; i < _intData[7]; i++) iwork[i] = 0;
 
@@ -239,9 +232,9 @@ void LsodarOSI::jacobianfx(integer* sizeOfX, doublereal* time, doublereal* x, in
 }
 
 
-void LsodarOSI::initializeDynamicalSystem( double t, SP::DynamicalSystem ds)
+void LsodarOSI::initializeWorkVectorsForDS( double t, SP::DynamicalSystem ds)
 {
-  DEBUG_BEGIN("LsodarOSI::initializeDynamicalSystem( double t, SP::DynamicalSystem ds)\n");
+  DEBUG_BEGIN("LsodarOSI::initializeWorkVectorsForDS( double t, SP::DynamicalSystem ds)\n");
   // Get work buffers from the graph
   VectorOfVectors& workVectors = *_initializeDSWorkVectors(ds);
 
@@ -268,10 +261,10 @@ void LsodarOSI::initializeDynamicalSystem( double t, SP::DynamicalSystem ds)
   }
   ds->swapInMemory();
 
-  DEBUG_END("LsodarOSI::initializeDynamicalSystem( double t, SP::DynamicalSystem ds)\n");
+  DEBUG_END("LsodarOSI::initializeWorkVectorsForDS( double t, SP::DynamicalSystem ds)\n");
 }
 
-void LsodarOSI::fillDSLinks(Interaction &inter,
+void LsodarOSI::initializeWorkVectorsForInteraction(Interaction &inter,
                               InteractionProperties& interProp,
                               DynamicalSystemsGraph & DSG)
 {
@@ -280,13 +273,16 @@ void LsodarOSI::fillDSLinks(Interaction &inter,
   assert(ds1);
   assert(ds2);
 
-  VectorOfBlockVectors& DSlink = *interProp.DSlink;
+
+  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
 
   interProp.workVectors.reset(new VectorOfVectors);
   interProp.workMatrices.reset(new VectorOfSMatrices);
-
+  interProp.workBlockVectors.reset(new VectorOfBlockVectors);
   VectorOfVectors& workV = *interProp.workVectors;
   VectorOfSMatrices& workM = *interProp.workMatrices;
+  VectorOfBlockVectors& workBlockV = *interProp.workBlockVectors;
+  workBlockV.resize(LsodarOSI::BLOCK_WORK_LENGTH);
 
   Relation &relation =  *inter.relation();
   relation.initializeWorkVectorsAndMatrices(inter, DSlink, workV, workM);
@@ -312,10 +308,10 @@ void LsodarOSI::fillDSLinks(Interaction &inter,
     _levelMaxForOutput = 4;
     _levelMinForInput = 1;
     _levelMaxForInput = 2;
-    RuntimeException::selfThrow("LsodarOSI::fillDSLinks  not yet implemented for nonsmooth law of type NewtonImpactFrictionNSL");
+    RuntimeException::selfThrow("LsodarOSI::initializeWorkVectorsForInteraction  not yet implemented for nonsmooth law of type NewtonImpactFrictionNSL");
   }
   else
-    RuntimeException::selfThrow("LsodarOSI::fillDSLinks not yet implemented  for nonsmooth of type");
+    RuntimeException::selfThrow("LsodarOSI::initializeWorkVectorsForInteraction not yet implemented  for nonsmooth of type");
 
   // Check if interations levels (i.e. y and lambda sizes) are compliant with the current osi.
   _check_and_update_interaction_levels(inter);
@@ -327,7 +323,7 @@ void LsodarOSI::fillDSLinks(Interaction &inter,
 
   if (!(checkOSI(DSG.descriptor(ds1)) && checkOSI(DSG.descriptor(ds2))))
   {
-    RuntimeException::selfThrow("LsodarOSI::fillDSLinks. The implementation is not correct for two different OSI for one interaction");
+    RuntimeException::selfThrow("LsodarOSI::initializeWorkVectorsForInteraction. The implementation is not correct for two different OSI for one interaction");
   }
 
 
@@ -336,8 +332,8 @@ void LsodarOSI::fillDSLinks(Interaction &inter,
   if (relationType == Lagrangian)
   {
     LagrangianDS& lds = *std11::static_pointer_cast<LagrangianDS> (ds1);
-    DSlink[LagrangianR::xfree].reset(new BlockVector());
-    DSlink[LagrangianR::xfree]->insertPtr(workVds1[OneStepIntegrator::free]);
+    workBlockV[LsodarOSI::xfree].reset(new BlockVector());
+    workBlockV[LsodarOSI::xfree]->insertPtr(workVds1[OneStepIntegrator::free]);
     DSlink[LagrangianR::p2].reset(new BlockVector());
     DSlink[LagrangianR::p2]->insertPtr(lds.p(2));
     DSlink[LagrangianR::q2].reset(new BlockVector());
@@ -345,8 +341,8 @@ void LsodarOSI::fillDSLinks(Interaction &inter,
   }
   // else if (relationType == NewtonEuler)
   // {
-  //   DSlink[NewtonEulerR::xfree].reset(new BlockVector());
-  //   DSlink[NewtonEulerR::xfree]->insertPtr(workVds1[OneStepIntegrator::free]);
+  //   workBlockV[NewtonEulerR::xfree].reset(new BlockVector());
+  //   workBlockV[NewtonEulerR::xfree]->insertPtr(workVds1[OneStepIntegrator::free]);
   // }
 
 
@@ -357,13 +353,13 @@ void LsodarOSI::fillDSLinks(Interaction &inter,
     if (relationType == Lagrangian)
     {
       LagrangianDS& lds = *std11::static_pointer_cast<LagrangianDS> (ds2);
-      DSlink[LagrangianR::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
+      workBlockV[LsodarOSI::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
       DSlink[LagrangianR::p2]->insertPtr(lds.p(2));
       DSlink[LagrangianR::q2]->insertPtr(lds.acceleration());
     }
     // else if (relationType == NewtonEuler)
     // {
-    //   DSlink[NewtonEulerR::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
+    //   workBlockV[NewtonEulerR::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
     // }
   }
 }
@@ -380,7 +376,7 @@ void LsodarOSI::initialize()
   //   {
   //     if(!checkOSI(dsi)) continue;
   //     SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
-  //     initializeDynamicalSystem(m, m.t0(),ds);
+  //     initializeWorkVectorsForDS(m, m.t0(),ds);
   //     //ds->resetToInitialState();
   //     //ds->swapInMemory();
   //   }
@@ -390,7 +386,7 @@ void LsodarOSI::initialize()
   // for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
   //   {
   //     Interaction& inter = *indexSet0->bundle(*ui);
-  //     fillDSLinks(m.t0(), inter, indexSet0->properties(*ui), *_dynamicalSystemsGraph);
+  //     initializeWorkVectorsForInteraction(m.t0(), inter, indexSet0->properties(*ui), *_dynamicalSystemsGraph);
   //   }
 
   computeRhs(_simulation->nonSmoothDynamicalSystem()->t0(),*_dynamicalSystemsGraph);
@@ -405,7 +401,7 @@ void LsodarOSI::initialize()
   // 2 - Ng, number of constraints:
   _intData[1] = std11::static_pointer_cast<EventDriven>(_simulation)->computeSizeOfg();
   // 3 - Itol, itask, iopt
-  _intData[2] = 1; // itol, 1 if ATOL is a scalar, else 2 (ATOL array)
+  _intData[2] = _itol; // itol, 1 if ATOL is a scalar, else 2 (ATOL array)
   _intData[3] = 1; // itask, an index specifying the task to be performed. 1: normal computation.
   _intData[5] = 0; // iopt: 0 if no optional input else 1.
 
@@ -453,9 +449,7 @@ void LsodarOSI::initialize()
   iwork[7] = 0;
   // Set   the maximum order to be allowed for the stiff  (BDF) method.
   iwork[8] = 0;
-  // Set atol and rtol values ...
-  rtol[0] = RTOL_DEFAULT ; // rtol
-  atol[0] = ATOL_DEFAULT ;  // atol
+
 
   // === Error handling in LSODAROSI===
 
@@ -635,9 +629,10 @@ void LsodarOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, 
   SP::OneStepNSProblems  allOSNS  = _simulation->oneStepNSProblems();
   SP::InteractionsGraph indexSet = osnsp->simulation()->indexSet(osnsp->indexSetLevel());
   SP::Interaction inter = indexSet->bundle(vertex_inter);
+  VectorOfBlockVectors& DSlink = inter->linkToDSVariables();
+  VectorOfBlockVectors& workBlockV = *indexSet->properties(vertex_inter).workBlockVectors;
 
-  VectorOfBlockVectors& DSlink = *indexSet->properties(vertex_inter).DSlink;
-  // Get relation and non smooth law types
+// Get relation and non smooth law types
   RELATION::TYPES relationType = inter->relation()->getType();
   RELATION::SUBTYPES relationSubType = inter->relation()->getSubType();
   unsigned int sizeY = inter->nonSmoothLaw()->size();
@@ -672,7 +667,7 @@ void LsodarOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, 
   {
     if(relationType == Lagrangian)
     {
-      Xfree = DSlink[LagrangianR::xfree];
+      Xfree = workBlockV[LsodarOSI::xfree];
       DEBUG_EXPR(Xfree->display(););
     }
     // else if  (relationType == NewtonEuler)

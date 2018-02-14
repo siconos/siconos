@@ -128,7 +128,7 @@ Hem5OSI::Hem5OSI():
   for(int i = 0; i < 9; i++) _intData[i] = 0;
   _sizeMem = 2;
   _timeStep = INITIAL_GUESS_TS;
-  // Set levels. This may depend on the nonsmooth law and will be updated during fillDSLinks(...) call.
+  // Set levels. This may depend on the nonsmooth law and will be updated during initializeWorkVectorsForInteraction(...) call.
   _levelMinForOutput=0;
   _levelMaxForOutput=2;
   _levelMinForInput=1;
@@ -401,7 +401,7 @@ void Hem5OSI_impl::fprob(integer* IFCN,
     for(std11::tie(ui, uiend) = indexSet2->vertices(); ui != uiend; ++ui)
     {
       SP::Interaction inter = indexSet2->bundle(*ui);
-      inter->computeOutput(t, indexSet2->properties(*ui), 0);
+      inter->computeOutput(t, 0);
       assert(0);
     }
 
@@ -493,7 +493,7 @@ void Hem5OSI_impl::fprob(integer* IFCN,
 // {
 //   std11::static_pointer_cast<EventDriven>(_simulation)->computeJacobianfx(shared_from_this(), sizeOfX, time, x, jacob);
 // }
-void Hem5OSI::initializeDynamicalSystem(double t, SP::DynamicalSystem ds)
+void Hem5OSI::initializeWorkVectorsForDS(double t, SP::DynamicalSystem ds)
 {
   // Get work buffers from the graph
   VectorOfVectors& workVectors = *_initializeDSWorkVectors(ds);
@@ -537,26 +537,28 @@ void Hem5OSI::initializeDynamicalSystem(double t, SP::DynamicalSystem ds)
 }
 
 
-void Hem5OSI::fillDSLinks(Interaction &inter,
+void Hem5OSI::initializeWorkVectorsForInteraction(Interaction &inter,
                             InteractionProperties& interProp,
                             DynamicalSystemsGraph & DSG)
 {
   SP::DynamicalSystem ds1= interProp.source;
   SP::DynamicalSystem ds2= interProp.target;
+  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
 
-  VectorOfBlockVectors& DSlink = *interProp.DSlink;
 
   interProp.workVectors.reset(new VectorOfVectors);
   interProp.workMatrices.reset(new VectorOfSMatrices);
+  interProp.workBlockVectors.reset(new VectorOfBlockVectors);
 
   VectorOfVectors& workV = *interProp.workVectors;
   VectorOfSMatrices& workM = *interProp.workMatrices;
+  VectorOfBlockVectors& workBlockV = *interProp.workBlockVectors;
+  workBlockV.resize(Hem5OSI::BLOCK_WORK_LENGTH);
 
   Relation &relation =  *inter.relation();
   relation.initializeWorkVectorsAndMatrices(inter, DSlink, workV, workM);
   RELATION::TYPES relationType = relation.getType();
 
-  assert(interProp.DSlink);
 
   workV.resize(Hem5OSI::WORK_INTERACTION_LENGTH);
   workV[Hem5OSI::OSNSP_RHS].reset(new SiconosVector(inter.getSizeOfY()));
@@ -576,10 +578,10 @@ void Hem5OSI::fillDSLinks(Interaction &inter,
     _levelMaxForOutput = 4;
     _levelMinForInput = 1;
     _levelMaxForInput = 2;
-    RuntimeException::selfThrow("HEM5OSI::fillDSLinks  not yet implemented for nonsmooth law of type NewtonImpactFrictionNSL");
+    RuntimeException::selfThrow("HEM5OSI::initializeWorkVectorsForInteraction  not yet implemented for nonsmooth law of type NewtonImpactFrictionNSL");
   }
   else
-    RuntimeException::selfThrow("HEM5OSI::fillDSLinks not yet implemented  for nonsmooth of type");
+    RuntimeException::selfThrow("HEM5OSI::initializeWorkVectorsForInteraction not yet implemented  for nonsmooth of type");
 
   // Check if interations levels (i.e. y and lambda sizes) are compliant with the current osi.
   _check_and_update_interaction_levels(inter);
@@ -590,19 +592,19 @@ void Hem5OSI::fillDSLinks(Interaction &inter,
   /* allocate and set work vectors for the osi */
   if (!(checkOSI(DSG.descriptor(ds1)) && checkOSI(DSG.descriptor(ds2))))
   {
-    RuntimeException::selfThrow("LsodarOSI::fillDSLinks. The implementation is not correct for two different OSI for one interaction");
+    RuntimeException::selfThrow("LsodarOSI::initializeWorkVectorsForInteraction. The implementation is not correct for two different OSI for one interaction");
   }
 
   VectorOfVectors &workVds1 = *DSG.properties(DSG.descriptor(ds1)).workVectors;
   if (relationType == Lagrangian)
   {
-    DSlink[LagrangianR::xfree].reset(new BlockVector());
-    DSlink[LagrangianR::xfree]->insertPtr(workVds1[OneStepIntegrator::free]);
+    workBlockV[Hem5OSI::xfree].reset(new BlockVector());
+    workBlockV[Hem5OSI::xfree]->insertPtr(workVds1[OneStepIntegrator::free]);
   }
   // else if (relationType == NewtonEuler)
   // {
-  //   DSlink[NewtonEulerR::xfree].reset(new BlockVector());
-  //   DSlink[NewtonEulerR::xfree]->insertPtr(workVds1[OneStepIntegrator::free]);
+  //   workBlockV[NewtonEulerR::xfree].reset(new BlockVector());
+  //   workBlockV[NewtonEulerR::xfree]->insertPtr(workVds1[OneStepIntegrator::free]);
   // }
 
   if (ds1 != ds2)
@@ -610,11 +612,11 @@ void Hem5OSI::fillDSLinks(Interaction &inter,
     VectorOfVectors &workVds2 = *DSG.properties(DSG.descriptor(ds2)).workVectors;
     if (relationType == Lagrangian)
     {
-      DSlink[LagrangianR::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
+      workBlockV[Hem5OSI::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
     }
     // else if (relationType == NewtonEuler)
     // {
-    //   DSlink[NewtonEulerR::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
+    //   workBlockV[NewtonEulerR::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
     // }
   }
 }
@@ -966,7 +968,7 @@ void Hem5OSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, On
   SP::InteractionsGraph indexSet = osnsp->simulation()->indexSet(osnsp->indexSetLevel());
   SP::Interaction inter = indexSet->bundle(vertex_inter);
 
-  VectorOfBlockVectors& DSlink = *indexSet->properties(vertex_inter).DSlink;
+  VectorOfBlockVectors& DSlink = inter->linkToDSVariables();
   // Get relation and non smooth law types
   RELATION::TYPES relationType = inter->relation()->getType();
   RELATION::SUBTYPES relationSubType = inter->relation()->getSubType();
@@ -999,7 +1001,7 @@ void Hem5OSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, On
   {
     if(relationType == Lagrangian)
     {
-      Xfree = DSlink[LagrangianR::xfree];
+      Xfree = DSlink[Hem5OSI::xfree];
     }
     // else if  (relationType == NewtonEuler)
     // {

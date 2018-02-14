@@ -53,6 +53,8 @@ OneStepIntegrator::_initializeDSWorkVectors(SP::DynamicalSystem ds)
 
   return wv;
 }
+
+
 void OneStepIntegrator::initialize()
 {
   if (_extraAdditionalTerms)
@@ -87,7 +89,7 @@ void OneStepIntegrator::initialize()
 //   {
 //     if(!checkOSI(dsi)) continue;
 //     SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
-//     initializeDynamicalSystem(t0, ds);
+//     initializeWorkVectorsForDS(t0, ds);
 //   }
 
 //   // 2 - Nonsmooth problems : set levels and initialize. Depends on OSI type.
@@ -110,7 +112,7 @@ void OneStepIntegrator::initialize()
 //     interaction_properties.block.reset(new SimpleMatrix(nslawSize, nslawSize));
 
 //     // Update DSlink : this depends on OSI and relation types.
-//     fillDSLinks(inter, interaction_properties, *_dynamicalSystemsGraph);
+//     initializeWorkVectorsForInteraction(inter, interaction_properties, *_dynamicalSystemsGraph);
 
 //     // Update interaction attributes (output)
 //     update_interaction_output(inter, t0, interaction_properties);
@@ -129,7 +131,7 @@ void OneStepIntegrator::update_interaction_output(Interaction& inter, double tim
   //    for instance:
   //      - contact detection
   //      - inter = ew interaction + link with ds
-  //      - simu->osi->fillDSLinks(inter)
+  //      - simu->osi->initializeWorkVectorsForInteraction(inter)
   //      - simu->osi->update_interaction_output()
 
   if (_steps > 1) // Multi--step methods
@@ -144,20 +146,20 @@ void OneStepIntegrator::update_interaction_output(Interaction& inter, double tim
       //        relation()->LinkDataFromMemory(k);
       for (unsigned int i = 0; i < inter.upperLevelForOutput() + 1; ++i)
 	    {
-	      inter.computeOutput(time, interaction_properties, i);
+	      inter.computeOutput(time, i);
 	      //_yMemory[i]->swap(*_y[i]);
 	    }
     }
     inter.swapInMemory();
   }
   // Compute a first value for the output
-  inter.computeOutput(time, interaction_properties, 0);
+  inter.computeOutput(time,  0);
     
   // prepare the gradients
   inter.relation()->computeJach(time, inter, interaction_properties);
   for (unsigned int i = 0; i < inter.upperLevelForOutput() + 1; ++i)
   {
-    inter.computeOutput(time, interaction_properties, i);
+    inter.computeOutput(time, i);
   }
   inter.swapInMemory();
 }
@@ -184,9 +186,9 @@ void OneStepIntegrator::_check_and_update_interaction_levels(Interaction& inter)
     inter.reset();
 }
 
-// void OneStepIntegrator::initializeDynamicalSystem( double t, SP::DynamicalSystem ds)
+// void OneStepIntegrator::initializeWorkVectorsForDS( double t, SP::DynamicalSystem ds)
 // {
-//   RuntimeException::selfThrow("OneStepIntegrator::initializeDynamicalSystem not implemented for integrator of type " + _integratorType);
+//   RuntimeException::selfThrow("OneStepIntegrator::initializeWorkVectorsForDS not implemented for integrator of type " + _integratorType);
 // }
 
 

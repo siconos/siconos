@@ -171,17 +171,23 @@ int main(int argc, char* argv[])
     // -------------
 
 
-    SP::Model FourBarIdeal(new Model(t0, T));
-    FourBarIdeal->nonSmoothDynamicalSystem()->insertDynamicalSystem(fourbar);
-    FourBarIdeal->nonSmoothDynamicalSystem()->link(inter, fourbar);
-    FourBarIdeal->nonSmoothDynamicalSystem()->link(inter1, fourbar);
-    FourBarIdeal->nonSmoothDynamicalSystem()->link(inter2, fourbar);
-    //FourBarIdeal->nonSmoothDynamicalSystem()->link(inter3, fourbar);
+    SP::NonSmoothDynamicalSystem FourBarIdeal(new NonSmoothDynamicalSystem(t0, T));
+    FourBarIdeal->insertDynamicalSystem(fourbar);
+    FourBarIdeal->link(inter, fourbar);
+    FourBarIdeal->link(inter1, fourbar);
+    FourBarIdeal->link(inter2, fourbar);
+    //FourBarIdeal->link(inter3, fourbar);
     // ----------------
     // --- Simulation ---
     // ----------------
     fourbar-> setzPtr(z);
+    fourbar->computeForces(t0, fourbar->q(), fourbar->velocity());
 
+    inter->computeOutput(t0,0);
+    inter1->computeOutput(t0,0);
+    inter2->computeOutput(t0,0);
+
+    
     // -- Time discretisation --
     SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
 
@@ -196,7 +202,7 @@ int main(int argc, char* argv[])
     impact->numericsSolverOptions()->iparam[2] = 1; // random
     SP::OneStepNSProblem position(new MLCPProjectOnConstraints(SICONOS_MLCP_ENUM));
 
-    SP::TimeSteppingCombinedProjection s(new TimeSteppingCombinedProjection(t, OSI, impact, position,2));
+    SP::TimeSteppingCombinedProjection s(new TimeSteppingCombinedProjection(FourBarIdeal, t, OSI, impact, position,2));
     s->setProjectionMaxIteration(2000);
     s->setConstraintTolUnilateral(1e-6);
     s->setConstraintTol(1e-6);
@@ -205,7 +211,6 @@ int main(int argc, char* argv[])
 /////////////////////////////////////////////////////////////////////////
     // -- Time discretisation --
     //SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
-
     //SP::TimeStepping s(new TimeStepping(t));
 
 
@@ -223,8 +228,7 @@ int main(int argc, char* argv[])
 
     //s->insertNonSmoothProblem(osnspb);
 
-    //cout << "=== End of model loading === " << endl;
-    FourBarIdeal->setSimulation(s);
+    cout << "=== End of model loading === " << endl;
 
 ////////////////////////////////////////////////////////////////////////
 
@@ -232,10 +236,6 @@ int main(int argc, char* argv[])
 
 
     // ================================= Computation =================================
-
-    // --- Simulation initialization ---
-    FourBarIdeal->initialize();
-    cout << "End of simulation initialisation" << endl;
 
     int k = 1;
     int N = ceil((T - t0) / h) + 1;
@@ -466,6 +466,14 @@ int main(int argc, char* argv[])
     ioMatrix::write("ex1xy2_ey1xy2.dat", "ascii", beam11Plot, "noDim");
     ioMatrix::write("ex1xy3_ey1xy3.dat", "ascii", beam12Plot, "noDim");
     ioMatrix::write("ex1xy4_ey1xy4.dat", "ascii", beam13Plot, "noDim");
+
+
+
+    double error=0.0, eps=1e-12;
+    if (ioMatrix::compareRefFile(dataPlot, "FourBarClearance.ref", eps, error)
+        && error > eps)
+      return 1;
+    
   }
 
 
@@ -475,6 +483,6 @@ int main(int argc, char* argv[])
   }
   catch (...)
   {
-    cout << "Exception caught in FourBarD1MinusLinear.cpp" << endl;
+    cout << "Exception caught in FourBarClearance.cpp" << endl;
   }
 }

@@ -135,7 +135,10 @@ public:
    *  \param workM
    */
   virtual void initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
-  
+  /** check sizes of the relation specific operators.
+   * \param inter an Interaction using this relation
+   */
+  virtual void checkSize(Interaction& inter);
   /** Function to compute the matrix C
    * \param time the current time
    * \param z the auxiliary input vector
@@ -180,8 +183,9 @@ public:
   *  \param lambda
   *  \param y value of h
   */
-  void computeh(double time, VectorOfVectors& workV, VectorOfSMatrices& workM,
-                BlockVector& x, SiconosVector& lambda, SiconosVector& z, SiconosVector& y);
+  void computeh(double time, 
+                BlockVector& x, SiconosVector& lambda,
+                SiconosVector& z, SiconosVector& y);
 
   /** default function to compute g
   *  \param time current time
@@ -190,7 +194,7 @@ public:
   *  \param z XXX
   *  \param r non-smooth input
   */
-  void computeg(double time, VectorOfSMatrices& workM, SiconosVector& lambda, SiconosVector& z, BlockVector& r);
+  void computeg(double time, SiconosVector& lambda, SiconosVector& z, BlockVector& r);
 
   /** default function to compute y
   *  \param time current time
@@ -198,7 +202,7 @@ public:
   *  \param interProp
   *  \param level not used
   */
-  virtual void computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level = 0);
+  virtual void computeOutput(double time, Interaction& inter,  unsigned int level = 0);
 
   /** default function to compute r
   *  \param time current time
@@ -206,7 +210,7 @@ public:
   *  \param interProp
   *  \param level not used
   */
-  virtual void computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level = 0);
+  virtual void computeInput(double time, Interaction& inter, unsigned int level = 0);
 
   /** print the data to the screen
   */

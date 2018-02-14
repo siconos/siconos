@@ -118,9 +118,9 @@ int main(int argc, char* argv[])
     // -------------
     // --- Model ---
     // -------------
-    SP::Model relayOscillatorWithChattering(new Model(t0, T));
-    relayOscillatorWithChattering->nonSmoothDynamicalSystem()->insertDynamicalSystem(process);
-    relayOscillatorWithChattering->nonSmoothDynamicalSystem()->link(myProcessInteraction, process);
+    SP::NonSmoothDynamicalSystem relayOscillatorWithChattering(new NonSmoothDynamicalSystem(t0, T));
+    relayOscillatorWithChattering->insertDynamicalSystem(process);
+    relayOscillatorWithChattering->link(myProcessInteraction, process);
  
     // ------------------
     // --- Simulation ---
@@ -128,7 +128,7 @@ int main(int argc, char* argv[])
     // TimeDiscretisation
     SP::TimeDiscretisation td(new TimeDiscretisation(t0, h));
     // == Creation of the Simulation ==
-    SP::TimeStepping s(new TimeStepping(td));
+    SP::TimeStepping s(new TimeStepping(relayOscillatorWithChattering, td));
     // -- OneStepIntegrators --
     double theta = 0.5;
     SP::EulerMoreauOSI myIntegrator(new EulerMoreauOSI(theta));
@@ -137,27 +137,13 @@ int main(int argc, char* argv[])
     // -- OneStepNsProblem --
 
     SP::Relay osnspb(new Relay());
-
-
     osnspb->setSolverId(SICONOS_RELAY_LEMKE);
     osnspb->numericsSolverOptions()->dparam[0] = 1e-08;
-
-
     s->insertNonSmoothProblem(osnspb);
-    relayOscillatorWithChattering->setSimulation(s);
 
     // =========================== End of model definition ===========================
 
     // ================================= Computation =================================
-
-    // --- Simulation initialization ---
-
-    cout << "====> Simulation initialisation ..." << endl << endl;
-
-    relayOscillatorWithChattering->initialize();
-
-
-    //  (s->oneStepNSProblems)[0]->initialize();
 
 
     // --- Get the values to be plotted ---

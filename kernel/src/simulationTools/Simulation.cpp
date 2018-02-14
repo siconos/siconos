@@ -197,31 +197,41 @@ void Simulation::updateIndexSets()
 
 void Simulation::insertNonSmoothProblem(SP::OneStepNSProblem osns, int Id)
 {
-  if (_allNSProblems->size() > 0 && ((*_allNSProblems)[Id]))
-    RuntimeException::selfThrow("Simulation - insertNonSmoothProblem(osns), trying to insert a OSNSP already existing. ");
-  (*_allNSProblems)[Id] = osns;
-
+  if (_allNSProblems->size() > (unsigned int)Id)
+  {
+    if ((*_allNSProblems)[Id])
+      RuntimeException::selfThrow("Simulation - insertNonSmoothProblem(osns), trying to insert a OSNSP already existing. ");
+    (*_allNSProblems)[Id] = osns;
+  }
+  else
+  {
+    _allNSProblems->resize(Id+1);
+    (*_allNSProblems)[Id] = osns;
+  }
 }
 void Simulation::initialize()
 {
   DEBUG_BEGIN("Simulation::initialize()\n");
-  DEBUG_EXPR_WE(std::cout << "Name :"<< name() << std::endl;);
+  DEBUG_EXPR(std::cout << "Name :"<< name() << std::endl;);
   // 1-  OneStepIntegrators initialization ===
   // we set the simulation pointer and the graph of DS in osi
-
   for (OSIIterator itosi = _allOSI->begin();
        itosi != _allOSI->end(); ++itosi)
   {
-    (*itosi)->setSimulationPtr(shared_from_this());
-    // a subgraph has to be implemented.
-    (*itosi)->setDynamicalSystemsGraph(_nsds->topology()->dSG(0));
+    DEBUG_PRINT("- 1 - set simulation pointer  and the graph of ds in osi\n");
+    if (!(*itosi)->isInitialized()){
+      (*itosi)->setSimulationPtr(shared_from_this());
+      // a subgraph has to be implemented.
+      (*itosi)->setDynamicalSystemsGraph(_nsds->topology()->dSG(0));
+    }
   }
 
-  // 2 - we set the osi of DS that ha been defined through associate(ds,osi)
+  // 2 - we set the osi of DS that has been defined through associate(ds,osi)
   std::map< SP::OneStepIntegrator, std::list<SP::DynamicalSystem> >::iterator  it;
   std::list<SP::DynamicalSystem> ::iterator  itlist;
   for ( it = _OSIDSmap.begin();  it !=_OSIDSmap.end(); ++it)
   {
+    DEBUG_PRINT("- 2 - we set the osi of DS that has been defined through associate(ds,osi)\n");
     for ( itlist = it->second.begin();  itlist !=it->second.end(); ++itlist)
     {
       SP::DynamicalSystem ds =  *itlist;
@@ -232,14 +242,23 @@ void Simulation::initialize()
     it->second.clear();
   }
 
-
+  // Allow the InteractionManager to add/remove any interactions it wants
+  updateWorldFromDS();
+  updateInteractions();
 
   // 3- we initialize new  ds and interaction
+  /* Changes to the NSDS are tracked by a changelog, making it fast
+   * for the Simulation to scan any changes it has not yet seen and
+   * initialize the associated ata structures.  It is just an
+   * optimisation over scanning the whole NSDS for new elements at
+   * each step. */
   SP::DynamicalSystemsGraph DSG = _nsds->topology()->dSG(0);
   std::list<NonSmoothDynamicalSystem::Changes>::const_iterator itc = _nsdsChangeLogPosition ;
+  bool interactionInitialized = false;
   itc++;
   while(itc != _nsds->changeLog().end())
   {
+    DEBUG_PRINT("- 3 - we initialize new  ds and interaction \n");
     DEBUG_PRINT("The nsds has changed\n")
     const NonSmoothDynamicalSystem::Changes& changes = *itc;
     itc++;
@@ -250,6 +269,10 @@ void Simulation::initialize()
       SP::DynamicalSystem ds = changes.ds;
       if (!DSG->properties(DSG->descriptor(ds)).osi)
       {
+        if (_allOSI->size() == 0)
+        RuntimeException::selfThrow
+            ("Simulation::initialize - there is no osi in this Simulation !!");
+        DEBUG_PRINTF("_allOSI->size() = %i\n", _allOSI->size());
         SP::OneStepIntegrator osi_default = *_allOSI->begin();
         _nsds->topology()->setOSI(ds, osi_default);
         if (_allOSI->size() > 1)
@@ -260,12 +283,13 @@ void Simulation::initialize()
         }
       }
       OneStepIntegrator& osi = *DSG->properties(DSG->descriptor(ds)).osi;
-      osi.initializeDynamicalSystem(getTk(),ds);
+      osi.initializeWorkVectorsForDS(getTk(),ds);
     }
     else if (changes.typeOfChange == NonSmoothDynamicalSystem::addInteraction)
     {
       SP::Interaction inter = changes.i;
       initializeInteraction(getTk(), inter);
+      interactionInitialized = true;
     }
   }
   _nsdsChangeLogPosition = _nsds->changeLogPosition();
@@ -279,8 +303,9 @@ void Simulation::initialize()
   // === OneStepIntegrators initialization ===
   for (OSIIterator itosi = _allOSI->begin();
        itosi != _allOSI->end(); ++itosi)
-  {
+  { 
     if (!(*itosi)->isInitialized()){
+      DEBUG_PRINT("osi->initialize\n")
       (*itosi)->initialize();
       _numberOfIndexSets = std::max<int>((*itosi)->numberOfIndexSets(), _numberOfIndexSets);
     }
@@ -292,12 +317,25 @@ void Simulation::initialize()
   assert (_numberOfIndexSets >0);
   if ((indxSize == LEVELMAX) || (indxSize < _numberOfIndexSets ))
   {
+    DEBUG_PRINT("Topology : different number of indexSets\n");
     topo->indexSetsResize(_numberOfIndexSets);
     // Init if the size has changed
     for (unsigned int i = indxSize; i < topo->indexSetsSize(); i++) // ++i ???
       topo->resetIndexSetPtr(i);
   }
 
+  if (interactionInitialized || !_isInitialized)
+  {
+    // Initialize OneStepNSProblem(s). Depends on the type of simulation.
+    // Warning FP : must be done in any case, even if the interactions set
+    // is empty.
+    initOSNS();
+
+    // Since initOSNS calls updateIndexSets() which resets the
+    // topology->hasChanged() flag, it must be specified explicitly.
+    // Otherwise OneStepNSProblem may fail to update its matrices.
+    _nsds->topology()->setHasChanged(true);
+  }
 
   if(!_isInitialized)
   {
@@ -307,12 +345,6 @@ void Simulation::initialize()
     // === Events manager initialization ===
     _eventsManager->initialize(_T);
     _tinit = _eventsManager->startingTime();
-
-
-    // Initialize OneStepNSProblem(s). Depends on the type of simulation.
-    // Warning FP : must be done in any case, even if the interactions set
-    // is empty.
-    initOSNS();
 
     // Process events at time _tinit. Useful to save values in memories
     // for example.  Warning: can not be called during
@@ -388,14 +420,14 @@ void Simulation::initializeInteraction(double time, SP::Interaction inter)
   InteractionProperties& i_prop = indexSet0->properties(ui);
   if (&osi1 == &osi2 )
     {
-      osi1.fillDSLinks(*inter, i_prop,  DSG);
+      osi1.initializeWorkVectorsForInteraction(*inter, i_prop,  DSG);
       osi1.update_interaction_output(*inter, time, i_prop);
     }
   else
     {
-      osi1.fillDSLinks(*inter, i_prop,  DSG);
+      osi1.initializeWorkVectorsForInteraction(*inter, i_prop,  DSG);
       osi1.update_interaction_output(*inter, time, i_prop);
-      osi2.fillDSLinks(*inter, i_prop,  DSG);
+      osi2.initializeWorkVectorsForInteraction(*inter, i_prop,  DSG);
       osi2.update_interaction_output(*inter, time, i_prop);
     }
   DEBUG_END("Simulation::initializeInteraction(double time, SP::Interaction inter)\n");
@@ -507,6 +539,10 @@ void Simulation::processEvents()
   }
 }
 
+void Simulation::clearNSDSChangeLog()
+{
+  _nsds->clearChangeLogTo(_nsdsChangeLogPosition);
+}
 
 void Simulation::updateT(double T)
 {
@@ -522,50 +558,19 @@ void Simulation::link(SP::Interaction inter,
   DEBUG_PRINTF("link interaction : %d\n", inter->number());
 
   nonSmoothDynamicalSystem()->link(inter, ds1, ds2);
-
-  initializeInteraction(nextTime(), inter);
-
-  _linkOrUnlink = true;
 }
 
 void Simulation::unlink(SP::Interaction inter)
 {
   nonSmoothDynamicalSystem()->removeInteraction(inter);
-  _linkOrUnlink = true;
 }
 
 void Simulation::updateInteractions()
 {
-  // Update interactions if a manager was provided
+  // Update interactions if a manager was provided.  Changes will be
+  // detected by Simulation::initialize() changelog code.
   if (_interman)
     _interman->updateInteractions(shared_from_this());
-
-  if (_linkOrUnlink) {
-    initOSNS();
-
-    // Since initOSNS calls updateIndexSets() which resets the
-    // topology->hasChanged() flag, it must be specified explicitly.
-    // Otherwise OneStepNSProblem may fail to update its matrices.
-    _nsds->topology()->setHasChanged(true);
-    _linkOrUnlink = false;
-  }
-}
-
-void Simulation::updateInteractionsNewtonIteration()
-{
-  // Update interactions if a manager was provided
-  if (_interman)
-    _interman->updateInteractionsNewtonIteration(shared_from_this());
-
-  if (_linkOrUnlink) {
-    initOSNS();
-
-    // Since initOSNS calls updateIndexSets() which resets the
-    // topology->hasChanged() flag, it must be specified explicitly.
-    // Otherwise OneStepNSProblem may fail to update its matrices.
-    _nsds->topology()->setHasChanged(true);
-    _linkOrUnlink = false;
-  }
 }
 
 void Simulation::updateInput(unsigned int)
@@ -629,7 +634,7 @@ void Simulation::updateOutput(unsigned int)
 //    *
 //    * 4. If Simulation already initialized, then DS work vectors in
 //    *    _dynamicalSystemsGraph properties for the DS must be
-//    *    initialized (OSI::initializeDynamicalSystem), otherwise it will
+//    *    initialized (OSI::initializeWorkVectorsForDS), otherwise it will
 //    *    be called later during Simulation::initialize().
 //   */
 
@@ -643,5 +648,5 @@ void Simulation::updateOutput(unsigned int)
 //   // If OSI has no DSG yet, assume DS will be initialized later.
 //   // (Typically, during Simulation::initialize())
 //   if (osi->dynamicalSystemsGraph())
-//     osi->initializeDynamicalSystem(*m, time, ds);
+//     osi->initializeWorkVectorsForDS(*m, time, ds);
 // }

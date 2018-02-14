@@ -162,9 +162,9 @@ int main(int argc, char* argv[])
     // -------------
     // --- Model ---
     // -------------
-    SP::Model myModel(new Model(t0, T));
+    SP::NonSmoothDynamicalSystem myModel(new NonSmoothDynamicalSystem(t0, T));
     // add the dynamical system in the non smooth dynamical system
-    myModel->nonSmoothDynamicalSystem()->insertDynamicalSystem(beam1);
+    myModel->insertDynamicalSystem(beam1);
     // ------------------
     // --- Simulation ---
     // ------------------
@@ -179,22 +179,16 @@ int main(int argc, char* argv[])
     SP::OneStepNSProblem impact(new MLCP());
 
     // -- (4) Simulation setup with (1) (2) (3)
-    SP::TimeStepping s(new TimeStepping(t));
+    SP::TimeStepping s(new TimeStepping(myModel, t));
 
     s->insertIntegrator(OSI1);
     s->insertNonSmoothProblem(impact, SICONOS_OSNSP_TS_VELOCITY);
     s->setNewtonMaxIteration(10);
-    myModel->setSimulation(s);
 
 
     // =========================== End of model definition ===========================
 
     // ================================= Computation =================================
-
-    // --- Simulation initialization ---
-
-    cout << "====> Initialisation ..." << endl << endl;
-    myModel->initialize();
 
 
     // --- Get the values to be plotted ---
@@ -266,16 +260,6 @@ int main(int argc, char* argv[])
     cout << "====> Output file writing ..." << endl;
     ioMatrix::write("NE_1DS_1Knee_MLCP.dat", "ascii", dataPlot, "noDim");
     ioMatrix::write("NE_1DS_1Knee_MLCP_beam1.dat", "ascii", beam1Plot, "noDim");
-
-    // SimpleMatrix dataPlotRef(dataPlot);
-    // dataPlotRef.zero();
-    // ioMatrix::read("NE_1DS_1Knee_1Prism_MLCP.ref", "ascii", dataPlotRef);
-    // if ((dataPlot - dataPlotRef).normInf() > 1e-7)
-    // {
-    //   (dataPlot - dataPlotRef).display();
-    //   std::cout << "Warning. The results is rather different from the reference file." << std::endl;
-    //   return 1;
-    // }
 
     fclose(pFile);
   }

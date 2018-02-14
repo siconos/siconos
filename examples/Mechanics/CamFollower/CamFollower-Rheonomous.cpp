@@ -104,23 +104,16 @@ int main(int argc, char* argv[])
     // --- Model ---
     // -------------
 
-    SP::Model Follower(new Model(t0, T));
-    Follower->nonSmoothDynamicalSystem()->insertDynamicalSystem(lds);
-    Follower->nonSmoothDynamicalSystem()->link(inter,lds);
+    SP::NonSmoothDynamicalSystem Follower(new NonSmoothDynamicalSystem(t0, T));
+    Follower->insertDynamicalSystem(lds);
+    Follower->link(inter,lds);
 
     // ----------------
     // --- Simulation ---
     // ----------------
 
-    // -- Time discretisation --
-    SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
-
-    SP::TimeStepping S(new TimeStepping(t));
-
-
     // -- OneStepIntegrator --
     SP::OneStepIntegrator OSI(new MoreauJeanOSI(theta));
-    S->insertIntegrator(OSI);
 
     // -- OneStepNsProblem --
 
@@ -135,17 +128,16 @@ int main(int argc, char* argv[])
     // tolerance
     osnspb->numericsSolverOptions()->dparam[0] = 1e-6;
 
-    S->insertNonSmoothProblem(osnspb);
-    Follower->setSimulation(S);
+    // -- Time discretisation --
+    SP::TimeDiscretisation t(new TimeDiscretisation(t0, h ));
+
+    SP::TimeStepping S(new TimeStepping(Follower, t, OSI, osnspb));
 
     cout << "=== End of model loading === " << endl;
     // =========================== End of model definition ===========================
 
     // ================================= Computation =================================
 
-    // --- Simulation initialization ---
-    Follower->initialize();
-    cout << "End of model initialisation" << endl;
 
 
     int k = 0;

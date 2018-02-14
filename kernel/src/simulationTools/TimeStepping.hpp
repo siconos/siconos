@@ -47,7 +47,6 @@ typedef void (*CheckSolverFPtr)(int, Simulation*);
 #define SICONOS_TS_LINEAR_IMPLICIT 2
 #define SICONOS_TS_NONLINEAR 3
 
-
 class TimeStepping : public Simulation
 {
 protected:
@@ -111,6 +110,10 @@ protected:
    */
   bool _warnOnNonConvergence;
 
+  /** boolean variable to resetAllLamda at each step (default true)
+   */
+  bool _resetAllLambda;
+
   /** boolean variable to force an explicit evaluation of the Jacobians
    * mapping of relations only at the beginning of the time--step and
    * not in the Newton iteration
@@ -147,15 +150,24 @@ public:
    *  \param osnspb one step non smooth problem (default none)
    */
   TimeStepping(SP::NonSmoothDynamicalSystem nsds, SP::TimeDiscretisation td,
-               SP::OneStepIntegrator osi = SP::OneStepIntegrator(),
-               SP::OneStepNSProblem osnspb = SP::OneStepNSProblem());
+               SP::OneStepIntegrator osi,
+               SP::OneStepNSProblem osnspb);
 
+  // /** Constructor with the time-discretisation.
+  //  * \param nsds the nsds that we want to simulate
+  //  *  \param td pointer to a timeDiscretisation used in the integration
+  //  *  (linked to the model that owns this simulation)
+  //  *  \param osi one step integrator (default none)
+  //  *  \param osnspb one step non smooth problem (default none)
+  //  */
+  // TimeStepping(SP::NonSmoothDynamicalSystem nsds, SP::TimeDiscretisation td);
+  
   /** Constructor with the time-discretisation.
    *  \param td pointer to a timeDiscretisation used in the integration
    *  (linked to the model that owns this simulation)
    *  \param nb number of non smooth problem
    */
-  TimeStepping(SP::NonSmoothDynamicalSystem nsds, SP::TimeDiscretisation td, int nb);
+  TimeStepping(SP::NonSmoothDynamicalSystem nsds, SP::TimeDiscretisation td, int nb =0);
 
   /** Destructor.
   */
@@ -255,6 +267,15 @@ public:
   {
     _warnOnNonConvergence = newval;
   };
+
+  void setResetAllLambda(bool newval)
+  {
+    _resetAllLambda = newval;
+  };
+
+  
+
+  
   bool explicitJacobiansOfRelation()
   {
   return  _explicitJacobiansOfRelation;
@@ -329,22 +350,6 @@ public:
   double newtonMaxIteration()
   {
     return _newtonMaxIteration;
-  };
-
-  /** set whether updateInterations should be called on each Newton iteration
-   *  \param update a bool indiciating the Newton updateInterations behaviour
-   */
-  void setNewtonUpdateInteractionsPerIteration(bool update)
-  {
-    _newtonUpdateInteractionsPerIteration = update;
-  };
-
-  /** get the Newton updateInterations behaviour
-   *  \return a bool indicating the Newton updateInterations behaviour
-   */
-  bool newtonUpdateInteractionsPerIteration()
-  {
-    return _newtonUpdateInteractionsPerIteration;
   };
 
   /** set the NewtonOptions

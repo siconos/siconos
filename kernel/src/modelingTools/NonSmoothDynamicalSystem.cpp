@@ -48,9 +48,13 @@ NonSmoothDynamicalSystem::NonSmoothDynamicalSystem():
   // === Builds an empty topology ===
   _topology.reset(new Topology());
 
-  // we push a first element in the list to avoid acces to null when we call --_changeLog.end();
+  // we push a first element in the list to avoid acces to null when
+  // we call --_changeLog.end();
   _changeLog.push_back(Changes(clearTopology));
   DEBUG_EXPR((--_changeLog.end())->display(););
+
+  // see Simulation::initialize() for an explanation of why we
+  // implement this changelog
 };
 //  constructor
 NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(double t0, double T):
@@ -60,15 +64,61 @@ NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(double t0, double T):
 {
   // === Builds an empty topology ===
   _topology.reset(new Topology());
-  // we push a first element in the list to avoid acces to null when we call --_changeLog.end();
+  // we push a first element in the list to avoid acces to null when
+  // we call --_changeLog.end();
   _changeLog.push_back(Changes(clearTopology));
   DEBUG_EXPR((--_changeLog.end())->display());
+
+  // see Simulation::initialize() for an explanation of why we
+  // implement this changelog
 };
 
 NonSmoothDynamicalSystem::~NonSmoothDynamicalSystem()
 {
   clear();
 }
+
+// changelog
+void NonSmoothDynamicalSystem::Changes::display() const
+{
+  std::cout << "Changes display   " << this <<std::endl;
+  if (typeOfChange == addDynamicalSystem)
+  {
+    std::cout << "typeOfChange : " << typeOfChange << " : addDynamicalSystem" << std::endl;
+  }
+  else if (typeOfChange == rmDynamicalSystem)
+  {
+    std::cout << "typeOfChange : " << typeOfChange << " : rmDynamicalSystem" << std::endl;
+  }
+  else if (typeOfChange == addInteraction)
+  {
+    std::cout << "typeOfChange : " << typeOfChange << " : addInteraction" << std::endl;
+  }
+  else if (typeOfChange == rmInteraction)
+  {
+    std::cout << "typeOfChange : " << typeOfChange << " : rmInteraction" << std::endl;
+  }
+  else if (typeOfChange == clearTopology)
+  {
+    std::cout << "typeOfChange : " << typeOfChange << " : clearTopology" << std::endl;
+  }
+}
+
+void NonSmoothDynamicalSystem::clearChangeLogTo(const ChangeLogIter& it)
+{
+  /* Given an interator into the changelog list, clear everything that
+   * comes before it. User must be careful calling this if he has two
+   * simulations, but in the one-simulation case (currently 100% of
+   * cases), calling this will prevent changelog from building up
+   * forever. Important especially for simulations using an
+   * InteractionManager, e.g. mechanics_io. */
+  while (_changeLog.begin() != it) {
+    _changeLog.pop_front();
+    assert((_changeLog.end() != it) && (_changeLog.begin() != _changeLog.end())
+           && "NSDS::clearChangeLogTo: iterator not in list!");
+  }
+}
+
 
 // === DynamicalSystems management ===
 
@@ -190,7 +240,7 @@ void NonSmoothDynamicalSystem::updateInput(double time, unsigned int level)
     inter = indexSet0->bundle(*ui);
     assert(inter->lowerLevelForInput() <= level);
     assert(inter->upperLevelForInput() >= level);
-    inter->computeInput(time, indexSet0->properties(*ui), level);
+    inter->computeInput(time, level);
   }
 
   DEBUG_END("Nonsmoothdynamicalsystem::updateInput(double time, unsigned int level)\n");
@@ -214,7 +264,7 @@ void NonSmoothDynamicalSystem::updateOutput(double time, unsigned int level)
     inter = indexSet0->bundle(*ui);
     assert(inter->lowerLevelForOutput() <= level);
     assert(inter->upperLevelForOutput() >= level);
-    inter->computeOutput(time, indexSet0->properties(*ui), level);
+    inter->computeOutput(time, level);
   }
   DEBUG_END("NonSmoothDynamicalSystem::updateOutput(unsigned int level)\n");
 

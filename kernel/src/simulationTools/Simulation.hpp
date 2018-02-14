@@ -25,32 +25,26 @@
 #include "SiconosConst.hpp"
 #include "SimulationTypeDef.hpp"
 #include "SiconosFwd.hpp"
-// #include "EventsManager.hpp"
-// #include "SiconosPointers.hpp"
 #include <fstream>
-// #include "Model.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
-// #include "Topology.hpp"
 #include "InteractionManager.hpp"
 #include <list>
 
-
 /** Description of the simulation process (integrators, time
-    discretisation and so on) - Base class for TimeStepping or
-    EventDriven.
+ *  discretisation and so on) - Base class for TimeStepping or
+ *  EventDriven.
+ *
+ *   \author SICONOS Development Team - copyright INRIA
+ *   \version 4.2.0.
+ *   \date (Creation) Apr 26, 2004
+ *
+ *   !!! This is an abstract class !!!
+ *
+ *   The available simulations are TimeStepping and EventDriven. See
+ *   derived classes for more details.
+ *
+ */
 
-    \author SICONOS Development Team - copyright INRIA
-    \version 3.8.0.
-    \date (Creation) Apr 26, 2004
-
-    !!! This is an abstract class !!!
-
-    The available simulations are TimeStepping and EventDriven. See
-    derived classes for more details.
-
-  Rules:
-  - A Model must be given to the constructor, otherwise an exception is thrown.
-*/
 class Simulation : public std11::enable_shared_from_this<Simulation>
 {
 protected:
@@ -58,14 +52,11 @@ protected:
   */
   ACCEPT_SERIALIZATION(Simulation);
 
-
   /** name or id of the Simulation */
   std::string _name;
 
   /** tool to manage all events */
   SP::EventsManager _eventsManager;
-
-
 
   /** current starting time for integration */
   double _tinit;
@@ -75,10 +66,11 @@ protected:
 
   /** real ending time for integration (different from tend in case of
       stop during integrate, for example when a root is found in
-      LsodarOSI procedure)
+      an EventDriven strategy)
   */
   double _tout;
 
+  
   double _T;
 
   /** the dynamical systems integrators */
@@ -136,26 +128,20 @@ protected:
    */
   double _relativeConvergenceTol;
 
-  /**
-   * track whether link() or unlink() has been called
-   */
-  bool _linkOrUnlink;
-
   bool _isInitialized;
 
-  
+  /** current NSDS changelog position */
+  NonSmoothDynamicalSystem::ChangeLogIter _nsdsChangeLogPosition;
+
+  /** map of not-yet-initialized DS variables for each OSI */
   std::map< SP::OneStepIntegrator, std::list<SP::DynamicalSystem> >  _OSIDSmap;
 
-  
   /** default constructor.
    */
   Simulation() {};
 
   /** Call the interaction manager one if is registered, otherwise do nothing. */
   void updateInteractions();
-
-  /** Call the interaction manager one if is registered, otherwise do nothing. */
-  void updateInteractionsNewtonIteration();
 
   /*TS set the ds->q memory, the world (CAD model for example) must be updated.
     Overload this method to update user model.*/
@@ -177,7 +163,6 @@ private:
 
 public:
 
-  std::list<NonSmoothDynamicalSystem::Changes>::const_iterator _nsdsChangeLogPosition;
   /** default constructor
    *  \param td the timeDiscretisation for this Simulation
    */
@@ -299,7 +284,10 @@ public:
    *  \param osi the OneStepIntegrator to add
    */
   virtual void insertIntegrator(SP::OneStepIntegrator osi);
+
+  /** associate an OSI with a DS */
   void associate(SP::OneStepIntegrator osi, SP::DynamicalSystem ds);
+
   /** get a pointer to indexSets[i]
       \param i number of the required index set
       \return a graph of interactions
@@ -468,6 +456,14 @@ public:
   /** step from current event to next event of EventsManager
    */
   virtual void advanceToEvent() = 0;
+
+
+  /** clear the NSDS changelog up to current position.  If you have a
+   * particularly dynamic simulation (DS and Interactions created and
+   * destroyed frequently), then it is important to call this
+   * periodically.
+   */
+  void clearNSDSChangeLog();
 
 
   /* Set the option to specify if a relative convergence criterion must

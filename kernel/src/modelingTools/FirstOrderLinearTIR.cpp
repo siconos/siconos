@@ -21,9 +21,9 @@
 #include "BlockVector.hpp"
 #include "SimulationGraphs.hpp"
 #include <iostream>
-
-//#define DEBUG_STDOUT
-//#define DEBUG_MESSAGES
+// #define DEBUG_NOCOLOR
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
 #include "debug.h"
 
 using namespace RELATION;
@@ -64,8 +64,12 @@ void FirstOrderLinearTIR::initializeWorkVectorsAndMatrices(Interaction& inter, V
   if (!_B)
     RuntimeException::selfThrow("FirstOrderLinearTIR::initialize() B is null and is a required input.");
 
-  // Check if various operators sizes are consistent.
-  // Reference: interaction.
+  checkSize(inter);
+}
+void FirstOrderLinearTIR::checkSize(Interaction& inter)
+{
+  DEBUG_PRINT("FirstOrderLinearTIR::checkSize(Interaction & inter)\n");
+  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
 
   DEBUG_PRINTF("_C->size(0) = %i,\t inter.getSizeOfY() = %i\n ",_C->size(0),inter.getSizeOfY() );
   DEBUG_PRINTF("_C->size(1) = %i,\t inter.getSizeOfDS() = %i\n ",_C->size(1),inter.getSizeOfDS() );
@@ -84,6 +88,7 @@ void FirstOrderLinearTIR::initializeWorkVectorsAndMatrices(Interaction& inter, V
     assert(((_F->size(0) != inter.getSizeOfY()) && (_F->size(1) != DSlink[FirstOrderR::z]->size())) && "FirstOrderLinearTIR::initialize , inconsistent size between C and F.");
   if (_e)
     assert(_e->size() == inter.getSizeOfY() && "FirstOrderLinearTIR::initialize , inconsistent size between C and e.");
+
 }
 
 void FirstOrderLinearTIR::computeh(BlockVector& x, SiconosVector& lambda, BlockVector& z, SiconosVector& y)
@@ -105,25 +110,30 @@ void FirstOrderLinearTIR::computeh(BlockVector& x, SiconosVector& lambda, BlockV
 
 }
 
-void FirstOrderLinearTIR::computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level)
+void FirstOrderLinearTIR::computeOutput(double time, Interaction& inter, unsigned int level)
 {
   // We get y and lambda of the interaction (pointers)
-  SiconosVector& y = *inter.y(0);
-  SiconosVector& lambda = *inter.lambda(0);
+  SiconosVector& y = *inter.y(level);
+  SiconosVector& lambda = *inter.lambda(level);
 
-  VectorOfBlockVectors& DSlink = *interProp.DSlink;
+  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
   computeh(*DSlink[FirstOrderR::x], lambda, *DSlink[FirstOrderR::z], y);
 }
+
 
 void FirstOrderLinearTIR::computeg(SiconosVector& lambda, BlockVector& r)
 {
   prod(*_B, lambda, r, false);
 }
 
-void FirstOrderLinearTIR::computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level)
+void FirstOrderLinearTIR::computeInput(double time, Interaction& inter, unsigned int level)
 {
-  VectorOfBlockVectors& DSlink = *interProp.DSlink;
+  DEBUG_BEGIN("FirstOrderLinearTIR::computeInput(double time, Interaction& inter, unsigned int level)\n")
+  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
+  DEBUG_EXPR(inter.lambda(level)->display(););
+  DEBUG_EXPR(DSlink[FirstOrderR::r]->display(););
   computeg(*inter.lambda(level), *DSlink[FirstOrderR::r]);
+  DEBUG_END("FirstOrderLinearTIR::computeInput(double time, Interaction& inter, unsigned int level)\n")
 }
 
 void FirstOrderLinearTIR::display() const

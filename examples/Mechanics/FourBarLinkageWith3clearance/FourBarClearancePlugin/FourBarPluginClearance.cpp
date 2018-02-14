@@ -757,6 +757,7 @@ extern "C" void jacobianFGyrVelocity(unsigned int sizeOfq, const double *q, cons
 
 extern "C" void FInt(double time, unsigned int sizeOfq, const double *q, const double *velocity, double *fInt, unsigned int sizeZ, double* z)
 {
+  //std::cout << "compute Fint" << std::endl;
   // internal forces (negative in h according to LagrangianDS)
 double s11 = FS1(q);
 double s21 = FS2(q);

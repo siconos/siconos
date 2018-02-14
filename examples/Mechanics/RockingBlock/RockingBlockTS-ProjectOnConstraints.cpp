@@ -96,10 +96,10 @@ int main(int argc, char* argv[])
     //================================================================================================================
     //            III. Create the "model" object
     //================================================================================================================
-    SP::Model RoBlockModel(new Model(TimeInitial, TimeFinal));
-    RoBlockModel->nonSmoothDynamicalSystem()->insertDynamicalSystem(RockingBlock);
-    RoBlockModel->nonSmoothDynamicalSystem()->link(inter1, RockingBlock);
-    RoBlockModel->nonSmoothDynamicalSystem()->link(inter2, RockingBlock);
+    SP::NonSmoothDynamicalSystem RoBlockModel(new NonSmoothDynamicalSystem(TimeInitial, TimeFinal));
+    RoBlockModel->insertDynamicalSystem(RockingBlock);
+    RoBlockModel->link(inter1, RockingBlock);
+    RoBlockModel->link(inter2, RockingBlock);
 
     
     //================================================================================================================
@@ -113,15 +113,12 @@ int main(int argc, char* argv[])
     SP::OneStepNSProblem impact(new LCP());
     SP::OneStepNSProblem impact_pos(new MLCPProjectOnConstraints());
     //4. Simulation with (1), (2), (3)
-    SP::TimeStepping TSscheme(new TimeSteppingDirectProjection(TimeDiscret, OSI, impact, impact_pos, 0));
-    RoBlockModel->setSimulation(TSscheme); // initialize the model
+    SP::TimeStepping TSscheme(new TimeSteppingDirectProjection(RoBlockModel, TimeDiscret, OSI, impact, impact_pos, 0));
 
     //==================================================================================================================
     //                    V. Process the simulation
     //==================================================================================================================
     // -------------------------------- Simulation initialization ------------------------------------------------------
-    cout << "====> Simulation initialisation ..." << endl << endl;
-    RoBlockModel->initialize(); // initialize the model
     SP::SiconosVector PosBlock = RockingBlock->q();        // pointer points to the position vector of the rocking block
     SP::SiconosVector VelBlock = RockingBlock->velocity(); // pointer points to the velocity of the rocking block
     //-------------------- Save the output during simulation ---------------------------------------------------------

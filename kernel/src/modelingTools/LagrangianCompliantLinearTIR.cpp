@@ -55,7 +55,12 @@ LagrangianCompliantLinearTIR::LagrangianCompliantLinearTIR(SP::SimpleMatrix C, S
 
 void LagrangianCompliantLinearTIR::initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
 {
+  checkSize(inter);
+}
+void LagrangianCompliantLinearTIR::checkSize(Interaction& inter)
+{
   unsigned int sizeY = inter.getSizeOfY();
+  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
 
   if (!(_jachq) || _jachq->size(1) !=  inter.getSizeOfDS() ||  _jachq->size(0) != sizeY)
     RuntimeException::selfThrow("LagrangianCompliantLinearTIR::initializeWorkVectorsAndMatrices inconsistent sizes between H matrix and the interaction.");
@@ -71,15 +76,23 @@ void LagrangianCompliantLinearTIR::initializeWorkVectorsAndMatrices(Interaction&
         _F->size(0) != sizeZ || _F->size(1) != sizeZ))
     RuntimeException::selfThrow("LagrangianCompliantLinearTIR::initializeWorkVectorsAndMatrices inconsistent sizes between F matrix and the interaction.");
 
-
 }
 
-void LagrangianCompliantLinearTIR::computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int derivativeNumber)
+
+void LagrangianCompliantLinearTIR::computeInput(double time, Interaction& inter, unsigned int level)
+{
+  // get lambda of the concerned interaction
+  SiconosVector& lambda = *inter.lambda(level);
+  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
+  // computation of p = Ht lambda
+  prod(lambda, *_jachq, *DSlink[LagrangianR::p0 + level], false);
+}
+void LagrangianCompliantLinearTIR::computeOutput(double time, Interaction& inter, unsigned int derivativeNumber)
 {
   // get y and lambda of the interaction
   SiconosVector& y = *inter.y(derivativeNumber);
   SiconosVector& lambda = *inter.lambda(derivativeNumber);
-  VectorOfBlockVectors& DSlink = *interProp.DSlink;
+  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
 
   prod(*_jachq, *DSlink[LagrangianR::q0 + derivativeNumber], y);
   prod(*_jachlambda, lambda, y, false);
@@ -92,15 +105,6 @@ void LagrangianCompliantLinearTIR::computeOutput(double time, Interaction& inter
       prod(*_F, *DSlink[LagrangianR::z], y, false);
   }
 
-}
-
-void LagrangianCompliantLinearTIR::computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level)
-{
-  // get lambda of the concerned interaction
-  SiconosVector& lambda = *inter.lambda(level);
-  VectorOfBlockVectors& DSlink = *interProp.DSlink;
-  // computation of p = Ht lambda
-  prod(lambda, *_jachq, *DSlink[LagrangianR::p0 + level], false);
 }
 
 void LagrangianCompliantLinearTIR::display() const

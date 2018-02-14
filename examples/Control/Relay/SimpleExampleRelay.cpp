@@ -91,16 +91,16 @@ int main(int argc, char* argv[])
     // -------------
     // --- Model ---
     // -------------
-    SP::Model simpleExampleRelay(new Model(t0, T));
-    simpleExampleRelay->nonSmoothDynamicalSystem()->insertDynamicalSystem(process);
-    simpleExampleRelay->nonSmoothDynamicalSystem()->link(myProcessInteraction, process);
+    SP::NonSmoothDynamicalSystem simpleExampleRelay(new NonSmoothDynamicalSystem(t0, T));
+    simpleExampleRelay->insertDynamicalSystem(process);
+    simpleExampleRelay->link(myProcessInteraction, process);
     // ------------------
     // --- Simulation ---
     // ------------------
     // TimeDiscretisation
     SP::TimeDiscretisation td(new TimeDiscretisation(t0, h));
     // == Creation of the Simulation ==
-    SP::TimeStepping s(new TimeStepping(td));
+    SP::TimeStepping s(new TimeStepping(simpleExampleRelay, td));
     // -- OneStepIntegrators --
     double theta = 0.5;
     SP::EulerMoreauOSI myIntegrator(new EulerMoreauOSI(theta));
@@ -111,21 +111,10 @@ int main(int argc, char* argv[])
 
     SP::Relay osnspb(new Relay(SICONOS_RELAY_PGS));
     s->insertNonSmoothProblem(osnspb);
-    simpleExampleRelay->setSimulation(s);
     
     // =========================== End of model definition ===========================
 
     // ================================= Computation =================================
-
-    // --- Simulation initialization ---
-
-    cout << "====> Simulation initialisation ..." << endl << endl;
-
-    simpleExampleRelay->initialize();
-
-
-    //  (s->oneStepNSProblems)[0]->initialize();
-
 
     // --- Get the values to be plotted ---
     unsigned int outputSize = 10; // number of required data
@@ -137,6 +126,9 @@ int main(int argc, char* argv[])
     SP::SiconosVector lambdaProc = myProcessInteraction->lambda(0);
     SP::SiconosVector yProc = myProcessInteraction->y(0);
 
+    myProcessInteraction->computeOutput(t0,0);
+    
+    
     // -> saved in a matrix dataPlot
     dataPlot(0, 0) = simpleExampleRelay->t0(); // Initial time of the model
     dataPlot(0, 1) = (*xProc)(0);
@@ -180,19 +172,10 @@ int main(int argc, char* argv[])
     cout << "====> Output file writing ..." << endl;
     dataPlot.resize(k, outputSize);
     ioMatrix::write("SimpleExampleRelay.dat", "ascii", dataPlot, "noDim");
-
-    // Comparison with a reference file
-    SimpleMatrix dataPlotRef(dataPlot);
-    dataPlotRef.zero();
-    ioMatrix::read("SimpleExampleRelay.ref", "ascii", dataPlotRef);
-    //std::cout << (dataPlot-dataPlotRef).normInf() <<std::endl;
-
-    if ((dataPlot - dataPlotRef).normInf() > 1e-12)
-    {
-      std::cout << "Warning. The results is rather different from the reference file." << std::endl;
+    double error=0.0, eps=1e-12;
+    if (ioMatrix::compareRefFile(dataPlot, "SimpleExampleRelay.ref", eps, error)
+        && error > eps)
       return 1;
-    }
-
   }
 
   catch (SiconosException e)

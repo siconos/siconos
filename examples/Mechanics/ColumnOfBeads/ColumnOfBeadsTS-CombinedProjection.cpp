@@ -138,21 +138,21 @@ int main(int argc, char* argv[])
     // --------------------------------------
     // ---      Model and simulation      ---
     // --------------------------------------
-    SP::Model columnOfBeads(new Model(t0, T));
+    SP::NonSmoothDynamicalSystem columnOfBeads(new NonSmoothDynamicalSystem(t0, T));
     // --  (1) OneStepIntegrators --
     SP::MoreauJeanCombinedProjectionOSI OSI(new MoreauJeanCombinedProjectionOSI(theta));
 
     // add the dynamical system in the non smooth dynamical system
     for (unsigned int i = 0; i < nBeads; i++)
     {
-      columnOfBeads->nonSmoothDynamicalSystem()->insertDynamicalSystem(beads[i]);
+      columnOfBeads->insertDynamicalSystem(beads[i]);
     }
 
     // // link the interaction and the dynamical system
     // for (unsigned int i =0; i< nBeads-1; i++)
     // {
-    //   columnOfBeads->nonSmoothDynamicalSystem()->link(interOfBeads[i],beads[i]);
-    //   columnOfBeads->nonSmoothDynamicalSystem()->link(interOfBeads[i],beads[i+1]);
+    //   columnOfBeads->link(interOfBeads[i],beads[i]);
+    //   columnOfBeads->link(interOfBeads[i],beads[i+1]);
     // }
 
     
@@ -164,20 +164,15 @@ int main(int argc, char* argv[])
     SP::OneStepNSProblem osnspb_pos(new MLCPProjectOnConstraints(SICONOS_MLCP_ENUM));
 
     // -- (4) Simulation setup with (1) (2) (3)
-    SP::TimeSteppingCombinedProjection s(new TimeSteppingCombinedProjection(t, OSI, osnspb, osnspb_pos));
+    SP::TimeSteppingCombinedProjection s(new TimeSteppingCombinedProjection(columnOfBeads, t, OSI, osnspb, osnspb_pos));
     s->setProjectionMaxIteration(10);
     s->setConstraintTolUnilateral(1e-08);
-    columnOfBeads->setSimulation(s);
 
 
     // =========================== End of model definition ===========================
 
     // ================================= Computation =================================
 
-    // --- Simulation initialization ---
-
-    cout << "====> Initialisation ..." << endl << endl;
-    columnOfBeads->initialize();
 
     int N = ceil((T - t0) / h); // Number of time steps
 
@@ -223,15 +218,7 @@ int main(int argc, char* argv[])
             // std::cout << "Number of contact = " << ncontact << std::endl;
 
             inter.reset(new Interaction(nslaw, relation));
-            columnOfBeads->nonSmoothDynamicalSystem()->link(inter, beads[0]);
-            s->initializeInteraction(s->nextTime(), inter);
-
-            if (!isOSNSinitialized)
-            {
-              s->initOSNS();
-              isOSNSinitialized = true;
-            }
-
+            columnOfBeads->link(inter, beads[0]);
             assert(inter->y(0)->getValue(0) >= 0);
             // std::cout<< "inter->y(0)->getValue(0)" <<inter->y(0)->getValue(0)   <<std::endl;
           }
@@ -251,15 +238,7 @@ int main(int argc, char* argv[])
             relationOfBeads[i].reset(new LagrangianLinearTIR(HOfBeads, bOfBeads));
             interOfBeads[i].reset(new Interaction(nslaw, relationOfBeads[i]));
 
-            columnOfBeads->nonSmoothDynamicalSystem()->link(interOfBeads[i], beads[i], beads[i+1]);
-            s->initializeInteraction(s->nextTime(), interOfBeads[i]);
-
-            if (!isOSNSinitialized)
-            {
-              s->initOSNS();
-              isOSNSinitialized = true;
-            }
-
+            columnOfBeads->link(interOfBeads[i], beads[i], beads[i+1]);
             // std::cout<< "interOfBeads["<<i<<"]->y(0)->getValue(0)" <<interOfBeads[i]->y(0)->getValue(0)   <<std::endl;
             assert(interOfBeads[i]->y(0)->getValue(0) >= 0);
           }
@@ -295,19 +274,12 @@ int main(int argc, char* argv[])
     cout << "====> Output file writing ..." << endl;
     dataPlot.resize(k, outputSize);
     ioMatrix::write("result.dat", "ascii", dataPlot, "noDim");
-    // Comparison with a reference file
-    SimpleMatrix dataPlotRef(dataPlot);
-    dataPlotRef.zero();
 
-    ioMatrix::read("result-WITHCOMBINEDPROJ.ref", "ascii", dataPlotRef);
-
-    cout << "====> Comparison with reference file ..." << endl;
-    std::cout << "Error w.r.t. reference file : " << (dataPlot - dataPlotRef).normInf() << std::endl;
-    if ((dataPlot - dataPlotRef).normInf() > 1e-10)
-    {
-      std::cout << "Warning. The result is rather different from the reference file." << std::endl;
+    ioMatrix::write("ColumnOfbeadsTS-CombinedProjectiom.dat", "ascii", dataPlot);
+    double error=0.0, eps=1e-12;
+    if (ioMatrix::compareRefFile(dataPlot, "ColumnOfbeadsTS-CombinedProjection.ref", eps, error)
+        && error > eps)
       return 1;
-    }
 
   }
 

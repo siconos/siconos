@@ -41,17 +41,17 @@ MoreauJeanBilbaoOSI::MoreauJeanBilbaoOSI():
   _steps=1;
 }
 
-void MoreauJeanBilbaoOSI::initializeDynamicalSystem( double t, SP::DynamicalSystem ds)
+void MoreauJeanBilbaoOSI::initializeWorkVectorsForDS( double t, SP::DynamicalSystem ds)
 {
   // Get work buffers from the graph
   // const DynamicalSystemsGraph::VDescriptor& dsv = _dynamicalSystemsGraph->descriptor(ds);
   //if(!(checkOSI(dsv)))
-  // RuntimeException::selfThrow("MoreauJeanBilbaoOSI::initializeDynamicalSystem(m,t,ds) - ds does not belong to the OSI.");
+  // RuntimeException::selfThrow("MoreauJeanBilbaoOSI::initializeWorkVectorsForDS(m,t,ds) - ds does not belong to the OSI.");
   VectorOfVectors& work_ds = *_initializeDSWorkVectors(ds);
   //VectorOfVectors& work_ds = *_dynamicalSystemsGraph->properties(dsv).workVectors;
   Type::Siconos dsType = Type::value(*ds);
   if(dsType != Type::LagrangianLinearDiagonalDS)
-    RuntimeException::selfThrow("MoreauJeanBilbaoOSI::initializeDynamicalSystem - not yet implemented for Dynamical system of type : " + Type::name(*ds));
+    RuntimeException::selfThrow("MoreauJeanBilbaoOSI::initializeWorkVectorsForDS - not yet implemented for Dynamical system of type : " + Type::name(*ds));
 
   work_ds.resize(MoreauJeanBilbaoOSI::WORK_LENGTH);
   // - work buffer, used to save vfree.
@@ -64,7 +64,7 @@ void MoreauJeanBilbaoOSI::initializeDynamicalSystem( double t, SP::DynamicalSyst
   lldds.swapInMemory();
 }
 
-void MoreauJeanBilbaoOSI::fillDSLinks(Interaction &inter, InteractionProperties& interProp,
+void MoreauJeanBilbaoOSI::initializeWorkVectorsForInteraction(Interaction &inter, InteractionProperties& interProp,
 				  DynamicalSystemsGraph & DSG)
 {
   // Get the dynamical systems linked by inter
@@ -74,14 +74,16 @@ void MoreauJeanBilbaoOSI::fillDSLinks(Interaction &inter, InteractionProperties&
   assert(ds2);
 
 
-  
-  VectorOfBlockVectors& DSlink = *interProp.DSlink;
+  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
 
   interProp.workVectors.reset(new VectorOfVectors);
   interProp.workMatrices.reset(new VectorOfSMatrices);
 
   VectorOfVectors& workV = *interProp.workVectors;
   VectorOfSMatrices& workM = *interProp.workMatrices;
+  interProp.workBlockVectors.reset(new VectorOfBlockVectors);
+  VectorOfBlockVectors& workBlockV = *interProp.workBlockVectors;
+  workBlockV.resize(MoreauJeanBilbaoOSI::BLOCK_WORK_LENGTH);
 
   Relation &relation =  *inter.relation();
   relation.initializeWorkVectorsAndMatrices(inter, DSlink, workV, workM);
@@ -105,14 +107,14 @@ void MoreauJeanBilbaoOSI::fillDSLinks(Interaction &inter, InteractionProperties&
   if(checkOSI(DSG.descriptor(ds1)))
   {
     VectorOfVectors &workVds1 = *DSG.properties(DSG.descriptor(ds1)).workVectors;
-    if (!DSlink[LagrangianR::xfree])
+    if (!workBlockV[MoreauJeanBilbaoOSI::xfree])
     {
-      DSlink[LagrangianR::xfree].reset(new BlockVector());
-      DSlink[LagrangianR::xfree]->insertPtr(workVds1[MoreauJeanBilbaoOSI::VFREE]);
+      workBlockV[MoreauJeanBilbaoOSI::xfree].reset(new BlockVector());
+      workBlockV[MoreauJeanBilbaoOSI::xfree]->insertPtr(workVds1[MoreauJeanBilbaoOSI::VFREE]);
     }
     else
     {
-      DSlink[LagrangianR::xfree]->setVectorPtr(0,workVds1[MoreauJeanBilbaoOSI::VFREE]);
+      workBlockV[MoreauJeanBilbaoOSI::xfree]->setVectorPtr(0,workVds1[MoreauJeanBilbaoOSI::VFREE]);
     }
   }
   if (ds1 != ds2)
@@ -120,16 +122,16 @@ void MoreauJeanBilbaoOSI::fillDSLinks(Interaction &inter, InteractionProperties&
     if(checkOSI(DSG.descriptor(ds2)))
     {
       VectorOfVectors &workVds2 = *DSG.properties(DSG.descriptor(ds2)).workVectors;
-      if (!DSlink[LagrangianR::xfree])
+      if (!workBlockV[MoreauJeanBilbaoOSI::xfree])
       {
-        DSlink[LagrangianR::xfree].reset(new BlockVector());
+        workBlockV[MoreauJeanBilbaoOSI::xfree].reset(new BlockVector());
         //dummy insertion to reserve first vector for ds1
-        DSlink[LagrangianR::xfree]->insertPtr(workVds2[MoreauJeanBilbaoOSI::VFREE]);
-        DSlink[LagrangianR::xfree]->insertPtr(workVds2[MoreauJeanBilbaoOSI::VFREE]);
+        workBlockV[MoreauJeanBilbaoOSI::xfree]->insertPtr(workVds2[MoreauJeanBilbaoOSI::VFREE]);
+        workBlockV[MoreauJeanBilbaoOSI::xfree]->insertPtr(workVds2[MoreauJeanBilbaoOSI::VFREE]);
       }
       else
       {
-        DSlink[LagrangianR::xfree]->insertPtr(workVds2[MoreauJeanBilbaoOSI::VFREE]);
+        workBlockV[MoreauJeanBilbaoOSI::xfree]->insertPtr(workVds2[MoreauJeanBilbaoOSI::VFREE]);
       }
     }
   }
@@ -481,14 +483,15 @@ void MoreauJeanBilbaoOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vert
 {
   InteractionsGraph& indexSet = *osnsp->simulation()->indexSet(osnsp->indexSetLevel());
   assert(indexSet.bundle(vertex_inter));
-  VectorOfBlockVectors& DSlink = *indexSet.properties(vertex_inter).DSlink;
   // current interaction
   Interaction& inter = *indexSet.bundle(vertex_inter);
+  //VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
   assert(inter.relation());
+  VectorOfBlockVectors& workBlockV = *indexSet.properties(vertex_inter).workBlockVectors;
   // Get relation and non smooth law types
   // RELATION::TYPES relationType = inter.relation()->getType();
   // RELATION::SUBTYPES relationSubType = inter.relation()->getSubType();
-  // check relation type: done in fillDSLinks.
+  // check relation type: done in initializeWorkVectorsForInteraction.
   // if(relationType != Lagrangian || relationSubType != LinearR)
   //   RuntimeException::selfThrow("MoreauJeanBilbaoOSI::computeFreeOutput only Lagrangian Linear Relations are allowed.");
 
@@ -503,7 +506,7 @@ void MoreauJeanBilbaoOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vert
   coord[6] = 0;
   coord[7] = sizeY;
   // buffer used to save output
-  BlockVector& x_free = *DSlink[LagrangianR::xfree];
+  BlockVector& x_free = *workBlockV[MoreauJeanBilbaoOSI::xfree];
   SiconosVector& osnsp_rhs = *(*indexSet.properties(vertex_inter).workVectors)[MoreauJeanBilbaoOSI::OSNSP_RHS];
 
 
