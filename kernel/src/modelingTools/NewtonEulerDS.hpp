@@ -361,7 +361,7 @@ protected:
 
   /** Default constructor
    */
-  NewtonEulerDS();
+  NewtonEulerDS(unsigned int order = 1);
 
   /** build all _plugin... PluggedObject */
   void _zeroPlugin();
@@ -379,7 +379,8 @@ public:
   NewtonEulerDS(SP::SiconosVector position,
                 SP::SiconosVector twist,
                 double mass,
-                SP::SiconosMatrix inertia);
+                SP::SiconosMatrix inertia,
+                unsigned int order =1);
 
   /** destructor */
   virtual ~NewtonEulerDS();
@@ -399,6 +400,12 @@ public:
    *  \param int input-level to be initialized.
    */
   void initializeNonSmoothInput(unsigned int level) ;
+
+  /** set nonsmooth input
+   *  \param  min input-level to be initialized.
+   *  \param  max input-level to be initialized.
+   */
+  void initializeNonSmoothInput(unsigned int min, unsigned max) ;
 
   /** update right-hand side for the current state
    *  \param double time of interest

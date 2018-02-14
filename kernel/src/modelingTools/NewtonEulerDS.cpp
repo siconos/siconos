@@ -391,8 +391,8 @@ void computeT(SP::SiconosVector q, SP::SimpleMatrix T)
 Q0 : contains the center of mass coordinate, and the quaternion initial. (dim(Q0)=7)
 Twist0 : contains the initial velocity of center of mass and the omega initial. (dim(VTwist0)=6)
 */
-NewtonEulerDS::NewtonEulerDS():
-  DynamicalSystem(13),
+NewtonEulerDS::NewtonEulerDS(unsigned int order):
+  DynamicalSystem(13,order),
   _hasConstantFExt(false),
   _hasConstantMExt(false),
   _isMextExpressedInInertialFrame(false),
@@ -411,8 +411,9 @@ NewtonEulerDS::NewtonEulerDS():
 
 
 NewtonEulerDS::NewtonEulerDS(SP::SiconosVector Q0, SP::SiconosVector Twist0,
-                             double  mass, SP::SiconosMatrix inertialMatrix):
-  DynamicalSystem(13),
+                             double  mass, SP::SiconosMatrix inertialMatrix,
+                             unsigned int order):
+  DynamicalSystem(13,order),
   _hasConstantFExt(false),
   _hasConstantMExt(false),
   _isMextExpressedInInertialFrame(false),
@@ -551,7 +552,7 @@ void NewtonEulerDS::setInertia(double ix, double iy, double iz)
 void NewtonEulerDS::initializeNonSmoothInput(unsigned int level)
 {
   DEBUG_PRINTF("NewtonEulerDS::initializeNonSmoothInput(unsigned int level) for level = %i\n",level);
-
+  assert(0);
   if(!_p[level])
   {
     if(level == 0)
@@ -568,6 +569,21 @@ void NewtonEulerDS::initializeNonSmoothInput(unsigned int level)
 #endif
 }
 
+void NewtonEulerDS::initializeNonSmoothInput(unsigned int min, unsigned int max)
+{
+  DEBUG_BEGIN("void NewtonEulerDS::initializeNonSmoothInput(unsigned int min, unsigned int max)\n")
+  _p.resize(max+1);
+  for (unsigned int level =min ; level < max+1 ; level++ )
+  {
+    if(level == 0)
+    {
+      _p[level].reset(new SiconosVector(_qDim));
+    }
+    else
+      _p[level].reset(new SiconosVector(_ndof));
+  }
+  DEBUG_END("void NewtonEulerDS::initializeNonSmoothInput(unsigned int min, unsigned int max)\n")
+}
 
 
 void NewtonEulerDS::initRhs(double time)

@@ -27,13 +27,13 @@
 
 
 /**  General First Order Non Linear Dynamical Systems - \f$ M(t) \dot{x} = f(x,t,z) + r, \quad x(t_0) = x_0 \f$
-     
+
      \author SICONOS Development Team - copyright INRIA
      \date (Creation) April 29, 2004
-     
+
      This class defines and computes a generic n-dimensional
      dynamical system of the form :
-     
+
      \f[
      M \dot x = f(x,t,z) + r, \quad x(t_0) = x_0
      \f]
@@ -49,14 +49,14 @@
      set by actuators) and so on.
 
      - \f$ f : R^{n} \times R  \mapsto  R^{n}\f$ the vector field.
- 
+
   By default, the DynamicalSystem is considered to be an Initial Value Problem (IVP)
   and the initial conditions are given by
    \f[
    x(t_0)=x_0
   \f]
   To define a Boundary Value Problem, a pointer on a BoundaryCondition must be set.
-   
+
   The right-hand side and its jacobian (from base classe) are defined as
 
   \f[
@@ -66,12 +66,12 @@
 
 
   The following operators can be plugged, in the usual way (see User Guide)
-  
+
   - \f$f(x,t,z)\f$
   - \f$\nabla_x f(x,t,z)\f$
   - \f$M(t)\f$
-  
- 
+
+
  */
 class FirstOrderNonLinearDS : public DynamicalSystem
 {
@@ -80,7 +80,7 @@ private:
 
   /** plugin signature */
   typedef void (*FNLDSPtrfct)(double, unsigned int, const double*, double*, unsigned int, double*);
- 
+
 protected:
   /* serialization hooks */
   ACCEPT_SERIALIZATION(FirstOrderNonLinearDS);
@@ -149,14 +149,15 @@ public:
       \warning you need to set explicitely the plugin for f and its jacobian if needed (e.g. if used with
       an EventDriven scheme)
   */
-  FirstOrderNonLinearDS(SP::SiconosVector newX0);
+  FirstOrderNonLinearDS(SP::SiconosVector newX0, unsigned int order =0);
 
   /** constructor from initial state and f (plugins), \f$\dot x = f(x, t, z) + r\f$
    *  \param newX0 initial state
    *  \param fPlugin name of the plugin function to be used for f(x,t,z)
    *  \param jacobianfxPlugin name of the plugin to be used for the jacobian of f(x,t,z)
    */
-  FirstOrderNonLinearDS(SP::SiconosVector newX0, const std::string& fPlugin, const std::string& jacobianfxPlugin);
+  FirstOrderNonLinearDS(SP::SiconosVector newX0, const std::string& fPlugin,
+                        const std::string& jacobianfxPlugin, unsigned int order =0);
 
   /** Copy constructor
    * \param FONLDS the FirstOrderNonLinearDS to copy
@@ -178,6 +179,12 @@ public:
    *  \param int input-level to be initialized.
    */
   void initializeNonSmoothInput(unsigned int level) ;
+
+  /** set nonsmooth input to zero
+   *  \param  min input-level to be initialized.
+   *  \param  max input-level to be initialized.
+   */
+  void initializeNonSmoothInput(unsigned int min, unsigned int max) ;
 
   /** update right-hand side for the current state
    *  \param double time of interest
@@ -201,7 +208,7 @@ public:
 
   ///@}
 
-  /*! @name Attributes access 
+  /*! @name Attributes access
     @{ */
 
   /** returns a pointer to M, matrix coeff. on left-hand side
@@ -301,9 +308,9 @@ public:
   //@}
 
   /*! @name Plugins management  */
-  
+
   //@{
-  
+
   /** Call all plugged-function to initialize plugged-object values
       \param time value
   */
@@ -415,5 +422,3 @@ public:
 TYPEDEF_SPTR(FirstOrderNonLinearDS)
 
 #endif
-
-

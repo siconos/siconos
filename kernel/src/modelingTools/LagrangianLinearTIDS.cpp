@@ -25,8 +25,10 @@
 
 // --- Constructor from a initial conditions and matrix-operators
 LagrangianLinearTIDS::LagrangianLinearTIDS(SP::SiconosVector newQ0, SP::SiconosVector newVelocity0,
-    SP::SiconosMatrix newMass,  SP::SiconosMatrix newK, SP::SiconosMatrix newC):
-  LagrangianDS(newQ0, newVelocity0, newMass)
+                                           SP::SiconosMatrix newMass,  SP::SiconosMatrix newK,
+                                           SP::SiconosMatrix newC,
+                                           unsigned int order):
+  LagrangianDS(newQ0, newVelocity0, newMass, order)
 {
   assert((newK->size(0) == _ndof && newK->size(1) == _ndof) &&
          "LagrangianLinearTIDS - constructor from data, inconsistent size between K and _ndof");

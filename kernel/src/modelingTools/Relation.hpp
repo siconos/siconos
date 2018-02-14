@@ -202,7 +202,7 @@ public:
    */
   virtual void setComputeJacglambdaFunction(const std::string& pluginPath, const std::string& functionName);
 
-  /** initialize the relation (check sizes, memory allocation ...)
+  /** initialize the relation (memory allocation of work vectors and matrices ...)
    * \param inter the interaction using this relation
    */
   virtual void initialize(Interaction& inter) = 0;
@@ -236,8 +236,9 @@ public:
    */
   virtual void computeOutput(double time, Interaction& inter,
                              unsigned int derivativeNumber = 0) = 0;
+
   /** default function to compute r
-   *  \param time the current time
+   *  \param time the current timels
    *  \param inter the interaction using this relation
    *  \param interProp
    *  \param level the input "derivative" order of lambda used to compute input

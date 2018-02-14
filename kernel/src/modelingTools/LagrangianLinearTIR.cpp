@@ -23,9 +23,10 @@
 #include "SimulationGraphs.hpp"
 
 #include <iostream>
-// #define DEBUG_NOCOLOR
-// #define DEBUG_STDOUT
-// #define DEBUG_MESSAGES
+#include <string>
+#define DEBUG_NOCOLOR
+#define DEBUG_STDOUT
+#define DEBUG_MESSAGES
 #include "debug.h"
 
 using namespace RELATION;
@@ -76,8 +77,16 @@ void LagrangianLinearTIR::computeOutput(double time, Interaction& inter, unsigne
 {
   DEBUG_BEGIN("LagrangianLinearTIR::computeOutput(double time, Interaction& inter, unsigned int derivativeNumber)\n");
   // get y and lambda of the interaction
+
+  if (!(inter.y()[derivativeNumber]))
+  {
+    RuntimeException::selfThrow("LagrangianLinearTIR::computeOutput - interaction output (y) is not defined for level " +std::to_string(derivativeNumber));
+  }
+
+
   SiconosVector& y = *inter.y(derivativeNumber);
   VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
+
   prod(*_jachq, *DSlink[LagrangianR::q0 + derivativeNumber], y);
 
   if (derivativeNumber == 0)
