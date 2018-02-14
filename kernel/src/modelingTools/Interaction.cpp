@@ -18,9 +18,9 @@
 #include <assert.h>
 #include <iostream>
 //#define DEBUG_BEGIN_END_ONLY
-// #define DEBUG_STDOUT
-// #define DEBUG_NOCOLOR
-// #define DEBUG_MESSAGES
+#define DEBUG_STDOUT
+#define DEBUG_NOCOLOR
+#define DEBUG_MESSAGES
 #include "debug.h"
 
 #include "Interaction.hpp"
@@ -383,12 +383,14 @@ void Interaction::initializeLinkToDsVariables(DynamicalSystem& ds1,
   else if (relationType == NewtonEuler)
   {
     __initDataNewtonEuler(DSlink, ds1, ds2);
-    static_cast<NewtonEulerR&> (*_relation).initialize(*this);
   }
   else
     RuntimeException::selfThrow("Interaction::initData unknown initialization procedure for \
         a relation of type: " + relationType);
 
+  _relation->initialize(*this);
+
+  
 }
 
 

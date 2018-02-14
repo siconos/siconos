@@ -28,9 +28,9 @@
 #include "SimulationGraphs.hpp"
 
 // #define DEBUG_BEGIN_END_ONLY
-// #define DEBUG_NOCOLOR
-// #define DEBUG_STDOUT
-// #define DEBUG_MESSAGES
+#define DEBUG_NOCOLOR
+#define DEBUG_STDOUT
+#define DEBUG_MESSAGES
 
 #include <debug.h>
 
@@ -52,7 +52,7 @@ void NewtonEulerR::initialize(Interaction& inter)
   unsigned int xSize = inter.getSizeOfDS();
   unsigned int qSize = 7 * (xSize / 6);
 
-  if (! _jachq)
+  if (!_jachq)
     _jachq.reset(new SimpleMatrix(ySize, qSize));
   else
   {
