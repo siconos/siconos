@@ -48,7 +48,7 @@ class NewtonEulerR : public Relation
 {
 public:
 // add deltaq ??? -- xhub 30/03/2014
-  enum NewtonEulerRDS  {z, q0, velocity, dotq, p0, p1, p2, DSlinkSize};
+  enum NewtonEulerRDS  {z, q0, velocity, acceleration,  dotq, p0, p1, p2, DSlinkSize};
 
 protected:
   /** serialization hooks
