@@ -145,9 +145,31 @@ def test_lagrangian_ds():
     mass = np.asarray(np.diag([1, 2, 3]), dtype=np.float64)
     ds = sk.LagrangianDS(q0, v0, mass)
     ec = ds.computeKineticEnergy()
+
     assert ec == 87.
     assert ds.dimension() == ndof
     assert np.allclose(ds.mass(), mass)
+
+    assert(np.all(ds.q() == [1, 2, 3]))
+    assert(np.all(ds.velocity() == [4, 5, 6]))
+
+    try:
+        print('order = ', ds.order())
+        print(ds.acceleration())
+    except Exception as err:
+        print(err)
+    try:
+        print(ds.p(2))
+    except Exception as err:
+        print(err)
+
+    ds = sk.LagrangianDS(q0, v0, mass, 2)
+    print('order = ', ds.order())
+    print(ds.acceleration())
+    try:
+        print(ds.p(2))
+    except Exception as err:
+        print(err)
 
 
 def test_lagrangian_tids():
@@ -179,3 +201,7 @@ def test_lagrangian_tids():
     assert np.allclose(stiffness, ds.jacobianqForces())
     ds.computeJacobianqDotForces(time)
     assert np.allclose(damping, ds.jacobianqDotForces())
+
+if __name__ == '__main__':
+    print('test_lagrangian_ds()')
+    test_lagrangian_ds()

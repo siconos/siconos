@@ -50,3 +50,221 @@ def test_Nsds():
     bouncing_ball = K.NonSmoothDynamicalSystem(t0, T)
     assert bouncing_ball.t0() == t0
 
+def create_lagrangian_linear_tids_order1():
+    #
+    # dynamical system
+    #
+    x = np.zeros(3, dtype=np.float64)
+    x[0] = 1.
+    x[1] = 2.
+    x[2] = 3.
+    v = np.zeros_like(x)
+    v[0] = 4.
+    v[1] = 5.
+    v[2] = 6.
+    # mass matrix
+    mass = np.eye(3, dtype=np.float64)
+    mass[2, 2] = 3. / 5 * r * r
+
+    # the dynamical system
+    ds = K.LagrangianLinearTIDS(x, v, mass)
+
+    # set external forces
+    weight = np.zeros_like(x)
+    weight[0] = -m * g
+    ds.setFExtPtr(weight)
+    return ds
+
+def create_lagrangian_linear_tids_order2():
+    #
+    # dynamical system
+    #
+    x = np.zeros(3, dtype=np.float64)
+    x[0] = 1.
+    x[1] = 2.
+    x[2] = 3.
+    v = np.zeros_like(x)
+    v[0] = 4.
+    v[1] = 5.
+    v[2] = 6.
+    # mass matrix
+    mass = np.eye(3, dtype=np.float64)
+    mass[2, 2] = 3. / 5 * r * r
+
+    # the dynamical system
+    ds = K.LagrangianLinearTIDS(x, v, mass, 2)
+
+    # set external forces
+    weight = np.zeros_like(x)
+    weight[0] = -m * g
+    ds.setFExtPtr(weight)
+    return ds
+H = np.zeros((1, 3), dtype=np.float64)
+H[0, 0] = 1.
+H[0, 1] = 2.
+H[0, 2] = 3.
+D = np.zeros((1, 1), dtype=np.float64)
+D[0, 0] = 1.
+
+
+relation_classes = {
+    K.LagrangianLinearTIR: (H,),
+    K.LagrangianCompliantLinearTIR: (H,D)}
+
+
+def test_lagrangian_interaction_interface_order1():
+    """Tests methods that should be available
+        for all lagrangian_interactions
+    """
+
+    ds = create_lagrangian_linear_tids_order1()
+
+    for args in relation_classes:
+        print('----- ')
+        print('Test class ', args)
+        nslaw = K.NewtonImpactNSL(e)
+
+        class_name = args
+        attr = relation_classes[args]
+        relation  = class_name(*attr)
+        #print(class_name, attr[0])
+
+
+        #relation = K.LagrangianLinearTIR(H)
+        inter = K.Interaction(nslaw, relation)
+
+        #
+        # NSDS
+        #
+        t0 = 0.      # start time
+        tend = 10.   # end time
+        nsds = K.NonSmoothDynamicalSystem(t0, tend)
+
+        # add the dynamical system to the non smooth dynamical system
+        nsds.insertDynamicalSystem(ds)
+
+        # link the interaction and the dynamical system
+        nsds.link(inter, ds)
+
+        # test interface
+        inter.computeOutput(t0,0)
+
+        inter.computeInput(t0,1)
+
+        print('y(1)[0] = ',inter.y(0)[0])
+        print('lambda(1) = ', inter.lambda_(1))
+
+        assert(inter.y(0)[0] == 14.0)
+        assert(inter.lambda_(1)[0] == 0.0)
+
+        inter.computeOutput(t0,1)
+
+        print('y(1)[0] = ', inter.y(1)[0])
+        assert(inter.y(1)[0] == 32.0)
+
+        try:
+            inter.computeInput(t0,0)
+            print('lambda(0) = ', inter.lambda_(0))
+        except Exception as err:
+            print(err)
+
+        try:
+            inter.computeInput(t0,2)
+            print('lambda(2) = ', inter.lambda_(2))
+        except Exception as err:
+            print(err)
+
+        try:
+            print('acceleration', ds.acceleration())
+        except Exception as err:
+            print(err)
+
+
+
+        try:
+            inter.computeOutput(t0,2)
+              #print('y(2)[0] = ', inter.y(2))
+        except Exception as err:
+            print(err)
+            print('level 2 for y and q is not allocated')
+
+def test_lagrangian_interaction_interface_order2():
+    """Tests methods that should be available
+        for all lagrangian_interactions
+    """
+
+    ds = create_lagrangian_linear_tids_order2()
+
+    for args in relation_classes:
+        print('----- ')
+        print('Test class ', args)
+        nslaw = K.NewtonImpactNSL(e)
+
+        class_name = args
+        attr = relation_classes[args]
+        relation  = class_name(*attr)
+        #print(class_name, attr[0])
+
+
+        #relation = K.LagrangianLinearTIR(H)
+        inter = K.Interaction(nslaw, relation, 0, 2)
+
+        #
+        # NSDS
+        #
+        t0 = 0.      # start time
+        tend = 10.   # end time
+        nsds = K.NonSmoothDynamicalSystem(t0, tend)
+
+        # add the dynamical system to the non smooth dynamical system
+        nsds.insertDynamicalSystem(ds)
+
+        # link the interaction and the dynamical system
+        nsds.link(inter, ds)
+
+        # test interface
+        inter.computeOutput(t0,0)
+
+        inter.computeInput(t0,1)
+
+        print('y(1)[0] = ',inter.y(0)[0])
+        print('lambda(1) = ', inter.lambda_(1))
+
+        assert(inter.y(0)[0] == 14.0)
+        assert(inter.lambda_(1)[0] == 0.0)
+
+        inter.computeOutput(t0,1)
+
+        print('y(1)[0] = ', inter.y(1)[0])
+        assert(inter.y(1)[0] == 32.0)
+
+        try:
+            inter.computeInput(t0,0)
+            print('lambda(0) = ', inter.lambda_(0))
+        except Exception as err:
+            print(err)
+        try:
+            inter.computeInput(t0,2)
+            print('lambda(2) = ', inter.lambda_(2))
+        except Exception as err:
+            print(err)
+
+        try:
+            print('acceleration', ds.acceleration())
+        except Exception as err:
+            print(err)
+
+        try:
+            inter.computeOutput(t0,2)
+              #print('y(2)[0] = ', inter.y(2))
+        except Exception as err:
+            print(err)
+            print('level 2 for y and q is not allocated')
+
+
+
+if __name__ == '__main__':
+    print('test_lagrangian_interaction_interface')
+    test_lagrangian_interaction_interface_order1()
+    print('test_lagrangian_interaction_interface')
+    test_lagrangian_interaction_interface_order2()
