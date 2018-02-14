@@ -135,12 +135,7 @@ void SchatzmanPaoliOSI::initializeWorkVectorsForDS( double t, SP::DynamicalSyste
   }
   // W initialization
   initializeIterationMatrixW(t, ds);
-
-  for (unsigned int k = _levelMinForInput ; k < _levelMaxForInput + 1; k++)
-  {
-    ds->initializeNonSmoothInput(k);
-  }
-
+  ds->initializeNonSmoothInput(_levelMaxForInput, _levelMaxForInput);
 
   //      if ((*itDS)->getType() == Type::LagrangianDS || (*itDS)->getType() == Type::FirstOrderNonLinearDS)
   DEBUG_EXPR(ds->display());
