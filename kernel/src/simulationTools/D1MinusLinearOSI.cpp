@@ -149,10 +149,7 @@ void D1MinusLinearOSI::initializeWorkVectorsForDS(double t, SP::DynamicalSystem 
   else
     RuntimeException::selfThrow("D1MinusLinearOSI::initialize - not implemented for Dynamical system type: " + dsType);
 
-  for (unsigned int k = _levelMinForInput ; k < _levelMaxForInput + 1; k++)
-  {
-    ds->initializeNonSmoothInput(k);
-  }
+  ds->initializeNonSmoothInput(_levelMinForInput, _levelMaxForInput);
 
 }
 
