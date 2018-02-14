@@ -21,6 +21,11 @@
   detection.
 */
 
+// Note, in general the "outside margin" is not implemented.  What is
+// needed is a way to project the point detected on the external shell
+// back to the shape surface.  This could be for example the closest
+// point on the convex hell.  (For convex shapes.)
+
 #include <algorithm>
 #include <MechanicsFwd.hpp>
 #include <BulletSiconosFwd.hpp>
@@ -1514,10 +1519,6 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
 
       if (nslaw && nslaw->size() == 3)
       {
-        // Remove the added outside margin as a correction factor in Relation
-        double combined_margin =
-          pairA->sshape->outsideMargin() + pairB->sshape->outsideMargin();
-
         SP::BulletR rel(makeBulletR(pairA->ds, pairA->sshape,
                                     pairB->ds, pairB->sshape,
                                     *it->point));
