@@ -108,7 +108,7 @@ SP::SiconosVector LagrangianDS::acceleration()
 {
   if (_order < 2)
   {
-    RuntimeException::selfThrow("LagrangianDS::acceleration q(2) is not allocated\n"
+    RuntimeException::selfThrow("LagrangianDS::acceleration q(2) is not allocated (_order < 2)\n"
                                 "Hint:Construct a LagrangianDS with order =2 if you need it. see or instance :\n"
                                 "     LagrangianDS::LagrangianDS(SP::SiconosVector q0, SP::SiconosVector v0, unsigned int order)\n"
                                 "     LagrangianDS::LagrangianDS(SP::SiconosVector q0, SP::SiconosVector v0, unsigned int order)\n"

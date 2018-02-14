@@ -516,6 +516,9 @@ public:
     return _twist0;
   }
 
+  SP::SiconosVector acceleration() const;
+
+
   /** Get the linear velocity in the absolute (inertial) or relative
    * (body) frame of reference.
    * \param absoluteRef If true, velocity is returned in the inertial

@@ -281,9 +281,6 @@ void Interaction::reset()
       _y_k[i].reset(new SiconosVector(nslawSize));
       _y_k[i]->zero();
     }
-
-
-
   }
 
 
@@ -291,10 +288,14 @@ void Interaction::reset()
        i < _upperLevelForInput + 1 ;
        i++)
   {
-    DEBUG_PRINTF("Interaction::initializeMemory(). _lambda[%i].reset()\n",i)
+    DEBUG_PRINTF("Interaction::initializeMemory(). _lambda[%i].reset()\n",i);
+    if (!_lambda[i])
       _lambda[i].reset(new SiconosVector(nslawSize));
-    _lambdaOld[i].reset(new SiconosVector(nslawSize));
-    _lambdaOld[i]->zero();
+    if (!_lambdaOld[i])
+    {
+      _lambdaOld[i].reset(new SiconosVector(nslawSize));
+      _lambdaOld[i]->zero();
+    }
   }
   DEBUG_END("void Interaction::reset()\n");
 }
@@ -441,20 +442,10 @@ void Interaction::resetLambda(unsigned int level)
   DSlink[FirstOrderR::x].reset(new BlockVector());
   DSlink[FirstOrderR::r].reset(new BlockVector());
   DSlink[FirstOrderR::z].reset(new BlockVector());
-  RELATION::SUBTYPES relationSubType = _relation->getSubType();
-
-  if(relationSubType != LinearTIR)
-  {
-    //we need extra continuous memory vector
-    //todo
-  }
-
-
 
   __initDSDataFirstOrder(ds1, DSlink);
   if(&ds1 != &ds2)
     __initDSDataFirstOrder(ds2, DSlink);
-
 }
 
 void Interaction::__initDSDataFirstOrder(DynamicalSystem& ds, VectorOfBlockVectors& DSlink)
@@ -462,8 +453,20 @@ void Interaction::__initDSDataFirstOrder(DynamicalSystem& ds, VectorOfBlockVecto
   // Put x/r ... of each DS into a block. (Pointers links, no copy!!)
   FirstOrderNonLinearDS& lds = static_cast<FirstOrderNonLinearDS&>(ds);
   DSlink[FirstOrderR::x]->insertPtr(lds.x());
-  DSlink[FirstOrderR::r]->insertPtr(lds.r());
   DSlink[FirstOrderR::z]->insertPtr(lds.z());
+  if (lds.order() > 0)
+  {
+    // we should have a loop up to the order in the future
+    // DSlink[LagrangianR::x1]->insertPtr(lds.x(1));
+    // setUpperLevelForOutput(1);
+    // reset();
+  }
+
+  lds.initializeNonSmoothInput(_lowerLevelForInput,_upperLevelForInput);
+  for (unsigned int k = _lowerLevelForInput; k < _upperLevelForInput+1; k++)
+  {
+    DSlink[FirstOrderR::r + k]->insertPtr(lds.r(k));
+  }
 }
 
 void Interaction::__initDataLagrangian(VectorOfBlockVectors& DSlink, DynamicalSystem& ds1, DynamicalSystem& ds2)
@@ -478,14 +481,6 @@ void Interaction::__initDataLagrangian(VectorOfBlockVectors& DSlink, DynamicalSy
   DSlink[LagrangianR::p1].reset(new BlockVector());
   DSlink[LagrangianR::p2].reset(new BlockVector());
   DSlink[LagrangianR::z].reset(new BlockVector());
-  RELATION::SUBTYPES relationSubType = _relation->getSubType();
-  if(relationSubType != LinearTIR)
-  {
-    //we need extra continuous memory vector
-    //todo
-  }
-
-
 
   __initDSDataLagrangian(ds1, DSlink);
   if(&ds1 != &ds2)
@@ -506,7 +501,6 @@ void Interaction::__initDSDataLagrangian(DynamicalSystem& ds, VectorOfBlockVecto
   // Put q, velocity and acceleration of each DS into a block. (Pointers links, no copy!!)
   DSlink[LagrangianR::q0]->insertPtr(lds.q());
   DSlink[LagrangianR::q1]->insertPtr(lds.velocity());
-
   if (lds.order() > 1)
   {
     // we should have a loop up to the order in the future
@@ -515,9 +509,7 @@ void Interaction::__initDSDataLagrangian(DynamicalSystem& ds, VectorOfBlockVecto
     reset();
   }
   DSlink[LagrangianR::z]->insertPtr(lds.z());
-
   lds.initializeNonSmoothInput(_lowerLevelForInput,_upperLevelForInput );
-
   for (unsigned int k = _lowerLevelForInput; k < _upperLevelForInput+1; k++)
   {
       DSlink[LagrangianR::p0 + k]->insertPtr(lds.p(k));
@@ -531,9 +523,8 @@ void Interaction::__initDataNewtonEuler(VectorOfBlockVectors& DSlink, DynamicalS
   //DSlink[NewtonEulerR::xfree].reset(new BlockVector());
   DSlink[NewtonEulerR::q0].reset(new BlockVector()); // displacement
   DSlink[NewtonEulerR::velocity].reset(new BlockVector()); // velocity
-//  DSlink[NewtonEulerR::deltaq].reset(new BlockVector());
   DSlink[NewtonEulerR::dotq].reset(new BlockVector()); // qdot
-  //  data[NewtonEulerR::q2].reset(new BlockVector()); // acceleration
+  DSlink[NewtonEulerR::acceleration].reset(new BlockVector()); // acceleration
   DSlink[NewtonEulerR::z].reset(new BlockVector()); // z vector
   DSlink[NewtonEulerR::p0].reset(new BlockVector());
   DSlink[NewtonEulerR::p1].reset(new BlockVector());
@@ -556,19 +547,21 @@ void Interaction::__initDSDataNewtonEuler(DynamicalSystem& ds, VectorOfBlockVect
   // Put q/velocity/acceleration of each DS into a block. (Pointers links, no copy!!)
   DSlink[NewtonEulerR::q0]->insertPtr(neds.q());
   DSlink[NewtonEulerR::velocity]->insertPtr(neds.twist());
-  //  DSlink[NewtonEulerR::deltaq]->insertPtr(neds.deltaq());
   DSlink[NewtonEulerR::dotq]->insertPtr(neds.dotq());
-  //    data[NewtonEulerR::q2]->insertPtr( neds.acceleration());
-  if (neds.p(0))
-      DSlink[NewtonEulerR::p0]->insertPtr(neds.p(0));
-  if (neds.p(1))
-    DSlink[NewtonEulerR::p1]->insertPtr(neds.p(1));
-  if (neds.p(2))
-    DSlink[NewtonEulerR::p2]->insertPtr(neds.p(2));
-
+  if (neds.order() > 1)
+  {
+    // we should have a loop up to the order in the future
+    DSlink[NewtonEulerR::acceleration]->insertPtr(neds.acceleration());
+    setUpperLevelForOutput(2);
+    reset();
+  }
+  neds.initializeNonSmoothInput(_lowerLevelForInput,_upperLevelForInput );
+  for (unsigned int k = _lowerLevelForInput; k < _upperLevelForInput+1; k++)
+  {
+    DSlink[LagrangianR::p0 + k]->insertPtr(neds.p(k));
+  }
   DSlink[NewtonEulerR::z]->insertPtr(neds.z());
   DEBUG_END("Interaction::initDSDataNewtonEuler(DynamicalSystem& ds, VectorOfBlockVectors& DSlink)\n");
-
 }
 // --- GETTERS/SETTERS ---
 
@@ -875,7 +868,8 @@ void Interaction::computeOutput(double time, unsigned int derivativeNumber)
   if (derivativeNumber > _upperLevelForOutput)
   {
     RuntimeException::selfThrow(
-      "\nInteraction::computeOutput - the derivative order ( "+std::to_string(derivativeNumber)+  "is greater than the maximum level of output allocated in this interaction\n"
+      "\nInteraction::computeOutput - the derivative order ("+std::to_string(derivativeNumber)+  ") is greater\n"
+      "  than the maximum level of output allocated in this interaction\n"
       "Hint: If you need to compute the output at level "+std::to_string(derivativeNumber)+
       "\n      the dynamical system must be of order greater or equal to 2\n" );
   }
