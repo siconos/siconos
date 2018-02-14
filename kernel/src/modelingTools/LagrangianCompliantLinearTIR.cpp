@@ -90,6 +90,11 @@ void LagrangianCompliantLinearTIR::computeInput(double time, Interaction& inter,
 void LagrangianCompliantLinearTIR::computeOutput(double time, Interaction& inter, unsigned int derivativeNumber)
 {
   // get y and lambda of the interaction
+  if (!(inter.y()[derivativeNumber]))
+  {
+    RuntimeException::selfThrow("LagrangianLinearTIR::computeOutput - interaction output (y) is not defined for level " +std::to_string(derivativeNumber));
+  }
+
   SiconosVector& y = *inter.y(derivativeNumber);
   SiconosVector& lambda = *inter.lambda(derivativeNumber);
   VectorOfBlockVectors& DSlink = inter.linkToDSVariables();

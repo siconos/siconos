@@ -31,6 +31,7 @@
 //#include "SiconosFwd.hpp"
 
 #include <vector>
+#include <limits.h>
 
 /** Non-smooth interaction involving 1 or 2 Dynamical Systems.
  *
@@ -222,7 +223,7 @@ private:
 protected:
   
   /** Default constructor. */
-  Interaction(): _number(__count++), _interactionSize(0), _sizeOfDS(0), _has2Bodies(false), _y(2){};
+  Interaction(): _number(__count++), _interactionSize(0), _sizeOfDS(0), _has2Bodies(false), _y(3){};
 
 public:
 
@@ -239,7 +240,8 @@ public:
    *         infered from the size of the NonSmoothLaw
    *  \param rel a pointer to the Relation
    */
-  Interaction(SP::NonSmoothLaw NSL, SP::Relation rel);
+  Interaction(SP::NonSmoothLaw NSL, SP::Relation rel,
+              unsigned int minLevelInput=UINT_MAX,  unsigned int maxLevelInput=UINT_MAX);
 
   /** destructor  */
   ~Interaction() {};
@@ -438,7 +440,7 @@ public:
    */
   inline SP::SiconosVector y(const unsigned int i) const
   {
-    assert(_y[i]);
+    assert(_y[i] && "_y[i]");
     return _y[i];
   }
 

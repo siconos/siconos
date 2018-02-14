@@ -45,21 +45,21 @@ void DynamicalSystem::_init()
 
 // Default constructor (protected)
 DynamicalSystem::DynamicalSystem():
-  _number(__count++), _n(0)
+  _number(__count++), _n(0), _order(1)
 {
   _init();
 }
 
 // From a minimum set of data
-DynamicalSystem::DynamicalSystem(unsigned int dimension):
-  _number(__count++), _n(dimension)
+DynamicalSystem::DynamicalSystem(unsigned int dimension, unsigned int order):
+  _number(__count++), _n(dimension),  _order(order)
 {
   _init();
 }
 
 // Copy constructor
 DynamicalSystem::DynamicalSystem(const DynamicalSystem & ds):
-  _number(__count++), _n(ds.n()), _stepsInMemory(ds.stepsInMemory())
+  _number(__count++), _n(ds.n()), _order(ds._order), _stepsInMemory(ds.stepsInMemory())
 {
   // The following data should always be initialize
   if(ds.x0())

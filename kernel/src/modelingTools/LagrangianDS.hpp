@@ -313,7 +313,7 @@ protected:
   void _zeroPlugin();
 
   /** Default constructor */
-  LagrangianDS():DynamicalSystem(Type::LagrangianDS) {};
+  LagrangianDS():DynamicalSystem() {};
 
 public:
 
@@ -321,7 +321,7 @@ public:
    *  \param position SiconosVector : initial coordinates of this DynamicalSystem
    *  \param velocity SiconosVector : initial velocity of this DynamicalSystem
    */
-  LagrangianDS(SP::SiconosVector position, SP::SiconosVector velocity);
+  LagrangianDS(SP::SiconosVector position, SP::SiconosVector velocity, unsigned int order =1);
 
   /** constructor from initial state and mass, \f$Mdv = p \f$
    *  \param position SiconosVector : initial coordinates of this DynamicalSystem
@@ -329,14 +329,14 @@ public:
    *  \param mass SiconosMatrix : mass matrix
    */
   LagrangianDS(SP::SiconosVector position,
-               SP::SiconosVector velocity, SP::SiconosMatrix mass);
+               SP::SiconosVector velocity, SP::SiconosMatrix mass, unsigned int order =1);
 
   /** constructor from initial state and mass (plugin) \f$Mdv = p \f$
    *  \param position SiconosVector : initial coordinates of this DynamicalSystem
    *  \param velocity SiconosVector : initial velocity of this DynamicalSystem
    *  \param plugin std::string: plugin path to compute mass matrix
    */
-  LagrangianDS(SP::SiconosVector position, SP::SiconosVector velocity, const std::string& plugin);
+  LagrangianDS(SP::SiconosVector position, SP::SiconosVector velocity, const std::string& plugin, unsigned int order =1);
 
   /** destructor */
   virtual ~LagrangianDS() {};
@@ -352,8 +352,13 @@ public:
    */
   void initRhs(double time) ;
 
-  /** set nonsmooth input to zero
-   *  \param int input-level to be initialized.
+  /** set nonsmooth input
+   *  \param  min input-level to be initialized.
+   *  \param  max input-level to be initialized.
+   */
+  void initializeNonSmoothInput(unsigned int min, unsigned max) ;
+
+  /** set nonsmooth input
    */
   void initializeNonSmoothInput(unsigned int level) ;
 
@@ -505,20 +510,15 @@ public:
   /** get acceleration (pointer link)
    *  \return pointer on a SiconosVector
    */
-  SP::SiconosVector acceleration() const
-  {
-    return _q[2];
-  };
+  SP::SiconosVector acceleration();
+
 
   /** get input due to nonsmooth interaction, \f$p\f$
    *  \param level unsigned int, required level for p
    *  \return pointer on a SiconosVector
    */
-  inline SP::SiconosVector p(unsigned int level) const
-  {
-    return _p[level];
-  }
 
+  SP::SiconosVector p(unsigned int level);
   /** set nonsmooth input (copy)
    *  \param newValue
    *  \param level required level for p

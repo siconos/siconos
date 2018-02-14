@@ -103,6 +103,9 @@ protected:
   /** the dimension of the system (\e ie size of the state vector x) */
   unsigned int _n;
 
+  /** the order of the dynamical system*/
+  unsigned int _order;
+
   /** initial state of the system */
   SP::SiconosVector _x0;
 
@@ -142,7 +145,7 @@ protected:
       result in \f$ \dot x = r \f$
    *  \param dimension size of the system (n)
    */
-  DynamicalSystem(unsigned int dimension);
+  DynamicalSystem(unsigned int dimension, unsigned int order = 1);
 
   /** Copy constructor
    * \param ds the DynamicalSystem to copy
@@ -175,6 +178,11 @@ public:
    *  \param int input-level to be initialized.
    */
   virtual void initializeNonSmoothInput(unsigned int level) = 0;
+
+  /** set nonsmooth input to zero
+   *  \param int input-level to be initialized.
+   */
+  virtual void initializeNonSmoothInput(unsigned int minlevel, unsigned int maxlevel) = 0;
 
   /** compute all component of the dynamical system, for the current state.
    *  \param double time of interest
@@ -233,6 +241,12 @@ public:
   inline unsigned int n() const
   {
     return _n;
+  }
+
+  /** returns the order of the vector state x */
+  inline unsigned int order() const
+  {
+    return _order;
   }
 
   /** returns the dimension of the system (n for first order, ndof for Lagrangian).

@@ -18,9 +18,9 @@
 #include "LagrangianDS.hpp"
 #include "BlockVector.hpp"
 #include "BlockMatrix.hpp"
-// #define DEBUG_NOCOLOR
-// #define DEBUG_STDOUT
-// #define DEBUG_MESSAGES
+#define DEBUG_NOCOLOR
+#define DEBUG_STDOUT
+#define DEBUG_MESSAGES
 #include "debug.h"
 #include <iostream>
 
@@ -33,21 +33,33 @@ void LagrangianDS::_init(SP::SiconosVector position, SP::SiconosVector velocity)
   _velocity0 = velocity;
 
   // -- Memory allocation for vector and matrix members --
-  _q.resize(3);
+
+  _q.resize(_order+1);
+  if (_order < 1)
+  {
+    RuntimeException::selfThrow("construct a LagrangianDS with at least order = 1\n"
+                                " LagrangianDS::LagrangianDS(SP::SiconosVector q0, SP::SiconosVector v0, unsigned int order) ");
+  }
   _q[0].reset(new SiconosVector(*_q0));
   _q[1].reset(new SiconosVector(*_velocity0));
 
-  /** \todo lazy Memory allocation */
-  _p.resize(3);
-  _p[1].reset(new SiconosVector(_ndof));
+  if (_order  > 1)
+    for (unsigned int i = 2 ; i < _order+1 ; i++)
+    {
+      _q[i].reset(new SiconosVector(_ndof));
+    }
+
+  // /** \todo lazy Memory allocation */
+  // _p.resize(3);
+  // _p[1].reset(new SiconosVector(_ndof));
 
   _zeroPlugin();
 }
 
 
 // Build from initial state only
-LagrangianDS::LagrangianDS(SP::SiconosVector q0, SP::SiconosVector v0):
-  DynamicalSystem(2 * q0->size()), _ndof(v0->size()),
+LagrangianDS::LagrangianDS(SP::SiconosVector q0, SP::SiconosVector v0, unsigned int order):
+  DynamicalSystem(2 * q0->size(), order) ,_ndof(v0->size()),
   _hasConstantMass(true), _hasConstantFExt(true)
 {
   // Initial conditions
@@ -55,8 +67,9 @@ LagrangianDS::LagrangianDS(SP::SiconosVector q0, SP::SiconosVector v0):
 }
 
 // From initial state and constant mass matrix, \f$ M\ddot q = p \f$
-LagrangianDS::LagrangianDS(SP::SiconosVector q0, SP::SiconosVector v0, SP::SiconosMatrix newMass):
-  DynamicalSystem(2 * q0->size()), _ndof(v0->size()),
+LagrangianDS::LagrangianDS(SP::SiconosVector q0, SP::SiconosVector v0,
+                           SP::SiconosMatrix newMass, unsigned int order):
+  DynamicalSystem(2 * q0->size(),order), _ndof(v0->size()),
   _hasConstantMass(true), _hasConstantFExt(true)
 
 {
@@ -67,10 +80,11 @@ LagrangianDS::LagrangianDS(SP::SiconosVector q0, SP::SiconosVector v0, SP::Sicon
 
 // From a set of data - Mass loaded from a plugin
 // This constructor leads to the minimum Lagrangian System form: \f$ M(q)\ddot q = p \f$
-LagrangianDS::LagrangianDS(SP::SiconosVector q0, SP::SiconosVector v0, const std::string& massName):
-  DynamicalSystem(), _ndof(q0->size()),
+LagrangianDS::LagrangianDS(SP::SiconosVector q0, SP::SiconosVector v0, const std::string& massName, unsigned int order):
+  DynamicalSystem(2 * q0->size(), order),  _ndof(q0->size()),
   _hasConstantMass(false), _hasConstantFExt(true)
 {
+  _order= order;
   _init(q0, v0);
   // Mass
   _mass.reset(new SimpleMatrix(_ndof, _ndof));
@@ -89,10 +103,52 @@ void LagrangianDS::_zeroPlugin()
   _pluginJacqDotFGyr.reset(new PluggedObject());
 }
 
+
+SP::SiconosVector LagrangianDS::acceleration()
+{
+  if (_order < 2)
+  {
+    RuntimeException::selfThrow("LagrangianDS::acceleration q(2) is not allocated\n"
+                                "Hint:Construct a LagrangianDS with order =2 if you need it. see or instance :\n"
+                                "     LagrangianDS::LagrangianDS(SP::SiconosVector q0, SP::SiconosVector v0, unsigned int order)\n"
+                                "     LagrangianDS::LagrangianDS(SP::SiconosVector q0, SP::SiconosVector v0, unsigned int order)\n"
+                                "      LagrangianDS::LagrangianDS(SP::SiconosVector q0, SP::SiconosVector v0, const std::string& massName, unsigned int order) \n");
+  }
+  return _q[2];
+}
+
+SP::SiconosVector LagrangianDS::p(unsigned int level)
+{
+  if (_p.empty())
+    RuntimeException::selfThrow("LagrangianDS::p p is empty\n""It should be allocated if the DS is linked to an interaction\n");
+  if (!_p[level])
+  {
+    RuntimeException::selfThrow("LagrangianDS::p p("+std::to_string(level) +") is not allocated\n");
+  }
+
+  return _p[level];
+}
+
+
 void LagrangianDS::initializeNonSmoothInput(unsigned int level)
 {
-  if(!_p[level])
+  assert(0);
+  if (!_p[level])
     _p[level].reset(new SiconosVector(_ndof));
+
+}
+
+
+void LagrangianDS::initializeNonSmoothInput(unsigned int min, unsigned int max)
+{
+  DEBUG_BEGIN("void LagrangianDS::initializeNonSmoothInput(unsigned int min, unsigned int max)\n")
+  _p.resize(max+1);
+  for (unsigned int i =min ; i < max+1 ; i++ )
+  {
+    if (!_p[i])
+      _p[i].reset(new SiconosVector(_ndof));
+  }
+  DEBUG_END("void LagrangianDS::initializeNonSmoothInput(unsigned int min, unsigned int max)\n")
 }
 
 void LagrangianDS::resetToInitialState()

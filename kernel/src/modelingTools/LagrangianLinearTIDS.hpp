@@ -109,15 +109,17 @@ public:
    *  \param K stiffness matrix
    *  \param C damping matrix
    */
-  LagrangianLinearTIDS(SP::SiconosVector q0, SP::SiconosVector v0, SP::SiconosMatrix M, SP::SiconosMatrix K, SP::SiconosMatrix C);
+  LagrangianLinearTIDS(SP::SiconosVector q0, SP::SiconosVector v0,
+                       SP::SiconosMatrix M, SP::SiconosMatrix K, SP::SiconosMatrix C,
+                       unsigned int order = 1);
 
   /** constructor from initial state and mass matrix only. Leads to \f$ M\dot v = F_{ext}(t,z) + p\f$.
    *  \param q0 initial coordinates
    *  \param v0 initial velocity
    *  \param M mass matrix
    */
-  LagrangianLinearTIDS(SP::SiconosVector q0, SP::SiconosVector v0, SP::SiconosMatrix M):
-    LagrangianDS(q0, v0, M){};
+  LagrangianLinearTIDS(SP::SiconosVector q0, SP::SiconosVector v0, SP::SiconosMatrix M, unsigned int order = 1):
+    LagrangianDS(q0, v0, M, order){};
 
   /** destructor */
   ~LagrangianLinearTIDS(){};

@@ -43,21 +43,23 @@ void FirstOrderNonLinearDS::_init(SP::SiconosVector initial_state)
   // _x.resize(2); done in base class constructor.
   _x[0].reset(new SiconosVector(*_x0));
   _x[1].reset(new SiconosVector(_n));
-  _r.reset(new SiconosVector(_n)); // FP: move this to initializeNonSmoothInput?
   _zeroPlugin();
 }
 
 // From a minimum set of data
-FirstOrderNonLinearDS::FirstOrderNonLinearDS(SP::SiconosVector initial_state):
-  DynamicalSystem(initial_state->size())
+FirstOrderNonLinearDS::FirstOrderNonLinearDS(SP::SiconosVector initial_state, unsigned int order):
+  DynamicalSystem(initial_state->size(), order)
 {
   _init(initial_state);
   // dot x = r
 }
 
 // From a minimum set of data
-FirstOrderNonLinearDS::FirstOrderNonLinearDS(SP::SiconosVector initial_state, const std::string& fPlugin, const std::string& jacobianfxPlugin):
-  DynamicalSystem(initial_state->size())
+FirstOrderNonLinearDS::FirstOrderNonLinearDS(SP::SiconosVector initial_state,
+                                             const std::string& fPlugin,
+                                             const std::string& jacobianfxPlugin,
+                                             unsigned int order):
+  DynamicalSystem(initial_state->size(), order)
 {
   _init(initial_state);
   // == f and its jacobian ==
@@ -134,13 +136,18 @@ void FirstOrderNonLinearDS::updatePlugins(double time)
 
 void FirstOrderNonLinearDS::initializeNonSmoothInput(unsigned int level)
 {
+  assert(0);
   /**\warning V.A. _r should be initialized here and not in  the constructor
    * The level should also be used if we need more that one _r
    */
   if (!_r)
     _r.reset(new SiconosVector(_n));
 }
-
+void FirstOrderNonLinearDS::initializeNonSmoothInput(unsigned int min, unsigned int max)
+{
+  if (!_r)
+    _r.reset(new SiconosVector(_n));
+}
 
 
 // ===== MEMORY MANAGEMENT FUNCTIONS =====
