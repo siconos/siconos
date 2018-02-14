@@ -402,11 +402,7 @@ void BulletSpaceFilter::buildInteractions(double time)
                * the contact points and normal otherwise the relation
                * is to the wrong side */
               flip = !dsa && dsb;
-              SP::BulletR rel(new BulletR(*cpoint,
-                                          flip ? dsb->q() : dsa->q(),
-                                          (flip ? (dsa?dsa->q():SP::SiconosVector())
-                                                : (dsb?dsb->q():SP::SiconosVector())),
-                                          flip));
+              SP::BulletR rel(new BulletR(*cpoint));
               rel->setContactPoint(cpoint);
               inter.reset(new Interaction(nslaw, rel));//, 4 * i + z));
             }
@@ -448,7 +444,8 @@ void BulletSpaceFilter::buildInteractions(double time)
             DEBUG_PRINTF("Interaction %p = true\n", static_cast<Interaction *>(cpoint->m_userPersistentData));
             DEBUG_PRINTF("cpoint %p  = true\n", &*cpoint);
             SP::BulletR rel(std11::static_pointer_cast<BulletR>(inter->relation()));
-            rel->updateContactPointsFromManifoldPoint(*cpoint,
+            rel->updateContactPointsFromManifoldPoint(*contactManifold, *cpoint,
+                                                      flip, 1.0,
                                      flip ? dsb : dsa,
                                      flip ? (dsa ? dsa : SP::NewtonEulerDS())
                                           : (dsb ? dsb : SP::NewtonEulerDS()));

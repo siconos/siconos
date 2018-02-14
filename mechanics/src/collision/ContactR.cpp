@@ -57,13 +57,8 @@ void copyQuatPos(const SiconosVector& from, boost::math::quaternion<double>& to)
   to = boost::math::quaternion<double>(0, from(0), from(1), from(2));
 }
 
-ContactR::ContactR(SP::SiconosVector q1, SP::SiconosVector q2, bool flip,
-                   double y_correction_A, double y_correction_B, double scaling)
-  : NewtonEulerFrom3DLocalFrameR(),
-    _y_correction_A(y_correction_A),
-    _y_correction_B(y_correction_B),
-    _scaling(scaling),
-    _flip(flip)
+ContactR::ContactR()
+  : NewtonEulerFrom3DLocalFrameR()
 {
 }
 
@@ -74,18 +69,7 @@ void ContactR::computeh(double time, BlockVector& q0, SiconosVector& y)
   // Update contact points and distance if necessary
   NewtonEulerFrom3DLocalFrameR::computeh(time, q0, y);
 
-  // Since Pc1 and Pc2 may have changed, _contactDistance must be updated
-  SiconosVector dpc(*_Pc2 - *_Pc1);
-  double dist = dpc.norm2();
-
-  _contactDistance = dist * (inner_prod(*_Nc, dpc) >= 0 ? -1 : 1);
-
-  // Due to margins we add, objects are reported as closer than they really
-  // are, so we correct by a factor.
-  double correction = _y_correction_A + _y_correction_B;
-  y.setValue(0, _contactDistance*_scaling + correction);
-
-  DEBUG_PRINTF("distance : %g\n",  y.getValue(0));
+  y.setValue(0, distance());
 
   DEBUG_PRINTF("position on A : %g,%g,%g\n", (*pc1())(0), (*pc1())(1), (*pc1())(2));
   DEBUG_PRINTF("position on B : %g,%g,%g\n", (*pc2())(0), (*pc2())(1), (*pc2())(2));
@@ -94,60 +78,17 @@ void ContactR::computeh(double time, BlockVector& q0, SiconosVector& y)
   DEBUG_END("ContactR::computeh(...)\n");
 }
 
-void ContactR::updateContactPoints(SiconosVector& pos1, SiconosVector& pos2,
-                                   double distance, SiconosVector& normal,
-                                   SP::NewtonEulerDS ds1,
-                                   SP::NewtonEulerDS ds2)
+void ContactR::updateContactPoints(const SiconosVector& pos1,
+                                   const SiconosVector& pos2,
+                                   const SiconosVector& normal)
 {
-  // Flip contact points if requested
-  SiconosVector posa(pos1);
-  SiconosVector posb(pos2);
-  if (_flip) {
-    SiconosVector posa = pos2;
-    SiconosVector posb = pos1;
-  }
-
-  // Store distance
-  _contactDistance = distance;
+  // Copy relative positions
+  *_relPc1 = pos1;
+  *_relPc2 = pos2;
 
   // Update normal
-  *_Nc = normal * (_flip ? -1 : 1);
+  *_relNc = normal;
 
-  // Adjust contact point positions correspondingly along normal.
-  // (The correction factor is split in two in case objects have
-  // different margins.)
-  posa = posa * _scaling + normal * _y_correction_A;
-  posb = posb * _scaling - normal * _y_correction_B;
-
-  // Update relative contact point locations.
-  boost::math::quaternion<double> qq1, pq1, pp1;
-  copyQuatRot(*ds1->q(), qq1);
-  copyQuatPos(*ds1->q(), pq1);
-  copyQuatPos(posa, pp1);
-
-  // Unrotate q1-posa vector
-  pq1 = (1.0 / qq1) * (pp1-pq1) * qq1;
-  copyQuatPos(pq1, *_relPc1);
-
-  if (ds2)
-  {
-    boost::math::quaternion<double> qq2, pq2, pp2;
-    copyQuatRot(*ds2->q(), qq2);
-    copyQuatPos(*ds2->q(), pq2);
-    copyQuatPos(posb, pp2);
-
-    // Unrotate q2-posb vector
-    pq2 = (1.0 / qq2) * (pp2-pq2) * qq2;
-    copyQuatPos(pq2, *_relPc2);
-  }
-  else
-    *_relPc2 = posb;
-
-  // Update initial contact point locations which may be modified
-  // during Newton loop
-  *_Pc1 = posa;
-  *_Pc2 = posb;
-
-  assert(!((*_Nc)(0)==0 && (*_Nc)(1)==0 && (*_Nc)(2)==0)
+  assert(!((*_relNc)(0)==0 && (*_relNc)(1)==0 && (*_relNc)(2)==0)
          && "nc = 0, problems..\n");
 }
