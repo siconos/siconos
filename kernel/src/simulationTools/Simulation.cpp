@@ -603,6 +603,9 @@ void Simulation::updateState(unsigned int)
   // 2 - compute state for each dynamical system
   for (itOSI = _allOSI->begin(); itOSI != _allOSI->end() ; ++itOSI)
     (*itOSI)->updateState();
+  /*Because the dof of DS have been updated,
+    the world (CAO for example) must be updated.*/
+  updateWorldFromDS();
 
   DEBUG_END("Simulation::updateState()\n");
 }

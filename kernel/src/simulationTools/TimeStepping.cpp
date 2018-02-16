@@ -389,6 +389,8 @@ void TimeStepping::initializeNewtonLoop()
     (*it)->computeResidu();
   }
 
+  updateWorldFromDS();
+
   // Predictive contact -- update initial contacts after updating DS positions
   {
     NonSmoothDynamicalSystem::ChangeLogIter p = _nsds->changeLogPosition();
