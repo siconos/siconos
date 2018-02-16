@@ -49,9 +49,7 @@ void localCheckSolverOuput(int, Simulation*)
 // ================= Creation of the model =======================
 void Spheres::init()
 {
-
   SP::TimeDiscretisation timedisc_;
-  SP::Simulation simulation_;
 #ifdef WITH_GENERIC_SOLVER
   SP::GenericMechanical osnspb_;
 #else
@@ -96,7 +94,7 @@ void Spheres::init()
     osi.reset(new MoreauJeanOSI(theta));
 
     // -- Model --
-    _model.reset(new Model(t0, T));
+    SP::NonSmoothDynamicalSystem nsds(new NonSmoothDynamicalSystem(t0, T));
 
     for (unsigned int i = 0; i < Spheres->size(0); i++)
     {
@@ -136,7 +134,7 @@ void Spheres::init()
       body->setFExtPtr(FExt);
 
       // add the dynamical system in the non smooth dynamical system
-      _model->nonSmoothDynamicalSystem()->insertDynamicalSystem(body);
+      nsds->insertDynamicalSystem(body);
     }
 
     // ------------------
@@ -167,7 +165,7 @@ void Spheres::init()
     osnspb_->setNumericsVerboseMode(0); // 0 silent, 1 verbose
     osnspb_->setKeepLambdaAndYState(true); // inject previous solution
 #endif
-    simulation_.reset(new TimeStepping(timedisc_, osi, osnspb_));
+    _sim.reset(new TimeStepping(nsds, timedisc_, osi, osnspb_));
     //     simulation_->setCheckSolverFunction(localCheckSolverOuput);
 
     // --- Simulation initialization ---
@@ -176,13 +174,11 @@ void Spheres::init()
 
     SP::NonSmoothLaw nslaw(new NewtonImpactFrictionNSL(0.0, 0.0, 0.6, 3));
 
-    _playground.reset(new SpaceFilter(3, 6, _model, _plans, _moving_plans));
+    _playground.reset(new SpaceFilter(3, 6, _plans, _moving_plans));
 
-    _playground->insert(nslaw, 0, 0);
+    _playground->insertNonSmoothLaw(nslaw, 0, 0);
 
-    _model->setSimulation(simulation_);
-    _model->initialize();
-
+    _sim->insertInteractionManager(_playground);
   }
 
   catch (SiconosException e)
@@ -203,17 +199,10 @@ void Spheres::compute()
 
   try
   {
-
-    _playground->buildInteractions(_model->currentTime());
-
-    _model->simulation()->advanceToEvent();
-
-    _model->simulation()->processEvents();
-
+    simulation()->advanceToEvent();
+    simulation()->processEvents();
     //    output.update();
-
     //    output.write();
-
   }
 
   catch (SiconosException e)

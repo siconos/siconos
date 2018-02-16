@@ -68,7 +68,7 @@ public:
 /* convenient macros */
 
 
-#define GETALLDS(M) M->model()->nonSmoothDynamicalSystem()->topology()->dSG(0)
+#define GETALLDS(M) M->simulation()->nonSmoothDynamicalSystem()->topology()->dSG(0)
 #define GETNDS(M) GETALLDS(M)->size()
 
 struct ForNdof : public Question<unsigned int>

@@ -71,7 +71,7 @@ public:
 /* convenient macros */
 
 
-#define GETALLDS(M) M->model()->nonSmoothDynamicalSystem()->topology()->dSG(0)
+#define GETALLDS(M) M->simulation()->nonSmoothDynamicalSystem()->topology()->dSG(0)
 #define GETNDS(M) GETALLDS(M)->size()
 
 struct ForNdof : public Question<unsigned int>
@@ -127,8 +127,8 @@ struct ForMassValue : public Question<double>
   ANSWER(Disk, mass()->getValue(0, 0));
   ANSWER(Circle, mass()->getValue(0, 0));
   ANSWER(SphereLDS, mass()->getValue(0, 0));
-  ANSWER(SphereNEDS, massValue());
-  IFBULLET(ANSWER(BulletDS, massValue()));
+  ANSWER(SphereNEDS, scalarMass());
+  IFBULLET(ANSWER(BulletDS, scalarMass()));
 };
 
 struct ForJachq : public Question<SP::SiconosMatrix>

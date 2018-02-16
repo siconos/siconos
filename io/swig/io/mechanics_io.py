@@ -140,12 +140,12 @@ def setup_default_classes():
         default_body_class = BodyDS
     elif use_original:
         if backend == 'bullet':
-            default_manager_class = lambda nsds,options: BulletSpaceFilter(nsds)
+            default_manager_class = lambda options: BulletSpaceFilter()
             default_simulation_class = BulletTimeStepping
             default_body_class = BulletDS
             use_bullet = have_bullet
         elif backend == 'occ':
-            default_manager_class = lambda nsds,options: occ.OccSpaceFilter(nsds)
+            default_manager_class = lambda options: occ.OccSpaceFilter()
             default_simulation_class = occ.OccTimeStepping
             default_body_class = occ.OccBody
             use_bullet = have_bullet
@@ -1285,10 +1285,7 @@ class Hdf5():
             gid1 = int(self._nslaws_data[name].attrs['gid1'])
             gid2 = int(self._nslaws_data[name].attrs['gid2'])
             if gid1 >= 0 and gid2 >= 0:
-                if use_proposed:
-                    self._broadphase.insertNonSmoothLaw(nslaw, gid1, gid2)
-                elif use_original:
-                    self._broadphase.insert(nslaw, gid1, gid2)
+                self._broadphase.insertNonSmoothLaw(nslaw, gid1, gid2)
 
     def importOccObject(self, name, translation, orientation,
                         velocity, contactors, mass, given_inertia, body_class,
@@ -1824,7 +1821,7 @@ class Hdf5():
 
                     cg1 = int(ctr1.attrs['group'])
                     cg2 = int(ctr2.attrs['group'])
-                    nslaw = self._broadphase.nslaw(cg1, cg2)
+                    nslaw = self._broadphase.nonSmoothLaw(cg1, cg2)
 
                     cocs1 = self._occ_contactors[body1_name][contactor1_name]
                     cocs2 = self._occ_contactors[body2_name][contactor2_name]
@@ -3038,7 +3035,7 @@ class Hdf5():
             options = SiconosBulletOptions()
             options.perturbationIterations = 3*multipoints_iterations
             options.minimumPointsPerturbationThreshold = 3*multipoints_iterations
-        self._broadphase = space_filter(nsds, options)
+        self._broadphase = space_filter(options)
 
         if use_original:
             if multipoints_iterations:
@@ -3070,8 +3067,8 @@ class Hdf5():
             simulation=time_stepping(nsds,timedisc)
             simulation.insertIntegrator(self._osi)
             simulation.insertNonSmoothProblem(osnspb)
-        if use_proposed:
-            simulation.insertInteractionManager(self._broadphase)
+
+        simulation.insertInteractionManager(self._broadphase)
 
         simulation.setNewtonOptions(Newton_options)
         simulation.setNewtonMaxIteration(Newton_max_iter)
@@ -3126,10 +3123,6 @@ class Hdf5():
 
             if controller is not None:
                 controller.step()
-
-            if use_original:
-                log(self._broadphase.buildInteractions, with_timer)\
-                    (self._nsds.currentTime())
 
             if (friction_contact_trace == True) :
                  osnspb._stepcounter = k

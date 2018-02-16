@@ -16,7 +16,6 @@
  * limitations under the License.
 */
 
-\
 #include "SiconosBodies.hpp"
 #include <Simulation.hpp>
 #include "SpaceFilter.hpp"
@@ -27,12 +26,8 @@ void SiconosBodies::compute()
 {
   try
   {
-    _playground->buildInteractions(_sim->getTk());
-
     _sim->advanceToEvent();
-
     _sim->processEvents();
-
   }
 
   catch (SiconosException e)

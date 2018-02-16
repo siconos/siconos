@@ -49,7 +49,7 @@ void BodiesViewer::init()
   stepSimulation_ = false;
   stepNow_ = false;
   //  setAnimationPeriod(0.);
-  setAnimationPeriod(Siconos_->model()->simulation()->timeStep() * 1000);
+  setAnimationPeriod(Siconos_->simulation()->timeStep() * 1000);
 
   DynamicalSystemsGraph::VIterator dsi, dsend;
   boost::tie(dsi, dsend) = GETALLDS(Siconos_)->vertices();

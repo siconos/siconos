@@ -42,7 +42,7 @@ protected:
   double _closeContactsThreshold;
 
 public:
-  BulletSpaceFilter(SP::NonSmoothDynamicalSystem nsds);
+  BulletSpaceFilter();
 
   /** Destructor.
    */
@@ -97,7 +97,7 @@ public:
 
   /** execute the broadphase contact detection and build indexSet0
    */
-  void buildInteractions(double);
+  void updateInteractions(SP::Simulation sim);
 
 
   /** set close contact parameter
