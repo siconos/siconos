@@ -294,17 +294,13 @@ int main(int argc, char* argv[])
     cout << "Computation Time " << time.elapsed()  << endl;
     // --- Output files ---
     cout << "====> Output file writing ..." << endl;
-    ioMatrix::write("result.dat", "ascii", dataPlot, "noDim");
-    // Comparison with a reference file
-    SimpleMatrix dataPlotRef(dataPlot);
-    dataPlotRef.zero();
-    ioMatrix::read("resultED_NewtonModel.ref", "ascii", dataPlotRef);
-
-    if ((dataPlot - dataPlotRef).normInf() > 1e-12)
-    {
-      std::cout << "Warning. The results is rather different from the reference file." << std::endl;
+    dataPlot.resize(k, outputSize);
+    ioMatrix::write("BeadColumnED_NewtonLaw.dat", "ascii", dataPlot, "noDim");
+    double error=0.0, eps=1e-12;
+    if (ioMatrix::compareRefFile(dataPlot, "BeadColumnED_NewtonLaw.ref", eps, error)
+        && error > eps)
       return 1;
-    }
+
   }
   catch (SiconosException e)
   {

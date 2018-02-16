@@ -264,22 +264,13 @@ int main(int argc, char* argv[])
     cout << "Number of events processed during simulation: " << (k + 1) << endl;
     cout << "Number of non-smooth events: " << NumberNSEvent << endl;
     cout << "====> Output file writing ..." << endl << endl;
-    ioMatrix::write("result.dat", "ascii", DataPlot, "noDim");
-
-    std::cout << "Comparison with a reference file" << std::endl;
-    SimpleMatrix dataPlotRef(DataPlot);
-    dataPlotRef.zero();
-    ioMatrix::read("resultED_LZBmodel_LsodarOSI.ref", "ascii", dataPlotRef);
-
-    double error = (DataPlot - dataPlotRef).normInf()/dataPlotRef.normInf();
-    std::cout << "Error = "<< error << std::endl;
-
-    if (error > 1e-10)
-    {
-      std::cout << "Warning. The results is rather different from the reference file." << std::endl;
-      std::cout << (DataPlot - dataPlotRef).normInf() << std::endl;
+    ioMatrix::write("RockingBlockED_Lsodar_LZBimpact.dat", "ascii", DataPlot, "noDim");
+    
+    double error=0.0, eps=1e-12;
+    if (ioMatrix::compareRefFile(DataPlot, "RockingBlockED_Lsodar_LZBimpact.ref", eps, error)
+        && error > eps)
       return 1;
-    }
+   
   }
   //============================== Catch exceptions ===================================================================
   catch (SiconosException e)
